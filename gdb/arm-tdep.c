@@ -1190,6 +1190,63 @@ pop_stack_item (struct stack_item *si)
   return si;
 }
 
+
+/* Return the alignment (in bytes) of the given type.  */
+
+static int
+arm_type_align (struct type *t)
+{
+  int n;
+  int align;
+  int falign;
+
+  switch (TYPE_CODE (t))
+    {
+    case TYPE_CODE_UNDEF:
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_VOID:
+    case TYPE_CODE_STRING:
+    case TYPE_CODE_ERROR:
+    case TYPE_CODE_MEMBER:
+    case TYPE_CODE_METHOD:
+    case TYPE_CODE_TEMPLATE:
+    case TYPE_CODE_TEMPLATE_ARG:
+    case TYPE_CODE_NAMESPACE:
+    case TYPE_CODE_TYPEDEF:
+    default:
+      /* Should never happen, so make something up.  */
+      return 4;
+
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_INT:
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_SET:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_BITSTRING:
+    case TYPE_CODE_REF:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_BOOL:
+      return TYPE_LENGTH (t);
+
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_COMPLEX:
+      /* TODO: What about vector types?  */
+      return arm_type_align (TYPE_TARGET_TYPE (t));
+
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      align = 1;
+      for (n = 0; n < TYPE_NFIELDS (t); n++)
+	{
+	  falign = arm_type_align (TYPE_FIELD_TYPE (t, n));
+	  if (falign > align)
+	    align = falign;
+	}
+      return align;
+    }
+}
+
 /* We currently only support passing parameters in integer registers.  This
    conforms with GCC's default model.  Several other variants exist and
    we should probably support some of them based on the selected ABI.  */
@@ -1218,11 +1275,6 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   argreg = ARM_A1_REGNUM;
   nstack = 0;
 
-  /* Some platforms require a double-word aligned stack.  Make sure sp
-     is correctly aligned before we start.  We always do this even if
-     it isn't really needed -- it can never hurt things.  */
-  sp &= ~(CORE_ADDR)(2 * DEPRECATED_REGISTER_SIZE - 1);
-
   /* The struct_return pointer occupies the first parameter
      passing register.  */
   if (struct_return)
@@ -1241,12 +1293,42 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *target_type;
       enum type_code typecode;
       bfd_byte *val;
+      int align;
 
       arg_type = check_typedef (value_type (args[argnum]));
       len = TYPE_LENGTH (arg_type);
       target_type = TYPE_TARGET_TYPE (arg_type);
       typecode = TYPE_CODE (arg_type);
       val = value_contents_writeable (args[argnum]);
+
+      if (gdbarch_tdep (gdbarch)->abi == ARM_ABI_APCS_GNU)
+	{
+	  /* The old APCS ABI does not require doubleword alignment.  */
+	  align = INT_REGISTER_SIZE;
+	}
+      else
+	{
+	  align = arm_type_align (arg_type);
+
+	  /* Round alignment up to one or two words.  */
+	  align = (align + INT_REGISTER_SIZE - 1) & ~(INT_REGISTER_SIZE - 1);
+
+	  gdb_assert (align == INT_REGISTER_SIZE
+		      || align == INT_REGISTER_SIZE * 2);
+	}
+
+      /* Push stack padding for dowubleword alignment.  */
+      if (nstack & (align - 1))
+	{
+	  si = push_stack_item (si, val, INT_REGISTER_SIZE);
+	  nstack += INT_REGISTER_SIZE;
+	}
+      
+      /* Doubleword aligned quantities must go in even register pairs.  */
+      if (argreg <= ARM_LAST_ARG_REGNUM
+	  && align > INT_REGISTER_SIZE
+	  && argreg & 1)
+	argreg++;
 
       /* If the argument is a pointer to a function, and it is a
 	 Thumb function, create a LOCAL copy of the value and set
@@ -1312,6 +1394,13 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   regcache_cooked_write_unsigned (regcache, ARM_SP_REGNUM, sp);
 
   return sp;
+}
+
+static CORE_ADDR
+arm_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
+{
+  /* Align the stack to eight bytes.  */
+  return sp & ~ (CORE_ADDR) 7;
 }
 
 static void
@@ -2083,24 +2172,13 @@ arm_extract_return_value (struct type *type,
     }
 }
 
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value.  */
-
-static CORE_ADDR
-arm_extract_struct_value_address (struct regcache *regcache)
-{
-  ULONGEST ret;
-
-  regcache_cooked_read_unsigned (regcache, ARM_A1_REGNUM, &ret);
-  return ret;
-}
 
 /* Will a function return an aggregate type in memory or in a
    register?  Return 0 if an aggregate type can be returned in a
    register, 1 if it must be returned in memory.  */
 
 static int
-arm_use_struct_convention (int gcc_p, struct type *type)
+arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 {
   int nRc;
   enum type_code code;
@@ -2130,6 +2208,11 @@ arm_use_struct_convention (int gcc_p, struct type *type)
     {
       return 1;
     }
+
+  /* The new EABI says all aggregates not larger than a word are returned
+     in a register.  */
+  if (gdbarch_tdep (gdbarch)->abi != ARM_ABI_APCS_GNU)
+    return 0;
 
   /* The only aggregate types that can be returned in a register are
      structs and unions.  Arrays must be returned in memory.  */
@@ -2279,6 +2362,33 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	}
     }
 }
+
+
+/* Handle function return values.  */
+
+static enum return_value_convention
+arm_return_value (struct gdbarch *gdbarch, struct type *valtype,
+		  struct regcache *regcache, void *readbuf,
+		  const void *writebuf)
+{
+  /* TODO: Only call for aggreagates.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+      || TYPE_CODE (valtype) == TYPE_CODE_UNION
+      || TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
+    {
+      if (arm_return_in_memory (gdbarch, valtype))
+	return RETURN_VALUE_STRUCT_CONVENTION;
+    }
+
+  if (writebuf)
+    arm_store_return_value (valtype, regcache, writebuf);
+
+  if (readbuf)
+    arm_extract_return_value (valtype, regcache, readbuf);
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
 
 static int
 arm_get_longjmp_target (CORE_ADDR *pc)
@@ -2565,6 +2675,10 @@ arm_elf_osabi_sniffer (bfd *abfd)
 	      osabi = GDB_OSABI_ARM_EABI_V2;
 	      break;
 
+	    case EF_ARM_EABI_VER4:
+	      osabi = GDB_OSABI_ARM_EABI_V4;
+	      break;
+
 	    case EF_ARM_EABI_UNKNOWN:
 	      /* Assume GNU tools.  */
 	      osabi = GDB_OSABI_ARM_APCS;
@@ -2576,6 +2690,12 @@ arm_elf_osabi_sniffer (bfd *abfd)
 arm_elf_osabi_sniffer: Unknown ARM EABI version 0x%x"),
 			      eflags);
 	    }
+	}
+      else if (osabi == GDB_OSABI_LINUX)
+	{
+	  eflags = EF_ARM_EABI_VERSION (elf_elfheader (abfd)->e_flags);
+	  if (eflags == EF_ARM_EABI_VER4)
+	    osabi = GDB_OSABI_ARM_EABI_V4_LINUX;
 	}
       break;
 
@@ -2653,10 +2773,20 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  /* We used to default to FPA for generic ARM, but almost nobody uses that
-     now, and we now provide a way for the user to force the model.  So 
-     default to the most useful variant.  */
-  tdep->fp_model = ARM_FLOAT_SOFT_FPA;
+  if (info.osabi == GDB_OSABI_ARM_EABI_V4 || info.osabi == GDB_OSABI_ARM_EABI_V4_LINUX)
+    {
+      /* Default EABI targets to soft-vfp.  */
+      tdep->fp_model = ARM_FLOAT_SOFT_VFP;
+      tdep->abi = ARM_ABI_AAPCS;
+    }
+  else
+    {
+      /* We used to default to FPA for generic ARM, but almost nobody uses
+	 that now, and we now provide a way for the user to force the model.
+	 So default to the most useful variant.  */
+      tdep->fp_model = ARM_FLOAT_SOFT_FPA;
+      tdep->abi = ARM_ABI_APCS_GNU;
+    }
 
   /* Breakpoints.  */
   switch (info.byte_order)
@@ -2690,6 +2820,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->jb_pc = -1;	/* Longjump support not enabled by default.  */
 
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
+  set_gdbarch_frame_align (gdbarch, arm_frame_align);
 
   set_gdbarch_write_pc (gdbarch, arm_write_pc);
 
@@ -2733,10 +2864,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, arm_register_name);
 
   /* Returning results.  */
-  set_gdbarch_extract_return_value (gdbarch, arm_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
-  set_gdbarch_deprecated_use_struct_convention (gdbarch, arm_use_struct_convention);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, arm_extract_struct_value_address);
+  set_gdbarch_return_value (gdbarch, arm_return_value);
 
   /* Single stepping.  */
   /* XXX For an RDI target we should ask the target if it can single-step.  */
@@ -2815,6 +2943,13 @@ arm_init_abi_eabi_v2 (struct gdbarch_info info,
 }
 
 static void
+arm_init_abi_eabi_v4 (struct gdbarch_info info,
+		      struct gdbarch *gdbarch)
+{
+  /* Place-holder.  */
+}
+
+static void
 arm_init_abi_apcs (struct gdbarch_info info,
 		   struct gdbarch *gdbarch)
 {
@@ -2849,6 +2984,8 @@ _initialize_arm_tdep (void)
                           arm_init_abi_eabi_v1);
   gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_EABI_V2,
                           arm_init_abi_eabi_v2);
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_EABI_V4,
+                          arm_init_abi_eabi_v4);
   gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_APCS,
                           arm_init_abi_apcs);
 

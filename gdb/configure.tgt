@@ -209,6 +209,8 @@ esac
 # map target onto default OS ABI
 
 case "${target}" in
+arm*-*-linux-gnueabi)
+		gdb_osabi=GDB_OSABI_ARM_EABI_V4_LINUX ;;
 *-*-linux*)	gdb_osabi=GDB_OSABI_LINUX ;;
 *-*-nto*)	gdb_osabi=GDB_OSABI_QNXNTO ;;
 m68*-*-openbsd* | m88*-*-openbsd* | vax-*-openbsd*) ;;

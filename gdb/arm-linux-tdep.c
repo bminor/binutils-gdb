@@ -52,6 +52,7 @@ static const char arm_linux_thumb_le_breakpoint[] = {0x01, 0xde};
 /* Description of the longjmp buffer.  */
 #define ARM_LINUX_JB_ELEMENT_SIZE	INT_REGISTER_SIZE
 #define ARM_LINUX_JB_PC			21
+#define ARM_LINUX_EABI_JB_PC		27
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
@@ -497,9 +498,42 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 }
 
+static void
+arm_linux_eabi_init_abi (struct gdbarch_info info,
+			 struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->lowest_pc = 0x8000;
+  if (info.byte_order == BFD_ENDIAN_BIG)
+    {
+      tdep->arm_breakpoint = arm_linux_arm_be_breakpoint;
+      tdep->thumb_breakpoint = arm_linux_thumb_be_breakpoint;
+    }
+  else
+    {
+      tdep->arm_breakpoint = arm_linux_arm_le_breakpoint;
+      tdep->thumb_breakpoint = arm_linux_thumb_le_breakpoint;
+    }
+  tdep->arm_breakpoint_size = sizeof (arm_linux_arm_le_breakpoint);
+  tdep->thumb_breakpoint_size = sizeof (arm_linux_thumb_le_breakpoint);
+
+  tdep->jb_pc = ARM_LINUX_EABI_JB_PC;
+  tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
+
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, arm_linux_svr4_fetch_link_map_offsets);
+
+  /* Shared library handling.  */
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+  set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
+}
+
 void
 _initialize_arm_linux_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_LINUX,
 			  arm_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_EABI_V4_LINUX,
+			  arm_linux_eabi_init_abi);
 }

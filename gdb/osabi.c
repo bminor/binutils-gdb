@@ -73,6 +73,8 @@ static const char * const gdb_osabi_names[] =
 
   "ARM EABI v1",
   "ARM EABI v2",
+  "ARM EABI v4",
+  "ARM EABI v4 GNU/Linux",
   "ARM APCS",
   "QNX Neutrino",
 

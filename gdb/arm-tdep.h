@@ -116,6 +116,12 @@ enum arm_float_model
 /* A method to the setting based on user's choice and ABI setting.  */
 enum arm_float_model arm_get_fp_model (struct gdbarch *);
 
+enum arm_abi_variant
+{
+  ARM_ABI_APCS_GNU,
+  ARM_ABI_AAPCS
+};
+
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
@@ -133,6 +139,8 @@ struct gdbarch_tdep
 				   If this is negative, longjmp support
 				   will be disabled.  */
   size_t jb_elt_size;		/* And the size of each entry in the buf.  */
+
+  enum arm_abi_variant abi;	/* Which abi variant is in use.  */
 };
 
 #ifndef LOWEST_PC
