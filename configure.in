@@ -423,7 +423,7 @@ case "${target}" in
     # copied from rs6000-*-* entry
     noconfigdirs="$noconfigdirs gas ld binutils gprof textutils cvs"
     ;;
-  powerpc*-*-winnt*)
+  powerpc*-*-winnt* | powerpc*-*-pe*)
     noconfigdirs="$noconfigdirs ld gdb"
     ;;
   rs6000-*-lynxos*)

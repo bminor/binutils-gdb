@@ -1,7 +1,7 @@
 Wed Sep 27 12:24:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
-	* configure.in: Don't configure ld and gdb for powerpc*-*-winnt*,
-	since they are not yet supported.
+	* configure.in: Don't configure ld and gdb for powerpc*-*-winnt*
+	or powerpc*-*-pe*, since they are not yet supported.
 
 Tue Sep 26 14:30:01 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
