@@ -1,3 +1,12 @@
+2002-11-25  Andrew Cagney  <cagney@redhat.com>
+
+	* ns32k-tdep.c: Include "gdb_string.h".
+	* mcore-tdep.c, cris-tdep.c, vax-tdep.c: Ditto.
+	* sh3-rom.c, ppc-sysv-tdep.c, ns32knbsd-tdep.c: Ditto.
+	* Makefile.in (sh3-rom.o): Update dependencies.
+	(ppc-sysv-tdep.o, ns32k-tdep.o, mcore-tdep.o): Ditto.
+	(cris-tdep.o): Ditto.
+
 2002-11-25  David Carlton  <carlton@math.stanford.edu>
 
 	* dwarf2read.c (scan_partial_symbols): Descend into namespace

@@ -27,6 +27,7 @@
 #include "gdbcore.h"
 #include "inferior.h"
 #include "arch-utils.h"
+#include "gdb_string.h"
 
 /* Functions declared and used only in this file */
 

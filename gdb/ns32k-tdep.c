@@ -26,6 +26,7 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "target.h"
+#include "gdb_string.h"
 
 #include "arch-utils.h"
 

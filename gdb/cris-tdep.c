@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/cris.h"
 #include "arch-utils.h"
 #include "regcache.h"
+#include "gdb_string.h"
 
 /* To get entry_point_address.  */
 #include "symfile.h"
