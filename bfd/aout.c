@@ -31,6 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
 void (*bfd_error_trap)();
+
 /*SUPPRESS558*/
 /*SUPPRESS529*/
 
@@ -50,52 +51,54 @@ typedef void generic_symbol_type;
 #include "a.out.sun4.h"
 
 #define CTOR_TABLE_RELOC_IDX 2
-static CONST reloc_howto_type howto_table_ext[] = 
+static  reloc_howto_type howto_table_ext[] = 
 {
   /* type                   rs   size bsz  pcrel bitpos  abs ovrf sf name partial inplace mask*/
-{ (unsigned int) RELOC_8,      0,  0,  	8,  false, 0, true,  true,0,"8", 	false, 0x000000ff},
-{ (unsigned int) RELOC_16,     0,  1, 	16, false, 0, true,  true,0,"16", 	false, 0x0000ffff},
-{ (unsigned int) RELOC_32,     0,  2, 	32, false, 0, true,  true,0,"32", 	false,  0xffffffff},
-{ (unsigned int) RELOC_DISP8,  0,  0, 	8,  true,  0, false, true,0,"DISP8", 	false, 0x000000ff},
-{ (unsigned int) RELOC_DISP16, 0,  1, 	16, true,  0, false, true,0,"DISP16", 	false, 0x0000ffff},
-{ (unsigned int) RELOC_DISP32, 0,  2, 	32, true,  0, false, true,0,"DISP32", 	false, 0xffffffff},
-{ (unsigned int) RELOC_WDISP30,2,  2, 	30, true,  0, false, true,0,"WDISP30", 	false, 0x3fffffff},
-{ (unsigned int) RELOC_WDISP22,2,  2, 	22, true,  0, false, true,0,"WDISP22", 	false, 0x003fffff},
-{ (unsigned int) RELOC_HI22,   10, 2, 	22, false, 0, false, true,0,"HI22",	false, 0x003fffff},
-{ (unsigned int) RELOC_22,      0, 2, 	22, false, 0, false, true,0,"22",       false, 0x003fffff},
-{ (unsigned int) RELOC_13, 	0, 2, 	13, false, 0, false, true,0,"13",       false, 0x00001fff},
-{ (unsigned int) RELOC_LO10, 	0, 2, 	10, false, 0, false, true,0,"LO10",     false, 0x000003ff},
-{ (unsigned int) RELOC_SFA_BASE,0, 2, 	32, false, 0, false, true,0,"SFA_BASE", false, 0xffffffff},
-{ (unsigned int) RELOC_SFA_OFF13,0,2, 	32, false, 0, false, true,0,"SFA_OFF13",false, 0xffffffff},
-{ (unsigned int) RELOC_BASE10, 0,  2, 	16, false, 0, false, true,0,"BASE10",   false, 0x0000ffff},
-{ (unsigned int) RELOC_BASE13, 0,  2,	13, false, 0, false, true,0,"BASE13",   false, 0x00001fff},
-{ (unsigned int) RELOC_BASE22, 0,  2,	0,  false, 0, false, true,0,"BASE22",   false, 0x00000000},
-{ (unsigned int) RELOC_PC10,   0,  2,	10, false, 0, false, true,0,"PC10",	false, 0x000003ff},
-{ (unsigned int) RELOC_PC22,   0,  2,	22, false, 0, false, true,0,"PC22",	false, 0x003fffff},
-{ (unsigned int) RELOC_JMP_TBL,0,  2,	32, false, 0, false, true,0,"JMP_TBL",	false, 0xffffffff},
-{ (unsigned int) RELOC_SEGOFF16,0, 2,	0,  false, 0, false, true,0,"SEGOFF16",	false, 0x00000000},
-{ (unsigned int) RELOC_GLOB_DAT,0, 2,	0,  false, 0, false, true,0,"GLOB_DAT",	false, 0x00000000},
-{ (unsigned int) RELOC_JMP_SLOT,0, 2,	0,  false, 0, false, true,0,"JMP_SLOT",	false, 0x00000000},
-{ (unsigned int) RELOC_RELATIVE,0, 2,	0,  false, 0, false, true,0,"RELATIVE",	false, 0x00000000},
-{ (unsigned int) RELOC_JUMPTARG,2, 13,	16, true,  0, false, true,0,"JUMPTARG",	false, 0x0000ffff},
-{ (unsigned int) RELOC_CONST,	0, 13,	16, false, 0, false, true,0,"CONST",	false, 0x0000ffff},
-{ (unsigned int) RELOC_CONSTH, 16, 13,	16, false, 0, false, true,0,"CONSTH",	false, 0x0000ffff},
+{ (unsigned int) RELOC_8,      0,  0,  	8,  false, 0, true,  true,0,"8", 	false, 0,0x000000ff},
+{ (unsigned int) RELOC_16,     0,  1, 	16, false, 0, true,  true,0,"16", 	false, 0,0x0000ffff},
+{ (unsigned int) RELOC_32,     0,  2, 	32, false, 0, true,  true,0,"32", 	false, 0,0xffffffff},
+{ (unsigned int) RELOC_DISP8,  0,  0, 	8,  true,  0, false, true,0,"DISP8", 	false, 0,0x000000ff},
+{ (unsigned int) RELOC_DISP16, 0,  1, 	16, true,  0, false, true,0,"DISP16", 	false, 0,0x0000ffff},
+{ (unsigned int) RELOC_DISP32, 0,  2, 	32, true,  0, false, true,0,"DISP32", 	false, 0,0xffffffff},
+{ (unsigned int) RELOC_WDISP30,2,  2, 	30, true,  0, false, true,0,"WDISP30", 	false, 0,0x3fffffff},
+{ (unsigned int) RELOC_WDISP22,2,  2, 	22, true,  0, false, true,0,"WDISP22", 	false, 0,0x003fffff},
+{ (unsigned int) RELOC_HI22,   10, 2, 	22, false, 0, false, true,0,"HI22",	false, 0,0x003fffff},
+{ (unsigned int) RELOC_22,      0, 2, 	22, false, 0, false, true,0,"22",       false, 0,0x003fffff},
+{ (unsigned int) RELOC_13, 	0, 2, 	13, false, 0, false, true,0,"13",       false, 0,0x00001fff},
+{ (unsigned int) RELOC_LO10, 	0, 2, 	10, false, 0, false, true,0,"LO10",     false, 0,0x000003ff},
+{ (unsigned int) RELOC_SFA_BASE,0, 2, 	32, false, 0, false, true,0,"SFA_BASE", false, 0,0xffffffff},
+{ (unsigned int) RELOC_SFA_OFF13,0,2, 	32, false, 0, false, true,0,"SFA_OFF13",false, 0,0xffffffff},
+{ (unsigned int) RELOC_BASE10, 0,  2, 	16, false, 0, false, true,0,"BASE10",   false, 0,0x0000ffff},
+{ (unsigned int) RELOC_BASE13, 0,  2,	13, false, 0, false, true,0,"BASE13",   false, 0,0x00001fff},
+{ (unsigned int) RELOC_BASE22, 0,  2,	0,  false, 0, false, true,0,"BASE22",   false, 0,0x00000000},
+{ (unsigned int) RELOC_PC10,   0,  2,	10, false, 0, false, true,0,"PC10",	false, 0,0x000003ff},
+{ (unsigned int) RELOC_PC22,   0,  2,	22, false, 0, false, true,0,"PC22",	false, 0,0x003fffff},
+{ (unsigned int) RELOC_JMP_TBL,0,  2,	32, false, 0, false, true,0,"JMP_TBL",	false, 0,0xffffffff},
+{ (unsigned int) RELOC_SEGOFF16,0, 2,	0,  false, 0, false, true,0,"SEGOFF16",	false, 0,0x00000000},
+{ (unsigned int) RELOC_GLOB_DAT,0, 2,	0,  false, 0, false, true,0,"GLOB_DAT",	false, 0,0x00000000},
+{ (unsigned int) RELOC_JMP_SLOT,0, 2,	0,  false, 0, false, true,0,"JMP_SLOT",	false, 0,0x00000000},
+{ (unsigned int) RELOC_RELATIVE,0, 2,	0,  false, 0, false, true,0,"RELATIVE",	false, 0,0x00000000},
+{ (unsigned int) RELOC_JUMPTARG,2, 13,	16, true,  0, false, true,0,"JUMPTARG",	false, 0,0x0000ffff},
+{ (unsigned int) RELOC_CONST,	0, 13,	16, false, 0, false, true,0,"CONST",	false, 0,0x0000ffff},
+{ (unsigned int) RELOC_CONSTH, 16, 13,	16, false, 0, false, true,0,"CONSTH",	false, 0,0x0000ffff},
 };
 
 /* Convert standard reloc records to "arelent" format (incl byte swap).  */
 
-static CONST reloc_howto_type howto_table_std[] = {
+static  reloc_howto_type howto_table_std[] = {
   /* type                   rs   size bsz  pcrel bitpos  abs ovrf sf name*/
-{ (unsigned int) 0,	       0,  0,  	8,  false, 0, true,  true,0,"8",	true, 0x000000ff},
-{ (unsigned int) 1,	       0,  1, 	16, false, 0, true,  true,0,"16",	true, 0x0000ffff},
-{ (unsigned int) 2,	       0,  2, 	32, false, 0, true,  true,0,"32",	true, 0xffffffff},
-{ (unsigned int) 3,	       0,  3, 	64, false, 0, true,  true,0,"64",       true, 0xdeaddead},
-{ (unsigned int) 4,	       0,  0, 	8,  true,  0, false, true,0,"DISP8",    true, 0x000000ff},
-{ (unsigned int) 5,	       0,  1, 	16, true,  0, false, true,0,"DISP16",   true, 0x0000ffff},
-{ (unsigned int) 6,	       0,  2, 	32, true,  0, false, true,0,"DISP32",   true, 0xffffffff},
-{ (unsigned int) 7,	       0,  3, 	64, true,  0, false, true,0,"DISP64",   true, 0xfeedface},
+{ (unsigned int) 0,	       0,  0,  	8,  false, 0, true,  true,0,"8",	true, 0x000000ff,0x000000ff},
+{ (unsigned int) 1,	       0,  1, 	16, false, 0, true,  true,0,"16",	true, 0x0000ffff,0x0000ffff},
+{ (unsigned int) 2,	       0,  2, 	32, false, 0, true,  true,0,"32",	true, 0xffffffff,0xffffffff},
+{ (unsigned int) 3,	       0,  3, 	64, false, 0, true,  true,0,"64",       true, 0xdeaddead,0xdeaddead},
+{ (unsigned int) 4,	       0,  0, 	8,  true,  0, false, true,0,"DISP8",    true, 0x000000ff,0x000000ff},
+{ (unsigned int) 5,	       0,  1, 	16, true,  0, false, true,0,"DISP16",   true, 0x0000ffff,0x0000ffff},
+{ (unsigned int) 6,	       0,  2, 	32, true,  0, false, true,0,"DISP32",   true, 0xffffffff,0xffffffff},
+{ (unsigned int) 7,	       0,  3, 	64, true,  0, false, true,0,"DISP64",   true, 0xfeedface,0xfeedface},
 };
 
+
+bfd_error_vector_type bfd_error_vector;
 /** a.out files */
 
 
@@ -116,11 +119,11 @@ bfd *abfd;
   }
 }
 
-void
-bfd_aout_swap_exec_header_in (abfd, raw_bytes, execp)
-     bfd *abfd;
-     unsigned char *raw_bytes;
-     struct exec *execp;
+static void
+DEFUN(bfd_aout_swap_exec_header_in,(abfd, raw_bytes, execp),
+      bfd *abfd AND
+      unsigned char *raw_bytes AND
+      struct exec *execp)
 {
   struct exec_bytes *bytes = (struct exec_bytes *)raw_bytes;
 
@@ -135,11 +138,11 @@ bfd_aout_swap_exec_header_in (abfd, raw_bytes, execp)
   execp->a_drsize = bfd_h_getlong (abfd, bytes->a_drsize);
 }
 
-void
-bfd_aout_swap_exec_header_out (abfd, execp, raw_bytes)
-     bfd *abfd;
-     struct exec *execp;
-     unsigned char *raw_bytes;
+static void
+DEFUN(bfd_aout_swap_exec_header_out,(abfd, execp, raw_bytes),
+     bfd *abfd AND
+     struct exec *execp AND 
+     unsigned char *raw_bytes)
 {
   struct exec_bytes *bytes = (struct exec_bytes *)raw_bytes;
 
@@ -183,6 +186,7 @@ static unsigned int n_stroff(ptr)
 struct exec *ptr;
 {return n_symoff(ptr) + ptr->a_syms;}
 
+static
 unsigned int n_badmag(ptr)
      struct exec *ptr;
 {
@@ -422,7 +426,7 @@ boolean
 sunos4_write_object_contents (abfd)
      bfd *abfd;
 {
-  unsigned int data_pad = 0;
+  size_t data_pad = 0;
   unsigned char exec_bytes[EXEC_BYTES_SIZE];
   struct exec *execp = exec_hdr (abfd);
 
@@ -464,17 +468,17 @@ sunos4_write_object_contents (abfd)
   N_SET_FLAGS (*execp, 0x1);	/* copied from ld.c; who the hell knows? */
 
   if (abfd->flags & D_PAGED) 
-    {
-      data_pad = ((obj_datasec(abfd)->size + PAGE_SIZE -1)
-		  & (- PAGE_SIZE)) - obj_datasec(abfd)->size;
+      {
+	data_pad = ((obj_datasec(abfd)->size + PAGE_SIZE -1)
+		    & (- PAGE_SIZE)) - obj_datasec(abfd)->size;
 
-      if (data_pad > obj_bsssec(abfd)->size)
-	execp->a_bss = 0;
-      else 
-	execp->a_bss = obj_bsssec(abfd)->size - data_pad;
-      execp->a_data = obj_datasec(abfd)->size + data_pad;
+	if (data_pad > obj_bsssec(abfd)->size)
+	  execp->a_bss = 0;
+	else 
+	  execp->a_bss = obj_bsssec(abfd)->size - data_pad;
+	execp->a_data = obj_datasec(abfd)->size + data_pad;
 
-    }
+      }
   else {
     execp->a_data = obj_datasec (abfd)->size;
     execp->a_bss = obj_bsssec (abfd)->size;
@@ -497,19 +501,19 @@ sunos4_write_object_contents (abfd)
   /* Now write out reloc info, followed by syms and strings */
 
   if (bfd_get_symcount (abfd) != 0) 
-    {
-      bfd_seek (abfd,
-		(long)(N_SYMOFF(*execp)), false);
+      {
+	bfd_seek (abfd,
+		  (long)(N_SYMOFF(*execp)), false);
 
-      sunos4_write_syms (abfd);
+	sunos4_write_syms (abfd);
 
-      bfd_seek (abfd,	(long)(N_TROFF(*execp)), false);
+	bfd_seek (abfd,	(long)(N_TROFF(*execp)), false);
 
-      if (!sunos4_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
-      bfd_seek (abfd, (long)(N_DROFF(*execp)), false);
+	if (!sunos4_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
+	bfd_seek (abfd, (long)(N_DROFF(*execp)), false);
 
-      if (!sunos4_squirt_out_relocs (abfd, obj_datasec (abfd))) return false;
-    }
+	if (!sunos4_squirt_out_relocs (abfd, obj_datasec (abfd))) return false;
+      }
   return true;
 }
 
@@ -1057,8 +1061,8 @@ translate_to_native_sym_flags (sym_pointer, cache_ptr_g, abfd)
       sym_pointer->n_type |= N_TEXT;
     }
     else {
-      bfd_error_trap(bfd_error_nonrepresentable_section,
-		 bfd_get_output_section(cache_ptr)->name);
+
+      bfd_error_vector.nonrepresentable_section(abfd, bfd_get_output_section(cache_ptr)->name);
 
     }
     /* Turn the symbol from section relative to absolute again */
@@ -1106,8 +1110,8 @@ bfd *abfd;
 }
 
 boolean
-sunos4_slurp_symbol_table (abfd)
-     bfd *abfd;
+DEFUN(sunos4_slurp_symbol_table, (abfd),
+      bfd *abfd)
 {
   unsigned int symbol_count;
   size_t symbol_size;
@@ -1210,10 +1214,10 @@ sunos4_slurp_symbol_table (abfd)
   return true;
 }
 
-
+
 void
-sunos4_write_syms (abfd)
-     bfd *abfd;
+DEFUN(sunos4_write_syms,(abfd),
+     bfd *abfd)
 {
   unsigned int count ;
   asymbol **generic = bfd_get_outsymbols (abfd);
@@ -1280,10 +1284,10 @@ sunos4_write_syms (abfd)
     }
 }
 
-
+
 void
-sunos4_reclaim_symbol_table (abfd)
-     bfd *abfd;
+DEFUN(sunos4_reclaim_symbol_table,(abfd),
+     bfd *abfd)
 {
   asection *section;
 
@@ -1985,20 +1989,20 @@ sunos4_close_and_cleanup (abfd)
 */
  
 boolean
-sunos4_find_nearest_line(abfd,
-			 section,
-			 symbols,
-			 offset,
-			 filename_ptr,
-			 functionname_ptr,
-			 line_ptr)
-bfd *abfd;
-asection *section;
-asymbol **symbols;
-bfd_vma offset;
-char **filename_ptr;
-char **functionname_ptr;
-unsigned int *line_ptr;
+DEFUN(sunos4_find_nearest_line,(abfd,
+				section,
+				symbols,
+				offset,
+				filename_ptr,
+				functionname_ptr,
+				line_ptr),
+      bfd *abfd AND
+      asection *section AND
+      asymbol **symbols AND
+      bfd_vma offset AND
+      char **filename_ptr AND
+      char **functionname_ptr AND
+      unsigned int *line_ptr)
 {
   /* Run down the file looking for the filename, function and linenumber */
   asymbol **p;

@@ -108,11 +108,11 @@ Summary:
    may ignore the byte-within-word field of the pointer.  */
 
 #ifndef __PTR_TO_INT
-#define __PTR_TO_INT(P) ((P) - (char *)0)
+#define __PTR_TO_INT(P) ((P) - (char*)0)
 #endif
 
 #ifndef __INT_TO_PTR
-#define __INT_TO_PTR(P) ((P) + (char *)0)
+#define __INT_TO_PTR(P) ((P) + (char*)0)
 #endif
 
 struct _obstack_chunk		/* Lives at front of each chunk. */
@@ -131,11 +131,8 @@ struct obstack		/* control current object in current chunk */
   char	*chunk_limit;		/* address of char after current chunk */
   int	temp;			/* Temporary for some macros.  */
   int   alignment_mask;		/* Mask of alignment for each object. */
-#ifdef __STDC__
-  void  *(*chunkfun) (); 	/* User's fcn to allocate a chunk.  */
-#else
-  char  *(*chunkfun) (); 	/* User's fcn to allocate a chunk.  */
-#endif
+
+  PTR(*chunkfun) (); 	/* User's fcn to allocate a chunk.  */
   void (*freefun) ();		/* User's function to free a chunk.  */
 };
 
