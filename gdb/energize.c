@@ -27,11 +27,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/param.h>
-#include <connection.h>
-#include <genericreq.h>
-#include <debuggerreq.h>
-#include <debuggerconn.h>
-#include <ttyconn.h>
+#include "energize/connection.h"
+#include "energize/genericreq.h"
+#include "energize/debuggerreq.h"
+#include "energize/debuggerconn.h"
+#include "energize/ttyconn.h"
 #include <varargs.h>
 #include <sys/stat.h>
 #ifdef USG
@@ -873,7 +873,7 @@ kernel_dispatch(queue)
 	  }
 	  break;
 	default:
-	  fprintf(stderr, "Unknown request type = %d\n",
+	  fprintf(stderr, "Unknown Tty request type = %d\n",
 		  req->head.reqType);
 	  break;
 	}
@@ -1148,8 +1148,22 @@ kernel_dispatch(queue)
 			      req->setValue.value.text);
 	  }
 	  break;
+	case DynamicLoadRType:
+	  switch (req->dynamicLoad.request->action)
+	    {
+	    case CDynamicLoadUpdateSymtab:
+	      printf_filtered("CDynamicLoadUpdateSymtab, filename=%s\n",
+			      req->dynamicLoad.filenames.text);
+	      break;
+	    default:
+	      printf_filtered("DynamicLoadRType: unknown action=%d, filename=%s\n",
+			      req->dynamicLoad.request->action,
+			      req->dynamicLoad.filenames.text);
+	      break;
+	    }
+	  break;
 	default:
-	  fprintf(stderr, "Unknown request type = %d\n",
+	  fprintf(stderr, "Unknown Debugger request type = %d\n",
 		  req->head.request->reqType);
 	  break;
 	}
