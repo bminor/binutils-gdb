@@ -1,5 +1,18 @@
 2000-02-24  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
+	* config/tc-i386.c (union i386_op): New.
+	(struct _i386_insn): Delete disps[], imms[], regs[].  Add op[].
+	Throughout file replace occurences of disps[n], imms[n], regs[n]
+	with equivalent op[n].disps, op[n].imms, op[n].regs.  Simplify
+	intel mode operand swapping.  Add assert in regKludge and
+	fake_zero_displacement code.  Test i.types[n] when outputting
+	displacements and immediates.  Combine output of Disp16 with
+	Disp32.
+
+	* config/tc-i386.h (TC_RELOC): Delete.
+	* config/tc-i386.c (TC_RELOC): Delete.  Replace usage of TC_RELOC
+	with equivalent call to reloc.
+
 	* as.h (flag_m68k_mri): Move declaration after target include, and
 	only declare when TC_M68K defined.  Define as zero otherwise.
 	(LABELS_WITHOUT_COLONS, NO_PSEUDO_DOT): If undefined, define as 0.

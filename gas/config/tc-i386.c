@@ -32,10 +32,6 @@
 #include "subsegs.h"
 #include "opcode/i386.h"
 
-#ifndef TC_RELOC
-#define TC_RELOC(X,Y) (Y)
-#endif
-
 #ifndef REGISTER_WARNINGS
 #define REGISTER_WARNINGS 1
 #endif
@@ -74,6 +70,13 @@ static bfd_reloc_code_real_type reloc
 /* 'md_assemble ()' gathers together information and puts it into a
    i386_insn. */
 
+union i386_op
+  {
+    expressionS *disps;
+    expressionS *imms;
+    const reg_entry *regs;
+  };
+
 struct _i386_insn
   {
     /* TM holds the template for the insn were currently assembling. */
@@ -82,8 +85,6 @@ struct _i386_insn
     /* SUFFIX holds the instruction mnemonic suffix if given.
        (e.g. 'l' for 'movl')  */
     char suffix;
-
-    /* Operands are coded with OPERANDS, TYPES, DISPS, IMMS, and REGS. */
 
     /* OPERANDS gives the number of given operands. */
     unsigned int operands;
@@ -94,12 +95,12 @@ struct _i386_insn
     unsigned int reg_operands, disp_operands, mem_operands, imm_operands;
 
     /* TYPES [i] is the type (see above #defines) which tells us how to
-       search through DISPS [i] & IMMS [i] & REGS [i] for the required
-       operand.  */
+       use OP[i] for the corresponding operand.  */
     unsigned int types[MAX_OPERANDS];
 
-    /* Displacements (if given) for each operand. */
-    expressionS *disps[MAX_OPERANDS];
+    /* Displacement expression, immediate expression, or register for each
+       operand.  */
+    union i386_op op[MAX_OPERANDS];
 
     /* Relocation type for operand */
 #ifdef BFD_ASSEMBLER
@@ -107,12 +108,6 @@ struct _i386_insn
 #else
     int disp_reloc[MAX_OPERANDS];
 #endif
-
-    /* Immediate operands (if given) for each operand. */
-    expressionS *imms[MAX_OPERANDS];
-
-    /* Register operands (if given) for each operand. */
-    const reg_entry *regs[MAX_OPERANDS];
 
     /* BASE_REG, INDEX_REG, and LOG2_SCALE_FACTOR are used to encode
        the base index byte below.  */
@@ -761,11 +756,11 @@ pi (line, x)
       fprintf (stdout, "\n");
       if (x->types[i]
 	  & (Reg | SReg2 | SReg3 | Control | Debug | Test | RegMMX | RegXMM))
-	fprintf (stdout, "%s\n", x->regs[i]->reg_name);
+	fprintf (stdout, "%s\n", x->op[i].regs->reg_name);
       if (x->types[i] & Imm)
-	pe (x->imms[i]);
+	pe (x->op[i].imms);
       if (x->types[i] & Disp)
-	pe (x->disps[i]);
+	pe (x->op[i].disps);
     }
 }
 
@@ -1271,15 +1266,13 @@ md_assemble (line)
     int suffix_check;
 
     /* All intel opcodes have reversed operands except for BOUND and ENTER */
-    if (intel_syntax
+    if (intel_syntax && i.operands > 1
 	&& (strcmp (mnemonic, "enter") != 0)
 	&& (strcmp (mnemonic, "bound") != 0)
 	&& (strncmp (mnemonic, "fsub", 4) !=0)
 	&& (strncmp (mnemonic, "fdiv", 4) !=0))
       {
-	const reg_entry *temp_reg = NULL;
-	expressionS *temp_disp = NULL;
-	expressionS *temp_imm = NULL;
+	union i386_op temp_op;
 	unsigned int temp_type;
 	int xchg1 = 0;
 	int xchg2 = 0;
@@ -1294,56 +1287,12 @@ md_assemble (line)
 	    xchg1 = 0;
 	    xchg2 = 2;
 	  }
-
-	if (i.operands > 1)
-	  {
-	    temp_type = i.types[xchg2];
-	    if (temp_type & Imm)
-	      temp_imm = i.imms[xchg2];
-	    else if (temp_type & Disp)
-	      temp_disp = i.disps[xchg2];
-	    else
-	      temp_reg = i.regs[xchg2];
-
-	    i.types[xchg2] = i.types[xchg1];
-
-	    if (i.types[xchg2] & Imm)
-	      {
-		i.imms[xchg2] = i.imms[xchg1];
-		i.imms[xchg1] = NULL;
-	      }
-	    else if (i.types[xchg2] & Disp)
-	      {
-		i.disps[xchg2] = i.disps[xchg1];
-		i.disps[xchg1] = NULL;
-	      }
-	    else
-	      {
-		i.regs[xchg2] = i.regs[xchg1];
-		i.regs[xchg1] = NULL;
-	      }
-
-	    if (temp_type & Imm)
-	      {
-		i.imms[xchg1] = temp_imm;
-		if (! (i.types[xchg1] & Imm))
-		  i.imms[xchg2] = NULL;
-	      }
-	    else if (temp_type & Disp)
-	      {
-		i.disps[xchg1] = temp_disp;
-		if (! (i.types[xchg1] & Disp))
-		  i.disps[xchg2] = NULL;
-	      }
-	    else
-	      {
-		i.regs[xchg1] = temp_reg;
-		if (i.types[xchg1] & (Imm | Disp))
-		  i.regs[xchg2] = NULL;
-	      }
-
-	    i.types[xchg1] = temp_type;
-	  }
+	temp_type = i.types[xchg2];
+	i.types[xchg2] = i.types[xchg1];
+	i.types[xchg1] = temp_type;
+	temp_op = i.op[xchg2];
+	i.op[xchg2] = i.op[xchg1];
+	i.op[xchg1] = temp_op;
       }
     overlap0 = 0;
     overlap1 = 0;
@@ -1556,7 +1505,7 @@ md_assemble (line)
 			|| i.tm.base_opcode == 0xfbf))
 		  continue;
 
-		if ((i.types[op] & WordReg) && i.regs[op]->reg_num < 4
+		if ((i.types[op] & WordReg) && i.op[op].regs->reg_num < 4
 #if 0
 		    /* Check that the template allows eight bit regs
 		       This kills insns such as `orb $1,%edx', which
@@ -1568,8 +1517,8 @@ md_assemble (line)
 #if REGISTER_WARNINGS
 		    if ((i.tm.operand_types[op] & InOutPortReg) == 0)
 		      as_warn (_("using `%%%s' instead of `%%%s' due to `%c' suffix"),
-			       (i.regs[op] - (i.types[op] & Reg16 ? 8 : 16))->reg_name,
-			       i.regs[op]->reg_name,
+			       (i.op[op].regs - (i.types[op] & Reg16 ? 8 : 16))->reg_name,
+			       i.op[op].regs->reg_name,
 			       i.suffix);
 #endif
 		    continue;
@@ -1581,7 +1530,7 @@ md_assemble (line)
 				   | FloatReg | FloatAcc))
 		  {
 		    as_bad (_("`%%%s' not allowed with `%s%c'"),
-			    i.regs[op]->reg_name,
+			    i.op[op].regs->reg_name,
 			    i.tm.name,
 			    i.suffix);
 		    return;
@@ -1598,7 +1547,7 @@ md_assemble (line)
 		  && (i.tm.operand_types[op] & (Reg16|Reg32|Acc)) != 0)
 		{
 		  as_bad (_("`%%%s' not allowed with `%s%c'"),
-			  i.regs[op]->reg_name,
+			  i.op[op].regs->reg_name,
 			  i.tm.name,
 			  i.suffix);
 		  return;
@@ -1609,8 +1558,8 @@ md_assemble (line)
 		       && (i.tm.operand_types[op] & (Reg32|Acc)) != 0)
 		{
 		  as_warn (_("using `%%%s' instead of `%%%s' due to `%c' suffix"),
-			   (i.regs[op] + 8)->reg_name,
-			   i.regs[op]->reg_name,
+			   (i.op[op].regs + 8)->reg_name,
+			   i.op[op].regs->reg_name,
 			   i.suffix);
 		}
 #endif
@@ -1625,7 +1574,7 @@ md_assemble (line)
 		  && (i.tm.operand_types[op] & (Reg16|Reg32|Acc)) != 0)
 		{
 		  as_bad (_("`%%%s' not allowed with `%s%c'"),
-			  i.regs[op]->reg_name,
+			  i.op[op].regs->reg_name,
 			  i.tm.name,
 			  i.suffix);
 		  return;
@@ -1636,8 +1585,8 @@ md_assemble (line)
 		       && (i.tm.operand_types[op] & (Reg16|Acc)) != 0)
 		{
 		  as_warn (_("using `%%%s' instead of `%%%s' due to `%c' suffix"),
-			   (i.regs[op] - 8)->reg_name,
-			   i.regs[op]->reg_name,
+			   (i.op[op].regs - 8)->reg_name,
+			   i.op[op].regs->reg_name,
 			   i.suffix);
 		}
 #endif
@@ -1724,7 +1673,7 @@ md_assemble (line)
 	{
 	  unsigned int prefix = DATA_PREFIX_OPCODE;
 
-	  if ((i.regs[1]->reg_type & Reg16) != 0)
+	  if ((i.op[1].regs->reg_type & Reg16) != 0)
 	    if (!add_prefix (prefix))
 	      return;
 	}
@@ -1771,10 +1720,10 @@ md_assemble (line)
 
 	expressionS *exp;
 
-	assert(i.imm_operands == 0 && i.operands <= 2);
+	assert(i.imm_operands == 0 && i.operands <= 2 && 2 < MAX_OPERANDS);
 
 	exp = &im_expressions[i.imm_operands++];
-	i.imms[i.operands] = exp;
+	i.op[i.operands].imms = exp;
 	i.types[i.operands++] = Imm8;
 	exp->X_op = O_constant;
 	exp->X_add_number = i.tm.extension_opcode;
@@ -1802,7 +1751,9 @@ md_assemble (line)
 	  {
 	    unsigned int first_reg_op = (i.types[0] & Reg) ? 0 : 1;
 	    /* Pretend we saw the extra register operand. */
-	    i.regs[first_reg_op+1] = i.regs[first_reg_op];
+	    assert (i.op[first_reg_op+1].regs == 0);
+	    i.op[first_reg_op+1].regs = i.op[first_reg_op].regs;
+	    i.types[first_reg_op+1] = i.types[first_reg_op];
 	    i.reg_operands = 2;
 	  }
 
@@ -1811,7 +1762,7 @@ md_assemble (line)
 	    /* The register or float register operand is in operand 0 or 1. */
 	    unsigned int op = (i.types[0] & (Reg | FloatReg)) ? 0 : 1;
 	    /* Register goes in low 3 bits of opcode. */
-	    i.tm.base_opcode |= i.regs[op]->reg_num;
+	    i.tm.base_opcode |= i.op[op].regs->reg_num;
 	    if ((i.tm.opcode_modifier & Ugh) != 0)
 	      {
 		/* Warn about some common errors, but press on regardless.
@@ -1820,14 +1771,14 @@ md_assemble (line)
 		  {
 		    /* reversed arguments on faddp, fsubp, etc. */
 		    as_warn (_("translating to `%s %%%s,%%%s'"), i.tm.name,
-			     i.regs[1]->reg_name,
-			     i.regs[0]->reg_name);
+			     i.op[1].regs->reg_name,
+			     i.op[0].regs->reg_name);
 		  }
 		else
 		  {
 		    /* extraneous `l' suffix on fp insn */
 		    as_warn (_("translating to `%s %%%s'"), i.tm.name,
-			     i.regs[0]->reg_name);
+			     i.op[0].regs->reg_name);
 		  }
 	      }
 	  }
@@ -1860,13 +1811,13 @@ md_assemble (line)
 		   destination in the i.rm.reg field.  */
 		if ((i.tm.operand_types[dest] & AnyMem) == 0)
 		  {
-		    i.rm.reg = i.regs[dest]->reg_num;
-		    i.rm.regmem = i.regs[source]->reg_num;
+		    i.rm.reg = i.op[dest].regs->reg_num;
+		    i.rm.regmem = i.op[source].regs->reg_num;
 		  }
 		else
 		  {
-		    i.rm.reg = i.regs[source]->reg_num;
-		    i.rm.regmem = i.regs[dest]->reg_num;
+		    i.rm.reg = i.op[source].regs->reg_num;
+		    i.rm.regmem = i.op[dest].regs->reg_num;
 		  }
 	      }
 	    else
@@ -1989,8 +1940,9 @@ md_assemble (line)
 			   holds the correct displacement size. */
 			expressionS *exp;
 
+			assert (i.op[op].disps == 0);
 			exp = &disp_expressions[i.disp_operands++];
-			i.disps[op] = exp;
+			i.op[op].disps = exp;
 			exp->X_op = O_constant;
 			exp->X_add_number = 0;
 			exp->X_add_symbol = (symbolS *) 0;
@@ -2020,9 +1972,9 @@ md_assemble (line)
 		    /* If there is an extension opcode to put here, the
 		       register number must be put into the regmem field. */
 		    if (i.tm.extension_opcode != None)
-		      i.rm.regmem = i.regs[op]->reg_num;
+		      i.rm.regmem = i.op[op].regs->reg_num;
 		    else
-		      i.rm.reg = i.regs[op]->reg_num;
+		      i.rm.reg = i.op[op].regs->reg_num;
 
 		    /* Now, if no memory operand has set i.rm.mode = 0, 1, 2
 		       we must set it to 3 to indicate this is a register
@@ -2038,12 +1990,12 @@ md_assemble (line)
 	  }
 	else if (i.tm.opcode_modifier & (Seg2ShortForm | Seg3ShortForm))
 	  {
-	    if (i.tm.base_opcode == POP_SEG_SHORT && i.regs[0]->reg_num == 1)
+	    if (i.tm.base_opcode == POP_SEG_SHORT && i.op[0].regs->reg_num == 1)
 	      {
 		as_bad (_("you can't `pop %%cs'"));
 		return;
 	      }
-	    i.tm.base_opcode |= (i.regs[0]->reg_num << 3);
+	    i.tm.base_opcode |= (i.op[0].regs->reg_num << 3);
 	  }
 	else if ((i.tm.base_opcode & ~(D|W)) == MOV_AX_DISP32)
 	  {
@@ -2076,20 +2028,20 @@ md_assemble (line)
   }
 
   /* Handle conversion of 'int $3' --> special int3 insn. */
-  if (i.tm.base_opcode == INT_OPCODE && i.imms[0]->X_add_number == 3)
+  if (i.tm.base_opcode == INT_OPCODE && i.op[0].imms->X_add_number == 3)
     {
       i.tm.base_opcode = INT3_OPCODE;
       i.imm_operands = 0;
     }
 
   if ((i.tm.opcode_modifier & (Jump | JumpByte | JumpDword))
-      && i.disps[0]->X_op == O_constant)
+      && i.op[0].disps->X_op == O_constant)
     {
       /* Convert "jmp constant" (and "call constant") to a jump (call) to
 	 the absolute address given by the constant.  Since ix86 jumps and
 	 calls are pc relative, we need to generate a reloc.  */
-      i.disps[0]->X_add_symbol = &abs_symbol;
-      i.disps[0]->X_op = O_symbol;
+      i.op[0].disps->X_add_symbol = &abs_symbol;
+      i.op[0].disps->X_op = O_symbol;
     }
 
   /* We are ready to output the insn. */
@@ -2141,8 +2093,8 @@ md_assemble (line)
 		  ((unsigned char) *p == JUMP_PC_RELATIVE
 		   ? ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL) | code16
 		   : ENCODE_RELAX_STATE (COND_JUMP, SMALL) | code16),
-		  i.disps[0]->X_add_symbol,
-		  i.disps[0]->X_add_number,
+		  i.op[0].disps->X_add_symbol,
+		  i.op[0].disps->X_add_number,
 		  p);
       }
     else if (i.tm.opcode_modifier & (JumpByte | JumpDword))
@@ -2199,7 +2151,7 @@ md_assemble (line)
 	*p++ = i.tm.base_opcode & 0xff;
 
 	fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-		     i.disps[0], 1, reloc (size, 1, i.disp_reloc[0]));
+		     i.op[0].disps, 1, reloc (size, 1, i.disp_reloc[0]));
       }
     else if (i.tm.opcode_modifier & JumpInterSegment)
       {
@@ -2231,9 +2183,9 @@ md_assemble (line)
 	if (prefix)
 	  *p++ = DATA_PREFIX_OPCODE;
 	*p++ = i.tm.base_opcode;
-	if (i.imms[1]->X_op == O_constant)
+	if (i.op[1].imms->X_op == O_constant)
 	  {
-	    long n = (long) i.imms[1]->X_add_number;
+	    long n = (long) i.op[1].imms->X_add_number;
 
 	    if (size == 2 && !fits_in_unsigned_word (n))
 	      {
@@ -2244,11 +2196,11 @@ md_assemble (line)
 	  }
 	else
 	  fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-		       i.imms[1], 0, reloc (size, 0, i.disp_reloc[0]));
-	if (i.imms[0]->X_op != O_constant)
+		       i.op[1].imms, 0, reloc (size, 0, i.disp_reloc[0]));
+	if (i.op[0].imms->X_op != O_constant)
 	  as_bad (_("can't handle non absolute segment in `%s'"),
 		  i.tm.name);
-	md_number_to_chars (p + size, (valueT) i.imms[0]->X_add_number, 2);
+	md_number_to_chars (p + size, (valueT) i.op[0].imms->X_add_number, 2);
       }
     else
       {
@@ -2334,12 +2286,12 @@ md_assemble (line)
 
 	    for (n = 0; n < i.operands; n++)
 	      {
-		if (i.disps[n])
+		if (i.types[n] & Disp)
 		  {
-		    if (i.disps[n]->X_op == O_constant)
+		    if (i.op[n].disps->X_op == O_constant)
 		      {
 			int size = 4;
-			long val = (long) i.disps[n]->X_add_number;
+			long val = (long) i.op[n].disps->X_add_number;
 
 			if (i.types[n] & (Disp8 | Disp16))
 			  {
@@ -2361,21 +2313,18 @@ md_assemble (line)
 			p = frag_more (size);
 			md_number_to_chars (p, (valueT) val, size);
 		      }
-		    else if (i.types[n] & Disp32)
-		      {
-			insn_size += 4;
-			p = frag_more (4);
-			fix_new_exp (frag_now, p - frag_now->fr_literal, 4,
-				     i.disps[n], 0,
-				     TC_RELOC (i.disp_reloc[n], BFD_RELOC_32));
-		      }
 		    else
-		      { /* must be Disp16 */
-			insn_size += 2;
-			p = frag_more (2);
-			fix_new_exp (frag_now, p - frag_now->fr_literal, 2,
-				     i.disps[n], 0,
-				     TC_RELOC (i.disp_reloc[n], BFD_RELOC_16));
+		      {
+			int size = 4;
+
+			if (i.types[n] & Disp16)
+			  size = 2;
+
+			insn_size += size;
+			p = frag_more (size);
+			fix_new_exp (frag_now, p - frag_now->fr_literal, size,
+				     i.op[n].disps, 0,
+				     reloc (size, 0, i.disp_reloc[n]));
 		      }
 		  }
 	      }
@@ -2388,12 +2337,12 @@ md_assemble (line)
 
 	    for (n = 0; n < i.operands; n++)
 	      {
-		if (i.imms[n])
+		if (i.types[n] & Imm)
 		  {
-		    if (i.imms[n]->X_op == O_constant)
+		    if (i.op[n].imms->X_op == O_constant)
 		      {
 			int size = 4;
-			long val = (long) i.imms[n]->X_add_number;
+			long val = (long) i.op[n].imms->X_add_number;
 
 			if (i.types[n] & (Imm8 | Imm8S | Imm16))
 			  {
@@ -2417,41 +2366,39 @@ md_assemble (line)
 		    else
 		      {		/* not absolute_section */
 			/* Need a 32-bit fixup (don't support 8bit
-			   non-absolute ims).  Try to support other
+			   non-absolute imms).  Try to support other
 			   sizes ... */
 #ifdef BFD_ASSEMBLER
 			enum bfd_reloc_code_real reloc_type;
 #else
 			int reloc_type;
 #endif
-			int size;
-			int pcrel = 0;
+			int size = 4;
 
-			if (i.types[n] & (Imm8 | Imm8S))
-			  size = 1;
-			else if (i.types[n] & Imm16)
+			if (i.types[n] & Imm16)
 			  size = 2;
-			else
-			  size = 4;
+			else if (i.types[n] & (Imm8 | Imm8S))
+			  size = 1;
+
 			insn_size += size;
 			p = frag_more (size);
 			reloc_type = reloc (size, 0, i.disp_reloc[0]);
 #ifdef BFD_ASSEMBLER
 			if (reloc_type == BFD_RELOC_32
 			    && GOT_symbol
-			    && GOT_symbol == i.imms[n]->X_add_symbol
-			    && (i.imms[n]->X_op == O_symbol
-				|| (i.imms[n]->X_op == O_add
+			    && GOT_symbol == i.op[n].imms->X_add_symbol
+			    && (i.op[n].imms->X_op == O_symbol
+				|| (i.op[n].imms->X_op == O_add
 				    && ((symbol_get_value_expression
-					 (i.imms[n]->X_op_symbol)->X_op)
+					 (i.op[n].imms->X_op_symbol)->X_op)
 					== O_subtract))))
 			  {
 			    reloc_type = BFD_RELOC_386_GOTPC;
-			    i.imms[n]->X_add_number += 3;
+			    i.op[n].imms->X_add_number += 3;
 			  }
 #endif
 			fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-				     i.imms[n], pcrel, reloc_type);
+				     i.op[n].imms, 0, reloc_type);
 		      }
 		  }
 	      }
@@ -2484,7 +2431,7 @@ i386_immediate (imm_start)
     }
 
   exp = &im_expressions[i.imm_operands++];
-  i.imms[this_operand] = exp;
+  i.op[this_operand].imms = exp;
 
   if (is_space_char (*imm_start))
     ++imm_start;
@@ -2678,8 +2625,7 @@ i386_displacement (disp_start, disp_end)
   i.types[this_operand] |= bigdisp;
 
   exp = &disp_expressions[i.disp_operands];
-  i.disps[this_operand] = exp;
-  i.disp_reloc[this_operand] = NO_RELOC;
+  i.op[this_operand].disps = exp;
   i.disp_operands++;
   save_input_line_pointer = input_line_pointer;
   input_line_pointer = disp_start;
@@ -3312,7 +3258,7 @@ i386_intel_operand (operand_string, got_a_float)
 
 	    }
 	  i.types[this_operand] |= r->reg_type & ~BaseIndex;
-	  i.regs[this_operand] = r;
+	  i.op[this_operand].regs = r;
 	  i.reg_operands++;
 	}
       else if (*op_string == REGISTER_PREFIX)
@@ -3415,7 +3361,7 @@ i386_operand (operand_string)
 	  return 0;
 	}
       i.types[this_operand] |= r->reg_type & ~BaseIndex;
-      i.regs[this_operand] = r;
+      i.op[this_operand].regs = r;
       i.reg_operands++;
     }
   else if (*op_string == REGISTER_PREFIX)

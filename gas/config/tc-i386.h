@@ -38,11 +38,6 @@ struct fix;
    type.  The idea is that if the original type is already some kind of PIC
    relocation, we leave it alone, otherwise we give it the desired type */
 
-#define TC_RELOC(X,Y) (((X) != BFD_RELOC_386_PLT32 && \
-	   (X) != BFD_RELOC_386_GOTOFF && \
-	   (X) != BFD_RELOC_386_GOT32 && \
-	   (X) != BFD_RELOC_386_GOTPC) ? Y : X)
-
 #define tc_fix_adjustable(X)  tc_i386_fix_adjustable(X)
 extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 
