@@ -583,7 +583,8 @@ AC_ARG_ENABLE(gdbmi,
       AC_MSG_ERROR(Bad value for --enable-gdbmi: ${enableval})
     ;;
   esac
-])
+],
+[enable_gdbmi=yes])
 case ${enable_gdbmi} in
   "yes" )
     if test -d "${srcdir}/mi" ; then

@@ -5,6 +5,11 @@
 
 * "info symbol" works on platforms which use COFF, ECOFF, XCOFF, and NLM.
 
+* The MI enabled.
+
+The new machine oriented interface (MI) introduced in GDB 5.0 has been
+revised and enabled.
+
 * New native configurations
 
 Alpha FreeBSD					alpha*-*-freebsd*

@@ -89,25 +89,6 @@ The following new features should be included in 5.1.
 
 --
 
-Enable MI by default.  Old code can be deleted after 5.1 is out.
-
-Issues:
-
-	o	syntax change where a list would
-		look like:
-		     [ foo=a, foo=b, foo=c ]
-		instead of
-		     { foo=a, foo=b, foo=c }
-
-	o	kill off the idea of a reverse
-		query.
-
-	o	review test cases
-
-	o	enable it
-
---
-
 Pascal (Pierre Muller, David Taylor)
 
 Pierre Muller has contributed patches for adding Pascal Language
