@@ -1,4 +1,13 @@
+Fri Sep 24 17:25:41 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* corelow.c:  Add multi thread/process support for core files with
+	.reg/XXX pseudo-sections.
+	* i386lynx-nat.c thread.h thread.c:  Remove unnecessary core file
+	support.
+
 Thu Sep 23 10:49:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote-udi.c (download): Skip zero length sections.
 
 	* valops.c (search_struct_method, value_struct_elt):
 	Use (value)-1, not -1, for error.

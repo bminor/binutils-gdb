@@ -29,12 +29,4 @@ extern void add_thread PARAMS ((int));
 
 extern int in_thread_list PARAMS ((int));
 
-#if 0
-#ifdef __STDC__
-struct _bfd;
-#endif
-
-extern void bfd_get_core_threads PARAMS ((struct _bfd *));
-#endif
-
 #endif	/* THREAD_H */

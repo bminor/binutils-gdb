@@ -109,19 +109,6 @@ in_thread_list (pid)
   return 0;			/* Never heard of 'im */
 }
 
-#if 0
-void
-bfd_get_core_threads (abfd)
-    bfd *abfd;
-{
-    int i;
-
-    inferior_pid = BUILDPID (inferior_pid, core_thread (abfd)->pid);
-    for (i = 0; i < core_pss (abfd).threadcnt; i++)
-      add_thread (core_thread (abfd)[i].pid);
-}
-#endif
-
 static void
 prune_threads ()
 {

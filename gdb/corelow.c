@@ -51,6 +51,8 @@ static void
 core_close (quitting)
      int quitting;
 {
+  inferior_pid = 0;		/* Avoid confusion from thread stuff */
+
   if (core_bfd) {
     free (bfd_get_filename (core_bfd));
     bfd_close (core_bfd);
@@ -77,6 +79,30 @@ solib_add_stub (from_tty)
     return 0;
 }
 #endif /* SOLIB_ADD */
+
+/* Look for sections whose names start with `.reg/' so that we can extract the
+   list of threads in a core file.  */
+
+static void
+add_to_thread_list (abfd, asect, reg_sect)
+     bfd *abfd;
+     asection *asect;
+     asection *reg_sect;
+{
+  int thread_id;
+
+  if (strncmp (bfd_section_name (abfd, asect), ".reg/", 5) != 0)
+    return;
+
+  thread_id = atoi (bfd_section_name (abfd, asect) + 5);
+
+  add_thread (thread_id);
+
+/* Warning, Will Robinson, looking at BFD private data! */
+
+  if (asect->filepos == reg_sect->filepos) /* Did we find .reg? */
+    inferior_pid = thread_id;	/* Yes, make it current */
+}
 
 /* This routine opens and sets up the core file bfd */
 
@@ -154,6 +180,12 @@ core_open (filename, from_tty)
     printf_filtered ("Program terminated with signal %d, %s.\n", siggy,
 	    safe_strsignal (siggy));
 
+  /* Build up thread list from BFD sections. */
+
+  init_thread_list ();
+  bfd_map_over_sections (core_bfd, add_to_thread_list,
+			 bfd_get_section_by_name (core_bfd, ".reg"));
+
   if (ontop) {
     /* Fetch all registers from core file */
     target_fetch_registers (-1);
@@ -201,8 +233,20 @@ get_core_registers (regno)
   sec_ptr reg_sec;
   unsigned size;
   char *the_regs;
+  char secname[10];
 
-  reg_sec = bfd_get_section_by_name (core_bfd, ".reg");
+  /* Thread support.  If inferior_pid is non-zero, then we have found a core
+     file with threads (or multiple processes).  In that case, we need to
+     use the appropriate register section, else we just use `.reg'. */
+
+  /* XXX - same thing needs to be done for floating-point (.reg2) sections. */
+
+  if (inferior_pid)
+    sprintf (secname, ".reg/%d", inferior_pid);
+  else
+    strcpy (secname, ".reg");
+
+  reg_sec = bfd_get_section_by_name (core_bfd, secname);
   if (!reg_sec) goto cant;
   size = bfd_section_size (core_bfd, reg_sec);
   the_regs = alloca (size);
