@@ -1,3 +1,9 @@
+2002-03-11  Andreas Jaeger  <aj@suse.de>
+
+	* ld-elfweak/strongdata.sym: Allow bss section for GCC 3.2 that
+	places zero initialized data in the bss.
+	* ld-elfweak/lddsodata.dsym: Likewise.
+
 2002-03-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/expdyn1.d: Tweak for change in elf.sc.
@@ -274,7 +280,7 @@
 2002-01-29  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld-mips-elf/emrelocs-eb.d: New file to test --embedded-relocs.
-	* ld-mips-elf/emrelocs-el.d: Likewise. 
+	* ld-mips-elf/emrelocs-el.d: Likewise.
 	* ld-mips-elf/emrelocs1.s: Likewise.
 	* ld-mips-elf/emrelocs2.s: Likewise.
 	* ld-mips-elf/emrelocs.ld: Likewise.
@@ -401,13 +407,13 @@
 
 	* ld-mmix/locdo-1.d: Prune character dump part.
 	* ld-mmix/local7m.d, ld-mmix/loc4.d, ld-mmix/loc4m.d,
- 	ld-mmix/loc1.d, ld-mmix/bspec1m.d, ld-mmix/bspec2m.d,
- 	ld-mmix/b-nosym.d, ld-mmix/b-fixo2.d, ld-mmix/b-loc64k.d,
- 	ld-mmix/undef-3m.d, ld-mmix/locto.s, ld-mmix/loct.s,
- 	ld-mmix/local3m.d, ld-mmix/local1m.d, ld-mmix/loc6m.d,
- 	ld-mmix/loc2.s, ld-mmix/loc1.s, ld-mmix/gregldo1.s,
- 	ld-mmix/dloc1.s, ld-mmix/b-widec3.s, ld-mmix/b-nosym.s: Remove
- 	unnecessary empty lines.
+	ld-mmix/loc1.d, ld-mmix/bspec1m.d, ld-mmix/bspec2m.d,
+	ld-mmix/b-nosym.d, ld-mmix/b-fixo2.d, ld-mmix/b-loc64k.d,
+	ld-mmix/undef-3m.d, ld-mmix/locto.s, ld-mmix/loct.s,
+	ld-mmix/local3m.d, ld-mmix/local1m.d, ld-mmix/loc6m.d,
+	ld-mmix/loc2.s, ld-mmix/loc1.s, ld-mmix/gregldo1.s,
+	ld-mmix/dloc1.s, ld-mmix/b-widec3.s, ld-mmix/b-nosym.s: Remove
+	unnecessary empty lines.
 
 2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
