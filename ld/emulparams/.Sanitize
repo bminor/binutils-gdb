@@ -139,6 +139,7 @@ shelf.sh
 shl.sh
 shlelf.sh
 sparcaout.sh
+sparclinux.sh
 sparclynx.sh
 sparcnbsd.sh
 st2000.sh
