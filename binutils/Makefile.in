@@ -78,8 +78,6 @@ VERSION=cygnus-2.6
 # Distribution name
 DIST_NAME=binutils-${VERSION}
 
-version=`./../gcc/gcc -dumpversion`
-
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo
 
