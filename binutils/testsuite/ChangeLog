@@ -1,3 +1,28 @@
+1999-01-29  Nick Clifton  <nickc@cygnus.com>
+
+	* config/default.exp: Add definitions of READELF and READELFFLAGS.
+
+	* binutils-all/readelf.exp: New file: Readelf tests
+	* binutils-all/readelf.h: New file: Expected results for 'readelf -h'
+	* binutils-all/readelf.s: New file: Expected results for 'readelf -S'
+	* binutils-all/readelf.ss: New file: Expected results for 'readelf -s'
+	* binutils-all/readelf.r: New file: Expected results for 'readelf -r'
+
+Wed Dec  9 19:11:39 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* binutils-all/objcopy.exp (copy_executable): Expect comparison
+	failure for mips*-*-elf.
+
+Fri Oct 16 22:57:12 1998  Felix Lee  <flee@cygnus.com>
+
+	* binutils-all/objcopy.exp: fix "no symbols" message.
+
+Tue Jul 28 15:14:04 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* binutils-all/objcopy.exp: Keep "main" and "_main" for strip with
+	saving symbol tests.  Look for either "main" or "_main" in the output
+	file.  Fix test for "no symbols" in the output file.
+
 1998-07-22  Vladimir N. Makarov  <vmakarov@cygnus.com>
 
 	* binutils-all/objcopy.exp: Polish output about fail for objcopy
