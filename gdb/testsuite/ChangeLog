@@ -1,3 +1,14 @@
+Thu Feb 25 10:39:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Redid configuration scheme.  Removed gdb.t*/configure.in.
+	Renamed gdb.t*/in-gdbme* to gdb.t*/gdbme*.  Changed to use CC, CXX
+	instead of CC_FOR_TARGET, CXX_FOR_TARGET.  Added mostlyclean and
+	distclean targets.  Built executables via .o files.  Adjusted
+	tests to account for source files in $(srcdir) rather than
+	$(objdir).
+	* lib/gdb.exp (runto): Don't expect () after the function name,
+	because it may have arguments.
+
 Wed Feb 24 08:05:38 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* gdb.t00/default.exp, gdb.t01/run.exp, gdb.t02/whatis.exp,
