@@ -4,6 +4,8 @@ Wed Sep 17 16:54:20 1997  Nick Clifton  <nickc@cygnus.com>
 	macro. 
 	(handle_tdaoff, handle_zdaoff, handle_sdaoff): New functions.
 start-sanitize-v850e	
+
+	* config/tc-v850.c (md_assemble): Corrected typo.
 	* config/tc-v850.c Add new sections: call_table_data and
 	call_table_text.
 	(v850_reloc_prefix): Add support for ctoff() relocation prefix. 

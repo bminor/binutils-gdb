@@ -1196,7 +1196,7 @@ md_assemble (str)
       
       if ((opcode->processors & processor_mask) == 0)
 	{
-	  errmsg = "Target processor doe snot support this instruction.";
+	  errmsg = "Target processor does not support this instruction.";
 	  goto error;
 	}
       
