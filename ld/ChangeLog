@@ -1,3 +1,8 @@
+2003-11-28  Marcel Moolenaar  <marcel@xcllnt.net>
+
+	* emulparams/elf64_ia64_fbsd.sh (TEXT_START_ADDR): Define.
+	(DATA_ADDR): Unset.
+
 2003-11-18  James E Wilson  <wilson@specifixinc.com>
 
 	* ldlang.c (lang_process): Move lang_reset_memory_regions call after
