@@ -17,6 +17,10 @@ Text:
 Name for assembler; individual configs may override
 _define__(<_AS__>,<as>)
 
+Text for host; individual configs *should* override, but this may
+catch some flubs
+_define__(<_HOST__>,<machine specific>)
+
 "Machine Dependent" nodename
 _define__(<_MACH_DEP__>,<Machine Dependent>)
 
