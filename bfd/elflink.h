@@ -921,6 +921,7 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
   boolean size_change_ok;
   char *shortname;
   struct elf_link_hash_entry *hi;
+  struct bfd_link_hash_entry *bh;
   struct elf_backend_data *bed;
   boolean collect;
   boolean dynamic;
@@ -979,11 +980,12 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
 
   if (! override)
     {
+      bh = &hi->root;
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, shortname, BSF_INDIRECT, bfd_ind_section_ptr,
-	      (bfd_vma) 0, name, false, collect,
-	      (struct bfd_link_hash_entry **) &hi)))
+	      (bfd_vma) 0, name, false, collect, &bh)))
 	return false;
+      hi = (struct elf_link_hash_entry *) bh;
     }
   else
     {
@@ -1098,11 +1100,12 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
     }
   else
     {
+      bh = &hi->root;
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, shortname, BSF_INDIRECT,
-	      bfd_ind_section_ptr, (bfd_vma) 0, name, false,
-	      collect, (struct bfd_link_hash_entry **) &hi)))
+	      bfd_ind_section_ptr, (bfd_vma) 0, name, false, collect, &bh)))
 	return false;
+      hi = (struct elf_link_hash_entry *) bh;
 
       /* If there is a duplicate definition somewhere, then HI may not
 	 point to an indirect symbol.  We will have reported an error
@@ -2292,6 +2295,7 @@ elf_link_create_dynamic_sections (abfd, info)
   flagword flags;
   register asection *s;
   struct elf_link_hash_entry *h;
+  struct bfd_link_hash_entry *bh;
   struct elf_backend_data *bed;
 
   if (! is_elf_hash_table (info))
@@ -2384,12 +2388,12 @@ elf_link_create_dynamic_sections (abfd, info)
      creating a .dynamic section.  We don't want to define it if there
      is no .dynamic section, since on some ELF platforms the start up
      code examines it to decide how to initialize the process.  */
-  h = NULL;
+  bh = NULL;
   if (! (_bfd_generic_link_add_one_symbol
 	 (info, abfd, "_DYNAMIC", BSF_GLOBAL, s, (bfd_vma) 0,
-	  (const char *) NULL, false, get_elf_backend_data (abfd)->collect,
-	  (struct bfd_link_hash_entry **) &h)))
+	  (const char *) 0, false, get_elf_backend_data (abfd)->collect, &bh)))
     return false;
+  h = (struct elf_link_hash_entry *) bh;
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
 
@@ -3326,19 +3330,20 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	      unsigned int cdeps;
 	      struct bfd_elf_version_deps *n;
 	      struct elf_link_hash_entry *h;
+	      struct bfd_link_hash_entry *bh;
 
 	      cdeps = 0;
 	      for (n = t->deps; n != NULL; n = n->next)
 		++cdeps;
 
 	      /* Add a symbol representing this version.  */
-	      h = NULL;
+	      bh = NULL;
 	      if (! (_bfd_generic_link_add_one_symbol
 		     (info, dynobj, t->name, BSF_GLOBAL, bfd_abs_section_ptr,
 		      (bfd_vma) 0, (const char *) NULL, false,
-		      get_elf_backend_data (dynobj)->collect,
-		      (struct bfd_link_hash_entry **) &h)))
+		      get_elf_backend_data (dynobj)->collect, &bh)))
 		return false;
+	      h = (struct elf_link_hash_entry *) bh;
 	      h->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
 	      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	      h->type = STT_OBJECT;

@@ -3166,6 +3166,7 @@ func_desc_adjust (h, inf)
 	{
 	  bfd *abfd;
 	  asymbol *newsym;
+	  struct bfd_link_hash_entry *bh;
 
 	  abfd = h->root.u.undef.abfd;
 	  newsym = bfd_make_empty_symbol (abfd);
@@ -3176,13 +3177,14 @@ func_desc_adjust (h, inf)
 	  if (h->root.type == bfd_link_hash_undefweak)
 	    newsym->flags |= BSF_WEAK;
 
+	  bh = &fdh->root;
 	  if ( !(_bfd_generic_link_add_one_symbol
 		 (info, abfd, newsym->name, newsym->flags,
-		  newsym->section, newsym->value, NULL, false, false,
-		  (struct bfd_link_hash_entry **) &fdh)))
+		  newsym->section, newsym->value, NULL, false, false, &bh)))
 	    {
 	      return false;
 	    }
+	  fdh = (struct elf_link_hash_entry *) bh;
 	  fdh->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
 	}
 

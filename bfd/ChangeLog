@@ -1,5 +1,32 @@
 2002-10-11  Alan Modra  <amodra@bigpond.net.au>
 
+	* coff-arm.c (record_arm_to_thumb_glue): Avoid type-punned pointers.
+	(record_thumb_to_arm_glue): Likewise.
+	* ecoff.c (ecoff_link_add_externals): Likewise.
+	* elf32-arm.h (record_arm_to_thumb_glue): Likewise.
+	(record_thumb_to_arm_glue): Likewise.
+	* elf32-m32r.c (m32r_elf_add_symbol_hook): Likewise.
+	* elf32-sh.c (sh_elf_create_dynamic_sections): Likewise.
+	* elf32-sh64.c (sh64_elf_add_symbol_hook): Likewise.
+	* elf64-alpha.c (elf64_alpha_create_dynamic_sections): Likewise.
+	* elf64-ppc.c (func_desc_adjust): Likewise.
+	* elf64-sh64.c (sh64_elf64_add_symbol_hook): Likewise.
+	(sh64_elf64_create_dynamic_sections): Likewise.
+	* elflink.c (_bfd_elf_create_got_section): Likewise.
+	(_bfd_elf_create_dynamic_sections): Likewise.
+	(_bfd_elf_create_linker_section): Likewise.
+	* elflink.h (elf_add_default_symbol): Likewise.
+	(elf_link_create_dynamic_sections): Likewise.
+	(NAME(bfd_elf,size_dynamic_sections)): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_aix_add_symbol_hook): Likewise.
+	* elfxx-mips.c (mips_elf_create_got_section): Likewise.
+	(_bfd_mips_elf_add_symbol_hook): Likewise.
+	(_bfd_mips_elf_create_dynamic_sections): Likewise.
+	* linker.c (generic_link_add_symbol_list): Likewise.
+	* xcofflink.c (xcoff_link_add_symbols): Likewise.
+
+	* elfxx-ia64.c (oor_brl, oor_ip): Conditionally define.
+
 	* elf64-ppc.c (edit_opd): Only zero opd syms when function is
 	completely removed.
 
