@@ -1,5 +1,5 @@
 /* Print SPARC instructions.
-   Copyright 1989, 1991, 1992, 1993, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1989, 91-93, 1995, 1996 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -52,19 +52,16 @@ static  char *reg_names[] =
   "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",	
   "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
   "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
-#ifndef NO_V9
   "f32", "f33", "f34", "f35", "f36", "f37", "f38", "f39",	
   "f40", "f41", "f42", "f43", "f44", "f45", "f46", "f47",	
   "f48", "f49", "f50", "f51", "f52", "f53", "f54", "f55",
   "f56", "f57", "f58", "f59", "f60", "f61", "f62", "f63",
 /* psr, wim, tbr, fpsr, cpsr are v8 only.  */
-#endif
   "y", "psr", "wim", "tbr", "pc", "npc", "fpsr", "cpsr"
 };
 
 #define	freg_names	(&reg_names[4 * 8])
 
-#ifndef NO_V9
 /* These are ordered according to there register number in
    rdpr and wrpr insns.  */
 static char *v9_priv_reg_names[] =
@@ -74,7 +71,6 @@ static char *v9_priv_reg_names[] =
   "wstate", "fq"
   /* "ver" - special cased */
 };
-#endif
 
 /* Macros used to extract instruction fields.  Not all fields have
    macros defined here, only those which are actually used.  */
@@ -89,10 +85,10 @@ static char *v9_priv_reg_names[] =
 #define X_IMM22(i) X_DISP22 (i)
 #define X_DISP30(i) (((i) >> 0) & 0x3fffffff)
 
-#ifndef NO_V9
+/* These are for v9.  */
 #define X_DISP16(i) (((((i) >> 20) & 3) << 14) | (((i) >> 0) & 0x3fff))
+#define X_DISP19(i) (((i) >> 0) & 0x7ffff)
 #define X_MEMBAR(i) ((i) & 0x7f)
-#endif
 
 /* Here is the union which was used to extract instruction fields
    before the shift and mask macros were written.
@@ -132,7 +128,6 @@ static char *v9_priv_reg_names[] =
 	   #define	disp22	branch.DISP22
 	   #define	imm22	disp22
 	 } branch;
-	 #ifndef NO_V9
        struct
 	 {
 	   unsigned int anop:2;
@@ -145,7 +140,6 @@ static char *v9_priv_reg_names[] =
 	   unsigned int _rs1:5;
 	   unsigned int DISP16LO:14;
 	 } branch16;
-	 #endif
        struct
 	 {
 	   unsigned int anop:2;
@@ -187,17 +181,17 @@ static int compare_opcodes ();
    displacement to that register, or it is an `add' or `or' instruction
    on that register.  */
 
-static int
-print_insn (memaddr, info, sparc64_p)
+int
+print_insn_sparc (memaddr, info)
      bfd_vma memaddr;
      disassemble_info *info;
-     int sparc64_p;
 {
   FILE *stream = info->stream;
   bfd_byte buffer[4];
   unsigned long insn;
   register unsigned int i;
   register struct opcode_hash *op;
+  int sparc_v9_p = bfd_mach_sparc_v9_p (info->mach);
 
   if (!opcodes_initialized)
     {
@@ -219,6 +213,9 @@ print_insn (memaddr, info, sparc64_p)
 
   insn = bfd_getb32 (buffer);
 
+  if (DISASM_RAW_INSN (info))
+    (*info->fprintf_func) (stream, "0x%08lx\t", insn);
+
   info->insn_info_valid = 1;			/* We do return this info */
   info->insn_type = dis_nonbranch;		/* Assume non branch insn */
   info->branch_delay_insns = 0;			/* Assume no delay */
@@ -229,12 +226,12 @@ print_insn (memaddr, info, sparc64_p)
       CONST struct sparc_opcode *opcode = op->opcode;
 
       /* If the current architecture isn't sparc64, skip sparc64 insns.  */
-      if (!sparc64_p
-	  && opcode->architecture == v9)
+      if (!sparc_v9_p
+	  && opcode->architecture >= v9)
 	continue;
 
       /* If the current architecture is sparc64, skip sparc32 only insns.  */
-      if (sparc64_p
+      if (sparc_v9_p
 	  && (opcode->flags & F_NOTV9))
 	continue;
 
@@ -283,7 +280,6 @@ print_insn (memaddr, info, sparc64_p)
 		      is_annulled = 1;
 		      ++s;
 		      continue;
-#ifndef NO_V9
 		    case 'N':
 		      (*info->fprintf_func) (stream, "pn");
 		      ++s;
@@ -293,7 +289,6 @@ print_insn (memaddr, info, sparc64_p)
 		      (*info->fprintf_func) (stream, "pt");
 		      ++s;
 		      continue;
-#endif	/* NO_V9 */
 
 		    default:
 		      break;
@@ -400,7 +395,6 @@ print_insn (memaddr, info, sparc64_p)
 		    }
 		    break;
 
-#ifndef NO_V9
 		  case 'I':	/* 11 bit immediate.  */
 		  case 'j':	/* 10 bit immediate.  */
 		    {
@@ -453,12 +447,12 @@ print_insn (memaddr, info, sparc64_p)
 		    }
 
 		  case 'k':
-		    info->target = memaddr + (SEX (X_DISP16 (insn), 16)) * 4;
+		    info->target = memaddr + SEX (X_DISP16 (insn), 16) * 4;
 		    (*info->print_address_func) (info->target, info);
 		    break;
 
 		  case 'G':
-		    info->target = memaddr + (SEX (X_DISP22 (insn), 19)) * 4;
+		    info->target = memaddr + SEX (X_DISP19 (insn), 19) * 4;
 		    (*info->print_address_func) (info->target, info);
 		    break;
 
@@ -525,7 +519,6 @@ print_insn (memaddr, info, sparc64_p)
 			(*info->fprintf_func) (stream, "%d", X_RD (insn));
 		      break;
 		    }
-#endif	/* NO_V9 */
 
 		  case 'M':
 		    (*info->fprintf_func) (stream, "%%asr%d", X_RS1 (insn));
@@ -536,17 +529,17 @@ print_insn (memaddr, info, sparc64_p)
 		    break;
 		    
 		  case 'L':
-		    info->target = memaddr + X_DISP30 (insn) * 4;
+		    info->target = memaddr + SEX (X_DISP30 (insn), 30) * 4;
 		    (*info->print_address_func) (info->target, info);
 		    break;
 
 		  case 'n':
 		    (*info->fprintf_func)
-		      (stream, "%#x", (SEX (X_DISP22 (insn), 22)));
+		      (stream, "%#x", SEX (X_DISP22 (insn), 22));
 		    break;
 
 		  case 'l':
-		    info->target = memaddr + (SEX (X_DISP22 (insn), 22)) * 4;
+		    info->target = memaddr + SEX (X_DISP22 (insn), 22) * 4;
 		    (*info->print_address_func) (info->target, info);
 		    break;
 
@@ -731,8 +724,8 @@ compare_opcodes (a, b)
     }
 
   /* Put non-sparc64 insns ahead of sparc64 ones.  */
-  if ((op0->architecture == v9) != (op1->architecture == v9))
-    return (op0->architecture == v9) - (op1->architecture == v9);
+  if ((op0->architecture >= v9) != (op1->architecture >= v9))
+    return (op0->architecture >= v9) - (op1->architecture >= v9);
 
   /* They are functionally equal.  So as long as the opcode table is
      valid, we can put whichever one first we want, on aesthetic grounds.  */
@@ -847,20 +840,4 @@ build_hash_table (table, hash_table, num_opcodes)
 	    min_count, max_count, (double) total / HASH_SIZE);
   }
 #endif
-}
-
-int
-print_insn_sparc (memaddr, info)
-     bfd_vma memaddr;
-     disassemble_info *info;
-{
-  return print_insn (memaddr, info, 0);
-}
-
-int
-print_insn_sparc64 (memaddr, info)
-     bfd_vma memaddr;
-     disassemble_info *info;
-{
-  return print_insn (memaddr, info, 1);
 }
