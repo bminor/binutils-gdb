@@ -502,15 +502,16 @@ ns32k-dis.lo: ns32k-dis.c $(BFD_H) $(INCDIR)/ansidecl.h \
 openrisc-asm.lo: openrisc-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h $(INCDIR)/opcode/cgen.h \
   openrisc-opc.h opintl.h
-openrisc-desc.lo: openrisc-desc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h $(INCDIR)/opcode/cgen.h \
-  openrisc-opc.h opintl.h $(INCDIR)/libiberty.h
+openrisc-desc.lo: openrisc-desc.c sysdep.h config.h \
+  $(INCDIR)/ansidecl.h $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h \
+  $(INCDIR)/opcode/cgen.h openrisc-opc.h opintl.h $(INCDIR)/libiberty.h
 openrisc-dis.lo: openrisc-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h \
   $(INCDIR)/opcode/cgen.h openrisc-opc.h opintl.h
-openrisc-ibld.lo: openrisc-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h \
-  $(INCDIR)/opcode/cgen.h openrisc-opc.h opintl.h
+openrisc-ibld.lo: openrisc-ibld.c sysdep.h config.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h \
+  openrisc-desc.h $(INCDIR)/opcode/cgen.h openrisc-opc.h \
+  opintl.h
 openrisc-opc.lo: openrisc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h $(INCDIR)/opcode/cgen.h \
   openrisc-opc.h $(INCDIR)/libiberty.h

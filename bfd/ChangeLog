@@ -1,3 +1,8 @@
+2001-07-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Update dependencies with "make dep-am".
+	* Makefile.in: Regenerate
+
 2001-07-15  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am (po/SRC-POTFILES.in): Use tmp.src instead of tmp.
