@@ -1,7 +1,7 @@
 /* Definitions for dealing with stack frames, for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -474,21 +474,12 @@ enum print_what
 
 extern void *frame_obstack_alloc (unsigned long size);
 
-/* Define a default FRAME_CHAIN_VALID, in the form that is suitable for most
-   targets.  If FRAME_CHAIN_VALID returns zero it means that the given frame
-   is the outermost one and has no caller.
+/* If FRAME_CHAIN_VALID returns zero it means that the given frame
+   is the outermost one and has no caller.  */
 
-   XXXX - both default and alternate frame_chain_valid functions are
-   deprecated.  New code should use dummy frames and one of the
-   generic functions. */
+extern int frame_chain_valid (CORE_ADDR, struct frame_info *);
 
-extern int file_frame_chain_valid (CORE_ADDR, struct frame_info *);
-extern int func_frame_chain_valid (CORE_ADDR, struct frame_info *);
-extern int nonnull_frame_chain_valid (CORE_ADDR, struct frame_info *);
-extern int generic_file_frame_chain_valid (CORE_ADDR, struct frame_info *);
-extern int generic_func_frame_chain_valid (CORE_ADDR, struct frame_info *);
 extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
-
 
 
 #ifdef FRAME_FIND_SAVED_REGS

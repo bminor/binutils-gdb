@@ -1,6 +1,6 @@
 /* Parameters for execution on a Matsushita mn10200 processor.
 
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    Contributed by Geoffrey Noer <noer@cygnus.com>
@@ -116,7 +116,6 @@ extern void mn10200_frame_find_saved_regs (struct frame_info *,
 
 extern CORE_ADDR mn10200_frame_chain (struct frame_info *);
 #define FRAME_CHAIN(fi) mn10200_frame_chain (fi)
-#define FRAME_CHAIN_VALID(FP, FI)	generic_file_frame_chain_valid (FP, FI)
 
 extern CORE_ADDR mn10200_find_callers_reg (struct frame_info *, int);
 extern CORE_ADDR mn10200_frame_saved_pc (struct frame_info *);

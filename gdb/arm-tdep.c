@@ -159,7 +159,7 @@ struct frame_extra_info
 static int
 arm_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
-  return (chain != 0 && (FRAME_SAVED_PC (thisframe) >= LOWEST_PC));
+  return (FRAME_SAVED_PC (thisframe) >= LOWEST_PC);
 }
 
 /* Set to true if the 32-bit mode is in use.  */

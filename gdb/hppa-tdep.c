@@ -1381,9 +1381,6 @@ hppa_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
   struct unwind_table_entry *u, *next_u = NULL;
   struct frame_info *next;
 
-  if (!chain)
-    return 0;
-
   u = find_unwind_entry (thisframe->pc);
 
   if (u == NULL)

@@ -1,7 +1,7 @@
 /* Cache and manage frames for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -693,15 +693,7 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache)
          main.  */
       id.base = FRAME_CHAIN (next_frame);
 
-      /* FIXME: cagney/2002-06-08: There should be two tests here.
-         The first would check for a valid frame chain based on a user
-         selectable policy.  The default being ``stop at main'' (as
-         implemented by generic_func_frame_chain_valid()).  Other
-         policies would be available - stop at NULL, ....  The second
-         test, if provided by the target architecture, would check for
-         more exotic cases - most target architectures wouldn't bother
-         with this second case.  */
-      if (!FRAME_CHAIN_VALID (id.base, next_frame))
+      if (!frame_chain_valid (id.base, next_frame))
 	return null_frame_id;
     }
   if (id.base == 0)
@@ -1019,15 +1011,7 @@ get_prev_frame (struct frame_info *next_frame)
          main.  */
       address = FRAME_CHAIN (next_frame);
 
-      /* FIXME: cagney/2002-06-08: There should be two tests here.
-         The first would check for a valid frame chain based on a user
-         selectable policy.  The default being ``stop at main'' (as
-         implemented by generic_func_frame_chain_valid()).  Other
-         policies would be available - stop at NULL, ....  The second
-         test, if provided by the target architecture, would check for
-         more exotic cases - most target architectures wouldn't bother
-         with this second case.  */
-      if (!FRAME_CHAIN_VALID (address, next_frame))
+      if (!frame_chain_valid (address, next_frame))
 	return 0;
     }
   if (address == 0)

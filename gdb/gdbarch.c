@@ -556,7 +556,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
   current_gdbarch->frame_args_skip = -1;
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
-  current_gdbarch->frame_chain_valid = generic_func_frame_chain_valid;
   current_gdbarch->frame_args_address = get_frame_base;
   current_gdbarch->frame_locals_address = get_frame_base;
   current_gdbarch->extra_stack_alignment_needed = 1;
@@ -769,7 +768,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_chain == 0))
     fprintf_unfiltered (log, "\n\tframe_chain");
-  /* Skip verify of frame_chain_valid, invalid_p == 0 */
+  /* Skip verify of frame_chain_valid, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_saved_pc == 0))
     fprintf_unfiltered (log, "\n\tframe_saved_pc");
@@ -1444,6 +1443,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: FRAME_CHAIN = <0x%08lx>\n",
                         (long) current_gdbarch->frame_chain
                         /*FRAME_CHAIN ()*/);
+#endif
+#ifdef FRAME_CHAIN_VALID_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_CHAIN_VALID_P()",
+                      XSTRING (FRAME_CHAIN_VALID_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FRAME_CHAIN_VALID_P() = %d\n",
+                      FRAME_CHAIN_VALID_P ());
 #endif
 #ifdef FRAME_CHAIN_VALID
   fprintf_unfiltered (file,
@@ -4638,6 +4646,13 @@ set_gdbarch_frame_chain (struct gdbarch *gdbarch,
                          gdbarch_frame_chain_ftype frame_chain)
 {
   gdbarch->frame_chain = frame_chain;
+}
+
+int
+gdbarch_frame_chain_valid_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->frame_chain_valid != 0;
 }
 
 int

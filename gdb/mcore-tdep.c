@@ -1,5 +1,5 @@
 /* Target-machine dependent code for Motorola MCore for GDB, the GNU debugger
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1131,7 +1131,6 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
   set_gdbarch_frame_chain (gdbarch, mcore_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
   set_gdbarch_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
   set_gdbarch_frame_saved_pc (gdbarch, mcore_frame_saved_pc);
   set_gdbarch_deprecated_store_return_value (gdbarch, mcore_store_return_value);

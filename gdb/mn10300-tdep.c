@@ -1,6 +1,6 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
 
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -1162,9 +1162,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Stack unwinding.  */
-  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_saved_pc_after_call (gdbarch, mn10300_saved_pc_after_call);
   set_gdbarch_init_extra_frame_info (gdbarch, mn10300_init_extra_frame_info);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);

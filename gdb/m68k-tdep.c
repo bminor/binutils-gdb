@@ -1,5 +1,6 @@
 /* Target dependent code for the Motorola 68000 series.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
+   2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1010,7 +1011,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_return_value (gdbarch, m68k_store_return_value);
 
   set_gdbarch_frame_chain (gdbarch, m68k_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, m68k_frame_saved_pc);
   set_gdbarch_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
   set_gdbarch_frameless_function_invocation (gdbarch,

@@ -1,5 +1,5 @@
 /* Macro definitions for GDB for a Fujitsu SPARClite.
-   Copyright 1993, 1994, 1995, 1998, 1999, 2000
+   Copyright 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -62,9 +62,6 @@ enum {
 /*
  * The following defines must go away for MULTI_ARCH.
  */
-
-#undef  FRAME_CHAIN_VALID
-#define FRAME_CHAIN_VALID(FP,FI) func_frame_chain_valid (FP, FI)
 
 #undef NUM_REGS
 #define NUM_REGS 80

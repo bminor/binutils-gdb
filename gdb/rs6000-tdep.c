@@ -2928,8 +2928,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_use_struct_convention (gdbarch,
 				       generic_use_struct_convention);
 
-  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
-
   set_gdbarch_frameless_function_invocation (gdbarch,
                                          rs6000_frameless_function_invocation);
   set_gdbarch_frame_chain (gdbarch, rs6000_frame_chain);

@@ -131,8 +131,6 @@ extern CORE_ADDR m32r_frame_chain (struct frame_info *fi);
 /* mvs_check  FRAME_CHAIN */
 #define FRAME_CHAIN(fi) 		m32r_frame_chain (fi)
 
-#define FRAME_CHAIN_VALID(fp, frame)	generic_file_frame_chain_valid (fp, frame)
-
 extern CORE_ADDR m32r_find_callers_reg (struct frame_info *fi, int regnum);
 extern CORE_ADDR m32r_frame_saved_pc (struct frame_info *);
 /* mvs_check  FRAME_SAVED_PC */

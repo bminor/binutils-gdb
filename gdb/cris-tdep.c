@@ -1,5 +1,5 @@
 /* Target dependent code for CRIS, for GDB, the GNU debugger.
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hendrik Ruijter, Stefan Andersson, and Orjan Friberg.
 
@@ -4312,7 +4312,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation 
     (gdbarch, cris_frameless_function_invocation);
   set_gdbarch_frame_chain (gdbarch, cris_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
 
   set_gdbarch_frame_saved_pc (gdbarch, cris_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, cris_saved_pc_after_call);

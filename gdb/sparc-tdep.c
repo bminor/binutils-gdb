@@ -3332,7 +3332,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
     case bfd_mach_sparc:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
-      set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
@@ -3343,7 +3342,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case bfd_mach_sparc_sparclet:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparclet_extract_return_value);
-      set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 32 + 32 + 8 + 8 + 8);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparclet_register_name);
@@ -3354,7 +3352,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case bfd_mach_sparc_sparclite:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
-      set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 80);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparclite_register_name);
@@ -3365,7 +3362,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case bfd_mach_sparc_v8plus:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
-      set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
@@ -3376,7 +3372,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case bfd_mach_sparc_v8plusa:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
-      set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
@@ -3387,7 +3382,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case bfd_mach_sparc_sparclite_le:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
-      set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 80);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparclite_register_name);
@@ -3398,7 +3392,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case bfd_mach_sparc_v9:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc64_extract_return_value);
-      set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 125);
       set_gdbarch_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
       set_gdbarch_register_name (gdbarch, sparc64_register_name);
@@ -3409,7 +3402,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case bfd_mach_sparc_v9a:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc64_extract_return_value);
-      set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 125);
       set_gdbarch_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
       set_gdbarch_register_name (gdbarch, sparc64_register_name);

@@ -5987,7 +5987,6 @@ mips_gdbarch_init (struct gdbarch_info info,
 				       mips_register_convert_to_raw);
 
   set_gdbarch_frame_chain (gdbarch, mips_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     generic_frameless_function_invocation_not);
   set_gdbarch_frame_saved_pc (gdbarch, mips_frame_saved_pc);

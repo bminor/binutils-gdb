@@ -1,5 +1,5 @@
 /* Target-dependent code for Atmel AVR, for GDB.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1262,7 +1262,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);	/* ??? */
   set_gdbarch_frame_chain (gdbarch, avr_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, avr_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, avr_frame_address);
   set_gdbarch_frame_locals_address (gdbarch, avr_frame_address);

@@ -1,3 +1,60 @@
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* arm-tdep.c (arm_frame_chain_valid):  Remove unnecessary test.
+	* d10v-tdep.c (d10v_frame_chain_valid): Remove unnecessary tests.
+	* hppa-tdep.c (hppa_frame_chain_valid): Remove unnecessary test.
+
+	* blockframe.c: Include "gdbcmd.h" and "command.h".
+	(backtrace_below_main): New variable.
+	(file_frame_chain_valid, func_frame_chain_valid)
+	(nonnull_frame_chain_valid, generic_file_frame_chain_valid)
+	(generic_func_frame_chain_valid): Remove functions.
+	(frame_chain_valid, do_flush_frames_sfunc): New functions.
+	(_initialize_blockframe): New function.
+	* Makefile.in (blockframe.o): Update dependencies.
+	* frame.c (frame_saved_regs_id_unwind, get_prev_frame): Remove FIXME
+	comment.  Call frame_chain_valid ().
+	* frame.h: Remove old prototypes.  Add prototype for
+	frame_chain_valid and update comments to match.
+	* gdbarch.sh: Change FRAME_CHAIN_VALID into a predicated function.
+	Remove old comment.
+	* gdbarch.h: Regenerated.
+	* gdbarch.c: Regenerated.
+
+	* alpha-tdep.c (alpha_gdbarch_init): Don't call
+	set_gdbarch_frame_chain_valid.
+	* avr-tdep.c (avr_gdbarch_init): Likewise.
+	* cris-tdep.c (cris_gdbarch_init): Likewise.
+	* frv-tdep.c (frv_gdbarch_init): Likewise.
+	* h8300-tdep.c (h8300_gdbarch_init): Likewise.
+	* i386-tdep.c (i386_svr4_init_abi): Likewise.
+	(i386_nw_init_abi): Likewise.
+	(i386_gdbarch_init): Likewise.
+	* ia64-tdep.c (ia64_gdbarch_init): Likewise.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Likewise.
+	* m68k-tdep.c (m68k_gdbarch_init): Likewise.
+	* mcore-tdep.c (mcore_gdbarch_init): Likewise.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Likewise.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Likewise.
+	* ppcnbsd-tdep.c (ppcnbsd_init_abi): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Likewise.
+	* s390-tdep.c (s390_gdbarch_init): Likewise.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	* sparc-tdep.c (sparc_gdbarch_init): Likewise.
+	* v850-tdep.c (v850_gdbarch_init): Likewise.
+	* vax-tdep.c (vax_gdbarch_init): Likewise.
+	* x86-64-tdep.c (x86_64_init_abi): Likewise.
+
+	* config/m32r/tm-m32r.h (FRAME_CHAIN_VALID): Don't define.
+	* config/m68k/tm-apollo68b.h (FRAME_CHAIN_VALID): Likewise.
+	* config/m68k/tm-m68kv4.h (FRAME_CHAIN_VALID): Likewise.
+	* config/m68k/tm-monitor.h (FRAME_CHAIN_VALID): Likewise.
+	* config/m68k/tm-os68k.h (FRAME_CHAIN_VALID): Likewise.
+	* config/m68k/tm-vx68.h (FRAME_CHAIN_VALID): Likewise.
+	* config/mn10200/tm-mn10200.h (FRAME_CHAIN_VALID): Likewise.
+	* config/sparc/tm-sparclite.h (FRAME_CHAIN_VALID): Likewise.
+
 2002-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (acconfig_h): Remove incorrect macro.

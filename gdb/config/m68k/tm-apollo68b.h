@@ -1,5 +1,5 @@
 /* Parameters for execution on Apollo 68k running BSD.
-   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1998
+   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1998, 2003
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
@@ -25,8 +25,6 @@
 #define BPT_VECTOR 0xb
 
 #include "m68k/tm-m68k.h"
-
-#define FRAME_CHAIN_VALID(chain, thisframe) nonnull_frame_chain_valid (chain, thisframe)
 
 /* These are the jmp_buf registers I could guess. There are 13 registers
  * in the buffer. There are 8 data registers, 6 general address registers,

@@ -1114,7 +1114,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, h8300_saved_pc_after_call);
   set_gdbarch_frame_saved_pc (gdbarch, h8300_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, h8300_skip_prologue);
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_frame_args_address (gdbarch, h8300_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, h8300_frame_locals_address);
 

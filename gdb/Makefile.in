@@ -1537,7 +1537,7 @@ bcache.o: bcache.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(gdb_string_h)
 blockframe.o: blockframe.c $(defs_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(frame_h) $(gdbcore_h) $(value_h) $(target_h) \
 	$(inferior_h) $(annotate_h) $(regcache_h) $(gdb_assert_h) \
-	$(dummy_frame_h)
+	$(dummy_frame_h) $(command_h) $(gdbcmd_h)
 breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcore_h) $(gdbcmd_h) $(value_h) \
 	$(command_h) $(inferior_h) $(gdbthread_h) $(target_h) $(language_h) \

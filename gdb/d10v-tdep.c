@@ -1,6 +1,6 @@
 /* Target-dependent code for Mitsubishi D10V, for GDB.
 
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -112,14 +112,7 @@ static void do_d10v_pop_frame (struct frame_info *fi);
 static int
 d10v_frame_chain_valid (CORE_ADDR chain, struct frame_info *frame)
 {
-  if (chain != 0 && frame != NULL)
-    {
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
-	return 1;	/* Path back from a call dummy must be valid. */
-      return (get_frame_pc (frame) > IMEM_START
-	      && !inside_main_func (get_frame_pc (frame)));
-    }
-  else return 0;
+    return (get_frame_pc (frame) > IMEM_START);
 }
 
 static CORE_ADDR

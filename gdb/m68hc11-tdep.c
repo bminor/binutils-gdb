@@ -1,5 +1,5 @@
 /* Target-dependent code for Motorola 68HC11 & 68HC12
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Stephane Carrez, stcarrez@nerim.fr
 
 This file is part of GDB.
@@ -1331,14 +1331,12 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
 
   set_gdbarch_frame_chain (gdbarch, m68hc11_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, m68hc11_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, m68hc11_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, m68hc11_frame_locals_address);
   set_gdbarch_saved_pc_after_call (gdbarch, m68hc11_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
 
   set_gdbarch_store_struct_return (gdbarch, m68hc11_store_struct_return);
