@@ -1,3 +1,7 @@
+Mon Jun  2 16:25:07 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/as.texinfo: Add ARM documentation from armT-970328-branch.
+
 Mon Jun  2 11:55:12 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* config/tc-mips.c: Added r3900 support.
