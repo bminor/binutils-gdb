@@ -173,6 +173,12 @@ static bfd_vma byte_get_little_endian
   PARAMS ((unsigned char *, int));
 static bfd_vma byte_get_big_endian
   PARAMS ((unsigned char *, int));
+static void (*byte_put)
+  PARAMS ((unsigned char *, bfd_vma, int));
+static void byte_put_little_endian
+  PARAMS ((unsigned char *, bfd_vma, int));
+static void byte_put_big_endian
+  PARAMS ((unsigned char *, bfd_vma, int));
 static const char *get_mips_dynamic_type
   PARAMS ((unsigned long));
 static const char *get_sparc64_dynamic_type
@@ -550,6 +556,37 @@ byte_get_little_endian (field, size)
     }
 }
 
+static void
+byte_put_little_endian (field, value, size)
+     unsigned char * field;
+     bfd_vma	     value;
+     int             size;
+{
+  switch (size)
+    {
+    case 8:
+      field[7] = (((value >> 24) >> 24) >> 8) & 0xff;
+      field[6] = ((value >> 24) >> 24) & 0xff;
+      field[5] = ((value >> 24) >> 16) & 0xff;
+      field[4] = ((value >> 24) >> 8) & 0xff;
+      /* Fall through.  */
+    case 4:
+      field[3] = (value >> 24) & 0xff;
+      field[2] = (value >> 16) & 0xff;
+      /* Fall through.  */
+    case 2:
+      field[1] = (value >> 8) & 0xff;
+      /* Fall through.  */
+    case 1:
+      field[0] = value & 0xff;
+      break;
+
+    default:
+      error (_("Unhandled data length: %d\n"), size);
+      abort ();
+    }
+}
+
 /* Print a VMA value.  */
 static void
 print_vma (vma, mode)
@@ -701,6 +738,41 @@ byte_get_big_endian (field, size)
 	|   (((bfd_vma) (field[1])) << 48)
 	|   (((bfd_vma) (field[0])) << 56);
 #endif
+
+    default:
+      error (_("Unhandled data length: %d\n"), size);
+      abort ();
+    }
+}
+
+static void
+byte_put_big_endian (field, value, size)
+     unsigned char * field;
+     bfd_vma	     value;
+     int             size;
+{
+  switch (size)
+    {
+    case 8:
+      field[7] = value & 0xff;
+      field[6] = (value >> 8) & 0xff;
+      field[5] = (value >> 16) & 0xff;
+      field[4] = (value >> 24) & 0xff;
+      value >>= 16;
+      value >>= 16;
+      /* Fall through.  */
+    case 4:
+      field[3] = value & 0xff;
+      field[2] = (value >> 8) & 0xff;
+      value >>= 16;
+      /* Fall through.  */
+    case 2:
+      field[1] = value & 0xff;
+      value >>= 8;
+      /* Fall through.  */
+    case 1:
+      field[0] = value & 0xff;
+      break;
 
     default:
       error (_("Unhandled data length: %d\n"), size);
@@ -8290,15 +8362,7 @@ display_debug_info (section, start, file)
       compunit.cu_version = byte_get (hdrptr, 2);
       hdrptr += 2;
 
-      cu_abbrev_offset_ptr = hdrptr;
-      compunit.cu_abbrev_offset = byte_get (hdrptr, offset_size);
-      hdrptr += offset_size;
-
-      compunit.cu_pointer_size = byte_get (hdrptr, 1);
-      hdrptr += 1;
-
-      /* Check for RELA relocations in the
-	 abbrev_offset address, and apply them.  */
+      /* Apply addends of RELA relocations.  */
       for (relsec = section_headers;
 	   relsec < section_headers + elf_header.e_shnum;
 	   ++relsec)
@@ -8323,8 +8387,13 @@ display_debug_info (section, start, file)
 
 	  for (rp = rela; rp < rela + nrelas; ++rp)
 	    {
-	      if (rp->r_offset
-		  != (bfd_vma) (cu_abbrev_offset_ptr - section_begin))
+	      unsigned char *loc;
+
+	      if (rp->r_offset >= (bfd_vma) (hdrptr - section_begin)
+		  && section->sh_size > (bfd_vma) offset_size
+		  && rp->r_offset <= section->sh_size - offset_size)
+		loc = section_begin + rp->r_offset;
+	      else
 		continue;
 
 	      if (is_32bit_elf)
@@ -8352,13 +8421,19 @@ display_debug_info (section, start, file)
 		    }
 		}
 
-	      compunit.cu_abbrev_offset = rp->r_addend;
-	      break;
+	      byte_put (loc, rp->r_addend, offset_size);
 	    }
 
 	  free (rela);
 	  break;
 	}
+
+      cu_abbrev_offset_ptr = hdrptr;
+      compunit.cu_abbrev_offset = byte_get (hdrptr, offset_size);
+      hdrptr += offset_size;
+
+      compunit.cu_pointer_size = byte_get (hdrptr, 1);
+      hdrptr += 1;
 
       tags = hdrptr;
       cu_offset = start - section_begin;
@@ -10294,8 +10369,14 @@ get_file_header (file)
     {
     default: /* fall through */
     case ELFDATANONE: /* fall through */
-    case ELFDATA2LSB: byte_get = byte_get_little_endian; break;
-    case ELFDATA2MSB: byte_get = byte_get_big_endian; break;
+    case ELFDATA2LSB:
+      byte_get = byte_get_little_endian;
+      byte_put = byte_put_little_endian;
+      break;
+    case ELFDATA2MSB:
+      byte_get = byte_get_big_endian;
+      byte_put = byte_put_big_endian;
+      break;
     }
 
   /* For now we only support 32 bit and 64 bit ELF files.  */

@@ -1,3 +1,11 @@
+2003-04-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* readelf.c (display_debug_info): Apply RELA relocations on the
+	entire section.
+	(byte_put_little_endian, byte_put_big_endian): New functions.
+	(byte_put): New variable.
+	(get_file_header): Initialize it.
+
 2003-04-05  Dimitrie O. Paun <dpaun@rogers.com>
 
 	* windres.c: Add -l for compatibility with wrc, and rc.
