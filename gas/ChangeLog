@@ -1,7 +1,7 @@
 Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
 	* doc/internals.texi (MD_PCREL_FROM_SECTION): Change
-	docuemntation to reflect reality.
+	documentation to reflect reality.
 
 2001-08-27  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
