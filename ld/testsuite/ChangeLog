@@ -1,3 +1,8 @@
+2000-10-02  Alan Modra  <alan@linuxcare.com.au>
+
+	* ld-scripts/weak.exp: Don't set $global$ for hppa-elf any more.
+	* ld-scripts/crossref.exp: Ditto.
+
 2000-09-29  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-selective/5.cc: New test.
