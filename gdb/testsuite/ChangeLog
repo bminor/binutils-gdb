@@ -1,3 +1,9 @@
+Tue Mar 11 11:42:58 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/monitor.exp: Make sure we disconnect from the target.
+	Also, try a reboot/reload cycle instead of failing if the
+	load fails.
+
 Fri Mar  7 13:48:30 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* gdb.base/default.exp: Don't set match_max.
