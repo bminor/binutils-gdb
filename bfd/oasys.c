@@ -33,24 +33,38 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define offsetof(type, identifier) (size_t) &(((type *) 0)->identifier)
 #endif
 
+static boolean oasys_read_record PARAMS ((bfd *,
+					  oasys_record_union_type *));
 static boolean oasys_write_sections PARAMS ((bfd *));
+static boolean oasys_write_record PARAMS ((bfd *,
+					   oasys_record_enum_type,
+					   oasys_record_union_type *,
+					   size_t));
+static boolean oasys_write_syms PARAMS ((bfd *));
+static boolean oasys_write_header PARAMS ((bfd *));
+static boolean oasys_write_end PARAMS ((bfd *));
+static boolean oasys_write_data PARAMS ((bfd *));
 
 /* Read in all the section data and relocation stuff too */
 PROTO (static boolean, oasys_slurp_section_data, (bfd * CONST abfd));
 
-static void
+static boolean
 oasys_read_record (abfd, record)
-     bfd *CONST abfd;
+     bfd *abfd;
      oasys_record_union_type *record;
 {
-
-  bfd_read ((PTR) record, 1, sizeof (record->header), abfd);
+  if (bfd_read ((PTR) record, 1, sizeof (record->header), abfd)
+      != sizeof (record->header))
+    return false;
 
   if ((size_t) record->header.length <= (size_t) sizeof (record->header))
-    return;
-  bfd_read ((PTR) (((char *) record) + sizeof (record->header)),
-	    1, record->header.length - sizeof (record->header),
-	    abfd);
+    return true;
+  if (bfd_read ((PTR) (((char *) record) + sizeof (record->header)),
+		1, record->header.length - sizeof (record->header),
+		abfd)
+      != record->header.length - sizeof (record->header))
+    return false;
+  return true;
 }
 static size_t
 oasys_string_length (record)
@@ -111,11 +125,13 @@ oasys_slurp_symbol_table (abfd)
   dest_defined = data->symbols + abfd->symcount - 1;
 
   string_ptr = data->strings;
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+    return false;
   while (loop)
     {
 
-      oasys_read_record (abfd, &record);
+      if (! oasys_read_record (abfd, &record))
+	return false;
       switch (record.header.type)
 	{
 	case oasys_record_is_header_enum:
@@ -249,8 +265,14 @@ oasys_archive_p (abfd)
   unsigned int i;
   file_ptr filepos;
 
-  bfd_seek (abfd, (file_ptr) 0, false);
-  bfd_read ((PTR) & header_ext, 1, sizeof (header_ext), abfd);
+  if (bfd_seek (abfd, (file_ptr) 0, false) != 0
+      || (bfd_read ((PTR) & header_ext, 1, sizeof (header_ext), abfd)
+	  != sizeof (header_ext)))
+    {
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
+      return NULL;
+    }
 
   header.version = bfd_h_get_32 (abfd, header_ext.version);
   header.mod_count = bfd_h_get_32 (abfd, header_ext.mod_count);
@@ -299,14 +321,17 @@ oasys_archive_p (abfd)
     filepos = header.mod_tbl_offset;
     for (i = 0; i < header.mod_count; i++)
       {
-	bfd_seek (abfd, filepos, SEEK_SET);
+	if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
+	  return NULL;
 
 	/* There are two ways of specifying the archive header */
 
 	if (0)
 	  {
 	    oasys_extmodule_table_type_a_type record_ext;
-	    bfd_read ((PTR) & record_ext, 1, sizeof (record_ext), abfd);
+	    if (bfd_read ((PTR) & record_ext, 1, sizeof (record_ext), abfd)
+		!= sizeof (record_ext))
+	      return NULL;
 
 	    record.mod_size = bfd_h_get_32 (abfd, record_ext.mod_size);
 	    record.file_offset = bfd_h_get_32 (abfd, record_ext.file_offset);
@@ -318,7 +343,7 @@ oasys_archive_p (abfd)
 	    module[i].name = bfd_alloc (abfd, 33);
 	    if (!module[i].name)
 	      {
-		bfd_set_error (bfd_error_no_error);
+		bfd_set_error (bfd_error_no_memory);
 		return NULL;
 	      }
 
@@ -332,7 +357,9 @@ oasys_archive_p (abfd)
 	else
 	  {
 	    oasys_extmodule_table_type_b_type record_ext;
-	    bfd_read ((PTR) & record_ext, 1, sizeof (record_ext), abfd);
+	    if (bfd_read ((PTR) & record_ext, 1, sizeof (record_ext), abfd)
+		!= sizeof (record_ext))
+	      return NULL;
 
 	    record.mod_size = bfd_h_get_32 (abfd, record_ext.mod_size);
 	    record.file_offset = bfd_h_get_32 (abfd, record_ext.file_offset);
@@ -345,10 +372,13 @@ oasys_archive_p (abfd)
 	    module[i].name = bfd_alloc (abfd, record.module_name_size + 1);
 	    if (!module[i].name)
 	      {
-		bfd_set_error (bfd_error_no_error);
+		bfd_set_error (bfd_error_no_memory);
 		return NULL;
 	      }
-	    bfd_read ((PTR) module[i].name, 1, record.module_name_size, abfd);
+	    if (bfd_read ((PTR) module[i].name, 1, record.module_name_size,
+			  abfd)
+		!= record.module_name_size)
+	      return NULL;
 	    module[i].name[record.module_name_size] = 0;
 	    filepos +=
 	      sizeof (record_ext) +
@@ -392,7 +422,8 @@ oasys_object_p (abfd)
   memset ((PTR) oasys->sections, 0xff, sizeof (oasys->sections));
 
   /* Point to the start of the file */
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+    goto fail;
   oasys->symbol_string_length = 0;
   /* Inspect the records, but only keep the section info -
      remember the size of the symbols
@@ -401,7 +432,8 @@ oasys_object_p (abfd)
   while (loop)
     {
       oasys_record_union_type record;
-      oasys_read_record (abfd, &record);
+      if (! oasys_read_record (abfd, &record))
+	goto fail;
       if ((size_t) record.header.length < (size_t) sizeof (record.header))
 	goto fail;
 
@@ -571,10 +603,12 @@ oasys_slurp_section_data (abfd)
   if (data->first_data_record == 0)
     return true;
 
-  bfd_seek (abfd, data->first_data_record, SEEK_SET);
+  if (bfd_seek (abfd, data->first_data_record, SEEK_SET) != 0)
+    return false;
   while (loop)
     {
-      oasys_read_record (abfd, &record);
+      if (! oasys_read_record (abfd, &record))
+	return false;
       switch (record.header.type)
 	{
 	case oasys_record_is_header_enum:
@@ -868,12 +902,12 @@ oasys_canonicalize_reloc (ignore_abfd, section, relptr, symbols)
 
 
 /* Calculate the checksum and write one record */
-static void
+static boolean
 oasys_write_record (abfd, type, record, size)
-     bfd *CONST abfd;
-     CONST oasys_record_enum_type type;
+     bfd *abfd;
+     oasys_record_enum_type type;
      oasys_record_union_type *record;
-     CONST size_t size;
+     size_t size;
 {
   int checksum;
   size_t i;
@@ -890,14 +924,16 @@ oasys_write_record (abfd, type, record, size)
       checksum += *ptr++;
     }
   record->header.check_sum = 0xff & (-checksum);
-  bfd_write ((PTR) record, 1, size, abfd);
+  if (bfd_write ((PTR) record, 1, size, abfd) != size)
+    return false;
+  return true;
 }
 
 
 /* Write out all the symbols */
-static void
+static boolean
 oasys_write_syms (abfd)
-     bfd *CONST abfd;
+     bfd *abfd;
 {
   unsigned int count;
   asymbol **generic = bfd_get_outsymbols (abfd);
@@ -966,20 +1002,26 @@ oasys_write_syms (abfd)
 
       if (g->flags & BSF_LOCAL)
 	{
-	  oasys_write_record (abfd,
-			      oasys_record_is_local_enum,
-			      (oasys_record_union_type *) & symbol,
-			  offsetof (oasys_symbol_record_type, name[0]) + l);
+	  if (! oasys_write_record (abfd,
+				    oasys_record_is_local_enum,
+				    (oasys_record_union_type *) & symbol,
+				    offsetof (oasys_symbol_record_type,
+					      name[0]) + l))
+	    return false;
 	}
       else
 	{
-	  oasys_write_record (abfd,
-			      oasys_record_is_symbol_enum,
-			      (oasys_record_union_type *) & symbol,
-			  offsetof (oasys_symbol_record_type, name[0]) + l);
+	  if (! oasys_write_record (abfd,
+				    oasys_record_is_symbol_enum,
+				    (oasys_record_union_type *) & symbol,
+				    offsetof (oasys_symbol_record_type,
+					      name[0]) + l))
+	    return false;
 	}
       g->value = index - 1;
     }
+
+  return true;
 }
 
 
@@ -1002,17 +1044,18 @@ oasys_write_sections (abfd)
       bfd_h_put_32 (abfd, s->_cooked_size, out.value);
       bfd_h_put_32 (abfd, s->vma, out.vma);
 
-      oasys_write_record (abfd,
-			  oasys_record_is_section_enum,
-			  (oasys_record_union_type *) & out,
-			  sizeof (out));
+      if (! oasys_write_record (abfd,
+				oasys_record_is_section_enum,
+				(oasys_record_union_type *) & out,
+				sizeof (out)))
+	return false;
     }
   return true;
 }
 
-static void
+static boolean
 oasys_write_header (abfd)
-     bfd *CONST abfd;
+     bfd *abfd;
 {
   /* Create and write the header */
   oasys_header_record_type r;
@@ -1031,18 +1074,19 @@ oasys_write_header (abfd)
 
   r.version_number = OASYS_VERSION_NUMBER;
   r.rev_number = OASYS_REV_NUMBER;
-  oasys_write_record (abfd,
-		      oasys_record_is_header_enum,
-		      (oasys_record_union_type *) & r,
-		      offsetof (oasys_header_record_type, description[0]));
+  if (! oasys_write_record (abfd,
+			    oasys_record_is_header_enum,
+			    (oasys_record_union_type *) & r,
+			    offsetof (oasys_header_record_type,
+				      description[0])))
+    return false;
 
-
-
+  return true;
 }
 
-static void
+static boolean
 oasys_write_end (abfd)
-     bfd *CONST abfd;
+     bfd *abfd;
 {
   oasys_end_record_type end;
   unsigned char null = 0;
@@ -1050,11 +1094,14 @@ oasys_write_end (abfd)
   bfd_h_put_32 (abfd, abfd->start_address, end.entry);
   bfd_h_put_16 (abfd, 0, end.fill);
   end.zero = 0;
-  oasys_write_record (abfd,
-		      oasys_record_is_end_enum,
-		      (oasys_record_union_type *) & end,
-		      sizeof (end));
-  bfd_write ((PTR) & null, 1, 1, abfd);
+  if (! oasys_write_record (abfd,
+			    oasys_record_is_end_enum,
+			    (oasys_record_union_type *) & end,
+			    sizeof (end)))
+    return false;
+  if (bfd_write ((PTR) & null, 1, 1, abfd) != 1)
+    return false;
+  return true;
 }
 
 static int
@@ -1071,9 +1118,9 @@ comp (ap, bp)
  Writing data..
 
 */
-static void
+static boolean
 oasys_write_data (abfd)
-     bfd *CONST abfd;
+     bfd *abfd;
 {
   asection *s;
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
@@ -1244,25 +1291,33 @@ oasys_write_data (abfd)
 		  --dst;
 		}
 
-	      oasys_write_record (abfd,
-				  oasys_record_is_data_enum,
-			       (oasys_record_union_type *) & processed_data,
-				  dst - (bfd_byte *) & processed_data);
-
+	      if (! oasys_write_record (abfd,
+					oasys_record_is_data_enum,
+					((oasys_record_union_type *)
+					 & processed_data),
+					dst - (bfd_byte *) & processed_data))
+		return false;
 	    }
 	}
     }
+
+  return true;
 }
+
 static boolean
 oasys_write_object_contents (abfd)
      bfd *abfd;
 {
-  oasys_write_header (abfd);
-  oasys_write_syms (abfd);
-  if (!oasys_write_sections (abfd))
+  if (! oasys_write_header (abfd))
     return false;
-  oasys_write_data (abfd);
-  oasys_write_end (abfd);
+  if (! oasys_write_syms (abfd))
+    return false;
+  if (! oasys_write_sections (abfd))
+    return false;
+  if (! oasys_write_data (abfd))
+    return false;
+  if (! oasys_write_end (abfd))
+    return false;
   return true;
 }
 
