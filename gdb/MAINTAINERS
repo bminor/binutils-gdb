@@ -61,7 +61,7 @@ maintainer works with the native maintainer when resolving API issues.
 			Maintenance only
 			OBSOLETE candidate, not multi-arch
 
-	arm		--target=arm-coff,arm-elf,arm-pe -w
+	arm		--target=arm-elf -w
 			Fernando Nasser		fnasser@redhat.com
 			Scott Bambrough		scottb@netwinder.org
 			Not multi-arch

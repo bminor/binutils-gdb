@@ -1,3 +1,7 @@
+2002-01-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Remove arm-coff and arm-pe from target list.
+
 2002-01-13  Keith Seitz  <keiths@redhat.com>
 
 	* stack.c (print_frame_info_base): Print the frame's pc
