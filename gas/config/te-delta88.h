@@ -1,6 +1,6 @@
-#define TE_DELTA
+/* This file is te-delta88.h.  */
 
-#include "obj-format.h"
+#define TE_DELTA88 1
 
 #define COFF_NOLOAD_PROBLEM	1
 
@@ -10,4 +10,4 @@
 #define LOCAL_LABELS_DOLLAR	1
 #define LOCAL_LABELS_FB		1
 
-/* end of te-delta.h */
+#include "obj-format.h"

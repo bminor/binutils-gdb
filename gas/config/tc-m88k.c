@@ -21,6 +21,7 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 
 #include <ctype.h>
 #include "as.h"
+#include "subsegs.h"
 #include "m88k-opcode.h"
 
 struct field_val_assoc
@@ -1426,6 +1427,23 @@ md_pcrel_from (fixp)
       abort ();
     }
   /*NOTREACHED*/
+}
+
+/* When we align the .init section, insert the correct NOP pattern.  */
+
+int
+m88k_do_align (n, fill)
+     int n;
+     const char *fill;
+{
+  if (!fill
+      && strcmp (obj_segment_name (now_seg), ".init") == 0)
+    {
+      static const unsigned char nop_pattern[] = { 0xf4, 0x00, 0x58, 0x00 };
+      frag_align_pattern (n, nop_pattern, sizeof (nop_pattern));
+      return 1;
+    }
+  return 0;
 }
 
 #endif /* M88KCOFF */

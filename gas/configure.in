@@ -204,6 +204,7 @@ changequote([,])dnl
 			     em=lynx ;;
       m68k-*-netbsd*)       fmt=aout em=nbsd bfd_gas=yes ;;
 
+      m88k-motorola-sysv3*) fmt=coff targ=m88kcoff em=delta88 ;;
       m88k-*-coff*)         fmt=coff targ=m88kcoff ;;
 
       # don't change em like *-*-bsd does

@@ -90,4 +90,15 @@ struct reloc_info_m88k
 /* No special hook needed for symbols.  */
 #define tc_coff_symbol_emit_hook(s)
 
+/* Align sections to a four byte boundary.  */
+#ifndef max
+#define max(a,b)	(((a) > (b)) ? (a) : (b))
+#endif
+#define SUB_SEGMENT_ALIGN(SEG)	max (section_alignment[(int) (SEG)], 4)
+
+/* We use a special alignment function to insert the correct nop
+   pattern in .init.  */
+extern int m88k_do_align PARAMS ((int, const char *));
+#define md_do_align(n,fill,l)	if (m88k_do_align(n,fill)) goto l
+
 #endif /* M88KCOFF */
