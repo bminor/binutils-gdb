@@ -94,6 +94,7 @@ ALL_EMULATIONS = \
 	eaixppc.o \
 	eaixrs6.o \
 	ealpha.o \
+	earcelf.o \
 	earmaoutb.o \
 	earmaoutl.o \
 	earmcoff.o \
@@ -237,11 +238,9 @@ eaixrs6.c: $(srcdir)/emulparams/aixrs6.sh \
 ealpha.c: $(srcdir)/emulparams/alpha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/alpha.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} alpha "$(tdir_alpha)"
-start-sanitize-arc:
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} arcelf "$(tdir_arcelf)"
-end-sanitize-arc:
 earmaoutb.c:	$(srcdir)/emulparams/armaoutb.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armaoutb "$(tdir_armaoutb)"
@@ -628,12 +627,18 @@ configdoc.texi:	${DOCVER}-doc.texi
 	  || ln ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi >/dev/null 2>&1 \
 	  || cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
 
-ld.info: $(srcdir)/ld.texinfo configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
-ld.dvi: $(srcdir)/ld.texinfo configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
+ld.info: $(srcdir)/ld.texinfo configdoc.texi bfdsumm.texi
+ld.dvi: $(srcdir)/ld.texinfo configdoc.texi bfdsumm.texi
+
+# We want to include a file from the BFD documentation.  automake
+# doesn't give us a way to set the include directories for makeinfo,
+# so we just create a file locally to include it.
+bfdsumm.texi: Makefile
+	echo @include $(BFDDIR)/doc/bfdsumm.texi > bfdsumm.texi
 
 MOSTCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h tmpdir crtbegin.o crtend.o
-CLEANFILES = dep.sed .dep .dep1
+CLEANFILES = dep.sed .dep .dep1 bfdsumm.texi
 DISTCLEANFILES = ldscripts
 
 .PHONY: install-exec-local install-data-local

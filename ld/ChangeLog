@@ -1,3 +1,10 @@
+Thu Aug 28 10:12:10 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.tgt (arc-*-elf*): Recognize.
+	* Makefile.am (ALL_EMULATIONS): Add earcelf.o.
+	* Makefile.in: Regenerate.
+	* emulparams/arcelf.sh: New file.
+
 Wed Aug 20 11:14:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (wildcardp): Don't let a backslash by itself cause a
@@ -3339,12 +3346,6 @@ Tue Apr 11 12:02:03 1995  Stan Shebs  <shebs@andros.cygnus.com>
 	* ldlex.l (TRUE_FALSE_ALREADY_DEFINED): If MPW, set this to
 	prevent redefinition errors.
 
-start-sanitize-arc
-Thu Apr  6 20:38:36 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* emulparams/arcelf.sh (ENTRY): Define.
-end-sanitize-arc
-
 Tue Apr  4 17:55:18 1995  Steve Chamberlain  <sac@bang.hack.com>
 
 	* ldwrite.c (clone_section): Align clone sections on even
@@ -3433,13 +3434,6 @@ Thu Mar  9 12:21:51 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	bfd_merge_private_bfd_data to let the backend do additional
 	checks.
 
-start-sanitize-arc
-Tue Mar  7 21:10:28 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* emulparams/arcelf.sh (OUTPUT_FORMAT): Change to elf32-littlearc.
-	(LITTLE_OUTPUT_FORMAT, BIG_OUTPUT_FORMAT): Define.
-end-sanitize-arc
-
 Tue Mar  7 00:53:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldemul.c (ldemul_choose_mode): If emulation not recognized, list
@@ -3495,12 +3489,6 @@ Fri Feb 17 13:06:47 1995  Michael Meissner  <meissner@cygnus.com>
 	* scripttempl/elfppc.sc: Add support for .got1 and .got2 sections.
 	Offset _GLOBAL_OFFSET_TABLE_ 32768 from the start of the GOT area
 	to double the size of the table.
-
-start-sanitize-arc
-Thu Feb  9 19:03:25 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* emulparms/arcelf.sh (TEMPLATE_NAME): Comment out.
-end-sanitize-arc
 
 Thu Feb  9 18:29:43 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
@@ -3634,15 +3622,6 @@ Mon Dec 19 14:02:13 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 	* ld.h (split_by_reloc, split_by_file): New flags.
 	* ldwrite.c  (clone_section, split_sections): New functions.
 	* lexsup.c (parse_args): Understand new split options.
-
-start-sanitize-arc
-Tue Dec 13 16:45:18 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* configure.in (arc-elf): New target.
-	* Makefile.in (earcelf.c): New target.
-	* config/arc-elf.mt: New file.
-	* emulparms/arcelf.sh: New file.
-end-sanitize-arc
 
 Fri Dec  9 17:22:55 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 

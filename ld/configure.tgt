@@ -12,9 +12,7 @@ targ_extra_emuls=
 
 case "${targ}" in
 arm-*-pe)		targ_emul=armpe ;;
-# start-sanitize-arc
 arc-*-elf*)		targ_emul=arcelf ;;
-# end-sanitize-arc
 d10v-*-*)		targ_emul=d10velf ;;
 # start-sanitize-d30v
 d30v-*-*)		targ_emul=d30velf ;;
@@ -58,6 +56,7 @@ m68*-apple-aux*)	targ_emul=m68kaux ;;
 i[3456]86-*-vsta)	targ_emul=vsta ;;
 i[3456]86-go32-rtems*)	targ_emul=i386go32 ;;
 i[3456]86-*-go32)	targ_emul=i386go32 ;;
+i[3456]86-*-msdosdjgpp*) targ_emul=i386go32 ;;
 i[3456]86-*-aix*)	targ_emul=i386coff ;;
 i[3456]86-*-sco*)	targ_emul=i386coff ;;
 i[3456]86-*-isc*)	targ_emul=i386coff ;;
@@ -193,6 +192,12 @@ tic80-*-*)		targ_emul=tic80coff ;;
 # start-sanitize-v850
 v850-*-*)		targ_emul=v850 ;;
 # end-sanitize-v850
+# start-sanitize-v850e
+v850e-*-*)		targ_emul=v850 ;;
+# end-sanitize-v850e
+# start-sanitize-v850eq
+v850eq-*-*)		targ_emul=v850 ;;
+# end-sanitize-v850eq
 w65-*-*)		targ_emul=w65 ;;
 *-*-aout)		targ_emul=${target_cpu}-${target_vendor} ;;
 *-*-coff)		targ_emul=${target_cpu}-${target_vendor} ;;
