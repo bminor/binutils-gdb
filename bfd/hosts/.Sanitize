@@ -70,7 +70,6 @@ ncr3000.h
 news-mips.h
 news.h
 ns32knbsd.h
-ns32knetbsd.h
 pc532mach.h
 riscos.h
 rs6000.h
@@ -81,7 +80,6 @@ sparc-ll.h
 sparc.h
 sparclynx.h
 sparcnbsd.h
-sparcnetbsd.h
 std-host.h
 stratus.h
 sun3.h
