@@ -65,7 +65,6 @@ char *only;
 
 char *machine = (char *) NULL;
 asymbol **syms;
-asymbol **syms2;
 
 unsigned int storage;
 
@@ -180,6 +179,34 @@ DEFUN (slurp_symtab, (abfd),
   return sy;
 }
 
+/* Filter out (in place) symbols that are useless for dis-assemble.
+   Return count of useful symbols. */
+
+int remove_useless_symbols (syms, count)
+     asymbol **syms;
+     int count;
+{
+  register asymbol **in_ptr = syms;
+  register asymbol **out_ptr = syms;
+
+  while ( --count >= 0 )
+    {
+      asymbol *sym = *in_ptr++;
+
+      if (sym->name == NULL || sym->name[0] == '\0')
+	continue;
+      if (sym->flags & (BSF_DEBUGGING))
+	continue;
+      if (sym->section == &bfd_und_section
+	  || bfd_is_com_section (sym->section))
+	continue;
+
+      *out_ptr++ = sym;
+    }
+  return out_ptr - syms;
+}
+
+
 /* Sort symbols into value order */
 static int 
 comp (ap, bp)
@@ -188,29 +215,17 @@ comp (ap, bp)
 {
   asymbol *a = *(asymbol **)ap;
   asymbol *b = *(asymbol **)bp;
-  int diff;
-  bfd *a_bfd, *b_bfd;
 
-  if (a->name == (char *) NULL || (a->flags & (BSF_DEBUGGING)))
-    a_bfd = 0;
-  else
-    a_bfd = bfd_asymbol_bfd(a);
-  if (b->name == (char *) NULL || (b->flags & (BSF_DEBUGGING)))
-    b_bfd = 0;
-  else
-    b_bfd = bfd_asymbol_bfd(b);
+  if (a->value > b->value)
+    return 1;
+  else if (a->value < b->value)
+    return -1;
 
-  diff = a_bfd - b_bfd;
-  if (diff)
-    {
-      return -diff;
-    }
-  diff = a->value - b->value;
-  if (diff)
-    {
-      return diff;
-    }
-  return a->section - b->section;
+  if (a->section > b->section)
+    return 1;
+  else if (a->section < b->section)
+    return -1;
+  return 0;
 }
 
 /* Print the supplied address symbolically if possible */
@@ -230,53 +245,27 @@ objdump_print_address (vma, info)
 
   int vardiff;
 
-  if (symcount == 0)
-    {
-      fprintf_vma (info->stream, vma);
-    }
-  else
+  fprintf_vma (info->stream, vma);
+
+  if (symcount > 0)
     {
       while (true)
 	{
+	  asymbol *sym; asection *sym_sec;
 	  oldthisplace = thisplace;
 	  thisplace = (max + min) / 2;
 	  if (thisplace == oldthisplace)
 	    break;
-	  vardiff = syms[thisplace]->value - vma;
+	  sym = syms[thisplace];
+	  vardiff = sym->value - vma;
+	  sym_sec = sym->section;
 
-	  if (vardiff
-	      /* Check that the value isn't merely a coincidence.
-	         (if not checked, we might print some undefined symbol
-		 for the address 0 rather than "main", for example.  */
-	      || !(syms[thisplace]->flags & (BSF_GLOBAL|BSF_LOCAL)))
-	    {
-	      if (vardiff > 0)
-		{
-		  max = thisplace;
-		}
-	      else
-		{
-		  min = thisplace;
-		}
-	    }
+	  if (vardiff > 0)
+	    max = thisplace;
+	  else if (vardiff < 0)
+	    min = thisplace;
 	  else
-	    {
-	      /* Totally awesome! the exact right symbol */
-	      CONST char *match_name = syms[thisplace]->name;
-	      int sym_len = strlen (match_name);
-
-	      /* Avoid "filename.o" as a match */
-	      if (sym_len > 2
-		  && match_name[sym_len - 2] == '.'
-		  && match_name[sym_len - 1] == 'o'
-		  && thisplace + 1 < symcount
-		  && syms[thisplace + 1]->value == vma)
-		match_name = syms[thisplace + 1]->name;
-	      /* Totally awesome! the exact right symbol */
-	      fprintf_vma (info->stream, vma);
-	      fprintf (info->stream, " (%s+)0000", syms[thisplace]->name);
-	      return;
-	    }
+	    goto found;
 	}
       /* We've run out of places to look, print the symbol before this one
          see if this or the symbol before describes this location the best */
@@ -291,17 +280,17 @@ objdump_print_address (vma, info)
 	    }
 	}
 
-      fprintf_vma (info->stream, vma);
+    found:
+      fprintf (info->stream, " <%s", syms[thisplace]->name);
       if (syms[thisplace]->value > vma)
 	{
-	  fprintf (info->stream, " (%s-)", syms[thisplace]->name);
-	  fprintf (info->stream, "%04x", syms[thisplace]->value - vma);
+	  fprintf (info->stream, "-%04x", syms[thisplace]->value - vma);
 	}
-      else
+      else if (vma > syms[thisplace]->value)
 	{
-	  fprintf (info->stream, " (%s+)", syms[thisplace]->name);
-	  fprintf (info->stream, "%04x", vma - syms[thisplace]->value);
+	  fprintf (info->stream, "+%04x", vma - syms[thisplace]->value);
 	}
+      fprintf (info->stream, ">");
     }
 }
 
@@ -315,7 +304,6 @@ disassemble_data (abfd)
   bfd_size_type i;
   unsigned int (*print) ()= 0; /* Old style */
   disassembler_ftype disassemble = 0; /* New style */
-  unsigned int print_insn_h8300 ();
   enum bfd_architecture a;
   struct disassemble_info disasm_info;
 
@@ -335,27 +323,10 @@ disassemble_data (abfd)
       syms[i]->value += syms[i]->section->vma;
     }
 
-  /* We keep a copy of the symbols in the original order */
-  syms2 = slurp_symtab (abfd);
+  symcount = remove_useless_symbols (syms, symcount);
 
   /* Sort the symbols into section and symbol order */
   (void) qsort (syms, symcount, sizeof (asymbol *), comp);
-
-  /* Find the first useless symbol */
-  {
-    unsigned int i;
-
-    for (i = 0; i < symcount; i++)
-      {
-	if (syms[i]->name == (char *) NULL
-	    || (syms[i]->flags & BSF_DEBUGGING) != 0)
-	  {
-	    symcount = i;
-	    break;
-	  }
-      }
-  }
-
 
   if (machine != (char *) NULL)
     {
@@ -395,6 +366,12 @@ disassemble_data (abfd)
 	  break;
 	case bfd_arch_h8500:
 	  disassemble = print_insn_h8500;
+	  break;
+	case bfd_arch_h8300:
+	  if (bfd_get_mach(abfd) == bfd_mach_h8300h)
+	   disassemble = print_insn_h8300h;
+	  else 
+	   disassemble = print_insn_h8300;
 	  break;
 	case bfd_arch_sh:
 	  disassemble = print_insn_sh;
@@ -737,6 +714,8 @@ display_bfd (abfd)
     dump_relocs (abfd);
   if (dump_section_contents)
     dump_data (abfd);
+  /* Note that disassemble_data re-orders the syms table, but that is
+     safe - as long as it is done last! */
   if (disassemble)
     disassemble_data (abfd);
 }
@@ -911,6 +890,7 @@ dump_relocs (abfd)
 	  arelent **p;
 
 	  relpp = (arelent **) xmalloc (bfd_get_reloc_upper_bound (abfd, a));
+	  /* Note that this must be done *before* we sort the syms table. */
 	  relcount = bfd_canonicalize_reloc (abfd, a, relpp, syms);
 	  if (relcount == 0)
 	    {

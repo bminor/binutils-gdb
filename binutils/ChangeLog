@@ -1,3 +1,14 @@
+Fri Jun 18 14:29:12 1993  Per Bothner  (bothner@deneb.cygnus.com)
+
+	* objdump.c (syms2):  Removed unused variable.
+	* objdump.c (remove_useless_symbols):  New function.
+	* objdump.c (comp):  Simplify.
+	* objdump.c (dis-assemble_data):  Make simpler and more
+	efficient how we filter out useless symbols:  Just filter
+	BEFORE the sort (using remove_useless_symbols).
+	* objdump.c (objdump_print_address):  Simplify.
+	Change output syntax to match gdb.
+
 Thu Jun 17 16:53:56 1993  david d `zoo' zuhn (zoo@cygnus.com)
 	
 	* Makefile.in: canonicalize install.sh; for use within
