@@ -1,5 +1,13 @@
 Tue May 17 11:08:22 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* breakpoint.c (breakpoint_1): Fix typo.
+
+	* annotate.c (annotate_field_end): Fix typo.
+
+	* Makefile.in: Move annotate.o from COMMON_OBS to OBS.
+
+	* Makefile.in (TSSTART): Remove; no longer used.
+
 	* utils.c (vfprintf_maybe_filtered, vfprintf_unfiltered): Call
 	fputs_unfiltered and exit directly, rather than fatal.  The latter
 	calls vfprintf_unfiltered!

@@ -1529,6 +1529,8 @@ breakpoint_1 (bnum, allflag)
 
 	if (!found_a_breakpoint++)
 	  {
+	    annotate_breakpoints_headers ();
+
 	    annotate_field (0);
 	    printf_filtered ("Num ");
 	    annotate_field (1);

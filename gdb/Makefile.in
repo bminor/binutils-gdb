@@ -445,17 +445,15 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	dwarfread.o mipsread.o stabsread.o core.o c-lang.o ch-lang.o m2-lang.o \
 	complaints.o typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o nlmread.o \
-	serial.o mdebugread.o os9kread.o annotate.o
+	serial.o mdebugread.o os9kread.o
 
-OBS = $(COMMON_OBS) main.o utils.o
+OBS = $(COMMON_OBS) main.o utils.o annotate.o
 
 LIBGDB_OBS = $(COMMON_OBS) libmain.o libutils.o
 
 TSOBS = inflow.o
 
 NTSOBS = standalone.o
-
-TSSTART = /lib/crt0.o
 
 NTSSTART = kdb-start.o
 

@@ -201,7 +201,7 @@ void
 annotate_field_end ()
 {
   if (annotation_level > 1)
-    printf_filtered ("\n\032\032field-value\n");
+    printf_filtered ("\n\032\032field-end\n");
 }
 
 void
