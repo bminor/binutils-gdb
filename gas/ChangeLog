@@ -1,6 +1,6 @@
 2003-03-04  Dmitry Diky  <diwil@mail.ru>
 
-	* config/tc-msp430.c (mcu_types): Add recenly announced x1122
+	* config/tc-msp430.c (mcu_types): Add recently announced x1122
 	and x1123 devices, add missed x437. 
 	(md_show_usage): Sort device list.
 
