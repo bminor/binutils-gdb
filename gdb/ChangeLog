@@ -1,5 +1,10 @@
 2003-08-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386fbsd-nat.c: Include "i386-tdep.h".
+	(child_resume): Make `eflags' an ULONGEST.  Use
+	regcache_cooked_read_unsigned and regcache_cooked_write_unsigned
+	instead of register_read and register_write.
+
 	* i386bsd-nat.c (fetch_inferior_registers,
 	store_inferior_registers): Don't use && at the end of a line.
 	(_initialize_i386bsd_nat): Fix typo.
