@@ -1,3 +1,9 @@
+Thu Feb 17 09:30:22 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* corelow.c, exec.c, irix5-nat.c, mipsread.c, objfiles.c, 
+	osfsolib.c, rs6000-nat.c, solib.c, symfile.c, utils.c, 
+	xcoffexec.c: Use bfd_get_error and bfd_set_error and new error names.
+
 Fri Feb 11 21:47:24 1994  Steve Chamberlain  (sac@sphagnum.cygnus.com)
 
 	* remote-hms.c (readchar, hms_open, hms_fetch_register): Made more robust.

@@ -189,7 +189,7 @@ solib_map_sections (so)
     {
       close (scratch_chan);
       error ("Could not open `%s' as an executable file: %s",
-	     scratch_pathname, bfd_errmsg (bfd_error));
+	     scratch_pathname, bfd_errmsg (bfd_get_error ()));
     }
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
   so -> abfd = abfd;
@@ -198,12 +198,12 @@ solib_map_sections (so)
   if (!bfd_check_format (abfd, bfd_object))
     {
       error ("\"%s\": not in executable format: %s.",
-	     scratch_pathname, bfd_errmsg (bfd_error));
+	     scratch_pathname, bfd_errmsg (bfd_get_error ()));
     }
   if (build_section_table (abfd, &so -> sections, &so -> sections_end))
     {
       error ("Can't find the file sections in `%s': %s", 
-	     bfd_get_filename (exec_bfd), bfd_errmsg (bfd_error));
+	     bfd_get_filename (exec_bfd), bfd_errmsg (bfd_get_error ()));
     }
 
   for (p = so -> sections; p < so -> sections_end; p++)

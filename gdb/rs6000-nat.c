@@ -380,7 +380,7 @@ add_vmap(ldi)
 	  abfd = bfd_fdopenr(objname, gnutarget, ldi->ldinfo_fd);
 	if (!abfd)
 	  error("Could not open `%s' as an executable file: %s",
-					objname, bfd_errmsg(bfd_error));
+					objname, bfd_errmsg(bfd_get_error ()));
 
 
 	/* make sure we have an object file */
@@ -415,7 +415,7 @@ add_vmap(ldi)
 	    obj_err:
 		bfd_close(abfd);
 		error ("\"%s\": not in executable format: %s.",
-		       objname, bfd_errmsg(bfd_error));
+		       objname, bfd_errmsg(bfd_get_error ()));
 		/*NOTREACHED*/
 	}
 	obj = allocate_objfile (vp->bfd, 0);
@@ -651,7 +651,7 @@ xcoff_relocate_core ()
     {
 bfd_err:
       fprintf_filtered (gdb_stderr, "Couldn't get ldinfo from core file: %s\n",
-			bfd_errmsg (bfd_error));
+			bfd_errmsg (bfd_get_error ()));
       do_cleanups (old);
       return;
     }

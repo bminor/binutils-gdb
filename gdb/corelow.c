@@ -155,7 +155,7 @@ core_open (filename, from_tty)
     {
       /* Do it after the err msg */
       make_cleanup (bfd_close, temp_bfd);
-      error ("\"%s\" is not a core dump: %s", filename, bfd_errmsg(bfd_error));
+      error ("\"%s\" is not a core dump: %s", filename, bfd_errmsg(bfd_get_error ()));
     }
 
   /* Looks semi-reasonable.  Toss the old core file and work on the new.  */
@@ -171,7 +171,7 @@ core_open (filename, from_tty)
   if (build_section_table (core_bfd, &core_ops.to_sections,
 			   &core_ops.to_sections_end))
     error ("Can't find sections in `%s': %s", bfd_get_filename(core_bfd),
-	   bfd_errmsg (bfd_error));
+	   bfd_errmsg (bfd_get_error ()));
 
   ontop = !push_target (&core_ops);
   discard_cleanups (old_chain);
@@ -265,7 +265,7 @@ get_core_registers (regno)
     {
 cant:
       fprintf_filtered (gdb_stderr, "Couldn't fetch registers from core file: %s\n",
-	       bfd_errmsg (bfd_error));
+	       bfd_errmsg (bfd_get_error ()));
     }
 
   /* Now do it again for the float registers, if they exist.  */
@@ -282,7 +282,7 @@ cant:
     else
       {
 	fprintf_filtered (gdb_stderr, "Couldn't fetch register set 2 from core file: %s\n",
-		 bfd_errmsg (bfd_error));
+		 bfd_errmsg (bfd_get_error ()));
       }
   }
   registers_fetched();

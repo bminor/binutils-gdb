@@ -149,14 +149,14 @@ exec_file_command (args, from_tty)
       exec_bfd = bfd_fdopenr (scratch_pathname, gnutarget, scratch_chan);
       if (!exec_bfd)
 	error ("Could not open `%s' as an executable file: %s",
-	       scratch_pathname, bfd_errmsg (bfd_error));
+	       scratch_pathname, bfd_errmsg (bfd_get_error ()));
       if (!bfd_check_format (exec_bfd, bfd_object))
 	{
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
 	  exec_close (0);
 	  error ("\"%s\": not in executable format: %s.",
-		 scratch_pathname, bfd_errmsg (bfd_error));
+		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 
       if (build_section_table (exec_bfd, &exec_ops.to_sections,
@@ -166,7 +166,7 @@ exec_file_command (args, from_tty)
 	     it.  */
 	  exec_close (0);
 	  error ("Can't find the file sections in `%s': %s", 
-		 exec_bfd->filename, bfd_errmsg (bfd_error));
+		 exec_bfd->filename, bfd_errmsg (bfd_get_error ()));
 	}
 
 #ifdef NEED_TEXT_START_END
@@ -237,8 +237,7 @@ add_to_section_table (abfd, asect, table_pp_char)
   flagword aflag;
 
   aflag = bfd_get_section_flags (abfd, asect);
-  /* FIXME, we need to handle BSS segment here...it alloc's but doesn't load */
-  if (!(aflag & SEC_LOAD))
+  if (!(aflag & SEC_ALLOC))
     return;
   if (0 == bfd_section_size (abfd, asect))
     return;
@@ -365,20 +364,24 @@ print_section_info (t, abfd)
   printf_filtered ("\t`%s', ", bfd_get_filename(abfd));
   wrap_here ("        ");
   printf_filtered ("file type %s.\n", bfd_get_target(abfd));
-  printf_filtered ("\tEntry point: %s\n",
-		   local_hex_string ((unsigned long) bfd_get_start_address (exec_bfd)));
-  for (p = t->to_sections; p < t->to_sections_end; p++) {
-    printf_filtered ("\t%s", local_hex_string_custom ((unsigned long) p->addr, "08l"));
-    printf_filtered (" - %s", local_hex_string_custom ((unsigned long) p->endaddr, "08l"));
-    if (info_verbose)
-      printf_filtered (" @ %s",
-		       local_hex_string_custom ((unsigned long) p->sec_ptr->filepos, "08l"));
-    printf_filtered (" is %s", bfd_section_name (p->bfd, p->sec_ptr));
-    if (p->bfd != abfd) {
-      printf_filtered (" in %s", bfd_get_filename (p->bfd));
+  printf_filtered ("\tEntry point: ");
+  print_address_numeric (bfd_get_start_address (exec_bfd), gdb_stdout);
+  printf_filtered ("\n");
+  for (p = t->to_sections; p < t->to_sections_end; p++)
+    {
+      /* FIXME-32x64 need a print_address_numeric with field width */
+      printf_filtered ("\t%s", local_hex_string_custom ((unsigned long) p->addr, "08l"));
+      printf_filtered (" - %s", local_hex_string_custom ((unsigned long) p->endaddr, "08l"));
+      if (info_verbose)
+	printf_filtered (" @ %s",
+			 local_hex_string_custom ((unsigned long) p->sec_ptr->filepos, "08l"));
+      printf_filtered (" is %s", bfd_section_name (p->bfd, p->sec_ptr));
+      if (p->bfd != abfd)
+	{
+	  printf_filtered (" in %s", bfd_get_filename (p->bfd));
+	}
+      printf_filtered ("\n");
     }
-    printf_filtered ("\n");
-  }
 }
 
 static void

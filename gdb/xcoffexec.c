@@ -149,25 +149,25 @@ exec_file_command (filename, from_tty)
       exec_bfd = bfd_fdopenr(scratch_pathname, gnutarget, scratch_chan);
       if (!exec_bfd)
 	error("Could not open `%s' as an executable file: %s",
-	      scratch_pathname, bfd_errmsg(bfd_error));
+	      scratch_pathname, bfd_errmsg(bfd_get_error ()));
 
       /* make sure we have an object file */
 
       if (!bfd_check_format(exec_bfd, bfd_object))
 	error("\"%s\": not in executable format: %s.", scratch_pathname,
-	      bfd_errmsg(bfd_error));
+	      bfd_errmsg(bfd_get_error ()));
 
       /* setup initial vmap */
 
       map_vmap (exec_bfd, 0);
       if (!vmap)
 	error("Can't find the file sections in `%s': %s", exec_bfd->filename,
-	      bfd_errmsg(bfd_error));
+	      bfd_errmsg(bfd_get_error ()));
 
       if (build_section_table (exec_bfd, &exec_ops.to_sections,
 			       &exec_ops.to_sections_end))
 	error ("Can't find the file sections in `%s': %s", exec_bfd->filename,
-	       bfd_errmsg (bfd_error));
+	       bfd_errmsg (bfd_get_error ()));
 
       /* make sure core, if present, matches */
       validate_files();

@@ -254,7 +254,7 @@ allocate_objfile (abfd, mapped)
   if (build_objfile_section_table (objfile))
     {
       error ("Can't find the file sections in `%s': %s", 
-	     objfile -> name, bfd_errmsg (bfd_error));
+	     objfile -> name, bfd_errmsg (bfd_get_error ()));
     }
 
   /* Push this file onto the head of the linked list of other such files. */

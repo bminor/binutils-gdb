@@ -409,6 +409,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
       else if (0 == bfd_get_section_name (objfile->obfd, lowest_sect)
 	       || !STREQ (".text",
 			      bfd_get_section_name (objfile->obfd, lowest_sect)))
+	/* FIXME-32x64--assumes bfd_vma fits in long.  */
 	warning ("Lowest section in %s is %s at 0x%lx",
 		 objfile->name,
 		 bfd_section_name (objfile->obfd, lowest_sect),
@@ -757,7 +758,7 @@ symfile_bfd_open (name)
       close (desc);
       make_cleanup (free, name);
       error ("\"%s\": can't open to read symbols: %s.", name,
-	     bfd_errmsg (bfd_error));
+	     bfd_errmsg (bfd_get_error ()));
     }
   sym_bfd->cacheable = true;
 
@@ -766,7 +767,7 @@ symfile_bfd_open (name)
       bfd_close (sym_bfd);	/* This also closes desc */
       make_cleanup (free, name);
       error ("\"%s\": can't read symbols: %s.", name,
-	     bfd_errmsg (bfd_error));
+	     bfd_errmsg (bfd_get_error ()));
     }
 
   return (sym_bfd);
@@ -797,10 +798,15 @@ find_sym_fns (objfile)
 {
   struct sym_fns *sf;
   enum bfd_flavour our_flavour = bfd_get_flavour (objfile -> obfd);
+  char *our_target = bfd_get_target (objfile -> obfd);
 
   /* Special kludge for RS/6000.  See xcoffread.c.  */
-  if (STREQ (bfd_get_target (objfile -> obfd), "aixcoff-rs6000"))
+  if (STREQ (our_target, "aixcoff-rs6000"))
     our_flavour = (enum bfd_flavour)-1;
+
+  /* Special kludge for apollo.  See dstread.c.  */
+  if (STREQN (our_target, "apollo", 6))
+    our_flavour = (enum bfd_flavour)-2;
 
   for (sf = symtab_fns; sf != NULL; sf = sf -> next)
     {
@@ -839,7 +845,12 @@ generic_load (filename, from_tty)
 {
   struct cleanup *old_cleanups;
   asection *s;
-  bfd *loadfile_bfd = bfd_openr (filename, gnutarget);
+  bfd *loadfile_bfd;
+
+  if (filename == NULL)
+    filename = get_exec_file (1);
+
+  loadfile_bfd = bfd_openr (filename, gnutarget);
   if (loadfile_bfd == NULL)
     {
       perror_with_name (filename);
@@ -850,7 +861,7 @@ generic_load (filename, from_tty)
   if (!bfd_check_format (loadfile_bfd, bfd_object)) 
     {
       error ("\"%s\" is not an object file: %s", filename,
-	     bfd_errmsg (bfd_error));
+	     bfd_errmsg (bfd_get_error ()));
     }
   
   for (s = loadfile_bfd->sections; s; s = s->next) 
@@ -873,9 +884,11 @@ generic_load (filename, from_tty)
 
 	      /* Is this really necessary?  I guess it gives the user something
 		 to look at during a long download.  */
-	      printf_filtered ("Loading section %s, size 0x%lx vma 0x%lx\n",
+	      printf_filtered ("Loading section %s, size 0x%lx vma ",
 			       bfd_get_section_name (loadfile_bfd, s),
-			       (unsigned long) size, (unsigned long) vma);
+			       (unsigned long) size);
+	      print_address_numeric (vma, gdb_stdout);
+	      printf_filtered ("\n");
 
 	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
 
@@ -968,6 +981,7 @@ add_symbol_file_command (args, from_tty)
 
   text_addr = parse_and_eval_address (args);
 
+  /* FIXME-32x64: Assumes text_addr fits in a long.  */
   if (!query ("add symbol table from file \"%s\" at text_addr = %s?\n",
 	      name, local_hex_string ((unsigned long)text_addr)))
     error ("Not confirmed.");
@@ -1044,7 +1058,7 @@ reread_symbols ()
 	  /* bfd_openr sets cacheable to true, which is what we want.  */
 	  if (!bfd_check_format (objfile->obfd, bfd_object))
 	    error ("Can't read symbols from %s: %s.", objfile->name,
-		   bfd_errmsg (bfd_error));
+		   bfd_errmsg (bfd_get_error ()));
 
 	  /* Save the offsets, we will nuke them with the rest of the
 	     psymbol_obstack.  */
@@ -1099,7 +1113,7 @@ reread_symbols ()
 	  if (build_objfile_section_table (objfile))
 	    {
 	      error ("Can't find the file sections in `%s': %s", 
-		     objfile -> name, bfd_errmsg (bfd_error));
+		     objfile -> name, bfd_errmsg (bfd_get_error ()));
 	    }
 
 	  /* We use the same section offsets as from last time.  I'm not
