@@ -222,30 +222,20 @@ typedef struct
 
 typedef struct
 {
-  union {
-    struct {
-      unsigned long ctype : 1,	/* 1: long 0: short format. See below.  */
-      rtype : 4,		/* Relocation types. See below. */
-      dist2to : 10,
-      relvaddr : 17;		/* (VADDR - vaddr of theprevious entry) >> 2 */
-    } b;
-    unsigned long l;
-  } info;
+  unsigned int ctype : 1;	/* 1: long 0: short format. See below.  */
+  unsigned int rtype : 4;	/* Relocation types. See below. */
+  unsigned int dist2to : 8;
+  unsigned int relvaddr : 19;	/* (VADDR - vaddr of the previous entry)/ 4 */
   unsigned long konst;		/* KONST field. See below.  */
   unsigned long vaddr;		/* VADDR to be relocated.  */
 } Elf32_crinfo;
 
 typedef struct
 {
-  union {
-    struct {
-      unsigned long ctype : 1,	/* 1: long 0: short format. See below.  */
-      rtype : 4,		/* Relocation types. See below. */
-      dist2to : 10,
-      relvaddr : 17;		/* (VADDR - vaddr of the previous entry)/ 4 */
-    } b;
-    unsigned long l;
-  } info;
+  unsigned int ctype : 1;	/* 1: long 0: short format. See below.  */
+  unsigned int rtype : 4;	/* Relocation types. See below. */
+  unsigned int dist2to : 8;
+  unsigned int relvaddr : 19;	/* (VADDR - vaddr of the previous entry)/ 4 */
   unsigned long konst;		/* KONST field. See below.  */
 } Elf32_crinfo2;
 
@@ -261,6 +251,17 @@ typedef struct
   bfd_byte info[4];
   bfd_byte konst[4];
 } Elf32_External_crinfo2;
+
+/* These are the constants used to swap the bitfields in a crinfo.  */
+
+#define CRINFO_CTYPE (0x1)
+#define CRINFO_CTYPE_SH (31)
+#define CRINFO_RTYPE (0xf)
+#define CRINFO_RTYPE_SH (27)
+#define CRINFO_DIST2TO (0xff)
+#define CRINFO_DIST2TO_SH (19)
+#define CRINFO_RELVADDR (0x7ffff)
+#define CRINFO_RELVADDR_SH (0)
 
 /* A compact relocation info has long (3 words) or short (2 words)
    formats.  A short format doesn't have VADDR field and relvaddr
@@ -283,12 +284,10 @@ typedef struct
 #define CRT_MIPS_GPHI_LO		0xc
 #define CRT_MIPS_JMPAD			0xd
 
-#define mips_elf_set_cr_format(x,format)	((x).info.b.ctype = (format))
-#define mips_elf_set_cr_type(x,type)		((x).info.b.rtype = (type))
-#define mips_elf_set_cr_dist2to(x,v)		((x).info.b.dist2to = (v))
-#define mips_elf_set_cr_relvaddr(x,d)		((x).info.b.relvaddr = (d)<<2)
-
-
+#define mips_elf_set_cr_format(x,format)	((x).ctype = (format))
+#define mips_elf_set_cr_type(x,type)		((x).rtype = (type))
+#define mips_elf_set_cr_dist2to(x,v)		((x).dist2to = (v))
+#define mips_elf_set_cr_relvaddr(x,d)		((x).relvaddr = (d)<<2)
 
 #define USE_REL	1		/* MIPS uses REL relocations instead of RELA */
 
@@ -1345,7 +1344,13 @@ bfd_elf32_swap_crinfo_out (abfd, in, ex)
      Elf32_crinfo *in;
      Elf32_External_crinfo *ex;
 {
-  bfd_h_put_32 (abfd, (bfd_vma) in->info.l, ex->info);
+  unsigned long l;
+
+  l = (((in->ctype & CRINFO_CTYPE) << CRINFO_CTYPE_SH)
+       | ((in->rtype & CRINFO_RTYPE) << CRINFO_RTYPE_SH)
+       | ((in->dist2to & CRINFO_DIST2TO) << CRINFO_DIST2TO_SH)
+       | ((in->relvaddr & CRINFO_RELVADDR) << CRINFO_RELVADDR_SH));
+  bfd_h_put_32 (abfd, (bfd_vma) l, ex->info);
   bfd_h_put_32 (abfd, (bfd_vma) in->konst, ex->konst);
   bfd_h_put_32 (abfd, (bfd_vma) in->vaddr, ex->vaddr);
 }
