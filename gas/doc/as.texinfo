@@ -3698,7 +3698,6 @@ Some machine configurations provide additional directives.
 				@code{.cfi_def_cfa_offset @var{offset}}
 				@code{.cfi_adjust_cfa_offset @var{offset}}
 				@code{.cfi_offset @var{register}, @var{offset}}
-				@code{.cfi_verbose [1|0]}
 
 * Data::                        @code{.data @var{subsection}}
 @ifset COFF
@@ -4014,9 +4013,12 @@ value that is added/substracted from the previous offset.
 Previous value of @var{register} is saved at offset @var{offset} from
 CFA. 
 
-@section @code{.cfi_verbose [1|0]}
-Switch on/off verbosity of the CFI machinery. @value{AS} will print
-lots of useful messages to standard output if you use this directive.
+@section @code{.cfi_rel_offset @var{register}, @var{offset}}
+Previous value of @var{register} is saved at offset @var{offset} from
+the current CFA register.  This is transformed to @code{.cfi_offset}
+using the known displacement of the CFA register from the CFA.
+This is often easier to use, because the number will match the
+code it's annotating.
 
 @node Comm
 @section @code{.comm @var{symbol} , @var{length} }

@@ -1,5 +1,7 @@
 2003-06-07  Richard Henderson  <rth@redhat.com>
 
+	* doc/as.texinfo: Document .cfi_rel_offset.
+
 	* dw2gencfi.c (struct cfa_save_data, cfa_save_stack): New.
 	(cfi_add_CFA_offset): Detect invalid offsets.
 	(cfi_add_CFA_remember_state): Save cur_cfa_offset.
