@@ -1,3 +1,8 @@
+Sat Aug  6 22:27:30 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* irix-core.c (irix_core_core_file_p):  Ignore sections that
+	are not contained in the core file.
+
 Thu Aug  4 11:32:23 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* coff-m68k.c (m68k_reloc_type_lookup): New function.
