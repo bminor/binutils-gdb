@@ -913,18 +913,19 @@ pke_check_stall(struct pke_device* me, enum pke_check_target what)
 void
 pke_flip_dbf(struct pke_device* me)
 {
+  int newdf;
   /* compute new TOP */
   PKE_REG_MASK_SET(me, TOP, TOP,
 		   PKE_REG_MASK_GET(me, TOPS, TOPS));
   /* flip DBF */
-  PKE_REG_MASK_SET(me, DBF, DF,
-		   PKE_REG_MASK_GET(me, DBF, DF) ? 0 : 1);
-  PKE_REG_MASK_SET(me, STAT, DBF, PKE_REG_MASK_GET(me, DBF, DF));
+  newdf = PKE_REG_MASK_GET(me, DBF, DF) ? 0 : 1;
+  PKE_REG_MASK_SET(me, DBF, DF, newdf);
+  PKE_REG_MASK_SET(me, STAT, DBF, newdf);
   /* compute new TOPS */
   PKE_REG_MASK_SET(me, TOPS, TOPS,
 		   (PKE_REG_MASK_GET(me, BASE, BASE) +
-		    (PKE_REG_MASK_GET(me, DBF, DF) *
-		     PKE_REG_MASK_GET(me, OFST, OFFSET))));
+		    newdf * PKE_REG_MASK_GET(me, OFST, OFFSET)));
+
   /* this is equivalent to last word from okadaa (98-02-25):
      1) TOP=TOPS;
      2) TOPS=BASE + !DBF*OFFSET
