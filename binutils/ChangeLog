@@ -1,3 +1,8 @@
+2002-06-07  Elias Athanasopoulos  <eathan@otenet.gr>
+	
+	* nm.c: When computing size of symbols for an ELF target use the
+	internal size field.
+
 2002-06-06  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* testsuite/binutils-all/objcopy.exp: clear xfail for

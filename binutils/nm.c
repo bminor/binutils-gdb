@@ -1,6 +1,6 @@
 /* nm.c -- Describe symbol table of a rel file.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -28,6 +28,7 @@
 #include "aout/ranlib.h"
 #include "demangle.h"
 #include "libiberty.h"
+#include "elf-bfd.h"
 
 /* When sorting by size, we use this structure to hold the size and a
    pointer to the minisymbol.  */
@@ -839,10 +840,10 @@ size_forward2 (P_x, P_y)
     return sorters[0][reverse_sort] (x->minisym, y->minisym);
 }
 
-/* Sort the symbols by size.  We guess the size by assuming that the
-   difference between the address of a symbol and the address of the
-   next higher symbol is the size.  FIXME: ELF actually stores a size
-   with each symbol.  We should use it.  */
+/* Sort the symbols by size.  ELF provides a size but for other formats
+   we have to make a guess by assuming that the difference between the
+   address of a symbol and the address of the next higher symbol is the
+   size.  */
 
 static long
 sort_symbols_by_size (abfd, dynamic, minisyms, symcount, size, symsizesp)
@@ -904,7 +905,9 @@ sort_symbols_by_size (abfd, dynamic, minisyms, symcount, size, symsizesp)
 
       sec = bfd_get_section (sym);
 
-      if (bfd_is_com_section (sec))
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour) 
+	sz = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
+      else if (bfd_is_com_section (sec))
 	sz = sym->value;
       else
 	{
