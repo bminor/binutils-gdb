@@ -1,6 +1,8 @@
 start-sanitize-v850
 Wed Aug 21 18:46:26 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-ope.c ("jmp"): R1 is only operand.
+
 	* v850-opc.c: Close unterminated comment.
 
 Wed Aug 21 17:31:26 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
