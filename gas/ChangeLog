@@ -1,3 +1,14 @@
+1999-08-27  Jim Wilson  <wilson@cygnus.com>
+
+	* dwarf2dbg.c (MAX_SPECIAL_ADDR_DELTA): Correct typo in comment.
+	(struct ls): Add frag field.  Initialize it to zero.
+	(out_end_sequence): New local text_frag.  Set it while in text section.
+	Replace address check with frag check.  Set ls.frag to text_frag if
+	out_set_addr called.
+	(dwarf2_gen_line_info): Add explanatory comment.  New local saved_frag.
+	Set it before switching sections.  Replace address check with frag
+	check.  Set ls.frag to saved_frag if out_set_addr called.
+
 1999-08-26  David Mosberger  <davidm@hpl.hp.com>
 
         * dwarf2dbg.c (out_end_sequence): If address changed, directly

@@ -78,7 +78,7 @@
    is not made available by the GCC front-end.  */
 #define	DWARF2_LINE_DEFAULT_IS_STMT	1
 
-/* Given a special op, return the line skip amount: */
+/* Given a special op, return the line skip amount.  */
 #define SPECIAL_LINE(op) \
 	(((op) - DWARF2_LINE_OPCODE_BASE)%DWARF2_LINE_RANGE + DWARF2_LINE_BASE)
 
@@ -86,11 +86,11 @@
    DWARF2_LINE_MIN_INSN_LENGTH.  */
 #define SPECIAL_ADDR(op) (((op) - DWARF2_LINE_OPCODE_BASE)/DWARF2_LINE_RANGE)
 
-/* The maximum address skip amont that can be encoded with a special op: */
+/* The maximum address skip amount that can be encoded with a special op.  */
 #define MAX_SPECIAL_ADDR_DELTA		SPECIAL_ADDR(255)
 
 #define INITIAL_STATE						\
-  /* initialize as per DWARF2.0 standard: */			\
+  /* Initialize as per DWARF2.0 standard.  */			\
   0,					/* address */		\
   1,					/* file */		\
   1,					/* line */		\
@@ -118,6 +118,7 @@ static struct
     unsigned int
       any_dwarf2_directives : 1;	/* did we emit any DWARF2 line debug directives? */
 
+    fragS * frag;	/* frag that "addr" is relative to */
     segT text_seg;	/* text segment "addr" is relative to */
     subsegT text_subseg;
     segT line_seg;	/* ".debug_line" segment */
@@ -142,6 +143,7 @@ ls =
     {
       INITIAL_STATE
     },
+    0,
     0,
     0,
     0,
@@ -324,6 +326,7 @@ static void
 out_end_sequence ()
 {
   addressT addr, delta;
+  fragS *text_frag;
 
   if (ls.text_seg)
     {
@@ -333,11 +336,13 @@ out_end_sequence ()
 #else
       addr = frag_now_fix ();
 #endif
+      text_frag = frag_now;
       subseg_set (ls.line_seg, DL_BODY);
-      if (addr < ls.sm.addr)
+      if (text_frag != ls.frag)
 	{
 	  out_set_addr (addr);
 	  ls.sm.addr = addr;
+	  ls.frag = text_frag;
 	}
       else
 	{
@@ -407,6 +412,9 @@ get_filenum (filenum, file)
   return ++ls.num_filenames;
 }
 
+/* Emit an entry in the line number table if the address or line has changed.
+   ADDR is relative to the current frag in the text section.  */
+
 void
 dwarf2_gen_line_info (addr, l)
      addressT addr;
@@ -416,6 +424,7 @@ dwarf2_gen_line_info (addr, l)
   unsigned int any_output = 0;
   subsegT saved_subseg;
   segT saved_seg;
+  fragS *saved_frag;
 
   if (flag_debug)
     fprintf (stderr, "line: addr %lx file `%s' line %u col %u flags %x\n",
@@ -438,6 +447,7 @@ dwarf2_gen_line_info (addr, l)
      them.  */
   saved_seg = now_seg;
   saved_subseg = now_subseg;
+  saved_frag = frag_now;
 
   if (!ls.line_seg)
     {
@@ -473,6 +483,7 @@ dwarf2_gen_line_info (addr, l)
       ls.text_subseg = saved_subseg;
       out_set_addr (addr);
       ls.sm.addr = addr;
+      ls.frag = saved_frag;
     }
 
   if (ls.sm.filenum != filenum)
@@ -506,18 +517,15 @@ dwarf2_gen_line_info (addr, l)
   if (ls.sm.line != l->line)
     {
       any_output = 1;
-      if (addr < ls.sm.addr)
+      if (saved_frag != ls.frag)
 	{
-	  /* This happens when a new frag got allocated (for whatever
-	     reason).  Deal with it by generating a reference symbol.
-	     Note: no end_sequence needs to be generated because the
-	     address did not really decrease (only the reference point
-	     changed).
-
-	     ??? Perhaps we should directly check for a change of
-	     frag_now instead?  */
+	  /* If a new frag got allocated (for whatever reason), then
+	     deal with it by generating a reference symbol.  Note: no
+	     end_sequence needs to be generated because the address did
+	     not really decrease (only the reference point changed).  */
 	  out_set_addr (addr);
 	  ls.sm.addr = addr;
+	  ls.frag = saved_frag;
 	}
       gen_addr_line (l->line - ls.sm.line,
 		     (addr - ls.sm.addr) / DWARF2_LINE_MIN_INSN_LENGTH);
