@@ -218,7 +218,6 @@ CODE_FRAGMENT
    struct which ultimately gets passed in to the bfd.  When it arrives, copy
    it to the following struct so that the data will be available in coffcode.h
    where it is needed.  The typedef's used are defined in bfd.h */
-
 
 /*
 SECTION

@@ -27,6 +27,21 @@
 	* elf-m10300.c: Likewise.
 	* elfxx-ia64.c: Likewise.
 
+	* aoutx.h: Fix formatting.
+	* bfd.c: Likewise.
+	* bfd-in2.h: Likewise.
+	* bfd-in.h: Likewise.
+	* cpu-i386.c: Likewise.
+	* cpu-m68hc11.c: Likewise.
+	* dwarf2.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* format.c: Likewise.
+	* freebsd.h: Likewise.
+	* hash.c: Likewise.
+	* hp300hpux.c: Likewise.
+	* hppabsd-core.c: Likewise.
+	* hpux-core.c: Likewise.
+
 2001-01-22  Bo Thorsen  <bo@suse.de>
 
 	* elf64-x86-64.c: Added PIC support for X86-64.

@@ -292,7 +292,6 @@ struct orl {			/* output ranlib */
   int namidx;			/* index into string table */
 };
 
-
 /* Linenumber stuff */
 typedef struct lineno_cache_entry {
   unsigned int line_number;	/* Linenumber from start of function*/

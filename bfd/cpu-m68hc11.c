@@ -36,4 +36,3 @@ const bfd_arch_info_type bfd_m68hc11_arch =
     bfd_default_scan,
     0,
 };
-

@@ -1977,7 +1977,6 @@ error_return:
   _bfd_stringtab_free (strtab);
   return false;
 }
-
 
 long
 NAME(aout,get_symtab) (abfd, location)
@@ -1995,7 +1994,6 @@ NAME(aout,get_symtab) (abfd, location)
     *location++ =0;
     return bfd_get_symcount (abfd);
 }
-
 
 /* Standard reloc stuff */
 /* Output standard relocation information to a file in target byte order.  */
@@ -2538,7 +2536,6 @@ NAME(aout,get_reloc_upper_bound) (abfd, asect)
   bfd_set_error (bfd_error_invalid_operation);
   return -1;
 }
-
 
 long
 NAME(aout,get_symtab_upper_bound) (abfd)

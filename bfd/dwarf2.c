@@ -1248,7 +1248,7 @@ parse_comp_unit (abfd, stash, unit_length, abbrev_length)
 
   char *info_ptr = stash->info_ptr;
   char *end_ptr = info_ptr + unit_length;
-  
+
   version = read_2_bytes (abfd, info_ptr);
   info_ptr += 2;
   BFD_ASSERT (abbrev_length == 0
@@ -1542,7 +1542,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 	return false;
 
       *pinfo = (PTR) stash;
-      
+
       msec = find_debug_info (abfd, NULL);
       if (! msec)
 	/* No dwarf2 info.  Note that at this point the stash

@@ -1716,7 +1716,6 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
-
 #define TARGET_LITTLE_SYM		    bfd_elf64_x86_64_vec
 #define TARGET_LITTLE_NAME		    "elf64-x86-64"
 #define ELF_ARCH			    bfd_arch_i386
