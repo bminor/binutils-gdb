@@ -49,7 +49,7 @@ nltype	indirectchild = {
 
 int
 iscall (unsigned char *ip) {
-  if (*ip == 0xeb || *ip = 0x9a) 
+  if (*ip == 0xeb || *ip == 0x9a) 
     return 1;
   return 0;
 }
@@ -95,8 +95,7 @@ findcall( parentp , p_lowpc , p_highpc )
 	   *	check that this is the address of 
 	   *	a function.
 	   */
-	  destpc = ( (unsigned long)instructp + 5 
-	    - (unsigned long) textspace;
+	  destpc = ( (unsigned long)instructp + 5 - (unsigned long) textspace);
 	  if ( destpc >= s_lowpc && destpc <= s_highpc ) {
 	    childp = nllookup( destpc );
 #			ifdef DEBUG
