@@ -107,7 +107,7 @@ x86_64_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 static CORE_ADDR
 x86_64_linux_sigcontext_addr (struct frame_info *next_frame)
 {
-  CORE_ADDR sp, ucontext_addr;
+  CORE_ADDR sp;
   char buf[8];
 
   frame_unwind_register (next_frame, SP_REGNUM, buf);
@@ -115,10 +115,11 @@ x86_64_linux_sigcontext_addr (struct frame_info *next_frame)
 
   /* The sigcontext structure is part of the user context.  A pointer
      to the user context is passed as the third argument to the signal
-     handler.  */
-  read_memory (sp + 16, buf, 8);
-  ucontext_addr = extract_unsigned_integer (buf, 8);
-  return ucontext_addr + X86_64_LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
+     handler, i.e. in %rdx.  Unfortunately %rdx isn't preserved across
+     function calls so we can't use it.  Fortunately the user context
+     is part of the signal frame and the unwound %rsp directly points
+     at it.  */
+  return sp + X86_64_LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 }
 
 
