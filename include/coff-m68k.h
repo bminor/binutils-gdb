@@ -44,7 +44,6 @@ typedef struct
   char	entry[4];		/* entry pt.				*/
   char 	text_start[4];		/* base of text used for this file */
   char 	data_start[4];		/* base of data used for this file */
-  char	tagentries[4];		/* number of tag entries to follow */
 }
 AOUTHDR;
 
