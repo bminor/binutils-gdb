@@ -3696,6 +3696,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mfmcsrr0",   XSPR(31,339,570),  XSPR_MASK, PPCRFMCI, { RT } },
 { "mfmcsrr1",   XSPR(31,339,571),  XSPR_MASK, PPCRFMCI, { RT } },
 { "mfmcsr",     XSPR(31,339,572),  XSPR_MASK, PPCRFMCI, { RT } },
+{ "mfmcar",     XSPR(31,339,573),  XSPR_MASK, PPCRFMCI, { RT } },
 { "mfdpdr",     XSPR(31,339,630),  XSPR_MASK, PPC860,	{ RT } },
 { "mfdpir",     XSPR(31,339,631),  XSPR_MASK, PPC860,	{ RT } },
 { "mfimmr",     XSPR(31,339,638),  XSPR_MASK, PPC860,	{ RT } },
