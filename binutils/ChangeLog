@@ -1,3 +1,8 @@
+Mon Dec  8 11:22:04 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* objdump.c (objdump_print_addr_with_sym): Remove call to
+	disasm_symaddr() as this function no longer exists.
+
 Tue Dec  2 10:23:50 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* objdump.c (objdump_print_addr_with_sym): Call disasm_symaddr()

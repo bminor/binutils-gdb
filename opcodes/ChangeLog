@@ -1,3 +1,10 @@
+Mon Dec  8 11:21:07 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* disassemble.c: Remove disasm_symaddr() function.
+
+	* arm-dis.c: Use info->symbol instead of info->flags to determine
+	if disassmbly should be in Thumb or Arm mode.
+
 Tue Dec  2 09:54:27 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-dis.c: Add support for disassembling Thumb opcodes.

@@ -22,7 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "dis-asm.h"
 #define DEFINE_TABLE
 #include "arm-opc.h"
-
+#include "coff/internal.h"
+#include "libcoff.h"
 
 static char *arm_conditional[] =
 {"eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc",
@@ -705,9 +706,20 @@ print_insn_big_arm (pc, info)
      bfd_vma pc;
      struct disassemble_info *info;
 {
-  unsigned char b[4];
-  long given;
-  int status;
+  unsigned char      b[4];
+  long               given;
+  int                status;
+  asymbol *          saved_symbol;
+  coff_symbol_type * cs;
+  int                is_thumb;
+  
+  cs = coffsymbol (info->symbol);
+  is_thumb = 
+     (   cs->native->u.syment.n_sclass == C_THUMBEXT
+      || cs->native->u.syment.n_sclass == C_THUMBSTAT
+      || cs->native->u.syment.n_sclass == C_THUMBLABEL
+      || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
+      || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC);
 
   info->bytes_per_chunk = 4;
   info->display_endian = BFD_ENDIAN_BIG;
@@ -721,7 +733,7 @@ print_insn_big_arm (pc, info)
       return -1;
     }
 
-  if (info->flags & 0x1)
+  if (is_thumb)
     {
       if (pc & 0x2)
 	{
@@ -746,34 +758,45 @@ print_insn_big_arm (pc, info)
       given = (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | (b[3]);
     }
 
-  if (info->flags & 0x1)
+  if (is_thumb)
     {
       status = print_insn_thumb (pc, info, given);
-      info->flags |= 1;		/* Stop displayed symbols from resetting the flag */
     }
   else
     {
       status = print_insn_arm (pc, info, given);
-      info->flags &= ~1;	/* Stop displayed symbols from resetting the flag */
     }
 
+  info->symbol = saved_symbol; /* Stop displayed symbols from resetting the stored symbol */
+  
   return status;
 }
 
 int
 print_insn_little_arm (pc, info)
      bfd_vma pc;
-     struct disassemble_info *info;
+     struct disassemble_info * info;
 {
-  unsigned char b[4];
-  long given;
-  int status;
+  unsigned char      b[4];
+  long               given;
+  int                status;
+  asymbol *          saved_symbol;
+  coff_symbol_type * cs;
+  int                is_thumb;
+  
+  cs = coffsymbol (info->symbol);
+  is_thumb = 
+     (   cs->native->u.syment.n_sclass == C_THUMBEXT
+      || cs->native->u.syment.n_sclass == C_THUMBSTAT
+      || cs->native->u.syment.n_sclass == C_THUMBLABEL
+      || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
+      || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC);
 
   info->bytes_per_chunk = 4;
   info->display_endian = BFD_ENDIAN_LITTLE;
 
   status = (*info->read_memory_func) (pc, (bfd_byte *) &b[0], 4, info);
-  if (status != 0 && (info->flags & 0x1))
+  if (status != 0 && is_thumb)
     {
       info->bytes_per_chunk = 2;
 
@@ -788,16 +811,18 @@ print_insn_little_arm (pc, info)
 
   given = (b[0]) | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
 
-  if (info->flags & 0x1)
+  saved_symbol = info->symbol;
+  
+  if (is_thumb)
     {
       status = print_insn_thumb (pc, info, given);
-      info->flags |= 1;		/* Stop displayed symbols from resetting the flag */
     }
   else
     {
       status = print_insn_arm (pc, info, given);
-      info->flags &= ~1;	/* Stop displayed symbols from resetting the flag */
     }
+
+  info->symbol = saved_symbol; /* Stop displayed symbols from resetting the stored symbol */
 
   return status;
 }
