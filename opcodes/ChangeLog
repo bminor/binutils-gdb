@@ -1,5 +1,12 @@
 2002-04-07  Andrew Cagney  <ac131313@redhat.com>
 
+	Import 2002-03-06 Chris Demetriou <cgd@broadcom.com>
+	* mips-opc.c (mips_builtin_opcodes): Mark "pref" as being
+	present on I4.
+	* mips-opc.c (mips_builtin_opcodes): Add "movn.ps" and "movz.ps".
+
+2002-04-07  Andrew Cagney  <ac131313@redhat.com>
+
 	Import 2002-03-11 Chris Demetriou <cgd@broadcom.com>
 	* mips-dis.c (is_newabi): Fix ABI decoding.
 
