@@ -1,4 +1,4 @@
-/* `Extended (actually Mangled) COFF' symbol table external format.
+/* MIPS `ECOFF' symbol table external format.
    Copyright 1992 Free Software Foundation.
    Contributed by Cygnus Support.  Written by John Gilmore.
 
@@ -17,6 +17,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* ECOFF uses COFF-like section structures, but its own symbol format.
+   This file defines the symbol format in fields whose size and alignment
+   will not vary on different host systems.  The bfd module coff-msym.c
+   converts between external and internal forms of this information,
+   deals with byte order issues, etc.  */
 
 /* File header as a set of bytes */
 
@@ -174,6 +180,9 @@ struct ext_ext {
 
 #define	EXT_BITS1_COBOL_MAIN_BIG	0x40
 #define	EXT_BITS1_COBOL_MAIN_LITTLE	0x02
+
+#define	EXT_BITS1_WEAKEXT_BIG		0x20
+#define	EXT_BITS1_WEAKEXT_LITTLE	0x04
 
 /* Type information external record */
 
