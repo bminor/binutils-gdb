@@ -1653,31 +1653,47 @@ debug_to_post_wait (ptid_t ptid, int status)
 }
 
 static void
+debug_print_register (const char * func, int regno)
+{
+  fprintf_unfiltered (gdb_stdlog, "%s ", func);
+  if (regno >= 0 && regno < NUM_REGS + NUM_PSEUDO_REGS
+      && REGISTER_NAME (regno) != NULL && REGISTER_NAME (regno)[0] != '\0')
+    fprintf_unfiltered (gdb_stdlog, "(%s)", REGISTER_NAME (regno));
+  else
+    fprintf_unfiltered (gdb_stdlog, "(%d)", regno);
+  if (regno >= 0)
+    {
+      int i;
+      unsigned char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+      read_register_gen (regno, buf);
+      fprintf_unfiltered (gdb_stdlog, " = ");
+      for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
+	}
+      if (REGISTER_RAW_SIZE (regno) <= sizeof (LONGEST))
+	{
+	  fprintf_unfiltered (gdb_stdlog, " 0x%s %s",
+			      paddr_nz (read_register (regno)),
+			      paddr_d (read_register (regno)));
+	}
+    }
+  fprintf_unfiltered (gdb_stdlog, "\n");
+}
+
+static void
 debug_to_fetch_registers (int regno)
 {
   debug_target.to_fetch_registers (regno);
-
-  fprintf_unfiltered (gdb_stdlog, "target_fetch_registers (%s)",
-		      regno != -1 ? REGISTER_NAME (regno) : "-1");
-  if (regno != -1)
-    fprintf_unfiltered (gdb_stdlog, " = 0x%lx %ld",
-			(unsigned long) read_register (regno),
-			(unsigned long) read_register (regno));
-  fprintf_unfiltered (gdb_stdlog, "\n");
+  debug_print_register ("target_fetch_registers", regno);
 }
 
 static void
 debug_to_store_registers (int regno)
 {
   debug_target.to_store_registers (regno);
-
-  if (regno >= 0 && regno < NUM_REGS)
-    fprintf_unfiltered (gdb_stdlog, "target_store_registers (%s) = 0x%lx %ld\n",
-			REGISTER_NAME (regno),
-			(unsigned long) read_register (regno),
-			(unsigned long) read_register (regno));
-  else
-    fprintf_unfiltered (gdb_stdlog, "target_store_registers (%d)\n", regno);
+  debug_print_register ("target_store_registers", regno);
+  fprintf_unfiltered (gdb_stdlog, "\n");
 }
 
 static void

@@ -1,3 +1,10 @@
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* target.c (debug_print_register): New function.  Handle oversize
+	registers.
+	(debug_to_fetch_registers): Call.
+	(debug_to_store_registers): Call.
+
 2002-05-03  Jim Blandy  <jimb@redhat.com>
 
 	* stabsread.c (cleanup_undefined_types): Use replace_type, not memcpy.
