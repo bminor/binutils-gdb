@@ -15,6 +15,14 @@ Wed Jul  3 15:02:21 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 Wed Jul  3 16:05:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.h (is_it_end_of_statement): Declare.
+	* read.c (is_it_end_of_statement): Remove declaration.
+
+	* config/tc-ppc.c (ppc_elf_suffix): Correct parenthesization of ||
+	within &&.
+	(md_assemble): Fix handling of @l with an unsigned constant.  Add
+	default case to reloc switch.
+
 	* config/tc-i386.h (AOUT_MACHTYPE): Define as 0 if TE_386BSD.
 
 	Based on patches from Tom Quiggle <quiggle@sgi.com>:
