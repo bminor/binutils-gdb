@@ -349,7 +349,7 @@ gld${EMULATION_NAME}_new_vers_pattern (entry)
 	      && next->match == entry->match)
 	    {
 	      next = entry->next;
-	      free (entry->pattern);
+	      free ((char *) entry->pattern);
 	      free (entry);
 	      return next;
 	    }
