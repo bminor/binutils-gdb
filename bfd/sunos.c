@@ -1029,7 +1029,7 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
   s = bfd_get_section_by_name (dynobj, ".hash");
   BFD_ASSERT (s != NULL);
   hashalloc = (dynsymcount + bucketcount - 1) * HASH_ENTRY_SIZE;
-  s->contents = bfd_alloc (dynobj, hashalloc);
+  s->contents = (bfd_byte *) bfd_alloc (dynobj, hashalloc);
   if (s->contents == NULL && dynsymcount > 0)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -1079,7 +1079,7 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
       bfd_byte *contents;
 
       add = 8 - (s->_raw_size & 7);
-      contents = realloc (s->contents, s->_raw_size + add);
+      contents = (bfd_byte *) realloc (s->contents, s->_raw_size + add);
       if (contents == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -1096,7 +1096,7 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
   BFD_ASSERT (s != NULL);
   if (s->_raw_size != 0)
     {
-      s->contents = bfd_alloc (dynobj, s->_raw_size);
+      s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
       if (s->contents == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -1122,7 +1122,7 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
   s = bfd_get_section_by_name (dynobj, ".dynrel");
   if (s->_raw_size != 0)
     {
-      s->contents = bfd_alloc (dynobj, s->_raw_size);
+      s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
       if (s->contents == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -1135,7 +1135,7 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
 
   /* Make space for the global offset table.  */
   s = bfd_get_section_by_name (dynobj, ".got");
-  s->contents = bfd_alloc (dynobj, s->_raw_size);
+  s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
   if (s->contents == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -1568,9 +1568,9 @@ sunos_scan_dynamic_symbol (h, data)
 				   ".dynstr");
       BFD_ASSERT (s != NULL);
       if (s->contents == NULL)
-	contents = malloc (len + 1);
+	contents = (bfd_byte *) malloc (len + 1);
       else
-	contents = realloc (s->contents, s->_raw_size + len + 1);
+	contents = (bfd_byte *) realloc (s->contents, s->_raw_size + len + 1);
       if (contents == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
