@@ -359,7 +359,6 @@ DEFUN (do_relocs_for, (abfd, h, file_cursor),
 	  struct external_reloc *ext_ptr;
 	  struct external_reloc *external_reloc_vec;
 	  unsigned int external_reloc_size;
-	  unsigned int count = 0;
 	  unsigned int base = segment_info[idx].scnhdr.s_paddr;
 	  fixS *fix_ptr = segment_info[idx].fix_root;
 	  nrelocs = count_entries_in_chain (idx);
@@ -1609,9 +1608,6 @@ DEFUN (crawl_symbols, (h, abfd),
 {
 
   unsigned int i;
-  unsigned int ptr = 0;
-
-
   symbolS *symbolP;
 
   /* Initialize the stack used to keep track of the matching .bb .be */

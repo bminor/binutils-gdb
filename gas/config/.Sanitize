@@ -18,6 +18,7 @@
 Do-first:
 
 
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -80,6 +81,7 @@ obj-ieee.c
 obj-ieee.h
 obj-vms.c
 obj-vms.h
+sh.mt
 sparc.mt
 tc-a29k.c
 tc-a29k.h
@@ -106,6 +108,8 @@ tc-ns32k.c
 tc-ns32k.h
 tc-rs6000.c
 tc-rs6000.h
+tc-sh.c
+tc-sh.h
 tc-sparc.c
 tc-sparc.h
 tc-tahoe.c

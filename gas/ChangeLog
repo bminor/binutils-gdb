@@ -1,3 +1,8 @@
+Mon Apr 26 18:29:05 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* config/tc-sh.ch, config/tc-sh.h: New files supporting Hitachi
+	SH.
+
 Mon Apr 26 12:28:27 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* expr.c (operand): Fix unary plus operator (previously was the
