@@ -253,11 +253,14 @@ gdbtk_readline (prompt)
 {
   char *merge[2];
   char *command;
+  int result;
 
   merge[0] = "gdbtk_tcl_readline";
   merge[1] = prompt;
   command = Tcl_Merge (2, merge);
-  if (Tcl_Eval (interp, command) == TCL_OK)
+  result = Tcl_Eval (interp, command);
+  free (command);
+  if (result == TCL_OK)
     {
       return (strdup (interp -> result));
     }

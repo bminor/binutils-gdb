@@ -1,4 +1,8 @@
 start-sanitize-gdbtk
+Tue Nov 19 09:26:14 1996  Tom Tromey  <tromey@cygnus.com>
+
+	* gdbtk.c (gdbtk_readline): Fix memory leak.
+
 Mon Nov 18 23:43:05 1996  Tom Tromey  <tromey@cygnus.com>
 
 	Fixes for Tcl 7.6 / Tk 4.2:
