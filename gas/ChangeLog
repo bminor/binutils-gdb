@@ -1,3 +1,8 @@
+Wed Apr 10 14:34:49 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-h8300.c (do_a_fix_imm): Don't cut off high bits
+	of a 32bit operand.
+
 Mon Apr  8 14:42:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Permit --enable-shared to specify a list of
