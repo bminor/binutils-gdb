@@ -368,6 +368,11 @@ dump_section_header (abfd, section, ignored)
 	  break;
 	}
       printf ("%s%s", comma, ls);
+
+      if (section->comdat != NULL)
+	printf (" (COMDAT %s %ld)", section->comdat->name,
+		section->comdat->symbol);
+
       comma = ", ";
     }
 
