@@ -1,5 +1,8 @@
 2004-08-07  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbtypes.c (_initialize_gdbtypes): Do not swap builtin_type_int8
+	through to builtin_type_uint128.
+
 	* c-exp.y: Use builtin_type function to obtain builtin types.
 
 	* gdbtypes.h (struct builtin_type): Delete builtin_int0 through to
