@@ -234,7 +234,7 @@ _bfd_elf_discard_section_eh_frame
        && bfd_is_abs_section (sec->output_section)))
     {
       /* At least one of the sections is being discarded from the
-         link, so we should just ignore them.  */
+	 link, so we should just ignore them.  */
       return FALSE;
     }
 
@@ -284,14 +284,14 @@ _bfd_elf_discard_section_eh_frame
 
 #define SKIP_RELOCS(buf)				\
   while (cookie->rel < cookie->relend			\
-         && (cookie->rel->r_offset			\
+	 && (cookie->rel->r_offset			\
 	     < (bfd_size_type) ((buf) - ehbuf)))	\
     cookie->rel++
 
 #define GET_RELOC(buf)					\
   ((cookie->rel < cookie->relend			\
     && (cookie->rel->r_offset				\
-        == (bfd_size_type) ((buf) - ehbuf)))		\
+	== (bfd_size_type) ((buf) - ehbuf)))		\
    ? cookie->rel : NULL)
 
   for (;;)
@@ -511,7 +511,7 @@ _bfd_elf_discard_section_eh_frame
 
 	  /* For shared libraries, try to get rid of as many RELATIVE relocs
 	     as possible.  */
-          if (info->shared
+	  if (info->shared
 	      && (get_elf_backend_data (abfd)
 		  ->elf_backend_can_make_relative_eh_frame
 		  (abfd, info, sec))
@@ -798,6 +798,39 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
   sec_info = elf_section_data (sec)->sec_info;
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
+
+  /* First convert all offsets to output section offsets, so that a
+     CIE offset is valid if the CIE is used by a FDE from some other
+     section.  This can happen when duplicate CIEs are deleted in
+     _bfd_elf_discard_section_eh_frame.  We do all sections here because
+     this function might not be called on sections in the same order as
+     _bfd_elf_discard_section_eh_frame.  */
+  if (!hdr_info->offsets_adjusted)
+    {
+      bfd *ibfd;
+      asection *eh;
+      struct eh_frame_sec_info *eh_inf;
+
+      for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+	{
+	  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+	      || (ibfd->flags & DYNAMIC) != 0)
+	    continue;
+
+	  eh = bfd_get_section_by_name (ibfd, ".eh_frame");
+	  if (eh == NULL || eh->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
+	    continue;
+
+	  eh_inf = elf_section_data (eh)->sec_info;
+	  for (ent = eh_inf->entry; ent < eh_inf->entry + eh_inf->count; ++ent)
+	    {
+	      ent->offset += eh->output_offset;
+	      ent->new_offset += eh->output_offset;
+	    }
+	}
+      hdr_info->offsets_adjusted = TRUE;
+    }
+
   if (hdr_info->table && hdr_info->array == NULL)
     hdr_info->array
       = bfd_malloc (hdr_info->fde_count * sizeof(*hdr_info->array));
@@ -809,16 +842,6 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
     {
       if (ent->removed)
 	continue;
-
-      /* First convert all offsets to output section offsets, so that a
-	 CIE offset is valid if the CIE is used by a FDE from some other
-	 section.  This can happen when duplicate CIEs are deleted in
-	 _bfd_elf_discard_section_eh_frame.
-	 FIXME: This assumes that _bfd_elf_discard_section_eh_frame is
-	 called on sections in the same order as this function, which
-	 isn't necessarily so.  */
-      ent->offset += sec->output_offset;
-      ent->new_offset += sec->output_offset;
 
       if (ent->cie)
 	{
@@ -864,7 +887,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		    break;
 		  case 'P':
 		    per_encoding = *buf++;
-                    per_width = get_DW_EH_PE_width (per_encoding, ptr_size);
+		    per_width = get_DW_EH_PE_width (per_encoding, ptr_size);
 		    BFD_ASSERT (per_width != 0);
 		    BFD_ASSERT (((per_encoding & 0x70) == DW_EH_PE_pcrel)
 				== ent->per_encoding_relative);
@@ -1013,8 +1036,8 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
   BFD_ASSERT ((bfd_size_type) (p - contents) == sec->size);
 
   return bfd_set_section_contents (abfd, sec->output_section,
-                                   contents, (file_ptr) sec->output_offset,
-                                   sec->size);
+				   contents, (file_ptr) sec->output_offset,
+				   sec->size);
 }
 
 /* Helper function used to sort .eh_frame_hdr search table by increasing

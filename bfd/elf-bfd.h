@@ -328,6 +328,7 @@ struct eh_frame_hdr_info
      We build it if we successfully read all .eh_frame input sections
      and recognize them.  */
   bfd_boolean table;
+  bfd_boolean offsets_adjusted;
 };
 
 /* ELF linker hash table.  */
@@ -1259,7 +1260,7 @@ struct elf_obj_tdata
   unsigned int cverrefs;
 
   /* Segment flags for the PT_GNU_STACK segment.  */
-  unsigned int stack_flags;  
+  unsigned int stack_flags;
 
   /* Should the PT_GNU_RELRO segment be emitted?  */
   bfd_boolean relro;
