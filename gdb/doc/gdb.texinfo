@@ -4718,6 +4718,7 @@ automatically.
 @ifset MOD2
 * Checks::                      Type and range checks
 @end ifset
+
 * Support::                     Supported languages
 @end menu
 
@@ -5076,6 +5077,7 @@ output values in a manner consistent with C conventions.
 @ifset MOD2
 * C Checks::                    C and C++ type and range checks
 @end ifset
+
 * Debugging C::                 @value{GDBN} and C
 * Debugging C plus plus::       Special features for C++
 @end menu
@@ -5969,8 +5971,8 @@ address can be specified by an integral constant, the construct
 In @value{GDBN} scripts, the Modula-2 inequality operator @code{#} is
 interpreted as the beginning of a comment.  Use @code{<>} instead.
 
-@end ifclear
 @end ifset
+@end ifclear
 
 @node Symbols
 @chapter Examining the Symbol Table

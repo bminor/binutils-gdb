@@ -1,3 +1,7 @@
+Mon Jul 19 12:02:50 1993  Roland H. Pesch  (pesch@cygnus.com)
+
+	* gdb.texinfo: repair conditional bugs in text markup
+
 Fri Jul 16 18:57:50 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo, all-cfg.texi, h8-cfg.texi: introduce MOD2 switch
