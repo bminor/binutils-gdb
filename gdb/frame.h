@@ -263,6 +263,9 @@ extern void frame_register_unwind (struct frame_info *frame, int regnum,
 /* NOTE: cagney/2002-09-13: Return void as one day these functions may
    be changed to return an indication that the read succeeded.  */
 
+extern void frame_unwind_register (struct frame_info *frame,
+				   int regnum, void *buf);
+
 extern void frame_unwind_signed_register (struct frame_info *frame,
 					  int regnum, LONGEST *val);
 
@@ -282,6 +285,9 @@ extern void frame_register (struct frame_info *frame, int regnum,
 /* More convenient interface to frame_register().  */
 /* NOTE: cagney/2002-09-13: Return void as one day these functions may
    be changed to return an indication that the read succeeded.  */
+
+extern void frame_read_register (struct frame_info *frame, int regnum,
+				 void *buf);
 
 extern void frame_read_signed_register (struct frame_info *frame,
 					int regnum, LONGEST *val);
@@ -562,6 +568,16 @@ extern void get_saved_register (char *raw_buffer, int *optimized,
 				CORE_ADDR * addrp,
 				struct frame_info *frame,
 				int regnum, enum lval_type *lval);
+
+/* FIXME: cagney/2003-02-02: Should be deprecated or replaced with a
+   function called frame_read_register_p().  This slightly weird (and
+   older) variant of frame_read_register() returns zero (indicating
+   the register is unavailable) if either: the register isn't cached;
+   or the register has been optimized out.  Problem is, neither check
+   is exactly correct.  A register can't be optimized out (it may not
+   have been saved as part of a function call); The fact that a
+   register isn't in the register cache doesn't mean that the register
+   isn't available (it could have been fetched from memory).  */
 
 extern int frame_register_read (struct frame_info *frame, int regnum,
 				void *buf);

@@ -1,5 +1,18 @@
 2003-02-02  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.c (frame_unwind_register): New function.
+	(frame_unwind_unsigned_register): Use.
+	(frame_unwind_signed_register): Use.
+	(frame_read_register): New function.
+	* frame.h (frame_unwind_register): Declare.
+	(frame_read_register): Declare.
+
+	* d10v-tdep.c (d10v_frame_pop): Rewrite. Use regcache_cooked_write
+	and frame_unwind_register instead of read_memory, write_register
+	and deprecated_write_register_bytes.
+
+2003-02-02  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.h: Note that namelen can be negative.
 	* frame.c (frame_map_name_to_regnum): When LEN is negative, use
 	NAME's length.

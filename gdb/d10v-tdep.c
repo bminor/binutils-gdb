@@ -1552,27 +1552,24 @@ d10v_frame_pop (struct frame_info *fi, void **unwind_cache,
   /* now update the current registers with the old values */
   for (regnum = A0_REGNUM; regnum < A0_REGNUM + NR_A_REGS; regnum++)
     {
-      if (info->saved_regs[regnum])
-	{
-	  read_memory (info->saved_regs[regnum], raw_buffer, REGISTER_RAW_SIZE (regnum));
-	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), raw_buffer,
-					   REGISTER_RAW_SIZE (regnum));
-	}
+      frame_unwind_register (fi, regnum, raw_buffer);
+      regcache_cooked_write (regcache, regnum, raw_buffer);
     }
   for (regnum = 0; regnum < SP_REGNUM; regnum++)
     {
-      if (info->saved_regs[regnum])
-	{
-	  write_register (regnum, read_memory_unsigned_integer (info->saved_regs[regnum], REGISTER_RAW_SIZE (regnum)));
-	}
+      frame_unwind_register (fi, regnum, raw_buffer);
+      regcache_cooked_write (regcache, regnum, raw_buffer);
     }
-  if (info->saved_regs[PSW_REGNUM])
-    {
-      write_register (PSW_REGNUM, read_memory_unsigned_integer (info->saved_regs[PSW_REGNUM], REGISTER_RAW_SIZE (PSW_REGNUM)));
-    }
+  frame_unwind_register (fi, PSW_REGNUM, raw_buffer);
+  regcache_cooked_write (regcache, PSW_REGNUM, raw_buffer);
 
-  write_register (PC_REGNUM, read_register (LR_REGNUM));
-  write_register (SP_REGNUM, fp + info->size);
+  frame_unwind_register (fi, LR_REGNUM, raw_buffer);
+  regcache_cooked_write (regcache, PC_REGNUM, raw_buffer);
+
+  store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (SP_REGNUM),
+			  fp + info->size);
+  regcache_cooked_write (regcache, SP_REGNUM, raw_buffer);
+
   target_store_registers (-1);
   flush_cached_frames ();
 }
