@@ -1,5 +1,8 @@
 Sun Feb 13 14:30:00 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.h (som_symbol_data): Safely access backend private data
+	for BFD symbols.  All callers changed.
+
 	* som.c (som_bfd_count_ar_symbols): New helper function.
 	(som_bfd_fill_in_ar_symbols): New helper function.
 	(som_slurp_armap): New function to read a SOM LST.

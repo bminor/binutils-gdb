@@ -2016,12 +2016,12 @@ compare_syms (sym1, sym2)
   if ((*sym1)->flags & BSF_SECTION_SYM)
     count1 = (int)(*sym1)->udata;
   else
-    count1 = (*som_symbol_data ((*sym1)))->reloc_count;
+    count1 = som_symbol_data (*sym1)->reloc_count;
 
   if ((*sym2)->flags & BSF_SECTION_SYM)
     count2 = (int)(*sym2)->udata;
   else
-    count2 = (*som_symbol_data ((*sym2)))->reloc_count;
+    count2 = som_symbol_data (*sym2)->reloc_count;
 
   /* Return the appropriate value.  */
   if (count1 < count2)
@@ -2063,7 +2063,7 @@ som_prep_for_fixups (abfd, syms, num_syms)
 	  syms[i]->udata = (PTR) 0;
 	}
       else
-	(*som_symbol_data (syms[i]))->reloc_count = 0;
+	som_symbol_data (syms[i])->reloc_count = 0;
     }
 
   /* Now that the counters are initialized, make a weighted count
@@ -2107,7 +2107,7 @@ som_prep_for_fixups (abfd, syms, num_syms)
 	    }
 
 	  /* A normal symbol.  Increment the count.  */
-	  (*som_symbol_data ((*reloc->sym_ptr_ptr)))->reloc_count += scale;
+	  som_symbol_data (*reloc->sym_ptr_ptr)->reloc_count += scale;
 	}
     }
 
@@ -2123,7 +2123,7 @@ som_prep_for_fixups (abfd, syms, num_syms)
       if (syms[i]->flags & BSF_SECTION_SYM)
 	syms[i]->udata = (PTR) i;
       else
-        (*som_symbol_data (syms[i]))->index = i;
+        som_symbol_data (syms[i])->index = i;
     }
 }
 
@@ -2218,7 +2218,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	      if ((*bfd_reloc->sym_ptr_ptr)->flags & BSF_SECTION_SYM)
 		sym_num = (int) (*bfd_reloc->sym_ptr_ptr)->udata;
 	      else
-		sym_num = (*som_symbol_data ((*bfd_reloc->sym_ptr_ptr)))->index;
+		sym_num = som_symbol_data (*bfd_reloc->sym_ptr_ptr)->index;
 	      
 	      /* If there is not enough room for the next couple relocations,
 		 then dump the current buffer contents now.  Also reinitialize
@@ -2343,7 +2343,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_ENTRY:
 		  {
 		    int *descp
-		       = (int *) (*som_symbol_data ((*bfd_reloc->sym_ptr_ptr)))->unwind;
+		       = (int *) som_symbol_data (*bfd_reloc->sym_ptr_ptr)->unwind;
 		    bfd_put_8 (abfd, R_ENTRY, p);
 		    bfd_put_32 (abfd, descp[0], p + 1);
 		    bfd_put_32 (abfd, descp[1], p + 5);
@@ -3132,7 +3132,7 @@ som_build_and_write_symbol_table (abfd)
 	     locally.  If BSF_FUNCTION is set for this symbol, then
 	     assign it type ST_CODE (the HP linker requires undefined
 	     external functions to have type ST_CODE rather than ST_ENTRY.  */
-	  else if (((*som_symbol_data (bfd_syms[i]))->som_type
+	  else if ((som_symbol_data (bfd_syms[i])->som_type
 		    == SYMBOL_TYPE_UNKNOWN)
 		   && (bfd_syms[i]->section == &bfd_und_section)
 		   && (bfd_syms[i]->flags & BSF_FUNCTION))
@@ -3141,46 +3141,46 @@ som_build_and_write_symbol_table (abfd)
 	  /* Handle function symbols which were defined in this file.
 	     They should have type ST_ENTRY.  Also retrieve the argument
 	     relocation bits from the SOM backend information.  */
-	  else if (((*som_symbol_data (bfd_syms[i]))->som_type
+	  else if ((som_symbol_data (bfd_syms[i])->som_type
 		    == SYMBOL_TYPE_ENTRY)
-		   || (((*som_symbol_data (bfd_syms[i]))->som_type
+		   || ((som_symbol_data (bfd_syms[i])->som_type
 			== SYMBOL_TYPE_CODE)
 		       && (bfd_syms[i]->flags & BSF_FUNCTION))
-		   || (((*som_symbol_data (bfd_syms[i]))->som_type
+		   || ((som_symbol_data (bfd_syms[i])->som_type
 			== SYMBOL_TYPE_UNKNOWN)
 		       && (bfd_syms[i]->flags & BSF_FUNCTION)))
 	    {
 	      som_symtab[i].symbol_type = ST_ENTRY;
 	      som_symtab[i].arg_reloc
-		= (*som_symbol_data (bfd_syms[i]))->tc_data.hppa_arg_reloc;
+		= som_symbol_data (bfd_syms[i])->tc_data.hppa_arg_reloc;
 	    }
 
 	  /* If the type is unknown at this point, it should be
 	     ST_DATA (functions were handled as special cases above).  */
-	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+	  else if (som_symbol_data (bfd_syms[i])->som_type
 		   == SYMBOL_TYPE_UNKNOWN)
 	    som_symtab[i].symbol_type = ST_DATA;
 
 	  /* From now on it's a very simple mapping.  */
-	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+	  else if (som_symbol_data (bfd_syms[i])->som_type
 		   == SYMBOL_TYPE_ABSOLUTE)
 	    som_symtab[i].symbol_type = ST_ABSOLUTE;
-	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+	  else if (som_symbol_data (bfd_syms[i])->som_type
 		   == SYMBOL_TYPE_CODE)
 	    som_symtab[i].symbol_type = ST_CODE;
-	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+	  else if (som_symbol_data (bfd_syms[i])->som_type
 		   == SYMBOL_TYPE_DATA)
 	    som_symtab[i].symbol_type = ST_DATA;
-	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+	  else if (som_symbol_data (bfd_syms[i])->som_type
 		   == SYMBOL_TYPE_MILLICODE)
 	    som_symtab[i].symbol_type = ST_MILLICODE;
-	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+	  else if (som_symbol_data (bfd_syms[i])->som_type
 		   == SYMBOL_TYPE_PLABEL)
 	    som_symtab[i].symbol_type = ST_PLABEL;
-	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+	  else if (som_symbol_data (bfd_syms[i])->som_type
 		   == SYMBOL_TYPE_PRI_PROG)
 	    som_symtab[i].symbol_type = ST_PRI_PROG;
-	  else if ((*som_symbol_data (bfd_syms[i]))->som_type
+	  else if (som_symbol_data (bfd_syms[i])->som_type
 		   == SYMBOL_TYPE_SEC_PROG)
 	    som_symtab[i].symbol_type = ST_SEC_PROG;
 	}
@@ -3991,7 +3991,7 @@ bfd_som_set_symbol_type (symbol, type)
      asymbol *symbol;
      unsigned int type;
 {
-  (*som_symbol_data (symbol))->som_type = type;
+  som_symbol_data (symbol)->som_type = type;
 }
 
 /* Attach 64bits of unwind information to a symbol (which hopefully
@@ -4003,7 +4003,7 @@ bfd_som_attach_unwind_info (symbol, unwind_desc)
      asymbol *symbol;
      char *unwind_desc;
 {
-  (*som_symbol_data (symbol))->unwind = unwind_desc;
+  som_symbol_data (symbol)->unwind = unwind_desc;
 }
 
 /* Attach an auxiliary header to the BFD backend so that it may be
