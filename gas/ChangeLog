@@ -1,3 +1,9 @@
+2003-01-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* doc/Makefile.am (as.1): Depend on "asconfig.texi gasver.texi
+	$(CPU_DOCS)".
+	* doc/Makefile.in: Regenerate.
+
 2002-12-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/as.texinfo (Invoking): Typo fix.
