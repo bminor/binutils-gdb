@@ -98,7 +98,7 @@ static void gdbtk_flush PARAMS ((FILE *));
 static void gdbtk_fputs PARAMS ((const char *, FILE *));
 static int gdbtk_query PARAMS ((const char *, va_list));
 static void gdbtk_warning PARAMS ((const char *, va_list));
-static void gdbtk_ignorable_warning PARAMS ((const char *));
+static void gdbtk_ignorable_warning PARAMS ((const char *, va_list));
 static char *gdbtk_readline PARAMS ((char *));
 static void gdbtk_init PARAMS ((char *));
 static void tk_command_loop PARAMS ((void));
@@ -118,6 +118,7 @@ static int gdb_force_quit PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_listfiles PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_listfuncs PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int call_wrapper PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int call_obj_wrapper PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []));
 static int gdb_cmd PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
 static int gdb_immediate_command PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
 static int gdb_fetch_registers PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
@@ -293,7 +294,7 @@ gdbtk_fputs (ptr, stream)
   in_fputs = 1;
 
   if (result_ptr)
-    Tcl_DStringAppend (result_ptr, (char *) ptr, -1);
+     Tcl_DStringAppend (result_ptr, (char *) ptr, -1);
   else if (error_string_ptr != NULL && stream == gdb_stderr)
     Tcl_DStringAppend (error_string_ptr, (char *) ptr, -1);
   else
@@ -324,13 +325,14 @@ gdbtk_warning (warning, args)
 }
 
 static void
-gdbtk_ignorable_warning (warning)
+gdbtk_ignorable_warning (warning, args)
      const char *warning;
+     va_list args;
 {
   char buf[200], *merge[2];
   char *command;
 
-  sprintf (buf, warning);
+  vsprintf (buf, warning, args);
   merge[0] = "gdbtk_tcl_ignorable_warning";
   merge[1] = buf;
   command = Tcl_Merge (2, merge);
@@ -1169,6 +1171,23 @@ wrapped_call (args)
   return 1;
 }
 
+struct wrapped_call_objs
+{
+  Tcl_Interp *interp;
+  Tcl_CmdProc *func;
+  int objc;
+  Tcl_Obj **objv;
+  int val;
+};
+
+static int
+wrapped_obj_call (args)
+     struct wrapped_call_objs *args;
+{
+  args->val = (*args->func) (args->func, args->interp, args->objc, args->objv);
+  return 1;
+}
+
 /* This routine acts as a top-level for all GDB code called by tcl/Tk.  It
    handles cleanups, and calls to return_to_top_level (usually via error).
    This is necessary in order to prevent a longjmp out of the bowels of Tk,
@@ -1240,6 +1259,93 @@ call_wrapper (clientData, interp, argc, argv)
       Tcl_AppendResult (interp, Tcl_DStringValue (&result),
 			Tcl_DStringValue (&error_string), (char *) NULL);
       Tcl_DStringFree (&result);
+      Tcl_DStringFree (&error_string);
+    }
+  
+  result_ptr = old_result_ptr;
+  error_string_ptr = old_error_string_ptr;
+
+#ifdef _WIN32
+  close_bfds ();
+#endif
+
+  return wrapped_args.val;
+}
+static int
+call_obj_wrapper (clientData, interp, objc, objv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int objc;
+     Tcl_Obj *CONST objv[];
+{
+  struct wrapped_call_objs wrapped_args;
+  Tcl_DString result, *old_result_ptr;
+  Tcl_DString error_string, *old_error_string_ptr;
+
+  /* The obj call wrapper works differently from the string wrapper, because
+   * the obj calls currently insert their results directly into the
+   * interpreter's result.  So there is no need to have a result_ptr...
+   * FIXME - rewrite all the object commands so they use a result_obj_ptr
+   *       - rewrite all the string commands to be object commands.
+   */
+  
+  Tcl_DStringInit (&result);
+  old_result_ptr = result_ptr;
+  result_ptr = &result;
+
+  Tcl_DStringInit (&error_string);
+
+  Tcl_DStringInit (&error_string);
+  old_error_string_ptr = error_string_ptr;
+  error_string_ptr = &error_string;
+
+  wrapped_args.func = (Tcl_CmdProc *)clientData;
+  wrapped_args.interp = interp;
+  wrapped_args.objc = objc;
+  wrapped_args.objv = objv;
+  wrapped_args.val = 0;
+
+  if (!catch_errors (wrapped_obj_call, &wrapped_args, "", RETURN_MASK_ALL))
+    {
+      wrapped_args.val = TCL_ERROR;	/* Flag an error for TCL */
+
+      /* Make sure the timer interrupts are turned off.  */
+      if (gdbtk_timer_going)
+        gdbtk_stop_timer ();
+
+      gdb_flush (gdb_stderr);	/* Flush error output */
+      gdb_flush (gdb_stdout);	/* Sometimes error output comes here as well */
+
+      /* In case of an error, we may need to force the GUI into idle
+	 mode because gdbtk_call_command may have bombed out while in
+	 the command routine.  */
+
+      running_now = 0;
+      Tcl_Eval (interp, "gdbtk_tcl_idle");
+    }
+  
+  /* do not suppress any errors -- a remote target could have errored */
+  load_in_progress = 0;
+
+  if (Tcl_DStringLength (&error_string) == 0)
+    {
+      /* We should insert the result here, but the obj commands now
+       * do this directly, so we don't need to.
+       * FIXME - ultimately, all this should be redone so that all the
+       * commands either manipulate the Tcl result directly, or use a result_ptr.
+       */
+      
+      Tcl_DStringFree (&error_string);
+    }
+  else if (*(Tcl_GetStringResult (interp)) == '\0')
+    {
+      Tcl_DStringResult (interp, &error_string);
+      Tcl_DStringFree (&error_string);
+    }
+  else
+    {
+      Tcl_AppendToObj(Tcl_GetObjResult(interp), Tcl_DStringValue (&error_string),
+			    Tcl_DStringLength (&error_string));
       Tcl_DStringFree (&error_string);
     }
   
@@ -1899,13 +2005,27 @@ gdbtk_call_command (cmdblk, arg, from_tty)
   running_now = 0;
   if (cmdblk->class == class_run || cmdblk->class == class_trace)
     {
-      running_now = 1;
-      if (!No_Update)
-        Tcl_Eval (interp, "gdbtk_tcl_busy");
-      (*cmdblk->function.cfunc)(arg, from_tty);
-      running_now = 0;
-      if (!No_Update)
-        Tcl_Eval (interp, "gdbtk_tcl_idle");
+
+/* HACK! HACK! This is to get the gui to update the tstart/tstop
+   button only incase of tstart/tstop commands issued from the console
+   We don't want to update the src window, s we need to have specific
+   procedures to do tstart and tstop
+*/
+      if (!strcmp(cmdblk->name, "tstart") && !No_Update)
+              Tcl_Eval (interp, "gdbtk_tcl_tstart"); 
+      else if (!strcmp(cmdblk->name, "tstop") && !No_Update) 
+              Tcl_Eval (interp, "gdbtk_tcl_tstop"); 
+/* end of hack */
+           else 
+             {
+                 running_now = 1;
+                 if (!No_Update)
+                   Tcl_Eval (interp, "gdbtk_tcl_busy");
+                 (*cmdblk->function.cfunc)(arg, from_tty);
+                 running_now = 0;
+                 if (!No_Update)
+                   Tcl_Eval (interp, "gdbtk_tcl_idle");
+             }
     }
   else
     (*cmdblk->function.cfunc)(arg, from_tty);
@@ -2110,7 +2230,7 @@ gdbtk_init ( argv0 )
                      gdb_immediate_command, NULL);
   Tcl_CreateCommand (interp, "gdb_loc", call_wrapper, gdb_loc, NULL);
   Tcl_CreateCommand (interp, "gdb_path_conv", call_wrapper, gdb_path_conv, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_listfiles", gdb_listfiles, NULL, NULL);
+  Tcl_CreateObjCommand (interp, "gdb_listfiles", call_obj_wrapper, gdb_listfiles, NULL);
   Tcl_CreateCommand (interp, "gdb_listfuncs", call_wrapper, gdb_listfuncs,
 		     NULL);
   Tcl_CreateCommand (interp, "gdb_get_mem", call_wrapper, gdb_get_mem,
@@ -2140,32 +2260,32 @@ gdbtk_init ( argv0 )
   Tcl_CreateCommand (interp, "gdb_is_tracing",
                      gdb_trace_status,
                      NULL, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_load_info", gdb_load_info, NULL, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_locals", gdb_get_vars_command, 
-                        (ClientData) 0, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_args", gdb_get_vars_command,
-                        (ClientData) 1, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_function", gdb_get_function_command,
-                        NULL, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_line", gdb_get_line_command,
-                        NULL, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_file", gdb_get_file_command,
-                        NULL, NULL);
+  Tcl_CreateObjCommand (interp, "gdb_load_info", call_obj_wrapper, gdb_load_info, NULL);
+  Tcl_CreateObjCommand (interp, "gdb_get_locals", call_obj_wrapper, gdb_get_vars_command, 
+                         NULL);
+  Tcl_CreateObjCommand (interp, "gdb_get_args", call_obj_wrapper, gdb_get_vars_command,
+                         NULL);
+  Tcl_CreateObjCommand (interp, "gdb_get_function", call_obj_wrapper, gdb_get_function_command,
+                         NULL);
+  Tcl_CreateObjCommand (interp, "gdb_get_line", call_obj_wrapper, gdb_get_line_command,
+                         NULL);
+  Tcl_CreateObjCommand (interp, "gdb_get_file", call_obj_wrapper, gdb_get_file_command,
+                         NULL);
   Tcl_CreateObjCommand (interp, "gdb_tracepoint_exists",
-                        gdb_tracepoint_exists_command, NULL, NULL);
+                        call_obj_wrapper, gdb_tracepoint_exists_command,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_get_tracepoint_info",
-                        gdb_get_tracepoint_info, NULL, NULL);
+                        call_obj_wrapper, gdb_get_tracepoint_info,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_actions",
-                        gdb_actions_command, NULL, NULL);
+                        call_obj_wrapper, gdb_actions_command,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_prompt",
-                        gdb_prompt_command, NULL, NULL);
+                        call_obj_wrapper, gdb_prompt_command,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_find_file",
-                        gdb_find_file_command, NULL, NULL);
+                        call_obj_wrapper, gdb_find_file_command,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_get_tracepoint_list",
-                        gdb_get_tracepoint_list, NULL, NULL);  
+                        call_obj_wrapper, gdb_get_tracepoint_list,  NULL);  
   Tcl_CreateCommand (interp, "gdb_pc_reg", get_pc_register, NULL, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_loadfile", gdb_loadfile, NULL, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_set_bp", gdb_set_bp, NULL, NULL);
+  Tcl_CreateObjCommand (interp, "gdb_loadfile", call_obj_wrapper, gdb_loadfile,  NULL);
+  Tcl_CreateObjCommand (interp, "gdb_set_bp", call_obj_wrapper, gdb_set_bp,  NULL);
 
   command_loop_hook = tk_command_loop;
   print_frame_info_listing_hook = gdbtk_print_frame_info;
@@ -2410,6 +2530,36 @@ gdbtk_load_hash (section, num)
   sprintf (buf, "download_hash %s %ld", section, num);
   Tcl_Eval (interp, buf); 
   return  atoi (interp->result);
+}
+
+/* gdb_get_locals -
+ * This and gdb_get_locals just call gdb_get_vars_command with the right
+ * value of clientData.  We can't use the client data in the definition
+ * of the command, because the call wrapper uses this instead...
+ */
+
+static int
+gdb_get_locals (clientData, interp, objc, objv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int objc;
+     Tcl_Obj *CONST objv[];
+{
+
+  return gdb_get_vars_command((ClientData) 0, interp, objc, objv);
+
+}
+
+static int
+gdb_get_args (clientData, interp, objc, objv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int objc;
+     Tcl_Obj *CONST objv[];
+{
+
+  return gdb_get_vars_command((ClientData) 1, interp, objc, objv);
+
 }
 
 /* gdb_get_vars_command -
@@ -3106,7 +3256,7 @@ gdb_loadfile (clientData, interp, objc, objv)
       mtime = bfd_get_mtime(exec_bfd);
  
   if (mtime && mtime < st.st_mtime)
-     gdbtk_ignorable_warning("Source file is more recent than executable.\n");
+     gdbtk_ignorable_warning("Source file is more recent than executable.\n", (va_list)0);
 
 
   /* Source linenumbers don't appear to be in order, and a sort is */
@@ -3302,31 +3452,4 @@ _initialize_gdbtk ()
 
       init_ui_hook = gdbtk_init;
     }
-#ifdef __CYGWIN32__
-  else
-    {
-      DWORD ft = GetFileType (GetStdHandle (STD_INPUT_HANDLE));
-      void cygwin32_attach_handle_to_fd (char *, int, HANDLE, int, int);
-
-      switch (ft)
-	{
-	  case FILE_TYPE_DISK:
-	  case FILE_TYPE_CHAR:
-	  case FILE_TYPE_PIPE:
-	    break;
-	  default:
-	    AllocConsole();
-	    cygwin32_attach_handle_to_fd ("/dev/conin", 0,
-					  GetStdHandle (STD_INPUT_HANDLE),
-					  1, GENERIC_READ);
-	    cygwin32_attach_handle_to_fd ("/dev/conout", 1,
-					  GetStdHandle (STD_OUTPUT_HANDLE),
-					  0, GENERIC_WRITE);
-	    cygwin32_attach_handle_to_fd ("/dev/conout", 2,
-					  GetStdHandle (STD_ERROR_HANDLE),
-					  0, GENERIC_WRITE);
-	    break;
-	}
-    }
-#endif
 }

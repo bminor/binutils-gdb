@@ -1,3 +1,45 @@
+Tue May 12 12:03:16 1998  James Ingham  <jingham@leda.cygnus.com>
+
+	* gdbtk.c: Add an object call wrapper for the new Tcl_Obj based
+	commands.  This way the obj commands will also go through
+	catch_errors.  This is just a bandaid while I rewrite the
+	string-based commands to use the object format.
+
+Thu May  7 14:49:38 1998  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/sparc/tm-sp64.h (CALL_DUMMY): Store and retrieve
+	%o0-%o5 as 64-bit values; compensate for stack bias.
+	(USE_STRUCT_CONVENTION): We only pass pointers to structs
+	if they're larger than 32 bytes.
+	(REG_STRUCT_HAS_ADDR): Ditto.
+
+	* sparc-tdep.c (sparc_init_extra_frame_info): Use read_sp()
+ 	instead of read_register. If the target is a sparc64 and the frame
+ 	pointer is odd, compensate for the stack bias.
+	(get_saved_register): Use read_sp().
+	(DUMMY_STACK_REG_BUF_SIZE): Use FP_REGISTER_BYTES.
+	(sparc_push_dummy_frame): Use read_sp()/write_sp(). On sparc64,
+ 	save the PC, NPC, CCR, FSR, FPRS, Y and ASI registers.
+	(sparc_frame_find_saved_regs): Use read_sp(). Read the PC, NPC,
+ 	CCR, FSR, FPRS, Y and ASI registers from the frame, if it's a
+ 	dummy frame.
+	(sparc_pop_frame): Use write_sp(). If the target is a sparc64 and
+ 	the FP is odd, compensate for stack bias.
+	(sparc_store_return_value): Right-justify the return value before
+ 	writing it to %o0.
+	(sparc_fix_call_dummy): Don't NOP out part of the call dummy on
+ 	sparc64.
+	(sparc64_read_sp, sparc64_read_fp, sparc64_write_sp,
+ 	sparc64_write_fp, sp64_push_arguments,
+ 	sparc64_extract_return_value): New functions to support the
+ 	sparc64 ABI.
+
+	* dwarfread.c (handle_producer): Set processing_gcc_compilation to
+ 	the right version number.
+
+	* dwarf2read.c (read_file_scope): Assume we're processing
+	GCC2 output.
+
 Wed May  6 16:34:03 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* somsolib.c: Include gdb_stat.h.
