@@ -165,25 +165,21 @@ fi
 
 if (echo $0 | grep '^/' > /dev/null) ; then
 	progname=$0
-	configsub=`echo $0 | sed -e 's:[^/]*$:config.sub:'`
 else
 	if (echo $0 | grep '/' > /dev/null) ; then
 		progname=`pwd`/$0
-
-		if [ ! -f config.sub ] ; then
-			echo '***' can not find config.sub.
-			echo 1
-		fi
-
-		configsub=`pwd`/config.sub
 	else
 		progname=$0
-		configsub="config.sub"
 		PATH=$PATH:`pwd` ; export PATH
 	fi
 fi
 
-echo configure = ${progname}, config.sub = ${configsub}
+configsub=`echo ${progname} | sed 's/configure\$/config.sub/'`
+
+if [ ! -f ${configsub} ] ; then
+	echo '***' cannot find config.sub.
+	echo 1
+fi
 
 # process host and target only if not removing.
 if [ -z "${removing}" -a -z "${fatal}" ] ; then
@@ -487,7 +483,7 @@ for host in ${hosts} ; do
 
 				if [ -f ${srcdir}/${site_makefile_frag} ] ; then
 					(echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" ; 
-						sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" ${Makefile}) > Makefile.tem
+						sed -e "/^####/  r ${srcdir}/${site_makefile_frag}" ${Makefile}) > Makefile.tem
 					mv Makefile.tem ${Makefile}
 				fi
 			fi
@@ -622,7 +618,13 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.49  1991/10/04 22:52:09  rich
+# Revision 1.51  1991/10/08 06:07:58  wilson
+# Fix bug in smake- file code.
+#
+# Revision 1.50  1991/10/04  23:49:37  rich
+# Per's patch for my config.sub botch.
+#
+# Revision 1.49  1991/10/04  22:52:09  rich
 # Use john's heuristic for finding ourselves.  kinda like hare krishna.
 #
 # Revision 1.48  1991/10/02  13:17:28  rich
