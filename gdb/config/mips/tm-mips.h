@@ -447,7 +447,8 @@ extern void mips_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_LOCATION AT_ENTRY_POINT
 
-#define CALL_DUMMY_ADDRESS() (entry_point_address ())
+#define CALL_DUMMY_ADDRESS() (mips_call_dummy_address ())
+extern CORE_ADDR mips_call_dummy_address PARAMS ((void));
 
 /* There's a mess in stack frame creation.  See comments in blockframe.c
    near reference to INIT_FRAME_PC_FIRST.  */
