@@ -1,3 +1,22 @@
+2002-12-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.h (get_frame_id): Convert to a function.
+	(null_frame_id, frame_id_p): Declare.
+	(frame_id_eq, frame_id_inner): Declare.
+	(frame_id_build): New function.
+	* frame.c (get_frame_id): Update.  Use null_frame_id.
+	(frame_find_by_id): Rewrite using frame_id_p, frame_id_eq and
+	frame_id_inner.
+	(null_frame_id, frame_id_p): Define.
+	(frame_id_eq, frame_id_inner): Define.
+	(frame_id_build): New function.
+	* varobj.c (varobj_create): Update.
+	(varobj_update): Update.
+	* valops.c (value_assign): Update.
+	(new_root_variable): Update.
+	* infrun.c (save_inferior_status): Update.
+	* breakpoint.c (watch_command_1): Update.
+
 2002-12-03  J. Brobecker  <brobecker@gnat.com>
 
 	* config/pa/tm-hppah.h (SNAP1): Remove unused macro.

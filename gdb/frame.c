@@ -35,22 +35,62 @@
 #include "annotate.h"
 #include "language.h"
 
-/* Return a frame uniq ID that can be used to, later re-find the
+/* Return a frame uniq ID that can be used to, later, re-find the
    frame.  */
 
-void
-get_frame_id (struct frame_info *fi, struct frame_id *id)
+struct frame_id
+get_frame_id (struct frame_info *fi)
 {
   if (fi == NULL)
     {
-      id->base = 0;
-      id->pc = 0;
+      return null_frame_id;
     }
   else
     {
-      id->base = fi->frame;
-      id->pc = fi->pc;
+      struct frame_id id;
+      id.base = fi->frame;
+      id.pc = fi->pc;
+      return id;
     }
+}
+
+const struct frame_id null_frame_id; /* All zeros.  */
+
+struct frame_id
+frame_id_build (CORE_ADDR base, CORE_ADDR func_or_pc)
+{
+  struct frame_id id;
+  id.base = base;
+  id.pc = func_or_pc;
+  return id;
+}
+
+int
+frame_id_p (struct frame_id l)
+{
+  /* The .func can be NULL but the .base cannot.  */
+  return (l.base != 0);
+}
+
+int
+frame_id_eq (struct frame_id l, struct frame_id r)
+{
+  /* If .base is different, the frames are different.  */
+  if (l.base != r.base)
+    return 0;
+  /* Add a test to check that the frame ID's are for the same function
+     here.  */
+  return 1;
+}
+
+int
+frame_id_inner (struct frame_id l, struct frame_id r)
+{
+  /* Only return non-zero when strictly inner than.  Note that, per
+     comment in "frame.h", there is some fuzz here.  Frameless
+     functions are not strictly inner than (same .base but different
+     .func).  */
+  return INNER_THAN (l.base, r.base);
 }
 
 struct frame_info *
@@ -60,29 +100,24 @@ frame_find_by_id (struct frame_id id)
 
   /* ZERO denotes the null frame, let the caller decide what to do
      about it.  Should it instead return get_current_frame()?  */
-  if (id.base == 0 && id.pc == 0)
+  if (!frame_id_p (id))
     return NULL;
 
   for (frame = get_current_frame ();
        frame != NULL;
        frame = get_prev_frame (frame))
     {
-      struct frame_id this;
-      get_frame_id (frame, &this);
-      if (INNER_THAN (this.base, id.base))
-	/* ``inner/current < frame < id.base''.  Keep looking along
-           the frame chain.  */
-	continue;
-      if (INNER_THAN (id.base, this.base))
-	/* ``inner/current < id.base < frame''.  Oops, gone past it.
-           Just give up.  */
+      struct frame_id this = get_frame_id (frame);
+      if (frame_id_eq (id, this))
+	/* An exact match.  */
+	return frame;
+      if (frame_id_inner (id, this))
+	/* Gone to far.  */
 	return NULL;
-      /* FIXME: cagney/2002-04-21: This isn't sufficient.  It should
-	 use id.pc / this.pc to check that the two frames belong to
-	 the same function.  Otherwise we'll do things like match
-	 dummy frames or mis-match frameless functions.  However,
-	 until someone notices, stick with the existing behavour.  */
-      return frame;
+      /* Either, we're not yet gone far enough out along the frame
+         chain (inner(this,id), or we're comparing frameless functions
+         (same .base, different .func, no test available).  Struggle
+         on until we've definitly gone to far.  */
     }
   return NULL;
 }

@@ -487,7 +487,7 @@ varobj_create (char *objname,
          Since select_frame is so benign, just call it for all cases. */
       if (fi != NULL)
 	{
-	  get_frame_id (fi, &var->root->frame);
+	  var->root->frame = get_frame_id (fi);
 	  old_fi = deprecated_selected_frame;
 	  select_frame (fi);
 	}
@@ -898,7 +898,7 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
 
   /* Save the selected stack frame, since we will need to change it
      in order to evaluate expressions. */
-  get_frame_id (deprecated_selected_frame, &old_fid);
+  old_fid = get_frame_id (deprecated_selected_frame);
 
   /* Update the root variable. value_of_root can return NULL
      if the variable is no longer around, i.e. we stepped out of
@@ -1344,8 +1344,7 @@ new_root_variable (void)
   var->root->lang = NULL;
   var->root->exp = NULL;
   var->root->valid_block = NULL;
-  var->root->frame.base = 0;
-  var->root->frame.pc = 0;
+  var->root->frame = null_frame_id;
   var->root->use_selected_frame = 0;
   var->root->rootvar = NULL;
 

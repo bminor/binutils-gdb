@@ -5400,7 +5400,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   if (frame)
     {
       prev_frame = get_prev_frame (frame);
-      get_frame_id (frame, &b->watchpoint_frame);
+      b->watchpoint_frame = get_frame_id (frame);
     }
   else
     {

@@ -31,8 +31,8 @@ struct frame_info;
 
 /* The frame object's ID.  This provides a per-frame unique identifier
    that can be used to relocate a `struct frame_info' after a target
-   resume or a frame cache destruct (assuming the target hasn't
-   unwound the stack past that frame - a problem handled elsewhere).  */
+   resume or a frame cache destruct.  It of course assumes that the
+   inferior hasn't unwound the stack past that frame.  */
 
 struct frame_id
 {
@@ -46,6 +46,38 @@ struct frame_id
      instead be the frame's function?  */
   CORE_ADDR pc;
 };
+
+/* Methods for constructing and comparing Frame IDs.
+
+   NOTE: Given frameless functions A and B, where A calls B (and hence
+   B is inner-to A).  The relationships: !eq(A,B); !eq(B,A);
+   !inner(A,B); !inner(B,A); all hold.  This is because, while B is
+   inner to A, B is not strictly inner to A (being frameless, they
+   have the same .base value).  */
+
+/* For convenience.  All fields are zero.  */
+extern const struct frame_id null_frame_id;
+
+/* Construct a frame ID.  The second parameter isn't yet well defined.
+   It might be the containing function, or the resume PC (see comment
+   above in `struct frame_id')?  A func/pc of zero indicates a
+   wildcard (i.e., do not use func in frame ID comparisons).  */
+extern struct frame_id frame_id_build (CORE_ADDR base,
+				       CORE_ADDR func_or_pc);
+
+/* Returns non-zero when L is a valid frame (a valid frame has a
+   non-zero .base).  */
+extern int frame_id_p (struct frame_id l);
+
+/* Returns non-zero when L and R identify the same frame, or, if
+   either L or R have a zero .func, then the same frame base.  */
+extern int frame_id_eq (struct frame_id l, struct frame_id r);
+
+/* Returns non-zero when L is strictly inner-than R (they have
+   different frame .bases).  Neither L, nor R can be `null'.  See note
+   above about frameless functions.  */
+extern int frame_id_inner (struct frame_id l, struct frame_id r);
+
 
 /* For every stopped thread, GDB tracks two frames: current and
    selected.  Current frame is the inner most frame of the selected
@@ -176,8 +208,9 @@ extern void find_frame_sal (struct frame_info *frame,
 extern CORE_ADDR get_frame_base (struct frame_info *);
 
 /* Return the per-frame unique identifer.  Can be used to relocate a
-   frame after a frame cache flush (and other similar operations).  */
-extern void get_frame_id (struct frame_info *fi, struct frame_id *id);
+   frame after a frame cache flush (and other similar operations).  If
+   FI is NULL, return the null_frame_id.  */
+extern struct frame_id get_frame_id (struct frame_info *fi);
 
 /* The frame's level: 0 for innermost, 1 for its caller, ...; or -1
    for an invalid frame).  */

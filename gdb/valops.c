@@ -649,7 +649,7 @@ value_assign (struct value *toval, struct value *fromval)
 	/* Since modifying a register can trash the frame chain, we
            save the old frame and then restore the new frame
            afterwards.  */
-	get_frame_id (deprecated_selected_frame, &old_frame);
+	old_frame = get_frame_id (deprecated_selected_frame);
 
 	/* Figure out which frame this is in currently.  */
 	if (VALUE_LVAL (toval) == lval_register)
