@@ -155,7 +155,9 @@ struct internal_lineno {
 #endif
 };
 
+
 /********************** SYMBOLS **********************/
+
 struct internal_syment {
 	union {
 		char	_n_name[SYMNMLEN];	/* old COFF version	*/
@@ -176,10 +178,9 @@ struct internal_syment {
 	char		n_numaux;	/* number of aux. entries	*/
 };
 
-/*
- * Relocatable symbols have number of the section in which they are defined,
- * or one of the following:
- */
+/* Relocatable symbols have number of the section in which they are defined,
+   or one of the following: */
+
 #define N_UNDEF	((short)0)  /* undefined symbol */
 #define N_ABS	((short)-1) /* value of symbol is absolute */
 #define N_DEBUG	((short)-2) /* debugging symbol -- value is meaningless */

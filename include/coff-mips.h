@@ -69,3 +69,26 @@ struct external_scnhdr {
 #define DEFAULT_TEXT_SECTION_ALIGNMENT 16
 /* For new sections we havn't heard of before */
 #define DEFAULT_SECTION_ALIGNMENT 4
+
+/********************** RELOCATION DIRECTIVES **********************/
+
+struct external_reloc {
+  char r_vaddr[4];
+  char r_symndx[4];
+  char r_type[2];
+  char pad[2];
+};
+
+
+/* Relevent values for r_type and ecoff.  Would someone please document them */
+
+#define RELOC struct external_reloc
+#define RELSZ 12
+
+/* These definitions are not used in ecoff, but they make it possible
+   for ecoff to use the same "internalcoff.h" as other coff implementations. */
+
+#define SYMNMLEN	8	/* # characters in a symbol name	*/
+#define FILNMLEN	14	/* # characters in a file name		*/
+#define DIMNUM		4	/* # array dimensions in auxiliary entry */
+
