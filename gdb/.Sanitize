@@ -189,6 +189,7 @@ gdba.el
 gdbcmd.h
 gdbcore.h
 gdbserver
+gdbthread.h
 gdbtypes.c
 gdbtypes.h
 gnu-nat.c
@@ -369,7 +370,6 @@ target.h
 terminal.h
 testsuite
 thread.c
-thread.h
 top.c
 top.h
 typeprint.c

@@ -428,7 +428,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	nindy-share/env.h nindy-share/stop.h \
 	vx-share/dbgRpcLib.h vx-share/ptrace.h vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/wait.h vx-share/xdr_ld.h \
-	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h thread.h \
+	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h gdbthread.h \
 	dcache.h remote-utils.h remote-sim.h top.h somsolib.h
 
 # Header files that already have srcdir in them, or which are in objdir.
@@ -1013,7 +1013,7 @@ blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	objfiles.h symfile.h target.h
 
 breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) language.h target.h thread.h gdb_string.h
+	$(inferior_h) language.h target.h gdbthread.h gdb_string.h
 
 buildsym.o: buildsym.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	objfiles.h symfile.h $(symtab_h) gdb_string.h
@@ -1084,7 +1084,7 @@ corefile.o: corefile.c $(dis-asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) target.h language.h gdb_string.h
 
 corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	target.h thread.h gdb_string.h
+	target.h gdbthread.h gdb_string.h
 
 cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h
@@ -1127,7 +1127,7 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 	gdb_string.h
 
 fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) target.h terminal.h thread.h gdb_string.h
+	$(inferior_h) target.h terminal.h gdbthread.h gdb_string.h
 
 # start-sanitize-gdbtk
 gdbtk.o: gdbtk.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
@@ -1192,13 +1192,13 @@ infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) target.h language.h gdb_string.h
 
 inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
-	signals.h target.h terminal.h thread.h gdb_string.h
+	signals.h target.h terminal.h gdbthread.h gdb_string.h
 
 infptrace.o: infptrace.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 	gdb_string.h $(wait_h) $(command_h)
 
 infrun.o: infrun.c $(wait_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h thread.h gdb_string.h
+	$(inferior_h) target.h gdbthread.h gdb_string.h
 
 inftarg.o: inftarg.c $(wait_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h terminal.h $(command_h)
@@ -1494,7 +1494,7 @@ tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	objfiles.h symfile.h target.h gdb_string.h
 
-thread.o: thread.c $(defs_h) thread.h $(gdbcmd_h)
+thread.o: thread.c $(defs_h) gdbthread.h $(gdbcmd_h)
 
 top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \

@@ -20,8 +20,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifndef THREAD_H
-#define THREAD_H
+#ifndef GDBTHREAD_H
+#define GDBTHREAD_H
 
 extern void init_thread_list PARAMS ((void));
 
@@ -43,4 +43,4 @@ extern void save_infrun_state PARAMS ((int, CORE_ADDR, CORE_ADDR, char *,
 				       struct breakpoint *, CORE_ADDR,
 				       CORE_ADDR, CORE_ADDR, int, int));
 
-#endif	/* THREAD_H */
+#endif	/* GDBTHREAD_H */

@@ -1,3 +1,10 @@
+Thu May  9 14:13:08 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in, breakpoint.c, corelow.c, fork-child.c, inflow.c,
+	infrun.c, mac-nat.c, procfs.c, remote.c, sol-thread.c, thread.c,
+	win32-nat.c, config/nm-lynx.h:  Rename thread.h to gdbthread.h to
+	avoid conflict with Solaris /usr/include/thread.h.
+
 Thu May  9 12:33:32 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
 
 	* abug-rom.c: Config file for the older style ABug monitor that

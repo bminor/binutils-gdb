@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "target.h"
 #include "gdbcore.h"
-#include "thread.h"
+#include "gdbthread.h"
 
 /* List of all available core_fns.  On gdb startup, each core file register
    reader calls add_core_fns() to register information on each core format it

@@ -36,7 +36,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb_string.h"
-#include "thread.h"
+#include "gdbthread.h"
 #include "gdbcmd.h"
 #include <sys/param.h>
 

@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "wait.h"
 #include "gdbcore.h"
 #include "terminal.h"
-#include "thread.h"
+#include "gdbthread.h"
 
 #include <signal.h>
 #ifdef HAVE_UNISTD_H

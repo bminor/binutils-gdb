@@ -51,7 +51,7 @@ regardless of whether or not the actual target has floating point hardware.
 #include "target.h"
 #include "command.h"
 #include "gdbcore.h"
-#include "thread.h"
+#include "gdbthread.h"
 
 #define MAX_SYSCALLS	256	/* Maximum number of syscalls for table */
 

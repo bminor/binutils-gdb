@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "/usr/include/thread.h"
 #include <proc_service.h>
 #include <thread_db.h>
-#include "thread.h"
+#include "gdbthread.h"
 #include "target.h"
 #include "inferior.h"
 #include <fcntl.h>

@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "environ.h"
 #include "value.h"
 #include "target.h"
-#include "thread.h"
+#include "gdbthread.h"
 #include "command.h"
 #include "gdbcmd.h"
 
