@@ -90,7 +90,7 @@ proc is_endian_output_format { object_flags } {
 proc big_or_little_endian {} {
 
     if [board_info [target_info name] exists multilib_flags] {
-	set tmp_flags " [board_info [target_info name] multilib_flags]";
+	set tmp_flags " [board_info [target_info name] multilib_flags]"
 
 	foreach x $tmp_flags {
 	    case $x in {
@@ -235,7 +235,7 @@ proc default_ld_compile { cc source object } {
     }
 
     if [board_info [target_info name] exists multilib_flags] {
-	append flags " [board_info [target_info name] multilib_flags]";
+	append flags " [board_info [target_info name] multilib_flags]"
     }
 
     verbose -log "$cc $flags -c $source -o $object"

@@ -1,3 +1,9 @@
+2004-05-12  Ben Elliston  <bje@au.ibm.com>
+
+	* ld-sh/sh64/relax.exp: Remove stray semicolons.
+	* ld-sh/sh64/relfail.exp: Likewise.
+	* lib/ld-lib.exp: Likewise.
+
 2004-05-11  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-i386/tlspic.rd: Adjust for section reordering changes

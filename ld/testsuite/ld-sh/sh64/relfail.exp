@@ -150,10 +150,10 @@ proc run_sh64relfailtests {sh64relfailtests} {
 	}
 	
 	if {$as_options == ""} {
-	    set as_options $def_as_options;
+	    set as_options $def_as_options
 	}
 	if {$ld_options == ""} {
-	    set ld_options $def_ld_options;
+	    set ld_options $def_ld_options
 	}
 	
 	if { $is_unresolved } {
@@ -165,7 +165,7 @@ proc run_sh64relfailtests {sh64relfailtests} {
 	puts $asm " .text"
 	puts $asm " .global $startsym"
 	puts $asm "$startsym:"
-	puts $asm " $opcode";
+	puts $asm " $opcode"
 	close $asm
 	
 	if ![ld_assemble $as "$as_options tmpdir/relfail-$testindex.s" "tmpdir/relfail-$testindex.o"] {

@@ -116,7 +116,7 @@ proc run_sh64relaxtest {sh64relaxtests} {
 	    
 	    if {$expect_relaxed == -1} {
 		pass $testname
-		continue;
+		continue
 	    }
 	    
 	    verbose "$testname: file $binfile doesn't exist" 1
