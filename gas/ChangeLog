@@ -1,5 +1,15 @@
 Wed Oct 22 12:51:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sh.c (sh_small): New variable.
+	(OPTION_SMALL): Define.
+	(md_longopts): Add "small".
+	(md_parse_option): Handle OPTION_SMALL.
+	(md_show_usage): Mention -small.
+	* config/tc-sh.h (sh_small): Declare.
+	(SUB_SEGMENT_ALIGN): Handle sh_small.
+	* config/obj-coff.h (TARGET_FORMAT): Check sh_small in TC_SH
+	case.
+
 	* config/tc-mips.c (macro): Correct handling of constant in M_LI_D
 	case in little endian mode.
 
