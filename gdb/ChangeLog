@@ -1,3 +1,8 @@
+Tue Aug 18 18:03:42 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-rdi.c (arm_rdi_open): Pass serial device name to
+ 	Adp_OpenDevice, and include it in error reports.
+
 1998-08-18  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* configure.in: Add more header files to AC_CHECK_HEADERS.

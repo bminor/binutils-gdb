@@ -198,10 +198,10 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   /* Make the basic low-level connection.  */
 
-  rslt = Adp_OpenDevice (NULL, NULL, 1);
+  rslt = Adp_OpenDevice (name, NULL, 1);
 
   if (rslt != adp_ok)
-    error ("Could not open port");
+    error ("Could not open device \"%s\"", name);
 
   gdb_config.bytesex = 2 | (target_byte_order == BIG_ENDIAN ? 1 : 0);
   gdb_config.fpe = 1;
