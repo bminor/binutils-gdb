@@ -40,7 +40,6 @@
 /* Pull in function declarations refered to, indirectly, via macros.  */
 #include "value.h" /* For default_coerce_float_to_double which is referenced by a macro.  */
 #include "inferior.h"		/* For unsigned_address_to_pointer().  */
-#include "sim-regno.h"		/* For legacy_register_sim_regno().  */
 #endif
 
 struct frame_info;
