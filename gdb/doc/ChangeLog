@@ -1,3 +1,8 @@
+Thu Jul 29 15:10:58 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* remote.texi: (MIPS Remote) clearer doc for set/show timeout,
+	retransmit-timeout
+
 Thu Jul 29 13:16:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdbint.texinfo: Update statement about `some ancient Unix

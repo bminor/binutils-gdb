@@ -1189,20 +1189,28 @@ at any time with the command @samp{show remotedebug}.
 
 @cindex @code{timeout}, MIPS protocol
 @cindex @code{retransmit-timeout}, MIPS protocol
-The timeout used while waiting for a packet is controlled by the
-@code{timeout} variable.  The default is 5 seconds.  The timeout used
-while waiting for an acknowledgement of a packet is controlled by the
-@code{retransmit-timeout} variable.  The default is 3 seconds.
+@kindex set timeout
+@kindex show timeout
+@kindex set retransmit-timeout
+@kindex show retransmit-timeout
+You can control the timeout used while waiting for a packet, in the MIPS
+remote protocol, with the @code{set timeout @var{seconds}} command.  The
+default is 5 seconds.  Similarly, you can control the timeout used while
+waiting for an acknowledgement of a packet with the @code{set
+retransmit-timeout @var{seconds}} command.  The default is 3 seconds.
+You can inspect both values with @code{show timeout} and @code{show
+retransmit-timeout}.  (These commands are @emph{only} available when
+@value{GDBN} is configured for @samp{--target=mips-idt-ecoff}.)
 
 @kindex set mipsfpu off
 @cindex MIPS remote floating point
 @cindex floating point, MIPS remote
 If your target board does not support the MIPS floating point
-coprocessor, you should use the command @samp{set mipsfpu off} (you may
-wish to put this in your @value{GDBINIT} file).  This will tell
-@value{GDBN} how to find the return value of functions which return
-floating point values, and tell it to call functions on the board
-without saving the floating point registers.
+coprocessor, use the command @samp{set mipsfpu off} (you may wish to put
+this in your @value{GDBINIT} file).  This will tell @value{GDBN} how to
+find the return value of functions which return floating point values,
+and tell it to call functions on the board without saving the floating
+point registers.
 @end ifset
 
 @ifset SIMS
