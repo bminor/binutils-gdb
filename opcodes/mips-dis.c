@@ -376,12 +376,12 @@ mips_isa_type (mach, isa, cputype)
       *isa = ISA_MIPS64 | INSN_SB1;
       break;
     case bfd_mach_mipsisa32:
-      * cputype = CPU_MIPS32;
-      * isa = ISA_MIPS32;
+      *cputype = CPU_MIPS32;
+      *isa = ISA_MIPS32;
       break;
     case bfd_mach_mipsisa64:
-      * cputype = CPU_MIPS64;
-      * isa = ISA_MIPS64;
+      *cputype = CPU_MIPS64;
+      *isa = ISA_MIPS64;
       break;
 
     default:

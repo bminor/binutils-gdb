@@ -1,3 +1,8 @@
+2002-03-14  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (mips_isa_type): Fix formatting of bfd_mach_mipsisa32
+	and bfd_mach_mipsisa64 cases to match the rest.
+
 2002-03-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/fr.po: Updated version.
