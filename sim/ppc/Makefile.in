@@ -147,7 +147,7 @@ MAKEOVERRIDES=
 
 LIB_INCLUDES	= -I$(srcdir)/../../include
 BFD_INCLUDES	= -I../../bfd -I$(srcdir)/../../bfd
-GDB_INCLUDES	= -I../../gdb -I$(srcdir)/../../gdb  -I$(srcdir)/../../gdb/config -I$(srcdir)/../../mmalloc
+GDB_INCLUDES	= -I../../gdb -I$(srcdir)/../../gdb  -I$(srcdir)/../../gdb/config
 
 INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES)
 
