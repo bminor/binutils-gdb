@@ -1,3 +1,8 @@
+Mon Oct 18 18:11:10 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
+
+	* tc_d10v.c (find_opcode): Allow ATSIGN to match expressions of the
+	form @abs16, @(abs16) and @(abs16 + imm).
+
 1999-10-21  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* config/tc-mips.c (ISA_HAS_COPROC_DELAYS) : New.

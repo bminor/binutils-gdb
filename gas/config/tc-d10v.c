@@ -1314,7 +1314,7 @@ find_opcode (opcode, myops)
 		  ((flags & OPERAND_PLUS)    && ((X_op != O_absent) || (num != OPERAND_PLUS))) ||
 		  ((flags & OPERAND_ATMINUS) && ((X_op != O_absent) || (num != OPERAND_ATMINUS))) ||
 		  ((flags & OPERAND_ATPAR)   && ((X_op != O_absent) || (num != OPERAND_ATPAR))) ||
-		  ((flags & OPERAND_ATSIGN)  && ((X_op != O_absent) || (num != OPERAND_ATSIGN))))
+		  ((flags & OPERAND_ATSIGN)  && ((X_op != O_absent) || ((num != OPERAND_ATSIGN) && (num != OPERAND_ATPAR)))))
 		{
 		  match = 0;
 		  break;
