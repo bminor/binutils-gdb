@@ -64,7 +64,8 @@ target_tools="groff"
 # directories to be built in the native environment only
 #
 native_only="autoconf cvs diff emacs fileutils find grep groff gzip hello indent
-             ispell m4 rcs recode sed shellutils tar textutils tk uudecode wdiff"
+             ispell m4 rcs recode sed shellutils tar textutils tk uudecode wdiff
+	     gprof"
 
 # directories to be built in a cross environment only
 #
@@ -186,7 +187,13 @@ case "${target}" in
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
   rs6000-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//;s/gprof//'`
+    ;;
+  mips-*-*)
+    configdirs=`echo ${configdirs} | sed -e 's/gprof//'`
+    ;;
+  i[34]86-*-sco*)
+    configdirs=`echo ${configdirs} | sed -e 's/gprof//'`
     ;;
   *-*-solaris2*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/gas//'`

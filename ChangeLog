@@ -1,3 +1,12 @@
+Wed Jun  9 12:31:34 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in: Build gprof only for native, and don't build it
+	for mips-*-*, rs6000-*-*, or i[34]86-*-sco*.
+
+Mon Jun  7 13:12:11 1993  david d `zoo' zuhn  (zoo at deneb.cygnus.com)
+
+	* configure.in: don't build gas,ld,binutils on for *-*-sysv4
+
 Mon Jun  7 11:40:11 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
 
 	* configure.in (host_tools): Add prms.
