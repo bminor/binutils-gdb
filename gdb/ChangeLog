@@ -1,3 +1,8 @@
+Thu Oct 20 06:56:07 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (coffread.o): Depend on target.h.
+	(remote-vx.o): Depend on gdb-stabs.h objfiles.h symfile.h $(bfd_h).
+
 Wed Oct 19 22:49:31 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* TODO: Fix typo.

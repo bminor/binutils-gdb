@@ -1038,7 +1038,7 @@ coff-solib.o: coff-solib.c $(defs_h)
 
 coffread.o: coffread.c $(bfd_h) $(breakpoint_h) buildsym.h \
 	complaints.h $(defs_h) $(expression_h) $(gdbtypes_h) objfiles.h \
-	symfile.h $(symtab_h) gdb-stabs.h stabsread.h
+	symfile.h $(symtab_h) gdb-stabs.h stabsread.h target.h
 
 command.o: command.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbtypes_h) $(symtab_h) $(value_h)
@@ -1321,7 +1321,7 @@ remote-udi.o: remote-udi.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 remote-vx.o: remote-vx.c $(wait_h) complaints.h $(defs_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(inferior_h) target.h vx-share/dbgRpcLib.h \
 	vx-share/ptrace.h vx-share/xdr_ld.h vx-share/xdr_ptrace.h \
-	vx-share/xdr_rdb.h
+	vx-share/xdr_rdb.h gdb-stabs.h objfiles.h symfile.h $(bfd_h)
 
 remote-z8k.o: remote-z8k.c $(wait_h) $(srcdir)/../sim/z8k/sim.h \
 	$(defs_h) $(gdbcore_h) $(inferior_h) target.h terminal.h
