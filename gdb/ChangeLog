@@ -1,3 +1,10 @@
+Mon Dec  2 11:04:05 1991  Per Bothner  (bothner at cygnus.com)
+
+	* mips-tdep.c (init_extra_frame_info):  Float register
+	'i' has gdb-internal number 'FP0+i', not '32+i'.
+	* mipsread.c (new_symbol):  Translate g++ special
+	symbol "$t" to "this".
+
 Sat Nov 30 21:29:55 1991  Steve Chamberlain  (sac at cygnus.com)
 	Changes due to include file renaming:
 
