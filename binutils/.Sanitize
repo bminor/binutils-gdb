@@ -49,6 +49,7 @@ copy.c
 cplus-dem.c
 filemode.c
 gmalloc.c
+i386-pinsn.c
 i960-pinsn.c
 is-ranlib.c
 is-strip.c

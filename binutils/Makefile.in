@@ -102,7 +102,7 @@ INCDIR = $(BASEDIR)/include
 
 # When adding .o files, to make VPATH work in Sun Make, you have to
 # also add a foo.o: foo.c line at the bottom of the file.
-DISASMS = m68k-pinsn.o i960-pinsn.o sparc-pinsn.o  am29k-pinsn.o
+DISASMS = m68k-pinsn.o i960-pinsn.o i386-pinsn.o sparc-pinsn.o  am29k-pinsn.o
 
 #
 ## Random definitions
@@ -351,6 +351,7 @@ not-strip.o:not-strip.c
 objdump.o: objdump.c
 size.o: size.c
 sparc-pinsn.o: sparc-pinsn.c
+i386-pinsn.o: i386-pinsn.c
 strip.o:strip.c
 version.o: $(srcdir)/version.c
 	$(CC) $(CFLAGS) -I. -I$(srcdir) -I$(INCDIR) $(HDEFINES) $(TDEFINES) -DVERSION='"$(VERSION)"' -c $(srcdir)/version.c

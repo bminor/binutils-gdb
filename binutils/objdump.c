@@ -54,7 +54,7 @@ PROTO (void, display_file, (char *filename, char *target));
 PROTO (void, dump_data, (bfd *abfd));
 PROTO (void, dump_relocs, (bfd *abfd));
 PROTO (void, dump_symbols, (bfd *abfd));
-PROTO (void, print_arelt_descr, (bfd *abfd, boolean verbose));
+PROTO (void, print_arelt_descr, (FILE *,bfd *abfd, boolean verbose));
 
 
 
@@ -81,10 +81,10 @@ usage ()
 }
 
 static struct option long_options[] = 
-	{{"syms",   0, &dump_symtab,	      1},
-	 {"reloc",  0, &dump_reloc_info,      1},
-	 {"header", 0, &dump_section_headers, 1},
-	 {0, 0, 0, 0}};
+	{{"syms",   no_argument, &dump_symtab,	      1},
+	 {"reloc",  no_argument, &dump_reloc_info,      1},
+	 {"header", no_argument, &dump_section_headers, 1},
+	 {0, no_argument, 0, 0}};
 
 
 
@@ -264,6 +264,7 @@ bfd *abfd;
   unsigned int print_insn_a29k();
   unsigned int print_insn_i960();
   unsigned int print_insn_sparc();
+  unsigned int print_insn_i386();
   unsigned int print_insn_h8300();
   enum bfd_architecture a;
 
@@ -315,6 +316,9 @@ bfd *abfd;
     switch (a) {
     case bfd_arch_sparc:
       print = print_insn_sparc;
+      break;
+    case bfd_arch_i386:
+      print = print_insn_i386;
       break;
     case bfd_arch_m68k:
       print = print_insn_m68k;
@@ -415,7 +419,7 @@ display_bfd (abfd)
     return;
   }
   printf ("\n%s:     file format %s\n", abfd->filename, abfd->xvec->name);
-  if (dump_ar_hdrs) print_arelt_descr (abfd, true);
+  if (dump_ar_hdrs) print_arelt_descr (stdout, abfd, true);
 
   if (dump_file_header) {
     char *comma = "";
@@ -514,40 +518,42 @@ dump_data (abfd)
 	strcmp(only,section->name) == 0){
 
 
+      if (section->flags & SEC_HAS_CONTENTS) 
+	{
+	  printf("Contents of section %s:\n", section->name);
 
-      printf("Contents of section %s:\n", section->name);
-
-      if (bfd_get_section_size_before_reloc(section) == 0) continue;
-      data = (bfd_byte *)malloc(bfd_get_section_size_before_reloc(section));
-      if (data == (bfd_byte *)NULL) {
-	fprintf (stderr, "%s: memory exhausted.\n", program_name);
-	exit (1);
-      }
-      datasize = bfd_get_section_size_before_reloc(section);
+	  if (bfd_get_section_size_before_reloc(section) == 0) continue;
+	  data = (bfd_byte *)malloc(bfd_get_section_size_before_reloc(section));
+	  if (data == (bfd_byte *)NULL) {
+	    fprintf (stderr, "%s: memory exhausted.\n", program_name);
+	    exit (1);
+	  }
+	  datasize = bfd_get_section_size_before_reloc(section);
 
 
-      bfd_get_section_contents (abfd, section, (PTR)data, 0, bfd_get_section_size_before_reloc(section));
+	  bfd_get_section_contents (abfd, section, (PTR)data, 0, bfd_get_section_size_before_reloc(section));
 
-      for (i= 0; i < bfd_get_section_size_before_reloc(section); i += onaline) {
-	bfd_size_type j;
-	printf(" %04lx ", (unsigned long int)(i + section->vma));
-	for (j = i; j < i+ onaline; j++) {
-	  if (j < bfd_get_section_size_before_reloc(section))
-	    printf("%02x", (unsigned)(data[j]));
-	  else 
-	    printf("  ");
-	  if ((j & 3 ) == 3) printf(" ");
-	}
+	  for (i= 0; i < bfd_get_section_size_before_reloc(section); i += onaline) {
+	    bfd_size_type j;
+	    printf(" %04lx ", (unsigned long int)(i + section->vma));
+	    for (j = i; j < i+ onaline; j++) {
+	      if (j < bfd_get_section_size_before_reloc(section))
+		printf("%02x", (unsigned)(data[j]));
+	      else 
+		printf("  ");
+	      if ((j & 3 ) == 3) printf(" ");
+	    }
 
-	printf(" ");
-	for (j = i; j < i+onaline ; j++) {
-	  if (j >= bfd_get_section_size_before_reloc(section))
 	    printf(" ");
-	  else
-	    printf("%c", isprint(data[j]) ?data[j] : '.');
+	    for (j = i; j < i+onaline ; j++) {
+	      if (j >= bfd_get_section_size_before_reloc(section))
+		printf(" ");
+	      else
+		printf("%c", isprint(data[j]) ?data[j] : '.');
+	    }
+	    putchar ('\n');
+	  }
 	}
-	putchar ('\n');
-      }
     }
 
     free (data);
