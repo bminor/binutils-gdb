@@ -1,3 +1,7 @@
+2003-07-18  Andrew Cagney  <cagney@redhat.com>
+
+	* ui-out.h (struct ui_file): Add opaque declaration.
+
 2003-07-17  Elena Zannoni  <ezannoni@redhat.com>
 
 	* Makefile.in (x86-64-linux-nat.o): Update dependencies.

@@ -25,6 +25,7 @@
 
 /* The ui_out structure */
 
+struct ui_file;
 struct ui_out;
 struct ui_out_data;
 
