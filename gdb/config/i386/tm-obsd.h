@@ -21,7 +21,6 @@
 #ifndef TM_OBSD_H
 #define TM_OBSD_H
 
-#define HAVE_I387_REGS
 #include "i386/tm-i386.h"
 
 /* OpenBSD uses the old gcc convention for struct returns.  */

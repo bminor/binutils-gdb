@@ -25,7 +25,6 @@
 #else
 #undef HAVE_SSE_REGS
 #endif /* CONTEXT_EXTENDED_REGISTERS */
-#define HAVE_I387_REGS
 
 #include "i386/tm-i386.h"
 

@@ -1,5 +1,12 @@
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-cygwin.h, config/i386/tm-fbsd.h,
+	config/i386/tm-go32.h, config/i386/tm-i386gnu.h,
+	config/i386/tm-i386sol2.h, config/i386/tm-i386v4.h,
+	config/i386/tm-linux.h, config/i386/tm-nbsd.h,
+	config/i386/tm-obsd.h (HAVE_I387_REGS): Remove define.
+	* config/i386/tm-i386.h: Unconditionally define FLOAT_INFO.
+
 	* i386-tdep.c (i386_coff_osabi_sniffer): Add "coff-go32" to the
 	list of DJGPP COFF targets.
 

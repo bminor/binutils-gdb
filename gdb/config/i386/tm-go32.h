@@ -22,7 +22,6 @@
 #define TM_GO32_H
 
 #undef HAVE_SSE_REGS	/* FIXME! go32-nat.c needs to support XMMi registers */
-#define HAVE_I387_REGS
 
 #include "i386/tm-i386.h"
 

@@ -87,10 +87,8 @@ extern void i386_register_convert_to_raw (struct type *type, int regnum,
 					  char *from, char *to);
 
 /* Print out the i387 floating point state.  */
-#ifdef HAVE_I387_REGS
 extern void i387_float_info (void);
 #define FLOAT_INFO { i387_float_info (); }
-#endif
 
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
