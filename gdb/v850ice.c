@@ -78,6 +78,8 @@ static void v850ice_open PARAMS ((char *name, int from_tty));
 
 static void v850ice_close PARAMS ((int quitting));
 
+static void v850ice_stop PARAMS ((void));
+
 static void v850ice_store_registers PARAMS ((int regno));
 
 static void v850ice_mourn PARAMS ((void));
@@ -380,6 +382,14 @@ v850ice_close (quitting)
       ice_open = 0;
       inferior_pid = 0;
     }
+}
+
+/* Stop the process on the ice. */
+static void
+v850ice_stop ()
+{
+  /* This is silly, but it works... */
+  v850ice_command ("stop", 0);
 }
 
 static void
@@ -767,7 +777,7 @@ v850ice_load (filename, from_tty)
   iob.size = 0;
   iob.buf  = buf;
   generic_load(filename, from_tty);
-  ExeAppReq ("GDB", GDOWNLOAD, NULL, &iob);
+  ExeAppReq ("GDB", GDOWNLOAD, filename, &iob);
 }
 
 static int
@@ -811,9 +821,8 @@ static int
 ice_cont (c)
   char *c;
 {
-  printf_unfiltered ("continue (ice)\n");
-  continue_command (NULL, 1);
-  togdb_force_update ();
+  printf_filtered ("continue (ice)");
+  Tcl_Eval (gdbtk_interp, "gdb_immediate continue");
   return 1;
 }
 
@@ -821,15 +830,13 @@ static int
 ice_stepi (c)
   char *c;
 {
-  char count_string[10] = "\0";
+  char string[50] = "\0";
   int count = (int) c;
 
-  sprintf (count_string, "%d", count);
-
+  sprintf (string, "gdb_immediate stepi %d", count);
   printf_unfiltered ("stepi (ice)\n");
-  stepi_command (count_string, 1);
+  Tcl_Eval (gdbtk_interp, string);
   ReplyMessage ((LRESULT) 1);
-  togdb_force_update ();
   return 1;
 }
 
@@ -837,14 +844,12 @@ static int
 ice_nexti (c)
   char *c;
 {
-  char count_string[10] = "\0";
+  char string[50] = "\0";
   int count = (int) c;
 
-  sprintf (count_string, "%d", count);
-
+  sprintf (string, "gdb_immediate nexti %d", count);
   printf_unfiltered ("nexti (ice)\n");
-  nexti_command (count_string, 1);
-  togdb_force_update ();
+  Tcl_Eval (gdbtk_interp, string);
   return 1;
 }
 
@@ -900,7 +905,7 @@ static void init_850ice_ops(void)
   v850ice_ops.to_can_run         =   0;		
   v850ice_ops.to_notice_signals  =   0;		
   v850ice_ops.to_thread_alive    =    NULL;	
-  v850ice_ops.to_stop            =   0;			
+  v850ice_ops.to_stop            =   v850ice_stop;
   v850ice_ops.to_stratum         =   process_stratum;	
   v850ice_ops.DONT_USE           =   NULL;		
   v850ice_ops.to_has_all_memory  =   1;		

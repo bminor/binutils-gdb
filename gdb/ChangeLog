@@ -1,3 +1,11 @@
+1998-08-19  Keith Seitz  <keiths@cygnus.com>
+
+	* v850ice.c (v850ice_stop): New function to stop the ICE.
+	(v850ice_load) Pass filename to ICE DLL.
+	(ice_stepi, ice_nexti, ice_cont): Do not directly call the gdb
+	commands -- let the GUI do it so that it can retain control
+	of the display.
+
 Wed Aug 19 15:53:52 1998  Anthony Green  <green@hoser.cygnus.com>
 
 	* i386v4-nat.c: Include sys/reg.h if present.
