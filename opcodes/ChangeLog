@@ -1,5 +1,9 @@
 Mon Jun 16 14:13:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* m68k-dis.c (print_insn_arg): Print case 7.2 using %pc@()
+	syntax.  From Roman Hodek
+	<rnhodek@faui22c.informatik.uni-erlangen.de>.
+
 	* i386-dis.c (twobyte_has_modrm): Fix pand.
 
 Mon Jun 16 14:08:38 1997  Michael Taylor  <mbt@mit.edu>
