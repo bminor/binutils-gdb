@@ -1,5 +1,5 @@
 /* strings -- print the strings of printable characters in files
-   Copyright (C) 1993, 94, 95, 96, 97, 98, 99, 2000
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify

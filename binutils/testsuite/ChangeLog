@@ -1,3 +1,11 @@
+2001-06-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* (binutils-all/ar.exp, binutils-all/nm.exp,
+	binutils-all/objcopy.exp, binutils-all/objdump.exp,
+	binutils-all/readelf.exp, binutils-all/size.exp,
+	binutils-all/hppa/objdump.exp, config/default.exp,
+	lib/utils-lib.exp): Update copyright notices.
+
 2001-01-16  Matthew Green  <mrg@redhat.com>
 
 	* binutils-all/readelf.s-64: Match readelf -S output.

@@ -1,5 +1,5 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright (C) 1999, 2000, 2001 Free Software Foundation.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
    This file is part of GAS, the GNU Assembler.

@@ -1,6 +1,6 @@
 /* BFD back-end data structures for ELF files.
-   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999, 2000 Free Software
-   Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.

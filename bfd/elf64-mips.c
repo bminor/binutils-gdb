@@ -1,5 +1,6 @@
 /* MIPS-specific support for 64-bit ELF
-   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Ian Lance Taylor, Cygnus Support
    Linker support added by Mark Mitchell, CodeSourcery, LLC.
    <mark@codesourcery.com>

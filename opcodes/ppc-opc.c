@@ -1,5 +1,6 @@
 /* ppc-opc.c -- PowerPC opcode list
-   Copyright (c) 1994, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 2000
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
 This file is part of GDB, GAS, and the GNU binutils.

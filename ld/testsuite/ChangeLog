@@ -1,3 +1,7 @@
+2001-06-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* Many files: Update copyright notices.
+
 2001-04-01  David O'Brien  <obrien@FreeBSD.org>
 
 	* ld-bootstrap/bootstrap.exp: FreeBSD 4.3+ will fail on the --static test

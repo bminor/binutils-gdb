@@ -2,7 +2,7 @@
 # It does some substitutions.
 cat >e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1995, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

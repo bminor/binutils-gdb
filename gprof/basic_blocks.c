@@ -2,7 +2,7 @@
    of basic-block info to/from gmon.out; computing and formatting of
    basic-block related statistics.
 
-   Copyright (C) 2000  Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
