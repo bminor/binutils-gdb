@@ -249,7 +249,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION=4.16-foundry-971110
+VERSION=4.16.1
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -271,7 +271,7 @@ SER_HARDWIRE = ser-unix.o
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
-REMOTE_OBS = remote.o dcache.o remote-utils.o
+REMOTE_OBS = remote.o dcache.o remote-utils.o tracepoint.o
 
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS =
@@ -585,19 +585,15 @@ install-only:
 		$(INSTALL_PROGRAM) gdb$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
 		$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
 		# start-sanitize-gdbtk
-		if [ x"$(ENABLE_GDBTK)" != x ] ; then \
-		  $(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl ; \
-		  $(SHELL) $(srcdir)/../mkinstalldirs \
+		$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl ; \
+		$(SHELL) $(srcdir)/../mkinstalldirs \
 			$(datadir)/gdbtcl/images \
 			$(datadir)/gdbtcl/images2 ; \
-		  cd $(srcdir)/gdbtcl2 ; \
-		  for i in *.tcl images/*.gif images2/*.gif tclIndex; \
-		    do \
+		cd $(srcdir)/gdbtcl2 ; \
+		for i in *.tcl images/*.gif images2/*.gif tclIndex; \
+		  do \
 			$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
-		    done ; \
-		else \
-		  true ; \
-		fi
+		  done ;
 	# end-sanitize-gdbtk
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
