@@ -1,3 +1,23 @@
+Thu Aug 10 00:38:11 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (s_set): Remove unused local ptr.
+	(hex_float): Check target_big_endian.
+	(equals): Remove unused local p.
+	* config/tc-a29k.h (TARGET_BYTES_BIG_ENDIAN): Define.
+	* config/tc-h8500.h (TARGET_BYTES_BIG_ENDIAN): Define.
+	* config/tc-hppa.h (TARGET_BYTES_BIG_ENDIAN): Define.
+	* config/tc-i860.h (TARGET_BYTES_BIG_ENDIAN): Define.
+	* config/tc-m68k.h (TARGET_BYTES_BIG_ENDIAN): Define.
+	* config/tc-m88k.h (TARGET_BYTES_BIG_ENDIAN): Define.
+	* config/tc-tahoe.h (TARGET_BYTES_BIG_ENDIAN): Define.
+	* config/tc-sh.c (little): Set target_big_endian.
+	(md_begin): Likewise.
+	(md_parse_option): Likewise.
+	(build_relax): Check target_big_endian rather than shl.
+	(build_Mytes, md_atof): Likewise.
+	(md_convert_frag, md_apply_fix): Likewise.
+	(md_number_to_chars): Likewise.
+	
 Wed Aug  9 10:51:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_abspcadd): New static variable.

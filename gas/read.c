@@ -1680,7 +1680,6 @@ s_set (ignore)
       /* Turn '. = mumble' into a .org mumble */
       register segT segment;
       expressionS exp;
-      register char *ptr;
 
       segment = get_known_segmented_expression (&exp);
 
@@ -2662,11 +2661,20 @@ hex_float (float_type, bytes)
 	  d += hex_value (*input_line_pointer);
 	  ++input_line_pointer;
 	}
-      bytes[i++] = d;
+      if (target_big_endian)
+	bytes[i] = d;
+      else
+	bytes[length - i - 1] = d;
+      ++i;
     }
 
   if (i < length)
-    memset (bytes + i, 0, length - i);
+    {
+      if (target_big_endian)
+	memset (bytes + i, 0, length - i);
+      else
+	memset (bytes, 0, length - i);
+    }
 
   return length;
 }
@@ -3148,7 +3156,6 @@ equals (sym_name)
       /* Turn '. = mumble' into a .org mumble */
       register segT segment;
       expressionS exp;
-      register char *p;
 
       segment = get_known_segmented_expression (&exp);
       if (!need_pass_2)

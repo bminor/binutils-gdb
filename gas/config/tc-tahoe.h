@@ -20,6 +20,8 @@
 
 #define TC_TAHOE 1
 
+#define TARGET_BYTES_BIG_ENDIAN 1
+
 #define NO_LISTING
 
 #define tc_headers_hook(a)		{;}	/* don't need it. */

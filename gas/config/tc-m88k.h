@@ -22,6 +22,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 
 #define TC_M88K
 
+#define TARGET_BYTES_BIG_ENDIAN 1
+
 #ifdef M88KCOFF
 #define COFF_MAGIC MC88OMAGIC
 #define BFD_ARCH bfd_arch_m88k

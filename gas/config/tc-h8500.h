@@ -20,6 +20,9 @@
 
 
 #define TC_H8500
+
+#define TARGET_BYTES_BIG_ENDIAN 1
+
 /* This macro translates between an internal fix and an coff reloc type */
 #define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
 
