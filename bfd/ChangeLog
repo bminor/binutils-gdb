@@ -1,3 +1,11 @@
+Wed Feb  7 13:37:39 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf.c (make_mapping): Add an additional argument to suppress
+	making the first section include the program headers.
+	(map_sections_to_segments): If the user used -Ttext such that the
+	program headers are on a different page, do not set the flags
+	saying that this section includes the program headers.
+
 Tue Feb  6 14:04:49 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* configure.in (*-*-netbsd*): Set COREFILE to netbsd-core.c.
