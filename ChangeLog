@@ -1,6 +1,12 @@
+Fri Feb 19 19:00:13 1993  Per Bothner  (bothner@cygnus.com)
+
+	* Makefile.in:  Add some extra semi-colons (needed if SHELL=bash).
+
 Fri Feb 19 00:59:33 1993  John Gilmore  (gnu@cygnus.com)
 
 	* README:  Update for gdb-4.8 release.
+	* Makefile.in (gdb.tar.Z):  Add texinfo/tex3patch.  Build
+	gdb-xxx.tar.z (gzip'd) file also.
 
 Thu Feb 18 09:16:17 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
