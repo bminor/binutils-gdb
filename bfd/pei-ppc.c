@@ -39,7 +39,7 @@ Boston, MA 02111-1307, USA.  */
 
 /* FIXME: Verify PCRELOFFSET is always false */
 
+/* FIXME: This target no longer works.  Search for POWERPC_LE_PE in
+   coff-ppc.c and peigen.c.  */
+
 #include "coff-ppc.c"
-
-
-

@@ -2214,6 +2214,7 @@ static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
 #define coff_bfd_final_link          ppc_bfd_coff_final_link 
 
 #ifndef COFF_IMAGE_WITH_PE
+/* FIXME: This no longer works.  */
 #define coff_swap_sym_in_hook        ppc_coff_swap_sym_in_hook
 #endif
 
@@ -2221,6 +2222,9 @@ static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
 
 #define COFF_PAGE_SIZE                       0x1000
 
+/* FIXME: This controls some code that used to be in peicode.h and is
+   now in peigen.c.  It will not control the code in peigen.c.  If
+   anybody wants to get this working, you will need to fix that.  */
 #define POWERPC_LE_PE
 
 #define COFF_SECTION_ALIGNMENT_ENTRIES \
