@@ -49,8 +49,8 @@ original English.
 @title Using ld
 @subtitle The GNU linker
 @sp 1
-@subtitle Second Edition---@code{ld} version 2.0
-@subtitle January 1992
+@subtitle @code{ld} version 2
+@subtitle August 1992
 @author Steve Chamberlain and Roland Pesch
 @author Cygnus Support
 @page
@@ -200,17 +200,17 @@ line:
 
 @smallexample
 ld [-o @var{output} ] @var{objfiles}@dots{}
-    [ -A@var{architecture} ]  [ -b @var{input-format} ]  [ -Bstatic ]  
-    [ -c @var{MRI-commandfile} ]  [ -d | -dc | -dp ]  
-    [ -defsym @var{symbol} = @var{expression} ]
-    [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
-    [ -format @var{input-format} ]  [ -g ]  [ -i ]
-    [ -l@var{ar} ]  [ -L@var{searchdir} ]  [ -M | -m ]  
-    [ -n | -N ]  [ -noinhibit-exec ]  [ -R @var{filename} ]  [ -relax ]
-    [ -r | -Ur ]  [ -S ]  [ -s ]  [ -T @var{commandfile} ]  
-    [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]  [ -Tbss @var{bssorg} ]
-    [ -t ]  [ -u @var{sym}]  [-v]  [ -X ]  [ -x ] 
-    [ @{ @var{script} @} ] 
+  [ -A@var{architecture} ]  [ -b @var{input-format} ]  [ -Bstatic ]  
+  [ -c @var{MRI-commandfile} ]  [ -d | -dc | -dp ]  
+  [ -defsym @var{symbol} = @var{expression} ]
+  [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
+  [ -format @var{input-format} ]  [ -g ]  [ -i ]
+  [ -l@var{ar} ]  [ -L@var{searchdir} ]  [ -M | -m ]  
+  [ -n | -N ]  [ -noinhibit-exec ]  [ -R @var{filename} ]  [ -relax ]
+  [ -r | -Ur ]  [ -S ]  [ -s ]  [ -T @var{commandfile} ]  
+  [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]  [ -Tbss @var{bssorg} ]
+  [ -t ]  [ -u @var{sym}]  [-v]  [ -X ]  [ -x ] 
+  [ @{ @var{script} @} ] 
 @end smallexample
 
 This plethora of command-line options may seem intimidating, but in
@@ -322,7 +322,7 @@ specified (@code{-r}).  The script command
 @code{FORCE_COMMON_ALLOCATION} has the same effect.
 
 @cindex symbols, from command line
-@kindex -defsym @var{symbol}=@var{exp}
+@kindex -defsym @var{symbol} = @var{exp}
 @item -defsym @var{symbol} = @var{expression}
 Create a global symbol in the output file, containing the absolute
 address given by @var{expression}.  You may use this option as many
@@ -1040,7 +1040,7 @@ result of an expression is required, but the value is not available,
 then an error results.  For example, a script like the following
 @example
 SECTIONS @{ @dots{}
-      text 9+this_isnt_constant: 
+      text 9+this_isnt_constant : 
                 @{ @dots{}
                 @}
 @dots{} @}
@@ -1072,12 +1072,12 @@ example the @code{symbol_1} and @code{symbol_2} are assigned identical
 values:
 @example
 SECTIONS@{ @dots{}
-        .output1:
+        .output1 :
                 @{ 
                 start_of_output_1 = ABSOLUTE(.);
                 @dots{}
                 @}
-        .output:
+        .output :
                 @{
                 symbol_1 = ADDR(.output1);
                 symbol_2 = start_of_output_1;
@@ -1092,7 +1092,7 @@ returns the result of the current location counter (@code{.}) aligned to
 the next @var{exp} boundary.  @var{exp} must be an expression whose
 value is a power of two.  This is equivalent to 
 @example
-(. + @var{exp} -1) & ~(@var{exp}-1)
+(. + @var{exp} - 1) & ~(@var{exp} - 1)
 @end example
 
 @code{ALIGN} doesn't change the value of the location counter---it just
@@ -1127,7 +1127,7 @@ to set a global symbol @code{begin} to the first location in the
 existed, its value is preserved:
 @smallexample
 SECTIONS@{ @dots{}
-        .text: @{
+        .text : @{
                 begin = DEFINED(begin) ? begin : . ;
                 @dots{}
         @}
@@ -1153,9 +1153,9 @@ SECTIONS@{ @dots{}
         .output @{
                 .start = . ;
                 @dots{}
-                .end = .;
+                .end = . ;
                 @}
-        symbol_1 = .end - .start;
+        symbol_1 = .end - .start ;
         symbol_2 = SIZEOF(.output);
 @dots{} @}
 
@@ -1194,7 +1194,7 @@ you wish.  The syntax is:
 @example
 MEMORY 
       @{
-       @var{name} (@var{attr}): ORIGIN = @var{origin}, LENGTH = @var{len}
+       @var{name} (@var{attr}) : ORIGIN = @var{origin}, LENGTH = @var{len}
        @dots{}
       @}
 @end example
@@ -1213,17 +1213,17 @@ attribute list is valid.  Valid attribute lists must be made up of the
 characters ``@code{LIRWX}''.  If you omit the attribute list, you may
 omit the parentheses around it as well.
 @item @var{origin}
-@kindex ORIGIN=
-@kindex o=
-@kindex org=
+@kindex ORIGIN =
+@kindex o =
+@kindex org =
 is the start address of the region in physical memory.  It is expressed as
 an expression, which must evaluate to a constant before
 memory allocation is performed. The keyword @code{ORIGIN} may be
 abbreviated to @code{org} or @code{o}.
 @item @var{len}
-@kindex LENGTH=
-@kindex len=
-@kindex l=
+@kindex LENGTH =
+@kindex len =
+@kindex l =
 is the size in bytes of the region (an expression).
 The keyword @code{LENGTH} may be abbreviated to @code{len} or @code{l}.
 @end table 
@@ -1235,8 +1235,8 @@ starting at @code{0x40000000} for four megabytes:
 @example
 MEMORY 
         @{
-        rom : ORIGIN= 0, LENGTH = 256K
-        ram : org= 0x40000000, l = 4M
+        rom : ORIGIN = 0, LENGTH = 256K
+        ram : org = 0x40000000, l = 4M
         @}
 @end example
 
@@ -1344,7 +1344,7 @@ output section; @emph{all} sections from that file are placed in the
 current section definition. To specify a list of particular files by
 name:
 @example
-.data: @{ afile.o bfile.o cfile.o @}
+.data : @{ afile.o bfile.o cfile.o @}
 @end example
 @noindent
 The example also illustrates that multiple statements can be included in
@@ -1404,7 +1404,7 @@ unallocated input files; its effect is exactly the same as that of
 
 @item @var{filename}@code{( COMMON )}
 @itemx [ COMMON ]
-@kindex [COMMON]
+@kindex [ COMMON ]
 @cindex uninitialized data
 @cindex commons in output
 Specify where in your output file to place uninitialized data
@@ -1544,7 +1544,7 @@ definition, the value is relative to the beginning of the section
 SECTIONS @{
   abs = 14 ;
   @dots{}
-  .data: @{ @dots{} rel = 14 ; @dots{} @}
+  .data : @{ @dots{} rel = 14 ; @dots{} @}
   abs2 = 14 + ADDR(.data);
   @dots{}
 @}
@@ -1700,7 +1700,7 @@ For example, if your input object files use some other symbol-name
 convention for the entry point, you can just assign the value of
 whatever symbol contains the start address to @code{start}:
 @example
-start = other_symbol;
+start = other_symbol ;
 @end example
 
 @node Other Commands,  , Entry Point, Commands
