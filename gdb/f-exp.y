@@ -924,7 +924,9 @@ yylex ()
   char *tokstart;
   
  retry:
-  
+ 
+  prev_lexptr = lexptr;
+ 
   tokstart = lexptr;
   
   /* First of all, let us make sure we are not dealing with the 
@@ -1171,5 +1173,8 @@ void
 yyerror (msg)
      char *msg;
 {
+  if (prev_lexptr)
+    lexptr = prev_lexptr;
+
   error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
 }

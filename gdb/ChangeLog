@@ -1,3 +1,11 @@
+2002-05-03  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* f-exp.y: Also use new prev_lexptr variable
+	to improve error reporting. Based on Michael Snyder
+	2002-04-24 dated patch to c-exp.y.
+	* jv-exp.y: Likewise.
+	* m2-exp.y: Likewise.
+
 2002-05-02  Elena Zannoni  <ezannoni@redhat.com>
 
 	* valops.c (value_arg_coerce): Don't coerce arrays to pointers if
