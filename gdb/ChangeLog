@@ -2,6 +2,7 @@
 
 	* interps.c (interpreter_exec_cmd): Remove mention of "mi" in
 	error message.
+	(list_interpreter_cmd): Removed.
 
 	* cli/cli-interp.c (do_captured_execute_command): New function.
 	(safe_execute_command): New function.

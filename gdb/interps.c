@@ -513,24 +513,6 @@ set_interpreter_cmd (char *args, int from_tty, struct cmd_list_element *c)
     }
 }
 
-/* list_interpreter_cmd - This implements "info interpreters". */
-
-void
-list_interpreter_cmd (char *args, int from_tty)
-{
-  struct gdb_interpreter *interp_ptr;
-
-  ui_out_list_begin (uiout, "interpreters");
-  for (interp_ptr = interp_list; interp_ptr != NULL;
-       interp_ptr = interp_ptr->next)
-    {
-      ui_out_text (uiout, "  * ");
-      ui_out_field_string (uiout, "interpreter", interp_ptr->name);
-      ui_out_text (uiout, "\n");
-    }
-  ui_out_list_end (uiout);
-}
-
 void
 interpreter_exec_cmd (char *args, int from_tty)
 {
