@@ -1,3 +1,8 @@
+Tue Apr 11 11:07:12 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* gdbtk.c (gdbtk_init): If SIOCSPGRP is not available, but
+	F_SETOWN is, use that.
+
 Mon Apr 10 18:31:57 1995  Stan Shebs  <shebs@andros.cygnus.com>
 	
 	Merge in support for Mac MPW as a host.

@@ -105,7 +105,7 @@ gdbtk_fputs (ptr, stream)
      FILE *stream;
 {
   if (result_ptr)
-    Tcl_DStringAppend (result_ptr, ptr, -1);
+    Tcl_DStringAppend (result_ptr, (char *)ptr, -1);
   else
     {
       Tcl_DString str;
@@ -113,7 +113,7 @@ gdbtk_fputs (ptr, stream)
       Tcl_DStringInit (&str);
 
       Tcl_DStringAppend (&str, "gdbtk_tcl_fputs", -1);
-      Tcl_DStringAppendElement (&str, ptr);
+      Tcl_DStringAppendElement (&str, (char *)ptr);
 
       Tcl_Eval (interp, Tcl_DStringValue (&str));
       Tcl_DStringFree (&str);
@@ -1121,7 +1121,14 @@ gdbtk_init ()
   i = getpid();
   if (ioctl (x_fd, SIOCSPGRP, &i))
     perror_with_name ("gdbtk_init: ioctl SIOCSPGRP failed");
-#endif
+
+#else
+#ifdef F_SETOWN
+  i = getpid();
+  if (fcntl (x_fd, F_SETOWN, i))
+    perror_with_name ("gdbtk_init: fcntl F_SETOWN failed");
+#endif	/* F_SETOWN */
+#endif	/* !SIOCSPGRP */
 #else
   if (ioctl (x_fd,  I_SETSIG, S_INPUT|S_RDNORM) < 0)
     perror_with_name ("gdbtk_init: ioctl I_SETSIG failed");
