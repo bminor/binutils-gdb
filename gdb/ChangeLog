@@ -1,3 +1,10 @@
+Wed Oct 20 11:35:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (INTERNAL_LDFLAGS): New macro.  The new part is
+	that we use CFLAGS and PROFILE_CFLAGS to link.
+	(gdb, rapp, kdb): Use INTERNAL_LDFLAGS instead of
+	LDFLAGS and/or GLOBAL_CFLAGS.
+
 Wed Oct 20 09:29:55 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in:  Add $(srcdir) to all refs to 29k-share

@@ -154,6 +154,14 @@ INTERNAL_CFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS)
 
+# LDFLAGS is specifically reserved for setting from the command line
+# when running make.
+
+# Profiling options need to go here to work.
+# I think it's perfectly reasonable for a user to set -pg in CFLAGS
+# and have it work; that's why CFLAGS is here.
+INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(LDFLAGS)
+
 # We are using our own version of REGEX now to be consistent across
 # machines.
 REGEX = regex.o
@@ -484,7 +492,7 @@ init.c: munch $(OBS) $(TSOBS)
 # Removing the old gdb first works better if it is running, at least on SunOS.
 gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	rm -f gdb
-	$(CC-LD) $(GLOBAL_CFLAGS) $(LDFLAGS) -o gdb \
+	$(CC-LD) $(INTERNAL_LDFLAGS) -o gdb \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 
 saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
@@ -520,7 +528,7 @@ gdb1: gdb
 rapp: $(RAPP_OBS)
 	rm -f rapp_init.c
 	$(srcdir)/munch $(MUNCH_DEFINE) $(RAPP_OBS) > rapp_init.c
-	$(CC-LD) $(LDFLAGS) -o $@ rapp_init.c $(RAPP_OBS)
+	$(CC-LD) $(INTERNAL_LDFLAGS) -o $@ rapp_init.c $(RAPP_OBS)
 
 config.status:
 	@echo "You must configure gdb.  Look at the README file for details."
@@ -559,7 +567,7 @@ xm-vaxbsd.h: xm-vax.h
 kdb:	$(NTSSTART) $(OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
 	rm -f init.c
 	$(srcdir)/munch $(MUNCH_DEFINE) $(OBS) $(NTSOBS) > init.c
-	$(CC) $(LDFLAGS) -c init.c $(CLIBS) 
+	$(CC) $(INTERNAL_LDFLAGS) -c init.c $(CLIBS) 
 	ld -o kdb $(NTSSTART) $(OBS) $(NTSOBS) init.o $(ADD_FILES) \
 	  -lc $(CLIBS)
 
