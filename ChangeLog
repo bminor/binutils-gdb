@@ -1,3 +1,8 @@
+Fri Aug 19 10:49:17 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure: Fix up help message; from karl@owl.hq.ileaf.com
+	(Karl Berry).
+
 Tue Aug 16 16:11:08 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* configure.in:  Also configure librx.

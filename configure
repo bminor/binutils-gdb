@@ -334,17 +334,7 @@ case "${fatal}" in
 				# assume we are running native, and force
 				# the same string for both target and host.
 				case $target_alias in
-				NOTARGET)
-					case $undefs in
-					NOUNDEFS) ;;
-					*)
-					    if expr $host_alias : $undefs >/dev/null
-					    then
-						host_alias=$undefs
-					    fi
-					    ;;
-					esac
-					;;
+				NOTARGET) ;;
 				*)
 					if expr $host_alias : $target_alias >/dev/null
 					then
@@ -384,29 +374,29 @@ esac
 
 if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
 	exec 1>&2
-	echo Usage: configure [OPTIONS] HOST
+	echo Usage: configure [OPTIONS] [HOST]
 	echo
 	echo Options: [defaults in brackets]
-	echo ' --prefix=MYDIR		 configure for installation of host independent files into MYDIR. ["/usr/local"]'
-	echo ' --exec-prefix=MYDIR	 configure for installation of host dependent files into MYDIR. ["/usr/local"]'
+	echo ' --prefix=MYDIR		 install into MYDIR. [/usr/local]'
+	echo ' --exec-prefix=MYDIR	 install host-dependent files into MYDIR. [/usr/local]'
 	echo ' --help			 print this message. [normal config]'
 	echo ' --build=BUILD		 configure for building on BUILD.  [BUILD=HOST]'
 	echo ' --host=HOST		 configure for HOST.  [determined via config.guess]'
 	echo ' --norecursion		 configure this directory only. [recurse]'
-	echo ' --program-prefix=FOO	 install programs with FOO prepended to their names. [ "" ]'
-	echo ' --program-suffix=FOO	 install programs with FOO appended to their names. [ "" ]'
-	echo ' --program-transform-name=FOO install programs with names transformed by sed pattern FOO. [ "" ]'
-	echo ' --site=SITE		 configure with site specific makefile for SITE'
-	echo ' --srcdir=DIR		 find the sources in DIR. ["." or ".."]'
-	echo ' --target=TARGET	 configure for TARGET.  [TARGET = HOST]'
-	echo ' --tmpdir=TMPDIR	 create temporary files in TMPDIR.  [ TMPDIR = "/tmp" ]'
-	echo ' --nfp			 configure the compilers default to soft floating point. [hard float]'
+	echo ' --program-prefix=FOO	 prepend FOO to installed program names. [""]'
+	echo ' --program-suffix=FOO	 append FOO to installed program names. [""]'
+	echo ' --program-transform-name=P transform installed names by sed pattern P. [""]'
+	echo ' --site=SITE		 configure with site-specific makefile for SITE.'
+	echo ' --srcdir=DIR		 find the sources in DIR. [. or ..]'
+	echo ' --target=TARGET	 configure for TARGET. [TARGET=HOST]'
+	echo ' --tmpdir=TMPDIR	 create temporary files in TMPDIR.  [/tmp]'
+	echo ' --nfp			 configure for soft floating point. [hard float]'
 	echo ' --with-FOO, --with-FOO=BAR package FOO is available (parameter BAR)'
 	echo ' --without-FOO		 package FOO is NOT available'
 	echo ' --enable-FOO, --enable-FOO=BAR include feature FOO (parameter BAR)'
 	echo ' --disable-FOO		 do not include feature FOO'
 	echo
-	echo 'Where HOST and TARGET are something like "sun4", "decstation", "encore", etc.'
+	echo 'Where HOST and TARGET are something like "sparc-sunos", "mips-ultrix", etc.'
 	echo
 	if [ -r config.status ] ; then
 		cat config.status
