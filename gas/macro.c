@@ -1,5 +1,5 @@
 /* macro.c - macro support for gas
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
@@ -93,7 +93,7 @@ static const char *macro_expand PARAMS ((int, sb *, macro_entry *, sb *));
 
 /* The macro hash table.  */
 
-static struct hash_control *macro_hash;
+struct hash_control *macro_hash;
 
 /* Whether any macros have been defined.  */
 

@@ -1,3 +1,11 @@
+2003-01-02  Ben Elliston  <bje@redhat.com>
+
+	* configure.in: Add iq2000-elf target.
+	* configure: Regenerate.
+	* config/tc-iq2000.c: New file.
+	* config/tc-iq2000.h: Likewise.
+	* po/gas.pot: Regenerate.
+
 2003-01-02  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c: Update copyright years to include 2003.

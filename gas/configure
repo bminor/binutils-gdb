@@ -2274,6 +2274,7 @@ for this_target in $target $canon_targets ; do
       x86_64)		cpu_type=i386 arch=x86_64;;
       ia64)		cpu_type=ia64 ;;
       ip2k)             cpu_type=ip2k endian=big ;; 
+      iq2000)           cpu_type=iq2000 endian=big ;; 
       m6811|m6812|m68hc12) cpu_type=m68hc11 ;;
       m680[012346]0)	cpu_type=m68k ;;
       m68008)		cpu_type=m68k ;;
@@ -2468,6 +2469,8 @@ EOF
       ia64-*-netbsd*)			fmt=elf em=nbsd ;;
 
       ip2k-*-*)				fmt=elf ;;
+
+      iq2000-*-elf)         fmt=elf bfd_gas=yes ;;
 
       m32r-*-*)				fmt=elf ;;
 
@@ -2757,7 +2760,7 @@ EOF
 
     # Any other special object files needed ?
     case ${cpu_type} in
-      fr30 | ip2k | m32r | openrisc)
+      fr30 | ip2k | iq2000 | m32r | openrisc)
 	using_cgen=yes
 	;;
 
