@@ -1,3 +1,10 @@
+2005-01-21  Fred Fish  <fnf@specifixinc.com>
+
+	* mips-opc.c:  Change INSN_ALIAS to INSN2_ALIAS.
+	Change INSN_WRITE_MDMX_ACC to INSN2_WRITE_MDMX_ACC.
+	Change INSN_READ_MDMX_ACC to INSN2_READ_MDMX_ACC.
+	* mips-dis.c: Ditto.
+
 2005-01-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (powerpc_opcodes): Add optional 'l' arg to tlbiel.

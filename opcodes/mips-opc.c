@@ -76,8 +76,8 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 
 #define IS_M    INSN_MULT
 
-#define WR_MACC INSN_WRITE_MDMX_ACC
-#define RD_MACC INSN_READ_MDMX_ACC
+#define WR_MACC INSN2_WRITE_MDMX_ACC
+#define RD_MACC INSN2_READ_MDMX_ACC
 
 #define I1	INSN_ISA1
 #define I2	INSN_ISA2
@@ -140,19 +140,19 @@ const struct mips_opcode mips_builtin_opcodes[] =
 /* name,    args,	match,	    mask,	pinfo,          	pinfo2,		membership */
 {"pref",    "k,o(b)",   0xcc000000, 0xfc000000, RD_b,           	0,		I4|I32|G3	},
 {"prefx",   "h,t(b)",	0x4c00000f, 0xfc0007ff, RD_b|RD_t,		0,		I4	},
-{"nop",     "",         0x00000000, 0xffffffff, 0,              	INSN_ALIAS,	I1      }, /* sll */
-{"ssnop",   "",         0x00000040, 0xffffffff, 0,              	INSN_ALIAS,	I32|N55	}, /* sll */
-{"ehb",     "",         0x000000c0, 0xffffffff, 0,              	INSN_ALIAS,	I33	}, /* sll */
-{"li",      "t,j",      0x24000000, 0xffe00000, WR_t,			INSN_ALIAS,	I1	}, /* addiu */
-{"li",	    "t,i",	0x34000000, 0xffe00000, WR_t,			INSN_ALIAS,	I1	}, /* ori */
+{"nop",     "",         0x00000000, 0xffffffff, 0,              	INSN2_ALIAS,	I1      }, /* sll */
+{"ssnop",   "",         0x00000040, 0xffffffff, 0,              	INSN2_ALIAS,	I32|N55	}, /* sll */
+{"ehb",     "",         0x000000c0, 0xffffffff, 0,              	INSN2_ALIAS,	I33	}, /* sll */
+{"li",      "t,j",      0x24000000, 0xffe00000, WR_t,			INSN2_ALIAS,	I1	}, /* addiu */
+{"li",	    "t,i",	0x34000000, 0xffe00000, WR_t,			INSN2_ALIAS,	I1	}, /* ori */
 {"li",      "t,I",	0,    (int) M_LI,	INSN_MACRO,		0,		I1	},
 {"move",    "d,s",	0,    (int) M_MOVE,	INSN_MACRO,		0,		I1	},
-{"move",    "d,s",	0x0000002d, 0xfc1f07ff, WR_d|RD_s,		INSN_ALIAS,	I3	},/* daddu */
-{"move",    "d,s",	0x00000021, 0xfc1f07ff, WR_d|RD_s,		INSN_ALIAS,	I1	},/* addu */
-{"move",    "d,s",	0x00000025, 0xfc1f07ff,	WR_d|RD_s,		INSN_ALIAS,	I1	},/* or */
-{"b",       "p",	0x10000000, 0xffff0000,	UBD,			INSN_ALIAS,	I1	},/* beq 0,0 */
-{"b",       "p",	0x04010000, 0xffff0000,	UBD,			INSN_ALIAS,	I1	},/* bgez 0 */
-{"bal",     "p",	0x04110000, 0xffff0000,	UBD|WR_31,		INSN_ALIAS,	I1	},/* bgezal 0*/
+{"move",    "d,s",	0x0000002d, 0xfc1f07ff, WR_d|RD_s,		INSN2_ALIAS,	I3	},/* daddu */
+{"move",    "d,s",	0x00000021, 0xfc1f07ff, WR_d|RD_s,		INSN2_ALIAS,	I1	},/* addu */
+{"move",    "d,s",	0x00000025, 0xfc1f07ff,	WR_d|RD_s,		INSN2_ALIAS,	I1	},/* or */
+{"b",       "p",	0x10000000, 0xffff0000,	UBD,			INSN2_ALIAS,	I1	},/* beq 0,0 */
+{"b",       "p",	0x04010000, 0xffff0000,	UBD,			INSN2_ALIAS,	I1	},/* bgez 0 */
+{"bal",     "p",	0x04110000, 0xffff0000,	UBD|WR_31,		INSN2_ALIAS,	I1	},/* bgezal 0*/
 
 {"abs",     "d,v",	0,    (int) M_ABS,	INSN_MACRO,		0,		I1	},
 {"abs.s",   "D,V",	0x46000005, 0xffff003f,	WR_D|RD_S|FP_S,		0,		I1	},

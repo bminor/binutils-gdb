@@ -1083,7 +1083,7 @@ print_insn_mips (memaddr, word, info)
 	  for (op = mips_opcodes; op < &mips_opcodes[NUMOPCODES]; op++)
 	    {
 	      if (op->pinfo == INSN_MACRO
-		  || (no_aliases && (op->pinfo2 & INSN_ALIAS)))
+		  || (no_aliases && (op->pinfo2 & INSN2_ALIAS)))
 		continue;
 	      if (i == ((op->match >> OP_SH_OP) & OP_MASK_OP))
 		{
@@ -1111,7 +1111,7 @@ print_insn_mips (memaddr, word, info)
       for (; op < &mips_opcodes[NUMOPCODES]; op++)
 	{
 	  if (op->pinfo != INSN_MACRO 
-	      && !(no_aliases && (op->pinfo2 & INSN_ALIAS))
+	      && !(no_aliases && (op->pinfo2 & INSN2_ALIAS))
 	      && (word & op->mask) == op->match)
 	    {
 	      register const char *d;
@@ -1311,7 +1311,7 @@ print_insn_mips16 (memaddr, info)
   for (op = mips16_opcodes; op < opend; op++)
     {
       if (op->pinfo != INSN_MACRO
-	  && !(no_aliases && (op->pinfo2 & INSN_ALIAS))
+	  && !(no_aliases && (op->pinfo2 & INSN2_ALIAS))
 	  && (insn & op->mask) == op->match)
 	{
 	  const char *s;
