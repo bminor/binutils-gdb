@@ -332,19 +332,19 @@ map_vmap (bfd *bf, bfd *arch)
   vmap_bfd.pvmap = vp;
   bfd_map_over_sections (bf, sex_to_vmap, &vmap_bfd);
 
+#if 0
+  /* This is only needed if we want to load shared libraries no matter what.
+     Since we provide the choice of incremental loading of shared objects
+     now, we do not have to load them as default anymore. */
+    
   obj = lookup_objfile_bfd (bf);
   if (exec_bfd && !obj) {
     obj = allocate_objfile (bf, 0);
 
-#if 0
-    /* This is only needed if we want to load shared libraries no matter what.
-       Since we provide the choice of incremental loading of shared objects
-       now, we do not have to load them as default anymore. */
-    
     syms_from_objfile (obj, 0, 0, 0);
     new_symfile_objfile (obj, 0, 0);
-#endif
   }
+#endif
 
   /* find the end of the list, and append. */
   for (vpp = &vmap; *vpp; vpp = &(*vpp)->nxt)

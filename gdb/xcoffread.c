@@ -1,5 +1,5 @@
 /* Read AIX xcoff symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993
    	     Free Software Foundation, Inc.
    Derived from coffread.c, dbxread.c, and a lot of hacking.
    Contributed by IBM Corporation.
@@ -20,12 +20,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include "defs.h"
-#include "bfd.h"
-
-#if defined(IBM6000_HOST) && defined(IBM6000_TARGET)
 /* Native only:  Need struct tbtable in <sys/debug.h> from host, and 
 		 need xcoff_add_toc_to_loadinfo in rs6000-tdep.c from target. */
+
+#include "defs.h"
+#include "bfd.h"
 
 /* AIX XCOFF names have a preceeding dot `.' */
 #define NAMES_HAVE_DOT 1
@@ -49,6 +48,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "buildsym.h"
 #include "stabsread.h"
 #include "gdb-stabs.h"
+#include "complaints.h"
 
 #include "coff/internal.h"	/* FIXME, internal data from BFD */
 #include "libcoff.h"		/* FIXME, internal data from BFD */
@@ -143,25 +143,19 @@ static unsigned	local_n_tmask;
 
 static unsigned	local_symesz;
 
-
-/* coff_symfile_init()
-   is the coff-specific initialization routine for reading symbols.
-   It is passed a struct sym_fns which contains, among other things,
-   the BFD for the file whose symbols are being read, and a slot for
-   a pointer to "private data" which we fill with cookies and other
-   treats for coff_symfile_read().
- 
-   We will only be called if this is a COFF or COFF-like file.
-   BFD handles figuring out the format of the file, and code in symtab.c
-   uses BFD's determination to vector to us.
- 
-   The ultimate result is a new symtab (or, FIXME, eventually a psymtab).  */
-
 struct coff_symfile_info {
   file_ptr min_lineno_offset;		/* Where in file lowest line#s are */
   file_ptr max_lineno_offset;		/* 1+last byte of line#s in file */
 };
 
+static struct complaint rsym_complaint = 
+  {"Non-stab C_RSYM `%s' needs special handling", 0, 0};
+
+static struct complaint storclass_complaint =
+  {"Unexpected storage class: %d", 0, 0};
+
+static struct complaint bf_notfound_complaint =
+  {"line numbers off, `.bf' symbol not found", 0, 0};
 
 static void
 enter_line_range PARAMS ((struct subfile *, unsigned, unsigned,
@@ -330,7 +324,7 @@ struct pending_stabs *stabs;
       pp += 2;
 
       if (*(pp-1) == 'F' || *(pp-1) == 'f')
-	SYMBOL_TYPE (sym) = lookup_function_type (read_type (&pp));
+	SYMBOL_TYPE (sym) = lookup_function_type (read_type (&pp, objfile));
       else
 	SYMBOL_TYPE (sym) = read_type (&pp, objfile);
     }
@@ -1707,7 +1701,7 @@ process_xcoff_symbol (cs, objfile)
 				obsavestring (name, qq-name,
 					      &objfile->symbol_obstack);
 	}
-	ttype = SYMBOL_TYPE (sym) = read_type (&pp);
+	ttype = SYMBOL_TYPE (sym) = read_type (&pp, objfile);
 
 	/* if there is no name for this typedef, you don't have to keep its
 	   symbol, since nobody could ask for it. Otherwise, build a symbol
@@ -1884,9 +1878,8 @@ process_xcoff_symbol (cs, objfile)
       break;
 
     case C_RSYM:
-
-#ifdef NO_DEFINE_SYMBOL
 	pp = (char*) strchr (name, ':');
+#ifdef NO_DEFINE_SYMBOL
 	SYMBOL_CLASS (sym) = LOC_REGISTER;
 	SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (cs->c_value);
 	if (pp) {
@@ -1912,13 +1905,13 @@ process_xcoff_symbol (cs, objfile)
 	  return sym;
 	}
 	else {
-	  warning ("A non-stab C_RSYM needs special handling.");
+	  complain (rsym_complaint, name);
 	  return NULL;
 	}
 #endif
 
     default	:
-      warning ("Unexpected storage class: %d.", cs->c_sclass);
+      complain (storclass_complaint, cs->c_sclass);
       return NULL;
     }
   }
@@ -1956,7 +1949,7 @@ read_symbol_lineno (symtable, symno)
     symno += symbol->n_numaux+1;
   }
 
-  printf ("GDB Error: `.bf' not found.\n");
+  complain (bf_notfound_complaint);
   return 0;
 
 gotit:
@@ -2041,74 +2034,25 @@ init_lineno (abfd, offset, size)
   printf ("Gdb Error: symbol names on multiple lines not implemented.\n")
 
 
-/* xlc/dbx combination uses a set of builtin types, starting from -1. return
-   the proper type node fora given builtin type #. */
-
-struct type *
-builtin_type (pp)
-char **pp;
-{
-  int typenums[2];
-
-  if (**pp != '-') {
-    printf ("ERROR!, unknown built-in type!\n");
-    return NULL;
-  }
-  *pp += 1;
-  read_type_number (pp, typenums);
-
-  /* default types are defined in dbxstclass.h. */
-  switch ( typenums[1] ) {
-  case 1: 
-    return lookup_fundamental_type (current_objfile, FT_INTEGER);
-  case 2: 
-    return lookup_fundamental_type (current_objfile, FT_CHAR);
-  case 3: 
-    return lookup_fundamental_type (current_objfile, FT_SHORT);
-  case 4: 
-    return lookup_fundamental_type (current_objfile, FT_LONG);
-  case 5: 
-    return lookup_fundamental_type (current_objfile, FT_UNSIGNED_CHAR);
-  case 6: 
-    return lookup_fundamental_type (current_objfile, FT_SIGNED_CHAR);
-  case 7: 
-    return lookup_fundamental_type (current_objfile, FT_UNSIGNED_SHORT);
-  case 8: 
-    return lookup_fundamental_type (current_objfile, FT_UNSIGNED_INTEGER);
-  case 9: 
-    return lookup_fundamental_type (current_objfile, FT_UNSIGNED_INTEGER);
-  case 10: 
-    return lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG);
-  case 11: 
-    return lookup_fundamental_type (current_objfile, FT_VOID);
-  case 12: 
-    return lookup_fundamental_type (current_objfile, FT_FLOAT);
-  case 13: 
-    return lookup_fundamental_type (current_objfile, FT_DBL_PREC_FLOAT);
-  case 14: 
-    return lookup_fundamental_type (current_objfile, FT_EXT_PREC_FLOAT);
-  case 15: 
-    /* requires a builtin `integer' */
-    return lookup_fundamental_type (current_objfile, FT_INTEGER);
-  case 16: 
-    return lookup_fundamental_type (current_objfile, FT_BOOLEAN);
-  case 17: 
-    /* requires builtin `short real' */
-    return lookup_fundamental_type (current_objfile, FT_FLOAT);
-  case 18: 
-    /* requires builtin `real' */
-    return lookup_fundamental_type (current_objfile, FT_FLOAT);
-  default :
-    printf ("ERROR! Unknown builtin type -%d\n", typenums[1]);
-    return NULL;
-  }
-}
-
 static void
 xcoff_new_init (objfile)
      struct objfile *objfile;
 {
 }
+
+
+/* xcoff_symfile_init()
+   is the xcoff-specific initialization routine for reading symbols.
+   It is passed an objfile which contains, among other things,
+   the BFD for the file whose symbols are being read, and a slot for
+   a pointer to "private data" which we fill with cookies and other
+   treats for xcoff_symfile_read().
+ 
+   We will only be called if this is an XCOFF or XCOFF-like file.
+   BFD handles figuring out the format of the file, and code in symfile.c
+   uses BFD's determination to vector to us.
+ 
+   The ultimate result is a new symtab (or, FIXME, eventually a psymtab).  */
 
 static void
 xcoff_symfile_init (objfile)
@@ -2353,12 +2297,3 @@ _initialize_xcoffread ()
 {
   add_symtab_fns(&xcoff_sym_fns);
 }
-
-#else /* IBM6000_HOST */
-struct type *
-builtin_type (ignore)
-char **ignore;
-{
-    fatal ("GDB internal error: builtin_type called on non-RS/6000!");
-}
-#endif /* IBM6000_HOST */

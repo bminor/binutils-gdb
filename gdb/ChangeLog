@@ -1,3 +1,19 @@
+Wed Feb 10 23:42:37 1993  John Gilmore  (gnu@cygnus.com)
+
+	* stabsread.c (rs6000_builtin_type):  Move function from
+	xcoffread.c:builtin_type.
+	* xcoffread.c (builtin_type):  Move to stabsread.  Remove
+	IBM6000_HOST dependency.  Move misplaced comments.
+	(various):  Change printf's to complaints.
+	(patch_block_stabs, process_xcoff_symbol case C_DECL):  Add
+	objfile argument to read_type calls under #if 0.
+	(process_xcoff_symbol case C_RSYM):  Fix typo in #ifdef.
+	* xcoffexec.c (map_vmap):  Don't allocate an objfile for the exec_file.
+	* Makefile.in:  xcoffread.o is not built by default.
+	* config/rs6000.mh (NATDEPFILES): xcoffread.o is native only.
+	* doc/gdbint.texinfo:  Eliminate IBM6000_HOST, document
+	IBM6000_TARGET.
+
 Wed Feb 10 18:31:20 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* findvar.c (read_var_value):  If REG_STRUCT_HAS_ADDR, then set

@@ -87,6 +87,9 @@ read_sun_floating_type PARAMS ((char **, int [2], struct objfile *));
 static struct type *
 read_enum_type PARAMS ((char **, struct type *, struct objfile *));
 
+static struct type *
+rs6000_builtin_type PARAMS ((char **pp));
+
 static int
 read_member_functions PARAMS ((struct field_info *, char **, struct type *,
 			       struct objfile *));
@@ -182,6 +185,9 @@ struct complaint vtbl_notfound_complaint =
 
 struct complaint unrecognized_cplus_name_complaint =
   {"Unknown C++ symbol name `%s'", 0, 0};
+
+struct complaint rs6000_builtin_complaint =
+  {"Unknown builtin type -%d", 0, 0};
 
 struct complaint stabs_general_complaint =
   {"%s", 0, 0};
@@ -1161,8 +1167,7 @@ read_type (pp, objfile)
       }
 
     case '-':				/* RS/6000 built-in type */
-      (*pp)--;
-      type = builtin_type (pp);		/* (in xcoffread.c) */
+      type = rs6000_builtin_type (pp);
       goto after_digits;
 
     case '0':
@@ -1331,6 +1336,64 @@ read_type (pp, objfile)
     abort ();
 
   return type;
+}
+
+/* RS/6000 xlc/dbx combination uses a set of builtin types, starting from -1.
+   Return the proper type node for a given builtin type number. */
+
+static struct type *
+rs6000_builtin_type (pp)
+     char **pp;
+{
+  int typenums[2];
+
+  read_type_number (pp, typenums);
+
+  /* default types are defined in dbxstclass.h. */
+  switch ( typenums[1] ) {
+  case 1: 
+    return lookup_fundamental_type (current_objfile, FT_INTEGER);
+  case 2: 
+    return lookup_fundamental_type (current_objfile, FT_CHAR);
+  case 3: 
+    return lookup_fundamental_type (current_objfile, FT_SHORT);
+  case 4: 
+    return lookup_fundamental_type (current_objfile, FT_LONG);
+  case 5: 
+    return lookup_fundamental_type (current_objfile, FT_UNSIGNED_CHAR);
+  case 6: 
+    return lookup_fundamental_type (current_objfile, FT_SIGNED_CHAR);
+  case 7: 
+    return lookup_fundamental_type (current_objfile, FT_UNSIGNED_SHORT);
+  case 8: 
+    return lookup_fundamental_type (current_objfile, FT_UNSIGNED_INTEGER);
+  case 9: 
+    return lookup_fundamental_type (current_objfile, FT_UNSIGNED_INTEGER);
+  case 10: 
+    return lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG);
+  case 11: 
+    return lookup_fundamental_type (current_objfile, FT_VOID);
+  case 12: 
+    return lookup_fundamental_type (current_objfile, FT_FLOAT);
+  case 13: 
+    return lookup_fundamental_type (current_objfile, FT_DBL_PREC_FLOAT);
+  case 14: 
+    return lookup_fundamental_type (current_objfile, FT_EXT_PREC_FLOAT);
+  case 15: 
+    /* requires a builtin `integer' */
+    return lookup_fundamental_type (current_objfile, FT_INTEGER);
+  case 16: 
+    return lookup_fundamental_type (current_objfile, FT_BOOLEAN);
+  case 17: 
+    /* requires builtin `short real' */
+    return lookup_fundamental_type (current_objfile, FT_FLOAT);
+  case 18: 
+    /* requires builtin `real' */
+    return lookup_fundamental_type (current_objfile, FT_FLOAT);
+  default:
+    complain (rs6000_builtin_complaint, typenums[1]);
+    return NULL;
+  }
 }
 
 /* This page contains subroutines of read_type.  */
@@ -2279,14 +2342,34 @@ read_struct_type (pp, type, objfile)
   /* Now read the baseclasses, if any, read the regular C struct or C++
      class member fields, attach the fields to the type, read the C++
      member functions, attach them to the type, and then read any tilde
-     fields. */
+     field (baseclass specifier for the class holding the main vtable). */
 
-  if (!read_baseclasses (&fi, pp, type, objfile)
-      || !read_struct_fields (&fi, pp, type, objfile)
-      || !attach_fields_to_type (&fi, type, objfile)
-      || !read_member_functions (&fi, pp, type, objfile)
-      || !attach_fn_fields_to_type (&fi, type)
-      || !read_tilde_fields (&fi, pp, type, objfile))
+  if (!read_baseclasses (&fi, pp, type, objfile))
+    {
+      do_cleanups (back_to);
+      return (error_type (pp));
+    }
+  if (!read_struct_fields (&fi, pp, type, objfile))
+    {
+      do_cleanups (back_to);
+      return (error_type (pp));
+    }
+  if (!attach_fields_to_type (&fi, type, objfile))
+    {
+      do_cleanups (back_to);
+      return (error_type (pp));
+    }
+  if (!read_member_functions (&fi, pp, type, objfile))
+    {
+      do_cleanups (back_to);
+      return (error_type (pp));
+    }
+  if (!attach_fn_fields_to_type (&fi, type))
+    {
+      do_cleanups (back_to);
+      return (error_type (pp));
+    }
+  if (!read_tilde_fields (&fi, pp, type, objfile))
     {
       do_cleanups (back_to);
       return (error_type (pp));
