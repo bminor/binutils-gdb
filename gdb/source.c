@@ -200,7 +200,9 @@ show_directories (ignore, from_tty)
      char *ignore;
      int from_tty;
 {
-  printf_filtered ("Source directories searched: %s\n", source_path);
+  puts_filtered ("Source directories searched: ");
+  puts_filtered (source_path);
+  puts_filtered ("\n");
 }
 
 /* Forget what we learned about line positions in source files,
@@ -608,6 +610,7 @@ find_source_lines (s, desc)
      int desc;
 {
   struct stat st;
+  char c;
   register char *data, *p, *end;
   int nlines = 0;
   int lines_allocated = 1000;
@@ -618,14 +621,35 @@ find_source_lines (s, desc)
   line_charpos = (int *) xmmalloc (s -> objfile -> md,
 				   lines_allocated * sizeof (int));
   if (fstat (desc, &st) < 0)
-    perror_with_name (s->filename);
+   perror_with_name (s->filename);
 
   if (exec_bfd) {
     exec_mtime = bfd_get_mtime(exec_bfd);
     if (exec_mtime && exec_mtime < st.st_mtime)
-      printf_filtered ("Source file is more recent than executable.\n");
+     printf_filtered ("Source file is more recent than executable.\n");
   }
 
+#ifdef LSEEK_NOT_LINEAR
+  /* Have to read it byte by byte to find out where the chars live */
+
+   line_charpos[0] = tell(desc);
+   nlines = 1;
+   while (myread(desc, &c, 1)>0) 
+   {
+     if (c == '\n') 
+     {
+       if (nlines == lines_allocated) 
+       {
+	 lines_allocated *= 2;
+	 line_charpos =
+	  (int *) xmrealloc (s -> objfile -> md, (char *) line_charpos,
+			     sizeof (int) * lines_allocated);
+       }
+       line_charpos[nlines++] = tell(desc);
+     }
+   }
+
+#else
   /* st_size might be a large type, but we only support source files whose 
      size fits in an int.  FIXME. */
   size = (int) st.st_size;
@@ -637,31 +661,33 @@ find_source_lines (s, desc)
   data = (char *) alloca (size);
 #endif
   if (myread (desc, data, size) < 0)
-    perror_with_name (s->filename);
+   perror_with_name (s->filename);
   end = data + size;
   p = data;
   line_charpos[0] = 0;
   nlines = 1;
   while (p != end)
+  {
+    if (*p++ == '\n'
+	/* A newline at the end does not start a new line.  */
+	&& p != end)
     {
-      if (*p++ == '\n'
-	  /* A newline at the end does not start a new line.  */
-	  && p != end)
-	{
-	  if (nlines == lines_allocated)
-	    {
-	      lines_allocated *= 2;
-	      line_charpos =
-		  (int *) xmrealloc (s -> objfile -> md, (char *) line_charpos,
-				     sizeof (int) * lines_allocated);
-	    }
-	  line_charpos[nlines++] = p - data;
-	}
+      if (nlines == lines_allocated)
+      {
+	lines_allocated *= 2;
+	line_charpos =
+	 (int *) xmrealloc (s -> objfile -> md, (char *) line_charpos,
+			    sizeof (int) * lines_allocated);
+      }
+      line_charpos[nlines++] = p - data;
     }
+  }
+#endif
   s->nlines = nlines;
   s->line_charpos =
-      (int *) xmrealloc (s -> objfile -> md, (char *) line_charpos,
-			 nlines * sizeof (int));
+   (int *) xmrealloc (s -> objfile -> md, (char *) line_charpos,
+		      nlines * sizeof (int));
+
 }
 
 /* Return the character position of a line LINE in symtab S.
@@ -821,7 +847,7 @@ print_source_lines (s, line, stopline, noerror)
       printf_filtered ("%d\t", current_source_line++);
       do
 	{
-	  if (c < 040 && c != '\t' && c != '\n')
+	  if (c < 040 && c != '\t' && c != '\n' && c != '\r')
 	      printf_filtered ("^%c", c + 0100);
 	  else if (c == 0177)
 	    printf_filtered ("^?");
@@ -1293,7 +1319,7 @@ Lines can be specified in these ways:\n\
   FILE:FUNCTION, to distinguish among like-named static functions.\n\
   *ADDRESS, to list around the line containing that address.\n\
 With two args if one is empty it stands for ten lines away from the other arg.");
-  add_com_alias ("l", "list", class_files, 0);
+  add_com_alias ("l", "list", class_files, 1);
 
   add_show_from_set
     (add_set_cmd ("listsize", class_support, var_uinteger,

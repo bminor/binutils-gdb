@@ -1,3 +1,15 @@
+Fri Nov  6 00:14:38 1992  John Gilmore  (gnu@cygnus.com)
+
+	* m68k-stub.c:  Remove ansidecl.h and the few uses of it.
+	Stubs should stand alone as much as possible.
+
+	* source.c (show_directories):  Avoid printf_filtered length prob
+	pointed out by Jonathan Stone.
+
+	* i960-pinsn.c (MEM_MAX, MEM_SIZ):  Set upper limit properly to
+	avoid accesses beyond end of table.  Fix by Lee W. Cooprider,
+	<Lee_Cooprider@vos.stratus.com>.
+
 Thu Nov  5 17:33:08 1992  Fred Fish  (fnf@cygnus.com)
 
 	* {ser-bsd.c, ser-termios.c} (serial_close):  Pass address of
