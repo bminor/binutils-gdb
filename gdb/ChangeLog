@@ -1,3 +1,17 @@
+Thu Oct 26 15:21:32 1995  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* regex.h: Renamed to gnu-regex.h.
+	* regex.c: Renamed to gnu-regex.c.
+	* Makefile.in (POSSLIBS): Refer to gnu-regex.h and gnu-regex.c.
+	(REGEX, REGEX1): Change to gnu-regex.o instead of regex.o.
+	(regex.o): Renamed to gnu-regex.o; refer to gnu-regex.c.
+	(irix5-nat.o, osfsolib.o, gnu-regex.o, solib.o, source.o, symtab.o):
+	Likewise.
+	* irix5-nat.c, osfsolib.c, gnu-regex.c, solib.c, source.c, symtab.c):
+	Include "gnu-regex.h" instead of "regex.h".
+	* alpha-tdep.c (in_prologue): Rename to alpha_in_prologue, to
+	avoid conflicts with symtab.h.
+
 Tue Oct 24 18:30:18 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* config/pa/hppahpux.mh: Remove hardcoding of X locations.

@@ -148,7 +148,7 @@ ENABLE_OBS= @ENABLE_OBS@
 
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
-# -I$(srcdir) for gdb internal headers and possibly for regex.h also.
+# -I$(srcdir) for gdb internal headers and possibly for gnu-regex.h also.
 # -I$(srcdir)/config for more generic config files.
 
 # It is also possible that you will need to add -I/usr/include/sys if
@@ -186,8 +186,8 @@ INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(LDFLAGS)
 
 # We are using our own version of REGEX now to be consistent across
 # machines.
-REGEX = regex.o
-REGEX1 = regex.o
+REGEX = gnu-regex.o
+REGEX1 = gnu-regex.o
 
 # If your system is missing alloca(), or, more likely, it's there but
 # it doesn't work, then refer to libiberty.
@@ -437,7 +437,7 @@ INFOFILES = gdb.info*
 
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 
-POSSLIBS = regex.c regex.h
+POSSLIBS = gnu-regex.c gnu-regex.h
 
 # {X,T,NAT}DEPFILES are something of a pain in that it's hard to
 # default their values the way we do for SER_HARDWIRE; in the future
@@ -1213,7 +1213,7 @@ inftarg.o: inftarg.c $(wait_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 
 irix4-nat.o: irix4-nat.c $(defs_h) $(inferior_h)
 irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) target.h \
-	$(symtab_h) symfile.h objfiles.h $(command_h) $(frame_h) regex.h \
+	$(symtab_h) symfile.h objfiles.h $(command_h) $(frame_h) gnu-regex.h \
 	language.h
 isi-xdep.o: isi-xdep.c
 
@@ -1308,7 +1308,7 @@ objfiles.o: objfiles.c $(bfd_h) $(defs_h) objfiles.h symfile.h \
 	$(symtab_h)
 
 osfsolib.o: osfsolib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	objfiles.h regex.h symfile.h target.h language.h
+	objfiles.h gnu-regex.h symfile.h target.h language.h
 
 somread.o: somread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
@@ -1332,7 +1332,7 @@ pyr-tdep.o: pyr-tdep.c $(defs_h)
 
 pyr-xdep.o: pyr-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
-regex.o: regex.c regex.h $(defs_h)
+gnu-regex.o: gnu-regex.c gnu-regex.h $(defs_h)
 
 remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h
@@ -1424,10 +1424,10 @@ sh3-rom.o: sh3-rom.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h
 
 solib.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	objfiles.h regex.h symfile.h target.h
+	objfiles.h gnu-regex.h symfile.h target.h
 
 source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
-	$(gdbcore_h) language.h objfiles.h regex.h symfile.h $(symtab_h)
+	$(gdbcore_h) language.h objfiles.h gnu-regex.h symfile.h $(symtab_h)
 
 sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 
@@ -1459,7 +1459,7 @@ symmisc.o: symmisc.c $(bfd_h) $(breakpoint_h) $(command_h) $(defs_h) \
 
 symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h objfiles.h \
-	regex.h symfile.h $(symtab_h) target.h $(value_h)
+	gnu-regex.h symfile.h $(symtab_h) target.h $(value_h)
 
 tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
 	$(symtab_h)

@@ -58,7 +58,7 @@ static void reinit_frame_cache_sfunc PARAMS ((char *, int,
 static CORE_ADDR after_prologue PARAMS ((CORE_ADDR pc,
 					 alpha_extra_func_info_t proc_desc));
 
-static int in_prologue PARAMS ((CORE_ADDR pc,
+static int alpha_in_prologue PARAMS ((CORE_ADDR pc,
 				alpha_extra_func_info_t proc_desc));
 
 /* Heuristic_proc_start may hunt through the text section for a long
@@ -444,7 +444,7 @@ after_prologue (pc, proc_desc)
    are definatly *not* in a function prologue.  */
 
 static int
-in_prologue (pc, proc_desc)
+alpha_in_prologue (pc, proc_desc)
      CORE_ADDR pc;
      alpha_extra_func_info_t proc_desc;
 {
@@ -530,7 +530,7 @@ find_proc_desc (pc, next_frame)
 	proc_desc = (alpha_extra_func_info_t)SYMBOL_VALUE(sym);
 	if (next_frame == NULL)
 	  {
-	    if (PROC_DESC_IS_DUMMY (proc_desc) || in_prologue (pc, proc_desc))
+	    if (PROC_DESC_IS_DUMMY (proc_desc) || alpha_in_prologue (pc, proc_desc))
 	      {
 		alpha_extra_func_info_t found_heuristic =
 		  heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),

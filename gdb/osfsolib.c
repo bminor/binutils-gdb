@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "target.h"
 #include "frame.h"
-#include "regex.h"
+#include "gnu-regex.h"
 #include "inferior.h"
 #include "language.h"
 

@@ -79,7 +79,7 @@ init_syntax_once ()
 #endif /* SYNTAX_TABLE */
 #endif /* not emacs */
 
-#include "regex.h"
+#include "gnu-regex.h"
 
 /* Number of failure points to allocate space for initially,
  when matching.  If this number is exceeded, more space is allocated,

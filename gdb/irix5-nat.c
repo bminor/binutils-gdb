@@ -196,7 +196,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 #include "objfiles.h"
 #include "command.h"
 #include "frame.h"
-#include "regex.h"
+#include "gnu-regex.h"
 #include "inferior.h"
 #include "language.h"
 

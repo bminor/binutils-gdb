@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "objfiles.h"
 #include "gdbcmd.h"
 #include "call-cmds.h"
-#include "regex.h"
+#include "gnu-regex.h"
 #include "expression.h"
 #include "language.h"
 #include "demangle.h"
