@@ -1,3 +1,14 @@
+2005-04-03  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Targets): Document "set/show architecture".  Remove
+	redundant index entry for "target" command.
+	(Backtrace): Add index entries.
+	(Symbols, Fortran): Document the "set case-sensitive" command.
+	(DJGPP Native): Document "set com1base", "set com1irq", etc.
+	(Print Settings): Add index entry for "set demangle-style".
+	(Target Commands): Document "set download-write-size".
+	(Debugging Output): Document "set exec-done-display".
+
 2005-04-02  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Files): Fix the name and documentation of

@@ -4124,6 +4124,9 @@ The display for frame zero does not begin with a program counter
 value, indicating that your program has stopped at the beginning of the
 code for line @code{993} of @code{builtin.c}.
 
+@cindex backtrace beyond @code{main} function
+@cindex program entry point
+@cindex startup code, and backtrace
 Most programs have a standard user entry point---a place where system
 libraries and startup code transition into user code.  For C this is
 @code{main}.  When @value{GDBN} finds the entry function in a backtrace
@@ -4149,7 +4152,7 @@ Display the current user entry point backtrace policy.
 
 @item set backtrace past-entry
 @itemx set backtrace past-entry on
-Backtraces will continue past the internal entry point of an application. 
+Backtraces will continue past the internal entry point of an application.
 This entry point is encoded by the linker when the application is built,
 and is likely before the user entry point @code{main} (or equivalent) is called.
 
@@ -5649,6 +5652,7 @@ or demangled form.
 
 @cindex C@t{++} symbol decoding style
 @cindex symbol decoding style, C@t{++}
+@kindex set demangle-style
 @item set demangle-style @var{style}
 Choose among several encoding schemes used by different compilers to
 represent C@t{++} names.  The choices for @var{style} are currently:
@@ -8800,6 +8804,11 @@ all @code{COMMON} blocks visible at current program location are
 printed.
 @end table
 
+Fortran symbols are usually case-insensitive, so @value{GDBN} by
+default uses case-insensitive matches for Fortran symbols.  You can
+change that with the @samp{set case-insensitive} command, see
+@ref{Symbols}, for the details.
+
 @node Modula-2
 @subsection Modula-2
 
@@ -9625,6 +9634,27 @@ p 'foo.c'::x
 looks up the value of @code{x} in the scope of the file @file{foo.c}.
 
 @table @code
+@cindex case-insensitive symbol names
+@cindex case sensitivity in symbol names
+@kindex set case-sensitive
+@item set case-sensitive on
+@itemx set case-sensitive off
+@itemx set case-sensitive auto
+Normally, when @value{GDBN} looks up symbols, it matches their names
+with case sensitivity determined by the current source language.
+Occasionally, you may wish to control that.  The command @code{set
+case-sensitive} lets you do that by specifying @code{on} for
+case-sensitive matches or @code{off} for case-insensitive ones.  If
+you specify @code{auto}, case sensitivity is reset to the default
+suitable for the source language.  The default is case-sensitive
+matches for all languages except for Fortran, for which the default is
+case-insensitive matches.
+
+@kindex show case-insensitive
+@item show case-insensitive
+This command shows the current setting of case sensitivity for symbols
+lookups.
+
 @kindex info address
 @cindex address of a symbol
 @item info address @var{symbol}
@@ -11012,8 +11042,6 @@ it.
 @chapter Specifying a Debugging Target
 
 @cindex debugging target
-@kindex target
-
 A @dfn{target} is the execution environment occupied by your program.
 
 Often, @value{GDBN} runs in the same host environment as your program;
@@ -11024,6 +11052,24 @@ host, or controlling a standalone system over a serial port or a
 realtime system over a TCP/IP connection---you can use the @code{target}
 command to specify one of the target types configured for @value{GDBN}
 (@pxref{Target Commands, ,Commands for managing targets}).
+
+@cindex target architecture
+It is possible to build @value{GDBN} for several different @dfn{target
+architectures}.  When @value{GDBN} is built like that, you can choose
+one of the available architectures with the @kbd{set architecture}
+command.
+
+@table @code
+@kindex set architecture
+@kindex show architecture
+@item set architecture @var{arch}
+This command sets the current target architecture to @var{arch}.  The
+value of @var{arch} can be @code{"auto"}, in addition to one of the
+supported architectures.
+
+@item show architecture
+Show the current target architecture.
+@end table
 
 @menu
 * Active Targets::              Active targets
@@ -11177,7 +11223,23 @@ Different targets are available on different configurations of @value{GDBN};
 your configuration may have more or fewer targets.
 
 Many remote targets require you to download the executable's code
-once you've successfully established a connection.
+once you've successfully established a connection.  You may wish to
+control the size of the data chunks used by @value{GDBN} to download
+program parts to the remote target.
+
+@table @code
+@kindex set download-write-size
+@item set download-write-size @var{size}
+Set the write size used when downloading a program.  Only used when
+downloading a program onto a remote target.  Specify zero or a
+negative value to disable blocked writes.  The actual size of each
+transfer is also limited by the size of the target packet and the
+memory cache.
+
+@kindex show download-write-size
+@item show download-write-size
+Show the current value of the write size.
+@end table
 
 @table @code
 
@@ -12188,6 +12250,45 @@ mapped 1:1, i.e.@: the physical and linear addresses are identical.
 
 This command is supported only with some DPMI servers.
 @end table
+
+In addition to native debugging, the DJGPP port supports remote
+debugging via a serial data link.  The following commands are specific
+to remote serial debugging in the DJGPP port of @value{GDBN}.
+
+@table @code
+@kindex set com1base
+@kindex set com1irq
+@kindex set com2base
+@kindex set com2irq
+@kindex set com3base
+@kindex set com3irq
+@kindex set com4base
+@kindex set com4irq
+@item set com1base @var{addr}
+This command sets the base I/O port address of the @file{COM1} serial
+port.
+
+@item set com1irq @var{irq}
+This command sets the @dfn{Interrupt Request} (@code{IRQ}) line to use
+for the @file{COM1} serial port.
+
+There are similar commands @samp{set com2base}, @samp{set com3irq},
+etc.@: for setting the port address and the @code{IRQ} lines for the
+other 3 COM ports.
+
+@kindex show com1base
+@kindex show com1irq
+@kindex show com2base
+@kindex show com2irq
+@kindex show com3base
+@kindex show com3irq
+@kindex show com4base
+@kindex show com4irq
+The related commands @samp{show com1base}, @samp{show com1irq} etc.@:
+display the current settings of the base address and the @code{IRQ}
+lines used by the COM ports.
+@end table
+
 
 @node Cygwin Native
 @subsection Features for Debugging MS Windows PE executables
@@ -13849,7 +13950,6 @@ Set the current OS ABI to @var{abi}.
 @end table
 
 @cindex float promotion
-@kindex set coerce-float-to-double
 
 Generally, the way that an argument of type @code{float} is passed to a
 function depends on whether the function is prototyped.  For a prototyped
@@ -13863,6 +13963,7 @@ a function is prototyped.  If @value{GDBN} calls a function that is not marked
 as prototyped, it consults @kbd{set coerce-float-to-double}.
 
 @table @code
+@kindex set coerce-float-to-double
 @item set coerce-float-to-double
 @itemx set coerce-float-to-double on
 Arguments of type @code{float} will be promoted to @code{double} when passed
@@ -13980,23 +14081,33 @@ Displays state of confirmation requests.
 @cindex optional debugging messages
 
 @table @code
+@kindex set exec-done-display
+@item set exec-done-display
+Turns on or off the notification of asynchronous commands'
+completion.  When on, @value{GDBN} will print a message when an
+asynchronous command finishes its execution.  The default is off.
+@kindex show exec-done-display
+@item show exec-done-display
+Displays the current setting of asynchronous command completion
+notification.
 @kindex set debug
 @cindex gdbarch debugging info
+@cindex architecture debugging info
 @item set debug arch
-Turns on or off display of gdbarch debugging info. The default is off
+Turns on or off display of gdbarch debugging info.  The default is off
 @kindex show debug
 @item show debug arch
 Displays the current state of displaying gdbarch debugging info.
 @item set debug event
 @cindex event debugging info
-Turns on or off display of @value{GDBN} event debugging info. The
+Turns on or off display of @value{GDBN} event debugging info.  The
 default is off.
 @item show debug event
 Displays the current state of displaying @value{GDBN} event debugging
 info.
 @item set debug expression
 @cindex expression debugging info
-Turns on or off display of @value{GDBN} expression debugging info. The
+Turns on or off display of @value{GDBN} expression debugging info.  The
 default is off.
 @item show debug expression
 Displays the current state of displaying @value{GDBN} expression
