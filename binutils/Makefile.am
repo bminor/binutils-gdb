@@ -418,7 +418,9 @@ nlmconv.o: nlmconv.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 nm.o: nm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
-  $(INCDIR)/aout/ranlib.h $(INCDIR)/demangle.h $(INCDIR)/libiberty.h
+  $(INCDIR)/aout/ranlib.h $(INCDIR)/demangle.h $(INCDIR)/libiberty.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h
 not-ranlib.o: not-ranlib.c
 not-strip.o: not-strip.c
 objcopy.o: objcopy.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
@@ -498,16 +500,16 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/dwarf2.h $(INCDIR)/elf/alpha.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/arm.h \
   $(INCDIR)/elf/avr.h $(INCDIR)/elf/cris.h $(INCDIR)/elf/d10v.h \
-  $(INCDIR)/elf/d30v.h $(INCDIR)/elf/fr30.h $(INCDIR)/elf/h8.h \
-  $(INCDIR)/elf/hppa.h $(INCDIR)/elf/i386.h $(INCDIR)/elf/i860.h \
-  $(INCDIR)/elf/i960.h $(INCDIR)/elf/ia64.h $(INCDIR)/elf/m32r.h \
-  $(INCDIR)/elf/m68k.h $(INCDIR)/elf/mcore.h $(INCDIR)/elf/mips.h \
-  $(INCDIR)/elf/mmix.h $(INCDIR)/elf/mn10200.h $(INCDIR)/elf/mn10300.h \
-  $(INCDIR)/elf/or32.h $(INCDIR)/elf/pj.h $(INCDIR)/elf/ppc.h \
-  $(INCDIR)/elf/s390.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/sparc.h \
-  $(INCDIR)/elf/v850.h $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/xstormy16.h \
-  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
-  unwind-ia64.h
+  $(INCDIR)/elf/d30v.h $(INCDIR)/elf/dlx.h $(INCDIR)/elf/fr30.h \
+  $(INCDIR)/elf/h8.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/i386.h \
+  $(INCDIR)/elf/i860.h $(INCDIR)/elf/i960.h $(INCDIR)/elf/ia64.h \
+  $(INCDIR)/elf/m32r.h $(INCDIR)/elf/m68k.h $(INCDIR)/elf/mcore.h \
+  $(INCDIR)/elf/mips.h $(INCDIR)/elf/mmix.h $(INCDIR)/elf/mn10200.h \
+  $(INCDIR)/elf/mn10300.h $(INCDIR)/elf/or32.h $(INCDIR)/elf/pj.h \
+  $(INCDIR)/elf/ppc.h $(INCDIR)/elf/s390.h $(INCDIR)/elf/sh.h \
+  $(INCDIR)/elf/sparc.h $(INCDIR)/elf/v850.h $(INCDIR)/elf/x86-64.h \
+  $(INCDIR)/elf/xstormy16.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/fopen-same.h unwind-ia64.h
 resres.o: resres.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h windres.h \

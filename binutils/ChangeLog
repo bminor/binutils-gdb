@@ -1,5 +1,9 @@
 2002-06-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regnerate.
+
 	* bucomm.c: Replace CONST with const.
 	* nm.c: Likewise.
 	* objdump.c: Likewise.

@@ -119,6 +119,8 @@ USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 YACC = @YACC@
+bfdincludedir = @bfdincludedir@
+bfdlibdir = @bfdlibdir@
 l = @l@
 
 AUTOMAKE_OPTIONS = cygnus
