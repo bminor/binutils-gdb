@@ -1,3 +1,8 @@
+2001-06-02  H.J. Lu  <hjl@gnu.org>
+
+	* coff-ia64.c (ia64coff_object_p): Rewrite with
+	external_PEI_DOS_hdr and external_PEI_IMAGE_hdr.
+
 2001-06-01  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c (elf64_x86_64_relocate_section): Add PC8
