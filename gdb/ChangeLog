@@ -1,5 +1,13 @@
 2002-04-07  Andrew Cagney  <ac131313@redhat.com>
 
+	I believe Jeff Law denies responsability for this one:
+	* config/pa/hpux11w.mh (MH_CFLAGS): Add -Dvfork=fork.
+	* config/pa/hpux11.mh (MH_CFLAGS): Add -Dvfork=fork.
+	* config/pa/hpux1020.mh (MH_CFLAGS): Add -Dvfork=fork.
+	Work-around for PR gdb/366.
+
+2002-04-07  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS (Misc): List Daniel Jacobowitz as the GDBSERVER
 	maintainer.
 
