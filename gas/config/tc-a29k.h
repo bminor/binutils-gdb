@@ -26,4 +26,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define tc_crawl_symbol_chain(a)	; /* not used */
 #define tc_coff_symbol_emit_hook(a)	; /* not used */
 
+#define AOUT_MACHTYPE 101
+
 /* end of tc-a29k.h */
