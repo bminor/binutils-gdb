@@ -1,3 +1,7 @@
+2003-11-28  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* cxxfilt.c (usage): Mention new -p/--no-params options.
+
 2003-11-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (install-exec-local): Remove common term from string

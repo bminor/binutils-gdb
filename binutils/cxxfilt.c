@@ -73,7 +73,8 @@ static void
 usage (FILE *stream, int status)
 {
   fprintf (stream, "\
-Usage: %s [-_] [-n] [--strip-underscores] [--no-strip-underscores] \n",
+Usage: %s [-_] [-n] [--strip-underscores] [--no-strip-underscores]\n\
+       [-p] [--no-params]\n",
 	   program_name);
 
   fprintf (stream, "\
