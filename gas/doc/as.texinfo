@@ -1,5 +1,13 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright (c) 1991 1992 1993 Free Software Foundation, Inc.
+@c  Copyright (c) 1991 1992 1993 1994 Free Software Foundation, Inc.
+@c UPDATE!!  On future updates--
+@c   (1)   check for new machine-dep cmdline options in
+@c         md_parse_option definitions in config/tc-*.c
+@c   (2)   for platform-specific directives, examine md_pseudo_op
+@c         in config/tc-*.c
+@c   (3)   for object-format specific directives, examine obj_pseudo_op
+@c         in config/obj-*.c       
+@c   (4)   portable directives in potable[] in read.c
 @c %**start of header
 @setfilename as.info
 @c ---config---
@@ -51,7 +59,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the GNU Assembler "@value{AS}".
 
-Copyright (C) 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -85,7 +93,7 @@ instead of in the original English.
 @subtitle for the @value{TARGET} family
 @end ifclear
 @sp 1
-@subtitle March 1993
+@subtitle January 1994
 @sp 1
 @sp 13
 The Free Software Foundation Inc.  thanks The Nice Computer
@@ -111,7 +119,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -2657,6 +2665,8 @@ Some machine configurations provide additional directives.
 @ifset have-stabs
 * Stab::                        @code{.stabd, .stabn, .stabs}
 @end ifset
+
+* String::                      @code{.string "@var{str}"}
 @ifset COFF
 * Tag::                         @code{.tag @var{structname}}
 @end ifset
@@ -3012,8 +3022,9 @@ Both spellings (@samp{.globl} and @samp{.global}) are accepted, for
 compatibility with other assemblers.
 
 @ifset HPPA
-On the HPPA symbols are made visible to @code{@value{LD}} with the 
-@code{.EXPORT} directive.
+On the HPPA, @code{.global} is not always enough to make it accessible to other
+partial programs.  You may need the HPPA-only @code{.EXPORT} directive as well.
+@xref{HPPA Directives,, HPPA Assembler Directives}.
 @end ifset
 
 @node hword
@@ -3487,9 +3498,10 @@ and @var{fill} are omitted, @var{fill} is assumed to be zero.
 @ifset HPPA
 @quotation
 @emph{Warning:} @code{.space} has a completely different meaning for HPPA
-targets; use @code{.block} as a substitute.  See @cite{HP9000 Series 800 
-Assembly Language Reference Manual} (HP 92432-90001) for the meaning of
-the @code{.space} directive.
+targets; use @code{.block} as a substitute.  See @cite{HP9000 Series 800
+Assembly Language Reference Manual} (HP 92432-90001) for the meaning of the
+@code{.space} directive.  @xref{HPPA Directives,,HPPA Assembler Directives},
+for a summary.
 @end quotation
 @end ifset
 @end ifclear
@@ -3574,6 +3586,16 @@ All five fields are specified.
 @end table
 @end ifset
 @c end     have-stabs
+
+@node String
+@section @code{.string} "@var{str}"
+
+@cindex string, copying to object file
+@cindex @code{string} directive
+
+Copy the characters in @var{str} to the object file.  You may specify more than
+one string to copy, separated by commas.  Unless otherwise specified for a
+particular machine, the assembler marks the end of each string with a 0 byte.
 
 @ifset COFF
 @node Tag
@@ -4986,27 +5008,182 @@ Since @samp{$} has no special meaning, you may use it in symbol names.
 The HPPA family uses @sc{ieee} floating-point numbers.
 
 @node HPPA Directives
-@section HPPA Machine Directives
-For detailed information on the HPPA machine instruction set, see
-@cite{HP9000 Series 800 Assembly Language Reference Manual} 
-(HP 92432-90001).
+@section HPPA Assembler Directives
 
-@code{@value{AS}} does not support the following assembler directives
-found in the HP manual:
-@itemize @bullet
-@item endm 
-@item enter
-@item leave
-@item listoff
-@item liston
-@item locct
-@item macro
-@end itemize
+@code{@value{AS}} for the HPPA supports many additional directives for
+compatibility with the native assembler.  This section describes them only
+briefly.  For detailed information on HPPA-specific assembler directives, see
+@cite{HP9000 Series 800 Assembly Language Reference Manual} (HP 92432-90001).
 
-@cindex @code{.PARAM} on HPPA
-@code{@value{AS}} supports one additional assembler directive for the
-HPPA: @code{.PARAM}.  It conveys register argument locations for
-static functions.  Its syntax closely follows the @code{.EXPORT} directive.
+@cindex HPPA directives not supported
+@code{@value{AS}} does @emph{not} support the following assembler directives
+described in the HP manual:
+
+@example
+endm           liston  
+enter          locct   
+leave          macro   
+listoff
+@end example
+
+@cindex @code{.param} on HPPA
+Beyond those implemented for compatibility, @code{@value{AS}} supports one
+additional assembler directive for the HPPA: @code{.param}.  It conveys
+register argument locations for static functions.  Its syntax closely follows
+the @code{.export} directive.
+
+@cindex HPPA-only directives
+These are the additional directives in @code{@value{AS}} for the HPPA:
+
+@table @code
+@item .block @var{n}
+@itemx .blockz @var{n}
+Reserve @var{n} bytes of storage, and initialize them to zero.
+
+@item .call 
+Mark the beginning of a procedure call.  Only the special case with @emph{no
+arguments} is allowed.
+
+@item .callinfo [ @var{param}=@var{value}, @dots{} ]  [ @var{flag}, @dots{} ]
+Specify a number of parameters and flags that define the environment for a
+procedure.
+
+@var{param} may be any of @samp{frame} (frame size), @samp{entry_gr} (end of
+general register range), @samp{entry_fr} (end of float register range),
+@samp{entry_sr} (end of space register range).
+
+The values for @var{flag} are @samp{calls} or @samp{caller} (proc has
+subroutines), @samp{no_calls} (proc does not call subroutines), @samp{save_rp}
+(preserve return pointer), @samp{save_sp} (proc preserves stack pointer),
+@samp{no_unwind} (do not unwind this proc), @samp{hpux_int} (proc is interrupt
+routine).
+
+@item .code
+@c ??? Not in HP manual
+Assemble into the code section.
+
+@ifset SOM
+@item .copyright "@var{string}"
+In the SOM object format, insert @var{string} into the object code, marked as a
+copyright string.
+@end ifset
+
+@ifset ELF
+@item .copyright "@var{string}"
+In the ELF object format, insert @var{string} into the object code, marked as a
+version string.
+@end ifset
+
+@item .enter
+Not yet supported; the assembler rejects programs containing this directive.
+
+@item .entry
+Mark the beginning of a procedure.
+
+@item .exit
+Mark the end of a procedure.
+
+@item .export @var{name} [ ,@var{typ} ]  [ ,@var{param}=@var{r} ]
+Make a procedure @var{name} available to callers.  @var{typ}, if present, must
+be one of @samp{absolute}, @samp{code} (ELF only, not SOM), @samp{data},
+@samp{entry}, @samp{data}, @samp{entry}, @samp{millicode}, @samp{plabel},
+@samp{pri_prog}, or @samp{sec_prog}.
+
+@var{param}, if present, provides either relocation information for the
+procedure arguments and result, or a privilege level.  @var{param} may be
+@samp{argw@var{n}} (where @var{n} ranges from @code{0} to @code{3}, and
+indicates one of four one-word arguments); @samp{rtnval} (the procedure's
+result); or @samp{priv_lev} (privilege level).  For arguments or the result,
+@var{r} specifies how to relocate, and must be one of @samp{no} (not
+relocatable), @samp{gr} (argument is in general register), @samp{fr} (in
+floating point register), or @samp{fu} (upper half of float register).
+For @samp{priv_lev}, @var{r} is an integer.
+
+@item .half @var{n}
+@c ?? Not in HP manual
+Define a two-byte integer constant @var{n}; synonym for the portable
+@code{@value{AS}} directive @code{.short}.
+
+@item .import @var{name} [ ,@var{typ} ]
+Converse of @code{.export}; make a procedure available to call.  The arguments
+use the same conventions as the first two arguments for @code{.export}.
+
+@item .label @var{name}
+Define @var{name} as a label for the current assembly location.
+
+@item .leave
+@c ?? Not in HP manual
+Not yet supported; the assembler rejects programs containing this directive.
+
+@item .origin @var{lc}
+Advance location counter to @var{lc}. Synonym for the @code{@value{as}}
+portable directive @code{.org}.
+
+@item .param @var{name} [ ,@var{typ} ]  [ ,@var{param}=@var{r} ]
+@c Not in HP manual
+Similar to @code{.export}, but used for static procedures.
+
+@item .proc
+Use preceding the first statement of a procedure.
+
+@item .procend
+Use following the last statement of a procedure.
+
+@item @var{label} .reg @var{expr}
+@c ?? Not in HP manual
+Synonym for @code{.equ}; define @var{label} with the absolute expression
+@var{expr} as its value.
+
+@item .space @var{secname}
+Switch to section @var{secname}, creating a new section by that name if
+necessary.  You may only use @var{keywords} when creating a new section, not
+when switching to an existing one.  @var{secname} may identify a section by
+number rather than by name.
+@c FIXME! Shouldn't there be optional parameters the first time?  I don't see
+@c provision for them in pa_space.
+
+@ignore
+@item .spnum
+@c ?? Not in HP manual
+FIXME--- Comments in source indicate directive not well understood.
+@end ignore
+
+@item .string "@var{str}"
+@cindex @code{string} directive on HPPA
+Copy the characters in @var{str} to the object file, after converting some
+@samp{\@var{x}} escape sequences to single characters.  Use @samp{\x@var{dd}}
+to refer to a character in hexadecimal.
+@c FIXME! Is that all?  HP manual mentions more, which I don't see in
+@c        pa_stringer. 
+
+@emph{Warning!} The HPPA version of @code{.string} differs in two ways from the
+usual @code{@value{AS}} definition.  First, it performs @samp{\} escape
+preprocessing, as described above; second, it does @emph{not} write a zero byte
+after copying @var{str}.
+
+@item .stringz "@var{str}"
+Like @code{.string}, but appends a zero byte after copying @var{str} to object
+file.
+
+@item .subspa @var{name} [ ,@var{params} ]
+Similar to @code{.space}, but selects a subsection @var{name} within the
+current section.  You may only specify @var{params} when you create a
+subsection (in the first instance of @code{.subspa} for this @var{name}).
+
+If specified, @var{params} declare attributes of the subsection, identified by
+keywords.  The keywords recognized are @samp{quad=@var{expr}} (``quadrant'' for
+this subsection), @samp{align=@var{expr}} (alignment for beginning of this
+subsection; a power of two), @samp{access=@var{expr}} (value for ``access
+rights'' field), @samp{sort=@var{expr}} (sorting order for this subspace in
+link), @samp{code_only} (subsection contains only code), @samp{unloadable}
+@c ?!
+(subsection cannot be loaded into memory), @samp{common} (subsection is common
+block), @samp{dup_comm} (initialized data may have duplicate names),
+or @samp{zero} (subsection is all zeros, do not write in object file).
+
+@item .version "@var{str}"
+Write @var{str} as version identifier in object code.
+@end table
 
 @node HPPA Opcodes
 @section Opcodes
@@ -6957,7 +7134,7 @@ described elsewhere in this manual.
 
 If you have contributed to @code{@value{AS}} and your name isn't listed here,
 it is not meant as a slight.  We just don't know about it.  Send mail to the
-maintainer, and we'll correct the situation.  Currently (June 1993), the
+maintainer, and we'll correct the situation.  Currently (January 1994), the
 maintainer is Ken Raeburn (email address @code{raeburn@@cygnus.com}).
 
 Dean Elsner wrote the original GNU assembler for the VAX.@footnote{Any more
