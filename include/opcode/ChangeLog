@@ -1,3 +1,7 @@
+Mon Nov  4 12:52:48 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h (MN10300_OPERAND_REPEATED): Define.
+
 Fri Nov  1 10:31:02 1996  Richard Henderson  <rth@tamu.edu>
 
 	* alpha.h: Don't include "bfd.h"; private relocation types are now

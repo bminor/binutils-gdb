@@ -89,4 +89,19 @@ extern const struct mn10300_operand mn10300_operands[];
 #define MN10300_OPERAND_PROMOTE 0x40
 
 #define MN10300_OPERAND_PAREN 0x80
+
+#define MN10300_OPERAND_REPEATED 0x100
+
+/* Opcode Formats.  */
+#define FMT_S0 1
+#define FMT_S1 2
+#define FMT_S2 3
+#define FMT_S4 4
+#define FMT_S6 5
+#define FMT_D0 6
+#define FMT_D1 7
+#define FMT_D2 8
+#define FMT_D4 9
+#define FMT_D5 10
+
 #endif /* MN10300_H */
