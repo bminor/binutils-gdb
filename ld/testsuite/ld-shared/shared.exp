@@ -202,13 +202,16 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	setup_xfail "*-*-sunos4*"
 	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o shared
 
-	# Test ELF shared library relocations with a non-zero load
-	# address for the library.  Near as I can tell, the R_*_RELATIVE
-	# relocations for various targets are broken in the case where
-	# the load address is not zero (which is the default).
-	setup_xfail "*-*-sunos4*"
-	shared_test shnp "shared (non PIC, load offset)" \
-		mainnp.o sh1np.o sh2np.o shared "$srcdir/$subdir/elf-offset.ld"
+	if [file exists "$srcdir/$subdir/elf-offset.ld"] {
+	    # Test ELF shared library relocations with a non-zero load
+	    # address for the library.  Near as I can tell, the R_*_RELATIVE
+	    # relocations for various targets are broken in the case where
+	    # the load address is not zero (which is the default).
+	    setup_xfail "*-*-sunos4*"
+	    shared_test shnp "shared (non PIC, load offset)" \
+		    mainnp.o sh1np.o sh2np.o shared \
+		    "$srcdir/$subdir/elf-offset.ld"
+	}
     } }
 
     # Now compile the code using -fpic.

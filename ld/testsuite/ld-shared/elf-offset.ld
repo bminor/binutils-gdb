@@ -5,7 +5,7 @@ PHDRS {
 }
 
 MEMORY {
-       RAM : ORIGIN = 0x10000, LENGTH = 0x7fffff
+       RAM : ORIGIN = 0x10000, LENGTH = 0x7ffffff
 }
 
 SECTIONS {
