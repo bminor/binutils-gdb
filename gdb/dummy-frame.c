@@ -387,7 +387,7 @@ dummy_frame_this_id (struct frame_info *next_frame,
     }
   else
     {
-      /* Outch!  We're not trying to find the innermost frame's ID yet
+      /* Ouch!  We're not trying to find the innermost frame's ID yet
 	 we're trying to unwind to a dummy.  The architecture must
 	 provide the unwind_dummy_id() method.  Abandon the unwind
 	 process but only after first warning the user.  */

@@ -1,5 +1,6 @@
 2003-10-09  Michael Snyder  <msnyder@redhat.com>
 
+	* dummy-frame.c: Fix typo.
 	* d10v-tdep.c: Random whitespace/comment tweaks.
 
 2003-10-09  Elena Zannoni  <ezannoni@redhat.com>
