@@ -1,5 +1,6 @@
 Fri Feb 13 13:11:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	From H.J. Lu <hjl@gnu.org>:
 	* Makefile.am (libbfd_la_LDFLAGS): Define.
 	* Makefile.in: Rebuild.
 

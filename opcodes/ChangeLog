@@ -7,6 +7,7 @@ Fri Feb 13 13:12:14 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* configure.in: Get the version number from BFD.
 	* configure: Rebuild.
 
+	From H.J. Lu <hjl@gnu.org>:
 	* Makefile.am (libopcodes_la_LDFLAGS): Define.
 	* Makefile.in: Rebuild.
 
