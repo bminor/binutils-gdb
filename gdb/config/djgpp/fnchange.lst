@@ -89,7 +89,6 @@
 @V@/gdb/config/alpha/alpha-osf3.mh @V@/gdb/config/alpha/alphosf3.mh
 @V@/gdb/config/alpha/tm-alphalinux.h @V@/gdb/config/alpha/tm-alplinux.h
 @V@/gdb/config/i386/nm-linux64.h @V@/gdb/config/i386/nm-lx64.h
-@V@/gdb/config/i386/tm-linux64.h @V@/gdb/config/i386/tm-lx64.h
 @V@/gdb/config/i386/nm-i386sco4.h @V@/gdb/config/i386/nm-sco4.h
 @V@/gdb/config/i386/nm-i386sco5.h @V@/gdb/config/i386/nm-sco5.h
 @V@/gdb/config/i386/nm-i386sol2.h @V@/gdb/config/i386/nm-sol2.h
@@ -103,7 +102,6 @@
 @V@/gdb/config/rs6000/nm-rs6000ly.h @V@/gdb/config/rs6000/nm-rs6kly.h
 @V@/gdb/config/rs6000/tm-rs6000.h @V@/gdb/config/rs6000/tm-rs6k.h
 @V@/gdb/config/rs6000/tm-rs6000ly.h @V@/gdb/config/rs6000/tm-rs6kly.h
-@V@/gdb/config/rs6000/tm-rs6000-aix4.h @V@/gdb/config/rs6000/tm-rs6kaix4.h
 @V@/gdb/config/sparc/tm-sparclynx.h @V@/gdb/config/sparc/tm-splynx.h
 @V@/gdb/f-exp.tab.c @V@/gdb/f-exp_tab.c
 @V@/gdb/gdbtk/ChangeLog-2001 @V@/gdb/gdbtk/ChangeLog.001
