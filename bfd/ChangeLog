@@ -1,5 +1,9 @@
 2004-08-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (struct ppc_link_hash_entry): Make "oh" a
+	"struct ppc_link_hash_entry *".  Adjust all references.
+	(ppc64_elf_hide_symbol): Correct a comment.
+
 	* elf64-ppc.c (get_opd_info): New function.
 	(adjust_opd_syms): Use get_opd_info.  Define removed symbols as zero.
 	(ppc64_elf_edit_opd): Use get_opd_info.  Check that sym has a dot

@@ -2771,7 +2771,7 @@ struct ppc_link_hash_entry
   struct ppc_dyn_relocs *dyn_relocs;
 
   /* Link between function code and descriptor symbols.  */
-  struct elf_link_hash_entry *oh;
+  struct ppc_link_hash_entry *oh;
 
   /* Flag function code and descriptor symbols.  */
   unsigned int is_func:1;
@@ -3582,7 +3582,7 @@ update_plt_info (bfd *abfd, struct ppc_link_hash_entry *eh, bfd_vma addend)
 static struct ppc_link_hash_entry *
 get_fdh (struct ppc_link_hash_entry *fh, struct ppc_link_hash_table *htab)
 {
-  struct ppc_link_hash_entry *fdh = (struct ppc_link_hash_entry *) fh->oh;
+  struct ppc_link_hash_entry *fdh = fh->oh;
 
   if (fdh == NULL)
     {
@@ -3593,9 +3593,9 @@ get_fdh (struct ppc_link_hash_entry *fh, struct ppc_link_hash_table *htab)
       if (fdh != NULL)
 	{
 	  fdh->is_func_descriptor = 1;
-	  fdh->oh = &fh->elf;
+	  fdh->oh = fh;
 	  fh->is_func = 1;
-	  fh->oh = &fdh->elf;
+	  fh->oh = fdh;
 	}
     }
 
@@ -4153,14 +4153,13 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	      /* Function descriptor syms cause the associated
 		 function code sym section to be marked.  */
 	      if (fdh->is_func_descriptor)
-		rsec = fdh->oh->root.u.def.section;
+		rsec = fdh->oh->elf.root.u.def.section;
 
 	      /* Function entry syms return NULL if they are in .opd
 		 and are not ._start (or others undefined on the ld
 		 command line).  Thus we avoid marking all function
 		 sections, as all functions are referenced in .opd.  */
-	      else if ((fdh->oh != NULL
-			&& ((struct ppc_link_hash_entry *) fdh->oh)->is_entry)
+	      else if ((fdh->oh != NULL && fdh->oh->is_entry)
 		       || ppc64_elf_section_data (sec)->opd.func_sec == NULL)
 		rsec = h->root.u.def.section;
 	      break;
@@ -4430,8 +4429,8 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
 	  fdh->elf.elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	}
       fdh->is_func_descriptor = 1;
-      fdh->oh = &fh->elf;
-      fh->oh = &fdh->elf;
+      fdh->oh = fh;
+      fh->oh = fdh;
     }
 
   /* Now that the info is on the function descriptor, clear the
@@ -4726,11 +4725,13 @@ ppc64_elf_hide_symbol (struct bfd_link_info *info,
 		       struct elf_link_hash_entry *h,
 		       bfd_boolean force_local)
 {
+  struct ppc_link_hash_entry *eh;
   _bfd_elf_link_hash_hide_symbol (info, h, force_local);
 
-  if (((struct ppc_link_hash_entry *) h)->is_func_descriptor)
+  eh = (struct ppc_link_hash_entry *) h;
+  if (eh->is_func_descriptor)
     {
-      struct elf_link_hash_entry *fh = ((struct ppc_link_hash_entry *) h)->oh;
+      struct ppc_link_hash_entry *fh = eh->oh;
 
       if (fh == NULL)
 	{
@@ -4744,14 +4745,15 @@ ppc64_elf_hide_symbol (struct bfd_link_info *info,
 	     when it runs out of memory.  This function doesn't have a
 	     return status, so there's no way to gracefully return an
 	     error.  So cheat.  We know that string[-1] can be safely
-	     dereferenced;  It's either a string in an ELF string
-	     table, or allocated in an objalloc structure.  */
+	     accessed;  It's either a string in an ELF string table,
+	     or allocated in an objalloc structure.  */
 
-	  p = h->root.root.string - 1;
+	  p = eh->elf.root.root.string - 1;
 	  save = *p;
 	  *(char *) p = '.';
 	  htab = ppc_hash_table (info);
-	  fh = elf_link_hash_lookup (&htab->elf, p, FALSE, FALSE, FALSE);
+	  fh = (struct ppc_link_hash_entry *)
+	    elf_link_hash_lookup (&htab->elf, p, FALSE, FALSE, FALSE);
 	  *(char *) p = save;
 
 	  /* Unfortunately, if it so happens that the string we were
@@ -4760,20 +4762,21 @@ ppc64_elf_hide_symbol (struct bfd_link_info *info,
 	     reason the lookup should fail.  */
 	  if (fh == NULL)
 	    {
-	      q = h->root.root.string + strlen (h->root.root.string);
-	      while (q >= h->root.root.string && *q == *p)
+	      q = eh->elf.root.root.string + strlen (eh->elf.root.root.string);
+	      while (q >= eh->elf.root.root.string && *q == *p)
 		--q, --p;
-	      if (q < h->root.root.string && *p == '.')
-		fh = elf_link_hash_lookup (&htab->elf, p, FALSE, FALSE, FALSE);
+	      if (q < eh->elf.root.root.string && *p == '.')
+		fh = (struct ppc_link_hash_entry *)
+		  elf_link_hash_lookup (&htab->elf, p, FALSE, FALSE, FALSE);
 	    }
 	  if (fh != NULL)
 	    {
-	      ((struct ppc_link_hash_entry *) h)->oh = fh;
-	      ((struct ppc_link_hash_entry *) fh)->oh = h;
+	      eh->oh = fh;
+	      fh->oh = eh;
 	    }
 	}
       if (fh != NULL)
-	_bfd_elf_link_hash_hide_symbol (info, fh, force_local);
+	_bfd_elf_link_hash_hide_symbol (info, &fh->elf, force_local);
     }
 }
 
@@ -6146,14 +6149,14 @@ ppc_type_of_stub (asection *input_sec,
   if (h != NULL)
     {
       if (h->oh != NULL
-	  && h->oh->dynindx != -1)
+	  && h->oh->elf.dynindx != -1)
 	{
 	  struct plt_entry *ent;
-	  for (ent = h->oh->plt.plist; ent != NULL; ent = ent->next)
+	  for (ent = h->oh->elf.plt.plist; ent != NULL; ent = ent->next)
 	    if (ent->addend == rel->r_addend
 		&& ent->plt.offset != (bfd_vma) -1)
 	      {
-		*hash = (struct ppc_link_hash_entry *) h->oh;
+		*hash = h->oh;
 		return ppc_stub_plt_call;
 	      }
 	}
@@ -6359,17 +6362,17 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       /* Do the best we can for shared libraries built without
 	 exporting ".foo" for each "foo".  This can happen when symbol
 	 versioning scripts strip all bar a subset of symbols.  */
-      if (stub_entry->h->oh->root.type != bfd_link_hash_defined
-	  && stub_entry->h->oh->root.type != bfd_link_hash_defweak)
+      if (stub_entry->h->oh->elf.root.type != bfd_link_hash_defined
+	  && stub_entry->h->oh->elf.root.type != bfd_link_hash_defweak)
 	{
 	  /* Point the symbol at the stub.  There may be multiple stubs,
 	     we don't really care;  The main thing is to make this sym
 	     defined somewhere.  Maybe defining the symbol in the stub
 	     section is a silly idea.  If we didn't do this, htab->top_id
 	     could disappear.  */
-	  stub_entry->h->oh->root.type = bfd_link_hash_defined;
-	  stub_entry->h->oh->root.u.def.section = stub_entry->stub_sec;
-	  stub_entry->h->oh->root.u.def.value = stub_entry->stub_offset;
+	  stub_entry->h->oh->elf.root.type = bfd_link_hash_defined;
+	  stub_entry->h->oh->elf.root.u.def.section = stub_entry->stub_sec;
+	  stub_entry->h->oh->elf.root.u.def.value = stub_entry->stub_offset;
 	}
 
       /* Now build the stub.  */
@@ -6412,9 +6415,9 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
   if (htab->emit_stub_syms
       && !(stub_entry->stub_type == ppc_stub_plt_call
-	   && stub_entry->h->oh->root.type == bfd_link_hash_defined
-	   && stub_entry->h->oh->root.u.def.section == stub_entry->stub_sec
-	   && stub_entry->h->oh->root.u.def.value == stub_entry->stub_offset))
+	   && stub_entry->h->oh->elf.root.type == bfd_link_hash_defined
+	   && stub_entry->h->oh->elf.root.u.def.section == stub_entry->stub_sec
+	   && stub_entry->h->oh->elf.root.u.def.value == stub_entry->stub_offset))
     {
       struct elf_link_hash_entry *h;
       h = elf_link_hash_lookup (&htab->elf, stub_entry->root.string,
@@ -7902,7 +7905,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     will be replaced with an instruction to restore the TOC
 	     base pointer.  */
 	  if (((h != NULL
-		&& (fdh = ((struct ppc_link_hash_entry *) h)->oh) != NULL
+		&& (fdh = &((struct ppc_link_hash_entry *) h)->oh->elf) != NULL
 		&& fdh->plt.plist != NULL)
 	       || ((fdh = h, sec) != NULL
 		   && sec->output_section != NULL
