@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -343,12 +343,20 @@ DEFUN(sec_to_styp_flags, (sec_name, sec_flags),
 	return((long)STYP_TEXT);
     } else if (!strcmp(sec_name, _DATA)) {
 	return((long)STYP_DATA);
+#ifdef TWO_DATA_SECS
+    } else if (!strcmp(sec_name, ".data2")) {
+        return((long)STYP_DATA);
+#endif /* TWO_DATA_SECS */
     } else if (!strcmp(sec_name, _BSS)) {
 	return((long)STYP_BSS);
 #ifdef _COMMENT
     } else if (!strcmp(sec_name, _COMMENT)) {
         return((long)STYP_INFO);
 #endif /* _COMMENT */
+#ifdef _LIB
+    } else if (!strcmp(sec_name, _LIB)) {
+        return((long)STYP_LIB);
+#endif /* _LIB */
     }
 
 /* Try and figure out what it should be */
@@ -363,6 +371,11 @@ DEFUN(sec_to_styp_flags, (sec_name, sec_flags),
    else if (sec_flags & SEC_LOAD) styp_flags = STYP_TEXT;
 
    if (styp_flags == 0) styp_flags = STYP_BSS;
+
+#ifdef STYP_NOLOAD
+   if (sec_flags & SEC_NEVER_LOAD)
+        styp_flags |= STYP_NOLOAD;
+#endif
 
    return(styp_flags);
 }
@@ -379,22 +392,30 @@ DEFUN(styp_to_sec_flags, (styp_flags),
 {
   flagword	sec_flags=0;
 
+#ifdef STYP_NOLOAD
+  if (styp_flags & STYP_NOLOAD)
+  {
+    sec_flags |= SEC_NEVER_LOAD;
+  }
+#endif /* STYP_NOLOAD */
+
   if ((styp_flags & STYP_TEXT) || (styp_flags & STYP_DATA)) 
   {
-    sec_flags = SEC_LOAD | SEC_ALLOC;
+    sec_flags |= SEC_LOAD | SEC_ALLOC;
   }
   else if (styp_flags & STYP_BSS) 
   {
-    sec_flags = SEC_ALLOC;
+    sec_flags |= SEC_ALLOC;
   }
   else if (styp_flags & STYP_INFO) 
   {
-    sec_flags = SEC_NEVER_LOAD;
+    sec_flags |= SEC_NEVER_LOAD;
   }
   else
   {
-    sec_flags = SEC_ALLOC | SEC_LOAD;
+    sec_flags |= SEC_ALLOC | SEC_LOAD;
   }
+
 #ifdef STYP_LIT			/* A29k readonly text/data section type */
   if ((styp_flags & STYP_LIT) == STYP_LIT)
   {
@@ -937,6 +958,12 @@ DEFUN(make_a_section_from_file,(abfd, hdr, target_index),
   name[sizeof (hdr->s_name)] = 0;
 
   return_section = bfd_make_section(abfd, name);
+#ifdef TWO_DATA_SECS
+  /* On SCO a file created by the Microsoft assembler can have two
+     .data sections.  We use .data2 for the second one.  */
+  if (return_section == NULL && strcmp(name, _DATA) == 0)
+    return_section = bfd_make_section(abfd, ".data2");
+#endif /* TWO_DATA_SECS */
   if (return_section == NULL)
    return false;
 
@@ -2497,7 +2524,14 @@ DEFUN(coff_write_object_contents,(abfd),
       {
 	internal_f.f_nscns ++;
 	strncpy(&(section.s_name[0]), current->name, 8);
-	section.s_vaddr = current->vma + pad;
+#ifdef _LIB
+	/* Always set s_vaddr of .lib to 0.  This is right for SVR3.2
+	   Ian Taylor <ian@cygnus.com>.  */
+	if (strcmp (current->name, _LIB) == 0)
+	  section.s_vaddr = 0;
+	else
+#endif
+	  section.s_vaddr = current->vma + pad;
 	section.s_paddr = current->vma + pad;
 	section.s_size = current->_raw_size - pad;
 	/*
@@ -2505,7 +2539,7 @@ DEFUN(coff_write_object_contents,(abfd),
 	  will be 0 too
 	  */
 	if (current->_raw_size - pad == 0 ||
-	    (current->flags & SEC_LOAD) == 0) {
+	    (current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0) {
 	    section.s_scnptr = 0;
 	  }
 	else {
@@ -2526,6 +2560,10 @@ DEFUN(coff_write_object_contents,(abfd),
 	    text_sec = current;
 	  } else if (!strcmp(current->name, _DATA)) {
 	      data_sec = current;
+#ifdef TWO_DATA_SECS
+	    } else if (!strcmp(current->name, ".data2")) {
+	      data_sec = current;
+#endif /* TWO_DATA_SECS */
 	    } else if (!strcmp(current->name, _BSS)) {
 		bss_sec = current;
 	      }
@@ -2746,6 +2784,15 @@ DEFUN(coff_set_section_contents,(abfd, section, location, offset, count),
 {
     if (abfd->output_has_begun == false)	/* set by bfd.c handler */
 	coff_compute_section_file_positions(abfd);
+
+#ifdef _LIB
+    /* If this is a .lib section, bump the vma address so that it
+       winds up being the number of .lib sections output.  This is
+       right for SVR3.2.  Shared libraries should probably get more
+       generic support.  Ian Taylor <ian@cygnus.com>.  */
+    if (strcmp (section->name, _LIB) == 0)
+      ++section->vma;
+#endif
 
     bfd_seek(abfd, (file_ptr) (section->filepos + offset), SEEK_SET);
 

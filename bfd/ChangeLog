@@ -1,3 +1,30 @@
+Fri Oct 23 08:15:56 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* changes to support i386-sysv with shared libraries:
+	* coffcode.h (sec_to_styp_flags): if TWO_DATA_SECS is defined,
+	check for .data2; if _LIB is defined, check for it; map
+	SEC_NEVER_LOAD to STYP_NOLOAD.
+	(styp_to_sec_flags): map STYP_NOLOAD to SEC_NEVER_LOAD.
+	(make_a_section_from_file): if TWO_DATA_SECS, accept .data2.
+	(coff_write_object_contents): force vaddr of .lib to 0; set scnptr
+	if section has contents, not just if it is loadable; if
+	TWO_DATA_SECS, check for .data2
+	(coff_set_section_contents): set vma of .lib section to number of
+	.lib sections.
+	* coff-i386.c: define TWO_DATA_SECS; use a special CALC_ADDEND;
+	don't define coff_write_armap to bsd_write_armap.
+	* hosts/i386v.h: don't include <utime.h>, since it is not provided
+	by SVR3.2.
+
+Thu Oct 22 22:40:20 1992  Brendan Kehoe  (brendan@lisa.cygnus.com)
+
+	* solaris2.h: Get the definition of alloca from alloca.h if we
+	aren't using gcc.
+
+Thu Oct 22 03:07:28 1992  John Gilmore  (gnu@cygnus.com)
+
+	* configure.in (i960-*-{aout,bout}):  Support these.
+
 Wed Oct 21 03:46:34 1992  John Gilmore  (gnu@cygnus.com)
 
 	* config/a29k-aout.mt (DEFAULT_TARGET):  Set to one that exists.
