@@ -1,3 +1,12 @@
+Wed Nov  3 16:24:09 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* values.c (value_fn_field): when physical name not found, do not
+	error, but return null.
+	* valops.c (value_struct_elt): when name and args match does not
+	mean it is the one, some times a typedef class can have the same
+	memeber method and args. This probably will not happen with new
+	version of g++, but it does happen in old g++ and cause gdb error.
+
 Wed Nov  3 09:20:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	Merge changes for dos x udi:

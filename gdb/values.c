@@ -762,8 +762,12 @@ value_fn_field (arg1p, f, j, type, offset)
 
   sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
 		       0, VAR_NAMESPACE, 0, NULL);
-  if (! sym) error ("Internal error: could not find physical method named %s",
+  if (! sym) 
+	return (value)NULL;
+/*
+	error ("Internal error: could not find physical method named %s",
 		    TYPE_FN_FIELD_PHYSNAME (f, j));
+*/
   
   v = allocate_value (ftype);
   VALUE_ADDRESS (v) = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
@@ -928,7 +932,7 @@ value_headof (in_arg, btype, dtype)
        * But we leave it in for future use, when we will hopefully
        * have optimizes the vtable to use thunks instead of offsets. */
       /* Use the name of vtable itself to extract a base type. */
-      demangled_name += 4;  /* Skip vt$ prefix. */
+      demangled_name += 4;  /* Skip _vt$ prefix. */
     }
   else
     {
@@ -985,10 +989,10 @@ vb_match (type, index, basetype)
 
   if (*name != '_')
     return 0;
-  /* gcc 2.4 uses vb$.  */
+  /* gcc 2.4 uses _vb$.  */
   if (name[1] == 'v' && name[2] == 'b' && name[3] == CPLUS_MARKER)
     field_class_name = name + 4;
-  /* gcc 2.5 will use _vb_.  */
+  /* gcc 2.5 will use __vb_.  */
   if (name[1] == '_' && name[2] == 'v' && name[3] == 'b' && name[4] == '_')
     field_class_name = name + 5;
 
