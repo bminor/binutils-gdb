@@ -2686,9 +2686,9 @@ gdb_loadfile (clientData, interp, objc, objv)
     }
   else
     {
-      Tcl_DStringAppend (&text_cmd_1, " insert end {-\t} break_tag", -1);
+      Tcl_DStringAppend (&text_cmd_1, " insert end {- } break_tag", -1);
       prefix_len_1 = Tcl_DStringLength(&text_cmd_1);
-      Tcl_DStringAppend (&text_cmd_2, " insert end { \t} \"\"", -1);
+      Tcl_DStringAppend (&text_cmd_2, " insert end {  } \"\"", -1);
       prefix_len_2 = Tcl_DStringLength(&text_cmd_2);
 
   

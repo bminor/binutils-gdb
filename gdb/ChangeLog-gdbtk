@@ -1,3 +1,8 @@
+Fri Jul 24 01:08:37 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk-cmds.c (gdb_loadfile): When there are no
+	linenumbers, use only one tab.
+
 Sat Jul 18 12:28:39 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* gdbtk.c (gdbtk_cleanup): Add call to tcl function
