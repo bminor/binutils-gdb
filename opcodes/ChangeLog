@@ -1,5 +1,8 @@
 Thu Mar 27 14:24:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ppc-opc.c: Add PPC 403 instructions and extended opcodes.  From
+	Andrew Bray <andy@madhouse.demon.co.uk>.
+
 	* mips-opc.c: Add cast when setting mips_opcodes.
 
 start-sanitize-v850
