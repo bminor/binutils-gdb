@@ -673,7 +673,7 @@ static void psymtab_to_symtab_1 (struct partial_symtab *);
 
 char *dwarf2_read_section (struct objfile *, asection *);
 
-static void dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu);
+static int dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu);
 
 static void dwarf2_empty_abbrev_table (void *);
 
@@ -968,6 +968,8 @@ static void set_die_type (struct die_info *, struct type *,
 
 static void reset_die_and_siblings_types (struct die_info *,
 					  struct dwarf2_cu *);
+
+static splay_tree create_comp_unit_tree (struct objfile *);
 
 /* Allocation function for the libiberty splay tree which uses an obstack.  */
 static void *
@@ -1335,6 +1337,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       struct abbrev_info *abbrev;
       unsigned int bytes_read;
       struct dwarf2_per_cu_data *this_cu;
+      int saw_ref_addr;
 
       beg_of_comp_unit = info_ptr;
 
@@ -1351,8 +1354,11 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       cu.partial_dies = NULL;
 
       /* Read the abbrevs for this compilation unit into a table */
-      dwarf2_read_abbrevs (abfd, &cu);
+      saw_ref_addr = dwarf2_read_abbrevs (abfd, &cu);
       back_to_inner = make_cleanup (dwarf2_empty_abbrev_table, &cu);
+
+      if (saw_ref_addr && cu_tree == NULL)
+	cu_tree = create_comp_unit_tree (objfile);
 
       /* Read the compilation unit die */
       abbrev = peek_die_abbrev (info_ptr, &bytes_read, &cu);
@@ -1377,9 +1383,6 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       /* Store the function that reads in the rest of the symbol table */
       pst->read_symtab = dwarf2_psymtab_to_symtab;
-
-      if (cu_tree == NULL)
-	cu_tree = dwarf2_per_objfile->cu_tree;
 
       if (cu_tree != NULL)
 	{
@@ -1542,10 +1545,9 @@ load_comp_unit (struct dwarf2_per_cu_data *this_cu, struct objfile *objfile)
    So there's no point in building this tree incrementally.  */
 
 static splay_tree
-create_comp_unit_tree (struct dwarf2_cu *cu)
+create_comp_unit_tree (struct objfile *objfile)
 {
   splay_tree cu_tree;
-  struct objfile *objfile = cu->objfile;
   char *info_ptr = dwarf_info_buffer;
 
   /* Initialize the compilation unit tree.  */
@@ -1578,12 +1580,6 @@ create_comp_unit_tree (struct dwarf2_cu *cu)
       this_cu->offset = offset;
       this_cu->length = cu_header.length;
       splay_tree_insert (cu_tree, this_cu->offset, (splay_tree_value) this_cu);
-
-      if (this_cu->offset == cu->header.offset)
-	{
-	  this_cu->cu = cu;
-	  cu->per_cu = this_cu;
-	}
 
       info_ptr = beg_of_comp_unit + cu_header.length 
                                   + cu_header.initial_length_size;
@@ -2280,15 +2276,27 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
      so much trouble to keep lazy during partial symbol reading.  If this
      proves to be unavoidable then we may want to strip out the lazy code
      during partial symbol reading also.  */
-  cu.per_cu = dwarf2_find_containing_comp_unit (offset + 1, &cu);
-  /* As in partial symbol table building, this leaks a pointer to our stack
-     frame into a global data structure.  Be sure to clear it before we
-     return.  */
-  cu.per_cu->cu = &cu;
-  make_cleanup (clear_per_cu_pointer, &cu);
-  cu.read_in_chain = NULL;
+  if (dwarf2_per_objfile->cu_tree == NULL)
+    cu.per_cu = NULL;
+  else
+    {
+      splay_tree_node node;
+      struct dwarf2_per_cu_data *per_cu;
 
-  cu.per_cu->psymtab = pst;
+      node = splay_tree_lookup (dwarf2_per_objfile->cu_tree, cu.header.offset);
+      gdb_assert (node != NULL);
+      cu.per_cu = (struct dwarf2_per_cu_data *) node->value;
+
+      /* As in partial symbol table building, this leaks a pointer to
+	 our stack frame into a global data structure.  Be sure to
+	 clear it before we return.  */
+      cu.per_cu->cu = &cu;
+      make_cleanup (clear_per_cu_pointer, &cu);
+
+      cu.per_cu->psymtab = pst;
+    }
+
+  cu.read_in_chain = NULL;
 
   cu.list_in_scope = &file_symbols;
 
@@ -4652,7 +4660,7 @@ dwarf2_read_section (struct objfile *objfile, asection *sectp)
    dies from a section we read in all abbreviations and install them
    in a hash table.  */
 
-static void
+static int
 dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
 {
   struct comp_unit_head *cu_header = &cu->header;
@@ -4662,6 +4670,7 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
   unsigned int abbrev_form, hash_number;
   struct attr_abbrev *cur_attrs;
   unsigned int allocated_attrs;
+  int saw_ref_addr = 0;
 
   /* Initialize dwarf2 abbrevs */
   obstack_init (&cu->abbrev_obstack);
@@ -4701,6 +4710,10 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
 		= xrealloc (cur_attrs, (allocated_attrs
 					* sizeof (struct attr_abbrev)));
 	    }
+
+	  if (abbrev_form == DW_FORM_ref_addr)
+	    saw_ref_addr = 1;
+
 	  cur_attrs[cur_abbrev->num_attrs].name = abbrev_name;
 	  cur_attrs[cur_abbrev->num_attrs++].form = abbrev_form;
 	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
@@ -4736,6 +4749,8 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
     }
 
   xfree (cur_attrs);
+
+  return saw_ref_addr;
 }
 
 /* Empty the abbrev table for a new compilation unit.  */
@@ -8859,8 +8874,7 @@ dwarf2_find_containing_comp_unit (unsigned long offset,
   splay_tree_node node;
 
   cu_tree = dwarf2_per_objfile->cu_tree;
-  if (cu_tree == NULL)
-    cu_tree = create_comp_unit_tree (cu);
+  gdb_assert (cu_tree != NULL);
   
   node = splay_tree_predecessor (cu_tree, offset);
   gdb_assert (node != NULL);
@@ -8965,6 +8979,9 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   struct dwarf2_offset_and_type **slot, ofs;
 
   die->type = type;
+
+  if (cu->per_cu == NULL)
+    return;
 
   type_hash = PST_PRIVATE (cu->per_cu->psymtab)->type_hash;
   if (type_hash == NULL)
