@@ -152,6 +152,15 @@ print_frame_info (fi, level, source, args)
       printf_filtered ("<function called from gdb>\n");
       return;
     }
+  if (fi->signal_handler_caller)
+    {
+      /* Do this regardless of SOURCE because we don't have any source
+	 to list for this frame.  */
+      if (level >= 0)
+	printf_filtered ("#%-2d ", level);
+      printf_filtered ("<signal handler called>\n");
+      return;
+    }
 
   sal = find_pc_line (fi->pc, fi->next_frame);
   func = find_pc_function (fi->pc);

@@ -1,3 +1,15 @@
+Tue Apr 20 08:55:11 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* rs6000-tdep.c: Delete unused function print_frame.
+
+	* frame.h (struct frame_info): Doc fix for next_frame.
+	New field signal_handler_caller.
+	blockframe.c (create_new_frame, get_prev_frame_info),
+	config/rs6000/tm-rs6000.h (INIT_EXTRA_FRAME_INFO): Set it (needs
+	INIT_FRAME_PC_FIRST).
+	stack.c (print_frame_info), rs6000-tdep.c (rs6000_frame_chain):
+	Check it.
+
 Mon Apr 19 22:52:33 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* irix4-nat.c (fetch_core_registers):  Special version of this for

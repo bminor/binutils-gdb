@@ -892,23 +892,6 @@ extract_return_value (valtype, regbuf, valbuf)
 CORE_ADDR rs6000_struct_return_address;
 
 
-/* Throw away this debugging code. FIXMEmgo. */
-void
-print_frame(fram)
-int fram;
-{
-  int ii, val;
-  for (ii=0; ii<40; ++ii) {
-    if ((ii % 4) == 0)
-      printf ("\n");
-    val = read_memory_integer (fram + ii * 4, 4);
-    printf ("0x%08x\t", val);
-  }
-  printf ("\n");
-}
-
-
-
 /* Indirect function calls use a piece of trampoline code to do context
    switching, i.e. to set the new TOC table. Skip such code if we are on
    its first instruction (as when we have single-stepped to here). 
@@ -1098,12 +1081,8 @@ rs6000_frame_chain (thisframe)
   FRAME_ADDR fp;
   if (inside_entry_file ((thisframe)->pc))
     return 0;
-  fp = read_memory_integer ((thisframe)->frame, 4);
-  if (fp == 0 && thisframe->pc < TEXT_SEGMENT_BASE)
+  if (thisframe->signal_handler_caller)
     {
-      /* If we are doing a backtrace from a signal handler, fp will be 0
-	 and thisframe->pc will be something like 0x3f88 or 0x2790.  */
-
       /* This was determined by experimentation on AIX 3.2.  Perhaps
 	 it corresponds to some offset in /usr/include/sys/user.h or
 	 something like that.  Using some system include file would
@@ -1114,6 +1093,9 @@ rs6000_frame_chain (thisframe)
 #define SIG_FRAME_FP_OFFSET 284
       fp = read_memory_integer (thisframe->frame + SIG_FRAME_FP_OFFSET, 4);
     }
+  else
+    fp = read_memory_integer ((thisframe)->frame, 4);
+
   return fp;
 }
 
