@@ -222,11 +222,18 @@ end-sanitize-vr5400
    "f" 32 bit floating point constant
    "l" 32 bit floating point constant in .lit4
 
+   Other:
+   "()" parens surrounding optional value
+   ","  separates operands
+start-sanitize-vr5400
+   "[]" brackets around index for vector-op scalar operand specifier (vr5400)
+end-sanitize-vr5400
+
    Characters used so far, for quick reference when adding more:
 start-sanitize-vr5400
-   "Pe%" plus...
+   "Pe%[]" plus...
 end-sanitize-vr5400
-   "<>"
+   "<>(),"
    "ABCDEFGILMNSTRVW"
    "abcdfhijkloprstuvwxz"
 */
