@@ -1,5 +1,5 @@
-# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
-# Free Software Foundation, Inc.
+# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+# 1998, 1999, 2000 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -342,7 +342,7 @@ RUNTESTFLAGS=
 # part of libiberty) a POSIX interface.  But at least for now the
 # host-dependent makefile fragment might need to use something else
 # besides ser-unix.o
-SER_HARDWIRE = ser-unix.o ser-pipe.o
+SER_HARDWIRE = @SER_HARDWIRE@
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
@@ -368,6 +368,7 @@ ANNOTATE_OBS = annotate.o
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
+	"infodir=$(infodir)" \
 	"against=$(against)" \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \

@@ -1,3 +1,8 @@
+Fri Aug  4 14:05:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (infodir, SER_HARDWIRE): Fix merge problems from
+ 	2000-07-07 Michael Snyder <msnyder@cleaver.cygnus.com>.
+	
 Wed Aug  2 21:15:26 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh (EXTRA_STACK_ALIGNMENT_NEEDED): Add.
