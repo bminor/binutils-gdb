@@ -1,6 +1,6 @@
 srcname="GDB"
 srctrigger=main.c
-
+echo ZAP
 # per-host:
 
 # map host info into gdb names.
@@ -112,7 +112,16 @@ a29k)
 	gdb_host=ultra3
 	;;
 
-arm | vax | m88k | merlin | none | np1 | pn | pyramid | tahoe)
+m88k)
+	case "${host_vendor}" in
+	motorola)
+		gdb_host=delta88 ;;
+	*)	
+		gdb_host=m88k ;;
+	esac
+	;;
+
+arm | vax | merlin | none | np1 | pn | pyramid | tahoe)
 	gdb_host=${host_cpu}
 	;;
 
@@ -122,6 +131,7 @@ arm | vax | m88k | merlin | none | np1 | pn | pyramid | tahoe)
 #i386v32-g
 
 esac
+
 
 if [ ! -f xconfig/${gdb_host} ]; then
 	echo '***' "Gdb does not support host ${host}" 1>&2
@@ -181,9 +191,15 @@ m68030)
 	esac
 	;;
 
-none | arm | tahoe | vax | np1 | pn | np1 | pn | pyramid | merlin | m88k)
+none | arm | tahoe | vax | np1 | pn | np1 | pn | pyramid | merlin)
 	gdb_target=${target_cpu} ;;
 
+m88k)
+	case "${target_vendor}" in
+	motorola) gdb_target=delta88 ;;
+	*) gdb_target=dgux ;;
+	esac
+	;;
 a29k)
 	case "${target_os}" in
 	none|aout|coff)	gdb_target=a29k ;;
