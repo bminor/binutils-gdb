@@ -350,6 +350,7 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 		  symaddr = sym -> value;
 		  if (symaddr == 0)
 		    continue;
+		  symaddr += addr;
 		}
 	      else if (sym -> section == &bfd_abs_section)
 		{
@@ -560,10 +561,9 @@ elf_symfile_read (objfile, section_offsets, mainline)
   offset = ANOFFSET (section_offsets, 0);
   elf_symtab_read (abfd, offset, objfile, 0);
 
-  /* Add the dynamic symbols if we are reading the main symbol table.  */
+  /* Add the dynamic symbols.  */
 
-  if (mainline)
-    elf_symtab_read (abfd, offset, objfile, 1);
+  elf_symtab_read (abfd, offset, objfile, 1);
 
   /* Now process debugging information, which is contained in
      special ELF sections.  We first have to find them... */

@@ -1,3 +1,13 @@
+Tue Jul 12 12:23:15 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* elfread.c (elf_symfile_read):  Unconditionally add dynamic
+	symbols for all symbol files.  Makes skipping over the
+	trampoline code work when stepping from a function in a shared
+	library into a function in a different shared library for Irix 5.
+	Other ELF targets do not have enough information in their
+	dynamic symbol tables to make this work.
+	(elf_symtab_read):  Relocate mst_solib_trampoline address.
+
 Mon Jul 11 16:38:49 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	Atari support, from Uwe Seimet (seimet@chemie.uni-kl.de).
