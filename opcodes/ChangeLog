@@ -1,3 +1,9 @@
+2004-01-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv-desc.h: Regenerate.
+	* frv-desc.c: Regenerate.
+	* frv-opc.c: Regenerate.
+
 2004-01-13  Michael Snyder  <msnyder@redhat.com>
 
 	* sh-dis.c (print_insn_sh): Allocate 4 bytes for insn.

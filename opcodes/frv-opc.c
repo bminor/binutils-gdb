@@ -239,6 +239,7 @@ static CGEN_ATTR_VALUE_TYPE fr400_unit_mapping[] =
 /* B01      */     UNIT_B0,
 /* C        */     UNIT_C,
 /* MULT-DIV */     UNIT_I0,  /* multiply and divide only in I0  unit.  */
+/* IACC     */     UNIT_I01, /* iacc multiply       in I0 or I1 unit.  */
 /* LOAD     */     UNIT_I0,  /* load                only in I0  unit.  */
 /* STORE    */     UNIT_I0,  /* store               only in I0  unit.  */
 /* SCAN     */     UNIT_I0,  /* scan                only in I0  unit.  */
@@ -269,6 +270,7 @@ static CGEN_ATTR_VALUE_TYPE fr500_unit_mapping[] =
 /* B01      */     UNIT_B01,
 /* C        */     UNIT_C,
 /* MULT-DIV */     UNIT_I01, /* multiply and divide in I0 or I1 unit.  */
+/* IACC     */     UNIT_NIL, /* iacc multiply       not implemented */
 /* LOAD     */     UNIT_I01, /* load                in I0 or I1 unit.  */
 /* STORE    */     UNIT_I0,  /* store               only in I0 unit.  */
 /* SCAN     */     UNIT_I01, /* scan                in I0 or I1 unit.  */
@@ -299,6 +301,7 @@ static CGEN_ATTR_VALUE_TYPE fr550_unit_mapping[] =
 /* B01      */     UNIT_B01,
 /* C        */     UNIT_C,
 /* MULT-DIV */     UNIT_I01,  /* multiply and divide in I0 or I1 unit.    */
+/* IACC     */     UNIT_NIL,  /* iacc multiply       not implemented.     */
 /* LOAD     */     UNIT_I01,  /* load                in I0 or I1 unit.    */
 /* STORE    */     UNIT_I01,  /* store               in I0 or I1 unit.    */
 /* SCAN     */     UNIT_IALL, /* scan                in any integer unit. */

@@ -1,6 +1,6 @@
 ; Fujitsu FRV opcode support, for GNU Binutils.  -*- Scheme -*-
 ;
-; Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
+; Copyright 2000, 2001, 2003, 2004 Free Software Foundation, Inc.
 ;
 ; Contributed by Red Hat Inc; developed under contract from Fujitsu.
 ;
@@ -1388,6 +1388,7 @@
 	  B0 B1 B01
 	  C
 	  MULT-DIV ; multiply/division slotted differently on different machines
+	  IACC     ; iacc multiply     slotted differently on different machines
 	  LOAD     ; loads             slotted differently on different machines
 	  STORE    ; store             slotted differently on different machines
 	  SCAN     ; scan, scani       slotted differently on different machines
@@ -3118,7 +3119,7 @@
 (define-pmacro (iacc-multiply-r-r name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT MULT-DIV) (FR400-MAJOR I-1) (MACH fr400))
+       ((UNIT IACC) (FR400-MAJOR I-1) (MACH fr400))
        (.str name "$pack $GRi,$GRj")
        (+ pack (rd-null) op GRi ope GRj)
        ((.sym iacc- operation) (mul DI (ext DI GRi) (ext DI GRj)))
