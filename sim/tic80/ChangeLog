@@ -1,3 +1,8 @@
+Wed Mar 11 14:12:56 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h (IMEM32_IMMED, IMEM32, STORE, MEM): Replace sim_core_*_map
+ 	with read_map, write_map, exec_map resp.
+
 Thu Feb 26 19:08:37 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-calls.c (sim_info): Delete.

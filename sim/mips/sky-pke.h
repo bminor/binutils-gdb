@@ -408,7 +408,7 @@ struct pke_device
     do { \
       sim_cpu* cpu = STATE_CPU(CURRENT_STATE, 0); \
       unsigned_##size value = \
-	sim_core_read_aligned_##size(cpu, CIA_GET(cpu), sim_core_read_map, \
+	sim_core_read_aligned_##size(cpu, CIA_GET(cpu), read_map, \
 				     (SIM_ADDR)(addr)); \
       memcpy((unsigned_##size*) (data), (void*) & value, size); \
      } while(0)
@@ -417,7 +417,7 @@ struct pke_device
     do { sim_cpu* cpu = STATE_CPU(CURRENT_STATE, 0); \
          unsigned_##size value; \
          memcpy((void*) & value, (unsigned_##size*)(data), size); \
-         sim_core_write_aligned_##size(cpu, CIA_GET(cpu), sim_core_write_map, \
+         sim_core_write_aligned_##size(cpu, CIA_GET(cpu), write_map, \
 				       (SIM_ADDR)(addr), value); \
          if((me)->fifo_trace_file != NULL) \
 	   { \

@@ -1,3 +1,8 @@
+Wed Mar 11 14:14:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_write, sim_read, load_memory, store_memory):
+ 	Replace sim_core_*_map with read_map, write_map, exec_map resp.
+
 Tue Jan 27 18:24:01 1998  Ian Carmichael  <iancarm@cygnus.com>
 
 	* Very, very early support for vu1 based on sce code.

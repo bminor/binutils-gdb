@@ -510,7 +510,7 @@ sim_write (sd,addr,buffer,size)
       int cca;
       if (!address_translation (sd, NULL_CIA, vaddr, isDATA, isSTORE, &paddr, &cca, isRAW))
 	break;
-      if (sim_core_write_buffer (sd, NULL, sim_core_read_map, buffer + index, paddr, 1) != 1)
+      if (sim_core_write_buffer (sd, NULL, read_map, buffer + index, paddr, 1) != 1)
 	break;
     }
 
@@ -538,7 +538,7 @@ sim_read (sd,addr,buffer,size)
       int cca;
       if (!address_translation (sd, NULL_CIA, vaddr, isDATA, isLOAD, &paddr, &cca, isRAW))
 	break;
-      if (sim_core_read_buffer (sd, NULL, sim_core_read_map, buffer + index, paddr, 1) != 1)
+      if (sim_core_read_buffer (sd, NULL, read_map, buffer + index, paddr, 1) != 1)
 	break;
     }
 
@@ -1352,39 +1352,38 @@ load_memory(sd,cia,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
     {
     case AccessLength_QUADWORD :
       {
-	unsigned_16 val = sim_core_read_aligned_16 (STATE_CPU (sd, 0), NULL_CIA,
-						    sim_core_read_map, pAddr);
+	unsigned_16 val = sim_core_read_aligned_16 (STATE_CPU (sd, 0), NULL_CIA, read_map, pAddr);
 	value1 = VH8_16 (val);
 	value = VL8_16 (val);
 	break;
       }
     case AccessLength_DOUBLEWORD :
       value = sim_core_read_aligned_8 (STATE_CPU (sd, 0), NULL_CIA,
-				       sim_core_read_map, pAddr);
+				       read_map, pAddr);
       break;
     case AccessLength_SEPTIBYTE :
       value = sim_core_read_misaligned_7 (STATE_CPU (sd, 0), NULL_CIA,
-					  sim_core_read_map, pAddr);
+					  read_map, pAddr);
     case AccessLength_SEXTIBYTE :
       value = sim_core_read_misaligned_6 (STATE_CPU (sd, 0), NULL_CIA,
-					  sim_core_read_map, pAddr);
+					  read_map, pAddr);
     case AccessLength_QUINTIBYTE :
       value = sim_core_read_misaligned_5 (STATE_CPU (sd, 0), NULL_CIA,
-					  sim_core_read_map, pAddr);
+					  read_map, pAddr);
     case AccessLength_WORD :
       value = sim_core_read_aligned_4 (STATE_CPU (sd, 0), NULL_CIA,
-				       sim_core_read_map, pAddr);
+				       read_map, pAddr);
       break;
     case AccessLength_TRIPLEBYTE :
       value = sim_core_read_misaligned_3 (STATE_CPU (sd, 0), NULL_CIA,
-					  sim_core_read_map, pAddr);
+					  read_map, pAddr);
     case AccessLength_HALFWORD :
       value = sim_core_read_aligned_2 (STATE_CPU (sd, 0), NULL_CIA,
-				       sim_core_read_map, pAddr);
+				       read_map, pAddr);
       break;
     case AccessLength_BYTE :
       value = sim_core_read_aligned_1 (STATE_CPU (sd, 0), NULL_CIA,
-				       sim_core_read_map, pAddr);
+				       read_map, pAddr);
       break;
     default:
       abort ();
@@ -1485,40 +1484,40 @@ store_memory(sd,cia,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
       {
 	unsigned_16 val = U16_8 (MemElem1, MemElem);
 	sim_core_write_aligned_16 (STATE_CPU (sd, 0), NULL_CIA,
-				   sim_core_write_map, pAddr, val);
+				   write_map, pAddr, val);
 	break;
       }
     case AccessLength_DOUBLEWORD :
       sim_core_write_aligned_8 (STATE_CPU (sd, 0), NULL_CIA,
-				sim_core_write_map, pAddr, MemElem);
+				write_map, pAddr, MemElem);
       break;
     case AccessLength_SEPTIBYTE :
       sim_core_write_misaligned_7 (STATE_CPU (sd, 0), NULL_CIA,
-				   sim_core_write_map, pAddr, MemElem);
+				   write_map, pAddr, MemElem);
       break;
     case AccessLength_SEXTIBYTE :
       sim_core_write_misaligned_6 (STATE_CPU (sd, 0), NULL_CIA,
-				   sim_core_write_map, pAddr, MemElem);
+				   write_map, pAddr, MemElem);
       break;
     case AccessLength_QUINTIBYTE :
       sim_core_write_misaligned_5 (STATE_CPU (sd, 0), NULL_CIA,
-				   sim_core_write_map, pAddr, MemElem);
+				   write_map, pAddr, MemElem);
       break;
     case AccessLength_WORD :
       sim_core_write_aligned_4 (STATE_CPU (sd, 0), NULL_CIA,
-				sim_core_write_map, pAddr, MemElem);
+				write_map, pAddr, MemElem);
       break;
     case AccessLength_TRIPLEBYTE :
       sim_core_write_misaligned_3 (STATE_CPU (sd, 0), NULL_CIA,
-				   sim_core_write_map, pAddr, MemElem);
+				   write_map, pAddr, MemElem);
       break;
     case AccessLength_HALFWORD :
       sim_core_write_aligned_2 (STATE_CPU (sd, 0), NULL_CIA,
-				sim_core_write_map, pAddr, MemElem);
+				write_map, pAddr, MemElem);
       break;
     case AccessLength_BYTE :
       sim_core_write_aligned_1 (STATE_CPU (sd, 0), NULL_CIA,
-				sim_core_write_map, pAddr, MemElem);
+				write_map, pAddr, MemElem);
       break;
     default:
       abort ();
