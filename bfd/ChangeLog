@@ -1,3 +1,13 @@
+Mon Oct 25 16:05:23 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* libbfd.c (bfd_write): If not everything is written out, set
+	bfd_error to system_call_error.  If the return value is
+	non-negative, set errno to ENOSPC (if ENOSPC is defined).
+	(bfd_seek): If the seek fails, set bfd_error to system_call_error.
+	(bfd_generic_set_section_contents): For a bad offset + count, set
+	bfd_error to bad_value.
+	* seclet.c (rel): Don't abort.  Instead, return false.
+
 Mon Oct 25 09:59:37 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* aoutx.h (reloc_type_lookup): Handle BFD_RELOC_SPARC_WDISP22.

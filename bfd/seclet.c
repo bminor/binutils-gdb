@@ -90,7 +90,7 @@ DEFUN(rel,(abfd, seclet, output_section, data, relocateable),
 				seclet->offset,
 				seclet->size) == false)
     {
-      abort();
+      return false;
     }
   }
   return true;

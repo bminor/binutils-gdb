@@ -216,17 +216,25 @@ DEFUN(bfd_read,(ptr, size, nitems, abfd),
 }
 
 bfd_size_type
-DEFUN(bfd_write,(ptr, size, nitems, abfd),
-      CONST PTR ptr AND
-      bfd_size_type size AND
-      bfd_size_type nitems AND
-      bfd *abfd)
+bfd_write (ptr, size, nitems, abfd)
+     CONST PTR ptr;
+     bfd_size_type size;
+     bfd_size_type nitems;
+     bfd *abfd;
 {
-  int nwrote = fwrite (ptr, 1, (int)(size*nitems), bfd_cache_lookup(abfd));
+  int nwrote = fwrite (ptr, 1, (int) (size * nitems), bfd_cache_lookup (abfd));
 #ifdef FILE_OFFSET_IS_CHAR_INDEX
   if (nwrote > 0)
     abfd->where += nwrote;
 #endif
+  if (nwrote != size * nitems)
+    {
+#ifdef ENOSPC
+      if (nwrote >= 0)
+	errno = ENOSPC;
+#endif
+      bfd_error = system_call_error;
+    }
   return nwrote;
 }
 
@@ -343,8 +351,11 @@ DEFUN(bfd_seek,(abfd, position, direction),
   result = fseek (f, file_position, direction);
 
   if (result != 0)
-    /* Force redetermination of `where' field.  */
-    bfd_tell (abfd);
+    {
+      /* Force redetermination of `where' field.  */
+      bfd_tell (abfd);
+      bfd_error = system_call_error;
+    }
   else
     {
 #ifdef FILE_OFFSET_IS_CHAR_INDEX
@@ -541,11 +552,11 @@ DESCRIPTION
 */ 
 
 /* Sign extension to bfd_signed_vma.  */
-#define COERCE16(x) ((bfd_signed_vma) (((x) ^ 0x8000) - 0x8000))
-#define COERCE32(x) ((bfd_signed_vma) (((x) ^ 0x80000000) - 0x80000000))
+#define COERCE16(x) (((bfd_signed_vma) (x) ^ 0x8000) - 0x8000)
+#define COERCE32(x) (((bfd_signed_vma) (x) ^ 0x80000000) - 0x80000000)
 #define EIGHT_GAZILLION (((HOST_64_BIT)0x80000000) << 32)
-#define COERCE64(x) ((bfd_signed_vma)\
-		     (((x) ^ EIGHT_GAZILLION) - EIGHT_GAZILLION))
+#define COERCE64(x) \
+  (((bfd_signed_vma) (x) ^ EIGHT_GAZILLION) - EIGHT_GAZILLION)
 
 bfd_vma
 DEFUN(bfd_getb16,(addr),
@@ -597,21 +608,23 @@ bfd_vma
 bfd_getb32 (addr)
      register bfd_byte *addr;
 {
-        return ((((addr[0] << 8) | addr[1]) << 8) | addr[2]) << 8 | addr[3];
+        return (((((bfd_vma)addr[0] << 8) | addr[1]) << 8)
+		| addr[2]) << 8 | addr[3];
 }
 
 bfd_vma
 bfd_getl32 (addr)
         register bfd_byte *addr;
 {
-        return ((((addr[3] << 8) | addr[2]) << 8) | addr[1]) << 8 | addr[0];
+        return (((((bfd_vma)addr[3] << 8) | addr[2]) << 8)
+		| addr[1]) << 8 | addr[0];
 }
 
 bfd_signed_vma
 bfd_getb_signed_32 (addr)
      register bfd_byte *addr;
 {
-        return COERCE32(((((addr[0] << 8) | addr[1]) << 8)
+        return COERCE32((((((bfd_vma)addr[0] << 8) | addr[1]) << 8)
 			 | addr[2]) << 8 | addr[3]);
 }
 
@@ -619,7 +632,7 @@ bfd_signed_vma
 bfd_getl_signed_32 (addr)
         register bfd_byte *addr;
 {
-        return COERCE32(((((addr[3] << 8) | addr[2]) << 8)
+        return COERCE32((((((bfd_vma)addr[3] << 8) | addr[2]) << 8)
 			 | addr[1]) << 8 | addr[0]);
 }
 
@@ -635,7 +648,7 @@ DEFUN(bfd_getb64,(addr),
             addr[2]) << 8) |
           addr[3]) );
 
-  low = ((((((((addr[4]) << 8) |
+  low = (((((((((bfd_vma)addr[4]) << 8) |
               addr[5]) << 8) |
             addr[6]) << 8) |
           addr[7]));
@@ -660,7 +673,7 @@ DEFUN(bfd_getl64,(addr),
             addr[5]) << 8) |
           addr[4]));
 
-  low = (((((((addr[3] << 8) |
+  low = ((((((((bfd_vma)addr[3] << 8) |
               addr[2]) << 8) |
             addr[1]) << 8) |
           addr[0]) );
@@ -685,7 +698,7 @@ DEFUN(bfd_getb_signed_64,(addr),
             addr[2]) << 8) |
           addr[3]) );
 
-  low = ((((((((addr[4]) << 8) |
+  low = (((((((((bfd_vma)addr[4]) << 8) |
               addr[5]) << 8) |
             addr[6]) << 8) |
           addr[7]));
@@ -710,7 +723,7 @@ DEFUN(bfd_getl_signed_64,(addr),
             addr[5]) << 8) |
           addr[4]));
 
-  low = (((((((addr[3] << 8) |
+  low = ((((((((bfd_vma)addr[3] << 8) |
               addr[2]) << 8) |
             addr[1]) << 8) |
           addr[0]) );
@@ -809,20 +822,27 @@ DEFUN(bfd_generic_get_section_contents, (abfd, section, location, offset, count)
    in read-write files, though.  See other set_section_contents functions
    to see why it doesn't work for new sections.  */
 boolean
-DEFUN(bfd_generic_set_section_contents, (abfd, section, location, offset, count),
-      bfd *abfd AND
-      sec_ptr section AND
-      PTR location AND
-      file_ptr offset AND
-      bfd_size_type count)
+bfd_generic_set_section_contents (abfd, section, location, offset, count)
+     bfd *abfd;
+     sec_ptr section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type count;
 {
-    if (count == 0)
-        return true;
-    if ((bfd_size_type)(offset+count) > bfd_get_section_size_after_reloc(section)
-        || bfd_seek(abfd, (file_ptr)(section->filepos + offset), SEEK_SET) == -1
-        || bfd_write(location, (bfd_size_type)1, count, abfd) != count)
-        return (false); /* on error */
-    return (true);
+  if (count == 0)
+    return true;
+
+  if (offset + count > bfd_get_section_size_after_reloc (section))
+    {
+      bfd_error = bad_value;
+      return false;
+    }
+
+  if (bfd_seek (abfd, (file_ptr) (section->filepos + offset), SEEK_SET) == -1
+      || bfd_write (location, (bfd_size_type) 1, count, abfd) != count)
+    return false;
+
+  return true;
 }
 
 /*
