@@ -62,19 +62,14 @@
 
 #include "readline/readline.h"
 
-#ifdef NEED_DECLARATION_MALLOC
+#if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* OK: PTR */
 #endif
-#ifdef NEED_DECLARATION_REALLOC
+#if !HAVE_DECL_REALLOC
 extern PTR realloc ();		/* OK: PTR */
 #endif
-#ifdef NEED_DECLARATION_FREE
+#if !HAVE_DECL_FREE
 extern void free ();
-#endif
-/* Actually, we'll never have the decl, since we don't define _GNU_SOURCE.  */
-#if defined(HAVE_CANONICALIZE_FILE_NAME) \
-    && defined(NEED_DECLARATION_CANONICALIZE_FILE_NAME)
-extern char *canonicalize_file_name (const char *);
 #endif
 
 /* readline defines this.  */

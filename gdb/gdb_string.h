@@ -1,5 +1,7 @@
 /* Portable <string.h>
-   Copyright 1995, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1995, 1998, 1999, 2000, 2001, 2004
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,15 +54,15 @@ extern int memcmp ();
 #endif
 #endif /* STDC_HEADERS */
 
-#ifdef NEED_DECLARATION_STRERROR
+#if !HAVE_DECL_STRERROR
 #ifndef strerror
 extern char *strerror (int);	/* X3.159-1989  4.11.6.2 */
 #endif
 #endif
 
-#ifdef NEED_DECLARATION_STRSTR
+#if !HAVE_DECL_STRSTR
 #ifndef strstr
-extern char *strstr (const char *, const char *);	/* X3.159-1989  4.11.5.7 */
+extern char *strstr (const char *, const char *); /* X3.159-1989  4.11.5.7 */
 #endif
 #endif
 

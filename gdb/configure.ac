@@ -424,7 +424,9 @@ AC_CHECK_HEADERS(ctype.h time.h)
 # Checks for declarations.  #
 # ------------------------- #
 
-gcc_AC_CHECK_DECLS(getopt)
+AC_CHECK_DECLS([free, malloc, realloc])
+AC_CHECK_DECLS([strerror, strstr])
+AC_CHECK_DECLS(getopt)
 
 # ----------------------- #
 # Checks for structures.  #
@@ -477,7 +479,7 @@ gdb_ptrace_headers='
 #endif
 '
 # There is no point in checking if we don't have a prototype.
-gcc_AC_CHECK_DECLS(ptrace, , [
+AC_CHECK_DECLS(ptrace, [], [
   : ${gdb_cv_func_ptrace_ret='int'}
   : ${gdb_cv_func_ptrace_args='int,int,long,long'}
 ], $gdb_ptrace_headers)
@@ -693,14 +695,6 @@ AC_CACHE_CHECK([for uintptr_t in stdint.h], gdb_cv_have_uintptr_t,
 if test $gdb_cv_have_uintptr_t = yes; then
   AC_DEFINE(HAVE_UINTPTR_T, 1, [Define if <stdint.h> provides the uintptr_t type.])
 fi
-
-BFD_NEED_DECLARATION(malloc)
-BFD_NEED_DECLARATION(realloc)
-BFD_NEED_DECLARATION(free)
-BFD_NEED_DECLARATION(strerror)
-BFD_NEED_DECLARATION(strdup)
-BFD_NEED_DECLARATION(strstr)
-BFD_NEED_DECLARATION(canonicalize_file_name)
 
 # If we are configured native on GNU/Linux, work around problems with
 # sys/procfs.h

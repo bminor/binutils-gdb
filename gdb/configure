@@ -13014,12 +13014,9 @@ done
 # Checks for declarations.  #
 # ------------------------- #
 
-for ac_func in getopt
-do
-  ac_tr_decl=HAVE_DECL_`echo $ac_func | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
-echo "$as_me:$LINENO: checking whether $ac_func is declared" >&5
-echo $ECHO_N "checking whether $ac_func is declared... $ECHO_C" >&6
-if eval "test \"\${gcc_cv_have_decl_$ac_func+set}\" = set"; then
+echo "$as_me:$LINENO: checking whether free is declared" >&5
+echo $ECHO_N "checking whether free is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_free+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -13028,16 +13025,14 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#undef $ac_tr_decl
-#define $ac_tr_decl 1
-
-
+$ac_includes_default
 int
 main ()
 {
-#ifndef $ac_func
-char *(*pfn) = (char *(*)) $ac_func ;
+#ifndef free
+  char *p = (char *) free;
 #endif
+
   ;
   return 0;
 }
@@ -13064,37 +13059,386 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  eval "gcc_cv_have_decl_$ac_func=yes"
+  ac_cv_have_decl_free=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-eval "gcc_cv_have_decl_$ac_func=no"
+ac_cv_have_decl_free=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_free" >&5
+echo "${ECHO_T}$ac_cv_have_decl_free" >&6
+if test $ac_cv_have_decl_free = yes; then
 
-if eval "test \"`echo '$gcc_cv_have_decl_'$ac_func`\" = yes"; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6 ; cat >>confdefs.h <<_ACEOF
-#define $ac_tr_decl 1
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_FREE 1
 _ACEOF
+
 
 else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6 ; cat >>confdefs.h <<_ACEOF
-#define $ac_tr_decl 0
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_FREE 0
 _ACEOF
+
+
+fi
+echo "$as_me:$LINENO: checking whether malloc is declared" >&5
+echo $ECHO_N "checking whether malloc is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_malloc+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+#ifndef malloc
+  char *p = (char *) malloc;
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_have_decl_malloc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_have_decl_malloc=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_malloc" >&5
+echo "${ECHO_T}$ac_cv_have_decl_malloc" >&6
+if test $ac_cv_have_decl_malloc = yes; then
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_MALLOC 1
+_ACEOF
+
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_MALLOC 0
+_ACEOF
+
+
+fi
+echo "$as_me:$LINENO: checking whether realloc is declared" >&5
+echo $ECHO_N "checking whether realloc is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_realloc+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+#ifndef realloc
+  char *p = (char *) realloc;
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_have_decl_realloc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_have_decl_realloc=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_realloc" >&5
+echo "${ECHO_T}$ac_cv_have_decl_realloc" >&6
+if test $ac_cv_have_decl_realloc = yes; then
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_REALLOC 1
+_ACEOF
+
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_REALLOC 0
+_ACEOF
+
 
 fi
 
-done
-if test x = y ; then
 
-cat >>confdefs.h <<\_ACEOF
+echo "$as_me:$LINENO: checking whether strerror is declared" >&5
+echo $ECHO_N "checking whether strerror is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_strerror+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+#ifndef strerror
+  char *p = (char *) strerror;
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_have_decl_strerror=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_have_decl_strerror=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_strerror" >&5
+echo "${ECHO_T}$ac_cv_have_decl_strerror" >&6
+if test $ac_cv_have_decl_strerror = yes; then
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRERROR 1
+_ACEOF
+
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRERROR 0
+_ACEOF
+
+
+fi
+echo "$as_me:$LINENO: checking whether strstr is declared" >&5
+echo $ECHO_N "checking whether strstr is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_strstr+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+#ifndef strstr
+  char *p = (char *) strstr;
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_have_decl_strstr=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_have_decl_strstr=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_strstr" >&5
+echo "${ECHO_T}$ac_cv_have_decl_strstr" >&6
+if test $ac_cv_have_decl_strstr = yes; then
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRSTR 1
+_ACEOF
+
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRSTR 0
+_ACEOF
+
+
+fi
+
+
+echo "$as_me:$LINENO: checking whether getopt is declared" >&5
+echo $ECHO_N "checking whether getopt is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_getopt+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+#ifndef getopt
+  char *p = (char *) getopt;
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_have_decl_getopt=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_have_decl_getopt=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_getopt" >&5
+echo "${ECHO_T}$ac_cv_have_decl_getopt" >&6
+if test $ac_cv_have_decl_getopt = yes; then
+
+cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_GETOPT 1
 _ACEOF
+
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_GETOPT 0
+_ACEOF
+
+
 fi
+
 
 
 # ----------------------- #
@@ -15850,12 +16194,9 @@ gdb_ptrace_headers='
 #endif
 '
 # There is no point in checking if we don't have a prototype.
-for ac_func in ptrace
-do
-  ac_tr_decl=HAVE_DECL_`echo $ac_func | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
-echo "$as_me:$LINENO: checking whether $ac_func is declared" >&5
-echo $ECHO_N "checking whether $ac_func is declared... $ECHO_C" >&6
-if eval "test \"\${gcc_cv_have_decl_$ac_func+set}\" = set"; then
+echo "$as_me:$LINENO: checking whether ptrace is declared" >&5
+echo $ECHO_N "checking whether ptrace is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_ptrace+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -15864,16 +16205,15 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#undef $ac_tr_decl
-#define $ac_tr_decl 1
-  $gdb_ptrace_headers
+$gdb_ptrace_headers
 
 int
 main ()
 {
-#ifndef $ac_func
-char *(*pfn) = (char *(*)) $ac_func ;
+#ifndef ptrace
+  char *p = (char *) ptrace;
 #endif
+
   ;
   return 0;
 }
@@ -15900,40 +16240,35 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  eval "gcc_cv_have_decl_$ac_func=yes"
+  ac_cv_have_decl_ptrace=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-eval "gcc_cv_have_decl_$ac_func=no"
+ac_cv_have_decl_ptrace=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_ptrace" >&5
+echo "${ECHO_T}$ac_cv_have_decl_ptrace" >&6
+if test $ac_cv_have_decl_ptrace = yes; then
 
-if eval "test \"`echo '$gcc_cv_have_decl_'$ac_func`\" = yes"; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6 ; cat >>confdefs.h <<_ACEOF
-#define $ac_tr_decl 1
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_PTRACE 1
 _ACEOF
+
 
 else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6 ; cat >>confdefs.h <<_ACEOF
-#define $ac_tr_decl 0
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_PTRACE 0
 _ACEOF
+
 
   : ${gdb_cv_func_ptrace_ret='int'}
   : ${gdb_cv_func_ptrace_args='int,int,long,long'}
 
 fi
 
-done
-if test x = y ; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_DECL_PTRACE 1
-_ACEOF
-fi
 
 # Check return type.
 echo "$as_me:$LINENO: checking return type of ptrace" >&5
@@ -17033,539 +17368,6 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 fi
-
-echo "$as_me:$LINENO: checking whether malloc must be declared" >&5
-echo $ECHO_N "checking whether malloc must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_malloc+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-int
-main ()
-{
-char *(*pfn) = (char *(*)) malloc
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_malloc=no
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-bfd_cv_decl_needed_malloc=yes
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_malloc" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_malloc" >&6
-if test $bfd_cv_decl_needed_malloc = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_MALLOC 1
-_ACEOF
-
-fi
-
-echo "$as_me:$LINENO: checking whether realloc must be declared" >&5
-echo $ECHO_N "checking whether realloc must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_realloc+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-int
-main ()
-{
-char *(*pfn) = (char *(*)) realloc
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_realloc=no
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-bfd_cv_decl_needed_realloc=yes
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_realloc" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_realloc" >&6
-if test $bfd_cv_decl_needed_realloc = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_REALLOC 1
-_ACEOF
-
-fi
-
-echo "$as_me:$LINENO: checking whether free must be declared" >&5
-echo $ECHO_N "checking whether free must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_free+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-int
-main ()
-{
-char *(*pfn) = (char *(*)) free
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_free=no
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-bfd_cv_decl_needed_free=yes
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_free" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_free" >&6
-if test $bfd_cv_decl_needed_free = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_FREE 1
-_ACEOF
-
-fi
-
-echo "$as_me:$LINENO: checking whether strerror must be declared" >&5
-echo $ECHO_N "checking whether strerror must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_strerror+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-int
-main ()
-{
-char *(*pfn) = (char *(*)) strerror
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_strerror=no
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-bfd_cv_decl_needed_strerror=yes
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_strerror" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_strerror" >&6
-if test $bfd_cv_decl_needed_strerror = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_STRERROR 1
-_ACEOF
-
-fi
-
-echo "$as_me:$LINENO: checking whether strdup must be declared" >&5
-echo $ECHO_N "checking whether strdup must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_strdup+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-int
-main ()
-{
-char *(*pfn) = (char *(*)) strdup
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_strdup=no
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-bfd_cv_decl_needed_strdup=yes
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_strdup" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_strdup" >&6
-if test $bfd_cv_decl_needed_strdup = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_STRDUP 1
-_ACEOF
-
-fi
-
-echo "$as_me:$LINENO: checking whether strstr must be declared" >&5
-echo $ECHO_N "checking whether strstr must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_strstr+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-int
-main ()
-{
-char *(*pfn) = (char *(*)) strstr
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_strstr=no
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-bfd_cv_decl_needed_strstr=yes
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_strstr" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_strstr" >&6
-if test $bfd_cv_decl_needed_strstr = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_STRSTR 1
-_ACEOF
-
-fi
-
-echo "$as_me:$LINENO: checking whether canonicalize_file_name must be declared" >&5
-echo $ECHO_N "checking whether canonicalize_file_name must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_canonicalize_file_name+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-int
-main ()
-{
-char *(*pfn) = (char *(*)) canonicalize_file_name
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_canonicalize_file_name=no
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-bfd_cv_decl_needed_canonicalize_file_name=yes
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_canonicalize_file_name" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_canonicalize_file_name" >&6
-if test $bfd_cv_decl_needed_canonicalize_file_name = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_CANONICALIZE_FILE_NAME 1
-_ACEOF
-
-fi
-
 
 # If we are configured native on GNU/Linux, work around problems with
 # sys/procfs.h
