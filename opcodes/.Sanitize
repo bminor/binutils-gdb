@@ -88,6 +88,10 @@ h8500-opc.h
 hppa-dis.c
 i386-dis.c
 i960-dis.c
+i960c-asm.c
+i960c-dis.c
+i960c-opc.c
+i960c-opc.h
 m32r-asm.c
 m32r-dis.c
 m32r-opc.c

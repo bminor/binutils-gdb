@@ -1,3 +1,20 @@
+1998-12-07  James E Wilson  <wilson@wilson-pc.cygnus.com>
+
+	* Makefile.am (CFILES): Add i960c-asm, i960c-dis.c, i960c-opc.c.
+	(ALL_MACHINES): Add i960c-asm.lo, i960c-dis.lo, i960-opc.lo.
+start-sanitize-cygnus
+	(CLEANFILES): Add stamp-i960.
+	(I960_DEPS): Define.
+	(i960c-opc.h, i960c-opc.c, i960c-asm.c, i960c-dis.c, stamp-i960):
+	New makefile rules.
+end-sanitize-cygnus
+	(i960-asm.lo, i960c-dis.lo, i960c-opc.lo): New Makefile rules.
+	* Makefile.in: Rebuilt.
+	* configure.in (bfd_i960_arch): Add i960c-opc.lo, i960-asm.o,
+	i960-dis.c to ta.
+	* i960-dis.c (print_insn_i960): Rename to print_insn_i960_orig.
+	* i960c-asm.c, i960c-dis.c, i960c-opc.c, i960c-opc.h: New files.
+	
 start-sanitize-fr30
 Mon Dec  7 14:33:44 1998  Dave Brolley  <brolley@cygnus.com>
 
