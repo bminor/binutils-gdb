@@ -508,9 +508,11 @@ DEFUN (fill_section, (abfd, h, file_cursor),
 	      s->s_scnptr = 0;
 	      s->s_flags |= STYP_BSS;
 #ifndef TC_I386
+#ifndef TC_A29K
 	      /* Apparently the SVR3 linker is confused by noload
-		 sections.  */
+		 sections.  So is the UDI mondfe program.  */
 	      s->s_flags |= STYP_NOLOAD;
+#endif
 #endif
 	    }
 	  else if (strcmp (s->s_name, ".lit") == 0)
