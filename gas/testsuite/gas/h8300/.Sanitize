@@ -17,6 +17,13 @@
 
 Do-first:
 
+h8s_files="addsubs.s bitops1s.s bitops2s.s bitops3s.s bitops4s.s branchess.s cbranchs.s compares.s decimals.s divmuls.s extends.s incdecs.s logicals.s macs.s miscs.s movbs.s movls.s movws.s multiples.s pushpops.s rotshifts.s"
+
+if ( echo $* | grep keep\-h8s > /dev/null ) ; then
+	keep_these_too="${h8s_files} ${keep_these_too}"
+else
+	lose_these_too="${h8s_files} ${lose_these_too}"
+fi
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -69,28 +76,6 @@ rotshift.s
 rotshifth.s
 
 Things-to-lose:
-
-addsubs.s
-bitops1s.s
-bitops2s.s
-bitops3s.s
-bitops4s.s
-branchess.s
-cbranchs.s
-compares.s
-decimals.s
-divmuls.s
-extends.s
-incdecs.s
-logicals.s
-macs.s
-miscs.s
-movbs.s
-movls.s
-movws.s
-multiples.s
-pushpops.s
-rotshifts.s
 
 Do-last:
 
