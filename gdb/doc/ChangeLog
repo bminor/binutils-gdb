@@ -1,3 +1,9 @@
+Thu May 14 17:09:48 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo: slight expansion of new text on reading info files
+	* gdbinv-s.m4.in: correct and expand info on cross-debugging
+	H8/300 from DOS.
+
 Tue May 12 12:22:47 1992  John Gilmore  (gnu at cygnus.com)
 
 	* gdb.texinfo:  `info user' => `show user'.  Noticed by David Taylor.

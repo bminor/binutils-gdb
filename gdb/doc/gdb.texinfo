@@ -7539,11 +7539,11 @@ and @TeX{} (or @code{texi2roff}) to typeset the printed version.
 GDB includes an already formatted copy of the on-line Info version of
 this manual in the @file{gdb} subdirectory.  The main Info file is
 @file{gdb-@var{version-number}/gdb/gdb.info}, and it refers to
-subordinate files matching @samp{gdb.info*} in the same directory.
-You can read these files
-by hand if necessary, but they are easier to read using the @code{info}
-subsystem in GNU Emacs, or by using the standalone @code{info} program,
-available as part of the texinfo distribution.
+subordinate files matching @samp{gdb.info*} in the same directory.  If
+necessary, you can print out these files, or read them with any editor;
+but they are easier to read using the @code{info} subsystem in GNU Emacs
+or the standalone @code{info} program, available as part of the GNU
+Texinfo distribution.
 
 If you want to format these Info files yourself, you need one of the
 Info formatting programs, such as @code{texinfo-format-buffer} or
