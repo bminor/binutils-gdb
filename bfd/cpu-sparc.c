@@ -23,6 +23,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
+  {
+    64,	/* bits in a word */
+    64,	/* bits in an address */
+    8,	/* bits in a byte */
+    bfd_arch_sparc,
+    bfd_mach_sparc_v9,
+    "sparc",
+    "sparc:v9",
+    3,
+    false,
+    bfd_default_compatible, 
+    bfd_default_scan,
+    &arch_info_struct[1],
+  },
   /* start-sanitize-v8plus */
   {
     32,	/* bits in a word */
@@ -36,7 +50,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     false,
     bfd_default_compatible, 
     bfd_default_scan,
-    &arch_info_struct[1],
+    &arch_info_struct[2],
   },
   {
     32,	/* bits in a word */
@@ -50,23 +64,9 @@ static const bfd_arch_info_type arch_info_struct[] =
     false,
     bfd_default_compatible, 
     bfd_default_scan,
-    &arch_info_struct[2],
-  },
-  /* end-sanitize-v8plus */
-  {
-    64,	/* bits in a word */
-    64,	/* bits in an address */
-    8,	/* bits in a byte */
-    bfd_arch_sparc,
-    bfd_mach_sparc_v9,
-    "sparc",
-    "sparc:v9",
-    3,
-    false,
-    bfd_default_compatible, 
-    bfd_default_scan,
     &arch_info_struct[3],
   },
+  /* end-sanitize-v8plus */
   {
     64,	/* bits in a word */
     64,	/* bits in an address */
