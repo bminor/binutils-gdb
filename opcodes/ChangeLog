@@ -1,3 +1,8 @@
+Thu May  7 12:49:46 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* mips-opc.c (teq,tge,tgeu,tlt,tltu,tne): Added three-operand
+ 	variety of ISA2 instructions to set bottom ten bits of trap code.
+
 Thu May  7 11:54:25 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (config.status): Add explicit target so that
