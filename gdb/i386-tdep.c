@@ -1597,7 +1597,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					   i386_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
 
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+  set_gdbarch_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
 
   /* "An argument's size is increased, if necessary, to make it a
      multiple of [32-bit] words.  This may require tail padding,

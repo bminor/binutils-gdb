@@ -650,16 +650,16 @@ block_innermost_frame (struct block *block)
 extern CORE_ADDR text_end;
 
 int
-pc_in_call_dummy_before_text_end (CORE_ADDR pc, CORE_ADDR sp,
-				  CORE_ADDR frame_address)
+deprecated_pc_in_call_dummy_before_text_end (CORE_ADDR pc, CORE_ADDR sp,
+					     CORE_ADDR frame_address)
 {
   return ((pc) >= text_end - CALL_DUMMY_LENGTH
 	  && (pc) <= text_end + DECR_PC_AFTER_BREAK);
 }
 
 int
-pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
-				 CORE_ADDR frame_address)
+deprecated_pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
+					    CORE_ADDR frame_address)
 {
   return ((pc) >= text_end
 	  && (pc) <= text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK);
@@ -684,7 +684,8 @@ pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
    allocate other kinds of code on the stack.  */
 
 int
-pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address)
+deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp,
+				      CORE_ADDR frame_address)
 {
   return (INNER_THAN ((sp), (pc))
 	  && (frame_address != 0)
@@ -692,8 +693,8 @@ pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address)
 }
 
 int
-pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
-				 CORE_ADDR frame_address)
+deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
+					    CORE_ADDR frame_address)
 {
   return ((pc) >= CALL_DUMMY_ADDRESS ()
 	  && (pc) <= (CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK));

@@ -1102,7 +1102,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
 
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+  set_gdbarch_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
 
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
 

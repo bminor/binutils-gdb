@@ -661,7 +661,7 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
 /* Method for detecting dummy frames.  */
 
 #define PC_IN_CALL_DUMMY(PC, SP, FRAME_ADDRESS) \
-     pc_in_call_dummy_on_stack (PC, SP, FRAME_ADDRESS)
+     deprecated_pc_in_call_dummy_on_stack (PC, SP, FRAME_ADDRESS)
 
 #endif /* GDB_MULTI_ARCH */
 

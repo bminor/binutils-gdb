@@ -1,3 +1,30 @@
+2002-11-26  Andrew Cagney  <ac131313@redhat.com>
+
+	* inferior.h (deprecated_pc_in_call_dummy_before_text_end): Rename
+	pc_in_call_dummy_before_text_end
+	(deprecated_pc_in_call_dummy_after_text_end): Rename
+	pc_in_call_dummy_after_text_end.
+	(deprecated_pc_in_call_dummy_on_stack): Rename
+	pc_in_call_dummy_on_stack.
+	(deprecated_pc_in_call_dummy_at_entry_point): Rename
+	pc_in_call_dummy_at_entry_point.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_gdbarch_init): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* config/sparc/tm-sparc.h (PC_IN_CALL_DUMMY): Update.
+	* blockframe.c (deprecated_pc_in_call_dummy_before_text_end)
+	(deprecated_pc_in_call_dummy_after_text_end)
+	(deprecated_pc_in_call_dummy_on_stack)
+	(deprecated_pc_in_call_dummy_at_entry_point): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+
 2002-11-25  Daniel Jacobowitz  <drow@mvista.com>
 
 	* acconfig.h (HAVE_PREAD64): Add.

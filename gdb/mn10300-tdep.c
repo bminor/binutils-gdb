@@ -1196,7 +1196,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+  set_gdbarch_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_arguments (gdbarch, mn10300_push_arguments);

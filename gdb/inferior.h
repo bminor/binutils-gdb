@@ -486,35 +486,59 @@ extern int attach_flag;
 
 /* Are we in a call dummy? */
 
-extern int pc_in_call_dummy_before_text_end (CORE_ADDR pc, CORE_ADDR sp,
-					     CORE_ADDR frame_address);
+/* NOTE: cagney/2002-11-24: Targets need to both switch to generic
+   dummy frames, and use generic_pc_in_call_dummy().  The generic
+   version should be able to handle all cases since that code works by
+   saving the address of the dummy's breakpoint (where ever it is).  */
+
+extern int deprecated_pc_in_call_dummy_before_text_end (CORE_ADDR pc,
+							CORE_ADDR sp,
+							CORE_ADDR frame_address);
 #if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == BEFORE_TEXT_END
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_before_text_end (pc, sp, frame_address)
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_before_text_end (pc, sp, frame_address)
 #endif /* Before text_end.  */
 #endif
 
-extern int pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
-					    CORE_ADDR frame_address);
+/* NOTE: cagney/2002-11-24: Targets need to both switch to generic
+   dummy frames, and use generic_pc_in_call_dummy().  The generic
+   version should be able to handle all cases since that code works by
+   saving the address of the dummy's breakpoint (where ever it is).  */
+
+extern int deprecated_pc_in_call_dummy_after_text_end (CORE_ADDR pc,
+						       CORE_ADDR sp,
+						       CORE_ADDR frame_address);
 #if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AFTER_TEXT_END
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_after_text_end (pc, sp, frame_address)
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_after_text_end (pc, sp, frame_address)
 #endif
 #endif
 
-extern int pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp,
-				      CORE_ADDR frame_address);
+/* NOTE: cagney/2002-11-24: Targets need to both switch to generic
+   dummy frames, and use generic_pc_in_call_dummy().  The generic
+   version should be able to handle all cases since that code works by
+   saving the address of the dummy's breakpoint (where ever it is).  */
+
+extern int deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc,
+						 CORE_ADDR sp,
+						 CORE_ADDR frame_address);
 #if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == ON_STACK
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_on_stack (pc, sp, frame_address)
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
 #endif
 #endif
 
-extern int pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
-					    CORE_ADDR frame_address);
+/* NOTE: cagney/2002-11-24: Targets need to both switch to generic
+   dummy frames, and use generic_pc_in_call_dummy().  The generic
+   version should be able to handle all cases since that code works by
+   saving the address of the dummy's breakpoint (where ever it is).  */
+
+extern int deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc,
+						       CORE_ADDR sp,
+						       CORE_ADDR frame_address);
 #if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AT_ENTRY_POINT
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
 #endif
 #endif
 
