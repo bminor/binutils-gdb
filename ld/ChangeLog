@@ -1,3 +1,7 @@
+Tue Feb 10 16:17:20 1998  H.J. Lu  <hjl@gnu.org>
+
+	* ldlex.l (V_IDENTIFIER): Allow '.' as symbol prefix.
+
 Tue Feb 10 15:09:45 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (Makefile): Add target, for dependencies on
