@@ -1515,7 +1515,8 @@ disassemble_bytes (struct disassemble_info * info,
 	      else
 		printf ("\t\t\t");
 
-	      objdump_print_value (section->vma + q->address, info, TRUE);
+	      objdump_print_value (section->vma - rel_offset + q->address,
+				   info, TRUE);
 
 	      printf (": %s\t", q->howto->name);
 
@@ -1600,7 +1601,7 @@ disassemble_section (bfd *abfd, asection *section, void *info)
       /* Dynamic reloc addresses are absolute, non-dynamic are section
 	 relative.  REL_OFFSET specifies the reloc address corresponding
 	 to the start of this section.  */
-      rel_offset = pinfo->buffer_vma;
+      rel_offset = section->vma;
     }
   else
     {

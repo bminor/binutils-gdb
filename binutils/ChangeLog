@@ -1,3 +1,10 @@
+2003-12-22  Jakub Jelinek  <jakub@redhat.com>
+
+	* objdump.c (disassemble_bytes): Subtract rel_offset from printed
+	reloc address.
+	(disassemble_section): Set rel_offset to section->vma instead of
+	pinfo->buffer_vma.
+
 2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* readelf.c (guess_is_rela): Changed m32r's default type to RELA.
