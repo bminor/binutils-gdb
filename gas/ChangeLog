@@ -29,18 +29,16 @@
 	* config/obj-elf.h (elf_copy_symbol_attributes): Declare.
 	(OBJ_COPY_SYMBOL_ATTRIBUTES): Call elf_copy_symbol_attributes.
 
-	* output-file.c (output_file_create): Don't try to open using
-	FOPEN_W as it's unnecessary and VMS doesn't define FOPEN_W.
+	* output-file.c (output_file_create): Don't try to open a second
+	time as it's unnecessary.  FOPEN_W was undefined too.
 
 2001-08-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
-	/gas/ChangeLog
 	* tc-mips.c (macro_build): Replace magic constants by defines.
 	(mips_ip): Likewise. Typo.
 
 2001-08-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
-	/gas/ChangeLog
 	* tc-mips.c (mips_abi_string): Initialize with NULL instead of 0.
 	(RELAX_ENCODE): Replace bfd_vma by valueT.
 	(load_address): Formatting.
@@ -297,11 +295,6 @@
 
 	* configure.in (i386-*-netbsdelf*): New target.
 	* configure: Regenerate.
-
-2001-07-11  Jakub Jelinek  <jakub@redhat.com>
-
-	* testsuite/gas/sparc/unalign.s: Remove .uaxword test.
-	* testsuite/gas/sparc/unalign.d: Adjust accordingly.
 
 2001-07-10  Mark Elbrecht  <snowball3@softhome.net>
 
@@ -588,7 +581,7 @@
 
 2001-06-12  Peter Jakubek <pjak@snafu.de>
 
-	* gas/config/tc-m68k.c (parse_mri_control_operand): Fix handling
+	* config/tc-m68k.c (parse_mri_control_operand): Fix handling
 	of AND/OR.
 	(swap_mri_condition): Add HS (alias fo CC) and LO (alias for CS).
 	(reverse_mri_condition): Likewise.
@@ -602,7 +595,7 @@
 	(s_mri_for): Likewise.
 	(s_mri_if): Fix handling comment ('*') in mri mode.
 	(s_mri_while): Likewise.
-	* gas/macro.c (macro_expand): Allow macro invocation with empty
+	* macro.c (macro_expand): Allow macro invocation with empty
 	extension.
 
 2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
@@ -699,7 +692,7 @@
 
 2001-06-06  Peter Jakubek <pjak@snafu.de>
 
-	* gas/config/tc-m68k.c (md_show_usage): Add all supported ColdFire
+	* config/tc-m68k.c (md_show_usage): Add all supported ColdFire
 	options to list (e.g. m5206e, m5307, m5407).
 
 2001-06-06  Martin Schwidefsky <schwidefsky@de.ibm.com>
@@ -2793,9 +2786,9 @@ Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 
 2000-11-07  Peter Targett  <peter.targett@arccores.com>
 
-	* gas/config/tc-arc.h: Avoid warnings for LITTLE_ENDIAN and
+	* config/tc-arc.h: Avoid warnings for LITTLE_ENDIAN and
 	BIG_ENDIAN macros.
-	* gas/config/tc-arc.c: Use S_IS_LOCAL to test local symbols.
+	* config/tc-arc.c: Use S_IS_LOCAL to test local symbols.
 	Fix compile time warning messages.
 
 2000-11-07  Nick Clifton  <nickc@redhat.com>
@@ -4977,7 +4970,7 @@ Thu May 18 10:52:14 2000  Jeffrey A Law  (law@cygnus.com)
 
 2000-05-03  Mark Elbrecht  <snowball3@bigfoot.com>
 
-	* gas/config/tc-i386.h (SUB_SEGMENT_ALIGN): If TE_GO32, return 4
+	* config/tc-i386.h (SUB_SEGMENT_ALIGN): If TE_GO32, return 4
 	for the .bss section too.
 
 2000-05-02  Alan Modra  <alan@linuxcare.com.au>

@@ -105,6 +105,11 @@
 	* gas/mips/eld_rel2.d: Do not expect zeroes at end of dump.
 	* gas/mips/elf_e_flags1.d: Pass -march=4000 to gas.
 
+2001-07-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* gas/sparc/unalign.s: Remove .uaxword test.
+	* gas/sparc/unalign.d: Adjust accordingly.
+
 2001-07-08  Anders Norlander <anorland@synergenix.se>
 
 	* gas/all/gas.exp: Run incbin test.
