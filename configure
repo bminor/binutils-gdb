@@ -463,7 +463,7 @@ case "${srcdir}" in
 esac
 
 # default exec_prefix
-case "${exec_prefix}" in
+case "${exec_prefixoption}" in
 "") exec_prefix="\$(prefix)" ;;
 *) ;;
 esac
@@ -492,6 +492,7 @@ esac
 
 # keep this filename short for &%*%$*# 14 char file names
 tmpfile=${TMPDIR}/cONf$$
+trap "rm -f ${tmpfile}.com ${tmpfile}.tgt ${tmpfile}.hst ${tmpfile}.pos; exit 1" 1 2 15
 trap "rm -f ${tmpfile}.com ${tmpfile}.tgt ${tmpfile}.hst ${tmpfile}.pos" 0
 
 # split ${srcdir}/configure.in into common, per-host, per-target,
@@ -681,8 +682,8 @@ for subdir in . ${subdirs} ; do
                 .) ;;
                 *) cat > ${subdir}/.gdbinit <<EOF
 # ${NO_EDIT}
-dir .
 dir ${makesrcdir}
+dir .
 source ${makesrcdir}/.gdbinit
 EOF
                         ;;

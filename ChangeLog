@@ -1,3 +1,11 @@
+Fri Jul 22 17:53:59 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* configure:  Search current dir first in .gdbinit.
+
+Fri Jul 22 11:28:30 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.sub:  Recognize freebsd (merged from gcc config.sub).
+
 Thu Jul 21 14:10:52 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* config.sub:  Refer to NeXT's operating system as nextstep.
