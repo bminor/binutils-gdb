@@ -1,3 +1,9 @@
+Thu Apr 29 12:50:37 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (check): Use individual check targets rather than
+	DO_X rule.
+	(check-gcc): Added.
+
 Thu Apr 29 09:50:07 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* config.sub: Use sysv3.2 not sysv32 for canonical OS

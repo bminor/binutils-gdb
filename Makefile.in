@@ -523,7 +523,6 @@ all.cross: \
 # because it is so large that it can easily overflow the command line
 # length limit on some systems.
 DO_X = \
-	do-check \
 	do-clean \
 	do-distclean \
 	do-dvi \
@@ -568,10 +567,9 @@ $(DO_X):
 
 # Here are the targets which correspond to the do-X targets.
 
-.PHONY: info check installcheck dvi install-info
+.PHONY: info installcheck dvi install-info
 .PHONY: clean distclean mostlyclean realclean local-clean local-distclean
 info: do-info
-check: do-check
 installcheck: do-installcheck
 dvi: do-dvi
 
@@ -592,6 +590,14 @@ clean: do-clean local-clean
 mostlyclean: do-mostlyclean local-clean
 distclean: do-distclean local-clean local-distclean
 realclean: do-realclean local-clean local-distclean
+
+# Check target.
+
+.PHONY: check
+check: $(CHECK_MODULES) \
+	$(CHECK_TARGET_MODULES) \
+	$(CHECK_X11_MODULES) \
+	check-gcc
 
 # Installation targets.
 
@@ -788,6 +794,16 @@ all-gcc:
 	  rootme=`pwd`; export rootme; \
 	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
 	  (cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) all); \
+	else \
+	  true; \
+	fi
+
+.PHONY: check-gcc
+check-gcc:
+	@if [ -f ./gcc/Makefile ] ; then \
+	  rootme=`pwd`; export rootme; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  (cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) check); \
 	else \
 	  true; \
 	fi
