@@ -1,5 +1,45 @@
 2000-10-14  Philip Blundell  <philb@gnu.org>
 
+	* config.sub, config.guess: Update from mainline sources.
+
+	From 2000-09-07  H.J. Lu  <hjl@gnu.org>
+
+	* configure.in (AC_ISC_POSIX): Put after AC_CANONICAL_SYSTEM.
+	* configure: Rebuild.
+
+	From 2000-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (display_debug_pubnames): Only issue warning
+	message once.  Terminate message with a new line.
+	(display_debug_aranges): Only display version 2 debug info.
+	
+	From 2000-07-19  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (get_dynamic_type): Change "AUXILARY" to
+	"AUXILIARY".
+	(process_dynamic_segment): Print out strings for DT_CONFIG,
+	DT_DEPAUDIT, DT_AUDIT and DT_RUNPATH.
+
+	From 2000-07-19  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (process_dynamic_segment): Change DF_1_NODEPLIB
+	to DF_1_NODEFLIB.
+
+	From 2000-07-19  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (get_dynamic_type): Fix DT_CHECKSUM.
+
+	From 2000-07-19  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (get_dynamic_type): Change DT_FEATURE_1 to
+	DT_FEATURE.
+	(process_dynamic_segment): Likewise.
+
+	* readelf.c (get_dynamic_type): Handle DT_CONFIG, DT_DEPAUDIT,
+	DT_AUDIT, DT_PLTPAD, DT_MOVETAB and DT_CHECKSUM.
+	(process_dynamic_segment): Handle DTF_1_CONFEXP, DF_1_NODEPLIB,
+	DF_1_NODUMP and DF_1_CONLFAT.
+
 	From 2000-07-01  Alexander Aganichev <AAganichev@hypercom.com>
 	
 	* stabs.c (parse_stab_type): Divide size in bits by 8 as binutils
