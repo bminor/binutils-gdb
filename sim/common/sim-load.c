@@ -166,6 +166,8 @@ sim_load_file (sd, myname, callback, prog, prog_bfd, verbose_p, lma_p, do_write)
       report_transfer_performance (callback, data_count, start_time, end_time);
     }
 
+  bfd_cache_close (result_bfd);
+
   return result_bfd;
 }
 
