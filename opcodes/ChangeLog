@@ -1,3 +1,8 @@
+1999-10-29  Nick Clifton  <nickc@cygnus.com>
+
+	* d30v-opc.c (mvtacc): Use format SHORT_AR not SHORT_AA
+	(d30v_format_tab): Define the SHORT_AR format.
+
 1999-10-28  Nick Clifton  <nickc@cygnus.com>
 
 	* mcore-dis.c: Remove spurious code introduced in previous delta. 
