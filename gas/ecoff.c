@@ -2134,6 +2134,7 @@ add_procedure (func)
 {
   register varray_t *vp;
   register proc_t *new_proc_ptr;
+  symbolS *sym;
 
 #ifdef ECOFF_DEBUG
   if (debug)
@@ -2160,10 +2161,13 @@ add_procedure (func)
   new_proc_ptr->pdr.lnLow = -1;
   new_proc_ptr->pdr.lnHigh = -1;
 
+  /* Set the BSF_FUNCTION flag for the symbol.  */
+  sym = symbol_find_or_make (func);
+  sym->bsym->flags |= BSF_FUNCTION;
+
   /* Push the start of the function.  */
   new_proc_ptr->sym = add_ecoff_symbol ((const char *) NULL, st_Proc, sc_Text,
-					symbol_find_or_make (func),
-					(bfd_vma) 0, (symint_t) 0,
+					sym, (bfd_vma) 0, (symint_t) 0,
 					(symint_t) 0);
 
   ++proc_cnt;
@@ -3746,16 +3750,17 @@ ecoff_build_lineno (backend, buf, bufend, offset, linecntptr)
 	     before it is used.  */
 	  count = 1;
 	}
-      else
+      else if (l->next->frag->fr_address + l->next->paddr
+	       > l->frag->fr_address + l->paddr)
 	{
 	  count = ((l->next->frag->fr_address + l->next->paddr
 		    - (l->frag->fr_address + l->paddr))
 		   >> 2);
-	  if (count <= 0)
-	    {
-	      /* Don't change last, so we still get the right delta.  */
-	      continue;
-	    }
+	}
+      else
+	{
+	  /* Don't change last, so we still get the right delta.  */
+	  continue;
 	}
 
       if (l->file != file || l->proc != proc)
@@ -4058,6 +4063,9 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 				  sym_ptr->ecoff_sym.asym.value =
 				    as_sym->ecoff_extern_size;
 				}
+#ifdef S_SET_SIZE
+			      S_SET_SIZE (as_sym, as_sym->ecoff_extern_size);
+#endif
 			    }
 			  else if (S_IS_COMMON (as_sym))
 			    {
@@ -4175,6 +4183,10 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 			  sym_ptr->ecoff_sym.asym.value =
 			    (S_GET_VALUE (as_sym)
 			     - S_GET_VALUE (begin_ptr->as_sym));
+#ifdef S_SET_SIZE
+			  S_SET_SIZE (begin_ptr->as_sym,
+				      sym_ptr->ecoff_sym.asym.value);
+#endif
 			}
 		      else if (begin_type == st_Block
 			       && sym_ptr->ecoff_sym.asym.sc != (int) sc_Info)

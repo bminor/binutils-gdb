@@ -1,5 +1,8 @@
 Wed Feb  7 14:12:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ecoff.c (ecoff_build_lineno): Don't try to store the address
+	difference if the next address is before the current one.
+
 	* config/tc-m68k.c (struct m68k_cpu): Add alias field.
 	(archs): Initialize new field.
 	(m68k_ip): Don't list alias names when listing CPUs which support
