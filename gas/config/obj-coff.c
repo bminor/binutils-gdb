@@ -1301,7 +1301,8 @@ coff_frob_symbol (symbolS *symp, int *punt)
 	  if (S_GET_STORAGE_CLASS (symp) == C_EFCN)
 	    {
 	      if (coff_last_function == 0)
-		as_fatal (_("C_EFCN symbol out of scope"));
+		as_fatal (_("C_EFCN symbol for %s out of scope"),
+			  S_GET_NAME (symp));
 	      SA_SET_SYM_FSIZE (coff_last_function,
 				(long) (S_GET_VALUE (symp)
 					- S_GET_VALUE (coff_last_function)));

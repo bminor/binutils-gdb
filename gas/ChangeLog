@@ -1,3 +1,8 @@
+2005-03-27  Ian Lance Taylor  <ian@airs.com>
+
+	* config/obj-coff.c (coff_frob_symbol): When crashing because of a
+	bad C_EFCN symbol, print its name.
+
 2005-03-25  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (use_longcalls): Delete.
