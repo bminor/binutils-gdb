@@ -1,3 +1,12 @@
+2003-11-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Initialize asm-note to "empty".  Set
+	asm-note to "netbsd" for *-*-netbsdelf* and x86_64-*-netbsd*.  Use
+	it to create the appropriate note.inc.
+	* gdb.asm/asmsrc1.s: Include "note.inc".
+	* gdb.asm/netbsd.inc: New file.
+	* gdb.asm/empty.inc: New file.
+
 2003-11-28  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Partial fix for PR testsuite/1456.

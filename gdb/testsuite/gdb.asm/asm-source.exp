@@ -32,6 +32,7 @@ set prms_id 0
 set bug_id 0
 
 set asm-arch ""
+set asm-note "empty"
 set asm-flags ""
 set link-flags "--entry _start"
 
@@ -124,6 +125,12 @@ if {[istarget "*-*-freebsd*"] || [istarget "*-*-netbsd*"]} then {
     append link-flags " -static"
 }
 
+# On NetBSD/ELF we need a special NetBSD-identifying note section.
+if { [istarget "*-*-netbsdelf*"]
+     || [istarget "x86_64-*-netbsd*"] } then {
+    set asm-note "netbsd"
+}
+
 # Watch out, we are invoking the assembler, but the testsuite sets multilib
 # switches according to compiler syntax.  If we pass these options straight
 # to the assembler, they won't always make sense.  If we don't pass them to
@@ -146,6 +153,8 @@ set srcfile2 asmsrc2.s
 
 remote_exec build "rm -f ${subdir}/arch.inc"
 remote_download host ${srcdir}/${subdir}/${asm-arch}.inc ${subdir}/arch.inc
+remote_exec build "rm -f ${subdir}/note.inc"
+remote_download host ${srcdir}/${subdir}/${asm-note}.inc ${subdir}/note.inc
 
 if { "${asm-flags}" == "" } {
     #set asm-flags "-Wa,-gstabs,-I${srcdir}/${subdir},-I${objdir}/${subdir}"
@@ -359,3 +368,4 @@ gdb_test "disassem foostatic" ".*<foostatic\\+0>:.*End of assembler dump." \
 	"look at static function"
 
 remote_exec build "rm -f ${subdir}/arch.inc"
+remote_exec build "rm -f ${subdir}/note.inc"
