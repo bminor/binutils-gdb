@@ -1,3 +1,25 @@
+Wed Dec  2 15:11:38 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* tracepoint.c: Move default definition of 
+	TARGET_VIRTUAL_FRAME_POINTER from here to target.h.
+	* target.h: Add default definition of TARGET_VIRTUAL_FRAME_POINTER.
+	* ax-gdb.c (gen_frame_args_address, gen_frame_locals_address):
+	use TARGET_VIRTUAL_FRAME_POINTER to determine frame pointer.
+	(gen_trace_for_expr): new argument, address of tracepoint, 
+	gets passed to new_agent_expr and added to struct agent_expr.
+	(is_nontrivial_conversion): call to new_agent_expr now requires
+	a dummy argument.  (agent_command): use get_current_frame() to
+	get current PC scope; pass it to gen_trace_for_expr.
+	* ax-general.c (new_agent_expr): new argument, address of 
+	tracepoint; store it in new field of struct agent_expr.
+	* ax.h (struct agent_expr): add new field for tracepoint address.
+	* ax-gdb.h: change prototypes to match above changes.
+
+Tue Dec  1 10:59:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ocd.c (remote_timeout), (BDM_BREAKPOINT), monitor.c (readchar),
+ 	remote.c: Cleanup closing of open comments.
+
 Mon Nov 30 16:04:03 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/fr30/tm-fr30.h (INNER_THAN): Add parameters.

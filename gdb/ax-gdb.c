@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "expression.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "frame.h"
 #include "ax.h"
 #include "ax-gdb.h"
 
@@ -47,7 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 
-/* Static forward declarations */
+/* Prototypes for local functions. */
 
 /* There's a standard order to the arguments of these functions:
    union exp_element ** --- pointer into expression
@@ -66,7 +67,7 @@ static void gen_fetch PARAMS ((struct agent_expr *, struct type *));
 static void gen_left_shift PARAMS ((struct agent_expr *, int));
 
 
-static void gen_frame_args_address PARAMS ((struct agent_expr *));
+static void gen_frame_args_address   PARAMS ((struct agent_expr *));
 static void gen_frame_locals_address PARAMS ((struct agent_expr *));
 static void gen_offset PARAMS ((struct agent_expr *ax, int offset));
 static void gen_sym_offset PARAMS ((struct agent_expr *, struct symbol *));
@@ -146,6 +147,7 @@ static void gen_sizeof PARAMS ((union exp_element **pc,
 static void gen_expr PARAMS ((union exp_element **pc,
 			      struct agent_expr *ax,
 			      struct axs_value *value));
+
 static void print_axs_value PARAMS ((GDB_FILE *f, struct axs_value *value));
 static void agent_command PARAMS ((char *exp, int from_tty));
 
@@ -475,8 +477,11 @@ static void
 gen_frame_args_address (ax)
      struct agent_expr *ax;
 {
-  /* FIXME: I'm sure this is wrong for processors other than the 68k.  */
-  ax_reg (ax, FP_REGNUM);
+  long frame_reg, frame_offset;
+
+  TARGET_VIRTUAL_FRAME_POINTER (ax->scope, &frame_reg, &frame_offset);
+  ax_reg     (ax, frame_reg);
+  gen_offset (ax, frame_offset);
 }
 
 
@@ -486,8 +491,11 @@ static void
 gen_frame_locals_address (ax)
      struct agent_expr *ax;
 {
-  /* FIXME: I'm sure this is wrong for processors other than the 68k.  */
-  ax_reg (ax, FP_REGNUM);
+  long frame_reg, frame_offset;
+
+  TARGET_VIRTUAL_FRAME_POINTER (ax->scope, &frame_reg, &frame_offset);
+  ax_reg     (ax, frame_reg);
+  gen_offset (ax, frame_offset);
 }
 
 
@@ -822,7 +830,7 @@ static int
 is_nontrivial_conversion (from, to)
      struct type *from, *to;
 {
-  struct agent_expr *ax = new_agent_expr ();
+  struct agent_expr *ax = new_agent_expr (0);
   int nontrivial;
 
   /* Actually generate the code, and see if anything came out.  At the
@@ -1768,6 +1776,7 @@ gen_expr (pc, ax, value)
      
 
 
+#if 0  /* not used */
 /* Generating bytecode from GDB expressions: driver */
 
 /* Given a GDB expression EXPR, produce a string of agent bytecode
@@ -1820,7 +1829,7 @@ expr_to_address_and_size (expr)
 
   return ax;
 }
-
+#endif /* 0 */
 
 /* Given a GDB expression EXPR, return bytecode to trace its value.
    The result will use the `trace' and `trace_quick' bytecodes to
@@ -1828,11 +1837,12 @@ expr_to_address_and_size (expr)
    caller can then use the ax_reqs function to discover which
    registers it relies upon.  */
 struct agent_expr *
-gen_trace_for_expr (expr)
+gen_trace_for_expr (scope, expr)
+     CORE_ADDR scope;
      struct expression *expr;
 {
   struct cleanup *old_chain = 0;
-  struct agent_expr *ax = new_agent_expr ();
+  struct agent_expr *ax = new_agent_expr (scope);
   union exp_element *pc;
   struct axs_value value;
 
@@ -1893,6 +1903,7 @@ agent_command (exp, from_tty)
   struct expression *expr;
   struct agent_expr *agent;
   struct agent_reqs reqs;
+  struct frame_info *fi = get_current_frame ();	/* need current scope */
 
   /* We don't deal with overlay debugging at the moment.  We need to
      think more carefully about this.  If you copy this code into
@@ -1906,7 +1917,7 @@ agent_command (exp, from_tty)
   
   expr = parse_expression (exp);
   old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
-  agent = gen_trace_for_expr (expr);
+  agent = gen_trace_for_expr (fi->pc, expr);
   make_cleanup ((make_cleanup_func) free_agent_expr, agent);
   ax_print (gdb_stdout, agent);
   ax_reqs (agent, &reqs);

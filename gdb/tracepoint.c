@@ -970,7 +970,7 @@ validate_actionline (line, t)
 
 	/* we have something to collect, make sure that the expr to
 	   bytecode translator can handle it and that it's not too long */
-	aexpr = gen_trace_for_expr(exp);
+	aexpr = gen_trace_for_expr (t->address, exp);
 	(void) make_cleanup ((make_cleanup_func) free_agent_expr, aexpr);
 
 	if (aexpr->len > MAX_AGENT_EXPR_LEN)
@@ -1438,18 +1438,6 @@ free_actions_list(actions_list)
   free(actions_list);
 }
 
-#ifndef TARGET_VIRTUAL_FRAME_POINTER
-/* If anybody else ever uses this macro, then move this 
-   default definition into some global header file such as defs.h.
-
-   FIXME: GDB's whole scheme for dealing with "frames" and
-   "frame pointers" needs a serious shakedown.
- */
-
-#define TARGET_VIRTUAL_FRAME_POINTER(ADDR, REGP, OFFP) \
-  do { *(REGP) = FP_REGNUM; *(OFFP) =  0; } while (0)
-#endif
-
 /* render all actions into gdb protocol */
 static void
 encode_actions (t, tdp_actions, stepping_actions)
@@ -1559,7 +1547,7 @@ encode_actions (t, tdp_actions, stepping_actions)
 		  break;
 
 		default:	/* full-fledged expression */
-		  aexpr = gen_trace_for_expr (exp);
+		  aexpr = gen_trace_for_expr (t->address, exp);
 
 		  old_chain1 = make_cleanup ((make_cleanup_func) 
                                              free_agent_expr, aexpr);
@@ -2322,7 +2310,7 @@ scope_info (args, from_tty)
   struct minimal_symbol *msym;
   struct block *block;
   char **canonical, *symname, *save_args = args;
-  int i, nsyms, count = 0;
+  int i, j, nsyms, count = 0;
 
   if (args == 0 || *args == 0)
     error ("requires an argument (function, line or *addr) to define a scope");
@@ -2365,9 +2353,9 @@ scope_info (args, from_tty)
 	  case LOC_CONST_BYTES:
 	    printf_filtered ("constant bytes: ");
 	    if (SYMBOL_TYPE (sym))
-	      for (i = 0; i < TYPE_LENGTH (SYMBOL_TYPE (sym)); i++)
+	      for (j = 0; j < TYPE_LENGTH (SYMBOL_TYPE (sym)); j++)
 		fprintf_filtered (gdb_stdout, " %02x",
-				  (unsigned) SYMBOL_VALUE_BYTES (sym) [i]);
+				  (unsigned) SYMBOL_VALUE_BYTES (sym) [j]);
   	    break;
 	  case LOC_STATIC:
 	    printf_filtered ("in static storage at address ");
