@@ -384,7 +384,7 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
   /* The debugging sections appear to be recognized only by name, not
      any sort of flag.  */
   {
-    const char *debug_sec_names [] =
+    static const char *debug_sec_names [] =
     {
       ".debug",
       ".gnu.linkonce.wi.",

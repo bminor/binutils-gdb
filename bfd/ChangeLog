@@ -1,3 +1,8 @@
+2000-09-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Make debug_sec_names
+	static.
+
 2000-09-10  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* coff-m68k.c (bfd_m68k_coff_create_embedded_relocs): Emit 8 NULs for
