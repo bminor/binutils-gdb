@@ -172,7 +172,9 @@ mywait (char *status)
   int pid;
   int w;
 
-  pid = wait (&w);
+  enable_async_io ();
+  pid = waitpid (inferior_pid, &w, 0);
+  disable_async_io ();
   if (pid != inferior_pid)
     perror_with_name ("wait");
 

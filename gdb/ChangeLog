@@ -1,3 +1,15 @@
+2001-07-11  Greg McGary  <greg@mcgary.org>
+ 
+	* gdbserver/remote-utils.c (remote_open): Set gdbserver as "owner"
+	of SIGIO.
+	(input_interrupt): Don't block on read, in case we got redundant
+	SIGIO.  Don't gripe about redundant SIGIO.
+	* gdbserver/low-hppabsd.c (mywait): Use waitpid().  Enable SIGIO
+	handler while waiting.
+	* gdbserver/low-linux.c (mywait): Likewise.
+	* gdbserver/low-nbsd.c (mywait): Likewise.
+	* gdbserver/low-sparc.c (mywait): Likewise.
+
 2001-07-11  Keith Seitz  <keiths@redhat.com>
 
 	* infrun.c (print_stop_reason): Add missing uiout field
