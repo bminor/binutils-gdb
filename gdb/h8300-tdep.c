@@ -303,8 +303,7 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
 
   if (have_fp)
     /* We keep the old FP in the SP spot */
-    fsr->regs[SP_REGNUM] = (read_memory_unsigned_integer
-			    (fsr->regs[6]), BINWORD);
+    fsr->regs[SP_REGNUM] = read_memory_unsigned_integer (fsr->regs[6], BINWORD);
   else
     fsr->regs[SP_REGNUM] = after_prolog_fp + auto_depth;
 

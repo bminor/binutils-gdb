@@ -1,3 +1,8 @@
+Sun Jul  4 15:04:47 1993  Doug Evans  (dje@cygnus.com)
+
+	* h8300-tdep.c (examine_prologue): Fix call to
+	read_memory_unsigned_integer.
+
 Fri Jul  2 18:22:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/mips/{x,n}m-irix{3,4}.h: Make some definitions here
