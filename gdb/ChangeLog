@@ -1,5 +1,8 @@
 2003-02-27  Michael Snyder  <msnyder@redhat.com>
 
+	* f-lang.c (build_fortran_types): New function.
+	(_initialize_f_language): Gdbarch-register built-in fortran types.
+
 	* doublest.c (extract_floating): Fix warning text.
 
 2003-02-27  Andrew Cagney  <cagney@redhat.com>
