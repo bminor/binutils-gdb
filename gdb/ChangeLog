@@ -1,3 +1,10 @@
+2004-10-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386gnu-nat.c: Include "gdb_string.h".
+	(fetch_fpregs): Use i387_supply_fxsave to fill the floating-point
+	registers when the floating-point state isn't initialized.
+	* Makefile.in (i386gnu-nat.o): Update dependencies.
+
 2004-10-11  David Anderson  <davea@sgi.com>
 
 	* regcache.c (regcache_raw_read): Comment was missing "to".

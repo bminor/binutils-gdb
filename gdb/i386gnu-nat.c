@@ -28,6 +28,7 @@
 #include "gdb_assert.h"
 #include <errno.h>
 #include <stdio.h>
+#include "gdb_string.h"
 
 #include <mach.h>
 #include <mach_error.h>
@@ -60,8 +61,9 @@ static int reg_offset[] =
 #define REG_ADDR(state, regnum) ((char *)(state) + reg_offset[regnum])
 
 
-/* Get the whole floating-point state of THREAD and record the
-   values of the corresponding (pseudo) registers.  */
+/* Get the whole floating-point state of THREAD and record the values
+   of the corresponding (pseudo) registers.  */
+
 static void
 fetch_fpregs (struct proc *thread)
 {
@@ -79,18 +81,15 @@ fetch_fpregs (struct proc *thread)
     }
 
   if (!state.initialized)
-    /* The floating-point state isn't initialized.  */
     {
-      int i;
-
-      for (i = FP0_REGNUM; i <= FOP_REGNUM; i++)
-	regcache_raw_supply (current_regcache, i, NULL);
-
-      return;
+      /* The floating-point state isn't initialized.  */
+      i387_supply_fsave (current_regcache, -1, NULL);
     }
-
-  /* Supply the floating-point registers.  */
-  i387_supply_fsave (current_regcache, -1, state.hw_state);
+  else
+    {
+      /* Supply the floating-point registers.  */
+      i387_supply_fsave (current_regcache, -1, state.hw_state);
+    }
 }
 
 #ifdef HAVE_SYS_PROCFS_H
