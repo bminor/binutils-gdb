@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1172,7 +1172,9 @@ DEFUN(coff_compute_section_file_positions,(abfd),
   asection       *current;
   asection	*previous = (asection *)NULL;
   file_ptr        sofar = FILHSZ;
+#ifndef I960
   file_ptr	old_sofar;
+#endif
   if (bfd_get_start_address(abfd)) 
   {
     /*  A start address may have been added to the original file. In this
@@ -1422,8 +1424,8 @@ DEFUN(coff_write_object_contents,(abfd),
 	  section.s_vaddr = 0;
 	else
 #endif
-	  section.s_vaddr = current->vma + pad;
-	section.s_paddr = current->vma + pad;
+	section.s_vaddr = current->lma + pad;
+	section.s_paddr = current->lma + pad;
 	section.s_size = current->_raw_size - pad;
 	/*
 	  If this section has no size or is unloadable then the scnptr
@@ -1637,6 +1639,11 @@ DEFUN(coff_set_section_contents,(abfd, section, location, offset, count),
     if (strcmp (section->name, _LIB) == 0)
       ++section->vma;
 #endif
+
+    /* Don't write out bss sections - one way to do this is to 
+       see if the filepos has not been set. */ 
+    if (section->filepos == 0)
+      return true;
 
     bfd_seek(abfd, (file_ptr) (section->filepos + offset), SEEK_SET);
 
@@ -2223,3 +2230,5 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table = {
 #define coff_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
 #define coff_bfd_relax_section		bfd_generic_relax_section
 #define coff_bfd_seclet_link		bfd_generic_seclet_link
+#define coff_bfd_reloc_type_lookup \
+  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
