@@ -53,8 +53,8 @@ changequote([,])dnl
   powerpcle*)	cpu_type=ppc endian=little ;;
   powerpc*)	cpu_type=ppc endian=big ;;
   rs6000*)	cpu_type=ppc ;;
-  sparc64)	cpu_type=sparc obj_format=elf
-		AC_DEFINE(sparcv9) ;;
+  sparc64)	cpu_type=sparc
+		AC_DEFINE(SPARC_V9) ;;
   sparclite*)   cpu_type=sparc ;;
   *)		cpu_type=${target_cpu} ;;
 esac
@@ -107,7 +107,7 @@ changequote([,])dnl
       powerpcle*)	cpu_type=ppc endian=little ;;
       powerpc*)		cpu_type=ppc endian=big ;;
       rs6000*)		cpu_type=ppc ;;
-      sparc64)		cpu_type=sparc obj_format=elf want_sparcv9=true ;;
+      sparc64)		cpu_type=sparc want_sparc_v9=true ;;
       sparclite*)	cpu_type=sparc ;;
       *)		cpu_type=${cpu} ;;
     esac
@@ -300,7 +300,7 @@ changequote([,])dnl
       *-*-xray | *-*-hms)   fmt=coff ;;
       *-*-sim)              fmt=coff ;;
       *-*-elf | *-*-sysv4* | *-*-solaris*)
-			    AC_MSG_WARN(GAS support for ELF format is incomplete.)
+			    AC_MSG_WARN(GAS support for ${generic_target} is incomplete.)
 			    fmt=elf dev=yes ;;
       *-*-vxworks)          fmt=aout ;;
       *-*-netware)          fmt=elf ;;
@@ -322,7 +322,11 @@ changequote([,])dnl
 
 # Other random stuff.
 
-    test -n "$want_sparcv9" && AC_DEFINE(sparcv9)
+    test -n "$want_sparc_v9" && AC_DEFINE(SPARC_V9)
+
+    case ${cpu}-${vendor}-${os} in
+      sparc64-*-elf*) AC_DEFINE(SPARC_ARCH64) ;;
+    esac
 
     case ${cpu_type} in
       m68k) extra_objects="$extra_objects m68k-parse.o" ;;

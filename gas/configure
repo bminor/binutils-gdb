@@ -686,9 +686,9 @@ case ${target_cpu} in
   powerpcle*)	cpu_type=ppc endian=little ;;
   powerpc*)	cpu_type=ppc endian=big ;;
   rs6000*)	cpu_type=ppc ;;
-  sparc64)	cpu_type=sparc obj_format=elf
+  sparc64)	cpu_type=sparc
 		cat >> confdefs.h <<\EOF
-#define sparcv9 1
+#define SPARC_V9 1
 EOF
  ;;
   sparclite*)   cpu_type=sparc ;;
@@ -753,7 +753,7 @@ for this_target in $target $canon_targets ; do
       powerpcle*)	cpu_type=ppc endian=little ;;
       powerpc*)		cpu_type=ppc endian=big ;;
       rs6000*)		cpu_type=ppc ;;
-      sparc64)		cpu_type=sparc obj_format=elf want_sparcv9=true ;;
+      sparc64)		cpu_type=sparc want_sparc_v9=true ;;
       sparclite*)	cpu_type=sparc ;;
       *)		cpu_type=${cpu} ;;
     esac
@@ -946,7 +946,7 @@ for this_target in $target $canon_targets ; do
       *-*-xray | *-*-hms)   fmt=coff ;;
       *-*-sim)              fmt=coff ;;
       *-*-elf | *-*-sysv4* | *-*-solaris*)
-			    echo "configure: warning: GAS support for ELF format is incomplete." 1>&2
+			    echo "configure: warning: GAS support for ${generic_target} is incomplete." 1>&2
 			    fmt=elf dev=yes ;;
       *-*-vxworks)          fmt=aout ;;
       *-*-netware)          fmt=elf ;;
@@ -968,10 +968,17 @@ for this_target in $target $canon_targets ; do
 
 # Other random stuff.
 
-    test -n "$want_sparcv9" && cat >> confdefs.h <<\EOF
-#define sparcv9 1
+    test -n "$want_sparc_v9" && cat >> confdefs.h <<\EOF
+#define SPARC_V9 1
 EOF
 
+
+    case ${cpu}-${vendor}-${os} in
+      sparc64-*-elf*) cat >> confdefs.h <<\EOF
+#define SPARC_ARCH64 1
+EOF
+ ;;
+    esac
 
     case ${cpu_type} in
       m68k) extra_objects="$extra_objects m68k-parse.o" ;;
@@ -1432,7 +1439,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1436 "configure"
+#line 1443 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1446,7 +1453,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1450 "configure"
+#line 1457 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1479,7 +1486,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1483 "configure"
+#line 1490 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1531,7 +1538,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1535 "configure"
+#line 1542 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -1555,7 +1562,7 @@ if eval "test \"`echo '$''{'ac_cv_header_alloca_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1559 "configure"
+#line 1566 "configure"
 #include "confdefs.h"
 #include <alloca.h>
 int main() { return 0; }
@@ -1587,7 +1594,7 @@ if eval "test \"`echo '$''{'ac_cv_func_alloca'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1591 "configure"
+#line 1598 "configure"
 #include "confdefs.h"
 
 #ifdef __GNUC__
@@ -1646,7 +1653,7 @@ if eval "test \"`echo '$''{'ac_cv_os_cray'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1650 "configure"
+#line 1657 "configure"
 #include "confdefs.h"
 #if defined(CRAY) && ! defined(CRAY2)
 webecray
@@ -1675,7 +1682,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1679 "configure"
+#line 1686 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1729,7 +1736,7 @@ else
   ac_cv_c_stack_direction=0
 else
 cat > conftest.$ac_ext <<EOF
-#line 1733 "configure"
+#line 1740 "configure"
 #include "confdefs.h"
 find_stack_direction ()
 {
@@ -1772,7 +1779,7 @@ else
   ac_cv_c_inline=no
 for ac_kw in inline __inline__ __inline; do
   cat > conftest.$ac_ext <<EOF
-#line 1776 "configure"
+#line 1783 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1812,7 +1819,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1816 "configure"
+#line 1823 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1865,7 +1872,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1869 "configure"
+#line 1876 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1918,7 +1925,7 @@ if eval "test \"`echo '$''{'gas_cv_assert_ok'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1922 "configure"
+#line 1929 "configure"
 #include "confdefs.h"
 #include <assert.h>
 #include <stdio.h>
@@ -1975,7 +1982,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1979 "configure"
+#line 1986 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -2011,7 +2018,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2015 "configure"
+#line 2022 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -2050,7 +2057,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_errno'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2054 "configure"
+#line 2061 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_ERRNO_H

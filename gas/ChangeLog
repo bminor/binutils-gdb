@@ -1,3 +1,26 @@
+Mon Jan 22 09:21:36 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* config/tc-sparc.h (TARGET_FORMAT): Use #ifdef SPARC_ARCH64 instead of
+	#ifdef sparcv9 when choosing value.
+	(ENV64): Delete.
+	(md_end): Define.
+	(sparc_md_end): Declare.
+	* config/tc-sparc.c (SPARC_V9): Renamed from sparcv9.
+	(initial_architecture): New static local.
+	(can_bump_v9_p): Likewise.
+	(NO_V9): Delete all occurrences.
+	(sparc_md_end): New function.
+	(sparc_ip): New local v9_arg_p.  Rework fp reg number test.
+	Don't bump architecture to v9 unless can_bump_v9_p set.
+	(md_parse_option): -A<arch> passed, set can_bump_v9_p accordingly.
+	* configure.in (sparc64 target cpu): Don't set obj_format here.
+	(SPARC_V9): Renamed from sparcv9.
+	(sparc64-*-elf*): Define SPARC_ARCH64.
+	* configure: Regenerated.
+	* acconfig.h (SPARC_V9): Renamed from sparcv9.
+	(SPARC_ARCH64): Add.
+	* config/vmsconf.h: Update.
+
 Mon Jan 22 17:24:47 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* config/tc-mips.c (load_register): Optimise "dli" loads.

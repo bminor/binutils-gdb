@@ -1,5 +1,5 @@
 /* tc-sparc.c -- Assemble for the SPARC
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90-95, 1996 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -28,11 +28,25 @@
 
 static void sparc_ip PARAMS ((char *));
 
-#ifdef sparcv9
-static enum sparc_architecture current_architecture = v9;
+#ifdef SPARC_V9
+/* In a 32 bit environment, don't bump up to v9 unless necessary.  */
+#ifdef SPARC_ARCH64
+static enum sparc_architecture initial_architecture = v9;
 #else
-static enum sparc_architecture current_architecture = v6;
+static enum sparc_architecture initial_architecture = v6;
 #endif
+#else
+static enum sparc_architecture initial_architecture = v6;
+#endif
+
+/* If sparc64 was the configured cpu, allow bumping up to v9 by default.  */
+#ifdef SPARC_V9
+static int can_bump_v9_p = 1;
+#else
+static int can_bump_v9_p = 0;
+#endif
+
+static enum sparc_architecture current_architecture;
 static int architecture_requested;
 static int warn_on_bump;
 
@@ -62,11 +76,9 @@ const pseudo_typeS md_pseudo_table[] =
   {"seg", s_seg, 0},
   {"skip", s_space, 0},
   {"word", cons, 4},
-#ifndef NO_V9
   {"xword", cons, 8},
 #ifdef OBJ_ELF
   {"uaxword", cons, 8},
-#endif
 #endif
 #ifdef OBJ_ELF
   /* these are specific to sparc/svr4 */
@@ -502,7 +514,7 @@ s_proc (ignore)
   ++input_line_pointer;
 }
 
-#ifndef NO_V9
+/* sparc64 priviledged registers */
 
 struct priv_reg_entry
   {
@@ -532,26 +544,6 @@ struct priv_reg_entry priv_reg_table[] =
   {"", -1},			/* end marker */
 };
 
-struct membar_masks
-{
-  char *name;
-  unsigned int len;
-  unsigned int mask;
-};
-
-#define MEMBAR_MASKS_SIZE 7
-
-static const struct membar_masks membar_masks[MEMBAR_MASKS_SIZE] =
-{
-  {"Sync", 4, 0x40},
-  {"MemIssue", 8, 0x20},
-  {"Lookaside", 9, 0x10},
-  {"StoreStore", 10, 0x08},
-  {"LoadStore", 9, 0x04},
-  {"StoreLoad", 9, 0x02},
-  {"LoadLoad", 8, 0x01},
-};
-
 static int
 cmp_reg_entry (p, q)
      struct priv_reg_entry *p, *q;
@@ -559,10 +551,9 @@ cmp_reg_entry (p, q)
   return strcmp (q->name, p->name);
 }
 
-#endif
-
 /* This function is called once, at assembler startup time.  It should
    set up all the tables, etc. that the MD part of the assembler will need. */
+
 void
 md_begin ()
 {
@@ -608,12 +599,42 @@ md_begin ()
   for (i = 'A'; i <= 'F'; ++i)
     toHex[i] = i + 10 - 'A';
 
-#ifndef NO_V9
   qsort (priv_reg_table, sizeof (priv_reg_table) / sizeof (priv_reg_table[0]),
 	 sizeof (priv_reg_table[0]), cmp_reg_entry);
-#endif
 
   target_big_endian = 1;
+  current_architecture = initial_architecture;
+}
+
+/* Called after all assembly has been done.  */
+
+void
+sparc_md_end ()
+{
+  /* If we bumped up in architecture, we need to change bfd's mach number.  */
+  /* ??? We could delete this test, I think.  */
+  if (current_architecture != initial_architecture)
+    {
+#ifdef BFD64
+      if (current_architecture < v9)
+	abort ();
+      else if (current_architecture == v9)
+	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9);
+      else if (current_architecture == v9a)
+	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9a);
+      else
+	abort ();
+#else
+      if (current_architecture < v9)
+	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc);
+      else if (current_architecture == v9)
+	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plus);
+      else if (current_architecture == v9a)
+	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plusa);
+      else
+	abort ();
+#endif
+    }
 }
 
 void
@@ -710,6 +731,67 @@ BSR (val, amount)
   return val >> amount;
 }
 
+/* Parse an argument that can be expressed as a keyword.
+   (eg: #StoreStore).
+   The result is a boolean indicating success.
+   If successful, INPUT_POINTER is updated.  */
+
+static int
+parse_keyword_arg (lookup_fn, input_pointerP, valueP)
+     int (*lookup_fn) ();
+     char **input_pointerP;
+     int *valueP;
+{
+  int value;
+  char c, *p, *q;
+
+  p = *input_pointerP;
+  for (q = p + (*p == '#'); isalpha (*q) || *q == '_'; ++q)
+    continue;
+  c = *q;
+  *q = 0;
+  value = (*lookup_fn) (p);
+  *q = c;
+  if (value == -1)
+    return 0;
+  *valueP = value;
+  *input_pointerP = q;
+  return 1;
+}
+
+/* Parse an argument that is a constant expression.
+   The result is a boolean indicating success.  */
+
+static int
+parse_const_expr_arg (input_pointerP, valueP)
+     char **input_pointerP;
+     int *valueP;
+{
+  char *save = input_line_pointer;
+  expressionS exp;
+
+  input_line_pointer = *input_pointerP;
+  /* The next expression may be something other than a constant
+     (say if we're not processing the right variant of the insn).
+     Don't call expression unless we're sure it will succeed as it will
+     signal an error (which we want to defer until later).  */
+  /* FIXME: It might be better to define md_operand and have it recognize
+     things like %asi, etc. but continuing that route through to the end
+     is a lot of work.  */
+  if (*input_line_pointer == '%')
+    {
+      input_line_pointer = save;
+      return 0;
+    }
+  expression (&exp);
+  *input_pointerP = input_line_pointer;
+  input_line_pointer = save;
+  if (exp.X_op != O_constant)
+    return 0;
+  *valueP = exp.X_add_number;
+  return 1;
+}
+
 static void
 sparc_ip (str)
      char *str;
@@ -725,12 +807,13 @@ sparc_ip (str)
   int match = 0;
   int comma = 0;
   long immediate_max = 0;
+  int v9_arg_p;
 
   for (s = str; islower (*s) || (*s >= '0' && *s <= '3'); ++s)
     ;
+
   switch (*s)
     {
-
     case '\0':
       break;
 
@@ -756,12 +839,14 @@ sparc_ip (str)
     {
       *--s = ',';
     }
+
   argsStart = s;
   for (;;)
     {
       opcode = insn->match;
       memset (&the_insn, '\0', sizeof (the_insn));
       the_insn.reloc = BFD_RELOC_NONE;
+      v9_arg_p = 0;
 
       /*
        * Build the opcode, checking as we go to make
@@ -771,114 +856,81 @@ sparc_ip (str)
 	{
 	  switch (*args)
 	    {
-#ifndef NO_V9
 	    case 'K':
 	      {
 		int kmask = 0;
-		int i;
 
 		/* Parse a series of masks.  */
 		if (*s == '#')
 		  {
 		    while (*s == '#')
 		      {
-			++s;
-			for (i = 0; i < MEMBAR_MASKS_SIZE; i++)
-			  if (!strncmp (s, membar_masks[i].name,
-					membar_masks[i].len))
-			    break;
-			if (i < MEMBAR_MASKS_SIZE)
-			  {
-			    kmask |= membar_masks[i].mask;
-			    s += membar_masks[i].len;
-			  }
-			else
+			int mask;
+
+			if (! parse_keyword_arg (sparc_encode_membar, &s,
+						 &mask))
 			  {
 			    error_message = ": invalid membar mask name";
 			    goto error;
 			  }
-			if (*s == '|')
+			kmask |= mask;
+			while (*s == ' ') { ++s; continue; }
+			if (*s == '|' || *s == '+')
 			  ++s;
+			while (*s == ' ') { ++s; continue; }
 		      }
 		  }
 		else
 		  {
-		    expressionS exp;
-		    char *hold;
-		    char *send;
-
-		    hold = input_line_pointer;
-		    input_line_pointer = s;
-		    expression (&exp);
-		    send = input_line_pointer;
-		    input_line_pointer = hold;
-
-		    kmask = exp.X_add_number;
-		    if (exp.X_op != O_constant
-			|| kmask < 0
-			|| kmask > 127)
+		    if (! parse_const_expr_arg (&s, &kmask))
+		      {
+			error_message = ": invalid membar mask expression";
+			goto error;
+		      }
+		    if (kmask < 0 || kmask > 127)
 		      {
 			error_message = ": invalid membar mask number";
 			goto error;
 		      }
-
-		    s = send;
 		  }
 
-		opcode |= SIMM13 (kmask);
+		opcode |= MEMBAR (kmask);
 		continue;
 	      }
 
 	    case '*':
 	      {
-		int prefetch_fcn = 0;
+		int fcn = 0;
 
 		/* Parse a prefetch function.  */
 		if (*s == '#')
 		  {
-		    s += 1;
-		    if (!strncmp (s, "n_reads", 7))
-		      prefetch_fcn = 0, s += 7;
-		    else if (!strncmp (s, "one_read", 8))
-		      prefetch_fcn = 1, s += 8;
-		    else if (!strncmp (s, "n_writes", 8))
-		      prefetch_fcn = 2, s += 8;
-		    else if (!strncmp (s, "one_write", 9))
-		      prefetch_fcn = 3, s += 9;
-		    else if (!strncmp (s, "page", 4))
-		      prefetch_fcn = 4, s += 4;
-		    else
+		    if (! parse_keyword_arg (sparc_encode_prefetch, &s, &fcn))
 		      {
 			error_message = ": invalid prefetch function name";
 			goto error;
 		      }
 		  }
-		else if (isdigit (*s))
+		else
 		  {
-		    while (isdigit (*s))
+		    if (! parse_const_expr_arg (&s, &fcn))
 		      {
-			prefetch_fcn = prefetch_fcn * 10 + *s - '0';
-			++s;
+			error_message = ": invalid prefetch function expression";
+			goto error;
 		      }
-
-		    if (prefetch_fcn < 0 || prefetch_fcn > 31)
+		    if (fcn < 0 || fcn > 31)
 		      {
 			error_message = ": invalid prefetch function number";
 			goto error;
 		      }
 		  }
-		else
-		  {
-		    error_message = ": unrecognizable prefetch function";
-		    goto error;
-		  }
-		opcode |= RD (prefetch_fcn);
+		opcode |= RD (fcn);
 		continue;
 	      }
 
 	    case '!':
 	    case '?':
-	      /* Parse a privileged register.  */
+	      /* Parse a sparc64 privileged register.  */
 	      if (*s == '%')
 		{
 		  struct priv_reg_entry *p = priv_reg_table;
@@ -911,7 +963,6 @@ sparc_ip (str)
 		  error_message = ": unrecognizable privileged register";
 		  goto error;
 		}
-#endif
 
 	    case 'M':
 	    case 'm':
@@ -947,7 +998,6 @@ sparc_ip (str)
 		}		/* if %asr */
 	      break;
 
-#ifndef NO_V9
 	    case 'I':
 	      the_insn.reloc = BFD_RELOC_SPARC_11;
 	      immediate_max = 0x03FF;
@@ -1071,7 +1121,6 @@ sparc_ip (str)
 		  continue;
 		}
 	      break;
-#endif /* NO_V9 */
 
 	    case '\0':		/* end of args */
 	      if (*s == '\0')
@@ -1245,10 +1294,9 @@ sparc_ip (str)
 		    default:
 		      goto error;
 		    }
-		  /*
-					 * Got the register, now figure out where
-					 * it goes in the opcode.
-					 */
+
+		  /* Got the register, now figure out where
+		     it goes in the opcode.  */
 		  switch (*args)
 		    {
 
@@ -1310,23 +1358,27 @@ sparc_ip (str)
 			break;
 		      }		/* register must be multiple of 4 */
 
-#ifndef NO_V9
 		    if (mask >= 64)
 		      {
-			error_message = ": There are only 64 f registers; [0-63]";
+			if (can_bump_v9_p)
+			  error_message = ": There are only 64 f registers; [0-63]";
+			else
+			  error_message = ": There are only 32 f registers; [0-31]";
 			goto error;
 		      }	/* on error */
-		    if (mask >= 32)
+		    else if (mask >= 32)
 		      {
-			mask -= 31;
-		      }	/* wrap high bit */
-#else
-		    if (mask >= 32)
-		      {
-			error_message = ": There are only 32 f registers; [0-31]";
-			goto error;
-		      }	/* on error */
-#endif
+			if (can_bump_v9_p)
+			  {
+			    v9_arg_p = 1;
+			    mask -= 31;	/* wrap high bit */
+			  }
+			else
+			  {
+			    error_message = ": There are only 32 f registers; [0-31]";
+			    goto error;
+			  }
+		      }
 		  }
 		else
 		  {
@@ -1335,7 +1387,6 @@ sparc_ip (str)
 
 		switch (*args)
 		  {
-
 		  case 'v':
 		  case 'V':
 		  case 'e':
@@ -1407,13 +1458,13 @@ sparc_ip (str)
 		      the_insn.reloc = BFD_RELOC_LO10;
 		      s += 3;
 		    }
-#ifndef NO_V9
 		  else if (c == 'u'
 			   && s[2] == 'h'
 			   && s[3] == 'i')
 		    {
 		      the_insn.reloc = BFD_RELOC_SPARC_HH22;
 		      s += 4;
+		      v9_arg_p = 1;
 		    }
 		  else if (c == 'u'
 			   && s[2] == 'l'
@@ -1421,8 +1472,8 @@ sparc_ip (str)
 		    {
 		      the_insn.reloc = BFD_RELOC_SPARC_HM10;
 		      s += 4;
+		      v9_arg_p = 1;
 		    }
-#endif /* NO_V9 */
 		  else
 		    break;
 		}
@@ -1469,7 +1520,6 @@ sparc_ip (str)
 		  && the_insn.exp.X_add_symbol == 0
 		  && the_insn.exp.X_op_symbol == 0)
 		{
-#ifndef NO_V9
 		  /* Handle %uhi/%ulo by moving the upper word to the lower
 		     one and pretending it's %hi/%lo.  We also need to watch
 		     for %hi/%lo: the top word needs to be zeroed otherwise
@@ -1484,14 +1534,14 @@ sparc_ip (str)
 		      the_insn.reloc = BFD_RELOC_LO10;
 		      the_insn.exp.X_add_number = BSR (the_insn.exp.X_add_number, 32);
 		      break;
-		    default:
-		      break;
 		    case BFD_RELOC_HI22:
 		    case BFD_RELOC_LO10:
 		      the_insn.exp.X_add_number &= 0xffffffff;
 		      break;
+		    default:
+		      break;
 		    }
-#endif
+
 		  /* For pc-relative call instructions, we reject
 		     constants to get better code.  */
 		  if (the_insn.pcrel
@@ -1548,40 +1598,22 @@ sparc_ip (str)
 		/* Parse an asi.  */
 		if (*s == '#')
 		  {
-		    char c, *p;
-
-		    for (p = s + 1; isalpha (*p) || *p == '_'; ++p)
-		      continue;
-		    c = *p;
-		    *p = 0;
-		    asi = sparc_encode_asi (s);
-		    *p = c;
-		    if (asi == -1)
+		    if (! parse_keyword_arg (sparc_encode_asi, &s, &asi))
 		      {
-			error_message = ": invalid asi name";
+			error_message = ": invalid ASI name";
 			goto error;
 		      }
-		    s = p;
 		  }
 		else
 		  {
-		    char *push = input_line_pointer;
-		    expressionS e;
-		    input_line_pointer = s;
-
-		    expression (&e);
-		    if (e.X_op != O_constant)
+		    if (! parse_const_expr_arg (&s, &asi))
 		      {
-			error_message = ": constant required for ASI";
+			error_message = ": invalid ASI expression";
 			goto error;
 		      }
-		    asi = e.X_add_number;
-		    s = input_line_pointer;
-		    input_line_pointer = push;
-		    
 		    if (asi < 0 || asi > 255)
 		      {
-			error_message = ": invalid asi number";
+			error_message = ": invalid ASI number";
 			goto error;
 		      }
 		  }
@@ -1626,7 +1658,6 @@ sparc_ip (str)
 		}
 	      break;
 
-#ifndef NO_V9
 	    case 'o':
 	      if (strncmp (s, "%asi", 4) != 0)
 		break;
@@ -1644,7 +1675,6 @@ sparc_ip (str)
 		break;
 	      s += 4;
 	      continue;
-#endif /* NO_V9 */
 
 	    case 't':
 	      if (strncmp (s, "%tbr", 4) != 0)
@@ -1658,7 +1688,6 @@ sparc_ip (str)
 	      s += 4;
 	      continue;
 
-#ifndef NO_V9
 	    case 'x':
 	      {
 		char *push = input_line_pointer;
@@ -1680,7 +1709,6 @@ sparc_ip (str)
 		input_line_pointer = push;
 		continue;
 	      }
-#endif
 
 	    case 'y':
 	      if (strncmp (s, "%y", 2) != 0)
@@ -1691,8 +1719,11 @@ sparc_ip (str)
 	    default:
 	      as_fatal ("failed sanity check.");
 	    }			/* switch on arg code */
+
+	  /* Break out of for() loop.  */
 	  break;
 	}			/* for each arg that we expect */
+
     error:
       if (match == 0)
 	{
@@ -1715,29 +1746,36 @@ sparc_ip (str)
 	{
 	  if (insn->architecture > current_architecture
 	      || (insn->architecture != current_architecture
-		  && current_architecture > v8))
+		  && current_architecture > v8)
+	      || (v9_arg_p && current_architecture < v9))
 	    {
+	      enum sparc_architecture needed_architecture =
+		((v9_arg_p && insn->architecture < v9)
+		 ? v9 : insn->architecture);
+
 	      if ((!architecture_requested || warn_on_bump)
 		  && !ARCHITECTURES_CONFLICT_P (current_architecture,
-						insn->architecture)
-		  && !ARCHITECTURES_CONFLICT_P (insn->architecture,
-						current_architecture))
+						needed_architecture)
+		  && !ARCHITECTURES_CONFLICT_P (needed_architecture,
+						current_architecture)
+		  && (needed_architecture < v9 || can_bump_v9_p))
 		{
 		  if (warn_on_bump)
 		    {
 		      as_warn ("architecture bumped from \"%s\" to \"%s\" on \"%s\"",
 			       architecture_pname[current_architecture],
-			       architecture_pname[insn->architecture],
+			       architecture_pname[needed_architecture],
 			       str);
 		    }		/* if warning */
 
-		  current_architecture = insn->architecture;
+		  if (needed_architecture > current_architecture)
+		    current_architecture = needed_architecture;
 		}
 	      else
 		{
 		  as_bad ("Architecture mismatch on \"%s\".", str);
 		  as_tsktsk (" (Requires %s; current architecture is %s.)",
-			     architecture_pname[insn->architecture],
+			     architecture_pname[needed_architecture],
 			     architecture_pname[current_architecture]);
 		  return;
 		}		/* if bump ok else error */
@@ -1947,7 +1985,6 @@ md_apply_fix (fixP, value)
       buf[3] = val;
       break;
 
-#ifndef NO_V9
     case BFD_RELOC_64:
       {
 	bfd_vma valh = BSR (val, 32);
@@ -2013,11 +2050,8 @@ md_apply_fix (fixP, value)
     case BFD_RELOC_SPARC_HH22:
       val = BSR (val, 32);
       /* intentional fallthrough */
-#endif /* NO_V9 */
 
-#ifndef NO_V9
     case BFD_RELOC_SPARC_LM22:
-#endif
     case BFD_RELOC_HI22:
       if (!fixP->fx_addsy)
 	{
@@ -2042,11 +2076,9 @@ md_apply_fix (fixP, value)
       buf[3] = val & 0xff;
       break;
 
-#ifndef NO_V9
     case BFD_RELOC_SPARC_HM10:
       val = BSR (val, 32);
       /* intentional fallthrough */
-#endif /* NO_V9 */
 
     case BFD_RELOC_LO10:
       if (!fixP->fx_addsy)
@@ -2280,7 +2312,9 @@ print_insn (insn)
  *		supported by the selected architecture cause fatal errors.
  *
  *		The default is to start at v6, and bump the architecture up
- *		whenever an instruction is seen at a higher level.
+ *		whenever an instruction is seen at a higher level.  If sparc64
+ *		was not the target cpu, v9 is not bumped up to, the user must
+ *		pass -Av9.
  *
  *		If -bump is specified, a warning is printing when bumping to
  *		higher levels.
@@ -2289,7 +2323,7 @@ print_insn (insn)
  *		that architecture.  Any higher level instructions are flagged
  *		as errors.
  *
- *		if both an architecture and -bump are specified, the
+ *		If both an architecture and -bump are specified, the
  *		architecture starts at the specified level, but bumps are
  *		warnings.
  *
@@ -2346,15 +2380,17 @@ md_parse_option (c, arg)
 	else
 	  {
 	    enum sparc_architecture new_arch = arch - architecture_pname;
-#ifdef NO_V9
-	    if (new_arch == v9)
-	      {
-		as_error ("v9 support not compiled in");
-		return 0;
-	      }
-#endif
-	    current_architecture = new_arch;
+
+	    initial_architecture = new_arch;
 	    architecture_requested = 1;
+
+	    /* ??? May wish an option to explicitly set `can_bump_v9_p'.  */
+	    /* Set `can_bump_v9_p' if v9: we assume that if the current
+	       architecture is v9, it's set.  */
+	    if (new_arch >= v9)
+	      can_bump_v9_p = 1;
+	    else
+	      can_bump_v9_p = 0;
 	  }
       }
       break;
