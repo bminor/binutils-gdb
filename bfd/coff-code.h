@@ -1190,14 +1190,12 @@ coff_write_object_contents(abfd)
     return false;
   reloc_base = obj_relocbase(abfd);
 
+  /* Make a pass through the symbol table to count line number entries and
+     put them into the correct asections */
 
-
-  /*
-    Make a pass through the symbol table to count line number entries and
-    put them into the correct asections
-    */
   coff_count_linenumbers(abfd);
   data_base = scn_base;
+
   /* Work out the size of the reloc and linno areas */
 
   for (current = abfd->sections; current != NULL; current = current->next) {
@@ -1205,7 +1203,6 @@ coff_write_object_contents(abfd)
     lnno_size += current->lineno_count * sizeof(struct lineno);
     data_base += sizeof(struct scnhdr);
   }
-
 
   lineno_base = reloc_base + reloc_size;
   sym_base = lineno_base + lnno_size;
@@ -1422,24 +1419,6 @@ coff_set_section_contents(abfd, section, location, offset, count)
     }
     return true;
 }
-
-static          boolean
-coff_get_section_contents(abfd, section, location, offset, count)
-    bfd            *abfd;
-    sec_ptr         section;
-    PTR             location;
-    file_ptr        offset;
-    int             count;
-{
-    if (count == 0
-	|| offset >= section->size
-	|| bfd_seek(abfd, section->filepos + offset, SEEK_SET) == -1
-	|| bfd_read(location, 1, count, abfd) != count) {
-	return (false);
-    }				/* on error */
-    return (true);
-}				/* coff_get_section_contents() */
-
 
 static          boolean
 coff_close_and_cleanup(abfd)
@@ -2406,11 +2385,12 @@ DEFUN(coff_sizeof_headers,(abfd, reloc),
 }
 
 
-#define coff_core_file_failing_command _bfd_dummy_core_file_failing_command
-#define coff_core_file_failing_signal _bfd_dummy_core_file_failing_signal
-#define coff_core_file_matches_executable_p _bfd_dummy_core_file_matches_executable_p
-#define coff_slurp_armap bfd_slurp_coff_armap
-#define coff_slurp_extended_name_table _bfd_slurp_extended_name_table
-#define coff_truncate_arname bfd_dont_truncate_arname
-#define coff_openr_next_archived_file bfd_generic_openr_next_archived_file
-#define coff_generic_stat_arch_elt bfd_generic_stat_arch_elt
+#define coff_core_file_failing_command	_bfd_dummy_core_file_failing_command
+#define coff_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
+#define coff_core_file_matches_executable_p	_bfd_dummy_core_file_matches_executable_p
+#define coff_slurp_armap		bfd_slurp_coff_armap
+#define coff_slurp_extended_name_table	_bfd_slurp_extended_name_table
+#define coff_truncate_arname		bfd_dont_truncate_arname
+#define coff_openr_next_archived_file	bfd_generic_openr_next_archived_file
+#define coff_generic_stat_arch_elt	bfd_generic_stat_arch_elt
+#define	coff_get_section_contents	bfd_generic_get_section_contents
