@@ -1,3 +1,12 @@
+start-sanitize-d10v
+Fri Sep  6 17:07:12 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c (d10v_dot_word): New function to support
+	"@word" with the word pseudo-op.
+	(md_apply_fix3): Cleanup and changes to support correct sizes
+	for 16 and 18-bit relocs.
+
+end-sanitize-d10v	
 Fri Sep  6 16:00:29 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in (sparc-*-aout): Set `em'.
