@@ -1,3 +1,8 @@
+2001-02-18  Jim Kingdon  <jkingdon@engr.sgi.com>
+
+	* irix-core.c (irix_core_core_file_p): Set the architecture (GDB
+	multiarch needs it).
+
 2001-02-18  H.J. Lu  <hjl@gnu.org>
 
 	* elflink.h (elf_link_input_bfd): Ignore invalid section symbol
