@@ -1,5 +1,10 @@
 Sat Jan 21 15:34:52 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.c++/cplusfuncs.exp (test_lookup_operator_functions): Fix
+	regexp which "info func operator\[\](" is supposed to match.  Fix
+	string to send to GDB.  Note that GDB still doesn't work right.  Add a
+	new test for "info func .perator\[\](" which GDB does handle correctly.
+
 	* gdb.base/nodebug.exp: xfail most of the new tests for ecoff systems.
 
 Fri Jan 20 12:14:23 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
