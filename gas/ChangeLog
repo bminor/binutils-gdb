@@ -1,3 +1,15 @@
+Thu Mar  9 13:51:30 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	Delete this patch, it breaks the h8300 assembler.
+	Tue Jan 10 13:34:14 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+	* config/obj-coff.c (write_object_file): Don't treat h8300 and z8k
+	specially with regard to fixups.
+
+Thu Mar  9 12:28:18 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (mrelocatable): Change type to boolean.
+	(md_begin): Set the EF_PPC_RELOCATABLE if -mrelocatable.
+
 Wed Mar  8 15:39:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_begin): Check for a cpu string of r8000 or
