@@ -182,6 +182,7 @@ char *strdup ();
 
 static int machine;
 int suckunderscore;
+int killat;
 static int verbose;
 FILE *base_file;
 #ifdef DLLTOOL_ARM
@@ -800,15 +801,18 @@ gen_exp_file ()
 static char *
 xlate (char *name)
 {
-  char *p;
+
   if (!suckunderscore)
     return name;
 
   if (name[0] == '_')
     name++;
-  p = strchr (name, '@');
-  if (p)
-    *p = 0;
+  if (killat) {
+    char *p;
+    p = strchr (name, '@');
+    if (p)
+      *p = 0;
+  }
   return name;
 }
 
@@ -1125,7 +1129,8 @@ usage (file, status)
   fprintf (file, "\t --base-file <basefile> Read linker generated base file\n");
   fprintf (file, "\t -b <basefile> \n");
   fprintf (file, "\t -v                     Verbose\n");
-
+  fprintf (file, "\t -u                     Remove leading underscore from .lib\n");
+  fprintf (file, "\t -k                     Kill @<n> from exported names\n");
   exit (status);
 }
 
@@ -1133,6 +1138,7 @@ static struct option long_options[] =
 {
   {"def", required_argument, NULL, 'd'},
   {"underscore", no_argument, NULL, 'u'},
+  {"killat", no_argument, NULL, 'k'},
   {"help", no_argument, NULL, 'h'},
   {"machine", required_argument, NULL, 'm'},
   {"base-file", required_argument, NULL, 'b'},
@@ -1149,7 +1155,7 @@ main (ac, av)
   program_name = av[0];
   oav = av;
 
-  while ((c = getopt_long (ac, av, "vbuh?m:o:Dd:", long_options, 0)) != EOF)
+  while ((c = getopt_long (ac, av, "kvbuh?m:o:Dd:", long_options, 0)) != EOF)
     {
       switch (c)
 	{
@@ -1171,6 +1177,9 @@ main (ac, av)
 	  break;
 	case 'u':
 	  suckunderscore = 1;
+	  break;
+	case 'k':
+	  killat = 1;
 	  break;
 	case 'd':
 	  def_file = optarg;
