@@ -1,3 +1,9 @@
+Wed Oct 27 12:18:07 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmcode.h (nlm_swap_auxiliary_headers_in,
+	nlm_swap_auxiliary_headers_out): Handle sharedDebugRecordOffset
+	and sharedDebugRecordCount fields.
+
 Tue Oct 26 16:21:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* targets.c (target_vector): Remove SCO_CORE.  On Sep 11 1993,
