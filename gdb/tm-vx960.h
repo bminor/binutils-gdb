@@ -20,6 +20,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "tm-i960.h"
 
+/* Under VxWorks the IP isn't filled in.  Skip it, go with RIP, which has
+   the real value.  */
+#undef PC_REGNUM
+#define PC_REGNUM RIP_REGNUM
+
 #define	GDBINIT_FILENAME	".vxgdbinit"
 
 #define	DEFAULT_PROMPT		"(vxgdb) "
