@@ -1,5 +1,7 @@
 Wed Jun  9 06:14:33 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* m68k-stub.c: Add comment about frame cache.
+
 	* target.h (target_store_registers): Doc fix re error handling.
 
 	* findvar.c (write_register): Call SWAP_TARGET_AND_HOST regardless
