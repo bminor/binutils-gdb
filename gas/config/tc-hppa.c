@@ -2468,6 +2468,18 @@ pa_ip (str)
 		continue;
 	      }
 
+	    /* Float operand 1 similar to 'b' but with l/r registers.  */
+	    case 'J':
+	      {
+		struct pa_11_fp_reg_struct result;
+
+		pa_parse_number (&s, &result);
+		CHECK_FIELD (result.number_part, 31, 0, 0);
+		opcode |= result.number_part << 21;
+		opcode |= (result.l_r_select & 1) << 7;
+		continue;
+	      }
+
 	    /* Handle L/R register halves like 'b'.  */
 	    case '3':
 	      {
@@ -2510,6 +2522,18 @@ pa_ip (str)
 		    opcode |= (result.l_r_select & 1) << 12;
 		    opcode |= 1 << 27;
 		  }
+		continue;
+	      }
+
+	    /* Float operand 2, like 'x' but with l/r register halves.  */
+	    case 'K':
+	      {
+		struct pa_11_fp_reg_struct result;
+
+		pa_parse_number (&s, &result);
+		CHECK_FIELD (result.number_part, 31, 0, 0);
+		opcode |= (result.number_part & 0x1f) << 16;
+		opcode |= (result.l_r_select & 1) << 12;
 		continue;
 	      }
 
