@@ -4956,8 +4956,6 @@ process_dynamic_segment (file)
 		  putchar ('\n');
 		}
 	    }
-	  else
-	    putchar ('\n');
 	  break;
 	}
     }
