@@ -1,3 +1,16 @@
+2003-03-21  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (s390_arch_size): Initialize to zero.
+	(current_arch_mask): Rename to current_mode_mask.
+	(current_arch_requested): Remove variable.
+	(current_cpu): New variable.
+	(init_default_arch): Set defaults values for s390_arch_size,
+	current_mode_mask and current_cpu.
+	(md_parse_option): New options -mesa, -mzarch and -march={g5,g6,z900}.
+	(md_begin): Replace current_arch_mask by current_cpu.
+	(md_assemble): Adapt check and error message to current_mode_mask and
+	current_cpu.
+
 2003-03-09  James E Wilson  <wilson@tuliptree.org>
 
 	* macro.c (buffer_and_nest): Store more to sb instead of '\n'.

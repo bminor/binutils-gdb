@@ -35,11 +35,10 @@
 #endif
 static char *default_arch = DEFAULT_ARCH;
 /* Either 32 or 64, selects file format.  */
-static int s390_arch_size;
-/* Current architecture. Start with the smallest instruction set.  */
-static enum s390_opcode_arch_val current_architecture = S390_OPCODE_ESA;
-static int current_arch_mask = 1 << S390_OPCODE_ESA;
-static int current_arch_requested = 0;
+static int s390_arch_size = 0;
+
+static unsigned int current_mode_mask = 0;
+static unsigned int current_cpu = -1U;
 
 /* Whether to use user friendly register names. Default is TRUE.  */
 #ifndef TARGET_REG_NAMES_P
@@ -320,26 +319,30 @@ struct option md_longopts[] = {
 size_t md_longopts_size = sizeof (md_longopts);
 
 /* Initialize the default opcode arch and word size from the default
-   architecture name.  */
+   architecture name if not specified by an option.  */
 static void
 init_default_arch ()
 {
-  if (current_arch_requested)
-    return;
-
   if (strcmp (default_arch, "s390") == 0)
     {
-      s390_arch_size = 32;
-      current_architecture = S390_OPCODE_ESA;
+      if (s390_arch_size == 0)
+	s390_arch_size = 32;
+      if (current_mode_mask == 0)
+	current_mode_mask = 1 << S390_OPCODE_ESA;
+      if (current_cpu == -1U)
+	current_cpu = S390_OPCODE_G5;
     }
   else if (strcmp (default_arch, "s390x") == 0)
     {
-      s390_arch_size = 64;
-      current_architecture = S390_OPCODE_ESAME;
+      if (s390_arch_size == 0)
+	s390_arch_size = 64;
+      if (current_mode_mask == 0)
+	current_mode_mask = 1 << S390_OPCODE_ZARCH;
+      if (current_cpu == -1U)
+	current_cpu = S390_OPCODE_Z900;
     }
   else
     as_fatal ("Invalid default architecture, broken assembler.");
-  current_arch_mask = 1 << current_architecture;
 }
 
 /* Called by TARGET_FORMAT.  */
@@ -380,6 +383,27 @@ md_parse_option (c, arg)
       else if (arg != NULL && strcmp (arg, "64") == 0)
 	s390_arch_size = 64;
 
+      else if (arg != NULL && strcmp (arg, "esa") == 0)
+	current_mode_mask = 1 << S390_OPCODE_ESA;
+
+      else if (arg != NULL && strcmp (arg, "zarch") == 0)
+	current_mode_mask = 1 << S390_OPCODE_ZARCH;
+
+      else if (arg != NULL && strncmp (arg, "arch=", 5) == 0)
+	{
+	  if (strcmp (arg + 5, "g5") == 0)
+	    current_cpu = S390_OPCODE_G5;
+	  else if (strcmp (arg + 5, "g6") == 0)
+	    current_cpu = S390_OPCODE_G6;
+	  else if (strcmp (arg + 5, "z900") == 0)
+	    current_cpu = S390_OPCODE_Z900;
+	  else
+	    {
+	      as_bad (_("invalid switch -m%s"), arg);
+	      return 0;
+	    }
+	}
+
       else
 	{
 	  as_bad (_("invalid switch -m%s"), arg);
@@ -388,14 +412,13 @@ md_parse_option (c, arg)
       break;
 
     case 'A':
+      /* Option -A is deprecated. Still available for compatability.  */
       if (arg != NULL && strcmp (arg, "esa") == 0)
-	current_architecture = S390_OPCODE_ESA;
+	current_cpu = S390_OPCODE_G5;
       else if (arg != NULL && strcmp (arg, "esame") == 0)
-	current_architecture = S390_OPCODE_ESAME;
+	current_cpu = S390_OPCODE_Z900;
       else
 	as_bad ("invalid architecture -A%s", arg);
-      current_arch_mask = 1 << current_architecture;
-      current_arch_requested = 1;
       break;
 
       /* -V: SVR4 argument to print version ID.  */
@@ -444,7 +467,7 @@ md_begin ()
   const char *retval;
 
   /* Give a warning if the combination -m64-bit and -Aesa is used.  */
-  if (s390_arch_size == 64 && current_arch_mask == (1 << S390_OPCODE_ESA))
+  if (s390_arch_size == 64 && current_cpu < S390_OPCODE_Z900)
     as_warn ("The 64 bit file format is used without esame instructions.");
 
   /* Set the ELF flags if desired.  */
@@ -1488,9 +1511,14 @@ md_assemble (str)
       as_bad (_("Unrecognized opcode: `%s'"), str);
       return;
     }
-  else if (!(opcode->architecture & current_arch_mask))
+  else if (!(opcode->modes & current_mode_mask))
     {
-      as_bad ("Opcode %s not available in this architecture", str);
+      as_bad ("Opcode %s not available in this mode", str);
+      return;
+    }
+  else if (opcode->min_cpu > current_cpu)
+    {
+      as_bad ("Opcode %s not available for this cpu", str);
       return;
     }
 
