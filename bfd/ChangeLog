@@ -1,3 +1,9 @@
+Wed Jan 29 00:00:49 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-mn10200.c (reloc_type): Add 16bit pc-relative reloc.
+	(elf_mn10200_howto_table): Likewise.
+	(mn10200_reloc_map): Likewise.
+
 start-sanitize-m32r
 Mon Jan 27 12:07:35 1997  Doug Evans  <dje@seba.cygnus.com>
 

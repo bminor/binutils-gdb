@@ -40,6 +40,7 @@ enum reloc_type
   R_MN10200_8,
   R_MN10200_24,
   R_MN10200_PCREL8,
+  R_MN10200_PCREL16,
   R_MN10200_PCREL24,
   R_MN10200_MAX
 };
@@ -130,6 +131,20 @@ static reloc_howto_type elf_mn10200_howto_table[] =
 	 0xff,
 	 0xff,
 	 true),
+  /* Simple 16 pc-relative reloc.  */
+  HOWTO (R_MN10200_PCREL16,
+	 0,
+	 1,
+	 16,
+	 true,
+	 0,
+	 complain_overflow_bitfield,
+	 bfd_elf_generic_reloc,
+	 "R_MN10200_PCREL16",
+	 false,
+	 0xffff,
+	 0xffff,
+	 true),
   /* Simple 32bit pc-relative reloc with a 1 byte adjustment
      to get the pc-relative offset correct.  */
   HOWTO (R_MN10200_PCREL24,
@@ -161,6 +176,7 @@ static const struct mn10200_reloc_map mn10200_reloc_map[] =
   { BFD_RELOC_8, R_MN10200_8, },
   { BFD_RELOC_24, R_MN10200_24, },
   { BFD_RELOC_8_PCREL, R_MN10200_PCREL8, },
+  { BFD_RELOC_16_PCREL, R_MN10200_PCREL16, },
   { BFD_RELOC_24_PCREL, R_MN10200_PCREL24, },
 };
 
