@@ -1,3 +1,7 @@
+Wed Oct 19 22:49:31 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Fix typo.
+
 Wed Oct 19 11:32:15 1994  Jim Kingdon  <kingdon@cygnus.com>
 
 	* objfiles.c (objfile_relocate): When relocating ->sections, use
