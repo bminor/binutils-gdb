@@ -1,3 +1,10 @@
+Wed Jun  1 10:49:41 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* Makefile.in: Rename HOST_ONLY to NATIVE.
+	* configure: Delete SunOs patch suffix from host_canonical
+	  and build_canonical variables that are prepended to Makefiles.
+	* configure.in: Add comments for easier maintenance.
+
 Tue May 31 19:39:47 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in: Add all-libproc target similar to all-gui.

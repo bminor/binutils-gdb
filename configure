@@ -276,10 +276,8 @@ do
 	--x-i* | --x-l*) other_options="$other_options $orig_option"
 		;;
 	--*)
-		echo "Warning: Unrecognized option: \"$orig_option\"". >&2
-		# Pass the option to any configure scripts in subdirectories
-		# in case they recognize it.
-		other_options="$other_options $orig_option"
+		echo "configure: Unrecognized option: \"$orig_option\"; use --help for usage." >&2
+		exit 1
 		;;
 	*)
 		case $undefs in
@@ -362,7 +360,7 @@ esac
 
 if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
 	exec 1>&2
-	echo Usage: configure HOST
+	echo Usage: configure [OPTIONS] HOST
 	echo
 	echo Options: [defaults in brackets]
 	echo ' --prefix=MYDIR		 configure for installation of host independent files into MYDIR. ["/usr/local"]'
@@ -384,7 +382,7 @@ if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
 	echo ' --enable-FOO, --enable-FOO=BAR include feature FOO (parameter BAR)'
 	echo ' --disable-FOO		 do not include feature FOO'
 	echo
-	echo 'Where HOST and TARGET are something like "vax", "sun3", "encore", etc.'
+	echo 'Where HOST and TARGET are something like "sun4", "decstation", "encore", etc.'
 	echo
 	if [ -r config.status ] ; then
 		cat config.status
@@ -634,9 +632,15 @@ for subdir in . ${subdirs} ; do
                 fi
 
                 ${remove} -f ${link}
-                # Make a symlink if possible, otherwise try a hard link
-                ${symbolic_link} ${srcdir}/${file} ${link} 2>/dev/null || ${hard_link} ${srcdir}/${file} ${link}
-
+		# Make a symlink if possible, otherwise try a hard link
+		if ${symbolic_link} ${srcdir}/${file} ${link} >/dev/null 2>&1 ; then
+			true
+		else
+			# We need to re-remove the file because Lynx leaves a 
+			# very strange directory there when it fails an NFS symlink.
+			${remove} -r -f ${link}
+			${hard_link} ${srcdir}/${file} ${link}
+		fi
                 if [ ! -r ${link} ] ; then
                         echo '***' "${progname}: unable to link \"${link}\" to \"${srcdir}/${file}\"." 1>&2
                         exit 1
@@ -751,6 +755,11 @@ EOF
 
             # real copy now in ${subdir}/Makefile.tem
 
+            # Remove patch suffixes from host name.
+            # See similar code in configure.in.
+            # Example: 'sparc-sun-sunos4.1.3_U1'
+            host_osnop=`echo ${host_os} | sed '/sunos/s/_U1//'`
+
             # prepend warning about editting, and a bunch of variables.
             rm -f ${Makefile}
             cat > ${Makefile} <<EOF
@@ -761,7 +770,7 @@ host_alias = ${host_alias}
 host_cpu = ${host_cpu}
 host_vendor = ${host_vendor}
 host_os = ${host_os}
-host_canonical = ${host_cpu}-${host_vendor}-${host_os}
+host_canonical = ${host_cpu}-${host_vendor}-${host_osnop}
 target_alias = ${target_alias}
 target_cpu = ${target_cpu}
 target_vendor = ${target_vendor}
@@ -770,12 +779,13 @@ target_canonical = ${target_cpu}-${target_vendor}-${target_os}
 EOF
 	    case "${build}" in
 	      "") ;;
-	      *)  cat >> ${Makefile} << EOF
+	      *) build_osnop=`echo ${build_os} | sed '/sunos/s/_U1//'` 
+                 cat >> ${Makefile} << EOF
 build_alias = ${build_alias}
 build_cpu = ${build_cpu}
 build_vendor = ${build_vendor}
 build_os = ${build_os}
-build_canonical = ${build_cpu}-${build_vendor}-${build_os}
+build_canonical = ${build_cpu}-${build_vendor}-${build_osnop}
 EOF
 	    esac
 
