@@ -2868,14 +2868,6 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
       n_opt_found = 0;
 
-#ifdef PCC_SOL_BROKEN
-      /* pcc bug, occasionally puts out SO for SOL.  */
-      if (context_stack_depth > 0)
-	{
-	  start_subfile (name, NULL);
-	  break;
-	}
-#endif
       if (last_source_file)
 	{
 	  /* Check if previous symbol was also an N_SO (with some

@@ -3547,10 +3547,6 @@ and guess the starting and ending addresses of the compilation unit from
 them.
 @end itemize
 
-@item PCC_SOL_BROKEN
-@findex PCC_SOL_BROKEN
-(Used only in the Convex target.)
-
 @item PC_LOAD_SEGMENT
 @findex PC_LOAD_SEGMENT
 If defined, print information about the load segment for the program

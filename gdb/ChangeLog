@@ -1,3 +1,8 @@
+2004-07-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* dbxread.c (process_one_symbol) [PCC_SOL_BROKEN]: Remove dead
+	code.
+
 2004-07-01  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
 	* ada-lang.c (decode_packed_array): Minor change to comment.

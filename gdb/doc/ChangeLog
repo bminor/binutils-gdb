@@ -1,3 +1,8 @@
+2004-07-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Remove
+	PCC_SOL_BROKEN.
+
 2004-06-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbint.texinfo (Target Architecture Definition): Remove
