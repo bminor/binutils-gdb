@@ -105,6 +105,8 @@ static void fix_common_block (struct symbol *, int);
 
 static int read_type_number (char **, int *);
 
+static struct type *read_type (char **, struct objfile *);
+
 static struct type *read_range_type (char **, int[2], struct objfile *);
 
 static struct type *read_sun_builtin_type (char **, int[2], struct objfile *);
@@ -145,6 +147,8 @@ static struct type *read_array_type (char **, struct type *,
 				     struct objfile *);
 
 static struct field *read_args (char **, int, struct objfile *, int *, int *);
+
+static void add_undefined_type (struct type *);
 
 static int
 read_cpp_abbrev (struct field_info *, char **, struct type *,
@@ -248,7 +252,7 @@ static struct symbol *current_symbol = NULL;
    This can be used for finding the type associated with that pair
    or for associating a new type with the pair.  */
 
-struct type **
+static struct type **
 dbx_lookup_type (int typenums[2])
 {
   register int filenum = typenums[0];
@@ -2259,7 +2263,7 @@ error_type (char **pp, struct objfile *objfile)
    assume that type information starts with a digit, '-', or '(' in
    deciding whether to call read_type.  */
 
-struct type *
+static struct type *
 read_type (register char **pp, struct objfile *objfile)
 {
   register struct type *type = 0;
@@ -5128,7 +5132,7 @@ fix_common_block (struct symbol *sym, int valu)
 /* Add a type to the list of undefined types to be checked through
    once this file has been read in.  */
 
-void
+static void
 add_undefined_type (struct type *type)
 {
   if (undef_types_length == undef_types_allocated)

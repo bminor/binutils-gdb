@@ -1,5 +1,13 @@
 2003-05-26  Elena Zannoni  <ezannoni@redhat.com>
 
+	* stabsread.c (dbx_lookup_type): Make static.
+	(read_type): Ditto.
+	(add_undefined_type): Ditto.
+	* stabsread.h (dbx_lookup_type, read_type, add_undefined_type): Do
+	not export.
+
+2003-05-26  Elena Zannoni  <ezannoni@redhat.com>
+
 	* hpread.c (hpread_has_name): Make static.
 	(hpread_psymtab_to_symtab): Ditto.
 	(file_exists): Ditto.
