@@ -1,3 +1,22 @@
+Tue Aug 31 15:01:27 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	Break dcache code out of remote-bug.c into dcache.[hc].
+	* Makefile.in (dcache_h): new macro.
+	  (HFILES): added $(dcache_h).
+	  (ALLDEPFILES): added dcache.c.
+	  (dcache.o): new rule.
+	  (remote-bug.o): now depends on $(dcache_h).
+	* remote-bug.c: include dcache.h. remove externs for insque and
+	  remque, add extern for bcopy.  Prototype bug_close,
+	  bug_clear_breakpoints, bug_write_cr.  dcache code moved to
+	  dcache.[hc].  Changed dcache calling convention to include an
+	  initial DCACHE argument.
+	  (bug_dcache): new static variable.
+	  (bug_read_inferior_memory): change second arg to
+	  unsigned char.
+	* dcache.[ch]: new files.
+	* config/m88k/m88k.mt (TDEPFILES): add dcache.o.
+
 Tue Aug 31 10:33:13 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* c-typeprint.c (c_print_type_base): Treat show = 0 just like

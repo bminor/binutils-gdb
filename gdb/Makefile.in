@@ -336,6 +336,7 @@ udiheaders = \
 	29k-share/udi/udipt29k.h \
 	29k-share/udi/udisoc.h
 
+dcache_h =	dcache.h
 
 gdbcore_h =	gdbcore.h $(bfd_h)
 
@@ -371,7 +372,7 @@ HFILES = buildsym.h call-cmds.h defs.h environ.h $(gdbcmd_h) \
 	nindy-share/env.h nindy-share/stop.h \
 	vx-share/dbgRpcLib.h vx-share/ptrace.h vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/wait.h vx-share/xdr_ld.h \
-	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h thread.h
+	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h thread.h $(dcache_h)
 
 # GDB "info" files, which should be included in their entirety
 INFOFILES = gdb.info*
@@ -799,7 +800,7 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	a29k-pinsn.c a29k-tdep.c a68v-nat.c altos-xdep.c arm-convert.s \
 	arm-pinsn.c arm-tdep.c arm-xdep.c convex-pinsn.c convex-tdep.c \
-	convex-xdep.c core-svr4.c coredep.c corelow.c delta68-nat.c \
+	convex-xdep.c core-svr4.c coredep.c corelow.c dcache.c delta68-nat.c \
 	dpx2-nat.c exec.c fork-child.c \
 	go32-xdep.c gould-pinsn.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-pinsn.c hppa-tdep.c hppab-nat.c hppah-nat.c \
@@ -1013,6 +1014,8 @@ corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbtypes_h) $(symtab_h) $(value_h)
 
+dcache.o: dcache.c $(dcache_h)
+
 dbxread.o: dbxread.c $(breakpoint_h) buildsym.h $(command_h) \
 	complaints.h $(defs_h) $(expression_h) gdb-stabs.h $(gdbcore_h) \
 	$(gdbtypes_h) language.h objfiles.h partial-stab.h stabsread.h \
@@ -1195,7 +1198,7 @@ remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h
 
 remote-bug.o: remote-bug.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) target.h terminal.h
+	$(inferior_h) target.h terminal.h $(dcache_h)
 
 remote-eb.o: remote-eb.c $(wait_h) $(srcdir)/config/a29k/tm-a29k.h \
 	$(defs_h) $(gdbcore_h) $(inferior_h) symfile.h target.h terminal.h

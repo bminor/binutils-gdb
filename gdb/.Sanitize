@@ -81,6 +81,8 @@ coredep.c
 corelow.c
 cp-valprint.c
 dbxread.c
+dcache.c
+dcache.h
 defs.h
 delta68-nat.c
 demangle.c

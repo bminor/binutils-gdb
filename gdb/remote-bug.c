@@ -38,9 +38,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "serial.h"
 #include "gdbcmd.h"
 
+#include "dcache.h"
+
 extern int sleep();
-extern int remque();
-extern int insque();
+extern int bcopy();
 
 /* External data declarations */
 extern int stop_soon_quietly;	/* for wait_for_inferior */
@@ -49,25 +50,26 @@ extern int stop_soon_quietly;	/* for wait_for_inferior */
 extern struct target_ops bug_ops;	/* Forward declaration */
 
 /* Forward function declarations */
-static void bug_close ();
-static int bug_clear_breakpoints ();
-static void bug_write_cr();
 
-#if __STDC__ == 1
+static int bug_clear_breakpoints PARAMS((void));
+static void bug_close PARAMS((int quitting));
+static void bug_write_cr PARAMS((char *string));
 
-static int bug_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
-static int bug_write_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
+static int bug_read_inferior_memory PARAMS((CORE_ADDR memaddr,
+					    unsigned char *myaddr,
+					    int len));
 
-#else
-
-static int bug_read_inferior_memory ();
-static int bug_write_inferior_memory ();
-
-#endif /* not __STDC__ */
+static int bug_write_inferior_memory PARAMS((CORE_ADDR memaddr,
+					     unsigned char *myaddr,
+					     int len));
 
 /* This is the serial descriptor to our target.  */
 
 static serial_t desc = NULL;
+
+/* This is our data cache. */
+
+static DCACHE *bug_dcache;
 
 /* This variable is somewhat arbitrary.  It's here so that it can be
    set from within a running gdb.  */
@@ -109,176 +111,6 @@ static int srec_sleep = 0;
    wanted to test error handling and recovery.  */
 
 static int srec_noise = 0;
-
-/***********************************************************************/
-/* Caching stuff stolen from remote-nindy.c  */
-
-/* The data cache records all the data read from the remote machine
-   since the last time it stopped.
-
-   Each cache block holds LINE_SIZE bytes of data
-   starting at a multiple-of-LINE_SIZE address.  */
-
-#define LINE_SIZE_POWER 4
-#define LINE_SIZE (1<<LINE_SIZE_POWER)	/* eg 1<<3 == 8 */
-#define LINE_SIZE_MASK ((LINE_SIZE-1))	/* eg 7*2+1= 111*/
-#define DCACHE_SIZE 64		/* Number of cache blocks */
-#define XFORM(x)  ((x&LINE_SIZE_MASK)>>2)
-struct dcache_block
-  {
-    struct dcache_block *next, *last;
-    unsigned int addr;		/* Address for which data is recorded.  */
-    int data[LINE_SIZE / sizeof (int)];
-  };
-
-struct dcache_block dcache_free, dcache_valid;
-
-/* Free all the data cache blocks, thus discarding all cached data.  */
-static
-void
-dcache_flush ()
-{
-  register struct dcache_block *db;
-
-  while ((db = dcache_valid.next) != &dcache_valid)
-    {
-      remque (db);
-      insque (db, &dcache_free);
-    }
-}
-
-/*
- * If addr is present in the dcache, return the address of the block
- * containing it.
- */
-static
-struct dcache_block *
-dcache_hit (addr)
-     unsigned int addr;
-{
-  register struct dcache_block *db;
-
-  if (addr & 3)
-    abort ();
-
-  /* Search all cache blocks for one that is at this address.  */
-  db = dcache_valid.next;
-  while (db != &dcache_valid)
-    {
-      if ((addr & ~LINE_SIZE_MASK) == db->addr)
-	return db;
-      db = db->next;
-    }
-  return NULL;
-}
-
-/*  Return the int data at address ADDR in dcache block DC.  */
-static
-int
-dcache_value (db, addr)
-     struct dcache_block *db;
-     unsigned int addr;
-{
-  if (addr & 3)
-    abort ();
-  return (db->data[XFORM (addr)]);
-}
-
-/* Get a free cache block, put or keep it on the valid list,
-   and return its address.  The caller should store into the block
-   the address and data that it describes, then remque it from the
-   free list and insert it into the valid list.  This procedure
-   prevents errors from creeping in if a ninMemGet is interrupted
-   (which used to put garbage blocks in the valid list...).  */
-static
-struct dcache_block *
-dcache_alloc ()
-{
-  register struct dcache_block *db;
-
-  if ((db = dcache_free.next) == &dcache_free)
-    {
-      /* If we can't get one from the free list, take last valid and put
-	 it on the free list.  */
-      db = dcache_valid.last;
-      remque (db);
-      insque (db, &dcache_free);
-    }
-
-  remque (db);
-  insque (db, &dcache_valid);
-  return (db);
-}
-
-/* Return the contents of the word at address ADDR in the remote machine,
-   using the data cache.  */
-static
-int
-dcache_fetch (addr)
-     CORE_ADDR addr;
-{
-  register struct dcache_block *db;
-
-  db = dcache_hit (addr);
-  if (db == 0)
-    {
-      db = dcache_alloc ();
-      immediate_quit++;
-      bug_read_inferior_memory (addr & ~LINE_SIZE_MASK, (unsigned char *) db->data, LINE_SIZE);
-      immediate_quit--;
-      db->addr = addr & ~LINE_SIZE_MASK;
-      remque (db);		/* Off the free list */
-      insque (db, &dcache_valid);	/* On the valid list */
-    }
-  return (dcache_value (db, addr));
-}
-
-/* Write the word at ADDR both in the data cache and in the remote machine.  */
-static void
-dcache_poke (addr, data)
-     CORE_ADDR addr;
-     int data;
-{
-  register struct dcache_block *db;
-
-  /* First make sure the word is IN the cache.  DB is its cache block.  */
-  db = dcache_hit (addr);
-  if (db == 0)
-    {
-      db = dcache_alloc ();
-      immediate_quit++;
-      bug_write_inferior_memory (addr & ~LINE_SIZE_MASK, (unsigned char *) db->data, LINE_SIZE);
-      immediate_quit--;
-      db->addr = addr & ~LINE_SIZE_MASK;
-      remque (db);		/* Off the free list */
-      insque (db, &dcache_valid);	/* On the valid list */
-    }
-
-  /* Modify the word in the cache.  */
-  db->data[XFORM (addr)] = data;
-
-  /* Send the changed word.  */
-  immediate_quit++;
-  bug_write_inferior_memory (addr, (unsigned char *) &data, 4);
-  immediate_quit--;
-}
-
-/* The cache itself. */
-struct dcache_block the_cache[DCACHE_SIZE];
-
-/* Initialize the data cache.  */
-static void
-dcache_init ()
-{
-  register i;
-  register struct dcache_block *db;
-
-  db = the_cache;
-  dcache_free.next = dcache_free.last = &dcache_free;
-  dcache_valid.next = dcache_valid.last = &dcache_valid;
-  for (i = 0; i < DCACHE_SIZE; i++, db++)
-    insque (db, &dcache_free);
-}
 
 /***********************************************************************
  * I/O stuff stolen from remote-eb.c
@@ -489,7 +321,7 @@ bug_load (args, fromtty)
 
   check_open ();
 
-  dcache_flush ();
+  dcache_flush (bug_dcache);
   inferior_pid = 0;
   abfd = bfd_openr (args, 0);
   if (!abfd)
@@ -616,7 +448,7 @@ bug_open (name, from_tty)
   SERIAL_RAW (desc);
   is_open = 1;
 
-  dcache_init ();
+  bug_dcache = dcache_init (bug_read_inferior_memory, bug_write_inferior_memory);
 
   /* Hello?  Are you there?  */
   SERIAL_WRITE (desc, "\r", 1);
@@ -666,7 +498,7 @@ void
 bug_resume (pid, step, sig)
      int pid, step, sig;
 {
-  dcache_flush ();
+  dcache_flush (bug_dcache);
 
   if (step)
     {
@@ -1040,7 +872,7 @@ int
 bug_fetch_word (addr)
      CORE_ADDR addr;
 {
-  return dcache_fetch (addr);
+  return dcache_fetch (bug_dcache, addr);
 }
 
 /* Write a word WORD into remote address ADDR.
@@ -1051,7 +883,7 @@ bug_store_word (addr, word)
      CORE_ADDR addr;
      int word;
 {
-  dcache_poke (addr, word);
+  dcache_poke (bug_dcache, addr, word);
 }
 
 int
@@ -1312,7 +1144,7 @@ bug_files_info ()
 static int
 bug_read_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
-     char *myaddr;
+     unsigned char *myaddr;
      int len;
 {
   char request[100];
