@@ -32,26 +32,6 @@ config
 config.h
 configure
 configure.in
-ld-emul.c
-ld-emul.h
-ld-gld-Ur.script
-ld-gld-r.script
-ld-gld.c
-ld-gld.script
-ld-gld68k-Ur.script
-ld-gld68k-r.script
-ld-gld68k.c
-ld-gld68k.script
-ld-gld960.c
-ld-gld960.script
-ld-gldm88kbcs-Ur.script
-ld-gldm88kbcs-r.script
-ld-gldm88kbcs.c
-ld-gldm88kbcs.script
-ld-lnk960-r.script
-ld-lnk960.c
-ld-lnk960.script
-ld-vanilla.c
 ld.h
 ld.texinfo
 ldemul.c
@@ -73,6 +53,10 @@ ldgldm88kbcs.c
 ldgldm88kbcs.script
 ldgldm88kbcsUr.script
 ldgldm88kbcsr.script
+ldglda29k.c
+ldglda29k.script
+ldglda29kUr.script
+ldglda29kr.script
 ldgldr.script
 ldgram.h
 ldgram.y
@@ -105,7 +89,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 21:45:12  rich
+# Revision 1.2  1991/07/16 00:31:15  steve
+# *** empty log message ***
+#
+# Revision 1.1  1991/05/23  21:45:12  rich
 # Initial revision
 #
 #
