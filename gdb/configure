@@ -17514,64 +17514,6 @@ _ACEOF
 fi
 
 
-# The following save_state_t checkery is only necessary for HPUX
-# versions earlier than 10.20.  When those fade from memory, this
-# could be expunged. --jsm 1999-03-22
-
-echo "$as_me:$LINENO: checking for HPUX save_state structure" >&5
-echo $ECHO_N "checking for HPUX save_state structure... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <machine/save_state.h>
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "save_state_t" >/dev/null 2>&1; then
-  gdb_cv_hpux_savestate=yes
-else
-  gdb_cv_hpux_savestate=no
-fi
-rm -f conftest*
-
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <machine/save_state.h>
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "ss_wide" >/dev/null 2>&1; then
-  gdb_cv_hpux_sswide=yes
-else
-  gdb_cv_hpux_sswide=no
-fi
-rm -f conftest*
-
-if test $gdb_cv_hpux_savestate = yes
-then
-  cat >>confdefs.h <<\_ACEOF
-#define HAVE_STRUCT_SAVE_STATE_T 1
-_ACEOF
-
-fi
-if test $gdb_cv_hpux_sswide = yes
-then
-  cat >>confdefs.h <<\_ACEOF
-#define HAVE_STRUCT_MEMBER_SS_WIDE 1
-_ACEOF
-
-fi
-echo "$as_me:$LINENO: result: $gdb_cv_hpux_sswide" >&5
-echo "${ECHO_T}$gdb_cv_hpux_sswide" >&6
-
-
 # If we are configured native on GNU/Linux, work around problems with
 # sys/procfs.h
 # Also detect which type of /proc is in use, such as for Unixware or Solaris.

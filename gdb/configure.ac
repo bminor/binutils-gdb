@@ -709,26 +709,6 @@ BFD_NEED_DECLARATION(strdup)
 BFD_NEED_DECLARATION(strstr)
 BFD_NEED_DECLARATION(canonicalize_file_name)
 
-# The following save_state_t checkery is only necessary for HPUX 
-# versions earlier than 10.20.  When those fade from memory, this 
-# could be expunged. --jsm 1999-03-22
-
-AC_MSG_CHECKING(for HPUX save_state structure)
-AC_EGREP_HEADER(save_state_t, machine/save_state.h, 
-                gdb_cv_hpux_savestate=yes, gdb_cv_hpux_savestate=no)
-AC_EGREP_HEADER(ss_wide, machine/save_state.h, gdb_cv_hpux_sswide=yes,
-                gdb_cv_hpux_sswide=no)
-if test $gdb_cv_hpux_savestate = yes
-then
-  AC_DEFINE(HAVE_STRUCT_SAVE_STATE_T, 1)
-fi
-if test $gdb_cv_hpux_sswide = yes
-then
-  AC_DEFINE(HAVE_STRUCT_MEMBER_SS_WIDE, 1)
-fi
-AC_MSG_RESULT($gdb_cv_hpux_sswide)
-
-
 # If we are configured native on GNU/Linux, work around problems with
 # sys/procfs.h
 # Also detect which type of /proc is in use, such as for Unixware or Solaris.
