@@ -1,6 +1,6 @@
 /* tc-m68k.c -- Assemble for the m68k family
    Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -732,7 +732,7 @@ tc_coff_fix2rtype (fixP)
    libraries, and we can relax any external sym.  */
 
 #define relaxable_symbol(symbol) \
-  (!((S_IS_EXTERNAL (symbol) && strcmp (TARGET_OS, "elf") != 0)		\
+  (!((S_IS_EXTERNAL (symbol) && EXTERN_FORCE_RELOC) \
      || S_IS_WEAK (symbol)))
 
 /* Compute the relocation code for a fixup of SIZE bytes, using pc

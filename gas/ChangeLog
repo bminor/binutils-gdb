@@ -1,3 +1,10 @@
+2004-01-26  Bernardo Innocenti  <bernie@develer.com>
+
+	* config/tc-m68k.h (EXTERN_FORCE_RELOC): Handle m68k-uclinux specially,
+	like m68k-elf.
+	* config/tc-m68k.c (RELAXABLE_SYMBOL): Use EXTERN_FORCE_RELOC instead
+	of hard-coded test for TARGET_OS=elf.
+
 2004-01-24  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (hilo_interlocks): Change definition
