@@ -1,5 +1,9 @@
 2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
 
+	* doc/as.texinfo: Wrap @menu in @ifnottex, not @ifinfo.
+
+2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
+
 	* NEWS: Mark version 2.12.
 
 2002-02-28  Jakub Jelinek  <jakub@redhat.com>
