@@ -1,3 +1,37 @@
+Tue Feb 15 19:39:24 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* section.c (bfd_get_section_contents): Since this function reads
+	unrelocated contents, the section's raw size is always the one to
+	use for bounds checking.
+
+	* linker.c (default_indirect_link_order): In assertion, compare
+	link_order size field against cooked size, not raw size, of input
+	section.
+
+	* bout.c (b_out_get_reloc_upper_bound): For BSS section, just
+	return 0.
+	(aligncode): When shrinking, the addend should be set to the
+	current offset in the section plus the number of bytes of padding
+	that will actually be retained.
+	(b_out_relax_section): If a section contains no relocations, don't
+	bother processing them.
+	(b_out_get_relocated_section_contents): Set reloc_done.  Assert
+	that bfd_get_section_contents returns true.  Check that relocs are
+	properly ordered.
+	(b_out_get_relocated_section_contents, case ALIGNDONE): Assert
+	that reloc->addend falls between the current source offset and the
+	raw size of the input section.
+
+	* config.bfd: Support i960 vxworks versions > 5.0 with coff, not
+	bout.  Default with no version number is still bout.  Support
+	explicit i960-coff target too.
+
+	* bout.c: Changed some indentation, deleted trailing whitespace,
+	fixed some comments, removed some "#if 1" lines.
+	(output_addr): New macro.
+	(calljx_callback, callj_callback, get_value, abs32code, aligncode,
+	b_out_get_relocated_section_contents): Use it for readability.
+
 Tue Feb 15 09:00:16 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_bfd_prep_for_ar_write): Iterate through the SOM
