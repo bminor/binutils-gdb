@@ -1,3 +1,14 @@
+1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* config/tc-sparc.c (sparc_ip): Allow OLO10 relocations
+	on -64 and not pic.
+	(output_insn): Put OLO10's secondary addend into tc_fix_data.
+	(md_apply_fix3): Handle BFD_RELOC_SPARC_OLO10.
+	(tc_gen_reloc): Return two relocs for OLO10, LO10 and SPARC13.
+	* config/tc-sparc.h (RELOC_EXPANSION_POSSIBLE,
+	MAX_RELOC_EXPANSION): Define.
+	(TC_FIX_TYPE, TC_INIT_FIX_DATA, TC_FIX_DATA_PRINT): Likewise.
+
 1999-07-16  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (intel_float_operand): Add prototype, make static.

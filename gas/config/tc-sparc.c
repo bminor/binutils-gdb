@@ -2226,7 +2226,7 @@ sparc_ip (str, pinsn)
 		      }
 		    else
 		      {
-			if (1 || old_reloc != BFD_RELOC_SPARC13
+			if (old_reloc != BFD_RELOC_SPARC13
 			    || the_insn.reloc != BFD_RELOC_LO10
 			    || sparc_arch_size != 64
 			    || sparc_pic_code)
@@ -2645,6 +2645,8 @@ output_insn (insn, the_insn)
 	 the insn size is 4 and fixup_segment will signal an overflow for
 	 large 8 byte quantities.  */
       fixP->fx_no_overflow = 1;
+      if (the_insn->reloc == BFD_RELOC_SPARC_OLO10)
+	fixP->tc_fix_data = the_insn->exp2.X_add_number;
     }
 
   last_insn = insn;
@@ -2979,6 +2981,11 @@ md_apply_fix3 (fixP, value, segment)
 	    }
 	  break;
 
+	case BFD_RELOC_SPARC_OLO10:
+	  val &= 0x3ff;
+	  val += fixP->tc_fix_data;
+	  /* intentional fallthrough */
+
 	case BFD_RELOC_SPARC13:
 	  if (! in_signed_range (val, 0x1fff))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -3048,15 +3055,17 @@ md_apply_fix3 (fixP, value, segment)
 
 /* Translate internal representation of relocation info to BFD target
    format.  */
-arelent *
+arelent **
 tc_gen_reloc (section, fixp)
      asection *section;
      fixS *fixp;
 {
+  static arelent *relocs[3];
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  relocs[0] = reloc = (arelent *) xmalloc (sizeof (arelent));
+  relocs[1] = NULL;
 
   reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
@@ -3093,6 +3102,7 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_SPARC_HIX22:
     case BFD_RELOC_SPARC_LOX10:
     case BFD_RELOC_SPARC_REV32:
+    case BFD_RELOC_SPARC_OLO10:
     case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_VTABLE_INHERIT:
       code = fixp->fx_r_type;
@@ -3146,13 +3156,18 @@ tc_gen_reloc (section, fixp)
     }
 #endif /* defined (OBJ_ELF) || defined (OBJ_AOUT) */
 
-  reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
+  if (code == BFD_RELOC_SPARC_OLO10)
+    reloc->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_LO10);
+  else
+    reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
   if (reloc->howto == 0)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("internal error: can't export reloc type %d (`%s')"),
 		    fixp->fx_r_type, bfd_get_reloc_code_name (code));
-      return 0;
+      xfree (reloc);
+      relocs[0] = NULL;
+      return relocs;
     }
 
   /* @@ Why fx_addnumber sometimes and fx_offset other times?  */
@@ -3187,7 +3202,21 @@ tc_gen_reloc (section, fixp)
     reloc->addend = fixp->fx_offset;
 #endif
 
-  return reloc;
+  /* We expand R_SPARC_OLO10 to R_SPARC_LO10 and R_SPARC_13
+     on the same location.  */
+  if (code == BFD_RELOC_SPARC_OLO10)
+    {
+      relocs[1] = reloc = (arelent *) xmalloc (sizeof (arelent));
+      relocs[2] = NULL;
+
+      reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+      *reloc->sym_ptr_ptr = symbol_get_bfdsym (section_symbol (absolute_section));
+      reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+      reloc->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_SPARC13);
+      reloc->addend = fixp->tc_fix_data;
+    }
+
+  return relocs;
 }
 
 /* We have no need to default values of symbols. */
