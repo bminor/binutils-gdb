@@ -3685,6 +3685,9 @@ ppc_frob_symbol (sym)
 	a->x_csect.x_smclas = sym->sy_tc.class;
       a->x_csect.x_stab = 0;
       a->x_csect.x_snstab = 0;
+
+      /* Don't let the COFF backend resort these symbols.  */
+      sym->bsym->flags |= BSF_NOT_AT_END;
     }
   else if (S_GET_STORAGE_CLASS (sym) == C_BSTAT)
     {

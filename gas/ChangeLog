@@ -10,6 +10,8 @@ Tue Oct 31 13:29:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 	do anything.
 	(ppc_symbol_new_hook): If ppc_stab_symbol is set, don't look for a
 	suffix.
+	(ppc_frob_symbol): Set BSF_NOT_AT_END for symbols with csect aux
+	entries.
 
 	* input-scrub.c (input_scrub_push): Reset sb_index.
 
