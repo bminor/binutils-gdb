@@ -332,8 +332,20 @@ to the @code{set_thread_cmd_list}.
 
 To add commands in general, use @code{add_cmd}.  @code{add_com} adds to
 the main command list, and should be used for those commands.  The usual
-place to add commands is in the @code{_initialize_@var{xyz}} routines at the
-ends of most source files.
+place to add commands is in the @code{_initialize_@var{xyz}} routines at
+the ends of most source files. 
+
+Before removing commands from the command set it is a good idea to
+deprecate them for some time.  Use @code{deprecate_cmd} on commands or
+aliases to set the deprecated flag.  @code{deprecate_cmd} takes a
+@code{struct cmd_list_element} as it's first argument.  You can use the
+return value from @code{add_com} or @code{add_cmd} to deprecate the
+command immediately after it is created.
+
+The first time a comamnd is used the user will be warned and offered a
+replacement (if one exists). Note that the replacement string passed to
+@code{deprecate_cmd} should be the full name of the command, i.e. the
+entire string the user should type at the command line.
 
 @section Console Printing
 
