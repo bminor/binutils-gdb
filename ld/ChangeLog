@@ -1,3 +1,8 @@
+Thu Jun 16 22:48:41 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* scripttempl/hppaelf.sc: Place .data and .bss at 0x40000000
+	when generating relocatable objects.
+
 Thu Jun 16 14:25:22 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 	* emultempl/linux.em: New file providing support for linking
