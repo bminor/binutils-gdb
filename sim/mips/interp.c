@@ -146,11 +146,14 @@ static void mips_size PARAMS((SIM_DESC sd, int n));
 #define K0SIZE  (0x20000000)
 #define K1BASE  (0xA0000000)
 #define K1SIZE  (0x20000000)
+#define MONITOR_BASE (0xBFC00000)
+#define MONITOR_SIZE (1 << 11)
+#define MEM_SIZE (2 << 20)
 
 /* Simple run-time monitor support */
 static unsigned char *monitor = NULL;
-static ut_reg monitor_base = 0xBFC00000;
-static unsigned monitor_size = (1 << 11); /* power-of-2 */
+static ut_reg monitor_base = MONITOR_BASE;
+static unsigned monitor_size = MONITOR_SIZE; /* power-of-2 */
 
 static char *logfile = NULL; /* logging disabled by default */
 static FILE *logfh = NULL;
@@ -283,6 +286,8 @@ sim_open (kind, cb, abfd, argv)
   SIM_DESC sd = sim_state_alloc (kind, cb);
   sim_cpu *cpu = STATE_CPU (sd, 0);
 
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
   /* FIXME: watchpoints code shouldn't need this */
   STATE_WATCHPOINTS (sd)->pc = &(PC);
   STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
@@ -290,7 +295,7 @@ sim_open (kind, cb, abfd, argv)
 
   /* memory defaults (unless sim_size was here first) */
   if (STATE_MEM_SIZE (sd) == 0)
-    STATE_MEM_SIZE (sd) = (2 << 20);
+    STATE_MEM_SIZE (sd) = MEM_SIZE;
   STATE_MEM_BASE (sd) = K1BASE;
 
   STATE = 0;
@@ -440,15 +445,13 @@ sim_open (kind, cb, abfd, argv)
        not using machine instructions. To avoid clashing with use of
        the MIPS TRAP system, we place our own (simulator specific)
        "undefined" instructions into the relevant vector slots. */
-    for (loop = 0; (loop < monitor_size); loop += 4) {
-      address_word vaddr = (monitor_base + loop);
-      address_word paddr;
-      int cca;
-      if (AddressTranslation(vaddr, isDATA, isSTORE, &paddr, &cca, isTARGET, isRAW))
-	StoreMemory(cca, AccessLength_WORD,
-		    (RSVD_INSTRUCTION | (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK) << RSVD_INSTRUCTION_ARG_SHIFT)),
-		    0, paddr, vaddr, isRAW);
-    }
+    for (loop = 0; (loop < MONITOR_SIZE); loop += 4)
+      {
+	address_word vaddr = (MONITOR_BASE + loop);
+	unsigned32 insn = (RSVD_INSTRUCTION | (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK) << RSVD_INSTRUCTION_ARG_SHIFT));
+	H2T (insn);
+	sim_write (sd, vaddr, (char *)&insn, sizeof (insn));
+      }
     /* The PMON monitor uses the same address space, but rather than
        branching into it the address of a routine is loaded. We can
        cheat for the moment, and direct the PMON routine to IDT style
@@ -457,53 +460,40 @@ sim_open (kind, cb, abfd, argv)
        entry points.*/
     for (loop = 0; (loop < 24); loop++)
       {
-        address_word vaddr = (monitor_base + 0x500 + (loop * 4));
-        address_word paddr;
-        int cca;
-        unsigned int value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
+        address_word vaddr = (MONITOR_BASE + 0x500 + (loop * 4));
+        unsigned32 value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
         switch (loop)
           {
             case 0: /* read */
               value = 7;
               break;
-
             case 1: /* write */
               value = 8;
               break;
-
             case 2: /* open */
               value = 6;
               break;
-
             case 3: /* close */
               value = 10;
               break;
-
             case 5: /* printf */
               value = ((0x500 - 16) / 8); /* not an IDT reason code */
               break;
-
             case 8: /* cliexit */
               value = 17;
               break;
-
             case 11: /* flush_cache */
               value = 28;
               break;
           }
-	    /* FIXME - should monitor_base be SIM_ADDR?? */
-        value = ((unsigned int)monitor_base + (value * 8));
-        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
-          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
-        else
-          sim_io_error(sd,"Failed to write to monitor space 0x%s",pr_addr(vaddr));
+	/* FIXME - should monitor_base be SIM_ADDR?? */
+        value = ((unsigned int)MONITOR_BASE + (value * 8));
+	H2T (value);
+	sim_write (sd, vaddr, (char *)&value, sizeof (value));
 
 	/* The LSI MiniRISC PMON has its vectors at 0x200, not 0x500.  */
 	vaddr -= 0x300;
-        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
-          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
-        else
-          sim_io_error(sd,"Failed to write to monitor space 0x%s",pr_addr(vaddr));
+	sim_write (sd, vaddr, (char *)&value, sizeof (value));
       }
   }
 
@@ -565,108 +555,27 @@ sim_write (sd,addr,buffer,size)
      unsigned char *buffer;
      int size;
 {
-  int index = size;
-  uword64 vaddr = (uword64)addr;
+  int index;
 
   /* Return the number of bytes written, or zero if error. */
 #ifdef DEBUG
   sim_io_printf(sd,"sim_write(0x%s,buffer,%d);\n",pr_addr(addr),size);
 #endif
 
-  /* We provide raw read and write routines, since we do not want to
-     count the GDB memory accesses in our statistics gathering. */
+  /* We use raw read and write routines, since we do not want to count
+     the GDB memory accesses in our statistics gathering. */
 
-  /* There is a lot of code duplication in the individual blocks
-     below, but the variables are declared locally to a block to give
-     the optimiser the best chance of improving the code. We have to
-     perform slow byte reads from the host memory, to ensure that we
-     get the data into the correct endianness for the (simulated)
-     target memory world. */
+  for (index = 0; index < size; index++)
+    {
+      address_word vaddr = (address_word)addr + index;
+      address_word paddr;
+      int cca;
+      if (!AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &cca, isTARGET, isRAW))
+	break;
+      StoreMemory (cca, AccessLength_BYTE, buffer[index], 0, paddr, vaddr, isRAW); 
+    }
 
-  /* Mask count to get odd byte, odd halfword, and odd word out of the
-     way. We can then perform doubleword transfers to and from the
-     simulator memory for optimum performance. */
-  if (index && (index & 1)) {
-    address_word paddr;
-    int cca;
-    if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
-      uword64 value = ((uword64)(*buffer++));
-      StoreMemory(cca,AccessLength_BYTE,value,0,paddr,vaddr,isRAW);
-    }
-    vaddr++;
-    index &= ~1; /* logical operations usually quicker than arithmetic on RISC systems */
-  }
-  if (index && (index & 2)) {
-    address_word paddr;
-    int cca;
-    if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
-      uword64 value;
-      /* We need to perform the following magic to ensure that that
-         bytes are written into same byte positions in the target memory
-         world, regardless of the endianness of the host. */
-      if (BigEndianMem) {
-        value =  ((uword64)(*buffer++) << 8);
-        value |= ((uword64)(*buffer++) << 0);
-      } else {
-        value =  ((uword64)(*buffer++) << 0);
-        value |= ((uword64)(*buffer++) << 8);
-      }
-      StoreMemory(cca,AccessLength_HALFWORD,value,0,paddr,vaddr,isRAW);
-    }
-    vaddr += 2;
-    index &= ~2;
-  }
-  if (index && (index & 4)) {
-    address_word paddr;
-    int cca;
-    if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
-      uword64 value;
-      if (BigEndianMem) {
-        value =  ((uword64)(*buffer++) << 24);
-        value |= ((uword64)(*buffer++) << 16);
-        value |= ((uword64)(*buffer++) << 8);
-        value |= ((uword64)(*buffer++) << 0);
-      } else {
-        value =  ((uword64)(*buffer++) << 0);
-        value |= ((uword64)(*buffer++) << 8);
-        value |= ((uword64)(*buffer++) << 16);
-        value |= ((uword64)(*buffer++) << 24);
-      }
-      StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
-    }
-    vaddr += 4;
-    index &= ~4;
-  }
-  for (;index; index -= 8) {
-    address_word paddr;
-    int cca;
-    if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
-      uword64 value;
-      if (BigEndianMem) {
-        value =  ((uword64)(*buffer++) << 56);
-        value |= ((uword64)(*buffer++) << 48);
-        value |= ((uword64)(*buffer++) << 40);
-        value |= ((uword64)(*buffer++) << 32);
-        value |= ((uword64)(*buffer++) << 24);
-        value |= ((uword64)(*buffer++) << 16);
-        value |= ((uword64)(*buffer++) << 8);
-        value |= ((uword64)(*buffer++) << 0);
-      } else {
-        value =  ((uword64)(*buffer++) << 0);
-        value |= ((uword64)(*buffer++) << 8);
-        value |= ((uword64)(*buffer++) << 16);
-        value |= ((uword64)(*buffer++) << 24);
-        value |= ((uword64)(*buffer++) << 32);
-        value |= ((uword64)(*buffer++) << 40);
-        value |= ((uword64)(*buffer++) << 48);
-        value |= ((uword64)(*buffer++) << 56);
-      }
-      StoreMemory(cca,AccessLength_DOUBLEWORD,value,0,paddr,vaddr,isRAW);
-    }
-    vaddr += 8;
-  }
-
-  return(size);
+  return(index);
 }
 
 int
@@ -683,22 +592,17 @@ sim_read (sd,addr,buffer,size)
   sim_io_printf(sd,"sim_read(0x%s,buffer,%d);\n",pr_addr(addr),size);
 #endif /* DEBUG */
 
-  /* TODO: Perform same optimisation as the sim_write() code
-     above. NOTE: This will require a bit more work since we will need
-     to ensure that the source physical address is doubleword aligned
-     before, and then deal with trailing bytes. */
-  for (index = 0; (index < size); index++) {
-    address_word vaddr;
-    address_word paddr;
-    unsigned64 value;
-    int cca;
-    vaddr = (address_word)addr + index;
-    if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&cca,isTARGET,isRAW)) {
-      LoadMemory(&value,NULL,cca,AccessLength_BYTE,paddr,vaddr,isDATA,isRAW);
+  for (index = 0; (index < size); index++)
+    {
+      address_word vaddr = (address_word)addr + index;
+      address_word paddr;
+      unsigned64 value;
+      int cca;
+      if (!AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &cca, isTARGET, isRAW))
+	break;
+      LoadMemory (&value, NULL, cca, AccessLength_BYTE, paddr, vaddr, isDATA, isRAW);
       buffer[index] = (unsigned char)(value&0xFF);
-    } else
-     break;
-  }
+    }
 
   return(index);
 }
@@ -951,6 +855,22 @@ mips_size(sd, newsize)
 /*-- Private simulator support interface ------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
+/* Read a null terminated string from memory, return in a buffer */
+static char *
+fetch_str (sd, addr)
+     SIM_DESC sd;
+     address_word addr;
+{
+  char *buf;
+  int nr = 0;
+  char null;
+  while (sim_read (sd, addr + nr, &null, 1) == 1 && null != 0)
+    nr++;
+  buf = NZALLOC (char, nr + 1);
+  sim_read (sd, addr, buf, nr);
+  return buf;
+}
+
 /* Simple monitor interface (currently setup for the IDT and PMON monitors) */
 static void
 sim_monitor(sd,reason)
@@ -969,68 +889,72 @@ sim_monitor(sd,reason)
   /* The following callback functions are available, however the
      monitor we are simulating does not make use of them: get_errno,
      isatty, lseek, rename, system, time and unlink */
-  switch (reason) {
+  switch (reason)
+    {
+
     case 6: /* int open(char *path,int flags) */
       {
-        address_word paddr;
-        int cca;
-        if (AddressTranslation(A0,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
-         V0 = sim_io_open(sd,(char *)((int)paddr),(int)A1);
-        else
-         sim_io_error(sd,"Attempt to pass pointer that does not reference simulated memory");
+	char *path = fetch_str (sd, A0);
+	V0 = sim_io_open (sd, path, (int)A1);
+	zfree (path);
+	break;
       }
-      break;
 
     case 7: /* int read(int file,char *ptr,int len) */
       {
-        address_word paddr;
-        int cca;
-        if (AddressTranslation(A1,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
-         V0 = sim_io_read(sd,(int)A0,(char *)((int)paddr),(int)A2);
-        else
-         sim_io_error(sd,"Attempt to pass pointer that does not reference simulated memory");
+	int fd = A0;
+	int nr = A2;
+	char *buf = zalloc (nr);
+	V0 = sim_io_read (sd, fd, buf, nr);
+	sim_write (sd, A1, buf, nr);
+	zfree (buf);
       }
       break;
 
     case 8: /* int write(int file,char *ptr,int len) */
       {
-        address_word paddr;
-        int cca;
-        if (AddressTranslation(A1,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
-         V0 = sim_io_write(sd,(int)A0,(const char *)((int)paddr),(int)A2);
-        else
-         sim_io_error(sd,"Attempt to pass pointer that does not reference simulated memory");
+	int fd = A0;
+	int nr = A2;
+	char *buf = zalloc (nr);
+	sim_read (sd, A1, buf, nr);
+	V0 = sim_io_write (sd, fd, buf, nr);
+	zfree (buf);
+	break;
       }
-      break;
 
     case 10: /* int close(int file) */
-      V0 = sim_io_close(sd,(int)A0);
-      break;
+      {
+	V0 = sim_io_close (sd, (int)A0);
+	break;
+      }
 
     case 11: /* char inbyte(void) */
       {
         char tmp;
-        if (sim_io_read_stdin(sd,&tmp,sizeof(char)) != sizeof(char)) {
-          sim_io_error(sd,"Invalid return from character read");
-          V0 = (ut_reg)-1;
-        }
+        if (sim_io_read_stdin (sd, &tmp, sizeof(char)) != sizeof(char))
+	  {
+	    sim_io_error(sd,"Invalid return from character read");
+	    V0 = (ut_reg)-1;
+	  }
         else
-         V0 = (ut_reg)tmp;
+	  V0 = (ut_reg)tmp;
+	break;
       }
-      break;
 
     case 12: /* void outbyte(char chr) : write a byte to "stdout" */
       {
         char tmp = (char)(A0 & 0xFF);
-        sim_io_write_stdout(sd,&tmp,sizeof(char));
+        sim_io_write_stdout (sd, &tmp, sizeof(char));
+	break;
       }
-      break;
 
     case 17: /* void _exit() */
-      sim_io_eprintf(sd,"sim_monitor(17): _exit(int reason) to be coded\n");
-      sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA, sim_exited,
-		       (unsigned int)(A0 & 0xFFFFFFFF));
-      break;
+      {
+	sim_io_eprintf (sd, "sim_monitor(17): _exit(int reason) to be coded\n");
+	sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA, sim_exited,
+			 (unsigned int)(A0 & 0xFFFFFFFF));
+	break;
+      }
 
     case 28 : /* PMON flush_cache */
       break;
@@ -1041,40 +965,13 @@ sim_monitor(sd,reason)
       /*      [A0 + 4] = instruction cache size */
       /*      [A0 + 8] = data cache size */
       {
-        address_word vaddr = A0;
-        address_word paddr, value;
-        int cca;
-        int failed = 0;
-
-        /* NOTE: We use RAW memory writes here, but since we are not
-           gathering statistics for the monitor calls we are simulating,
-           it is not an issue. */
-
-        /* Memory size */
-        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isREAL)) {
-          value = (uword64)STATE_MEM_SIZE (sd);
-          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
-          /* We re-do the address translations, in-case the block
-             overlaps a memory boundary: */
-          value = 0;
-          vaddr += (AccessLength_WORD + 1);
-          if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isREAL)) {
-            StoreMemory(cca,AccessLength_WORD,0,value,paddr,vaddr,isRAW);
-            vaddr += (AccessLength_WORD + 1);
-            if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isREAL))
-             StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
-            else
-             failed = -1;
-          } else
-           failed = -1;
-        } else
-         failed = -1;
-
-        if (failed)
-         sim_io_error(sd,"Invalid pointer passed into monitor call");
+	address_word value = MEM_SIZE /* FIXME STATE_MEM_SIZE (sd) */;
+	H2T (value);
+	sim_write (sd, A0, (char *)&value, sizeof (value));
+	sim_io_eprintf (sd, "sim: get_mem_info() depreciated\n");
+	break;
       }
-      break;
-
+    
     case 158 : /* PMON printf */
       /* in:  A0 = pointer to format string */
       /*      A1 = optional argument 1 */
@@ -1083,108 +980,116 @@ sim_monitor(sd,reason)
       /* out: void */
       /* The following is based on the PMON printf source */
       {
-        address_word paddr;
-        int cca;
+	address_word s = A0;
+	char c;
+	signed_word *ap = &A1; /* 1st argument */
         /* This isn't the quickest way, since we call the host print
            routine for every character almost. But it does avoid
            having to allocate and manage a temporary string buffer. */
-        if (AddressTranslation(A0,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL)) {
-          char *s = (char *)((int)paddr);
-          signed_word *ap = &A1; /* 1st argument */
-          /* TODO: Include check that we only use three arguments (A1, A2 and A3) */
-          for (; *s;) {
-            if (*s == '%') {
-              char tmp[40];
-              enum {FMT_RJUST, FMT_LJUST, FMT_RJUST0, FMT_CENTER} fmt = FMT_RJUST;
-              int width = 0, trunc = 0, haddot = 0, longlong = 0;
-              s++;
-              for (; *s; s++) {
-                if (strchr ("dobxXulscefg%", *s))
-                  break;
-		else if (*s == '-')
-                  fmt = FMT_LJUST;
-		else if (*s == '0')
-                  fmt = FMT_RJUST0;
-		else if (*s == '~')
-                  fmt = FMT_CENTER;
-		else if (*s == '*') {
-                  if (haddot)
-                    trunc = (int)*ap++;
-                  else
-                    width = (int)*ap++;
-		} else if (*s >= '1' && *s <= '9') {
-                  char *t;
-                  unsigned int n;
-                  for (t = s; isdigit (*s); s++);
-                  strncpy (tmp, t, s - t);
-                  tmp[s - t] = '\0';
-                  n = (unsigned int)strtol(tmp,NULL,10);
-                  if (haddot)
-                   trunc = n;
-                  else
-                   width = n;
-                  s--;
-		} else if (*s == '.')
-                  haddot = 1;
-              }
-              if (*s == '%') {
-                sim_io_printf(sd,"%%");
-              } else if (*s == 's') {
-                if ((int)*ap != 0) {
-                  if (AddressTranslation(*ap++,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL)) {
-                    char *p = (char *)((int)paddr);;
-                    sim_io_printf(sd,p);
-                  } else {
-                    ap++;
-                    sim_io_error(sd,"Attempt to pass pointer that does not reference simulated memory");
-                  }
-                }
-		else
-                  sim_io_printf(sd,"(null)");
-              } else if (*s == 'c') {
-                int n = (int)*ap++;
-		sim_io_printf(sd,"%c",n);
-              } else {
-		if (*s == 'l') {
-                  if (*++s == 'l') {
-                    longlong = 1;
-                    ++s;
-                  }
-		}
-		if (strchr ("dobxXu", *s)) {
-                  word64 lv = (word64) *ap++;
-                  if (*s == 'b')
-                    sim_io_printf(sd,"<binary not supported>");
-                  else {
-                    sprintf(tmp,"%%%s%c",longlong ? "ll" : "",*s);
-                    if (longlong)
-                      sim_io_printf(sd,tmp,lv);
-                    else
-                      sim_io_printf(sd,tmp,(int)lv);
-                  }
-		} else if (strchr ("eEfgG", *s)) {
-#ifdef _MSC_VER /* MSVC version 2.x can't convert from uword64 directly */
-                  double dbl = (double)((word64)*ap++);
-#else
-                  double dbl = (double)*ap++;
-#endif
-                  sprintf(tmp,"%%%d.%d%c",width,trunc,*s);
-                  sim_io_printf(sd,tmp,dbl);
-                  trunc = 0;
-		}
-              }
-              s++;
-            } else
-             sim_io_printf(sd,"%c",*s++);
-          }
-        } else
-         sim_io_error(sd,"Attempt to pass pointer that does not reference simulated memory");
+	/* TODO: Include check that we only use three arguments (A1,
+           A2 and A3) */
+	while (sim_read (sd, s++, &c, 1) && c != '\0')
+	  {
+            if (c == '%')
+	      {
+		char tmp[40];
+		enum {FMT_RJUST, FMT_LJUST, FMT_RJUST0, FMT_CENTER} fmt = FMT_RJUST;
+		int width = 0, trunc = 0, haddot = 0, longlong = 0;
+		while (sim_read (sd, s++, &c, 1) && c != '\0')
+		  {
+		    if (strchr ("dobxXulscefg%", s))
+		      break;
+		    else if (c == '-')
+		      fmt = FMT_LJUST;
+		    else if (c == '0')
+		      fmt = FMT_RJUST0;
+		    else if (c == '~')
+		      fmt = FMT_CENTER;
+		    else if (c == '*')
+		      {
+			if (haddot)
+			  trunc = (int)*ap++;
+			else
+			  width = (int)*ap++;
+		      }
+		    else if (c >= '1' && c <= '9')
+		      {
+			address_word t = s;
+			unsigned int n;
+			while (sim_read (sd, s++, &c, 1) == 1 && isdigit (c))
+			  tmp[s - t] = c;
+			tmp[s - t] = '\0';
+			n = (unsigned int)strtol(tmp,NULL,10);
+			if (haddot)
+			  trunc = n;
+			else
+			  width = n;
+			s--;
+		      }
+		    else if (c == '.')
+		      haddot = 1;
+		  }
+		switch (c)
+		  {
+		  case '%':
+		    sim_io_printf (sd, "%%");
+		    break;
+		  case 's':
+		    if ((int)*ap != 0)
+		      {
+			address_word p = *ap++;
+			char ch;
+			while (sim_read (sd, p++, &ch, 1) == 1 && ch != '\0')
+			  sim_io_printf(sd, "%c", ch);
+		      }
+		    else
+		      sim_io_printf(sd,"(null)");
+		    break;
+		  case 'c':
+		    sim_io_printf (sd, "%c", (int)*ap++);
+		    break;
+		  default:
+		    if (c == 'l')
+		      {
+			sim_read (sd, s++, &c, 1);
+			if (c == 'l')
+			  {
+			    longlong = 1;
+			    sim_read (sd, s++, &c, 1);
+			  }
+		      }
+		    if (strchr ("dobxXu", c))
+		      {
+			word64 lv = (word64) *ap++;
+			if (c == 'b')
+			  sim_io_printf(sd,"<binary not supported>");
+			else
+			  {
+			    sprintf (tmp, "%%%s%c", longlong ? "ll" : "", c);
+			    if (longlong)
+			      sim_io_printf(sd, tmp, lv);
+			    else
+			      sim_io_printf(sd, tmp, (int)lv);
+			  }
+		      }
+		    else if (strchr ("eEfgG", c))
+		      {
+			double dbl = *(double*)(ap++);
+			sprintf (tmp, "%%%d.%d%c", width, trunc, c);
+			sim_io_printf (sd, tmp, dbl);
+			trunc = 0;
+		      }
+		  }
+	      }
+	    else
+	      sim_io_printf(sd, "%c", c);
+	  }
+	break;
       }
-      break;
 
     default:
-      sim_io_eprintf(sd,"TODO: sim_monitor(%d) : PC = 0x%s\n",reason,pr_addr(IPC));
-      sim_io_eprintf(sd,"(Arguments : A0 = 0x%s : A1 = 0x%s : A2 = 0x%s : A3 = 0x%s)\n",pr_addr(A0),pr_addr(A1),pr_addr(A2),pr_addr(A3));
+      sim_io_error (sd, "TODO: sim_monitor(%d) : PC = 0x%s\n",
+		    reason, pr_addr(IPC));
       break;
   }
   return;
@@ -1517,14 +1422,13 @@ ColdReset (sd)
    function raises an exception and does not return. */
 
 int
-address_translation(sd,vAddr,IorD,LorS,pAddr,CCA,host,raw)
+address_translation(sd,vAddr,IorD,LorS,pAddr,CCA,raw)
      SIM_DESC sd;
      address_word vAddr;
      int IorD;
      int LorS;
      address_word *pAddr;
      int *CCA;
-     int host;
      int raw;
 {
   int res = -1; /* TRUE : Assume good return */
@@ -1558,11 +1462,9 @@ address_translation(sd,vAddr,IorD,LorS,pAddr,CCA,host,raw)
      LoadMemory and StoreMemory functions. They should be merged into
      a single function (that can be in-lined if required). */
   if ((vAddr >= STATE_MEM_BASE (sd)) && (vAddr < (STATE_MEM_BASE (sd) + STATE_MEM_SIZE (sd)))) {
-    if (host)
-     *pAddr = (int)&STATE_MEMORY (sd)[((unsigned int)(vAddr - STATE_MEM_BASE (sd)) & (STATE_MEM_SIZE (sd) - 1))];
+    /* do nothing */
   } else if ((vAddr >= monitor_base) && (vAddr < (monitor_base + monitor_size))) {
-    if (host)
-     *pAddr = (int)&monitor[((unsigned int)(vAddr - monitor_base) & (monitor_size - 1))];
+    /* do nothing */
   } else {
 #ifdef DEBUG
     sim_io_eprintf(sd,"Failed: AddressTranslation(0x%s,%s,%s,...) IPC = 0x%s\n",pr_addr(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "isSTORE" : "isLOAD"),pr_addr(IPC));
@@ -1661,10 +1563,11 @@ load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
 
   /* Decide which physical memory locations are being dealt with. At
      this point we should be able to split the pAddr bits into the
-     relevant address map being simulated. If the "raw" variable is
-     set, the memory read being performed should *NOT* update any I/O
-     state or affect the CPU state. This also includes avoiding
-     affecting statistics gathering. */
+     relevant address map being simulated. */
+  /* If the "raw" variable is set, the memory read being performed
+     should *NOT* update any I/O state or affect the CPU state
+     (including statistics gathering).  The parameter MEMVALP is least
+     significant byte justified. */
 
   /* If instruction fetch then we need to check that the two lo-order
      bits are zero, otherwise raise a InstructionFetch exception: */
@@ -1787,10 +1690,8 @@ load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
              (int)(pAddr & LOADDRMASK),pr_uword64(value1),pr_uword64(value));
 #endif /* DEBUG */
 
-      /* TODO: We could try and avoid the shifts when dealing with raw
-         memory accesses. This would mean updating the LoadMemory and
-         StoreMemory routines to avoid shifting the data before
-         returning or using it. */
+      /* When dealing with raw memory accesses there is no need to
+         deal with shifts. */
       if (AccessLength <= AccessLength_DOUBLEWORD) {
         if (!raw) { /* do nothing for raw accessess */
           if (BigEndianMem)
@@ -1807,8 +1708,8 @@ load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
     }
   }
 
-*memvalp = value;
-if (memval1p) *memval1p = value1;
+  *memvalp = value;
+  if (memval1p) *memval1p = value1;
 }
 
 
@@ -1858,6 +1759,11 @@ store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
      we could merge a lot of this code with the LoadMemory
      routine. However, this would slow the simulator down with
      run-time conditionals. */
+     
+  /* If the "raw" variable is set, the memory read being performed
+     should *NOT* update any I/O state or affect the CPU state
+     (including statistics gathering).  The parameter MEMELEM is least
+     significant byte justified. */
   {
     unsigned int index = 0;
     unsigned char *mem = NULL;
@@ -1882,6 +1788,8 @@ store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
       if (AccessLength <= AccessLength_DOUBLEWORD) {
         if (BigEndianMem) {
           if (raw)
+	    /* need to shift raw (least significant byte aligned) data
+	       into correct byte slots */
             shift = ((7 - AccessLength) * 8);
           else /* real memory access */
             shift = ((pAddr & LOADDRMASK) * 8);

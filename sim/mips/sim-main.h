@@ -672,8 +672,9 @@ void decode_coproc PARAMS ((SIM_DESC sd,unsigned int instruction));
 #define isSTORE         (1 == 1) /* TRUE */
 #define isREAL          (1 == 0) /* FALSE */
 #define isRAW           (1 == 1) /* TRUE */
+/* The parameter HOST (isTARGET / isHOST) is ignored */
 #define isTARGET        (1 == 0) /* FALSE */
-#define isHOST          (1 == 1) /* TRUE */
+/* #define isHOST          (1 == 1) TRUE */
 
 /* The "AccessLength" specifications for Loads and Stores. NOTE: This
    is the number of bytes minus 1. */
@@ -687,9 +688,9 @@ void decode_coproc PARAMS ((SIM_DESC sd,unsigned int instruction));
 #define AccessLength_DOUBLEWORD (7)
 #define AccessLength_QUADWORD   (15)
 
-int address_translation PARAMS ((SIM_DESC sd, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int host, int raw));
+int address_translation PARAMS ((SIM_DESC sd, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int raw));
 #define AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw) \
-address_translation(sd, vAddr,IorD,LorS,pAddr,CCA,host,raw)
+address_translation(sd, vAddr,IorD,LorS,pAddr,CCA,raw)
 
 void load_memory PARAMS ((SIM_DESC sd, uword64* memvalp, uword64* memval1p, int CCA, int AccessLength, address_word pAddr, address_word vAddr, int IorD, int raw));
 #define LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw) \

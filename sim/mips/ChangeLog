@@ -1,3 +1,20 @@
+Wed Nov  5 09:35:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (fetch_str): New function.
+	(sim_monitor): Rewrite using sim_read & sim_write.
+	(sim_open): Check magic number.
+	(sim_open): Write monitor vectors into memory using sim_write.
+	(MONITOR_BASE, MONITOR_SIZE, MEM_SIZE): Define.
+	(sim_read, sim_write): Simplify - transfer data one byte at a
+ 	time.
+	(load_memory, store_memory): Clarify meaning of parameter RAW.
+
+	* sim-main.h (isHOST): Defete definition.
+	(isTARGET): Mark as depreciated.
+	(address_translation): Delete parameter HOST.
+
+	* interp.c (address_translation): Delete parameter HOST.
+
 start-sanitize-tx49
 Wed Oct 29 14:21:32 1997  Gavin Koch  <gavin@cygnus.com>
 
