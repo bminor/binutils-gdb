@@ -222,6 +222,7 @@ extern CORE_ADDR m32r_push_arguments PARAMS ((int nargs,
    one that takes account of generic CALL_DUMMY frames */
 #define GET_SAVED_REGISTER
 
+#define USE_GENERIC_DUMMY_FRAMES
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_LENGTH            (0)
 #define CALL_DUMMY_START_OFFSET      (0)

@@ -113,6 +113,7 @@ extern CORE_ADDR v850_skip_prologue PARAMS ((CORE_ADDR pc));
 extern void v850_pop_frame PARAMS ((struct frame_info *frame));
 #define POP_FRAME v850_pop_frame (get_current_frame ())
 
+#define USE_GENERIC_DUMMY_FRAMES
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)

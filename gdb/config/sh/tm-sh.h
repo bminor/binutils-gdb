@@ -248,6 +248,7 @@ extern CORE_ADDR sh_push_arguments PARAMS ((int nargs,
 					    unsigned char struct_return,
 					    CORE_ADDR struct_addr));
 
+#define USE_GENERIC_DUMMY_FRAMES
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_LENGTH            (0)
 #define CALL_DUMMY_START_OFFSET      (0)

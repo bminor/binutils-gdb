@@ -272,6 +272,7 @@ typedef unsigned short INSN_WORD;
  * CALL_DUMMY stuff:
  */
 
+#define USE_GENERIC_DUMMY_FRAMES
 #define CALL_DUMMY			{0}
 #define CALL_DUMMY_LENGTH		(0)
 #define CALL_DUMMY_ADDRESS()		entry_point_address ()

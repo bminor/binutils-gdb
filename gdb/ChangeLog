@@ -1,7 +1,24 @@
+Tue Dec  3 11:38:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* blockframe.c: add macro USE_GENERIC_DUMMY_FRAMES to enable/disable
+	  code for generic call_dummy frames.
+	* config/h8300/tm-h8300.h: turn on USE_GENERIC_DUMMY_FRAMES
+start-sanitize-m32r
+	* config/m32r/tm-m32r.h: turn on USE_GENERIC_DUMMY_FRAMES
+end-sanitize-m32r
+	* config/sh/tm-sh.h: turn on USE_GENERIC_DUMMY_FRAMES
+start-sanitize-v850
+	* config/v850/tm-v850.h: turn on USE_GENERIC_DUMMY_FRAMES
+end-sanitize-v850
+
 Sun Dec  1 00:41:47 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* vax-tdep.c (vax_print_insn, print_insn_arg):  Use info functions
 	for printing. From Valeriy Ushakov <uwe@ptc.spbu.ru>.
+
+Sun Dec  1 00:40:46 1996  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure.tgt: add new mn10300 entry
 
 Sun Dec  1 00:18:59 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -214,17 +231,17 @@ Thu Nov 28 00:46:24 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 Wed Nov 27 11:29:06 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* blockframe.c: 	...Remove old-style CALL_DUMMY code...
-	* h8300-tdep.c: 
-	* config/h8300/tm-h8300.h: 
+	* h8300-tdep.c: 		ditto
+	* config/h8300/tm-h8300.h: 	ditto
 start-sanitize-m32r
-	* m32r-tdep.c:  
-	* config/m32r/tm-m32r.h: 
+	* m32r-tdep.c:  		ditto
+	* config/m32r/tm-m32r.h: 	ditto
 end-sanitize-m32r
-	* sh-tdep.c:    
-	* config/sh/tm-sh.h: 
+	* sh-tdep.c:    		ditto
+	* config/sh/tm-sh.h: 		ditto
 start-sanitize-v850
-	* v850-tdep.c:  
-	* config/v850/tm-v850.h: 
+	* v850-tdep.c:  		ditto
+	* config/v850/tm-v850.h: 	ditto
 end-sanitize-v850
 	
 Wed Nov 27 10:32:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
