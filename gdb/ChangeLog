@@ -1,5 +1,15 @@
 Sat Jun 12 14:40:54 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* dbxread.c (process_one_symbol): Set n_opt_found based on whether
+	a non-gcc N_OPT symbol is found.  Make SUN_FIXED_LBRAC_BUG a macro
+	which returns 0 or 1 to say whether to do it.
+	* config/sparc/sun4{sol2,os4}.h
+	(SUN_FIXED_LBRAC_BUG,VARIABLES_INSIDE_BLOCK): Use n_opt_found so
+	the right thing happens for both acc and SunOS4 /bin/cc.
+
+	* valprint.c (print_hex_chars): Use local_hex_format_{pre,suf}fix.
+	* printcmd.c (print_scalar_formatted): Use val_print_type_code_int.
+
 	* mips-tdep.c: Remove isa_NAN; it assumed sizeof(host int) == 4 and
 	probably contained byte-order sins too.
 	config/mips/tm-mips.h (INVALID_FLOAT): Define to 0 like most machines.

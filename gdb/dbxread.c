@@ -1465,12 +1465,11 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
      struct section_offsets *section_offsets;
      struct objfile *objfile;
 {
-#ifndef SUN_FIXED_LBRAC_BUG
   /* This records the last pc address we've seen.  We depend on there being
      an SLINE or FUN or SO before the first LBRAC, since the variable does
      not get reset in between reads of different symbol files.  */
   static CORE_ADDR last_pc_address;
-#endif
+
   register struct context_stack *new;
   /* This remembers the address of the start of a function.  It is used
      because in Solaris 2, N_LBRAC, N_RBRAC, and N_SLINE entries are
@@ -1483,6 +1482,10 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
   /* If this is nonzero, N_LBRAC, N_RBRAC, and N_SLINE entries are relative
      to the function start address.  */
   int block_address_function_relative;
+
+  /* If this is nonzero, we've seen a non-gcc N_OPT symbol for this source
+     file.  */
+  int n_opt_found;
 
   /* This is true for Solaris (and all other stabs-in-elf systems, hopefully,
      since it would be silly to do things differently from Solaris), and
@@ -1541,9 +1544,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	  break;
 	}
 
-#ifndef SUN_FIXED_LBRAC_BUG
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
-#endif
 
       if (block_address_function_relative)
 	/* On Solaris 2.0 compilers, the block addresses and N_SLINE's
@@ -1586,13 +1587,11 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	valu += last_source_start_addr;
 #endif
 
-#ifndef SUN_FIXED_LBRAC_BUG
-      if (valu < last_pc_address) {
+      if (!SUN_FIXED_LBRAC_BUG && valu < last_pc_address) {
 	/* Patch current LBRAC pc value to match last handy pc value */
  	complain (&lbrac_complaint);
 	valu = last_pc_address;
       }
-#endif
       new = push_context (desc, valu);
       break;
 
@@ -1678,10 +1677,10 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       /* Relocate for dynamic loading */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 
-#ifndef SUN_FIXED_LBRAC_BUG
+      n_opt_found = 0;
+
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
-#endif
-  
+
 #ifdef PCC_SOL_BROKEN
       /* pcc bug, occasionally puts out SO for SOL.  */
       if (context_stack_depth > 0)
@@ -1739,9 +1738,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	 Enter it in the line list for this symbol table.  */
       /* Relocate for dynamic loading and for ELF acc fn-relative syms.  */
       valu += function_start_offset;
-#ifndef SUN_FIXED_LBRAC_BUG
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
-#endif
       record_line (current_subfile, desc, valu);
       break;
 
@@ -1861,6 +1858,8 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		}
 #endif
 	    }
+	  else
+	    n_opt_found = 1;
 	}
       break;
 
