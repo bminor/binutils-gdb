@@ -507,61 +507,6 @@ ldfile_open_command_file (const char *name)
   saved_script_handle = ldlex_input_stack;
 }
 
-#ifdef GNU960
-static char *
-gnu960_map_archname (char *name)
-{
-  struct tabentry { char *cmd_switch; char *arch; };
-  static struct tabentry arch_tab[] =
-  {
-	"",   "",
-	"KA", "ka",
-	"KB", "kb",
-	"KC", "mc",	/* Synonym for MC */
-	"MC", "mc",
-	"CA", "ca",
-	"SA", "ka",	/* Functionally equivalent to KA */
-	"SB", "kb",	/* Functionally equivalent to KB */
-	NULL, ""
-  };
-  struct tabentry *tp;
-
-  for (tp = arch_tab; tp->cmd_switch != NULL; tp++)
-    {
-      if (! strcmp (name,tp->cmd_switch))
-	break;
-    }
-
-  if (tp->cmd_switch == NULL)
-    einfo (_("%P%F: unknown architecture: %s\n"), name);
-
-  return tp->arch;
-}
-
-void
-ldfile_add_arch (char *name)
-{
-  search_arch_type *new = xmalloc (sizeof (search_arch_type));
-
-  if (*name != '\0')
-    {
-      if (ldfile_output_machine_name[0] != '\0')
-	{
-	  einfo (_("%P%F: target architecture respecified\n"));
-	  return;
-	}
-
-      ldfile_output_machine_name = name;
-    }
-
-  new->next = NULL;
-  new->name = gnu960_map_archname (name);
-  *search_arch_tail_ptr = new;
-  search_arch_tail_ptr = &new->next;
-}
-
-#else /* not GNU960 */
-
 void
 ldfile_add_arch (const char *in_name)
 {
@@ -581,7 +526,6 @@ ldfile_add_arch (const char *in_name)
   search_arch_tail_ptr = &new->next;
 
 }
-#endif
 
 /* Set the output architecture.  */
 

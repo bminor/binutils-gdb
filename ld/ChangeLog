@@ -1,3 +1,10 @@
+2005-02-24  Ben Elliston  <bje@au.ibm.com>
+
+	* ldfile.c: Remove GNU960 conditional code.
+	* emultempl/gld960.em: Likewise.
+	* emultempl/gld960c.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+
 2005-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/lnk960.em (lnk960_before_parse): Remove redundant
