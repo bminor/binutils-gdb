@@ -1,3 +1,9 @@
+Tue May  9 00:47:03 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* obj.h (struct format_ops) [BFD_ASSEMBLER]: New type.
+	(this_format) [BFD_ASSEMBLER]: Declare new variable, if not
+	already defined as a macro.
+
 Mon May  8 21:44:13 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* subsegs.h (seg_info): Provide dummy version for

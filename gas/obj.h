@@ -19,55 +19,49 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#if __STDC__ == 1
-
-char *obj_default_output_file_name (void);
-void obj_crawl_symbol_chain (object_headers * headers);
-void obj_emit_relocations (char **where, fixS * fixP, relax_addressT segment_address_in_file);
-void obj_emit_strings (char **where);
-void obj_emit_symbols (char **where, symbolS * symbol_rootP);
-void obj_header_append (char **where, object_headers * headers);
-void obj_read_begin_hook (void);
+char *obj_default_output_file_name PARAMS ((void));
+void obj_emit_relocations PARAMS ((char **where, fixS * fixP,
+				   relax_addressT segment_address_in_file));
+void obj_emit_strings PARAMS ((char **where));
+void obj_emit_symbols PARAMS ((char **where, symbolS * symbols));
+void obj_read_begin_hook PARAMS ((void));
+#ifndef BFD_ASSEMBLER
+void obj_crawl_symbol_chain PARAMS ((object_headers * headers));
+void obj_header_append PARAMS ((char **where, object_headers * headers));
+#ifndef obj_pre_write_hook
+void obj_pre_write_hook PARAMS ((object_headers * headers));
+#endif
+#endif
 
 #ifndef obj_symbol_new_hook
-void obj_symbol_new_hook (symbolS * symbolP);
-#endif /* obj_symbol_new_hook */
+void obj_symbol_new_hook PARAMS ((symbolS * symbolP));
+#endif
 
-void obj_symbol_to_chars (char **where, symbolS * symbolP);
-
-#ifndef obj_pre_write_hook
-void obj_pre_write_hook (object_headers * headers);
-#endif /* obj_pre_write_hook */
-
-#else /* not __STDC__ */
-
-char *obj_default_output_file_name ();
-void obj_crawl_symbol_chain ();
-void obj_emit_relocations ();
-void obj_emit_strings ();
-void obj_emit_symbols ();
-void obj_header_append ();
-void obj_read_begin_hook ();
-
-#ifndef obj_symbol_new_hook
-void obj_symbol_new_hook ();
-#endif /* obj_symbol_new_hook */
-
-void obj_symbol_to_chars ();
-
-#ifndef obj_pre_write_hook
-void obj_pre_write_hook ();
-#endif /* obj_pre_write_hook */
-
-#endif /* not __STDC__ */
+void obj_symbol_to_chars PARAMS ((char **where, symbolS * symbolP));
 
 extern const pseudo_typeS obj_pseudo_table[];
 
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
+#ifdef BFD_ASSEMBLER
+struct format_ops {
+  int flavor;
+  unsigned char dfl_leading_underscore : 1;
+  unsigned char emit_section_symbols : 1;
+  void (*frob_symbol) PARAMS ((symbolS *, int *));
+  void (*frob_file) PARAMS ((void));
+  bfd_vma (*s_get_size) PARAMS ((symbolS *));
+  void (*s_set_size) PARAMS ((symbolS *, bfd_vma));
+  bfd_vma (*s_get_align) PARAMS ((symbolS *));
+  void (*s_set_align) PARAMS ((symbolS *, bfd_vma));
+  void (*copy_symbol_attributes) PARAMS ((symbolS *, symbolS *));
+  void (*generate_asm_lineno) PARAMS ((const char *, int));
+  void (*process_stab) (/* what, string, type, other, desc */);
+  int (*sec_sym_ok_for_reloc) PARAMS ((asection *));
+  void (*pop_insert) PARAMS ((void));
+};
+
+#ifndef this_format
+COMMON const struct format_ops *this_format;
+#endif
+#endif
 
 /* end of obj.h */
