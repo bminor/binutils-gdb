@@ -1,3 +1,10 @@
+Mon May 15 11:23:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* proc-events.c (init_syscall_table): Delete stray ``;''.
+	* ui-out.c (ui_out_set_flags, ui_out_clear_flags): Return old
+ 	value.
+	* mdebugread.c (START_PSYMTAB): Add paren to avoid x=x=x.
+
 Fri May 12 20:38:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Mention weak symbol problem.  Mention UnixWare thread
