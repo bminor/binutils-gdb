@@ -442,7 +442,7 @@ elf_symfile_read (objfile, section_offsets, mainline)
 	 table.  */
       struct elf32_internal_shdr *elf_sect;
 
-      elf_sect = bfd_elf32_find_section (abfd, ".stabstr");
+      elf_sect = bfd_elf_find_section (abfd, ".stabstr");
       if (elf_sect)
 	elfstab_build_psymtabs (objfile,
   	  section_offsets,

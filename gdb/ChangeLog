@@ -1,3 +1,8 @@
+Fri Jun 25 11:16:31 1993  Fred Fish  (fnf@cygnus.com)
+
+	* elf_symfile_read (bfd_elf32_find_section):  Revert back to
+	calling bfd_elf_find_section to track bfd changes.
+
 Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/mips/riscos.mh (REGEX{,1}, MUNCH_DEFINE, MH_CFLAGS): Define.
