@@ -1,3 +1,7 @@
+Tue Jan 11 13:22:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* scripttempl/elf.sc: Correct typo.
+
 Mon Jan 10 19:49:05 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldgram.y, ldlex.l: Make the space between -e, -u, and -y and
