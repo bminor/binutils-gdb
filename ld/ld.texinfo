@@ -950,6 +950,24 @@ sorted by name.  For each symbol, a list of file names is given.  If the
 symbol is defined, the first file listed is the location of the
 definition.  The remaining files contain references to the symbol.
 
+@cindex common allocation
+@kindex --no-define-common
+@item --no-define-common
+This option inhibits the assignment of addresses to common symbols.
+The script command @code{INHIBIT_COMMON_ALLOCATION} has the same effect.
+@xref{Miscellaneous Commands}.
+
+The @samp{--no-define-common} option allows decoupling
+the decision to assign addresses to Common symbols from the choice
+of the output file type; otherwise a non-Relocatable output type
+forces assigning addresses to Common symbols.
+Using @samp{--no-define-common} allows Common symbols that are referenced
+from a shared library to be assigned addresses only in the main program.
+This eliminates the unused duplicate space in the shared library,
+and also prevents any possible confusion over resolving to the wrong
+duplicate when there are many dynamic modules with specialized search
+paths for runtime symbol resolution.
+
 @cindex symbols, from command line
 @kindex --defsym @var{symbol}=@var{exp}
 @item --defsym @var{symbol}=@var{expression}
@@ -2310,6 +2328,13 @@ command has the same effect as the @samp{-u} command-line option.
 This command has the same effect as the @samp{-d} command-line option:
 to make @code{ld} assign space to common symbols even if a relocatable
 output file is specified (@samp{-r}).
+
+@item INHIBIT_COMMON_ALLOCATION
+@kindex INHIBIT_COMMON_ALLOCATION
+@cindex common allocation in linker script
+This command has the same effect as the @samp{--no-define-common}
+command-line option: to make @code{ld} omit the assignment of addresses
+to common symbols even for a non-relocatable output file.
 
 @item NOCROSSREFS(@var{section} @var{section} @dots{})
 @kindex NOCROSSREFS(@var{sections})

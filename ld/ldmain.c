@@ -205,6 +205,7 @@ main (argc, argv)
   config.split_by_reloc = (unsigned) -1;
   config.split_by_file = (bfd_size_type) -1;
   command_line.force_common_definition = false;
+  command_line.inhibit_common_definition = false;
   command_line.interpreter = NULL;
   command_line.rpath = NULL;
   command_line.warn_mismatch = true;

@@ -102,6 +102,9 @@ typedef struct user_section_struct {
 typedef struct {
   /* 1 => assign space to common symbols even if `relocatable_output'.  */
   boolean force_common_definition;
+
+  /* 1 => do not assign addresses to common symbols. */
+  boolean inhibit_common_definition;
   boolean relax;
 
   /* Name of runtime interpreter to invoke.  */

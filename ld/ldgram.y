@@ -125,6 +125,7 @@ static int error_index;
 %token SECTIONS PHDRS SORT
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
+%token INHIBIT_COMMON_ALLOCATION
 %token SIZEOF_HEADERS
 %token INCLUDE
 %token MEMORY DEFSYMEND
@@ -321,6 +322,8 @@ ifile_p1:
 		  { ldfile_set_output_arch($3); }
 	|	FORCE_COMMON_ALLOCATION
 		{ command_line.force_common_definition = true ; }
+	|	INHIBIT_COMMON_ALLOCATION
+		{ command_line.inhibit_common_definition = true ; }
 	|	INPUT '(' input_list ')'
 	|	GROUP
 		  { lang_enter_group (); }

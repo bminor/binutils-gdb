@@ -1,6 +1,12 @@
-2001-09-29  Alan Modra  <amodra@bigpond.net.au>
+2001-09-29  John Reiser  <jreiser@BitWagon.com>
 
-	* ldlang.c (section_already_linked): Remove assignment to kept_section.
+	* ldlang.c (lang_common): Conditionally inhibit Common allocation.
+	* lexsup.c: Add --no-define-common commandline option.
+	* ldgram.y: Add INHIBIT_COMMON_ALLOCATION script command.
+	* ldlex.l: Likewise.
+	* ld.h: Add command_line.inhibit_common_definition.
+	* ldmain.c (main): Initialize.
+	* ld.texinfo: Document.
 
 2001-09-26  Alan Modra  <amodra@bigpond.net.au>
 

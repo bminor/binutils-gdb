@@ -132,6 +132,7 @@ int parsing_defsym = 0;
 #define OPTION_ALLOW_SHLIB_UNDEFINED	(OPTION_TARGET_HELP + 1)
 #define OPTION_DISCARD_NONE		(OPTION_ALLOW_SHLIB_UNDEFINED + 1)
 #define OPTION_SPARE_DYNAMIC_TAGS	(OPTION_DISCARD_NONE + 1)
+#define OPTION_NO_DEFINE_COMMON		(OPTION_SPARE_DYNAMIC_TAGS + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -311,6 +312,8 @@ static const struct ld_option ld_options[] =
      '\0', N_("SYMBOL"), N_("Call SYMBOL at load-time"), ONE_DASH },
   { {"Map", required_argument, NULL, OPTION_MAP},
       '\0', N_("FILE"), N_("Write a map file"), ONE_DASH },
+  { {"no-define-common", no_argument, NULL, OPTION_NO_DEFINE_COMMON},
+      '\0', NULL, N_("Do not define Common storage"), TWO_DASHES },
   { {"no-demangle", no_argument, NULL, OPTION_NO_DEMANGLE },
       '\0', NULL, N_("Do not demangle symbol names"), TWO_DASHES },
   { {"no-keep-memory", no_argument, NULL, OPTION_NO_KEEP_MEMORY},
@@ -746,6 +749,9 @@ parse_args (argc, argv)
 	case 'n':
 	  config.magic_demand_paged = false;
 	  config.dynamic_link = false;
+	  break;
+	case OPTION_NO_DEFINE_COMMON:
+	  command_line.inhibit_common_definition = true;
 	  break;
 	case OPTION_NO_DEMANGLE:
 	  demangling = false;

@@ -3550,6 +3550,8 @@ lang_check ()
 static void
 lang_common ()
 {
+  if (command_line.inhibit_common_definition)
+    return;
   if (link_info.relocateable
       && ! command_line.force_common_definition)
     return;
