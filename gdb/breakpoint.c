@@ -106,9 +106,6 @@ static void
 describe_other_breakpoints PARAMS ((CORE_ADDR));
 
 static void
-watchpoints_info PARAMS ((char *, int));
-
-static void
 breakpoints_info PARAMS ((char *, int));
 
 static void
@@ -263,11 +260,11 @@ condition_command (arg, from_tty)
       {
 	if (b->cond)
 	  {
-	    free (b->cond);
+	    free ((PTR)b->cond);
 	    b->cond = 0;
 	  }
 	if (b->cond_string != NULL)
-	  free (b->cond_string);
+	  free ((PTR)b->cond_string);
 
 	if (*p == 0)
 	  {
@@ -556,7 +553,7 @@ bpstat_clear (bsp)
       q = p->next;
       if (p->old_val != NULL)
 	value_free (p->old_val);
-      free (p);
+      free ((PTR)p);
       p = q;
     }
   *bsp = NULL;
@@ -997,9 +994,8 @@ bpstat_should_step ()
    is nonzero, process only watchpoints.  */
 
 static void
-breakpoint_1 (bnum, type, allflag)
+breakpoint_1 (bnum, allflag)
      int bnum;
-     enum bptype type;
      int allflag;
 {
   register struct breakpoint *b;
@@ -1111,7 +1107,7 @@ breakpoints_info (bnum_exp, from_tty)
   if (bnum_exp)
     bnum = parse_and_eval_address (bnum_exp);
 
-  breakpoint_1 (bnum, bp_breakpoint, 0);
+  breakpoint_1 (bnum, 0);
 }
 
 /* ARGSUSED */
@@ -1125,21 +1121,7 @@ all_breakpoints_info (bnum_exp, from_tty)
   if (bnum_exp)
     bnum = parse_and_eval_address (bnum_exp);
 
-  breakpoint_1 (bnum, bp_breakpoint, 1);
-}
-
-/* ARGSUSED */
-static void
-watchpoints_info (bnum_exp, from_tty)
-     char *bnum_exp;
-     int from_tty;
-{
-  int bnum = -1;
-
-  if (bnum_exp)
-    bnum = parse_and_eval_address (bnum_exp);
-
-  breakpoint_1 (bnum, bp_watchpoint, 0);
+  breakpoint_1 (bnum, 1);
 }
 
 /* Print a message describing any breakpoints set at PC.  */
@@ -1259,7 +1241,6 @@ static void
 create_longjmp_breakpoint(func_name)
      char *func_name;
 {
-  int i;
   struct symtab_and_line sal;
   struct breakpoint *b;
   static int internal_breakpoint_number = -1;
@@ -1556,7 +1537,7 @@ break_command_1 (arg, tempflag, from_tty)
       printf ("Multiple breakpoints were set.\n");
       printf ("Use the \"delete\" command to delete unwanted breakpoints.\n");
     }
-  free (sals.sals);
+  free ((PTR)sals.sals);
 }
 
 /* Helper function for break_command_1 and disassemble_command.  */
@@ -1661,7 +1642,7 @@ until_break_command (arg, from_tty)
     error ("Couldn't get information on specified line.");
   
   sal = sals.sals[0];
-  free (sals.sals);		/* malloc'd, so freed */
+  free ((PTR)sals.sals);		/* malloc'd, so freed */
   
   if (*arg)
     error ("Junk at end of arguments.");
@@ -1984,7 +1965,7 @@ catch_command_1 (arg, tempflag, from_tty)
       printf ("Multiple breakpoints were set.\n");
       printf ("Use the \"delete\" command to delete unwanted breakpoints.\n");
     }
-  free (sals.sals);
+  free ((PTR)sals.sals);
 }
 
 #if 0
@@ -2099,7 +2080,7 @@ clear_command (arg, from_tty)
 	}
       if (from_tty) putchar ('\n');
     }
-  free (sals.sals);
+  free ((PTR)sals.sals);
 }
 
 /* Delete breakpoint in BS if they are `delete' breakpoints.
@@ -2140,11 +2121,11 @@ delete_breakpoint (bpt)
 
   free_command_lines (&bpt->commands);
   if (bpt->cond)
-    free (bpt->cond);
+    free ((PTR)bpt->cond);
   if (bpt->cond_string != NULL)
-    free (bpt->cond_string);
+    free ((PTR)bpt->cond_string);
   if (bpt->addr_string != NULL)
-    free (bpt->addr_string);
+    free ((PTR)bpt->addr_string);
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
     printf ("breakpoint #%d deleted\n", bpt->number);
@@ -2154,7 +2135,7 @@ delete_breakpoint (bpt)
   for (bs = stop_bpstat; bs; bs = bs->next)
     if (bs->breakpoint_at == bpt)
       bs->breakpoint_at = NULL;
-  free (bpt);
+  free ((PTR)bpt);
 }
 
 static void
@@ -2231,7 +2212,7 @@ breakpoint_re_set_one (bint)
 	    }
 	  b->enable = save_enable;	/* Restore it, this worked. */
 	}
-      free (sals.sals);
+      free ((PTR)sals.sals);
       break;
     case bp_watchpoint:
       /* FIXME!  This is the wrong thing to do.... */
@@ -2692,9 +2673,8 @@ Do \"help breakpoints\" for info on other commands dealing with breakpoints.");
 A watchpoint stops execution of your program whenever the value of\n\
 an expression changes.");
 
-  add_info ("watchpoints", watchpoints_info,
-	    "Status of all watchpoints, or watchpoint number NUMBER.\n\
-Second column is \"y\" for enabled watchpoints, \"n\" for disabled.");
+  add_info ("watchpoints", breakpoints_info,
+	    "Synonym for ``info breakpoints''.");
 }
 
 #ifdef IBM6000_HOST

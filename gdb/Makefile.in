@@ -165,7 +165,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
 ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.4.6
+VERSION = 4.4.7
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -229,9 +229,9 @@ SFILES_STAND = $(SFILES) standalone.c
 SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
 # Header files that are not named in config/* Makefile fragments go here.
-HFILES=	breakpoint.h buildsym.h command.h defs.h environ.h \
+HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h environ.h \
 	expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h \
-	ieee-float.h inferior.h minimon.h partial-stab.h \
+	ieee-float.h inferior.h minimon.h objfiles.h partial-stab.h \
 	signals.h signame.h symfile.h symtab.h solib.h \
 	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h tm-sysv4.h \
 	xm-m68k.h xm-sysv4.h language.h parser-defs.h value.h
@@ -331,13 +331,13 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#unload ${srcdir}/nindy-share/[A-Z]*
 	#load c-exp.tab.c m2-exp.tab.c
 	#load copying.c version.c
-	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
-	#load ${LIBIBERTY_DIR}/*.c
-	#load ${BFD_DIR}/*.c
-	#load ${READLINE_DIR}/*.c
-	#load ${MMALLOC_DIR}/*.c
+	#load ../libiberty/libiberty.a
+	#load ../bfd/libbfd.a
+	#load ../readline/libreadline.a
+	#load ../mmalloc/libmmalloc.a
 	#load -ltermcap 
-
+	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
+	echo "Load .c corresponding to:" $(DEPFILES)
 
 
 # This is useful when debugging GDB, because some Unix's don't let you run GDB
@@ -672,6 +672,9 @@ mipsread.o: ${srcdir}/mipsread.c
 
 elfread.o: ${srcdir}/elfread.c
 	${CC} -c ${CFLAGS} -I$(BFD_DIR) ${srcdir}/elfread.c
+
+dwarfread.o: ${srcdir}/dwarfread.c
+	${CC} -c ${CFLAGS} -I$(BFD_DIR) ${srcdir}/dwarfread.c
 
 xcoffread.o: ${srcdir}/xcoffread.c
 	${CC} -c ${CFLAGS} -I$(BFD_DIR) ${srcdir}/xcoffread.c
