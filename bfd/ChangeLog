@@ -1,3 +1,19 @@
+2003-11-11  Nick Clifton  <nickc@redhat.com>
+
+	* elf-m10300.c (bfd_mn10300_elf_size_dynamic_sections): Use
+	info->executable not info->shared to decide if a .interp section
+	should be present.
+	* elf32-arm.h (elf32_arm_size_dynamic_sections): Likewise.
+	* elf32-cris.c (elf_cris_size_dynamic_sections): Likewise.
+	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Likewise.
+	* elf32-i370.c (i370_elf_size_dynamic_sections): Likewise.
+	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Likewise.
+	* elf32-vax.c (elf_vax_size_dynamic_sections): Likewise.
+	* elf32-xtensa.c (elf_xtensa_size_dynamic_sections): Likewise.
+	* elf64-hppa.c (elf64_hppa_size_dynamic_sections): Likewise.
+	* elfxx-mips.c (_bfd_mips_size_dynamic_sections): Likewise.
+	* elflink.h (size_dynamic_sections): Likewise.
+
 2003-11-10  Jonathan Wilson <jonwil@tpgi.com.au>
 
 	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Swap out tls pointer.

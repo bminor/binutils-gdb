@@ -1981,7 +1981,7 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
       bfd_boolean all_defined;
 
       *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
-      BFD_ASSERT (*sinterpptr != NULL || info->shared);
+      BFD_ASSERT (*sinterpptr != NULL || !info->executable);
 
       if (soname != NULL)
 	{
