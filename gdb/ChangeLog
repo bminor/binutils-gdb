@@ -1,3 +1,18 @@
+Sat Jul  9 16:28:43 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symtab.c (find_function_start_sal):  New function to find
+	the start of a function from a function symbol.
+	(decode_line_1, decode_line_2):  Use it instead of open coded
+	partial copies of the code.
+	(list_symbols):  Quote symbol name before passing it to
+	break_command to enable proper handling of mangled symbols.
+
+Wed Jul  6 20:22:07 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* ch-exp.y (match_simple_name_string):  Don't lower-case here.
+	* ch-exp.y (yylex):  First try name lookup using exact name
+	typed by user;  if that fails, try lower-cased name.
+
 Wed Jul  6 00:48:57 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* dbxread.c, elfread.c, mipsread.c, nlmread.c, os9kread.c:
