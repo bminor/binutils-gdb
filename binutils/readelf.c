@@ -9787,8 +9787,8 @@ process_mips_specific (FILE *file)
 	  free (econf64);
 	}
 
-      printf (_("\nSection '.conflict' contains %ld entries:\n"),
-	      (long) conflictsno);
+      printf (_("\nSection '.conflict' contains %lu entries:\n"),
+	      (unsigned long) conflictsno);
       puts (_("  Num:    Index       Value  Name"));
 
       for (cnt = 0; cnt < conflictsno; ++cnt)

@@ -1,3 +1,8 @@
+2004-02-23  Daniel Lucq  <daniel@lucq.org>
+
+	* readelf.c (process_mips_specific): Print conflictsno as an
+	unsigned long.
+
 2004-02-21  Dmitry Timoshkov  <dmitry@baikal.ru>
 
 	* dlltool.c (gen_exp_file): Always output names for forwarded symbols.
