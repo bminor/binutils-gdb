@@ -1,3 +1,21 @@
+#ifdef PROTECTED_CHECK
+#include <features.h>
+
+int
+main (argc, argv)
+  int argc;
+  char *argv[];
+{
+#if defined (__GLIBC__) && (__GLIBC__ > 2 \
+			    || (__GLIBC__ == 2 \
+				&&  __GLIBC_MINOR__ >= 2))
+  puts ("yes");
+#else
+  puts ("no");
+#endif
+  return 0;
+}
+#else
 /* This is the main program for the shared library test.  */
 
 #include <stdio.h>
@@ -158,3 +176,4 @@ main ()
 	  main_visibility_checkvar ());
   return 0;
 }
+#endif

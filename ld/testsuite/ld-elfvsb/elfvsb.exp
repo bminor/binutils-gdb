@@ -74,6 +74,16 @@ if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
     close $file
 }
 
+set support_protected "no"
+
+if [istarget *-*-linux*] {
+    if [ld_compile "$CC $CFLAGS -DPROTECTED_CHECK" $srcdir/$subdir/main.c $tmpdir/main.o] {
+      if [ld_link $ld $tmpdir/main "$tmpdir/main.o"] {
+	catch "exec $tmpdir/main" support_protected
+      }
+    }
+}
+
 # The test procedure.
 proc visibility_test { visibility progname testname main sh1 sh2 dat args } {
     global ld
@@ -171,6 +181,7 @@ proc visibility_run {visibility} {
     global tmpdir
     global picflag
     global target_triplet
+    global support_protected
 
     if [ string match $visibility "hidden" ] {
 	set VSBCFLAG "-DHIDDEN_TEST"
@@ -215,7 +226,9 @@ proc visibility_run {visibility} {
 	    # overriding.
 	    if { [ string match $visibility "protected" ]
 		 || [ string match $visibility "protected_undef_def" ] } {
-		setup_xfail $target_triplet
+		if [ string match $support_protected "no" ] {
+		    setup_xfail $target_triplet
+		}
 	    } else {
 		setup_xfail "*-*-sunos4*"
 	    }
@@ -227,7 +240,9 @@ proc visibility_run {visibility} {
 	    # the load address is not zero (which is the default).
 	    if { [ string match $visibility "protected" ]
 		 || [ string match $visibility "protected_undef_def" ] } {
-		setup_xfail $target_triplet
+		if [ string match $support_protected "no" ] {
+		    setup_xfail $target_triplet
+		}
 	    } else {
 		setup_xfail "*-*-sunos4*"
 		setup_xfail "*-*-linux*libc1"
@@ -245,7 +260,9 @@ proc visibility_run {visibility} {
 	} else {
 	    if { [ string match $visibility "protected" ]
 		 || [ string match $visibility "protected_undef_def" ] } {
-		setup_xfail $target_triplet
+		if [ string match $support_protected "no" ] {
+		    setup_xfail $target_triplet
+		}
 	    }
 	    # SunOS can not compare function pointers correctly
 	    if [istarget "*-*-sunos4*"] {
@@ -271,7 +288,9 @@ proc visibility_run {visibility} {
 		# overriding.
 		if { [ string match $visibility "protected" ]
 		     || [ string match $visibility "protected_undef_def" ] } {
-		    setup_xfail $target_triplet
+		    if [ string match $support_protected "no" ] {
+			setup_xfail $target_triplet
+		    }
 		} else {
 		    setup_xfail "*-*-sunos4*"
 		}
@@ -284,7 +303,9 @@ proc visibility_run {visibility} {
 	if { [file exists $tmpdir/sh1p.o ] && [ file exists $tmpdir/sh2p.o ] } {
 	    if { [ string match $visibility "protected" ]
 		 || [ string match $visibility "protected_undef_def" ] } {
-		setup_xfail $target_triplet
+		if [ string match $support_protected "no" ] {
+		    setup_xfail $target_triplet
+		}
 	    }
 	    if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 		visibility_test $visibility vmpp "visibility ($visibility) (PIC main)" mainp.o sh1p.o sh2p.o xcoff

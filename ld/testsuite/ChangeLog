@@ -1,3 +1,15 @@
+2000-07-16  H.J. Lu  (hjl@gnu.org)
+
+	* ld-elfvsb/elfvsb.exp (support_protected): New variable. Check
+	and set to "yes" if the protected visibility is expected to
+	pass.
+	(visibility_run): Set expected to fail for the "protected"
+	and "protected_undef_def" tests only if $support_protected is
+	"no".
+
+	* ld-elfvsb/main.c (PROTECTED_CHECK): Check for the protected
+	visibility support if defined.
+
 2000-07-15  H.J. Lu  (hjl@gnu.org)
 
 	* ld-elfvsb/elfvsb.exp (visibility_run): Set expected failure
