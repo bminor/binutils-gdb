@@ -1029,6 +1029,7 @@ find_pc_symtab (pc)
 	/* Might want to error() here (in case symtab is corrupt and
 	   will cause a core dump), but maybe we can successfully
 	   continue, so let's not.  */
+	/* FIXME-32x64: assumes pc fits in a long */
 	warning ("\
 (Internal error: pc 0x%lx in read in psymtab, but not in symtab.)\n",
 	         (unsigned long) pc);
@@ -2148,7 +2149,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   copy = (char *) alloca (p - *argptr + 1);
   memcpy (copy, *argptr, p - *argptr);
   copy[p - *argptr] = '\0';
-  if ((copy[0] == copy [p - *argptr - 1])
+  if (p != *argptr
+      && (copy[0] == copy [p - *argptr - 1])
       && strchr (gdb_completer_quote_characters, copy[0]) != NULL)
     {
       copy [p - *argptr - 1] = '\0';
