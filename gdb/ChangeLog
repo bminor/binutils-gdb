@@ -1,3 +1,28 @@
+Sun Nov 17 16:20:53 1991  Michael Tiemann  (tiemann at rtl.cygnus.com)
+
+	* symtab.h (struct type): Moved C++-specific fields into new type
+	`struct cplus_struct_type'.  Now takes 10% less memory.  Many
+	macros changed.
+	* symtab.c (init_type): Don't set fields belonging to
+	TYPE_CPLUS_SPECIFIC unless TYPE is TYPE_CODE_STRUCT.
+	* buildsym.c (read_type): Allocate TYPE_CPLUS_SPECIFIC for
+	TYPE_CODE_STRUCT.
+	(read_struct_type): Ditto.  Also, add comments about how we can
+	deduce TYPE_VPTR_FIELDNO from inheritance info and fieldname info.
+	* coffread.c (decode_base_type): Allocate TYPE_CPLUS_SPECIFIC for
+	TYPE_CODE_STRUCT.
+	(read_struct_type): Ditto.
+	* dwarfread.c (struct_type): Ditto.
+
+	* symtab.c (read_range_type): Don't set TYPE_MAIN_VARIANT.
+	(lookup_pointer_type): Don't use or set TYPE_MAIN_VARIANT.
+	(lookup_reference_type): Ditto.
+
+	* cplus-dem.c: Many changes made to handle decoding of
+	ANSI-mangled names.
+	* symtab.c (gdb_mangle_name): Mangle/demangle ANSI-mangled names
+	as well.
+
 Fri Nov 15 17:57:59 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* mipsread.c (parse_partial_symbols):  patch to keep DEC C

@@ -899,6 +899,9 @@ DEFUN(struct_type, (dip, thisdie, enddie),
     {
     case TAG_structure_type:
       TYPE_CODE (type) = TYPE_CODE_STRUCT;
+      TYPE_CPLUS_SPECIFIC (type)
+	= (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
+      bzero (TYPE_CPLUS_SPECIFIC (type), sizeof (struct cplus_struct_type));
       tpart1 = "struct ";
       break;
     case TAG_union_type:

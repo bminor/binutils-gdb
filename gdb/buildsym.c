@@ -1636,6 +1636,12 @@ read_type (pp)
 	type = dbx_alloc_type (typenums);
 	TYPE_CODE (type) = code;
 	TYPE_NAME (type) = type_name;
+	if (code == TYPE_CODE_STRUCT)
+	  {
+	    TYPE_CPLUS_SPECIFIC (type)
+	      = (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
+	    bzero (TYPE_CPLUS_SPECIFIC (type), sizeof (struct cplus_struct_type));
+	  }
 
 	TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
 
@@ -1853,11 +1859,12 @@ read_struct_type (pp, type)
   int nfn_fields = 0;
 
   if (TYPE_MAIN_VARIANT (type) == 0)
-    {
-      TYPE_MAIN_VARIANT (type) = type;
-    }
+    TYPE_MAIN_VARIANT (type) = type;
 
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
+  TYPE_CPLUS_SPECIFIC (type)
+    = (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
+  bzero (TYPE_CPLUS_SPECIFIC (type), sizeof (struct cplus_struct_type));
 
   /* First comes the total size in bytes.  */
 
@@ -2393,11 +2400,46 @@ read_struct_type (pp, type)
       /* Read either a '%' or the final ';'.  */
       if (*(*pp)++ == '%')
 	{
+	  /* We'd like to be able to derive the vtable pointer field
+	     from the type information, but when it's inherited, that's
+	     hard.  A reason it's hard is because we may read in the
+	     info about a derived class before we read in info about
+	     the base class that provides the vtable pointer field.
+	     Once the base info has been read, we could fill in the info
+	     for the derived classes, but for the fact that by then,
+	     we don't remember who needs what.  */
+
+	  int predicted_fieldno = -1;
+
 	  /* Now we must record the virtual function table pointer's
 	     field information.  */
 
 	  struct type *t;
 	  int i;
+
+
+#if 0
+	  {
+	    /* In version 2, we derive the vfield ourselves.  */
+	    for (n = 0; n < nfields; n++)
+	      {
+		if (! strncmp (TYPE_FIELD_NAME (type, n), vptr_name, 
+			       sizeof (vptr_name) -1))
+		  {
+		    predicted_fieldno = n;
+		    break;
+		  }
+	      }
+	    if (predicted_fieldno < 0)
+	      for (n = 0; n < TYPE_N_BASECLASSES (type); n++)
+		if (! TYPE_FIELD_VIRTUAL (type, n)
+		    && TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, n)) >= 0)
+		  {
+		    predicted_fieldno = TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, n));
+		    break;
+		  }
+	  }
+#endif
 
 	  t = read_type (pp);
 	  p = (*pp)++;
@@ -2421,7 +2463,7 @@ read_struct_type (pp, type)
 		}
 	      else for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); --i)
 		if (! strncmp (TYPE_FIELD_NAME (t, i), vptr_name, 
-			sizeof (vptr_name) -1))
+			       sizeof (vptr_name) -1))
 		  {
 		    TYPE_VPTR_FIELDNO (type) = i;
 		    break;
@@ -2432,6 +2474,12 @@ read_struct_type (pp, type)
 	    }
 	  else
 	    TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (t);
+
+#if 0
+	  if (TYPE_VPTR_FIELDNO (type) != predicted_fieldno)
+	    error ("TYPE_VPTR_FIELDNO miscalculated");
+#endif
+
 	  *pp = p + 1;
 	}
     }
@@ -2796,7 +2844,6 @@ read_range_type (pp, typenums)
 						       sizeof (struct type));
 	  bzero (result_type, sizeof (struct type));
 	  TYPE_LENGTH (result_type) = nbits / TARGET_CHAR_BIT;
-	  TYPE_MAIN_VARIANT (result_type) = result_type;
 	  TYPE_CODE (result_type) = TYPE_CODE_INT;
 	  if (got_unsigned)
 	    TYPE_FLAGS (result_type) |= TYPE_FLAG_UNSIGNED;
