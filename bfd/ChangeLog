@@ -4,6 +4,9 @@
 	New target (was sparc-*-openbsd* before).
 	(sparc-*-openbsd*): Change to use bfd_elf32_sparc_vec.
 	
+	* configure.in (vax-*-openbsd*): Set COREFILE to netbsd-core.lo.
+	* configure: Regenerate.
+
 2003-06-11  H.J. Lu <hongjiu.lu@intel.com>
 
 	* po/Make-in (DESTDIR): New.
