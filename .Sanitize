@@ -27,7 +27,6 @@ echo Sanitizing `pwd`...
 
 Things-to-keep:
 
-INSTALL
 Makefile.in
 README
 README.configure
@@ -59,7 +58,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.10  1991/08/25 23:40:20  rich
+# Revision 1.11  1991/09/02 01:12:42  rich
+# dump the obsolete INSTALL.
+#
+# Revision 1.10  1991/08/25  23:40:20  rich
 # rcs enters the soup.
 #
 # Revision 1.9  1991/08/25  21:48:37  rich
