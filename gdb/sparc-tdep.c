@@ -3188,7 +3188,7 @@ sparc_call_dummy_address (void)
 
 /* Supply the Y register number to those that need it.  */
 
-static int
+int
 sparc_y_regnum (void)
 {
   return gdbarch_tdep (current_gdbarch)->y_regnum;

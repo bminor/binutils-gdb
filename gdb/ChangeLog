@@ -1,3 +1,7 @@
+2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* sparc-tdep.c (sparc_y_regnum): Make external again.
+
 2003-06-29  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (frame_register_unwind): Use unsigned char when dumping
