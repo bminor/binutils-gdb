@@ -21,10 +21,10 @@
 # End of host and target-dependent makefile fragments
 
 # Destination directory of the software tree build
-destdir = /usr/local
+ddestdir = /usr/local
 
 # Place to install binaries in the destination tree. 
-bindir=$(destdir)/bin
+bindir=$(ddestdir)/bin
 
 # System V: If you compile gdb with a compiler which uses the coff
 # encapsulation feature (this is a function of the compiler used, NOT
@@ -87,13 +87,13 @@ INCLUDE_DEP = $$(INCLUDE_DIR)
 # (When we want the binary library built from it, we use ${BFD_DIR}${subdir}.)
 BFD_DIR =  ${srcdir}/../bfd
 BFD_DEP = $$(BFD_DIR)
-BFD_LIB = $(BFD_DIR)${subdir}/libbfd.a
+BFD_LIB = $(unsubdir)/../bfd${subdir}/libbfd.a
 
 # Where is the source dir for the READLINE library?  Traditionally in .. or .
 # (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
 READLINE_DIR = ${srcdir}/../readline
 READLINE_DEP = $$(READLINE_DIR)
-RL_LIB = $(READLINE_DIR)${subdir}/libreadline.a
+RL_LIB = $(unsubdir)/../readline${subdir}/libreadline.a
 
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
@@ -112,7 +112,7 @@ LDFLAGS = $(CFLAGS)
 
 # Where is the "-liberty" library, containing getopt and obstack?
 LIBIBERTY_DIR = ${srcdir}/../libiberty
-LIBIBERTY = ${LIBIBERTY_DIR}${subdir}/libiberty.a
+LIBIBERTY = $(unsubdir)/../libiberty${subdir}/libiberty.a
 
 # Flags that describe where you can find the termcap library.
 # You may need to make other arrangements for USG.
