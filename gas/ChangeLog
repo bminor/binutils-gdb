@@ -1,5 +1,8 @@
 Fri Dec  9 21:04:17 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* ecoff.c (ecoff_set_gp_prolog_size): If there is no current
+	routine, just return.
+
 	* config/tc-alpha.c (alpha_ip, case 'B', subcase 'c'): Use opcode
 	value from pattern instead of assuming jsr.
 	* config/alpha-opcode.h (jmp): Add a "1,Bc" form.
