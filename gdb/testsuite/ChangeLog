@@ -1,3 +1,11 @@
+2001-05-03  Michael Snyder  <msnyder@redhat.com>
+
+	* config/sid.exp (gdb_target_sid): Check for error messages.
+	On error or timeout, don't make expect exit (which will terminate
+	all subsequent tests); instead just make gdb exit.
+	(gdb_load): Check for error messages.  On error or timeout, 
+	return a negative value.
+
 2001-04-24  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.c++/templates.exp: If we see the prompt for the overload

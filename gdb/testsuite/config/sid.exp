@@ -141,13 +141,18 @@ proc gdb_target_sid { } {
     set timeout 60
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect {
+	-re ".*\[Ee\]rror.*$gdb_prompt $" {
+	    perror "Couldn't set target for remote simulator."
+	    cleanup
+	    gdb_exit
+	}
 	-re "Remote debugging using.*$gdb_prompt"	{
 	    verbose "Set target to sid"
 	}
 	timeout { 
 	    perror "Couldn't set target for remote simulator."
 	    cleanup
-	    exit $exit_status
+	    gdb_exit
 	}
     }
     set timeout $prev_timeout
@@ -164,6 +169,7 @@ proc gdb_load { arg } {
     global loadfile
     global GDB
     global gdb_prompt
+    global retval
 
     gdb_unload
     if [gdb_file_cmd $arg] then { return -1 }
@@ -175,24 +181,32 @@ proc gdb_load { arg } {
     set timeout 2400
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect {
+	-re ".*\[Ee\]rror.*$gdb_prompt $" {
+	    if $verbose>1 then {
+		perror "Error during download."
+	    }
+	    set retval -1;
+	}
 	-re ".*$gdb_prompt $" {
 	    if $verbose>1 then {
 		send_user "Loaded $arg into $GDB\n"
 	    }
-	    set timeout 30
-	    verbose "Timeout is now $timeout seconds" 2
-	    return 1
+	    set retval 1;
 	}
 	-re "$gdb_prompt $"     {
 	    if $verbose>1 then {
 		perror "GDB couldn't load."
 	    }
+	    set retval -1;
 	}
 	timeout {
 	    if $verbose>1 then {
 		perror "Timed out trying to load $arg."
 	    }
+	    set retval -1;
 	}
     }
     set timeout $prev_timeout
+    verbose "Timeout is now $timeout seconds" 2
+    return $retval;
 }
