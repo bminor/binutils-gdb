@@ -1,3 +1,19 @@
+2003-11-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf.c (_bfd_elf_link_hash_copy_indirect): Copy
+	ELF_LINK_HASH_NEEDS_PLT.  Fix formatting.
+	* elf32-hppa.c (elf32_hppa_copy_indirect_symbol): Likewise.
+	* elf32-i386.c (elf_i386_copy_indirect_symbol): Likewise.
+	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Likewise.
+	* elf32-s390.c (elf_s390_copy_indirect_symbol): Likewise.
+	* elf32-sh.c (sh_elf_copy_indirect_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Likewise.
+	* elf64-s390.c (elf_s390_copy_indirect_symbol): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_copy_indirect_symbol): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_hash_copy_indirect): Likewise.
+	* elf32-xtensa.c (elf_xtensa_copy_indirect_symbol): Remove.
+	(elf_backend_copy_indirect_symbol): Don't define.
+
 2003-11-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elfxx-mips.c (mips_elf_merge_gots): Weaken assert for local

@@ -560,7 +560,8 @@ elf64_x86_64_copy_indirect_symbol (const struct elf_backend_data *bed,
     dir->elf_link_hash_flags |=
       (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
 				   | ELF_LINK_HASH_REF_REGULAR
-				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				   | ELF_LINK_HASH_NEEDS_PLT));
   else
     _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }

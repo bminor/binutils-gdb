@@ -47,9 +47,6 @@ static bfd_boolean elf_xtensa_check_relocs
 	   const Elf_Internal_Rela *));
 static void elf_xtensa_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean));
-static void elf_xtensa_copy_indirect_symbol
-  PARAMS ((const struct elf_backend_data *, struct elf_link_hash_entry *,
-	   struct elf_link_hash_entry *));
 static asection *elf_xtensa_gc_mark_hook
   PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
@@ -793,19 +790,6 @@ elf_xtensa_hide_symbol (info, h, force_local)
   elf_xtensa_make_sym_local (info, h);
 
   _bfd_elf_link_hash_hide_symbol (info, h, force_local);
-}
-
-
-static void
-elf_xtensa_copy_indirect_symbol (bed, dir, ind)
-     const struct elf_backend_data *bed;
-     struct elf_link_hash_entry *dir, *ind;
-{
-  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
-
-  /* The standard function doesn't copy the NEEDS_PLT flag.  */
-  dir->elf_link_hash_flags |=
-    (ind->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT);
 }
 
 
@@ -5850,7 +5834,6 @@ static struct bfd_elf_special_section const elf_xtensa_special_sections[]=
 
 #define elf_backend_adjust_dynamic_symbol    elf_xtensa_adjust_dynamic_symbol
 #define elf_backend_check_relocs	     elf_xtensa_check_relocs
-#define elf_backend_copy_indirect_symbol     elf_xtensa_copy_indirect_symbol
 #define elf_backend_create_dynamic_sections  elf_xtensa_create_dynamic_sections
 #define elf_backend_discard_info	     elf_xtensa_discard_info
 #define elf_backend_ignore_discarded_relocs  elf_xtensa_ignore_discarded_relocs

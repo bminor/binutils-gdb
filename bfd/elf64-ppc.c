@@ -3359,7 +3359,8 @@ ppc64_elf_copy_indirect_symbol
   edir->tls_mask |= eind->tls_mask;
 
   mask = (ELF_LINK_HASH_REF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR
-	  | ELF_LINK_HASH_REF_REGULAR_NONWEAK | ELF_LINK_NON_GOT_REF);
+	  | ELF_LINK_HASH_REF_REGULAR_NONWEAK | ELF_LINK_NON_GOT_REF
+	  | ELF_LINK_HASH_NEEDS_PLT);
   /* If called to transfer flags for a weakdef during processing
      of elf_adjust_dynamic_symbol, don't copy ELF_LINK_NON_GOT_REF.
      We clear it ourselves for ELIMINATE_COPY_RELOCS.  */

@@ -1592,7 +1592,8 @@ elfNN_ia64_hash_copy_indirect (bed, xdir, xind)
     (ind->root.elf_link_hash_flags
      & (ELF_LINK_HASH_REF_DYNAMIC
         | ELF_LINK_HASH_REF_REGULAR
-        | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+        | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+        | ELF_LINK_HASH_NEEDS_PLT));
 
   if (ind->root.root.type != bfd_link_hash_indirect)
     return;

@@ -1354,12 +1354,12 @@ _bfd_elf_link_hash_copy_indirect (const struct elf_backend_data *bed,
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
 
-  dir->elf_link_hash_flags |=
-    (ind->elf_link_hash_flags
-     & (ELF_LINK_HASH_REF_DYNAMIC
-	| ELF_LINK_HASH_REF_REGULAR
-	| ELF_LINK_HASH_REF_REGULAR_NONWEAK
-	| ELF_LINK_NON_GOT_REF));
+  dir->elf_link_hash_flags
+    |= (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
+				    | ELF_LINK_HASH_REF_REGULAR
+				    | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				    | ELF_LINK_NON_GOT_REF
+				    | ELF_LINK_HASH_NEEDS_PLT));
 
   if (ind->root.type != bfd_link_hash_indirect)
     return;
