@@ -13,6 +13,11 @@ Thu Sep 17 16:03:28 1998  Richard Henderson  <rth@cygnus.com>
         (elf64_alpha_relocate_section): Assert we don't overrun
         the allocated relocation space.
 
+Wed Sep 16 18:03:13 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf.c (swap_out_syms): Always treat section symbols as
+	special, even if they are attached to a common section.
+
 Wed Sep 16 10:34:13 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_symbol_processing): Move symbols in
