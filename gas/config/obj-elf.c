@@ -377,7 +377,7 @@ obj_elf_common (ignore)
   }
 }
 
-static void 
+static void
 obj_elf_local (ignore)
      int ignore;
 {
@@ -406,7 +406,7 @@ obj_elf_local (ignore)
   demand_empty_rest_of_line ();
 }
 
-static void 
+static void
 obj_elf_weak (ignore)
      int ignore;
 {
@@ -439,7 +439,7 @@ static segT previous_section;
 static int previous_subsection;
 
 /* Handle the .section pseudo-op.  This code supports two different
-   syntaxes.  
+   syntaxes.
 
    The first is found on Solaris, and looks like
        .section ".sec1",#alloc,#execinstr,#write
@@ -825,7 +825,7 @@ obj_elf_line (ignore)
   demand_empty_rest_of_line ();
 }
 
-void 
+void
 obj_read_begin_hook ()
 {
 #ifdef NEED_ECOFF_DEBUG
@@ -834,7 +834,7 @@ obj_read_begin_hook ()
 #endif
 }
 
-void 
+void
 obj_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
@@ -846,7 +846,7 @@ obj_symbol_new_hook (symbolP)
 #endif
 }
 
-void 
+void
 obj_elf_version (ignore)
      int ignore;
 {
@@ -1200,7 +1200,7 @@ elf_frob_symbol (symp, puntp)
 #endif
 }
 
-void 
+void
 elf_frob_file ()
 {
   bfd_map_over_sections (stdoutput, adjust_stab_sections, (PTR) 0);
@@ -1208,7 +1208,16 @@ elf_frob_file ()
 #ifdef elf_tc_final_processing
   elf_tc_final_processing ();
 #endif
+}
 
+/* It is required that we let write_relocs have the opportunity to
+   optimize away fixups before output has begun, since it is possible
+   to eliminate all fixups for a section and thus we never should
+   have generated the relocation section.  */
+
+void
+elf_frob_file_after_relocs ()
+{
 #ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
     /* Generate the ECOFF debugging information.  */
@@ -1227,7 +1236,7 @@ elf_frob_file ()
 #define SET(ptr, offset, type) \
     debug.ptr = (type) (buf + debug.symbolic_header.offset)
 
-	SET (line, cbLineOffset, unsigned char *);
+      SET (line, cbLineOffset, unsigned char *);
       SET (external_dnr, cbDnOffset, PTR);
       SET (external_pdr, cbPdOffset, PTR);
       SET (external_sym, cbSymOffset, PTR);
@@ -1238,7 +1247,7 @@ elf_frob_file ()
       SET (external_rfd, cbRfdOffset, PTR);
       /* ssext and external_ext are set up just below.  */
 
-#undef SET    
+#undef SET
 
       /* Set up the external symbols.  */
       debug.ssext = debug.ssext_end = NULL;

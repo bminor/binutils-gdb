@@ -1,3 +1,18 @@
+Mon Oct 14 11:24:28 1996  Richard Henderson  <rth@tamu.edu>
+
+	* config/obj-elf.c (elf_frob_file): Move ECOFF debug processing to ...
+	(elf_frob_file_after_relocs): ... here.  New function.
+	* config/obj-elf.h (obj_from_file_after_relocs): New macro.
+	* write.c (write_object_file): Call *frob_after_relocs after the
+	call to write_relocs.
+
+	* config/tc-alpha.c: Use new BFD_RELOC_ALPHA_ELF_LITERAL reloc.
+
+	* config/tc-alpha.c (load_expression): Don't SET_VALUE on the section
+	symbol, as this messes up linking.  Instead, expand the recursive call
+	inline and change up the appropriate bits to get the 0x8000 offset
+	in the reloc addend.
+
 Thu Oct 10 17:30:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sparc.h (tc_fix_adjustable): Permit the difference of

@@ -295,7 +295,7 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
     case O_constant:
       off = exp->X_add_number;
       break;
-      
+
     default:
       as_bad ("expression too complex for fixup");
     }
@@ -319,7 +319,7 @@ append (charPP, fromP, length)
   *charPP += length;
 }
 
-#ifndef BFD_ASSEMBLER 
+#ifndef BFD_ASSEMBLER
 int section_alignment[SEG_MAXIMUM_ORDINAL];
 #endif
 
@@ -329,7 +329,7 @@ int section_alignment[SEG_MAXIMUM_ORDINAL];
  * boundary, all of the other alignments within it will work.  At
  * least one object format really uses this info.
  */
-void 
+void
 record_alignment (seg, align)
      /* Segment to which alignment pertains */
      segT seg;
@@ -427,7 +427,7 @@ chain_frchains_together (abfd, section, xxx)
 
 #if !defined (BFD) && !defined (BFD_ASSEMBLER)
 
-void 
+void
 remove_subsegs (head, seg, root, last)
      frchainS *head;
      int seg;
@@ -727,7 +727,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 #endif
 
 	/* Is there some other (target cpu dependent) reason we can't adjust
-	   this one?  (E.g. relocations involving function addresses on 
+	   this one?  (E.g. relocations involving function addresses on
 	   the PA.  */
 #ifdef tc_fix_adjustable
 	if (! tc_fix_adjustable (fixp))
@@ -760,9 +760,13 @@ adjust_reloc_syms (abfd, sec, xxx)
 
 	/* If the section symbol isn't going to be output, the relocs
 	   at least should still work.  If not, figure out what to do
-	   when we run into that case.  */
+	   when we run into that case.
+
+	   We refetch the segment when calling section_symbol, rather
+	   than using symsec, because S_GET_VALUE may wind up changing
+	   the section when it calls resolve_symbol_value. */
 	fixp->fx_offset += S_GET_VALUE (sym);
-	fixp->fx_addsy = section_symbol (symsec);
+	fixp->fx_addsy = section_symbol (S_GET_SEGMENT (sym));
 	fixp->fx_addsy->sy_used_in_reloc = 1;
 
       done:
@@ -842,9 +846,13 @@ write_relocs (abfd, sec, xxx)
 	  n--;
 	  continue;
 	}
+
+#if 0
+      /* This test is triggered inappropriately for the SH.  */
       if (fixp->fx_where + fixp->fx_size
 	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
 	abort ();
+#endif
 
       s = bfd_install_relocation (stdoutput, reloc,
 				  fixp->fx_frag->fr_literal,
@@ -1228,7 +1236,7 @@ set_symtab ()
 }
 #endif
 
-void 
+void
 write_object_file ()
 {
   struct frchain *frchainP;	/* Track along all frchains. */
@@ -1425,7 +1433,7 @@ write_object_file ()
 #else
 	  fix_new_exp (lie->frag,
 		       lie->word_goes_here - lie->frag->fr_literal,
-		       2, &exp, 0, BFD_RELOC_NONE);
+		       2, &exp, 0, BFD_RELOC_16);
 #endif
 #else
 #if defined(TC_SPARC) || defined(TC_A29K) || defined(NEED_FX_R_TYPE)
@@ -1636,6 +1644,13 @@ write_object_file ()
 
   PROGRESS (1);
 
+#ifdef tc_frob_file_before_adjust
+  tc_frob_file_before_adjust ();
+#endif
+#ifdef obj_frob_file_before_adjust
+  obj_frob_file_before_adjust ();
+#endif
+
   bfd_map_over_sections (stdoutput, adjust_reloc_syms, (char *)0);
 
   /* Set up symbol table, and write it out.  */
@@ -1778,6 +1793,13 @@ write_object_file ()
 
   bfd_map_over_sections (stdoutput, write_relocs, (char *) 0);
 
+#ifdef tc_frob_file_after_relocs
+  tc_frob_file_after_relocs ();
+#endif
+#ifdef obj_frob_file_after_relocs
+  obj_frob_file_after_relocs ();
+#endif
+
   bfd_map_over_sections (stdoutput, write_contents, (char *) 0);
 #endif /* BFD_ASSEMBLER */
 }
@@ -1800,7 +1822,7 @@ write_object_file ()
 #ifdef TC_GENERIC_RELAX_TABLE
 
 /* Subroutines of relax_segment.  */
-static int 
+static int
 is_dnrange (f1, f2)
      struct frag *f1;
      struct frag *f2;
@@ -1835,7 +1857,7 @@ relax_align (address, alignment)
   return (new_address - address);
 }
 
-void 
+void
 relax_segment (segment_frag_root, segment)
      struct frag *segment_frag_root;
      segT segment;
@@ -2210,7 +2232,7 @@ fixup_segment (fixP, this_segment_type)
   int pcrel, plt;
   fragS *fragP;
   segT add_symbol_segment = absolute_section;
-  
+
   /* If the linker is doing the relaxing, we must not do any fixups.
 
      Well, strictly speaking that's not true -- we could do any that are
@@ -2258,7 +2280,7 @@ fixup_segment (fixP, this_segment_type)
 
       if (add_symbolP)
 	add_symbol_segment = S_GET_SEGMENT (add_symbolP);
-      
+
       if (sub_symbolP)
 	{
 	  resolve_symbol_value (sub_symbolP);
@@ -2395,7 +2417,7 @@ fixup_segment (fixP, this_segment_type)
 	      add_number += S_GET_VALUE (add_symbolP);
 	      add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment_type);
 	      pcrel = 0;	/* Lie. Don't want further pcrel processing. */
-	      
+
 	      /* Let the target machine make the final determination
 		 as to whether or not a relocation will be needed to
 		 handle this fixup.  */
@@ -2418,7 +2440,7 @@ fixup_segment (fixP, this_segment_type)
 		  /* Let the target machine make the final determination
 		     as to whether or not a relocation will be needed to
 		     handle this fixup.  */
-		  
+
 		  if (!TC_FORCE_RELOCATION (fixP))
 		    {
 		      fixP->fx_addsy = NULL;
@@ -2446,7 +2468,7 @@ fixup_segment (fixP, this_segment_type)
 		      continue;
 		    }		/* COBR */
 #endif /* TC_I960 */
-		  
+
 #ifdef OBJ_COFF
 #ifdef TE_I386AIX
 		  if (S_IS_COMMON (add_symbolP))
