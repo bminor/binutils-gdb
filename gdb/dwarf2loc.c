@@ -427,7 +427,7 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
       {
 	int bytes_read;
 	CORE_ADDR offset = dwarf2_read_address (&dlbaton->data[1],
-						&dlbaton->data[dlbaton->size - 2],
+						&dlbaton->data[dlbaton->size - 1],
 						&bytes_read);
 	fprintf_filtered (stream, 
 			  "a thread-local variable at offset %s in the"
