@@ -1,3 +1,7 @@
+2004-05-05  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/frv/reloc1.d: Match elf32-frvfdpic as well.
+
 2004-04-14  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/vr4122.[sd]: Change option to -mfix-vr4120.
