@@ -42,7 +42,7 @@ if ![info exists GDB] {
     if ![is_remote host] {
 	set GDB [findfile $base_dir/../../gdb/gdb "$base_dir/../../gdb/gdb" [transform gdb]]
     } else {
-	set GDB gdb
+	set GDB [transform gdb];
     }
 }
 verbose "using GDB = $GDB" 2
@@ -708,7 +708,6 @@ proc default_gdb_start { } {
     verbose "Spawning $GDB -nw $GDBFLAGS"
 
     if [info exists gdb_spawn_id] {
-	foo;
 	return 0;
     }
 
@@ -725,7 +724,8 @@ proc default_gdb_start { } {
 	set res [remote_spawn host "$GDB -nw $GDBFLAGS"];
     }
     if { $res < 0 || $res == "" } {
-	bar
+	perror "Spawning $GDB failed."
+	return 1;
     }
     set timeout 10
     gdb_expect {
@@ -821,10 +821,15 @@ proc get_compiler_info {binfile} {
 }
 
 proc gdb_compile {source dest type options} {
+    global GDB_TESTCASE_OPTIONS;
+
     if [target_info exists gdb_stub] {
 	set options2 { "additional_flags=-Dusestubs" }
 	lappend options "libs=[target_info gdb_stub]";
 	set options [concat $options2 $options]
+    }
+    if [info exists GDB_TESTCASE_OPTIONS] {
+	lappend options "additional_flags=$GDB_TESTCASE_OPTIONS";
     }
     verbose "options are $options"
     verbose "source is $source $dest $type $options"
@@ -867,10 +872,16 @@ proc gdb_expect { args } {
 # gdb_expect to fail immediately (until the next call to 
 # gdb_stop_suppressing_tests).
 #
-proc gdb_suppress_tests { } {
+proc gdb_suppress_tests { args } {
     global suppress_flag;
 
     incr suppress_flag;
+
+    if { [llength $args] > 0 } {
+	warning "[lindex $args 0]\n";
+    } else {
+	warning "Because of previous failure, all subsequent tests in this group will automatically fail.\n";
+    }
 }
 
 #
@@ -880,6 +891,7 @@ proc gdb_stop_suppressing_tests { } {
     global suppress_flag;
 
     set suppress_flag 0;
+    clone_output "Tests restarted.\n";
 }
 
 proc gdb_start { } {
@@ -911,6 +923,7 @@ proc gdb_init { args } {
     # testcase that will fail in random places if we don't increase this.
     match_max -d 20000
 
+    # We want to add the name of the TCL testcase to the PASS/FAIL messages.
     if { [llength $args] > 0 } {
 	global pf_prefix
 
