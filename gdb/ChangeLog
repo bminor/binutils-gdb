@@ -1,5 +1,9 @@
 2004-11-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/m68k/nbsdaout.mh (NAT_FILE): Set to solib.h instead of
+	tm-solib.h.
+	* config/m68k/obsd.mh (NAT_FILE): Likewise.
+
 	* sparc-tdep.h (sparc32nbsd_elf_init_abi): New prototype.
 	* sparcnbsd-tdep.c (sparc32nbsd_elf_init_abi): Make global.
 	* sparcobsd-tdep.c (sparc32obsd_init_abi): Call
