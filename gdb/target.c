@@ -1,7 +1,7 @@
 /* Select target systems and architectures at runtime for GDB.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -1249,8 +1249,26 @@ int
 target_read_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 {
   if (target_xfer_partial_p ())
-    return target_xfer_partial (target_stack, TARGET_OBJECT_MEMORY, NULL,
-				buf, NULL, memaddr, len);
+    {
+      int retval;
+
+      retval = target_xfer_partial (target_stack, TARGET_OBJECT_MEMORY,
+				    NULL, buf, NULL, memaddr, len);
+
+      if (retval <= 0)
+	{
+	  if (errno)
+	    *err = errno;
+	  else
+	    *err = EIO;
+	  return -1;
+	}
+      else
+	{
+	  *err = 0;
+	  return retval;
+	}
+    }
   else
     return target_xfer_memory_partial (memaddr, buf, len, 0, err);
 }
@@ -1259,8 +1277,26 @@ int
 target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 {
   if (target_xfer_partial_p ())
-    return target_xfer_partial (target_stack, TARGET_OBJECT_MEMORY, NULL,
-				NULL, buf, memaddr, len);
+    {
+      int retval;
+
+      retval = target_xfer_partial (target_stack, TARGET_OBJECT_MEMORY,
+				    NULL, NULL, buf, memaddr, len);
+
+      if (retval <= 0)
+	{
+	  if (errno)
+	    *err = errno;
+	  else
+	    *err = EIO;
+	  return -1;
+	}
+      else
+	{
+	  *err = 0;
+	  return retval;
+	}
+    }
   else
     return target_xfer_memory_partial (memaddr, buf, len, 1, err);
 }

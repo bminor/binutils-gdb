@@ -1,3 +1,9 @@
+2005-03-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* target.c (target_read_memory_partial): Always initialize
+	ERR.
+	(target_write_memory_partial): Likewise.
+
 2005-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (remote_open_1): Call observer_notify_inferior_created.
