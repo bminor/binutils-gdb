@@ -1,3 +1,11 @@
+2004-12-04  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdbint.texinfo (Algorithms): More accurate description of
+	STOPPED_BY_WATCHPOINT.  Point out that target_stopped_data_address
+	is not needed unless data-read and data-access watchpoints are
+	supported.  Add a description of how GDB checks whether the
+	inferior stopped because a watchpoint was hit.
+
 2004-11-23  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Files): Add cross-reference to description of
