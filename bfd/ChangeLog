@@ -1,5 +1,10 @@
 Wed Jun 12 11:16:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (xcoff_link_add_symbols): When considering whether
+	to replace a symbol in a dynamic object with a symbol from another
+	dynamic object, do the replacement if the existing symbol is
+	global linkage code.
+
 	* xcofflink.c (_bfd_ppc_xcoff_relocate_section): Check explicitly
 	for _ptrgl, and treat it as global linkage code.
 
