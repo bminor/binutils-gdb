@@ -1,3 +1,38 @@
+Tue Mar 15 22:58:28 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* bfd-in2.h, libbfd.h, libcoff.h: Rebuilt.
+
+	* bfd-in.h (JUMP_TABLE): Add new entries to the jump table
+	for bfd_copy_private_section_data, bfd_copy_private_bfd_data,
+	and bfd_is_local_label.
+
+	* targets.c: Add new entries to the bfd_target structure.
+	
+	* bfd.c (bfd_copy_private_bfd_data): New definition.
+
+	* section.c (bfd_copy_private_section_data): New definition.
+
+	* syms.c (bfd_is_local_label): New definition.
+
+	* libbfd-in.h (bfd_generic_is_local_label): Declare.
+
+	* libbfd.c (bfd_generic_is_local_label): New function.
+
+	* *-core.c: Provide default definitions for new functions in
+	the target vector which all point to bfd_false.
+
+	* aout-target.h, coffcode.h, elf32-target.h elf64-target.h, ieee.c
+	libaout.h, libecoff.h, nlm-target.h, oasys.c, srec.c, tekhex.c
+	Default new vectors for copying private backend data to bfd_true.
+	Default new vector for determining if a symbol is a local label
+	to bfd_generic_is_local_label.
+
+	* som.c (som_bfd_copy_private_section_data): New function.
+	(som_bfd_is_local_label): New function.
+	(som_bfd_copy_private_bfd_data): For now default to bfd_true.
+
+	* elf32-hppa.c (hppa_elf_is_local_label): New function.
+
 Tue Mar 15 23:55:47 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* cf-m68klynx.c (CALC_ADDEND): Use _bfd_m68klynx_howto_table.

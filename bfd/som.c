@@ -149,6 +149,9 @@ static asymbol * som_make_empty_symbol PARAMS ((bfd *));
 static void som_print_symbol PARAMS ((bfd *, PTR,
 				      asymbol *, bfd_print_symbol_type));
 static boolean som_new_section_hook PARAMS ((bfd *, asection *));
+static boolean som_bfd_copy_private_section_data PARAMS ((bfd *, asection *,
+							  bfd *, asection *));
+static boolean som_bfd_is_local_label PARAMS ((bfd *, asymbol *));
 static boolean som_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
 						 file_ptr, bfd_size_type));
 static boolean som_set_arch_mach PARAMS ((bfd *, enum bfd_architecture,
@@ -3644,6 +3647,14 @@ som_print_symbol (ignore_abfd, afile, symbol, how)
     }
 }
 
+static boolean
+som_bfd_is_local_label (abfd, sym)
+     bfd *abfd;
+     asymbol *sym;
+{
+  return (sym->name[0] == 'L' && sym->name[1] == '$');
+}
+
 /* Count or process variable-length SOM fixup records.
 
    To avoid code duplication we use this code both to compute the number
@@ -4036,6 +4047,29 @@ som_new_section_hook (abfd, newsect)
   return true;
 }
 
+/* Copy any private info we understand from the input section
+   to the output section.  */
+static boolean
+som_bfd_copy_private_section_data (ibfd, isection, obfd, osection)
+     bfd *ibfd;
+     asection *isection;
+     bfd *obfd;
+     asection *osection;
+{
+  /* One day we may try to grok other private data.  */
+  if (ibfd->xvec->flavour != bfd_target_som_flavour
+      || obfd->xvec->flavour != bfd_target_som_flavour)
+    return false;
+
+  memcpy (som_section_data (osection), som_section_data (isection),
+	  sizeof (struct som_section_data_struct));
+
+  /* Reparent if necessary.  */
+  if (som_section_data (osection)->containing_space)
+    som_section_data (osection)->containing_space =
+      som_section_data (osection)->containing_space->output_section;
+}
+       
 /* Set backend info for sections which can not be described
    in the BFD data structures.  */
 
@@ -5189,6 +5223,9 @@ som_slurp_extended_name_table (abfd)
 #define som_core_file_failing_command	_bfd_dummy_core_file_failing_command
 #define som_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
 #define som_core_file_matches_executable_p	_bfd_dummy_core_file_matches_executable_p
+
+#define som_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
 
 bfd_target som_vec =
 {
