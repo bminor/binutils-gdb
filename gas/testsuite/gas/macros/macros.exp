@@ -32,5 +32,6 @@ if { ![istarget hppa*-*-*] || [istarget *-*-linux*]} {
     setup_xfail powerpc-*-aix*
     setup_xfail sh*-*-*
     setup_xfail z8k*-*-*
+    setup_xfail h8300*-*-*
     run_dump_test strings
 }

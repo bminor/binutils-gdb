@@ -95,6 +95,7 @@ if { ![istarget hppa*-*-*] && ![istarget *c54x*-*-*] } then {
     setup_xfail "vax*-*-vms*"
     setup_xfail "mn10300*-*-*"
     setup_xfail "mn10200*-*-*"
+    setup_xfail "h8300*-*-elf*"
     do_930509a
 }
 

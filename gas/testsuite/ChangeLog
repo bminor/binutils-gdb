@@ -1,3 +1,15 @@
+Tue Sep  4 20:06:09 2001  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/all/gas.exp (930509a): Expect failure on the H8/300 ELF port.
+
+	* gas/h8300/ffxx1-elf.d: Update due to recent changes to H8/300
+	ELF toolchain.
+	* gas/h8300/h8300-elf.exp: Likewise.
+
+	* gas/macros/macros.exp: Expect failure on all H8/300 ports.
+
+	* gas/vtable/vtable.exp: Do not run tests on H8/300 ELF ports.
+
 Thu Aug 30 21:58:48 2001  J"orn Rennecke <amylaar@redhat.com>
 
 	* gas/h8300/h8300.exp (do_h8300_cbranch): Remove invocation.

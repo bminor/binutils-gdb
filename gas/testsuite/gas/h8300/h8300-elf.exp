@@ -11,26 +11,26 @@ proc do_h8300_cbranch {} {
     # assembled correctly.
     while 1 {
 	expect {
-	    -re " +\[0-9\]+ 0000 40FE\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0002 40FC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0004 41FA\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0006 41F8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0008 42F6\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000a 43F4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000c 44F2\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000e 44F0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0010 45EE\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0012 45EC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0014 46EA\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0016 47E8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0018 48E6\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 001a 49E4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 001c 4AE2\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 001e 4BE0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0020 4CDE\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0022 4DDC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0024 4EDA\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0026 4FD8\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0000 4000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0002 4000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0004 4100\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0006 4100\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0008 4200\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000a 4300\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000c 4400\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000e 4400\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0010 4500\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0012 4500\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0014 4600\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0016 4700\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0018 4800\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 001a 4900\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 001c 4A00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 001e 4B00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0020 4C00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0022 4D00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0024 4E00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0026 4F00\[^\n\]*\n"   { set x [expr $x+1] }
 	    timeout 				{ perror "timeout\n; break }
 	    eof					{ break }
 	}
@@ -54,7 +54,7 @@ proc do_h8300_branch {} {
     # assembled correctly.
     while 1 {
 	expect {
-	    -re " +\[0-9\]+ 0000 55FE\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0000 5500\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 0002 5A000000\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 0006 5900\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 0008 5B00\[^\n\]*\n"   { set x [expr $x+1] }
@@ -84,46 +84,46 @@ proc do_h8300h_cbranch {} {
     # assembled correctly.
     while 1 {
 	expect {
-	    -re " +\[0-9\]+ 0000 40FE\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0002 40FC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0004 41FA\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0006 41F8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0008 42F6\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000a 43F4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000c 44F2\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000e 44F0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0010 45EE\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0012 45EC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0014 46EA\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0016 47E8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0018 48E6\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 001a 49E4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 001c 4AE2\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 001e 4BE0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0020 4CDE\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0022 4DDC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0024 4EDA\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0026 4FD8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0028 5800FFD4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 002c 5800FFD0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0030 5810FFCC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0034 5810FFC8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0038 5820FFC4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 003c 5830FFC0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0040 5840FFBC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0044 5840FFB8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0048 5850FFB4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 004c 5850FFB0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0050 5860FFAC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0054 5870FFA8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0058 5880FFA4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 005c 5890FFA0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0060 58A0FF9C\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0064 58B0FF98\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0068 58C0FF94\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 006c 58D0FF90\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0070 58E0FF8C\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0074 58F0FF88\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0000 4000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0002 4000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0004 4100\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0006 4100\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0008 4200\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000a 4300\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000c 4400\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000e 4400\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0010 4500\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0012 4500\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0014 4600\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0016 4700\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0018 4800\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 001a 4900\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 001c 4A00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 001e 4B00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0020 4C00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0022 4D00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0024 4E00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0026 4F00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0028 58000000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 002c 58000000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0030 58100000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0034 58100000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0038 58200000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 003c 58300000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0040 58400000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0044 58400000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0048 58500000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 004c 58500000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0050 58600000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0054 58700000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0058 58800000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 005c 58900000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0060 58A00000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0064 58B00000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0068 58C00000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 006c 58D00000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0070 58E00000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0074 58F00000\[^\n\]*\n"   { set x [expr $x+1] }
 	    timeout 				{ perror "timeout\n; break }
 	    eof					{ break }
 	}
@@ -147,14 +147,14 @@ proc do_h8300h_branch {} {
     # assembled correctly.
     while 1 {
 	expect {
-	    -re " +\[0-9\]+ 0000 55FE\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0002 5C00FFFA\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0000 5500\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0002 5C000000\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 0006 5A000000\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 000a 5900\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000c 5B10\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000c 5B00\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 000e 5E000000\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 0012 5D00\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0014 5F10\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0014 5F00\[^\n\]*\n"   { set x [expr $x+1] }
 	    timeout 				{ perror "timeout\n; break }
 	    eof					{ break }
 	}
@@ -178,46 +178,46 @@ proc do_h8300s_cbranch {} {
     # assembled correctly.
     while 1 {
 	expect {
-	    -re " +\[0-9\]+ 0000 40FE\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0002 40FC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0004 41FA\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0006 41F8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0008 42F6\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000a 43F4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000c 44F2\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000e 44F0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0010 45EE\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0012 45EC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0014 46EA\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0016 47E8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0018 48E6\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 001a 49E4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 001c 4AE2\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 001e 4BE0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0020 4CDE\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0022 4DDC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0024 4EDA\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0026 4FD8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0028 5800FFD4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 002c 5800FFD0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0030 5810FFCC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0034 5810FFC8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0038 5820FFC4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 003c 5830FFC0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0040 5840FFBC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0044 5840FFB8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0048 5850FFB4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 004c 5850FFB0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0050 5860FFAC\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0054 5870FFA8\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0058 5880FFA4\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 005c 5890FFA0\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0060 58A0FF9C\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0064 58B0FF98\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0068 58C0FF94\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 006c 58D0FF90\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0070 58E0FF8C\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0074 58F0FF88\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0000 4000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0002 4000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0004 4100\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0006 4100\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0008 4200\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000a 4300\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000c 4400\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000e 4400\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0010 4500\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0012 4500\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0014 4600\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0016 4700\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0018 4800\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 001a 4900\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 001c 4A00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 001e 4B00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0020 4C00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0022 4D00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0024 4E00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0026 4F00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0028 58000000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 002c 58000000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0030 58100000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0034 58100000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0038 58200000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 003c 58300000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0040 58400000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0044 58400000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0048 58500000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 004c 58500000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0050 58600000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0054 58700000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0058 58800000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 005c 58900000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0060 58A00000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0064 58B00000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0068 58C00000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 006c 58D00000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0070 58E00000\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0074 58F00000\[^\n\]*\n"   { set x [expr $x+1] }
 	    timeout 				{ perror "timeout\n; break }
 	    eof					{ break }
 	}
@@ -241,14 +241,14 @@ proc do_h8300s_branch {} {
     # assembled correctly.
     while 1 {
 	expect {
-	    -re " +\[0-9\]+ 0000 55FE\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0002 5C00FFFA\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0000 5500\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0002 5C000000\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 0006 5A000000\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 000a 5900\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000c 5B10\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000c 5B00\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 000e 5E000000\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 0012 5D00\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0014 5F10\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0014 5F00\[^\n\]*\n"   { set x [expr $x+1] }
 	    timeout 				{ perror "timeout\n; break }
 	    eof					{ break }
 	}
