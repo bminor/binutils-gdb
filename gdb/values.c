@@ -28,6 +28,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "gdbcmd.h"
 
+extern char *cplus_demangle ();
+extern char *cplus_mangle_opname ();
+
 /* The value-history records all the values printed
    by print commands during this session.  Each chunk
    records 60 consecutive values.  The first chunk on
@@ -876,8 +879,7 @@ value_virtual_fn_field (arg1, f, j, type)
      was.  If so, fill in the virtual function table entry for the
      type now.  */
   if (TYPE_VPTR_FIELDNO (context) < 0)
-    TYPE_VPTR_FIELDNO (context)
-      = fill_in_vptr_fieldno (context);
+    fill_in_vptr_fieldno (context);
 
   /* The virtual function table is now an array of structures
      which have the form { int16 offset, delta; void *pfn; }.  */
@@ -904,13 +906,109 @@ value_virtual_fn_field (arg1, f, j, type)
   return vfn;
 }
 
+/* ARG is a pointer to an object we know to be at least
+   a DTYPE.  BTYPE is the most derived basetype that has
+   already been searched (and need not be searched again).
+   After looking at the vtables between BTYPE and DTYPE,
+   return the most derived type we find.  The caller must
+   be satisfied when the return value == DTYPE.
+
+   FIXME-tiemann: should work with dossier entries as well.  */
+
+static value
+value_headof (arg, btype, dtype)
+     value arg;
+     struct type *btype, *dtype;
+{
+  /* First collect the vtables we must look at for this object.  */
+  /* FIXME-tiemann: right now, just look at top-most vtable.  */
+  value vtbl, entry, best_entry = 0;
+  struct type *entry_type;
+  int i, nelems;
+  int offset, best_offset = 0;
+  struct symbol *sym;
+  CORE_ADDR pc_for_sym;
+  char *demangled_name;
+
+  vtbl = value_ind (value_field (value_ind (arg), TYPE_VPTR_FIELDNO (dtype)));
+
+  /* Check that VTBL looks like it points to a virtual function table.  */
+  i = find_pc_misc_function (VALUE_ADDRESS (vtbl));
+  if (i < 0 || ! VTBL_PREFIX_P (misc_function_vector[i].name))
+    {
+      /* If we expected to find a vtable, but did not, let the user
+	 know that we aren't happy, but don't throw an error.
+	 FIXME: there has to be a better way to do this.  */
+      struct type *error_type = (struct type *)xmalloc (sizeof (struct type));
+      bcopy (VALUE_TYPE (arg), error_type, sizeof (struct type));
+      TYPE_NAME (error_type) = savestring ("suspicious *", sizeof ("suspicious *"));
+      VALUE_TYPE (arg) = error_type;
+      return arg;
+    }
+
+  /* Now search through the virtual function table.  */
+  entry = value_ind (vtbl);
+  entry_type = VALUE_TYPE (entry);
+  nelems = value_as_long (value_field (entry, 2));
+  for (i = 1; i <= nelems; i++)
+    {
+      entry = value_subscript (vtbl, value_from_long (builtin_type_int, i));
+      offset = value_as_long (value_field (entry, 0));
+      if (offset < best_offset)
+	{
+	  best_offset = offset;
+	  best_entry = entry;
+	}
+    }
+  if (best_entry == 0)
+    return arg;
+
+  /* Move the pointer according to BEST_ENTRY's offset, and figure
+     out what type we should return as the new pointer.  */
+  pc_for_sym = value_as_long (value_field (best_entry, 2));
+  sym = find_pc_function (pc_for_sym);
+  demangled_name = cplus_demangle (SYMBOL_NAME (sym), -1);
+  *(strchr (demangled_name, ':')) = '\0';
+  sym = lookup_symbol (demangled_name, 0, VAR_NAMESPACE, 0, 0);
+  if (sym == 0)
+    error ("could not find type declaration for `%s'", SYMBOL_NAME (sym));
+  free (demangled_name);
+  arg = value_add (value_cast (builtin_type_int, arg),
+		   value_field (best_entry, 0));
+  VALUE_TYPE (arg) = lookup_pointer_type (SYMBOL_TYPE (sym));
+  return arg;
+}
+
+/* ARG is a pointer object of type TYPE.  If TYPE has virtual
+   function tables, probe ARG's tables (including the vtables
+   of its baseclasses) to figure out the most derived type that ARG
+   could actually be a pointer to.  */
+
+value
+value_from_vtable_info (arg, type)
+     value arg;
+     struct type *type;
+{
+  /* Take care of preliminaries.  */
+  if (TYPE_VPTR_FIELDNO (type) < 0)
+    fill_in_vptr_fieldno (type);
+  if (TYPE_VPTR_FIELDNO (type) < 0 || VALUE_REPEATED (arg))
+    return 0;
+
+  return value_headof (arg, 0, type);
+}
+
 /* The value of a static class member does not depend
    on its instance, only on its type.  If FIELDNO >= 0,
    then fieldno is a valid field number and is used directly.
    Otherwise, FIELDNAME is the name of the field we are
    searching for.  If it is not a static field name, an
    error is signaled.  TYPE is the type in which we look for the
-   static field member.  */
+   static field member.
+
+   Return zero if we couldn't find anything; the caller may signal
+   an error in that case.  */
+
 value
 value_static_field (type, fieldname, fieldno)
      register struct type *type;
@@ -925,41 +1023,32 @@ value_static_field (type, fieldname, fieldno)
     {
       register struct type *t = type;
       /* Look for static field.  */
-      while (t)
-	{
-	  int i;
-	  for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); i--)
-	    if (! strcmp (TYPE_FIELD_NAME (t, i), fieldname))
+      int i;
+      for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
+	if (! strcmp (TYPE_FIELD_NAME (type, i), fieldname))
+	  {
+	    if (TYPE_FIELD_STATIC (type, i))
 	      {
-		if (TYPE_FIELD_STATIC (t, i))
-		  {
-		    fieldno = i;
-		    goto found;
-		  }
-		else
-		  error ("field `%s' is not static");
+		fieldno = i;
+		goto found;
 	      }
-	  /* FIXME: this does not recursively check multiple baseclasses.  */
-	  t = TYPE_N_BASECLASSES (t) ? TYPE_BASECLASS (t, 0) : 0;
+	    else
+	      error ("field `%s' is not static", fieldname);
+	  }
+      for (; i > 0; i--)
+	{
+	  v = value_static_field (TYPE_BASECLASS (type, i), fieldname, -1);
+	  if (v != 0)
+	    return v;
 	}
 
-      t = type;
-
-      if (destructor_name_p (fieldname, t))
+      if (destructor_name_p (fieldname, type))
 	error ("Cannot get value of destructor");
 
-      while (t)
+      for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
 	{
-	  int i;
-
-	  for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; i--)
-	    {
-	      if (! strcmp (TYPE_FN_FIELDLIST_NAME (t, i), fieldname))
-		{
-		  error ("Cannot get value of method \"%s\"", fieldname);
-		}
-	    }
-	  t = TYPE_N_BASECLASSES (t) ? TYPE_BASECLASS (t, 0) : 0;
+	  if (! strcmp (TYPE_FN_FIELDLIST_NAME (type, i), fieldname))
+	    error ("Cannot get value of method \"%s\"", fieldname);
 	}
       error("there is no field named %s", fieldname);
     }
@@ -976,17 +1065,26 @@ value_static_field (type, fieldname, fieldno)
 
 /* Compute the address of the baseclass which is
    the INDEXth baseclass of TYPE.  The TYPE base
-   of the object is at VALADDR.  */
+   of the object is at VALADDR.
+
+   If ERRP is non-NULL, set *ERRP to be the errno code of any error,
+   or 0 if no error.  In that case the return value is not the address
+   of the baseclasss, but the address which could not be read
+   successfully.  */
 
 char *
-baseclass_addr (type, index, valaddr, valuep)
+baseclass_addr (type, index, valaddr, valuep, errp)
      struct type *type;
      int index;
      char *valaddr;
      value *valuep;
+     int *errp;
 {
   struct type *basetype = TYPE_BASECLASS (type, index);
 
+  if (errp)
+    *errp = 0;
+  
   if (BASETYPE_VIA_VIRTUAL (type, index))
     {
       /* Must hunt for the pointer to this virtual baseclass.  */
@@ -1005,12 +1103,35 @@ baseclass_addr (type, index, valaddr, valuep)
 	{
 	  if (! strcmp (vbase_name, TYPE_FIELD_NAME (type, i)))
 	    {
-	      value v = value_at (basetype,
-				  unpack_long (TYPE_FIELD_TYPE (type, i),
-					       valaddr + (TYPE_FIELD_BITPOS (type, i) / 8)));
-	      if (valuep)
-		*valuep = v;
-	      return (char *) VALUE_CONTENTS (v);
+	      value val = allocate_value (basetype);
+	      CORE_ADDR addr;
+	      int status;
+
+	      addr = unpack_long (TYPE_FIELD_TYPE (type, i),
+				  valaddr + (TYPE_FIELD_BITPOS (type, i) / 8));
+
+	      status = target_read_memory (addr,
+					   VALUE_CONTENTS_RAW (val),
+					   TYPE_LENGTH (type));
+	      VALUE_LVAL (val) = lval_memory;
+	      VALUE_ADDRESS (val) = addr;
+
+	      if (status != 0)
+		{
+		  if (valuep)
+		    *valuep = NULL;
+		  release_value (val);
+		  value_free (val);
+		  if (errp)
+		    *errp = status;
+		  return (char *)addr;
+		}
+	      else
+		{
+		  if (valuep)
+		    *valuep = val;
+		  return (char *) VALUE_CONTENTS (val);
+		}
 	    }
 	}
       /* Not in the fields, so try looking through the baseclasses.  */
@@ -1050,18 +1171,33 @@ check_stub_method (type, i, j)
 {
   extern char *gdb_mangle_typename (), *strchr ();
   struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
+  char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
   char *inner_name = gdb_mangle_typename (type);
-  char *mangled_name
-    = (char *)xmalloc (strlen (TYPE_FN_FIELDLIST_NAME (type, i))
-		       + strlen (inner_name)
-		       + strlen (TYPE_FN_FIELD_PHYSNAME (f, j))
-		       + 1);
-  char *demangled_name, *cplus_demangle ();
+  int mangled_name_len = (strlen (field_name)
+			  + strlen (inner_name)
+			  + strlen (TYPE_FN_FIELD_PHYSNAME (f, j))
+			  + 1);
+  char *mangled_name;
+  char *demangled_name;
   char *argtypetext, *p;
   int depth = 0, argcount = 1;
   struct type **argtypes;
 
-  strcpy (mangled_name, TYPE_FN_FIELDLIST_NAME (type, i));
+  if (OPNAME_PREFIX_P (field_name))
+    {
+      char *opname = cplus_mangle_opname (field_name + 3);
+      mangled_name_len += strlen (opname);
+      mangled_name = (char *)xmalloc (mangled_name_len);
+
+      strncpy (mangled_name, field_name, 3);
+      mangled_name[3] = '\0';
+      strcat (mangled_name, opname);
+    }
+  else
+    {
+      mangled_name = (char *)xmalloc (mangled_name_len);
+      strcpy (mangled_name, TYPE_FN_FIELDLIST_NAME (type, i));
+    }
   strcat (mangled_name, inner_name);
   strcat (mangled_name, TYPE_FN_FIELD_PHYSNAME (f, j));
   demangled_name = cplus_demangle (mangled_name, 0);
@@ -1119,11 +1255,12 @@ check_stub_method (type, i, j)
     argtypes[argcount] = NULL;		/* List terminator */
 
   free (demangled_name);
-  smash_to_method_type (TYPE_FN_FIELD_TYPE (f, j), type,
-			TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
-			argtypes);
+  
+  type = lookup_method_type (type, TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)), argtypes);
+  /* Free the stub type...it's no longer needed.  */
+  free (TYPE_FN_FIELD_TYPE (f, j));
   TYPE_FN_FIELD_PHYSNAME (f, j) = mangled_name;
-  TYPE_FLAGS (TYPE_FN_FIELD_TYPE (f, j)) &= ~TYPE_FLAG_STUB;
+  TYPE_FN_FIELD_TYPE (f, j) = type;
 }
 
 long
