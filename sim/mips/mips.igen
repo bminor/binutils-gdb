@@ -35,6 +35,9 @@
 
 
 // Models known by this simulator are defined below.
+//
+// When placing models in the instruction descriptions, please place
+// them one per line, in the order given here.
 
 //  MIPS ISAs:
 //
@@ -131,7 +134,10 @@
 }
 
 :function:::int:check_mt_hilo:hilo_history *history
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 {
@@ -153,7 +159,10 @@
 
 
 :function:::int:check_mf_hilo:hilo_history *history, hilo_history *peer
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -185,7 +194,10 @@
 
 
 :function:::int:check_mult_hilo:hilo_history *hi, hilo_history *lo
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 {
@@ -215,7 +227,10 @@
 
 
 :function:::int:check_div_hilo:hilo_history *hi, hilo_history *lo
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -244,7 +259,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,100000:SPECIAL:32::ADD
 "add r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -262,7 +280,10 @@
 
 001000,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ADDI
 "addi r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -287,7 +308,10 @@
 
 001001,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ADDIU
 "addiu r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -306,7 +330,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,100001:SPECIAL:32::ADDU
 "addu r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -325,7 +352,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,100100:SPECIAL:32::AND
 "and r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -337,7 +367,10 @@
 
 001100,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ANDI
 "and r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -351,7 +384,10 @@
 
 000100,5.RS,5.RT,16.OFFSET:NORMAL:32::BEQ
 "beq r<RS>, r<RT>, <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -391,7 +427,10 @@
 
 000001,5.RS,00001,16.OFFSET:REGIMM:32::BGEZ
 "bgez r<RS>, <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -409,7 +448,10 @@
 
 000001,5.RS!31,10001,16.OFFSET:REGIMM:32::BGEZAL
 "bgezal r<RS>, <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -475,7 +517,10 @@
 
 000111,5.RS,00000,16.OFFSET:NORMAL:32::BGTZ
 "bgtz r<RS>, <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -517,7 +562,10 @@
 
 000110,5.RS,00000,16.OFFSET:NORMAL:32::BLEZ
 "blez r<RS>, <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -559,7 +607,10 @@
 
 000001,5.RS,00000,16.OFFSET:REGIMM:32::BLTZ
 "bltz r<RS>, <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -577,7 +628,10 @@
 
 000001,5.RS!31,10000,16.OFFSET:REGIMM:32::BLTZAL
 "bltzal r<RS>, <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -645,7 +699,10 @@
 
 000101,5.RS,5.RT,16.OFFSET:NORMAL:32::BNE
 "bne r<RS>, r<RT>, <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -685,7 +742,10 @@
 
 000000,20.CODE,001101:SPECIAL:32::BREAK
 "break <CODE>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -899,7 +959,10 @@
 
 000000,5.RS,5.RT,0000000000,011010:SPECIAL:32::DIV
 "div r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -932,7 +995,10 @@
 
 000000,5.RS,5.RT,0000000000,011011:SPECIAL:32::DIVU
 "divu r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1009,7 +1075,8 @@
 
 000000,5.RS,5.RT,0000000000,011100:SPECIAL:64::DMULT
 "dmult r<RS>, r<RT>"
-*mipsIII,mipsIV:
+*mipsIII:
+*mipsIV:
 *vr4100:
 {
   do_dmult (SD_, RS, RT, 0);
@@ -1032,7 +1099,8 @@
 
 000000,5.RS,5.RT,0000000000,011101:SPECIAL:64::DMULTU
 "dmultu r<RS>, r<RT>"
-*mipsIII,mipsIV:
+*mipsIII:
+*mipsIV:
 *vr4100:
 {
   do_dmultu (SD_, RS, RT, 0);
@@ -1222,7 +1290,10 @@
 
 000010,26.INSTR_INDEX:NORMAL:32::J
 "j <INSTR_INDEX>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1236,7 +1307,10 @@
 
 000011,26.INSTR_INDEX:NORMAL:32::JAL
 "jal <INSTR_INDEX>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1251,7 +1325,10 @@
 000000,5.RS,00000,5.RD,00000,001001:SPECIAL:32::JALR
 "jalr r<RS>":RD == 31
 "jalr r<RD>, r<RS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1264,7 +1341,10 @@
 
 000000,5.RS,000000000000000,001000:SPECIAL:32::JR
 "jr r<RS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1299,7 +1379,10 @@
 
 100000,5.BASE,5.RT,16.OFFSET:NORMAL:32::LB
 "lb r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1310,7 +1393,10 @@
 
 100100,5.BASE,5.RT,16.OFFSET:NORMAL:32::LBU
 "lbu r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1369,7 +1455,10 @@
 
 100001,5.BASE,5.RT,16.OFFSET:NORMAL:32::LH
 "lh r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1380,7 +1469,10 @@
 
 100101,5.BASE,5.RT,16.OFFSET:NORMAL:32::LHU
 "lhu r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1467,7 +1559,10 @@
 
 001111,00000,5.RT,16.IMMEDIATE:NORMAL:32::LUI
 "lui r<RT>, <IMMEDIATE>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1480,7 +1575,10 @@
 
 100011,5.BASE,5.RT,16.OFFSET:NORMAL:32::LW
 "lw r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1491,7 +1589,10 @@
 
 1100,ZZ!0!1!3,5.BASE,5.RT,16.OFFSET:NORMAL:32::LWCz
 "lwc<ZZ> r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1559,7 +1660,10 @@
 
 100010,5.BASE,5.RT,16.OFFSET:NORMAL:32::LWL
 "lwl r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1601,7 +1705,10 @@
 
 100110,5.BASE,5.RT,16.OFFSET:NORMAL:32::LWR
 "lwr r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1631,7 +1738,10 @@
 
 000000,0000000000,5.RD,00000,010000:SPECIAL:32::MFHI
 "mfhi r<RD>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1651,7 +1761,10 @@
 
 000000,0000000000,5.RD,00000,010010:SPECIAL:32::MFLO
 "mflo r<RD>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1685,7 +1798,10 @@
 
 000000,5.RS,000000000000000,010001:SPECIAL:32::MTHI
 "mthi r<RS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1698,7 +1814,10 @@
 
 000000,5.RS,000000000000000,010011:SPECIAL:32::MTLO
 "mtlo r<RS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1725,7 +1844,10 @@
 
 000000,5.RS,5.RT,0000000000,011000:SPECIAL:32::MULT
 "mult r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 {
   do_mult (SD_, RS, RT, 0);
@@ -1758,7 +1880,10 @@
 
 000000,5.RS,5.RT,0000000000,011001:SPECIAL:32::MULTU
 "multu r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 {
   do_multu (SD_, RS, RT, 0);
@@ -1783,7 +1908,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,100111:SPECIAL:32::NOR
 "nor r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1801,7 +1929,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,100101:SPECIAL:32::OR
 "or r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1820,7 +1951,10 @@
 
 001101,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ORI
 "ori r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -1874,7 +2008,10 @@
 
 101000,5.BASE,5.RT,16.OFFSET:NORMAL:32::SB
 "sb r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2009,7 +2146,10 @@
 
 101001,5.BASE,5.RT,16.OFFSET:NORMAL:32::SH
 "sh r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2029,7 +2169,10 @@
 000000,00000,5.RT,5.RD,5.SHIFT,000000:SPECIAL:32::SLL
 "nop":RD == 0 && RT == 0 && SHIFT == 0
 "sll r<RD>, r<RT>, <SHIFT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2052,7 +2195,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,000100:SPECIAL:32::SLLV
 "sllv r<RD>, r<RT>, r<RS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2070,7 +2216,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,101010:SPECIAL:32::SLT
 "slt r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2088,7 +2237,10 @@
 
 001010,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::SLTI
 "slti r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2106,7 +2258,10 @@
 
 001011,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::SLTIU
 "sltiu r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2125,7 +2280,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,101011:SPECIAL:32::SLTU
 "sltu r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2144,7 +2302,10 @@
 
 000000,00000,5.RT,5.RD,5.SHIFT,000011:SPECIAL:32::SRA
 "sra r<RD>, r<RT>, <SHIFT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2165,7 +2326,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,000111:SPECIAL:32::SRAV
 "srav r<RD>, r<RT>, r<RS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2185,7 +2349,10 @@
 
 000000,00000,5.RT,5.RD,5.SHIFT,000010:SPECIAL:32::SRL
 "srl r<RD>, r<RT>, <SHIFT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2205,7 +2372,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,000110:SPECIAL:32::SRLV
 "srlv r<RD>, r<RT>, r<RS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2216,7 +2386,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,100010:SPECIAL:32::SUB
 "sub r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2240,7 +2413,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,100011:SPECIAL:32::SUBU
 "subu r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2251,7 +2427,10 @@
 
 101011,5.BASE,5.RT,16.OFFSET:NORMAL:32::SW
 "sw r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *r3900:
 *vr5000:
@@ -2262,7 +2441,10 @@
 
 1110,ZZ!0!1!3,5.BASE,5.RT,16.OFFSET:NORMAL:32::SWCz
 "swc<ZZ> r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2320,7 +2502,10 @@
 
 101010,5.BASE,5.RT,16.OFFSET:NORMAL:32::SWL
 "swl r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2352,7 +2537,10 @@
 
 101110,5.BASE,5.RT,16.OFFSET:NORMAL:32::SWR
 "swr r<RT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2377,7 +2565,10 @@
 
 000000,20.CODE,001100:SPECIAL:32::SYSCALL
 "syscall <CODE>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2551,7 +2742,10 @@
 
 000000,5.RS,5.RT,5.RD,00000,100110:SPECIAL:32::XOR
 "xor r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2569,7 +2763,10 @@
 
 001110,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::XORI
 "xori r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2650,7 +2847,10 @@
 
 010001,10,3.FMT,00000,5.FS,5.FD,000101:COP1:32,f::ABS.fmt
 "abs.%s<FMT> f<FD>, f<FS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2671,7 +2871,10 @@
 
 010001,10,3.FMT,5.FT,5.FS,5.FD,000000:COP1:32,f::ADD.fmt
 "add.%s<FMT> f<FD>, f<FS>, f<FT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2698,7 +2901,9 @@
 
 010001,01000,3.0,1.ND,1.TF,16.OFFSET:COP1S:32,f::BC1a
 "bc1%s<TF>%s<ND> <OFFSET>"
-*mipsI,mipsII,mipsIII:
+*mipsI:
+*mipsII:
+*mipsIII:
 {
   check_branch_bug ();
   TRACE_BRANCH_INPUT (PREVCOC1());
@@ -2788,7 +2993,9 @@
 
 010001,10,3.FMT,5.FT,5.FS,3.0,00,11,4.COND:COP1:32::C.cond.fmta
 "c.%s<COND>.%s<FMT> f<FS>, f<FT>"
-*mipsI,mipsII,mipsIII:
+*mipsI:
+*mipsII:
+*mipsIII:
 {
   do_c_cond_fmt (SD_, FMT, FT, FS, 0, COND, instruction_0);
 }
@@ -2924,7 +3131,10 @@
 //
 010001,10,3.FMT,00000,5.FS,5.FD,100001:COP1:32::CVT.D.fmt
 "cvt.d.%s<FMT> f<FD>, f<FS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2968,7 +3178,10 @@
 //
 010001,10,3.FMT,00000,5.FS,5.FD,100000:COP1:32::CVT.S.fmt
 "cvt.s.%s<FMT> f<FD>, f<FS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -2988,7 +3201,10 @@
 
 010001,10,3.FMT,00000,5.FS,5.FD,100100:COP1:32::CVT.W.fmt
 "cvt.w.%s<FMT> f<FD>, f<FS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3008,7 +3224,10 @@
 
 010001,10,3.FMT,5.FT,5.FS,5.FD,000011:COP1:32::DIV.fmt
 "div.%s<FMT> f<FD>, f<FS>, f<FT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3160,7 +3379,10 @@
 
 110001,5.BASE,5.FT,16.OFFSET:COP1:32::LWC1 
 "lwc1 f<FT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3256,7 +3478,10 @@
 
 010001,10,3.FMT,00000,5.FS,5.FD,000110:COP1:32::MOV.fmt
 "mov.%s<FMT> f<FD>, f<FS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3371,7 +3596,10 @@
 
 010001,10,3.FMT,5.FT,5.FS,5.FD,000010:COP1:32::MUL.fmt
 "mul.%s<FMT> f<FD>, f<FS>, f<FT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3392,7 +3620,10 @@
 
 010001,10,3.FMT,00000,5.FS,5.FD,000111:COP1:32::NEG.fmt
 "neg.%s<FMT> f<FD>, f<FS>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3622,7 +3853,10 @@
 
 010001,10,3.FMT,5.FT,5.FS,5.FD,000001:COP1:32::SUB.fmt
 "sub.%s<FMT> f<FD>, f<FS>, f<FT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3644,7 +3878,10 @@
 
 111001,5.BASE,5.FT,16.OFFSET:COP1:32::SWC1
 "swc1 f<FT>, <OFFSET>(r<BASE>)"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3770,7 +4007,10 @@
 
 010000,01000,00000,16.OFFSET:COP0:32::BC0F
 "bc0f <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 
@@ -3785,20 +4025,29 @@
 
 010000,01000,00010,16.OFFSET:COP0:32::BC0FL
 "bc0fl <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 
 
 010000,01000,00001,16.OFFSET:COP0:32::BC0T
 "bc0t <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 
 
 010000,01000,00011,16.OFFSET:COP0:32::BC0TL
 "bc0tl <OFFSET>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 
@@ -3826,14 +4075,18 @@
 
 010000,1,0000000000000000000,111001:COP0:32::DI
 "di"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 
 
 010000,00001,5.RT,5.RD,00000000000:COP0:64::DMFC0
 "dmfc0 r<RT>, r<RD>"
-*mipsIII,mipsIV:
+*mipsIII:
+*mipsIV:
 {
   DecodeCoproc (instruction_0);
 }
@@ -3841,7 +4094,8 @@
 
 010000,00101,5.RT,5.RD,00000000000:COP0:64::DMTC0
 "dmtc0 r<RT>, r<RD>"
-*mipsIII,mipsIV:
+*mipsIII:
+*mipsIV:
 {
   DecodeCoproc (instruction_0);
 }
@@ -3849,7 +4103,10 @@
 
 010000,1,0000000000000000000,111000:COP0:32::EI
 "ei"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 
@@ -3878,7 +4135,10 @@
 
 010000,00000,5.RT,5.RD,00000,6.REGX:COP0:32::MFC0
 "mfc0 r<RT>, r<RD> # <REGX>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3890,7 +4150,10 @@
 
 010000,00100,5.RT,5.RD,00000,6.REGX:COP0:32::MTC0
 "mtc0 r<RT>, r<RD> # <REGX>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3901,7 +4164,10 @@
 
 010000,1,0000000000000000000,010000:COP0:32::RFE
 "rfe"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -3912,7 +4178,10 @@
 
 0100,ZZ!0!1!3,5.COP_FUN0!8,5.COP_FUN1,16.COP_FUN2:NORMAL:32::COPz
 "cop<ZZ> <COP_FUN0><COP_FUN1><COP_FUN2>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *r3900:
 {
@@ -3923,28 +4192,40 @@
 
 010000,1,0000000000000000000,001000:COP0:32::TLBP
 "tlbp"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 
 
 010000,1,0000000000000000000,000001:COP0:32::TLBR
 "tlbr"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 
 
 010000,1,0000000000000000000,000010:COP0:32::TLBWI
 "tlbwi"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 
 
 010000,1,0000000000000000000,000110:COP0:32::TLBWR
 "tlbwr"
-*mipsI,mipsII,mipsIII,mipsIV:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
 *vr4100:
 *vr5000:
 

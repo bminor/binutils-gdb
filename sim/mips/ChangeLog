@@ -1,3 +1,8 @@
+2002-02-18  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen: For all functions and instructions, list model
+	names that support that instruction one per line.
+
 2002-02-11  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen: Add some additional comments about supported
