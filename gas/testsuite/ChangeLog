@@ -1,3 +1,25 @@
+Thu Jul  4 14:23:36 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Avoid DOS file naming problems:
+	* gas/h8300/branch.s: Rename from branches.s.
+	* gas/h8300/branchh.s: Rename from branchesh.s.
+start-sanitize-h8s
+	* gas/h8300/branchs.s: Rename from branchess.s.
+end-sanitize-h8s
+	* gas/h8300/rotsh.s: Rename from rotshift.s.
+	* gas/h8300/rotshh.s: Rename from rotshifth.s.
+start-sanitize-h8s
+	* gas/h8300/rotshs.s: Rename from rotshifts.s.
+end-sanitize-h8s
+	* gas/h8300/h8300.exp: Corresponding changes.
+
+Thu Jul  4 14:01:46 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* gas/mips/mips.exp: Add new tests for processors with interlocks
+ 	on div and mul.
+	* gas/mips/div-ilocks.d: Added.
+	* gas/mips/mul-ilocks.d: Added.
+	
 Wed Jul  3 14:20:04 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/all/gas.exp: Remove setup_xfail for h8300*-*-* for two tests

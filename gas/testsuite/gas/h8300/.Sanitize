@@ -17,7 +17,7 @@
 
 Do-first:
 
-h8s_files="addsubs.s bitops1s.s bitops2s.s bitops3s.s bitops4s.s branchess.s cbranchs.s compares.s decimals.s divmuls.s extends.s incdecs.s logicals.s macs.s miscs.s movbs.s movls.s movws.s multiples.s pushpops.s rotshifts.s"
+h8s_files="addsubs.s bitops1s.s bitops2s.s bitops3s.s bitops4s.s branchs.s cbranchs.s compares.s decimals.s divmuls.s extends.s incdecs.s logicals.s macs.s miscs.s movbs.s movls.s movws.s multiples.s pushpops.s rotshs.s"
 
 if ( echo $* | grep keep\-h8s > /dev/null ) ; then
 	keep_these_too="${h8s_files} ${keep_these_too}"
@@ -43,8 +43,8 @@ bitops3.s
 bitops3h.s
 bitops4.s
 bitops4h.s
-branches.s
-branchesh.s
+branch.s
+branchh.s
 cbranch.s
 cbranchh.s
 cmpsi2.s
@@ -72,8 +72,8 @@ movw.s
 movwh.s
 pushpop.s
 pushpoph.s
-rotshift.s
-rotshifth.s
+rotsh.s
+rotshh.s
 
 Things-to-lose:
 
