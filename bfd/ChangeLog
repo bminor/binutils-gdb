@@ -1,3 +1,10 @@
+Wed Dec 28 20:54:47 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_write_fixups): Use SEC_HAS_CONTENTS to identify
+	bss-like sections.
+	(som_get_section_contents): Likewise.
+	(som_set_section_contents): Likewise.
+
 Tue Dec 27 14:03:47 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (setup_sections): Turn off SEC_HAS_CONTENTS for bss-like

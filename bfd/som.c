@@ -2381,7 +2381,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 
 	  /* If this subspace does not have real data, then we are
 	     finised with it.  */
-	  if ((subsection->flags & (SEC_LOAD | SEC_DEBUGGING)) == 0)
+	  if ((subsection->flags & SEC_HAS_CONTENTS) == 0)
 	    {
 	      som_section_data (subsection)->subspace_dict->fixup_request_index
 		= -1;
@@ -4571,7 +4571,7 @@ som_get_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  if (count == 0 || ((section->flags & (SEC_LOAD | SEC_DEBUGGING)) == 0))
+  if (count == 0 || ((section->flags & SEC_HAS_CONTENTS) == 0))
     return true;
   if ((bfd_size_type)(offset+count) > section->_raw_size
       || bfd_seek (abfd, (file_ptr)(section->filepos + offset), SEEK_SET) == -1
@@ -4602,7 +4602,7 @@ som_set_section_contents (abfd, section, location, offset, count)
   /* Only write subspaces which have "real" contents (eg. the contents
      are not generated at run time by the OS).  */
   if (!som_is_subspace (section)
-      || ((section->flags & (SEC_LOAD | SEC_DEBUGGING)) == 0))
+      || ((section->flags & SEC_HAS_CONTENTS) == 0))
     return true;
 
   /* Seek to the proper offset within the object file and write the
