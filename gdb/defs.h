@@ -868,9 +868,10 @@ extern void xmfree (void *md, void *ptr);
    "libiberty.h". */
 extern void xfree (void *);
 
-/* Utility macros to allocate typed memory.  Avoids errors like
-   ``struct foo *foo = xmalloc (sizeof bar)'' and ``struct foo *foo =
-   (struct foo *) xmalloc (sizeof bar)''.  */
+/* Utility macros to allocate typed memory.  Avoids errors like:
+   struct foo *foo = xmalloc (sizeof struct bar); and memset (foo,
+   sizeof (struct foo), 0).  */
+#define XZALLOC(TYPE) ((TYPE*) memset (xmalloc (sizeof (TYPE)), 0, sizeof (TYPE)))
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 #define XCALLOC(NMEMB, TYPE) ((TYPE*) xcalloc ((NMEMB), sizeof (TYPE)))
 

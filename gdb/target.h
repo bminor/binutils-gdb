@@ -280,6 +280,8 @@ struct target_ops
     char *to_doc;		/* Documentation.  Does not include trailing
 				   newline, and starts with a one-line descrip-
 				   tion (probably similar to to_longname).  */
+    /* Per-target scratch pad.  */
+    void *to_data;
     /* The open routine takes the rest of the parameters from the
        command, and (if successful) pushes a new target onto the
        stack.  Targets should supply this routine, if only to provide
