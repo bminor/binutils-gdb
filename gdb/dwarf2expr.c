@@ -562,7 +562,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	    second = dwarf_expr_fetch (ctx, 0);
 	    dwarf_expr_pop (ctx);
 
-	    first = dwarf_expr_fetch (ctx, 1);
+	    first = dwarf_expr_fetch (ctx, 0);
 	    dwarf_expr_pop (ctx);
 
 	    val1 = value_from_longest (unsigned_address_type (), first);
@@ -660,7 +660,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	  goto no_push;
 
 	default:
-	  error ("Unhandled dwarf expression opcode");
+	  error ("Unhandled dwarf expression opcode 0x%x", op);
 	}
 
       /* Most things push a result value.  */

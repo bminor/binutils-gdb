@@ -1,3 +1,10 @@
+2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	Suggested by George Anzinger.
+	* dwarf2expr.c (execute_stack_op): Fetch the second item from the
+	correct stack offset.  Include unknown opcode numbers in the error
+	message.
+
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
 	* x86-64-tdep.c (x86_64_init_abi): No need to clear
