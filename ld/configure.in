@@ -81,7 +81,7 @@ case "${target}" in
 			;;
   a29k-*-*)		my_target=coff-a29k
 			;;
-  h8300-*-hms)		my_target=coff-h8300
+  h8300*-*-hms)		my_target=coff-h8300
 			;;
   h8500-*-hms)		my_target=coff-h8500
 			;;
