@@ -1,3 +1,9 @@
+Wed Sep  9 14:24:12 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-arm.c (elf32_arm_find_nearest_line): New function:  just
+	like _elf_bfd_find_nearest_line() except that STT_ARM_TFUNC is
+	also accepted as a function symbol type.
+
 Mon Sep  7 13:24:03 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* rs6000-core.c (_LONG_LONG):  Define for AIX 4.x only.

@@ -503,7 +503,6 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info)
 
   for (; sec != NULL; sec = sec->next)
     {
-
       if (sec->reloc_count == 0)
 	continue;
 
@@ -603,7 +602,6 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info)
 	      break;
 
 	    case R_ARM_THM_PC22:
-
 	      /* This one is a call from thumb code.  We look 
 	         up the target of the call. If it is not a thumb
                  target, we insert glue. */ 
@@ -1050,6 +1048,8 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
 	  _bfd_error_handler
 	    (_ ("  first occurrence: %s: thumb call to arm"),
 	     bfd_get_filename (input_bfd));
+
+	  return false;
 	}
 
       --my_offset;
@@ -1092,6 +1092,8 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
   bfd_put_32 (output_bfd,
 	      insert_thumb_branch (tmp, ret_offset),
 	      hit_data - input_section->vma);
+
+  return true;
 }
 
 /* Arm code calling a Thumb function */
@@ -1179,6 +1181,8 @@ elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
   bfd_put_32 (output_bfd, tmp, hit_data
 	      - input_section->vma);
 
+
+  return true;
 }
 
 /* Perform a relocation as part of a final link.  */
@@ -1304,9 +1308,12 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
         /* If it's not a call to thumb, assume call to arm */
 	if (sym_flags != STT_ARM_TFUNC)
 	  {
-	    elf32_thumb_to_arm_stub (info, sym_name, input_bfd, output_bfd, input_section,
-				  hit_data, sym_sec, offset, addend, value);
-	    return bfd_reloc_ok;
+	    if (elf32_thumb_to_arm_stub
+		(info, sym_name, input_bfd, output_bfd, input_section,
+		 hit_data, sym_sec, offset, addend, value))
+	      return bfd_reloc_ok;
+	    else
+	      return bfd_reloc_dangerous;
 	  }
 
 	relocation = value + addend;
@@ -1510,12 +1517,12 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 					 contents, rel->r_offset,
 					 relocation, rel->r_addend,
 					 info, sec, name,
-					 (h ? ELF_ST_TYPE (h->type) : ELF_ST_TYPE (sym->st_info)));
-
+					 (h ? ELF_ST_TYPE (h->type) :
+					  ELF_ST_TYPE (sym->st_info)));
 
       if (r != bfd_reloc_ok)
 	{
-	  const char *msg = (const char *) 0;
+	  const char * msg = (const char *) 0;
 
 	  switch (r)
 	    {
@@ -1771,11 +1778,96 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 
 static int
 elf32_arm_get_symbol_type (elf_sym)
-     Elf_Internal_Sym *elf_sym;
+     Elf_Internal_Sym * elf_sym;
 {
-   return ELF_ST_TYPE(elf_sym->st_info);
+  return ELF_ST_TYPE (elf_sym->st_info);
 }
     
+
+
+
+/* Find the nearest line to a particular section and offset, for error
+   reporting.   This code is a duplicate of the code in elf.c, except
+   that it also accepts STT_ARM_TFUNC as a symbol that names a function. */
+
+boolean
+elf32_arm_find_nearest_line
+  (abfd, section, symbols, offset, filename_ptr, functionname_ptr, line_ptr)
+     bfd *          abfd;
+     asection *     section;
+     asymbol **     symbols;
+     bfd_vma        offset;
+     CONST char **  filename_ptr;
+     CONST char **  functionname_ptr;
+     unsigned int * line_ptr;
+{
+  boolean      found;
+  const char * filename;
+  asymbol *    func;
+  bfd_vma      low_func;
+  asymbol **   p;
+
+  if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
+				     filename_ptr, functionname_ptr, 
+				     line_ptr))
+    return true;
+
+  if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,
+					     &found, filename_ptr,
+					     functionname_ptr, line_ptr,
+					     &elf_tdata (abfd)->line_info))
+    return false;
+  
+  if (found)
+    return true;
+
+  if (symbols == NULL)
+    return false;
+
+  filename = NULL;
+  func = NULL;
+  low_func = 0;
+
+  for (p = symbols; *p != NULL; p++)
+    {
+      elf_symbol_type *q;
+
+      q = (elf_symbol_type *) *p;
+
+      if (bfd_get_section (&q->symbol) != section)
+	continue;
+
+      switch (ELF_ST_TYPE (q->internal_elf_sym.st_info))
+	{
+	default:
+	  break;
+	case STT_FILE:
+	  filename = bfd_asymbol_name (&q->symbol);
+	  break;
+	case STT_NOTYPE:
+	case STT_FUNC:
+	case STT_ARM_TFUNC:
+	  if (q->symbol.section == section
+	      && q->symbol.value >= low_func
+	      && q->symbol.value <= offset)
+	    {
+	      func = (asymbol *) q;
+	      low_func = q->symbol.value;
+	    }
+	  break;
+	}
+    }
+
+  if (func == NULL)
+    return false;
+
+  *filename_ptr = filename;
+  *functionname_ptr = bfd_asymbol_name (func);
+  *line_ptr = 0;
+  
+  return true;
+}
+
 
 #define TARGET_LITTLE_SYM		bfd_elf32_littlearm_vec
 #define TARGET_LITTLE_NAME		"elf32-littlearm"
@@ -1793,6 +1885,7 @@ elf32_arm_get_symbol_type (elf_sym)
 #define bfd_elf32_bfd_set_private_flags		elf32_arm_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	elf32_arm_print_private_bfd_data
 #define bfd_elf32_bfd_link_hash_table_create    elf32_arm_link_hash_table_create
+#define bfd_elf32_find_nearest_line	        elf32_arm_find_nearest_line
 #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
 #define elf_symbol_leading_char '_'
 
