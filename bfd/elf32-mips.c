@@ -4388,6 +4388,20 @@ _bfd_mips_elf_final_link (abfd, info)
 	elf_gp (abfd) = (h->u.def.value
 			 + h->u.def.section->output_section->vma
 			 + h->u.def.section->output_offset);
+      else if (info->relocateable)
+	{
+	  bfd_vma lo;
+
+	  /* Find the GP-relative section with the lowest offset.  */
+	  lo = (bfd_vma) -1;
+	  for (o = abfd->sections; o != (asection *) NULL; o = o->next)
+	    if (o->vma < lo 
+		&& (elf_section_data (o)->this_hdr.sh_flags & SHF_MIPS_GPREL))
+	      lo = o->vma;
+
+	  /* And calculate GP relative to that.  */
+	  elf_gp (abfd) = lo + ELF_MIPS_GP_OFFSET (abfd);
+	}
       else
 	{
 	  /* If the relocate_section function needs to do a reloc
@@ -6530,9 +6544,11 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  unsigned long r_symndx;
 
 	  /* Since we're just relocating, all we need to do is copy
-	     the relocations back out to the object file, unless they're 
-	     against a section symbol, in which case we need to adjust 
-	     by the section offset.  */
+	     the relocations back out to the object file, unless
+	     they're against a section symbol, in which case we need
+	     to adjust by the section offset, or unless they're GP
+	     relative in which case we need to adjust by the amount
+	     that we're adjusting GP in this relocateable object.  */
 
 	  if (!mips_elf_local_relocation_p (input_bfd, rel, local_sections))
 	    /* A non-local relocation is never against a section.  */
@@ -6540,17 +6556,23 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  r_symndx = ELF32_R_SYM (rel->r_info);
 	  sym = local_syms + r_symndx;
-	  if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
-	    continue;
+	  if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    {
+	      /* Adjust the addend appropriately.  */
+	      addend += local_sections[r_symndx]->output_offset;
 
-	  /* Adjust the addend appropriately.  */
-	  addend += local_sections[r_symndx]->output_offset;
-
-	  /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
+	      /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
 	     then we only want to write out the high-order 16 bits.
 	     The subsequent R_MIPS_LO16 will handle the low-order bits.  */
-	  if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16)
-	    addend >>= 16;
+	      if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16)
+		addend >>= 16;
+	    }
+	  
+	  if (r_type == R_MIPS16_GPREL 
+	      || r_type == R_MIPS_GPREL16
+	      || r_type == R_MIPS_GPREL32)
+	    addend -= (_bfd_get_gp_value (output_bfd)
+		       - _bfd_get_gp_value (input_bfd));
 
 	  if (rela_relocation_p)
 	    /* If this is a RELA relocation, just update the addend.

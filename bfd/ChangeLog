@@ -1,3 +1,10 @@
+Mon Jul 19 14:03:44 1999  Mark P. Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (_bfd_mips_elf_final_link): Restore setting of GP
+ 	removed in previous change.
+	(_bfd_mips_elf_relocate_section): Adjust GP relative relocations
+ 	in relocateable output.
+
 1999-07-19  Ian Lance Taylor  <ian@zembu.com>
 
 	* coff-m88k.c (m88kbcs_vec): Initialize new field of bfd_target
