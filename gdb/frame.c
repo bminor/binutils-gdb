@@ -615,6 +615,41 @@ frame_unwind_register (struct frame_info *frame, int regnum, void *buf)
 }
 
 void
+get_frame_register (struct frame_info *frame,
+		    int regnum, void *buf)
+{
+  frame_unwind_register (frame->next, regnum, buf);
+}
+
+LONGEST
+frame_unwind_register_signed (struct frame_info *frame, int regnum)
+{
+  char buf[MAX_REGISTER_SIZE];
+  frame_unwind_register (frame, regnum, buf);
+  return extract_signed_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+}
+
+LONGEST
+get_frame_register_signed (struct frame_info *frame, int regnum)
+{
+  return frame_unwind_register_signed (frame->next, regnum);
+}
+
+ULONGEST
+frame_unwind_register_unsigned (struct frame_info *frame, int regnum)
+{
+  char buf[MAX_REGISTER_SIZE];
+  frame_unwind_register (frame, regnum, buf);
+  return extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+}
+
+ULONGEST
+get_frame_register_unsigned (struct frame_info *frame, int regnum)
+{
+  return frame_unwind_register_unsigned (frame->next, regnum);
+}
+
+void
 frame_unwind_signed_register (struct frame_info *frame, int regnum,
 			      LONGEST *val)
 {

@@ -23,6 +23,47 @@
 #if !defined (FRAME_H)
 #define FRAME_H 1
 
+/* The following is the intended naming schema for frame functions.
+   It isn't 100% consistent, but it is aproaching that.  Frame naming
+   schema:
+
+   Prefixes:
+
+   get_frame_WHAT...(): Get WHAT from the THIS frame (functionaly
+   equivalent to THIS->next->unwind->what)
+
+   frame_unwind_WHAT...(): Unwind THIS frame's WHAT from the NEXT
+   frame.
+
+   put_frame_WHAT...(): Put a value into this frame (unsafe, need to
+   invalidate the frame / regcache afterwards) (better name more
+   strongly hinting at its unsafeness)
+
+   safe_....(): Safer version of various functions, doesn't throw an
+   error (leave this for later?).  Returns non-zero if the fetch
+   succeeds.   Return a freshly allocated error message?
+
+   Suffixes:
+
+   void /frame/_WHAT(): Read WHAT's value into the buffer parameter.
+
+   ULONGEST /frame/_WHAT_unsigned(): Return an unsigned value (the
+   alternative is *frame_unsigned_WHAT).
+
+   LONGEST /frame/_WHAT_signed(): Return WHAT signed value.
+
+   What:
+
+   /frame/_memory* (frame, coreaddr, len [, buf]): Extract/return
+   *memory.
+
+   /frame/_register* (frame, regnum [, buf]): extract/return register.
+
+   CORE_ADDR /frame/_{pc,sp,...} (frame): Resume address, innner most
+   stack *address, ...
+
+   */
+
 struct symtab_and_line;
 struct frame_unwind;
 struct frame_base;
@@ -303,16 +344,31 @@ extern void frame_register_unwind (struct frame_info *frame, int regnum,
 				   CORE_ADDR *addrp, int *realnump,
 				   void *valuep);
 
-/* More convenient interface to frame_register_unwind().  */
-/* NOTE: cagney/2002-09-13: Return void as one day these functions may
-   be changed to return an indication that the read succeeded.  */
+/* Fetch a register from this, or unwind a register from the next
+   frame.  Note that the get_frame methods are wrappers to
+   frame->next->unwind.  They all [potentially] throw an error if the
+   fetch fails.  */
 
 extern void frame_unwind_register (struct frame_info *frame,
 				   int regnum, void *buf);
+extern void get_frame_register (struct frame_info *frame,
+				int regnum, void *buf);
 
+extern LONGEST frame_unwind_register_signed (struct frame_info *frame,
+					     int regnum);
+extern LONGEST get_frame_register_signed (struct frame_info *frame,
+					  int regnum);
+extern ULONGEST frame_unwind_register_unsigned (struct frame_info *frame,
+					       int regnum);
+extern ULONGEST get_frame_register_unsigned (struct frame_info *frame,
+					     int regnum);
+
+
+/* Use frame_unwind_register_signed.  */
 extern void frame_unwind_signed_register (struct frame_info *frame,
 					  int regnum, LONGEST *val);
 
+/* Use frame_unwind_register_signed.  */
 extern void frame_unwind_unsigned_register (struct frame_info *frame,
 					    int regnum, ULONGEST *val);
 
@@ -330,12 +386,15 @@ extern void frame_register (struct frame_info *frame, int regnum,
 /* NOTE: cagney/2002-09-13: Return void as one day these functions may
    be changed to return an indication that the read succeeded.  */
 
+/* Use get_frame_register.  */
 extern void frame_read_register (struct frame_info *frame, int regnum,
 				 void *buf);
 
+/* Use get_frame_register_signed.  */
 extern void frame_read_signed_register (struct frame_info *frame,
 					int regnum, LONGEST *val);
 
+/* Use get_frame_register_unsigned.  */
 extern void frame_read_unsigned_register (struct frame_info *frame,
 					  int regnum, ULONGEST *val);
 
