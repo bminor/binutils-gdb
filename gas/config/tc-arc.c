@@ -631,7 +631,7 @@ md_assemble (str)
 	      /* Is there anything left to parse?
 		 We don't check for this at the top because we want to parse
 		 any trailing fake arguments in the syntax string.  */
-	      if (*str == '\0')
+	      if (is_end_of_line[(unsigned char) *str])
 		break;
 
 	      /* Parse the operand.  */
@@ -739,7 +739,7 @@ md_assemble (str)
 	  while (isspace (*str))
 	    ++str;
 
-	  if (*str != '\0')
+	  if (!is_end_of_line[(unsigned char) *str])
 	    as_bad ("junk at end of line: `%s'", str);
 
 	  /* Is there a limm value?  */

@@ -1,5 +1,8 @@
 2001-05-22  Alan Modra  <amodra@one.net.au>
 
+	* config/tc-arc.c (md_assemble): Use is_end_of_line instead of
+	testing for NULs.
+
 	* symbols.c (resolve_symbol_value): Remove "finalize" param,
 	instead use finalize_syms directly.  Don't treat expressions
 	specially with regard to finalize_syms.  Update calls to self.
