@@ -31,7 +31,7 @@ fi
 
 # mswin gdb is not really gdbtk, but is close enough for now.
 
-gdbtk_files="gdbtk.c gdbtk.tcl mswin"
+gdbtk_files="README.GDBTK gdbtk.c gdbtk.tcl mswin"
 
 if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 	lose_these_too="${gdbtk_files} ${lose_these_too}"
