@@ -148,8 +148,7 @@ do
     fi
 done
 
-# We don't do any links based on the target system, just minor makefile
-# config.
+# We don't do any links based on the target system, just makefile config.
 
 # post-target:
 
@@ -263,7 +262,7 @@ if [ x${all_targets} = xfalse ]; then
 	z8kcoff_vec)		tb="$tb coff-z8k.o" ;;
 
 	"")			;;
-	*) echo "*** unknown target vector $vec in $f" 1>&2; exit 1 ;;
+	*) echo "*** unknown target vector $vec" 1>&2; exit 1 ;;
 	esac
     done
 
