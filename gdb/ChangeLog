@@ -1,5 +1,15 @@
 2004-04-07  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/sparc/linux.mt (TDEPFILES): Remove solib-legacy.o.
+	* config/sparc/linux64.mt (TDEPFILES): Likewise.
+	* config/sparc/sol2.mt (TDEPFILES): Add solib.o and solib-svr4.o.
+	* config/sparc/sol2.mh (NATDEPFILES): Remove solib.o, solib-svr4.o
+	and solib-legacy.o.
+	* config/sparc/sol2-64.mt (TDEPFILES): Add solib.o and
+	solib-svr4.o.
+	* config/sparc/tm-sol2.h: Update copyright year.  Include
+	"solib.h".
+
 	* sparc-sol2-tdep.c: Update copyright year.  Include
 	"solib-svr4.h".
 	(sparc32_sol2_init_abi): Set solib_svr4_fetch_link_map_offsets.
