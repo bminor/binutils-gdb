@@ -389,7 +389,7 @@ integer_constant (radix, expressionP)
       break;
     case 10:
       maxdig = radix = 10;
-      too_many_digits = (valuesize + 12) / 4; /* very rough */
+      too_many_digits = (valuesize + 11) / 4; /* very rough */
     }
 #undef valuesize
   start = input_line_pointer;

@@ -1,3 +1,8 @@
+1999-09-11  Donn Terry  <donn@interix.com>
+
+	* expr.c (integer_constant): Correct too_many_digits calculation
+	in base 10 case.
+
 1999-09-09  Andreas Schwab  <schwab@suse.de>
 
 	* doc/c-arm.texi: Fix arguments of @var to not contain
