@@ -1,3 +1,8 @@
+2001-11-02  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elfcore.h (elf_core_file_p): Preserve and clear abfd section
+	information.  Save bfd arch and mach values.  Restore on error.
+
 2001-11-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (hppa_handle_PIC_calls): Rename to mark_PIC_calls.
