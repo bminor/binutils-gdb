@@ -47,6 +47,10 @@ enum strata {
 struct target_ops {
 	char  *to_shortname;		/* Name this target type */
 	char  *to_longname;		/* Name for printing */
+	/* Documentation.  Does not include trailing newline, and
+	   starts with a one-line description (probably similar to
+	   to_longname).  */
+	char  *to_doc;
 #ifdef __STDC__
 	void (*to_open) (char *name, int from_tty);
 	void (*to_close) (int quitting);
@@ -140,6 +144,9 @@ extern struct target_ops	*current_target;
 #define	target_shortname	(current_target->to_shortname)
 #define	target_longname		(current_target->to_longname)
 
+/* The open routine takes the rest of the parameters from the command,
+   and (if successful) pushes a new target onto the stack.
+   Targets should supply this routine, if only to provide an error message.  */
 #define	target_open(name, from_tty)	\
 	(*current_target->to_open) (name, from_tty)
 
@@ -397,10 +404,12 @@ extern int target_xfer_memory();
 void add_target (struct target_ops *);
 int push_target (struct target_ops *);
 int unpush_target (struct target_ops *);
-void pop_target ();
+void target_preopen (int);
+void pop_target (void);
 #else
 void add_target ();
 int push_target ();
 int unpush_target ();
+void target_preopen ();
 void pop_target ();
 #endif
