@@ -1,3 +1,8 @@
+2001-05-24  Alan Modra  <amodra@one.net.au>
+
+	* write.c (write_object_file): Set finalize_syms = 1 before
+	size_seg is called.
+
 2001-05-23  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (ISA_HAS_64BIT_REGS): Add ISA_MIPS64 as 64 bit
