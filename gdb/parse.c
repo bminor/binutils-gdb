@@ -215,7 +215,7 @@ write_exp_elt_longcst (expelt)
 
 void
 write_exp_elt_dblcst (expelt)
-     double expelt;
+     DOUBLEST expelt;
 {
   union exp_element tmp;
 

@@ -119,8 +119,11 @@ yyerror PARAMS ((char *));
     struct {
       LONGEST val;
       struct type *type;
-    } typed_val;
-    double dval;
+    } typed_val_int;
+    struct {
+      DOUBLEST dval;
+      struct type *type;
+    } typed_val_float;
     struct symbol *sym;
     struct type *tval;
     struct stoken sval;
@@ -152,8 +155,8 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %type <tval> ptype
 %type <lval> array_mod
 
-%token <typed_val> INT
-%token <dval> FLOAT
+%token <typed_val_int> INT
+%token <typed_val_float> FLOAT
 
 /* Both NAME and TYPENAME tokens represent symbols in the input,
    and both convey their data as strings.
@@ -183,7 +186,7 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
-%token SIGNED_KEYWORD LONG SHORT INT_KEYWORD CONST_KEYWORD VOLATILE_KEYWORD
+%token SIGNED_KEYWORD LONG SHORT INT_KEYWORD CONST_KEYWORD VOLATILE_KEYWORD DOUBLE_KEYWORD
 
 %token <voidval> VARIABLE
 
@@ -473,8 +476,8 @@ exp	:	NAME_OR_INT
 			{ YYSTYPE val;
 			  parse_number ($1.stoken.ptr, $1.stoken.length, 0, &val);
 			  write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (val.typed_val.type);
-			  write_exp_elt_longcst ((LONGEST)val.typed_val.val);
+			  write_exp_elt_type (val.typed_val_int.type);
+			  write_exp_elt_longcst ((LONGEST)val.typed_val_int.val);
 			  write_exp_elt_opcode (OP_LONG);
 			}
 	;
@@ -482,8 +485,8 @@ exp	:	NAME_OR_INT
 
 exp	:	FLOAT
 			{ write_exp_elt_opcode (OP_DOUBLE);
-			  write_exp_elt_type (builtin_type_double);
-			  write_exp_elt_dblcst ($1);
+			  write_exp_elt_type ($1.type);
+			  write_exp_elt_dblcst ($1.dval);
 			  write_exp_elt_opcode (OP_DOUBLE); }
 	;
 
@@ -806,6 +809,10 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = builtin_type_short; }
 	|	UNSIGNED SHORT INT_KEYWORD
 			{ $$ = builtin_type_unsigned_short; }
+	|	DOUBLE_KEYWORD
+			{ $$ = builtin_type_double; }
+	|	LONG DOUBLE_KEYWORD
+			{ $$ = builtin_type_long_double; }
 	|	STRUCT name
 			{ $$ = lookup_struct (copy_name ($2),
 					      expression_context_block); }
@@ -926,8 +933,30 @@ parse_number (p, len, parsed_float, putithere)
 
   if (parsed_float)
     {
+      char c;
+
       /* It's a float since it contains a point or an exponent.  */
-      putithere->dval = atof (p);
+
+      if (sizeof (putithere->typed_val_float.dval) <= sizeof (float))
+	sscanf (p, "%g", &putithere->typed_val_float.dval);
+      else if (sizeof (putithere->typed_val_float.dval) <= sizeof (double))
+	sscanf (p, "%lg", &putithere->typed_val_float.dval);
+      else
+	sscanf (p, "%Lg", &putithere->typed_val_float.dval);
+
+      /* See if it has `f' or `l' suffix (float or long double).  */
+
+      c = tolower (p[len - 1]);
+
+      if (c == 'f')
+	putithere->typed_val_float.type = builtin_type_float;
+      else if (c == 'l')
+	putithere->typed_val_float.type = builtin_type_long_double;
+      else if (isdigit (c) || c == '.')
+	putithere->typed_val_float.type = builtin_type_double;
+      else
+	return ERROR;
+
       return FLOAT;
     }
 
@@ -1064,18 +1093,18 @@ parse_number (p, len, parsed_float, putithere)
       signed_type = builtin_type_long_long;
     }
 
-   putithere->typed_val.val = n;
+   putithere->typed_val_int.val = n;
 
    /* If the high bit of the worked out type is set then this number
       has to be unsigned. */
 
    if (unsigned_p || (n & high_bit)) 
      {
-       putithere->typed_val.type = unsigned_type;
+       putithere->typed_val_int.type = unsigned_type;
      }
    else 
      {
-       putithere->typed_val.type = signed_type;
+       putithere->typed_val_int.type = signed_type;
      }
 
    return INT;
@@ -1175,8 +1204,8 @@ yylex ()
       else if (c == '\'')
 	error ("Empty character constant.");
 
-      yylval.typed_val.val = c;
-      yylval.typed_val.type = builtin_type_char;
+      yylval.typed_val_int.val = c;
+      yylval.typed_val_int.type = builtin_type_char;
 
       c = *lexptr++;
       if (c != '\'')
@@ -1409,6 +1438,8 @@ yylex ()
 	return SIGNED_KEYWORD;
       if (STREQN (tokstart, "sizeof", 6))      
 	return SIZEOF;
+      if (STREQN (tokstart, "double", 6))      
+	return DOUBLE_KEYWORD;
       break;
     case 5:
       if (current_language->la_language == language_cplus

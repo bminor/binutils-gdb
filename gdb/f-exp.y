@@ -122,7 +122,7 @@ void yyerror PARAMS ((char *));
       LONGEST val;
       struct type *type;
     } typed_val;
-    double dval;
+    DOUBLEST dval;
     struct symbol *sym;
     struct type *tval;
     struct stoken sval;

@@ -1,3 +1,56 @@
+Thu Feb 16 16:02:03 1996  Stu Grossman  (grossman@cygnus.com)
+
+	* Add native support for long double data type.
+	* c-exp.y (%union):  Change dval to typed_val_float.  Use DOUBLEST
+	to store actual data.  Change types of INT and FLOAT tokens to
+	typed_val_int and typed_val_float respectively.  Create new token
+	DOUBLE_KEYWORD to specify the string `double'.  Make production
+	for FLOAT use type determined by parse_number.  Add production for
+	"long double" data type.
+	* (parse_number):  Use sscanf to parse numbers as float, double or
+	long double depending upon the type of typed_val_float.dval.  Also
+	allow user to specify `f' or `l' suffix to explicitly specify
+	float or long double constants.  Change typed_val to
+	typed_val_int.
+	* (yylex):  Change typed_val to typed_val_int.  Also, scan for
+	"double" keyword.
+	* coffread.c (decode_base_type):  Add support for T_LNGDBL basic
+	type.
+	* configure, configure.in:  Add check for long double support in
+	the host compiler.
+	* defs.h:  Define DOUBLEST appropriatly depending on whether
+	HAVE_LONG_DOUBLE (from autoconf) is defined.  Also, fix prototypes
+	for functions that handle this type.
+	* expression.h (union exp_element):  doubleconst is now type
+	DOUBLEST.
+	* m2-exp.y f-exp.y (%union):  dval becomes type DOUBLEST.
+	* findvar.c (extract_floating):  Make return value be DOUBLEST.
+	Also, add support for numbers with size of long double.
+	* (store_floating):  Arg `val' is now type DOUBLEST.  Handle all
+	floating types.
+	* parser-defs.h parse.c (write_exp_elt_dblcst):  Arg expelt is now
+	DOUBLEST.
+	* valarith.c (value_binop):  Change temp variables v1, v2 and v to
+	type DOUBLEST.  Coerce type of result to long double if either op
+	was of that type.
+	* valops.c (value_arg_coerce):  If argument type is bigger than
+	double, coerce to long double.
+	* (call_function_by_hand):  If REG_STRUCT_HAS_ADDR is defined, and
+	arg type is float and > 8 bytes, then use pointer-to-object
+	calling conventions.
+	* valprint.c (print_floating):  Arg doub is now type DOUBLEST.
+	Use appropriate format and precision to print out floating point
+	values.
+	* value.h:  Fixup prototypes for value_as_double,
+	value_from_double, and unpack_double to use DOUBLEST.
+	* values.c (record_latest_value):  Remove check for invalid
+	floats.  Allow history to store them so that people may examine
+	them in hex if they want.
+	* (value_as_double unpack_double):  Change return value to DOUBLEST.
+	* (value_from_double):  Arg `num' is now DOUBLEST.
+	* (using_struct_return):  Use RETURN_VALUE_ON_STACK macro (target
+	specific) to expect certain types to always be returned on the stack.
+
 Fri Feb 16 14:00:54 1996  Fred Fish  <fnf@cygnus.com>
 
 	* bcache.c, bcache.h: New files to implement a byte cache.

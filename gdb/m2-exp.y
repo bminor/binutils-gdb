@@ -136,7 +136,7 @@ static struct block *modblock=0;
   {
     LONGEST lval;
     unsigned LONGEST ulval;
-    double dval;
+    DOUBLEST dval;
     struct symbol *sym;
     struct type *tval;
     struct stoken sval;

@@ -95,7 +95,7 @@ extern void write_exp_elt_sym PARAMS ((struct symbol *));
 
 extern void write_exp_elt_longcst PARAMS ((LONGEST));
 
-extern void write_exp_elt_dblcst PARAMS ((double));
+extern void write_exp_elt_dblcst PARAMS ((DOUBLEST));
 
 extern void write_exp_elt_type PARAMS ((struct type *));
 

@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -228,7 +228,7 @@ store_address (addr, len, val)
    3.  We probably should have a LONGEST_DOUBLE or DOUBLEST or whatever
    we want to call it which is long double where available.  */
 
-double
+DOUBLEST
 extract_floating (addr, len)
      PTR addr;
      int len;
@@ -247,6 +247,13 @@ extract_floating (addr, len)
       SWAP_FLOATING (&retval, sizeof (retval));
       return retval;
     }
+  else if (len == sizeof (long double))
+    {
+      long double retval;
+      memcpy (&retval, addr, sizeof (retval));
+      SWAP_FLOATING (&retval, sizeof (retval));
+      return retval;
+    }
   else
     {
       error ("Can't deal with a floating point number of %d bytes.", len);
@@ -257,7 +264,7 @@ void
 store_floating (addr, len, val)
      PTR addr;
      int len;
-     double val;
+     DOUBLEST val;
 {
   if (len == sizeof (float))
     {
@@ -266,6 +273,13 @@ store_floating (addr, len, val)
       memcpy (addr, &floatval, sizeof (floatval));
     }
   else if (len == sizeof (double))
+    {
+      double doubleval = val;
+
+      SWAP_FLOATING (&doubleval, sizeof (doubleval));
+      memcpy (addr, &doubleval, sizeof (doubleval));
+    }
+  else if (len == sizeof (long double))
     {
       SWAP_FLOATING (&val, sizeof (val));
       memcpy (addr, &val, sizeof (val));
@@ -971,6 +985,7 @@ symbol_read_needs_frame (sym)
 
     case LOC_BLOCK:
     case LOC_CONST_BYTES:
+    case LOC_UNRESOLVED:
     case LOC_OPTIMIZED_OUT:
       return 0;
     }
@@ -1098,6 +1113,17 @@ read_var_value (var, frame)
       }
       break;
 
+    case LOC_UNRESOLVED:
+      {
+	struct minimal_symbol *msym;
+
+	msym = lookup_minimal_symbol (SYMBOL_NAME (var), NULL, NULL);
+	if (msym == NULL)
+	  return 0;
+	addr = SYMBOL_VALUE_ADDRESS (msym);
+      }
+      break;
+
     case LOC_OPTIMIZED_OUT:
       VALUE_LVAL (v) = not_lval;
       VALUE_OPTIMIZED_OUT (v) = 1;
@@ -1126,11 +1152,14 @@ value_from_register (type, regnum, frame)
   CORE_ADDR addr;
   int optim;
   value_ptr v = allocate_value (type);
-  int len = TYPE_LENGTH (type);
   char *value_bytes = 0;
   int value_bytes_copied = 0;
   int num_storage_locs;
   enum lval_type lval;
+  int len;
+
+  CHECK_TYPEDEF (type);
+  len = TYPE_LENGTH (type);
 
   VALUE_REGNO (v) = regnum;
 

@@ -407,12 +407,13 @@ value_assign (toval, fromval)
   if (!toval->modifiable)
     error ("Left operand of assignment is not a modifiable lvalue.");
 
-  COERCE_ARRAY (fromval);
   COERCE_REF (toval);
 
   type = VALUE_TYPE (toval);
   if (VALUE_LVAL (toval) != lval_internalvar)
     fromval = value_cast (type, fromval);
+  else
+    COERCE_ARRAY (fromval);
   CHECK_TYPEDEF (type);
 
   /* If TOVAL is a special machine register requiring conversion
@@ -886,10 +887,18 @@ value_arg_coerce (arg, param_type)
       if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
 	type = builtin_type_int;
       break;
-    case TYPE_CODE_FLT:
-      if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
-	type = builtin_type_double;
-      break;
+   case TYPE_CODE_FLT:
+     /* coerce float to double, unless the function prototype specifies float */
+#if 0
+     if (param_type == 0)
+#endif
+       {
+	 if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
+	   type = builtin_type_double;
+	 else if (TYPE_LENGTH (type) > TYPE_LENGTH (builtin_type_double))
+	   type = builtin_type_long_double;
+       }
+     break;
     case TYPE_CODE_FUNC:
       type = lookup_pointer_type (type);
       break;
@@ -1139,7 +1148,10 @@ call_function_by_hand (function, nargs, args)
 	     || TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
 	     || TYPE_CODE (arg_type) == TYPE_CODE_STRING
 	     || TYPE_CODE (arg_type) == TYPE_CODE_BITSTRING
-	     || TYPE_CODE (arg_type) == TYPE_CODE_SET)
+	     || TYPE_CODE (arg_type) == TYPE_CODE_SET
+	     || (TYPE_CODE (arg_type) == TYPE_CODE_FLT
+		 && TYPE_LENGTH (arg_type) > 8)
+	     )
 	  && REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
 	  {
 	    CORE_ADDR addr;
@@ -1363,6 +1375,23 @@ value_array (lowbound, highbound, elemvec)
 	}
     }
 
+  rangetype = create_range_type ((struct type *) NULL, builtin_type_int,
+				 lowbound, highbound);
+  arraytype = create_array_type ((struct type *) NULL, 
+				 VALUE_TYPE (elemvec[0]), rangetype);
+
+  if (!current_language->c_style_arrays)
+    {
+      val = allocate_value (arraytype);
+      for (idx = 0; idx < nelem; idx++)
+	{
+	  memcpy (VALUE_CONTENTS_RAW (val) + (idx * typelength),
+		  VALUE_CONTENTS (elemvec[idx]),
+		  typelength);
+	}
+      return val;
+    }
+
   /* Allocate space to store the array in the inferior, and then initialize
      it by copying in each element.  FIXME:  Is it worth it to create a
      local buffer in which to collect each value and then write all the
@@ -1377,10 +1406,6 @@ value_array (lowbound, highbound, elemvec)
 
   /* Create the array type and set up an array value to be evaluated lazily. */
 
-  rangetype = create_range_type ((struct type *) NULL, builtin_type_int,
-				 lowbound, highbound);
-  arraytype = create_array_type ((struct type *) NULL, 
-				 VALUE_TYPE (elemvec[0]), rangetype);
   val = value_at_lazy (arraytype, addr);
   return (val);
 }

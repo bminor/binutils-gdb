@@ -1295,6 +1295,39 @@ EOF
 
 fi
 
+
+echo $ac_n "checking for long double""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_c_long_double'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1305 "configure"
+#include "confdefs.h"
+
+int main() { return 0; }
+int t() {
+long double foo;
+; return 0; }
+EOF
+if eval $ac_compile; then
+  rm -rf conftest*
+  ac_cv_c_long_double=yes
+else
+  rm -rf conftest*
+  ac_cv_c_long_double=no
+fi
+rm -f conftest*
+
+fi
+
+echo "$ac_t""$ac_cv_c_long_double" 1>&6
+if test $ac_cv_c_long_double = yes; then
+  cat >> confdefs.h <<\EOF
+#define HAVE_LONG_DOUBLE 1
+EOF
+
+fi
+
 for ac_func in valloc getpagesize
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
@@ -1302,7 +1335,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1306 "configure"
+#line 1339 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1354,7 +1387,7 @@ else
   ac_cv_func_mmap=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1358 "configure"
+#line 1391 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test. */
@@ -1588,7 +1621,7 @@ test -z "$x_direct_test_library" && x_direct_test_library=Xt
 test -z "$x_direct_test_function" && x_direct_test_function=XtMalloc
 test -z "$x_direct_test_include" && x_direct_test_include=X11/Intrinsic.h
 cat > conftest.$ac_ext <<EOF
-#line 1592 "configure"
+#line 1625 "configure"
 #include "confdefs.h"
 #include <$x_direct_test_include>
 EOF
@@ -1651,7 +1684,7 @@ rm -f conftest*
 ac_save_LIBS="$LIBS"
 LIBS="-l$x_direct_test_library $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1655 "configure"
+#line 1688 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1770,7 +1803,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lICE  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1774 "configure"
+#line 1807 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1814,7 +1847,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1818 "configure"
+#line 1851 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1849,7 +1882,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet_stub  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1853 "configure"
+#line 1886 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1889,7 +1922,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lnsl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1893 "configure"
+#line 1926 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1928,7 +1961,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsocket  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1932 "configure"
+#line 1965 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -2033,7 +2066,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2037 "configure"
+#line 2070 "configure"
 #include "confdefs.h"
 #include <tclInt.h>
 EOF
@@ -2090,7 +2123,7 @@ if test "$cross_compiling" = yes; then
 
 else
 cat > conftest.$ac_ext <<EOF
-#line 2094 "configure"
+#line 2127 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -2250,7 +2283,7 @@ else
   ac_cv_c_tclib="-l$installedtcllibroot"
 else
 cat > conftest.$ac_ext <<EOF
-#line 2254 "configure"
+#line 2287 "configure"
 #include "confdefs.h"
 
     Tcl_AppInit()
@@ -2366,7 +2399,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2370 "configure"
+#line 2403 "configure"
 #include "confdefs.h"
 #include <tk.h>
 EOF
@@ -2430,7 +2463,7 @@ if test "$cross_compiling" = yes; then
 
 else
 cat > conftest.$ac_ext <<EOF
-#line 2434 "configure"
+#line 2467 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -2611,7 +2644,7 @@ else
   ac_cv_c_tklib="-l$installedtklibroot"
 else
 cat > conftest.$ac_ext <<EOF
-#line 2615 "configure"
+#line 2648 "configure"
 #include "confdefs.h"
 
        Tcl_AppInit()
@@ -2658,7 +2691,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 2662 "configure"
+#line 2695 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -2696,7 +2729,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldld  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 2700 "configure"
+#line 2733 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
