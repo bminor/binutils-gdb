@@ -1799,7 +1799,11 @@ ENUMX
 ENUMX
   BFD_RELOC_SPARC_RELATIVE
 ENUMX
+  BFD_RELOC_SPARC_UA16
+ENUMX
   BFD_RELOC_SPARC_UA32
+ENUMX
+  BFD_RELOC_SPARC_UA64
 ENUMDOC
   SPARC ELF relocations.  There is probably some overlap with other
   relocation types already defined.

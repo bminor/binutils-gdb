@@ -1,3 +1,9 @@
+2001-05-28  Jeff Sturm  <jsturm@one-point.com>
+
+	* gas/sparc/unalign.s: New test.  Check unaligned relocs.
+	* gas/sparc/unalign.d: New expected test results.
+	* gas/sparc/sparc.exp: Run new test.
+
 2001-05-23  Alan Modra  <amodra@one.net.au>
 
 	* gas/elf/ehopt0.d: Tweak for bigendian targets.

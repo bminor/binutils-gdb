@@ -1901,7 +1901,9 @@ relocation types already defined. */
   BFD_RELOC_SPARC_GLOB_DAT,
   BFD_RELOC_SPARC_JMP_SLOT,
   BFD_RELOC_SPARC_RELATIVE,
+  BFD_RELOC_SPARC_UA16,
   BFD_RELOC_SPARC_UA32,
+  BFD_RELOC_SPARC_UA64,
 
 /* I think these are specific to SPARC a.out (e.g., Sun 4). */
   BFD_RELOC_SPARC_BASE13,
