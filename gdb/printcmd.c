@@ -995,6 +995,10 @@ address_info (exp, from_tty)
 	      local_hex_string(BLOCK_START (SYMBOL_BLOCK_VALUE (sym))));
       break;
 
+    case LOC_OPTIMIZED_OUT:
+      printf_filtered ("optimized out");
+      break;
+      
     default:
       printf ("of unknown (botched) type");
       break;
@@ -1511,24 +1515,31 @@ print_frame_args (func, fi, num, stream)
 	continue;
       }
 
-      /* If the symbol name is non-null, 
-	 we have to re-look-up the symbol because arguments often have
-	 two entries (one a parameter, one a register or local), and the one
-	 we want is the non-parm, which lookup_symbol will find for
-	 us.  After this, sym could be any SYMBOL_CLASS... 
-
+      /* We have to look up the symbol because arguments can have
+	 two entries (one a parameter, one a local) and the one we
+	 want is the local, which lookup_symbol will find for us.
+	 This includes gcc1 (not gcc2) on the sparc when passing a
+	 small structure and gcc2 when the argument type is float
+	 and it is passed as a double and converted to float by
+	 the prologue (in the latter case the type of the LOC_ARG
+	 symbol is double and the type of the LOC_LOCAL symbol is
+	 float).  It's possible this should be dealt with in
+	 symbol reading the way it now is for LOC_REGPARM.  */
+      /* But if the parameter name is null, don't try it.
 	 Null parameter names occur on the RS/6000, for traceback tables.
 	 FIXME, should we even print them?  */
 
       if (*SYMBOL_NAME (sym))
-        sym = lookup_symbol (SYMBOL_NAME (sym),
-		    b, VAR_NAMESPACE, (int *)NULL, (struct symtab **)NULL);
+        sym = lookup_symbol
+	  (SYMBOL_NAME (sym),
+	   b, VAR_NAMESPACE, (int *)NULL, (struct symtab **)NULL);
 
       /* Print the current arg.  */
       if (! first)
 	fprintf_filtered (stream, ", ");
       wrap_here ("    ");
-      fprint_symbol (stream, SYMBOL_SOURCE_NAME (sym));
+      fprintf_symbol_filtered (stream, SYMBOL_SOURCE_NAME (sym),
+			       SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
       fputs_filtered ("=", stream);
 
       /* Avoid value_print because it will deref ref parameters.  We just
@@ -1931,9 +1942,8 @@ _initialize_printcmd ()
 ADDRESS is an expression for the memory address to examine.\n\
 FMT is a repeat count followed by a format letter and a size letter.\n\
 Format letters are o(octal), x(hex), d(decimal), u(unsigned decimal),\n\
- f(float), a(address), i(instruction), c(char) and s(string).\n\
+  t(binary), f(float), a(address), i(instruction), c(char) and s(string).\n\
 Size letters are b(byte), h(halfword), w(word), g(giant, 8 bytes).\n\
-  g is meaningful only with f, for type double.\n\
 The specified number of objects of the specified size are printed\n\
 according to the format.\n\n\
 Defaults for format and size letters are those previously used.\n\

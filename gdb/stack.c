@@ -887,10 +887,18 @@ print_frame_arg_vars (frame, stream)
 	  values_printed = 1;
 	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);
-	  /* We have to look up the symbol because arguments often have
-	     two entries (one a parameter, one a register) and the one
-	     we want is the register, which lookup_symbol will find for
-	     us.  */
+
+	  /* We have to look up the symbol because arguments can have
+	     two entries (one a parameter, one a local) and the one we
+	     want is the local, which lookup_symbol will find for us.
+	     This includes gcc1 (not gcc2) on the sparc when passing a
+	     small structure and gcc2 when the argument type is float
+	     and it is passed as a double and converted to float by
+	     the prologue (in the latter case the type of the LOC_ARG
+	     symbol is double and the type of the LOC_LOCAL symbol is
+	     float).  It's possible this should be dealt with in
+	     symbol reading the way it now is for LOC_REGPARM.  */
+
 	  sym2 = lookup_symbol (SYMBOL_NAME (sym),
 			b, VAR_NAMESPACE, (int *)NULL, (struct symtab **)NULL);
 	  print_variable_value (sym2, frame, stream);
