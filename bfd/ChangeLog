@@ -1,5 +1,15 @@
 2001-05-25  H.J. Lu  <hjl@gnu.org>
 
+	* Makefile.am (BFD32_BACKENDS): Remove coff-pmac.lo.
+	(BFD32_BACKENDS_CFILES): Remove coff-pmac.c.
+	(coff-rs6000.lo): Remove the old dependency.
+	* Makefile.in: Rebuild.
+
+	* configure.in (pmac_xcoff_vec): Replace coff-pmac.lo with
+	coff-rs6000.lo.
+
+2001-05-25  H.J. Lu  <hjl@gnu.org>
+
 	* coff-rs6000.c (rs6000coff_vec): Use rs6000coff_core_p,
 	rs6000coff_core_file_matches_executable_p,
 	rs6000coff_core_file_failing_command and

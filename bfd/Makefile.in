@@ -283,7 +283,6 @@ BFD32_BACKENDS = \
 	coff-m68k.lo \
 	coff-m88k.lo \
 	coff-mips.lo \
-	coff-pmac.lo \
 	coff-rs6000.lo \
 	coff-sh.lo \
 	coff-sparc.lo \
@@ -425,7 +424,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-m68k.c \
 	coff-m88k.c \
 	coff-mips.c \
-	coff-pmac.c \
 	coff-rs6000.c \
 	coff-sh.c \
 	coff-sparc.c \
@@ -537,6 +535,7 @@ BFD32_BACKENDS_CFILES = \
 	vms-tir.c \
 	xcofflink.c
 
+
 # The .o files needed by all of the 64 bit vectors that are configured into
 # target_vector in targets.c if configured with --enable-targets=all
 # and --enable-64-bit-bfd.
@@ -630,7 +629,8 @@ SOURCE_HFILES = \
 	elfcode.h elfcore.h elflink.h freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libieee.h libnlm.h liboasys.h libpei.h netbsd.h nlm-target.h \
-	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h xcoff.h libxcoff.h
+	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h libxcoff.h xcoff.h
+
 
 BUILD_HFILES = \
 	elf32-target.h elf64-target.h targmatch.h

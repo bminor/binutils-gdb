@@ -160,7 +160,6 @@ BFD32_BACKENDS = \
 	coff-m68k.lo \
 	coff-m88k.lo \
 	coff-mips.lo \
-	coff-pmac.lo \
 	coff-rs6000.lo \
 	coff-sh.lo \
 	coff-sparc.lo \
@@ -301,7 +300,6 @@ BFD32_BACKENDS_CFILES = \
 	coff-m68k.c \
 	coff-m88k.c \
 	coff-mips.c \
-	coff-pmac.c \
 	coff-rs6000.c \
 	coff-sh.c \
 	coff-sparc.c \
@@ -920,9 +918,6 @@ coff-rs6000.lo: coff64-rs6000.c coff-rs6000.c xcofflink.c \
 coff64-rs6000.lo: coff64-rs6000.c coff-rs6000.c xcofflink.c \
   $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h \
   $(INCDIR)/coff/rs6k64.h libcoff.h libxcoff.h coffcode.h coffswap.h
-coff-rs6000.lo: coff-rs6000.c $(INCDIR)/filenames.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/rs6000.h libcoff.h \
-  $(INCDIR)/bfdlink.h xcoff-target.h coffcode.h coffswap.h
 coff-sh.lo: coff-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/sh.h $(INCDIR)/coff/internal.h libcoff.h \
   coffcode.h coffswap.h
