@@ -230,6 +230,7 @@ enum elf_link_info_type
   ELF_INFO_TYPE_MERGE,
   ELF_INFO_TYPE_EH_FRAME,
   ELF_INFO_TYPE_EH_FRAME_HDR,
+  ELF_INFO_TYPE_JUST_SYMS,
   ELF_INFO_TYPE_LAST
 };
 
@@ -908,7 +909,8 @@ struct bfd_elf_section_data
 #define elf_discarded_section(sec)					\
   (!bfd_is_abs_section(sec)						\
    && bfd_is_abs_section((sec)->output_section)				\
-   && elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_MERGE)
+   && elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_MERGE	\
+   && elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
 
 #define get_elf_backend_data(abfd) \
   ((struct elf_backend_data *) (abfd)->xvec->backend_data)
@@ -1226,10 +1228,10 @@ extern boolean _bfd_elf_link_hash_table_init
 				       const char *)));
 extern boolean _bfd_elf_slurp_version_tables
   PARAMS ((bfd *));
-
 extern boolean _bfd_elf_merge_sections
   PARAMS ((bfd *, struct bfd_link_info *));
-
+extern void _bfd_elf_link_just_syms
+  PARAMS ((asection *, struct bfd_link_info *));
 extern boolean _bfd_elf_copy_private_symbol_data
   PARAMS ((bfd *, asymbol *, bfd *, asymbol *));
 extern boolean _bfd_elf_copy_private_section_data

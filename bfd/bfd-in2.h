@@ -3510,6 +3510,9 @@ bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 #define bfd_link_add_symbols(abfd, info) \
        BFD_SEND (abfd, _bfd_link_add_symbols, (abfd, info))
 
+#define bfd_link_just_syms(sec, info) \
+       BFD_SEND (abfd, _bfd_link_just_syms, (sec, info))
+
 #define bfd_final_link(abfd, info) \
        BFD_SEND (abfd, _bfd_final_link, (abfd, info))
 
@@ -3834,6 +3837,7 @@ CONCAT2 (NAME,_bfd_relax_section), \
 CONCAT2 (NAME,_bfd_link_hash_table_create), \
 CONCAT2 (NAME,_bfd_link_hash_table_free), \
 CONCAT2 (NAME,_bfd_link_add_symbols), \
+CONCAT2 (NAME,_bfd_link_just_syms), \
 CONCAT2 (NAME,_bfd_final_link), \
 CONCAT2 (NAME,_bfd_link_split_section), \
 CONCAT2 (NAME,_bfd_gc_sections), \
@@ -3855,6 +3859,9 @@ CONCAT2 (NAME,_bfd_merge_sections)
 
   /* Add symbols from this object file into the hash table.  */
   boolean  (*_bfd_link_add_symbols) PARAMS ((bfd *, struct bfd_link_info *));
+
+  /* Indicate that we are only retrieving symbol values from this section.  */
+  void     (*_bfd_link_just_syms) PARAMS ((asection *, struct bfd_link_info *));
 
   /* Do a link based on the link_order structures attached to each
      section of the BFD.  */

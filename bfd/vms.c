@@ -132,6 +132,7 @@ static boolean vms_bfd_merge_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 static boolean vms_bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 
 #define vms_make_empty_symbol _bfd_generic_make_empty_symbol
+#define vms_bfd_link_just_syms _bfd_generic_link_just_syms
 
 /*===========================================================================*/
 

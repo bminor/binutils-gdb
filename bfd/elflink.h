@@ -2258,7 +2258,9 @@ elf_link_add_object_symbols (abfd, info)
       asection *stab, *stabstr;
 
       stab = bfd_get_section_by_name (abfd, ".stab");
-      if (stab != NULL && !(stab->flags & SEC_MERGE))
+      if (stab != NULL
+	  && (stab->flags & SEC_MERGE) == 0
+	  && !bfd_is_abs_section (stab->output_section))
 	{
 	  stabstr = bfd_get_section_by_name (abfd, ".stabstr");
 
@@ -2284,7 +2286,8 @@ elf_link_add_object_symbols (abfd, info)
       asection *s;
 
       for (s = abfd->sections; s != NULL; s = s->next)
-	if (s->flags & SEC_MERGE)
+	if ((s->flags & SEC_MERGE) != 0
+	    && !bfd_is_abs_section (s->output_section))
 	  {
 	    struct bfd_elf_section_data *secdata;
 
@@ -8267,11 +8270,19 @@ elf_bfd_discard_info (output_bfd, info)
       if (ehdr)
 	{
 	  eh = bfd_get_section_by_name (abfd, ".eh_frame");
-	  if (eh && eh->_raw_size == 0)
+	  if (eh && (eh->_raw_size == 0
+		     || bfd_is_abs_section (eh->output_section)))
 	    eh = NULL;
 	}
 
-      stab = strip ? NULL : bfd_get_section_by_name (abfd, ".stab");
+      stab = NULL;
+      if (!strip)
+	{
+	  stab = bfd_get_section_by_name (abfd, ".stab");
+	  if (stab && (stab->_raw_size == 0
+		       || bfd_is_abs_section (stab->output_section)))
+	    stab = NULL;
+	}
       if ((! stab
 	   || elf_section_data(stab)->sec_info_type != ELF_INFO_TYPE_STABS)
 	  && ! eh

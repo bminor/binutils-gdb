@@ -515,6 +515,7 @@ aout_adobe_sizeof_headers (ignore_abfd, ignore)
 #define aout_32_bfd_link_hash_table_free \
   _bfd_generic_link_hash_table_free
 #define aout_32_bfd_link_add_symbols	_bfd_generic_link_add_symbols
+#define aout_32_bfd_link_just_syms	_bfd_generic_link_just_syms
 #define aout_32_bfd_final_link		_bfd_generic_final_link
 #define aout_32_bfd_link_split_section	_bfd_generic_link_split_section
 

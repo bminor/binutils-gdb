@@ -2712,7 +2712,8 @@ const bfd_target rs6000coff64_vec =
   _bfd_xcoff_bfd_link_hash_table_create,/* _bfd_link_hash_table_create */
   _bfd_generic_link_hash_table_free,    /* _bfd_link_hash_table_free */
   _bfd_xcoff_bfd_link_add_symbols,	/* _bfd_link_add_symbols */
-  _bfd_xcoff_bfd_final_link,		/* _bfd_filnal_link */
+  _bfd_generic_link_just_syms,		/* _bfd_link_just_syms */
+  _bfd_xcoff_bfd_final_link,		/* _bfd_final_link */
   _bfd_generic_link_split_section,	/* _bfd_link_split_section */
   bfd_generic_gc_sections,		/* _bfd_gc_sections */
   bfd_generic_merge_sections,		/* _bfd_merge_sections */
@@ -2964,7 +2965,8 @@ const bfd_target aix5coff64_vec =
   _bfd_xcoff_bfd_link_hash_table_create,/* _bfd_link_hash_table_create */
   _bfd_generic_link_hash_table_free,    /* _bfd_link_hash_table_free */
   _bfd_xcoff_bfd_link_add_symbols,	/* _bfd_link_add_symbols */
-  _bfd_xcoff_bfd_final_link,		/* _bfd_filnal_link */
+  _bfd_generic_link_just_syms,		/* _bfd_link_just_syms */
+  _bfd_xcoff_bfd_final_link,		/* _bfd_final_link */
   _bfd_generic_link_split_section,	/* _bfd_link_split_section */
   bfd_generic_gc_sections,		/* _bfd_gc_sections */
   bfd_generic_merge_sections,		/* _bfd_merge_sections */

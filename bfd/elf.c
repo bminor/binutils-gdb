@@ -814,6 +814,19 @@ _bfd_elf_merge_sections (abfd, info)
 			 merge_sections_remove_hook);
   return true;
 }
+
+void
+_bfd_elf_link_just_syms (sec, info)
+     asection *sec;
+     struct bfd_link_info *info;
+{
+  sec->output_section = bfd_abs_section_ptr;
+  sec->output_offset = sec->vma;
+  if (!is_elf_hash_table (info))
+    return;
+
+  elf_section_data (sec)->sec_info_type = ELF_INFO_TYPE_JUST_SYMS;
+}
 
 /* Copy the program header and other data from one object module to
    another.  */

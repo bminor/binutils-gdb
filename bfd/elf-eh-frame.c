@@ -787,7 +787,7 @@ _bfd_elf_maybe_strip_eh_frame_hdr (info)
   struct eh_frame_hdr_info *hdr_info;
 
   sec = bfd_get_section_by_name (elf_hash_table (info)->dynobj, ".eh_frame_hdr");
-  if (sec == NULL)
+  if (sec == NULL || bfd_is_abs_section (sec->output_section))
     return true;
 
   hdr_info
@@ -805,7 +805,7 @@ _bfd_elf_maybe_strip_eh_frame_hdr (info)
 	/* Count only sections which have at least a single CIE or FDE.
 	   There cannot be any CIE or FDE <= 8 bytes.  */
 	o = bfd_get_section_by_name (abfd, ".eh_frame");
-	if (o && o->_raw_size > 8)
+	if (o && o->_raw_size > 8 && !bfd_is_abs_section (o->output_section))
 	  break;
       }
 

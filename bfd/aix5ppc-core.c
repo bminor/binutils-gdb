@@ -328,7 +328,7 @@ int                xcoff64_core_file_failing_signal PARAMS ((bfd *));
 
 const bfd_target *
 xcoff64_core_p (abfd)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
 {
   bfd_set_error (bfd_error_wrong_format);
   return 0;
@@ -336,22 +336,22 @@ xcoff64_core_p (abfd)
 
 boolean
 xcoff64_core_file_matches_executable_p (core_bfd, exec_bfd)
-     bfd *core_bfd;
-     bfd *exec_bfd;
+     bfd *core_bfd ATTRIBUTE_UNUSED;
+     bfd *exec_bfd ATTRIBUTE_UNUSED;
 {
   return false;
 }
 
 char *
 xcoff64_core_file_failing_command (abfd)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
 {
   return 0;
 }
 
 int
 xcoff64_core_file_failing_signal (abfd)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
 {
   return 0;
 }

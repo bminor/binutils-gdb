@@ -986,6 +986,9 @@ tic30_aout_set_arch_mach (abfd, arch, machine)
 #ifndef MY_bfd_link_add_symbols
 #define MY_bfd_link_add_symbols NAME(aout,link_add_symbols)
 #endif
+#ifndef MY_bfd_link_just_syms
+#define MY_bfd_link_just_syms _bfd_generic_link_just_syms
+#endif
 #ifndef MY_bfd_link_split_section
 #define MY_bfd_link_split_section  _bfd_generic_link_split_section
 #endif

@@ -328,6 +328,8 @@ extern boolean _bfd_generic_set_section_contents
   ((void (*) PARAMS ((struct bfd_link_hash_table *))) bfd_void)
 #define _bfd_nolink_bfd_link_add_symbols \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
+#define _bfd_nolink_bfd_link_just_syms \
+  ((void (*) PARAMS ((asection *, struct bfd_link_info *))) bfd_void)
 #define _bfd_nolink_bfd_final_link \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 #define _bfd_nolink_bfd_link_split_section \
@@ -410,8 +412,6 @@ extern boolean _bfd_generic_link_add_archive_symbols
   PARAMS ((bfd *, struct bfd_link_info *,
 	   boolean (*checkfn) (bfd *, struct bfd_link_info *, boolean *)));
 
-
-
 /* Forward declaration to avoid prototype errors.  */
 typedef struct bfd_link_hash_entry _bfd_link_hash_entry;
 
@@ -420,6 +420,10 @@ extern boolean _bfd_generic_link_add_one_symbol
   PARAMS ((struct bfd_link_info *, bfd *, const char *name, flagword,
 	   asection *, bfd_vma, const char *, boolean copy,
 	   boolean constructor, struct bfd_link_hash_entry **));
+
+/* Generic routine to mark section as supplying symbols only.  */
+extern void _bfd_generic_link_just_syms
+  PARAMS ((asection *, struct bfd_link_info *));
 
 /* Generic link routine.  */
 extern boolean _bfd_generic_final_link

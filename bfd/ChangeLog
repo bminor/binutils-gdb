@@ -1,3 +1,47 @@
+2002-05-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* aix5ppc-core.c: Warning fixes.
+	* aout-adobe.c (aout_32_bfd_link_just_syms): Define.
+	* aout-target.h (MY_bfd_link_just_syms): Define.
+	* aout-tic30.c (MY_bfd_link_just_syms): Define.
+	* bfd.c (bfd_link_just_syms): Define.
+	* binary.c (binary_bfd_link_just_syms): Define.
+	* bout.c (b_out_bfd_link_just_syms): Define.
+	* coff-rs6000.c (rs6000coff_vec, pmac_xcoff_vec): Update initializer.
+	* coff64-rs6000.c (rs6000coff64_vec, aix5coff64_vec): Likewise.
+	* coffcode.h (coff_bfd_link_just_syms): Define.
+	* elf-bfd.h (enum elf_link_info_type): Add ELF_INFO_TYPE_JUST_SYMS.
+	(elf_discarded_section): Check for ELF_INFO_TYPE_JUST_SYMS.
+	(_bfd_elf_link_just_syms): Declare.
+	* elf.c (_bfd_elf_link_just_syms): New function.
+	* elf-eh-frame.c (_bfd_elf_maybe_strip_eh_frame_hdr): Check that
+	sections haven't already been discarded by the linker.
+	* elflink.h (elf_link_add_object_symbols): Likewise for stab
+	sections and SEC_MERGE sections.
+	(elf_bfd_discard_info): Similarly here.
+	* elfxx-target.h (bfd_elfNN_bfd_link_just_syms): Define.
+	* i386msdos.c (msdos_bfd_link_just_syms): Define.
+	* i386os9k.c (os9k_bfd_link_just_syms): Define.
+	* ieee.c (ieee_bfd_link_just_syms): Define.
+	* ihex.c (ihex_bfd_link_just_syms): Define.
+	* libbfd-in.h (_bfd_nolink_bfd_link_just_syms): Define.
+	(_bfd_generic_link_just_syms): Declare.
+	* libecoff.h (_bfd_ecoff_bfd_link_just_syms): Define.
+	* linker.c (_bfd_generic_link_just_syms): New function.
+	* mmo.c (mmo_bfd_link_just_syms): Define.
+	* nlm-target.h (nlm_bfd_link_just_syms): Define.
+	* oasys.c (oasys_bfd_link_just_syms): Define.
+	* ppcboot.c (ppcboot_bfd_link_just_syms): Define.
+	* som.c (som_bfd_link_just_syms): Define.
+	* srec.c (srec_bfd_link_just_syms): Define.
+	* targets.c (struct bfd_target): Add _bfd_link_just_syms.
+	(BFD_JUMP_TABLE_LINK): And here.
+	* tekhex.c (tekhex_bfd_link_just_syms): Define.
+	* versados.c (versados_bfd_link_just_syms): Define.
+	* vms.c (vms_bfd_link_just_syms): Define.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2002-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elf32-mips.c: Remove superfluous definitions copied from

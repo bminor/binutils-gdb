@@ -757,6 +757,19 @@ _bfd_generic_link_add_symbols_collect (abfd, info)
   return generic_link_add_symbols (abfd, info, true);
 }
 
+/* Indicate that we are only retrieving symbol values from this
+   section.  We want the symbols to act as though the values in the
+   file are absolute.  */
+
+void
+_bfd_generic_link_just_syms (sec, info)
+     asection *sec;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+{
+  sec->output_section = bfd_abs_section_ptr;
+  sec->output_offset = sec->vma;
+}
+
 /* Add symbols from an object file to the global hash table.  */
 
 static boolean

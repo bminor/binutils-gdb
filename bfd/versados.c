@@ -870,6 +870,7 @@ versados_canonicalize_reloc (abfd, section, relptr, symbols)
 #define versados_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define versados_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define versados_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define versados_bfd_link_just_syms _bfd_generic_link_just_syms
 #define versados_bfd_final_link _bfd_generic_final_link
 #define versados_bfd_link_split_section _bfd_generic_link_split_section
 
