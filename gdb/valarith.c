@@ -46,8 +46,8 @@ value_add (arg1, arg2)
   register int len;
   struct type *type1, *type2, *valptrtype;
 
-  COERCE_ARRAY (arg1);
-  COERCE_ARRAY (arg2);
+  COERCE_NUMBER (arg1);
+  COERCE_NUMBER (arg2);
   type1 = check_typedef (VALUE_TYPE (arg1));
   type2 = check_typedef (VALUE_TYPE (arg2));
 
@@ -85,8 +85,8 @@ value_sub (arg1, arg2)
      value_ptr arg1, arg2;
 {
   struct type *type1, *type2;
-  COERCE_ARRAY (arg1);
-  COERCE_ARRAY (arg2);
+  COERCE_NUMBER (arg1);
+  COERCE_NUMBER (arg2);
   type1 = check_typedef (VALUE_TYPE (arg1));
   type2 = check_typedef (VALUE_TYPE (arg2));
 
@@ -183,7 +183,7 @@ value_subscript (array, idx)
       byte = *((char*)VALUE_CONTENTS (array) + offset);
       bit_index = index % TARGET_CHAR_BIT;
       byte >>= (BITS_BIG_ENDIAN ? TARGET_CHAR_BIT - 1 - bit_index : bit_index);
-      v = value_from_longest (builtin_type_int, byte & 1);
+      v = value_from_longest (LA_BOOL_TYPE, byte & 1);
       VALUE_BITPOS (v) = bit_index;
       VALUE_BITSIZE (v) = 1;
       VALUE_LVAL (v) = VALUE_LVAL (array);
@@ -246,7 +246,7 @@ binop_user_defined_p (op, arg1, arg2)
      value_ptr arg1, arg2;
 {
   struct type *type1, *type2;
-  if (op == BINOP_ASSIGN)
+  if (op == BINOP_ASSIGN || op == BINOP_CONCAT)
     return 0;
   type1 = check_typedef (VALUE_TYPE (arg1));
   type2 = check_typedef (VALUE_TYPE (arg2));
@@ -399,6 +399,7 @@ value_x_unop (arg1, op)
   char tstr[13], mangle_tstr[13];
   int static_memfuncp;
 
+  COERCE_REF (arg1);
   COERCE_ENUM (arg1);
 
   /* now we know that what we have to do is construct our
@@ -477,6 +478,9 @@ value_concat (arg1, arg2)
   char inchar;
   struct type *type1 = check_typedef (VALUE_TYPE (arg1));
   struct type *type2 = check_typedef (VALUE_TYPE (arg2));
+
+  COERCE_VARYING_ARRAY (arg1, type1);
+  COERCE_VARYING_ARRAY (arg2, type2);
 
   /* First figure out if we are dealing with two values to be concatenated
      or a repeat count and a value to be repeated.  INVAL1 is set to the
@@ -605,6 +609,8 @@ value_binop (arg1, arg2, op)
   register value_ptr val;
   struct type *type1, *type2;
 
+  COERCE_REF (arg1);
+  COERCE_REF (arg2);
   COERCE_ENUM (arg1);
   COERCE_ENUM (arg2);
   type1 = check_typedef (VALUE_TYPE (arg1));
@@ -630,7 +636,7 @@ value_binop (arg1, arg2, op)
       /* FIXME-if-picky-about-floating-accuracy: Should be doing this
 	 in target format.  real.c in GCC probably has the necessary
 	 code.  */
-      double v1, v2, v;
+      DOUBLEST v1, v2, v;
       v1 = value_as_double (arg1);
       v2 = value_as_double (arg2);
       switch (op)
@@ -655,7 +661,15 @@ value_binop (arg1, arg2, op)
 	  error ("Integer-only operation on floating point number.");
 	}
 
-      val = allocate_value (builtin_type_double);
+      /* If either arg was long double, make sure that value is also long
+	 double.  */
+
+      if (TYPE_LENGTH(type1) * 8 > TARGET_DOUBLE_BIT
+	  || TYPE_LENGTH(type2) * 8 > TARGET_DOUBLE_BIT)
+	val = allocate_value (builtin_type_long_double);
+      else
+	val = allocate_value (builtin_type_double);
+
       store_floating (VALUE_CONTENTS_RAW (val), TYPE_LENGTH (VALUE_TYPE (val)),
 		      v);
     }
@@ -991,7 +1005,7 @@ value_logical_not (arg1)
   register char *p;
   struct type *type1;
 
-  COERCE_ARRAY (arg1);
+  COERCE_NUMBER (arg1);
   type1 = check_typedef (VALUE_TYPE (arg1));
 
   if (TYPE_CODE (type1) == TYPE_CODE_FLT)
@@ -1023,8 +1037,8 @@ value_equal (arg1, arg2)
   enum type_code code1;
   enum type_code code2;
 
-  COERCE_ARRAY (arg1);
-  COERCE_ARRAY (arg2);
+  COERCE_NUMBER (arg1);
+  COERCE_NUMBER (arg2);
 
   type1 = check_typedef (VALUE_TYPE (arg1));
   type2 = check_typedef (VALUE_TYPE (arg2));
@@ -1076,8 +1090,8 @@ value_less (arg1, arg2)
   register enum type_code code2;
   struct type *type1, *type2;
 
-  COERCE_ARRAY (arg1);
-  COERCE_ARRAY (arg2);
+  COERCE_NUMBER (arg1);
+  COERCE_NUMBER (arg2);
 
   type1 = check_typedef (VALUE_TYPE (arg1));
   type2 = check_typedef (VALUE_TYPE (arg2));
@@ -1115,6 +1129,7 @@ value_neg (arg1)
 {
   register struct type *type;
 
+  COERCE_REF (arg1);
   COERCE_ENUM (arg1);
 
   type = check_typedef (VALUE_TYPE (arg1));
@@ -1133,6 +1148,7 @@ value_ptr
 value_complement (arg1)
      register value_ptr arg1;
 {
+  COERCE_REF (arg1);
   COERCE_ENUM (arg1);
 
   if (TYPE_CODE (check_typedef (VALUE_TYPE (arg1))) != TYPE_CODE_INT)

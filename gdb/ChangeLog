@@ -1,5 +1,8 @@
 Mon Mar  4 23:44:16 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* valarith.c (binop_user_defined_p):  Return 0 for BINOP_CONCAT.
+	(value_concat):  Handle varying strings (add COERCE_VARYING_ARRAY).
+
 	* ch-lang.c (evaluate_subexp_chill case MULTI_SUBSCRIPT):  Error
 	if "function" is pointer to non-function.
 
