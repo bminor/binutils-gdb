@@ -1,5 +1,16 @@
 2001-09-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	From Daniel Jacobowitz  <drow@mvista.com>	
+	* dbxread.c (dbx_symfile_read): Only reinitialize
+	the psymbol list if mainline or if both static
+	and global lists are empty.
+	* dwarf2read.c (dwarf2_build_psymtabs): Likewise.
+	* dwarfread.c (dwarf_build_psymtabs): Likewise.
+	* xcoffread.c (xcoff_initial_scan): Likewise.
+	* os9kread.c (os9k_symfile_read): Likewise.
 	
+2001-09-04  Elena Zannoni  <ezannoni@redhat.com>
+
 	From Daniel Jacobowitz  <drow@mvista.com>	
 	* mdebugread.c (psymtab_to_symtab_1): Handle N_SO stabs without
 	a name specially.

@@ -320,8 +320,9 @@ os9k_symfile_read (struct objfile *objfile, int mainline)
 
   sym_bfd = objfile->obfd;
   /* If we are reinitializing, or if we have never loaded syms yet, init */
-  if (mainline || objfile->global_psymbols.size == 0 ||
-      objfile->static_psymbols.size == 0)
+  if (mainline
+      || (objfile->global_psymbols.size == 0
+	  && objfile->static_psymbols.size == 0))
     init_psymbol_list (objfile, DBX_SYMCOUNT (objfile));
 
   free_pending_blocks ();

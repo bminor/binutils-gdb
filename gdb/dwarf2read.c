@@ -869,8 +869,9 @@ dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
 					   dwarf_line_offset,
 					   dwarf_line_size);
 
-  if (mainline || objfile->global_psymbols.size == 0 ||
-      objfile->static_psymbols.size == 0)
+  if (mainline
+      || (objfile->global_psymbols.size == 0
+	  && objfile->static_psymbols.size == 0))
     {
       init_psymbol_list (objfile, 1024);
     }

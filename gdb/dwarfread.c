@@ -706,8 +706,9 @@ dwarf_build_psymtabs (struct objfile *objfile, int mainline, file_ptr dbfoff,
      Since we have no idea how many DIES we are looking at, we just guess
      some arbitrary value. */
 
-  if (mainline || objfile->global_psymbols.size == 0 ||
-      objfile->static_psymbols.size == 0)
+  if (mainline
+      || (objfile->global_psymbols.size == 0
+	  && objfile->static_psymbols.size == 0))
     {
       init_psymbol_list (objfile, 1024);
     }
