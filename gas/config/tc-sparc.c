@@ -2517,6 +2517,21 @@ md_apply_fix3 (fixP, value, segment)
       && ! S_IS_COMMON (fixP->fx_addsy)
       && (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) == 0)
     fixP->fx_addnumber -= 2 * S_GET_VALUE (fixP->fx_addsy);
+
+  /* When generating PIC code, we need to fiddle to get
+     bfd_install_relocation to do the right thing for a PC relative
+     reloc against a local symbol which we are going to keep.  */
+  if (sparc_pic_code
+      && fixP->fx_r_type == BFD_RELOC_32_PCREL_S2
+      && fixP->fx_addsy != NULL
+      && (S_IS_EXTERNAL (fixP->fx_addsy)
+	  || S_IS_WEAK (fixP->fx_addsy))
+      && S_IS_DEFINED (fixP->fx_addsy)
+      && ! S_IS_COMMON (fixP->fx_addsy))
+    {
+      val = 0;
+      fixP->fx_addnumber -= 2 * S_GET_VALUE (fixP->fx_addsy);
+    }
 #endif
 
   /* If this is a data relocation, just output VAL.  */
@@ -2829,6 +2844,14 @@ tc_gen_reloc (section, fixp)
   if (reloc->howto->pc_relative == 0
       || code == BFD_RELOC_SPARC_PC10
       || code == BFD_RELOC_SPARC_PC22)
+    reloc->addend = fixp->fx_addnumber;
+  else if (sparc_pic_code
+	   && fixp->fx_r_type == BFD_RELOC_32_PCREL_S2
+	   && fixp->fx_addsy != NULL
+	   && (S_IS_EXTERNAL (fixp->fx_addsy)
+	       || S_IS_WEAK (fixp->fx_addsy))
+	   && S_IS_DEFINED (fixp->fx_addsy)
+	   && ! S_IS_COMMON (fixp->fx_addsy))
     reloc->addend = fixp->fx_addnumber;
   else
     reloc->addend = fixp->fx_offset - reloc->address;
@@ -3353,11 +3376,21 @@ sparc_handle_align (fragp)
           unsigned *p = (unsigned *)(fragp->fr_literal + fragp->fr_fix);
           int i;
           
-          for (i = 0; i < count; i += 4)
-            *p++ = 0x01000000; /* nop */
+          for (i = 0; i < count; i += 4, p++)
+            if (INSN_BIG_ENDIAN)
+              number_to_chars_bigendian ((char *)p, 0x01000000, 4); /* emit nops */
+            else
+              number_to_chars_littleendian ((char *)p, 0x10000000, 4);
+
           if (SPARC_OPCODE_ARCH_V9_P (max_architecture) && count > 8)
-            *(unsigned *)(fragp->fr_literal + fragp->fr_fix) =
-              0x30680000 | (count >> 2); /* ba,a,pt %xcc, 1f */
+            {
+            char *waddr = &fragp->fr_literal + fragp->fr_fix;
+            unsigned wval = (0x30680000 | count >> 2); /* ba,a,pt %xcc, 1f */
+            if (INSN_BIG_ENDIAN)
+              number_to_chars_bigendian (waddr, wval, 4);
+            else
+              number_to_chars_littleendian (waddr, wval, 4);
+            }
           fragp->fr_var = count;
         }
     }
