@@ -21,7 +21,7 @@
    to convert it to new machines' assemblers as desired.  There was too
    much bloody rewriting required before.  There still probably is.  */
 
-#include "ctype.h"
+#include <ctype.h>
 #include "as.h"
 
 #include "opcode/a29k.h"
@@ -243,6 +243,12 @@ define_some_regs ()
   insert_sreg ("iba1", SREG + 25);
   insert_sreg ("ibc1", SREG + 26);
 
+  /* Additional registers for the 29040.  */
+  insert_sreg ("dba", SREG + 27);
+  insert_sreg ("dbc", SREG + 28);
+  insert_sreg ("cir", SREG + 29);
+  insert_sreg ("cdr", SREG + 30);
+
   /* Unprotected special-purpose register names */
   insert_sreg ("ipc", SREG + 128);
   insert_sreg ("ipa", SREG + 129);
@@ -373,16 +379,17 @@ md_assemble (str)
 }
 
 char *
-parse_operand (s, operandp)
+parse_operand (s, operandp, opt)
      char *s;
      expressionS *operandp;
+     int opt;
 {
   char *save = input_line_pointer;
   char *new;
 
   input_line_pointer = s;
   expression (operandp);
-  if (operandp->X_op == O_absent)
+  if (operandp->X_op == O_absent && ! opt)
     as_bad ("missing operand");
   new = input_line_pointer;
   input_line_pointer = save;
@@ -443,7 +450,10 @@ machine_ip (str)
      and do a "continue".  If an operand fails to match, we "break".  */
 
   if (insn->args[0] != '\0')
-    s = parse_operand (s, operand);	/* Prime the pump */
+    {
+      /* Prime the pump.  */
+      s = parse_operand (s, operand, insn->args[0] == 'I');
+    }
 
   for (args = insn->args;; ++args)
     {
@@ -463,7 +473,8 @@ machine_ip (str)
 	case ',':		/* Must match a comma */
 	  if (*s++ == ',')
 	    {
-	      s = parse_operand (s, operand);	/* Parse next opnd */
+	      /* Parse next operand.  */
+	      s = parse_operand (s, operand, args[1] == 'I');
 	      continue;
 	    }
 	  break;
@@ -644,6 +655,18 @@ machine_ip (str)
 	      operand->X_add_number < 8)
 	    {
 	      opcode |= operand->X_add_number << 4;
+	      continue;
+	    }
+	  break;
+
+	case 'I':		/* ID bits of INV and IRETINV.  */
+	  /* This operand is optional.  */
+	  if (operand->X_op == O_absent)
+	    continue;
+	  else if (operand->X_op == O_constant
+		   && operand->X_add_number < 4)
+	    {
+	      opcode |= operand->X_add_number << 16;
 	      continue;
 	    }
 	  break;
@@ -1065,29 +1088,41 @@ md_undefined_symbol (name)
   long regnum;
   char testbuf[5 + /*SLOP*/ 5];
 
-  if (name[0] == 'g' || name[0] == 'G' || name[0] == 'l' || name[0] == 'L')
+  if (name[0] == 'g' || name[0] == 'G'
+      || name[0] == 'l' || name[0] == 'L'
+      || name[0] == 's' || name[0] == 'S')
     {
       /* Perhaps a global or local register name */
       if (name[1] == 'r' || name[1] == 'R')
 	{
-	  /* Parse the number, make sure it has no extra zeroes or trailing
-				   chars */
+	  long maxreg;
+
+	  /* Parse the number, make sure it has no extra zeroes or
+	     trailing chars. */
 	  regnum = atol (&name[2]);
-	  if (regnum > 127)
-	    return 0;
+
+	  if (name[0] == 's' || name[0] == 'S')
+	    maxreg = 255;
+	  else
+	    maxreg = 127;
+	  if (regnum > maxreg)
+	    return NULL;
+
 	  sprintf (testbuf, "%ld", regnum);
 	  if (strcmp (testbuf, &name[2]) != 0)
-	    return 0;		/* gr007 or lr7foo or whatever */
+	    return NULL;	/* gr007 or lr7foo or whatever */
 
 	  /* We have a wiener!  Define and return a new symbol for it.  */
 	  if (name[0] == 'l' || name[0] == 'L')
 	    regnum += 128;
+	  else if (name[0] == 's' || name[0] == 'S')
+	    regnum += SREG;
 	  return (symbol_new (name, SEG_REGISTER, (valueT) regnum,
 			      &zero_address_frag));
 	}
     }
 
-  return 0;
+  return NULL;
 }
 
 /* Parse an operand that is machine-specific.  */
