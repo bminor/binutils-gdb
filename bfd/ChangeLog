@@ -1,5 +1,9 @@
 2005-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c (assign_section_numbers): Fix a typo.
+
+2005-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elflink.c (elf_link_input_bfd): Remove the extra `\n' in
 	error message.
 	(_bfd_elf_section_already_linked): Likewise.

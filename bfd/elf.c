@@ -2914,7 +2914,7 @@ assign_section_numbers (bfd *abfd)
 			    = get_elf_backend_data (abfd);
 			  if (bed->link_order_error_handler)
 			    bed->link_order_error_handler
-			      (_("%B: warning: sh_link not set for section `%S'"),
+			      (_("%B: warning: sh_link not set for section `%A'"),
 			       abfd, s);
 			}
 		      else
