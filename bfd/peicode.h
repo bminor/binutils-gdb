@@ -2106,6 +2106,9 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
   if ((internal_f->f_flags & F_DLL) != 0)
     pe->dll = 1;
 
+  if ((internal_f->f_flags & IMAGE_FILE_DEBUG_STRIPPED) == 0)
+    abfd->flags |= HAS_DEBUG;
+
 #ifdef COFF_IMAGE_WITH_PE
   if (aouthdr) 
     pe->pe_opthdr = ((struct internal_aouthdr *)aouthdr)->pe;

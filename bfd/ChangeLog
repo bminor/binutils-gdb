@@ -7,6 +7,13 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* coffcode.h (coff_mkobject_hook): If COFF_WITH_PE, set HAS_DEBUG
+	to the reverse of IMAGE_FILE_DEBUG_STRIPPED.
+	(coff_write_object_contents): Set IMAGE_FILE_DEBUG_STRIPPED if
+	there is no SEC_DEBUGGING section.
+	* peicode.h (pe_mkobject_hook): Set HAS_DEBUG to the reverse of
+	IMAGE_FILE_DEBUG_STRIPPED.
+
 	* pe-i386.c (COFF_LONG_FILENAMES): Define.
 	(COFF_SECTION_ALIGNMENT_ENTRIES): Define.
 	* pei-i386.c (COFF_LONG_FILENAMES): Define.

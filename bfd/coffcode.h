@@ -1627,6 +1627,13 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
     coff->flags = 0;
 #endif
   
+#ifdef COFF_WITH_PE
+  /* FIXME: I'm not sure this is ever executed, since peicode.h
+     defines coff_mkobject_hook.  */
+  if ((internal_f->f_flags & IMAGE_FILE_DEBUG_STRIPPED) == 0)
+    abfd->flags |= HAS_DEBUG;
+#endif
+
   return (PTR) coff;
 }
 #endif
@@ -2902,6 +2909,7 @@ coff_write_object_contents (abfd)
   asection *current;
   boolean hasrelocs = false;
   boolean haslinno = false;
+  boolean hasdebug = false;
   file_ptr scn_base;
   file_ptr reloc_base;
   file_ptr lineno_base;
@@ -2992,18 +3000,17 @@ coff_write_object_contents (abfd)
        current = current->next)
     {
       struct internal_scnhdr section;
-
-#ifdef COFF_WITH_PE
-      /* If we've got a .reloc section, remember. */
+      boolean is_reloc_section = false;
 
 #ifdef COFF_IMAGE_WITH_PE
       if (strcmp (current->name, ".reloc") == 0)
 	{
+	  is_reloc_section = true;
+	  hasrelocs = true;
 	  pe_data (abfd)->has_reloc_section = 1;
 	}
 #endif
 
-#endif
       internal_f.f_nscns++;
 
       strncpy (section.s_name, current->name, SCNNMLEN);
@@ -3069,6 +3076,9 @@ coff_write_object_contents (abfd)
 	hasrelocs = true;
       if (current->lineno_count != 0)
 	haslinno = true;
+      if ((current->flags & SEC_DEBUGGING) != 0
+	  && ! is_reloc_section)
+	hasdebug = true;
 
 #ifdef RS6000COFF_C
       /* Indicate the use of an XCOFF overflow section header.  */
@@ -3277,6 +3287,10 @@ coff_write_object_contents (abfd)
     internal_f.f_flags |= F_LNNO;
   if (abfd->flags & EXEC_P)
     internal_f.f_flags |= F_EXEC;
+#ifdef COFF_IMAGE_WITH_PE
+  if (! hasdebug)
+    internal_f.f_flags |= IMAGE_FILE_DEBUG_STRIPPED;
+#endif
 
 #ifndef COFF_WITH_PE
   if (bfd_little_endian (abfd))
