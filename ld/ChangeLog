@@ -1,3 +1,11 @@
+Mon Dec  7 08:43:41 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+	 -y support
+	* ld.texinfo: new doc.
+	* ldgram.y, ldlex.l: understand -y<symbol>
+	* ldmain.c (Q_enter_file_symbols): if had -y, lookup symbol and
+	print info. (add_ysym): new function.
+	* ldsym.h: (ldsym_type): new define SYM_Y.
+
 Sat Nov 21 03:15:27 1992  John Gilmore  (gnu@cygnus.com)
 
 	* ldctor.h, lderror.h, ldexp.h, ldfile.h, ldindr.h, ldlang.c,

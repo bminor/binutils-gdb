@@ -43,36 +43,7 @@ char *buystring();
 unsigned int lineno = 1;
 int old;
 
-comment()
-{
-  int c;
-  while (1)
-  {
-    c = input();
-    while (c !='*' && c != EOF) 
-    {
-      if (c == '\n') lineno++;
-      c = input();
-    }
-
-
-    if (c == '*')
-    {
-      c = input();
-      while ( c == '*')
-       c = input();
-      if ( c == '/' )
-       break;			/* found the end */
-    }
-
-    if ( c == EOF )
-    {
-      einfo( "%F%P :EOF in comment");
-      break;
-    }
-  }
-}
-
+static comment();
 
 #undef YY_INPUT
 #define YY_INPUT(buf,result,max_size) yy_input(buf, &result, max_size)
@@ -104,6 +75,9 @@ SYMBOLCHARN     [_a-zA-Z\/\.\\0-9]
 FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\\,\~]
 FILENAME	{FILENAMECHAR}+
 WHITE		[ \t\n]+ 
+
+NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
+
 
 %s COMMAND
 %s SCRIPT
@@ -197,13 +171,20 @@ WHITE		[ \t\n]+
 				 return OPTION_F;
 			       }
 
+<COMMAND>"-y"{FILENAME}         {
+					yylval.name = buystring(yytext+2);
+					return OPTION_y;
+				}
+				
 <COMMAND>"-A"{FILENAME} 	{
 		                	yylval.name = buystring(yytext+2);
 				 	return OPTION_Aarch;
 			       	}
 
+<COMMAND>"-retain-symbols-file"	{ return OPTION_RETAIN_SYMBOLS_FILE; }
+
 <MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
-  				yylval.integer = strtoul(yytext+1, 0,16);	
+  				yylval.integer = strtoul(yytext+1, 0,16);
 				return INT;
 			}
 
@@ -325,9 +306,13 @@ WHITE		[ \t\n]+
 <MRI>"\n"	                { ++ lineno;  RTOKEN(NEWLINE); }
 <MRI>"*".*			{ /* Mri comment line */ }
 <MRI>"END"                      { RTOKEN(ENDWORD); }
+<MRI>"ALIGNMOD"		{ RTOKEN(ALIGNMOD);}
+<MRI>"ALIGN"		{ RTOKEN(ALIGN_K);}
+
 <MRI>"CHIP"                     { RTOKEN(CHIP); }
 <MRI>"BASE"                     { RTOKEN(BASE); }
 <MRI>"ALIAS"                     { RTOKEN(ALIAS); }
+<MRI>"TRUNCATE"                     { RTOKEN(TRUNCATE); }
 <MRI>"LOAD"                     { RTOKEN(LOAD); }
 <MRI>"PUBLIC"                   { RTOKEN(PUBLIC); }
 <MRI>"ORDER"                    { RTOKEN(ORDER); }
@@ -352,7 +337,14 @@ WHITE		[ \t\n]+
 				}
 
 
-<MRI,BOTH,EXPRESSION>{FILENAMECHAR1}{FILENAMECHAR}*	{
+<MRI>{FILENAMECHAR1}{NOCFILENAMECHAR}*	{
+/* Filename without commas, needed to parse mri stuff */
+				 yylval.name = buystring(yytext); 
+				  return NAME;
+				}
+
+
+<BOTH,EXPRESSION>{FILENAMECHAR1}{FILENAMECHAR}*	{
 				 yylval.name = buystring(yytext); 
 				  return NAME;
 				}
@@ -527,3 +519,33 @@ int max_size;
   }
 }
 
+static
+comment()
+{
+  int c;
+  while (1)
+  {
+    c = input();
+    while (c !='*' && c != EOF) 
+    {
+      if (c == '\n') lineno++;
+      c = input();
+    }
+
+
+    if (c == '*')
+    {
+      c = input();
+      while ( c == '*')
+       c = input();
+      if ( c == '/' )
+       break;			/* found the end */
+    }
+
+    if ( c == EOF )
+    {
+      einfo( "%F%P :EOF in comment");
+      break;
+    }
+  }
+}

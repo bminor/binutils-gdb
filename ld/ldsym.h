@@ -56,6 +56,8 @@ typedef struct user_symbol_struct
   /* If this symbol explicitly should be kept, despite discarding
      most others.  */
 #define SYM_KEEP 8
+  /* If its got -y set */
+#define SYM_Y 16
   int flags;
 } ldsym_type;
 
