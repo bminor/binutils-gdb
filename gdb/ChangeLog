@@ -1,3 +1,9 @@
+Thu Apr 16 18:26:34 1992  Per Bothner  (bothner@cygnus.com)
+
+	* rs6000-pinsn.c:  New version from IBM (Metin).
+	* m2-exp.y:  Re-write string initializers ("<>" => {'<', '>'})
+	to avoid warnings from some compilers.
+
 Tue Apr 14 22:33:55 1992  Fred Fish  (fnf@cygnus.com)
 
 	* gdbtypes.h (FT_FIXED_DECIMAL, FT_FLOAT_DECIMAL):  Add defines.

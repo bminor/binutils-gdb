@@ -785,11 +785,11 @@ static struct
    int token;
 } tokentab2[] =
 {
-    {"<>",    NOTEQUAL 	 },
-    {":=",    ASSIGN	 },
-    {"<=",    LEQ	 },
-    {">=",    GEQ	 },
-    {"::",    COLONCOLON },
+    { {'<', '>'},    NOTEQUAL 	},
+    { {':', '='},    ASSIGN	},
+    { {'<', '='},    LEQ	},
+    { {'>', '='},    GEQ	},
+    { {':', ':'},    COLONCOLON },
 
 };
 

@@ -29,7 +29,7 @@ print_insn (memaddr, stream)
   CORE_ADDR memaddr;
   FILE *stream;
 {
-	int  pop, eop;			/* primary and extended opcodes */
+	int  pop, eop, probable_eop;	/* primary and extended opcodes */
 	int  min, max;
 	int  best = -1;			/* found best opcode index	*/
 	int  oldbest = -1;
@@ -37,7 +37,6 @@ print_insn (memaddr, stream)
 
 	read_memory (memaddr, &the_insn, sizeof (the_insn));
 	pop = (unsigned)(the_insn >> 26);
-	eop = ((the_insn) >> 1) & 0x3ff;
 	min = 0, max = NOPCODES-1;
 
 	while (min < max) {
@@ -55,7 +54,7 @@ print_insn (memaddr, stream)
 	    min = best;
 
 	  else {
-	    /* opcode matched, check extended opcode. */
+	    /* Opcode matched, check extended opcode. */
 
 	    if (rs6k_ops [best].e_opcode == -1) {
 	      /* there is no valid extended opcode, what we've got is
@@ -63,12 +62,18 @@ print_insn (memaddr, stream)
 	      goto insn_found;
 	    }
 
-	    else if (eop < rs6k_ops [best].e_opcode) {
+	    /* Largest possible value of extended opcode. */
+	    probable_eop = ((the_insn) >> 1) & 0x3ff;
+
+	    eop = probable_eop & eopMask [rs6k_ops [best].format];
+
+	    if (eop < rs6k_ops [best].e_opcode) {
 
 	      while (pop == rs6k_ops [best].p_opcode) {
 		if (eop == rs6k_ops [best].e_opcode)	/* found it! */
 		  goto insn_found;
 	        --best;
+	        eop = probable_eop & eopMask [rs6k_ops [best].format];
 	      }
 	      goto not_found;
 	    }
@@ -79,6 +84,7 @@ print_insn (memaddr, stream)
 		if (eop == rs6k_ops [best].e_opcode)	/* found it! */
 		  goto insn_found;
 	        ++best;
+	        eop = probable_eop & eopMask [rs6k_ops [best].format];
 	      }
 	      goto not_found;
 	    }
