@@ -18,6 +18,7 @@
 
 2002-04-12  Michael Snyder  <msnyder@redhat.com>
 
+	* Remote.c: Spelling fix.
 	* gcore.c (default_derive_heap_segment): Use bfd_section_name.
 	If no symbol found for "sbrk", try "_sbrk".
 	(make_output_phdrs): Use bfd_section_name.

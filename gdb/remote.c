@@ -211,7 +211,7 @@ void open_remote_target (char *, int, struct target_ops *, int);
 
 void _initialize_remote (void);
 
-/* Description of the remote protocol.  Strictly speeking, when the
+/* Description of the remote protocol.  Strictly speaking, when the
    target is open()ed, remote.c should create a per-target description
    of the remote protocol using that target's architecture.
    Unfortunatly, the target stack doesn't include local state.  For
