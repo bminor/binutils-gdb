@@ -1,3 +1,7 @@
+Thu Apr  3 18:26:56 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/m32r/allinsn.{exp,s.d}: New testcases.
+
 start-sanitize-d30v
 Thu Mar 27 00:42:28 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
