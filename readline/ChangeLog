@@ -1,3 +1,7 @@
+Thu Jun 25 16:15:27 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* configure.in:  Make bsd based systems use sysdep-obsd.h.
+
 Tue Jun 23 23:22:53 1992  Per Bothner  (bothner@cygnus.com)
 
 	* config/mh-posix:  New file, for Posix-compliant systems.
