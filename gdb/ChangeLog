@@ -1,3 +1,8 @@
+Mon Nov 15 12:29:10 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* stack.c(print_frame_info): print demangled function name
+	ansi style.
+
 Mon Nov 15 14:32:29 1993  Steve Chamberlain  (sac@jonny.cygnus.com)
 
     	* remote-e7000.c: New file to cope with the Hitachi E7000 ICE.
