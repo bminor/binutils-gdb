@@ -122,7 +122,7 @@ get_java_class_symtab (void)
 
       /* Allocate GLOBAL_BLOCK.  */
       bl = allocate_block (&objfile->symbol_obstack);
-      BLOCK_DICT (bl) = dict_create_linear_expandable ();
+      BLOCK_DICT (bl) = dict_create_hashed_expandable ();
       BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
       class_symtab->free_func = free_class_block;
     }

@@ -1,3 +1,27 @@
+2003-02-19  David Carlton  <carlton@math.stanford.edu>
+
+	* mdebugread.c (new_block): Add 'function' arg.
+	(parse_symbol): New arg to new_block.
+	(new_symtab): Ditto.
+	(fixup_sigtramp): Ditto.
+	* cp-support.c (initialize_namespace_blocks): Use
+	dict_hashed_expandable instead of dict_linear_expandable.
+	* jv-lang.c (get_java_class_symtab): Ditto.
+	* dictionary.c (enum dict_type): Add DICT_HASHED_EXPANDABLE.
+	(struct dictionary_hashed_expandable): New.
+	(struct dictionary): Add hashed_expandable member.
+	(DICT_EXPANDABLE_INITIAL_CAPACITY): Rename from
+	DICT_LINEAR_EXPANDABLE_INITIAL_CAPACITY.
+	(dict_create_linear_expandable): Use
+	DICT_EXPANDABLE_INITIAL_CAPACITY.
+	(dict_linear_vtbl): New.
+	(dict_create_hashed_expandable): New.
+	(add_symbol_hashed_expandable): New.
+	(dict_create_hashed): Move code into insert_symbol_hashed.
+	(insert_symbol_hashed): New.
+	(expand_hashtable): New.
+	* dictionary.h: Declare dict_create_hashed_expandable.
+
 2003-02-12  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (examine_compound_token): Call decode_namespace.

@@ -429,7 +429,7 @@ initialize_namespace_blocks (void)
 
   /* Allocate GLOBAL_BLOCK, which is namespace_block.  */
   bl = allocate_block (&objfile->symbol_obstack);
-  BLOCK_DICT (bl) = dict_create_linear_expandable ();
+  BLOCK_DICT (bl) = dict_create_hashed_expandable ();
   BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
   namespace_block = bl;
 
@@ -438,7 +438,7 @@ initialize_namespace_blocks (void)
      pretend that it's actually a local block (e.g. by setting
      BLOCK_SUPERBLOCK appropriately).  */
   bl = allocate_block (&objfile->symbol_obstack);
-  BLOCK_DICT (bl) = dict_create_linear_expandable ();
+  BLOCK_DICT (bl) = dict_create_hashed_expandable ();
   BLOCKVECTOR_BLOCK (bv, 2) = bl;
   possible_namespace_block = bl;
 

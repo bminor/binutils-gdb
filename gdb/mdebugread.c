@@ -285,7 +285,7 @@ static struct symbol *new_symbol (char *);
 
 static struct type *new_type (char *);
 
-static struct block *new_block (void);
+static struct block *new_block (int function);
 
 static struct symtab *new_symtab (char *, int, struct objfile *);
 
@@ -832,7 +832,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	TYPE_FLAGS (SYMBOL_TYPE (s)) |= TYPE_FLAG_PROTOTYPED;
 
       /* Create and enter a new lexical context */
-      b = new_block ();
+      b = new_block (1);
       SYMBOL_BLOCK_VALUE (s) = b;
       BLOCK_FUNCTION (b) = s;
       BLOCK_START (b) = BLOCK_END (b) = sh->value;
@@ -1163,7 +1163,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	}
 
       top_stack->blocktype = stBlock;
-      b = new_block ();
+      b = new_block (0);
       BLOCK_START (b) = sh->value + top_stack->procadr;
       BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
       top_stack->cur_block = b;
@@ -4602,8 +4602,8 @@ new_symtab (char *name, int maxlines, struct objfile *objfile)
 
   /* All symtabs must have at least two blocks */
   BLOCKVECTOR (s) = new_bvect (2);
-  global_block = new_block ();
-  static_block = new_block ();
+  global_block = new_block (0);
+  static_block = new_block (0);
   BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK) = global_block;
   BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK) = static_block;
   BLOCK_SUPERBLOCK (static_block) = global_block;
@@ -4690,13 +4690,20 @@ new_bvect (int nblocks)
   return bv;
 }
 
-/* Allocate and zero a new block.  Set its BLOCK_DICT.  */
+/* Allocate and zero a new block, and set its BLOCK_DICT.  If function
+   is non-zero, assume the block is associated to a function, and make
+   sure that the symbols are stored linearly; otherwise, store them
+   hashed.  */
 
 static struct block *
-new_block (void)
+new_block (int function)
 {
   struct block *retval = xzalloc (sizeof (struct block));
-  BLOCK_DICT (retval) = dict_create_linear_expandable ();
+
+  if (function)
+    BLOCK_DICT (retval) = dict_create_linear_expandable ();
+  else
+    BLOCK_DICT (retval) = dict_create_hashed_expandable ();
 
   return retval;
 }
@@ -4824,7 +4831,7 @@ fixup_sigtramp (void)
   TYPE_TARGET_TYPE (SYMBOL_TYPE (s)) = mdebug_type_void;
 
   /* Need a block to allocate MIPS_EFI_SYMBOL_NAME in */
-  b = new_block ();
+  b = new_block (0);
   SYMBOL_BLOCK_VALUE (s) = b;
   BLOCK_START (b) = sigtramp_address;
   BLOCK_END (b) = sigtramp_end;

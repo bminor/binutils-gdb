@@ -102,9 +102,11 @@
 
 enum dict_type
   {
-    /* Symbols are stored in a (fixed-size) hash table.  */
+    /* Symbols are stored in a fixed-size hash table.  */
     DICT_HASHED,
-    /* Symbols are stored in a (fixed-size) array.  */
+    /* Symbols are stored in an expandable hash table.  */
+    DICT_HASHED_EXPANDABLE,
+    /* Symbols are stored in a fixed-size array.  */
     DICT_LINEAR,
     /* Symbols are stored in an expandable array.  */
     DICT_LINEAR_EXPANDABLE,
@@ -144,6 +146,16 @@ struct dictionary_hashed
   struct symbol **buckets;
 };
 
+struct dictionary_hashed_expandable
+{
+  /* How many buckets we currently have.  */
+  int nbuckets;
+  struct symbol **buckets;
+  /* How many syms we currently have; we need this so we will know
+     when to add more buckets.  */
+  int nsyms;
+};
+
 struct dictionary_linear
 {
   int nsyms;
@@ -171,6 +183,7 @@ struct dictionary
   union
   {
     struct dictionary_hashed hashed;
+    struct dictionary_hashed_expandable hashed_expandable;
     struct dictionary_linear linear;
     struct dictionary_linear_expandable linear_expandable;
   }
@@ -181,9 +194,13 @@ struct dictionary
 
 #define DICT_VTBL(d)			(d)->vtbl
 
+/* These can be used for DICT_HASHED_EXPANDABLE, too.  */
+
 #define DICT_HASHED_NBUCKETS(d)		(d)->data.hashed.nbuckets
 #define DICT_HASHED_BUCKETS(d)		(d)->data.hashed.buckets
 #define DICT_HASHED_BUCKET(d,i)		DICT_HASHED_BUCKETS (d) [i]
+
+#define DICT_HASHED_EXPANDABLE_NSYMS(d)	(d)->data.hashed_expandable.nsyms
 
 /* These can be used for DICT_LINEAR_EXPANDABLEs, too.  */
 
@@ -194,9 +211,9 @@ struct dictionary
 #define DICT_LINEAR_EXPANDABLE_CAPACITY(d) \
 		(d)->data.linear_expandable.capacity
 
-/* The initial size of a DICT_LINEAR_EXPANDABLE dictionary.  */
+/* The initial size of a DICT_*_EXPANDABLE dictionary.  */
 
-#define DICT_LINEAR_EXPANDABLE_INITIAL_CAPACITY 10
+#define DICT_EXPANDABLE_INITIAL_CAPACITY 10
 
 /* This calculates the number of buckets we'll use in a hashtable,
    given the number of symbols that it will contain.  */
@@ -216,11 +233,6 @@ struct dictionary
    otherwise, this is unused.  */
 #define DICT_ITERATOR_CURRENT(iter)		(iter)->current
 
-/* Functions to handle some of the common code in dict_iterator_first and
-   dict_iterator_next.  */
-
-static struct symbol *iterator_hashed_advance (struct dict_iterator *iter);
-
 /* Declarations of functions for vtbls.  */
 
 /* Functions that might work across a range of dictionary types.  */
@@ -230,7 +242,8 @@ static void add_symbol_nonexpandable (struct dictionary *dict,
 
 static void free_obstack (struct dictionary *dict);
 
-/* Functions for DICT_HASHED dictionaries.  */
+/* Functions for DICT_HASHED and DICT_HASHED_EXPANDABLE
+   dictionaries.  */
 
 static struct symbol *iterator_first_hashed (const struct dictionary *dict,
 					     struct dict_iterator *iterator);
@@ -243,6 +256,13 @@ static struct symbol *iter_name_first_hashed (const struct dictionary *dict,
 
 static struct symbol *iter_name_next_hashed (const char *name,
 					     struct dict_iterator *iterator);
+
+/* Functions only for DICT_HASHED_EXPANDABLE.  */
+
+static void free_hashed_expandable (struct dictionary *dict);
+
+static void add_symbol_hashed_expandable (struct dictionary *dict,
+					  struct symbol *sym);
 
 /* Functions for DICT_LINEAR and DICT_LINEAR_EXPANDABLE
    dictionaries.  */
@@ -276,6 +296,14 @@ static const struct dict_vtbl dict_hashed_vtbl =
     iter_name_first_hashed, iter_name_next_hashed,
   };
 
+static const struct dict_vtbl dict_hashed_expandable_vtbl =
+  {
+    DICT_HASHED_EXPANDABLE, free_hashed_expandable,
+    add_symbol_hashed_expandable,
+    iterator_first_hashed, iterator_next_hashed,
+    iter_name_first_hashed, iter_name_next_hashed,
+  };
+
 static const struct dict_vtbl dict_linear_vtbl =
   {
     DICT_LINEAR, free_obstack,  add_symbol_nonexpandable,
@@ -290,6 +318,16 @@ static const struct dict_vtbl dict_linear_expandable_vtbl =
     iterator_first_linear, iterator_next_linear,
     iter_name_first_linear, iter_name_next_linear,
   };
+
+/* Declarations of helper functions (i.e. ones that don't go into
+   vtbls).  */
+
+static struct symbol *iterator_hashed_advance (struct dict_iterator *iter);
+
+static void insert_symbol_hashed (struct dictionary *dict,
+				  struct symbol *sym);
+
+static void expand_hashtable (struct dictionary *dict);
 
 /* The creation functions.  */
 
@@ -329,13 +367,29 @@ dict_create_hashed (struct obstack *obstack,
     {
       for (i = list_counter->nsyms - 1; i >= 0; --i)
 	{
-	  struct symbol *sym = list_counter->symbol[i];
-	  unsigned int hash_index;
-	  hash_index = msymbol_hash_iw (SYMBOL_BEST_NAME (sym)) % nbuckets;
-	  sym->hash_next = buckets[hash_index];
-	  buckets[hash_index] = sym;
+	  insert_symbol_hashed (retval, list_counter->symbol[i]);
 	}
     }
+
+  return retval;
+}
+
+/* Create a dictionary implemented via a hashtable that grows as
+   necessary.  The dictionary is initially empty; to add symbols to
+   it, call dict_add_symbol().  Call dict_free() when you're done with
+   it.  */
+
+extern struct dictionary *
+dict_create_hashed_expandable (void)
+{
+  struct dictionary *retval;
+
+  retval = xmalloc (sizeof (struct dictionary));
+  DICT_VTBL (retval) = &dict_hashed_expandable_vtbl;
+  DICT_HASHED_NBUCKETS (retval) = DICT_EXPANDABLE_INITIAL_CAPACITY;
+  DICT_HASHED_BUCKETS (retval) = xcalloc (DICT_EXPANDABLE_INITIAL_CAPACITY,
+					  sizeof (struct symbol *));
+  DICT_HASHED_EXPANDABLE_NSYMS (retval) = 0;
 
   return retval;
 }
@@ -390,12 +444,6 @@ dict_create_linear (struct obstack *obstack,
    it, call dict_add_symbol().  Call dict_free() when you're done with
    it.  */
 
-/* FIXME: carlton/2002-09-11: This environment type exists only to
-   make mdebugread.c and jv-lang.c happy.  The former should be
-   converted over to the buildsym.c mechanisms (or made obsolete, I
-   suggest in an excess of optimism); the latter should perhaps be
-   rethought.  */
-
 struct dictionary *
 dict_create_linear_expandable (void)
 {
@@ -405,7 +453,7 @@ dict_create_linear_expandable (void)
   DICT_VTBL (retval) = &dict_linear_expandable_vtbl;
   DICT_LINEAR_NSYMS (retval) = 0;
   DICT_LINEAR_EXPANDABLE_CAPACITY (retval)
-    = DICT_LINEAR_EXPANDABLE_INITIAL_CAPACITY;
+    = DICT_EXPANDABLE_INITIAL_CAPACITY;
   DICT_LINEAR_SYMS (retval)
     = xmalloc (DICT_LINEAR_EXPANDABLE_CAPACITY (retval)
 	       * sizeof (struct symbol *));
@@ -509,7 +557,7 @@ add_symbol_nonexpandable (struct dictionary *dict, struct symbol *sym)
 		  "dict_add_symbol: non-expandable dictionary");
 }
 
-/* Functions for DICT_HASHED.  */
+/* Functions for DICT_HASHED and DICT_HASHED_EXPANDABLE.  */
 
 static struct symbol *
 iterator_first_hashed (const struct dictionary *dict,
@@ -608,6 +656,75 @@ iter_name_next_hashed (const char *name, struct dict_iterator *iterator)
   DICT_ITERATOR_CURRENT (iterator) = next;
 
   return next;
+}
+
+/* Insert SYM into DICT.  */
+
+static void
+insert_symbol_hashed (struct dictionary *dict,
+		      struct symbol *sym)
+{
+  unsigned int hash_index;
+  struct symbol **buckets = DICT_HASHED_BUCKETS (dict);
+
+  hash_index = (msymbol_hash_iw (SYMBOL_BEST_NAME (sym))
+		% DICT_HASHED_NBUCKETS (dict));
+  sym->hash_next = buckets[hash_index];
+  buckets[hash_index] = sym;
+}
+
+/* Functions only for DICT_HASHED_EXPANDABLE.  */
+
+static void
+free_hashed_expandable (struct dictionary *dict)
+{
+  xfree (DICT_HASHED_BUCKETS (dict));
+  xfree (dict);
+}
+
+static void
+add_symbol_hashed_expandable (struct dictionary *dict,
+			      struct symbol *sym)
+{
+  int nsyms = ++DICT_HASHED_EXPANDABLE_NSYMS (dict);
+
+  if (DICT_HASHTABLE_SIZE (nsyms) > DICT_HASHED_NBUCKETS (dict))
+    expand_hashtable (dict);
+
+  insert_symbol_hashed (dict, sym);
+  DICT_HASHED_EXPANDABLE_NSYMS (dict) = nsyms;
+}
+
+static void
+expand_hashtable (struct dictionary *dict)
+{
+  int old_nbuckets = DICT_HASHED_NBUCKETS (dict);
+  struct symbol **old_buckets = DICT_HASHED_BUCKETS (dict);
+  int new_nbuckets = 2*old_nbuckets + 1;
+  struct symbol **new_buckets = xcalloc (new_nbuckets,
+					 sizeof (struct symbol *));
+  int i;
+
+  DICT_HASHED_NBUCKETS (dict) = new_nbuckets;
+  DICT_HASHED_BUCKETS (dict) = new_buckets;
+
+  for (i = 0; i < old_nbuckets; ++i) {
+    struct symbol *sym, *next_sym;
+
+    sym = old_buckets[i];
+    if (sym != NULL) {
+      for (next_sym = sym->hash_next;
+	   next_sym != NULL;
+	   next_sym = sym->hash_next) {
+	insert_symbol_hashed (dict, sym);
+	sym = next_sym;
+      }
+
+      insert_symbol_hashed (dict, sym);
+    }
+  }
+
+  xfree (old_buckets);
 }
 
 /* Functions for DICT_LINEAR and DICT_LINEAR_EXPANDABLE.  */

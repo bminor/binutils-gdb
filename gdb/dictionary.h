@@ -44,6 +44,13 @@ extern struct dictionary *dict_create_hashed (struct obstack *obstack,
 					      const struct pending
 					      *symbol_list);
 
+/* Create a dictionary implemented via a hashtable that grows as
+   necessary.  The dictionary is initially empty; to add symbols to
+   it, call dict_add_symbol().  Call dict_free() when you're done with
+   it.  */
+
+extern struct dictionary *dict_create_hashed_expandable (void);
+
 /* Create a dictionary implemented via a fixed-size array.  All memory
    it uses is allocated on OBSTACK; the environment is initialized
    from the SYMBOL_LIST.  The symbols are ordered in the same order
@@ -57,12 +64,6 @@ extern struct dictionary *dict_create_linear (struct obstack *obstack,
    necessary.  The dictionary is initially empty; to add symbols to
    it, call dict_add_symbol().  Call dict_free() when you're done with
    it.  */
-
-/* FIXME: carlton/2002-09-11: This environment type exists only to
-   make mdebugread.c and jv-lang.c happy.  The former should be
-   converted over to the buildsym.c mechanisms (or made obsolete, I
-   suggest in an excess of optimism); the latter should probably be
-   rethought.  */
 
 extern struct dictionary *dict_create_linear_expandable (void);
 
