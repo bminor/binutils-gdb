@@ -1,3 +1,8 @@
+2000-05-10  Geoff Keating  <geoffk@cygnus.com>
+
+	* ppc-opc.c (powerpc_opcodes): Make the predicted-branch opcodes
+	also available in common mode when powerpc syntax is being used.
+
 2000-05-08  Alan Modra  <alan@linuxcare.com.au>
 
 	* m68k-dis.c (dummy_printer): Add ATTRIBUTE_UNUSED to args.
