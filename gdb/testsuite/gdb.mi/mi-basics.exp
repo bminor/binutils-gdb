@@ -108,9 +108,9 @@ proc test_exec_and_symbol_mi_operatons {} {
     # -file-symbol-file
 
     # FIXME: file-clear is not implemented yet.
-    mi_gdb_test "-file-clear" \
-             "\\\^done" \
-             "file-clear operation"
+#   mi_gdb_test "-file-clear" \
+#            "\\\^done" \
+#            "file-clear operation"
 
     mi_gdb_test "-file-exec-file ${binfile}" \
              "\\\^done" \

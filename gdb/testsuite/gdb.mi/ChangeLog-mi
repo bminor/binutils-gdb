@@ -1,5 +1,7 @@
 2000-03-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* mi-basics.exp: Comment out test for a still unimplemented operation.
+
 	* mi-disassemble.exp: Rewrite most of the tests to conform to new
  	disassemble interface.
 
