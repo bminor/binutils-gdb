@@ -39,27 +39,25 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	exit 0 ;;
 esac
 
-# uname didn't exit or help; try another approach.
+echo '(No uname command or uname output not recognized.)' 1>&2
+#echo "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" 1>&2
 
 cat >dummy.c <<EOF
 main()
 {
 #if defined (sony)
 #if defined (MIPSEB)
-    exit(1);
 #else
-    printf("m68k-sony-newsos\n");
+  printf("m68k-sony-newsos\n"); exit(0);
 #endif
 #endif
+  exit (1);
 }
 EOF
 
 ${CC-cc} dummy.c -o dummy && dummy && rm dummy.c dummy && exit 0
 rm -f dummy.c dummy
 
-echo "(No uname comamnd or uname output not recognized." 1>&2
-echo "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" 1>&2
-echo "Unable to guess system type)" 1>&2
+echo '(Unable to guess system type)' 1>&2
 
 exit 1
-
