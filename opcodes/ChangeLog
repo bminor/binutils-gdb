@@ -1,3 +1,8 @@
+2004-06-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	2003-07-21  Richard Sandiford  <rsandifo@redhat.com>
+	* disassemble.c (disassembler): Handle bfd_mach_h8300sxn.
+
 2004-06-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (BH, XLBH_MASK): Define.
