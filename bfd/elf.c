@@ -50,6 +50,7 @@ static boolean prep_headers PARAMS ((bfd *));
 static boolean swap_out_syms PARAMS ((bfd *, struct bfd_strtab_hash **, int));
 static boolean copy_private_bfd_data PARAMS ((bfd *, bfd *));
 static char *elf_read PARAMS ((bfd *, file_ptr, bfd_size_type));
+static const char *group_signature PARAMS ((bfd *, Elf_Internal_Shdr *));
 static boolean setup_group PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 static void merge_sections_remove_hook PARAMS ((bfd *, asection *));
 static void elf_fake_sections PARAMS ((bfd *, asection *, PTR));
@@ -361,6 +362,35 @@ typedef union elf_internal_group {
   unsigned int flags;
 } Elf_Internal_Group;
 
+/* Return the name of the group signature symbol.  Why isn't the
+   signature just a string?  */
+
+static const char *
+group_signature (abfd, ghdr)
+     bfd *abfd;
+     Elf_Internal_Shdr *ghdr;
+{
+  struct elf_backend_data *bed;
+  file_ptr pos;
+  unsigned char ename[4];
+  unsigned long iname;
+
+  /* First we need to ensure the symbol table is available.  */
+  if (! bfd_section_from_shdr (abfd, ghdr->sh_link))
+    return NULL;
+
+  /* Fortunately, the name index is at the same place in the external
+     symbol for both 32 and 64 bit ELF.  */
+  bed = get_elf_backend_data (abfd);
+  pos = elf_tdata (abfd)->symtab_hdr.sh_offset;
+  pos += ghdr->sh_info * bed->s->sizeof_sym;
+  if (bfd_seek (abfd, pos, SEEK_SET) != 0
+      || bfd_bread (ename, (bfd_size_type) 4, abfd) != 4)
+    return NULL;
+  iname = H_GET_32 (abfd, ename);
+  return elf_string_from_elf_strtab (abfd, iname);
+}
+
 /* Set next_in_group list pointer, and group name for NEWSECT.  */
 
 static boolean
@@ -440,6 +470,9 @@ setup_group (abfd, hdr, newsect)
 		      if (src == shdr->contents)
 			{
 			  dest->flags = idx;
+			  if (shdr->bfd_section != NULL && (idx & GRP_COMDAT))
+			    shdr->bfd_section->flags
+			      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 			  break;
 			}
 		      if (idx >= shnum)
@@ -492,32 +525,20 @@ setup_group (abfd, hdr, newsect)
 		  }
 		else
 		  {
-		    struct elf_backend_data *bed;
-		    file_ptr pos;
-		    unsigned char ename[4];
-		    unsigned long iname;
 		    const char *gname;
 
-		    /* Humbug.  Get the name from the group signature
-		       symbol.  Why isn't the signature just a string?
-		       Fortunately, the name index is at the same
-		       place in the external symbol for both 32 and 64
-		       bit ELF.  */
-		    bed = get_elf_backend_data (abfd);
-		    pos = elf_tdata (abfd)->symtab_hdr.sh_offset;
-		    pos += shdr->sh_info * bed->s->sizeof_sym;
-		    if (bfd_seek (abfd, pos, SEEK_SET) != 0
-			|| bfd_bread (ename, (bfd_size_type) 4, abfd) != 4)
+		    gname = group_signature (abfd, shdr);
+		    if (gname == NULL)
 		      return false;
-		    iname = H_GET_32 (abfd, ename);
-		    gname = elf_string_from_elf_strtab (abfd, iname);
 		    elf_group_name (newsect) = gname;
 
 		    /* Start a circular list with one element.  */
 		    elf_next_in_group (newsect) = newsect;
 		  }
+
 		if (shdr->bfd_section != NULL)
 		  elf_next_in_group (shdr->bfd_section) = newsect;
+
 		i = num_group - 1;
 		break;
 	      }
@@ -530,6 +551,24 @@ setup_group (abfd, hdr, newsect)
 			     bfd_archive_filename (abfd), newsect->name);
     }
   return true;
+}
+
+void
+bfd_elf_discard_group (abfd, group)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *group;
+{
+  asection *first = elf_next_in_group (group);
+  asection *s = first;
+
+  while (s != NULL)
+    {
+      s->output_section = bfd_abs_section_ptr;
+      s = elf_next_in_group (s);
+      /* These lists are circular.  */
+      if (s == first)
+	break;
+    }
 }
 
 /* Make a BFD section from an ELF section.  We store a pointer to the
@@ -620,7 +659,8 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
      The symbols will be defined as weak, so that multiple definitions
      are permitted.  The GNU linker extension is to actually discard
      all but one of the sections.  */
-  if (strncmp (name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0)
+  if (strncmp (name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0
+      && elf_next_in_group (newsect) == NULL)
     flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 
   bed = get_elf_backend_data (abfd);
@@ -1820,7 +1860,12 @@ bfd_section_from_shdr (abfd, shindex)
       return true;
 
     case SHT_GROUP:
-      /* Make a section for objcopy and relocatable links.  */
+      /* We need a BFD section for objcopy and relocatable linking,
+	 and it's handy to have the signature available as the section
+	 name.  */
+      name = group_signature (abfd, hdr);
+      if (name == NULL)
+	return false;
       if (!_bfd_elf_make_section_from_shdr (abfd, hdr, name))
 	return false;
       if (hdr->contents != NULL)
@@ -1828,6 +1873,10 @@ bfd_section_from_shdr (abfd, shindex)
 	  Elf_Internal_Group *idx = (Elf_Internal_Group *) hdr->contents;
 	  unsigned int n_elt = hdr->sh_size / 4;
 	  asection *s;
+
+	  if (idx->flags & GRP_COMDAT)
+	    hdr->bfd_section->flags
+	      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 
 	  while (--n_elt != 0)
 	    if ((s = (++idx)->shdr->bfd_section) != NULL
@@ -2369,7 +2418,7 @@ set_group_contents (abfd, sec, failedptrarg)
       while (elt != elf_next_in_group (l->u.indirect.section));
 
   loc -= 4;
-  H_PUT_32 (abfd, 0, loc);
+  H_PUT_32 (abfd, sec->flags & SEC_LINK_ONCE ? GRP_COMDAT : 0, loc);
 
   BFD_ASSERT (loc == sec->contents);
 }

@@ -926,11 +926,15 @@ struct bfd_elf_section_data
 
   /* Nonzero if this section uses RELA relocations, rather than REL.  */
   unsigned int use_rela_p:1;
+
+  /* Nonzero when a group is COMDAT.  */
+  unsigned int linkonce_p:1;
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
 #define elf_group_name(sec)    (elf_section_data(sec)->group_name)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
+#define elf_linkonce_p(sec)    (elf_section_data(sec)->linkonce_p)
 
 /* Return true if section has been discarded.  */
 #define elf_discarded_section(sec)					\

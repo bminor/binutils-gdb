@@ -1375,3 +1375,24 @@ _bfd_strip_section_from_output (info, s)
 
   s->flags |= SEC_EXCLUDE;
 }
+
+/*
+FUNCTION
+	bfd_discard_group
+
+SYNOPSIS
+	void bfd_discard_group (bfd *abfd, asection *group);
+
+DESCRIPTION
+	Remove all members of @var{group} from the output.
+*/
+
+void
+bfd_discard_group (abfd, group)
+     bfd *abfd;
+     asection *group;
+{
+  if ((group->flags & SEC_GROUP) != 0
+      && abfd->xvec->flavour == bfd_target_elf_flavour)
+    bfd_elf_discard_group (abfd, group);
+}

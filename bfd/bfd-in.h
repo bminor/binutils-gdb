@@ -657,6 +657,8 @@ extern boolean bfd_elf32_discard_info
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf64_discard_info
   PARAMS ((bfd *, struct bfd_link_info *));
+extern void bfd_elf_discard_group
+  PARAMS ((bfd *, struct sec *));
 
 /* Return an upper bound on the number of bytes required to store a
    copy of ABFD's program header table entries.  Return -1 if an error

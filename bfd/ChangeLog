@@ -1,5 +1,22 @@
 2002-06-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf.c (setup_group): Set SEC_LINK_ONCE on GRP_COMDAT groups.
+	(bfd_section_from_shdr): Likewise.  Set section name of group
+	sections from signature.
+	(group_signature): Split out from setup_group.  Ensure symbol table
+	is available.
+	(bfd_elf_discard_group): New function.
+	(_bfd_elf_make_section_from_shdr): Don't set SEC_LINK_ONCE on
+	.gnu.linkonce* sections if they are members of a group.
+	(set_group_contents): Set GRP_COMDAT flag.
+	* section.c (bfd_discard_group): New function.
+	* bfd-in.h (bfd_elf_discard_group): Declare.
+	* bfd-in2.h: Regenerate.
+	* elf-bfd.h (struct bfd_elf_section_data): Add linkonce_p field.
+	(elf_linkonce_p): Define.
+
+2002-06-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf.c (bfd_section_from_shdr): Make "name" const.
 	* elf-bfd.h (elf_backend_section_from_shdr): Likewise.
 	* elf32-i370.c (i370_elf_section_from_shdr): Likewise.

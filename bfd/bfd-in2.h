@@ -663,6 +663,8 @@ extern boolean bfd_elf32_discard_info
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf64_discard_info
   PARAMS ((bfd *, struct bfd_link_info *));
+extern void bfd_elf_discard_group
+  PARAMS ((bfd *, struct sec *));
 
 /* Return an upper bound on the number of bytes required to store a
    copy of ABFD's program header table entries.  Return -1 if an error
@@ -1449,6 +1451,9 @@ bfd_copy_private_section_data PARAMS ((bfd *ibfd, asection *isec,
                (ibfd, isection, obfd, osection))
 void
 _bfd_strip_section_from_output PARAMS ((struct bfd_link_info *info, asection *section));
+
+void
+bfd_discard_group PARAMS ((bfd *abfd, asection *group));
 
 enum bfd_architecture
 {
