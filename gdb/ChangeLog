@@ -1,5 +1,11 @@
 2001-08-24  Andrew Cagney  <ac131313@redhat.com>
 
+	* regcache.c (read_register_bytes): When REGISTER_NAME indicates
+	that a register should be ignored, supply a value for the register
+	from the raw registers[] buffer.
+
+2001-08-24  Andrew Cagney  <ac131313@redhat.com>
+
 	* go32-nat.c (go32_create_inferior): Use xfree instead of free.
 	* config/djgpp/fnchange.lst: Add entries for i386bsd-tdep.c and
 	i386bsd-nat.c.

@@ -230,9 +230,6 @@ read_register_bytes (int in_start, char *in_buf, int in_len)
       int end;
       int byte;
 
-      if (REGISTER_NAME (regnum) == NULL || *REGISTER_NAME (regnum) == '\0')
-	continue;
-
       reg_start = REGISTER_BYTE (regnum);
       reg_len = REGISTER_RAW_SIZE (regnum);
       reg_end = reg_start + reg_len;
@@ -241,8 +238,18 @@ read_register_bytes (int in_start, char *in_buf, int in_len)
 	/* The range the user wants to read doesn't overlap with regnum.  */
 	continue;
 
-      /* Force the cache to fetch the entire register. */
-      read_register_gen (regnum, reg_buf);
+      if (REGISTER_NAME (regnum) != NULL && *REGISTER_NAME (regnum) != '\0')
+	/* Force the cache to fetch the entire register.  */
+	read_register_gen (regnum, reg_buf);
+      else
+	/* Legacy note: even though this register is ``invalid'' we
+           still need to return something.  It would appear that some
+           code relies on apparent gaps in the register array also
+           being returned.  */
+	/* FIXME: cagney/2001-08-18: This is just silly.  It defeats
+           the entire register read/write flow of control.  Must
+           resist temptation to return 0xdeadbeef.  */
+	memcpy (reg_buf, registers + reg_start, reg_len);
 
       /* Legacy note: This function, for some reason, allows a NULL
          input buffer.  If the buffer is NULL, the registers are still
