@@ -1,3 +1,8 @@
+Mon Dec 18 11:47:19 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* Makefile.in: (configure-target-examples, all-target-examples):
+	New targets, configure and build example programs.
+
 Fri Dec 15 16:13:03 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-configure: If an mpw-config.in generated a file mk.sed,
