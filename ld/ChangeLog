@@ -1,3 +1,8 @@
+2004-04-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldlang.c (lang_do_assignments_1): Handle .tbss output section
+	specially.
+
 2004-04-18  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* scriptempl/pe.sc:  Put numbered .ctors.* after .ctors

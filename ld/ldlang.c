@@ -3350,9 +3350,11 @@ lang_do_assignments_1
 	      {
 		dot = os->bfd_section->vma;
 		lang_do_assignments_1 (os->children.head, os, os->fill, dot);
-		dot = (os->bfd_section->vma
-		       + TO_ADDR (os->bfd_section->_raw_size));
-
+		/* .tbss sections effectively have zero size.  */
+		if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
+		    || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
+		    || link_info.relocatable)
+		  dot += TO_ADDR (os->bfd_section->_raw_size);
 	      }
 	    if (os->load_base)
 	      {
