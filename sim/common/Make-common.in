@@ -73,6 +73,7 @@ SIM_PROFILE = @sim_profile@
 
 SIM_ASSERT = @sim_assert@
 SIM_ALIGNMENT = @sim_alignment@
+SIM_BITSIZE = @sim_bitsize@
 SIM_DEFAULT_MODEL = @sim_default_model@
 SIM_ENDIAN = @sim_endian@
 SIM_FLOAT = @sim_float@
@@ -134,6 +135,7 @@ CONFIG_CFLAGS = @DEFS@ \
 	$(SIM_BSWAP) \
 	$(SIM_ASSERT) \
 	$(SIM_ALIGNMENT) \
+	$(SIM_BITSIZE) \
 	$(SIM_ENDIAN) \
 	$(SIM_FLOAT) \
 	$(SIM_HARDWARE) \
@@ -167,7 +169,7 @@ EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB) \
 
 LIB_OBJS = callback.o targ-map.o $(SIM_OBJS)
 
-all: libsim.a run $(SIM_EXTRA_ALL)
+all: $(SIM_EXTRA_ALL) libsim.a run
 
 libsim.a: $(LIB_OBJS)
 	rm -f libsim.a
@@ -433,7 +435,7 @@ config.h: stamp-h ; @true
 stamp-h: config.in config.status
 	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
 
-.gdbinit: config.status $(srcdir)/../common/gdbinit.in
+.gdbinit: # config.status $(srcdir)/../common/gdbinit.in
 	CONFIG_FILES=$@:../common/gdbinit.in CONFIG_HEADERS= $(SHELL) ./config.status
 
 ## End COMMON_POST_CONFIG_FRAG

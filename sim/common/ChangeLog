@@ -1,3 +1,11 @@
+Mon Oct 13 11:34:50 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-alu.h (ALU64_HAD_OVERFLOW): Define.
+	(ALU64_SUB): Define.
+
+	* Make-common.in (all): Build SIM_EXTRA_ALL first.
+	(.gdbinit): Remove dependencies, generate once per build.
+
 Tue Oct 14 19:20:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-n-core.h (sim_core_read_aligned_N,

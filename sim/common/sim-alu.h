@@ -132,7 +132,7 @@ do { \
 #define ALU64_ADD(VAL) \
 do { \
   unsigned64 val = (VAL); \
-  unsigned64 alu_lo = alu_val + val); \
+  unsigned64 alu_lo = alu_val + val; \
   signed alu_carry = ((alu_lo & LSBIT64 (31)) != 0); \
   alu_carry_val = (alu_carry_val \
 		   + MSEXTRACTED64 (val, 0, 31) \
@@ -186,7 +186,8 @@ do { \
 
 #define ALU64_SUB(VAL) \
 do { \
-  error("ALU_SUB64"); \
+  signed64 subval = -(VAL); /* -MININT? */ \
+  ALU64_ADD (subval); \
 } while (0)
 
 #define ALU_SUB(VAL) XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_SUB)(VAL)
@@ -334,10 +335,14 @@ do { \
   (!(alu_overflow_val & MSBIT32 (0)) != !(alu_overflow_val & MSBIT32 (16)))
   
 #define ALU32_HAD_OVERFLOW \
-  ((((unsigned64)(alu_overflow_val & BIT64(0))) >> 32) \
-   != (alu_overflow_val & MSBIT64(32)))
+  ((((unsigned64)(alu_overflow_val & MSBIT64(0))) >> 32) \
+   != (unsigned64)(alu_overflow_val & MSBIT64(32)))
+
+#define ALU64_HAD_OVERFLOW \
+  ((alu_val & MSBIT64 (0)) != (alu_overflow_val & MSBIT64 (0)))
 
 #define ALU_HAD_OVERFLOW XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_HAD_OVERFLOW)
+
 
 /* carry found in bit before sign */
 
