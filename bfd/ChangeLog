@@ -1,3 +1,8 @@
+2003-09-30  Jakub Jelinek  <jakub@redhat.com>
+
+	* elfxx-ia64.c (ia64_howto_table): Fix size of R_IA64_TPREL64[LM]SB,
+	R_IA64_DTPREL{32,64}[LM]SB and R_IA64_DTPMOD64[LM]SB.
+
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* archures.c (bfd_mach_mipsisa64r2): New define.
