@@ -1,3 +1,13 @@
+2004-10-26  Mark Mitchell  <mark@codesourcery.com>
+
+	* readelf.c (get_note_type): Handle notes not in core files.
+	(process_note_sections): New function.
+	(process_corefile_contents): Rename to ...
+	(process_notes): ... this.
+	(process_object): Call process_notes, not
+	process_corefile_contents.
+	* doc/binutils.texi: Update readelf -n documentation.
+
 2004-10-26  Jakub Jelinek  <jakub@redhat.com>
 
 	* ar.c (extract_file): Set atime to mtime for ar xo.

@@ -3225,8 +3225,8 @@ Display all the headers in the file.  Equivalent to @option{-h -l -S}.
 
 @item -n
 @itemx --notes
-@cindex ELF core notes
-Displays the contents of the NOTE segment, if it exists.
+@cindex ELF notes
+Displays the contents of the NOTE segments and/or sections, if any.
 
 @item -r
 @itemx --relocs

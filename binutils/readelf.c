@@ -10348,24 +10348,49 @@ get_note_type (unsigned e_type)
 {
   static char buff[64];
 
-  switch (e_type)
-    {
-    case NT_AUXV: 	return _("NT_AUXV (auxiliary vector)");
-    case NT_PRSTATUS:	return _("NT_PRSTATUS (prstatus structure)");
-    case NT_FPREGSET:	return _("NT_FPREGSET (floating point registers)");
-    case NT_PRPSINFO:	return _("NT_PRPSINFO (prpsinfo structure)");
-    case NT_TASKSTRUCT:	return _("NT_TASKSTRUCT (task structure)");
-    case NT_PRXFPREG:	return _("NT_PRXFPREG (user_xfpregs structure)");
-    case NT_PSTATUS:	return _("NT_PSTATUS (pstatus structure)");
-    case NT_FPREGS:	return _("NT_FPREGS (floating point registers)");
-    case NT_PSINFO:	return _("NT_PSINFO (psinfo structure)");
-    case NT_LWPSTATUS:	return _("NT_LWPSTATUS (lwpstatus_t structure)");
-    case NT_LWPSINFO:	return _("NT_LWPSINFO (lwpsinfo_t structure)");
-    case NT_WIN32PSTATUS: return _("NT_WIN32PSTATUS (win32_pstatus structure)");
-    default:
-      sprintf (buff, _("Unknown note type: (0x%08x)"), e_type);
-      return buff;
-    }
+  if (elf_header.e_type == ET_CORE)
+    switch (e_type)
+      {
+      case NT_AUXV: 	
+	return _("NT_AUXV (auxiliary vector)");
+      case NT_PRSTATUS:	
+	return _("NT_PRSTATUS (prstatus structure)");
+      case NT_FPREGSET:	
+	return _("NT_FPREGSET (floating point registers)");
+      case NT_PRPSINFO:	
+	return _("NT_PRPSINFO (prpsinfo structure)");
+      case NT_TASKSTRUCT:	
+	return _("NT_TASKSTRUCT (task structure)");
+      case NT_PRXFPREG:	
+	return _("NT_PRXFPREG (user_xfpregs structure)");
+      case NT_PSTATUS:	
+	return _("NT_PSTATUS (pstatus structure)");
+      case NT_FPREGS:	
+	return _("NT_FPREGS (floating point registers)");
+      case NT_PSINFO:	
+	return _("NT_PSINFO (psinfo structure)");
+      case NT_LWPSTATUS:	
+	return _("NT_LWPSTATUS (lwpstatus_t structure)");
+      case NT_LWPSINFO:	
+	return _("NT_LWPSINFO (lwpsinfo_t structure)");
+      case NT_WIN32PSTATUS: 
+	return _("NT_WIN32PSTATUS (win32_pstatus structure)");
+      default:
+	break;
+      }
+  else
+    switch (e_type)
+      {
+      case NT_VERSION:
+	return _("NT_VERSION (version)");
+      case NT_ARCH:
+	return _("NT_ARCH (architecture)");
+      default:
+	break;
+      }
+
+  sprintf (buff, _("Unknown note type: (0x%08x)"), e_type);
+  return buff;
 }
 
 static const char *
@@ -10440,22 +10465,18 @@ process_note (Elf_Internal_Note *pnote)
   const char *nt;
 
   if (pnote->namesz == 0)
-    {
-      /* If there is no note name, then use the default set of
-	 note type strings.  */
-      nt = get_note_type (pnote->type);
-    }
+    /* If there is no note name, then use the default set of
+       note type strings.  */
+    nt = get_note_type (pnote->type);
+
   else if (strncmp (pnote->namedata, "NetBSD-CORE", 11) == 0)
-    {
-      /* NetBSD-specific core file notes.  */
-      nt = get_netbsd_elfcore_note_type (pnote->type);
-    }
+    /* NetBSD-specific core file notes.  */
+    nt = get_netbsd_elfcore_note_type (pnote->type);
+
   else
-    {
-      /* Don't recognize this note name; just use the default set of
-	 note type strings.  */
+    /* Don't recognize this note name; just use the default set of
+       note type strings.  */
       nt = get_note_type (pnote->type);
-    }
 
   printf ("  %s\t\t0x%08lx\t%s\n",
 	  pnote->namesz ? pnote->namedata : "(NONE)",
@@ -10570,24 +10591,39 @@ process_corefile_note_segments (FILE *file)
 }
 
 static int
-process_corefile_contents (FILE *file)
+process_note_sections (FILE *file)
+{
+  Elf_Internal_Shdr *section;
+  unsigned long i;
+  int res = 1;
+
+  for (i = 0, section = section_headers;
+       i < elf_header.e_shnum;
+       i++, section++)
+    if (section->sh_type == SHT_NOTE)
+      res &= process_corefile_note_segment (file,
+					    (bfd_vma) section->sh_offset,
+					    (bfd_vma) section->sh_size);
+
+  return res;
+}
+
+static int
+process_notes (FILE *file)
 {
   /* If we have not been asked to display the notes then do nothing.  */
   if (! do_notes)
     return 1;
 
-  /* If file is not a core file then exit.  */
   if (elf_header.e_type != ET_CORE)
-    return 1;
+    return process_note_sections (file);
 
   /* No program headers means no NOTE segment.  */
-  if (elf_header.e_phnum == 0)
-    {
-      printf (_("No note segments present in the core file.\n"));
-      return 1;
-   }
+  if (elf_header.e_phnum > 0)
+    return process_corefile_note_segments (file);
 
-  return process_corefile_note_segments (file);
+  printf (_("No note segments present in the core file.\n"));
+  return 1;
 }
 
 static int
@@ -10756,7 +10792,7 @@ process_object (char *file_name, FILE *file)
 
   process_section_contents (file);
 
-  process_corefile_contents (file);
+  process_notes (file);
 
   process_gnu_liblist (file);
 
