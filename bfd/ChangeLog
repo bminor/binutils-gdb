@@ -1,3 +1,8 @@
+2002-05-04  Bob Byrnes  <byrnes@curl.com>
+
+	* opncls.c (_bfd_new_bfd_contained_in): Check return value of
+	_bfd_new_bfd.
+
 2002-05-03  H.J. Lu  (hjl@gnu.org)
 
 	* elfxx-mips.c (mips_elf_link_hash_entry): Add forced_local.

@@ -93,6 +93,8 @@ _bfd_new_bfd_contained_in (obfd)
   bfd *nbfd;
 
   nbfd = _bfd_new_bfd ();
+  if (nbfd == NULL)
+    return NULL;
   nbfd->xvec = obfd->xvec;
   nbfd->my_archive = obfd;
   nbfd->direction = read_direction;
