@@ -3887,7 +3887,7 @@ removed to avoid conflicts with other assemblers.  @xref{Machine Dependencies}.
 @cindex @code{fill} directive
 @cindex writing patterns in memory
 @cindex patterns, writing in memory
-@var{result}, @var{size} and @var{value} are absolute expressions.
+@var{repeat}, @var{size} and @var{value} are absolute expressions.
 This emits @var{repeat} copies of @var{size} bytes.  @var{Repeat}
 may be zero or more.  @var{Size} may be zero or more, but if it is
 more than 8, then it is deemed to have the value 8, compatible with
