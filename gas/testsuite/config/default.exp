@@ -2,13 +2,27 @@ load_lib gas-defs.exp
 
 global AS
 if ![info exists AS] then {
-    set AS [findfile $base_dir/as.new "as.new" [transform as]]
+    set AS [findfile $base_dir/../as.new "../as.new" [transform as]]
+}
 
+global GASP
+if ![info exists GASP] then {
+    set GASP [findfile $base_dir/../gasp.new "../gasp.new" [transform gasp]]
 }
 
 global ASFLAGS
 if ![info exists ASFLAGS] then {
     set ASFLAGS ""
+}
+
+if ![info exists OBJDUMP] then {
+    set OBJDUMP [findfile $base_dir/../../binutils/objdump \
+			  $base_dir/../../binutils/objdump \
+			  [transform objdump]]
+}
+
+if ![info exists OBJDUMPFLAGS] then {
+    set OBJDUMPFLAGS {}
 }
 
 gas_init
