@@ -1,3 +1,11 @@
+Wed Mar 13 17:47:31 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* scripttempl/h8300.sc: Change name of page zero memory
+	from "null" to "vectors".  Create an output section for
+	vectors.  Add comments on how to explicitly place items
+	in the vector table.
+	* scripttempl/h8300h.sc: Likewise.
+
 Wed Mar 13 12:40:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/lnk960.em (machine_table): Add jx and hx.
