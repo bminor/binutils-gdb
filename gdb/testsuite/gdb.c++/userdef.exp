@@ -66,6 +66,23 @@ send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
 
 gdb_test "print one + two" "\\\$\[0-9\]* = {x = 6, y = 8}"
 
+# If GDB fails to restore the selected frame properly after the
+# inferior function call above (see GDB PR 1155 for an explanation of
+# why this might happen), all the subsequent tests will fail.  We
+# should detect report that failure, but let the marker call finish so
+# that the rest of the tests can run undisturbed.
+gdb_test_multiple "frame" "re-selected 'main' frame after inferior call" {
+    -re "#0  marker1.*$gdb_prompt $" {
+        setup_kfail "gdb/1155" s390-*-linux-gnu
+        fail "re-selected 'main' frame after inferior call"
+        gdb_test "finish" ".*main.*at .*userdef.cc:27\[67\].*" \
+                "finish call to marker1"
+    }
+    -re "#1  ($hex in )?main.*$gdb_prompt $" {
+        pass "re-selected 'main' frame after inferior call"
+    }
+}
+        
 gdb_test "print one - two" "\\\$\[0-9\]* = {x = -2, y = -2}"
 
 gdb_test "print one * two" "\\\$\[0-9\]* = {x = 8, y = 15}"

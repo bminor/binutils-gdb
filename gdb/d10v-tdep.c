@@ -488,17 +488,6 @@ d10v_extract_struct_value_address (struct regcache *regcache)
   return (addr | DMEM_START);
 }
 
-/* Immediately after a function call, return the saved pc.  We can't
-   use frame->return_pc beause that is determined by reading R13 off
-   the stack and that may not be written yet. */
-
-static CORE_ADDR
-d10v_saved_pc_after_call (struct frame_info *frame)
-{
-  return ((read_register (LR_REGNUM) << 2)
-	  | IMEM_START);
-}
-
 static int
 check_prologue (unsigned short op)
 {
@@ -1553,6 +1542,7 @@ d10v_frame_prev_register (struct frame_info *next_frame,
 }
 
 static const struct frame_unwind d10v_frame_unwind = {
+  NORMAL_FRAME,
   d10v_frame_this_id,
   d10v_frame_prev_register
 };
@@ -1587,7 +1577,6 @@ static struct frame_id
 d10v_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST base;
-  struct frame_id id;
   frame_unwind_unsigned_register (next_frame, SP_REGNUM, &base);
   return frame_id_build (d10v_make_daddr (base), frame_pc_unwind (next_frame));
 }
@@ -1700,7 +1689,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
 
-  set_gdbarch_saved_pc_after_call (gdbarch, d10v_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_stack_align (gdbarch, d10v_stack_align);
 

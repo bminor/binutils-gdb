@@ -383,9 +383,8 @@ dummy_frame_this_id (struct frame_info *next_frame,
          get_prev_frame code has already created THIS frame and linked
          it in to the frame chain (a pretty bold assumption), extract
          the ID from THIS base / pc.  */
-      (*this_id)
-	= frame_id_build (get_frame_base (get_prev_frame (next_frame)),
-			  get_frame_pc (get_prev_frame (next_frame)));
+      (*this_id) = frame_id_build (get_frame_base (get_prev_frame (next_frame)),
+				   get_frame_pc (get_prev_frame (next_frame)));
     }
   else
     {
@@ -398,12 +397,13 @@ dummy_frame_this_id (struct frame_info *next_frame,
       (*this_id) = null_frame_id;
       return;
     }
-  (*this_prologue_cache) = find_dummy_frame ((*this_id).func_addr,
+  (*this_prologue_cache) = find_dummy_frame ((*this_id).code_addr,
 					     (*this_id).stack_addr);
 }
 
 static struct frame_unwind dummy_frame_unwind =
 {
+  DUMMY_FRAME,
   dummy_frame_this_id,
   dummy_frame_prev_register
 };

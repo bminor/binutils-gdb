@@ -728,9 +728,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of unwind_pc, has predicate */
   /* Skip verify of frame_args_address, invalid_p == 0 */
   /* Skip verify of frame_locals_address, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->saved_pc_after_call == 0))
-    fprintf_unfiltered (log, "\n\tsaved_pc_after_call");
+  /* Skip verify of saved_pc_after_call, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_num_args == 0))
     fprintf_unfiltered (log, "\n\tframe_num_args");
@@ -2151,6 +2149,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: RETURN_VALUE_ON_STACK = <0x%08lx>\n",
                         (long) current_gdbarch->return_value_on_stack
                         /*RETURN_VALUE_ON_STACK ()*/);
+#endif
+#ifdef SAVED_PC_AFTER_CALL_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SAVED_PC_AFTER_CALL_P()",
+                      XSTRING (SAVED_PC_AFTER_CALL_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: SAVED_PC_AFTER_CALL_P() = %d\n",
+                      SAVED_PC_AFTER_CALL_P ());
 #endif
 #ifdef SAVED_PC_AFTER_CALL
   fprintf_unfiltered (file,
@@ -4900,6 +4907,13 @@ set_gdbarch_frame_locals_address (struct gdbarch *gdbarch,
                                   gdbarch_frame_locals_address_ftype frame_locals_address)
 {
   gdbarch->frame_locals_address = frame_locals_address;
+}
+
+int
+gdbarch_saved_pc_after_call_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->saved_pc_after_call != 0;
 }
 
 CORE_ADDR

@@ -312,11 +312,11 @@ call_dummy
   for (i = 0; i < NUM_REGS; i++) \
     { \
       if (i == SP_REGNUM) \
-        (FSR)->regs[SP_REGNUM] = read_memory_integer (TMP1 + SP_REGNUM * 8, 8); \
+        (FSR)[SP_REGNUM] = read_memory_integer (TMP1 + SP_REGNUM * 8, 8); \
       else if (i >= FP0_REGNUM) \
-        (FSR)->regs[i] = TMP2 + (i - FP0_REGNUM) * 8; \
+        (FSR)[i] = TMP2 + (i - FP0_REGNUM) * 8; \
       else \
-        (FSR)->regs[i] = TMP1 + i * 8; \
+        (FSR)[i] = TMP1 + i * 8; \
     } \
 }
 

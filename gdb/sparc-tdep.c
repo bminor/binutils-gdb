@@ -41,6 +41,7 @@
 #endif
 
 #include "gdbcore.h"
+#include "gdb_assert.h"
 
 #include "symfile.h" 	/* for 'entry_point_address' */
 
@@ -436,16 +437,17 @@ sparc_frame_chain (struct frame_info *frame)
      about the chain value.  If it really is zero, we detect it later
      in sparc_init_prev_frame.
      
-     Note:  kevinb/2003-02-18:  The constant 1 used to be returned
-     here, but, after some recent changes to frame_chain_valid(),
-     this value is no longer suitable for causing frame_chain_valid()
-     to "not worry about the chain value."  The constant ~0 (i.e,
-     0xfff...) causes the failing test in frame_chain_valid() to
-     succeed thus preserving the "not worry" property.  I had considered
-     using something like ``get_frame_base (frame) + 1''.  However, I think
-     a constant value is better, because when debugging this problem,
-     I knew that something funny was going on as soon as I saw the
-     constant 1 being used as the frame chain elsewhere in GDB.  */
+     Note: kevinb/2003-02-18: The constant 1 used to be returned here,
+     but, after some recent changes to legacy_frame_chain_valid(),
+     this value is no longer suitable for causing
+     legacy_frame_chain_valid() to "not worry about the chain value."
+     The constant ~0 (i.e, 0xfff...) causes the failing test in
+     legacy_frame_chain_valid() to succeed thus preserving the "not
+     worry" property.  I had considered using something like
+     ``get_frame_base (frame) + 1''.  However, I think a constant
+     value is better, because when debugging this problem, I knew that
+     something funny was going on as soon as I saw the constant 1
+     being used as the frame chain elsewhere in GDB.  */
 
   return ~ (CORE_ADDR) 0;
 }
@@ -1133,9 +1135,7 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
   register int regnum;
   CORE_ADDR frame_addr = get_frame_base (fi);
 
-  if (!fi)
-    internal_error (__FILE__, __LINE__,
-		    "Bad frame info struct in FRAME_FIND_SAVED_REGS");
+  gdb_assert (fi != NULL);
 
   memset (saved_regs_addr, 0, NUM_REGS * sizeof (CORE_ADDR));
 

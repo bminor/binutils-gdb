@@ -20,8 +20,37 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "defs.h"
 
 #include "gdb_string.h"
+#include "gdbcore.h"
 #include "i386-tdep.h"
 #include "osabi.h"
+#include "frame.h"
+#include "dummy-frame.h"
+
+static int
+i386_cygwin_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
+{
+  /* In the context where this is used, we get the saved PC before we've
+     successfully unwound far enough to be sure what we've got (it may
+     be a signal handler caller).  If we're dealing with a signal
+     handler caller, this will return valid, which is fine.  If not,
+     it'll make the correct test.  */
+  return ((get_frame_type (thisframe) == SIGTRAMP_FRAME) || chain != 0);
+}
+/* Return the chain-pointer for FRAME.  In the case of the i386, the
+   frame's nominal address is the address of a 4-byte word containing
+   the calling frame's address.  */
+static CORE_ADDR
+i386_cygwin_frame_chain (struct frame_info *frame)
+{
+  if (pc_in_dummy_frame (get_frame_pc (frame)))
+    return get_frame_base (frame);
+
+  if (get_frame_type (frame) == SIGTRAMP_FRAME
+      || i386_frameless_signal_p (frame))
+    return get_frame_base (frame);
+
+  return read_memory_unsigned_integer (get_frame_base (frame), 4);
+}
 
 static void
 i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -29,6 +58,8 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   tdep->struct_return = reg_struct_return;
+  set_gdbarch_deprecated_frame_chain (gdbarch, i386_cygwin_frame_chain);
+  set_gdbarch_deprecated_frame_chain_valid (gdbarch, i386_cygwin_frame_chain_valid);
 }
 
 static enum gdb_osabi

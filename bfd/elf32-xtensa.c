@@ -1893,6 +1893,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
       bfd_reloc_status_type r;
       bfd_boolean is_weak_undef;
       bfd_boolean unresolved_reloc;
+      bfd_boolean warned;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == (int) R_XTENSA_GNU_VTINHERIT
@@ -1983,6 +1984,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
       sec = NULL;
       is_weak_undef = FALSE;
       unresolved_reloc = FALSE;
+      warned = FALSE;
 
       if (howto->partial_inplace)
 	{
@@ -2039,10 +2041,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 		      (!info->shared || info->no_undefined
 		       || ELF_ST_VISIBILITY (h->other)))))
 		return FALSE;
-
-	      /* To avoid any more warning messages, like "call out of
-		 range", we continue immediately to the next relocation.  */
-	      continue;
+	      warned = TRUE;
 	    }
 	}
 
@@ -2171,7 +2170,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 			       contents, rel->r_offset, is_weak_undef,
 			       &error_message);
       
-      if (r != bfd_reloc_ok)
+      if (r != bfd_reloc_ok && !warned)
 	{
 	  const char *name;
 

@@ -1178,7 +1178,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
     }
   else
     {    
-      ip = get_pc_function_start (get_frame_pc (fi));
+      ip = get_frame_func (fi);
       sal = find_pc_line (ip, 0);
 
       /* If there is no symbol information then sal.end == 0, and we end up

@@ -669,7 +669,14 @@ cd ${srcdir}
 set fullsrcdir [pwd]
 cd ${mydir}
 
-gdb_test "cd ${fullsrcdir}" "Working directory ${fullsrcdir}.*" "cd to \${srcdir}"
+# If the directory name contains a '+' we must escape it, adding a backslash.
+# If not, the test below will fail because it will interpret the '+' as a 
+# regexp operator. We use string_to_regexp for this purpose.
+
+gdb_test "cd ${fullsrcdir}" \
+         "Working directory [string_to_regexp ${fullsrcdir}].*" \
+         "cd to \${srcdir}"
+
 send_gdb "file ./gdb.base/compl\t"
 sleep 1
 gdb_expect  {

@@ -518,8 +518,8 @@ F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc::0:0
 # behaviour here (and hence entrench it further) gdbarch simply
 # reqires that these methods be set up from the word go.  This also
 # avoids any potential problems with moving beyond multi-arch partial.
-v:1:DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
-v:1:CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
+v::DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
+v::CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
 f::CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void::::entry_point_address::0
 v::CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset
 v::CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:call_dummy_breakpoint_offset
@@ -529,7 +529,7 @@ v::CALL_DUMMY_LENGTH:int:call_dummy_length
 # is false, the corresponding function works.  This simplifies the
 # migration process - old code, calling DEPRECATED_PC_IN_CALL_DUMMY(),
 # doesn't need to be modified.
-F:1:DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::generic_pc_in_call_dummy:generic_pc_in_call_dummy
+F::DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::generic_pc_in_call_dummy:generic_pc_in_call_dummy
 v::CALL_DUMMY_WORDS:LONGEST *:call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
 v::SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0
 V:2:DEPRECATED_CALL_DUMMY_STACK_ADJUST:int:deprecated_call_dummy_stack_adjust::::0
@@ -599,7 +599,7 @@ F:2:DEPRECATED_FRAME_SAVED_PC:CORE_ADDR:deprecated_frame_saved_pc:struct frame_i
 M::UNWIND_PC:CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame:
 f:2:FRAME_ARGS_ADDRESS:CORE_ADDR:frame_args_address:struct frame_info *fi:fi::0:get_frame_base::0
 f:2:FRAME_LOCALS_ADDRESS:CORE_ADDR:frame_locals_address:struct frame_info *fi:fi::0:get_frame_base::0
-f:2:SAVED_PC_AFTER_CALL:CORE_ADDR:saved_pc_after_call:struct frame_info *frame:frame::0:0
+F::SAVED_PC_AFTER_CALL:CORE_ADDR:saved_pc_after_call:struct frame_info *frame:frame
 f:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame::0:0
 #
 F:2:STACK_ALIGN:CORE_ADDR:stack_align:CORE_ADDR sp:sp::0:0
@@ -819,18 +819,6 @@ extern struct gdbarch *current_gdbarch;
 
 /* If any of the following are defined, the target wasn't correctly
    converted. */
-
-#if GDB_MULTI_ARCH
-#if defined (EXTRA_FRAME_INFO)
-#error "EXTRA_FRAME_INFO: replaced by struct frame_extra_info"
-#endif
-#endif
-
-#if GDB_MULTI_ARCH
-#if defined (FRAME_FIND_SAVED_REGS)
-#error "FRAME_FIND_SAVED_REGS: replaced by DEPRECATED_FRAME_INIT_SAVED_REGS"
-#endif
-#endif
 
 #if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PURE) && defined (GDB_TM_FILE)
 #error "GDB_TM_FILE: Pure multi-arch targets do not have a tm.h file."

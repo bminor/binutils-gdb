@@ -199,8 +199,10 @@ value_nsstring (char *ptr, int len)
   if (!target_has_execution)
     return 0;		/* Can't call into inferior to create NSString.  */
 
-  if (!(sym = lookup_struct_typedef("NSString", 0, 1)) &&
-      !(sym = lookup_struct_typedef("NXString", 0, 1)))
+  sym = lookup_struct_typedef("NSString", 0, 1);
+  if (sym == NULL)
+    sym = lookup_struct_typedef("NXString", 0, 1);
+  if (sym == NULL)
     type = lookup_pointer_type(builtin_type_void);
   else
     type = lookup_pointer_type(SYMBOL_TYPE (sym));
@@ -369,8 +371,6 @@ objc_printstr (struct ui_file *stream, char *string,
   int in_quotes = 0;
   int need_comma = 0;
   extern int inspect_it;
-  extern int repeat_count_threshold;
-  extern int print_max;
 
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in
@@ -890,16 +890,17 @@ selectors_info (char *regexp, int from_tty)
     }
 
   if (regexp != NULL)
-    if (0 != (val = re_comp (myregexp)))
-      error ("Invalid regexp (%s): %s", val, regexp);
+    {
+      val = re_comp (myregexp);
+      if (val != 0)
+	error ("Invalid regexp (%s): %s", val, regexp);
+    }
 
   /* First time thru is JUST to get max length and count.  */
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
-      name = SYMBOL_DEMANGLED_NAME (msymbol);
-      if (name == NULL)
-	name = DEPRECATED_SYMBOL_NAME (msymbol);
+      name = SYMBOL_NATURAL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
 	  name[1] == '[')		/* Got a method name.  */
@@ -930,9 +931,7 @@ selectors_info (char *regexp, int from_tty)
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  name = SYMBOL_DEMANGLED_NAME (msymbol);
-	  if (name == NULL)
-	    name = DEPRECATED_SYMBOL_NAME (msymbol);
+	  name = SYMBOL_NATURAL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')		/* Got a method name.  */
@@ -956,9 +955,7 @@ selectors_info (char *regexp, int from_tty)
 	  char *p = asel;
 
 	  QUIT;
-	  name = SYMBOL_DEMANGLED_NAME (sym_arr[ix]);
-	  if (name == NULL)
-	    name = DEPRECATED_SYMBOL_NAME (sym_arr[ix]);
+	  name = SYMBOL_NATURAL_NAME (sym_arr[ix]);
 	  name = strchr (name, ' ') + 1;
 	  if (p[0] && specialcmp(name, p) == 0)
 	    continue;		/* Seen this one already (not unique).  */
@@ -1033,16 +1030,17 @@ classes_info (char *regexp, int from_tty)
     }
 
   if (regexp != NULL)
-    if (0 != (val = re_comp (myregexp)))
-      error ("Invalid regexp (%s): %s", val, regexp);
+    {
+      val = re_comp (myregexp);
+      if (val != 0)
+	error ("Invalid regexp (%s): %s", val, regexp);
+    }
 
   /* First time thru is JUST to get max length and count.  */
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
-      name = SYMBOL_DEMANGLED_NAME (msymbol);
-      if (name == NULL)
-	name = DEPRECATED_SYMBOL_NAME (msymbol);
+      name = SYMBOL_NATURAL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
 	  name[1] == '[')			/* Got a method name.  */
@@ -1066,9 +1064,7 @@ classes_info (char *regexp, int from_tty)
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  name = SYMBOL_DEMANGLED_NAME (msymbol);
-	  if (name == NULL)
-	    name = DEPRECATED_SYMBOL_NAME (msymbol);
+	  name = SYMBOL_NATURAL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')			/* Got a method name.  */
@@ -1085,9 +1081,7 @@ classes_info (char *regexp, int from_tty)
 	  char *p = aclass;
 
 	  QUIT;
-	  name = SYMBOL_DEMANGLED_NAME (sym_arr[ix]);
-	  if (name == NULL)
-	    name = DEPRECATED_SYMBOL_NAME (sym_arr[ix]);
+	  name = SYMBOL_NATURAL_NAME (sym_arr[ix]);
 	  name += 2;
 	  if (p[0] && specialcmp(name, p) == 0)
 	    continue;	/* Seen this one already (not unique).  */
@@ -1348,9 +1342,7 @@ find_methods (struct symtab *symtab, char type,
 	  /* Not in the specified symtab.  */
 	  continue;
 
-      symname = SYMBOL_DEMANGLED_NAME (msymbol);
-      if (symname == NULL)
-	symname = DEPRECATED_SYMBOL_NAME (msymbol);
+      symname = SYMBOL_NATURAL_NAME (msymbol);
       if (symname == NULL)
 	continue;
 
@@ -1386,10 +1378,8 @@ find_methods (struct symtab *symtab, char type,
       sym = find_pc_function (SYMBOL_VALUE_ADDRESS (msymbol));
       if (sym != NULL)
         {
-          const char *newsymname = SYMBOL_DEMANGLED_NAME (sym);
+          const char *newsymname = SYMBOL_NATURAL_NAME (sym);
 	  
-          if (newsymname == NULL)
-            newsymname = DEPRECATED_SYMBOL_NAME (sym);
           if (strcmp (symname, newsymname) == 0)
             {
               /* Found a high-level method sym: swap it into the
@@ -1730,7 +1720,10 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
   unsigned int i;
 
   find_objc_msgsend ();
-  if (new_pc != NULL) { *new_pc = 0; }
+  if (new_pc != NULL)
+    {
+      *new_pc = 0;
+    }
 
   for (i = 0; i < nmethcalls; i++) 
     if ((pc >= methcalls[i].begin) && (pc < methcalls[i].end)) 

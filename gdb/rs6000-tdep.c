@@ -990,7 +990,7 @@ rs6000_pop_frame (void)
      still in the link register, otherwise walk the frames and retrieve the
      saved %pc value in the previous frame.  */
 
-  addr = get_pc_function_start (get_frame_pc (frame));
+  addr = get_frame_func (frame);
   (void) skip_prologue (addr, get_frame_pc (frame), &fdata);
 
   wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
@@ -1499,7 +1499,7 @@ rs6000_frameless_function_invocation (struct frame_info *fi)
       && !(get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
     return 0;
 
-  func_start = get_pc_function_start (get_frame_pc (fi));
+  func_start = get_frame_func (fi);
 
   /* If we failed to find the start of the function, it is a mistake
      to inspect the instructions.  */
@@ -1540,7 +1540,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
     return deprecated_read_register_dummy (get_frame_pc (fi),
 					   get_frame_base (fi), PC_REGNUM);
 
-  func_start = get_pc_function_start (get_frame_pc (fi));
+  func_start = get_frame_func (fi);
 
   /* If we failed to find the start of the function, it is a mistake
      to inspect the instructions.  */
@@ -1596,8 +1596,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   if (fdatap == NULL)
     {
       fdatap = &work_fdata;
-      (void) skip_prologue (get_pc_function_start (get_frame_pc (fi)),
-			    get_frame_pc (fi), fdatap);
+      (void) skip_prologue (get_frame_func (fi), get_frame_pc (fi), fdatap);
     }
 
   frame_saved_regs_zalloc (fi);
@@ -1647,7 +1646,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
       CORE_ADDR gpr_addr = frame_addr + fdatap->gpr_offset;
       for (i = fdatap->saved_gpr; i < 32; i++)
 	{
-	  get_frame_saved_regs (fi)[i] = gpr_addr;
+	  get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = gpr_addr;
 	  gpr_addr += wordsize;
 	}
     }
@@ -1720,8 +1719,7 @@ frame_initial_stack_address (struct frame_info *fi)
 
   /* Find out if this function is using an alloca register.  */
 
-  (void) skip_prologue (get_pc_function_start (get_frame_pc (fi)),
-			get_frame_pc (fi), &fdata);
+  (void) skip_prologue (get_frame_func (fi), get_frame_pc (fi), &fdata);
 
   /* If saved registers of this frame are not known yet, read and
      cache them.  */
@@ -1894,8 +1892,8 @@ rs6000_register_convert_to_virtual (int n, struct type *type,
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
-      double val = extract_floating (from, REGISTER_RAW_SIZE (n));
-      store_floating (to, TYPE_LENGTH (type), val);
+      double val = deprecated_extract_floating (from, REGISTER_RAW_SIZE (n));
+      deprecated_store_floating (to, TYPE_LENGTH (type), val);
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));
@@ -1910,8 +1908,8 @@ rs6000_register_convert_to_raw (struct type *type, int n,
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
-      double val = extract_floating (from, TYPE_LENGTH (type));
-      store_floating (to, REGISTER_RAW_SIZE (n), val);
+      double val = deprecated_extract_floating (from, TYPE_LENGTH (type));
+      deprecated_store_floating (to, REGISTER_RAW_SIZE (n), val);
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));
@@ -2741,9 +2739,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     {
       arch = bfd_arch_powerpc;
-      mach = 0;
-      bfd_default_set_arch_mach (&abfd, arch, mach);
+      bfd_default_set_arch_mach (&abfd, arch, 0);
       info.bfd_arch_info = bfd_get_arch_info (&abfd);
+      mach = info.bfd_arch_info->mach;
     }
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   tdep->wordsize = wordsize;
