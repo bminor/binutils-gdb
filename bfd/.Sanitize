@@ -41,8 +41,9 @@ Things-to-keep:
 
 COPYING
 ChangeLog
-ChangeLog.1
-ChangeLog.2
+ChangeLog-9193
+ChangeLog-9495
+ChangeLog-9697
 Makefile.am
 Makefile.in
 PORTING
