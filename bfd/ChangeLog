@@ -29,7 +29,8 @@
 
 2002-09-17  Jakub Jelinek  <jakub@redhat.com>
 
-	* elf_i386_relocate_section (R_386_TLS_TPOFF32): Negate addend.
+	* elf32-i386.c (elf_i386_relocate_section) [R_386_TLS_TPOFF32]: Negate
+	addend.
 
 2002-09-17  Alan Modra  <amodra@bigpond.net.au>
 
