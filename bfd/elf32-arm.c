@@ -4607,6 +4607,35 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   return TRUE;
 }
 
+/* Find any dynamic relocs that apply to read-only sections.  */
+
+static bfd_boolean
+elf32_arm_readonly_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
+{
+  struct elf32_arm_link_hash_entry *eh;
+  struct elf32_arm_relocs_copied *p;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  eh = (struct elf32_arm_link_hash_entry *) h;
+  for (p = eh->relocs_copied; p != NULL; p = p->next)
+    {
+      asection *s = p->section;
+
+      if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	{
+	  struct bfd_link_info *info = (struct bfd_link_info *) inf;
+
+	  info->flags |= DF_TEXTREL;
+
+	  /* Not an error, just cut short the traversal.  */
+	  return FALSE;
+	}
+    }
+  return TRUE;
+}
+
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -4814,6 +4843,12 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	      || !add_dynamic_entry (DT_RELENT, sizeof (Elf32_External_Rel)))
 	    return FALSE;
 	}
+
+      /* If any dynamic relocs apply to a read-only section,
+	 then we need a DT_TEXTREL entry.  */
+      if ((info->flags & DF_TEXTREL) == 0)
+	elf_link_hash_traverse (&htab->root, elf32_arm_readonly_dynrelocs,
+				(PTR) info);
 
       if ((info->flags & DF_TEXTREL) != 0)
 	{

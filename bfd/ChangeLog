@@ -1,3 +1,9 @@
+2004-11-09  Daniel Jacobowitz  <dan@debian.org>
+
+	From David Poole <daveml@mbuf.com>:
+	* elf32-arm.c (elf32_arm_readonly_dynrelocs): New function.
+	(elf32_arm_size_dynamic_sections): Call it.
+
 2004-11-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (SOURCE_HFILES): Remove elf32-arm.h.
