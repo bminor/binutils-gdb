@@ -44,12 +44,12 @@ void
 alphabsd_supply_fpreg (char *fpregs, int regno)
 {
   /* FPCR is at slot 33; slot 32 unused.  */
-  alpha_supply_fp_regs (regno, regs, regs + 32*8);
+  alpha_supply_fp_regs (regno, fpregs, fpregs + 32*8);
 }
 
 void
 alphabsd_fill_fpreg (char *fpregs, int regno)
 {
   /* FPCR is at slot 33; slot 32 unused.  */
-  alpha_fill_fp_regs (regno, regs, regs + 32*8);
+  alpha_fill_fp_regs (regno, fpregs, fpregs + 32*8);
 }
