@@ -1,5 +1,12 @@
 2004-05-08  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_USE_GENERIC_DUMMY_FRAMES): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* blockframe.c (legacy_frame_chain_valid): Simplify by eliminating
+	DEPRECATED_USE_GENERIC_DUMMY_FRAMES.
+	* infcall.c (legacy_push_dummy_code, call_function_by_hand): Ditto.
+	* frame.c (frame_type_from_pc, legacy_get_prev_frame): Ditto.
+
 	* breakpoint.h (deprecated_frame_in_dummy): Delete declaration.
 	(struct frame_info): Delete opaque declaration.
 	* breakpoint.c (deprecated_frame_in_dummy): Delete function.

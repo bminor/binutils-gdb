@@ -527,8 +527,7 @@ int
 legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
   /* Don't prune CALL_DUMMY frames.  */
-  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
     return 1;
 
   /* If the new frame pointer is zero, then it isn't valid.  */

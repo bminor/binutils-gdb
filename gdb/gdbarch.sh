@@ -864,9 +864,6 @@ struct obstack;
 
 extern struct gdbarch *current_gdbarch;
 
-/* Always one, being eliminated.  */
-#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 1
-
 /* If any of the following are defined, the target wasn't correctly
    converted. */
 

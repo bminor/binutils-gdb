@@ -292,8 +292,7 @@ legacy_push_dummy_code (struct gdbarch *gdbarch,
      dummy_addr.  Ulgh!  Blame the HP/UX target.  */
   (*real_pc) += DEPRECATED_CALL_DUMMY_START_OFFSET;
   write_memory (start_sp, (char *) dummy1, sizeof_dummy1);
-  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-    generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
+  generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
   return sp;
 }
 
@@ -596,10 +595,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       internal_error (__FILE__, __LINE__, "bad switch");
     }
 
-  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-    /* Save where the breakpoint is going to be inserted so that the
-       dummy-frame code is later able to re-identify it.  */
-    generic_save_call_dummy_addr (bp_addr, bp_addr + 1);
+  /* Save where the breakpoint is going to be inserted so that the
+     dummy-frame code is later able to re-identify it.  */
+  generic_save_call_dummy_addr (bp_addr, bp_addr + 1);
 
   if (nargs < TYPE_NFIELDS (ftype))
     error ("too few arguments in function call");
@@ -833,7 +831,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       /* Sanity.  The exact same SP value is returned by
 	 PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
 	 unwind_dummy_id to form the frame ID's stack address.  */
-      gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
       generic_save_dummy_frame_tos (sp);
     }
   else if (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P ())
@@ -861,7 +858,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	/* Sanity.  The exact same SP value is returned by
 	 PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
 	 unwind_dummy_id to form the frame ID's stack address.  */
-	gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
 	frame = frame_id_build (sp, sal.pc);
       }
     else
