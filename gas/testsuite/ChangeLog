@@ -1,5 +1,11 @@
 2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
 
+	* gas/mips/sb1-ext-mdmx.s: New file.
+	* gas/mips/sb1-ext-mdmx.d: Likewise.
+	* gas/mips/mips.exp: Run new "sb1-ext-mdmx" test.
+
+2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
+
 	* gas/mips/mips.exp: Use elf-rel2 and elfel-rel2 for
 	mipsisa64*-*-* targets, rather than e32-rel2 and e32el-rel2.
 

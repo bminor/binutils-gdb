@@ -1,3 +1,8 @@
+2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* mips-opc.c: Add support for SB-1 MDMX subset and extensions.
+
 2002-05-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
