@@ -1,7 +1,17 @@
+Mon Aug 23 14:56:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/m88k/{delta88v4.mt,delta88v4.mh}: New files
+	* config/m88k/delta88.mh: Fix comment.
+	* config/m88k/tm-delta88.h: Remove unused BCS define.
+	* config/m88k/{tm-delta88v4.h,xm-delta88v4.h,nm-delta88v4.h}:
+	New files.
+	* configure.in: Recognize m88*-motorola-sysv4*.
+	* m88k-nat.c: Always include sys/types.h; don't depend on USG.
+
 Mon Aug 23 12:57:42 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
-	* mipsread.c (parse_symbol, parse_type, cross_ref):  Pass name of symbol
-	as an argument and use it in complaints.
+	* mipsread.c (parse_symbol, parse_type, cross_ref):  Pass name of
+	symbol as an argument and use it in complaints.
 	* symmisc.c (dump_psymtab):  Dump filenames of dependencies.
 
 Mon Aug 23 1993  Sean Fagan  (sef@cygnus.com)

@@ -73,8 +73,10 @@ m68*-sun-sunos3*)	gdb_host=sun3os3 ;;
 m68*-sun-sunos4*)	gdb_host=sun3os4 ;;
 m68*-sun-*)		gdb_host=sun3os4 ;;
 
-m88k-motorola-*)	gdb_host=delta88 ;;
-m88k-*-*)		gdb_host=m88k ;;
+m88*-motorola-sysv4*)	gdb_host=delta88v4 ;;
+m88*-motorola-sysv*)	gdb_host=delta88 ;;
+# I suspect this is just used for DGUX
+m88*-*-*)		gdb_host=m88k ;;
 
 mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
@@ -231,8 +233,9 @@ m68*-*-sunos3*)		gdb_target=sun3os3 ;;
 m68*-*-sunos4*)		gdb_target=sun3os4 ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
-m88k-motorola-*)	gdb_target=delta88 ;;
-m88k-*-*)		gdb_target=m88k ;;
+m88*-motorola-svr4*)	gdb_target=delta88r4 ;;
+m88*-motorola-*)	gdb_target=delta88 ;;
+m88*-*-*)		gdb_target=m88k ;;
 
 mips-big-*)		gdb_target=bigmips ;;
 mips-dec-*)		gdb_target=decstation ;;

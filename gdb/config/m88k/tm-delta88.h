@@ -19,9 +19,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "m88k/tm-m88k.h"
 
-/* BCS is a standard for binary compatibility.  This machine uses it.  */
-#if !defined (BCS)
-#define BCS 1
-#endif
-
 #define DELTA88

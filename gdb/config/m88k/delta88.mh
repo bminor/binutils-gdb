@@ -1,4 +1,4 @@
-# Host: Motorola 88000 running DGUX
+# Host: Motorola 88k running SVR3
 XDEPFILES= 
 XM_FILE= xm-delta88.h
 NAT_FILE= nm-m88k.h

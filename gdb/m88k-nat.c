@@ -21,10 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "inferior.h"
 
-#ifdef USG
 #include <sys/types.h>
-#endif
-
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <signal.h>
@@ -223,3 +220,57 @@ m88k_register_u_addr (blockend, regnum)
     }
 }
 
+#ifdef USE_PROC_FS
+
+#include <sys/procfs.h>
+
+/*  Given a pointer to a general register set in /proc format (gregset_t *),
+    unpack the register contents and supply them as gdb's idea of the current
+    register values. */
+
+void
+supply_gregset (gregsetp)
+     gregset_t *gregsetp;
+{
+    register int regi;
+    register greg_t *regp = (greg_t *) gregsetp;
+
+    for (regi=0; regi <= SP_REGNUM; regi++)
+	supply_register (regi, (char *) (regp + regi));
+
+    supply_register (SXIP_REGNUM, (char *) (regp + R_XIP));
+    supply_register (SNIP_REGNUM, (char *) (regp + R_NIP));
+    supply_register (SFIP_REGNUM, (char *) (regp + R_FIP));
+    supply_register (PSR_REGNUM, (char *) (regp + R_PSR));
+    supply_register (FPSR_REGNUM, (char *) (regp + R_FPSR));
+    supply_register (FPCR_REGNUM, (char *) (regp + R_FPCR));
+}
+
+void
+fill_gregset (gregsetp, regno)
+     gregset_t *gregsetp;
+     int regno;
+{
+    int regi;
+    register greg_t *regp = (greg_t *) gregsetp;
+    extern char registers[];
+
+    for (regi = 0 ; regi < R_R31 ; regi++)
+	if ((regno == -1) || (regno == regi))
+	    *(regp + regi) = *(int *) &registers[REGISTER_BYTE(regi)];
+
+    if ((regno == -1) || (regno == SXIP_REGNUM))
+	*(regp + R_XIP) = *(int *) &registers[REGISTER_BYTE(SXIP_REGNUM)];
+    if ((regno == -1) || (regno == SNIP_REGNUM))
+	*(regp + R_NIP) = *(int *) &registers[REGISTER_BYTE(SNIP_REGNUM)];
+    if ((regno == -1) || (regno == SFIP_REGNUM))
+	*(regp + R_PSR) = *(int *) &registers[REGISTER_BYTE(PSR_REGNUM)];
+    if ((regno == -1) || (regno == PSR_REGNUM))
+	*(regp + R_PSR) = *(int *) &registers[REGISTER_BYTE(PSR_REGNUM)];
+    if ((regno == -1) || (regno == FPSR_REGNUM))
+	*(regp + R_FPSR) = *(int *) &registers[REGISTER_BYTE(FPSR_REGNUM)];
+    if ((regno == -1) || (regno == FPCR_REGNUM))
+	*(regp + R_FPCR) = *(int *) &registers[REGISTER_BYTE(FPCR_REGNUM)];
+}
+
+#endif /* USE_PROC_FS */
