@@ -632,11 +632,21 @@ default_print_insn (cd, pc, info)
    Print one instruction from PC on INFO->STREAM.
    Return the size of the instruction (in bytes).  */
 
+typedef struct cpu_desc_list {
+  struct cpu_desc_list *next;
+  int isa;
+  int mach;
+  int endian;
+  CGEN_CPU_DESC cd;
+} cpu_desc_list;
+
 int
 print_insn_fr30 (pc, info)
      bfd_vma pc;
      disassemble_info *info;
 {
+  static cpu_desc_list *cd_list = 0;
+  cpu_desc_list *cl = 0;
   static CGEN_CPU_DESC cd = 0;
   static int prev_isa;
   static int prev_mach;
@@ -667,18 +677,27 @@ print_insn_fr30 (pc, info)
 #ifdef CGEN_COMPUTE_ISA
   isa = CGEN_COMPUTE_ISA (info);
 #else
-  isa = 0;
+  isa = info->insn_sets;
 #endif
 
-  /* If we've switched cpu's, close the current table and open a new one.  */
+  /* If we've switched cpu's, try to find a handle we've used before */
   if (cd
       && (isa != prev_isa
 	  || mach != prev_mach
 	  || endian != prev_endian))
     {
-      fr30_cgen_cpu_close (cd);
       cd = 0;
-    }
+      for (cl = cd_list; cl; cl = cl->next)
+	{
+	  if (cl->isa == isa &&
+	      cl->mach == mach &&
+	      cl->endian == endian)
+	    {
+	      cd = cl->cd;
+	      break;
+	    }
+	}
+    } 
 
   /* If we haven't initialized yet, initialize the opcode table.  */
   if (! cd)
@@ -699,6 +718,16 @@ print_insn_fr30 (pc, info)
 				 CGEN_CPU_OPEN_END);
       if (!cd)
 	abort ();
+
+      /* save this away for future reference */
+      cl = xmalloc (sizeof (struct cpu_desc_list));
+      cl->cd = cd;
+      cl->isa = isa;
+      cl->mach = mach;
+      cl->endian = endian;
+      cl->next = cd_list;
+      cd_list = cl;
+
       fr30_cgen_init_dis (cd);
     }
 
