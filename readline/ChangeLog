@@ -1,3 +1,7 @@
+Tue Dec 29 18:11:28 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* configure.in: added tests for cross-build for Cygwin.
+
 1998-12-24  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* Makefile.in: Add CYGNUS LOCAL comment.
