@@ -1,3 +1,9 @@
+Tue Jan 31 13:51:53 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/m68k/monitor.mt,
+	config/pa/{hppabsd.mt,hppahpux.mt,hppaosf.mt,hppapro.mt}: Put
+	depfiles in TDEPFILES not REMOTE_O.
+
 Tue Jan 31 11:14:44 1995  Steve Chamberlain  <sac@splat>
 
 	From nigel@algor.co.uk.

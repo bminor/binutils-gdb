@@ -1,4 +1,3 @@
 # Target: HP PA-RISC running bsd
-TDEPFILES= hppa-tdep.o
+TDEPFILES= hppa-tdep.o remote-pa.o
 TM_FILE= tm-hppab.h
-REMOTE_O=dcache.o remote.o remote-pa.o remote-utils.o 
