@@ -141,7 +141,7 @@ chill_type_print_base (type, stream, show, level)
 
       case TYPE_CODE_SET:
         fputs_filtered ("POWERSET ", stream);
-	chill_print_type (TYPE_FIELD_TYPE (type, 0), "", stream,
+	chill_print_type (TYPE_INDEX_TYPE (type), "", stream,
 			  show - 1, level);
 	break;
 

@@ -494,6 +494,7 @@ allocate_cplus_struct_type PARAMS ((struct type *));
 #define TYPE_NFIELDS(thistype) (thistype)->nfields
 #define TYPE_FIELDS(thistype) (thistype)->fields
 
+#define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
 #define TYPE_LOW_BOUND(range_type) TYPE_FIELD_BITPOS (range_type, 0)
 #define TYPE_HIGH_BOUND(range_type) TYPE_FIELD_BITPOS (range_type, 1)
 /* If TYPE_DUMMY_RANGE is true for a range type, it was allocated

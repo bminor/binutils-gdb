@@ -1719,11 +1719,6 @@ read_type (pp, objfile)
     case 'S':
       type1 = read_type (pp, objfile);
       type = create_set_type ((struct type*) NULL, type1);
-      if (TYPE_FLAGS (type1) & TYPE_FLAG_STUB)
-	{
-	  TYPE_FLAGS (type) |= TYPE_FLAG_TARGET_STUB;
-	  add_undefined_type (type);
-	}
       if (is_string)
 	TYPE_CODE (type) = TYPE_CODE_BITSTRING;
       if (typenums[0] != -1)

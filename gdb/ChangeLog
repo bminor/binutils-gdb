@@ -1,3 +1,12 @@
+Fri Sep 16 16:06:08 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* gdbtypes.h (TYPE_INDEX_TYPE):  New macro.
+	* ch-typeprint.c, ch-valprint.c:  Use TYPE_INDEX_TYPE.
+	* ch-valprint.c (chill_val_print):  Pass index type directly
+	(instead of its TYPE_TARGET_TYPE) to print_type_scalar.
+	* stabsread.c (read_type):  Don't set TYPE_FLAG_TARGET_STUB
+	if the index type is a stub.
+
 Fri Sep 16 17:18:44 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* config/i386/{i386aix.mh, i386bsd.mh, i386lynx.mh, i386sco.mh,

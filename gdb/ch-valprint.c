@@ -294,7 +294,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_SET:
-      elttype = TYPE_FIELD_TYPE (type, 0);
+      elttype = TYPE_INDEX_TYPE (type);
       check_stub_type (elttype);
       if (TYPE_FLAGS (elttype) & TYPE_FLAG_STUB)
 	{
@@ -323,7 +323,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	      {
 		if (need_comma)
 		  fputs_filtered (", ", stream);
-		print_type_scalar (TYPE_TARGET_TYPE (range), i, stream);
+		print_type_scalar (range, i, stream);
 		need_comma = 1;
 
 		/* Look for a continuous range of true elements. */
@@ -334,7 +334,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		    while (i+1 <= high_bound
 			   && value_bit_index (type, valaddr, ++i))
 		      j = i;
-		    print_type_scalar (TYPE_TARGET_TYPE (range), j, stream);
+		    print_type_scalar (range, j, stream);
 		  }
 	      }
 	  }
