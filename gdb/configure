@@ -5778,7 +5778,12 @@ if test "${with_sim_gpu2+set}" = set; then
   mips*-sky*-*)
     if test -d "${withval}"
     then
-      LIBS="${LIBS} -L${withval}/lib -lgpu2 -L${x_libraries} -lX11 -lXext"
+      if test x${x_libraries} != x
+      then
+	LIBS="${LIBS} -L${withval}/lib -lgpu2 -L${x_libraries} -lX11 -lXext -lm"
+      else
+	LIBS="${LIBS} -L${withval}/lib -lgpu2 -lX11 -lXext -lm"
+      fi
     else
       echo "configure: warning: Directory ${withval} does not exist." 1>&2
     fi ;;
@@ -5946,7 +5951,7 @@ links="${links} nm.h"
 fi
 # start-sanitize-gdbtk
 echo $ac_n "checking whether ln -s works""... $ac_c" 1>&6
-echo "configure:5950: checking whether ln -s works" >&5
+echo "configure:5955: checking whether ln -s works" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_LN_S'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5981,19 +5986,19 @@ fi
 
 
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:5985: checking for Cygwin environment" >&5
+echo "configure:5990: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'am_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5990 "configure"
+#line 5995 "configure"
 #include "confdefs.h"
 
 int main() {
 return __CYGWIN32__;
 ; return 0; }
 EOF
-if { (eval echo configure:5997: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:6002: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   am_cv_cygwin=yes
 else
@@ -6010,19 +6015,19 @@ echo "$ac_t""$am_cv_cygwin" 1>&6
 CYGWIN=
 test "$am_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for Mingw32 environment""... $ac_c" 1>&6
-echo "configure:6014: checking for Mingw32 environment" >&5
+echo "configure:6019: checking for Mingw32 environment" >&5
 if eval "test \"`echo '$''{'am_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6019 "configure"
+#line 6024 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:6026: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:6031: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   am_cv_mingw32=yes
 else
@@ -6041,7 +6046,7 @@ test "$am_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:6045: checking for executable suffix" >&5
+echo "configure:6050: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'am_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

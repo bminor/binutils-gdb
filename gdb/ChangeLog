@@ -1,3 +1,11 @@
+start-sanitize-sky
+1998-12-11  Jeff Law (law@cygnus.com)
+
+        * configure.in (with-sim-gpu2): Do not emit a -L argument without
+        an associated pathname.  Link in the math library after the gpu2
+        library.
+
+end-sanitize-sky
 Fri Dec 11 09:07:05 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* i386b-nat.c: Include "expression.h".
