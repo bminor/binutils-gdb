@@ -1,3 +1,7 @@
+2003-08-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/alpha/nm-fbsd.h (SVR4_SHARED_LIBS): Remove define.
+
 2003-08-16  Andrew Cagney  <cagney@redhat.com>
 
 	* NEWS: Mention that "set prompt-escape-char" was deleted.
