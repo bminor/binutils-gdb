@@ -2573,12 +2573,8 @@ proc_clear_current_signal (procinfo *pi)
   return win;
 }
 
-/*
- * Function: proc_get_gregs
- *
- * Get the general registers for the process or LWP.
- * Returns non-zero for success, zero for failure.
- */
+/* Return the general-purpose registers for the process or LWP
+   corresponding to PI.  Upon failure, return NULL.  */
 
 gdb_gregset_t *
 proc_get_gregs (procinfo *pi)
@@ -2587,29 +2583,22 @@ proc_get_gregs (procinfo *pi)
     if (!proc_get_status (pi))
       return NULL;
 
-  /*
-   * OK, sorry about the ifdef's.
-   * There's three cases instead of two, because
-   * in this instance Unixware and Solaris/RW differ.
-   */
+  /* OK, sorry about the ifdef's.  There's three cases instead of two,
+     because in this case Unixware and Solaris/RW differ.  */
 
 #ifdef NEW_PROC_API
-#ifdef UNIXWARE		/* ugh, a true architecture dependency */
+# ifdef UNIXWARE		/* FIXME:  Should be autoconfigured.  */
   return &pi->prstatus.pr_lwp.pr_context.uc_mcontext.gregs;
-#else	/* not Unixware */
+# else
   return &pi->prstatus.pr_lwp.pr_reg;
-#endif	/* Unixware */
-#else	/* not NEW_PROC_API */
+# endif
+#else
   return &pi->prstatus.pr_reg;
-#endif	/* NEW_PROC_API */
+#endif
 }
 
-/*
- * Function: proc_get_fpregs
- *
- * Get the floating point registers for the process or LWP.
- * Returns non-zero for success, zero for failure.
- */
+/* Return the general-purpose registers for the process or LWP
+   corresponding to PI.  Upon failure, return NULL.  */
 
 gdb_fpregset_t *
 proc_get_fpregs (procinfo *pi)
@@ -2619,25 +2608,24 @@ proc_get_fpregs (procinfo *pi)
     if (!proc_get_status (pi))
       return NULL;
 
-#ifdef UNIXWARE		/* a true architecture dependency */
+# ifdef UNIXWARE		/* FIXME:  Should be autoconfigured.  */
   return &pi->prstatus.pr_lwp.pr_context.uc_mcontext.fpregs;
-#else
+# else
   return &pi->prstatus.pr_lwp.pr_fpreg;
-#endif	/* Unixware */
+# endif
 
-#else	/* not NEW_PROC_API */
+#else  /* not NEW_PROC_API */
   if (pi->fpregs_valid)
-    return &pi->fpregset;	/* already got 'em */
+    return &pi->fpregset;	/* Already got 'em.  */
   else
     {
-      if (pi->ctl_fd == 0 &&
-	  open_procinfo_files (pi, FD_CTL) == 0)
+      if (pi->ctl_fd == 0 && open_procinfo_files (pi, FD_CTL) == 0)
 	{
 	  return NULL;
 	}
       else
 	{
-#ifdef PIOCTGFPREG
+# ifdef PIOCTGFPREG
 	  struct {
 	    long pr_count;
 	    tid_t pr_error_thread;
@@ -2647,46 +2635,43 @@ proc_get_fpregs (procinfo *pi)
 	  thread_fpregs.pr_count = 1;
 	  thread_fpregs.thread_1.tid = pi->tid;
 
-	  if (pi->tid == 0 &&
-	      ioctl (pi->ctl_fd, PIOCGFPREG, &pi->fpregset) >= 0)
+	  if (pi->tid == 0
+	      && ioctl (pi->ctl_fd, PIOCGFPREG, &pi->fpregset) >= 0)
 	    {
 	      pi->fpregs_valid = 1;
-	      return &pi->fpregset;	/* got 'em now! */
+	      return &pi->fpregset; /* Got 'em now!  */
 	    }
-	  else if (pi->tid != 0 &&
-		   ioctl (pi->ctl_fd, PIOCTGFPREG, &thread_fpregs) >= 0)
+	  else if (pi->tid != 0
+		   && ioctl (pi->ctl_fd, PIOCTGFPREG, &thread_fpregs) >= 0)
 	    {
 	      memcpy (&pi->fpregset, &thread_fpregs.thread_1.pr_fpregs,
 		      sizeof (pi->fpregset));
 	      pi->fpregs_valid = 1;
-	      return &pi->fpregset;	/* got 'em now! */
+	      return &pi->fpregset; /* Got 'em now!  */
 	    }
 	  else
 	    {
 	      return NULL;
 	    }
-#else
+# else
 	  if (ioctl (pi->ctl_fd, PIOCGFPREG, &pi->fpregset) >= 0)
 	    {
 	      pi->fpregs_valid = 1;
-	      return &pi->fpregset;	/* got 'em now! */
+	      return &pi->fpregset; /* Got 'em now!  */
 	    }
 	  else
 	    {
 	      return NULL;
 	    }
-#endif
+# endif
 	}
     }
-#endif
+#endif /* NEW_PROC_API */
 }
 
-/*
- * Function: proc_set_gregs
- *
- * Write the general registers back to the process or LWP.
- * Returns non-zero for success, zero for failure.
- */
+/* Write the general-purpose registers back to the process or LWP
+   corresponding to PI.  Return non-zero for success, zero for
+   failure.  */
 
 int
 proc_set_gregs (procinfo *pi)
@@ -2694,11 +2679,11 @@ proc_set_gregs (procinfo *pi)
   gdb_gregset_t *gregs;
   int win;
 
-  if ((gregs = proc_get_gregs (pi)) == NULL)
-    return 0;	/* get_regs has already warned */
+  gregs = proc_get_gregs (pi);
+  if (gregs == NULL)
+    return 0;			/* proc_get_regs has already warned.  */
 
-  if (pi->ctl_fd == 0 &&
-      open_procinfo_files (pi, FD_CTL) == 0)
+  if (pi->ctl_fd == 0 && open_procinfo_files (pi, FD_CTL) == 0)
     {
       return 0;
     }
@@ -2711,7 +2696,7 @@ proc_set_gregs (procinfo *pi)
 	char gregs[sizeof (gdb_gregset_t)];
       } arg;
 
-      arg.cmd   = PCSREG;
+      arg.cmd = PCSREG;
       memcpy (&arg.gregs, gregs, sizeof (arg.gregs));
       win = (write (pi->ctl_fd, (void *) &arg, sizeof (arg)) == sizeof (arg));
 #else
@@ -2719,17 +2704,14 @@ proc_set_gregs (procinfo *pi)
 #endif
     }
 
-  /* Policy: writing the regs invalidates our cache. */
+  /* Policy: writing the registers invalidates our cache.  */
   pi->gregs_valid = 0;
   return win;
 }
 
-/*
- * Function: proc_set_fpregs
- *
- * Modify the floating point register set of the process or LWP.
- * Returns non-zero for success, zero for failure.
- */
+/* Write the floating-pointer registers back to the process or LWP
+   corresponding to PI.  Return non-zero for success, zero for
+   failure.  */
 
 int
 proc_set_fpregs (procinfo *pi)
@@ -2737,11 +2719,11 @@ proc_set_fpregs (procinfo *pi)
   gdb_fpregset_t *fpregs;
   int win;
 
-  if ((fpregs = proc_get_fpregs (pi)) == NULL)
-    return 0;		/* get_fpregs has already warned */
+  fpregs = proc_get_fpregs (pi);
+  if (fpregs == NULL)
+    return 0;			/* proc_get_fpregs has already warned.  */
 
-  if (pi->ctl_fd == 0 &&
-      open_procinfo_files (pi, FD_CTL) == 0)
+  if (pi->ctl_fd == 0 && open_procinfo_files (pi, FD_CTL) == 0)
     {
       return 0;
     }
@@ -2754,11 +2736,11 @@ proc_set_fpregs (procinfo *pi)
 	char fpregs[sizeof (gdb_fpregset_t)];
       } arg;
 
-      arg.cmd   = PCSFPREG;
+      arg.cmd = PCSFPREG;
       memcpy (&arg.fpregs, fpregs, sizeof (arg.fpregs));
       win = (write (pi->ctl_fd, (void *) &arg, sizeof (arg)) == sizeof (arg));
 #else
-#ifdef PIOCTSFPREG
+# ifdef PIOCTSFPREG
       if (pi->tid == 0)
 	win = (ioctl (pi->ctl_fd, PIOCSFPREG, fpregs) >= 0);
       else
@@ -2775,13 +2757,13 @@ proc_set_fpregs (procinfo *pi)
 		  sizeof (*fpregs));
 	  win = (ioctl (pi->ctl_fd, PIOCTSFPREG, &thread_fpregs) >= 0);
 	}
-#else
+# else
       win = (ioctl (pi->ctl_fd, PIOCSFPREG, fpregs) >= 0);
-#endif	/* osf PIOCTSFPREG */
-#endif	/* NEW_PROC_API */
+# endif
+#endif /* NEW_PROC_API */
     }
 
-  /* Policy: writing the regs invalidates our cache. */
+  /* Policy: writing the registers invalidates our cache.  */
   pi->fpregs_valid = 0;
   return win;
 }
@@ -3683,57 +3665,59 @@ do_detach (int signo)
   destroy_procinfo (pi);
 }
 
-/*
- * fetch_registers
- *
- * Since the /proc interface cannot give us individual registers,
- * we pay no attention to the (regno) argument, and just fetch them all.
- * This results in the possibility that we will do unnecessarily many
- * fetches, since we may be called repeatedly for individual registers.
- * So we cache the results, and mark the cache invalid when the process
- * is resumed.
- */
+/* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
+   for all registers.
+
+   ??? Is the following note still relevant?  We can't get individual
+   registers with the PT_GETREGS ptrace(2) request either, yet we
+   don't bother with caching at all in that case.
+
+   NOTE: Since the /proc interface cannot give us individual
+   registers, we pay no attention to REGNUM, and just fetch them all.
+   This results in the possibility that we will do unnecessarily many
+   fetches, since we may be called repeatedly for individual
+   registers.  So we cache the results, and mark the cache invalid
+   when the process is resumed.  */
 
 static void
-procfs_fetch_registers (int regno)
+procfs_fetch_registers (int regnum)
 {
-  gdb_fpregset_t *fpregs;
-  gdb_gregset_t  *gregs;
-  procinfo       *pi;
-  int            pid;
-  int            tid;
+  gdb_gregset_t *gregs;
+  procinfo *pi;
+  int pid = PIDGET (inferior_ptid);
+  int tid = TIDGET (inferior_ptid);
 
-  pid = PIDGET (inferior_ptid);
-  tid = TIDGET (inferior_ptid);
-
-  /* First look up procinfo for the main process. */
-  pi  = find_procinfo_or_die (pid, 0);
+  /* First look up procinfo for the main process.  */
+  pi = find_procinfo_or_die (pid, 0);
 
   /* If the event thread is not the same as GDB's requested thread
      (ie. inferior_ptid), then look up procinfo for the requested
      thread.  */
-  if ((tid != 0) &&
-      (tid != proc_get_current_thread (pi)))
+  if (tid != 0 && tid != proc_get_current_thread (pi))
     pi = find_procinfo_or_die (pid, tid);
 
   if (pi == NULL)
     error ("procfs: fetch_registers failed to find procinfo for %s",
 	   target_pid_to_str (inferior_ptid));
 
-  if ((gregs = proc_get_gregs (pi)) == NULL)
+  gregs = proc_get_gregs (pi);
+  if (gregs == NULL)
     proc_error (pi, "fetch_registers, get_gregs", __LINE__);
 
   supply_gregset (gregs);
 
-  if (FP0_REGNUM >= 0)	/* need floating point? */
+  if (FP0_REGNUM >= 0)		/* Do we have an FPU?  */
     {
-      if ((regno >= 0 && regno < FP0_REGNUM)
-	  || regno == PC_REGNUM
-	  || regno == DEPRECATED_FP_REGNUM
-	  || regno == SP_REGNUM)
-	return;			/* not a floating point register */
+      gdb_fpregset_t *fpregs;
 
-      if ((fpregs = proc_get_fpregs (pi)) == NULL)
+      if ((regnum >= 0 && regnum < FP0_REGNUM)
+	  || regnum == PC_REGNUM
+	  || regnum == DEPRECATED_FP_REGNUM
+	  || regnum == SP_REGNUM)
+	return;			/* Not a floating point register.  */
+
+      fpregs = proc_get_fpregs (pi);
+      if (fpregs == NULL)
 	proc_error (pi, "fetch_registers, get_fpregs", __LINE__);
 
       supply_fpregset (fpregs);
@@ -3754,62 +3738,60 @@ procfs_prepare_to_store (void)
 #endif
 }
 
-/*
- * store_registers
- *
- * Since the /proc interface will not read individual registers,
- * we will cache these requests until the process is resumed, and
- * only then write them back to the inferior process.
- *
- * FIXME: is that a really bad idea?  Have to think about cases
- * where writing one register might affect the value of others, etc.
- */
+/* Store register REGNUM back into the inferior.  If REGNUM is -1, do
+   this for all registers.
+
+   NOTE: Since the /proc interface will not read individual registers,
+   we will cache these requests until the process is resumed, and only
+   then write them back to the inferior process.
+ 
+   FIXME: is that a really bad idea?  Have to think about cases where
+   writing one register might affect the value of others, etc.  */
 
 static void
-procfs_store_registers (int regno)
+procfs_store_registers (int regnum)
 {
-  gdb_fpregset_t *fpregs;
-  gdb_gregset_t  *gregs;
-  procinfo       *pi;
-  int            pid;
-  int            tid;
+  gdb_gregset_t *gregs;
+  procinfo *pi;
+  int pid = PIDGET (inferior_ptid);
+  int tid = TIDGET (inferior_ptid);
 
-  pid = PIDGET (inferior_ptid);
-  tid = TIDGET (inferior_ptid);
+  /* First find procinfo for main process.  */
+  pi = find_procinfo_or_die (pid, 0);
 
-  /* First find procinfo for main process */
-  pi  = find_procinfo_or_die (pid, 0);
-
-  /* If current lwp for process is not the same as requested thread
-     (ie. inferior_ptid), then find procinfo for the requested thread.  */
-
-  if ((tid != 0) &&
-      (tid != proc_get_current_thread (pi)))
+  /* If the event thread is not the same as GDB's requested thread
+     (ie. inferior_ptid), then look up procinfo for the requested
+     thread.  */
+  if (tid != 0 && tid != proc_get_current_thread (pi))
     pi = find_procinfo_or_die (pid, tid);
 
   if (pi == NULL)
     error ("procfs: store_registers: failed to find procinfo for %s",
 	   target_pid_to_str (inferior_ptid));
 
-  if ((gregs = proc_get_gregs (pi)) == NULL)
+  gregs = proc_get_gregs (pi);
+  if (gregs == NULL)
     proc_error (pi, "store_registers, get_gregs", __LINE__);
 
-  fill_gregset (gregs, regno);
+  fill_gregset (gregs, regnum);
   if (!proc_set_gregs (pi))
     proc_error (pi, "store_registers, set_gregs", __LINE__);
 
-  if (FP0_REGNUM >= 0)		/* need floating point? */
+  if (FP0_REGNUM >= 0)		/* Do we have an FPU?  */
     {
-      if ((regno >= 0 && regno < FP0_REGNUM)
-	  || regno == PC_REGNUM
-	  || regno == DEPRECATED_FP_REGNUM
-	  || regno == SP_REGNUM)
-	return;			/* not a floating point register */
+      gdb_fpregset_t *fpregs;
 
-      if ((fpregs = proc_get_fpregs (pi)) == NULL)
+      if ((regnum >= 0 && regnum < FP0_REGNUM)
+	  || regnum == PC_REGNUM
+	  || regnum == DEPRECATED_FP_REGNUM
+	  || regnum == SP_REGNUM)
+	return;			/* Not a floating point register.  */
+
+      fpregs = proc_get_fpregs (pi);
+      if (fpregs == NULL)
 	proc_error (pi, "store_registers, get_fpregs", __LINE__);
 
-      fill_fpregset (fpregs, regno);
+      fill_fpregset (fpregs, regnum);
       if (!proc_set_fpregs (pi))
 	proc_error (pi, "store_registers, set_fpregs", __LINE__);
     }
