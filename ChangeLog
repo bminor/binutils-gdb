@@ -1,3 +1,7 @@
+Mon Oct  3 14:28:34 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config.sub: No longer recognize h8300h.
+
 Mon Oct  3 12:40:54 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config.sub: Remove extraneous differences between config.sub and

@@ -138,7 +138,7 @@ case $basic_machine in
 		| powerpc | sparc64 | 1750a | dsp16xx | mips64 | mipsel \
 		| mips64el | mips64orion | mips64orionel \
 		| m88110 | sparc | m680[01234]0 | m683?2 | z8k | v70 \
-		| h8500 | h8300h) # CYGNUS LOCAL
+		| h8500) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
 	# Object if more than one company name word.
@@ -156,7 +156,7 @@ case $basic_machine in
 	      | sh-* | powerpc-* | sparc64-* | mips64-* | mipsel-* \
 	      | mips64el-* | mips64orion-* | mips64orionel-* \
 	      | m88110-* | m680[01234]0-* | m683?2-* | z8k-* \
-	      | h8500-* | h8300h-* ) # CYGNUS LOCAL
+	      | h8500-*) # CYGNUS LOCAL
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
