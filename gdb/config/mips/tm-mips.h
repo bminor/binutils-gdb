@@ -312,11 +312,6 @@ extern int mips_frame_num_args (struct frame_info *);
    function calls.  We don't need STACK_ALIGN, PUSH_ARGUMENTS will
    handle it. */
 
-extern CORE_ADDR mips_push_arguments (int, struct value **, CORE_ADDR, int,
-				      CORE_ADDR);
-#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-  (mips_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
-
 extern CORE_ADDR mips_push_return_address (CORE_ADDR pc, CORE_ADDR sp);
 #define PUSH_RETURN_ADDRESS(PC, SP) (mips_push_return_address ((PC), (SP)))
 

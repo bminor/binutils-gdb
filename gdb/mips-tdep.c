@@ -3298,7 +3298,7 @@ mips_read_fp_register_double (int regno, char *rare_buffer)
 static void
 mips_print_register (int regnum, int all)
 {
-  char *raw_buffer (MAX_REGISTER_RAW_SIZE);
+  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
 
   /* Get the data in raw format.  */
   if (!frame_register_read (selected_frame, regnum, raw_buffer))
