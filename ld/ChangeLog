@@ -1,3 +1,10 @@
+2000-07-10  Alan Modra  <alan@linuxcare.com.au>
+
+	* configure.tgt: Remove extraneous hppa*-*-linux-gnu*.
+
+	From  Ryan Bradetich  <rbradetich@uswest.net>
+	* ldwrite.c (SSIZE): Remove to cure macro redefinition warning.
+	
 2000-07-09  Alan Modra  <alan@linuxcare.com.au>
 
 	Changes to create multiple linker stubs, positioned immediately
@@ -65,7 +72,7 @@
 	(compute_dll_image_base): New static function. 
 	(gld_${EMULATION_NAME}_set_symbols): Use.
 
-2000-06-05  DJ Delorie  <dj@redhat.com>
+2000-07-05  DJ Delorie  <dj@redhat.com>
 
 	* MAINTAINERS: new
 

@@ -210,7 +210,6 @@ m68*-*-rtems*)		targ_emul=m68kcoff ;;
 hppa*64*-*)		targ_emul=elf64hppa ;;
 hppa*-*-linux-gnu*)	targ_emul=hppalinux ;;
 hppa*-*-*elf*)		targ_emul=hppaelf ;;
-hppa*-*-linux-gnu*)	targ_emul=hppaelf ;;
 hppa*-*-lites*)		targ_emul=hppaelf ;;
 hppa*-*-rtems*)		targ_emul=hppaelf ;;
 vax-dec-ultrix* | vax-dec-bsd*) targ_emul=vax ;;

@@ -305,8 +305,7 @@ clone_section (abfd, s, count)
      asection *s;
      int *count;
 {
-#define SSIZE 8
-  char sname[SSIZE];		/* ??  find the name for this size */
+  char sname[8];		/* ??  find the name for this size */
   asection *n;
   struct bfd_link_hash_entry *h;
   /* Invent a section name - use first five
