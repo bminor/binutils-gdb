@@ -1,5 +1,9 @@
 2000-09-03  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdb_thread_db.h [HAVE_THREAD_DB_H]: Include <thread_db.h>.
+	[!HAVE_THREAD_DB_H]: Update from current glibc thread_db.h.  Deal
+	with absence of <stdint.h> here.
+
 	* gdb_proc_service.h: Add copyright notice.
 	Protect against multiple inclusion.
 	Add fix for broken prfpregset_t here.
