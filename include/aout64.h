@@ -175,7 +175,8 @@ struct internal_nlist {
 #define N_TEXT 	4
 #define N_DATA 	6
 #define N_BSS 	8
-#define N_FN	15
+#define N_FN	0x0e
+#define	N_COMM	0x12	/* Common symbol (visible after shared lib dynlink) */
 #define N_EXT 	1
 #define N_TYPE  0x1e
 #define N_STAB 	0xe0
@@ -202,6 +203,11 @@ struct internal_nlist {
 /* This is output from LD.  */
 #define N_SETV	0x1C		/* Pointer to set vector in data area.  */
 
+/* Warning symbol. The text gives a warning message, the next symbol
+   in the table will be undefined. When the symbol is referenced, the
+   message is printed.  */
+
+#define	N_WARNING 0x1e
 
 /* Relocations 
 

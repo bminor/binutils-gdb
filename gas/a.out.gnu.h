@@ -169,7 +169,8 @@ struct nlist {
 #define N_TEXT 4
 #define N_DATA 6
 #define N_BSS 8
-#define N_FN 0x1e
+#define N_FN 0xe
+#define	N_COMM	0x12		/* common (visible in shared lib commons) */
 
 #define N_EXT 1
 #define N_TYPE 036
@@ -205,6 +206,12 @@ struct nlist {
 
 /* This is output from LD.  */
 #define N_SETV	0x1C		/* Pointer to set vector in data area.  */
+
+/* Warning symbol. The text gives a warning message, the next symbol
+   in the table will be undefined. When the symbol is referenced, the
+   message is printed.  */
+
+#define	N_WARNING 0x1e
 
 /* This structure describes a single relocation to be performed.
    The text-relocation section of the file is a vector of these structures,

@@ -1,3 +1,10 @@
+Wed Sep  4 08:58:37 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* a.out.gnu.h, aout64.h:  Add N_WARNING.  Change N_FN to 0x0E,
+	to match SunOS and BSD.  Add N_COMM as 0x12 for SunOS shared lib
+	support.
+	* stab.def:  Add N_COMM to table, fix overlap comment.
+
 Tue Sep  3 06:29:20 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	Merge with latest FSF versions of these files.

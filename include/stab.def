@@ -167,8 +167,8 @@ __define_stab (N_LENG, 0xfe, "LENG")
 	| 00 - 1F are not dbx stab symbols		|
 	| Entries with bit 01 set are external symbols. |
 	| 00 UNDEF  | 02 ABS	| 04 TEXT   | 06 DATA	|
-	| 08 BSS    | 0A INDR*	| 0C 	    | 0E FN	|
-	| 10 	    | 12 	| 14 SETA   | 16 SETT	|
+	| 08 BSS    | 0A INDR	| 0C 	    | 0E FN	|
+	| 10 	    | 12 COMM	| 14 SETA   | 16 SETT	|
 	| 18 SETD   | 1A SETB	| 1C SETV   | 1E WARNING|
 	|_______________________________________________|
 	| Debug entries with bit 01 set are unused.	|
@@ -203,5 +203,4 @@ __define_stab (N_LENG, 0xfe, "LENG")
 	+-----------------------------------------------+
  * 50 EHDECL is also MOD2.
  * 48 BSLINE is also BROWS.
- * 0A INDR is also COMM (supposedly only used internally to unix ld?)
  */
