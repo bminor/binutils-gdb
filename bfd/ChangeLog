@@ -1,3 +1,17 @@
+Wed May 12 14:39:59 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c: Include libaout.h and aout/aout64.h to get
+	definitions for N_SET[ATDB].
+	(ecoff_howto_table): Moved near top of file.
+	(ecoff_set_symbol_info): If a STABS symbol of type N_SET[ATDB] is
+	seen, cook up a constructor section of the same name and put in a
+	reloc pointing to the symbol.  This lets the GNU linker build
+	global constructors and destructors without using collect.
+
+Tue May 11 00:33:31 1993  John Gilmore  (gnu@cygnus.com)
+
+	* coff-m88k.c (m88kbcs_vec):  Symbols have underbars.
+
 Sun May  9 16:36:59 1993  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in (hppa*-*-bsd):  Change to hppa*-*-bsd*
