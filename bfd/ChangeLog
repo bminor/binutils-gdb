@@ -1,5 +1,11 @@
 2004-08-13  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 293
+	* elf32-hppa.c (elf32_hppa_hide_symbol): Use init_refcount to
+	zero the plt field.
+
+2004-08-13  Alan Modra  <amodra@bigpond.net.au>
+
 	* bfd.c (_bfd_default_error_handler): Handle %A and %B.
 	(bfd_archive_filename, bfd_get_section_ident): Delete.
 	* ecofflink.c (bfd_ecoff_debug_accumulate_other): Don't call
