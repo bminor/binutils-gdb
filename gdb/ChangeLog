@@ -1,3 +1,7 @@
+2004-05-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* regset.h (collect_regset_ftype): Unconstify fourth argument.
+
 2004-05-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* MAINTAINERS: Undelete m88k.  Add myself as maintainer.
