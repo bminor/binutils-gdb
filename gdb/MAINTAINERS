@@ -152,10 +152,7 @@ maintainer works with the native maintainer when resolving API issues.
 	xstormy16	--target=xstormy16-elf ,-Werror
 			Corinna Vinschen	vinschen@redhat.com
 
-	z8k		--target=z8k-coff ,-Werror
-			Known problem in 5.1
-			Maintenance only
-			OBSOLETE candidate, not multi-arch
+	z8k		(--target=z8k-coff OBSOLETE)
 
 All developers recognized by this file can make arbitrary changes to
 OBSOLETE targets.

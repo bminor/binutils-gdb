@@ -1,5 +1,14 @@
 2003-02-04  Andrew Cagney  <ac131313@redhat.com>
 
+	* NEWS: Mention that the z8k-zilog-none is obsolete.
+	* MAINTAINERS: Mark z8k as obsolete.
+	* configure.tgt: Obsolete the z8k-*-coff* target.
+	* config/z8k/z8k.mt: Obsolete file.
+	* config/z8k/tm-z8k.h: Obsolete file.
+	* z8k-tdep.c: Obsolete file.
+
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* NEWS: Mention that the mn10200-elf is obsolete.
 	* configure.tgt: Obsolete mn10200-*-* target.
 	* breakpoint.c (update_breakpoints_after_exec): Update comment to

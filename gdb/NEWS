@@ -37,6 +37,7 @@ been commented out.  Unless there is activity to revive these
 configurations, the next release of GDB will have their sources
 permanently REMOVED.
 
+Z8000 simulator		  		z8k-zilog-none 	  or z8ksim
 Matsushita MN10200 w/simulator			mn10200-*-*
 H8/500 simulator 			h8500-hitachi-hms or h8500hms
 
