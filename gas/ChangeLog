@@ -1,3 +1,8 @@
+Sun Jun 21 12:26:36 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (d30v_align): Always perform alignment request,
+	even if it is belived to be unnecessary.
+
 start-sanitize-r5900
 Fri Jun 19 19:56:50 1998  Jeffrey A Law  (law@cygnus.com)
 
