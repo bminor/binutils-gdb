@@ -1,3 +1,10 @@
+2004-01-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gcore.c (gcore_copy_callback): Use paddr_d to print size
+	variable.
+	(gcore_create_callback): Ditto.  Skip any memory segment that has
+	no permissions set.
+
 2004-01-14  David Carlton  <carlton@kealia.com>
 
 	Change symbols for C++ nested types to contain the fully qualified
