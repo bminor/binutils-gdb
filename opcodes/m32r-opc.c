@@ -1,8 +1,6 @@
 /* CGEN opcode support for m32r.
 
-This file is machine generated.
-
-Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -33,12 +31,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Attributes.  */
 
 static const CGEN_ATTR_ENTRY MACH_attr[] = 
-{  { "m32r", MACH_M32R },
+{
+  { "m32r", MACH_M32R },
   { 0, 0 }
 };
 
 const CGEN_ATTR_TABLE m32r_cgen_operand_attr_table[] = 
-{  { "ABS-ADDR", NULL },
+{
+  { "ABS-ADDR", NULL },
   { "FAKE", NULL },
   { "NEGATIVE", NULL },
   { "PC", NULL },
@@ -51,7 +51,8 @@ const CGEN_ATTR_TABLE m32r_cgen_operand_attr_table[] =
 };
 
 const CGEN_ATTR_TABLE m32r_cgen_insn_attr_table[] = 
-{  { "ALIAS", NULL },
+{
+  { "ALIAS", NULL },
   { "COND-CTI", NULL },
   { "FILL-SLOT", NULL },
   { "RELAX", NULL },
@@ -65,16 +66,19 @@ const CGEN_ATTR_TABLE m32r_cgen_insn_attr_table[] =
 };
 
 CGEN_KEYWORD_ENTRY m32r_cgen_opval_mach_entries[] = 
-{  { "m32r", MACH_M32R }
+{
+  { "m32r", MACH_M32R }
 };
 
 CGEN_KEYWORD m32r_cgen_opval_mach = 
-{  & m32r_cgen_opval_mach_entries[0],
+{
+  & m32r_cgen_opval_mach_entries[0],
   1
 };
 
 CGEN_KEYWORD_ENTRY m32r_cgen_opval_h_gr_entries[] = 
-{  { "fp", 13 },
+{
+  { "fp", 13 },
   { "lr", 14 },
   { "sp", 15 },
   { "r0", 0 },
@@ -96,12 +100,14 @@ CGEN_KEYWORD_ENTRY m32r_cgen_opval_h_gr_entries[] =
 };
 
 CGEN_KEYWORD m32r_cgen_opval_h_gr = 
-{  & m32r_cgen_opval_h_gr_entries[0],
+{
+  & m32r_cgen_opval_h_gr_entries[0],
   19
 };
 
 CGEN_KEYWORD_ENTRY m32r_cgen_opval_h_cr_entries[] = 
-{  { "psw", 0 },
+{
+  { "psw", 0 },
   { "cbr", 1 },
   { "spi", 2 },
   { "spu", 3 },
@@ -116,13 +122,15 @@ CGEN_KEYWORD_ENTRY m32r_cgen_opval_h_cr_entries[] =
 };
 
 CGEN_KEYWORD m32r_cgen_opval_h_cr = 
-{  & m32r_cgen_opval_h_cr_entries[0],
+{
+  & m32r_cgen_opval_h_cr_entries[0],
   12
 };
 
 
 static CGEN_HW_ENTRY m32r_cgen_hw_entries[] = 
-{  { & m32r_cgen_hw_entries[1], "h-pc", CGEN_ASM_KEYWORD /*FIXME*/, 0 },
+{
+  { & m32r_cgen_hw_entries[1], "h-pc", CGEN_ASM_KEYWORD /*FIXME*/, 0 },
   { & m32r_cgen_hw_entries[2], "h-memory", CGEN_ASM_KEYWORD /*FIXME*/, 0 },
   { & m32r_cgen_hw_entries[3], "h-sint", CGEN_ASM_KEYWORD /*FIXME*/, 0 },
   { & m32r_cgen_hw_entries[4], "h-uint", CGEN_ASM_KEYWORD /*FIXME*/, 0 },
@@ -193,7 +201,8 @@ const CGEN_OPERAND m32r_cgen_operand_table[CGEN_NUM_OPERANDS] =
 #define OP 1 /* syntax value for mnemonic */
 
 static const CGEN_SYNTAX syntax_table[] =
-{/* <op> $dr,$sr */
+{
+/* <op> $dr,$sr */
 /*   0 */  { OP, ' ', 130, ',', 129, 0 },
 /* <op> $dr,$sr,$slo16 */
 /*   1 */  { OP, ' ', 130, ',', 129, ',', 141, 0 },
@@ -268,7 +277,8 @@ static const CGEN_SYNTAX syntax_table[] =
 #undef OP
 
 static const CGEN_FORMAT format_table[] = 
-{/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr. */
+{
+/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr. */
 /*   0 */  { 16, 16, 0xf0f0 },
 /* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.f-simm16.slo16. */
 /*   1 */  { 32, 32, 0xf0f00000 },
@@ -327,7 +337,8 @@ static const CGEN_FORMAT format_table[] =
 #define FMT(n) (& format_table[n])
 
 const CGEN_INSN m32r_cgen_insn_table_entries[CGEN_NUM_INSNS] =
-{ /* null first entry, end of all hash chains */
+{
+  /* null first entry, end of all hash chains */
   { { 0 }, 0 },
 /* add $dr,$sr */
   {
@@ -1119,14 +1130,15 @@ m32r_cgen_asm_hash_insn (insn)
 
 unsigned int
 m32r_cgen_dis_hash_insn (buf, value)
-     const char *  buf;
+     const char * buf;
      unsigned long value;
 {
   return CGEN_DIS_HASH (buf, value);
 }
 
 CGEN_OPCODE_DATA m32r_cgen_opcode_data = 
-{  & m32r_cgen_hw_entries[0],
+{
+  & m32r_cgen_hw_entries[0],
   & m32r_cgen_insn_table,
 };
 
@@ -1141,7 +1153,7 @@ m32r_cgen_init_tables (mach)
 CGEN_INLINE void
 m32r_cgen_set_operand (opindex, valuep, fields)
      int opindex;
-     const long *  valuep;
+     const long * valuep;
      CGEN_FIELDS * fields;
 {
   switch (opindex)
@@ -1212,7 +1224,7 @@ m32r_cgen_set_operand (opindex, valuep, fields)
 
 CGEN_INLINE long
 m32r_cgen_get_operand (opindex, fields)
-     int                 opindex;
+     int opindex;
      const CGEN_FIELDS * fields;
 {
   long value;

@@ -196,9 +196,9 @@ my_print_insn (pc, info, buf, buflen)
 
 CGEN_INLINE int
 m32r_cgen_extract_operand (opindex, buf_ctrl, insn_value, fields)
-     int           opindex;
-     void *        buf_ctrl;
-     cgen_insn_t   insn_value;
+     int opindex;
+     void * buf_ctrl;
+     cgen_insn_t insn_value;
      CGEN_FIELDS * fields;
 {
   int length;
@@ -285,12 +285,12 @@ m32r_cgen_extract_operand (opindex, buf_ctrl, insn_value, fields)
 
 CGEN_INLINE void
 m32r_cgen_print_operand (opindex, info, fields, attrs, pc, length)
-     int                opindex;
+     int opindex;
      disassemble_info * info;
-     CGEN_FIELDS *      fields;
-     void const *       attrs;
-     bfd_vma            pc;
-     int                length;
+     CGEN_FIELDS * fields;
+     void const * attrs;
+     bfd_vma pc;
+     int length;
 {
   switch (opindex)
     {
@@ -357,12 +357,14 @@ m32r_cgen_print_operand (opindex, info, fields, attrs, pc, length)
 }
 
 cgen_extract_fn * m32r_cgen_extract_handlers[] = 
-{  0, /* default */
+{
+  0, /* default */
   extract_insn_normal,
 };
 
 cgen_print_fn * m32r_cgen_print_handlers[] = 
-{  0, /* default */
+{
+  0, /* default */
   print_insn_normal,
 };
 
@@ -455,7 +457,7 @@ print_insn_normal (dis_info, insn, fields, pc, length)
 }
 
 /* Default value for CGEN_PRINT_INSN.
-   Given BUFLEN bytes (target byte order) read into BUF, look up the
+   Given BUFLEN bits (target byte order) read into BUF, look up the
    insn in the instruction table and disassemble it.
 
    The result is the size of the insn in bytes.  */

@@ -1,8 +1,6 @@
 /* Instruction description for m32r.
 
-This file is machine generated.
-
-Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -155,7 +153,8 @@ typedef enum cgen_insn_type {
 
 /* This struct records data prior to insertion or after extraction.  */
 typedef struct cgen_fields 
-{  long f_nil;
+{
+  long f_nil;
   long f_op1;
   long f_op2;
   long f_cond;

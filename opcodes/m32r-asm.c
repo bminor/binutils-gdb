@@ -351,7 +351,7 @@ m32r_cgen_parse_operand (opindex, strp, fields)
 
 CGEN_INLINE void
 m32r_cgen_insert_operand (opindex, fields, buffer)
-     int           opindex;
+     int opindex;
      CGEN_FIELDS * fields;
      cgen_insn_t * buffer;
 {
@@ -430,7 +430,7 @@ m32r_cgen_insert_operand (opindex, fields, buffer)
 
 CGEN_INLINE const char *
 m32r_cgen_validate_operand (opindex, fields)
-     int                 opindex;
+     int opindex;
      const CGEN_FIELDS * fields;
 {
   const char * errmsg = NULL;
@@ -502,12 +502,14 @@ m32r_cgen_validate_operand (opindex, fields)
 }
 
 cgen_parse_fn * m32r_cgen_parse_handlers[] = 
-{  0, /* default */
+{
+  0, /* default */
   parse_insn_normal,
 };
 
 cgen_insert_fn * m32r_cgen_insert_handlers[] = 
-{  0, /* default */
+{
+  0, /* default */
   insert_insn_normal,
 };
 
