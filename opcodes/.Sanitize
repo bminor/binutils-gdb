@@ -31,7 +31,7 @@ else
 	lose_these_too="${d10v_files} ${lose_these_too}"
 fi
 
-v850_files="v850-opc.c"
+v850_files="v850-opc.c v850-dis.c"
 
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
 	keep_these_too="${v850_files} ${keep_these_too}"
@@ -150,7 +150,7 @@ else
 	done
 fi
 
-v850_files="ChangeLog Makefile.in configure.in configure disassemble.c"
+v850_files="ChangeLog configure.in configure disassemble.c"
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
 	for i in $v850_files ; do
 		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
