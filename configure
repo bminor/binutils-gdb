@@ -673,10 +673,8 @@ fi
 if [ -z "${CC}" -a -r Makefile ]; then
   sed -n -e ':loop
 /\\$/ N
-s/\\$/\\*hpuxsedbug*/
-/\\$/ b loop
-s/\\\*hpuxsedbug\*/\\/g
 s/\\\n//g
+t loop
 /^CC[ 	]*=/ s/CC[ 	]*=[ 	]*\(.*\)/\1/p' < Makefile > Makefile.cc
   CC=`tail -1 Makefile.cc`
   rm -f Makefile.cc
@@ -685,10 +683,8 @@ fi
 if [ -z "${CXX}" -a -r Makefile ]; then
   sed -n -e ':loop
 /\\$/ N
-s/\\$/\\*hpuxsedbug*/
-/\\$/ b loop
-s/\\\*hpuxsedbug\*/\\/g
 s/\\\n//g
+t loop
 /^CXX[ 	]*=/ s/CXX[ 	]*=[ 	]*\(.*\)/\1/p' < Makefile > Makefile.cc
   CXX=`tail -1 Makefile.cc`
   rm -f Makefile.cc
@@ -746,10 +742,8 @@ if [ "${build}" != "${host}" ]; then
     if [ -z "`eval 'echo $'"${var}"`" -a -r Makefile ]; then
       sed -n -e ':loop
 /\\$/ N
-s/\\$/\\*hpuxsedbug*/
-/\\$/ b loop
-s/\\\*hpuxsedbug\*/\\/g
 s/\\\n//g
+t loop
 /^'"${var}"'[ 	]*=/ s/'"${var}"'[ 	]*=[ 	]*\(.*\)/\1/p' \
 	< Makefile > Makefile.v
       t=`tail -1 Makefile.v`
@@ -1114,19 +1108,15 @@ EOF
 		    -e "/^CC[ 	]*=/{
 			:loop1
 			/\\\\$/ N
-			s/\\\\$/\\\\*hpuxsedbug*/
-			/\\\\$/ b loop1
-			s/\\\\\\*hpuxsedbug\\*/\\\\/g
 			s/\\\\\\n//g
+			t loop1
 			s%^CC[ 	]*=.*$%CC = ${CC}%
 			}" \
 		    -e "/^CXX[ 	]*=/{
 			:loop2
 			/\\\\$/ N
-			s/\\\\$/\\\\*hpuxsedbug*/
-			/\\\\$/ b loop2
-			s/\\\\\\*hpuxsedbug\\*/\\\\/g
 			s/\\\\\\n//g
+			t loop2
 			s%^CXX[ 	]*=.*$%CXX = ${CXX}%
 			}" \
 		    -e "s:^SHELL[	 ]*=.*$:SHELL = ${config_shell}:" \

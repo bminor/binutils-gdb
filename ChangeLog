@@ -1,5 +1,7 @@
 Thu Oct 10 12:30:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure: Rework yesterday's sed script patch.
+
 	* config.sub: Merge with FSF.
 
 Wed Oct  9 17:24:59 1996  Per Bothner  <bothner@deneb.cygnus.com>
