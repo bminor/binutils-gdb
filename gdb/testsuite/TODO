@@ -55,6 +55,10 @@ functions, etc.
 Test GDB expressions--test all operators (and overloaded operators for
 C++).  Test integer constants which are signed or unsigned int, long,
 or long long.  Test detection of overflow of an integer constant.
+Here are a few integer constants to test (test they get the right
+types): 5, 5LL, 5LuL, 5L6u (invalid), 5LU.  Maybe things like
+0x12345678, 0x87654321, etc., but their types depend on sizes of int,
+long, etc.
 
 Test that printing const-qualified versions of various types works.
 In particular, on the sparc and probably other machines, "double" is
