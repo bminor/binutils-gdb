@@ -57,12 +57,44 @@ texinfo
 
 Do-last:
 
+echo Looking for signs of \"v9\"...
+
+# Don't try to clean directories here, as the 'mv' command will fail.
+# Also, grep fails on NFS mounted directories.
+if ( echo $* | grep keep\-v9 > /dev/null ) ; then
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-v9 $i > /dev/null) ; then
+			echo Keeping v9 stuff in $i
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-v9 $i > /dev/null) ; then
+			echo Cleaning the \"v9\" out of $i...
+			sed '/start\-sanitize\-v9/,/end-\sanitize\-v9/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				mv $i .Recover
+			fi
+			mv new $i
+			echo $i >> .Recover
+		fi
+	done
+fi
+
+echo Propagating sanitized top-level `configure' and `config.sub' through tree.
+
+./configure -template=./configure
+
 echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.13  1991/09/12 00:33:59  rich
+# Revision 1.14  1991/09/13 03:11:27  gnu
+# Clean out "v9" stuff from here, and propagate configure and config.sub
+# to all lower directories after sanity sets in.
+#
+# Revision 1.13  1991/09/12  00:33:59  rich
 # add gdbm.
 #
 # Revision 1.12  1991/09/02  22:19:49  rich
