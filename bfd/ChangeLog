@@ -1,3 +1,23 @@
+Wed Dec  1 14:15:10 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* elfcode.h (write_relocs): Initialize local var LAST_SYM_IDX, to
+	make gcc happy.
+
+	* mipsbsd.c: Changes from Ralph Campbell:
+	(mips_howto_table_ext): MIPS_RELOC_LO16 should use
+	complain_overflow_dont.
+	(aout_mips_*_vec): Make name use "a.out" instead of "aout", to
+	make gdb happy.
+
+	* bfd.c (bfd_errmsgs): Reword invalid-target message.
+
+	* config.bfd: For sparc*-*-coff, use sparc-coff.
+	* configure.in: Handle sparccoff_vec.
+	* targets.c (sparccoff_vec): Declare.
+
+	* reloc.c (bfd_get_reloc_size): New function.
+	(struct reloc_howto_type): Update documentation of size field.
+
 Wed Dec  1 14:39:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bfd-in.h (uint64_typeLOW, uint64_typeHIGH): Fully parenthesize
