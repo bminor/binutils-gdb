@@ -1,0 +1,62 @@
+# Copyright (C) 1995 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+if $tracelevel then {
+	strace $tracelevel
+}
+
+proc do_tests {} {
+    global prms_id bug_id subdir objdir srcdir binfile prompt
+
+    set prms_id 0
+    set bug_id 0
+
+    # Start with a fresh gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $objdir/$subdir/$binfile
+
+    send "set language chill\n" ; expect -re "$prompt $"
+
+    # These tests based on Cygnus PR chill/5696.
+    runto string.ch:11
+    test_print_accept "p s20" {"Moser Wilfried"} "print simple vstring"
+    test_print_accept "p s20(1)" {'o'} "print vstring element"
+    test_print_accept "p s20(1:3)" {"ose"} "print vstring slice (:)"
+    test_print_accept "p s20(2 up 3)" {"ser"} "print vstring slice (up)"
+    test_print_accept "p s10" {"1234567890"} "print simple string"
+    test_print_accept "p s10(1)" {'2'} "print string element"
+    test_print_accept "p s10(1:3)" {"234"} "print string slice (:)"
+    test_print_accept "p s10(2 up 3)" {"345"} "print string slice (up)"
+}
+
+# Check to see if we have an executable to test.  If not, then either we
+# haven't tried to compile one, or the compilation failed for some reason.
+# In either case, just notify the user and skip the tests in this file.
+
+set binfile "string.exe"
+set srcfile $binfile.ch
+
+if ![file exists $objdir/$subdir/$binfile] then {
+    warning "$binfile does not exist; tests suppressed."
+} else {
+    do_tests
+}

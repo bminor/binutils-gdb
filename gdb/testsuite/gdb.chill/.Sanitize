@@ -48,6 +48,8 @@ pr-6292.ch
 pr-6292.exp
 result.ch
 result.exp
+string.ch
+string.exp
 tuples.ch
 tuples.exp
 
