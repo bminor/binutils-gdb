@@ -1,3 +1,7 @@
+2000-05-26  Alan Modra  <alan@linuxcare.com.au>
+
+	* opncls.c (bfd_close_all_done): Mask file perms with 0777 not 0x777.
+
 2000-05-26  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-sparc.c (sparc64_elf_relax_section): New.
@@ -214,7 +218,7 @@ Fri May  5 16:51:03 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 2000-05-02  H.J. Lu  <hjl@gnu.org>
 
-	* elf.c (prep_headers): USe ELFOSABI_NONE instead of
+	* elf.c (prep_headers): Use ELFOSABI_NONE instead of
 	ELFOSABI_SYSV.
 
 2000-05-02  Alan Modra  <alan@linuxcare.com.au>
