@@ -3417,7 +3417,7 @@ bfd_prstatus (abfd, descdata, descsz, filepos)
 	return false;
       newsect->_raw_size = sizeof (status->pr_reg);
       newsect->filepos = filepos + (long) &status->pr_reg;
-      newsect->flags = SEC_ALLOC | SEC_HAS_CONTENTS;
+      newsect->flags = SEC_HAS_CONTENTS;
       newsect->alignment_power = 2;
       if ((core_prstatus (abfd) = bfd_alloc (abfd, descsz)) != NULL)
 	{
@@ -3462,7 +3462,7 @@ bfd_fpregset (abfd, descdata, descsz, filepos)
     return false;
   newsect->_raw_size = descsz;
   newsect->filepos = filepos;
-  newsect->flags = SEC_ALLOC | SEC_HAS_CONTENTS;
+  newsect->flags = SEC_HAS_CONTENTS;
   newsect->alignment_power = 2;
   return true;
 }
@@ -5632,9 +5632,12 @@ elf_link_output_sym (finfo, name, elfsym, input_sec)
 
   output_symbol_hook = get_elf_backend_data (finfo->output_bfd)->
     elf_backend_link_output_symbol_hook;
-  if (! ((*output_symbol_hook)
-	 (finfo->output_bfd, finfo->info, name, elfsym, input_sec)))
-    return false;
+  if (output_symbol_hook != NULL)
+    {
+      if (! ((*output_symbol_hook)
+	     (finfo->output_bfd, finfo->info, name, elfsym, input_sec)))
+	return false;
+    }
 
   if (name == (const char *) NULL || *name == '\0')
     elfsym->st_name = 0;
