@@ -1,3 +1,8 @@
+2003-02-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.tgt (*-*-solaris*): Set gdb_osabi to
+	GDB_OSABI_SOLARIS.
+
 2003-02-05  Michael Chastain  <mec@shout.net>
 
 	* PROBLEMS (i[3456]86-*-linux*): Warn about binutils

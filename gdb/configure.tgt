@@ -284,4 +284,5 @@ esac
 case "${target}" in
 *-*-linux*)	gdb_osabi=GDB_OSABI_LINUX ;;
 *-*-gnu*)	gdb_osabi=GDB_OSABI_HURD ;;
+*-*-solaris*)	gdb_osabi=GDB_OSABI_SOLARIS ;;
 esac
