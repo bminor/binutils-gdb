@@ -1,3 +1,9 @@
+start-sanitize-vr4320
+Tue Mar  3 11:06:53 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* gas/mips/mips.exp (ilocks) : Added mips64vr4320*-*-*.
+
+end-sanitize-vr4320
 Mon Mar  2 13:30:40 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* gas/m32r/allinsn.[sd] (ldi8a,ldi16a): Delete.
