@@ -1,3 +1,8 @@
+2004-10-28  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* crx-opc.c (REV_COP_INST): New macro, reverse operand order of
+	COP_INST macro.
+
 2004-10-27  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* crx-dis.c (enum REG_ARG_TYPE): New, replacing COP_ARG_TYPE.
