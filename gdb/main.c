@@ -1019,7 +1019,7 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
 	    mac_command_loop ();
 	  else
 #endif /* MPW */
-/* start-sanitize-mpw */
+/* end-sanitize-mpw */
 	  command_loop ();
           quit_command ((char *)0, instream == stdin);
 	}
