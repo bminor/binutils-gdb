@@ -70,3 +70,9 @@ BUILD_DLLTOOL = \
 /^Makefile \\Option-f/,/^$/d
 /^"{o}"config.h \\Option-f/,/^$/d
 /^config.status \\Option-f/,/^$/d
+
+# Don't try to make the demangler's man page, it's useless.
+/^{DEMANGLER_PROG}\.1 \\Option-f/,/^$/d
+# Don't depend on it either.
+/{DEMANGLER_PROG}/s/ {DEMANGLER_PROG}\.1//
+

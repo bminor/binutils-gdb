@@ -1,3 +1,13 @@
+Sun Nov 12 12:56:05 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed (DEMANGLER_PROG): Edit out attempts to do anything
+ 	with the man page.
+
+Fri Nov 10 11:41:22 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c (setup_section): Copy the section lma independently of
+	the vma.
+
 Wed Nov  8 11:33:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* arsup.c (ar_open): Cast malloc return value.
