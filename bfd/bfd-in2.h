@@ -81,7 +81,13 @@ typedef struct _bfd bfd;
    force me to change it. */
 /* typedef enum boolean {false, true} boolean; */
 /* Yup, SVR4 has a "typedef enum boolean" in <sys/types.h>  -fnf */
+/* It gets worse if the host also defines a true/false enum... -sts */
+#ifndef TRUE_FALSE_ALREADY_DEFINED
 typedef enum bfd_boolean {false, true} boolean;
+#define BFD_TRUE_FALSE
+#else
+typedef enum bfd_boolean {bfd_false, bfd_true} boolean;
+#endif
 
 /* A pointer to a position in a file.  */
 /* FIXME:  This should be using off_t from <sys/types.h>.
@@ -435,7 +441,7 @@ extern void bfd_hash_traverse PARAMS ((struct bfd_hash_table *,
 #define CAT3(a,b,c)	a##b##c
 #define CAT4(a,b,c,d)	a##b##c##d
 #else
-#ifdef __STDC__
+#if defined(__STDC__) || defined(ALMOST_STDC)
 #define CAT(a,b) a##b
 #define CAT3(a,b,c) a##b##c
 #define XCAT2(a,b)	CAT(a,b)
@@ -536,7 +542,7 @@ void		bfd_putb16	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putl16	   PARAMS ((bfd_vma, unsigned char *));
 
 /* ECOFF linking routines.  */
-#ifdef __STDC__
+#if defined(__STDC__) || defined(ALMOST_STDC)
 struct ecoff_debug_info;
 struct ecoff_debug_swap;
 struct ecoff_extr;

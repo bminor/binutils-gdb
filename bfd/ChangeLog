@@ -1,3 +1,11 @@
+Fri Jan  7 10:29:27 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+    	* bfd-in.h: (bfd_boolean): Add workaround for systems that also
+	define true and false as enums.
+	(ALMOST_STDC): Add as alternative to __STDC__.
+	* bfd-in2.h: Rebuilt.
+	* syms.c (bfd_print_symbol_vandf): Convert a PTR to FILE*.
+
 Thu Jan  6 14:24:44 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* aoutx.h (translate_to_native_sym_flags): Catch the case where
