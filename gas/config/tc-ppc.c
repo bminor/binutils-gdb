@@ -25,6 +25,10 @@
 
 #include "opcode/ppc.h"
 
+#ifdef OBJ_ELF
+#include "elf/ppc.h"
+#endif
+
 /* This is the assembler for the PowerPC or POWER (RS/6000) chips.  */
 
 /* FIXME: This should be handled in a different way.  */
@@ -146,7 +150,7 @@ static struct hash_control *ppc_macro_hash;
 #ifdef OBJ_ELF
 /* Whether to warn about non PC relative relocations that aren't
    in the .got2 section. */
-static int mrelocatable = 0;
+static boolean mrelocatable = false;
 #endif
 
 #ifdef OBJ_COFF
@@ -264,7 +268,7 @@ md_parse_option (c, arg)
 #ifdef OBJ_ELF
       /* -mrelocatable -- warn about initializations that require relocation */
       else if (strcmp (arg, "relocatable") == 0)
-	mrelocatable = 1;
+	mrelocatable = true;
 #endif
       else
 	{
@@ -359,6 +363,12 @@ md_begin ()
   const struct powerpc_macro *macro_end;
 
   ppc_set_cpu ();
+
+#ifdef OBJ_ELF
+  /* Set  the -mrelocatable flag bit */
+  if (mrelocatable)
+    bfd_set_private_flags (stdoutput, EF_PPC_RELOCATABLE);
+#endif
 
   /* Insert the opcodes into a hash table.  */
   ppc_hash = hash_new ();
@@ -584,8 +594,8 @@ ppc_elf_validate_fix (fixS *fixp, segT seg)
       && strcmp (segment_name (seg), ".got2") != 0
       && strcmp (segment_name (seg), ".stab") != 0)
     {
-      as_bad_where (fixp->fx_file, fixp->fx_line,
-		    "Relocation cannot be done when using -mrelocatable");
+      as_warn_where (fixp->fx_file, fixp->fx_line,
+		     "Relocation cannot be done when using -mrelocatable");
     }
 }
 

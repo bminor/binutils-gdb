@@ -1,3 +1,8 @@
+Tue Mar 14 17:00:57 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_validate_fix): Use as_warn_where, not
+	as_bad_where to give a warning instead of an error.
+
 Mon Mar 13 17:03:46 1995  Pat Rankin  (rankin@eql.caltech.edu)
 
 	* config/tc-vax.c (md_assemble):  issue a warning if a constant
