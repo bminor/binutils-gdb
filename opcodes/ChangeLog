@@ -1,6 +1,6 @@
 Tue Feb  8 00:32:28 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
-	* dis-buf.c, i386-dis.c:  Include <string.h>.
+	* dis-buf.c, i386-dis.c:  Include sysdep.h.
 
 Mon Feb  7 19:22:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
