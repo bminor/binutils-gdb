@@ -86,6 +86,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef SIOCSPGRP
 #endif
 
+extern char *source_path;       /* from source.c */
 int gdbtk_load_hash PARAMS ((char *, unsigned long));
 int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 
@@ -140,6 +141,7 @@ static int gdb_tracepoint_exists_command PARAMS ((ClientData, Tcl_Interp *, int,
 static int gdb_get_tracepoint_info PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_actions_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_prompt_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
+static int gdb_find_file_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static void gdbtk_create_tracepoint PARAMS ((struct tracepoint *));
 static void gdbtk_delete_tracepoint PARAMS ((struct tracepoint *));
 static void tracepoint_notify PARAMS ((struct tracepoint *, const char *));
@@ -1897,6 +1899,8 @@ gdbtk_init ( argv0 )
                         gdb_actions_command, NULL, NULL);
   Tcl_CreateObjCommand (interp, "gdb_prompt",
                         gdb_prompt_command, NULL, NULL);
+  Tcl_CreateObjCommand (interp, "gdb_find_file",
+                        gdb_find_file_command, NULL, NULL);
   
   command_loop_hook = tk_command_loop;
   print_frame_info_listing_hook =
@@ -2585,6 +2589,77 @@ gdb_prompt_command (clientData, interp, objc, objv)
   Tcl_Obj *CONST objv[];
 {
   Tcl_SetResult (interp, get_prompt (), TCL_VOLATILE);
+  return TCL_OK;
+}
+
+
+/* This is stolen from source.c */
+#ifdef CRLF_SOURCE_FILES
+
+/* Define CRLF_SOURCE_FILES in an xm-*.h file if source files on the
+   host use \r\n rather than just \n.  Defining CRLF_SOURCE_FILES is
+   much faster than defining LSEEK_NOT_LINEAR.  */
+
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
+#define OPEN_MODE (O_RDONLY | O_BINARY)
+
+#else /* ! defined (CRLF_SOURCE_FILES) */
+
+#define OPEN_MODE O_RDONLY
+
+#endif /* ! defined (CRLF_SOURCE_FILES) */
+
+/* Find the pathname to a file, searching the source_dir */
+/* we may actually need to use openp to find the the full pathname
+   so we don't have any "../" et al in it. */
+static int
+gdb_find_file_command (clientData, interp, objc, objv)
+  ClientData clientData;
+  Tcl_Interp *interp;
+  int objc;
+  Tcl_Obj *CONST objv[];
+{
+  char *file, *filename;
+  char *p;
+  int   found;
+
+  if (objc != 2)
+    {
+      Tcl_AppendResult (interp, "wrong # of args: should be \"",
+                        Tcl_GetStringFromObj (objv[0], NULL),
+                        " filename\"");
+      return TCL_ERROR;
+    }
+
+  /* try something simple first */
+  file  = Tcl_GetStringFromObj (objv[1], NULL);
+  if (access (file, R_OK) == 0)
+    {
+      Tcl_SetObjResult (interp, Tcl_NewStringObj (file, -1));
+      return TCL_OK;
+    }
+
+  /* Search the path -- do NOT search CWD first -- be consistent with source.c */
+  found = openp (source_path, 0, file, OPEN_MODE, 0, &filename);
+  if (found < 0)
+    {
+      /* Did not work -- try just the base filename */
+      p = basename (file);
+      if (p != file)
+        found = openp (source_path, 0, p, OPEN_MODE, 0, &filename);
+    }
+          
+  if (found >= 0)
+    {
+      Tcl_SetObjResult (interp, Tcl_NewStringObj (filename, -1));
+      close (found);
+    }
+  else
+    Tcl_SetResult (interp, "", TCL_STATIC);
+  
   return TCL_OK;
 }
 

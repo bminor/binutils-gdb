@@ -1,3 +1,9 @@
+Fri Dec  5 10:31:23 1997  Keith Seitz  <keiths@pizza.cygnus.com>
+
+	* gdbtk.c (gdbtk_init): add gdb_find_file to interpreter
+	(gdb_find_file_command): new function searches source_path to
+	find real full filename
+
 Fri Dec  5 09:22:35 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/v850/tm-v850.h (BREAKPOINT): Reverted back to old value...
