@@ -1,3 +1,12 @@
+start-sanitize-tic80
+Wed Feb 26 15:16:04 1997  Fred Fish  <fnf@cygnus.com>
+
+	* gas/tic80/{regops2.d, regops2.lst, regops2.s, regops3.d,
+ 	regops3.lst, regops3.s, regops4.d, regops4.lst, regops4.s}:
+	New tests for :m and :s operand modifiers.
+	* gas/tic80/tic80.exp: Run the regops2, regops3, and regops4 tests.
+
+end-sanitize-tic80
 Tue Feb 25 13:45:55 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/macros/semi.s: Force the final alignment to use a fill value

@@ -4,6 +4,9 @@
 if [istarget tic80*-*-*] then {
 
     run_dump_test "regops"
+    run_dump_test "regops2"
+    run_dump_test "regops3"
+    run_dump_test "regops4"
     run_dump_test "cregops"
     run_dump_test "endmask"
     run_dump_test "bitnum"
