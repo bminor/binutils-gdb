@@ -1,5 +1,7 @@
 Wed Jul  7 17:58:14 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
 
+	* Makefile.in: remove all.cross and install.cross targets
+
 	* configure: remove CROSS=-DCROSS_COMPILE and ALL=all.cross
 	  definitions
 
