@@ -618,6 +618,16 @@ struct elf_backend_data
   void (*elf_backend_hide_symbol)
     PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 
+  /* Emit relocations.  Overrides default routine for emitting relocs,
+     except during a relocatable link, or if all relocs are being emitted.  */
+  void (*elf_backend_emit_relocs)
+    PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *));
+
+  /* Count relocations.  Not called for relocatable links
+     or if all relocs are being preserved in the output.  */
+  unsigned int (*elf_backend_count_relocs)
+    PARAMS ((asection *, Elf_Internal_Rela *));
+
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
   const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;

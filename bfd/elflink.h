@@ -4135,6 +4135,7 @@ elf_link_size_reloc_section (abfd, rel_hdr, o)
      asection *o;
 {
   unsigned reloc_count;
+  unsigned num_rel_hashes;
 
   /* Figure out how many relocations there will be.  */
   if (rel_hdr == &elf_section_data (o)->rel_hdr)
@@ -4142,6 +4143,10 @@ elf_link_size_reloc_section (abfd, rel_hdr, o)
   else
     reloc_count = elf_section_data (o)->rel_count2;
 
+  num_rel_hashes = o->reloc_count;
+  if (num_rel_hashes < reloc_count)
+    num_rel_hashes = reloc_count;
+  
   /* That allows us to calculate the size of the section.  */
   rel_hdr->sh_size = rel_hdr->sh_entsize * reloc_count;
 
@@ -4155,14 +4160,15 @@ elf_link_size_reloc_section (abfd, rel_hdr, o)
 
   /* We only allocate one set of hash entries, so we only do it the
      first time we are called.  */
-  if (elf_section_data (o)->rel_hashes == NULL)
+  if (elf_section_data (o)->rel_hashes == NULL
+      && num_rel_hashes)
     {
       struct elf_link_hash_entry **p;
 
       p = ((struct elf_link_hash_entry **)
-	   bfd_zmalloc (o->reloc_count
+	   bfd_zmalloc (num_rel_hashes
 			* sizeof (struct elf_link_hash_entry *)));
-      if (p == NULL && o->reloc_count != 0)
+      if (p == NULL)
 	return false;
 
       elf_section_data (o)->rel_hashes = p;
@@ -4268,6 +4274,7 @@ elf_bfd_final_link (abfd, info)
      struct bfd_link_info *info;
 {
   boolean dynamic;
+  boolean emit_relocs;
   bfd *dynobj;
   struct elf_final_link_info finfo;
   register asection *o;
@@ -4291,6 +4298,10 @@ elf_bfd_final_link (abfd, info)
 
   dynamic = elf_hash_table (info)->dynamic_sections_created;
   dynobj = elf_hash_table (info)->dynobj;
+
+  emit_relocs = (info->relocateable
+                 || info->emitrelocations
+                 || bed->elf_backend_emit_relocs);
 
   finfo.info = info;
   finfo.output_bfd = abfd;
@@ -4357,6 +4368,20 @@ elf_bfd_final_link (abfd, info)
 
 	      if (info->relocateable || info->emitrelocations)
 		o->reloc_count += sec->reloc_count;
+              else if (bed->elf_backend_count_relocs)
+		{
+		  Elf_Internal_Rela * relocs;
+
+		  relocs = (NAME(_bfd_elf,link_read_relocs)
+			    (abfd, sec, (PTR) NULL,
+			     (Elf_Internal_Rela *) NULL, info->keep_memory));
+
+		  o->reloc_count += (*bed->elf_backend_count_relocs)
+		                      (sec, relocs);
+
+		  if (!info->keep_memory)
+		    free (relocs);
+		}
 
 	      if (sec->_raw_size > max_contents_size)
 		max_contents_size = sec->_raw_size;
@@ -4427,7 +4452,7 @@ elf_bfd_final_link (abfd, info)
   /* Figure out how many relocations we will have in each section.
      Just using RELOC_COUNT isn't good enough since that doesn't
      maintain a separate value for REL vs. RELA relocations.  */
-  if (info->relocateable || info->emitrelocations)
+  if (emit_relocs)
     for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
       for (o = sub->sections; o != NULL; o = o->next)
 	{
@@ -4467,6 +4492,7 @@ elf_bfd_final_link (abfd, info)
 	      *rel_count += NUM_SHDR_ENTRIES (& esdi->rel_hdr);
 	      if (esdi->rel_hdr2)
 		*rel_count2 += NUM_SHDR_ENTRIES (esdi->rel_hdr2);
+	      output_section->flags |= SEC_RELOC;
 	    }
 	}
 
@@ -4533,7 +4559,8 @@ elf_bfd_final_link (abfd, info)
 
   /* Start writing out the symbol table.  The first symbol is always a
      dummy symbol.  */
-  if (info->strip != strip_all || info->relocateable || info->emitrelocations)
+  if (info->strip != strip_all
+      || emit_relocs)
     {
       elfsym.st_value = 0;
       elfsym.st_size = 0;
@@ -4566,7 +4593,8 @@ elf_bfd_final_link (abfd, info)
      symbols have no names.  We store the index of each one in the
      index field of the section, so that we can find it again when
      outputting relocs.  */
-  if (info->strip != strip_all || info->relocateable || info->emitrelocations)
+  if (info->strip != strip_all
+      || emit_relocs)
     {
       elfsym.st_size = 0;
       elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
@@ -5018,7 +5046,7 @@ elf_bfd_final_link (abfd, info)
     {
       if ((o->flags & SEC_RELOC) != 0
 	  && elf_section_data (o)->rel_hashes != NULL)
-	free (elf_section_data (o)->rel_hashes);
+        free (elf_section_data (o)->rel_hashes);
     }
 
   elf_tdata (abfd)->linker = true;
@@ -5572,6 +5600,7 @@ elf_link_input_bfd (finfo, input_bfd)
   asection **ppsection;
   asection *o;
   struct elf_backend_data *bed;
+  boolean emit_relocs;
 
   output_bfd = finfo->output_bfd;
   bed = get_elf_backend_data (output_bfd);
@@ -5582,6 +5611,10 @@ elf_link_input_bfd (finfo, input_bfd)
      contents.  */
   if ((input_bfd->flags & DYNAMIC) != 0)
     return true;
+
+  emit_relocs = (finfo->info->relocateable
+                 || finfo->info->emitrelocations
+                 || bed->elf_backend_emit_relocs);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   if (elf_bad_symtab (input_bfd))
@@ -5860,13 +5893,16 @@ elf_link_input_bfd (finfo, input_bfd)
 				     finfo->sections))
 	    return false;
 
-	  if (finfo->info->relocateable || finfo->info->emitrelocations)
+	  if (emit_relocs)
 	    {
 	      Elf_Internal_Rela *irela;
 	      Elf_Internal_Rela *irelaend;
 	      struct elf_link_hash_entry **rel_hash;
 	      Elf_Internal_Shdr *input_rel_hdr;
 	      unsigned int next_erel;
+	      void (* reloc_emitter) PARAMS ((bfd *, asection *,
+					      Elf_Internal_Shdr *,
+					      Elf_Internal_Rela *));
 
 	      /* Adjust the reloc addresses and symbol indices.  */
 
@@ -6008,17 +6044,23 @@ elf_link_input_bfd (finfo, input_bfd)
 		}
 
 	      /* Swap out the relocs.  */
+              if (bed->elf_backend_emit_relocs
+                  && ! (finfo->info->relocateable || finfo->info->emitrelocations))
+                reloc_emitter = bed->elf_backend_emit_relocs;
+              else
+                reloc_emitter = elf_link_output_relocs;
+
 	      input_rel_hdr = &elf_section_data (o)->rel_hdr;
-	      elf_link_output_relocs (output_bfd, o,
-				      input_rel_hdr,
-				      internal_relocs);
-	      internal_relocs += NUM_SHDR_ENTRIES (input_rel_hdr)
-				 * bed->s->int_rels_per_ext_rel;
+              (*reloc_emitter) (output_bfd, o, input_rel_hdr, internal_relocs);
+
 	      input_rel_hdr = elf_section_data (o)->rel_hdr2;
-	      if (input_rel_hdr)
-		elf_link_output_relocs (output_bfd, o,
-					input_rel_hdr,
-					internal_relocs);
+              if (input_rel_hdr)
+                {
+                  internal_relocs += NUM_SHDR_ENTRIES (input_rel_hdr)
+				     * bed->s->int_rels_per_ext_rel;
+                  reloc_emitter (output_bfd, o, input_rel_hdr, internal_relocs);
+                }
+
 	    }
 	}
 

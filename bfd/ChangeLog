@@ -1,3 +1,30 @@
+2001-06-20  Catherine Moore  <clm@redhat.com>
+
+        * elf-bfd.h (struct elf_backend_data):
+        elf_backend_emit_relocs: New field: Function for emitting
+        relocs.
+        elf_backend_count_relocs: New field: Function for determining
+        the number of relocs to be emitted.
+        * elfxx-target.h: Provide default (NULL) values for
+        elf_backend_emit_relocs and elf_backend_count_relocs.
+        * elflink.h (elf_link_size_reloc_section): Make the hash table
+        big enough to hold the relocs counted by either reloc_count or
+        o->reloc_count.  
+        (elf_bfd_final_link) emit_relocs: New boolean, set if relocs
+        should be emitted, either because of a command line option
+        stored in the info structure or because the target provides a
+        special reloc emitting function.
+        If the target provides a reloc counting function use it,
+        unless performing a relocatable link or emitting all relocs.
+        Also set the SEC_RELOC flag on any output section which will
+        contain relocs.
+        (elf_link_input_bfd): emit_relocs: New boolean, set if relocs
+        should be emitted, either because of a command line option
+        stored in the info structure or because the target provides a
+        special reloc emitting function.
+        If the target provides a reloc emitting function, use it,
+        unless performing a relocatable link or emitting all relocs.
+
 2001-06-20  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-i386.c (elf_i386_size_dynamic_sections): Always

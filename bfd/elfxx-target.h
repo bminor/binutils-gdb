@@ -323,6 +323,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_hide_symbol
 #define elf_backend_hide_symbol		_bfd_elf_link_hash_hide_symbol
 #endif
+#ifndef elf_backend_emit_relocs
+#define elf_backend_emit_relocs			NULL
+#endif
+#ifndef elf_backend_count_relocs
+#define elf_backend_count_relocs		NULL
+#endif
 
 /* Previously, backends could only use SHT_REL or SHT_RELA relocation
    sections, but not both.  They defined USE_REL to indicate SHT_REL
@@ -404,6 +410,8 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_output_arch_syms,
   elf_backend_copy_indirect_symbol,
   elf_backend_hide_symbol,
+  elf_backend_emit_relocs,
+  elf_backend_count_relocs,
   elf_backend_ecoff_debug_swap,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
