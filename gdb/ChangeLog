@@ -1,5 +1,9 @@
 Wed Nov 20 18:35:56 1991  John Gilmore  (gnu at cygnus.com)
 
+	* configure.in, xconfig, tconfig:  Makefile fragments for various
+	hosts and targets now come from gdb/config/mh-* and
+	gdb/config/mt-*.  This is for consistency with other config setups.
+
 	* rs6000-pinsn.c, rs6k-opcode.h:  Clean up.
 	* rs6k-opcode.def:  Delete.
 
