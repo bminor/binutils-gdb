@@ -6,8 +6,7 @@
 
 #include "v850_sim.h"
 
-#define IMEM_SIZE 18	/* V850 instruction memory size is 18 bits */
-#define DMEM_SIZE 16	/* Data memory */
+#define MEM_SIZE 18	/* V850 memory size is 18 bits XXX */
 
 uint16 OP[4];
 
@@ -72,82 +71,58 @@ lookup_hash (ins)
   return (h);
 }
 
+uint8
+get_byte (x)
+     uint8 *x;
+{
+  return *x;
+}
+
+uint16
+get_half (x)
+     uint8 *x;
+{
+  uint8 *a = x;
+  return (a[1] << 8) + (a[0]);
+}
+
 uint32
-get_longword (x)
+get_word (x)
       uint8 *x;
 {
   uint8 *a = x;
   return (a[3]<<24) + (a[2]<<16) + (a[1]<<8) + (a[0]);
 }
 
-int64
-get_longlong (x)
-      uint8 *x;
+void
+put_byte (addr, data)
+     uint8 *addr;
+     uint8 data;
 {
-  uint8 *a = x;
-  return ((int64)a[0]<<56) + ((int64)a[1]<<48) + ((int64)a[2]<<40) + ((int64)a[3]<<32) +
-    ((int64)a[4]<< 24) + ((int64)a[5]<<16) + ((int64)a[6]<<8) + (int64)a[7];
+  uint8 *a = addr;
+  a[0] = data;
 }
-
-uint16
-get_word (x)
-      uint8 *x;
-{
-  uint8 *a = x;
-  return ((uint16)a[0]<<8) + a[1];
-}
-
 
 void
-write_word (addr, data)
+put_half (addr, data)
      uint8 *addr;
      uint16 data;
 {
   uint8 *a = addr;
-  a[0] = data >> 8;
-  a[1] = data & 0xff;
+  a[0] = data & 0xff;
+  a[1] = (data >> 8) & 0xff;
 }
 
 void
-write_longword (addr, data)
+put_word (addr, data)
      uint8 *addr;
      uint32 data;
 {
-  addr[0] = (data >> 24) & 0xff;
-  addr[1] = (data >> 16) & 0xff;
-  addr[2] = (data >> 8) & 0xff;
-  addr[3] = data & 0xff;
-}
-
-void
-write_longlong (addr, data)
-     uint8 *addr;
-     int64 data;
-{
   uint8 *a = addr;
-  a[0] = data >> 56;
-  a[1] = (data >> 48) & 0xff;
-  a[2] = (data >> 40) & 0xff;
-  a[3] = (data >> 32) & 0xff;
-  a[4] = (data >> 24) & 0xff;
-  a[5] = (data >> 16) & 0xff;
-  a[6] = (data >> 8) & 0xff;
-  a[7] = data & 0xff;
-}
-
-static void
-get_operands (struct simops *s, uint32 ins)
-{
-  int i, shift, bits, flags;
-  uint32 mask;
-  for (i=0; i < s->numops; i++)
-    {
-      shift = s->operands[3*i];
-      bits = s->operands[3*i+1];
-      flags = s->operands[3*i+2];
-      mask = 0x7FFFFFFF >> (31 - bits);
-      OP[i] = (ins >> shift) & mask;
-    }
+  a[0] = data & 0xff;
+  a[1] = (data >> 8) & 0xff;
+  a[2] = (data >> 16) & 0xff;
+  a[3] = (data >> 24) & 0xff;
 }
 
 static void
@@ -213,7 +188,14 @@ static void
 do_format_7 (insn)
      uint32 insn;
 {
+  struct hash_entry *h;
   printf("format 7 0x%x\n", insn);
+
+  h = lookup_hash (insn);
+  OP[0] = insn & 0x1f;
+  OP[1] = (insn >> 11) & 0x1f;
+  OP[2] = (insn >> 16) & 0xffff;
+  (h->ops->func) ();
 }
 
 static void
@@ -241,27 +223,24 @@ sim_size (power)
      int power;
 
 {
-  if (State.imem)
+  if (State.mem)
     {
-      free (State.imem);
-      free (State.dmem);
+      free (State.mem);
     }
 
-  State.imem = (uint8 *)calloc(1,1<<IMEM_SIZE);
-  State.dmem = (uint8 *)calloc(1,1<<DMEM_SIZE);
-  if (!State.imem || !State.dmem )
+  State.mem = (uint8 *)calloc(1,1<<MEM_SIZE);
+  if (!State.mem)
     {
       fprintf (stderr,"Memory allocation failed.\n");
       exit(1);
     }
-  printf ("Allocated %d bytes instruction memory and\n",1<<IMEM_SIZE);
-  printf ("          %d bytes data memory.\n",1<<DMEM_SIZE);
+  printf ("Allocated %d bytes memory and\n",1<<MEM_SIZE);
 }
 
 static void
 init_system ()
 {
-  if (!State.imem)
+  if (!State.mem)
     sim_size(1);
 }
 
@@ -277,7 +256,7 @@ sim_write (addr, buffer, size)
   /* printf ("sim_write %d bytes to 0x%x\n",size,addr); */
   for (i = 0; i < size; i++)
     {
-      State.imem[i+addr] = buffer[i]; 
+      State.mem[i+addr] = buffer[i]; 
     }
   return size;
 }
@@ -486,7 +465,7 @@ sim_read (addr, buffer, size)
   int i;
   for (i = 0; i < size; i++)
     {
-      buffer[i] = State.imem[addr + i];
+      buffer[i] = State.mem[addr + i];
     }
   return size;
 } 

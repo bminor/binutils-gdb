@@ -2,19 +2,134 @@
 #include "v850_sim.h"
 #include "simops.h"
 
+/* sld.b */
 void
-OP_10760 ()
+OP_300 ()
 {
 }
 
+/* sld.h */
 void
-OP_C7C0 ()
+OP_400 ()
 {
 }
 
+/* sld.w */
+void
+OP_500 ()
+{
+}
+
+/* sst.b */
+void
+OP_380 ()
+{
+}
+
+/* sst.h */
+void
+OP_480 ()
+{
+}
+
+/* sst.w */
+void
+OP_501 ()
+{
+}
+
+/* ld.b */
+void
+OP_700 ()
+{
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  temp = OP[2];
+  temp = (temp << 16) >> 16;
+  op2 = temp;
+  result = get_byte (State.mem + op0 + op2);
+  result = (result << 24) >> 24;
+  State.regs[OP[1]] = result;
+}
+
+/* ld.h */
+void
+OP_720 ()
+{
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  temp = (temp << 16) >> 16;
+  temp &= ~0x1;
+  op2 = temp;
+  result = get_half (State.mem + op0 + op2);
+  result = (result << 16) >> 16;
+  State.regs[OP[1]] = result;
+}
+
+/* ld.w */
+void
+OP_10720 ()
+{
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  temp = (temp << 16) >> 16;
+  temp &= ~0x1;
+  op2 = temp;
+  result = get_word (State.mem + op0 + op2);
+  State.regs[OP[1]] = result;
+}
+
+/* st.b */
+void
+OP_740 ()
+{
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  temp = OP[2];
+  temp = (temp << 16) >> 16;
+  op2 = temp;
+  put_byte (State.mem + op0 + op2, op1);
+}
+
+/* st.h */
 void
 OP_760 ()
 {
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  temp = OP[2];
+  temp &= ~0x1;
+  temp = (temp << 16) >> 16;
+  op2 = temp;
+  put_half (State.mem + op0 + op2, op1);
+}
+
+/* st.w */
+void
+OP_10760 ()
+{
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  temp = OP[2];
+  temp &= ~0x1;
+  temp = (temp << 16) >> 16;
+  op2 = temp;
+  put_word (State.mem + op0 + op2, op1);
 }
 
 /* bv disp9 */
@@ -823,26 +938,6 @@ OP_160 ()
   State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
-void
-OP_10720 ()
-{
-}
-
-void
-OP_720 ()
-{
-}
-
-void
-OP_87C0 ()
-{
-}
-
-void
-OP_300 ()
-{
-}
-
 /* mov reg, reg */
 void
 OP_0 ()
@@ -881,21 +976,6 @@ OP_640 ()
   value = (value & 0xffff) << 16; 
 
   State.regs[OP[2]] = State.regs[OP[1]] + value;
-}
-
-void
-OP_7C0 ()
-{
-}
-
-void
-OP_1687E0 ()
-{
-}
-
-void
-OP_740 ()
-{
 }
 
 /* sar zero_extend(imm5),reg1 */
@@ -1028,16 +1108,6 @@ OP_8007E0 ()
   State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
   State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
-}
-
-void
-OP_500 ()
-{
-}
-
-void
-OP_47C0 ()
-{
 }
 
 /* or reg, reg */
@@ -1182,18 +1252,27 @@ OP_20 ()
   State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
+/* set1 */
 void
-OP_480 ()
+OP_7C0 ()
 {
 }
 
+/* not1 */
 void
-OP_380 ()
+OP_47C0 ()
 {
 }
 
+/* clr1 */
 void
-OP_501 ()
+OP_87C0 ()
+{
+}
+
+/* tst1 */
+void
+OP_C7C0 ()
 {
 }
 
@@ -1250,15 +1329,5 @@ OP_4007E0 ()
 
   op0 = State.sregs[OP[1]];
   State.regs[OP[0]] = op0;
-}
-
-void
-OP_400 ()
-{
-}
-
-void
-OP_700 ()
-{
 }
 

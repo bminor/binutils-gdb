@@ -1,5 +1,17 @@
 Thu Aug 29 13:53:29 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850_sim.h: The V850 doesn't have split I&D spaces.  Change
+	accordingly.  Remove many unused definitions.
+	* interp.c: The V850 doesn't have split I&D spaces.  Change
+	accordingly.
+	(get_longlong, get_longword, get_word): Deleted.
+	(write_longlong, write_longword, write_word): Deleted.
+	(get_operands): Deleted.
+	(get_byte, get_half, get_word): New functions.
+	(put_byte, put_half, put_word): New functions.
+	* simops.c: Remove unused functions.  Rough cut at
+	"ld.b", "ld.h", "ld.w", "st.b", "st.h", "st.w" insns.
+
 	* v850_sim.h (struct _state): Remove "psw" field.  Add
 	"sregs" field.
 	(PSW): Remove bogus definition.
