@@ -8,6 +8,12 @@
 
 2002-04-07  Elena Zannoni  <ezannoni@redhat.com>
 
+	* remote-e7000.c (write_small, e7000_read_inferior_memory,
+	e7000_read_inferior_memory_large, e7000_insert_breakpoint,
+	e7000_remove_breakpoint): Use paddr_nz() to print addresses.
+
+2002-04-07  Elena Zannoni  <ezannoni@redhat.com>
+
 	* sh-tdep.c (sh_fp_frame_init_saved_regs,
 	sh_nofp_frame_init_saved_regs): Use alloca() for 'where'
 	information.

@@ -1083,15 +1083,15 @@ write_small (CORE_ADDR memaddr, unsigned char *myaddr, int len)
       if (((memaddr + i) & 3) == 0 && (i + 3 < len))
 	{
 	  /* Can be done with a long word */
-	  sprintf (buf, "m %lx %x%02x%02x%02x;l\r",
-		   memaddr + i,
+	  sprintf (buf, "m %s %x%02x%02x%02x;l\r",
+		   paddr_nz (memaddr + i),
 		   myaddr[i], myaddr[i + 1], myaddr[i + 2], myaddr[i + 3]);
 	  puts_e7000debug (buf);
 	  i += 3;
 	}
       else
 	{
-	  sprintf (buf, "m %lx %x\r", memaddr + i, myaddr[i]);
+	  sprintf (buf, "m %s %x\r", paddr_nz (memaddr + i), myaddr[i]);
 	  puts_e7000debug (buf);
 	}
     }
@@ -1244,7 +1244,7 @@ e7000_read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
       return 0;
     }
 
-  sprintf (buf, "m %lx;l\r", memaddr);
+  sprintf (buf, "m %s;l\r", paddr_nz (memaddr));
   puts_e7000debug (buf);
 
   for (count = 0; count < len; count += 4)
@@ -1323,7 +1323,7 @@ e7000_read_inferior_memory_large (CORE_ADDR memaddr, unsigned char *myaddr,
       return 0;
     }
 
-  sprintf (buf, "d %lx %lx\r", memaddr, memaddr + len - 1);
+  sprintf (buf, "d %s %s\r", paddr_nz (memaddr), paddr_nz (memaddr + len - 1));
   puts_e7000debug (buf);
 
   count = 0;
@@ -1705,12 +1705,12 @@ e7000_insert_breakpoint (CORE_ADDR addr, char *shadow)
 #ifdef HARD_BREAKPOINTS
 	if (BC_BREAKPOINTS)
 	  {
-	    sprintf (buf, "BC%d A=%lx\r", i + 1, addr);
+	    sprintf (buf, "BC%d A=%s\r", i + 1, paddr_nz (addr));
 	    puts_e7000debug (buf);
 	  }
 	else
 	  {
-	    sprintf (buf, "B %lx\r", addr);
+	    sprintf (buf, "B %s\r", paddr_nz (addr));
 	    puts_e7000debug (buf);
 	  }
 #else
@@ -1749,12 +1749,12 @@ e7000_remove_breakpoint (CORE_ADDR addr, char *shadow)
 	  }
 	else
 	  {
-	    sprintf (buf, "B - %lx\r", addr);
+	    sprintf (buf, "B - %s\r", paddr_nz (addr));
 	    puts_e7000debug (buf);
 	  }
 	expect_prompt ();
 #else
-	sprintf (buf, "B - %lx\r", addr);
+	sprintf (buf, "B - %s\r", paddr_nz (addr));
 	puts_e7000debug (buf);
 	expect_prompt ();
 
@@ -1766,8 +1766,8 @@ e7000_remove_breakpoint (CORE_ADDR addr, char *shadow)
 
 	return 0;
       }
-
-  warning ("Can't find breakpoint associated with 0x%lx\n", addr);
+ 
+  warning ("Can't find breakpoint associated with 0x%s\n", paddr_nz (addr));
   return 1;
 }
 
