@@ -1999,7 +1999,7 @@ load_register (counter, reg, ep, dbl)
 		    || sizeof (ep->X_add_number) > 4
 		    || (ep->X_add_number & 0x80000000) == 0))
 	       || ((mips_isa < 3 || !dbl)
-		   && (ep->X_add_number &~ 0xffffffff) == 0))
+		   && (ep->X_add_number &~ (offsetT) 0xffffffff) == 0))
 	{
 	  /* 32 bit values require an lui.  */
 	  macro_build ((char *) NULL, counter, ep, "lui", "t,u", reg,

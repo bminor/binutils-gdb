@@ -1,3 +1,8 @@
+Mon Oct 14 13:59:12 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (load_register): Add cast to offsetT when using
+	a constant with &~.
+
 Mon Oct 14 11:24:28 1996  Richard Henderson  <rth@tamu.edu>
 
 	* config/obj-elf.c (elf_frob_file): Move ECOFF debug processing to ...
