@@ -1,3 +1,17 @@
+Mon Apr 11 10:31:00 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* Makefile.in (check): Set TCL_LIBRARY for runtest.
+
+Mon Feb 14 19:34:03 1994  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* Makefile.in: Use new config features of DejaGnu in site.exp
+	file. "Make check" should now work for all crosses.
+
+Fri Jan 28 18:00:29 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* binutils.all/objdump.exp: In usage message, accept
+	"section-name" as well as "section_name".
+
 Mon Jan 17 16:57:02 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* binutils.all/objdump.exp: Trim list of format names expected,

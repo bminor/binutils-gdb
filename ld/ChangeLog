@@ -6,6 +6,10 @@ Mon Apr 11 12:32:57 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	exist, get crtbegin based on gcc -print-libgcc-file-name.
 	(HOSTING_LIBS): Similar change for ../gcc/crtend.o.
 
+Mon Apr 11 10:31:00 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* Makefile.in (check): Set TCL_LIBRARY for runtest.
+
 Wed Apr  6 00:09:37 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* configure.in (hppa*-*-*elf*): Don't require "-hp-" for the

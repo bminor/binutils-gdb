@@ -1,3 +1,7 @@
+Mon Apr 11 10:31:00 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* Makefile.in (check): Set TCL_LIBRARY for runtest.
+
 Mon Apr 11 09:15:30 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* From Peter Schauer with minor modifications.

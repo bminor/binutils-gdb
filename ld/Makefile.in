@@ -117,7 +117,13 @@ CXXFLAGS = -fgnu-linker
 CXX = g++
 
 # Setup the testing framework, if you have one
-RUNTEST = runtest
+EXPECT = `if [ -f $${rootme}/../../expect/expect ] ; then \
+          echo $${rootme}/../../expect/expect ; \
+          else echo expect ; fi`
+
+RUNTEST = `if [ -f $${srcdir}/../../dejagnu/runtest ] ; then \
+           echo $${srcdir}/../../dejagnu/runtest ; \
+           else echo runtest ;  fi`
 RUNTESTFLAGS =
 RUNTEST_CC = `if [ -f ../gcc/xgcc ] ; then \
 	       echo ../gcc/xgcc -B../gcc/; \
@@ -378,7 +384,7 @@ em_coff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} coff_sparc
 em_elf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
-  $(srcdir)/emultempl/ppc.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
@@ -442,6 +448,12 @@ site.exp: ./config.status Makefile
 
 check: ld.new site.exp
 	@if [ $(host_canonical) = $(target_canonical) ]; then \
+	        rootme=`pwd`; export rootme; \
+	        srcdir=${srcdir} ; export srcdir ; \
+	        EXPECT=${EXPECT} ; export EXPECT ; \
+	        if [ -f $${rootme}/../expect/expect ] ; then  \
+	           TCL_LIBRARY=$${srcdir}/../tcl/library ; \
+	           export TCL_LIBRARY ; fi ; \
 		$(RUNTEST) --tool ld \
 		--srcdir $(srcdir)/testsuite $(RUNTESTFLAGS) \
 		CC="$(RUNTEST_CC)" CFLAGS="$(RUNTEST_CFLAGS)" \
@@ -481,9 +493,25 @@ cdtest: cdtest-main.o cdtest-func.o cdtest-foo.o ld.new
 	./ld.new $(HOSTING_EMU) -o cdtest $(HOSTING_CRT0) \
 	  cdtest-main.o cdtest-func.o cdtest-foo.o $(HOSTING_LIBS)
 
-check-cdtest: cdtest $(srcdir)/cdtest.exp
-	./cdtest >cdtest.out
+cdtest.out: cdtest
+	./cdtest > cdtest.tmp
+	mv cdtest.tmp cdtest.out
+
+cdtest-ur.o: cdtest-main.o cdtest-func.o cdtest-foo.o ld.new
+	./ld.new $(HOSTING_EMU) -o cdtest-ur.o -Ur cdtest-main.o \
+	  cdtest-func.o cdtest-foo.o
+
+cdtest-ur: cdtest-ur.o
+	./ld.new $(HOSTING_EMU) -o cdtest-ur $(HOSTING_CRT0) cdtest-ur.o \
+	  $(HOSTING_LIBS)
+
+cdtest-ur.out: cdtest-ur
+	./cdtest-ur > cdtest-ur.tmp
+	mv cdtest-ur.tmp cdtest-ur.out
+
+check-cdtest: cdtest.out cdtest-ur.out $(srcdir)/cdtest.exp
 	diff $(srcdir)/cdtest.exp cdtest.out
+	diff $(srcdir)/cdtest.exp cdtest-ur.out
 
 .PHONY: check-cdtest
 
