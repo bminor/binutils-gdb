@@ -1,3 +1,9 @@
+Wed Mar 26 11:32:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cond.c (cond_finish_check): New function.
+	* as.h (cond_finish_check): Declare.
+	* as.c (main): Call cond_finish_check.
+
 start-sanitize-d30v
 Tue Mar 25 14:45:54 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
