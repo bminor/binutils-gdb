@@ -64,6 +64,9 @@ static struct symtabs_and_lines find_method (int funfirstline,
 					     struct type *t,
 					     struct symbol *sym_class);
 
+static int collect_methods (char *copy, struct type *t,
+			    struct symbol **sym_arr);
+
 static NORETURN void cplusplus_error (const char *name,
 				      const char *fmt, ...)
      ATTR_NORETURN ATTR_FORMAT (printf, 2, 3);
@@ -1135,29 +1138,15 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
 {
   struct symtabs_and_lines values;
   struct symbol *sym = 0;
-  int i1 = 0;	/*  Counter for the symbol array.  */
+  int i1;	/*  Counter for the symbol array.  */
   struct symbol **sym_arr =  alloca (total_number_of_methods (t)
 				     * sizeof (struct symbol *));
 
-  if (destructor_name_p (copy, t))
-    {
-      /* Destructors are a special case.  */
-      int m_index, f_index;
+  /* Find all methods with a matching name, and put them in
+     sym_arr.  */
 
-      if (get_destructor_fn_field (t, &m_index, &f_index))
-	{
-	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, m_index);
+  i1 = collect_methods (copy, t, sym_arr);
 
-	  sym_arr[i1] =
-	    lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, f_index),
-			   NULL, VAR_NAMESPACE, (int *) NULL,
-			   (struct symtab **) NULL);
-	  if (sym_arr[i1])
-	    i1++;
-	}
-    }
-  else
-    i1 = find_methods (t, copy, sym_arr);
   if (i1 == 1)
     {
       /* There is exactly one field with that name.  */
@@ -1204,6 +1193,38 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
 			 "the class %s does not have any method named %s\n",
 			 SYMBOL_PRINT_NAME (sym_class), tmp);
     }
+}
+
+/* Find all methods named COPY in the class whose type is T, and put
+   them in SYM_ARR.  Return the number of methods found.  */
+
+static int
+collect_methods (char *copy, struct type *t,
+		 struct symbol **sym_arr)
+{
+  int i1 = 0;	/*  Counter for the symbol array.  */
+
+  if (destructor_name_p (copy, t))
+    {
+      /* Destructors are a special case.  */
+      int m_index, f_index;
+
+      if (get_destructor_fn_field (t, &m_index, &f_index))
+	{
+	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, m_index);
+
+	  sym_arr[i1] =
+	    lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, f_index),
+			   NULL, VAR_NAMESPACE, (int *) NULL,
+			   (struct symtab **) NULL);
+	  if (sym_arr[i1])
+	    i1++;
+	}
+    }
+  else
+    i1 = find_methods (t, copy, sym_arr);
+
+  return i1;
 }
 
 

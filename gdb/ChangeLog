@@ -1,3 +1,8 @@
+2003-03-03  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (find_method): Extract code into collect_methods.
+	(collect_methods): New.
+
 2003-03-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-tdep.c (i386bsd_sigcontext_addr): Use get_next_frame and
