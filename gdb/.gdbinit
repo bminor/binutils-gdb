@@ -10,4 +10,7 @@ commands
 	return
 end
 
+dir ../mmalloc
+dir ../libiberty
+dir ../bfd
 set prompt (top-gdb)
