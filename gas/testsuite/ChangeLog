@@ -1,3 +1,10 @@
+2003-10-06  Nick Clifton  <nickc@redhat.com>
+
+	* gas/macros/app1.d: Skip sections symbols (if present).
+	* gas/macros/app2.d: Likewise.
+	* gas/macros/app3.d: Likewise.
+	* gas/macros/app4.d: Likewise.
+
 2003-10-04  Christian Groessler  <chris@groessler.org>
 
 	* gas/z8k/calr-backf.s: New file.
