@@ -1,3 +1,12 @@
+2002-01-21  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/ending-run.c (main): Avoid messing with setvbuf; just
+	call `fflush' after every `printf', so that the output is produced
+	at predictable points, regardless of whatever buffering does (or
+	doesn't) take place.
+	* gdb.base/ending-run.exp: Adjust tests to expect output to appear
+	at different points.
+
 2002-01-20  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.c++/inherit.exp: Update copyright years.

@@ -129,10 +129,10 @@ gdb_expect {
 # See if we can step out with control.  The "1 2 3" stuff
 # is output from the program.
 #
-gdb_test "cont" ".*Breakpoint.*31.*"
+gdb_test "cont" ".*1 2 7 14 23 34 47 62 79.*Breakpoint.*31.*"
 
 if ![gdb_skip_stdio_test "Step to return"] {
-    gdb_test "next" ".*1 2 7 14 23 34 47 62 79  Goodbye!.*32.*" \
+    gdb_test "next" ".*Goodbye!.*32.*" \
 	    "Step to return"
 } else {
     gdb_test "next" "" ""
