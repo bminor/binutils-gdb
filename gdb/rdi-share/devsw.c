@@ -37,7 +37,6 @@ static int angelDebugLogEnable = 0;
 static void openLogFile ()
 {
   time_t t;
-  struct tm lt;
   
   if (angelDebugFilename == NULL || *angelDebugFilename =='\0')
     return;
@@ -67,7 +66,6 @@ static void openLogFile ()
 static void closeLogFile (void)
 {
   time_t t;
-  struct tm lt;
   
   if (!angelDebugLogFile)
     return;
