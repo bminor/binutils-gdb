@@ -34,6 +34,7 @@ br-djmp.S
 br-djsr.S
 configure
 configure.in
+do-shifts.S
 em-e0.S
 em-e47.S
 em-pchr.S
