@@ -125,11 +125,30 @@ static bfd_byte *elf32_mips_get_relocated_section_contents
   PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
 	   bfd_byte *, boolean, asymbol **));
 
-/* This is true for Irix 5 executables, false for normal MIPS ELF ABI
-   executables.  FIXME: At the moment, we default to always generating
-   Irix 5 executables.  */
+/* The level of IRIX compatibility we're striving for.  */
 
-#define SGI_COMPAT(abfd) (1)
+typedef enum {
+  ict_none,
+  ict_irix5,
+  ict_irix6
+} irix_compat_t;
+
+/* Nonzero if ABFD is using the N32 ABI.  */
+
+#define ABI_N32_P(abfd) \
+  ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI2) != 0)
+
+/* What version of Irix we are trying to be compatible with.  FIXME:
+   At the moment, we never generate "normal" MIPS ELF ABI executables;
+   we always use some version of Irix.  */
+
+#define IRIX_COMPAT(abfd) \
+  (ABI_N32_P (abfd) ? ict_irix6 : ict_irix5)
+
+/* Whether we are trying to be compatible with IRIX at all.  */
+
+#define SGI_COMPAT(abfd) \
+  (IRIX_COMPAT (abfd) != ict_none)
 
 /* This structure is used to hold .got information when linking.  It
    is stored in the tdata field of the bfd_elf_section_data structure.  */
@@ -5638,7 +5657,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && (r == bfd_reloc_undefined || r == bfd_reloc_overflow))
 	    r = bfd_reloc_ok;
 
-	  if (SGI_COMPAT (abfd)
+	  if (SGI_COMPAT (output_bfd)
 	      && scpt != NULL
 	      && (input_section->flags & SEC_ALLOC) != 0)
 	    {

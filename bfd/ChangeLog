@@ -1,3 +1,11 @@
+1999-06-26  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (irix_compat_t): New enumeration.
+	(ABI_N32_P): New macro.
+	(IRIX_COMPAT): Likewise.
+	(SGI_COMPAT): Implement in terms of IRIX_COMPAT.
+	(mips_elf_relocate_section): Fix typo.
+	
 1999-06-26  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* peicode.h (coff_swap_scnhdr_out): Mark non readonly BFD sections
