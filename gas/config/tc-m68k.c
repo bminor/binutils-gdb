@@ -74,6 +74,9 @@ const int md_reloc_size = 8;	/* Size of relocation record */
    references.  */
 int flag_want_pic;
 
+static int flag_short_refs;	/* -l option */
+static int flag_long_jumps;	/* -S option */
+
 #ifdef REGISTER_PREFIX_OPTIONAL
 int flag_reg_prefix_optional = REGISTER_PREFIX_OPTIONAL;
 #else
@@ -1554,7 +1557,7 @@ main ()
 	printf ("Iadd: '%.*s'", 1 + thark.e_iadd - thark.b_iadd, thark.b_iadd);
       printf ("\n");
     }
-  exit (0);
+  exit (EXIT_SUCCESS);
 }
 
 #endif
@@ -1862,7 +1865,7 @@ m68k_ip (instring)
 		    }		/* if not address register indirect */
 		  break;
 		case 'B':	/* FOO */
-		  if (opP->mode != ABSL || (flagseen['S'] && instring[0] == 'j'
+		  if (opP->mode != ABSL || (flag_long_jumps && instring[0] == 'j'
 					    && instring[1] == 'b'
 					    && instring[2] == 's'
 					    && instring[3] == 'r'))
@@ -1903,7 +1906,7 @@ m68k_ip (instring)
 		    losing++;
 		  else
 		    {
-		      enum _register *rp;
+		      const enum _register *rp;
 		      for (rp = control_regs; *rp; rp++)
 			if (*rp == opP->reg)
 			  break;
@@ -2321,7 +2324,7 @@ m68k_ip (instring)
 	      if (!issword (nextword)
 		  || (isvar (opP->con1)
 		      && ((opP->con1->e_siz == 0
-			   && flagseen['l'] == 0)
+			   && flag_short_refs == 0)
 			  || opP->con1->e_siz == 3)))
 		{
 
@@ -2563,7 +2566,7 @@ m68k_ip (instring)
 		      && seg (opP->con1) == text_section
 		      && now_seg == text_section
 		      && cpu_of_arch (current_architecture) >= m68020
-		      && !flagseen['S']
+		      && !flag_long_jumps
 		      && !strchr ("~%&$?", s[0]))
 		    {
 		      tmpreg = 0x3A;	/* 7.2 */
@@ -2844,6 +2847,9 @@ m68k_ip (instring)
 	    case DTT1:
 	      tmpreg = 0x007;
 	      break;
+	    case BUSCR:
+	      tmpreg = 0x008;
+	      break;
 
 	    case USP:
 	      tmpreg = 0x800;
@@ -2868,6 +2874,9 @@ m68k_ip (instring)
 	      break;
 	    case SRP:
 	      tmpreg = 0x807;
+	      break;
+	    case PCR:
+	      tmpreg = 0x808;
 	      break;
 	    default:
 	      as_fatal ("failed sanity check.");
@@ -3541,6 +3550,8 @@ static const struct init_entry init_table[] =
   { "tc", TC },
   { "srp", SRP },
   { "urp", URP },
+  { "buscr", BUSCR },
+  { "pcr", PCR },
 
   { "ac", AC },
   { "bc", BC },
@@ -4048,19 +4059,21 @@ md_number_to_chars (buf, val, n)
 static void
 md_apply_fix_2 (fixP, val)
      fixS *fixP;
-     long val;
+     offsetT val;
 {
-  unsigned long upper_limit;
-  long lower_limit;
+  addressT upper_limit;
+  offsetT lower_limit;
 
-#ifdef IBM_COMPILER_SUX
-  /* This is unnecessary but it convinces the native rs6000
-     compiler to generate the code we want. */
+  /* This is unnecessary but it convinces the native rs6000 compiler
+     to generate the code we want.  */
   char *buf = fixP->fx_frag->fr_literal;
   buf += fixP->fx_where;
-#else /* IBM_COMPILER_SUX */
-  char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-#endif /* IBM_COMPILER_SUX */
+  /* end ibm compiler workaround */
+
+  if (val & 0x80000000)
+    val |= ~(addressT)0x7fffffff;
+  else
+    val &= 0x7fffffff;
 
   switch (fixP->fx_size)
     {
@@ -4081,7 +4094,7 @@ md_apply_fix_2 (fixP, val)
       *buf++ = (val >> 8);
       *buf++ = val;
       upper_limit = 0x7fffffff;
-      lower_limit = -0x80000000;
+      lower_limit = -(offsetT)0x80000000;
       break;
     default:
       BAD_CASE (fixP->fx_size);
@@ -4094,7 +4107,8 @@ md_apply_fix_2 (fixP, val)
   if (!fixP->fx_pcrel)
     upper_limit = upper_limit * 2 + 1;
 
-  if ((unsigned) val > upper_limit && (val > 0 || val < lower_limit))
+  if ((addressT) val > upper_limit
+      && (val > 0 || val < lower_limit))
     as_bad_where (fixP->fx_file, fixP->fx_line, "value out of range");
 
   /* A one byte PC-relative reloc means a short branch.  We can't use
@@ -4114,7 +4128,7 @@ md_apply_fix (fixP, valp)
      fixS *fixP;
      long *valp;
 {
-  md_apply_fix_2 (fixP, *valp);
+  md_apply_fix_2 (fixP, (addressT) *valp);
   return 1;
 }
 #else
@@ -4122,7 +4136,7 @@ void md_apply_fix (fixP, val)
      fixS *fixP;
      long val;
 {
-  md_apply_fix_2 (fixP, val);
+  md_apply_fix_2 (fixP, (addressT) val);
 }
 #endif
 
@@ -4140,17 +4154,12 @@ md_convert_frag_1 (fragP)
   /* Address in object code of the displacement.  */
   register int object_address = fragP->fr_fix + fragP->fr_address;
 
-#ifdef IBM_COMPILER_SUX
-  /* This is wrong but it convinces the native rs6000 compiler to
-     generate the code we want. */
+  /* Address in gas core of the place to store the displacement.  */
+  /* This convinces the native rs6000 compiler to generate the code we
+     want. */
   register char *buffer_address = fragP->fr_literal;
   buffer_address += fragP->fr_fix;
-#else /* IBM_COMPILER_SUX */
-  /* Address in gas core of the place to store the displacement.  */
-  register char *buffer_address = fragP->fr_fix + fragP->fr_literal;
-#endif /* IBM_COMPILER_SUX */
-
-  /* No longer true:   know(fragP->fr_symbol); */
+  /* end ibm compiler workaround */
 
   /* The displacement of the address, from current location.  */
   disp = fragP->fr_symbol ? S_GET_VALUE (fragP->fr_symbol) : 0;
@@ -4397,7 +4406,7 @@ md_estimate_size_before_relax (fragP, segment)
 
     case TAB (FBRANCH, SZ_UNDEF):
       {
-	if (S_GET_SEGMENT (fragP->fr_symbol) == segment || flagseen['l'])
+	if (S_GET_SEGMENT (fragP->fr_symbol) == segment || flag_short_refs)
 	  {
 	    fragP->fr_subtype = TAB (FBRANCH, SHORT);
 	    fragP->fr_var += 2;
@@ -4412,7 +4421,7 @@ md_estimate_size_before_relax (fragP, segment)
 
     case TAB (PCREL, SZ_UNDEF):
       {
-	if (S_GET_SEGMENT (fragP->fr_symbol) == segment || flagseen['l'])
+	if (S_GET_SEGMENT (fragP->fr_symbol) == segment || flag_short_refs)
 	  {
 	    fragP->fr_subtype = TAB (PCREL, SHORT);
 	    fragP->fr_var += 2;
@@ -4436,7 +4445,7 @@ md_estimate_size_before_relax (fragP, segment)
 	/* only Bcc 68000 instructions can come here */
 	/* change bcc into b!cc/jmp absl long */
 	fragP->fr_opcode[0] ^= 0x01;	/* invert bcc */
-	if (flagseen['l'])
+	if (flag_short_refs)
 	  {
 	    fragP->fr_opcode[1] = 0x04;	/* branch offset = 6 */
 	    /* JF: these were fr_opcode[2,3] */
@@ -4479,7 +4488,7 @@ md_estimate_size_before_relax (fragP, segment)
 	buffer_address[1] = 0x04;
 	buffer_address[2] = 0x60;	/* put in bra pc + ... */
 
-	if (flagseen['l'])
+	if (flag_short_refs)
 	  {
 	    /* JF: these were fr_opcode[5-7] */
 	    buffer_address[3] = 0x04;	/* plus 4 */
@@ -4510,7 +4519,7 @@ md_estimate_size_before_relax (fragP, segment)
 
     case TAB (PCLEA, SZ_UNDEF):
       {
-	if ((S_GET_SEGMENT (fragP->fr_symbol)) == segment || flagseen['l'])
+	if ((S_GET_SEGMENT (fragP->fr_symbol)) == segment || flag_short_refs)
 	  {
 	    fragP->fr_subtype = TAB (PCLEA, SHORT);
 	    fragP->fr_var += 2;
@@ -4977,10 +4986,12 @@ md_parse_option (c, arg)
     {
     case 'l':			/* -l means keep external to 2 bit offset
 				   rather than 16 bit one */
+      flag_short_refs = 1;
       break;
 
     case 'S':			/* -S means that jbsr's always turn into
 				   jsr's.  */
+      flag_long_jumps = 1;
       break;
 
     case 'A':
@@ -4995,36 +5006,44 @@ md_parse_option (c, arg)
 	  || !strcmp (arg, "68008")
 	  || !strcmp (arg, "68302"))
 	{
+	  current_architecture &=~ m68000up;
 	  current_architecture |= m68000;
 	}
       else if (!strcmp (arg, "68010"))
 	{
+	  current_architecture &=~ m68000up;
 	  current_architecture |= m68010;
 	}
       else if (!strcmp (arg, "68020"))
 	{
+	  current_architecture &=~ m68000up;
 	  current_architecture |= m68020 | MAYBE_FLOAT_TOO;
 	}
       else if (!strcmp (arg, "68030"))
 	{
+	  current_architecture &=~ m68000up;
 	  current_architecture |= m68030 | MAYBE_FLOAT_TOO;
 	}
       else if (!strcmp (arg, "68040"))
 	{
+	  current_architecture &=~ m68000up;
 	  current_architecture |= m68040 | MAYBE_FLOAT_TOO;
 	}
       else if (!strcmp (arg, "68060"))
 	{
+	  current_architecture &=~ m68000up;
 	  current_architecture |= m68060 | MAYBE_FLOAT_TOO;
 	}
 #ifndef NO_68881
       else if (!strcmp (arg, "68881"))
 	{
 	  current_architecture |= m68881;
+	  no_68881 = 0;
 	}
       else if (!strcmp (arg, "68882"))
 	{
 	  current_architecture |= m68882;
+	  no_68881 = 0;
 	}
 #endif /* NO_68881 */
       /* Even if we aren't configured to support the processor,
@@ -5039,6 +5058,7 @@ md_parse_option (c, arg)
       else if (!strcmp (arg, "68851"))
 	{
 	  current_architecture |= m68851;
+	  no_68851 = 0;
 	}
 #endif /* NO_68851 */
       else if (!strcmp (arg, "no-68851"))
@@ -5051,6 +5071,7 @@ md_parse_option (c, arg)
 	       || !strcmp (arg, "68333")
 	       || !strcmp (arg, "68340"))
 	{
+	  current_architecture &=~ m68000up;
 	  current_architecture |= cpu32;
 	}
       else
@@ -5229,8 +5250,10 @@ md_pcrel_from (fixP)
 }
 
 #ifndef BFD_ASSEMBLER
+/*ARGSUSED*/
 void
-tc_coff_symbol_emit_hook ()
+tc_coff_symbol_emit_hook (ignore)
+     symbolS *ignore;
 {
 }
 

@@ -1,5 +1,9 @@
 Tue Dec 20 14:56:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* config/tc-m68k.c (md_apply_fix_2): Use offsetT and addressT
+	instead of long and unsigned long.
+	(md_apply_fix): Cast value before passing it.
+
 	* config/obj-aout.h, config/obj-coff.c, config/obj-elf.h,
 	config/obj-som.h, config/tc-h8500.c, config/tc-hppa.c,
 	config/tc-hppa.h, config/tc-sh.c, config/tc-z8k.c: Don't rely on
