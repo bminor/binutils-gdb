@@ -1,3 +1,23 @@
+1998-11-30  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen-dis.c (hash_insn_array): CGEN_INSN_VALUE ->
+	CGEN_INSN_BASE_VALUE.
+start-sanitize-cygnus
+	* cgen-asm.in (insert_normal): Change start,length to unsigned int.
+	New args word_offset, word_length.  Rewrite.
+	(FLD): Define.
+	(insert_1): Fix lsb0 case.
+	* cgen-dis.in (extract_normal): Change start,length to unsigned int.
+	New args word_offset, word_length.  Rewrite.
+	(FLD): Define.
+	(extract_1): Fix lsb0 case.
+	* cgen-opc.in (FLD): Define.
+end-sanitize-cygnus
+	* m32r-opc.c,m32r-opc.h,m32r-asm.c,m32r-dis.c: Regenerate.
+start-sanitize-fr30
+	* fr30-opc.c,fr30-opc.h,fr30-asm.c,fr30-dis.c: Regenerate.
+end-sanitize-fr30
+
 start-sanitize-cygnus
 Mon Nov 30 11:52:44 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -47,6 +67,7 @@ Wed Nov 18 21:36:37 1998  Dave Brolley  <brolley@cygnus.com>
 end-sanitize-fr30
 1998-11-18  Doug Evans  <devans@casey.cygnus.com>
 
+start-sanitize-cygnus
 	* cgen-asm.in (insert_1): Replace calls to bfd_getb8/putb8.
 	(insert_normal, !CGEN_INT_INSN_P case): Only fetch enough bytes
 	to hold value.
@@ -61,6 +82,7 @@ end-sanitize-fr30
 	* cgen-opc.c (cgen_{get,put}_insn_value): Move here ...
 	* cgen-opc.in: ... from here.
 	(@arch@_cgen_lookup_insn): Rewrite ! CGEN_INT_INSN_P case.
+end-sanitize-cygnus
 	* m32r-asm.c,m32r-dis.c,m32r-opc.c: Rebuild.
 start-sanitize-fr30
 	* fr30-asm.c,fr30-dis.c,fr30-opc.c: Rebuild.
@@ -599,7 +621,7 @@ Thu Jun 18 10:22:24 1998  John Metzler  <jmetzler@cygnus.com>
  	environments where the symbol table is not present, we no longer
  	rely in the symbol table, rather, use the low bit of the
  	instructions address to guess. There should be no change for usage
- 	of the disassembler in host based programse, gdb ,objdump.
+ 	of the disassembler in host based programs, gdb, objdump.
 	(print_insn_big_mips): ditto.
 	(print_insn_mips): ditto
 
@@ -757,8 +779,10 @@ Tue May 26 16:14:39 1998  Nick Clifton  <nickc@cygnus.com>
 
 Fri May 22 16:00:00 1998  Doug Evans  <devans@canuck.cygnus.com>
 
+start-sanitize-cygnus
 	* cgen-asm.in (insert_normal): Handle empty fields and 64 bit hosts.
 	* cgen-dis.in (extract_normal): Likewise.
+end-sanitize-cygnus
 	* m32r-asm.c,m32r-dis.c: Regenerate.
 
 start-sanitize-sky
@@ -973,11 +997,13 @@ Mon Apr 27 10:33:56 1998  Doug Evans  <devans@seba.cygnus.com>
 	* cgen-opc.c (cgen_current_opcode_table): Renamed from ..._data.
 	(cgen_set_cpu,cgen_hw_lookup,cgen_insn_count): Update.
 	(cgen_macro_insn_count): New function.
+start-sanitize-cygnus
 	* cgen-opc.in (@arch@_cgen_lookup_insn): New arg alias_p.
 	All callers updated.  Sanity check result of extract fn.
 	(@arch@_cgen_get_insn_operands): Change result type to void.
 	Delete args insn_value, length.  New arg fields.  All callers updated.
 	(@arch@_cgen_lookup_get_insn_operands): New function.
+end-sanitize-cygnus
 	* m32r-opc.h,m32r-opc.c,m32r-asm.c,m32r-dis.c: Regenerate.
 
 Fri Apr 24 16:07:57 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
@@ -1348,6 +1374,7 @@ Wed Mar  4 12:08:14 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-opc.h,m32r-opc.c,m32r-asm.c,m32r-dis.c: Regenerate.
 
+start-sanitize-cygnus
 Tue Mar  3 18:51:22 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-asm.in: Move insertion of generated routines to top of file.
@@ -1357,6 +1384,7 @@ Tue Mar  3 18:51:22 1998  Doug Evans  <devans@seba.cygnus.com>
 	(print_normal): Add prototype.  Call CGEN_PRINT_NORMAL if defined.
 	(print_keyword): Add prototype.  Fix type of `attrs' arg.
 
+end-sanitize-cygnus
 start-sanitize-vr4320
 Tue Mar  3 11:47:58 1998  Gavin Koch  <gavin@cygnus.com>
 
@@ -1434,8 +1462,10 @@ Tue Feb 24 11:06:18 1998  Nick Clifton  <nickc@cygnus.com>
 Mon Feb 23 13:16:17 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-asm.c: Include symcat.h.
-	* cgen-dis.c,cgen-opc.c,cgen-asm.in,cgen-dis.in: Ditto.
-
+	* cgen-dis.c,cgen-opc.c: Ditto.
+start-sanitize-cygnus
+	* cgen-asm.in,cgen-dis.in: Ditto.
+end-sanitize-cygnus
 	* m32r-asm.c,m32r-dis.c,m32r-opc.h,m32r-opc.c: Regenerate.
 
 start-sanitize-sky
@@ -1502,20 +1532,24 @@ Tue Feb 17 18:48:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 end-sanitize-sky
 Tue Feb 17 17:14:50 1998  Doug Evans  <devans@seba.cygnus.com>
 
+start-sanitize-cygnus
 	* Makefile.am (CGENFILES): Update.
 	* Makefile.in: Regenerate.
 	* cgen-asm.in (insert_normal): Result is error message now.
 	Validate value to be inserted.
 	(insert_insn_normal): Result is error message now.
 	(@arch@_cgen_assemble_insn): Update.
+end-sanitize-cygnus
 	* cgen-asm.c (cgen_parse_{signed,unsigned}_integer): Delete min,max
 	arguments.  Don't perform validation here.
 	* m32r-asm.c,m32r-dis.c,m32r-opc.c: Regenerate.
 
 Fri Feb 13 14:26:06 1998  Doug Evans  <devans@canuck.cygnus.com>
 
+start-sanitize-cygnus
 	* cgen-opc.in (@arch@_cgen_get_insn_operands): Handle empty
 	operand instance list.
+end-sanitize-cygnus
 	* m32r-opc.c: Regenerate.
 
 Fri Feb 13 14:53:02 1998  Ian Lance Taylor  <ian@cygnus.com>
@@ -1543,9 +1577,11 @@ Fri Feb 13 09:50:32 1998  Nick Clifton  <nickc@cygnus.com>
 
 Thu Feb 12 11:01:40 1998  Doug Evans  <devans@canuck.cygnus.com>
 
+start-sanitize-cygnus
 	* cgen-opc.in (@arch@_cgen_lookup_insn): New argument alias_p.
 	Ignore ALIAS insns if asked to.
 	(@arch@_cgen_get_insn_operands): Pass 0 for alias_p, NULL for insn.
+end-sanitize-cygnus
 	* m32r-opc.c: Regenerate.
 
 start-sanitize-sky
@@ -1565,17 +1601,16 @@ Thu Feb 12 03:41:00 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 Wed Feb 11 18:58:34 1998  Doug Evans  <devans@seba.cygnus.com>
 
+start-sanitize-cygnus
 	* cgen-opc.in: New file.
 	* cgen.sh: Translate @ARCH@.  Cat cgen-opc.in into @arch@-opc.c.
 	* Makefile.am (CGENFILES): Add cgen-opc.in.
 	* Makefile.in: Regenerate.
-
-	* cgen-opc.c (cgen_set_cpu): Delete init of hw list `next' chain.
-	(cgen_hw_lookup): Make result const.
-
 	* cgen-dis.in (*): Use PTR instead of void *.
 	(print_insn): Delete unused vars `i', `syntax'.
-
+end-sanitize-cygnus
+	* cgen-opc.c (cgen_set_cpu): Delete init of hw list `next' chain.
+	(cgen_hw_lookup): Make result const.
 	* m32r-opc.h, m32r-opc.c, m32r-asm.c, m32r-dis.c: Regenerate.
 
 start-sanitize-sky
