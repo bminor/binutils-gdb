@@ -504,10 +504,6 @@ This sends the next command (if any) to gdb."
       (set-gdb-instance-prompting instance t))))
 
 (defun gdb-send-item (instance item)
-  (dbug 'sending
-	(function
-	 (lambda ()
-	   (insert (format "%s\n" item)))))
   (set-gdb-instance-current-item instance item)
   (if (stringp item)
       (progn
@@ -702,8 +698,6 @@ buffer."
 		 (annotation-rule (assoc annotation-type
 					 gdb-annotation-rules)))
 	    ;; Call the handler for this annotation.
-	    (dbug 'annotation
-		  '(lambda () (insert annotation-type "\n")))
 	    (if annotation-rule
 		(funcall (car (cdr annotation-rule))
 			 instance
