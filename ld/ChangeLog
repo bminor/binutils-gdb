@@ -1,3 +1,7 @@
+2000-08-10  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/mipspe.sh (ENTRY): Add definition.
+
 2000-08-08  Peter Jeremy  <peter.jeremy@alcatel.com.au>
 
 	* emultempl/elf32.em (_after_close): Refer to -rpath not --rpath
