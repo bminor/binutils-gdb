@@ -51,21 +51,11 @@ struct value;
 
 #define DEFAULT_MIPS_TYPE "generic"
 
-/* Offset from address of function to start of its code.
-   Zero on most machines.  */
-
-#define FUNCTION_START_OFFSET 0
-
 /* Return non-zero if PC points to an instruction which will cause a step
    to execute both the instruction at PC and an instruction at PC+4.  */
 extern int mips_step_skips_delay (CORE_ADDR);
 #define STEP_SKIPS_DELAY_P (1)
 #define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
-
-/* Are we currently handling a signal */
-
-extern int in_sigtramp (CORE_ADDR, char *);
-#define IN_SIGTRAMP(pc, name)	in_sigtramp(pc, name)
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
@@ -151,11 +141,6 @@ extern const char *mips_register_name (int regnr);
 
 #define REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
 
-/* Number of bytes of storage in the program's representation
-   for register N. */
-
-#define REGISTER_VIRTUAL_SIZE(N) TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (N))
-
 /* Return the GDB type object for the "standard" data type of data in
    register N.  */
 
@@ -172,27 +157,18 @@ extern const char *mips_register_name (int regnr);
    If the target is big endian, double register values need conversion
    between memory and register formats.  */
 
-#define REGISTER_CONVERT_TO_TYPE(n, type, buffer)			\
-  do {if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG				\
-	  && REGISTER_RAW_SIZE (n) == 4					\
-	  && (n) >= FP0_REGNUM && (n) < FP0_REGNUM + 32			\
-	  && TYPE_CODE(type) == TYPE_CODE_FLT				\
-	  && TYPE_LENGTH(type) == 8) {					\
-        char __temp[4];							\
-	memcpy (__temp, ((char *)(buffer))+4, 4);			\
-	memcpy (((char *)(buffer))+4, (buffer), 4); 			\
-	memcpy (((char *)(buffer)), __temp, 4); }} while (0)
+extern void mips_register_convert_to_type (int regnum, 
+					   struct type *type,
+					   char *buffer);
+extern void mips_register_convert_from_type (int regnum, 
+					     struct type *type,
+					     char *buffer);
 
-#define REGISTER_CONVERT_FROM_TYPE(n, type, buffer)			\
-  do {if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG				\
-	  && REGISTER_RAW_SIZE (n) == 4					\
-	  && (n) >= FP0_REGNUM && (n) < FP0_REGNUM + 32			\
-	  && TYPE_CODE(type) == TYPE_CODE_FLT				\
-	  && TYPE_LENGTH(type) == 8) {					\
-        char __temp[4];							\
-	memcpy (__temp, ((char *)(buffer))+4, 4);			\
-	memcpy (((char *)(buffer))+4, (buffer), 4); 			\
-	memcpy (((char *)(buffer)), __temp, 4); }} while (0)
+#define REGISTER_CONVERT_TO_TYPE(n, type, buffer)	\
+  mips_register_convert_to_type ((n), (type), (buffer))
+
+#define REGISTER_CONVERT_FROM_TYPE(n, type, buffer)	\
+  mips_register_convert_from_type ((n), (type), (buffer))
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  Handled by mips_push_arguments.  */

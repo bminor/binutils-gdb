@@ -477,6 +477,38 @@ mips_register_convert_to_raw (struct type *virtual_type, int n,
 	    TYPE_LENGTH (virtual_type));
 }
 
+void
+mips_register_convert_to_type (int regnum, struct type *type, char *buffer)
+{
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+      && REGISTER_RAW_SIZE (regnum) == 4
+      && (regnum) >= FP0_REGNUM && (regnum) < FP0_REGNUM + 32
+      && TYPE_CODE(type) == TYPE_CODE_FLT
+      && TYPE_LENGTH(type) == 8) 
+    {
+      char temp[4];
+      memcpy (temp, ((char *)(buffer))+4, 4);
+      memcpy (((char *)(buffer))+4, (buffer), 4);
+      memcpy (((char *)(buffer)), temp, 4); 
+    }
+}
+
+void
+mips_register_convert_from_type (int regnum, struct type *type, char *buffer)
+{
+if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+    && REGISTER_RAW_SIZE (regnum) == 4
+    && (regnum) >= FP0_REGNUM && (regnum) < FP0_REGNUM + 32
+    && TYPE_CODE(type) == TYPE_CODE_FLT
+    && TYPE_LENGTH(type) == 8) 
+  {
+    char temp[4];
+    memcpy (temp, ((char *)(buffer))+4, 4);
+    memcpy (((char *)(buffer))+4, (buffer), 4);
+    memcpy (((char *)(buffer)), temp, 4);
+  }
+}
+
 /* Return the GDB type object for the "standard" data type
    of data in register REG.  
    
@@ -4186,8 +4218,8 @@ mips_store_return_value (struct type *valtype, char *valbuf)
 
 /* Exported procedure: Is PC in the signal trampoline code */
 
-int
-in_sigtramp (CORE_ADDR pc, char *ignore)
+static int
+mips_pc_in_sigtramp (CORE_ADDR pc, char *ignore)
 {
   if (sigtramp_address == 0)
     fixup_sigtramp ();
@@ -4873,7 +4905,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       osabi = gdbarch_lookup_osabi (info.abfd);
     }
 
-  /* Check ELF_FLAGS to see if it specifies the ABI being used. */
+  /* Check ELF_FLAGS to see if it specifies the ABI being used.  */
   switch ((elf_flags & EF_MIPS_ABI))
     {
     case E_MIPS_ABI_O32:
@@ -4967,7 +4999,7 @@ mips_gdbarch_init (struct gdbarch_info info,
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       /* MIPS needs to be pedantic about which ABI the object is
-         using. */
+         using.  */
       if (gdbarch_tdep (arches->gdbarch)->elf_flags != elf_flags)
 	continue;
       if (gdbarch_tdep (arches->gdbarch)->mips_abi != mips_abi)
@@ -4976,13 +5008,13 @@ mips_gdbarch_init (struct gdbarch_info info,
         return arches->gdbarch;
     }
 
-  /* Need a new architecture. Fill in a target specific vector. */
+  /* Need a new architecture.  Fill in a target specific vector.  */
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
   tdep->osabi = osabi;
 
-  /* Initially set everything according to the default ABI/ISA. */
+  /* Initially set everything according to the default ABI/ISA.  */
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);
   set_gdbarch_float_bit (gdbarch, 32);
@@ -5133,7 +5165,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 
      ``We deliberately don't allow "-gp32" to set the MIPS_32BITMODE
      flag in object files because to do so would make it impossible to
-     link with libraries compiled without "-gp32". This is
+     link with libraries compiled without "-gp32".  This is
      unnecessarily restrictive.
 
      We could solve this problem by adding "-gp32" multilibs to gcc,
@@ -5143,10 +5175,10 @@ mips_gdbarch_init (struct gdbarch_info info,
      But even more unhelpfully, the default linker output target for
      mips64-elf is elf32-bigmips, and has EF_MIPS_32BIT_MODE set, even
      for 64-bit programs - you need to change the ABI to change this,
-     and not all gcc targets support that currently. Therefore using
+     and not all gcc targets support that currently.  Therefore using
      this flag to detect 32-bit mode would do the wrong thing given
      the current gcc - it would make GDB treat these 64-bit programs
-     as 32-bit programs by default. */
+     as 32-bit programs by default.  */
 
   /* enable/disable the MIPS FPU */
   if (!mips_fpu_type_auto)
@@ -5173,7 +5205,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   /* MIPS version of register names.  NOTE: At present the MIPS
      register name management is part way between the old -
      #undef/#define REGISTER_NAMES and the new REGISTER_NAME(nr).
-     Further work on it is required. */
+     Further work on it is required.  */
   set_gdbarch_register_name (gdbarch, mips_register_name);
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
@@ -5181,8 +5213,8 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_read_sp (gdbarch, mips_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
 
-  /* Add/remove bits from an address. The MIPS needs be careful to
-     ensure that all 32 bit addresses are sign extended to 64 bits. */
+  /* Add/remove bits from an address.  The MIPS needs be careful to
+     ensure that all 32 bit addresses are sign extended to 64 bits.  */
   set_gdbarch_addr_bits_remove (gdbarch, mips_addr_bits_remove);
 
   /* There's a mess in stack frame creation.  See comments in
@@ -5190,7 +5222,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_init_frame_pc_first (gdbarch, mips_init_frame_pc_first);
   set_gdbarch_init_frame_pc (gdbarch, init_frame_pc_noop);
 
-  /* Map debug register numbers onto internal register numbers. */
+  /* Map debug register numbers onto internal register numbers.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, mips_stab_reg_to_regnum);
   set_gdbarch_ecoff_reg_to_regnum (gdbarch, mips_ecoff_reg_to_regnum);
 
@@ -5235,11 +5267,15 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_address_to_pointer (gdbarch, address_to_signed_pointer);
   set_gdbarch_integer_to_address (gdbarch, mips_integer_to_address);
 
+  set_gdbarch_function_start_offset (gdbarch, 0);
+
   /* There are MIPS targets which do not yet use this since they still
      define REGISTER_VIRTUAL_TYPE.  */
   set_gdbarch_register_virtual_type (gdbarch, mips_register_virtual_type);
+  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
 
   set_gdbarch_do_registers_info (gdbarch, mips_do_registers_info);
+  set_gdbarch_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
