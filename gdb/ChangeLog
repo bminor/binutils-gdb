@@ -1,3 +1,22 @@
+2000-07-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* config/sh/tm-sh.h (STORE_RETURN_VALUE): Redefine as
+ 	sh_store_return_value().
+	* sh-tdep.c (sh_store_return_value): New function. Store the
+ 	value returned by a function into the appropriate register.
+
+2000-07-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * sh-tdep.c (sh_skip_prologue): Before looking at the actual
+ 	instructions, try to see if the symbol table can be of help, by
+ 	calling after_prologue(). If this doesn't work, call
+ 	skip_prologue_hard_way().
+	(skip_prologue_hard_way): Renamed from sh_skip_prologue. Add some
+ 	more instruction pattern matching for pushing of arguments, and
+ 	manipulation of r14.
+	(after_prologue): New function. Use symbol table info to determine
+ 	the end of the prologue, if possible.
+
 2000-07-07  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* findvar.c (_initialize_findvar, build_findvar, write_fp, read_fp,

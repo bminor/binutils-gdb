@@ -181,12 +181,11 @@ extern void sh_extract_return_value (struct type *, void *, void *);
 	sh_extract_return_value (TYPE, REGBUF, VALBUF)
 
 /* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.
+   of type TYPE, given in virtual format. */
 
-   Things always get returned in R0/R1 */
-
+extern void sh_store_return_value (struct type *, void *);
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (REGISTER_BYTE(0), VALBUF, TYPE_LENGTH (TYPE))
+  sh_store_return_value (TYPE, VALBUF)
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,

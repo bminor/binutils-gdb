@@ -161,19 +161,74 @@ sh_processor_type_table[] =
    [sts.l       pr,@-r15]
    [mov.l       r14,@-r15]
    [mov         r15,r14]
+
+   Actually it can be more complicated than this.  For instance, with
+   newer gcc's:
+
+   mov.l   r14,@-r15
+   add     #-12,r15
+   mov     r15,r14
+   mov     r4,r1
+   mov     r5,r2
+   mov.l   r6,@(4,r14)
+   mov.l   r7,@(8,r14)
+   mov.b   r1,@r14
+   mov     r14,r1
+   mov     r14,r1
+   add     #2,r1
+   mov.w   r2,@r1
+
  */
 
+/* STS.L PR,@-r15  0100111100100010
+   r15-4-->r15, PR-->(r15) */
 #define IS_STS(x)  		((x) == 0x4f22)
+
+/* MOV.L Rm,@-r15  00101111mmmm0110
+   r15-4-->r15, Rm-->(R15) */
 #define IS_PUSH(x) 		(((x) & 0xff0f) == 0x2f06)
+
 #define GET_PUSHED_REG(x)  	(((x) >> 4) & 0xf)
+
+/* MOV r15,r14     0110111011110011
+   r15-->r14  */
 #define IS_MOV_SP_FP(x)  	((x) == 0x6ef3)
+
+/* ADD #imm,r15    01111111iiiiiiii
+   r15+imm-->r15 */
 #define IS_ADD_SP(x) 		(((x) & 0xff00) == 0x7f00)
+
 #define IS_MOV_R3(x) 		(((x) & 0xff00) == 0x1a00)
 #define IS_SHLL_R3(x)		((x) == 0x4300)
-#define IS_ADD_R3SP(x)		((x) == 0x3f3c)
-#define IS_FMOV(x)		(((x) & 0xf00f) == 0xf00b)
-#define FPSCR_SZ		(1 << 20)
 
+/* ADD r3,r15      0011111100111100
+   r15+r3-->r15 */
+#define IS_ADD_R3SP(x)		((x) == 0x3f3c)
+
+/* FMOV.S FRm,@-Rn  Rn-4-->Rn, FRm-->(Rn)     1111nnnnmmmm1011
+   or
+   FMOV DRm,@-Rn    Rn-8-->Rn, DRm-->(Rn)     1111nnnnmmm01011
+   or
+   FMOV XDm,@-Rn    Rn-8-->Rn, XDm-->(Rn)     1111nnnnmmm11011 */
+#define IS_FMOV(x)		(((x) & 0xf00f) == 0xf00b)
+
+/* MOV Rm,Rn            Rm-->Rn          0110nnnnmmmm0011 
+   or
+   MOV.L Rm,@(disp,Rn)  Rm-->(dispx4+Rn) 0001nnnnmmmmdddd
+   or
+   MOV.L Rm,@Rn         Rm-->(Rn)        0010nnnnmmmm0010
+   where Rm is one of r4,r5,r6,r7 which are the argument registers. */
+#define IS_ARG_MOV(x) \
+(((((x) & 0xf00f) == 0x6003) && (((x) & 0x00f0) >= 0x0040 && ((x) & 0x00f0) <= 0x0070)) \
+|| ((((x) & 0xf000) == 0x1000) && (((x) & 0x00f0) >= 0x0040 && ((x) & 0x00f0) <= 0x0070)) \
+|| ((((x) & 0xf00f) == 0x2002) && (((x) & 0x00f0) >= 0x0040 && ((x) & 0x00f0) <= 0x0070)))
+
+/* MOV.L Rm,@(disp,r14)  00011110mmmmdddd
+   Rm-->(dispx4+r14) where Rm is one of r4,r5,r6,r7 */
+#define IS_MOV_R14(x) \
+((((x) & 0xff00) == 0x1e) && (((x) & 0x00f0) >= 0x0040 && ((x) & 0x00f0) <= 0x0070))
+                        
+#define FPSCR_SZ		(1 << 20)
 
 /* Should call_function allocate stack space for a struct return?  */
 int
@@ -184,14 +239,46 @@ sh_use_struct_convention (gcc_p, type)
   return (TYPE_LENGTH (type) > 1);
 }
 
-
 /* Skip any prologue before the guts of a function */
 
-CORE_ADDR
-sh_skip_prologue (start_pc)
+/* Skip the prologue using the debug information. If this fails we'll
+   fall back on the 'guess' method below. */
+static CORE_ADDR
+after_prologue (pc)
+     CORE_ADDR pc;
+{
+  struct symtab_and_line sal;
+  CORE_ADDR func_addr, func_end;
+
+  /* If we can not find the symbol in the partial symbol table, then
+     there is no hope we can determine the function's start address
+     with this code.  */
+  if (!find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    return 0;
+
+  /* Get the line associated with FUNC_ADDR.  */
+  sal = find_pc_line (func_addr, 0);
+
+  /* There are only two cases to consider.  First, the end of the source line
+     is within the function bounds.  In that case we return the end of the
+     source line.  Second is the end of the source line extends beyond the
+     bounds of the current function.  We need to use the slow code to
+     examine instructions in that case.  */
+  if (sal.end < func_end)
+    return sal.end;
+  else
+    return 0;
+}
+
+/* Here we look at each instruction in the function, and try to guess
+   where the prologue ends. Unfortunately this is not always 
+   accurate. */
+static CORE_ADDR
+skip_prologue_hard_way (start_pc)
      CORE_ADDR start_pc;
 {
   CORE_ADDR here, end;
+  int updated_fp = 0;
 
   if (!start_pc)
     return 0;
@@ -201,17 +288,43 @@ sh_skip_prologue (start_pc)
       int w = read_memory_integer (here, 2);
       here += 2;
       if (IS_FMOV (w) || IS_PUSH (w) || IS_STS (w) || IS_MOV_R3 (w)
-	  || IS_ADD_R3SP (w) || IS_ADD_SP (w) || IS_SHLL_R3 (w))
-	start_pc = here;
-
-      if (IS_MOV_SP_FP (w))
+	  || IS_ADD_R3SP (w) || IS_ADD_SP (w) || IS_SHLL_R3 (w) 
+	  || IS_ARG_MOV (w) || IS_MOV_R14 (w))
 	{
 	  start_pc = here;
-	  break;
 	}
+      else if (IS_MOV_SP_FP (w))
+	{
+	  start_pc = here;
+	  updated_fp = 1;
+	}
+      else
+	/* Don't bail out yet, if we are before the copy of sp. */
+	if (updated_fp)
+	  break;
     }
 
   return start_pc;
+}
+
+CORE_ADDR
+sh_skip_prologue (pc)
+     CORE_ADDR pc;
+{
+  CORE_ADDR post_prologue_pc;
+
+  /* See if we can determine the end of the prologue via the symbol table.
+     If so, then return either PC, or the PC after the prologue, whichever
+     is greater.  */
+
+  post_prologue_pc = after_prologue (pc);
+
+  /* If after_prologue returned a useful address, then use it.  Else
+     fall back on the instruction skipping code. */
+  if (post_prologue_pc != 0)
+    return max (pc, post_prologue_pc);
+  else
+    return (skip_prologue_hard_way (pc));
 }
 
 /* Disassemble an instruction.  */
@@ -784,6 +897,29 @@ sh_extract_return_value (type, regbuf, valbuf)
     memcpy (valbuf, ((char *) regbuf) + 8 - len, len);
   else
     error ("bad size for return value");
+}
+
+/* If the architecture is sh4 or sh3e, store a function's return value
+   in the R0 general register or in the FP0 floating point register,
+   depending on the type of the return value. In all the other cases
+   the result is stored in r0. */
+void
+sh_store_return_value (struct type *type, void *valbuf)
+{
+  int cpu;
+  if (TARGET_ARCHITECTURE->arch == bfd_arch_sh)
+    cpu = TARGET_ARCHITECTURE->mach;
+  else
+    cpu = 0;
+  if (cpu == bfd_mach_sh3e || cpu == bfd_mach_sh4)
+    {
+      if (TYPE_CODE (type) == TYPE_CODE_FLT) 
+	write_register_bytes (REGISTER_BYTE (FP0_REGNUM), valbuf, TYPE_LENGTH (type));
+      else
+	write_register_bytes (REGISTER_BYTE (0), valbuf, TYPE_LENGTH (type));
+    }
+  else
+    write_register_bytes (REGISTER_BYTE (0), valbuf, TYPE_LENGTH (type));
 }
 
 void
