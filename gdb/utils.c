@@ -459,7 +459,7 @@ add_continuation (void (*continuation_hook) (struct continuation_arg *),
    before we have a chance of exhausting those that were already
    there. We need to then save the beginning of the list in a pointer
    and do the continuations from there on, instead of using the
-   global beginning of list as our iteration pointer.*/
+   global beginning of list as our iteration pointer.  */
 void
 do_all_continuations (void)
 {
@@ -473,7 +473,7 @@ do_all_continuations (void)
   continuation_ptr = cmd_continuation;
   cmd_continuation = NULL;
 
-  /* Work now on the list we have set aside. */
+  /* Work now on the list we have set aside.  */
   while (continuation_ptr)
     {
       (continuation_ptr->continuation_hook) (continuation_ptr->arg_list);
@@ -499,7 +499,8 @@ discard_all_continuations (void)
 }
 
 /* Add a continuation to the continuation list, the global list
-   intermediate_continuation. The new continuation will be added at the front.*/
+   intermediate_continuation.  The new continuation will be added at
+   the front.  */
 void
 add_intermediate_continuation (void (*continuation_hook)
 			       (struct continuation_arg *),
@@ -536,7 +537,7 @@ do_all_intermediate_continuations (void)
   continuation_ptr = intermediate_continuation;
   intermediate_continuation = NULL;
 
-  /* Work now on the list we have set aside. */
+  /* Work now on the list we have set aside.  */
   while (continuation_ptr)
     {
       (continuation_ptr->continuation_hook) (continuation_ptr->arg_list);

@@ -1,5 +1,6 @@
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* utils.c: Whitespace tweaks.
 	* tracepoint.[ch]: Whitespace tweaks.
 	* solist.h: Whitespace tweaks.
 
