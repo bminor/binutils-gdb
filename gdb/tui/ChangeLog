@@ -1,5 +1,10 @@
 2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiWin.c (_tuiAllWindowsInfo): Don't crash if the window
+	is not displayed.
+
+2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tui-out.c (tui_out_new): Clear start_of_line.
 	* tuiSource.c (tuiVerticalSourceScroll): Use print_source_lines
 	to update the current source line.

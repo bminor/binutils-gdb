@@ -928,7 +928,7 @@ _tuiAllWindowsInfo (char *arg, int fromTTY)
   TuiWinInfoPtr winWithFocus = tuiWinWithFocus ();
 
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
-    if (winList[type]->generic.isVisible)
+    if (winList[type] && winList[type]->generic.isVisible)
       {
 	if (winWithFocus == winList[type])
 	  printf_filtered ("        %s\t(%d lines)  <has focus>\n",
