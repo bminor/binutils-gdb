@@ -192,7 +192,7 @@ case "${targ}" in
     targ_defvec=i386coff_vec
     ;;
   i[345]86-*-aout* | i[345]86*-*-vsta*)
-    targ_defvec=i386_aout_vec
+    targ_defvec=i386aout_vec
     ;;
 
   i860-*-sysv4*)
