@@ -2074,7 +2074,7 @@ file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
 205^done
 (@value{GDBP})
 111-exec-return
-111^done,frame=@{level="0 ",func="callee3",
+111^done,frame=@{level="0",func="callee3",
 args=[@{name="strarg",
 value="0x11940 \"A string argument.\""@}],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
@@ -2709,15 +2709,15 @@ functionality of @samp{-stack-list-arguments}.
 -stack-list-frames
 ^done,
 stack=[
-frame=@{level="0 ",addr="0x00010734",func="callee4",
+frame=@{level="0",addr="0x00010734",func="callee4",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8"@},
-frame=@{level="1 ",addr="0x0001076c",func="callee3",
+frame=@{level="1",addr="0x0001076c",func="callee3",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="17"@},
-frame=@{level="2 ",addr="0x0001078c",func="callee2",
+frame=@{level="2",addr="0x0001078c",func="callee2",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="22"@},
-frame=@{level="3 ",addr="0x000107b4",func="callee1",
+frame=@{level="3",addr="0x000107b4",func="callee1",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="27"@},
-frame=@{level="4 ",addr="0x000107e0",func="main",
+frame=@{level="4",addr="0x000107e0",func="main",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="32"@}]
 (@value{GDBP})
 -stack-list-arguments 0
@@ -2799,25 +2799,25 @@ Full stack backtrace:
 (@value{GDBP})
 -stack-list-frames
 ^done,stack=
-[frame=@{level="0 ",addr="0x0001076c",func="foo",
+[frame=@{level="0",addr="0x0001076c",func="foo",
   file="recursive2.c",line="11"@},
-frame=@{level="1 ",addr="0x000107a4",func="foo",
+frame=@{level="1",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
-frame=@{level="2 ",addr="0x000107a4",func="foo",
+frame=@{level="2",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
-frame=@{level="3 ",addr="0x000107a4",func="foo",
+frame=@{level="3",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
-frame=@{level="4 ",addr="0x000107a4",func="foo",
+frame=@{level="4",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
-frame=@{level="5 ",addr="0x000107a4",func="foo",
+frame=@{level="5",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
-frame=@{level="6 ",addr="0x000107a4",func="foo",
+frame=@{level="6",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
-frame=@{level="7 ",addr="0x000107a4",func="foo",
+frame=@{level="7",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
-frame=@{level="8 ",addr="0x000107a4",func="foo",
+frame=@{level="8",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
-frame=@{level="9 ",addr="0x000107a4",func="foo",
+frame=@{level="9",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
 frame=@{level="10",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
@@ -2832,11 +2832,11 @@ Show frames between @var{low_frame} and @var{high_frame}:
 (@value{GDBP})
 -stack-list-frames 3 5
 ^done,stack=
-[frame=@{level="3 ",addr="0x000107a4",func="foo",
+[frame=@{level="3",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
-frame=@{level="4 ",addr="0x000107a4",func="foo",
+frame=@{level="4",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
-frame=@{level="5 ",addr="0x000107a4",func="foo",
+frame=@{level="5",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@}]
 (@value{GDBP})
 @end smallexample
@@ -2847,7 +2847,7 @@ Show a single frame:
 (@value{GDBP})
 -stack-list-frames 3 3
 ^done,stack=
-[frame=@{level="3 ",addr="0x000107a4",func="foo",
+[frame=@{level="3",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@}]
 (@value{GDBP})
 @end smallexample
@@ -3510,7 +3510,7 @@ number-of-threads="3"
 (@value{GDBP})
 -thread-select 3
 ^done,new-thread-id="3",
-frame=@{level="0 ",func="vprintf",
+frame=@{level="0",func="vprintf",
 args=[@{name="format",value="0x8048e9c \"%*s%c %d %c\\n\""@},
 @{name="arg",value="0x2"@}],file="vprintf.c",line="31"@}
 (@value{GDBP})

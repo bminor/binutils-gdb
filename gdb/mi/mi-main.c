@@ -40,6 +40,8 @@
 #include "value.h"		/* for write_register_bytes() */
 #include "regcache.h"
 #include "gdb.h"
+#include "frame.h"
+
 #include <ctype.h>
 #include <sys/time.h>
 
@@ -97,12 +99,6 @@ void mi_load_progress (const char *section_name,
 		       unsigned long total_section,
 		       unsigned long total_sent,
 		       unsigned long grand_total);
-
-/* FIXME: these should go in some .h file, but infcmd.c doesn't have a
-   corresponding .h file. These wrappers will be obsolete anyway, once
-   we pull the plug on the sanitization. */
-extern void interrupt_target_command_wrapper (char *, int);
-extern void return_command_wrapper (char *, int);
 
 /* A helper function which will set mi_error_message to error_last_message. */
 void
@@ -187,11 +183,11 @@ mi_cmd_exec_return (char *args, int from_tty)
   if (*args)
     /* Call return_command with from_tty argument equal to 0 so as to
        avoid being queried. */
-    return_command_wrapper (args, 0);
+    return_command (args, 0);
   else
     /* Call return_command with from_tty argument equal to 0 so as to
        avoid being queried. */
-    return_command_wrapper (NULL, 0);
+    return_command (NULL, 0);
 
   /* Because we have called return_command with from_tty = 0, we need
      to print the frame here. */
@@ -223,7 +219,7 @@ mi_cmd_exec_interrupt (char *args, int from_tty)
 		 "mi_cmd_exec_interrupt: Inferior not executing.");
       return MI_CMD_ERROR;
     }
-  interrupt_target_command_wrapper (args, from_tty);
+  interrupt_target_command (args, from_tty);
   if (last_async_command)
     fputs_unfiltered (last_async_command, raw_stdout);
   fputs_unfiltered ("^done", raw_stdout);
@@ -252,8 +248,12 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
   else
     rc = gdb_thread_select (uiout, argv[0]);
 
-  if (rc == GDB_RC_FAIL)
+  /* RC is enum gdb_rc if it is successful (>=0)
+     enum return_reason if not (<0). */
+  if ((int) rc < 0 && (enum return_reason) rc == RETURN_ERROR)
     return MI_CMD_CAUGHT_ERROR;
+  else if ((int) rc >= 0 && rc == GDB_RC_FAIL)
+    return MI_CMD_ERROR;
   else
     return MI_CMD_DONE;
 }
@@ -923,19 +923,22 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   /* Build the result as a two dimentional table. */
   {
     struct ui_stream *stream = ui_out_stream_new (uiout);
+    struct cleanup *cleanup_list_memory;
     int row;
     int row_byte;
-    ui_out_list_begin (uiout, "memory");
+    cleanup_list_memory = make_cleanup_ui_out_list_begin_end (uiout, "memory");
     for (row = 0, row_byte = 0;
 	 row < nr_rows;
 	 row++, row_byte += nr_cols * word_size)
       {
 	int col;
 	int col_byte;
-	ui_out_tuple_begin (uiout, NULL);
+	struct cleanup *cleanup_tuple;
+	struct cleanup *cleanup_list_data;
+	cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	ui_out_field_core_addr (uiout, "addr", addr + row_byte);
 	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr + row_byte); */
-	ui_out_list_begin (uiout, "data");
+	cleanup_list_data = make_cleanup_ui_out_list_begin_end (uiout, "data");
 	for (col = 0, col_byte = row_byte;
 	     col < nr_cols;
 	     col++, col_byte += word_size)
@@ -952,7 +955,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 		ui_out_field_stream (uiout, NULL, stream);
 	      }
 	  }
-	ui_out_list_end (uiout);
+	do_cleanups (cleanup_list_data);
 	if (aschar)
 	  {
 	    int byte;
@@ -972,10 +975,10 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	      }
 	    ui_out_field_stream (uiout, "ascii", stream);
 	  }
-	ui_out_tuple_end (uiout);
+	do_cleanups (cleanup_tuple);
       }
     ui_out_stream_delete (stream);
-    ui_out_list_end (uiout);
+    do_cleanups (cleanup_list_memory);
   }
   do_cleanups (cleanups);
   return MI_CMD_DONE;
@@ -1429,17 +1432,18 @@ mi_load_progress (const char *section_name,
 		 strcmp (previous_sect_name, section_name) : 1);
   if (new_section)
     {
+      struct cleanup *cleanup_tuple;
       xfree (previous_sect_name);
       previous_sect_name = xstrdup (section_name);
 
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
-      ui_out_tuple_begin (uiout, NULL);
+      cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);
       ui_out_field_int (uiout, "section-size", total_section);
       ui_out_field_int (uiout, "total-size", grand_total);
-      ui_out_tuple_end (uiout);
+      do_cleanups (cleanup_tuple);
       mi_out_put (uiout, raw_stdout);
       fputs_unfiltered ("\n", raw_stdout);
       gdb_flush (raw_stdout);
@@ -1448,26 +1452,96 @@ mi_load_progress (const char *section_name,
   if (delta.tv_sec >= update_threshold.tv_sec &&
       delta.tv_usec >= update_threshold.tv_usec)
     {
+      struct cleanup *cleanup_tuple;
       last_update.tv_sec = time_now.tv_sec;
       last_update.tv_usec = time_now.tv_usec;
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
-      ui_out_tuple_begin (uiout, NULL);
+      cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);
       ui_out_field_int (uiout, "section-sent", sent_so_far);
       ui_out_field_int (uiout, "section-size", total_section);
       ui_out_field_int (uiout, "total-sent", total_sent);
       ui_out_field_int (uiout, "total-size", grand_total);
-      ui_out_tuple_end (uiout);
+      do_cleanups (cleanup_tuple);
       mi_out_put (uiout, raw_stdout);
       fputs_unfiltered ("\n", raw_stdout);
       gdb_flush (raw_stdout);
     }
 }
 
-void
-mi_setup_architecture_data (void)
+static void
+mi_command_loop (int mi_version)
+{
+  /* HACK: Force stdout/stderr to point at the console.  This avoids
+     any potential side effects caused by legacy code that is still
+     using the TUI / fputs_unfiltered_hook */
+  raw_stdout = stdio_fileopen (stdout);
+  /* Route normal output through the MIx */
+  gdb_stdout = mi_console_file_new (raw_stdout, "~");
+  /* Route error and log output through the MI */
+  gdb_stderr = mi_console_file_new (raw_stdout, "&");
+  gdb_stdlog = gdb_stderr;
+  /* Route target output through the MI. */
+  gdb_stdtarg = mi_console_file_new (raw_stdout, "@");
+
+  /* HACK: Poke the ui_out table directly.  Should we be creating a
+     mi_out object wired up to the above gdb_stdout / gdb_stderr? */
+  uiout = mi_out_new (mi_version);
+
+  /* HACK: Override any other interpreter hooks.  We need to create a
+     real event table and pass in that. */
+  init_ui_hook = 0;
+  /* command_loop_hook = 0; */
+  print_frame_info_listing_hook = 0;
+  query_hook = 0;
+  warning_hook = 0;
+  create_breakpoint_hook = 0;
+  delete_breakpoint_hook = 0;
+  modify_breakpoint_hook = 0;
+  interactive_hook = 0;
+  registers_changed_hook = 0;
+  readline_begin_hook = 0;
+  readline_hook = 0;
+  readline_end_hook = 0;
+  register_changed_hook = 0;
+  memory_changed_hook = 0;
+  context_hook = 0;
+  target_wait_hook = 0;
+  call_command_hook = 0;
+  error_hook = 0;
+  error_begin_hook = 0;
+  show_load_progress = mi_load_progress;
+
+  /* Turn off 8 bit strings in quoted output.  Any character with the
+     high bit set is printed using C's octal format. */
+  sevenbit_strings = 1;
+
+  /* Tell the world that we're alive */
+  fputs_unfiltered ("(gdb) \n", raw_stdout);
+  gdb_flush (raw_stdout);
+
+  if (!event_loop_p)
+    simplified_command_loop (mi_input, mi_execute_command);
+  else
+    start_event_loop ();
+}
+
+static void
+mi1_command_loop (void)
+{
+  mi_command_loop (1);
+}
+
+static void
+mi2_command_loop (void)
+{
+  mi_command_loop (2);
+}
+
+static void
+setup_architecture_data (void)
 {
   /* don't trust REGISTER_BYTES to be zero. */
   old_regs = xmalloc (REGISTER_BYTES + 1);
@@ -1477,6 +1551,21 @@ mi_setup_architecture_data (void)
 void
 mi_register_gdbarch_swap (void)
 {
+  if (interpreter_p == NULL)
+    return;
+
+  /* If we're _the_ interpreter, take control. */
+  if (strcmp (interpreter_p, "mi") == 0)
+    command_loop_hook = mi2_command_loop;
+  else if (strcmp (interpreter_p, "mi1") == 0)
+    command_loop_hook = mi1_command_loop;
+  else if (strcmp (interpreter_p, "mi2") == 0)
+    command_loop_hook = mi2_command_loop;
+  else
+    return;
+
+  init_ui_hook = mi_init_ui;
+  setup_architecture_data ();
   register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
   register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);
 }

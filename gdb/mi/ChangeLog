@@ -151,6 +151,55 @@
 	(mi_init_ui): Remove.
 	(_initialize_mi_main): Remove. No longer needed.
 
+2002-10-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-cmd-var.c: Change all remaining occurrences of ui_out_tuple_begin 
+	to make_cleanup_ui_out_tuple_begin_end.  Change all remaining 
+	occurrences of ui_out_list_begin to make_cleanup_ui_out_list_begin_end.
+	Use do_cleanups instead of ui_out_list_end or ui_out_tuple_end.  This 
+	is a fix for PR gdb/680.
+	* mi-cmd-stack.c: Ditto.
+	* mi-main.c: Ditto.
+
+2002-10-22  Keith Seitz  <keiths@redhat.com>
+
+	* mi-main.c (mi_cmd_thread_select): Only return MI_CMD_CAUGHT_ERROR
+	when we really did catch an error(). If we got GDB_RC_FAIL, return
+	MI_CMD_ERROR instead.
+
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdbmi.texinfo: Fix examples that show frames to remove
+	extraneous blank in level field.  Part of fix for PR gdb/192.
+        
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+        
+	* mi-cmd-var.c (mi_cmd_var_update): Fix for PR gdb/672.  For m2, 
+	output list begin and end for "changelist" rather than tuple begin/end.
+	(varobj_update_one): For m2, add tuple begin and end for varobj 
+	update output.
+
+2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-main.c (mi_cmd_exec_return): Don't use
+	return_command_wrapper, use return_command instead.
+	(mi_cmd_exec_interrupt): Don't use
+	interrupt_target_command_wrapper, use interrupt_target_command
+	instead.
+	(return_command_wrapper, interrupt_target_command_wrapper):
+	Delete.
+	Include frame.h.
+
+2002-10-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (mi2_command_loop): New function.
+	(mi0_command_loop): Delete function.
+	(_initialize_mi_main): Recognize, and default to, "mi2".  Do not
+	recognize "mi0".
+	* mi-out.c (mi_table_begin): Remove mi0 code.
+	(mi_table_body, mi_table_end): Ditto.
+	(mi_table_header, mi_open, mi_close): Ditto.
+
 2002-09-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-out.c (mi_version): New function.
