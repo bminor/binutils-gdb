@@ -1,3 +1,11 @@
+Fri Jun  5 19:15:59 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* gas/m68k/operands.s: For all pc relative addresses change tstl
+	to pea since the former does not allow pcrel on m68000.  Do not
+	make label foo global, so that references to it can be relaxed on
+	ELF targets.
+	* gas/m68k/operands.d, gas/m68k/op68000.d: Updated.
+
 Tue Jun  2 15:08:36 1998  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* gas/ppc/ppc.exp: Run simpshft test.
