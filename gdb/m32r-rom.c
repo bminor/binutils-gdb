@@ -398,63 +398,6 @@ mon2000_open (char *args, int from_tty)
   monitor_open (args, &mon2000_cmds, from_tty);
 }
 
-/* Function: set_board_address
-   Tell the BootOne monitor what it's ethernet IP address is. */
-
-static void
-m32r_set_board_address (char *args, int from_tty)
-{
-  int resp_len;
-  char buf[1024];
-
-  if (args && *args)
-    {
-      monitor_printf ("ulip %s\n", args);
-      resp_len = monitor_expect_prompt (buf, sizeof (buf));
-      /* now parse the result for success */
-    }
-  else
-    error ("Requires argument (IP address for M32R-EVA board)");
-}
-
-/* Function: set_server_address
-   Tell the BootOne monitor what gdb's ethernet IP address is. */
-
-static void
-m32r_set_server_address (char *args, int from_tty)
-{
-  int resp_len;
-  char buf[1024];
-
-  if (args && *args)
-    {
-      monitor_printf ("uhip %s\n", args);
-      resp_len = monitor_expect_prompt (buf, sizeof (buf));
-      /* now parse the result for success */
-    }
-  else
-    error ("Requires argument (IP address of GDB's host computer)");
-}
-
-/* Function: set_download_path
-   Tell the BootOne monitor the default path for downloadable SREC files. */
-
-static void
-m32r_set_download_path (char *args, int from_tty)
-{
-  int resp_len;
-  char buf[1024];
-
-  if (args && *args)
-    {
-      monitor_printf ("up %s\n", args);
-      resp_len = monitor_expect_prompt (buf, sizeof (buf));
-      /* now parse the result for success */
-    }
-  else
-    error ("Requires argument (default path for downloadable SREC files)");
-}
-
 static void
 m32r_upload_command (char *args, int from_tty)
 {

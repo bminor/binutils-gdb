@@ -364,12 +364,6 @@ remote_fileio_to_be (LONGEST num, char *buf, int bytes)
 }
 
 static void
-remote_fileio_to_fio_int (long num, fio_int_t fnum)
-{
-  remote_fileio_to_be ((LONGEST) num, (char *) fnum, 4);
-}
-
-static void
 remote_fileio_to_fio_uint (long num, fio_uint_t fnum)
 {
   remote_fileio_to_be ((LONGEST) num, (char *) fnum, 4);

@@ -80,8 +80,6 @@ static void forward_search_command (char *, int);
 
 static void line_info (char *, int);
 
-static void ambiguous_line_spec (struct symtabs_and_lines *);
-
 static void source_info (char *, int);
 
 static void show_directories (char *, int);
