@@ -1,3 +1,8 @@
+Fri Nov  9 17:55:39 2001  Jeffrey A Law  (law@cygnus.com)
+
+	* readelf.c (get_elf_class): Fix ISO portability glitch.
+	(get_data_encoding, get_osabi_name, request_dump): Likewise.
+
 2001-11-07  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (debug_str, debug_str_size): New.

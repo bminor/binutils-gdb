@@ -233,10 +233,10 @@ static void               add_abbrev_attr             PARAMS ((unsigned long, un
 static unsigned char *    read_and_display_attr       PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long, unsigned long));
 static unsigned char *    display_block               PARAMS ((unsigned char *, unsigned long));
 static void               decode_location_expression  PARAMS ((unsigned char *, unsigned int, unsigned long));
-static void		  request_dump                PARAMS ((unsigned int, char));
-static const char *       get_elf_class               PARAMS ((unsigned char));
-static const char *       get_data_encoding           PARAMS ((unsigned char));
-static const char *       get_osabi_name              PARAMS ((unsigned char));
+static void		  request_dump                PARAMS ((unsigned int, int));
+static const char *       get_elf_class               PARAMS ((unsigned int));
+static const char *       get_data_encoding           PARAMS ((unsigned int));
+static const char *       get_osabi_name              PARAMS ((unsigned int));
 static int		  guess_is_rela               PARAMS ((unsigned long));
 static char *		  get_note_type		         PARAMS ((unsigned int));
 static int		  process_note		         PARAMS ((Elf32_Internal_Note *));
@@ -2089,7 +2089,7 @@ usage ()
 static void
 request_dump (section, type)
      unsigned int section;
-     char         type;
+     int         type;
 {
   if (section >= num_dump_sects)
     {
@@ -2300,7 +2300,7 @@ parse_args (argc, argv)
 
 static const char *
 get_elf_class (elf_class)
-     unsigned char elf_class;
+     unsigned int elf_class;
 {
   static char buff [32];
 
@@ -2317,7 +2317,7 @@ get_elf_class (elf_class)
 
 static const char *
 get_data_encoding (encoding)
-     unsigned char encoding;
+     unsigned int encoding;
 {
   static char buff [32];
 
@@ -2334,7 +2334,7 @@ get_data_encoding (encoding)
 
 static const char *
 get_osabi_name (osabi)
-     unsigned char osabi;
+     unsigned int osabi;
 {
   static char buff [32];
 
