@@ -1,5 +1,11 @@
 2001-02-17  Chris Demetriou  <cgd@broadcom.com>
 
+	* gas/mips/mips32.d: Remove ELF dependencies.  This test
+	wasn't meant to be ELF specific, and doesn't have to be.
+	* gas/mips/mips64.d: Likewise.
+
+2001-02-17  Chris Demetriou  <cgd@broadcom.com>
+
 	* gas/mips/mips.exp: Don't attempt the elf_e_flags family of
 	tests if not ELF; they test ELF-specific features.
 

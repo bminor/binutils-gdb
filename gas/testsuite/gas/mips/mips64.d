@@ -1,10 +1,10 @@
-#objdump: -dr --prefix-addresses --show-raw-insn
+#objdump: -dr --prefix-addresses --show-raw-insn -mmips:mips64
 #name: MIPS MIPS64 instructions
 #as: -mips64
 
 # Check MIPS32 instruction assembly
 
-.*: +file format elf.*mips.*
+.*: +file format .*mips.*
 
 Disassembly of section .text:
 0+0000 <[^>]*> 70410825 	dclo	\$at,\$v0
