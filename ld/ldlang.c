@@ -1873,11 +1873,23 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      }
 
       break;
+
+   case lang_padding_statement_enum:
+     /* If we are relaxing, and this is not the first pass, some
+	padding statements may have been inserted during previous
+	passes.  We may have to move the padding statement to a new
+	location if dot has a different value at this point in this
+	pass than it did at this point in the previous pass.  */
+     s->padding_statement.output_offset =
+       dot - output_section_statement->bfd_section->vma;
+     dot += s->padding_statement.size;
+     break;
+
      default:
       FAIL ();
       break;
+
       /* This can only get here when relaxing is turned on */
-     case lang_padding_statement_enum:
 
      case lang_address_statement_enum:
       break;
