@@ -62,9 +62,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef NULL_CIA
 #define NULL_CIA ((sim_cia) 0)
 #endif
+/* Return the current instruction address as a number.
+   Some targets treat the current instruction address as a struct
+   (e.g. for delay slot handling).  */
+#ifndef CIA_ADDR
+#define CIA_ADDR(cia) (cia)
+#endif
 #ifndef INVALID_INSTRUCTION_ADDRESS
 #define INVALID_INSTRUCTION_ADDRESS ((address_word)0 - 1)
 #endif
+
 typedef struct _sim_cpu sim_cpu;
 
 #include "sim-module.h"
@@ -80,7 +87,9 @@ typedef struct _sim_cpu sim_cpu;
 #include "sim-engine.h"
 #include "sim-watch.h"
 #include "sim-memopt.h"
-
+#ifdef SIM_HAVE_BREAKPOINTS
+#include "sim-break.h"
+#endif
 
 /* Global pointer to current state while sim_resume is running.
    On a machine with lots of registers, it might be possible to reserve
@@ -153,6 +162,10 @@ typedef struct {
   int verbose_p;
 #define STATE_VERBOSE_P(sd) ((sd)->base.verbose_p)
 
+  /* Non cpu-specific trace data.  See sim-trace.h.  */
+  TRACE_DATA trace_data;
+#define STATE_TRACE_DATA(sd) (& (sd)->base.trace_data)
+
   /* If non NULL, the BFD architecture specified on the command line */
   const struct bfd_arch_info *architecture;
 #define STATE_ARCHITECTURE(sd) ((sd)->base.architecture)
@@ -220,13 +233,16 @@ typedef struct {
   sim_watchpoints watchpoints;
 #define STATE_WATCHPOINTS(sd) (&(sd)->base.watchpoints)
 
+  /* Pointer to list of breakpoints */
+  struct sim_breakpoint *breakpoints;
+#define STATE_BREAKPOINTS(sd) ((sd)->base.breakpoints)
+
   /* Marker for those wanting to do sanity checks.
      This should remain the last member of this struct to help catch
      miscompilation errors.  */
   int magic;
 #define SIM_MAGIC_NUMBER 0x4242
 #define STATE_MAGIC(sd) ((sd)->base.magic)
-
 } sim_state_base;
 
 

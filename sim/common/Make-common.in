@@ -125,6 +125,33 @@ SIM_EXTRA_INSTALL =
 # Dependency of `clean' to clean any extra files.
 SIM_EXTRA_CLEAN =
 
+# Every time a new general purpose source file was added every target's
+# Makefile.in needed to be updated to include the file in SIM_OBJS.
+# This doesn't scale.
+# This variable specifies all the generic stuff common to the newer simulators.
+# Things like sim-reason.o can't go here as the cpu may provide its own
+# (though hopefully in time that won't be so).  Things like sim-bits.o can go
+# here.  Some files are used by all simulators (e.g. callback.o).
+# Those files are specified in LIB_OBJS below.
+
+SIM_NEW_COMMON_OBJS = \
+	sim-bits.o \
+	sim-break.o \
+	sim-config.o \
+	sim-core.o \
+	sim-endian.o \
+	sim-events.o \
+	sim-fpu.o \
+	sim-io.o \
+	sim-load.o \
+	sim-memopt.o \
+	sim-module.o \
+	sim-options.o \
+	sim-profile.o \
+	sim-trace.o \
+	sim-utils.o \
+	sim-watch.o
+
 ## End COMMON_PRE_CONFIG_FRAG
 
 ## COMMON_POST_CONFIG_FRAG
