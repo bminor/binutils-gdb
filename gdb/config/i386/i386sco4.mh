@@ -1,0 +1,16 @@
+# Host: Intel 386 running SCO Unix 3.2v4
+XDEPFILES= i387-tdep.o
+XM_FILE= xm-i386sco.h
+NAT_FILE= nm-i386sco4.h
+NATDEPFILES= infptrace.o inftarg.o fork-child.o coredep.o corelow.o i386v-nat.o
+XM_CLIBS= -lPW
+SYSV_DEFINE=-DSYSV
+REGEX=regex.o
+REGEX1=regex.o
+# The cc compiler mishandles const in cases like 
+# struct type ** const (c_builtin_types[]) = 
+MH_CFLAGS=-Dconst=
+# The cc compiler sometimes produces debugging output that nm can not
+# parse.  Passing -p to nm makes it not even try, and allows munch to
+# work.
+MUNCH_DEFINE=-p
