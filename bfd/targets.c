@@ -301,6 +301,7 @@ The general target vector.
 .CAT(NAME,_construct_extended_name_table),\
 .CAT(NAME,_truncate_arname),\
 .CAT(NAME,_write_armap),\
+.CAT(NAME,_read_ar_hdr),\
 .CAT(NAME,_openr_next_archived_file),\
 .CAT(NAME,_generic_stat_arch_elt),\
 .CAT(NAME,_update_armap_timestamp)
@@ -314,6 +315,7 @@ The general target vector.
 .                              struct orl *map,
 .                              unsigned int orl_count, 
 .                              int stridx));
+.  PTR (*_bfd_read_ar_hdr) PARAMS ((bfd *));
 .  bfd *    (*openr_next_archived_file) PARAMS ((bfd *arch, bfd *prev));
 .  int      (*_bfd_stat_arch_elt) PARAMS ((bfd *, struct stat *));
 .  boolean  (*_bfd_update_armap_timestamp) PARAMS ((bfd *));
@@ -533,6 +535,7 @@ extern const bfd_target pc532netbsd_vec;
 extern const bfd_target oasys_vec;
 extern const bfd_target pc532machaout_vec;
 extern const bfd_target riscix_vec;
+extern const bfd_target pmac_xcoff_vec;
 extern const bfd_target rs6000coff_vec;
 extern const bfd_target shcoff_vec;
 /* start-sanitize-rce */
@@ -708,6 +711,10 @@ const bfd_target * const bfd_target_vector[] = {
 	&aout_arm_big_vec,
 	&aout_arm_little_vec,
 	&riscix_vec,
+#endif
+#if 0
+	/* This has the same magic number as RS/6000. */
+	&pmac_xcoff_vec,
 #endif
 	&rs6000coff_vec,
 	&shcoff_vec,

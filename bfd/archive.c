@@ -178,8 +178,6 @@ static boolean do_slurp_coff_armap PARAMS ((bfd *abfd));
 static const char *normalize PARAMS ((bfd *, const char *file));
 static struct areltdata *bfd_ar_hdr_from_filesystem PARAMS ((bfd *abfd,
 							     const char *));
-static boolean compute_and_write_armap PARAMS ((bfd *arch,
-						unsigned int elength));
 
 boolean
 _bfd_generic_mkarchive (abfd)
@@ -365,8 +363,8 @@ get_extended_arelt_filename (arch, name)
    could have been moved arbitrarily.
 */
 
-struct areltdata *
-_bfd_snarf_ar_hdr (abfd)
+PTR
+_bfd_generic_read_ar_hdr (abfd)
      bfd *abfd;
 {
 #ifndef errno
@@ -496,7 +494,7 @@ _bfd_snarf_ar_hdr (abfd)
       ared->filename[namelen] = '\0';
     }
 
-  return ared;
+  return (PTR) ared;
 }
 
 /* This is an internal function; it's mainly used when indexing
@@ -518,7 +516,7 @@ _bfd_get_elt_at_filepos (archive, filepos)
   if (0 > bfd_seek (archive, filepos, SEEK_SET))
     return NULL;
 
-  if ((new_areldata = _bfd_snarf_ar_hdr (archive)) == NULL)
+  if ((new_areldata = _bfd_read_ar_hdr (archive)) == NULL)
     return NULL;
 
   n_nfd = _bfd_create_empty_archive_element_shell (archive);
@@ -745,7 +743,7 @@ do_slurp_bsd_armap (abfd)
   unsigned int parsed_size;
   carsym *set;
 
-  mapdata = _bfd_snarf_ar_hdr (abfd);
+  mapdata = _bfd_read_ar_hdr (abfd);
   if (mapdata == NULL)
     return false;
   parsed_size = mapdata->parsed_size;
@@ -826,7 +824,7 @@ do_slurp_coff_armap (abfd)
   char int_buf[sizeof (long)];
   unsigned int carsym_size, ptrsize, i;
 
-  mapdata = _bfd_snarf_ar_hdr (abfd);
+  mapdata = _bfd_read_ar_hdr (abfd);
   if (mapdata == NULL)
     return false;
   parsed_size = mapdata->parsed_size;
@@ -915,7 +913,7 @@ do_slurp_coff_armap (abfd)
     struct areltdata *tmp;
 
     bfd_seek (abfd,   ardata->first_file_filepos, SEEK_SET);
-    tmp = _bfd_snarf_ar_hdr (abfd);
+    tmp = _bfd_read_ar_hdr (abfd);
     if (tmp != NULL) 
       {
 	if (tmp->arch_header[0] == '/'
@@ -1005,7 +1003,7 @@ bfd_slurp_bsd_armap_f2 (abfd)
       return true;
     }
 
-  mapdata = _bfd_snarf_ar_hdr (abfd);
+  mapdata = _bfd_read_ar_hdr (abfd);
   if (mapdata == NULL)
     return false;
 
@@ -1106,7 +1104,7 @@ _bfd_slurp_extended_name_table (abfd)
 	  return true;
 	}
 
-      namedata = _bfd_snarf_ar_hdr (abfd);
+      namedata = _bfd_read_ar_hdr (abfd);
       if (namedata == NULL)
 	return false;
 
@@ -1653,7 +1651,7 @@ _bfd_write_archive_contents (arch)
 
   if (makemap && hasobjects)
     {
-      if (compute_and_write_armap (arch, elength) != true)
+      if (_bfd_compute_and_write_armap (arch, elength) != true)
 	return false;
     }
 
@@ -1728,8 +1726,8 @@ _bfd_write_archive_contents (arch)
 	{
 	  if (bfd_update_armap_timestamp (arch))
 	    break;
-	  fprintf (stderr,
-		   "Warning: writing archive was slow: rewriting timestamp\n");
+	  (*_bfd_error_handler)
+	    ("Warning: writing archive was slow: rewriting timestamp\n");
 	}
       while (++tries < 6);
     }
@@ -1739,8 +1737,8 @@ _bfd_write_archive_contents (arch)
 
 /* Note that the namidx for the first symbol is 0 */
 
-static boolean
-compute_and_write_armap (arch, elength)
+boolean
+_bfd_compute_and_write_armap (arch, elength)
      bfd *arch;
      unsigned int elength;
 {

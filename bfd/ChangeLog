@@ -1,3 +1,34 @@
+Fri Oct  6 12:04:02 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-rs6000.c: Add full support for AIX archives.  Rewrite old
+	read-only/host-only support.
+
+	* coffcode.h (coff_slurp_symbol_table): Set C_HIDEXT symbols to be
+	BSF_LOCAL.
+
+	* targets.c (bfd_target): Add _bfd_read_ar_hdr field.  Modify
+	BFD_JUMP_TABLE_ARCHIVE accordingly.
+	* libbfd-in.h (_bfd_snarf_ar_hdr): Don't declare.
+	(_bfd_compute_and_write_armap): Declare.
+	(_bfd_generic_read_ar_hdr): Declare.
+	(_bfd_read_ar_hdr): Define.
+	(_bfd_noarchive_read_ar_hdr): Define.
+	(_bfd_archive_bsd_read_ar_hdr): Define.
+	(_bfd_archive_coff_read_ar_hdr): Define.
+	* archive.c: Change all callers of _bfd_snarf_ar_hdr to call
+	_bfd_read_ar_hdr instead.
+	(_bfd_generic_read_ar_hdr): Rename from _bfd_snarf_ar_hdr.
+	(_bfd_compute_and_write_armap): Rename from
+	compute_and_write_armap.  Make non-static.  Change all callers.
+	* ecoff.c (_bfd_ecoff_slurp_armap): Call _bfd_read_ar_hdr rather
+	than _bfd_snarf_ar_hdr.
+	* aout-target.h (MY_read_ar_hdr): Define if not defined.
+	* ieee.c (ieee_read_ar_hdr): Define.
+	* libecoff.h (_bfd_ecoff_read_ar_hdr): Define.
+	* oasys.c (oasys_read_ar_hdr): Define.
+	* som.c (som_read_ar_hdr): Define.
+	* bfd-in2.h, libbfd.h: Rebuild.
+
 Thu Oct  5 14:04:07 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* peicode.c (coff_swap_filehdr_in): If symptr is

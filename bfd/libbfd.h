@@ -90,7 +90,6 @@ bfd *	_bfd_create_empty_archive_element_shell PARAMS ((bfd *obfd));
 bfd *	_bfd_look_for_bfd_in_cache PARAMS ((bfd *arch_bfd, file_ptr index));
 boolean _bfd_add_bfd_to_archive_cache PARAMS ((bfd *, file_ptr, bfd *));
 boolean	_bfd_generic_mkarchive PARAMS ((bfd *abfd));
-struct areltdata *_bfd_snarf_ar_hdr PARAMS ((bfd *abfd));
 const bfd_target *bfd_generic_archive_p PARAMS ((bfd *abfd));
 boolean	bfd_slurp_armap PARAMS ((bfd *abfd));
 boolean bfd_slurp_bsd_armap_f2 PARAMS ((bfd *abfd));
@@ -100,6 +99,7 @@ boolean	_bfd_slurp_extended_name_table PARAMS ((bfd *abfd));
 extern boolean _bfd_construct_extended_name_table
   PARAMS ((bfd *, boolean, char **, bfd_size_type *));
 boolean	_bfd_write_archive_contents PARAMS ((bfd *abfd));
+boolean _bfd_compute_and_write_armap PARAMS ((bfd *, unsigned int elength));
 bfd *_bfd_get_elt_at_filepos PARAMS ((bfd *archive, file_ptr filepos));
 bfd * _bfd_new_bfd PARAMS ((void));
 
@@ -128,11 +128,15 @@ boolean	bsd_write_armap PARAMS ((bfd *arch, unsigned int elength,
 boolean	coff_write_armap PARAMS ((bfd *arch, unsigned int elength,
 				   struct orl *map, unsigned int orl_count, int stridx));
 
+extern PTR _bfd_generic_read_ar_hdr PARAMS ((bfd *));
+
 bfd *	bfd_generic_openr_next_archived_file PARAMS ((bfd *archive,
 						     bfd *last_file));
 
 int	bfd_generic_stat_arch_elt PARAMS ((bfd *, struct stat *));
 
+#define _bfd_read_ar_hdr(abfd) \
+  BFD_SEND (abfd, _bfd_read_ar_hdr, (abfd))
 
 /* Generic routines to use for BFD_JUMP_TABLE_GENERIC.  Use
    BFD_JUMP_TABLE_GENERIC (_bfd_generic).  */
@@ -183,6 +187,7 @@ extern boolean _bfd_nocore_core_file_matches_executable_p
   ((boolean (*) \
     PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int))) \
    bfd_false)
+#define _bfd_noarchive_read_ar_hdr bfd_nullvoidptr
 #define _bfd_noarchive_openr_next_archived_file \
   ((bfd *(*) PARAMS ((bfd *, bfd *))) bfd_nullvoidptr)
 #define _bfd_noarchive_generic_stat_arch_elt bfd_generic_stat_arch_elt
@@ -198,6 +203,7 @@ extern boolean _bfd_archive_bsd_construct_extended_name_table
   PARAMS ((bfd *, char **, bfd_size_type *, const char **));
 #define _bfd_archive_bsd_truncate_arname bfd_bsd_truncate_arname
 #define _bfd_archive_bsd_write_armap bsd_write_armap
+#define _bfd_archive_bsd_read_ar_hdr _bfd_generic_read_ar_hdr
 #define _bfd_archive_bsd_openr_next_archived_file \
   bfd_generic_openr_next_archived_file
 #define _bfd_archive_bsd_generic_stat_arch_elt \
@@ -214,6 +220,7 @@ extern boolean _bfd_archive_coff_construct_extended_name_table
   PARAMS ((bfd *, char **, bfd_size_type *, const char **));
 #define _bfd_archive_coff_truncate_arname bfd_dont_truncate_arname
 #define _bfd_archive_coff_write_armap coff_write_armap
+#define _bfd_archive_coff_read_ar_hdr _bfd_generic_read_ar_hdr
 #define _bfd_archive_coff_openr_next_archived_file \
   bfd_generic_openr_next_archived_file
 #define _bfd_archive_coff_generic_stat_arch_elt \
@@ -420,7 +427,7 @@ extern boolean _bfd_stringtab_emit PARAMS ((bfd *, struct bfd_strtab_hash *));
 #define	bfd_read_p(abfd) ((abfd)->direction == read_direction || (abfd)->direction == both_direction)
 #define	bfd_write_p(abfd) ((abfd)->direction == write_direction || (abfd)->direction == both_direction)
 
-void	bfd_assert PARAMS ((char*,int));
+void	bfd_assert PARAMS ((const char*,int));
 
 #define BFD_ASSERT(x) \
 { if (!(x)) bfd_assert(__FILE__,__LINE__); }

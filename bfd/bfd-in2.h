@@ -88,6 +88,11 @@ typedef struct _bfd bfd;
 #if defined (__GNUG__) && (__GNUC_MINOR__ > 5)
 #define TRUE_FALSE_ALREADY_DEFINED
 #endif
+#ifdef MPW
+/* Pre-emptive strike - get the file with the enum. */
+#include <Types.h>
+#define TRUE_FALSE_ALREADY_DEFINED
+#endif /* MPW */
 #ifndef TRUE_FALSE_ALREADY_DEFINED
 typedef enum bfd_boolean {false, true} boolean;
 #define BFD_TRUE_FALSE
@@ -2209,6 +2214,7 @@ CAT(NAME,_slurp_extended_name_table),\
 CAT(NAME,_construct_extended_name_table),\
 CAT(NAME,_truncate_arname),\
 CAT(NAME,_write_armap),\
+CAT(NAME,_read_ar_hdr),\
 CAT(NAME,_openr_next_archived_file),\
 CAT(NAME,_generic_stat_arch_elt),\
 CAT(NAME,_update_armap_timestamp)
@@ -2222,6 +2228,7 @@ CAT(NAME,_update_armap_timestamp)
                               struct orl *map,
                               unsigned int orl_count, 
                               int stridx));
+  PTR (*_bfd_read_ar_hdr) PARAMS ((bfd *));
   bfd *    (*openr_next_archived_file) PARAMS ((bfd *arch, bfd *prev));
   int      (*_bfd_stat_arch_elt) PARAMS ((bfd *, struct stat *));
   boolean  (*_bfd_update_armap_timestamp) PARAMS ((bfd *));
