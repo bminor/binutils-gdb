@@ -1,7 +1,8 @@
 Thu Feb  5 14:21:34 1998  Michael Meissner  <meissner@cygnus.com>
 
-	* libbfd.h (BFD_ALIGN): If rounding up would cause the address to
-	wrap, just return all 1's bits instead.
+	* libbfd-in.h (BFD_ALIGN): If rounding up would cause the address
+	to wrap, just return all 1's bits instead.
+	* libbfd.h: Regenerate.
 
 Thu Feb  5 11:51:05 1998  Ian Lance Taylor  <ian@cygnus.com>
 
