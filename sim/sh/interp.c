@@ -54,6 +54,8 @@
 
 extern unsigned char sh_jump_table[], sh_dsp_table[0x1000], ppi_table[];
 
+int sim_write (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size);
+
 #define O_RECOMPILE 85
 #define DEFINE_TABLE
 #define DISASSEMBLER_TABLE
@@ -162,6 +164,7 @@ static int target_little_endian;
 static int global_endianw, endianb;
 static int target_dsp;
 static int host_little_endian;
+static char **prog_argv;
 
 #if 1
 static int maskw = 0;
@@ -263,6 +266,20 @@ do { \
 #define FPSCR_FR  ((GET_FPSCR() & FPSCR_MASK_FR) != 0)
 #define FPSCR_SZ  ((GET_FPSCR() & FPSCR_MASK_SZ) != 0)
 #define FPSCR_PR  ((GET_FPSCR() & FPSCR_MASK_PR) != 0)
+
+/* Count the number of arguments in an argv.  */
+static int
+count_argc (char **argv)
+{
+  int i;
+
+  if (! argv)
+    return -1;
+
+  for (i = 0; argv[i] != NULL; ++i)
+    continue;
+  return i;
+}
 
 static void
 set_fpscr1 (x)
@@ -1102,11 +1119,31 @@ trap (i, regs, memory, maskl, maskw, endianw)
 	      strnswap (regs[5], len);
 	      break;
 	    }
+	  case SYS_argc:
+	    regs[0] = count_argc (prog_argv);
+	    break;
+	  case SYS_argnlen:
+	    if (regs[5] < count_argc (prog_argv))
+	      regs[0] = strlen (prog_argv[regs[5]]);
+	    else
+	      regs[0] = -1;
+	    break;
+	  case SYS_argn:
+	    if (regs[5] < count_argc (prog_argv))
+	      {
+		/* Include the termination byte.  */
+		int i = strlen (prog_argv[regs[5]]) + 1;
+		regs[0] = sim_write (0, regs[6], prog_argv[regs[5]], i);
+	      }
+	    else
+	      regs[0] = -1;
+	    break;
 	  case SYS_time:
 	    regs[0] = get_now ();
 	    break;
 	  default:
-	    abort ();
+	    regs[0] = -1;
+	    break;
 	  }
 	regs[1] = callback->get_errno (callback);
 	errno = perrno;
@@ -2146,12 +2183,17 @@ sim_create_inferior (sd, prog_bfd, argv, env)
      char **argv;
      char **env;
 {
-  /* clear the registers */
+  /* Clear the registers. */
   memset (&saved_state, 0,
 	  (char*)&saved_state.asregs.end_of_registers - (char*)&saved_state);
-  /* set the PC */
+
+  /* Set the PC.  */
   if (prog_bfd != NULL)
     saved_state.asregs.pc = bfd_get_start_address (prog_bfd);
+
+  /* Record the program's arguments. */
+  prog_argv = argv;
+
   return SIM_RC_OK;
 }
 

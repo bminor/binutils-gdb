@@ -1,3 +1,14 @@
+2001-01-30  Ben Elliston  <bje@redhat.com>
+
+	* interp.c (sim_create_inferior): Record program arguments for
+	later inspection by the trap handler.
+	(count_argc): New function.
+	(prog_argv): Declare static.
+	(sim_write): Declare.
+	(trap): Implement argc, argnlen and argn system calls. Do not
+	abort on unknown system calls--simply return -1.
+	* syscall.h (SYS_argc, SYS_argnlen, SYS_argn): Define.
+
 2001-01-24  Alexandre Oliva  <aoliva@redhat.com>
 
 	* interp.c (trap): Implement time.

@@ -27,7 +27,8 @@
 #define	SYS_stat	38
 #define	SYS_pipe	42
 #define	SYS_execve	59
+#define	SYS_argc	172
+#define	SYS_argnlen	173
+#define	SYS_argn	174
 #define SYS_utime       201 /* not really a system call */
 #define SYS_wait        202 /* nor is this */
-
-
