@@ -1,5 +1,8 @@
 Mon Oct  5 09:46:44 1992  Ian Lance Taylor  (ian@cygnus.com)
 
+	* munch: HP9000/300 nm puts an etra space between T and symbol
+	name.
+
 	* config/irix4.mh: added -lsun to XM_CLIBS to get RPC functions
 	needed for vxworks targets.
 
