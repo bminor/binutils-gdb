@@ -19,6 +19,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "somsolib.h"
+#include "regcache.h"
 
 #define U_REGS_OFFSET 0
 

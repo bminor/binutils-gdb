@@ -21,6 +21,8 @@
 #ifndef TM_D30V_H
 #define TM_D30V_H
 
+#include "regcache.h"
+
 /* Define the bit, byte, and word ordering of the machine.  */
 
 #define TARGET_BYTE_ORDER	BIG_ENDIAN

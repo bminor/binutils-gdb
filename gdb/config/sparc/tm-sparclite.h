@@ -19,6 +19,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include "regcache.h"
+
 #define TARGET_SPARCLITE 1	/* Still needed for non-multi-arch case */
 
 #include "sparc/tm-sparc.h"

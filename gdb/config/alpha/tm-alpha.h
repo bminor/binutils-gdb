@@ -23,6 +23,7 @@
 #ifndef TM_ALPHA_H
 #define TM_ALPHA_H
 
+#include "regcache.h"
 #include "bfd.h"
 #include "coff/sym.h"		/* Needed for PDR below.  */
 #include "coff/symconst.h"

@@ -19,6 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include "regcache.h"
 #include "a29k/tm-a29k.h"
 #include "tm-vxworks.h"
 

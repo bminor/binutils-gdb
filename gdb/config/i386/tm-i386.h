@@ -22,6 +22,8 @@
 #ifndef TM_I386_H
 #define TM_I386_H 1
 
+#include "regcache.h"
+
 /* Forward declarations for prototypes.  */
 struct frame_info;
 struct frame_saved_regs;

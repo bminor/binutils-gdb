@@ -1,3 +1,51 @@
+2001-03-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/mips/tm-mips.h: Include "regcache.h" for macros refering
+	to regcache functions.
+	* config/m68k/tm-m68k.h: Ditto.
+	* config/i386/tm-i386v.h: Ditto.
+	* config/mcore/tm-mcore.h: Ditto.
+	* config/m88k/tm-m88k.h: Ditto.
+	* config/m68k/tm-news.h: Ditto.
+	* config/m68k/tm-linux.h: Ditto.
+	* config/m68k/tm-delta68.h: Ditto.
+	* config/m68k/nm-sun3.h: Ditto.
+	* config/m32r/tm-m32r.h: Ditto.
+	* config/i386/tm-symmetry.h: Ditto.
+	* config/i386/tm-sun386.h: Ditto.
+	* config/i386/tm-i386.h: Ditto.
+	* config/i386/nm-symmetry.h: Ditto.
+	* config/i386/nm-sun386.h: Ditto.
+	* config/i386/nm-ptx4.h: Ditto.
+	* config/i386/nm-i386mach.h: Ditto.
+	* config/h8500/tm-h8500.h: Ditto.
+	* config/h8300/tm-h8300.h: Ditto.
+	* config/fr30/tm-fr30.h: Ditto.
+	* config/d30v/tm-d30v.h: Ditto.
+	* config/arm/tm-arm.h: Ditto.
+	* config/arc/tm-arc.h: Ditto.
+	* config/alpha/tm-alpha.h: Ditto.
+	* config/a29k/tm-vx29k.h: Ditto.
+	* config/a29k/tm-a29k.h: Ditto.
+	* config/w65/tm-w65.h: Ditto.
+	* config/vax/tm-vax.h: Ditto.
+	* config/v850/tm-v850.h: Ditto.
+	* config/tic80/tm-tic80.h: Ditto.
+	* config/sparc/tm-sparclite.h: Ditto.
+	* config/sparc/tm-sparclet.h: Ditto.
+	* config/sparc/tm-sparc.h: Ditto.
+	* config/sparc/nm-sun4sol2.h: Ditto.
+	* config/sparc/nm-sun4os4.h: Ditto.
+	* config/sparc/nm-nbsd.h: Ditto.
+	* config/powerpc/nm-solaris.h: Ditto.
+	* config/pa/tm-hppao.h: Ditto.
+	* config/pa/tm-hppa.h: Ditto.
+	* config/pa/nm-hppab.h: Ditto.
+	* config/ns32k/tm-umax.h: Ditto.
+	* config/ns32k/tm-merlin.h: Ditto.
+	* config/nm-m3.h: Ditto.
+	* config/nm-gnu.h: Ditto.
+
 2001-03-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Update list of targets. Mark arm-* and v850-elf as

@@ -22,6 +22,8 @@
 #ifndef TM_ARM_H
 #define TM_ARM_H
 
+#include "regcache.h"
+
 /* Forward declarations for prototypes.  */
 struct type;
 struct value;

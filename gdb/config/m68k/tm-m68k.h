@@ -19,6 +19,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include "regcache.h"
+
 /* Generic 68000 stuff, to be included by other tm-*.h files.  */
 
 #define IEEE_FLOAT (1)

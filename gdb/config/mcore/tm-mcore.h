@@ -18,6 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA. */
 
+#include "regcache.h"
+
 /* The mcore is little endian (by default) */
 #define TARGET_BYTE_ORDER_DEFAULT LITTLE_ENDIAN
 

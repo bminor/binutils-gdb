@@ -20,6 +20,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include "regcache.h"
+
 /* Parameters for an EB29K (a board which plugs into a PC and is
    accessed through EBMON software running on the PC, which we
    use as we'd use a remote stub (see remote-eb.c).

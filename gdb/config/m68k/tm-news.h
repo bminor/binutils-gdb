@@ -19,6 +19,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include "regcache.h"
+
 /* See following cpu type determination macro to get the machine type.
 
    Here is an m-news.h file for gdb.  It supports the 68881 registers.

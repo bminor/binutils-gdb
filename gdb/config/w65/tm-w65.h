@@ -18,6 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include "regcache.h"
+
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
 #define GDB_TARGET_IS_W65

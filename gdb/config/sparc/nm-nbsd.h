@@ -22,6 +22,8 @@
 #ifndef NM_NBSD_H
 #define NM_NBSD_H
 
+#include "regcache.h"
+
 /* Get generic NetBSD native definitions. */
 
 #include "config/nm-nbsd.h"

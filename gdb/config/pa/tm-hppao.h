@@ -2,6 +2,8 @@
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).  */
 
+#include "regcache.h"
+
 /* Define offsets to access CPROC stack when it does not have
  * a kernel thread.
  */

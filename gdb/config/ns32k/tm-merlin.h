@@ -19,6 +19,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include "regcache.h"
+
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
 /* Offset from address of function to start of its code.

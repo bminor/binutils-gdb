@@ -27,6 +27,8 @@
 
 #define GDB_MULTI_ARCH 1
 
+#include "regcache.h"
+
 struct frame_info;
 struct symbol;
 struct type;

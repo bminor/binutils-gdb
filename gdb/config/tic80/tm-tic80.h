@@ -22,6 +22,8 @@
 #ifndef TM_TIC80_H
 #define TM_TIC80_H
 
+#include "regcache.h"
+
 /* Forward declare structs used in prototypes */
 struct frame_info;
 struct type;

@@ -24,6 +24,7 @@
 
 /* First pick up the generic *86 target file. */
 
+#include "regcache.h"
 #include "i386/tm-i386.h"
 
 /* Number of traps that happen between exec'ing the shell to run an

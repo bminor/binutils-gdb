@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <mach.h>
 #include <mach/exception.h>
+#include "regcache.h"
 
 extern char *gnu_target_pid_to_str (int pid);
 

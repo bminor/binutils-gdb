@@ -18,6 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include "regcache.h"
+
 #define FR30_GENREGS		16
 #define FR30_DEDICATEDREGS	8
 #define FR30_REGSIZE		4	/* bytes */

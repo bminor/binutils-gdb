@@ -22,6 +22,7 @@
 #if !defined (TM_SUN386_H)
 #define TM_SUN386_H 1
 
+#include "regcache.h"
 #include "i386/tm-i386.h"
 
 #ifndef sun386

@@ -23,6 +23,7 @@
 #define NM_M3_H
 
 #include <mach.h>
+#include "regcache.h"
 
 /* Mach3 doesn't declare errno in <errno.h>.  */
 extern int errno;
