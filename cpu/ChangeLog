@@ -1,3 +1,13 @@
+2003-06-06  Andrew Cagney  <cagney@redhat.com>
+
+	Contributed by Red Hat.
+	* iq2000.cpu: New file.  Written by Ben Elliston, Jeff Johnston,
+	Stan Cox, and Frank Ch. Eigler.
+	* iq2000.opc: New file.  Written by Ben Elliston, Frank
+	Ch. Eigler, Chris Moller, Jeff Johnston, and Stan Cox.
+	* iq2000m.cpu: New file.  Written by Jeff Johnston.
+	* iq10.cpu: New file.  Written by Jeff Johnston.
+
 2003-06-05  Nick Clifton  <nickc@redhat.com>
 
 	* frv.cpu (FRintieven): New operand.  An even-numbered only
