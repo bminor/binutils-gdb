@@ -1,6 +1,9 @@
 start-sanitize-v850
 Fri Aug 23 00:27:01 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-opc.c (v850_opcodes): Add initializer for size field
+	on all opcodes.
+
 	* v850-opc.c (v850_operands): D6 -> DS7.  References changed.
 	Add D8 for 8-bit unsigned field in short load/store insns.
 	(IF4A, IF4D): These both need two registers.
