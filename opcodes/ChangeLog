@@ -1,3 +1,18 @@
+Wed Oct 19 13:40:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* a29k-dis.c (print_special): Add special register names defined
+	on 29030, 29040 and 29050.
+	(print_insn): Handle new operand type 'I'.
+
+Wed Oct 12 11:59:55 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* Makefile.in (INSTALL): Use top level install.sh script.
+
+Wed Oct  5 19:16:29 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* sparc-dis.c: Rewrite to use bitfields, rather than a union, so
+	that it works on a little endian host.
+
 Tue Oct  4 12:14:21 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* configure.in: Use ${config_shell} when running config.bfd.

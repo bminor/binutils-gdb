@@ -49,7 +49,9 @@ print_special (num, info)
   /* Register names of registers 0-SPEC0_NUM-1.  */
   static char *spec0_names[] = {
     "vab", "ops", "cps", "cfg", "cha", "chd", "chc", "rbp", "tmc", "tmr",
-    "pc0", "pc1", "pc2", "mmu", "lru"
+    "pc0", "pc1", "pc2", "mmu", "lru", "rsn", "rma0", "rmc0", "rma1", "rmc1",
+    "spc0", "spc1", "spc2", "iba0", "ibc0", "iba1", "ibc1", "dba", "dbc",
+    "cir", "cdr"
     };
 #define SPEC0_NUM ((sizeof spec0_names) / (sizeof spec0_names[0]))
 
@@ -242,6 +244,11 @@ print_insn (memaddr, info)
 
 		case 'r':
 		  (*info->fprintf_func) (info->stream, "%d", (insn0 >> 4) & 7);
+		  break;
+
+		case 'I':
+		  if ((insn16 & 3) != 0)
+		    (*info->fprintf_func) (info->stream, "%d", insn16 & 3);
 		  break;
 
 		case 'd':
