@@ -231,7 +231,7 @@ extern const struct tic80_operand tic80_operands[];
 /* This mask is used to strip operand bits from an int that contains
    both operand bits and a numeric value in the lsbs. */
 
-#define TIC80_OPERAND_MASK	(OPERAND_GPR | OPERAND_FPA | OPERAND_CR | OPERAND_CC | OPERAND_BITNUM)
+#define TIC80_OPERAND_MASK	(TIC80_OPERAND_GPR | TIC80_OPERAND_FPA | TIC80_OPERAND_CR | TIC80_OPERAND_CC | TIC80_OPERAND_BITNUM)
 
 
 /* Flag bits for the struct tic80_opcode flags field. */
