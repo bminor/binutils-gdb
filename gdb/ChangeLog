@@ -1,5 +1,16 @@
 2004-01-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64nbsd-tdep.c: Include "regset.h".
+	(sparc64nbsd_sizeof_struct_reg, sparc64nbsd_sizeof_struct_fpreg):
+	Remove variables.
+	(fetch_core_registers): Remove function.
+	(sparc64nbsd_core_fns): Remove variable.
+	(sparc64nbsd_supply_gregset, sparc64nbsd_supply_fpregset): New
+	functions.
+	(sparc64nbsd_init_abi): Initialize TDEP->gregset,
+	TDEP->sizeof_gregset, TDEP->fpregset and TDEP->sizeof_gregset.
+	(_initialize_sparc64nbsd_tdep): Remove call to add_core_fns.
+
 	* sparc-tdep.c (sparc32_extract_struct_value_address): Rename from
 	sparc_extract_struct_value_address.
 	(sparc32_gdbarch_init): Set extract_struct_value_address.
