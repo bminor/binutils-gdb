@@ -1,3 +1,7 @@
+2003-03-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* Reverted 2003-03-02's patch.
+
 2003-03-11  Steve Ellcey  <sje@cup.hp.com>
 
 	* dwarf2dbg.c (generic_dwarf2_emit_offset): New.

@@ -1,5 +1,7 @@
 2003-03-12  Alexandre Oliva  <aoliva@redhat.com>
 
+	* Reverted 2003-03-02's patch.
+
 	* elfxx-target.h (bfd_elfNN_canonicalize_reloc): Make it
 	overridable.
 	* elf64-mips.c (mips_elf64_canonicalize_reloc,

@@ -496,6 +496,7 @@ static struct mips_got_info *mips_elf_got_for_ibfd
 static bfd *reldyn_sorting_bfd;
 
 /* Nonzero if ABFD is using the N32 ABI.  */
+
 #define ABI_N32_P(abfd) \
   ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI2) != 0)
 
@@ -2129,7 +2130,7 @@ mips_elf_bfd2got_entry_eq (entry1, entry2)
   return e1->bfd == e2->bfd;
 }
 
-/* In a multi-got link, determine the GOT to be used for IBFD.  G must
+/* In a multi-got link, determine the GOT to be used for IBDF.  G must
    be the master GOT data.  */
 
 static struct mips_got_info *
@@ -3315,6 +3316,12 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       value &= howto->dst_mask;
       break;
 
+    case R_MIPS_GNU_REL16_S2:
+      value = symbol + mips_elf_sign_extend (addend << 2, 18) - p;
+      overflowed_p = mips_elf_overflow_p (value, 18);
+      value = (value >> 2) & howto->dst_mask;
+      break;
+
     case R_MIPS_GNU_REL_HI16:
       /* Instead of subtracting 'p' here, we should be subtracting the
 	 equivalent value for the LO part of the reloc, since the value
@@ -3443,10 +3450,8 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       break;
 
     case R_MIPS_PC16:
-    case R_MIPS_GNU_REL16_S2:
-      value = mips_elf_sign_extend (addend << 2, 18) + symbol - p;
-      overflowed_p = mips_elf_overflow_p (value, 18);
-      value = (value >> 2) & howto->dst_mask;
+      value = mips_elf_sign_extend (addend, 16) + symbol - p;
+      overflowed_p = mips_elf_overflow_p (value, 16);
       break;
 
     case R_MIPS_GOT_HI16:

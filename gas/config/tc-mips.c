@@ -2018,8 +2018,7 @@ append_insn (place, ip, address_expr, reloc_type)
 
   if (place == NULL
       && address_expr
-      && (*reloc_type == BFD_RELOC_16_PCREL_S2
-	  || *reloc_type == BFD_RELOC_MIPSEMB_16_PCREL_S2)
+      && *reloc_type == BFD_RELOC_16_PCREL_S2
       && (pinfo & INSN_UNCOND_BRANCH_DELAY || pinfo & INSN_COND_BRANCH_DELAY
 	  || pinfo & INSN_COND_BRANCH_LIKELY)
       && mips_relax_branch
@@ -2141,18 +2140,6 @@ append_insn (place, ip, address_expr, reloc_type)
 	      break;
 
 	    case BFD_RELOC_16_PCREL_S2:
-	      if ((address_expr->X_add_number & 3) != 0)
-		as_bad (_("branch to misaligned address (0x%lx)"),
-			(unsigned long) address_expr->X_add_number);
-	      if (mips_relax_branch)
-		goto need_reloc;
-	      if ((address_expr->X_add_number + 0x20000) & ~0x3ffff)
-		as_bad (_("branch address range overflow (0x%lx)"),
-			(unsigned long) address_expr->X_add_number);
-	      ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0xffff;
-	      break;
-
-	    case BFD_RELOC_MIPSEMB_16_PCREL_S2:
 	      goto need_reloc;
 
 	    default:
@@ -2167,8 +2154,7 @@ append_insn (place, ip, address_expr, reloc_type)
 	    {
 	      fixp[0] = fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
 				     address_expr,
-				     (*reloc_type == BFD_RELOC_16_PCREL_S2
-				      || *reloc_type == BFD_RELOC_MIPSEMB_16_PCREL_S2),
+				     *reloc_type == BFD_RELOC_16_PCREL_S2,
 				     reloc_type[0]);
 
 	      /* These relocations can have an addend that won't fit in
@@ -3118,32 +3104,20 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 
 	case 'p':
 	  assert (ep != NULL);
-
 	  /*
 	   * This allows macro() to pass an immediate expression for
 	   * creating short branches without creating a symbol.
-	   *
-	   * We don't allow branch relaxation for these branches, as
-	   * they should only appear in ".set nomacro" anyway.
+	   * Note that the expression still might come from the assembly
+	   * input, in which case the value is not checked for range nor
+	   * is a relocation entry generated (yuck).
 	   */
 	  if (ep->X_op == O_constant)
 	    {
-	      if ((ep->X_add_number & 3) != 0)
-		as_bad (_("branch to misaligned address (0x%lx)"),
-			(unsigned long) ep->X_add_number);
-	      if ((ep->X_add_number + 0x20000) & ~0x3ffff)
-		as_bad (_("branch address range overflow (0x%lx)"),
-			(unsigned long) ep->X_add_number);
 	      insn.insn_opcode |= (ep->X_add_number >> 2) & 0xffff;
 	      ep = NULL;
 	    }
 	  else
-	    {
-	      if (mips_pic == EMBEDDED_PIC)
-		*r = BFD_RELOC_MIPSEMB_16_PCREL_S2;
-	      else
-		*r = BFD_RELOC_16_PCREL_S2;
-	    }
+	    *r = BFD_RELOC_16_PCREL_S2;
 	  continue;
 
 	case 'a':
@@ -9180,10 +9154,7 @@ mips_ip (str, ip)
 	      continue;
 
 	    case 'p':		/* pc relative offset */
-	      if (mips_pic == EMBEDDED_PIC)
-		*offset_reloc = BFD_RELOC_MIPSEMB_16_PCREL_S2;
-	      else
-		*offset_reloc = BFD_RELOC_16_PCREL_S2;
+	      *offset_reloc = BFD_RELOC_16_PCREL_S2;
 	      my_getExpression (&offset_expr, s);
 	      s = expr_end;
 	      continue;
@@ -11200,8 +11171,7 @@ md_apply_fix3 (fixP, valP, seg)
 	  /* BFD's REL handling, for MIPS, is _very_ weird.
 	     This gives the right results, but it can't possibly
 	     be the way things are supposed to work.  */
-	  if ((fixP->fx_r_type != BFD_RELOC_16_PCREL_S2
-	       && fixP->fx_r_type != BFD_RELOC_MIPSEMB_16_PCREL_S2)
+	  if (fixP->fx_r_type != BFD_RELOC_16_PCREL_S2
 	      || S_GET_SEGMENT (fixP->fx_addsy) != undefined_section)
 	    value += fixP->fx_frag->fr_address + fixP->fx_where;
 	}
@@ -11371,10 +11341,9 @@ md_apply_fix3 (fixP, valP, seg)
       break;
 
     case BFD_RELOC_16_PCREL_S2:
-    case BFD_RELOC_MIPSEMB_16_PCREL_S2:
       if ((value & 0x3) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("Branch to misaligned address (%lx)"), (long) value);
+		      _("Branch to odd address (%lx)"), (long) value);
 
       /*
        * We need to save the bits in the instruction since fixup_segment()
@@ -11387,7 +11356,8 @@ md_apply_fix3 (fixP, valP, seg)
 	 do the store, so it must be done here.  This is probably
 	 a bug somewhere.  */
       if (!fixP->fx_done
-	  && (fixP->fx_addsy == NULL			/* ??? */
+	  && (fixP->fx_r_type != BFD_RELOC_16_PCREL_S2
+	      || fixP->fx_addsy == NULL			/* ??? */
 	      || ! S_IS_DEFINED (fixP->fx_addsy)))
 	value -= fixP->fx_frag->fr_address + fixP->fx_where;
 
@@ -13381,7 +13351,6 @@ tc_gen_reloc (section, fixp)
 	case BFD_RELOC_32_PCREL:
 	case BFD_RELOC_64_PCREL:
 	case BFD_RELOC_16_PCREL_S2:
-	case BFD_RELOC_MIPSEMB_16_PCREL_S2:
 	case BFD_RELOC_PCREL_HI16_S:
 	case BFD_RELOC_PCREL_LO16:
 	  break;
@@ -13405,7 +13374,17 @@ tc_gen_reloc (section, fixp)
     reloc->addend += S_GET_VALUE (fixp->fx_addsy);
 #endif
 
-  reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
+  /* To support a PC relative reloc when generating embedded PIC code
+     for ECOFF, we use a Cygnus extension.  We check for that here to
+     make sure that we don't let such a reloc escape normally.  */
+  if ((OUTPUT_FLAVOR == bfd_target_ecoff_flavour
+       || OUTPUT_FLAVOR == bfd_target_elf_flavour)
+      && code == BFD_RELOC_16_PCREL_S2
+      && mips_pic != EMBEDDED_PIC)
+    reloc->howto = NULL;
+  else
+    reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
+
   if (reloc->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
@@ -13491,9 +13470,8 @@ md_convert_frag (abfd, asec, fragp)
 	  exp.X_add_number = fragp->fr_offset;
 
 	  fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
-			      4, &exp, 1, ((mips_pic == EMBEDDED_PIC)
-					   ? BFD_RELOC_MIPSEMB_16_PCREL_S2
-					   : BFD_RELOC_16_PCREL_S2));
+			      4, &exp, 1,
+			      BFD_RELOC_16_PCREL_S2);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
