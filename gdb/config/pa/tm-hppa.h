@@ -59,6 +59,8 @@ extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 				   other r registers.  */
 #define FLAGS_REGNUM 0		/* Various status flags */
 #define RP_REGNUM 2		/* return pointer */
+#define HPPA_FP_REGNUM 3	/* The ABI's frame pointer, when used */
+#define HPPA_SP_REGNUM 30	/* Stack pointer.  */
 #define SAR_REGNUM 32		/* Shift Amount Register */
 #define IPSW_REGNUM 41		/* Interrupt Processor Status Word */
 #define PCOQ_HEAD_REGNUM 33	/* instruction offset queue head */
@@ -73,6 +75,7 @@ extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define CCR_REGNUM 54		/* Coprocessor Configuration Register */
 #define TR0_REGNUM 57		/* Temporary Registers (cr24 -> cr31) */
 #define CR27_REGNUM 60		/* Base register for thread-local storage, cr27 */
+#define HPPA_FP0_REGNUM 64	/* First floating-point.  */
 #define FP4_REGNUM 72
 
 #define ARG0_REGNUM 26		/* The first argument of a callee. */

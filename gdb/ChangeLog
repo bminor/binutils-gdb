@@ -1,5 +1,20 @@
 2004-03-07  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c: Replace DEPRECATED_FP_REGNUM with HPPA_FP_REGNUM,
+	FP0_REGNUM with HPPA_FP0_REGNUM, and SP_REGNUM with
+	HPPA_SP_REGNUM.
+	(hppa_register_raw_size, hppa_register_byte, hppa_read_fp)
+	(hppa_target_read_fp): Delete.
+	(hppa_gdbarch_init): Do not set deprecated register_raw_size,
+	register_virtual_size, max_register_raw_size,
+	max_register_virtual_size, register_byte, register_size,
+	target_read_fp, fp_regnum, and register_bytes.  Set register_type
+	instead of register_virtual_type.
+	(hppa32_register_type, hppa64_register_type): Replace
+	hppa32_register_virtual_type and hppa64_register_virtual_type.
+	* config/pa/tm-hppa.h (HPPA_FP0_REGNUM, HPPA_SP_REGNUM)
+	(HPPA_FP_REGNUM): Define.
+
 	* hppa-tdep.c (hppa_gdbarch_init): Add missing "break".
 
 	* config/pa/tm-hppa.h (DEPRECATED_DO_REGISTERS_INFO)

@@ -147,15 +147,10 @@ int hppa_in_solib_return_trampoline (CORE_ADDR pc, char *name);
 int hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs);
 int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 int hppa_instruction_nullified (void);
-int hppa_register_raw_size (int reg_nr);
-int hppa_register_byte (int reg_nr);
-struct type * hppa32_register_virtual_type (int reg_nr);
-struct type * hppa64_register_virtual_type (int reg_nr);
 int hppa_cannot_store_register (int regnum);
 CORE_ADDR hppa_smash_text_address (CORE_ADDR addr);
 CORE_ADDR hppa_target_read_pc (ptid_t ptid);
 void hppa_target_write_pc (CORE_ADDR v, ptid_t ptid);
-CORE_ADDR hppa_target_read_fp (void);
 
 typedef struct
   {
@@ -1155,31 +1150,6 @@ cover_find_stub_with_shl_get (void *args_untyped)
   return 0;
 }
 
-/* If the pid is in a syscall, then the FP register is not readable.
-   We'll return zero in that case, rather than attempting to read it
-   and cause a warning. */
-
-CORE_ADDR
-hppa_read_fp (int pid)
-{
-  int flags = read_register (FLAGS_REGNUM);
-
-  if (flags & 2)
-    {
-      return (CORE_ADDR) 0;
-    }
-
-  /* This is the only site that may directly read_register () the FP
-     register.  All others must use deprecated_read_fp (). */
-  return read_register (DEPRECATED_FP_REGNUM);
-}
-
-CORE_ADDR
-hppa_target_read_fp (void)
-{
-  return hppa_read_fp (PIDGET (inferior_ptid));
-}
-
 /* Get the PC from %r31 if currently in a syscall.  Also mask out privilege
    bits.  */
 
@@ -1725,7 +1695,7 @@ hppa_skip_trampoline_code (CORE_ADDR pc)
 	     rp from sp - 8.  */
 	  if (prev_inst == 0x4bc23ff1)
 	    return (read_memory_integer
-		    (read_register (SP_REGNUM) - 8, 4)) & ~0x3;
+		    (read_register (HPPA_SP_REGNUM) - 8, 4)) & ~0x3;
 	  else
 	    {
 	      warning ("Unable to find restore of %%rp before bv (%%rp).");
@@ -1739,7 +1709,7 @@ hppa_skip_trampoline_code (CORE_ADDR pc)
       else if ((curr_inst & 0xffe0f000) == 0xe840d000)
 	{
 	  return (read_memory_integer
-		  (read_register (SP_REGNUM) - 24, TARGET_PTR_BIT / 8)) & ~0x3;
+		  (read_register (HPPA_SP_REGNUM) - 24, TARGET_PTR_BIT / 8)) & ~0x3;
 	}
 
       /* What about be,n 0(sr0,%rp)?  It's just another way we return to
@@ -1751,7 +1721,7 @@ hppa_skip_trampoline_code (CORE_ADDR pc)
 	     I guess we could check for the previous instruction being
 	     mtsp %r1,%sr0 if we want to do sanity checking.  */
 	  return (read_memory_integer
-		  (read_register (SP_REGNUM) - 24, TARGET_PTR_BIT / 8)) & ~0x3;
+		  (read_register (HPPA_SP_REGNUM) - 24, TARGET_PTR_BIT / 8)) & ~0x3;
 	}
 
       /* Haven't found the branch yet, but we're still in the stub.
@@ -1938,7 +1908,7 @@ restart:
   for (i = 3; i < u->Entry_GR + 3; i++)
     {
       /* Frame pointer gets saved into a special location.  */
-      if (u->Save_SP && i == DEPRECATED_FP_REGNUM)
+      if (u->Save_SP && i == HPPA_FP_REGNUM)
 	continue;
 
       save_gr |= (1 << i);
@@ -2232,7 +2202,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   for (i = 3; i < u->Entry_GR + 3; i++)
     {
       /* Frame pointer gets saved into a special location.  */
-      if (u->Save_SP && i == DEPRECATED_FP_REGNUM)
+      if (u->Save_SP && i == HPPA_FP_REGNUM)
 	continue;
 	
       saved_gr_mask |= (1 << i);
@@ -2302,13 +2272,13 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	    || (inst & 0xffffc00c) == 0x73c10008) /* std,ma r1,N(sr0,sp) */
 	  {
 	    looking_for_sp = 0;
-	    cache->saved_regs[DEPRECATED_FP_REGNUM].addr = 0;
+	    cache->saved_regs[HPPA_FP_REGNUM].addr = 0;
 	  }
 	
 	/* Account for general and floating-point register saves.  */
 	reg = inst_saves_gr (inst);
 	if (reg >= 3 && reg <= 18
-	    && (!u->Save_SP || reg != DEPRECATED_FP_REGNUM))
+	    && (!u->Save_SP || reg != HPPA_FP_REGNUM))
 	  {
 	    saved_gr_mask &= ~(1 << reg);
 	    if ((inst >> 26) == 0x1b && extract_14 (inst) >= 0)
@@ -2368,7 +2338,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	      }
 	    else
 	      {
-		cache->saved_regs[reg + FP0_REGNUM + 4].addr = fp_loc;
+		cache->saved_regs[reg + HPPA_FP0_REGNUM + 4].addr = fp_loc;
 		fp_loc += 8;
 	      }
 	  }
@@ -2387,10 +2357,10 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
     /* The frame base always represents the value of %sp at entry to
        the current function (and is thus equivalent to the "saved"
        stack pointer.  */
-    CORE_ADDR this_sp = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+    CORE_ADDR this_sp = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
     /* FIXME: cagney/2004-02-22: This assumes that the frame has been
        created.  If it hasn't everything will be out-of-wack.  */
-    if (u->Save_SP && trad_frame_addr_p (cache->saved_regs, SP_REGNUM))
+    if (u->Save_SP && trad_frame_addr_p (cache->saved_regs, HPPA_SP_REGNUM))
       /* Both we're expecting the SP to be saved and the SP has been
 	 saved.  The entry SP value is saved at this frame's SP
 	 address.  */
@@ -2399,7 +2369,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
       /* The prologue has been slowly allocating stack space.  Adjust
 	 the SP back.  */
       cache->base = this_sp - frame_size;
-    trad_frame_set_value (cache->saved_regs, SP_REGNUM, cache->base);
+    trad_frame_set_value (cache->saved_regs, HPPA_SP_REGNUM, cache->base);
   }
 
   /* The PC is found in the "return register", "Millicode" uses "r31"
@@ -2509,7 +2479,7 @@ static struct frame_id
 hppa_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   return frame_id_build (frame_unwind_register_unsigned (next_frame,
-							 SP_REGNUM),
+							 HPPA_SP_REGNUM),
 			 frame_pc_unwind (next_frame));
 }
 
@@ -3125,46 +3095,28 @@ hppa_instruction_nullified (void)
   return ((ipsw & 0x00200000) && !(flags & 0x2));
 }
 
-int
-hppa_register_raw_size (int reg_nr)
-{
-  /* All registers have the same size.  */
-  return DEPRECATED_REGISTER_SIZE;
-}
-
-/* Index within the register vector of the first byte of the space i
-   used for register REG_NR.  */
-
-int
-hppa_register_byte (int reg_nr)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  return reg_nr * tdep->bytes_per_address;
-}
-
 /* Return the GDB type object for the "standard" data type of data
    in register N.  */
 
-struct type *
-hppa32_register_virtual_type (int reg_nr)
+static struct type *
+hppa32_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
    if (reg_nr < FP4_REGNUM)
-     return builtin_type_int;
+     return builtin_type_uint32;
    else
-     return builtin_type_float;
+     return builtin_type_ieee_single_big;
 }
 
 /* Return the GDB type object for the "standard" data type of data
    in register N.  hppa64 version.  */
 
-struct type *
-hppa64_register_virtual_type (int reg_nr)
+static struct type *
+hppa64_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
    if (reg_nr < FP4_REGNUM)
-     return builtin_type_unsigned_long_long;
+     return builtin_type_uint64;
    else
-     return builtin_type_double;
+     return builtin_type_ieee_double_big;
 }
 
 /* Return True if REGNUM is not a register available to the user
@@ -3277,24 +3229,18 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       case 4:
         set_gdbarch_num_regs (gdbarch, hppa32_num_regs);
         set_gdbarch_register_name (gdbarch, hppa32_register_name);
-        set_gdbarch_deprecated_register_virtual_type
-          (gdbarch, hppa32_register_virtual_type);
+        set_gdbarch_register_type (gdbarch, hppa32_register_type);
         break;
       case 8:
         set_gdbarch_num_regs (gdbarch, hppa64_num_regs);
         set_gdbarch_register_name (gdbarch, hppa64_register_name);
-        set_gdbarch_deprecated_register_virtual_type
-          (gdbarch, hppa64_register_virtual_type);
+        set_gdbarch_register_type (gdbarch, hppa64_register_type);
         break;
       default:
         internal_error (__FILE__, __LINE__, "Unsupported address size: %d",
                         tdep->bytes_per_address);
     }
 
-  /* The following gdbarch vector elements depend on other parts of this
-     vector which have been set above, depending on the ABI.  */
-  set_gdbarch_deprecated_register_bytes
-    (gdbarch, gdbarch_num_regs (gdbarch) * tdep->bytes_per_address);
   set_gdbarch_long_bit (gdbarch, tdep->bytes_per_address * TARGET_CHAR_BIT);
   set_gdbarch_ptr_bit (gdbarch, tdep->bytes_per_address * TARGET_CHAR_BIT);
 
@@ -3312,22 +3258,14 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_in_solib_return_trampoline (gdbarch,
                                           hppa_in_solib_return_trampoline);
   set_gdbarch_inner_than (gdbarch, hppa_inner_than);
-  set_gdbarch_deprecated_register_size (gdbarch, tdep->bytes_per_address);
-  set_gdbarch_deprecated_fp_regnum (gdbarch, 3);
-  set_gdbarch_sp_regnum (gdbarch, 30);
-  set_gdbarch_fp0_regnum (gdbarch, 64);
-  set_gdbarch_deprecated_register_raw_size (gdbarch, hppa_register_raw_size);
-  set_gdbarch_deprecated_register_byte (gdbarch, hppa_register_byte);
-  set_gdbarch_deprecated_register_virtual_size (gdbarch, hppa_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, tdep->bytes_per_address);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
+  set_gdbarch_sp_regnum (gdbarch, HPPA_SP_REGNUM);
+  set_gdbarch_fp0_regnum (gdbarch, HPPA_FP0_REGNUM);
   set_gdbarch_cannot_store_register (gdbarch, hppa_cannot_store_register);
   set_gdbarch_addr_bits_remove (gdbarch, hppa_smash_text_address);
   set_gdbarch_smash_text_address (gdbarch, hppa_smash_text_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_read_pc (gdbarch, hppa_target_read_pc);
   set_gdbarch_write_pc (gdbarch, hppa_target_write_pc);
-  set_gdbarch_deprecated_target_read_fp (gdbarch, hppa_target_read_fp);
 
   /* Helper for function argument information.  */
   set_gdbarch_fetch_pointer_argument (gdbarch, hppa_fetch_pointer_argument);
