@@ -1,3 +1,10 @@
+2001-08-10  Michael Snyder  <msnyder@redhat.com>
+
+	* regcache.c (legacy_write_register_gen): Don't 'optimize out'
+	a write_register to a pseudo-reg.  Target_store_pseudo_register
+	needs to get called, because these regs may be computed and may
+	have side-effects.
+
 2001-08-10  Keith Seitz  <keiths@redhat.com>
 
 	* gdb-events.sh: Deal with event notifications with no

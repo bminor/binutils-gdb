@@ -334,15 +334,16 @@ legacy_write_register_gen (int regnum, char *myaddr)
 
   size = REGISTER_RAW_SIZE (regnum);
 
-  /* If we have a valid copy of the register, and new value == old value,
-     then don't bother doing the actual store. */
-
-  if (register_cached (regnum)
-      && memcmp (register_buffer (regnum), myaddr, size) == 0)
-    return;
-
   if (real_register (regnum))
-    target_prepare_to_store ();
+    {
+      /* If we have a valid copy of the register, and new value == old
+	 value, then don't bother doing the actual store. */
+      if (register_cached (regnum)
+	  && memcmp (register_buffer (regnum), myaddr, size) == 0)
+	return;
+      else
+	target_prepare_to_store ();
+    }
 
   memcpy (register_buffer (regnum), myaddr, size);
 
