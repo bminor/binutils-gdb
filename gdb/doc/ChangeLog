@@ -1,3 +1,7 @@
+2002-02-01  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.texinfo (set trust-readonly): Change value{gdbn} to value{GDBN}.
+
 2002-01-30  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.texinfo: (remote protocol): Gramatical fix-up.

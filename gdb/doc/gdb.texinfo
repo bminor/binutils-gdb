@@ -9422,7 +9422,7 @@ enhancement to debugging performance.
 The default is off.
 
 @item set trust-readonly-sections off
-Tell @value{gdbn} not to trust readonly sections.  This means that
+Tell @value{GDBN} not to trust readonly sections.  This means that
 the contents of the section might change while the program is running,
 and must therefore be fetched from the target when needed.
 @end table
