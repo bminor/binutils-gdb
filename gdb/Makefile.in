@@ -2417,42 +2417,40 @@ varobj.o: varobj.c $(defs_h) $(value_h) $(expression_h) $(frame_h) \
 wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) $(wrapper_h)
 
 #
-# CLI dependencies
+# gdb/cli/ dependencies
 #
 # Need to explicitly specify the compile rule as make will do nothing
-# or try to compile the object file into the cli directory.
+# or try to compile the object file into the mi directory.
 
 cli-cmds.o: $(srcdir)/cli/cli-cmds.c $(defs_h) $(completer_h) $(target_h) \
-		$(gdb_wait_h) $(gdb_regex_h) $(gdb_string_h) $(filenames_h) \
-		$(ui_out_h) $(top_h) $(cli_cli_decode_h) $(cli_cli_script_h) \
-		$(cli_cli_setshow_h) $(cli_cli_cmds_h)
+	$(gdb_wait_h) $(gdb_regex_h) $(gdb_string_h) $(filenames_h) \
+	$(ui_out_h) $(top_h) $(cli_decode_h) $(cli_script_h) \
+	$(cli_setshow_h) $(cli_cmds_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-cmds.c
-
-cli-decode.o: $(srcdir)/cli/cli-decode.c $(defs_h) $(symtab_h) $(gdb_regex_h) \
-		$(gdb_string_h) $(ui_out_h) $(cli_cli_cmds_h) \
-		$(cli_cli_decode_h) $(gdb_assert_h)
+cli-decode.o: $(srcdir)/cli/cli-decode.c $(defs_h) $(symtab_h) \
+	$(gdb_regex_h) $(gdb_string_h) $(ui_out_h) $(cli_cmds_h) \
+	$(cli_decode_h) $(gdb_assert_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-decode.c
-
-cli-dump.o: $(srcdir)/cli/cli-dump.c $(defs_h) $(gdb_string_h) $(command_h) \
-	$(value_h) $(gdbcmd_h) $(completer_h) $(cli_dump_h)
+cli-dump.o: $(srcdir)/cli/cli-dump.c $(defs_h) $(gdb_string_h) \
+	$(cli_decode_h) $(cli_cmds_h) $(value_h) $(completer_h) \
+	$(cli_dump_h) $(gdb_assert_h) $(target_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-dump.c
-
-cli-setshow.o: $(srcdir)/cli/cli-setshow.c $(defs_h) $(value_h) \
-		$(gdb_string_h) $(ui_out_h) $(cli_cli_decode_h) \
-		$(cli_cli_cmds_h) $(cli_cli_setshow_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-setshow.c
-
-cli-script.o: $(srcdir)/cli//cli-script.c $(defs_h) $(value_h) $(language_h) \
-		$(ui_out_h) $(top_h) $(cli_cli_cmds_h) $(cli_cli_decode_h) \
-		$(cli_cli_script_h)
+cli-script.o: $(srcdir)/cli/cli-script.c $(defs_h) $(value_h) $(language_h) \
+	$(ui_out_h) $(gdb_string_h) $(top_h) $(cli_cmds_h) $(cli_decode_h) \
+	$(cli_script_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-script.c
-
-cli-utils.o: $(srcdir)/cli/cli-utils.c $(cli_utils_h) $(defs_h)
+cli-setshow.o: $(srcdir)/cli/cli-setshow.c $(defs_h) $(value_h) \
+	$(gdb_string_h) $(ui_out_h) $(cli_decode_h) $(cli_cmds_h) \
+	$(cli_setshow_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-setshow.c
+cli-utils.o: $(srcdir)/cli/cli-utils.c $(defs_h) $(cli_utils_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-utils.c
 
 #
 # GDBTK sub-directory
 #
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the mi directory.
 
 gdbres.o: $(srcdir)/gdbtk/gdb.rc $(srcdir)/gdbtk/gdbtool.ico
 	$(WINDRES) --include $(srcdir)/gdbtk $(srcdir)/gdbtk/gdb.rc gdbres.o
@@ -2530,44 +2528,50 @@ gdbtk-wrapper.o: $(srcdir)/gdbtk/generic/gdbtk-wrapper.c \
 		$(srcdir)/gdbtk/generic/gdbtk-wrapper.c
 
 #
-# MI dependencies
+# gdb/mi/ dependencies
 #
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the mi directory.
 
-mi-cmds.o: $(srcdir)/mi/mi-cmds.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmds.c
-mi-cmd-var.o: $(srcdir)/mi/mi-cmd-var.c $(defs_h) $(mi_cmds_h) $(ui_out_h) \
-		$(mi_out_h) $(varobj_h) $(value_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-var.c
-mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(top_h) $(mi_cmds_h) \
-		$(ui_out_h) $(frame_h) $(value_h) $(target_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-stack.c
 mi-cmd-break.o: $(srcdir)/mi/mi-cmd-break.c $(defs_h) $(mi_cmds_h) \
-		$(ui_out_h) $(mi_out_h) $(breakpoint_h) $(gdb_string_h) \
-		$(gdb_events_h) $(mi_getopt_h) $(gdb_h)
+	$(ui_out_h) $(mi_out_h) $(breakpoint_h) $(gdb_string_h) \
+	$(mi_getopt_h) $(gdb_events_h) $(gdb_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-break.c
 mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(target_h) $(value_h) \
-		$(mi_cmds_h) $(mi_getopt_h) $(ui_out_h) $(gdb_string_h)
+	$(mi_cmds_h) $(mi_getopt_h) $(ui_out_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-disas.c
-mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h) \
-		$(mi_console_h) $(mi_getopt_h) $(event_loop_h) $(event_top_h) \
-		$(mi_getopt_h) $(regcache_h) $(gdb_h) $(target_h) \
-		$(inferior_h) $(gdb_string_h) $(gdbthread_h) $(mi_out_h) \
-		$(gdbcore_h) $(value_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-main.c
-mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(mi_out_h) $(ui_out_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c
-mi-console.o: $(srcdir)/mi/mi-console.c $(mi_out_h) $(defs_h)
+mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(target_h) $(frame_h) \
+	$(value_h) $(mi_cmds_h) $(ui_out_h) $(symtab_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-stack.c
+mi-cmd-var.o: $(srcdir)/mi/mi-cmd-var.c $(defs_h) $(mi_cmds_h) $(ui_out_h) \
+	$(mi_out_h) $(varobj_h) $(value_h) $(gdb_string_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-var.c
+mi-cmds.o: $(srcdir)/mi/mi-cmds.c $(defs_h) $(top_h) $(mi_cmds_h) \
+	$(gdb_string_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmds.c
+mi-console.o: $(srcdir)/mi/mi-console.c $(defs_h) $(mi_console_h) \
+	$(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-console.c
-mi-parse.o: $(srcdir)/mi/mi-parse.c $(defs_h) $(mi_parse_h) $(mi_cmds_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-parse.c
-mi-getopt.o: $(srcdir)/mi/mi-getopt.c $(mi_getopt_h) $(defs_h)
+mi-getopt.o: $(srcdir)/mi/mi-getopt.c $(defs_h) $(mi_getopt_h) \
+	$(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-getopt.c
+mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(target_h) $(inferior_h) \
+	$(gdb_string_h) $(top_h) $(gdbthread_h) $(mi_cmds_h) $(mi_parse_h) \
+	$(mi_getopt_h) $(mi_console_h) $(ui_out_h) $(mi_out_h) \
+	$(event_loop_h) $(event_top_h) $(gdbcore_h) $(value_h) $(regcache_h) \
+	$(gdb_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-main.c
+mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(ui_out_h) $(mi_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c
+mi-parse.o: $(srcdir)/mi/mi-parse.c $(defs_h) $(mi_cmds_h) $(mi_parse_h) \
+	$(gdb_string_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-parse.c
 
 #
 # nindy-share sub-directory
 #
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the mi directory.
 
 Onindy.o: nindy-share/Onindy.c $(gdb_wait_h) nindy-share/block_io.h \
 	nindy-share/env.h
@@ -2583,6 +2587,8 @@ ttyflush.o: nindy-share/ttyflush.c $(srcdir)/nindy-share/ttyflush.c
 #
 # rdi-share sub-directory
 #
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the mi directory.
 
 rdi-share/libangsd.a:	force
 	@dir=rdi-share; \
@@ -2597,6 +2603,8 @@ rdi-share/libangsd.a:	force
 #
 # Signals sub-directory
 #
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the mi directory.
 
 signals.o: $(srcdir)/signals/signals.c $(defs_h) $(target_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/signals/signals.c
@@ -2607,74 +2615,78 @@ signals.o: $(srcdir)/signals/signals.c $(defs_h) $(target_h)
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the mi directory.
 
-tui.o: $(srcdir)/tui/tui.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiLayout.h $(srcdir)/tui/tuiIO.h \
-		$(srcdir)/tui/tuiRegs.h $(srcdir)/tui/tuiWin.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui.c
-tui-file.o: $(srcdir)/tui/tui-file.c
+tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(ui_file_h) $(tui_file_h) \
+	$(tui_tuiIO_h) $(tui_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-file.c
-tui-hooks.o: $(srcdir)/tui/tui-hooks.c \
-		$(srcdir)/tui/tui.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui-hooks.c
-tui-out.o: $(srcdir)/tui/tui-out.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui-out.c
-tuiCommand.o: $(srcdir)/tui/tuiCommand.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiWin.h $(srcdir)/tui/tuiIO.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiCommand.c
-tuiData.o: $(srcdir)/tui/tuiData.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiData.c
-tuiDataWin.o: $(srcdir)/tui/tuiDataWin.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiRegs.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiDataWin.c
-tuiDisassem.o: $(srcdir)/tui/tuiDisassem.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiLayout.h $(srcdir)/tui/tuiSourceWin.h \
-		$(srcdir)/tui/tuiStack.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiDisassem.c
-tuiGeneralWin.o: $(srcdir)/tui/tuiGeneralWin.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiGeneralWin.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiGeneralWin.c
-tuiIO.o: $(srcdir)/tui/tuiIO.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiIO.h $(srcdir)/tui/tuiCommand.h \
-		$(srcdir)/tui/tuiWin.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiIO.c
-tuiLayout.o: $(srcdir)/tui/tuiLayout.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiGeneralWin.h $(srcdir)/tui/tuiStack.h \
-		$(srcdir)/tui/tuiRegs.h $(srcdir)/tui/tuiDisassem.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiLayout.c
-tuiRegs.o: $(srcdir)/tui/tuiRegs.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiLayout.h $(srcdir)/tui/tuiWin.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiRegs.c
-tuiSource.o: $(srcdir)/tui/tuiSource.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiStack.h $(srcdir)/tui/tuiSourceWin.h \
-		$(srcdir)/tui/tuiSource.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiSource.c
-tuiSourceWin.o: $(srcdir)/tui/tuiSourceWin.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiStack.h $(srcdir)/tui/tuiSourceWin.h \
-		$(srcdir)/tui/tuiSource.h $(srcdir)/tui/tuiDisassem.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiSourceWin.c
-tuiStack.o: $(srcdir)/tui/tuiStack.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiStack.h $(srcdir)/tui/tuiSourceWin.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiStack.c
-tuiWin.o: $(srcdir)/tui/tuiWin.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
-		$(srcdir)/tui/tuiGeneralWin.h $(srcdir)/tui/tuiStack.h \
-		$(srcdir)/tui/tuiSourceWin.h $(srcdir)/tui/tuiDataWin.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiWin.c
+tui-hooks.o: $(srcdir)/tui/tui-hooks.c $(config_h) $(defs_h) $(symtab_h) \
+	$(inferior_h) $(command_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
+	$(target_h) $(gdbcore_h) $(event_loop_h) $(frame_h) $(breakpoint_h) \
+	$(gdb_events_h) $(tui_h) $(tuiData_h) $(tuiLayout_h) $(tuiIO_h) \
+	$(tuiRegs_h) $(tuiWin_h) $(tuiStack_h) $(tuiDataWin_h) \
+	$(tuiSourceWin_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-hooks.c
+tui-out.o: $(srcdir)/tui/tui-out.c $(defs_h) $(ui_out_h) $(tui_h) \
+	$(gdb_string_h) $(gdb_assert_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-out.c
+tui.o: $(srcdir)/tui/tui.c $(config_h) $(defs_h) $(gdbcmd_h) $(tui_h) \
+	$(tuiData_h) $(tuiLayout_h) $(tuiIO_h) $(tuiRegs_h) $(tuiStack_h) \
+	$(tuiWin_h) $(tuiSourceWin_h) $(readline_h) $(target_h) $(frame_h) \
+	$(breakpoint_h) $(inferior_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui.c
+tuiCommand.o: $(srcdir)/tui/tuiCommand.c $(config_h) $(defs_h) $(tui_h) \
+	$(tuiData_h) $(tuiWin_h) $(tuiIO_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiCommand.c
+tuiData.o: $(srcdir)/tui/tuiData.c $(config_h) $(defs_h) $(tui_h) \
+	$(tuiData_h) $(tuiGeneralWin_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiData.c
+tuiDataWin.o: $(srcdir)/tui/tuiDataWin.c $(config_h) $(defs_h) $(tui_h) \
+	$(tuiData_h) $(tuiGeneralWin_h) $(tuiRegs_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiDataWin.c
+tuiDisassem.o: $(srcdir)/tui/tuiDisassem.c $(config_h) $(defs_h) $(symtab_h) \
+	$(breakpoint_h) $(frame_h) $(value_h) $(tui_h) $(tuiData_h) \
+	$(tuiWin_h) $(tuiLayout_h) $(tuiSourceWin_h) $(tuiStack_h) \
+	$(tui_file_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiDisassem.c
+tuiGeneralWin.o: $(srcdir)/tui/tuiGeneralWin.c $(config_h) $(defs_h) \
+	$(tui_h) $(tuiData_h) $(tuiGeneralWin_h) $(tuiWin_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiGeneralWin.c
+tuiIO.o: $(srcdir)/tui/tuiIO.c $(config_h) $(defs_h) $(terminal_h) \
+	$(target_h) $(event_loop_h) $(command_h) $(top_h) $(readline_h) \
+	$(tui_h) $(tuiData_h) $(tuiIO_h) $(tuiCommand_h) $(tuiWin_h) \
+	$(tuiGeneralWin_h) $(tui_file_h) $(ui_out_h) $(cli_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiIO.c
+tuiLayout.o: $(srcdir)/tui/tuiLayout.c $(config_h) $(defs_h) $(command_h) \
+	$(symtab_h) $(frame_h) $(tui_h) $(tuiData_h) $(tuiDataWin_h) \
+	$(tuiGeneralWin_h) $(tuiStack_h) $(tuiRegs_h) $(tuiWin_h) \
+	$(tuiSourceWin_h) $(tuiDisassem_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiLayout.c
+tuiRegs.o: $(srcdir)/tui/tuiRegs.c $(config_h) $(defs_h) $(tui_h) \
+	$(tuiData_h) $(symtab_h) $(gdbtypes_h) $(gdbcmd_h) $(frame_h) \
+	$(inferior_h) $(target_h) $(tuiLayout_h) $(tuiWin_h) $(tuiDataWin_h) \
+	$(tuiGeneralWin_h) $(tui_file_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiRegs.c
+tuiSource.o: $(srcdir)/tui/tuiSource.c $(config_h) $(defs_h) $(symtab_h) \
+	$(frame_h) $(breakpoint_h) $(source_h) $(symtab_h) $(tui_h) \
+	$(tuiData_h) $(tuiStack_h) $(tuiSourceWin_h) $(tuiSource_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiSource.c
+tuiSourceWin.o: $(srcdir)/tui/tuiSourceWin.c $(config_h) $(defs_h) \
+	$(symtab_h) $(frame_h) $(breakpoint_h) $(value_h) $(tui_h) \
+	$(tuiData_h) $(tuiStack_h) $(tuiWin_h) $(tuiGeneralWin_h) \
+	$(tuiSourceWin_h) $(tuiSource_h) $(tuiDisassem_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiSourceWin.c
+tuiStack.o: $(srcdir)/tui/tuiStack.c $(config_h) $(defs_h) $(symtab_h) \
+	$(breakpoint_h) $(frame_h) $(command_h) $(tui_h) $(tuiData_h) \
+	$(tuiStack_h) $(tuiGeneralWin_h) $(tuiSource_h) $(tuiSourceWin_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiStack.c
+tuiWin.o: $(srcdir)/tui/tuiWin.c $(config_h) $(defs_h) $(command_h) \
+	$(symtab_h) $(breakpoint_h) $(frame_h) $(cli_cmds_h) $(tui_h) \
+	$(tuiData_h) $(tuiGeneralWin_h) $(tuiStack_h) $(tuiRegs_h) \
+	$(tuiDisassem_h) $(tuiSource_h) $(tuiSourceWin_h) $(tuiDataWin_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiWin.c
 
+#
 # vx-share sub-directory
+#
 
 xdr_ld.o: vx-share/xdr_ld.c $(defs_h) vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/xdr_ld.h
