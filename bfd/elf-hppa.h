@@ -1004,7 +1004,6 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      sym_sec = h->root.u.def.section;
 
-
 	      /* If this symbol has an entry in the PA64 dynamic hash
 		 table, then get it.  */
 	      dyn_name = get_dyn_name (input_bfd, h, rel,
@@ -1031,6 +1030,26 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		 dyn_h hash table entry.  */
 	      else
 		relocation = 0;
+	    }
+	  /* Allow undefined symbols in shared libraries.  */
+          else if (info->shared && !info->symbolic && !info->no_undefined)
+	    {
+	      /* If this symbol has an entry in the PA64 dynamic hash
+		 table, then get it.  */
+	      dyn_name = get_dyn_name (input_bfd, h, rel,
+				       &dynh_buf, &dynh_buflen);
+	      dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
+						  dyn_name, false, false);
+
+	      if (dyn_h == NULL)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
+		     bfd_get_filename (input_bfd), h->root.root.string,
+		     bfd_get_section_name (input_bfd, input_section));
+		  relocation = 0;
+		}
+	      relocation = 0;
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
@@ -1150,8 +1169,9 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	/* If this is a call to a function defined in another dynamic
 	   library, then redirect the call to the local stub for this
 	   function.  */
-	if (sym_sec->output_section == NULL)
-	  value = dyn_h->stub_offset;
+	if (sym_sec == NULL || sym_sec->output_section == NULL)
+	  value = (dyn_h->stub_offset + hppa_info->stub_sec->output_offset
+		   + hppa_info->stub_sec->output_section->vma);
   
 	/* Turn VALUE into a proper PC relative address.  */
 	value -= (offset + input_section->output_offset
@@ -1184,7 +1204,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	/* If this is a call to a function defined in another dynamic
 	   library, then redirect the call to the local stub for this
 	   function.  */
-	if (sym_sec->output_section == NULL)
+	if (sym_sec == NULL || sym_sec->output_section == NULL)
 	  value = (dyn_h->stub_offset + hppa_info->stub_sec->output_offset
 		   + hppa_info->stub_sec->output_section->vma);
   
@@ -1507,8 +1527,9 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	/* If this is a call to a function defined in another dynamic
 	   library, then redirect the call to the local stub for this
 	   function.  */
-	if (sym_sec->output_section == NULL)
-	  value = dyn_h->stub_offset;
+	if (sym_sec == NULL || sym_sec->output_section == NULL)
+	  value = (dyn_h->stub_offset + hppa_info->stub_sec->output_offset
+		   + hppa_info->stub_sec->output_section->vma);
   
 	/* Turn VALUE into a proper PC relative address.  */
 	value -= (offset + input_section->output_offset
@@ -1525,8 +1546,10 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	/* If this is a call to a function defined in another dynamic
 	   library, then redirect the call to the local stub for this
 	   function.  */
-	if (sym_sec->output_section == NULL)
-	  value = dyn_h->stub_offset;
+	if (sym_sec == NULL || sym_sec->output_section == NULL)
+	  value = (dyn_h->stub_offset + hppa_info->stub_sec->output_offset
+		   + hppa_info->stub_sec->output_section->vma);
+  
   
 	/* Turn VALUE into a proper PC relative address.  */
 	value -= (offset + input_section->output_offset
