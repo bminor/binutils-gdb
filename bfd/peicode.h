@@ -235,6 +235,8 @@ coff_swap_filehdr_in (abfd, src, dst)
   filehdr_dst->f_flags = bfd_h_get_16(abfd, (bfd_byte *)filehdr_src-> f_flags);
 }
 
+#ifdef COFF_IMAGE_WITH_PE
+
 static  unsigned int
 coff_swap_filehdr_out (abfd, in, out)
      bfd       *abfd;
@@ -363,7 +365,30 @@ coff_swap_filehdr_out (abfd, in, out)
 
   return sizeof(FILHDR);
 }
+#else
 
+static  unsigned int
+coff_swap_filehdr_out (abfd, in, out)
+     bfd       *abfd;
+     PTR	in;
+     PTR	out;
+{
+  struct internal_filehdr *filehdr_in = (struct internal_filehdr *)in;
+  FILHDR *filehdr_out = (FILHDR *)out;
+
+  bfd_h_put_16(abfd, filehdr_in->f_magic, (bfd_byte *) filehdr_out->f_magic);
+  bfd_h_put_16(abfd, filehdr_in->f_nscns, (bfd_byte *) filehdr_out->f_nscns);
+  bfd_h_put_32(abfd, filehdr_in->f_timdat, (bfd_byte *) filehdr_out->f_timdat);
+  PUT_FILEHDR_SYMPTR (abfd, (bfd_vma) filehdr_in->f_symptr,
+		      (bfd_byte *) filehdr_out->f_symptr);
+  bfd_h_put_32(abfd, filehdr_in->f_nsyms, (bfd_byte *) filehdr_out->f_nsyms);
+  bfd_h_put_16(abfd, filehdr_in->f_opthdr, (bfd_byte *) filehdr_out->f_opthdr);
+  bfd_h_put_16(abfd, filehdr_in->f_flags, (bfd_byte *) filehdr_out->f_flags);
+
+  return sizeof(FILHDR);
+}
+
+#endif
 
 
 static void
@@ -891,6 +916,11 @@ static void
     {
       scnhdr_int->s_vaddr += pe_data (abfd)->pe_opthdr.ImageBase;
     }
+  if (strcmp (scnhdr_int->s_name, _BSS) == 0) 
+    {
+      scnhdr_int->s_size = scnhdr_int->s_paddr;
+      scnhdr_int->s_paddr = 0;
+    }
 }
 
 static unsigned int
@@ -950,6 +980,11 @@ coff_swap_scnhdr_out (abfd, in, out)
      section data is ever generated, we must add IMAGE_SCN_MEM_DISCARDABLE
      (0x02000000).  Also, the resource data should also be read and
      writable.  */
+
+  /* FIXME: alignment is also encoded in this field, at least on ppc (krk) */
+  /* FIXME: even worse, I don't see how to get the original alignment field*/
+  /*        back...                                                        */
+
   {
     int flags = scnhdr_int->s_flags;
     if (strcmp (scnhdr_int->s_name, ".data")  == 0 ||
@@ -966,6 +1001,19 @@ coff_swap_scnhdr_out (abfd, in, out)
     else if (strcmp (scnhdr_int->s_name, ".rdata") == 0
 	     || strcmp (scnhdr_int->s_name, ".edata") == 0)
       flags =  IMAGE_SCN_MEM_READ | SEC_DATA;     
+    /* ppc-nt additions */
+    else if (strcmp (scnhdr_int->s_name, ".pdata") == 0)
+      flags = IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_ALIGN_4BYTES |
+			  IMAGE_SCN_MEM_READ ;
+    else if (strcmp (scnhdr_int->s_name, ".reldata") == 0)
+      flags =  IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_ALIGN_8BYTES |
+	       IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE ;
+    else if (strcmp (scnhdr_int->s_name, ".ydata") == 0)
+      flags =  IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_ALIGN_8BYTES |
+	       IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE ;
+    else if (strcmp (scnhdr_int->s_name, ".drectve") == 0)
+      flags =  IMAGE_SCN_LNK_INFO | IMAGE_SCN_LNK_REMOVE ;
+    /* end of ppc-nt additions */
 
     bfd_h_put_32(abfd, flags, (bfd_byte *) scnhdr_ext->s_flags);
   }
@@ -1004,13 +1052,13 @@ pe_print_private_bfd_data (abfd, vfile)
   int j;
   pe_data_type *pe = pe_data (abfd);
   struct internal_extra_pe_aouthdr *i = &pe->pe_opthdr;
-  fprintf (file,"ImageBase\t\t");
+  fprintf (file,"\nImageBase\t\t");
   fprintf_vma (file, i->ImageBase);
-  fprintf (file,"SectionAlignment\t");
+  fprintf (file,"\nSectionAlignment\t");
   fprintf_vma (file, i->SectionAlignment);
-  fprintf (file,"FileAlignment\t\t");
+  fprintf (file,"\nFileAlignment\t\t");
   fprintf_vma (file, i->FileAlignment);
-  fprintf (file,"MajorOSystemVersion\t%d\n", i->MajorOperatingSystemVersion);
+  fprintf (file,"\nMajorOSystemVersion\t%d\n", i->MajorOperatingSystemVersion);
   fprintf (file,"MinorOSystemVersion\t%d\n", i->MinorOperatingSystemVersion);
   fprintf (file,"MajorImageVersion\t%d\n", i->MajorImageVersion);
   fprintf (file,"MinorImageVersion\t%d\n", i->MinorImageVersion);
@@ -1024,13 +1072,13 @@ pe_print_private_bfd_data (abfd, vfile)
   fprintf (file,"DllCharacteristics\t%08x\n", i->DllCharacteristics);
   fprintf (file,"SizeOfStackReserve\t");
   fprintf_vma (file, i->SizeOfStackReserve);
-  fprintf (file,"SizeOfStackCommit\t");
+  fprintf (file,"\nSizeOfStackCommit\t");
   fprintf_vma (file, i->SizeOfStackCommit);
-  fprintf (file,"SizeOfHeapReserve\t");
+  fprintf (file,"\nSizeOfHeapReserve\t");
   fprintf_vma (file, i->SizeOfHeapReserve);
-  fprintf (file,"SizeOfHeapCommit\t");
+  fprintf (file,"\nSizeOfHeapCommit\t");
   fprintf_vma (file, i->SizeOfHeapCommit);
-  fprintf (file,"LoaderFlags\t\t%08lx\n", i->LoaderFlags);
+  fprintf (file,"\nLoaderFlags\t\t%08lx\n", i->LoaderFlags);
   fprintf (file,"NumberOfRvaAndSizes\t%08lx\n", i->NumberOfRvaAndSizes);
 
   for (j = 0; j < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; j++) 
@@ -1093,10 +1141,32 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
     obj_conv_table_size (abfd) =
       internal_f->f_nsyms;
 
+#ifdef COFF_IMAGE_WITH_PE
   pe->pe_opthdr = ((struct internal_aouthdr *)aouthdr)->pe;
+#endif
+
   return (PTR) pe;
 }
 
 
+
+/* Copy any private info we understand from the input bfd
+   to the output bfd.  */
+
+#define coff_bfd_copy_private_bfd_data pe_bfd_copy_private_bfd_data
+
+static boolean
+pe_bfd_copy_private_bfd_data (ibfd, obfd)
+     bfd *ibfd, *obfd;
+{
+  /* One day we may try to grok other private data.  */
+  if (ibfd->xvec->flavour != bfd_target_coff_flavour
+      || obfd->xvec->flavour != bfd_target_coff_flavour)
+    return true;
+
+  pe_data(obfd)->pe_opthdr = pe_data (ibfd)->pe_opthdr;
+
+  return true;
+}
 
 

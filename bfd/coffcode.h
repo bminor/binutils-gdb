@@ -1078,8 +1078,18 @@ coff_set_arch_mach_hook (abfd, filehdr)
     case U802ROMAGIC:
     case U802WRMAGIC:
     case U802TOCMAGIC:
+#ifdef POWERMAC
+      /* PowerPC Macs use the same magic numbers as RS/6000 (because
+	 that's how they were bootstrapped originally), but they are
+	 always PowerPC architecture.  */
+      arch = bfd_arch_powerpc;
+      machine = 601;
+#else
+      /* FIXME The architecture and machine can now (as of AIX 4.1) be
+	 identified by looking at fields in the a.out header. */
       arch = bfd_arch_rs6000;
       machine = 6000;
+#endif /* POWERMAC */
       break;
 #endif
 
@@ -2839,17 +2849,23 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #define coff_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
 #define	coff_get_section_contents _bfd_generic_get_section_contents
 
-#define coff_bfd_copy_private_symbol_data \
-  _bfd_generic_bfd_copy_private_symbol_data
-#define coff_bfd_copy_private_section_data \
-  _bfd_generic_bfd_copy_private_section_data
+#ifndef coff_bfd_copy_private_symbol_data
+#define coff_bfd_copy_private_symbol_data  _bfd_generic_bfd_copy_private_symbol_data
+#endif
+
+#ifndef coff_bfd_copy_private_section_data
+#define coff_bfd_copy_private_section_data  _bfd_generic_bfd_copy_private_section_data
+#endif
+
+#ifndef coff_bfd_copy_private_bfd_data 
 #define coff_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
+#endif
+
 #define coff_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
 #define coff_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
 
 #ifndef coff_bfd_print_private_bfd_data 
-#define coff_bfd_print_private_bfd_data \
-   _bfd_generic_bfd_print_private_bfd_data
+#define coff_bfd_print_private_bfd_data  _bfd_generic_bfd_print_private_bfd_data
 #endif
 
 #ifndef coff_bfd_is_local_label
