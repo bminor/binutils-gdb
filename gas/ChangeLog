@@ -1,3 +1,8 @@
+Mon Mar 13 22:02:59 2000  Hans-Peter Nilsson  <hp@axis.se>
+
+	* expr.c (operand) [case 'f']: When testing if '0f' can start a
+	floating-point-number, make sure 'f' is in FLT_CHARS.
+
 Sat Mar 11 00:01:39 2000  Hans-Peter Nilsson  <hp@axis.se>
 
 	* read.c (TC_IMPLICIT_LCOMM_ALIGNMENT): New default-definition.

@@ -923,7 +923,8 @@ operand (expressionP)
 		 number, make it one.  Otherwise, make it a local label,
 		 and try to deal with parsing the rest later.  */
 	      if (!input_line_pointer[1]
-		  || (is_end_of_line[0xff & input_line_pointer[1]]))
+		  || (is_end_of_line[0xff & input_line_pointer[1]])
+		  || strchr (FLT_CHARS, 'f') == NULL)
 		goto is_0f_label;
 	      {
 		char *cp = input_line_pointer + 1;
