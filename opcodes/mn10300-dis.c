@@ -221,10 +221,10 @@ print_insn_mn10300 (memaddr, info)
 	}
       extension = bfd_getb16 (buffer);
       extension <<= 8;
-      status = (*info->read_memory_func) (memaddr + 7, buffer, 1, info);
+      status = (*info->read_memory_func) (memaddr + 6, buffer, 1, info);
       if (status != 0)
 	{
-	  (*info->memory_error_func) (status, memaddr + 7, info);
+	  (*info->memory_error_func) (status, memaddr + 6, info);
 	  return -1;
 	}
       extension |= *(unsigned char *)buffer;
@@ -298,8 +298,25 @@ disassemble (memaddr, info, insn, extension, size)
 
 	      operand = &mn10300_operands[*opindex_ptr];
 
-	      value = ((insn >> (operand->shift))
-		       & ((1 << operand->bits) - 1));
+	      if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
+		{
+		  unsigned long temp;
+		  value = insn & ((1 << operand->bits) - 1);
+		  value <<= (32 - operand->bits);
+		  temp = extension >> operand->shift;
+		  temp &= ((1 << 32 - operand->bits) - 1);
+		  value |= temp;
+		}
+	      else if ((operand->flags & MN10300_OPERAND_EXTENDED) != 0)
+		{
+		  value = ((extension >> (operand->shift))
+			   & ((1 << operand->bits) - 1));
+		}
+	      else
+		{
+		  value = ((insn >> (operand->shift))
+			   & ((1 << operand->bits) - 1));
+		}
 
 	      if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
 		value = ((long)(value << (32 - operand->bits))

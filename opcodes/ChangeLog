@@ -1,3 +1,9 @@
+Wed Nov 20 10:37:13 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-dis.c (print_insn_mn10300): Fix fetch of last byte
+	in 7 byte insns.
+	(disassemble): Handle SPLIT and EXTENDED operands.
+
 Tue Nov 19 13:33:01 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-dis.c: Rough cut at printing some operands.
