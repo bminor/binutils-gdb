@@ -364,7 +364,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
          for that line.  */
 
       next_line = 0;		/* Force out first line */
-      ui_out_tuple_begin (uiout, "asm_insns");
+      ui_out_list_begin (uiout, "asm_insns");
       num_displayed = 0;
       for (i = 0; i < newlines; i++)
 	{
@@ -387,8 +387,8 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 			{
 			  ui_out_tuple_begin (uiout, "src_and_asm_line");
 			  print_source_lines (symtab, next_line, mle[i].line + 1, 0);
-			  ui_out_tuple_begin (uiout, "line_asm_insn");
-			  ui_out_tuple_end (uiout);
+			  ui_out_list_begin (uiout, "line_asm_insn");
+			  ui_out_list_end (uiout);
 			  ui_out_tuple_end (uiout);
 			}
 		      /* Print the last line and leave list open for
@@ -404,7 +404,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 		}
 
 	      next_line = mle[i].line + 1;
-	      ui_out_tuple_begin (uiout, "line_asm_insn");
+	      ui_out_list_begin (uiout, "line_asm_insn");
 	      if (i + 1 < newlines && mle[i + 1].line <= mle[i].line)
 		close_list = 0;
 	    }
@@ -441,7 +441,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	    }
 	  if (close_list)
 	    {
-	      ui_out_tuple_end (uiout);
+	      ui_out_list_end (uiout);
 	      ui_out_tuple_end (uiout);
 	      close_list = 0;
 	    }
@@ -449,12 +449,12 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	    if (num_displayed >= how_many)
 	      break;
 	}
-      ui_out_tuple_end (uiout);
+      ui_out_list_end (uiout);
     }
   else
     {
     assembly_only:
-      ui_out_tuple_begin (uiout, "asm_insns");
+      ui_out_list_begin (uiout, "asm_insns");
       num_displayed = 0;
       for (pc = low; pc < high;)
 	{
@@ -487,7 +487,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	  ui_file_rewind (stb->stream);
 	  ui_out_tuple_end (uiout);
 	}
-      ui_out_tuple_end (uiout);
+      ui_out_list_end (uiout);
     }
   gdb_flush (gdb_stdout);
 

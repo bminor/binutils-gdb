@@ -1093,7 +1093,7 @@ Disassemble from the current value of @code{$pc} to @code{$pc + 20}:
 (@value{GDBP})
 -data-disassemble -s $pc -e "$pc + 20" -- 0
 ^done,
-asm_insns=@{
+asm_insns=[
 @{address="0x000107c0",func-name="main",offset="4",
 inst="mov  2, %o0"@},
 @{address="0x000107c4",func-name="main",offset="8",
@@ -1103,7 +1103,7 @@ inst="or  %o2, 0x140, %o1\t! 0x11940 <_lib_version+8>"@},
 @{address="0x000107cc",func-name="main",offset="16",
 inst="sethi  %hi(0x11800), %o2"@},
 @{address="0x000107d0",func-name="main",offset="20",
-inst="or  %o2, 0x168, %o4\t! 0x11968 <_lib_version+48>"@}@}
+inst="or  %o2, 0x168, %o4\t! 0x11968 <_lib_version+48>"@}]
 (@value{GDBP})
 @end smallexample
 
@@ -1112,7 +1112,7 @@ Disassemble the whole @code{main} function.  Line 32 is part of
 
 @smallexample
 -data-disassemble -f basics.c -l 32 -- 0
-^done,asm_insns=@{
+^done,asm_insns=[
 @{address="0x000107bc",func-name="main",offset="0",
 inst="save  %sp, -112, %sp"@},
 @{address="0x000107c0",func-name="main",offset="4",
@@ -1121,7 +1121,7 @@ inst="mov   2, %o0"@},
 inst="sethi %hi(0x11800), %o2"@},
 [@dots{}]
 @{address="0x0001081c",func-name="main",offset="96",inst="ret "@},
-@{address="0x00010820",func-name="main",offset="100",inst="restore "@}@}
+@{address="0x00010820",func-name="main",offset="100",inst="restore "@}]
 (@value{GDBP})
 @end smallexample
 
@@ -1130,13 +1130,13 @@ Disassemble 3 instructions from the start of @code{main}:
 @smallexample
 (@value{GDBP})
 -data-disassemble -f basics.c -l 32 -n 3 -- 0
-^done,asm_insns=@{
+^done,asm_insns=[
 @{address="0x000107bc",func-name="main",offset="0",
 inst="save  %sp, -112, %sp"@},
 @{address="0x000107c0",func-name="main",offset="4",
 inst="mov  2, %o0"@},
 @{address="0x000107c4",func-name="main",offset="8",
-inst="sethi  %hi(0x11800), %o2"@}@}
+inst="sethi  %hi(0x11800), %o2"@}]
 (@value{GDBP})
 @end smallexample
 
@@ -1145,20 +1145,19 @@ Disassemble 3 instructions from the start of @code{main} in mixed mode:
 @smallexample
 (@value{GDBP})
 -data-disassemble -f basics.c -l 32 -n 3 -- 1
-^done,asm_insns=@{
+^done,asm_insns=[
 src_and_asm_line=@{line="31",
 file="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb/ \
-  testsuite/gdb.mi/basics.c",line_asm_insn=@{
+  testsuite/gdb.mi/basics.c",line_asm_insn=[
 @{address="0x000107bc",func-name="main",offset="0",
-inst="save  %sp, -112, %sp"@}@}@},
-
+inst="save  %sp, -112, %sp"@}]@},
 src_and_asm_line=@{line="32",
 file="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb/ \
-  testsuite/gdb.mi/basics.c",line_asm_insn=@{
+  testsuite/gdb.mi/basics.c",line_asm_insn=[
 @{address="0x000107c0",func-name="main",offset="4",
 inst="mov  2, %o0"@},
 @{address="0x000107c4",func-name="main",offset="8",
-inst="sethi  %hi(0x11800), %o2"@}@}@}@}
+inst="sethi  %hi(0x11800), %o2"@}]@}]
 (@value{GDBP})
 @end smallexample
 

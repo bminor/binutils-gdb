@@ -1,3 +1,9 @@
+2001-06-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-disassemble.exp: Update patterns matching data-disassemble
+	output.  Now produces a list of instructions and a list of
+	source/assembly lines.
+
 2001-06-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-basics.exp, mi-break.exp, mi-console.exp, mi-disassemble.exp,

@@ -1,3 +1,14 @@
+2001-06-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbmi.texinfo (data-disassemble): Update documentation of
+	output.  Produces a list of instructions and a list of source
+	lines.
+
+2001-06-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-cmd-disas.c (mi_cmd_disassemble): For "-data-disassemble",
+	output a list instead of a tupple.
+
 2001-06-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-out.c (struct ui_out_data): Replace field first_header with
