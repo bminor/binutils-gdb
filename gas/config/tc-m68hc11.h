@@ -104,5 +104,8 @@ extern struct relax_type md_relax_table[];
   S_SET_VALUE (sym, (valueT) frag_now_fix ()); \
 } while (0)
 
+#define elf_tc_final_processing	m68hc11_elf_final_processing
+extern void m68hc11_elf_final_processing PARAMS ((void));
+
 #define tc_print_statistics(FILE) m68hc11_print_statistics (FILE)
 extern void m68hc11_print_statistics PARAMS ((FILE *));

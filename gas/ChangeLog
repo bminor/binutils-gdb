@@ -1,5 +1,15 @@
 2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* config/tc-m68hc11.c (m68hc11_elf_final_processing): New function.
+	(md_pseudo_table): Add .mode, .far and .interrupt pseudo op.
+	(s_m68hc11_mode): New function for .mode pseudo op.
+	(s_m68hc11_mark_symbol): New function for .far and .interrupt
+	pseudo op.
+	* config/tc-m68hc11.h (elf_tc_final_processing): Define.
+	(m68hc11_elf_final_processing): Declare.
+
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* config/tc-m68hc11.c (md_begin): Take into account additional
 	page operand for call instruction.
 	(print_opcode_format): Likewise.

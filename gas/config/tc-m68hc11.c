@@ -182,6 +182,15 @@ static void build_insn
   PARAMS ((struct m68hc11_opcode *, operand *, int));
 static int relaxable_symbol PARAMS ((symbolS *));
 
+/* Pseudo op to control the ELF flags.  */
+static void s_m68hc11_mode PARAMS ((int));
+
+/* Mark the symbols with STO_M68HC12_FAR to indicate the functions
+   are using 'rtc' for returning.  It is necessary to use 'call'
+   to invoke them.  This is also used by the debugger to correctly
+   find the stack frame.  */
+static void s_m68hc11_mark_symbol PARAMS ((int));
+
 /* Controls whether relative branches can be turned into long branches.
    When the relative offset is too large, the insn are changed:
     bra -> jmp
@@ -229,6 +238,9 @@ static int num_opcodes;
 /* The opcodes sorted by name and filtered by current cpu.  */
 static struct m68hc11_opcode *m68hc11_sorted_opcodes;
 
+/* ELF flags to set in the output file header.  */
+static int elf_flags = 0;
+
 /* These are the machine dependent pseudo-ops.  These are included so
    the assembler can work on the output from the SUN C compiler, which
    generates these.  */
@@ -251,6 +263,15 @@ const pseudo_typeS md_pseudo_table[] = {
 
   /* Motorola ALIS.  */
   {"xrefb", s_ignore, 0}, /* Same as xref  */
+
+  /* .mode instruction (ala SH).  */
+  {"mode", s_m68hc11_mode, 0},
+
+  /* .far instruction.  */
+  {"far", s_m68hc11_mark_symbol, STO_M68HC12_FAR},
+
+  /* .interrupt instruction.  */
+  {"interrupt", s_m68hc11_mark_symbol, STO_M68HC12_INTERRUPT},
 
   {0, 0, 0}
 };
@@ -2488,6 +2509,89 @@ md_assemble (str)
   else
     build_insn (opcode, operands, nb_operands);
 }
+
+
+/* Pseudo op to control the ELF flags.  */
+static void
+s_m68hc11_mode (x)
+     int x ATTRIBUTE_UNUSED;
+{
+  char *name = input_line_pointer, ch;
+
+  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+    input_line_pointer++;
+  ch = *input_line_pointer;
+  *input_line_pointer = '\0';
+
+  if (strcmp (name, "mshort") == 0)
+    {
+      elf_flags &= ~E_M68HC11_I32;
+    }
+  else if (strcmp (name, "mlong") == 0)
+    {
+      elf_flags |= E_M68HC11_I32;
+    }
+  else if (strcmp (name, "mshort-double") == 0)
+    {
+      elf_flags &= ~E_M68HC11_F64;
+    }
+  else if (strcmp (name, "mlong-double") == 0)
+    {
+      elf_flags |= E_M68HC11_F64;
+    }
+  else
+    {
+      as_warn (_("Invalid mode: %s\n"), name);
+    }
+  *input_line_pointer = ch;
+  demand_empty_rest_of_line ();
+}
+
+/* Mark the symbols with STO_M68HC12_FAR to indicate the functions
+   are using 'rtc' for returning.  It is necessary to use 'call'
+   to invoke them.  This is also used by the debugger to correctly
+   find the stack frame.  */
+static void
+s_m68hc11_mark_symbol (mark)
+     int mark;
+{
+  char *name;
+  int c;
+  symbolS *symbolP;
+  asymbol *bfdsym;
+  elf_symbol_type *elfsym;
+
+  do
+    {
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      symbolP = symbol_find_or_make (name);
+      *input_line_pointer = c;
+
+      SKIP_WHITESPACE ();
+
+      bfdsym = symbol_get_bfdsym (symbolP);
+      elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+
+      assert (elfsym);
+
+      /* Mark the symbol far (using rtc for function return).  */
+      elfsym->internal_elf_sym.st_other |= mark;
+
+      if (c == ',')
+	{
+	  input_line_pointer ++;
+
+	  SKIP_WHITESPACE ();
+
+	  if (*input_line_pointer == '\n')
+	    c = '\n';
+	}
+    }
+  while (c == ',');
+
+  demand_empty_rest_of_line ();
+}
 
 /* Relocation, relaxation and frag conversions.  */
 long
@@ -2937,4 +3041,12 @@ md_apply_fix3 (fixP, valP, seg)
       as_fatal (_("Line %d: unknown relocation type: 0x%x."),
 		fixP->fx_line, fixP->fx_r_type);
     }
+}
+
+/* Set the ELF specific flags.  */
+void
+m68hc11_elf_final_processing ()
+{
+  elf_elfheader (stdoutput)->e_flags &= ~EF_M68HC11_ABI;
+  elf_elfheader (stdoutput)->e_flags |= elf_flags;
 }
