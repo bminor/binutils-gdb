@@ -329,7 +329,7 @@ all.normal: all-m4 all-autoconf all-libiberty all-mmalloc all-texinfo \
 	$(end-sanitize-chill) \
 	all-gprof all-send_pr all-libm all-deja-gnu \
 	all-fileutils all-find all-gawk all-sed all-shellutils \
-	all-textutils all-time all-wdiff
+	all-textutils all-time all-wdiff all-uudecode 
 
 
 all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
@@ -410,7 +410,7 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-z8ksim \
 	install-h8300sim \
 	install-fileutils install-find install-gawk install-m4 install-sed install-shellutils \
-	install-textutils install-time install-wdiff
+	install-textutils install-time install-wdiff install-uudecode
 
 #
 # Install the gcc headers files, but not the fixed include files,
@@ -1287,6 +1287,23 @@ install-wdiff: force
 	@if [ -f ./wdiff/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./wdiff; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+### uudecode
+all-uudecode: all-libiberty
+	@if [ -f ./uudecode/Makefile ] ; then \
+	  rootme=`pwd` ; export rootme ; \
+		(cd ./uudecode; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-uudecode: force
+	@if [ -f ./uudecode/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./uudecode; $(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi

@@ -1,3 +1,10 @@
+Tue Feb  2 18:57:59 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: add uudecode to host_tools
+
+	* Makefile.in: added {all,install}-uudecode targets, added them to
+	the appropriate lists
+
 Tue Feb  2 11:45:53 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (all-gcc): Added dependency on all-gas.
