@@ -345,29 +345,29 @@ const inst crx_instruction[] =
 
 /* Load instructions (from memory to register).  */
 #define  LD_REG_INST(NAME, OPC1, OPC2, DISP) \
-  /* opc12 r abs16 */								  \
-  {NAME,  2, 0x320+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,			  \
-      {{abs16,0}, {regr,16}}},							  \
-  /* opc12 r abs32 */								  \
-  {NAME,  3, 0x330+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,			  \
-      {{abs32,0}, {regr,16}}},							  \
-  /* opc4 r rbase dispu[bwd]4 */						  \
-  {NAME,  1, 0x8+OPC2,  28, LD_STOR_INS | DISP | REVERSE_MATCH,			  \
-      {{rbase_cst4,16}, {regr,24}}},						  \
-  /* opc4 r rbase disps16 */							  \
-  {NAME,  2, ((0x8+OPC2)<<8)+0xE, 20, LD_STOR_INS | DISP | FMT_1 | REVERSE_MATCH, \
-      {{rbase_disps16,16}, {regr,24}}},						  \
-  /* opc4 r rbase disps32 */							  \
-  {NAME,  3, ((0x8+OPC2)<<8)+0xF,  20, LD_STOR_INS | FMT_1 | REVERSE_MATCH,	  \
-      {{rbase_disps32,16}, {regr,24}}},						  \
-  /* opc12 r rbase ridx scl2 disps6 */						  \
-  {NAME,  2, 0x32C+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,			  \
-      {{rindex_disps6,0}, {regr,16}}},						  \
-  /* opc12 r rbase ridx scl2 disps22 */						  \
-  {NAME,  3, 0x33C+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,			  \
-      {{rindex_disps22,0}, {regr,16}}},						  \
-  /* opc12 r rbase disps12 */							  \
-  {NAME,  2, 0x328+OPC1,  20, LD_STOR_INS_INC | REVERSE_MATCH,			  \
+  /* opc12 r abs16 */							    \
+  {NAME,  2, 0x320+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,		    \
+      {{abs16,0}, {regr,16}}},						    \
+  /* opc12 r abs32 */							    \
+  {NAME,  3, 0x330+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,		    \
+      {{abs32,0}, {regr,16}}},						    \
+  /* opc4 r rbase dispu[bwd]4 */					    \
+  {NAME,  1, 0x8+OPC2,  28, LD_STOR_INS | DISP | REVERSE_MATCH,		    \
+      {{rbase_dispu4,16}, {regr,24}}},					    \
+  /* opc4 r rbase disps16 */						    \
+  {NAME,  2, ((0x8+OPC2)<<8)+0xE, 20, LD_STOR_INS | FMT_1 | REVERSE_MATCH,  \
+      {{rbase_disps16,16}, {regr,24}}},					    \
+  /* opc4 r rbase disps32 */						    \
+  {NAME,  3, ((0x8+OPC2)<<8)+0xF,  20, LD_STOR_INS | FMT_1 | REVERSE_MATCH, \
+      {{rbase_disps32,16}, {regr,24}}},					    \
+  /* opc12 r rbase ridx scl2 disps6 */					    \
+  {NAME,  2, 0x32C+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,		    \
+      {{rindex_disps6,0}, {regr,16}}},					    \
+  /* opc12 r rbase ridx scl2 disps22 */					    \
+  {NAME,  3, 0x33C+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,		    \
+      {{rindex_disps22,0}, {regr,16}}},					    \
+  /* opc12 r rbase disps12 */						    \
+  {NAME,  2, 0x328+OPC1,  20, LD_STOR_INS_INC | REVERSE_MATCH,		    \
       {{rbase_disps12,12}, {regr,16}}}
 
   LD_REG_INST ("loadb", 0x0, 0x0, DISPUB4),
@@ -376,23 +376,25 @@ const inst crx_instruction[] =
 
 /* Store instructions (from Register to Memory).  */
 #define  ST_REG_INST(NAME, OPC1, OPC2, DISP) \
-  /* opc12 r abs16 */								  \
-  {NAME,  2, 0x320+OPC1,  20, LD_STOR_INS, {{regr,16}, {abs16,0}}},		  \
-  /* opc12 r abs32 */								  \
-  {NAME,  3, 0x330+OPC1,  20, LD_STOR_INS, {{regr,16}, {abs32,0}}},		  \
-  /* opc4 r rbase dispu[bwd]4 */						  \
-  {NAME,  1, 0x8+OPC2,  28, LD_STOR_INS | DISP, {{regr,24}, {rbase_cst4,16}}},	  \
-  /* opc4 r rbase disps16 */							  \
-  {NAME,  2, ((0x8+OPC2)<<8)+0xE,  20, LD_STOR_INS | DISP | FMT_1,		  \
-      {{regr,24}, {rbase_disps16,16}}},						  \
-  /* opc4 r rbase disps32 */							  \
-  {NAME,  3, ((0x8+OPC2)<<8)+0xF,  20, LD_STOR_INS | FMT_1,			  \
-      {{regr,24}, {rbase_disps32,16}}},						  \
-  /* opc12 r rbase ridx scl2 disps6 */						  \
-  {NAME,  2, 0x32C+OPC1,  20, LD_STOR_INS, {{regr,16}, {rindex_disps6,0}}},	  \
-  /* opc12 r rbase ridx scl2 disps22 */						  \
-  {NAME,  3, 0x33C+OPC1,  20, LD_STOR_INS, {{regr,16}, {rindex_disps22,0}}},	  \
-  /* opc12 r rbase disps12 */							  \
+  /* opc12 r abs16 */							      \
+  {NAME,  2, 0x320+OPC1,  20, LD_STOR_INS, {{regr,16}, {abs16,0}}},	      \
+  /* opc12 r abs32 */							      \
+  {NAME,  3, 0x330+OPC1,  20, LD_STOR_INS, {{regr,16}, {abs32,0}}},	      \
+  /* opc4 r rbase dispu[bwd]4 */					      \
+  {NAME,  1, 0x8+OPC2,  28, LD_STOR_INS | DISP,				      \
+      {{regr,24}, {rbase_dispu4,16}}},					      \
+  /* opc4 r rbase disps16 */						      \
+  {NAME,  2, ((0x8+OPC2)<<8)+0xE,  20, LD_STOR_INS | FMT_1,	  	      \
+      {{regr,24}, {rbase_disps16,16}}},					      \
+  /* opc4 r rbase disps32 */						      \
+  {NAME,  3, ((0x8+OPC2)<<8)+0xF,  20, LD_STOR_INS | FMT_1,		      \
+      {{regr,24}, {rbase_disps32,16}}},					      \
+  /* opc12 r rbase ridx scl2 disps6 */					      \
+  {NAME,  2, 0x32C+OPC1,  20, LD_STOR_INS,				      \
+      {{regr,16}, {rindex_disps6,0}}},					      \
+  /* opc12 r rbase ridx scl2 disps22 */					      \
+  {NAME,  3, 0x33C+OPC1,  20, LD_STOR_INS, {{regr,16}, {rindex_disps22,0}}},  \
+  /* opc12 r rbase disps12 */						      \
   {NAME,  2, 0x328+OPC1,  20, LD_STOR_INS_INC, {{regr,16}, {rbase_disps12,12}}}
 
 /* Store instructions (Immediate to Memory).  */
@@ -541,10 +543,10 @@ const inst crx_instruction[] =
   /* CO-processor extensions.  */
   /* opc12 c4 opc4 ui4 disps9 */
   {"bcop",    2, 0x30107, 12, COP_BRANCH_INS | FMT_4, 
-      {{ui4,16}, {ui4,8}, {disps9,0}}},
+      {{ui4,8}, {ui4,16}, {disps9,0}}},
   /* opc12 c4 opc4 ui4 disps25 */
   {"bcop",    3, 0x31107, 12, COP_BRANCH_INS | FMT_4, 
-      {{ui4,16}, {ui4,8}, {disps25,0}}},
+      {{ui4,8}, {ui4,16}, {disps25,0}}},
   /* opc12 c4 opc4 cpdo r r */
   {"cpdop",   2, 0x3010B, 12, COP_REG_INS | FMT_4, 
       {{ui4,16}, {ui4,8}, {regr,4}, {regr,0}}},
@@ -563,8 +565,10 @@ const inst crx_instruction[] =
   {"cinv",    2, 0x3010000, 4,	NO_TYPE_INS, {{ui4,0}}},
 
   /* opc9 ui5 ui5 ui5 r r */
-  {"ram", 2, 0x7C,  23, NO_TYPE_INS, {{ui5,18}, {ui5,13}, {ui5,8}, {regr,4}, {regr,0}}},
-  {"rim", 2, 0x7D,  23, NO_TYPE_INS, {{ui5,18}, {ui5,13}, {ui5,8}, {regr,4}, {regr,0}}},
+  {"ram", 2, 0x7C,  23, NO_TYPE_INS, 
+      {{ui5,18}, {ui5,13}, {ui5,8}, {regr,4}, {regr,0}}},
+  {"rim", 2, 0x7D,  23, NO_TYPE_INS, 
+      {{ui5,18}, {ui5,13}, {ui5,8}, {regr,4}, {regr,0}}},
 
   /* opc9 ui3 r */
   {"rotb",    1, 0x1FB,	23, NO_TYPE_INS, {{ui3,20}, {regr,16}}},
@@ -649,34 +653,34 @@ const int crx_num_copregs = ARRAY_SIZE (crx_copregtab);
 const operand_entry crx_optab[] =
 {
   /* Index 0 is dummy, so we can count the instruction's operands.  */
-  {0,	nullargs,   0},				      /* dummy */
-  {4,	arg_ic,	    OPERAND_CST4},		      /* cst4 */
-  {16,	arg_ic,	    OPERAND_SIGNED},		      /* i16 */
-  {32,	arg_ic,	    OPERAND_SIGNED},		      /* i32 */
-  {3,	arg_ic,	    OPERAND_UNSIGNED},		      /* ui3 */
-  {4,	arg_ic,	    OPERAND_UNSIGNED},		      /* ui4 */
-  {5,	arg_ic,	    OPERAND_UNSIGNED},		      /* ui5 */
-  {16,	arg_ic,	    OPERAND_UNSIGNED},		      /* ui16 */
-  {8,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT},      /* disps9 */
-  {16,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT},      /* disps17 */
-  {24,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT},      /* disps25 */
-  {32,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT},      /* disps32 */
-  {4,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT_DEC},  /* dispu5 */
-  {8,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT|OPERAND_ESC}, /* dispe9 */
-  {16,	arg_c,	    0},				      /* abs16 */
-  {32,	arg_c,	    0},				      /* abs32 */
-  {4,	arg_rbase,  0},				      /* rbase */
-  {4,	arg_cr,	    OPERAND_CST4},		      /* rbase_cst4 */
-  {12,	arg_cr,	    0},				      /* rbase_disps12 */
-  {16,	arg_cr,	    0},				      /* rbase_disps16 */
-  {28,	arg_cr,	    0},				      /* rbase_disps28 */
-  {32,	arg_cr,	    0},				      /* rbase_disps32 */
-  {6,	arg_idxr,   0},				      /* rindex_disps6 */
-  {22,  arg_idxr,   0},				      /* rindex_disps22 */
-  {4,	arg_r,	    0},				      /* regr */
-  {8,	arg_r,	    0},				      /* regr8 */
-  {4,	arg_copr,   0},				      /* copregr */
-  {4,	arg_copsr,  0}				      /* copsregr */
+  {0,	nullargs,   0},					/* dummy */
+  {4,	arg_ic,	    OP_CST4},				/* cst4 */
+  {16,	arg_ic,	    OP_SIGNED},				/* i16 */
+  {32,	arg_ic,	    OP_SIGNED},				/* i32 */
+  {3,	arg_ic,	    OP_UNSIGNED},			/* ui3 */
+  {4,	arg_ic,	    OP_UNSIGNED},		        /* ui4 */
+  {5,	arg_ic,	    OP_UNSIGNED},		        /* ui5 */
+  {16,	arg_ic,	    OP_UNSIGNED},		        /* ui16 */
+  {8,	arg_c,	    OP_EVEN|OP_SHIFT|OP_SIGNED},	/* disps9 */
+  {16,	arg_c,	    OP_EVEN|OP_SHIFT|OP_SIGNED},	/* disps17 */
+  {24,	arg_c,	    OP_EVEN|OP_SHIFT|OP_SIGNED},	/* disps25 */
+  {32,	arg_c,	    OP_EVEN|OP_SHIFT|OP_SIGNED},	/* disps32 */
+  {4,	arg_c,	    OP_EVEN|OP_SHIFT_DEC|OP_UNSIGNED},  /* dispu5 */
+  {8,	arg_c,	    OP_EVEN|OP_SHIFT|OP_SIGNED|OP_ESC}, /* dispe9 */
+  {16,	arg_c,	    OP_UNSIGNED|OP_UPPER_64KB},		/* abs16 */
+  {32,	arg_c,	    OP_UNSIGNED},			/* abs32 */
+  {4,	arg_rbase,  0},					/* rbase */
+  {4,	arg_cr,	    OP_DISPU4},				/* rbase_dispu4 */
+  {12,	arg_cr,	    OP_SIGNED},				/* rbase_disps12 */
+  {16,	arg_cr,	    OP_SIGNED},				/* rbase_disps16 */
+  {28,	arg_cr,	    OP_SIGNED},				/* rbase_disps28 */
+  {32,	arg_cr,	    OP_SIGNED},				/* rbase_disps32 */
+  {6,	arg_idxr,   OP_SIGNED},				/* rindex_disps6 */
+  {22,  arg_idxr,   OP_SIGNED},				/* rindex_disps22 */
+  {4,	arg_r,	    0},					/* regr */
+  {8,	arg_r,	    0},					/* regr8 */
+  {4,	arg_copr,   0},					/* copregr */
+  {4,	arg_copsr,  0}					/* copsregr */
 };
 
 /* CRX traps/interrupts.  */
@@ -688,11 +692,23 @@ const trap_entry crx_traps[] =
 
 const int crx_num_traps = ARRAY_SIZE (crx_traps);
 
-/* cst4 operand mapping.  */
-const cst4_entry cst4_map[] =
+/* cst4 operand mapping:
+The value in entry <N> is mapped to the value <N>
+      Value		  Binary mapping
+    cst4_map[N]	  -->>		N
+
+Example (for N=5):
+
+    cst4_map[5]=-4  -->>	5		*/
+const long cst4_map[] =
 {
-  {0,0}, {1,1}, {2,2}, {3,3}, {4,4}, {5,-4}, {6,-1},
-  {7,7}, {8,8}, {9,16}, {10,32}, {11,20}, {12,12}, {13,48}
+  0, 1, 2, 3, 4, -4, -1, 7, 8, 16, 32, 20, 12, 48
 };
 
 const int cst4_maps = ARRAY_SIZE (cst4_map);
+
+/* CRX instructions that don't have arguments.  */
+const char* no_op_insn[] = 
+{
+  "di", "ei", "eiwait", "nop", "retx", "wait", NULL
+};

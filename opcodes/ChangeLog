@@ -1,3 +1,10 @@
+2004-11-29  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* crx-opc.c (crx_optab): Mark all rbase_disps* operands as signed.
+	(no_op_insn): Initialize array with instructions that have no
+	operands.
+	* crx-dis.c (make_instruction): Get rid of COP_BRANCH_INS operand swapping.
+
 2004-11-29  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-dis.c: Correct top-level comment.

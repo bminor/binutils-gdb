@@ -651,14 +651,14 @@ static void
 make_instruction (void)
 {
   int i;
-  unsigned int temp_value, shift;
+  unsigned int shift;
   argument a;
 
   for (i = 0; i < currInsn.nargs; i++)
     {
       a.type = getargtype (instruction->operands[i].op_type);
       if (instruction->operands[i].op_type == cst4
-	  || instruction->operands[i].op_type == rbase_cst4)
+	  || instruction->operands[i].op_type == rbase_dispu4)
 	cst4flag = 1;
       a.size = getbits (instruction->operands[i].op_type);
       shift = instruction->operands[i].shift;
@@ -669,15 +669,8 @@ make_instruction (void)
 
   /* Calculate instruction size (in bytes).  */
   currInsn.size = instruction->size + (size_changed ? 1 : 0);
+  /* Now in bits.  */
   currInsn.size *= 2;
-
-  /* Swapping first and second arguments.  */
-  if (IS_INSN_TYPE (COP_BRANCH_INS))
-    {
-      temp_value = currInsn.arg[0].constant;
-      currInsn.arg[0].constant = currInsn.arg[1].constant;
-      currInsn.arg[1].constant = temp_value;
-    }
 }
 
 /* Retrieve a single word from a given memory address.  */
