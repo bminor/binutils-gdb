@@ -1,3 +1,8 @@
+2003-09-12  David Carlton  <carlton@kealia.com>
+
+	* carlton_runnamespace (TESTS): Fix typo in gdb.c++->gdb.cp
+	transition.
+
 2003-08-22  Michael Chastain  <mec@shout.net>
 
 	* gdb.cp: New directory.

@@ -6,7 +6,7 @@
 # stabs info, too?
 
 EXTRADEBUGPATH=/usr/local/testbed/gcc3/bin
-TESTS="gdb.cpnamespace.exp gdb.cp/rtti.exp"
+TESTS="gdb.cp/namespace.exp gdb.cp/rtti.exp"
 
 echo "Running tests using regular compiler."
 runtest ${TESTS} > /dev/null 2>&1
