@@ -24,6 +24,7 @@
 
 static void setup_section ();
 static void copy_section ();
+static void mark_symbols_used_in_relocations ();
 
 #define nonfatal(s) {bfd_nonfatal(s); status = 1; return;}
 
@@ -180,7 +181,6 @@ filter_symbols (abfd, osyms, isyms, symcount)
      unsigned long symcount;
 {
   register asymbol **from = isyms, **to = osyms;
-  char locals_prefix = bfd_get_symbol_leading_char (abfd) == '_' ? 'L' : '.';
   unsigned int src_count = 0, dst_count = 0;
 
   for (; src_count < symcount; src_count++)
@@ -190,6 +190,7 @@ filter_symbols (abfd, osyms, isyms, symcount)
       int keep;
 
       if ((flags & BSF_GLOBAL)	/* Keep if external.  */
+	  || (flags & BSF_KEEP)	/* Keep if used in a relocation.  */
 	  || bfd_get_section (sym) == &bfd_und_section
 	  || bfd_is_com_section (bfd_get_section (sym)))
 	keep = 1;
@@ -198,7 +199,7 @@ filter_symbols (abfd, osyms, isyms, symcount)
       else			/* Local symbol.  */
 	keep = discard_locals != locals_all
 	  && (discard_locals != locals_start_L ||
-	      bfd_asymbol_name (sym)[0] != locals_prefix);
+	      ! bfd_is_local_label (abfd, sym));
       if (keep)
 	to[dst_count++] = sym;
     }
@@ -266,6 +267,22 @@ copy_object (ibfd, obfd)
   if (osympp != isympp)
     free (osympp);
 
+  /* Allow the BFD backend to copy any private data it understands
+     from the input BFD to the output BFD.  */
+  if (!bfd_copy_private_bfd_data (ibfd, obfd))
+    {
+      fprintf (stderr, "%s: %s: error copying private BFD data: %s\n",
+	       program_name, bfd_errmsg (bfd_get_error ()));
+      status = 1;
+      return;
+    }
+
+  /* bfd mandates that all output sections be created and sizes set before
+     any output is done.  Thus, we traverse all sections multiple times.  */
+  bfd_map_over_sections (ibfd, setup_section, (void *) obfd);
+
+  /* Symbol filtering must happen after the output sections have
+     been created, but before their contents are set.  */
   if (strip_symbols == strip_all && discard_locals == locals_undef)
     {
       osympp = isympp = NULL;
@@ -278,6 +295,17 @@ copy_object (ibfd, obfd)
 
       if (strip_symbols == strip_debug || discard_locals != locals_undef)
 	{
+	  /* Mark symbols used in output relocations so that they
+	     are kept, even if they are local labels or static symbols.
+
+	     Note we iterate over the input sections examining their
+	     relocations since the relocations for the output sections
+	     haven't been set yet.  mark_symbols_used_in_relocations will
+	     ignore input sections which have no corresponding output
+	     section.  */
+	  bfd_map_over_sections (ibfd,
+				 mark_symbols_used_in_relocations,
+				 (void *)isympp);
 	  osympp = (asymbol **) xmalloc (symcount * sizeof (asymbol *));
 	  symcount = filter_symbols (ibfd, osympp, isympp, symcount);
 	}
@@ -285,9 +313,7 @@ copy_object (ibfd, obfd)
 
   bfd_set_symtab (obfd, osympp, symcount);
 
-  /* bfd mandates that all output sections be created and sizes set before
-     any output is done.  Thus, we traverse all sections multiple times.  */
-  bfd_map_over_sections (ibfd, setup_section, (void *) obfd);
+  /* This has to happen after the symbol table has been set.  */
   bfd_map_over_sections (ibfd, copy_section, (void *) obfd);
 }
 
@@ -458,15 +484,11 @@ setup_section (ibfd, isection, obfd)
 	  || discard_locals == locals_all))
     return;
 
-  osection = bfd_get_section_by_name (obfd, bfd_section_name (ibfd, isection));
+  osection = bfd_make_section_anyway (obfd, bfd_section_name (ibfd, isection));
   if (osection == NULL)
     {
-      osection = bfd_make_section (obfd, bfd_section_name (ibfd, isection));
-      if (osection == NULL)
-	{
-	  err = "making";
-	  goto loser;
-	}
+      err = "making";
+      goto loser;
     }
 
   if (!bfd_set_section_size (obfd,
@@ -508,6 +530,14 @@ setup_section (ibfd, isection, obfd)
   isection->output_section = osection;
   isection->output_offset = 0;
 
+  /* Allow the BFD backend to copy any private data it understands
+     from the input section to the output section.  */
+  if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection))
+    {
+      err = "private data";
+      goto loser;
+    }
+
   /* All went well */
   return;
 
@@ -542,12 +572,10 @@ copy_section (ibfd, isection, obfd)
       return;
     }
 
-  osection = bfd_get_section_by_name (obfd,
-				      bfd_section_name (ibfd, isection));
-
+  osection = isection->output_section;
   size = bfd_get_section_size_before_reloc (isection);
 
-  if (size == 0)
+  if (size == 0 || osection == 0)
     return;
 
   if (strip_symbols == strip_all
@@ -585,6 +613,41 @@ copy_section (ibfd, isection, obfd)
 	}
       free (memhunk);
     }
+}
+
+/* Mark all the symbols which will be used in output relocations with
+   the BSF_KEEP flag so that those symbols will not be stripped.
+
+   Ignore relocations which will not appear in the output file.  */
+
+static void
+mark_symbols_used_in_relocations (ibfd, isection, symbols)
+     bfd *ibfd;
+     sec_ptr isection;
+     asymbol **symbols;
+{
+  arelent **relpp;
+  unsigned int relcount, i;
+
+  /* Ignore an input section with no corresponding output section.  */
+  if (isection->output_section == NULL)
+    return;
+
+  relpp = (arelent **) xmalloc (bfd_get_reloc_upper_bound (ibfd, isection));
+  relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, symbols);
+
+  /* Examine each symbol used in a relocation.  If it's not one of the
+     special bfd section symbols, then mark it with BSF_KEEP.  */
+  for (i = 0; i < relcount; i++)
+    {
+      if (*relpp[i]->sym_ptr_ptr != bfd_com_section.symbol
+	  && *relpp[i]->sym_ptr_ptr != bfd_abs_section.symbol
+	  && *relpp[i]->sym_ptr_ptr != bfd_und_section.symbol)
+	(*relpp[i]->sym_ptr_ptr)->flags |= BSF_KEEP;
+    }
+
+  if (relpp != NULL)
+    free (relpp);
 }
 
 /* The number of bytes to copy at once.  */

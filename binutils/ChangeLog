@@ -1,3 +1,15 @@
+Sun Mar 27 16:23:39 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* More fixes for object formats which allow multiple sections
+	with the same name:
+	* objcopy.c (setup_section): Make a new output section even if
+	one already exists with the given name.
+	(copy_section): Use isection->output_section rather than trying
+	to look the output section up by its (possibly non-unique) name.
+
+	* Makefile.in (install-info): Look for binutils.info in the
+	current directory, then in $(srcdir).  Don't use $<.
+
 Mon Mar 21 12:55:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* objdump.c (objdump_print_address): Make static.  Declare with
