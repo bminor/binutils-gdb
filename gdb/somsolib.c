@@ -83,7 +83,43 @@ som_solib_add (arg_string, from_tty, target)
   struct minimal_symbol *msymbol;
   CORE_ADDR addr;
   int status;
+  unsigned int dld_flags;
   char buf[4];
+
+  /* If we're debugging a core file, or have attached to a running
+     process, then som_solib_create_inferior_hook will not have been
+     called.
+
+     We need to examine __dld_flags to determine if the shared library
+     list is valid, and to determine if the libraries have been privately
+     mapped.  */
+  msymbol = lookup_minimal_symbol ("__dld_flags", (struct objfile *) NULL);
+  if (msymbol == NULL)
+    {
+      error ("Unable to find __dld_flags symbol in object file.\n");
+      return;
+    }
+
+  addr = SYMBOL_VALUE_ADDRESS (msymbol);
+  /* Read the current contents.  */
+  status = target_read_memory (addr, buf, 4);
+  if (status != 0)
+    {
+      error ("Unable to read __dld_flags\n");
+      return;
+    }
+  dld_flags = extract_unsigned_integer (buf, 4);
+
+  /* __dld_list may not be valid.  If it's not valid tell the user.  */
+  if ((dld_flags & 4) == 0)
+    {
+      error ("__dld_list is not valid according to __dld_flags.\n");
+      return;
+    }
+
+  /* If the libraries were not mapped private, warn the user.  */
+  if ((dld_flags & 1) == 0)
+    warning ("The shared libraries were not privately mapped;\nsetting a breakpoint in a shared library will not work.\n");
 
   msymbol = lookup_minimal_symbol ("__dld_list", (struct objfile *) NULL);
   if (!msymbol)

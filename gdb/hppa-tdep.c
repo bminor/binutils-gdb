@@ -708,6 +708,7 @@ rp_saved (pc)
       switch (u->stub_type)
 	{
 	case EXPORT:
+	case IMPORT:
 	  return -24;
 	case PARAMETER_RELOCATION:
 	  return -8;
