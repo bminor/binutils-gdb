@@ -107,8 +107,8 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
 #define OBJ_PROCESS_STAB(what, string, type, other, desc) \
   ecoff_stab ((what), (string), (type), (other), (desc))
 
-#define OBJ_GENERATE_ASM_LINE_STAB(lineno) \
-  ecoff_generate_asm_line_stab ((lineno))
+#define OBJ_GENERATE_ASM_LINENO(filename, lineno) \
+  ecoff_generate_asm_lineno ((filename), (lineno))
 
 /* ECOFF requires that we call the ecoff_frob_symbol hook.  */
 #define obj_frob_symbol(symp, punt) ecoff_frob_symbol (symp)
