@@ -110,6 +110,8 @@ static const char * find_section_rename
   PARAMS ((bfd *, sec_ptr, flagword *));
 static void add_section_rename
   PARAMS ((const char *, const char *, flagword));
+static void add_redefine_syms_file 
+  PARAMS ((const char *));
 
 #define RETURN_NONFATAL(s) {bfd_nonfatal (s); status = 1; return;}
 
@@ -217,6 +219,10 @@ struct section_add
 /* List of sections to add to the output BFD.  */
 static struct section_add *add_sections;
 
+/* If non-NULL the argument to --add-gnu-debuglink.
+   This should be the filename to store in the .gnu_debuglink section.  */
+static const char * gnu_debuglink_filename = NULL;
+
 /* Whether to convert debugging information.  */
 static bfd_boolean convert_debugging = FALSE;
 
@@ -277,6 +283,7 @@ static char *prefix_alloc_sections_string = 0;
 #define OPTION_PREFIX_SECTIONS (OPTION_PREFIX_SYMBOLS + 1)
 #define OPTION_PREFIX_ALLOC_SECTIONS (OPTION_PREFIX_SECTIONS + 1)
 #define OPTION_FORMATS_INFO (OPTION_PREFIX_ALLOC_SECTIONS + 1)
+#define OPTION_ADD_GNU_DEBUGLINK (OPTION_FORMATS_INFO + 1)
 
 /* Options to handle if running as "strip".  */
 
@@ -309,6 +316,7 @@ static struct option strip_options[] =
 
 static struct option copy_options[] =
 {
+  {"add-gnu-debuglink", required_argument, 0, OPTION_ADD_GNU_DEBUGLINK},
   {"add-section", required_argument, 0, OPTION_ADD_SECTION},
   {"adjust-start", required_argument, 0, OPTION_CHANGE_START},
   {"adjust-vma", required_argument, 0, OPTION_CHANGE_ADDRESSES},
@@ -410,9 +418,10 @@ copy_usage (stream, exit_status)
      --debugging                   Convert debugging information, if possible\n\
   -p --preserve-dates              Copy modified/access timestamps to the output\n\
   -j --only-section <name>         Only copy section <name> into the output\n\
+     --add-gnu-debuglink=<file>    Add section .gnu_debuglink linking to <file>\n\
   -R --remove-section <name>       Remove section <name> from the output\n\
   -S --strip-all                   Remove all symbol and relocation information\n\
-  -g --strip-debug                 Remove all debugging symbols\n\
+  -g --strip-debug                 Remove all debugging symbols & sections\n\
      --strip-unneeded              Remove all symbols not needed by relocations\n\
   -N --strip-symbol <name>         Do not copy symbol <name>\n\
   -K --keep-symbol <name>          Only copy symbol <name>\n\
@@ -487,7 +496,7 @@ strip_usage (stream, exit_status)
   -p --preserve-dates              Copy modified/access timestamps to the output\n\
   -R --remove-section=<name>       Remove section <name> from the output\n\
   -s --strip-all                   Remove all symbol and relocation information\n\
-  -g -S -d --strip-debug           Remove all debugging symbols\n\
+  -g -S -d --strip-debug           Remove all debugging symbols & sections\n\
      --strip-unneeded              Remove all symbols not needed by relocations\n\
   -N --strip-symbol=<name>         Do not copy symbol <name>\n\
   -K --keep-symbol=<name>          Only copy symbol <name>\n\
@@ -752,24 +761,28 @@ is_strip_section (abfd, sec)
      bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
 {
-  struct section_list *p;
+  if (sections_removed || sections_copied)
+    {
+      struct section_list *p;
 
-  if ((bfd_get_section_flags (abfd, sec) & SEC_DEBUGGING) != 0
-      && (strip_symbols == STRIP_DEBUG
+      p = find_section_list (bfd_get_section_name (abfd, sec), FALSE);
+
+      if (sections_removed && p != NULL && p->remove)
+	return TRUE;
+      if (sections_copied && (p == NULL || ! p->copy))
+	return TRUE;
+    }
+
+  if ((bfd_get_section_flags (abfd, sec) & SEC_DEBUGGING) != 0)
+    {
+      if (strip_symbols == STRIP_DEBUG
 	  || strip_symbols == STRIP_UNNEEDED
 	  || strip_symbols == STRIP_ALL
 	  || discard_locals == LOCALS_ALL
-	  || convert_debugging))
-    return TRUE;
+	  || convert_debugging)
+	return TRUE;
+    }
 
-  if (! sections_removed && ! sections_copied)
-    return FALSE;
-
-  p = find_section_list (bfd_get_section_name (abfd, sec), FALSE);
-  if (sections_removed && p != NULL && p->remove)
-    return TRUE;
-  if (sections_copied && (p == NULL || ! p->copy))
-    return TRUE;
   return FALSE;
 }
 
@@ -976,7 +989,7 @@ redefine_list_append (cause, source, target)
 /* Handle the --redefine-syms option.  Read lines containing "old new"
    from the file, and add them to the symbol redefine list.  */
 
-void
+static void
 add_redefine_syms_file (filename)
      const char *filename;
 {
@@ -1182,6 +1195,8 @@ copy_object (ibfd, obfd)
 
       for (padd = add_sections; padd != NULL; padd = padd->next)
 	{
+	  flagword flags;
+
 	  padd->section = bfd_make_section (obfd, padd->name);
 	  if (padd->section == NULL)
 	    {
@@ -1190,43 +1205,45 @@ copy_object (ibfd, obfd)
 	      status = 1;
 	      return;
 	    }
+
+	  if (! bfd_set_section_size (obfd, padd->section, padd->size))
+	    RETURN_NONFATAL (bfd_get_filename (obfd));
+
+	  pset = find_section_list (padd->name, FALSE);
+	  if (pset != NULL)
+	    pset->used = TRUE;
+
+	  if (pset != NULL && pset->set_flags)
+	    flags = pset->flags | SEC_HAS_CONTENTS;
 	  else
+	    flags = SEC_HAS_CONTENTS | SEC_READONLY | SEC_DATA;
+
+	  if (! bfd_set_section_flags (obfd, padd->section, flags))
+	    RETURN_NONFATAL (bfd_get_filename (obfd));
+
+	  if (pset != NULL)
 	    {
-	      flagword flags;
+	      if (pset->change_vma != CHANGE_IGNORE)
+		if (! bfd_set_section_vma (obfd, padd->section, pset->vma_val))
+		  RETURN_NONFATAL (bfd_get_filename (obfd));
 
-	      if (! bfd_set_section_size (obfd, padd->section, padd->size))
-		RETURN_NONFATAL (bfd_get_filename (obfd));
-
-	      pset = find_section_list (padd->name, FALSE);
-	      if (pset != NULL)
-		pset->used = TRUE;
-
-	      if (pset != NULL && pset->set_flags)
-		flags = pset->flags | SEC_HAS_CONTENTS;
-	      else
-		flags = SEC_HAS_CONTENTS | SEC_READONLY | SEC_DATA;
-
-	      if (! bfd_set_section_flags (obfd, padd->section, flags))
-		RETURN_NONFATAL (bfd_get_filename (obfd));
-
-	      if (pset != NULL)
+	      if (pset->change_lma != CHANGE_IGNORE)
 		{
-		  if (pset->change_vma != CHANGE_IGNORE)
-		    if (! bfd_set_section_vma (obfd, padd->section, pset->vma_val))
-		      RETURN_NONFATAL (bfd_get_filename (obfd));
-
-		  if (pset->change_lma != CHANGE_IGNORE)
-		    {
-		      padd->section->lma = pset->lma_val;
-
-		      if (! bfd_set_section_alignment
-			  (obfd, padd->section,
-			   bfd_section_alignment (obfd, padd->section)))
-			RETURN_NONFATAL (bfd_get_filename (obfd));
-		    }
+		  padd->section->lma = pset->lma_val;
+		  
+		  if (! bfd_set_section_alignment
+		      (obfd, padd->section,
+		       bfd_section_alignment (obfd, padd->section)))
+		    RETURN_NONFATAL (bfd_get_filename (obfd));
 		}
 	    }
 	}
+    }
+
+  if (gnu_debuglink_filename != NULL)
+    {
+      if (! bfd_add_gnu_debuglink (obfd, gnu_debuglink_filename))
+	RETURN_NONFATAL (gnu_debuglink_filename);
     }
 
   if (gap_fill_set || pad_to_set)
@@ -1761,22 +1778,12 @@ setup_section (ibfd, isection, obfdarg)
   const char * name;
   char *prefix = NULL;
 
-  if ((bfd_get_section_flags (ibfd, isection) & SEC_DEBUGGING) != 0
-      && (strip_symbols == STRIP_DEBUG
-	  || strip_symbols == STRIP_UNNEEDED
-	  || strip_symbols == STRIP_ALL
-	  || discard_locals == LOCALS_ALL
-	  || convert_debugging))
+  if (is_strip_section (ibfd, isection))
     return;
 
   p = find_section_list (bfd_section_name (ibfd, isection), FALSE);
   if (p != NULL)
     p->used = TRUE;
-
-  if (sections_removed && p != NULL && p->remove)
-    return;
-  if (sections_copied && (p == NULL || ! p->copy))
-    return;
 
   /* Get the, possibly new, name of the output section.  */
   name = find_section_rename (ibfd, isection, & flags);
@@ -1913,23 +1920,11 @@ copy_section (ibfd, isection, obfdarg)
   if (status != 0)
     return;
 
+  if (is_strip_section (ibfd, isection))
+    return;
+
   flags = bfd_get_section_flags (ibfd, isection);
-  if ((flags & SEC_DEBUGGING) != 0
-      && (strip_symbols == STRIP_DEBUG
-	  || strip_symbols == STRIP_UNNEEDED
-	  || strip_symbols == STRIP_ALL
-	  || discard_locals == LOCALS_ALL
-	  || convert_debugging))
-    return;
-
   if ((flags & SEC_GROUP) != 0)
-    return;
-
-  p = find_section_list (bfd_section_name (ibfd, isection), FALSE);
-
-  if (sections_removed && p != NULL && p->remove)
-    return;
-  if (sections_copied && (p == NULL || ! p->copy))
     return;
 
   osection = isection->output_section;
@@ -1937,6 +1932,8 @@ copy_section (ibfd, isection, obfdarg)
 
   if (size == 0 || osection == 0)
     return;
+
+  p = find_section_list (bfd_get_section_name (ibfd, isection), FALSE);
 
   /* Core files do not need to be relocated.  */
   if (bfd_get_format (obfd) == bfd_core)
@@ -2418,6 +2415,10 @@ copy_main (argc, argv)
 	  strip_symbols = STRIP_UNNEEDED;
 	  break;
 
+	case OPTION_ADD_GNU_DEBUGLINK:
+	  gnu_debuglink_filename = optarg;
+	  break;
+
 	case 'K':
 	  add_specific_symbol (optarg, &keep_specific_list);
 	  break;
@@ -2789,7 +2790,8 @@ copy_main (argc, argv)
 	  break;
 
 	case 0:
-	  break;		/* we've been given a long option */
+	  /* We've been given a long option.  */
+	  break;
 
 	case 'H':
 	case 'h':

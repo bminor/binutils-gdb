@@ -905,8 +905,14 @@ bfd_make_writable PARAMS ((bfd *abfd));
 bfd_boolean
 bfd_make_readable PARAMS ((bfd *abfd));
 
+unsigned long
+bfd_calc_gnu_debuglink_crc32 PARAMS ((unsigned long crc, const unsigned char *buf, bfd_size_type len));
+
 char *
 bfd_follow_gnu_debuglink PARAMS ((bfd *abfd, const char *dir));
+
+bfd_boolean
+bfd_add_gnu_debuglink PARAMS ((bfd * abfd, const char * filename));
 
 /* Extracted from libbfd.c.  */
 

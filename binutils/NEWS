@@ -1,5 +1,9 @@
 -*- text -*-
 
+* objcopy now accepts --add-gnu-debuglink=<file> to insert a .gnu_debuglink
+  section into a (presumably stripped) executable.  This allows the debug
+  information for the file to be held in a seperate file.
+  
 * BFD marks the sections .comment and .note as 'n' in the BSD/POSIX
   single-character representation.  This can be checked by running nm
   with the -a switch.

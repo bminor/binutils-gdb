@@ -932,21 +932,26 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{-I} @var{bfdname}|@option{--input-target=}@var{bfdname}]
         [@option{-O} @var{bfdname}|@option{--output-target=}@var{bfdname}]
         [@option{-B} @var{bfdarch}|@option{--binary-architecture=}@var{bfdarch}]
-        [@option{-S}|@option{--strip-all}] [@option{-g}|@option{--strip-debug}]
+        [@option{-S}|@option{--strip-all}]
+        [@option{-g}|@option{--strip-debug}]
+        [@option{--add-gnu-debuglink=}@var{path-to-file}]
         [@option{-K} @var{symbolname}|@option{--keep-symbol=}@var{symbolname}]
         [@option{-N} @var{symbolname}|@option{--strip-symbol=}@var{symbolname}]
         [@option{-G} @var{symbolname}|@option{--keep-global-symbol=}@var{symbolname}]
         [@option{-L} @var{symbolname}|@option{--localize-symbol=}@var{symbolname}]
         [@option{-W} @var{symbolname}|@option{--weaken-symbol=}@var{symbolname}]
-        [@option{-x}|@option{--discard-all}] [@option{-X}|@option{--discard-locals}]
+        [@option{-x}|@option{--discard-all}]
+        [@option{-X}|@option{--discard-locals}]
         [@option{-b} @var{byte}|@option{--byte=}@var{byte}]
         [@option{-i} @var{interleave}|@option{--interleave=}@var{interleave}]
         [@option{-j} @var{sectionname}|@option{--only-section=}@var{sectionname}]
         [@option{-R} @var{sectionname}|@option{--remove-section=}@var{sectionname}]
         [@option{-p}|@option{--preserve-dates}]
         [@option{--debugging}]
-        [@option{--gap-fill=}@var{val}] [@option{--pad-to=}@var{address}]
-        [@option{--set-start=}@var{val}] [@option{--adjust-start=}@var{incr}]
+        [@option{--gap-fill=}@var{val}]
+        [@option{--pad-to=}@var{address}]
+        [@option{--set-start=}@var{val}]
+        [@option{--adjust-start=}@var{incr}]
         [@option{--change-addresses=}@var{incr}]
         [@option{--change-section-address} @var{section}@{=,+,-@}@var{val}]
         [@option{--change-section-lma} @var{section}@{=,+,-@}@var{val}]
@@ -955,10 +960,10 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--set-section-flags} @var{section}=@var{flags}]
         [@option{--add-section} @var{sectionname}=@var{filename}]
         [@option{--rename-section} @var{oldname}=@var{newname}[,@var{flags}]]
-        [@option{--change-leading-char} ] [@option{--remove-leading-char}]
-        [@option{--srec-len=}@var{ival} ] [@option{--srec-forceS3}]
-        [@option{--redefine-sym} @var{old}=@var{new} ]
-        [@option{--redefine-syms=}@var{filename} ]
+        [@option{--change-leading-char}] [@option{--remove-leading-char}]
+        [@option{--srec-len=}@var{ival}] [@option{--srec-forceS3}]
+        [@option{--redefine-sym} @var{old}=@var{new}]
+        [@option{--redefine-syms=}@var{filename}]
         [@option{--weaken}]
         [@option{--keep-symbols=}@var{filename}]
         [@option{--strip-symbols=}@var{filename}]
@@ -1069,10 +1074,14 @@ Do not copy relocation and symbol information from the source file.
 
 @item -g
 @itemx --strip-debug
-Do not copy debugging symbols from the source file.
+Do not copy debugging symbols or sections from the source file.
 
 @item --strip-unneeded
 Strip all symbols that are not needed for relocation processing.
+
+@item --add-gnu-debuglink=@var{path-to-file}
+Creates a .gnu_debuglink section which contains a reference to @var{path-to-file}
+and adds it to the output file.
 
 @item -K @var{symbolname}
 @itemx --keep-symbol=@var{symbolname}
@@ -2054,15 +2063,16 @@ and the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS strip
-strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname} ]
-      [@option{-I} @var{bfdname} |@option{--input-target=}@var{bfdname} ]
-      [@option{-O} @var{bfdname} |@option{--output-target=}@var{bfdname} ]
-      [@option{-s}|@option{--strip-all}] [@option{-S}|@option{-g}|@option{-d}|@option{--strip-debug}]
-      [@option{-K} @var{symbolname} |@option{--keep-symbol=}@var{symbolname} ]
-      [@option{-N} @var{symbolname} |@option{--strip-symbol=}@var{symbolname} ]
-      [@option{-x}|@option{--discard-all} ] [@option{-X} |@option{--discard-locals}]
-      [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname} ]
-      [@option{-o} @var{file} ] [@option{-p}|@option{--preserve-dates}]
+strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
+      [@option{-I} @var{bfdname} |@option{--input-target=}@var{bfdname}]
+      [@option{-O} @var{bfdname} |@option{--output-target=}@var{bfdname}]
+      [@option{-s}|@option{--strip-all}]
+      [@option{-S}|@option{-g}|@option{-d}|@option{--strip-debug}]
+      [@option{-K} @var{symbolname} |@option{--keep-symbol=}@var{symbolname}]
+      [@option{-N} @var{symbolname} |@option{--strip-symbol=}@var{symbolname}]
+      [@option{-x}|@option{--discard-all}] [@option{-X} |@option{--discard-locals}]
+      [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname}]
+      [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
       [@option{-v} |@option{--verbose}] [@option{-V}|@option{--version}]
       [@option{--help}] [@option{--info}]
       @var{objfile}@dots{}

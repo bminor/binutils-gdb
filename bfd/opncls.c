@@ -716,28 +716,32 @@ bfd_release (abfd, block)
    without debug symbols).
 */
 
-static unsigned long  calc_crc32                  PARAMS ((unsigned long, const unsigned char *, size_t));
 static char *         get_debug_link_info         PARAMS ((bfd *, unsigned long *));
 static bfd_boolean    separate_debug_file_exists  PARAMS ((const char *, const unsigned long));
 static char *         find_separate_debug_file    PARAMS ((bfd *, const char *));
 
+#define GNU_DEBUGLINK	".gnu_debuglink"
 /*
-INTERNAL_FUNCTION
-	calc_crc32
+FUNCTION
+	bfd_calc_gnu_debuglink_crc32
 
 SYNOPSIS
-	unsigned long calc_crc32 (unsigned long crc, const unsigned char *buf, size_t len);
+	unsigned long bfd_calc_gnu_debuglink_crc32 (unsigned long crc, const unsigned char *buf, bfd_size_type len);
 
 DESCRIPTION
-	Advance the CRC32 given by @var{crc} through @var{len}
-	bytes of @var{buf}. Return the updated CRC32 value.
+	Computes a CRC value as used in the .gnu_debuglink section.
+	Advances the previously computed @var{crc} value by computing
+	and adding in the crc32 for @var{len} bytes of @var{buf}.
+
+RETURNS
+	Return the updated CRC32 value.
 */     
 
-static unsigned long
-calc_crc32 (crc, buf, len)
+unsigned long
+bfd_calc_gnu_debuglink_crc32 (crc, buf, len)
      unsigned long crc;
      const unsigned char *buf;
-     size_t len;
+     bfd_size_type len;
 {
   static const unsigned long crc32_table[256] =
     {
@@ -808,7 +812,7 @@ INTERNAL_FUNCTION
 	get_debug_link_info
 
 SYNOPSIS
-	char *get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
+	char * get_debug_link_info (bfd * abfd, unsigned long * crc32_out)
 
 DESCRIPTION
 	fetch the filename and CRC32 value for any separate debuginfo
@@ -818,8 +822,8 @@ DESCRIPTION
 
 static char *
 get_debug_link_info (abfd, crc32_out)
-     bfd *abfd;
-     unsigned long *crc32_out;
+     bfd * abfd;
+     unsigned long * crc32_out;
 {
   asection * sect;
   bfd_size_type debuglink_size;
@@ -831,14 +835,17 @@ get_debug_link_info (abfd, crc32_out)
   BFD_ASSERT (abfd);
   BFD_ASSERT (crc32_out);
 
-  sect = bfd_get_section_by_name (abfd, ".gnu_debuglink");
+  sect = bfd_get_section_by_name (abfd, GNU_DEBUGLINK);
 
   if (sect == NULL)
     return NULL;
 
   debuglink_size = bfd_section_size (abfd, sect);  
 
-  contents = xmalloc (debuglink_size);
+  contents = malloc (debuglink_size);
+  if (contents == NULL)
+    return NULL;
+
   ret = bfd_get_section_contents (abfd, sect, contents,
 				  (file_ptr)0, debuglink_size);
   if (! ret)
@@ -877,7 +884,7 @@ separate_debug_file_exists (name, crc)
   static char buffer [8 * 1024];
   unsigned long file_crc = 0;
   int fd;
-  int count;
+  bfd_size_type count;
 
   BFD_ASSERT (name);
 
@@ -886,7 +893,7 @@ separate_debug_file_exists (name, crc)
     return FALSE;
 
   while ((count = read (fd, buffer, sizeof (buffer))) > 0)
-    file_crc = calc_crc32 (file_crc, buffer, count);
+    file_crc = bfd_calc_gnu_debuglink_crc32 (file_crc, buffer, count);
 
   close (fd);
 
@@ -930,16 +937,21 @@ find_separate_debug_file (abfd, debug_file_directory)
     return NULL;
 
   basename = get_debug_link_info (abfd, & crc32);
-
   if (basename == NULL)
     return NULL;
+
   if (strlen (basename) < 1)
     {
       free (basename);
       return NULL;
     }
 
-  dir = xstrdup (abfd->filename);
+  dir = strdup (abfd->filename);
+  if (dir == NULL)
+    {
+      free (basename);
+      return NULL;
+    }
   BFD_ASSERT (strlen (dir) != 0);
   
   /* Strip off filename part.  */
@@ -950,11 +962,17 @@ find_separate_debug_file (abfd, debug_file_directory)
   dir[i + 1] = '\0';
   BFD_ASSERT (dir[i] == '/' || dir[0] == '\0')
 
-  debugfile = xmalloc (strlen (debug_file_directory) + 1
-		       + strlen (dir)
-		       + strlen (".debug/")
-		       + strlen (basename) 
-		       + 1);
+  debugfile = malloc (strlen (debug_file_directory) + 1
+		      + strlen (dir)
+		      + strlen (".debug/")
+		      + strlen (basename) 
+		      + 1);
+  if (debugfile == NULL)
+    {
+      free (basename);
+      free (dir);
+      return NULL;
+    }
 
   /* First try in the same directory as the original file:  */
   strcpy (debugfile, dir);
@@ -1036,4 +1054,115 @@ bfd_follow_gnu_debuglink (abfd, dir)
     dir = DEBUGDIR;
 #endif
   return find_separate_debug_file (abfd, dir);
+}
+
+/*
+FUNCTION
+	bfd_add_gnu_debuglink
+
+SYNOPSIS
+	bfd_boolean bfd_add_gnu_debuglink (bfd * abfd, const char * filename);
+
+DESCRIPTION
+
+	Takes a @var{BFD} and adds a .gnu_debuglink section containing a link
+	to the specified @var{filename}.  The filename should be relative to
+	the current directory.
+
+RETURNS
+	<<TRUE>> is returned if all is ok.  Otherwise <<FALSE>> is returned
+	and bfd_error is set.  
+*/
+
+bfd_boolean
+bfd_add_gnu_debuglink (abfd, filename)
+     bfd *abfd;
+     const char * filename;
+{
+  asection * sect;
+  bfd_size_type debuglink_size;
+  unsigned long crc32;
+  char * contents;
+  bfd_size_type crc_offset;
+  FILE * handle;
+  static char buffer[8 * 1024];
+  size_t count;
+
+  if (abfd == NULL || filename == NULL)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return FALSE;
+    }
+
+  /* Make sure that we can read the file.
+     XXX - Should we attempt to locate the debug info file using the same
+     algorithm as gdb ?  At the moment, since we are creating the
+     .gnu_debuglink section, we insist upon the user providing us with a
+     correct-for-section-creation-time path, but this need not conform to
+     the gdb location algorithm.  */
+  handle = fopen (filename, FOPEN_RB);
+  if (handle == NULL)
+    {
+      bfd_set_error (bfd_error_system_call);
+      return FALSE;
+    }
+
+  crc32 = 0;
+  while ((count = fread (buffer, 1, sizeof buffer, handle)) > 0)
+    crc32 = bfd_calc_gnu_debuglink_crc32 (crc32, buffer, count);
+  fclose (handle);
+
+  /* Strip off any path components in filename,
+     now that we no longer need them.  */
+  filename = lbasename (filename);
+  
+  sect = bfd_get_section_by_name (abfd, GNU_DEBUGLINK);
+  if (sect)
+    {
+      /* Section already exists.  */
+      bfd_set_error (bfd_error_invalid_operation);
+      return FALSE;
+    }
+
+  sect = bfd_make_section (abfd, GNU_DEBUGLINK);
+  if (sect == NULL)
+    return FALSE;
+
+  if (! bfd_set_section_flags (abfd, sect,
+			       SEC_HAS_CONTENTS | SEC_DEBUGGING))
+    /* XXX Should we delete the section from the bfd ?  */
+    return FALSE;
+
+  
+  debuglink_size = strlen (filename) + 1;
+  debuglink_size += 3;
+  debuglink_size &= ~3;
+  debuglink_size += 4;
+
+  if (! bfd_set_section_size (abfd, sect, debuglink_size))
+    /* XXX Should we delete the section from the bfd ?  */
+    return FALSE;
+  
+  contents = malloc (debuglink_size);
+  if (contents == NULL)
+    {
+      /* XXX Should we delete the section from the bfd ?  */
+      bfd_set_error (bfd_error_no_memory);
+      return FALSE;
+    }
+
+  strcpy (contents, filename);
+  crc_offset = debuglink_size - 4;
+
+  bfd_put_32 (abfd, crc32, (bfd_byte *) (contents + crc_offset));
+
+  if (! bfd_set_section_contents (abfd, sect, contents,
+				  (file_ptr)0, debuglink_size))
+    {
+      /* XXX Should we delete the section from the bfd ?  */
+      free (contents);
+      return FALSE;
+    }
+
+  return TRUE;
 }

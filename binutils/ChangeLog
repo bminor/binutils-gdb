@@ -1,3 +1,21 @@
+2003-06-11  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (gnu_debuglink_filename): New variable.
+        (OPTION_ADD_GNU_DEBUGLINK): New switch
+        (copy_options): Describe --add-gnu-debuglink switch.
+        Mention that --strip-debug removes sections as well.
+        (is_strip_section): Process the sections removed and kept
+        lists before checking for debugging sections.
+        (add_redefine_syms_file): Make function static.
+        (copy_object): Use is_strip_section.
+        Check to see if a .gnu_debuglink section should be added.  If
+        so, call bfd_add_gnu_debuglink.
+        (setup_section): Use is_strip_section.
+        (copy_section): Use is_strip_section.
+        (copy_main): Handle OPTION_ADD_GNU_DEBUGLINK.
+	* NEWS: Mention new objcopy switch.
+        * doc/binutils.texi: Document new switch.
+
 2003-06-11  H.J. Lu <hongjiu.lu@intel.com>
 
 	* po/Make-in (DESTDIR): New.
