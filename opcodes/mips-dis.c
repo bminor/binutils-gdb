@@ -49,7 +49,7 @@ static CONST char * CONST reg_names[] = REGISTER_NAMES;
 /* subroutine */
 static void
 print_insn_arg (d, l, pc, info)
-     char *d;
+     const char *d;
      register unsigned long int l;
      bfd_vma pc;
      struct disassemble_info *info;
@@ -112,6 +112,10 @@ print_insn_arg (d, l, pc, info)
     case 'd':
       (*info->fprintf_func) (info->stream, "$%s",
 			     reg_names[(l >> OP_SH_RD) & OP_MASK_RD]);
+      break;
+
+    case 'z':
+      (*info->fprintf_func) (info->stream, "$%s", reg_names[0]);
       break;
 
     case '<':
@@ -180,7 +184,7 @@ _print_insn_mips (memaddr, word, info)
      unsigned long int word;
 {
   register int i;
-  register char *d;
+  register const char *d;
 
   for (i = 0; i < NUMOPCODES; i++)
     {

@@ -1,10 +1,13 @@
 Thu Sep  2 10:35:25 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	* mips-opc.c: Move div machine instruction after macro forms.
-	Change d,s,t form to d,v,t.  Likewise for divu, ddiv and ddivu.
-	This is for compatibility with the MIPS assembler, which only
-	generates the simple machine instruction when an explicit
-	destination of $0 is used.
+	* mips-opc.c: Change div machine instruction to be z,s,t rather
+	than s,t.  Change div macro to be d,v,t rather than d,s,t.
+	Likewise for divu, ddiv, ddivu.  Added z,s,t case for drem, dremu,
+	rem and remu which generates only the corresponding div
+	instruction.  This is for compatibility with the MIPS assembler,
+	which only generates the simple machine instruction when an
+	explicit destination of $0 is used.
+	* mips-dis.c (print_insn_arg): Handle 'z' (always register zero).
 
 Thu Aug 26 17:41:44 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
