@@ -2344,7 +2344,36 @@ read_one_struct_field (fip, pp, p, type, objfile)
      struct type *type;
      struct objfile *objfile;
 {
-  fip -> list -> field.name =
+  /* The following is code to work around cfront generated stabs.
+     The stabs contains full mangled name for each field.
+     We try to demangle the name and extract the field name out of it.
+  */
+  if (current_language->la_language == language_cplus)
+    {
+      char save_p;
+      char *dem, *dem_p;
+      save_p = *p;
+      *p = '\0';
+      dem = cplus_demangle (*pp, DMGL_ANSI | DMGL_PARAMS);
+      if (dem != NULL)
+        {
+          dem_p = strrchr (dem, ':');
+          if (dem_p != 0 && *(dem_p-1)==':')
+            dem_p++;
+          fip->list->field.name =
+            obsavestring (dem_p, strlen(dem_p), &objfile -> type_obstack);
+        }
+      else
+        {
+          fip->list->field.name =
+            obsavestring (*pp, p - *pp, &objfile -> type_obstack);
+        }
+      *p = save_p;
+    }
+  /* end of code for cfront work around */
+
+  else
+    fip -> list -> field.name =
     obsavestring (*pp, p - *pp, &objfile -> type_obstack);
   *pp = p + 1;
 
