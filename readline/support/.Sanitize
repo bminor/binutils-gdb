@@ -25,13 +25,11 @@ Do-first:
 
 Things-to-keep:
 
-Inputrc
-Makefile.in
-fileman.c
-histexamp.c
-manexamp.c
-rl.c
-rltest.c
+config.guess
+config.sub
+install.sh
+mkdirs
+mkdist
 
 Things-to-lose:
 

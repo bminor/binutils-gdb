@@ -27,14 +27,17 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
-configure.in
 hist.texinfo
 hstech.texinfo
 hsuser.texinfo
 inc-hist.texi
+readline.0
+readline.3
 rlman.texinfo
 rltech.texinfo
 rluser.texinfo
+texi2dvi
+texi2html
 
 Things-to-lose:
 
