@@ -87,8 +87,9 @@ static ldsym_type *global_symbol_hash_table[TABSIZE];
 /* Compute the hash code for symbol name KEY.  */
 static 
 #ifdef __GNUC__
-inline
+__inline
 #endif
+
 int
 DEFUN(hash_string,(key),
       CONST char *key)
@@ -106,7 +107,7 @@ DEFUN(hash_string,(key),
 
 static
 #ifdef __GNUC__
-inline
+__inline
 #endif ldsym_type *bp;
 ldsym_type *
 DEFUN(search,(key,hashval) ,
