@@ -1,3 +1,12 @@
+2004-01-16  Andrew Cagney  <cagney@redhat.com>
+
+	Changes from Peter Schauer.
+	* rs6000-tdep.c: Update copyright year.
+	(rs6000_push_dummy_call): Update the stack pointer before
+	accessing the corresponding stack region.
+	* rs6000-nat.c: Update copyright year.
+	(set_host_arch): Set "info.abfd" to "exec_bfd".
+
 2004-01-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* blockframe.c: Update copyright year.

@@ -1,8 +1,8 @@
 /* IBM RS/6000 native-dependent code for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1002,6 +1002,7 @@ set_host_arch (int pid)
 
   gdbarch_info_init (&info);
   info.bfd_arch_info = bfd_get_arch_info (&abfd);
+  info.abfd = exec_bfd;
 
   if (!gdbarch_update_p (info))
     {
