@@ -1,3 +1,8 @@
+Thu Jul  9 11:31:54 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/Makefile.am (MAINTAINERCLEANFILES): Define.
+	* doc/Makefile.in: Rebuild.
+
 Wed Jul  8 12:18:56 1998  Jeffrey A Law  (law@cygnus.com)
 
         * config/tc-mips.c (mips_ip, case 'i' and 'j'): Mask off high bits
