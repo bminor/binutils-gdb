@@ -1,3 +1,9 @@
+2002-05-10  Petr Sorfa  <petrs@caldera.com>
+
+	* ia64-tdep.c: Handle breakpoints on L instruction type
+	in MLX instruction bundle by moving the breakpoint to
+	the third slot (X instruction type) as L holds only data.
+
 2002-05-10  Kevin Buettner  <kevinb@redhat.com>
 
 	* dbxread.c (discarding_local_symbols_complaint): New complaint.
