@@ -99,7 +99,8 @@ static void check_duplicates (struct breakpoint *);
 
 static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
 
-static CORE_ADDR adjust_breakpoint_address (CORE_ADDR bpaddr);
+static CORE_ADDR adjust_breakpoint_address (CORE_ADDR bpaddr,
+                                            enum bptype bptype);
 
 static void describe_other_breakpoints (CORE_ADDR, asection *);
 
@@ -3947,11 +3948,23 @@ breakpoint_adjustment_warning (CORE_ADDR from_addr, CORE_ADDR to_addr,
    this function is simply the identity function.  */
 
 static CORE_ADDR
-adjust_breakpoint_address (CORE_ADDR bpaddr)
+adjust_breakpoint_address (CORE_ADDR bpaddr, enum bptype bptype)
 {
   if (!gdbarch_adjust_breakpoint_address_p (current_gdbarch))
     {
       /* Very few targets need any kind of breakpoint adjustment.  */
+      return bpaddr;
+    }
+  else if (bptype == bp_watchpoint
+           || bptype == bp_hardware_watchpoint
+           || bptype == bp_read_watchpoint
+           || bptype == bp_access_watchpoint
+           || bptype == bp_catch_fork
+           || bptype == bp_catch_vfork
+           || bptype == bp_catch_exec)
+    {
+      /* Watchpoints and the various bp_catch_* eventpoints should not
+         have their addresses modified.  */
       return bpaddr;
     }
   else
@@ -4062,7 +4075,8 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
   memset (b, 0, sizeof (*b));
   b->loc = allocate_bp_location (b, bptype);
   b->loc->requested_address = sal.pc;
-  b->loc->address = adjust_breakpoint_address (b->loc->requested_address);
+  b->loc->address = adjust_breakpoint_address (b->loc->requested_address,
+                                               bptype);
   if (sal.symtab == NULL)
     b->source_file = NULL;
   else
@@ -4622,7 +4636,8 @@ set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_id frame_id)
     if (b->type == bp_longjmp_resume)
     {
       b->loc->requested_address = pc;
-      b->loc->address = adjust_breakpoint_address (b->loc->requested_address);
+      b->loc->address = adjust_breakpoint_address (b->loc->requested_address,
+                                                   b->type);
       b->enable_state = bp_enabled;
       b->frame_id = frame_id;
       check_duplicates (b);
@@ -5879,7 +5894,8 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 	  scope_breakpoint->loc->requested_address
 	    = get_frame_pc (prev_frame);
 	  scope_breakpoint->loc->address
-	    = adjust_breakpoint_address (scope_breakpoint->loc->requested_address);
+	    = adjust_breakpoint_address (scope_breakpoint->loc->requested_address,
+	                                 scope_breakpoint->type);
 
 	  /* The scope breakpoint is related to the watchpoint.  We
 	     will need to act on them together.  */
@@ -7185,7 +7201,8 @@ breakpoint_re_set_one (void *bint)
 	      b->line_number = sals.sals[i].line;
 	      b->loc->requested_address = sals.sals[i].pc;
 	      b->loc->address
-	        = adjust_breakpoint_address (b->loc->requested_address);
+	        = adjust_breakpoint_address (b->loc->requested_address,
+		                             b->type);
 
 	      /* Used to check for duplicates here, but that can
 	         cause trouble, as it doesn't check for disabled

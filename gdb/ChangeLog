@@ -1,3 +1,9 @@
+2004-03-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* breakpoint.c (adjust_breakpoint_address): Don't adjust
+	breakpoint address for watchpoints or the catch eventpoints.
+	Add new paramter ``bptype''.  Adjust all callers.
+
 2004-03-19  Andrew Cagney  <cagney@redhat.com>
 
 	* config/pa/tm-hppa.h (GDB_TARGET_IS_HPPA): Delete unused macro.
