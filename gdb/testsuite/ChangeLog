@@ -1,5 +1,10 @@
 2005-02-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.base/start.c: New file.
+	* gdb.base/start.exp: New testcase.
+
+2005-02-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/start/dummy.adb: New file.
 	* gdb.ada/start.exp: New testcase.
 
