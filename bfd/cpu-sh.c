@@ -47,13 +47,13 @@ compatible (a,b)
 }
 #endif
 
-#define SH_NEXT &arch_info_struct[0]
-#define SH2_NEXT &arch_info_struct[1]
-#define SH_DSP_NEXT &arch_info_struct[2]
-#define SH3_NEXT &arch_info_struct[3]
+#define SH_NEXT      &arch_info_struct[0]
+#define SH2_NEXT     &arch_info_struct[1]
+#define SH_DSP_NEXT  &arch_info_struct[2]
+#define SH3_NEXT     &arch_info_struct[3]
 #define SH3_DSP_NEXT &arch_info_struct[4]
-#define SH3E_NEXT &arch_info_struct[5]
-#define SH4_NEXT NULL
+#define SH3E_NEXT    &arch_info_struct[5]
+#define SH4_NEXT     NULL
 
 static const bfd_arch_info_type arch_info_struct[] =
 {

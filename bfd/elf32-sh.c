@@ -77,7 +77,8 @@ static boolean sh_elf_finish_dynamic_sections
 
 #define ELF_DYNAMIC_INTERPRETER "/usr/lib/libc.so.1"
 
-static reloc_howto_type sh_elf_howto_table[] = {
+static reloc_howto_type sh_elf_howto_table[] =
+{
   /* No relocation.  */
   HOWTO (R_SH_NONE,		/* type */
 	 0,			/* rightshift */
@@ -911,14 +912,16 @@ sh_elf_ignore_reloc (abfd, reloc_entry, symbol, data, input_section,
 
 /* This structure is used to map BFD reloc codes to SH ELF relocs.  */
 
-struct elf_reloc_map {
+struct elf_reloc_map
+{
   bfd_reloc_code_real_type bfd_reloc_val;
   unsigned char elf_reloc_val;
 };
 
 /* An array mapping BFD reloc codes to SH ELF relocs.  */
 
-static const struct elf_reloc_map sh_reloc_map[] = {
+static const struct elf_reloc_map sh_reloc_map[] =
+{
   { BFD_RELOC_NONE, R_SH_NONE },
   { BFD_RELOC_32, R_SH_DIR32 },
   { BFD_RELOC_CTOR, R_SH_DIR32 },
@@ -2087,7 +2090,8 @@ sh_elf_swap_insns (abfd, sec, relocs, contents, addr)
 
 /* First entry in an absolute procedure linkage table look like this.  */
 
-static const bfd_byte elf_sh_plt0_entry_be[PLT_ENTRY_SIZE] = {
+static const bfd_byte elf_sh_plt0_entry_be[PLT_ENTRY_SIZE] =
+{
   0xd0, 0x04,	/* mov.l 1f,r0 */
   0xd2, 0x05,	/* mov.l 2f,r2 */
   0x60, 0x02,	/* mov.l @r0,r0 */
@@ -2102,7 +2106,8 @@ static const bfd_byte elf_sh_plt0_entry_be[PLT_ENTRY_SIZE] = {
   0, 0, 0, 0,	/* 2: replaced with address of .got.plt + 4.  */
 };
 
-static const bfd_byte elf_sh_plt0_entry_le[PLT_ENTRY_SIZE] = {
+static const bfd_byte elf_sh_plt0_entry_le[PLT_ENTRY_SIZE] =
+{
   0x04, 0xd0,	/* mov.l 1f,r0 */
   0x05, 0xd2,	/* mov.l 2f,r2 */
   0x02, 0x60,	/* mov.l @r0,r0 */
@@ -2120,7 +2125,8 @@ static const bfd_byte elf_sh_plt0_entry_le[PLT_ENTRY_SIZE] = {
 /* Sebsequent entries in an absolute procedure linkage table look like
    this.  */
 
-static const bfd_byte elf_sh_plt_entry_be[PLT_ENTRY_SIZE] = {
+static const bfd_byte elf_sh_plt_entry_be[PLT_ENTRY_SIZE] =
+{
   0xd0, 0x04,	/* mov.l 1f,r0 */
   0x60, 0x02,	/* mov.l @r0,r0 */
   0xd2, 0x02,	/* mov.l 0f,r2 */
@@ -2134,7 +2140,8 @@ static const bfd_byte elf_sh_plt_entry_be[PLT_ENTRY_SIZE] = {
   0, 0, 0, 0,	/* 2: replaced with offset into relocation table.  */
 };
 
-static const bfd_byte elf_sh_plt_entry_le[PLT_ENTRY_SIZE] = {
+static const bfd_byte elf_sh_plt_entry_le[PLT_ENTRY_SIZE] =
+{
   0x04, 0xd0,	/* mov.l 1f,r0 */
   0x02, 0x60,	/* mov.l @r0,r0 */
   0x02, 0xd2,	/* mov.l 0f,r2 */
@@ -2150,7 +2157,8 @@ static const bfd_byte elf_sh_plt_entry_le[PLT_ENTRY_SIZE] = {
 
 /* Entries in a PIC procedure linkage table look like this.  */
 
-static const bfd_byte elf_sh_pic_plt_entry_be[PLT_ENTRY_SIZE] = {
+static const bfd_byte elf_sh_pic_plt_entry_be[PLT_ENTRY_SIZE] =
+{
   0xd0, 0x04,	/* mov.l 1f,r0 */
   0x00, 0xce,	/* mov.l @(r0,r12),r0 */
   0x40, 0x2b,	/* jmp @r0 */
@@ -2165,7 +2173,8 @@ static const bfd_byte elf_sh_pic_plt_entry_be[PLT_ENTRY_SIZE] = {
   0, 0, 0, 0    /* 2: replaced with offset into relocation table.  */
 };
 
-static const bfd_byte elf_sh_pic_plt_entry_le[PLT_ENTRY_SIZE] = {
+static const bfd_byte elf_sh_pic_plt_entry_le[PLT_ENTRY_SIZE] =
+{
   0x04, 0xd0,	/* mov.l 1f,r0 */
   0xce, 0x00,	/* mov.l @(r0,r12),r0 */
   0x2b, 0x40,	/* jmp @r0 */
@@ -2214,7 +2223,8 @@ static const bfd_byte *elf_sh_pic_plt_entry;
 /* This structure keeps track of the number of PC relative relocs we
    have copied for a given symbol.  */
 
-struct elf_sh_pcrel_relocs_copied {
+struct elf_sh_pcrel_relocs_copied
+{
   /* Next section.  */
   struct elf_sh_pcrel_relocs_copied *next;
   /* A section in dynobj.  */
@@ -2225,7 +2235,8 @@ struct elf_sh_pcrel_relocs_copied {
 
 /* sh ELF linker hash entry.  */
 
-struct elf_sh_link_hash_entry {
+struct elf_sh_link_hash_entry
+{
   struct elf_link_hash_entry root;
 
   /* Number of PC relative relocs copied for this symbol.  */
@@ -2234,7 +2245,8 @@ struct elf_sh_link_hash_entry {
 
 /* sh ELF linker hash table.  */
 
-struct elf_sh_link_hash_table {
+struct elf_sh_link_hash_table
+{
   struct elf_link_hash_table root;
 };
 
@@ -3524,9 +3536,7 @@ sh_elf_gc_mark_hook (abfd, info, rel, h, sym)
 	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
 	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
                 && sym->st_shndx != SHN_COMMON))
-	{
-	  return bfd_section_from_elf_index (abfd, sym->st_shndx);
-	}
+	return bfd_section_from_elf_index (abfd, sym->st_shndx);
     }
   return NULL;
 }
@@ -3895,10 +3905,10 @@ sh_elf_set_private_flags (abfd, flags)
 
 static boolean
 sh_elf_copy_private_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
+     bfd * ibfd;
+     bfd * obfd;
 {
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return true;
 

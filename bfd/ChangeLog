@@ -1,3 +1,11 @@
+2000-12-12  Nick Clifton  <nickc@redhat.com>
+
+	* cpu-sh.c: Fix formattng.
+	* elf.c: Fix formattng.
+	* elf32-mips.c: Fix formattng.
+	* elf32-sh.c: Fix formattng.
+	* elf64-alpha.c: Fix formattng.
+
 2000-12-09  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-mips.c (_bfd_mips_elf_find_nearest_line): Pass

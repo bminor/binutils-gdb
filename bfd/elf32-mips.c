@@ -49,7 +49,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* This structure is used to hold .got information when linking.  It
    is stored in the tdata field of the bfd_elf_section_data structure.  */
 
-struct mips_got_info {
+struct mips_got_info
+{
   /* The global symbol in the GOT with the lowest index in the dynamic
      symbol table.  */
   struct elf_link_hash_entry *global_gotsym;
@@ -64,7 +65,8 @@ struct mips_got_info {
 /* The MIPS ELF linker needs additional information for each symbol in
    the global hash table.  */
 
-struct mips_elf_link_hash_entry {
+struct mips_elf_link_hash_entry
+{
   struct elf_link_hash_entry root;
 
   /* External symbol information.  */
@@ -321,7 +323,8 @@ static bfd *reldyn_sorting_bfd;
 /* Names of sections which appear in the .dynsym section in an Irix 5
    executable.  */
 
-static const char * const mips_elf_dynsym_sec_names[] = {
+static const char * const mips_elf_dynsym_sec_names[] =
+{
   ".text",
   ".init",
   ".fini",
@@ -345,7 +348,8 @@ static const char * const mips_elf_dynsym_sec_names[] = {
 
 /* The names of the runtime procedure table symbols used on Irix 5.  */
 
-static const char * const mips_elf_dynsym_rtproc_names[] = {
+static const char * const mips_elf_dynsym_rtproc_names[] =
+{
   "_procedure_table",
   "_procedure_string_table",
   "_procedure_table_size",
@@ -355,7 +359,8 @@ static const char * const mips_elf_dynsym_rtproc_names[] = {
 /* These structures are used to generate the .compact_rel section on
    Irix 5.  */
 
-typedef struct {
+typedef struct
+{
   unsigned long id1;		/* Always one?  */
   unsigned long num;		/* Number of compact relocation entries.  */
   unsigned long id2;		/* Always two?  */
@@ -364,7 +369,8 @@ typedef struct {
   unsigned long reserved1;	/* Zero?  */
 } Elf32_compact_rel;
 
-typedef struct {
+typedef struct
+{
   bfd_byte id1[4];
   bfd_byte num[4];
   bfd_byte id2[4];
@@ -373,7 +379,8 @@ typedef struct {
   bfd_byte reserved1[4];
 } Elf32_External_compact_rel;
 
-typedef struct {
+typedef struct
+{
   unsigned int ctype : 1;	/* 1: long 0: short format. See below.  */
   unsigned int rtype : 4;	/* Relocation types. See below.  */
   unsigned int dist2to : 8;
@@ -382,7 +389,8 @@ typedef struct {
   unsigned long vaddr;		/* VADDR to be relocated.  */
 } Elf32_crinfo;
 
-typedef struct {
+typedef struct
+{
   unsigned int ctype : 1;	/* 1: long 0: short format. See below.  */
   unsigned int rtype : 4;	/* Relocation types. See below.  */
   unsigned int dist2to : 8;
@@ -390,13 +398,15 @@ typedef struct {
   unsigned long konst;		/* KONST field. See below.  */
 } Elf32_crinfo2;
 
-typedef struct {
+typedef struct
+{
   bfd_byte info[4];
   bfd_byte konst[4];
   bfd_byte vaddr[4];
 } Elf32_External_crinfo;
 
-typedef struct {
+typedef struct
+{
   bfd_byte info[4];
   bfd_byte konst[4];
 } Elf32_External_crinfo2;
@@ -449,7 +459,8 @@ static void bfd_elf32_swap_crinfo_out
    from smaller values.  Start with zero, widen, *then* decrement.  */
 #define MINUS_ONE	(((bfd_vma)0) - 1)
 
-static reloc_howto_type elf_mips_howto_table[] = {
+static reloc_howto_type elf_mips_howto_table[] =
+{
   /* No relocation.  */
   HOWTO (R_MIPS_NONE,		/* type */
 	 0,			/* rightshift */
@@ -1067,7 +1078,8 @@ static reloc_howto_type elf_mips_gnu_vtentry_howto =
    reloc.  This extension permits gcc to output the HI and LO relocs
    itself.  */
 
-struct mips_hi16 {
+struct mips_hi16
+{
   struct mips_hi16 *next;
   bfd_byte *addr;
   bfd_vma addend;
@@ -1924,7 +1936,8 @@ struct elf_reloc_map {
   enum elf_mips_reloc_type elf_reloc_val;
 };
 
-static CONST struct elf_reloc_map mips_reloc_map[] = {
+static CONST struct elf_reloc_map mips_reloc_map[] =
+{
   { BFD_RELOC_NONE, R_MIPS_NONE, },
   { BFD_RELOC_16, R_MIPS_16 },
   { BFD_RELOC_32, R_MIPS_32 },
@@ -3491,7 +3504,8 @@ _bfd_mips_elf_modify_segment_map (abfd)
       if (m != NULL
 	  && m->count == 1 && strcmp (m->sections[0]->name, ".dynamic") == 0)
 	{
-	  static const char *sec_names[] = {
+	  static const char *sec_names[] =
+	  {
 	    ".dynamic", ".dynstr", ".dynsym", ".hash"
 	  };
 	  bfd_vma low, high;
@@ -3710,7 +3724,8 @@ mips_elf_is_local_label_name (abfd, name)
 /* MIPS ELF uses a special find_nearest_line routine in order the
    handle the ECOFF debugging information.  */
 
-struct mips_elf_find_line {
+struct mips_elf_find_line
+{
   struct ecoff_debug_info d;
   struct ecoff_find_line i;
 };
@@ -3863,7 +3878,8 @@ _bfd_mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 
 /* MIPS ELF linker hash table.  */
 
-struct mips_elf_link_hash_table {
+struct mips_elf_link_hash_table
+{
   struct elf_link_hash_table root;
 #if 0
   /* We no longer use this.  */
@@ -4157,7 +4173,8 @@ _bfd_mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
 /* Structure used to pass information to mips_elf_output_extsym.  */
 
-struct extsym_info {
+struct extsym_info
+{
   bfd *abfd;
   struct bfd_link_info *info;
   struct ecoff_debug_info *debug;
@@ -4532,11 +4549,13 @@ _bfd_mips_elf_final_link (abfd, info)
   EXTR esym;
   bfd_vma last;
   unsigned int i;
-  static const char * const name[] = {
+  static const char * const name[] =
+  {
     ".text", ".init", ".fini", ".data",
     ".rodata", ".sdata", ".sbss", ".bss"
   };
-  static const int sc[] = {
+  static const int sc[] =
+  {
     scText, scInit, scFini, scData,
     scRData, scSData, scSBss, scBss
   };
@@ -5455,7 +5474,8 @@ mips_elf_record_global_got_symbol (h, info, g)
 /* This structure is passed to mips_elf_sort_hash_table_f when sorting
    the dynamic symbols.  */
 
-struct mips_elf_hash_sort_data {
+struct mips_elf_hash_sort_data
+{
   /* The symbol in the global GOT with the lowest dynamic symbol table
      index.  */
   struct elf_link_hash_entry *low;
@@ -6610,7 +6630,6 @@ mips_elf_perform_relocation (info, howto, relocation, value,
 	value = (((value & 0x1f0000) << 5)
 		 | ((value & 0x3e00000) >> 5)
 		 | (value & 0xffff));
-
     }
   else if (r_type == R_MIPS16_GPREL)
     {

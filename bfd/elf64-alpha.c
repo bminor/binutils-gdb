@@ -4741,9 +4741,7 @@ const struct elf_size_info alpha_elf_size_info =
 #define elf_backend_size_info \
   alpha_elf_size_info
 
-/*
- * A few constants that determine how the .plt section is set up.
- */
+/* A few constants that determine how the .plt section is set up.  */
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
