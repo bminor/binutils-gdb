@@ -2428,7 +2428,13 @@ xcoff_mark (info, sec)
 		  if (h == NULL
 		      || h->root.type == bfd_link_hash_defined
 		      || h->root.type == bfd_link_hash_defweak
-		      || h->root.type == bfd_link_hash_common)
+		      || h->root.type == bfd_link_hash_common
+		      || ((h->flags & XCOFF_CALLED) != 0
+			  && (h->flags & XCOFF_DEF_REGULAR) == 0
+			  && (h->flags & XCOFF_REF_DYNAMIC) != 0
+			  && (h->root.type == bfd_link_hash_undefined
+			      || h->root.type == bfd_link_hash_undefweak)
+			  && h->root.root.string[0] == '.'))
 		    break;
 		  /* Fall through.  */
 		case R_POS:
