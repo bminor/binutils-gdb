@@ -1,5 +1,7 @@
 2004-03-19  Andrew Cagney  <cagney@redhat.com>
 
+	* config/pa/tm-hppa.h (GDB_TARGET_IS_HPPA): Delete unused macro.
+
 	* PROBLEMS: Delete note that ARM does not use frame code, problem
 	fixed.
 

@@ -3725,7 +3725,6 @@ reserved for that breakpoint, and @var{real_pc} set to @var{funaddr}.
 This method replaces @code{DEPRECATED_CALL_DUMMY_WORDS},
 @code{DEPRECATED_SIZEOF_CALL_DUMMY_WORDS}, @code{CALL_DUMMY},
 @code{CALL_DUMMY_LOCATION}, @code{DEPRECATED_REGISTER_SIZE},
-@code{GDB_TARGET_IS_HPPA},
 @code{DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET}, and
 @code{DEPRECATED_FIX_CALL_DUMMY}.
 

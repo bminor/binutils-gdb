@@ -1,3 +1,8 @@
+2004-03-19  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	reference to GDB_TARGET_IS_HPPA.
+
 2004-03-18  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Coding): Update section on gdbarch_data,
