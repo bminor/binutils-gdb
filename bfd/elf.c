@@ -271,7 +271,7 @@ bfd_elf_hash (namearg)
 	  h ^= g;
 	}
     }
-  return h;
+  return h & 0xffffffff;
 }
 
 /* Read a specified number of bytes at a specified offset in an ELF
