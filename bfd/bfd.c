@@ -74,7 +74,10 @@ DEFUN(bfd_nonrepresentable_section,(abfd, name),
 	 CONST  bfd * CONST abfd AND
 	 CONST  char * CONST name)
 {
-  printf("bfd error writing file %s, can't represent section name %s\n", abfd->filename, name);
+  printf("bfd error writing file %s, format %s can't represent section %s\n",
+	 abfd->filename, 
+	 abfd->xvec->name,
+	 name);
   exit(1);
 }
 bfd_error_vector_type bfd_error_vector = 
@@ -123,8 +126,8 @@ bfd_ec error_tag;
 void (*bfd_error_trap)() = bfd_default_error_trap;
 void (*bfd_error_nonrepresentabltrap)() = bfd_default_error_trap;
 void
-bfd_perror (message)
-     char *message;
+DEFUN(bfd_perror,(message),
+      CONST char *message)
 {
   if (bfd_error == system_call_error)
     perror(message);		/* must be system error then... */
@@ -765,109 +768,119 @@ bfd *output_bfd;
 
       }
 
-  if (output_bfd!= (bfd *)NULL &&   howto->partial_inplace == false)  {
-    /*
-      This is a partial relocation, and we want to apply the relocation
-      to the reloc entry rather than the raw data. Modify the reloc
-      inplace to reflect what we now know.
-      */
-    reloc_entry->addend = relocation  ;
-    reloc_entry->section = reloc_target_input_section;
-    if (reloc_target_input_section != (asection *)NULL) {
-      /* If we know the output section we can forget the symbol */
-      reloc_entry->sym_ptr_ptr = (asymbol**)NULL;
+  if (output_bfd!= (bfd *)NULL) {
+    if ( howto->partial_inplace == false)  {
+      /*
+	This is a partial relocation, and we want to apply the relocation
+	to the reloc entry rather than the raw data. Modify the reloc
+	inplace to reflect what we now know.
+	*/
+      reloc_entry->addend = relocation  ;
+      reloc_entry->section = reloc_target_input_section;
+      if (reloc_target_input_section != (asection *)NULL) {
+	/* If we know the output section we can forget the symbol */
+	reloc_entry->sym_ptr_ptr = (asymbol**)NULL;
+      }
+      reloc_entry->address += 
+	input_section->output_offset;
+      return flag;
     }
-    reloc_entry->address += 
-      input_section->output_offset;
+    else 
+	{
+	  /* This is a partial relocation, but inplace, so modify the
+	     reloc record a bit
+	     */
+
+	}
   }
-  else {
-    reloc_entry->addend = 0;
+
+  reloc_entry->addend = 0;
 
 
-    /* 
-      Either we are relocating all the way, or we don't want to apply
-      the relocation to the reloc entry (probably because there isn't
-      any room in the output format to describe addends to relocs)
-      */
-    relocation >>= howto->rightshift;
+  /* 
+    Either we are relocating all the way, or we don't want to apply
+    the relocation to the reloc entry (probably because there isn't
+    any room in the output format to describe addends to relocs)
+    */
+  relocation >>= howto->rightshift;
 
-    /* Shift everything up to where it's going to be used */
+  /* Shift everything up to where it's going to be used */
    
-    relocation <<= howto->bitpos;
+  relocation <<= howto->bitpos;
 
 
-    /* Wait for the day when all have the mask in them */
+  /* Wait for the day when all have the mask in them */
 
 
 
-    relocation_before = relocation;
+  relocation_before = relocation;
 
 
-    /* What we do:
-       i instruction to be left alone
-       o offset within instruction
-       r relocation offset to apply
-       S src mask
-       D dst mask
-       N ~dst mask
-       A part 1
-       B part 2
-       R result
-       
-       Do this:
-           i i i i i o o o o o 	from bfd_get<size>
-       and           S S S S S 	to get the size offset we want
-       +   r r r r r r r r r r  to get the final value to place
-       and           D D D D D  to chop to right size
-       -----------------------
-                     A A A A A 
-       And this:
-           i i i i i o o o o o	from bfd_get<size>
-       and N N N N N 	        get instruction
-       -----------------------
-           B B B B B
-
-       And then:	     
-           B B B B B       
-       or 	     A A A A A     
-       -----------------------
-           R R R R R R R R R R 	put into bfd_put<size>
-       */
+  /* What we do:
+     i instruction to be left alone
+     o offset within instruction
+     r relocation offset to apply
+     S src mask
+     D dst mask
+     N ~dst mask
+     A part 1
+     B part 2
+     R result
+     
+     Do this:
+     i i i i i o o o o o 	from bfd_get<size>
+     and           S S S S S 	to get the size offset we want
+     +   r r r r r r r r r r  to get the final value to place
+     and           D D D D D  to chop to right size
+     -----------------------
+     A A A A A 
+     And this:
+     ...   i i i i i o o o o o	from bfd_get<size>
+     and   N N N N N 	        get instruction
+     -----------------------
+     ...   B B B B B
+     
+     And then:	     
+     B B B B B       
+     or 	     A A A A A     
+     -----------------------
+     R R R R R R R R R R 	put into bfd_put<size>
+     */
 
 #define DOIT(x) \
-     x = ( (x & ~howto->dst_mask) | (((x & howto->src_mask) +  relocation) & howto->dst_mask))
+  x = ( (x & ~howto->dst_mask) | (((x & howto->src_mask) +  relocation) & howto->dst_mask))
 
-      switch (howto->size)
-	  {
-	  case 0:
-	      {
-		char x = bfd_getchar(abfd, (char *)data + addr);
-		DOIT(x);
-		bfd_putchar(abfd,x, (unsigned char *) data + addr);
-	      }
-	    break;
+    switch (howto->size)
+	{
+	case 0:
+	    {
+	      char x = bfd_getchar(abfd, (char *)data + addr);
+	      DOIT(x);
+	      bfd_putchar(abfd,x, (unsigned char *) data + addr);
+	    }
+	  break;
 
-	  case 1:
-	      { 
-		short x = bfd_getshort(abfd, (bfd_byte *)data + addr);
-		DOIT(x);
-		bfd_putshort(abfd, x,   (unsigned char *)data + addr);
-	      }
-	    break;
-	  case 2:
-	      {
-		long  x = bfd_getlong(abfd, (bfd_byte *) data + addr);
-DOIT(x);
-		bfd_putlong(abfd,x,    (bfd_byte *)data + addr);
-	      }	   
-	    break;
-	  case 3:
-	    /* Do nothing */
-	    break;
-	  default:
-	    return bfd_reloc_other;
-	  }
-  }
+	case 1:
+	    { 
+	      short x = bfd_getshort(abfd, (bfd_byte *)data + addr);
+	      DOIT(x);
+	      bfd_putshort(abfd, x,   (unsigned char *)data + addr);
+	    }
+	  break;
+	case 2:
+	    {
+	      long  x = bfd_getlong(abfd, (bfd_byte *) data + addr);
+	      DOIT(x);
+	      bfd_putlong(abfd,x,    (bfd_byte *)data + addr);
+	    }	   
+	  break;
+	case 3:
+	  /* Do nothing */
+	  break;
+	default:
+	  return bfd_reloc_other;
+	}
+
   return flag;
 }
 
