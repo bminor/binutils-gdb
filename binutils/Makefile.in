@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.3 from Makefile.am
+# Makefile.in generated automatically by automake 1.3b from Makefile.am
 
 # Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -32,7 +32,7 @@ mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
 
-DISTDIR =
+DESTDIR =
 
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -64,18 +64,46 @@ host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
 AR = @AR@
+AS = @AS@
 BUILD_DLLTOOL = @BUILD_DLLTOOL@
+BUILD_DLLWRAP = @BUILD_DLLWRAP@
 BUILD_NLMCONV = @BUILD_NLMCONV@
 BUILD_SRCONV = @BUILD_SRCONV@
 BUILD_WINDRES = @BUILD_WINDRES@
+CATALOGS = @CATALOGS@
+CATOBJEXT = @CATOBJEXT@
 CC = @CC@
+DATADIRNAME = @DATADIRNAME@
+DLLTOOL = @DLLTOOL@
 DLLTOOL_DEFS = @DLLTOOL_DEFS@
 EXEEXT = @EXEEXT@
+GMOFILES = @GMOFILES@
+GMSGFMT = @GMSGFMT@
+GT_NO = @GT_NO@
+GT_YES = @GT_YES@
 HDEFINES = @HDEFINES@
+INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
+INSTOBJEXT = @INSTOBJEXT@
+INTLDEPS = @INTLDEPS@
+INTLOBJS = @INTLOBJS@
+LD = @LD@
 LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MAKEINFO = @MAKEINFO@
+MKINSTALLDIRS = @MKINSTALLDIRS@
+MSGFMT = @MSGFMT@
 NLMCONV_DEFS = @NLMCONV_DEFS@
+NM = @NM@
+PACKAGE = @PACKAGE@
+POFILES = @POFILES@
+POSUB = @POSUB@
 RANLIB = @RANLIB@
 UNDERSCORE = @UNDERSCORE@
+USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
+USE_NLS = @USE_NLS@
+VERSION = @VERSION@
+l = @l@
 
 INTLLIBS = @INTLLIBS@
 
@@ -154,7 +182,8 @@ CFILES = addr2line.c ar.c arsup.c bucomm.c coffdump.c coffgrok.c debug.c \
 	maybe-strip.c nlmconv.c nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c rdcoff.c rddbg.c size.c srconv.c \
 	stabs.c strings.c sysdump.c version.c wrstabs.c \
-	windres.c resrc.c rescoff.c resbin.c winduni.c readelf.c
+	windres.c resrc.c rescoff.c resbin.c winduni.c readelf.c \
+	resres.c
 
 GENERATED_CFILES = \
 	underscore.c arparse.c arlex.c sysroff.c sysinfo.c syslex.c \
@@ -239,7 +268,7 @@ sysdump_SOURCES = sysdump.c $(BULIBS)
 nlmconv_SOURCES = nlmconv.c nlmheader.y $(BULIBS)
 
 windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
-	winduni.c $(BULIBS)
+	winduni.c resres.c $(BULIBS)
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
@@ -291,7 +320,7 @@ filemode.o
 dlltool_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 dlltool_LDFLAGS = 
 windres_OBJECTS =  windres.o resrc.o rescoff.o resbin.o rcparse.o \
-rclex.o winduni.o bucomm.o version.o filemode.o
+rclex.o winduni.o resres.o bucomm.o version.o filemode.o
 windres_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 windres_LDFLAGS = 
 size_OBJECTS =  size.o bucomm.o version.o filemode.o
@@ -344,10 +373,9 @@ LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
 LEXLIB = @LEXLIB@
 YLWRAP = $(top_srcdir)/../ylwrap
 CFLAGS = @CFLAGS@
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -o $@
-MAKEINFO = `if test -f $(top_builddir)/../texinfo/makeinfo/makeinfo; then echo $(top_builddir)/../texinfo/makeinfo/makeinfo; else echo makeinfo; fi`
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LINK = $(LIBTOOL) --mode=link $(CC) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 TEXI2DVI = `if test -f $(top_srcdir)/../texinfo/util/texi2dvi; then echo $(top_srcdir)/../texinfo/util/texi2dvi; else echo texi2dvi; fi`
 TEXINFO_TEX = $(top_srcdir)/../texinfo/texinfo.tex
 INFO_DEPS = binutils.info
@@ -362,9 +390,6 @@ acinclude.m4 aclocal.m4 arlex.c arparse.c config.in configure \
 configure.in deflex.c defparse.c nlmheader.c rclex.c rcparse.c \
 stamp-h.in
 
-
-PACKAGE = @PACKAGE@
-VERSION = @VERSION@
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
@@ -553,14 +578,14 @@ strip-new$(EXEEXT): $(strip_new_OBJECTS) $(strip_new_DEPENDENCIES)
 	@rm -f strip-new$(EXEEXT)
 	$(LINK) $(strip_new_LDFLAGS) $(strip_new_OBJECTS) $(strip_new_LDADD) $(LIBS)
 .y.c:
-	$(SHELL) $(YLWRAP) "$(YACC)" $< y.tab.c $*.c y.tab.h $*.h -- $(YFLAGS)
+	$(SHELL) $(YLWRAP) "$(YACC)" $< y.tab.c $*.c y.tab.h $*.h -- $(AM_YFLAGS) $(YFLAGS)
 defparse.h: defparse.c
 arparse.h: arparse.c
 rcparse.h: rcparse.c
 nlmheader.h: nlmheader.c
 
 .l.c:
-	$(SHELL) $(YLWRAP) "$(LEX)" $< $(LEX_OUTPUT_ROOT).c $@ -- $(LFLAGS)
+	$(SHELL) $(YLWRAP) "$(LEX)" $< $(LEX_OUTPUT_ROOT).c $@ -- $(AM_LFLAGS) $(LFLAGS)
 
 binutils.info: binutils.texi
 binutils.dvi: binutils.texi
@@ -881,7 +906,7 @@ uninstall: uninstall-recursive uninstall-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
 installdirs: installdirs-recursive
-	$(mkinstalldirs)  $(DATADIR)$(bindir) $(DESTDIR)$(mandir)/man1
+	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(mandir)/man1
 
 
 mostlyclean-generic:
@@ -891,13 +916,12 @@ clean-generic:
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
-	-rm -f Makefile $(DISTCLEANFILES)
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
-	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+	-test -z "defparsehdefparsecarparseharparsecrcparsehrcparsecnlmheaderhnlmheadercrclexldeflexlarlexl$(MAINTAINERCLEANFILES)" || rm -f defparseh defparsec arparseh arparsec rcparseh rcparsec nlmheaderh nlmheaderc rclexl deflexl arlexl $(MAINTAINERCLEANFILES)
 mostlyclean-am:  mostlyclean-hdr mostlyclean-binPROGRAMS \
 		mostlyclean-noinstPROGRAMS mostlyclean-compile \
 		mostlyclean-libtool mostlyclean-aminfo mostlyclean-tags \
@@ -1110,9 +1134,9 @@ install-exec-local: $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	for i in $(TOOL_PROGS); do \
 	  if [ -f $$i$(EXEEXT) ]; then \
 	    j=`echo $$i | sed -e 's/-new//'`; \
-	    rm -f $(tooldir)/bin/$$j$(EXEEXT); \
 	    k=`echo $$j | sed '$(transform)'`; \
 	    if [ "$(bindir)/$$k$(EXEEXT)" != "$(tooldir)/bin/$$j$(EXEEXT)" ]; then \
+	      rm -f $(tooldir)/bin/$$j$(EXEEXT); \
 	      ln $(bindir)/$$k$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT) >/dev/null 2>/dev/null \
 		|| $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$i$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT); \
 	    fi; \
@@ -1216,6 +1240,7 @@ rescoff.o: rescoff.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 resbin.o: resbin.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   windres.h winduni.h
+resres.o: resres.c windres.h
 winduni.o: winduni.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h winduni.h
 readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \

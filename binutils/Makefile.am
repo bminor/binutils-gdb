@@ -82,7 +82,8 @@ CFILES = addr2line.c ar.c arsup.c bucomm.c coffdump.c coffgrok.c debug.c \
 	maybe-strip.c nlmconv.c nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c rdcoff.c rddbg.c size.c srconv.c \
 	stabs.c strings.c sysdump.c version.c wrstabs.c \
-	windres.c resrc.c rescoff.c resbin.c winduni.c readelf.c
+	windres.c resrc.c rescoff.c resbin.c winduni.c readelf.c \
+	resres.c
 
 GENERATED_CFILES = \
 	underscore.c arparse.c arlex.c sysroff.c sysinfo.c syslex.c \
@@ -252,7 +253,7 @@ nlmconv.o: nlmconv.c $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
 nlmconv_SOURCES = nlmconv.c nlmheader.y $(BULIBS)
 
 windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
-	winduni.c $(BULIBS)
+	winduni.c resres.c $(BULIBS)
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
@@ -338,9 +339,9 @@ install-exec-local: $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	for i in $(TOOL_PROGS); do \
 	  if [ -f $$i$(EXEEXT) ]; then \
 	    j=`echo $$i | sed -e 's/-new//'`; \
-	    rm -f $(tooldir)/bin/$$j$(EXEEXT); \
 	    k=`echo $$j | sed '$(transform)'`; \
 	    if [ "$(bindir)/$$k$(EXEEXT)" != "$(tooldir)/bin/$$j$(EXEEXT)" ]; then \
+	      rm -f $(tooldir)/bin/$$j$(EXEEXT); \
 	      ln $(bindir)/$$k$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT) >/dev/null 2>/dev/null \
 		|| $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$i$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT); \
 	    fi; \
@@ -444,6 +445,7 @@ rescoff.o: rescoff.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 resbin.o: resbin.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   windres.h winduni.h
+resres.o: resres.c windres.h
 winduni.o: winduni.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h winduni.h
 readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \

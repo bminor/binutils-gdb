@@ -1,3 +1,21 @@
+Tue Oct  6 18:20:10 1998  Geoffrey Noer  <noer@cygnus.com>
+ 
+        From Anders Norlander <anorland@hem2.passagen.se>.
+ 
+        * resres.c: New file.  Implementation of read_res_file and
+        write_res_file functions for windres.
+        * rcparse.y: Handle CONTROL's with named classes.
+        * resbin.c: Bug in res_to_bin_dialog and bin_to_res_dialog
+        when dialog is extended: The version and signature fields should
+        be reversed (despite what the docs say). Id is 32 bits long in
+        extended dialogs.
+        * resrc.c (write_rc_dialog): properly print controls with named
+        classes.
+        * windres.c (read_res_file, write_res_file): Remove stubs.
+        * resres.c (write_res): Rename RT_ACCELERATORS to RT_ACCELERATOR.
+        * Makefile.in (windres_SOURCES): Add resres.c.
+        (windres_OBJECTS): Add resres.o.
+
 Sun Oct  4 20:34:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Nokubi Hirotaka <hnokubi@yyy.or.jp>:
