@@ -1,3 +1,10 @@
+Tue Nov  7 14:02:57 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Don't treat rs6000-*-lynx* specially.
+	* configure: Rebuild.
+	* config/rslynx: Remove.
+	* Makefile.in: Remove @target_makefile_fragment@.
+
 Mon Nov  6 15:00:50 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bucomm.h: Include <sys/types.h>.

@@ -43,6 +43,7 @@ AC_PROG_INSTALL
 BFD_CC_FOR_BUILD
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h)
+AC_HEADER_SYS_WAIT
 AC_CHECK_FUNCS(sbrk utimes)
 
 AC_MSG_CHECKING(for time_t in time.h)
@@ -94,7 +95,6 @@ BFD_BINARY_FOPEN
 # target-specific stuff:
 
 # Canonicalize the secondary target names.
-target_makefile_fragment=/dev/null
 if test -n "$enable_targets"; then
     for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
@@ -106,13 +106,7 @@ if test -n "$enable_targets"; then
 	    canon_targets="$canon_targets $targ"
 	fi
     done
-else
-    # If our target is rs6000 _and nothing else_ then we build only nm!
-    case $target in
-    rs6000-*-lynx*) target_makefile_fragment=${srcdir}/config/rslynx ;;
-    esac
 fi
-AC_SUBST_FILE(target_makefile_fragment)
 
 all_targets=false
 BUILD_NLMCONV=

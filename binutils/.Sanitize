@@ -43,7 +43,6 @@ bucomm.h
 coffdump.c
 coffgrok.c
 coffgrok.h
-config
 config.in
 configure
 configure.bat

@@ -688,10 +688,12 @@ cross_compiling=$ac_cv_c_cross
 echo "$ac_t""$ac_cv_c_cross" 1>&6
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.
-if test "x$cross_compiling" = "xno"; then
-  CC_FOR_BUILD='$(CC)'
-else
-  CC_FOR_BUILD=gcc
+if test -z "$CC_FOR_BUILD"; then
+  if test "x$cross_compiling" = "xno"; then
+    CC_FOR_BUILD='$(CC)'
+  else
+    CC_FOR_BUILD=gcc
+  fi
 fi
 
 
@@ -710,7 +712,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 714 "configure"
+#line 716 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -724,7 +726,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 728 "configure"
+#line 730 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -757,7 +759,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 761 "configure"
+#line 763 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -790,7 +792,7 @@ if eval "test \"`echo '$''{'ac_cv_header_sys_wait_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 794 "configure"
+#line 796 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -832,7 +834,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 836 "configure"
+#line 838 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -882,7 +884,7 @@ if eval "test \"`echo '$''{'bu_cv_decl_time_t_time_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 886 "configure"
+#line 888 "configure"
 #include "confdefs.h"
 #include <time.h>
 int main() { return 0; }
@@ -914,7 +916,7 @@ if eval "test \"`echo '$''{'bu_cv_decl_time_t_types_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 918 "configure"
+#line 920 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 int main() { return 0; }
@@ -948,7 +950,7 @@ if eval "test \"`echo '$''{'bu_cv_header_utime_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 952 "configure"
+#line 954 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #ifdef HAVE_TIME_H
@@ -984,7 +986,7 @@ if eval "test \"`echo '$''{'bu_cv_decl_needed_fprintf'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 988 "configure"
+#line 990 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 int main() { return 0; }
@@ -1022,7 +1024,6 @@ esac
 # target-specific stuff:
 
 # Canonicalize the secondary target names.
-target_makefile_fragment=/dev/null
 if test -n "$enable_targets"; then
     for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
@@ -1034,13 +1035,7 @@ if test -n "$enable_targets"; then
 	    canon_targets="$canon_targets $targ"
 	fi
     done
-else
-    # If our target is rs6000 _and nothing else_ then we build only nm!
-    case $target in
-    rs6000-*-lynx*) target_makefile_fragment=${srcdir}/config/rslynx ;;
-    esac
 fi
-
 
 all_targets=false
 BUILD_NLMCONV=
@@ -1232,8 +1227,6 @@ s%@INSTALL_PROGRAM@%$INSTALL_PROGRAM%g
 s%@INSTALL_DATA@%$INSTALL_DATA%g
 s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
 s%@CPP@%$CPP%g
-/@target_makefile_fragment@/r $target_makefile_fragment
-s%@target_makefile_fragment@%%g
 s%@NLMCONV_DEFS@%$NLMCONV_DEFS%g
 s%@BUILD_NLMCONV@%$BUILD_NLMCONV%g
 s%@BUILD_SRCONV@%$BUILD_SRCONV%g
