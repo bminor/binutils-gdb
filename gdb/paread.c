@@ -399,8 +399,14 @@ pa_symfile_init (objfile)
     perror_with_name (name);
   val = bfd_read (DBX_STRINGTAB (objfile), DBX_STRINGTAB_SIZE (objfile), 1,
 		  sym_bfd);
-  if (val != DBX_STRINGTAB_SIZE (objfile))
+  if (val == 0)
+    error ("End of file reading string table");
+  else if (val < 0)
+    /* It's possible bfd_read should be setting bfd_error, and we should be
+       checking that.  But currently it doesn't set bfd_error.  */
     perror_with_name (name);
+  else if (val != DBX_STRINGTAB_SIZE (objfile))
+    error ("Short read reading string table");
 }
 
 /* PA specific parsing routine for section offsets.
