@@ -1,3 +1,16 @@
+2003-03-20  D.Venkatasubramanian  <dvenkat@noida.hcltech.com>
+
+	* compile.c (cmdline_location): Added function to 
+	return the location of 8-bit (256 locations) where the
+	Command Line arguments would be stored.
+	(decode): Added a TRAP to 0xcc for Commandline 
+	processing using pseudo opcode O_SYS_CMDLINE.
+	(sim_resume): Added handling of O_SYS_CMDLINE Trap.
+	(sim_create_inferior): Setting a pointer to 
+	Commandline Args array.
+	* inst.h: Added a new variable ptr_command_line for
+	storing pointer to Commandline array.
+
 2003-03-14  D.Venkatasubramanian <dvenkat@noida.hcltech.com>
 
 	* compile.c (decode): Added code for some more magic traps.

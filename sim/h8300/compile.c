@@ -176,6 +176,17 @@ lvalue (int x, int rn)
     }
 }
 
+static int
+cmdline_location()
+{
+  if (h8300smode)
+    return 0xffff00L;
+  else if (h8300hmode)
+    return 0x2ff00L;
+  else
+    return 0xff00L;
+}
+
 static unsigned int
 decode (int addr, unsigned char *data, decoded_inst *dst)
 {
@@ -476,6 +487,9 @@ decode (int addr, unsigned char *data, decoded_inst *dst)
 			  break;
 			case 0xcb:
 			  dst->opcode = O (O_SYS_FSTAT, SB);
+			  break;
+			case 0xcc:
+			  dst->opcode = O (O_SYS_CMDLINE, SB);
 			  break;
 			}
 		      /* End of Processing for system calls.  */
@@ -1408,6 +1422,163 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	case O (O_BVS, SB):
 	  if ((V == 1))
 	    goto condtrue;
+	  goto next;
+
+	/* Trap for Command Line setup.  */
+	case O (O_SYS_CMDLINE, SB):
+	  {
+	    int i = 0;		/* Loop counter.  */
+	    int j = 0;		/* Loop counter.  */
+	    int ind_arg_len = 0;	/* Length of each argument.  */
+	    int no_of_args = 0;	/* The no. or cmdline args.  */
+	    int current_location = 0;	/* Location of string.  */
+	    int old_sp = 0;	/* The Initial Stack Pointer.  */
+	    int no_of_slots = 0;	/* No. of slots required on the stack
+					   for storing cmdline args.  */
+	    int sp_move = 0;	/* No. of locations by which the stack needs
+				   to grow.  */
+	    int new_sp = 0;	/* The final stack pointer location passed
+				   back.  */
+	    int *argv_ptrs;	/* Pointers of argv strings to be stored.  */
+	    int argv_ptrs_location = 0;	/* Location of pointers to cmdline
+					   args on the stack.  */
+	    int char_ptr_size = 0;	/* Size of a character pointer on
+					   target machine.  */
+	    int addr_cmdline = 0;	/* Memory location where cmdline has
+					   to be stored.  */
+	    int size_cmdline = 0;	/* Size of cmdline.  */
+
+	    /* Set the address of 256 free locations where command line is
+	       stored.  */
+	    addr_cmdline = cmdline_location();
+	    cpu.regs[0] = addr_cmdline;
+
+	    /* Counting the no. of commandline arguments.  */
+	    for (i = 0; ptr_command_line[i] != NULL; i++)
+	      continue;
+
+	    /* No. of arguments in the command line.  */
+	    no_of_args = i;
+
+	    /* Current location is just a temporary variable,which we are
+	       setting to the point to the start of our commandline string.  */
+	    current_location = addr_cmdline;
+
+	    /* Allocating space for storing pointers of the command line
+	       arguments.  */
+	    argv_ptrs = (int *) malloc (sizeof (int) * no_of_args);
+
+	    /* Setting char_ptr_size to the sizeof (char *) on the different
+	       architectures.  */
+	    if (h8300hmode || h8300smode)
+	      {
+		char_ptr_size = 4;
+	      }
+	    else
+	      {
+		char_ptr_size = 2;
+	      }
+
+	    for (i = 0; i < no_of_args; i++)
+	      {
+		ind_arg_len = 0;
+
+		/* The size of the commandline argument.  */
+		ind_arg_len = (strlen (ptr_command_line[i]) + 1);
+
+		/* The total size of the command line string.  */
+		size_cmdline += ind_arg_len;
+
+		/* As we have only 256 bytes, we need to provide a graceful
+		   exit. Anyways, a program using command line arguments 
+		   where we cannot store all the command line arguments
+		   given may behave unpredictably.  */
+		if (size_cmdline >= 256)
+		  {
+		    cpu.regs[0] = 0;
+		    goto next;
+		  }
+		else
+		  {
+		    /* current_location points to the memory where the next
+		       commandline argument is stored.  */
+		    argv_ptrs[i] = current_location;
+		    for (j = 0; j < ind_arg_len; j++)
+		      {
+			SET_MEMORY_B ((current_location +
+				       (sizeof (char) * j)),
+				      *(ptr_command_line[i] + 
+				       sizeof (char) * j));
+		      }
+
+		    /* Setting current_location to the starting of next
+		       argument.  */
+		    current_location += ind_arg_len;
+		  }
+	      }
+
+	    /* This is the original position of the stack pointer.  */
+	    old_sp = cpu.regs[7];
+
+	    /* We need space from the stack to store the pointers to argvs.  */
+	    /* As we will infringe on the stack, we need to shift the stack
+	       pointer so that the data is not overwritten. We calculate how
+	       much space is required.  */
+	    sp_move = (no_of_args) * (char_ptr_size);
+
+	    /* The final position of stack pointer, we have thus taken some
+	       space from the stack.  */
+	    new_sp = old_sp - sp_move;
+
+	    /* Temporary variable holding value where the argv pointers need
+	       to be stored.  */
+	    argv_ptrs_location = new_sp;
+
+	    /* The argv pointers are stored at sequential locations. As per
+	       the H8300 ABI.  */
+	    for (i = 0; i < no_of_args; i++)
+	      {
+		/* Saving the argv pointer.  */
+		if (h8300hmode || h8300smode)
+		  {
+		    SET_MEMORY_L (argv_ptrs_location, argv_ptrs[i]);
+		  }
+		else
+		  {
+		    SET_MEMORY_W (argv_ptrs_location, argv_ptrs[i]);
+		  }
+	
+		/* The next location where the pointer to the next argv
+		   string has to be stored.  */    
+		argv_ptrs_location += char_ptr_size;
+	      }
+
+	    /* Required by POSIX, Setting 0x0 at the end of the list of argv
+	       pointers.  */
+	    if (h8300hmode || h8300smode)
+	      {
+		SET_MEMORY_L (old_sp, 0x0);
+	      }
+	    else
+	      {
+		SET_MEMORY_W (old_sp, 0x0);
+	      }
+
+	    /* Freeing allocated memory.  */
+	    free (argv_ptrs);
+	    for (i = 0; i <= no_of_args; i++)
+	      {
+		free (ptr_command_line[i]);
+	      }
+	    free (ptr_command_line);
+
+	    /* The no. of argv arguments are returned in Reg 0.  */
+	    cpu.regs[0] = no_of_args;
+	    /* The Pointer to argv in Register 1.  */
+	    cpu.regs[1] = new_sp;
+	    /* Setting the stack pointer to the new value.  */
+	    cpu.regs[7] = new_sp;
+	  }
 	  goto next;
 
 	  /* System call processing starts.  */
@@ -2531,10 +2702,37 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 {
+  int i = 0;
+  int len_arg = 0;
+  int no_of_args = 0;
+  
   if (abfd != NULL)
     cpu.pc = bfd_get_start_address (abfd);
   else
     cpu.pc = 0;
+
+  /* Command Line support.  */
+  if (argv != NULL)
+    {
+      /* Counting the no. of commandline arguments.  */
+      for (no_of_args = 0; argv[no_of_args] != NULL; no_of_args++)
+        continue;
+
+      /* Allocating memory for the argv pointers.  */
+      ptr_command_line = (char **) malloc ((sizeof (char *))
+		         * (no_of_args + 1));
+
+      for (i = 0; i < no_of_args; i++)
+	{
+	  /* Calculating the length of argument for allocating memory.  */
+	  len_arg = strlen (argv[i] + 1);
+	  ptr_command_line[i] = (char *) malloc (sizeof (char) * len_arg);
+	  /* Copying the argument string.  */
+	  ptr_command_line[i] = (char *) strdup (argv[i]);
+	}
+      ptr_command_line[i] = NULL;
+    }
+  
   return SIM_RC_OK;
 }
 

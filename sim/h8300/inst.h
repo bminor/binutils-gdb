@@ -66,6 +66,9 @@ enum h8300_sim_state {
   SIM_STATE_RUNNING, SIM_STATE_EXITED, SIM_STATE_SIGNALLED, SIM_STATE_STOPPED
 };
 
+/* For Command Line.  */
+char **ptr_command_line; /* Pointer to Command Line Arguments. */
+
 typedef struct
 {
   enum h8300_sim_state state;
