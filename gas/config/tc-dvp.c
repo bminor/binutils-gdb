@@ -607,11 +607,20 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 
 	  if (operand->flags & DVP_OPERAND_FAKE)
 	    {
+	      long value = 0;
+	      if (operand->parse)
+		{
+		  errmsg = NULL;
+		  value = (*operand->parse) (opcode, operand, mods,
+					     &str, &errmsg);
+		  if (errmsg)
+		    break;
+		}
 	      if (operand->insert)
 		{
 		  errmsg = NULL;
-		  (*operand->insert) (opcode, operand, mods, insn_buf, 0,
-				      &errmsg);
+		  (*operand->insert) (opcode, operand, mods, insn_buf,
+				      (offsetT) value, &errmsg);
 		  /* If we get an error, go on to try the next insn.  */
 		  if (errmsg)
 		    break;
