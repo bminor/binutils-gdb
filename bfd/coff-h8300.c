@@ -776,8 +776,15 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       src_address += 4;
       break;
 
-    /* A 16-bit absolute relocation that was formerly a 24-/32-bit
-       absolute relocation.  */
+      /* This is a 24-/32-bit absolute address in one of the following
+	 instructions:
+
+	   "band", "bclr", "biand", "bild", "bior", "bist", "bixor",
+	   "bld", "bnot", "bor", "bset", "bst", "btst", "bxor", and
+	   "mov.[bwl]"
+
+	 We may relax this into an 16-bit absolute address if it's in
+	 the right range.  */
     case R_MOVL2:
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
       value = bfd_h8300_pad_address (abfd, value);
@@ -788,8 +795,9 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	  /* Insert the 16-bit value into the proper location.  */
 	  bfd_put_16 (abfd, value, data + dst_address);
 
-	  /* Fix the opcode.  For all the move insns, we simply
-	     need to turn off bit 0x20 in the previous byte.  */
+	  /* Fix the opcode.  For all the instructions that belong to
+	     this relaxation, we simply need to turn off bit 0x20 in
+	     the previous byte.  */
 	  data[dst_address - 1] &= ~0x20;
 	  dst_address += 2;
 	  src_address += 4;
@@ -834,7 +842,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	  bfd_put_8 (abfd, 0x55, data + dst_address - 1);
 	  break;
 	case 0x5a:
-	  /* jmp ->bra */
+	  /* jmp -> bra */
 	  bfd_put_8 (abfd, 0x40, data + dst_address - 1);
 	  break;
 
@@ -877,12 +885,15 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	{
 	case 0x58:
 	  /* bCC:16 -> bCC:8 */
-	  /* Get the condition code from the original insn.  */
+	  /* Get the second byte of the original insn, which contains
+	     the condition code.  */
 	  tmp = data[dst_address - 1];
+
+	  /* Compute the fisrt byte of the relaxed instruction.  The
+	     original sequence 0x58 0xX0 is relaxed to 0x4X, where X
+	     represents the condition code.  */
 	  tmp &= 0xf0;
 	  tmp >>= 4;
-
-	  /* Now or in the high nibble of the opcode.  */
 	  tmp |= 0x40;
 
 	  /* Write it.  */

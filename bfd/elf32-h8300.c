@@ -666,6 +666,9 @@ elf32_h8_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
      mov.b:16	     ->    mov.b:8                2 bytes
      mov.b:24/32     ->    mov.b:8                4 bytes
 
+     bset:24/32	     ->    bset:16                2 bytes
+     (also applicable to other bit manipulation instructions)
+
      mov.[bwl]:24/32 ->    mov.[bwl]:16           2 bytes */
 
 static bfd_boolean
@@ -919,8 +922,10 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 		  }
 
 		if (code == 0x5e)
+		  /* This is jsr.  */
 		  bfd_put_8 (abfd, 0x55, contents + irel->r_offset - 1);
 		else if (code == 0x5a)
+		  /* This is jmp.  */
 		  bfd_put_8 (abfd, 0x40, contents + irel->r_offset - 1);
 		else
 		  abort ();
@@ -975,14 +980,21 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 		if (code == 0x58)
 		  {
 		    /* bCC:16 -> bCC:8 */
-		    /* Get the condition code from the original insn.  */
+		    /* Get the second byte of the original insn, which
+		       contains the condition code.  */
 		    code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+
+		    /* Compute the fisrt byte of the relaxed
+		       instruction.  The original sequence 0x58 0xX0
+		       is relaxed to 0x4X, where X represents the
+		       condition code.  */
 		    code &= 0xf0;
 		    code >>= 4;
 		    code |= 0x40;
 		    bfd_put_8 (abfd, code, contents + irel->r_offset - 2);
 		  }
 		else if (code == 0x5c)
+		  /* This is bsr.  */
 		  bfd_put_8 (abfd, 0x55, contents + irel->r_offset - 2);
 		else
 		  abort ();
@@ -1179,11 +1191,17 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	      }
 	  }
 
-	/* Fall through.  */
+	  /* Fall through.  */
 
-	/* This is a 24-/32-bit absolute address in a "mov" insn,
-	   which may become a 16-bit absolute address if it is in the
-	   right range.  */
+	  /* This is a 24-/32-bit absolute address in one of the
+	     following instructions:
+
+	       "band", "bclr", "biand", "bild", "bior", "bist",
+	       "bixor", "bld", "bnot", "bor", "bset", "bst", "btst",
+	       "bxor", and "mov.[bwl]"
+
+	     We may relax this into an 16-bit absolute address if it's
+	     in the right range.  */
 	case R_H8_DIR32A16:
 	  {
 	    bfd_vma value;
@@ -1202,7 +1220,9 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 		/* Get the opcode.  */
 		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
 
-		/* We just need to turn off bit 0x20.  */
+		/* Fix the opcode.  For all the instructions that
+		   belong to this relaxation, we simply need to turn
+		   off bit 0x20 in the previous byte.  */
 		code &= ~0x20;
 
 		bfd_put_8 (abfd, code, contents + irel->r_offset - 1);
