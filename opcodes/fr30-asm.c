@@ -85,6 +85,51 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
     case FR30_OPERAND_RJ :
       errmsg = cgen_parse_keyword (od, strp, & fr30_cgen_opval_h_gr, & fields->f_Rj);
       break;
+    case FR30_OPERAND_RS1 :
+      errmsg = cgen_parse_keyword (od, strp, & fr30_cgen_opval_h_dr, & fields->f_Rs1);
+      break;
+    case FR30_OPERAND_RS2 :
+      errmsg = cgen_parse_keyword (od, strp, & fr30_cgen_opval_h_dr, & fields->f_Rs2);
+      break;
+    case FR30_OPERAND_U4 :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_U4, &fields->f_u4);
+      break;
+    case FR30_OPERAND_M4 :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_M4, &fields->f_m4);
+      break;
+    case FR30_OPERAND_I8 :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_I8, &fields->f_i8);
+      break;
+    case FR30_OPERAND_U8 :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_U8, &fields->f_u8);
+      break;
+    case FR30_OPERAND_O8 :
+      errmsg = cgen_parse_signed_integer (od, strp, FR30_OPERAND_O8, &fields->f_o8);
+      break;
+    case FR30_OPERAND_S10 :
+      errmsg = cgen_parse_signed_integer (od, strp, FR30_OPERAND_S10, &fields->f_s10);
+      break;
+    case FR30_OPERAND_U10 :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_U10, &fields->f_u10);
+      break;
+    case FR30_OPERAND_DIR8 :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_DIR8, &fields->f_dir8);
+      break;
+    case FR30_OPERAND_DIR9 :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_DIR9, &fields->f_dir9);
+      break;
+    case FR30_OPERAND_DIR10 :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_DIR10, &fields->f_dir10);
+      break;
+    case FR30_OPERAND_LABEL9 :
+      errmsg = cgen_parse_signed_integer (od, strp, FR30_OPERAND_LABEL9, &fields->f_rel8);
+      break;
+    case FR30_OPERAND_LABEL12 :
+      errmsg = cgen_parse_signed_integer (od, strp, FR30_OPERAND_LABEL12, &fields->f_rel11);
+      break;
+    case FR30_OPERAND_CC :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_CC, &fields->f_cc);
+      break;
 
     default :
       /* xgettext:c-format */
@@ -127,6 +172,79 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
       break;
     case FR30_OPERAND_RJ :
       errmsg = insert_normal (od, fields->f_Rj, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_RS1 :
+      errmsg = insert_normal (od, fields->f_Rs1, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_RS2 :
+      errmsg = insert_normal (od, fields->f_Rs2, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_U4 :
+      errmsg = insert_normal (od, fields->f_u4, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_M4 :
+      {
+        long value = fields->f_m4;
+        value = ((value) & (15));
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      }
+      break;
+    case FR30_OPERAND_I8 :
+      errmsg = insert_normal (od, fields->f_i8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_U8 :
+      errmsg = insert_normal (od, fields->f_u8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_O8 :
+      errmsg = insert_normal (od, fields->f_o8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_S10 :
+      {
+        long value = fields->f_s10;
+        value = ((((unsigned int) (value) >> (2))) & (255));
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      }
+      break;
+    case FR30_OPERAND_U10 :
+      {
+        long value = fields->f_u10;
+        value = ((((unsigned int) (value) >> (2))) & (255));
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      }
+      break;
+    case FR30_OPERAND_DIR8 :
+      errmsg = insert_normal (od, fields->f_dir8, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+    case FR30_OPERAND_DIR9 :
+      {
+        long value = fields->f_dir9;
+        value = ((((unsigned int) (value) >> (1))) & (255));
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      }
+      break;
+    case FR30_OPERAND_DIR10 :
+      {
+        long value = fields->f_dir10;
+        value = ((((unsigned int) (value) >> (2))) & (255));
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      }
+      break;
+    case FR30_OPERAND_LABEL9 :
+      {
+        long value = fields->f_rel8;
+        value = ((((unsigned int) (value) >> (1))) & (255));
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      }
+      break;
+    case FR30_OPERAND_LABEL12 :
+      {
+        long value = fields->f_rel11;
+        value = ((((unsigned int) (value) >> (1))) & (2047));
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), buffer);
+      }
+      break;
+    case FR30_OPERAND_CC :
+      errmsg = insert_normal (od, fields->f_cc, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
       break;
 
     default :

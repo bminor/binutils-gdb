@@ -80,10 +80,23 @@ typedef enum insn_op3 {
  , OP3_C, OP3_D, OP3_E, OP3_F
 } INSN_OP3;
 
+/* Enum declaration for insn op4 enums.  */
+typedef enum insn_op4 {
+  OP4_0
+} INSN_OP4;
+
 /* Enum declaration for insn op5 enums.  */
 typedef enum insn_op5 {
   OP5_0, OP5_1
 } INSN_OP5;
+
+/* Enum declaration for insn cc enums.  */
+typedef enum insn_cc {
+  CC_RA, CC_NO, CC_EQ, CC_NE
+ , CC_C, CC_NC, CC_N, CC_P
+ , CC_V, CC_NV, CC_LT, CC_GE
+ , CC_LE, CC_GT, CC_LS, CC_HI
+} INSN_CC;
 
 /* Enum declaration for general registers.  */
 typedef enum h_gr {
@@ -97,12 +110,8 @@ typedef enum h_gr {
 /* Enum declaration for dedicated registers.  */
 typedef enum h_dr {
   H_DR_TBR, H_DR_RP, H_DR_SSP, H_DR_USP
+ , H_DR_MDH, H_DR_MDL
 } H_DR;
-
-/* Enum declaration for multiplication and division registers.  */
-typedef enum h_mdr {
-  H_MDR_MDH = 4, H_MDR_MDL = 5
-} H_MDR;
 
 /* Enum declaration for control registers.  */
 typedef enum h_cr {
@@ -111,7 +120,11 @@ typedef enum h_cr {
 
 /* Enum declaration for fr30 operand types.  */
 typedef enum cgen_operand_type {
-  FR30_OPERAND_PC, FR30_OPERAND_RI, FR30_OPERAND_RJ, FR30_OPERAND_NBIT
+  FR30_OPERAND_PC, FR30_OPERAND_RI, FR30_OPERAND_RJ, FR30_OPERAND_RS1
+ , FR30_OPERAND_RS2, FR30_OPERAND_PS, FR30_OPERAND_U4, FR30_OPERAND_M4
+ , FR30_OPERAND_I8, FR30_OPERAND_U8, FR30_OPERAND_O8, FR30_OPERAND_S10
+ , FR30_OPERAND_U10, FR30_OPERAND_DIR8, FR30_OPERAND_DIR9, FR30_OPERAND_DIR10
+ , FR30_OPERAND_LABEL9, FR30_OPERAND_LABEL12, FR30_OPERAND_CC, FR30_OPERAND_NBIT
  , FR30_OPERAND_VBIT, FR30_OPERAND_ZBIT, FR30_OPERAND_CBIT, FR30_OPERAND_MAX
 } CGEN_OPERAND_TYPE;
 
@@ -129,13 +142,13 @@ typedef enum mach_attr {
 #define MAX_OPERANDS ((int) FR30_OPERAND_MAX)
 
 /* Maximum number of operands referenced by any insn.  */
-#define MAX_OPERAND_INSTANCES 7
+#define MAX_OPERAND_INSTANCES 8
 
 /* Hardware, operand and instruction attribute indices.  */
 
 /* Enum declaration for cgen_hw attrs.  */
 typedef enum cgen_hw_attr {
-  CGEN_HW_CACHE_ADDR, CGEN_HW_FUN_ACCESS, CGEN_HW_PC, CGEN_HW_PROFILE
+  CGEN_HW_CACHE_ADDR, CGEN_HW_PC, CGEN_HW_PROFILE
 } CGEN_HW_ATTR;
 
 /* Number of non-boolean elements in cgen_hw.  */
@@ -143,8 +156,9 @@ typedef enum cgen_hw_attr {
 
 /* Enum declaration for cgen_operand attrs.  */
 typedef enum cgen_operand_attr {
-  CGEN_OPERAND_ABS_ADDR, CGEN_OPERAND_NEGATIVE, CGEN_OPERAND_PCREL_ADDR, CGEN_OPERAND_RELAX
- , CGEN_OPERAND_SEM_ONLY, CGEN_OPERAND_SIGN_OPT, CGEN_OPERAND_UNSIGNED
+  CGEN_OPERAND_ABS_ADDR, CGEN_OPERAND_HASH_PREFIX, CGEN_OPERAND_NEGATIVE, CGEN_OPERAND_PCREL_ADDR
+ , CGEN_OPERAND_RELAX, CGEN_OPERAND_SEM_ONLY, CGEN_OPERAND_SIGN_OPT, CGEN_OPERAND_SIGNED
+ , CGEN_OPERAND_UNSIGNED
 } CGEN_OPERAND_ATTR;
 
 /* Number of non-boolean elements in cgen_operand.  */
@@ -161,7 +175,41 @@ typedef enum cgen_insn_attr {
 
 /* Enum declaration for fr30 instruction types.  */
 typedef enum cgen_insn_type {
-  FR30_INSN_INVALID, FR30_INSN_ADD, FR30_INSN_MAX
+  FR30_INSN_INVALID, FR30_INSN_ADD, FR30_INSN_ADDI, FR30_INSN_ADD2
+ , FR30_INSN_ADDC, FR30_INSN_ADDN, FR30_INSN_ADDNI, FR30_INSN_ADDN2
+ , FR30_INSN_SUB, FR30_INSN_SUBC, FR30_INSN_SUBN, FR30_INSN_CMP
+ , FR30_INSN_CMPI, FR30_INSN_CMP2, FR30_INSN_AND, FR30_INSN_OR
+ , FR30_INSN_EOR, FR30_INSN_ANDM, FR30_INSN_ANDH, FR30_INSN_ANDB
+ , FR30_INSN_ORM, FR30_INSN_ORH, FR30_INSN_ORB, FR30_INSN_EORM
+ , FR30_INSN_EORH, FR30_INSN_EORB, FR30_INSN_BANDL, FR30_INSN_BORL
+ , FR30_INSN_BEORL, FR30_INSN_BANDH, FR30_INSN_BORH, FR30_INSN_BEORH
+ , FR30_INSN_BTSTL, FR30_INSN_BTSTH, FR30_INSN_MUL, FR30_INSN_MULU
+ , FR30_INSN_MULH, FR30_INSN_MULUH, FR30_INSN_DIV0S, FR30_INSN_DIV0U
+ , FR30_INSN_DIV1, FR30_INSN_DIV2, FR30_INSN_DIV3, FR30_INSN_DIV4S
+ , FR30_INSN_LSL, FR30_INSN_LSLI, FR30_INSN_LSL2, FR30_INSN_LSR
+ , FR30_INSN_LSRI, FR30_INSN_LSR2, FR30_INSN_ASR, FR30_INSN_ASRI
+ , FR30_INSN_ASR2, FR30_INSN_LDI_8, FR30_INSN_LD, FR30_INSN_LDUH
+ , FR30_INSN_LDUB, FR30_INSN_LDR13, FR30_INSN_LDR13UH, FR30_INSN_LDR13UB
+ , FR30_INSN_LDR14, FR30_INSN_LDR14UH, FR30_INSN_LDR14UB, FR30_INSN_LDR15
+ , FR30_INSN_LDR15GR, FR30_INSN_LDR15DR, FR30_INSN_LDR15PS, FR30_INSN_ST
+ , FR30_INSN_STH, FR30_INSN_STB, FR30_INSN_STR13, FR30_INSN_STR13H
+ , FR30_INSN_STR13B, FR30_INSN_STR14, FR30_INSN_STR14H, FR30_INSN_STR14B
+ , FR30_INSN_STR15, FR30_INSN_STR15GR, FR30_INSN_STR15DR, FR30_INSN_STR15PS
+ , FR30_INSN_MOV, FR30_INSN_MOVDR, FR30_INSN_MOVPS, FR30_INSN_MOV2DR
+ , FR30_INSN_MOV2PS, FR30_INSN_JMP, FR30_INSN_CALL, FR30_INSN_CALLR
+ , FR30_INSN_RET, FR30_INSN_INT, FR30_INSN_INTE, FR30_INSN_RETI
+ , FR30_INSN_BRA, FR30_INSN_BNO, FR30_INSN_BEQ, FR30_INSN_BNE
+ , FR30_INSN_BC, FR30_INSN_BNC, FR30_INSN_BN, FR30_INSN_BP
+ , FR30_INSN_BV, FR30_INSN_BNV, FR30_INSN_BLT, FR30_INSN_BGE
+ , FR30_INSN_BLE, FR30_INSN_BGT, FR30_INSN_BLS, FR30_INSN_BHI
+ , FR30_INSN_DMOV2R13, FR30_INSN_DMOV2R13H, FR30_INSN_DMOV2R13B, FR30_INSN_DMOVR13
+ , FR30_INSN_DMOVR13H, FR30_INSN_DMOVR13B, FR30_INSN_DMOV2R13PI, FR30_INSN_DMOV2R13PIH
+ , FR30_INSN_DMOV2R13PIB, FR30_INSN_DMOV13PI, FR30_INSN_DMOV13PIH, FR30_INSN_DMOV13PIB
+ , FR30_INSN_DMOV2R15PD, FR30_INSN_DMOV15PI, FR30_INSN_LDRES, FR30_INSN_STRES
+ , FR30_INSN_NOP, FR30_INSN_ANDCCR, FR30_INSN_ORCCR, FR30_INSN_STILM
+ , FR30_INSN_ADDSP, FR30_INSN_EXTSB, FR30_INSN_EXTUB, FR30_INSN_EXTSH
+ , FR30_INSN_EXTUH, FR30_INSN_ENTER, FR30_INSN_LEAVE, FR30_INSN_XCHB
+ , FR30_INSN_MAX
 } CGEN_INSN_TYPE;
 
 /* Index of `invalid' insn place holder.  */
@@ -179,18 +227,25 @@ struct cgen_fields
   long f_op1;
   long f_op2;
   long f_op3;
+  long f_op4;
   long f_op5;
+  long f_cc;
   long f_Rj;
   long f_Ri;
-  long f_Rs;
+  long f_Rs1;
+  long f_Rs2;
   long f_u4;
   long f_i4;
   long f_m4;
   long f_u8;
   long f_i8;
   long f_o8;
+  long f_s10;
+  long f_u10;
   long f_rel8;
-  long f_dir;
+  long f_dir8;
+  long f_dir9;
+  long f_dir10;
   long f_rlist;
   long f_rel11;
   int length;
@@ -205,8 +260,8 @@ extern const CGEN_ATTR_TABLE fr30_cgen_insn_attr_table[];
 typedef enum hw_type {
   HW_H_PC, HW_H_MEMORY, HW_H_SINT, HW_H_UINT
  , HW_H_ADDR, HW_H_IADDR, HW_H_GR, HW_H_DR
- , HW_H_MDR, HW_H_CR, HW_H_NBIT, HW_H_ZBIT
- , HW_H_VBIT, HW_H_CBIT, HW_MAX
+ , HW_H_CR, HW_H_NBIT, HW_H_ZBIT, HW_H_VBIT
+ , HW_H_CBIT, HW_MAX
 } HW_TYPE;
 
 #define MAX_HW ((int) HW_MAX)
@@ -215,7 +270,6 @@ typedef enum hw_type {
 
 extern CGEN_KEYWORD fr30_cgen_opval_h_gr;
 extern CGEN_KEYWORD fr30_cgen_opval_h_dr;
-extern CGEN_KEYWORD fr30_cgen_opval_h_mdr;
 extern CGEN_KEYWORD fr30_cgen_opval_h_cr;
 
 #define CGEN_INIT_PARSE(od) \

@@ -95,6 +95,86 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
     case FR30_OPERAND_RJ :
       length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_Rj);
       break;
+    case FR30_OPERAND_RS1 :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_Rs1);
+      break;
+    case FR30_OPERAND_RS2 :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_Rs2);
+      break;
+    case FR30_OPERAND_U4 :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_u4);
+      break;
+    case FR30_OPERAND_M4 :
+      {
+        long value;
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), & value);
+        value = ((value) | ((! (15))));
+        fields->f_m4 = value;
+      }
+      break;
+    case FR30_OPERAND_I8 :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), & fields->f_i8);
+      break;
+    case FR30_OPERAND_U8 :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & fields->f_u8);
+      break;
+    case FR30_OPERAND_O8 :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), & fields->f_o8);
+      break;
+    case FR30_OPERAND_S10 :
+      {
+        long value;
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        value = ((value) << (2));
+        fields->f_s10 = value;
+      }
+      break;
+    case FR30_OPERAND_U10 :
+      {
+        long value;
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        value = ((value) << (2));
+        fields->f_u10 = value;
+      }
+      break;
+    case FR30_OPERAND_DIR8 :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & fields->f_dir8);
+      break;
+    case FR30_OPERAND_DIR9 :
+      {
+        long value;
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        value = ((value) << (1));
+        fields->f_dir9 = value;
+      }
+      break;
+    case FR30_OPERAND_DIR10 :
+      {
+        long value;
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        value = ((value) << (2));
+        fields->f_dir10 = value;
+      }
+      break;
+    case FR30_OPERAND_LABEL9 :
+      {
+        long value;
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), & value);
+        value = ((value) << (1));
+        fields->f_rel8 = value;
+      }
+      break;
+    case FR30_OPERAND_LABEL12 :
+      {
+        long value;
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), & value);
+        value = ((value) << (1));
+        fields->f_rel11 = value;
+      }
+      break;
+    case FR30_OPERAND_CC :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, CGEN_FIELDS_BITSIZE (fields), & fields->f_cc);
+      break;
 
     default :
       /* xgettext:c-format */
@@ -137,6 +217,51 @@ fr30_cgen_print_operand (od, opindex, info, fields, attrs, pc, length)
       break;
     case FR30_OPERAND_RJ :
       print_keyword (od, info, & fr30_cgen_opval_h_gr, fields->f_Rj, 0|(1<<CGEN_OPERAND_UNSIGNED));
+      break;
+    case FR30_OPERAND_RS1 :
+      print_keyword (od, info, & fr30_cgen_opval_h_dr, fields->f_Rs1, 0|(1<<CGEN_OPERAND_UNSIGNED));
+      break;
+    case FR30_OPERAND_RS2 :
+      print_keyword (od, info, & fr30_cgen_opval_h_dr, fields->f_Rs2, 0|(1<<CGEN_OPERAND_UNSIGNED));
+      break;
+    case FR30_OPERAND_U4 :
+      print_normal (od, info, fields->f_u4, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+    case FR30_OPERAND_M4 :
+      print_normal (od, info, fields->f_m4, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+    case FR30_OPERAND_I8 :
+      print_normal (od, info, fields->f_i8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+    case FR30_OPERAND_U8 :
+      print_normal (od, info, fields->f_u8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+    case FR30_OPERAND_O8 :
+      print_normal (od, info, fields->f_o8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+    case FR30_OPERAND_S10 :
+      print_normal (od, info, fields->f_s10, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case FR30_OPERAND_U10 :
+      print_normal (od, info, fields->f_u10, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+    case FR30_OPERAND_DIR8 :
+      print_normal (od, info, fields->f_dir8, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+    case FR30_OPERAND_DIR9 :
+      print_normal (od, info, fields->f_dir9, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+    case FR30_OPERAND_DIR10 :
+      print_normal (od, info, fields->f_dir10, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+    case FR30_OPERAND_LABEL9 :
+      print_normal (od, info, fields->f_rel8, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case FR30_OPERAND_LABEL12 :
+      print_normal (od, info, fields->f_rel11, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case FR30_OPERAND_CC :
+      print_normal (od, info, fields->f_cc, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
 
     default :
