@@ -34,6 +34,10 @@
    NetBSD/sparc64 overlaps with M_MIPS1.  */
 #define M_SPARC64_OPENBSD	M_MIPS1
 
+/* Offset of StackGhost cookie within `struct md_coredump' on
+   OpenBSD/sparc.  */
+#define CORE_WCOOKIE_OFFSET	344
+
 struct netbsd_core_struct
 {
   struct core core;
@@ -139,6 +143,25 @@ netbsd_core_file_p (abfd)
       asect->vma = coreseg.c_addr;
       asect->filepos = offset;
       asect->alignment_power = 2;
+
+      if (CORE_GETMID (core) == M_SPARC_NETBSD
+	  && CORE_GETFLAG (coreseg) == CORE_CPU
+	  && coreseg.c_size > CORE_WCOOKIE_OFFSET)
+	{
+	  /* Truncate the .reg section.  */
+	  asect->_raw_size = CORE_WCOOKIE_OFFSET;
+
+	  /* And create the .wcookie section.  */
+	  asect = bfd_make_section_anyway (abfd, ".wcookie");
+	  if (asect == NULL)
+	    goto punt;
+
+	  asect->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
+	  asect->_raw_size = 4;
+	  asect->vma = 0;
+	  asect->filepos = offset + CORE_WCOOKIE_OFFSET;
+	  asect->alignment_power = 2;
+	}
 
       offset += coreseg.c_size;
     }

@@ -1,3 +1,8 @@
+2004-04-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* netbsd-core.c (CORE_WCOOKIE_OFFSET): New define.
+	(netbsd_core_file_p): Create a .wcookie section for OpenBSD/sparc.
+
 2004-04-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-cr16c.c (elf32_cr16c_relocate_section): Use
