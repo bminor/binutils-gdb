@@ -1,5 +1,10 @@
 2004-11-10  Randolph Chung  <tausq@debian.org>
 
+	* frame.c (get_prev_frame): Use get_frame_type to retrieve the 
+    frame's type.
+
+2004-11-10  Randolph Chung  <tausq@debian.org>
+
 	* blockframe.c (inside_entry_func): Move to .....
 	* frame.c (inside_entry_func): ... here, and make static.
 	(backtrace_past_entry): New flag.

@@ -1239,7 +1239,7 @@ get_prev_frame (struct frame_info *this_frame)
      stop at main, we should at least stop at the entry point of the
      application.  */
   if (!backtrace_past_entry
-      && this_frame->unwind->type != DUMMY_FRAME && this_frame->level >= 0
+      && get_frame_type (this_frame) != DUMMY_FRAME && this_frame->level >= 0
       && inside_entry_func (this_frame))
     {
       frame_debug_got_null_frame (gdb_stdlog, this_frame, "inside entry func");
