@@ -312,7 +312,7 @@ const int md_short_jump_size = 4;
 const int md_long_jump_size = 4;
 #endif
 
-CONST char *md_shortopts = "A:m:kVQ:";
+const char *md_shortopts = "A:m:kVQ:";
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };

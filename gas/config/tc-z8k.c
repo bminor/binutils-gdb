@@ -1340,7 +1340,7 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-CONST char *md_shortopts = "z:";
+const char *md_shortopts = "z:";
 
 struct option md_longopts[] =
   {

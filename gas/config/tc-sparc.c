@@ -395,12 +395,12 @@ sparc_target_format ()
  */
 
 #ifdef OBJ_ELF
-CONST char *md_shortopts = "A:K:VQ:sq";
+const char *md_shortopts = "A:K:VQ:sq";
 #else
 #ifdef OBJ_AOUT
-CONST char *md_shortopts = "A:k";
+const char *md_shortopts = "A:k";
 #else
-CONST char *md_shortopts = "A:";
+const char *md_shortopts = "A:";
 #endif
 #endif
 struct option md_longopts[] = {

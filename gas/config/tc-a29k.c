@@ -1,5 +1,5 @@
 /* tc-a29k.c -- Assemble for the AMD 29000.
-   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1998, 2000, 2001
+   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1038,7 +1038,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 
 #endif /* OBJ_AOUT */
 
-CONST char *md_shortopts = "";
+const char *md_shortopts = "";
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };

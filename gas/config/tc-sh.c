@@ -2601,7 +2601,7 @@ s_uses (ignore)
   demand_empty_rest_of_line ();
 }
 
-CONST char *md_shortopts = "";
+const char *md_shortopts = "";
 struct option md_longopts[] =
 {
 #define OPTION_RELAX  (OPTION_MD_BASE)

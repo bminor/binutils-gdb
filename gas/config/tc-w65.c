@@ -1,5 +1,5 @@
 /* tc-w65.c -- Assemble code for the W65816
-   Copyright 1995, 1998, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1995, 1998, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -28,7 +28,7 @@
 #include "../opcodes/w65-opc.h"
 
 const char comment_chars[] = "!";
-CONST char line_separator_chars[] = ";";
+const char line_separator_chars[] = ";";
 const char line_comment_chars[] = "!#";
 
 /* This table describes all the machine specific pseudo-ops the assembler
@@ -1186,7 +1186,7 @@ md_estimate_size_before_relax (fragP, segment_type)
   return fragP->fr_var;
 }
 
-CONST char *md_shortopts = "";
+const char *md_shortopts = "";
 struct option md_longopts[] = {
 #define OPTION_RELAX (OPTION_MD_BASE)
   {NULL, no_argument, NULL, 0}

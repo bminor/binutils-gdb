@@ -1,5 +1,5 @@
 /* tc-tic80.c -- Assemble for the TI TMS320C80 (MV)
-   Copyright 1996, 1997, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -900,7 +900,7 @@ md_begin ()
 
 /* The assembler adds md_shortopts to the string passed to getopt.  */
 
-CONST char *md_shortopts = "";
+const char *md_shortopts = "";
 
 /* The assembler adds md_longopts to the machine independent long options
    that are passed to getopt.  */

@@ -1,5 +1,5 @@
 /* tc-h8500.c -- Assemble code for the Hitachi H8/500
-   Copyright 1993, 1994, 1995, 1998, 2000, 2001
+   Copyright 1993, 1994, 1995, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1199,7 +1199,7 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-CONST char *md_shortopts = "";
+const char *md_shortopts = "";
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };

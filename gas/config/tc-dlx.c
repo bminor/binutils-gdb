@@ -1239,7 +1239,7 @@ md_apply_fix3 (fixP, valP, seg)
   return;
 }
 
-CONST char *md_shortopts = "";
+const char *md_shortopts = "";
 
 struct option md_longopts[] =
   {

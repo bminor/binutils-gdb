@@ -10546,7 +10546,7 @@ md_assemble (str)
 
       */
 
-CONST char * md_shortopts = "m:k";
+const char * md_shortopts = "m:k";
 
 #ifdef ARM_BI_ENDIAN
 #define OPTION_EB (OPTION_MD_BASE + 0)

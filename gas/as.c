@@ -350,7 +350,7 @@ parse_args (pargc, pargv)
      as if it were the argument of an option with character code 1.  */
 
   char *shortopts;
-  extern CONST char *md_shortopts;
+  extern const char *md_shortopts;
   static const char std_shortopts[] = {
     '-', 'J',
 #ifndef WORKING_DOT_WORD

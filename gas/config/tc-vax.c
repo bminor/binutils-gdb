@@ -1,5 +1,5 @@
 /* tc-vax.c - vax-specific -
-   Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1998, 2000, 2001
+   Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -3097,9 +3097,9 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 }
 
 #ifdef OBJ_VMS
-CONST char *md_shortopts = "d:STt:V+1h:Hv::";
+const char *md_shortopts = "d:STt:V+1h:Hv::";
 #else
-CONST char *md_shortopts = "d:STt:V";
+const char *md_shortopts = "d:STt:V";
 #endif
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}

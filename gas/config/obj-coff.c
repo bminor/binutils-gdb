@@ -271,7 +271,7 @@ fetch_coff_debug_section ()
   static segT debug_section;
   if (!debug_section)
     {
-      CONST asymbol *s;
+      const asymbol *s;
       s = bfd_make_debug_symbol (stdoutput, (char *) 0, 0);
       assert (s != 0);
       debug_section = s->section;
@@ -711,7 +711,7 @@ obj_coff_endef (ignore)
       /* intentional fallthrough */
     case C_FCN:
       {
-	CONST char *name;
+	const char *name;
 	S_SET_SEGMENT (def_symbol_in_progress, text_section);
 
 	name = S_GET_NAME (def_symbol_in_progress);

@@ -1,5 +1,5 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
    This file is part of GAS, the GNU Assembler.
@@ -255,7 +255,7 @@ const pseudo_typeS md_pseudo_table[] = {
 
 /* Options and initialization.  */
 
-CONST char *md_shortopts = "Sm:";
+const char *md_shortopts = "Sm:";
 
 struct option md_longopts[] = {
 #define OPTION_FORCE_LONG_BRANCH (OPTION_MD_BASE)

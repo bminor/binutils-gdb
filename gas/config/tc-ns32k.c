@@ -1,6 +1,6 @@
 /* ns32k.c  -- Assemble on the National Semiconductor 32k series
    Copyright 1987, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -2125,7 +2125,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
   md_number_to_disp (ptr + 1, (valueT) offset, 4);
 }
 
-CONST char *md_shortopts = "m:";
+const char *md_shortopts = "m:";
 
 struct option md_longopts[] =
 {

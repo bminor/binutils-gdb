@@ -1,5 +1,5 @@
 /* tc-i860.c -- Assembler for the Intel i860 architecture.
-   Copyright 1989, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001
+   Copyright 1989, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    Brought back from the dead and completely reworked
@@ -1013,9 +1013,9 @@ print_insn (insn)
 
 
 #ifdef OBJ_ELF
-CONST char *md_shortopts = "VQ:";
+const char *md_shortopts = "VQ:";
 #else
-CONST char *md_shortopts = "";
+const char *md_shortopts = "";
 #endif
 
 #define OPTION_EB		(OPTION_MD_BASE + 0)

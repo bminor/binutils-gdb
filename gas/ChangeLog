@@ -1,3 +1,34 @@
+2002-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* as.c: Replace CONST with const.
+	* write.c: Likewise.
+	* config/obj-coff.c: Likewise.
+	* config/tc-a29k.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-dlx.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-h8500.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i860.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-m88k.c: Likewise.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-pdp11.c: Likewise.
+	* config/tc-pj.c: Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-tahoe.c: Likewise.
+	* config/tc-tic80.c: Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-vax.c: Likewise.
+	* config/tc-w65.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+
 2002-06-08  Daniel Jacobowitz  <drow@mvista.com>
 
 	Based on patch from Matt Green:

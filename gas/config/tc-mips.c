@@ -3045,8 +3045,8 @@ macro_build_lui (place, counter, ep, regnum)
   struct mips_cl_insn insn;
   bfd_reloc_code_real_type r[3]
     = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
-  CONST char *name = "lui";
-  CONST char *fmt = "t,u";
+  const char *name = "lui";
+  const char *fmt = "t,u";
 
   assert (! mips_opts.mips16);
 
@@ -9832,7 +9832,7 @@ static int support_64bit_objects(void)
 }
 #endif /* OBJ_ELF */
 
-CONST char *md_shortopts = "nO::g::G:";
+const char *md_shortopts = "nO::g::G:";
 
 struct option md_longopts[] =
 {

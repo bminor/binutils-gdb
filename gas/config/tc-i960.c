@@ -1,6 +1,6 @@
 /* tc-i960.c - All the i80960-specific stuff
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001
+   1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -912,7 +912,7 @@ md_number_to_field (instrP, val, bfixP)
 
   ****************************************************************************/
 
-CONST char *md_shortopts = "A:b";
+const char *md_shortopts = "A:b";
 struct option md_longopts[] =
 {
 #define OPTION_LINKRELAX (OPTION_MD_BASE)

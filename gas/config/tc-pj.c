@@ -1,6 +1,6 @@
 /*-
    tc-pj.c -- Assemble code for Pico Java
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -383,7 +383,7 @@ md_atof (type, litP, sizeP)
   return NULL;
 }
 
-CONST char *md_shortopts = "";
+const char *md_shortopts = "";
 
 struct option md_longopts[] = {
 

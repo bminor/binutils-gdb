@@ -1794,7 +1794,7 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-CONST char * md_shortopts = "";
+const char * md_shortopts = "";
 
 #define OPTION_JSRI2BSR_ON	(OPTION_MD_BASE + 0)
 #define OPTION_JSRI2BSR_OFF	(OPTION_MD_BASE + 1)

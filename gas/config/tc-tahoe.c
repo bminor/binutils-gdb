@@ -1,6 +1,6 @@
 /* This file is tc-tahoe.c
 
-   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1995, 2000, 2001
+   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1995, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -386,7 +386,7 @@ md_begin ()
     as_fatal (errorval);
 }
 
-CONST char *md_shortopts = "ad:STt:V";
+const char *md_shortopts = "ad:STt:V";
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };

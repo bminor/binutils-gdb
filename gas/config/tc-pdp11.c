@@ -75,25 +75,25 @@ int asm_option[ASM_OPT_NUM];
 
 /* These chars start a comment anywhere in a source file (except inside
    another comment */
-CONST char comment_chars[] = "#/";
+const char comment_chars[] = "#/";
 
 /* These chars only start a comment at the beginning of a line.  */
-CONST char line_comment_chars[] = "#/";
+const char line_comment_chars[] = "#/";
 
-CONST char line_separator_chars[] = ";";
+const char line_separator_chars[] = ";";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
-CONST char EXP_CHARS[] = "eE";
+const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant */
 /* as in 0f123.456 */
 /* or    0H1.234E-12 (see exp chars above) */
-CONST char FLT_CHARS[] = "dDfF";
+const char FLT_CHARS[] = "dDfF";
 
 void pseudo_even (int);
 void pseudo_bss (int);
 
-CONST pseudo_typeS md_pseudo_table[] =
+const pseudo_typeS md_pseudo_table[] =
 {
   { "bss", pseudo_bss, 0 },
   { "even", pseudo_even, 0 },
@@ -617,7 +617,7 @@ void
 md_assemble (instruction_string)
      char *instruction_string;
 {
-  CONST struct pdp11_opcode *op;
+  const struct pdp11_opcode *op;
   struct pdp11_code insn, op1, op2;
   int error;
   int size;
@@ -1019,8 +1019,8 @@ md_convert_frag (headers, seg, fragP)
 {
 }
 
-CONST int md_short_jump_size = 2;
-CONST int md_long_jump_size = 4;
+const int md_short_jump_size = 2;
+const int md_long_jump_size = 4;
 
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
@@ -1289,7 +1289,7 @@ set_machine_model (arg)
     return 0;
 }
 
-CONST char *md_shortopts = "m:";
+const char *md_shortopts = "m:";
 
 struct option md_longopts[] =
 {
@@ -1364,9 +1364,9 @@ enum
 
 struct
 {
-  CONST char *pattern;
+  const char *pattern;
   int opt;
-  CONST char *description;
+  const char *description;
 } options;
 
 static struct options extension_opts[] =
@@ -1433,7 +1433,7 @@ static struct options model_opts[] =
 
 struct
 {
-  CONST char *title;
+  const char *title;
   struct options *opts;
   int num;
 } all_opts[] =
@@ -1508,7 +1508,7 @@ parse_match (char *arg, char *pattern)
 int
 fprint_opt (stream, pattern)
      FILE *stream;
-     CONST char *pattern;
+     const char *pattern;
 {
   int n;
 

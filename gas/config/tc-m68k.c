@@ -55,12 +55,12 @@ const char line_comment_chars[] = "#*";
 const char line_separator_chars[] = ";";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
-CONST char EXP_CHARS[] = "eE";
+const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant, as
    in "0f12.456" or "0d1.2345e12".  */
 
-CONST char FLT_CHARS[] = "rRsSfFdDxXeEpP";
+const char FLT_CHARS[] = "rRsSfFdDxXeEpP";
 
 /* Also be aware that MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT may have to be
    changed in read.c .  Ideally it shouldn't have to know about it at all,
@@ -611,7 +611,7 @@ const pseudo_typeS md_pseudo_table[] =
 extern void obj_coff_section PARAMS ((int));
 #endif
 
-CONST pseudo_typeS mote_pseudo_table[] =
+const pseudo_typeS mote_pseudo_table[] =
 {
 
   {"dcl", cons, 4},
@@ -4730,7 +4730,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
    * Out: GNU LD relocation length code: 0, 1, or 2.
    */
 
-  static CONST unsigned char nbytes_r_length[] = {42, 0, 1, 42, 2};
+  static const unsigned char nbytes_r_length[] = {42, 0, 1, 42, 2};
   long r_symbolnum;
 
   know (fixP->fx_addsy != NULL);
@@ -4754,8 +4754,8 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
 #ifndef WORKING_DOT_WORD
-CONST int md_short_jump_size = 4;
-CONST int md_long_jump_size = 6;
+const int md_short_jump_size = 4;
+const int md_long_jump_size = 6;
 
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
@@ -6729,9 +6729,9 @@ s_mri_endw (ignore)
  */
 
 #ifdef OBJ_ELF
-CONST char *md_shortopts = "lSA:m:kQ:V";
+const char *md_shortopts = "lSA:m:kQ:V";
 #else
-CONST char *md_shortopts = "lSA:m:k";
+const char *md_shortopts = "lSA:m:k";
 #endif
 
 struct option md_longopts[] = {

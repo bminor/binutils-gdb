@@ -1,6 +1,6 @@
 /* write.c - emit .o file
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001
+   1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -61,8 +61,8 @@
 #endif
 
 #ifndef WORKING_DOT_WORD
-extern CONST int md_short_jump_size;
-extern CONST int md_long_jump_size;
+extern const int md_short_jump_size;
+extern const int md_long_jump_size;
 #endif
 
 /* Used to control final evaluation of expressions.  */

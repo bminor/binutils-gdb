@@ -1086,7 +1086,7 @@ parse_register_list (insn, operand)
   return NULL;
 }
 
-CONST char *md_shortopts = "m:";
+const char *md_shortopts = "m:";
 
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
