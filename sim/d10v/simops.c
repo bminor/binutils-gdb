@@ -50,6 +50,7 @@ move_to_cr (int cr, reg_t val)
   switch (cr)
     {
     case PSW_CR:
+      State.sp[State.SM] = State.regs[SP_IDX]; /* save old SP */
       State.SM = (val & PSW_SM_BIT) != 0;
       State.EA = (val & PSW_EA_BIT) != 0;
       State.DB = (val & PSW_DB_BIT) != 0;
@@ -62,6 +63,7 @@ move_to_cr (int cr, reg_t val)
       State.F0 = (val & PSW_F0_BIT) != 0;
       State.F1 = (val & PSW_F1_BIT) != 0;
       State.C =  (val & PSW_C_BIT) != 0;
+      State.regs[SP_IDX] = State.sp[State.SM]; /* restore new SP */
       if (State.ST && !State.FX)
 	{
 	  (*d10v_callback->printf_filtered)

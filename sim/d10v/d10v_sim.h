@@ -75,10 +75,15 @@ enum _ins_type
 
 extern unsigned long ins_type_counters[ (int)INS_MAX ];
 
+enum {
+  SP_IDX = 15,
+};
+
 struct _state
 {
   reg_t regs[16];		/* general-purpose registers */
   reg_t cregs[16];		/* control registers */
+  reg_t sp[2];                  /* holding area for SPI(0)/SPU(1) */
   int64 a[2];			/* accumulators */
   uint8 SM;
   uint8 EA;
