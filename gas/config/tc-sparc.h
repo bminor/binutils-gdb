@@ -1,5 +1,5 @@
 /* tc-sparc.h - Macros and type defines for the sparc.
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -19,6 +19,7 @@
 
 #define TC_SPARC 1
 
+#define NO_LISTING
 #define LOCAL_LABELS_FB
 
 #ifdef OBJ_BOUT
@@ -33,7 +34,9 @@
 
 #define tc_headers_hook(a)		{;} /* don't need it. */
 #define tc_crawl_symbol_chain(a)	{;} /* don't need it. */
-    
+
+void tc_aout_pre_write_hook();
+
 #define LISTING_HEADER "SPARC GAS "
 
 /*

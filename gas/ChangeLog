@@ -1,3 +1,7 @@
+Fri Feb 21 06:21:07 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* read.c, write.c subsegs.c: back out the .bss changes.
+
 Fri Feb 21 01:08:48 1992  Minh Tran-Le (TRANLE@INTELLICORP.COM)
 
 	* symbols.c (local_label_name): symbols now start with ^A.

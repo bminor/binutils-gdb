@@ -21,7 +21,45 @@
 #ifndef __A_OUT_GNU_H__
 #define __A_OUT_GNU_H__
 
-#include "aout/reloc.h"
+#if defined(TC_SPARC) || defined(TC_A29K)
+enum reloc_type {
+	RELOC_8,        RELOC_16,        RELOC_32, /* simple relocations */
+	RELOC_DISP8,    RELOC_DISP16,    RELOC_DISP32, /* pc-rel displacement */
+	RELOC_WDISP30,  RELOC_WDISP22,
+	RELOC_HI22,     RELOC_22,
+	RELOC_13,       RELOC_LO10,
+	RELOC_SFA_BASE, RELOC_SFA_OFF13,
+	RELOC_BASE10,   RELOC_BASE13,    RELOC_BASE22, /* P.I.C. (base-relative) */
+	RELOC_PC10,     RELOC_PC22,	/* for some sort of pc-rel P.I.C. (?) */
+	RELOC_JMP_TBL,		/* P.I.C. jump table */
+	RELOC_SEGOFF16,		/* reputedly for shared libraries somehow */
+	RELOC_GLOB_DAT,  RELOC_JMP_SLOT, RELOC_RELATIVE,
+	RELOC_11,
+	RELOC_WDISP2_14,
+	RELOC_WDISP19,
+	RELOC_HHI22,
+	RELOC_HLO10,
+	
+	/* 29K relocation types */
+	RELOC_JUMPTARG, RELOC_CONST,     RELOC_CONSTH,
+	
+	RELOC_WDISP14, RELOC_WDISP21,
+	
+	NO_RELOC,
+};
+#endif /* TC_SPARC or TC_A29K */
+
+#ifdef TC_I860
+/* NOTE: three bits max, see struct reloc_info_i860.r_type */
+enum i860_reloc_type {
+	NO_RELOC = 0, BRADDR, LOW0, LOW1, LOW2, LOW3, LOW4, SPLIT0, SPLIT1, SPLIT2, RELOC_32,
+};
+
+ /* NOTE: two bits max, see reloc_info_i860.r_type */
+enum highlow_type {
+	NO_SPEC = 0, PAIR, HIGH, HIGHADJ,
+};
+#endif /* TC_I860 */
 
 #define __GNU_EXEC_MACROS__
 
@@ -255,6 +293,23 @@ struct reloc_ext_bytes {
 	unsigned char r_bits[1];
 	unsigned char r_addend[4];
 };
+
+struct reloc_info_i860
+{
+	unsigned long r_address;
+	/*
+	 * Using bit fields here is a bad idea because the order is not portable. :-(
+	 */
+	unsigned int r_symbolnum: 24;
+	unsigned int r_pcrel    : 1;
+	unsigned int r_extern   : 1;
+	/* combining the two field simplifies the argument passing in "new_fix()" */
+	/* and is compatible with the existing Sparc #ifdef's */
+	/* r_type:  highlow_type - bits 5,4; reloc_type - bits 3-0 */
+	unsigned int r_type     : 6;
+	long r_addend;
+};
+
 
 #define	RELOC_EXT_BITS_EXTERN_BIG	0x80
 #define	RELOC_EXT_BITS_EXTERN_LITTLE	0x01

@@ -19,6 +19,8 @@
 
 #define TC_A29K
 
+#define NO_LISTING
+
 #define tc_aout_pre_write_hook(x)	{;} /* not used */
 #define tc_coff_symbol_emit_hook(a)	{;} /* not used */
 #define tc_crawl_symbol_chain(a)	{;} /* not used */
