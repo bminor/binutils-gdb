@@ -1,10 +1,26 @@
+Tue Jul 30 17:26:39 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* configure.in:  Remove xm.h and tm.h even if we aren't linking
+	new ones, so "./configure sun4; ./configure none" does the right
+	thing.  Assume that alldeps.mak and depend are already built in
+	srcdir, and avoid running "make" (particularly "make depend",
+	which involves "gcc") from inside configure.  Build Makefile
+	directly rather than building Makefile.conf first.
+	* configure:  Regenerate with above changes.
+	* Makefile.in:  Use $(BISON) to find bison.  Roll VERSION
+	to 3.98.  Revise gdb.tar.Z procedure to produce a file
+	called gdb-$(VERSION).tar.Z but which unpacks into a
+	directory called "gdb".  Move non-source files out of
+	$(SFILES_SUBDIR).  Pretty up alldeps.mak with comments.
+	(depend):  Don't try to do "gcc expread.y".
+	(expread.o):  Update dependencies by hand.
+
 Mon Jul 29 15:21:09 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* doc/gdb.texinfo:
 	Fixed a variety of small typos that prevented info from formatting
 	cleanly; altered too-long heading for GPL Appendix, as discussed
 	w/RMS; Changed date on cover to July 91.
-
 
 Fri Jul 26 13:20:02 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 

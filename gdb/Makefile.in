@@ -48,7 +48,9 @@ srcdir = .
 # CFLAGS section if your system doesn't have fcntl.h in /usr/include (which 
 # is where it should be according to Posix).
 
-YACC=bison -y
+BISON=bison
+BISONFLAGS=-y
+YACC=$(BISON) $(BISONFLAGS)
 # YACC=yacc
 SHELL=/bin/sh
 MAKE=make
@@ -57,10 +59,12 @@ MAKE=make
 # Berkeley/Sun don't have quite enough. 
 #M4=/usr/5bin/m4
 M4=gm4
-# where to find texinfo; if you have PostScript fonts you may want to try 
-# the Cygnus mods (which also have different header/footer layout)
-#TEXIDIR=${srcdir}/../texinfo/cygnus
+
+# where to find texinfo; GDB dist should include a recent one
 TEXIDIR=${srcdir}/../texinfo/fsf
+
+# where to find makeinfo, preferably one designed for texinfo-2
+MAKEINFO=makeinfo
 
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefinded refs.
@@ -128,8 +132,8 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 3.96
-DIST=gdb-$(VERSION)
+VERSION = 3.98
+DIST=gdb
 
 LINT=/usr/5bin/lint
 LINTFLAGS=
@@ -162,8 +166,6 @@ SFILES_SUBDIR = \
 	 ${srcdir}/vx-share/xdr_ptrace.h \
 	 ${srcdir}/vx-share/xdr_rdb.h \
 	 ${srcdir}/vx-share/xdr_regs.h \
-	 ${srcdir}/nindy-share/Makefile \
-	 ${srcdir}/nindy-share/VERSION \
 	 ${srcdir}/nindy-share/b.out.h \
 	 ${srcdir}/nindy-share/block_io.h \
 	 ${srcdir}/nindy-share/coff.h \
@@ -171,6 +173,11 @@ SFILES_SUBDIR = \
 	 ${srcdir}/nindy-share/env.h \
 	 ${srcdir}/nindy-share/stop.h \
 	 ${srcdir}/nindy-share/ttycntl.h
+
+# Non-source files in subdirs, that should go into gdb.tar.Z.
+NONSRC_SUBDIR = \
+	 ${srcdir}/nindy-share/Makefile \
+	 ${srcdir}/nindy-share/VERSION
 
 # All source files that go into linking GDB, except config-specified files.
 SFILES = $(SFILES_MAINDIR) $(SFILES_SUBDIR)
@@ -184,29 +191,8 @@ SFILES_DOCDIR = \
 	${srcdir}/doc/pretex.m4      \
 	${srcdir}/doc/none.m4        \
 	${srcdir}/doc/all.m4         \
-	${srcdir}/doc/gdb.alter-m4   \
-	${srcdir}/doc/gdb.bugs-m4    \
-	${srcdir}/doc/gdb.canned-m4  \
-	${srcdir}/doc/gdb.cmds-m4    \
-	${srcdir}/doc/gdb.ctl-m4     \
-	${srcdir}/doc/gdb.data-m4    \
-	${srcdir}/doc/gdb.emacs-m4   \
-	${srcdir}/doc/gdb.files-m4   \
-	${srcdir}/doc/gdb.gpl-m4     \
-	${srcdir}/doc/gdb.install-m4 \
-	${srcdir}/doc/gdb.inv.m-m4   \
-	${srcdir}/doc/gdb.inv.s-m4   \
-	${srcdir}/doc/gdb.invoc-m4   \
-	${srcdir}/doc/gdb.rdln-m4    \
-	${srcdir}/doc/gdb.rename-m4  \
-	${srcdir}/doc/gdb.run-m4     \
-	${srcdir}/doc/gdb.sample-m4  \
-	${srcdir}/doc/gdb.src-m4     \
-	${srcdir}/doc/gdb.stack-m4   \
-	${srcdir}/doc/gdb.stop-m4    \
-	${srcdir}/doc/gdb.symb-m4    \
-	${srcdir}/doc/gdb.tgts-m4    \
-	${srcdir}/doc/gdb.top-m4     
+	${srcdir}/doc/gdbinv-m.m4   \
+	${srcdir}/doc/gdbinv-s.m4   
 
 # Any additional files specified on these lines should also be added to
 # the OTHERS = definition below, so they go in the tar files.
@@ -247,8 +233,8 @@ TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 # tdesc-lib cannot be named simply tdesc, because if it were, GNU make
 # would try to make it from tdesc.c.
 # tdesc-lib removed from the list due to Motorola copyrights...gnu@cygnus.com
-OTHERS = Makefile Makefile.in depend alldeps.mak Makefile.conf \
-	 createtags munch configure configure.in config.status \
+OTHERS = Makefile.in depend alldeps.mak \
+	 createtags munch configure configure.in \
 	 ChangeLog ChangeLog-3.x \
 	 README TODO TAGS WHATS.NEW Projects \
 	 .gdbinit COPYING expread.tab.c \
@@ -340,14 +326,10 @@ rapp: $(RAPP_OBS)
 	${CC-LD} $(LDFLAGS) -o $@ rapp_init.c $(RAPP_OBS)
 	
 # Support for building Makefile out of configured pieces, automatically
-# generated dependencies, etc.  Makefile.conf is built by configure,
-# and includes the body of Makefile.in as well as configuration
-# settings.  We add alldeps.mak and depend to get Makefile.
-# See also "make-depend:", where we also rebuild Makefile after making depend.
-Makefiles= Makefile.conf alldeps.mak depend
-
-make-Makefile: $(Makefiles) depend
-	cat ${Makefiles} > ./Makefile
+# generated dependencies, etc.  alldeps.mak is a file that contains
+# "make" variable definitions for all ALLDEPFILES, ALLDEPFILES_MAINDIR,
+# ALLDEPFILES_SUBDIR, ALLPARAM, and ALLCONFIG, all cadged from the current
+# contents of the xconfig and tconfig subdirectories.
 
 alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
 	rm -f alldeps.mak alldeps.tmp allparam.tmp allconfig.tmp
@@ -375,6 +357,8 @@ alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
 	      -e 's!xdr_regs.o!vx-share/xdr_regs.c!' \
 	      -e 's/\.o/.c/' \
 	    >alldeps2.tmp
+	echo '# Start of "alldeps.mak" definitions' \
+	    >>alldeps.mak;
 	echo 'ALLDEPFILES = $$(ALLDEPFILES_MAINDIR) $$(ALLDEPFILES_SUBDIR)' \
 	    >>alldeps.mak;
 	grep -v / alldeps2.tmp | \
@@ -395,12 +379,14 @@ alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
 	    NR == 0 {printf $$0;} \
 	    NR != 0 {printf "\\\n" $$0} \
 	    END {printf "\n\n"}' >>alldeps.mak;
+	echo '# End of "alldeps.mak" definitions' \
+	    >>alldeps.mak;
 	rm -f alldeps.tmp alldeps2.tmp allparam.tmp allconfig.tmp
 
 # The sed script makes everything which depends on {x,t}m.h depend on
 # config.status as well, in case someone reconfigures gdb out from
 # under an already compiled gdb.
-make-depend: $(SOURCES) Makefile.in
+depend: $(SOURCES) Makefile.in
 	@echo Ignore errors about non-existent system-supplied include files
 	@echo for systems other than the one you are using.
 	@echo "If xm.h and tm.h don't exist, the error messages saying so"
@@ -408,7 +394,7 @@ make-depend: $(SOURCES) Makefile.in
 	@echo Also ignore parse errors in valops.c, and any errors in
 	@echo arm-convert.s.
 	-$(GCC) -MM $(CFLAGS) -I$(BFD_DIR) \
-	  `ls $(SOURCES) | grep -v \.h$$ |sort -u` >depend.tmp
+	  `ls $(SOURCES) | grep -v '\.[hy]$$' |sort -u` >depend.tmp
 # If running in srcdir, translate "./foo.c" into "$srcdir/foo.c" except
 # for xm.h and tm.h.  This allows the same "depend" file to be used
 # by the various subdirectories.
@@ -462,9 +448,16 @@ TAGS: ${TAGFILES}
 	$(srcdir)/createtags $(TM_FILE) ${XM_FILE} $(DEPFILES) ${TAGFILES}
 tags: TAGS
 
-# FIXME: Get alldeps.mak up to date, ./configure none, THEN make gdb.tar.Z!
-gdb.tar.Z: ${TARFILES} ${TARDIRS}
-	rm -f gdb.tar; rm -rf $(DIST)
+gdb.tar.Z: force_update
+	./configure none
+	$(MAKE) alldeps.mak
+	./configure none
+	$(MAKE) depend
+	./configure none
+	$(MAKE) gdb-$(VERSION).tar.Z
+
+gdb-$(VERSION).tar.Z: ${TARFILES} ${TARDIRS}
+	rm -f gdb.tar gdb-$(VERSION).tar.Z; rm -rf $(DIST)
 	mkdir $(DIST)
 	cd $(DIST) ; for i in ${TARFILES} ; do ln -s ../$$i . ; done
 	cd $(DIST); for i in ${TARDIRS}; do \
@@ -476,9 +469,9 @@ gdb.tar.Z: ${TARFILES} ${TARDIRS}
 	  for i in $(ALLCONFIG) ; do ln -s ../../$$i ../$$i ; done
 	mkdir $(DIST)/vx-share $(DIST)/nindy-share
 	cd $(DIST)/tconfig ; \
-	  for i in $(SFILES_SUBDIR) $(ALLDEPFILES_SUBDIR); \
+	  for i in $(SFILES_SUBDIR) $(NONSRC_SUBDIR) $(ALLDEPFILES_SUBDIR); \
 	    do ln -s ../../$$i ../$$i ; done
-	tar chf - $(DIST) | compress >gdb.tar.Z
+	tar chf - $(DIST) | compress >gdb-$(VERSION).tar.Z
 	rm -rf $(DIST)
 
 clean:
@@ -491,12 +484,14 @@ clean:
 distclean: clean expread.tab.c TAGS
 	rm -f tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
-	rm -f ${TESTS} Makefile Makefile.conf depend
+	rm -f ${TESTS} Makefile depend
 
 realclean: clean
 	rm -f expread.tab.c TAGS
 	rm -f tm.h xm.h config.status
-	rm -f Makefile Makefile.conf depend
+	rm -f Makefile depend
+
+# Documentation!
 
 rdl-apps.texinfo: ${READLINE_DIR}/inc-readline.texinfo \
 			${READLINE_DIR}/inc-history.texinfo
@@ -514,11 +509,11 @@ gdb.dvi : gdb-all.texinfo rdl-apps.texinfo
 	mv gdb-all.dvi gdb.dvi
 	rm -f gdb-all.?? gdb-all.???
 
-# We're using texinfo2, and many makeinfo's 
-# can't cope with all the markup.  In the meantime, we distribute the info
+# We're using texinfo2, and older makeinfo's may not be able to
+# cope with all the markup.  In the meantime, we distribute the info
 # files as formatted by the elisp texinfo2 code.
 gdb.info: gdb-all.texinfo
-	makeinfo gdb-all.texinfo
+	${MAKEINFO} gdb-all.texinfo
 
 # Make copying.c from COPYING
 copying.c : COPYING copying.awk
@@ -527,13 +522,15 @@ copying.c : COPYING copying.awk
 version.c : Makefile.in
 	echo 'char *version = "$(VERSION)";' >version.c
 
+# expread.tab.c is generated in srcdir from expread.y, then compiled in target
+# directory to expread.o.
 ${srcdir}/expread.tab.c : $(srcdir)/expread.y
-	@echo 'Expect 4 shift/reduce conflict.'
+	@echo 'Expect 4 shift/reduce conflicts.'
 	${YACC} $(srcdir)/expread.y
 	mv y.tab.c ${srcdir}/expread.tab.c
 
 expread.o : ${srcdir}/expread.tab.c defs.h param.h symtab.h \
-            frame.h expression.h
+            frame.h expression.h value.h command.h
 	$(CC) -c ${CFLAGS} `echo ${srcdir}/expread.tab.c | sed 's,^\./,,'`
 	mv expread.tab.o expread.o
 
@@ -591,3 +588,12 @@ force_update :
 cplus-dem.o : cplus-dem.c
 	${CC} -c ${CFLAGS} -Dnounderscore \
 	  `echo ${srcdir}/cplus-dem.c | sed 's,^\./,,'`
+
+# This is the end of "Makefile.in".  When built into "Makefile"
+# by the configure script, two things are added below this point:
+# 	alldeps.mak -- defintions of all files that are used in
+#			host- or target-dependent configurations
+#	depend -- what .o files depend on what .c and .h files,
+#			for all configurations.
+
+

@@ -1,6 +1,5 @@
 srcname="GDB"
 srctrigger=main.c
-Makefile=Makefile.conf
 
 # per-host:
 
@@ -31,13 +30,17 @@ host_makefile_frag=xconfig/${host}
 target_makefile_frag=tconfig/${target}
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) is not set in the
-# ?config/* file, we don't make the corresponding links.
+# ?config/* file, we don't make the corresponding links.  But we have
+# to remove the xm.h files and tm.h files anyway, e.g. when switching
+# from "configure host" to "configure none".
 files=
 links=
+rm -f xm.h
 if [ "${hostfile}" != "" ]; then
 	files="${files} ${hostfile}"
 	links="${links} xm.h"
 fi
+rm -f tm.h
 if [ "${targetfile}" != "" ]; then
 	files="${files} ${targetfile}"
 	links="${links} tm.h"
@@ -53,8 +56,4 @@ case ${srcdir} in
       echo "source ${srcdir}/.gdbinit" >> .gdbinit
 esac
 
-rm -f Makefile
-if [ ! -f ${srcdir}/depend ]; then
-  make -f Makefile.conf make-depend
-fi
-make -f Makefile.conf make-Makefile
+cat ${srcdir}/alldeps.mak ${srcdir}/depend >>Makefile
