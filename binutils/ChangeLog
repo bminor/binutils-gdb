@@ -1,4 +1,21 @@
+Thu Sep 30 16:46:26 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* Makefile.in (binutils.dvi): use TEXIDIR to find texinfo.tex
+
+Sat Sep 25 18:09:29 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* objcopy.c (simple_copy, smart_rename): New functions.
+	(main): Use them.
+
+Fri Sep 24 15:38:29 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (clean, distclean): Recurse into testsuite.
+
 Thu Sep 23 01:05:06 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objcopy.c (setup_sections, copy_sections): If stripping, don't
+	copy SEC_DEBUGGING sections.
+	* objdump.c (dump_headers): Print SEC_DEBUGGING flag.
 
 	* objdump.c (usage): Mention --stabs.
 

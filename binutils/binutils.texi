@@ -60,9 +60,7 @@ into another language, under the above conditions for modified versions.
 @page
 
 @tex
-\def\$#1${{#1}} % Kluge: collect RCS revision info without $...$
-\xdef\manvers{\$Revision$} % For use in headers, footers too
-{\parskip=0pt \hfill Cygnus Support\par \hfill \manvers\par \hfill
+{\parskip=0pt \hfill Cygnus Support\par \hfill
 \TeX{}info \texinfoversion\par }
 @end tex
 
@@ -138,7 +136,7 @@ Discard symbols
 @cindex archives
 @cindex collections of files
 @smallexample
-ar [-]@var{p}@var{mod} [ @var{membername} ] @var{archive} @var{file}@dots{}
+ar [-]@var{p}[@var{mod} [@var{relpos}]] @var{archive} [@var{member}@dots{}]
 ar -M [ <mri-script ]
 @end smallexample
 
@@ -196,7 +194,7 @@ program.
 @section Controlling @code{ar} on the command line
 
 @smallexample
-ar [-]@var{p}@var{mod} [ @var{membername} ] @var{archive} @var{file}@dots{}
+ar [-]@var{p}[@var{mod} [@var{relpos}]] @var{archive} [@var{member}@dots{}]
 @end smallexample
 
 @cindex Unix compatibility, @code{ar}
@@ -205,7 +203,7 @@ arguments to execute: one keyletter specifying the @emph{operation}
 (optionally accompanied by other keyletters specifying
 @emph{modifiers}), and the archive name to act on.
 
-Most operations can also accept further @var{file} arguments,
+Most operations can also accept further @var{member} arguments,
 specifying particular files to operate on.
 
 GNU @code{ar} allows you to mix the operation code @var{p} and modifier
@@ -222,7 +220,7 @@ any of the following, but you must specify only one of them:
 @item d
 @cindex deleting from archive
 @emph{Delete} modules from the archive.  Specify the names of modules to
-be deleted as @var{file}@dots{}; the archive is untouched if you
+be deleted as @var{member}@dots{}; the archive is untouched if you
 specify no files to delete.
 
 If you specify the @samp{v} modifier, @code{ar} lists each module
@@ -237,7 +235,7 @@ programs are linked using the library, if a symbol is defined in more
 than one member.  
 
 If no modifiers are used with @code{m}, any members you name in the
-@var{file} arguments are moved to the @emph{end} of the archive;
+@var{member} arguments are moved to the @emph{end} of the archive;
 you can use the @samp{a}, @samp{b}, or @samp{i} modifiers to move them to a
 specified place instead.
 
@@ -247,12 +245,12 @@ specified place instead.
 output file.  If the @samp{v} modifier is specified, show the member
 name before copying its contents to standard output.
 
-If you specify no @var{file} arguments, all the files in the archive are
+If you specify no @var{member} arguments, all the files in the archive are
 printed.
 
 @item q
 @cindex quick append to archive
-@emph{Quick append}; add the files @var{file}@dots{} to the end of
+@emph{Quick append}; add the files @var{member}@dots{} to the end of
 @var{archive}, without checking for replacement.
 
 The modifiers @samp{a}, @samp{b}, and @samp{i} do @emph{not} affect this
@@ -266,12 +264,12 @@ index is not updated, even if it already existed; you can use @samp{ar s} or
 
 @item r
 @cindex replacement in archive
-Insert the files @var{file}@dots{} into @var{archive} (with
+Insert the files @var{member}@dots{} into @var{archive} (with
 @emph{replacement}). This operation differs from @samp{q} in that any
 previously existing members are deleted if their names match those being
 added.
 
-If one of the files named in @var{file}@dots{} doesn't exist, @code{ar}
+If one of the files named in @var{member}@dots{} does not exist, @code{ar}
 displays an error message, and leaves undisturbed any existing members
 of the archive matching that name.
 
@@ -287,12 +285,12 @@ deleted) or replaced.
 @item t
 @cindex contents of archive
 Display a @emph{table} listing the contents of @var{archive}, or those
-of the files listed in @var{file}@dots{} that are present in the
+of the files listed in @var{member}@dots{} that are present in the
 archive.  Normally only the member name is shown; if you also want to
 see the modes (permissions), timestamp, owner, group, and size, you can
 request that by also specifying the @samp{v} modifier.
 
-If you do not specify a @var{file}, all files in the archive
+If you do not specify a @var{member}, all files in the archive
 are listed.
 
 @cindex repeated names in archive
@@ -306,11 +304,11 @@ listing---in our example, @samp{ar t b.a}.
 
 @item x
 @cindex extract from archive
-@emph{Extract} members (named @var{file}) from the archive.  You can
+@emph{Extract} members (named @var{member}) from the archive.  You can
 use the @samp{v} modifier with this operation, to request that
 @code{ar} list each name as it extracts it.
 
-If you do not specify a @var{file}, all files in the archive
+If you do not specify a @var{member}, all files in the archive
 are extracted.
 
 @end table
@@ -323,26 +321,26 @@ keyletter, to specify variations on an operation's behavior:
 @cindex relative placement in archive
 Add new files @emph{after} an existing member of the
 archive.  If you use the modifier @samp{a}, the name of an existing archive
-member must be present as the @var{membername} argument, before the
+member must be present as the @var{relpos} argument, before the
 @var{archive} specification.
 
 @item b
 Add new files @emph{before} an existing member of the
 archive.  If you use the modifier @samp{b}, the name of an existing archive
-member must be present as the @var{membername} argument, before the
+member must be present as the @var{relpos} argument, before the
 @var{archive} specification.  (same as @samp{i}).
 
 @item c
 @cindex creating archives
 @emph{Create} the archive.  The specified @var{archive} is always
-created if it didn't exist, when you request an update.  But a warning is
+created if it did not exist, when you request an update.  But a warning is
 issued unless you specify in advance that you expect to create it, by
 using this modifier.
 
 @item i
 Insert new files @emph{before} an existing member of the
 archive.  If you use the modifier @samp{i}, the name of an existing archive
-member must be present as the @var{membername} argument, before the
+member must be present as the @var{relpos} argument, before the
 @var{archive} specification.  (same as @samp{b}).
 
 @item l
@@ -453,10 +451,10 @@ Add all the contents of @var{archive} (or, if specified, each named
 
 Requires prior use of @code{OPEN} or @code{CREATE}.
 
-@item ADDMOD @var{file}, @var{file}, @dots{} @var{file}
+@item ADDMOD @var{member}, @var{member}, @dots{} @var{member}
 @c FIXME! w/Replacement??  If so, like "ar r @var{archive} @var{names}"
 @c        else like "ar q..."
-Add each named @var{file} as a module in the current archive.
+Add each named @var{member} as a module in the current archive.
 
 Requires prior use of @code{OPEN} or @code{CREATE}.
 
@@ -750,7 +748,7 @@ by their names.
 @item -p
 @itemx --no-sort 
 @cindex sorting symbols
-Don't bother to sort the symbols in any order; print them in the order
+Do not bother to sort the symbols in any order; print them in the order
 encountered.
 
 @item -P
@@ -1066,8 +1064,8 @@ Display the version number of @code{size}.
 
 @smallexample
 strings [-afov] [-@var{min-len}] [-n @var{min-len}] [-t @var{radix}] [-]
-        [--all] [--print-file-name] [--bytes=@var{min-len}] [--radix=@var{radix}]
-        [--help] [--version] @var{file}@dots{}
+        [--all] [--print-file-name] [--bytes=@var{min-len}]
+        [--radix=@var{radix}] [--help] [--version] @var{file}@dots{}
 @end smallexample
 
 For each @var{file} given, GNU @code{strings} prints the printable
