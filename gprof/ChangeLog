@@ -1,3 +1,7 @@
+Thu Jan 16 17:42:54 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dummy.c (find_call): Clear ignore_direct_calls.
+
 Tue Dec 31 15:44:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (.c.o): Add -D_GNU_SOURCE.  Put $(CFLAGS) at the
