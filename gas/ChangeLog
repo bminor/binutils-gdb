@@ -1,5 +1,9 @@
 Mon Oct 21 11:38:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-i386.c (md_apply_fix3): Don't increment value for a PC
+ 	relative reloc when BFD_ASSEMBLER and OBJ_AOUT (more ugly gas
+ 	reloc hacking).
+
 	* config/obj-aout.h (S_IS_DEFINE): non BFD_ASSEMBLER version:
 	Don't check S_GET_OTHER.
 
