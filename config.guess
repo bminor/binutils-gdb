@@ -1,6 +1,6 @@
 #!/bin/sh
 # This script attempts to guess a canonical system name.
-#   Copyright (C) 1992, 1993 Free Software Foundation, Inc.
+#   Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -28,6 +28,12 @@
 # (but try to keep the structure clean).
 #
 
+# This is needed to find uname on a Pyramid OSx when run in the BSD universe.
+# (ghazi@noc.rutgers.edu 8/24/94.)
+if (test -f /.attbin/uname) >/dev/null 2>&1 ; then
+	PATH=$PATH:/.attbin ; export PATH
+fi
+
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 UNAME_RELEASE=`(uname -r) 2>/dev/null` || UNAME_RELEASE=unknown
 UNAME_SYSTEM=`(uname -s) 2>/dev/null` || UNAME_SYSTEM=unknown
@@ -47,6 +53,13 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
     arm:RISC*:1.[012]*:*|arm:riscix:1.[012]*:*)
 	echo arm-acorn-riscix${UNAME_RELEASE}
 	exit 0;;
+    Pyramid*:OSx*:*:*)
+	if test "`(/bin/universe) 2>/dev/null`" = att ; then
+		echo pyramid-pyramid-sysv3
+	else
+		echo pyramid-pyramid-bsd
+	fi
+	exit 0 ;;
     sun4*:SunOS:5.*:*)
 	echo sparc-sun-solaris2`echo ${UNAME_RELEASE}|sed -e 's/[^.]*//'`
 	exit 0 ;;
@@ -84,8 +97,16 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	echo m88k-motorola-sysv3
 	exit 0 ;;
     AViiON:dgux:*:*)
- 	echo m88k-dg-dgux${UNAME_RELEASE}
+	if [ ${TARGET_BINARY_INTERFACE}x = m88kdguxelfx \
+	     -o ${TARGET_BINARY_INTERFACE}x = x ] ; then
+		echo m88k-dg-dgux${UNAME_RELEASE}
+	else
+		echo m88k-dg-dguxbcs${UNAME_RELEASE}
+	fi
  	exit 0 ;;
+    M88*:DolphinOS:*:*)	# DolphinOS (SVR3)
+	echo m88k-dolphin-sysv3
+	exit 0 ;;
     M88*:*:R3*:*)
 	# Delta 88k system running SVR3
 	echo m88k-motorola-sysv3
@@ -231,6 +252,13 @@ EOF
     Intel:Mach:3*:*)
 	echo i386-unknown-mach3
 	exit 0 ;;
+    i860:*:4.*:*) # i860-SVR4
+	if grep Stardent /usr/include/sys/uadmin.h >/dev/null 2>&1 ; then
+	  echo i860-stardent-sysv${UNAME_RELEASE} # Stardent Vistra i860-SVR4
+	else # Add other i860-SVR4 vendors below as they are discovered.
+	  echo i860-unknown-sysv${UNAME_RELEASE}  # Unknown i860-SVR4
+	fi
+	exit 0 ;;
     mini*:CTIX:SYS*5:*)
 	# "miniframe"
 	echo m68010-convergent-sysv
@@ -334,6 +362,10 @@ main()
 #else
   printf("vax-dec-ultrix\n"); exit(0);
 #endif
+#endif
+
+#if defined (alliant) && defined (i860)
+  printf ("i860-alliant-bsd\n"); exit (0);
 #endif
 
   exit (1);
