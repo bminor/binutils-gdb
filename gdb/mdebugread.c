@@ -866,7 +866,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 		 patch up the type and make it void*
 		 instead. (davidm@azstarnet.com)
 		 */
-	      t = t->pointer_type;
+	      t = make_pointer_type (t, NULL);
 	    }
 	}
       b = top_stack->cur_block;
