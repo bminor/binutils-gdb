@@ -235,6 +235,16 @@ m68k_extract_struct_value_address (struct regcache *regcache)
   return extract_unsigned_integer (buf, 4);
 }
 
+static int
+m68k_use_struct_convention (int gcc_p, struct type *type)
+{
+  enum struct_return struct_return;
+
+  struct_return = gdbarch_tdep (current_gdbarch)->struct_return;
+  return generic_use_struct_convention (struct_return == reg_struct_return,
+					type);
+}
+
 /* A function that tells us whether the function invocation represented
    by fi does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
@@ -317,20 +327,29 @@ m68k_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   /* Push arguments in reverse order.  */
   for (i = nargs - 1; i >= 0; i--)
     {
-      int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
+      struct type *value_type = VALUE_ENCLOSING_TYPE (args[i]);
+      int len = TYPE_LENGTH (value_type);
       int container_len = (len + 3) & ~3;
-      int offset = container_len - len;
+      int offset;
 
+      /* Non-scalars bigger than 4 bytes are left aligned, others are
+	 right aligned.  */
+      if ((TYPE_CODE (value_type) == TYPE_CODE_STRUCT
+	   || TYPE_CODE (value_type) == TYPE_CODE_UNION
+	   || TYPE_CODE (value_type) == TYPE_CODE_ARRAY)
+	  && len > 4)
+	offset = 0;
+      else
+	offset = container_len - len;
       sp -= container_len;
       write_memory (sp + offset, VALUE_CONTENTS_ALL (args[i]), len);
     }
 
-  /* Push value address.  */
+  /* Store struct value address.  */
   if (struct_return)
     {
-      sp -= 4;
       store_unsigned_integer (buf, 4, struct_addr);
-      write_memory (sp, buf, 4);
+      regcache_cooked_write (regcache, M68K_A1_REGNUM, buf);
     }
 
   /* Store return address.  */
@@ -1100,6 +1119,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_store_return_value (gdbarch, m68k_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch,
 					    m68k_extract_struct_value_address);
+  set_gdbarch_use_struct_convention (gdbarch, m68k_use_struct_convention);
 
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     m68k_frameless_function_invocation);
@@ -1126,6 +1146,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->jb_pc = -1;
 #endif
   tdep->get_sigtramp_info = NULL;
+  tdep->struct_return = pcc_struct_return;
 
   /* Frame unwinder.  */
   set_gdbarch_unwind_dummy_id (gdbarch, m68k_unwind_dummy_id);

@@ -1,3 +1,16 @@
+2003-07-09  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-tdep.h (enum struct_return): Define.
+	(struct gdbarch_tdep): Add struct_return.
+	* m68k-tdep.c (m68k_push_dummy_call): Non-scalars bigger than 4
+	bytes are padded to the right, not to the left.  Pass struct value
+	address in register %a1, not on stack.
+	(m68k_use_struct_convention): New function.
+	(m68k_gdbarch_init): Set use_struct_convention.  Initialize
+	struct_return in tdep to pcc_struct_return.
+	* m68klinux-tdep.c (m68k_linux_init_abi): Set struct_return to
+	reg_struct_return.
+
 2003-07-09  Joel Brobecker  <brobecker@gnat.com>      
 
 	* somread.c (som_symfile_offsets): Fix compilation error.   

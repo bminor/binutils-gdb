@@ -290,6 +290,7 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc = M68K_LINUX_JB_PC;
   tdep->jb_elt_size = M68K_LINUX_JB_ELEMENT_SIZE;
   tdep->get_sigtramp_info = m68k_linux_get_sigtramp_info;
+  tdep->struct_return = reg_struct_return;
 
   set_gdbarch_extract_return_value (gdbarch, m68k_linux_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, m68k_linux_store_return_value);
