@@ -92,7 +92,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 			struct type * type, int offset)
 {
   struct value *arg1 = *arg1p;
-  struct type *type1 = check_typedef (VALUE_TYPE (arg1));
+  struct type *type1 = check_typedef (value_type (arg1));
 
 
   struct type *entry_type;
@@ -119,7 +119,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
     {
       struct value *tmp = value_cast (context, value_addr (arg1));
       arg1 = value_ind (tmp);
-      type1 = check_typedef (VALUE_TYPE (arg1));
+      type1 = check_typedef (value_type (arg1));
     }
 
   context = type1;
@@ -138,8 +138,8 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 
   /* With older versions of g++, the vtbl field pointed to an array
      of structures.  Nowadays it points directly to the structure. */
-  if (TYPE_CODE (VALUE_TYPE (vtbl)) == TYPE_CODE_PTR
-      && TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (vtbl))) == TYPE_CODE_ARRAY)
+  if (TYPE_CODE (value_type (vtbl)) == TYPE_CODE_PTR
+      && TYPE_CODE (TYPE_TARGET_TYPE (value_type (vtbl))) == TYPE_CODE_ARRAY)
     {
       /* Handle the case where the vtbl field points to an
          array of structures. */
@@ -158,12 +158,12 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
       entry = value_ind (vtbl);
     }
 
-  entry_type = check_typedef (VALUE_TYPE (entry));
+  entry_type = check_typedef (value_type (entry));
 
   if (TYPE_CODE (entry_type) == TYPE_CODE_STRUCT)
     {
       /* Move the `this' pointer according to the virtual function table. */
-      VALUE_OFFSET (arg1) += value_as_long (value_field (entry, 0));
+      arg1->offset += value_as_long (value_field (entry, 0));
 
       if (!VALUE_LAZY (arg1))
 	{
@@ -178,7 +178,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
   else
     error ("I'm confused:  virtual function table has bad type");
   /* Reinstantiate the function pointer with the correct type.  */
-  VALUE_TYPE (vfn) = lookup_pointer_type (TYPE_FN_FIELD_TYPE (f, j));
+  vfn->type = lookup_pointer_type (TYPE_FN_FIELD_TYPE (f, j));
 
   *arg1p = arg1;
   return vfn;
@@ -208,7 +208,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
     *using_enc = 0;
 
   /* Get declared type */
-  known_type = VALUE_TYPE (v);
+  known_type = value_type (v);
   CHECK_TYPEDEF (known_type);
   /* RTTI works only or class objects */
   if (TYPE_CODE (known_type) != TYPE_CODE_CLASS)

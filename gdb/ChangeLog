@@ -1,5 +1,22 @@
 2004-11-12  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (VALUE_TYPE, VALUE_NEXT, VALUE_OFFSET, VALUE_BITSIZE)
+	(VALUE_BITPOS): Delete.
+	(value_type, value_offset, value_bitsize, value_bitpos): Declare.
+	* value.c (value_type, value_offset, value_bitpos)
+	(value_bitsize): New functions.  Update references.
+	* arm-tdep.c, gnu-v3-abi.c, hpacc-abi.c, gnu-v2-abi.c: Update.
+	* f-valprint.c, cp-valprint.c, c-valprint.c: Update.
+	* ada-valprint.c, typeprint.c, scm-valprint.c, scm-exp.c: Update.
+	* p-valprint.c, jv-valprint.c, jv-lang.c, varobj.c: Update.
+	* objc-lang.c, ada-lang.c, std-regs.c, stack.c: Update.
+	* infcall.c, linespec.c, printcmd.c, valarith.c: Update.
+	* valops.c, eval.c, findvar.c, breakpoint.c: Update.
+	* tracepoint.c, ax-gdb.c, mi/mi-main.c, cli/cli-dump.c:
+	* rs6000-tdep.c, ppc-sysv-tdep.c: Update.
+
+2004-11-12  Andrew Cagney  <cagney@gnu.org>
+
 	* cris-tdep.c (cris_register_offset): Delete, never called.
 	(cris_spec_reg_applicable): Delete cris_ver_sim.
 	* MAINTAINERS: List d10v as OBSOLETE.

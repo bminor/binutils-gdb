@@ -210,8 +210,8 @@ get_java_utf8_name (struct obstack *obstack, struct value *name)
   CORE_ADDR data_addr;
   temp = value_struct_elt (&temp, NULL, "length", NULL, "structure");
   name_length = (int) value_as_long (temp);
-  data_addr = VALUE_ADDRESS (temp) + VALUE_OFFSET (temp)
-    + TYPE_LENGTH (VALUE_TYPE (temp));
+  data_addr = VALUE_ADDRESS (temp) + value_offset (temp)
+    + TYPE_LENGTH (value_type (temp));
   chrs = obstack_alloc (obstack, name_length + 1);
   chrs[name_length] = '\0';
   read_memory (data_addr, chrs, name_length);
@@ -225,8 +225,8 @@ java_class_from_object (struct value *obj_val)
      class are fixed.  FIXME */
   struct value *vtable_val;
 
-  if (TYPE_CODE (VALUE_TYPE (obj_val)) == TYPE_CODE_PTR
-      && TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (obj_val))) == 0)
+  if (TYPE_CODE (value_type (obj_val)) == TYPE_CODE_PTR
+      && TYPE_LENGTH (TYPE_TARGET_TYPE (value_type (obj_val))) == 0)
     obj_val = value_at (get_java_object_type (),
 			value_as_address (obj_val));
 
@@ -259,14 +259,14 @@ type_from_class (struct value *clas)
   struct dict_iterator iter;
   int is_array = 0;
 
-  type = check_typedef (VALUE_TYPE (clas));
+  type = check_typedef (value_type (clas));
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
       if (value_logical_not (clas))
 	return NULL;
       clas = value_ind (clas);
     }
-  addr = VALUE_ADDRESS (clas) + VALUE_OFFSET (clas);
+  addr = VALUE_ADDRESS (clas) + value_offset (clas);
 
 #if 0
   get_java_class_symtab ();
@@ -318,7 +318,7 @@ type_from_class (struct value *clas)
       temp = clas;
       /* Set array element type. */
       temp = value_struct_elt (&temp, NULL, "methods", NULL, "structure");
-      VALUE_TYPE (temp) = lookup_pointer_type (VALUE_TYPE (clas));
+      temp->type = lookup_pointer_type (value_type (clas));
       TYPE_TARGET_TYPE (type) = type_from_class (temp);
     }
 
@@ -421,9 +421,9 @@ java_link_class_type (struct type *type, struct value *clas)
   fields = NULL;
   nfields--;			/* First set up dummy "class" field. */
   SET_FIELD_PHYSADDR (TYPE_FIELD (type, nfields),
-		      VALUE_ADDRESS (clas) + VALUE_OFFSET (clas));
+		      VALUE_ADDRESS (clas) + value_offset (clas));
   TYPE_FIELD_NAME (type, nfields) = "class";
-  TYPE_FIELD_TYPE (type, nfields) = VALUE_TYPE (clas);
+  TYPE_FIELD_TYPE (type, nfields) = value_type (clas);
   SET_TYPE_FIELD_PRIVATE (type, nfields);
 
   for (i = TYPE_N_BASECLASSES (type); i < nfields; i++)
@@ -438,7 +438,7 @@ java_link_class_type (struct type *type, struct value *clas)
 	}
       else
 	{			/* Re-use field value for next field. */
-	  VALUE_ADDRESS (field) += TYPE_LENGTH (VALUE_TYPE (field));
+	  VALUE_ADDRESS (field) += TYPE_LENGTH (value_type (field));
 	  VALUE_LAZY (field) = 1;
 	}
       temp = field;
@@ -508,7 +508,7 @@ java_link_class_type (struct type *type, struct value *clas)
 	}
       else
 	{			/* Re-use method value for next method. */
-	  VALUE_ADDRESS (method) += TYPE_LENGTH (VALUE_TYPE (method));
+	  VALUE_ADDRESS (method) += TYPE_LENGTH (value_type (method));
 	  VALUE_LAZY (method) = 1;
 	}
 
@@ -846,7 +846,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	goto standard;
       (*pos)++;
       arg1 = evaluate_subexp_java (NULL_TYPE, exp, pos, EVAL_NORMAL);
-      if (is_object_type (VALUE_TYPE (arg1)))
+      if (is_object_type (value_type (arg1)))
 	{
 	  struct type *type;
 
@@ -868,7 +868,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
          then report this as an error. */
 
       arg1 = coerce_ref (arg1);
-      type = check_typedef (VALUE_TYPE (arg1));
+      type = check_typedef (value_type (arg1));
       if (TYPE_CODE (type) == TYPE_CODE_PTR)
 	type = check_typedef (TYPE_TARGET_TYPE (type));
       name = TYPE_NAME (type);
@@ -888,7 +888,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	  /* Get CLASS_ELEMENT_TYPE of the array type. */
 	  temp = value_struct_elt (&temp, NULL, "methods",
 				   NULL, "structure");
-	  VALUE_TYPE (temp) = VALUE_TYPE (clas);
+	  temp->type = value_type (clas);
 	  el_type = type_from_class (temp);
 	  if (TYPE_CODE (el_type) == TYPE_CODE_STRUCT)
 	    el_type = lookup_pointer_type (el_type);
@@ -929,7 +929,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
     case STRUCTOP_STRUCT:
       arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
       /* Convert object field (such as TYPE.class) to reference. */
-      if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_STRUCT)
+      if (TYPE_CODE (value_type (arg1)) == TYPE_CODE_STRUCT)
 	arg1 = value_addr (arg1);
       return arg1;
     default:

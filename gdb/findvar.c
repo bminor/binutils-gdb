@@ -722,10 +722,10 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 	  && len < register_size (current_gdbarch, regnum))
 	/* Big-endian, and we want less than full size.  */
-	VALUE_OFFSET (v) = register_size (current_gdbarch, regnum) - len;
+	v->offset = register_size (current_gdbarch, regnum) - len;
       else
-	VALUE_OFFSET (v) = 0;
-      memcpy (VALUE_CONTENTS_RAW (v), value_bytes + VALUE_OFFSET (v), len);
+	v->offset = 0;
+      memcpy (VALUE_CONTENTS_RAW (v), value_bytes + value_offset (v), len);
     }
   return v;
 }

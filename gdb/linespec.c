@@ -1663,7 +1663,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
       /* We have a value history reference.  */
       sscanf ((copy[1] == '$') ? copy + 2 : copy + 1, "%d", &index);
       valx = access_value_history ((copy[1] == '$') ? -index : index);
-      if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
+      if (TYPE_CODE (value_type (valx)) != TYPE_CODE_INT)
 	error ("History values used in line specs must have integer values.");
     }
   else
@@ -1689,7 +1689,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
       /* Not a user variable or function -- must be convenience variable.  */
       need_canonical = (file_symtab == 0) ? 1 : 0;
       valx = value_of_internalvar (lookup_internalvar (copy + 1));
-      if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
+      if (TYPE_CODE (value_type (valx)) != TYPE_CODE_INT)
 	error ("Convenience variables used in line specs must have integer values.");
     }
 

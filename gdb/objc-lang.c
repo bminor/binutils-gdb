@@ -203,7 +203,7 @@ value_nsstring (char *ptr, int len)
   else
     error ("NSString: internal error -- no way to create new NSString");
 
-  VALUE_TYPE(nsstringValue) = type;
+  nsstringValue->type = type;
   return nsstringValue;
 }
 

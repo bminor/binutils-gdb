@@ -310,10 +310,10 @@ tryagain:
       if (!skipping)
 	{
 	  struct value *val = scm_evaluate_string (str.ptr, lexptr - str.ptr);
-	  if (!is_scmvalue_type (VALUE_TYPE (val)))
+	  if (!is_scmvalue_type (value_type (val)))
 	    error ("quoted scm form yields non-SCM value");
 	  svalue = extract_signed_integer (VALUE_CONTENTS (val),
-					   TYPE_LENGTH (VALUE_TYPE (val)));
+					   TYPE_LENGTH (value_type (val)));
 	  goto handle_immediate;
 	}
       return;

@@ -401,7 +401,7 @@ get_number_trailer (char **pp, int trailer)
       strncpy (varname, start, p - start);
       varname[p - start] = '\0';
       val = value_of_internalvar (lookup_internalvar (varname));
-      if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT)
+      if (TYPE_CODE (value_type (val)) == TYPE_CODE_INT)
 	retval = (int) value_as_long (val);
       else
 	{
@@ -962,7 +962,7 @@ insert_bp_location (struct bp_location *bpt,
 	      if (VALUE_LVAL (v) == lval_memory
 		  && ! VALUE_LAZY (v))
 		{
-		  struct type *vtype = check_typedef (VALUE_TYPE (v));
+		  struct type *vtype = check_typedef (value_type (v));
 
 		  /* We only watch structs and arrays if user asked
 		     for it explicitly, never if they just happen to
@@ -974,8 +974,8 @@ insert_bp_location (struct bp_location *bpt,
 		      CORE_ADDR addr;
 		      int len, type;
 
-		      addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-		      len = TYPE_LENGTH (VALUE_TYPE (v));
+		      addr = VALUE_ADDRESS (v) + value_offset (v);
+		      len = TYPE_LENGTH (value_type (v));
 		      type = hw_write;
 		      if (bpt->owner->type == bp_read_watchpoint)
 			type = hw_read;
@@ -1495,7 +1495,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 	  if (VALUE_LVAL (v) == lval_memory
 	      && ! VALUE_LAZY (v))
 	    {
-	      struct type *vtype = check_typedef (VALUE_TYPE (v));
+	      struct type *vtype = check_typedef (value_type (v));
 
 	      if (v == b->owner->val_chain
 		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
@@ -1504,8 +1504,8 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 		  CORE_ADDR addr;
 		  int len, type;
 
-		  addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-		  len = TYPE_LENGTH (VALUE_TYPE (v));
+		  addr = VALUE_ADDRESS (v) + value_offset (v);
+		  len = TYPE_LENGTH (value_type (v));
 		  type   = hw_write;
 		  if (b->owner->type == bp_read_watchpoint)
 		    type = hw_read;
@@ -2748,7 +2748,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 	    if (VALUE_LVAL (v) == lval_memory
 		&& ! VALUE_LAZY (v))
 	      {
-		struct type *vtype = check_typedef (VALUE_TYPE (v));
+		struct type *vtype = check_typedef (value_type (v));
 
 		if (v == b->val_chain
 		    || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
@@ -2756,11 +2756,11 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 		  {
 		    CORE_ADDR vaddr;
 
-		    vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
+		    vaddr = VALUE_ADDRESS (v) + value_offset (v);
 		    /* Exact match not required.  Within range is
                        sufficient.  */
 		    if (addr >= vaddr &&
-			addr < vaddr + TYPE_LENGTH (VALUE_TYPE (v)))
+			addr < vaddr + TYPE_LENGTH (value_type (v)))
 		      found = 1;
 		  }
 	      }
@@ -5994,7 +5994,7 @@ can_use_hardware_watchpoint (struct value *v)
 	    {
 	      /* Ahh, memory we actually used!  Check if we can cover
                  it with hardware watchpoints.  */
-	      struct type *vtype = check_typedef (VALUE_TYPE (v));
+	      struct type *vtype = check_typedef (value_type (v));
 
 	      /* We only watch structs and arrays if user asked for it
 		 explicitly, never if they just happen to appear in a
@@ -6003,8 +6003,8 @@ can_use_hardware_watchpoint (struct value *v)
 		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
 		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
 		{
-		  CORE_ADDR vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-		  int       len   = TYPE_LENGTH (VALUE_TYPE (v));
+		  CORE_ADDR vaddr = VALUE_ADDRESS (v) + value_offset (v);
+		  int       len   = TYPE_LENGTH (value_type (v));
 
 		  if (!TARGET_REGION_OK_FOR_HW_WATCHPOINT (vaddr, len))
 		    return 0;

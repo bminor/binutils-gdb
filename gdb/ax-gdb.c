@@ -1490,7 +1490,7 @@ gen_expr (union exp_element **pc, struct agent_expr *ax,
       {
 	ax_const_l (ax, value_as_long (v));
 	value->kind = axs_rvalue;
-	value->type = check_typedef (VALUE_TYPE (v));
+	value->type = check_typedef (value_type (v));
 	return;
       }
   }

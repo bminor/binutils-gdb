@@ -292,7 +292,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
       func_string = create_array_type (func_string,
 				       builtin_type_char, func_range);
       func_val = allocate_value (func_string);
-      VALUE_TYPE (func_val) = func_string;
+      func_val->type = func_string;
       memcpy (VALUE_CONTENTS_RAW (func_val),
 	      DEPRECATED_SYMBOL_NAME (traceframe_fun),
 	      len);
@@ -313,7 +313,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
       file_string = create_array_type (file_string,
 				       builtin_type_char, file_range);
       file_val = allocate_value (file_string);
-      VALUE_TYPE (file_val) = file_string;
+      file_val->type = file_string;
       memcpy (VALUE_CONTENTS_RAW (file_val),
 	      traceframe_sal.symtab->filename,
 	      len);
@@ -1566,7 +1566,7 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
 		    case UNOP_MEMVAL:
 		      /* safe because we know it's a simple expression */
 		      tempval = evaluate_expression (exp);
-		      addr = VALUE_ADDRESS (tempval) + VALUE_OFFSET (tempval);
+		      addr = VALUE_ADDRESS (tempval) + value_offset (tempval);
 		      len = TYPE_LENGTH (check_typedef (exp->elts[1].type));
 		      add_memrange (collect, -1, addr, len);
 		      break;

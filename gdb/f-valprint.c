@@ -443,7 +443,7 @@ f_val_print (struct type *type, char *valaddr, int embedded_offset,
 	      (TYPE_TARGET_TYPE (type),
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr + embedded_offset));
-	      val_print (VALUE_TYPE (deref_val),
+	      val_print (value_type (deref_val),
 			 VALUE_CONTENTS (deref_val),
 			 0,
 			 VALUE_ADDRESS (deref_val),

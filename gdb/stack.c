@@ -349,11 +349,11 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 	     2 for each recurse.  */
 	  val = read_var_value (sym, fi);
 
-	  annotate_arg_value (val == NULL ? NULL : VALUE_TYPE (val));
+	  annotate_arg_value (val == NULL ? NULL : value_type (val));
 
 	  if (val)
 	    {
-	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
+	      val_print (value_type (val), VALUE_CONTENTS (val), 0,
 			 VALUE_ADDRESS (val),
 			 stb->stream, 0, 0, 2, Val_no_prettyprint);
 	      ui_out_field_stream (uiout, "value", stb);
@@ -1897,7 +1897,7 @@ If you continue, the return value that you specified will be ignored.\n";
   /* Store RETURN_VAUE in the just-returned register set.  */
   if (return_value != NULL)
     {
-      struct type *return_type = VALUE_TYPE (return_value);
+      struct type *return_type = value_type (return_value);
       gdb_assert (gdbarch_return_value (current_gdbarch, return_type,
 					NULL, NULL, NULL)
 		  == RETURN_VALUE_REGISTER_CONVENTION);

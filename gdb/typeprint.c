@@ -133,7 +133,7 @@ whatis_exp (char *exp, int show)
   else
     val = access_value_history (0);
 
-  type = VALUE_TYPE (val);
+  type = value_type (val);
 
   if (objectprint)
     {
@@ -341,7 +341,7 @@ maintenance_print_type (char *typename, int from_tty)
 	  /* The user expression may name a type indirectly by naming an
 	     object of that type.  Find that indirectly named type. */
 	  val = evaluate_type (expr);
-	  type = VALUE_TYPE (val);
+	  type = value_type (val);
 	}
       if (type != NULL)
 	{

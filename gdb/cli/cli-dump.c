@@ -300,7 +300,7 @@ dump_value_to_file (char *cmd, char *mode, char *file_format)
   if (file_format == NULL || strcmp (file_format, "binary") == 0)
     {
       dump_binary_file (filename, mode, VALUE_CONTENTS (val), 
-			TYPE_LENGTH (VALUE_TYPE (val)));
+			TYPE_LENGTH (value_type (val)));
     }
   else
     {
@@ -318,7 +318,7 @@ dump_value_to_file (char *cmd, char *mode, char *file_format)
 
       dump_bfd_file (filename, mode, file_format, vaddr, 
 		     VALUE_CONTENTS (val), 
-		     TYPE_LENGTH (VALUE_TYPE (val)));
+		     TYPE_LENGTH (value_type (val)));
     }
 
   do_cleanups (old_cleanups);

@@ -84,16 +84,16 @@ allocate_value (struct type *type)
   struct type *atype = check_typedef (type);
 
   val = (struct value *) xmalloc (sizeof (struct value) + TYPE_LENGTH (atype));
-  VALUE_NEXT (val) = all_values;
+  val->next = all_values;
   all_values = val;
-  VALUE_TYPE (val) = type;
+  val->type = type;
   VALUE_ENCLOSING_TYPE (val) = type;
   VALUE_LVAL (val) = not_lval;
   VALUE_ADDRESS (val) = 0;
   VALUE_FRAME_ID (val) = null_frame_id;
-  VALUE_OFFSET (val) = 0;
-  VALUE_BITPOS (val) = 0;
-  VALUE_BITSIZE (val) = 0;
+  val->offset = 0;
+  val->bitpos = 0;
+  val->bitsize = 0;
   VALUE_REGNO (val) = -1;
   VALUE_LAZY (val) = 0;
   VALUE_OPTIMIZED_OUT (val) = 0;
@@ -121,6 +121,32 @@ allocate_repeat_value (struct type *type, int count)
 					    type, range_type));
 }
 
+/* Accessor methods.  */
+
+struct type *
+value_type (struct value *value)
+{
+  return value->type;
+}
+
+int
+value_offset (struct value *value)
+{
+  return value->offset;
+}
+
+int
+value_bitpos (struct value *value)
+{
+  return value->bitpos;
+}
+
+int
+value_bitsize (struct value *value)
+{
+  return value->bitsize;
+}
+
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed
    if a subsequent value_free_to_mark is passed the mark.  */
@@ -140,7 +166,7 @@ value_free_to_mark (struct value *mark)
 
   for (val = all_values; val && val != mark; val = next)
     {
-      next = VALUE_NEXT (val);
+      next = val->next;
       value_free (val);
     }
   all_values = val;
@@ -157,7 +183,7 @@ free_all_values (void)
 
   for (val = all_values; val; val = next)
     {
-      next = VALUE_NEXT (val);
+      next = val->next;
       value_free (val);
     }
 
@@ -195,11 +221,11 @@ value_release_to_mark (struct value *mark)
   struct value *val;
   struct value *next;
 
-  for (val = next = all_values; next; next = VALUE_NEXT (next))
-    if (VALUE_NEXT (next) == mark)
+  for (val = next = all_values; next; next = next->next)
+    if (next->next == mark)
       {
-	all_values = VALUE_NEXT (next);
-	VALUE_NEXT (next) = 0;
+	all_values = next->next;
+	next->next = NULL;
 	return val;
       }
   all_values = 0;
@@ -215,12 +241,12 @@ value_copy (struct value *arg)
 {
   struct type *encl_type = VALUE_ENCLOSING_TYPE (arg);
   struct value *val = allocate_value (encl_type);
-  VALUE_TYPE (val) = VALUE_TYPE (arg);
+  val->type = arg->type;
   VALUE_LVAL (val) = VALUE_LVAL (arg);
   VALUE_ADDRESS (val) = VALUE_ADDRESS (arg);
-  VALUE_OFFSET (val) = VALUE_OFFSET (arg);
-  VALUE_BITPOS (val) = VALUE_BITPOS (arg);
-  VALUE_BITSIZE (val) = VALUE_BITSIZE (arg);
+  val->offset = arg->offset;
+  val->bitpos = arg->bitpos;
+  val->bitsize = arg->bitsize;
   VALUE_FRAME_ID (val) = VALUE_FRAME_ID (arg);
   VALUE_REGNO (val) = VALUE_REGNO (arg);
   VALUE_LAZY (val) = VALUE_LAZY (arg);
@@ -440,7 +466,7 @@ set_internalvar_component (struct internalvar *var, int offset, int bitpos,
     modify_field (addr, value_as_long (newval),
 		  bitpos, bitsize);
   else
-    memcpy (addr, VALUE_CONTENTS (newval), TYPE_LENGTH (VALUE_TYPE (newval)));
+    memcpy (addr, VALUE_CONTENTS (newval), TYPE_LENGTH (value_type (newval)));
 }
 
 void
@@ -527,7 +553,7 @@ value_as_long (struct value *val)
      in disassemble_command).  It also dereferences references, which
      I suspect is the most logical thing to do.  */
   val = coerce_array (val);
-  return unpack_long (VALUE_TYPE (val), VALUE_CONTENTS (val));
+  return unpack_long (value_type (val), VALUE_CONTENTS (val));
 }
 
 DOUBLEST
@@ -536,7 +562,7 @@ value_as_double (struct value *val)
   DOUBLEST foo;
   int inv;
 
-  foo = unpack_double (VALUE_TYPE (val), VALUE_CONTENTS (val), &inv);
+  foo = unpack_double (value_type (val), VALUE_CONTENTS (val), &inv);
   if (inv)
     error ("Invalid floating value found in program.");
   return foo;
@@ -593,8 +619,8 @@ value_as_address (struct value *val)
 
      The following shortcut avoids this whole mess.  If VAL is a
      function, just return its address directly.  */
-  if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FUNC
-      || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_METHOD)
+  if (TYPE_CODE (value_type (val)) == TYPE_CODE_FUNC
+      || TYPE_CODE (value_type (val)) == TYPE_CODE_METHOD)
     return VALUE_ADDRESS (val);
 
   val = coerce_array (val);
@@ -636,12 +662,12 @@ value_as_address (struct value *val)
      converted to pointers; usually, the ABI doesn't either, but
      ABI-specific code is a more reasonable place to handle it.  */
 
-  if (TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_PTR
-      && TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_REF
+  if (TYPE_CODE (value_type (val)) != TYPE_CODE_PTR
+      && TYPE_CODE (value_type (val)) != TYPE_CODE_REF
       && INTEGER_TO_ADDRESS_P ())
-    return INTEGER_TO_ADDRESS (VALUE_TYPE (val), VALUE_CONTENTS (val));
+    return INTEGER_TO_ADDRESS (value_type (val), VALUE_CONTENTS (val));
 
-  return unpack_long (VALUE_TYPE (val), VALUE_CONTENTS (val));
+  return unpack_long (value_type (val), VALUE_CONTENTS (val));
 #endif
 }
 
@@ -896,9 +922,9 @@ value_primitive_field (struct value *arg1, int offset,
 						    VALUE_CONTENTS (arg1)
 						    + offset,
 						    fieldno));
-      VALUE_BITPOS (v) = TYPE_FIELD_BITPOS (arg_type, fieldno) % 8;
-      VALUE_BITSIZE (v) = TYPE_FIELD_BITSIZE (arg_type, fieldno);
-      VALUE_OFFSET (v) = VALUE_OFFSET (arg1) + offset
+      v->bitpos = TYPE_FIELD_BITPOS (arg_type, fieldno) % 8;
+      v->bitsize = TYPE_FIELD_BITSIZE (arg_type, fieldno);
+      v->offset = value_offset (arg1) + offset
 	+ TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
     }
   else if (fieldno < TYPE_N_BASECLASSES (arg_type))
@@ -907,13 +933,13 @@ value_primitive_field (struct value *arg1, int offset,
          entire object's contents for later references to virtual
          bases, etc.  */
       v = allocate_value (VALUE_ENCLOSING_TYPE (arg1));
-      VALUE_TYPE (v) = type;
+      v->type = type;
       if (VALUE_LAZY (arg1))
 	VALUE_LAZY (v) = 1;
       else
 	memcpy (VALUE_CONTENTS_ALL_RAW (v), VALUE_CONTENTS_ALL_RAW (arg1),
 		TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg1)));
-      VALUE_OFFSET (v) = VALUE_OFFSET (arg1);
+      v->offset = value_offset (arg1);
       VALUE_EMBEDDED_OFFSET (v)
 	= offset +
 	VALUE_EMBEDDED_OFFSET (arg1) +
@@ -930,8 +956,8 @@ value_primitive_field (struct value *arg1, int offset,
 	memcpy (VALUE_CONTENTS_RAW (v),
 		VALUE_CONTENTS_RAW (arg1) + offset,
 		TYPE_LENGTH (type));
-      VALUE_OFFSET (v) = VALUE_OFFSET (arg1) + offset
-			 + VALUE_EMBEDDED_OFFSET (arg1);
+      v->offset = (value_offset (arg1) + offset
+		   + VALUE_EMBEDDED_OFFSET (arg1));
     }
   VALUE_LVAL (v) = VALUE_LVAL (arg1);
   if (VALUE_LVAL (arg1) == lval_internalvar)
@@ -950,7 +976,7 @@ value_primitive_field (struct value *arg1, int offset,
 struct value *
 value_field (struct value *arg1, int fieldno)
 {
-  return value_primitive_field (arg1, 0, fieldno, VALUE_TYPE (arg1));
+  return value_primitive_field (arg1, 0, fieldno, value_type (arg1));
 }
 
 /* Return a non-virtual function as a value.
@@ -996,7 +1022,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *ty
 
   if (arg1p)
     {
-      if (type != VALUE_TYPE (*arg1p))
+      if (type != value_type (*arg1p))
 	*arg1p = value_ind (value_cast (lookup_pointer_type (type),
 					value_addr (*arg1p)));
 
@@ -1201,10 +1227,10 @@ value_from_double (struct type *type, DOUBLEST num)
 struct value *
 coerce_ref (struct value *arg)
 {
-  struct type *value_type_arg_tmp = check_typedef (VALUE_TYPE (arg));
+  struct type *value_type_arg_tmp = check_typedef (value_type (arg));
   if (TYPE_CODE (value_type_arg_tmp) == TYPE_CODE_REF)
     arg = value_at_lazy (TYPE_TARGET_TYPE (value_type_arg_tmp),
-			 unpack_pointer (VALUE_TYPE (arg),		
+			 unpack_pointer (value_type (arg),		
 					 VALUE_CONTENTS (arg)));
   return arg;
 }
@@ -1214,9 +1240,9 @@ coerce_array (struct value *arg)
 {
   arg = coerce_ref (arg);
   if (current_language->c_style_arrays
-      && TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY)
+      && TYPE_CODE (value_type (arg)) == TYPE_CODE_ARRAY)
     arg = value_coerce_array (arg);
-  if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FUNC)
+  if (TYPE_CODE (value_type (arg)) == TYPE_CODE_FUNC)
     arg = value_coerce_function (arg);
   return arg;
 }
@@ -1232,7 +1258,7 @@ coerce_number (struct value *arg)
 struct value *
 coerce_enum (struct value *arg)
 {
-  if (TYPE_CODE (check_typedef (VALUE_TYPE (arg))) == TYPE_CODE_ENUM)
+  if (TYPE_CODE (check_typedef (value_type (arg))) == TYPE_CODE_ENUM)
     arg = value_cast (builtin_type_unsigned_int, arg);
   return arg;
 }

@@ -679,7 +679,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   val = evaluate_expression (expr);
 
   /* Print the result of the expression evaluation. */
-  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
+  val_print (value_type (val), VALUE_CONTENTS (val),
 	     VALUE_EMBEDDED_OFFSET (val), VALUE_ADDRESS (val),
 	     stb->stream, 0, 0, 0, 0);
 

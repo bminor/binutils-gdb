@@ -85,7 +85,7 @@ static struct value *
 value_arg_coerce (struct value *arg, struct type *param_type,
 		  int is_prototyped)
 {
-  struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+  struct type *arg_type = check_typedef (value_type (arg));
   struct type *type
     = param_type ? check_typedef (param_type) : arg_type;
 
@@ -96,7 +96,7 @@ value_arg_coerce (struct value *arg, struct type *param_type,
 	  && TYPE_CODE (arg_type) != TYPE_CODE_PTR)
 	{
 	  arg = value_addr (arg);
-	  VALUE_TYPE (arg) = param_type;
+	  arg->type = param_type;
 	  return arg;
 	}
       break;
@@ -162,7 +162,7 @@ value_arg_coerce (struct value *arg, struct type *param_type,
 CORE_ADDR
 find_function_addr (struct value *function, struct type **retval_type)
 {
-  struct type *ftype = check_typedef (VALUE_TYPE (function));
+  struct type *ftype = check_typedef (value_type (function));
   enum type_code code = TYPE_CODE (ftype);
   struct type *value_type;
   CORE_ADDR funaddr;
@@ -297,7 +297,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 {
   CORE_ADDR sp;
   CORE_ADDR dummy_addr;
-  struct type *value_type;
+  struct type *values_type;
   unsigned char struct_return;
   CORE_ADDR struct_addr = 0;
   struct regcache *retbuf;
@@ -307,7 +307,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   CORE_ADDR funaddr;
   int using_gcc;		/* Set to version of gcc in use, or zero if not gcc */
   CORE_ADDR real_pc;
-  struct type *ftype = check_typedef (VALUE_TYPE (function));
+  struct type *ftype = check_typedef (value_type (function));
   CORE_ADDR bp_addr;
   struct regcache *caller_regcache;
   struct cleanup *caller_regcache_cleanup;
@@ -401,8 +401,8 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       sp = old_sp;
   }
 
-  funaddr = find_function_addr (function, &value_type);
-  CHECK_TYPEDEF (value_type);
+  funaddr = find_function_addr (function, &values_type);
+  CHECK_TYPEDEF (values_type);
 
   {
     struct block *b = block_for_pc (funaddr);
@@ -413,7 +413,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   /* Are we returning a value using a structure return or a normal
      value return? */
 
-  struct_return = using_struct_return (value_type, using_gcc);
+  struct_return = using_struct_return (values_type, using_gcc);
 
   /* Determine the location of the breakpoint (and possibly other
      stuff) that the called function will return to.  The SPARC, for a
@@ -432,7 +432,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       if (INNER_THAN (1, 2))
 	{
 	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
-				using_gcc, args, nargs, value_type,
+				using_gcc, args, nargs, values_type,
 				&real_pc, &bp_addr);
 	  dummy_addr = sp;
 	}
@@ -440,7 +440,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	{
 	  dummy_addr = sp;
 	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
-				using_gcc, args, nargs, value_type,
+				using_gcc, args, nargs, values_type,
 				&real_pc, &bp_addr);
 	}
       break;
@@ -556,7 +556,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	 pointer to the structure, not the structure itself.  */
       for (i = nargs - 1; i >= 0; i--)
 	{
-	  struct type *arg_type = check_typedef (VALUE_TYPE (args[i]));
+	  struct type *arg_type = check_typedef (value_type (args[i]));
 	  if ((TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
 	       || TYPE_CODE (arg_type) == TYPE_CODE_UNION
 	       || TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
@@ -594,7 +594,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	      write_memory (addr, VALUE_CONTENTS_ALL (args[i]), len);
 	      /* The value we're going to pass is the address of the
 		 thing we just pushed.  */
-	      /*args[i] = value_from_longest (lookup_pointer_type (value_type),
+	      /*args[i] = value_from_longest (lookup_pointer_type (values_type),
 		(LONGEST) addr); */
 	      args[i] = value_from_pointer (lookup_pointer_type (arg_type),
 					    addr);
@@ -609,7 +609,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
   if (struct_return)
     {
-      int len = TYPE_LENGTH (value_type);
+      int len = TYPE_LENGTH (values_type);
       if (INNER_THAN (1, 2))
 	{
 	  /* Stack grows downward.  Align STRUCT_ADDR and SP after
@@ -839,10 +839,10 @@ the function call).", name);
   /* Figure out the value returned by the function, return that.  */
   {
     struct value *retval;
-    if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
+    if (TYPE_CODE (values_type) == TYPE_CODE_VOID)
       /* If the function returns void, don't bother fetching the
 	 return value.  */
-      retval = allocate_value (value_type);
+      retval = allocate_value (values_type);
     else if (struct_return)
       /* NOTE: cagney/2003-09-27: This assumes that PUSH_DUMMY_CALL
 	 has correctly stored STRUCT_ADDR in the target.  In the past
@@ -852,15 +852,15 @@ the function call).", name);
 	 you're seeing problems with values being returned using the
 	 "struct return convention", check that PUSH_DUMMY_CALL isn't
 	 playing tricks.  */
-      retval = value_at (value_type, struct_addr);
+      retval = value_at (values_type, struct_addr);
     else
       {
 	/* This code only handles "register convention".  */
-	retval = allocate_value (value_type);
-	gdb_assert (gdbarch_return_value (current_gdbarch, value_type,
+	retval = allocate_value (values_type);
+	gdb_assert (gdbarch_return_value (current_gdbarch, values_type,
 					  NULL, NULL, NULL)
 		    == RETURN_VALUE_REGISTER_CONVENTION);
-	gdbarch_return_value (current_gdbarch, value_type, retbuf,
+	gdbarch_return_value (current_gdbarch, values_type, retbuf,
 			      VALUE_CONTENTS_RAW (retval) /*read*/,
 			      NULL /*write*/);
       }

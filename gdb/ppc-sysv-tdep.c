@@ -97,7 +97,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       for (argno = 0; argno < nargs; argno++)
 	{
 	  struct value *arg = args[argno];
-	  struct type *type = check_typedef (VALUE_TYPE (arg));
+	  struct type *type = check_typedef (value_type (arg));
 	  int len = TYPE_LENGTH (type);
 	  char *val = VALUE_CONTENTS (arg);
 
@@ -634,7 +634,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       for (argno = 0; argno < nargs; argno++)
 	{
 	  struct value *arg = args[argno];
-	  struct type *type = check_typedef (VALUE_TYPE (arg));
+	  struct type *type = check_typedef (value_type (arg));
 	  char *val = VALUE_CONTENTS (arg);
 	  if (TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) <= 8)
 	    {

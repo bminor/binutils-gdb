@@ -52,8 +52,8 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
   int i;
   char *name;
 
-  type = VALUE_TYPE (val);
-  address = VALUE_ADDRESS (val) + VALUE_OFFSET (val);
+  type = value_type (val);
+  address = VALUE_ADDRESS (val) + value_offset (val);
 
   if (is_object_type (type))
     {
@@ -170,15 +170,15 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	      else
 		{
 		  VALUE_LAZY (v) = 1;
-		  VALUE_OFFSET (v) = 0;
+		  v->offset = 0;
 		}
 
-	      VALUE_OFFSET (next_v) = VALUE_OFFSET (v);
+	      next_v->offset = value_offset (v);
 
 	      for (reps = 1; i + reps < length; reps++)
 		{
 		  VALUE_LAZY (next_v) = 1;
-		  VALUE_OFFSET (next_v) += TYPE_LENGTH (el_type);
+		  next_v->offset += TYPE_LENGTH (el_type);
 		  if (memcmp (VALUE_CONTENTS (v), VALUE_CONTENTS (next_v),
 			      TYPE_LENGTH (el_type)) != 0)
 		    break;
@@ -189,7 +189,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	      else
 		fprintf_filtered (stream, "%d..%d: ", i, i + reps - 1);
 
-	      val_print (VALUE_TYPE (v), VALUE_CONTENTS (v), 0, 0,
+	      val_print (value_type (v), VALUE_CONTENTS (v), 0, 0,
 			 stream, format, 2, 1, pretty);
 
 	      things_printed++;
@@ -408,10 +408,10 @@ java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
 		    fputs_filtered ("<optimized out>", stream);
 		  else
 		    {
-		      struct type *t = check_typedef (VALUE_TYPE (v));
+		      struct type *t = check_typedef (value_type (v));
 		      if (TYPE_CODE (t) == TYPE_CODE_STRUCT)
 			v = value_addr (v);
-		      val_print (VALUE_TYPE (v),
+		      val_print (value_type (v),
 				 VALUE_CONTENTS (v), 0, VALUE_ADDRESS (v),
 				 stream, format, 0, recurse + 1, pretty);
 		    }

@@ -191,7 +191,7 @@ gnuv3_rtti_type (struct value *value,
 {
   struct type *vtable_type = gdbarch_data (current_gdbarch,
 					   vtable_type_gdbarch_data);
-  struct type *value_type = check_typedef (VALUE_TYPE (value));
+  struct type *values_type = check_typedef (value_type (value));
   CORE_ADDR vtable_address;
   struct value *vtable;
   struct minimal_symbol *vtable_symbol;
@@ -202,13 +202,13 @@ gnuv3_rtti_type (struct value *value,
   LONGEST offset_to_top;
 
   /* We only have RTTI for class objects.  */
-  if (TYPE_CODE (value_type) != TYPE_CODE_CLASS)
+  if (TYPE_CODE (values_type) != TYPE_CODE_CLASS)
     return NULL;
 
-  /* If we can't find the virtual table pointer for value_type, we
+  /* If we can't find the virtual table pointer for values_type, we
      can't find the RTTI.  */
-  fill_in_vptr_fieldno (value_type);
-  if (TYPE_VPTR_FIELDNO (value_type) == -1)
+  fill_in_vptr_fieldno (values_type);
+  if (TYPE_VPTR_FIELDNO (values_type) == -1)
     return NULL;
 
   if (using_enc_p)
@@ -216,22 +216,22 @@ gnuv3_rtti_type (struct value *value,
 
   /* Fetch VALUE's virtual table pointer, and tweak it to point at
      an instance of our imaginary gdb_gnu_v3_abi_vtable structure.  */
-  base_type = check_typedef (TYPE_VPTR_BASETYPE (value_type));
-  if (value_type != base_type)
+  base_type = check_typedef (TYPE_VPTR_BASETYPE (values_type));
+  if (values_type != base_type)
     {
       value = value_cast (base_type, value);
       if (using_enc_p)
 	*using_enc_p = 1;
     }
   vtable_address
-    = value_as_address (value_field (value, TYPE_VPTR_FIELDNO (value_type)));
+    = value_as_address (value_field (value, TYPE_VPTR_FIELDNO (values_type)));
   vtable = value_at_lazy (vtable_type,
                           vtable_address - vtable_address_point_offset ());
   
   /* Find the linker symbol for this vtable.  */
   vtable_symbol
     = lookup_minimal_symbol_by_pc (VALUE_ADDRESS (vtable)
-                                   + VALUE_OFFSET (vtable)
+                                   + value_offset (vtable)
                                    + VALUE_EMBEDDED_OFFSET (vtable));
   if (! vtable_symbol)
     return NULL;
@@ -246,7 +246,7 @@ gnuv3_rtti_type (struct value *value,
       || strncmp (vtable_symbol_name, "vtable for ", 11))
     {
       warning ("can't find linker symbol for virtual table for `%s' value",
-	       TYPE_NAME (value_type));
+	       TYPE_NAME (values_type));
       if (vtable_symbol_name)
 	warning ("  found `%s' instead", vtable_symbol_name);
       return NULL;
@@ -283,14 +283,14 @@ gnuv3_virtual_fn_field (struct value **value_p,
   struct type *vtable_type = gdbarch_data (current_gdbarch,
 					   vtable_type_gdbarch_data);
   struct value *value = *value_p;
-  struct type *value_type = check_typedef (VALUE_TYPE (value));
+  struct type *values_type = check_typedef (value_type (value));
   struct type *vfn_base;
   CORE_ADDR vtable_address;
   struct value *vtable;
   struct value *vfn;
 
   /* Some simple sanity checks.  */
-  if (TYPE_CODE (value_type) != TYPE_CODE_CLASS)
+  if (TYPE_CODE (values_type) != TYPE_CODE_CLASS)
     error ("Only classes can have virtual functions.");
 
   /* Find the base class that defines this virtual function.  */
@@ -314,7 +314,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
   /* Now that we know which base class is defining our virtual
      function, cast our value to that baseclass.  This takes care of
      any necessary `this' adjustments.  */
-  if (vfn_base != value_type)
+  if (vfn_base != values_type)
     value = value_cast (vfn_base, value);
 
   /* Now value is an object of the appropriate base type.  Fetch its

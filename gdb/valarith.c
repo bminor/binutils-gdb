@@ -93,8 +93,8 @@ value_add (struct value *arg1, struct value *arg2)
 
   arg1 = coerce_array (arg1);
   arg2 = coerce_array (arg2);
-  type1 = check_typedef (VALUE_TYPE (arg1));
-  type2 = check_typedef (VALUE_TYPE (arg2));
+  type1 = check_typedef (value_type (arg1));
+  type2 = check_typedef (value_type (arg2));
 
   if ((TYPE_CODE (type1) == TYPE_CODE_PTR
        || TYPE_CODE (type2) == TYPE_CODE_PTR)
@@ -134,8 +134,8 @@ value_sub (struct value *arg1, struct value *arg2)
   struct type *type1, *type2;
   arg1 = coerce_array (arg1);
   arg2 = coerce_array (arg2);
-  type1 = check_typedef (VALUE_TYPE (arg1));
-  type2 = check_typedef (VALUE_TYPE (arg2));
+  type1 = check_typedef (value_type (arg1));
+  type2 = check_typedef (value_type (arg2));
 
   if (TYPE_CODE (type1) == TYPE_CODE_PTR)
     {
@@ -183,7 +183,7 @@ value_subscript (struct value *array, struct value *idx)
   struct type *tarray;
 
   array = coerce_ref (array);
-  tarray = check_typedef (VALUE_TYPE (array));
+  tarray = check_typedef (value_type (array));
 
   if (TYPE_CODE (tarray) == TYPE_CODE_ARRAY
       || TYPE_CODE (tarray) == TYPE_CODE_STRING)
@@ -233,13 +233,13 @@ value_subscript (struct value *array, struct value *idx)
       bit_index = index % TARGET_CHAR_BIT;
       byte >>= (BITS_BIG_ENDIAN ? TARGET_CHAR_BIT - 1 - bit_index : bit_index);
       v = value_from_longest (LA_BOOL_TYPE, byte & 1);
-      VALUE_BITPOS (v) = bit_index;
-      VALUE_BITSIZE (v) = 1;
+      v->bitpos = bit_index;
+      v->bitsize = 1;
       VALUE_LVAL (v) = VALUE_LVAL (array);
       if (VALUE_LVAL (array) == lval_internalvar)
 	VALUE_LVAL (v) = lval_internalvar_component;
       VALUE_ADDRESS (v) = VALUE_ADDRESS (array);
-      VALUE_OFFSET (v) = offset + VALUE_OFFSET (array);
+      v->offset = offset + value_offset (array);
       return v;
     }
 
@@ -256,7 +256,7 @@ value_subscript (struct value *array, struct value *idx)
 static struct value *
 value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound)
 {
-  struct type *array_type = check_typedef (VALUE_TYPE (array));
+  struct type *array_type = check_typedef (value_type (array));
   struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
   unsigned int elt_size = TYPE_LENGTH (elt_type);
   LONGEST index = value_as_long (idx);
@@ -278,7 +278,7 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
     VALUE_LVAL (v) = VALUE_LVAL (array);
   VALUE_ADDRESS (v) = VALUE_ADDRESS (array);
   VALUE_REGNO (v) = VALUE_REGNO (array);
-  VALUE_OFFSET (v) = VALUE_OFFSET (array) + elt_offs;
+  v->offset = value_offset (array) + elt_offs;
   return v;
 }
 
@@ -294,8 +294,8 @@ binop_user_defined_p (enum exp_opcode op, struct value *arg1, struct value *arg2
   struct type *type1, *type2;
   if (op == BINOP_ASSIGN || op == BINOP_CONCAT)
     return 0;
-  type1 = check_typedef (VALUE_TYPE (arg1));
-  type2 = check_typedef (VALUE_TYPE (arg2));
+  type1 = check_typedef (value_type (arg1));
+  type2 = check_typedef (value_type (arg2));
   return (TYPE_CODE (type1) == TYPE_CODE_STRUCT
 	  || TYPE_CODE (type2) == TYPE_CODE_STRUCT
 	  || (TYPE_CODE (type1) == TYPE_CODE_REF
@@ -316,7 +316,7 @@ unop_user_defined_p (enum exp_opcode op, struct value *arg1)
   struct type *type1;
   if (op == UNOP_ADDR)
     return 0;
-  type1 = check_typedef (VALUE_TYPE (arg1));
+  type1 = check_typedef (value_type (arg1));
   for (;;)
     {
       if (TYPE_CODE (type1) == TYPE_CODE_STRUCT)
@@ -354,7 +354,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
   /* now we know that what we have to do is construct our
      arg vector and find the right function to call it with.  */
 
-  if (TYPE_CODE (check_typedef (VALUE_TYPE (arg1))) != TYPE_CODE_STRUCT)
+  if (TYPE_CODE (check_typedef (value_type (arg1))) != TYPE_CODE_STRUCT)
     error ("Can't do that binary op on that type");	/* FIXME be explicit */
 
   argvec = (struct value **) alloca (sizeof (struct value *) * 4);
@@ -483,7 +483,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	{
 	  struct type *return_type;
 	  return_type
-	    = TYPE_TARGET_TYPE (check_typedef (VALUE_TYPE (argvec[0])));
+	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
       return call_function_by_hand (argvec[0], 2 - static_memfuncp, argvec + 1);
@@ -514,7 +514,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
   /* now we know that what we have to do is construct our
      arg vector and find the right function to call it with.  */
 
-  if (TYPE_CODE (check_typedef (VALUE_TYPE (arg1))) != TYPE_CODE_STRUCT)
+  if (TYPE_CODE (check_typedef (value_type (arg1))) != TYPE_CODE_STRUCT)
     error ("Can't do that unary op on that type");	/* FIXME be explicit */
 
   argvec = (struct value **) alloca (sizeof (struct value *) * 4);
@@ -578,7 +578,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	{
 	  struct type *return_type;
 	  return_type
-	    = TYPE_TARGET_TYPE (check_typedef (VALUE_TYPE (argvec[0])));
+	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
       return call_function_by_hand (argvec[0], nargs, argvec + 1);
@@ -619,8 +619,8 @@ value_concat (struct value *arg1, struct value *arg2)
   int count, idx;
   char *ptr;
   char inchar;
-  struct type *type1 = check_typedef (VALUE_TYPE (arg1));
-  struct type *type2 = check_typedef (VALUE_TYPE (arg2));
+  struct type *type1 = check_typedef (value_type (arg1));
+  struct type *type2 = check_typedef (value_type (arg2));
 
   /* First figure out if we are dealing with two values to be concatenated
      or a repeat count and a value to be repeated.  INVAL1 is set to the
@@ -749,8 +749,8 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
   arg1 = coerce_ref (arg1);
   arg2 = coerce_ref (arg2);
-  type1 = check_typedef (VALUE_TYPE (arg1));
-  type2 = check_typedef (VALUE_TYPE (arg2));
+  type1 = check_typedef (value_type (arg1));
+  type2 = check_typedef (value_type (arg2));
 
   if ((TYPE_CODE (type1) != TYPE_CODE_FLT && !is_integral_type (type1))
       ||
@@ -804,7 +804,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       else
 	val = allocate_value (builtin_type_double);
 
-      store_typed_floating (VALUE_CONTENTS_RAW (val), VALUE_TYPE (val), v);
+      store_typed_floating (VALUE_CONTENTS_RAW (val), value_type (val), v);
     }
   else if (TYPE_CODE (type1) == TYPE_CODE_BOOL
 	   &&
@@ -1014,7 +1014,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	     ? builtin_type_unsigned_long_long
 	     : builtin_type_unsigned_long);
 	  store_unsigned_integer (VALUE_CONTENTS_RAW (val),
-				  TYPE_LENGTH (VALUE_TYPE (val)),
+				  TYPE_LENGTH (value_type (val)),
 				  v);
 	}
       else
@@ -1138,7 +1138,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	     ? builtin_type_long_long
 	     : builtin_type_long);
 	  store_signed_integer (VALUE_CONTENTS_RAW (val),
-				TYPE_LENGTH (VALUE_TYPE (val)),
+				TYPE_LENGTH (value_type (val)),
 				v);
 	}
     }
@@ -1156,7 +1156,7 @@ value_logical_not (struct value *arg1)
   struct type *type1;
 
   arg1 = coerce_number (arg1);
-  type1 = check_typedef (VALUE_TYPE (arg1));
+  type1 = check_typedef (value_type (arg1));
 
   if (TYPE_CODE (type1) == TYPE_CODE_FLT)
     return 0 == value_as_double (arg1);
@@ -1179,8 +1179,8 @@ value_logical_not (struct value *arg1)
 static int
 value_strcmp (struct value *arg1, struct value *arg2)
 {
-  int len1 = TYPE_LENGTH (VALUE_TYPE (arg1));
-  int len2 = TYPE_LENGTH (VALUE_TYPE (arg2));
+  int len1 = TYPE_LENGTH (value_type (arg1));
+  int len2 = TYPE_LENGTH (value_type (arg2));
   char *s1 = VALUE_CONTENTS (arg1);
   char *s2 = VALUE_CONTENTS (arg2);
   int i, len = len1 < len2 ? len1 : len2;
@@ -1219,8 +1219,8 @@ value_equal (struct value *arg1, struct value *arg2)
   arg1 = coerce_array (arg1);
   arg2 = coerce_array (arg2);
 
-  type1 = check_typedef (VALUE_TYPE (arg1));
-  type2 = check_typedef (VALUE_TYPE (arg2));
+  type1 = check_typedef (value_type (arg1));
+  type2 = check_typedef (value_type (arg2));
   code1 = TYPE_CODE (type1);
   code2 = TYPE_CODE (type2);
   is_int1 = is_integral_type (type1);
@@ -1278,8 +1278,8 @@ value_less (struct value *arg1, struct value *arg2)
   arg1 = coerce_array (arg1);
   arg2 = coerce_array (arg2);
 
-  type1 = check_typedef (VALUE_TYPE (arg1));
-  type2 = check_typedef (VALUE_TYPE (arg2));
+  type1 = check_typedef (value_type (arg1));
+  type2 = check_typedef (value_type (arg2));
   code1 = TYPE_CODE (type1);
   code2 = TYPE_CODE (type2);
   is_int1 = is_integral_type (type1);
@@ -1315,11 +1315,11 @@ struct value *
 value_neg (struct value *arg1)
 {
   struct type *type;
-  struct type *result_type = VALUE_TYPE (arg1);
+  struct type *result_type = value_type (arg1);
 
   arg1 = coerce_ref (arg1);
 
-  type = check_typedef (VALUE_TYPE (arg1));
+  type = check_typedef (value_type (arg1));
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     return value_from_double (result_type, -value_as_double (arg1));
@@ -1343,11 +1343,11 @@ struct value *
 value_complement (struct value *arg1)
 {
   struct type *type;
-  struct type *result_type = VALUE_TYPE (arg1);
+  struct type *result_type = value_type (arg1);
 
   arg1 = coerce_ref (arg1);
 
-  type = check_typedef (VALUE_TYPE (arg1));
+  type = check_typedef (value_type (arg1));
 
   if (!is_integral_type (type))
     error ("Argument to complement operation not an integer or boolean.");
@@ -1360,7 +1360,7 @@ value_complement (struct value *arg1)
   return value_from_longest (result_type, ~value_as_long (arg1));
 }
 
-/* The INDEX'th bit of SET value whose VALUE_TYPE is TYPE,
+/* The INDEX'th bit of SET value whose value_type is TYPE,
    and whose VALUE_CONTENTS is valaddr.
    Return -1 if out of range, -2 other error. */
 
@@ -1388,8 +1388,8 @@ struct value *
 value_in (struct value *element, struct value *set)
 {
   int member;
-  struct type *settype = check_typedef (VALUE_TYPE (set));
-  struct type *eltype = check_typedef (VALUE_TYPE (element));
+  struct type *settype = check_typedef (value_type (set));
+  struct type *eltype = check_typedef (value_type (element));
   if (TYPE_CODE (eltype) == TYPE_CODE_RANGE)
     eltype = TYPE_TARGET_TYPE (eltype);
   if (TYPE_CODE (settype) != TYPE_CODE_SET)

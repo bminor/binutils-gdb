@@ -422,7 +422,7 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
       v = value_from_pointer (lookup_pointer_type (builtin_type_unsigned_long),
 			      *(unsigned long *) (valaddr + offset));
 
-      val_print (VALUE_TYPE (v), VALUE_CONTENTS (v), 0, 0,
+      val_print (value_type (v), VALUE_CONTENTS (v), 0, 0,
 		 stream, format, 0, recurse + 1, pretty);
       fields_seen = 1;
 
@@ -784,10 +784,10 @@ cp_print_hpacc_virtual_table_entries (struct type *type, int *vfuncs,
 	  /* adjust by offset */
 	  vf->aligner.contents[0] += 4 * (HP_ACC_VFUNC_START + vx);
 	  vf = value_ind (vf);	/* get the entry */
-	  VALUE_TYPE (vf) = VALUE_TYPE (v);	/* make it a pointer */
+	  vf->type = value_type (v);	/* make it a pointer */
 
 	  /* print out the entry */
-	  val_print (VALUE_TYPE (vf), VALUE_CONTENTS (vf), 0, 0,
+	  val_print (value_type (vf), VALUE_CONTENTS (vf), 0, 0,
 		     stream, format, 0, recurse + 1, pretty);
 	  field_physname
 	    = TYPE_FN_FIELD_PHYSNAME (TYPE_FN_FIELDLIST1 (type, fn), oi);

@@ -232,7 +232,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 		      wtype = TYPE_TARGET_TYPE (type);
 		    }
 		  vt_val = value_at (wtype, vt_address);
-		  val_print (VALUE_TYPE (vt_val), VALUE_CONTENTS (vt_val), 0,
+		  val_print (value_type (vt_val), VALUE_CONTENTS (vt_val), 0,
 			     VALUE_ADDRESS (vt_val), stream, format,
 			     deref_ref, recurse + 1, pretty);
 		  if (pretty)
@@ -282,7 +282,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 	      (TYPE_TARGET_TYPE (type),
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr + embedded_offset));
-	      val_print (VALUE_TYPE (deref_val),
+	      val_print (value_type (deref_val),
 			 VALUE_CONTENTS (deref_val),
 			 0,
 			 VALUE_ADDRESS (deref_val),
@@ -498,7 +498,7 @@ int
 c_value_print (struct value *val, struct ui_file *stream, int format,
 	       enum val_prettyprint pretty)
 {
-  struct type *type = VALUE_TYPE (val);
+  struct type *type = value_type (val);
   struct type *real_type;
   int full, top, using_enc;
 
@@ -530,7 +530,7 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
 	       */
 	      struct value *temparg;
 	      temparg=value_copy(val);
-	      VALUE_TYPE (temparg) = lookup_pointer_type(TYPE_TARGET_TYPE(type));
+	      temparg->type = lookup_pointer_type (TYPE_TARGET_TYPE(type));
 	      val=temparg;
 	    }
 	  /* Pointer to class, check real type of object */
@@ -566,7 +566,7 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
 	  fprintf_filtered (stream, ") ");
 	}
     }
-  if (objectprint && (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_CLASS))
+  if (objectprint && (TYPE_CODE (value_type (val)) == TYPE_CODE_CLASS))
     {
       /* Attempt to determine real type of object */
       real_type = value_rtti_type (val, &full, &top, &using_enc);
@@ -596,6 +596,6 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
 
   return val_print (type, VALUE_CONTENTS_ALL (val),
 		    VALUE_EMBEDDED_OFFSET (val),
-		    VALUE_ADDRESS (val) + VALUE_OFFSET (val),
+		    VALUE_ADDRESS (val) + value_offset (val),
 		    stream, format, 1, 0, pretty);
 }

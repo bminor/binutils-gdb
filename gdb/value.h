@@ -178,7 +178,12 @@ struct value
     /* Do not add any new members here -- contents above will trash them.  */
 };
 
-#define VALUE_TYPE(val) (val)->type
+
+extern struct type *value_type (struct value *);
+extern int value_bitsize (struct value *);
+extern int value_bitpos (struct value *);
+extern int value_offset (struct value *);
+
 #define VALUE_ENCLOSING_TYPE(val) (val)->enclosing_type
 #define VALUE_LAZY(val) (val)->lazy
 
@@ -215,10 +220,6 @@ extern int value_fetch_lazy (struct value *val);
 #define VALUE_INTERNALVAR(val) (val)->location.internalvar
 #define VALUE_FRAME_REGNUM(val) ((val)->location.regnum)
 #define VALUE_FRAME_ID(val) ((val)->frame_id)
-#define VALUE_OFFSET(val) (val)->offset
-#define VALUE_BITSIZE(val) (val)->bitsize
-#define VALUE_BITPOS(val) (val)->bitpos
-#define VALUE_NEXT(val) (val)->next
 #define VALUE_REGNO(val) (val)->regno
 #define VALUE_OPTIMIZED_OUT(val) ((val)->optimized_out)
 #define VALUE_EMBEDDED_OFFSET(val) ((val)->embedded_offset)

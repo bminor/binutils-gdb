@@ -1224,7 +1224,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       enum type_code typecode;
       char *val;
 
-      arg_type = check_typedef (VALUE_TYPE (args[argnum]));
+      arg_type = check_typedef (value_type (args[argnum]));
       len = TYPE_LENGTH (arg_type);
       target_type = TYPE_TARGET_TYPE (arg_type);
       typecode = TYPE_CODE (arg_type);

@@ -238,7 +238,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 		      wtype = TYPE_TARGET_TYPE (type);
 		    }
 		  vt_val = value_at (wtype, vt_address);
-		  val_print (VALUE_TYPE (vt_val), VALUE_CONTENTS (vt_val), 0,
+		  val_print (value_type (vt_val), VALUE_CONTENTS (vt_val), 0,
 			     VALUE_ADDRESS (vt_val), stream, format,
 			     deref_ref, recurse + 1, pretty);
 		  if (pretty)
@@ -290,7 +290,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	      (TYPE_TARGET_TYPE (type),
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr + embedded_offset));
-	      val_print (VALUE_TYPE (deref_val),
+	      val_print (value_type (deref_val),
 			 VALUE_CONTENTS (deref_val), 0,
 			 VALUE_ADDRESS (deref_val), stream, format,
 			 deref_ref, recurse + 1, pretty);
@@ -537,7 +537,7 @@ int
 pascal_value_print (struct value *val, struct ui_file *stream, int format,
 		    enum val_prettyprint pretty)
 {
-  struct type *type = VALUE_TYPE (val);
+  struct type *type = value_type (val);
 
   /* If it is a pointer, indicate what it points to.
 
@@ -565,7 +565,7 @@ pascal_value_print (struct value *val, struct ui_file *stream, int format,
 	}
     }
   return val_print (type, VALUE_CONTENTS (val), VALUE_EMBEDDED_OFFSET (val),
-		    VALUE_ADDRESS (val) + VALUE_OFFSET (val),
+		    VALUE_ADDRESS (val) + value_offset (val),
 		    stream, format, 1, 0, pretty);
 }
 

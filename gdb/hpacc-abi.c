@@ -85,7 +85,7 @@ hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 			struct type * type, int offset)
 {
   struct value *arg1 = *arg1p;
-  struct type *type1 = check_typedef (VALUE_TYPE (arg1));
+  struct type *type1 = check_typedef (value_type (arg1));
 
   /* Deal with HP/Taligent runtime model for virtual functions */
   struct value *vp;
@@ -166,7 +166,7 @@ hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 
   /* Wrap this addr in a value and return pointer */
   vp = allocate_value (ftype);
-  VALUE_TYPE (vp) = ftype;
+  vp->type = ftype;
   VALUE_ADDRESS (vp) = coreptr;
 
   /* pai: (temp) do we need the value_ind stuff in value_fn_field? */
@@ -193,7 +193,7 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
     *using_enc = 0;
 
   /* Get declared type */
-  known_type = VALUE_TYPE (v);
+  known_type = value_type (v);
   CHECK_TYPEDEF (known_type);
   /* RTTI works only or class objects */
   if (TYPE_CODE (known_type) != TYPE_CODE_CLASS)
@@ -218,7 +218,7 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 
   /* First get the virtual table address */
   coreptr = *(CORE_ADDR *) ((VALUE_CONTENTS_ALL (v))
-                            + VALUE_OFFSET (v)
+                            + value_offset (v)
                             + (using_enclosing
                                ? 0
                                : VALUE_EMBEDDED_OFFSET (v)));

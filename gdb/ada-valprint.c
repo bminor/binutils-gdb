@@ -614,7 +614,7 @@ ada_val_print_1 (struct type *type, char *valaddr0, int embedded_offset,
 	  retn = 0;
 	}
       else
-	retn = ada_val_print_1 (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
+	retn = ada_val_print_1 (value_type (val), VALUE_CONTENTS (val), 0,
 				VALUE_ADDRESS (val), stream, format,
 				deref_ref, recurse, pretty);
       value_free_to_mark (mark);
@@ -860,7 +860,7 @@ ada_val_print_1 (struct type *type, char *valaddr0, int embedded_offset,
 		    ada_value_ind (value_from_longest
 				   (lookup_pointer_type (elttype),
 				    deref_val_int));
-		  val_print (VALUE_TYPE (deref_val),
+		  val_print (value_type (deref_val),
 			     VALUE_CONTENTS (deref_val), 0,
 			     VALUE_ADDRESS (deref_val), stream, format,
 			     deref_ref, recurse + 1, pretty);
@@ -902,9 +902,9 @@ ada_value_print (struct value *val0, struct ui_file *stream, int format,
 		 enum val_prettyprint pretty)
 {
   char *valaddr = VALUE_CONTENTS (val0);
-  CORE_ADDR address = VALUE_ADDRESS (val0) + VALUE_OFFSET (val0);
+  CORE_ADDR address = VALUE_ADDRESS (val0) + value_offset (val0);
   struct type *type =
-    ada_to_fixed_type (VALUE_TYPE (val0), valaddr, address, NULL);
+    ada_to_fixed_type (value_type (val0), valaddr, address, NULL);
   struct value *val =
     value_from_contents_and_address (type, valaddr, address);
 

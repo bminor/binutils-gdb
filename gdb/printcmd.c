@@ -275,7 +275,7 @@ static void
 print_formatted (struct value *val, int format, int size,
 		 struct ui_file *stream)
 {
-  struct type *type = check_typedef (VALUE_TYPE (val));
+  struct type *type = check_typedef (value_type (val));
   int len = TYPE_LENGTH (type);
 
   if (VALUE_LVAL (val) == lval_memory)
@@ -888,15 +888,15 @@ print_command_1 (char *exp, int inspect, int voidprint)
   else
     val = access_value_history (0);
 
-  if (voidprint || (val && VALUE_TYPE (val) &&
-		    TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_VOID))
+  if (voidprint || (val && value_type (val) &&
+		    TYPE_CODE (value_type (val)) != TYPE_CODE_VOID))
     {
       int histindex = record_latest_value (val);
 
       if (histindex >= 0)
-	annotate_value_history_begin (histindex, VALUE_TYPE (val));
+	annotate_value_history_begin (histindex, value_type (val));
       else
-	annotate_value_begin (VALUE_TYPE (val));
+	annotate_value_begin (value_type (val));
 
       if (inspect)
 	printf_unfiltered ("\031(gdb-makebuffer \"%s\"  %d '(\"", exp, histindex);
@@ -967,7 +967,7 @@ output_command (char *exp, int from_tty)
 
   val = evaluate_expression (expr);
 
-  annotate_value_begin (VALUE_TYPE (val));
+  annotate_value_begin (value_type (val));
 
   print_formatted (val, format, fmt.size, gdb_stdout);
 
@@ -1283,12 +1283,12 @@ x_command (char *exp, int from_tty)
 	*exp = 0;
       old_chain = make_cleanup (free_current_contents, &expr);
       val = evaluate_expression (expr);
-      if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_REF)
+      if (TYPE_CODE (value_type (val)) == TYPE_CODE_REF)
 	val = value_ind (val);
       /* In rvalue contexts, such as this, functions are coerced into
          pointers to functions.  This makes "x/i main" work.  */
       if (/* last_format == 'i'  && */ 
-	  TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FUNC
+	  TYPE_CODE (value_type (val)) == TYPE_CODE_FUNC
 	   && VALUE_LVAL (val) == lval_memory)
 	next_address = VALUE_ADDRESS (val);
       else
@@ -1308,7 +1308,7 @@ x_command (char *exp, int from_tty)
       /* Make last address examined available to the user as $_.  Use
          the correct pointer type.  */
       struct type *pointer_type
-	= lookup_pointer_type (VALUE_TYPE (last_examine_value));
+	= lookup_pointer_type (value_type (last_examine_value));
       set_internalvar (lookup_internalvar ("_"),
 		       value_from_pointer (pointer_type,
 					   last_examine_address));
@@ -1902,11 +1902,11 @@ printf_command (char *arg, int from_tty)
 
 	if (argclass[nargs] == double_arg)
 	  {
-	    struct type *type = VALUE_TYPE (val_args[nargs]);
+	    struct type *type = value_type (val_args[nargs]);
 	    if (TYPE_LENGTH (type) == sizeof (float))
-	        VALUE_TYPE (val_args[nargs]) = builtin_type_float;
+	      val_args[nargs]->type = builtin_type_float;
 	    if (TYPE_LENGTH (type) == sizeof (double))
-	        VALUE_TYPE (val_args[nargs]) = builtin_type_double;
+	      val_args[nargs]->type = builtin_type_double;
 	  }
 	nargs++;
 	s = s1;

@@ -505,7 +505,7 @@ varobj_create (char *objname,
       else
 	var->value = evaluate_type (var->root->exp);
 
-      var->type = VALUE_TYPE (var->value);
+      var->type = value_type (var->value);
 
       /* Set language info */
       lang = variable_language (var);
@@ -744,7 +744,7 @@ varobj_get_type (struct varobj *var)
   /* To print the type, we simply create a zero ``struct value *'' and
      cast it to our type. We then typeprint this variable. */
   val = value_zero (var->type, not_lval);
-  type_print (VALUE_TYPE (val), "", stb, -1);
+  type_print (value_type (val), "", stb, -1);
 
   thetype = ui_file_xstrdup (stb, &length);
   do_cleanups (old_chain);
@@ -1705,7 +1705,7 @@ type_of_child (struct varobj *var)
   /* If the child had no evaluation errors, var->value
      will be non-NULL and contain a valid type. */
   if (var->value != NULL)
-    return VALUE_TYPE (var->value);
+    return value_type (var->value);
 
   /* Otherwise, we must compute the type. */
   return (*var->root->lang->type_of_child) (var->parent, var->index);
@@ -2093,7 +2093,7 @@ c_value_of_variable (struct varobj *var)
 
 	    if (VALUE_LAZY (var->value))
 	      gdb_value_fetch_lazy (var->value);
-	    val_print (VALUE_TYPE (var->value),
+	    val_print (value_type (var->value),
 		       VALUE_CONTENTS_RAW (var->value), 0,
 		       VALUE_ADDRESS (var->value), stb,
 		       format_code[(int) var->format], 1, 0, 0);
@@ -2378,8 +2378,8 @@ cplus_value_of_child (struct varobj *parent, int index)
 	    {
 	      struct value *temp = NULL;
 
-	      if (TYPE_CODE (VALUE_TYPE (parent->value)) == TYPE_CODE_PTR
-		  || TYPE_CODE (VALUE_TYPE (parent->value)) == TYPE_CODE_REF)
+	      if (TYPE_CODE (value_type (parent->value)) == TYPE_CODE_PTR
+		  || TYPE_CODE (value_type (parent->value)) == TYPE_CODE_REF)
 		{
 		  if (!gdb_value_ind (parent->value, &temp))
 		    return NULL;
