@@ -1387,13 +1387,13 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       gdb_flush (gdb_stdout);
 
       if (annotation_level > 1)
-	printf_filtered ("\n\032\032pre-%cquery\n", defchar);
+	printf_filtered ("\n\032\032pre-query\n");
 
       vfprintf_filtered (gdb_stdout, ctlstr, args);
       printf_filtered ("(%s or %s) ", y_string, n_string);
 
       if (annotation_level > 1)
-	printf_filtered ("\n\032\032%cquery\n", defchar);
+	printf_filtered ("\n\032\032query\n");
 
       wrap_here ("");
       gdb_flush (gdb_stdout);
@@ -1437,7 +1437,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
     }
 
   if (annotation_level > 1)
-    printf_filtered ("\n\032\032post-%cquery\n", defchar);
+    printf_filtered ("\n\032\032post-query\n");
   return retval;
 }
 
