@@ -32,26 +32,42 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define MINUS_ONE (~ (bfd_vma) 0)
 
 /* The relocation "howto" table.  Order of fields:
-   type, size, bitsize, pc_relative, complain_on_overflow, special_function,
-   name, partial_inplace, src_mask, dst_pack, pcrel_offset  */
+   type, size, bitsize, pc_relative, complain_on_overflow,
+   special_function, name, partial_inplace, src_mask, dst_pack, pcrel_offset.  */
 static reloc_howto_type x86_64_elf_howto_table[] =
 {
-  HOWTO(R_X86_64_NONE,          0,0, 0,false,0,complain_overflow_dont,    0, "R_X86_64_NONE",   false,0x00000000,0x00000000,false),
-  HOWTO(R_X86_64_64,    0,4,64,false,0,complain_overflow_bitfield,0, "R_X86_64_64",     false,MINUS_ONE ,MINUS_ONE ,false),
-  HOWTO(R_X86_64_PC32,          0,4,32,true ,0,complain_overflow_signed  ,0, "R_X86_64_PC32",   false,0xffffffff,0xffffffff,true),
-  HOWTO(R_X86_64_GOT32,         0,4,32,false,0,complain_overflow_signed  ,0, "R_X86_64_GOT32",  false,0xffffffff,0xffffffff,false),
-  HOWTO(R_X86_64_PLT32,         0,4,32,true ,0,complain_overflow_signed  ,0, "R_X86_64_PLT32",  false,0xffffffff,0xffffffff,true),
-  HOWTO(R_X86_64_COPY,     0,4,32,false,0,complain_overflow_bitfield,0, "R_X86_64_COPY",   false,0xffffffff,0xffffffff,false),
-  HOWTO(R_X86_64_GLOB_DAT, 0,4,64,false,0,complain_overflow_bitfield,0,"R_X86_64_GLOB_DAT",false,MINUS_ONE ,MINUS_ONE ,false),
-  HOWTO(R_X86_64_RELATIVE ,0,4,64,false,0,complain_overflow_bitfield,0,"R_X86_64_RELATIVE",false,MINUS_ONE ,MINUS_ONE ,false),
-  HOWTO(R_X86_64_JUMP_SLOT,0,4,64,false,0,complain_overflow_bitfield,0,"R_X86_64_JUMP_SLOT",false,MINUS_ONE,MINUS_ONE ,false),
-  HOWTO(R_X86_64_GOTPCREL, 0,4,32,true, 0,complain_overflow_signed  ,0, "R_X86_64_GOTPCREL",false,0xffffffff,0xffffffff,true),
-  HOWTO(R_X86_64_32,    0,4,32,false,0,complain_overflow_unsigned,0, "R_X86_64_32",     false,0xffffffff,0xffffffff,false),
-  HOWTO(R_X86_64_32S,   0,4,32,false,0,complain_overflow_signed,  0, "R_X86_64_32S",    false,0xffffffff,0xffffffff,false),
-  HOWTO(R_X86_64_16,    0,1,16,false,0,complain_overflow_bitfield,0, "R_X86_64_16",     false,0xffff    ,0xffff,    false),
-  HOWTO(R_X86_64_PC16,          0,1,16,true ,0,complain_overflow_bitfield,0, "R_X86_64_PC16",   false,0xffff    ,0xffff,    true),
-  HOWTO(R_X86_64_8,     0,0, 8,false,0,complain_overflow_signed  ,0, "R_X86_64_8",      false,0xff      ,0xff,      false),
-  HOWTO(R_X86_64_PC8,   0,0, 8,true ,0,complain_overflow_signed  ,0, "R_X86_64_PC8",    false,0xff      ,0xff,      true),
+  HOWTO(R_X86_64_NONE, 0, 0, 0, false, 0, complain_overflow_dont,
+	bfd_elf_generic_reloc, "R_X86_64_NONE",	false, 0x00000000, 0x00000000, false),
+  HOWTO(R_X86_64_64, 0, 4, 64, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_X86_64_64", false, MINUS_ONE, MINUS_ONE, false),
+  HOWTO(R_X86_64_PC32, 0, 4, 32, true, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_PC32", false, 0xffffffff, 0xffffffff, true),
+  HOWTO(R_X86_64_GOT32, 0, 4, 32, false, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_GOT32", false, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_X86_64_PLT32, 0, 4, 32, true, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_PLT32", false, 0xffffffff, 0xffffffff, true),
+  HOWTO(R_X86_64_COPY, 0, 4, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_X86_64_COPY", false, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_X86_64_GLOB_DAT, 0, 4, 64, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_X86_64_GLOB_DAT", false, MINUS_ONE, MINUS_ONE, false),
+  HOWTO(R_X86_64_RELATIVE, 0, 4, 64, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_X86_64_RELATIVE", false, MINUS_ONE, MINUS_ONE, false),
+  HOWTO(R_X86_64_JUMP_SLOT, 0, 4, 64, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_X86_64_JUMP_SLOT", false, MINUS_ONE, MINUS_ONE, false),
+  HOWTO(R_X86_64_GOTPCREL, 0, 4, 32, true,0 , complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_GOTPCREL", false, 0xffffffff, 0xffffffff, true),
+  HOWTO(R_X86_64_32, 0, 4, 32, false, 0, complain_overflow_unsigned,
+	bfd_elf_generic_reloc, "R_X86_64_32", false, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_X86_64_32S, 0, 4, 32, false, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_32S", false, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_X86_64_16, 0, 1, 16, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_X86_64_16", false, 0xffff, 0xffff, false),
+  HOWTO(R_X86_64_PC16,0, 1, 16, true, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_X86_64_PC16", false, 0xffff, 0xffff, true),
+  HOWTO(R_X86_64_8, 0, 0, 8, false, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_8", false, 0xff, 0xff, false),
+  HOWTO(R_X86_64_PC8, 0, 0, 8, true, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_PC8", false, 0xff, 0xff, true)
 };
 
 /* Map BFD relocs to the x86_64 elf relocs.  */
@@ -97,7 +113,7 @@ static boolean elf64_x86_64_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf64_x86_64_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-         Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+	 Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static boolean elf64_x86_64_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
 	   Elf_Internal_Sym *sym));
@@ -137,12 +153,12 @@ elf64_x86_64_info_to_howto (abfd, cache_ptr, dst)
   BFD_ASSERT (r_type == cache_ptr->howto->type);
 }
 
-/* Functions for the x86-64 ELF linker.  */
+/* Functions for the x86-64 ELF linker.	 */
 
-/* The name of the dynamic interpreter.  This is put in the .interp
+/* The name of the dynamic interpreter.	 This is put in the .interp
    section.  */
 
-#define ELF_DYNAMIC_INTERPRETER "/lib/libd64.so.1"
+#define ELF_DYNAMIC_INTERPRETER "/lib/ld64.so.1"
 
 /* The size in bytes of an entry in the global offset table.  */
 
@@ -159,7 +175,7 @@ static const bfd_byte elf64_x86_64_plt0_entry[PLT_ENTRY_SIZE] =
 {
   0xff, 0xb3, 8, 0, 0, 0,	/* pushq GOT+8(%rip) */
   0xff, 0xa3, 16, 0, 0, 0,	/* jmp GOT+16(%rip) */
-  0, 0, 0, 0			/* pad out to 16 bytes.  */
+  0, 0, 0, 0			/* pad out to 16 bytes.	 */
 };
 
 /* Subsequent entries in a procedure linkage table look like this.  */
@@ -167,7 +183,7 @@ static const bfd_byte elf64_x86_64_plt0_entry[PLT_ENTRY_SIZE] =
 static const bfd_byte elf64_x86_64_plt_entry[PLT_ENTRY_SIZE] =
 {
   0xff, 0xa3,	/* jmp *name@GOTPC(%rip) */
-  0, 0, 0, 0,	/* replaced with offset to this symbol in .got.  */
+  0, 0, 0, 0,	/* replaced with offset to this symbol in .got.	 */
   0x68,	/* pushq immediate */
   0, 0, 0, 0,	/* replaced with index into relocation table.  */
   0xe9,		/* jmp relative */
@@ -175,10 +191,10 @@ static const bfd_byte elf64_x86_64_plt_entry[PLT_ENTRY_SIZE] =
 };
 
 /* The x86-64 linker needs to keep track of the number of relocs that
-   it decides to copy in check_relocs for each symbol.  This is so
+   it decides to copy in check_relocs for each symbol.	This is so
    that it can discard PC relative relocs if it doesn't need them when
    linking with -Bsymbolic.  We store the information in a field
-   extending the regular ELF linker hash table.  */
+   extending the regular ELF linker hash table.	 */
 
 /* This structure keeps track of the number of PC relative relocs we
    have copied for a given symbol.  */
@@ -205,7 +221,8 @@ struct elf64_x86_64_link_hash_entry
 
 /* x86-64  ELF linker hash table.  */
 
-struct elf64_x86_64_link_hash_table {
+struct elf64_x86_64_link_hash_table
+{
   struct elf_link_hash_table root;
 };
 
@@ -227,7 +244,7 @@ static boolean elf64_x86_64_discard_copies
 #define elf64_x86_64_hash_table(p) \
   ((struct elf64_x86_64_link_hash_table *) ((p)->hash))
 
-/* Create an entry in an x86-64 ELF linker hash table.  */
+/* Create an entry in an x86-64 ELF linker hash table.	*/
 
 static struct bfd_hash_entry *
 elf64_x86_64_link_hash_newfunc (entry, table, string)
@@ -239,7 +256,7 @@ elf64_x86_64_link_hash_newfunc (entry, table, string)
     (struct elf64_x86_64_link_hash_entry *) entry;
 
   /* Allocate the structure if it has not already been allocated by a
-     subclass.  */
+     subclass.	*/
   if (ret == (struct elf64_x86_64_link_hash_entry *) NULL)
     ret = ((struct elf64_x86_64_link_hash_entry *)
 	   bfd_hash_allocate (table,
@@ -351,7 +368,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	{
 	case R_X86_64_GOTPCREL:
 	case R_X86_64_GOT32:
-	  /* This symbol requires a global offset table entry.  */
+	  /* This symbol requires a global offset table entry.	*/
 
 	  if (sgot == NULL)
 	    {
@@ -432,14 +449,14 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 
 	case R_X86_64_PLT32:
 	  /* This symbol requires a procedure linkage table entry.  We
-             actually build the entry in adjust_dynamic_symbol,
-             because this might be a case of linking PIC code which is
-             never referenced by a dynamic object, in which case we
-             don't need to generate a procedure linkage table entry
-             after all.  */
+	     actually build the entry in adjust_dynamic_symbol,
+	     because this might be a case of linking PIC code which is
+	     never referenced by a dynamic object, in which case we
+	     don't need to generate a procedure linkage table entry
+	     after all.	 */
 
 	  /* If this is a local symbol, we resolve it directly without
-             creating a procedure linkage table entry.  */
+	     creating a procedure linkage table entry.	*/
 	  if (h == NULL)
 	    continue;
 
@@ -464,7 +481,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	     into the shared library.  However, if we are linking with
 	     -Bsymbolic, we do not need to copy a reloc against a
 	     global symbol which is defined in an object we are
-	     including in the link (i.e., DEF_REGULAR is set).  At
+	     including in the link (i.e., DEF_REGULAR is set).	At
 	     this point we have not seen all the input files, so it is
 	     possible that DEF_REGULAR is not set now but will be set
 	     later (it is never cleared).  We account for that
@@ -558,7 +575,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 }
 
 /* Return the section that should be marked against GC for a given
-   relocation.  */
+   relocation.	*/
 
 static asection *
 elf64_x86_64_gc_mark_hook (abfd, info, rel, h, sym)
@@ -597,7 +614,7 @@ elf64_x86_64_gc_mark_hook (abfd, info, rel, h, sym)
   return NULL;
 }
 
-/* Update the got entry reference counts for the section being removed.  */
+/* Update the got entry reference counts for the section being removed.	 */
 
 static boolean
 elf64_x86_64_gc_sweep_hook (abfd, info, sec, relocs)
@@ -683,7 +700,7 @@ elf64_x86_64_gc_sweep_hook (abfd, info, sec, relocs)
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
    change the definition to something the rest of the link can
-   understand.  */
+   understand.	*/
 
 static boolean
 elf64_x86_64_adjust_dynamic_symbol (info, h)
@@ -713,21 +730,16 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
   if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
-      if (! elf_hash_table (info)->dynamic_sections_created)
+      if ((! info->shared
+	   && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+	   && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0)
+	  || (info->shared && h->plt.refcount <= 0))
 	{
-	  /* FIXME: These are the sparc64 comment and then the i386 comment.
-	     How we need to deal with this and why remains to be seen.  */
-	  /* This case can occur if we saw a WPLT30 reloc in an input
-             file, but none of the input files were dynamic objects.
-             In such a case, we don't actually need to build a
-             procedure linkage table, and we can just do a WDISP30
-             reloc instead.  */
 	  /* This case can occur if we saw a PLT32 reloc in an input
 	     file, but the symbol was never referred to by a dynamic
 	     object, or if all references were garbage collected.  In
 	     such a case, we don't actually need to build a procedure
 	     linkage table, and we can just do a PC32 reloc instead.  */
-	  /* i386 code: */
 	  h->plt.offset = (bfd_vma) -1;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	  return true;
@@ -750,7 +762,7 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
 
       /* If this symbol is not defined in a regular file, and we are
 	 not generating a shared library, then set the symbol to this
-	 location in the .plt.  This is required to make function
+	 location in the .plt.	This is required to make function
 	 pointers compare as equal between the normal executable and
 	 the shared library.  */
       if (! info->shared
@@ -765,6 +777,12 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
       /* Make room for this entry.  */
       s->_raw_size += PLT_ENTRY_SIZE;
 
+      /* We also need to make an entry in the .got.plt section, which
+	 will be placed in the .got section by the linker script.  */
+      s = bfd_get_section_by_name (dynobj, ".got.plt");
+      BFD_ASSERT (s != NULL);
+      s->_raw_size += GOT_ENTRY_SIZE;
+
       /* We also need to make an entry in the .rela.plt section.  */
       s = bfd_get_section_by_name (dynobj, ".rela.plt");
       BFD_ASSERT (s != NULL);
@@ -775,7 +793,7 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
-     real definition first, and we can just use the same value.  */
+     real definition first, and we can just use the same value.	 */
   if (h->weakdef != NULL)
     {
       BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
@@ -786,12 +804,12 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
     }
 
   /* This is a reference to a symbol defined by a dynamic object which
-     is not a function.  */
+     is not a function.	 */
 
   /* If we are creating a shared library, we must presume that the
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
-     be handled correctly by relocate_section.  */
+     be handled correctly by relocate_section.	*/
   if (info->shared)
     return true;
 
@@ -801,7 +819,7 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
     return true;
 
   /* We must allocate the symbol in our .dynbss section, which will
-     become part of the .bss section of the executable.  There will be
+     become part of the .bss section of the executable.	 There will be
      an entry for this symbol in the .dynsym section.  The dynamic
      object will contain position independent code, so all references
      from the dynamic object to this symbol will go through the global
@@ -828,7 +846,7 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
     }
 
   /* We need to figure out the alignment required for this symbol.  I
-     have no idea how ELF linkers handle this.  16-bytes is the size
+     have no idea how ELF linkers handle this.	16-bytes is the size
      of the largest type that requires hard alignment -- long double.  */
   /* FIXME: This is VERY ugly. Should be fixed for all architectures using
      this construct.  */
@@ -884,10 +902,10 @@ elf64_x86_64_size_dynamic_sections (output_bfd, info)
   else
     {
       /* We may have created entries in the .rela.got section.
-         However, if we are not creating the dynamic sections, we will
-         not actually use these entries.  Reset the size of .rela.got,
-         which will cause it to get stripped from the output file
-         below.  */
+	 However, if we are not creating the dynamic sections, we will
+	 not actually use these entries.  Reset the size of .rela.got,
+	 which will cause it to get stripped from the output file
+	 below.	 */
       s = bfd_get_section_by_name (dynobj, ".rela.got");
       if (s != NULL)
 	s->_raw_size = 0;
@@ -924,7 +942,7 @@ elf64_x86_64_size_dynamic_sections (output_bfd, info)
 	  if (s->_raw_size == 0)
 	    {
 	      /* Strip this section if we don't need it; see the
-                 comment below.  */
+		 comment below.	 */
 	      strip = true;
 	    }
 	  else
@@ -953,7 +971,7 @@ elf64_x86_64_size_dynamic_sections (output_bfd, info)
 	      asection *target;
 
 	      /* Remember whether there are any reloc sections other
-                 than .rela.plt.  */
+		 than .rela.plt.  */
 	      if (strcmp (name, ".rela.plt") != 0)
 		{
 		  const char *outname;
@@ -1006,7 +1024,7 @@ elf64_x86_64_size_dynamic_sections (output_bfd, info)
       /* Add some entries to the .dynamic section.  We fill in the
 	 values later, in elf64_x86_64_finish_dynamic_sections, but we
 	 must add the entries now so that we get the correct size for
-	 the .dynamic section.  The DT_DEBUG entry is filled in by the
+	 the .dynamic section.	The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
       if (! info->shared)
 	{
@@ -1016,10 +1034,9 @@ elf64_x86_64_size_dynamic_sections (output_bfd, info)
 
       if (plt)
 	{
-	  /* FIXME: Are all these needed?  */
 	  if (! bfd_elf64_add_dynamic_entry (info, DT_PLTGOT, 0)
 	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTREL, DT_REL)
+	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
 	      || ! bfd_elf64_add_dynamic_entry (info, DT_JMPREL, 0))
 	    return false;
 	}
@@ -1079,7 +1096,7 @@ elf64_x86_64_discard_copies (h, inf)
 
 static boolean
 elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
-                             contents, relocs, local_syms, local_sections)
+			     contents, relocs, local_syms, local_sections)
      bfd *output_bfd;
      struct bfd_link_info *info;
      bfd *input_bfd;
@@ -1155,7 +1172,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  continue;
 	}
 
-      /* This is a final link.  */
+      /* This is a final link.	*/
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -1228,15 +1245,15 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  /* This is actually a static link, or it is a -Bsymbolic
 		     link and the symbol is defined locally, or the symbol
-		     was forced to be local because of a version file.  We
+		     was forced to be local because of a version file.	We
 		     must initialize this entry in the global offset table.
 		     Since the offset must always be a multiple of 8, we
 		     use the least significant bit to record whether we
 		     have initialized it already.
 
 		     When doing a dynamic link, we create a .rela.got
-		     relocation entry to initialize the value.  This is
-		     done in the finish_dynamic_symbol routine.  */
+		     relocation entry to initialize the value.	This is
+		     done in the finish_dynamic_symbol routine.	 */
 		  if ((off & 1) != 0)
 		    off &= ~1;
 		  else
@@ -1258,8 +1275,8 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      off = local_got_offsets[r_symndx];
 
 	      /* The offset must always be a multiple of 8.  We use
-                 the least significant bit to record whether we have
-                 already generated the necessary reloc.  */
+		 the least significant bit to record whether we have
+		 already generated the necessary reloc.	 */
 	      if ((off & 1) != 0)
 		off &= ~1;
 	      else
@@ -1312,15 +1329,15 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  /* This is actually a static link, or it is a -Bsymbolic
 		     link and the symbol is defined locally, or the symbol
-		     was forced to be local because of a version file.  We
+		     was forced to be local because of a version file.	We
 		     must initialize this entry in the global offset table.
 		     Since the offset must always be a multiple of 8, we
 		     use the least significant bit to record whether we
 		     have initialized it already.
 
 		     When doing a dynamic link, we create a .rela.got
-		     relocation entry to initialize the value.  This is
-		     done in the finish_dynamic_symbol routine.  */
+		     relocation entry to initialize the value.	This is
+		     done in the finish_dynamic_symbol routine.	 */
 		  if ((off & 1) != 0)
 		    off &= ~1;
 		  else
@@ -1342,8 +1359,8 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      off = local_got_offsets[r_symndx];
 
 	      /* The offset must always be a multiple of 8.  We use
-                 the least significant bit to record whether we have
-                 already generated the necessary reloc.  */
+		 the least significant bit to record whether we have
+		 already generated the necessary reloc.	 */
 	      if ((off & 1) != 0)
 		off &= ~1;
 	      else
@@ -1384,15 +1401,15 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	     procedure linkage table.  */
 
 	  /* Resolve a PLT32 reloc against a local symbol directly,
-             without using the procedure linkage table.  */
+	     without using the procedure linkage table.	 */
 	  if (h == NULL)
 	    break;
 
 	  if (h->plt.offset == (bfd_vma) -1 || splt == NULL)
 	    {
 	      /* We didn't make a PLT entry for this symbol.  This
-                 happens when statically linking PIC code, or when
-                 using -Bsymbolic.  */
+		 happens when statically linking PIC code, or when
+		 using -Bsymbolic.  */
 	      break;
 	    }
 
@@ -1408,7 +1425,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
 	  /* FIXME: The abi says the linker should make sure the value is
-	     the same when it's zeroextended to 64 bit.  */
+	     the same when it's zeroextended to 64 bit.	 */
 	  if (info->shared
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && ((r_type != R_X86_64_PC8 && r_type != R_X86_64_PC16
@@ -1424,7 +1441,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
-		 time.  */
+		 time.	*/
 
 	      if (sreloc == NULL)
 		{
@@ -1483,7 +1500,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		{
 		  /* h->dynindx may be -1 if this symbol was marked to
-                     become local.  */
+		     become local.  */
 		  if (h == NULL
 		      || ((info->symbolic || h->dynindx == -1)
 			  && (h->elf_link_hash_flags
@@ -1586,7 +1603,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
       Elf_Internal_Rela rela;
 
       /* This symbol has an entry in the procedure linkage table.  Set
-	 it up.  */
+	 it up.	 */
 
       BFD_ASSERT (h->dynindx != -1);
 
@@ -1602,7 +1619,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
       plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
 
       /* Get the offset into the .got table of the entry that
-	 corresponds to this function.  Each .got entry is GOT_ENTRY_SIZE
+	 corresponds to this function.	Each .got entry is GOT_ENTRY_SIZE
 	 bytes. The first three are reserved.  */
       got_offset = (plt_index + 3) * GOT_ENTRY_SIZE;
 
@@ -1619,7 +1636,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_put_64 (output_bfd, - (h->plt.offset + PLT_ENTRY_SIZE),
 		  splt->contents + h->plt.offset + 12);
 
-      /* Fill in the entry in the global offset table.  */
+      /* Fill in the entry in the global offset table.	*/
       bfd_put_64 (output_bfd, (splt->output_section->vma + splt->output_offset
 			       + h->plt.offset + 6),
 		  sgot->contents + got_offset);
@@ -1637,7 +1654,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  /* Mark the symbol as undefined, rather than as defined in
-	     the .plt section.  Leave the value alone.  */
+	     the .plt section.	Leave the value alone.	*/
 	  sym->st_shndx = SHN_UNDEF;
 	}
     }
@@ -1696,8 +1713,7 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
       asection *splt;
       Elf64_External_Dyn *dyncon, *dynconend;
 
-      splt = bfd_get_section_by_name (dynobj, ".plt");
-      BFD_ASSERT (splt != NULL && sdyn != NULL);
+      BFD_ASSERT (sdyn != NULL);
 
       dyncon = (Elf64_External_Dyn *) sdyn->contents;
       dynconend = (Elf64_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
@@ -1730,14 +1746,14 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 	    case DT_RELASZ:
 	      /* FIXME: This comment and code is from elf64-alpha.c:  */
 	      /* My interpretation of the TIS v1.1 ELF document indicates
-		 that RELASZ should not include JMPREL.  This is not what
+		 that RELASZ should not include JMPREL.	 This is not what
 		 the rest of the BFD does.  It is, however, what the
 		 glibc ld.so wants.  Do this fixup here until we found
 		 out who is right.  */
 	      s = bfd_get_section_by_name (output_bfd, ".rela.plt");
 	      if (s)
 		{
-		  /* Subtract JMPREL size from RELASZ.  */
+		  /* Subtract JMPREL size from RELASZ.	*/
 		  dyn.d_un.d_val -=
 		    (s->_cooked_size ? s->_cooked_size : s->_raw_size);
 		}
@@ -1755,9 +1771,11 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 	}
 
       /* Initialize the contents of the .plt section.  */
+      splt = bfd_get_section_by_name (dynobj, ".plt");
+      BFD_ASSERT (splt != NULL);
       if (splt->_raw_size > 0)
 	{
-	    memcpy (splt->contents, elf64_x86_64_plt0_entry, PLT_ENTRY_SIZE);
+	  memcpy (splt->contents, elf64_x86_64_plt0_entry, PLT_ENTRY_SIZE);
 	}
 
       elf_section_data (splt->output_section)->this_hdr.sh_entsize =
@@ -1766,7 +1784,7 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 
   /* Set the first entry in the global offset table to the address of
      the dynamic section.  */
-  sgot = bfd_get_section_by_name (dynobj, ".got");
+  sgot = bfd_get_section_by_name (dynobj, ".got.plt");
   BFD_ASSERT (sgot != NULL);
   if (sgot->_raw_size > 0)
     {
@@ -1787,11 +1805,48 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
+/*
+ * Why was the hash table entry size definition changed from
+ * ARCH_SIZE/8 to 4? This breaks the 64 bit dynamic linker and
+ * this is the only reason for the elf64_x86_64_size_info structure.
+ */
+
+const struct elf_size_info elf64_86_64_size_info =
+{
+  sizeof (Elf64_External_Ehdr),
+  sizeof (Elf64_External_Phdr),
+  sizeof (Elf64_External_Shdr),
+  sizeof (Elf64_External_Rel),
+  sizeof (Elf64_External_Rela),
+  sizeof (Elf64_External_Sym),
+  sizeof (Elf64_External_Dyn),
+  sizeof (Elf_External_Note),
+  8,		/* hash-table entry size */
+  1,		/* internal relocations per external relocations */
+  64,		/* arch_size */
+  8,		/* file_align */
+  ELFCLASS64, EV_CURRENT,
+  bfd_elf64_write_out_phdrs,
+  bfd_elf64_write_shdrs_and_ehdr,
+  bfd_elf64_write_relocs,
+  bfd_elf64_swap_symbol_out,
+  bfd_elf64_slurp_reloc_table,
+  bfd_elf64_slurp_symbol_table,
+  bfd_elf64_swap_dyn_in,
+  bfd_elf64_swap_dyn_out,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};
+
 #define TARGET_LITTLE_SYM		    bfd_elf64_x86_64_vec
 #define TARGET_LITTLE_NAME		    "elf64-x86-64"
 #define ELF_ARCH			    bfd_arch_i386
 #define ELF_MACHINE_CODE		    EM_X86_64
 #define ELF_MAXPAGESIZE			    0x100000
+
+#define elf_backend_size_info		    elf64_86_64_size_info
 
 #define elf_backend_can_gc_sections	    1
 #define elf_backend_want_got_plt	    1
@@ -1801,13 +1856,11 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_plt_header_size	    PLT_ENTRY_SIZE
 
 #define elf_info_to_howto		    elf64_x86_64_info_to_howto
-#define elf_backend_object_p		    elf64_x86_64_elf_object_p
-#define elf_backend_relocate_section	    elf64_x86_64_relocate_section
 
 #define bfd_elf64_bfd_final_link	    _bfd_elf64_gc_common_final_link
 #define bfd_elf64_bfd_link_hash_table_create \
   elf64_x86_64_link_hash_table_create
-#define bfd_elf64_bfd_reloc_type_lookup     elf64_x86_64_reloc_type_lookup
+#define bfd_elf64_bfd_reloc_type_lookup	    elf64_x86_64_reloc_type_lookup
 
 #define elf_backend_adjust_dynamic_symbol   elf64_x86_64_adjust_dynamic_symbol
 #define elf_backend_check_relocs	    elf64_x86_64_check_relocs
@@ -1819,5 +1872,6 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_gc_sweep_hook	    elf64_x86_64_gc_sweep_hook
 #define elf_backend_relocate_section	    elf64_x86_64_relocate_section
 #define elf_backend_size_dynamic_sections   elf64_x86_64_size_dynamic_sections
+#define elf_backend_object_p		    elf64_x86_64_elf_object_p
 
 #include "elf64-target.h"

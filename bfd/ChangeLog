@@ -1,3 +1,18 @@
+2001-02-14  Bo Thorsen  <bo@suse.de>
+
+        * elf64-x86-64.c: Small formatting fixes and rearrangements of code.
+        (elf64_86_64_size_info): Struct added to fix a problem
+        with the hashtable string entries.
+        (elf64_x86_64_adjust_dynamic_symbol): Add generation of .got.plt.
+        (elf64_x86_64_size_dynamic_sections): A FIXME removed.
+        (elf64_x86_64_size_dynamic_sections): Fix a dynamic entry and
+        remove the FIXME for this.
+        (elf64_x86_64_adjust_dynamic_symbol): Fix check for unneeded .plt
+        section. Also removed the FIXME for it.
+        (x86_64_elf_howto_table): Use bfd_elf_generic_reloc.
+        (ELF_DYNAMIC_INTERPRETER): Fix the name of the dynamic linker.
+        (elf64_x86_64_finish_dynamic_sections): Enable .got.plt writing.
+
 2001-02-14  Philip Blundell  <pb@futuretv.com>
 
 	From 2001-02-08  H.J. Lu  <hjl@gnu.org>
