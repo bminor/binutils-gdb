@@ -1,3 +1,7 @@
+2002-10-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386v-nat.c: Include "i386-tdep.h".
+
 2002-10-25  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbtypes.c (address_space_name_to_int): Update.
