@@ -6,19 +6,19 @@
 	block_value param.
 	* ldlang.c (lang_enter_output_section_statement): Likewise.
 	(TO_ADDR, TO_SIZE): Define.
-	(opb): New var.
+	(opb_shift): New var.
 	(init_opb): New function.
 	(print_input_section): Call init_opb and use TO_ADDR.
 	(print_data_statement, print_reloc_statement): Likewise.
 	(print_padding_statement): Likewise.
-	(size_input_section): Use TO_SIZE and TO_ADDR, and global opb.
+	(size_input_section): Use TO_SIZE and TO_ADDR, and global opb_shift.
 	(lang_check_section_addresses): Likewise.
 	(lang_size_sections_1): Likewise.
 	(lang_do_assignments_1): Likewise.
 	(lang_set_startof): Likewise.
-	(lang_one_common): Likewise.  Combine power_of_two and opb alignment.
+	(lang_one_common): Likewise.  Combine power_of_two and opb_shift align.
 	(lang_process): Call init_opb.
-	(lang_abs_symbol_at_end_of): Use TO_ADDR and global opb.
+	(lang_abs_symbol_at_end_of): Use TO_ADDR and global opb_shift.
 	(lang_enter_overlay_section): Adjust
 	lang_enter_output_section_statement call.
 	* ldgram.y: Likewise.
