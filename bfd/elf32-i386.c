@@ -697,6 +697,7 @@ elf_i386_link_hash_table_create (abfd)
   ret->srelplt = NULL;
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
+  ret->tls_ldm_got.refcount = 0;
   ret->sym_sec.abfd = NULL;
 
   return &ret->elf.root;
