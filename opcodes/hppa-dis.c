@@ -23,24 +23,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dis-asm.h"
 #include "opcode/hppa.h"
 
-/* Initializer for an array of names of registers.
-   There should be NUM_REGS strings in this initializer.  */
+/* Integer register names, indexed by the numbers which appear in the
+   opcodes.  */
+static const char *const reg_names[] = 
+ {"flags", "r1", "rp", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
+  "r10", "r11", "r12", "r13", "r14", "r15", "r16", "r17", "r18", "r19",
+  "r20", "r21", "r22", "arg3", "arg2", "arg1", "arg0", "dp", "ret0", "ret1",
+  "sp", "r31"}
 
-#define REGISTER_NAMES  \
- {"flags", "r1", "rp", "r3", "r4", "r5", "r6", "r7", "r8", "r9",        \
-  "r10", "r11", "r12", "r13", "r14", "r15", "r16", "r17", "r18", "r19", \
-  "r20", "r21", "r22", "arg3", "arg2", "arg1", "arg0", "dp", "ret0", "ret1", \
-  "sp", "r31", "sar", "pcoqh", "pcsqh", "pcoqt", "pcsqt", \
-  "eiem", "iir", "isr", "ior", "ipsw", "goto", "sr4", "sr0", "sr1", "sr2", \
-  "sr3", "sr5", "sr6", "sr7", "cr0", "cr8", "cr9", "ccr", "cr12", "cr13", \
-  "cr24", "cr25", "cr26", "mpsfu_high", "mpsfu_low", "mpsfu_ovflo", "pad", \
-  "fpsr", "fpe1", "fpe2", "fpe3", "fpe4", "fpe5", "fpe6", "fpe7", \
-  "fp4", "fp5", "fp6", "fp7", "fp8", \
-  "fp9", "fp10", "fp11", "fp12", "fp13", "fp14", "fp15", \
-  "fp16", "fp17", "fp18", "fp19", "fp20", "fp21", "fp22", "fp23", \
-  "fp24", "fp25", "fp26", "fp27", "fp28", "fp29", "fp30", "fp31"}
-
-static const char *const reg_names[] = REGISTER_NAMES;
+/* Floating point register names, indexed by the numbers which appear in the
+   opcodes.  */
+static const char *const fp_reg_names[] = 
+ {"fpsr", "fpe2", "fpe4", "fpe6", 
+  "fr4", "fr5", "fr6", "fr7", "fr8", 
+  "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15", 
+  "fr16", "fr17", "fr18", "fr19", "fr20", "fr21", "fr22", "fr23",
+  "fr24", "fr25", "fr26", "fr27", "fr28", "fr29", "fr30", "fr31"};
 
 typedef unsigned int CORE_ADDR;
 
@@ -123,11 +121,24 @@ fput_reg (reg, info)
 }
 
 static void
-fput_reg_r (reg, info)
+fput_fp_reg (reg, info)
      unsigned reg;
      disassemble_info *info;
 {
-  (*info->fprintf_func) (info->stream, "%sR", reg ? reg_names[reg] : "r0");
+  (*info->fprintf_func) (info->stream, reg ? fp_reg_names[reg] : "fr0");
+}
+
+static void
+fput_fp_reg_r (reg, info)
+     unsigned reg;
+     disassemble_info *info;
+{
+  /* Special case floating point exception registers.  */
+  if (reg < 4)
+    (*info->fprintf_func) (info->stream, "fpe%d", reg * 2 + 1);
+  else
+    (*info->fprintf_func) (info->stream, "%sR", reg ? fp_reg_names[reg] 
+						    : "fr0");
 }
 
 static void
@@ -378,9 +389,9 @@ print_insn_hppa (memaddr, info)
 		  break;
 		case 'X':
                   if (GET_FIELD (insn, 25, 25))
-		      fput_reg_r (GET_FIELD (insn, 11, 15), info);
+		      fput_fp_reg_r (GET_FIELD (insn, 11, 15), info);
 		  else
-		      fput_reg (GET_FIELD (insn, 11, 15), info);
+		      fput_fp_reg (GET_FIELD (insn, 11, 15), info);
 		  break;
 		case 'b':
 		  fput_reg (GET_FIELD (insn, 6, 10), info);
@@ -390,33 +401,36 @@ print_insn_hppa (memaddr, info)
 		  break;
 		case 'E':
                   if (GET_FIELD (insn, 25, 25))
-		      fput_reg_r (GET_FIELD (insn, 6, 10), info);
+		      fput_fp_reg_r (GET_FIELD (insn, 6, 10), info);
 		  else
-		      fput_reg (GET_FIELD (insn, 6, 10), info);
+		      fput_fp_reg (GET_FIELD (insn, 6, 10), info);
 		  break;
 		case 't':
 		  fput_reg (GET_FIELD (insn, 27, 31), info);
 		  break;
 		case 'v':
                   if (GET_FIELD (insn, 25, 25))
-		      fput_reg_r (GET_FIELD (insn, 27, 31), info);
+		      fput_fp_reg_r (GET_FIELD (insn, 27, 31), info);
 		  else
-		      fput_reg (GET_FIELD (insn, 27, 31), info);
+		      fput_fp_reg (GET_FIELD (insn, 27, 31), info);
+		  break;
+		case 'y':
+		  fput_fp_reg (GET_FIELD (insn, 27, 31), info);
 		  break;
 		case '4':
-		  fput_creg (GET_FIELD (insn, 6, 10), info);
+		  fput_fp_reg (GET_FIELD (insn, 6, 10), info);
 		  break;
 		case '6':
-		  fput_reg (GET_FIELD (insn, 11, 15), info);
+		  fput_fp_reg (GET_FIELD (insn, 11, 15), info);
 		  break;
 		case '7':
-		  fput_reg (GET_FIELD (insn, 27, 31), info);
+		  fput_fp_reg (GET_FIELD (insn, 27, 31), info);
 		  break;
 		case '8':
-		  fput_reg (GET_FIELD (insn, 16, 20), info);
+		  fput_fp_reg (GET_FIELD (insn, 16, 20), info);
 		  break;
 		case '9':
-		  fput_reg (GET_FIELD (insn, 21, 25), info);
+		  fput_fp_reg (GET_FIELD (insn, 21, 25), info);
 		  break;
 		case '5':
 		  fput_const (extract_5_load (insn), info);
@@ -608,16 +622,16 @@ print_insn_hppa (memaddr, info)
 		  break;
 		case 'J':
                   if (GET_FIELD (insn, 24, 24))
-		      fput_reg_r (GET_FIELD (insn, 6, 10), info);
+		      fput_fp_reg_r (GET_FIELD (insn, 6, 10), info);
 		  else
-		      fput_reg (GET_FIELD (insn, 6, 10), info);
+		      fput_fp_reg (GET_FIELD (insn, 6, 10), info);
 		      
 		  break;
 		case 'K':
                   if (GET_FIELD (insn, 19, 19))
-		      fput_reg_r (GET_FIELD (insn, 11, 15), info);
+		      fput_fp_reg_r (GET_FIELD (insn, 11, 15), info);
 		  else
-		      fput_reg (GET_FIELD (insn, 11, 15), info);
+		      fput_fp_reg (GET_FIELD (insn, 11, 15), info);
 		  break;
 		case 'M':
 		  fputs_filtered (float_comp_names[GET_FIELD (insn, 27, 31)],
