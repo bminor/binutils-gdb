@@ -194,24 +194,22 @@ DEFUN (do_relocs_for, (idx),
 	  reloc_ptr_vector[i] = to;
 	  to->howto = (reloc_howto_type *) (from->fx_r_type);
 
-	  /* We can't represent complicated things in a reloc yet */
-	  /*	if (from->fx_addsy == 0 ||
-				from->fx_subsy != 0) abort();
-				*/
+#if 0	  /* We can't represent complicated things in a reloc yet */
+	  if (from->fx_addsy == 0 || from->fx_subsy != 0) abort();
+#endif
+
 	  s = &(from->fx_addsy->sy_symbol.sy);
 	  to->address = ((char *) (from->fx_frag->fr_address +
 				   from->fx_where))
 	    - ((char *) (&(from->fx_frag->fr_literal)));
 	  to->addend = from->fx_offset;
-	  /* If we know the symbol which we want to relocate to, turn this
-			       reloaction into a section relative.
-			
-			       If this relocation is pcrelative, and we know the
-			       destination, we still want to keep the relocation - since
-			       the linker might relax some of the bytes, but it stops
-			       being pc relative and turns into an absolute relocation.
-			
-			       */
+	  /* If we know the symbol which we want to relocate to, turn
+	     this reloaction into a section relative.
+
+	     If this relocation is pcrelative, and we know the
+	     destination, we still want to keep the relocation - since
+	     the linker might relax some of the bytes, but it stops
+	     being pc relative and turns into an absolute relocation. */
 	  if (s)
 	    {
 	      if ((s->flags & BSF_UNDEFINED) == 0)
