@@ -1448,6 +1448,9 @@ bpstat_what (bs)
     /* We hit the through_sigtramp breakpoint.  */
     through_sig,
 
+    /* We hit the shared library event breakpoint.  */
+    shlib_event,
+
     /* This is just used to count how many enums there are.  */
     class_last
     };
@@ -1455,15 +1458,16 @@ bpstat_what (bs)
   /* Here is the table which drives this routine.  So that we can
      format it pretty, we define some abbreviations for the
      enum bpstat_what codes.  */
-#define keep_c BPSTAT_WHAT_KEEP_CHECKING
-#define stop_s BPSTAT_WHAT_STOP_SILENT
-#define stop_n BPSTAT_WHAT_STOP_NOISY
-#define single BPSTAT_WHAT_SINGLE
-#define setlr BPSTAT_WHAT_SET_LONGJMP_RESUME
-#define clrlr BPSTAT_WHAT_CLEAR_LONGJMP_RESUME
-#define clrlrs BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE
+#define kc BPSTAT_WHAT_KEEP_CHECKING
+#define ss BPSTAT_WHAT_STOP_SILENT
+#define sn BPSTAT_WHAT_STOP_NOISY
+#define sgl BPSTAT_WHAT_SINGLE
+#define slr BPSTAT_WHAT_SET_LONGJMP_RESUME
+#define clr BPSTAT_WHAT_CLEAR_LONGJMP_RESUME
+#define clrs BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE
 #define sr BPSTAT_WHAT_STEP_RESUME
 #define ts BPSTAT_WHAT_THROUGH_SIGTRAMP
+#define shl BPSTAT_WHAT_CHECK_SHLIBS
 
 /* "Can't happen."  Might want to print an error message.
    abort() is not out of the question, but chances are GDB is just
@@ -1488,29 +1492,31 @@ bpstat_what (bs)
     table[(int)class_last][(int)BPSTAT_WHAT_LAST] =
       {
 	/*                              old action */
-	/*       keep_c stop_s stop_n single  setlr   clrlr   clrlrs  sr  ts
+	/*       kc   ss   sn   sgl   slr  clr   clrs  sr   ts  shl
 	 */
-/*no_effect*/	{keep_c,stop_s,stop_n,single, setlr , clrlr , clrlrs, sr, ts},
-/*wp_silent*/	{stop_s,stop_s,stop_n,stop_s, stop_s, stop_s, stop_s, sr, ts},
-/*wp_noisy*/    {stop_n,stop_n,stop_n,stop_n, stop_n, stop_n, stop_n, sr, ts},
-/*bp_nostop*/	{single,stop_s,stop_n,single, setlr , clrlrs, clrlrs, sr, ts},
-/*bp_silent*/	{stop_s,stop_s,stop_n,stop_s, stop_s, stop_s, stop_s, sr, ts},
-/*bp_noisy*/    {stop_n,stop_n,stop_n,stop_n, stop_n, stop_n, stop_n, sr, ts},
-/*long_jump*/	{setlr ,stop_s,stop_n,setlr , err   , err   , err   , sr, ts},
-/*long_resume*/	{clrlr ,stop_s,stop_n,clrlrs, err   , err   , err   , sr, ts},
-/*step_resume*/	{sr    ,sr    ,sr    ,sr    , sr    , sr    , sr    , sr, ts},
-/*through_sig*/ {ts    ,ts    ,ts    ,ts    , ts    , ts    , ts    , ts, ts}
+/*no_effect*/	{kc,  ss,  sn,  sgl,  slr, clr,  clrs, sr,  ts, shl},
+/*wp_silent*/	{ss,  ss,  sn,  ss,   ss,  ss,   ss,   sr,  ts, shl},
+/*wp_noisy*/    {sn,  sn,  sn,  sn,   sn,  sn,   sn,   sr,  ts, shl},
+/*bp_nostop*/	{sgl, ss,  sn,  sgl,  slr, clrs, clrs, sr,  ts, shl},
+/*bp_silent*/	{ss,  ss,  sn,  ss,   ss,  ss,   ss,   sr,  ts, shl},
+/*bp_noisy*/    {sn,  sn,  sn,  sn,   sn,  sn,   sn,   sr,  ts, shl},
+/*long_jump*/	{slr, ss,  sn,  slr,  err, err,  err,  sr,  ts, shl},
+/*long_resume*/	{clr, ss,  sn,  clrs, err, err,  err,  sr,  ts, shl},
+/*step_resume*/	{sr,  sr,  sr,  sr,   sr,  sr,   sr,   sr,  ts, shl},
+/*through_sig*/ {ts,  ts,  ts,  ts,   ts,  ts,   ts,   ts,  ts, shl},
+/*shlib*/       {shl, shl, shl, shl,  shl, shl,  shl,  shl, ts, shl}
 	      };
-#undef keep_c
-#undef stop_s
-#undef stop_n
-#undef single
-#undef setlr
-#undef clrlr
-#undef clrlrs
+#undef kc
+#undef ss
+#undef sn
+#undef sgl
+#undef slr
+#undef clr
+#undef clrs
 #undef err
 #undef sr
 #undef ts
+#undef shl
   enum bpstat_what_main_action current_action = BPSTAT_WHAT_KEEP_CHECKING;
   struct bpstat_what retval;
 
@@ -1575,7 +1581,9 @@ bpstat_what (bs)
 	case bp_watchpoint_scope:
 	  bs_class = bp_nostop;
 	  break;
-
+	case bp_shlib_event:
+	  bs_class = shlib_event;
+	  break;
 	case bp_call_dummy:
 	  /* Make sure the action is stop (silent or noisy), so infrun.c
 	     pops the dummy frame.  */
@@ -1622,7 +1630,9 @@ breakpoint_1 (bnum, allflag)
 			      "hw watchpoint", "read watchpoint",
 			      "acc watchpoint", "longjmp",
 			      "longjmp resume", "step resume",
-			      "watchpoint scope", "call dummy" };
+			      "sigtramp",
+			      "watchpoint scope", "call dummy",
+			      "shlib events" };
   static char *bpdisps[] = {"del", "dis", "keep"};
   static char bpenables[] = "ny";
   char wrap_indent[80];
@@ -1700,6 +1710,7 @@ breakpoint_1 (bnum, allflag)
 	  case bp_through_sigtramp:
 	  case bp_watchpoint_scope:
 	  case bp_call_dummy:
+	  case bp_shlib_event:
 	    if (addressprint)
 	      {
 	        annotate_field (4);
@@ -1951,13 +1962,14 @@ set_raw_breakpoint (sal)
   return b;
 }
 
+static int internal_breakpoint_number = -1;
+
 static void
 create_longjmp_breakpoint (func_name)
      char *func_name;
 {
   struct symtab_and_line sal;
   struct breakpoint *b;
-  static int internal_breakpoint_number = -1;
 
   if (func_name != NULL)
     {
@@ -2017,6 +2029,34 @@ disable_longjmp_breakpoint()
 	check_duplicates (b->address);
       }
 }
+
+#ifdef SOLIB_ADD
+void
+remove_solib_event_breakpoints ()
+{
+  register struct breakpoint *b;
+
+  ALL_BREAKPOINTS (b)
+    if (b->type == bp_shlib_event)
+      delete_breakpoint (b);
+}
+
+void
+create_solib_event_breakpoint (address)
+     CORE_ADDR address;
+{
+  struct breakpoint *b;
+  struct symtab_and_line sal;
+
+  sal.pc = address;
+  sal.symtab = NULL;
+  sal.line = 0;
+  b = set_raw_breakpoint (sal);
+  b->number = internal_breakpoint_number--;
+  b->disposition = donttouch;
+  b->type = bp_shlib_event;
+}
+#endif
 
 int
 hw_breakpoint_used_count()
@@ -3392,6 +3432,11 @@ breakpoint_re_set_one (bint)
     case bp_watchpoint_scope:
     case bp_call_dummy:
       delete_breakpoint (b);
+      break;
+
+    /* This breakpoint is special, it's set up when the inferior
+       starts and we really don't want to touch it.  */
+    case bp_shlib_event:
       break;
     }
 

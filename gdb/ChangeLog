@@ -1,3 +1,9 @@
+Wed Mar  6 09:34:11 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* From Peter Schauer:
+	* breakpoint.c (internal_breakpoint_number): Move to file scope.
+	(create_solib_event_breakpoint): Use an internal breakpoint number.
+
 Wed Mar  6 00:32:44 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* valarith.c (value_in): Change builtin_type_chill_bool to
