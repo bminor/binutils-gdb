@@ -1,4 +1,9 @@
-2005-01-25  Jan Beulich  <jbeulich@novell.com>
+2005-01-27  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/nop_x.[ds]: New.
+	* gas/ia64/ia64.exp: Run new test.
+
+2005-01-27  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/ia64/dv-waw-err.l: Don't expect ar112 move warning to refer to
 	M-unit.

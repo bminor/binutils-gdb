@@ -1,4 +1,8 @@
-2005-01-25  Jan Beulich  <jbeulich@novell.com>
+2005-01-27  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (emit_one_bundle): Change "?imbf??" to "?ibmfxx".
+
+2005-01-27  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.c (emit_one_bundle): Add late resolution of move
 	to/from application registers dynamic insns.

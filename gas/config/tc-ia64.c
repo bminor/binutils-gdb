@@ -6387,7 +6387,7 @@ emit_one_bundle ()
 	  else
 	    as_fatal ("emit_one_bundle: unexpected dynamic op");
 
-	  sprintf (mnemonic, "%s.%c", idesc->name, "?imbf??"[insn_unit]);
+	  sprintf (mnemonic, "%s.%c", idesc->name, "?imbfxx"[insn_unit]);
 	  opnd1 = idesc->operands[0];
 	  opnd2 = idesc->operands[1];
 	  ia64_free_opcode (idesc);
