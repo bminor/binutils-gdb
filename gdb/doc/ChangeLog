@@ -1,3 +1,7 @@
+Mon May 24 09:00:33 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Stabs Format):  Misc fixes.
+
 Sat May 22 10:40:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Constants):  Allow an `e' constant to be non-enum.

@@ -195,8 +195,7 @@ deal more complex.
 The overall format is of the @code{"@var{string}"} field is:
 
 @example
-"@var{name}@r{[}:@var{symbol_descriptor}@r{]}
-     @r{[}@var{type_number}@r{[}=@var{type_descriptor} @r{@dots{}]]}"
+"@var{name}:@var{symbol-descriptor} @var{type-information}"
 @end example
 
 @var{name} is the name of the symbol represented by the stab.
@@ -204,7 +203,9 @@ The overall format is of the @code{"@var{string}"} field is:
 object.  For example, @samp{:t10=*2} defines type 10 as a pointer to
 type 2, but does not give the type a name.  Omitting the @var{name}
 field is supported by AIX dbx and GDB after about version 4.8, but not
-other debuggers.
+other debuggers.  GCC sometimes uses a single space as the name instead
+of omitting the name altogether; apparently that is supported by most
+debuggers. 
 
 The @var{symbol_descriptor} following the @samp{:} is an alphabetic
 character that tells more specifically what kind of symbol the stab
