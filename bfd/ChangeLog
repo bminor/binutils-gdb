@@ -1,3 +1,8 @@
+Mon Oct 19 16:57:05 1998  Felix Lee  <flee@cygnus.com>
+
+	* acinclude.m4: undo previous gettext change
+	* aclocal.m4: rebuild with right version of aclocal.
+
 Mon Oct 19 01:47:21 1998  Felix Lee  <flee@cygnus.com>
 
 	* acinclude.m4, aclocal.m4: move gettext-related fragments from
