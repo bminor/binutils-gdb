@@ -74,6 +74,7 @@ BUILD_WINDRES = @BUILD_WINDRES@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
+CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DATADIRNAME = @DATADIRNAME@
@@ -87,6 +88,7 @@ GCJ = @GCJ@
 GCJFLAGS = @GCJFLAGS@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
+GNATBIND = @GNATBIND@
 GT_NO = @GT_NO@
 GT_YES = @GT_YES@
 HDEFINES = @HDEFINES@
@@ -95,6 +97,7 @@ INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
 INTLOBJS = @INTLOBJS@
 LIBTOOL = @LIBTOOL@
+LN = @LN@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -114,7 +117,15 @@ USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 bfdincludedir = @bfdincludedir@
 bfdlibdir = @bfdlibdir@
+build_noncanonical = @build_noncanonical@
+build_subdir = @build_subdir@
+do_compare = @do_compare@
+host_noncanonical = @host_noncanonical@
+host_subdir = @host_subdir@
 l = @l@
+ncn_cv_ = @ncn_cv_@
+target_noncanonical = @target_noncanonical@
+target_subdir = @target_subdir@
 
 INTLLIBS = @INTLLIBS@
 
@@ -1205,9 +1216,9 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/or32.h $(INCDIR)/elf/pj.h $(INCDIR)/elf/ppc.h \
   $(INCDIR)/elf/ppc64.h $(INCDIR)/elf/s390.h $(INCDIR)/elf/sh.h \
   $(INCDIR)/elf/sparc.h $(INCDIR)/elf/v850.h $(INCDIR)/elf/vax.h \
-  $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/xstormy16.h $(INCDIR)/elf/iq2000.h \
-  $(INCDIR)/elf/xtensa.h $(INCDIR)/aout/ar.h bucomm.h \
-  config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/xstormy16.h $(INCDIR)/elf/crx.h \
+  $(INCDIR)/elf/iq2000.h $(INCDIR)/elf/xtensa.h $(INCDIR)/aout/ar.h \
+  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h unwind-ia64.h
 rename.o: rename.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
