@@ -40,8 +40,8 @@ RUNTEST = runtest
 RUNTESTFLAGS = 
 
 CC = ` \
-  if [ -f $${rootme}../../gcc/Makefile ] ; then \
-    echo $${rootme}../../gcc/xgcc -B$${rootme}../../gcc/; \
+  if [ -f $${rootme}/../../gcc/Makefile ] ; then \
+    echo $${rootme}/../../gcc/xgcc -B$${rootme}../../gcc/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo cc; \
@@ -51,8 +51,8 @@ CC = ` \
   fi`
 
 CHILL = ` \
-  if [ -f $${rootme}../../gcc/Makefile ] ; then \
-    echo $${rootme}../../gcc/xgcc -B$${rootme}../../gcc/ -L$${rootme}../../chillrt/; \
+  if [ -f $${rootme}/../../gcc/Makefile ] ; then \
+    echo $${rootme}/../../gcc/xgcc -B$${rootme}../../gcc/ -L$${rootme}../../chillrt/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo gcc; \
@@ -62,8 +62,8 @@ CHILL = ` \
   fi`
 
 CXX = ` \
-  if [ -f $${rootme}../../gcc/Makefile ] ; then \
-    echo $${rootme}../../gcc/xgcc -B$${rootme}../../gcc/; \
+  if [ -f $${rootme}/../../gcc/Makefile ] ; then \
+    echo $${rootme}/../../gcc/xgcc -B$${rootme}../../gcc/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo gcc; \
@@ -72,9 +72,12 @@ CXX = ` \
     fi; \
   fi`
 
-GDB = `if [ -f $${rootme}../gdb ] ; \
-	then echo $${rootme}../gdb ; \
-	else echo gdb; fi`
+GDB = ` \
+  if [ -f $${rootme}/../gdb ] ; then \
+    echo $${rootme}/../gdb ; \
+  else echo gdb; \
+  fi`
+
 GDBFLAGS =
 
 EXPECT = `if [ -f $${rootme}../../expect/expect ] ; \
@@ -146,7 +149,8 @@ site.exp: ./config.status Makefile
 
 installcheck:
 check: site.exp all
-	$(RUNTEST) $(RUNTESTFLAGS) --tool gdb GDB=$(GDB) --srcdir $(srcdir) --target $(target_canonical)
+	rootme=`pwd`; export rootme; \
+	$(RUNTEST) $(RUNTESTFLAGS) --tool gdb GDB=$(GDB) --srcdir $(srcdir)
 
 subdir_do: force
 	@for i in $(DODIRS); do \
