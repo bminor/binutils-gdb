@@ -168,13 +168,14 @@ static boolean mips_elf_next_lo16_addend
 static bfd_reloc_status_type mips_elf_calculate_relocation
   PARAMS ((bfd *, bfd *, asection *, struct bfd_link_info *,
 	   const Elf_Internal_Rela *, bfd_vma, reloc_howto_type *,
-	   Elf_Internal_Sym *, asection **, bfd_vma *, const char **));
+	   Elf_Internal_Sym *, asection **, bfd_vma *, const char **,
+	   boolean *));
 static bfd_vma mips_elf_obtain_contents
   PARAMS ((reloc_howto_type *, const Elf_Internal_Rela *, bfd *, bfd_byte *));
-static void mips_elf_perform_relocation
+static boolean mips_elf_perform_relocation
   PARAMS ((struct bfd_link_info *, reloc_howto_type *, 
 	   const Elf_Internal_Rela *, bfd_vma,
-	   bfd *, bfd_byte *));
+	   bfd *, asection *, bfd_byte *, boolean));
 static boolean mips_elf_assign_gp PARAMS ((bfd *, bfd_vma *));
 static boolean mips_elf_sort_hash_table_f 
   PARAMS ((struct mips_elf_link_hash_entry *, PTR));
@@ -192,6 +193,8 @@ static unsigned int mips_elf_create_dynamic_relocation
 	   long, bfd_vma, asection *));
 static void mips_elf_allocate_dynamic_relocations 
   PARAMS ((bfd *, unsigned int));
+static boolean mips_elf_stub_section_p 
+  PARAMS ((bfd *, asection *));
 
 /* The level of IRIX compatibility we're striving for.  */
 
@@ -5662,6 +5665,8 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, dynindx,
    RELOCATION; RELOCATION->R_ADDEND is ignored.
 
    The result of the relocation calculation is stored in VALUEP.
+   REQUIRE_JALXP indicates whether or not the opcode used with this
+   relocation must be JALX.
 
    This function returns bfd_reloc_continue if the caller need take no
    further action regarding this relocation, bfd_reloc_notsupported if
@@ -5679,7 +5684,8 @@ mips_elf_calculate_relocation (abfd,
 			       local_syms,
 			       local_sections,
 			       valuep,
-			       namep) 
+			       namep,
+			       require_jalxp) 
      bfd *abfd;
      bfd *input_bfd;
      asection *input_section;
@@ -5691,6 +5697,7 @@ mips_elf_calculate_relocation (abfd,
      asection **local_sections;
      bfd_vma *valuep;
      const char **namep;
+     boolean *require_jalxp;
 {
   /* The eventual value we will return.  */
   bfd_vma value;
@@ -5725,6 +5732,8 @@ mips_elf_calculate_relocation (abfd,
   /* True if overflow occurred during the calculation of the
      relocation value.  */
   boolean overflowed_p;
+  /* True if this relocation refers to a MIPS16 function.  */
+  boolean target_is_16_bit_code_p = false;
 
   /* Parse the relocation.  */
   r_symndx = ELF32_R_SYM (relocation->r_info);
@@ -5773,6 +5782,8 @@ mips_elf_calculate_relocation (abfd,
 						sym->st_name);
       if (*namep == '\0')
 	*namep = bfd_section_name (input_bfd, sec);
+
+      target_is_16_bit_code_p = (sym->st_other == STO_MIPS16);
     }
   else
     {
@@ -5821,7 +5832,73 @@ mips_elf_calculate_relocation (abfd,
 	     input_section, relocation->r_offset);
 	  return bfd_reloc_undefined;
 	}
+
+      target_is_16_bit_code_p = (h->root.other == STO_MIPS16);
     }
+  
+  /* If this is a 32-bit call to a 16-bit function with a stub, we
+     need to redirect the call to the stub, unless we're already *in*
+     a stub.  */
+  if (r_type != R_MIPS16_26 && !info->relocateable
+      && ((h != NULL && h->fn_stub != NULL)
+	  || (local_p && elf_tdata (input_bfd)->local_stubs != NULL
+	      && elf_tdata (input_bfd)->local_stubs[r_symndx] != NULL))
+      && !mips_elf_stub_section_p (input_bfd, input_section))
+    {
+      /* This is a 32-bit call to a 16-bit function.  We should
+	 have already noticed that we were going to need the
+	 stub.  */
+      if (local_p)
+	sec = elf_tdata (input_bfd)->local_stubs[r_symndx];
+      else
+	{
+	  BFD_ASSERT (h->need_fn_stub);
+	  sec = h->fn_stub;
+	}
+
+      symbol = sec->output_section->vma + sec->output_offset;
+    }
+  /* If this is a 16-bit call to a 32-bit function with a stub, we
+     need to redirect the call to the stub.  */
+  else if (r_type == R_MIPS16_26 && !info->relocateable
+	   && h != NULL 
+	   && (h->call_stub != NULL || h->call_fp_stub != NULL)
+	   && !target_is_16_bit_code_p)
+    {
+      /* If both call_stub and call_fp_stub are defined, we can figure
+	 out which one to use by seeing which one appears in the input
+	 file.  */
+      if (h->call_stub != NULL && h->call_fp_stub != NULL)
+	{
+	  asection *o;
+
+	  sec = NULL;
+	  for (o = input_bfd->sections; o != NULL; o = o->next)
+	    {
+	      if (strncmp (bfd_get_section_name (input_bfd, o),
+			   CALL_FP_STUB, sizeof CALL_FP_STUB - 1) == 0)
+		{
+		  sec = h->call_fp_stub;
+		  break;
+		}
+	    }
+	  if (sec == NULL)
+	    sec = h->call_stub;
+	}
+      else if (h->call_stub != NULL)
+	sec = h->call_stub;
+      else
+	sec = h->call_fp_stub;
+
+      BFD_ASSERT (sec->_raw_size > 0);
+      symbol = sec->output_section->vma + sec->output_offset;
+    }
+
+  /* Calls from 16-bit code to 32-bit code and vice versa require the
+     special jalx instruction.  */
+  if (!info->relocateable
+      && ((r_type == R_MIPS16_26) != target_is_16_bit_code_p))
+    *require_jalxp = true;
 
   /* If we haven't already determined the GOT offset, or the GP value,
      and we're going to need it, get it now.  */
@@ -6114,22 +6191,28 @@ mips_elf_obtain_contents (howto, relocation, input_bfd, contents)
 /* It has been determined that the result of the RELOCATION is the
    VALUE.  Use HOWTO to place VALUE into the output file at the
    appropriate position.  The SECTION is the section to which the
-   relocatin applies.
+   relocation applies.  If REQUIRE_JALX is true, then the opcode used
+   for the relocation must be either JAL or JALX, and it is
+   unconditionally converted to JALX.
 
    Returns false if anything goes wrong.  */
 
-static void
+static boolean
 mips_elf_perform_relocation (info, howto, relocation, value,
-			     input_bfd, contents)
+			     input_bfd, input_section, 
+			     contents, require_jalx)
      struct bfd_link_info *info;
      reloc_howto_type *howto;
      const Elf_Internal_Rela *relocation;
      bfd_vma value;
      bfd *input_bfd;
+     asection *input_section;
      bfd_byte *contents;
+     boolean require_jalx;
 {
   bfd_vma x;
   bfd_byte *location;
+  int r_type = ELF32_R_TYPE (relocation->r_info);
 
   /* Figure out where the relocation is occurring.  */
   location = contents + relocation->r_offset;
@@ -6142,7 +6225,7 @@ mips_elf_perform_relocation (info, howto, relocation, value,
 
   /* If this is the R_MIPS16_26 relocation, we must store the
      value in a funny way.  */
-  if (ELF32_R_TYPE (relocation->r_info) == R_MIPS16_26)
+  if (r_type == R_MIPS16_26)
     {
       /* R_MIPS16_26 is used for the mips16 jal and jalx instructions.
 	 Most mips16 instructions are 16 bits, but these instructions
@@ -6210,7 +6293,7 @@ mips_elf_perform_relocation (info, howto, relocation, value,
 		 | (value & 0xffff));
       
     }
-  else if (ELF32_R_TYPE (relocation->r_info) == R_MIPS16_GPREL)
+  else if (r_type == R_MIPS16_GPREL)
     {
       /* R_MIPS16_GPREL is used for GP-relative addressing in mips16
 	 mode.  A typical instruction will have a format like this:
@@ -6239,15 +6322,64 @@ mips_elf_perform_relocation (info, howto, relocation, value,
   /* Set the field.  */
   x |= (value & howto->dst_mask);
 
+  /* If required, turn JAL into JALX.  */
+  if (require_jalx)
+    {
+      boolean ok;
+      bfd_vma opcode = x >> 26;
+      bfd_vma jalx_opcode;
+
+      /* Check to see if the opcode is already JAL or JALX.  */
+      if (r_type == R_MIPS16_26)
+	{
+	  ok = ((opcode == 0x6) || (opcode == 0x7));
+	  jalx_opcode = 0x7;
+	}
+      else
+	{
+	  ok = ((opcode == 0x3) || (opcode == 0x1d));
+	  jalx_opcode = 0x1d;
+	}
+
+      /* If the opcode is not JAL or JALX, there's a problem.  */
+      if (!ok)
+	{
+	  (*_bfd_error_handler)
+	    (_("%s: %s+0x%lx: jump to stub routine which is not jal"),
+	     bfd_get_filename (input_bfd),
+	     input_section->name,
+	     (unsigned long) relocation->r_offset);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      /* Make this the JALX opcode.  */
+      x = (x & ~(0x3f << 26)) | (jalx_opcode << 26);
+    }
+
   /* Swap the high- and low-order 16 bits on little-endian systems
      when doing a MIPS16 relocation.  */
-  if ((ELF32_R_TYPE (relocation->r_info) == R_MIPS16_GPREL
-       || ELF32_R_TYPE (relocation->r_info) == R_MIPS16_26)
+  if ((r_type == R_MIPS16_GPREL || r_type == R_MIPS16_26)
       && bfd_little_endian (input_bfd))
     x = (((x & 0xffff) << 16) | ((x & 0xffff0000) >> 16));
   
   /* Put the value into the output.  */
   bfd_put (8 * bfd_get_reloc_size (howto), input_bfd, x, location);
+  return true;
+}
+
+/* Returns true if SECTION is a MIPS16 stub section.  */
+
+static boolean
+mips_elf_stub_section_p (abfd, section)
+     bfd *abfd;
+     asection *section;
+{
+  const char *name = bfd_get_section_name (abfd, section);
+
+  return (strncmp (name, FN_STUB, sizeof FN_STUB - 1) == 0
+	  || strncmp (name, CALL_STUB, sizeof CALL_STUB - 1) == 0
+	  || strncmp (name, CALL_FP_STUB, sizeof CALL_FP_STUB - 1) == 0);
 }
 
 /* Relocate a MIPS ELF section.  */
@@ -6279,6 +6411,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       const char *name;
       bfd_vma value;
       reloc_howto_type *howto;
+      boolean require_jalx;
 
       /* Find the relocation howto for this relocation.  */
       if (ELF32_R_TYPE (rel->r_info) == R_MIPS_64
@@ -6383,7 +6516,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					     local_syms,
 					     local_sections,
 					     &value,
-					     &name))
+					     &name,
+					     &require_jalx))
 	{
 	case bfd_reloc_continue:
 	  /* There's nothing to do.  */
@@ -6476,8 +6610,10 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
 
       /* Actually perform the relocation.  */
-      mips_elf_perform_relocation (info, howto, rel, value, input_bfd, 
-				   contents);
+      if (!mips_elf_perform_relocation (info, howto, rel, value, input_bfd, 
+					input_section, contents,
+					require_jalx))
+	return false;
     }
 
   return true;

@@ -1,3 +1,12 @@
+1999-07-15  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (mips_elf_stub_section_p): New function.
+	(mips_elf_calculate_relocation): Handle MIPS16 stub functions.
+	(mips_elf_relocate_section): Adjust calling sequence for
+	mips_elf_calculate_relocation and mips_elf_perform_relocation.
+	(mips_elf_perform_relocation): Turn `jal' into `jalx' where
+	required.
+
 1999-07-15  Ian Lance Taylor  <ian@zembu.com>
 
 	* configure.in: Bump version number to 2.9.5.
