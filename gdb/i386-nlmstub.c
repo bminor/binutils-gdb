@@ -321,7 +321,7 @@ getpacket (buffer)
 	  xmitcsum += hex(ch);
 	  if ((remote_debug ) && (checksum != xmitcsum))
 	    {
-	      fprintf(stderr,"bad checksum.  My count = 0x%x, sent=0x%x. buf=%s\n",
+	      fprintf_unfiltered(gdb_stderr,"bad checksum.  My count = 0x%x, sent=0x%x. buf=%s\n",
 		      checksum,xmitcsum,buffer);
 	    }
 
@@ -413,8 +413,8 @@ debug_error (format, parm)
 {
   if (remote_debug)
     {
-      fprintf (stderr, format, parm);
-      fprintf (stderr, "\n");
+      fprintf_unfiltered (gdb_stderr, format, parm);
+      fprintf_unfiltered (gdb_stderr, "\n");
     }
 }
 
@@ -834,11 +834,11 @@ main (argc, argv)
   /* Create a screen for the debugger.  */
   console_screen = CreateScreen ("System Console", 0);
   if (DisplayScreen (console_screen) != ESUCCESS)
-    fprintf (stderr, "DisplayScreen failed\n");
+    fprintf_unfiltered (gdb_stderr, "DisplayScreen failed\n");
 
   if (argc < 4)
     {
-      fprintf (stderr,
+      fprintf_unfiltered (gdb_stderr,
 	       "Usage: load gdbserver board port program [arguments]\n");
       exit (1);
     }
@@ -853,16 +853,16 @@ main (argc, argv)
       switch (err)
 	{
 	case AIO_PORT_NOT_AVAILABLE:
-	  fprintf (stderr, "Port not available\n");
+	  fprintf_unfiltered (gdb_stderr, "Port not available\n");
 	  break;
 
 	case AIO_BOARD_NUMBER_INVALID:
 	case AIO_PORT_NUMBER_INVALID:
-	  fprintf (stderr, "No such port\n");
+	  fprintf_unfiltered (gdb_stderr, "No such port\n");
 	  break;
 
 	default:
-	  fprintf (stderr, "Could not open port: %d\n", err);
+	  fprintf_unfiltered (gdb_stderr, "Could not open port: %d\n", err);
 	  break;
 	}
 
@@ -874,7 +874,7 @@ main (argc, argv)
 			  AIO_HARDWARE_FLOW_CONTROL_OFF);
   if (err != AIO_SUCCESS)
     {
-      fprintf (stderr, "Could not configure port: %d\n", err);
+      fprintf_unfiltered (gdb_stderr, "Could not configure port: %d\n", err);
       AIOReleasePort (AIOhandle);
       exit (1);
     }
@@ -887,7 +887,7 @@ main (argc, argv)
 					   DebuggerSignature));
   if (s.DDSResourceTag == 0)
     {
-      fprintf (stderr, "AllocateResourceTag failed\n");
+      fprintf_unfiltered (gdb_stderr, "AllocateResourceTag failed\n");
       AIOReleasePort (AIOhandle);
       exit (1);
     }
@@ -897,7 +897,7 @@ main (argc, argv)
   err = RegisterDebuggerRTag (&s, AT_FIRST);
   if (err != 0)
     {
-      fprintf (stderr, "RegisterDebuggerRTag failed\n");
+      fprintf_unfiltered (gdb_stderr, "RegisterDebuggerRTag failed\n");
       AIOReleasePort (AIOhandle);
       exit (1);
     }
@@ -917,7 +917,7 @@ main (argc, argv)
      "$?#xx") sitting there.  */
   if (! putDebugChar ('+'))
     {
-      fprintf (stderr, "putDebugChar failed\n");
+      fprintf_unfiltered (gdb_stderr, "putDebugChar failed\n");
       UnRegisterDebugger (&s);
       AIOReleasePort (AIOhandle);
       exit (1);
@@ -936,7 +936,7 @@ main (argc, argv)
 		    cmdlin, LO_DEBUG);
   if (err != 0)
     {
-      fprintf (stderr, "LoadModule failed: %d\n", err);
+      fprintf_unfiltered (gdb_stderr, "LoadModule failed: %d\n", err);
       UnRegisterDebugger (&s);
       AIOReleasePort (AIOhandle);
       exit (1);
@@ -952,7 +952,7 @@ main (argc, argv)
   /* If we are woken up, print an optional error message, deregister
      ourselves and exit.  */
   if (error_message != NULL)
-    fprintf (stderr, "%s\n", error_message);
+    fprintf_unfiltered (gdb_stderr, "%s\n", error_message);
   UnRegisterDebugger (&s);
   AIOReleasePort (AIOhandle);
   exit (0);

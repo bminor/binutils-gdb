@@ -1624,7 +1624,7 @@ proc_set_exec_trap ()
   if ((fd = open (procname, O_RDWR)) < 0)
     {
       perror (procname);
-      fflush (stderr);
+      gdb_flush (gdb_stderr);
       _exit (127);
     }
   premptyset (&exitset);
@@ -1648,7 +1648,7 @@ proc_set_exec_trap ()
   if (ioctl (fd, PIOCSEXIT, &exitset) < 0)
     {
       perror (procname);
-      fflush (stderr);
+      gdb_flush (gdb_stderr);
       _exit (127);
     }
 
@@ -1657,7 +1657,7 @@ proc_set_exec_trap ()
   if (ioctl (fd, PIOCSENTRY, &entryset) < 0)
     {
       perror (procname);
-      fflush (stderr);
+      gdb_flush (gdb_stderr);
       _exit (126);
     }
 
@@ -1859,11 +1859,11 @@ procfs_attach (args, from_tty)
       exec_file = (char *) get_exec_file (0);
 
       if (exec_file)
-	printf ("Attaching to program `%s', %s\n", exec_file, target_pid_to_str (pid));
+	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file, target_pid_to_str (pid));
       else
-	printf ("Attaching to %s\n", target_pid_to_str (pid));
+	printf_unfiltered ("Attaching to %s\n", target_pid_to_str (pid));
 
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
     }
 
   do_attach (pid);
@@ -1892,9 +1892,9 @@ procfs_detach (args, from_tty)
       char *exec_file = get_exec_file (0);
       if (exec_file == 0)
 	exec_file = "";
-      printf ("Detaching from program: %s %s\n",
+      printf_unfiltered ("Detaching from program: %s %s\n",
 	      exec_file, target_pid_to_str (inferior_pid));
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
     }
   if (args)
     siggnal = atoi (args);
@@ -1924,7 +1924,7 @@ static void
 procfs_files_info (ignore)
      struct target_ops *ignore;
 {
-  printf ("\tUsing the running image of %s %s via /proc.\n",
+  printf_unfiltered ("\tUsing the running image of %s %s via /proc.\n",
 	  attach_flag? "attached": "child", target_pid_to_str (inferior_pid));
 }
 
@@ -2032,7 +2032,7 @@ do_attach (pid)
 	}
       else
 	{
-	  printf ("Ok, gdb will wait for %s to stop.\n", target_pid_to_str (pid));
+	  printf_unfiltered ("Ok, gdb will wait for %s to stop.\n", target_pid_to_str (pid));
 	}
     }
 
@@ -2109,32 +2109,32 @@ do_detach (signal)
   if (ioctl (pi->fd, PIOCSEXIT, &pi->saved_exitset) < 0)
     {
       print_sys_errmsg (pi->pathname, errno);
-      printf ("PIOCSEXIT failed.\n");
+      printf_unfiltered ("PIOCSEXIT failed.\n");
     }
   if (ioctl (pi->fd, PIOCSENTRY, &pi->saved_entryset) < 0)
     {
       print_sys_errmsg (pi->pathname, errno);
-      printf ("PIOCSENTRY failed.\n");
+      printf_unfiltered ("PIOCSENTRY failed.\n");
     }
   if (ioctl (pi->fd, PIOCSTRACE, &pi->saved_trace) < 0)
     {
       print_sys_errmsg (pi->pathname, errno);
-      printf ("PIOCSTRACE failed.\n");
+      printf_unfiltered ("PIOCSTRACE failed.\n");
     }
   if (ioctl (pi->fd, PIOCSHOLD, &pi->saved_sighold) < 0)
     {
       print_sys_errmsg (pi->pathname, errno);
-      printf ("PIOSCHOLD failed.\n");
+      printf_unfiltered ("PIOSCHOLD failed.\n");
     }
   if (ioctl (pi->fd, PIOCSFAULT, &pi->saved_fltset) < 0)
     {
       print_sys_errmsg (pi->pathname, errno);
-      printf ("PIOCSFAULT failed.\n");
+      printf_unfiltered ("PIOCSFAULT failed.\n");
     }
   if (ioctl (pi->fd, PIOCSTATUS, &pi->prstatus) < 0)
     {
       print_sys_errmsg (pi->pathname, errno);
-      printf ("PIOCSTATUS failed.\n");
+      printf_unfiltered ("PIOCSTATUS failed.\n");
     }
   else
     {
@@ -2147,7 +2147,7 @@ do_detach (signal)
 	      if (ioctl (pi->fd, PIOCCFAULT, 0))
   		{
   		  print_sys_errmsg (pi->pathname, errno);
-		  printf ("PIOCCFAULT failed.\n");
+		  printf_unfiltered ("PIOCCFAULT failed.\n");
   		}
 
 	      /* Make it run again when we close it.  */
@@ -2165,7 +2165,7 @@ do_detach (signal)
 	      if (result)
 		{
 		  print_sys_errmsg (pi->pathname, errno);
-		  printf ("PIOCSRLC or PIOCSET failed.\n");
+		  printf_unfiltered ("PIOCSRLC or PIOCSET failed.\n");
 		}
 	    }
 	}
@@ -2409,7 +2409,7 @@ wait_again:
 
   if (rtnval == -1)		/* No more children to wait for */
     {
-      fprintf (stderr, "Child process unexpectedly missing.\n");
+      fprintf_unfiltered (gdb_stderr, "Child process unexpectedly missing.\n");
       *statloc = 42;	/* Claim it exited with signal 42 */
       return rtnval;
     }
@@ -2593,7 +2593,7 @@ procfs_resume (pid, step, signo)
 	      {
 		if (ioctl (procinfo->fd, PIOCSTATUS, &procinfo->prstatus) < 0)
 		  {
-		    fprintf(stderr, "PIOCSTATUS failed, errno=%d\n", errno);
+		    fprintf_unfiltered(gdb_stderr, "PIOCSTATUS failed, errno=%d\n", errno);
 		  }
 		print_sys_errmsg (procinfo->pathname, errno);
 		error ("PIOCRUN failed");

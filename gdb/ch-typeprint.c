@@ -37,13 +37,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <errno.h>
 
 static void
-chill_type_print_base PARAMS ((struct type *, FILE *, int, int));
+chill_type_print_base PARAMS ((struct type *, GDB_FILE *, int, int));
 
 void
 chill_print_type (type, varstring, stream, show, level)
      struct type *type;
      char *varstring;
-     FILE *stream;
+     GDB_FILE *stream;
      int show;
      int level;
 {
@@ -70,7 +70,7 @@ chill_print_type (type, varstring, stream, show, level)
 static void
 chill_type_print_base (type, stream, show, level)
      struct type *type;
-     FILE *stream;
+     GDB_FILE *stream;
      int show;
      int level;
 {

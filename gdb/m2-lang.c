@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 static void
 emit_char (c, stream, quoter)
      register int c;
-     FILE *stream;
+     GDB_FILE *stream;
      int quoter;
 {
 
@@ -87,7 +87,7 @@ emit_char (c, stream, quoter)
 static void
 m2_printchar (c, stream)
      int c;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   fputs_filtered ("'", stream);
   emit_char (c, stream, '\'');
@@ -103,7 +103,7 @@ m2_printchar (c, stream)
 
 static void
 m2_printstr (stream, string, length, force_ellipses)
-     FILE *stream;
+     GDB_FILE *stream;
      char *string;
      unsigned int length;
      int force_ellipses;
@@ -118,7 +118,7 @@ m2_printstr (stream, string, length, force_ellipses)
 
   if (length == 0)
     {
-      fputs_filtered ("\"\"", stdout);
+      fputs_filtered ("\"\"", gdb_stdout);
       return;
     }
 

@@ -275,56 +275,56 @@ print_387_status (status, ep)
   if (status != 0) 
     {
       if (bothstatus)
-	printf ("u: ");
+	printf_unfiltered ("u: ");
       print_387_status_word (status);
     }
   
   if (ep->status != 0) 
     {
       if (bothstatus)
-	printf ("e: ");
+	printf_unfiltered ("e: ");
       print_387_status_word (ep->status);
     }
   
   print_387_control_word (ep->control);
-  printf ("last exception: ");
-  printf ("opcode %s; ", local_hex_string(ep->opcode));
-  printf ("pc %s:", local_hex_string(ep->code_seg));
-  printf ("%s; ", local_hex_string(ep->eip));
-  printf ("operand %s", local_hex_string(ep->operand_seg));
-  printf (":%s\n", local_hex_string(ep->operand));
+  printf_unfiltered ("last exception: ");
+  printf_unfiltered ("opcode %s; ", local_hex_string(ep->opcode));
+  printf_unfiltered ("pc %s:", local_hex_string(ep->code_seg));
+  printf_unfiltered ("%s; ", local_hex_string(ep->eip));
+  printf_unfiltered ("operand %s", local_hex_string(ep->operand_seg));
+  printf_unfiltered (":%s\n", local_hex_string(ep->operand));
   
   top = (ep->status >> 11) & 7;
   
-  printf ("regno  tag  msb              lsb  value\n");
+  printf_unfiltered ("regno  tag  msb              lsb  value\n");
   for (fpreg = 7; fpreg >= 0; fpreg--) 
     {
       double val;
       
-      printf ("%s %d: ", fpreg == top ? "=>" : "  ", fpreg);
+      printf_unfiltered ("%s %d: ", fpreg == top ? "=>" : "  ", fpreg);
       
       switch ((ep->tag >> (fpreg * 2)) & 3) 
 	{
-	case 0: printf ("valid "); break;
-	case 1: printf ("zero  "); break;
-	case 2: printf ("trap  "); break;
-	case 3: printf ("empty "); break;
+	case 0: printf_unfiltered ("valid "); break;
+	case 1: printf_unfiltered ("zero  "); break;
+	case 2: printf_unfiltered ("trap  "); break;
+	case 3: printf_unfiltered ("empty "); break;
 	}
       for (i = 9; i >= 0; i--)
-	printf ("%02x", ep->regs[fpreg][i]);
+	printf_unfiltered ("%02x", ep->regs[fpreg][i]);
       
       ieee_extended_to_double (&ext_format_i387, (char *)ep->regs[fpreg],
 			       &val);
-      printf ("  %g\n", val);
+      printf_unfiltered ("  %g\n", val);
     }
   if (ep->r0)
-    printf ("warning: reserved0 is %s\n", local_hex_string(ep->r0));
+    printf_unfiltered ("warning: reserved0 is %s\n", local_hex_string(ep->r0));
   if (ep->r1)
-    printf ("warning: reserved1 is %s\n", local_hex_string(ep->r1));
+    printf_unfiltered ("warning: reserved1 is %s\n", local_hex_string(ep->r1));
   if (ep->r2)
-    printf ("warning: reserved2 is %s\n", local_hex_string(ep->r2));
+    printf_unfiltered ("warning: reserved2 is %s\n", local_hex_string(ep->r2));
   if (ep->r3)
-    printf ("warning: reserved3 is %s\n", local_hex_string(ep->r3));
+    printf_unfiltered ("warning: reserved3 is %s\n", local_hex_string(ep->r3));
 }
 	
 /*

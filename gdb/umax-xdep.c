@@ -91,9 +91,9 @@ core_file_command (filename, from_tty)
 	reg_offset = 0;
 
 	memcpy (&core_aouthdr, &u.pt_aouthdr, sizeof (AOUTHDR));
-	printf ("Core file is from \"%s\".\n", u.pt_comm);
+	printf_unfiltered ("Core file is from \"%s\".\n", u.pt_comm);
 	if (u.pt_signal > 0)
-	  printf ("Program terminated with signal %d, %s.\n",
+	  printf_unfiltered ("Program terminated with signal %d, %s.\n",
 		  u.pt_signal, safe_strsignal (u.pt_signal));
 
 	/* Read the register values out of the core file and store
@@ -130,5 +130,5 @@ core_file_command (filename, from_tty)
       validate_files ();
     }
   else if (from_tty)
-    printf ("No core file now.\n");
+    printf_unfiltered ("No core file now.\n");
 }

@@ -360,7 +360,7 @@ show_values (num_exp, from_tty)
     {
       val = access_value_history (i);
       printf_filtered ("$%d = ", i);
-      value_print (val, stdout, 0, Val_pretty_default);
+      value_print (val, gdb_stdout, 0, Val_pretty_default);
       printf_filtered ("\n");
     }
 
@@ -512,11 +512,11 @@ show_convenience (ignore, from_tty)
 	  varseen = 1;
 	}
       printf_filtered ("$%s = ", var->name);
-      value_print (var->value, stdout, 0, Val_pretty_default);
+      value_print (var->value, gdb_stdout, 0, Val_pretty_default);
       printf_filtered ("\n");
     }
   if (!varseen)
-    printf ("No debugger convenience variables now defined.\n\
+    printf_unfiltered ("No debugger convenience variables now defined.\n\
 Convenience variables have names starting with \"$\";\n\
 use \"set\" as in \"set $foo = 5\" to define them.\n");
 }

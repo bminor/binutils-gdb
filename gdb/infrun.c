@@ -335,7 +335,6 @@ The same program may be running in another process.");
 static CORE_ADDR prev_pc;
 static CORE_ADDR prev_sp;
 static CORE_ADDR prev_func_start;
-static CORE_ADDR prev_func_end;
 static char *prev_func_name;
 
 
@@ -393,7 +392,6 @@ wait_for_inferior ()
   int random_signal;
   CORE_ADDR stop_sp = 0;
   CORE_ADDR stop_func_start;
-  CORE_ADDR stop_func_end;
   char *stop_func_name;
   CORE_ADDR prologue_pc = 0, tmp;
   struct symtab_and_line sal;
@@ -441,7 +439,7 @@ wait_for_inferior ()
 	  else
 	    if (!batch_mode())
 	      printf_filtered ("\nProgram exited normally.\n");
-	  fflush (stdout);
+	  gdb_flush (gdb_stdout);
 	  target_mourn_inferior ();
 #ifdef NO_SINGLE_STEP
 	  one_stepped = 0;
@@ -471,7 +469,7 @@ wait_for_inferior ()
 	  printf_filtered (", %s\n", safe_strsignal (stop_signal));
 #endif
 	  printf_filtered ("The program no longer exists.\n");
-	  fflush (stdout);
+	  gdb_flush (gdb_stdout);
 #ifdef NO_SINGLE_STEP
 	  one_stepped = 0;
 #endif
@@ -520,7 +518,7 @@ wait_for_inferior ()
 
 	  if (!in_thread_list (pid))
 	    {
-	      fprintf (stderr, "[New %s]\n", target_pid_to_str (pid));
+	      fprintf_unfiltered (gdb_stderr, "[New %s]\n", target_pid_to_str (pid));
 	      add_thread (pid);
 
 	      target_resume (-1, 0, 0);
@@ -542,7 +540,7 @@ wait_for_inferior ()
 		    printf_filtered ("%s (%d)", signame, stop_signal);
 		  printf_filtered (", %s\n", safe_strsignal (stop_signal));
 
-		  fflush (stdout);
+		  gdb_flush (gdb_stdout);
 		}
 
 	      if (stop_signal == SIGTRAP
@@ -604,12 +602,11 @@ switch_thread:
       stop_frame_address = FRAME_FP (get_current_frame ());
       stop_sp = read_sp ();
       stop_func_start = 0;
-      stop_func_end = 0;
       stop_func_name = 0;
       /* Don't care about return value; stop_func_start and stop_func_name
 	 will both be 0 if it doesn't work.  */
       find_pc_partial_function (stop_pc, &stop_func_name, &stop_func_start,
-				&stop_func_end);
+				NULL);
       stop_func_start += FUNCTION_START_OFFSET;
       another_trap = 0;
       bpstat_clear (&stop_bpstat);
@@ -739,7 +736,7 @@ switch_thread:
 		printf_filtered ("%s (%d)", signame, stop_signal);
 	      printf_filtered (", %s\n", safe_strsignal (stop_signal));
 #endif /* PRINT_RANDOM_SIGNAL */
-	      fflush (stdout);
+	      gdb_flush (gdb_stdout);
 	    }
 	  if (stop_signal >= NSIG
 	      || signal_stop[stop_signal])
@@ -980,11 +977,9 @@ switch_thread:
 	      or the call instruction itself saves the PC on the stack.  */
 	   || prologue_pc != stop_func_start
 	   || stop_sp != prev_sp)
-	  && (/* PC is out of bounds of the current function.   Note that this
-		 seems sorta redundant w.r.t the prior test of stop_func_start
-		 != prev_func_start...  */
-	      stop_pc < prev_func_start
-	      || stop_pc >= prev_func_end
+	  && (/* PC is completely out of bounds of any known objfiles.  Treat
+		 like a subroutine call. */
+	      ! stop_func_start
 
 	      /* If we do a call, we will be at the start of a function.  */
 	      || stop_pc == stop_func_start
@@ -1201,7 +1196,6 @@ step_into_function:
 					  original pc would not have
 					  been at the start of a
 					  function. */
-      prev_func_end = stop_func_end;
       prev_func_name = stop_func_name;
       prev_sp = stop_sp;
 
@@ -1276,7 +1270,6 @@ step_into_function:
 	 loop.  */
       prev_pc = read_pc ();
       prev_func_start = stop_func_start;
-      prev_func_end = stop_func_end;
       prev_func_name = stop_func_name;
       prev_sp = stop_sp;
     }
@@ -1573,8 +1566,8 @@ handle_command (args, from_tty)
 		      }
 		    else
 		      {
-			printf ("Not confirmed, unchanged.\n");
-			fflush (stdout);
+			printf_unfiltered ("Not confirmed, unchanged.\n");
+			gdb_flush (gdb_stdout);
 		      }
 		  }
 		break;

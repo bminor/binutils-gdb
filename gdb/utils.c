@@ -30,10 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "signals.h"
 #include "gdbcmd.h"
 #include "serial.h"
-#if 0
-/* No longer needed, I suspect.  */
-#include "terminal.h"
-#endif
+#include "terminal.h" /* For job_control */
 #include "bfd.h"
 #include "target.h"
 #include "demangle.h"
@@ -219,7 +216,7 @@ warning_setup ()
 {
   target_terminal_ours ();
   wrap_here("");			/* Force out any buffered output */
-  fflush (stdout);
+  gdb_flush (gdb_stdout);
 }
 
 /* Print a warning message.
@@ -239,12 +236,12 @@ warning (va_alist)
   va_start (args);
   target_terminal_ours ();
   wrap_here("");			/* Force out any buffered output */
-  fflush (stdout);
+  gdb_flush (gdb_stdout);
   if (warning_pre_print)
-    fprintf (stderr, warning_pre_print);
+    fprintf_unfiltered (gdb_stderr, warning_pre_print);
   string = va_arg (args, char *);
-  vfprintf (stderr, string, args);
-  fprintf (stderr, "\n");
+  vfprintf_unfiltered (gdb_stderr, string, args);
+  fprintf_unfiltered (gdb_stderr, "\n");
   va_end (args);
 }
 
@@ -263,12 +260,12 @@ error (va_alist)
   va_start (args);
   target_terminal_ours ();
   wrap_here("");			/* Force out any buffered output */
-  fflush (stdout);
+  gdb_flush (gdb_stdout);
   if (error_pre_print)
-    fprintf_filtered (stderr, error_pre_print);
+    fprintf_filtered (gdb_stderr, error_pre_print);
   string = va_arg (args, char *);
-  vfprintf_filtered (stderr, string, args);
-  fprintf_filtered (stderr, "\n");
+  vfprintf_filtered (gdb_stderr, string, args);
+  fprintf_filtered (gdb_stderr, "\n");
   va_end (args);
   return_to_top_level (RETURN_ERROR);
 }
@@ -290,9 +287,9 @@ fatal (va_alist)
 
   va_start (args);
   string = va_arg (args, char *);
-  fprintf (stderr, "\ngdb: ");
-  vfprintf (stderr, string, args);
-  fprintf (stderr, "\n");
+  fprintf_unfiltered (gdb_stderr, "\ngdb: ");
+  vfprintf_unfiltered (gdb_stderr, string, args);
+  fprintf_unfiltered (gdb_stderr, "\n");
   va_end (args);
   exit (1);
 }
@@ -312,9 +309,9 @@ fatal_dump_core (va_alist)
   string = va_arg (args, char *);
   /* "internal error" is always correct, since GDB should never dump
      core, no matter what the input.  */
-  fprintf (stderr, "\ngdb internal error: ");
-  vfprintf (stderr, string, args);
-  fprintf (stderr, "\n");
+  fprintf_unfiltered (gdb_stderr, "\ngdb internal error: ");
+  vfprintf_unfiltered (gdb_stderr, string, args);
+  fprintf_unfiltered (gdb_stderr, "\n");
   va_end (args);
 
   signal (SIGQUIT, SIG_DFL);
@@ -405,7 +402,7 @@ print_sys_errmsg (string, errcode)
   strcat (combined, ": ");
   strcat (combined, err);
 
-  fprintf (stderr, "%s.\n", combined);
+  fprintf_unfiltered (gdb_stderr, "%s.\n", combined);
 }
 
 /* Control C eventually causes this to be called, at a convenient time.  */
@@ -413,26 +410,26 @@ print_sys_errmsg (string, errcode)
 void
 quit ()
 {
-  serial_t stdout_serial = serial_fdopen (1);
+  serial_t gdb_stdout_serial = serial_fdopen (1);
 
   target_terminal_ours ();
   wrap_here ((char *)0);		/* Force out any pending output */
 
-  SERIAL_FLUSH_OUTPUT (stdout_serial);
+  SERIAL_FLUSH_OUTPUT (gdb_stdout_serial);
 
-  SERIAL_UN_FDOPEN (stdout_serial);
+  SERIAL_UN_FDOPEN (gdb_stdout_serial);
 
   /* Don't use *_filtered; we don't want to prompt the user to continue.  */
   if (error_pre_print)
-    fprintf (stderr, error_pre_print);
+    fprintf_unfiltered (gdb_stderr, error_pre_print);
 
   if (job_control
       /* If there is no terminal switching for this target, then we can't
 	 possibly get screwed by the lack of job control.  */
       || current_target->to_terminal_ours == NULL)
-    fprintf (stderr, "Quit\n");
+    fprintf_unfiltered (gdb_stderr, "Quit\n");
   else
-    fprintf (stderr,
+    fprintf_unfiltered (gdb_stderr,
 	     "Quit (expect signal SIGINT when the program is resumed)\n");
   return_to_top_level (RETURN_QUIT);
 }
@@ -627,7 +624,7 @@ PTR
 xmalloc (size)
      long size;
 {
-  return (xmmalloc ((void *) NULL, size));
+  return (xmmalloc ((PTR) NULL, size));
 }
 
 /* Like mrealloc but get error if no storage available.  */
@@ -637,7 +634,7 @@ xrealloc (ptr, size)
      PTR ptr;
      long size;
 {
-  return (xmrealloc ((void *) NULL, ptr, size));
+  return (xmrealloc ((PTR) NULL, ptr, size));
 }
 
 
@@ -683,7 +680,7 @@ savestring (ptr, size)
 
 char *
 msavestring (md, ptr, size)
-     void *md;
+     PTR md;
      const char *ptr;
      int size;
 {
@@ -705,7 +702,7 @@ strsave (ptr)
 
 char *
 mstrsave (md, ptr)
-     void *md;
+     PTR md;
      const char *ptr;
 {
   return (msavestring (md, ptr, strlen (ptr)));
@@ -742,13 +739,13 @@ query (va_alist)
   while (1)
     {
       wrap_here ("");		/* Flush any buffered output */
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
       va_start (args);
       ctlstr = va_arg (args, char *);
-      vfprintf_filtered (stdout, ctlstr, args);
+      vfprintf_filtered (gdb_stdout, ctlstr, args);
       va_end (args);
       printf_filtered ("(y or n) ");
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
       answer = fgetc (stdin);
       clearerr (stdin);		/* in case of C-d */
       if (answer == EOF)	/* C-d */
@@ -1030,7 +1027,7 @@ wrap_here(indent)
   if (wrap_buffer[0])
     {
       *wrap_pointer = '\0';
-      fputs (wrap_buffer, stdout);
+      fputs  (wrap_buffer, gdb_stdout);
     }
   wrap_pointer = wrap_buffer;
   wrap_buffer[0] = '\0';
@@ -1069,6 +1066,15 @@ begin_line ()
     }
 }
 
+
+GDB_FILE *
+gdb_fopen (name, mode)
+     char * name;
+     char * mode;
+{
+  return fopen (name, mode);
+}
+
 /* Like fputs but pause after every screenful, and can wrap at points
    other than the final character of a line.
    Unlike fputs, fputs_filtered does not return a value.
@@ -1080,9 +1086,17 @@ begin_line ()
    called when cleanups are not in place.  */
 
 void
-fputs_filtered (linebuffer, stream)
+gdb_flush (stream)
+     FILE *stream;
+{
+  fflush (stream);
+}
+
+static void
+fputs_maybe_filtered (linebuffer, stream, filter)
      const char *linebuffer;
      FILE *stream;
+     int filter;
 {
   const char *lineptr;
 
@@ -1090,7 +1104,7 @@ fputs_filtered (linebuffer, stream)
     return;
   
   /* Don't do any filtering if it is disabled.  */
-  if (stream != stdout
+  if (stream != gdb_stdout
    || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX))
     {
       fputs (linebuffer, stream);
@@ -1105,7 +1119,8 @@ fputs_filtered (linebuffer, stream)
   while (*lineptr)
     {
       /* Possible new page.  */
-      if (lines_printed >= lines_per_page - 1)
+      if (filter &&
+	  (lines_printed >= lines_per_page - 1))
 	prompt_for_continue ();
 
       while (*lineptr && *lineptr != '\n')
@@ -1181,6 +1196,44 @@ fputs_filtered (linebuffer, stream)
     }
 }
 
+void
+fputs_filtered (linebuffer, stream)
+     const char *linebuffer;
+     FILE *stream;
+{
+  fputs_maybe_filtered (linebuffer, stream, 1);
+}
+
+void
+fputs_unfiltered (linebuffer, stream)
+     const char *linebuffer;
+     FILE *stream;
+{
+  fputs_maybe_filtered (linebuffer, stream, 0);
+}
+
+void
+putc_unfiltered (c)
+     int c;
+{
+  char buf[2];
+  buf[0] = c;
+  buf[1] = 0;
+  fputs_unfiltered (buf, gdb_stdout);
+}
+
+void
+fputc_unfiltered (c, stream)
+     int c;
+     FILE * stream;
+{
+  char buf[2];
+  buf[0] = c;
+  buf[1] = 0;
+  fputs_unfiltered (buf, stream);
+}
+
+
 /* Print a variable number of ARGS using format FORMAT.  If this
    information is going to put the amount written (since the last call
    to REINITIALIZE_MORE_FILTER or the last page break) over the page size,
@@ -1206,11 +1259,12 @@ fputs_filtered (linebuffer, stream)
 
 #define	MIN_LINEBUF	255
 
-void
-vfprintf_filtered (stream, format, args)
+static void
+vfprintf_maybe_filtered (stream, format, args, filter)
      FILE *stream;
      char *format;
      va_list args;
+     int filter;
 {
   char line_buf[MIN_LINEBUF+10];
   char *linebuffer = line_buf;
@@ -1228,7 +1282,26 @@ vfprintf_filtered (stream, format, args)
      followed.   */
   vsprintf (linebuffer, format, args);
 
-  fputs_filtered (linebuffer, stream);
+  fputs_maybe_filtered (linebuffer, stream, filter);
+}
+
+
+void
+vfprintf_filtered (stream, format, args)
+     FILE *stream;
+     char *format;
+     va_list args;
+{
+  vfprintf_maybe_filtered (stream, format, args, 1);
+}
+
+void
+vfprintf_unfiltered (stream, format, args)
+     FILE *stream;
+     char *format;
+     va_list args;
+{
+  vfprintf_maybe_filtered (stream, format, args, 0);
 }
 
 void
@@ -1236,7 +1309,15 @@ vprintf_filtered (format, args)
      char *format;
      va_list args;
 {
-  vfprintf_filtered (stdout, format, args);
+  vfprintf_maybe_filtered (gdb_stdout, format, args, 1);
+}
+
+void
+vprintf_unfiltered (format, args)
+     char *format;
+     va_list args;
+{
+  vfprintf_maybe_filtered (gdb_stdout, format, args, 0);
 }
 
 /* VARARGS */
@@ -1258,8 +1339,27 @@ fprintf_filtered (va_alist)
   va_end (args);
 }
 
+/* VARARGS */
+void
+fprintf_unfiltered (va_alist)
+     va_dcl
+{
+  va_list args;
+  FILE *stream;
+  char *format;
+
+  va_start (args);
+  stream = va_arg (args, FILE *);
+  format = va_arg (args, char *);
+
+  /* This won't blow up if the restrictions described above are
+     followed.   */
+  vfprintf_unfiltered (stream, format, args);
+  va_end (args);
+}
+
 /* Like fprintf_filtered, but prints it's result indent.
-   Called as fprintfi_filtered (spaces, format, arg1, arg2, ...); */
+   Called as fprintfi_filtered (spaces, stream, format, ...);  */
 
 /* VARARGS */
 void
@@ -1283,6 +1383,7 @@ fprintfi_filtered (va_alist)
   va_end (args);
 }
 
+
 /* VARARGS */
 void
 printf_filtered (va_alist)
@@ -1294,12 +1395,28 @@ printf_filtered (va_alist)
   va_start (args);
   format = va_arg (args, char *);
 
-  vfprintf_filtered (stdout, format, args);
+  vfprintf_filtered (gdb_stdout, format, args);
+  va_end (args);
+}
+
+
+/* VARARGS */
+void
+printf_unfiltered (va_alist)
+     va_dcl
+{
+  va_list args;
+  char *format;
+
+  va_start (args);
+  format = va_arg (args, char *);
+
+  vfprintf_unfiltered (gdb_stdout, format, args);
   va_end (args);
 }
 
 /* Like printf_filtered, but prints it's result indented.
-   Called as printfi_filtered (spaces, format, arg1, arg2, ...); */
+   Called as printfi_filtered (spaces, format, ...);  */
 
 /* VARARGS */
 void
@@ -1313,8 +1430,8 @@ printfi_filtered (va_alist)
   va_start (args);
   spaces = va_arg (args, int);
   format = va_arg (args, char *);
-  print_spaces_filtered (spaces, stdout);
-  vfprintf_filtered (stdout, format, args);
+  print_spaces_filtered (spaces, gdb_stdout);
+  vfprintf_filtered (gdb_stdout, format, args);
   va_end (args);
 }
 
@@ -1327,7 +1444,14 @@ void
 puts_filtered (string)
      char *string;
 {
-  fputs_filtered (string, stdout);
+  fputs_filtered (string, gdb_stdout);
+}
+
+void
+puts_unfiltered (string)
+     char *string;
+{
+  fputs_unfiltered (string, gdb_stdout);
 }
 
 /* Return a pointer to N spaces and a null.  The pointer is good
@@ -1515,7 +1639,7 @@ _initialize_utils ()
 #endif
 #endif
   /* If the output is not a terminal, don't paginate it.  */
-  if (!ISATTY (stdout))
+  if (!ISATTY (gdb_stdout))
     lines_per_page = UINT_MAX;
 
   set_width_command ((char *)NULL, 0, c);

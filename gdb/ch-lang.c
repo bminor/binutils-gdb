@@ -52,7 +52,7 @@ chill_demangle (mangled)
 static void
 chill_printchar (c, stream)
      register int c;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   c &= 0xFF;			/* Avoid sign bit follies */
 
@@ -79,7 +79,7 @@ chill_printchar (c, stream)
 
 static void
 chill_printstr (stream, string, length, force_ellipses)
-     FILE *stream;
+     GDB_FILE *stream;
      char *string;
      unsigned int length;
      int force_ellipses;

@@ -693,9 +693,9 @@ lookup_struct_elt_type (type, name, noerr)
       TYPE_CODE (type) != TYPE_CODE_UNION)
     {
       target_terminal_ours ();
-      fflush (stdout);
-      fprintf (stderr, "Type ");
-      type_print (type, "", stderr, -1);
+      gdb_flush (gdb_stdout);
+      fprintf_unfiltered (gdb_stderr, "Type ");
+      type_print (type, "", gdb_stderr, -1);
       error (" is not a structure or union type.");
     }
 
@@ -743,11 +743,11 @@ lookup_struct_elt_type (type, name, noerr)
     }
   
   target_terminal_ours ();
-  fflush (stdout);
-  fprintf (stderr, "Type ");
-  type_print (type, "", stderr, -1);
-  fprintf (stderr, " has no component named ");
-  fputs_filtered (name, stderr);
+  gdb_flush (gdb_stdout);
+  fprintf_unfiltered (gdb_stderr, "Type ");
+  type_print (type, "", gdb_stderr, -1);
+  fprintf_unfiltered (gdb_stderr, " has no component named ");
+  fputs_filtered (name, gdb_stderr);
   error (".");
   return (struct type *)-1;	/* For lint */
 }

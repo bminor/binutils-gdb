@@ -535,7 +535,7 @@ solib_add (arg_string, from_tty, target)
 	    {
 	      if (from_tty)
 		{
-		  printf ("Symbols already loaded for %s\n", so -> so_name);
+		  printf_unfiltered ("Symbols already loaded for %s\n", so -> so_name);
 		}
 	    }
 	  else if (catch_errors
@@ -576,7 +576,7 @@ info_sharedlibrary_command (ignore, from_tty)
   
   if (exec_bfd == NULL)
     {
-      printf ("No exec file.\n");
+      printf_unfiltered ("No exec file.\n");
       return;
     }
   while ((so = find_solib (so)) != NULL)
@@ -588,7 +588,7 @@ info_sharedlibrary_command (ignore, from_tty)
 
 	  if (!header_done)
 	    {
-	      printf("%-20s%-20s%-12s%s\n", "From", "To", "Syms Read",
+	      printf_unfiltered("%-20s%-20s%-12s%s\n", "From", "To", "Syms Read",
 		     "Shared Object Library");
 	      header_done++;
 	    }
@@ -597,15 +597,15 @@ info_sharedlibrary_command (ignore, from_tty)
 	      txt_start = (unsigned long) so -> textsection -> addr;
 	      txt_end = (unsigned long) so -> textsection -> endaddr;
 	    }
-	  printf ("%-20s", local_hex_string_custom (txt_start, "08l"));
-	  printf ("%-20s", local_hex_string_custom (txt_end, "08l"));
-	  printf ("%-12s", so -> symbols_loaded ? "Yes" : "No");
-	  printf ("%s\n",  so -> so_name);
+	  printf_unfiltered ("%-20s", local_hex_string_custom (txt_start, "08l"));
+	  printf_unfiltered ("%-20s", local_hex_string_custom (txt_end, "08l"));
+	  printf_unfiltered ("%-12s", so -> symbols_loaded ? "Yes" : "No");
+	  printf_unfiltered ("%s\n",  so -> so_name);
 	}
     }
   if (so_list_head == NULL)
     {
-      printf ("No shared libraries loaded at this time.\n");	
+      printf_unfiltered ("No shared libraries loaded at this time.\n");	
     }
 }
 

@@ -111,8 +111,8 @@ void
 cplusplus_hint (name)
      char *name;
 {
-  printf ("Hint: try '%s<TAB> or '%s<ESC-?>\n", name, name);
-  printf ("(Note leading single quote.)\n");
+  printf_unfiltered ("Hint: try '%s<TAB> or '%s<ESC-?>\n", name, name);
+  printf_unfiltered ("(Note leading single quote.)\n");
 }
 
 /* Check for a symtab of a specific name; first in symtabs, then in
@@ -267,7 +267,6 @@ gdb_mangle_name (type, i, j)
   char *volatile_prefix = method->is_volatile ? "V" : "";
   char buf[20];
   int len = (newname == NULL ? 0 : strlen (newname));
-  char *opname;
 
   is_constructor = newname && STREQ(field_name, newname);
   if (!is_constructor)
@@ -348,6 +347,7 @@ gdb_mangle_name (type, i, j)
      work with the normal mechanisms.  */
   if (OPNAME_PREFIX_P (field_name))
     {
+      char *opname;
       opname = cplus_mangle_opname (field_name + 3, 0);
       if (opname == NULL)
 	{
@@ -1531,10 +1531,10 @@ find_methods (t, name, sym_arr)
 		if (sym_arr[i1]) i1++;
 		else
 		  {
-		    fputs_filtered("(Cannot find method ", stdout);
-		    fprintf_symbol_filtered (stdout, phys_name,
+		    fputs_filtered("(Cannot find method ", gdb_stdout);
+		    fprintf_symbol_filtered (gdb_stdout, phys_name,
 					     language_cplus, DMGL_PARAMS);
-		    fputs_filtered(" - possibly inlined.)\n", stdout);
+		    fputs_filtered(" - possibly inlined.)\n", gdb_stdout);
 		  }
 	      }
 	}
@@ -2130,7 +2130,7 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
     }
 
   i = 0;
-  printf("[0] cancel\n[1] all\n");
+  printf_unfiltered("[0] cancel\n[1] all\n");
   while (i < nelts)
     {
       if (sym_arr[i] && SYMBOL_CLASS (sym_arr[i]) == LOC_BLOCK)
@@ -2143,10 +2143,10 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
 	  values.sals[i] = find_pc_line (pc, 0);
 	  values.sals[i].pc = (values.sals[i].end && values.sals[i].pc != pc) ?
 			       values.sals[i].end                      :  pc;
-	  printf("[%d] %s at %s:%d\n", (i+2), SYMBOL_SOURCE_NAME (sym_arr[i]),
+	  printf_unfiltered("[%d] %s at %s:%d\n", (i+2), SYMBOL_SOURCE_NAME (sym_arr[i]),
 		 values.sals[i].symtab->filename, values.sals[i].line);
 	}
-      else printf ("?HERE\n");
+      else printf_unfiltered ("?HERE\n");
       i++;
     }
   
@@ -2154,8 +2154,8 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
     {
       prompt = ">";
     }
-  printf("%s ",prompt);
-  fflush(stdout);
+  printf_unfiltered("%s ",prompt);
+  gdb_flush(gdb_stdout);
 
   args = command_line_input ((char *) NULL, 0);
   
@@ -2198,7 +2198,7 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
 
       if (num > nelts + 2)
 	{
-	  printf ("No choice number %d.\n", num);
+	  printf_unfiltered ("No choice number %d.\n", num);
 	}
       else
 	{
@@ -2216,7 +2216,7 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
 	    }
 	  else
 	    {
-	      printf ("duplicate request for %d ignored.\n", num);
+	      printf_unfiltered ("duplicate request for %d ignored.\n", num);
 	    }
 	}
 
@@ -2285,7 +2285,7 @@ output_source_filename (name, first)
     }
 
   wrap_here ("");
-  fputs_filtered (name, stdout);
+  fputs_filtered (name, gdb_stdout);
 }  
 
 static void
@@ -2534,9 +2534,9 @@ list_symbols (regexp, class, bpt)
 		      }
 		    else if (!found_in_file)
 		      {
-			fputs_filtered ("\nFile ", stdout);
-			fputs_filtered (s->filename, stdout);
-			fputs_filtered (":\n", stdout);
+			fputs_filtered ("\nFile ", gdb_stdout);
+			fputs_filtered (s->filename, gdb_stdout);
+			fputs_filtered (":\n", gdb_stdout);
 		      }
 		    found_in_file = 1;
 		    
@@ -2546,7 +2546,7 @@ list_symbols (regexp, class, bpt)
 		    /* Typedef that is not a C++ class */
 		    if (class == 2
 			&& SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE)
-		      c_typedef_print (SYMBOL_TYPE(sym), sym, stdout);
+		      c_typedef_print (SYMBOL_TYPE(sym), sym, gdb_stdout);
 		    /* variable, func, or typedef-that-is-c++-class */
 		    else if (class < 2 || 
 			     (class == 2 && 
@@ -2555,7 +2555,7 @@ list_symbols (regexp, class, bpt)
 			type_print (SYMBOL_TYPE (sym),
 				    (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 				     ? "" : SYMBOL_SOURCE_NAME (sym)),
-				    stdout, 0);
+				    gdb_stdout, 0);
 			
 			printf_filtered (";\n");
 		      }
@@ -2564,12 +2564,12 @@ list_symbols (regexp, class, bpt)
 # if 0  /* FIXME, why is this zapped out? */
 			char buf[1024];
 			c_type_print_base (TYPE_FN_FIELD_TYPE(t, i),
-					   stdout, 0, 0); 
+					   gdb_stdout, 0, 0); 
 			c_type_print_varspec_prefix (TYPE_FN_FIELD_TYPE(t, i),
-						     stdout, 0); 
+						     gdb_stdout, 0); 
 			sprintf (buf, " %s::", type_name_no_tag (t));
 			cp_type_print_method_args (TYPE_FN_FIELD_ARGS (t, i),
-						   buf, name, stdout);
+						   buf, name, gdb_stdout);
 # endif
 		      }
 		  }

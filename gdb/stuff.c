@@ -168,7 +168,7 @@ err (va_alist)
 
   va_start (args);
   string = va_arg (args, char *);
-  vfprintf (stderr, string, args);
+  vfprintf (gdb_stderr, string, args);
   va_end (args);
   exit (-1);
 }

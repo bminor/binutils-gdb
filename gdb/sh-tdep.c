@@ -75,7 +75,7 @@ sh_skip_prologue (start_pc)
 int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   disassemble_info info;
   GDB_INIT_DISASSEMBLE_INFO (info, stream);

@@ -61,8 +61,8 @@ maintenance_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf ("\"maintenance\" must be followed by the name of a maintenance command.\n");
-  help_list (maintenancelist, "maintenance ", -1, stdout);
+  printf_unfiltered ("\"maintenance\" must be followed by the name of a maintenance command.\n");
+  help_list (maintenancelist, "maintenance ", -1, gdb_stdout);
 }
 
 
@@ -96,19 +96,19 @@ maintenance_demangle (args, from_tty)
 
   if (args == NULL || *args == '\0')
     {
-      printf ("\"maintenance demangle\" takes an argument to demangle.\n");
+      printf_unfiltered ("\"maintenance demangle\" takes an argument to demangle.\n");
     }
   else
     {
       demangled = cplus_demangle (args, DMGL_ANSI | DMGL_PARAMS);
       if (demangled != NULL)
 	{
-	  printf ("%s\n", demangled);
+	  printf_unfiltered ("%s\n", demangled);
 	  free (demangled);
 	}
       else
 	{
-	  printf ("Can't demangle \"%s\"\n", args);
+	  printf_unfiltered ("Can't demangle \"%s\"\n", args);
 	}
     }
 }
@@ -123,8 +123,8 @@ maintenance_info_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  printf ("\"maintenance info\" must be followed by the name of an info command.\n");
-  help_list (maintenanceinfolist, "maintenance info ", -1, stdout);
+  printf_unfiltered ("\"maintenance info\" must be followed by the name of an info command.\n");
+  help_list (maintenanceinfolist, "maintenance info ", -1, gdb_stdout);
 }
 
 static void
@@ -213,8 +213,8 @@ maintenance_print_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  printf ("\"maintenance print\" must be followed by the name of a print command.\n");
-  help_list (maintenanceprintlist, "maintenance print ", -1, stdout);
+  printf_unfiltered ("\"maintenance print\" must be followed by the name of a print command.\n");
+  help_list (maintenanceprintlist, "maintenance print ", -1, gdb_stdout);
 }
 
 #endif	/* MAINTENANCE_CMDS */

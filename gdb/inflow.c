@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "serial.h"
 #include "terminal.h"
 #include "target.h"
+#include "thread.h"
 
 #include <signal.h>
 #include <fcntl.h>
@@ -146,6 +147,9 @@ gdb_has_a_terminal ()
 	}
 
       return gdb_has_a_terminal_flag == yes;
+    default:
+      /* "Can't happen".  */
+      return 0;
     }
 }
 
@@ -153,7 +157,7 @@ gdb_has_a_terminal ()
 
 #define	OOPSY(what)	\
   if (result == -1)	\
-    fprintf(stderr, "[%s failed in terminal_inferior: %s]\n", \
+    fprintf_unfiltered(gdb_stderr, "[%s failed in terminal_inferior: %s]\n", \
 	    what, strerror (errno))
 
 static void terminal_ours_1 PARAMS ((int));
@@ -331,7 +335,7 @@ terminal_ours_1 (output_only)
 	     used to check for an error here, so perhaps there are other
 	     such situations as well.  */
 	  if (result == -1)
-	    fprintf (stderr, "[tcsetpgrp failed in terminal_ours: %s]\n",
+	    fprintf_unfiltered (gdb_stderr, "[tcsetpgrp failed in terminal_ours: %s]\n",
 		     strerror (errno));
 #endif
 #endif /* termios */
@@ -528,12 +532,14 @@ kill_command (arg, from_tty)
     error ("Not confirmed.");
   target_kill ();
 
+  init_thread_list();		/* Destroy thread info */
+
   /* Killing off the inferior can leave us with a core file.  If so,
      print the state we are left in.  */
   if (target_has_stack) {
     printf_filtered ("In %s,\n", current_target->to_longname);
     if (selected_frame == NULL)
-      fputs_filtered ("No selected stack frame.\n", stdout);
+      fputs_filtered ("No selected stack frame.\n", gdb_stdout);
     else
       print_stack_frame (selected_frame, selected_frame_level, 1);
   }

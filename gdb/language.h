@@ -126,19 +126,19 @@ struct language_defn
 
   void (*la_error) PARAMS ((char *));
 
-  void (*la_printchar) PARAMS ((int, FILE *));
+  void (*la_printchar) PARAMS ((int, GDB_FILE *));
 
-  void (*la_printstr) PARAMS ((FILE *, char *, unsigned int, int));
+  void (*la_printstr) PARAMS ((GDB_FILE *, char *, unsigned int, int));
 
   struct type *(*la_fund_type) PARAMS ((struct objfile *, int));
 
   /* Print a type using syntax appropriate for this language. */
 
-  void (*la_print_type) PARAMS ((struct type *, char *, FILE *, int, int));
+  void (*la_print_type) PARAMS ((struct type *, char *, GDB_FILE *, int, int));
 
   /* Print a value using syntax appropriate for this language. */
 
-  int (*la_val_print) PARAMS ((struct type *, char *,  CORE_ADDR, FILE *,
+  int (*la_val_print) PARAMS ((struct type *, char *,  CORE_ADDR, GDB_FILE *,
 			       int, int, int, enum val_prettyprint));
 
   /* Longest signed integral type */

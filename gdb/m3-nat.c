@@ -2377,7 +2377,7 @@ map_cprocs_to_kernel_threads (cprocs, mthreads, thread_count)
 
 void
 print_tl_address (stream, pc)
-     FILE *stream;
+     GDB_FILE *stream;
      CORE_ADDR pc;
 {
   if (! lookup_minimal_symbol_by_pc (pc))
@@ -2687,7 +2687,7 @@ thread_list_command()
 			   buf,
 			   translate_cstate (scan->state),
 			   wired);
-	  print_tl_address (stdout, kthread->pc);
+	  print_tl_address (gdb_stdout, kthread->pc);
 	}
       else
 	{
@@ -2720,7 +2720,7 @@ thread_list_command()
 	  if (FETCH_CPROC_STATE (&state) == -1)
 	    puts_filtered ("???");
 	  else
-	    print_tl_address (stdout, state.pc);
+	    print_tl_address (gdb_stdout, state.pc);
 
 	  neworder++;
 	}
@@ -2787,7 +2787,7 @@ thread_list_command()
 			   buf,
 			   "",   /* No cproc state */
 			   "");	/* Can't be wired */
-	  print_tl_address (stdout, their_threads[index].pc);
+	  print_tl_address (gdb_stdout, their_threads[index].pc);
 	  puts_filtered ("\n");
 	}
     }
@@ -3623,8 +3623,8 @@ thread_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  printf ("\"thread\" must be followed by the name of a thread command.\n");
-  help_list (cmd_thread_list, "thread ", -1, stdout);
+  printf_unfiltered ("\"thread\" must be followed by the name of a thread command.\n");
+  help_list (cmd_thread_list, "thread ", -1, gdb_stdout);
 }
 
 /*ARGSUSED*/
@@ -3633,8 +3633,8 @@ task_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  printf ("\"task\" must be followed by the name of a task command.\n");
-  help_list (cmd_task_list, "task ", -1, stdout);
+  printf_unfiltered ("\"task\" must be followed by the name of a task command.\n");
+  help_list (cmd_task_list, "task ", -1, gdb_stdout);
 }
 
 add_mach_specific_commands ()
@@ -4082,11 +4082,11 @@ m3_attach (args, from_tty)
       exec_file = (char *) get_exec_file (0);
 
       if (exec_file)
-	printf ("Attaching to program `%s', %s\n", exec_file, target_pid_to_str (pid));
+	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file, target_pid_to_str (pid));
       else
-	printf ("Attaching to %s\n", target_pid_to_str (pid));
+	printf_unfiltered ("Attaching to %s\n", target_pid_to_str (pid));
 
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
     }
 
   m3_do_attach (pid);
@@ -4210,9 +4210,9 @@ m3_detach (args, from_tty)
       char *exec_file = get_exec_file (0);
       if (exec_file == 0)
 	exec_file = "";
-      printf ("Detaching from program: %s %s\n",
+      printf_unfiltered ("Detaching from program: %s %s\n",
 	      exec_file, target_pid_to_str (inferior_pid));
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
     }
   if (args)
     siggnal = atoi (args);

@@ -56,7 +56,7 @@ static void
 args_info PARAMS ((char *, int));
 
 static void
-print_frame_arg_vars PARAMS ((FRAME, FILE *));
+print_frame_arg_vars PARAMS ((FRAME, GDB_FILE *));
 
 static void
 catch_info PARAMS ((char *, int));
@@ -65,16 +65,16 @@ static void
 locals_info PARAMS ((char *, int));
 
 static void
-print_frame_label_vars PARAMS ((FRAME, int, FILE *));
+print_frame_label_vars PARAMS ((FRAME, int, GDB_FILE *));
 
 static void
-print_frame_local_vars PARAMS ((FRAME, FILE *));
+print_frame_local_vars PARAMS ((FRAME, GDB_FILE *));
 
 static int
-print_block_frame_labels PARAMS ((struct block *, int *, FILE *));
+print_block_frame_labels PARAMS ((struct block *, int *, GDB_FILE *));
 
 static int
-print_block_frame_locals PARAMS ((struct block *, FRAME, FILE *));
+print_block_frame_locals PARAMS ((struct block *, FRAME, GDB_FILE *));
 
 static void
 backtrace_command PARAMS ((char *, int));
@@ -107,6 +107,25 @@ int selected_frame_level;
 int frame_file_full_name = 0;
 
 
+struct print_stack_frame_args {
+  struct frame_info *fi;
+  int level;
+  int source;
+  int args;
+};
+
+static int print_stack_frame_stub PARAMS ((char *));
+
+/* Pass the args the way catch_errors wants them.  */
+static int
+print_stack_frame_stub (args)
+     char *args;
+{
+  struct print_stack_frame_args *p = (struct print_stack_frame_args *)args;
+  print_frame_info (p->fi, p->level, p->source, p->args);
+  return 0;
+}
+
 /* Print a stack frame briefly.  FRAME should be the frame id
    and LEVEL should be its level in the stack (or -1 for level not defined).
    This prints the level, the function executing, the arguments,
@@ -123,11 +142,14 @@ print_stack_frame (frame, level, source)
      int level;
      int source;
 {
-  struct frame_info *fi;
+  struct print_stack_frame_args args;
 
-  fi = get_frame_info (frame);
+  args.fi = get_frame_info (frame);
+  args.level = level;
+  args.source = source;
+  args.args = 1;
 
-  print_frame_info (fi, level, source, 1);
+  catch_errors (print_stack_frame_stub, (char *)&args, "", RETURN_MASK_ERROR);
 }
 
 struct print_args_args {
@@ -145,7 +167,7 @@ print_args_stub (args)
   int numargs;
   struct print_args_args *p = (struct print_args_args *)args;
   FRAME_NUM_ARGS (numargs, (p->fi));
-  print_frame_args (p->func, p->fi, numargs, stdout);
+  print_frame_args (p->func, p->fi, numargs, gdb_stdout);
   return 0;
 }
 
@@ -257,10 +279,10 @@ print_frame_info (fi, level, source, args)
       if (addressprint)
 	if (fi->pc != sal.pc || !sal.symtab)
 	  printf_filtered ("%s in ", local_hex_string((unsigned long) fi->pc));
-      fprintf_symbol_filtered (stdout, funname ? funname : "??", funlang,
+      fprintf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
 			       DMGL_NO_OPTS);
       wrap_here ("   ");
-      fputs_filtered (" (", stdout);
+      fputs_filtered (" (", gdb_stdout);
       if (args)
 	{
 	  struct print_args_args args;
@@ -305,7 +327,7 @@ print_frame_info (fi, level, source, args)
   if (source != 0)
     set_default_breakpoint (1, fi->pc, sal.symtab, sal.line);
 
-  fflush (stdout);
+  gdb_flush (gdb_stdout);
 }
 
 /*
@@ -473,7 +495,7 @@ frame_info (addr_exp, from_tty)
   if (funname)
     {
       printf_filtered (" in ");
-      fprintf_symbol_filtered (stdout, funname, funlang,
+      fprintf_symbol_filtered (gdb_stdout, funname, funlang,
 			       DMGL_ANSI | DMGL_PARAMS);
     }
   wrap_here ("   ");
@@ -533,7 +555,7 @@ frame_info (addr_exp, from_tty)
 	  puts_filtered (" 1 arg: ");
 	else
 	  printf_filtered (" %d args: ", numargs);
-	print_frame_args (func, fi, numargs, stdout);
+	print_frame_args (func, fi, numargs, gdb_stdout);
 	puts_filtered ("\n");
       }
   }
@@ -599,7 +621,7 @@ backtrace_limit_info (arg, from_tty)
   if (arg)
     error ("\"Info backtrace-limit\" takes no arguments.");
 
-  printf ("Backtrace limit: %d.\n", backtrace_limit);
+  printf_unfiltered ("Backtrace limit: %d.\n", backtrace_limit);
 }
 #endif
 
@@ -686,6 +708,11 @@ backtrace_command (count_exp, from_tty)
     {
       QUIT;
       fi = get_frame_info (frame);
+
+      /* Don't use print_stack_frame; if an error() occurs it probably
+	 means further attempts to backtrace would fail (on the other
+	 hand, perhaps the code does or could be fixed to make sure
+	 the frame->prev field gets set to NULL in that case).  */
       print_frame_info (fi, trailing_level + i, 0, 1);
     }
 
@@ -701,7 +728,7 @@ static int
 print_block_frame_locals (b, frame, stream)
      struct block *b;
      register FRAME frame;
-     register FILE *stream;
+     register GDB_FILE *stream;
 {
   int nsyms;
   register int i;
@@ -733,7 +760,7 @@ static int
 print_block_frame_labels (b, have_default, stream)
      struct block *b;
      int *have_default;
-     register FILE *stream;
+     register GDB_FILE *stream;
 {
   int nsyms;
   register int i;
@@ -778,7 +805,7 @@ print_block_frame_labels (b, have_default, stream)
 static void
 print_frame_local_vars (frame, stream)
      register FRAME frame;
-     register FILE *stream;
+     register GDB_FILE *stream;
 {
   register struct block *block = get_frame_block (frame);
   register int values_printed = 0;
@@ -813,7 +840,7 @@ static void
 print_frame_label_vars (frame, this_level_only, stream)
      register FRAME frame;
      int this_level_only;
-     register FILE *stream;
+     register GDB_FILE *stream;
 {
   register struct blockvector *bl;
   register struct block *block = get_frame_block (frame);
@@ -888,7 +915,7 @@ locals_info (args, from_tty)
 {
   if (!selected_frame)
     error ("No frame selected.");
-  print_frame_local_vars (selected_frame, stdout);
+  print_frame_local_vars (selected_frame, gdb_stdout);
 }
 
 static void
@@ -898,13 +925,13 @@ catch_info (ignore, from_tty)
 {
   if (!selected_frame)
     error ("No frame selected.");
-  print_frame_label_vars (selected_frame, 0, stdout);
+  print_frame_label_vars (selected_frame, 0, gdb_stdout);
 }
 
 static void
 print_frame_arg_vars (frame, stream)
      register FRAME frame;
-     register FILE *stream;
+     register GDB_FILE *stream;
 {
   struct symbol *func = get_frame_function (frame);
   register struct block *b;
@@ -973,7 +1000,7 @@ args_info (ignore, from_tty)
 {
   if (!selected_frame)
     error ("No frame selected.");
-  print_frame_arg_vars (selected_frame, stdout);
+  print_frame_arg_vars (selected_frame, gdb_stdout);
 }
 
 /* Select frame FRAME, and note that its stack level is LEVEL.

@@ -830,36 +830,36 @@ a29k_get_processor_type ()
   switch ((cfg_reg >> 28) & 0xf)
     {
     case 0:
-      fprintf_filtered (stderr, "Remote debugging an Am29000");
+      fprintf_filtered (gdb_stderr, "Remote debugging an Am29000");
       break;
     case 1:
-      fprintf_filtered (stderr, "Remote debugging an Am29005");
+      fprintf_filtered (gdb_stderr, "Remote debugging an Am29005");
       break;
     case 2:
-      fprintf_filtered (stderr, "Remote debugging an Am29050");
+      fprintf_filtered (gdb_stderr, "Remote debugging an Am29050");
       processor_type = a29k_freeze_mode;
       break;
     case 3:
-      fprintf_filtered (stderr, "Remote debugging an Am29035");
+      fprintf_filtered (gdb_stderr, "Remote debugging an Am29035");
       break;
     case 4:
-      fprintf_filtered (stderr, "Remote debugging an Am29030");
+      fprintf_filtered (gdb_stderr, "Remote debugging an Am29030");
       break;
     case 5:
-      fprintf_filtered (stderr, "Remote debugging an Am2920*");
+      fprintf_filtered (gdb_stderr, "Remote debugging an Am2920*");
       break;
     case 6:
-      fprintf_filtered (stderr, "Remote debugging an Am2924*");
+      fprintf_filtered (gdb_stderr, "Remote debugging an Am2924*");
       break;
     case 7:
-      fprintf_filtered (stderr, "Remote debugging an Am29040");
+      fprintf_filtered (gdb_stderr, "Remote debugging an Am29040");
       break;
     default:
-      fprintf_filtered (stderr, "Remote debugging an unknown Am29k\n");
+      fprintf_filtered (gdb_stderr, "Remote debugging an unknown Am29k\n");
       /* Don't bother to print the revision.  */
       return;
     }
-  fprintf_filtered (stderr, " revision %c\n", 'A' + ((cfg_reg >> 24) & 0x0f));
+  fprintf_filtered (gdb_stderr, " revision %c\n", 'A' + ((cfg_reg >> 24) & 0x0f));
 }
 
 void

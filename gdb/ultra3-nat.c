@@ -298,7 +298,7 @@ register_addr (regno,blockend)
 	case BP_REGNUM:  return(offsetof(struct ptrace_user,pt_bp));
 	case FC_REGNUM:  return(offsetof(struct ptrace_user,pt_fc));
 	default:
-	     fprintf_filtered(stderr,"register_addr():Bad register %s (%d)\n", 
+	     fprintf_filtered(gdb_stderr,"register_addr():Bad register %s (%d)\n", 
 				reg_names[regno],regno);
 	     return(0xffffffff);	/* Should make ptrace() fail */
     }

@@ -111,43 +111,43 @@ struct pt_regset ep;
     int fpreg;
     unsigned char *p;
     
-    printf("80387:");
+    printf_unfiltered("80387:");
     if (ep.pr_fpu.fpu_ip == 0) {
-	printf(" not in use.\n");
+	printf_unfiltered(" not in use.\n");
 	return;
     } else {
-	printf("\n");
+	printf_unfiltered("\n");
     }
     if (ep.pr_fpu.fpu_status != 0) {
 	print_387_status_word (ep.pr_fpu.fpu_status);
     }
     print_387_control_word (ep.pr_fpu.fpu_control);
-    printf ("last exception: ");
-    printf ("opcode 0x%x; ", ep.pr_fpu.fpu_rsvd4);
-    printf ("pc 0x%x:0x%x; ", ep.pr_fpu.fpu_cs, ep.pr_fpu.fpu_ip);
-    printf ("operand 0x%x:0x%x\n", ep.pr_fpu.fpu_data_offset, ep.pr_fpu.fpu_op_sel);
+    printf_unfiltered ("last exception: ");
+    printf_unfiltered ("opcode 0x%x; ", ep.pr_fpu.fpu_rsvd4);
+    printf_unfiltered ("pc 0x%x:0x%x; ", ep.pr_fpu.fpu_cs, ep.pr_fpu.fpu_ip);
+    printf_unfiltered ("operand 0x%x:0x%x\n", ep.pr_fpu.fpu_data_offset, ep.pr_fpu.fpu_op_sel);
     
     top = (ep.pr_fpu.fpu_status >> 11) & 7;
     
-    printf ("regno  tag  msb              lsb  value\n");
+    printf_unfiltered ("regno  tag  msb              lsb  value\n");
     for (fpreg = 7; fpreg >= 0; fpreg--) 
 	{
 	    double val;
 	    
-	    printf ("%s %d: ", fpreg == top ? "=>" : "  ", fpreg);
+	    printf_unfiltered ("%s %d: ", fpreg == top ? "=>" : "  ", fpreg);
 	    
 	    switch ((ep.pr_fpu.fpu_tag >> (fpreg * 2)) & 3) 
 		{
-		case 0: printf ("valid "); break;
-		case 1: printf ("zero  "); break;
-		case 2: printf ("trap  "); break;
-		case 3: printf ("empty "); break;
+		case 0: printf_unfiltered ("valid "); break;
+		case 1: printf_unfiltered ("zero  "); break;
+		case 2: printf_unfiltered ("trap  "); break;
+		case 3: printf_unfiltered ("empty "); break;
 		}
 	    for (i = 9; i >= 0; i--)
-		printf ("%02x", ep.pr_fpu.fpu_stack[fpreg][i]);
+		printf_unfiltered ("%02x", ep.pr_fpu.fpu_stack[fpreg][i]);
 	    
 	    i387_to_double (ep.pr_fpu.fpu_stack[fpreg], (char *)&val);
-	    printf ("  %g\n", val);
+	    printf_unfiltered ("  %g\n", val);
 	}
     if (ep.pr_fpu.fpu_rsvd1)
 	warning ("rsvd1 is 0x%x\n", ep.pr_fpu.fpu_rsvd1);
@@ -167,72 +167,72 @@ unsigned int pcr;
     int pcr_tmp;
 
     pcr_tmp = pcr & FPA_PCR_MODE;
-    printf("\tMODE= %#x; RND= %#x ", pcr_tmp, pcr_tmp & 12);
+    printf_unfiltered("\tMODE= %#x; RND= %#x ", pcr_tmp, pcr_tmp & 12);
     switch (pcr_tmp & 12) {
     case 0:
-	printf("RN (Nearest Value)");
+	printf_unfiltered("RN (Nearest Value)");
 	break;
     case 1:
-	printf("RZ (Zero)");
+	printf_unfiltered("RZ (Zero)");
 	break;
     case 2:
-	printf("RP (Positive Infinity)");
+	printf_unfiltered("RP (Positive Infinity)");
 	break;
     case 3:
-	printf("RM (Negative Infinity)");
+	printf_unfiltered("RM (Negative Infinity)");
 	break;
     }
-    printf("; IRND= %d ", pcr_tmp & 2);
+    printf_unfiltered("; IRND= %d ", pcr_tmp & 2);
     if (0 == pcr_tmp & 2) {
-	printf("(same as RND)\n");
+	printf_unfiltered("(same as RND)\n");
     } else {
-	printf("(toward zero)\n");
+	printf_unfiltered("(toward zero)\n");
     }
     pcr_tmp = pcr & FPA_PCR_EM;
-    printf("\tEM= %#x", pcr_tmp);
-    if (pcr_tmp & FPA_PCR_EM_DM) printf(" DM");
-    if (pcr_tmp & FPA_PCR_EM_UOM) printf(" UOM");
-    if (pcr_tmp & FPA_PCR_EM_PM) printf(" PM");
-    if (pcr_tmp & FPA_PCR_EM_UM) printf(" UM");
-    if (pcr_tmp & FPA_PCR_EM_OM) printf(" OM");
-    if (pcr_tmp & FPA_PCR_EM_ZM) printf(" ZM");
-    if (pcr_tmp & FPA_PCR_EM_IM) printf(" IM");
-    printf("\n");
+    printf_unfiltered("\tEM= %#x", pcr_tmp);
+    if (pcr_tmp & FPA_PCR_EM_DM) printf_unfiltered(" DM");
+    if (pcr_tmp & FPA_PCR_EM_UOM) printf_unfiltered(" UOM");
+    if (pcr_tmp & FPA_PCR_EM_PM) printf_unfiltered(" PM");
+    if (pcr_tmp & FPA_PCR_EM_UM) printf_unfiltered(" UM");
+    if (pcr_tmp & FPA_PCR_EM_OM) printf_unfiltered(" OM");
+    if (pcr_tmp & FPA_PCR_EM_ZM) printf_unfiltered(" ZM");
+    if (pcr_tmp & FPA_PCR_EM_IM) printf_unfiltered(" IM");
+    printf_unfiltered("\n");
     pcr_tmp = FPA_PCR_CC;
-    printf("\tCC= %#x", pcr_tmp);
-    if (pcr_tmp & FPA_PCR_20MHZ) printf(" 20MHZ");
-    if (pcr_tmp & FPA_PCR_CC_Z) printf(" Z");
-    if (pcr_tmp & FPA_PCR_CC_C2) printf(" C2");
-    if (pcr_tmp & FPA_PCR_CC_C1) printf(" C1");
+    printf_unfiltered("\tCC= %#x", pcr_tmp);
+    if (pcr_tmp & FPA_PCR_20MHZ) printf_unfiltered(" 20MHZ");
+    if (pcr_tmp & FPA_PCR_CC_Z) printf_unfiltered(" Z");
+    if (pcr_tmp & FPA_PCR_CC_C2) printf_unfiltered(" C2");
+    if (pcr_tmp & FPA_PCR_CC_C1) printf_unfiltered(" C1");
     switch (pcr_tmp) {
     case FPA_PCR_CC_Z:
-	printf(" (Equal)");
+	printf_unfiltered(" (Equal)");
 	break;
     case FPA_PCR_CC_C1:
-	printf(" (Less than)");
+	printf_unfiltered(" (Less than)");
 	break;
     case 0:
-	printf(" (Greater than)");
+	printf_unfiltered(" (Greater than)");
 	break;
     case FPA_PCR_CC_Z | FPA_PCR_CC_C1 | FPA_PCR_CC_C2:
-	printf(" (Unordered)");
+	printf_unfiltered(" (Unordered)");
 	break;
     default:
-	printf(" (Undefined)");
+	printf_unfiltered(" (Undefined)");
 	break;
     }
-    printf("\n");
+    printf_unfiltered("\n");
     pcr_tmp = pcr & FPA_PCR_AE;
-    printf("\tAE= %#x", pcr_tmp);
-    if (pcr_tmp & FPA_PCR_AE_DE) printf(" DE");
-    if (pcr_tmp & FPA_PCR_AE_UOE) printf(" UOE");
-    if (pcr_tmp & FPA_PCR_AE_PE) printf(" PE");
-    if (pcr_tmp & FPA_PCR_AE_UE) printf(" UE");
-    if (pcr_tmp & FPA_PCR_AE_OE) printf(" OE");
-    if (pcr_tmp & FPA_PCR_AE_ZE) printf(" ZE");
-    if (pcr_tmp & FPA_PCR_AE_EE) printf(" EE");
-    if (pcr_tmp & FPA_PCR_AE_IE) printf(" IE");
-    printf("\n");
+    printf_unfiltered("\tAE= %#x", pcr_tmp);
+    if (pcr_tmp & FPA_PCR_AE_DE) printf_unfiltered(" DE");
+    if (pcr_tmp & FPA_PCR_AE_UOE) printf_unfiltered(" UOE");
+    if (pcr_tmp & FPA_PCR_AE_PE) printf_unfiltered(" PE");
+    if (pcr_tmp & FPA_PCR_AE_UE) printf_unfiltered(" UE");
+    if (pcr_tmp & FPA_PCR_AE_OE) printf_unfiltered(" OE");
+    if (pcr_tmp & FPA_PCR_AE_ZE) printf_unfiltered(" ZE");
+    if (pcr_tmp & FPA_PCR_AE_EE) printf_unfiltered(" EE");
+    if (pcr_tmp & FPA_PCR_AE_IE) printf_unfiltered(" IE");
+    printf_unfiltered("\n");
 }
 
 print_1167_regs(regs)
@@ -253,13 +253,13 @@ long regs[FPA_NREGS];
 
     for (i = 0; i < FPA_NREGS; i++) {
 	xf.l = regs[i];
-	printf("%%fp%d: raw= %#x, single= %f", i+1, regs[i], xf.f);
+	printf_unfiltered("%%fp%d: raw= %#x, single= %f", i+1, regs[i], xf.f);
 	if (!(i & 1)) {
-	    printf("\n");
+	    printf_unfiltered("\n");
 	} else {
 	    xd.l[1] = regs[i];
 	    xd.l[0] = regs[i+1];
-	    printf(", double= %f\n", xd.d);
+	    printf_unfiltered(", double= %f\n", xd.d);
 	}
     }
 }
@@ -269,13 +269,13 @@ struct pt_regset ep;
 
 {
 
-    printf("WTL 1167:");
+    printf_unfiltered("WTL 1167:");
     if (ep.pr_fpa.fpa_pcr !=0) {
-	printf("\n");
+	printf_unfiltered("\n");
 	print_1167_control_word(ep.pr_fpa.fpa_pcr);
 	print_1167_regs(ep.pr_fpa.fpa_regs);
     } else {
-	printf(" not in use.\n");
+	printf_unfiltered(" not in use.\n");
     }
 }
 

@@ -417,7 +417,7 @@ remote_interrupt (signo)
   signal (signo, remote_interrupt_twice);
   
   if (remote_debug)
-    printf ("remote_interrupt called\n");
+    printf_unfiltered ("remote_interrupt called\n");
 
   SERIAL_WRITE (remote_desc, "\003", 1); /* Send a ^C */
 }
@@ -656,7 +656,7 @@ remote_fetch_registers (regno)
 	 && (buf[0] < 'a' || buf[0] > 'f'))
     {
       if (remote_debug)
-	printf ("Bad register packet; fetching a new packet\n");
+	printf_unfiltered ("Bad register packet; fetching a new packet\n");
       getpkt (buf, 0);
     }
 
@@ -997,7 +997,7 @@ putpkt (buf)
       if (remote_debug)
 	{
 	  *p = '\0';
-	  printf ("Sending packet: %s...", buf2);  fflush(stdout);
+	  printf_unfiltered ("Sending packet: %s...", buf2);  gdb_flush(gdb_stdout);
 	}
       if (SERIAL_WRITE (remote_desc, buf2, p - buf2))
 	perror_with_name ("putpkt: write failed");
@@ -1011,7 +1011,7 @@ putpkt (buf)
 	    {
 	    case '+':
 	      if (remote_debug)
-		printf("Ack\n");
+		printf_unfiltered("Ack\n");
 	      return;
 	    case SERIAL_TIMEOUT:
 	      break;		/* Retransmit buffer */
@@ -1021,7 +1021,7 @@ putpkt (buf)
 	      error ("putpkt: EOF while trying to read ACK");
 	    default:
 	      if (remote_debug)
-		printf ("%02X %c ", ch&0xFF, ch);
+		printf_unfiltered ("%02X %c ", ch&0xFF, ch);
 	      continue;
 	    }
 	  break;		/* Here to retransmit */
@@ -1133,7 +1133,7 @@ whole:
 	}
       else
 	{
-	  printf ("Ignoring packet error, continuing...\n");
+	  printf_unfiltered ("Ignoring packet error, continuing...\n");
 	  break;
 	}
     }
@@ -1143,7 +1143,7 @@ out:
   SERIAL_WRITE (remote_desc, "+", 1);
 
   if (remote_debug)
-    fprintf (stderr,"Packet received: %s\n", buf);
+    fprintf_unfiltered (gdb_stderr,"Packet received: %s\n", buf);
 }
 
 static void

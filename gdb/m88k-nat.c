@@ -146,7 +146,7 @@ store_inferior_registers (regno)
 	ptrace (6, inferior_pid,
 		(PTRACE_ARG3_TYPE) SFIP_OFFSET, read_register(regno));
       else
-	printf ("Bad register number for store_inferior routine\n");
+	printf_unfiltered ("Bad register number for store_inferior routine\n");
     }
   else
     { 

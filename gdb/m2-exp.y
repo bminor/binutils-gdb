@@ -1153,7 +1153,7 @@ void
 yyerror(msg)
      char *msg;	/* unused */
 {
-   printf("Parsing:  %s\n",lexptr);
+   printf_unfiltered("Parsing:  %s\n",lexptr);
    if (yychar < 256)
      error("Invalid syntax in expression near character '%c'.",yychar);
    else

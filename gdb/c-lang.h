@@ -24,8 +24,8 @@ extern void
 c_error PARAMS ((char *));	/* Defined in c-exp.y */
 
 extern void			/* Defined in c-typeprint.c */
-c_print_type PARAMS ((struct type *, char *, FILE *, int, int));
+c_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
 
 extern int
-c_val_print PARAMS ((struct type *, char *, CORE_ADDR, FILE *, int, int,
+c_val_print PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *, int, int,
 		     int, enum val_prettyprint));

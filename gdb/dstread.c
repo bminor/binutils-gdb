@@ -330,7 +330,7 @@ dst_symfile_read (objfile, section_offsets, mainline)
   symfile_bfd = abfd;			/* Kludge for swap routines */
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
-   desc = fileno ((FILE *)(abfd->iostream));	/* File descriptor */
+   desc = fileno ((GDB_FILE *)(abfd->iostream));	/* File descriptor */
 
   /* Read the line number table, all at once.  */
   bfd_map_over_sections (abfd, find_dst_sections, (PTR)NULL);
@@ -707,10 +707,10 @@ get_dst_entry(buffer, ret_entry)
     }
     if (size == -1)
     {
-	fprintf(stderr, "Warning: unexpected DST entry type (%d) found\nLast valid entry was of type: %d\n",
+	fprintf_unfiltered(gdb_stderr, "Warning: unexpected DST entry type (%d) found\nLast valid entry was of type: %d\n",
 		(int) entry->rec_type,
 		last_type);
-	fprintf(stderr, "Last unknown_3 value: %d\n", lu3);
+	fprintf_unfiltered(gdb_stderr, "Last unknown_3 value: %d\n", lu3);
 	size = 0;
     }
     else
@@ -1115,7 +1115,7 @@ decode_dst_locstring(locstr, sym)
 	{
 		if (count++ == 100)
 		{
-			fprintf(stderr, "Error reading locstring\n");
+			fprintf_unfiltered(gdb_stderr, "Error reading locstring\n");
 			break;
 		}
 		entry = (dst_loc_entry_t *) locstr;

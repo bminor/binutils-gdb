@@ -73,7 +73,7 @@ static void
 command_loop_marker PARAMS ((int));
 
 static void
-print_gdb_version PARAMS ((FILE *));
+print_gdb_version PARAMS ((GDB_FILE *));
 
 static void
 quit_command PARAMS ((char *, int));
@@ -687,7 +687,7 @@ main (argc, argv)
 	  ADDITIONAL_OPTION_CASES
 #endif
 	  case '?':
-	    fprintf (stderr,
+	    fprintf_unfiltered (gdb_stderr,
 		     "Use `%s --help' for a complete list of options.\n",
 		     argv[0]);
 	    exit (1);
@@ -707,7 +707,7 @@ main (argc, argv)
 	  corearg = argv[optind];
 	  break;
 	case 3:
-	  fprintf (stderr,
+	  fprintf_unfiltered (gdb_stderr,
 		   "Excess command line arguments ignored. (%s%s)\n",
 		   argv[optind], (optind == argc - 1) ? "" : " ...");
 	  break;
@@ -727,7 +727,7 @@ main (argc, argv)
      after initialize_all_files.  */
   if (print_version)
     {
-      print_gdb_version (stdout);
+      print_gdb_version (gdb_stdout);
       wrap_here ("");
       printf_filtered ("\n");
       exit (0);
@@ -739,14 +739,14 @@ main (argc, argv)
 	 are printing the version here, and the help is long enough
 	 already.  */
 
-      print_gdb_version (stdout);
+      print_gdb_version (gdb_stdout);
       /* Make sure the output gets printed.  */
       wrap_here ("");
       printf_filtered ("\n");
 
       /* But don't use *_filtered here.  We don't want to prompt for continue
 	 no matter how small the screen or how much we're going to print.  */
-      fputs ("\
+      fputs_unfiltered ("\
 This is the GNU debugger.  Usage:\n\
     gdb [options] [executable-file [core-file or process-id]]\n\
 Options:\n\
@@ -767,13 +767,13 @@ Options:\n\
   -b BAUDRATE        Set serial port baud rate used for remote debugging.\n\
   --mapped           Use mapped symbol files if supported on this system.\n\
   --readnow          Fully read symbol files on first access.\n\
-", stdout);
+", gdb_stdout);
 #ifdef ADDITIONAL_OPTION_HELP
-      fputs (ADDITIONAL_OPTION_HELP, stdout);
+      fputs_unfiltered (ADDITIONAL_OPTION_HELP, gdb_stdout);
 #endif
-      fputs ("\n\
+      fputs_unfiltered ("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
-GDB manual (available as on-line info or a printed manual).\n", stdout);
+GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
       exit (0);
     }
     
@@ -782,11 +782,11 @@ GDB manual (available as on-line info or a printed manual).\n", stdout);
       /* Print all the junk at the top, with trailing "..." if we are about
 	 to read a symbol file (possibly slowly).  */
       print_gnu_advertisement ();
-      print_gdb_version (stdout);
+      print_gdb_version (gdb_stdout);
       if (symarg)
 	printf_filtered ("..");
       wrap_here("");
-      fflush (stdout);		/* Force to screen during slow operations */
+      gdb_flush (gdb_stdout);		/* Force to screen during slow operations */
     }
 
   error_pre_print = "\n\n";
@@ -1119,8 +1119,8 @@ gdb_readline (prrompt)
       /* Don't use a _filtered function here.  It causes the assumed
 	 character position to be off, since the newline we read from
 	 the user is not accounted for.  */
-      fputs (prrompt, stdout);
-      fflush (stdout);
+      fputs_unfiltered (prrompt, gdb_stdout);
+      gdb_flush (gdb_stdout);
     }
   
   result = (char *) xmalloc (result_size);
@@ -1593,8 +1593,8 @@ int signo;
 #else
   signal (STOP_SIGNAL, stop_sig);
 #endif
-  printf ("%s", prompt);
-  fflush (stdout);
+  printf_unfiltered ("%s", prompt);
+  gdb_flush (gdb_stdout);
 
   /* Forget about any previous command -- null line now will do nothing.  */
   dont_repeat ();
@@ -1679,12 +1679,12 @@ command_line_input (prrompt, repeat)
 
   while (1)
     {
-      /* Reports are that some Sys V's don't flush stdout/err on reads
+      /* Reports are that some Sys V's don't flush gdb_stdout/err on reads
 	 from stdin, when stdin/out are sockets rather than ttys.  So we
 	 have to do it ourselves, to make emacs-gdb and xxgdb work.
 	 On other machines, doing this once per input should be a cheap nop.  */
-      fflush (stdout);
-      fflush (stderr);
+      gdb_flush (gdb_stdout);
+      gdb_flush (gdb_stderr);
 
       /* Don't use fancy stuff if not talking to stdin.  */
       if (command_editing_p && instream == stdin
@@ -1741,7 +1741,7 @@ command_line_input (prrompt, repeat)
       if (expanded)
 	{
 	  /* Print the changes.  */
-	  printf ("%s\n", history_value);
+	  printf_unfiltered ("%s\n", history_value);
 
 	  /* If there was an error, call this function again.  */
 	  if (expanded < 0)
@@ -1939,8 +1939,8 @@ info_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  printf ("\"info\" must be followed by the name of an info command.\n");
-  help_list (infolist, "info ", -1, stdout);
+  printf_unfiltered ("\"info\" must be followed by the name of an info command.\n");
+  help_list (infolist, "info ", -1, gdb_stdout);
 }
 
 /* The "show" command with no arguments shows all the settings.  */
@@ -1991,7 +1991,7 @@ help_command (command, from_tty)
      char *command;
      int from_tty; /* Ignored */
 {
-  help_cmd (command, stdout);
+  help_cmd (command, gdb_stdout);
 }
 
 static void
@@ -2077,9 +2077,9 @@ define_command (comname, from_tty)
 
   if (from_tty)
     {
-      printf ("Type commands for definition of \"%s\".\n\
+      printf_unfiltered ("Type commands for definition of \"%s\".\n\
 End with a line saying just \"end\".\n", comname);
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
     }
 
   cmds = read_command_lines ();
@@ -2118,7 +2118,7 @@ document_command (comname, from_tty)
     error ("Command \"%s\" is built-in.", comname);
 
   if (from_tty)
-    printf ("Type documentation for \"%s\".\n\
+    printf_unfiltered ("Type documentation for \"%s\".\n\
 End with a line saying just \"end\".\n", comname);
 
   doclines = read_command_lines ();
@@ -2149,7 +2149,7 @@ End with a line saying just \"end\".\n", comname);
 static void
 print_gnu_advertisement()
 {
-    printf ("\
+    printf_unfiltered ("\
 GDB is free software and you are welcome to distribute copies of it\n\
  under certain conditions; type \"show copying\" to see the conditions.\n\
 There is absolutely no warranty for GDB; type \"show warranty\" for details.\n\
@@ -2158,7 +2158,7 @@ There is absolutely no warranty for GDB; type \"show warranty\" for details.\n\
 
 static void
 print_gdb_version (stream)
-  FILE *stream;
+  GDB_FILE *stream;
 {
   fprintf_filtered (stream, "\
 GDB %s (%s", version, host_canonical);
@@ -2179,7 +2179,7 @@ show_version (args, from_tty)
 {
   immediate_quit++;
   print_gnu_advertisement ();
-  print_gdb_version (stdout);
+  print_gdb_version (gdb_stdout);
   printf_filtered ("\n");
   immediate_quit--;
 }
@@ -2189,8 +2189,8 @@ show_version (args, from_tty)
 void
 print_prompt ()
 {
-  printf ("%s", prompt);
-  fflush (stdout);
+  printf_unfiltered ("%s", prompt);
+  gdb_flush (gdb_stdout);
 }
 
 static void
@@ -2240,10 +2240,10 @@ pwd_command (args, from_tty)
   getcwd (dirbuf, sizeof (dirbuf));
 
   if (!STREQ (dirbuf, current_directory))
-    printf ("Working directory %s\n (canonically %s).\n",
+    printf_unfiltered ("Working directory %s\n (canonically %s).\n",
 	    current_directory, dirbuf);
   else
-    printf ("Working directory %s.\n", current_directory);
+    printf_unfiltered ("Working directory %s.\n", current_directory);
 }
 
 static void
@@ -2386,7 +2386,7 @@ echo_command (text, from_tty)
 
   /* Force this output to appear now.  */
   wrap_here ("");
-  fflush (stdout);
+  gdb_flush (gdb_stdout);
 }
 
 
@@ -2497,8 +2497,8 @@ set_history (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf ("\"set history\" must be followed by the name of a history subcommand.\n");
-  help_list (sethistlist, "set history ", -1, stdout);
+  printf_unfiltered ("\"set history\" must be followed by the name of a history subcommand.\n");
+  help_list (sethistlist, "set history ", -1, gdb_stdout);
 }
 
 /* ARGSUSED */
@@ -2789,6 +2789,15 @@ the previous command number shown.",
 
   add_cmd ("version", no_class, show_version,
 	   "Show what version of GDB this is.", &showlist);
+
+  /* If target is open when baud changes, it doesn't take effect until the
+     next open (I think, not sure).  */
+  add_show_from_set (add_set_cmd ("remotebaud", no_class,
+				  var_zinteger, (char *)&baud_rate,
+				  "Set baud rate for remote serial I/O.\n\
+This value is used to set the speed of the serial port when debugging\n\
+using remote targets.", &setlist),
+		     &showlist);
 
   add_show_from_set (
     add_set_cmd ("remotedebug", no_class, var_boolean, (char *)&remote_debug,

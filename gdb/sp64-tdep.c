@@ -89,7 +89,7 @@ sparc64_single_step (ignore)
       npc4 = next_pc + 4; /* branch not taken */
 
       target_insert_breakpoint (next_pc, break_mem[0]);
-      /* printf ("set break at %x\n",next_pc); */
+      /* printf_unfiltered ("set break at %x\n",next_pc); */
 
       pc = read_register (PC_REGNUM);
       pc_instruction = read_memory_integer (pc, sizeof(pc_instruction));
@@ -256,7 +256,7 @@ dump_ccreg (reg, val)
      char *reg;
      int val;
 {
-  printf ("%s:%s,%s,%s,%s", reg,
+  printf_unfiltered ("%s:%s,%s,%s,%s", reg,
 	  val & 8 ? "N" : "NN",
 	  val & 4 ? "Z" : "NZ",
 	  val & 2 ? "O" : "NO",
@@ -274,16 +274,16 @@ sparc_print_register_hook (regno)
       char doublereg[8];		/* two float regs */
       if (!read_relative_register_raw_bytes ((regno), doublereg))
 	{
-	  printf("\t");
-	  print_floating (doublereg, builtin_type_double, stdout);
+	  printf_unfiltered("\t");
+	  print_floating (doublereg, builtin_type_double, gdb_stdout);
 	}
     }
   else if ((regno) == CCR_REGNUM)
     {
       int ccr = read_register (CCR_REGNUM);
-      printf("\t");
+      printf_unfiltered("\t");
       dump_ccreg ("xcc", ccr >> 4);
-      printf(", ");
+      printf_unfiltered(", ");
       dump_ccreg ("icc", ccr & 15);
     }
 }

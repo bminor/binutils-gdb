@@ -436,7 +436,7 @@ place.  The default vectors are called @code{default-input-vector},
 @code{default-output-vector}, &c.  
 
 The default query function always returns `y'.  Other input functions
-always abort.  The default output functions do nothing.
+always abort.  The default output functions discard output silently.
 
 
 @node Invoking, Defining Commands, I/O, Top

@@ -564,7 +564,7 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 	{
 	  printf_filtered ("Mapped symbols for %s...", name);
 	  wrap_here ("");
-	  fflush (stdout);
+	  gdb_flush (gdb_stdout);
 	}
       init_entry_point_info (objfile);
       find_sym_fns (objfile);
@@ -578,7 +578,7 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 	{
 	  printf_filtered ("Reading symbols from %s...", name);
 	  wrap_here ("");
-	  fflush (stdout);
+	  gdb_flush (gdb_stdout);
 	}
       syms_from_objfile (objfile, addr, mainline, from_tty);
     }      
@@ -594,7 +594,7 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 	{
 	  printf_filtered ("expanding to full symbols...");
 	  wrap_here ("");
-	  fflush (stdout);
+	  gdb_flush (gdb_stdout);
 	}
 
       for (psymtab = objfile -> psymtabs;
@@ -608,7 +608,7 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
   if (from_tty || info_verbose)
     {
       printf_filtered ("done.\n");
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
     }
 
   new_symfile_objfile (objfile, mainline, from_tty);
@@ -648,7 +648,7 @@ symbol_file_command (args, from_tty)
       symfile_objfile = NULL;
       if (from_tty)
 	{
-	  printf ("No symbol file now.\n");
+	  printf_unfiltered ("No symbol file now.\n");
 	}
     }
   else

@@ -52,7 +52,7 @@ register_addr (regno, blockend)
     return offsetof (struct user, u_fpu.regs.iaddr);
   else
     {
-      fprintf (stderr, "\
+      fprintf_unfiltered (gdb_stderr, "\
 Internal error: invalid register number %d in REGISTER_U_ADDR\n",
 	       regno);
       return blockend;

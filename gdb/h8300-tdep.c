@@ -100,7 +100,7 @@ h8300_skip_prologue (start_pc)
 int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   disassemble_info info;
   GDB_INIT_DISASSEMBLE_INFO(info, stream);
@@ -415,8 +415,8 @@ set_machine (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf ("\"set machine\" must be followed by h8300 or h8300h.\n");
-  help_list (setmemorylist, "set memory ", -1, stdout);
+  printf_unfiltered ("\"set machine\" must be followed by h8300 or h8300h.\n");
+  help_list (setmemorylist, "set memory ", -1, gdb_stdout);
 }
 
 void
@@ -448,37 +448,37 @@ print_register_hook (regno)
 
       read_relative_register_raw_bytes (regno, b);
       l = b[1];
-      printf ("\t");
-      printf ("I-%d - ", (l & 0x80) != 0);
-      printf ("H-%d - ", (l & 0x20) != 0);
+      printf_unfiltered ("\t");
+      printf_unfiltered ("I-%d - ", (l & 0x80) != 0);
+      printf_unfiltered ("H-%d - ", (l & 0x20) != 0);
       N = (l & 0x8) != 0;
       Z = (l & 0x4) != 0;
       V = (l & 0x2) != 0;
       C = (l & 0x1) != 0;
-      printf ("N-%d ", N);
-      printf ("Z-%d ", Z);
-      printf ("V-%d ", V);
-      printf ("C-%d ", C);
+      printf_unfiltered ("N-%d ", N);
+      printf_unfiltered ("Z-%d ", Z);
+      printf_unfiltered ("V-%d ", V);
+      printf_unfiltered ("C-%d ", C);
       if ((C | Z) == 0)
-	printf ("u> ");
+	printf_unfiltered ("u> ");
       if ((C | Z) == 1)
-	printf ("u<= ");
+	printf_unfiltered ("u<= ");
       if ((C == 0))
-	printf ("u>= ");
+	printf_unfiltered ("u>= ");
       if (C == 1)
-	printf ("u< ");
+	printf_unfiltered ("u< ");
       if (Z == 0)
-	printf ("!= ");
+	printf_unfiltered ("!= ");
       if (Z == 1)
-	printf ("== ");
+	printf_unfiltered ("== ");
       if ((N ^ V) == 0)
-	printf (">= ");
+	printf_unfiltered (">= ");
       if ((N ^ V) == 1)
-	printf ("< ");
+	printf_unfiltered ("< ");
       if ((Z | (N ^ V)) == 0)
-	printf ("> ");
+	printf_unfiltered ("> ");
       if ((Z | (N ^ V)) == 1)
-	printf ("<= ");
+	printf_unfiltered ("<= ");
     }
 }
 

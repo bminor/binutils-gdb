@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static void uerror(char *s)
 {
-  fprintf(stderr, "Fatal: %s!\n");
+  fprintf_unfiltered(gdb_stderr, "Fatal: %s!\n");
   exit(1);
 }
 

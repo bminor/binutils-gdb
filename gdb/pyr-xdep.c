@@ -49,13 +49,13 @@ fetch_inferior_registers (regno)
     reg_buf[regno] = ptrace (3, inferior_pid, (PTRACE_ARG3_TYPE) regno, 0);
     
 #if defined(PYRAMID_CONTROL_FRAME_DEBUGGING)
-    printf ("Fetching register %s, got %0x\n",
+    printf_unfiltered ("Fetching register %s, got %0x\n",
 	    reg_names[regno],
 	    reg_buf[regno]);
 #endif /* PYRAMID_CONTROL_FRAME_DEBUGGING */
     
     if (reg_buf[regno] == -1 && errno == EIO) {
-      printf("fetch_interior_registers: fetching register %s\n",
+      printf_unfiltered("fetch_interior_registers: fetching register %s\n",
 	     reg_names[regno]);
       errno = 0;
     }
@@ -104,7 +104,7 @@ fetch_inferior_registers (regno)
 				(PTRACE_ARG3_TYPE) (datum+((32+15)*4)), 0);
     if (inferior_saved_pc > 0) break;
 #if defined(PYRAMID_CONTROL_FRAME_DEBUGGING)
-    printf("skipping kernel frame %08x, pc=%08x\n", datum,
+    printf_unfiltered("skipping kernel frame %08x, pc=%08x\n", datum,
 	   inferior_saved_pc);
 #endif /* PYRAMID_CONTROL_FRAME_DEBUGGING */
     skipped_frames++;
@@ -115,7 +115,7 @@ fetch_inferior_registers (regno)
   supply_register(CSP_REGNUM, reg_buf+CSP_REGNUM);
 #ifdef  PYRAMID_CONTROL_FRAME_DEBUGGING
   if (skipped_frames) {
-    fprintf (stderr,
+    fprintf_unfiltered (stderr,
 	     "skipped %d frames from %x to %x; cfp was %x, now %x\n",
 	     skipped_frames, reg_buf[CSP_REGNUM]);
   }
@@ -277,16 +277,16 @@ core_file_command (filename, from_tty)
 
 	    if (*(int *)buf >= 0)
 		    break;
-	    printf ("skipping frame %s\n", local_hex_string (last_frame_address));
+	    printf_unfiltered ("skipping frame %s\n", local_hex_string (last_frame_address));
 	    last_frame_offset -= CONTROL_STACK_FRAME_SIZE;
 	    last_frame_address -= CONTROL_STACK_FRAME_SIZE;
 	}
 	reg_offset = last_frame_offset;
 
 #if 1 || defined(PYRAMID_CONTROL_FRAME_DEBUGGING)
-	printf ("Control stack pointer = %s\n",
+	printf_unfiltered ("Control stack pointer = %s\n",
 		local_hex_string (u.u_pcb.pcb_csp));
-	printf ("offset to control stack %d outermost frame %d (%s)\n",
+	printf_unfiltered ("offset to control stack %d outermost frame %d (%s)\n",
 	      reg_stack_offset, reg_offset, local_hex_string (last_frame_address));
 #endif /* PYRAMID_CONTROL_FRAME_DEBUGGING */
 
@@ -332,7 +332,7 @@ core_file_command (filename, from_tty)
 	      if (val < 0)
 		perror_with_name (filename);
 #ifdef PYRAMID_CONTROL_FRAME_DEBUGGING
-      printf ("[reg %s(%d), offset in file %s=0x%0x, addr =0x%0x, =%0x]\n",
+      printf_unfiltered ("[reg %s(%d), offset in file %s=0x%0x, addr =0x%0x, =%0x]\n",
 	      reg_names[regno], regno, filename,
 	      register_addr(regno, reg_offset),
 	      regno * 4 + last_frame_address,
@@ -350,7 +350,7 @@ core_file_command (filename, from_tty)
 	}
 
 #if 1 || defined(PYRAMID_CONTROL_FRAME_DEBUGGING)
-      printf ("Providing CSP (%s) as nominal address of current frame.\n",
+      printf_unfiltered ("Providing CSP (%s) as nominal address of current frame.\n",
 	      local_hex_string(last_frame_address));
 #endif PYRAMID_CONTROL_FRAME_DEBUGGING
       /* FIXME: Which of the following is correct? */
@@ -366,5 +366,5 @@ core_file_command (filename, from_tty)
       validate_files ();
     }
   else if (from_tty)
-    printf ("No core file now.\n");
+    printf_unfiltered ("No core file now.\n");
 }

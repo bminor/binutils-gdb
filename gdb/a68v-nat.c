@@ -129,7 +129,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which)
 #endif
       }
     else
-      fprintf (stderr, "Couldn't read float regs from core file\n");
+      fprintf_unfiltered (gdb_stderr, "Couldn't read float regs from core file\n");
   }
 }
 #else /* Not sun3 target.  */

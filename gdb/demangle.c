@@ -127,13 +127,13 @@ set_demangling_command (ignore, from_tty)
     {
       if (*current_demangling_style_string != '\0')
 	{
-	  printf ("Unknown demangling style `%s'.\n",
+	  printf_unfiltered ("Unknown demangling style `%s'.\n",
 		  current_demangling_style_string);
 	}
-      printf ("The currently understood settings are:\n\n");
+      printf_unfiltered ("The currently understood settings are:\n\n");
       for (dem = demanglers; dem -> demangling_style_name != NULL; dem++)
 	{
-	  printf ("%-10s %s\n", dem -> demangling_style_name,
+	  printf_unfiltered ("%-10s %s\n", dem -> demangling_style_name,
 		  dem -> demangling_style_doc);
 	  if (dem -> demangling_style == current_demangling_style)
 	    {

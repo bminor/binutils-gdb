@@ -378,8 +378,8 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
 		 should be filtered?  */
 	      if (! mips_initializing || sr_get_debug () > 0)
 		{
-		  putchar (ch);
-		  fflush (stdout);
+		  putchar_unfiltered (ch);
+		  gdb_flush (gdb_stdout);
 		}
 
 	      ++*pgarbage;
@@ -911,7 +911,7 @@ device is attached to the target board (e.g., /dev/ttya).");
   mips_initialize ();
 
   if (from_tty)
-    printf ("Remote MIPS debugging using %s\n", name);
+    printf_unfiltered ("Remote MIPS debugging using %s\n", name);
   push_target (&mips_ops);	/* Switch to using remote target now */
 
   /* FIXME: Should we call start_remote here?  */
@@ -948,7 +948,7 @@ mips_detach (args, from_tty)
 
   pop_target ();
   if (from_tty)
-    printf ("Ending remote MIPS debugging.\n");
+    printf_unfiltered ("Ending remote MIPS debugging.\n");
 }
 
 /* Tell the target board to resume.  This does not wait for a reply
@@ -1212,7 +1212,7 @@ static void
 mips_files_info (ignore)
      struct target_ops *ignore;
 {
-  printf ("Debugging a MIPS board over a serial line.\n");
+  printf_unfiltered ("Debugging a MIPS board over a serial line.\n");
 }
 
 /* Kill the process running on the board.  This will actually only

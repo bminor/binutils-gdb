@@ -363,7 +363,7 @@ mod_path (dirname, which_path)
 	if (stat (name, &st) < 0)
 	  {
 	    int save_errno = errno;
-	    fprintf (stderr, "Warning: ");
+	    fprintf_unfiltered (gdb_stderr, "Warning: ");
 	    print_sys_errmsg (name, save_errno);
 	  }
 	else if ((st.st_mode & S_IFMT) != S_IFDIR)
@@ -804,10 +804,10 @@ identify_source_line (s, line, mid_statement, pc)
   if (line > s->nlines)
     /* Don't index off the end of the line_charpos array.  */
     return 0;
-  printf ("\032\032%s:%d:%d:%s:0x%x\n", s->fullname,
+  printf_unfiltered ("\032\032%s:%d:%d:%s:0x%lx\n", s->fullname,
 	  line, s->line_charpos[line - 1],
 	  mid_statement ? "middle" : "beg",
-	  pc);
+	  (unsigned long) pc);
   current_source_line = line;
   first_line_listed = line;
   last_line_listed = line;
@@ -961,7 +961,7 @@ list_command (arg, from_tty)
     dummy_beg = 1;
   else
     {
-      sals = decode_line_1 (&arg1, 0, 0, 0);
+      sals = decode_line_1 (&arg1, 0, 0, 0, 0);
 
       if (! sals.nelts) return;  /*  C++  */
       if (sals.nelts > 1)
@@ -993,9 +993,9 @@ list_command (arg, from_tty)
       else
 	{
 	  if (dummy_beg)
-	    sals_end = decode_line_1 (&arg1, 0, 0, 0);
+	    sals_end = decode_line_1 (&arg1, 0, 0, 0, 0);
 	  else
-	    sals_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line);
+	    sals_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line, 0);
 	  if (sals_end.nelts == 0) 
 	    return;
 	  if (sals_end.nelts > 1)
@@ -1025,17 +1025,19 @@ list_command (arg, from_tty)
   if (*arg == '*')
     {
       if (sal.symtab == 0)
-	error ("No source file for address %s.", local_hex_string(sal.pc));
+	error ("No source file for address %s.",
+		local_hex_string((unsigned long) sal.pc));
       sym = find_pc_function (sal.pc);
       if (sym)
 	{
-	  printf_filtered ("%s is in ", local_hex_string(sal.pc));
-	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stdout);
+	  printf_filtered ("%s is in ",
+			   local_hex_string((unsigned long) sal.pc));
+	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
 	  printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
 	}
       else
 	printf_filtered ("%s is at %s:%d.\n",
-			 local_hex_string(sal.pc), 
+			 local_hex_string((unsigned long) sal.pc), 
 			 sal.symtab->filename, sal.line);
     }
 
@@ -1116,7 +1118,7 @@ line_info (arg, from_tty)
 		 address.  */
 	      printf_filtered (" for address ");
 	      wrap_here ("  ");
-	      print_address (sal.pc, stdout);
+	      print_address (sal.pc, gdb_stdout);
 	    }
 	  else
 	    printf_filtered (".");
@@ -1131,7 +1133,7 @@ line_info (arg, from_tty)
 			       sal.line, sal.symtab->filename);
 	      wrap_here ("  ");
 	      printf_filtered (" is at address ");
-	      print_address (start_pc, stdout);
+	      print_address (start_pc, gdb_stdout);
 	      wrap_here ("  ");
 	      printf_filtered (" but contains no code.\n");
 	    }
@@ -1141,10 +1143,10 @@ line_info (arg, from_tty)
 			       sal.line, sal.symtab->filename);
 	      wrap_here ("  ");
 	      printf_filtered (" starts at address ");
-	      print_address (start_pc, stdout);
+	      print_address (start_pc, gdb_stdout);
 	      wrap_here ("  ");
 	      printf_filtered (" and ends at ");
-	      print_address (end_pc, stdout);
+	      print_address (end_pc, gdb_stdout);
 	      printf_filtered (".\n");
 	    }
 
@@ -1166,6 +1168,7 @@ line_info (arg, from_tty)
 	printf_filtered ("Line number %d is out of range for \"%s\".\n",
 			 sal.line, sal.symtab->filename);
     }
+  free (sals.sals);
 }
 
 /* Commands to search the source file for a regexp.  */
@@ -1327,6 +1330,12 @@ _initialize_source ()
   struct cmd_list_element *c;
   current_source_symtab = 0;
   init_source_path ();
+
+  /* The intention is to use POSIX Basic Regular Expressions.
+     Always use the GNU regex routine for consistency across all hosts.
+     Our current GNU regex.c does not have all the POSIX features, so this is
+     just an approximation.  */
+  re_set_syntax (RE_SYNTAX_GREP);
 
   c = add_cmd ("directory", class_files, directory_command,
 	   "Add directory DIR to beginning of search path for source files.\n\

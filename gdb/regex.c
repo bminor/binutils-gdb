@@ -1657,21 +1657,21 @@ main (argc, argv)
 	  for (i = 0; i < buf.used; i++)
 	    printchar (buf.buffer[i]);
 
-	  putchar ('\n');
+	  putchar_unfiltered ('\n');
 
-	  printf ("%d allocated, %d used.\n", buf.allocated, buf.used);
+	  printf_unfiltered ("%d allocated, %d used.\n", buf.allocated, buf.used);
 
 	  re_compile_fastmap (&buf);
-	  printf ("Allowed by fastmap: ");
+	  printf_unfiltered ("Allowed by fastmap: ");
 	  for (i = 0; i < (1 << BYTEWIDTH); i++)
 	    if (fastmap[i]) printchar (i);
-	  putchar ('\n');
+	  putchar_unfiltered ('\n');
 	}
 
       gets (pat);	/* Now read the string to match against */
 
       i = re_match (&buf, pat, strlen (pat), 0, 0);
-      printf ("Match value %d.\n", i);
+      printf_unfiltered ("Match value %d.\n", i);
     }
 }
 
@@ -1681,23 +1681,23 @@ print_buf (bufp)
 {
   int i;
 
-  printf ("buf is :\n----------------\n");
+  printf_unfiltered ("buf is :\n----------------\n");
   for (i = 0; i < bufp->used; i++)
     printchar (bufp->buffer[i]);
   
-  printf ("\n%d allocated, %d used.\n", bufp->allocated, bufp->used);
+  printf_unfiltered ("\n%d allocated, %d used.\n", bufp->allocated, bufp->used);
   
-  printf ("Allowed by fastmap: ");
+  printf_unfiltered ("Allowed by fastmap: ");
   for (i = 0; i < (1 << BYTEWIDTH); i++)
     if (bufp->fastmap[i])
       printchar (i);
-  printf ("\nAllowed by translate: ");
+  printf_unfiltered ("\nAllowed by translate: ");
   if (bufp->translate)
     for (i = 0; i < (1 << BYTEWIDTH); i++)
       if (bufp->translate[i])
 	printchar (i);
-  printf ("\nfastmap is%s accurate\n", bufp->fastmap_accurate ? "" : "n't");
-  printf ("can %s be null\n----------", bufp->can_be_null ? "" : "not");
+  printf_unfiltered ("\nfastmap is%s accurate\n", bufp->fastmap_accurate ? "" : "n't");
+  printf_unfiltered ("can %s be null\n----------", bufp->can_be_null ? "" : "not");
 }
 #endif
 
@@ -1706,19 +1706,19 @@ printchar (c)
 {
   if (c < 041 || c >= 0177)
     {
-      putchar ('\\');
-      putchar (((c >> 6) & 3) + '0');
-      putchar (((c >> 3) & 7) + '0');
-      putchar ((c & 7) + '0');
+      putchar_unfiltered ('\\');
+      putchar_unfiltered (((c >> 6) & 3) + '0');
+      putchar_unfiltered (((c >> 3) & 7) + '0');
+      putchar_unfiltered ((c & 7) + '0');
     }
   else
-    putchar (c);
+    putchar_unfiltered (c);
 }
 
 error (string)
      char *string;
 {
-  puts (string);
+  puts_unfiltered (string);
   exit (1);
 }
 

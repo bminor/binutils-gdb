@@ -2364,14 +2364,14 @@ psymtab_to_symtab_1 (pst)
 		  /* Inform about additional files that need to be read in. */
 		  if (info_verbose)
 		    {
-		      fputs_filtered (" ", stdout);
+		      fputs_filtered (" ", gdb_stdout);
 		      wrap_here ("");
-		      fputs_filtered ("and ", stdout);
+		      fputs_filtered ("and ", gdb_stdout);
 		      wrap_here ("");
 		      printf_filtered ("%s...",
 				       pst -> dependencies[i] -> filename);
 		      wrap_here ("");
-		      fflush (stdout);		/* Flush output */
+		      gdb_flush (gdb_stdout);		/* Flush output */
 		    }
 		  psymtab_to_symtab_1 (pst -> dependencies[i]);
 		}
@@ -2385,7 +2385,7 @@ psymtab_to_symtab_1 (pst)
 		{
 		  printf_filtered ("%d DIE's, sorting...", diecount);
 		  wrap_here ("");
-		  fflush (stdout);
+		  gdb_flush (gdb_stdout);
 		}
 	      sort_symtab_syms (pst -> symtab);
 	      do_cleanups (old_chain);
@@ -2435,7 +2435,7 @@ dwarf_psymtab_to_symtab (pst)
 		{
 		  printf_filtered ("Reading in symbols for %s...",
 				   pst -> filename);
-		  fflush (stdout);
+		  gdb_flush (gdb_stdout);
 		}
 	      
 	      psymtab_to_symtab_1 (pst);
@@ -2453,7 +2453,7 @@ dwarf_psymtab_to_symtab (pst)
 	      if (info_verbose)
 		{
 		  printf_filtered ("done.\n");
-		  fflush (stdout);
+		  gdb_flush (gdb_stdout);
 		}
 	    }
 	}

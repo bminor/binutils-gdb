@@ -183,7 +183,7 @@ dos_async_rx()
   while (!dos_async_ready())
     if (kbhit())
       {
-	printf("abort!\n");
+	printf_unfiltered("abort!\n");
 	return 0;
       }
 

@@ -184,7 +184,7 @@ char *filename;
   else {
   	exec_close(0);	/* just in case	*/
   	if (from_tty)
-	  printf("No exec file now.\n");
+	  printf_unfiltered("No exec file now.\n");
   }
 }
 
@@ -277,7 +277,7 @@ sex_to_vmap(bfd *bf, sec_ptr sex, PTR arg3)
   }
 
   else if (STREQ(bfd_section_name(bf, sex), ".bss"))	/* FIXMEmgo */
-    printf ("bss section in exec! Don't know what the heck to do!\n");
+    printf_unfiltered ("bss section in exec! Don't know what the heck to do!\n");
 }
 
 /* Make a vmap for the BFD "bf", which might be a member of the archive
@@ -759,13 +759,13 @@ exec_files_info (t)
   if (!vp)
     return;
 
-  printf("\tMapping info for file `%s'.\n", vp->name);
+  printf_unfiltered("\tMapping info for file `%s'.\n", vp->name);
 
-  printf("\t  %8.8s   %8.8s   %8.8s   %8.8s %8.8s %s\n",
+  printf_unfiltered("\t  %8.8s   %8.8s   %8.8s   %8.8s %8.8s %s\n",
     "tstart", "tend", "dstart", "dend", "section", "file(member)");
 
   for (; vp; vp = vp->nxt)
-     printf("\t0x%8.8x 0x%8.8x 0x%8.8x 0x%8.8x %s%s%s%s\n",
+     printf_unfiltered("\t0x%8.8x 0x%8.8x 0x%8.8x 0x%8.8x %s%s%s%s\n",
 	vp->tstart,
 	vp->tend,
 	vp->dstart,
@@ -925,7 +925,7 @@ xcoff_relocate_core ()
   if (ldinfo_sec == NULL)
     {
 bfd_err:
-      fprintf_filtered (stderr, "Couldn't get ldinfo from core file: %s\n",
+      fprintf_filtered (gdb_stderr, "Couldn't get ldinfo from core file: %s\n",
 			bfd_errmsg (bfd_error));
       do_cleanups (old);
       return;

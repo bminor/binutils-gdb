@@ -76,7 +76,7 @@ usage(proto, junk)
      char *junk;
 {
   if (junk != NULL)
-    fprintf(stderr, "Unrecognized arguments: `%s'.\n", junk);
+    fprintf_unfiltered(gdb_stderr, "Unrecognized arguments: `%s'.\n", junk);
 
   /* FIXME-now: service@host? */
 
@@ -217,7 +217,7 @@ sr_readchar ()
     error ("Timeout reading from remote system.");
 
   if (sr_get_debug() > 0)
-    printf ("%c", buf);
+    printf_unfiltered ("%c", buf);
 
   return buf & 0x7f;
 }
@@ -232,9 +232,9 @@ sr_pollchar()
     buf = 0;
   if (sr_get_debug() > 0)
     if (buf)
-      printf ("%c", buf);
+      printf_unfiltered ("%c", buf);
     else
-      printf ("<empty character poll>");
+      printf_unfiltered ("<empty character poll>");
 
   return buf & 0x7f;
 }
@@ -276,7 +276,7 @@ sr_write (a, l)
 
   if (sr_get_debug() > 0)
     for (i = 0; i < l; i++)
-      printf ("%c", a[i]);
+      printf_unfiltered ("%c", a[i]);
 
   return;
 }
@@ -573,9 +573,9 @@ gr_multi_scan (list, passthrough)
 	  if (passthrough)
 	    {
 	      for (p = swallowed; p < swallowed_p; ++p)
-		putc (*p, stdout);
+		putc_unfiltered (*p, gdb_stdout);
 
-	      putc (ch, stdout);
+	      putc_unfiltered (ch, gdb_stdout);
 	    }
 
 	  swallowed_p = swallowed;

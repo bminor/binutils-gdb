@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "c-lang.h" /* For c_val_print */
 
 static void
-chill_print_value_fields PARAMS ((struct type *, char *, FILE *, int, int,
+chill_print_value_fields PARAMS ((struct type *, char *, GDB_FILE *, int, int,
 				  enum val_prettyprint, struct type **));
 
 
@@ -52,7 +52,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
-     FILE *stream;
+     GDB_FILE *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -246,7 +246,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       c_val_print (type, valaddr, address, stream, format,
 		   deref_ref, recurse, pretty);
     }
-  fflush (stream);
+  gdb_flush (stream);
   return (0);
 }
 
@@ -264,7 +264,7 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 			  dont_print)
      struct type *type;
      char *valaddr;
-     FILE *stream;
+     GDB_FILE *stream;
      int format;
      int recurse;
      enum val_prettyprint pretty;

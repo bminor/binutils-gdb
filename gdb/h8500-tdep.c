@@ -109,7 +109,7 @@ h8500_skip_prologue (start_pc)
 int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   disassemble_info info;
   GDB_INIT_DISASSEMBLE_INFO (info, stream);
@@ -397,36 +397,36 @@ print_register_hook (regno)
 
       read_relative_register_raw_bytes (regno, b);
       l = b[1];
-      printf ("\t");
-      printf ("I-%d - ", (l & 0x80) != 0);
+      printf_unfiltered ("\t");
+      printf_unfiltered ("I-%d - ", (l & 0x80) != 0);
       N = (l & 0x8) != 0;
       Z = (l & 0x4) != 0;
       V = (l & 0x2) != 0;
       C = (l & 0x1) != 0;
-      printf ("N-%d ", N);
-      printf ("Z-%d ", Z);
-      printf ("V-%d ", V);
-      printf ("C-%d ", C);
+      printf_unfiltered ("N-%d ", N);
+      printf_unfiltered ("Z-%d ", Z);
+      printf_unfiltered ("V-%d ", V);
+      printf_unfiltered ("C-%d ", C);
       if ((C | Z) == 0)
-	printf ("u> ");
+	printf_unfiltered ("u> ");
       if ((C | Z) == 1)
-	printf ("u<= ");
+	printf_unfiltered ("u<= ");
       if ((C == 0))
-	printf ("u>= ");
+	printf_unfiltered ("u>= ");
       if (C == 1)
-	printf ("u< ");
+	printf_unfiltered ("u< ");
       if (Z == 0)
-	printf ("!= ");
+	printf_unfiltered ("!= ");
       if (Z == 1)
-	printf ("== ");
+	printf_unfiltered ("== ");
       if ((N ^ V) == 0)
-	printf (">= ");
+	printf_unfiltered (">= ");
       if ((N ^ V) == 1)
-	printf ("< ");
+	printf_unfiltered ("< ");
       if ((Z | (N ^ V)) == 0)
-	printf ("> ");
+	printf_unfiltered ("> ");
       if ((Z | (N ^ V)) == 1)
-	printf ("<= ");
+	printf_unfiltered ("<= ");
     }
 }
 
@@ -600,7 +600,7 @@ h8500_set_pointer_size (newsize)
 
   if (oldsize != newsize)
     {
-      printf ("pointer size set to %d bits\n", newsize);
+      printf_unfiltered ("pointer size set to %d bits\n", newsize);
       oldsize = newsize;
       if (newsize == 32)
 	{
@@ -639,8 +639,8 @@ set_memory (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf ("\"set memory\" must be followed by the name of a memory subcommand.\n");
-  help_list (setmemorylist, "set memory ", -1, stdout);
+  printf_unfiltered ("\"set memory\" must be followed by the name of a memory subcommand.\n");
+  help_list (setmemorylist, "set memory ", -1, gdb_stdout);
 }
 
 /* See if variable name is ppc or pr[0-7] */

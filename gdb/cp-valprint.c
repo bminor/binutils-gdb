@@ -33,20 +33,20 @@ int objectprint;		/* Controls looking up an object's derived type
 struct obstack dont_print_obstack;
 
 static void
-cplus_print_value PARAMS ((struct type *, char *, FILE *, int, int,
+cplus_print_value PARAMS ((struct type *, char *, GDB_FILE *, int, int,
 			   enum val_prettyprint, struct type **));
 
 /* BEGIN-FIXME:  Hooks into typeprint.c, find a better home for prototypes. */
 
 extern void
-c_type_print_base PARAMS ((struct type *, FILE *, int, int));
+c_type_print_base PARAMS ((struct type *, GDB_FILE *, int, int));
 
 extern void
-c_type_print_varspec_prefix PARAMS ((struct type *, FILE *, int, int));
+c_type_print_varspec_prefix PARAMS ((struct type *, GDB_FILE *, int, int));
 
 extern void
 cp_type_print_method_args PARAMS ((struct type **, char *, char *, int,
-				   FILE *));
+				   GDB_FILE *));
 
 extern struct obstack dont_print_obstack;
 
@@ -56,7 +56,7 @@ extern struct obstack dont_print_obstack;
 /* BEGIN-FIXME:  Hooks into c-valprint.c */
 
 extern int
-c_val_print PARAMS ((struct type *, char *, CORE_ADDR, FILE *, int, int, int,
+c_val_print PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *, int, int, int,
 		     enum val_prettyprint));
 /* END-FIXME */
 
@@ -65,7 +65,7 @@ void
 cp_print_class_method (valaddr, type, stream)
      char *valaddr;
      struct type *type;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   struct type *domain;
   struct fn_field *f = NULL;
@@ -136,7 +136,7 @@ cp_print_class_method (valaddr, type, stream)
     {
       fprintf_filtered (stream, "&");
       c_type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
-      fprintf (stream, kind);
+      fprintf_unfiltered (stream, kind);
       if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
 	  && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == CPLUS_MARKER)
 	{
@@ -212,7 +212,7 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 		       dont_print)
      struct type *type;
      char *valaddr;
-     FILE *stream;
+     GDB_FILE *stream;
      int format;
      int recurse;
      enum val_prettyprint pretty;
@@ -325,7 +325,7 @@ static void
 cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
      struct type *type;
      char *valaddr;
-     FILE *stream;
+     GDB_FILE *stream;
      int format;
      int recurse;
      enum val_prettyprint pretty;
@@ -411,7 +411,7 @@ void
 cp_print_class_member (valaddr, domain, stream, prefix)
      char *valaddr;
      struct type *domain;
-     FILE *stream;
+     GDB_FILE *stream;
      char *prefix;
 {
   

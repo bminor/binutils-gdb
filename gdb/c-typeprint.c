@@ -39,19 +39,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern int demangle;	/* whether to print C++ syms raw or source-form */
 
 static void
-c_type_print_args PARAMS ((struct type *, FILE *));
+c_type_print_args PARAMS ((struct type *, GDB_FILE *));
 
 static void
-c_type_print_varspec_suffix PARAMS ((struct type *, FILE *, int, int, int));
+c_type_print_varspec_suffix PARAMS ((struct type *, GDB_FILE *, int, int, int));
 
 static void
-cp_type_print_derivation_info PARAMS ((FILE *, struct type *));
+cp_type_print_derivation_info PARAMS ((GDB_FILE *, struct type *));
 
 void
-c_type_print_varspec_prefix PARAMS ((struct type *, FILE *, int, int));
+c_type_print_varspec_prefix PARAMS ((struct type *, GDB_FILE *, int, int));
 
 void
-c_type_print_base PARAMS ((struct type *, FILE *, int, int));
+c_type_print_base PARAMS ((struct type *, GDB_FILE *, int, int));
 
 
 /* Print a description of a type in the format of a 
@@ -62,7 +62,7 @@ void
 c_typedef_print (type, new, stream)
    struct type *type;
    struct symbol *new;
-   FILE *stream;
+   GDB_FILE *stream;
 {
    switch (current_language->la_language)
    {
@@ -104,7 +104,7 @@ void
 c_print_type (type, varstring, stream, show, level)
      struct type *type;
      char *varstring;
-     FILE *stream;
+     GDB_FILE *stream;
      int show;
      int level;
 {
@@ -145,7 +145,7 @@ cp_type_print_method_args (args, prefix, varstring, staticp, stream)
      char *prefix;
      char *varstring;
      int staticp;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   int i;
 
@@ -199,7 +199,7 @@ cp_type_print_method_args (args, prefix, varstring, staticp, stream)
 
 static void
 cp_type_print_derivation_info (stream, type)
-     FILE *stream;
+     GDB_FILE *stream;
      struct type *type;
 {
   char *name;
@@ -231,7 +231,7 @@ cp_type_print_derivation_info (stream, type)
 void
 c_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
      struct type *type;
-     FILE *stream;
+     GDB_FILE *stream;
      int show;
      int passed_a_ptr;
 {
@@ -266,7 +266,7 @@ c_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
 
     case TYPE_CODE_METHOD:
       if (passed_a_ptr)
-	fprintf (stream, "(");
+	fprintf_unfiltered (stream, "(");
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
       if (passed_a_ptr)
 	{
@@ -316,7 +316,7 @@ c_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
 static void
 c_type_print_args (type, stream)
      struct type *type;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   int i;
   struct type **args;
@@ -358,7 +358,7 @@ c_type_print_args (type, stream)
 static void
 c_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
      struct type *type;
-     FILE *stream;
+     GDB_FILE *stream;
      int show;
      int passed_a_ptr;
      int demangled_args;
@@ -456,7 +456,7 @@ c_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
 void
 c_type_print_base (type, stream, show, level)
      struct type *type;
-     FILE *stream;
+     GDB_FILE *stream;
      int show;
      int level;
 {
@@ -665,7 +665,7 @@ c_type_print_base (type, stream, show, level)
 		  if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) == 0)
 		    {
 		      /* Keep GDB from crashing here.  */
-		      fprintf (stream, "<undefined type> %s;\n",
+		      fprintf_unfiltered (stream, "<undefined type> %s;\n",
 			       TYPE_FN_FIELD_PHYSNAME (f, j));
 		      break;
 		    }

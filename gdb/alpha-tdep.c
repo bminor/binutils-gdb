@@ -919,7 +919,7 @@ alpha_store_return_value (valtype, valbuf)
 int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   disassemble_info info;
 

@@ -132,7 +132,7 @@ i386_float_info ()
   
   if (fpvalid == 0) 
     {
-      printf ("no floating point status saved\n");
+      printf_unfiltered ("no floating point status saved\n");
       return;
     }
   

@@ -14,6 +14,8 @@ Wed Oct 27 00:25:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Mon Oct 25 03:25:41 1993  Tom Lord  (lord@cygnus.com)
 
+	* libgdb.texinfo (I/O): incorporated better phrasing from rich.
+
 	* libgdb.texinfo (Defining Commands): made the DOC arg
 	to gdb_define_app_command a char * instead of char **
 	per a suggestion from kingdon.

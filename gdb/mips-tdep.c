@@ -347,12 +347,9 @@ mips_frame_chain(frame)
        we loop forever if we see a zero size frame.  */
     if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
 	&& PROC_FRAME_OFFSET (proc_desc) == 0
-	/* Frameless functions, which can happen on the innermost frame
-	   or a frame which was innermost when a signal happened, can
-	   have frame size zero.  No need to check for non-frameless
-	   functions in these situations, though (I don't think).  */
-	&& frame->next != NULL
-	&& !frame->next->signal_handler_caller)
+	/* The previous frame from a sigtramp frame might be frameless
+	   and have frame size zero.  */
+	&& !frame->signal_handler_caller)
       return 0;
     else
       return read_next_frame_reg(frame, PROC_FRAME_REG(proc_desc))
@@ -640,7 +637,7 @@ mips_pop_frame()
   /* We let mips_init_extra_frame_info figure out the frame pointer */
   set_current_frame (create_new_frame (0, read_pc ()));
 
-  if (PROC_DESC_IS_DUMMY(proc_desc))
+  if (proc_desc && PROC_DESC_IS_DUMMY(proc_desc))
     {
       struct linked_proc_info *pi_ptr, *prev_ptr;
 
@@ -695,10 +692,10 @@ mips_print_register (regnum, all)
 #endif
     printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
     val_print (builtin_type_double, dbuffer, 0,
-	       stdout, 0, 1, 0, Val_pretty_default);
+	       gdb_stdout, 0, 1, 0, Val_pretty_default);
     printf_filtered ("); ");
   }
-  fputs_filtered (reg_names[regnum], stdout);
+  fputs_filtered (reg_names[regnum], gdb_stdout);
 
   /* The problem with printing numeric register names (r26, etc.) is that
      the user can't use them on input.  Probably the best solution is to
@@ -713,7 +710,7 @@ mips_print_register (regnum, all)
   if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT
       && ! INVALID_FLOAT (raw_buffer, REGISTER_VIRTUAL_SIZE(regnum))) {
     val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0,
-	       stdout, 0, 1, 0, Val_pretty_default);
+	       gdb_stdout, 0, 1, 0, Val_pretty_default);
   }
   /* Else print as integer in hex.  */
   else
@@ -730,7 +727,7 @@ mips_print_register (regnum, all)
 	   registers line up.  */
 	printf_filtered (local_hex_format(), val);
       else
-	printf_filtered ("%s=%d", local_hex_string(val), val);
+	printf_filtered ("%s=%ld", local_hex_string(val), val);
     }
 }
 

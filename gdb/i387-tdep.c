@@ -52,35 +52,35 @@ void
 print_387_control_word (control)
      unsigned int control;
 {
-  printf ("control %s: ", local_hex_string(control));
-  printf ("compute to ");
+  printf_unfiltered ("control %s: ", local_hex_string(control));
+  printf_unfiltered ("compute to ");
   switch ((control >> 8) & 3) 
     {
-    case 0: printf ("24 bits; "); break;
-    case 1: printf ("(bad); "); break;
-    case 2: printf ("53 bits; "); break;
-    case 3: printf ("64 bits; "); break;
+    case 0: printf_unfiltered ("24 bits; "); break;
+    case 1: printf_unfiltered ("(bad); "); break;
+    case 2: printf_unfiltered ("53 bits; "); break;
+    case 3: printf_unfiltered ("64 bits; "); break;
     }
-  printf ("round ");
+  printf_unfiltered ("round ");
   switch ((control >> 10) & 3) 
     {
-    case 0: printf ("NEAREST; "); break;
-    case 1: printf ("DOWN; "); break;
-    case 2: printf ("UP; "); break;
-    case 3: printf ("CHOP; "); break;
+    case 0: printf_unfiltered ("NEAREST; "); break;
+    case 1: printf_unfiltered ("DOWN; "); break;
+    case 2: printf_unfiltered ("UP; "); break;
+    case 3: printf_unfiltered ("CHOP; "); break;
     }
   if (control & 0x3f) 
     {
-      printf ("mask:");
-      if (control & 0x0001) printf (" INVALID");
-      if (control & 0x0002) printf (" DENORM");
-      if (control & 0x0004) printf (" DIVZ");
-      if (control & 0x0008) printf (" OVERF");
-      if (control & 0x0010) printf (" UNDERF");
-      if (control & 0x0020) printf (" LOS");
-      printf (";");
+      printf_unfiltered ("mask:");
+      if (control & 0x0001) printf_unfiltered (" INVALID");
+      if (control & 0x0002) printf_unfiltered (" DENORM");
+      if (control & 0x0004) printf_unfiltered (" DIVZ");
+      if (control & 0x0008) printf_unfiltered (" OVERF");
+      if (control & 0x0010) printf_unfiltered (" UNDERF");
+      if (control & 0x0020) printf_unfiltered (" LOS");
+      printf_unfiltered (";");
     }
-  printf ("\n");
+  printf_unfiltered ("\n");
   if (control & 0xe080) warning ("reserved bits on: %s\n",
 				local_hex_string(control & 0xe080));
 }
@@ -89,20 +89,20 @@ void
 print_387_status_word (status)
      unsigned int status;
 {
-  printf ("status %s: ", local_hex_string (status));
+  printf_unfiltered ("status %s: ", local_hex_string (status));
   if (status & 0xff) 
     {
-      printf ("exceptions:");
-      if (status & 0x0001) printf (" INVALID");
-      if (status & 0x0002) printf (" DENORM");
-      if (status & 0x0004) printf (" DIVZ");
-      if (status & 0x0008) printf (" OVERF");
-      if (status & 0x0010) printf (" UNDERF");
-      if (status & 0x0020) printf (" LOS");
-      if (status & 0x0040) printf (" FPSTACK");
-      printf ("; ");
+      printf_unfiltered ("exceptions:");
+      if (status & 0x0001) printf_unfiltered (" INVALID");
+      if (status & 0x0002) printf_unfiltered (" DENORM");
+      if (status & 0x0004) printf_unfiltered (" DIVZ");
+      if (status & 0x0008) printf_unfiltered (" OVERF");
+      if (status & 0x0010) printf_unfiltered (" UNDERF");
+      if (status & 0x0020) printf_unfiltered (" LOS");
+      if (status & 0x0040) printf_unfiltered (" FPSTACK");
+      printf_unfiltered ("; ");
     }
-  printf ("flags: %d%d%d%d; ",
+  printf_unfiltered ("flags: %d%d%d%d; ",
 	  (status & 0x4000) != 0,
 	  (status & 0x0400) != 0,
 	  (status & 0x0200) != 0,
@@ -111,5 +111,5 @@ print_387_status_word (status)
   /* FIXME: Someone claims this should be 7 - (status >> 11) & 7 for AIX.
      What's the story?  Is the following just wrong or are differing
      notations in use?  */
-  printf ("top %d\n", (status >> 11) & 7);
+  printf_unfiltered ("top %d\n", (status >> 11) & 7);
 }

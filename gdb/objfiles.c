@@ -639,7 +639,7 @@ open_existing_mapped_file (symsfilename, mtime, mapped)
 	{
 	  if (error_pre_print)
 	    {
-	      printf (error_pre_print);
+	      printf_unfiltered (error_pre_print);
 	    }
 	  print_sys_errmsg (symsfilename, errno);
 	}
@@ -709,7 +709,7 @@ open_mapped_file (filename, mtime, mapped)
 	{
 	  if (error_pre_print)
 	    {
-	      printf (error_pre_print);
+	      printf_unfiltered (error_pre_print);
 	    }
 	  print_sys_errmsg (symsfilename, errno);
 	}

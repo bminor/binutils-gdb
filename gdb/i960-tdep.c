@@ -62,7 +62,7 @@ check_host()
 	 */
 	for ( i = 0; i < TYPELEN; i++ ){
 		if ( types[i].hostsize != types[i].i960size ){
-			printf("sizeof(%s) != %d:  PROCEED AT YOUR OWN RISK!\n",
+			printf_unfiltered("sizeof(%s) != %d:  PROCEED AT YOUR OWN RISK!\n",
 					types[i].typename, types[i].i960size );
 		}
 
@@ -619,7 +619,7 @@ print_fault( siggnal )
 #	define NUMMSGS ((int)( sizeof(sigmsgs) / sizeof(sigmsgs[0]) ))
 
 	if (siggnal < NSIG) {
-	      printf ("\nProgram received signal %d, %s\n",
+	      printf_unfiltered ("\nProgram received signal %d, %s\n",
 		      siggnal, safe_strsignal (siggnal));
 	} else {
 		/* The various target_wait()s bias the 80960 "signal number"
@@ -628,7 +628,7 @@ print_fault( siggnal )
 		   "unbias" it before using it.  */
 		siggnal -= NSIG;
 
-		printf("Program stopped for reason #%d: %s.\n", siggnal,
+		printf_unfiltered("Program stopped for reason #%d: %s.\n", siggnal,
 				(siggnal < NUMMSGS && siggnal >= 0)?
 				sigmsgs[siggnal] : unknown );
 	}

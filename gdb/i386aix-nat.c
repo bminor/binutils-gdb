@@ -127,46 +127,46 @@ print_387_status (status, ep)
   if (status != 0) 
     {
       if (bothstatus)
-	printf ("u: ");
+	printf_unfiltered ("u: ");
       print_387_status_word (status);
     }
   
   if (ep->status != 0) 
     {
       if (bothstatus)
-	printf ("e: ");
+	printf_unfiltered ("e: ");
       print_387_status_word (ep->status);
     }
   
   print_387_control_word (ep->control);
-  printf ("last exception: ");
-  printf ("opcode %s; ", local_hex_string(ep->opcode));
-  printf ("pc %s:", local_hex_string(ep->code_seg));
-  printf ("%s; ", local_hex_string(ep->eip));
-  printf ("operand %s", local_hex_string(ep->operand_seg));
-  printf (":%s\n", local_hex_string(ep->operand));
+  printf_unfiltered ("last exception: ");
+  printf_unfiltered ("opcode %s; ", local_hex_string(ep->opcode));
+  printf_unfiltered ("pc %s:", local_hex_string(ep->code_seg));
+  printf_unfiltered ("%s; ", local_hex_string(ep->eip));
+  printf_unfiltered ("operand %s", local_hex_string(ep->operand_seg));
+  printf_unfiltered (":%s\n", local_hex_string(ep->operand));
   
   top = 7- ((ep->status >> 11) & 7);
   
-  printf ("regno  tag  msb              lsb  value\n");
+  printf_unfiltered ("regno  tag  msb              lsb  value\n");
   for (fpreg = 7; fpreg >= 0; fpreg--) 
     {
       double val;
       
-      printf ("%s %d: ", fpreg == top ? "=>" : "  ", fpreg);
+      printf_unfiltered ("%s %d: ", fpreg == top ? "=>" : "  ", fpreg);
       
       switch ((ep->tag >> ((7 - fpreg) * 2)) & 3) 
 	{
-	case 0: printf ("valid "); break;
-	case 1: printf ("zero  "); break;
-	case 2: printf ("trap  "); break;
-	case 3: printf ("empty "); break;
+	case 0: printf_unfiltered ("valid "); break;
+	case 1: printf_unfiltered ("zero  "); break;
+	case 2: printf_unfiltered ("trap  "); break;
+	case 3: printf_unfiltered ("empty "); break;
 	}
       for (i = 9; i >= 0; i--)
-	printf ("%02x", ep->regs[fpreg][i]);
+	printf_unfiltered ("%02x", ep->regs[fpreg][i]);
       
       i387_to_double ((char *)ep->regs[fpreg], (char *)&val);
-      printf ("  %#g\n", val);
+      printf_unfiltered ("  %#g\n", val);
     }
 }
 
@@ -195,7 +195,7 @@ i386_float_info ()
   
   if (fpsaved == 0) 
     {
-      printf ("no floating point status saved\n");
+      printf_unfiltered ("no floating point status saved\n");
       return;
     }
 
@@ -333,6 +333,6 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
       if (core_reg_size >= sizeof (core_env387))
 	memcpy (&core_env387, core_reg_sect, core_reg_size);
       else
-	fprintf (stderr, "Couldn't read float regs from core file\n");
+	fprintf_unfiltered (gdb_stderr, "Couldn't read float regs from core file\n");
     }
 }

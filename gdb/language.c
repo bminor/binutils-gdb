@@ -161,12 +161,12 @@ set_language_command (ignore, from_tty)
 
   /* FIXME -- do this from the list, with HELP.  */
   if (!language || !language[0]) {
-    printf("The currently understood settings are:\n\n");
-    printf ("local or auto    Automatic setting based on source file\n");
-    printf ("c                Use the C language\n");
-    printf ("c++              Use the C++ language\n");
-    printf ("chill            Use the Chill language\n");
-    printf ("modula-2         Use the Modula-2 language\n");
+    printf_unfiltered("The currently understood settings are:\n\n");
+    printf_unfiltered ("local or auto    Automatic setting based on source file\n");
+    printf_unfiltered ("c                Use the C language\n");
+    printf_unfiltered ("c++              Use the C++ language\n");
+    printf_unfiltered ("chill            Use the Chill language\n");
+    printf_unfiltered ("modula-2         Use the Modula-2 language\n");
     /* Restore the silly string. */
     set_language(current_language->la_language);
     return;
@@ -212,7 +212,7 @@ show_type_command(ignore, from_tty)
    int from_tty;
 {
    if (type_check != current_language->la_type_check)
-      printf(
+      printf_unfiltered(
 "Warning: the current type check setting does not match the language.\n");
 }
 
@@ -258,7 +258,7 @@ show_range_command(ignore, from_tty)
 {
 
    if (range_check != current_language->la_range_check)
-      printf(
+      printf_unfiltered(
 "Warning: the current range check setting does not match the language.\n");
 }
 
@@ -411,14 +411,14 @@ language_info (quietly)
     return;
 
   expected_language = current_language;
-  printf("Current language:  %s\n",language);
+  printf_unfiltered("Current language:  %s\n",language);
   show_language_command((char *)0, 1);
 
   if (!quietly)
     {
-       printf("Type checking:     %s\n",type);
+       printf_unfiltered("Type checking:     %s\n",type);
        show_type_command((char *)0, 1);
-       printf("Range checking:    %s\n",range);
+       printf_unfiltered("Range checking:    %s\n",range);
        show_range_command((char *)0, 1);
     }
 }
@@ -1012,14 +1012,14 @@ type_error (va_alist)
    char *string;
 
    if (type_check==type_check_warn)
-      fprintf(stderr,warning_pre_print);
+      fprintf_unfiltered(gdb_stderr,warning_pre_print);
    else
       target_terminal_ours();
 
    va_start (args);
    string = va_arg (args, char *);
-   vfprintf (stderr, string, args);
-   fprintf (stderr, "\n");
+   vfprintf_unfiltered (gdb_stderr, string, args);
+   fprintf_unfiltered (gdb_stderr, "\n");
    va_end (args);
    if (type_check==type_check_on)
       return_to_top_level (RETURN_ERROR);
@@ -1033,14 +1033,14 @@ range_error (va_alist)
    char *string;
 
    if (range_check==range_check_warn)
-      fprintf(stderr,warning_pre_print);
+      fprintf_unfiltered(gdb_stderr,warning_pre_print);
    else
       target_terminal_ours();
 
    va_start (args);
    string = va_arg (args, char *);
-   vfprintf (stderr, string, args);
-   fprintf (stderr, "\n");
+   vfprintf_unfiltered (gdb_stderr, string, args);
+   fprintf_unfiltered (gdb_stderr, "\n");
    va_end (args);
    if (range_check==range_check_on)
       return_to_top_level (RETURN_ERROR);
@@ -1085,9 +1085,9 @@ set_check (ignore, from_tty)
    char *ignore;
    int from_tty;
 {
-   printf(
+   printf_unfiltered(
 "\"set check\" must be followed by the name of a check subcommand.\n");
-   help_list(setchecklist, "set check ", -1, stdout);
+   help_list(setchecklist, "set check ", -1, gdb_stdout);
 }
 
 static void
@@ -1106,7 +1106,7 @@ add_language (lang)
 {
   if (lang->la_magic != LANG_MAGIC)
     {
-      fprintf(stderr, "Magic number of %s language struct wrong\n",
+      fprintf_unfiltered(gdb_stderr, "Magic number of %s language struct wrong\n",
 	lang->la_name);
       abort();
     }
@@ -1144,14 +1144,14 @@ unk_lang_error (msg)
 static void
 unk_lang_printchar (c, stream)
      register int c;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   error ("internal error - unimplemented function unk_lang_printchar called.");
 }
 
 static void
 unk_lang_printstr (stream, string, length, force_ellipses)
-     FILE *stream;
+     GDB_FILE *stream;
      char *string;
      unsigned int length;
      int force_ellipses;
@@ -1171,7 +1171,7 @@ void
 unk_lang_print_type (type, varstring, stream, show, level)
      struct type *type;
      char *varstring;
-     FILE *stream;
+     GDB_FILE *stream;
      int show;
      int level;
 {
@@ -1184,7 +1184,7 @@ unk_lang_val_print (type, valaddr, address, stream, format, deref_ref,
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
-     FILE *stream;
+     GDB_FILE *stream;
      int format;
      int deref_ref;
      int recurse;

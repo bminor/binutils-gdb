@@ -645,7 +645,7 @@ function_frame_info (pc, fdata)
     if (tmp == 0x93e1) {
       if (fdata->offset)
 /*        fatal ("Unrecognized prolog."); */
-        printf ("Unrecognized prolog!\n");
+        printf_unfiltered ("Unrecognized prolog!\n");
 
       fdata->saved_gpr = 31;
       tmp2 = op & 0xffff;
@@ -719,7 +719,7 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
   CORE_ADDR saved_sp, pc;
 
   if ( dummy_frame_count <= 0)
-    printf ("FATAL ERROR -push_arguments()! frame not found!!\n");
+    printf_unfiltered ("FATAL ERROR -push_arguments()! frame not found!!\n");
 
   /* The first eight words of ther arguments are passed in registers. Copy
      them appropriately.
@@ -743,7 +743,7 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
          there is no way we would run out of them. */
 
       if (len > 8)
-        printf (
+        printf_unfiltered (
 "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
       memcpy (&registers[REGISTER_BYTE(FP0_REGNUM + 1 + f_argno)], VALUE_CONTENTS (arg), 
@@ -834,7 +834,7 @@ ran_out_of_registers_for_arguments:
       if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FLT && f_argno < 13) {
 
         if (len > 8)
-          printf (
+          printf_unfiltered (
 "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
         memcpy (&registers[REGISTER_BYTE(FP0_REGNUM + 1 + f_argno)], VALUE_CONTENTS (arg), 

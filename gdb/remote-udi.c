@@ -143,7 +143,7 @@ udi_create_inferior (execfile, args, env)
 
   if (udi_session_id < 0)
     {
-      printf("UDI connection not open yet.\n");
+      printf_unfiltered("UDI connection not open yet.\n");
       return;
     }
 
@@ -235,13 +235,13 @@ udi_open (name, from_tty)
 			  ChipVersions, &NumberOfChips))
     error ("UDIGetTargetConfig() failed");
   if (NumberOfChips > 2)
-    fprintf(stderr,"Target has more than one processor\n");
+    fprintf_unfiltered(gdb_stderr,"Target has more than one processor\n");
   for (cnt=0; cnt < NumberOfRanges; cnt++)
     {
       switch(KnownMemory[cnt].Space)
 	{
 	default:
-	  fprintf(stderr, "UDIGetTargetConfig() unknown memory space\n");
+	  fprintf_unfiltered(gdb_stderr, "UDIGetTargetConfig() unknown memory space\n");
 	  break;
 	case UDI29KCP_S:
 	  break;
@@ -263,7 +263,7 @@ udi_open (name, from_tty)
   a29k_get_processor_type ();
 
   if (UDICreateProcess (&PId))
-     fprintf(stderr, "UDICreateProcess() failed\n");
+     fprintf_unfiltered(gdb_stderr, "UDICreateProcess() failed\n");
 
   /* Print out some stuff, letting the user now what's going on */
   if (UDICapabilities (&TIPId, &TargetId, DFEId, DFE, &TIP, &DFEIPCId,
@@ -325,14 +325,14 @@ udi_attach (args, from_tty)
       error ("UDI connection not opened yet, use the 'target udi' command.\n");
 	
   if (from_tty)
-      printf ("Attaching to remote program %s...\n", prog_name);
+      printf_unfiltered ("Attaching to remote program %s...\n", prog_name);
 
   UDIStop();
   From.Space = UDI29KSpecialRegs;
   From.Offset = 11;
   if (err = UDIRead(From, &PC_adds, Count, Size, &CountDone, HostEndian))
     error ("UDIRead failed in udi_attach");
-  printf ("Remote process is now halted, pc1 = 0x%x.\n", PC_adds);
+  printf_unfiltered ("Remote process is now halted, pc1 = 0x%x.\n", PC_adds);
 }
 /************************************************************* UDI_DETACH */
 /* Terminate the open connection to the TIP process.
@@ -352,7 +352,7 @@ udi_detach (args,from_tty)
   pop_target();         	/* calls udi_close to do the real work */
 
   if (from_tty)
-    printf ("Ending remote debugging\n");
+    printf_unfiltered ("Ending remote debugging\n");
 }
 
 
@@ -374,7 +374,7 @@ udi_resume (pid, step, sig)
       if (!tip_error)
 	return;
 
-      fprintf (stderr,  "UDIStep() error = %d\n", tip_error);
+      fprintf_unfiltered (gdb_stderr,  "UDIStep() error = %d\n", tip_error);
       error ("failed in udi_resume");
     }
 
@@ -416,19 +416,19 @@ udi_wait (pid, status)
 
       switch (StopReason & UDIGrossState)
 	{
-	case UDIStdoutReady:
-	  if (UDIGetStdout (sbuf, (UDISizeT)SBUF_MAX, &CountDone))
+	case UDIGdb_StdoutReady:
+	  if (UDIGetGdb_Stdout (sbuf, (UDISizeT)SBUF_MAX, &CountDone))
 	    /* This is said to happen if the program tries to output
 	       a whole bunch of output (more than SBUF_MAX, I would
 	       guess).  It doesn't seem to happen with the simulator.  */
-	    warning ("UDIGetStdout() failed in udi_wait");
-	  fwrite (sbuf, 1, CountDone, stdout);
-	  fflush(stdout);
+	    warning ("UDIGetGdb_Stdout() failed in udi_wait");
+	  fwrite (sbuf, 1, CountDone, gdb_stdout);
+	  gdb_flush(gdb_stdout);
 	  continue;
-	case UDIStderrReady:
-	  UDIGetStderr (sbuf, (UDISizeT)SBUF_MAX, &CountDone);
-	  fwrite (sbuf, 1, CountDone, stderr);
-	  fflush(stderr);
+	case UDIGdb_StderrReady:
+	  UDIGetGdb_Stderr (sbuf, (UDISizeT)SBUF_MAX, &CountDone);
+	  fwrite (sbuf, 1, CountDone, gdb_stderr);
+	  gdb_flush(gdb_stderr);
 	  continue;
 
 	case UDIStdinNeeded:
@@ -460,12 +460,12 @@ udi_wait (pid, status)
   switch (StopReason & UDIGrossState)
     {
     case UDITrapped:
-      printf("Am290*0 received vector number %d\n", StopReason >> 24);
+      printf_unfiltered("Am290*0 received vector number %d\n", StopReason >> 24);
 	  
       switch (StopReason >> 8)
 	{
 	case 0:			/* Illegal opcode */
-	  printf("	(break point)\n");
+	  printf_unfiltered("	(break point)\n");
 	  WSETSTOP ((*status), SIGTRAP);
 	  break;
 	case 1:			/* Unaligned Access */
@@ -565,12 +565,12 @@ udi_pc()
 
   err = UDIRead(From, To, Count, Size, &CountDone, HostEndian);
 
-  printf ("err = %d, CountDone = %d, pc[0] = 0x%x, pc[1] = 0x%x\n",
+  printf_unfiltered ("err = %d, CountDone = %d, pc[0] = 0x%x, pc[1] = 0x%x\n",
 	  err, CountDone, pc[0], pc[1]);
 
   udi_fetch_registers(-1);
 
-  printf("other pc1 = 0x%x, pc0 = 0x%x\n", *(int *)&registers[4 * PC_REGNUM],
+  printf_unfiltered("other pc1 = 0x%x, pc0 = 0x%x\n", *(int *)&registers[4 * PC_REGNUM],
 	  *(int *)&registers[4 * NPC_REGNUM]);
 
   /* Now, read all the registers globally */
@@ -697,8 +697,8 @@ int	regno;
 
   if (remote_debug)
     {
-      printf("Fetching all registers\n");
-      printf("Fetching PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n",
+      printf_unfiltered("Fetching all registers\n");
+      printf_unfiltered("Fetching PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n",
 	     read_register(NPC_REGNUM), read_register(PC_REGNUM),
 	     read_register(PC2_REGNUM));
     }
@@ -738,8 +738,8 @@ int regno;
 
   if (remote_debug)
     {
-      printf("Storing all registers\n");
-      printf("PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n", read_register(NPC_REGNUM),
+      printf_unfiltered("Storing all registers\n");
+      printf_unfiltered("PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n", read_register(NPC_REGNUM),
 	     read_register(PC_REGNUM), read_register(PC2_REGNUM));
     }
 
@@ -890,7 +890,7 @@ udi_xfer_inferior_memory (memaddr, myaddr, len, write)
 static void
 udi_files_info ()
 {
-  printf ("\tAttached to UDI socket to %s and running program %s.\n",
+  printf_unfiltered ("\tAttached to UDI socket to %s and running program %s.\n",
           udi_config_id, prog_name);
 }
 
@@ -968,7 +968,7 @@ just invoke udi_close, which seems to get things right.
   inferior_pid = 0;
 
   if (from_tty)
-    printf("Target has been stopped.");
+    printf_unfiltered("Target has been stopped.");
 #else
   udi_close(0);
 #endif
@@ -1109,7 +1109,7 @@ download(load_arg_string, from_tty)
 	       below starts writing before it even checks the size.  */
 	    continue;
 
-	  printf("[Loading section %s at %x (%d bytes)]\n",
+	  printf_unfiltered("[Loading section %s at %x (%d bytes)]\n",
 		 section_name,
 		 To.Offset,
 		 section_size);
@@ -1198,9 +1198,9 @@ download(load_arg_string, from_tty)
 
 		  xerr = UDIGetErrorMsg(err, 100, message, &Count);
 		  if (!xerr)
-		    fprintf (stderr, "Error is %s\n", message);
+		    fprintf_unfiltered (gdb_stderr, "Error is %s\n", message);
 		  else
-		    fprintf (stderr, "xerr is %d\n", xerr);
+		    fprintf_unfiltered (gdb_stderr, "xerr is %d\n", xerr);
 		  error ("UDICopy failed, error = %d", err);
 		}
 	    }
@@ -1371,7 +1371,7 @@ fetch_register (regno)
   supply_register(regno, (char *) &To);
 
   if (remote_debug)
-    printf("Fetching register %s = 0x%x\n", reg_names[regno], To);
+    printf_unfiltered("Fetching register %s = 0x%x\n", reg_names[regno], To);
 }
 /*****************************************************************************/ 
 /* Store a single register indicated by 'regno'. 
@@ -1392,7 +1392,7 @@ store_register (regno)
   From =  read_register (regno);	/* get data value */
 
   if (remote_debug)
-    printf("Storing register %s = 0x%x\n", reg_names[regno], From);
+    printf_unfiltered("Storing register %s = 0x%x\n", reg_names[regno], From);
 
   if (regno == GR1_REGNUM)
     {
@@ -1526,7 +1526,7 @@ CORE_ADDR	addr;
 
 void  convert16() {;}
 void  convert32() {;}
-FILE* EchoFile = 0;		/* used for debugging */
+GDB_FILE * EchoFile = 0;		/* used for debugging */
 int   QuietMode = 0;		/* used for debugging */
 
 #ifdef NO_HIF_SUPPORT

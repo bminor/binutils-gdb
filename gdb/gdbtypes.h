@@ -695,7 +695,7 @@ extern void recursive_dump_type PARAMS ((struct type *, int));
 /* printcmd.c */
 
 extern void
-print_scalar_formatted PARAMS ((char *, struct type *, int, int, FILE *));
+print_scalar_formatted PARAMS ((char *, struct type *, int, int, GDB_FILE *));
 
 #if MAINTENANCE_CMDS
 extern void maintenance_print_type PARAMS ((char *, int));

@@ -217,6 +217,32 @@ Mon Oct 25 14:57:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* breakpoint.c (mention): Add bp_call_dummy to switch.
 	* symmisc.c (dump_symtab): Use %d not %ld for line number.
 
+Sun Oct 24 18:29:32 1993  Tom Lord  (lord@rtl.cygnus.com)
+
+	* every non-obsolete file except utils.c:
+	  Change the stream argument to _filtered to GDB_FILE *.
+	  Change all references to stdout/stderr to gdb_stdout/gdb_stderr.
+	  Replace all calls to stdio output functions with
+	    calls to corresponding _unfiltered functions.
+	  Replaced calls to fopen for output to gdb_fopen.
+	  Added sufficient goo to utils.c and defs.h to make the above
+	  work.
+	  
+	  The net effect is that stdio output functions are only directly
+	  used in utils.c.  Elsewhere, the _unfiltered and _filtered 
+	  functions and GDB_FILE type are used.
+
+	  In the near future, GDB_FILE will stop being equivalant to 
+	  FILE.
+
+	  The semantics of some commands has changed in a very subtle way:
+	  called in the right context, they may cause new occurences of 
+	  prompt_for_continue() behavior.
+
+	  Please respect this change by not reintroducing stdio output 
+	  dependencies in the main body of gdb code.  All output from
+	  commands should go to a GDB_FILE.
+
 Sun Oct 24 20:16:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* parse.c, parser-defs.h (write_exp_msymbol):  New function to write

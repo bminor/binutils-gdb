@@ -261,7 +261,7 @@ readchar ()
     error ("Timeout reading from remote system.");
 
   if (!quiet)
-    printf ("%c", buf);
+    printf_unfiltered ("%c", buf);
 
   return buf & 0x7f;
 }
@@ -275,7 +275,7 @@ readchar_nofail ()
   if (buf == SERIAL_TIMEOUT)
     buf = 0;
   if (!quiet)
-    printf ("%c", buf);
+    printf_unfiltered ("%c", buf);
 
   return buf & 0x7f;
 
@@ -446,7 +446,7 @@ hms_load (args, fromtty)
 	      bfd_get_section_contents (abfd, s, buffer, i, delta);
 	      hms_write_inferior_memory (s->vma + i, buffer, delta);
 	      printf_filtered ("*");
-	      fflush (stdout);
+	      gdb_flush (gdb_stdout);
 	    }
 	  printf_filtered ("\n");
 	  free (buffer);
@@ -744,12 +744,12 @@ hms_wait (pid, status)
 
 	  /* Print out any characters which have been swallowed.  */
 	  for (p = swallowed; p < swallowed_p; ++p)
-	    putc (*p, stdout);
+	    putc_unfiltered (*p, gdb_stdout);
 	  swallowed_p = swallowed;
 
 	  if ((ch != '\r' && ch != '\n') || swallowed_cr > 10)
 	    {
-	      putc (ch, stdout);
+	      putc_unfiltered (ch, gdb_stdout);
 	      swallowed_cr = 10;
 	    }
 	  swallowed_cr++;
@@ -847,7 +847,7 @@ hms_write (a, l)
   if (!quiet)
     for (i = 0; i < l; i++)
       {
-	printf ("%c", a[i]);
+	printf_unfiltered ("%c", a[i]);
       }
 }
 
@@ -1215,7 +1215,7 @@ hms_before_main_loop ()
 {
   char ttyname[100];
   char *p, *p2;
-  extern FILE *instream;
+  extern GDB_FILE *instream;
 
   push_target (&hms_ops);
 }
@@ -1241,7 +1241,7 @@ hms_insert_breakpoint (addr, save)
     }
   else
     {
-      fprintf_filtered (stderr,
+      fprintf_filtered (gdb_stderr,
 		      "Too many break points, break point not installed\n");
       return (1);
     }

@@ -32,9 +32,9 @@ extern unsigned int print_max;	/* Max # of chars for strings/vectors */
 extern int output_format;
 
 extern void
-val_print_array_elements PARAMS ((struct type *, char *, CORE_ADDR, FILE *,
+val_print_array_elements PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *,
 				  int, int, int, enum val_prettyprint, int));
 
 extern void
-val_print_type_code_int PARAMS ((struct type *, char *, FILE *));
+val_print_type_code_int PARAMS ((struct type *, char *, GDB_FILE *));
 

@@ -116,7 +116,7 @@ core_file_command (filename, from_tty)
 	  reg_offset -= KERNEL_U_ADDR;
 
 	memcpy (&core_aouthdr, &u.u_exdata, sizeof (AOUTHDR));
-	printf ("Core file is from \"%s\".\n", u.u_comm);
+	printf_unfiltered ("Core file is from \"%s\".\n", u.u_comm);
 
 	/* I don't know where to find this info.
 	   So, for now, mark it as not available.  */
@@ -161,5 +161,5 @@ core_file_command (filename, from_tty)
       validate_files ();
     }
   else if (from_tty)
-    printf ("No core file now.\n");
+    printf_unfiltered ("No core file now.\n");
 }

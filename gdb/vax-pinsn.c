@@ -35,7 +35,7 @@ static unsigned char *print_insn_arg ();
 int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   unsigned char buffer[MAXLEN];
   register int i;
@@ -52,11 +52,11 @@ print_insn (memaddr, stream)
   /* Handle undefined instructions.  */
   if (i == NOPCODES)
     {
-      fprintf (stream, "0%o", buffer[0]);
+      fprintf_unfiltered (stream, "0%o", buffer[0]);
       return 1;
     }
 
-  fprintf (stream, "%s", votstrs[i].name);
+  fprintf_unfiltered (stream, "%s", votstrs[i].name);
 
   /* Point at first byte of argument data,
      and at descriptor for first argument.  */
@@ -64,14 +64,14 @@ print_insn (memaddr, stream)
   d = votstrs[i].detail.args;
 
   if (*d)
-    fputc (' ', stream);
+    fputc_unfiltered (' ', stream);
 
   while (*d)
     {
       p = print_insn_arg (d, p, memaddr + (p - buffer), stream);
       d += 2;
       if (*d)
-	fprintf (stream, ",");
+	fprintf_unfiltered (stream, ",");
     }
   return p - buffer;
 }
@@ -81,7 +81,7 @@ print_insn_arg (d, p, addr, stream)
      char *d;
      register char *p;
      CORE_ADDR addr;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   register int regnum = *p & 0xf;
   float floatlitbuf;
@@ -89,10 +89,10 @@ print_insn_arg (d, p, addr, stream)
   if (*d == 'b')
     {
       if (d[1] == 'b')
-	fprintf (stream, "0x%x", addr + *p++ + 1);
+	fprintf_unfiltered (stream, "0x%x", addr + *p++ + 1);
       else
 	{
-	  fprintf (stream, "0x%x", addr + *(short *)p + 2);
+	  fprintf_unfiltered (stream, "0x%x", addr + *(short *)p + 2);
 	  p += 2;
 	}
     }
@@ -106,32 +106,32 @@ print_insn_arg (d, p, addr, stream)
 	if (d[1] == 'd' || d[1] == 'f' || d[1] == 'g' || d[1] == 'h')
 	  {
 	    *(int *)&floatlitbuf = 0x4000 + ((p[-1] & 0x3f) << 4);
-	    fprintf (stream, "$%f", floatlitbuf);
+	    fprintf_unfiltered (stream, "$%f", floatlitbuf);
 	  }
 	else
-	  fprintf (stream, "$%d", p[-1] & 0x3f);
+	  fprintf_unfiltered (stream, "$%d", p[-1] & 0x3f);
 	break;
 
       case 4:			/* Indexed */
 	p = (char *) print_insn_arg (d, p, addr + 1, stream);
-	fprintf (stream, "[%s]", reg_names[regnum]);
+	fprintf_unfiltered (stream, "[%s]", reg_names[regnum]);
 	break;
 
       case 5:			/* Register */
-	fprintf (stream, reg_names[regnum]);
+	fprintf_unfiltered (stream, reg_names[regnum]);
 	break;
 
       case 7:			/* Autodecrement */
-	fputc ('-', stream);
+	fputc_unfiltered ('-', stream);
       case 6:			/* Register deferred */
-	fprintf (stream, "(%s)", reg_names[regnum]);
+	fprintf_unfiltered (stream, "(%s)", reg_names[regnum]);
 	break;
 
       case 9:			/* Autoincrement deferred */
-	fputc ('@', stream);
+	fputc_unfiltered ('@', stream);
 	if (regnum == PC_REGNUM)
 	  {
-	    fputc ('#', stream);
+	    fputc_unfiltered ('#', stream);
 	    print_address (*(long *)p, stream);
 	    p += 4;
 	    break;
@@ -139,30 +139,30 @@ print_insn_arg (d, p, addr, stream)
       case 8:			/* Autoincrement */
 	if (regnum == PC_REGNUM)
 	  {
-	    fputc ('#', stream);
+	    fputc_unfiltered ('#', stream);
 	    switch (d[1])
 	      {
 	      case 'b':
-		fprintf (stream, "%d", *p++);
+		fprintf_unfiltered (stream, "%d", *p++);
 		break;
 
 	      case 'w':
-		fprintf (stream, "%d", *(short *)p);
+		fprintf_unfiltered (stream, "%d", *(short *)p);
 		p += 2;
 		break;
 
 	      case 'l':
-		fprintf (stream, "%d", *(long *)p);
+		fprintf_unfiltered (stream, "%d", *(long *)p);
 		p += 4;
 		break;
 
 	      case 'q':
-		fprintf (stream, "0x%x%08x", ((long *)p)[1], ((long *)p)[0]);
+		fprintf_unfiltered (stream, "0x%x%08x", ((long *)p)[1], ((long *)p)[0]);
 		p += 8;
 		break;
 
 	      case 'o':
-		fprintf (stream, "0x%x%08x%08x%08x",
+		fprintf_unfiltered (stream, "0x%x%08x%08x%08x",
 			 ((long *)p)[3], ((long *)p)[2],
 			 ((long *)p)[1], ((long *)p)[0]);
 		p += 16;
@@ -170,64 +170,64 @@ print_insn_arg (d, p, addr, stream)
 
 	      case 'f':
 		if (INVALID_FLOAT (p, 4))
-		  fprintf (stream, "<<invalid float 0x%x>>", *(int *) p);
+		  fprintf_unfiltered (stream, "<<invalid float 0x%x>>", *(int *) p);
 		else
-		  fprintf (stream, "%f", *(float *) p);
+		  fprintf_unfiltered (stream, "%f", *(float *) p);
 		p += 4;
 		break;
 
 	      case 'd':
 		if (INVALID_FLOAT (p, 8))
-		  fprintf (stream, "<<invalid float 0x%x%08x>>",
+		  fprintf_unfiltered (stream, "<<invalid float 0x%x%08x>>",
 			   ((long *)p)[1], ((long *)p)[0]);
 		else
-		  fprintf (stream, "%f", *(double *) p);
+		  fprintf_unfiltered (stream, "%f", *(double *) p);
 		p += 8;
 		break;
 
 	      case 'g':
-		fprintf (stream, "g-float");
+		fprintf_unfiltered (stream, "g-float");
 		p += 8;
 		break;
 
 	      case 'h':
-		fprintf (stream, "h-float");
+		fprintf_unfiltered (stream, "h-float");
 		p += 16;
 		break;
 
 	      }
 	  }
 	else
-	  fprintf (stream, "(%s)+", reg_names[regnum]);
+	  fprintf_unfiltered (stream, "(%s)+", reg_names[regnum]);
 	break;
 
       case 11:			/* Byte displacement deferred */
-	fputc ('@', stream);
+	fputc_unfiltered ('@', stream);
       case 10:			/* Byte displacement */
 	if (regnum == PC_REGNUM)
 	  print_address (addr + *p + 2, stream);
 	else
-	  fprintf (stream, "%d(%s)", *p, reg_names[regnum]);
+	  fprintf_unfiltered (stream, "%d(%s)", *p, reg_names[regnum]);
 	p += 1;
 	break;
 
       case 13:			/* Word displacement deferred */
-	fputc ('@', stream);
+	fputc_unfiltered ('@', stream);
       case 12:			/* Word displacement */
 	if (regnum == PC_REGNUM)
 	  print_address (addr + *(short *)p + 3, stream);
 	else
-	  fprintf (stream, "%d(%s)", *(short *)p, reg_names[regnum]);
+	  fprintf_unfiltered (stream, "%d(%s)", *(short *)p, reg_names[regnum]);
 	p += 2;
 	break;
 
       case 15:			/* Long displacement deferred */
-	fputc ('@', stream);
+	fputc_unfiltered ('@', stream);
       case 14:			/* Long displacement */
 	if (regnum == PC_REGNUM)
 	  print_address (addr + *(long *)p + 5, stream);
 	else
-	  fprintf (stream, "%d(%s)", *(long *)p, reg_names[regnum]);
+	  fprintf_unfiltered (stream, "%d(%s)", *(long *)p, reg_names[regnum]);
 	p += 4;
       }
 

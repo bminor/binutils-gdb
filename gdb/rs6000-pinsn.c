@@ -27,7 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 int
 print_insn (memaddr, stream)
   CORE_ADDR memaddr;
-  FILE *stream;
+  GDB_FILE *stream;
 {
 	int  pop, eop, probable_eop;	/* primary and extended opcodes */
 	int  min, max;
@@ -108,7 +108,7 @@ insn_found:
 	return 4;
 
 not_found:
-	fprintf (stream, "0x%08x", the_insn);
+	fprintf_unfiltered (stream, "0x%08x", the_insn);
 	return 4;
 }
 
@@ -184,7 +184,7 @@ int	insn_no;
   }
   *qq = '\0';
 
-  fprintf (stream, "%s%s\t", rs6k_ops[insn_no].operator, buf);
+  fprintf_unfiltered (stream, "%s%s\t", rs6k_ops[insn_no].operator, buf);
 
   /* parse the operand now. */
   pp = rs6k_ops[insn_no].oprnd_format;
@@ -192,12 +192,12 @@ int	insn_no;
   while (*pp != 0) {
     switch (*pp) {
       case TO	:
-	fprintf (stream, "%d", (insn_word >> 21) & 0x1f);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 21) & 0x1f);
 	break;
 
       case RT	:
       case RS	:
-	fprintf (stream, "r%d", (insn_word >> 21) & 0x1f);
+	fprintf_unfiltered (stream, "r%d", (insn_word >> 21) & 0x1f);
 	break;
 
       case LI	:
@@ -212,16 +212,16 @@ int	insn_no;
 	   and disassembler is to switch to a match/lose style opcode
 	   table like the sparc.  */
 	if (tmp > 11) {
-	  fprintf (stream, "{unknown cond code: 0x%x}", insn_word);
+	  fprintf_unfiltered (stream, "{unknown cond code: 0x%x}", insn_word);
 	  tmp = 0;
 	}
-	fprintf (stream, "%s", cond_code [tmp]);
+	fprintf_unfiltered (stream, "%s", cond_code [tmp]);
 #else
 	/* So for just always use the "bbf/bbt" form.  This is perfectly
 	   correct, just not necessarily as legible.
 
 	   If tmp is not in the range 0-3, we can't use an XX form anyway.  */
-	fprintf (stream, "%d", tmp);
+	fprintf_unfiltered (stream, "%d", tmp);
 #endif
 	break;
 
@@ -253,7 +253,7 @@ int	insn_no;
 	  nocomma = 1;
 	}
 	else
-          fprintf (stream, "%d", (insn_word >> 5) & 0x7f);
+          fprintf_unfiltered (stream, "%d", (insn_word >> 5) & 0x7f);
 	break;
 
       case FL1	:			/* for svc only */
@@ -261,83 +261,83 @@ int	insn_no;
 	  nocomma = 1;
 	}
 	else
-          fprintf (stream, "%d", (insn_word >> 12) & 0xf);
+          fprintf_unfiltered (stream, "%d", (insn_word >> 12) & 0xf);
 	break;
 
       case FL2	:			/* for svc only	*/
 	nocomma = 0;
 	if (insn_word & 0x2)		/* SA is set	*/
-	  fprintf (stream, "%d", (insn_word >> 2) & 0x3fff);
+	  fprintf_unfiltered (stream, "%d", (insn_word >> 2) & 0x3fff);
 	else
-          fprintf (stream, "%d", (insn_word >> 2) & 0x7);
+          fprintf_unfiltered (stream, "%d", (insn_word >> 2) & 0x7);
 	break;
 
       case RA	:
 	if (nocomma) {
-	  fprintf (stream, "r%d)", (insn_word >> 16) & 0x1f);
+	  fprintf_unfiltered (stream, "r%d)", (insn_word >> 16) & 0x1f);
 	  nocomma = 0;
 	}
 	else
-	  fprintf (stream, "r%d", (insn_word >> 16) & 0x1f);
+	  fprintf_unfiltered (stream, "r%d", (insn_word >> 16) & 0x1f);
 	break;
 
       case RB	:
-	fprintf (stream, "r%d", (insn_word >> 11) & 0x1f);
+	fprintf_unfiltered (stream, "r%d", (insn_word >> 11) & 0x1f);
 	break;
 
       case SI	:
 	tmp = insn_word & 0xffff;
 	if (tmp & 0x8000)
 	  tmp -= 0x10000;
-	fprintf (stream, "%d", tmp);
+	fprintf_unfiltered (stream, "%d", tmp);
 	break;
 
       case UI	:
-	fprintf (stream, "%d", insn_word & 0xffff);
+	fprintf_unfiltered (stream, "%d", insn_word & 0xffff);
 	break;
 
       case BF	:
-	fprintf (stream, "%d", (insn_word >> 23) & 0x7);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 23) & 0x7);
 	break;
 
       case BFA	:
-	fprintf (stream, "%d", (insn_word >> 18) & 0x7);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 18) & 0x7);
 	break;
 
       case BT	:
-	fprintf (stream, "%d", (insn_word >> 21) & 0x1f);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 21) & 0x1f);
 	break;
 
       case BA	:
-	fprintf (stream, "%d", (insn_word >> 16) & 0x1f);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 16) & 0x1f);
 	break;
 
       case BB	:
-	fprintf (stream, "%d", (insn_word >> 11) & 0x1f);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 11) & 0x1f);
 	break;
 
       case BO	:
-	fprintf (stream, "%d", (insn_word >> 21) & 0x1f);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 21) & 0x1f);
 	break;
 
       case BI	:
-	fprintf (stream, "%d", (insn_word >> 16) & 0x1f);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 16) & 0x1f);
 	break;
 
       case SH	:
-	fprintf (stream, "%d", (insn_word >> 11) & 0x1f);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 11) & 0x1f);
 	break;
 
       case MB	:
-	fprintf (stream, "0x%x", (insn_word >> 6) & 0x1f);
+	fprintf_unfiltered (stream, "0x%x", (insn_word >> 6) & 0x1f);
 	break;
 
       case ME	:
-	fprintf (stream, "0x%x", (insn_word >> 1) & 0x1f);
+	fprintf_unfiltered (stream, "0x%x", (insn_word >> 1) & 0x1f);
 	break;
 
       case SPR	:
-	fprintf (stream, "%d", (insn_word >> 16) & 0x1f);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 16) & 0x1f);
 	break;
 
       case DIS	:
@@ -345,50 +345,50 @@ int	insn_no;
 	tmp = insn_word & 0xffff;
 	if (tmp & 0x8000)
 	  tmp -= 0x10000;
-	fprintf (stream, "%d(", tmp);
+	fprintf_unfiltered (stream, "%d(", tmp);
 	break;
 
       case FXM	:
-	fprintf (stream, "0x%x", (insn_word >> 12) & 0xff);
+	fprintf_unfiltered (stream, "0x%x", (insn_word >> 12) & 0xff);
 	break;
 
       case FRT	:
       case FRS	:
-	fprintf (stream, "f%d", (insn_word >> 21) & 0x1f);
+	fprintf_unfiltered (stream, "f%d", (insn_word >> 21) & 0x1f);
 	break;
 
       case FRA	:
-	fprintf (stream, "f%d", (insn_word >> 16) & 0x1f);
+	fprintf_unfiltered (stream, "f%d", (insn_word >> 16) & 0x1f);
 	break;
 
       case FRB	:
-	fprintf (stream, "f%d", (insn_word >> 11) & 0x1f);
+	fprintf_unfiltered (stream, "f%d", (insn_word >> 11) & 0x1f);
 	break;
 
       case FRC	:
-	fprintf (stream, "f%d", (insn_word >> 6) & 0x1f);
+	fprintf_unfiltered (stream, "f%d", (insn_word >> 6) & 0x1f);
 	break;
 
       case FLM	:
-	fprintf (stream, "0x%x", (insn_word >> 17) & 0xff);
+	fprintf_unfiltered (stream, "0x%x", (insn_word >> 17) & 0xff);
 	break;
 
       case NB	:
-	fprintf (stream, "%d", (insn_word >> 11) & 0x1f);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 11) & 0x1f);
 	break;
 
       case I	:
-	fprintf (stream, "%d", (insn_word >> 12) & 0xf);
+	fprintf_unfiltered (stream, "%d", (insn_word >> 12) & 0xf);
 	break;
 
       default	:
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 "{Internal error: Unknown operand format identifier %d}",
 		 *pp);
     }
     ++pp;
 
     if (*pp != '\0' && !nocomma)
-      fputc(',', stream);
+      fputc_unfiltered(',', stream);
   }
 }

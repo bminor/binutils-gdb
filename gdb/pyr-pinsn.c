@@ -38,7 +38,7 @@ CORE_ADDR pyr_frame_chain(frame)
     CORE_ADDR frame;
 {
     int foo=frame - CONTROL_STACK_FRAME_SIZE;
-    /* printf ("...following chain from %x: got %x\n", frame, foo);*/
+    /* printf_unfiltered ("...following chain from %x: got %x\n", frame, foo);*/
     return foo;
 }
 
@@ -47,7 +47,7 @@ CORE_ADDR pyr_saved_pc(frame)
 {
     int foo=0;
     foo = read_memory_integer (((CORE_ADDR)(frame))+60, 4);
-    printf ("..reading pc from frame 0x%0x+%d regs: got %0x\n",
+    printf_unfiltered ("..reading pc from frame 0x%0x+%d regs: got %0x\n",
 	    frame, 60/4, foo);
     return foo;
 }
@@ -96,7 +96,7 @@ print_insn (memaddr, stream)
   if (*((int *)buffer) == 0x0) {
     /* "halt" looks just like an invalid "jump" to the insn decoder,
        so is dealt with as a special case */
-    fprintf (stream, "halt");
+    fprintf_unfiltered (stream, "halt");
     return (4);
   }
 
@@ -106,7 +106,7 @@ print_insn (memaddr, stream)
 
   if (i == NOPCODES)
 	  /* FIXME: Handle unrecognised instructions better.  */
-	  fprintf (stream, "???\t#%08x\t(op=%x mode =%x)",
+	  fprintf_unfiltered (stream, "???\t#%08x\t(op=%x mode =%x)",
 		   insn, insn_decode.operator, insn_decode.mode);
   else
     {
@@ -122,7 +122,7 @@ print_insn (memaddr, stream)
 	 special case: check the operands of branch insn and print an
 	 appropriate mnemonic. */ 
 
-      fprintf (stream, "%s\t", pyr_opcodes[i].name);
+      fprintf_unfiltered (stream, "%s\t", pyr_opcodes[i].name);
 
     /* Print the operands of the insn (as specified in
        insn.operand_mode). 
@@ -139,24 +139,24 @@ print_insn (memaddr, stream)
       /* Is bfc and no bits specified an unconditional branch?*/
       for (i=0;i<4;i++) {
 	if ((bit_codes) & 0x1)
-		fputc (cc_bit_names[i], stream);
+		fputc_unfiltered (cc_bit_names[i], stream);
 	bit_codes >>= 1;
       }
 
-      fprintf (stream, ",%0x",
+      fprintf_unfiltered (stream, ",%0x",
 	       displacement + memaddr);
       return (insn_size);
     }
 
       switch (operand_mode) {
       case 0:
-	fprintf (stream, "%s,%s",
+	fprintf_unfiltered (stream, "%s,%s",
 		 reg_names [op_1_regno],
 		 reg_names [op_2_regno]);
 	break;
 	    
       case 1:
-	fprintf (stream, " 0x%0x,%s",
+	fprintf_unfiltered (stream, " 0x%0x,%s",
 		 op_1_regno,
 		 reg_names [op_2_regno]);
 	break;
@@ -165,12 +165,12 @@ print_insn (memaddr, stream)
 	read_memory (memaddr+4, buffer, MAXLEN);
 	insn_size += 4;
 	extra_1 = * ((int *) buffer);
-	fprintf (stream, " $0x%0x,%s",
+	fprintf_unfiltered (stream, " $0x%0x,%s",
 		 extra_1,
 		 reg_names [op_2_regno]);
 	break;
       case 3:
-	fprintf (stream, " (%s),%s",
+	fprintf_unfiltered (stream, " (%s),%s",
 		 reg_names [op_1_regno],
 		 reg_names [op_2_regno]);
 	break;
@@ -179,7 +179,7 @@ print_insn (memaddr, stream)
 	read_memory (memaddr+4, buffer, MAXLEN);
 	insn_size += 4;
 	extra_1 = * ((int *) buffer);
-	fprintf (stream, " 0x%0x(%s),%s",
+	fprintf_unfiltered (stream, " 0x%0x(%s),%s",
 		 extra_1,
 		 reg_names [op_1_regno],
 		 reg_names [op_2_regno]);
@@ -187,7 +187,7 @@ print_insn (memaddr, stream)
 	
 	/* S1 destination mode */
       case 5:
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 ((index_reg_regno) ? "%s,(%s)[%s*%1d]" : "%s,(%s)"),
 		 reg_names [op_1_regno],
 		 reg_names [op_2_regno],
@@ -196,7 +196,7 @@ print_insn (memaddr, stream)
 	break;
 	
       case 6:
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 ((index_reg_regno) ? " $%#0x,(%s)[%s*%1d]"
 		  : " $%#0x,(%s)"),
 		 op_1_regno,
@@ -209,7 +209,7 @@ print_insn (memaddr, stream)
 	read_memory (memaddr+4, buffer, MAXLEN);
 	insn_size += 4;
 	extra_1 = * ((int *) buffer);
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 ((index_reg_regno) ? " $%#0x,(%s)[%s*%1d]"
 		  : " $%#0x,(%s)"),
 		 extra_1,
@@ -219,7 +219,7 @@ print_insn (memaddr, stream)
 	break;
 	
       case 8:
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 ((index_reg_regno) ? " (%s),(%s)[%s*%1d]" : " (%s),(%s)"),
 		 reg_names [op_1_regno],
 		 reg_names [op_2_regno],
@@ -231,7 +231,7 @@ print_insn (memaddr, stream)
 	read_memory (memaddr+4, buffer, MAXLEN);
 	insn_size += 4;
 	extra_1 = * ((int *) buffer);
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 ((index_reg_regno)
 		  ? "%#0x(%s),(%s)[%s*%1d]"
 		  : "%#0x(%s),(%s)"),
@@ -247,7 +247,7 @@ print_insn (memaddr, stream)
 	read_memory (memaddr+4, buffer, MAXLEN);
 	insn_size += 4;
 	extra_1 = * ((int *) buffer);
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 ((index_reg_regno) ? "%s,%#0x(%s)[%s*%1d]" : "%s,%#0x(%s)"),
 		 reg_names [op_1_regno],
 		 extra_1,
@@ -259,7 +259,7 @@ print_insn (memaddr, stream)
 	read_memory (memaddr+4, buffer, MAXLEN);
 	insn_size += 4;
 	extra_1 = * ((int *) buffer);
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 ((index_reg_regno) ?
 		  " $%#0x,%#0x(%s)[%s*%1d]" : " $%#0x,%#0x(%s)"),
 		 op_1_regno,
@@ -275,7 +275,7 @@ print_insn (memaddr, stream)
 	read_memory (memaddr+8, buffer, MAXLEN);
 	insn_size += 4;
 	extra_2 = * ((int *) buffer);
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 ((index_reg_regno) ?
 		  " $%#0x,%#0x(%s)[%s*%1d]" : " $%#0x,%#0x(%s)"),
 		 extra_1,
@@ -289,7 +289,7 @@ print_insn (memaddr, stream)
 	read_memory (memaddr+4, buffer, MAXLEN);
 	insn_size += 4;
 	extra_1 = * ((int *) buffer);
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 ((index_reg_regno)
 		  ? " (%s),%#0x(%s)[%s*%1d]" 
 		  : " (%s),%#0x(%s)"),
@@ -306,7 +306,7 @@ print_insn (memaddr, stream)
 	read_memory (memaddr+8, buffer, MAXLEN);
 	insn_size += 4;
 	extra_2 = * ((int *) buffer);
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 ((index_reg_regno) ? "%#0x(%s),%#0x(%s)[%s*%1d]"
 		  : "%#0x(%s),%#0x(%s) "),
 		 extra_1,
@@ -318,13 +318,13 @@ print_insn (memaddr, stream)
 	break;
 	
       default:
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 ((index_reg_regno) ? "%s,%s [%s*%1d]" : "%s,%s"),
 		 reg_names [op_1_regno],
 		 reg_names [op_2_regno],
 		 reg_names [index_reg_regno],
 		 index_multiplier);
-	fprintf (stream,
+	fprintf_unfiltered (stream,
 		 "\t\t# unknown mode in %08x",
 		 insn);
 	break;

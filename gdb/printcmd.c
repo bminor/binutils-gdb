@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "breakpoint.h"
 #include "demangle.h"
+#include "valprint.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
@@ -127,7 +128,7 @@ printf_command PARAMS ((char *, int));
 
 static void
 print_frame_nameless_args PARAMS ((struct frame_info *, long, int, int,
-				   FILE *));
+				   GDB_FILE *));
 
 static void
 display_info PARAMS ((char *, int));
@@ -273,7 +274,7 @@ decode_format (string_ptr, oformat, osize)
   return val;
 }
 
-/* Print value VAL on stdout according to FORMAT, a letter or 0.
+/* Print value VAL on gdb_stdout according to FORMAT, a letter or 0.
    Do not end with a newline.
    0 means print VAL according to its own type.
    SIZE is the letter for the size of datum being printed.
@@ -294,7 +295,7 @@ print_formatted (val, format, size)
     {
     case 's':
       next_address = VALUE_ADDRESS (val)
-	+ value_print (value_addr (val), stdout, format, Val_pretty_default);
+	+ value_print (value_addr (val), gdb_stdout, format, Val_pretty_default);
       break;
 
     case 'i':
@@ -305,7 +306,7 @@ print_formatted (val, format, size)
       /* We often wrap here if there are long symbolic names.  */
       wrap_here ("    ");
       next_address = VALUE_ADDRESS (val)
-	+ print_insn (VALUE_ADDRESS (val), stdout);
+	+ print_insn (VALUE_ADDRESS (val), gdb_stdout);
       break;
 
     default:
@@ -315,10 +316,10 @@ print_formatted (val, format, size)
 	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_STRUCT
 	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_UNION
 	  || VALUE_REPEATED (val))
-	value_print (val, stdout, format, Val_pretty_default);
+	value_print (val, gdb_stdout, format, Val_pretty_default);
       else
 	print_scalar_formatted (VALUE_CONTENTS (val), VALUE_TYPE (val),
-				format, size, stdout);
+				format, size, gdb_stdout);
     }
 }
 
@@ -335,7 +336,7 @@ print_scalar_formatted (valaddr, type, format, size, stream)
      struct type *type;
      int format;
      int size;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   LONGEST val_long;
   int len = TYPE_LENGTH (type);
@@ -504,7 +505,7 @@ set_next_address (addr)
 void
 print_address_symbolic (addr, stream, do_demangle, leadin)
      CORE_ADDR addr;
-     FILE *stream;
+     GDB_FILE *stream;
      int do_demangle;
      char *leadin;
 {
@@ -576,7 +577,7 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
 void
 print_address (addr, stream)
      CORE_ADDR addr;
-     FILE *stream;
+     GDB_FILE *stream;
 {
 #if 0 && defined (ADDR_BITS_REMOVE)
   /* This is wrong for pointer to char, in which we do want to print
@@ -597,7 +598,7 @@ print_address (addr, stream)
 void
 print_address_demangle (addr, stream, do_demangle)
      CORE_ADDR addr;
-     FILE *stream;
+     GDB_FILE *stream;
      int do_demangle;
 {
   if (addr == 0) {
@@ -611,8 +612,16 @@ print_address_demangle (addr, stream, do_demangle)
 }
 
 
+/* These are the types that $__ will get after an examine command of one
+   of these sizes.  */
+
+static struct type *examine_b_type;
+static struct type *examine_h_type;
+static struct type *examine_w_type;
+static struct type *examine_g_type;
+
 /* Examine data at address ADDR in format FMT.
-   Fetch it from memory and print on stdout.  */
+   Fetch it from memory and print on gdb_stdout.  */
 
 static void
 do_examine (fmt, addr)
@@ -636,17 +645,14 @@ do_examine (fmt, addr)
   if (format == 's' || format == 'i')
     size = 'b';
 
-  /* I don't think the TYPE_CODE, TYPE_NAME, or TYPE_FLAGS matter.
-     This is just a (fairly twisted) way of telling print_formatted
-     the right length.  */
   if (size == 'b')
-    val_type = init_type (TYPE_CODE_INT, 1, 0, NULL, NULL);
+    val_type = examine_b_type;
   else if (size == 'h')
-    val_type = init_type (TYPE_CODE_INT, 2, 0, NULL, NULL);
+    val_type = examine_h_type;
   else if (size == 'w')
-    val_type = init_type (TYPE_CODE_INT, 4, 0, NULL, NULL);
+    val_type = examine_w_type;
   else if (size == 'g')
-    val_type = init_type (TYPE_CODE_INT, 8, 0, NULL, NULL);
+    val_type = examine_g_type;
 
   maxelts = 8;
   if (size == 'w')
@@ -661,7 +667,7 @@ do_examine (fmt, addr)
 
   while (count > 0)
     {
-      print_address (next_address, stdout);
+      print_address (next_address, gdb_stdout);
       printf_filtered (":");
       for (i = maxelts;
 	   i > 0 && count > 0;
@@ -675,9 +681,8 @@ do_examine (fmt, addr)
 	  print_formatted (last_examine_value, format, size);
 	}
       printf_filtered ("\n");
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
     }
-  free (val_type);
 }
 
 static void
@@ -767,14 +772,14 @@ print_command_1 (exp, inspect, voidprint)
       int histindex = record_latest_value (val);
 
       if (inspect)
-	printf ("\031(gdb-makebuffer \"%s\"  %d '(\"", exp, histindex);
+	printf_unfiltered ("\031(gdb-makebuffer \"%s\"  %d '(\"", exp, histindex);
       else
 	if (histindex >= 0) printf_filtered ("$%d = ", histindex);
 
       print_formatted (val, format, fmt.size);
       printf_filtered ("\n");
       if (inspect)
-	printf("\") )\030");
+	printf_unfiltered("\") )\030");
     }
 
   if (cleanup)
@@ -878,14 +883,14 @@ address_info (exp, from_tty)
     {
       if (is_a_field_of_this)
 	{
-	  printf ("Symbol \"%s\" is a field of the local class variable `this'\n", exp);
+	  printf_unfiltered ("Symbol \"%s\" is a field of the local class variable `this'\n", exp);
 	  return;
 	}
 
       msymbol = lookup_minimal_symbol (exp, (struct objfile *) NULL);
 
       if (msymbol != NULL)
-	printf ("Symbol \"%s\" is at %s in a file compiled without debugging.\n",
+	printf_unfiltered ("Symbol \"%s\" is at %s in a file compiled without debugging.\n",
 		exp,
 		local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (msymbol)));
       else
@@ -893,7 +898,7 @@ address_info (exp, from_tty)
       return;
     }
 
-  printf ("Symbol \"%s\" is ", SYMBOL_NAME (sym));
+  printf_unfiltered ("Symbol \"%s\" is ", SYMBOL_NAME (sym));
   val = SYMBOL_VALUE (sym);
   basereg = SYMBOL_BASEREG (sym);
 
@@ -901,63 +906,63 @@ address_info (exp, from_tty)
     {
     case LOC_CONST:
     case LOC_CONST_BYTES:
-      printf ("constant");
+      printf_unfiltered ("constant");
       break;
 
     case LOC_LABEL:
-      printf ("a label at address %s",
+      printf_unfiltered ("a label at address %s",
 	      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (sym)));
       break;
 
     case LOC_REGISTER:
-      printf ("a variable in register %s", reg_names[val]);
+      printf_unfiltered ("a variable in register %s", reg_names[val]);
       break;
 
     case LOC_STATIC:
-      printf ("static storage at address %s",
+      printf_unfiltered ("static storage at address %s",
 	      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (sym)));
       break;
 
     case LOC_REGPARM:
-      printf ("an argument in register %s", reg_names[val]);
+      printf_unfiltered ("an argument in register %s", reg_names[val]);
       break;
 
     case LOC_REGPARM_ADDR:
-      printf ("address of an argument in register %s", reg_names[val]);
+      printf_unfiltered ("address of an argument in register %s", reg_names[val]);
       break;
 
     case LOC_ARG:
-      printf ("an argument at offset %ld", val);
+      printf_unfiltered ("an argument at offset %ld", val);
       break;
 
     case LOC_LOCAL_ARG:
-      printf ("an argument at frame offset %ld", val);
+      printf_unfiltered ("an argument at frame offset %ld", val);
       break;
 
     case LOC_LOCAL:
-      printf ("a local variable at frame offset %ld", val);
+      printf_unfiltered ("a local variable at frame offset %ld", val);
       break;
 
     case LOC_REF_ARG:
-      printf ("a reference argument at offset %ld", val);
+      printf_unfiltered ("a reference argument at offset %ld", val);
       break;
 
     case LOC_BASEREG:
-      printf ("a variable at offset %ld from register %s",
+      printf_unfiltered ("a variable at offset %ld from register %s",
 	      val, reg_names[basereg]);
       break;
 
     case LOC_BASEREG_ARG:
-      printf ("an argument at offset %ld from register %s",
+      printf_unfiltered ("an argument at offset %ld from register %s",
 	      val, reg_names[basereg]);
       break;
 
     case LOC_TYPEDEF:
-      printf ("a typedef");
+      printf_unfiltered ("a typedef");
       break;
 
     case LOC_BLOCK:
-      printf ("a function at address %s",
+      printf_unfiltered ("a function at address %s",
 	      local_hex_string((unsigned long) BLOCK_START (SYMBOL_BLOCK_VALUE (sym))));
       break;
 
@@ -966,10 +971,10 @@ address_info (exp, from_tty)
       break;
       
     default:
-      printf ("of unknown (botched) type");
+      printf_unfiltered ("of unknown (botched) type");
       break;
     }
-  printf (".\n");
+  printf_unfiltered (".\n");
 }
 
 static void
@@ -1220,7 +1225,7 @@ do_one_display (d)
       if (d->format.format != 'i' && d->format.format != 's')
 	printf_filtered ("%c", d->format.size);
       printf_filtered (" ");
-      print_expression (d->exp, stdout);
+      print_expression (d->exp, gdb_stdout);
       if (d->format.count != 1)
 	printf_filtered ("\n");
       else
@@ -1236,14 +1241,14 @@ do_one_display (d)
     {
       if (d->format.format)
 	printf_filtered ("/%c ", d->format.format);
-      print_expression (d->exp, stdout);
+      print_expression (d->exp, gdb_stdout);
       printf_filtered (" = ");
       print_formatted (evaluate_expression (d->exp),
 		       d->format.format, d->format.size);
       printf_filtered ("\n");
     }
 
-  fflush (stdout);
+  gdb_flush (gdb_stdout);
   current_display_number = -1;
 }
 
@@ -1274,7 +1279,7 @@ disable_display (num)
 	d->status = disabled;
 	return;
       }
-  printf ("No display number %d.\n", num);
+  printf_unfiltered ("No display number %d.\n", num);
 }
   
 void
@@ -1283,7 +1288,7 @@ disable_current_display ()
   if (current_display_number >= 0)
     {
       disable_display (current_display_number);
-      fprintf (stderr, "Disabling display %d to avoid infinite recursion.\n",
+      fprintf_unfiltered (gdb_stderr, "Disabling display %d to avoid infinite recursion.\n",
 	       current_display_number);
     }
   current_display_number = -1;
@@ -1297,7 +1302,7 @@ display_info (ignore, from_tty)
   register struct display *d;
 
   if (!display_chain)
-    printf ("There are no auto-display expressions now.\n");
+    printf_unfiltered ("There are no auto-display expressions now.\n");
   else
       printf_filtered ("Auto-display expressions now in effect:\n\
 Num Enb Expression\n");
@@ -1310,11 +1315,11 @@ Num Enb Expression\n");
 		d->format.format);
       else if (d->format.format)
 	printf_filtered ("/%c ", d->format.format);
-      print_expression (d->exp, stdout);
+      print_expression (d->exp, gdb_stdout);
       if (d->block && !contained_in (get_selected_block (), d->block))
 	printf_filtered (" (cannot be evaluated in the current context)");
       printf_filtered ("\n");
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
     }
 }
 
@@ -1350,7 +1355,7 @@ enable_display (args, from_tty)
 	      d->status = enabled;
 	      goto win;
 	    }
-	printf ("No display number %d.\n", num);
+	printf_unfiltered ("No display number %d.\n", num);
       win:
 	p = p1;
 	while (*p == ' ' || *p == '\t')
@@ -1398,7 +1403,7 @@ void
 print_variable_value (var, frame, stream)
      struct symbol *var;
      FRAME frame;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   value val = read_var_value (var, frame);
   value_print (val, stream, 0, Val_pretty_default);
@@ -1417,7 +1422,7 @@ print_frame_args (func, fi, num, stream)
      struct symbol *func;
      struct frame_info *fi;
      int num;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   struct block *b = NULL;
   int nsyms = 0;
@@ -1551,7 +1556,7 @@ print_frame_nameless_args (fi, start, num, first, stream)
      long start;
      int num;
      int first;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   int i;
   CORE_ADDR argsaddr;
@@ -1587,90 +1592,6 @@ print_frame_nameless_args (fi, start, num, first, stream)
     }
 }
 
-/* This is an interface which allows to us make a va_list.  */
-typedef struct {
-  unsigned int nargs;
-  unsigned int max_arg_size;
-
-  /* Current position in bytes.  */
-  unsigned int argindex;
-
-#ifdef MAKEVA_EXTRA_INFO
-  /* For host dependent information.  */
-  MAKEVA_EXTRA_INFO
-#endif
-
-  /* Some systems (mips, pa) would like this to be aligned, and it never
-     will hurt.  */
-  union
-    {
-      char arg_bytes[1];
-      double force_double_align;
-      LONGEST force_long_align;
-    } aligner;
-} makeva_list;
-
-/* Tell the caller how many bytes to allocate for a makeva_list with NARGS
-   arguments and whose largest argument is MAX_ARG_SIZE bytes.  This
-   way the caller can use alloca, malloc, or some other allocator.  */
-unsigned int
-makeva_size (nargs, max_arg_size)
-     unsigned int nargs;
-     unsigned int max_arg_size;
-{
-#if defined (MAKEVA_SIZE)
-  MAKEVA_SIZE (nargs, max_arg_size);
-#else
-  return sizeof (makeva_list) + nargs * max_arg_size;
-#endif
-}
-
-/* Start working on LIST with NARGS arguments and whose largest
-   argument is MAX_ARG_SIZE bytes.  */
-void
-makeva_start (list, nargs, max_arg_size)
-     makeva_list *list;
-     unsigned int nargs;
-     unsigned int max_arg_size;
-{
-  list->nargs = nargs;
-  list->max_arg_size = max_arg_size;
-#if defined (MAKEVA_START)
-  MAKEVA_START (list);
-#else
-  list->argindex = 0;
-#endif
-}
-
-/* Add ARG to LIST.  */
-void
-makeva_arg (list, argaddr, argsize)
-     makeva_list *list;
-     PTR argaddr;
-     unsigned int argsize;
-{
-#if defined (MAKEVA_ARG)
-  MAKEVA_ARG (list, argaddr, argsize);
-#else
-  memcpy (&list->aligner.arg_bytes[list->argindex], argaddr, argsize);
-  list->argindex += argsize;
-#endif
-}
-
-/* From LIST, for which makeva_arg has been called for each arg,
-   return a va_list containing the args.  */
-va_list
-makeva_end (list)
-     makeva_list *list;
-{
-#if defined (MAKEVA_END)
-  MAKEVA_END (list);
-#else
-  /* This works if a va_list is just a pointer to the arguments.  */
-  return (va_list) list->aligner.arg_bytes;
-#endif
-}
-
 /* ARGSUSED */
 static void
 printf_command (arg, from_tty)
@@ -1681,11 +1602,14 @@ printf_command (arg, from_tty)
   register char *s = arg;
   char *string;
   value *val_args;
+  char *substrings;
+  char *current_substring;
   int nargs = 0;
   int allocated_args = 20;
-  va_list args_to_vprintf;
+  struct cleanup *old_cleanups;
 
   val_args = (value *) xmalloc (allocated_args * sizeof (value));
+  old_cleanups = make_cleanup (free_current_contents, &val_args);
 
   if (s == 0)
     error_no_arg ("format-control string and values to print");
@@ -1701,6 +1625,7 @@ printf_command (arg, from_tty)
      processing some kinds of escape sequence.  */
 
   f = string = (char *) alloca (strlen (s) + 1);
+
   while (*s != '"')
     {
       int c = *s++;
@@ -1708,7 +1633,6 @@ printf_command (arg, from_tty)
 	{
 	case '\0':
 	  error ("Bad format string, non-terminated '\"'.");
-	  /* doesn't return */
 
 	case '\\':
 	  switch (c = *s++)
@@ -1750,26 +1674,27 @@ printf_command (arg, from_tty)
   if (*s == ',') s++;
   while (*s == ' ' || *s == '\t') s++;
 
+  /* Need extra space for the '\0's.  Doubling the size is sufficient.  */
+  substrings = alloca (strlen (string) * 2);
+  current_substring = substrings;
+
   {
     /* Now scan the string for %-specs and see what kinds of args they want.
-       argclass[I] classifies the %-specs so we can give vprintf something
+       argclass[I] classifies the %-specs so we can give vprintf_unfiltered something
        of the right size.  */
- 
-    enum argclass {int_arg, string_arg, double_arg, long_long_arg};
+
+    enum argclass {no_arg, int_arg, string_arg, double_arg, long_long_arg};
     enum argclass *argclass;
+    enum argclass this_argclass;
+    char *last_arg;
     int nargs_wanted;
     int lcount;
     int i;
-    /* We build up a va_list to pass to vprintf.  This is unnecessary;
-       instead of calling vprintf ("%d%f", <constructed va_list>) we
-       could just call printf ("%d", arg1); printf ("%f", arg2);.  Funny
-       how I thought of that right *after* I got the MAKEVA stuff pretty much
-       working...  */
-    makeva_list *args_makeva;
 
     argclass = (enum argclass *) alloca (strlen (s) * sizeof *argclass);
     nargs_wanted = 0;
     f = string;
+    last_arg = string;
     while (*f)
       if (*f++ == '%')
 	{
@@ -1780,15 +1705,44 @@ printf_command (arg, from_tty)
 		lcount++;
 	      f++;
 	    }
-	  if (*f == 's')
-	    argclass[nargs_wanted++] = string_arg;
-	  else if (*f == 'e' || *f == 'f' || *f == 'g')
-	    argclass[nargs_wanted++] = double_arg;
-	  else if (lcount > 1)
-	    argclass[nargs_wanted++] = long_long_arg;
-	  else if (*f != '%')
-	    argclass[nargs_wanted++] = int_arg;
+	  switch (*f)
+	    {
+	    case 's':
+	      this_argclass = string_arg;
+	      break;
+
+	    case 'e':
+	    case 'f':
+	    case 'g':
+	      this_argclass = double_arg;
+	      break;
+
+	    case '*':
+	      error ("`*' not supported for precision or width in printf");
+
+	    case 'n':
+	      error ("Format specifier `n' not supported in printf");
+
+	    case '%':
+	      this_argclass = no_arg;
+	      break;
+
+	    default:
+	      if (lcount > 1)
+		this_argclass = long_long_arg;
+	      else
+		this_argclass = int_arg;
+	      break;
+	    }
 	  f++;
+	  if (this_argclass != no_arg)
+	    {
+	      strncpy (current_substring, last_arg, f - last_arg);
+	      current_substring += f - last_arg;
+	      *current_substring++ = '\0';
+	      last_arg = f;
+	      argclass[nargs_wanted++] = this_argclass;
+	    }
 	}
 
     /* Now, parse all arguments and evaluate them.
@@ -1823,69 +1777,85 @@ printf_command (arg, from_tty)
     if (nargs != nargs_wanted)
       error ("Wrong number of arguments for specified format-string");
 
-    /* Now lay out an argument-list containing the arguments
-       as doubles, integers and C pointers.  */
+    /* FIXME: We should be using vprintf_filtered, but as long as it
+       has an arbitrary limit that is unacceptable.  Correct fix is
+       for vprintf_filtered to scan down the format string so it knows
+       how big a buffer it needs (perhaps by putting a vasprintf (see
+       GNU C library) in libiberty).
 
-    args_makeva = (makeva_list *)
-      alloca (makeva_size (nargs, sizeof (double)));
-    makeva_start (args_makeva, nargs, sizeof (double));
+       But for now, just force out any pending output, so at least the output
+       appears in the correct order.  */
+    wrap_here ((char *)NULL);
+
+    /* Now actually print them.  */
+    current_substring = substrings;
     for (i = 0; i < nargs; i++)
       {
-	if (argclass[i] == string_arg)
+	switch (argclass[i])
 	  {
-	    char *str;
-	    CORE_ADDR tem;
-	    int j;
-	    tem = value_as_pointer (val_args[i]);
- 
-	    /* This is a %s argument.  Find the length of the string.  */
-	    for (j = 0; ; j++)
-	      {
-		char c;
-		QUIT;
-		read_memory (tem + j, &c, 1);
-		if (c == 0)
-		  break;
-	      }
- 
-	    /* Copy the string contents into a string inside GDB.  */
-	    str = (char *) alloca (j + 1);
-	    read_memory (tem, str, j);
-	    str[j] = 0;
- 
-	    /* Pass address of internal copy as the arg to vprintf.  */
-	    makeva_arg (args_makeva, &str, sizeof (str));
-	  }
-	else if (VALUE_TYPE (val_args[i])->code == TYPE_CODE_FLT)
-	  {
-	    double val = value_as_double (val_args[i]);
-	    makeva_arg (args_makeva, &val, sizeof (val));
-	  }
-	else
-#ifdef CC_HAS_LONG_LONG
-	  if (argclass[i] == long_long_arg)
+	  case string_arg:
+	    {
+	      char *str;
+	      CORE_ADDR tem;
+	      int j;
+	      tem = value_as_pointer (val_args[i]);
+
+	      /* This is a %s argument.  Find the length of the string.  */
+	      for (j = 0; ; j++)
+		{
+		  char c;
+		  QUIT;
+		  read_memory (tem + j, &c, 1);
+		  if (c == 0)
+		    break;
+		}
+
+	      /* Copy the string contents into a string inside GDB.  */
+	      str = (char *) alloca (j + 1);
+	      read_memory (tem, str, j);
+	      str[j] = 0;
+
+	      /* Don't use printf_filtered because of arbitrary limit.  */
+	      printf_unfiltered (current_substring, str);
+	    }
+	    break;
+	  case double_arg:
+	    {
+	      double val = value_as_double (val_args[i]);
+	      /* Don't use printf_filtered because of arbitrary limit.  */
+	      printf_unfiltered (current_substring, val);
+	      break;
+	    }
+	  case long_long_arg:
+#if defined (CC_HAS_LONG_LONG) && defined (PRINTF_HAS_LONG_LONG)
 	    {
 	      long long val = value_as_long (val_args[i]);
-	      makeva_arg (args_makeva, &val, sizeof (val));
+	      /* Don't use printf_filtered because of arbitrary limit.  */
+	      printf_unfiltered (current_substring, val);
+	      break;
 	    }
-	  else
+#else
+	    error ("long long not supported in printf");
 #endif
+	  case int_arg:
 	    {
+	      /* FIXME: there should be separate int_arg and long_arg.  */
 	      long val = value_as_long (val_args[i]);
-	      makeva_arg (args_makeva, &val, sizeof (val));
+	      /* Don't use printf_filtered because of arbitrary limit.  */
+	      printf_unfiltered (current_substring, val);
+	      break;
 	    }
+	  default:
+	    error ("internal error in printf_command");
+	  }
+	/* Skip to the next substring.  */
+	current_substring += strlen (current_substring) + 1;
       }
-    args_to_vprintf = makeva_end (args_makeva);
+    /* Print the portion of the format string after the last argument.  */
+    /* It would be OK to use printf_filtered here.  */
+    printf (last_arg);
   }
-
-  /* FIXME: We should be using vprintf_filtered, but as long as it has an
-     arbitrary limit that is unacceptable.  Correct fix is for vprintf_filtered
-     to scan down the format string so it knows how big a buffer it needs.
-
-     But for now, just force out any pending output, so at least the output
-     appears in the correct order.  */
-  wrap_here ((char *)NULL);
-  vprintf (string, args_to_vprintf);
+  do_cleanups (old_cleanups);
 }
 
 /* Dump a specified section of assembly code.  With no command line
@@ -1946,13 +1916,13 @@ disassemble_command (arg, from_tty)
   for (pc = low; pc < high; )
     {
       QUIT;
-      print_address (pc, stdout);
+      print_address (pc, gdb_stdout);
       printf_filtered (":\t");
-      pc += print_insn (pc, stdout);
+      pc += print_insn (pc, gdb_stdout);
       printf_filtered ("\n");
     }
   printf_filtered ("End of assembler dump.\n");
-  fflush (stdout);
+  gdb_flush (gdb_stdout);
 }
 
 
@@ -2100,4 +2070,9 @@ environment, the value is printed in its own window.");
 	"Set printing of source filename and line number with <symbol>.",
 		   &setprintlist),
       &showprintlist);
+
+  examine_b_type = init_type (TYPE_CODE_INT, 1, 0, NULL, NULL);
+  examine_h_type = init_type (TYPE_CODE_INT, 2, 0, NULL, NULL);
+  examine_w_type = init_type (TYPE_CODE_INT, 4, 0, NULL, NULL);
+  examine_g_type = init_type (TYPE_CODE_INT, 8, 0, NULL, NULL);
 }

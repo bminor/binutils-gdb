@@ -74,7 +74,7 @@ solib_add (arg_string, from_tty, target)
       /* if already loaded, continue with the next one. */
       if (vp->loaded) {
 	
-	printf ("%s%s%s%s: already loaded.\n",
+	printf_unfiltered ("%s%s%s%s: already loaded.\n",
 	  *vp->member ? "(" : "",
 	  vp->member,
 	  *vp->member ? ") " : "",
@@ -82,12 +82,12 @@ solib_add (arg_string, from_tty, target)
 	continue;
       }
 
-      printf ("Loading  %s%s%s%s...",
+      printf_unfiltered ("Loading  %s%s%s%s...",
 	  *vp->member ? "(" : "",
 	  vp->member,
 	  *vp->member ? ") " : "",
 	  vp->name);
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
 
       /* This is gross and doesn't work.  If this code is re-enabled,
 	 just stick a objfile member into the struct vmap; that's the
@@ -101,7 +101,7 @@ solib_add (arg_string, from_tty, target)
 	syms_from_objfile (obj, 0, 0, 0);
 	new_symfile_objfile (obj, 0, 0);
 	vmap_symtab (vp, 0, 0);
-	printf ("Done.\n");
+	printf_unfiltered ("Done.\n");
 	loaded = vp->loaded = 1;
     }
   }
@@ -118,7 +118,7 @@ solib_add (arg_string, from_tty, target)
 /*    reinit_frame_cache(); */
   }
   else if (!matched)
-    printf ("No matching shared object found.\n");
+    printf_unfiltered ("No matching shared object found.\n");
 }
 #endif /* SOLIB_SYMBOLS_MANUAL */
 
@@ -154,19 +154,19 @@ register struct ld_info *ldi;
    struct vmap *vp = vmap;
 
    if (!vp || !vp->nxt) {
-     printf("No shared libraries loaded at this time.\n");	
+     printf_unfiltered("No shared libraries loaded at this time.\n");	
      return;
    }
 
    /* skip over the first vmap, it is the main program, always loaded. */
    vp = vp->nxt;
 
-   printf ("\
+   printf_unfiltered ("\
 Text Range		Data Range		Syms	Shared Object Library\n");
 
    for (; vp; vp = vp->nxt) {
 
-     printf ("0x%08x-0x%08x	0x%08x-0x%08x	%s	%s%s%s%s\n",
+     printf_unfiltered ("0x%08x-0x%08x	0x%08x-0x%08x	%s	%s%s%s%s\n",
 	vp->tstart, vp->tend,
 	vp->dstart, vp->dend,
 	vp->loaded ? "Yes" : "No ",

@@ -252,7 +252,7 @@ Start it from the beginning? "))
       puts_filtered(" ");
       puts_filtered(inferior_args);
       puts_filtered("\n");
-      fflush (stdout);
+      gdb_flush (gdb_stdout);
     }
 
   target_create_inferior (exec_file, inferior_args,
@@ -382,7 +382,7 @@ step_1 (skip_subroutines, single_inst, count_string)
 	      printf_filtered ("\
 Single stepping until exit from function %s, \n\
 which has no line number information.\n", name);
-	      fflush (stdout);
+	      gdb_flush (gdb_stdout);
 	    }
 	}
       else
@@ -749,7 +749,7 @@ finish_command (arg, from_tty)
 		BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function))));
 
       printf_filtered ("Value returned is $%d = ", record_latest_value (val));
-      value_print (val, stdout, 0, Val_no_prettyprint);
+      value_print (val, gdb_stdout, 0, Val_no_prettyprint);
       printf_filtered ("\n");
     }
   do_cleanups(old_chain);
@@ -1067,8 +1067,8 @@ do_registers_info (regnum, fpregs)
 	  continue;
       }
 
-      fputs_filtered (reg_names[i], stdout);
-      print_spaces_filtered (15 - strlen (reg_names[i]), stdout);
+      fputs_filtered (reg_names[i], gdb_stdout);
+      print_spaces_filtered (15 - strlen (reg_names[i]), gdb_stdout);
 
       /* Get the data in raw format, then convert also to virtual format.  */
       if (read_relative_register_raw_bytes (i, raw_buffer))
@@ -1086,7 +1086,7 @@ do_registers_info (regnum, fpregs)
 	  register int j;
 
 	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0,
-		     stdout, 0, 1, 0, Val_pretty_default);
+		     gdb_stdout, 0, 1, 0, Val_pretty_default);
 
 	  printf_filtered ("\t(raw 0x");
 	  for (j = 0; j < REGISTER_RAW_SIZE (i); j++)
@@ -1109,10 +1109,10 @@ do_registers_info (regnum, fpregs)
       else
 	{
 	  val_print (REGISTER_VIRTUAL_TYPE (i), raw_buffer, 0,
-		     stdout, 'x', 1, 0, Val_pretty_default);
+		     gdb_stdout, 'x', 1, 0, Val_pretty_default);
 	  printf_filtered ("\t");
 	  val_print (REGISTER_VIRTUAL_TYPE (i), raw_buffer, 0,
-		     stdout,   0, 1, 0, Val_pretty_default);
+		     gdb_stdout,   0, 1, 0, Val_pretty_default);
 	}
 
       /* The SPARC wants to print even-numbered float regs as doubles
@@ -1280,7 +1280,7 @@ unset_command (args, from_tty)
      int from_tty;
 {
   printf_filtered ("\"unset\" must be followed by the name of an unset subcommand.\n");
-  help_list (unsetlist, "unset ", -1, stdout);
+  help_list (unsetlist, "unset ", -1, gdb_stdout);
 }
 
 void

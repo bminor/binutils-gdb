@@ -30,7 +30,7 @@ pyr_print_registers(reg_buf, regnum)
   struct user u;
 
   for (regno = 0; regno < 16; regno++) {
-    printf/*_filtered*/ ("%6.6s: %8x  %6.6s: %8x  %6s: %8x  %6s: %8x\n",
+    printf_unfiltered/*_filtered*/ ("%6.6s: %8x  %6.6s: %8x  %6s: %8x  %6s: %8x\n",
 		     reg_names[regno], reg_buf[regno],
 		     reg_names[regno+16], reg_buf[regno+16],
 		     reg_names[regno+32], reg_buf[regno+32],
@@ -42,7 +42,7 @@ pyr_print_registers(reg_buf, regnum)
   ksp = ptrace (3, inferior_pid,
 		(PTRACE_ARG3_TYPE) ((char *)&u.u_pcb.pcb_ksp) -
 		((char *)&u), 0);
-  printf/*_filtered*/ ("\n%6.6s: %8x  %6.6s: %8x (%08x) %6.6s %8x\n",
+  printf_unfiltered/*_filtered*/ ("\n%6.6s: %8x  %6.6s: %8x (%08x) %6.6s %8x\n",
 		   reg_names[CSP_REGNUM],reg_buf[CSP_REGNUM],
 		   reg_names[KSP_REGNUM], reg_buf[KSP_REGNUM], ksp,
 		   "usp", usp);
@@ -89,7 +89,7 @@ CORE_ADDR frame_locals_address (frame)
   register int addr = find_saved_register (frame,CFP_REGNUM);
   register int result = read_memory_integer (addr, 4);
 #ifdef PYRAMID_CONTROL_FRAME_DEBUGGING
-  fprintf (stderr,
+  fprintf_unfiltered (stderr,
 	   "\t[[..frame_locals:%8x, %s= %x @%x fcfp= %x foo= %x\n\t gr13=%x pr13=%x tr13=%x @%x]]\n",
 	   frame->frame,
 	   reg_names[CFP_REGNUM],
@@ -115,7 +115,7 @@ CORE_ADDR frame_args_addr (frame)
   register int result = read_memory_integer (addr, 4);
 
 #ifdef PYRAMID_CONTROL_FRAME_DEBUGGING
-  fprintf (stderr,
+  fprintf_unfiltered (stderr,
 	   "\t[[..frame_args:%8x, %s= %x @%x fcfp= %x r_r= %x\n\t gr13=%x pr13=%x tr13=%x @%x]]\n",
 	   frame->frame,
 	   reg_names[CFP_REGNUM],

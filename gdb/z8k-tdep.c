@@ -206,7 +206,7 @@ z8k_push_dummy_frame ()
 int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   disassemble_info info;
 
@@ -352,8 +352,8 @@ print_register_hook (regno)
 
       read_relative_register_raw_bytes (regno, (char *) (l + 0));
       read_relative_register_raw_bytes (regno + 1, (char *) (l + 1));
-      printf ("\t");
-      printf ("%04x%04x", l[0], l[1]);
+      printf_unfiltered ("\t");
+      printf_unfiltered ("%04x%04x", l[0], l[1]);
     }
 
   if ((regno & 3) == 0 && regno < 16)
@@ -365,8 +365,8 @@ print_register_hook (regno)
       read_relative_register_raw_bytes (regno + 2, (char *) (l + 2));
       read_relative_register_raw_bytes (regno + 3, (char *) (l + 3));
 
-      printf ("\t");
-      printf ("%04x%04x%04x%04x", l[0], l[1], l[2], l[3]);
+      printf_unfiltered ("\t");
+      printf_unfiltered ("%04x%04x%04x%04x", l[0], l[1], l[2], l[3]);
     }
   if (regno == 15)
     {
@@ -375,10 +375,10 @@ print_register_hook (regno)
 
       read_relative_register_raw_bytes (regno, (char *) (&rval));
 
-      printf ("\n");
+      printf_unfiltered ("\n");
       for (i = 0; i < 10; i += 2)
 	{
-	  printf ("(sp+%d=%04x)", i, read_memory_short (rval + i));
+	  printf_unfiltered ("(sp+%d=%04x)", i, read_memory_short (rval + i));
 	}
     }
 
@@ -421,7 +421,7 @@ z8k_set_pointer_size (newsize)
 
   if (oldsize != newsize)
     {
-      printf ("pointer size set to %d bits\n", newsize);
+      printf_unfiltered ("pointer size set to %d bits\n", newsize);
       oldsize = newsize;
       if (newsize == 32)
 	{
@@ -457,8 +457,8 @@ set_memory (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf ("\"set memory\" must be followed by the name of a memory subcommand.\n");
-  help_list (setmemorylist, "set memory ", -1, stdout);
+  printf_unfiltered ("\"set memory\" must be followed by the name of a memory subcommand.\n");
+  help_list (setmemorylist, "set memory ", -1, gdb_stdout);
 }
 
 void

@@ -102,7 +102,7 @@ fetch_inferior_registers (regno)
 		(PTRACE_ARG3_TYPE) special_regs[regno-FIRST_SP_REGNUM], 0, 0);
   }
   else
-    fprintf (stderr, "gdb error: register no %d not implemented.\n", regno);
+    fprintf_unfiltered (gdb_stderr, "gdb error: register no %d not implemented.\n", regno);
 
   register_valid [regno] = 1;
 }
@@ -181,7 +181,7 @@ store_inferior_registers (regno)
   }
 
   else
-    fprintf (stderr, "Gdb error: register no %d not implemented.\n", regno);
+    fprintf_unfiltered (gdb_stderr, "Gdb error: register no %d not implemented.\n", regno);
 
   if ( errno ) {
     perror ("ptrace write");  errno = 0;
@@ -244,5 +244,5 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
     memcpy (&registers [REGISTER_BYTE (FP0_REGNUM)], core_reg_sect, 32 * 8);
 
   else
-    fprintf (stderr, "Gdb error: unknown parameter to fetch_core_registers().\n");
+    fprintf_unfiltered (gdb_stderr, "Gdb error: unknown parameter to fetch_core_registers().\n");
 }

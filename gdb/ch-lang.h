@@ -24,8 +24,8 @@ extern void
 chill_error PARAMS ((char *));	/* Defined in ch-exp.y */
 
 extern void			/* Defined in ch-typeprint.c */
-chill_print_type PARAMS ((struct type *, char *, FILE *, int, int));
+chill_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
 
 extern int
-chill_val_print PARAMS ((struct type *, char *, CORE_ADDR, FILE *, int, int,
+chill_val_print PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *, int, int,
 			 int, enum val_prettyprint));

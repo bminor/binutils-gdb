@@ -128,7 +128,7 @@ extern char *mktemp();
 extern void generic_mourn_inferior ();
 
 extern struct target_ops nindy_ops;
-extern FILE *instream;
+extern GDB_FILE *instream;
 extern struct ext_format ext_format_i960;	/* i960-tdep.c */
 
 extern char ninStopWhy ();
@@ -227,7 +227,7 @@ nindy_detach (name, from_tty)
 static void
 nindy_files_info ()
 {
-  printf("\tAttached to %s at %d bps%s%s.\n", savename,
+  printf_unfiltered("\tAttached to %s at %d bps%s%s.\n", savename,
 	 sr_get_baud_rate(),
 	 nindy_old_protocol? " in old protocol": "",
          nindy_initial_brk? " with initial break": "");
@@ -292,7 +292,7 @@ You may need to reset the 80960 and/or reload your program.\n");
 }
 
 /* Wait until the remote machine stops. While waiting, operate in passthrough
- * mode; i.e., pass everything NINDY sends to stdout, and everything from
+ * mode; i.e., pass everything NINDY sends to gdb_stdout, and everything from
  * stdin to NINDY.
  *
  * Return to caller, storing status in 'status' just as `wait' would.
@@ -698,8 +698,8 @@ nindy_before_main_loop ()
 
   while (current_target != &nindy_ops) { /* remote tty not specified yet */
 	if ( instream == stdin ){
-		printf("\nAttach /dev/ttyNN -- specify NN, or \"quit\" to quit:  ");
-		fflush( stdout );
+		printf_unfiltered("\nAttach /dev/ttyNN -- specify NN, or \"quit\" to quit:  ");
+		gdb_flush( gdb_stdout );
 	}
 	fgets( ttyname, sizeof(ttyname)-1, stdin );
 

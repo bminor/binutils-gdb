@@ -118,9 +118,9 @@ core_file_command (filename, from_tty)
 	core_aouthdr.magic = corestr.c_aouthdr.a_info;
 	core_aouthdr.vstamp = /*SUNVERSION*/ 31252;
 #endif
-	printf ("Core file is from \"%s\".\n", corestr.c_cmdname);
+	printf_unfiltered ("Core file is from \"%s\".\n", corestr.c_cmdname);
 	if (corestr.c_signo > 0)
-	  printf ("Program terminated with signal %d, %s.\n",
+	  printf_unfiltered ("Program terminated with signal %d, %s.\n",
 		  corestr.c_signo, safe_strsignal (corestr.c_signo));
       }
       if (filename[0] == '/')
@@ -137,7 +137,7 @@ core_file_command (filename, from_tty)
       validate_files ();
     }
   else if (from_tty)
-    printf ("No core file now.\n");
+    printf_unfiltered ("No core file now.\n");
 }
 
 i387_to_double (from, to)

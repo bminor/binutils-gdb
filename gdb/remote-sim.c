@@ -192,7 +192,7 @@ sim_load_standard (abfd)
 	bfd_get_section_contents (abfd, s, buffer, i, sub_delta);
 	sim_write (s->vma + i, buffer, sub_delta);
 	printf_filtered ("*");
-	fflush (stdout);
+	gdb_flush (gdb_stdout);
       }
       printf_filtered ("\n");
       free (buffer);

@@ -563,8 +563,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 			   (dependencies_used
 			    * sizeof (struct partial_symtab *)));
 #ifdef DEBUG_INFO
-		    fprintf (stderr, "Had to reallocate dependency list.\n");
-		    fprintf (stderr, "New dependencies allocated: %d\n",
+		    fprintf_unfiltered (gdb_stderr, "Had to reallocate dependency list.\n");
+		    fprintf_unfiltered (gdb_stderr, "New dependencies allocated: %d\n",
 			     dependencies_allocated);
 #endif
 		  }

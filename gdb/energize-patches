@@ -1619,7 +1619,7 @@
   		    {
   		      val_print (elttype, valaddr + i * eltlen,
 ***************
-*** 841,846 ****
+Sun Oct 24 23:48:55 1993*** 841,846 ****
 --- 856,862 ----
   				 recurse + 1, pretty);
   		      things_printed++;

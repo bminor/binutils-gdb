@@ -152,7 +152,7 @@ static void
 cleanup_tty(ttystate)
      serial_ttystate ttystate;
 {
-  printf ("\r\n[Exiting connect mode]\r\n");
+  printf_unfiltered ("\r\n[Exiting connect mode]\r\n");
   SERIAL_SET_TTY_STATE (tty_desc, ttystate);
   free (ttystate);
   SERIAL_CLOSE (tty_desc);
@@ -171,9 +171,9 @@ connect_command (args, fromtty)
   dont_repeat();
 
   if (args)
-    fprintf(stderr, "This command takes no args.  They have been ignored.\n");
+    fprintf_unfiltered(gdb_stderr, "This command takes no args.  They have been ignored.\n");
 	
-  printf("[Entering connect mode.  Use ~. or ~^D to escape]\n");
+  printf_unfiltered("[Entering connect mode.  Use ~. or ~^D to escape]\n");
 
   tty_desc = SERIAL_FDOPEN (0);
   port_desc = last_serial_opened;

@@ -32,13 +32,13 @@ extern int vtblprint;		/* Controls printing of vtbl's */
 extern int demangle;		/* whether to print C++ syms raw or src-form */
 
 extern void
-cp_print_class_member PARAMS ((char *, struct type *, FILE *, char *));
+cp_print_class_member PARAMS ((char *, struct type *, GDB_FILE *, char *));
 
 extern void
-cp_print_class_method PARAMS ((char *, struct type *, FILE *));
+cp_print_class_method PARAMS ((char *, struct type *, GDB_FILE *));
 
 extern void
-cp_print_value_fields PARAMS ((struct type *, char *, FILE *, int, int,
+cp_print_value_fields PARAMS ((struct type *, char *, GDB_FILE *, int, int,
 			       enum val_prettyprint, struct type **));
 
 extern int
@@ -53,11 +53,11 @@ cp_is_vtbl_member PARAMS ((struct type *));
 /* BEGIN-FIXME:  Hooks into c-typeprint.c */
 
 extern void
-c_type_print_varspec_prefix PARAMS ((struct type *, FILE *, int, int));
+c_type_print_varspec_prefix PARAMS ((struct type *, GDB_FILE *, int, int));
 
 extern void
 cp_type_print_method_args PARAMS ((struct type **, char *, char *, int,
-				   FILE *));
+				   GDB_FILE *));
 /* END-FIXME */
 
 
@@ -83,7 +83,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
-     FILE *stream;
+     GDB_FILE *stream;
      int format;
      int deref_ref;
      int recurse;
@@ -411,6 +411,6 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
     default:
       error ("Invalid C/C++ type code %d in symbol table.", TYPE_CODE (type));
     }
-  fflush (stream);
+  gdb_flush (stream);
   return (0);
 }

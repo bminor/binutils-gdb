@@ -513,7 +513,7 @@ child_create_inferior (exec_file, allargs, env)
 
       fprintf (stderr, "Cannot exec %s: %s.\n", shell_file,
 	       errno < sys_nerr ? sys_errlist[errno] : "unknown error");
-      fflush (stderr);
+      gdb_flush (stderr);
       _exit (0177);
     }
 
@@ -649,7 +649,7 @@ child_open (args, from_tty)
     {
       printf ("Attaching program: %s pid %d\n",
 	      exec_file, pid);
-      fflush (stdout);
+      gdb_flush (stdout);
     }
 
   attach (pid);
@@ -716,7 +716,7 @@ wait_for_inferior ()
 	  else
 	    if (!batch_mode())
 	      printf ("\nProgram exited normally.\n");
-	  fflush (stdout);
+	  gdb_flush (stdout);
 	  target_mourn_inferior ();
 #ifdef NO_SINGLE_STEP
 	  one_stepped = 0;
@@ -736,7 +736,7 @@ wait_for_inferior ()
 		  ? sys_siglist[stop_signal]
 		  : "(undocumented)");
 	  printf ("The inferior process no longer exists.\n");
-	  fflush (stdout);
+	  gdb_flush (stdout);
 #ifdef NO_SINGLE_STEP
 	  one_stepped = 0;
 #endif
@@ -899,7 +899,7 @@ wait_for_inferior ()
 		      ? sys_siglist[stop_signal]
 		      : "(undocumented)");
 #endif /* PRINT_RANDOM_SIGNAL */
-	      fflush (stdout);
+	      gdb_flush (stdout);
 	    }
 	  if (stop_signal >= NSIG
 	      || signal_stop[stop_signal])

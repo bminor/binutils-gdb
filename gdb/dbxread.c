@@ -1254,7 +1254,7 @@ dbx_psymtab_to_symtab_1 (pst)
 
   if (pst->readin)
     {
-      fprintf (stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
+      fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
 	       pst->filename);
       return;
     }
@@ -1266,13 +1266,13 @@ dbx_psymtab_to_symtab_1 (pst)
 	/* Inform about additional files that need to be read in.  */
 	if (info_verbose)
 	  {
-	    fputs_filtered (" ", stdout);
+	    fputs_filtered (" ", gdb_stdout);
 	    wrap_here ("");
-	    fputs_filtered ("and ", stdout);
+	    fputs_filtered ("and ", gdb_stdout);
 	    wrap_here ("");
 	    printf_filtered ("%s...", pst->dependencies[i]->filename);
 	    wrap_here ("");		/* Flush output */
-	    fflush (stdout);
+	    gdb_flush (gdb_stdout);
 	  }
 	dbx_psymtab_to_symtab_1 (pst->dependencies[i]);
       }
@@ -1311,7 +1311,7 @@ dbx_psymtab_to_symtab (pst)
 
   if (pst->readin)
     {
-      fprintf (stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
+      fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
 	       pst->filename);
       return;
     }
@@ -1323,7 +1323,7 @@ dbx_psymtab_to_symtab (pst)
       if (info_verbose)
 	{
 	  printf_filtered ("Reading in symbols for %s...", pst->filename);
-	  fflush (stdout);
+	  gdb_flush (gdb_stdout);
 	}
 
       sym_bfd = pst->objfile->obfd;

@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ctype.h"
 #include "command.h"
 #include "inferior.h"
+#include "thread.h"
 #include "target.h"
 #include "language.h"
 #include <string.h>
@@ -449,7 +450,7 @@ insert_breakpoints ()
 		b->enable = disabled;
 		if (!disabled_breaks)
 		  {
-		    fprintf (stderr,
+		    fprintf_unfiltered (gdb_stderr,
 			 "Cannot insert breakpoint %d:\n", b->number);
 		    printf_filtered ("Disabling shared library breakpoints:\n");
 		  }
@@ -459,9 +460,9 @@ insert_breakpoints ()
 	    else
 #endif
 	      {
-		fprintf (stderr, "Cannot insert breakpoint %d:\n", b->number);
+		fprintf_unfiltered (gdb_stderr, "Cannot insert breakpoint %d:\n", b->number);
 #ifdef ONE_PROCESS_WRITETEXT
-		fprintf (stderr,
+		fprintf_unfiltered (gdb_stderr,
 		  "The same program may be running in another process.\n");
 #endif
 		memory_error (val, b->address);	/* which bombs us out */
@@ -482,7 +483,7 @@ remove_breakpoints ()
   int val;
 
 #ifdef BREAKPOINT_DEBUG
-  printf ("Removing breakpoints.\n");
+  printf_unfiltered ("Removing breakpoints.\n");
 #endif /* BREAKPOINT_DEBUG */
 
   ALL_BREAKPOINTS (b)
@@ -493,11 +494,11 @@ remove_breakpoints ()
 	  return val;
 	b->inserted = 0;
 #ifdef BREAKPOINT_DEBUG
-	printf ("Removed breakpoint at %s",
+	printf_unfiltered ("Removed breakpoint at %s",
 		local_hex_string((unsigned long) b->address));
-	printf (", shadow %s",
+	printf_unfiltered (", shadow %s",
 		local_hex_string((unsigned long) b->shadow_contents[0]));
-	printf (", %s.\n",
+	printf_unfiltered (", %s.\n",
 		local_hex_string((unsigned long) b->shadow_contents[1]));
 #endif /* BREAKPOINT_DEBUG */
       }
@@ -552,6 +553,29 @@ breakpoint_here_p (pc)
 
   return 0;
 }
+
+/* breakpoint_match_thread (PC, PID) returns true if the breakpoint at PC
+   is valid for process/thread PID.  */
+
+int
+breakpoint_thread_match (pc, pid)
+     CORE_ADDR pc;
+     int pid;
+{
+  struct breakpoint *b;
+  int thread;
+
+  thread = pid_to_thread_id (pid);
+
+  ALL_BREAKPOINTS (b)
+    if (b->enable != disabled
+	&& b->address == pc
+	&& (b->thread == -1 || b->thread == thread))
+      return 1;
+
+  return 0;
+}
+
 
 /* bpstat stuff.  External routines' interfaces are documented
    in breakpoint.h.  */
@@ -740,11 +764,11 @@ print_it_normal (bs)
   if (bs->old_val != NULL)
     {
       printf_filtered ("\nWatchpoint %d, ", bs->breakpoint_at->number);
-      print_expression (bs->breakpoint_at->exp, stdout);
+      print_expression (bs->breakpoint_at->exp, gdb_stdout);
       printf_filtered ("\nOld value = ");
-      value_print (bs->old_val, stdout, 0, Val_pretty_default);
+      value_print (bs->old_val, gdb_stdout, 0, Val_pretty_default);
       printf_filtered ("\nNew value = ");
-      value_print (bs->breakpoint_at->val, stdout, 0,
+      value_print (bs->breakpoint_at->val, gdb_stdout, 0,
 		   Val_pretty_default);
       printf_filtered ("\n");
       value_free (bs->old_val);
@@ -1406,7 +1430,7 @@ breakpoint_1 (bnum, allflag)
 	switch (b->type)
 	  {
 	  case bp_watchpoint:
-	    print_expression (b->exp, stdout);
+	    print_expression (b->exp, gdb_stdout);
 	    break;
 
 	  case bp_breakpoint:
@@ -1425,16 +1449,16 @@ breakpoint_1 (bnum, allflag)
 		sym = find_pc_function (b->address);
 		if (sym)
 		  {
-		    fputs_filtered ("in ", stdout);
-		    fputs_filtered (SYMBOL_SOURCE_NAME (sym), stdout);
+		    fputs_filtered ("in ", gdb_stdout);
+		    fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
 		    wrap_here (wrap_indent);
-		    fputs_filtered (" at ", stdout);
+		    fputs_filtered (" at ", gdb_stdout);
 		  }
-		fputs_filtered (b->source_file, stdout);
+		fputs_filtered (b->source_file, gdb_stdout);
 		printf_filtered (":%d", b->line_number);
 	      }
 	    else
-	      print_address_symbolic (b->address, stdout, demangle, " ");
+	      print_address_symbolic (b->address, gdb_stdout, demangle, " ");
 	    break;
 	  }
 
@@ -1446,7 +1470,7 @@ breakpoint_1 (bnum, allflag)
 	if (b->cond)
 	  {
 	    printf_filtered ("\tstop only if ");
-	    print_expression (b->cond, stdout);
+	    print_expression (b->cond, gdb_stdout);
 	    printf_filtered ("\n");
 	  }
 	if (b->ignore_count)
@@ -1454,9 +1478,9 @@ breakpoint_1 (bnum, allflag)
 	if ((l = b->commands))
 	  while (l)
 	    {
-	      fputs_filtered ("\t", stdout);
-	      fputs_filtered (l->line, stdout);
-	      fputs_filtered ("\n", stdout);
+	      fputs_filtered ("\t", gdb_stdout);
+	      fputs_filtered (l->line, gdb_stdout);
+	      fputs_filtered ("\n", gdb_stdout);
 	      l = l->next;
 	    }
       }
@@ -1521,17 +1545,17 @@ describe_other_breakpoints (pc)
       others++;
   if (others > 0)
     {
-      printf ("Note: breakpoint%s ", (others > 1) ? "s" : "");
+      printf_unfiltered ("Note: breakpoint%s ", (others > 1) ? "s" : "");
       ALL_BREAKPOINTS (b)
 	if (b->address == pc)
 	  {
 	    others--;
-	    printf ("%d%s%s ",
+	    printf_unfiltered ("%d%s%s ",
 		    b->number,
 		    (b->enable == disabled) ? " (disabled)" : "",
 		    (others > 1) ? "," : ((others == 1) ? " and" : ""));
 	  }
-      printf ("also set at pc %s.\n", local_hex_string((unsigned long) pc));
+      printf_unfiltered ("also set at pc %s.\n", local_hex_string((unsigned long) pc));
     }
 }
 
@@ -1597,6 +1621,7 @@ set_raw_breakpoint (sal)
   else
     b->source_file = savestring (sal.symtab->filename,
 				 strlen (sal.symtab->filename));
+  b->thread = -1;
   b->line_number = sal.line;
   b->enable = enabled;
   b->next = 0;
@@ -1761,7 +1786,7 @@ mention (b)
     {
     case bp_watchpoint:
       printf_filtered ("Watchpoint %d: ", b->number);
-      print_expression (b->exp, stdout);
+      print_expression (b->exp, gdb_stdout);
       break;
     case bp_breakpoint:
       printf_filtered ("Breakpoint %d at %s", b->number,
@@ -1775,6 +1800,7 @@ mention (b)
     case bp_longjmp:
     case bp_longjmp_resume:
     case bp_step_resume:
+    case bp_call_dummy:
       break;
     }
   printf_filtered ("\n");
@@ -1841,8 +1867,8 @@ break_command_1 (arg, tempflag, from_tty)
   struct cleanup *old_chain;
   struct cleanup *canonical_strings_chain = NULL;
   char **canonical = (char **)NULL;
-  
   int i;
+  int thread;
 
   sals.sals = NULL;
   sals.nelts = 0;
@@ -1904,21 +1930,48 @@ break_command_1 (arg, tempflag, from_tty)
 	}
     }
 
+  thread = -1;			/* No specific thread yet */
+
   /* Resolve all line numbers to PC's, and verify that conditions
      can be parsed, before setting any breakpoints.  */
   for (i = 0; i < sals.nelts; i++)
     {
+      char *tok, *end_tok;
+      int toklen;
+
       resolve_sal_pc (&sals.sals[i]);
       
-      while (arg && *arg)
+      tok = arg;
+
+      while (tok && *tok)
 	{
-	  if (arg[0] == 'i' && arg[1] == 'f'
-	      && (arg[2] == ' ' || arg[2] == '\t'))
+	  while (*tok == ' ' || *tok == '\t')
+	    tok++;
+
+	  end_tok = tok;
+
+	  while (*end_tok != ' ' && *end_tok != '\t' && *end_tok != '\000')
+	    end_tok++;
+
+	  toklen = end_tok - tok;
+
+	  if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
 	    {
-	      arg += 2;
-	      cond_start = arg;
-	      cond = parse_exp_1 (&arg, block_for_pc (sals.sals[i].pc), 0);
-	      cond_end = arg;
+	      tok = cond_start = end_tok + 1;
+	      cond = parse_exp_1 (&tok, block_for_pc (sals.sals[i].pc), 0);
+	      cond_end = tok;
+	    }
+	  else if (toklen >= 1 && strncmp (tok, "thread", toklen) == 0)
+	    {
+	      char *tmptok;
+
+	      tok = end_tok + 1;
+	      tmptok = tok;
+	      thread = strtol (tok, &tok, 0);
+	      if (tok == tmptok)
+		error ("Junk after thread keyword.");
+	      if (!valid_thread_id (thread))
+		error ("Unknown thread %d\n", thread);
 	    }
 	  else
 	    error ("Junk at end of arguments.");
@@ -1942,6 +1995,7 @@ break_command_1 (arg, tempflag, from_tty)
       b->number = breakpoint_count;
       b->type = bp_breakpoint;
       b->cond = cond;
+      b->thread = thread;
 
       /* If a canonical line spec is needed use that instead of the
 	 command string.  */
@@ -1960,8 +2014,8 @@ break_command_1 (arg, tempflag, from_tty)
 
   if (sals.nelts > 1)
     {
-      printf ("Multiple breakpoints were set.\n");
-      printf ("Use the \"delete\" command to delete unwanted breakpoints.\n");
+      printf_unfiltered ("Multiple breakpoints were set.\n");
+      printf_unfiltered ("Use the \"delete\" command to delete unwanted breakpoints.\n");
     }
   do_cleanups (old_chain);
 }
@@ -2182,7 +2236,7 @@ map_catch_names (args, function)
 	  goto win;
 	}
 #endif
-      printf ("No catch clause for exception %s.\n", p);
+      printf_unfiltered ("No catch clause for exception %s.\n", p);
 #if 0
     win:
 #endif
@@ -2388,8 +2442,8 @@ catch_command_1 (arg, tempflag, from_tty)
 
   if (sals.nelts > 1)
     {
-      printf ("Multiple breakpoints were set.\n");
-      printf ("Use the \"delete\" command to delete unwanted breakpoints.\n");
+      printf_unfiltered ("Multiple breakpoints were set.\n");
+      printf_unfiltered ("Use the \"delete\" command to delete unwanted breakpoints.\n");
     }
   free ((PTR)sals.sals);
 }
@@ -2503,15 +2557,15 @@ clear_command (arg, from_tty)
 	}
 
       if (found->next) from_tty = 1; /* Always report if deleted more than one */
-      if (from_tty) printf ("Deleted breakpoint%s ", found->next ? "s" : "");
+      if (from_tty) printf_unfiltered ("Deleted breakpoint%s ", found->next ? "s" : "");
       while (found)
 	{
-	  if (from_tty) printf ("%d ", found->number);
+	  if (from_tty) printf_unfiltered ("%d ", found->number);
 	  b1 = found->next;
 	  delete_breakpoint (found);
 	  found = b1;
 	}
-      if (from_tty) putchar ('\n');
+      if (from_tty) putchar_unfiltered ('\n');
     }
   free ((PTR)sals.sals);
 }
@@ -2565,7 +2619,7 @@ delete_breakpoint (bpt)
 	    val = target_insert_breakpoint (b->address, b->shadow_contents);
 	    if (val != 0)
 	      {
-		fprintf (stderr, "Cannot insert breakpoint %d:\n", b->number);
+		fprintf_unfiltered (gdb_stderr, "Cannot insert breakpoint %d:\n", b->number);
 		memory_error (val, b->address);	/* which bombs us out */
 	      }
 	    else
@@ -2586,7 +2640,7 @@ delete_breakpoint (bpt)
     free (bpt->source_file);
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
-    printf ("breakpoint #%d deleted\n", bpt->number);
+    printf_unfiltered ("breakpoint #%d deleted\n", bpt->number);
 
   /* Be sure no bpstat's are pointing at it after it's been freed.  */
   /* FIXME, how can we find all bpstat's?  We just check stop_bpstat for now. */
@@ -2860,7 +2914,7 @@ map_breakpoint_numbers (args, function)
 	    function (b);
 	    goto win;
 	  }
-      printf ("No breakpoint number %d.\n", num);
+      printf_unfiltered ("No breakpoint number %d.\n", num);
     win:
       p = p1;
     }
@@ -2876,7 +2930,7 @@ enable_breakpoint (bpt)
   bpt->enable = enabled;
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
-    printf ("breakpoint #%d enabled\n", bpt->number);
+    printf_unfiltered ("breakpoint #%d enabled\n", bpt->number);
 
   check_duplicates (bpt->address);
   if (bpt->type == bp_watchpoint)

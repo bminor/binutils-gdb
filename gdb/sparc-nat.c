@@ -121,7 +121,7 @@ fetch_inferior_registers (regno)
       CORE_ADDR sp = *(CORE_ADDR*)&registers[REGISTER_BYTE (SP_REGNUM)];
       i = REGISTER_BYTE (regno);
       if (register_valid[regno])
-	printf("register %d valid and read\n", regno);
+	printf_unfiltered("register %d valid and read\n", regno);
       target_xfer_memory (sp + i - REGISTER_BYTE (L0_REGNUM),
 			  &registers[i], REGISTER_RAW_SIZE (regno), 0);
       register_valid[regno] = 1;
@@ -278,8 +278,8 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
       if (0 != target_read_memory (sp, &registers[REGISTER_BYTE (L0_REGNUM)], 
 			  16 * REGISTER_RAW_SIZE (L0_REGNUM)))
 	{
-	  /* fprintf so user can still use gdb */
-	  fprintf (stderr,
+	  /* fprintf_unfiltered so user can still use gdb */
+	  fprintf_unfiltered (gdb_stderr,
 		   "Couldn't read input and local registers from core file\n");
 	}
     }
@@ -296,7 +296,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
 		sizeof (FPU_FSR_TYPE));
       }
     else
-      fprintf (stderr, "Couldn't read float regs from core file\n");
+      fprintf_unfiltered (gdb_stderr, "Couldn't read float regs from core file\n");
   }
 }
 

@@ -415,7 +415,7 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
   /* (we hope...) */
   if (fsr->regs[SP_REGNUM] != 0 
    && fsr->regs[SP_REGNUM] != frame_sp - sp_offset)
-    fprintf(stderr, "Bad saved SP value %x != %x, offset %x!\n",
+    fprintf_unfiltered(gdb_stderr, "Bad saved SP value %x != %x, offset %x!\n",
         fsr->regs[SP_REGNUM],
 	frame_sp - sp_offset, sp_offset);
 

@@ -53,7 +53,7 @@ int fd, cmd, arg;
   switch (cmd) {
 	case F_GETFL: return(O_RDONLY);	break;
 	default:	
-		printf("Ultra3's fcntl() failing, cmd = %d.\n",cmd);
+		printf_unfiltered("Ultra3's fcntl() failing, cmd = %d.\n",cmd);
 		return(-1);
   }
 }

@@ -73,7 +73,7 @@ tcp_open(scb, name)
 
   if (!hostent)
     {
-      fprintf (stderr, "%s: unknown host\n", hostname);
+      fprintf_unfiltered (gdb_stderr, "%s: unknown host\n", hostname);
       errno = ENOENT;
       return -1;
     }

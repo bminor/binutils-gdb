@@ -880,9 +880,9 @@ restore_pc_queue (fsr)
         {
           stop_signal = WTERMSIG (w);
           terminal_ours_for_output ();
-          printf ("\nProgram terminated with signal %d, %s\n",
+          printf_unfiltered ("\nProgram terminated with signal %d, %s\n",
                   stop_signal, safe_strsignal (stop_signal));
-          fflush (stdout);
+          gdb_flush (gdb_stdout);
           return 0;
         }
     }
@@ -1061,7 +1061,7 @@ pa_do_registers_info (regnum, fpregs)
   if (regnum == -1)
     pa_print_registers (raw_regs, regnum, fpregs);
   else if (regnum < FP0_REGNUM)
-    printf ("%s %x\n", reg_names[regnum], *(long *)(raw_regs +
+    printf_unfiltered ("%s %x\n", reg_names[regnum], *(long *)(raw_regs +
 						    REGISTER_BYTE (regnum)));
   else
     pa_print_fp_reg (regnum);
@@ -1075,7 +1075,7 @@ pa_print_registers (raw_regs, regnum, fpregs)
   int i;
 
   for (i = 0; i < 18; i++)
-    printf ("%8.8s: %8x  %8.8s: %8x  %8.8s: %8x  %8.8s: %8x\n",
+    printf_unfiltered ("%8.8s: %8x  %8.8s: %8x  %8.8s: %8x  %8.8s: %8x\n",
 	    reg_names[i],
 	    *(int *)(raw_regs + REGISTER_BYTE (i)),
 	    reg_names[i + 18],
@@ -1101,10 +1101,10 @@ pa_print_fp_reg (i)
   read_relative_register_raw_bytes (i, raw_buffer);
   REGISTER_CONVERT_TO_VIRTUAL (i, raw_buffer, virtual_buffer);
 
-  fputs_filtered (reg_names[i], stdout);
-  print_spaces_filtered (15 - strlen (reg_names[i]), stdout);
+  fputs_filtered (reg_names[i], gdb_stdout);
+  print_spaces_filtered (15 - strlen (reg_names[i]), gdb_stdout);
 
-  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, stdout, 0,
+  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, gdb_stdout, 0,
 	     1, 0, Val_pretty_default);
   printf_filtered ("\n");
 }
@@ -1211,11 +1211,11 @@ unwind_command (exp, from_tty)
 
   if (!xxx.u)
     {
-      printf ("Can't find unwind table entry for PC 0x%x\n", address);
+      printf_unfiltered ("Can't find unwind table entry for PC 0x%x\n", address);
       return;
     }
 
-  printf ("%08x\n%08X\n%08X\n%08X\n", xxx.foo[0], xxx.foo[1], xxx.foo[2],
+  printf_unfiltered ("%08x\n%08X\n%08X\n%08X\n", xxx.foo[0], xxx.foo[1], xxx.foo[2],
 	  xxx.foo[3]);
 }
 #endif /* MAINTENANCE_CMDS */

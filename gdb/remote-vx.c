@@ -557,20 +557,20 @@ vx_xfer_memory (memaddr, myaddr, len, write, target)
 static void
 vx_files_info ()
 {
-  printf ("\tAttached to host `%s'", vx_host);
-  printf (", which has %sfloating point", target_has_fp? "": "no ");
-  printf (".\n");
+  printf_unfiltered ("\tAttached to host `%s'", vx_host);
+  printf_unfiltered (", which has %sfloating point", target_has_fp? "": "no ");
+  printf_unfiltered (".\n");
 }
 
 static void
 vx_run_files_info ()
 {
-  printf ("\tRunning %s VxWorks process %s", 
+  printf_unfiltered ("\tRunning %s VxWorks process %s", 
 	  vx_running? "child": "attached",
 	  local_hex_string((unsigned long) inferior_pid));
   if (vx_running)
-    printf (", function `%s'", vx_running);
-  printf(".\n");
+    printf_unfiltered (", function `%s'", vx_running);
+  printf_unfiltered(".\n");
 }
 
 static void
@@ -974,9 +974,9 @@ add_symbol_stub (arg)
 {
   struct ldfile *pLoadFile = (struct ldfile *)arg;
 
-  printf("\t%s: ", pLoadFile->name);
+  printf_unfiltered("\t%s: ", pLoadFile->name);
   symbol_file_add (pLoadFile->name, 0, pLoadFile->txt_addr, 0, 0, 0);
-  printf ("ok\n");
+  printf_unfiltered ("ok\n");
   return 1;
 }
 /* Target command for VxWorks target systems.
@@ -1004,8 +1004,8 @@ vx_open (args, from_tty)
   target_preopen (from_tty);
   
   unpush_target (&vx_ops);
-  printf ("Attaching remote machine across net...\n");
-  fflush (stdout);
+  printf_unfiltered ("Attaching remote machine across net...\n");
+  gdb_flush (gdb_stdout);
 
   /* Allow the user to kill the connect attempt by typing ^C.
      Wait until the call to target_has_fp () completes before
@@ -1039,7 +1039,7 @@ vx_open (args, from_tty)
 	     "Error while reading symbols from boot file:\n", RETURN_MASK_ALL))
 	  puts_filtered ("ok\n");
       } else if (from_tty)
-	printf ("VxWorks kernel symbols not loaded.\n");
+	printf_unfiltered ("VxWorks kernel symbols not loaded.\n");
     }
   else
     error ("Can't retrieve boot file name from target machine.");
@@ -1103,7 +1103,7 @@ vx_attach (args, from_tty)
     error ("Invalid process-id -- give a single number in decimal or 0xhex");
 
   if (from_tty)
-      printf ("Attaching pid %s.\n",
+      printf_unfiltered ("Attaching pid %s.\n",
 	      local_hex_string((unsigned long) pid));
 
   memset ((char *)&ptrace_in,  '\0', sizeof (ptrace_in));
@@ -1149,7 +1149,7 @@ vx_detach (args, from_tty)
     error ("Argument given to VxWorks \"detach\".");
 
   if (from_tty)
-      printf ("Detaching pid %s.\n",
+      printf_unfiltered ("Detaching pid %s.\n",
 	      local_hex_string((unsigned long) inferior_pid));
 
   if (args)		/* FIXME, should be possible to leave suspended */
@@ -1181,7 +1181,7 @@ vx_kill ()
   Ptrace_return ptrace_out;
   int status;
 
-  printf ("Killing pid %s.\n", local_hex_string((unsigned long) inferior_pid));
+  printf_unfiltered ("Killing pid %s.\n", local_hex_string((unsigned long) inferior_pid));
 
   memset ((char *)&ptrace_in,  '\0', sizeof (ptrace_in));
   memset ((char *)&ptrace_out, '\0', sizeof (ptrace_out));

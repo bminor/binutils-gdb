@@ -810,7 +810,7 @@ retrieve_tracebackinfo (abfd, textsec, cs)
 		abfd, textsec, buffer, 
 		(file_ptr)(functionstart + 
 		 bytesread - (buffer + bufferbytes - (char*)pinsn)),MIN_TBTABSIZ))
-	  { printf ("Abnormal return!..\n"); return NULL; }
+	  { printf_unfiltered ("Abnormal return!..\n"); return NULL; }
 
 	ptb = (struct tbtable *)buffer;
       }
@@ -892,7 +892,7 @@ retrieve_traceback (abfd, textsec, cs, size)
 		abfd, textsec, buffer, 
 		(file_ptr)(functionstart + 
 		 bytesread - (buffer + bufferbytes - pinsn)),MIN_TBTABSIZ))
-	/*   abort (); */ { printf ("abort!!!\n"); return NULL; }
+	/*   abort (); */ { printf_unfiltered ("abort!!!\n"); return NULL; }
 
 	return (struct tbtable *)buffer;
       }
@@ -1051,7 +1051,7 @@ read_xcoff_symtab (objfile, nsyms)
 
   textsec = bfd_get_section_by_name (abfd, ".text");
   if (!textsec) {
-    printf ("Unable to locate text section!\n");
+    printf_unfiltered ("Unable to locate text section!\n");
   }
 
   while (symnum < nsyms) {
@@ -1459,7 +1459,7 @@ function_entry_point:
     case C_STRTAG	:
     case C_UNTAG	:
     case C_ENTAG	:
-      printf ("ERROR: Unimplemented storage class: %d.\n", cs->c_sclass);
+      printf_unfiltered ("ERROR: Unimplemented storage class: %d.\n", cs->c_sclass);
       break;
 
     case C_HIDEXT	:		/* ignore these.. */
@@ -1681,7 +1681,7 @@ process_xcoff_symbol (cs, objfile)
       break;
 
     case C_REG:
-      printf ("ERROR! C_REG is not fully implemented!\n");
+      printf_unfiltered ("ERROR! C_REG is not fully implemented!\n");
       SYMBOL_CLASS (sym) = LOC_REGISTER;
       SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
       SYMBOL_SECTION (sym) = cs->c_secnum;
@@ -1858,7 +1858,7 @@ free_linetab ()
 
 #undef next_symbol_text
 #define	next_symbol_text() \
-  printf ("Gdb Error: symbol names on multiple lines not implemented.\n")
+  printf_unfiltered ("Gdb Error: symbol names on multiple lines not implemented.\n")
 
 
 static void
@@ -1983,7 +1983,7 @@ init_debugsection(abfd)
     return -1;
 
   if (!bfd_get_section_contents(abfd, secp, debugsec, (file_ptr) 0, length)) {
-    printf ("Can't read .debug section from symbol file\n");
+    printf_unfiltered ("Can't read .debug section from symbol file\n");
     return -1;
   }
   return 0;

@@ -693,7 +693,7 @@ execute_command_1(va_alist)
 }
 
 #ifdef KERNEL_RECORD
-FILE *kerout;
+GDB_FILE *kerout;
 
 static int
 kernel_record(fd, ptr, num)

@@ -170,8 +170,8 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
      output prior to doing a fork, to avoid the possibility of both the
      parent and child flushing the same data after the fork. */
 
-  fflush (stdout);
-  fflush (stderr);
+  gdb_flush (gdb_stdout);
+  gdb_flush (gdb_stderr);
 
 #if defined(USG) && !defined(HAVE_VFORK)
   pid = fork ();
@@ -228,9 +228,9 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
       environ = env;
       execlp (shell_file, shell_file, "-c", shell_command, (char *)0);
 
-      fprintf (stderr, "Cannot exec %s: %s.\n", shell_file,
+      fprintf_unfiltered (gdb_stderr, "Cannot exec %s: %s.\n", shell_file,
 	       safe_strerror (errno));
-      fflush (stderr);
+      gdb_flush (gdb_stderr);
       _exit (0177);
     }
 
