@@ -1,3 +1,8 @@
+Mon May  3 09:24:49 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* som.c (som_fixup_formats): Fix comments for R_SHORT_PCREL_MODE
+	and R_LONG_PCREL_MODE.
+
 1999-04-29  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-mcore.c (coff_mcore_relocate_section): Fix typos.
