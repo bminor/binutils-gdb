@@ -179,14 +179,17 @@ if { [istarget mips*-*-*] } then {
   	run_dump_test "mips-abi32-pic"
 
 	run_dump_test "elf${el}-rel"
-	if [istarget mips64*-*-*] { 
+	if {[istarget mips64*-*-*] || [istarget mipsisa32*-*-*]} { 
 	    run_dump_test "elf${el}-rel2"
-	    run_dump_test "elf-rel4"
-	} {
+	} else {
 	    run_dump_test "e32${el}-rel2"
-	    run_dump_test "e32-rel4"
 	}
 	run_dump_test "elf${el}-rel3"
+	if {[istarget mips64*-*-*]} {
+	    run_dump_test "elf-rel4"
+	} else {
+	    run_dump_test "e32-rel4"
+	}
 	run_dump_test "elf-rel5"
 	run_dump_test "${tmips}${el}empic"
 	run_dump_test "empic2"

@@ -1,3 +1,10 @@
+2002-04-30  Chris Demetriou  <cgd@broadcom.com>
+
+	Merge from mainline:
+	2002-03-15  Chris G. Demetriou  <cgd@broadcom.com> 
+	* gas/mips/mips.exp: Use elf-rel2 and elfel-rel2 for
+	mipsisa32*-*-* targets, rather than e32-rel2 and e32el-rel2.
+
 2002-04-27  Alan Modra  <amodra@bigpond.net.au>
 
 	Merge from mainline.
