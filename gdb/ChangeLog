@@ -1,3 +1,8 @@
+Fri May 23 14:45:02 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* infcmd.c (jump_command): Don't try to dereference sfn if it's
+ 	NULL.
+
 Fri May 23 13:51:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* top.c (init_cmd_lists): Always initialize endianlist.
