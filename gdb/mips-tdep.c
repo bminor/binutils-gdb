@@ -4696,12 +4696,12 @@ mips_eabi_extract_return_value (struct type *valtype,
   return_value_location (valtype, &hi, &lo);
 
   memcpy (valbuf + lo.buf_offset,
-	  regbuf + DEPRECATED_REGISTER_BYTE (lo.reg) + lo.reg_offset,
+	  regbuf + DEPRECATED_REGISTER_BYTE (NUM_REGS + lo.reg) + lo.reg_offset,
 	  lo.len);
 
   if (hi.len > 0)
     memcpy (valbuf + hi.buf_offset,
-	    regbuf + DEPRECATED_REGISTER_BYTE (hi.reg) + hi.reg_offset,
+	    regbuf + DEPRECATED_REGISTER_BYTE (NUM_REGS + hi.reg) + hi.reg_offset,
 	    hi.len);
 }
 
@@ -4715,12 +4715,12 @@ mips_o64_extract_return_value (struct type *valtype,
   return_value_location (valtype, &hi, &lo);
 
   memcpy (valbuf + lo.buf_offset,
-	  regbuf + DEPRECATED_REGISTER_BYTE (lo.reg) + lo.reg_offset,
+	  regbuf + DEPRECATED_REGISTER_BYTE (NUM_REGS + lo.reg) + lo.reg_offset,
 	  lo.len);
 
   if (hi.len > 0)
     memcpy (valbuf + hi.buf_offset,
-	    regbuf + DEPRECATED_REGISTER_BYTE (hi.reg) + hi.reg_offset,
+	    regbuf + DEPRECATED_REGISTER_BYTE (NUM_REGS + hi.reg) + hi.reg_offset,
 	    hi.len);
 }
 
