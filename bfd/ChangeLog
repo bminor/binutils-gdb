@@ -1,3 +1,7 @@
+2000-06-08  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.in (VERSION): Update to show this is the CVS mainline.
+
 2000-06-07  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-d10v.c: Include elf/d10v.h

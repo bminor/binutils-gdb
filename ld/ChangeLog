@@ -1,3 +1,7 @@
+2000-06-08  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.in (VERSION): Update to show this is the CVS mainline.
+
 2000-06-07  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* emultempl/mipsecoff.em (gld{EMULATION_NAME}_after_open): Require all
