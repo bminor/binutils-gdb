@@ -140,6 +140,7 @@ libnlm.h
 liboasys.h
 mipsbsd.c
 newsos3.c
+netbsd386.c
 nlm-target.h
 nlm.c
 nlm32-gen.c
