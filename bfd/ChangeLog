@@ -1,3 +1,7 @@
+Thu Sep 12 11:10:05 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (ieee_vec): Set symbol_leading_char field to '_'.
+
 Wed Sep 11 11:57:56 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* tekhex.c (first_phase): Change type parameter from char to int.
