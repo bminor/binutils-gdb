@@ -77,7 +77,14 @@ read_mapping (FILE *mapfile,
 
   if (ret > 0 && ret != EOF && *inode != 0)
     {
-      ret += fscanf (mapfile, "%s\n", filename);
+      /* Eat everything up to EOL for the filename.  This will prevent
+       weird filenames (such as one with embedded whitespace) from
+       confusing this code.  It also makes this code more robust
+       in respect to annotations the kernel may add after the
+       filename.
+
+       Note the filename is used for informational purposes only.  */
+      ret += fscanf (mapfile, "%[^\n]\n", filename);
     }
   else
     {
