@@ -1,6 +1,6 @@
 -*- text -*-
 
-Changes since 2.7:
+Changes in 2.8:
 
 MIPS16 support added.
 
@@ -8,7 +8,7 @@ Motorola ColdFire 5200 support added (configure for m68k and use -m5200).
 
 Alpha/VMS support added.
 
-Changes since 2.6:
+Changes in 2.7:
 
 The PowerPC assembler now allows the use of symbolic register names (r0, etc.)
 if -mregnames is used.  Symbolic names preceded by a '%' (%r0, etc.) can be
@@ -31,7 +31,7 @@ target=i386-unknown-sco3.2v5elf.
 
 m88k-motorola-sysv* support added.
 
-Changes since 2.5:
+Changes in 2.6:
 
 Gas now directly supports macros, without requiring GASP.
 
@@ -45,7 +45,7 @@ Added -mips4 support to MIPS assembler.
 
 Added PIC support to Solaris and SPARC SunOS 4 assembler.
 
-Changes since 2.3:
+Changes in 2.4:
 
 Converted this directory to use an autoconf-generated configure script.
 
@@ -79,7 +79,7 @@ Support for the 21164 has been contributed by Digital.
 
 Updated ns32k (pc532-mach, netbsd532) support from Ian Dall.
 
-Changes since 2.2:
+Changes in 2.3:
 
 Mach i386 support, by David Mackenzie and Ken Raeburn.
 
@@ -121,7 +121,7 @@ phases of compilation.  (You should be able to get all of them printed out with
 
 ----------------------------------------------------------------
 
-Changes since 2.1:
+Changes in 2.2:
 
 RS/6000 AIX and MIPS SGI Irix 5 support has been added.
 
@@ -155,7 +155,7 @@ support is in progress.
 
 ----------------------------------------------------------------
 
-Changes for 2.1:
+Changes in 2.1:
 
 Several small fixes for i386-aix (PS/2) support from Minh Tran-Le have been
 incorporated, but not well tested yet.
@@ -180,7 +180,7 @@ Test suite framework is starting to become reasonable.
 
 ----------------------------------------------------------------
 
-Changes for 2.0:
+Changes in 2.0:
 
 Mostly bug fixes.
 
@@ -188,7 +188,7 @@ Some more merging of BFD and ELF code, but ELF still doesn't work.
 
 ----------------------------------------------------------------
 
-Changes for 1.94:
+Changes in 1.94:
 
 BFD merge is partly done.  Adventurous souls may try giving configure the
 "--with-bfd-assembler" option.  Currently, ELF format requires it, a.out format
@@ -215,7 +215,7 @@ Youngdale.
 
 ----------------------------------------------------------------
 
-Changes for 1.93.01:
+Changes in 1.93.01:
 
 For m68k, support for more processors has been added: 68040, CPU32, 68851.
 
