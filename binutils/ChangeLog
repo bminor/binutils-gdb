@@ -1,3 +1,33 @@
+2001-06-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (GET_DATA_ALLOC): Remove.
+	(GET_DATA): Remove.
+	(get_data): New function combining above macros, with an extra
+	test for zero size.
+	(slurp_rela_relocs): Use get_data, and catch error return.
+	(slurp_rel_relocs): Likewise.
+	(get_32bit_program_headers): Likewise.
+	(get_64bit_program_headers): Likewise.
+	(get_32bit_section_headers): Likewise.
+	(get_64bit_section_headers): Likewise.
+	(get_32bit_elf_symbols): Likewise.
+	(get_64bit_elf_symbols): Likewise.
+	(process_section_headers): Likewise.
+	(process_relocs): Likewise.
+	(slurp_ia64_unwind_table): Likewise.
+	(process_unwind): Likewise.
+	(get_32bit_dynamic_segment): Likewise.
+	(get_64bit_dynamic_segment): Likewise.
+	(process_dynamic_segment): Likewise.
+	(process_version_sections): Likewise.
+	(process_symbol_table): Likewise.
+	(dump_section): Likewise.
+	(display_debug_info): Likewise.
+	(display_debug_section): Likewise.
+	(process_section_contents): Likewise.
+	(process_corefile_note_segment): Likewise.
+	(process_mips_specific): Likewise.  Also free econf32, econf64.
+
 2001-06-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (dump_relocations): Print "bad symbol index" if

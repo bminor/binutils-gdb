@@ -266,42 +266,6 @@ typedef int Elf32_Word;
 
 #define NUM_ELEM(array)	(sizeof (array) / sizeof ((array)[0]))
 
-#define GET_DATA_ALLOC(offset, size, var, type, reason)			\
-  if (fseek (file, offset, SEEK_SET))					\
-    {									\
-      error (_("Unable to seek to start of %s at %x\n"), reason, offset); \
-      return 0;								\
-    }									\
-									\
-  var = (type) malloc (size);						\
-									\
-  if (var == NULL)							\
-    {									\
-      error (_("Out of memory allocating %d bytes for %s\n"), size, reason); \
-      return 0;								\
-    }									\
-									\
-  if (fread (var, size, 1, file) != 1)					\
-    {									\
-      error (_("Unable to read in %d bytes of %s\n"), size, reason);	\
-      free (var);							\
-      var = NULL;							\
-      return 0;							\
-    }
-
-
-#define GET_DATA(offset, var, reason)					\
-  if (fseek (file, offset, SEEK_SET))					\
-    {									\
-      error (_("Unable to seek to %x for %s\n"), offset, reason);	\
-      return 0;								\
-    }									\
-  else if (fread (& var, sizeof (var), 1, file) != 1)			\
-    {									\
-      error (_("Unable to read data at %x for %s\n"), offset, reason);	\
-      return 0;								\
-    }
-
 #define GET_ELF_SYMBOLS(file, offset, size)			\
   (is_32bit_elf ? get_32bit_elf_symbols (file, offset, size)	\
    : get_64bit_elf_symbols (file, offset, size))
@@ -362,6 +326,51 @@ warn (va_alist)
   return;
 }
 #endif
+
+static PTR get_data PARAMS ((PTR, FILE *, long, size_t, const char *));
+
+static PTR
+get_data (var, file, offset, size, reason)
+     PTR var;
+     FILE *file;
+     long offset;
+     size_t size;
+     const char *reason;
+{
+  PTR mvar;
+
+  if (size == 0)
+    return NULL;
+
+  if (fseek (file, offset, SEEK_SET))
+    {
+      error (_("Unable to seek to %x for %s\n"), offset, reason);
+      return NULL;
+    }
+
+  mvar = var;
+  if (mvar == NULL)
+    {
+      mvar = (PTR) malloc (size);
+
+      if (mvar == NULL)
+	{
+	  error (_("Out of memory allocating %d bytes for %s\n"),
+		 size, reason);
+	  return NULL;
+	}
+    }
+
+  if (fread (mvar, size, 1, file) != 1)
+    {
+      error (_("Unable to read in %d bytes of %s\n"), size, reason);
+      if (mvar != var)
+	free (mvar);
+      return NULL;
+    }
+
+  return mvar;
+}
 
 static bfd_vma
 byte_get_little_endian (field, size)
@@ -633,8 +642,10 @@ slurp_rela_relocs (file, rel_offset, rel_size, relasp, nrelasp)
     {
       Elf32_External_Rela * erelas;
 
-      GET_DATA_ALLOC (rel_offset, rel_size, erelas,
-		      Elf32_External_Rela *, "relocs");
+      erelas = (Elf32_External_Rela *) get_data (NULL, file, rel_offset,
+						 rel_size, _("relocs"));
+      if (!erelas)
+	return 0;
 
       nrelas = rel_size / sizeof (Elf32_External_Rela);
 
@@ -660,8 +671,10 @@ slurp_rela_relocs (file, rel_offset, rel_size, relasp, nrelasp)
     {
       Elf64_External_Rela * erelas;
 
-      GET_DATA_ALLOC (rel_offset, rel_size, erelas,
-		      Elf64_External_Rela *, "relocs");
+      erelas = (Elf64_External_Rela *) get_data (NULL, file, rel_offset,
+						 rel_size, _("relocs"));
+      if (!erelas)
+	return 0;
 
       nrelas = rel_size / sizeof (Elf64_External_Rela);
 
@@ -704,8 +717,10 @@ slurp_rel_relocs (file, rel_offset, rel_size, relsp, nrelsp)
     {
       Elf32_External_Rel * erels;
 
-      GET_DATA_ALLOC (rel_offset, rel_size, erels,
-		      Elf32_External_Rel *, "relocs");
+      erels = (Elf32_External_Rel *) get_data (NULL, file, rel_offset,
+					       rel_size, _("relocs"));
+      if (!erels)
+	return 0;
 
       nrels = rel_size / sizeof (Elf32_External_Rel);
 
@@ -729,8 +744,10 @@ slurp_rel_relocs (file, rel_offset, rel_size, relsp, nrelsp)
     {
       Elf64_External_Rel * erels;
 
-      GET_DATA_ALLOC (rel_offset, rel_size, erels,
-		      Elf64_External_Rel *, "relocs");
+      erels = (Elf64_External_Rel *) get_data (NULL, file, rel_offset,
+					       rel_size, _("relocs"));
+      if (!erels)
+	return 0;
 
       nrels = rel_size / sizeof (Elf64_External_Rel);
 
@@ -2362,9 +2379,12 @@ get_32bit_program_headers (file, program_headers)
   Elf32_Internal_Phdr * internal;
   unsigned int          i;
 
-  GET_DATA_ALLOC (elf_header.e_phoff,
-		  elf_header.e_phentsize * elf_header.e_phnum,
-		  phdrs, Elf32_External_Phdr *, "program headers");
+  phdrs = ((Elf32_External_Phdr *)
+	   get_data (NULL, file, elf_header.e_phoff,
+		     elf_header.e_phentsize * elf_header.e_phnum,
+		     _("program headers")));
+  if (!phdrs)
+    return 0;
 
   for (i = 0, internal = program_headers, external = phdrs;
        i < elf_header.e_phnum;
@@ -2395,9 +2415,12 @@ get_64bit_program_headers (file, program_headers)
   Elf64_Internal_Phdr * internal;
   unsigned int          i;
 
-  GET_DATA_ALLOC (elf_header.e_phoff,
-		  elf_header.e_phentsize * elf_header.e_phnum,
-		  phdrs, Elf64_External_Phdr *, "program headers");
+  phdrs = ((Elf64_External_Phdr *)
+	   get_data (NULL, file, elf_header.e_phoff,
+		     elf_header.e_phentsize * elf_header.e_phnum,
+		     _("program headers")));
+  if (!phdrs)
+    return 0;
 
   for (i = 0, internal = program_headers, external = phdrs;
        i < elf_header.e_phnum;
@@ -2616,9 +2639,12 @@ get_32bit_section_headers (file)
   Elf32_Internal_Shdr * internal;
   unsigned int          i;
 
-  GET_DATA_ALLOC (elf_header.e_shoff,
-		  elf_header.e_shentsize * elf_header.e_shnum,
-		  shdrs, Elf32_External_Shdr *, "section headers");
+  shdrs = ((Elf32_External_Shdr *)
+	   get_data (NULL, file, elf_header.e_shoff,
+		     elf_header.e_shentsize * elf_header.e_shnum,
+		     _("section headers")));
+  if (!shdrs)
+    return 0;
 
   section_headers = (Elf_Internal_Shdr *) malloc
     (elf_header.e_shnum * sizeof (Elf_Internal_Shdr));
@@ -2658,9 +2684,12 @@ get_64bit_section_headers (file)
   Elf64_Internal_Shdr * internal;
   unsigned int          i;
 
-  GET_DATA_ALLOC (elf_header.e_shoff,
-		  elf_header.e_shentsize * elf_header.e_shnum,
-		  shdrs, Elf64_External_Shdr *, "section headers");
+  shdrs = ((Elf64_External_Shdr *)
+	   get_data (NULL, file, elf_header.e_shoff,
+		     elf_header.e_shentsize * elf_header.e_shnum,
+		     _("section headers")));
+  if (!shdrs)
+    return 0;
 
   section_headers = (Elf_Internal_Shdr *) malloc
     (elf_header.e_shnum * sizeof (Elf_Internal_Shdr));
@@ -2703,8 +2732,11 @@ get_32bit_elf_symbols (file, offset, number)
   Elf_Internal_Sym *   psym;
   unsigned int         j;
 
-  GET_DATA_ALLOC (offset, number * sizeof (Elf32_External_Sym),
-		  esyms, Elf32_External_Sym *, "symbols");
+  esyms = ((Elf32_External_Sym *)
+	   get_data (NULL, file, offset,
+		     number * sizeof (Elf32_External_Sym), _("symbols")));
+  if (!esyms)
+    return NULL;
 
   isyms = (Elf_Internal_Sym *) malloc (number * sizeof (Elf_Internal_Sym));
 
@@ -2744,8 +2776,11 @@ get_64bit_elf_symbols (file, offset, number)
   Elf_Internal_Sym *   psym;
   unsigned int         j;
 
-  GET_DATA_ALLOC (offset, number * sizeof (Elf64_External_Sym),
-		  esyms, Elf64_External_Sym *, "symbols");
+  esyms = ((Elf64_External_Sym *)
+	   get_data (NULL, file, offset,
+		     number * sizeof (Elf64_External_Sym), _("symbols")));
+  if (!esyms)
+    return NULL;
 
   isyms = (Elf_Internal_Sym *) malloc (number * sizeof (Elf_Internal_Sym));
 
@@ -2855,8 +2890,8 @@ process_section_headers (file)
 
   if (section->sh_size != 0)
     {
-      GET_DATA_ALLOC (section->sh_offset, section->sh_size,
-		      string_table, char *, "string table");
+      string_table = (char *) get_data (NULL, file, section->sh_offset,
+					section->sh_size, _("string table"));
 
       string_table_length = section->sh_size;
     }
@@ -2894,8 +2929,9 @@ process_section_headers (file)
 	      continue;
 	    }
 
-	  GET_DATA_ALLOC (section->sh_offset, section->sh_size,
-			  dynamic_strings, char *, "dynamic strings");
+	  dynamic_strings = (char *) get_data (NULL, file, section->sh_offset,
+					       section->sh_size,
+					       _("dynamic strings"));
 	}
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
 		|| do_debug_lines || do_debug_pubnames || do_debug_aranges
@@ -3101,8 +3137,9 @@ process_relocs (file)
 
 		  strsec = section_headers + symsec->sh_link;
 
-		  GET_DATA_ALLOC (strsec->sh_offset, strsec->sh_size, strtab,
-				  char *, "string table");
+		  strtab = (char *) get_data (NULL, file, strsec->sh_offset,
+					      strsec->sh_size,
+					      _("string table"));
 		}
 	      is_rela = section->sh_type == SHT_RELA;
 
@@ -3314,7 +3351,10 @@ slurp_ia64_unwind_table (file, aux, sec)
 
   /* Second, build the unwind table from the contents of the unwind section:  */
   size = sec->sh_size;
-  GET_DATA_ALLOC (sec->sh_offset, size, table, char *, "unwind table");
+  table = (char *) get_data (NULL, file, sec->sh_offset,
+			     size, _("unwind table"));
+  if (!table)
+    return 0;
 
   tep = aux->table = xmalloc (size / (3 * addr_size) * sizeof (aux->table[0]));
   for (tp = table; tp < table + size; tp += 3 * addr_size, ++ tep)
@@ -3445,8 +3485,8 @@ process_unwind (file)
 
 	  strsec = section_headers + sec->sh_link;
 	  aux.strtab_size = strsec->sh_size;
-	  GET_DATA_ALLOC (strsec->sh_offset, aux.strtab_size,
-			  aux.strtab, char *, "string table");
+	  aux.strtab = (char *) get_data (NULL, file, strsec->sh_offset,
+					  aux.strtab_size, _("string table"));
 	}
       else if (sec->sh_type == SHT_IA_64_UNWIND)
 	unwcount++;
@@ -3515,8 +3555,8 @@ process_unwind (file)
 	{
 	  aux.info_size = sec->sh_size;
 	  aux.info_addr = sec->sh_addr;
-	  GET_DATA_ALLOC (sec->sh_offset, aux.info_size, aux.info,
-			  char *, "unwind info");
+	  aux.info = (char *) get_data (NULL, file, sec->sh_offset,
+					aux.info_size, _("unwind info"));
 
 	  printf (_("\nUnwind section "));
 
@@ -3690,8 +3730,10 @@ get_32bit_dynamic_segment (file)
   Elf_Internal_Dyn *   entry;
   bfd_size_type        i;
 
-  GET_DATA_ALLOC (dynamic_addr, dynamic_size,
-		  edyn, Elf32_External_Dyn *, "dynamic segment");
+  edyn = (Elf32_External_Dyn *) get_data (NULL, file, dynamic_addr,
+					  dynamic_size, _("dynamic segment"));
+  if (!edyn)
+    return 0;
 
   /* SGI's ELF has more than one section in the DYNAMIC segment.  Determine
      how large this .dynamic is now.  We can do this even before the byte
@@ -3731,8 +3773,10 @@ get_64bit_dynamic_segment (file)
   Elf_Internal_Dyn *   entry;
   bfd_size_type        i;
 
-  GET_DATA_ALLOC (dynamic_addr, dynamic_size,
-		  edyn, Elf64_External_Dyn *, "dynamic segment");
+  edyn = (Elf64_External_Dyn *) get_data (NULL, file, dynamic_addr,
+					  dynamic_size, _("dynamic segment"));
+  if (!edyn)
+    return 0;
 
   /* SGI's ELF has more than one section in the DYNAMIC segment.  Determine
      how large this .dynamic is now.  We can do this even before the byte
@@ -3882,8 +3926,8 @@ process_dynamic_segment (file)
 	      continue;
 	    }
 
-	  GET_DATA_ALLOC (offset, str_tab_len, dynamic_strings, char *,
-			  "dynamic string table");
+	  dynamic_strings = (char *) get_data (NULL, file, offset, str_tab_len,
+					       _("dynamic string table"));
 
 	  break;
 	}
@@ -3916,8 +3960,11 @@ process_dynamic_segment (file)
 	  Elf_Internal_Syminfo * syminfo;
 
 	  /* There is a syminfo section.  Read the data.  */
-	  GET_DATA_ALLOC (dynamic_syminfo_offset, syminsz, extsyminfo,
-			  Elf_External_Syminfo *, "symbol information");
+	  extsyminfo = ((Elf_External_Syminfo *)
+			get_data (NULL, file, dynamic_syminfo_offset,
+				  syminsz, _("symbol information")));
+	  if (!extsyminfo)
+	    return 0;
 
 	  dynamic_syminfo = (Elf_Internal_Syminfo *) malloc (syminsz);
 	  if (dynamic_syminfo == NULL)
@@ -4367,9 +4414,12 @@ process_version_sections (file)
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (section_headers + section->sh_link));
 
-	    GET_DATA_ALLOC (section->sh_offset, section->sh_size,
-			    edefs, Elf_External_Verdef *,
-			    "version definition section");
+	    edefs = ((Elf_External_Verdef *)
+		     get_data (NULL, file, section->sh_offset,
+			       section->sh_size,
+			       _("version definition section")));
+	    if (!edefs)
+	      break;
 
 	    for (idx = cnt = 0; cnt < section->sh_info; ++ cnt)
 	      {
@@ -4455,9 +4505,11 @@ process_version_sections (file)
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (section_headers + section->sh_link));
 
-	    GET_DATA_ALLOC (section->sh_offset, section->sh_size,
-			    eneed, Elf_External_Verneed *,
-			    "version need section");
+	    eneed = ((Elf_External_Verneed *)
+		     get_data (NULL, file, section->sh_offset,
+			       section->sh_size, _("version need section")));
+	    if (!eneed)
+	      break;
 
 	    for (idx = cnt = 0; cnt < section->sh_info; ++cnt)
 	      {
@@ -4543,8 +4595,11 @@ process_version_sections (file)
 
 	    string_sec = section_headers + link_section->sh_link;
 
-	    GET_DATA_ALLOC (string_sec->sh_offset, string_sec->sh_size,
-			    strtab, char *, "version string table");
+	    strtab = (char *) get_data (NULL, file, string_sec->sh_offset,
+					string_sec->sh_size,
+					_("version string table"));
+	    if (!strtab)
+	      break;
 
 	    printf (_("\nVersion symbols section '%s' contains %d entries:\n"),
 		    SECTION_NAME (section), total);
@@ -4555,10 +4610,16 @@ process_version_sections (file)
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (link_section));
 
-	    GET_DATA_ALLOC (version_info [DT_VERSIONTAGIDX (DT_VERSYM)]
-			    - loadaddr,
-			    total * sizeof (short), edata,
-			    unsigned char *, "version symbol data");
+	    edata =
+	      ((unsigned char *)
+	       get_data (NULL, file,
+			 version_info[DT_VERSIONTAGIDX (DT_VERSYM)] - loadaddr,
+			 total * sizeof (short), _("version symbol data")));
+	    if (!edata)
+	      {
+		free (strtab);
+		break;
+	      }
 
 	    data = (unsigned short *) malloc (total * sizeof (short));
 
@@ -4619,7 +4680,8 @@ process_version_sections (file)
 			      Elf_External_Vernaux   evna;
 			      unsigned long          a_off;
 
-			      GET_DATA (offset, evn, "version need");
+			      get_data (&evn, file, offset, sizeof (evn),
+					_("version need"));
 
 			      ivn.vn_aux  = BYTE_GET (evn.vn_aux);
 			      ivn.vn_next = BYTE_GET (evn.vn_next);
@@ -4628,8 +4690,8 @@ process_version_sections (file)
 
 			      do
 				{
-				  GET_DATA (a_off, evna,
-					    "version need aux (2)");
+				  get_data (&evna, file, a_off, sizeof (evna),
+					    _("version need aux (2)"));
 
 				  ivna.vna_next  = BYTE_GET (evna.vna_next);
 				  ivna.vna_other = BYTE_GET (evna.vna_other);
@@ -4669,7 +4731,8 @@ process_version_sections (file)
 
 			  do
 			    {
-			      GET_DATA (offset, evd, "version def");
+			      get_data (&evd, file, offset, sizeof (evd),
+					_("version def"));
 
 			      ivd.vd_next = BYTE_GET (evd.vd_next);
 			      ivd.vd_ndx  = BYTE_GET (evd.vd_ndx);
@@ -4686,8 +4749,9 @@ process_version_sections (file)
 
 			      ivd.vd_aux = BYTE_GET (evd.vd_aux);
 
-			      GET_DATA (offset - ivd.vd_next + ivd.vd_aux,
-					evda, "version def aux");
+			      get_data (&evda, file,
+					offset - ivd.vd_next + ivd.vd_aux,
+					sizeof (evda), _("version def aux"));
 
 			      ivda.vda_name = BYTE_GET (evda.vda_name);
 
@@ -4992,8 +5056,9 @@ process_symbol_table (file)
 
 	      string_sec = section_headers + section->sh_link;
 
-	      GET_DATA_ALLOC (string_sec->sh_offset, string_sec->sh_size,
-			      strtab, char *, "string table");
+	      strtab = (char *) get_data (NULL, file, string_sec->sh_offset,
+					  string_sec->sh_size,
+					  _("string table"));
 	    }
 
 	  for (si = 0, psym = symtab;
@@ -5022,8 +5087,8 @@ process_symbol_table (file)
 		  offset = version_info [DT_VERSIONTAGIDX (DT_VERSYM)]
 		    - loadaddr;
 
-		  GET_DATA (offset + si * sizeof (vers_data), data,
-			    "version data");
+		  get_data (&data, file, offset + si * sizeof (vers_data),
+			    sizeof (data), _("version data"));
 
 		  vers_data = byte_get (data, 2);
 
@@ -5050,7 +5115,8 @@ process_symbol_table (file)
 			    {
 			      unsigned long  vna_off;
 
-			      GET_DATA (offset, evn, "version need");
+			      get_data (&evn, file, offset, sizeof (evn),
+					_("version need"));
 
 			      ivn.vn_aux  = BYTE_GET (evn.vn_aux);
 			      ivn.vn_next = BYTE_GET (evn.vn_next);
@@ -5061,8 +5127,9 @@ process_symbol_table (file)
 				{
 				  Elf_External_Vernaux  evna;
 
-				  GET_DATA (vna_off, evna,
-					    "version need aux (3)");
+				  get_data (&evna, file, vna_off,
+					    sizeof (evna),
+					    _("version need aux (3)"));
 
 				  ivna.vna_other = BYTE_GET (evna.vna_other);
 				  ivna.vna_next  = BYTE_GET (evna.vna_next);
@@ -5110,7 +5177,8 @@ process_symbol_table (file)
 				{
 				  Elf_External_Verdef   evd;
 
-				  GET_DATA (offset, evd, "version def");
+				  get_data (&evd, file, offset, sizeof (evd),
+					    _("version def"));
 
 				  ivd.vd_ndx  = BYTE_GET (evd.vd_ndx);
 				  ivd.vd_aux  = BYTE_GET (evd.vd_aux);
@@ -5124,7 +5192,8 @@ process_symbol_table (file)
 			      offset -= ivd.vd_next;
 			      offset += ivd.vd_aux;
 
-			      GET_DATA (offset, evda, "version def aux");
+			      get_data (&evda, file, offset, sizeof (evda),
+					_("version def aux"));
 
 			      ivda.vda_name = BYTE_GET (evda.vda_name);
 
@@ -5317,8 +5386,10 @@ dump_section (section, file)
 
   addr = section->sh_addr;
 
-  GET_DATA_ALLOC (section->sh_offset, bytes, start, unsigned char *,
-		  "section data");
+  start = (unsigned char *) get_data (NULL, file, section->sh_offset, bytes,
+				      _("section data"));
+  if (!start)
+    return 0;
 
   data = start;
 
@@ -6858,8 +6929,11 @@ display_debug_info (section, start, file)
 	    return 0;
 	  }
 
-	GET_DATA_ALLOC (sec->sh_offset, sec->sh_size, begin, unsigned char *,
-			"debug_abbrev section data");
+	begin = ((unsigned char *)
+		 get_data (NULL, file, sec->sh_offset, sec->sh_size, 
+			   _("debug_abbrev section data")));
+	if (!begin)
+	  return 0;
 
 	process_abbrev_section (begin + compunit.cu_abbrev_offset,
 				begin + sec->sh_size);
@@ -7732,8 +7806,10 @@ display_debug_section (section, file)
       return 0;
     }
 
-  GET_DATA_ALLOC (section->sh_offset, length, start, unsigned char *,
-		  "debug section data");
+  start = (unsigned char *) get_data (NULL, file, section->sh_offset, length, 
+				      _("debug section data"));
+  if (!start)
+    return 0;
 
   /* See if we know how to display the contents of this section.  */
   if (strncmp (name, ".gnu.linkonce.wi.", 17) == 0)
@@ -7792,8 +7868,11 @@ process_section_contents (file)
 		unsigned char * start;
 
 		length = section->sh_size;
-		GET_DATA_ALLOC (section->sh_offset, length, start, unsigned char *,
-				"debug section data");
+		start = ((unsigned char *)
+			 get_data (NULL, file, section->sh_offset, length, 
+				   _("debug section data")));
+		if (!start)
+		  return 0;
 
 		debug_displays[j].prescan (section, start, file);
 		free (start);
@@ -7889,73 +7968,77 @@ process_mips_specific (file)
       Elf32_External_Lib * elib;
       size_t cnt;
 
-      GET_DATA_ALLOC (liblist_offset, liblistno * sizeof (Elf32_External_Lib),
-		      elib, Elf32_External_Lib *, "liblist");
-
-      printf ("\nSection '.liblist' contains %lu entries:\n",
-	      (unsigned long) liblistno);
-      fputs ("     Library              Time Stamp          Checksum   Version Flags\n",
-	     stdout);
-
-      for (cnt = 0; cnt < liblistno; ++cnt)
+      elib = ((Elf32_External_Lib *)
+	      get_data (NULL, file, liblist_offset,
+			liblistno * sizeof (Elf32_External_Lib),
+			_("liblist")));
+      if (elib)
 	{
-	  Elf32_Lib liblist;
-	  time_t time;
-	  char timebuf[20];
-	  struct tm * tmp;
+	  printf ("\nSection '.liblist' contains %lu entries:\n",
+		  (unsigned long) liblistno);
+	  fputs ("     Library              Time Stamp          Checksum   Version Flags\n",
+		 stdout);
 
-	  liblist.l_name = BYTE_GET (elib[cnt].l_name);
-	  time = BYTE_GET (elib[cnt].l_time_stamp);
-	  liblist.l_checksum = BYTE_GET (elib[cnt].l_checksum);
-	  liblist.l_version = BYTE_GET (elib[cnt].l_version);
-	  liblist.l_flags = BYTE_GET (elib[cnt].l_flags);
-
-	  tmp = gmtime (&time);
-	  sprintf (timebuf, "%04u-%02u-%02uT%02u:%02u:%02u",
-		   tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
-		   tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
-
-	  printf ("%3lu: %-20s %s %#10lx %-7ld", (unsigned long) cnt,
-		  dynamic_strings + liblist.l_name, timebuf,
-		  liblist.l_checksum, liblist.l_version);
-
-	  if (liblist.l_flags == 0)
-	    puts (" NONE");
-	  else
+	  for (cnt = 0; cnt < liblistno; ++cnt)
 	    {
-	      static const struct
-	      {
-		const char * name;
-		int bit;
-	      }
-	      l_flags_vals[] =
-	      {
-		{ " EXACT_MATCH", LL_EXACT_MATCH },
-		{ " IGNORE_INT_VER", LL_IGNORE_INT_VER },
-		{ " REQUIRE_MINOR", LL_REQUIRE_MINOR },
-		{ " EXPORTS", LL_EXPORTS },
-		{ " DELAY_LOAD", LL_DELAY_LOAD },
-		{ " DELTA", LL_DELTA }
-	      };
-	      int flags = liblist.l_flags;
-	      size_t fcnt;
+	      Elf32_Lib liblist;
+	      time_t time;
+	      char timebuf[20];
+	      struct tm * tmp;
 
-	      for (fcnt = 0;
-		   fcnt < sizeof (l_flags_vals) / sizeof (l_flags_vals[0]);
-		   ++fcnt)
-		if ((flags & l_flags_vals[fcnt].bit) != 0)
+	      liblist.l_name = BYTE_GET (elib[cnt].l_name);
+	      time = BYTE_GET (elib[cnt].l_time_stamp);
+	      liblist.l_checksum = BYTE_GET (elib[cnt].l_checksum);
+	      liblist.l_version = BYTE_GET (elib[cnt].l_version);
+	      liblist.l_flags = BYTE_GET (elib[cnt].l_flags);
+
+	      tmp = gmtime (&time);
+	      sprintf (timebuf, "%04u-%02u-%02uT%02u:%02u:%02u",
+		       tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
+		       tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
+
+	      printf ("%3lu: %-20s %s %#10lx %-7ld", (unsigned long) cnt,
+		      dynamic_strings + liblist.l_name, timebuf,
+		      liblist.l_checksum, liblist.l_version);
+
+	      if (liblist.l_flags == 0)
+		puts (" NONE");
+	      else
+		{
+		  static const struct
 		  {
-		    fputs (l_flags_vals[fcnt].name, stdout);
-		    flags ^= l_flags_vals[fcnt].bit;
+		    const char * name;
+		    int bit;
 		  }
-	      if (flags != 0)
-		printf (" %#x", (unsigned int) flags);
+		  l_flags_vals[] =
+		  {
+		    { " EXACT_MATCH", LL_EXACT_MATCH },
+		    { " IGNORE_INT_VER", LL_IGNORE_INT_VER },
+		    { " REQUIRE_MINOR", LL_REQUIRE_MINOR },
+		    { " EXPORTS", LL_EXPORTS },
+		    { " DELAY_LOAD", LL_DELAY_LOAD },
+		    { " DELTA", LL_DELTA }
+		  };
+		  int flags = liblist.l_flags;
+		  size_t fcnt;
 
-	      puts ("");
+		  for (fcnt = 0;
+		       fcnt < sizeof (l_flags_vals) / sizeof (l_flags_vals[0]);
+		       ++fcnt)
+		    if ((flags & l_flags_vals[fcnt].bit) != 0)
+		      {
+			fputs (l_flags_vals[fcnt].name, stdout);
+			flags ^= l_flags_vals[fcnt].bit;
+		      }
+		  if (flags != 0)
+		    printf (" %#x", (unsigned int) flags);
+
+		  puts ("");
+		}
 	    }
-	}
 
-      free (elib);
+	  free (elib);
+	}
     }
 
   if (options_offset != 0)
@@ -7971,194 +8054,194 @@ process_mips_specific (file)
       while (sect->sh_type != SHT_MIPS_OPTIONS)
 	++ sect;
 
-      GET_DATA_ALLOC (options_offset, sect->sh_size, eopt,
-		      Elf_External_Options *, "options");
-
-      iopt = (Elf_Internal_Options *) malloc ((sect->sh_size / sizeof (eopt))
-					      * sizeof (* iopt));
-      if (iopt == NULL)
+      eopt = (Elf_External_Options *) get_data (NULL, file, options_offset,
+						sect->sh_size, _("options"));
+      if (eopt)
 	{
-	  error (_("Out of memory"));
-	  return 0;
-	}
-
-      offset = cnt = 0;
-      option = iopt;
-
-      while (offset < sect->sh_size)
-	{
-	  Elf_External_Options * eoption;
-
-	  eoption = (Elf_External_Options *) ((char *) eopt + offset);
-
-	  option->kind = BYTE_GET (eoption->kind);
-	  option->size = BYTE_GET (eoption->size);
-	  option->section = BYTE_GET (eoption->section);
-	  option->info = BYTE_GET (eoption->info);
-
-	  offset += option->size;
-
-	  ++option;
-	  ++cnt;
-	}
-
-      printf (_("\nSection '%s' contains %d entries:\n"),
-	      SECTION_NAME (sect), cnt);
-
-      option = iopt;
-
-      while (cnt-- > 0)
-	{
-	  size_t len;
-
-	  switch (option->kind)
+	  iopt = ((Elf_Internal_Options *)
+		  malloc ((sect->sh_size / sizeof (eopt)) * sizeof (* iopt)));
+	  if (iopt == NULL)
 	    {
-	    case ODK_NULL:
-	      /* This shouldn't happen.  */
-	      printf (" NULL       %d %lx", option->section, option->info);
-	      break;
-	    case ODK_REGINFO:
-	      printf (" REGINFO    ");
-	      if (elf_header.e_machine == EM_MIPS)
-		{
-		  /* 32bit form.  */
-		  Elf32_External_RegInfo * ereg;
-		  Elf32_RegInfo            reginfo;
-
-		  ereg = (Elf32_External_RegInfo *) (option + 1);
-		  reginfo.ri_gprmask = BYTE_GET (ereg->ri_gprmask);
-		  reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
-		  reginfo.ri_cprmask[1] = BYTE_GET (ereg->ri_cprmask[1]);
-		  reginfo.ri_cprmask[2] = BYTE_GET (ereg->ri_cprmask[2]);
-		  reginfo.ri_cprmask[3] = BYTE_GET (ereg->ri_cprmask[3]);
-		  reginfo.ri_gp_value = BYTE_GET (ereg->ri_gp_value);
-
-		  printf ("GPR %08lx  GP 0x%lx\n",
-			  reginfo.ri_gprmask,
-			  (unsigned long) reginfo.ri_gp_value);
-		  printf ("            CPR0 %08lx  CPR1 %08lx  CPR2 %08lx  CPR3 %08lx\n",
-			  reginfo.ri_cprmask[0], reginfo.ri_cprmask[1],
-			  reginfo.ri_cprmask[2], reginfo.ri_cprmask[3]);
-		}
-	      else
-		{
-		  /* 64 bit form.  */
-		  Elf64_External_RegInfo * ereg;
-		  Elf64_Internal_RegInfo reginfo;
-
-		  ereg = (Elf64_External_RegInfo *) (option + 1);
-		  reginfo.ri_gprmask    = BYTE_GET (ereg->ri_gprmask);
-		  reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
-		  reginfo.ri_cprmask[1] = BYTE_GET (ereg->ri_cprmask[1]);
-		  reginfo.ri_cprmask[2] = BYTE_GET (ereg->ri_cprmask[2]);
-		  reginfo.ri_cprmask[3] = BYTE_GET (ereg->ri_cprmask[3]);
-		  reginfo.ri_gp_value   = BYTE_GET8 (ereg->ri_gp_value);
-
-		  printf ("GPR %08lx  GP 0x",
-			  reginfo.ri_gprmask);
-		  printf_vma (reginfo.ri_gp_value);
-		  printf ("\n");
-
-		  printf ("            CPR0 %08lx  CPR1 %08lx  CPR2 %08lx  CPR3 %08lx\n",
-			  reginfo.ri_cprmask[0], reginfo.ri_cprmask[1],
-			  reginfo.ri_cprmask[2], reginfo.ri_cprmask[3]);
-		}
-	      ++option;
-	      continue;
-	    case ODK_EXCEPTIONS:
-	      fputs (" EXCEPTIONS fpe_min(", stdout);
-	      process_mips_fpe_exception (option->info & OEX_FPU_MIN);
-	      fputs (") fpe_max(", stdout);
-	      process_mips_fpe_exception ((option->info & OEX_FPU_MAX) >> 8);
-	      fputs (")", stdout);
-
-	      if (option->info & OEX_PAGE0)
-		fputs (" PAGE0", stdout);
-	      if (option->info & OEX_SMM)
-		fputs (" SMM", stdout);
-	      if (option->info & OEX_FPDBUG)
-		fputs (" FPDBUG", stdout);
-	      if (option->info & OEX_DISMISS)
-		fputs (" DISMISS", stdout);
-	      break;
-	    case ODK_PAD:
-	      fputs (" PAD       ", stdout);
-	      if (option->info & OPAD_PREFIX)
-		fputs (" PREFIX", stdout);
-	      if (option->info & OPAD_POSTFIX)
-		fputs (" POSTFIX", stdout);
-	      if (option->info & OPAD_SYMBOL)
-		fputs (" SYMBOL", stdout);
-	      break;
-	    case ODK_HWPATCH:
-	      fputs (" HWPATCH   ", stdout);
-	      if (option->info & OHW_R4KEOP)
-		fputs (" R4KEOP", stdout);
-	      if (option->info & OHW_R8KPFETCH)
-		fputs (" R8KPFETCH", stdout);
-	      if (option->info & OHW_R5KEOP)
-		fputs (" R5KEOP", stdout);
-	      if (option->info & OHW_R5KCVTL)
-		fputs (" R5KCVTL", stdout);
-	      break;
-	    case ODK_FILL:
-	      fputs (" FILL       ", stdout);
-	      /* XXX Print content of info word?  */
-	      break;
-	    case ODK_TAGS:
-	      fputs (" TAGS       ", stdout);
-	      /* XXX Print content of info word?  */
-	      break;
-	    case ODK_HWAND:
-	      fputs (" HWAND     ", stdout);
-	      if (option->info & OHWA0_R4KEOP_CHECKED)
-		fputs (" R4KEOP_CHECKED", stdout);
-	      if (option->info & OHWA0_R4KEOP_CLEAN)
-		fputs (" R4KEOP_CLEAN", stdout);
-	      break;
-	    case ODK_HWOR:
-	      fputs (" HWOR      ", stdout);
-	      if (option->info & OHWA0_R4KEOP_CHECKED)
-		fputs (" R4KEOP_CHECKED", stdout);
-	      if (option->info & OHWA0_R4KEOP_CLEAN)
-		fputs (" R4KEOP_CLEAN", stdout);
-	      break;
-	    case ODK_GP_GROUP:
-	      printf (" GP_GROUP  %#06lx  self-contained %#06lx",
-		      option->info & OGP_GROUP,
-		      (option->info & OGP_SELF) >> 16);
-	      break;
-	    case ODK_IDENT:
-	      printf (" IDENT     %#06lx  self-contained %#06lx",
-		      option->info & OGP_GROUP,
-		      (option->info & OGP_SELF) >> 16);
-	      break;
-	    default:
-	      /* This shouldn't happen.  */
-	      printf (" %3d ???     %d %lx",
-		      option->kind, option->section, option->info);
-	      break;
+	      error (_("Out of memory"));
+	      return 0;
 	    }
 
-	  len = sizeof (* eopt);
-	  while (len < option->size)
-	    if (((char *) option)[len] >= ' '
-		&& ((char *) option)[len] < 0x7f)
-	      printf ("%c", ((char *) option)[len++]);
-	    else
-	      printf ("\\%03o", ((char *) option)[len++]);
+	  offset = cnt = 0;
+	  option = iopt;
 
-	  fputs ("\n", stdout);
-	  ++option;
+	  while (offset < sect->sh_size)
+	    {
+	      Elf_External_Options * eoption;
+
+	      eoption = (Elf_External_Options *) ((char *) eopt + offset);
+
+	      option->kind = BYTE_GET (eoption->kind);
+	      option->size = BYTE_GET (eoption->size);
+	      option->section = BYTE_GET (eoption->section);
+	      option->info = BYTE_GET (eoption->info);
+
+	      offset += option->size;
+
+	      ++option;
+	      ++cnt;
+	    }
+
+	  printf (_("\nSection '%s' contains %d entries:\n"),
+		  SECTION_NAME (sect), cnt);
+
+	  option = iopt;
+
+	  while (cnt-- > 0)
+	    {
+	      size_t len;
+
+	      switch (option->kind)
+		{
+		case ODK_NULL:
+		  /* This shouldn't happen.  */
+		  printf (" NULL       %d %lx", option->section, option->info);
+		  break;
+		case ODK_REGINFO:
+		  printf (" REGINFO    ");
+		  if (elf_header.e_machine == EM_MIPS)
+		    {
+		      /* 32bit form.  */
+		      Elf32_External_RegInfo * ereg;
+		      Elf32_RegInfo            reginfo;
+
+		      ereg = (Elf32_External_RegInfo *) (option + 1);
+		      reginfo.ri_gprmask = BYTE_GET (ereg->ri_gprmask);
+		      reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
+		      reginfo.ri_cprmask[1] = BYTE_GET (ereg->ri_cprmask[1]);
+		      reginfo.ri_cprmask[2] = BYTE_GET (ereg->ri_cprmask[2]);
+		      reginfo.ri_cprmask[3] = BYTE_GET (ereg->ri_cprmask[3]);
+		      reginfo.ri_gp_value = BYTE_GET (ereg->ri_gp_value);
+
+		      printf ("GPR %08lx  GP 0x%lx\n",
+			      reginfo.ri_gprmask,
+			      (unsigned long) reginfo.ri_gp_value);
+		      printf ("            CPR0 %08lx  CPR1 %08lx  CPR2 %08lx  CPR3 %08lx\n",
+			      reginfo.ri_cprmask[0], reginfo.ri_cprmask[1],
+			      reginfo.ri_cprmask[2], reginfo.ri_cprmask[3]);
+		    }
+		  else
+		    {
+		      /* 64 bit form.  */
+		      Elf64_External_RegInfo * ereg;
+		      Elf64_Internal_RegInfo reginfo;
+
+		      ereg = (Elf64_External_RegInfo *) (option + 1);
+		      reginfo.ri_gprmask    = BYTE_GET (ereg->ri_gprmask);
+		      reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
+		      reginfo.ri_cprmask[1] = BYTE_GET (ereg->ri_cprmask[1]);
+		      reginfo.ri_cprmask[2] = BYTE_GET (ereg->ri_cprmask[2]);
+		      reginfo.ri_cprmask[3] = BYTE_GET (ereg->ri_cprmask[3]);
+		      reginfo.ri_gp_value   = BYTE_GET8 (ereg->ri_gp_value);
+
+		      printf ("GPR %08lx  GP 0x",
+			      reginfo.ri_gprmask);
+		      printf_vma (reginfo.ri_gp_value);
+		      printf ("\n");
+
+		      printf ("            CPR0 %08lx  CPR1 %08lx  CPR2 %08lx  CPR3 %08lx\n",
+			      reginfo.ri_cprmask[0], reginfo.ri_cprmask[1],
+			      reginfo.ri_cprmask[2], reginfo.ri_cprmask[3]);
+		    }
+		  ++option;
+		  continue;
+		case ODK_EXCEPTIONS:
+		  fputs (" EXCEPTIONS fpe_min(", stdout);
+		  process_mips_fpe_exception (option->info & OEX_FPU_MIN);
+		  fputs (") fpe_max(", stdout);
+		  process_mips_fpe_exception ((option->info & OEX_FPU_MAX) >> 8);
+		  fputs (")", stdout);
+
+		  if (option->info & OEX_PAGE0)
+		    fputs (" PAGE0", stdout);
+		  if (option->info & OEX_SMM)
+		    fputs (" SMM", stdout);
+		  if (option->info & OEX_FPDBUG)
+		    fputs (" FPDBUG", stdout);
+		  if (option->info & OEX_DISMISS)
+		    fputs (" DISMISS", stdout);
+		  break;
+		case ODK_PAD:
+		  fputs (" PAD       ", stdout);
+		  if (option->info & OPAD_PREFIX)
+		    fputs (" PREFIX", stdout);
+		  if (option->info & OPAD_POSTFIX)
+		    fputs (" POSTFIX", stdout);
+		  if (option->info & OPAD_SYMBOL)
+		    fputs (" SYMBOL", stdout);
+		  break;
+		case ODK_HWPATCH:
+		  fputs (" HWPATCH   ", stdout);
+		  if (option->info & OHW_R4KEOP)
+		    fputs (" R4KEOP", stdout);
+		  if (option->info & OHW_R8KPFETCH)
+		    fputs (" R8KPFETCH", stdout);
+		  if (option->info & OHW_R5KEOP)
+		    fputs (" R5KEOP", stdout);
+		  if (option->info & OHW_R5KCVTL)
+		    fputs (" R5KCVTL", stdout);
+		  break;
+		case ODK_FILL:
+		  fputs (" FILL       ", stdout);
+		  /* XXX Print content of info word?  */
+		  break;
+		case ODK_TAGS:
+		  fputs (" TAGS       ", stdout);
+		  /* XXX Print content of info word?  */
+		  break;
+		case ODK_HWAND:
+		  fputs (" HWAND     ", stdout);
+		  if (option->info & OHWA0_R4KEOP_CHECKED)
+		    fputs (" R4KEOP_CHECKED", stdout);
+		  if (option->info & OHWA0_R4KEOP_CLEAN)
+		    fputs (" R4KEOP_CLEAN", stdout);
+		  break;
+		case ODK_HWOR:
+		  fputs (" HWOR      ", stdout);
+		  if (option->info & OHWA0_R4KEOP_CHECKED)
+		    fputs (" R4KEOP_CHECKED", stdout);
+		  if (option->info & OHWA0_R4KEOP_CLEAN)
+		    fputs (" R4KEOP_CLEAN", stdout);
+		  break;
+		case ODK_GP_GROUP:
+		  printf (" GP_GROUP  %#06lx  self-contained %#06lx",
+			  option->info & OGP_GROUP,
+			  (option->info & OGP_SELF) >> 16);
+		  break;
+		case ODK_IDENT:
+		  printf (" IDENT     %#06lx  self-contained %#06lx",
+			  option->info & OGP_GROUP,
+			  (option->info & OGP_SELF) >> 16);
+		  break;
+		default:
+		  /* This shouldn't happen.  */
+		  printf (" %3d ???     %d %lx",
+			  option->kind, option->section, option->info);
+		  break;
+		}
+
+	      len = sizeof (* eopt);
+	      while (len < option->size)
+		if (((char *) option)[len] >= ' '
+		    && ((char *) option)[len] < 0x7f)
+		  printf ("%c", ((char *) option)[len++]);
+		else
+		  printf ("\\%03o", ((char *) option)[len++]);
+
+	      fputs ("\n", stdout);
+	      ++option;
+	    }
+
+	  free (eopt);
 	}
-
-      free (eopt);
     }
 
   if (conflicts_offset != 0 && conflictsno != 0)
     {
-      Elf32_External_Conflict * econf32;
-      Elf64_External_Conflict * econf64;
       Elf32_Conflict * iconf;
       size_t cnt;
 
@@ -8177,19 +8260,35 @@ process_mips_specific (file)
 
       if (is_32bit_elf)
 	{
-	  GET_DATA_ALLOC (conflicts_offset, conflictsno * sizeof (* econf32),
-			  econf32, Elf32_External_Conflict *, "conflict");
+	  Elf32_External_Conflict * econf32;
+
+	  econf32 = ((Elf32_External_Conflict *)
+		     get_data (NULL, file, conflicts_offset,
+			       conflictsno * sizeof (* econf32),
+			       _("conflict")));
+	  if (!econf32)
+	    return 0;
 
 	  for (cnt = 0; cnt < conflictsno; ++cnt)
 	    iconf[cnt] = BYTE_GET (econf32[cnt]);
+
+	  free (econf32);
 	}
       else
 	{
-	  GET_DATA_ALLOC (conflicts_offset, conflictsno * sizeof (* econf64),
-			  econf64, Elf64_External_Conflict *, "conflict");
+	  Elf64_External_Conflict * econf64;
+
+	  econf64 = ((Elf64_External_Conflict *)
+		     get_data (NULL, file, conflicts_offset,
+			       conflictsno * sizeof (* econf64),
+			       _("conflict")));
+	  if (!econf64)
+	    return 0;
 
 	  for (cnt = 0; cnt < conflictsno; ++cnt)
 	    iconf[cnt] = BYTE_GET (econf64[cnt]);
+
+	  free (econf64);
 	}
 
       printf (_("\nSection '.conflict' contains %d entries:\n"), conflictsno);
@@ -8264,7 +8363,10 @@ process_corefile_note_segment (file, offset, length)
   if (length <= 0)
     return 0;
 
-  GET_DATA_ALLOC (offset, length, pnotes, Elf_External_Note *, "notes");
+  pnotes = (Elf_External_Note *) get_data (NULL, file, offset, length,
+					   _("notes"));
+  if (!pnotes)
+    return 0;
 
   external = pnotes;
 
