@@ -1,3 +1,7 @@
+Wed Sep 22 21:22:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.texi (Bootstrapping): Discuss 386 call gates.
+
 Sat Sep 18 17:10:44 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
 
 	* stabs.texinfo (Based Variables): New node.
