@@ -2,10 +2,10 @@
 #undef _MSE_INT_H
 
 /* Define if your struct reg has r_fs.  */
-#undef HAVE_R_FS
+#undef HAVE_STRUCT_REG_R_FS
 
 /* Define if your struct reg has r_gs.  */
-#undef HAVE_R_GS
+#undef HAVE_STRUCT_REG_R_GS
 
 /* Define if pstatus_t type is available */
 #undef HAVE_PSTATUS_T

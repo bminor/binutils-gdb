@@ -78,12 +78,12 @@ static int reg_offset[] =
   REG_OFFSET (r_ss),
   REG_OFFSET (r_ds),
   REG_OFFSET (r_es),
-#ifdef HAVE_R_FS
+#ifdef HAVE_STRUCT_REG_R_FS
   REG_OFFSET (r_fs),
 #else
   -1,
 #endif
-#ifdef HAVE_R_GS
+#ifdef HAVE_STRUCT_REG_R_GS
   REG_OFFSET (r_gs)
 #else
   -1

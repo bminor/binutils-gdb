@@ -116,17 +116,17 @@ AC_FUNC_ALLOCA
 
 # See if machine/reg.h supports the %fs and %gs i386 segment registers.
 # Older i386 BSD's don't have the r_fs and r_gs members of `struct reg'.
-AC_CACHE_CHECK([for r_fs in struct reg], gdb_cv_struct_r_fs,
+AC_CACHE_CHECK([for r_fs in struct reg], gdb_cv_struct_reg_r_fs,
 [AC_TRY_COMPILE([#include <machine/reg.h>], [struct reg r; r.r_fs;],
-gdb_cv_struct_r_fs=yes, gdb_cv_struct_r_fs=no)])
-if test $gdb_cv_struct_r_fs = yes; then
-  AC_DEFINE(HAVE_R_FS)
+gdb_cv_struct_reg_r_fs=yes, gdb_cv_struct_reg_r_fs=no)])
+if test $gdb_cv_struct_reg_r_fs = yes; then
+  AC_DEFINE(HAVE_STRUCT_REG_R_FS)
 fi
-AC_CACHE_CHECK([for r_gs in struct reg], gdb_cv_struct_r_gs,
+AC_CACHE_CHECK([for r_gs in struct reg], gdb_cv_struct_reg_r_gs,
 [AC_TRY_COMPILE([#include <machine/reg.h>], [struct reg r; r.r_gs;],
-gdb_cv_struct_r_gs=yes, gdb_cv_struct_r_gs=no)])
-if test $gdb_cv_struct_r_gs = yes; then
-  AC_DEFINE(HAVE_R_GS)
+gdb_cv_struct_reg_r_gs=yes, gdb_cv_struct_reg_r_gs=no)])
+if test $gdb_cv_struct_reg_r_gs = yes; then
+  AC_DEFINE(HAVE_STRUCT_REG_R_GS)
 fi
 
 dnl See if ptrace.h provides the PTRACE_GETREGS request.
