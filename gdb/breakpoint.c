@@ -445,8 +445,8 @@ insert_breakpoints ()
 		b->enable = disabled;
 		if (!disabled_breaks)
 		  {
-		    fprintf_filtered (stderr, "Cannot insert breakpoint %d:\n",
-				      b->number);
+		    fprintf (stderr,
+			 "Cannot insert breakpoint %d:\n", b->number);
 		    printf_filtered ("Disabling shared library breakpoints:\n");
 		  }
 		disabled_breaks = 1;
@@ -455,11 +455,10 @@ insert_breakpoints ()
 	    else
 #endif
 	      {
-		fprintf_filtered (stderr, "Cannot insert breakpoint %d:\n",
-				  b->number);
+		fprintf (stderr, "Cannot insert breakpoint %d:\n", b->number);
 #ifdef ONE_PROCESS_WRITETEXT
-		fprintf_filtered (stderr,
-				  "The same program may be running in another process.\n");
+		fprintf (stderr,
+		  "The same program may be running in another process.\n");
 #endif
 		memory_error (val, b->address);	/* which bombs us out */
 	      }
@@ -479,7 +478,7 @@ remove_breakpoints ()
   int val;
 
 #ifdef BREAKPOINT_DEBUG
-  printf_filtered ("Removing breakpoints.\n");
+  printf ("Removing breakpoints.\n");
 #endif /* BREAKPOINT_DEBUG */
 
   ALL_BREAKPOINTS (b)
@@ -490,12 +489,12 @@ remove_breakpoints ()
 	  return val;
 	b->inserted = 0;
 #ifdef BREAKPOINT_DEBUG
-	printf_filtered ("Removed breakpoint at %s",
-			 local_hex_string(b->address));
-	printf_filtered (", shadow %s",
-			 local_hex_string(b->shadow_contents[0]));
-	printf_filtered (", %s.\n",
-			 local_hex_string(b->shadow_contents[1]));
+	printf ("Removed breakpoint at %s",
+		local_hex_string(b->address));
+	printf (", shadow %s",
+		local_hex_string(b->shadow_contents[0]));
+	printf (", %s.\n",
+		local_hex_string(b->shadow_contents[1]));
 #endif /* BREAKPOINT_DEBUG */
       }
 
@@ -794,7 +793,7 @@ bpstat_alloc (b, cbs)
 
 	Each element of the chain refers to a particular breakpoint or
 	watchpoint at which we have stopped.  (We may have stopped for
-	several reasons.)
+	several reasons concurrently.)
 
 	Each element of the chain has valid next, breakpoint_at,
 	commands, FIXME??? fields.
@@ -932,7 +931,7 @@ which its expression is valid.\n", b->number);
 	      bs->commands = b->commands;
 	      if (b->silent)
 		this_bp_print = 0;
-	      if (bs->commands && !strcmp ("silent", bs->commands->line))
+	      if (bs->commands && STREQ ("silent", bs->commands->line))
 		{
 		  bs->commands = bs->commands->next;
 		  this_bp_print = 0;
@@ -1052,8 +1051,7 @@ breakpoint_1 (bnum, allflag)
 		if (sym)
 		  {
 		    fputs_filtered ("in ", stdout);
-		    fputs_demangled (SYMBOL_NAME (sym), stdout, 
-				     DMGL_ANSI | DMGL_PARAMS);
+		    fputs_filtered (SYMBOL_SOURCE_NAME (sym), stdout);
 		    fputs_filtered (" at ", stdout);
 		  }
 		fputs_filtered (b->symtab->filename, stdout);
@@ -1142,18 +1140,17 @@ describe_other_breakpoints (pc)
       others++;
   if (others > 0)
     {
-      printf_filtered ("Note: breakpoint%s ", (others > 1) ? "s" : "");
+      printf ("Note: breakpoint%s ", (others > 1) ? "s" : "");
       ALL_BREAKPOINTS (b)
 	if (b->address == pc)
 	  {
 	    others--;
-	    printf_filtered ("%d%s%s ",
-			     b->number,
-			     (b->enable == disabled) ? " (disabled)" : "",
-			     (others > 1) ? "," :
-			       ((others == 1) ? " and" : ""));
+	    printf ("%d%s%s ",
+		    b->number,
+		    (b->enable == disabled) ? " (disabled)" : "",
+		    (others > 1) ? "," : ((others == 1) ? " and" : ""));
 	  }
-      printf_filtered ("also set at pc %s.\n", local_hex_string(pc));
+      printf ("also set at pc %s.\n", local_hex_string(pc));
     }
 }
 
@@ -1256,7 +1253,7 @@ create_longjmp_breakpoint(func_name)
 
       m = lookup_minimal_symbol(func_name, (struct objfile *)NULL);
       if (m)
-	sal.pc = m->address;
+	sal.pc = SYMBOL_VALUE_ADDRESS (m);
       else
 	return;
     }
@@ -1552,8 +1549,8 @@ break_command_1 (arg, tempflag, from_tty)
 
   if (sals.nelts > 1)
     {
-      printf_filtered ("Multiple breakpoints were set.\n");
-      printf_filtered ("Use the \"delete\" command to delete unwanted breakpoints.\n");
+      printf ("Multiple breakpoints were set.\n");
+      printf ("Use the \"delete\" command to delete unwanted breakpoints.\n");
     }
   free ((PTR)sals.sals);
 }
@@ -1614,6 +1611,8 @@ watch_command (arg, from_tty)
   exp_valid_block = innermost_block;
   val = evaluate_expression (exp);
   release_value (val);
+  if (VALUE_LAZY (val))
+    value_fetch_lazy (val);
 
   /* Now set up the breakpoint.  */
   b = set_raw_breakpoint (sal);
@@ -1771,7 +1770,7 @@ map_catch_names (args, function)
 	  goto win;
 	}
 #endif
-      printf_filtered ("No catch clause for exception %s.\n", p);
+      printf ("No catch clause for exception %s.\n", p);
 #if 0
     win:
 #endif
@@ -1846,7 +1845,7 @@ get_catch_sals (this_level_only)
 	      for (i = 0; i < nsyms; i++)
 		{
 		  sym = BLOCK_SYM (b, i);
-		  if (! strcmp (SYMBOL_NAME (sym), "default"))
+		  if (STREQ (SYMBOL_NAME (sym), "default"))
 		    {
 		      if (have_default)
 			continue;
@@ -1972,18 +1971,16 @@ catch_command_1 (arg, tempflag, from_tty)
       b->enable = enabled;
       b->disposition = tempflag ? delete : donttouch;
 
-      printf_filtered ("Breakpoint %d at %s", b->number,
-		       local_hex_string(b->address));
+      printf ("Breakpoint %d at %s", b->number, local_hex_string(b->address));
       if (b->symtab)
-	printf_filtered (": file %s, line %d.",
-			 b->symtab->filename, b->line_number);
-      printf_filtered ("\n");
+	printf (": file %s, line %d.", b->symtab->filename, b->line_number);
+      printf ("\n");
     }
 
   if (sals.nelts > 1)
     {
-      printf_filtered ("Multiple breakpoints were set.\n");
-      printf_filtered ("Use the \"delete\" command to delete unwanted breakpoints.\n");
+      printf ("Multiple breakpoints were set.\n");
+      printf ("Use the \"delete\" command to delete unwanted breakpoints.\n");
     }
   free ((PTR)sals.sals);
 }
@@ -2090,11 +2087,10 @@ clear_command (arg, from_tty)
 	}
 
       if (found->next) from_tty = 1; /* Always report if deleted more than one */
-      if (from_tty) printf_filtered ("Deleted breakpoint%s ",
-				     found->next ? "s" : "");
+      if (from_tty) printf ("Deleted breakpoint%s ", found->next ? "s" : "");
       while (found)
 	{
-	  if (from_tty) printf_filtered ("%d ", found->number);
+	  if (from_tty) printf ("%d ", found->number);
 	  b1 = found->next;
 	  delete_breakpoint (found);
 	  found = b1;
@@ -2149,7 +2145,7 @@ delete_breakpoint (bpt)
     free ((PTR)bpt->addr_string);
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
-    printf_filtered ("breakpoint #%d deleted\n", bpt->number);
+    printf ("breakpoint #%d deleted\n", bpt->number);
 
   /* Be sure no bpstat's are pointing at it after it's been freed.  */
   /* FIXME, how can we find all bpstat's?  We just check stop_bpstat for now. */
@@ -2235,12 +2231,18 @@ breakpoint_re_set_one (bint)
 	}
       free ((PTR)sals.sals);
       break;
+
     case bp_watchpoint:
-      /* FIXME!  This is the wrong thing to do.... */
-      delete_breakpoint (b);
+      if (b->cond_string != NULL)
+	{
+	  s = b->cond_string;
+	  b->cond = parse_exp_1 (&s, (struct block *)0, 0);
+	}
       break;
+
     default:
       printf_filtered ("Deleting unknown breakpoint type %d\n", b->type);
+      /* fall through */
     case bp_until:
     case bp_finish:
     case bp_longjmp:
@@ -2269,7 +2271,7 @@ breakpoint_re_set ()
 
   ALL_BREAKPOINTS_SAFE (b, temp)
     {
-      printf_filtered (message, message1, b->number);	/* Format possible error msg */
+      sprintf (message, message1, b->number);	/* Format possible error msg */
       catch_errors (breakpoint_re_set_one, (char *) b, message);
     }
 
@@ -2382,7 +2384,7 @@ map_breakpoint_numbers (args, function)
 	    function (b);
 	    goto win;
 	  }
-      printf_filtered ("No breakpoint number %d.\n", num);
+      printf ("No breakpoint number %d.\n", num);
     win:
       p = p1;
     }
@@ -2395,7 +2397,7 @@ enable_breakpoint (bpt)
   bpt->enable = enabled;
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
-    printf_filtered ("breakpoint #%d enabled\n", bpt->number);
+    printf ("breakpoint #%d enabled\n", bpt->number);
 
   check_duplicates (bpt->address);
   if (bpt->type == bp_watchpoint)
@@ -2413,6 +2415,8 @@ is valid is not currently in scope.\n", bpt->number);
 
       bpt->val = evaluate_expression (bpt->exp);
       release_value (bpt->val);
+      if (VALUE_LAZY (bpt->val))
+	value_fetch_lazy (bpt->val);
     }
 }
 
@@ -2717,21 +2721,26 @@ an expression changes.");
 	    "Synonym for ``info breakpoints''.");
 }
 
+/* OK, when we call objfile_relocate, we need to relocate breakpoints
+   too.  breakpoint_re_set is not a good choice--for example, if
+   addr_string contains just a line number without a file name the
+   breakpoint might get set in a different file.  In general, there is
+   no need to go all the way back to the user's string (though this might
+   work if some effort were made to canonicalize it), since symtabs and
+   everything except addresses are still valid.
+
+   Probably the best way to solve this is to have each breakpoint save
+   the objfile and the section number that was used to set it (if set
+   by "*addr", probably it is best to use find_pc_line to get a symtab
+   and use the objfile and block_line_section for that symtab).  Then
+   objfile_relocate can call fixup_breakpoints with the objfile and
+   the new_offsets, and it can relocate only the appropriate breakpoints.  */
+
 #ifdef IBM6000_TARGET
-/* Where should this function go? It is used by AIX only. FIXME. */
+/* But for now, just kludge it based on the concept that before an
+   objfile is relocated the breakpoint is below 0x10000000, and afterwards
+   it is higher, so that way we only relocate each breakpoint once.  */
 
-/* Breakpoint address relocation used to be done in breakpoint_re_set(). That
-   approach the following problem:
-
-     before running the program, if a file is list, then a breakpoint is
-     set (just the line number), then if we switch into another file and run
-     the program, just a line number as a breakpoint address was not
-     descriptive enough and breakpoint was ending up in a different file's
-     similar line. 
-
-  I don't think any other platform has this breakpoint relocation problem, so this
-  is not an issue for other platforms. */
-   
 void
 fixup_breakpoints (low, high, delta)
   CORE_ADDR low;

@@ -1,3 +1,10 @@
+Fri Mar 26 11:29:30 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* breakpoint.c (watch_command, enable_breakpoint): Fetch lazy values.
+
+	* rs6000-tdep.c (single_step): Misc cleanups (CORE_ADDR not int,
+	don't use sizeof(int) for target stuff, etc).
+
 Wed Mar 24 08:48:30 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Clean up xcoff relocation.
