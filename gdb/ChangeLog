@@ -1,3 +1,15 @@
+2002-03-23  Andrew Cagney  <cagney@redhat.com>
+
+	* defs.h (error): Add printf format attribute.
+	* thread-db.c (thread_from_lwp): Fix error format string.
+	* stack.c (parse_frame_specification): Ditto.
+	* cli/cli-decode.c (undef_cmd_error): Ditto.
+	* scm-lang.c (scm_lookup_name): Ditto.
+	* tracepoint.c (trace_error): Ditto.
+	* remote-utils.c (usage): Ditto.
+	* remote.c (compare_sections_command): Ditto.
+	Fix PR gdb/328.
+
 2002-03-22  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbtypes.c (append_composite_type_field): New function.

@@ -704,7 +704,7 @@ parse_frame_specification (char *frame_exp)
 	   really should be used instead of spaces to delimit; using spaces
 	   normally works in an expression).  */
 #ifdef SETUP_ARBITRARY_FRAME
-	error ("No frame %d", args[0]);
+	error ("No frame %s", paddr_d (args[0]));
 #endif
 
 	/* If (s)he specifies the frame with an address, he deserves what

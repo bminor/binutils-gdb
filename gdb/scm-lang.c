@@ -180,7 +180,7 @@ scm_lookup_name (char *str)
 		       (struct symtab **) NULL);
   if (sym)
     return value_of_variable (sym, NULL);
-  error ("No symbol \"%s\" in current context.");
+  error ("No symbol \"%s\" in current context.", str);
 }
 
 struct value *

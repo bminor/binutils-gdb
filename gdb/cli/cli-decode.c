@@ -975,7 +975,7 @@ undef_cmd_error (char *cmdtype, char *q)
 	 cmdtype,
 	 q,
 	 *cmdtype ? " " : "",
-	 strlen (cmdtype) - 1,
+	 (int) strlen (cmdtype) - 1,
 	 cmdtype);
 }
 

@@ -866,7 +866,7 @@ extern char *warning_pre_print;
 
 extern NORETURN void verror (const char *fmt, va_list ap) ATTR_NORETURN;
 
-extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN;
+extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 
 extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
 

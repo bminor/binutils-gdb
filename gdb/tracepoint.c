@@ -190,7 +190,7 @@ trace_error (char *buf)
       if (*++buf == '0')	/*   general case: */
 	error ("tracepoint.c: error in outgoing packet.");
       else
-	error ("tracepoint.c: error in outgoing packet at field #%d.",
+	error ("tracepoint.c: error in outgoing packet at field #%ld.",
 	       strtol (buf, NULL, 16));
     case '2':
       error ("trace API error 0x%s.", ++buf);

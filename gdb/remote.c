@@ -5013,8 +5013,8 @@ compare_sections_command (char *args, int from_tty)
 
       getpkt (buf, (rs->remote_packet_size), 0);
       if (buf[0] == 'E')
-	error ("target memory fault, section %s, range 0x%08x -- 0x%08x",
-	       sectname, lma, lma + size);
+	error ("target memory fault, section %s, range 0x%s -- 0x%s",
+	       sectname, paddr (lma), paddr (lma + size));
       if (buf[0] != 'C')
 	error ("remote target does not support this operation");
 
