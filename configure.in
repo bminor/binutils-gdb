@@ -156,6 +156,7 @@ fi
 if false && [ "${host}" = "${target}" ] && [ x${enable_shared} = x ]; then
   case "${target}" in
     alpha-dec-osf*)	enable_shared=yes ;;
+    alpha-*-linux*)	enable_shared=yes ;;
     mips-sgi-irix5*)	enable_shared=yes ;;
     *)			enable_shared=no ;;
   esac

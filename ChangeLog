@@ -1,6 +1,14 @@
+Sun May 26 15:16:27 1996  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in (alpha-*-linux*): Set enable_shared to yes.
+
+Tue May 21 15:41:39 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-configure: Handle --enable-FOO and --disable-FOO.
+
 Mon May 20 10:12:29 1996  Geoffrey Noer  <noer@cygnus.com>
 
-	* configure.in (*-*-cygwin32): configure make
+	* configure.in (*-*-cygwin32): Configure make.
 
 Tue May  7 14:19:42 1996  Tom Tromey  <tromey@snuffle.cygnus.com>
 
