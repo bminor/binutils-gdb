@@ -1,3 +1,9 @@
+Tue Oct  8 13:58:59 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* binutils.texinfo: remove most remaining FIXME's, delete
+	references to __.SYMDEF by name
+
+
 Tue Oct  8 10:23:44 1991  Steve Chamberlain  (steve at cygnus.com)
 
 	* objdump.c (print_address) Print addresses nicely.
