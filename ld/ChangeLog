@@ -1,3 +1,9 @@
+Fri Mar 14 21:30:06 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/elfmips.sc: Change handling of data area when
+	generating a shared library to not skip a large block of memory.
+	From Per Fogelstrom <pefo@cvs.openbsd.org>.
+
 Wed Mar 12 21:33:09 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldmain.c (multiple_definition): Only skip the warning if the

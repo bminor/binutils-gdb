@@ -128,8 +128,9 @@ SECTIONS
      important than losing a page of the virtual address space (note
      that no actual memory is lost; the page which is skipped can not
      be referenced).  */
-  ${RELOCATING+. += ${DATA_ADDR} - ${TEXT_START_ADDR};}
-  ${RELOCATING+. += 0x10000;}
+  ${CREATE_SHLIB-${RELOCATING+. += ${DATA_ADDR} - ${TEXT_START_ADDR};}}
+  ${CREATE_SHLIB-${RELOCATING+. += 0x10000;}}
+  ${CREATE_SHLIB+${RELOCATING+. = ALIGN(${MAXPAGESIZE}) + (ALIGN(8) & (${MAXPAGESIZE} - 1));}}
   .data  ${RELOCATING-0} :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
