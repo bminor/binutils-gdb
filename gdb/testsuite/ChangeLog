@@ -1,5 +1,9 @@
 Tue Jul 12 12:22:32 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
+	* gdb.c++/cplusfuncs.cc: Include <stddef.h>, not <sys/types.h>,
+	  for size_t definition.
+	* gdb.c++/templates.cc: Likewise
+
 	* config/mt-i386-netware: New file.
 
 	* gdb.base/interrupt.c: Do not test if errno == EINTR if it's not
