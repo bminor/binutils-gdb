@@ -29,6 +29,7 @@
 #include "gdb_assert.h"
 
 #include "alpha-tdep.h"
+#include "mdebugread.h"
 
 /* FIXME: Some of this code should perhaps be merged with mips.  */
 
@@ -90,11 +91,11 @@
 /* Locate the mdebug PDR for the given PC.  Return null if one can't
    be found; you'll have to fall back to other methods in that case.  */
 
-static alpha_extra_func_info_t
+static struct mdebug_extra_func_info *
 find_proc_desc (CORE_ADDR pc)
 {
   struct block *b = block_for_pc (pc);
-  alpha_extra_func_info_t proc_desc = NULL;
+  struct mdebug_extra_func_info *proc_desc = NULL;
   struct symbol *sym = NULL;
 
   if (b)
@@ -113,7 +114,7 @@ find_proc_desc (CORE_ADDR pc)
 
   if (sym)
     {
-      proc_desc = (alpha_extra_func_info_t) SYMBOL_VALUE (sym);
+      proc_desc = (struct mdebug_extra_func_info *) SYMBOL_VALUE (sym);
 
       /* If we never found a PDR for this function in symbol reading,
 	 then examine prologues to find the information.  */
@@ -128,7 +129,7 @@ find_proc_desc (CORE_ADDR pc)
    find the prologue, then return 0.  */
 
 static CORE_ADDR
-alpha_mdebug_after_prologue (CORE_ADDR pc, alpha_extra_func_info_t proc_desc)
+alpha_mdebug_after_prologue (CORE_ADDR pc, struct mdebug_extra_func_info *proc_desc)
 {
   if (proc_desc)
     {
@@ -146,7 +147,7 @@ alpha_mdebug_after_prologue (CORE_ADDR pc, alpha_extra_func_info_t proc_desc)
    if we are definitively *not* in a function prologue.  */
 
 static int
-alpha_mdebug_in_prologue (CORE_ADDR pc, alpha_extra_func_info_t proc_desc)
+alpha_mdebug_in_prologue (CORE_ADDR pc, struct mdebug_extra_func_info *proc_desc)
 {
   CORE_ADDR after_prologue_pc = alpha_mdebug_after_prologue (pc, proc_desc);
   return (after_prologue_pc == 0 || pc < after_prologue_pc);
@@ -157,7 +158,7 @@ alpha_mdebug_in_prologue (CORE_ADDR pc, alpha_extra_func_info_t proc_desc)
 
 struct alpha_mdebug_unwind_cache
 {
-  alpha_extra_func_info_t proc_desc;
+  struct mdebug_extra_func_info *proc_desc;
   CORE_ADDR vfp;
   CORE_ADDR *saved_regs;
 };
@@ -170,7 +171,7 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *next_frame,
 				 void **this_prologue_cache)
 {
   struct alpha_mdebug_unwind_cache *info;
-  alpha_extra_func_info_t proc_desc;
+  struct mdebug_extra_func_info *proc_desc;
   ULONGEST vfp;
   CORE_ADDR pc, reg_position;
   unsigned long mask;
@@ -307,7 +308,7 @@ const struct frame_unwind *
 alpha_mdebug_frame_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  alpha_extra_func_info_t proc_desc;
+  struct mdebug_extra_func_info *proc_desc;
 
   /* If this PC does not map to a PDR, then clearly this isn't an
      mdebug frame.  */
@@ -364,7 +365,7 @@ static const struct frame_base *
 alpha_mdebug_frame_base_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  alpha_extra_func_info_t proc_desc;
+  struct mdebug_extra_func_info *proc_desc;
 
   /* If this PC does not map to a PDR, then clearly this isn't an
      mdebug frame.  */

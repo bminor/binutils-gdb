@@ -1,3 +1,9 @@
+2004-11-06  Joel Brobecker  <brobecker@gnat.com>
+
+	* alpha-mdebug-tdep.c: #include mdebugread.h.
+	Replace alpha_extra_func_info_t by struct mdebug_extra_func_info *.
+	* Makefile.in (alpha-mdebug-tdep.o): Add dependency on mdebugread.h.
+
 2004-11-05  Andrew Cagney  <cagney@gnu.org>
 
 	* dwarf2-frame.c (dwarf2_frame_cache): Only complain when both the
