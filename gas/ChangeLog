@@ -1,5 +1,15 @@
 2005-02-11  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.h (LEX_AT): Include LEX_BEGIN_NAME.
+	(LEX_QM): Likewise.
+	(ia64_parse_name): New third parameter.
+	(md_parse_name): Pass third argument.
+	* config/tc-ia64.c (pseudo_func): Placeholders use NULL as name.
+	(md_operand): Handling of '@'-prefixed symbols moved from here...
+	(ia64_parse_name): ...to here.
+
+2005-02-11  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (md): Remove last_groups and group_idx.
 	(errata_nop_necessary_p): Remove declaraction and definition.
 	(emit_one_bundle): Don't call errata_nop_necessary_p. Don't

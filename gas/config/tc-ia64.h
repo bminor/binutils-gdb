@@ -74,8 +74,8 @@ extern const char *ia64_target_format PARAMS ((void));
 #define NEED_INDEX_OPERATOR		/* [ ] is index operator */
 
 #define QUOTES_IN_INSN			/* allow `string "foo;bar"' */
-#define LEX_AT		LEX_NAME	/* allow `@' inside name */
-#define LEX_QM		LEX_NAME	/* allow `?' inside name */
+#define LEX_AT		(LEX_NAME|LEX_BEGIN_NAME) /* allow `@' inside name */
+#define LEX_QM		(LEX_NAME|LEX_BEGIN_NAME) /* allow `?' inside name */
 #define LEX_HASH	LEX_END_NAME	/* allow `#' ending a name */
 
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
@@ -94,7 +94,7 @@ extern void ia64_frob_label PARAMS((struct symbol *sym));
 extern int ia64_frob_symbol PARAMS((struct symbol *sym));
 #endif
 extern void ia64_flush_pending_output PARAMS((void));
-extern int ia64_parse_name (char *name, expressionS *e);
+extern int ia64_parse_name PARAMS((char *name, expressionS *e, char *nextP));
 extern int ia64_optimize_expr PARAMS((expressionS *l, operatorT op,
 				      expressionS *r));
 extern void ia64_cons_align PARAMS((int));
@@ -125,7 +125,7 @@ extern void ia64_convert_frag (fragS *);
 #define tc_frob_symbol(s,p)		p |= ia64_frob_symbol (s)
 #endif /* TE_HPUX */
 #define md_flush_pending_output()	ia64_flush_pending_output ()
-#define md_parse_name(s,e,c)		ia64_parse_name (s, e)
+#define md_parse_name(s,e,c)		ia64_parse_name (s, e, c)
 #define tc_canonicalize_symbol_name(s)	ia64_canonicalize_symbol_name (s)
 #define tc_canonicalize_section_name(s)	ia64_canonicalize_symbol_name (s)
 #define md_optimize_expr(l,o,r)		ia64_optimize_expr (l, o, r)

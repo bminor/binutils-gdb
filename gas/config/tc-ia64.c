@@ -495,10 +495,10 @@ pseudo_func[] =
     { "segrel",	PSEUDO_FUNC_RELOC, { 0 } },
     { "tprel",	PSEUDO_FUNC_RELOC, { 0 } },
     { "ltv",	PSEUDO_FUNC_RELOC, { 0 } },
-    { "", 0, { 0 } },	/* placeholder for FUNC_LT_FPTR_RELATIVE */
-    { "", 0, { 0 } },	/* placeholder for FUNC_LT_DTP_MODULE */
-    { "", 0, { 0 } },	/* placeholder for FUNC_LT_DTP_RELATIVE */
-    { "", 0, { 0 } },	/* placeholder for FUNC_LT_TP_RELATIVE */
+    { NULL, 0, { 0 } },	/* placeholder for FUNC_LT_FPTR_RELATIVE */
+    { NULL, 0, { 0 } },	/* placeholder for FUNC_LT_DTP_MODULE */
+    { NULL, 0, { 0 } },	/* placeholder for FUNC_LT_DTP_RELATIVE */
+    { NULL, 0, { 0 } },	/* placeholder for FUNC_LT_TP_RELATIVE */
     { "iplt",	PSEUDO_FUNC_RELOC, { 0 } },
 
     /* mbtype4 constants:  */
@@ -7475,15 +7475,100 @@ ia64_optimize_expr (l, op, r)
 }
 
 int
-ia64_parse_name (name, e)
+ia64_parse_name (name, e, nextcharP)
      char *name;
      expressionS *e;
+     char *nextcharP;
 {
   struct const_desc *cdesc;
   struct dynreg *dr = 0;
   unsigned int regnum;
+  unsigned int idx;
   struct symbol *sym;
   char *end;
+
+  if (*name == '@')
+    {
+      enum pseudo_type pseudo_type = PSEUDO_FUNC_NONE;
+
+      /* Find what relocation pseudo-function we're dealing with.  */
+      for (idx = 0; idx < NELEMS (pseudo_func); ++idx)
+	if (pseudo_func[idx].name
+	    && pseudo_func[idx].name[0] == name[1]
+	    && strcmp (pseudo_func[idx].name + 1, name + 2) == 0)
+	  {
+	    pseudo_type = pseudo_func[idx].type;
+	    break;
+	  }
+      switch (pseudo_type)
+	{
+	case PSEUDO_FUNC_RELOC:
+	  end = input_line_pointer;
+	  if (*nextcharP != '(')
+	    {
+	      as_bad ("Expected '('");
+	      goto done;
+	    }
+	  /* Skip '('.  */
+	  ++input_line_pointer;
+	  expression (e);
+	  if (*input_line_pointer != ')')
+	    {
+	      as_bad ("Missing ')'");
+	      goto done;
+	    }
+	  /* Skip ')'.  */
+	  ++input_line_pointer;
+	  if (e->X_op != O_symbol)
+	    {
+	      if (e->X_op != O_pseudo_fixup)
+		{
+		  as_bad ("Not a symbolic expression");
+		  goto done;
+		}
+	      if (idx != FUNC_LT_RELATIVE)
+		{
+		  as_bad ("Illegal combination of relocation functions");
+		  goto done;
+		}
+	      switch (S_GET_VALUE (e->X_op_symbol))
+		{
+		case FUNC_FPTR_RELATIVE:
+		  idx = FUNC_LT_FPTR_RELATIVE; break;
+		case FUNC_DTP_MODULE:
+		  idx = FUNC_LT_DTP_MODULE; break;
+		case FUNC_DTP_RELATIVE:
+		  idx = FUNC_LT_DTP_RELATIVE; break;
+		case FUNC_TP_RELATIVE:
+		  idx = FUNC_LT_TP_RELATIVE; break;
+		default:
+		  as_bad ("Illegal combination of relocation functions");
+		  goto done;
+		}
+	    }
+	  /* Make sure gas doesn't get rid of local symbols that are used
+	     in relocs.  */
+	  e->X_op = O_pseudo_fixup;
+	  e->X_op_symbol = pseudo_func[idx].u.sym;
+	  break;
+
+	case PSEUDO_FUNC_CONST:
+	  e->X_op = O_constant;
+	  e->X_add_number = pseudo_func[idx].u.ival;
+	  break;
+
+	case PSEUDO_FUNC_REG:
+	  e->X_op = O_register;
+	  e->X_add_number = pseudo_func[idx].u.ival;
+	  break;
+
+	default:
+	  return 0;
+	}
+    done:
+      *nextcharP = *input_line_pointer;
+      return 1;
+    }
 
   /* first see if NAME is a known register name:  */
   sym = hash_find (md.reg_hash, name);
@@ -10310,104 +10395,14 @@ void
 md_operand (e)
      expressionS *e;
 {
-  enum pseudo_type pseudo_type;
-  const char *name;
-  size_t len;
-  int ch, i;
-
   switch (*input_line_pointer)
     {
-    case '@':
-      /* Find what relocation pseudo-function we're dealing with.  */
-      pseudo_type = 0;
-      ch = *++input_line_pointer;
-      for (i = 0; i < NELEMS (pseudo_func); ++i)
-	if (pseudo_func[i].name && pseudo_func[i].name[0] == ch)
-	  {
-	    len = strlen (pseudo_func[i].name);
-	    if (strncmp (pseudo_func[i].name + 1,
-			 input_line_pointer + 1, len - 1) == 0
-		&& !is_part_of_name (input_line_pointer[len]))
-	      {
-		input_line_pointer += len;
-		pseudo_type = pseudo_func[i].type;
-		break;
-	      }
-	  }
-      switch (pseudo_type)
-	{
-	case PSEUDO_FUNC_RELOC:
-	  SKIP_WHITESPACE ();
-	  if (*input_line_pointer != '(')
-	    {
-	      as_bad ("Expected '('");
-	      goto err;
-	    }
-	  /* Skip '('.  */
-	  ++input_line_pointer;
-	  expression (e);
-	  if (*input_line_pointer++ != ')')
-	    {
-	      as_bad ("Missing ')'");
-	      goto err;
-	    }
-	  if (e->X_op != O_symbol)
-	    {
-	      if (e->X_op != O_pseudo_fixup)
-		{
-		  as_bad ("Not a symbolic expression");
-		  goto err;
-		}
-	      if (i != FUNC_LT_RELATIVE)
-		{
-		  as_bad ("Illegal combination of relocation functions");
-		  goto err;
-		}
-	      switch (S_GET_VALUE (e->X_op_symbol))
-		{
-		case FUNC_FPTR_RELATIVE:
-		  i = FUNC_LT_FPTR_RELATIVE; break;
-		case FUNC_DTP_MODULE:
-		  i = FUNC_LT_DTP_MODULE; break;
-		case FUNC_DTP_RELATIVE:
-		  i = FUNC_LT_DTP_RELATIVE; break;
-		case FUNC_TP_RELATIVE:
-		  i = FUNC_LT_TP_RELATIVE; break;
-		default:
-		  as_bad ("Illegal combination of relocation functions");
-		  goto err;
-		}
-	    }
-	  /* Make sure gas doesn't get rid of local symbols that are used
-	     in relocs.  */
-	  e->X_op = O_pseudo_fixup;
-	  e->X_op_symbol = pseudo_func[i].u.sym;
-	  break;
-
-	case PSEUDO_FUNC_CONST:
-	  e->X_op = O_constant;
-	  e->X_add_number = pseudo_func[i].u.ival;
-	  break;
-
-	case PSEUDO_FUNC_REG:
-	  e->X_op = O_register;
-	  e->X_add_number = pseudo_func[i].u.ival;
-	  break;
-
-	default:
-	  name = input_line_pointer - 1;
-	  get_symbol_end ();
-	  as_bad ("Unknown pseudo function `%s'", name);
-	  goto err;
-	}
-      break;
-
     case '[':
       ++input_line_pointer;
       expression (e);
       if (*input_line_pointer != ']')
 	{
-	  as_bad ("Closing bracket misssing");
+	  as_bad ("Closing bracket missing");
 	  goto err;
 	}
       else
