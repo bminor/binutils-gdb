@@ -1,3 +1,8 @@
+2002-02-23  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/templates.exp: Remove setup_xfail_format "stabs" on
+	test "ptype bint".  The test passes on all my stabs configurations.
+
 2002-02-21  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.asm/asm-source.exp: Parse the output from `info sources' one

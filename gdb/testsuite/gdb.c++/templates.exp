@@ -316,11 +316,7 @@ gdb_expect {
 
 
 # ptype Bar<int,33>
-# stabs screws this test royally. 
-# It thinks it has a badly mangled name.
-# I blame stabs, the other formats get it right. -djb
-get_debug_format
-setup_xfail_format "stabs"
+
 send_gdb "ptype bint\n"   
 gdb_expect {   
    -re "type = (class |)Bar<int,(\\(int\\)|)33> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int bar\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bint" }
