@@ -1,3 +1,8 @@
+2004-11-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (decode_frame_entry_1): Correctly skip
+	personality routine in a CIE augmentation.  Avoid indirection.
+
 2004-11-12  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* Makefile.in (m32r-linux-tdep.o): Update dependencies.
