@@ -86,3 +86,44 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
    for any relocations that pic won't support.  */
 #define tc_frob_file() frv_frob_file ()
 extern void frv_frob_file	PARAMS ((void));
+
+/* We don't want 0x00 for code alignment because this generates `add.p
+   gr0, gr0, gr0' patterns.  Although it's fine as a nop instruction,
+   it has the VLIW packing bit set, which means if you have a bunch of
+   them in a row and attempt to execute them, you'll exceed the VLIW
+   capacity and fail.  This also gets GDB confused sometimes, because
+   it won't set breakpoints in instructions other than the first of a
+   VLIW pack, so you used to be unable to set a breakpoint in the
+   initial instruction of a function that followed such
+   alignment-introduced instructions.
+
+   We could have arranged to emit `nop' instructions (0x80880000),
+   maybe even VLIW-pack sequences of nop instructions as much as
+   possible for the selected machine type, just in case the alignment
+   code actually happens to run, but this is probably too much effort
+   for little gain.  This code is not meant to be run anyway, so just
+   emit nops.  */
+#define MAX_MEM_FOR_RS_ALIGN_CODE (3 + 4)
+#define HANDLE_ALIGN(FRAGP) do						\
+  if ((FRAGP)->fr_type == rs_align_code) 				\
+    {									\
+      valueT count = ((FRAGP)->fr_next->fr_address			\
+		      - ((FRAGP)->fr_address + (FRAGP)->fr_fix));	\
+      unsigned char *dest = (FRAGP)->fr_literal + (FRAGP)->fr_fix;	\
+      if ((count & 3) != 0)						\
+	{								\
+	  memset (dest, 0, (count & 3));				\
+	  (FRAGP)->fr_fix += (count & 3);				\
+	  dest += (count & 3);						\
+	  count -= (count & 3);						\
+	}								\
+      if (count)							\
+	{								\
+	  (FRAGP)->fr_var = 4;						\
+	  *dest++ = 0x80;						\
+	  *dest++ = 0x88;						\
+	  *dest++ = 0x00;						\
+	  *dest++ = 0x00;						\
+	}								\
+    }									\
+ while (0)
