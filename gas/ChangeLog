@@ -1,3 +1,17 @@
+start-sanitize-vr4xxx
+1998-11-24  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (md_begin): Added mip64vr4xxx as a 
+	possible CPU_TARGET.
+
+end-sanitize-vr4xxx
+Tue Nov 24 14:54:38 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d10v.c (md_assemble): Make static 'etype' have file
+	scope.
+	(d10v_cleanup): Only generate previous insn if a multiline insn is
+	not pending.
+
 start-sanitize-fr30
 Fri Nov 20 11:41:13 1998  Nick Clifton  <nickc@cygnus.com>
 

@@ -527,6 +527,33 @@ else
 	done
 fi
 
+if ( echo $* | grep keep\-vr4xxx > /dev/null ) ; then
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-vr4xxx $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping vr4xxx stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-vr4xxx $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"vr4xxx\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-vr4xxx/,/end-\sanitize\-vr4xxx/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 if ( echo $* | grep keep\-vr4320 > /dev/null ) ; then
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-vr4320 $i > /dev/null) ; then

@@ -167,6 +167,10 @@ mips*-dec-mach3*)	gdb_target=mach3 ;;
 mips*-dec-*)		gdb_target=decstation ;;
 mips64*el-*-ecoff*)	gdb_target=embedl64 ;;
 mips64*-*-ecoff*)	gdb_target=embed64 ;;
+# start-sanitize-vr4xxx
+mips64*vr4xxx*el-*-elf*)gdb_target=vr4300el ;;
+mips64*vr4xxx*-*-elf*)	gdb_target=vr4300 ;;
+# end-sanitize-vr4xxx
 # start-sanitize-vr4320
 mips64*vr4320*el-*-elf*)gdb_target=vr4300el ;;
 mips64*vr4320*-*-elf*)	gdb_target=vr4320 ;;

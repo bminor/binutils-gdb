@@ -1,6 +1,14 @@
+start-sanitize-vr4xxx
+1998-11-24  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* configure.tgt: Handle mips64*vr4xxx.
+
+
+end-sanitize-vr4xxx
 1998-11-23  DJ Delorie  <dj@cygnus.com>
 
-	* pe-dll.c (make_head): name object files sequentially to ensure
+	* pe-dll.c (fill_edata): fill in timestamp
+	(make_head): name object files sequentially to ensure
 	they link in the right order.
 	(make_tail): same here
 	(pe_process_import_defs): use sequential names for bfds to ensure

@@ -1,3 +1,19 @@
+start-sanitize-vr4xxx
+1998-11-24  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* configure.tgt: Handle mips64*vr4xxx.
+
+end-sanitize-vr4xxx
+Tue Nov 24 15:46:33 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/mn10300/tm-mn10300.h (TARGET_VIRTUAL_FRAME_POINTER):
+	new target macro.
+	* mn10300-tdep.c (mn10300_virtual_frame_pointer): new function.
+	* tracepoint.c (encode_actions): Use the new target macro to
+	determine the virtual frame pointer, for collecting locals/args.
+	(add_local_symbols, collect_symbol): add a register/offset pair of
+	arguments so that the virtual frame pointer can be passed in.
+
 1998-11-24  Felix Lee  <flee@cygnus.com>
 
 	* procfs.c (procfs_wait): handle syscall events first.
