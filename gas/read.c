@@ -1579,7 +1579,8 @@ pseudo_set (symbolP)
       break;
 
     case O_symbol:
-      if (S_GET_SEGMENT (exp.X_add_symbol) == undefined_section)
+      if (S_GET_SEGMENT (exp.X_add_symbol) == undefined_section
+	  || exp.X_add_number != 0)
 	symbolP->sy_value = exp;
       else
 	{
@@ -1595,15 +1596,7 @@ pseudo_set (symbolP)
 	  S_SET_VALUE (symbolP,
 		       exp.X_add_number + S_GET_VALUE (s));
 	  symbolP->sy_frag = s->sy_frag;
-#ifdef BFD_ASSEMBLER
-	  /* In an expression, transfer the settings of these flags.
-	     The user can override later, of course.  */
-#define COPIED_SYMFLAGS	(BSF_FUNCTION)
-	  symbolP->bsym->flags |= s->bsym->flags & COPIED_SYMFLAGS;
-#endif
-#ifdef OBJ_COPY_SYMBOL_ATTRIBUTES
-	  OBJ_COPY_SYMBOL_ATTRIBUTES (symbolP, s);
-#endif
+	  copy_symbol_attributes (symbolP, s);
 	}
       break;
 
