@@ -2027,14 +2027,14 @@ mmix_elf_check_relocs (abfd, info, sec, relocs)
         /* This relocation describes the C++ object vtable hierarchy.
            Reconstruct it for later use during GC.  */
         case R_MMIX_GNU_VTINHERIT:
-          if (!_bfd_elf64_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return FALSE;
           break;
 
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_MMIX_GNU_VTENTRY:
-          if (!_bfd_elf64_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+          if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return FALSE;
           break;
 	}
@@ -2272,7 +2272,7 @@ mmix_elf_final_link (abfd, info)
       --abfd->section_count;
     }
 
-  if (! bfd_elf64_bfd_final_link (abfd, info))
+  if (! bfd_elf_final_link (abfd, info))
     return FALSE;
 
   /* Since this section is marked SEC_LINKER_CREATED, it isn't output by

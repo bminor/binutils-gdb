@@ -588,7 +588,7 @@ CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 SOURCE_HFILES = \
 	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
 	elf-bfd.h elf-hppa.h elf32-arm.h elf32-hppa.h \
-	elf64-hppa.h elfcode.h elfcore.h elflink.h \
+	elf64-hppa.h elfcode.h elfcore.h \
 	freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h libieee.h \
 	libnlm.h liboasys.h libpei.h libxcoff.h mach-o.h \
@@ -1310,7 +1310,7 @@ elf32-xtensa.lo: elf32-xtensa.c $(INCDIR)/filenames.h \
 elf32.lo: elf32.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfcore.h \
-  elflink.h $(INCDIR)/safe-ctype.h
+  $(INCDIR)/safe-ctype.h
 elflink.lo: elflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h
@@ -1592,7 +1592,7 @@ elf64-sparc.lo: elf64-sparc.c $(INCDIR)/filenames.h \
 elf64.lo: elf64.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfcore.h \
-  elflink.h $(INCDIR)/safe-ctype.h
+  $(INCDIR)/safe-ctype.h
 mmo.lo: mmo.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/elf/mmix.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/mmix.h
 nlm32-alpha.lo: nlm32-alpha.c $(INCDIR)/filenames.h \

@@ -2144,7 +2144,7 @@ mips_elf_record_global_got_symbol (struct elf_link_hash_entry *h,
 	  _bfd_mips_elf_hide_symbol (info, h, TRUE);
 	  break;
 	}
-      if (!bfd_elf32_link_record_dynamic_symbol (info, h))
+      if (!bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
     }
 
@@ -2956,7 +2956,7 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info,
   h->type = STT_OBJECT;
 
   if (info->shared
-      && ! bfd_elf32_link_record_dynamic_symbol (info, h))
+      && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
   amt = sizeof (struct mips_got_info);
@@ -4848,7 +4848,7 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_OBJECT;
 
-      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
 
       mips_elf_hash_table (info)->use_rld_obj_head = TRUE;
@@ -4960,7 +4960,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_SECTION;
 
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
 
@@ -5005,7 +5005,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_SECTION;
 
-      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
 
       if (! mips_elf_hash_table (info)->use_rld_obj_head)
@@ -5029,7 +5029,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_OBJECT;
 
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
     }
@@ -5348,7 +5348,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	      /* We need a stub, not a plt entry for the undefined
 		 function.  But we record it as if it needs plt.  See
-		 elf_adjust_dynamic_symbol in elflink.h.  */
+		 _bfd_elf_adjust_dynamic_symbol.  */
 	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	      h->type = STT_FUNC;
 	    }
@@ -5460,14 +5460,14 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* This relocation describes the C++ object vtable hierarchy.
 	     Reconstruct it for later use during GC.  */
 	case R_MIPS_GNU_VTINHERIT:
-	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
 	    return FALSE;
 	  break;
 
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
 	case R_MIPS_GNU_VTENTRY:
-	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_offset))
+	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_offset))
 	    return FALSE;
 	  break;
 
@@ -7731,7 +7731,7 @@ _bfd_mips_elf_discard_info (bfd *abfd, struct elf_reloc_cookie *cookie,
 
   for (i = 0, skip = 0; i < o->_raw_size / PDR_SIZE; i ++)
     {
-      if (MNAME(abfd,_bfd_elf,reloc_symbol_deleted_p) (i * PDR_SIZE, cookie))
+      if (bfd_elf_reloc_symbol_deleted_p (i * PDR_SIZE, cookie))
 	{
 	  tdata[i] = 1;
 	  skip ++;
@@ -8788,7 +8788,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  if (!MNAME(abfd,bfd_elf,bfd_final_link) (abfd, info))
+  if (!bfd_elf_final_link (abfd, info))
     return FALSE;
 
   /* Now write out the computed sections.  */

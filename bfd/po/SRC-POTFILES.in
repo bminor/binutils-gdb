@@ -185,7 +185,6 @@ elfcore.h
 elf-eh-frame.c
 elf-hppa.h
 elflink.c
-elflink.h
 elf-m10200.c
 elf-m10300.c
 elfn32-mips.c

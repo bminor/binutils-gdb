@@ -1,5 +1,57 @@
 2004-03-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Remove all mention of elflink.h.
+	* Makefile.in: Regenerate.
+	* bfd-in.h (bfd_elf_discard_info): Declare.
+	(bfd_elf32_discard_info, bfd_elf64_discard_info): Delete.
+	* bfd-in2.h: Regenerate.
+	* elf-bfd.h (bfd_elf32_print_symbol, bfd_elf64_print_symbol,
+	bfd_elf32_link_record_dynamic_symbol,
+	bfd_elf64_link_record_dynamic_symbol,
+	_bfd_elf_link_record_dynamic_symbol, bfd_elf32_bfd_final_link,
+	bfd_elf64_bfd_final_link, elf_link_record_local_dynamic_symbol,
+	_bfd_elf32_link_record_local_dynamic_symbol,
+	_bfd_elf64_link_record_local_dynamic_symbol,
+	_bfd_elf32_gc_sections, _bfd_elf32_gc_common_finalize_got_offsets,
+	_bfd_elf32_gc_common_final_link, _bfd_elf64_gc_common_final_link,
+	_bfd_elf32_gc_record_vtinherit, _bfd_elf32_gc_record_vtentry,
+	_bfd_elf64_gc_sections, _bfd_elf64_gc_common_finalize_got_offsets,
+	_bfd_elf64_gc_record_vtinherit, _bfd_elf64_gc_record_vtentry,
+	_bfd_elf32_reloc_symbol_deleted_p,
+	_bfd_elf64_reloc_symbol_deleted_p): Delete.
+	(bfd_elf_link_record_dynamic_symbol,
+	bfd_elf_link_record_local_dynamic_symbol,
+	bfd_elf_final_link, bfd_elf_gc_sections,
+	bfd_elf_gc_record_vtinherit, bfd_elf_gc_record_vtentry,
+	bfd_elf_gc_common_finalize_got_offsets, bfd_elf_gc_common_final_link,
+	bfd_elf_reloc_symbol_deleted_p): Declare.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.
+	* elf32-arm.h: Update for changed function names.  Remove local
+	WILL_CALL_FINISH_DYNAMIC_SECTION define.
+	* elf-hppa.h, elf-m10300.c, elf32-cris.c, elf32-d10v.c, elf32-dlx.c,
+	* elf32-fr30.c, elf32-frv.c, elf32-h8300.c, elf32-hppa.c, elf32-i386.c,
+	* elf32-iq2000.c, elf32-m32r.c, elf32-m68hc1x.c, elf32-m68k.c,
+	* elf32-mcore.c, elf32-openrisc.c, elf32-ppc.c, elf32-s390.c,
+	* elf32-sh.c, elf32-sparc.c, elf32-v850.c, elf32-vax.c,
+	* elf32-xstormy16.c, elf32-xtensa.c, elf64-alpha.c, elf64-hppa.c,
+	* elf64-mmix.c, elf64-ppc.c, elf64-s390.c, elf64-sh64.c, elf64-sparc.c,
+	* elf64-x86-64.c, elfxx-ia64.c, elfxx-mips.c, elfxx-target.h: Likewise.
+	* elfxx-target.h (bfd_elfNN_bfd_final_link): Define.
+	(bfd_elfNN_print_symbol): Define.
+	* elfcode.h: Don't include elflink.h.
+	(elf_bfd_discard_info, elf_reloc_symbol_deleted_p,
+	elf_link_record_dynamic_symbol, elf_bfd_final_link, elf_gc_sections,
+	elf_gc_common_finalize_got_offsets, elf_gc_common_final_link,
+	elf_gc_record_vtinherit, elf_gc_record_vtentry,
+	elf_link_record_local_dynamic_symbol): Don't define.
+	* elflink.c: Update for changed function names.  Move elflink.h
+	code here.
+	* elflink.h: Delete file.
+	* po/SRC-POTFILES.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-mmix.c (mmix_elf_relocate_section): Restore code setting
 	"name" for global syms accidentally removed in 2004-03-20 change.
 
@@ -109,7 +161,7 @@
 
 	* elflink.h (elf_link_add_object_symbols): Add DT_NEEDED for as-needed
 	and chained shared libs only if dynsym.  Clear dynsym on forced-local.
-	
+
 	* elf-bfd.h (_bfd_elf_add_dynamic_entry): Declare.
 	(bfd_elf32_add_dynamic_entry, bfd_elf64_add_dynamic_entry): Delete.
 	(_bfd_elf_add_dt_needed_tag): Declare.
@@ -170,7 +222,7 @@
 	(elf_xtensa_size_dynamic_sections): Don't add DT_TEXTREL entry.
 	(elf_xtensa_relocate_section): Read literal tables and check for
 	dynamic relocations in read-only sections and not in literal pools.
-	
+
 2004-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 51.

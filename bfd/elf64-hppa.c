@@ -933,7 +933,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	     section symbol for this section ends up in the dynamic
 	     symbol table.  */
 	  if (info->shared && dynrel_type == R_PARISC_FPTR64
-	      && ! (_bfd_elf64_link_record_local_dynamic_symbol
+	      && ! (bfd_elf_link_record_local_dynamic_symbol
 		    (info, abfd, sec_symndx)))
 	    return FALSE;
 	}
@@ -1044,7 +1044,7 @@ allocate_global_data_dlt (dyn_h, data)
 	      bfd *owner;
 	      owner = (h ? h->root.u.def.section->owner : dyn_h->owner);
 
-	      if (! (_bfd_elf64_link_record_local_dynamic_symbol
+	      if (! (bfd_elf_link_record_local_dynamic_symbol
 		     (x->info, owner, dyn_h->sym_indx)))
 		return FALSE;
 	    }
@@ -1148,7 +1148,7 @@ allocate_global_data_opd (dyn_h, data)
 	      bfd *owner;
 	      owner = (h ? h->root.u.def.section->owner : dyn_h->owner);
 
-	      if (!_bfd_elf64_link_record_local_dynamic_symbol
+	      if (!bfd_elf_link_record_local_dynamic_symbol
 		    (x->info, owner, dyn_h->sym_indx))
 		return FALSE;
 	    }
@@ -1174,7 +1174,7 @@ allocate_global_data_opd (dyn_h, data)
 	      nh->root.u.def.value = h->root.u.def.value;
 	      nh->root.u.def.section = h->root.u.def.section;
 
-	      if (! bfd_elf64_link_record_dynamic_symbol (x->info, nh))
+	      if (! bfd_elf_link_record_dynamic_symbol (x->info, nh))
 		return FALSE;
 
 	     }
@@ -1510,7 +1510,7 @@ allocate_dynrel_entries (dyn_h, data)
 	 the symbol need only be added once.  */
       if (dyn_h->h == 0
 	  || (dyn_h->h->dynindx == -1 && dyn_h->h->type != STT_PARISC_MILLI))
-	if (!_bfd_elf64_link_record_local_dynamic_symbol
+	if (!bfd_elf_link_record_local_dynamic_symbol
 	    (x->info, rent->sec->owner, dyn_h->sym_indx))
 	  return FALSE;
     }

@@ -733,14 +733,14 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 	case R_XTENSA_GNU_VTINHERIT:
 	  /* This relocation describes the C++ object vtable hierarchy.
 	     Reconstruct it for later use during GC.  */
-	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
 	    return FALSE;
 	  break;
 
 	case R_XTENSA_GNU_VTENTRY:
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
-	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
 	    return FALSE;
 	  break;
 
@@ -2720,7 +2720,7 @@ elf_xtensa_discard_info_for_section (abfd, cookie, info, sec)
       while (cookie->rel < cookie->relend
 	     && cookie->rel->r_offset == offset)
 	{
-	  if (_bfd_elf32_reloc_symbol_deleted_p (offset, cookie))
+	  if (bfd_elf_reloc_symbol_deleted_p (offset, cookie))
 	    {
 	      /* Remove the table entry.  (If the reloc type is NONE, then
 		 the entry has already been merged with another and deleted
@@ -5815,7 +5815,6 @@ static struct bfd_elf_special_section const elf_xtensa_special_sections[]=
 
 #define elf_info_to_howto		     elf_xtensa_info_to_howto_rela
 
-#define bfd_elf32_bfd_final_link	     bfd_elf32_bfd_final_link
 #define bfd_elf32_bfd_merge_private_bfd_data elf_xtensa_merge_private_bfd_data
 #define bfd_elf32_new_section_hook	     elf_xtensa_new_section_hook
 #define bfd_elf32_bfd_print_private_bfd_data elf_xtensa_print_private_bfd_data

@@ -1558,7 +1558,7 @@ elf32_h8_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* ??? when elf_backend_relocate_section is not defined, elf32-target.h
    defaults to using _bfd_generic_link_hash_table_create, but
-   elflink.h:bfd_elf32_size_dynamic_sections uses
+   bfd_elf_size_dynamic_sections uses
    dynobj = elf_hash_table (info)->dynobj;
    and thus requires an elf hash table.  */
 #define bfd_elf32_bfd_link_hash_table_create _bfd_elf_link_hash_table_create
