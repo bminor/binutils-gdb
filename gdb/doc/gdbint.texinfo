@@ -1,4 +1,4 @@
-\input texinfo
+\input texinfo   @c -*- texinfo -*-
 @setfilename gdbint.info
 @include gdb-cfg.texi
 @ifinfo
@@ -292,7 +292,11 @@ for something to happen.
 
 Since they depend on hardware resources, hardware breakpoints may be
 limited in number; when the user asks for more, @value{GDBN} will
-start trying to set software breakpoints.
+start trying to set software breakpoints.  (On some architectures,
+notably the 32-bit x86 platforms, @value{GDBN} cannot alsways know
+whether there's enough hardware resources to insert all the hardware
+breakpoints and watchpoints.  On those platforms, @value{GDBN} prints
+an error message only when the program being debugged is continued.)
 
 @cindex software breakpoints
 Software breakpoints require @value{GDBN} to do somewhat more work.
@@ -351,6 +355,357 @@ is target specific, you will need to define it in the appropriate
 @file{tm-@var{target}.h} file.  Look in @file{tm-sun4os4.h} and
 @file{sparc-tdep.c} for examples of how to do this.
 
+@section Watchpoints
+@cindex watchpoints
+
+Watchpoints are a special kind of breakpoints (@pxref{Algorithms,
+breakpoints}) which break when data is accessed rather than when some
+instruction is executed.  When you have data which changes without
+your knowing what code does that, watchpoints are the silver bullet to
+hunt down and kill such bugs.
+
+@cindex hardware watchpoints
+@cindex software watchpoints
+Watchpoints can be either hardware-assisted or not; the latter type is
+known as ``software watchpoints.''  @value{GDBN} always uses
+hardware-assisted watchpoints if they are available, and falls back on
+software watchpoints otherwise.  Typical situations where @value{GDBN}
+will use software watchpoints are:
+
+@itemize @bullet
+@item
+The watched memory region is too large for the underlying hardware
+watchpoint support.  For example, each x86 debug register can watch up
+to 4 bytes of memory, so trying to watch data structures whose size is
+more than 16 bytes will cause @value{GDBN} to use software
+watchpoints.
+
+@item
+The value of the expression to be watched depends on data held in
+registers (as opposed to memory).
+
+@item
+Too many different watchpoints requested.  (On some architectures,
+this situation is impossible to detect until the debugged program is
+resumed.)  Note that x86 debug registers are used both for hardware
+breakpoints and for watchpoints, so setting too many hardware
+breakpoints might cause watchpoint insertion to fail.
+
+@item
+No hardware-assisted watchpoints provided by the target
+implementation.
+@end itemize
+
+Software watchpoints are very slow, since @value{GDBN} needs to
+single-step the program being debugged and test the value of the
+watched expression(s) after each instruction.  The rest of this
+section is mostly irrelevant for software watchpoints.
+
+@value{GDBN} uses several macros and primitives to support hardware
+watchpoints:
+
+@table @code
+@findex TARGET_HAS_HARDWARE_WATCHPOINTS
+@item TARGET_HAS_HARDWARE_WATCHPOINTS
+If defined, the target supports hardware watchpoints.
+
+@findex TARGET_CAN_USE_HARDWARE_WATCHPOINT
+@item TARGET_CAN_USE_HARDWARE_WATCHPOINT (@var{type}, @var{count}, @var{other})
+Return the number of hardware watchpoints of type @var{type} that are
+possible to be set.  The value is positive if @var{count} watchpoints
+of this type can be set, zero if setting watchpoints of this type is
+not supported, and negative if @var{count} is more than the maximum
+number of watchpoints of type @var{type} that can be set.  @var{other}
+is non-zero if other types of watchpoints are currently enabled (there
+are architectures which cannot set watchpoints of different types at
+the same time).
+
+@findex TARGET_REGION_OK_FOR_HW_WATCHPOINT
+@item TARGET_REGION_OK_FOR_HW_WATCHPOINT (@var{addr}, @var{len})
+Return non-zero if hardware watchpoints can be used to watch a region
+whose address is @var{addr} and whose length in bytes is @var{len}.
+
+@findex TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT
+@item TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT (@var{size})
+Return non-zero if hardware watchpoints can be used to watch a region
+whose size is @var{size}.  @value{GDBN} only uses this macro as a
+fall-back, in case @code{TARGET_REGION_OK_FOR_HW_WATCHPOINT} is not
+defined.
+
+@findex TARGET_DISABLE_HW_WATCHPOINTS
+@item TARGET_DISABLE_HW_WATCHPOINTS (@var{pid})
+Disables watchpoints in the process identified by @var{pid}.  This is
+used, e.g., on HP-UX which provides operations to disable and enable
+the page-level memory protection that implements hardware watchpoints
+on that platform.
+
+@findex TARGET_ENABLE_HW_WATCHPOINTS
+@item TARGET_ENABLE_HW_WATCHPOINTS (@var{pid})
+Enables watchpoints in the process identified by @var{pid}.  This is
+used, e.g., on HP-UX which provides operations to disable and enable
+the page-level memory protection that implements hardware watchpoints
+on that platform.
+
+@findex TARGET_RANGE_PROFITABLE_FOR_HW_WATCHPOINT
+@item TARGET_RANGE_PROFITABLE_FOR_HW_WATCHPOINT (@var{pid},@var{start},@var{len})
+Some addresses may not be profitable to use hardware to watch, or may
+be difficult to understand when the addressed object is out of scope,
+and hence should not be watched with hardware watchpoints.  On some
+targets, this may have severe performance penalties, such that we
+might as well use regular watchpoints, and save (possibly precious)
+hardware watchpoints for other locations.
+
+@findex target_insert_watchpoint
+@findex target_remove_watchpoint
+@item target_insert_watchpoint (@var{addr}, @var{len}, @var{type})
+@itemx target_remove_watchpoint (@var{addr}, @var{len}, @var{type})
+Insert or remove a hardware watchpoint starting at @var{addr}, for
+@var{len} bytes.  @var{type} is the watchpoint type, one of the
+possible values of the enumerated data type @code{target_hw_bp_type},
+defined by @file{breakpoint.h} as follows:
+
+@example
+ enum target_hw_bp_type
+   @{
+     hw_write   = 0, /* Common (write) HW watchpoint */
+     hw_read    = 1, /* Read    HW watchpoint */
+     hw_access  = 2, /* Access (read or write) HW watchpoint */
+     hw_execute = 3  /* Execute HW breakpoint */
+   @};
+@end example
+
+@noindent
+These two macros should return 0 for success, non-zero for failure.
+
+@cindex insert or remove hardware breakpoint
+@findex target_remove_hw_breakpoint
+@findex target_insert_hw_breakpoint
+@item target_remove_hw_breakpoint (@var{addr}, @var{shadow})
+@itemx target_insert_hw_breakpoint (@var{addr}, @var{shadow})
+Insert or remove a hardware-assisted breakpoint at address @var{addr}.
+Returns zero for success, non-zero for failure.  @var{shadow} is the
+real contents of the byte where the breakpoint has been inserted; it
+is generally not valid when hardware breakpoints are used, but since
+no other code touches these values, the implementations of the above
+two macros can use them for their internal purposes.
+
+@findex target_stopped_data_address
+@item target_stopped_data_address ()
+If the inferior has some watchpoint that triggered, return the address
+associated with that watchpoint.  Otherwise, return zero.
+
+@findex DECR_PC_AFTER_HW_BREAK
+@item DECR_PC_AFTER_HW_BREAK
+If defined, @value{GDBN} decrements the program counter by the value
+of @code{DECR_PC_AFTER_HW_BREAK} after a hardware break-point.  This
+overrides the value of @code{DECR_PC_AFTER_BREAK} when a breakpoint
+that breaks is a hardware-assisted breakpoint.
+
+@findex HAVE_STEPPABLE_WATCHPOINT
+@item HAVE_STEPPABLE_WATCHPOINT
+If defined to a non-zero value, it is not necessary to disable a
+watchpoint to step over it.
+
+@findex HAVE_NONSTEPPABLE_WATCHPOINT
+@item HAVE_NONSTEPPABLE_WATCHPOINT
+If defined to a non-zero value, @value{GDBN} should disable a
+watchpoint to step the inferior over it.
+
+@findex HAVE_CONTINUABLE_WATCHPOINT
+@item HAVE_CONTINUABLE_WATCHPOINT
+If defined to a non-zero value, it is possible to continue the
+inferior after a watchpoint has been hit.
+
+@findex CANNOT_STEP_HW_WATCHPOINTS
+@item CANNOT_STEP_HW_WATCHPOINTS
+If this is defined to a non-zero value, @value{GDBN} will remove all
+watchpoints before stepping the inferior.
+
+@findex STOPPED_BY_WATCHPOINT
+@item STOPPED_BY_WATCHPOINT (@var{wait_status})
+Return non-zero if stopped by a watchpoint.  @var{wait_status} is of
+the type @code{struct target_waitstatus}, defined by @file{target.h}.
+@end table
+
+@subsection x86 Watchpoints
+@cindex x86 debug registers
+@cindex watchpoints, on x86
+
+The 32-bit Intel x86 (a.k.a.@: ia32) processors feature special debug
+registers designed to facilitate debugging.  @value{GDBN} provides a
+generic library of functions that x86-based ports can use to implement
+support for watchpoints and hardware-assisted breakpoints.  This
+subsection documents the x86 watchpoint facilities in @value{GDBN}.
+
+To use the generic x86 watchpoint support, a port should do the
+following:
+
+@itemize @bullet
+@findex I386_USE_GENERIC_WATCHPOINTS
+@item
+Define the macro @code{I386_USE_GENERIC_WATCHPOINTS} somewhere in the
+target-dependent headers.
+
+@item
+Include the @file{config/i386/nm-i386.h} header file @emph{after}
+defining @code{I386_USE_GENERIC_WATCHPOINTS}.
+
+@item
+Add @file{i386-nat.o} to the value of the Make variable
+@code{NATDEPFILES} (@pxref{Native Debugging, NATDEPFILES}) or
+@code{TDEPFILES} (@pxref{Target Architecture Definition, TDEPFILES}).
+
+@item
+Provide implementations for the @code{I386_DR_LOW_*} macros described
+below.  Typically, each macro should call a target-specific function
+which does the real work.
+@end itemize
+
+The x86 watchpoint support works by maintaining mirror images of the
+debug registers.  Values are copied between the mirror images and the
+real debug registers via a set of macros which each target needs to
+provide:
+
+@table @code
+@findex I386_DR_LOW_SET_CONTROL
+@item I386_DR_LOW_SET_CONTROL (@var{val})
+Set the Debug Control (DR7) register to the value @var{val}.
+
+@findex I386_DR_LOW_SET_ADDR
+@item I386_DR_LOW_SET_ADDR (@var{idx}, @var{addr})
+Put the address @var{addr} into the debug register number @var{idx}.
+
+@findex I386_DR_LOW_RESET_ADDR
+@item I386_DR_LOW_RESET_ADDR (@var{idx})
+Reset (i.e.@: zero out) the address stored in the debug register
+number @var{idx}.
+
+@findex I386_DR_LOW_GET_STATUS
+@item I386_DR_LOW_GET_STATUS
+Return the value of the Debug Status (DR6) register.  This value is
+used immediately after it is returned by
+@code{I386_DR_LOW_GET_STATUS}, so as to support per-thread status
+register values.
+@end table
+
+For each one of the 4 debug registers (whose indices are from 0 to 3)
+that store addresses, a reference count is maintained by @value{GDBN},
+to allow sharing of debug registers by several watchpoints.  This
+allows users to define several watchpoints that watch the same
+expression, but with different conditions and/or commands, without
+wasting debug registers which are in short supply.  @value{GDBN}
+maintains the reference counts internally, targets don't have to do
+anything to use this feature.
+
+The x86 debug registers can each watch a region that is 1, 2, or 4
+bytes long.  The ia32 architecture requires that each watched region
+be appropriately aligned: 2-byte region on 2-byte boundary, 4-byte
+region on 4-byte boundary.  However, the x86 watchpoint support in
+@value{GDBN} can watch unaligned regions and regions larger than 4
+bytes (up to 16 bytes) by allocating several debug registers to watch
+a single region.  This allocation of several registers per a watched
+region is also done automatically without target code intervention.
+
+The generic x86 watchpoint support provides the following API for the
+@value{GDBN}'s application code:
+
+@table @code
+@findex i386_region_ok_for_watchpoint
+@item i386_region_ok_for_watchpoint (@var{addr}, @var{len})
+The macro @code{TARGET_REGION_OK_FOR_HW_WATCHPOINT} is set to call
+this function.  It counts the number of debug registers required to
+watch a given region, and returns a non-zero value if that number is
+less than 4, the number of debug registers available to x86
+processors.
+
+@findex i386_stopped_data_address
+@item i386_stopped_data_address (void)
+The macros @code{STOPPED_BY_WATCHPOINT} and
+@code{target_stopped_data_address} are set to call this function.  The
+argument passed to @code{STOPPED_BY_WATCHPOINT} is ignored.  This
+function examines the breakpoint condition bits in the DR6 Debug
+Status register, as returned by the @code{I386_DR_LOW_GET_STATUS}
+macro, and returns the address associated with the first bit that is
+set in DR6.
+
+@findex i386_insert_watchpoint
+@findex i386_remove_watchpoint
+@item i386_insert_watchpoint (@var{addr}, @var{len}, @var{type})
+@itemx i386_remove_watchpoint (@var{addr}, @var{len}, @var{type})
+Insert or remove a watchpoint.  The macros
+@code{target_insert_watchpoint} and @code{target_remove_watchpoint}
+are set to call these functions.  @code{i386_insert_watchpoint} first
+looks for a debug register which is already set to watch the same
+region for the same access types; if found, it just increments the
+reference count of that debug register, thus implementing debug
+register sharing between watchpoints.  If no such register is found,
+the function looks for a vacant debug register, sets its mirrorred
+value to @var{addr}, sets the mirrorred value of DR7 Debug Control
+register as appropriate for the @var{len} and @var{type} parameters,
+and then passes the new values of the debug register and DR7 to the
+inferior by calling @code{I386_DR_LOW_SET_ADDR} and
+@code{I386_DR_LOW_SET_CONTROL}.  If more than one debug register is
+required to cover the given region, the above process is repeated for
+each debug register.
+
+@code{i386_remove_watchpoint} does the opposite: it resets the address
+in the mirrorred value of the debug register and its read/write and
+length bits in the mirrorred value of DR7, then passes these new
+values to the inferior via @code{I386_DR_LOW_RESET_ADDR} and
+@code{I386_DR_LOW_SET_CONTROL}.  If a register is shared by several
+watchpoints, each time a @code{i386_remove_watchpoint} is called, it
+decrements the reference count, and only calls
+@code{I386_DR_LOW_RESET_ADDR} and @code{I386_DR_LOW_SET_CONTROL} when
+the count goes to zero.
+
+@findex i386_insert_hw_breakpoint
+@findex i386_remove_hw_breakpoint
+@item i386_insert_hw_breakpoint (@var{addr}, @var{shadow}
+@itemx i386_remove_hw_breakpoint (@var{addr}, @var{shadow})
+These functions insert and remove hardware-assisted breakpoints.  The
+macros @code{target_insert_hw_breakpoint} and
+@code{target_remove_hw_breakpoint} are set to call these functions.
+These functions work like @code{i386_insert_watchpoint} and
+@code{i386_remove_watchpoint}, respectively, except that they set up
+the debug registers to watch instruction execution, and each
+hardware-assisted breakpoint always requires exactly one debug
+register.
+
+@findex i386_stopped_by_hwbp
+@item i386_stopped_by_hwbp (void)
+This function returns non-zero if the inferior has some watchpoint or
+hardware breakpoint that triggered.  It works like
+@code{i386_stopped_data_address}, except that it doesn't return the
+address whose watchpoint triggered.
+
+@findex i386_cleanup_dregs
+@item i386_cleanup_dregs (void)
+This function clears all the reference counts, addresses, and control
+bits in the mirror images of the debug registers.  It doesn't affect
+the actual debug registers in the inferior process.
+@end table
+
+@noindent
+@strong{Notes:}
+@enumerate 1
+@item
+x86 processors support setting watchpoints on I/O reads or writes.
+However, since no target supports this (as of March 2001), and since
+@code{enum target_hw_bp_type} doesn't even have an enumeration for I/O
+watchpoints, this feature is not yet available to @value{GDBN} running
+on x86.
+
+@item
+x86 processors can enable watchpoints locally, for the current task
+only, or globally, for all the tasks.  For each debug register,
+there's a bit in the DR7 Debug Control register that determines
+whether the associated address is watched locally or globally.  The
+current implementation of x86 watchpoint support in @value{GDBN}
+always sets watchpoints to be locally enabled, since global
+watchpoints might interfere with the underlying OS and are probably
+unavailable in many platforms.
+@end enumerate
+
 @node User Interface
 
 @chapter User Interface
@@ -375,7 +730,7 @@ to the @code{set_thread_cmd_list}.
 To add commands in general, use @code{add_cmd}.  @code{add_com} adds to
 the main command list, and should be used for those commands.  The usual
 place to add commands is in the @code{_initialize_@var{xyz}} routines at
-the ends of most source files. 
+the ends of most source files.
 
 @cindex deprecating commands
 @findex deprecate_cmd
@@ -1103,10 +1458,10 @@ The ordering of bytes in the host.  This must be defined to be either
 @code{BIG_ENDIAN} or @code{LITTLE_ENDIAN}.
 
 @item INT_MAX
-@item INT_MIN
-@item LONG_MAX
-@item UINT_MAX
-@item ULONG_MAX
+@itemx INT_MIN
+@itemx LONG_MAX
+@itemx UINT_MAX
+@itemx ULONG_MAX
 Values for host-side constants.
 
 @item ISATTY
@@ -1223,7 +1578,7 @@ Define this to indicate that @code{siginterrupt} is not available.
 Define if this is not in a system header file (typically, @file{unistd.h}).
 
 @item SEEK_CUR
-@item SEEK_SET
+@itemx SEEK_SET
 Define these to appropriate value for the system @code{lseek}, if not already
 defined.
 
@@ -1991,6 +2346,10 @@ conditional should be eliminated (FIXME) and replaced by
 feature-specific macros.  It was introduced in a haste and we are
 repenting at leisure.
 
+@item I386_USE_GENERIC_WATCHPOINTS
+An x86-based target can define this to use the generic x86 watchpoint
+support; see @ref{Algorithms, I386_USE_GENERIC_WATCHPOINTS}.
+
 @item SYMBOLS_CAN_START_WITH_DOLLAR
 @findex SYMBOLS_CAN_START_WITH_DOLLAR
 Some systems have routines whose names start with @samp{$}.  Giving this
@@ -2467,6 +2826,11 @@ frame pointer in use at the code address @var{pc}.  If virtual
 frame pointers are not used, a default definition simply returns 
 @code{FP_REGNUM}, with an offset of zero.
 
+@item TARGET_HAS_HARDWARE_WATCHPOINTS
+If non-zero, the target has support for hardware-assisted
+watchpoints.  @xref{Algorithms, watchpoints}, for more details and
+other related macros.
+
 @item USE_STRUCT_CONVENTION (@var{gcc_p}, @var{type})
 @findex USE_STRUCT_CONVENTION
 If defined, this must be an expression that is nonzero if a value of the
@@ -2795,6 +3159,10 @@ This macro determines the target PC address that @code{longjmp} will jump to,
 assuming that we have just stopped at a longjmp breakpoint.  It takes a
 @code{CORE_ADDR *} as argument, and stores the target PC value through this
 pointer.  It examines the current state of the machine as needed.
+
+@item I386_USE_GENERIC_WATCHPOINTS
+An x86-based machine can define this to use the generic x86 watchpoint
+support; see @ref{Algorithms, I386_USE_GENERIC_WATCHPOINTS}.
 
 @item KERNEL_U_ADDR
 @findex KERNEL_U_ADDR

@@ -1,3 +1,11 @@
+2001-03-21  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdbint.texinfo (Algorithms): New section "Watchpoints" and new
+	subsection "x86 Watchpoints".
+	(Target Architecture Definition): Document the macros
+	I386_USE_GENERIC_WATCHPOINTS and TARGET_HAS_HARDWARE_WATCHPOINTS.
+	(Native Debugging): Document I386_USE_GENERIC_WATCHPOINTS.
+
 2001-03-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Update
