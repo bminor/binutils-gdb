@@ -1,5 +1,20 @@
 2002-09-27  David Carlton  <carlton@math.stanford.edu>
 
+	* Makefile.in (cris-tdep.o): Depend on gdb_string_h.
+	(mcore-tdep.o): Ditto.
+	(ns32k-tdep.o): Ditto.
+	(ns32knbsd-tdep.o): Ditto.
+	(sh3-rom.o): Ditto.
+	(vax-tdep.o): Ditto.
+	* cris-tdep.c: #include "gdb_string.h"
+	* mcore-tdep.c: Ditto.
+	* ns32k-tdep.c: Ditto.
+	* ns32knbsd-tdep.c: Ditto.
+	* sh3-rom.c: Ditto.
+	* vax-tdep.c: Ditto.
+
+2002-09-27  David Carlton  <carlton@math.stanford.edu>
+
 	* config/djgpp/fnchange.lst: Add entries for
 	gdb/testsuite/gdb.c++/m-static files.
 

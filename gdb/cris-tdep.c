@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "solib.h"              /* Support for shared libraries. */
 #include "solib-svr4.h"         /* For struct link_map_offsets.  */
+#include "gdb_string.h"
 
 
 enum cris_num_regs
