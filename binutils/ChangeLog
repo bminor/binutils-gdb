@@ -1,3 +1,9 @@
+Fri Jun 12 13:33:51 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* po/Make-in (all-yes): Depend on .pot file if maintainer mode
+	enabled.
+	($(PACKAGE).pot): Unconditionally depend on POTFILES.
+
 Fri Jun 12 16:06:15 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* readelf.c (get_ppc_rel_type): New PowerPC support.

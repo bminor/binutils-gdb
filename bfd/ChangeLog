@@ -1,3 +1,8 @@
+Fri Jun 12 13:30:17 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* po/Make-in (all-yes): If maintainer mode, depend on .pot file.
+	($(PACKAGE).pot): Unconditionally depend on POTFILES.
+
 Fri Jun 12 13:34:02 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* elf.c (swap_out_syms): New arg relocatable_p.
