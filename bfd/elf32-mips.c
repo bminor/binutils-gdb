@@ -1,5 +1,5 @@
 /* MIPS-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
@@ -1786,23 +1786,23 @@ _bfd_mips_elf_lo16_reloc (abfd,
 	     to know anything about the LO16 itself, except where to
 	     find the low 16 bits of the addend needed by the LO16.  */
 	  insn = bfd_get_32 (abfd, l->addr);
-	  vallo = (bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address)
-		   & 0xffff);
+	  vallo = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
+
+	  /* The low order 16 bits are always treated as a signed
+	     value.  */
+	  vallo = ((vallo & 0xffff) ^ 0x8000) - 0x8000;
 	  val = ((insn & 0xffff) << 16) + vallo;
 	  val += l->addend;
 
-	  /* The low order 16 bits are always treated as a signed
-	     value.  Therefore, a negative value in the low order bits
-	     requires an adjustment in the high order bits.  We need
-	     to make this adjustment in two ways: once for the bits we
-	     took from the data, and once for the bits we are putting
-	     back in to the data.  */
-	  if ((vallo & 0x8000) != 0)
-	    val -= 0x10000;
-	  if ((val & 0x8000) != 0)
-	    val += 0x10000;
+	  /* At this point, "val" has the value of the combined HI/LO
+	     pair.  If the low order 16 bits (which will be used for
+	     the LO16 insn) are negative, then we will need an
+	     adjustment for the high order 16 bits.  */
+	  val += 0x8000;
+	  val = (val >> 16) & 0xffff;
 
-	  insn = (insn &~ (bfd_vma) 0xffff) | ((val >> 16) & 0xffff);
+	  insn &= ~ (bfd_vma) 0xffff;
+	  insn |= val;
 	  bfd_put_32 (abfd, (bfd_vma) insn, l->addr);
 
 	  if (strcmp (bfd_asymbol_name (symbol), "_gp_disp") == 0)
