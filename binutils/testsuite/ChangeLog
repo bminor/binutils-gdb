@@ -1,3 +1,16 @@
+Wed Aug 24 12:41:37 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.in, binutils.all/configure.in: Change i386 to
+	i[345]86.
+
+Tue Jul 19 15:23:53 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* config/mt-mips-ecoff: Add -Tidp.ld option.
+
+Thu Jun 30 12:41:55 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* config/default.exp: Use nm.new, not nm, from newly built tree.
+
 Tue May 17 14:04:05 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* config/default.exp, config/unix.exp: Replace error
