@@ -1,3 +1,96 @@
+Mon May 18 17:29:03 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* getopt.h: merged changes from grep-1.6 (alpha).
+
+Fri May  8 14:53:32 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* getopt.h: merged changes from bison-1.18.
+
+Sat Mar 14 17:25:20 1992  Fred Fish  (fnf@cygnus.com)
+
+	* obstack.h:  Add "area_id" and "flags" members to obstack
+	structure.  Add obstack_chunkfun() and obstack_freefun() to
+	set functions explicitly.  Convert maybe_empty_object to
+	a bit in "flags".
+
+Thu Feb 27 22:01:02 1992  Per Bothner  (bothner@cygnus.com)
+
+	* wait.h (WIFSTOPPED):  Add IBM rs6000-specific version.
+
+Fri Feb 21 20:49:20 1992  John Gilmore  (gnu at cygnus.com)
+
+	* obstack.h:  Add obstack_full_begin.
+	* bfd.h, obstack.h:  Protolint.
+
+Thu Jan 30 01:18:42 1992  John Gilmore  (gnu at cygnus.com)
+
+	* bfd.h:  Remove comma from enum declaration.
+
+Mon Jan 27 22:01:13 1992  Steve Chamberlain  (sac at cygnus.com)
+
+	* bfd.h : new target entr, bfd_relax_section 
+
+Wed Dec 18 17:19:44 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* bfd.h, ieee.h, opcode/m68k.h, opcode/sparc.h:  ANSIfy enums.
+
+Thu Dec 12 20:59:56 1991  John Gilmore  (gnu at cygnus.com)
+
+	* fopen-same.h, fopen-bin.h:  New files for configuring
+	whether fopen distinguishes binary files or not.  For use
+	by host-dependent config files.
+
+Sat Nov 30 20:46:43 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* bfd.h: change the documentation format.
+
+	* created coff, elf and opcode and aout directories. Moved:
+
+	aout64.h	==> aout/aout64.h
+	ar.h		==> aout/ar.h
+	a.out.encap.h	==> aout/encap.h
+	a.out.host.h	==> aout/host.h
+	a.out.hp.h	==> aout/hp.h
+	a.out.sun4.h	==> aout/sun4.h
+	ranlib.h	==> aout/ranlib.h
+	reloc.h		==> aout/reloc.h
+	stab.def	==> aout/stab.def
+	stab.gnu.h	==> aout/stab_gnu.h
+
+	coff-a29k.h	==> coff/a29k.h
+	coff-h8300.h	==> coff/h8300.h
+	coff-i386.h	==> coff/i386.h
+	coff-i960.h	==> coff/i960.h
+	internalcoff.h	==> coff/internal.h
+	coff-m68k.h	==> coff/m68k.h
+	coff-m88k.h	==> coff/m88k.h
+	coff-mips.h	==> coff/mips.h
+	coff-rs6000.h	==> coff/rs6000.h
+
+	elf-common.h	==> elf/common.h
+	dwarf.h		==> elf/dwarf.h
+	elf-external.h	==> elf/external.h
+	elf-internal.h  ==> elf/internal.h
+
+	a29k-opcode.h	==> opcode/a29k.h
+	arm-opcode.h	==> opcode/arm.h
+	h8300-opcode.h	==> opcode/h8300.h
+	i386-opcode.h	==> opcode/i386.h
+	i860-opcode.h	==> opcode/i860.h
+	i960-opcode.h	==> opcode/i960.h
+	m68k-opcode.h	==> opcode/m68k.h
+	m88k-opcode.h	==> opcode/m88k.h
+	mips-opcode.h	==> opcode/mips.h
+	np1-opcode.h	==> opcode/np1.h
+	ns32k-opcode.h	==> opcode/ns32k.h
+	pn-opcode.h	==> opcode/pn.h
+	pyr-opcode.h	==> opcode/pyr.h
+	sparc-opcode.h	==> opcode/sparc.h
+	tahoe-opcode.h	==> opcode/tahoe.h
+	vax-opcode.h	==> opcode/vax.h
+
+
+
 Wed Nov 27 10:38:31 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* internalcoff.h: (internal_scnhdr) took out #def dependency, now

@@ -1,9 +1,9 @@
-/* declarations for getopt
-   Copyright (C) 1989 Free Software Foundation, Inc.
+/* Declarations for getopt.
+   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -14,6 +14,9 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#ifndef _GETOPT_H
+#define _GETOPT_H 1
 
 /* For communication from `getopt' to the caller.
    When `getopt' finds an option that takes an argument,
@@ -43,34 +46,68 @@ extern int optind;
 extern int opterr;
 
 /* Describe the long-named options requested by the application.
-   _GETOPT_LONG_OPTIONS is a vector of `struct option' terminated by an
-   element containing a name which is zero.
+   The LONG_OPTIONS argument to getopt_long or getopt_long_only is a vector
+   of `struct option' terminated by an element containing a name which is
+   zero.
+
    The field `has_arg' is:
-   0 if the option does not take an argument,
-   1 if the option requires an argument,
-   2 if the option takes an optional argument.
-   If the field `flag' is nonzero, it points to a variable that is set to
-   the value given in the field `val' when the option is found, but
-   left unchanged if the option is not found.  */
+   no_argument		(or 0) if the option does not take an argument,
+   required_argument	(or 1) if the option requires an argument,
+   optional_argument 	(or 2) if the option takes an optional argument.
+
+   If the field `flag' is not NULL, it points to a variable that is set
+   to the value given in the field `val' when the option is found, but
+   left unchanged if the option is not found.
+
+   To have a long-named option do something other than set an `int' to
+   a compiled-in constant, such as set a value from `optarg', set the
+   option's `flag' field to zero and its `val' field to a nonzero
+   value (the equivalent single-letter option character, if there is
+   one).  For long options that have a zero `flag' field, `getopt'
+   returns the contents of the `val' field.  */
 
 struct option
 {
+#if	__STDC__
+  const char *name;
+#else
   char *name;
+#endif
+  /* has_arg can't be an enum because some compilers complain about
+     type mismatches in all the code that assumes it is an int.  */
   int has_arg;
   int *flag;
   int val;
 };
 
-extern struct option *_getopt_long_options;
+/* Names for the values of the `has_arg' field of `struct option'.  */
 
-/* Name of long-named option actually found.
-   Only changed when a long-named option is found.  */
+enum _argtype
+{
+  no_argument,
+  required_argument,
+  optional_argument
+};
 
-extern char *_getopt_option_name;
+#if __STDC__
+extern int getopt (int argc, char *const *argv, const char *shortopts);
+extern int getopt_long (int argc, char *const *argv, const char *shortopts,
+		        const struct option *longopts, int *longind);
+extern int getopt_long_only (int argc, char *const *argv,
+			     const char *shortopts,
+		             const struct option *longopts, int *longind);
 
-/* The index in GETOPT_LONG_OPTIONS of the long-named option found.
-   Only valid when a long-named option has been found by the most
-   recent call to `getopt'.  */
+/* Internal only.  Users should not call this directly.  */
+extern int _getopt_internal (int argc, char *const *argv,
+			     const char *shortopts,
+		             const struct option *longopts, int *longind,
+			     int long_only);
+#else /* not __STDC__ */
+extern int getopt ();
+extern int getopt_long ();
+extern int getopt_long_only ();
 
-extern int option_index;
+extern int _getopt_internal ();
+#endif /* not __STDC__ */
 
+#endif /* _GETOPT_H */
