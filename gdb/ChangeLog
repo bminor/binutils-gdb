@@ -1,5 +1,7 @@
 Wed Jul 21 11:37:30 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* hppa{b,h}-nat.c: Warning, not error, if can't access registers.
+
 	* config/pa/hppa{b,h}.h: Define ATTACH_DETACH.
 
 Wed Jul 21 03:07:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)

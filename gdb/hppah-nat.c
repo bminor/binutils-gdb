@@ -121,6 +121,8 @@ store_inferior_registers (regno)
                   scratch, 0);
           if (errno != 0)
             {
+	      /* Error, even if attached.  Failing to write these two
+		 registers is pretty serious.  */
               sprintf (buf, "writing register number %d", regno);
               perror_with_name (buf);
             }
@@ -133,8 +135,14 @@ store_inferior_registers (regno)
 		    *(int *) &registers[REGISTER_BYTE (regno) + i], 0);
 	    if (errno != 0)
 	      {
-		sprintf (buf, "writing register number %d(%d)", regno, i);
-		perror_with_name (buf);
+		/* Warning, not error, in case we are attached; sometimes the
+		   kernel doesn't let us at the registers.  */
+		char *err = safe_strerror (errno);
+		char *msg = alloca (strlen (err) + 128);
+		sprintf (msg, "writing register %s: %s",
+			 reg_names[regno], err);
+		warning (msg);
+		goto error_exit;
 	      }
 	    regaddr += sizeof(int);
 	  }
@@ -145,34 +153,10 @@ store_inferior_registers (regno)
 	{
 	  if (CANNOT_STORE_REGISTER (regno))
 	    continue;
-	  regaddr = register_addr (regno, offset);
-          errno = 0;
-          if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
-            {
-              scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
-              ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-                      scratch, 0);
-              if (errno != 0)
-                {
-                  sprintf (buf, "writing register number %d", regno);
-                  perror_with_name (buf);
-                }
-            }
-          else
-	    for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
-	      {
-		errno = 0;
-		ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-			*(int *) &registers[REGISTER_BYTE (regno) + i], 0);
-		if (errno != 0)
-		  {
-		    sprintf (buf, "writing register number %d(%d)", regno, i);
-		    perror_with_name (buf);
-		  }
-		regaddr += sizeof(int);
-	      }
+	  store_inferior_registers (regno);
 	}
     }
+ error_exit:
   return;
 }
 
@@ -201,13 +185,19 @@ fetch_register (regno)
       regaddr += sizeof (int);
       if (errno != 0)
 	{
-	  sprintf (mess, "reading register %s (#%d)", reg_names[regno], regno);
-	  perror_with_name (mess);
+	  /* Warning, not error, in case we are attached; sometimes the
+	     kernel doesn't let us at the registers.  */
+	  char *err = safe_strerror (errno);
+	  char *msg = alloca (strlen (err) + 128);
+	  sprintf (msg, "reading register %s: %s", reg_names[regno], err);
+	  warning (msg);
+	  goto error_exit;
 	}
     }
   if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
     buf[3] &= ~0x3;
   supply_register (regno, buf);
+ error_exit:;
 }
 
 /* Resume execution of the inferior process.

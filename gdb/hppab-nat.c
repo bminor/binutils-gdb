@@ -169,7 +169,6 @@ fetch_register (regno)
 {
   register unsigned int regaddr;
   char buf[MAX_REGISTER_RAW_SIZE];
-  char mess[128];				/* For messages */
   register int i;
 
   /* Offset of registers within the u area.  */
@@ -186,11 +185,17 @@ fetch_register (regno)
       regaddr += sizeof (int);
       if (errno != 0)
 	{
-	  sprintf (mess, "reading register %s (#%d)", reg_names[regno], regno);
-	  perror_with_name (mess);
+	  /* Warning, not error, in case we are attached; sometimes the
+	     kernel doesn't let us at the registers.  */
+	  char *err = safe_strerror (errno);
+	  char *msg = alloca (strlen (err) + 128);
+	  sprintf (msg, "reading register %s: %s", reg_names[regno], err);
+	  warning (msg);
+	  goto error_exit;
 	}
     }
   supply_register (regno, buf);
+ error_exit:;
 }
 
 /* Fetch all registers, or just one, from the child process.  */
@@ -215,7 +220,6 @@ store_inferior_registers (regno)
      int regno;
 {
   register unsigned int regaddr;
-  char buf[80];
   extern char registers[];
   register int i;
 
@@ -231,8 +235,11 @@ store_inferior_registers (regno)
 		  *(int *) &registers[REGISTER_BYTE (regno) + i]);
 	  if (errno != 0)
 	    {
-	      sprintf (buf, "writing register number %d(%d)", regno, i);
-	      perror_with_name (buf);
+	      char *err = safe_strerror (errno);
+	      char *msg = alloca (strlen (err) + 128);
+	      sprintf (msg, "writing register %s: %s", reg_names[regno], err);
+	      warning (msg);
+	      errors_found = 1;
 	    }
 	  regaddr += sizeof(int);
 	}
@@ -243,19 +250,7 @@ store_inferior_registers (regno)
 	{
 	  if (CANNOT_STORE_REGISTER (regno))
 	    continue;
-	  regaddr = register_addr (regno, offset);
-	  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
-	    {
-	      errno = 0;
-	      ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		      *(int *) &registers[REGISTER_BYTE (regno) + i]);
-	      if (errno != 0)
-		{
-		  sprintf (buf, "writing register number %d(%d)", regno, i);
-		  perror_with_name (buf);
-		}
-	      regaddr += sizeof(int);
-	    }
+	  store_inferior_registers (regno);
 	}
     }
   return;
