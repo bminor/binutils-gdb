@@ -8,11 +8,6 @@ Mon Jan  3 15:32:16 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 	* libaout.h (N_SET_DYNAMIC): New macro.
 	(N_DYNAMIC): Add missing 0 in mask.
 
-Mon Jan  3 13:05:08 1994  Stan Shebs  (shebs@andros.cygnus.com)
-
-	* syms.c (bfd_print_symbol_vandf): Change PTR to FILE *.
-	* hosts/irix4.h (exit): Declare properly.
-
 Mon Jan  3 11:41:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bfd-in.h, hash.c: Change bfd_hash_allocate argument from size_t
