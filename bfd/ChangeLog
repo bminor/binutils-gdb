@@ -1,3 +1,26 @@
+2002-05-04  Tom Rix  <trix@redhat.com>
+
+	* coffswap.h (coff_swap_reloc_in): Remove XCOFF support.
+	(coff_swap_reloc_out): Same.
+	* coff-rs6000.c: (xcoff_swap_reloc_in): Moved from coffswap.h.
+	(xcoff_swap_reloc_out): Same.
+	(xcoff_rtype2howto): Renamed from _bfd_xcoff_rtype2howto. Special
+	case some 16 bit relocs. Add reloc value to output.
+	(xcoff_howto_table): Remove 64 bit R_POS, add 16 bit
+	R_RBR. Improve names. 
+	(_bfd_xcoff_reloc_type_lookup): Adjust for removal of 64 bit R_POS.
+	(bfd_xcoff_backend_data): Update with new reloc swap names.
+	(bfd_pmac_xcoff_backend_data) : Same.
+	* coff64-rs6000.c: (xcoff64_swap_reloc_in): Moved from coffswap.h.
+	(xcoff64_swap_reloc_out): Same.
+	(xcoff64_rtype2howto): Special case some 16 bit relocs and 32 bit 
+	R_POS. Add reloc value to output.
+	(xcoff64_howto_table): Move 64 bit R_POS to first entry.  Add 16 
+	bit R_RBR. Improve names, masks. 
+	(xcoff64_reloc_type_lookup): Adjust for move of 64 bit R_POS.
+	(bfd_xcoff_backend_data): Update with new reloc swap names.
+	(bfd_xcoff_aix5_backend_data) : Same.
+
 2002-05-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (struct elf32_hppa_link_hash_table): Add
