@@ -28,6 +28,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define FM11	0xC0000000
 
 #define NOP 0x5e00
+#define OPCODE_DIVS	0x14002800
 
 /* The opcode table is an array of struct d10v_opcode.  */
 
@@ -39,9 +40,7 @@ struct d10v_opcode
   /* the opcode format */
   int format;
 
-  /* opcode types.  these numbers were picked so we can do 
-     if( i & SHORT_OPCODE) */
-
+  /* These numbers were picked so we can do if( i & SHORT_OPCODE) */
 #define SHORT_OPCODE 1
 #define LONG_OPCODE  8
 #define SHORT_2	     1		/* short with 2 operands */
@@ -49,6 +48,11 @@ struct d10v_opcode
 #define LONG_B	     8		/* long with 16-bit branch */
 #define LONG_L       10		/* long with 3 operands */
 #define LONG_R       12		/* reserved */
+
+  /* just a placeholder for variable-length instructions */
+  /* for example, "bra" will be a fake for "bra.s" and bra.l" */
+  /* which will immediately follow in the opcode table.  */
+#define OPCODE_FAKE  32
 
   /* the number of cycles */
   int cycles;
@@ -62,9 +66,10 @@ struct d10v_opcode
 
   /* execution type; parallel or sequential */
   int exec_type;
-#define PAR	1
-#define SEQ	2
-#define BRANCH_LINK 3
+#define PARONLY 1	/* parallel only */
+#define SEQ	2	/* must be sequential */
+#define PAR	3	/* may be parallel */
+#define BRANCH_LINK 4	/* subroutine call.  sequential and aligned */
 
   /* the opcode */
   long opcode;
@@ -146,6 +151,9 @@ extern const struct d10v_operand d10v_operands[];
 
 /* predecrement mode '@-sp'  */
 #define OPERAND_ATMINUS	(0x2000)
+
+/* signed number */
+#define OPERAND_SIGNED	(0x4000)
 
 /* Structure to hold information about predefined registers.  */
 struct pd_reg
