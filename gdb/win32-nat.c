@@ -26,15 +26,7 @@
 
 /* We assume we're being built with and will be used for cygwin.  */
 
-#include <windows.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <imagehlp.h>
-#include <sys/cygwin.h>
 #include "defs.h"
-#include "tm.h"			/* required for SSE registers */
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "target.h"
@@ -44,6 +36,13 @@
 #include "regcache.h"
 #include "top.h"
 #include "i386-tdep.h"
+#include <signal.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <windows.h>
+#include <imagehlp.h>
+#include <sys/cygwin.h>
 
 #include "buildsym.h"
 #include "symfile.h"
@@ -70,12 +69,8 @@ enum
 #include <sys/procfs.h>
 #include <psapi.h>
 
-#ifdef HAVE_SSE_REGS
 #define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_DEBUG_REGISTERS \
 	| CONTEXT_EXTENDED_REGISTERS
-#else
-#define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_DEBUG_REGISTERS
-#endif
 
 static unsigned dr[8];
 static int debug_registers_changed = 0;
