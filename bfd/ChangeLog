@@ -1,3 +1,45 @@
+Fri Jul 30 18:08:27 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlm32-i386.c: New file.  First cut at i386 NLM code.
+	* libnlm.h: Added some more prototypes.
+	(struct nlm_relent): New structure.
+	(nlmNAME(symbol_type)): Added rcnt and relocs fields.
+	(struct nlm_obj_tdata): Added new fields: nlm_symbols,
+	nlm_text_low, nlm_data_low, nlm_reloc_fixups,
+	nlm_reloc_fixup_secs.
+	(struct nlm_backend_data): New structure, with accessor macros.
+	* nlmcode.h: Use NLM_HIBIT rather than MSB.
+	(nlm_object_p): Set SEC_RELOC for .text and .data.  Don't set
+	SEC_DATA for .bss.  Set HAS_RELOC and HAS_SYMS for abfd.  Set the
+	architecture.
+	(nlm_swap_fixed_header_out, nlm_swap_variable_header_out,
+	find_nonzero, nlm_swap_auxiliary_headers_out): New outbound
+	swapping functions.
+	(nlm_get_symtab_upper_bound, nlm_slurp_symbol_table): Include
+	external references in symbol table as undefined symbols.
+	(nlm_get_symtab, nlm_slurp_symbol_table): Fill in alocation
+	argument in get_symtab rather than in slurp_symbol_table.
+	(nlm_slurp_symbol_table): Save symbol information in tdata.
+	(nlm_print_symbol): New function.
+	(nlm_slurp_reloc_fixups, nlm_get_reloc_upper_bound,
+	nlm_canonicalize_reloc): New functions to read relocs.
+	(nlm_compute_section_file_positions, nlm_set_section_contents,
+	nlm_external_reloc_compare, nlm_write_object_contents): New
+	functions to create NLM files.
+	* nlm-target.h: Define all the nlm functions here either as
+	default values or in terms of nlmNAME.  Use JUMP_TABLE(nlm).  Set
+	the backend_data field to TARGET_BACKEND_DATA.
+	* nlm32-gen.c, nlm64-gen.c: Don't define function macros here;
+	they are now in nlm-target.h.
+	(TARGET_BACKEND_DATA): Define as NULL.
+	* nlm.c (nlm_mkobject): Do allocate the tdata field.
+	(nlm_set_arch_mach): New function.
+	* targets.c: Added nlm32_i386_vec.
+	* Makefile.in (BFD32_BACKENDS): Added nlm32-i386.o.
+	(CFILES): Added nlm32-i386.c.
+	(nlm32-gen.o, nlm64-gen.o): Depend on nlm-target.h.
+	(nlm32-i386.o): New target.
+
 Thu Jul 29 20:20:39 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* hosts/sun3.h: remove some function decls that conflict w/ ANSI
@@ -297,6 +339,13 @@ Thu Jul  1 14:52:47 1993  Frederic Pierresteguy (F.Pierresteguy@frcl.bull.fr)
 Fri Jul  9 00:43:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* aoutf1.h: Add definition of MACHTYPE_OK.
+
+Thu Jul  8 14:37:44 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* syms.c, bfd-in2.h: Doc fix.
+
+	* coffcode.h (CALC_ADDEND): Check for common section using the
+	section flag as well as the symbol flag.
 
 Thu Jul  8 13:43:52 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
