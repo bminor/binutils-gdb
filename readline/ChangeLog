@@ -1,3 +1,7 @@
+Thu Jun 10 11:22:41 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Makefile.in: Add mostlyclean, distclean, and realclean targets.
+
 Fri May 21 17:09:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/mh-isc: New file.
