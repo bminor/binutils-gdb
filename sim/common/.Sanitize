@@ -89,6 +89,8 @@ sim-trace.h
 sim-types.h
 sim-utils.c
 sim-utils.h
+sim-watch.c
+sim-watch.h
 sim-xcat.h
 tconfig.in
 
