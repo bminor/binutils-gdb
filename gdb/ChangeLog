@@ -1,3 +1,15 @@
+Wed Dec  10 13:16:45 1997  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c (gdb_get_tracepoint_info): Use info in struct 
+	symtab_and_line (not struct tracepoint) so that we get the
+	real line info for an address. Arrange data more like
+	gdb_get_breakpoint_info.
+	(tracepoint_notify): Use info in struct symtab_and_line again.
+	(gdbtk_init): Add command "gdb_get_tracepoint_list" into
+	interpreter.
+	(gdb_get_tracepoint_list): New function that aids the source
+	window in displaying tracepoints when the file changes.
+	
 Wed Dec 10 17:57:00 1997  David Taylor  <taylor@texas.cygnus.com>
 
 	* d30v-tdep.c : don't bury lots of magic numbers in the code
@@ -23,14 +35,7 @@ Wed Dec 10 15:54:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Check
  	cu_header.length is within dwarf_info_buffer not
  	dwarf_abbrev_buffer.
-
-Mon Dec  8 15:51:45 1997  Keith Seitz  <keiths@onions.cygnus.com>
-
-	* gdbtk.c (gdb_get_tracepoint_info): use info in struct 
-	  symtab_and_line, not struct tracepoint.
-	  (tracepoint_notify): use info in struct symtab_and_line,
-	  not struct tracepoint
-
+	
 Mon Dec  8 14:28:49 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* tracepoint.c (memrange_sortmerge): allow for memranges 
@@ -38,9 +43,9 @@ Mon Dec  8 14:28:49 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 Fri Dec  5 10:31:23 1997  Keith Seitz  <keiths@pizza.cygnus.com>
 
-	* gdbtk.c (gdbtk_init): add gdb_find_file to interpreter
-	(gdb_find_file_command): new function searches source_path to
-	find real full filename
+	* gdbtk.c (gdbtk_init): Add gdb_find_file into interpreter.
+	(gdb_find_file_command): New function which searches source path
+	to find the real full filename of a file.
 
 Fri Dec  5 09:22:35 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -52,9 +57,9 @@ Thu Dec  4 09:30:22 1997  Nick Clifton  <nickc@cygnus.com>
 
 Wed Dec  3 12:44:15 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
-	* tracepoint.c: add declaration for x_command
+	* tracepoint.c: Add declaration for x_command.
 
-	* printcmd.c (x_command): remove static declaration
+	* printcmd.c (x_command): Remove static declaration.
 
 Wed Dec  3 12:00:42 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
