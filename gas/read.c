@@ -120,6 +120,8 @@ static char *bignum_high;	/* Highest char of bignum. */
 /* May point to (bignum_start-1). */
 /* Never >= bignum_limit. */
 
+int target_big_endian;
+
 static char *old_buffer;	/* JF a hack */
 static char *old_input;
 static char *old_limit;
@@ -142,7 +144,6 @@ unsigned int next_char_of_string PARAMS ((void));
 static segT get_known_segmented_expression PARAMS ((expressionS * expP));
 static void grow_bignum PARAMS ((void));
 static void pobegin PARAMS ((void));
-void stringer PARAMS ((int append_zero));
 
 extern int listing;
 
@@ -194,7 +195,7 @@ static const pseudo_typeS potable[] =
 /* err */
 /* extend */
   {"extern", s_ignore, 0},	/* We treat all undef as ext */
-  {"app-file", s_app_file, 0},
+  {"appfile", s_app_file, 0},
   {"file", s_app_file, 0},
   {"fill", s_fill, 0},
   {"float", float_cons, 'f'},
@@ -414,7 +415,7 @@ read_a_source_file (name)
 
 		}
 	      else if (c == '=' || input_line_pointer[1] == '=')
-		{		/* JF deal with FOO=BAR */
+		{
 		  equals (s);
 		  demand_empty_rest_of_line ();
 		}
@@ -447,8 +448,9 @@ read_a_source_file (name)
 
 		      /* Put it back for error messages etc. */
 		      *input_line_pointer = c;
-		      /* The following skip of whitespace is compulsory. */
-		      /* A well shaped space is sometimes all that separates keyword from operands. */
+		      /* The following skip of whitespace is compulsory.
+			 A well shaped space is sometimes all that separates
+			 keyword from operands. */
 		      if (c == ' ' || c == '\t')
 			{
 			  input_line_pointer++;
@@ -1952,8 +1954,16 @@ big_cons (nbytes)
 	}
       if (!need_pass_2)
 	{
+	  char *src = bignum_low;
 	  p = frag_more (nbytes);
-	  bcopy (bignum_low, p, (int) nbytes);
+	  if (target_big_endian)
+	    {
+	      int i;
+	      for (i = nbytes - 1; i >= 0; i--)
+		p[i] = *src++;
+	    }
+	  else
+	    bcopy (bignum_low, p, (int) nbytes);
 	}
       /* C contains character after number. */
       SKIP_WHITESPACE ();
@@ -2504,8 +2514,6 @@ void
 s_ignore (arg)
      int arg;
 {
-  extern char is_end_of_line[];
-
   while (!is_end_of_line[*input_line_pointer])
     {
       ++input_line_pointer;
