@@ -720,49 +720,39 @@ xfer_mem (SIM_ADDR virt,
 	  int size,
 	  int write_p)
 {
-  int xfered = 0;
+  uint8 *memory;
+  unsigned long phys;
+  int phys_size;
+  phys_size = sim_d10v_translate_addr (virt, size, &phys, NULL,
+				       dmap_register, imap_register);
+  if (phys_size == 0)
+    return 0;
 
-  while (0 < size)
-    {
-      uint8 *memory;
-      unsigned long phys;
-      int phys_size;
-      phys_size = sim_d10v_translate_addr (virt, size, &phys, NULL,
-					   dmap_register, imap_register);
-      if (phys_size == 0)
-	return xfered;
-
-      memory = map_memory (phys);
+  memory = map_memory (phys);
 
 #ifdef DEBUG
-      if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
-	{
-	  (*d10v_callback->printf_filtered)
-	    (d10v_callback,
-	     "sim_%s %d bytes: 0x%08lx (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
+  if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
+    {
+      (*d10v_callback->printf_filtered)
+	(d10v_callback,
+	 "sim_%s %d bytes: 0x%08lx (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
 	     (write_p ? "write" : "read"),
-	     phys_size, virt, last_from,
-	     phys, last_to,
-	     (long) memory, last_segname);
-	}
+	 phys_size, virt, last_from,
+	 phys, last_to,
+	 (long) memory, last_segname);
+    }
 #endif
 
-      if (write_p)
-	{
-	  memcpy (memory, buffer, phys_size);
-	}
-      else
-	{
-	  memcpy (buffer, memory, phys_size);
-	}
-
-      virt += phys_size;
-      buffer += phys_size;
-      xfered += phys_size;
-      size -= phys_size;
+  if (write_p)
+    {
+      memcpy (memory, buffer, phys_size);
     }
-
-  return xfered;
+  else
+    {
+      memcpy (buffer, memory, phys_size);
+    }
+  
+  return phys_size;
 }
 
 

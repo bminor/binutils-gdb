@@ -1,3 +1,8 @@
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (xfer_mem): Simplify.  Only do a single partial
+	transfer.  Problem reported by Tom Rix.
+
 2003-05-07  Andrew Cagney  <cagney@redhat.com>
 
 	* interp.c (sim_d10v_translate_addr): Add "regcache" parameter.
