@@ -343,17 +343,10 @@ static const template i386_optab[] = {
 {"jnle", 1, 0x7f, _, Jump, { Disp, 0, 0} },
 {"jg", 1, 0x7f, _, Jump, { Disp, 0, 0} },
 
-#if 0  /* XXX where are these macros used?
-	  To get them working again, they need to take
-	  an entire template as the parameter,
-	  and check for Data16/Data32 flags.  */
-/* these turn into pseudo operations when disp is larger than 8 bits */
 #define IS_JUMP_ON_CX_ZERO(o) \
-  (o == 0x66e3)
-#define IS_JUMP_ON_ECX_ZERO(o) \
   (o == 0xe3)
-#endif
 
+/* jcxz vs. jecxz is chosen on the basis of the address size prefix.  */
 {"jcxz", 1, 0xe3, _, JumpByte|Data16, { Disp, 0, 0} },
 {"jecxz", 1, 0xe3, _, JumpByte|Data32, { Disp, 0, 0} },
 
@@ -535,6 +528,7 @@ static const template i386_optab[] = {
 
 /* comparison (with pop) */
 {"fcomp", 1, 0xd8d8, _, ShortForm, { FloatReg, 0, 0} },
+{"fcomp", 0, 0xd8d9, _, NoModrm, {0, 0, 0} },   /* fcomp %st, %st(1) */
 {"fcomps", 1, 0xd8, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem float  */
 {"ficompl", 1, 0xda, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem word  */
 {"fcompl", 1, 0xdc, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem double  */
@@ -777,6 +771,8 @@ static const template i386_optab[] = {
 /* Pentium Pro extensions */
 {"rdpmc", 0, 0x0f33, _, NoModrm, { 0, 0, 0} },
 
+{"ud2", 0, 0x0fff, _, NoModrm, {0, 0, 0} }, /* official undefined instr. */
+
 {"cmovo",  2, 0x0f40, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
 {"cmovno", 2, 0x0f41, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
 {"cmovb",  2, 0x0f42, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
@@ -811,8 +807,8 @@ static const template i386_optab[] = {
 /* MMX instructions.  */
 
 {"emms",      0, 0x0f77, _, NoModrm, { 0, 0, 0 } },
-{"movd",      2, 0x0f6e, _, Modrm, { WordReg|WordMem, RegMMX, 0 } },
-{"movd",      2, 0x0f7e, _, Modrm, { RegMMX, WordReg|WordMem, 0 } },
+{"movd",      2, 0x0f6e, _, Modrm, { Reg32|WordMem, RegMMX, 0 } },
+{"movd",      2, 0x0f7e, _, Modrm, { RegMMX, Reg32|WordMem, 0 } },
 {"movq",      2, 0x0f6f, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"movq",      2, 0x0f7f, _, Modrm, { RegMMX, RegMMX|WordMem, 0 } },
 {"packssdw",  2, 0x0f6b, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
@@ -825,7 +821,7 @@ static const template i386_optab[] = {
 {"paddsw",    2, 0x0fed, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"paddusb",   2, 0x0fdc, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"paddusw",   2, 0x0fdd, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
-{"pand",      2, 0x0fda, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
+{"pand",      2, 0x0fdb, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"pandn",     2, 0x0fdf, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"pcmpeqb",   2, 0x0f74, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
 {"pcmpeqw",   2, 0x0f75, _, Modrm, { RegMMX|WordMem, RegMMX, 0 } },
