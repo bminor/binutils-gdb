@@ -1,3 +1,9 @@
+Wed Apr 16 14:02:29 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Set .rela.bss size
+	to sizeof Rela structure, not sizeof Rel structure.  From Gary
+	Thomas <g.thomas@opengroup.org>.
+
 Tue Apr 15 11:50:37 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aout-target.h (MY(callback)): If entry_is_text_address, adjust
