@@ -1,3 +1,10 @@
+1999-02-05  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.h: Tidy OBJ_ELF and OBJ_COFF definitions.
+
+	* config/tc-arm.c (md_apply_fix3): Fix BFD_RELOC_ARM_PCREL_BRANCH
+	for COFF ports.
+
 start-sanitize-cygnus
 Thu Feb  4 10:35:47 1999  Jeffrey A Law  (law@cygnus.com)
 
