@@ -1,3 +1,14 @@
+Thu Mar  3 15:51:05 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* i386.h: Reverse last change.  It'll be handled in gas instead.
+
+Thu Feb 24 15:29:05 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* i386.h (sar): Disabled the two-operand Imm1 form, since it was
+	slower on the 486 and used the implicit shift count despite the
+	explicit operand.  The one-operand form is still available to get
+	the shorter form with the implicit shift count.
+
 Thu Feb 17 12:27:52 1994  Torbjorn Granlund  (tege@mexican.cygnus.com)
 
 	* hppa.h: Fix typo in fstws arg string.
