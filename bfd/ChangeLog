@@ -1,3 +1,8 @@
+Mon Jun 17 10:06:50 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* som.h (R_HPPA_BEGIN_TRY, R_HPPA_END_TRY): Define.
+	* som.c (som_write_fixups): Handle R_BEGIN_TRY and R_END_TRY.
+
 Mon Jun 17 12:49:11 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_relocate_section): Don't create a reloc
