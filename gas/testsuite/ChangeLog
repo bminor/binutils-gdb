@@ -1,3 +1,8 @@
+2002-02-22  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gasp/gasp.exp: If gasp does not exist, do not complain, just
+	exit silently.
+
 2002-02-20  Tom Rix  <trix@redhat.com>
 
 	* gas/ppc/ppc.exp: Add xcoff booke tests.
