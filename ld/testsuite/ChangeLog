@@ -1,3 +1,12 @@
+2001-09-14  H.J. Lu  <hjl@gnu.org>
+
+	* ld-elfweak/bar.c: Updated.
+	* ld-elfweak/bar1a.c: Likewise.
+	* ld-elfweak/main.c: Likewise.
+	* ld-elfweak/main1.c: Likewise.
+	* ld-elfweak/elfweak.exp: Likewise.
+	* ld-elfweak/weakdata.dsym: Updated.
+
 2001-09-11  H.J. Lu  <hjl@gnu.org>
 
 	* ld-elfweak/elfweak.exp (build_lib): Take a list of object

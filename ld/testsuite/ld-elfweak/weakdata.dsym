@@ -1,2 +1,1 @@
 [0-9a-f]*[ 	]+w[ 	]+DO[ 	]+.data[	]+[0-9a-f]*[ 	]+(Base[ 	]+|[ 	]*)deallocate_foo
-[0-9a-f]*[ 	]+DF[ 	]+\*UND\*[	]+[0-9a-f]*[ 	]+(Base[ 	]+|[ 	]*)foo

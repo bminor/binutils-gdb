@@ -3,6 +3,7 @@
 #pragma weak foo
 
 extern void foo ();
+extern void foobar ();
 
 void
 foo ()
@@ -13,6 +14,6 @@ foo ()
 int
 main ()
 {
-  foo ();
+  foobar ();
   return 0;
 }
