@@ -1,3 +1,7 @@
+Tue Oct 20 12:18:08 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* app.c (do_scrub_next_char): discard whitespace after a label.
+
 Sat Oct 10 12:33:45 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: differentiate between SunOS 4 and Solaris2 for Sun4
