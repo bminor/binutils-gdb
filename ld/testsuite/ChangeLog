@@ -1,3 +1,14 @@
+2004-07-01  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-sparc/tlssunpic32.rd: Adjust for section reordering changes
+	and removal of unneeded STT_SECTION symbols from .dynsym.
+	* ld-sparc/tlssunbin32.rd: Likewise.
+	* ld-sparc/tlssunpic32.dd: Likewise.
+	* ld-sparc/tlssunpic32.sd: Likewise.
+	* ld-sparc/tlssunbin32.dd: Likewise.
+	* ld-sparc/tlssunbin32.sd: Likewise.
+	* ld-sparc/tlssunbin32.td: Likewise.
+
 2004-07-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-discard/extern.d: Update.
