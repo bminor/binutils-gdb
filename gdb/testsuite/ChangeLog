@@ -1,3 +1,12 @@
+Thu May 21 02:28:37 1998  Felix Lee  <flee@zog.cygnus.com>
+
+	* gdb.base/exprs.exp: delete test that depends on int size.
+
+Sun May 17 17:10:22 1998  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/sim.exp: Removed checks for target triplets.
+	(gdb_target_sim): Use gdb,target_sim_options.
+
 Sat May 16 23:43:35 1998  Mark Alexander  <marka@cygnus.com>
 
 	* gdb.base/reread.exp: New file.
