@@ -1,3 +1,11 @@
+2004-09-10  Joel Brobecker  <brobecker@gnat.com>
+
+	* hpux-core.c (thread_section_p): New function.
+	(hpux_core_core_file_p): Fix computation of offset in call
+	to bfd_seek. Create a ".reg" section from an arbitrary
+	".reg/<id>" section if none was created after having read
+	all sections.
+
 2004-09-11  Andreas Schwab  <schwab@suse.de>
 
 	* acinclude.m4: Fix spelling of ACX_NONCANONICAL_*.
