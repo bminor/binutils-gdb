@@ -62,6 +62,7 @@ irix4.mh
 m68k-coff.mt
 m68k.mt
 m68k-lynx.mt
+m68klynx.mh
 m68kv.mt
 m88k-bcs.mt
 mipsbsd.mh

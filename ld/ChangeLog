@@ -1,3 +1,7 @@
+Mon Sep 12 17:04:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/m68klynx.mh: New file.
+
 Mon Sep 12 01:50:03 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* emultempl/hppaelf.em: Add newlines to the error messages.
