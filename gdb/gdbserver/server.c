@@ -573,9 +573,10 @@ main (int argc, char *argv[])
 
 	  if (status == 'W')
 	    fprintf (stderr,
-		     "\nChild exited with status %d\n", sig);
+		     "\nChild exited with status %d\n", signal);
 	  if (status == 'X')
-	    fprintf (stderr, "\nChild terminated with signal = 0x%x\n", sig);
+	    fprintf (stderr, "\nChild terminated with signal = 0x%x\n",
+		     signal);
 	  if (status == 'W' || status == 'X')
 	    {
 	      if (extended_protocol)

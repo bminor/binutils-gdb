@@ -1,5 +1,10 @@
 2004-03-04  Nathan J. Williams  <nathanw@wasabisystems.com>
 
+	* server.c (main): Print child status or termination signal from
+	variable 'signal', not 'sig'.
+
+2004-03-04  Nathan J. Williams  <nathanw@wasabisystems.com>
+
 	* linux-low.c (linux_read_memory): Change return type to
 	int.  Check for and return error from ptrace().
 	* target.c (read_inferior_memory): Change return type to int.  Pass
