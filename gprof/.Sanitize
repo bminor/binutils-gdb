@@ -1,5 +1,4 @@
 # Sanitize.in for devo.
-# $Id$
 #
 
 # Each directory to survive it's way into a release will need a file
@@ -40,6 +39,7 @@ gmon.h
 gprof.1
 gprof.c
 gprof.h
+gprog.texi
 hertz.c
 i386.c
 i386.h
