@@ -173,6 +173,7 @@ static struct blockvector *new_bvect();
 
 static struct type	*parse_type();
 static struct type	*make_type();
+static struct type	*make_struct_type();
 static struct symbol	*mylookup_symbol();
 static struct block	*shrink_block();
 
@@ -1071,10 +1072,10 @@ static struct type *parse_type(ax, sh, bs)
 		complain (&basic_type_complaint, t->bt);
 		return builtin_type_int;
 	}
-	if (map_bt[t->bt])
+	if (map_bt[t->bt]) {
 		tp = *map_bt[t->bt];
 		fmt = "%s";
-	else {
+	} else {
 		/* Cannot use builtin types -- build our own */
 		switch (t->bt) {
 		    case btAdr:
