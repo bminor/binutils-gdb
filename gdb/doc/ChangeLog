@@ -1,3 +1,7 @@
+2001-01-04  Nicholas Duffek  <nsd@redhat.com>
+
+	* gdbint.texinfo (POP_FRAME): Document use by return_command.
+
 2000-12-25  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* refcard.tex: Version and copyright fixed.  From Phil Edwards

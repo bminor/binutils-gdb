@@ -2028,7 +2028,7 @@ definition is only used in generic code when parsing "$ps".)
 
 @item POP_FRAME
 Used in @samp{call_function_by_hand} to remove an artificial stack
-frame.
+frame and in @samp{return_command} to remove a real stack frame.
 
 @item PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr)
 Define this to push arguments onto the stack for inferior function
