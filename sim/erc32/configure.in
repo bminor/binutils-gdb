@@ -6,4 +6,7 @@ SIM_AC_COMMON
 
 AC_CHECK_HEADERS(stdlib.h)
 
+AC_CHECK_LIB(termcap, main, TERMCAP=-ltermcap, TERMCAP="")
+AC_SUBST(TERMCAP)
+
 SIM_AC_OUTPUT

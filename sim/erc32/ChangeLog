@@ -1,3 +1,28 @@
+Tue Dec  3 11:54:37 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* configure.in: Look for libtermcap.a.
+	* Makefile.in: Only link in -ltermcap if it exists.
+	* erc32.c: Update to version 2.6a. Fix uart handling.
+	* exec.c: Update to version 2.6a. Add sparclite support.
+	* float.c: Update to version 2.6a. Convert comments to
+	preprocessor warnings. Add __setfpucw() for i385 hosts so floating
+	point exceptions work on win32.
+	* func.c: Update to version 2.6a. Fix uart handling, add support
+	for user error traps.
+	* help.c: Update to version 2.6a. Add help note on user error
+	traps.
+	* interf.c: Update to version 2.6a. Fix uart handling, and add
+	sparclite support.
+	* examples/gccx: Use sparclite cross compiler, not native gcc.
+	* examples/srt0.S: Use "mov" rather than "wr" for manipulating
+	the psr register.
+
+Mon Nov 25 08:28:10 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (run.o): Remove this rule, it hides the one in
+	../common/Make-common.in that correctly references the source
+	in the sibling ../common directory.
+
 Wed Nov 20 01:30:12 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in: Delete stuff moved to ../common/Make-common.in.

@@ -23,9 +23,12 @@
 #include <signal.h>
 #include <string.h>
 #include <stdio.h>
+#include <sys/fcntl.h>
 #include "sis.h"
 #include "bfd.h"
 #include <dis-asm.h>
+
+#include "remote-sim.h"
 
 #ifndef fprintf
 extern          fprintf();
@@ -41,23 +44,22 @@ extern struct estate ebase;
 
 extern int      ctrl_c;
 extern int      nfp;
+extern int      ift;
+extern int      rom8;
+extern int      wrp;
 extern int      sis_verbose;
 extern char    *sis_version;
 extern struct estate ebase;
 extern struct evcell evbuf[];
 extern struct irqcell irqarr[];
 extern int      irqpend, ext_irl;
-extern char	uart_dev1[], uart_dev2[];
+extern int      sparclite;
+extern int      termsave;
+extern char     uart_dev1[], uart_dev2[];
 
 int             sis_gdb_break = 1;
 
-#ifdef IUREV0
-extern int      iurev0;
-#endif
-
-#ifdef MECREV0
-extern int      mecrev0;
-#endif
+host_callback *sim_callback;
 
 run_sim(sregs, go, icount, dis)
     struct pstate  *sregs;
@@ -68,8 +70,10 @@ run_sim(sregs, go, icount, dis)
     int             mexc, ws;
 
     if (sis_verbose)
-	printf_filtered("resuming at %x\n", sregs->pc);
-    sregs->starttime = time(NULL);
+	(*sim_callback->printf_filtered) (sim_callback, "resuming at %x\n",
+					  sregs->pc);
+   init_stdio();
+   sregs->starttime = time(NULL);
     while ((!sregs->err_mode & (go || (icount > 0))) &&
 	   ((sregs->bptnum == 0) || !(sregs->bphit = check_bpt(sregs)))) {
 
@@ -85,12 +89,6 @@ run_sim(sregs, go, icount, dis)
 		sregs->asi = 8;
 	    else
 		sregs->asi = 9;
-#ifdef IUREV0
-	    if (iurev0 && sregs->rett_err) {
-		sregs->asi &= ~0x1;
-		sregs->asi |= ((sregs->psr & 0x040) >> 6);
-	    }
-#endif
 
 	    mexc = memory_read(sregs->asi, sregs->pc, &sregs->inst, &sregs->hold);
 	    if (sregs->annul) {
@@ -115,7 +113,8 @@ run_sim(sregs, go, icount, dis)
 		    }
 		    if ((sis_gdb_break) && (sregs->inst == 0x91d02001)) {
 			if (sis_verbose)
-			    printf_filtered("SW BP hit at %x\n", sregs->pc);
+			    (*sim_callback->printf_filtered) (sim_callback,
+							      "SW BP hit at %x\n", sregs->pc);
 			return (BPT_HIT);
 		    } else
 			dispatch_instruction(sregs);
@@ -131,14 +130,18 @@ run_sim(sregs, go, icount, dis)
 	    go = icount = 0;
 	}
     }
+    sim_stop();
     sregs->tottime += time(NULL) - sregs->starttime;
+    restore_stdio();
+    clearerr(stdin);
     if (sregs->err_mode)
 	error_mode(sregs->pc);
     if (sregs->err_mode)
 	return (ERROR);
     if (sregs->bphit) {
 	if (sis_verbose)
-	    printf_filtered("HW BP hit at %x\n", sregs->pc);
+	    (*sim_callback->printf_filtered) (sim_callback,
+					      "HW BP hit at %x\n", sregs->pc);
 	return (BPT_HIT);
     }
     if (ctrl_c) {
@@ -148,9 +151,22 @@ run_sim(sregs, go, icount, dis)
     return (TIME_OUT);
 }
 
+void
+sim_set_callbacks (ptr)
+     host_callback *ptr;
+{
+  sim_callback = ptr;
+}
 
 void
-sim_open(char *args)
+sim_size (memsize)
+     int memsize;
+{
+}
+
+void
+sim_open(args)
+     char *args;
 {
 
     int             argc = 0;
@@ -160,8 +176,8 @@ sim_open(char *args)
     int             grdl = 0;
     int             freq = 15;
 
-    printf_filtered("\n SIS - SPARC instruction simulator %s\n", sis_version);
-    printf_filtered(" Bug-reports to Jiri Gaisler ESA/ESTEC (jgais@wd.estec.esa.nl)\n");
+    (*sim_callback->printf_filtered) (sim_callback, "\n SIS - SPARC instruction simulator %s\n", sis_version);
+    (*sim_callback->printf_filtered) (sim_callback, " Bug-reports to Jiri Gaisler ESA/ESTEC (jgais@wd.estec.esa.nl)\n");
     argv = buildargv(args);
     if (argv != NULL)
 	while (argv[argc])
@@ -170,39 +186,40 @@ sim_open(char *args)
 	if (argv[stat][0] == '-') {
 	    if (strcmp(argv[stat], "-v") == 0) {
 		sis_verbose = 1;
-	    }
-#ifdef IUREV0
-	    if (strcmp(argv[stat], "-iurev0") == 0) {
-		iurev0 = 1;
-		printf_filtered(" simulating IU rev.0 jmpl/restore bug\n");
-	    }
-#endif
-#ifdef MECREV0
-	    if (strcmp(argv[stat], "-mecrev0") == 0) {
-		mecrev0 = 1;
-		printf_filtered(" simulating MEC rev.0 timer and uart interrupt bug\n");
-	    }
-#endif
+	    } else
 	    if (strcmp(argv[stat], "-nfp") == 0) {
-		printf_filtered("no FPU\n");
+		(*sim_callback->printf_filtered) (sim_callback, "no FPU\n");
 		nfp = 1;
-	    }
-            if (strcmp(argv[stat], "-uart1") == 0) {
-                if ((stat + 1) < argc)
-                    strcpy(uart_dev1, argv[++stat]);
-	    }
-            if (strcmp(argv[stat], "-uart2") == 0) {
-                if ((stat + 1) < argc)
-                    strcpy(uart_dev2, argv[++stat]);
-	    }
+	    } else
+            if (strcmp(argv[stat], "-ift") == 0) {
+                ift = 1;
+	    } else
+	    if (strcmp(argv[stat], "-sparclite") == 0) {
+		(*sim_callback->printf_filtered) (sim_callback, "simulating Sparclite\n");
+		sparclite = 1;
+	    } else
+            if (strcmp(argv[stat], "-wrp") == 0) {
+                wrp = 1;
+	    } else
+            if (strcmp(argv[stat], "-rom8") == 0) {
+                rom8 = 1;
+	    } else 
+	    if (strcmp(argv[stat], "-uart1") == 0) {
+		if ((stat + 1) < argc)
+		    strcpy(uart_dev1, argv[++stat]);
+	    } else
+	    if (strcmp(argv[stat], "-uart2") == 0) {
+		if ((stat + 1) < argc)
+		    strcpy(uart_dev2, argv[++stat]);
+	    } else
 	    if (strcmp(argv[stat], "-nogdb") == 0) {
-		printf_filtered("disabling GDB trap handling for breakpoints\n");
+		(*sim_callback->printf_filtered) (sim_callback, "disabling GDB trap handling for breakpoints\n");
 		sis_gdb_break = 0;
-	    }
+	    } else
 	    if (strcmp(argv[stat], "-freq") == 0)
 		if ((stat + 1) < argc) {
 		    freq = VAL(argv[++stat]);
-		    printf_filtered(" ERC32 freq %d Mhz\n", freq);
+		    (*sim_callback->printf_filtered) (sim_callback, " ERC32 freq %d Mhz\n", freq);
 		}
 	} else
 	    bfd_load(argv[stat]);
@@ -210,8 +227,8 @@ sim_open(char *args)
     }
     freeargv(argv);
     sregs.freq = freq;
-
-    INIT_DISASSEMBLE_INFO(dinfo, stdout, fprintf);
+    termsave = fcntl(0, F_GETFL, 0);
+    INIT_DISASSEMBLE_INFO(dinfo, stdout,(fprintf_ftype)fprintf);
     init_signals();
     reset_all();
     ebase.simtime = 0;
@@ -225,20 +242,31 @@ sim_close(int quitting)
 {
 
     exit_sim();
+    fcntl(0, F_SETFL, termsave);
 
 };
 
 /* Return non-zero if the caller should handle the load. Zero if
      we have loaded the image. */
+
+int sim_load PARAMS ((char *prog, int from_tty));
+
 int
-sim_load(char *prog, int from_tty)
+sim_load(prog, from_tty)
+     char *prog;
+     int from_tty;
 {
     bfd_load(prog);
     return (0);
 }
 
+void sim_create_inferior PARAMS ((SIM_ADDR start_address, char **argv, char **env));
+
 void
-sim_create_inferior(int start_address, char **argv, char **env)
+sim_create_inferior(start_address, argv, env)
+     SIM_ADDR start_address;
+     char **argv;
+     char **env;
 {
     ebase.simtime = 0;
     reset_all();
@@ -269,15 +297,20 @@ sim_fetch_register(regno, buf)
 
 int
 sim_write(mem, buf, length)
-    int             mem;
+    SIM_ADDR             mem;
     unsigned char  *buf;
     int             length;
 {
     return (sis_memory_write(mem, buf, length));
 }
 
+int sim_read PARAMS ((SIM_ADDR mem, unsigned char *buf, int length));
+
 int
-sim_read(int mem, unsigned char *buf, int length)
+sim_read(mem, buf, length)
+     SIM_ADDR mem;
+     unsigned char *buf;
+     int length;
 {
     return (sis_memory_read(mem, buf, length));
 }
@@ -292,10 +325,6 @@ sim_info(int verbose)
 
 int             simstat = OK;
 
-enum sim_stop {
-    sim_exited, sim_stopped, sim_signalled
-};
-
 void
 sim_stop_reason(enum sim_stop * reason, int *sigrc)
 {
@@ -309,6 +338,9 @@ sim_stop_reason(enum sim_stop * reason, int *sigrc)
     case TIME_OUT:
     case BPT_HIT:
 	*reason = sim_stopped;
+#ifdef _WIN32
+#define SIGTRAP 5
+#endif
 	*sigrc = SIGTRAP;
 	break;
     case ERROR:
@@ -375,15 +407,21 @@ sim_resume(int step, int siggnal)
 {
     simstat = run_sim(&sregs, 1, 0, 0);
 
-    flush_windows ();
+    if (sis_gdb_break) flush_windows ();
+}
+
+int
+sim_trace ()
+{
+  /* FIXME: unfinished */
+  sim_resume (0, 0);
+  return 1;
 }
 
 void
 sim_kill(void)
 {
-};
-
-
+}
 
 void
 sim_do_command(cmd)
@@ -392,7 +430,7 @@ sim_do_command(cmd)
     exec_cmd(&sregs, cmd);
 }
 
-
+#if 0 /* FIXME: These shouldn't exist.  */
 
 int
 sim_insert_breakpoint(int addr)
@@ -401,7 +439,7 @@ sim_insert_breakpoint(int addr)
 	sregs.bpts[sregs.bptnum] = addr & ~0x3;
 	sregs.bptnum++;
 	if (sis_verbose)
-	    printf_filtered("inserted HW BP at %x\n", addr);
+	    (*sim_callback->printf_filtered) (sim_callback, "inserted HW BP at %x\n", addr);
 	return 0;
     } else
 	return 1;
@@ -419,8 +457,10 @@ sim_remove_breakpoint(int addr)
 	    sregs.bpts[i] = sregs.bpts[i + 1];
 	sregs.bptnum -= 1;
 	if (sis_verbose)
-	    printf_filtered("removed HW BP at %x\n", addr);
+	    (*sim_callback->printf_filtered) (sim_callback, "removed HW BP at %x\n", addr);
 	return 0;
     }
     return 1;
 }
+
+#endif
