@@ -1,3 +1,8 @@
+Mon Mar  3 12:29:20 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* defs.h (LONGEST): Move #ifndef LONGEST to outside.
+	Try BFD_HOST_64_BIT if ! CC_HAS_LONG_LONG.
+
 Thu Feb 27 18:54:11 1997  Mark Alexander  <marka@cygnus.com>
 
 	* mips-tdep.c (IS_MIPS16_ADDR, MAKE_MIPS16_ADDR, UNMAKE_MIPS16_ADDR):
