@@ -1,5 +1,8 @@
 Tue Jan 10 18:42:07 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
+	* gdb.stabs/weird.exp: Allow spaces followed by backspaces in echo
+	of "file" command.
+
 	* gdb.c++/classes.exp (test_ptype_class_objects, ptype class Foo):
 	Add additional pattern for when "int operator int(void);" appears
 	in a different order.
