@@ -1654,11 +1654,18 @@ get_register (regnum, fp)
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
   int format = (int)fp;
+  int optim;
 
   if (format == 'N')
     format = 0;
 
-  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+  /* read_relative_register_raw_bytes returns a virtual frame pointer
+     (FRAME_FP (selected_frame)) if regnum == FP_REGNUM instead
+     of the real contents of the register. To get around this,
+     use get_saved_register instead. */
+  get_saved_register (raw_buffer, &optim, (CORE_ADDR *) NULL, selected_frame,
+                      regnum, (enum lval_type *) NULL);
+  if (optim)
     {
       Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
 				Tcl_NewStringObj ("Optimized out", -1));

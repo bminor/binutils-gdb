@@ -1,3 +1,8 @@
+Mon Dec 21 11:11:02 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* gdbtk-cmds.c (get_register): Call get_saved_register instead of
+	read_relative_register_raw_bytes to fetch registers.
+
 Thu Dec 17 09:00:56 1998  Keith Seitz  <keiths@cygnus.com>
 
         * gdbtk-cmds.c (gdb_search): Don't mention C++ RTTI and
