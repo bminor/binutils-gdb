@@ -18,6 +18,7 @@ base=`echo $1 | cut -d '.' -f 1`
 
 awk -f awkscan $1 | \
 sed -f sedscript | \
+sed -f unPROTO | \
 sed -f exmerge  | \
 sed -f exfilter  >$base.texi
 
