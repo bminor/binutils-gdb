@@ -1,3 +1,12 @@
+2004-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_dyn_reloc_entry): Add the reltext.
+	field to track if a relocation is against readonly section.
+	(count_dyn_reloc): Take a new argument for rent->reltext.
+	(elfNN_ia64_check_relocs): Adjust call to count_dyn_reloc.
+	(get_reloc_section): Don't set ia64_info->reltext here.
+	(allocate_dynrel_entries): Set ia64_info->reltext here.
+
 2004-02-24  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-frv.c (FRV_SYM_LOCAL): Weak undefined doesn't imply local.
