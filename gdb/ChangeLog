@@ -1,5 +1,16 @@
 2004-06-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386nbsd-nat.c: New file.
+	* Makefile.in (ALLDEPFILES): Add i386nbsd-nat.c, i386nbsd-tdep.c,
+	i386obsd-nat.c and i386obsd-tdep.c.
+	(i386nbsd-nat.o): New dependency.
+	* config/i386/obsd.mh (NATDEPFILES): Add i386nbsd-nat.o and
+	bsd-kvm.o.
+	(LOADLIBES): New variable.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Add i386nbsd-nat.o and
+	bsd-kvm.o.
+	(LOADLIBES): New variable.
+
 	* config/i386/fbsd64.mh (NATDEPFILES): Add bsd-kvm.o.
 	(LOADLIBES): New variable.
 
