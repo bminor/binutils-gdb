@@ -1,3 +1,7 @@
+2005-02-13  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
+	* ld-elf/warn1.d: Do not run on sparc64-*-solaris2*.
+
 2005-02-11  Paul Brook  <paul@codesourcery.com>
 
 	* ld-elf/symbol1w.s: Avoid using @function syntax.
