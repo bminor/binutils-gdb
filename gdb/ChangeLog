@@ -1,3 +1,19 @@
+2003-08-04  Andrew Cagney  <cagney@redhat.com>
+
+	* reggroups.c (struct reggroup_el): Define.
+	(struct reggroups): Delete field "nr_group".  Replace array
+	"group" with a "first" to "last" linked list.
+	(reggroups_init): Update.  Allocate using gdbarch's obstack.
+	(reggroups_free): Delete function.
+	(add_group): Update.  Add "el" parameter.
+	(reggroup_add): Pass gdbarch obstack allocated space to add_group.
+	(default_groups): Update.
+	(reggroup_next): Replace reggroups.
+	(reggroups_dump): Update.
+	(_initialize_reggroup): Pass XMALLOC allocated space to add_group.
+	* regcache.c (regcache_dump): Use reggroup_next instead of reggroups.
+	* infcmd.c (registers_info): Use reggroup_next instead of reggroups.
+
 2003-08-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (tui-interp.o): Update dependencies.

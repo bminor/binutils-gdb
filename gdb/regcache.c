@@ -1426,7 +1426,6 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 {
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   struct gdbarch *gdbarch = regcache->descr->gdbarch;
-  struct reggroup *const *groups = reggroups (gdbarch);
   int regnum;
   int footnote_nr = 0;
   int footnote_register_size = 0;
@@ -1597,13 +1596,15 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	    fprintf_unfiltered (file, "Groups");
 	  else
 	    {
-	      int i;
 	      const char *sep = "";
-	      for (i = 0; groups[i] != NULL; i++)
+	      struct reggroup *group;
+	      for (group = reggroup_next (gdbarch, NULL);
+		   group != NULL;
+		   group = reggroup_next (gdbarch, group))
 		{
-		  if (gdbarch_register_reggroup_p (gdbarch, regnum, groups[i]))
+		  if (gdbarch_register_reggroup_p (gdbarch, regnum, group))
 		    {
-		      fprintf_unfiltered (file, "%s%s", sep, reggroup_name (groups[i]));
+		      fprintf_unfiltered (file, "%s%s", sep, reggroup_name (group));
 		      sep = ",";
 		    }
 		}
