@@ -59,7 +59,7 @@ mmix_after_allocation ()
 {
   asection *sec
     = bfd_get_section_by_name (output_bfd, MMIX_REG_CONTENTS_SECTION_NAME);
-  bfd_vma regvma;
+  bfd_signed_vma regvma;
 
   /* If there's no register section, we don't need to do anything.  */
   if (sec == NULL)
@@ -73,7 +73,7 @@ mmix_after_allocation ()
 	   (unsigned) sec->_raw_size / 8);
 
   /* Set vma to correspond to first such register number * 8.  */
-  bfd_set_section_vma (output_bfd, sec, regvma);
+  bfd_set_section_vma (output_bfd, sec, (bfd_vma) regvma);
 
   /* ??? Why isn't the section size (_cooked_size) set?  Doesn't it get
      set regardless of presence of relocations?  */

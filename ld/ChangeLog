@@ -1,3 +1,8 @@
+2002-02-04  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* emultempl/mmix-elfnmmo.em (mmix_after_allocation): Use signed
+	arithmetic when checking for too many global registers.
+
 2002-02-02  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add ehppanbsd.o.
