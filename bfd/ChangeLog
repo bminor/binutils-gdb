@@ -1,3 +1,16 @@
+Fri Mar 17 11:50:34 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elfcode.h (elf_link_add_object_symbols): Check whether a dynamic
+	object has already been included, and ignore it the second time.
+
+Wed Mar 15 11:56:40 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-sparc.c (elf_sparc_howto_table): Change R_SPARC_GOT13 from
+	complain_overflow_bitfield to complain_overflow_signed.
+
+	* libelf.h (bfd_elf32__write_relocs): Don't declare.
+	(bfd_elf64__write_relocs): Don't declare.
+
 Tue Mar 14 05:54:33 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* stab-syms.c (aout_stab_name): Moved aout_stab_names to be local
