@@ -1147,6 +1147,11 @@ struct section_table
     bfd *bfd;			/* BFD file pointer */
   };
 
+/* Return the "section" containing the specified address.  */
+struct section_table *target_section_by_addr (struct target_ops *target,
+					      CORE_ADDR addr);
+
+
 /* Builds a section table, given args BFD, SECTABLE_PTR, SECEND_PTR.
    Returns 0 if OK, 1 on error.  */
 

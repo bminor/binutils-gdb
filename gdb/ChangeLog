@@ -1,5 +1,9 @@
 2003-10-17  Andrew Cagney  <cagney@redhat.com>
 
+	* target.c (target_section_by_addr): New function.
+	(do_xfer_memory): Use "target_section_by_addr".
+	* target.h (target_section_by_addr): Declare.
+
 	* target.h (struct target_ops): Add "to_read_partial" and
 	"to_write_partial", delete "to_query".
 	(target_read_partial, target_write_partial): Declare.

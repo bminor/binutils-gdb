@@ -814,6 +814,21 @@ done:
   return nbytes_read;
 }
 
+/* Find a section containing ADDR.  */
+struct section_table *
+target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
+{
+  struct section_table *secp;
+  for (secp = target->to_sections;
+       secp < target->to_sections_end;
+       secp++)
+    {
+      if (addr >= secp->addr && addr < secp->endaddr)
+	return secp;
+    }
+  return NULL;
+}
+
 /* Read LEN bytes of target memory at address MEMADDR, placing the results in
    GDB's memory at MYADDR.  Returns either 0 for success or an errno value
    if any error occurs.
@@ -861,22 +876,15 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 
   if (!write && trust_readonly)
     {
+      struct section_table *secp;
       /* User-settable option, "trust-readonly-sections".  If true,
          then memory from any SEC_READONLY bfd section may be read
-         directly from the bfd file. */
-
-      struct section_table *secp;
-
-      for (secp = current_target.to_sections;
-	   secp < current_target.to_sections_end;
-	   secp++)
-	{
-	  if (bfd_get_section_flags (secp->bfd, secp->the_bfd_section) 
-	      & SEC_READONLY)
-	    if (memaddr >= secp->addr && memaddr < secp->endaddr)
-	      return xfer_memory (memaddr, myaddr, len, 0, 
-				  attrib, &current_target);
-	}
+         directly from the bfd file.  */
+      secp = target_section_by_addr (&current_target, memaddr);
+      if (secp != NULL
+	  && (bfd_get_section_flags (secp->bfd, secp->the_bfd_section)
+	      & SEC_READONLY))
+	return xfer_memory (memaddr, myaddr, len, 0, attrib, &current_target);
     }
 
   /* The quick case is that the top target can handle the transfer.  */
