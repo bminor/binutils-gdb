@@ -1,5 +1,7 @@
 Mon Apr  6 14:34:08 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* configure.in:  sco is an os, not a vendor!
+
 	* configure:  Quote $( better.  Keep various shells happy.
 
 Tue Mar 31 16:32:57 1992  K. Richard Pixley  (rich@cygnus.com)

@@ -16,6 +16,7 @@ aix*)		host_makefile_frag=config/mh-aix ;;
 m88kbcs)	host_makefile_frag=config/mh-delta88;;
 sysv4*)		host_makefile_frag=config/mh-sysv4 ;;
 sysv* | irix3)	host_makefile_frag=config/mh-sysv ;;
+sco*)		host_makefile_frag=config/mh-sco ;;
 irix4)		host_makefile_frag=config/mh-irix4 ;;
 ultrix*)
 	case "${host_cpu}" in
@@ -24,7 +25,6 @@ ultrix*)
 esac
 
 case "${host_vendor}" in
-sco*)		host_makefile_frag=config/mh-sco ;;
 apollo*)	case "${host_cpu}" in
 		m68k*)
 			host_makefile_frag=config/mh-apollo68 ;;
