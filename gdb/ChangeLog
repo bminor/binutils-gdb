@@ -1,3 +1,7 @@
+Fri May 17 13:31:04 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* sh-stub.c: New file, was config/sh/stub.c.
+
 start-sanitize-gdbtk
 Thu May 16 19:20:29 1996  Fred Fish  <fnf@fishfood.ninemoons.com>
 
