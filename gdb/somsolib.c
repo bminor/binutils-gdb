@@ -34,6 +34,7 @@ and by Cygnus Support.  */
 #include "objfiles.h"
 #include "inferior.h"
 #include "gdb-stabs.h"
+#include "gdbcmd.h"
 
 /* TODO:
 
@@ -94,6 +95,17 @@ struct so_list
   struct section_table *sections_end;
   struct so_list *next;
 };
+
+/* If true, then shared library symbols will be added automatically
+   when the inferior is created.  This is almost always what users
+   will want to have happen; but for very large programs, the startup
+   time will be excessive, and so if this is a problem, the user can
+   clear this flag and then add the shared library symbols as needed.
+   Note that there is a potential for confusion, since if the shared
+   library symbols are not loaded, commands like "info fun" will *not*
+   report all the functions that are actually present.  */
+
+int auto_solib_add_at_startup = 1;
 
 static struct so_list *so_list_head;
 
@@ -559,7 +571,8 @@ som_solib_create_inferior_hook()
       return;
     }
 
-  som_solib_add ((char *) 0, 0, (struct target_ops *) 0);
+  if (auto_solib_add_at_startup)
+    som_solib_add ((char *) 0, 0, (struct target_ops *) 0);
 }
 
 /* Return the GOT value for the shared library in which ADDR belongs.  If
@@ -692,4 +705,14 @@ _initialize_som_solib ()
            "Load shared object library symbols for files matching REGEXP.");
   add_info ("sharedlibrary", som_sharedlibrary_info_command,
 	    "Status of loaded shared object libraries.");
+  add_show_from_set
+    (add_set_cmd ("auto-solib-add", class_support, var_zinteger,
+		  (char *) &auto_solib_add_at_startup,
+		  "Set autoloading of shared library symbols at startup.\n\
+If nonzero, symbols from all shared object libraries will be loaded\n\
+automatically when the inferior begins execution.  Otherwise, symbols\n\
+must be loaded manually, using `sharedlibrary'.",
+		  &setlist),
+     &showlist);
+
 }

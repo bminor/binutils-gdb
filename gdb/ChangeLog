@@ -1,3 +1,11 @@
+Wed Sep 13 08:45:02 1995  Jeff Law  (law@fast.cs.utah.edu)
+
+	* somsolib.c (auto_solib_add_at_startup): Define new global variable.
+	(som_solib_create_inferior_hook): Don't add libraries if
+	auto_solib_add_at_startup is zero.
+	(_initialize_som_solib): Add command to toggle
+	auto_solib_add_at_startup.
+
 Tue Sep 12 19:37:24 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* monitor.c (monitor_make_srec): Fix thinkos in computation
