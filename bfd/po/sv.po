@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bfd 2.14rel030712\n"
 "POT-Creation-Date: 2003-07-11 13:53+0930\n"
-"PO-Revision-Date: 2003-07-16 14:38+0200\n"
+"PO-Revision-Date: 2003-07-17 22:55+0200\n"
 "Last-Translator: Christian Rose <menthos@menthos.com>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1052,7 +1052,7 @@ msgstr "ip2k-länkare: redundant sidinstruktion vid 0x%08lx (dest = 0x%08lx)."
 #. Only if it's not an unresolved symbol.
 #: elf32-ip2k.c:1593
 msgid "unsupported relocation between data/insn address spaces"
-msgstr "omlokalisering mellan data/instruktionsadressutrymmen stöds inte"
+msgstr "omlokalisering mellan data/-instruktionsadressutrymmen stöds inte"
 
 #: elf32-iq2000.c:907 elf32-m68hc1x.c:1431 elf32-ppc.c:2175 elf64-sparc.c:3072
 #: elfxx-mips.c:9195
@@ -1649,7 +1649,7 @@ msgstr "kan inte bygga grenstubb \"%s\""
 
 #: elf64-ppc.c:7047
 msgid ".glink and .plt too far apart"
-msgstr ".glink och .plt för långt ifrån"
+msgstr ".glink och .plt för långt ifrån varandra"
 
 #: elf64-ppc.c:7135
 msgid "stubs don't match calculated size"
@@ -2624,12 +2624,12 @@ msgstr "%s: länkar icke-pic-kod i en positionsoberoende körbar fil"
 #: elf32-ia64.c:4363 elf64-ia64.c:4363
 #, c-format
 msgid "%s: @internal branch to dynamic symbol %s"
-msgstr "%s: @internal-gren mot dynamiska symbolen %s"
+msgstr "%s: @internal-gren till dynamiska symbolen %s"
 
 #: elf32-ia64.c:4365 elf64-ia64.c:4365
 #, c-format
 msgid "%s: speculation fixup to dynamic symbol %s"
-msgstr "%s: spekulationsfix mot dynamiska symbolen %s"
+msgstr "%s: spekulationsfix till dynamiska symbolen %s"
 
 #: elf32-ia64.c:4367 elf64-ia64.c:4367
 #, c-format
