@@ -847,6 +847,8 @@ parse_register_dump (buf, len)
 	 points to the start of the register value.  */
       struct re_registers register_strings;
 
+      memset (&register_strings, 0, sizeof (struct re_registers));
+
       if (re_search (&register_pattern, buf, len, 0, len,
 		     &register_strings) == -1)
 	break;
@@ -1759,6 +1761,7 @@ monitor_read_memory (memaddr, myaddr, len)
       struct re_registers resp_strings;
       RDEBUG(("MON getmem.resp_delim %s\n",current_monitor->getmem.resp_delim)) ;
 
+      memset (&resp_strings, 0, sizeof (struct re_registers));
       tmp = strlen (p);
       retval = re_search (&getmem_resp_delim_pattern, p, tmp, 0, tmp,
 			  &resp_strings);

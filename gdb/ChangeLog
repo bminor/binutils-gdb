@@ -1,3 +1,8 @@
+1998-12-03  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+        * monitor.c (monitor_read_memory): Zero out pattern buffers
+        before calling re_search.
+        (parse_register_dump): Ditto.
 
 Thu Dec  3 10:37:22 EST 1998  Zdenek Radouch   (radouch@cygnus.com)
 
@@ -5,7 +10,6 @@ Thu Dec  3 10:37:22 EST 1998  Zdenek Radouch   (radouch@cygnus.com)
 	* configure.tgt
 	* fr30-tdep.c
 	* config/fr30/tm-fr30.h
-
 	
 Thu Dec  3 16:30:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
