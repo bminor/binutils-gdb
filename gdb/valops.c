@@ -1,6 +1,6 @@
 /* Perform non-arithmetic operations on values, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -64,16 +64,20 @@ static struct value *search_struct_method (char *, struct value **,
 
 static int check_field_in (struct type *, const char *);
 
-
 static struct value *value_struct_elt_for_reference (struct type *domain,
 						     int offset,
 						     struct type *curtype,
 						     char *name,
-						     struct type *intype);
+						     struct type *intype,
+						     enum noside noside);
 
 static struct value *value_namespace_elt (const struct type *curtype,
-					  const char *name,
+					  char *name,
 					  enum noside noside);
+
+static struct value *value_maybe_namespace_elt (const struct type *curtype,
+						char *name,
+						enum noside noside);
 
 static CORE_ADDR allocate_space_in_inferior (int);
 
@@ -2234,7 +2238,8 @@ value_aggregate_elt (struct type *curtype,
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      return value_struct_elt_for_reference (curtype, 0, curtype, name, NULL);
+      return value_struct_elt_for_reference (curtype, 0, curtype, name, NULL,
+					     noside);
     case TYPE_CODE_NAMESPACE:
       return value_namespace_elt (curtype, name, noside);
     default:
@@ -2250,10 +2255,11 @@ value_aggregate_elt (struct type *curtype,
    "pointers to member functions".  This function is used
    to resolve user expressions of the form "DOMAIN::NAME".  */
 
-struct value *
+static struct value *
 value_struct_elt_for_reference (struct type *domain, int offset,
 				struct type *curtype, char *name,
-				struct type *intype)
+				struct type *intype,
+				enum noside noside)
 {
   struct type *t = curtype;
   int i;
@@ -2376,11 +2382,17 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 					  offset + base_offset,
 					  TYPE_BASECLASS (t, i),
 					  name,
-					  intype);
+					  intype,
+					  noside);
       if (v)
 	return v;
     }
-  return 0;
+
+  /* As a last chance, pretend that CURTYPE is a namespace, and look
+     it up that way; this (frequently) works for types nested inside
+     classes.  */
+
+  return value_maybe_namespace_elt (curtype, name, noside);
 }
 
 /* C++: Return the member NAME of the namespace given by the type
@@ -2388,24 +2400,11 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
 static struct value *
 value_namespace_elt (const struct type *curtype,
-		     const char *name,
+		     char *name,
 		     enum noside noside)
 {
-  const char *namespace_name = TYPE_TAG_NAME (curtype);
-  struct symbol *sym;
-  struct value *retval;
-
-  sym = cp_lookup_symbol_namespace (namespace_name, name, NULL,
-				    get_selected_block (0), VAR_DOMAIN,
-				    NULL);
-
-  if (sym == NULL)
-    retval = NULL;
-  else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
-	   && (SYMBOL_CLASS (sym) == LOC_TYPEDEF))
-    retval = allocate_value (SYMBOL_TYPE (sym));
-  else
-    retval = value_of_variable (sym, get_selected_block (0));
+  struct value *retval = value_maybe_namespace_elt (curtype, name,
+						    noside);
 
   if (retval == NULL)
     error ("No symbol \"%s\" in namespace \"%s\".", name,
@@ -2414,6 +2413,32 @@ value_namespace_elt (const struct type *curtype,
   return retval;
 }
 
+/* A helper function used by value_namespace_elt and
+   value_struct_elt_for_reference.  It looks up NAME inside the
+   context CURTYPE; this works if CURTYPE is a namespace or if CURTYPE
+   is a class and NAME refers to a type in CURTYPE itself (as opposed
+   to, say, some base class of CURTYPE).  */
+
+static struct value *
+value_maybe_namespace_elt (const struct type *curtype,
+			   char *name,
+			   enum noside noside)
+{
+  const char *namespace_name = TYPE_TAG_NAME (curtype);
+  struct symbol *sym;
+
+  sym = cp_lookup_symbol_namespace (namespace_name, name, NULL,
+				    get_selected_block (0), VAR_DOMAIN,
+				    NULL);
+
+  if (sym == NULL)
+    return NULL;
+  else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
+	   && (SYMBOL_CLASS (sym) == LOC_TYPEDEF))
+    return allocate_value (SYMBOL_TYPE (sym));
+  else
+    return value_of_variable (sym, get_selected_block (0));
+}
 
 /* Given a pointer value V, find the real (RTTI) type
    of the object it points to.

@@ -32,9 +32,12 @@
 #include "dictionary.h"
 #include "command.h"
 
-/* When set, the file that we're processing seems to have debugging
-   info for C++ namespaces, so cp-namespace.c shouldn't try to guess
-   namespace info itself.  */
+/* When set, the file that we're processing is known to have debugging
+   info for C++ namespaces.  */
+
+/* NOTE: carlton/2004-01-13: No currently released version of GCC (the
+   latest of which is 3.3.x at the time of this writing) produces this
+   debug info.  GCC 3.4 should, however.  */
 
 unsigned char processing_has_namespace_info;
 
@@ -222,12 +225,6 @@ cp_set_block_scope (const struct symbol *symbol,
 
   if (SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
     {
-#if 0
-      /* FIXME: carlton/2003-06-12: As mentioned above,
-	 'processing_has_namespace_info' currently isn't entirely
-	 reliable, so let's always use demangled names to get this
-	 information for now.  */
-
       if (processing_has_namespace_info)
 	{
 	  block_set_scope
@@ -237,7 +234,6 @@ cp_set_block_scope (const struct symbol *symbol,
 	     obstack);
 	}
       else
-#endif
 	{
 	  /* Try to figure out the appropriate namespace from the
 	     demangled name.  */
@@ -520,10 +516,6 @@ lookup_symbol_file (const char *name,
    class or namespace given by PARENT_TYPE, from within the context
    given by BLOCK.  Return NULL if there is no such nested type.  */
 
-/* FIXME: carlton/2003-09-24: For now, this only works for nested
-   namespaces; the patch to make this work on other sorts of nested
-   types is next on my TODO list.  */
-
 struct type *
 cp_lookup_nested_type (struct type *parent_type,
 		       const char *nested_name,
@@ -531,8 +523,16 @@ cp_lookup_nested_type (struct type *parent_type,
 {
   switch (TYPE_CODE (parent_type))
     {
+    case TYPE_CODE_STRUCT:
     case TYPE_CODE_NAMESPACE:
       {
+	/* NOTE: carlton/2003-11-10: We don't treat C++ class members
+	   of classes like, say, data or function members.  Instead,
+	   they're just represented by symbols whose names are
+	   qualified by the name of the surrounding class.  This is
+	   just like members of namespaces; in particular,
+	   lookup_symbol_namespace works when looking them up.  */
+
 	const char *parent_name = TYPE_TAG_NAME (parent_type);
 	struct symbol *sym = cp_lookup_symbol_namespace (parent_name,
 							 nested_name,
@@ -547,7 +547,7 @@ cp_lookup_nested_type (struct type *parent_type,
       }
     default:
       internal_error (__FILE__, __LINE__,
-		      "cp_lookup_nested_type called on a non-namespace.");
+		      "cp_lookup_nested_type called on a non-aggregate type.");
     }
 }
 

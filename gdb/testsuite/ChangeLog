@@ -1,3 +1,10 @@
+2004-01-14  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/namespace.exp: Add tests involving classes defined within
+	namespaces.
+	* gdb.cp/namespace.cc (C::CClass): New.
+	* gdb.cp/namespace1.cc (C::OtherFileClass): New.
+
 2004-01-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.base/sepdebug.exp: Bail out of the test if we don't know

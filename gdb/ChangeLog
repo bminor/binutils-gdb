@@ -1,3 +1,41 @@
+2004-01-14  David Carlton  <carlton@kealia.com>
+
+	Change symbols for C++ nested types to contain the fully qualified
+	name, if possible.  (At least in the DWARF-2 case.)  Partial fix
+	for PR's c++/57, c++/488, c++/539, c++/573, c++/609, c++/832,
+	c++/895.
+	* c-exp.y (qualified_type): Handle types nested within classes.
+	* cp-namespace.c: Update comments.
+	(cp_set_block_scope): Delete #if 0.
+	(cp_lookup_nested_type): Handle types nested within classes.
+	* dwarf2read.c: (scan_partial_symbols): Call add_partial_structure
+	when appropriate.
+	(add_partial_symbol): Add the name of the enclosing namespace to
+	types.
+	(pdi_needs_namespace): New.
+	(add_partial_namespace): Tweak comment.
+	(add_partial_structure): New.
+	(psymtab_to_symtab_1): Initialize processing_current_prefix
+	here...
+	(process_die): instead of here.
+	(read_structure_scope): Try to figure out the name of the class or
+	namespace that the structure might be defined within.
+	(read_enumeration): Generate fully-qualified names, if possible.
+	(read_namespace): Don't set name to NULL.
+	(die_specification): New.
+	(new_symbol): Generate fully-qualified names for types.
+	(read_type_die): Determine appropriate prefix.
+	(determine_prefix): New.
+	(typename_concat): New.
+	(class_name): New.
+	* valops.c (value_aggregate_elt): Pass NOSIDE to
+	value_struct_elt_for_reference.
+	(value_struct_elt_for_reference): Make static, add NOSIDE
+	parameter, call value_maybe_namespace_elt as a last resort.
+	(value_namespace_elt): Break out code into
+	value_maybe_namespace_elt.
+	(value_maybe_namespace_elt): New.
+
 2004-01-12  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_convert_register_p): Handle both raw and
