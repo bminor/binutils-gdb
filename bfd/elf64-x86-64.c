@@ -153,7 +153,8 @@ static boolean elf64_x86_64_finish_dynamic_symbol
 	   Elf_Internal_Sym *sym));
 static boolean elf64_x86_64_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
-static enum elf_reloc_type_class elf64_x86_64_reloc_type_class PARAMS ((int));
+static enum elf_reloc_type_class elf64_x86_64_reloc_type_class
+  PARAMS ((const Elf_Internal_Rela *));
 
 /* Given a BFD reloc type, return a HOWTO structure.  */
 static reloc_howto_type *
@@ -1936,10 +1937,10 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 }
 
 static enum elf_reloc_type_class
-elf64_x86_64_reloc_type_class (type)
-     int type;
+elf64_x86_64_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELF64_R_TYPE (rela->r_info))
     {
     case R_X86_64_RELATIVE:
       return reloc_class_relative;

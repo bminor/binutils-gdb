@@ -96,7 +96,8 @@ static boolean sparc64_elf_slurp_reloc_table
 static long sparc64_elf_canonicalize_dynamic_reloc
   PARAMS ((bfd *, arelent **, asymbol **));
 static void sparc64_elf_write_relocs PARAMS ((bfd *, asection *, PTR));
-static enum elf_reloc_type_class sparc64_elf_reloc_type_class PARAMS ((int));
+static enum elf_reloc_type_class sparc64_elf_reloc_type_class
+  PARAMS ((const Elf_Internal_Rela *));
 
 /* The relocation "howto" table.  */
 
@@ -2917,10 +2918,10 @@ sparc64_elf_finish_dynamic_sections (output_bfd, info)
 }
 
 static enum elf_reloc_type_class
-sparc64_elf_reloc_type_class (type)
-     int type;
+sparc64_elf_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELF64_R_TYPE (rela->r_info))
     {
     case R_SPARC_RELATIVE:
       return reloc_class_relative;

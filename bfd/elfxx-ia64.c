@@ -301,7 +301,7 @@ static boolean elfNN_ia64_merge_private_bfd_data
 static boolean elfNN_ia64_print_private_bfd_data
   PARAMS ((bfd *abfd, PTR ptr));
 static enum elf_reloc_type_class elfNN_ia64_reloc_type_class
-  PARAMS ((int));
+  PARAMS ((const Elf_Internal_Rela *));
 
 /* ia64-specific relocation */
 
@@ -4330,10 +4330,10 @@ elfNN_ia64_print_private_bfd_data (abfd, ptr)
 }
 
 static enum elf_reloc_type_class
-elfNN_ia64_reloc_type_class (type)
-     int type;
+elfNN_ia64_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELFNN_R_TYPE (rela->r_info))
     {
     case R_IA64_REL32MSB:
     case R_IA64_REL32LSB:

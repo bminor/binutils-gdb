@@ -63,7 +63,8 @@ static boolean elf_i386_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_i386_fake_sections
   PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
-static enum elf_reloc_type_class elf_i386_reloc_type_class PARAMS ((int));
+static enum elf_reloc_type_class elf_i386_reloc_type_class
+  PARAMS ((const Elf_Internal_Rela *));
 static boolean elf_i386_grok_prstatus
   PARAMS ((bfd *abfd, Elf_Internal_Note *note));
 static boolean elf_i386_grok_psinfo
@@ -2186,10 +2187,10 @@ elf_i386_fake_sections (abfd, hdr, sec)
 }
 
 static enum elf_reloc_type_class
-elf_i386_reloc_type_class (type)
-     int type;
+elf_i386_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELF32_R_TYPE (rela->r_info))
     {
     case R_386_RELATIVE:
       return reloc_class_relative;

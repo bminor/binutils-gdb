@@ -53,7 +53,7 @@ static boolean elf32_sparc_object_p
 static void elf32_sparc_final_write_processing
   PARAMS ((bfd *, boolean));
 static enum elf_reloc_type_class elf32_sparc_reloc_type_class
-  PARAMS ((int));
+  PARAMS ((const Elf_Internal_Rela *));
 static asection * elf32_sparc_gc_mark_hook
   PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
@@ -2082,10 +2082,10 @@ elf32_sparc_final_write_processing (abfd, linker)
 }
 
 static enum elf_reloc_type_class
-elf32_sparc_reloc_type_class (type)
-     int type;
+elf32_sparc_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELF32_R_TYPE (rela->r_info))
     {
     case R_SPARC_RELATIVE:
       return reloc_class_relative;

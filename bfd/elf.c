@@ -5982,8 +5982,8 @@ _bfd_elf_fprintf_vma (abfd, stream, value)
 }
 
 enum elf_reloc_type_class
-_bfd_elf_reloc_type_class (type)
-     int type ATTRIBUTE_UNUSED;
+_bfd_elf_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela ATTRIBUTE_UNUSED;
 {
   return reloc_class_normal;
 }

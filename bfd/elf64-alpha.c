@@ -136,7 +136,7 @@ static boolean elf64_alpha_merge_ind_symbols
 static Elf_Internal_Rela * elf64_alpha_find_reloc_at_ofs
   PARAMS ((Elf_Internal_Rela *, Elf_Internal_Rela *, bfd_vma, int));
 static enum elf_reloc_type_class elf64_alpha_reloc_type_class
-  PARAMS ((int));
+  PARAMS ((const Elf_Internal_Rela *));
 
 struct alpha_elf_link_hash_entry
 {
@@ -4131,10 +4131,10 @@ elf64_alpha_final_link (abfd, info)
 }
 
 static enum elf_reloc_type_class
-elf64_alpha_reloc_type_class (type)
-     int type;
+elf64_alpha_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELF64_R_TYPE (rela->r_info))
     {
     case R_ALPHA_RELATIVE:
       return reloc_class_relative;

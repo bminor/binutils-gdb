@@ -64,7 +64,7 @@ static boolean elf32_m68k_merge_private_bfd_data
 static boolean elf32_m68k_print_private_bfd_data
   PARAMS ((bfd *, PTR));
 static enum elf_reloc_type_class elf32_m68k_reloc_type_class
-  PARAMS ((int));
+  PARAMS ((const Elf_Internal_Rela *));
 
 static reloc_howto_type howto_table[] = {
   HOWTO(R_68K_NONE,       0, 0, 0, false,0, complain_overflow_dont,     bfd_elf_generic_reloc, "R_68K_NONE",      false, 0, 0x00000000,false),
@@ -2308,10 +2308,10 @@ error_return:
 }
 
 static enum elf_reloc_type_class
-elf32_m68k_reloc_type_class (type)
-     int type;
+elf32_m68k_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELF32_R_TYPE (rela->r_info))
     {
     case R_68K_RELATIVE:
       return reloc_class_relative;

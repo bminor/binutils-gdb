@@ -1,3 +1,27 @@
+2001-09-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (elf_backend_reloc_type_class): Pass in the entire
+	reloc rather than just the type.
+	(_bfd_elf_reloc_type_class): Likewise.
+	* elf.c (_bfd_elf_reloc_type_class): Likewise.
+	* elf32-arm.h (elf32_arm_reloc_type_class): Likewise.
+	* elf32-cris.c (elf_cris_reloc_type_class): Likewise.
+	* elf32-i386.c (elf_i386_reloc_type_class): Likewise.
+	* elf32-m68k.c (elf32_m68k_reloc_type_class): Likewise.
+	* elf32-ppc.c (ppc_elf_reloc_type_class): Likewise.
+	* elf32-s390.c (elf_s390_reloc_type_class): Likewise.
+	* elf32-sh.c (sh_elf_reloc_type_class): Likewise.
+	* elf32-sparc.c (elf32_sparc_reloc_type_class): Likewise.
+	* elf64-alpha.c (elf64_alpha_reloc_type_class): Likewise.
+	* elf64-s390.c (elf_s390_reloc_type_class): Likewise.
+	* elf64-sparc.c (sparc64_elf_reloc_type_class): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_reloc_type_class): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_reloc_type_class): Likewise.
+	* elflink.h: Formatting fixes.
+	(elf_link_sort_relocs): Make "count" and "size" bfd_size_type.
+	Call bfd_zmalloc rather than calloc.  Remove unnecessary cast of
+	o->contents to PTR.  Update call to elf_backend_reloc_type_class.
+
 2001-09-22  John Reiser  <jreiser@BitWagon.com>
 
 	* elfcode.h (elf_object_p): Allow for no section header at all in
@@ -90,23 +114,23 @@
 
 2001-09-20  John Reiser  <jreiser@BitWagon.com>
 	
-	* elf32-i386.c (elf_i386_relocate_section): coordinate info->symbolic
-	  and info->allow_shlib_undefined.
-	* elf32-cris.c: likewise
-	* elf32-hppa.c: likewise
-	* elf32-m68k.c: likewise
-	* elf32-mips.c: likewise
-	* elf32-ppc.c: likewise
-	* elf32-s390.c: likewise
-	* elf32-sh.c: likewise
-	* elf32-sparc.c: likewise
-	* elf64-alpha.c: likewise
-	* elf64-hppa.c: likewise
-	* elf64-ppc.c: likewise
-	* elf64-s390.c: likewise
-	* elf64-sparc.c: likewise
-	* elf64-x86-64.c: likewise
-	* elfxx-ia64.c: likewise
+	* elf32-i386.c (elf_i386_relocate_section): Coordinate info->symbolic
+	and info->allow_shlib_undefined.
+	* elf32-cris.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mips.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-sparc.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfxx-ia64.c: Likewise.
 
 2001-09-18  Bruno Haible  <haible@clisp.cons.org>
 

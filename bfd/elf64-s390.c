@@ -56,7 +56,8 @@ static boolean elf_s390_finish_dynamic_symbol
 static boolean elf_s390_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_s390_object_p PARAMS ((bfd *));
-static enum elf_reloc_type_class elf_s390_reloc_type_class PARAMS ((int));
+static enum elf_reloc_type_class elf_s390_reloc_type_class
+  PARAMS ((const Elf_Internal_Rela *));
 
 #define USE_RELA 1		/* We want RELA relocations, not REL.  */
 
@@ -2100,10 +2101,10 @@ elf_s390_object_p (abfd)
 
 
 static enum elf_reloc_type_class
-elf_s390_reloc_type_class (type)
-     int type;
+elf_s390_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELF64_R_TYPE (rela->r_info))
     {
     case R_390_RELATIVE:
       return reloc_class_relative;

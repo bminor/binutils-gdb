@@ -108,7 +108,8 @@ static boolean ppc_elf_finish_dynamic_symbol PARAMS ((bfd *,
 						      Elf_Internal_Sym *));
 
 static boolean ppc_elf_finish_dynamic_sections PARAMS ((bfd *, struct bfd_link_info *));
-static enum elf_reloc_type_class ppc_elf_reloc_type_class PARAMS ((int));
+static enum elf_reloc_type_class ppc_elf_reloc_type_class
+  PARAMS ((const Elf_Internal_Rela *));
 static boolean ppc_elf_grok_prstatus
   PARAMS ((bfd *abfd, Elf_Internal_Note *note));
 static boolean ppc_elf_grok_psinfo
@@ -3717,10 +3718,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 }
 
 static enum elf_reloc_type_class
-ppc_elf_reloc_type_class (type)
-     int type;
+ppc_elf_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELF32_R_TYPE (rela->r_info))
     {
     case R_PPC_RELATIVE:
       return reloc_class_relative;

@@ -84,7 +84,7 @@ static boolean sh_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 static enum elf_reloc_type_class sh_elf_reloc_type_class
-  PARAMS ((int));
+  PARAMS ((const Elf_Internal_Rela *));
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -4434,10 +4434,10 @@ sh_elf_finish_dynamic_sections (output_bfd, info)
 }
 
 static enum elf_reloc_type_class
-sh_elf_reloc_type_class (type)
-     int type;
+sh_elf_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELF32_R_TYPE (rela->r_info))
     {
     case R_SH_RELATIVE:
       return reloc_class_relative;

@@ -86,7 +86,7 @@ static boolean elf_cris_finish_dynamic_sections
 static void elf_cris_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static enum elf_reloc_type_class elf_cris_reloc_type_class
-  PARAMS ((int));
+  PARAMS ((const Elf_Internal_Rela *));
 
 static reloc_howto_type cris_elf_howto_table [] =
 {
@@ -2981,10 +2981,10 @@ cris_elf_merge_private_bfd_data (ibfd, obfd)
 
 
 static enum elf_reloc_type_class
-elf_cris_reloc_type_class (type)
-     int type;
+elf_cris_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELF32_R_TYPE (rela->r_info))
     {
     case R_CRIS_RELATIVE:
       return reloc_class_relative;

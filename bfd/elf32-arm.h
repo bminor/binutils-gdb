@@ -92,7 +92,7 @@ boolean bfd_elf32_arm_get_bfd_for_interworking
 boolean bfd_elf32_arm_process_before_allocation
   PARAMS ((bfd *, struct bfd_link_info *, int));
 static enum elf_reloc_type_class elf32_arm_reloc_type_class
-  PARAMS ((int));
+  PARAMS ((const Elf_Internal_Rela *));
 
 #define INTERWORK_FLAG(abfd)   (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK)
 
@@ -3459,10 +3459,10 @@ elf32_arm_post_process_headers (abfd, link_info)
 }
 
 static enum elf_reloc_type_class
-elf32_arm_reloc_type_class (type)
-     int type;
+elf32_arm_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
 {
-  switch (type)
+  switch ((int) ELF32_R_TYPE (rela->r_info))
     {
     case R_ARM_RELATIVE:
       return reloc_class_relative;

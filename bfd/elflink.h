@@ -4338,8 +4338,8 @@ elf_link_sort_cmp1 (A, B)
      const PTR A;
      const PTR B;
 {
-  struct elf_link_sort_rela *a = (struct elf_link_sort_rela *)A;
-  struct elf_link_sort_rela *b = (struct elf_link_sort_rela *)B;
+  struct elf_link_sort_rela *a = (struct elf_link_sort_rela *) A;
+  struct elf_link_sort_rela *b = (struct elf_link_sort_rela *) B;
   int relativea, relativeb;
 
   relativea = a->type == reloc_class_relative;
@@ -4365,8 +4365,8 @@ elf_link_sort_cmp2 (A, B)
      const PTR A;
      const PTR B;
 {
-  struct elf_link_sort_rela *a = (struct elf_link_sort_rela *)A;
-  struct elf_link_sort_rela *b = (struct elf_link_sort_rela *)B;
+  struct elf_link_sort_rela *a = (struct elf_link_sort_rela *) A;
+  struct elf_link_sort_rela *b = (struct elf_link_sort_rela *) B;
   int copya, copyb;
 
   if (a->offset < b->offset)
@@ -4395,7 +4395,8 @@ elf_link_sort_relocs (abfd, info, psec)
   bfd *dynobj = elf_hash_table (info)->dynobj;
   asection *reldyn, *o;
   boolean rel = false;
-  size_t count, size, i, j, ret;
+  bfd_size_type count, size;
+  size_t i, j, ret;
   struct elf_link_sort_rela *rela;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
@@ -4421,7 +4422,7 @@ elf_link_sort_relocs (abfd, info, psec)
   if (size != reldyn->_raw_size)
     return 0;
 
-  rela = (struct elf_link_sort_rela *) calloc (sizeof (*rela), count);
+  rela = (struct elf_link_sort_rela *) bfd_zmalloc (sizeof (*rela) * count);
   if (rela == NULL)
     {
       (*info->callbacks->warning)
@@ -4441,7 +4442,7 @@ elf_link_sort_relocs (abfd, info, psec)
 	    struct elf_link_sort_rela *s;
 
 	    erel = (Elf_External_Rel *) o->contents;
-	    erelend = (Elf_External_Rel *) ((PTR) o->contents + o->_raw_size);
+	    erelend = (Elf_External_Rel *) (o->contents + o->_raw_size);
 	    s = rela + o->output_offset / sizeof (Elf_External_Rel);
 	    for (; erel < erelend; erel++, s++)
 	      {
@@ -4450,8 +4451,7 @@ elf_link_sort_relocs (abfd, info, psec)
 		else
 		  elf_swap_reloc_in (abfd, erel, &s->u.rel);
 
-		s->type = ((*bed->elf_backend_reloc_type_class)
-			   ((int) ELF_R_TYPE (s->u.rel.r_info)));
+		s->type = (*bed->elf_backend_reloc_type_class) (&s->u.rela);
 	      }
 	  }
 	else
@@ -4460,7 +4460,7 @@ elf_link_sort_relocs (abfd, info, psec)
 	    struct elf_link_sort_rela *s;
 
 	    erela = (Elf_External_Rela *) o->contents;
-	    erelaend = (Elf_External_Rela *) ((PTR) o->contents + o->_raw_size);
+	    erelaend = (Elf_External_Rela *) (o->contents + o->_raw_size);
 	    s = rela + o->output_offset / sizeof (Elf_External_Rela);
 	    for (; erela < erelaend; erela++, s++)
 	      {
@@ -4470,8 +4470,7 @@ elf_link_sort_relocs (abfd, info, psec)
 		else
 		  elf_swap_reloca_in (dynobj, erela, &s->u.rela);
 
-		s->type = ((*bed->elf_backend_reloc_type_class)
-			   ((int) ELF_R_TYPE (s->u.rel.r_info)));
+		s->type = (*bed->elf_backend_reloc_type_class) (&s->u.rela);
 	      }
 	  }
       }

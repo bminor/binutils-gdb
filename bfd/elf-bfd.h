@@ -665,8 +665,8 @@ struct elf_backend_data
     PARAMS ((bfd *, PTR, bfd_vma));
 
   /* This function returns class of a reloc type.  */
-  enum elf_reloc_type_class (* elf_backend_reloc_type_class)
-    PARAMS ((int));
+  enum elf_reloc_type_class (*elf_backend_reloc_type_class)
+    PARAMS ((const Elf_Internal_Rela *));
 
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
@@ -1044,7 +1044,7 @@ extern void _bfd_elf_fprintf_vma
   PARAMS ((bfd *, PTR, bfd_vma));
 
 extern enum elf_reloc_type_class _bfd_elf_reloc_type_class
-  PARAMS ((int));
+  PARAMS ((const Elf_Internal_Rela *));
 
 extern unsigned long bfd_elf_hash
   PARAMS ((const char *));
