@@ -258,10 +258,6 @@ struct comp_unit_head
 
     struct comp_unit_head *next;
 
-    /* DWARF abbreviation table associated with this compilation unit */
-
-    struct abbrev_info *dwarf2_abbrevs[ABBREV_HASH_SIZE];
-
     /* Base address of this compilation unit.  */
 
     CORE_ADDR base_address;
@@ -285,8 +281,7 @@ struct dwarf2_cu
   /* The header of the compilation unit.
 
      FIXME drow/2003-11-10: Some of the things from the comp_unit_head
-     should be moved to the dwarf2_cu structure; for instance the abbrevs
-     hash table.  */
+     should logically be moved to the dwarf2_cu structure.  */
   struct comp_unit_head header;
 
   struct function_range *first_fn, *last_fn, *cached_fn;
@@ -320,6 +315,10 @@ struct dwarf2_cu
   htab_t partial_dies;
   struct obstack partial_die_obstack;
 
+  /* DWARF abbreviation table associated with this compilation unit.  */
+  struct abbrev_info **dwarf2_abbrevs;
+
+  /* Storage for the abbrev table.  */
   struct obstack abbrev_obstack;
 
   /* When multiple dwarf2_cu structures are living in memory, this field
@@ -704,7 +703,7 @@ char *dwarf2_read_section (struct objfile *, asection *);
 
 static int dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu);
 
-static void dwarf2_empty_abbrev_table (void *);
+static void dwarf2_free_abbrev_table (void *);
 
 static struct abbrev_info *peek_die_abbrev (char *, int *, struct dwarf2_cu *);
 
@@ -1406,7 +1405,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       /* Read the abbrevs for this compilation unit into a table */
       saw_ref_addr = dwarf2_read_abbrevs (abfd, &cu);
-      back_to_inner = make_cleanup (dwarf2_empty_abbrev_table, &cu);
+      back_to_inner = make_cleanup (dwarf2_free_abbrev_table, &cu);
 
       if (saw_ref_addr && cu_tree == NULL)
 	cu_tree = create_comp_unit_tree (objfile);
@@ -1555,7 +1554,7 @@ load_comp_unit (struct dwarf2_per_cu_data *this_cu, struct objfile *objfile)
 
   /* Read the abbrevs for this compilation unit into a table */
   dwarf2_read_abbrevs (abfd, cu);
-  back_to = make_cleanup (dwarf2_empty_abbrev_table, cu);
+  back_to = make_cleanup (dwarf2_free_abbrev_table, cu);
 
   /* Read the compilation unit die */
   abbrev = peek_die_abbrev (info_ptr, &bytes_read, cu);
@@ -2465,7 +2464,7 @@ load_full_comp_unit (struct partial_symtab *pst,
 
   /* Read the abbrevs for this compilation unit  */
   dwarf2_read_abbrevs (abfd, cu);
-  back_to = make_cleanup (dwarf2_empty_abbrev_table, cu);
+  back_to = make_cleanup (dwarf2_free_abbrev_table, cu);
 
   cu->header.offset = offset;
 
@@ -4869,8 +4868,11 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
 
   /* Initialize dwarf2 abbrevs */
   obstack_init (&cu->abbrev_obstack);
-  memset (cu_header->dwarf2_abbrevs, 0,
-          ABBREV_HASH_SIZE*sizeof (struct abbrev_info *));
+  cu->dwarf2_abbrevs = obstack_alloc (&cu->abbrev_obstack,
+				      (ABBREV_HASH_SIZE
+				       * sizeof (struct abbrev_info *)));
+  memset (cu->dwarf2_abbrevs, 0,
+          ABBREV_HASH_SIZE * sizeof (struct abbrev_info *));
 
   abbrev_ptr = dwarf_abbrev_buffer + cu_header->abbrev_offset;
   abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
@@ -4929,8 +4931,8 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
 	      cur_abbrev->num_attrs * sizeof (struct attr_abbrev));
 
       hash_number = abbrev_number % ABBREV_HASH_SIZE;
-      cur_abbrev->next = cu_header->dwarf2_abbrevs[hash_number];
-      cu_header->dwarf2_abbrevs[hash_number] = cur_abbrev;
+      cur_abbrev->next = cu->dwarf2_abbrevs[hash_number];
+      cu->dwarf2_abbrevs[hash_number] = cur_abbrev;
 
       /* Get next abbreviation.
          Under Irix6 the abbreviations for a compilation unit are not
@@ -4953,14 +4955,15 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
   return saw_ref_addr;
 }
 
-/* Empty the abbrev table for a new compilation unit.  */
+/* Release the memory used by the abbrev table for a compilation unit.  */
 
 static void
-dwarf2_empty_abbrev_table (void *ptr_to_cu)
+dwarf2_free_abbrev_table (void *ptr_to_cu)
 {
   struct dwarf2_cu *cu = ptr_to_cu;
 
   obstack_free (&cu->abbrev_obstack, NULL);
+  cu->dwarf2_abbrevs = NULL;
 }
 
 /* Lookup an abbrev_info structure in the abbrev hash table.  */
@@ -4968,12 +4971,11 @@ dwarf2_empty_abbrev_table (void *ptr_to_cu)
 static struct abbrev_info *
 dwarf2_lookup_abbrev (unsigned int number, struct dwarf2_cu *cu)
 {
-  struct comp_unit_head *cu_header = &cu->header;
   unsigned int hash_number;
   struct abbrev_info *abbrev;
 
   hash_number = number % ABBREV_HASH_SIZE;
-  abbrev = cu_header->dwarf2_abbrevs[hash_number];
+  abbrev = cu->dwarf2_abbrevs[hash_number];
 
   while (abbrev)
     {

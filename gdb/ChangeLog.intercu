@@ -1,5 +1,18 @@
 2004-02-24  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (struct comp_unit_head): Remove dwarf2_abbrevs array.
+	(struct dwarf2_cu): Add dwarf2_abbrevs pointer.  Update comment about
+	comp_unit_head.
+	(dwarf2_free_abbrev_table): Renamed from dwarf2_empty_abbrev_table.
+	Clear the pointer abbrev table pointer.
+	(dwarf2_build_psymtabs_hard, load_comp_unit, load_full_comp_unit):
+	Update calls.
+	(dwarf2_read_abbrevs): Update for moved dwarf2_abbrevs pointer.
+	Allocate the hash table from the obstack.
+	(dwarf2_lookup_abbrev): Update for moved dwarf2_abbrevs pointer.
+
+2004-02-24  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (skip_leb128, peek_die_abbrev, skip_one_die)
 	(skip_children, locate_pdi_sibling): Update comments and
 	clean up.
