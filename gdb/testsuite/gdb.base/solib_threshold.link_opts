@@ -1,4 +1,0 @@
-# Linker options for solib_threshold test
--l00_solib_threshold
--l01_solib_threshold
--l02_solib_threshold

@@ -1,24 +1,24 @@
 /*
- * Program to generate the auto_solib_add_threshhold testcase,
+ * Program to generate the so-thresh testcase,
  * including associated linked-against shared libraries.
  * Build as:
  *
- *        cc -g -o gen_auto_solib_add_threshhold gen_auto_solib_add_threshhold.c
+ *        cc -g -o gen-so-thresh gen-so-thresh.c
  *
  * Invoke as:
  *
- *        gen_auto_solib_add_threshhold
+ *        gen-so-thresh
  *
  * It will put all the code in the current directory (".").
  *
  * A makefile can also be generated if the -makemake option is used.
  * To use the makefile:
  *
- *        make -f auto_solib_add_threshhold.mk all
+ *        make -f so-thresh.mk all
  *
  * The name of the application is
  *
- *        auto_solib_add_threshhold
+ *        so-thresh
  *
  * (Revised from a program by John Bishop.  --rehrauer)
  */
@@ -65,15 +65,15 @@ char **argv;
         return;
       }
 
-    if (strncmp (argv[0], "gen_", 4) != 0)
+    if (strncmp (argv[0], "gen-", 4) != 0)
       {
-        printf ("** This tool expected to be named \"gen_something\"\n");
+        printf ("** This tool expected to be named \"gen-something\"\n");
         return;
       }
     strcpy (testcase_name, argv[0]+4);
 
     strcpy (linkfile_name, testcase_name);
-    strcat (linkfile_name, ".link_opts");
+    strcat (linkfile_name, ".linkopts");
     link_file = fopen (linkfile_name, "w");
     fprintf (link_file, "# Linker options for %s test\n", testcase_name);
     
@@ -114,15 +114,15 @@ char **argv;
           {
             fprintf (make_file, "lib%2.2d_%s.o: lib%2.2d_%s.c\n", i, testcase_name, i, testcase_name);
             fprintf (make_file, "\t$(CC) $(CFLAGS) +Z -o lib%2.2d_%s.o -c lib%2.2d_%s.c\n", i, testcase_name, i, testcase_name);
-            fprintf (make_file, "lib%2.2d_%s.sl: lib%2.2d_%s.o\n", i, testcase_name, i, testcase_name);
-            fprintf (make_file, "\t$(LD) $(LDFLAGS) -b -o lib%2.2d_%s.sl lib%2.2d_%s.o\n", i, testcase_name, i, testcase_name);
+            fprintf (make_file, "lib%2.2d-%s.sl: lib%2.2d-%s.o\n", i, testcase_name, i, testcase_name);
+            fprintf (make_file, "\t$(LD) $(LDFLAGS) -b -o lib%2.2d-%s.sl lib%2.2d-%s.o\n", i, testcase_name, i, testcase_name);
           }
         fprintf (make_file, "\n");
 fprintf (make_file, "# For convenience, here's names for all pieces of all shlibs.\n");
         fprintf (make_file, "SHLIB_SOURCES = \\\n");
         for (i=0; i < lib_num-1; i++)
-          fprintf (make_file, "\tlib%2.2d_%s.c \\\n", i, testcase_name);
-        fprintf (make_file, "\tlib%2.2d_%s.c\n", lib_num-1, testcase_name);
+          fprintf (make_file, "\tlib%2.2d-%s.c \\\n", i, testcase_name);
+        fprintf (make_file, "\tlib%2.2d-%s.c\n", lib_num-1, testcase_name);
         fprintf (make_file, "SHLIB_OBJECTS = $(SHLIB_SOURCES:.c=.o)\n");
         fprintf (make_file, "SHLIBS = $(SHLIB_SOURCES:.c=.sl)\n");
         fprintf (make_file, "SHLIB_NAMES = $(SHLIB_SOURCES:.c=)\n");
@@ -145,16 +145,16 @@ fprintf (make_file, "# For convenience, here's names for all pieces of all shlib
         fprintf (make_file, "# To remove everything built via this makefile...\n");
         fprintf (make_file, "clean:\n");
         /* Do this carefully, to avoid hitting silly HP-UX ARG_MAX limits... */
-        fprintf (make_file, "\trm -f lib0*_%s.*\n", testcase_name);
-        fprintf (make_file, "\trm -f lib1*_%s.*\n", testcase_name);
-        fprintf (make_file, "\trm -f lib2*_%s.*\n", testcase_name);
-        fprintf (make_file, "\trm -f lib3*_%s.*\n", testcase_name);
-        fprintf (make_file, "\trm -f lib4*_%s.*\n", testcase_name);
-        fprintf (make_file, "\trm -f lib5*_%s.*\n", testcase_name);
-        fprintf (make_file, "\trm -f lib6*_%s.*\n", testcase_name);
-        fprintf (make_file, "\trm -f lib7*_%s.*\n", testcase_name);
-        fprintf (make_file, "\trm -f lib8*_%s.*\n", testcase_name);
-        fprintf (make_file, "\trm -f lib9*_%s.*\n", testcase_name);
+        fprintf (make_file, "\trm -f lib0*-%s.*\n", testcase_name);
+        fprintf (make_file, "\trm -f lib1*-%s.*\n", testcase_name);
+        fprintf (make_file, "\trm -f lib2*-%s.*\n", testcase_name);
+        fprintf (make_file, "\trm -f lib3*-%s.*\n", testcase_name);
+        fprintf (make_file, "\trm -f lib4*-%s.*\n", testcase_name);
+        fprintf (make_file, "\trm -f lib5*-%s.*\n", testcase_name);
+        fprintf (make_file, "\trm -f lib6*-%s.*\n", testcase_name);
+        fprintf (make_file, "\trm -f lib7*-%s.*\n", testcase_name);
+        fprintf (make_file, "\trm -f lib8*-%s.*\n", testcase_name);
+        fprintf (make_file, "\trm -f lib9*-%s.*\n", testcase_name);
         fprintf (make_file, "\trm -f %s %s %s %s.c\n", argv[0], testcase_name, linkfile_name, testcase_name);
         fprintf (make_file, "\n");
         fclose (make_file);
@@ -166,8 +166,8 @@ fprintf (make_file, "# For convenience, here's names for all pieces of all shlib
 
         /* Generate the names for the library.
          */
-        sprintf (file_name, "lib%2.2d_%s.c", i, testcase_name);
-        sprintf (file_name_core, "lib%2.2d_%s", i, testcase_name);
+        sprintf (file_name, "lib%2.2d-%s.c", i, testcase_name);
+        sprintf (file_name_core, "lib%2.2d-%s", i, testcase_name);
 
         /* Generate the source code.
          */
@@ -189,7 +189,7 @@ fprintf (make_file, "# For convenience, here's names for all pieces of all shlib
 
         /* Add a linker options line
            */
-        fprintf (link_file, "-l%2.2d_%s\n", i, testcase_name);
+        fprintf (link_file, "-l%2.2d-%s\n", i, testcase_name);
     }
 
     /* Generate the "main" file.

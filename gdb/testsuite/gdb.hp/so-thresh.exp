@@ -29,7 +29,7 @@ if ![isnative] then {
     return
 }
 
-set testfile "solib_threshold"
+set testfile "so-thresh"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
@@ -38,22 +38,22 @@ if [get_compiler_info ${binfile}] {
 }
 
 # This testcase is automatically generated, via the
-# gen_solib_threshold program, which also should
+# gen-so-thresh program, which also should
 # live in this same directory.
 #
 # The generator produces:
-#   - solib_threshhold.c
-#   - 3 .c files named solib_threshold_libXX.c
-#   - a makefile named solib_threshold.mk with a
-#     target named "solib_threshold" that will compile
+#   - so-thresh.c
+#   - 3 .c files named libXX-so-thresh.c
+#   - a makefile named so-thresh.mk with a
+#     target named "so-thresh" that will compile
 #     and link the testcase
 #
-# Making with solib_threshold.mk produces:
-#   - solib_threshold
+# Making with so-thresh.mk produces:
+#   - so-thresh
 #   - 3 shared libraries that are linked against, named
-#     solib_threshhold_libXX.sl
+#     libXX-so-thresh.sl
 #
-# We build gen_solib_threshhold, run it, and then make with
+# We build gen-so-thresh, run it, and then make with
 # the makefile it produces.
 #
 set genfile gen_${testfile}
@@ -86,7 +86,8 @@ set timeout 60
 #
 
 send_user "Making with ${testfile}.mk ...\n"
-remote_exec build "sh -c \\\"cd ${objdir}/${subdir}\\; make -f ${srcdir}/${subdir}/${testfile}.mk clean require_shlibs all SRCDIR=${srcdir}/${subdir} OBJDIR=${objdir}/${subdir}\\\""
+# remote_exec build "sh -c \\\"cd ${objdir}/${subdir}\\; make -v -f ${srcdir}/${subdir}/${testfile}.mk clean require_shlibs all SRCDIR=${srcdir}/${subdir} OBJDIR=${objdir}/${subdir}\\\""
+remote_exec build "sh -c \\\"cd ${objdir}/${subdir}\\; make -v -f ${srcdir}/${subdir}/${testfile}.mk clean require_shlibs all SRCDIR=${srcdir}/${subdir} OBJDIR=${objdir}/${subdir}\\\""
 
 # Only HP-UX (and any other platforms using SOM shared libraries, I
 # guess) interprets the auto-solib-add variable as a threshhold,
@@ -350,7 +351,7 @@ gdb_expect {
 }
 send_gdb "sharedlibrary\n"
 gdb_expect {
-  -re ".*Reading symbols from .*/lib02_solib_threshold\\.sl\\.\\.\\.done\\..*$gdb_prompt $"\
+  -re ".*Reading symbols from .*/lib02-so-thresh\\.sl\\.\\.\\.done\\..*$gdb_prompt $"\
           {pass "manually load all symbols"}
   -re "$gdb_prompt $"\
           {fail "manually load all symbols"}
