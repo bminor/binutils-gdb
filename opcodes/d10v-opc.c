@@ -90,7 +90,7 @@ const struct d10v_operand d10v_operands[] =
   { 4, 1, OPERAND_NUM|OPERAND_SIGNED },
 #define UNUM4	(NUM4 + 1)
   { 4, 1, OPERAND_NUM },
-#define UNUM4S	(UNUM4 + 1)			/* slli, srai, srli */
+#define UNUM4S	(UNUM4 + 1)			/* slli, srai, srli, subi */
   { 4, 1, OPERAND_NUM|OPERAND_SHIFT },
 #define UNUM8	(UNUM4S + 1)			/* repi */
   { 8, 16, OPERAND_NUM },
@@ -281,12 +281,14 @@ const struct d10v_opcode d10v_opcodes[] = {
   { "stb", SHORT_2, 1, MU, PAR, 0x7800, 0x7e01, { RSRC2, ATSIGN, RSRC } },
   { "stop", SHORT_2, 1, MU, PAR, 0x5fe0, 0x7fff, { 0 } },
   { "sub", SHORT_2, 1, EITHER, PAR, 0x0, 0x7e01, { RDST, RSRC } },
+  { "sub", SHORT_2, 1, IU, PAR, 0x1001, 0x7ee3, { ADST, RSRC } },
+  { "sub", SHORT_2, 1, IU, PAR, 0x1003, 0x7eef, { ADST, ASRC } },
   { "sub2w", SHORT_2, 1, IU, PAR, 0x1000, 0x7e23, { RDSTE, RSRCE } },
   { "subac3", LONG_R, 1, IU, SEQ, 0x17000000, 0x3ffffe22, { RDSTE, RSRCE, ASRC0 } },
   { "subac3", LONG_R, 1, IU, SEQ, 0x17000002, 0x3ffffe2e, { RDSTE, ASRC, ASRC0 } },
   { "subac3s", LONG_R, 1, IU, SEQ, 0x17001000, 0x3ffffe22, { RDSTE, RSRCE, ASRC0 } },
   { "subac3s", LONG_R, 1, IU, SEQ, 0x17001002, 0x3ffffe2e, { RDSTE, ASRC, ASRC0 } },
-  { "subi", SHORT_2, 1, EITHER, PAR, 0x1, 0x7e01, { RDST, UNUM4 } },
+  { "subi", SHORT_2, 1, EITHER, PAR, 0x1, 0x7e01, { RDST, UNUM4S } },
   { "trap", SHORT_2, 5, MU, PAR, 0x5f00, 0x7fe1, { UNUM4 } },
   { "tst0i", LONG_L, 1, MU, SEQ, 0x7000000, 0x3f0f0000, { RSRC2, NUM16 } },
   { "tst1i", LONG_L, 1, MU, SEQ, 0xf000000, 0x3f0f0000, { RSRC2, NUM16 } },

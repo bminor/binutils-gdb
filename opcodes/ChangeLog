@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Fri Aug  2 17:47:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-opc.c (d10v_operands): Added 2 accumulator sub instructions.
+	Changed subi operand type to treat 0 as 16.
+
+end-sanitize-d10v
 Wed Jul 31 16:21:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-opc.c: Add cpushl for the mcf5200.  From Ken Rose
