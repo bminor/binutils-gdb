@@ -625,7 +625,14 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
 	  ++reps;
 	  ++rep1;
 	}
-      
+
+      if (annotation_level > 1)
+	{
+	  printf_filtered ("\n\032\032array-element-begin %d ", i);
+	  print_value_flags (elttype);
+	  printf_filtered ("\n");
+	}
+
       if (reps > repeat_count_threshold)
 	{
 	  val_print (elttype, valaddr + i * eltlen, 0, stream, format,
@@ -640,6 +647,8 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
 		     deref_ref, recurse + 1, pretty);
 	  things_printed++;
 	}
+      if (annotation_level > 1)
+	printf_filtered ("\n\032\032array-element-end\n");
     }
   if (i < len)
     {

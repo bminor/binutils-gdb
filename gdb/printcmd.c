@@ -87,6 +87,19 @@ int current_display_number;
 
 int inspect_it = 0;
 
+void
+print_value_flags (t)
+     struct type *t;
+{
+  /* FIXME: Should we be printing * for references as well as pointers?  */
+  if (t != NULL
+      && TYPE_CODE (t) == TYPE_CODE_PTR
+      && TYPE_CODE (TYPE_TARGET_TYPE (t)) != TYPE_CODE_VOID)
+    printf_filtered ("*");
+  else
+    printf_filtered ("-");
+}
+
 struct display
 {
   /* Chain link to next auto-display item.  */
@@ -811,6 +824,16 @@ print_command_1 (exp, inspect, voidprint)
     {
       int histindex = record_latest_value (val);
 
+      if (annotation_level > 1)
+	{
+	  if (histindex >= 0)
+	    printf_filtered ("\n\032\032value-history-begin %d ", histindex);
+	  else
+	    printf_filtered ("\n\032\032value-begin ");
+	  print_value_flags (VALUE_TYPE (val));
+	  printf_filtered ("\n");
+	}
+
       if (inspect)
 	printf_unfiltered ("\031(gdb-makebuffer \"%s\"  %d '(\"", exp, histindex);
       else
@@ -818,6 +841,15 @@ print_command_1 (exp, inspect, voidprint)
 
       print_formatted (val, format, fmt.size);
       printf_filtered ("\n");
+
+      if (annotation_level > 1)
+	{
+	  if (histindex >= 0)
+	    printf_filtered ("\n\032\032value-history-end\n");
+	  else
+	    printf_filtered ("\n\032\032value-end\n");
+	}
+
       if (inspect)
 	printf_unfiltered("\") )\030");
     }
@@ -1597,8 +1629,13 @@ print_frame_args (func, fi, num, stream)
       if (! first)
 	fprintf_filtered (stream, ", ");
       wrap_here ("    ");
+
+      if (annotation_level > 1)
+	printf_filtered ("\n\032\032arg-name-begin\n");
       fprintf_symbol_filtered (stream, SYMBOL_SOURCE_NAME (sym),
 			       SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
+      if (annotation_level > 1)
+	printf_filtered ("\n\032\032arg-name-end\n");
       fputs_filtered ("=", stream);
 
       /* Avoid value_print because it will deref ref parameters.  We just
@@ -1607,11 +1644,23 @@ print_frame_args (func, fi, num, stream)
 	 standard indentation here is 4 spaces, and val_print indents
 	 2 for each recurse.  */
       val = read_var_value (sym, FRAME_INFO_ID (fi));
+
+      if (annotation_level > 1)
+	{
+	  printf_filtered ("\n\032\032arg-begin ");
+	  print_value_flags (val == NULL ? NULL : VALUE_TYPE (val));
+	  printf_filtered ("\n");
+	}
+
       if (val)
         val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), VALUE_ADDRESS (val),
 		   stream, 0, 0, 2, Val_no_prettyprint);
       else
 	fputs_filtered ("???", stream);
+
+      if (annotation_level > 1)
+	printf_filtered ("\n\032\032arg-end\n");
+
       first = 0;
     }
 

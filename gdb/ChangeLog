@@ -1,3 +1,12 @@
+Wed Apr 20 19:41:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* printcmd.c (print_command_1): Annotate the top-level expressions
+	that we print.
+	(print_frame_args): Annotate each argument.
+	* printcmd.c, defs.h (print_value_flags): New function.
+	* cp-valprint.c (cp_print_value_fields): Annotate each field.
+	* valprint.c (val_print_array_elements): Annotate each array element.
+
 Wed Apr 20 13:18:41 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* findvar.c (read_var_value):  Handle LOC_REPARM_ADDR case correctly,
