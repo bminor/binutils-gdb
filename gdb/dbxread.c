@@ -270,10 +270,6 @@ extern void _initialize_dbxread (void);
 
 static void process_now (struct objfile *);
 
-static void free_header_files (void);
-
-static void init_header_files (void);
-
 static void read_ofile_symtab (struct partial_symtab *);
 
 static void dbx_psymtab_to_symtab (struct partial_symtab *);
@@ -319,7 +315,7 @@ static struct partial_symtab *start_psymtab (struct objfile *, char *,
 
 /* Free up old header file tables */
 
-static void
+void
 free_header_files (void)
 {
   if (this_object_header_files)
@@ -332,7 +328,7 @@ free_header_files (void)
 
 /* Allocate new header file tables */
 
-static void
+void
 init_header_files (void)
 {
   n_allocated_this_object_header_files = 10;

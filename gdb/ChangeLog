@@ -1,6 +1,16 @@
 2001-09-04  Elena Zannoni  <ezannoni@redhat.com>
 
 	From Daniel Jacobowitz  <drow@mvista.com>	
+	* dbxread.c (free_header_files): Make global.
+	(init_header_files): Likewise.
+	* stabsread.h (free_header_files): Add prototype.
+	(init_header_files): Likewise.
+	* mdebugread.c (mdebug_build_psymtabs): Initialize
+	properly before using the stabs debug reader.
+
+2001-09-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	From Daniel Jacobowitz  <drow@mvista.com>	
 	* dbxread.c (dbx_symfile_read): Only reinitialize
 	the psymbol list if mainline or if both static
 	and global lists are empty.

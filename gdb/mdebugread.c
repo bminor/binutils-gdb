@@ -491,6 +491,11 @@ mdebug_build_psymtabs (struct objfile *objfile,
   debug_swap = swap;
   debug_info = info;
 
+  stabsread_new_init ();
+  buildsym_new_init ();
+  free_header_files ();
+  init_header_files ();
+        
   /* Make sure all the FDR information is swapped in.  */
   if (info->fdr == (FDR *) NULL)
     {

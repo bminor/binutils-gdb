@@ -219,4 +219,8 @@ extern struct symbol *ref_search (int);
 extern int resolve_cfront_continuation
   (struct objfile *objfile, struct symbol *sym, char *p);
 
+extern void free_header_files (void);
+
+extern void init_header_files (void);
+
 #undef EXTERN
