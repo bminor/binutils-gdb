@@ -45,6 +45,7 @@ ChangeLog
 alpha.h
 common.h
 dwarf.h
+dwarf2.h
 external.h
 hppa.h
 internal.h
