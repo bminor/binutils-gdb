@@ -643,7 +643,7 @@ itbl_disassemble (char *s, unsigned long insn)
 	  if (r)
 	    strcat (s, r->name);
 	  else
-	    sprintf (s, "%s$%d", s, value);
+	    sprintf (s, "%s$%lu", s, value);
 	  break;
 	case e_addr:
 	  /* use assembler's symbol table to find symbol */
@@ -652,7 +652,7 @@ itbl_disassemble (char *s, unsigned long insn)
 			*/
 	  /* If not a symbol, fall thru to IMMED */
 	case e_immed:
-	  sprintf (s, "%s0x%x", s, value);
+	  sprintf (s, "%s0x%lx", s, value);
 	  break;
 	default:
 	  return 0;		/* error; invalid field spec */
@@ -741,7 +741,7 @@ char *
 itbl_get_field (char **S)
 {
   static char n[128];
-  char *p, *ps, *s;
+  char *s;
   int len;
 
   s = *S;
@@ -811,8 +811,8 @@ find_entry_byval (e_processor processor, e_type type,
 	  eval = apply_range (e->value, e->range);
 	  val &= apply_range (0xffffffff, e->range);
 	}
-      else if (r->sbit == e->range.sbit && r->ebit == e->range.ebit
-	       || e->range.sbit == 0 && e->range.ebit == 0)
+      else if ((r->sbit == e->range.sbit && r->ebit == e->range.ebit)
+	       || (e->range.sbit == 0 && e->range.ebit == 0))
 	{
 	  eval = apply_range (e->value, *r);
 	  val = apply_range (val, *r);
