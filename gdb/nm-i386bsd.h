@@ -1,4 +1,4 @@
-/* Host-dependent definitions for Intel 386 running BSD Unix, for GDB.
+/* Native-dependent definitions for Intel 386 running BSD Unix, for GDB.
    Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -17,15 +17,16 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
+/* This is the amount to subtract from u.u_ar0
+   to get the offset in the core file of the register values.  */
 
-#include <machine/limits.h>		/* for INT_MIN, to avoid "INT_MIN
-					   redefined" warnings from defs.h */
+#include <machine/vmparam.h>
+#define KERNEL_U_ADDR USRSTACK
 
-/* psignal() is in <signal.h>.  */
+#define REGISTER_U_ADDR(addr, blockend, regno) \
+	(addr) = i386_register_u_addr ((blockend),(regno));
 
-#define PSIGNAL_IN_SIGNAL_H
+extern int
+i386_register_u_addr PARAMS ((int, int));
 
-/* Get rid of any system-imposed stack limit if possible.  */
-
-#define SET_STACK_LIMIT_HUGE
+#define PTRACE_ARG3_TYPE char*

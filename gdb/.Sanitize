@@ -142,6 +142,7 @@ munch
 news-xdep.c
 nindy-share
 nindy-tdep.c
+nm-i386bsd.h
 nm-irix3.h
 nm-irix4.h
 nm-mips.h
