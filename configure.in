@@ -186,6 +186,8 @@ fi
 
 case "${target}" in
   v810*)		target_makefile_frag=config/mt-v810 ;;
+  i[345]86-*-netware*)  target_makefile_frag=config/mt-netware ;;
+  powerpc-*-netware*)   target_makefile_frag=config/mt-netware ;;
 esac
 
 gasdir=gas
