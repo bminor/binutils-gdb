@@ -461,21 +461,24 @@ dcache_info (char *exp, int tty)
   printf_filtered ("Dcache enabled, line width %d, depth %d\n",
 		   LINE_SIZE, DCACHE_SIZE);
 
-  printf_filtered ("Cache state:\n");
-
-  for (p = last_cache->valid_head; p; p = p->p)
+  if (last_cache)
     {
-      int j;
-      printf_filtered ("Line at %s, referenced %d times\n",
-		       paddr (p->addr), p->refs);
+      printf_filtered ("Cache state:\n");
 
-      for (j = 0; j < LINE_SIZE; j++)
-	printf_filtered ("%02x", p->data[j] & 0xFF);
-      printf_filtered ("\n");
+      for (p = last_cache->valid_head; p; p = p->p)
+	{
+	  int j;
+	  printf_filtered ("Line at %s, referenced %d times\n",
+			   paddr (p->addr), p->refs);
 
-      for (j = 0; j < LINE_SIZE; j++)
-	printf_filtered (" %2x", p->state[j]);
-      printf_filtered ("\n");
+	  for (j = 0; j < LINE_SIZE; j++)
+	    printf_filtered ("%02x", p->data[j] & 0xFF);
+	  printf_filtered ("\n");
+
+	  for (j = 0; j < LINE_SIZE; j++)
+	    printf_filtered (" %2x", p->state[j]);
+	  printf_filtered ("\n");
+	}
     }
 }
 

@@ -1,3 +1,8 @@
+2000-08-11  J.T. Conklin  <jtc@redback.com>
+
+	* dcache.c (dcache_info): Don't print cache state if last_cache 
+	is NULL.
+
 2000-08-10  Andrew Cagney  <cagney@ops1.cygnus.com>
 
 	* config/mn10300/tm-mn10300.h, mn10300-tdep.c
