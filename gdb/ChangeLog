@@ -1,4 +1,11 @@
+Mon May  3 13:52:08 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips-pinsn.c (print_insn): Return value.
+
 Sun May  2 11:43:57 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (SFILES):  Remove ser-hardwire.c; it is a link made
+	at configuration time and doesn't belong in the distribution archive.
 
 	* Makefile.in (NONSRC):  Add 29k-share/README.
 	* Makefile.in (HFILES):  Add 29k-share/udi/udiids.h.

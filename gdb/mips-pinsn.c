@@ -35,7 +35,7 @@ print_insn (memaddr, stream)
 
   /* print_insn_mips is in opcodes/mips-dis.c.  */
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-    print_insn_big_mips (memaddr, &info);
+    return print_insn_big_mips (memaddr, &info);
   else
-    print_insn_little_mips (memaddr, &info);
+    return print_insn_little_mips (memaddr, &info);
 }
