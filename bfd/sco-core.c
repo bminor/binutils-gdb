@@ -232,6 +232,9 @@ sco_core_file_matches_executable_p  (core_bfd, exec_bfd)
 #define	sco_print_symbol			(PROTO (void, (*),	\
 	(bfd *, PTR, struct symbol_cache_entry  *,			\
 	 bfd_print_symbol_type))) bfd_false
+#define	sco_get_symbol_info			(PROTO (void, (*),	\
+	(bfd *, struct symbol_cache_entry  *,			\
+	 symbol_info *))) bfd_false
 #define	sco_get_lineno			(PROTO (alent *, (*),	\
 	(bfd *, struct symbol_cache_entry *))) bfd_nullvoidptr
 #define	sco_set_arch_mach			(PROTO (boolean, (*),	\

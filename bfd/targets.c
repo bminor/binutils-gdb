@@ -261,6 +261,10 @@ Symbols and relocations
 .                                      struct symbol_cache_entry *,
 .                                      bfd_print_symbol_type));
 .#define bfd_print_symbol(b,p,s,e) BFD_SEND(b, _bfd_print_symbol, (b,p,s,e))
+.  void          (*_bfd_get_symbol_info) PARAMS ((bfd *,
+.                                      struct symbol_cache_entry *,
+.                                      symbol_info *));
+.#define bfd_get_symbol_info(b,p,e) BFD_SEND(b, _bfd_get_symbol_info, (b,p,e))
 
 .  alent *    (*_get_lineno) PARAMS ((bfd *, struct symbol_cache_entry *));
 .
@@ -372,7 +376,9 @@ extern bfd_target h8300coff_vec;
 extern bfd_target h8500coff_vec;
 extern bfd_target z8kcoff_vec;
 extern bfd_target we32kcoff_vec;
-#ifdef HOST_HPPAHPUX
+extern bfd_target shcoff_vec;
+
+#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
 extern bfd_target hppa_vec;
 #endif
 
@@ -430,7 +436,7 @@ bfd_target *target_vector[] = {
 	&m68kcoff_vec,
 	&a29kcoff_big_vec,
 	&rs6000coff_vec,
-#ifdef HOST_HPPAHPUX
+#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
         &hppa_vec,
 #endif
 	&we32kcoff_vec,

@@ -65,6 +65,8 @@ extern unsigned int elf_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
 extern asymbol *elf_make_empty_symbol PARAMS ((bfd *));
 extern void elf_print_symbol PARAMS ((bfd *, PTR, asymbol *,
 				      bfd_print_symbol_type));
+extern void elf_get_symbol_info PARAMS ((bfd *, asymbol *,
+					 symbol_info *));
 extern alent *elf_get_lineno PARAMS ((bfd *, asymbol *));
 extern boolean elf_set_arch_mach PARAMS ((bfd *, enum bfd_architecture,
 					  unsigned long));
