@@ -82,8 +82,9 @@ core_file_command (char *filename, int from_tty)
 }
 
 
-/* If there are two or more functions that wish to hook into exec_file_command,
- * this function will call all of the hook functions. */
+/* If there are two or more functions that wish to hook into
+   exec_file_command, this function will call all of the hook
+   functions.  */
 
 static void
 call_extra_exec_file_hooks (char *filename)
@@ -108,7 +109,7 @@ specify_exec_file_hook (void (*hook) (char *))
        * and the subsequent hooks called. */
       if (exec_file_hook_count == 0)
 	{
-	  /* If this is the first extra hook, initialize the hook array. */
+	  /* If this is the first extra hook, initialize the hook array.  */
 	  exec_file_extra_hooks = (hook_type *) xmalloc (sizeof (hook_type));
 	  exec_file_extra_hooks[0] = deprecated_exec_file_display_hook;
 	  deprecated_exec_file_display_hook = call_extra_exec_file_hooks;

@@ -1,5 +1,6 @@
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* corefile.c: Whitespace tweaks.
 	* completer.c: Whitespace tweaks.
 	* coff-solib.c: Whitespace tweaks.
 	* coff-solib.h: Whitespace tweaks.
