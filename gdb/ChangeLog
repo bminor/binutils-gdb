@@ -1,3 +1,8 @@
+2000-03-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* ser-go32.c (ports): Make the initializers complete, to pacify
+	GCC 2.9X.
+
 2000-03-17  Jim Blandy  <jimb@redhat.com>
 
 	* i386v-nat.c (i386_insert_nonaligned_watchpoint): Use a
