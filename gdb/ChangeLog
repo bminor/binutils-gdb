@@ -1,3 +1,17 @@
+Sun Sep 10 10:24:48 1995  Michael Tiemann  <tiemann@axon.cygnus.com>
+
+	* tm-ppc-eabi.h (PC_IN_CALL_DUMMY): Redefine this to work with the
+	simulator.  FIXME.
+
+	* rs6000-tdep.c (push_dummy_frame): Calculate the correct link
+	register offset from the current frame (don't assume it is always 8).
+	(push_dummy_frame): Add comment about having only 4096 bytes of
+	stack space in the simulator (by default).
+
+	* remote-sim.c (gdbsim_create_inferior): Call
+	`add_text_to_loadinfo' so that gdb can find TOC entries when
+	calling functions in the inferior.
+
 Sun Sep 10 09:00:28 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* sparc-tdep.c (fill_fpregset):  Fix incorrect FP_MAX_REGNUM

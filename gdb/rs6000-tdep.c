@@ -445,6 +445,10 @@ push_dummy_frame ()
   /* Same thing, target byte order.  */
   char pc_targ[4];
   
+  /* Needed to figure out where to save the dummy link area.
+     FIXME: There should be an easier way to do this, no?  tiemann 9/9/95.  */
+  struct rs6000_framedata fdata;
+
   int ii;
 
   target_fetch_registers (-1);
@@ -463,6 +467,8 @@ push_dummy_frame ()
   pc = read_register(PC_REGNUM);
   store_address (pc_targ, 4, pc);
 
+  (void) skip_prologue (get_pc_function_start (pc) + FUNCTION_START_OFFSET, &fdata);
+
   dummy_frame_addr [dummy_frame_count++] = sp;
 
   /* Be careful! If the stack pointer is not decremented first, then kernel 
@@ -470,6 +476,10 @@ push_dummy_frame ()
      uses that area for IPC purposes when executing ptrace(2) calls. So 
      before writing register values into the new frame, decrement and update
      %sp first in order to secure your frame. */
+
+  /* FIXME: We don't check if the stack really has this much space.
+     This is a problem on the ppc simulator (which only grants one page
+     (4096 bytes) by default.  */
 
   write_register (SP_REGNUM, sp-DUMMY_FRAME_SIZE);
 
@@ -479,7 +489,7 @@ push_dummy_frame ()
   flush_cached_frames ();
 
   /* save program counter in link register's space. */
-  write_memory (sp+8, pc_targ, 4);
+  write_memory (sp+fdata.lr_offset, pc_targ, 4);
 
   /* save all floating point and general purpose registers here. */
 
@@ -550,7 +560,7 @@ pop_dummy_frame ()
     		&registers[REGISTER_BYTE (FPLAST_REGNUM + ii)], 4);
 
   read_memory (sp-(DUMMY_FRAME_SIZE-8), 
-  				&registers [REGISTER_BYTE(PC_REGNUM)], 4);
+	       &registers [REGISTER_BYTE(PC_REGNUM)], 4);
 
   /* when a dummy frame was being pushed, we had to decrement %sp first, in 
      order to secure astack space. Thus, saved %sp (or %r1) value, is not the
