@@ -1,3 +1,7 @@
+Wed Jun 17 19:12:23 1998  Jeff Holcomb  <jeffh@cygnus.com>
+
+	* Makefile.in (install-only): Install tracing help files.
+
 Mon Jun 15 13:18:21 1998  Jim Ingham <jingham@cygnus.com>
 
 	* gdbtk.c (gdbtk_init): Add elements to the auto_path AS LIST
