@@ -1,3 +1,11 @@
+Tue Jun 24 11:20:43 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c (coff_object_p): Read the f_opthdr bytes from the
+	file, not aoutsz bytes (they are different in XCOFF .o files).
+
+	* xcofflink.c (xcoff_link_add_symbols): Permit symbols to be
+	redefined by objects included from archives.
+
 Mon Jun 23 18:03:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_merge_symbol): In the case of a new defined
