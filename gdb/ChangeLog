@@ -1,3 +1,8 @@
+2002-09-24  Keith Seitz  <keiths@redhat.com>
+
+	* varobj.c (c_type_of_child): Use get_target_type instead
+	of TYPE_TARGET_TYPE.
+
 2002-09-22  Fernando Nasser  <fnasser@redhat.com>
 
 	* source.c (get_current_or_default_source_symtab_and_line): Remove
