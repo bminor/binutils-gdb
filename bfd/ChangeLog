@@ -1,7 +1,62 @@
 Fri Aug 20 15:16:58 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* elfcode.h (elf_build_phdrs): Unused function deleted.
+	(bfd_shdr_from_section): Ditto.
+	(write_relocs): Don't change section contents for addend.
+	(elf_locate_sh): Return type is now always elf_internal_shdr,
+	since the other types were really aliases for this type anyways.
+	Don't compile this function, since it is static and doesn't appear
+	to be used in this file.
+	(sym_is_global): Return non-zero for weak symbols.  Abort if
+	section pointer is null.
+	(swap_out_syms): Reorder tests so function symbols can be weak.
+	(elf_slurp_symbol_table): Don't use BSF_EXPORT.
+	(elf_slurp_reloca_table): Make RELOC_PROCESSING section smaller by
+	extracting out some common code.  Abort if BFD section symbol has
+	null name.
+	(elf_slurp_reloc_table): Translate ELF section symbols into BFD
+	section symbols.  Don't read section contents to fill in addend
+	field.
+
 	* elf32-i386.c (elf_howto_table): All partial_inplace fields
 	should be "true".
+
+	* Merged from OSF:
+
+	Tue Jun 15 14:38:32 1993  Michael Meissner  (meissner@osf.org)
+
+	* libelf.h (struct Elf_Sym_Extra): New structure to contain ELF
+	specific information for a symbol.  Put in elf_sym_num, which
+	gives the external symbol number in the elf object file, since
+	local symbols must come before global symbols.
+	(elf_sym_extra): New macro.
+	(elf_symtab_map): Delete, in favor of using Elf_Sym_Extra.
+	* elfcode.h (elf_map_symbols): Use Elf_Sym_Extra to map internal
+	symbol number to external number.  Store the address of the
+	Elf_Sym_Extra field for the symbol in the udata field.
+	(elf_write_object_contents): Use Elf_Sym_Extra to map out symbols.
+
+	Sun Jun 20 16:30:11 1993  Michael Meissner  (meissner@osf.org)
+
+	* elfcode.h (elf_obj_tdata): Add field to count the size of the
+	array of pointers to section symbols.
+	(elf_map_symbols): Bump the max index of the section symbols so
+	that we don't overwrite memory.  Store the max index into the
+	elf_obj_tdata field.
+
+	Sat Jun 19 10:12:27 1993  Michael Meissner  (meissner@osf.org)
+
+	* elfcode.h (elf_obj_tdata): Add pointer to an array of pointers
+	to the section symbols we created.  Remove unused field
+	internal_syms.
+	(elf_map_symbols): Fill in array of pointers to section symbols.
+	Only create section symbols for sections that have SEC_ALLOC set,
+	and have non-zero size.
+	(elf_symbol_from_bfd_symbol): If udata is NULL, and this is a
+	section symbol, look up the section in the list of section
+	symbols, and set the udata pointer appropriately.  Otherwise, if
+	udata is still NULL, fail an assertion, and use 0, instead of
+	dropping core.
 
 Fri Aug 20 12:18:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 

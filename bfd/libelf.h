@@ -98,6 +98,13 @@ struct elf_backend_data
   PTR global_sym;
 };
 
+struct elf_sym_extra
+{
+  int elf_sym_num;		/* sym# after locals/globals are reordered */
+};
+
+typedef struct elf_sym_extra Elf_Sym_Extra;
+
 struct bfd_elf_arch_map {
   enum bfd_architecture bfd_arch;
   int elf_arch;
@@ -139,11 +146,12 @@ struct elf_obj_tdata
   struct strtab *strtab_ptr;
   int num_locals;
   int num_globals;
-  int *symtab_map;
   PTR raw_syms;			/* Elf_External_Sym* */
   Elf_Internal_Sym *internal_syms;
   PTR symbols;			/* elf_symbol_type */
-/*  struct strtab *shstrtab;*/
+  Elf_Sym_Extra *sym_extra;
+  asymbol **section_syms;	/* STT_SECTION symbols for each section */
+  int num_section_syms;		/* number of section_syms allocated */
   Elf_Internal_Shdr symtab_hdr;
   Elf_Internal_Shdr shstrtab_hdr;
   Elf_Internal_Shdr strtab_hdr;
@@ -160,7 +168,9 @@ struct elf_obj_tdata
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
 #define elf_num_locals(bfd)	(elf_tdata(bfd) -> num_locals)
 #define elf_num_globals(bfd)	(elf_tdata(bfd) -> num_globals)
-#define elf_symtab_map(bfd)	(elf_tdata(bfd) -> symtab_map)
+#define elf_sym_extra(bfd)	(elf_tdata(bfd) -> sym_extra)
+#define elf_section_syms(bfd)	(elf_tdata(bfd) -> section_syms)
+#define elf_num_section_syms(bfd) (elf_tdata(bfd) -> num_section_syms)
 #define core_prpsinfo(bfd)	(elf_tdata(bfd) -> prpsinfo)
 #define core_prstatus(bfd)	(elf_tdata(bfd) -> prstatus)
 #define obj_symbols(bfd)	((elf_symbol_type*)(elf_tdata(bfd) -> symbols))
