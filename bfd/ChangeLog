@@ -1,5 +1,12 @@
 2001-08-09  H.J. Lu  <hjl@gnu.org>
 
+	* bfd-in.h (bfd_elf_sprintf_vma, bfd_elf_fprintf_vma): Moved
+	to ...
+	* elf-bfd.h: Here.
+	* bfd-in2.h: Regenerated.
+
+2001-08-09  H.J. Lu  <hjl@gnu.org>
+
 	* bfd-in.h (bfd_sprintf_vma): New prototype.
 	(bfd_fprintf_vma): Likewise.
 	(bfd_elf_sprintf_vma): Likewise.

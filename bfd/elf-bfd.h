@@ -999,6 +999,9 @@ extern void bfd_elf_print_symbol PARAMS ((bfd *, PTR, asymbol *,
 #define bfd_elf32_print_symbol	bfd_elf_print_symbol
 #define bfd_elf64_print_symbol	bfd_elf_print_symbol
 
+extern void bfd_elf_sprintf_vma PARAMS ((bfd *, char *, bfd_vma));
+extern void bfd_elf_fprintf_vma PARAMS ((bfd *, PTR, bfd_vma));
+
 extern unsigned long bfd_elf_hash PARAMS ((const char *));
 
 extern bfd_reloc_status_type bfd_elf_generic_reloc PARAMS ((bfd *,

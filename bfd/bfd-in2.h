@@ -185,8 +185,6 @@ typedef unsigned long bfd_size_type;
 
 extern void bfd_sprintf_vma PARAMS ((bfd *, char *, bfd_vma));
 extern void bfd_fprintf_vma PARAMS ((bfd *, PTR, bfd_vma));
-extern void bfd_elf_sprintf_vma PARAMS ((bfd *, char *, bfd_vma));
-extern void bfd_elf_fprintf_vma PARAMS ((bfd *, PTR, bfd_vma));
 
 #define printf_vma(x) fprintf_vma(stdout,x)
 #define bfd_printf_vma(abfd,x) bfd_fprintf_vma (abfd,stdout,x)
