@@ -4907,8 +4907,9 @@ mips_extract_struct_value_address (struct regcache *regcache)
   /* FIXME: This will only work at random.  The caller passes the
      struct_return address in V0, but it is not preserved.  It may
      still be there, or this may be a random value.  */
-  CORE_ADDR val;
-  regcache_cooked_read_unsigned (regcache, V0_REGNUM, &val);
+  LONGEST val;
+
+  regcache_cooked_read_signed (regcache, V0_REGNUM, &val);
   return val;
 }
 
