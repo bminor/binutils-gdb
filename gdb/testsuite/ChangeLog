@@ -1,3 +1,11 @@
+Wed May 10 16:03:23 1995  Torbjorn Granlund  <tege@adder.cygnus.com>
+
+	* Makefile.in: Make clean targets work also when SUBDIRS is empty.
+
+Mon May  1 07:32:48 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* lib/gdb.exp: Disable chill tests for irix5.
+
 Wed Apr 26 07:36:03 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/scope.exp: Make test names unique.  Use gdb_test.  Make
