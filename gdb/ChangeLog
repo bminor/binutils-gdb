@@ -1,3 +1,8 @@
+2000-10-27  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-exp.y (yylex): avoid problem with symbol name 
+	starting as a operator name.
+
 2000-11-30  Fernando Nasser  <fnasser@redhat.com>
 
 	* linespec.h: New file. Declarations for linespec.c.

@@ -942,30 +942,37 @@ yylex ()
   char *uptokstart;
   char *tokptr;
   char *p;
-  int tempbufindex;
+  int explen, tempbufindex;
   static char *tempbuf;
   static int tempbufsize;
 
  retry:
 
   tokstart = lexptr;
+  explen = strlen (lexptr);
   /* See if it is a special token of length 3.  */
-  for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
-    if (STREQN (tokstart, tokentab3[i].operator, 3))
-      {
-	lexptr += 3;
-	yylval.opcode = tokentab3[i].opcode;
-	return tokentab3[i].token;
-      }
+  if (explen > 2)
+    for (i = 0; i < sizeof (tokentab3) / sizeof (tokentab3[0]); i++)
+      if (strnicmp (tokstart, tokentab3[i].operator, 3) == 0
+          && (!isalpha (tokentab3[i].operator[0]) || explen == 3
+              || (!isalpha (tokstart[3]) && !isdigit (tokstart[3]) && tokstart[3] != '_')))
+        {
+          lexptr += 3;
+          yylval.opcode = tokentab3[i].opcode;
+          return tokentab3[i].token;
+        }
 
   /* See if it is a special token of length 2.  */
-  for (i = 0; i < sizeof tokentab2 / sizeof tokentab2[0]; i++)
-    if (STREQN (tokstart, tokentab2[i].operator, 2))
-      {
-	lexptr += 2;
-	yylval.opcode = tokentab2[i].opcode;
-	return tokentab2[i].token;
-      }
+  if (explen > 1)
+  for (i = 0; i < sizeof (tokentab2) / sizeof (tokentab2[0]); i++)
+      if (strnicmp (tokstart, tokentab2[i].operator, 2) == 0
+          && (!isalpha (tokentab2[i].operator[0]) || explen == 2
+              || (!isalpha (tokstart[2]) && !isdigit (tokstart[2]) && tokstart[2] != '_')))
+        {
+          lexptr += 2;
+          yylval.opcode = tokentab2[i].opcode;
+          return tokentab2[i].token;
+        }
 
   switch (c = *tokstart)
     {
@@ -1443,4 +1450,3 @@ yyerror (msg)
 {
   error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
 }
-
