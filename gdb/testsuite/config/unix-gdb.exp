@@ -39,10 +39,14 @@ if ![info exists decimal] then {
 proc gdb_version {} {
     global GDB
     global GDBFLAGS
+    if {[which $GDB] != 0} then {
     set tmp [exec echo "q" | $GDB]
     set version [lindex $tmp [lsearch $tmp "\[0-9\]*"]]
     set version [string range $version 0 [expr [string length $version]-2]]
     clone_output "[which $GDB] version $version $GDBFLAGS\n"
+    } else {
+	warning "$GDB does not exist"
+}
 }
 
 #
@@ -95,7 +99,6 @@ proc gdb_load { arg } {
 	    if $verbose>1 then {
 		send_user "\t\tLoaded $arg into the $GDB\n"
 	    }
-	    return 0
 	    }
 	-re "has no symbol-table.*$prompt $" {
 	    error "$arg wasn't compiled with \"-g\""
@@ -202,12 +205,18 @@ proc gdb_start {} {
     set oldtimeout $timeout
     set timeout [expr "$timeout + 60"]
     if [ llength $GDBFLAGS ] then {
+	if {[which $GDB] != 0} then {
 	spawn $GDB $GDBFLAGS
     } else {
-	if {[which $GDB] != 0} then {
+	    error "$GDB does not exist."
+	    exit 1
+	}
+    } else {
+	IF {[WHICH $GDB] != 0} then {
 	spawn $GDB
 	} else {
-	    error "Can't find $GDB"
+	    error "$GDB does not exist."
+	    exit 1
 	}
     }
     expect {
