@@ -47,7 +47,6 @@ Tue Jan 11 13:01:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	emitting nop instructions.
 	* Makefile.in (listing.o): Depends upon subsegs.h.
 
->>>>>>> 1.484
 Mon Jan 10 09:52:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_ip): Put check for missing label on .PROC
