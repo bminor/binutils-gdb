@@ -1,3 +1,24 @@
+1999-02-10  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* gdb.base/smoke.exp: Disambiguate two test case names (both
+	called ``print'').
+
+Fri Feb  5 12:42:56 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/volatile.exp: Use gdb_test, add xfails for GCC
+ 	compilation.
+
+1999-02-04  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* gdb.base/miscexprs.exp: Change patterns to match GDB's
+	actual output formatting.
+	* gdb.base/smoke.exp: GDB removes leading 0's.
+	* gdb.base/volatile.exp: Don't check type of remuneration;
+	that variable is no longer defined in constvars.c.
+	* gdb.base/step-test.c (main): Exit with explicit exit code.
+	* gdb.base/step-test.exp: Remove two nexti checks--they are
+	not portable.
+
 1999-02-04  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* gdb.base/help.exp ("help delete display"): Fix test to match
@@ -5,9 +26,9 @@
 
 	* gdb.base/long_long.c (known_types): Initialize values to zero.
 	* gdb.base/long_long.exp: Step one more line
-	so 'dec' is initialized in "get to known place".  GDB doesn't 
-        prepend unnecessary zeros to the front of numbers.  Explicitly 
-	ask for hex formatting.  Use unique test case names.
+	so 'dec' is initialized in "get to known place".  GDB removes
+        leading zeros.  Explicitly ask for hex formatting.  Use 
+        unique test case names.
 
 Tue Feb  2 10:16:08 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
