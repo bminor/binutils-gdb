@@ -53,7 +53,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define IRIX3_SYS 17		/* SGI Iris running irix 3.x */
 #define IRIX4_SYS 18		/* SGI Iris running cypress */
 #define HP300BSD_SYS 19
-#define	ULTRA3_SYM1_SYS 20		/* NYU Ultracomputer */
+#define	ULTRA3_SYS 20		/* NYU Ultracomputer */
 
 #include <ansidecl.h>
 
@@ -147,7 +147,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/h-hp300bsd.h>
 #endif
 
-#if HOST_SYS == ULTRA3_SYM1_SYS
+#if HOST_SYS == ULTRA3_SYS
 #include <sys/h-ultra3.h>
 #endif
 
