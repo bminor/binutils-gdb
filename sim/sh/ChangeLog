@@ -1,3 +1,10 @@
+2003-07-09  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (ppi_gensim): For a conditional ppi insn, if the
+	condition is false, we want to return (not break).  A break
+	will take us to the end of the function where registers will
+	be updated, whereas the desired outcome is for nothing to change.
+
 2003-07-03  Michael Snyder  <msnyder@redhat.com>
 
 	* gencode.c (movs): Fix a couple of text transpositions.
