@@ -268,6 +268,9 @@ sim-utils.o: $(srcdir)/../common/sim-utils.c $(sim_main_headers) \
 sim-load.o: $(srcdir)/../common/sim-load.c
 	$(CC) -c $(srcdir)/../common/sim-load.c $(ALL_CFLAGS)
 
+nrun.o: $(srcdir)/../common/nrun.c config.h tconfig.h \
+	  $(srcroot)/include/callback.h $(sim_main_headers)
+	$(CC) -c $(srcdir)/../common/nrun.c $(ALL_CFLAGS)
 
 install: install-common $(SIM_EXTRA_INSTALL)
 

@@ -34,6 +34,7 @@ configure
 gentmap.c
 gentvals.sh
 nltvals.def
+nrun.c
 run.c
 run.1
 sim-assert.h
