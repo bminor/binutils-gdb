@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Sun Aug 25 15:21:45 PDT 1991, by rich@cygint.cygnus.com
+# Last Mod Sun Aug 25 21:42:08 PDT 1991, by rich@cygint.cygnus.com
 #
 # $Id$
 
@@ -135,11 +135,20 @@ install-dirs: force
 	- mkdir $(destdir)/include
 	- mkdir $(destdir)/man
 	- mkdir $(destdir)/man/man1
-	(cd  $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
-                then echo .$(target) ; fi`$(subdir) ; $(MAKE) install-dir)
+	if [ -d $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+                then echo .$(target) ; fi`$(subdir) ] ; then \
+		(cd  $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+	                then echo .$(target) ; fi`$(subdir) ; \
+				$(MAKE) install-dir) ; \
+	fi
 
 install-fixed-includes: force
-	(cd gcc ; $(MAKE) install-fixed-includes)
+	if [ -d $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+                then echo .$(target) ; fi`$(subdir) ] ; then \
+		(cd  $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+	                then echo .$(target) ; fi`$(subdir) ; \
+				$(MAKE) install-fixed-includes) ; \
+	fi
 
 etags tags: TAGS
 
@@ -190,7 +199,10 @@ force_update:
 
 #
 # $Log$
-# Revision 1.28  1991/08/25 23:40:22  rich
+# Revision 1.29  1991/08/26 04:45:57  rich
+# Correcting install target when gcc not present.
+#
+# Revision 1.28  1991/08/25  23:40:22  rich
 # rcs enters the soup.
 #
 # Revision 1.27  1991/08/23  07:15:56  gnu
