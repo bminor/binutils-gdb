@@ -1,3 +1,14 @@
+2001-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (string_table_length): New variable.
+	(SECTION_NAME): Catch out of range indices and missing section
+	pointers.
+	(process_section_headers): Delete useless local variable
+	string_table_offset.  Set the value of string_table_length
+	after loading the string table.
+	(process_mips_specific): Use SECTION_NAME macro.
+	(process_file): Set string_table_length to 0 when it is freed.
+
 2001-01-12  Nick Clifton  <nickc@redhat.com>
 
 	* version.c (print_version): Update copyright date.
