@@ -1,3 +1,18 @@
+Thu Dec  5 13:24:46 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Calling check_relocs
+	even if SEC_ALLOC is not set.
+	* elf32-i386.c (elf_i386_check_relocs): Don't check SEC_ALLOC
+	when deciding whether to copy a reloc into a shared object.
+	(elf_i386_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_check_relocs): Likewise.
+	(elf32_sparc_relocate_section): Likewise.
+	* elf32-i386.c (elf_i386_check_relocs): Don't set SEC_ALLOC in a
+	reloc section if it is not set in the source section.
+	* elf32-sparc.c (elf32_sparc_check_relocs): Likewise.
+	* elf.c (bfd_section_from_shdr): Mark a reloc section associated
+	with a SEC_DEBUGGING section as SEC_DEBUGGING.
+
 Wed Dec  4 14:18:13 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): #if 0 code that

@@ -956,12 +956,6 @@ elf_link_add_object_symbols (abfd, info)
 	      || o->reloc_count == 0)
 	    continue;
 
-	  /* I believe we can ignore the relocs for any section which
-             does not form part of the final process image, such as a
-             debugging section.  */
-	  if ((o->flags & SEC_ALLOC) == 0)
-	    continue;
-
 	  internal_relocs = (NAME(_bfd_elf,link_read_relocs)
 			     (abfd, o, (PTR) NULL,
 			      (Elf_Internal_Rela *) NULL,

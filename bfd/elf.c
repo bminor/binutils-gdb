@@ -576,6 +576,7 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
       ret->plt_offset = (bfd_vma) -1;
       ret->linker_section_pointer = (elf_linker_section_pointers_t *)0;
       ret->type = STT_NOTYPE;
+      ret->other = 0;
       /* Assume that we have been called by a non-ELF symbol reader.
          This flag is then reset by the code which reads an ELF input
          file.  This ensures that a symbol created by a non-ELF symbol
@@ -863,7 +864,19 @@ bfd_section_from_shdr (abfd, shindex)
 	   represent such a section, so at least for now, we don't
 	   try.  We just present it as a normal section.  */
 	if (hdr->sh_link != elf_onesymtab (abfd))
-	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+	  {
+	    if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+	      return false;
+	    if (hdr->bfd_section != NULL
+		&& bfd_section_from_shdr (abfd, hdr->sh_info))
+	      {
+		target_sect = bfd_section_from_elf_index (abfd, hdr->sh_info);
+		if (target_sect != NULL
+		    && (target_sect->flags & SEC_DEBUGGING) != 0)
+		  hdr->bfd_section->flags |= SEC_DEBUGGING;
+	      }
+	    return true;
+	  }
 
 	if (! bfd_section_from_shdr (abfd, hdr->sh_info))
 	  return false;
@@ -2525,8 +2538,11 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_CYGNUS_M32R;
       break;
 /* end-sanitize-m32r */
-    case bfd_arch_mn10x00:
-      i_ehdrp->e_machine = EM_CYGNUS_MN10x00;
+    case bfd_arch_mn10200:
+      i_ehdrp->e_machine = EM_CYGNUS_MN10200;
+      break;
+    case bfd_arch_mn10300:
+      i_ehdrp->e_machine = EM_CYGNUS_MN10300;
       break;
       /* also note that EM_M32, AT&T WE32100 is unknown to bfd */
     default:
@@ -3149,7 +3165,11 @@ swap_out_syms (abfd, sttp)
 	    sym.st_info = ELF_ST_INFO (bind, type);
 	  }
 
-	sym.st_other = 0;
+	if (type_ptr != NULL)
+	  sym.st_other = type_ptr->internal_elf_sym.st_other;
+	else
+	  sym.st_other = 0;
+
 	bed->s->swap_symbol_out (abfd, &sym, (PTR) outbound_syms);
 	outbound_syms += bed->s->sizeof_sym;
       }
