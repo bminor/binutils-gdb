@@ -12774,6 +12774,7 @@ nopic_need_relax (sym, before_relaxing)
 	      || strcmp (symname, "_gp_disp") == 0))
 	change = 1;
       else if ((! S_IS_DEFINED (sym) || S_IS_COMMON (sym))
+	       && !S_IS_EXTERN (sym)
 	       && (0
 #ifndef NO_ECOFF_DEBUGGING
 		   || (symbol_get_obj (sym)->ecoff_extern_size != 0

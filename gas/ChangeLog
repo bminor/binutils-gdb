@@ -1,6 +1,11 @@
+2003-03-26  Eric Christopher  <echristo@redhat.com>
+
+	* config/tc-mips.c (nopic_need_relax): Check for
+        S_IS_EXTERN.
+
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
-	    
+
 	Contribute support for Intel's iWMMXt chip - an	ARM variant:
 
 	* config/tc-arm.c: (ARM_CEXT_IWMMXT, ARM_ARCH_IWMMXT, WR_PREFIX,
@@ -17,7 +22,7 @@
 	do_iwmmxt_wrwrwr, do_iwmmxt_wshufh, do_iwmmxt_wzero,
 	cp_byte_address_offset, cp_byte_address_required_here,
 	check_iwmmxt_insn): New	functions.
-	(asm_opcode_insns): Add iWMMXt instructions.	
+	(asm_opcode_insns): Add iWMMXt instructions.
 	(md_begin): Set the mach value for iWMMXt targets.  Create a note
 	section to identify iwmmxt binaries.
 	(md_apply_fix3): Handle BFD_RELOC_ARM_CP_OFF_IMM_S2.
@@ -29,7 +34,7 @@
 	* doc/as.texinfo: Rename the all occurances of C54X to TIC54X.
 	* doc/all.texi: Likewise.
 	* doc/c-tic54x.texi: Likewise.
-	
+
 2003-03-21  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-ia64.c (generate_unwind_image): Fix type of unw_rec to
@@ -82,7 +87,7 @@
 2003-03-04  Dmitry Diky  <diwil@mail.ru>
 
 	* config/tc-msp430.c (mcu_types): Add recently announced x1122
-	and x1123 devices, add missed x437. 
+	and x1123 devices, add missed x437.
 	(md_show_usage): Sort device list.
 
 2003-03-03  J"orn Rennecke <joern.rennecke@superh.com>
@@ -243,7 +248,7 @@
 	Output main source file dirname before its filename.
 
 2003-01-28    Dmitry Diky <diwil@mail.ru>
-	
+
 	* config/tc-msp430.c: Replace occurences of 'tolower' with
 	'TOLOWER'.
 
@@ -583,7 +588,7 @@
 
 2002-12-16  Andrew MacLeod  <amacleod@redhat.com>
 
-	* config/tc-xstormy16.c (md_cgen_lookup_reloc): If a relocation 
+	* config/tc-xstormy16.c (md_cgen_lookup_reloc): If a relocation
 	has already been set up, use it.
 
 2002-12-16  Kazu Hirata  <kazu@cs.umass.edu>
