@@ -1,3 +1,7 @@
+2002-01-08  Jason Merrill  <jason@redhat.com>
+
+	* gdb.c++/userdef.cc: Use <iostream> instead of <iostream.h>.
+
 2001-11-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* lib/mi-support.exp (mi_run_to_helper): Move comments
