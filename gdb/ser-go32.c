@@ -80,6 +80,7 @@ dos_async_init()
   int i;
   ASYNC_STRUCT *a1;
   ASYNC_STRUCT *a2;
+
   a1 = getivec(12);
   a2 = getivec(11);
   async = 0;
@@ -87,23 +88,26 @@ dos_async_init()
     async = a1;
   if (a2)
     async = a2;
+
   if (a1 && a2)
-  {
-    if (a1 < a2)
-      async = a1;
-    else
-      async = a2;
-  }
+    {
+      if (a1 < a2)
+	async = a1;
+      else
+	async = a2;
+    }
+
   if (async == 0)
-  {
-    error("GDB can not connect to asynctsr program, check that it is installed\n\
+    {
+      error("GDB can not connect to asynctsr program, check that it is installed\n\
 and that serial I/O is not being redirected (perhaps by NFS)\n\n\
 example configuration:\n\
 C> mode com2:9600,n,8,1,p\n\
 C> asynctsr 2\n\
 C> gdb \n");
 
-  }
+    }
+
   iov = async->iov;
   outportb(com_ier, 0x0f);
   outportb(com_bfr, 0x03);
@@ -200,7 +204,7 @@ go32_open (scb, name)
      const char *name;
 {
   scb->fd = dos_async_init();
-  if (scb->fd)
+  if (!scb->fd)
     return 1;
 
   return 0;

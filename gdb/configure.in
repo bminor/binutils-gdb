@@ -1,13 +1,7 @@
-configdirs="doc testsuite"
+configdirs="doc testsuite sparclite"
 srcname="GDB"
 srctrigger=main.c
 gdb_serial_driver=ser-unix.c
-
-echo ${target}
-
-if [ "${target_cpu}" = "sparclite" ] ; then
-	configdirs = "$configdirs sparclite"
-fi
 
 # per-host:
 
