@@ -1,3 +1,14 @@
+Wed Jun 22 13:38:32 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* mips-dis.c (_print_insn_mips): Build a static hash table mapping
+	opcodes to the first instruction with that opcode, to speed
+	disassembly of large files.  From ralphc@pyramid.com (Ralph
+	Campbell).
+
+Tue Jun  7 12:49:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (mostlyclean): Fix typo (was mostyclean).
+
 Wed May 11 22:32:00 1994  DJ Delorie (dj@ctron.com)
 
 	* configure.bat: update to latest makefile.in
