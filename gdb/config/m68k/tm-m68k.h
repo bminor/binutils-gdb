@@ -95,8 +95,10 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */
 
+#if !GDB_MULTI_ARCH
 #if !defined (DECR_PC_AFTER_BREAK)
 #define DECR_PC_AFTER_BREAK 2
+#endif
 #endif
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
@@ -110,12 +112,15 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 #define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
 #define REGISTER_BYTES_NOFP (16*4 + 8)
 
+
 #ifndef NUM_REGS
 #define NUM_REGS 29
 #endif
 
+
 #define NUM_FREGS (NUM_REGS-24)
 
+#if !GDB_MULTI_ARCH
 #ifndef REGISTER_BYTES_OK
 #define REGISTER_BYTES_OK(b) \
    ((b) == REGISTER_BYTES_FP \
@@ -125,6 +130,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 #ifndef REGISTER_BYTES
 #define REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4)
 #endif
+#endif //multi-arch
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
@@ -157,7 +163,8 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
 #define MAX_REGISTER_VIRTUAL_SIZE 12
-#endif
+#endif //multi-arch
+
 /* Return the GDB type object for the "standard" data type of data 
    in register N.  This should be int for D0-D7, long double for FP0-FP7,
    and void pointer for all others (A0-A7, PC, SR, FPCONTROL etc).
@@ -205,7 +212,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
-
+#if !GDB_MULTI_ARCH
 #define STORE_STRUCT_RETURN(ADDR, SP) \
   { write_register (A1_REGNUM, (ADDR)); }
 
@@ -221,11 +228,13 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 	         (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)),	\
 	  TYPE_LENGTH(TYPE))
 #endif
+#endif //multi-arch
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  Assumes floats are passed
    in d0/d1.  */
 
+#if !GDB_MULTI_ARCH
 #if !defined (STORE_RETURN_VALUE)
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
   write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
@@ -236,6 +245,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 #define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(CORE_ADDR *)(REGBUF))
+#endif //multi-arch
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -248,20 +258,24 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 /* If we are chaining from sigtramp, then manufacture a sigtramp frame
    (which isn't really on the stack.  I'm not sure this is right for anything
    but BSD4.3 on an hp300.  */
+#if !GDB_MULTI_ARCH
 #define FRAME_CHAIN(thisframe)  \
   (thisframe->signal_handler_caller \
    ? thisframe->frame \
    : (!inside_entry_file ((thisframe)->pc) \
       ? read_memory_integer ((thisframe)->frame, 4) \
       : 0))
+#endif
 
 /* Define other aspects of the stack frame.  */
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
+#if !GDB_MULTI_ARCH
 #define FRAMELESS_FUNCTION_INVOCATION(FI) \
      (((FI)->signal_handler_caller) ? 0 : frameless_look_for_prologue(FI))
+#endif
 
 /* This was determined by experimentation on hp300 BSD 4.3.  Perhaps
    it corresponds to some offset in /usr/include/sys/user.h or
@@ -272,6 +286,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 
 #define SIG_PC_FP_OFFSET 530
 
+#if !GDB_MULTI_ARCH
 #define FRAME_SAVED_PC(FRAME) \
   (((FRAME)->signal_handler_caller \
     ? ((FRAME)->next \
@@ -281,6 +296,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
        ) \
     : read_memory_integer ((FRAME)->frame + 4, 4)) \
    )
+#endif
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 

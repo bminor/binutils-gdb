@@ -1,3 +1,26 @@
+2002-06-24  Grace Sainsbury  <graces@redhat.com>
+
+	* config/m68k/tm-m68k.h (DECR_PC_AFTER_BREAK): Remove.
+	(REGISTER_BYTES_OK): Remove.
+	(REGISTER_BYTES): Remove.
+	(STORE_STRUCT_RETURN): Remove.
+	(DEPRECATED_EXTRACT_RETURN_VALUE): Remove.
+	(STORE_RETURN_VALUE): Remove.
+	(DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS): Remove.
+	(FRAME_CHAIN): Remove.
+	(FRAMELESS_FUNCTION_INVOCATION): Remove.
+	(FRAME_SAVED_PC): Remove.  
+	* m68k-tdep.c (m68k_register_bytes_ok):Add.
+	(m68k_store_struct_return): Add.
+	(m68k_deprecated_extract_return_value): Add.
+	(m68k_deprecated_extract_struct_value_address): Add.
+	(m68k_store_return_value): Add.
+	(m68k_frame_chain): Add.
+	(m68k_frameless_function_invocation): Add.
+	(m68k_frame_saved_pc): Add.
+	(m68k_gdbarch_init): added set_gdbarch calls for new 
+	functions and deleted macros.
+
 2002-06-23  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove old files.

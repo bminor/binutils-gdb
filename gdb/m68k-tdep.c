@@ -44,6 +44,13 @@
 
 void m68k_frame_init_saved_regs (struct frame_info *frame_info);
 
+static int
+m68k_register_bytes_ok (numbytes)
+{
+  return ((numbytes == REGISTER_BYTES_FP)
+	  || (numbytes == REGISTER_BYTES_NOFP));
+}
+
 /* Number of bytes of storage in the actual machine representation
    for register regnum.  On the 68000, all regs are 4 bytes
    except the floating point regs which are 12 bytes.  */
@@ -129,6 +136,101 @@ m68k_register_byte (int regnum)
   else
     return (regnum * 4);
 }
+
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  This is called from call_function. */
+
+static void
+m68k_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
+{
+  write_register (A1_REGNUM, addr);
+}
+
+/* Extract from an array regbuf containing the (raw) register state
+   a function return value of type type, and copy that, in virtual format,
+   into valbuf.  This is assuming that floating point values are returned
+   as doubles in d0/d1.  */
+
+static void
+m68k_deprecated_extract_return_value (struct type *type, char *regbuf,
+				      char *valbuf)
+{
+  int offset = 0;
+  int typeLength = TYPE_LENGTH (type);
+
+  if (typeLength < 4)
+    offset = 4 - typeLength;
+
+  memcpy (valbuf, regbuf + offset, typeLength);
+}
+
+static CORE_ADDR
+m68k_deprecated_extract_struct_value_address (char *regbuf)
+{
+  return (*(CORE_ADDR *) (regbuf));
+}
+
+/* Write into appropriate registers a function return value
+   of type TYPE, given in virtual format.  Assumes floats are passed
+   in d0/d1.  */
+
+static void
+m68k_store_return_value (struct type *type, char *valbuf)
+{
+  write_register_bytes (0, valbuf, TYPE_LENGTH (type));
+}
+
+/* Describe the pointer in each stack frame to the previous stack frame
+   (its caller).  */
+
+/* FRAME_CHAIN takes a frame's nominal address and produces the frame's
+   chain-pointer.
+   In the case of the 68000, the frame's nominal address
+   is the address of a 4-byte word containing the calling frame's address.  */
+
+/* If we are chaining from sigtramp, then manufacture a sigtramp frame
+   (which isn't really on the stack.  I'm not sure this is right for anything
+   but BSD4.3 on an hp300.  */
+
+static CORE_ADDR
+m68k_frame_chain (struct frame_info *thisframe)
+{
+  if (thisframe->signal_handler_caller)
+    return thisframe->frame;
+  else if (!inside_entry_file ((thisframe)->pc))
+    return read_memory_integer ((thisframe)->frame, 4);
+  else
+    return 0;
+}
+
+/* A function that tells us whether the function invocation represented
+   by fi does not have a frame on the stack associated with it.  If it
+   does not, FRAMELESS is set to 1, else 0.  */
+
+static int
+m68k_frameless_function_invocation (struct frame_info *fi)
+{
+  if (fi->signal_handler_caller)
+    return 0;
+  else
+    return frameless_look_for_prologue (fi);
+}
+
+static CORE_ADDR
+m68k_frame_saved_pc (struct frame_info *frame)
+{
+  if (frame->signal_handler_caller)
+    {
+      if (frame->next)
+	return read_memory_integer (frame->next->frame + SIG_PC_FP_OFFSET, 4);
+      else
+	return read_memory_integer (read_register (SP_REGNUM)
+				    + SIG_PC_FP_OFFSET - 8, 4);
+    }
+  else
+    return read_memory_integer (frame->frame + 4, 4);
+}
+
 
 /* The only reason this is here is the tm-altos.h reference below.  It
    was moved back here from tm-m68k.h.  FIXME? */
@@ -830,6 +932,19 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_stack_align (gdbarch, m68k_stack_align);
 
+  set_gdbarch_decr_pc_after_break (gdbarch, 2);
+
+  set_gdbarch_store_struct_return (gdbarch, m68k_store_struct_return);
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+					       m68k_deprecated_extract_return_value);
+  set_gdbarch_store_return_value (gdbarch, m68k_store_return_value);
+
+  set_gdbarch_frame_chain (gdbarch, m68k_frame_chain);
+  set_gdbarch_frame_saved_pc (gdbarch, m68k_frame_saved_pc);
+  set_gdbarch_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
+  set_gdbarch_frameless_function_invocation (gdbarch,
+					     m68k_frameless_function_invocation);
+
   set_gdbarch_register_raw_size (gdbarch, m68k_register_raw_size);
   set_gdbarch_register_virtual_size (gdbarch, m68k_register_virtual_size);
   set_gdbarch_max_register_raw_size (gdbarch, 12);
@@ -838,8 +953,9 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, m68k_register_name);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_byte (gdbarch, m68k_register_byte);
-
-  set_gdbarch_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
+  set_gdbarch_num_regs (gdbarch, 29);
+  set_gdbarch_register_bytes_ok (gdbarch, m68k_register_bytes_ok);
+  set_gdbarch_register_bytes (gdbarch, (16 * 4 + 8 + 8 * 12 + 3 * 4));
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
