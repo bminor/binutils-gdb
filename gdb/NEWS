@@ -1,6 +1,24 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+*** Changes in GDB-4.7:
+
+auto demangling style
+improved dwarf support?
+redundant SO fix...
+hppa cross host
+better c++ support?
+apollo 68b host
+remote.c improved (new T message)
+improved 29k support
+host/native/target split
+bugs bugs bugs
+sparc-stub.c
+rs6000 cleanups...  cross host
+
+==>Sun Aug 30 21:32:17 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+
 *** Changes in GDB-4.6:
 
  * Better support for C++ function names
