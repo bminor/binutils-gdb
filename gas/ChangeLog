@@ -1,3 +1,7 @@
+2001-06-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* expr.c: Fix typo in comment.
+
 2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* doc/as.texinfo (Infix Ops): Document that comparison and

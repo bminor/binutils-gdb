@@ -1456,7 +1456,7 @@ static const operatorT op_encoding[256] = {
    0	operand, (expression)
    1	||
    2	&&
-   3	= <> < <= >= >
+   3	== <> < <= >= >
    4	+ -
    5	used for * / % in MRI mode
    6	& ^ ! |
