@@ -1029,42 +1029,41 @@ proc all_fpu_comparison_tests { } {
 
     # Fails due to spacing and probably formatting problems.
     foreach i $fpu_comparison_formats {
-	setup_xfail "hppa*-*-*"
 	send "x/32i fcmp_$i"; send "_tests\n"
 	expect {
 	    -re ".*
-.*fcmp,$i,false? fr5,fr10\r\n\
-.*fcmp,$i,false fr5,fr10\r\n\
-.*fcmp,$i,\? fr5,fr10\r\n\
-.*fcmp,$i,!<=> fr5,fr10\r\n\
-.*fcmp,$i,= fr5,fr10\r\n\
-.*fcmp,$i,=t fr5,fr10\r\n\
-.*fcmp,$i,\?= fr5,fr10\r\n\
-.*fcmp,$i,!<> fr5,fr10\r\n\
-.*fcmp,$i,!\?>= fr5,fr10\r\n\
-.*fcmp,$i,< fr5,fr10\r\n\
-.*fcmp,$i,\?< fr5,fr10\r\n\
-.*fcmp,$i,!>= fr5,fr10\r\n\
-.*fcmp,$i,!\?> fr5,fr10\r\n\
-.*fcmp,$i,<= fr5,fr10\r\n\
-.*fcmp,$i,\?<= fr5,fr10\r\n\
-.*fcmp,$i,!> fr5,fr10\r\n\
-.*fcmp,$i,!\?<= fr5,fr10\r\n\
-.*fcmp,$i,> fr5,fr10\r\n\
-.*fcmp,$i,\?> fr5,fr10\r\n\
-.*fcmp,$i,!<= fr5,fr10\r\n\
-.*fcmp,$i,!\?< fr5,fr10\r\n\
-.*fcmp,$i,>= fr5,fr10\r\n\
-.*fcmp,$i,\?>= fr5,fr10\r\n\
-.*fcmp,$i,!< fr5,fr10\r\n\
-.*fcmp,$i,!\?= fr5,fr10\r\n\
-.*fcmp,$i,<> fr5,fr10\r\n\
-.*fcmp,$i,!= fr5,fr10\r\n\
-.*fcmp,$i,!=t fr5,fr10\r\n\
-.*fcmp,$i,!\? fr5,fr10\r\n\
-.*fcmp,$i,<=> fr5,fr10\r\n\
-.*fcmp,$i,true? fr5,fr10\r\n\
-.*fcmp,$i,true fr5,fr10\r\n\
+.*fcmp,$i,false\? fr4,fr5\r\n\
+.*fcmp,$i,false fr4,fr5\r\n\
+.*fcmp,$i,\? fr4,fr5\r\n\
+.*fcmp,$i,!<=> fr4,fr5\r\n\
+.*fcmp,$i,= fr4,fr5\r\n\
+.*fcmp,$i,=t fr4,fr5\r\n\
+.*fcmp,$i,\?= fr4,fr5\r\n\
+.*fcmp,$i,!<> fr4,fr5\r\n\
+.*fcmp,$i,!\?>= fr4,fr5\r\n\
+.*fcmp,$i,< fr4,fr5\r\n\
+.*fcmp,$i,\?< fr4,fr5\r\n\
+.*fcmp,$i,!>= fr4,fr5\r\n\
+.*fcmp,$i,!\?> fr4,fr5\r\n\
+.*fcmp,$i,<= fr4,fr5\r\n\
+.*fcmp,$i,\?<= fr4,fr5\r\n\
+.*fcmp,$i,!> fr4,fr5\r\n\
+.*fcmp,$i,!\?<= fr4,fr5\r\n\
+.*fcmp,$i,> fr4,fr5\r\n\
+.*fcmp,$i,\?> fr4,fr5\r\n\
+.*fcmp,$i,!<= fr4,fr5\r\n\
+.*fcmp,$i,!\?< fr4,fr5\r\n\
+.*fcmp,$i,>= fr4,fr5\r\n\
+.*fcmp,$i,\?>= fr4,fr5\r\n\
+.*fcmp,$i,!< fr4,fr5\r\n\
+.*fcmp,$i,!\?= fr4,fr5\r\n\
+.*fcmp,$i,<> fr4,fr5\r\n\
+.*fcmp,$i,!= fr4,fr5\r\n\
+.*fcmp,$i,!=t fr4,fr5\r\n\
+.*fcmp,$i,!\? fr4,fr5\r\n\
+.*fcmp,$i,<=> fr4,fr5\r\n\
+.*fcmp,$i,true\? fr4,fr5\r\n\
+.*fcmp,$i,true fr4,fr5\r\n\
 .*$prompt $" { pass "$i tests" }
 	    -re "$prompt $" { fail "fcmp_$i tests" }
 	    timeout { fail "(timeout) fcmp_$i tests" }

@@ -1,5 +1,8 @@
 Fri Feb  4 23:45:11 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* gdb.disasm/hppa.exp (fcmp_tests): Fix thinko in expect string.
+	No longer expected to fail.
+
 	* gdb.disasm/hppa.exp (xmpyu_tests): Fix buglet in expect
 	string.  No longer expected to fail.
 
