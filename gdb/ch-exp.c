@@ -75,6 +75,7 @@ typedef union
 enum ch_terminal {
   END_TOKEN = 0,
   /* '\001' ... '\xff' come first. */
+  OPEN_PAREN = '(',
   TOKEN_NOT_READ = 999,
   INTEGER_LITERAL,
   BOOLEAN_LITERAL,
@@ -176,6 +177,8 @@ peek_token_ (i)
   return terminal_buffer[i];
 }
 
+#if 0
+
 static void
 pushback_token (code, node)
      enum ch_terminal code;
@@ -192,6 +195,8 @@ pushback_token (code, node)
   terminal_buffer[0] = code;
   val_buffer[0] = node;
 }
+
+#endif
 
 static void
 forward_token_()
@@ -778,7 +783,7 @@ parse_primval ()
 	    }
 	  write_exp_elt_opcode (UNOP_IND);
 	  continue;
-	case '(':
+	case OPEN_PAREN:
 	  parse_call ();
 	  continue;
 	case CHARACTER_STRING_LITERAL:
@@ -790,6 +795,55 @@ parse_primval ()
 	  write_exp_elt_longcst (1);
 	  write_exp_elt_opcode (MULTI_SUBSCRIPT);
 	  continue;
+	case END_TOKEN:
+	case TOKEN_NOT_READ:
+	case INTEGER_LITERAL:
+	case BOOLEAN_LITERAL:
+	case FLOAT_LITERAL:
+	case GENERAL_PROCEDURE_NAME:
+	case LOCATION_NAME:
+	case EMPTINESS_LITERAL:
+	case TYPENAME:
+	case CASE:
+	case OF:
+	case ESAC:
+	case LOGIOR:
+	case ORIF:
+	case LOGXOR:
+	case LOGAND:
+	case ANDIF:
+	case NOTEQUAL:
+	case GEQ:
+	case LEQ:
+	case IN:
+	case SLASH_SLASH:
+	case MOD:
+	case REM:
+	case NOT:
+	case RECEIVE:
+	case UP:
+	case IF:
+	case THEN:
+	case ELSE:
+	case FI:
+	case ELSIF:
+	case ILLEGAL_TOKEN:
+	case NUM:
+	case PRED:
+	case SUCC:
+	case ABS:
+	case CARD:
+	case MAX_TOKEN:
+	case MIN_TOKEN:
+	case ADDR_TOKEN:
+	case SIZE:
+	case UPPER:
+	case LOWER:
+	case LENGTH:
+	case ARRAY:
+	case GDB_VARIABLE:
+	case GDB_ASSIGNMENT:
+	  break;
 	}
       break;
     }
@@ -1976,6 +2030,9 @@ ch_lex ()
 	      case LOC_CONST_BYTES:
 	      case LOC_OPTIMIZED_OUT:
 		error ("Symbol \"%s\" names no location.", inputname);
+		break;
+	      case LOC_UNRESOLVED:
+		error ("unhandled SYMBOL_CLASS in ch_lex()");
 		break;
 	      }
 	  }

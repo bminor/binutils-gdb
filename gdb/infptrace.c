@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "inferior.h"
 #include "target.h"
 #include "gdb_string.h"
+#include "wait.h"
+#include "command.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -519,12 +521,14 @@ udot_info ()
 
 #endif
 }
+#endif /* !defined (CHILD_XFER_MEMORY).  */
+
 
 void
 _initialize_infptrace ()
 {
+#if !defined (CHILD_XFER_MEMORY)
   add_info ("udot", udot_info,
 	    "Print contents of kernel ``struct user'' for current child.");
-
+#endif
 }
-#endif /* !defined (CHILD_XFER_MEMORY).  */

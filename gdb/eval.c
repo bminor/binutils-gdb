@@ -335,7 +335,6 @@ init_array_element (array, element, exp, pos, noside, low_bound, high_bound)
   else if (exp->elts[*pos].opcode == BINOP_RANGE)
     {
       LONGEST low, high;
-      value_ptr val;
       (*pos)++;
       low = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
       high = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
@@ -460,11 +459,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 
     case OP_BOOL:
       (*pos) += 2;
-      if (current_language->la_language == language_fortran)
-	return value_from_longest (builtin_type_f_logical_s2,
-				   exp->elts[pc + 1].longconst);
-      else
-	return value_from_longest (builtin_type_chill_bool,
+      return value_from_longest (LA_BOOL_TYPE,
 				   exp->elts[pc + 1].longconst);
 
     case OP_INTERNALVAR:
@@ -698,7 +693,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 		  /* If one is virtual, then all are virtual.  */
 		  if (TYPE_FN_FIELD_VIRTUAL_P (f, 0))
 		    for (j = TYPE_FN_FIELDLIST_LENGTH (basetype, i) - 1; j >= 0; --j)
-		      if (TYPE_FN_FIELD_VOFFSET (f, j) == fnoffset)
+		      if ((int) TYPE_FN_FIELD_VOFFSET (f, j) == fnoffset)
 			{
 			  value_ptr temp = value_ind (arg2);
 			  arg1 = value_virtual_fn_field (&temp, f, j, domain_type, 0);

@@ -1,3 +1,88 @@
+Fri Mar 29 21:39:56 1996  Fred Fish  <fnf@cygnus.com>
+
+	* core-aout.c (fetch_core_registers): Cast core_reg_size to int
+	before testing against reg_ptr.
+	* eval.c (evaluate_subexp_standard): Cast type of
+	TYPE_FN_FIELD_VOFFSET to int.
+	* findvar.c (extract_signed_integer, extract_unsigned_integer,
+	extract_long_unsigned_integer): Cast type of sizeof to int.
+	* values.c (unpack_field_as_long, modify_field): Ditto.
+	* valops.c (value_assign, call_function_by_hand): Ditto.
+	* infcmd.c (do_registers_info): Ditto.
+	* ser-tcp.c (tcp_open): Ditto
+	* remote.c (putpkt): Ditto.
+	* dcache.c (dcache_peek): Ditto.
+	* dcache.c (dcache_poke): Ditto.
+	* m2-exp.y (yylex): Ditto.
+	* gnu-regex.c (re_match_2): Ditto.
+	* f-lang.c (ADD_BF_SYMNUM, saved_bf_list_end, tmp_bf_ptr): Ifdef
+	out unused macro definition and variables.
+	* inftarg.c (proc_wait): Move from main.c to here, and make static.
+	* valprint.c (val_print_string): Change bufsize from int to unsigned.
+	* main.c (wait.h): Include
+	* top.c (command_line_input): Remove unused variable "c".
+	* f-typeprint.c (f_type_print_varspec_prefix): Add missing enum
+	value TYPE_CODE_TYPEDEF to switch statement.
+	(f_type_print_varspec_suffix): Add missing enum value
+	TYPE_CODE_TYPEDEF to switch statement.
+	* ch-exp.c (parse_primval): Add remaining enumeration values to
+	switch statement, with no specific action.
+	(ch_lex): Add LOC_UNRESOLVED in switch statement.
+	(pushback_token): Ifdef out, since code using it is ifdef'd out.
+	* stabsread.c (cleanup_undefined_types): Remove unused label
+	"badtype".
+	* objfiles.h (print_symbol_bcache_statistics): Add prototype.
+	* maint.c (objfiles.h): Include.
+	(maintenance_print_statistics): Remove unused variable "temp".
+	* minsyms.c (lookup_minimal_symbol_solib_trampoline): Remove
+	unused variable "found_file_symbol".
+	* m2-exp.y (yylex): Add LOC_UNRESOLVED case to switch.
+	* language.c (lang_bool_type): Use existing function local type
+	variable rather than create block local variables.
+	* solib.c (disable_break): Enclose in ifndef SVR4_SHARED_LIBS.
+	* infptrace.c (wait.h, command.h): Include.
+	* ser-tcp.c (gdb_string.h): Include
+	* i386-tdep.c (codestream_seek): Change "place" to CORE_ADDR.
+	(i386_get_frame_setup): Change "pc" from int to CORE_ADDR.
+	* command.c (complete_on_enum): Make assignment used as truth value
+	explictly check against NULL.
+	(wait.h): Include.
+	* infrun.c (wait_for_inferior): Ifdef out prologue_pc since code
+	that uses it is ifdef'd out.
+	* parser-defs.h: Add prototype for write_dollar_variable.
+	* infrun.c: Add prototype for write_pc_pid.
+	* breakpoint.h: Add prototype for re_enable_breakpoints_in_shlibs.
+	* symmisc.c (bcache.h): Include.
+	* bcache.h: Add prototype for print_bcache_statistics.
+	* symfile.c: Include <time.h>.
+	* printcmd.c (print_scalar_formatted): Change len to unsigned int.
+	* valarith.c (value_equal): Cast result of TYPE_LENGTH to int.
+	* valarith.c (value_binop): Change result_len, promoted_len1,
+ 	and promoted_len2 to unsigned int.
+	* valarith.c (value_subscripted_rvalue): Change elt_offs and
+ 	elt_size to unsigned int.
+	* valops.c (value_array): Change typelength to unsigned int.
+	(destructor_name_p): Change len to unsigned int.
+	* scm-lang.h (scm_parse): Add prototype for scm_unpack.
+	* symfile.c (decrement_reading_symtab): Change return type to void.
+	* valarith.c (value_subscript): Remove unused variable "word".
+	(value_subscript): Remove unused variable "tint".
+	* valops.c (auto_abandon): Ifdef out, since code using it is also
+	ifdef'd out.
+	* eval.c (init_array_element): Remove unused variable "val".
+	* Makefile.in (values.o): Depends on scm-lang.h.
+	(command.o): Depends upon wait_h.
+	(ser-tcp.o): Depends upon gdb_string.h.
+	(infptrace.o): Depends upon wait_h and command_h.
+	(maint.o): Depends on objfiles.h and symfile.h.
+	* values.c (allocate_repeat_value): Remove unused variable
+	"element_type".
+	(scm-lang.h): Include.
+	* breakpoint.c (create_longjmp_breakpoint): Enclose in
+	GET_LONGJMP_TARGET define, unused otherwise.
+	* config/i386/nm-linux.h: Add prototypes for i386_insert_watchpoint,
+	i386_remove_watchpoint and i386_stopped_by_watchpoint.
+	
 Thu Mar 28 12:53:19 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in (sparc64-*-solaris2*): Delete.

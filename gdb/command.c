@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcmd.h"
 #include "symtab.h"
 #include "value.h"
+#include "wait.h"
 #include <ctype.h>
 #include "gdb_string.h"
 #ifdef HAVE_UNISTD_H
@@ -1048,7 +1049,7 @@ complete_on_enum (enumlist, text, word)
   matchlist = (char **) xmalloc (sizeof_matchlist * sizeof (char *));
   matches = 0;
 
-  for (i = 0; name = enumlist[i]; i++)
+  for (i = 0; (name = enumlist[i]) != NULL; i++)
     if (strncmp (name, text, textlen) == 0)
       {
 	if (matches == sizeof_matchlist)

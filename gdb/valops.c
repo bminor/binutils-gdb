@@ -66,7 +66,9 @@ static value_ptr cast_into_complex PARAMS ((struct type *, value_ptr));
 
 /* Flag for whether we want to abandon failed expression evals by default.  */
 
+#if 0
 static int auto_abandon = 0;
+#endif
 
 
 /* Find the address of function name NAME in the inferior.  */
@@ -470,7 +472,7 @@ value_assign (toval, fromval)
 		     + HOST_CHAR_BIT - 1)
 		    / HOST_CHAR_BIT;
 
-	  if (len > sizeof (LONGEST))
+	  if (len > (int) sizeof (LONGEST))
 	    error ("Can't handle bitfields which don't fit in a %d bit word.",
 		   sizeof (LONGEST) * HOST_CHAR_BIT);
 
@@ -495,7 +497,7 @@ value_assign (toval, fromval)
 	  char buffer[sizeof (LONGEST)];
           int len = REGISTER_RAW_SIZE (VALUE_REGNO (toval));
 
-	  if (len > sizeof (LONGEST))
+	  if (len > (int) sizeof (LONGEST))
 	    error ("Can't handle bitfields in registers larger than %d bits.",
 		   sizeof (LONGEST) * HOST_CHAR_BIT);
 
@@ -624,7 +626,7 @@ Can't handle bitfield which doesn't fit in a single register.");
   /* If the field does not entirely fill a LONGEST, then zero the sign bits.
      If the field is signed, and is negative, then sign extend. */
   if ((VALUE_BITSIZE (toval) > 0)
-      && (VALUE_BITSIZE (toval) < 8 * sizeof (LONGEST)))
+      && (VALUE_BITSIZE (toval) < 8 * (int) sizeof (LONGEST)))
     {
       LONGEST fieldval = value_as_long (fromval);
       LONGEST valmask = (((unsigned LONGEST) 1) << VALUE_BITSIZE (toval)) - 1;
@@ -1075,7 +1077,7 @@ call_function_by_hand (function, nargs, args)
 
   /* Create a call sequence customized for this function
      and the number of arguments for it.  */
-  for (i = 0; i < sizeof dummy / sizeof (dummy[0]); i++)
+  for (i = 0; i < (int) (sizeof (dummy) / sizeof (dummy[0])); i++)
     store_unsigned_integer (&dummy1[i * REGISTER_SIZE],
 			    REGISTER_SIZE,
 			    (unsigned LONGEST)dummy[i]);
@@ -1359,7 +1361,7 @@ value_array (lowbound, highbound, elemvec)
 {
   int nelem;
   int idx;
-  int typelength;
+  unsigned int typelength;
   value_ptr val;
   struct type *rangetype;
   struct type *arraytype;
@@ -1896,7 +1898,7 @@ destructor_name_p (name, type)
     {
       char *dname = type_name_no_tag (type);
       char *cp = strchr (dname, '<');
-      int len;
+      unsigned int len;
 
       /* Do not compare the template part for template classes.  */
       if (cp == NULL)

@@ -110,6 +110,8 @@ extern void write_exp_elt_block PARAMS ((struct block *));
 extern void write_exp_msymbol PARAMS ((struct minimal_symbol *,
 				       struct type *, struct type *));
 
+extern void write_dollar_variable PARAMS ((struct stoken str));
+
 extern void
 start_arglist PARAMS ((void));
 

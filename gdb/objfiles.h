@@ -175,6 +175,7 @@ struct objstats {
 #define OBJSTAT(objfile, expr) (objfile -> stats.expr)
 #define OBJSTATS struct objstats stats
 extern void print_objfile_statistics PARAMS ((void));
+extern void print_symbol_bcache_statistics PARAMS ((void));
 
 #else
 

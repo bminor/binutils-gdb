@@ -1027,7 +1027,7 @@ do_registers_info (regnum, fpregs)
 
       /* Else if virtual format is too long for printf,
 	 print in hex a byte at a time.  */
-      else if (REGISTER_VIRTUAL_SIZE (i) > sizeof (long))
+      else if (REGISTER_VIRTUAL_SIZE (i) > (int) sizeof (long))
 	{
 	  register int j;
 	  printf_filtered ("0x");
@@ -1173,8 +1173,11 @@ attach_command (args, from_tty)
 
 #ifdef SOLIB_ADD
   if (auto_solib_add)
-  /* Add shared library symbols from the newly attached process, if any.  */
-    SOLIB_ADD ((char *)0, from_tty, (struct target_ops *)0);
+    {
+      /* Add shared library symbols from the newly attached process, if any.  */
+      SOLIB_ADD ((char *)0, from_tty, (struct target_ops *)0);
+      re_enable_breakpoints_in_shlibs ();
+    }
 #endif
 
   normal_stop ();

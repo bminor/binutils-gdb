@@ -1126,7 +1126,7 @@ re_match_2 (pbufp, string1, size1, string2, size2, pos, regs, mstop)
   /* Initialize \) text positions to -1
      to mark ones that no \( or \) has been seen for.  */
 
-  for (mcnt = 0; mcnt < sizeof (regend) / sizeof (*regend); mcnt++)
+  for (mcnt = 0; mcnt < (int) (sizeof (regend) / sizeof (*regend)); mcnt++)
     regend[mcnt] = (unsigned char *) -1;
 
   /* `p' scans through the pattern as `d' scans through the data.

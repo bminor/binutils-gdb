@@ -1891,7 +1891,6 @@ command_line_input (prrompt, repeat, annotation_suffix)
   char *p1;
   char *rl;
   char *local_prompt = prrompt;
-  register int c;
   char *nline;
   char got_eof = 0;
 

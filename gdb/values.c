@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcmd.h"
 #include "target.h"
 #include "language.h"
+#include "scm-lang.h"
 #include "demangle.h"
 
 /* Local function prototypes. */
@@ -100,7 +101,6 @@ allocate_repeat_value (type, count)
      struct type *type;
      int count;
 {
-  struct type *element_type = type;
   int low_bound = current_language->string_lower_bound; /* ??? */
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
@@ -1155,7 +1155,7 @@ unpack_field_as_long (type, valaddr, fieldno)
   /* If the field does not entirely fill a LONGEST, then zero the sign bits.
      If the field is signed, and is negative, then sign extend. */
 
-  if ((bitsize > 0) && (bitsize < 8 * sizeof (val)))
+  if ((bitsize > 0) && (bitsize < 8 * (int) sizeof (val)))
     {
       valmask = (((unsigned LONGEST) 1) << bitsize) - 1;
       val &= valmask;
@@ -1185,12 +1185,12 @@ modify_field (addr, fieldval, bitpos, bitsize)
 
   /* If a negative fieldval fits in the field in question, chop
      off the sign extension bits.  */
-  if (bitsize < (8 * sizeof (fieldval))
+  if (bitsize < (8 * (int) sizeof (fieldval))
       && (~fieldval & ~((1 << (bitsize - 1)) - 1)) == 0)
     fieldval = fieldval & ((1 << bitsize) - 1);
 
   /* Warn if value is too big to fit in the field in question.  */
-  if (bitsize < (8 * sizeof (fieldval))
+  if (bitsize < (8 * (int) sizeof (fieldval))
       && 0 != (fieldval & ~((1<<bitsize)-1)))
     {
       /* FIXME: would like to include fieldval in the message, but
@@ -1208,7 +1208,7 @@ modify_field (addr, fieldval, bitpos, bitsize)
     bitpos = sizeof (oword) * 8 - bitpos - bitsize;
 
   /* Mask out old value, while avoiding shifts >= size of oword */
-  if (bitsize < 8 * sizeof (oword))
+  if (bitsize < 8 * (int) sizeof (oword))
     oword &= ~(((((unsigned LONGEST)1) << bitsize) - 1) << bitpos);
   else
     oword &= ~((~(unsigned LONGEST)0) << bitpos);

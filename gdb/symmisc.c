@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "obstack.h"
 #include "language.h"
+#include "bcache.h"
 
 #include "gdb_string.h"
 
@@ -160,8 +161,8 @@ print_symbol_bcache_statistics ()
   immediate_quit++;
   ALL_OBJFILES (objfile)
     {
-      printf_filtered ("Cached obstack statistics for '%s':\n", objfile -> name);
-      print_bcache_statistics (&objfile -> psymbol_cache, "partial symbol obstack");
+      printf_filtered ("Byte cache statistics for '%s':\n", objfile -> name);
+      print_bcache_statistics (&objfile -> psymbol_cache, "partial symbol cache");
     }
   immediate_quit--;
 }

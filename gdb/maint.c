@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "expression.h" /* For language.h */
 #include "language.h"
+#include "symfile.h"
+#include "objfiles.h"
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -249,8 +251,6 @@ maintenance_print_statistics (args, from_tty)
      char *args;
      int from_tty;
 {
-  int temp;
-
   print_objfile_statistics ();
   print_symbol_bcache_statistics ();
 }

@@ -108,6 +108,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 					for step or cont : SAA where AA is the
 					signal number.
 
+	detach          D               Reply OK.
+
 	There is no immediate reply to step or cont.
 	The reply comes when the machine stops.
 	It is		SAA		AA is the signal number.
@@ -273,6 +275,13 @@ extern struct target_ops extended_remote_ops;	/* Forward decl */
    be plenty.  */
 
 static int remote_timeout = 2;
+
+/* This variable chooses whether to send a ^C or a break when the user
+   requests program interruption.  Although ^C is usually what remote
+   systems expect, and that is the default here, sometimes a break is
+   preferable instead.  */
+
+static int remote_break;
 
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
@@ -561,22 +570,25 @@ device is attached to the remote system (e.g. /dev/ttya).");
     pop_target();
 }
 
-/* remote_detach()
-   takes a program previously attached to and detaches it.
-   We better not have left any breakpoints
-   in the program or it'll die when it hits one.
-   Close the open connection to the remote debugger.
-   Use this when you want to detach and do something else
-   with your gdb.  */
+/* This takes a program previously attached to and detaches it.  After
+   this is done, GDB can be used to debug some other program.  We
+   better not have left any breakpoints in the target program or it'll
+   die when it hits one.  */
 
 static void
 remote_detach (args, from_tty)
      char *args;
      int from_tty;
 {
+  char buf[PBUFSIZ];
+
   if (args)
     error ("Argument given to \"detach\" when remotely debugging.");
-  
+
+  /* Tell the remote target to detach.  */
+  strcpy (buf, "D");
+  remote_send (buf);
+
   pop_target ();
   if (from_tty)
     puts_filtered ("Ending remote debugging.\n");
@@ -656,7 +668,11 @@ remote_interrupt (signo)
   if (remote_debug)
     printf_unfiltered ("remote_interrupt called\n");
 
-  SERIAL_WRITE (remote_desc, "\003", 1); /* Send a ^C */
+  /* Send a break or a ^C, depending on user preference.  */
+  if (remote_break)
+    SERIAL_SEND_BREAK (remote_desc);
+  else
+    SERIAL_WRITE (remote_desc, "\003", 1);
 }
 
 static void (*ofunc)();
@@ -1126,7 +1142,7 @@ remote_read_bytes (memaddr, myaddr, len)
 
       /* FIXME-32x64: Need a version of print_address_numeric which puts the
 	 result in a buffer like sprintf.  */
-      sprintf (buf, "m%lx,%x", (unsigned long) memaddr, todo);
+      sprintf (buf, "m%lx,%x", (unsigned long) memaddr + done, todo);
       putpkt (buf);
       getpkt (buf, 0);
 
@@ -1149,7 +1165,7 @@ remote_read_bytes (memaddr, myaddr, len)
 	  if (p[0] == 0 || p[1] == 0)
 	    /* Reply is short.  This means that we were able to read only part
 	       of what we wanted to.  */
-	    break;
+	    return i + done;
 	  myaddr[i + done] = fromhex (p[0]) * 16 + fromhex (p[1]);
 	  p += 2;
 	}
@@ -1315,7 +1331,7 @@ putpkt (buf)
   /* Copy the packet into buffer BUF2, encapsulating it
      and giving it a checksum.  */
 
-  if (cnt > sizeof(buf2) - 5)		/* Prosanity check */
+  if (cnt > (int) sizeof (buf2) - 5)		/* Prosanity check */
     abort();
 
   p = buf2;
@@ -1731,10 +1747,8 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   remote_prepare_to_store,	/* to_prepare_to_store */
   remote_xfer_memory,		/* to_xfer_memory */
   remote_files_info,		/* to_files_info */
-
   remote_insert_breakpoint,	/* to_insert_breakpoint */
   remote_remove_breakpoint,	/* to_remove_breakpoint */
-
   NULL,				/* to_terminal_init */
   NULL,				/* to_terminal_inferior */
   NULL,				/* to_terminal_ours_for_output */
@@ -1816,5 +1830,10 @@ _initialize_remote ()
   add_show_from_set (add_set_cmd ("remotetimeout", no_class,
 				  var_integer, (char *)&remote_timeout,
 				  "Set timeout value for remote read.\n", &setlist),
+		     &showlist);
+
+  add_show_from_set (add_set_cmd ("remotebreak", no_class,
+				  var_integer, (char *)&remote_break,
+				  "Set whether to send break if interrupted.\n", &setlist),
 		     &showlist);
 }

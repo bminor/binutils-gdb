@@ -206,7 +206,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.15.2
+VERSION = 4.15.3
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -1055,7 +1055,7 @@ coffread.o: coffread.c $(bfd_h) $(breakpoint_h) buildsym.h \
 	gdb_string.h
 
 command.o: command.c $(defs_h) $(expression_h) $(gdbcmd_h) \
-	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h
+	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h $(wait_h)
 
 complaints.o: complaints.c complaints.h $(defs_h) $(gdbcmd_h)
 
@@ -1190,7 +1190,7 @@ inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
 	signals.h target.h terminal.h thread.h gdb_string.h
 
 infptrace.o: infptrace.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
-	gdb_string.h
+	gdb_string.h $(wait_h) $(command_h)
 
 infrun.o: infrun.c $(wait_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) target.h thread.h gdb_string.h
@@ -1238,7 +1238,7 @@ mac-nat.o: mac-nat.c $(defs_h) gdb_string.h
 main.o: main.c top.h $(defs_h) gdb_string.h
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
-	$(expression_h)
+	$(expression_h) objfiles.h symfile.h
 
 mdebugread.o: mdebugread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 	$(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
@@ -1412,7 +1412,7 @@ ser-go32.o: ser-go32.c $(defs_h) serial.h
 
 ser-mac.o: ser-mac.c $(defs_h) serial.h signals.h
 
-ser-tcp.o: ser-tcp.c $(defs_h) serial.h signals.h
+ser-tcp.o: ser-tcp.c $(defs_h) serial.h signals.h gdb_string.h
 
 ser-unix.o: ser-unix.c $(defs_h) serial.h 
 
@@ -1510,7 +1510,7 @@ valprint.o: valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 
 values.o: values.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) $(symtab_h) target.h $(value_h) \
-	gdb_string.h
+	gdb_string.h scm-lang.h
 
 vax-tdep.o: vax-tdep.c $(OP_INCLUDE)/vax.h $(defs_h) $(symtab_h)
 

@@ -1,5 +1,5 @@
 /* Find a variable's value in memory, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -55,7 +55,7 @@ extract_signed_integer (addr, len)
   unsigned char *startaddr = (unsigned char *)addr;
   unsigned char *endaddr = startaddr + len;
 
-  if (len > sizeof (LONGEST))
+  if (len > (int) sizeof (LONGEST))
     error ("\
 That operation is not available on integers of more than %d bytes.",
 	   sizeof (LONGEST));
@@ -91,7 +91,7 @@ extract_unsigned_integer (addr, len)
   unsigned char *startaddr = (unsigned char *)addr;
   unsigned char *endaddr = startaddr + len;
 
-  if (len > sizeof (unsigned LONGEST))
+  if (len > (int) sizeof (unsigned LONGEST))
     error ("\
 That operation is not available on integers of more than %d bytes.",
 	   sizeof (unsigned LONGEST));
@@ -110,6 +110,58 @@ That operation is not available on integers of more than %d bytes.",
 	retval = (retval << 8) | *p;
     }
   return retval;
+}
+
+/* Sometimes a long long unsigned integer can be extracted as a
+   LONGEST value.  This is done so that we can print these values
+   better.  If this integer can be converted to a LONGEST, this
+   function returns 1 and sets *PVAL.  Otherwise it returns 0.  */
+
+int
+extract_long_unsigned_integer (addr, orig_len, pval)
+     PTR addr;
+     int orig_len;
+     LONGEST *pval;
+{
+  char *p, *first_addr;
+  int len;
+
+  len = orig_len;
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    {
+      for (p = (char *) addr;
+	   len > (int) sizeof (LONGEST) && p < (char *) addr + orig_len;
+	   p++)
+	{
+	  if (*p == 0)
+	    len--;
+	  else
+	    break;
+	}
+      first_addr = p;
+    }
+  else
+    {
+      first_addr = (char *) addr;
+      for (p = (char *) addr + orig_len - 1;
+	   len > (int) sizeof (LONGEST) && p >= (char *) addr;
+	   p--)
+	{
+	  if (*p == 0)
+	    len--;
+	  else
+	    break;
+	}
+    }
+
+  if (len <= (int) sizeof (LONGEST))
+    {
+      *pval = (LONGEST) extract_unsigned_integer (first_addr,
+						  sizeof (LONGEST));
+      return 1;
+    }
+
+  return 0;
 }
 
 CORE_ADDR
@@ -247,9 +299,9 @@ extract_floating (addr, len)
       SWAP_FLOATING (&retval, sizeof (retval));
       return retval;
     }
-  else if (len == sizeof (long double))
+  else if (len == sizeof (DOUBLEST))
     {
-      long double retval;
+      DOUBLEST retval;
       memcpy (&retval, addr, sizeof (retval));
       SWAP_FLOATING (&retval, sizeof (retval));
       return retval;
@@ -279,7 +331,7 @@ store_floating (addr, len, val)
       SWAP_FLOATING (&doubleval, sizeof (doubleval));
       memcpy (addr, &doubleval, sizeof (doubleval));
     }
-  else if (len == sizeof (long double))
+  else if (len == sizeof (DOUBLEST))
     {
       SWAP_FLOATING (&val, sizeof (val));
       memcpy (addr, &val, sizeof (val));

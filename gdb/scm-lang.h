@@ -46,3 +46,5 @@ extern struct value * scm_evaluate_string PARAMS ((char*, int));
 extern struct type *builtin_type_scm;
 
 extern int scm_parse ();
+
+extern LONGEST scm_unpack PARAMS ((struct type *, char *, enum type_code));

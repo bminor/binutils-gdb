@@ -355,7 +355,7 @@ dcache_peek (dcache, addr, data)
 {
   char *dp = (char *) data;
   int i;
-  for (i = 0; i < sizeof (int); i++)
+  for (i = 0; i < (int) sizeof (int); i++)
     {
       if (!dcache_peek_byte (dcache, addr + i, dp + i))
 	return 0;
@@ -433,7 +433,7 @@ dcache_poke (dcache, addr, data)
 {
   char *dp = (char *) (&data);
   int i;
-  for (i = 0; i < sizeof (int); i++)
+  for (i = 0; i < (int) sizeof (int); i++)
     {
       if (!dcache_poke_byte (dcache, addr + i, dp + i))
 	return 0;

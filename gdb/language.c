@@ -799,7 +799,7 @@ lang_bool_type ()
       sym = lookup_symbol ("logical", NULL, VAR_NAMESPACE, NULL, NULL);
       if (sym)
 	{
-	  struct type *type = SYMBOL_TYPE (sym);
+	  type = SYMBOL_TYPE (sym);
 	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
 	    return type;
 	}
@@ -808,7 +808,7 @@ lang_bool_type ()
       sym = lookup_symbol ("bool", NULL, VAR_NAMESPACE, NULL, NULL);
       if (sym)
 	{
-	  struct type *type = SYMBOL_TYPE (sym);
+	  type = SYMBOL_TYPE (sym);
 	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
 	    return type;
 	}

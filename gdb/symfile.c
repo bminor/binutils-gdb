@@ -43,6 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include "gdb_stat.h"
 #include <ctype.h>
+#include <time.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -273,7 +274,7 @@ obconcat (obstackp, s1, s2, s3)
 
 int currently_reading_symtab = 0;
 
-static int
+static void
 decrement_reading_symtab (dummy)
      void *dummy;
 {
@@ -923,6 +924,8 @@ generic_load (filename, from_tty)
   struct cleanup *old_cleanups;
   asection *s;
   bfd *loadfile_bfd;
+  time_t start_time, end_time;	/* Start and end times of download */
+  unsigned long data_count;	/* Number of bytes transferred to memory */
 
   loadfile_bfd = bfd_openr (filename, gnutarget);
   if (loadfile_bfd == NULL)
@@ -941,6 +944,8 @@ generic_load (filename, from_tty)
 	     bfd_errmsg (bfd_get_error ()));
     }
   
+  start_time = time (NULL);
+
   for (s = loadfile_bfd->sections; s; s = s->next) 
     {
       if (s->flags & SEC_LOAD) 
@@ -953,6 +958,8 @@ generic_load (filename, from_tty)
 	      char *buffer;
 	      struct cleanup *old_chain;
 	      bfd_vma vma;
+
+	      data_count += size;
 
 	      buffer = xmalloc (size);
 	      old_chain = make_cleanup (free, buffer);
@@ -976,6 +983,8 @@ generic_load (filename, from_tty)
 	}
     }
 
+  end_time = time (NULL);
+
   /* We were doing this in remote-mips.c, I suspect it is right
      for other targets too.  */
   write_pc (loadfile_bfd->start_address);
@@ -985,6 +994,10 @@ generic_load (filename, from_tty)
      commented out), making the call confuses GDB if more than one file is
      loaded in.  remote-nindy.c had no call to symbol_file_add, but remote-vx.c
      does.  */
+
+  if (end_time != start_time)
+   printf_filtered ("Transfer rate: %d bits/sec.\n",
+                    (data_count * 8)/(end_time - start_time));
 
   do_cleanups (old_cleanups);
 }
@@ -1182,17 +1195,17 @@ reread_symbols ()
 	     enough?  */
 	  if (objfile->global_psymbols.list)
 	    mfree (objfile->md, objfile->global_psymbols.list);
-	  objfile->global_psymbols.list = NULL;
-	  objfile->global_psymbols.next = NULL;
-	  objfile->global_psymbols.size = 0;
+	  memset (&objfile -> global_psymbols, 0,
+		  sizeof (objfile -> global_psymbols));
 	  if (objfile->static_psymbols.list)
 	    mfree (objfile->md, objfile->static_psymbols.list);
-	  objfile->static_psymbols.list = NULL;
-	  objfile->static_psymbols.next = NULL;
-	  objfile->static_psymbols.size = 0;
+	  memset (&objfile -> static_psymbols, 0,
+		  sizeof (objfile -> static_psymbols));
 
 	  /* Free the obstacks for non-reusable objfiles */
 	  obstack_free (&objfile -> psymbol_cache.cache, 0);
+	  memset (&objfile -> psymbol_cache, 0,
+		  sizeof (objfile -> psymbol_cache));
 	  obstack_free (&objfile -> psymbol_obstack, 0);
 	  obstack_free (&objfile -> symbol_obstack, 0);
 	  obstack_free (&objfile -> type_obstack, 0);

@@ -84,7 +84,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      CORE_REGISTER_ADDR to offset to the other registers.  If this is a modern
      core file without a upage, reg_ptr will be zero and this is all a big
      NOP.  */
-  if (reg_ptr > core_reg_size)
+  if (reg_ptr > (int) core_reg_size)
     reg_ptr -= KERNEL_U_ADDR;
 
   for (regno = 0; regno < numregs; regno++)

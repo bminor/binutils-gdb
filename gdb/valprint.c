@@ -147,8 +147,7 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
      only a stub and we can't find and substitute its complete type, then
      print appropriate string and return.  */
 
-  if (TYPE_FLAGS (real_type) & TYPE_FLAG_STUB
-      || TYPE_LENGTH (real_type) == 0)
+  if (TYPE_FLAGS (real_type) & TYPE_FLAG_STUB)
     {
       fprintf_filtered (stream, "<incomplete type>");
       gdb_flush (stream);
@@ -184,7 +183,9 @@ value_print (val, stream, format, pretty)
   return LA_VALUE_PRINT (val, stream, format, pretty);
 }
 
-/*  Called by various <lang>_val_print routines to print TYPE_CODE_INT's */
+/* Called by various <lang>_val_print routines to print
+   TYPE_CODE_INT's.  TYPE is the type.  VALADDR is the address of the
+   value.  STREAM is where to print the value.  */
 
 void
 val_print_type_code_int (type, valaddr, stream)
@@ -192,74 +193,22 @@ val_print_type_code_int (type, valaddr, stream)
      char *valaddr;
      GDB_FILE *stream;
 {
-  char *p;
-  /* Pointer to first (i.e. lowest address) nonzero character.  */
-  char *first_addr;
-  unsigned int len;
-
   if (TYPE_LENGTH (type) > sizeof (LONGEST))
     {
-      if (TYPE_UNSIGNED (type))
-	{
-	  /* First figure out whether the number in fact has zeros
-	     in all its bytes more significant than least significant
-	     sizeof (LONGEST) ones.  */
-	  len = TYPE_LENGTH (type);
-	  
-	  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-	    {
-	      for (p = valaddr;
-		   len > sizeof (LONGEST) && p < valaddr + TYPE_LENGTH (type);
-		   p++)
-		{
-		  if (*p == 0)
-		    {
-		      len--;
-		    }
-		  else
-		    {
-		      break;
-		    }
-		}
-	      first_addr = p;
-	    }
-	  else
-	    {
-	      first_addr = valaddr;
-	      for (p = valaddr + TYPE_LENGTH (type) - 1;
-		   len > sizeof (LONGEST) && p >= valaddr;
-		   p--)
-		{
-		  if (*p == 0)
-		    {
-		      len--;
-		    }
-		  else
-		    {
-		      break;
-		    }
-		}
-	    }
+      LONGEST val;
 
-	  if (len <= sizeof (LONGEST))
-	    {
-	      /* The most significant bytes are zero, so we can just get
-		 the least significant sizeof (LONGEST) bytes and print it
-		 in decimal.  */
-	      print_longest (stream, 'u', 0,
-			     extract_unsigned_integer (first_addr,
-						       sizeof (LONGEST)));
-	    }
-	  else
-	    {
-	      /* It is big, so print it in hex.  */
-	      print_hex_chars (stream, (unsigned char *) first_addr, len);
-	    }
+      if (TYPE_UNSIGNED (type)
+	  && extract_long_unsigned_integer (valaddr, TYPE_LENGTH (type),
+					    &val))
+	{
+	  print_longest (stream, 'u', 0, val);
 	}
       else
 	{
-	  /* Signed.  One could assume two's complement (a reasonable
-	     assumption, I think) and do better than this.  */
+	  /* Signed, or we couldn't turn an unsigned value into a
+	     LONGEST.  For signed values, one could assume two's
+	     complement (a reasonable assumption, I think) and do
+	     better than this.  */
 	  print_hex_chars (stream, (unsigned char *) valaddr,
 			   TYPE_LENGTH (type));
 	}
@@ -427,7 +376,7 @@ print_floating (valaddr, type, stream)
      struct type *type;
      GDB_FILE *stream;
 {
-  double doub;
+  DOUBLEST doub;
   int inv;
   unsigned len = TYPE_LENGTH (type);
   
@@ -505,9 +454,17 @@ print_floating (valaddr, type, stream)
 
   doub = unpack_double (type, valaddr, &inv);
   if (inv)
-    fprintf_filtered (stream, "<invalid float value>");
+    {
+      fprintf_filtered (stream, "<invalid float value>");
+      return;
+    }
+
+  if (len < sizeof (double))
+    fprintf_filtered (stream, "%.9g", (double) doub);
+  else if (len == sizeof (double))
+    fprintf_filtered (stream, "%.17g", (double) doub);
   else
-    fprintf_filtered (stream, len <= sizeof(float) ? "%.9g" : "%.17g", doub);
+    fprintf_filtered (stream, "%.35Lg", doub);
 }
 
 /* VALADDR points to an integer of LEN bytes.  Print it in hex on stream.  */
@@ -656,7 +613,7 @@ val_print_string (addr, len, stream)
   unsigned int fetchlimit;	/* Maximum number of bytes to fetch. */
   unsigned int nfetch;		/* Bytes to fetch / bytes fetched. */
   unsigned int chunksize;	/* Size of each fetch, in bytes. */
-  int bufsize;			/* Size of current fetch buffer. */
+  unsigned int bufsize;		/* Size of current fetch buffer. */
   char *buffer = NULL;		/* Dynamically growable fetch buffer. */
   char *bufptr;			/* Pointer to next available byte in buffer. */
   char *limit;			/* First location past end of fetch buffer. */

@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 #include "signals.h"
+#include "gdb_string.h"
 
 struct tcp_ttystate
 {
@@ -66,7 +67,7 @@ tcp_open(scb, name)
   if (!port_str)
     error ("tcp_open: No colon in host name!"); /* Shouldn't ever happen */
 
-  tmp = min (port_str - name, sizeof hostname - 1);
+  tmp = min (port_str - name, (int) sizeof hostname - 1);
   strncpy (hostname, name, tmp); /* Don't want colon */
   hostname[tmp] = '\000';	/* Tie off host name */
   port = atoi (port_str + 1);

@@ -3812,7 +3812,6 @@ cleanup_undefined_types ()
 	  break;
 
 	default:
-	badtype:
 	  {
 	    static struct complaint msg = {"\
 GDB internal error.  cleanup_undefined_types with bad type %d.", 0, 0};

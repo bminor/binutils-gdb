@@ -1,5 +1,5 @@
 /* Fortran language support routines for GDB, the GNU debugger.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996 Free Software Foundation, Inc.
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
 
@@ -582,13 +582,16 @@ SAVED_F77_COMMON_PTR current_common=NULL;       /* Ptr to current COMMON */
 
 static SAVED_BF_PTR saved_bf_list=NULL;          /* Ptr to (.bf,function) 
                                                     list*/
+#if 0
 static SAVED_BF_PTR saved_bf_list_end=NULL;      /* Ptr to above list's end */
+#endif
 static SAVED_BF_PTR current_head_bf_list=NULL;   /* Current head of above list
 						  */
 
+#if 0
 static SAVED_BF_PTR tmp_bf_ptr;                  /* Generic temporary for use 
                                                     in macros */ 
-
+#endif
 
 /* The following function simply enters a given common block onto 
    the global common block chain */
@@ -824,6 +827,7 @@ void patch_all_commons_by_name (name, offset, secnum)
    first by a queueing algorithm and upon failure fall back to 
    a linear scan. */ 
 
+#if 0
 #define ADD_BF_SYMNUM(bf_sym,fcn_sym) \
   \
   if (saved_bf_list == NULL) \
@@ -848,7 +852,7 @@ else \
 		 saved_bf_list_end->next = tmp_bf_ptr;  \
 		   saved_bf_list_end = tmp_bf_ptr; \
 		   } 
-
+#endif
 
 /* This function frees the entire (.bf,function) list */ 
 

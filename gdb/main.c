@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include <setjmp.h>
@@ -140,7 +140,7 @@ main (argc, argv)
   current_directory = gdb_dirbuf;
 
   /* Parse arguments and options.  */
-#ifndef WIN32
+#ifndef WINGDB
   {
     int c;
     /* When var field is 0, use flag field to record the equivalent
@@ -297,6 +297,10 @@ main (argc, argv)
 	  }
       }
 
+    /* If --help or --version, disable window interface.  */
+    if (print_help || print_version)
+      use_windows = 0;
+
     /* OK, that's all the options.  The other arguments are filenames.  */
     count = 0;
     for (; optind < argc; optind++)
@@ -382,7 +386,7 @@ For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
       exit (0);
     }
-    
+
   if (!quiet)
     {
       /* Print all the junk at the top, with trailing "..." if we are about
@@ -413,6 +417,7 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
       strcpy (homeinit, getenv ("HOME"));
       strcat (homeinit, "/");
       strcat (homeinit, gdbinit);
+
       if (!inhibit_gdbinit && access (homeinit, R_OK) == 0)
 	{
 	  if (!SET_TOP_LEVEL ())
@@ -567,7 +572,7 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
   /* The default command loop. 
      The WIN32 Gui calls this main to set up gdb's state, and 
      has its own command loop. */
-#if !defined (WIN32)
+#if !defined (WINGDB)
   while (1)
     {
       if (!SET_TOP_LEVEL ())
@@ -592,16 +597,6 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
 void
 init_proc ()
 {
-}
-
-int
-proc_wait (pid, status)
-     int pid;
-     int *status;
-{
-#ifndef __GO32__
-  return wait (status);
-#endif
 }
 
 void

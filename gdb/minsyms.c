@@ -270,7 +270,6 @@ lookup_minimal_symbol_solib_trampoline (name, sfile, objf)
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
   struct minimal_symbol *found_symbol = NULL;
-  struct minimal_symbol *found_file_symbol = NULL;
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
   if (sfile != NULL)
