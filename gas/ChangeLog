@@ -1,5 +1,9 @@
 Wed Jul 19 11:49:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gasp.c (process_assigns): Use toupper before comparing against
+	upper case letter.
+	(whatcond): Likewise.
+
 	* config/tc-sh.c (sh_relax): Rename from relax, and make global.
 	Renamed all uses.
 	(insert): Pass a size of 2, not 4.

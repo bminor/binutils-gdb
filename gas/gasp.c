@@ -1957,26 +1957,26 @@ process_assigns (idx, in, buf)
 	}
       else if (idx + 3 < in->len
 	       && in->ptr[idx] == '.'
-	       && in->ptr[idx + 1] == 'L'
-	       && in->ptr[idx + 2] == 'E'
-	       && in->ptr[idx + 3] == 'N')
+	       && toupper ((unsigned char) in->ptr[idx + 1]) == 'L'
+	       && toupper ((unsigned char) in->ptr[idx + 2]) == 'E'
+	       && toupper ((unsigned char) in->ptr[idx + 3]) == 'N')
 	idx = dolen (idx + 4, in, buf);
       else if (idx + 6 < in->len
 	       && in->ptr[idx] == '.'
-	       && in->ptr[idx + 1] == 'I'
-	       && in->ptr[idx + 2] == 'N'
-	       && in->ptr[idx + 3] == 'S'
-	       && in->ptr[idx + 4] == 'T'
-	       && in->ptr[idx + 5] == 'R')
+	       && toupper ((unsigned char) in->ptr[idx + 1]) == 'I'
+	       && toupper ((unsigned char) in->ptr[idx + 2]) == 'N'
+	       && toupper ((unsigned char) in->ptr[idx + 3]) == 'S'
+	       && toupper ((unsigned char) in->ptr[idx + 4]) == 'T'
+	       && toupper ((unsigned char) in->ptr[idx + 5]) == 'R')
 	idx = doinstr (idx + 6, in, buf);
       else if (idx + 7 < in->len
 	       && in->ptr[idx] == '.'
-	       && in->ptr[idx + 1] == 'S'
-	       && in->ptr[idx + 2] == 'U'
-	       && in->ptr[idx + 3] == 'B'
-	       && in->ptr[idx + 4] == 'S'
-	       && in->ptr[idx + 5] == 'T'
-	       && in->ptr[idx + 6] == 'R')
+	       && toupper ((unsigned char) in->ptr[idx + 1]) == 'S'
+	       && toupper ((unsigned char) in->ptr[idx + 2]) == 'U'
+	       && toupper ((unsigned char) in->ptr[idx + 3]) == 'B'
+	       && toupper ((unsigned char) in->ptr[idx + 4]) == 'S'
+	       && toupper ((unsigned char) in->ptr[idx + 5]) == 'T'
+	       && toupper ((unsigned char) in->ptr[idx + 6]) == 'R')
 	idx = dosubstr (idx + 7, in, buf);
       else if (ISFIRSTCHAR (in->ptr[idx]))
 	{
@@ -2275,22 +2275,31 @@ whatcond (idx, in, val)
      int *val;
 {
   int cond;
-  char *p;
+
   idx = sb_skip_white (idx, in);
-  p = in->ptr + idx;
-  if (p[0] == 'E' && p[1] == 'Q')
-    cond = EQ;
-  else if (p[0] == 'N' && p[1] == 'E')
-    cond = NE;
-  else if (p[0] == 'L' && p[1] == 'T')
-    cond = LT;
-  else if (p[0] == 'L' && p[1] == 'E')
-    cond = LE;
-  else if (p[0] == 'G' && p[1] == 'T')
-    cond = GT;
-  else if (p[0] == 'G' && p[1] == 'E')
-    cond = GE;
-  else
+  cond = NEVER;
+  if (idx + 1 < in->len)
+    {
+      char *p;
+      char a, b;
+
+      p = in->ptr + idx;
+      a = toupper ((unsigned char) p[0]);
+      b = toupper ((unsigned char) p[1]);
+      if (a == 'E' && b == 'Q')
+	cond = EQ;
+      else if (a == 'N' && b == 'E')
+	cond = NE;
+      else if (a == 'L' && b == 'T')
+	cond = LT;
+      else if (a == 'L' && b == 'E')
+	cond = LE;
+      else if (a == 'G' && b == 'T')
+	cond = GT;
+      else if (a == 'G' && b == 'E')
+	cond = GE;
+    }
+  if (cond == NEVER)
     {
       ERROR ((stderr, "Comparison operator must be one of EQ, NE, LT, LE, GT or GE.\n"));
       cond = NEVER;
