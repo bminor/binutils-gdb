@@ -1,5 +1,10 @@
 2002-02-19  Richard Earnshaw  <rearnsha@arm.com>
 
+	* config/djgpp/fnchange.lst: Add change rules for armnbsd-tdep.c and
+	armnbsd-nat.c.
+
+2002-02-19  Richard Earnshaw  <rearnsha@arm.com>
+
 	* arm-tdep.h (enum arm_float_model): New enum.
 	(struct gdbarch_tdep): Add fp_model.
 	* arm-tdep.c (arm_gdbarch_init): Set fp_model in tdep.  Defer setting
