@@ -1,3 +1,7 @@
+2001-06-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* NEWS: Fix a typo.  Mention hppa64-elf.  Add binutils-2.11 marker.
+
 2001-06-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* MAINTAINERS: Update my email address.
@@ -344,7 +348,7 @@ Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
-	* MAINTAINERS: Add Jvrn Rennecke and self as SH maintainers.
+	* MAINTAINERS: Add Jörn Rennecke and self as SH maintainers.
 	Change sourceware.cygnus.com to sources.redhat.com.
 	Fix typo for "amongst".
 

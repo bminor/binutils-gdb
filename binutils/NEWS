@@ -7,11 +7,13 @@
 * Support for OpenRISC by Johan Rydberg.
 
 * New command line switch to objcopy -B (or --binary-architecture) which sets
-  the archiceture of the output file to the given argument.  This option only
+  the architecture of the output file to the given argument.  This option only
   makes sense, if the input target is binary.  Otherwise it is ignored.
   By Stefan Geuken.
 
 * Support for PDP-11 by Lars Brinkhoff.
+
+Changes in binutils 2.11:
 
 * Add support for ARM v5t and v5te architectures and Intel's XScale ARM
   extenstions.
@@ -26,6 +28,8 @@
 * Support for CRIS (Axis Communications ETRAX series).
 
 Changes in binutils 2.10:
+
+* Support for 64-bit ELF on HPPA.
 
 * New command line switch to objdump --file-start-context which shows the
   entire file contents up to the source line first encountered for a given
