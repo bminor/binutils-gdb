@@ -30,6 +30,7 @@ aout.sc
 ebmon29k.sc
 elf.sc
 h8300.sc
+h8300h.sc
 h8500.sc
 hppaosf.sc
 i386coff.sc
