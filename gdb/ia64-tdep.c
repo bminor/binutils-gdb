@@ -87,8 +87,8 @@ static gdbarch_push_arguments_ftype ia64_push_arguments;
 static gdbarch_push_return_address_ftype ia64_push_return_address;
 static gdbarch_pop_frame_ftype ia64_pop_frame;
 static gdbarch_saved_pc_after_call_ftype ia64_saved_pc_after_call;
-
 static void ia64_pop_frame_regular (struct frame_info *frame);
+static struct type *is_float_or_hfa_type (struct type *t);
 
 static int ia64_num_regs = 590;
 
@@ -384,7 +384,7 @@ replace_slotN_contents (unsigned char *bundle, long long instr, int slotnum)
   replace_bit_field (bundle, instr, 5+41*slotnum, 41);
 }
 
-static template_encoding_table[32][3] =
+static enum instruction_type template_encoding_table[32][3] =
 {
   { M, I, I },				/* 00 */
   { M, I, I },				/* 01 */
@@ -445,7 +445,7 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
   template = extract_bit_field (bundle, 0, 5);
   *it = template_encoding_table[(int)template][slotnum];
 
-  if (slotnum == 2 || slotnum == 1 && *it == L)
+  if (slotnum == 2 || (slotnum == 1 && *it == L))
     addr += 16;
   else
     addr += (slotnum + 1) * SLOT_MULTIPLIER;
@@ -639,7 +639,6 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 {
   CORE_ADDR next_pc;
   CORE_ADDR last_prologue_pc = pc;
-  int done = 0;
   instruction_type it;
   long long instr;
   int do_fsr_stuff = 0;
@@ -1137,20 +1136,45 @@ ia64_get_saved_register (char *raw_buffer,
 int
 ia64_use_struct_convention (int gcc_p, struct type *type)
 {
-  /* FIXME: Need to check for HFAs; structures containing (only) up to 8
-     floating point values of the same size are returned in floating point
-     registers. */
+  struct type *float_elt_type;
+
+  /* HFAs are structures (or arrays) consisting entirely of floating
+     point values of the same length.  Up to 8 of these are returned
+     in registers.  Don't use the struct convention when this is the
+     case. */
+  float_elt_type = is_float_or_hfa_type (type);
+  if (float_elt_type != NULL
+      && TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type) <= 8)
+    return 0;
+
+  /* Other structs of length 32 or less are returned in r8-r11.
+     Don't use the struct convention for those either. */
   return TYPE_LENGTH (type) > 32;
 }
 
 void
 ia64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    ia64_register_convert_to_virtual (IA64_FR8_REGNUM, type,
-      &regbuf[REGISTER_BYTE (IA64_FR8_REGNUM)], valbuf);
+  struct type *float_elt_type;
+
+  float_elt_type = is_float_or_hfa_type (type);
+  if (float_elt_type != NULL)
+    {
+      int offset = 0;
+      int regnum = IA64_FR8_REGNUM;
+      int n = TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type);
+
+      while (n-- > 0)
+	{
+	  ia64_register_convert_to_virtual (regnum, float_elt_type,
+	    &regbuf[REGISTER_BYTE (regnum)], valbuf + offset);
+	  offset += TYPE_LENGTH (float_elt_type);
+	  regnum++;
+	}
+    }
   else
-    memcpy (valbuf, &regbuf[REGISTER_BYTE (IA64_GR8_REGNUM)], TYPE_LENGTH (type));
+    memcpy (valbuf, &regbuf[REGISTER_BYTE (IA64_GR8_REGNUM)],
+	    TYPE_LENGTH (type));
 }
 
 /* FIXME: Turn this into a stack of some sort.  Unfortunately, something
@@ -1219,7 +1243,6 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
   else
     {
       struct frame_info *frn = frame->next;
-      CORE_ADDR cfm_addr;
 
       FRAME_INIT_SAVED_REGS (frn);
 
@@ -1243,133 +1266,68 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
   frame->extra_info->fp_reg = 0;
 }
 
-#define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
-
-CORE_ADDR
-ia64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
-		    int struct_return, CORE_ADDR struct_addr)
+static int
+is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
 {
-  int argno;
-  value_ptr arg;
-  struct type *type;
-  int len, argoffset;
-  int nslots, rseslots, memslots, slotnum;
-  int floatreg;
-  CORE_ADDR bsp, cfm, pfs, new_bsp;
-
-  nslots = 0;
-  /* Count the number of slots needed for the arguments */
-  for (argno = 0; argno < nargs; argno++)
+  switch (TYPE_CODE (t))
     {
-      arg = args[argno];
-      type = check_typedef (VALUE_TYPE (arg));
-      len = TYPE_LENGTH (type);
-
-      /* FIXME: This is crude and it is wrong (IMO), but it matches
-         what gcc does, I think. */
-      if (len > 8 && (nslots & 1))
-	nslots++;
-
-      nslots += (len + 7) / 8;
-    }
-
-  rseslots = (nslots > 8) ? 8 : nslots;
-  memslots = nslots - rseslots;
-
-  cfm = read_register (IA64_CFM_REGNUM);
-
-  bsp = read_register (IA64_BSP_REGNUM);
-  bsp = rse_address_add (bsp, cfm & 0x7f);
-  new_bsp = rse_address_add (bsp, rseslots);
-  write_register (IA64_BSP_REGNUM, new_bsp);
-
-  pfs = read_register (IA64_PFS_REGNUM);
-  pfs &= 0xc000000000000000LL;
-  pfs |= (cfm & 0xffffffffffffLL);
-  write_register (IA64_PFS_REGNUM, pfs);
-
-  cfm &= 0xc000000000000000LL;
-  cfm |= rseslots;
-  write_register (IA64_CFM_REGNUM, cfm);
-  
-
-  
-  sp = sp - 16 - memslots * 8;
-  sp &= ~0xfLL;				/* Maintain 16 byte alignment */
-
-  slotnum = 0;
-  floatreg = IA64_FR8_REGNUM;
-  for (argno = 0; argno < nargs; argno++)
-    {
-      arg = args[argno];
-      type = check_typedef (VALUE_TYPE (arg));
-      len = TYPE_LENGTH (type);
-      if (len > 8 && (slotnum & 1))
-	slotnum++;
-      argoffset = 0;
-      while (len > 0)
+    case TYPE_CODE_FLT:
+      if (*etp)
+	return TYPE_LENGTH (*etp) == TYPE_LENGTH (t);
+      else
 	{
-	  char val_buf[8];
-
-	  memset (val_buf, 0, 8);
-	  memcpy (val_buf, VALUE_CONTENTS (arg) + argoffset, (len > 8) ? 8 : len);
-
-	  if (slotnum < rseslots)
-	    write_memory (rse_address_add (bsp, slotnum), val_buf, 8);
-	  else
-	    write_memory (sp + 16 + 8 * (slotnum - rseslots), val_buf, 8);
-
-	  argoffset += 8;
-	  len -= 8;
-	  slotnum++;
+	  *etp = t;
+	  return 1;
 	}
-      if (TYPE_CODE (type) == TYPE_CODE_FLT && floatreg < IA64_FR16_REGNUM)
-        {
-	  ia64_register_convert_to_raw (type, floatreg, VALUE_CONTENTS (arg),
-	    &registers[REGISTER_BYTE (floatreg)]);
-	  floatreg++;
-	}
+      break;
+    case TYPE_CODE_ARRAY:
+      return is_float_or_hfa_type_recurse (TYPE_TARGET_TYPE (t), etp);
+      break;
+    case TYPE_CODE_STRUCT:
+      {
+	int i;
+
+	for (i = 0; i < TYPE_NFIELDS (t); i++)
+	  if (!is_float_or_hfa_type_recurse (TYPE_FIELD_TYPE (t, i), etp))
+	    return 0;
+	return 1;
+      }
+      break;
+    default:
+      return 0;
+      break;
     }
-
-  if (struct_return)
-    {
-      store_address (&registers[REGISTER_BYTE (IA64_GR8_REGNUM)],
-                     REGISTER_RAW_SIZE (IA64_GR8_REGNUM),
-		     struct_addr);
-    }
-
-
-  target_store_registers (-1);
-
-  /* FIXME: This doesn't belong here!  Instead, SAVE_DUMMY_FRAME_TOS needs
-     to be defined to call generic_save_dummy_frame_tos().  But at the
-     time of this writing, SAVE_DUMMY_FRAME_TOS wasn't gdbarch'd, so
-     I chose to put this call here instead of using the old mechanisms. 
-     Once SAVE_DUMMY_FRAME_TOS is gdbarch'd, all we need to do is add the
-     line
-
-	set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-
-     to ia64_gdbarch_init() and remove the line below. */
-  generic_save_dummy_frame_tos (sp);
-
-  return sp;
 }
 
-CORE_ADDR
-ia64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
+/* Determine if the given type is one of the floating point types or
+   and HFA (which is a struct, array, or combination thereof whose
+   bottom-most elements are all of the same floating point type.) */
+
+static struct type *
+is_float_or_hfa_type (struct type *t)
+{
+  struct type *et = 0;
+
+  return is_float_or_hfa_type_recurse (t, &et) ? et : 0;
+}
+
+
+/* Attempt to find (and return) the global pointer for the given
+   function.
+
+   This is a rather nasty bit of code searchs for the .dynamic section
+   in the objfile corresponding to the pc of the function we're trying
+   to call.  Once it finds the addresses at which the .dynamic section
+   lives in the child process, it scans the Elf64_Dyn entries for a
+   DT_PLTGOT tag.  If it finds one of these, the corresponding
+   d_un.d_ptr value is the global pointer.  */
+
+static CORE_ADDR
+find_global_pointer (CORE_ADDR faddr)
 {
   struct partial_symtab *pst;
-
-  /* Attempt to determine and set global pointer (r1) for this pc.
      
-     This rather nasty bit of code searchs for the .dynamic section
-     in the objfile corresponding to the pc of the function we're
-     trying to call.  Once it finds the addresses at which the .dynamic
-     section lives in the child process, it scans the Elf64_Dyn entries
-     for a DT_PLTGOT tag.  If it finds one of these, the corresponding
-     d_un.d_ptr value is the global pointer. */
-  pst = find_pc_psymtab (pc);
+  pst = find_pc_psymtab (faddr);
   if (pst != NULL)
     {
       struct obj_section *osect;
@@ -1406,8 +1364,7 @@ ia64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 		  global_pointer = extract_address (buf, sizeof (buf));
 
 		  /* The payoff... */
-		  write_register (IA64_GR1_REGNUM, global_pointer);
-		  break;
+		  return global_pointer;
 		}
 
 	      if (tag == DT_NULL)
@@ -1417,6 +1374,262 @@ ia64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 	    }
 	}
     }
+  return 0;
+}
+
+/* Given a function's address, attempt to find (and return) the
+   corresponding (canonical) function descriptor.  Return 0 if
+   not found. */
+static CORE_ADDR
+find_extant_func_descr (CORE_ADDR faddr)
+{
+  struct partial_symtab *pst;
+  struct obj_section *osect;
+
+  /* Return early if faddr is already a function descriptor */
+  osect = find_pc_section (faddr);
+  if (osect && strcmp (osect->the_bfd_section->name, ".opd") == 0)
+    return faddr;
+
+  pst = find_pc_psymtab (faddr);
+  if (pst != NULL)
+    {
+      ALL_OBJFILE_OSECTIONS (pst->objfile, osect)
+	{
+	  if (strcmp (osect->the_bfd_section->name, ".opd") == 0)
+	    break;
+	}
+
+      if (osect < pst->objfile->sections_end)
+	{
+	  CORE_ADDR addr;
+
+	  addr = osect->addr;
+	  while (addr < osect->endaddr)
+	    {
+	      int status;
+	      LONGEST faddr2;
+	      char buf[8];
+
+	      status = target_read_memory (addr, buf, sizeof (buf));
+	      if (status != 0)
+		break;
+	      faddr2 = extract_signed_integer (buf, sizeof (buf));
+
+	      if (faddr == faddr2)
+		return addr;
+
+	      addr += 16;
+	    }
+	}
+    }
+  return 0;
+}
+
+/* Attempt to find a function descriptor corresponding to the
+   given address.  If none is found, construct one on the
+   stack using the address at fdaptr */
+
+static CORE_ADDR
+find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
+{
+  CORE_ADDR fdesc;
+
+  fdesc = find_extant_func_descr (faddr);
+
+  if (fdesc == 0)
+    {
+      CORE_ADDR global_pointer;
+      char buf[16];
+
+      fdesc = *fdaptr;
+      *fdaptr += 16;
+
+      global_pointer = find_global_pointer (faddr);
+
+      if (global_pointer == 0)
+	global_pointer = read_register (IA64_GR1_REGNUM);
+
+      store_address (buf, 8, faddr);
+      store_address (buf + 8, 8, global_pointer);
+
+      write_memory (fdesc, buf, 16);
+    }
+
+  return fdesc; 
+}
+
+CORE_ADDR
+ia64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		    int struct_return, CORE_ADDR struct_addr)
+{
+  int argno;
+  value_ptr arg;
+  struct type *type;
+  int len, argoffset;
+  int nslots, rseslots, memslots, slotnum, nfuncargs;
+  int floatreg;
+  CORE_ADDR bsp, cfm, pfs, new_bsp, funcdescaddr;
+
+  nslots = 0;
+  nfuncargs = 0;
+  /* Count the number of slots needed for the arguments */
+  for (argno = 0; argno < nargs; argno++)
+    {
+      arg = args[argno];
+      type = check_typedef (VALUE_TYPE (arg));
+      len = TYPE_LENGTH (type);
+
+      /* FIXME: This is crude and it is wrong (IMO), but it matches
+         what gcc does, I think. */
+      if (len > 8 && (nslots & 1))
+	nslots++;
+
+      if (TYPE_CODE (type) == TYPE_CODE_FUNC)
+	nfuncargs++;
+
+      nslots += (len + 7) / 8;
+    }
+
+  /* Divvy up the slots between the RSE and the memory stack */
+  rseslots = (nslots > 8) ? 8 : nslots;
+  memslots = nslots - rseslots;
+
+  /* Allocate a new RSE frame */
+  cfm = read_register (IA64_CFM_REGNUM);
+
+  bsp = read_register (IA64_BSP_REGNUM);
+  bsp = rse_address_add (bsp, cfm & 0x7f);
+  new_bsp = rse_address_add (bsp, rseslots);
+  write_register (IA64_BSP_REGNUM, new_bsp);
+
+  pfs = read_register (IA64_PFS_REGNUM);
+  pfs &= 0xc000000000000000LL;
+  pfs |= (cfm & 0xffffffffffffLL);
+  write_register (IA64_PFS_REGNUM, pfs);
+
+  cfm &= 0xc000000000000000LL;
+  cfm |= rseslots;
+  write_register (IA64_CFM_REGNUM, cfm);
+  
+  /* We will attempt to find function descriptors in the .opd segment,
+     but if we can't we'll construct them ourselves.  That being the
+     case, we'll need to reserve space on the stack for them. */
+  funcdescaddr = sp - nfuncargs * 16;
+  funcdescaddr &= ~0xfLL;
+
+  /* Adjust the stack pointer to it's new value.  The calling conventions
+     require us to have 16 bytes of scratch, plus whatever space is
+     necessary for the memory slots and our function descriptors */
+  sp = sp - 16 - (memslots + nfuncargs) * 8;
+  sp &= ~0xfLL;				/* Maintain 16 byte alignment */
+
+  /* Place the arguments where they belong.  The arguments will be
+     either placed in the RSE backing store or on the memory stack.
+     In addition, floating point arguments or HFAs are placed in
+     floating point registers. */
+  slotnum = 0;
+  floatreg = IA64_FR8_REGNUM;
+  for (argno = 0; argno < nargs; argno++)
+    {
+      struct type *float_elt_type;
+
+      arg = args[argno];
+      type = check_typedef (VALUE_TYPE (arg));
+      len = TYPE_LENGTH (type);
+
+      /* Special handling for function parameters */
+      if (len == 8 
+          && TYPE_CODE (type) == TYPE_CODE_PTR 
+	  && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC)
+	{
+	  char val_buf[8];
+
+	  store_address (val_buf, 8,
+	    find_func_descr (extract_address (VALUE_CONTENTS (arg), 8),
+	                     &funcdescaddr));
+	  if (slotnum < rseslots)
+	    write_memory (rse_address_add (bsp, slotnum), val_buf, 8);
+	  else
+	    write_memory (sp + 16 + 8 * (slotnum - rseslots), val_buf, 8);
+	  slotnum++;
+	  continue;
+	}
+
+      /* Normal slots */
+      if (len > 8 && (slotnum & 1))
+	slotnum++;
+      argoffset = 0;
+      while (len > 0)
+	{
+	  char val_buf[8];
+
+	  memset (val_buf, 0, 8);
+	  memcpy (val_buf, VALUE_CONTENTS (arg) + argoffset, (len > 8) ? 8 : len);
+
+	  if (slotnum < rseslots)
+	    write_memory (rse_address_add (bsp, slotnum), val_buf, 8);
+	  else
+	    write_memory (sp + 16 + 8 * (slotnum - rseslots), val_buf, 8);
+
+	  argoffset += 8;
+	  len -= 8;
+	  slotnum++;
+	}
+
+      /* Handle floating point types (including HFAs) */
+      float_elt_type = is_float_or_hfa_type (type);
+      if (float_elt_type != NULL)
+	{
+	  argoffset = 0;
+	  len = TYPE_LENGTH (type);
+	  while (len > 0 && floatreg < IA64_FR16_REGNUM)
+	    {
+	      ia64_register_convert_to_raw (
+		float_elt_type,
+		floatreg,
+	        VALUE_CONTENTS (arg) + argoffset,
+		&registers[REGISTER_BYTE (floatreg)]);
+	      floatreg++;
+	      argoffset += TYPE_LENGTH (float_elt_type);
+	      len -= TYPE_LENGTH (float_elt_type);
+	    }
+	}
+    }
+
+  /* Store the struct return value in r8 if necessary. */
+  if (struct_return)
+    {
+      store_address (&registers[REGISTER_BYTE (IA64_GR8_REGNUM)],
+                     REGISTER_RAW_SIZE (IA64_GR8_REGNUM),
+		     struct_addr);
+    }
+
+  /* Sync gdb's idea of what the registers are with the target. */
+  target_store_registers (-1);
+
+  /* FIXME: This doesn't belong here!  Instead, SAVE_DUMMY_FRAME_TOS needs
+     to be defined to call generic_save_dummy_frame_tos().  But at the
+     time of this writing, SAVE_DUMMY_FRAME_TOS wasn't gdbarch'd, so
+     I chose to put this call here instead of using the old mechanisms. 
+     Once SAVE_DUMMY_FRAME_TOS is gdbarch'd, all we need to do is add the
+     line
+
+	set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+
+     to ia64_gdbarch_init() and remove the line below. */
+  generic_save_dummy_frame_tos (sp);
+
+  return sp;
+}
+
+CORE_ADDR
+ia64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
+{
+  CORE_ADDR global_pointer = find_global_pointer (pc);
+
+  if (global_pointer != 0)
+    write_register (IA64_GR1_REGNUM, global_pointer);
 
   write_register (IA64_BR0_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;

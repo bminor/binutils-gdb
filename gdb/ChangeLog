@@ -1,3 +1,18 @@
+2000-03-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-linux-nat.c: Fix copyright.
+	(fill_gregset): Minor formatting fix.
+	* ia64-tdep.c (template_encoding_table, fetch_instruction,
+	examine_prologue): Clean up some compiler warnings.
+	(is_float_or_hfa_type_recurse, is_float_or_hfa_type, find_func_descr,
+	find_global_pointer, find_extant_func_descr): New functions.
+	(ia64_use_struct_convention, ia64_extract_return_value,
+	ia64_push_arguments): Handle HFAs.
+	(ia64_push_arguments): Find (or build) a function descriptor
+	when given a function address.
+	(ia64_push_return_address): Moved code for finding the
+	global pointer into its own function, find_global_pointer ().
+
 2000-03-22  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* event-loop.c (handle_file_event): Run through indent.

@@ -1,5 +1,5 @@
-/* Functions specific to running gdb native on IA64 running Linux.
-   Copyright 1999 Free Software Foundation, Inc.
+/* Functions specific to running gdb native on IA-64 running Linux.
+   Copyright 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -394,6 +394,6 @@ fill_gregset (gregsetp, regno)
      gregset_t *gregsetp;
      int regno;
 {
-  fprintf(stderr, "Warning: fill_gregset not implemented!\n");
+  fprintf (stderr, "Warning: fill_gregset not implemented!\n");
   /* FIXME: Implement later */
 }
