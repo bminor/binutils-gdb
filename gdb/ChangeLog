@@ -1,6 +1,8 @@
 2001-06-28  Jim Blandy  <jimb@redhat.com>
 
-	* d10v-tdep.c (10v_frame_chain_valid, d10v_use_struct_convention,
+	* d10v-tdep.c (d10v_ts2_dmap_register): Doc fix.
+
+	* d10v-tdep.c (d10v_frame_chain_valid, d10v_use_struct_convention,
 	d10v_breakpoint_from_pc, d10v_register_byte,
 	d10v_register_raw_size, d10v_register_virtual_size,
 	d10v_register_virtual_type, d10v_register_convertible,

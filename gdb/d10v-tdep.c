@@ -193,7 +193,20 @@ d10v_ts3_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
-/* Access the DMAP/IMAP registers in a target independent way. */
+/* Access the DMAP/IMAP registers in a target independent way.
+
+   Divide the D10V's 64k data space into four 16k segments:
+   0x0000 -- 0x3fff, 0x4000 -- 0x7fff, 0x8000 -- 0xbfff, and 
+   0xc000 -- 0xffff.
+
+   On the TS2, the first two segments (0x0000 -- 0x3fff, 0x4000 --
+   0x7fff) always map to the on-chip data RAM, and the fourth always
+   maps to I/O space.  The third (0x8000 - 0xbfff) can be mapped into
+   unified memory or instruction memory, under the control of the
+   single DMAP register.
+
+   On the TS3, there are four DMAP registers, each of which controls
+   one of the segments.  */
 
 static unsigned long
 d10v_ts2_dmap_register (int reg_nr)
