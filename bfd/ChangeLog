@@ -1,3 +1,9 @@
+2003-12-03  Dave Airlie  <airlied@linux.ie>
+
+	* config.bfd: Add vax-linux-gnu target.
+	* configure.in: Likewise.
+	* configure: Regenerate.
+
 2003-12-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* ecoff.c (ecoff_link_add_archive_symbols): Update for renamed

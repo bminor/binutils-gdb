@@ -397,6 +397,10 @@ changequote([,])dnl
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/vaxult2.h"'
 	;;
+  vax-*-linux-gnu*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/vaxlinux.h"'
+	;;
   vax-*-*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/vaxbsd.h"'

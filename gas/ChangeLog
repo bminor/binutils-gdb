@@ -1,3 +1,10 @@
+2003-12-03  Dave Airlie  <airlied@linux.ie>
+
+	* configure.in: Likewise.
+	* configure: Regenerate.
+	* config/tc-vax.c (md_shortopts): Add 'Q'.
+	(md_parse_option): Ignore 'Q' for now.
+
 2003-12-02  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* messages.c: Convert to ISO-C.

@@ -1,5 +1,5 @@
 /* tc-vax.c - vax-specific -
-   Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1998, 2000, 2001, 2002
+   Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1998, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -3257,7 +3257,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 #ifdef OBJ_VMS
 const char *md_shortopts = "d:STt:V+1h:Hv::";
 #elif defined(OBJ_ELF)
-const char *md_shortopts = "d:STt:VkK";
+const char *md_shortopts = "d:STt:VkKQ:";
 #else
 const char *md_shortopts = "d:STt:V";
 #endif
@@ -3333,6 +3333,11 @@ md_parse_option (c, arg)
     case 'k':
       flag_want_pic = 1;
       break;			/* -pic, Position Independent Code */
+
+     /* -Qy, -Qn: SVR4 arguments controlling whether a .comment
+	section should be emitted or not.  FIXME: Not implemented.  */
+    case 'Q':
+      break;
 #endif
 
     default:

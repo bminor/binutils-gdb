@@ -4249,7 +4249,14 @@ echo "$as_me: error: Unknown vendor for mips-bsd configuration." >&2;}
 
       ppc-*-pe | ppc-*-cygwin*)		fmt=coff em=pe ;;
       ppc-*-winnt*)			fmt=coff em=pe ;;
-      ppc-*-aix5*)			fmt=coff em=aix5 ;;
+      ppc-*-aix5.[01])			fmt=coff em=aix5 ;;
+      ppc-*-aix5.*)			fmt=coff em=aix5
+
+cat >>confdefs.h <<\_ACEOF
+#define AIX_WEAK_SUPPORT 1
+_ACEOF
+
+      ;;
       ppc-*-aix*)			fmt=coff ;;
       ppc-*-beos*)			fmt=coff ;;
       ppc-*-*n*bsd* | ppc-*-elf*)	fmt=elf ;;
@@ -4343,6 +4350,7 @@ echo "$as_me: error: Solaris must be configured little endian" >&2;}
       vax-*-netbsdelf*)			fmt=elf em=nbsd ;;
       vax-*-netbsd*)			fmt=aout em=nbsd ;;
       vax-*-bsd* | vax-*-ultrix*)	fmt=aout ;;
+      vax-*-linux-gnu*)			fmt=elf em=linux bfd_gas=yes ;;
       vax-*-vms)			fmt=vms ;;
 
       w65-*-*)				fmt=coff ;;

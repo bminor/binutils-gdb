@@ -404,7 +404,13 @@ changequote([,])dnl
 
       ppc-*-pe | ppc-*-cygwin*)		fmt=coff em=pe ;;
       ppc-*-winnt*)			fmt=coff em=pe ;;
-      ppc-*-aix5*)			fmt=coff em=aix5 ;;
+changequote(,)dnl
+      ppc-*-aix5.[01])			fmt=coff em=aix5 ;;
+changequote([,])dnl
+      ppc-*-aix5.*)			fmt=coff em=aix5
+      	AC_DEFINE(AIX_WEAK_SUPPORT, 1,
+		  [Define if using AIX 5.2 value for C_WEAKEXT.])
+      ;;
       ppc-*-aix*)			fmt=coff ;;
       ppc-*-beos*)			fmt=coff ;;
       ppc-*-*n*bsd* | ppc-*-elf*)	fmt=elf ;;
@@ -491,6 +497,7 @@ changequote([,])dnl
       vax-*-netbsdelf*)			fmt=elf em=nbsd ;;
       vax-*-netbsd*)			fmt=aout em=nbsd ;;
       vax-*-bsd* | vax-*-ultrix*)	fmt=aout ;;
+      vax-*-linux-gnu*)			fmt=elf em=linux bfd_gas=yes ;;
       vax-*-vms)			fmt=vms ;;
 
       w65-*-*)				fmt=coff ;;
