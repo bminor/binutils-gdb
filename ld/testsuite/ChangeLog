@@ -1,3 +1,7 @@
+1999-07-10  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld-elfvers/vers.exp: Use -rpath in new vers19 test.
+
 1999-07-07  Ian Lance Taylor  <ian@zembu.com>
 
 	* ld-elfvers/vers.exp: Add new tests vers17 to vers19.
