@@ -1,3 +1,10 @@
+Sun Jun  5 15:02:30 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Only set SEC_DATA if
+	SEC_LOAD is set, rather than checking SEC_ALLOC.
+
+	* libbfd-in.h (bfd_realloc): Change last arg to "size_t size".
+
 Fri Jun  3 10:58:02 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_write_object_contents): Don't compute the file header's
