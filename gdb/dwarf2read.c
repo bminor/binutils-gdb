@@ -1344,6 +1344,7 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 	      break;
 	    case DW_TAG_variable:
 	    case DW_TAG_typedef:
+	    case DW_TAG_union_type:
 	      if (!pdi.is_declaration)
 		{
 		  add_partial_symbol (&pdi, objfile, cu_header, namespace);
@@ -1351,7 +1352,6 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 	      break;
 	    case DW_TAG_class_type:
 	    case DW_TAG_structure_type:
-	    case DW_TAG_union_type:
 	      if (!pdi.is_declaration)
 		{
 		  info_ptr = add_partial_structure (&pdi, info_ptr,
@@ -1605,8 +1605,7 @@ add_partial_namespace (struct partial_die_info *pdi, char *info_ptr,
   return info_ptr;
 }
 
-/* Read a partial die corresponding to a non-enumeration compound data
-   structure type.  */
+/* Read a partial die corresponding to a class or structure.  */
 
 static char *
 add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
@@ -1615,8 +1614,39 @@ add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
 		       const char *namespace)
 {
   bfd *abfd = objfile->obfd;
+  char *actual_class_name = NULL;
+
+  if (cu_language == language_cplus
+      && namespace == NULL
+      && struct_pdi->name != NULL
+      && struct_pdi->has_children)
+    {
+      /* We don't have namespace debugging information, so see if we
+	 can figure out if this structure lives in a namespace.  Look
+	 for a member function; its demangled name will contain
+	 namespace info, if there is any.  */
+      char *next_child = info_ptr;
+
+      while (1)
+	{
+	  struct partial_die_info child_pdi;
+
+	  next_child = read_partial_die (&child_pdi, abfd, next_child,
+					 cu_header);
+	  if (!child_pdi.tag)
+	    break;
+	  if (child_pdi.tag == DW_TAG_subprogram)
+	    {
+	      actual_class_name = class_name_from_physname (child_pdi.name);
+	      if (actual_class_name != NULL)
+		struct_pdi->name = actual_class_name;
+	      break;
+	    }
+	}
+    }
 
   add_partial_symbol (struct_pdi, objfile, cu_header, namespace);
+  xfree(actual_class_name);
 
   return locate_pdi_sibling (struct_pdi, info_ptr, abfd, cu_header);
 }
@@ -2681,6 +2711,10 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
   struct attribute *attr;
   char *name;
   const char *previous_prefix = processing_current_prefix;
+  /* This says whether or not we want to try to update the structure's
+     name to include enclosing namespace/class information, if
+     any.  */
+  int need_to_update_name = 0;
 
   type = alloc_type (objfile);
 
@@ -2707,6 +2741,7 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 	{
 	  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name),
 					       &objfile->type_obstack);
+	  need_to_update_name = (cu_language == language_cplus);
 	}
     }
 
@@ -2767,6 +2802,29 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 	      /* C++ member function. */
 	      process_die (child_die, objfile, cu_header);
 	      dwarf2_add_member_fn (&fi, child_die, type, objfile, cu_header);
+	      if (need_to_update_name)
+		{
+		  /* The demangled names of member functions contain
+		     information about enclosing namespaces/classes,
+		     if any.  */
+
+		  /* FIXME: carlton/2003-01-10: The excessive
+		     demangling here is a bit wasteful, as is the
+		     memory usage for names.  */
+		  char *actual_class_name
+		    = class_name_from_physname (dwarf2_linkage_name
+						(child_die));
+		  if (actual_class_name != NULL
+		      && strcmp (actual_class_name, name) != 0)
+		    {
+		      TYPE_TAG_NAME (type)
+			= obsavestring (actual_class_name,
+					strlen (actual_class_name),
+					&objfile->type_obstack);
+		    }
+		  xfree (actual_class_name);
+		  need_to_update_name = 0;
+		}
 	    }
 	  else if (child_die->tag == DW_TAG_inheritance)
 	    {
@@ -5225,15 +5283,19 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
 
-	  /* Make sure that the symbol includes appropriate
-	     namespaces in its name.  */
+	  /* Make sure that the symbol includes appropriate enclosing
+	     classes/namespaces in its name.  These are calculated in
+	     read_structure_scope, and the correct name is saved in
+	     the type.  */
 
-	  if (processing_has_namespace_info)
+	  if (cu_language == language_cplus)
 	    {
 	      struct type *type = SYMBOL_TYPE (sym);
 	      
 	      if (TYPE_TAG_NAME (type) != NULL)
 		{
+		  /* FIXME: carlton/2003-01-10: We're being a bit
+		     profligate with memory names here.  */
 		  SYMBOL_NAME (sym)
 		    = obsavestring (TYPE_TAG_NAME (type),
 				    strlen (TYPE_TAG_NAME (type)),

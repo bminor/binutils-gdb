@@ -307,6 +307,10 @@ allocate_objfile (bfd *abfd, int flags)
 		 objfile->name, bfd_errmsg (bfd_get_error ()));
 	}
     }
+  else
+    {
+      objfile->name = "<<anonymous objfile>>";
+    }
 
   /* Initialize the section indexes for this objfile, so that we can
      later detect if they are used w/o being properly assigned to. */

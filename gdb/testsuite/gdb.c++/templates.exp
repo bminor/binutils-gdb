@@ -288,6 +288,7 @@ gdb_expect {
 send_gdb "ptype fvpchar\n"   
 gdb_expect {   
    -re "type = (class |)Foo<volatile char ?\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*.*char.*\\*t;\r\n\r\n\[ \t\]*.*char \\* foo\\(int,.*char.*\\*\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype fvpchar" }
+   -re "type = class Foo<char volatile\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*.*char.*\\*t;\r\n\r\n\[ \t\]*.*char \\* foo\\(int,.*char.*\\*\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype fvpchar" }
    -re "$gdb_prompt $"                     { fail "ptype fvpchar" }
    timeout                             { fail "(timeout) ptype fvpchar" }
 }
@@ -319,7 +320,7 @@ gdb_expect {
 
 send_gdb "ptype bint\n"   
 gdb_expect {   
-   -re "type = (class |)Bar<int,(\\(int\\)|)33> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int bar\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bint" }
+   -re "type = (class |)Bar<int, ?(\\(int\\)|)33> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int bar\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bint" }
    -re "$gdb_prompt $"                     { fail "ptype bint" }
    timeout                             { fail "(timeout) ptype bint" }
 }
@@ -328,7 +329,7 @@ gdb_expect {
 
 send_gdb "ptype bint2\n"   
 gdb_expect {   
-   -re "type = (class |)Bar<int,(\\(int\\)|)1> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int bar\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bint2" }
+   -re "type = (class |)Bar<int, ?(\\(int\\)|)1> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int bar\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bint2" }
    -re "$gdb_prompt $"                     { fail "ptype bint2" }
    timeout                             { fail "(timeout) ptype bint2" }
 }
@@ -351,7 +352,7 @@ gdb_expect {
 
 send_gdb "ptype bazint\n"   
 gdb_expect {   
-   -re "type = (class |)Baz<int,(\\(char\\)|)(115|\\'s\\')> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int baz\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bazint" }
+   -re "type = (class |)Baz<int, ?(\\(char\\)|)(115|\\'s\\')> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int baz\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bazint" }
    -re "$gdb_prompt $"                     { fail "ptype bazint" }
    timeout                             { fail "(timeout) ptype bazint" }
 }
@@ -360,7 +361,7 @@ gdb_expect {
 
 send_gdb "ptype bazint2\n"   
 gdb_expect {   
-   -re "type = (class |)Baz<char,(\\(char\\)|)(97|\\'a\\')> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*char t;\r\n\r\n\[ \t\]*.*char baz\\(int, char\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bazint2" }
+   -re "type = (class |)Baz<char, ?(\\(char\\)|)(97|\\'a\\')> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*char t;\r\n\r\n\[ \t\]*.*char baz\\(int, char\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype bazint2" }
    -re "$gdb_prompt $"                     { fail "ptype bazint2" }
    timeout                             { fail "(timeout) ptype bazint2" }
 }
@@ -380,7 +381,7 @@ gdb_expect {
 
 send_gdb "ptype quxint\n"   
 gdb_expect {   
-   -re "type = class Qux<int,&string> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int qux\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
+   -re "type = class Qux<int, ?&\\(?string\\)?> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int qux\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
    -re "$gdb_prompt $"                     { fail "ptype quxint" }
    timeout                             { fail "(timeout) ptype quxint" }
 }
@@ -413,7 +414,7 @@ gdb_expect {
 
 send_gdb "ptype siip\n"   
 gdb_expect {   
-   -re "type = class Spec<int,int ?\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\r\n\[ \t\]*.*int spec\\(int ?\\*\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype siip" }
+   -re "type = class Spec<int, ?int ?\\*> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\r\n\[ \t\]*.*int spec\\(int ?\\*\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype siip" }
    -re "$gdb_prompt $"                     { fail "ptype siip" }
    timeout                             { fail "(timeout) ptype siip" }
 }

@@ -1,3 +1,13 @@
+2003-01-10  David Carlton  <carlton@math.stanford.edu>
+
+	* objfiles.c (allocate_objfile): Always set name.
+	* dwarf2read.c (scan_partial_symbols): Don't call
+	add_partial_structure on unions.
+	(add_partial_structure): Look for enclosing namespace names.
+	(read_structure_scope): Look enclosing namespace/class names.
+	(new_symbol): For C++ structures, always grab the name from the
+	type's name.
+
 2003-01-07  David Carlton  <carlton@math.stanford.edu>
 
 	* dwarf2read.c (add_partial_structure): New function.
