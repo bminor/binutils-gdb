@@ -24,7 +24,7 @@ else
         lose_these_too="${r5900_files} ${lose_these_too}"
 fi
 
-vr5400_files="vr5400.igen"
+vr5400_files="vr5400.igen mdmx.igen"
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
         keep_these_too="${vr5400_files} ${keep_these_too}"
 else
@@ -148,7 +148,7 @@ else
 fi
 
 
-vr5400_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc m16.igen vr5400.igen"
+vr5400_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc m16.igen vr5400.igen mdmx.igen"
 
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
 	for i in $vr5400_files ; do

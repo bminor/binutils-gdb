@@ -1,3 +1,15 @@
+Wed Nov 26 11:00:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen (LWC1): Correct assembler - lwc1 not swc1.
+
+start-sanitize-vr5400
+	* sim-main.h: Add 8*3*8 bit accumulator.
+
+	* vr5400.igen: Move mdmx instructins from here
+	* mdmx.igen: To here - new file. Add/fix missing instructions.
+	* mips.igen: Include mdmx.igen.
+
+start-sanitize-vr5400
 Sun Nov 23 01:45:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (sim-fpu.h): Include.
