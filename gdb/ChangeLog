@@ -1,3 +1,9 @@
+Fri Jan 19 02:31:40 2001  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* target.h (TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT)
+	* breakpoint.c (TARGET_REGION_OK_FOR_HW_WATCHPOINT): Wrap macro
+ 	definition in parenthesis.
+
 Fri Jan 19 02:13:40 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-10-27 Mark Salter <msalter@redhat.com>:

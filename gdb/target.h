@@ -1184,7 +1184,7 @@ extern void (*target_new_objfile_hook) (struct objfile *);
 
 #if !defined(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT)
 #define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(byte_count) \
-     (LONGEST)(byte_count) <= REGISTER_SIZE
+     ((LONGEST)(byte_count) <= REGISTER_SIZE)
 #endif
 
 /* However, some addresses may not be profitable to use hardware to watch,
