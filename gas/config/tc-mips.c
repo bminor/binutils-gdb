@@ -8068,12 +8068,12 @@ struct option md_longopts[] = {
   {"mips16", no_argument, NULL, OPTION_MIPS16},
 #define OPTION_NO_MIPS16 (OPTION_MD_BASE + 23)
   {"no-mips16", no_argument, NULL, OPTION_NO_MIPS16},
-  /* start-sanitize-5900 */
+  /* start-sanitize-r5900 */
 #define OPTION_M5900 (OPTION_MD_BASE + 24)
   {"m5900", no_argument, NULL, OPTION_M5900},
 #define OPTION_NO_M5900 (OPTION_MD_BASE + 25)
   {"no-m5900", no_argument, NULL, OPTION_NO_M5900},
-  /* end-sanitize-5900 */
+  /* end-sanitize-r5900 */
 
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
@@ -9922,7 +9922,26 @@ md_estimate_size_before_relax (fragp, segtype)
     }
   else if (mips_pic == SVR4_PIC)
     {
-      asection *symsec = fragp->fr_symbol->bsym->section;
+      symbolS *sym;
+      asection *symsec;
+
+      sym = fragp->fr_symbol;
+
+      /* Handle the case of a symbol equated to another symbol.  */
+      while (sym->sy_value.X_op == O_symbol
+	     && (! S_IS_DEFINED (sym) || S_IS_COMMON (sym)))
+	{
+	  symbolS *n;
+
+	  /* It's possible to get a loop here in a badly written
+             program.  */
+	  n = sym->sy_value.X_add_symbol;
+	  if (n == sym)
+	    break;
+	  sym = n;
+	}
+
+      symsec = S_GET_SEGMENT (sym);
 
       /* This must duplicate the test in adjust_reloc_syms.  */
       change = (symsec != &bfd_und_section
@@ -9969,7 +9988,8 @@ mips_fix_adjustable (fixp)
     return 1;
 #ifdef S_GET_OTHER
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour
-      && S_GET_OTHER (fixp->fx_addsy) == STO_MIPS16)
+      && S_GET_OTHER (fixp->fx_addsy) == STO_MIPS16
+      && fixp->fx_subsy == NULL)
     return 0;
 #endif
   return 1;

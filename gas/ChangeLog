@@ -1,5 +1,8 @@
 Fri Mar 14 15:33:38 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (md_estimate_size_before_relax): Handle the
+	case of a symbol equated to another symbol when using SVR4_PIC.
+
 	* Makefile.in (TARG_CPU_DEP_sparc): Add opcode/sparc.h.
 
 Thu Mar 13 11:20:51 1997  Ian Lance Taylor  <ian@cygnus.com>
