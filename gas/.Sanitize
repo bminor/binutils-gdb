@@ -58,7 +58,7 @@ debug.c
 doc
 expr.c
 expr.h
-flonum-const.c
+flonum-konst.c
 flonum-copy.c
 flonum-mult.c
 flonum.h
@@ -106,7 +106,13 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.10  1992/02/22 20:44:46  sac
+# Revision 1.11  1992/03/13 16:04:15  sac
+# Fri Mar 13 08:03:03 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+#
+# 	* flonum-const.c: renamed flonum-konst.c to stop dos name
+# 	conflict.
+#
+# Revision 1.10  1992/02/22  20:44:46  sac
 # 	* app.c: MRI compatibility - allow single quote to start a string.
 # 	* as.c: fix typo recently introduced.
 # 	* as.h : Don't include aout/reloc.h - it's not right for COFF!

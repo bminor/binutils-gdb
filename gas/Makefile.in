@@ -71,7 +71,7 @@ REAL_SOURCES = \
 	$(srcdir)/bignum-copy.c \
 	$(srcdir)/cond.c \
 	$(srcdir)/expr.c \
-	$(srcdir)/flonum-const.c \
+	$(srcdir)/flonum-konst.c \
 	$(srcdir)/flonum-copy.c \
 	$(srcdir)/flonum-mult.c \
 	$(srcdir)/frags.c \
@@ -140,7 +140,7 @@ OBJS = \
 	bignum-copy.o \
 	cond.o \
 	expr.o \
-	flonum-const.o \
+	flonum-konst.o \
 	flonum-copy.o \
 	flonum-mult.o \
 	frags.o \
@@ -205,7 +205,7 @@ SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 STAGESTUFF = *.o as.new
 
 as.new: $(OBJS) $(LIBDEPS)
-	-mv -f as.new as.old
+	[ ! -f as.new ] || mv as.new as.old
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
 check:
@@ -241,7 +241,7 @@ expr.o : expr.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
    
-flonum-const.o : flonum-const.c flonum.h bignum.h 
+flonum-konst.o : flonum-konst.c flonum.h bignum.h 
 flonum-copy.o : flonum-copy.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 

@@ -1,3 +1,8 @@
+Fri Mar 13 08:03:03 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* flonum-const.c: renamed flonum-konst.c to stop dos name
+	conflict.
+
 Wed Mar 11 23:32:42 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* configure.in: vxworks68 gets te-sun3.h.
