@@ -1,3 +1,8 @@
+Fri May  8 11:42:15 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* mipsread.c (parse_procedure):  Return rather than using
+	uninitialized variable 'b'.
+
 Fri May  8 07:48:27 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in, remote-udi.c, remote-vx.c, 29k-share/dfe/mini2udi.c,
