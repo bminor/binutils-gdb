@@ -1,3 +1,19 @@
+2002-11-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (frame.o): Update dependencies.
+	* blockframe.c (current_frame, frame_obstack_alloc)
+	(frame_saved_regs_zalloc, get_current_frame)
+	(set_current_frame, create_new_frame)
+	(set_unwind_by_pc, get_next_frame)
+	(flush_cached_frames, reinit_frame_cache)
+	(frame_saved_regs_register_unwind)
+	(deprecated_generic_get_saved_register)
+	(get_prev_frame, get_frame_pc, get_frame_saved_regs)
+	(_initialize_blockframe): Move frame code from here...
+	* frame.c: ...to here.  Include "gdb_obstack.h", "gdbcore.h",
+	"annotate.h" and "dummy-frame.h".
+	(_initialize_frame): New function.
+
 2002-11-08  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (read_func_scope): Restore list_in_scope properly

@@ -29,6 +29,10 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "builtin-regs.h"
+#include "gdb_obstack.h"
+#include "dummy-frame.h"
+#include "gdbcore.h"
+#include "annotate.h"
 
 /* Return a frame uniq ID that can be used to, later re-find the
    frame.  */
@@ -377,4 +381,545 @@ frame_map_regnum_to_name (int regnum)
   if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
     return REGISTER_NAME (regnum);
   return builtin_reg_map_regnum_to_name (regnum);
+}
+
+/* Info about the innermost stack frame (contents of FP register) */
+
+static struct frame_info *current_frame;
+
+/* Cache for frame addresses already read by gdb.  Valid only while
+   inferior is stopped.  Control variables for the frame cache should
+   be local to this module.  */
+
+static struct obstack frame_cache_obstack;
+
+void *
+frame_obstack_alloc (unsigned long size)
+{
+  return obstack_alloc (&frame_cache_obstack, size);
+}
+
+void
+frame_saved_regs_zalloc (struct frame_info *fi)
+{
+  fi->saved_regs = (CORE_ADDR *)
+    frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
+  memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
+}
+
+
+/* Return the innermost (currently executing) stack frame.  */
+
+struct frame_info *
+get_current_frame (void)
+{
+  if (current_frame == NULL)
+    {
+      if (target_has_stack)
+	current_frame = create_new_frame (read_fp (), read_pc ());
+      else
+	error ("No stack.");
+    }
+  return current_frame;
+}
+
+void
+set_current_frame (struct frame_info *frame)
+{
+  current_frame = frame;
+}
+
+/* Return the register saved in the simplistic ``saved_regs'' cache.
+   If the value isn't here AND a value is needed, try the next inner
+   most frame.  */
+
+static void
+frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
+				  int regnum, int *optimizedp,
+				  enum lval_type *lvalp, CORE_ADDR *addrp,
+				  int *realnump, void *bufferp)
+{
+  /* There is always a frame at this point.  And THIS is the frame
+     we're interested in.  */
+  gdb_assert (frame != NULL);
+  /* If we're using generic dummy frames, we'd better not be in a call
+     dummy.  (generic_call_dummy_register_unwind ought to have been called
+     instead.)  */
+  gdb_assert (!(USE_GENERIC_DUMMY_FRAMES
+                && PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame)));
+
+  /* Load the saved_regs register cache.  */
+  if (frame->saved_regs == NULL)
+    FRAME_INIT_SAVED_REGS (frame);
+
+  if (frame->saved_regs != NULL
+      && frame->saved_regs[regnum] != 0)
+    {
+      if (regnum == SP_REGNUM)
+	{
+	  /* SP register treated specially.  */
+	  *optimizedp = 0;
+	  *lvalp = not_lval;
+	  *addrp = 0;
+	  *realnump = -1;
+	  if (bufferp != NULL)
+	    store_address (bufferp, REGISTER_RAW_SIZE (regnum),
+			   frame->saved_regs[regnum]);
+	}
+      else
+	{
+	  /* Any other register is saved in memory, fetch it but cache
+             a local copy of its value.  */
+	  *optimizedp = 0;
+	  *lvalp = lval_memory;
+	  *addrp = frame->saved_regs[regnum];
+	  *realnump = -1;
+	  if (bufferp != NULL)
+	    {
+#if 1
+	      /* Save each register value, as it is read in, in a
+                 frame based cache.  */
+	      void **regs = (*cache);
+	      if (regs == NULL)
+		{
+		  int sizeof_cache = ((NUM_REGS + NUM_PSEUDO_REGS)
+				      * sizeof (void *));
+		  regs = frame_obstack_alloc (sizeof_cache);
+		  memset (regs, 0, sizeof_cache);
+		  (*cache) = regs;
+		}
+	      if (regs[regnum] == NULL)
+		{
+		  regs[regnum]
+		    = frame_obstack_alloc (REGISTER_RAW_SIZE (regnum));
+		  read_memory (frame->saved_regs[regnum], regs[regnum],
+			       REGISTER_RAW_SIZE (regnum));
+		}
+	      memcpy (bufferp, regs[regnum], REGISTER_RAW_SIZE (regnum));
+#else
+	      /* Read the value in from memory.  */
+	      read_memory (frame->saved_regs[regnum], bufferp,
+			   REGISTER_RAW_SIZE (regnum));
+#endif
+	    }
+	}
+      return;
+    }
+
+  /* No luck, assume this and the next frame have the same register
+     value.  If a value is needed, pass the request on down the chain;
+     otherwise just return an indication that the value is in the same
+     register as the next frame.  */
+  if (bufferp == NULL)
+    {
+      *optimizedp = 0;
+      *lvalp = lval_register;
+      *addrp = 0;
+      *realnump = regnum;
+    }
+  else
+    {
+      frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
+			     realnump, bufferp);
+    }
+}
+
+/* Function: get_saved_register
+   Find register number REGNUM relative to FRAME and put its (raw,
+   target format) contents in *RAW_BUFFER.  
+
+   Set *OPTIMIZED if the variable was optimized out (and thus can't be
+   fetched).  Note that this is never set to anything other than zero
+   in this implementation.
+
+   Set *LVAL to lval_memory, lval_register, or not_lval, depending on
+   whether the value was fetched from memory, from a register, or in a
+   strange and non-modifiable way (e.g. a frame pointer which was
+   calculated rather than fetched).  We will use not_lval for values
+   fetched from generic dummy frames.
+
+   Set *ADDRP to the address, either in memory or as a REGISTER_BYTE
+   offset into the registers array.  If the value is stored in a dummy
+   frame, set *ADDRP to zero.
+
+   To use this implementation, define a function called
+   "get_saved_register" in your target code, which simply passes all
+   of its arguments to this function.
+
+   The argument RAW_BUFFER must point to aligned memory.  */
+
+void
+deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
+				       CORE_ADDR *addrp,
+				       struct frame_info *frame, int regnum,
+				       enum lval_type *lval)
+{
+  if (!target_has_registers)
+    error ("No registers.");
+
+  /* Normal systems don't optimize out things with register numbers.  */
+  if (optimized != NULL)
+    *optimized = 0;
+
+  if (addrp)			/* default assumption: not found in memory */
+    *addrp = 0;
+
+  /* Note: since the current frame's registers could only have been
+     saved by frames INTERIOR TO the current frame, we skip examining
+     the current frame itself: otherwise, we would be getting the
+     previous frame's registers which were saved by the current frame.  */
+
+  while (frame && ((frame = frame->next) != NULL))
+    {
+      if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+	{
+	  if (lval)		/* found it in a CALL_DUMMY frame */
+	    *lval = not_lval;
+	  if (raw_buffer)
+	    /* FIXME: cagney/2002-06-26: This should be via the
+	       gdbarch_register_read() method so that it, on the fly,
+	       constructs either a raw or pseudo register from the raw
+	       register cache.  */
+	    regcache_raw_read (generic_find_dummy_frame (frame->pc,
+							 frame->frame),
+			       regnum, raw_buffer);
+	  return;
+	}
+
+      FRAME_INIT_SAVED_REGS (frame);
+      if (frame->saved_regs != NULL
+	  && frame->saved_regs[regnum] != 0)
+	{
+	  if (lval)		/* found it saved on the stack */
+	    *lval = lval_memory;
+	  if (regnum == SP_REGNUM)
+	    {
+	      if (raw_buffer)	/* SP register treated specially */
+		store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
+			       frame->saved_regs[regnum]);
+	    }
+	  else
+	    {
+	      if (addrp)	/* any other register */
+		*addrp = frame->saved_regs[regnum];
+	      if (raw_buffer)
+		read_memory (frame->saved_regs[regnum], raw_buffer,
+			     REGISTER_RAW_SIZE (regnum));
+	    }
+	  return;
+	}
+    }
+
+  /* If we get thru the loop to this point, it means the register was
+     not saved in any frame.  Return the actual live-register value.  */
+
+  if (lval)			/* found it in a live register */
+    *lval = lval_register;
+  if (addrp)
+    *addrp = REGISTER_BYTE (regnum);
+  if (raw_buffer)
+    deprecated_read_register_gen (regnum, raw_buffer);
+}
+
+/* Using the PC, select a mechanism for unwinding a frame returning
+   the previous frame.  The register unwind function should, on
+   demand, initialize the ->context object.  */
+
+static void
+set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
+		  frame_register_unwind_ftype **unwind)
+{
+  if (!USE_GENERIC_DUMMY_FRAMES)
+    /* Still need to set this to something.  The ``info frame'' code
+       calls this function to find out where the saved registers are.
+       Hopefully this is robust enough to stop any core dumps and
+       return vaguely correct values..  */
+    *unwind = frame_saved_regs_register_unwind;
+  else if (PC_IN_CALL_DUMMY (pc, fp, fp))
+    *unwind = generic_call_dummy_register_unwind;
+  else
+    *unwind = frame_saved_regs_register_unwind;
+}
+
+/* Create an arbitrary (i.e. address specified by user) or innermost frame.
+   Always returns a non-NULL value.  */
+
+struct frame_info *
+create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
+{
+  struct frame_info *fi;
+  char *name;
+
+  fi = (struct frame_info *)
+    obstack_alloc (&frame_cache_obstack,
+		   sizeof (struct frame_info));
+
+  /* Zero all fields by default.  */
+  memset (fi, 0, sizeof (struct frame_info));
+
+  fi->frame = addr;
+  fi->pc = pc;
+  find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
+  fi->signal_handler_caller = PC_IN_SIGTRAMP (fi->pc, name);
+
+  if (INIT_EXTRA_FRAME_INFO_P ())
+    INIT_EXTRA_FRAME_INFO (0, fi);
+
+  /* Select/initialize an unwind function.  */
+  set_unwind_by_pc (fi->pc, fi->frame, &fi->register_unwind);
+
+  return fi;
+}
+
+/* Return the frame that FRAME calls (NULL if FRAME is the innermost
+   frame).  */
+
+struct frame_info *
+get_next_frame (struct frame_info *frame)
+{
+  return frame->next;
+}
+
+/* Flush the entire frame cache.  */
+
+void
+flush_cached_frames (void)
+{
+  /* Since we can't really be sure what the first object allocated was */
+  obstack_free (&frame_cache_obstack, 0);
+  obstack_init (&frame_cache_obstack);
+
+  current_frame = NULL;		/* Invalidate cache */
+  select_frame (NULL);
+  annotate_frames_invalid ();
+}
+
+/* Flush the frame cache, and start a new one if necessary.  */
+
+void
+reinit_frame_cache (void)
+{
+  flush_cached_frames ();
+
+  /* FIXME: The inferior_ptid test is wrong if there is a corefile.  */
+  if (PIDGET (inferior_ptid) != 0)
+    {
+      select_frame (get_current_frame ());
+    }
+}
+
+/* Return a structure containing various interesting information
+   about the frame that called NEXT_FRAME.  Returns NULL
+   if there is no such frame.  */
+
+struct frame_info *
+get_prev_frame (struct frame_info *next_frame)
+{
+  CORE_ADDR address = 0;
+  struct frame_info *prev;
+  int fromleaf = 0;
+  char *name;
+
+  /* If the requested entry is in the cache, return it.
+     Otherwise, figure out what the address should be for the entry
+     we're about to add to the cache. */
+
+  if (!next_frame)
+    {
+#if 0
+      /* This screws value_of_variable, which just wants a nice clean
+         NULL return from block_innermost_frame if there are no frames.
+         I don't think I've ever seen this message happen otherwise.
+         And returning NULL here is a perfectly legitimate thing to do.  */
+      if (!current_frame)
+	{
+	  error ("You haven't set up a process's stack to examine.");
+	}
+#endif
+
+      return current_frame;
+    }
+
+  /* If we have the prev one, return it */
+  if (next_frame->prev)
+    return next_frame->prev;
+
+  /* On some machines it is possible to call a function without
+     setting up a stack frame for it.  On these machines, we
+     define this macro to take two args; a frameinfo pointer
+     identifying a frame and a variable to set or clear if it is
+     or isn't leafless.  */
+
+  /* Still don't want to worry about this except on the innermost
+     frame.  This macro will set FROMLEAF if NEXT_FRAME is a
+     frameless function invocation.  */
+  if (!(next_frame->next))
+    {
+      fromleaf = FRAMELESS_FUNCTION_INVOCATION (next_frame);
+      if (fromleaf)
+	address = FRAME_FP (next_frame);
+    }
+
+  if (!fromleaf)
+    {
+      /* Two macros defined in tm.h specify the machine-dependent
+         actions to be performed here.
+         First, get the frame's chain-pointer.
+         If that is zero, the frame is the outermost frame or a leaf
+         called by the outermost frame.  This means that if start
+         calls main without a frame, we'll return 0 (which is fine
+         anyway).
+
+         Nope; there's a problem.  This also returns when the current
+         routine is a leaf of main.  This is unacceptable.  We move
+         this to after the ffi test; I'd rather have backtraces from
+         start go curfluy than have an abort called from main not show
+         main.  */
+      address = FRAME_CHAIN (next_frame);
+
+      /* FIXME: cagney/2002-06-08: There should be two tests here.
+         The first would check for a valid frame chain based on a user
+         selectable policy.  The default being ``stop at main'' (as
+         implemented by generic_func_frame_chain_valid()).  Other
+         policies would be available - stop at NULL, ....  The second
+         test, if provided by the target architecture, would check for
+         more exotic cases - most target architectures wouldn't bother
+         with this second case.  */
+      if (!FRAME_CHAIN_VALID (address, next_frame))
+	return 0;
+    }
+  if (address == 0)
+    return 0;
+
+  prev = (struct frame_info *)
+    obstack_alloc (&frame_cache_obstack,
+		   sizeof (struct frame_info));
+
+  /* Zero all fields by default.  */
+  memset (prev, 0, sizeof (struct frame_info));
+
+  if (next_frame)
+    next_frame->prev = prev;
+  prev->next = next_frame;
+  prev->frame = address;
+  prev->level = next_frame->level + 1;
+
+/* This change should not be needed, FIXME!  We should
+   determine whether any targets *need* INIT_FRAME_PC to happen
+   after INIT_EXTRA_FRAME_INFO and come up with a simple way to
+   express what goes on here.
+
+   INIT_EXTRA_FRAME_INFO is called from two places: create_new_frame
+   (where the PC is already set up) and here (where it isn't).
+   INIT_FRAME_PC is only called from here, always after
+   INIT_EXTRA_FRAME_INFO.
+
+   The catch is the MIPS, where INIT_EXTRA_FRAME_INFO requires the PC
+   value (which hasn't been set yet).  Some other machines appear to
+   require INIT_EXTRA_FRAME_INFO before they can do INIT_FRAME_PC.  Phoo.
+
+   We shouldn't need INIT_FRAME_PC_FIRST to add more complication to
+   an already overcomplicated part of GDB.   gnu@cygnus.com, 15Sep92.
+
+   Assuming that some machines need INIT_FRAME_PC after
+   INIT_EXTRA_FRAME_INFO, one possible scheme:
+
+   SETUP_INNERMOST_FRAME()
+   Default version is just create_new_frame (read_fp ()),
+   read_pc ()).  Machines with extra frame info would do that (or the
+   local equivalent) and then set the extra fields.
+   SETUP_ARBITRARY_FRAME(argc, argv)
+   Only change here is that create_new_frame would no longer init extra
+   frame info; SETUP_ARBITRARY_FRAME would have to do that.
+   INIT_PREV_FRAME(fromleaf, prev)
+   Replace INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC.  This should
+   also return a flag saying whether to keep the new frame, or
+   whether to discard it, because on some machines (e.g.  mips) it
+   is really awkward to have FRAME_CHAIN_VALID called *before*
+   INIT_EXTRA_FRAME_INFO (there is no good way to get information
+   deduced in FRAME_CHAIN_VALID into the extra fields of the new frame).
+   std_frame_pc(fromleaf, prev)
+   This is the default setting for INIT_PREV_FRAME.  It just does what
+   the default INIT_FRAME_PC does.  Some machines will call it from
+   INIT_PREV_FRAME (either at the beginning, the end, or in the middle).
+   Some machines won't use it.
+   kingdon@cygnus.com, 13Apr93, 31Jan94, 14Dec94.  */
+
+  INIT_FRAME_PC_FIRST (fromleaf, prev);
+
+  if (INIT_EXTRA_FRAME_INFO_P ())
+    INIT_EXTRA_FRAME_INFO (fromleaf, prev);
+
+  /* This entry is in the frame queue now, which is good since
+     FRAME_SAVED_PC may use that queue to figure out its value
+     (see tm-sparc.h).  We want the pc saved in the inferior frame. */
+  INIT_FRAME_PC (fromleaf, prev);
+
+  /* If ->frame and ->pc are unchanged, we are in the process of getting
+     ourselves into an infinite backtrace.  Some architectures check this
+     in FRAME_CHAIN or thereabouts, but it seems like there is no reason
+     this can't be an architecture-independent check.  */
+  if (next_frame != NULL)
+    {
+      if (prev->frame == next_frame->frame
+	  && prev->pc == next_frame->pc)
+	{
+	  next_frame->prev = NULL;
+	  obstack_free (&frame_cache_obstack, prev);
+	  return NULL;
+	}
+    }
+
+  /* Initialize the code used to unwind the frame PREV based on the PC
+     (and probably other architectural information).  The PC lets you
+     check things like the debug info at that point (dwarf2cfi?) and
+     use that to decide how the frame should be unwound.  */
+  set_unwind_by_pc (prev->pc, prev->frame, &prev->register_unwind);
+
+  find_pc_partial_function (prev->pc, &name,
+			    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
+  if (PC_IN_SIGTRAMP (prev->pc, name))
+    prev->signal_handler_caller = 1;
+
+  return prev;
+}
+
+CORE_ADDR
+get_frame_pc (struct frame_info *frame)
+{
+  return frame->pc;
+}
+
+#ifdef FRAME_FIND_SAVED_REGS
+/* XXX - deprecated.  This is a compatibility function for targets
+   that do not yet implement FRAME_INIT_SAVED_REGS.  */
+/* Find the addresses in which registers are saved in FRAME.  */
+
+void
+get_frame_saved_regs (struct frame_info *frame,
+		      struct frame_saved_regs *saved_regs_addr)
+{
+  if (frame->saved_regs == NULL)
+    {
+      frame->saved_regs = (CORE_ADDR *)
+	frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
+    }
+  if (saved_regs_addr == NULL)
+    {
+      struct frame_saved_regs saved_regs;
+      FRAME_FIND_SAVED_REGS (frame, saved_regs);
+      memcpy (frame->saved_regs, &saved_regs, SIZEOF_FRAME_SAVED_REGS);
+    }
+  else
+    {
+      FRAME_FIND_SAVED_REGS (frame, *saved_regs_addr);
+      memcpy (frame->saved_regs, saved_regs_addr, SIZEOF_FRAME_SAVED_REGS);
+    }
+}
+#endif
+
+void
+_initialize_frame (void)
+{
+  obstack_init (&frame_cache_obstack);
 }
