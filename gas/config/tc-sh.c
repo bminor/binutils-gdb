@@ -694,12 +694,12 @@ parse_reg (src, mode, reg)
   if (l0 == 'm' && l1 == 'a' && tolower (src[2]) == 'c'
       && ! IDENT_CHAR ((unsigned char) src[4]))
     {
-      if (src[3] == 'l')
+      if (tolower (src[3]) == 'l')
 	{
 	  *mode = A_MACL;
 	  return 4;
 	}
-      if (src[3] == 'h')
+      if (tolower (src[3]) == 'h')
 	{
 	  *mode = A_MACH;
 	  return 4;
