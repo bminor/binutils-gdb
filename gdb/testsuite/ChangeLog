@@ -1,3 +1,7 @@
+2003-03-26  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/ptype.exp: Actually use some typedef'd types.
+
 2003-03-21  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* gdb.asm/asm-source.exp: Set asm-arch for m6811 and m6812.
