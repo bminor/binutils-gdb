@@ -3,6 +3,7 @@
     */
 
 #include "sim-main.h"
+#include "sim-endian.h"
 
 #include "sky-device.h"
 #include "sky-vu1.h"
@@ -11,8 +12,8 @@
 
 VectorUnitState vu1_state;
 
-static char vu1_umem_buffer[VU1_MEM0_SIZE];
-static char vu1_mem_buffer[VU1_MEM1_SIZE];
+static char vu1_umem_buffer[VU1_MEM0_SIZE] __attribute__ ((aligned(16)));
+static char vu1_mem_buffer[VU1_MEM1_SIZE]  __attribute__ ((aligned(16)));
 
 void init_vu1(void);
 void init_vu(VectorUnitState *state, char* umem_buffer, char* mem_buffer);
@@ -54,8 +55,10 @@ vu1_io_read_register_window(device *me,
 	*(u_long*)&source_buffer[VU1_MTPC - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MTPC;
 	*(VpeStat*)&source_buffer[VPE1_STAT - VU1_REGISTER_WINDOW_START] = vu1_state.regs.VPE_STAT;
 
+#if 0
 	printf("%s: Read: %x, %d, dest: %x, space: %d, %x!\n", me->name, (int)addr, nr_bytes, (int)dest, space, *(int*)&(vu1_state.regs.VPE_STAT));
 	printf("	vu1_state.regs.VPE_STAT = %x\n", *(int*)&(vu1_state.regs.VPE_STAT));
+#endif
 
 	if (addr + nr_bytes > VU1_REGISTER_WINDOW_END) {
 	    fprintf(stderr, "Error: Read past end of vu1 register window!!!\n");
@@ -82,26 +85,18 @@ vu1_io_write_register_window(device *me,
 	    /* Magic to switch VU to run state, until other methods are available. */
 	    vu1_state.runState = VU_RUN;
 	    vu1_state.regs.VPE_STAT.vbs = 1;
-printf("Magic start run...\n");
-#if 0
-printf("%x,%x,%x,%x\n", &vu1_state.regs.VF[0][0], &vu1_state.regs.VPE_STAT,
-			((char*)&vu1_state.regs.VPE_STAT) - ((char*)&vu1_state.regs.VF[0][0]),
-			((char*)&vu1_state.regs.VPE_STAT) - ((char*)&vu1_state.regs.VF[0][0]) + VU1_REGISTER_WINDOW_START
-     );
-
-printf("%x,%x,%x,%x\n", &vu1_state.regs.VF[0][0], &vu1_state.regs.VI[0],
-			((char*)&vu1_state.regs.VI[0]) - ((char*)&vu1_state.regs.VF[0][0]),
-			((char*)&vu1_state.regs.VI[0]) - ((char*)&vu1_state.regs.VF[0][0]) + VU1_REGISTER_WINDOW_START
-     );
-printf("%x,%x,%x,%x\n", &vu1_state.regs.VF[0][0], &vu1_state.regs.MST,
-			((char*)&vu1_state.regs.MST) - ((char*)&vu1_state.regs.VF[0][0]),
-			((char*)&vu1_state.regs.MST) - ((char*)&vu1_state.regs.VF[0][0]) + VU1_REGISTER_WINDOW_START
-     );
-#endif
+	    vu1_state.junk.eflag = 0;
+	    vu1_state.junk.peflag = 0;
+/*printf("Magic start run...\n");*/
 	    return nr_bytes;
-	}
+	} else if (addr == VU1_MST && nr_bytes == 4) {
+	    /* Magic switch to set _TOP register */
+/*printf("Magic set TOP register to %d\n", T2H_4(*(int*)source));*/
+	    vu1_state.junk._TOP = T2H_4(*(int*)source); 	
+	    return nr_bytes;
+        }
 
-	printf("%s: Write: %x, %d, source: %x, space: %d!\n", me->name, (int)addr, nr_bytes, (int)source, space);
+	/*printf("%s: Write: %x, %d, source: %x, space: %d!\n", me->name, (int)addr, nr_bytes, (int)source, space);*/
 
 	if (addr + nr_bytes > VU1_REGISTER_WINDOW_END) {
 	    fprintf(stderr, "Error: Read past end of vu1 register window!!!\n");
@@ -187,7 +182,7 @@ static void abend2(char *fmt, char* p) {
     exit(1);
 }
 
-void getoption(void);
+void getoption(VectorUnitState* state);
 
 void init_vu1(void) {
     init_vu(&vu1_state, &vu1_umem_buffer[0], &vu1_mem_buffer[0]);
@@ -207,7 +202,7 @@ void init_vu(VectorUnitState *state, char* umem_buffer, char* mem_buffer)
 	state->runState = VU_READY;
 
 	/* read option */
-	getoption();
+	getoption(state);
 
 	/* read instruction file (mandatory) */
 	if (*ifilename) {
@@ -262,20 +257,20 @@ static void Usage(void)
 }
 #endif
 
-void getoption(void)
+void getoption(VectorUnitState* state)
 {
 #if 0
 	int startline = 0;
 	int count = 1;
 #endif
 
-	_is_dbg = 1;
-	_vpepc = 0;
-	_is_verb = 0;
-	_is_dump = 0;
-	_pgpuif	 = 2;
-	_ITOP = 20;
-	_TOP = 10;
+	state->junk._is_dbg = 1;
+	state->junk._vpepc = 0;
+	state->junk._is_verb = 0;
+	state->junk._is_dump = 0;
+	state->junk._pgpuif	 = 2;
+	state->junk._ITOP = 20;
+	state->junk._TOP = 10;
 
 #if 0
 	while(argc - count){
@@ -295,19 +290,19 @@ void getoption(void)
 					break;
 				case 's':
 					sscanf(argv[count+1], "%d", &startline);
-					_vpepc = startline;
+					state->junk._vpepc = startline;
 					count += 2;
 					break;
 				case 'd':
-					_is_dbg = 1;
+					state->junk._is_dbg = 1;
 					count += 1;
 					break;
 				case 'v':
-					_is_verb = 1;
+					state->junk._is_verb = 1;
 					count += 1;
 					break;
 				case 'p':
-					_is_dump = 1;
+					state->junk._is_dump = 1;
 					count += 1;
 					break;
 				case 'h':
