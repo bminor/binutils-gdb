@@ -47,6 +47,15 @@
 #define PTRACE_ARCH_PRCTL      30
 #endif
 
+/* The following definitions come from prctl.h, but may be absent
+   for certain configurations.  */
+#ifndef ARCH_GET_FS
+#define ARCH_SET_GS 0x1001
+#define ARCH_SET_FS 0x1002
+#define ARCH_GET_FS 0x1003
+#define ARCH_GET_GS 0x1004
+#endif
+
 static int x86_64_regmap[] = {
   RAX * 8, RBX * 8, RCX * 8, RDX * 8,
   RSI * 8, RDI * 8, RBP * 8, RSP * 8,
