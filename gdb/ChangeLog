@@ -1,3 +1,27 @@
+2003-07-02  Jim Blandy  <jimb@redhat.com>
+
+	New S390 prologue analyzer.
+	* s390-tdep.c (struct prologue_value, enum pv_boolean): New types.
+	(pv_set_to_unknown, pv_set_to_constant, pv_set_to_register,
+	pv_constant_last, pv_add, pv_add_constant, pv_subtract,
+	pv_logical_and, pv_is_identical, pv_is_register, pv_is_array_ref,
+	compute_x_addr, s390_on_stack, s390_store,
+	s390_get_signal_frame_info): New functions.
+	(S390_NUM_SPILL_SLOTS): New macro.
+	(s390_get_frame_info): Rewritten.
+	(is_arg_reg): Deleted.
+
+        Break out the decoding of S/390 instructions into separate
+        functions, to make it more legible, and easier to check
+        against the spec.
+        * s390-tdep.c (is_ri, is_ril, is_rr, is_rre, is_rs, is_rse,
+	is_rx, is_rxe): New functions.
+	(op1_aghi, op2_aghi, op1_ahi, op2_ahi, op_ar, op_basr, op1_bras,
+	op2_bras, op_l, op_la, op1_larl, op2_larl, op_lgr, op1_lghi,
+	op2_lghi, op1_lhi, op2_lhi, op_lr, op_nr, op_ngr, op_s, op_st,
+	op_std, op1_stg, op2_stg, op_stm, op1_stmg, op2_stmg, op_svc): New
+	enums for opcode values.  (Is this an improvement?)
+
 2003-07-02  Andrew Cagney  <cagney@redhat.com>
 
 	* i386-tdep.c: Revert change committed as part of trad-frame code
