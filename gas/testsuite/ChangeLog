@@ -1,3 +1,12 @@
+start-sanitize-sky
+Mon Jun  1 14:33:43 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/all/gas.exp: Don't run `align' test for dvp-*-*.
+	* gas/macros/macros.exp: Don't run `semi' test for dvp-*-*.
+	* gas/dvp/align.[sd]: New testcase.
+	* gas/dvp/semi.[sd]: New testcase.
+
+end-sanitize-sky
 Fri May 29 12:07:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/mips.exp: Adjust ilocks initialization to match current
