@@ -5,6 +5,8 @@ Tue Nov 26 13:24:17 1996  Jeffrey A Law  (law@cygnus.com)
 
 Tue Nov 26 10:53:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure: Rebuild with autoconf 2.12.
+
 	Add support for mips16 (16 bit MIPS implementation):
 	* mips16-opc.c: New file.
 	* mips-dis.c: Include "elf-bfd.h" and "elf/mips.h".

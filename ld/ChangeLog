@@ -1,3 +1,12 @@
+Tue Nov 26 16:58:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Rebuild with autoconf 2.12.
+
+Mon Nov 25 12:17:55 1996  Jim Wilson  <wilson@cygnus.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_set_symbols): Add case
+	for bfd_vma to init loop.
+
 Mon Nov 25 09:55:07 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* emulparms/mn10300.sh: Remove bogus '_' prefix for
