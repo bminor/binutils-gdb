@@ -1,5 +1,18 @@
 2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (remove_breakpoint): Take an bp_location
+	instead of a breakpoint argument.  Check the bp_location's type.
+	Fix a reversed condition for hardware breakpoints.
+
+	(insert_bp_location): Update call to remove_breakpoint.
+	(remove_breakpoints): Likewise.  Use ALL_BP_LOCATIONS.
+	(remove_hw_watchpoints): Likewise.
+	(reattach_breakpoints): Likewise.
+	(detach_breakpoints): Likewise.
+	(delete_breakpoint): Likewise.
+
+2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.c (mark_breakpoints_out): Use ALL_BP_LOCATIONS.
 	(beakpoint_init_inferior): Likewise.
 	(breakpoint_here_p): Likewise.  Only check addresses for software

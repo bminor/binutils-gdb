@@ -128,7 +128,7 @@ typedef enum
   }
 insertion_state_t;
 
-static int remove_breakpoint (struct breakpoint *, insertion_state_t);
+static int remove_breakpoint (struct bp_location *, insertion_state_t);
 
 static enum print_stop_action print_it_typical (bpstat);
 
@@ -976,7 +976,7 @@ insert_bp_location (struct bp_location *bpt,
 	     value chain brings us here.  */
 	  if (!bpt->inserted)
 	    {
-	      remove_breakpoint (bpt->owner, mark_uninserted);
+	      remove_breakpoint (bpt, mark_uninserted);
 	      *hw_breakpoint_error = 1;
 	      fprintf_unfiltered (tmp_error_stream,
 				  "Could not insert hardware watchpoint %d.\n", 
@@ -1150,12 +1150,12 @@ You may have requested too many hardware breakpoints/watchpoints.\n");
 int
 remove_breakpoints (void)
 {
-  struct breakpoint *b;
+  struct bp_location *b;
   int val;
 
-  ALL_BREAKPOINTS (b)
+  ALL_BP_LOCATIONS (b)
   {
-    if (b->loc->inserted)
+    if (b->inserted)
       {
 	val = remove_breakpoint (b, mark_uninserted);
 	if (val != 0)
@@ -1168,15 +1168,12 @@ remove_breakpoints (void)
 int
 remove_hw_watchpoints (void)
 {
-  struct breakpoint *b;
+  struct bp_location *b;
   int val;
 
-  ALL_BREAKPOINTS (b)
+  ALL_BP_LOCATIONS (b)
   {
-    if (b->loc->inserted
-	&& (b->type == bp_hardware_watchpoint
-	    || b->type == bp_read_watchpoint
-	    || b->type == bp_access_watchpoint))
+    if (b->inserted && b->loc_type == bp_loc_hardware_watchpoint)
       {
 	val = remove_breakpoint (b, mark_uninserted);
 	if (val != 0)
@@ -1189,21 +1186,23 @@ remove_hw_watchpoints (void)
 int
 reattach_breakpoints (int pid)
 {
-  struct breakpoint *b;
+  struct bp_location *b;
   int val;
   struct cleanup *old_chain = save_inferior_ptid ();
 
   /* Set inferior_ptid; remove_breakpoint uses this global.  */
   inferior_ptid = pid_to_ptid (pid);
-  ALL_BREAKPOINTS (b)
+  ALL_BP_LOCATIONS (b)
   {
-    if (b->loc->inserted)
+    if (b->inserted)
       {
 	remove_breakpoint (b, mark_inserted);
-	if (b->type == bp_hardware_breakpoint)
-	  val = target_insert_hw_breakpoint (b->loc->address, b->loc->shadow_contents);
+	if (b->loc_type == bp_loc_hardware_breakpoint)
+	  val = target_insert_hw_breakpoint (b->address, b->shadow_contents);
 	else
-	  val = target_insert_breakpoint (b->loc->address, b->loc->shadow_contents);
+	  val = target_insert_breakpoint (b->address, b->shadow_contents);
+	/* FIXME drow/2003-10-07: This doesn't handle any other kinds of
+	   breakpoints.  It's wrong for watchpoints, for example.  */
 	if (val != 0)
 	  {
 	    do_cleanups (old_chain);
@@ -1352,7 +1351,7 @@ update_breakpoints_after_exec (void)
 int
 detach_breakpoints (int pid)
 {
-  struct breakpoint *b;
+  struct bp_location *b;
   int val;
   struct cleanup *old_chain = save_inferior_ptid ();
 
@@ -1361,9 +1360,9 @@ detach_breakpoints (int pid)
 
   /* Set inferior_ptid; remove_breakpoint uses this global.  */
   inferior_ptid = pid_to_ptid (pid);
-  ALL_BREAKPOINTS (b)
+  ALL_BP_LOCATIONS (b)
   {
-    if (b->loc->inserted)
+    if (b->inserted)
       {
 	val = remove_breakpoint (b, mark_inserted);
 	if (val != 0)
@@ -1378,27 +1377,20 @@ detach_breakpoints (int pid)
 }
 
 static int
-remove_breakpoint (struct breakpoint *b, insertion_state_t is)
+remove_breakpoint (struct bp_location *b, insertion_state_t is)
 {
   int val;
 
-  if (b->enable_state == bp_permanent)
+  if (b->owner->enable_state == bp_permanent)
     /* Permanent breakpoints cannot be inserted or removed.  */
     return 0;
 
-  if (b->type == bp_none)
+  if (b->owner->type == bp_none)
     warning ("attempted to remove apparently deleted breakpoint #%d?", 
-	     b->number);
+	     b->owner->number);
 
-  if (b->type != bp_watchpoint
-      && b->type != bp_hardware_watchpoint
-      && b->type != bp_read_watchpoint
-      && b->type != bp_access_watchpoint
-      && b->type != bp_catch_fork
-      && b->type != bp_catch_vfork
-      && b->type != bp_catch_exec
-      && b->type != bp_catch_catch
-      && b->type != bp_catch_throw)
+  if (b->loc_type == bp_loc_software_breakpoint
+      || b->loc_type == bp_loc_hardware_breakpoint)
     {
       /* "Normal" instruction breakpoint: either the standard
 	 trap-instruction bp (bp_breakpoint), or a
@@ -1406,16 +1398,16 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 
       /* First check to see if we have to handle an overlay.  */
       if (overlay_debugging == ovly_off
-	  || b->loc->section == NULL
-	  || !(section_is_overlay (b->loc->section)))
+	  || b->section == NULL
+	  || !(section_is_overlay (b->section)))
 	{
 	  /* No overlay handling: just remove the breakpoint.  */
 
-	  if (b->type == bp_hardware_breakpoint)
-	    val = target_remove_hw_breakpoint (b->loc->address, 
-					       b->loc->shadow_contents);
+	  if (b->loc_type == bp_loc_hardware_breakpoint)
+	    val = target_remove_hw_breakpoint (b->address, 
+					       b->shadow_contents);
 	  else
-	    val = target_remove_breakpoint (b->loc->address, b->loc->shadow_contents);
+	    val = target_remove_breakpoint (b->address, b->shadow_contents);
 	}
       else
 	{
@@ -1426,29 +1418,29 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 		/* Yes -- overlay event support is not active, so we
 		   should have set a breakpoint at the LMA.  Remove it.  
 		*/
-		CORE_ADDR addr = overlay_unmapped_address (b->loc->address, 
-							   b->loc->section);
+		CORE_ADDR addr = overlay_unmapped_address (b->address, 
+							   b->section);
 		/* Ignore any failures: if the LMA is in ROM, we will
 		   have already warned when we failed to insert it.  */
-		if (b->type != bp_hardware_breakpoint)
-		  target_remove_hw_breakpoint (addr, b->loc->shadow_contents);
+		if (b->loc_type == bp_loc_hardware_breakpoint)
+		  target_remove_hw_breakpoint (addr, b->shadow_contents);
 		else
-		  target_remove_breakpoint (addr, b->loc->shadow_contents);
+		  target_remove_breakpoint (addr, b->shadow_contents);
 	      }
 	  /* Did we set a breakpoint at the VMA? 
 	     If so, we will have marked the breakpoint 'inserted'.  */
-	  if (b->loc->inserted)
+	  if (b->inserted)
 	    {
 	      /* Yes -- remove it.  Previously we did not bother to
 		 remove the breakpoint if the section had been
 		 unmapped, but let's not rely on that being safe.  We
 		 don't know what the overlay manager might do.  */
-	      if (b->type == bp_hardware_breakpoint)
-		val = target_remove_hw_breakpoint (b->loc->address, 
-						   b->loc->shadow_contents);
+	      if (b->loc_type == bp_loc_hardware_breakpoint)
+		val = target_remove_hw_breakpoint (b->address, 
+						   b->shadow_contents);
 	      else
-		val = target_remove_breakpoint (b->loc->address,
-						b->loc->shadow_contents);
+		val = target_remove_breakpoint (b->address,
+						b->shadow_contents);
 	    }
 	  else
 	    {
@@ -1458,20 +1450,18 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 	}
       if (val)
 	return val;
-      b->loc->inserted = (is == mark_inserted);
+      b->inserted = (is == mark_inserted);
     }
-  else if ((b->type == bp_hardware_watchpoint ||
-	    b->type == bp_read_watchpoint ||
-	    b->type == bp_access_watchpoint)
-	   && b->enable_state == bp_enabled
-	   && !b->loc->duplicate)
+  else if (b->loc_type == bp_loc_hardware_watchpoint
+	   && b->owner->enable_state == bp_enabled
+	   && !b->duplicate)
     {
       struct value *v;
       struct value *n;
 
-      b->loc->inserted = (is == mark_inserted);
+      b->inserted = (is == mark_inserted);
       /* Walk down the saved value chain.  */
-      for (v = b->val_chain; v; v = v->next)
+      for (v = b->owner->val_chain; v; v = v->next)
 	{
 	  /* For each memory reference remove the watchpoint
 	     at that address.  */
@@ -1480,7 +1470,7 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 	    {
 	      struct type *vtype = check_typedef (VALUE_TYPE (v));
 
-	      if (v == b->val_chain
+	      if (v == b->owner->val_chain
 		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
 		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
 		{
@@ -1490,40 +1480,40 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 		  addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
 		  len = TYPE_LENGTH (VALUE_TYPE (v));
 		  type   = hw_write;
-		  if (b->type == bp_read_watchpoint)
+		  if (b->owner->type == bp_read_watchpoint)
 		    type = hw_read;
-		  else if (b->type == bp_access_watchpoint)
+		  else if (b->owner->type == bp_access_watchpoint)
 		    type = hw_access;
 
 		  val = target_remove_watchpoint (addr, len, type);
 		  if (val == -1)
-		    b->loc->inserted = 1;
+		    b->inserted = 1;
 		  val = 0;
 		}
 	    }
 	}
       /* Failure to remove any of the hardware watchpoints comes here.  */
-      if ((is == mark_uninserted) && (b->loc->inserted))
+      if ((is == mark_uninserted) && (b->inserted))
 	warning ("Could not remove hardware watchpoint %d.",
-		 b->number);
+		 b->owner->number);
 
       /* Free the saved value chain.  We will construct a new one
          the next time the watchpoint is inserted.  */
-      for (v = b->val_chain; v; v = n)
+      for (v = b->owner->val_chain; v; v = n)
 	{
 	  n = v->next;
 	  value_free (v);
 	}
-      b->val_chain = NULL;
+      b->owner->val_chain = NULL;
     }
-  else if ((b->type == bp_catch_fork ||
-	    b->type == bp_catch_vfork ||
-	    b->type == bp_catch_exec)
-	   && b->enable_state == bp_enabled
-	   && !b->loc->duplicate)
+  else if ((b->owner->type == bp_catch_fork ||
+	    b->owner->type == bp_catch_vfork ||
+	    b->owner->type == bp_catch_exec)
+	   && b->owner->enable_state == bp_enabled
+	   && !b->duplicate)
     {
       val = -1;
-      switch (b->type)
+      switch (b->owner->type)
 	{
 	case bp_catch_fork:
 	  val = target_remove_fork_catchpoint (PIDGET (inferior_ptid));
@@ -1540,30 +1530,30 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 	}
       if (val)
 	return val;
-      b->loc->inserted = (is == mark_inserted);
+      b->inserted = (is == mark_inserted);
     }
-  else if ((b->type == bp_catch_catch ||
-	    b->type == bp_catch_throw)
-	   && b->enable_state == bp_enabled
-	   && !b->loc->duplicate)
+  else if ((b->owner->type == bp_catch_catch ||
+	    b->owner->type == bp_catch_throw)
+	   && b->owner->enable_state == bp_enabled
+	   && !b->duplicate)
     {
 
-      val = target_remove_breakpoint (b->loc->address, b->loc->shadow_contents);
+      val = target_remove_breakpoint (b->address, b->shadow_contents);
       if (val)
 	return val;
-      b->loc->inserted = (is == mark_inserted);
+      b->inserted = (is == mark_inserted);
     }
-  else if (ep_is_exception_catchpoint (b)
-	   && b->loc->inserted	/* sometimes previous insert doesn't happen */
-	   && b->enable_state == bp_enabled
-	   && !b->loc->duplicate)
+  else if (ep_is_exception_catchpoint (b->owner)
+	   && b->inserted	/* sometimes previous insert doesn't happen */
+	   && b->owner->enable_state == bp_enabled
+	   && !b->duplicate)
     {
 
-      val = target_remove_breakpoint (b->loc->address, b->loc->shadow_contents);
+      val = target_remove_breakpoint (b->address, b->shadow_contents);
       if (val)
 	return val;
 
-      b->loc->inserted = (is == mark_inserted);
+      b->inserted = (is == mark_inserted);
     }
 
   return 0;
@@ -6708,7 +6698,7 @@ delete_breakpoint (struct breakpoint *bpt)
   breakpoint_delete_event (bpt->number);
 
   if (bpt->loc->inserted)
-    remove_breakpoint (bpt, mark_inserted);
+    remove_breakpoint (bpt->loc, mark_inserted);
 
   if (breakpoint_chain == bpt)
     breakpoint_chain = bpt->next;
