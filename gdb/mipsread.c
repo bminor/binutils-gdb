@@ -1063,7 +1063,8 @@ parse_symbol(sh, ax)
 
 	    case stGlobal:	/* external symbol, goes into the primary block */
 		class = LOC_STATIC;
-		b = BLOCKVECTOR_BLOCK(BLOCKVECTOR(top_stack->cur_st), 0);
+		b = BLOCKVECTOR_BLOCK(BLOCKVECTOR(top_stack->cur_st),
+				      GLOBAL_BLOCK);
 		goto data;
 
 	    case stStatic:	/* static data, goes into the current block. */
@@ -1610,7 +1611,8 @@ parse_external(es, skip_procedures)
 		ax = 0;
 	}
 	top_stack->cur_st = cur_stab;
-	top_stack->cur_block = BLOCKVECTOR_BLOCK(BLOCKVECTOR(top_stack->cur_st),0);
+	top_stack->cur_block = BLOCKVECTOR_BLOCK(BLOCKVECTOR(top_stack->cur_st),
+						 GLOBAL_BLOCK);
 
 	/* Reading .o files */
 	if (es->asym.sc == scUndefined || es->asym.sc == scNil) {
@@ -2018,7 +2020,8 @@ static void psymtab_to_symtab_1(pst)
 
 	push_parse_stack();
 	top_stack->cur_st = cur_stab;
-	top_stack->cur_block = BLOCKVECTOR_BLOCK(BLOCKVECTOR(cur_stab), 0);
+	top_stack->cur_block = BLOCKVECTOR_BLOCK(BLOCKVECTOR(cur_stab),
+						 GLOBAL_BLOCK);
 	BLOCK_START(top_stack->cur_block) = fh ? fh->adr : 0;
 	BLOCK_END(top_stack->cur_block) = 0;
 	top_stack->blocktype = stFile;
@@ -2222,8 +2225,8 @@ compare_symtabs( s1, s2)
 	/* "most specific" first */
 
 	register struct block *b1, *b2;
-	b1 = BLOCKVECTOR_BLOCK(BLOCKVECTOR(*s1),0);
-	b2 = BLOCKVECTOR_BLOCK(BLOCKVECTOR(*s2),0);
+	b1 = BLOCKVECTOR_BLOCK(BLOCKVECTOR(*s1),GLOBAL_BLOCK);
+	b2 = BLOCKVECTOR_BLOCK(BLOCKVECTOR(*s2),GLOBAL_BLOCK);
 	if (BLOCK_END(b1) == BLOCK_END(b2))
 		return BLOCK_START(b1) - BLOCK_START(b2);
 	return BLOCK_END(b1) - BLOCK_END(b2);
@@ -2290,8 +2293,8 @@ sort_blocks(s)
 
 	if (BLOCKVECTOR_NBLOCKS(bv) <= 2) {
 		/* Cosmetic */
-		if (BLOCK_END(BLOCKVECTOR_BLOCK(bv,0)) == 0)
-			BLOCK_START(BLOCKVECTOR_BLOCK(bv,0)) = 0;
+		if (BLOCK_END(BLOCKVECTOR_BLOCK(bv,GLOBAL_BLOCK)) == 0)
+			BLOCK_START(BLOCKVECTOR_BLOCK(bv,GLOBAL_BLOCK)) = 0;
 		return;
 	}
 	/*
@@ -2301,8 +2304,8 @@ sort_blocks(s)
 	 * to detect -O3 images in advance.
 	 */
 	if (BLOCKVECTOR_NBLOCKS(bv) > 3)
-		qsort(&BLOCKVECTOR_BLOCK(bv,2),
-		      BLOCKVECTOR_NBLOCKS(bv) - 2,
+		qsort(&BLOCKVECTOR_BLOCK(bv,FIRST_LOCAL_BLOCK),
+		      BLOCKVECTOR_NBLOCKS(bv) - FIRST_LOCAL_BLOCK,
 		      sizeof(struct block *),
 		      compare_blocks);
 
@@ -2310,16 +2313,19 @@ sort_blocks(s)
 		register CORE_ADDR high = 0;
 		register int    i, j = BLOCKVECTOR_NBLOCKS(bv);
 
-		for (i = 2; i < j; i++)
+		for (i = FIRST_LOCAL_BLOCK; i < j; i++)
 			if (high < BLOCK_END(BLOCKVECTOR_BLOCK(bv,i)))
 				high = BLOCK_END(BLOCKVECTOR_BLOCK(bv,i));
-		BLOCK_END(BLOCKVECTOR_BLOCK(bv,0)) = high;
+		BLOCK_END(BLOCKVECTOR_BLOCK(bv,GLOBAL_BLOCK)) = high;
 	}
 
-	BLOCK_START(BLOCKVECTOR_BLOCK(bv,0)) = BLOCK_START(BLOCKVECTOR_BLOCK(bv,2));
+	BLOCK_START(BLOCKVECTOR_BLOCK(bv,GLOBAL_BLOCK)) =
+		BLOCK_START(BLOCKVECTOR_BLOCK(bv,FIRST_LOCAL_BLOCK));
 
-	BLOCK_START(BLOCKVECTOR_BLOCK(bv,1)) = BLOCK_START(BLOCKVECTOR_BLOCK(bv,0));
-	BLOCK_END  (BLOCKVECTOR_BLOCK(bv,1)) = BLOCK_END  (BLOCKVECTOR_BLOCK(bv,0));
+	BLOCK_START(BLOCKVECTOR_BLOCK(bv,STATIC_BLOCK)) = 
+		BLOCK_START(BLOCKVECTOR_BLOCK(bv,GLOBAL_BLOCK));
+	BLOCK_END  (BLOCKVECTOR_BLOCK(bv,STATIC_BLOCK)) =
+		BLOCK_END  (BLOCKVECTOR_BLOCK(bv,GLOBAL_BLOCK));
 }
 
 /* Sort the symtab list, as required by some search procedures.
@@ -2409,10 +2415,10 @@ new_symtab(name, maxsyms, maxlines)
 
 	/* All symtabs must have at least two blocks */
 	BLOCKVECTOR(s) = new_bvect(2);
-	BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), 0) = new_block(maxsyms);
-	BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), 1) = new_block(maxsyms);
-	BLOCK_SUPERBLOCK( BLOCKVECTOR_BLOCK(BLOCKVECTOR(s),1)) =
-		BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), 0);
+	BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), GLOBAL_BLOCK) = new_block(maxsyms);
+	BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), STATIC_BLOCK) = new_block(maxsyms);
+	BLOCK_SUPERBLOCK( BLOCKVECTOR_BLOCK(BLOCKVECTOR(s),STATIC_BLOCK)) =
+		BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), GLOBAL_BLOCK);
 
 	s->free_code = free_linetable;
 
@@ -2702,7 +2708,8 @@ mips_create_dummy_symbol(end_pc, size, nargs, framesize)
 	BLOCK_START(bl) = end_pc - size;
 	BLOCK_END(bl) = end_pc;
 
-	BLOCK_SUPERBLOCK(bl) = BLOCKVECTOR_BLOCK(BLOCKVECTOR(dummy_symtab),0);
+	BLOCK_SUPERBLOCK(bl) =
+		BLOCKVECTOR_BLOCK(BLOCKVECTOR(dummy_symtab),GLOBAL_BLOCK);
 	add_block(bl, dummy_symtab);
 	sort_blocks(dummy_symtab);
 
@@ -2742,7 +2749,7 @@ mips_destroy_dummy_symbol(end_pc)
 	free(SYMBOL_VALUE(BLOCK_SYM(bl,0)));
 	free(BLOCK_SYM(bl,0));
 
-	for (i = 2; i < BLOCKVECTOR_NBLOCKS(bv); i++)
+	for (i = FIRST_LOCAL_BLOCK; i < BLOCKVECTOR_NBLOCKS(bv); i++)
 		if (BLOCKVECTOR_BLOCK(bv,i) == bl)
 			break;
 	for (; i < BLOCKVECTOR_NBLOCKS(bv) - 1; i++)
