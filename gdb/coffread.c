@@ -489,7 +489,8 @@ end_symtab ()
       return;
     }
 
-  /* Create the two top-level blocks for this file.  */
+  /* Create the two top-level blocks for this file (STATIC_BLOCK and
+     GLOBAL_BLOCK).  */
   finish_block (0, &file_symbols, 0, cur_src_start_addr, cur_src_end_addr);
   finish_block (0, &global_symbols, 0, cur_src_start_addr, cur_src_end_addr);
 
@@ -516,6 +517,8 @@ end_symtab ()
   symtab->coffsem = last_coffsem;
   symtab->coffsyn = last_coffsyn;
 #endif
+
+  free_named_symtabs (symtab->filename);
 
   /* Link the new symtab into the list of such.  */
   symtab->next = symtab_list;
@@ -1373,7 +1376,7 @@ patch_opaque_types ()
       register int i;
 
       /* Go through the per-file symbols only */
-      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), 1);
+      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
       for (i = BLOCK_NSYMS (b) - 1; i >= 0; i--)
 	{
 	  register struct symbol *real_sym;
