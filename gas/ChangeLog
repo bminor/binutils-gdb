@@ -1,3 +1,8 @@
+2000-05-03  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* gas/config/tc-i386.h (SUB_SEGMENT_ALIGN): If TE_GO32, return 4
+	for the .bss section too.
+
 2000-04-29  Andreas Jaeger  <aj@suse.de>
 
 	* as.h: Correctly check GCC version.

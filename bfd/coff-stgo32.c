@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 COFF files (go32 variant with a stub).
-   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -46,6 +46,8 @@
 { COFF_SECTION_NAME_EXACT_MATCH (".data"), \
   COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 4 }, \
 { COFF_SECTION_NAME_EXACT_MATCH (".text"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 4 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".bss"), \
   COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 4 }
 
 #include "bfd.h"
