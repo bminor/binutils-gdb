@@ -1607,28 +1607,44 @@ mips_find_saved_regs (struct frame_info *fci)
     CORE_ADDR reg_position = (get_frame_base (fci)
 			      + PROC_FREG_OFFSET (proc_desc));
 
-    /* Apparently, the freg_offset gives the offset to the first 64
-       bit saved.
-
-       When the ABI specifies 64 bit saved registers, the FREG_OFFSET
-       designates the first saved 64 bit register.
-
-       When the ABI specifies 32 bit saved registers, the ``64 bit
-       saved DOUBLE'' consists of two adjacent 32 bit registers, Hence
-       FREG_OFFSET, designates the address of the lower register of
-       the register pair.  Adjust the offset so that it designates the
-       upper register of the pair -- i.e., the address of the first
-       saved 32 bit register.  */
-
-    if (MIPS_SAVED_REGSIZE == 4)
-      reg_position += MIPS_SAVED_REGSIZE;
-
     /* Fill in the offsets for the float registers which float_mask
        says were saved.  */
     for (ireg = MIPS_NUMREGS - 1; float_mask; --ireg, float_mask <<= 1)
       if (float_mask & 0x80000000)
 	{
-	  set_reg_offset (saved_regs, FP0_REGNUM + ireg, reg_position);
+	  if (MIPS_SAVED_REGSIZE == 4 && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	    {
+	      /* On a big endian 32 bit ABI, floating point registers
+		 are paired to form doubles such that the most
+		 significant part is in $f[N+1] and the least
+		 significant in $f[N] vis: $f[N+1] ||| $f[N].  The
+		 registers are also spilled as a pair and stored as a
+		 double.
+
+	         When little-endian the least significant part is
+	         stored first leading to the memory order $f[N] and
+	         then $f[N+1].
+
+		 Unfortunatly, when big-endian the most significant
+		 part of the double is stored first, and the least
+		 significant is stored second.  This leads to the
+		 registers being ordered in memory as firt $f[N+1] and
+		 then $f[N].
+
+		 For the big-endian case make certain that the
+		 addresses point at the correct (swapped) locations
+		 $f[N] and $f[N+1] pair (keep in mind that
+		 reg_position is decremented each time through the
+		 loop).  */
+	      if ((ireg & 1))
+		set_reg_offset (saved_regs, FP0_REGNUM + ireg,
+				reg_position - MIPS_SAVED_REGSIZE);
+	      else
+		set_reg_offset (saved_regs, FP0_REGNUM + ireg,
+				reg_position + MIPS_SAVED_REGSIZE);
+	    }
+	  else
+	    set_reg_offset (saved_regs, FP0_REGNUM + ireg, reg_position);
 	  reg_position -= MIPS_SAVED_REGSIZE;
 	}
 

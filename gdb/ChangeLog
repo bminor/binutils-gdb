@@ -1,5 +1,8 @@
 2003-06-21  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_find_saved_regs): Rewrite mdebug code handling
+	32 bit floating-point register saves.
+
 	* frame.h (deprecated_unwind_get_saved_register): Delete.
 	* frame.c (deprecated_unwind_get_saved_register): Delete function.
 	* mips-tdep.c (mips_get_saved_register): Use frame_register_unwind
