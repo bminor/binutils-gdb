@@ -1,5 +1,7 @@
 Fri Jun 17 11:16:50 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* libhppa.h (bfd_hppa_insn2fmt, hppa_rebuild_insn): Make INLINE.
+
 	* elf32-hppa.h (elf_hppa_final_processing): Delete decl.
 
 Thu Jun 16 23:36:23 1994  Jeff Law  (law@snake.cs.utah.edu)
