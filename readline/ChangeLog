@@ -1,3 +1,7 @@
+Fri Jul  2 11:05:34 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in (*-*-riscos*): New entry; use mh-sysv.
+
 Wed Jun 23 13:00:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in: Add comment.
