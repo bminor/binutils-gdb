@@ -1,3 +1,8 @@
+Sat Sep 19 23:51:47 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libbfd.c (bfd_log2): Cast to bfd_vma before shifting, not
+	after.  From Chris Torek <torek@bsdi.com>.
+
 Sat Sep 19 22:42:23 1998  Doug Rabson  <dfr@nlsystems.com>
 
 	* elflink.h (elf_link_add_object_symbols): Ensure that the warning
