@@ -1,5 +1,9 @@
 2003-07-07  Joel Brobecker  <brobecker@gnat.com>
 
+	* config/mips/tm-irix6.h (MIPS_REGISTER_TYPE): Add comment.
+
+2003-07-07  Joel Brobecker  <brobecker@gnat.com>
+
 	* mips-tdep.c (mips_register_raw_size): Fix compilation failure.
 	(mips_register_byte): Likewise.
 

@@ -94,4 +94,8 @@
 #define SIGFRAME_REG_SIZE	8
 
 /* Undefine those methods which have been multiarched.  */
+
+/* Undefine MIPS_REGISTER_TYPE, so that GDB uses real C code in
+   mips_register_type() to return the register type, instead of
+   relying on this macro.  */
 #undef MIPS_REGISTER_TYPE
