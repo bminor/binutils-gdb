@@ -1,6 +1,6 @@
 2004-01-27  Michael Chastain  <mec.gnu@mindspring.com>
 
-	* PROBLEMS: add gdb/1516.
+	* PROBLEMS: Add gdb/1516.
 
 2003-12-29  Robert Millan  <robertmh@gnu.org>
 
