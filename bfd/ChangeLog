@@ -1,3 +1,13 @@
+Tue Sep 13 16:04:07 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* cofflink.c (coff_link_input_bfd): syment_base is unsigned
+	so can't compare -ve numbers with it.
+
+Mon Sep 12 20:31:17 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* configure.in (shcoff_vec): Use cofflink.o now.
+	* coff-sh.c: Rewritten to use new fast coff backend.
+
 Tue Sep 13 16:23:57 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* aoutx.h (NAME(aout,final_link)): Don't assume that all the input
