@@ -1,5 +1,11 @@
 2002-07-15  Andrew Cagney  <ac131313@redhat.com>
 
+	From Gerhard Tonn <TON@de.ibm.com>:
+	* s390-nat.c (fill_fpregset, fill_gregset): Use regcache_collect
+	instead of supply_register.
+
+2002-07-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* dwarf2cfi.c: Include "gdb_assert.h".
 	(frame_state_for): Use gdb_assert to check that fde->cie_ptr is
 	non-NULL.
