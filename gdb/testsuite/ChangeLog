@@ -1,3 +1,9 @@
+2003-01-30  Michael Chastain  <mec@shout.net>
+
+	* lib/gdb.exp: Revert patch of 2003-01-06, which set LC_ALL.
+	This was a workaround for a UTF-8 bug in readline 4.3.  The bug
+	has been fixed in gdb/readline on 2003-01-09.
+
 2003-01-29  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/args.exp: Skip if target does not support args passing.
