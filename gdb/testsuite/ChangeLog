@@ -1,5 +1,11 @@
 Thu Jul  3 15:35:12 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* lib/gdb.exp(get_debug_format): Don't cause the testsuite to fail
+ 	if we can't get a debug format from GDB (we may be testing an
+ 	older GDB). Use a 10 second timeout when checking for the format.
+
+	* gdb.stabs/weird.exp: Fix quoting.
+
 	* config/sparclet.exp: Renamed sparclet-loader.c to stub-loader.c.
 
 Mon Jun 30 18:31:43 1997  Bob Manson  <manson@charmed.cygnus.com>

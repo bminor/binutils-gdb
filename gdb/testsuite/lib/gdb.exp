@@ -988,19 +988,23 @@ proc get_debug_format { } {
 
     set debug_format "unknown"
     send_gdb "info source\n"
-    gdb_expect {
-	-re ".*Compiled with (.*) debugging format.\r\n$gdb_prompt $" {
+    gdb_expect 10 {
+	-re "Compiled with (.*) debugging format.\r\n$gdb_prompt $" {
 	    set debug_format $expect_out(1,string)
 	    verbose "debug format is $debug_format"
 	    return 1;
 	}
-	-re ".*No current source file.\r\n$gdb_prompt $" {
+	-re "No current source file.\r\n$gdb_prompt $" {
 	    perror "get_debug_format used when no current source file"
 	    return 0;
 	}
+	-re "$gdb_prompt $" {
+	    warning "couldn't check debug format (no valid response)."
+	    return 1;
+	}
 	timeout {
-	    perror "couldn't check debug format (timed out)."
-	    return 0;
+	    warning "couldn't check debug format (timed out)."
+	    return 1;
 	}
     }
 }
