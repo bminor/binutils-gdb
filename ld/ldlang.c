@@ -2260,6 +2260,9 @@ lang_one_common (h, info)
   /* Increase the size of the section.  */
   section->_raw_size += size;
 
+  /* Make sure the section is allocated in memory.  */
+  section->flags |= SEC_ALLOC;
+
   if (config.map_file != NULL)
     fprintf (config.map_file, "Allocating common %s: %lx at %lx %s\n",
 	     h->root.string, (unsigned long) size,
