@@ -85,8 +85,8 @@ static void ppc_ualong PARAMS ((int));
 static void ppc_znop PARAMS ((int));
 static void ppc_pe_comm PARAMS ((int));
 static void ppc_pe_section PARAMS ((int));
-static void ppc_pe_section PARAMS ((int));
 static void ppc_pe_function PARAMS ((int));
+static void ppc_pe_tocd PARAMS ((int));
 #endif
 
 /* Generic assembler global variables which must be defined by all
@@ -160,6 +160,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "lcomm",	ppc_pe_comm,	1 },
   { "section",  ppc_pe_section, 0 },
   { "function",	ppc_pe_function,0 },
+  { "tocd",     ppc_pe_tocd,    0 },
 #endif
 
   /* This pseudo-op is used even when not generating XCOFF output.  */
@@ -170,9 +171,12 @@ const pseudo_typeS md_pseudo_table[] =
 
 
 #ifdef TE_PE
-/* The Windows NT PowerPC assembler used predefined names.    */
-/* Structure to hold information about predefined registers.  */
+/* The Windows NT PowerPC assembler uses predefined names.            */
 
+/* In general, there are lots of them, in an attempt to be compatible */
+/* with a number of other Windows NT assemblers.                      */
+
+/* Structure to hold information about predefined registers.  */
 struct pd_reg
   {
     char *name;
@@ -181,27 +185,47 @@ struct pd_reg
 
 /* List of registers that are pre-defined:
 
-   Each general register has one predefined name of the form
-   r<REGNUM> which has the value <REGNUM>.
+   Each general register has predefined names of the form:
+   1. r<reg_num> which has the value <reg_num>.
+   2. r.<reg_num> which has the value <reg_num>.
 
-   Each floating point register has one predefined name of the form
-   f<REGNUM> which has the value <REGNUM>.
 
-   Each condition register has one predefined name of the form
-   cr<REGNUM> which has the value <REGNUM>.
+   Each floating point register has predefined names of the form:
+   1. f<reg_num> which has the value <reg_num>.
+   2. f.<reg_num> which has the value <reg_num>.
+
+   Each condition register has predefined names of the form:
+   1. cr<reg_num> which has the value <reg_num>.
+   2. cr.<reg_num> which has the value <reg_num>.
 
    There are individual registers as well:
-   sp    has the value 1
-   rtoc  has the value 2
-   fpscr has the value 0
-   xer   has the value 1
-   lr    has the value 8
-   ctr   has the value 9
+   sp or r.sp     has the value 1
+   rtoc or r.toc  has the value 2
+   fpscr          has the value 0
+   xer            has the value 1
+   lr             has the value 8
+   ctr            has the value 9
+   pmr            has the value 0
+   dar            has the value 19
+   dsisr          has the value 18
+   dec            has the value 22
+   sdr1           has the value 25
+   srr0           has the value 26
+   srr1           has the value 27
 
    The table is sorted. Suitable for searching by a binary search. */
 
 static const struct pd_reg pre_defined_registers[] =
 {
+  { "cr.0", 0 },    /* Condition Registers */
+  { "cr.1", 1 },
+  { "cr.2", 2 },
+  { "cr.3", 3 },
+  { "cr.4", 4 },
+  { "cr.5", 5 },
+  { "cr.6", 6 },
+  { "cr.7", 7 },
+
   { "cr0", 0 },
   { "cr1", 1 },
   { "cr2", 2 },
@@ -212,6 +236,43 @@ static const struct pd_reg pre_defined_registers[] =
   { "cr7", 7 },
 
   { "ctr", 9 },
+
+  { "dar", 19 },    /* Data Access Register */
+  { "dec", 22 },    /* Decrementer */
+  { "dsisr", 18 },  /* Data Storage Interrupt Status Register */
+
+  { "f.0", 0 },     /* Floating point registers */
+  { "f.1", 1 }, 
+  { "f.10", 10 }, 
+  { "f.11", 11 }, 
+  { "f.12", 12 }, 
+  { "f.13", 13 }, 
+  { "f.14", 14 }, 
+  { "f.15", 15 }, 
+  { "f.16", 16 }, 
+  { "f.17", 17 }, 
+  { "f.18", 18 }, 
+  { "f.19", 19 }, 
+  { "f.2", 2 }, 
+  { "f.20", 20 }, 
+  { "f.21", 21 }, 
+  { "f.22", 22 }, 
+  { "f.23", 23 }, 
+  { "f.24", 24 }, 
+  { "f.25", 25 }, 
+  { "f.26", 26 }, 
+  { "f.27", 27 }, 
+  { "f.28", 28 }, 
+  { "f.29", 29 }, 
+  { "f.3", 3 }, 
+  { "f.30", 30 },
+  { "f.31", 31 },
+  { "f.4", 4 }, 
+  { "f.5", 5 }, 
+  { "f.6", 6 }, 
+  { "f.7", 7 }, 
+  { "f.8", 8 }, 
+  { "f.9", 9 }, 
 
   { "f0", 0 }, 
   { "f1", 1 }, 
@@ -248,9 +309,48 @@ static const struct pd_reg pre_defined_registers[] =
 
   { "fpscr", 0 },
 
-  { "lr", 8 },
+  { "lr", 8 },     /* Link Register */
 
-  { "r0", 0 },
+  { "pmr", 0 },
+
+  { "r.0", 0 },    /* General Purpose Registers */
+  { "r.1", 1 },
+  { "r.10", 10 },
+  { "r.11", 11 },
+  { "r.12", 12 },
+  { "r.13", 13 },
+  { "r.14", 14 },
+  { "r.15", 15 },
+  { "r.16", 16 },
+  { "r.17", 17 },
+  { "r.18", 18 },
+  { "r.19", 19 },
+  { "r.2", 2 },
+  { "r.20", 20 },
+  { "r.21", 21 },
+  { "r.22", 22 },
+  { "r.23", 23 },
+  { "r.24", 24 },
+  { "r.25", 25 },
+  { "r.26", 26 },
+  { "r.27", 27 },
+  { "r.28", 28 },
+  { "r.29", 29 },
+  { "r.3", 3 },
+  { "r.30", 30 },
+  { "r.31", 31 },
+  { "r.4", 4 },
+  { "r.5", 5 },
+  { "r.6", 6 },
+  { "r.7", 7 },
+  { "r.8", 8 },
+  { "r.9", 9 },
+
+  { "r.sp", 1 },   /* Stack Pointer */
+
+  { "r.toc", 2 },  /* Pointer to the table of contents */
+
+  { "r0", 0 },     /* More general purpose registers */
   { "r1", 1 },
   { "r10", 10 },
   { "r11", 11 },
@@ -283,9 +383,14 @@ static const struct pd_reg pre_defined_registers[] =
   { "r8", 8 },
   { "r9", 9 },
 
-  { "rtoc", 2 },
+  { "rtoc", 2 },  /* Table of contents */
+
+  { "sdr1", 25 }, /* Storage Description Register 1 */
 
   { "sp", 1 },
+
+  { "srr0", 26 }, /* Machine Status Save/Restore Register 0 */
+  { "srr1", 27 }, /* Machine Status Save/Restore Register 1 */
 
   { "xer", 1 },
 
@@ -404,11 +509,14 @@ static bfd_size_type ppc_debug_name_section_size;
 
 #ifdef TE_PE
 
-/* Various sections.  */
+/* Various sections that we need for PE coff support.  */
+static segT ydata_section;
+static segT pdata_section;
+static segT reldata_section;
+static segT rdata_section;
+static segT tocdata_section;
 
-static segT ydata_section, pdata_section, reldata_section, rdata_section;
-
-/* The current section.  */
+/* The current section and the previous section. See ppc_previous. */
 static segT ppc_previous_section;
 static segT ppc_current_section;
 
@@ -961,6 +1069,101 @@ register_name (expressionP)
       return 0;
     }
 }
+
+/*
+ * Summary of parse_toc_entry().
+ *
+ * in:	Input_line_pointer points to the '[' in one of:
+ *
+ *        [toc] [tocv] [toc32] [toc64]
+ *
+ *      Anything else is an error of one kind or another.
+ *
+ * out:	
+ *   return value: success or failure
+ *   toc_kind:     kind of toc reference
+ *   input_line_pointer:
+ *     success: first char after the ']'
+ *     failure: unchanged
+ *
+ * settings:
+ *
+ *     [toc]   - rv == success, toc_kind = default_toc
+ *     [tocv]  - rv == success, toc_kind = data_in_toc
+ *     [toc32] - rv == success, toc_kind = must_be_32
+ *     [toc64] - rv == success, toc_kind = must_be_64
+ *
+ */
+
+enum toc_size_qualifier 
+{ 
+  default_toc, /* The toc cell constructed should be the system default size */
+  data_in_toc, /* This is a direct reference to a toc cell                   */
+  must_be_32,  /* The toc cell constructed must be 32 bits wide              */
+  must_be_64   /* The toc cell constructed must be 64 bits wide              */
+};
+
+static int
+parse_toc_entry(toc_kind)
+     enum toc_size_qualifier *toc_kind;
+{
+  char *start;
+  char *toc_spec;
+  char c;
+  enum toc_size_qualifier t;
+
+  /* save the input_line_pointer */
+  start = input_line_pointer;
+
+  /* skip over the '[' , and whitespace */
+  ++input_line_pointer;
+  SKIP_WHITESPACE ();
+  
+  /* find the spelling of the operand */
+  toc_spec = input_line_pointer;
+  c = get_symbol_end ();
+
+  if (strcmp(toc_spec, "toc") == 0) 
+    {
+      t = default_toc;
+    }
+  else if (strcmp(toc_spec, "tocv") == 0) 
+    {
+      t = data_in_toc;
+    }
+  else if (strcmp(toc_spec, "toc32") == 0) 
+    {
+      t = must_be_32;
+    }
+  else if (strcmp(toc_spec, "toc64") == 0) 
+    {
+      t = must_be_64;
+    }
+  else
+    {
+      as_bad ("syntax error: invalid toc specifier `%s'", toc_spec);
+      *input_line_pointer = c;   /* put back the delimiting char */
+      input_line_pointer = start; /* reset input_line pointer */
+      return 0;
+    }
+
+  /* now find the ']' */
+  *input_line_pointer = c;   /* put back the delimiting char */
+
+  SKIP_WHITESPACE ();	     /* leading whitespace could be there. */
+  c = *input_line_pointer++; /* input_line_pointer->past char in c. */
+
+  if (c != ']')
+    {
+      as_bad ("syntax error: expected `]', found  `%c'", c);
+      input_line_pointer = start; /* reset input_line pointer */
+      return 0;
+    }
+
+  *toc_kind = t;             /* set return value */
+  return 1;
+}
+
 #endif
 
 
@@ -1124,31 +1327,17 @@ md_assemble (str)
 #ifdef TE_PE
       if (*input_line_pointer == '[') 
 	{
-	  /* Expecting something like the second argument here:
+	  /* We are expecting something like the second argument here:
 
 	        lwz r4,[toc].GS.0.static_int(rtoc)
-
-	     The only legal thing between the '[]' sequence is
-	     'toc'. The second arg must be a symbol name, and the
-	     register must be the toc register: 'rtoc' or '2'
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	     The argument following the `]' must be a symbol name, and the 
+             register must be the toc register: 'rtoc' or '2'
 
 	     The effect is to 0 as the displacement field
-	     in the instruction, and issue an IMAGE_REL_PPC_TOCREL16
-	     reloc against it based on the symbol. The linker will 
-	     build the toc, and insert the resolved toc offset.
-
-	     FIXME:
-	     To support "data in toc", we need to allow for the following:
-
-	     # open up the toc section, and put "gorp" in it
-
-	            .toc
-	     gorp:  .long
-	            ....
-	            li r4,[tocv]gorp
-
-	     In this case, r4 is loaded with the displacement of gorp in
-	     the toc.
+	     in the instruction, and issue an IMAGE_REL_PPC_TOCREL16 (or
+	     the appropriate variation) reloc against it based on the symbol.
+	     The linker will build the toc, and insert the resolved toc offset.
 
 	     Note:
 	     o The size of the toc entry is currently assumed to be
@@ -1161,18 +1350,79 @@ md_assemble (str)
 	         lwz r4,[toc64].GS.0.static_int(rtoc)
 	       These demand toc entries of the specified size, and the
 	       instruction probably requires it.
-
           */
 
-	  input_line_pointer += 5; /* FIXME: parse and semantics needed */
+	  int valid_toc;
+	  enum toc_size_qualifier toc_kind;
+	  bfd_reloc_code_real_type toc_reloc;
+
+	  /* go parse off the [tocXX] part */
+	  valid_toc = parse_toc_entry(&toc_kind);
+
+	  if (!valid_toc) 
+	    {
+	      /* Note: message has already been issued.     */
+	      /* FIXME: what sort of recovery should we do? */
+	      /*        demand_rest_of_line(); return; ?    */
+	    }
+
+	  /* Now get the symbol following the ']' */
 	  expression(&ex);
+
+	  switch (toc_kind)
+	    {
+	    case default_toc:
+	      /* In this case, we may not have seen the symbol yet, since  */
+	      /* it is allowed to appear on a .extern or .globl or just be */
+	      /* a label in the .data section.                             */
+	      toc_reloc = BFD_RELOC_PPC_TOC16;
+	      break;
+	    case data_in_toc:
+	      /* 1. The symbol must be defined and either in the toc        */
+	      /*    section, or a global.                                   */
+	      /* 2. The reloc generated must have the TOCDEFN flag set in   */
+	      /*    upper bit mess of the reloc type.                       */
+	      /* FIXME: It's a little confusing what the tocv qualifier can */
+	      /*        be used for. At the very least, I've seen three     */
+	      /*        uses, only one of which I'm sure I can explain.     */
+	      if (ex.X_op == O_symbol) 
+		{		  
+		  assert (ex.X_add_symbol != NULL);
+		  if (ex.X_add_symbol->bsym->section != tocdata_section)
+		    {
+		      as_warn("[tocv] symbol is not a toc symbol");
+		    }
+		}
+
+	      toc_reloc = BFD_RELOC_PPC_TOC16;
+	      break;
+	    case must_be_32:
+	      /* FIXME: these next two specifically specify 32/64 bit toc   */
+	      /*        entries. We don't support them today. Is this the   */
+	      /*        right way to say that?                              */
+	      toc_reloc = BFD_RELOC_UNUSED;
+	      as_bad ("Unimplemented toc32 expression modifier");
+	      break;
+	    case must_be_64:
+	      /* FIXME: see above */
+	      toc_reloc = BFD_RELOC_UNUSED;
+	      as_bad ("Unimplemented toc64 expression modifier");
+	      break;
+	    default:
+	      fprintf(stderr, 
+		      "Unexpected return value [%d] from parse_toc_entry!\n",
+		      toc_kind);
+	      abort();
+	      break;
+	    }
 
 	  /* We need to generate a fixup for this expression.  */
 	  if (fc >= MAX_INSN_FIXUPS)
 	    as_fatal ("too many fixups");
+
+	  fixups[fc].reloc = toc_reloc;
 	  fixups[fc].exp = ex;
 	  fixups[fc].opindex = *opindex_ptr;
-	  fixups[fc].reloc = BFD_RELOC_PPC_TOC16;
 	  ++fc;
 
           /* Ok. We've set up the fixup for the instruction. Now make it
@@ -2621,6 +2871,7 @@ ppc_znop(ignore)
 	   BFD_RELOC_16_GOT_PCREL);
 
 }
+
 /* pseudo-op: 
    behaviour: 
    errors:    
@@ -2915,6 +3166,30 @@ ppc_pe_function (ignore)
   SF_SET_FUNCTION (ext_sym);
   SF_SET_PROCESS (ext_sym);
   coff_add_linesym (ext_sym);
+
+  demand_empty_rest_of_line ();
+}
+
+static void
+ppc_pe_tocd (ignore)
+     int ignore;
+{
+  if (tocdata_section == 0)
+    {
+      tocdata_section = subseg_new (".tocd", 0);
+      /* FIXME: section flags won't work */
+      bfd_set_section_flags (stdoutput, tocdata_section,
+			     (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+			      | SEC_READONLY | SEC_DATA ));
+
+      bfd_set_section_alignment (stdoutput, tocdata_section, 2);
+    }
+  else
+    {
+      rdata_section = subseg_new (".tocd", 0);
+    }
+
+  ppc_set_current_section(tocdata_section);
 
   demand_empty_rest_of_line ();
 }
