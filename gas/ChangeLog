@@ -1,3 +1,8 @@
+Tue May 20 11:23:31 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (macro_build,mips_ip): Move the INSN_ISA field into the
+ 	new membership field.
+
 Thu May 15 10:00:53 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_begin): If no cpu type is specified on the

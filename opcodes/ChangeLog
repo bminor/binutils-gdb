@@ -1,3 +1,13 @@
+Tue May 20 11:26:27 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Moved INSN_ISA field into new 
+	  field membership.
+	* mips16-opc.c (mip16_opcodes): same.
+
+Mon May 12 15:10:53 1997  Jim Wilson  <wilson@cygnus.com>
+
+	* m68k-opc.c (moveb): Change $d to %d.
+
 Mon May  5 14:28:41 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386-dis.c: (dis386_twobyte): Add MMX instructions.
