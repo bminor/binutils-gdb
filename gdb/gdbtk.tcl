@@ -1283,6 +1283,7 @@ bind .command.text <Key-Return> {
 bind .command.text <Enter> {focus %W}
 bind .command.text <Delete> {delete_char %W}
 bind .command.text <BackSpace> {delete_char %W}
+bind .command.text <Control-u> {delete_line %W}
 proc delete_char {win} {
 	global command_line
 
@@ -1290,6 +1291,14 @@ proc delete_char {win} {
 	$win yview -pickplace insert
 	set tmp [expr [string length $command_line] - 2]
 	set command_line [string range $command_line 0 $tmp]
+}
+
+proc delete_line {win} {
+	global command_line
+
+	$win delete {end linestart + 6 chars} end
+	$win yview -pickplace insert
+	set command_line {}
 }
 
 wm minsize .command 1 1

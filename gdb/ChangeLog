@@ -1,3 +1,7 @@
+Sat Sep 17 17:05:14 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl:  Let ^U delete lines in the command window.
+
 Sat Sep 17 02:26:58 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* cp-valprint.c (static_field_print):  New variable, controls
