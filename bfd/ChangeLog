@@ -1,5 +1,10 @@
 2004-03-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-mmix.c (mmix_elf_relocate_section): Restore code setting
+	"name" for global syms accidentally removed in 2004-03-20 change.
+
+2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (struct elf_reloc_cookie): Add r_sym_shift field.
 	* elflink.h: Replace all occurrences of sizeof (Elf_External_*)
 	where Elf_External_* is different for 64 and 32 bit, with
