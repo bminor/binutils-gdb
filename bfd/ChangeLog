@@ -1,3 +1,9 @@
+Thu Feb  5 11:51:05 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf64-mips.c (mips_elf64_swap_reloca_out): Swap out r_addend,
+ 	rather than swapping out r_offset twice.  From Luke Deller
+ 	<luked@cse.unsw.edu.au>.
+
 Wed Feb  4 19:11:28 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Set libtool_enable_shared rather than
