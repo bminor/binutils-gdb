@@ -67,6 +67,7 @@ proc gdb_target_cmd { targetname serialport } {
 	    }
 	}
     }
+    return 1
 }
 
 
@@ -109,7 +110,7 @@ proc gdb_target_monitor { exec_file } {
     for {set j 1} {$j <= 2} {incr j} {
 	if [gdb_file_cmd $exec_file] { return -1; }
 
-	gdb_target_cmd $targetname $serialport;
+	if ![gdb_target_cmd $targetname $serialport] { return 0; }
 
 	gdb_target_exec;
 
