@@ -1,3 +1,11 @@
+2002-01-10  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* arminit.c (ARMul_Abort): Fix parameters passed to CPRead[13].
+	* armemu.c (ARMul_Emulate32): Fix parameters passed to CPRead[13]
+	and CPRead[14].
+	Fix formatting.  Improve layout.
+	* armemu.h: Fix formatting.  Improve layout.
+
 2002-01-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* wrapper.c (sim_fetch_register): If fetching more than 4 bytes

@@ -302,13 +302,15 @@ ARMul_Abort (ARMul_State * state, ARMword vector)
       SETABORT (IBIT, SVC26MODE, isize);
       break;
     case ARMul_IRQV:		/* IRQ */
-      if (!state->is_XScale
-	  || (state->CPRead[13](state, 0, 0) & ARMul_CP13_R0_IRQ))
+      if (   ! state->is_XScale
+	  || ! state->CPRead[13] (state, 0, & temp)
+	  || (temp & ARMul_CP13_R0_IRQ))
         SETABORT (IBIT, state->prog32Sig ? IRQ32MODE : IRQ26MODE, esize);
       break;
     case ARMul_FIQV:		/* FIQ */
-      if (!state->is_XScale
-	  || (state->CPRead[13](state, 0, 0) & ARMul_CP13_R0_FIQ))
+      if (   ! state->is_XScale
+	  || ! state->CPRead[13] (state, 0, & temp)
+	  || (temp & ARMul_CP13_R0_FIQ))
         SETABORT (INTBITS, state->prog32Sig ? FIQ32MODE : FIQ26MODE, esize);
       break;
     }

@@ -479,12 +479,13 @@ ARMul_Emulate26 (ARMul_State * state)
 		  
 		  state->Reg[14] = pc + 4;
 		  
-		  dest = pc + 8 + 1; /* Force entry into Thumb mode.  */
+		  /* Force entry into Thumb mode.  */
+		  dest = pc + 8 + 1;
 		  if (BIT (23))
 		    dest += (NEGBRANCH + (BIT (24) << 1));
 		  else
 		    dest += POSBRANCH + (BIT (24) << 1);
-		  
+
 		  WriteR15Branch (state, dest);
 		  goto donext;
 		}
@@ -544,25 +545,32 @@ ARMul_Emulate26 (ARMul_State * state)
       /* Handle the Clock counter here.  */
       if (state->is_XScale)
 	{
-	  ARMword cp14r0 = state->CPRead[14] (state, 0, 0);
+	  ARMword cp14r0;
+	  int ok;
 
-	  if (cp14r0 && ARMul_CP14_R0_ENABLE)
+	  ok = state->CPRead[14] (state, 0, & cp14r0);
+
+	  if (ok && (cp14r0 & ARMul_CP14_R0_ENABLE))
 	    {
-	      unsigned long newcycles, nowtime = ARMul_Time(state);
+	      unsigned long newcycles, nowtime = ARMul_Time (state);
 
 	      newcycles = nowtime - state->LastTime;
 	      state->LastTime = nowtime;
-	      if (cp14r0 && ARMul_CP14_R0_CCD)
+
+	      if (cp14r0 & ARMul_CP14_R0_CCD)
 	        {
 		  if (state->CP14R0_CCD == -1)
 		    state->CP14R0_CCD = newcycles;
 		  else
 		    state->CP14R0_CCD += newcycles;
+
 		  if (state->CP14R0_CCD >= 64)
 		    {
 		      newcycles = 0;
+
 		      while (state->CP14R0_CCD >= 64)
 		        state->CP14R0_CCD -= 64, newcycles++;
+
 		      goto check_PMUintr;
 		    }
 		}
@@ -576,10 +584,10 @@ check_PMUintr:
 		  cp14r0 |= ARMul_CP14_R0_FLAG2;
 		  (void) state->CPWrite[14] (state, 0, cp14r0);
 
-		  cp14r1 = state->CPRead[14] (state, 1, 0);
+		  ok = state->CPRead[14] (state, 1, & cp14r1);
 
 		  /* Coded like this for portability.  */
-		  while (newcycles)
+		  while (ok && newcycles)
 		    {
 		      if (cp14r1 == 0xffffffff)
 			{
@@ -587,14 +595,19 @@ check_PMUintr:
 			  do_int = 1;
 			}
 		      else
-			cp14r1++;
-			newcycles--;
+			cp14r1 ++;
+
+		      newcycles --;
 		    }
+
 		  (void) state->CPWrite[14] (state, 1, cp14r1);
+
 		  if (do_int && (cp14r0 & ARMul_CP14_R0_INTEN2))
 		    {
-		      if (state->CPRead[13] (state, 8, 0)
-			&& ARMul_CP13_R8_PMUS)
+		      ARMword temp;
+
+		      if (state->CPRead[13] (state, 8, & temp)
+			  && (temp & ARMul_CP13_R8_PMUS))
 		        ARMul_Abort (state, ARMul_FIQV);
 		      else
 		        ARMul_Abort (state, ARMul_IRQV);
@@ -606,8 +619,8 @@ check_PMUintr:
       /* Handle hardware instructions breakpoints here.  */
       if (state->is_XScale)
 	{
-	  if ((pc | 3) == (read_cp15_reg (14, 0, 8) | 2)
-           || (pc | 3) == (read_cp15_reg (14, 0, 9) | 2))
+	  if (   (pc | 3) == (read_cp15_reg (14, 0, 8) | 2)
+	      || (pc | 3) == (read_cp15_reg (14, 0, 9) | 2))
 	    {
 	      if (XScale_debug_moe (state, ARMul_CP14_R10_MOE_IB))
 	        ARMul_OSHandleSWI (state, SWI_Breakpoint);
@@ -615,10 +628,9 @@ check_PMUintr:
 	}
 
       /* Actual execution of instructions begins here.  */
-
+      /* If the condition codes don't match, stop here.  */
       if (temp)
 	{
-	  /* If the condition codes don't match, stop here.  */
 	mainswitch:
 
 	  if (state->is_XScale)
@@ -703,7 +715,8 @@ check_PMUintr:
 		}
 #endif
 	      if (BITS (4, 7) == 9)
-		{		/* MUL */
+		{
+		  /* MUL */
 		  rhs = state->Reg[MULRHSReg];
 		  if (MULLHSReg == MULDESTReg)
 		    {
@@ -713,16 +726,18 @@ check_PMUintr:
 		  else if (MULDESTReg != 15)
 		    state->Reg[MULDESTReg] = state->Reg[MULLHSReg] * rhs;
 		  else
-		    {
-		      UNDEF_MULPCDest;
-		    }
-		  for (dest = 0, temp = 0; dest < 32; dest++)
+		    UNDEF_MULPCDest;
+
+		  for (dest = 0, temp = 0; dest < 32; dest ++)
 		    if (rhs & (1L << dest))
-		      temp = dest;	/* mult takes this many/2 I cycles */
+		      temp = dest;
+
+		  /* Mult takes this many/2 I cycles.  */
 		  ARMul_Icycles (state, ARMul_MultTable[temp], 0L);
 		}
 	      else
-		{		/* AND reg */
+		{
+		  /* AND reg.  */
 		  rhs = DPRegRHS;
 		  dest = LHS & rhs;
 		  WRITEDEST (dest);
@@ -732,15 +747,15 @@ check_PMUintr:
 	    case 0x01:		/* ANDS reg and MULS */
 #ifdef MODET
 	      if ((BITS (4, 11) & 0xF9) == 0x9)
-		{
-		  /* LDR register offset, no write-back, down, post indexed */
-		  LHPOSTDOWN ();
-		  /* fall through to rest of decoding */
-		}
+		/* LDR register offset, no write-back, down, post indexed.  */
+		LHPOSTDOWN ();
+	      /* Fall through to rest of decoding.  */
 #endif
 	      if (BITS (4, 7) == 9)
-		{		/* MULS */
+		{
+		  /* MULS */
 		  rhs = state->Reg[MULRHSReg];
+
 		  if (MULLHSReg == MULDESTReg)
 		    {
 		      UNDEF_MULDestEQOp1;
@@ -755,16 +770,18 @@ check_PMUintr:
 		      state->Reg[MULDESTReg] = dest;
 		    }
 		  else
-		    {
-		      UNDEF_MULPCDest;
-		    }
-		  for (dest = 0, temp = 0; dest < 32; dest++)
+		    UNDEF_MULPCDest;
+
+		  for (dest = 0, temp = 0; dest < 32; dest ++)
 		    if (rhs & (1L << dest))
-		      temp = dest;	/* mult takes this many/2 I cycles */
+		      temp = dest;
+
+		  /* Mult takes this many/2 I cycles.  */
 		  ARMul_Icycles (state, ARMul_MultTable[temp], 0L);
 		}
 	      else
-		{		/* ANDS reg */
+		{
+		  /* ANDS reg.  */
 		  rhs = DPSRegRHS;
 		  dest = LHS & rhs;
 		  WRITESDEST (dest);
@@ -775,7 +792,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 11) == 0xB)
 		{
-		  /* STRH register offset, write-back, down, post indexed */
+		  /* STRH register offset, write-back, down, post indexed.  */
 		  SHDOWNWB ();
 		  break;
 		}
@@ -792,12 +809,13 @@ check_PMUintr:
 		    state->Reg[MULDESTReg] =
 		      state->Reg[MULLHSReg] * rhs + state->Reg[MULACCReg];
 		  else
-		    {
-		      UNDEF_MULPCDest;
-		    }
-		  for (dest = 0, temp = 0; dest < 32; dest++)
+		    UNDEF_MULPCDest;
+
+		  for (dest = 0, temp = 0; dest < 32; dest ++)
 		    if (rhs & (1L << dest))
-		      temp = dest;	/* mult takes this many/2 I cycles */
+		      temp = dest;
+
+		  /* Mult takes this many/2 I cycles.  */
 		  ARMul_Icycles (state, ARMul_MultTable[temp], 0L);
 		}
 	      else
@@ -811,15 +829,15 @@ check_PMUintr:
 	    case 0x03:		/* EORS reg and MLAS */
 #ifdef MODET
 	      if ((BITS (4, 11) & 0xF9) == 0x9)
-		{
-		  /* LDR register offset, write-back, down, post-indexed */
-		  LHPOSTDOWN ();
-		  /* fall through to rest of the decoding */
-		}
+		/* LDR register offset, write-back, down, post-indexed.  */
+		LHPOSTDOWN ();
+	      /* Fall through to rest of the decoding.  */
 #endif
 	      if (BITS (4, 7) == 9)
-		{		/* MLAS */
+		{
+		  /* MLAS */
 		  rhs = state->Reg[MULRHSReg];
+
 		  if (MULLHSReg == MULDESTReg)
 		    {
 		      UNDEF_MULDestEQOp1;
@@ -835,16 +853,18 @@ check_PMUintr:
 		      state->Reg[MULDESTReg] = dest;
 		    }
 		  else
-		    {
-		      UNDEF_MULPCDest;
-		    }
-		  for (dest = 0, temp = 0; dest < 32; dest++)
+		    UNDEF_MULPCDest;
+
+		  for (dest = 0, temp = 0; dest < 32; dest ++)
 		    if (rhs & (1L << dest))
-		      temp = dest;	/* mult takes this many/2 I cycles */
+		      temp = dest;
+
+		  /* Mult takes this many/2 I cycles.  */
 		  ARMul_Icycles (state, ARMul_MultTable[temp], 0L);
 		}
 	      else
-		{		/* EORS Reg */
+		{
+		  /* EORS Reg.  */
 		  rhs = DPSRegRHS;
 		  dest = LHS ^ rhs;
 		  WRITESDEST (dest);
@@ -855,7 +875,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 7) == 0xB)
 		{
-		  /* STRH immediate offset, no write-back, down, post indexed */
+		  /* STRH immediate offset, no write-back, down, post indexed.  */
 		  SHDOWNWB ();
 		  break;
 		}
@@ -878,15 +898,14 @@ check_PMUintr:
 	    case 0x05:		/* SUBS reg */
 #ifdef MODET
 	      if ((BITS (4, 7) & 0x9) == 0x9)
-		{
-		  /* LDR immediate offset, no write-back, down, post indexed */
-		  LHPOSTDOWN ();
-		  /* fall through to the rest of the instruction decoding */
-		}
+		/* LDR immediate offset, no write-back, down, post indexed.  */
+		LHPOSTDOWN ();
+	      /* Fall through to the rest of the instruction decoding.  */
 #endif
 	      lhs = LHS;
 	      rhs = DPRegRHS;
 	      dest = lhs - rhs;
+
 	      if ((lhs >= rhs) || ((rhs | lhs) >> 31))
 		{
 		  ARMul_SubCarry (state, lhs, rhs, dest);
@@ -904,7 +923,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 7) == 0xB)
 		{
-		  /* STRH immediate offset, write-back, down, post indexed */
+		  /* STRH immediate offset, write-back, down, post indexed.  */
 		  SHDOWNWB ();
 		  break;
 		}
@@ -917,15 +936,14 @@ check_PMUintr:
 	    case 0x07:		/* RSBS reg */
 #ifdef MODET
 	      if ((BITS (4, 7) & 0x9) == 0x9)
-		{
-		  /* LDR immediate offset, write-back, down, post indexed */
-		  LHPOSTDOWN ();
-		  /* fall through to remainder of instruction decoding */
-		}
+		/* LDR immediate offset, write-back, down, post indexed.  */
+		LHPOSTDOWN ();
+	      /* Fall through to remainder of instruction decoding.  */
 #endif
 	      lhs = LHS;
 	      rhs = DPRegRHS;
 	      dest = rhs - lhs;
+
 	      if ((rhs >= lhs) || ((rhs | lhs) >> 31))
 		{
 		  ARMul_SubCarry (state, rhs, lhs, dest);
@@ -943,7 +961,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 11) == 0xB)
 		{
-		  /* STRH register offset, no write-back, up, post indexed */
+		  /* STRH register offset, no write-back, up, post indexed.  */
 		  SHUPWB ();
 		  break;
 		}
@@ -960,7 +978,8 @@ check_PMUintr:
 #endif
 #ifdef MODET
 	      if (BITS (4, 7) == 0x9)
-		{		/* MULL */
+		{
+		  /* MULL */
 		  /* 32x32 = 64 */
 		  ARMul_Icycles (state,
 				 Multiply64 (state, instr, LUNSIGNED,
@@ -976,15 +995,14 @@ check_PMUintr:
 	    case 0x09:		/* ADDS reg */
 #ifdef MODET
 	      if ((BITS (4, 11) & 0xF9) == 0x9)
-		{
-		  /* LDR register offset, no write-back, up, post indexed */
-		  LHPOSTUP ();
-		  /* fall through to remaining instruction decoding */
-		}
+		/* LDR register offset, no write-back, up, post indexed.  */
+		LHPOSTUP ();
+	      /* Fall through to remaining instruction decoding.  */
 #endif
 #ifdef MODET
 	      if (BITS (4, 7) == 0x9)
-		{		/* MULL */
+		{
+		  /* MULL */
 		  /* 32x32=64 */
 		  ARMul_Icycles (state,
 				 Multiply64 (state, instr, LUNSIGNED, LSCC),
@@ -997,7 +1015,8 @@ check_PMUintr:
 	      dest = lhs + rhs;
 	      ASSIGNZ (dest == 0);
 	      if ((lhs | rhs) >> 30)
-		{		/* possible C,V,N to set */
+		{
+		  /* Possible C,V,N to set.  */
 		  ASSIGNN (NEG (dest));
 		  ARMul_AddCarry (state, lhs, rhs, dest);
 		  ARMul_AddOverflow (state, lhs, rhs, dest);
@@ -1015,14 +1034,13 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 11) == 0xB)
 		{
-		  /* STRH register offset, write-back, up, post-indexed */
+		  /* STRH register offset, write-back, up, post-indexed.  */
 		  SHUPWB ();
 		  break;
 		}
-#endif
-#ifdef MODET
 	      if (BITS (4, 7) == 0x9)
-		{		/* MULL */
+		{
+		  /* MULL */
 		  /* 32x32=64 */
 		  ARMul_Icycles (state,
 				 MultiplyAdd64 (state, instr, LUNSIGNED,
@@ -1038,15 +1056,12 @@ check_PMUintr:
 	    case 0x0b:		/* ADCS reg */
 #ifdef MODET
 	      if ((BITS (4, 11) & 0xF9) == 0x9)
-		{
-		  /* LDR register offset, write-back, up, post indexed */
-		  LHPOSTUP ();
-		  /* fall through to remaining instruction decoding */
-		}
-#endif
-#ifdef MODET
+		/* LDR register offset, write-back, up, post indexed.  */
+		LHPOSTUP ();
+	      /* Fall through to remaining instruction decoding.  */
 	      if (BITS (4, 7) == 0x9)
-		{		/* MULL */
+		{
+		  /* MULL */
 		  /* 32x32=64 */
 		  ARMul_Icycles (state,
 				 MultiplyAdd64 (state, instr, LUNSIGNED,
@@ -1059,7 +1074,8 @@ check_PMUintr:
 	      dest = lhs + rhs + CFLAG;
 	      ASSIGNZ (dest == 0);
 	      if ((lhs | rhs) >> 30)
-		{		/* possible C,V,N to set */
+		{
+		  /* Possible C,V,N to set.  */
 		  ASSIGNN (NEG (dest));
 		  ARMul_AddCarry (state, lhs, rhs, dest);
 		  ARMul_AddOverflow (state, lhs, rhs, dest);
@@ -1077,7 +1093,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 7) == 0xB)
 		{
-		  /* STRH immediate offset, no write-back, up post indexed */
+		  /* STRH immediate offset, no write-back, up post indexed.  */
 		  SHUPWB ();
 		  break;
 		}
@@ -1091,10 +1107,9 @@ check_PMUintr:
 		  Handle_Store_Double (state, instr);
 		  break;
 		}
-#endif
-#ifdef MODET
 	      if (BITS (4, 7) == 0x9)
-		{		/* MULL */
+		{
+		  /* MULL */
 		  /* 32x32=64 */
 		  ARMul_Icycles (state,
 				 Multiply64 (state, instr, LSIGNED, LDEFAULT),
@@ -1110,14 +1125,12 @@ check_PMUintr:
 	    case 0x0d:		/* SBCS reg */
 #ifdef MODET
 	      if ((BITS (4, 7) & 0x9) == 0x9)
-		{
-		  /* LDR immediate offset, no write-back, up, post indexed */
-		  LHPOSTUP ();
-		}
-#endif
-#ifdef MODET
+		/* LDR immediate offset, no write-back, up, post indexed.  */
+		LHPOSTUP ();
+
 	      if (BITS (4, 7) == 0x9)
-		{		/* MULL */
+		{
+		  /* MULL */
 		  /* 32x32=64 */
 		  ARMul_Icycles (state,
 				 Multiply64 (state, instr, LSIGNED, LSCC),
@@ -1145,14 +1158,14 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 7) == 0xB)
 		{
-		  /* STRH immediate offset, write-back, up, post indexed */
+		  /* STRH immediate offset, write-back, up, post indexed.  */
 		  SHUPWB ();
 		  break;
 		}
-#endif
-#ifdef MODET
+
 	      if (BITS (4, 7) == 0x9)
-		{		/* MULL */
+		{
+		  /* MULL */
 		  /* 32x32=64 */
 		  ARMul_Icycles (state,
 				 MultiplyAdd64 (state, instr, LSIGNED,
@@ -1168,15 +1181,13 @@ check_PMUintr:
 	    case 0x0f:		/* RSCS reg */
 #ifdef MODET
 	      if ((BITS (4, 7) & 0x9) == 0x9)
-		{
-		  /* LDR immediate offset, write-back, up, post indexed */
-		  LHPOSTUP ();
-		  /* fall through to remaining instruction decoding */
-		}
-#endif
-#ifdef MODET
+		/* LDR immediate offset, write-back, up, post indexed.  */
+		LHPOSTUP ();
+	      /* Fall through to remaining instruction decoding.  */
+
 	      if (BITS (4, 7) == 0x9)
-		{		/* MULL */
+		{
+		  /* MULL */
 		  /* 32x32=64 */
 		  ARMul_Icycles (state,
 				 MultiplyAdd64 (state, instr, LSIGNED, LSCC),
@@ -1187,6 +1198,7 @@ check_PMUintr:
 	      lhs = LHS;
 	      rhs = DPRegRHS;
 	      dest = rhs - lhs - !CFLAG;
+
 	      if ((rhs >= lhs) || ((rhs | lhs) >> 31))
 		{
 		  ARMul_SubCarry (state, rhs, lhs, dest);
@@ -1200,7 +1212,7 @@ check_PMUintr:
 	      WRITESDEST (dest);
 	      break;
 
-	    case 0x10:		/* TST reg and MRS CPSR and SWP word */
+	    case 0x10:		/* TST reg and MRS CPSR and SWP word.  */
 	      if (state->is_v5e)
 		{
 		  if (BIT (4) == 0 && BIT (7) == 1)
@@ -1246,7 +1258,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 11) == 0xB)
 		{
-		  /* STRH register offset, no write-back, down, pre indexed */
+		  /* STRH register offset, no write-back, down, pre indexed.  */
 		  SHPREDOWN ();
 		  break;
 		}
@@ -1262,7 +1274,8 @@ check_PMUintr:
 		}
 #endif
 	      if (BITS (4, 11) == 9)
-		{		/* SWP */
+		{
+		  /* SWP */
 		  UNDEF_SWPPC;
 		  temp = LHS;
 		  BUSUSEDINCPCS;
@@ -1281,9 +1294,7 @@ check_PMUintr:
 		  else
 		    DEST = dest;
 		  if (state->abortSig || state->Aborted)
-		    {
-		      TAKEABORT;
-		    }
+		    TAKEABORT;
 		}
 	      else if ((BITS (0, 11) == 0) && (LHSReg == 15))
 		{		/* MRS CPSR */
@@ -1299,14 +1310,13 @@ check_PMUintr:
 	    case 0x11:		/* TSTP reg */
 #ifdef MODET
 	      if ((BITS (4, 11) & 0xF9) == 0x9)
-		{
-		  /* LDR register offset, no write-back, down, pre indexed */
-		  LHPREDOWN ();
-		  /* continue with remaining instruction decode */
-		}
+		/* LDR register offset, no write-back, down, pre indexed.  */
+		LHPREDOWN ();
+	      /* Continue with remaining instruction decode.  */
 #endif
 	      if (DESTReg == 15)
-		{		/* TSTP reg */
+		{
+		  /* TSTP reg */
 #ifdef MODE32
 		  state->Cpsr = GETSPSR (state->Bank);
 		  ARMul_CPSRAltered (state);
@@ -1317,14 +1327,15 @@ check_PMUintr:
 #endif
 		}
 	      else
-		{		/* TST reg */
+		{
+		  /* TST reg */
 		  rhs = DPSRegRHS;
 		  dest = LHS & rhs;
 		  ARMul_NegZero (state, dest);
 		}
 	      break;
 
-	    case 0x12:		/* TEQ reg and MSR reg to CPSR (ARM6) */
+	    case 0x12:		/* TEQ reg and MSR reg to CPSR (ARM6).  */
 	      if (state->is_v5)
 		{
 		  if (BITS (4, 7) == 3)
@@ -1394,7 +1405,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 11) == 0xB)
 		{
-		  /* STRH register offset, write-back, down, pre indexed */
+		  /* STRH register offset, write-back, down, pre indexed.  */
 		  SHPREDOWNWB ();
 		  break;
 		}
@@ -1436,8 +1447,8 @@ check_PMUintr:
 			ARMul_OSHandleSWI (state, SWI_Breakpoint);
 		      else
 			{
-			/* BKPT - normally this will cause an abort, but on the
-			   XScale we must check the DCSR.  */
+			  /* BKPT - normally this will cause an abort, but on the
+			     XScale we must check the DCSR.  */
 			  XScale_set_fsr_far (state, ARMul_CP15_R5_MMU_EXCPT, pc);
 	                  if (!XScale_debug_moe (state, ARMul_CP14_R10_MOE_BT))
 			    break;
@@ -1450,7 +1461,7 @@ check_PMUintr:
 		}
 	      if (DESTReg == 15)
 		{
-		  /* MSR reg to CPSR */
+		  /* MSR reg to CPSR.  */
 		  UNDEF_MSRPC;
 		  temp = DPRegRHS;
 #ifdef MODET
@@ -1460,22 +1471,20 @@ check_PMUintr:
 		  ARMul_FixCPSR (state, instr, temp);
 		}
 	      else
-		{
-		  UNDEF_Test;
-		}
+		UNDEF_Test;
+
 	      break;
 
 	    case 0x13:		/* TEQP reg */
 #ifdef MODET
 	      if ((BITS (4, 11) & 0xF9) == 0x9)
-		{
-		  /* LDR register offset, write-back, down, pre indexed.  */
-		  LHPREDOWNWB ();
-		  /* Continue with remaining instruction decode.  */
-		}
+		/* LDR register offset, write-back, down, pre indexed.  */
+		LHPREDOWNWB ();
+	      /* Continue with remaining instruction decode.  */
 #endif
 	      if (DESTReg == 15)
-		{		/* TEQP reg */
+		{
+		  /* TEQP reg */
 #ifdef MODE32
 		  state->Cpsr = GETSPSR (state->Bank);
 		  ARMul_CPSRAltered (state);
@@ -1486,14 +1495,15 @@ check_PMUintr:
 #endif
 		}
 	      else
-		{		/* TEQ Reg */
+		{
+		  /* TEQ Reg.  */
 		  rhs = DPSRegRHS;
 		  dest = LHS ^ rhs;
 		  ARMul_NegZero (state, dest);
 		}
 	      break;
 
-	    case 0x14:		/* CMP reg and MRS SPSR and SWP byte */
+	    case 0x14:		/* CMP reg and MRS SPSR and SWP byte.  */
 	      if (state->is_v5e)
 		{
 		  if (BIT (4) == 0 && BIT (7) == 1)
@@ -1567,7 +1577,8 @@ check_PMUintr:
 		}
 #endif
 	      if (BITS (4, 11) == 9)
-		{		/* SWP */
+		{
+		  /* SWP */
 		  UNDEF_SWPPC;
 		  temp = LHS;
 		  BUSUSEDINCPCS;
@@ -1582,32 +1593,29 @@ check_PMUintr:
 #endif
 		    DEST = ARMul_SwapByte (state, temp, state->Reg[RHSReg]);
 		  if (state->abortSig || state->Aborted)
-		    {
-		      TAKEABORT;
-		    }
+		    TAKEABORT;
 		}
 	      else if ((BITS (0, 11) == 0) && (LHSReg == 15))
-		{		/* MRS SPSR */
+		{
+		  /* MRS SPSR */
 		  UNDEF_MRSPC;
 		  DEST = GETSPSR (state->Bank);
 		}
 	      else
-		{
-		  UNDEF_Test;
-		}
+		UNDEF_Test;
+
 	      break;
 
-	    case 0x15:		/* CMPP reg */
+	    case 0x15:		/* CMPP reg.  */
 #ifdef MODET
 	      if ((BITS (4, 7) & 0x9) == 0x9)
-		{
-		  /* LDR immediate offset, no write-back, down, pre indexed */
-		  LHPREDOWN ();
-		  /* continue with remaining instruction decode */
-		}
+		/* LDR immediate offset, no write-back, down, pre indexed.  */
+		LHPREDOWN ();
+	      /* Continue with remaining instruction decode.  */
 #endif
 	      if (DESTReg == 15)
-		{		/* CMPP reg */
+		{
+		  /* CMPP reg.  */
 #ifdef MODE32
 		  state->Cpsr = GETSPSR (state->Bank);
 		  ARMul_CPSRAltered (state);
@@ -1618,7 +1626,8 @@ check_PMUintr:
 #endif
 		}
 	      else
-		{		/* CMP reg */
+		{
+		  /* CMP reg.  */
 		  lhs = LHS;
 		  rhs = DPRegRHS;
 		  dest = lhs - rhs;
@@ -1706,7 +1715,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 7) == 0xB)
 		{
-		  /* STRH immediate offset, write-back, down, pre indexed */
+		  /* STRH immediate offset, write-back, down, pre indexed.  */
 		  SHPREDOWNWB ();
 		  break;
 		}
@@ -1722,7 +1731,8 @@ check_PMUintr:
 		}
 #endif
 	      if (DESTReg == 15)
-		{		/* MSR */
+		{
+		  /* MSR */
 		  UNDEF_MSRPC;
 		  ARMul_FixSPSR (state, instr, DPRegRHS);
 		}
@@ -1735,11 +1745,9 @@ check_PMUintr:
 	    case 0x17:		/* CMNP reg */
 #ifdef MODET
 	      if ((BITS (4, 7) & 0x9) == 0x9)
-		{
-		  /* LDR immediate offset, write-back, down, pre indexed */
-		  LHPREDOWNWB ();
-		  /* continue with remaining instruction decoding */
-		}
+		/* LDR immediate offset, write-back, down, pre indexed.  */
+		LHPREDOWNWB ();
+	      /* Continue with remaining instruction decoding.  */
 #endif
 	      if (DESTReg == 15)
 		{
@@ -1754,13 +1762,15 @@ check_PMUintr:
 		  break;
 		}
 	      else
-		{		/* CMN reg */
+		{
+		  /* CMN reg.  */
 		  lhs = LHS;
 		  rhs = DPRegRHS;
 		  dest = lhs + rhs;
 		  ASSIGNZ (dest == 0);
 		  if ((lhs | rhs) >> 30)
-		    {		/* possible C,V,N to set */
+		    {
+		      /* Possible C,V,N to set.  */
 		      ASSIGNN (NEG (dest));
 		      ARMul_AddCarry (state, lhs, rhs, dest);
 		      ARMul_AddOverflow (state, lhs, rhs, dest);
@@ -1778,7 +1788,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 11) == 0xB)
 		{
-		  /* STRH register offset, no write-back, up, pre indexed */
+		  /* STRH register offset, no write-back, up, pre indexed.  */
 		  SHPREUP ();
 		  break;
 		}
@@ -1801,11 +1811,9 @@ check_PMUintr:
 	    case 0x19:		/* ORRS reg */
 #ifdef MODET
 	      if ((BITS (4, 11) & 0xF9) == 0x9)
-		{
-		  /* LDR register offset, no write-back, up, pre indexed */
-		  LHPREUP ();
-		  /* continue with remaining instruction decoding */
-		}
+		/* LDR register offset, no write-back, up, pre indexed.  */
+		LHPREUP ();
+	      /* Continue with remaining instruction decoding.  */
 #endif
 	      rhs = DPSRegRHS;
 	      dest = LHS | rhs;
@@ -1816,7 +1824,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 11) == 0xB)
 		{
-		  /* STRH register offset, write-back, up, pre indexed */
+		  /* STRH register offset, write-back, up, pre indexed.  */
 		  SHPREUPWB ();
 		  break;
 		}
@@ -1838,11 +1846,9 @@ check_PMUintr:
 	    case 0x1b:		/* MOVS reg */
 #ifdef MODET
 	      if ((BITS (4, 11) & 0xF9) == 0x9)
-		{
-		  /* LDR register offset, write-back, up, pre indexed */
-		  LHPREUPWB ();
-		  /* continue with remaining instruction decoding */
-		}
+		/* LDR register offset, write-back, up, pre indexed.  */
+		LHPREUPWB ();
+	      /* Continue with remaining instruction decoding.  */
 #endif
 	      dest = DPSRegRHS;
 	      WRITESDEST (dest);
@@ -1852,7 +1858,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 7) == 0xB)
 		{
-		  /* STRH immediate offset, no write-back, up, pre indexed */
+		  /* STRH immediate offset, no write-back, up, pre indexed.  */
 		  SHPREUP ();
 		  break;
 		}
@@ -1875,11 +1881,9 @@ check_PMUintr:
 	    case 0x1d:		/* BICS reg */
 #ifdef MODET
 	      if ((BITS (4, 7) & 0x9) == 0x9)
-		{
-		  /* LDR immediate offset, no write-back, up, pre indexed */
-		  LHPREUP ();
-		  /* continue with instruction decoding */
-		}
+		/* LDR immediate offset, no write-back, up, pre indexed.  */
+		LHPREUP ();
+	      /* Continue with instruction decoding.  */
 #endif
 	      rhs = DPSRegRHS;
 	      dest = LHS & ~rhs;
@@ -1890,7 +1894,7 @@ check_PMUintr:
 #ifdef MODET
 	      if (BITS (4, 7) == 0xB)
 		{
-		  /* STRH immediate offset, write-back, up, pre indexed */
+		  /* STRH immediate offset, write-back, up, pre indexed.  */
 		  SHPREUPWB ();
 		  break;
 		}
@@ -1912,17 +1916,15 @@ check_PMUintr:
 	    case 0x1f:		/* MVNS reg */
 #ifdef MODET
 	      if ((BITS (4, 7) & 0x9) == 0x9)
-		{
-		  /* LDR immediate offset, write-back, up, pre indexed */
-		  LHPREUPWB ();
-		  /* continue instruction decoding */
-		}
+		/* LDR immediate offset, write-back, up, pre indexed.  */
+		LHPREUPWB ();
+	      /* Continue instruction decoding.  */
 #endif
 	      dest = ~DPSRegRHS;
 	      WRITESDEST (dest);
 	      break;
 
-	      
+
 	      /* Data Processing Immediate RHS Instructions.  */
 
 	    case 0x20:		/* AND immed */
@@ -1956,6 +1958,7 @@ check_PMUintr:
 	      lhs = LHS;
 	      rhs = DPImmRHS;
 	      dest = lhs - rhs;
+
 	      if ((lhs >= rhs) || ((rhs | lhs) >> 31))
 		{
 		  ARMul_SubCarry (state, lhs, rhs, dest);
@@ -1978,6 +1981,7 @@ check_PMUintr:
 	      lhs = LHS;
 	      rhs = DPImmRHS;
 	      dest = rhs - lhs;
+
 	      if ((rhs >= lhs) || ((rhs | lhs) >> 31))
 		{
 		  ARMul_SubCarry (state, rhs, lhs, dest);
@@ -2001,8 +2005,10 @@ check_PMUintr:
 	      rhs = DPImmRHS;
 	      dest = lhs + rhs;
 	      ASSIGNZ (dest == 0);
+
 	      if ((lhs | rhs) >> 30)
-		{		/* possible C,V,N to set */
+		{
+		  /* Possible C,V,N to set.  */
 		  ASSIGNN (NEG (dest));
 		  ARMul_AddCarry (state, lhs, rhs, dest);
 		  ARMul_AddOverflow (state, lhs, rhs, dest);
@@ -2027,7 +2033,8 @@ check_PMUintr:
 	      dest = lhs + rhs + CFLAG;
 	      ASSIGNZ (dest == 0);
 	      if ((lhs | rhs) >> 30)
-		{		/* possible C,V,N to set */
+		{
+		  /* Possible C,V,N to set.  */
 		  ASSIGNN (NEG (dest));
 		  ARMul_AddCarry (state, lhs, rhs, dest);
 		  ARMul_AddOverflow (state, lhs, rhs, dest);
@@ -2091,7 +2098,8 @@ check_PMUintr:
 
 	    case 0x31:		/* TSTP immed */
 	      if (DESTReg == 15)
-		{		/* TSTP immed */
+		{
+		  /* TSTP immed.  */
 #ifdef MODE32
 		  state->Cpsr = GETSPSR (state->Bank);
 		  ARMul_CPSRAltered (state);
@@ -2102,7 +2110,8 @@ check_PMUintr:
 		}
 	      else
 		{
-		  DPSImmRHS;	/* TST immed */
+		  /* TST immed.  */
+		  DPSImmRHS;
 		  dest = LHS & rhs;
 		  ARMul_NegZero (state, dest);
 		}
@@ -2110,18 +2119,16 @@ check_PMUintr:
 
 	    case 0x32:		/* TEQ immed and MSR immed to CPSR */
 	      if (DESTReg == 15)
-		{		/* MSR immed to CPSR */
-		  ARMul_FixCPSR (state, instr, DPImmRHS);
-		}
+		/* MSR immed to CPSR.  */
+		ARMul_FixCPSR (state, instr, DPImmRHS);
 	      else
-		{
-		  UNDEF_Test;
-		}
+		UNDEF_Test;
 	      break;
 
 	    case 0x33:		/* TEQP immed */
 	      if (DESTReg == 15)
-		{		/* TEQP immed */
+		{
+		  /* TEQP immed.  */
 #ifdef MODE32
 		  state->Cpsr = GETSPSR (state->Bank);
 		  ARMul_CPSRAltered (state);
@@ -2144,7 +2151,8 @@ check_PMUintr:
 
 	    case 0x35:		/* CMPP immed */
 	      if (DESTReg == 15)
-		{		/* CMPP immed */
+		{
+		  /* CMPP immed.  */
 #ifdef MODE32
 		  state->Cpsr = GETSPSR (state->Bank);
 		  ARMul_CPSRAltered (state);
@@ -2156,10 +2164,12 @@ check_PMUintr:
 		}
 	      else
 		{
-		  lhs = LHS;	/* CMP immed */
+		  /* CMP immed.  */
+		  lhs = LHS;
 		  rhs = DPImmRHS;
 		  dest = lhs - rhs;
 		  ARMul_NegZero (state, dest);
+
 		  if ((lhs >= rhs) || ((rhs | lhs) >> 31))
 		    {
 		      ARMul_SubCarry (state, lhs, rhs, dest);
@@ -2174,17 +2184,16 @@ check_PMUintr:
 	      break;
 
 	    case 0x36:		/* CMN immed and MSR immed to SPSR */
-	      if (DESTReg == 15)	/* MSR */
+	      if (DESTReg == 15)
 		ARMul_FixSPSR (state, instr, DPImmRHS);
 	      else
-		{
-		  UNDEF_Test;
-		}
+		UNDEF_Test;
 	      break;
 
-	    case 0x37:		/* CMNP immed */
+	    case 0x37:		/* CMNP immed.  */
 	      if (DESTReg == 15)
-		{		/* CMNP immed */
+		{
+		  /* CMNP immed.  */
 #ifdef MODE32
 		  state->Cpsr = GETSPSR (state->Bank);
 		  ARMul_CPSRAltered (state);
@@ -2196,12 +2205,14 @@ check_PMUintr:
 		}
 	      else
 		{
-		  lhs = LHS;	/* CMN immed */
+		  /* CMN immed.  */
+		  lhs = LHS;
 		  rhs = DPImmRHS;
 		  dest = lhs + rhs;
 		  ASSIGNZ (dest == 0);
 		  if ((lhs | rhs) >> 30)
-		    {		/* possible C,V,N to set */
+		    {
+		      /* Possible C,V,N to set.  */
 		      ASSIGNN (NEG (dest));
 		      ARMul_AddCarry (state, lhs, rhs, dest);
 		      ARMul_AddOverflow (state, lhs, rhs, dest);
@@ -2215,63 +2226,64 @@ check_PMUintr:
 		}
 	      break;
 
-	    case 0x38:		/* ORR immed */
+	    case 0x38:		/* ORR immed.  */
 	      dest = LHS | DPImmRHS;
 	      WRITEDEST (dest);
 	      break;
 
-	    case 0x39:		/* ORRS immed */
+	    case 0x39:		/* ORRS immed.  */
 	      DPSImmRHS;
 	      dest = LHS | rhs;
 	      WRITESDEST (dest);
 	      break;
 
-	    case 0x3a:		/* MOV immed */
+	    case 0x3a:		/* MOV immed.  */
 	      dest = DPImmRHS;
 	      WRITEDEST (dest);
 	      break;
 
-	    case 0x3b:		/* MOVS immed */
+	    case 0x3b:		/* MOVS immed.  */
 	      DPSImmRHS;
 	      WRITESDEST (rhs);
 	      break;
 
-	    case 0x3c:		/* BIC immed */
+	    case 0x3c:		/* BIC immed.  */
 	      dest = LHS & ~DPImmRHS;
 	      WRITEDEST (dest);
 	      break;
 
-	    case 0x3d:		/* BICS immed */
+	    case 0x3d:		/* BICS immed.  */
 	      DPSImmRHS;
 	      dest = LHS & ~rhs;
 	      WRITESDEST (dest);
 	      break;
 
-	    case 0x3e:		/* MVN immed */
+	    case 0x3e:		/* MVN immed.  */
 	      dest = ~DPImmRHS;
 	      WRITEDEST (dest);
 	      break;
 
-	    case 0x3f:		/* MVNS immed */
+	    case 0x3f:		/* MVNS immed.  */
 	      DPSImmRHS;
 	      WRITESDEST (~rhs);
 	      break;
 
+
 	      /* Single Data Transfer Immediate RHS Instructions.  */
 
-	    case 0x40:		/* Store Word, No WriteBack, Post Dec, Immed */
+	    case 0x40:		/* Store Word, No WriteBack, Post Dec, Immed.  */
 	      lhs = LHS;
 	      if (StoreWord (state, instr, lhs))
 		LSBase = lhs - LSImmRHS;
 	      break;
 
-	    case 0x41:		/* Load Word, No WriteBack, Post Dec, Immed */
+	    case 0x41:		/* Load Word, No WriteBack, Post Dec, Immed.  */
 	      lhs = LHS;
 	      if (LoadWord (state, instr, lhs))
 		LSBase = lhs - LSImmRHS;
 	      break;
 
-	    case 0x42:		/* Store Word, WriteBack, Post Dec, Immed */
+	    case 0x42:		/* Store Word, WriteBack, Post Dec, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      lhs = LHS;
@@ -2282,7 +2294,7 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x43:		/* Load Word, WriteBack, Post Dec, Immed */
+	    case 0x43:		/* Load Word, WriteBack, Post Dec, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      lhs = LHS;
@@ -2292,19 +2304,19 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x44:		/* Store Byte, No WriteBack, Post Dec, Immed */
+	    case 0x44:		/* Store Byte, No WriteBack, Post Dec, Immed.  */
 	      lhs = LHS;
 	      if (StoreByte (state, instr, lhs))
 		LSBase = lhs - LSImmRHS;
 	      break;
 
-	    case 0x45:		/* Load Byte, No WriteBack, Post Dec, Immed */
+	    case 0x45:		/* Load Byte, No WriteBack, Post Dec, Immed.  */
 	      lhs = LHS;
 	      if (LoadByte (state, instr, lhs, LUNSIGNED))
 		LSBase = lhs - LSImmRHS;
 	      break;
 
-	    case 0x46:		/* Store Byte, WriteBack, Post Dec, Immed */
+	    case 0x46:		/* Store Byte, WriteBack, Post Dec, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      lhs = LHS;
@@ -2314,7 +2326,7 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x47:		/* Load Byte, WriteBack, Post Dec, Immed */
+	    case 0x47:		/* Load Byte, WriteBack, Post Dec, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      lhs = LHS;
@@ -2324,19 +2336,19 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x48:		/* Store Word, No WriteBack, Post Inc, Immed */
+	    case 0x48:		/* Store Word, No WriteBack, Post Inc, Immed.  */
 	      lhs = LHS;
 	      if (StoreWord (state, instr, lhs))
 		LSBase = lhs + LSImmRHS;
 	      break;
 
-	    case 0x49:		/* Load Word, No WriteBack, Post Inc, Immed */
+	    case 0x49:		/* Load Word, No WriteBack, Post Inc, Immed.  */
 	      lhs = LHS;
 	      if (LoadWord (state, instr, lhs))
 		LSBase = lhs + LSImmRHS;
 	      break;
 
-	    case 0x4a:		/* Store Word, WriteBack, Post Inc, Immed */
+	    case 0x4a:		/* Store Word, WriteBack, Post Inc, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      lhs = LHS;
@@ -2346,7 +2358,7 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x4b:		/* Load Word, WriteBack, Post Inc, Immed */
+	    case 0x4b:		/* Load Word, WriteBack, Post Inc, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      lhs = LHS;
@@ -2356,19 +2368,19 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x4c:		/* Store Byte, No WriteBack, Post Inc, Immed */
+	    case 0x4c:		/* Store Byte, No WriteBack, Post Inc, Immed.  */
 	      lhs = LHS;
 	      if (StoreByte (state, instr, lhs))
 		LSBase = lhs + LSImmRHS;
 	      break;
 
-	    case 0x4d:		/* Load Byte, No WriteBack, Post Inc, Immed */
+	    case 0x4d:		/* Load Byte, No WriteBack, Post Inc, Immed.  */
 	      lhs = LHS;
 	      if (LoadByte (state, instr, lhs, LUNSIGNED))
 		LSBase = lhs + LSImmRHS;
 	      break;
 
-	    case 0x4e:		/* Store Byte, WriteBack, Post Inc, Immed */
+	    case 0x4e:		/* Store Byte, WriteBack, Post Inc, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      lhs = LHS;
@@ -2378,7 +2390,7 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x4f:		/* Load Byte, WriteBack, Post Inc, Immed */
+	    case 0x4f:		/* Load Byte, WriteBack, Post Inc, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      lhs = LHS;
@@ -2389,15 +2401,15 @@ check_PMUintr:
 	      break;
 
 
-	    case 0x50:		/* Store Word, No WriteBack, Pre Dec, Immed */
+	    case 0x50:		/* Store Word, No WriteBack, Pre Dec, Immed.  */
 	      (void) StoreWord (state, instr, LHS - LSImmRHS);
 	      break;
 
-	    case 0x51:		/* Load Word, No WriteBack, Pre Dec, Immed */
+	    case 0x51:		/* Load Word, No WriteBack, Pre Dec, Immed.  */
 	      (void) LoadWord (state, instr, LHS - LSImmRHS);
 	      break;
 
-	    case 0x52:		/* Store Word, WriteBack, Pre Dec, Immed */
+	    case 0x52:		/* Store Word, WriteBack, Pre Dec, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      temp = LHS - LSImmRHS;
@@ -2405,7 +2417,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x53:		/* Load Word, WriteBack, Pre Dec, Immed */
+	    case 0x53:		/* Load Word, WriteBack, Pre Dec, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      temp = LHS - LSImmRHS;
@@ -2413,15 +2425,15 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x54:		/* Store Byte, No WriteBack, Pre Dec, Immed */
+	    case 0x54:		/* Store Byte, No WriteBack, Pre Dec, Immed.  */
 	      (void) StoreByte (state, instr, LHS - LSImmRHS);
 	      break;
 
-	    case 0x55:		/* Load Byte, No WriteBack, Pre Dec, Immed */
+	    case 0x55:		/* Load Byte, No WriteBack, Pre Dec, Immed.  */
 	      (void) LoadByte (state, instr, LHS - LSImmRHS, LUNSIGNED);
 	      break;
 
-	    case 0x56:		/* Store Byte, WriteBack, Pre Dec, Immed */
+	    case 0x56:		/* Store Byte, WriteBack, Pre Dec, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      temp = LHS - LSImmRHS;
@@ -2429,7 +2441,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x57:		/* Load Byte, WriteBack, Pre Dec, Immed */
+	    case 0x57:		/* Load Byte, WriteBack, Pre Dec, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      temp = LHS - LSImmRHS;
@@ -2437,15 +2449,15 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x58:		/* Store Word, No WriteBack, Pre Inc, Immed */
+	    case 0x58:		/* Store Word, No WriteBack, Pre Inc, Immed.  */
 	      (void) StoreWord (state, instr, LHS + LSImmRHS);
 	      break;
 
-	    case 0x59:		/* Load Word, No WriteBack, Pre Inc, Immed */
+	    case 0x59:		/* Load Word, No WriteBack, Pre Inc, Immed.  */
 	      (void) LoadWord (state, instr, LHS + LSImmRHS);
 	      break;
 
-	    case 0x5a:		/* Store Word, WriteBack, Pre Inc, Immed */
+	    case 0x5a:		/* Store Word, WriteBack, Pre Inc, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      temp = LHS + LSImmRHS;
@@ -2453,7 +2465,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x5b:		/* Load Word, WriteBack, Pre Inc, Immed */
+	    case 0x5b:		/* Load Word, WriteBack, Pre Inc, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      temp = LHS + LSImmRHS;
@@ -2461,15 +2473,15 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x5c:		/* Store Byte, No WriteBack, Pre Inc, Immed */
+	    case 0x5c:		/* Store Byte, No WriteBack, Pre Inc, Immed.  */
 	      (void) StoreByte (state, instr, LHS + LSImmRHS);
 	      break;
 
-	    case 0x5d:		/* Load Byte, No WriteBack, Pre Inc, Immed */
+	    case 0x5d:		/* Load Byte, No WriteBack, Pre Inc, Immed.  */
 	      (void) LoadByte (state, instr, LHS + LSImmRHS, LUNSIGNED);
 	      break;
 
-	    case 0x5e:		/* Store Byte, WriteBack, Pre Inc, Immed */
+	    case 0x5e:		/* Store Byte, WriteBack, Pre Inc, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      temp = LHS + LSImmRHS;
@@ -2477,7 +2489,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x5f:		/* Load Byte, WriteBack, Pre Inc, Immed */
+	    case 0x5f:		/* Load Byte, WriteBack, Pre Inc, Immed.  */
 	      UNDEF_LSRBaseEQDestWb;
 	      UNDEF_LSRPCBaseWb;
 	      temp = LHS + LSImmRHS;
@@ -2488,7 +2500,7 @@ check_PMUintr:
 
 	      /* Single Data Transfer Register RHS Instructions.  */
 
-	    case 0x60:		/* Store Word, No WriteBack, Post Dec, Reg */
+	    case 0x60:		/* Store Word, No WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2503,7 +2515,7 @@ check_PMUintr:
 		LSBase = lhs - LSRegRHS;
 	      break;
 
-	    case 0x61:		/* Load Word, No WriteBack, Post Dec, Reg */
+	    case 0x61:		/* Load Word, No WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2519,7 +2531,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x62:		/* Store Word, WriteBack, Post Dec, Reg */
+	    case 0x62:		/* Store Word, WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2536,7 +2548,7 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x63:		/* Load Word, WriteBack, Post Dec, Reg */
+	    case 0x63:		/* Load Word, WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2554,7 +2566,7 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x64:		/* Store Byte, No WriteBack, Post Dec, Reg */
+	    case 0x64:		/* Store Byte, No WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2569,7 +2581,7 @@ check_PMUintr:
 		LSBase = lhs - LSRegRHS;
 	      break;
 
-	    case 0x65:		/* Load Byte, No WriteBack, Post Dec, Reg */
+	    case 0x65:		/* Load Byte, No WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2585,7 +2597,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x66:		/* Store Byte, WriteBack, Post Dec, Reg */
+	    case 0x66:		/* Store Byte, WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2602,7 +2614,7 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x67:		/* Load Byte, WriteBack, Post Dec, Reg */
+	    case 0x67:		/* Load Byte, WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2620,7 +2632,7 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x68:		/* Store Word, No WriteBack, Post Inc, Reg */
+	    case 0x68:		/* Store Word, No WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2635,7 +2647,7 @@ check_PMUintr:
 		LSBase = lhs + LSRegRHS;
 	      break;
 
-	    case 0x69:		/* Load Word, No WriteBack, Post Inc, Reg */
+	    case 0x69:		/* Load Word, No WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2651,7 +2663,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x6a:		/* Store Word, WriteBack, Post Inc, Reg */
+	    case 0x6a:		/* Store Word, WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2668,7 +2680,7 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x6b:		/* Load Word, WriteBack, Post Inc, Reg */
+	    case 0x6b:		/* Load Word, WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2686,7 +2698,7 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x6c:		/* Store Byte, No WriteBack, Post Inc, Reg */
+	    case 0x6c:		/* Store Byte, No WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2701,7 +2713,7 @@ check_PMUintr:
 		LSBase = lhs + LSRegRHS;
 	      break;
 
-	    case 0x6d:		/* Load Byte, No WriteBack, Post Inc, Reg */
+	    case 0x6d:		/* Load Byte, No WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2717,7 +2729,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x6e:		/* Store Byte, WriteBack, Post Inc, Reg */
+	    case 0x6e:		/* Store Byte, WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2734,7 +2746,7 @@ check_PMUintr:
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
-	    case 0x6f:		/* Load Byte, WriteBack, Post Inc, Reg */
+	    case 0x6f:		/* Load Byte, WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2753,7 +2765,7 @@ check_PMUintr:
 	      break;
 
 
-	    case 0x70:		/* Store Word, No WriteBack, Pre Dec, Reg */
+	    case 0x70:		/* Store Word, No WriteBack, Pre Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2762,7 +2774,7 @@ check_PMUintr:
 	      (void) StoreWord (state, instr, LHS - LSRegRHS);
 	      break;
 
-	    case 0x71:		/* Load Word, No WriteBack, Pre Dec, Reg */
+	    case 0x71:		/* Load Word, No WriteBack, Pre Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2771,7 +2783,7 @@ check_PMUintr:
 	      (void) LoadWord (state, instr, LHS - LSRegRHS);
 	      break;
 
-	    case 0x72:		/* Store Word, WriteBack, Pre Dec, Reg */
+	    case 0x72:		/* Store Word, WriteBack, Pre Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2786,7 +2798,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x73:		/* Load Word, WriteBack, Pre Dec, Reg */
+	    case 0x73:		/* Load Word, WriteBack, Pre Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2801,7 +2813,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x74:		/* Store Byte, No WriteBack, Pre Dec, Reg */
+	    case 0x74:		/* Store Byte, No WriteBack, Pre Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2810,7 +2822,7 @@ check_PMUintr:
 	      (void) StoreByte (state, instr, LHS - LSRegRHS);
 	      break;
 
-	    case 0x75:		/* Load Byte, No WriteBack, Pre Dec, Reg */
+	    case 0x75:		/* Load Byte, No WriteBack, Pre Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2819,7 +2831,7 @@ check_PMUintr:
 	      (void) LoadByte (state, instr, LHS - LSRegRHS, LUNSIGNED);
 	      break;
 
-	    case 0x76:		/* Store Byte, WriteBack, Pre Dec, Reg */
+	    case 0x76:		/* Store Byte, WriteBack, Pre Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2834,7 +2846,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x77:		/* Load Byte, WriteBack, Pre Dec, Reg */
+	    case 0x77:		/* Load Byte, WriteBack, Pre Dec, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2849,7 +2861,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x78:		/* Store Word, No WriteBack, Pre Inc, Reg */
+	    case 0x78:		/* Store Word, No WriteBack, Pre Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2858,7 +2870,7 @@ check_PMUintr:
 	      (void) StoreWord (state, instr, LHS + LSRegRHS);
 	      break;
 
-	    case 0x79:		/* Load Word, No WriteBack, Pre Inc, Reg */
+	    case 0x79:		/* Load Word, No WriteBack, Pre Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2867,7 +2879,7 @@ check_PMUintr:
 	      (void) LoadWord (state, instr, LHS + LSRegRHS);
 	      break;
 
-	    case 0x7a:		/* Store Word, WriteBack, Pre Inc, Reg */
+	    case 0x7a:		/* Store Word, WriteBack, Pre Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2882,7 +2894,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x7b:		/* Load Word, WriteBack, Pre Inc, Reg */
+	    case 0x7b:		/* Load Word, WriteBack, Pre Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2897,7 +2909,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x7c:		/* Store Byte, No WriteBack, Pre Inc, Reg */
+	    case 0x7c:		/* Store Byte, No WriteBack, Pre Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2906,7 +2918,7 @@ check_PMUintr:
 	      (void) StoreByte (state, instr, LHS + LSRegRHS);
 	      break;
 
-	    case 0x7d:		/* Load Byte, No WriteBack, Pre Inc, Reg */
+	    case 0x7d:		/* Load Byte, No WriteBack, Pre Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2915,7 +2927,7 @@ check_PMUintr:
 	      (void) LoadByte (state, instr, LHS + LSRegRHS, LUNSIGNED);
 	      break;
 
-	    case 0x7e:		/* Store Byte, WriteBack, Pre Inc, Reg */
+	    case 0x7e:		/* Store Byte, WriteBack, Pre Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  ARMul_UndefInstr (state, instr);
@@ -2930,7 +2942,7 @@ check_PMUintr:
 		LSBase = temp;
 	      break;
 
-	    case 0x7f:		/* Load Byte, WriteBack, Pre Inc, Reg */
+	    case 0x7f:		/* Load Byte, WriteBack, Pre Inc, Reg.  */
 	      if (BIT (4))
 		{
 		  /* Check for the special breakpoint opcode.
@@ -2957,146 +2969,146 @@ check_PMUintr:
 
 	      /* Multiple Data Transfer Instructions.  */
 
-	    case 0x80:		/* Store, No WriteBack, Post Dec */
+	    case 0x80:		/* Store, No WriteBack, Post Dec.  */
 	      STOREMULT (instr, LSBase - LSMNumRegs + 4L, 0L);
 	      break;
 
-	    case 0x81:		/* Load, No WriteBack, Post Dec */
+	    case 0x81:		/* Load, No WriteBack, Post Dec.  */
 	      LOADMULT (instr, LSBase - LSMNumRegs + 4L, 0L);
 	      break;
 
-	    case 0x82:		/* Store, WriteBack, Post Dec */
+	    case 0x82:		/* Store, WriteBack, Post Dec.  */
 	      temp = LSBase - LSMNumRegs;
 	      STOREMULT (instr, temp + 4L, temp);
 	      break;
 
-	    case 0x83:		/* Load, WriteBack, Post Dec */
+	    case 0x83:		/* Load, WriteBack, Post Dec.  */
 	      temp = LSBase - LSMNumRegs;
 	      LOADMULT (instr, temp + 4L, temp);
 	      break;
 
-	    case 0x84:		/* Store, Flags, No WriteBack, Post Dec */
+	    case 0x84:		/* Store, Flags, No WriteBack, Post Dec.  */
 	      STORESMULT (instr, LSBase - LSMNumRegs + 4L, 0L);
 	      break;
 
-	    case 0x85:		/* Load, Flags, No WriteBack, Post Dec */
+	    case 0x85:		/* Load, Flags, No WriteBack, Post Dec.  */
 	      LOADSMULT (instr, LSBase - LSMNumRegs + 4L, 0L);
 	      break;
 
-	    case 0x86:		/* Store, Flags, WriteBack, Post Dec */
+	    case 0x86:		/* Store, Flags, WriteBack, Post Dec.  */
 	      temp = LSBase - LSMNumRegs;
 	      STORESMULT (instr, temp + 4L, temp);
 	      break;
 
-	    case 0x87:		/* Load, Flags, WriteBack, Post Dec */
+	    case 0x87:		/* Load, Flags, WriteBack, Post Dec.  */
 	      temp = LSBase - LSMNumRegs;
 	      LOADSMULT (instr, temp + 4L, temp);
 	      break;
 
-	    case 0x88:		/* Store, No WriteBack, Post Inc */
+	    case 0x88:		/* Store, No WriteBack, Post Inc.  */
 	      STOREMULT (instr, LSBase, 0L);
 	      break;
 
-	    case 0x89:		/* Load, No WriteBack, Post Inc */
+	    case 0x89:		/* Load, No WriteBack, Post Inc.  */
 	      LOADMULT (instr, LSBase, 0L);
 	      break;
 
-	    case 0x8a:		/* Store, WriteBack, Post Inc */
+	    case 0x8a:		/* Store, WriteBack, Post Inc.  */
 	      temp = LSBase;
 	      STOREMULT (instr, temp, temp + LSMNumRegs);
 	      break;
 
-	    case 0x8b:		/* Load, WriteBack, Post Inc */
+	    case 0x8b:		/* Load, WriteBack, Post Inc.  */
 	      temp = LSBase;
 	      LOADMULT (instr, temp, temp + LSMNumRegs);
 	      break;
 
-	    case 0x8c:		/* Store, Flags, No WriteBack, Post Inc */
+	    case 0x8c:		/* Store, Flags, No WriteBack, Post Inc.  */
 	      STORESMULT (instr, LSBase, 0L);
 	      break;
 
-	    case 0x8d:		/* Load, Flags, No WriteBack, Post Inc */
+	    case 0x8d:		/* Load, Flags, No WriteBack, Post Inc.  */
 	      LOADSMULT (instr, LSBase, 0L);
 	      break;
 
-	    case 0x8e:		/* Store, Flags, WriteBack, Post Inc */
+	    case 0x8e:		/* Store, Flags, WriteBack, Post Inc.  */
 	      temp = LSBase;
 	      STORESMULT (instr, temp, temp + LSMNumRegs);
 	      break;
 
-	    case 0x8f:		/* Load, Flags, WriteBack, Post Inc */
+	    case 0x8f:		/* Load, Flags, WriteBack, Post Inc.  */
 	      temp = LSBase;
 	      LOADSMULT (instr, temp, temp + LSMNumRegs);
 	      break;
 
-	    case 0x90:		/* Store, No WriteBack, Pre Dec */
+	    case 0x90:		/* Store, No WriteBack, Pre Dec.  */
 	      STOREMULT (instr, LSBase - LSMNumRegs, 0L);
 	      break;
 
-	    case 0x91:		/* Load, No WriteBack, Pre Dec */
+	    case 0x91:		/* Load, No WriteBack, Pre Dec.  */
 	      LOADMULT (instr, LSBase - LSMNumRegs, 0L);
 	      break;
 
-	    case 0x92:		/* Store, WriteBack, Pre Dec */
+	    case 0x92:		/* Store, WriteBack, Pre Dec.  */
 	      temp = LSBase - LSMNumRegs;
 	      STOREMULT (instr, temp, temp);
 	      break;
 
-	    case 0x93:		/* Load, WriteBack, Pre Dec */
+	    case 0x93:		/* Load, WriteBack, Pre Dec.  */
 	      temp = LSBase - LSMNumRegs;
 	      LOADMULT (instr, temp, temp);
 	      break;
 
-	    case 0x94:		/* Store, Flags, No WriteBack, Pre Dec */
+	    case 0x94:		/* Store, Flags, No WriteBack, Pre Dec.  */
 	      STORESMULT (instr, LSBase - LSMNumRegs, 0L);
 	      break;
 
-	    case 0x95:		/* Load, Flags, No WriteBack, Pre Dec */
+	    case 0x95:		/* Load, Flags, No WriteBack, Pre Dec.  */
 	      LOADSMULT (instr, LSBase - LSMNumRegs, 0L);
 	      break;
 
-	    case 0x96:		/* Store, Flags, WriteBack, Pre Dec */
+	    case 0x96:		/* Store, Flags, WriteBack, Pre Dec.  */
 	      temp = LSBase - LSMNumRegs;
 	      STORESMULT (instr, temp, temp);
 	      break;
 
-	    case 0x97:		/* Load, Flags, WriteBack, Pre Dec */
+	    case 0x97:		/* Load, Flags, WriteBack, Pre Dec.  */
 	      temp = LSBase - LSMNumRegs;
 	      LOADSMULT (instr, temp, temp);
 	      break;
 
-	    case 0x98:		/* Store, No WriteBack, Pre Inc */
+	    case 0x98:		/* Store, No WriteBack, Pre Inc.  */
 	      STOREMULT (instr, LSBase + 4L, 0L);
 	      break;
 
-	    case 0x99:		/* Load, No WriteBack, Pre Inc */
+	    case 0x99:		/* Load, No WriteBack, Pre Inc.  */
 	      LOADMULT (instr, LSBase + 4L, 0L);
 	      break;
 
-	    case 0x9a:		/* Store, WriteBack, Pre Inc */
+	    case 0x9a:		/* Store, WriteBack, Pre Inc.  */
 	      temp = LSBase;
 	      STOREMULT (instr, temp + 4L, temp + LSMNumRegs);
 	      break;
 
-	    case 0x9b:		/* Load, WriteBack, Pre Inc */
+	    case 0x9b:		/* Load, WriteBack, Pre Inc.  */
 	      temp = LSBase;
 	      LOADMULT (instr, temp + 4L, temp + LSMNumRegs);
 	      break;
 
-	    case 0x9c:		/* Store, Flags, No WriteBack, Pre Inc */
+	    case 0x9c:		/* Store, Flags, No WriteBack, Pre Inc.  */
 	      STORESMULT (instr, LSBase + 4L, 0L);
 	      break;
 
-	    case 0x9d:		/* Load, Flags, No WriteBack, Pre Inc */
+	    case 0x9d:		/* Load, Flags, No WriteBack, Pre Inc.  */
 	      LOADSMULT (instr, LSBase + 4L, 0L);
 	      break;
 
-	    case 0x9e:		/* Store, Flags, WriteBack, Pre Inc */
+	    case 0x9e:		/* Store, Flags, WriteBack, Pre Inc.  */
 	      temp = LSBase;
 	      STORESMULT (instr, temp + 4L, temp + LSMNumRegs);
 	      break;
 
-	    case 0x9f:		/* Load, Flags, WriteBack, Pre Inc */
+	    case 0x9f:		/* Load, Flags, WriteBack, Pre Inc.  */
 	      temp = LSBase;
 	      LOADSMULT (instr, temp + 4L, temp + LSMNumRegs);
 	      break;
@@ -3169,6 +3181,7 @@ check_PMUintr:
 	      FLUSHPIPE;
 	      break;
 
+
 	      /* Co-Processor Data Transfers.  */
 	    case 0xc4:
 	      if (state->is_v5)
@@ -3205,7 +3218,7 @@ check_PMUintr:
 		}
 	      /* Drop through.  */
 	      
-	    case 0xc0:		/* Store , No WriteBack , Post Dec */
+	    case 0xc0:		/* Store , No WriteBack , Post Dec.  */
 	      ARMul_STC (state, instr, LHS);
 	      break;
 
@@ -3250,91 +3263,91 @@ check_PMUintr:
 		}
 	      /* Drop through.  */
 
-	    case 0xc1:		/* Load , No WriteBack , Post Dec */
+	    case 0xc1:		/* Load , No WriteBack , Post Dec.  */
 	      ARMul_LDC (state, instr, LHS);
 	      break;
 
 	    case 0xc2:
-	    case 0xc6:		/* Store , WriteBack , Post Dec */
+	    case 0xc6:		/* Store , WriteBack , Post Dec.  */
 	      lhs = LHS;
 	      state->Base = lhs - LSCOff;
 	      ARMul_STC (state, instr, lhs);
 	      break;
 
 	    case 0xc3:
-	    case 0xc7:		/* Load , WriteBack , Post Dec */
+	    case 0xc7:		/* Load , WriteBack , Post Dec.  */
 	      lhs = LHS;
 	      state->Base = lhs - LSCOff;
 	      ARMul_LDC (state, instr, lhs);
 	      break;
 
 	    case 0xc8:
-	    case 0xcc:		/* Store , No WriteBack , Post Inc */
+	    case 0xcc:		/* Store , No WriteBack , Post Inc.  */
 	      ARMul_STC (state, instr, LHS);
 	      break;
 
 	    case 0xc9:
-	    case 0xcd:		/* Load , No WriteBack , Post Inc */
+	    case 0xcd:		/* Load , No WriteBack , Post Inc.  */
 	      ARMul_LDC (state, instr, LHS);
 	      break;
 
 	    case 0xca:
-	    case 0xce:		/* Store , WriteBack , Post Inc */
+	    case 0xce:		/* Store , WriteBack , Post Inc.  */
 	      lhs = LHS;
 	      state->Base = lhs + LSCOff;
 	      ARMul_STC (state, instr, LHS);
 	      break;
 
 	    case 0xcb:
-	    case 0xcf:		/* Load , WriteBack , Post Inc */
+	    case 0xcf:		/* Load , WriteBack , Post Inc.  */
 	      lhs = LHS;
 	      state->Base = lhs + LSCOff;
 	      ARMul_LDC (state, instr, LHS);
 	      break;
 
 	    case 0xd0:
-	    case 0xd4:		/* Store , No WriteBack , Pre Dec */
+	    case 0xd4:		/* Store , No WriteBack , Pre Dec.  */
 	      ARMul_STC (state, instr, LHS - LSCOff);
 	      break;
 
 	    case 0xd1:
-	    case 0xd5:		/* Load , No WriteBack , Pre Dec */
+	    case 0xd5:		/* Load , No WriteBack , Pre Dec.  */
 	      ARMul_LDC (state, instr, LHS - LSCOff);
 	      break;
 
 	    case 0xd2:
-	    case 0xd6:		/* Store , WriteBack , Pre Dec */
+	    case 0xd6:		/* Store , WriteBack , Pre Dec.  */
 	      lhs = LHS - LSCOff;
 	      state->Base = lhs;
 	      ARMul_STC (state, instr, lhs);
 	      break;
 
 	    case 0xd3:
-	    case 0xd7:		/* Load , WriteBack , Pre Dec */
+	    case 0xd7:		/* Load , WriteBack , Pre Dec.  */
 	      lhs = LHS - LSCOff;
 	      state->Base = lhs;
 	      ARMul_LDC (state, instr, lhs);
 	      break;
 
 	    case 0xd8:
-	    case 0xdc:		/* Store , No WriteBack , Pre Inc */
+	    case 0xdc:		/* Store , No WriteBack , Pre Inc.  */
 	      ARMul_STC (state, instr, LHS + LSCOff);
 	      break;
 
 	    case 0xd9:
-	    case 0xdd:		/* Load , No WriteBack , Pre Inc */
+	    case 0xdd:		/* Load , No WriteBack , Pre Inc.  */
 	      ARMul_LDC (state, instr, LHS + LSCOff);
 	      break;
 
 	    case 0xda:
-	    case 0xde:		/* Store , WriteBack , Pre Inc */
+	    case 0xde:		/* Store , WriteBack , Pre Inc.  */
 	      lhs = LHS + LSCOff;
 	      state->Base = lhs;
 	      ARMul_STC (state, instr, lhs);
 	      break;
 
 	    case 0xdb:
-	    case 0xdf:		/* Load , WriteBack , Pre Inc */
+	    case 0xdf:		/* Load , WriteBack , Pre Inc.  */
 	      lhs = LHS + LSCOff;
 	      state->Base = lhs;
 	      ARMul_LDC (state, instr, lhs);
@@ -3342,6 +3355,7 @@ check_PMUintr:
 
 
 	      /* Co-Processor Register Transfers (MCR) and Data Ops.  */
+
 	    case 0xe2:
 	      if (! CP_ACCESS_ALLOWED (state, CPNum))
 		{
@@ -3438,7 +3452,8 @@ check_PMUintr:
 	    case 0xec:
 	    case 0xee:
 	      if (BIT (4))
-		{		/* MCR */
+		{
+		  /* MCR.  */
 		  if (DESTReg == 15)
 		    {
 		      UNDEF_MCRPC;
@@ -3452,7 +3467,8 @@ check_PMUintr:
 		  else
 		    ARMul_MCR (state, instr, DEST);
 		}
-	      else		/* CDP Part 1 */
+	      else
+		/* CDP Part 1.  */
 		ARMul_CDP (state, instr);
 	      break;
 
@@ -3467,7 +3483,8 @@ check_PMUintr:
 	    case 0xed:
 	    case 0xef:
 	      if (BIT (4))
-		{		/* MRC */
+		{
+		  /* MRC */
 		  temp = ARMul_MRC (state, instr);
 		  if (DESTReg == 15)
 		    {
@@ -3479,12 +3496,13 @@ check_PMUintr:
 		  else
 		    DEST = temp;
 		}
-	      else		/* CDP Part 2 */
+	      else
+		/* CDP Part 2.  */
 		ARMul_CDP (state, instr);
 	      break;
 
 
-	      /*  SWI instruction.  */
+	      /* SWI instruction.  */
 	    case 0xf0:
 	    case 0xf1:
 	    case 0xf2:
@@ -3624,13 +3642,14 @@ GetDPRegRHS (ARMul_State * state, ARMword instr)
 	  else
 	    return ((ARMword) ((long int) base >> (int) shamt));
 	case ROR:
-	  if (shamt == 0)	/* its an RRX */
+	  if (shamt == 0)
+	    /* It's an RRX.  */
 	    return ((base >> 1) | (CFLAG << 31));
 	  else
 	    return ((base << (32 - shamt)) | (base >> shamt));
 	}
     }
-  
+
   return 0;
 }
 
@@ -3735,6 +3754,7 @@ GetDPSRegRHS (ARMul_State * state, ARMword instr)
 #endif
 	base = state->Reg[base];
       shamt = BITS (7, 11);
+
       switch ((int) BITS (5, 6))
 	{
 	case LSL:
@@ -3764,7 +3784,8 @@ GetDPSRegRHS (ARMul_State * state, ARMword instr)
 	    }
 	case ROR:
 	  if (shamt == 0)
-	    {			/* its an RRX */
+	    {
+	      /* It's an RRX.  */
 	      shamt = CFLAG;
 	      ASSIGNC (base & 1);
 	      return ((base >> 1) | (shamt << 31));
@@ -3796,12 +3817,14 @@ WriteR15 (ARMul_State * state, ARMword src)
   else
 #endif
     src &= 0xfffffffc;
+
 #ifdef MODE32
   state->Reg[15] = src & PCBITS;
 #else
   state->Reg[15] = (src & R15PCBITS) | ECC | ER15INT | EMODE;
   ARMul_R15Altered (state);
 #endif
+
   FLUSHPIPE;
 }
 
@@ -3826,14 +3849,17 @@ WriteSR15 (ARMul_State * state, ARMword src)
 #else
 #ifdef MODET
   if (TFLAG)
-    abort (); /* ARMul_R15Altered would have to support it.  */
+    /* ARMul_R15Altered would have to support it.  */
+    abort ();
   else
 #endif
     src &= 0xfffffffc;
+
   if (state->Bank == USERBANK)
     state->Reg[15] = (src & (CCBITS | R15PCBITS)) | ER15INT | EMODE;
   else
     state->Reg[15] = src;
+
   ARMul_R15Altered (state);
 #endif
   FLUSHPIPE;
@@ -3875,7 +3901,8 @@ GetLSRegRHS (ARMul_State * state, ARMword instr)
   base = RHSReg;
 #ifndef MODE32
   if (base == 15)
-    base = ECC | ER15INT | R15PC | EMODE;	/* Now forbidden, but ....  */
+    /* Now forbidden, but ...  */
+    base = ECC | ER15INT | R15PC | EMODE;
   else
 #endif
     base = state->Reg[base];
@@ -3896,7 +3923,8 @@ GetLSRegRHS (ARMul_State * state, ARMword instr)
       else
 	return ((ARMword) ((long int) base >> (int) shamt));
     case ROR:
-      if (shamt == 0)		/* its an RRX */
+      if (shamt == 0)
+	/* It's an RRX.  */
 	return ((base >> 1) | (CFLAG << 31));
       else
 	return ((base << (32 - shamt)) | (base >> shamt));
@@ -3916,12 +3944,13 @@ GetLS7RHS (ARMul_State * state, ARMword instr)
       /* Register.  */
 #ifndef MODE32
       if (RHSReg == 15)
-	return ECC | ER15INT | R15PC | EMODE;	/* Now forbidden, but ...  */
+	/* Now forbidden, but ...  */
+	return ECC | ER15INT | R15PC | EMODE;
 #endif
       return state->Reg[RHSReg];
     }
 
-  /* Otherwise an immediate.  */
+  /* Immediate.  */
   return BITS (0, 3) | (BITS (8, 11) << 4);
 }
 
@@ -3943,7 +3972,7 @@ LoadWord (ARMul_State * state, ARMword instr, ARMword address)
   if (state->Aborted)
     {
       TAKEABORT;
-      return (state->lateabtSig);
+      return state->lateabtSig;
     }
   if (address & 3)
     dest = ARMul_Align (state, address, dest);
@@ -3965,22 +3994,19 @@ LoadHalfWord (ARMul_State * state, ARMword instr, ARMword address,
   BUSUSEDINCPCS;
 #ifndef MODE32
   if (ADDREXCEPT (address))
-    {
-      INTERNALABORT (address);
-    }
+    INTERNALABORT (address);
 #endif
   dest = ARMul_LoadHalfWord (state, address);
   if (state->Aborted)
     {
       TAKEABORT;
-      return (state->lateabtSig);
+      return state->lateabtSig;
     }
   UNDEF_LSRBPC;
   if (signextend)
-    {
-      if (dest & 1 << (16 - 1))
-	dest = (dest & ((1 << 16) - 1)) - (1 << 16);
-    }
+    if (dest & 1 << (16 - 1))
+      dest = (dest & ((1 << 16) - 1)) - (1 << 16);
+
   WRITEDEST (dest);
   ARMul_Icycles (state, 1, 0L);
   return (DESTReg != LHSReg);
@@ -3998,24 +4024,22 @@ LoadByte (ARMul_State * state, ARMword instr, ARMword address, int signextend)
   BUSUSEDINCPCS;
 #ifndef MODE32
   if (ADDREXCEPT (address))
-    {
-      INTERNALABORT (address);
-    }
+    INTERNALABORT (address);
 #endif
   dest = ARMul_LoadByte (state, address);
   if (state->Aborted)
     {
       TAKEABORT;
-      return (state->lateabtSig);
+      return state->lateabtSig;
     }
   UNDEF_LSRBPC;
   if (signextend)
-    {
-      if (dest & 1 << (8 - 1))
-	dest = (dest & ((1 << 8) - 1)) - (1 << 8);
-    }
+    if (dest & 1 << (8 - 1))
+      dest = (dest & ((1 << 8) - 1)) - (1 << 8);
+
   WRITEDEST (dest);
   ARMul_Icycles (state, 1, 0L);
+
   return (DESTReg != LHSReg);
 }
 
@@ -4288,7 +4312,6 @@ StoreHalfWord (ARMul_State * state, ARMword instr, ARMword address)
       TAKEABORT;
       return state->lateabtSig;
     }
-
   return TRUE;
 }
 
@@ -4318,7 +4341,7 @@ StoreByte (ARMul_State * state, ARMword instr, ARMword address)
   if (state->Aborted)
     {
       TAKEABORT;
-      return (state->lateabtSig);
+      return state->lateabtSig;
     }
   UNDEF_LSRBPC;
   return TRUE;
@@ -4327,7 +4350,7 @@ StoreByte (ARMul_State * state, ARMword instr, ARMword address)
 /* This function does the work of loading the registers listed in an LDM
    instruction, when the S bit is clear.  The code here is always increment
    after, it's up to the caller to get the input address correct and to
-   handle base register modification.a  */
+   handle base register modification.  */
 
 static void
 LoadMult (ARMul_State * state, ARMword instr, ARMword address, ARMword WBBase)
@@ -4345,8 +4368,9 @@ LoadMult (ARMul_State * state, ARMword instr, ARMword address, ARMword WBBase)
   if (BIT (21) && LHSReg != 15)
     LSBase = WBBase;
 
+  /* N cycle first.  */
   for (temp = 0; !BIT (temp); temp++)
-    ;	/* N cycle first */
+    ;
 
   dest = ARMul_LoadWordN (state, address);
 
@@ -4358,9 +4382,11 @@ LoadMult (ARMul_State * state, ARMword instr, ARMword address, ARMword WBBase)
       state->Aborted = ARMul_DataAbortV;
     }
 
-  for (; temp < 16; temp++)	/* S cycles from here on */
+  /* S cycles from here on.  */
+  for (; temp < 16; temp ++)
     if (BIT (temp))
-      {				/* load this register */
+      {
+	/* Load this register.  */
 	address += 4;
 	dest = ARMul_LoadWordS (state, address);
 
@@ -4422,8 +4448,9 @@ LoadSMult (ARMul_State * state,
       UNDEF_LSMUserBankWb;
     }
 
+  /* N cycle first.  */
   for (temp = 0; !BIT (temp); temp ++)
-    ;	/* N cycle first.  */
+    ;
 
   dest = ARMul_LoadWordN (state, address);
 
@@ -4431,12 +4458,12 @@ LoadSMult (ARMul_State * state,
     state->Reg[temp++] = dest;
   else if (!state->Aborted)
     {
-      XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
+      XScale_set_fsr_far (state, ARMul_CP15_R5_ST_ALIGN, address);
       state->Aborted = ARMul_DataAbortV;
     }
 
+  /* S cycles from here on.  */
   for (; temp < 16; temp++)
-    /* S cycles from here on.  */
     if (BIT (temp))
       {
 	/* Load this register.  */
@@ -4447,7 +4474,7 @@ LoadSMult (ARMul_State * state,
 	  state->Reg[temp] = dest;
 	else if (!state->Aborted)
 	  {
-            XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
+            XScale_set_fsr_far (state, ARMul_CP15_R5_ST_ALIGN, address);
 	    state->Aborted = ARMul_DataAbortV;
 	  }
       }
@@ -4501,8 +4528,10 @@ LoadSMult (ARMul_State * state,
    handle base register modification.  */
 
 static void
-StoreMult (ARMul_State * state, ARMword instr,
-	   ARMword address, ARMword WBBase)
+StoreMult (ARMul_State * state,
+	   ARMword instr,
+	   ARMword address,
+	   ARMword WBBase)
 {
   ARMword temp;
 
@@ -4522,8 +4551,9 @@ StoreMult (ARMul_State * state, ARMword instr,
     PATCHR15;
 #endif
 
-  for (temp = 0; !BIT (temp); temp++)
-    ;	/* N cycle first.  */
+  /* N cycle first.  */
+  for (temp = 0; !BIT (temp); temp ++)
+    ;
 
 #ifdef MODE32
   ARMul_StoreWordN (state, address, state->Reg[temp++]);
@@ -4540,6 +4570,7 @@ StoreMult (ARMul_State * state, ARMword instr,
 	    address += 4;
 	    (void) ARMul_LoadWordS (state, address);
 	  }
+
       if (BIT (21) && LHSReg != 15)
 	LSBase = WBBase;
       TAKEABORT;
@@ -4551,14 +4582,15 @@ StoreMult (ARMul_State * state, ARMword instr,
 
   if (state->abortSig && !state->Aborted)
     {
-      XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
+      XScale_set_fsr_far (state, ARMul_CP15_R5_ST_ALIGN, address);
       state->Aborted = ARMul_DataAbortV;
     }
 
   if (BIT (21) && LHSReg != 15)
     LSBase = WBBase;
 
-  for (; temp < 16; temp++)	/* S cycles from here on */
+  /* S cycles from here on.  */
+  for (; temp < 16; temp ++)
     if (BIT (temp))
       {
 	/* Save this register.  */
@@ -4568,7 +4600,7 @@ StoreMult (ARMul_State * state, ARMword instr,
 
 	if (state->abortSig && !state->Aborted)
 	  {
-            XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
+            XScale_set_fsr_far (state, ARMul_CP15_R5_ST_ALIGN, address);
 	    state->Aborted = ARMul_DataAbortV;
 	  }
       }
@@ -4635,7 +4667,6 @@ StoreSMult (ARMul_State * state,
 	LSBase = WBBase;
 
       TAKEABORT;
-
       return;
     }
   else
@@ -4644,12 +4675,12 @@ StoreSMult (ARMul_State * state,
 
   if (state->abortSig && !state->Aborted)
     {
-      XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
+      XScale_set_fsr_far (state, ARMul_CP15_R5_ST_ALIGN, address);
       state->Aborted = ARMul_DataAbortV;
     }
 
+  /* S cycles from here on.  */
   for (; temp < 16; temp++)
-    /* S cycles from here on.  */
     if (BIT (temp))
       {
 	/* Save this register.  */
@@ -4659,7 +4690,7 @@ StoreSMult (ARMul_State * state,
 
 	if (state->abortSig && !state->Aborted)
 	  {
-            XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
+            XScale_set_fsr_far (state, ARMul_CP15_R5_ST_ALIGN, address);
 	    state->Aborted = ARMul_DataAbortV;
 	  }
       }
@@ -4686,13 +4717,13 @@ Add32 (ARMword a1, ARMword a2, int *carry)
   unsigned int ua1 = (unsigned int) a1;
 
   /* If (result == RdLo) and (state->Reg[nRdLo] == 0),
-     or (result > RdLo) then we have no carry: */
+     or (result > RdLo) then we have no carry.  */
   if ((uresult == ua1) ? (a2 != 0) : (uresult < ua1))
     *carry = 1;
   else
     *carry = 0;
 
-  return (result);
+  return result;
 }
 
 /* This function does the work of multiplying
@@ -4733,7 +4764,6 @@ Multiply64 (ARMul_State * state, ARMword instr, int msigned, int scc)
       if (msigned)
 	{
 	  /* Compute sign of result and adjust operands if necessary.  */
-
 	  sign = (Rm ^ Rs) & 0x80000000;
 
 	  if (((signed long) Rm) < 0)
@@ -4761,7 +4791,6 @@ Multiply64 (ARMul_State * state, ARMword instr, int msigned, int scc)
       if (sign)
 	{
 	  /* Negate result if necessary.  */
-
 	  RdLo = ~RdLo;
 	  RdHi = ~RdHi;
 	  if (RdLo == 0xFFFFFFFF)
@@ -4772,7 +4801,6 @@ Multiply64 (ARMul_State * state, ARMword instr, int msigned, int scc)
 	  else
 	    RdLo += 1;
 	}
-      /* Else undefined result.  */
 
       state->Reg[nRdLo] = RdLo;
       state->Reg[nRdHi] = RdHi;
@@ -4781,11 +4809,9 @@ Multiply64 (ARMul_State * state, ARMword instr, int msigned, int scc)
     fprintf (stderr, "sim: MULTIPLY64 - INVALID ARGUMENTS\n");
 
   if (scc)
-    {
-      /* Ensure that both RdHi and RdLo are used to compute Z,
-	 but don't let RdLo's sign bit make it to N.  */
-      ARMul_NegZero (state, RdHi | (RdLo >> 16) | (RdLo & 0xFFFF));
-    }
+    /* Ensure that both RdHi and RdLo are used to compute Z,
+       but don't let RdLo's sign bit make it to N.  */
+    ARMul_NegZero (state, RdHi | (RdLo >> 16) | (RdLo & 0xFFFF));
 
   /* The cycle count depends on whether the instruction is a signed or
      unsigned multiply, and what bits are clear in the multiplier.  */

@@ -305,9 +305,9 @@ extern ARMword isize;
 #define NEXTCYCLE(c)
 
 /* Macros to extract parts of instructions.  */
-#define DESTReg (BITS(12,15))
-#define LHSReg (BITS(16,19))
-#define RHSReg (BITS(0,3))
+#define DESTReg (BITS (12, 15))
+#define LHSReg  (BITS (16, 19))
+#define RHSReg  (BITS ( 0,  3))
 
 #define DEST (state->Reg[DESTReg])
 
@@ -367,42 +367,62 @@ extern ARMword isize;
 
 /* Determine if access to coprocessor CP is permitted.
    The XScale has a register in CP15 which controls access to CP0 - CP13.  */
-#define CP_ACCESS_ALLOWED(STATE, CP)                \
-    (   ((CP) >= 14) \
-     || (! (STATE)->is_XScale) \
+#define CP_ACCESS_ALLOWED(STATE, CP)			\
+    (   ((CP) >= 14)					\
+     || (! (STATE)->is_XScale)				\
      || (read_cp15_reg (15, 0, 1) & (1 << (CP))))
 
 /* Macro to rotate n right by b bits.  */
 #define ROTATER(n, b) (((n) >> (b)) | ((n) << (32 - (b))))
 
 /* Macros to store results of instructions.  */
-#define WRITEDEST(d) if (DESTReg == 15) \
-                        WriteR15 (state, d) ; \
-                     else \
-                          DEST = d
+#define WRITEDEST(d)				\
+  do						\
+    {						\
+      if (DESTReg == 15) 			\
+	WriteR15 (state, d); 			\
+      else 					\
+	DEST = d;				\
+    }						\
+  while (0)
 
-#define WRITESDEST(d) if (DESTReg == 15) \
-                         WriteSR15 (state, d) ; \
-                      else { \
-                         DEST = d ; \
-                         ARMul_NegZero (state, d) ; \
-                         }
+#define WRITESDEST(d)				\
+  do						\
+    {						\
+      if (DESTReg == 15)			\
+	WriteSR15 (state, d);			\
+      else					\
+	{					\
+	  DEST = d;				\
+	  ARMul_NegZero (state, d);		\
+	}					\
+    }						\
+  while (0)
 
-#define WRITEDESTB(d) if (DESTReg == 15) \
-                        WriteR15Branch (state, d) ; \
-                     else \
-                          DEST = d
+#define WRITEDESTB(d)				\
+  do						\
+    {						\
+      if (DESTReg == 15)			\
+	WriteR15Branch (state, d);		\
+      else					\
+	DEST = d;				\
+    }						\
+  while (0)
 
 #define BYTETOBUS(data) ((data & 0xff) | \
                         ((data & 0xff) << 8) | \
                         ((data & 0xff) << 16) | \
                         ((data & 0xff) << 24))
 
-#define BUSTOBYTE(address, data) \
-           if (state->bigendSig) \
-              temp = (data >> (((address ^ 3) & 3) << 3)) & 0xff ; \
-           else \
-              temp = (data >> ((address & 3) << 3)) & 0xff
+#define BUSTOBYTE(address, data)				\
+  do								\
+    {								\
+      if (state->bigendSig) 					\
+	temp = (data >> (((address ^ 3) & 3) << 3)) & 0xff;	\
+      else							\
+	temp = (data >> ((address & 3) << 3)) & 0xff;		\
+    }								\
+  while (0)
 
 #define LOADMULT(instr,   address, wb)  LoadMult   (state, instr, address, wb)
 #define LOADSMULT(instr,  address, wb)  LoadSMult  (state, instr, address, wb)
@@ -414,7 +434,6 @@ extern ARMword isize;
 
 
 /* Values for Emulate.  */
-
 #define STOP            0	/* stop */
 #define CHANGEMODE      1	/* change mode */
 #define ONCE            2	/* execute just one interation */
