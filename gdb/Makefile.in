@@ -2129,7 +2129,8 @@ solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) $(solib_svr4_h)
 solib-osf.o: solib-osf.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(target_h) $(inferior_h) $(solist_h)
 solib-sunos.o: solib-sunos.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(gdbcore_h) $(inferior_h) $(solist_h)
+	$(symfile_h) $(objfiles_h) $(gdbcore_h) $(inferior_h) $(solist_h) \
+	$(bcache_h) $(regcache_h)
 solib-svr4.o: solib-svr4.c $(defs_h) $(elf_external_h) $(elf_common_h) \
 	$(elf_mips_h) $(symtab_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdbcore_h) $(target_h) $(inferior_h) $(solist_h) $(solib_svr4_h)

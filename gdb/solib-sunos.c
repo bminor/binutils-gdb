@@ -39,6 +39,8 @@
 #include "gdbcore.h"
 #include "inferior.h"
 #include "solist.h"
+#include "bcache.h"
+#include "regcache.h"
 
 /* Link map info to include in an allocated so_list entry */
 
