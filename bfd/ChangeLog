@@ -1,3 +1,8 @@
+Wed Jun 17 14:02:46 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* libaout.h (aout_backend_data):  Change defs of two bitfields to
+	be unsigned chars instead to get around rs6000 compiler problem.
+
 Wed Jun 17 13:55:31 1992  Fred Fish  (fnf@cygnus.com)
 
 	* elf.c (bfd_section_from_shdr, elf_slurp_symbol_table):
