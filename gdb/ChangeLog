@@ -1,3 +1,9 @@
+Mon Nov  8 10:42:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c: Remove long_kludge_name code (it was already #if 0).
+	* stabsread.c (read_one_struct_field): Clean up comments to reflect
+	Kung's change of 5 Nov 93.
+
 Mon Nov  8 07:57:30 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* configure.in: Remove h8300h, we have multilib now.

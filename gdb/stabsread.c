@@ -145,20 +145,6 @@ static const char vb_name[] =   { '_','v','b',CPLUS_MARKER,'\0' };
 #endif
 
 #if 0
-/* I think this can go away, all current uses have been removed.
-   GCC emits a few crazy types which can only be distinguished by the
-   name (complex, long long on some machines), but I'd say fix GCC.  */
-
-/* During some calls to read_type (and thus to read_range_type), this
-   contains the name of the type being defined.  Range types are only
-   used in C as basic types.  We use the name to distinguish the otherwise
-   identical basic types "int" and "long" and their unsigned versions.
-   FIXME, this should disappear with better type management.  */
-
-static char *long_kludge_name;
-#endif
-
-#if 0
 struct complaint dbx_class_complaint =
 {
   "encountered DBX-style class variable debugging information.\n\
@@ -976,17 +962,6 @@ define_symbol (valu, string, desc, type, objfile)
       break;
 
     case 't':
-#if 0
-      /* See comment where long_kludge_name is declared.  */
-      /* Here we save the name of the symbol for read_range_type, which
-	 ends up reading in the basic types.  In stabs, unfortunately there
-	 is no distinction between "int" and "long" types except their
-	 names.  Until we work out a saner type policy (eliminating most
-	 builtin types and using the names specified in the files), we
-	 save away the name so that far away from here in read_range_type,
-	 we can examine it to decide between "int" and "long".  FIXME.  */
-      long_kludge_name = SYMBOL_NAME (sym);
-#endif
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
 
       /* For a nameless type, we don't want a create a symbol, thus we
@@ -2218,32 +2193,23 @@ read_one_struct_field (fip, pp, p, type, objfile)
 	return;
       }
   }
-  /* kung: I add a new visibility type VISIBILITY_IGNORE, so that
-     when printing value, this field will print <no value>. ptype
-     will still print the type info of the field. */
-  /* FIXME-tiemann: Can't the compiler put out something which
-     lets us distinguish these? (or maybe just not put out anything
-     for the field).  What is the story here?  What does the compiler
-     really do?  Also, patch gdb.texinfo for this case; I document
-     it as a possible problem there.  Search for "DBX-style".  */
-  
-  /* This is wrong because this is identical to the symbols
-     produced for GCC 0-size arrays.  For example:
-     typedef union {
-     int num;
-     char str[0];
-     } foo;
-     The code which dumped core in such circumstances should be
-     fixed not to dump core.  */
-  
-  /* g++ -g0 can put out bitpos & bitsize zero for a static
-     field.  This does not give us any way of getting its
-     class, so we can't know its name.  But we can just
-     ignore the field so we don't dump core and other nasty
-     stuff.  */
+
   if (fip -> list -> field.bitpos == 0 && fip -> list -> field.bitsize == 0)
     {
-      /* complain (&dbx_class_complaint); */
+      /* This can happen in two cases: (1) at least for gcc 2.4.5 or so,
+	 it is a field which has been optimized out.  The correct stab for
+	 this case is to use VISIBILITY_IGNORE, but that is a recent
+	 invention.  (2) It is a 0-size array.  For example
+	 union { int num; char str[0]; } foo.  Printing "<no value>" for
+	 str in "p foo" is OK, since foo.str (and thus foo.str[3])
+	 will continue to work, and a 0-size array as a whole doesn't
+	 have any contents to print.
+
+	 I suspect this probably could also happen with gcc -gstabs (not
+	 -gstabs+) for static fields, and perhaps other C++ extensions.
+	 Hopefully few people use -gstabs with gdb, since it is intended
+	 for dbx compatibility.  */
+
       /* Ignore this field.  */
       fip -> list-> visibility = VISIBILITY_IGNORE;
     }
@@ -2293,7 +2259,7 @@ read_one_struct_field (fip, pp, p, type, objfile)
    or nothing, for C style fields with public visibility.
 
    Returns 1 for success, 0 for failure.  */
-       
+
 static int
 read_struct_fields (fip, pp, type, objfile)
      struct field_info *fip;
@@ -3007,55 +2973,10 @@ read_sun_builtin_type (pp, typenums, objfile)
   if (nbits != 0)
     return error_type (pp);
 
-#if 0
-  /* FIXME.  Here we should just be able to make a type of the right
-     number of bits and signedness.  FIXME.  */
-
-  if (type_bits == TARGET_LONG_LONG_BIT)
-    return (lookup_fundamental_type (objfile,
-		 signed_type? FT_LONG_LONG: FT_UNSIGNED_LONG_LONG));
-  
-  if (type_bits == TARGET_INT_BIT)
-    {
-      /* FIXME -- the only way to distinguish `int' from `long'
-	 is to look at its name!  */
-      if (signed_type)
-	{
-	  if (long_kludge_name && long_kludge_name[0] == 'l' /* long */)
-	    return lookup_fundamental_type (objfile, FT_LONG);
-	  else
-	    return lookup_fundamental_type (objfile, FT_INTEGER);
-	}
-      else
-	{
-	  if (long_kludge_name
-	      && ((long_kludge_name[0] == 'u' /* unsigned */ &&
-		   long_kludge_name[9] == 'l' /* long */)
-		  || (long_kludge_name[0] == 'l' /* long unsigned */)))
-	    return lookup_fundamental_type (objfile, FT_UNSIGNED_LONG);
-	  else
-	    return lookup_fundamental_type (objfile, FT_UNSIGNED_INTEGER);
-	}
-    }
-    
-  if (type_bits == TARGET_SHORT_BIT)
-    return (lookup_fundamental_type (objfile,
-		 signed_type? FT_SHORT: FT_UNSIGNED_SHORT));
-  
-  if (type_bits == TARGET_CHAR_BIT)
-    return (lookup_fundamental_type (objfile,
-		 signed_type? FT_CHAR: FT_UNSIGNED_CHAR));
-  
-  if (type_bits == 0)
-    return lookup_fundamental_type (objfile, FT_VOID);
-  
-  return error_type (pp);
-#else
   return init_type (type_bits == 0 ? TYPE_CODE_VOID : TYPE_CODE_INT,
 		    type_bits / TARGET_CHAR_BIT,
 		    signed_type ? 0 : TYPE_FLAG_UNSIGNED, (char *)NULL,
 		    objfile);
-#endif
 }
 
 static struct type *
