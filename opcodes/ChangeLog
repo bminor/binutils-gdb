@@ -1,4 +1,8 @@
 start-sanitize-tic80
+Thu Feb 27 11:36:41 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* tic80-dis.c (print_insn_tic80): Set info->bytes_per_line to 8.
+
 Wed Feb 26 15:34:48 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* tic80-opc.c (tic80_predefined_symbols): Define r25 properly.
