@@ -1,5 +1,10 @@
 2002-12-08  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/rs6000/tm-rs6000.h (init_frame_pc_noop): Add declaration.
+	* dwarf2cfi.c (cfi_init_frame_pc): Cast the PC to a pointer.
+
+2002-12-08  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (INIT_FRAME_PC_FIRST, INIT_FRAME_PC_DEFAULT): Convert
 	to pure functions.
 	* gdbarch.h, gdbarch.c: Re-generate.

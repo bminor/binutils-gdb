@@ -1754,7 +1754,7 @@ cfi_init_frame_pc (int fromleaf, struct frame_info *fi)
       CORE_ADDR pc;
       /* FIXME: cagney/2002-12-04: This is straight wrong.  It's
          assuming that the PC is CORE_ADDR (a host quantity) in size.  */
-      get_reg (&pc, UNWIND_CONTEXT (get_next_frame (fi)), PC_REGNUM);
+      get_reg ((void *)&pc, UNWIND_CONTEXT (get_next_frame (fi)), PC_REGNUM);
       return pc;
     }
   else
