@@ -1,26 +1,26 @@
 /* BFD back-end data structures for a.out (and similar) files.
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Cygnus Support.
 
-   We try to encapsulate the differences in a few routines, and otherwise
-   share large masses of code.  This means we only have to fix bugs in
-   one place, most of the time.  */
+This file is part of BFD, the Binary File Descriptor library.
 
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
-
-This file is part of BFD, the Binary File Diddler.
-
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* We try to encapsulate the differences in the various a.out file
+   variants in a few routines, and otherwise share large masses of code.
+   This means we only have to fix bugs in one place, most of the time.  */
 
 /* $Id$ */
 
@@ -29,7 +29,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #else
 #define CAT3(a,b,c) a/**/b/**/c
 #endif
-
 
 /* Parameterize the a.out code based on whether it is being built
    for a 32-bit architecture or a 64-bit architecture.  */
@@ -58,6 +57,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	obj_str_filepos(bfd)	(adata(bfd)->str_filepos)
 
 #define	obj_reloc_entry_size(bfd) (adata(bfd)->reloc_entry_size)
+
+/* Declare these types at file level, since they are used in parameter
+   lists, which have wierd scope.  */
+struct external_exec;
+struct internal_exec;
 
 typedef struct aout_symbol {
   asymbol symbol;
@@ -129,7 +133,7 @@ PROTO (unsigned int, NAME(aout,get_reloc_upper_bound), (bfd *abfd, sec_ptr asect
 PROTO (void,	NAME(aout,reclaim_reloc), (bfd *ignore_abfd, sec_ptr ignore));
 PROTO (alent *,	NAME(aout,get_lineno), (bfd *ignore_abfd, asymbol *ignore_symbol));
 PROTO (void,	NAME(aout,print_symbol), (bfd *ignore_abfd, PTR file,
-			    asymbol *symbol, bfd_print_symbol_enum_type how));
+			    asymbol *symbol, bfd_print_symbol_type how));
 PROTO (boolean,	NAME(aout,close_and_cleanup), (bfd *abfd));
 PROTO (boolean,	NAME(aout,find_nearest_line), (bfd *abfd, asection *section,
       asymbol **symbols, bfd_vma offset, CONST char **filename_ptr,
@@ -172,18 +176,23 @@ PROTO (void,	NAME(aout,swap_exec_header_out),(bfd *abfd, struct internal_exec *e
 
 #define WRITE_HEADERS(abfd, execp)					      \
       {									      \
+        if ((obj_textsec(abfd)->vma & 0xff )== EXEC_BYTES_SIZE)  \
+		abfd->flags |= D_PAGED; 		\
+	else						\
+		abfd->flags &= ~D_PAGED;		\
 	if (abfd->flags & D_PAGED) 					      \
 	    {								      \
 	      execp->a_text = obj_textsec (abfd)->size + EXEC_BYTES_SIZE;     \
 	      N_SET_MAGIC (*execp, ZMAGIC);				      \
 	    } 								      \
-	else if (abfd->flags & WP_TEXT) 				      \
+	else 								      \
 	    {								      \
-	      N_SET_MAGIC (*execp, NMAGIC);				      \
+	      execp->a_text = obj_textsec (abfd)->size;			      \
+	      if (abfd->flags & WP_TEXT)				      \
+	        { N_SET_MAGIC (*execp, NMAGIC); }			      \
+	      else							      \
+	  	{ N_SET_MAGIC(*execp, OMAGIC); }			      \
 	    }								      \
-	else {								      \
-	  N_SET_MAGIC(*execp, OMAGIC);					      \
-	}								      \
 	if (abfd->flags & D_PAGED) 					      \
 	    {								      \
 	      data_pad = ((obj_datasec(abfd)->size + PAGE_SIZE -1)	      \

@@ -78,9 +78,10 @@ DEFUN(newsos3_callback,(abfd),
   
   WORK_OUT_FILE_POSITIONS(abfd, execp) ;
   
-  /* Determine the architecture and machine type of the object file.  */
-  abfd->obj_arch = bfd_arch_m68k;
-  abfd->obj_machine = 0;
+  /* Determine the architecture and machine type of the object file.
+   */
+  bfd_default_set_arch_mach(abfd, bfd_arch_m68k, 0);
+
 
   return abfd->xvec;
 }
@@ -145,7 +146,7 @@ DEFUN(newsos3_write_object_contents,(abfd),
 bfd_target newsos3_vec = /* Sony 68k-based machines running newsos3 */
 {
   "a.out-newsos3",		/* name */
-  bfd_target_aout_flavour_enum,
+  bfd_target_aout_flavour,
   true,				/* target byte order */
   true,				/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */

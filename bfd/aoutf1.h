@@ -81,17 +81,17 @@ DEFUN(NAME(sunos,object_p), (abfd),
 static void
 DEFUN(choose_reloc_size,(abfd),
 bfd *abfd)
-  {
-    switch (abfd->obj_arch) {
-    case bfd_arch_sparc:
-    case bfd_arch_a29k:
-      obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
-      break;
-    default:
-      obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
-      break;
-    }
+{
+  switch (bfd_get_arch(abfd)) {
+  case bfd_arch_sparc:
+  case bfd_arch_a29k:
+    obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
+    break;
+  default:
+    obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
+    break;
   }
+}
 
 /* Set parameters about this a.out file that are machine-dependent.
    This routine is called from some_aout_object_p just before it returns.  */
@@ -101,103 +101,102 @@ sunos4_callback (abfd)
      bfd *abfd;
 {
   struct internal_exec *execp = exec_hdr (abfd);
-
+  enum bfd_architecture arch;
+  long machine;
   WORK_OUT_FILE_POSITIONS(abfd, execp);  
 
   /* Determine the architecture and machine type of the object file.  */
   switch (N_MACHTYPE (*exec_hdr (abfd))) {
-    
+
   case M_UNKNOWN:
-    abfd->obj_arch = bfd_arch_unknown;
-    abfd->obj_machine = 0;
+    arch = bfd_arch_unknown;
+    machine = 0;
     break;
     
   case M_68010:
-    abfd->obj_arch = bfd_arch_m68k;
-    abfd->obj_machine = 68010;
+    arch = bfd_arch_m68k;
+    machine = 68010;
     break;
     
   case M_68020:
-    abfd->obj_arch = bfd_arch_m68k;
-    abfd->obj_machine = 68020;
+    arch = bfd_arch_m68k;
+    machine = 68020;
     break;
     
   case M_SPARC:
-    abfd->obj_arch = bfd_arch_sparc;
-    abfd->obj_machine = 0;
+    arch = bfd_arch_sparc;
+    machine = 0;
     break;
     
   case M_386:
-    abfd->obj_arch = bfd_arch_i386;
-    abfd->obj_machine = 0;
+    arch = bfd_arch_i386;
+    machine = 0;
     break;
     
   case M_29K:
-    abfd->obj_arch = bfd_arch_a29k;
-    abfd->obj_machine = 0;
+    arch = bfd_arch_a29k;
+    machine = 0;
     break;
     
   default:
-    abfd->obj_arch = bfd_arch_obscure;
-    abfd->obj_machine = 0;
+    arch = bfd_arch_obscure;
+    machine = 0;
     break;
   }
-  
+  bfd_set_arch_mach(abfd, arch, machine);  
   choose_reloc_size(abfd);
   return abfd->xvec;
 }
 
 
 /* Write an object file in SunOS format.
-Section contents have already been written.  We write the
-file header, symbols, and relocation.  */
+  Section contents have already been written.  We write the
+  file header, symbols, and relocation.  */
 
 boolean
-DEFUN(NAME(aout,sunos4_write_object_contents),(abfd),
+DEFUN(NAME(aout,sunos4_write_object_contents),
+      (abfd),
       bfd *abfd)
-
-  {
-    bfd_size_type data_pad = 0;
-    struct external_exec exec_bytes;
-    struct internal_exec *execp = exec_hdr (abfd);
+{
+  bfd_size_type data_pad = 0;
+  struct external_exec exec_bytes;
+  struct internal_exec *execp = exec_hdr (abfd);
     
+  execp->a_text = obj_textsec (abfd)->size;
     
-    
-    execp->a_text = obj_textsec (abfd)->size;
-    
-    /* Magic number, maestro, please!  */
-    switch (bfd_get_architecture(abfd)) {
-    case bfd_arch_m68k:
-      switch (bfd_get_machine(abfd)) {
-      case 68010:
-	N_SET_MACHTYPE(*execp, M_68010);
-	break;
-      default:
-      case 68020:
-	N_SET_MACHTYPE(*execp, M_68020);
-	break;
-      }
-      break;
-    case bfd_arch_sparc:
-      N_SET_MACHTYPE(*execp, M_SPARC);
-      break;
-    case bfd_arch_i386:
-      N_SET_MACHTYPE(*execp, M_386);
-      break;
-    case bfd_arch_a29k:
-      N_SET_MACHTYPE(*execp, M_29K);
+  /* Magic number, maestro, please!  */
+  switch (bfd_get_arch(abfd)) {
+  case bfd_arch_m68k:
+    switch (bfd_get_mach(abfd)) {
+    case 68010:
+      N_SET_MACHTYPE(*execp, M_68010);
       break;
     default:
-      N_SET_MACHTYPE(*execp, M_UNKNOWN);
+    case 68020:
+      N_SET_MACHTYPE(*execp, M_68020);
+      break;
     }
+    break;
+  case bfd_arch_sparc:
+    N_SET_MACHTYPE(*execp, M_SPARC);
+    break;
+  case bfd_arch_i386:
+    N_SET_MACHTYPE(*execp, M_386);
+    break;
+  case bfd_arch_a29k:
+    N_SET_MACHTYPE(*execp, M_29K);
+    break;
+  default:
+    N_SET_MACHTYPE(*execp, M_UNKNOWN);
+  }
     
-    choose_reloc_size(abfd);
-
-    /* FIXME */
-    N_SET_FLAGS (*execp, 0x1);
+  choose_reloc_size(abfd);
     
-    WRITE_HEADERS(abfd, execp);
-
+  /* FIXME */
+  N_SET_FLAGS (*execp, 0x1);
+    
+  WRITE_HEADERS(abfd, execp);
+    
   return true;
 }
 
@@ -207,14 +206,14 @@ DEFUN(NAME(aout,sunos4_write_object_contents),(abfd),
 #define CORE_NAMELEN 16
 
 /* The core structure is taken from the Sun documentation.
-Unfortunately, they don't document the FPA structure, or at least I
-can't find it easily.  Fortunately the core header contains its own
-length.  So this shouldn't cause problems, except for c_ucode, which
-so far we don't use but is easy to find with a little arithmetic. */
+  Unfortunately, they don't document the FPA structure, or at least I
+  can't find it easily.  Fortunately the core header contains its own
+  length.  So this shouldn't cause problems, except for c_ucode, which
+  so far we don't use but is easy to find with a little arithmetic. */
 
 /* But the reg structure can be gotten from the SPARC processor handbook.
-This really should be in a GNU include file though so that gdb can use
-the same info. */
+  This really should be in a GNU include file though so that gdb can use
+  the same info. */
 struct regs {
   int r_psr;
   int r_pc;
@@ -240,19 +239,19 @@ struct regs {
 /* Taken from Sun documentation: */
 
 /* FIXME:  It's worse than we expect.  This struct contains TWO substructs
-neither of whose size we know, WITH STUFF IN BETWEEN THEM!  We can't
-even portably access the stuff in between!  */
+  neither of whose size we know, WITH STUFF IN BETWEEN THEM!  We can't
+  even portably access the stuff in between!  */
 
 struct external_sparc_core {
   int c_magic;			/* Corefile magic number */
   int c_len;			/* Sizeof (struct core) */
 #define	SPARC_CORE_LEN	432
   int c_regs[19];		/* General purpose registers -- MACHDEP SIZE */
-  struct external_exec c_aouthdr;	/* A.out header */
-  int c_signo;			/* Killing signal, if any */
-  int c_tsize;			/* Text size (bytes) */
-  int c_dsize;			/* Data size (bytes) */
-  int c_ssize;			/* Stack size (bytes) */
+  struct external_exec c_aouthdr; /* A.out header */
+  int c_signo;			  /* Killing signal, if any */
+  int c_tsize;			  /* Text size (bytes) */
+  int c_dsize;			  /* Data size (bytes) */
+  int c_ssize;			  /* Stack size (bytes) */
   char c_cmdname[CORE_NAMELEN + 1]; /* Command name */
   double fp_stuff[1];		    /* external FPU state (size unknown by us) */
   /* The type "double" is critical here, for alignment.
@@ -288,12 +287,12 @@ struct internal_sunos_core {
   int c_len;			/* Sizeof (struct core) */
   long c_regs_pos;		/* file offset of General purpose registers */
   int c_regs_size;		/* size of General purpose registers */
-  struct internal_exec c_aouthdr;	/* A.out header */
-  int c_signo;			/* Killing signal, if any */
-  int c_tsize;			/* Text size (bytes) */
-  int c_dsize;			/* Data size (bytes) */
-  int c_ssize;			/* Stack size (bytes) */
-  long c_stacktop;		/* Stack top (address) */
+  struct internal_exec c_aouthdr; /* A.out header */
+  int c_signo;			  /* Killing signal, if any */
+  int c_tsize;			  /* Text size (bytes) */
+  int c_dsize;			  /* Data size (bytes) */
+  int c_ssize;			  /* Stack size (bytes) */
+  long c_stacktop;		  /* Stack top (address) */
   char c_cmdname[CORE_NAMELEN + 1]; /* Command name */
   long fp_stuff_pos;		/* file offset of external FPU state (regs) */
   int fp_stuff_size;		/* Size of it */
@@ -308,7 +307,7 @@ DEFUN(swapcore_sun3,(abfd, ext, intcore),
       struct internal_sunos_core *intcore)
 {
   struct external_sun3_core *extcore = (struct external_sun3_core *)ext;
-  
+
   intcore->c_magic = bfd_h_get_32 (abfd, (unsigned char *)&extcore->c_magic);
   intcore->c_len   = bfd_h_get_32 (abfd, (unsigned char *)&extcore->c_len  );
   intcore->c_regs_pos  = (long) (((struct external_sun3_core *)0)->c_regs);
@@ -324,9 +323,10 @@ DEFUN(swapcore_sun3,(abfd, ext, intcore),
   intcore->fp_stuff_size = intcore->c_len - (sizeof extcore->c_ucode) -
     (file_ptr)(((struct external_sun3_core *)0)->fp_stuff);
   /* Ucode is the last thing in the struct -- just before the end */
-  intcore->c_ucode = bfd_h_get_32 (abfd, 
-	intcore->c_len - sizeof (extcore->c_ucode) + (unsigned char *)extcore);
-  intcore->c_stacktop = 0x0E000000;	/* By experimentation */
+  intcore->c_ucode = 
+    bfd_h_get_32 (abfd, 
+		  intcore->c_len - sizeof (extcore->c_ucode) + (unsigned char *)extcore);
+  intcore->c_stacktop = 0x0E000000; /* By experimentation */
 }
 
 
@@ -354,8 +354,9 @@ DEFUN(swapcore_sparc,(abfd, ext, intcore),
   intcore->fp_stuff_size = intcore->c_len - (sizeof extcore->c_ucode) -
     (file_ptr)(((struct external_sparc_core *)0)->fp_stuff);
   /* Ucode is the last thing in the struct -- just before the end */
-  intcore->c_ucode = bfd_h_get_32 (abfd, 
-	intcore->c_len - sizeof (extcore->c_ucode) + (unsigned char *)extcore);
+  intcore->c_ucode =
+    bfd_h_get_32 (abfd, 
+		  intcore->c_len - sizeof (extcore->c_ucode) + (unsigned char *)extcore);
   /* Supposedly the user stack grows downward from the bottom of kernel memory.
      Presuming that this remains true, this definition will work. */
 #define SPARC_USRSTACK (-(128*1024*1024))
@@ -587,7 +588,7 @@ a.out versions.  */
 bfd_target VECNAME =
   {
     TARGETNAME,
-    bfd_target_aout_flavour_enum,
+    bfd_target_aout_flavour,
     true,			/* target byte order */
     true,			/* target headers byte order */
     (HAS_RELOC | EXEC_P |	/* object flags */

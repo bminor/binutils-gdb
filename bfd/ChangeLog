@@ -1,3 +1,34 @@
+Fri Oct  4 18:18:46 1991  John Gilmore  (gnu at cygnus.com)
+
+	* bfd.c:  Remove strerror() to libiberty.
+
+	* elf.c:  Remove elf_set_section_contents, use generic one.  Lint.
+	* libbfd-in.h, libbfd.c:  Add bfd_generic_set_section_contents.
+	* libbfd.c (bfd_generic_{get,set}_section_contents):  Check that
+	last byte of transfer, not first byte, is within the section.
+
+	* host-aout.c:  Remove `BSD' archive support.  Lint.
+
+	* archures.c: Rename `struct bfd_arch_info_struct' to `struct
+	bfd_arch_info'.  Rename `typedef bfd_arch_info_struct_type' to
+	`bfd_arch_info_type'.  All uses changed.
+	* reloc.c:  Rename `bfd_reloc_status_enum_type' to
+	`bfd_reloc_status_type'.  Rename `bfd_reloc_code_enum_real_type'
+	to `bfd_reloc_code_real_type'.  (This seems to be a misnomer,
+	it needs a better name.)  All uses changed.
+	* targets.c:  Rename `enum target_flavour_enum' to `enum
+	target_flavour', and remove the `_enum' from all of the enum
+	values themselves.  All uses changed.
+
+	* configure.in, config/h-i386mach:  i386 mach host.
+	* config/t-i386-aout:  Use host-aout.c.
+
+	* trad-core.c:  Give it its own xvec's to make it independent
+	of other file formats.
+	* ecoff.c, host-aout.c:  Remove refs to trad-core.
+	* config/t-dec3100, t-hp300bsd, t-tahoe, t-vax:  Define TRAD_CORE.
+	* targets.c:  #ifdef TRAD_CORE, include it in the vector.
+
 Fri Oct  4 17:38:03 1991  Steve Chamberlain  (steve at cygnus.com)
 
 	* reloc.c: Extended NEWHOWTO macro

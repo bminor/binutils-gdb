@@ -250,37 +250,37 @@ DEFUN(NAME(host_aout,write_object_contents), (abfd),
 /* We use BFD generic archive files.  */
 #define	aout_32_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #define	aout_32_generic_stat_arch_elt		bfd_generic_stat_arch_elt
-#define	aout_32_slurp_armap			bfd_slurp_bsd_armap
+#define	aout_32_slurp_armap			bfd_false
 #define	aout_32_slurp_extended_name_table	bfd_true
-#define	aout_32_write_armap			bsd_write_armap
-#define	aout_32_truncate_arname			bfd_bsd_truncate_arname
-/* #define aout_32_machine_type 			sunos_machine_type */
+#define	aout_32_write_armap			(PROTO (boolean, (*),	\
+     (bfd *arch, unsigned int elength, struct orl *map, int orl_count,	\
+      int stridx))) bfd_false
+#define	aout_32_truncate_arname			bfd_dont_truncate_arname
 
-/* Traditional Unix core files with upage */
-#define	aout_32_core_file_failing_command 	trad_unix_core_file_failing_command
-#define	aout_32_core_file_failing_signal	trad_unix_core_file_failing_signal
-#define	aout_32_core_file_matches_executable_p	trad_unix_core_file_matches_executable_p
-
-
-#define	aout_64_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define	aout_64_generic_stat_arch_elt		bfd_generic_stat_arch_elt
-#define	aout_64_slurp_armap			bfd_slurp_bsd_armap
-#define	aout_64_slurp_extended_name_table	bfd_true
-#define	aout_64_write_armap			bsd_write_armap
-#define	aout_64_truncate_arname			bfd_bsd_truncate_arname
-/* #define aout_64_machine_type 			sunos_machine_type */
-
-#define	aout_64_core_file_failing_command 	trad_unix_core_file_failing_command
-#define	aout_64_core_file_failing_signal	trad_unix_core_file_failing_signal
-#define	aout_64_core_file_matches_executable_p	trad_unix_core_file_matches_executable_p
-
-#define aout_64_bfd_debug_info_start		bfd_void
-#define aout_64_bfd_debug_info_end		bfd_void
-#define aout_64_bfd_debug_info_accumulate	bfd_void
+/* No core file defined here -- configure in trad-core.c separately.  */
+#define	aout_32_core_file_failing_command 	bfd_false
+#define	aout_32_core_file_failing_signal	bfd_false
+#define	aout_32_core_file_matches_executable_p	bfd_true
+#define	some_kinda_core_file_p			bfd_false
 
 #define aout_32_bfd_debug_info_start		bfd_void
 #define aout_32_bfd_debug_info_end		bfd_void
 #define aout_32_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
+
+#define	aout_64_openr_next_archived_file	aout_32_openr_next_archived_file
+#define	aout_64_generic_stat_arch_elt		aout_32_generic_stat_arch_elt
+#define	aout_64_slurp_armap			aout_32_slurp_armap
+#define	aout_64_slurp_extended_name_table	aout_32_slurp_extended_name_table
+#define	aout_64_write_armap			aout_32_write_armap
+#define	aout_64_truncate_arname			aout_32_truncate_arname
+
+#define	aout_64_core_file_failing_command 	aout_32_core_file_failing_command
+#define	aout_64_core_file_failing_signal	aout_32_core_file_failing_signal
+#define	aout_64_core_file_matches_executable_p	aout_32_core_file_matches_executable_p
+
+#define aout_64_bfd_debug_info_start		aout_32_bfd_debug_info_start
+#define aout_64_bfd_debug_info_end		aout_32_bfd_debug_info_end
+#define aout_64_bfd_debug_info_accumulate	aout_32_bfd_debug_info_accumulate
 
 
 /* We implement these routines ourselves, rather than using the generic
@@ -290,7 +290,7 @@ DEFUN(NAME(host_aout,write_object_contents), (abfd),
 bfd_target host_aout_big_vec =
   {
     "a.out-host-big",
-    bfd_target_aout_flavour_enum,
+    bfd_target_aout_flavour,
     true,			/* target byte order */
     true,			/* target headers byte order */
     (HAS_RELOC | EXEC_P |	/* object flags */
@@ -304,7 +304,7 @@ bfd_target host_aout_big_vec =
     _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
     
       {_bfd_dummy_target, NAME(host_aout,object_p),
-       bfd_generic_archive_p, trad_unix_core_file_p},
+       bfd_generic_archive_p, some_kinda_core_file_p},
       {bfd_false, NAME(host_aout,mkobject),
        _bfd_generic_mkarchive, bfd_false},
       {bfd_false, NAME(host_aout,write_object_contents), /* bfd_write_contents */
@@ -316,7 +316,7 @@ bfd_target host_aout_big_vec =
 bfd_target host_aout_little_vec =
   {
     "a.out-host-little",
-    bfd_target_aout_flavour_enum,
+    bfd_target_aout_flavour,
     false,			/* target byte order */
     false,			/* target headers byte order */
     (HAS_RELOC | EXEC_P |	/* object flags */
@@ -326,11 +326,11 @@ bfd_target host_aout_little_vec =
     ' ',						   /* ar_pad_char */
     16,							   /* ar_max_namelen */
     3,							   /* minimum alignment power */
-    _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-    _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+    _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putb16, /* data */
+    _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
     
       {_bfd_dummy_target, NAME(host_aout,object_p),
-       bfd_generic_archive_p, trad_unix_core_file_p},
+       bfd_generic_archive_p, some_kinda_core_file_p},
       {bfd_false, NAME(host_aout,mkobject),
        _bfd_generic_mkarchive, bfd_false},
       {bfd_false, NAME(host_aout,write_object_contents), /* bfd_write_contents */

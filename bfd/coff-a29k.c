@@ -56,7 +56,7 @@ asymbol *symbol;
   return(relocation);
 }
 
-static bfd_reloc_status_enum_type
+static bfd_reloc_status_type
 a29k_reloc(abfd, reloc_entry, symbol_in, data, input_section)
 bfd *abfd;
 arelent *reloc_entry;
@@ -68,7 +68,7 @@ asection *input_section;
 	static unsigned long part1_consth_value;
 	unsigned long insn, value, sym_value; 
 	unsigned short r_type;
-/*  	bfd_reloc_status_enum_type result;*/
+/*  	bfd_reloc_status_type result;*/
 /*  	coff_symbol_type *cs = coffsymbol(symbol_in);*/
 	
 	r_type = reloc_entry->howto->type;
@@ -212,7 +212,7 @@ static reloc_howto_type howto_table[] =
 bfd_target a29kcoff_big_vec =
 {
   "coff-a29k-big",		/* name */
-  bfd_target_coff_flavour_enum,
+  bfd_target_coff_flavour,
   true,				/* data byte order is big */
   true,				/* header byte order is big */
 

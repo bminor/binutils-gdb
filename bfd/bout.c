@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
 
 
-
+#define	EXEC_BYTES_SIZE		(sizeof (struct exec))
 PROTO (static boolean, b_out_squirt_out_relocs,(bfd *abfd, asection *section));
 PROTO (static bfd_target *, b_out_callback, (bfd *));
 
@@ -115,9 +115,10 @@ b_out_callback (abfd)
   swap_exec_header (abfd, execp);
 
   /* Architecture and machine type */
-  abfd->obj_arch = bfd_arch_i960;	/* B.out only used on i960 */
-  abfd->obj_machine = bfd_mach_i960_core;	/* Default */
-/* FIXME:  Set real machine type from file here */
+  bfd_set_arch_mach(abfd, 
+		    bfd_arch_i960, /* B.out only used on i960 */
+		    bfd_mach_i960_core /* Default */
+		    );
 
   /* The positions of the string table and symbol table.  */
   obj_str_filepos (abfd) = N_STROFF (anexec);
@@ -254,7 +255,7 @@ swap_exec_header (abfd, execp)
 #define BAL	 0x0b000000	/* Template for 'bal' instruction	*/
 #define BAL_MASK 0x00ffffff
 
-static bfd_reloc_status_enum_type 
+static bfd_reloc_status_type 
 callj_callback(abfd, reloc_entry, symbol_in, data, input_section)
 bfd *abfd;
 arelent *reloc_entry;
@@ -639,8 +640,8 @@ b_out_set_arch_mach (abfd, arch, machine)
      enum bfd_architecture arch;
      unsigned long machine;
 {
-  abfd->obj_arch = arch;
-  abfd->obj_machine = machine;
+  bfd_default_set_arch_mach(abfd, arch, machine);
+
   if (arch == bfd_arch_unknown)	/* Unknown machine arch is OK */
     return true;
   if (arch == bfd_arch_i960)	/* i960 default is OK */
@@ -667,7 +668,6 @@ DEFUN(b_out_sizeof_headers,(ignore_abfd, ignore),
 {
   return sizeof(struct internal_exec);
 }
-
 
 
 
@@ -703,7 +703,7 @@ DEFUN(b_out_sizeof_headers,(ignore_abfd, ignore),
 bfd_target b_out_vec_big_host =
 {
   "b.out.big",			/* name */
-  bfd_target_aout_flavour_enum,
+  bfd_target_aout_flavour,
   false,			/* data byte order is little */
   true,				/* hdr byte order is big */
   (HAS_RELOC | EXEC_P |		/* object flags */
@@ -730,7 +730,7 @@ _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs
 bfd_target b_out_vec_little_host =
 {
   "b.out.little",		/* name */
-  bfd_target_aout_flavour_enum,
+  bfd_target_aout_flavour,
   false,			/* data byte order is little */
   false,			/* header byte order is little */
   (HAS_RELOC | EXEC_P |		/* object flags */
