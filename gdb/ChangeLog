@@ -1,5 +1,10 @@
 2003-03-25  Richard Earnshaw  <rearnsha@arm.com>
 
+	PR cli/548
+	* arm-tdep.c (_initialize_arm_tdep): Command is "set arm disassembler".
+
+2003-03-25  Richard Earnshaw  <rearnsha@arm.com>
+
 	* arm-tdep.c (arm_gdbarch_init): Register the disassembler function.
 	(_initialize_arm_tdep): Don't set tm_print_insn.
 

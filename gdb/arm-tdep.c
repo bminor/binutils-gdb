@@ -3164,7 +3164,7 @@ _initialize_arm_tdep (void)
 		 "show arm disassembly");
 
   /* And now add the new interface.  */
-  new_set = add_set_enum_cmd ("disassembly", no_class,
+  new_set = add_set_enum_cmd ("disassembler", no_class,
 			      valid_disassembly_styles, &disassembly_style,
 			      helptext, &setarmcmdlist);
 
