@@ -1280,6 +1280,7 @@ ieee_slurp_debug (abfd)
 {
   ieee_data_type *ieee = IEEE_DATA (abfd);
   asection *sec;
+  file_ptr debug_end;
 
   if (ieee->w.r.debug_information_part == 0)
     return true;
@@ -1289,7 +1290,13 @@ ieee_slurp_debug (abfd)
     return false;
   sec->flags |= SEC_DEBUGGING | SEC_HAS_CONTENTS;
   sec->filepos = ieee->w.r.debug_information_part;
-  sec->_raw_size = ieee->w.r.data_part - ieee->w.r.debug_information_part;
+
+  debug_end = ieee->w.r.data_part;
+  if (debug_end == 0)
+    debug_end = ieee->w.r.trailer_part;
+  if (debug_end == 0)
+    debug_end = ieee->w.r.me_record;
+  sec->_raw_size = debug_end - ieee->w.r.debug_information_part;
 
   return true;
 }
