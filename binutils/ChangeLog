@@ -1,3 +1,7 @@
+2002-11-23  Nick Clifton  <nickc@redhat.com>
+
+	* size.c (usage): Fix typo describing switch for hex format.
+
 2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* testsuite/binutils-all/objcopy.exp: Disable tic4x from test
