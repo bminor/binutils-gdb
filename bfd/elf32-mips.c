@@ -529,7 +529,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_32",		/* name */
 	 true,			/* partial_inplace */
@@ -544,7 +544,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_REL32",	/* name */
 	 true,			/* partial_inplace */
@@ -682,7 +682,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 _bfd_mips_elf_gprel32_reloc, /* special_function */
 	 "R_MIPS_GPREL32",	/* name */
 	 true,			/* partial_inplace */
@@ -735,7 +735,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 mips32_64bit_reloc,	/* special_function */
 	 "R_MIPS_64",		/* name */
 	 true,			/* partial_inplace */
@@ -750,7 +750,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_GOT_DISP",	/* name */
 	 true,			/* partial_inplace */
@@ -765,7 +765,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_GOT_PAGE",	/* name */
 	 true,			/* partial_inplace */
@@ -780,7 +780,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_GOT_OFST",	/* name */
 	 true,			/* partial_inplace */
@@ -825,7 +825,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_SUB",		/* name */
 	 true,			/* partial_inplace */
@@ -849,7 +849,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_HIGHER",	/* name */
 	 true,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -864,7 +864,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_HIGHEST",	/* name */
 	 true,			/* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -908,7 +908,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_SCN_DISP",     /* name */
-	 false,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
@@ -5585,7 +5585,7 @@ mips_elf_sort_hash_table (info, max_local)
 			       mips_elf_sort_hash_table_f,
 			       &hsd);
 
-  /* There shoud have been enough room in the symbol table to
+  /* There should have been enough room in the symbol table to
      accomodate both the GOT and non-GOT symbols.  */
   BFD_ASSERT (hsd.max_non_got_dynindx <= hsd.min_got_dynindx);
 
