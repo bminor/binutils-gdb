@@ -1,5 +1,9 @@
 Thu Nov 27 09:07:18 1997  Michael Meissner  <meissner@cygnus.com>
 
+	* configure.in ({TCL_LIBS,CONFIG_DEPS}): Don't add IDE libraries
+	if not --enable-ide.
+	* configure: Regenerate.
+
 	* gdbtk.c (gdb_get_breakpoint_info): Add missing filename
 	argument.
 	(toplevel): Move include of guitcl.h into #ifdef IDE region.
