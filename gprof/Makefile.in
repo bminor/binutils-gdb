@@ -43,7 +43,7 @@ DISTSTUFF = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 CFLAGS=-g
 LDFLAGS=
 .c.o:
-	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd -DMACHINE_H=\"$(MACHINE).h\" $(TCFLAGS) $(HCFLAGS) $<
+	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I../include -I$(srcdir)/../include -I$(srcdir)/../bfd -DMACHINE_H=\"$(MACHINE).h\" $(TCFLAGS) $(HCFLAGS) $<
 
 all:	diststuff $(PROG)
 

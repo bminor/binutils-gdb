@@ -75,7 +75,7 @@ LIB_PATH =
 
 BASEDIR	= ../..
 INCLUDE	= $(srcdir)/../include
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(srcdir)/../bfd -I$(INCLUDE) 
+INCLUDES = -I. -I$(srcdir) -I../include -I$(srcdir)/../bfd -I$(INCLUDE) 
 
 # What version of the manual to build
 DOCVER = gen
