@@ -72,7 +72,6 @@ static boolean pr_fix_visibility
 
 static boolean pr_start_compilation_unit PARAMS ((PTR, const char *));
 static boolean pr_start_source PARAMS ((PTR, const char *));
-static boolean pr_ellipsis_type PARAMS ((PTR));
 static boolean pr_empty_type PARAMS ((PTR));
 static boolean pr_void_type PARAMS ((PTR));
 static boolean pr_int_type PARAMS ((PTR, unsigned int, boolean));
@@ -82,14 +81,14 @@ static boolean pr_bool_type PARAMS ((PTR, unsigned int));
 static boolean pr_enum_type
   PARAMS ((PTR, const char *, const char **, bfd_signed_vma *));
 static boolean pr_pointer_type PARAMS ((PTR));
-static boolean pr_function_type PARAMS ((PTR));
+static boolean pr_function_type PARAMS ((PTR, int, boolean));
 static boolean pr_reference_type PARAMS ((PTR));
 static boolean pr_range_type PARAMS ((PTR, bfd_signed_vma, bfd_signed_vma));
 static boolean pr_array_type
   PARAMS ((PTR, bfd_signed_vma, bfd_signed_vma, boolean));
 static boolean pr_set_type PARAMS ((PTR, boolean));
 static boolean pr_offset_type PARAMS ((PTR));
-static boolean pr_method_type PARAMS ((PTR, boolean, int));
+static boolean pr_method_type PARAMS ((PTR, boolean, int, boolean));
 static boolean pr_const_type PARAMS ((PTR));
 static boolean pr_volatile_type PARAMS ((PTR));
 static boolean pr_start_struct_type
@@ -134,7 +133,6 @@ static const struct debug_write_fns pr_fns =
 {
   pr_start_compilation_unit,
   pr_start_source,
-  pr_ellipsis_type,
   pr_empty_type,
   pr_void_type,
   pr_int_type,
@@ -413,17 +411,6 @@ pr_start_source (p, filename)
   return true;
 }
 
-/* Push an ellipsis type onto the type stack.  */
-
-static boolean
-pr_ellipsis_type (p)
-     PTR p;
-{
-  struct pr_handle *info = (struct pr_handle *) p;
-
-  return push_type (info, "...");
-}
-
 /* Push an empty type onto the type stack.  */
 
 static boolean
@@ -591,14 +578,78 @@ pr_pointer_type (p)
 /* Turn the top type on the stack into a function returning that type.  */
 
 static boolean
-pr_function_type (p)
+pr_function_type (p, argcount, varargs)
      PTR p;
+     int argcount;
+     boolean varargs;
 {
   struct pr_handle *info = (struct pr_handle *) p;
+  char **arg_types;
+  unsigned int len;
+  char *s;
 
   assert (info->stack != NULL);
 
-  return substitute_type (info, "(|) ()");
+  len = 10;
+
+  if (argcount <= 0)
+    {
+      arg_types = NULL;
+      len += 15;
+    }
+  else
+    {
+      int i;
+
+      arg_types = (char **) xmalloc (argcount * sizeof *arg_types);
+      for (i = argcount - 1; i >= 0; i--)
+	{
+	  if (! substitute_type (info, ""))
+	    return false;
+	  arg_types[i] = pop_type (info);
+	  if (arg_types[i] == NULL)
+	    return false;
+	  len += strlen (arg_types[i]) + 2;
+	}
+      if (varargs)
+	len += 5;
+    }
+
+  /* Now the return type is on the top of the stack.  */
+
+  s = (char *) xmalloc (len);
+  strcpy (s, "(|) (");
+
+  if (argcount < 0)
+    strcat (s, "/* unknown */");
+  else
+    {
+      int i;
+
+      for (i = 0; i < argcount; i++)
+	{
+	  if (i > 0)
+	    strcat (s, ", ");
+	  strcat (s, arg_types[i]);
+	}
+      if (varargs)
+	{
+	  if (i > 0)
+	    strcat (s, ", ");
+	  strcat (s, "...");
+	}
+      if (argcount > 0)
+	free (arg_types);
+    }
+
+  strcat (s, ")");
+
+  if (! substitute_type (info, s))
+    return false;
+
+  free (s);
+
+  return true;
 }
 
 /* Turn the top type on the stack into a reference to that type.  */
@@ -745,10 +796,11 @@ pr_offset_type (p)
 /* Make a method type.  */
 
 static boolean
-pr_method_type (p, domain, argcount)
+pr_method_type (p, domain, argcount, varargs)
      PTR p;
      boolean domain;
      int argcount;
+     boolean varargs;
 {
   struct pr_handle *info = (struct pr_handle *) p;
   unsigned int len;
@@ -797,6 +849,8 @@ pr_method_type (p, domain, argcount)
 	    return false;
 	  len += strlen (arg_types[i]) + 2;
 	}
+      if (varargs)
+	len += 5;
     }
 
   /* Now the return type is on the top of the stack.  */
@@ -820,6 +874,14 @@ pr_method_type (p, domain, argcount)
 	    strcat (s, ", ");
 	  strcat (s, arg_types[i]);
 	}
+      if (varargs)
+	{
+	  if (i > 0)
+	    strcat (s, ", ");
+	  strcat (s, "...");
+	}
+      if (argcount > 0)
+	free (arg_types);
     }
 
   strcat (s, ")");
@@ -865,7 +927,6 @@ pr_start_struct_type (p, tag, id, structp, size)
      unsigned int size;
 {
   struct pr_handle *info = (struct pr_handle *) p;
-  char ab[30];
 
   info->indent += 2;
 
@@ -885,13 +946,35 @@ pr_start_struct_type (p, tag, id, structp, size)
 	return false;
     }
 
-  if (size != 0)
-    sprintf (ab, " { /* size %u */\n", size);
-  else
-    strcpy (ab, " {\n");
-  if (! append_type (info, ab))
+  if (! append_type (info, " {"))
     return false;
+  if (size != 0 || tag != NULL)
+    {
+      char ab[30];
+
+      if (! append_type (info, " /*"))
+	return false;
+
+      if (size != 0)
+	{
+	  sprintf (ab, " size %u", size);
+	  if (! append_type (info, ab))
+	    return false;
+	}
+      if (tag != NULL)
+	{
+	  sprintf (ab, " id %u", id);
+	  if (! append_type (info, ab))
+	    return false;
+	}
+      if (! append_type (info, " */"))
+	return false;
+    }
+  if (! append_type (info, "\n"))
+    return false;
+
   info->stack->visibility = DEBUG_VISIBILITY_PUBLIC;
+
   return indent_type (info);
 }
 
@@ -1059,7 +1142,7 @@ pr_start_class_type (p, tag, id, structp, size, vptr, ownvptr)
 
   if (! append_type (info, " {"))
     return false;
-  if (size != 0 || vptr || ownvptr)
+  if (size != 0 || vptr || ownvptr || tag != NULL)
     {
       if (! append_type (info, " /*"))
 	return false;
@@ -1089,6 +1172,15 @@ pr_start_class_type (p, tag, id, structp, size, vptr, ownvptr)
 		  || ! append_type (info, " "))
 		return false;
 	    }
+	}
+
+      if (tag != NULL)
+	{
+	  char ab[30];
+
+	  sprintf (ab, " id %u", id);
+	  if (! append_type (info, ab))
+	    return false;
 	}
 
       if (! append_type (info, " */"))
@@ -1463,7 +1555,16 @@ pr_tag_type (p, name, id, kind)
       tag = idbuf;
     }
 
-  return append_type (info, tag);
+  if (! append_type (info, tag))
+    return false;
+  if (name != NULL && kind != DEBUG_KIND_ENUM)
+    {
+      sprintf (idbuf, " /* id %u */", id);
+      if (! append_type (info, idbuf))
+	return false;
+    }
+
+  return true;
 }
 
 /* Output a typedef.  */
