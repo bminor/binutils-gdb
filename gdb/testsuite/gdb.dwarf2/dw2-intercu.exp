@@ -1,5 +1,4 @@
-#   Copyright 2004
-#   Free Software Foundation, Inc.
+# Copyright 2004, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,6 +21,7 @@
 if {![istarget *-*-linux*]
     && ![istarget *-*-gnu*]
     && ![istarget *-*-elf*]
+    && ![istarget *-*-openbsd*]
     && ![istarget arm-*-eabi*]
     && ![istarget powerpc-*-eabi*]} {
     return 0  
@@ -49,5 +49,5 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 gdb_test "set listsize 1" ""
-gdb_test "list func_cu1" "4\tFile 1 Line 4"
+gdb_test "list func_cu1" "4\[ \t\]+File 1 Line 4"
 gdb_test "ptype func_cu1" "type = int \\(\\)"
