@@ -332,18 +332,6 @@ struct elf_backend_data
   /* The maximum page size for this backend.  */
   bfd_vma maxpagesize;
 
-  /* This is true if the linker should act like collect and gather
-     global constructors and destructors by name.  This is true for
-     MIPS ELF because the Irix 5 tools can not handle the .init
-     section.  */
-  boolean collect;
-
-  /* This is true if the linker should ignore changes to the type of a
-     symbol.  This is true for MIPS ELF because some Irix 5 objects
-     record undefined functions as STT_OBJECT although the definitions
-     are STT_FUNC.  */
-  boolean type_change_ok;
-
   /* A function to translate an ELF RELA relocation to a BFD arelent
      structure.  */
   void (*elf_info_to_howto) PARAMS ((bfd *, arelent *,
@@ -618,6 +606,18 @@ struct elf_backend_data
   bfd_vma got_header_size;
   bfd_vma plt_header_size;
 
+  /* This is true if the linker should act like collect and gather
+     global constructors and destructors by name.  This is true for
+     MIPS ELF because the Irix 5 tools can not handle the .init
+     section.  */
+  unsigned collect : 1;
+
+  /* This is true if the linker should ignore changes to the type of a
+     symbol.  This is true for MIPS ELF because some Irix 5 objects
+     record undefined functions as STT_OBJECT although the definitions
+     are STT_FUNC.  */
+  unsigned type_change_ok : 1;
+
   /* Whether the backend may use REL relocations.  (Some backends use
      both REL and RELA relocations, and this flag is set for those
      backends.)  */
@@ -634,6 +634,10 @@ struct elf_backend_data
      and the backend wants RELA relocations for a particular 
      section.  */   
   unsigned default_use_rela_p : 1;
+
+  /* True if addresses "naturally" sign extend.  This is used when
+     swapping in from Elf32 when BFD64.  */
+  unsigned sign_extend_vma : 1;
 
   unsigned want_got_plt : 1;
   unsigned plt_readonly : 1;

@@ -338,6 +338,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_backend_size_info _bfd_elfNN_size_info
 #endif
 
+#ifndef elf_backend_sign_extend_vma
+#define elf_backend_sign_extend_vma 0
+#endif
+
 extern const struct elf_size_info _bfd_elfNN_size_info;
 
 static CONST struct elf_backend_data elfNN_bed =
@@ -345,8 +349,6 @@ static CONST struct elf_backend_data elfNN_bed =
   ELF_ARCH,			/* arch */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
-  elf_backend_collect,
-  elf_backend_type_change_ok,
   elf_info_to_howto,
   elf_info_to_howto_rel,
   elf_backend_sym_is_global,
@@ -384,9 +386,12 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_got_symbol_offset,
   elf_backend_got_header_size,
   elf_backend_plt_header_size,
+  elf_backend_collect,
+  elf_backend_type_change_ok,
   elf_backend_may_use_rel_p,
   elf_backend_may_use_rela_p,
   elf_backend_default_use_rela_p,
+  elf_backend_sign_extend_vma,
   elf_backend_want_got_plt,
   elf_backend_plt_readonly,
   elf_backend_want_plt_sym,

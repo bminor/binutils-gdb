@@ -1,3 +1,13 @@
+1999-11-17  Richard Henderson  <rth@cygnus.com>
+
+	* elf-bfd.h (struct elf_backend_data): Reorder collect and
+	type_change_ok; add sign_extend_vma.
+	* elf32-mips.c (elf_backend_sign_extend_vma): Define.
+	* elfcode.h (elf_swap_symbol_in): Mind be->sign_extend_vma.
+	(elf_swap_shdr_in, elf_swap_phdr_in): Likewise.
+	* elfxx-target.h (elf_backend_sign_extend_vma): Default.
+	(elfNN_bed): Follow struture changes.
+
 1999-11-09  Ian Lance Taylor  <ian@zembu.com>
 
 	* libbfd.c (bfd_read): Check result of read against desired result

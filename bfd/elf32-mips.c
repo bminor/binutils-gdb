@@ -8809,6 +8809,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap =
 #define elf_backend_collect		true
 #define elf_backend_type_change_ok	true
 #define elf_backend_can_gc_sections	true
+#define elf_backend_sign_extend_vma	true
 #define elf_info_to_howto		mips_info_to_howto_rela
 #define elf_info_to_howto_rel		mips_info_to_howto_rel
 #define elf_backend_sym_is_global	mips_elf_sym_is_global

@@ -207,8 +207,13 @@ elf_swap_symbol_in (abfd, src, dst)
      const Elf_External_Sym *src;
      Elf_Internal_Sym *dst;
 {
+  int signed_vma = get_elf_backend_data (abfd)->sign_extend_vma;
+
   dst->st_name = bfd_h_get_32 (abfd, (bfd_byte *) src->st_name);
-  dst->st_value = get_word (abfd, (bfd_byte *) src->st_value);
+  if (signed_vma)
+    dst->st_value = get_signed_word (abfd, (bfd_byte *) src->st_value);
+  else
+    dst->st_value = get_word (abfd, (bfd_byte *) src->st_value);
   dst->st_size = get_word (abfd, (bfd_byte *) src->st_size);
   dst->st_info = bfd_h_get_8 (abfd, (bfd_byte *) src->st_info);
   dst->st_other = bfd_h_get_8 (abfd, (bfd_byte *) src->st_other);
@@ -295,10 +300,15 @@ elf_swap_shdr_in (abfd, src, dst)
      const Elf_External_Shdr *src;
      Elf_Internal_Shdr *dst;
 {
+  int signed_vma = get_elf_backend_data (abfd)->sign_extend_vma;
+
   dst->sh_name = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_name);
   dst->sh_type = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_type);
   dst->sh_flags = get_word (abfd, (bfd_byte *) src->sh_flags);
-  dst->sh_addr = get_word (abfd, (bfd_byte *) src->sh_addr);
+  if (signed_vma)
+    dst->sh_addr = get_signed_word (abfd, (bfd_byte *) src->sh_addr);
+  else
+    dst->sh_addr = get_word (abfd, (bfd_byte *) src->sh_addr);
   dst->sh_offset = get_word (abfd, (bfd_byte *) src->sh_offset);
   dst->sh_size = get_word (abfd, (bfd_byte *) src->sh_size);
   dst->sh_link = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_link);
@@ -341,11 +351,21 @@ elf_swap_phdr_in (abfd, src, dst)
      const Elf_External_Phdr *src;
      Elf_Internal_Phdr *dst;
 {
+  int signed_vma = get_elf_backend_data (abfd)->sign_extend_vma;
+
   dst->p_type = bfd_h_get_32 (abfd, (bfd_byte *) src->p_type);
   dst->p_flags = bfd_h_get_32 (abfd, (bfd_byte *) src->p_flags);
   dst->p_offset = get_word (abfd, (bfd_byte *) src->p_offset);
-  dst->p_vaddr = get_word (abfd, (bfd_byte *) src->p_vaddr);
-  dst->p_paddr = get_word (abfd, (bfd_byte *) src->p_paddr);
+  if (signed_vma)
+    {
+      dst->p_vaddr = get_signed_word (abfd, (bfd_byte *) src->p_vaddr);
+      dst->p_paddr = get_signed_word (abfd, (bfd_byte *) src->p_paddr);
+    }
+  else
+    {
+      dst->p_vaddr = get_word (abfd, (bfd_byte *) src->p_vaddr);
+      dst->p_paddr = get_word (abfd, (bfd_byte *) src->p_paddr);
+    }
   dst->p_filesz = get_word (abfd, (bfd_byte *) src->p_filesz);
   dst->p_memsz = get_word (abfd, (bfd_byte *) src->p_memsz);
   dst->p_align = get_word (abfd, (bfd_byte *) src->p_align);
