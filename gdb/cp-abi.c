@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "value.h"
 #include "cp-abi.h"
+#include "gdb_string.h"
 
 struct cp_abi_ops current_cp_abi;
 

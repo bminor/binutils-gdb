@@ -48,7 +48,9 @@
 #endif
 #include <signal.h>
 #include <fcntl.h>
+#if 0
 #include <termio.h>
+#endif
 #include <setjmp.h>
 #include "defs.h"
 #include "gdbcmd.h"
@@ -72,7 +74,7 @@ static int tui_finish_init = 1;
 
 /* Switch the output mode between TUI/standard gdb.  */
 static int
-tui_switch_mode (void)
+tui_rl_switch_mode (void)
 {
   if (tui_active)
     {
@@ -105,15 +107,16 @@ tui_switch_mode (void)
   return 0;
 }
 
-/* Change the TUI layout to show a next layout.
+/* TUI readline command.
+   Change the TUI layout to show a next layout.
    This function is bound to CTRL-X 2.  It is intended to provide
    a functionality close to the Emacs split-window command.  We always
    show two windows (src+asm), (src+regs) or (asm+regs).  */
 static int
-tui_change_windows (void)
+tui_rl_change_windows (void)
 {
   if (!tui_active)
-    tui_switch_mode ();
+    tui_rl_switch_mode ();
 
   if (tui_active)
     {
@@ -155,13 +158,13 @@ tui_change_windows (void)
   return 0;
 }
 
-
-/* Delete the second TUI window to only show one.  */
+/* TUI readline command.
+   Delete the second TUI window to only show one.  */
 static int
-tui_delete_other_windows (void)
+tui_rl_delete_other_windows (void)
 {
   if (!tui_active)
-    tui_switch_mode ();
+    tui_rl_switch_mode ();
 
   if (tui_active)
     {
@@ -197,12 +200,12 @@ tui_initialize_readline ()
 {
   rl_initialize ();
 
-  rl_add_defun ("tui-switch-mode", tui_switch_mode, -1);
-  rl_bind_key_in_map ('a', tui_switch_mode, emacs_ctlx_keymap);
-  rl_bind_key_in_map ('A', tui_switch_mode, emacs_ctlx_keymap);
-  rl_bind_key_in_map (CTRL ('A'), tui_switch_mode, emacs_ctlx_keymap);
-  rl_bind_key_in_map ('1', tui_delete_other_windows, emacs_ctlx_keymap);
-  rl_bind_key_in_map ('2', tui_change_windows, emacs_ctlx_keymap);
+  rl_add_defun ("tui-switch-mode", tui_rl_switch_mode, -1);
+  rl_bind_key_in_map ('a', tui_rl_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('A', tui_rl_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map (CTRL ('A'), tui_rl_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('1', tui_rl_delete_other_windows, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('2', tui_rl_change_windows, emacs_ctlx_keymap);
 }
 
 /* Enter in the tui mode (curses).
@@ -235,8 +238,8 @@ tui_enable (void)
       setTermWidthTo (COLS);
       def_prog_mode ();
 
-      tuiSetLocatorContent (0);
-      showLayout (SRC_COMMAND);
+      tuiShowFrameInfo (0);
+      tuiSetLayout (SRC_COMMAND, TUI_UNDEFINED_REGS);
       tuiSetWinFocusTo (srcWin);
       keypad (cmdWin->generic.handle, TRUE);
       wrefresh (cmdWin->generic.handle);
@@ -259,7 +262,14 @@ tui_enable (void)
 
   tui_version = 1;
   tui_active = 1;
+  if (selected_frame)
+     tuiShowFrameInfo (selected_frame);
+
   refresh ();
+
+  /* Update gdb's knowledge of its terminal.  */
+  target_terminal_save_ours ();
+  tui_update_gdb_sizes ();
 }
 
 /* Leave the tui mode.
@@ -282,8 +292,12 @@ tui_disable (void)
      so that terminal management with the inferior works.  */
   tui_setup_io (0);
 
+  /* Update gdb's knowledge of its terminal.  */
+  target_terminal_save_ours ();
+
   tui_version = 0;
   tui_active = 0;
+  tui_update_gdb_sizes ();
 }
 
 /* Wrapper on top of free() to ensure that input address
@@ -297,33 +311,8 @@ tuiFree (char *ptr)
     }
 }
 
-/* Determine what the low address will be to display in the TUI's
-   disassembly window.  This may or may not be the same as the
-   low address input.  */
-CORE_ADDR
-tuiGetLowDisassemblyAddress (CORE_ADDR low, CORE_ADDR pc)
-{
-  int line;
-  CORE_ADDR newLow;
-
-  /* Determine where to start the disassembly so that the pc is about in the
-     middle of the viewport.  */
-  for (line = 0, newLow = pc;
-       (newLow > low &&
-	line < (tuiDefaultWinViewportHeight (DISASSEM_WIN,
-					     DISASSEM_COMMAND) / 2));)
-    {
-      bfd_byte buffer[4];
-
-      newLow -= sizeof (bfd_getb32 (buffer));
-      line++;
-    }
-
-  return newLow;
-}
-
 void
-strcat_to_buf (char *buf, int buflen, char *itemToAdd)
+strcat_to_buf (char *buf, int buflen, const char *itemToAdd)
 {
   if (itemToAdd != (char *) NULL && buf != (char *) NULL)
     {

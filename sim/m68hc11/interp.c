@@ -1,6 +1,6 @@
 /* interp.c -- Simulator for Motorola 68HC11/68HC12
    Copyright (C) 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
-   Written by Stephane Carrez (stcarrez@worldnet.fr)
+   Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, the GNU debugger.
 
@@ -166,7 +166,7 @@ sim_board_reset (SIM_DESC sd)
   cpu_restart (cpu);
 }
 
-int
+static int
 sim_hw_configure (SIM_DESC sd)
 {
   const struct bfd_arch_info *arch;
@@ -229,6 +229,10 @@ sim_hw_configure (SIM_DESC sd)
 	  sim_hw_parse (sd, "/m68hc11/m68hc11eepr/reg 0xb000 512");
 	  sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/m68hc11eepr");
 	}
+      sim_hw_parse (sd, "/m68hc11 > port-a cpu-write-port /m68hc11");
+      sim_hw_parse (sd, "/m68hc11 > port-b cpu-write-port /m68hc11");
+      sim_hw_parse (sd, "/m68hc11 > port-c cpu-write-port /m68hc11");
+      sim_hw_parse (sd, "/m68hc11 > port-d cpu-write-port /m68hc11");
       cpu->hw_cpu = sim_hw_parse (sd, "/m68hc11");
     }
   else
@@ -238,11 +242,14 @@ sim_hw_configure (SIM_DESC sd)
 	{
 	  /* Allocate core external memory.  */
 	  sim_do_commandf (sd, "memory region 0x%lx@%d,0x%lx",
-			   0x8000, M6811_RAM_LEVEL, 0x8000);
+			   0xC000, M6811_RAM_LEVEL, 0x4000);
 	  sim_do_commandf (sd, "memory region 0x000@%d,0x8000",
+			   M6811_RAM_LEVEL);
+	  sim_do_commandf (sd, "memory region 0x01000000@%d,0x100000",
 			   M6811_RAM_LEVEL);
 
 	  sim_hw_parse (sd, "/m68hc12/reg 0x0 0x3FF");
+	  sim_hw_parse (sd, "/m68hc12/use_bank 1");
 	}
 
       if (!hw_tree_find_property (device_tree, "/m68hc12/m68hc12sio@1/reg"))
@@ -256,6 +263,7 @@ sim_hw_configure (SIM_DESC sd)
 	  /* M68hc11 Timer configuration. */
 	  sim_hw_parse (sd, "/m68hc12/m68hc12tim/reg 0x1b 0x5");
 	  sim_hw_parse (sd, "/m68hc12 > cpu-reset reset /m68hc12/m68hc12tim");
+          sim_hw_parse (sd, "/m68hc12 > capture capture /m68hc12/m68hc12tim");
 	}
 
       /* Create the SPI device.  */
@@ -277,9 +285,13 @@ sim_hw_configure (SIM_DESC sd)
 	  sim_hw_parse (sd, "/m68hc12 > cpu-reset reset /m68hc12/m68hc12eepr");
 	}
 
+      sim_hw_parse (sd, "/m68hc12 > port-a cpu-write-port /m68hc12");
+      sim_hw_parse (sd, "/m68hc12 > port-b cpu-write-port /m68hc12");
+      sim_hw_parse (sd, "/m68hc12 > port-c cpu-write-port /m68hc12");
+      sim_hw_parse (sd, "/m68hc12 > port-d cpu-write-port /m68hc12");
       cpu->hw_cpu = sim_hw_parse (sd, "/m68hc12");
     }
-  return 0;
+  return 1;
 }
 
 static int
@@ -289,10 +301,36 @@ sim_prepare_for_program (SIM_DESC sd, struct _bfd* abfd)
 
   cpu = STATE_CPU (sd, 0);
 
-  sim_hw_configure (sd);
+  if (!sim_hw_configure (sd))
+    return SIM_RC_FAIL;
+
   if (abfd != NULL)
     {
+      asection *s;
       cpu->cpu_elf_start = bfd_get_start_address (abfd);
+      /* See if any section sets the reset address */
+      cpu->cpu_use_elf_start = 1;
+      for (s = abfd->sections; s && cpu->cpu_use_elf_start; s = s->next) 
+        {
+          if (s->flags & SEC_LOAD)
+            {
+              bfd_size_type size;
+
+              size = bfd_get_section_size_before_reloc (s);
+              if (size > 0)
+                {
+                  bfd_vma lma;
+
+                  if (STATE_LOAD_AT_LMA_P (sd))
+                    lma = bfd_section_lma (abfd, s);
+                  else
+                    lma = bfd_section_vma (abfd, s);
+
+                  if (lma <= 0xFFFE && lma+size >= 0x10000)
+                    cpu->cpu_use_elf_start = 0;
+                }
+            }
+        }
     }
 
   /* reset all state information */
@@ -319,7 +357,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
 
   cpu_initialize (sd, cpu);
 
-  cpu->cpu_use_elf_start = 1;
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     {
       free_state (sd);
@@ -468,16 +505,19 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   sim_cpu *cpu;
   uint16 val;
+  int size = 2;
 
   cpu = STATE_CPU (sd, 0);
   switch (rn)
     {
     case A_REGNUM:
       val = cpu_get_a (cpu);
+      size = 1;
       break;
 
     case B_REGNUM:
       val = cpu_get_b (cpu);
+      size = 1;
       break;
 
     case D_REGNUM:
@@ -502,6 +542,12 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 
     case PSW_REGNUM:
       val = cpu_get_ccr (cpu);
+      size = 1;
+      break;
+
+    case PAGE_REGNUM:
+      val = cpu_get_page (cpu);
+      size = 1;
       break;
 
     default:
@@ -510,7 +556,7 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     }
   memory[0] = val >> 8;
   memory[1] = val & 0x0FF;
-  return 2;
+  return size;
 }
 
 int
@@ -533,11 +579,11 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 
     case A_REGNUM:
       cpu_set_a (cpu, val);
-      break;
+      return 1;
 
     case B_REGNUM:
       cpu_set_b (cpu, val);
-      break;
+      return 1;
 
     case X_REGNUM:
       cpu_set_x (cpu, val);
@@ -557,7 +603,11 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 
     case PSW_REGNUM:
       cpu_set_ccr (cpu, val);
-      break;
+      return 1;
+
+    case PAGE_REGNUM:
+      cpu_set_page (cpu, val);
+      return 1;
 
     default:
       break;

@@ -1015,7 +1015,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_store_struct_return (gdbarch, m68k_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch,
 					       m68k_deprecated_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, m68k_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, m68k_store_return_value);
 
   set_gdbarch_frame_chain (gdbarch, m68k_frame_chain);
   set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);

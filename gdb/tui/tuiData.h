@@ -1,5 +1,5 @@
 /* TUI data manipulation routines.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -42,6 +42,7 @@
 	 int viewportHeight;	/* viewport height */
 	 int lastVisibleLine;	/* index of last visible line */
 	 int isVisible;		/* whether the window is visible or not */
+         char* title;          /* Window title to display.  */
        }
 TuiGenWinInfo, *TuiGenWinInfoPtr;
 
@@ -170,7 +171,7 @@ TuiSourceElement, *TuiSourceElementPtr;
 /* Elements in the data display window content */
 typedef struct _TuiDataElement
   {
-    char *name;
+    const char *name;
     int itemNo;			/* the register number, or data display number */
     TuiDataType type;
     Opaque value;
@@ -244,6 +245,7 @@ typedef struct _TuiSourceInfo
     TuiGenWinInfoPtr executionInfo;	/* execution information window */
     int horizontalOffset;	/* used for horizontal scroll */
     TuiLineOrAddress startLineOrAddr;
+    char* filename;
   }
 TuiSourceInfo, *TuiSourceInfoPtr;
 

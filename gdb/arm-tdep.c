@@ -1585,7 +1585,7 @@ print_fpu_flags (int flags)
    (if present) or emulator.  */
 static void
 arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
-		      struct frame_info *frame)
+		      struct frame_info *frame, const char *args)
 {
   register unsigned long status = read_register (ARM_FPS_REGNUM);
   int type;
@@ -2926,7 +2926,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Returning results.  */
   set_gdbarch_deprecated_extract_return_value (gdbarch, arm_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, arm_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, arm_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch,

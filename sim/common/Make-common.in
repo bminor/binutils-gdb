@@ -655,7 +655,7 @@ CGEN = `if [ -f ../../guile/libguile/guile ]; then echo ../../guile/libguile/gui
 CGENFLAGS = -v
 CGEN_CPU_DIR = $(CGENDIR)/cpu
 
-CGEN_READ_SCM = ../../cgen/stamp-cgen $(CGENDIR)/sim.scm
+CGEN_READ_SCM = $(CGENDIR)/sim.scm
 CGEN_ARCH_SCM = $(CGENDIR)/sim-arch.scm
 CGEN_CPU_SCM = $(CGENDIR)/sim-cpu.scm $(CGENDIR)/sim-model.scm
 CGEN_DECODE_SCM = $(CGENDIR)/sim-decode.scm

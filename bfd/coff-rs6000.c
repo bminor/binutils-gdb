@@ -4053,7 +4053,7 @@ const bfd_target rs6000coff_vec =
     (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | DYNAMIC
      | HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
-    (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC),
+    SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA,
     0,				/* leading char */
     '/',			/* ar_pad_char */
     15,				/* ar_max_namelen */
@@ -4295,7 +4295,7 @@ const bfd_target pmac_xcoff_vec =
     (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | DYNAMIC
      | HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
-    (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC),
+    SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA,
     0,				/* leading char */
     '/',			/* ar_pad_char */
     15,				/* ar_max_namelen */

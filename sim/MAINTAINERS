@@ -11,7 +11,7 @@ gdb-patches@sources.redhat.com
 
 arm	        Nick Clifton <nickc@redhat.com>
 ppc		Andrew Cagney <ac131313@redhat.com>
-ppc		Geoff Keating <geoffk@redhat.com>
+ppc		Geoff Keating <geoffk@geoffk.org>
 m68hc11		Stephane Carrez <stcarrez@nerim.fr>
 mips		Andrew Cagney <ac131313@redhat.com>
 mips		Chris Demetriou <cgd@broadcom.com>

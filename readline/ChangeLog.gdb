@@ -1,3 +1,8 @@
+2002-08-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* support/config.guess: Import version 2002-08-23.
+	* support/config.sub: Import version 2002-08-22.
+
 2002-07-19  Chris Demetriou  <cgd@broadcom.com>
 
 	* support/config.guess: Update from ../config.guess.

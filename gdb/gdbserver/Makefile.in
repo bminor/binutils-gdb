@@ -102,6 +102,7 @@ INTERNAL_CFLAGS =  $(WARN_CFLAGS) ${CFLAGS} ${GLOBAL_CFLAGS} \
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
+LDFLAGS = @LDFLAGS@
 
 # Perhaps should come from parent Makefile
 VERSION = gdbserver-4.12.3

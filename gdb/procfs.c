@@ -136,6 +136,8 @@ static int proc_find_memory_regions (int (*) (CORE_ADDR,
 
 static char * procfs_make_note_section (bfd *, int *);
 
+static int procfs_can_use_hw_breakpoint (int, int, int);
+
 struct target_ops procfs_ops;		/* the target vector */
 
 static void
@@ -168,6 +170,7 @@ init_procfs_ops (void)
   procfs_ops.to_terminal_inferior   = terminal_inferior;
   procfs_ops.to_terminal_ours_for_output = terminal_ours_for_output;
   procfs_ops.to_terminal_ours       = terminal_ours;
+  procfs_ops.to_terminal_save_ours  = terminal_save_ours;
   procfs_ops.to_terminal_info       = child_terminal_info;
 
   procfs_ops.to_find_new_threads    = procfs_find_new_threads;
@@ -183,6 +186,7 @@ init_procfs_ops (void)
   procfs_ops.to_has_thread_control  = tc_schedlock;
   procfs_ops.to_find_memory_regions = proc_find_memory_regions;
   procfs_ops.to_make_corefile_notes = procfs_make_note_section;
+  procfs_ops.to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
   procfs_ops.to_magic               = OPS_MAGIC;
 }
 
@@ -5136,6 +5140,37 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
 #endif /* AIX5 */
 #endif /* UNIXWARE */
   return 0;
+}
+
+/* Return non-zero if we can set a hardware watchpoint of type TYPE.  TYPE
+   is one of bp_hardware_watchpoint, bp_read_watchpoint, bp_write_watchpoint,
+   or bp_hardware_watchpoint.  CNT is the number of watchpoints used so
+   far.
+   
+   Note:  procfs_can_use_hw_breakpoint() is not yet used by all
+   procfs.c targets due to the fact that some of them still define
+   TARGET_CAN_USE_HARDWARE_WATCHPOINT.  */
+
+static int
+procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
+{
+#ifndef TARGET_HAS_HARDWARE_WATCHPOINTS
+  return 0;
+#else
+  /* Due to the way that proc_set_watchpoint() is implemented, host
+     and target pointers must be of the same size.  If they are not,
+     we can't use hardware watchpoints.  This limitation is due to the
+     fact that proc_set_watchpoint() calls address_to_host_pointer();
+     a close inspection of address_to_host_pointer will reveal that
+     an internal error will be generated when the host and target
+     pointer sizes are different.  */
+  if (sizeof (void *) != TYPE_LENGTH (builtin_type_void_data_ptr))
+    return 0;
+
+  /* Other tests here???  */
+
+  return 1;
+#endif
 }
 
 /*

@@ -1612,7 +1612,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_return_address (gdbarch, d10v_push_return_address);
 
   set_gdbarch_store_struct_return (gdbarch, d10v_store_struct_return);
-  set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, d10v_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, d10v_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, d10v_use_struct_convention);
 

@@ -58,7 +58,7 @@
 /* Write into appropriate registers a function return value of type
    TYPE, given in virtual format.  */
 
-#define STORE_RETURN_VALUE(TYPE,VALBUF) \
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
 {									\
   if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				\
     {									\

@@ -20,17 +20,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#if 0
-/* code to execute to print interesting information about the
-   floating point processor (if any)
-   No need to define if there is nothing to do.
-   On the 386, unfortunately this code is host-dependent (and lives
-   in the i386-xdep.c file), so we can't
-   do this unless we *know* we aren't cross-debugging.  FIXME.
- */
-#define FLOAT_INFO { i386_float_info (); }
-#endif /*0 */
-
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = i386_register_u_addr ((blockend),(regno));
 

@@ -515,10 +515,10 @@ unparse_instr (instr_data, is_segmented)
 	  break;
 	case CLASS_BA:
           if (is_segmented)
-            sprintf (tmp_str, "rr%ld(#%lx)", instr_data->arg_reg[datum_value],
+            sprintf (tmp_str, "rr%ld(#0x%lx)", instr_data->arg_reg[datum_value],
                      instr_data->immediate);
           else
-            sprintf (tmp_str, "r%ld(#%lx)", instr_data->arg_reg[datum_value],
+            sprintf (tmp_str, "r%ld(#0x%lx)", instr_data->arg_reg[datum_value],
                      instr_data->immediate);
 	  strcat (out_str, tmp_str);
 	  break;

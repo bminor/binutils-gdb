@@ -624,7 +624,9 @@ do
     bfd_elf32_shl_vec)		tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_shlin_vec)	tb="$tb elf32-sh-lin.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shlnbsd_vec)	tb="$tb elf32-sh-nbsd.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
+    bfd_elf32_shlqnx_vec)	tb="$tb elf32-shqnx.lo elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_shnbsd_vec)	tb="$tb elf32-sh-nbsd.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
+    bfd_elf32_shqnx_vec)	tb="$tb elf32-shqnx.lo elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elf32.lo $elf" ;;
     bfd_elf32_tradbigmips_vec)  tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_tradlittlemips_vec) tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
@@ -739,6 +741,12 @@ do
     sunos_big_vec)		tb="$tb sunos.lo aout32.lo" ;;
     tic30_aout_vec)		tb="$tb aout-tic30.lo" ;;
     tic30_coff_vec)		tb="$tb coff-tic30.lo" ;;
+    tic4x_coff0_vec)            tb="$tb coff-tic4x.lo" ;;
+    tic4x_coff0_beh_vec)        tb="$tb coff-tic4x.lo" ;;
+    tic4x_coff1_vec)            tb="$tb coff-tic4x.lo" ;;
+    tic4x_coff1_beh_vec)        tb="$tb coff-tic4x.lo" ;;
+    tic4x_coff2_vec)            tb="$tb coff-tic4x.lo" ;;
+    tic4x_coff2_beh_vec)        tb="$tb coff-tic4x.lo" ;;
     tic54x_coff0_beh_vec)	tb="$tb coff-tic54x.lo" ;;
     tic54x_coff0_vec)		tb="$tb coff-tic54x.lo" ;;
     tic54x_coff1_beh_vec)	tb="$tb coff-tic54x.lo" ;;

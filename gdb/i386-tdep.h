@@ -114,7 +114,7 @@ struct gdbarch_tdep
 #define FOP_REGNUM	(FPC_REGNUM + 7)
 
 /* Return non-zero if N corresponds to a FPU data registers.  */
-#define FP_REGNUM_P(n)	(FP0_REGNUM <= (n) && (n) < FPC_REGNUM)
+#define FP_REGNUM_P(n)	(FP0_REGNUM && FP0_REGNUM <= (n) && (n) < FPC_REGNUM)
 
 /* Return non-zero if N corresponds to a FPU control register.  */
 #define FPC_REGNUM_P(n)	(FPC_REGNUM <= (n) && (n) < XMM0_REGNUM)
@@ -160,16 +160,11 @@ struct gdbarch_tdep
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	16
 
+/* Functions exported from i386-tdep.c.  */
+extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
+
 /* Return the name of register REG.  */
 extern char const *i386_register_name (int reg);
-
-/* Return the offset into the register array of the start of register
-   number REG.  */
-extern int i386_register_byte (int reg);
-
-/* Return the number of bytes of storage in GDB's register array
-   occupied by register REG.  */
-extern int i386_register_raw_size (int reg);
 
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);

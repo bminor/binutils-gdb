@@ -43,6 +43,9 @@ extern gdbarch_breakpoint_from_pc_ftype legacy_breakpoint_from_pc;
    register cache.  */
 extern gdbarch_extract_return_value_ftype legacy_extract_return_value;
 
+/* Implementation of store return value that grubs the register cache.  */
+extern gdbarch_store_return_value_ftype legacy_store_return_value;
+
 /* Frameless functions not identifable. */
 extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_invocation_not;
 
@@ -144,16 +147,17 @@ extern CORE_ADDR generic_skip_trampoline_code (CORE_ADDR pc);
 
 extern int generic_in_solib_call_trampoline (CORE_ADDR pc, char *name);
 
-extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern int generic_in_solib_return_trampoline (CORE_ADDR pc, char *name);
 
-extern void default_print_float_info (struct gdbarch *gdbarch,
-				      struct ui_file *file,
-				      struct frame_info *frame);
+extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
 
 /* Assume that the world is sane, a registers raw and virtual size
    both match its type.  */
 
 extern int generic_register_size (int regnum);
+
+/* Assume that the world is sane, the registers are all adjacent.  */
+extern int generic_register_byte (int regnum);
 
 /* Prop up old targets that use various IN_SIGTRAMP() macros.  */
 extern int legacy_pc_in_sigtramp (CORE_ADDR pc, char *name);

@@ -48,11 +48,7 @@ Opaque (*OpaqueFuncPtr) (va_list);
  */
      typedef OpaqueFuncPtr TuiOpaqueFuncPtr;
 
-extern Opaque vcatch_errors (OpaqueFuncPtr, ...);
-extern Opaque va_catch_errors (OpaqueFuncPtr, va_list);
-
-extern void strcat_to_buf (char *, int, char *);
-extern void strcat_to_buf_with_fmt (char *, int, char *, ...);
+extern void strcat_to_buf (char *, int, const char *);
 
 /* Types of error returns */
      typedef enum
@@ -129,9 +125,7 @@ extern void tui_vStartNewLines (va_list);
 extern TuiStatus tui_set_layout (const char *);
 
 /* tuiSourceWin.c */
-extern void tuiDisplayMainFunction (void);
 extern void tuiUpdateAllExecInfos (void);
-extern void tuiUpdateOnEnd (void);
 extern void tui_vAllSetHasBreakAt (va_list);
 extern void tui_vUpdateSourceWindowsWithAddr (va_list);
 

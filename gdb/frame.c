@@ -142,7 +142,9 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 	 register cache.  */
       *optimizedp = 0;
       *lvalp = lval_register;
-      *addrp = 0;
+      /* ULGH!  Code uses the offset into the raw register byte array
+         as a way of identifying a register.  */
+      *addrp = REGISTER_BYTE (regnum);
       /* Should this code test ``register_cached (regnum) < 0'' and do
          something like set realnum to -1 when the register isn't
          available?  */

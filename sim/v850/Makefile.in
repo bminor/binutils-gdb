@@ -82,6 +82,7 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 	../igen/igen \
 		$(IGEN_TRACE) \
 		-G gen-direct-access \
+		-G gen-zero-r0 \
 		-i $(IGEN_INSN) \
 		-o $(IGEN_DC) \
 		-x \

@@ -1,6 +1,6 @@
 /* sim-main.h -- Simulator for Motorola 68HC11 & 68HC12
    Copyright (C) 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
-   Written by Stephane Carrez (stcarrez@worldnet.fr)
+   Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, the GNU debugger.
 
@@ -80,6 +80,7 @@ enum cpu_type
 #define B_REGNUM        6
 #define PSW_REGNUM 	7
 #define Z_REGNUM        8
+#define PAGE_REGNUM     9
 
 typedef struct m6811_regs {
     unsigned short      d;
@@ -88,6 +89,7 @@ typedef struct m6811_regs {
     unsigned short      sp;
     unsigned short      pc;
     unsigned char       ccr;
+  unsigned short      page;
 } m6811_regs;
 
 
@@ -126,6 +128,7 @@ enum M6811_Special
   /* 68HC12 instructions.  */
   M6812_BGND,
   M6812_CALL,
+  M6812_CALL_INDIRECT,
   M6812_IDIVS,
   M6812_EDIV,
   M6812_EDIVS,
@@ -232,6 +235,7 @@ struct _sim_cpu {
 #define cpu_get_sp(PROC)           ((PROC)->cpu_regs.sp)
 #define cpu_get_a(PROC)            ((PROC->cpu_regs.d >> 8) & 0x0FF)
 #define cpu_get_b(PROC)            ((PROC->cpu_regs.d) & 0x0FF)
+#define cpu_get_page(PROC)         (PROC->cpu_regs.page)
 
 /* 68HC12 specific and Motorola internal registers.  */
 #define cpu_get_tmp3(PROC)         (0)
@@ -240,10 +244,11 @@ struct _sim_cpu {
 #define cpu_set_d(PROC,VAL)        (((PROC)->cpu_regs.d) = (VAL))
 #define cpu_set_x(PROC,VAL)        (((PROC)->cpu_regs.ix) = (VAL))
 #define cpu_set_y(PROC,VAL)        (((PROC)->cpu_regs.iy) = (VAL))
+#define cpu_set_page(PROC,VAL)     ((PROC->cpu_regs.page) = (VAL))
 
 /* 68HC12 specific and Motorola internal registers.  */
 #define cpu_set_tmp3(PROC,VAL)     (0)
-#define cpu_set_tmp2(PROC,VAL)     (0)
+#define cpu_set_tmp2(PROC,VAL)     (void) (0)
 
 #if 0
 /* This is a function in m68hc11_sim.c to keep track of the frame.  */
@@ -287,11 +292,21 @@ extern void cpu_memory_exception (struct _sim_cpu *proc,
                                   uint16 addr,
                                   const char *message);
 
+inline address_word
+phys_to_virt (sim_cpu *cpu, address_word addr)
+{
+  if (addr >= 0x8000 && addr < 0xc000)
+    return ((address_word) (addr) - 0x8000)
+      + (((address_word) cpu->cpu_regs.page) << 14) + 0x01000000;
+  else
+    return (address_word) (addr);
+}
+
 inline uint8
 memory_read8 (sim_cpu *cpu, uint16 addr)
 {
   uint8 val;
-  
+
   if (sim_core_read_buffer (CPU_STATE (cpu), cpu, 0, &val, addr, 1) != 1)
     {
       cpu_memory_exception (cpu, SIM_SIGSEGV, addr,
@@ -314,7 +329,7 @@ inline uint16
 memory_read16 (sim_cpu *cpu, uint16 addr)
 {
   uint8 b[2];
-  
+
   if (sim_core_read_buffer (CPU_STATE (cpu), cpu, 0, b, addr, 2) != 2)
     {
       cpu_memory_exception (cpu, SIM_SIGSEGV, addr,
@@ -523,6 +538,11 @@ extern void cpu_info (SIM_DESC sd, sim_cpu *proc);
 
 extern int cpu_initialize (SIM_DESC sd, sim_cpu *cpu);
 
+/* Returns the address of a 68HC12 indexed operand.
+   Pre and post modifications are handled on the source register.  */
+extern uint16 cpu_get_indexed_operand_addr (sim_cpu* cpu, int restrict);
+
+extern void cpu_return (sim_cpu *cpu);
 extern void cpu_set_sp (sim_cpu *cpu, uint16 val);
 extern int cpu_reset (sim_cpu *cpu);
 extern int cpu_restart (sim_cpu *cpu);

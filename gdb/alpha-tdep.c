@@ -54,7 +54,6 @@ static gdbarch_register_convert_to_virtual_ftype
 static gdbarch_register_convert_to_raw_ftype alpha_register_convert_to_raw;
 static gdbarch_store_struct_return_ftype alpha_store_struct_return;
 static gdbarch_deprecated_extract_return_value_ftype alpha_extract_return_value;
-static gdbarch_store_return_value_ftype alpha_store_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype
     alpha_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype alpha_use_struct_convention;
@@ -65,7 +64,6 @@ static gdbarch_frame_args_address_ftype alpha_frame_args_address;
 static gdbarch_frame_locals_address_ftype alpha_frame_locals_address;
 
 static gdbarch_skip_prologue_ftype alpha_skip_prologue;
-static gdbarch_get_saved_register_ftype alpha_get_saved_register;
 static gdbarch_saved_pc_after_call_ftype alpha_saved_pc_after_call;
 static gdbarch_frame_chain_ftype alpha_frame_chain;
 static gdbarch_frame_saved_pc_ftype alpha_frame_saved_pc;
@@ -499,54 +497,6 @@ alpha_frame_saved_pc (struct frame_info *frame)
     return read_memory_integer (frame->frame - 8, 8);
 
   return read_next_frame_reg (frame, pcreg);
-}
-
-static void
-alpha_get_saved_register (char *raw_buffer,
-			  int *optimized,
-			  CORE_ADDR *addrp,
-			  struct frame_info *frame,
-			  int regnum,
-			  enum lval_type *lval)
-{
-  CORE_ADDR addr;
-
-  if (!target_has_registers)
-    error ("No registers.");
-
-  /* Normal systems don't optimize out things with register numbers.  */
-  if (optimized != NULL)
-    *optimized = 0;
-  addr = find_saved_register (frame, regnum);
-  if (addr != 0)
-    {
-      if (lval != NULL)
-	*lval = lval_memory;
-      if (regnum == SP_REGNUM)
-	{
-	  if (raw_buffer != NULL)
-	    {
-	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			     (LONGEST) addr);
-	    }
-	  if (addrp != NULL)
-	    *addrp = 0;
-	  return;
-	}
-      if (raw_buffer != NULL)
-	target_read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
-    }
-  else
-    {
-      if (lval != NULL)
-	*lval = lval_register;
-      addr = REGISTER_BYTE (regnum);
-      if (raw_buffer != NULL)
-	read_register_gen (regnum, raw_buffer);
-    }
-  if (addrp != NULL)
-    *addrp = addr;
 }
 
 static CORE_ADDR
@@ -1904,13 +1854,12 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_saved_pc (gdbarch, alpha_frame_saved_pc);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, alpha_frame_init_saved_regs);
-  set_gdbarch_get_saved_register (gdbarch, alpha_get_saved_register);
 
   set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, alpha_extract_return_value);
 
   set_gdbarch_store_struct_return (gdbarch, alpha_store_struct_return);
-  set_gdbarch_store_return_value (gdbarch, alpha_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, alpha_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
 					    alpha_extract_struct_value_address);
 

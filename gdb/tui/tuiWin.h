@@ -1,5 +1,5 @@
 /* TUI window generic functions.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -37,8 +37,6 @@ extern void tuiScrollLeft (TuiWinInfoPtr, int);
 extern void tuiScrollRight (TuiWinInfoPtr, int);
 extern void tui_scroll (TuiScrollDirection, TuiWinInfoPtr, int);
 extern void tuiSetWinFocusTo (TuiWinInfoPtr);
-extern void tuiClearWinFocusFrom (TuiWinInfoPtr);
-extern void tuiClearWinFocus (void);
 extern void tuiResizeAll (void);
 extern void tuiRefreshAll (void);
 extern void tuiSigwinchHandler (int);
@@ -53,6 +51,9 @@ extern int tui_border_attrs;
 extern int tui_active_border_attrs;
 
 extern int tui_update_variables ();
+
+/* Update gdb's knowledge of the terminal size.  */
+extern void tui_update_gdb_sizes (void);
 
 #endif
 /*_TUI_WIN_H*/

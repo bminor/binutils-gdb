@@ -267,7 +267,7 @@ extern CORE_ADDR sparc_skip_prologue (CORE_ADDR);
 /* Write into appropriate registers a function return value of type
    TYPE, given in virtual format.  */
 
-#define STORE_RETURN_VALUE(TYPE, VALBUF) \
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE, VALBUF) \
      sparc_store_return_value (TYPE, VALBUF)
 extern void sparc_store_return_value (struct type *, char *);
 

@@ -138,6 +138,8 @@ static void debug_to_terminal_inferior (void);
 
 static void debug_to_terminal_ours_for_output (void);
 
+static void debug_to_terminal_save_ours (void);
+
 static void debug_to_terminal_ours (void);
 
 static void debug_to_terminal_info (char *, int);
@@ -445,6 +447,9 @@ cleanup_target (struct target_ops *t)
   de_fault (to_terminal_ours, 
 	    (void (*) (void)) 
 	    target_ignore);
+  de_fault (to_terminal_save_ours, 
+	    (void (*) (void)) 
+	    target_ignore);
   de_fault (to_terminal_info, 
 	    default_terminal_info);
   de_fault (to_kill, 
@@ -608,6 +613,7 @@ update_current_target (void)
       INHERIT (to_terminal_inferior, t);
       INHERIT (to_terminal_ours_for_output, t);
       INHERIT (to_terminal_ours, t);
+      INHERIT (to_terminal_save_ours, t);
       INHERIT (to_terminal_info, t);
       INHERIT (to_kill, t);
       INHERIT (to_load, t);
@@ -1980,6 +1986,14 @@ debug_to_terminal_ours (void)
 }
 
 static void
+debug_to_terminal_save_ours (void)
+{
+  debug_target.to_terminal_save_ours ();
+
+  fprintf_unfiltered (gdb_stdlog, "target_terminal_save_ours ()\n");
+}
+
+static void
 debug_to_terminal_info (char *arg, int from_tty)
 {
   debug_target.to_terminal_info (arg, from_tty);
@@ -2405,6 +2419,7 @@ setup_target_debug (void)
   current_target.to_terminal_inferior = debug_to_terminal_inferior;
   current_target.to_terminal_ours_for_output = debug_to_terminal_ours_for_output;
   current_target.to_terminal_ours = debug_to_terminal_ours;
+  current_target.to_terminal_save_ours = debug_to_terminal_save_ours;
   current_target.to_terminal_info = debug_to_terminal_info;
   current_target.to_kill = debug_to_kill;
   current_target.to_load = debug_to_load;

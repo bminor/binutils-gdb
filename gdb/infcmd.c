@@ -1549,32 +1549,48 @@ path_command (char *dirname, int from_tty)
 #ifdef REGISTER_NAMES
 char *gdb_register_names[] = REGISTER_NAMES;
 #endif
-/* Print out the machine register regnum. If regnum is -1,
-   print all registers (fpregs == 1) or all non-float registers
-   (fpregs == 0).
+/* Print out the machine register regnum. If regnum is -1, print all
+   registers (print_all == 1) or all non-float and non-vector
+   registers (print_all == 0).
 
    For most machines, having all_registers_info() print the
-   register(s) one per line is good enough. If a different format
-   is required, (eg, for MIPS or Pyramid 90x, which both have
-   lots of regs), or there is an existing convention for showing
-   all the registers, define the macro DO_REGISTERS_INFO(regnum, fp)
-   to provide that format.  */
+   register(s) one per line is good enough.  If a different format is
+   required, (eg, for MIPS or Pyramid 90x, which both have lots of
+   regs), or there is an existing convention for showing all the
+   registers, define the architecture method PRINT_REGISTERS_INFO to
+   provide that format.  */
 
 void
-do_registers_info (int regnum, int fpregs)
+default_print_registers_info (struct gdbarch *gdbarch,
+			      struct ui_file *file,
+			      struct frame_info *frame,
+			      int regnum, int print_all)
 {
-  register int i;
-  int numregs = NUM_REGS + NUM_PSEUDO_REGS;
-  char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
-  char *virtual_buffer = (char*) alloca (MAX_REGISTER_VIRTUAL_SIZE);
+  int i;
+  const int numregs = NUM_REGS + NUM_PSEUDO_REGS;
+  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char *virtual_buffer = alloca (MAX_REGISTER_VIRTUAL_SIZE);
+
+  /* FIXME: cagney/2002-03-08: This should be deprecated.  */
+  if (DO_REGISTERS_INFO_P ())
+    {
+      DO_REGISTERS_INFO (regnum, print_all);
+      return;
+    }
 
   for (i = 0; i < numregs; i++)
     {
-      /* Decide between printing all regs, nonfloat regs, or specific reg.  */
+      /* Decide between printing all regs, non-float / vector regs, or
+         specific reg.  */
       if (regnum == -1)
 	{
-	  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT && !fpregs)
-	    continue;
+	  if (!print_all)
+	    {
+	      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
+		continue;
+	      if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)))
+		continue;
+	    }
 	}
       else
 	{
@@ -1587,16 +1603,19 @@ do_registers_info (int regnum, int fpregs)
       if (REGISTER_NAME (i) == NULL || *(REGISTER_NAME (i)) == '\0')
 	continue;
 
-      fputs_filtered (REGISTER_NAME (i), gdb_stdout);
-      print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), gdb_stdout);
+      fputs_filtered (REGISTER_NAME (i), file);
+      print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), file);
 
       /* Get the data in raw format.  */
-      if (! frame_register_read (selected_frame, i, raw_buffer))
+      if (! frame_register_read (frame, i, raw_buffer))
 	{
-	  printf_filtered ("*value not available*\n");
+	  fprintf_filtered (file, "*value not available*\n");
 	  continue;
 	}
 
+      /* FIXME: cagney/2002-08-03: This code shouldn't be necessary.
+         The function frame_register_read() should have returned the
+         pre-cooked register so no conversion is necessary.  */
       /* Convert raw data to virtual format if necessary.  */
       if (REGISTER_CONVERTIBLE (i))
 	{
@@ -1609,31 +1628,40 @@ do_registers_info (int regnum, int fpregs)
 		  REGISTER_VIRTUAL_SIZE (i));
 	}
 
-      /* If virtual format is floating, print it that way, and in raw hex.  */
+      /* If virtual format is floating, print it that way, and in raw
+         hex.  */
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
 	{
-	  register int j;
+	  int j;
 
 	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
-		     gdb_stdout, 0, 1, 0, Val_pretty_default);
+		     file, 0, 1, 0, Val_pretty_default);
 
-	  printf_filtered ("\t(raw 0x");
+	  fprintf_filtered (file, "\t(raw 0x");
 	  for (j = 0; j < REGISTER_RAW_SIZE (i); j++)
 	    {
-	      register int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
-	      : REGISTER_RAW_SIZE (i) - 1 - j;
-	      printf_filtered ("%02x", (unsigned char) raw_buffer[idx]);
+	      int idx;
+	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+		idx = j;
+	      else
+		idx = REGISTER_RAW_SIZE (i) - 1 - j;
+	      fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[idx]);
 	    }
-	  printf_filtered (")");
+	  fprintf_filtered (file, ")");
 	}
-      /* Else print as integer in hex and in decimal.  */
       else
 	{
+	  /* Print the register in hex.  */
 	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
 		     gdb_stdout, 'x', 1, 0, Val_pretty_default);
-	  printf_filtered ("\t");
-	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
-		     gdb_stdout, 0, 1, 0, Val_pretty_default);
+          /* If not a vector register, print it also according to its
+             natural format.  */
+	  if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)) == 0)
+	    {
+	      printf_filtered ("\t");
+	      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+			 gdb_stdout, 0, 1, 0, Val_pretty_default);
+	    }
 	}
 
       /* The SPARC wants to print even-numbered float regs as doubles
@@ -1642,7 +1670,7 @@ do_registers_info (int regnum, int fpregs)
       PRINT_REGISTER_HOOK (i);
 #endif
 
-      printf_filtered ("\n");
+      fprintf_filtered (file, "\n");
     }
 }
 
@@ -1659,7 +1687,8 @@ registers_info (char *addr_exp, int fpregs)
 
   if (!addr_exp)
     {
-      DO_REGISTERS_INFO (-1, fpregs);
+      gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
+				    selected_frame, -1, fpregs);
       return;
     }
 
@@ -1684,7 +1713,8 @@ registers_info (char *addr_exp, int fpregs)
 	error ("%.*s: invalid register", (int) (end - addr_exp), addr_exp);
 
     found:
-      DO_REGISTERS_INFO (regnum, fpregs);
+      gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
+				    selected_frame, regnum, fpregs);
 
       addr_exp = end;
       while (*addr_exp == ' ' || *addr_exp == '\t')
@@ -1703,6 +1733,41 @@ void
 nofp_registers_info (char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 0);
+}
+
+static void
+print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
+		   struct frame_info *frame, const char *args)
+{
+  if (gdbarch_print_vector_info_p (gdbarch))
+    gdbarch_print_vector_info (gdbarch, file, frame, args);
+  else
+    {
+      int regnum;
+      int printed_something = 0;
+
+      if (!target_has_registers)
+	error ("The program has no registers now.");
+      if (selected_frame == NULL)
+	error ("No selected frame.");
+
+      for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+	{
+	  if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (regnum)))
+	    {
+	      printed_something = 1;
+	      gdbarch_print_registers_info (gdbarch, file, frame, regnum, 1);
+	    }
+	}
+      if (!printed_something)
+	fprintf_filtered (file, "No vector information\n");
+    }
+}
+
+static void
+vector_info (char *args, int from_tty)
+{
+  print_vector_info (current_gdbarch, gdb_stdout, selected_frame, args);
 }
 
 
@@ -1845,9 +1910,46 @@ interrupt_target_command (char *args, int from_tty)
 
 /* ARGSUSED */
 static void
-float_info (char *addr_exp, int from_tty)
+print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
+		  struct frame_info *frame, const char *args)
 {
-  gdbarch_print_float_info (current_gdbarch, gdb_stdout, selected_frame);
+  if (gdbarch_print_float_info_p (gdbarch))
+    gdbarch_print_float_info (gdbarch, file, frame, args);
+  else
+    {
+#ifdef FLOAT_INFO
+#if GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL
+#error "FLOAT_INFO defined in multi-arch"
+#endif
+      FLOAT_INFO;
+#else
+      int regnum;
+      int printed_something = 0;
+
+      if (!target_has_registers)
+	error ("The program has no registers now.");
+      if (selected_frame == NULL)
+	error ("No selected frame.");
+
+      for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+	{
+	  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
+	    {
+	      printed_something = 1;
+	      gdbarch_print_registers_info (gdbarch, file, frame, regnum, 1);
+	    }
+	}
+      if (!printed_something)
+	fprintf_filtered (file, "\
+No floating-point info available for this processor.\n");
+#endif
+    }
+}
+
+static void
+float_info (char *args, int from_tty)
+{
+  print_float_info (current_gdbarch, gdb_stdout, selected_frame, args);
 }
 
 /* ARGSUSED */
@@ -2041,6 +2143,9 @@ Register name as argument means describe only that register.");
 
   add_info ("float", float_info,
 	    "Print the status of the floating point unit\n");
+
+  add_info ("vector", vector_info,
+	    "Print the status of the vector unit\n");
 
   inferior_environ = make_environ ();
   init_environ (inferior_environ);

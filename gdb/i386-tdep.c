@@ -25,6 +25,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "gdbcore.h"
+#include "objfiles.h"
 #include "target.h"
 #include "floatformat.h"
 #include "symfile.h"
@@ -38,6 +39,7 @@
 #include "gdb_assert.h"
 
 #include "i386-tdep.h"
+#include "i387-tdep.h"
 
 /* Names of the registers.  The first 10 registers match the register
    numbering scheme used by GCC for stabs and DWARF.  */
@@ -56,26 +58,22 @@ static char *i386_register_names[] =
   "mxcsr"
 };
 
-/* i386_register_offset[i] is the offset into the register file of the
-   start of register number i.  We initialize this from
-   i386_register_size.  */
-static int i386_register_offset[I386_SSE_NUM_REGS];
+/* MMX registers.  */
 
-/* i386_register_size[i] is the number of bytes of storage in GDB's
-   register array occupied by register i.  */
-static int i386_register_size[I386_SSE_NUM_REGS] = {
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-  10, 10, 10, 10,
-  10, 10, 10, 10,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-  16, 16, 16, 16,
-  16, 16, 16, 16,
-   4
+static char *i386_mmx_names[] =
+{
+  "mm0", "mm1", "mm2", "mm3",
+  "mm4", "mm5", "mm6", "mm7"
 };
+static const int mmx_num_regs = (sizeof (i386_mmx_names)
+				 / sizeof (i386_mmx_names[0]));
+#define MM0_REGNUM (NUM_REGS)
+
+static int
+mmx_regnum_p (int reg)
+{
+  return (reg >= MM0_REGNUM && reg < MM0_REGNUM + mmx_num_regs);
+}
 
 /* Return the name of register REG.  */
 
@@ -84,27 +82,12 @@ i386_register_name (int reg)
 {
   if (reg < 0)
     return NULL;
+  if (mmx_regnum_p (reg))
+    return i386_mmx_names[reg - MM0_REGNUM];
   if (reg >= sizeof (i386_register_names) / sizeof (*i386_register_names))
     return NULL;
 
   return i386_register_names[reg];
-}
-
-/* Return the offset into the register array of the start of register
-   number REG.  */
-int
-i386_register_byte (int reg)
-{
-  return i386_register_offset[reg];
-}
-
-/* Return the number of bytes of storage in GDB's register array
-   occupied by register REG.  */
-
-int
-i386_register_raw_size (int reg)
-{
-  return i386_register_size[reg];
 }
 
 /* Convert stabs register number REG to the appropriate register
@@ -132,9 +115,7 @@ i386_stab_reg_to_regnum (int reg)
   else if (reg >= 29 && reg <= 36)
     {
       /* MMX registers.  */
-      /* FIXME: kettenis/2001-07-28: Should we have the MMX registers
-         as pseudo-registers?  */
-      return reg - 29 + FP0_REGNUM;
+      return reg - 29 + MM0_REGNUM;
     }
 
   /* This will hopefully provoke a warning.  */
@@ -853,8 +834,7 @@ i386_do_pop_frame (struct frame_info *frame)
       if (addr)
 	{
 	  read_memory (addr, regbuf, REGISTER_RAW_SIZE (regnum));
-	  write_register_bytes (REGISTER_BYTE (regnum), regbuf,
-				REGISTER_RAW_SIZE (regnum));
+	  write_register_gen (regnum, regbuf);
 	}
     }
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
@@ -937,8 +917,9 @@ i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 
 static void
 i386_extract_return_value (struct type *type, struct regcache *regcache,
-			   char *valbuf)
+			   void *dst)
 {
+  bfd_byte *valbuf = dst;
   int len = TYPE_LENGTH (type);
   char buf[I386_MAX_REGISTER_SIZE];
 
@@ -992,20 +973,21 @@ i386_extract_return_value (struct type *type, struct regcache *regcache,
    in VALBUF of type TYPE, given in virtual format.  */
 
 static void
-i386_store_return_value (struct type *type, char *valbuf)
+i386_store_return_value (struct type *type, struct regcache *regcache,
+			 const void *valbuf)
 {
   int len = TYPE_LENGTH (type);
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       && TYPE_NFIELDS (type) == 1)
     {
-      i386_store_return_value (TYPE_FIELD_TYPE (type, 0), valbuf);
+      i386_store_return_value (TYPE_FIELD_TYPE (type, 0), regcache, valbuf);
       return;
     }
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      unsigned int fstat;
+      ULONGEST fstat;
       char buf[FPU_REG_RAW_SIZE];
 
       if (FP0_REGNUM == 0)
@@ -1023,21 +1005,20 @@ i386_store_return_value (struct type *type, char *valbuf)
 	 not exactly how it would happen on the target itself, but
 	 it is the best we can do.  */
       convert_typed_floating (valbuf, type, buf, builtin_type_i387_ext);
-      write_register_bytes (REGISTER_BYTE (FP0_REGNUM), buf,
-			    FPU_REG_RAW_SIZE);
+      regcache_raw_write (regcache, FP0_REGNUM, buf);
 
       /* Set the top of the floating-point register stack to 7.  The
          actual value doesn't really matter, but 7 is what a normal
          function return would end up with if the program started out
          with a freshly initialized FPU.  */
-      fstat = read_register (FSTAT_REGNUM);
+      regcache_raw_read_unsigned (regcache, FSTAT_REGNUM, &fstat);
       fstat |= (7 << 11);
-      write_register (FSTAT_REGNUM, fstat);
+      regcache_raw_write_unsigned (regcache, FSTAT_REGNUM, fstat);
 
       /* Mark %st(1) through %st(7) as empty.  Since we set the top of
          the floating-point register stack to 7, the appropriate value
          for the tag word is 0x3fff.  */
-      write_register (FTAG_REGNUM, 0x3fff);
+      regcache_raw_write_unsigned (regcache, FTAG_REGNUM, 0x3fff);
     }
   else
     {
@@ -1045,13 +1026,12 @@ i386_store_return_value (struct type *type, char *valbuf)
       int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
-	write_register_bytes (REGISTER_BYTE (LOW_RETURN_REGNUM), valbuf, len);
+	regcache_raw_write_part (regcache, LOW_RETURN_REGNUM, 0, len, valbuf);
       else if (len <= (low_size + high_size))
 	{
-	  write_register_bytes (REGISTER_BYTE (LOW_RETURN_REGNUM),
-				valbuf, low_size);
-	  write_register_bytes (REGISTER_BYTE (HIGH_RETURN_REGNUM),
-				valbuf + low_size, len - low_size);
+	  regcache_raw_write (regcache, LOW_RETURN_REGNUM, valbuf);
+	  regcache_raw_write_part (regcache, HIGH_RETURN_REGNUM, 0,
+				   len - low_size, (char *) valbuf + low_size);
 	}
       else
 	internal_error (__FILE__, __LINE__,
@@ -1066,7 +1046,18 @@ i386_store_return_value (struct type *type, char *valbuf)
 static CORE_ADDR
 i386_extract_struct_value_address (struct regcache *regcache)
 {
-  return regcache_raw_read_as_address (regcache, LOW_RETURN_REGNUM);
+  /* NOTE: cagney/2002-08-12: Replaced a call to
+     regcache_raw_read_as_address() with a call to
+     regcache_cooked_read_unsigned().  The old, ...as_address function
+     was eventually calling extract_unsigned_integer (via
+     extract_address) to unpack the registers value.  The below is
+     doing an unsigned extract so that it is functionally equivalent.
+     The read needs to be cooked as, otherwise, it will never
+     correctly return the value of a register in the [NUM_REGS
+     .. NUM_REGS+NUM_PSEUDO_REGS) range.  */
+  ULONGEST val;
+  regcache_cooked_read_unsigned (regcache, LOW_RETURN_REGNUM, &val);
+  return val;
 }
 
 
@@ -1117,7 +1108,62 @@ i386_register_virtual_type (int regnum)
   if (IS_SSE_REGNUM (regnum))
     return builtin_type_vec128i;
 
+  if (mmx_regnum_p (regnum))
+    return builtin_type_vec64i;
+
   return builtin_type_int;
+}
+
+/* Map a cooked register onto a raw register or memory.  For the i386,
+   the MMX registers need to be mapped onto floating point registers.  */
+
+static int
+mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
+{
+  int mmxi;
+  ULONGEST fstat;
+  int tos;
+  int fpi;
+  mmxi = regnum - MM0_REGNUM;
+  regcache_raw_read_unsigned (regcache, FSTAT_REGNUM, &fstat);
+  tos = (fstat >> 11) & 0x7;
+  fpi = (mmxi + tos) % 8;
+  return (FP0_REGNUM + fpi);
+}
+
+static void
+i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+			   int regnum, void *buf)
+{
+  if (mmx_regnum_p (regnum))
+    {
+      char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
+      int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
+      regcache_raw_read (regcache, fpnum, mmx_buf);
+      /* Extract (always little endian).  */
+      memcpy (buf, mmx_buf, REGISTER_RAW_SIZE (regnum));
+    }
+  else
+    regcache_raw_read (regcache, regnum, buf);
+}
+
+static void
+i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
+			    int regnum, const void *buf)
+{
+  if (mmx_regnum_p (regnum))
+    {
+      char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
+      int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
+      /* Read ...  */
+      regcache_raw_read (regcache, fpnum, mmx_buf);
+      /* ... Modify ... (always little endian).  */
+      memcpy (mmx_buf, buf, REGISTER_RAW_SIZE (regnum));
+      /* ... Write.  */
+      regcache_raw_write (regcache, fpnum, mmx_buf);
+    }
+  else
+    regcache_raw_write (regcache, regnum, buf);
 }
 
 /* Return true iff register REGNUM's virtual format is different from
@@ -1208,7 +1254,7 @@ sunpro_static_transform_name (char *name)
 /* Stuff for WIN32 PE style DLL's but is pretty generic really.  */
 
 CORE_ADDR
-skip_trampoline_code (CORE_ADDR pc, char *name)
+i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name)
 {
   if (pc && read_memory_unsigned_integer (pc, 2) == 0x25ff) /* jmp *(dest) */
     {
@@ -1326,8 +1372,12 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* System V Release 4 uses ELF.  */
   i386_elf_init_abi (info, gdbarch);
 
+  /* System V Release 4 has shared libraries.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+
   /* FIXME: kettenis/20020511: Why do we override this function here?  */
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
   tdep->sigcontext_addr = i386_svr4_sigcontext_addr;
@@ -1357,7 +1407,7 @@ i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* FIXME: kettenis/20020511: Why do we override this function here?  */
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
 
   tdep->jb_pc_offset = 24;
 }
@@ -1439,11 +1489,11 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, i386_register_name);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
-  set_gdbarch_register_byte (gdbarch, i386_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, i386_register_raw_size);
   set_gdbarch_max_register_raw_size (gdbarch, I386_MAX_REGISTER_SIZE);
   set_gdbarch_max_register_virtual_size (gdbarch, I386_MAX_REGISTER_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, i386_register_virtual_type);
+
+  set_gdbarch_print_float_info (gdbarch, i387_print_float_info);
 
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
@@ -1467,7 +1517,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					   i386_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
 
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
 
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
@@ -1515,6 +1565,11 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
+  /* Wire in the MMX registers.  */
+  set_gdbarch_num_pseudo_regs (gdbarch, mmx_num_regs);
+  set_gdbarch_pseudo_register_read (gdbarch, i386_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
+
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
 
@@ -1545,19 +1600,6 @@ void
 _initialize_i386_tdep (void)
 {
   register_gdbarch_init (bfd_arch_i386, i386_gdbarch_init);
-
-  /* Initialize the table saying where each register starts in the
-     register file.  */
-  {
-    int i, offset;
-
-    offset = 0;
-    for (i = 0; i < I386_SSE_NUM_REGS; i++)
-      {
-	i386_register_offset[i] = offset;
-	offset += i386_register_size[i];
-      }
-  }
 
   tm_print_insn = gdb_print_insn_i386;
   tm_print_insn_info.mach = bfd_lookup_arch (bfd_arch_i386, 0)->mach;

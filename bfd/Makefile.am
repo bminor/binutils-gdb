@@ -89,6 +89,7 @@ ALL_MACHINES = \
 	cpu-sh.lo \
 	cpu-sparc.lo \
 	cpu-tic30.lo \
+	cpu-tic4x.lo \
 	cpu-tic54x.lo \
 	cpu-tic80.lo \
 	cpu-v850.lo \
@@ -140,6 +141,7 @@ ALL_MACHINES_CFILES = \
 	cpu-sh.c \
 	cpu-sparc.c \
 	cpu-tic30.c \
+	cpu-tic4x.c \
 	cpu-tic54x.c \
 	cpu-tic80.c \
 	cpu-v850.c \
@@ -185,6 +187,7 @@ BFD32_BACKENDS = \
 	coff-stgo32.lo \
 	coff-svm68k.lo \
 	coff-tic30.lo \
+	coff-tic4x.lo \
 	coff-tic54x.lo \
 	coff-tic80.lo \
 	coff-u68k.lo \
@@ -240,6 +243,7 @@ BFD32_BACKENDS = \
 	elf32-sh64-com.lo \
 	elf32-sh-nbsd.lo \
 	elf32-sh64-nbsd.lo \
+	elf32-shqnx.lo \
 	elf32-sparc.lo \
 	elf32-v850.lo \
 	elf32-vax.lo \
@@ -345,6 +349,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-stgo32.c \
 	coff-svm68k.c \
 	coff-tic30.c \
+	coff-tic4x.c \
 	coff-tic54x.c \
 	coff-tic80.c \
 	coff-u68k.c \
@@ -399,6 +404,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-sh-lin.c \
 	elf32-sh-nbsd.c \
 	elf32-sh64-nbsd.c \
+	elf32-shqnx.c \
 	elf32-sparc.c \
 	elf32-v850.c \
 	elf32-vax.c \
@@ -933,6 +939,7 @@ cpu-s390.lo: cpu-s390.c $(INCDIR)/filenames.h
 cpu-sh.lo: cpu-sh.c $(INCDIR)/filenames.h
 cpu-sparc.lo: cpu-sparc.c $(INCDIR)/filenames.h
 cpu-tic30.lo: cpu-tic30.c $(INCDIR)/filenames.h
+cpu-tic4x.lo: cpu-tic4x.c $(INCDIR)/filenames.h
 cpu-tic54x.lo: cpu-tic54x.c $(INCDIR)/filenames.h
 cpu-tic80.lo: cpu-tic80.c $(INCDIR)/filenames.h
 cpu-v850.lo: cpu-v850.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h
@@ -1051,6 +1058,9 @@ coff-svm68k.lo: coff-svm68k.c coff-m68k.c $(INCDIR)/filenames.h \
 coff-tic30.lo: coff-tic30.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/tic30.h $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   libcoff.h coffcode.h coffswap.h
+coff-tic4x.lo: coff-tic4x.c $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic4x.h $(INCDIR)/coff/ti.h \
+  $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-tic54x.lo: coff-tic54x.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic54x.h $(INCDIR)/coff/ti.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
@@ -1260,6 +1270,10 @@ elf32-sh64-nbsd.lo: elf32-sh64-nbsd.c elf32-sh64.c \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(srcdir)/../opcodes/sh64-opc.h elf32-sh.c $(INCDIR)/elf/sh.h \
   $(INCDIR)/elf/reloc-macros.h elf32-target.h
+elf32-shqnx.lo: elf32-shqnx.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
+  elf-bfd.h elf32-qnx.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
 elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sparc.h \

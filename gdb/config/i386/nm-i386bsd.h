@@ -28,8 +28,6 @@
 #include <machine/vmparam.h>
 #define KERNEL_U_ADDR USRSTACK
 
-#undef FLOAT_INFO		/* No float info yet */
-
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = i386_register_u_addr ((blockend),(regno));
 

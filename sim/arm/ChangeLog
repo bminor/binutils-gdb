@@ -1,3 +1,8 @@
+2002-08-15  Nick Clifton  <nickc@redhat.com>
+
+	* armos.c (ARMul_OSHandleSWI): Catch and ignore SWIs of -1, they
+	can be caused by an interrupted system call being resumed by GDB.
+
 2002-07-05  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* armemu.c (ARMul_Emulate32): Add more tests for valid MIA, MIAPH

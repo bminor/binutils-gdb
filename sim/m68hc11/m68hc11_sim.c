@@ -1,6 +1,6 @@
 /* m6811_cpu.c -- 68HC11&68HC12 CPU Emulation
    Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
-   Written by Stephane Carrez (stcarrez@worldnet.fr)
+   Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, GAS, and the GNU binutils.
 
@@ -907,6 +907,60 @@ cpu_special (sim_cpu *cpu, enum M6811_Special special)
       }
       break;
 
+    case M6812_CALL:
+      {
+        uint8 page;
+        uint16 addr;
+
+        addr = cpu_fetch16 (cpu);
+        page = cpu_fetch8 (cpu);
+
+        cpu_m68hc12_push_uint16 (cpu, cpu_get_pc (cpu));
+        cpu_m68hc12_push_uint8 (cpu, cpu_get_page (cpu));
+
+        cpu_set_page (cpu, page);
+        cpu_set_pc (cpu, addr);
+      }
+      break;
+
+    case M6812_CALL_INDIRECT:
+      {
+        uint8 code;
+        uint16 addr;
+        uint8 page;
+
+        code = memory_read8 (cpu, cpu_get_pc (cpu));
+        /* Indirect addressing call has the page specified in the
+           memory location pointed to by the address.  */
+        if ((code & 0xE3) == 0xE3)
+          {
+            addr = cpu_get_indexed_operand_addr (cpu, 0);
+            page = memory_read8 (cpu, addr + 2);
+            addr = memory_read16 (cpu, addr);
+          }
+        else
+          {
+            /* Otherwise, page is in the opcode.  */
+            addr = cpu_get_indexed_operand16 (cpu, 0);
+            page = cpu_fetch8 (cpu);
+          }
+        cpu_m68hc12_push_uint16 (cpu, cpu_get_pc (cpu));
+        cpu_m68hc12_push_uint8 (cpu, cpu_get_page (cpu));
+        cpu_set_page (cpu, page);
+        cpu_set_pc (cpu, addr);
+      }
+      break;
+
+    case M6812_RTC:
+      {
+        uint8 page = cpu_m68hc12_pop_uint8 (cpu);
+        uint16 addr = cpu_m68hc12_pop_uint16 (cpu);
+
+        cpu_set_page (cpu, page);
+        cpu_set_pc (cpu, addr);
+      }
+      break;
+      
     case M6812_ETBL:
     default:
       sim_engine_halt (CPU_STATE (cpu), cpu, NULL,

@@ -361,18 +361,11 @@ value_cast (struct type *type, struct value *arg2)
 				       value_zero (t1, not_lval), 0, t1, 1);
 		  if (v)
 		    {
-		      struct value *v2 = value_ind (arg2);
-		      VALUE_ADDRESS (v2) -= VALUE_ADDRESS (v)
-			+ VALUE_OFFSET (v);
-
-                      /* JYG: adjust the new pointer value and
-			 embedded offset. */
-                      v2->aligner.contents[0] -=  VALUE_EMBEDDED_OFFSET (v);
-                      VALUE_EMBEDDED_OFFSET (v2) = 0;
-
-		      v2 = value_addr (v2);
-		      VALUE_TYPE (v2) = type;
-		      return v2;
+                      CORE_ADDR addr2 = value_as_address (arg2);
+                      addr2 -= (VALUE_ADDRESS (v)
+                                + VALUE_OFFSET (v)
+                                + VALUE_EMBEDDED_OFFSET (v));
+                      return value_from_pointer (type, addr2);
 		    }
 		}
 	    }
@@ -770,7 +763,7 @@ value_assign (struct value *toval, struct value *fromval)
 	if (regno > VALUE_FRAME_REGNUM (toval) + reg_offset)
 	  regno = -1;
 	if (register_changed_hook)
-	  register_changed_hook (regno);
+	  register_changed_hook (-1);
 	target_changed_event ();
       }
       break;
@@ -2061,11 +2054,18 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	  {
 	    struct value *v;
 	    if (TYPE_FIELD_STATIC (type, i))
-	      v = value_static_field (type, i);
+	      {
+		v = value_static_field (type, i);
+		if (v == 0)
+		  error ("field %s is nonexistent or has been optimised out",
+			 name);
+	      }
 	    else
-	      v = value_primitive_field (arg1, offset, i, type);
-	    if (v == 0)
-	      error ("there is no field named %s", name);
+	      {
+		v = value_primitive_field (arg1, offset, i, type);
+		if (v == 0)
+		  error ("there is no field named %s", name);
+	      }
 	    return v;
 	  }
 
@@ -3050,7 +3050,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      v = value_static_field (t, i);
 	      if (v == NULL)
-		error ("Internal error: could not find static variable %s",
+		error ("static field %s has been optimized out",
 		       name);
 	      return v;
 	    }

@@ -366,6 +366,8 @@ do { \
 
 #endif
 
+#define GPR_SET(N, VAL) (State.regs[(N)] = (VAL))
+#define GPR_CLEAR(N)    (State.regs[(N)] = 0)
 
 extern void divun ( unsigned int       N,
 		    unsigned long int  als,

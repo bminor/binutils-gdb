@@ -273,6 +273,9 @@ bfd_format;
 /* This flag indicates that the BFD contents are actually cached in
    memory.  If this is set, iostream points to a bfd_in_memory struct.  */
 #define BFD_IN_MEMORY 0x800
+ 
+/* The sections in this BFD specify a memory page.  */
+#define HAS_LOAD_PAGE 0x1000
 
 /* Symbols and relocation.  */
 
@@ -1572,6 +1575,7 @@ enum bfd_architecture
 #define bfd_mach_ppc_rs64ii    642
 #define bfd_mach_ppc_rs64iii   643
 #define bfd_mach_ppc_7400      7400
+#define bfd_mach_ppc_e500      500
   bfd_arch_rs6000,    /* IBM RS/6000 */
 #define bfd_mach_rs6k          0
 #define bfd_mach_rs6k_rs1      6001
@@ -1617,6 +1621,9 @@ enum bfd_architecture
   bfd_arch_ns32k,     /* National Semiconductors ns32000 */
   bfd_arch_w65,       /* WDC 65816 */
   bfd_arch_tic30,     /* Texas Instruments TMS320C30 */
+  bfd_arch_tic4x,     /* Texas Instruments TMS320C3X/4X */
+#define bfd_mach_c3x           30
+#define bfd_mach_c4x           40
   bfd_arch_tic54x,    /* Texas Instruments TMS320C54X */
   bfd_arch_tic80,     /* TI TMS320c80 (MVP) */
   bfd_arch_v850,      /* NEC V850 */
@@ -2661,6 +2668,14 @@ bits placed non-contigously in the instruction.  */
 /* This is a 16 bit offset from the call table base pointer.  */
   BFD_RELOC_V850_CALLT_16_16_OFFSET,
 
+/* Used for relaxing indirect function calls.  */
+  BFD_RELOC_V850_LONGCALL,
+
+/* Used for relaxing indirect jumps.  */
+  BFD_RELOC_V850_LONGJUMP,
+
+/* Used to maintain alignment whilst relaxing.  */
+  BFD_RELOC_V850_ALIGN,
 
 /* This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
 instruction.  */
@@ -3040,16 +3055,47 @@ this offset in the reloc's section offset.  */
   BFD_RELOC_IA64_LTOFF_DTPREL22,
 
 /* Motorola 68HC11 reloc.
-This is the 8 bits high part of an absolute address.  */
+This is the 8 bit high part of an absolute address.  */
   BFD_RELOC_M68HC11_HI8,
 
 /* Motorola 68HC11 reloc.
-This is the 8 bits low part of an absolute address.  */
+This is the 8 bit low part of an absolute address.  */
   BFD_RELOC_M68HC11_LO8,
 
 /* Motorola 68HC11 reloc.
-This is the 3 bits of a value.  */
+This is the 3 bit of a value.  */
   BFD_RELOC_M68HC11_3B,
+
+/* Motorola 68HC11 reloc.
+This reloc marks the beginning of a jump/call instruction.
+It is used for linker relaxation to correctly identify beginning
+of instruction and change some branchs to use PC-relative
+addressing mode.  */
+  BFD_RELOC_M68HC11_RL_JUMP,
+
+/* Motorola 68HC11 reloc.
+This reloc marks a group of several instructions that gcc generates
+and for which the linker relaxation pass can modify and/or remove
+some of them.  */
+  BFD_RELOC_M68HC11_RL_GROUP,
+
+/* Motorola 68HC11 reloc.
+This is the 16-bit lower part of an address.  It is used for 'call'
+instruction to specify the symbol address without any special
+transformation (due to memory bank window).  */
+  BFD_RELOC_M68HC11_LO16,
+
+/* Motorola 68HC11 reloc.
+This is a 8-bit reloc that specifies the page number of an address.
+It is used by 'call' instruction to specify the page number of
+the symbol.  */
+  BFD_RELOC_M68HC11_PAGE,
+
+/* Motorola 68HC11 reloc.
+This is a 24-bit reloc that represents the address with a 16-bit
+value and a 8-bit page number.  The symbol address is transformed
+to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
+  BFD_RELOC_M68HC11_24,
 
 /* These relocs are only used within the CRIS assembler.  They are not
 (at present) written to any object files.  */

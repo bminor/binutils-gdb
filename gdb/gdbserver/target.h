@@ -32,7 +32,7 @@ struct target_ops
      ARGS is a standard NULL-terminated array of arguments,
      to be passed to the inferior as ``argv''.
 
-     Returns 0 on success, -1 on failure.  Registers the new
+     Returns the new PID on success, -1 on failure.  Registers the new
      process with the process list.  */
 
   int (*create_inferior) (char *program, char **args);
@@ -104,11 +104,6 @@ struct target_ops
      symbols.  */
 
   void (*look_up_symbols) (void);
-
-  /* Return the PID we should send a signal to.  Used for asynchronous
-     interrupts (user hitting Control-C).  */
-
-  int (*signal_pid) (void);
 };
 
 extern struct target_ops *the_target;

@@ -14,9 +14,9 @@
 
 */
 
-#include <ctype.h> 
-#include "defs.h" 
-#include "command.h" 
+#include <ctype.h>
+#include "defs.h"
+#include "command.h"
 #include "value.h"
 #include "language.h"
 #include "inferior.h"
@@ -30,7 +30,7 @@
 
 #if (defined(__alpha__) && defined(__osf__) && !defined(VXWORKS_TARGET))
 #include "gregset.h"
-#endif 
+#endif
 
 #include "ada-lang.h"
 
@@ -71,10 +71,10 @@ extern int dec_thread_get_registers (gdb_gregset_t *, gdb_fpregset_t *);
 #elif defined (sun) && defined (__SVR4)
 #define GET_CURRENT_THREAD solaris_thread_get_current_thread
 #define THREAD_FETCH_REGISTERS() (-1)
-extern void *GET_CURRENT_THREAD();
+extern void *GET_CURRENT_THREAD ();
 
 #elif defined (_AIX) || (defined(__alpha__) && defined(__osf__))
-extern void *GET_CURRENT_THREAD();
+extern void *GET_CURRENT_THREAD ();
 
 #elif defined (__WIN32__) || defined (hpux)
 #define GET_CURRENT_THREAD() (inferior_pid)
@@ -90,7 +90,7 @@ extern void *GET_CURRENT_THREAD();
 #define READ_MEMORY(addr, var) read_memory (addr, (char*) &var, sizeof (var))
 /* external declarations */
 
-extern struct value* find_function_in_inferior (char *);
+extern struct value *find_function_in_inferior (char *);
 
 /* Global visible variables */
 
@@ -110,8 +110,7 @@ const int MAX_NUMBER_OF_KNOWN_TASKS = 1000;
 int current_task = -1, current_task_id = -1, current_task_index;
 void *current_thread, *current_lwp;
 
-char *ada_task_states[] =
-{
+char *ada_task_states[] = {
   "Unactivated",
   "Runnable",
   "Terminated",
@@ -131,8 +130,7 @@ char *ada_task_states[] =
 
 /* Global internal types */
 
-static char *ada_long_task_states[] =
-{
+static char *ada_long_task_states[] = {
   "Unactivated",
   "Runnable",
   "Terminated",
@@ -153,10 +151,10 @@ static char *ada_long_task_states[] =
 /* Global internal variables */
 
 static int highest_task_num = 0;
-int thread_support = 0; /* 1 if the thread library in use is supported */
+int thread_support = 0;		/* 1 if the thread library in use is supported */
 static int gdbtk_task_initialization = 0;
 
-static int 
+static int
 add_task_entry (void *p_task_id, int index)
 {
   struct task_entry *new_task_entry = NULL;
@@ -176,11 +174,12 @@ add_task_entry (void *p_task_id, int index)
       pt->next_task = new_task_entry;
       pt->stack_per = 0;
     }
-  else task_list = new_task_entry;
+  else
+    task_list = new_task_entry;
   return new_task_entry->task_num;
 }
 
-int 
+int
 get_entry_number (void *p_task_id)
 {
   struct task_entry *pt;
@@ -204,7 +203,7 @@ get_thread_entry_vptr (void *thread)
   while (pt != NULL)
     {
       if (pt->thread == thread)
-      return pt;
+	return pt;
       pt = pt->next_task;
     }
   return 0;
@@ -250,7 +249,7 @@ valid_task_id (int task)
 void *
 get_self_id (void)
 {
-  struct value* val;
+  struct value *val;
   void *self_id;
   int result;
   struct task_entry *ent;
@@ -270,10 +269,11 @@ get_self_id (void)
   return NULL;
 }
 
-int get_current_task ()
+int
+get_current_task ()
 {
   int result;
-  
+
   /* FIXME: language_ada should be defined in defs.h */
   /*  if (current_language->la_language != language_ada) return -1; */
 
@@ -293,22 +293,22 @@ info_task (char *arg, int from_tty)
   void *self_id, *caller;
   struct task_fields atcb, atcb2;
   struct entry_call call;
-  int bounds [2];
-  char image [256];
+  int bounds[2];
+  char image[256];
   int num;
 
   /* FIXME: language_ada should be defined in defs.h */
   /*  if (current_language->la_language != language_ada) 
-    { 
-      printf_filtered ("The current language does not support tasks.\n"); 
-      return; 
-    } 
-  */
+     { 
+     printf_filtered ("The current language does not support tasks.\n"); 
+     return; 
+     } 
+   */
   pt = get_entry_vptr (atoi (arg));
   if (pt == NULL)
     {
-      printf_filtered ("Task %s not found.\n", arg); 
-      return; 
+      printf_filtered ("Task %s not found.\n", arg);
+      return;
     }
 
   temp_task = pt->task_id;
@@ -320,14 +320,16 @@ info_task (char *arg, int from_tty)
   printf_filtered ("Ada Task: %p\n", temp_task);
 
   /* print the name of the task */
-  if (atcb.image.P_ARRAY != NULL) {
-    READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb.image.P_BOUNDS), bounds);
-    bounds [1] = EXTRACT_INT (bounds [1]);
-    read_memory ((CORE_ADDR) EXTRACT_ADDRESS (atcb.image.P_ARRAY),
-                 (char*) &image, bounds [1]);
-    printf_filtered ("Name: %.*s\n", bounds [1], image);
-  }
-  else printf_filtered ("<no name>\n");
+  if (atcb.image.P_ARRAY != NULL)
+    {
+      READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb.image.P_BOUNDS), bounds);
+      bounds[1] = EXTRACT_INT (bounds[1]);
+      read_memory ((CORE_ADDR) EXTRACT_ADDRESS (atcb.image.P_ARRAY),
+		   (char *) &image, bounds[1]);
+      printf_filtered ("Name: %.*s\n", bounds[1], image);
+    }
+  else
+    printf_filtered ("<no name>\n");
 
   /* print the thread id */
 
@@ -339,9 +341,9 @@ info_task (char *arg, int from_tty)
   if ((long) pt->lwp != 0)
     {
       if ((long) pt->lwp < 65536)
-        printf_filtered ("LWP: %ld\n", (long int) pt->lwp);
+	printf_filtered ("LWP: %ld\n", (long int) pt->lwp);
       else
-        printf_filtered ("LWP: %p\n", pt->lwp);
+	printf_filtered ("LWP: %p\n", pt->lwp);
     }
 
   /* print the parent gdb task id */
@@ -353,16 +355,17 @@ info_task (char *arg, int from_tty)
       READ_MEMORY ((CORE_ADDR) pt2->task_id, atcb2);
 
       /* print the name of the task */
-      if (atcb2.image.P_ARRAY != NULL) {
-        READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb2.image.P_BOUNDS),
-                     bounds);
-        bounds [1] = EXTRACT_INT (bounds [1]);
-        read_memory ((CORE_ADDR) EXTRACT_ADDRESS (atcb2.image.P_ARRAY),
-                     (char*) &image, bounds [1]);
-        printf_filtered (" (%.*s)\n", bounds [1], image);
-      }
+      if (atcb2.image.P_ARRAY != NULL)
+	{
+	  READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb2.image.P_BOUNDS),
+		       bounds);
+	  bounds[1] = EXTRACT_INT (bounds[1]);
+	  read_memory ((CORE_ADDR) EXTRACT_ADDRESS (atcb2.image.P_ARRAY),
+		       (char *) &image, bounds[1]);
+	  printf_filtered (" (%.*s)\n", bounds[1], image);
+	}
       else
-        printf_filtered ("\n");
+	printf_filtered ("\n");
     }
   else
     printf_filtered ("No parent\n");
@@ -375,11 +378,12 @@ info_task (char *arg, int from_tty)
   /* check if this task is accepting a rendezvous */
   if (atcb.call == NULL)
     caller = NULL;
-  else {
-    READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb.call), call);
-    caller = EXTRACT_ADDRESS (call.self);
-  }
- 
+  else
+    {
+      READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb.call), call);
+      caller = EXTRACT_ADDRESS (call.self);
+    }
+
   if (caller != NULL)
     {
       num = get_entry_number (caller);
@@ -391,14 +395,15 @@ info_task (char *arg, int from_tty)
 	  READ_MEMORY ((CORE_ADDR) pt2->task_id, atcb2);
 
 	  /* print the name of the task */
-	  if (atcb2.image.P_ARRAY != NULL) {
-	    READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb2.image.P_BOUNDS),
-                         bounds);
-            bounds [1] = EXTRACT_INT (bounds [1]);
-	    read_memory ((CORE_ADDR) EXTRACT_ADDRESS (atcb2.image.P_ARRAY),
-                         (char*) &image, bounds [1]);
-	    printf_filtered (" (%.*s)\n", bounds [1], image);
-	  }
+	  if (atcb2.image.P_ARRAY != NULL)
+	    {
+	      READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb2.image.P_BOUNDS),
+			   bounds);
+	      bounds[1] = EXTRACT_INT (bounds[1]);
+	      read_memory ((CORE_ADDR) EXTRACT_ADDRESS (atcb2.image.P_ARRAY),
+			   (char *) &image, bounds[1]);
+	      printf_filtered (" (%.*s)\n", bounds[1], image);
+	    }
 	  else
 	    printf_filtered ("\n");
 	}
@@ -406,7 +411,7 @@ info_task (char *arg, int from_tty)
 	printf_filtered ("\n");
     }
   else
-    printf_filtered ("State: %s\n", ada_long_task_states [atcb.state]);
+    printf_filtered ("State: %s\n", ada_long_task_states[atcb.state]);
 }
 
 #if 0
@@ -418,28 +423,37 @@ info_task (char *arg, int from_tty)
 print_align (void)
 {
   struct task_fields tf;
-  void *tf_base             = &(tf);
-  void *tf_state            = &(tf.state);
-  void *tf_entry_num        = &(tf.entry_num);
-  void *tf_parent           = &(tf.parent);
-  void *tf_priority         = &(tf.priority);
+  void *tf_base = &(tf);
+  void *tf_state = &(tf.state);
+  void *tf_entry_num = &(tf.entry_num);
+  void *tf_parent = &(tf.parent);
+  void *tf_priority = &(tf.priority);
   void *tf_current_priority = &(tf.current_priority);
-  void *tf_image            = &(tf.image);
-  void *tf_call             = &(tf.call);
-  void *tf_thread           = &(tf.thread);
-  void *tf_lwp              = &(tf.lwp);
+  void *tf_image = &(tf.image);
+  void *tf_call = &(tf.call);
+  void *tf_thread = &(tf.thread);
+  void *tf_lwp = &(tf.lwp);
   printf_filtered ("\n");
   printf_filtered ("(tf_base = 0x%x)\n", tf_base);
-  printf_filtered ("task_fields.entry_num        at %3d (0x%x)\n", tf_entry_num - tf_base, tf_entry_num);
-  printf_filtered ("task_fields.state            at %3d (0x%x)\n", tf_state - tf_base, tf_state);
-  printf_filtered ("task_fields.parent           at %3d (0x%x)\n", tf_parent - tf_base, tf_parent);
-  printf_filtered ("task_fields.priority         at %3d (0x%x)\n", tf_priority - tf_base, tf_priority);
-  printf_filtered ("task_fields.current_priority at %3d (0x%x)\n", tf_current_priority - tf_base, tf_current_priority);
-  printf_filtered ("task_fields.image            at %3d (0x%x)\n", tf_image - tf_base, tf_image);
-  printf_filtered ("task_fields.call             at %3d (0x%x)\n", tf_call - tf_base, tf_call);
-  printf_filtered ("task_fields.thread           at %3d (0x%x)\n", tf_thread - tf_base, tf_thread);
-  printf_filtered ("task_fields.lwp              at %3d (0x%x)\n", tf_lwp - tf_base, tf_lwp);
-  printf_filtered ("\n"); 
+  printf_filtered ("task_fields.entry_num        at %3d (0x%x)\n",
+		   tf_entry_num - tf_base, tf_entry_num);
+  printf_filtered ("task_fields.state            at %3d (0x%x)\n",
+		   tf_state - tf_base, tf_state);
+  printf_filtered ("task_fields.parent           at %3d (0x%x)\n",
+		   tf_parent - tf_base, tf_parent);
+  printf_filtered ("task_fields.priority         at %3d (0x%x)\n",
+		   tf_priority - tf_base, tf_priority);
+  printf_filtered ("task_fields.current_priority at %3d (0x%x)\n",
+		   tf_current_priority - tf_base, tf_current_priority);
+  printf_filtered ("task_fields.image            at %3d (0x%x)\n",
+		   tf_image - tf_base, tf_image);
+  printf_filtered ("task_fields.call             at %3d (0x%x)\n",
+		   tf_call - tf_base, tf_call);
+  printf_filtered ("task_fields.thread           at %3d (0x%x)\n",
+		   tf_thread - tf_base, tf_thread);
+  printf_filtered ("task_fields.lwp              at %3d (0x%x)\n",
+		   tf_lwp - tf_base, tf_lwp);
+  printf_filtered ("\n");
 }
 #endif
 
@@ -448,15 +462,15 @@ print_align (void)
 static void
 info_tasks (char *arg, int from_tty)
 {
-  struct value* val;
+  struct value *val;
   int i, task_number, state;
-  void *temp_task, *temp_tasks [MAX_NUMBER_OF_KNOWN_TASKS];
+  void *temp_task, *temp_tasks[MAX_NUMBER_OF_KNOWN_TASKS];
   struct task_entry *pt;
-  void *self_id, *caller, *thread_id=NULL;
+  void *self_id, *caller, *thread_id = NULL;
   struct task_fields atcb;
   struct entry_call call;
-  int bounds [2];
-  char image [256];
+  int bounds[2];
+  char image[256];
   int size;
   char car;
 
@@ -474,7 +488,7 @@ info_tasks (char *arg, int from_tty)
 
   task_number = 0;
 
-  if (PIDGET(inferior_ptid) == 0)
+  if (PIDGET (inferior_ptid) == 0)
     {
       printf_filtered ("The program is not being run under gdb. ");
       printf_filtered ("Use 'run' or 'attach' first.\n");
@@ -494,7 +508,7 @@ info_tasks (char *arg, int from_tty)
 	known_tasks_addr = (void *) SYMBOL_VALUE_ADDRESS (msym);
       else
 #ifndef VXWORKS_TARGET
-	return; 
+	return;
 #else
 	{
 	  if (target_lookup_symbol (KNOWN_TASKS_NAME, &known_tasks_addr) != 0)
@@ -519,28 +533,29 @@ info_tasks (char *arg, int from_tty)
 
   READ_MEMORY ((CORE_ADDR) known_tasks_addr, temp_tasks);
 
-  for (i=0; i<MAX_NUMBER_OF_KNOWN_TASKS; i++)
+  for (i = 0; i < MAX_NUMBER_OF_KNOWN_TASKS; i++)
     {
       temp_task = EXTRACT_ADDRESS (temp_tasks[i]);
 
       if (temp_task != NULL)
-        {
-          task_number = get_entry_number (temp_task);
-          if (task_number == 0)
+	{
+	  task_number = get_entry_number (temp_task);
+	  if (task_number == 0)
 	    task_number = add_task_entry (temp_task, i);
-        }
-    }      
+	}
+    }
 
   /* Return without printing anything if this function was called in
      order to init GDBTK tasking. */
 
-  if (init_only) return;
+  if (init_only)
+    return;
 
   /* print the header */
 
 #if defined(__alpha__) && defined(__osf__) && !defined(VXWORKS_TARGET)
   printf_filtered
-   ("  ID       TID P-ID Pri Stack  %% State                  Name\n");
+    ("  ID       TID P-ID Pri Stack  %% State                  Name\n");
 #else
   printf_filtered ("  ID       TID P-ID Pri State                  Name\n");
 #endif
@@ -579,15 +594,15 @@ info_tasks (char *arg, int from_tty)
       printf_filtered (" %9lx", (long) temp_task);
 #else
 #ifdef TARGET_64
-      printf_filtered (" %#9lx", (unsigned long)pt->thread & 0x3ffffffffff);
+      printf_filtered (" %#9lx", (unsigned long) pt->thread & 0x3ffffffffff);
 #else
-      printf_filtered (" %#9lx", (long)pt->thread);
+      printf_filtered (" %#9lx", (long) pt->thread);
 #endif
 #endif
 
       /* print the parent gdb task id */
       printf_filtered
-        (" %4d", get_entry_number (EXTRACT_ADDRESS (atcb.parent)));
+	(" %4d", get_entry_number (EXTRACT_ADDRESS (atcb.parent)));
 
       /* print the base priority of the task */
       printf_filtered (" %3d", EXTRACT_INT (atcb.priority));
@@ -595,39 +610,41 @@ info_tasks (char *arg, int from_tty)
 #if defined(__alpha__) && defined(__osf__) && !defined(VXWORKS_TARGET)
       if (pt->task_num == 1 || atcb.state == Terminated)
 	{
-          printf_filtered ("  Unknown");
+	  printf_filtered ("  Unknown");
 	  goto next;
 	}
 
-      read_memory ((CORE_ADDR)atcb.thread, &thr, sizeof (thr));
+      read_memory ((CORE_ADDR) atcb.thread, &thr, sizeof (thr));
       current_thread = atcb.thread;
-      regs.regs [SP_REGNUM] = 0;
-      if (dec_thread_get_registers (&regs, NULL) == 0) {
-	pt->stack_per = (100 * ((long)thr.__stack_base -
-	regs.regs [SP_REGNUM])) / thr.__stack_size;
-	/* if the thread is terminated but still there, the
-	stack_base/size values are erroneous. Try to patch it */
-	if (pt->stack_per < 0 || pt->stack_per > 100) pt->stack_per = 0;
-      }
+      regs.regs[SP_REGNUM] = 0;
+      if (dec_thread_get_registers (&regs, NULL) == 0)
+	{
+	  pt->stack_per = (100 * ((long) thr.__stack_base -
+				  regs.regs[SP_REGNUM])) / thr.__stack_size;
+	  /* if the thread is terminated but still there, the
+	     stack_base/size values are erroneous. Try to patch it */
+	  if (pt->stack_per < 0 || pt->stack_per > 100)
+	    pt->stack_per = 0;
+	}
 
       /* print information about stack space used in the thread */
-      if (thr.__stack_size < 1024*1024)
+      if (thr.__stack_size < 1024 * 1024)
 	{
 	  size = thr.__stack_size / 1024;
 	  car = 'K';
 	}
-      else if (thr.__stack_size < 1024*1024*1024)
+      else if (thr.__stack_size < 1024 * 1024 * 1024)
 	{
 	  size = thr.__stack_size / 1024 / 1024;
 	  car = 'M';
 	}
-      else /* Who knows... */
+      else			/* Who knows... */
 	{
 	  size = thr.__stack_size / 1024 / 1024 / 1024;
 	  car = 'G';
 	}
       printf_filtered (" %4d%c %2d", size, car, pt->stack_per);
-next:
+    next:
 #endif
 
       /* print the current state of the task */
@@ -635,13 +652,15 @@ next:
       /* check if this task is accepting a rendezvous */
       if (atcb.call == NULL)
 	caller = NULL;
-      else {
-	READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb.call), call);
-	caller = EXTRACT_ADDRESS (call.self);
-      }
- 
+      else
+	{
+	  READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb.call), call);
+	  caller = EXTRACT_ADDRESS (call.self);
+	}
+
       if (caller != NULL)
-	printf_filtered (" Accepting RV with %-4d", get_entry_number (caller));
+	printf_filtered (" Accepting RV with %-4d",
+			 get_entry_number (caller));
       else
 	{
 	  state = atcb.state;
@@ -653,18 +672,21 @@ next:
 	    /* Replace "Runnable" by "Running" if this is the current task */
 	    printf_filtered (" %-22s", "Running");
 	  else
-	    printf_filtered (" %-22s", ada_task_states [state]);
+	    printf_filtered (" %-22s", ada_task_states[state]);
 	}
 
       /* finally, print the name of the task */
-      if (atcb.image.P_ARRAY != NULL) {
-        READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb.image.P_BOUNDS), bounds);
-        bounds [1] = EXTRACT_INT (bounds [1]);
-        read_memory ((CORE_ADDR) EXTRACT_ADDRESS (atcb.image.P_ARRAY),
-                     (char*)&image, bounds [1]);
-        printf_filtered (" %.*s\n", bounds [1], image);
-      }
-      else printf_filtered (" <no name>\n");
+      if (atcb.image.P_ARRAY != NULL)
+	{
+	  READ_MEMORY ((CORE_ADDR) EXTRACT_ADDRESS (atcb.image.P_BOUNDS),
+		       bounds);
+	  bounds[1] = EXTRACT_INT (bounds[1]);
+	  read_memory ((CORE_ADDR) EXTRACT_ADDRESS (atcb.image.P_ARRAY),
+		       (char *) &image, bounds[1]);
+	  printf_filtered (" %.*s\n", bounds[1], image);
+	}
+      else
+	printf_filtered (" <no name>\n");
 
       pt = pt->next_task;
     }
@@ -686,10 +708,10 @@ gdbtk_tcl_tasks_initialize (void)
 static void
 info_tasks_command (char *arg, int from_tty)
 {
-   if (arg == NULL || *arg == '\000')
-      info_tasks (arg, from_tty);
-   else
-      info_task (arg, from_tty);
+  if (arg == NULL || *arg == '\000')
+    info_tasks (arg, from_tty);
+  else
+    info_task (arg, from_tty);
 }
 
 /* Switch from one thread to another. */
@@ -730,7 +752,8 @@ task_switch (void *tid, void *lwpid)
 #endif
 	}
 
-      if (res == 0) stop_pc = read_pc();
+      if (res == 0)
+	stop_pc = read_pc ();
       select_frame (get_current_frame ());
       return res;
     }
@@ -746,14 +769,14 @@ task_command (char *tidstr, int from_tty)
 
   if (!tidstr)
     error ("Please specify a task ID.  Use the \"info tasks\" command to\n"
-           "see the IDs of currently known tasks.");
+	   "see the IDs of currently known tasks.");
 
   num = atoi (tidstr);
   e = get_entry_vptr (num);
 
   if (e == NULL)
     error ("Task ID %d not known.  Use the \"info tasks\" command to\n"
-           "see the IDs of currently known tasks.", num);
+	   "see the IDs of currently known tasks.", num);
 
   if (current_task_id == -1)
     {
@@ -771,10 +794,11 @@ task_command (char *tidstr, int from_tty)
   if (task_switch (e->thread, e->lwp) == 0)
     {
       /* FIXME: find_printable_frame should be defined in frame.h, and
-	 implemented in ada-lang.c */
-      /*      find_printable_frame (selected_frame, frame_relative_level (selected_frame));*/
+         implemented in ada-lang.c */
+      /*      find_printable_frame (selected_frame, frame_relative_level (selected_frame)); */
       printf_filtered ("[Switching to task %d]\n", num);
-      print_stack_frame (selected_frame, frame_relative_level (selected_frame), 1);
+      print_stack_frame (selected_frame,
+			 frame_relative_level (selected_frame), 1);
     }
   else
     printf_filtered ("Unable to switch to task %d\n", num);
@@ -786,13 +810,11 @@ _initialize_tasks (void)
   static struct cmd_list_element *task_cmd_list = NULL;
   extern struct cmd_list_element *cmdlist;
 
-  add_info (
-        "tasks", info_tasks_command,
-	"Without argument: list all known Ada tasks, with status information.\n"
-	"info tasks n: print detailed information of task n.\n");
+  add_info ("tasks", info_tasks_command,
+	    "Without argument: list all known Ada tasks, with status information.\n"
+	    "info tasks n: print detailed information of task n.\n");
 
   add_prefix_cmd ("task", class_run, task_command,
-                  "Use this command to switch between tasks.\n\
- The new task ID must be currently known.", &task_cmd_list, "task ", 1,
-                  &cmdlist);
+		  "Use this command to switch between tasks.\n\
+ The new task ID must be currently known.", &task_cmd_list, "task ", 1, &cmdlist);
 }

@@ -48,9 +48,6 @@
 	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \
 	 : builtin_type_int)
 
-/* Force N32 ABI as the default. */
-#define MIPS_DEFAULT_ABI MIPS_ABI_N32
-
 #endif /* N32 */
 
 

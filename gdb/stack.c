@@ -1519,6 +1519,15 @@ select_frame (struct frame_info *fi)
   if (selected_frame_level_changed_hook)
     selected_frame_level_changed_hook (frame_relative_level (fi));
 
+  /* FIXME: kseitz/2002-08-28: It would be nice to call
+     selected_frame_level_changed_event right here, but due to limitations
+     in the current interfaces, we would end up flooding UIs with events
+     because select_frame is used extensively internally.
+
+     Once we have frame-parameterized frame (and frame-related) commands,
+     the event notification can be moved here, since this function will only
+     be called when the users selected frame is being changed. */
+
   /* Ensure that symbols for this frame are read in.  Also, determine the
      source language of this frame, and switch to it if desired.  */
   if (fi)
@@ -1622,7 +1631,7 @@ select_frame_command_wrapper (char *level_exp, int from_tty)
 static void
 select_frame_command (char *level_exp, int from_tty)
 {
-  register struct frame_info *frame;
+  struct frame_info *frame;
   int level = frame_relative_level (selected_frame);
 
   if (!target_has_stack)

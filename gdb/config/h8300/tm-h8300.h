@@ -175,7 +175,7 @@ extern void h8300_extract_return_value (struct type *, char *, char *);
 /* FIXME: Won't work with both h8/300's.  */
 
 extern void h8300_store_return_value (struct type *, char *);
-#define STORE_RETURN_VALUE(TYPE,VALBUF) \
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
     h8300_store_return_value(TYPE, (char *) (VALBUF))
 
 /* struct passing and returning stuff */

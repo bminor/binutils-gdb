@@ -2917,7 +2917,8 @@ elf_cris_discard_excess_program_dynamics (h, inf)
 	 functions; doing this for all symbols would presumably not
 	 introduce new problems.  Of course we don't do this if we're
 	 exporting all dynamic symbols.  */
-      if (! info->export_dynamic)
+      if (! info->export_dynamic
+	  && (h->root.elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0)
 	{
 	  h->root.dynindx = -1;
 	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,

@@ -56,8 +56,8 @@ typedef elf_fpreg_t elf_fpregset_t[ELF_NFPREG];
 
 /* Figure out where the longjmp will land.
    We expect the first arg to be a pointer to the jmp_buf structure from
-   which we extract the pc (JB_PC) that we will land at.  The pc is copied
-   into PC.  This routine returns 1 on success.  */
+   which we extract the pc (MIPS_LINUX_JB_PC) that we will land at.  The pc
+   is copied into PC.  This routine returns 1 on success.  */
 
 int
 mips_linux_get_longjmp_target (CORE_ADDR *pc)
@@ -67,8 +67,9 @@ mips_linux_get_longjmp_target (CORE_ADDR *pc)
 
   jb_addr = read_register (A0_REGNUM);
 
-  if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
-			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
+  if (target_read_memory (jb_addr
+			  + MIPS_LINUX_JB_PC * MIPS_LINUX_JB_ELEMENT_SIZE,
+			  buf, TARGET_PTR_BIT / TARGET_CHAR_BIT))
     return 0;
 
   *pc = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
@@ -83,7 +84,9 @@ supply_gregset (elf_gregset_t *gregsetp)
 {
   int regi;
   elf_greg_t *regp = *gregsetp;
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
+  char *zerobuf = alloca (MAX_REGISTER_RAW_SIZE);
+
+  memset (zerobuf, 0, MAX_REGISTER_RAW_SIZE);
 
   for (regi = EF_REG0; regi <= EF_REG31; regi++)
     supply_register ((regi - EF_REG0), (char *)(regp + regi));
@@ -172,7 +175,9 @@ void
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
   register int regi;
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
+  char *zerobuf = alloca (MAX_REGISTER_RAW_SIZE);
+
+  memset (zerobuf, 0, MAX_REGISTER_RAW_SIZE);
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi,

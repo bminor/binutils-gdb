@@ -3094,10 +3094,30 @@ library in which breakpoints cannot be set and so should be disabled.
 @findex DO_REGISTERS_INFO
 If defined, use this to print the value of a register or all registers.
 
+This method is deprecated.
+
 @item PRINT_FLOAT_INFO()
-#findex PRINT_FLOAT_INFO
+@findex PRINT_FLOAT_INFO
 If defined, then the @samp{info float} command will print information about
 the processor's floating point unit.
+
+@item print_registers_info (@var{gdbarch}, @var{frame}, @var{regnum}, @var{all})
+@findex print_registers_info
+If defined, pretty print the value of the register @var{regnum} for the
+specified @var{frame}.  If the value of @var{regnum} is -1, pretty print
+either all registers (@var{all} is non zero) or a select subset of
+registers (@var{all} is zero).
+
+The default method prints one register per line, and if @var{all} is
+zero omits floating-point registers.
+
+@item PRINT_VECTOR_INFO()
+@findex PRINT_VECTOR_INFO
+If defined, then the @samp{info vector} command will call this function
+to print information about the processor's vector unit.
+
+By default, the @samp{info vector} command will print all vector
+registers (the register's type having the vector attribute).
 
 @item DWARF_REG_TO_REGNUM
 @findex DWARF_REG_TO_REGNUM
@@ -3681,10 +3701,11 @@ delay slot.  If a breakpoint has been placed in the instruction's delay
 slot, @value{GDBN} will single-step over that instruction before resuming
 normally.  Currently only defined for the Mips.
 
-@item STORE_RETURN_VALUE (@var{type}, @var{valbuf})
+@item STORE_RETURN_VALUE (@var{type}, @var{regcache}, @var{valbuf})
 @findex STORE_RETURN_VALUE
-A C expression that stores a function return value of type @var{type},
-where @var{valbuf} is the address of the value to be stored.
+A C expression that writes the function return value, found in
+@var{valbuf}, into the @var{regcache}.  @var{type} is the type of the
+value that is to be returned.
 
 @item SUN_FIXED_LBRAC_BUG
 @findex SUN_FIXED_LBRAC_BUG

@@ -173,13 +173,6 @@ static int may_follow_exec = MAY_FOLLOW_EXEC;
 #define SKIP_SOLIB_RESOLVER(pc) 0
 #endif
 
-/* In some shared library schemes, the return path from a shared library
-   call may need to go through a trampoline too.  */
-
-#ifndef IN_SOLIB_RETURN_TRAMPOLINE
-#define IN_SOLIB_RETURN_TRAMPOLINE(pc,name)	0
-#endif
-
 /* This function returns TRUE if pc is the address of an instruction
    that lies within the dynamic linker (such as the event hook, or the
    dld itself).
@@ -997,16 +990,9 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
     trap_expected = 1;
   else
     {
-      int temp = insert_breakpoints ();
-      if (temp)
-	{
-	  print_sys_errmsg ("insert_breakpoints", temp);
-	  error ("Cannot insert breakpoints.\n\
-The same program may be running in another process,\n\
-or you may have requested too many hardware\n\
-breakpoints and/or watchpoints.\n");
-	}
-
+      insert_breakpoints ();
+      /* If we get here there was no call to error() in 
+	 insert breakpoints -- so they were inserted.  */
       breakpoints_inserted = 1;
     }
 
@@ -1408,6 +1394,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 {
   CORE_ADDR tmp;
   int stepped_after_stopped_by_watchpoint;
+  int sw_single_step_trap_p = 0;
 
   /* Cache the last pid/waitstatus. */
   target_last_wait_ptid = ecs->ptid;
@@ -1826,10 +1813,11 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   if (stop_signal == TARGET_SIGNAL_TRAP)
     {
-      if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
-	ecs->random_signal = 0;
-      else if (breakpoints_inserted
-	       && breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
+      /* Check if a regular breakpoint has been hit before checking
+         for a potential single step breakpoint. Otherwise, GDB will
+         not see this breakpoint hit when stepping onto breakpoints.  */
+      if (breakpoints_inserted
+          && breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
 	{
 	  ecs->random_signal = 0;
 	  if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK,
@@ -1885,6 +1873,22 @@ handle_inferior_event (struct execution_control_state *ecs)
 		}
 	    }
 	}
+      else if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
+        {
+          /* Readjust the stop_pc as it is off by DECR_PC_AFTER_BREAK
+             compared to the value it would have if the system stepping
+             capability was used. This allows the rest of the code in
+             this function to use this address without having to worry
+             whether software single step is in use or not.  */
+          if (DECR_PC_AFTER_BREAK)
+            {
+              stop_pc -= DECR_PC_AFTER_BREAK;
+              write_pc_pid (stop_pc, ecs->ptid);
+            }
+
+          sw_single_step_trap_p = 1;
+          ecs->random_signal = 0;
+        }
     }
   else
     ecs->random_signal = 1;
@@ -2099,22 +2103,23 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     This is only important on targets where DECR_PC_AFTER_BREAK
 	     is non-zero.  The prev_pc test is meant to distinguish between
 	     singlestepping a trap instruction, and singlestepping thru a
-	     jump to the instruction following a trap instruction. */
+	     jump to the instruction following a trap instruction.
 
-	  stop_bpstat = bpstat_stop_status (&stop_pc,
-					    /* Pass TRUE if our reason for stopping is something other
-					       than hitting a breakpoint.  We do this by checking that
-					       1) stepping is going on and 2) we didn't hit a breakpoint
-					       in a signal handler without an intervening stop in
-					       sigtramp, which is detected by a new stack pointer value
-					       below any usual function calling stack adjustments.  */
-					    (currently_stepping (ecs)
-					     && prev_pc !=
-					     stop_pc - DECR_PC_AFTER_BREAK
-					     && !(step_range_end
-						  && INNER_THAN (read_sp (),
-								 (step_sp -
-								  16)))));
+             Therefore, pass TRUE if our reason for stopping is
+             something other than hitting a breakpoint.  We do this by
+             checking that either: we detected earlier a software single
+             step trap or, 1) stepping is going on and 2) we didn't hit
+             a breakpoint in a signal handler without an intervening stop
+             in sigtramp, which is detected by a new stack pointer value
+             below any usual function calling stack adjustments.  */
+	  stop_bpstat =
+            bpstat_stop_status
+              (&stop_pc,
+               sw_single_step_trap_p
+               || (currently_stepping (ecs)
+                   && prev_pc != stop_pc - DECR_PC_AFTER_BREAK
+                   && !(step_range_end
+                        && INNER_THAN (read_sp (), (step_sp - 16)))));
 	  /* Following in case break condition called a
 	     function.  */
 	  stop_print_frame = 1;
@@ -3366,16 +3371,6 @@ normal_stop (void)
      DECR_PC_AFTER_BREAK */
   if (target_has_execution && get_current_frame ())
     (get_current_frame ())->pc = read_pc ();
-
-  if (breakpoints_failed)
-    {
-      target_terminal_ours_for_output ();
-      print_sys_errmsg ("While inserting breakpoints", breakpoints_failed);
-      printf_filtered ("Stopped; cannot insert breakpoints.\n\
-The same program may be running in another process,\n\
-or you may have requested too many hardware breakpoints\n\
-and/or watchpoints.\n");
-    }
 
   if (target_has_execution && breakpoints_inserted)
     {

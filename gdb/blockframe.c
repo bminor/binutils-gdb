@@ -809,9 +809,9 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
 
   mapped_pc = overlay_mapped_address (pc, section);
 
-  if (mapped_pc >= cache_pc_function_low &&
-      mapped_pc < cache_pc_function_high &&
-      section == cache_pc_function_section)
+  if (mapped_pc >= cache_pc_function_low
+      && mapped_pc < cache_pc_function_high
+      && section == cache_pc_function_section)
     goto return_cached_value;
 
   /* If sigtramp is in the u area, it counts as a function (especially
@@ -917,7 +917,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
   for (i = 1; SYMBOL_NAME (msymbol + i) != NULL; i++)
     {
       if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
-	&& SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
+	  && SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
 	break;
     }
 
@@ -929,7 +929,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
        So the end address is the end of the section.  */
     cache_pc_function_high = osect->endaddr;
 
-return_cached_value:
+ return_cached_value:
 
   if (address)
     {
@@ -948,8 +948,8 @@ return_cached_value:
 	{
 	  /* Because the high address is actually beyond the end of
 	     the function (and therefore possibly beyond the end of
-	     the overlay), we must actually convert (high - 1)
-	     and then add one to that. */
+	     the overlay), we must actually convert (high - 1) and
+	     then add one to that. */
 
 	  *endaddr = 1 + overlay_unmapped_address (cache_pc_function_high - 1,
 						   section);
@@ -961,7 +961,7 @@ return_cached_value:
   return 1;
 }
 
-/* Backward compatibility, no section argument */
+/* Backward compatibility, no section argument.  */
 
 int
 find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
@@ -1215,7 +1215,20 @@ generic_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
   struct regcache *dummy_regs = generic_find_dummy_frame (pc, fp);
 
   if (dummy_regs)
-    return regcache_raw_read_as_address (dummy_regs, regno);
+    {
+      /* NOTE: cagney/2002-08-12: Replaced a call to
+	 regcache_raw_read_as_address() with a call to
+	 regcache_cooked_read_unsigned().  The old, ...as_address
+	 function was eventually calling extract_unsigned_integer (via
+	 extract_address) to unpack the registers value.  The below is
+	 doing an unsigned extract so that it is functionally
+	 equivalent.  The read needs to be cooked as, otherwise, it
+	 will never correctly return the value of a register in the
+	 [NUM_REGS .. NUM_REGS+NUM_PSEUDO_REGS) range.  */
+      ULONGEST val;
+      regcache_cooked_read_unsigned (dummy_regs, regno, &val);
+      return val;
+    }
   else
     return 0;
 }
@@ -1389,11 +1402,10 @@ generic_call_dummy_register_unwind (struct frame_info *frame, void **cache,
 #endif
       gdb_assert (registers != NULL);
       /* Return the actual value.  */
-      /* FIXME: cagney/2002-06-26: This should be via the
-         gdbarch_register_read() method so that it, on the fly,
+      /* Use the regcache_cooked_read() method so that it, on the fly,
          constructs either a raw or pseudo register from the raw
          register cache.  */
-      regcache_raw_read (registers, regnum, bufferp);
+      regcache_cooked_read (registers, regnum, bufferp);
     }
 }
 
@@ -1410,7 +1422,11 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
   /* There is always a frame at this point.  And THIS is the frame
      we're interested in.  */
   gdb_assert (frame != NULL);
-  gdb_assert (!PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame));
+  /* If we're using generic dummy frames, we'd better not be in a call
+     dummy.  (generic_call_dummy_register_unwind ought to have been called
+     instead.)  */
+  gdb_assert (!(USE_GENERIC_DUMMY_FRAMES
+                && PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame)));
 
   /* Load the saved_regs register cache.  */
   if (frame->saved_regs == NULL)

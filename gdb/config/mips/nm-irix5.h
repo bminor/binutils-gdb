@@ -24,7 +24,9 @@
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS
 
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) 1
+/* TARGET_CAN_USE_HARDWARE_WATCHPOINT is now defined to go through
+   the target vector.  For Irix5, procfs_can_use_hw_watchpoint()
+   should be invoked.  */
 
 /* When a hardware watchpoint fires off the PC will be left at the
    instruction which caused the watchpoint.  It will be necessary for

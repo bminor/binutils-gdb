@@ -55,31 +55,11 @@
 
 
 /*****************************************
-** EXTERNAL DATA DECLS                    **
-******************************************/
-extern int current_source_line;
-extern struct symtab *current_source_symtab;
-
-
-/*****************************************
 ** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
 ******************************************/
 
 static struct breakpoint *_hasBreak (char *, int);
 
-
-/*****************************************
-** STATIC LOCAL DATA                    **
-******************************************/
-
-
-/*****************************************
-** PUBLIC FUNCTIONS                     **
-******************************************/
-
-/*********************************
-** SOURCE/DISASSEM  FUNCTIONS    **
-*********************************/
 
 /*
    ** tuiSetSourceContent().
@@ -94,7 +74,7 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
     {
       register FILE *stream;
       register int i, desc, c, lineWidth, nlines;
-      register char *srcLine;
+      register char *srcLine = 0;
 
       if ((ret = tuiAllocSourceBuffer (srcWin)) == TUI_SUCCESS)
 	{
@@ -136,17 +116,24 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
 		{
 		  register int offset, curLineNo, curLine, curLen, threshold;
 		  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
-		  /*
-		     ** Determine the threshold for the length of the line
-		     ** and the offset to start the display
-		   */
-		  offset = srcWin->detail.sourceInfo.horizontalOffset;
+                  TuiSourceInfoPtr src = &srcWin->detail.sourceInfo;
+
+                  if (srcWin->generic.title)
+                    xfree (srcWin->generic.title);
+                  srcWin->generic.title = xstrdup (s->filename);
+
+                  if (src->filename)
+                    xfree (src->filename);
+                  src->filename = xstrdup (s->filename);
+
+		  /* Determine the threshold for the length of the line
+                     and the offset to start the display.  */
+		  offset = src->horizontalOffset;
 		  threshold = (lineWidth - 1) + offset;
 		  stream = fdopen (desc, FOPEN_RT);
 		  clearerr (stream);
 		  curLine = 0;
-		  curLineNo =
-		    srcWin->detail.sourceInfo.startLineOrAddr.lineNo = lineNo;
+		  curLineNo = src->startLineOrAddr.lineNo = lineNo;
 		  if (offset > 0)
 		    srcLine = (char *) xmalloc (
 					   (threshold + 1) * sizeof (char));

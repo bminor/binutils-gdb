@@ -318,6 +318,7 @@ NAME(aout,reloc_type_lookup) (abfd,code)
     /* std relocs.  */
     switch (code)
       {
+	STD (BFD_RELOC_8, 0);
 	STD (BFD_RELOC_16, 1);
 	STD (BFD_RELOC_32, 2);
 	STD (BFD_RELOC_8_PCREL, 4);

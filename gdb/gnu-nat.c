@@ -2612,6 +2612,7 @@ init_gnu_ops (void)
   gnu_ops.to_terminal_init = gnu_terminal_init_inferior;
   gnu_ops.to_terminal_inferior = terminal_inferior;
   gnu_ops.to_terminal_ours_for_output = terminal_ours_for_output;
+  gnu_ops.to_terminal_save_ours = terminal_save_ours;
   gnu_ops.to_terminal_ours = terminal_ours;
   gnu_ops.to_terminal_info = child_terminal_info;
   gnu_ops.to_kill = gnu_kill_inferior;	/* to_kill */

@@ -260,8 +260,8 @@ call_dummy
   (TYPE_LENGTH (value_type) > 16)                
 
 /* RM: for return command */
-#undef STORE_RETURN_VALUE
-#define STORE_RETURN_VALUE(TYPE,VALBUF) \
+#undef DEPRECATED_STORE_RETURN_VALUE
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
   { \
     if (TYPE_CODE (TYPE) == TYPE_CODE_FLT && !SOFT_FLOAT) \
       write_register_bytes \

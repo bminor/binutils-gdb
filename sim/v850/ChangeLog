@@ -1,3 +1,12 @@
+2002-08-29  Nick Clifton  <nickc@redhat.com>
+
+	From 2001-08-23  Catherine Moore  <clm@redhat.com>
+
+	* Makefile.in: Add gen-zero-r0 option.
+	* sim-main.h (GPR_SET, GPR_CLEAR): Define.
+	* simops.c (OP_24007E0):  Sign extend the imm9
+	operand of a mul instruction.
+
 2002-06-17  Andrew Cagney  <cagney@redhat.com>
 
 	* simops.c (trace_result): Fix printf formatting.

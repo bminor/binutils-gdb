@@ -287,7 +287,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
      bfd *abfd;
      struct bfd_link_info *info;
      asection *sec, *ehdrsec;
-     boolean (*reloc_symbol_deleted_p) (bfd_vma, PTR);
+     boolean (*reloc_symbol_deleted_p) PARAMS ((bfd_vma, PTR));
      struct elf_reloc_cookie *cookie;
 {
   bfd_byte *ehbuf = NULL, *buf;
@@ -506,6 +506,11 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	    }
 	  read_uleb128 (cie.code_align, buf);
 	  read_sleb128 (cie.data_align, buf);
+	  /* Note - in DWARF2 the return address column is an unsigned byte.
+	     In DWARF3 it is a ULEB128.  We are following DWARF3.  For most
+	     ports this will not matter as the value will be less than 128.
+	     For the others (eg FRV, SH, MMIX, IA64) they need a fixed GCC
+	     which conforms to the DWARF3 standard.  */
 	  read_uleb128 (cie.ra_column, buf);
 	  ENSURE_NO_RELOCS (buf);
 	  cie.lsda_encoding = DW_EH_PE_omit;

@@ -28,11 +28,6 @@
 #include "mips/tm-mips.h"
 #include "solib.h"
 
-/* There's an E_MIPS_ABI_O32 flag in e_flags, but we don't use it - in
-   fact, using it may violate the o32 ABI.  */
-
-#define MIPS_DEFAULT_ABI MIPS_ABI_O32
-
 /* We don't want to inherit tm-mips.h's shared library trampoline code.  */
 #undef IN_SOLIB_CALL_TRAMPOLINE
 #undef IN_SOLIB_RETURN_TRAMPOLINE

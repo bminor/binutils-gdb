@@ -198,10 +198,12 @@ linux_do_thread_registers (bfd *obfd, ptid_t ptid,
   return note_data;
 }
 
-struct linux_corefile_thread_data {
-  bfd  *obfd;
+struct linux_corefile_thread_data
+{
+  bfd *obfd;
   char *note_data;
-  int  *note_size;
+  int *note_size;
+  int num_notes;
 };
 
 /* Function: linux_corefile_thread_callback
@@ -224,6 +226,7 @@ linux_corefile_thread_callback (struct thread_info *ti, void *data)
 					       ti->ptid, 
 					       args->note_data, 
 					       args->note_size);
+  args->num_notes++;
   inferior_ptid = saved_ptid;
   registers_changed ();
   target_fetch_registers (-1);	/* FIXME should not be necessary; 
@@ -271,11 +274,12 @@ linux_make_note_section (bfd *obfd, int *note_size)
   thread_args.obfd = obfd;
   thread_args.note_data = note_data;
   thread_args.note_size = note_size;
+  thread_args.num_notes = 0;
   iterate_over_threads (linux_corefile_thread_callback, &thread_args);
-  if (thread_args.note_data == note_data)
+  if (thread_args.num_notes == 0)
     {
       /* iterate_over_threads didn't come up with any threads;
-	 just use inferior_ptid. */
+	 just use inferior_ptid.  */
       note_data = linux_do_thread_registers (obfd, inferior_ptid, 
 					     note_data, note_size);
     }

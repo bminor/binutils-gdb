@@ -593,16 +593,34 @@ coff_symfile_read (struct objfile *objfile, int mainline)
 
 /* End of warning */
 
-  /* Read the line number table, all at once.  */
   info->min_lineno_offset = 0;
   info->max_lineno_offset = 0;
-  bfd_map_over_sections (abfd, find_linenos, (void *) info);
 
-  make_cleanup (free_linetab_cleanup, 0 /*ignore*/);
-  val = init_lineno (abfd, info->min_lineno_offset,
-		     info->max_lineno_offset - info->min_lineno_offset);
-  if (val < 0)
-    error ("\"%s\": error reading line numbers\n", name);
+  /* Only read line number information if we have symbols.
+
+     On Windows NT, some of the system's DLL's have sections with
+     PointerToLinenumbers fields that are non-zero, but point at
+     random places within the image file.  (In the case I found,
+     KERNEL32.DLL's .text section has a line number info pointer that
+     points into the middle of the string `lib\\i386\kernel32.dll'.)
+
+     However, these DLL's also have no symbols.  The line number
+     tables are meaningless without symbols.  And in fact, GDB never
+     uses the line number information unless there are symbols.  So we
+     can avoid spurious error messages (and maybe run a little
+     faster!) by not even reading the line number table unless we have
+     symbols.  */
+  if (num_symbols > 0)
+    {
+      /* Read the line number table, all at once.  */
+      bfd_map_over_sections (abfd, find_linenos, (void *) info);
+
+      make_cleanup (free_linetab_cleanup, 0 /*ignore*/);
+      val = init_lineno (abfd, info->min_lineno_offset,
+                         info->max_lineno_offset - info->min_lineno_offset);
+      if (val < 0)
+        error ("\"%s\": error reading line numbers\n", name);
+    }
 
   /* Now read the string table, all at once.  */
 

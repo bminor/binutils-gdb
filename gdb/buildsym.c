@@ -486,11 +486,11 @@ record_pending_block (struct objfile *objfile, struct block *block,
     }
 }
 
-/* Note that this is only used in this file and in dstread.c, which
-   should be fixed to not need direct access to this function.  When
-   that is done, it can be made static again. */
+/* OBSOLETE Note that this is only used in this file and in dstread.c, which */
+/* OBSOLETE should be fixed to not need direct access to this function.  When */
+/* OBSOLETE that is done, it can be made static again. */
 
-struct blockvector *
+static struct blockvector *
 make_blockvector (struct objfile *objfile)
 {
   register struct pending_block *next;

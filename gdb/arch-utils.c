@@ -95,11 +95,25 @@ legacy_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
    register cache.  */
 void
 legacy_extract_return_value (struct type *type, struct regcache *regcache,
-			     char *valbuf)
+			     void *valbuf)
 {
   char *registers = deprecated_grub_regcache_for_registers (regcache);
-  DEPRECATED_EXTRACT_RETURN_VALUE (type, registers, valbuf);
+  bfd_byte *buf = valbuf;
+  DEPRECATED_EXTRACT_RETURN_VALUE (type, registers, buf);
 }
+
+/* Implementation of store return value that grubs the register cache.
+   Takes a local copy of the buffer to avoid const problems.  */
+void
+legacy_store_return_value (struct type *type, struct regcache *regcache,
+			   const void *buf)
+{
+  bfd_byte *b = alloca (TYPE_LENGTH (type));
+  gdb_assert (regcache == current_regcache);
+  memcpy (b, buf, TYPE_LENGTH (type));
+  DEPRECATED_STORE_RETURN_VALUE (type, b);
+}
+
 
 int
 legacy_register_sim_regno (int regnum)
@@ -137,6 +151,12 @@ generic_skip_trampoline_code (CORE_ADDR pc)
 
 int
 generic_in_solib_call_trampoline (CORE_ADDR pc, char *name)
+{
+  return 0;
+}
+
+int
+generic_in_solib_return_trampoline (CORE_ADDR pc, char *name)
 {
   return 0;
 }
@@ -248,21 +268,6 @@ default_double_format (struct gdbarch *gdbarch)
       internal_error (__FILE__, __LINE__,
 		      "default_double_format: bad byte order");
     }
-}
-
-void
-default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
-			  struct frame_info *frame)
-{
-#ifdef FLOAT_INFO
-#if GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL
-#error "FLOAT_INFO defined in multi-arch"
-#endif
-  FLOAT_INFO;
-#else
-  fprintf_filtered (file, "\
-No floating point info available for this processor.\n");
-#endif
 }
 
 /* Misc helper functions for targets. */
@@ -444,6 +449,23 @@ generic_register_size (int regnum)
        (name && STREQ ("_sigtramp", name))
 #endif
 #endif
+
+/* Assume all registers are adjacent.  */
+
+int
+generic_register_byte (int regnum)
+{
+  int byte;
+  int i;
+  gdb_assert (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS);
+  byte = 0;
+  for (i = 0; i < regnum; i++)
+    {
+      byte += TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (i));
+    }
+  return byte;
+}
+
 
 int
 legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)

@@ -57,9 +57,17 @@ permanently REMOVED.
 
 Mitsubishi D30V					d30v-*-*
 OS/9000						i[34]86-*-os9k
+IBM AIX PS/2					i[3456]86-*-aix
 Fujitsu FR30					fr30-*-elf*
 Motorola Delta 88000 running Sys V		m88k-motorola-sysv  or  delta88
 Argonaut Risc Chip (ARC)			arc-*-*
+i386 running Mach 3.0				i[3456]86-*-mach3*
+i386 running Mach				i[3456]86-*-mach*
+i386 running OSF/1				i[3456]86-*osf1mk*
+HP/Apollo 68k Family				m68*-apollo*-sysv*,
+						m68*-apollo*-bsd*,
+						m68*-hp-bsd*, m68*-hp-hpux*
+I960 with MON960				i960-*-coff
 
 * OBSOLETE languages
 
@@ -89,6 +97,12 @@ Support for the "generate-core-file" has been added.
 These commands allow data to be copied from target memory
 to a bfd-format or binary file (dump and append), and back
 from a file into memory (restore).
+
+* Improved "next/step" support on multi-processor Alpha Tru64.
+
+The previous single-step mechanism could cause unpredictable problems,
+including the random appearance of SIGSEGV or SIGTRAP signals. The use
+of a software single-step mechanism prevents this.
 
 *** Changes in GDB 5.2.1:
 

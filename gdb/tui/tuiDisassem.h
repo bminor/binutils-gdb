@@ -31,7 +31,7 @@
 /*****************************************
 ** PUBLIC FUNCTION EXTERNAL DECLS        **
 ******************************************/
-extern TuiStatus tuiSetDisassemContent (struct symtab *, CORE_ADDR);
+extern TuiStatus tuiSetDisassemContent (CORE_ADDR);
 extern void tuiShowDisassem (CORE_ADDR);
 extern void tuiShowDisassemAndUpdateSource (CORE_ADDR);
 extern void tuiVerticalDisassemScroll (TuiScrollDirection, int);

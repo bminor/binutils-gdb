@@ -337,51 +337,6 @@ ns32k_frame_locals_address (struct frame_info *frame)
   return (frame->frame);
 }
 
-static void
-ns32k_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
-                          struct frame_info *frame, int regnum,
-			  enum lval_type *lval)
-{
-  CORE_ADDR addr;
-
-  if (!target_has_registers)
-    error ("No registers.");
-
-  /* Normal systems don't optimize out things with register numbers.  */
-  if (optimized != NULL)
-    *optimized = 0;
-  addr = find_saved_register (frame, regnum);
-  if (addr != 0)
-    {
-      if (lval != NULL)
-	*lval = lval_memory;
-      if (regnum == SP_REGNUM)
-	{
-	  if (raw_buffer != NULL)
-	    {
-	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			     (LONGEST) addr);
-	    }
-	  if (addrp != NULL)
-	    *addrp = 0;
-	  return;
-	}
-      if (raw_buffer != NULL)
-	target_read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
-    }
-  else
-    {
-      if (lval != NULL)
-	*lval = lval_register;
-      addr = REGISTER_BYTE (regnum);
-      if (raw_buffer != NULL)
-	read_register_gen (regnum, raw_buffer);
-    }
-  if (addrp != NULL)
-    *addrp = addr;
-}
-
 /* Code to initialize the addresses of the saved registers of frame described
    by FRAME_INFO.  This includes special registers such as pc and fp saved in
    special ways in the stack frame.  sp is even more special: the address we
@@ -614,14 +569,12 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
-  set_gdbarch_get_saved_register (gdbarch, ns32k_get_saved_register);
-
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Return value info */
   set_gdbarch_store_struct_return (gdbarch, ns32k_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch, ns32k_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, ns32k_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, ns32k_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
                                             ns32k_extract_struct_value_address);
 

@@ -19,9 +19,6 @@
 
 #include "mips/tm-bigmips.h"
 
-#undef DEFAULT_MIPS_TYPE
-#define DEFAULT_MIPS_TYPE "r3051"
-
 /* Watchpoint support */
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS

@@ -461,14 +461,17 @@ f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:
 f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_name::0
 v:2:REGISTER_SIZE:int:register_size::::0:-1
 v:2:REGISTER_BYTES:int:register_bytes::::0:-1
-f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::0:0
+f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte::0
 f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
 v:2:MAX_REGISTER_RAW_SIZE:int:max_register_raw_size::::0:-1
 f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
 v:2:MAX_REGISTER_VIRTUAL_SIZE:int:max_register_virtual_size::::0:-1
 f:2:REGISTER_VIRTUAL_TYPE:struct type *:register_virtual_type:int reg_nr:reg_nr::0:0
-f:2:DO_REGISTERS_INFO:void:do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs:::do_registers_info::0
-m:2:PRINT_FLOAT_INFO:void:print_float_info:struct ui_file *file, struct frame_info *frame:file, frame:::default_print_float_info::0
+#
+F:2:DO_REGISTERS_INFO:void:do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs
+m:2:PRINT_REGISTERS_INFO:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all:::default_print_registers_info::0
+M:2:PRINT_FLOAT_INFO:void:print_float_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
+M:2:PRINT_VECTOR_INFO:void:print_vector_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
 # MAP a GDB RAW register number onto a simulator register number.  See
 # also include/...-sim.h.
 f:2:REGISTER_SIM_REGNO:int:register_sim_regno:int reg_nr:reg_nr:::legacy_register_sim_regno::0
@@ -520,15 +523,18 @@ f:2:ADDRESS_TO_POINTER:void:address_to_pointer:struct type *type, void *buf, COR
 F:2:INTEGER_TO_ADDRESS:CORE_ADDR:integer_to_address:struct type *type, void *buf:type, buf
 #
 f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::generic_return_value_on_stack_not::0
-f:2:EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, struct regcache *regcache, char *valbuf:type, regcache, valbuf:::legacy_extract_return_value::0
-f:2:DEPRECATED_EXTRACT_RETURN_VALUE:void:deprecated_extract_return_value:struct type *type, char *regbuf, char *valbuf:type, regbuf, valbuf::0:0
 f:2:PUSH_ARGUMENTS:CORE_ADDR:push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr:::default_push_arguments::0
 f:2:PUSH_DUMMY_FRAME:void:push_dummy_frame:void:-:::0
 F:2:PUSH_RETURN_ADDRESS:CORE_ADDR:push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
 f:2:POP_FRAME:void:pop_frame:void:-:::0
 #
 f:2:STORE_STRUCT_RETURN:void:store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
-f:2:STORE_RETURN_VALUE:void:store_return_value:struct type *type, char *valbuf:type, valbuf:::0
+#
+f::EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, struct regcache *regcache, void *valbuf:type, regcache, valbuf:::legacy_extract_return_value::0
+f::STORE_RETURN_VALUE:void:store_return_value:struct type *type, struct regcache *regcache, const void *valbuf:type, regcache, valbuf:::legacy_store_return_value::0
+f::DEPRECATED_EXTRACT_RETURN_VALUE:void:deprecated_extract_return_value:struct type *type, char *regbuf, char *valbuf:type, regbuf, valbuf
+f::DEPRECATED_STORE_RETURN_VALUE:void:deprecated_store_return_value:struct type *type, char *valbuf:type, valbuf
+#
 F:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:struct regcache *regcache:regcache:::0
 F:2:DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:deprecated_extract_struct_value_address:char *regbuf:regbuf:::0
 f:2:USE_STRUCT_CONVENTION:int:use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type:::generic_use_struct_convention::0
@@ -599,10 +605,16 @@ f:2:SMASH_TEXT_ADDRESS:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr:::core_a
 F:2:SOFTWARE_SINGLE_STEP:void:software_single_step:enum target_signal sig, int insert_breakpoints_p:sig, insert_breakpoints_p::0:0
 f:2:TARGET_PRINT_INSN:int:print_insn:bfd_vma vma, disassemble_info *info:vma, info:::legacy_print_insn::0
 f:2:SKIP_TRAMPOLINE_CODE:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc:::generic_skip_trampoline_code::0
+
+
 # For SVR4 shared libraries, each call goes through a small piece of
 # trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
-# to nonzero if we are current stopped in one of these.
+# to nonzero if we are currently stopped in one of these.
 f:2:IN_SOLIB_CALL_TRAMPOLINE:int:in_solib_call_trampoline:CORE_ADDR pc, char *name:pc, name:::generic_in_solib_call_trampoline::0
+
+# Some systems also have trampoline code for returning from shared libs.
+f:2:IN_SOLIB_RETURN_TRAMPOLINE:int:in_solib_return_trampoline:CORE_ADDR pc, char *name:pc, name:::generic_in_solib_return_trampoline::0
+
 # Sigtramp is a routine that the kernel calls (which then calls the
 # signal handler).  On most machines it is a library routine that is
 # linked into the executable.

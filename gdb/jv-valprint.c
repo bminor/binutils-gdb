@@ -30,6 +30,7 @@
 #include "jv-lang.h"
 #include "c-lang.h"
 #include "annotate.h"
+#include "gdb_string.h"
 
 /* Local functions */
 

@@ -92,6 +92,8 @@ struct type *builtin_type_v8qi;
 struct type *builtin_type_v8hi;
 struct type *builtin_type_v4hi;
 struct type *builtin_type_v2si;
+struct type *builtin_type_vec64;
+struct type *builtin_type_vec64i;
 struct type *builtin_type_vec128;
 struct type *builtin_type_vec128i;
 struct type *builtin_type_ieee_single_big;
@@ -819,6 +821,64 @@ init_vector_type (struct type *elt_type, int n)
 }
 
 static struct type *
+build_builtin_type_vec64 (void)
+{
+  /* Construct a type for the 64 bit registers.  The type we're
+     building is this: */
+#if 0
+  union __gdb_builtin_type_vec64
+  {
+    int64_t uint64;
+    float v2_float[2];
+    int32_t v2_int32[2];
+    int16_t v4_int16[4];
+    int8_t v8_int8[8];
+  };
+#endif
+
+  struct type *t;
+
+  t = init_composite_type ("__gdb_builtin_type_vec64", TYPE_CODE_UNION);
+  append_composite_type_field (t, "uint64", builtin_type_int64);
+  append_composite_type_field (t, "v2_float", builtin_type_v2_float);
+  append_composite_type_field (t, "v2_int32", builtin_type_v2_int32);
+  append_composite_type_field (t, "v4_int16", builtin_type_v4_int16);
+  append_composite_type_field (t, "v8_int8", builtin_type_v8_int8);
+
+  TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+  TYPE_NAME (t) = "builtin_type_vec64";
+  return t;
+}
+
+static struct type *
+build_builtin_type_vec64i (void)
+{
+  /* Construct a type for the 64 bit registers.  The type we're
+     building is this: */
+#if 0
+  union __gdb_builtin_type_vec64i 
+  {
+    int64_t uint64;
+    int32_t v2_int32[2];
+    int16_t v4_int16[4];
+    int8_t v8_int8[8];
+  };
+#endif
+
+  struct type *t;
+
+  t = init_composite_type ("__gdb_builtin_type_vec64i", TYPE_CODE_UNION);
+  append_composite_type_field (t, "uint64", builtin_type_int64);
+  append_composite_type_field (t, "v2_int32", builtin_type_v2_int32);
+  append_composite_type_field (t, "v4_int16", builtin_type_v4_int16);
+  append_composite_type_field (t, "v8_int8", builtin_type_v8_int8);
+
+  TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+  TYPE_NAME (t) = "builtin_type_vec64i";
+  return t;
+}
+
+static struct type *
 build_builtin_type_vec128 (void)
 {
   /* Construct a type for the 128 bit registers.  The type we're
@@ -843,6 +903,8 @@ build_builtin_type_vec128 (void)
   append_composite_type_field (t, "v8_int16", builtin_type_v8_int16);
   append_composite_type_field (t, "v16_int8", builtin_type_v16_int8);
 
+  TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+  TYPE_NAME (t) = "builtin_type_vec128";
   return t;
 }
 
@@ -861,6 +923,8 @@ build_builtin_type_vec128i (void)
   append_composite_type_field (t, "v2_int64", builtin_type_v2_int64);
   append_composite_type_field (t, "uint128", builtin_type_int128);
 
+  TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+  TYPE_NAME (t) = "builtin_type_vec128i";
   return t;
 }
 
@@ -3324,7 +3388,9 @@ build_gdbtypes (void)
   builtin_type_v4_int16 = init_vector_type (builtin_type_int16, 4);
   builtin_type_v8_int8 = init_vector_type (builtin_type_int8, 8);
 
-  /* Vector types. */
+  /* Vector types.  */
+  builtin_type_vec64 = build_builtin_type_vec64 ();
+  builtin_type_vec64i = build_builtin_type_vec64i ();
   builtin_type_vec128 = build_builtin_type_vec128 ();
   builtin_type_vec128i = build_builtin_type_vec128i ();
 

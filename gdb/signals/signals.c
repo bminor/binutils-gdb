@@ -25,6 +25,7 @@
 #else
 #include "defs.h"
 #include "target.h"
+#include "gdb_string.h"
 #endif
 
 #include <signal.h>
