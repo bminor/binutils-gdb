@@ -1,3 +1,11 @@
+Tue Oct  1 05:02:53 1991  John Gilmore  (gnu at cygnus.com)
+
+	Vax Ultrix changes from David Taylor <taylor@think.com>:
+	* host-aout.c:  Make little-endian vector really little-endian.
+	* configure.in:  Separate vax and tahoe cases, handle ultrix.
+	* config/t-vax:  Add trad-core.o.
+	* config/h-vaxult:  New host system.
+
 Mon Sep 30 15:13:46 1991  Steve Chamberlain  (steve at cygnus.com)
 
 	* cpu-a29k.c, cpu-i386.c, cpu-m68k.c, cpu-mips.c, cpu-vax.c,

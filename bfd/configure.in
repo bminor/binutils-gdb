@@ -63,8 +63,14 @@ else
 	a29k)	bfd_host=ultra3
 		;;
 
-	tahoe | vax)
+	tahoe)
 		bfd_host=${host_cpu}
+		;;
+        vax)
+		case "${host_os}" in
+		ultrix) bfd_host=vaxult ;;
+		*) bfd_host=vax ;;
+		esac
 		;;
 	esac
 fi
@@ -106,6 +112,7 @@ sun)
 dec)
 	case "${target_cpu}" in
 	mips) bfd_target=dec3100 ;;
+	vax) bfd_target=vax ;;
 	esac
 	;;
 hp)
