@@ -41,6 +41,9 @@ static serial_t scb_base;
 char *serial_logfile = NULL;
 FILE *serial_logfp = NULL;
 
+static struct serial_ops *serial_interface_lookup PARAMS ((char *));
+static void serial_logchar PARAMS ((int));
+
 
 static int serial_reading = 0;
 static int serial_writing = 0;

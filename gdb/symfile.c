@@ -90,6 +90,8 @@ static bfd *symfile_bfd_open PARAMS ((char *));
 
 static void find_sym_fns PARAMS ((struct objfile *));
 
+static void decrement_reading_symtab PARAMS ((void *));
+
 /* List of all available sym_fns.  On gdb startup, each object file reader
    calls add_symtab_fns() to register information on each format it is
    prepared to read. */
@@ -963,7 +965,7 @@ generic_load (filename, from_tty)
   char buf[128];
 
   /* enable user to specify address for downloading as 2nd arg to load */
-  n = sscanf(filename, "%s 0x%x", buf, &load_offset);
+  n = sscanf(filename, "%s 0x%lx", buf, &load_offset);
   if (n > 1 ) 
     filename = buf;
   else

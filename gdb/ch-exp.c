@@ -55,6 +55,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h" /* Required by objfiles.h.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 
+#ifdef __GNUC__
+#define INLINE __inline__
+#endif
+
 typedef union
 
   {
@@ -131,13 +135,55 @@ enum ch_terminal {
 };
 
 /* Forward declarations. */
-static void parse_expr ();
-static void parse_primval ();
-static void parse_untyped_expr ();
-static int parse_opt_untyped_expr ();
-static void parse_if_expression_body PARAMS((void));
+
 static void write_lower_upper_value PARAMS ((enum exp_opcode, struct type *));
-static enum ch_terminal ch_lex ();
+static enum ch_terminal match_bitstring_literal PARAMS ((void));
+static enum ch_terminal match_integer_literal PARAMS ((void));
+static enum ch_terminal match_character_literal PARAMS ((void));
+static enum ch_terminal match_string_literal PARAMS ((void));
+static enum ch_terminal match_float_literal PARAMS ((void));
+static enum ch_terminal match_float_literal PARAMS ((void));
+static int decode_integer_literal PARAMS ((LONGEST *, char **));
+static int decode_integer_value PARAMS ((int, char **, LONGEST *));
+static char *match_simple_name_string PARAMS ((void));
+static void growbuf_by_size PARAMS ((int));
+static void parse_untyped_expr PARAMS ((void));
+static void parse_if_expression PARAMS ((void));
+static void parse_else_alternative PARAMS ((void));
+static void parse_then_alternative PARAMS ((void));
+static void parse_expr PARAMS ((void));
+static void parse_operand0 PARAMS ((void));
+static void parse_operand1 PARAMS ((void));
+static void parse_operand2 PARAMS ((void));
+static void parse_operand3 PARAMS ((void));
+static void parse_operand4 PARAMS ((void));
+static void parse_operand5 PARAMS ((void));
+static void parse_operand6 PARAMS ((void));
+static void parse_primval PARAMS ((void));
+static void parse_tuple PARAMS ((struct type *));
+static void parse_opt_element_list PARAMS ((void));
+static void parse_tuple_element PARAMS ((void));
+static void parse_named_record_element PARAMS ((void));
+static void parse_call PARAMS ((void));
+static struct type *parse_mode_or_normal_call PARAMS ((void));
+#if 0
+static struct type *parse_mode_call PARAMS ((void));
+#endif
+static void parse_unary_call PARAMS ((void));
+static int parse_opt_untyped_expr PARAMS ((void));
+static void parse_case_label PARAMS ((void));
+static int expect PARAMS ((enum ch_terminal, char *));
+static void parse_expr PARAMS ((void));
+static void parse_primval PARAMS ((void));
+static void parse_untyped_expr PARAMS ((void));
+static int parse_opt_untyped_expr PARAMS ((void));
+static void parse_if_expression_body PARAMS((void));
+static enum ch_terminal ch_lex PARAMS ((void));
+INLINE static enum ch_terminal PEEK_TOKEN PARAMS ((void));
+static enum ch_terminal peek_token_ PARAMS ((int));
+static void forward_token_ PARAMS ((void));
+static void require PARAMS ((enum ch_terminal));
+static int check_token PARAMS ((enum ch_terminal));
 
 #define MAX_LOOK_AHEAD 2
 static enum ch_terminal terminal_buffer[MAX_LOOK_AHEAD+1] = {
@@ -147,10 +193,7 @@ static YYSTYPE val_buffer[MAX_LOOK_AHEAD+1];
 
 /*int current_token, lookahead_token;*/
 
-#ifdef __GNUC__
-__inline__
-#endif
-static enum ch_terminal
+INLINE static enum ch_terminal
 PEEK_TOKEN()
 {
   if (terminal_buffer[0] == TOKEN_NOT_READ)
@@ -214,7 +257,7 @@ forward_token_()
 /* Skip the next token.
    if it isn't TOKEN, the parser is broken. */
 
-void
+static void
 require(token)
      enum ch_terminal token;
 {
@@ -227,7 +270,7 @@ require(token)
   FORWARD_TOKEN();
 }
 
-int
+static int
 check_token (token)
      enum ch_terminal token;
 {
@@ -240,8 +283,8 @@ check_token (token)
 /* return 0 if expected token was not found,
    else return 1.
 */
-int
-expect(token, message)
+static int
+expect (token, message)
      enum ch_terminal token;
      char *message;
 {
@@ -408,7 +451,9 @@ parse_unary_call ()
 
 /* Parse NAME '(' MODENAME ')'. */
 
-struct type *
+#if 0
+
+static struct type *
 parse_mode_call ()
 {
   struct type *type;
@@ -422,7 +467,9 @@ parse_mode_call ()
   return type;
 }
 
-struct type *
+#endif
+
+static struct type *
 parse_mode_or_normal_call ()
 {
   struct type *type;
@@ -486,9 +533,11 @@ static void
 parse_named_record_element ()
 {
   struct stoken label;
+  char buf[256];
 
   label = PEEK_LVAL ().sval;
-  expect (FIELD_NAME, "expected a field name here `%s'", lexptr);
+  sprintf (buf, "expected a field name here `%s'", lexptr);
+  expect (FIELD_NAME, buf);
   if (check_token (','))
     parse_named_record_element ();
   else if (check_token (':'))
@@ -2072,7 +2121,6 @@ write_lower_upper_value (opcode, type)
     write_exp_elt_opcode (opcode);
   else
     {
-      extern LONGEST type_lower_upper ();
       struct type *result_type;
       LONGEST val = type_lower_upper (opcode, type, &result_type);
       write_exp_elt_opcode (OP_LONG);

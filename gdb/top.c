@@ -55,11 +55,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_stat.h"
 #include <ctype.h>
 
-extern void initialize_targets PARAMS ((void));
-
 extern void initialize_utils PARAMS ((void));
 
 /* Prototypes for local functions */
+
+static void dont_repeat_command PARAMS ((char *, int));
+
+static void source_cleanup_lines PARAMS ((PTR));
+
+static void user_defined_command PARAMS ((char *, int));
+
+static void init_signals PARAMS ((void));
+
+#ifdef STOP_SIGNAL
+static void stop_sig PARAMS ((int));
+#endif
+
+static void disconnect PARAMS ((int));
 
 static char * line_completion_function PARAMS ((char *, int, char *, int));
 
@@ -393,7 +405,7 @@ void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s, int line,
 					       int stopline, int noerror));
 /* Replaces most of query.  */
 
-int (*query_hook) PARAMS (());
+int (*query_hook) PARAMS ((const char *, va_list));
 
 /* Called from gdb_flush to flush output.  */
 
@@ -446,7 +458,7 @@ void (*call_command_hook) PARAMS ((struct cmd_list_element *c, char *cmd,
 /* Takes control from error ().  Typically used to prevent longjmps out of the
    middle of the GUI.  Usually used in conjunction with a catch routine.  */
 
-NORETURN void (*error_hook) PARAMS (()) ATTR_NORETURN;
+NORETURN void (*error_hook) PARAMS ((void)) ATTR_NORETURN;
 
 
 /* Where to go for return_to_top_level (RETURN_ERROR).  */
@@ -624,7 +636,7 @@ read_command_file (stream)
   do_cleanups (cleanups);
 }
 
-extern void init_proc ();
+extern void init_proc PARAMS ((void));
 
 void (*pre_init_ui_hook) PARAMS ((void));
 
@@ -1160,7 +1172,9 @@ execute_command (p, from_tty)
   register struct cmd_list_element *c;
   register enum language flang;
   static int warned = 0;
+  /* FIXME: These should really be in an appropriate header file */
   extern FILE *serial_logfp;
+  extern void serial_log_command PARAMS ((const char *));
 
   free_all_values ();
 

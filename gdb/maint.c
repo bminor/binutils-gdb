@@ -49,6 +49,14 @@ static void maintenance_time_display PARAMS ((char *, int));
 
 static void maintenance_space_display PARAMS ((char *, int));
 
+static void maintenance_info_command PARAMS ((char *, int));
+
+static void print_section_table PARAMS ((bfd *, asection *, PTR));
+
+static void maintenance_info_sections PARAMS ((char *, int));
+
+static void maintenance_print_command PARAMS ((char *, int));
+
 /* Set this to the maximum number of seconds to wait instead of waiting forever
    in target_wait().  If this timer times out, then it generates an error and
    the command is aborted.  This replaces most of the need for timeouts in the

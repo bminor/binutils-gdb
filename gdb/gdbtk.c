@@ -55,6 +55,44 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef SIOCSPGRP
 #endif
 
+static void null_routine PARAMS ((int));
+static void gdbtk_flush PARAMS ((FILE *));
+static void gdbtk_fputs PARAMS ((const char *, FILE *));
+static int gdbtk_query PARAMS ((const char *, va_list));
+static char *gdbtk_readline PARAMS ((char *));
+static void gdbtk_init PARAMS ((void));
+static void tk_command_loop PARAMS ((void));
+static void gdbtk_call_command PARAMS ((struct cmd_list_element *, char *, int));
+static int gdbtk_wait PARAMS ((int, struct target_waitstatus *));
+static void x_event PARAMS ((int));
+static void gdbtk_interactive PARAMS ((void));
+static void cleanup_init PARAMS ((int));
+static void tk_command PARAMS ((char *, int));
+static int gdb_disassemble PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int compare_lines PARAMS ((const PTR, const PTR));
+static int gdbtk_dis_asm_read_memory PARAMS ((bfd_vma, bfd_byte *, int, disassemble_info *));
+static int gdb_stop PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int gdb_listfiles PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int call_wrapper PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int gdb_cmd PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
+static int gdb_fetch_registers PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static void gdbtk_readline_end PARAMS ((void));
+static int gdb_changed_register_list PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static void register_changed_p PARAMS ((int, void *));
+static int gdb_get_breakpoint_list PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int gdb_get_breakpoint_info PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static void breakpoint_notify PARAMS ((struct breakpoint *, const char *));
+static void gdbtk_create_breakpoint PARAMS ((struct breakpoint *));
+static void gdbtk_delete_breakpoint PARAMS ((struct breakpoint *));
+static void gdbtk_modify_breakpoint PARAMS ((struct breakpoint *));
+static int gdb_loc PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int gdb_eval PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int gdb_sourcelines PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int map_arg_registers PARAMS ((int, char *[], void (*) (int, void *), void *));
+static void get_register_name PARAMS ((int, void *));
+static int gdb_regnames PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static void get_register PARAMS ((int, void *));
+
 /* Handle for TCL interpreter */
 
 static Tcl_Interp *interp = NULL;
@@ -166,7 +204,7 @@ gdbtk_fputs (ptr, stream)
 
 static int
 gdbtk_query (query, args)
-     char *query;
+     const char *query;
      va_list args;
 {
   char buf[200], *merge[2];
@@ -591,7 +629,7 @@ gdb_regnames (clientData, interp, argc, argv)
   argc--;
   argv++;
 
-  return map_arg_registers (argc, argv, get_register_name, 0);
+  return map_arg_registers (argc, argv, get_register_name, NULL);
 }
 
 #ifndef REGISTER_CONVERTIBLE
@@ -667,7 +705,7 @@ gdb_fetch_registers (clientData, interp, argc, argv)
   argc--;
   format = **argv++;
 
-  return map_arg_registers (argc, argv, get_register, format);
+  return map_arg_registers (argc, argv, get_register, (void *) format);
 }
 
 /* This contains the previous values of the registers, since the last call to
@@ -681,7 +719,6 @@ register_changed_p (regnum, argp)
      void *argp;		/* Ignored */
 {
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
-  char buf[100];
 
   if (read_relative_register_raw_bytes (regnum, raw_buffer))
     return;
@@ -1251,7 +1288,8 @@ gdbtk_init ()
 		     gdb_get_breakpoint_info, NULL);
 
   command_loop_hook = tk_command_loop;
-  print_frame_info_listing_hook = null_routine;
+  print_frame_info_listing_hook =
+    (void (*) PARAMS ((struct symtab *, int, int, int))) null_routine;
   query_hook = gdbtk_query;
   flush_hook = gdbtk_flush;
   create_breakpoint_hook = gdbtk_create_breakpoint;

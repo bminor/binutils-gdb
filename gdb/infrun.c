@@ -55,6 +55,8 @@ static void resume_cleanups PARAMS ((int));
 
 static int hook_stop_stub PARAMS ((char *));
 
+static void delete_breakpoint_current_contents PARAMS ((PTR));
+
 /* GET_LONGJMP_TARGET returns the PC at which longjmp() will resume the
    program.  It needs to examine the jmp_buf argument and extract the PC
    from it.  The return value is non-zero on success, zero otherwise. */
@@ -151,9 +153,11 @@ static struct symbol *step_start_function;
 
 static int trap_expected;
 
+#ifdef SOLIB_ADD
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
 static int stop_on_solib_events;
+#endif
 
 #ifdef HP_OS_BUG
 /* Nonzero if the next time we try to continue the inferior, it will
@@ -194,13 +198,6 @@ static int breakpoints_failed;
 /* Nonzero after stop if current stack frame should be printed.  */
 
 static int stop_print_frame;
-
-#ifdef NO_SINGLE_STEP
-extern int one_stepped;		/* From machine dependent code */
-extern void single_step ();	/* Same. */
-#endif /* NO_SINGLE_STEP */
-
-extern void write_pc_pid PARAMS ((CORE_ADDR, int));
 
 
 /* Things to clean up if we QUIT out of resume ().  */
@@ -455,7 +452,7 @@ wait_for_inferior ()
   struct cleanup *old_cleanups;
   struct target_waitstatus w;
   int another_trap;
-  int random_signal;
+  int random_signal = 0;
   CORE_ADDR stop_func_start;
   CORE_ADDR stop_func_end;
   char *stop_func_name;
@@ -1063,8 +1060,8 @@ wait_for_inferior ()
 	      another_trap = 1;
 	    break;
 
-#ifdef SOLIB_ADD
 	  case BPSTAT_WHAT_CHECK_SHLIBS:
+#ifdef SOLIB_ADD
 	    {
 	      extern int auto_solib_add;
 
@@ -1104,6 +1101,7 @@ wait_for_inferior ()
 		}
 	    }
 #endif
+	  break;
 
 	  case BPSTAT_WHAT_LAST:
 	    /* Not a real code, but listed here to shut up gcc -Wall.  */
@@ -1187,7 +1185,8 @@ wait_for_inferior ()
 
       /* Did we just take a signal?  */
       if (IN_SIGTRAMP (stop_pc, stop_func_name)
-	  && !IN_SIGTRAMP (prev_pc, prev_func_name))
+	  && !IN_SIGTRAMP (prev_pc, prev_func_name)
+	  && read_sp () INNER_THAN step_sp)
 	{
 	  /* We've just taken a signal; go until we are back to
 	     the point where we took it and one more.  */
@@ -1251,16 +1250,17 @@ wait_for_inferior ()
 	    SKIP_PROLOGUE (prologue_pc);
 	}
 
-      if ((/* Might be a non-recursive call.  If the symbols are missing
-	      enough that stop_func_start == prev_func_start even though
-	      they are really two functions, we will treat some calls as
-	      jumps.  */
-	   stop_func_start != prev_func_start
+      if (!(step_sp INNER_THAN read_sp ())	/* don't mistake (sig)return as a call */
+	  && (/* Might be a non-recursive call.  If the symbols are missing
+		 enough that stop_func_start == prev_func_start even though
+		 they are really two functions, we will treat some calls as
+		 jumps.  */
+	      stop_func_start != prev_func_start
 
-	   /* Might be a recursive call if either we have a prologue
-	      or the call instruction itself saves the PC on the stack.  */
-	   || prologue_pc != stop_func_start
-	   || read_sp () != step_sp)
+	      /* Might be a recursive call if either we have a prologue
+		 or the call instruction itself saves the PC on the stack.  */
+	      || prologue_pc != stop_func_start
+	      || read_sp () != step_sp)
 	  && (/* PC is completely out of bounds of any known objfiles.  Treat
 		 like a subroutine call. */
 	      ! stop_func_start
@@ -1519,12 +1519,14 @@ step_into_function:
 	}
       step_range_start = sal.pc;
       step_range_end = sal.end;
+      step_frame_address = FRAME_FP (get_current_frame ());
       goto keep_going;
 
     check_sigtramp2:
       if (trap_expected
 	  && IN_SIGTRAMP (stop_pc, stop_func_name)
-	  && !IN_SIGTRAMP (prev_pc, prev_func_name))
+	  && !IN_SIGTRAMP (prev_pc, prev_func_name)
+	  && read_sp () INNER_THAN step_sp)
 	{
 	  /* What has happened here is that we have just stepped the inferior
 	     with a signal (because it is a signal which shouldn't make

@@ -82,6 +82,8 @@ static void step_command PARAMS ((char *, int));
 
 static void run_command PARAMS ((char *, int));
 
+static void breakpoint_auto_delete_contents PARAMS ((PTR));
+
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error ("The program is not being run.");
 
@@ -500,7 +502,8 @@ signal_command (signum_exp, from_tty)
 
 /* Call breakpoint_auto_delete on the current contents of the bpstat
    pointed to by arg (which is really a bpstat *).  */
-void
+
+static void
 breakpoint_auto_delete_contents (arg)
      PTR arg;
 {
@@ -1019,7 +1022,11 @@ do_registers_info (regnum, fpregs)
 
 	  printf_filtered ("\t(raw 0x");
 	  for (j = 0; j < REGISTER_RAW_SIZE (i); j++)
-	    printf_filtered ("%02x", (unsigned char)raw_buffer[j]);
+	    {
+	      register int idx = TARGET_BYTE_ORDER == BIG_ENDIAN ? j
+		: REGISTER_RAW_SIZE (i) - 1 - j;
+	      printf_filtered ("%02x", (unsigned char)raw_buffer[idx]);
+	    }
 	  printf_filtered (")");
 	}
 
@@ -1137,7 +1144,9 @@ attach_command (args, from_tty)
      char *args;
      int from_tty;
 {
+#ifdef SOLIB_ADD
   extern int auto_solib_add;
+#endif
 
   dont_repeat ();			/* Not for the faint of heart */
 

@@ -41,6 +41,8 @@ static void show_values PARAMS ((char *, int));
 
 static void show_convenience PARAMS ((char *, int));
 
+static int vb_match PARAMS ((struct type *, int, struct type *));
+
 /* The value-history records all the values printed
    by print commands during this session.  Each chunk
    records 60 consecutive values.  The first chunk on

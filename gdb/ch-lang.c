@@ -26,6 +26,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 #include "ch-lang.h"
 
+static value_ptr
+evaluate_subexp_chill PARAMS ((struct type *, struct expression *, int *, enum noside));
+
+static value_ptr
+value_chill_max_min PARAMS ((enum exp_opcode, value_ptr));
+
+static value_ptr
+value_chill_card PARAMS ((value_ptr));
+
+static value_ptr
+ value_chill_length PARAMS ((value_ptr));
+
+static struct type *
+chill_create_fundamental_type PARAMS ((struct objfile *, int));
+
+static void
+chill_printstr PARAMS ((GDB_FILE *, char *, unsigned int, int));
+
+static void
+chill_printchar PARAMS ((int, GDB_FILE *));
 
 /* For now, Chill uses a simple mangling algorithm whereby you simply
    discard everything after the occurance of two successive CPLUS_MARKER

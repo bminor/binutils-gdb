@@ -44,7 +44,24 @@
 #include <fcntl.h>
 #include <time.h>
 
-
+static int os_init PARAMS ((host_callback *));
+static int os_shutdown PARAMS ((host_callback *));
+static int os_unlink PARAMS ((host_callback *, const char *));
+static long os_time PARAMS ((host_callback *, long *));
+static int os_system PARAMS ((host_callback *, const char *));
+static int os_rename PARAMS ((host_callback *, const char *, const char *));
+static int os_write_stdout PARAMS ((host_callback *, const char *, int));
+static int os_write PARAMS ((host_callback *, int, const char *, int));
+static int os_read_stdin PARAMS ((host_callback *, char *, int));
+static int os_read PARAMS ((host_callback *, int, char *, int));
+static int os_open PARAMS ((host_callback *, const char *, int));
+static int os_lseek PARAMS ((host_callback *, int, long, int));
+static int os_isatty PARAMS ((host_callback *, int));
+static int os_get_errno PARAMS ((host_callback *));
+static int os_close PARAMS ((host_callback *, int));
+static int fdmap PARAMS ((host_callback *, int));
+static int fdbad PARAMS ((host_callback *, int));
+static int wrap PARAMS ((host_callback *, int));
 
 /* Set the callback copy of errno from what we see now. */
 static int 
@@ -80,7 +97,7 @@ fdmap (p, fd)
   return p->fdmap[fd];
 }
 
-int 
+static int 
 os_close (p, fd)
      host_callback *p;
      int fd;
@@ -94,7 +111,7 @@ os_close (p, fd)
   return result;
 }
 
-int 
+static int 
 os_get_errno (p)
      host_callback *p;
 {
@@ -103,7 +120,7 @@ os_get_errno (p)
 }
 
 
-int 
+static int 
 os_isatty (p, fd)
      host_callback *p;
      int fd;
@@ -113,11 +130,11 @@ os_isatty (p, fd)
   result = fdbad (p, fd);
   if (result)
     return result;
-  result = wrap (p, isatty (fdmap (fd)));
+  result = wrap (p, isatty (fdmap (p, fd)));
   return result;
 }
 
-int 
+static int 
 os_lseek (p, fd, off, way)
      host_callback *p;
      int fd;
@@ -133,7 +150,7 @@ os_lseek (p, fd, off, way)
   return result;
 }
 
-int 
+static int 
 os_open (p, name, flags)
      host_callback *p;
      const char *name;
@@ -159,7 +176,7 @@ os_open (p, name, flags)
   return -1;
 }
 
-int 
+static int 
 os_read (p, fd, buf, len)
      host_callback *p;
      int fd;
@@ -175,7 +192,7 @@ os_read (p, fd, buf, len)
   return result;
 }
 
-int 
+static int 
 os_read_stdin (p, buf, len)
      host_callback *p;
      char *buf;
@@ -184,7 +201,7 @@ os_read_stdin (p, buf, len)
   return wrap (p, read (0, buf, len));
 }
 
-int 
+static int 
 os_write (p, fd, buf, len)
      host_callback *p;
      int fd;
@@ -201,7 +218,8 @@ os_write (p, fd, buf, len)
 }
 
 /* ignore the grossness of INSIDE_SIMULATOR, it will go away one day. */
-int 
+
+static int 
 os_write_stdout (p, buf, len)
      host_callback *p;
      const char *buf;
@@ -225,7 +243,7 @@ os_write_stdout (p, buf, len)
 #endif
 }
 
-int 
+static int 
 os_rename (p, f1, f2)
      host_callback *p;
      const char *f1;
@@ -235,7 +253,7 @@ os_rename (p, f1, f2)
 }
 
 
-int
+static int
 os_system (p, s)
      host_callback *p;
      const char *s;
@@ -243,7 +261,7 @@ os_system (p, s)
   return wrap (p, system (s));
 }
 
-long 
+static long 
 os_time (p, t)
      host_callback *p;
      long *t;
@@ -252,7 +270,7 @@ os_time (p, t)
 }
 
 
-int 
+static int 
 os_unlink (p, f1)
      host_callback *p;
      const char *f1;
@@ -261,9 +279,9 @@ os_unlink (p, f1)
 }
 
 
-int
+static int
 os_shutdown (p)
-host_callback *p;
+     host_callback *p;
 {
   int i;
   for (i = 0; i < MAX_CALLBACK_FDS; i++)
@@ -276,8 +294,9 @@ host_callback *p;
   return 1;
 }
 
-int os_init(p)
-host_callback *p;
+static int
+os_init(p)
+     host_callback *p;
 {
   int i;
   os_shutdown (p);
@@ -296,7 +315,7 @@ host_callback *p;
    move the whole file into sim/common and remove this bit. */
 
 /* VARARGS */
-void
+static void
 #ifdef ANSI_PROTOTYPES
 os_printf_filtered (host_callback *p, const char *format, ...)
 #else

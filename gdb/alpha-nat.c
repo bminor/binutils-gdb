@@ -30,6 +30,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 #include <sys/user.h>
 
+static void fetch_core_registers PARAMS ((char *, unsigned, int, unsigned));
+
 /* Size of elements in jmpbuf */
 
 #define JB_ELEMENT_SIZE 8

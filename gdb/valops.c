@@ -62,6 +62,8 @@ static CORE_ADDR allocate_space_in_inferior PARAMS ((int));
 
 static value_ptr cast_into_complex PARAMS ((struct type *, value_ptr));
 
+static value_ptr value_arg_coerce PARAMS ((value_ptr, struct type *));
+
 #define VALUE_SUBSTRING_START(VAL) VALUE_FRAME(VAL)
 
 /* Flag for whether we want to abandon failed expression evals by default.  */
@@ -1031,7 +1033,7 @@ call_function_by_hand (function, nargs, args)
   CORE_ADDR old_sp;
   struct type *value_type;
   unsigned char struct_return;
-  CORE_ADDR struct_addr;
+  CORE_ADDR struct_addr = 0;
   struct inferior_status inf_status;
   struct cleanup *old_chain;
   CORE_ADDR funaddr;
@@ -1698,6 +1700,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
     {
       char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
+      /* FIXME!  May need to check for ARM demangling here */
       if (strncmp(t_field_name, "__", 2)==0 ||
 	strncmp(t_field_name, "op", 2)==0 ||
 	strncmp(t_field_name, "type", 4)==0 )
@@ -2214,7 +2217,7 @@ value_slice (array, lowbound, length)
      done with it.  */
   slice_range_type = create_range_type ((struct type*) NULL,
 					TYPE_TARGET_TYPE (range_type),
-					lowerbound, lowerbound + length - 1);
+					lowbound, lowbound + length - 1);
   if (TYPE_CODE (array_type) == TYPE_CODE_BITSTRING)
     {
       int i;

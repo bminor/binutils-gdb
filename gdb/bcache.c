@@ -23,6 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bcache.h"
 #include "gdb_string.h"		/* For memcpy declaration */
 
+static unsigned int hash PARAMS ((void *, int));
+static void *lookup_cache PARAMS ((void *, int, int, struct bcache *));
+
 /* FIXME:  Incredibly simplistic hash generator.  Probably way too expensive
  (consider long strings) and unlikely to have good distribution across hash
  values for typical input. */

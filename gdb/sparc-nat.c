@@ -38,6 +38,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	STACK_REGS	2
 #define	FP_REGS		4
 
+static void
+fetch_core_registers PARAMS ((char *, unsigned int, int, unsigned int));
+
 /* Fetch one or more registers from the inferior.  REGNO == -1 to get
    them all.  We actually fetch more than requested, when convenient,
    marking them as valid so we won't fetch them again.  */

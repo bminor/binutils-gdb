@@ -47,6 +47,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 #endif /* sgtty */
 
+#if defined (SIGIO) && defined (FASYNC) && defined (FD_SET) && defined (F_SETOWN)
+static void
+handle_sigio PARAMS ((int));
+#endif
+
+static void
+pass_signal PARAMS ((int));
+
 static void
 kill_command PARAMS ((char *, int));
 
@@ -82,6 +90,7 @@ PROCESS_GROUP_TYPE inferior_process_group;
    inferior only.  If we have job control, that takes care of it.  If not,
    we save our handlers in these two variables and set SIGINT and SIGQUIT
    to SIG_IGN.  */
+
 static void (*sigint_ours) ();
 static void (*sigquit_ours) ();
 

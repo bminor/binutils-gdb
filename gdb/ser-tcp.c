@@ -45,6 +45,10 @@ static int tcp_write PARAMS ((serial_t scb, const char *str, int len));
 static void tcp_close PARAMS ((serial_t scb));
 static serial_ttystate tcp_get_tty_state PARAMS ((serial_t scb));
 static int tcp_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
+static int tcp_return_0 PARAMS ((serial_t));
+static int tcp_noflush_set_tty_state PARAMS ((serial_t, serial_ttystate,
+					      serial_ttystate));
+static void tcp_print_tty_state PARAMS ((serial_t, serial_ttystate));
 
 /* Open up a raw tcp socket */
 

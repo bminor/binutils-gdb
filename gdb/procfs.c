@@ -119,8 +119,6 @@ static struct pollfd *poll_list; /* pollfds used for waiting on /proc */
 
 static int num_poll_list = 0;	/* Number of entries in poll_list */
 
-static int last_resume_pid = -1; /* Last pid used with procfs_resume */
-
 /*  Much of the information used in the /proc interface, particularly for
     printing status information, is kept as tables of structures of the
     following form.  These tables can be used to map numeric values to
@@ -368,6 +366,50 @@ static char *syscall_table[MAX_SYSCALLS];
 
 /* Prototypes for local functions */
 
+static void procfs_stop PARAMS ((void));
+
+static int procfs_thread_alive PARAMS ((int));
+
+static int procfs_can_run PARAMS ((void));
+
+static void procfs_mourn_inferior PARAMS ((void));
+
+static void procfs_fetch_registers PARAMS ((int));
+
+static int procfs_wait PARAMS ((int, struct target_waitstatus *));
+
+static void procfs_open PARAMS ((char *, int));
+
+static void procfs_files_info PARAMS ((struct target_ops *));
+
+static void procfs_prepare_to_store PARAMS ((void));
+
+static void procfs_detach PARAMS ((char *, int));
+
+static void procfs_attach PARAMS ((char *, int));
+
+static void proc_set_exec_trap PARAMS ((void));
+
+static int procfs_init_inferior PARAMS ((int));
+
+static struct procinfo *create_procinfo PARAMS ((int));
+
+static void procfs_store_registers PARAMS ((int));
+
+static int procfs_xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
+
+static void procfs_kill_inferior PARAMS ((void));
+
+static char *sigcodedesc PARAMS ((siginfo_t *));
+
+static char *sigcodename PARAMS ((siginfo_t *));
+
+static struct procinfo *wait_fd PARAMS ((void));
+
+static void remove_fd PARAMS ((struct procinfo *));
+
+static void add_fd PARAMS ((struct procinfo *));
+
 static void set_proc_siginfo PARAMS ((struct procinfo *, int));
 
 static void init_syscall_table PARAMS ((void));
@@ -587,8 +629,10 @@ static struct procinfo *
 wait_fd ()
 {
   struct procinfo *pi;
+#ifndef LOSING_POLL
   int num_fds;
   int i;
+#endif
 
   set_sigint_trap ();	/* Causes SIGINT to be passed on to the
 			   attached process. */
@@ -2287,7 +2331,6 @@ static int
 do_attach (pid)
      int pid;
 {
-  int result;
   struct procinfo *pi;
 
   pi = (struct procinfo *) xmalloc (sizeof (struct procinfo));
@@ -2411,7 +2454,6 @@ static void
 do_detach (signal)
      int signal;
 {
-  int result;
   struct procinfo *pi;
 
   pi = current_procinfo;
@@ -3833,7 +3875,9 @@ modify_inherit_on_fork_flag (fd, flag)
      int fd;
      int flag;
 {
+#ifdef PIOCSET
   long pr_flags;
+#endif
   int retval;
 
 #ifdef PIOCSET			/* New method */
@@ -3884,7 +3928,9 @@ modify_run_on_last_close_flag (fd, flag)
      int fd;
      int flag;
 {
+#ifdef PIOCSET
   long pr_flags;
+#endif
   int retval;
 
 #ifdef PIOCSET			/* New method */

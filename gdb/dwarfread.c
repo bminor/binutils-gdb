@@ -442,6 +442,9 @@ static const struct language_defn *cu_language_defn;
 /* Forward declarations of static functions so we don't have to worry
    about ordering within this file.  */
 
+static void
+free_utypes PARAMS ((PTR));
+
 static int
 attribute_size PARAMS ((unsigned int));
 

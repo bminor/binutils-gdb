@@ -118,7 +118,7 @@ static int
 breakpoint_cond_eval PARAMS ((char *));
 
 static void
-cleanup_executing_breakpoints PARAMS ((int));
+cleanup_executing_breakpoints PARAMS ((PTR));
 
 static void
 commands_command PARAMS ((char *, int));
@@ -134,6 +134,50 @@ set_breakpoint_count PARAMS ((int));
 
 static int
 remove_breakpoint PARAMS ((struct breakpoint *));
+
+static int
+print_it_normal PARAMS ((bpstat));
+
+static int
+watchpoint_check PARAMS ((char *));
+
+static int
+print_it_done PARAMS ((bpstat));
+
+static int
+print_it_noop PARAMS ((bpstat));
+
+static void
+maintenance_info_breakpoints PARAMS ((char *, int));
+
+#ifdef GET_LONGJMP_TARGET
+static void
+create_longjmp_breakpoint PARAMS ((char *));
+#endif
+
+static int
+hw_breakpoint_used_count PARAMS ((void));
+
+static int
+hw_watchpoint_used_count PARAMS ((enum bptype, int *));
+
+static void
+hbreak_command PARAMS ((char *, int));
+
+static void
+thbreak_command PARAMS ((char *, int));
+
+static void
+watch_command_1 PARAMS ((char *, int, int));
+
+static void
+rwatch_command PARAMS ((char *, int));
+
+static void
+awatch_command PARAMS ((char *, int));
+
+static void
+do_enable_breakpoint PARAMS ((struct breakpoint *, enum bpdisp));
 
 extern int addressprint;		/* Print machine addresses? */
 
@@ -914,7 +958,7 @@ bpstat_clear_actions (bs)
 /* ARGSUSED */
 static void
 cleanup_executing_breakpoints (ignore)
-     int ignore;
+     PTR ignore;
 {
   executing_breakpoint_commands = 0;
 }
@@ -2126,7 +2170,7 @@ re_enable_breakpoints_in_shlibs ()
 
 #endif
 
-int
+static int
 hw_breakpoint_used_count()
 {
   register struct breakpoint *b;
@@ -2141,7 +2185,7 @@ hw_breakpoint_used_count()
   return i;
 }
 
-int
+static int
 hw_watchpoint_used_count(type, other_type_used)
     enum bptype type;
     int *other_type_used;
@@ -2545,7 +2589,8 @@ watch_command_1 (arg, accessflag, from_tty)
   struct expression *exp;
   struct block *exp_valid_block;
   struct value *val, *mark;
-  struct frame_info *frame, *prev_frame;
+  struct frame_info *frame;
+  struct frame_info *prev_frame = NULL;
   char *exp_start = NULL;
   char *exp_end = NULL;
   char *tok, *end_tok;

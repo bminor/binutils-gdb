@@ -118,7 +118,7 @@ branch_dest (opcode, instr, pc, safety)
 
 void
 single_step (signal)
-     int signal;
+     enum target_signal signal;
 {
 #define	INSNLEN(OPCODE)	 4
 

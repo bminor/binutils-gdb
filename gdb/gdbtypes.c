@@ -54,6 +54,18 @@ struct type *builtin_type_complex;
 struct type *builtin_type_double_complex;
 struct type *builtin_type_string;
 
+struct extra { char str[128]; int len; }; /* maximum extention is 128! FIXME */
+
+static void add_name PARAMS ((struct extra *, char *));
+static void add_mangled_type PARAMS ((struct extra *, struct type *));
+#if 0
+static void cfront_mangle_name PARAMS ((struct type *, int, int));
+#endif
+static void print_bit_vector PARAMS ((B_TYPE *, int));
+static void print_arg_types PARAMS ((struct type **, int));
+static void dump_fn_fieldlists PARAMS ((struct type *, int));
+static void print_cplus_stuff PARAMS ((struct type *, int));
+
 /* Alloc a new type structure and fill it with some defaults.  If
    OBJFILE is non-NULL, then allocate the space for the type structure
    in that objfile's type_obstack. */
@@ -979,21 +991,21 @@ check_typedef (type)
 #include <ctype.h>
 #define INIT_EXTRA { pextras->len=0; pextras->str[0]='\0'; }
 #define ADD_EXTRA(c) { pextras->str[pextras->len++]=c; }
-struct extra { char str[128]; int len; }; /* maximum extention is 128! FIXME */
-void 
+
+static void 
 add_name(pextras,n) 
   struct extra * pextras;
   char * n; 
 {
-  char lenstr[512];	/* FIXME!  hardcoded :-( */
-  int nlen, lenstrlen;
+  int nlen;
+
   if ((nlen = (n ? strlen(n) : 0))==0) 
     return;
   sprintf(pextras->str+pextras->len,"%d%s",nlen,n);
   pextras->len=strlen(pextras->str);
 }
 
-void 
+static void 
 add_mangled_type(pextras,t) 
   struct extra * pextras;
   struct type * t;
@@ -1116,7 +1128,8 @@ add_mangled_type(pextras,t)
     add_mangled_type(pextras,t->target_type);
 }
 
-char * 
+#if 0
+void
 cfront_mangle_name(type, i, j)
      struct type *type;
      int i;
@@ -1165,6 +1178,8 @@ cfront_mangle_name(type, i, j)
 	mangled_name = arm_mangled_name;
      }
 }
+#endif	/* 0 */
+
 #undef ADD_EXTRA
 /* End of new code added to support parsing of Cfront stabs strings */
 

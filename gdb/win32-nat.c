@@ -51,6 +51,8 @@
 /* Forward declaration */
 extern struct target_ops child_ops;
 
+static void child_stop PARAMS ((void));
+
 /* The most recently read context. Inspect ContextFlags to see what 
    bits are valid. */
 
@@ -765,7 +767,7 @@ child_mourn_inferior ()
 /* Send a SIGINT to the process group.  This acts just like the user typed a
    ^C on the controlling terminal. */
 
-void
+static void
 child_stop ()
 {
   DEBUG_EVENTS (("gdb: GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)\n"));

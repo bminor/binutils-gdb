@@ -65,11 +65,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
 
-/* defined in stabsread.c; used for completing cfront stabs strings */
-extern void 
-resolve_cfront_continuation PARAMS((struct objfile * objfile, 
-		struct symbol * sym, char * p));
-
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
@@ -210,6 +205,9 @@ static struct header_file_location *bincl_list, *next_bincl;
 static int bincls_allocated;
 
 /* Local function prototypes */
+
+static void 
+process_now PARAMS ((struct objfile *));
 
 static void
 free_header_files PARAMS ((void));
@@ -779,7 +777,7 @@ process_later(sym,p)
   cont_count++;
 }
 
-void 
+static void 
 process_now(objfile) 
   struct objfile * objfile;
 {

@@ -109,6 +109,10 @@ static int yylex PARAMS ((void));
 
 void yyerror PARAMS ((char *));
 
+static void growbuf_by_size PARAMS ((int));
+
+static int match_string_literal PARAMS ((void));
+
 %}
 
 /* Although the yacc "value" of an expression is not used,

@@ -23,7 +23,7 @@
 #include "dcache.h"
 #include "gdbcmd.h"
 #include "gdb_string.h"
-
+#include "gdbcore.h"
 
 /* 
    The data cache could lead to incorrect results because it doesn't know
@@ -478,8 +478,8 @@ dcache_xfer_memory (dcache, memaddr, myaddr, len, should_write)
 
   if (remote_dcache) 
     {
-      int (*xfunc) ()
-	= should_write ? dcache_poke_byte : dcache_peek_byte;
+      int (*xfunc) PARAMS ((DCACHE *dcache, CORE_ADDR addr, char *ptr));
+      xfunc = should_write ? dcache_poke_byte : dcache_peek_byte;
 
       for (i = 0; i < len; i++)
 	{
@@ -491,8 +491,8 @@ dcache_xfer_memory (dcache, memaddr, myaddr, len, should_write)
     }
   else 
     {
-      int (*xfunc) () 
-	= should_write ? dcache->write_memory : dcache->read_memory;
+      memxferfunc xfunc;
+      xfunc = should_write ? dcache->write_memory : dcache->read_memory;
 
       if (dcache->cache_has_stuff)
 	dcache_flush (dcache);

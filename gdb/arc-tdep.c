@@ -527,7 +527,7 @@ int one_stepped;
 
 void
 single_step (ignore)
-     int ignore; /* sig, but we don't need it */
+     enum target_signal ignore; /* sig, but we don't need it */
 {
   static CORE_ADDR next_pc, target;
   static int brktrg_p;

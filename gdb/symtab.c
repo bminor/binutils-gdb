@@ -89,6 +89,9 @@ lookup_partial_symbol PARAMS ((struct partial_symtab *, const char *,
 static struct symtab *
 lookup_symtab_1 PARAMS ((char *));
 
+static void
+cplusplus_hint PARAMS ((char *));
+
 /* */
 
 /* The single non-language-specific builtin type */
@@ -106,7 +109,7 @@ char no_symtab_msg[] = "No symbol table is loaded.  Use the \"file\" command.";
    using the new command completion feature on single quoted demangled C++
    symbols.  Remove when loose ends are cleaned up.   FIXME -fnf */
 
-void
+static void
 cplusplus_hint (name)
      char *name;
 {
@@ -325,7 +328,7 @@ gdb_mangle_name (type, i, j)
      work with the normal mechanisms.  */
   if (OPNAME_PREFIX_P (field_name))
     {
-      char *opname = cplus_mangle_opname (field_name + 3, 0);
+      const char *opname = cplus_mangle_opname (field_name + 3, 0);
       if (opname == NULL)
 	error ("No mangling for \"%s\"", field_name);
       mangled_name_len += strlen (opname);
@@ -408,7 +411,7 @@ find_pc_psymbol (psymtab, pc)
      struct partial_symtab *psymtab;
      CORE_ADDR pc;
 {
-  struct partial_symbol *best = NULL, *p;
+  struct partial_symbol *best = NULL, *p, **pp;
   CORE_ADDR best_pc;
   
   if (!psymtab)
@@ -421,30 +424,36 @@ find_pc_psymbol (psymtab, pc)
   /* Search the global symbols as well as the static symbols, so that
      find_pc_partial_function doesn't use a minimal symbol and thus
      cache a bad endaddr.  */
-  for (p = psymtab->objfile->global_psymbols.list + psymtab->globals_offset;
-       (p - (psymtab->objfile->global_psymbols.list + psymtab->globals_offset)
+  for (pp = psymtab->objfile->global_psymbols.list + psymtab->globals_offset;
+       (pp - (psymtab->objfile->global_psymbols.list + psymtab->globals_offset)
 	< psymtab->n_global_syms);
-       p++)
-    if (SYMBOL_NAMESPACE (p) == VAR_NAMESPACE
-	&& SYMBOL_CLASS (p) == LOC_BLOCK
-	&& pc >= SYMBOL_VALUE_ADDRESS (p)
-	&& SYMBOL_VALUE_ADDRESS (p) > best_pc)
-      {
-	best_pc = SYMBOL_VALUE_ADDRESS (p);
-	best = p;
-      }
-  for (p = psymtab->objfile->static_psymbols.list + psymtab->statics_offset;
-       (p - (psymtab->objfile->static_psymbols.list + psymtab->statics_offset)
+       pp++)
+    {
+      p = *pp;
+      if (SYMBOL_NAMESPACE (p) == VAR_NAMESPACE
+	  && SYMBOL_CLASS (p) == LOC_BLOCK
+	  && pc >= SYMBOL_VALUE_ADDRESS (p)
+	  && SYMBOL_VALUE_ADDRESS (p) > best_pc)
+	{
+	  best_pc = SYMBOL_VALUE_ADDRESS (p);
+	  best = p;
+	}
+    }
+  for (pp = psymtab->objfile->static_psymbols.list + psymtab->statics_offset;
+       (pp - (psymtab->objfile->static_psymbols.list + psymtab->statics_offset)
 	< psymtab->n_static_syms);
-       p++)
-    if (SYMBOL_NAMESPACE (p) == VAR_NAMESPACE
-	&& SYMBOL_CLASS (p) == LOC_BLOCK
-	&& pc >= SYMBOL_VALUE_ADDRESS (p)
-	&& SYMBOL_VALUE_ADDRESS (p) > best_pc)
-      {
-	best_pc = SYMBOL_VALUE_ADDRESS (p);
-	best = p;
-      }
+       pp++)
+    {
+      p = *pp;
+      if (SYMBOL_NAMESPACE (p) == VAR_NAMESPACE
+	  && SYMBOL_CLASS (p) == LOC_BLOCK
+	  && pc >= SYMBOL_VALUE_ADDRESS (p)
+	  && SYMBOL_VALUE_ADDRESS (p) > best_pc)
+	{
+	  best_pc = SYMBOL_VALUE_ADDRESS (p);
+	  best = p;
+	}
+    }
   if (best_pc == psymtab->textlow - 1)
     return 0;
   return best;
@@ -703,8 +712,8 @@ lookup_partial_symbol (pst, name, global, namespace)
      int global;
      namespace_enum namespace;
 {
-  struct partial_symbol *start, *psym;
-  struct partial_symbol *top, *bottom, *center;
+  struct partial_symbol **start, **psym;
+  struct partial_symbol **top, **bottom, **center;
   int length = (global ? pst->n_global_syms : pst->n_static_syms);
   int do_linear_search = 1;
 
@@ -733,11 +742,11 @@ lookup_partial_symbol (pst, name, global, namespace)
 	  center = bottom + (top - bottom) / 2;
 	  if (!(center < top))
 	    abort ();
-	  if (!do_linear_search && SYMBOL_LANGUAGE (center) == language_cplus)
+	  if (!do_linear_search && SYMBOL_LANGUAGE (*center) == language_cplus)
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (STRCMP (SYMBOL_NAME (center), name) >= 0)
+	  if (STRCMP (SYMBOL_NAME (*center), name) >= 0)
 	    {
 	      top = center;
 	    }
@@ -748,11 +757,11 @@ lookup_partial_symbol (pst, name, global, namespace)
 	}
       if (!(top == bottom))
 	abort ();
-      while (STREQ (SYMBOL_NAME (top), name))
+      while (STREQ (SYMBOL_NAME (*top), name))
 	{
-	  if (SYMBOL_NAMESPACE (top) == namespace)
+	  if (SYMBOL_NAMESPACE (*top) == namespace)
 	    {
-	      return top;
+	      return (*top);
 	    }
 	  top ++;
 	}
@@ -765,11 +774,11 @@ lookup_partial_symbol (pst, name, global, namespace)
     {
       for (psym = start; psym < start + length; psym++)
 	{
-	  if (namespace == SYMBOL_NAMESPACE (psym))
+	  if (namespace == SYMBOL_NAMESPACE (*psym))
 	    {
-	      if (SYMBOL_MATCHES_NAME (psym, name))
+	      if (SYMBOL_MATCHES_NAME (*psym, name))
 		{
-		  return (psym);
+		  return (*psym);
 		}
 	    }
 	}
@@ -993,7 +1002,7 @@ find_pc_symtab (pc)
 	  /* For an objfile that has its functions reordered,
 	     find_pc_psymtab will find the proper partial symbol table
 	     and we simply return its corresponding symtab.  */
-	  if (objfile->flags & OBJF_REORDERED)
+	  if ((objfile->flags & OBJF_REORDERED) && objfile->psymtabs)
 	    {
 	      ps = find_pc_psymtab (pc);
 	      if (ps)
@@ -1208,7 +1217,8 @@ find_pc_line (pc, notcurrent)
 
       for (i = 0; i < len; i++, item++)
 	{
-	  /* Return the last line that did not start after PC.  */
+	  /* Leave prev pointing to the linetable entry for the last line
+	     that started at or before PC.  */
 	  if (item->pc > pc)
 	    break;
 
@@ -2601,7 +2611,7 @@ list_symbols (regexp, class, bpt, from_tty)
   register struct block *b;
   register int i, j;
   register struct symbol *sym;
-  struct partial_symbol *psym;
+  struct partial_symbol **psym;
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
   char *val;
@@ -2664,7 +2674,7 @@ list_symbols (regexp, class, bpt, from_tty)
 
   ALL_PSYMTABS (objfile, ps)
     {
-      struct partial_symbol *bound, *gbound, *sbound;
+      struct partial_symbol **bound, **gbound, **sbound;
       int keep_going = 1;
       
       if (ps->readin) continue;
@@ -2695,12 +2705,12 @@ list_symbols (regexp, class, bpt, from_tty)
 
 	      /* If it would match (logic taken from loop below)
 		 load the file and go on to the next one */
-	      if ((regexp == NULL || SYMBOL_MATCHES_REGEXP (psym))
-		  && ((class == 0 && SYMBOL_CLASS (psym) != LOC_TYPEDEF
-		       && SYMBOL_CLASS (psym) != LOC_BLOCK)
-		      || (class == 1 && SYMBOL_CLASS (psym) == LOC_BLOCK)
-		      || (class == 2 && SYMBOL_CLASS (psym) == LOC_TYPEDEF)
-		      || (class == 3 && SYMBOL_CLASS (psym) == LOC_BLOCK)))
+	      if ((regexp == NULL || SYMBOL_MATCHES_REGEXP (*psym))
+		  && ((class == 0 && SYMBOL_CLASS (*psym) != LOC_TYPEDEF
+		       && SYMBOL_CLASS (*psym) != LOC_BLOCK)
+		      || (class == 1 && SYMBOL_CLASS (*psym) == LOC_BLOCK)
+		      || (class == 2 && SYMBOL_CLASS (*psym) == LOC_TYPEDEF)
+		      || (class == 3 && SYMBOL_CLASS (*psym) == LOC_BLOCK)))
 		{
 		  PSYMTAB_TO_SYMTAB(ps);
 		  keep_going = 0;
@@ -3079,7 +3089,7 @@ make_symbol_completion_list (text, word)
   register struct objfile *objfile;
   register struct block *b, *surrounding_static_block = 0;
   register int i, j;
-  struct partial_symbol *psym;
+  struct partial_symbol **psym;
   /* The symbol we are completing on.  Points in same buffer as text.  */
   char *sym_text;
   /* Length of sym_text.  */
@@ -3157,7 +3167,7 @@ make_symbol_completion_list (text, word)
 	{
 	  /* If interrupted, then quit. */
 	  QUIT;
-	  COMPLETION_LIST_ADD_SYMBOL (psym, sym_text, sym_text_len, text, word);
+	  COMPLETION_LIST_ADD_SYMBOL (*psym, sym_text, sym_text_len, text, word);
 	}
       
       for (psym = objfile->static_psymbols.list + ps->statics_offset;
@@ -3166,7 +3176,7 @@ make_symbol_completion_list (text, word)
 	   psym++)
 	{
 	  QUIT;
-	  COMPLETION_LIST_ADD_SYMBOL (psym, sym_text, sym_text_len, text, word);
+	  COMPLETION_LIST_ADD_SYMBOL (*psym, sym_text, sym_text_len, text, word);
 	}
     }
 

@@ -305,6 +305,24 @@ static int found_ecoff_debugging_info;
 
 /* Forward declarations */
 
+static void
+add_pending PARAMS ((FDR *, char *, struct type *));
+
+static struct mdebug_pending *
+is_pending_symbol PARAMS ((FDR *, char *));
+
+static void
+pop_parse_stack PARAMS ((void));
+
+static void
+push_parse_stack PARAMS ((void));
+
+static char *
+fdr_name PARAMS ((FDR *));
+
+static void
+mdebug_psymtab_to_symtab PARAMS ((struct partial_symtab *));
+
 static int
 upgrade_type PARAMS ((int, struct type **, int, union aux_ext *, int, char *));
 

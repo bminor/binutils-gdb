@@ -37,6 +37,8 @@ extern struct obstack frame_cache_obstack;
 
 /* Forward declarations.  */
 
+static alpha_extra_func_info_t push_sigtramp_desc PARAMS ((CORE_ADDR low_addr));
+
 static CORE_ADDR read_next_frame_reg PARAMS ((struct frame_info *, int));
 
 static CORE_ADDR heuristic_proc_start PARAMS ((CORE_ADDR));
@@ -155,11 +157,12 @@ struct linked_proc_info
    guarantee that we are in the middle of a sigreturn syscall.  Don't
    think this will be a problem in praxis, though.
 */
+
 long
 alpha_linux_sigtramp_offset (CORE_ADDR pc)
 {
   unsigned int i[3], w;
-  long off, res;
+  long off;
 
   if (read_memory_nobpt(pc, (char *) &w, 4) != 0)
     return -1;
@@ -209,8 +212,9 @@ alpha_osf_skip_sigtramp_frame (frame, pc)
    the signal-handler return code starting at address LOW_ADDR.  The
    descriptor is added to the linked_proc_desc_table.  */
 
-alpha_extra_func_info_t
-push_sigtramp_desc (CORE_ADDR low_addr)
+static alpha_extra_func_info_t
+push_sigtramp_desc (low_addr)
+     CORE_ADDR low_addr;
 {
   struct linked_proc_info *link;
   alpha_extra_func_info_t proc_desc;
@@ -233,6 +237,7 @@ push_sigtramp_desc (CORE_ADDR low_addr)
   PROC_PC_REG (proc_desc)	= 26;
   PROC_LOCALOFF (proc_desc)	= 0;
   SET_PROC_DESC_IS_DYN_SIGTRAMP (proc_desc);
+  return (proc_desc);
 }
 
 

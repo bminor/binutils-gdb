@@ -51,6 +51,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Prototypes for local functions */
 
+static void vfprintf_maybe_filtered PARAMS ((FILE *, const char *, va_list, int));
+
+static void fputs_maybe_filtered PARAMS ((const char *, FILE *, int));
+
+#if !defined (NO_MMALLOC) && !defined (NO_MMCHECK)
+static void malloc_botch PARAMS ((void));
+#endif
+
 static void
 fatal_dump_core PARAMS((char *, ...));
 
@@ -217,7 +225,7 @@ free_current_contents (location)
 /* ARGSUSED */
 void
 null_cleanup (arg)
-    char **arg;
+    PTR arg;
 {
 }
 
@@ -1495,7 +1503,7 @@ fputc_unfiltered (c, stream)
 static void
 vfprintf_maybe_filtered (stream, format, args, filter)
      FILE *stream;
-     char *format;
+     const char *format;
      va_list args;
      int filter;
 {

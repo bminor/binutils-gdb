@@ -1,3 +1,540 @@
+Thu Jul 25 19:41:31 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (scm-valprint.o): Depends upon gdbcore_h.
+	(arm-tdep.o): Ditto.
+	(dcache.o): Ditto.
+	(i386ly-tdep.o): Ditto.
+	(i960-tdep.o): Ditto.
+	(m68k-tdep.o): Ditto.
+	(nindy-tdep.o): Ditto.
+	(scm-lang.o): Ditto.
+	(w65-tdep.o): Ditto.
+	(z8k-tdep.o): Ditto.
+	(m68k-tdep.o): Depends upon value_h and gdb_string.h
+	(m2-valprint.o): Depends upon m2-lang.h.
+	(sparc-tdep.o): Depends upon gdb_string.h
+	(valprint.o): Depends upon valprint.h
+	
+	* remote-e7000.c (notice_quit): Remove prototype.
+	* top.c (initialize_targets): Remove prototype, now in target.h.
+	* stabsread.c (resolve_cfront_continuation): Remove prototype.
+	* dbxread.c (resolve_cfront_continuation): Remove prototype.
+	* symfile.h (set_demangling_style): Remove prototype.
+	* config/tm-sysv4.h (in_plt_section): Remove prototype, in objfiles.h.
+	* config/sparc/tm-sparc.h (single_step): Remove extern decl, now in
+ 	target.h.
+	* config/arc/tm-arc.h (one_stepped, single_step): Remove extern decls,
+ 	now in target.h.
+	* ser-unix.c (hardwire_restore): Remove obsolete prototype.
+	* sparc-tdep.c (single_step): Remove forward decl of isbranch.
+	* scm-lang.c (find_function_in_inferior): Remove prototype.
+	(value_allocate_space_in_inferior): Ditto.
+	* infrun.c (write_pc_pid): Remove prototype, now in inferior.h.
+	* defs.h (strchr): Remove declarations, they are declared in
+ 	gdb_string.h also.
+	(strrchr): Ditto.
+ 	(strstr): Ditto.
+ 	(strtok): Ditto.
+ 	(strerror): Ditto.
+	* f-valprint.c (f77_print_array_1): Remove extra arg that was being
+	passed to f77_print_array_1.
+	* gdbtk.c (register_changed_p): Remove unused local variable "buf".
+	* gdbtypes.c (add_name): Remove unused variables lenstrlen and lenstr.
+	* scm-exp.c (scm_istr2int): Remove unused variable "j".
+	(scm_parse): Remove unused variable "str".
+	* hp300ux-nat.c (store_inferior_register): Remove unused variable
+ 	"buf".
+	(store_inferior_registers): Remove unnecessary decl "registers".
+	* m68k-tdep.c (m68k_pop_frame): Remove unused variable "fi".
+	* scm-lang.c (scm_get_field): Remove unused variable "val".
+	(scm_lookup_name): Remove unused variable "symval".
+	* objfiles.c (map_to_file): Remove unused local variable "tempfd".
+	* procfs.c (do_attach, do_detach): Remove unused variable "result".
+	(last_resume_pid): Remove unused static variable.
+	* alpha-tdep.c (alpha_linux_sigtramp_offset): Remove unused variable
+	"res".
+	* objfiles.c (map_to_address): Remove unused function.
+	* f-valprint.c (print_max): Remove extraneous extern decl,
+ 	in valprint.h.
+	(calc_f77_array_dims): Remove extraneous prototype, in f-lang.h.
+	* ch-exp.c (write_lower_upper_value): Remove prototype for
+	type_lower_upper.
+
+	* gdbtypes.c (cfront_mangle_name): #ifdef out unused function.
+	* ch-exp.c (parse_mode_call): Ditto.
+	* f-valprint.c (there_is_a_visible_common_named): Ditto.
+	* f-lang.c (clear_function_list): Ditto.
+	(get_bf_for_fcn): Ditto.
+ 	(clear_bf_list): Ditto.
+ 	(add_common_block): Ditto.
+	(patch_all_commons_by_name): Ditto.
+ 	(find_first_common_named): Ditto.
+ 	(add_common_entry): Ditto.
+	(allocate_saved_function_node): Ditto.
+ 	(allocate_saved_bf_node): Ditto.
+	(allocate_common_entry_node): Ditto.
+	(allocate_saved_f77_common_node): Ditto.
+	
+	* arm-tdep.c (gdbcore.h): Include for necessary prototypes.
+	* dcache.c (gdbcore.h): Ditto.
+	* i386ly-tdep.c (gdbcore.h): Ditto.
+	* i960-tdep.c (gdbcore.h): Ditto.
+	* m2-valprint.c (m2-lang.h): Ditto.
+	* m68k-tdep.c (gdbcore.h): Ditto.
+	(value.h): Ditto.
+	(gdb_string.h): Ditto.
+	* nindy-tdep.c (gdbcore.h): Ditto.
+	* scm-lang.c (gdbcore.h): Ditto.
+	* scm-valprint.c (gdbcore.h): Ditto.
+	* w65-tdep.c (gdbcore.h): Ditto.
+	* z8k-tdep.c (gdbcore.h): Ditto.
+	* sparc-tdep.c (gdb_string.h): Include.
+	* valprint.c (valprint.h): Include.
+
+	* config/xm-lynx.h: Remove part of comment about INT_MIN
+	redefined warnings from defs.h, since INT_MIN define in
+	defs.h is now protected by #ifndef INT_MIN.
+	* config/i386/xm-i386bsd.h: Ditto.
+	* config/m68k/xm-hp300bsd.h: Ditto.
+	* config/m68k/xm-news.h: Ditto.
+
+	* config/pa/xm-hppah.h (INT_MIN): Remove bogus INT_MIN
+	definition as 0x80000000.  The macro in defs.h is better.
+	* config/i386/xm-i386m3.h (INT_MIN): Ditto.
+	* config/i386/xm-i386mach.h (INT_MIN): Ditto.
+	* config/ns32k/xm-ns32km3.h (INT_MIN): Ditto.
+	* config/pa/xm-hppab.h: Ditto.
+
+	* core-aout.c (fetch_core_registers): Add prototype.
+	* hp300ux-nat.c (fetch_inferior_register): Ditto.
+	(store_inferior_register_1): Ditto.
+	(store_inferior_register): Ditto.
+	* config/m68k/tm-m68k.h (find_saved_regs): Ditto.
+	*scm-valprint.c (c_val_print): Ditto.
+	* procfs.c (add_fd): Ditto.
+	(remove_fd): Ditto.
+	(wait_fd): Ditto.
+	(sigcodename): Ditto.
+	(sigcodedesc): Ditto.
+	(procfs_kill_inferior): Ditto.
+	(procfs_xfer_memory): Ditto.
+ 	(procfs_store_registers): Ditto.
+	(create_procinfo): Ditto.
+ 	(procfs_init_inferior): Ditto.
+ 	(proc_set_exec_trap): Ditto.
+	(procfs_attach): Ditto.
+ 	(procfs_detach): Ditto.
+ 	(procfs_prepare_to_store): Ditto.
+	(procfs_files_info): Ditto.
+ 	(procfs_open): Ditto.
+ 	(procfs_wait): Ditto.
+ 	(procfs_fetch_registers): Ditto.
+	(procfs_mourn_inferior): Ditto.
+ 	(procfs_can_run): Ditto.
+ 	(procfs_thread_alive): Ditto.
+	(procfs_stop): Ditto.
+	* alpha-nat.c (fetch_core_registers): Ditto.
+	* config/alpha/tm-alpha.h (alpha_osf_skip_sigtramp_frame): Ditto.
+	* objfiles.c (ecoff_relocate_efi): Ditto.
+	* inflow.c (pass_signal): Ditto.
+	(handle_sigio): Ditto.
+	* annotate.c (breakpoint_changed): Ditto.
+	* callback.c (wrap): Ditto.
+	(fdbad): Ditto.
+ 	(fdmap): Ditto.
+	* utils.c (malloc_botch): Ditto.
+	(fputs_maybe_filtered): Ditto.
+	(vfprintf_maybe_filtered): Ditto.
+	* defs.h (notice_quit): Ditto.
+	* defs.h (xmalloc, xrealloc): Ditto.
+	* top.c (stop_sig): Ditto.
+	(init_signals): Ditto.
+ 	(user_defined_command): Ditto.
+ 	(source_cleanup_lines): Ditto.
+	(dont_repeat_command): Ditto.
+	(serial_log_command): Ditto.
+	(disconnect): Ditto.
+	* target.h (initialize_targets): Ditto.
+	* os9kread.c (read_minimal_symbols): Ditto.
+	* mdebugread.c (mdebug_psymtab_to_symtab): Ditto.
+	(fdr_name): Ditto.
+ 	(push_parse_stack): Ditto.
+	(pop_parse_stack): Ditto.
+ 	(is_pending_symbol): Ditto.
+ 	(add_pending): Ditto.
+	* serial.c (serial_logchar): Ditto.
+	(serial_interface_lookup): Ditto.
+	* serial.h (serial_log_command): Ditto.
+	* f-valprint.c (info_common_command): Ditto.
+	* gdbtypes.h (print_type_scalar): Ditto.
+	* scm-valprint.c (scm_scmlist_print): Ditto.
+	(scm_ipruk): Ditto.
+	* scm-lang.c (scm_printstr): Ditto.
+	(in_eval_c): Ditto.
+ 	(evaluate_subexp_scm): Ditto.
+	* scm-exp.c (scm_read_token): Ditto.
+	(scm_skip_ws): Ditto.
+ 	(scm_lreadparen): Ditto.
+	* m2-lang.c (emit_char): Ditto.
+	(m2_printchar): Ditto.
+ 	(m2_printstr): Ditto.
+	(m2_create_fundamental_type): Ditto.
+	* f-lang.c (emit_char): Ditto.
+	(f_printchar): Ditto.
+ 	(f_printstr): Ditto.
+	(f_create_fundamental_type): Ditto.
+	* ch-lang.c (chill_printchar): Ditto.
+	(chill_printstr): Ditto.
+	(chill_create_fundamental_type): Ditto.
+ 	(value_chill_length): Ditto.
+ 	(value_chill_card): Ditto.
+	(value_chill_max_min): Ditto.
+ 	(evaluate_subexp_chill): Ditto.
+	* ch-exp.c (PEEK_TOKEN): Ditto.
+	(peek_token_): Ditto.
+ 	(forward_token_): Ditto.
+ 	(parse_case_label): Ditto.
+	(parse_opt_untyped_expr): Ditto.
+ 	(parse_unary_call): Ditto.
+ 	(parse_call): Ditto.
+	(parse_named_record_element): Ditto.
+ 	(parse_tuple_element): Ditto.
+	(parse_opt_element_list): Ditto.
+ 	(parse_tuple): Ditto.
+ 	(parse_primval): Ditto.
+ 	(parse_operand6): Ditto.
+	(parse_operand5): Ditto.
+ 	(parse_operand4): Ditto.
+ 	(parse_operand3): Ditto.
+ 	(parse_operand2): Ditto.
+	(parse_operand1): Ditto.
+ 	(parse_operand0): Ditto.
+ 	(parse_expr): Ditto.
+ 	(parse_then_alternative): Ditto.
+	(parse_else_alternative): Ditto.
+ 	(parse_if_expression): Ditto.
+ 	(parse_untyped_expr): Ditto.
+	(growbuf_by_size): Ditto.
+ 	(match_simple_name_string): Ditto.
+ 	(decode_integer_value): Ditto.
+	(decode_integer_literal): Ditto.
+ 	(match_float_literal): Ditto.
+ 	(match_float_literal): Ditto.
+	(match_string_literal): Ditto.
+ 	(match_character_literal): Ditto.
+ 	(match_integer_literal): Ditto.
+	(match_bitstring_literal): Ditto.
+ 	(write_lower_upper_value): Ditto.
+	* ch-lang.h (type_lower_upper): Ditto.
+	* c-lang.c (emit_char): Ditto.
+	* dwarfread.c (free_utypes): Ditto.
+	* stabsread.h (resolve_cfront_continuation): Ditto.
+	* stabsread.c (get_substring): Ditto.
+	(read_one_struct_field): Ditto.
+	* stabsread.h (process_later): Ditto.
+	* demangle.c (set_demangling_command): Ditto.
+	* defs.h (set_demangling_style): Ditto.
+	* maint.c (maintenance_info_command): Ditto.
+	(print_section_table): Ditto.
+	(maintenance_info_sections): Ditto.
+ 	(maintenance_print_command): Ditto.
+	* symtab.h (maintenance_print_statistics): Ditto.
+	* objfiles.h (in_plt_section): Ditto.
+	* objfiles.c (add_to_objfile_sections): Ditto.
+	* bcache.c (hash): Ditto.
+	(lookup_cache): Ditto.
+	* exec.c (bfdsec_to_vmap): Ditto.
+	(ignore): Ditto.
+	* f-exp.y (growbuf_by_size, match_string_literal): Ditto.
+	* language.c (unk_lang_printchar): Ditto.
+	(unk_lang_printstr): Ditto.
+	(unk_lang_create_fundamental_type): Ditto.
+ 	(unk_lang_print_type): Ditto.
+	(unk_lang_val_print): Ditto.
+ 	(unk_lang_value_print): Ditto.
+	* target.c (update_current_target): Ditto.
+	(debug_to_open): Ditto.
+ 	(debug_to_close): Ditto.
+	(debug_to_attach): Ditto.
+ 	(debug_to_detach): Ditto.
+ 	(debug_to_resume): Ditto.
+ 	(debug_to_wait): Ditto.
+	(debug_to_fetch_registers): Ditto.
+ 	(debug_to_store_registers): Ditto.
+ 	(debug_to_prepare_to_store): Ditto.
+ 	(debug_to_xfer_memory): Ditto.
+ 	(debug_to_files_info): Ditto.
+ 	(debug_to_insert_breakpoint): Ditto.
+	(debug_to_remove_breakpoint): Ditto.
+ 	(debug_to_terminal_init): Ditto.
+	(debug_to_terminal_inferior): Ditto.
+ 	(debug_to_terminal_ours_for_output): Ditto.
+	(debug_to_terminal_ours): Ditto.
+ 	(debug_to_terminal_info): Ditto.
+ 	(debug_to_kill): Ditto.
+	(debug_to_load): Ditto.
+ 	(debug_to_lookup_symbol): Ditto.
+ 	(debug_to_create_inferior): Ditto.
+	(debug_to_mourn_inferior): Ditto.
+ 	(debug_to_can_run): Ditto.
+ 	(debug_to_notice_signals): Ditto.
+	(debug_to_thread_alive): Ditto.
+ 	(debug_to_stop): Ditto.
+	* gdbtk.c (null_routine): Ditto.
+	(gdbtk_flush): Ditto.
+ 	(gdbtk_fputs): Ditto.
+ 	(gdbtk_query): Ditto.
+	(gdbtk_readline): Ditto.
+ 	(gdbtk_readline_end): Ditto.
+ 	(gdb_get_breakpoint_list): Ditto.
+	(gdb_get_breakpoint_info): Ditto.
+ 	(breakpoint_notify): Ditto.
+ 	(gdbtk_create_breakpoint): Ditto.
+	(gdbtk_delete_breakpoint): Ditto.
+ 	(gdbtk_modify_breakpoint): Ditto.
+ 	(gdb_loc): Ditto.
+ 	(gdb_eval): Ditto.
+	(gdb_sourcelines): Ditto.
+ 	(map_arg_registers): Ditto.
+ 	(get_register_name): Ditto.
+ 	(gdb_regnames): Ditto.
+	(get_register): Ditto.
+ 	(gdb_fetch_registers): Ditto.
+ 	(register_changed_p): Ditto.
+	(gdb_changed_register_list): Ditto.
+ 	(gdb_cmd): Ditto.
+ 	(call_wrapper): Ditto.
+ 	(gdb_listfiles): Ditto.
+	(gdb_stop): Ditto.
+ 	(gdbtk_dis_asm_read_memory): Ditto.
+ 	(compare_lines): Ditto.
+ 	(gdb_disassemble): Ditto.
+	(tk_command): Ditto.
+ 	(cleanup_init): Ditto.
+ 	(gdbtk_interactive): Ditto.
+ 	(x_event): Ditto.
+ 	(gdbtk_wait): Ditto.
+	(gdbtk_call_command): Ditto.
+ 	(tk_command_loop): Ditto.
+ 	(gdbtk_init): Ditto.
+	* breakpoint.h (set_breakpoint_sal): Ditto.
+	* remote-utils.c (usage): Ditto.
+	* remote.c (set_thread): Ditto.
+	(remote_thread_alive): Ditto.
+	(get_offsets): Ditto.
+	(read_frame): Ditto.
+	(remote_insert_breakpoint): Ditto.
+	(remote_remove_breakpoint): Ditto.
+	* sparc-nat.c (fetch_core_registers): Ditto.
+	* corelow.c (add_to_thread_list): Ditto.
+	(ignore): Ditto.
+	* inftarg.c (proc_wait): Ditto.
+	* infptrace.c (udot_info): Ditto.
+	(fetch_register): Ditto.
+	* ser-unix.c (hardwire_noflush_set_tty_state): Ditto.
+	(hardwire_print_tty_state): Ditto.
+	(hardwire_flush_output): Ditto.
+	(hardwire_flush_input): Ditto.
+	(hardwire_send_break): Ditto.
+	(hardwire_setstopbits): Ditto.
+	* ser-tcp.c (tcp_return_0): Ditto.
+	(tcp_noflush_set_tty_state): Ditto.
+	(tcp_print_tty_state): Ditto.
+	* solib.c (match_main): Ditto.
+	* gdbtypes.c (print_bit_vector): Ditto.
+	(print_arg_types): Ditto.
+	(dump_fn_fieldlists): Ditto.
+	(print_cplus_stuff): Ditto.
+	* symfile.h (entry_point_address): Ditto.
+	* symfile.c (decrement_reading_symtab): Ditto.
+	* valops.c (value_arg_coerce): Ditto.
+	* value.h (find_function_in_inferior): Ditto.
+	(value_allocate_space_in_inferior): Ditto.
+	* values.c (vb_match): Ditto.
+	* thread.c (info_thread_command): Ditto.
+	(restore_current_thread): Ditto.
+	(thread_apply_all_command): Ditto.
+	(thread_apply_command): Ditto.
+	* inferior.h (write_pc_pid): Ditto.
+	* infrun.c (delete_breakpoint_current_contents): Ditto.
+	* breakpoint.c (print_it_normal): Ditto.
+	(watchpoint_check): Ditto.
+	(print_it_done): Ditto.
+	(print_it_noop): Ditto.
+	(maintenance_info_breakpoints): Ditto.
+	(create_longjmp_breakpoint): Ditto.
+	(hbreak_command): Ditto.
+	(thbreak_command): Ditto.
+	(watch_commnd_1): Ditto.
+	(rwatch_command): Ditto.
+	(awatch_command): Ditto.
+	(do_enable_breakpoint): Ditto.
+	* ch-valprint.c (chill_val_print_array_elements): Ditto.
+	* eval.c (evaluate_subexp): Ditto.
+	(get_label): Ditto.
+	(evaluate_struct_tuple): Ditto.
+	* eval.c (init_array_element): Ditto.
+
+	* alpha-tdep.c (push_sigtramp_desc): Add prototype and make static.
+	* breakpoint.c (hw_breakpoint_used_count): Ditto.
+	(hw_watchpoint_used_count): Ditto.
+	* findvar.c (write_register_gen): Ditto.
+	(read_register_pid): Ditto.
+	* symtab.c (cplusplus_hint): Ditto.
+	* infcmd.c (breakpoint_auto_delete_contents): Ditto.
+	* ch-valprint.c (chill_print_type_scalar): Ditto.
+	* gdbtypes.c (add_name): Ditto.
+	(add_mangled_type): Ditto.
+	(cfront_mangle_name): Ditto.
+	* sparc-tdep.c (isbranch): Ditto.
+	* inftarg.c (child_stop): Ditto.
+	* win32-nat.c (child_stop): Ditto.
+	* mac-nat.c (child_stop): Ditto.
+	* remote-utils.c (sr_com): Ditto.
+	* dbxread.c (process_now): Ditto.
+	* ch-exp.c (require): Ditto.
+	(check_token): Ditto.
+	(expect): Ditto.
+	(parse_mode_call): Ditto.
+	(parse_mode_or_normal_call): Ditto.
+	* scm-lang.c (scm_lookup_name): Ditto
+	* f-lang.c (allocate_saved_bf_node): Ditto.
+	(allocate_saved_function_node): Ditto.
+	(allocate_saved_f77_common_node): Ditto.
+ 	(allocate_common_entry_node): Ditto.
+	(add_common_block): Ditto.
+ 	(add_common_entry): Ditto.
+ 	(find_first_common_named): Ditto.
+	(patch_common_entries): Ditto.
+ 	(patch_all_commons_by_name): Ditto.
+ 	(clear_bf_list): Ditto.
+	(get_bf_for_fcn): Ditto.
+ 	(clear_function_list):  Ditto.
+	* scm-exp.c (scm_istr2int): Ditto.
+	(scm_istring2number): Ditto.
+	* scm-valprint.c (scm_inferior_print): Ditto.
+	* f-typeprint.c (print_equivalent_f77_float_type): Ditto.
+	* f-valprint.c (f77_get_dynamic_length_of_aggregate): Ditto.
+	(f77_create_arrayprint_offset_tbl): Ditto.
+ 	(f77_print_array_1): Ditto.
+ 	(f77_print_array): Ditto.
+	(list_all_visible_commons): Ditto.
+ 	(there_is_a_visible_common_named): Ditto.
+	* mdebugread.c (ecoff_relocate_efi): Ditto.
+	* callback.c (os_close): Ditto.
+	(os_get_errno): Ditto.
+ 	(os_isatty): Ditto.
+ 	(os_lseek): Ditto.
+ 	(os_open): Ditto.
+	(os_read): Ditto.
+ 	(os_read_stdin): Ditto.
+ 	(os_write): Ditto.
+ 	(os_write_stdout): Ditto.
+ 	(os_rename): Ditto.
+	(os_system): Ditto.
+ 	(os_time): Ditto.
+ 	(os_unlink): Ditto.
+ 	(os_shutdown): Ditto.
+ 	(os_init): Ditto.
+	(os_printf_filtered): Ditto.
+
+	* scm-lang.h (scm_parse): Change old style decl to prototype.
+	* config/alpha/tm-alphalinux.h (alpha_linux_sigtramp_offset): Ditto.
+	* top.c (init_proc): Ditto.
+	(query_hook): Ditto.
+	(error_hook): Ditto.
+	* f-lang.c (c_value_print): Ditto.
+	* ch-exp.c (parse_expression): Ditto.
+	(parse_primval): Ditto.
+ 	(parse_untyped_expr): Ditto.
+	(parse_opt_untyped_expr): Ditto.
+ 	(ch_lex): Ditto.
+	* config/sparc/tm-sparc.h (sparc_init_extra_frame_info): Ditto.
+	(sparc_frame_saved_pc): Ditto.
+	(sparc_push_dummy_frame): Ditto.
+	(sparc_pop_frame): Ditto.
+	* defs.h (fclose): Ditto.
+	(atof): Ditto.
+ 	(error_hook): Ditto.
+
+	* arc-tdep.c (single_step): Change arg to type "enum target_signal".
+	* rs6000-tdep.c (single_step): Ditto.
+	* sparc-tdep.c (single_step): Ditto.
+
+	* breakpoint.c (cleanup_executing_breakpoints): Change unused arg type
+	to PTR which is what make_cleanup expects.
+	* utils.c (null_cleanup): Change arg type to PTR.
+	* defs.h (null_cleanup): Change prototype to match actual function.
+	* config/sparc/tm-sparc.h (struct frame_info): Move forward decl.
+	* ch-valprint.c (chill_val_print): Cast 2nd arg of
+	chill_print_type_scalar to LONGEST.
+	* infrun.c (wait_for_inferior): Have empty switch case for
+	BPSTAT_WHAT_CHECK_SHLIBS when SOLIB_ADD is not defined.
+	(stop_on_solib_events): Only needed if SOLIB_ADD is defined.
+	* infcmd.c (attach_command): Only need auto_solib_add if SOLIB_ADD
+	is defined.
+	* symfile.c (generic_load): Scan long int using a long int spec,
+	not an int spec.
+	* infptrace.c (udot_info): Only need local variables if	KERNEL_U_SIZE
+ 	is defined.
+	(fetch_register): Only need function if FETCH_INFERIOR_REGISTERS is
+ 	not defined.
+	* inflow.c (handle_sigio): Only need prototype when the actual
+	function is compiled in.
+	* valprint.c (longest_to_int): Expand error message to be
+	separate messages for args larger than largest signed int
+	and args smaller than smallest signed int.
+	* valprint.c (print_longest): Fix problems with support for case
+	where compiler supports type "long long" but the runtime doesn't
+	support printing them with "%ll".
+	* scm-valprint.c (scm_scmlist_print, scm_scmval_print): Change
+ 	return types to void since we don't actually return anything
+ 	meaningful and callees ignore the values anyway.
+	* procfs.c (modify_inherit_on_fork_flag): Enclose pr_flags in PIOCSET
+	ifdef.
+	(modify_run_on_last_close_flag): Ditto.
+	(wait_fd): Enclose local variables "num_fds" and "i" LOSING_POLL
+	ifdef
+	* alpha-tdep.c (push_sigtramp_desc): Return proc_desc rather than
+ 	random value.
+	* infrun.c (wait_for_inferior): Ensure random_signal is not used
+	uninitialized.
+	* valops.c (call_function_by_hand): Ensure struct_addr is not used
+	uninitialized.
+	* breakpoint.c (watch_command_1): Ensure prev_frame is not used
+	uninitialized.
+	* utils.c (vfprintf_maybe_filtered): Change second arg from "char *"
+	to "const char *".
+	* gdbtk.c (gdb_fetch_registers): Cast fourth arg to map_arg_registers
+	to proper pointer type, from int.
+	(gdbtk_query): Change first arg to "const char *" from "char *".
+	* infptrace.c (udot_info): Add two dummy args so that the type is
+	correct for passing to add_info.
+	* f-lang.c (saved_fcn): Move decl to head of file so it can be used
+ 	in prototypes.
+ 	(saved_bf_symnum): Ditto.
+ 	(SAVED_FUNCTION): Ditto.
+	(SAVED_FUNCTION_PTR): Ditto.
+ 	(SAVED_BF): Ditto.
+ 	(SAVED_BF_PTR): Ditto.
+	* ch-exp.c (parse_named_record_element): Build error message in
+	temporary buffer before passing it to expect, rather than passing
+	wrong number of args to expect.
+	* demangle.c (set_demangling_style): Call set_demangling_command with
+	correct number of arguments.
+	* inferior.h (terminal_init_inferior_with_pgrp): Change arg type to
+	int to match actual function.
+	(os_isatty): Call fdmap with right number of arguments, was missing
+	the host_callback* arg.
+	* target.c (cleanup_target): Prototype all functions casts.
+	* target.h (one_stepped, single_step): Declare here and convert
+	single_step to prototype.
+	* infrun.c (one_stepped, single_step): Don't declare externs
+	here, they have moved to target.h.
+ 	* eval.c (init_array_element): Declare previously undeclared
+	last two args as LONGEST.
+	* dcache.c (dcache_xfer_memory):  Change xfunc decls to prototype form.
+
 Thu Jul 25 16:11:54 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* dsrec.c (load_srec): Protect ANSI style function parms with PARAMS.

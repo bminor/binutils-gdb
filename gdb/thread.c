@@ -58,13 +58,29 @@ struct thread_info
 static struct thread_info *thread_list = NULL;
 static int highest_thread_num;
 
-static void thread_command PARAMS ((char * tidstr, int from_tty));
+static void
+thread_command PARAMS ((char * tidstr, int from_tty));
 
-static void prune_threads PARAMS ((void));
+static void
+prune_threads PARAMS ((void));
 
-static void thread_switch PARAMS ((int pid));
+static void
+thread_switch PARAMS ((int pid));
 
-static struct thread_info * find_thread_id PARAMS ((int num));
+static struct thread_info *
+find_thread_id PARAMS ((int num));
+
+static void
+info_threads_command PARAMS ((char *, int));
+
+static void
+restore_current_thread PARAMS ((int));
+
+static void
+thread_apply_all_command PARAMS ((char *, int));
+
+static void
+thread_apply_command PARAMS ((char *, int));
 
 void
 init_thread_list ()

@@ -35,6 +35,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "obstack.h"
 #include "gdb_string.h"
 
+/* FIXME: imported from mdebugread.c */
+
+extern void ecoff_relocate_efi PARAMS ((struct symbol *, CORE_ADDR));
+
 /* Prototypes for local functions */
 
 #if !defined(NO_MMALLOC) && defined(HAVE_MMAP)
@@ -45,13 +49,13 @@ open_existing_mapped_file PARAMS ((char *, long, int));
 static int
 open_mapped_file PARAMS ((char *filename, long mtime, int mapped));
 
-static CORE_ADDR
-map_to_address PARAMS ((void));
-
 static PTR
 map_to_file PARAMS ((int));
 
 #endif  /* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
+
+static void
+add_to_objfile_sections PARAMS ((bfd *, sec_ptr, PTR));
 
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info. */
@@ -543,7 +547,7 @@ objfile_relocate (objfile, new_offsets)
 		  if (SYMBOL_CLASS (sym) == LOC_CONST
 		      && SYMBOL_NAMESPACE (sym) == LABEL_NAMESPACE
 		      && STRCMP (SYMBOL_NAME (sym), MIPS_EFI_SYMBOL_NAME) == 0)
-		    ecoff_relocate_efi (sym, ANOFFSET (delta, s->block_line_section));
+		ecoff_relocate_efi (sym, ANOFFSET (delta, s->block_line_section));
 #endif
 	      }
 	  }
@@ -825,59 +829,12 @@ open_mapped_file (filename, mtime, mapped)
   return (fd);
 }
 
-/* Return the base address at which we would like the next objfile's
-   mapped data to start.
-
-   For now, we use the kludge that the configuration specifies a base
-   address to which it is safe to map the first mmalloc heap, and an
-   increment to add to this address for each successive heap.  There are
-   a lot of issues to deal with here to make this work reasonably, including:
-
-     Avoid memory collisions with existing mapped address spaces
-
-     Reclaim address spaces when their mmalloc heaps are unmapped
-
-     When mmalloc heaps are shared between processes they have to be
-     mapped at the same addresses in each
-
-     Once created, a mmalloc heap that is to be mapped back in must be
-     mapped at the original address.  I.E. each objfile will expect to
-     be remapped at it's original address.  This becomes a problem if
-     the desired address is already in use.
-
-     etc, etc, etc.
-
- */
-
-
-static CORE_ADDR
-map_to_address ()
-{
-
-#if defined(MMAP_BASE_ADDRESS) && defined (MMAP_INCREMENT)
-
-  static CORE_ADDR next = MMAP_BASE_ADDRESS;
-  CORE_ADDR mapto = next;
-
-  next += MMAP_INCREMENT;
-  return (mapto);
-
-#else
-
-  warning ("need to recompile gdb with MMAP_BASE_ADDRESS and MMAP_INCREMENT defined");
-  return (0);
-
-#endif
-
-}
-
 static PTR
 map_to_file (fd)
      int fd;
 {
   PTR md;
   CORE_ADDR mapto;
-  int tempfd;
 
   md = mmalloc_attach (fd, (PTR) 0);
   if (md != NULL)

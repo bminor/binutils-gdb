@@ -57,8 +57,6 @@
 #define ACK  0x06
 #define CTRLZ 0x1a
 
-extern void notice_quit PARAMS ((void));
-
 extern void report_transfer_performance PARAMS ((unsigned long,
 						 time_t, time_t));
 

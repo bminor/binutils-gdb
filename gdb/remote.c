@@ -266,6 +266,18 @@ static void remote_interrupt_twice PARAMS ((int signo));
 
 static void interrupt_query PARAMS ((void));
 
+static void set_thread PARAMS ((int, int));
+
+static int remote_thread_alive PARAMS ((int));
+
+static void get_offsets PARAMS ((void));
+
+static int read_frame PARAMS ((char *));
+
+static int remote_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+
+static int remote_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+
 extern struct target_ops remote_ops;	/* Forward decl */
 extern struct target_ops extended_remote_ops;	/* Forward decl */
 

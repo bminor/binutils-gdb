@@ -179,4 +179,6 @@ extern void serial_printf PARAMS ((serial_t desc, const char *, ...))
 extern char *serial_logfile;
 extern FILE *serial_logfp;
 
+extern void serial_log_command PARAMS ((const char *));
+
 #endif /* SERIAL_H */

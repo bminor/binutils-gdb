@@ -125,6 +125,10 @@ static struct complaint lbrac_mismatch_complaint =
 #endif
 
 /* Local function prototypes */
+
+static void
+read_minimal_symbols PARAMS ((struct objfile *, struct section_offsets *));
+
 static void
 os9k_read_ofile_symtab PARAMS ((struct partial_symtab *));
 

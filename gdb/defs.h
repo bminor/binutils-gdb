@@ -45,6 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <varargs.h>
 #endif
 
+#define PRIVATE_XMALLOC 1	/* Suppress libiberty decls for xmalloc/xrealloc */
 #include "libiberty.h"
 
 /* libiberty.h can't declare this one, but evidently we can.  */
@@ -207,6 +208,12 @@ extern char *chill_demangle PARAMS ((const char *));
 
 /* From utils.c */
 
+extern PTR xmalloc PARAMS ((long));
+
+extern PTR xrealloc PARAMS ((PTR, long));
+
+extern void notice_quit PARAMS ((void));
+
 extern int strcmp_iw PARAMS ((const char *, const char *));
 
 extern char *safe_strerror PARAMS ((int));
@@ -242,12 +249,17 @@ extern void restore_cleanups PARAMS ((struct cleanup *));
 
 extern void free_current_contents PARAMS ((char **));
 
-extern void null_cleanup PARAMS ((char **));
+extern void null_cleanup PARAMS ((PTR));
 
 extern int myread PARAMS ((int, char *, int));
 
 extern int query PARAMS((char *, ...))
      ATTR_FORMAT(printf, 1, 2);
+
+/* From demangle.c */
+
+extern void set_demangling_style PARAMS ((char *));
+
 
 /* Annotation stuff.  */
 
@@ -643,11 +655,11 @@ extern char *getenv PARAMS ((const char *));
    somewhere. */
 
 #ifndef FCLOSE_PROVIDED
-extern int fclose ();
+extern int fclose PARAMS ((FILE *));
 #endif
 
 #ifndef atof
-extern double atof ();
+extern double atof PARAMS ((const char *));	/* X3.159-1989  4.10.1.1 */
 #endif
 
 #ifndef MALLOC_INCOMPATIBLE
@@ -659,30 +671,6 @@ extern PTR realloc ();
 extern void free ();
 
 #endif /* MALLOC_INCOMPATIBLE */
-
-#ifndef __WIN32__
-
-#ifndef strchr
-extern char *strchr ();
-#endif
-
-#ifndef strrchr
-extern char *strrchr ();
-#endif
-
-#ifndef strstr
-extern char *strstr ();
-#endif
-
-#ifndef strtok
-extern char *strtok ();
-#endif
-
-#ifndef strerror
-extern char *strerror ();
-#endif
-
-#endif	/* !__WIN32__ */
 
 /* Various possibilities for alloca.  */
 #ifndef alloca
@@ -998,7 +986,7 @@ extern int (*target_wait_hook) PARAMS ((int pid,
 extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
 					  char *cmd, int from_tty));
 
-extern NORETURN void (*error_hook) PARAMS (()) ATTR_NORETURN;
+extern NORETURN void (*error_hook) PARAMS ((void)) ATTR_NORETURN;
 
 
 

@@ -88,6 +88,25 @@ set_check PARAMS ((char *, int));
 static void
 set_type_range PARAMS ((void));
 
+static void
+unk_lang_printchar PARAMS ((int, GDB_FILE *));
+
+static void
+unk_lang_printstr PARAMS ((GDB_FILE *, char *, unsigned int, int));
+
+static struct type *
+unk_lang_create_fundamental_type PARAMS ((struct objfile *, int));
+
+static void
+unk_lang_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
+
+static int
+unk_lang_val_print PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *,
+			    int, int, int, enum val_prettyprint));
+
+static int
+unk_lang_value_print PARAMS ((value_ptr, GDB_FILE *, int, enum val_prettyprint));
+
 /* Forward declaration */
 extern const struct language_defn unknown_language_defn;
 extern char *warning_pre_print;
@@ -1219,7 +1238,7 @@ unk_lang_create_fundamental_type (objfile, typeid)
   error ("internal error - unimplemented function unk_lang_create_fundamental_type called.");
 }
 
-void
+static void
 unk_lang_print_type (type, varstring, stream, show, level)
      struct type *type;
      char *varstring;
@@ -1230,7 +1249,7 @@ unk_lang_print_type (type, varstring, stream, show, level)
   error ("internal error - unimplemented function unk_lang_print_type called.");
 }
 
-int
+static int
 unk_lang_val_print (type, valaddr, address, stream, format, deref_ref,
 		    recurse, pretty)
      struct type *type;
@@ -1245,7 +1264,7 @@ unk_lang_val_print (type, valaddr, address, stream, format, deref_ref,
   error ("internal error - unimplemented function unk_lang_val_print called.");
 }
 
-int
+static int
 unk_lang_value_print (val, stream, format, pretty)
      value_ptr val;
      GDB_FILE *stream;

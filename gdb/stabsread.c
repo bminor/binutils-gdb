@@ -75,6 +75,13 @@ struct field_info
     } *fnlist;
 };
 
+static void
+read_one_struct_field PARAMS ((struct field_info *, char **, char *,
+			       struct type *, struct objfile *));
+
+static char * 
+get_substring PARAMS ((char **, char));
+
 static struct type *
 dbx_alloc_type PARAMS ((int [2], struct objfile *));
 
@@ -144,10 +151,6 @@ read_cpp_abbrev PARAMS ((struct field_info *, char **, struct type *,
 			 struct objfile *));
 
 /* new functions added for cfront support */
-
-extern void
-resolve_cfront_continuation PARAMS ((struct objfile *, struct symbol *, 
-			char * p));
 
 static int
 copy_cfront_struct_fields PARAMS ((struct field_info *, struct type *,

@@ -45,6 +45,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 extern struct target_ops child_ops;
 
+static void child_stop PARAMS ((void));
+
 static void
 child_fetch_inferior_registers (int r)
 {
@@ -224,7 +226,7 @@ child_mourn_inferior ()
   generic_mourn_inferior ();
 }
 
-void
+static void
 child_stop ()
 {
 }

@@ -58,6 +58,10 @@ static void set_section_command PARAMS ((char *, int));
 
 static void exec_files_info PARAMS ((struct target_ops *));
 
+static void bfdsec_to_vmap PARAMS ((bfd *, sec_ptr, PTR));
+
+static int ignore PARAMS ((CORE_ADDR, char *));
+
 extern int info_verbose;
 
 /* The Binary File Descriptor handle for the executable file.  */

@@ -36,6 +36,13 @@ static void
 chill_print_value_fields PARAMS ((struct type *, char *, GDB_FILE *, int, int,
 				  enum val_prettyprint, struct type **));
 
+static void
+chill_print_type_scalar PARAMS ((struct type *, LONGEST, GDB_FILE *));
+
+static void
+chill_val_print_array_elements PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *,
+					int, int, int, enum val_prettyprint));
+
 
 /* Print integral scalar data VAL, of type TYPE, onto stdio stream STREAM.
    Used to print data from type structures in a specified type.  For example,
@@ -43,7 +50,7 @@ chill_print_value_fields PARAMS ((struct type *, char *, GDB_FILE *, int, int,
    allows the ranges to be printed in their "natural" form rather than as
    decimal integer values. */
 
-void
+static void
 chill_print_type_scalar (type, val, stream)
      struct type *type;
      LONGEST val;
@@ -382,7 +389,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	      {
 		if (need_comma)
 		  fputs_filtered (", ", stream);
-		chill_print_type_scalar (range, i, stream);
+		chill_print_type_scalar (range, (LONGEST) i, stream);
 		need_comma = 1;
 
 		/* Look for a continuous range of true elements. */
@@ -393,7 +400,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		    while (i+1 <= high_bound
 			   && value_bit_index (type, valaddr, ++i))
 		      j = i;
-		    chill_print_type_scalar (range, j, stream);
+		    chill_print_type_scalar (range, (LONGEST) j, stream);
 		  }
 	      }
 	  }

@@ -52,6 +52,10 @@ static void core_close PARAMS ((int));
 
 static void get_core_registers PARAMS ((int));
 
+static void add_to_thread_list PARAMS ((bfd *, asection *, PTR));
+
+static int ignore PARAMS ((CORE_ADDR, char *));
+
 /* Link a new core_fns into the global core_file_fns list.  Called on gdb
    startup by the _initialize routine in each core file register reader, to
    register information about each format the the reader is prepared to

@@ -454,6 +454,9 @@ have_minimal_symbols PARAMS ((void));
 extern struct obj_section *
 find_pc_section PARAMS((CORE_ADDR pc));
 
+extern int
+in_plt_section PARAMS ((CORE_ADDR, char *));
+
 /* Traverse all object files.  ALL_OBJFILES_SAFE works even if you delete
    the objfile during the traversal.  */
 

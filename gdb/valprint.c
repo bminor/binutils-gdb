@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 #include "demangle.h"
 #include "annotate.h"
+#include "valprint.h"
 
 #include <errno.h>
 
@@ -244,15 +245,60 @@ print_longest (stream, format, use_local, val_long)
 {
 #if defined (CC_HAS_LONG_LONG) && !defined (PRINTF_HAS_LONG_LONG)
   long vtop, vbot;
+  unsigned int ui_max = UINT_MAX;
+  unsigned long long val_ulonglong;
 
-  vtop = val_long >> (sizeof (long) * HOST_CHAR_BIT);
+  /* Do shift in two operations so that if sizeof (long) == sizeof (LONGEST)
+     we can avoid warnings from picky compilers about shifts >= the size of
+     the shiftee in bits */
+  vtop = val_long >> (sizeof (long) * HOST_CHAR_BIT - 1);
+  vtop >>= 1;
   vbot = (long) val_long;
-
-  if ((format == 'd' && (val_long < INT_MIN || val_long > INT_MAX))
-      || ((format == 'u' || format == 'x') && (unsigned long long)val_long > UINT_MAX))
+  val_ulonglong = (unsigned long long) val_long;
+  switch (format)
     {
-      fprintf_filtered (stream, "0x%lx%08lx", vtop, vbot);
-      return;
+    case 'd':
+      if (val_long < INT_MIN || val_long > INT_MAX)
+	{
+	  if (sizeof (long long) > sizeof (long))
+	    {
+	      fprintf_filtered (stream, "0x%lx%08lx", vtop, vbot);
+	    }
+	  else
+	    {
+	      fprintf_filtered (stream, "%d", vbot);
+	    }
+	  return;
+	}
+      break;
+    case 'x':
+      if (val_ulonglong > ui_max)
+	{
+	  if (sizeof (long long) > sizeof (long))
+	    {
+	      fprintf_filtered (stream, "0x%lx%08lx", vtop, vbot);
+	    }
+	  else
+	    {
+	      fprintf_filtered (stream, "0x%lx", vbot);
+	    }
+	  return;
+	}
+      break;
+    case 'u':
+      if (val_ulonglong > ui_max)
+	{
+	  if (sizeof (long long) > sizeof (long))
+	    {
+	      fprintf_filtered (stream, "0x%lx%08lx", vtop, vbot);
+	    }
+	  else
+	    {
+	      fprintf_filtered (stream, "%lu", (unsigned long) vbot);
+	    }
+	  return;
+	}
+      break;
     }
 #endif
 
@@ -361,8 +407,10 @@ longest_to_int (arg)
   if (sizeof (LONGEST) <= sizeof (int))
     return arg;
 
-  if (arg > INT_MAX || arg < INT_MIN)
-    error ("Value out of range.");
+  if (arg > INT_MAX)
+    error ("Value is larger than largest signed integer.");
+  if (arg < INT_MIN)
+    error ("Value is smaller than smallest signed integer.");
 
   return arg;
 }
@@ -464,7 +512,12 @@ print_floating (valaddr, type, stream)
   else if (len == sizeof (double))
     fprintf_filtered (stream, "%.17g", (double) doub);
   else
+#ifdef PRINTF_HAS_LONG_DOUBLE
     fprintf_filtered (stream, "%.35Lg", doub);
+#else
+    /* This at least wins with values that are representable as doubles */
+    fprintf_filtered (stream, "%.17g", (double) doub);
+#endif
 }
 
 /* VALADDR points to an integer of LEN bytes.  Print it in hex on stream.  */

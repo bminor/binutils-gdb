@@ -28,11 +28,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 # else
 #   include <strings.h>
 # endif
-extern char *strchr();
-extern char *strrchr();
-extern char *strstr();
-extern char *strtok();
-extern char *strerror();
+
+#ifndef strchr
+extern char *strchr PARAMS ((const char *, int));	/* X3.159-1989  4.11.5.2 */
+#endif
+
+#ifndef strrchr
+extern char *strrchr PARAMS ((const char *, int));	/* X3.159-1989  4.11.5.5 */
+#endif
+
+#ifndef strstr
+extern char *strstr PARAMS ((const char *, const char *));	/* X3.159-1989  4.11.5.7 */
+#endif
+
+#ifndef strtok
+extern char *strtok PARAMS ((char *, const char *));	/* X3.159-1989  4.11.5.8 */
+#endif
+
+#ifndef strerror
+extern char *strerror PARAMS ((int));	/* X3.159-1989  4.11.6.2 */
+#endif
+
 # ifdef HAVE_MEMORY_H
 #   include <memory.h>
 # else
@@ -43,6 +59,6 @@ extern int   memcmp();
 # endif
 #endif
 
-extern char *strdup();
+extern char *strdup ();
 
 #endif	/* !defined(GDB_STRING_H) */

@@ -786,4 +786,8 @@ extern int can_dereference PARAMS ((struct type *));
 extern void maintenance_print_type PARAMS ((char *, int));
 #endif
 
+/* typeprint.c */
+
+extern void print_type_scalar PARAMS ((struct type *, LONGEST, GDB_FILE *));
+
 #endif	/* GDBTYPES_H */
