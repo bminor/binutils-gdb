@@ -680,58 +680,6 @@ test "$program_transform_name" = "" && program_transform_name="s,x,x,"
 
 te_file=generic
 
-# assign cpu type
-
-# check for architecture variants
-case ${target_cpu} in
-  armeb)	cpu_type=arm endian=big ;;
-  arm*)		cpu_type=arm endian=little ;;
-  hppa*)	cpu_type=hppa ;;
-  i[45]86)	cpu_type=i386 ;;
-  m680[012346]0) cpu_type=m68k ;;
-  m68008)	cpu_type=m68k ;;
-  m683??)       cpu_type=m68k ;;
-  m8*)		cpu_type=m88k ;;
-  mips*el)	cpu_type=mips endian=little;;
-  mips*)	cpu_type=mips endian=big ;;
-  powerpcle*)	cpu_type=ppc endian=little ;;
-  powerpc*)	cpu_type=ppc endian=big ;;
-  rs6000*)	cpu_type=ppc ;;
-  sparc64)	cpu_type=sparc
-		cat >> confdefs.h <<\EOF
-#define SPARC_V9 1
-EOF
- ;;
-  sparc*)	cpu_type=sparc ;;
-  *)		cpu_type=${target_cpu} ;;
-esac
-
-# do we need the opcodes library?
-case ${cpu_type} in
-  alpha | vax)
-    ;;
-  *)
-    OPCODES_DEP=../opcodes/libopcodes.a
-    OPCODES_LIB='-L../opcodes -lopcodes'
-
-    # We need to handle some special cases if opcodes was built shared.
-    if test "${shared}" = "true"; then
-      case "${host}" in
-      *-*-sunos*)
-      # On SunOS, we must link against the name we are going to install,
-      # not -lbfd, since SunOS does not support SONAME.
-      OPCODES_LIB='-L../opcodes -l`echo opcodes | sed '"'"'$(program_transform_name)'"'"'`'
-      ;;
-      esac
-    fi
-    ;;
-esac
-
-
-
-gas_target=${cpu_type}
-this_target=${generic_target}
-
 canon_targets=""
 if test -n "$enable_targets" ; then
   for t in `echo $enable_targets | sed 's/,/ /g'`; do
@@ -766,6 +714,8 @@ for this_target in $target $canon_targets ; do
 
     # check for architecture variants
     case ${cpu} in
+      armeb)		cpu_type=arm endian=big ;;
+      arm*)		cpu_type=arm endian=little ;;
       hppa*)		cpu_type=hppa ;;
       i[45]86)		cpu_type=i386 ;;
       m680[012346]0)	cpu_type=m68k ;;
@@ -989,6 +939,12 @@ for this_target in $target $canon_targets ; do
     esac
 
 # Other random stuff.
+
+    # do we need the opcodes library?
+    case ${cpu_type} in
+      alpha | vax) ;;
+      *) need_opcodes=yes ;;
+    esac
 
     test -n "$want_sparc_v9" && cat >> confdefs.h <<\EOF
 #define SPARC_V9 1
@@ -1287,22 +1243,44 @@ EOF
 	need_bfd=yes ;;
 esac
 
-case "${need_bfd}" in
-  yes)	BFDDEP=../bfd/libbfd.a
-	BFDLIB='-L../bfd -lbfd'
-	ALL_OBJ_DEPS="$ALL_OBJ_DEPS ../bfd/bfd.h"
+# do we need the opcodes library?
+case "${need_opcodes}" in
+  yes)
+    OPCODES_DEP=../opcodes/libopcodes.a
+    OPCODES_LIB='-L../opcodes -lopcodes'
 
-	# We need to handle some special cases if BFD was built shared.
-	if test "${shared}" = "true"; then
-	  case "${host}" in
-	  *-*-sunos*)
-	  # On SunOS, we must link against the name we are going to install,
-	  # not -lbfd, since SunOS does not support SONAME.
-	  BFDLIB='-L../bfd -l`echo bfd | sed '"'"'$(program_transform_name)'"'"'`'
-	  ;;
-	  esac
-	fi
+    # We need to handle some special cases if opcodes was built shared.
+    if test "${shared}" = "true"; then
+      case "${host}" in
+      *-*-sunos*)
+      # On SunOS, we must link against the name we are going to install,
+      # not -lbfd, since SunOS does not support SONAME.
+      OPCODES_LIB='-L../opcodes -l`echo opcodes | sed '"'"'$(program_transform_name)'"'"'`'
+      ;;
+      esac
+    fi
+    ;;
+esac
+
+
+
+case "${need_bfd}" in
+  yes)
+    BFDDEP=../bfd/libbfd.a
+    BFDLIB='-L../bfd -lbfd'
+    ALL_OBJ_DEPS="$ALL_OBJ_DEPS ../bfd/bfd.h"
+
+    # We need to handle some special cases if BFD was built shared.
+    if test "${shared}" = "true"; then
+      case "${host}" in
+	*-*-sunos*)
+	# On SunOS, we must link against the name we are going to install,
+	# not -lbfd, since SunOS does not support SONAME.
+	BFDLIB='-L../bfd -l`echo bfd | sed '"'"'$(program_transform_name)'"'"'`'
 	;;
+      esac
+    fi
+    ;;
 esac
 
 
@@ -1479,7 +1457,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1483 "configure"
+#line 1461 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1493,7 +1471,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1497 "configure"
+#line 1475 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1526,7 +1504,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1530 "configure"
+#line 1508 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1578,7 +1556,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1582 "configure"
+#line 1560 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -1602,7 +1580,7 @@ if eval "test \"`echo '$''{'ac_cv_header_alloca_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1606 "configure"
+#line 1584 "configure"
 #include "confdefs.h"
 #include <alloca.h>
 int main() { return 0; }
@@ -1634,7 +1612,7 @@ if eval "test \"`echo '$''{'ac_cv_func_alloca'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1638 "configure"
+#line 1616 "configure"
 #include "confdefs.h"
 
 #ifdef __GNUC__
@@ -1693,7 +1671,7 @@ if eval "test \"`echo '$''{'ac_cv_os_cray'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1697 "configure"
+#line 1675 "configure"
 #include "confdefs.h"
 #if defined(CRAY) && ! defined(CRAY2)
 webecray
@@ -1722,7 +1700,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1726 "configure"
+#line 1704 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1776,7 +1754,7 @@ else
   ac_cv_c_stack_direction=0
 else
 cat > conftest.$ac_ext <<EOF
-#line 1780 "configure"
+#line 1758 "configure"
 #include "confdefs.h"
 find_stack_direction ()
 {
@@ -1819,7 +1797,7 @@ else
   ac_cv_c_inline=no
 for ac_kw in inline __inline__ __inline; do
   cat > conftest.$ac_ext <<EOF
-#line 1823 "configure"
+#line 1801 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1859,7 +1837,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1863 "configure"
+#line 1841 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1912,7 +1890,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1916 "configure"
+#line 1894 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1965,7 +1943,7 @@ if eval "test \"`echo '$''{'gas_cv_assert_ok'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1969 "configure"
+#line 1947 "configure"
 #include "confdefs.h"
 #include <assert.h>
 #include <stdio.h>
@@ -2022,7 +2000,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2026 "configure"
+#line 2004 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -2058,7 +2036,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2062 "configure"
+#line 2040 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -2097,7 +2075,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_errno'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2101 "configure"
+#line 2079 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_ERRNO_H
@@ -2306,14 +2284,14 @@ s%@build_alias@%$build_alias%g
 s%@build_cpu@%$build_cpu%g
 s%@build_vendor@%$build_vendor%g
 s%@build_os@%$build_os%g
-s%@OPCODES_DEP@%$OPCODES_DEP%g
-s%@OPCODES_LIB@%$OPCODES_LIB%g
 /@target_frag@/r $target_frag
 s%@target_frag@%%g
 s%@extra_objects@%$extra_objects%g
 s%@target_cpu_type@%$target_cpu_type%g
 s%@obj_format@%$obj_format%g
 s%@atof@%$atof%g
+s%@OPCODES_DEP@%$OPCODES_DEP%g
+s%@OPCODES_LIB@%$OPCODES_LIB%g
 s%@BFDDEP@%$BFDDEP%g
 s%@BFDLIB@%$BFDLIB%g
 s%@ALL_OBJ_DEPS@%$ALL_OBJ_DEPS%g

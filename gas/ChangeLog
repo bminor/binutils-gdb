@@ -11,6 +11,12 @@ Wed Feb 14 16:33:12 1996  Martin Anantharaman  <martin@mail.imech.uni-duisburg.d
 
 Wed Feb 14 13:43:24 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	From Alan Modra <alan@spri.levels.unisa.edu.au>:
+	* configure.in: Remove duplicate setting of cpu_type.  Check
+	whether opcodes library is required for on all targets, not just
+	primary one.
+	* configure: Rebuild.
+
 	* config/tc-mips.c (mips_big_got): New static variable.
 	(s_extern): Don't declare.
 	(reg_needs_delay): New static function.

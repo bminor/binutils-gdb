@@ -41,57 +41,6 @@ AC_ARG_PROGRAM
 
 te_file=generic
 
-# assign cpu type
-
-# check for architecture variants
-case ${target_cpu} in
-  armeb)	cpu_type=arm endian=big ;;
-  arm*)		cpu_type=arm endian=little ;;
-  hppa*)	cpu_type=hppa ;;
-changequote(,)dnl
-  i[45]86)	cpu_type=i386 ;;
-  m680[012346]0) cpu_type=m68k ;;
-  m68008)	cpu_type=m68k ;;
-  m683??)       cpu_type=m68k ;;
-changequote([,])dnl
-  m8*)		cpu_type=m88k ;;
-  mips*el)	cpu_type=mips endian=little;;
-  mips*)	cpu_type=mips endian=big ;;
-  powerpcle*)	cpu_type=ppc endian=little ;;
-  powerpc*)	cpu_type=ppc endian=big ;;
-  rs6000*)	cpu_type=ppc ;;
-  sparc64)	cpu_type=sparc
-		AC_DEFINE(SPARC_V9) ;;
-  sparc*)	cpu_type=sparc ;;
-  *)		cpu_type=${target_cpu} ;;
-esac
-
-# do we need the opcodes library?
-case ${cpu_type} in
-  alpha | vax)
-    ;;
-  *)
-    OPCODES_DEP=../opcodes/libopcodes.a
-    OPCODES_LIB='-L../opcodes -lopcodes'
-
-    # We need to handle some special cases if opcodes was built shared.
-    if test "${shared}" = "true"; then
-      case "${host}" in
-      *-*-sunos*)
-      # On SunOS, we must link against the name we are going to install,
-      # not -lbfd, since SunOS does not support SONAME.
-      OPCODES_LIB='-L../opcodes -l`echo opcodes | sed '"'"'$(program_transform_name)'"'"'`'
-      ;;
-      esac
-    fi
-    ;;
-esac
-AC_SUBST(OPCODES_DEP)
-AC_SUBST(OPCODES_LIB)
-
-gas_target=${cpu_type}
-this_target=${generic_target}
-
 canon_targets=""
 if test -n "$enable_targets" ; then
   for t in `echo $enable_targets | sed 's/,/ /g'`; do
@@ -114,6 +63,8 @@ for this_target in $target $canon_targets ; do
 
     # check for architecture variants
     case ${cpu} in
+      armeb)		cpu_type=arm endian=big ;;
+      arm*)		cpu_type=arm endian=little ;;
       hppa*)		cpu_type=hppa ;;
 changequote(,)dnl
       i[45]86)		cpu_type=i386 ;;
@@ -340,6 +291,12 @@ changequote([,])dnl
 
 # Other random stuff.
 
+    # do we need the opcodes library?
+    case ${cpu_type} in
+      alpha | vax) ;;
+      *) need_opcodes=yes ;;
+    esac
+
     test -n "$want_sparc_v9" && AC_DEFINE(SPARC_V9)
 
     case ${cpu}-${vendor}-${os} in
@@ -545,22 +502,44 @@ case "${primary_bfd_gas}" in
 	need_bfd=yes ;;
 esac
 
-case "${need_bfd}" in
-  yes)	BFDDEP=../bfd/libbfd.a
-	BFDLIB='-L../bfd -lbfd'
-	ALL_OBJ_DEPS="$ALL_OBJ_DEPS ../bfd/bfd.h"
+# do we need the opcodes library?
+case "${need_opcodes}" in
+  yes)
+    OPCODES_DEP=../opcodes/libopcodes.a
+    OPCODES_LIB='-L../opcodes -lopcodes'
 
-	# We need to handle some special cases if BFD was built shared.
-	if test "${shared}" = "true"; then
-	  case "${host}" in
-	  *-*-sunos*)
-	  # On SunOS, we must link against the name we are going to install,
-	  # not -lbfd, since SunOS does not support SONAME.
-	  BFDLIB='-L../bfd -l`echo bfd | sed '"'"'$(program_transform_name)'"'"'`'
-	  ;;
-	  esac
-	fi
+    # We need to handle some special cases if opcodes was built shared.
+    if test "${shared}" = "true"; then
+      case "${host}" in
+      *-*-sunos*)
+      # On SunOS, we must link against the name we are going to install,
+      # not -lbfd, since SunOS does not support SONAME.
+      OPCODES_LIB='-L../opcodes -l`echo opcodes | sed '"'"'$(program_transform_name)'"'"'`'
+      ;;
+      esac
+    fi
+    ;;
+esac
+AC_SUBST(OPCODES_DEP)
+AC_SUBST(OPCODES_LIB)
+
+case "${need_bfd}" in
+  yes)
+    BFDDEP=../bfd/libbfd.a
+    BFDLIB='-L../bfd -lbfd'
+    ALL_OBJ_DEPS="$ALL_OBJ_DEPS ../bfd/bfd.h"
+
+    # We need to handle some special cases if BFD was built shared.
+    if test "${shared}" = "true"; then
+      case "${host}" in
+	*-*-sunos*)
+	# On SunOS, we must link against the name we are going to install,
+	# not -lbfd, since SunOS does not support SONAME.
+	BFDLIB='-L../bfd -l`echo bfd | sed '"'"'$(program_transform_name)'"'"'`'
 	;;
+      esac
+    fi
+    ;;
 esac
 AC_SUBST(BFDDEP)
 AC_SUBST(BFDLIB)
