@@ -1,3 +1,11 @@
+2002-02-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: "make dep-am".
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2002-02-10  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* configure.in <bfd_sh_arc>: For sh-* and shl-*, enable sh64
