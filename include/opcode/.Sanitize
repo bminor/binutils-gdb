@@ -34,6 +34,7 @@ Things-to-keep:
 
 ChangeLog
 a29k.h
+alpha.h
 arm.h
 convex.h
 h8300.h
