@@ -625,7 +625,7 @@ evsta.c: $(srcdir)/emulparams/vsta.sh \
 	${GENSCRIPTS} vsta "$(tdir_vsta)"
 # start-sanitize-v850
 ev850.c: $(srcdir)/emulparams/v850.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/v850.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} v850 "$(tdir_v850)"
 # end-sanitize-v850
 ew65.c: $(srcdir)/emulparams/w65.sh \

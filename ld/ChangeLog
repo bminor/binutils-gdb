@@ -1,3 +1,10 @@
+start-sanitize-v850
+Wed Oct 16 23:10:01 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* scripttempl/v850.sc: New linker script for the V850.
+	* Makefile.in: Use it.
+
+end-sanitize-v850
 Thu Oct 10 17:57:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emulparams/elf32b4300.sh: Define _gp in OTHER_GOT_SYMBOLS, not
