@@ -1,5 +1,9 @@
 2003-11-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* gas/i386/divide.s: New.
+	* gas/i386/divide.d: New.
+	* gas/i386/i386.exp (gas_32_check): Run it.
+
 	* gas/ppc/machine.s: New.
 	* gas/ppc/machine.d: New.
 	* gas/ppc/ppc.exp: Run it.
