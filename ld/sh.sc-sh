@@ -3,11 +3,7 @@ OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 
 MEMORY {
-	rom   : o = 0x0000, l = 0x7fe0 
-	duart : o = 0x7fe0, l = 16
-	ram   : o = 0x8000, l = 28k
-	topram : o = 0x8000+28k, l = 1k
-	hmsram : o = 0xfb80, l = 512
+	ram   : o = 0x1000, l = 512k
 	}
 
 SECTIONS 				
@@ -34,7 +30,7 @@ SECTIONS
 	{
 	${RELOCATING+ _stack = . ; }
 	*(.stack)
-	} ${RELOCATING+ > topram}
+	} ${RELOCATING+ > ram}
 }
 EOF
 
