@@ -595,6 +595,34 @@ subseg_text_p (segT sec)
 #endif /* ! BFD_ASSEMBLER */
 }
 
+/* Return non zero if SEC has at least one byte of data.  It is
+   possible that we'll return zero even on a non-empty section because
+   we don't know all the fragment types, and it is possible that an
+   fr_fix == 0 one still contributes data.  Think of this as
+   seg_definitely_not_empty_p.  */
+
+bfd_boolean
+seg_not_empty_p (segT sec)
+{
+  segment_info_type *seginfo = seg_info (sec);
+  frchainS *chain;
+  fragS *frag;
+
+  if (!seginfo)
+    return 0;
+  
+  for (chain = seginfo->frchainP; chain; chain = chain->frch_next)
+    {
+      for (frag = chain->frch_root; frag; frag = frag->fr_next)
+	if (frag->fr_fix)
+	  return 1;
+      if (obstack_next_free (&chain->frch_obstack)
+	  != chain->frch_last->fr_literal)
+	return 1;
+    }
+  return 0;
+}
+
 void
 subsegs_print_statistics (FILE *file)
 {

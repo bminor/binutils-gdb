@@ -1,3 +1,10 @@
+2005-01-27  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* dwarf2dbg.c (dwarf2_finish): Correct logic for determining when
+	to emit .debug_line and other debug sections.
+	* as.h (seg_not_empty_p): Declare.
+	* subsegs.c (seg_not_empty_p): New predicate.
+
 2005-01-27  Andrew Cagney  <cagney@gnu.org>
 
 	* configure: Regenerate to track ../gettext.m4 change.

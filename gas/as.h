@@ -577,13 +577,13 @@ segT   subseg_new (const char *, subsegT);
 segT   subseg_force_new (const char *, subsegT);
 void   subseg_set (segT, subsegT);
 int    subseg_text_p (segT);
+bfd_boolean seg_not_empty_p (segT);
 void   start_dependencies (char *);
 void   register_dependency (char *);
 void   print_dependencies (void);
 #ifdef BFD_ASSEMBLER
 segT   subseg_get (const char *, int);
 #endif
-
 
 struct expressionS;
 struct fix;
