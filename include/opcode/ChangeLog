@@ -1,3 +1,7 @@
+Fri Jul 24 11:44:24 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cgen.h (cgen_macro_insn_count): Declare.
+
 Tue Jul 21 13:12:13 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.h (CGEN_VERSION_{MAJOR,MINOR,FIXLEVEL}): Define.
