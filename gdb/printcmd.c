@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "target.h"
 #include "breakpoint.h"
+#include "demangle.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
@@ -103,7 +104,7 @@ static void
 delete_display PARAMS ((int));
 
 static void
-enable_display PARAMS ((char *));
+enable_display PARAMS ((char *, int));
 
 static void
 disable_display_command PARAMS ((char *, int));
@@ -121,13 +122,13 @@ static void
 print_frame_nameless_args PARAMS ((CORE_ADDR, long, int, int, FILE *));
 
 static void
-display_info PARAMS ((void));
+display_info PARAMS ((char *, int));
 
 static void
 do_one_display PARAMS ((struct display *));
 
 static void
-undisplay_command PARAMS ((char *));
+undisplay_command PARAMS ((char *, int));
 
 static void
 free_display PARAMS ((struct display *));
@@ -578,7 +579,7 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   fputs_filtered (leadin, stream);
   fputs_filtered ("<", stream);
   if (do_demangle)
-    fputs_demangled (msymbol -> name, stream, 1);
+    fputs_demangled (msymbol -> name, stream, DMGL_ANSI | DMGL_PARAMS);
   else
     fputs_filtered (msymbol -> name, stream);
   name_location = msymbol -> address;
@@ -840,7 +841,7 @@ output_command (exp, from_tty)
     {
       exp++;
       fmt = decode_format (&exp, 0, 0);
-      validate_format (fmt, "print");
+      validate_format (fmt, "output");
       format = fmt.format;
     }
 
@@ -876,6 +877,7 @@ address_info (exp, from_tty)
   register struct symbol *sym;
   register struct minimal_symbol *msymbol;
   register long val;
+  register long basereg;
   int is_a_field_of_this;	/* C++: lookup_symbol sets this to nonzero
 				   if exp is a field of `this'. */
 
@@ -904,6 +906,7 @@ address_info (exp, from_tty)
 
   printf ("Symbol \"%s\" is ", SYMBOL_NAME (sym));
   val = SYMBOL_VALUE (sym);
+  basereg = SYMBOL_BASEREG (sym);
 
   switch (SYMBOL_CLASS (sym))
     {
@@ -929,15 +932,39 @@ address_info (exp, from_tty)
       break;
       
     case LOC_ARG:
-      printf ("an argument at offset %ld", val);
+      if (SYMBOL_BASEREG_VALID (sym))
+	{
+	  printf ("an argument at offset %ld from register %s",
+		  val, reg_names[basereg]);
+	}
+      else
+	{
+	  printf ("an argument at offset %ld", val);
+	}
       break;
 
     case LOC_LOCAL_ARG:
-      printf ("an argument at frame offset %ld", val);
+      if (SYMBOL_BASEREG_VALID (sym))
+	{
+	  printf ("an argument at offset %ld from register %s",
+		  val, reg_names[basereg]);
+	}
+      else
+	{
+	  printf ("an argument at frame offset %ld", val);
+	}
       break;
 
     case LOC_LOCAL:
-      printf ("a local variable at frame offset %ld", val);
+      if (SYMBOL_BASEREG_VALID (sym))
+	{
+	  printf ("a local variable at offset %ld from register %s",
+		  val, reg_names[basereg]);
+	}
+      else
+	{
+	  printf ("a local variable at frame offset %ld", val);
+	}
       break;
 
     case LOC_REF_ARG:
@@ -978,8 +1005,6 @@ x_command (exp, from_tty)
     {
       exp++;
       fmt = decode_format (&exp, last_format, last_size);
-      last_size = fmt.size;
-      last_format = fmt.format;
     }
 
   /* If we have an expression, evaluate it and use it as the address.  */
@@ -1008,6 +1033,10 @@ x_command (exp, from_tty)
     }
 
   do_examine (fmt, next_address);
+
+  /* If the examine succeeds, we remember its size and format for next time.  */
+  last_size = fmt.size;
+  last_format = fmt.format;
 
   /* Set a couple of internal variables if appropriate. */
   if (last_examine_value)
@@ -1169,8 +1198,8 @@ static void
 free_display (d)
      struct display *d;
 {
-  free (d->exp);
-  free (d);
+  free ((PTR)d->exp);
+  free ((PTR)d);
 }
 
 /* Clear out the display_chain.
@@ -1184,9 +1213,9 @@ clear_displays ()
 
   while (d = display_chain)
     {
-      free (d->exp);
+      free ((PTR)d->exp);
       display_chain = d->next;
-      free (d);
+      free ((PTR)d);
     }
 }
 
@@ -1226,8 +1255,9 @@ delete_display (num)
    Specify the element numbers.  */
 
 static void
-undisplay_command (args)
+undisplay_command (args, from_tty)
      char *args;
+     int from_tty;
 {
   register char *p = args;
   register char *p1;
@@ -1362,7 +1392,9 @@ disable_current_display ()
 }
 
 static void
-display_info ()
+display_info (ignore, from_tty)
+     char *ignore;
+     int from_tty;
 {
   register struct display *d;
 
@@ -1389,8 +1421,9 @@ Num Enb Expression\n");
 }
 
 static void
-enable_display (args)
+enable_display (args, from_tty)
      char *args;
+     int from_tty;
 {
   register char *p = args;
   register char *p1;

@@ -1,5 +1,8 @@
 Wed Jun 24 12:53:20 1992  John Gilmore  (gnu at cygnus.com)
 
+	* printcmd.c (output_command):  Thinko.
+	(x_command):  Only set remembered size/format if cmd succeeds.
+
 	* dbxread.c (read_ofile_symtab):  Remove N_CATCH special case,
 	since it is no longer used and burns time for every symbol read.
 	(process_one_symbol):  Treat N_CATCH like default (complain).
