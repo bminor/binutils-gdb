@@ -1,3 +1,15 @@
+Wed Nov 23 22:34:51 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* sh-opc.h (mov.l gbr): Get direction right.
+	* sh-dis.c (print_insn_shx): New function.
+	(print_insn_shl, print_insn_sh): Call print_insn_shx to
+	print opcodes with right byte order.
+
+Thu Nov  3 19:32:22 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* ns32k-dis.c (struct ns32k_option): Renamed from struct option,
+	to avoid conflicts with getopt.
+
 Mon Oct 31 18:48:10 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* hppa-dis.c (print_insn_hppa): Read the instruction using
