@@ -1,3 +1,8 @@
+2001-07-16  Philip Blundell  <philb@gnu.org>
+
+	* gas/arm/arm7t.d, gas/arm/inst.d: Tweak expected output for
+	change to disassembler.
+
 2001-07-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	Fix failures in MIPS testsuite:
