@@ -216,7 +216,6 @@ extern const char extra_symbol_chars[];
 #define NO_BASE_REGISTER_16 6
 
 /* these are the instruction mnemonic suffixes.  */
-#define DWORD_MNEM_SUFFIX 'l'
 #define WORD_MNEM_SUFFIX  'w'
 #define BYTE_MNEM_SUFFIX  'b'
 #define SHORT_MNEM_SUFFIX 's'
@@ -224,7 +223,7 @@ extern const char extra_symbol_chars[];
 /* Intel Syntax */
 #define LONG_DOUBLE_MNEM_SUFFIX 'x'
 /* Intel Syntax */
-#define INTEL_DWORD_MNEM_SUFFIX 'd'
+#define DWORD_MNEM_SUFFIX 'd'
 
 /* modrm.mode = REGMEM_FIELD_HAS_REG when a register is in there */
 #define REGMEM_FIELD_HAS_REG 0x3/* always = 0x3 */

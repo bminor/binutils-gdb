@@ -25,16 +25,36 @@
 .*:100: Warning:.*
 .*:101: Warning:.*
 .*:135: Warning:.*
-.*:163: Warning:.*
-.*:165: Warning:.*
-.*:167: Warning:.*
-.*:169: Warning:.*
-.*:171: Warning:.*
-.*:177: Warning:.*
-.*:179: Warning:.*
-.*:181: Warning:.*
-.*:183: Warning:.*
-.*:185: Warning:.*
+.*:162: Warning:.*
+.*:164: Warning:.*
+.*:166: Warning:.*
+.*:168: Warning:.*
+.*:170: Warning:.*
+.*:176: Warning:.*
+.*:178: Warning:.*
+.*:180: Warning:.*
+.*:182: Warning:.*
+.*:184: Warning:.*
+.*:191: Warning:.*
+.*:193: Warning:.*
+.*:195: Warning:.*
+.*:197: Warning:.*
+.*:199: Warning:.*
+.*:205: Warning:.*
+.*:207: Warning:.*
+.*:209: Warning:.*
+.*:211: Warning:.*
+.*:213: Warning:.*
+.*:220: Warning:.*
+.*:222: Warning:.*
+.*:224: Warning:.*
+.*:226: Warning:.*
+.*:228: Warning:.*
+.*:234: Warning:.*
+.*:236: Warning:.*
+.*:238: Warning:.*
+.*:240: Warning:.*
+.*:242: Warning:.*
    1                       	.psize 0
    2                       	.text
    3                       	# test various segment reg insns
@@ -219,46 +239,123 @@
  156 0160 67668984 248C0000 		movl	%eax,140\(%esp\)
  156      00
  157                       	
- 158                       	.code32
- 159                       	.extern xxx
- 160 0169 EB98              		jmp	1b
- 161 016b E9FCFFFF FF       		jmp	xxx
- 162 0170 FF250000 0000     		jmp	\*xxx
- 163 0176 FF250000 0000     		jmp	xxx\(,1\)
+ 158                       	.extern xxx
+ 159 0169 EB98              		jmp	1b
+ 160 016b E9FEFF            		jmp	xxx
+ 161 016e FF260000          		jmp	\*xxx
+ 162 0172 FF260000          		jmp	xxx\(,1\)
 .*Warning:.*
- 164 017c FFE7              		jmp	\*%edi
- 165 017e FFE7              		jmp	%edi
+ 163 0176 66FFE7            		jmp	\*%edi
+ 164 0179 66FFE7            		jmp	%edi
 .*Warning:.*
- 166 0180 FF27              		jmp	\*\(%edi\)
- 167 0182 FF27              		jmp	\(%edi\)
+ 165 017c 67FF27            		jmp	\*\(%edi\)
+ 166 017f 67FF27            		jmp	\(%edi\)
 .*Warning:.*
- 168 0184 FF2CBD00 000000   		ljmp	\*xxx\(,%edi,4\)
- 169 018b FF2CBD00 000000   		ljmp	xxx\(,%edi,4\)
+ 167 0182 67FFAF00 000000   		ljmp	\*xxx\(%edi\)
+ 168 0189 67FFAF00 000000   		ljmp	xxx\(%edi\)
 .*Warning:.*
- 170 0192 FF2D0000 0000     		ljmp	\*xxx
- 171 0198 FF2D0000 0000     		ljmp	xxx\(,1\)
+ 169 0190 FF2E0000          		ljmp	\*xxx
+ 170 0194 FF2E0000          		ljmp	xxx\(,1\)
 .*Warning:.*
- 172 019e EA000000 003412   		ljmp	\$0x1234,\$xxx
- 173                       	
- 174 01a5 E859FFFF FF       		call	1b
- 175 01aa E8FCFFFF FF       		call	xxx
- 176 01af FF150000 0000     		call	\*xxx
- 177 01b5 FF150000 0000     		call	xxx\(,1\)
+ 171 0198 EA000034 12       		ljmp	\$0x1234,\$xxx
+ 172                       	
+ 173 019d 66E860FF FFFF     		call	1b
+ 174 01a3 66E8FCFF FFFF     		call	xxx
+ 175 01a9 66FF1600 00       		call	\*xxx
+ 176 01ae 66FF1600 00       		call	xxx\(,1\)
 .*Warning:.*
- 178 01bb FFD7              		call	\*%edi
- 179 01bd FFD7              		call	%edi
+ 177 01b3 66FFD7            		call	\*%edi
+ 178 01b6 66FFD7            		call	%edi
 .*Warning:.*
- 180 01bf FF17              		call	\*\(%edi\)
- 181 01c1 FF17              		call	\(%edi\)
+ 179 01b9 6766FF17          		call	\*\(%edi\)
+ 180 01bd 6766FF17          		call	\(%edi\)
 .*Warning:.*
- 182 01c3 FF1CBD00 000000   		lcall	\*xxx\(,%edi,4\)
- 183 01ca FF1CBD00 000000   		lcall	xxx\(,%edi,4\)
+ 181 01c1 6766FF9F 00000000 		lcall	\*xxx\(%edi\)
+ 182 01c9 6766FF9F 00000000 		lcall	xxx\(%edi\)
 .*Warning:.*
- 184 01d1 FF1D0000 0000     		lcall	\*xxx
- 185 01d7 FF1D0000 0000     		lcall	xxx\(,1\)
+ 183 01d1 66FF1E00 00       		lcall	\*xxx
+ 184 01d6 66FF1E00 00       		lcall	xxx\(,1\)
 .*Warning:.*
- 186 01dd 9A000000 003412   		lcall	\$0x1234,\$xxx
- 187                       	
- 188                       		# Force a good alignment.
- 189 01e4 00000000 00000000 		.p2align	4,0
- 189      00000000 
+ 185 01db 669A0000 00003412 		lcall	\$0x1234,\$xxx
+ 186                       	
+ 187                       	.code16
+ 188 01e3 E91DFF            		jmp	1b
+ 189 01e6 E9FEFF            		jmp	xxx
+ 190 01e9 FF260000          		jmp	\*xxx
+ 191 01ed FF260000          		jmp	xxx\(,1\)
+.*Warning:.*
+ 192 01f1 FFE7              		jmp	\*%di
+ 193 01f3 FFE7              		jmp	%di
+.*Warning:.*
+ 194 01f5 FF25              		jmp	\*\(%di\)
+ 195 01f7 FF25              		jmp	\(%di\)
+.*Warning:.*
+ 196 01f9 FFAD0000          		ljmp	\*xxx\(%di\)
+ 197 01fd FFAD0000          		ljmp	xxx\(%di\)
+.*Warning:.*
+ 198 0201 FF2E0000          		ljmp	\*xxx
+ 199 0205 FF2E0000          		ljmp	xxx\(,1\)
+.*Warning:.*
+ 200 0209 EA000034 12       		ljmp	\$0x1234,\$xxx
+ 201                       	
+ 202 020e E8F2FE            		call	1b
+ 203 0211 E8FEFF            		call	xxx
+ 204 0214 FF160000          		call	\*xxx
+ 205 0218 FF160000          		call	xxx\(,1\)
+.*Warning:.*
+ 206 021c FFD7              		call	\*%di
+ 207 021e FFD7              		call	%di
+.*Warning:.*
+ 208 0220 FF15              		call	\*\(%di\)
+ 209 0222 FF15              		call	\(%di\)
+.*Warning:.*
+ 210 0224 FF9D0000          		lcall	\*xxx\(%di\)
+ 211 0228 FF9D0000          		lcall	xxx\(%di\)
+.*Warning:.*
+ 212 022c FF1E0000          		lcall	\*xxx
+ 213 0230 FF1E0000          		lcall	xxx\(,1\)
+.*Warning:.*
+ 214 0234 9A000034 12       		lcall	\$0x1234,\$xxx
+ 215                       	
+ 216                       	.code32
+ 217 0239 E9C5FEFF FF       		jmp	1b
+ 218 023e E9FCFFFF FF       		jmp	xxx
+ 219 0243 FF250000 0000     		jmp	\*xxx
+ 220 0249 FF250000 0000     		jmp	xxx\(,1\)
+.*Warning:.*
+ 221 024f FFE7              		jmp	\*%edi
+ 222 0251 FFE7              		jmp	%edi
+.*Warning:.*
+ 223 0253 FF27              		jmp	\*\(%edi\)
+ 224 0255 FF27              		jmp	\(%edi\)
+.*Warning:.*
+ 225 0257 FF2CBD00 000000   		ljmp	\*xxx\(,%edi,4\)
+ 226 025e FF2CBD00 000000   		ljmp	xxx\(,%edi,4\)
+.*Warning:.*
+ 227 0265 FF2D0000 0000     		ljmp	\*xxx
+ 228 026b FF2D0000 0000     		ljmp	xxx\(,1\)
+.*Warning:.*
+ 229 0271 EA000000 003412   		ljmp	\$0x1234,\$xxx
+ 230                       	
+ 231 0278 E886FEFF FF       		call	1b
+ 232 027d E8FCFFFF FF       		call	xxx
+ 233 0282 FF150000 0000     		call	\*xxx
+ 234 0288 FF150000 0000     		call	xxx\(,1\)
+.*Warning:.*
+ 235 028e FFD7              		call	\*%edi
+ 236 0290 FFD7              		call	%edi
+.*Warning:.*
+ 237 0292 FF17              		call	\*\(%edi\)
+ 238 0294 FF17              		call	\(%edi\)
+.*Warning:.*
+ 239 0296 FF1CBD00 000000   		lcall	\*xxx\(,%edi,4\)
+ 240 029d FF1CBD00 000000   		lcall	xxx\(,%edi,4\)
+.*Warning:.*
+ 241 02a4 FF1D0000 0000     		lcall	\*xxx
+ 242 02aa FF1D0000 0000     		lcall	xxx\(,1\)
+.*Warning:.*
+ 243 02b0 9A000000 003412   		lcall	\$0x1234,\$xxx
+ 244                       	
+ 245                       		# Force a good alignment.
+ 246 02b7 00000000 00000000 		.p2align	4,0
+ 246      00

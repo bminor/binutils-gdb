@@ -232,7 +232,8 @@ static int allow_naked_reg = 0;  /* 1 if register prefix % not required */
 
 static char stackop_size = '\0';  /* Used in 16 bit gcc mode to add an l
 				     suffix to call, ret, enter, leave, push,
-				     and pop instructions.  */
+				     and pop instructions so that gcc has the
+				     same stack frame as in 32 bit mode.  */
 
 /* Interface to relax_segment.
    There are 2 relax states for 386 jump insns: one for conditional &
@@ -1093,20 +1094,17 @@ md_assemble (line)
 	/* See if we can get a match by trimming off a suffix.  */
 	switch (mnem_p[-1])
 	  {
-	  case DWORD_MNEM_SUFFIX:
 	  case WORD_MNEM_SUFFIX:
 	  case BYTE_MNEM_SUFFIX:
 	  case SHORT_MNEM_SUFFIX:
-#if LONG_MNEM_SUFFIX != DWORD_MNEM_SUFFIX
 	  case LONG_MNEM_SUFFIX:
-#endif
 	    i.suffix = mnem_p[-1];
 	    mnem_p[-1] = '\0';
 	    current_templates = hash_find (op_hash, mnemonic);
 	    break;
 
 	  /* Intel Syntax */
-	  case INTEL_DWORD_MNEM_SUFFIX:
+	  case DWORD_MNEM_SUFFIX:
 	    if (intel_syntax)
 	      {
 		i.suffix = mnem_p[-1];
@@ -1359,7 +1357,7 @@ md_assemble (line)
 			  ? No_sSuf
 			  : (i.suffix == LONG_MNEM_SUFFIX
 			     ? No_lSuf
-			     : (i.suffix == INTEL_DWORD_MNEM_SUFFIX
+			     : (i.suffix == DWORD_MNEM_SUFFIX
 				? No_dSuf
 				: (i.suffix == LONG_DOUBLE_MNEM_SUFFIX ? No_xSuf : 0))))));
 
@@ -1518,7 +1516,7 @@ md_assemble (line)
 	if (i.tm.opcode_modifier & Size16)
 	  i.suffix = WORD_MNEM_SUFFIX;
 	else
-	  i.suffix = DWORD_MNEM_SUFFIX;
+	  i.suffix = LONG_MNEM_SUFFIX;
       }
     else if (i.reg_operands)
       {
@@ -1535,7 +1533,7 @@ md_assemble (line)
 		{
 		  i.suffix = ((i.types[op] & Reg8) ? BYTE_MNEM_SUFFIX :
 			      (i.types[op] & Reg16) ? WORD_MNEM_SUFFIX :
-			      DWORD_MNEM_SUFFIX);
+			      LONG_MNEM_SUFFIX);
 		  break;
 		}
 	  }
@@ -1590,7 +1588,7 @@ md_assemble (line)
 		  }
 	      }
 	  }
-	else if (i.suffix == DWORD_MNEM_SUFFIX)
+	else if (i.suffix == LONG_MNEM_SUFFIX)
 	  {
 	    int op;
 	    for (op = i.operands; --op >= 0; )
@@ -1744,8 +1742,7 @@ md_assemble (line)
 	/* Now select between word & dword operations via the operand
 	   size prefix, except for instructions that will ignore this
 	   prefix anyway.  */
-	if (((intel_syntax && (i.suffix == INTEL_DWORD_MNEM_SUFFIX))
-	     || i.suffix == DWORD_MNEM_SUFFIX
+	if (((intel_syntax && (i.suffix == DWORD_MNEM_SUFFIX))
 	     || i.suffix == LONG_MNEM_SUFFIX) == flag_16bit_code
 	    && !(i.tm.opcode_modifier & IgnoreSize))
 	  {
@@ -1758,7 +1755,7 @@ md_assemble (line)
 	  }
 	/* Size floating point instruction.  */
 	if (i.suffix == LONG_MNEM_SUFFIX
-	    || (intel_syntax && i.suffix == INTEL_DWORD_MNEM_SUFFIX))
+	    || (intel_syntax && i.suffix == DWORD_MNEM_SUFFIX))
 	  {
 	    if (i.tm.opcode_modifier & FloatMF)
 	      i.tm.base_opcode ^= 4;
@@ -2578,7 +2575,7 @@ i386_immediate (imm_start)
       i.types[this_operand] |=
 	(bigimm | smallest_imm_type ((long) exp->X_add_number));
 
-      /* If a suffix is given, this operand may be shortended. */
+      /* If a suffix is given, this operand may be shortened.  */
       switch (i.suffix)
 	{
 	case WORD_MNEM_SUFFIX:
@@ -2863,14 +2860,14 @@ i386_operand_modifier (op_string, got_a_float)
       if (got_a_float)
 	i.suffix = SHORT_MNEM_SUFFIX;
       else
-	i.suffix = DWORD_MNEM_SUFFIX;
+	i.suffix = LONG_MNEM_SUFFIX;
       *op_string += 9;
       return DWORD_PTR;
     }
 
   else if (!strncasecmp (*op_string, "QWORD PTR", 9))
     {
-      i.suffix = INTEL_DWORD_MNEM_SUFFIX;
+      i.suffix = DWORD_MNEM_SUFFIX;
       *op_string += 9;
       return QWORD_PTR;
     }

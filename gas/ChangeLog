@@ -1,3 +1,14 @@
+2000-01-15  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.h (DWORD_MNEM_SUFFIX): Delete.
+	* config/tc-i386.c (DWORD_MNEM_SUFFIX): Rename all occurrences to
+	LONG_MNEM_SUFFIX.
+
+	* config/tc-i386.h (INTEL_DWORD_MNEM_SUFFIX): Rename to
+	DWORD_MNEM_SUFFIX.
+	* config/tc-i386.c (INTEL_DWORD_MNEM_SUFFIX): Here too.  Fix some
+	comments.
+
 2000-01-13  Clinton Popetz  <cpopetz@cygnus.com>
 
         * config/tc-mips.c (mips_do_align): New function.
