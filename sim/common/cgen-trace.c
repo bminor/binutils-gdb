@@ -69,13 +69,13 @@ trace_insn_fini (SIM_CPU *cpu)
   if (CPU_PROFILE_FLAGS (cpu) [PROFILE_MODEL_IDX])
     {
       unsigned long total = PROFILE_TOTAL_CYCLE_COUNT (CPU_PROFILE_DATA (cpu));
-      trace_printf (cpu, "%-*ld %-*ld ",
+      trace_printf (CPU_STATE (cpu), cpu, "%-*ld %-*ld ",
 		    SIZE_CYCLE_COUNT, total - last_cycle_count,
 		    SIZE_TOTAL_CYCLE_COUNT, total);
       last_cycle_count = total;
     }
 
-  trace_printf (cpu, "%s\n", trace_buf);
+  trace_printf (CPU_STATE (cpu), cpu, "%s\n", trace_buf);
 }
 
 /* For communication between trace_insn and trace_result.  */
@@ -95,7 +95,7 @@ trace_insn (SIM_CPU *cpu, const struct cgen_insn *opcode,
       cgen_trace_printf (cpu, "0x%.*x %-*s ",
 			 SIZE_PC, (unsigned) pc,
 			 SIZE_INSTRUCTION,
-			 CGEN_INSN_SYNTAX (opcode)->mnemonic);
+			 CGEN_INSN_MNEMONIC (opcode));
       return;
     }
 
@@ -143,7 +143,7 @@ trace_insn (SIM_CPU *cpu, const struct cgen_insn *opcode,
 	}
     }
 
-  sim_disassemble_insn (opcode, abuf, pc, disasm_buf);
+  sim_disassemble_insn (cpu, opcode, abuf, pc, disasm_buf);
 
   cgen_trace_printf (cpu, "0x%.*x %-*.*s %-*s ",
 		     SIZE_PC, (unsigned) pc,
@@ -168,7 +168,7 @@ trace_extract (SIM_CPU *cpu, PCADDR pc, char *name, ...)
 
   va_start (args, name);
 
-  trace_printf (cpu, "Extract: 0x%.*x: %s ", SIZE_PC, pc, name);
+  trace_printf (CPU_STATE (cpu), cpu, "Extract: 0x%.*x: %s ", SIZE_PC, pc, name);
 
   do {
     int type,ival;
@@ -178,14 +178,14 @@ trace_extract (SIM_CPU *cpu, PCADDR pc, char *name, ...)
     if (fmt)
       {
 	if (printed_one_p)
-	  trace_printf (cpu, ", ");
+	  trace_printf (CPU_STATE (cpu), cpu, ", ");
 	printed_one_p = 1;
 	type = va_arg (args, int);
 	switch (type)
 	  {
 	  case 'x' :
 	    ival = va_arg (args, int);
-	    trace_printf (cpu, fmt, ival);
+	    trace_printf (CPU_STATE (cpu), cpu, fmt, ival);
 	    break;
 	  default :
 	    abort ();
@@ -194,7 +194,7 @@ trace_extract (SIM_CPU *cpu, PCADDR pc, char *name, ...)
   } while (fmt);
 
   va_end (args);
-  trace_printf (cpu, "\n");
+  trace_printf (CPU_STATE (cpu), cpu, "\n");
 }
 
 void

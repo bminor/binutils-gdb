@@ -1,3 +1,17 @@
+Fri Jan 16 12:33:09 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* cgen-trace.c (trace_insn): Call CGEN_INSN_MNEMONIC() rather than
+	CGEN_INSN_SYNTAX().
+
+Mon Dec 15 23:17:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Mon Dec 15 23:16:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* aclocal.m4 (AR): Check for sigaction.
+
 Thu Dec  4 09:21:05 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Make-common.in (sim-core.o): Depend on $(sim_main_headers).
@@ -61,7 +75,7 @@ Fri Nov 28 20:10:09 1997  Michael Meissner  <meissner@cygnus.com>
 
 Fri Nov 28 11:15:05 1997  Doug Evans  <devans@canuck.cygnus.com>
 
-	* gennltvals.sh: Redo syscall support to allow sanitization.
+	* gennltvals.sh: Redo syscall support.
 	* nltvals.def: Regenerated.
 
 Wed Nov 26 16:49:38 1997  Michael Meissner  <meissner@cygnus.com>
