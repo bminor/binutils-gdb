@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "gdb-stabs.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -474,9 +475,35 @@ objfile_relocate (objfile, new_offsets)
   }
 
   {
+    struct partial_symtab *p;
+
+    ALL_OBJFILE_PSYMTABS (objfile, p)
+      {
+	p->textlow += ANOFFSET (delta, SECT_OFF_TEXT);
+	p->texthigh += ANOFFSET (delta, SECT_OFF_TEXT);
+      }
+  }
+
+  {
+    struct partial_symbol *psym;
+
+    for (psym = objfile->global_psymbols.list;
+	 psym < objfile->global_psymbols.next;
+	 psym++)
+      if (SYMBOL_SECTION (psym) >= 0)
+	SYMBOL_VALUE_ADDRESS (psym) += ANOFFSET (delta, SYMBOL_SECTION (psym));
+    for (psym = objfile->static_psymbols.list;
+	 psym < objfile->static_psymbols.next;
+	 psym++)
+      if (SYMBOL_SECTION (psym) >= 0)
+	SYMBOL_VALUE_ADDRESS (psym) += ANOFFSET (delta, SYMBOL_SECTION (psym));
+  }
+
+  {
     struct minimal_symbol *msym;
     ALL_OBJFILE_MSYMBOLS (objfile, msym)
-      SYMBOL_VALUE_ADDRESS (msym) += ANOFFSET (delta, SYMBOL_SECTION (msym));
+      if (SYMBOL_SECTION (msym) >= 0)
+	SYMBOL_VALUE_ADDRESS (msym) += ANOFFSET (delta, SYMBOL_SECTION (msym));
   }
 
   {

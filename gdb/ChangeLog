@@ -1,3 +1,21 @@
+Tue Sep 21 17:06:19 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfread.c (record_minimal_symbol_and_info): Guess the section to
+	use from the type.
+	* objfiles.c: Include gdb-stabs.h for SECT_* macros.
+	(objfile_relocate): Relocate textlow and texthigh in psymtabs.
+	Relocate partial symbols.  Check that minimal SYMBOL_SECTION is
+	nonnegative before using it.
+	* symtab.h: Adjust section field comment.
+
+	* remote.c (interrupt_query): New function.
+	(remote_interrupt_twice): Call interrupt_query.
+	(putpkt, getpkt): If quit_flag is set, call interrupt_query.
+	(remote_wait): Don't bother with objfile_relocate if the addresses
+	haven't changed.
+	(remote_fetch_registers): If we see a packet that doesn't start
+	with a hex character, fetch a new one.
+
 Tue Sep 21 11:44:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote.c, remote-utils.c: Use SERIAL_FLUSH_INPUT after opening it.

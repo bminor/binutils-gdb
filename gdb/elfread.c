@@ -173,8 +173,31 @@ record_minimal_symbol_and_info (name, address, ms_type, info, objfile)
      char *info;		/* FIXME, is this really char *? */
      struct objfile *objfile;
 {
+  int section;
+
+  /* Guess the section from the type.  This is likely to be wrong in
+     some cases.  */
+  switch (ms_type)
+    {
+    case mst_text:
+    case mst_file_text:
+      section = SECT_OFF_TEXT;
+      break;
+    case mst_data:
+    case mst_file_data:
+      section = SECT_OFF_DATA;
+      break;
+    case mst_bss:
+    case mst_file_bss:
+      section = SECT_OFF_BSS;
+      break;
+    default:
+      section = -1;
+      break;
+    }
+
   name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
-  prim_record_minimal_symbol_and_info (name, address, ms_type, info, -1);
+  prim_record_minimal_symbol_and_info (name, address, ms_type, info, section);
 }
 
 /*
