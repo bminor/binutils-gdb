@@ -1766,11 +1766,13 @@ and one called @samp{.mdata}, which is loaded at the end of the
 
 @smallexample
 SECTIONS
-	@{
-	.text 0x1000 : @{ *(.text) _etext = . ; @}
-	.mdata 0x2000 :  AT ( ADDR(.text) + SIZEOF ( .text ) )
-	     @{ _data = . ; *(.data); _edata = . ;  @}
-	.bss 0x3000 : @{ _bstart = . ;  *(.bss) *(COMMON) ; _bend = . ;@}
+  @{
+  .text 0x1000 : @{ *(.text) _etext = . ; @}
+  .mdata 0x2000 : 
+    AT ( ADDR(.text) + SIZEOF ( .text ) )
+    @{ _data = . ; *(.data); _edata = . ;  @}
+  .bss 0x3000 :
+    @{ _bstart = . ;  *(.bss) *(COMMON) ; _bend = . ;@}
 @}
 @end smallexample
 
@@ -1779,19 +1781,19 @@ for use with a ROM generated this way has to include something like
 the following, to copy the initialized data from the ROM image to its runtime
 address:
 
-@example
-/* ROM has data glommed at end of text; copy it. */
+@smallexample
 char *src = _etext;
 char *dst = _data;
 
+/* ROM has data at end of text; copy it. */
 while (dst < _edata) @{
-	*dst++ = *src++;
+  *dst++ = *src++;
 @}
 
 /* Zero bss */
 for (dst = _bstart; dst< _bend; dst++)
-	*dst = 0;
-@end example
+  *dst = 0;
+@end smallexample
 
 @item =@var{fill}
 @kindex =@var{fill}
