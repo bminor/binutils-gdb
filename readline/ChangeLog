@@ -1,3 +1,8 @@
+Wed Apr 13 21:28:44 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* rltty.c (set_tty_settings): Don't set readline_echoing_p.
+	(rl_deprep_terminal) [NEW_TTY_DRIVER]: Set readline_echoing_p.
+
 Sun Mar 13 09:13:12 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in: Add TAGS target.
