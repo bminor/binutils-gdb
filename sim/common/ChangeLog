@@ -1,3 +1,8 @@
+Fri May 15 15:59:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	* Make-common.in (install-common): Run ranlib on installed copy of
+	libsim.a.
+
 Fri May 15 15:03:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* Make-common.in (install-common): Rename and install libsim.a.
