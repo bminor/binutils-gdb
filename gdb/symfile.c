@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "value.h"
 #include "symfile.h"
+#include "objfiles.h"
 #include "gdbcmd.h"
 #include "breakpoint.h"
 
@@ -39,15 +40,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Global variables owned by this file */
 
-CORE_ADDR entry_point;			/* Where execution starts in symfile */
 int readnow_symbol_files;		/* Read full symbols immediately */
 
 /* External variables and functions referenced. */
 
 extern int info_verbose;
-
-extern CORE_ADDR startup_file_start;	/* From blockframe.c */
-extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 
 /* Functions this file defines */
 
@@ -80,26 +77,6 @@ clear_symtab_users_once PARAMS ((void));
    prepared to read. */
 
 static struct sym_fns *symtab_fns = NULL;
-
-/* When we need to allocate a new type, we need to know which type_obstack
-   to allocate the type on, since there is one for each objfile.  The places
-   where types are allocated are deeply buried in function call hierarchies
-   which know nothing about objfiles, so rather than trying to pass a
-   particular objfile down to them, we just do an end run around them and
-   set current_objfile to be whatever objfile we expect to be using at the
-   time types are being allocated.  For instance, when we start reading
-   symbols for a particular objfile, we set current_objfile to point to that
-   objfile, and when we are done, we set it back to NULL, to ensure that we
-   never put a type someplace other than where we are expecting to put it.
-   FIXME:  Maybe we should review the entire type handling system and
-   see if there is a better way to avoid this problem. */
-
-struct objfile *current_objfile = NULL;
-
-/* The object file that the main symbol table was loaded from (e.g. the
-   argument to the "symbol-file" or "file" command).  */
-
-struct objfile *symfile_objfile = NULL;
 
 /* Structures with which to manage partial symbol allocation.  */
 
@@ -328,6 +305,32 @@ psymtab_to_symtab (pst)
   return pst->symtab;
 }
 
+/* Initialize entry point information for this objfile. */
+
+void
+init_entry_point_info (objfile)
+     struct objfile *objfile;
+{
+  /* Save startup file's range of PC addresses to help blockframe.c
+     decide where the bottom of the stack is.  */
+
+  if (bfd_get_file_flags (objfile -> obfd) & EXEC_P)
+    {
+      /* Executable file -- record its entry point so we'll recognize
+	 the startup file because it contains the entry point.  */
+      objfile -> ei.entry_point = bfd_get_start_address (objfile -> obfd);
+    }
+  else
+    {
+      /* Examination of non-executable.o files.  Short-circuit this stuff.  */
+      /* ~0 will not be in any file, we hope.  */
+      objfile -> ei.entry_point = ~0;
+      /* set the startup file to be an empty range.  */
+      objfile -> ei.entry_file_lowpc = 0;
+      objfile -> ei.entry_file_highpc = 0;
+    }
+}
+
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
 
@@ -352,30 +355,19 @@ syms_from_objfile (objfile, addr, mainline, verbo)
   /* There is a distinction between having no symbol table
      (we refuse to read the file, leaving the old set of symbols around)
      and having no debugging symbols in your symbol table (we read
-     the file and end up with a mostly empty symbol table).  */
+     the file and end up with a mostly empty symbol table).
+
+     FIXME:  This strategy works correctly when the debugging symbols are
+     intermixed with "normal" symbols.  However, when the debugging symbols
+     are separate, such as with ELF/DWARF, it is perfectly plausible for
+     the symbol table to be missing but still have all the DWARF info
+     intact.  Thus in general it is wrong to assume that having no symbol
+     table implies no debugging information. */
 
   if (!(bfd_get_file_flags (objfile -> obfd) & HAS_SYMS))
     return;
 
-  /* Save startup file's range of PC addresses to help blockframe.c
-     decide where the bottom of the stack is.  */
-
-  if (bfd_get_file_flags (objfile -> obfd) & EXEC_P)
-    {
-      /* Executable file -- record its entry point so we'll recognize
-	 the startup file because it contains the entry point.  */
-      entry_point = bfd_get_start_address (objfile -> obfd);
-    }
-  else
-    {
-      /* Examination of non-executable.o files.  Short-circuit this stuff.  */
-      /* ~0 will not be in any file, we hope.  */
-      entry_point = ~0;
-      /* set the startup file to be an empty range.  */
-      startup_file_start = 0;
-      startup_file_end = 0;
-    }
-
+  init_entry_point_info (objfile);
   find_sym_fns (objfile);
 
   if (mainline) 
@@ -488,11 +480,12 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
   /* If the objfile uses a mapped symbol file, and we have a psymtab for
      it, then skip reading any symbols at this time. */
 
-  if ((objfile -> flags & OBJF_MAPPED) && (objfile -> psymtabs != NULL))
+  if ((objfile -> flags & OBJF_MAPPED) && (objfile -> flags & OBJF_SYMS))
     {
       /* We mapped in an existing symbol table file that already has had
-	 the psymbols read in.  So we can skip that part.  Notify the user
-	 that instead of reading the symbols, they have been mapped. */
+	 initial symbol reading performed, so we can skip that part.  Notify
+	 the user that instead of reading the symbols, they have been mapped.
+	 */
       if (from_tty || info_verbose)
 	{
 	  printf_filtered ("Mapped symbols for %s...", name);
@@ -503,8 +496,8 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
   else
     {
       /* We either created a new mapped symbol table, mapped an existing
-	 symbol table file with no partial symbols, or need to read an
-	 unmapped symbol table. */
+	 symbol table file which has not had initial symbol reading
+	 performed, or need to read an unmapped symbol table. */
       if (from_tty || info_verbose)
 	{
 	  printf_filtered ("Reading symbols from %s...", name);
@@ -512,6 +505,7 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 	  fflush (stdout);
 	}
       syms_from_objfile (objfile, addr, mainline, from_tty);
+      objfile -> flags |= OBJF_SYMS;
     }      
 
   /* We now have at least a partial symbol table.  Check to see if the
@@ -519,8 +513,7 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
      the gdb startup command line or on a per symbol file basis.  Expand
      all partial symbol tables for this objfile if so. */
 
-  readnow |= readnow_symbol_files;
-  if (readnow)
+  if (readnow || readnow_symbol_files)
     {
       if (from_tty || info_verbose)
 	{

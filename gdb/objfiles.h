@@ -236,6 +236,15 @@ struct objfile
 
 #define OBJF_MAPPED	(1 << 0)	/* Objfile data is mmap'd */
 
+/* When using mapped/remapped predigested gdb symbol information, we need
+   a flag that indicates that we have previously done an initial symbol
+   table read from this particular objfile.  We can't just look for the
+   absence of any of the three symbol tables (msymbols, psymtab, symtab)
+   because if the file has no symbols for example, none of these will
+   exist. */
+
+#define OBJF_SYMS	(1 << 1)	/* Have tried to read symbols */
+
 /* The object file that the main symbol table was loaded from (e.g. the
    argument to the "symbol-file" or "file" command).  */
 
