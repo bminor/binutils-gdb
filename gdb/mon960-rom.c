@@ -133,7 +133,7 @@ mon960_load (desc, file, hashmark)
 /* g0-g14, fp, pfp, sp, rip,r3-15, pc, ac, tc, fp0-3 */ 
 /* NOTE: "ip" is documented as "ir" in the Mon960 UG. */
 /* NOTE: "ir" can't be accessed... but there's an ip and rip. */
-static char *mon960_regnames[NUM_REGS] = {
+static char *full_regnames[NUM_REGS] = {
   /*  0 */ "pfp", "sp",  "rip", "r3",  "r4",  "r5",  "r6",  "r7",
   /*  8 */ "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",
   /* 16 */ "g0",  "g1",  "g2",  "g3",  "g4",  "g5",  "g6",  "g7",
@@ -141,13 +141,24 @@ static char *mon960_regnames[NUM_REGS] = {
   /* 32 */ "pc",  "ac",  "tc",  "ip",  "fp0", "fp1", "fp2", "fp3",
   };
 
+static char *mon960_regnames[NUM_REGS];
+
 /* Define the monitor command strings. Since these are passed directly
    through to a printf style function, we may include formatting
    strings. We also need a CR or LF on the end.  */
 
 /* need to pause the monitor for timing reasons, so slow it down */
 
+#if 1
+/* FIXME: this extremely long init string causes MON960 to return two NAKS
+   instead of performing the autobaud recognition, at least when gdb
+   is running on Linux.  The short string below works on Linux, and on
+   SunOS using a tcp serial connection.  Must retest on SunOS using a
+   direct serial connection; if that works, get rid of the long string. */
 static char *mon960_inits[] = {"\n\r\r\r\r\r\r\r\r\r\r\r\r\r\r\n\r\n\r\n", NULL};
+#else
+static char *mon960_inits[] = { "\r", NULL};
+#endif
 
 static struct monitor_ops mon960_cmds =
 {
@@ -158,7 +169,7 @@ static struct monitor_ops mon960_cmds =
   mon960_inits,			/* Init strings */
   "go\n\r",			/* continue command */
   "st\n\r",			/* single step */
-  "\n\r",			/* break interrupts the program */
+  NULL,				/* break interrupts the program */
   NULL,				/* set a breakpoint */
 				/* can't use "br" because only 2 hw bps are supported */
   NULL,				/* clear a breakpoint - "de" is for hw bps */
@@ -168,8 +179,8 @@ static struct monitor_ops mon960_cmds =
   {
     /* can't use "mb", "md" or "mo" because they require interaction */
     NULL,			/* setmem.cmdb (addr, value) */
-    "md %x %x\n\r",		/* setmem.cmdw (addr, value) */
-    NULL,			/* setmem.cmdl (addr, value) */
+    NULL,			/* setmem.cmdw (addr, value) */
+    "md %x %x\n\r",		/* setmem.cmdl (addr, value) */
     NULL,			/* setmem.cmdll (addr, value) */
     NULL,			/* setmem.resp_delim */
     NULL,			/* setmem.term */
@@ -225,12 +236,31 @@ mon960_open (args, from_tty)
      char *args;
      int from_tty;
 {
+  char buf[64];
+
   monitor_open (args, &mon960_cmds, from_tty);
+
+  /* Attempt to fetch the value of the first floating point register (fp0).
+     If the monitor returns a string containing the word "Bad" we'll assume
+     this processor has no floating point registers, and nullify the 
+     regnames entries that refer to FP registers.  */
+
+  monitor_printf (mon960_cmds.getreg.cmd, full_regnames[FP0_REGNUM]); /* di fp0 */
+  if (monitor_expect_prompt (buf, sizeof(buf)) != -1)
+    if (strstr(buf, "Bad") != NULL)
+      {
+	int i;
+
+	for (i = FP0_REGNUM; i < FP0_REGNUM + 4; i++)
+	    mon960_regnames[i] = NULL;
+      }
 }
 
 void
 _initialize_mon960 ()
 {
+  memcpy(mon960_regnames, full_regnames, sizeof(full_regnames));
+
   init_monitor_ops (&mon960_ops);
 
   mon960_ops.to_shortname = "mon960"; /* for the target command */
@@ -249,4 +279,3 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   mon960_ops.to_open = mon960_open;
   add_target (&mon960_ops);
 }
-

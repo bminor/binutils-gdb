@@ -1,3 +1,10 @@
+Mon Jul 08 08:50:39 1996  Mark Alexander  <marka@cygnus.com>
+
+	* mon960-rom.c (mon960_open): Add floating point detection to
+	prevent hang on non-FPU processors (PR 9775).
+	(mon960_cmds): Swap setmem.cmdw and setmem.cmdl to fix problem
+	setting breakpoints and improve loading speed.
+
 Sun Jul  7 14:57:34 1996  Fred Fish  <fnf@cygnus.com>
 
 	* coffread.c (record_minimal_symbol): Don't presave name string
