@@ -66,6 +66,9 @@ HOST_PREFIX_1 = loser-
 # We don't specify -g -O because many compilers don't support -g -O,
 # and/or -O is broken in and of itself.
 CFLAGS = -g
+LIBCFLAGS = $(CFLAGS)
+CFLAGS_FOR_TARGET = $(CFLAGS)
+LIBCFLAGS_FOR_TARGET = $(CFLAGS_FOR_TARGET)
 
 # start-sanitize-chill
 CHILLFLAGS = $(CFLAGS)
@@ -75,6 +78,9 @@ CXX = gcc
 
 # Use -O2 to stress test the compiler.
 CXXFLAGS = -g -O2 -fno-implicit-templates
+LIBCXXFLAGS = $(CXXFLAGS)
+CXXFLAGS_FOR_TARGET = $(CXXFLAGS)
+LIBCXXFLAGS_FOR_TARGET = $(CXXFLAGS_FOR_TARGET)
 
 RANLIB = ranlib
 NM = nm
@@ -235,6 +241,7 @@ BASE_FLAGS_TO_PASS = \
 	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
 	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"CFLAGS=$(CFLAGS)" \
+	"CFLAGS_FOR_TARGET=$(CFLAGS_FOR_TARGET)" \
 	$(start-sanitize-chill)\
 	"CHILLFLAGS=$(CHILLFLAGS)" \
 	"CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
@@ -242,6 +249,7 @@ BASE_FLAGS_TO_PASS = \
 	$(end-sanitize-chill)\
 	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
+	"CXXFLAGS_FOR_TARGET=$(CXXFLAGS_FOR_TARGET)" \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
 	"GCC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"INSTALL=$(INSTALL)" \
@@ -250,6 +258,10 @@ BASE_FLAGS_TO_PASS = \
 	"INSTALL_XFORM=$(INSTALL_XFORM)" \
 	"LDFLAGS=$(LDFLAGS)" \
 	"LEX=$(LEX)" \
+	"LIBCFLAGS=$(LIBCFLAGS)" \
+	"LIBCFLAGS_FOR_TARGET=$(LIBCFLAGS_FOR_TARGET)" \
+	"LIBCXXFLAGS=$(LIBCFLAGS)" \
+	"LIBCXXFLAGS_FOR_TARGET=$(LIBCFLAGS_FOR_TARGET)" \
 	"M4=$(M4)" \
 	"MAKEINFO=$(MAKEINFO) $(MAKEINFOFLAGS)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
@@ -291,7 +303,11 @@ EXTRA_TARGET_FLAGS = \
 	'AR=$$(AR_FOR_TARGET)' \
 	'AS=$$(AS_FOR_TARGET)' \
 	'CC=$$(CC_FOR_TARGET)' \
+	'CFLAGS=$$(CFLAGS_FOR_TARGET)' \
 	'CXX=$$(CXX_FOR_TARGET)' \
+	'CXXFLAGS=$$(CXXFLAGS_FOR_TARGET)' \
+	'LIBCFLAGS=$$(LIBCFLAGS_FOR_TARGET)' \
+	'LIBCXXFLAGS=$$(LIBCXXFLAGS_FOR_TARGET)' \
 	'NM=$$(NM_FOR_TARGET)' \
 	'RANLIB=$$(RANLIB_FOR_TARGET)'
 
@@ -919,7 +935,7 @@ all-gui: all-gdb all-libproc all-librx
 all-gzip: all-libiberty
 all-hello: all-libiberty
 all-indent:
-all-ispell: all-emacs # all-emacs19 ??? is this needed?
+all-ispell: all-emacs19
 all-ld: all-libiberty all-bfd all-byacc all-flex
 all-libg++: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib \
 	all-libio all-librx

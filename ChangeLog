@@ -1,3 +1,7 @@
+Wed Nov 23 10:29:25 1994  Brendan Kehoe  (brendan@lisa.cygnus.com)
+
+	* Makefile.in (all-ispell): Depend on all-emacs19 instead of all-emacs.
+
 Mon Nov 21 11:14:01 1994  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* configure.in (*-*-netware*): Don't configure xiberty.
