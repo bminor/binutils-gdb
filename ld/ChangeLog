@@ -1,3 +1,8 @@
+2001-07-11  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* emultempl/pe.em (after_open): Check for the output_bfd not
+	having any coff_data structure allocated to it.
+
 2001-07-09  David O'Brien  <obrien@FreeBSD.org>
 
 	* emultempl/elf32.em: Do not assuming that contents of the buffer

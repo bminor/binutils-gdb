@@ -800,7 +800,7 @@ gld_${EMULATION_NAME}_after_open ()
      FIXME: This should be done via a function, rather than by
      including an internal BFD header.  */
   
-  if (!coff_data (output_bfd)->pe)
+  if (coff_data (output_bfd) == NULL || coff_data (output_bfd)->pe == NULL)
     einfo (_("%F%P: PE operations on non PE file.\n"));
 
   pe_data (output_bfd)->pe_opthdr = pe;
