@@ -999,6 +999,7 @@ Specify the filename of the executable file.",
 	0, /* lookup sym */
 	child_create_inferior,
 	0, /* mourn_inferior */
+	0, /* can_run */
 	file_stratum, 0, /* next */
 	0, 1, 0, 0, 0,	/* all mem, mem, stack, regs, exec */
 	0, 0,			/* section pointers */

@@ -1405,6 +1405,7 @@ by a serial line.",
 	0, 			/* lookup_symbol */
 	hms_create_inferior, 	/* create_inferior */ 
 	hms_mourn, 		/* mourn_inferior FIXME */
+  	0,			/* can_run */
 	process_stratum, 0, /* next */
 	1, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
 	0,0,		/* Section pointers */

@@ -795,6 +795,7 @@ the speed to connect at in bits per second.",
   0,				/* lookup_symbol */
   st2000_create_inferior,
   st2000_mourn_inferior,
+  0,				/* can_run */
   process_stratum,
   0,				/* next */
   1,

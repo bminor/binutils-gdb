@@ -1342,6 +1342,7 @@ static struct target_ops udi_ops = {
         0,                      /* lookup_symbol */
         udi_create_inferior,  /* create_inferior */
         udi_mourn,            /* mourn_inferior FIXME */
+	0,			/* can_run */
         process_stratum, 0, /* next */
         1, 1, 1, 1, 1,  /* all mem, mem, stack, regs, exec */
 	0, 0,			/* Section pointers */

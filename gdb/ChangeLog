@@ -1,3 +1,27 @@
+Mon Sep 21 18:16:30 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	Break the thread of control that implies that a unix child
+	process will be the default target.
+
+	* target.c (find_default_run_target, find_default_attach,
+	find_default_create_inferior, return_zero):  new functions.
+	(cleanup_target):  Make return_zero the default for to_can_run.
+
+	* exec.c (exec_ops), core.c (core_ops):  Replace child_attach and
+	child_create_inferior references with find_default_XXX instead.
+
+	* target.h (struct target_ops): new field, to_can_run.
+	(find_default_attach, find_default_create_inferior):  new prototypes.
+	(target_can_run): new macro.
+
+	* Also added a zero (default) to_can_run element to all static
+	struct target_ops initializations throughout GDB, except: 
+	* inftarg.c (child_ops): Use new child_can_run() to enable child runs.
+
+	* infrun.c (child_create_inferior):  Clean up error handling when
+	no exec file is specified.
+	(child_attach):  Don't require exec file.
+
 Mon Sep 21 19:43:13 1992  John Gilmore and K. Richard Pixley (gnu@cygnus.com)
 
 	Remove kill_inferior_fast, in favor of target_kill, which goes

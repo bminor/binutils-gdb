@@ -987,6 +987,7 @@ executable as it exists on the remote computer.  For example,\n\
 	0, /* lookup_symbol */
 	eb_create_inferior,
 	eb_mourn_inferior,
+  	0,	/* can_run */
 	process_stratum, 0, /* next */
 	1, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
 	0, 0,			/* Section pointers */

@@ -433,14 +433,15 @@ struct target_ops core_ops = {
 	"core", "Local core dump file",
 	"Use a core file as a target.  Specify the filename of the core file.",
 	core_open, core_close,
-	child_attach, core_detach, 0, 0, /* resume, wait */
+	find_default_attach, core_detach, 0, 0, /* resume, wait */
 	get_core_registers, 
 	0, 0, /* store_regs, prepare_to_store */
 	xfer_memory, core_files_info,
 	0, 0, /* core_insert_breakpoint, core_remove_breakpoint, */
 	0, 0, 0, 0, 0, /* terminal stuff */
 	0, 0, 0, /* kill, load, lookup sym */
-	child_create_inferior, 0, /* mourn_inferior */
+	find_default_create_inferior, 0, /* mourn_inferior */
+	0, /* can_run */
 	core_stratum, 0, /* next */
 	0, 1, 1, 1, 0,	/* all mem, mem, stack, regs, exec */
 	0, 0,			/* section pointers */
