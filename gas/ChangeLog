@@ -1,3 +1,9 @@
+2003-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.c (fixup_segment): When handling an expression involving
+	the subtraction of two symbols in the same segment, don't clear
+	fx_pcrel except for TC_M68K.
+
 2003-08-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.h: Remove BFD_ASSEMBLER tests and all !BFD_ASSEMBLER

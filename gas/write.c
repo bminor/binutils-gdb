@@ -2642,18 +2642,12 @@ fixup_segment (fixP, this_segment)
 	      add_number += S_GET_VALUE (fixP->fx_addsy);
 	      add_number -= S_GET_VALUE (fixP->fx_subsy);
 	      fixP->fx_offset = add_number;
-	      /* If the back-end code has selected a pc-relative
-		 reloc, adjust the value to be pc-relative.  */
-	      if (1
-#ifdef TC_M68K
-		  /* See the comment below about 68k weirdness.  */
-		  && 0
-#endif
-		  && fixP->fx_pcrel)
-		add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment); 
 	      fixP->fx_addsy = NULL;
 	      fixP->fx_subsy = NULL;
+#ifdef TC_M68K
+	      /* See the comment below about 68k weirdness.  */
 	      fixP->fx_pcrel = 0;
+#endif
 	    }
 	  else if (sub_symbol_segment == absolute_section
 		   && !TC_FORCE_RELOCATION_SUB_ABS (fixP))
