@@ -129,6 +129,14 @@ maintainer works with the native maintainer when resolving API issues.
 	xstormy16	--target=xstormy16-elf
 			Corinna Vinschen	vinschen@redhat.com
 
+The following developers can commit changes to specific architectures:
+
+	Randolph Chung (pa)
+	Jeff Johnston (ia64)
+	Kei Sakamoto (m32r)
+	Joel Brobecker (mips)
+	Ulrich Weigand (s390)
+
 All developers recognized by this file can make arbitrary changes to
 OBSOLETE targets.
 
