@@ -133,7 +133,7 @@ ppc_register_u_addr (int regno)
 
   /* General purpose registers occupy 1 slot each in the buffer */
   if (regno >= tdep->ppc_gp0_regnum && regno <= tdep->ppc_gplast_regnum )
-    u_addr =  ((PT_R0 + regno) * wordsize);
+    u_addr = ((regno - tdep->ppc_gp0_regnum + PT_R0) * wordsize);
 
   /* Floating point regs: eight bytes each in both 32- and 64-bit
      ptrace interfaces.  Thus, two slots each in 32-bit interface, one

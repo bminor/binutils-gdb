@@ -1,3 +1,8 @@
+2004-04-22  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-linux-nat.c (ppc_register_u_addr): Don't assume that r0 is
+	register number zero.
+
 2004-04-21  Andrew Cagney  <cagney@redhat.com>
 
 	* annotate.h (deprecated_annotate_starting_hook)
