@@ -133,6 +133,31 @@ struct unwind_desc
     unsigned int frame_size:27;
   };
 
+/* We can't rely on compilers placing bitfields in any particular
+   place, so use these macros when dumping unwind descriptors to
+   object files.  */
+#define UNWIND_LOW32(U) \
+  (((U)->cannot_unwind << 31)		\
+   | ((U)->millicode << 30)		\
+   | ((U)->millicode_save_rest << 29)	\
+   | ((U)->region_desc << 27)		\
+   | ((U)->save_sr << 25)		\
+   | ((U)->entry_fr << 21)		\
+   | ((U)->entry_gr << 16)		\
+   | ((U)->args_stored << 15)		\
+   | ((U)->call_fr << 10)		\
+   | ((U)->call_gr << 5)		\
+   | ((U)->save_sp << 4)		\
+   | ((U)->save_rp << 3)		\
+   | ((U)->save_rp_in_frame << 2)	\
+   | ((U)->extn_ptr_defined << 1)	\
+   | ((U)->cleanup_defined << 0))
+
+#define UNWIND_HIGH32(U) \
+  (((U)->hpe_interrupt_marker << 31)	\
+   | ((U)->hpux_interrupt_marker << 30)	\
+   | ((U)->frame_size << 0))
+
 struct unwind_table
   {
     /* Starting and ending offsets of the region described by
@@ -546,7 +571,7 @@ static void fix_new_hppa PARAMS ((fragS *, int, int, symbolS *,
 				  offsetT, expressionS *, int,
 				  bfd_reloc_code_real_type,
 				  enum hppa_reloc_field_selector_type_alt,
-				  int, unsigned int, int *));
+				  int, unsigned int, int));
 static int is_end_of_statement PARAMS ((void));
 static int reg_name_search PARAMS ((char *));
 static int pa_chk_field_selector PARAMS ((char **));
@@ -1278,7 +1303,7 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
      enum hppa_reloc_field_selector_type_alt r_field;
      int r_format;
      unsigned int arg_reloc;
-     int* unwind_bits ATTRIBUTE_UNUSED;
+     int unwind_bits ATTRIBUTE_UNUSED;
 {
   fixS *new_fix;
 
@@ -1297,7 +1322,7 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
   hppa_fix->segment = now_seg;
 #ifdef OBJ_SOM
   if (r_type == R_ENTRY || r_type == R_EXIT)
-    new_fix->fx_offset = *unwind_bits;
+    new_fix->fx_offset = unwind_bits;
 #endif
 
   /* foo-$global$ is used to access non-automatic storage.  $global$
@@ -1348,7 +1373,7 @@ cons_fix_new_hppa (frag, where, size, exp)
 
   fix_new_hppa (frag, where, size,
 		(symbolS *) NULL, (offsetT) 0, exp, 0, rel_type,
-		hppa_field_selector, size * 8, 0, NULL);
+		hppa_field_selector, size * 8, 0, 0);
 
   /* Reset field selector to its default state.  */
   hppa_field_selector = 0;
@@ -1458,12 +1483,14 @@ md_assemble (str)
 		 information when the label appears after the proc/procend.  */
 	      if (within_entry_exit)
 		{
-		  char *where = frag_more (0);
+		  char *where;
+		  unsigned int u;
 
+		  where = frag_more (0);
+		  u = UNWIND_LOW32 (&last_call_info->ci_unwind.descriptor);
 		  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
 				NULL, (offsetT) 0, NULL,
-				0, R_HPPA_ENTRY, e_fsel, 0, 0,
-				(int *)&last_call_info->ci_unwind.descriptor);
+				0, R_HPPA_ENTRY, e_fsel, 0, 0, u);
 		}
 #endif
 	    }
@@ -1488,7 +1515,7 @@ md_assemble (str)
     fix_new_hppa (frag_now, (to - frag_now->fr_literal), 4, NULL,
 		  (offsetT) 0, &the_insn.exp, the_insn.pcrel,
 		  the_insn.reloc, the_insn.field_selector,
-		  the_insn.format, the_insn.arg_reloc, NULL);
+		  the_insn.format, the_insn.arg_reloc, 0);
 
 #ifdef OBJ_ELF
   dwarf2_emit_insn (4);
@@ -5923,7 +5950,7 @@ pa_brtab (begin)
   fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
 		NULL, (offsetT) 0, NULL,
 		0, begin ? R_HPPA_BEGIN_BRTAB : R_HPPA_END_BRTAB,
-		e_fsel, 0, 0, NULL);
+		e_fsel, 0, 0, 0);
 #endif
 
   demand_empty_rest_of_line ();
@@ -5948,7 +5975,7 @@ pa_try (begin)
   fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
 		NULL, (offsetT) 0, begin ? NULL : &exp,
 		0, begin ? R_HPPA_BEGIN_TRY : R_HPPA_END_TRY,
-		e_fsel, 0, 0, NULL);
+		e_fsel, 0, 0, 0);
 #endif
 
   demand_empty_rest_of_line ();
@@ -6049,12 +6076,11 @@ static void
 pa_build_unwind_subspace (call_info)
      struct call_info *call_info;
 {
-  char *unwind;
   asection *seg, *save_seg;
   subsegT save_subseg;
-  unsigned int i;
+  unsigned int unwind;
   int reloc;
-  char c, *p;
+  char *p;
 
   if ((bfd_get_section_flags (stdoutput, now_seg)
        & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
@@ -6081,17 +6107,14 @@ pa_build_unwind_subspace (call_info)
 
   /* Get some space to hold relocation information for the unwind
      descriptor.  */
-  p = frag_more (4);
-  md_number_to_chars (p, 0, 4);
+  p = frag_more (16);
+  md_number_to_chars (p, 0, 8);
 
   /* Relocation info. for start offset of the function.  */
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
 		call_info->start_symbol, (offsetT) 0,
 		(expressionS *) NULL, 0, reloc,
-		e_fsel, 32, 0, NULL);
-
-  p = frag_more (4);
-  md_number_to_chars (p, 0, 4);
+		e_fsel, 32, 0, 0);
 
   /* Relocation info. for end offset of the function.
 
@@ -6101,20 +6124,17 @@ pa_build_unwind_subspace (call_info)
      value as call_info->start_symbol + function size once the linker is
      finished with its work.  */
 
-  fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
+  fix_new_hppa (frag_now, p + 4 - frag_now->fr_literal, 4,
 		call_info->end_symbol, (offsetT) 0,
 		(expressionS *) NULL, 0, reloc,
-		e_fsel, 32, 0, NULL);
+		e_fsel, 32, 0, 0);
 
-  /* Dump it.  */
-  unwind = (char *) &call_info->ci_unwind;
-  for (i = 8; i < sizeof (struct unwind_table); i++)
-    {
-      c = *(unwind + i);
-      {
-	FRAG_APPEND_1_CHAR (c);
-      }
-    }
+  /* Dump the descriptor.  */
+  unwind = UNWIND_LOW32 (&call_info->ci_unwind.descriptor);
+  md_number_to_chars (p + 8, unwind, 4);
+
+  unwind = UNWIND_HIGH32 (&call_info->ci_unwind.descriptor);
+  md_number_to_chars (p + 12, unwind, 4);
 
   /* Return back to the original segment/subsegment.  */
   subseg_set (save_seg, save_subseg);
@@ -6404,12 +6424,14 @@ pa_entry (unused)
      denote the entry and exit points.  */
   if (last_call_info->start_symbol != NULL)
     {
-      char *where = frag_more (0);
+      char *where;
+      unsigned int u;
 
+      where = frag_more (0);
+      u = UNWIND_LOW32 (&last_call_info->ci_unwind.descriptor);
       fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
 		    NULL, (offsetT) 0, NULL,
-		    0, R_HPPA_ENTRY, e_fsel, 0, 0,
-		    (int *) &last_call_info->ci_unwind.descriptor);
+		    0, R_HPPA_ENTRY, e_fsel, 0, 0, u);
     }
 #endif
 }
@@ -6517,7 +6539,7 @@ process_exit ()
   fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
 		NULL, (offsetT) 0,
 		NULL, 0, R_HPPA_EXIT, e_fsel, 0, 0,
-		(int *) &last_call_info->ci_unwind.descriptor + 1);
+		UNWIND_HIGH32 (&last_call_info->ci_unwind.descriptor));
 #endif
 }
 
@@ -7048,12 +7070,14 @@ pa_procend (unused)
 		 information when the label appears after the proc/procend.  */
 	      if (within_entry_exit)
 		{
-		  char *where = frag_more (0);
+		  char *where;
+		  unsigned int u;
 
+		  where = frag_more (0);
+		  u = UNWIND_LOW32 (&last_call_info->ci_unwind.descriptor);
 		  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
 				NULL, (offsetT) 0, NULL,
-				0, R_HPPA_ENTRY, e_fsel, 0, 0,
-				(int *) &last_call_info->ci_unwind.descriptor);
+				0, R_HPPA_ENTRY, e_fsel, 0, 0, u);
 		}
 #endif
 	    }
