@@ -45,12 +45,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define STEP_SKIPS_DELAY_P (1)
 #define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
 
-/* The size of a register.  This is predefined in tm-mips64.h.  */
-
-#ifndef MIPS_REGSIZE
-#define MIPS_REGSIZE 4
-#endif
-
 /* Initializer for an array of names for registers 32 and above.
    There should be NUM_REGS-32 strings in this initializer.  */
 
@@ -98,7 +92,7 @@ extern int mips_step_skips_delay (CORE_ADDR);
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#define MIPS_REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
+#define MIPS_REGISTER_BYTE(N) ((N) * mips_regsize (current_gdbarch))
 
 /* Return the GDB type object for the "standard" data type of data in
    register N.  */

@@ -19,9 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Use eight byte registers.  */
-#define MIPS_REGSIZE 8
-
 /* define 8 byte register type */
 #define MIPS_REGISTER_TYPE(N) \
         (((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_double \

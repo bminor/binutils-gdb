@@ -78,11 +78,11 @@
 
 #undef  MIPS_REGISTER_BYTE
 #define MIPS_REGISTER_BYTE(N) \
-     (((N) < FP0_REGNUM) ? (N) * MIPS_REGSIZE : \
+     (((N) < FP0_REGNUM) ? (N) * mips_regsize (current_gdbarch) : \
       ((N) < FP0_REGNUM + 32) ?     \
-      FP0_REGNUM * MIPS_REGSIZE + \
+      FP0_REGNUM * mips_regsize (current_gdbarch) + \
       ((N) - FP0_REGNUM) * sizeof(double) : \
-      32 * sizeof(double) + ((N) - 32) * MIPS_REGSIZE)
+      32 * sizeof(double) + ((N) - 32) * mips_regsize (current_gdbarch))
 
 #undef  MIPS_REGISTER_TYPE
 #define MIPS_REGISTER_TYPE(N) \

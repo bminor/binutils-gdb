@@ -213,6 +213,13 @@ mips_abi (struct gdbarch *gdbarch)
   return gdbarch_tdep (gdbarch)->mips_abi;
 }
 
+int
+mips_regsize (struct gdbarch *gdbarch)
+{
+  return (gdbarch_bfd_arch_info (gdbarch)->bits_per_word
+	  / gdbarch_bfd_arch_info (gdbarch)->bits_per_byte);
+}
+
 static unsigned int
 mips_saved_regsize (void)
 {
@@ -641,7 +648,7 @@ mips_register_raw_size (int regnum)
 	   registers.  */
 	return 8;
       else
-	return MIPS_REGSIZE;
+	return mips_regsize (current_gdbarch);
     }
   else if (regnum < 2 * NUM_REGS)
     {
@@ -782,7 +789,7 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
     {
       /* Everything else...
          Return type appropriate for width of register.  */
-      if (MIPS_REGSIZE == TYPE_LENGTH (builtin_type_uint64))
+      if (mips_regsize (current_gdbarch) == TYPE_LENGTH (builtin_type_uint64))
 	return builtin_type_uint64;
       else
 	return builtin_type_uint32;
@@ -1559,16 +1566,16 @@ mips_find_saved_regs (struct frame_info *fci)
 #ifndef SIGFRAME_BASE
   /* To satisfy alignment restrictions, sigcontext is located 4 bytes
      above the sigtramp frame.  */
-#define SIGFRAME_BASE		MIPS_REGSIZE
+#define SIGFRAME_BASE		mips_regsize (current_gdbarch)
 /* FIXME!  Are these correct?? */
-#define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 2 * MIPS_REGSIZE)
-#define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 3 * MIPS_REGSIZE)
+#define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 2 * mips_regsize (current_gdbarch))
+#define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 3 * mips_regsize (current_gdbarch))
 #define SIGFRAME_FPREGSAVE_OFF	\
-        (SIGFRAME_REGSAVE_OFF + MIPS_NUMREGS * MIPS_REGSIZE + 3 * MIPS_REGSIZE)
+        (SIGFRAME_REGSAVE_OFF + MIPS_NUMREGS * mips_regsize (current_gdbarch) + 3 * mips_regsize (current_gdbarch))
 #endif
 #ifndef SIGFRAME_REG_SIZE
   /* FIXME!  Is this correct?? */
-#define SIGFRAME_REG_SIZE	MIPS_REGSIZE
+#define SIGFRAME_REG_SIZE	mips_regsize (current_gdbarch)
 #endif
   if ((get_frame_type (fci) == SIGTRAMP_FRAME))
     {
@@ -2252,7 +2259,7 @@ restart:
 	     but the register size used is only 32 bits. Make the address
 	     for the saved register point to the lower 32 bits.  */
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (temp_saved_regs, reg, sp + low_word + 8 - MIPS_REGSIZE);
+	  set_reg_offset (temp_saved_regs, reg, sp + low_word + 8 - mips_regsize (current_gdbarch));
 	}
       else if (high_word == 0x27be)	/* addiu $30,$sp,size */
 	{
@@ -2960,10 +2967,11 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	  /* Copy the argument to general registers or the stack in
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
-	  /* Note: structs whose size is not a multiple of MIPS_REGSIZE
-	     are treated specially: Irix cc passes them in registers
-	     where gcc sometimes puts them on the stack.  For maximum
-	     compatibility, we will put them in both places.  */
+	  /* Note: structs whose size is not a multiple of
+	     mips_regsize() are treated specially: Irix cc passes them
+	     in registers where gcc sometimes puts them on the stack.
+	     For maximum compatibility, we will put them in both
+	     places.  */
 	  int odd_sized_struct = ((len > MIPS_SAVED_REGSIZE) &&
 				  (len % MIPS_SAVED_REGSIZE != 0));
 
@@ -3167,10 +3175,11 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	  /* Copy the argument to general registers or the stack in
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
-	  /* Note: structs whose size is not a multiple of MIPS_REGSIZE
-	     are treated specially: Irix cc passes them in registers
-	     where gcc sometimes puts them on the stack.  For maximum
-	     compatibility, we will put them in both places.  */
+	  /* Note: structs whose size is not a multiple of
+	     mips_regsize() are treated specially: Irix cc passes them
+	     in registers where gcc sometimes puts them on the stack.
+	     For maximum compatibility, we will put them in both
+	     places.  */
 	  int odd_sized_struct = ((len > MIPS_SAVED_REGSIZE) &&
 				  (len % MIPS_SAVED_REGSIZE != 0));
 	  /* Note: Floating-point values that didn't fit into an FP
@@ -3457,10 +3466,11 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	  /* Copy the argument to general registers or the stack in
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
-	  /* Note: structs whose size is not a multiple of MIPS_REGSIZE
-	     are treated specially: Irix cc passes them in registers
-	     where gcc sometimes puts them on the stack.  For maximum
-	     compatibility, we will put them in both places.  */
+	  /* Note: structs whose size is not a multiple of
+	     mips_regsize() are treated specially: Irix cc passes them
+	     in registers where gcc sometimes puts them on the stack.
+	     For maximum compatibility, we will put them in both
+	     places.  */
 	  int odd_sized_struct = ((len > MIPS_SAVED_REGSIZE) &&
 				  (len % MIPS_SAVED_REGSIZE != 0));
 	  /* Structures should be aligned to eight bytes (even arg registers)
@@ -3536,8 +3546,8 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		  && !fp_register_arg_p (typecode, arg_type))
 		{
 		  LONGEST regval = extract_signed_integer (val, partial_len);
-		  /* Value may need to be sign extended, because 
-		     MIPS_REGSIZE != MIPS_SAVED_REGSIZE.  */
+		  /* Value may need to be sign extended, because
+		     mips_regsize() != MIPS_SAVED_REGSIZE.  */
 
 		  /* A non-floating-point argument being passed in a
 		     general register.  If a struct or union, and if
@@ -3765,10 +3775,11 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	  /* Copy the argument to general registers or the stack in
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
-	  /* Note: structs whose size is not a multiple of MIPS_REGSIZE
-	     are treated specially: Irix cc passes them in registers
-	     where gcc sometimes puts them on the stack.  For maximum
-	     compatibility, we will put them in both places.  */
+	  /* Note: structs whose size is not a multiple of
+	     mips_regsize() are treated specially: Irix cc passes them
+	     in registers where gcc sometimes puts them on the stack.
+	     For maximum compatibility, we will put them in both
+	     places.  */
 	  int odd_sized_struct = ((len > MIPS_SAVED_REGSIZE) &&
 				  (len % MIPS_SAVED_REGSIZE != 0));
 	  /* Structures should be aligned to eight bytes (even arg registers)
@@ -3844,8 +3855,8 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		  && !fp_register_arg_p (typecode, arg_type))
 		{
 		  LONGEST regval = extract_signed_integer (val, partial_len);
-		  /* Value may need to be sign extended, because 
-		     MIPS_REGSIZE != MIPS_SAVED_REGSIZE.  */
+		  /* Value may need to be sign extended, because
+		     mips_regsize() != MIPS_SAVED_REGSIZE.  */
 
 		  /* A non-floating-point argument being passed in a
 		     general register.  If a struct or union, and if
@@ -4238,7 +4249,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
   struct gdbarch *gdbarch = get_frame_arch (frame);
   /* do values for GP (int) regs */
   char raw_buffer[MAX_REGISTER_SIZE];
-  int ncols = (MIPS_REGSIZE == 8 ? 4 : 8);	/* display cols per row */
+  int ncols = (mips_regsize (gdbarch) == 8 ? 4 : 8);	/* display cols per row */
   int col, byte;
   int regnum;
 
@@ -4252,7 +4263,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 	continue;		/* unused register */
       if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
 	break;			/* end the row: reached FP register */
-      fprintf_filtered (file, MIPS_REGSIZE == 8 ? "%17s" : "%9s",
+      fprintf_filtered (file, mips_regsize (current_gdbarch) == 8 ? "%17s" : "%9s",
 			REGISTER_NAME (regnum));
       col++;
     }
@@ -4275,7 +4286,10 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
       if (!frame_register_read (frame, regnum, raw_buffer))
 	error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
       /* pad small registers */
-      for (byte = 0; byte < (MIPS_REGSIZE - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum)); byte++)
+      for (byte = 0;
+	   byte < (mips_regsize (current_gdbarch)
+		   - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
+	   byte++)
 	printf_filtered ("  ");
       /* Now print the register value in hex, endian order. */
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
@@ -6236,9 +6250,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_STACK_ARGSIZE = %d\n",
 		      MIPS_STACK_ARGSIZE);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS_REGSIZE = %d\n",
-		      MIPS_REGSIZE);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: A0_REGNUM = %d\n",
 		      A0_REGNUM);

@@ -1,5 +1,35 @@
 2003-11-15  Andrew Cagney  <cagney@redhat.com>
 
+	Replace MIPS_REGSIZE with mips_regsize.
+	* mips-tdep.c (mips_regsize): New function.
+	* mips-tdep.h (mips_regsize): Declare.
+	* mipsnbsd-tdep.h (SIZEOF_STRUCT_FPREG): Update.
+	(SIZEOF_STRUCT_REG): Update.
+	* mipsnbsd-tdep.c (mipsnbsd_supply_reg): Update.
+	(mipsnbsd_fill_reg): Update.
+	(mipsnbsd_supply_fpreg): Update.
+	(mipsnbsd_fill_fpreg): Update.
+	(NBSD_MIPS_JB_ELEMENT_SIZE): Update.
+	* mips-tdep.c (mips_register_raw_size): Update.
+	(mips_register_type): Update.
+	(SIGFRAME_BASE): Update.
+	(SIGFRAME_PC_OFF): Update.
+	(SIGFRAME_REGSAVE_OFF): Update.
+	(SIGFRAME_FPREGSAVE_OFF): Update.
+	(SIGFRAME_REG_SIZE): Update.
+	(mips32_heuristic_proc_desc): Update.
+	(print_gp_register_row): Update.
+	(mips_dump_tdep): Do not print MIPS_REGSIZE.
+	* irix5-nat.c (supply_gregset): Update.
+	(fetch_core_registers): Update.
+	* config/mips/tm-mips64.h (MIPS_REGSIZE): Delete macro.
+	* config/mips/tm-irix6.h (MIPS_REGISTER_BYTE): Update.
+	* config/mips/tm-mips.h (MIPS_REGSIZE): Delete macro.
+	(MIPS_REGISTER_BYTE): Update.
+	* config/mips/tm-irix5.h (MIPS_REGISTER_BYTE): Update.
+
+2003-11-15  Andrew Cagney  <cagney@redhat.com>
+
 	* config/sparc/tm-sparc.h (DEPRECATE_USE_REGISTER_NOT_ARG): Rename
 	USE_REGISTER_NOT_ARG.
 	* stabsread.c (define_symbol): Update.

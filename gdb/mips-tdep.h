@@ -1,6 +1,6 @@
 /* Target-dependent header for the MIPS architecture, for GDB, the GNU Debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -42,5 +42,9 @@ enum mips_abi mips_abi (struct gdbarch *gdbarch);
 
 /* For wince :-(.  */
 extern CORE_ADDR mips_next_pc (CORE_ADDR pc);
+
+/* Return the "MIPS" register size.  Just a short cut to the BFD
+   architecture's word size.  */
+extern int mips_regsize (struct gdbarch *gdbarch);
 
 #endif /* MIPS_TDEP_H */

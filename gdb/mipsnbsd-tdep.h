@@ -27,7 +27,7 @@ void mipsnbsd_fill_reg (char *, int);
 void mipsnbsd_supply_fpreg (char *, int);
 void mipsnbsd_fill_fpreg (char *, int);
 
-#define SIZEOF_STRUCT_REG	(38 * MIPS_REGSIZE)
-#define SIZEOF_STRUCT_FPREG	(33 * MIPS_REGSIZE)
+#define SIZEOF_STRUCT_REG	(38 * mips_regsize (current_gdbarch))
+#define SIZEOF_STRUCT_FPREG	(33 * mips_regsize (current_gdbarch))
 
 #endif /* MIPSNBSD_TDEP_H */

@@ -55,7 +55,7 @@ supply_gregset (gregset_t *gregsetp)
 {
   int regi;
   greg_t *regp = &(*gregsetp)[0];
-  int gregoff = sizeof (greg_t) - MIPS_REGSIZE;
+  int gregoff = sizeof (greg_t) - mips_regsize (current_gdbarch);
   static char zerobuf[32] = {0};
 
   for (regi = 0; regi <= CTX_RA; regi++)
@@ -200,8 +200,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
     {
       memcpy ((char *) deprecated_registers, core_reg_sect, core_reg_size);
     }
-  else if (MIPS_REGSIZE == 4 &&
-	   core_reg_size == (2 * MIPS_REGSIZE) * NUM_REGS)
+  else if (mips_regsize (current_gdbarch) == 4 &&
+	   core_reg_size == (2 * mips_regsize (current_gdbarch)) * NUM_REGS)
     {
       /* This is a core file from a N32 executable, 64 bits are saved
          for all registers.  */
