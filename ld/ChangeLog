@@ -1,4 +1,18 @@
+start-sanitize-armelf
+Fri Jul 31 15:56:16 1998  Catherine Moore  <clm@cygnus.com>
+
+        * emulparams/armelf.sh: New file.
+        * configure.tgt:  Recognize thumb-elf and arm-elf.
+        * Makefile.am (earmelf.o): New.
+        * Makefile.in: Rebuild.
+
+end-sanitize-armelf
 Fri Jul 24 12:00:57 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (install-exec-local): Don't remove the file before
+	checking whether $(bindir) == $(tooldir)/bin.  From Maciej
+	W. Rozycki <macro@ds2.pg.gda.pl>.
+	* Makefile.in: Rebuild.
 
 	* configure.tgt: Recognize h8[35]00*-coff* as well as -hms*.
 
