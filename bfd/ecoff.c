@@ -52,30 +52,6 @@ static void ecoff_emit_aggregate PARAMS ((bfd *abfd, char *string,
 					  CONST char *which));
 static char *ecoff_type_to_string PARAMS ((bfd *abfd, union aux_ext *aux_ptr,
 					   unsigned int indx, int bigendian));
-static bfd_reloc_status_type ecoff_generic_reloc PARAMS ((bfd *abfd,
-							  arelent *reloc,
-							  asymbol *symbol,
-							  PTR data,
-							  asection *section,
-							  bfd *output_bfd));
-static bfd_reloc_status_type ecoff_refhi_reloc PARAMS ((bfd *abfd,
-							arelent *reloc,
-							asymbol *symbol,
-							PTR data,
-							asection *section,
-							bfd *output_bfd));
-static bfd_reloc_status_type ecoff_reflo_reloc PARAMS ((bfd *abfd,
-							arelent *reloc,
-							asymbol *symbol,
-							PTR data,
-							asection *section,
-							bfd *output_bfd));
-static bfd_reloc_status_type ecoff_gprel_reloc PARAMS ((bfd *abfd,
-							arelent *reloc,
-							asymbol *symbol,
-							PTR data,
-							asection *section,
-							bfd *output_bfd));
 static boolean ecoff_slurp_reloc_table PARAMS ((bfd *abfd, asection *section,
 						asymbol **symbols));
 static void ecoff_clear_output_flags PARAMS ((bfd *abfd));
@@ -96,139 +72,6 @@ static unsigned int ecoff_armap_hash PARAMS ((CONST char *s,
 					      unsigned int *rehash,
 					      unsigned int size,
 					      unsigned int hlog));
-
-/* How to process the various relocs types.  */
-
-static reloc_howto_type ecoff_howto_table[] =
-{
-  /* Reloc type 0 is ignored.  The reloc reading code ensures that
-     this is a reference to the .abs section, which will cause
-     bfd_perform_relocation to do nothing.  */
-  HOWTO (ECOFF_R_IGNORE,	/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 8,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 0,			/* special_function */
-	 "IGNORE",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* A 16 bit reference to a symbol, normally from a data section.  */
-  HOWTO (ECOFF_R_REFHALF,	/* type */
-	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ecoff_generic_reloc,	/* special_function */
-	 "REFHALF",		/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* A 32 bit reference to a symbol, normally from a data section.  */
-  HOWTO (ECOFF_R_REFWORD,	/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ecoff_generic_reloc,	/* special_function */
-	 "REFWORD",		/* name */
-	 true,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
-	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* A 26 bit absolute jump address.  */
-  HOWTO (ECOFF_R_JMPADDR,	/* type */
-	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 26,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ecoff_generic_reloc,	/* special_function */
-	 "JMPADDR",		/* name */
-	 true,			/* partial_inplace */
-	 0x3ffffff,		/* src_mask */
-	 0x3ffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* The high 16 bits of a symbol value.  Handled by the function
-     ecoff_refhi_reloc.  */
-  HOWTO (ECOFF_R_REFHI,		/* type */
-	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ecoff_refhi_reloc,	/* special_function */
-	 "REFHI",		/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* The low 16 bits of a symbol value.  */
-  HOWTO (ECOFF_R_REFLO,		/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 ecoff_reflo_reloc,	/* special_function */
-	 "REFLO",		/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* A reference to an offset from the gp register.  Handled by the
-     function ecoff_gprel_reloc.  */
-  HOWTO (ECOFF_R_GPREL,		/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 ecoff_gprel_reloc,	/* special_function */
-	 "GPREL",		/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* A reference to a literal using an offset from the gp register.
-     Handled by the function ecoff_gprel_reloc.  */
-  HOWTO (ECOFF_R_LITERAL,	/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 ecoff_gprel_reloc,	/* special_function */
-	 "LITERAL",		/* name */
-	 true,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 false)			/* pcrel_offset */
-};
-
-#define ECOFF_HOWTO_COUNT \
-  (sizeof ecoff_howto_table / sizeof ecoff_howto_table[0])
 
 /* This stuff is somewhat copied from coffcode.h.  */
 
@@ -1008,7 +851,6 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
 	    asection *section;
 	    arelent_chain *reloc_chain;
 	    unsigned int bitsize;
-	    int reloc_index;
 
 	    /* Get a section with the same name as the symbol (usually
 	       __CTOR_LIST__ or __DTOR_LIST__).  FIXME: gcc uses the
@@ -1040,19 +882,8 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
 	      bfd_get_section (asym)->symbol_ptr_ptr;
 	    reloc_chain->relent.address = section->_raw_size;
 	    reloc_chain->relent.addend = asym->value;
-
-	    bitsize = ecoff_backend (abfd)->constructor_bitsize;
-	    switch (bitsize)
-	      {
-	      case 32:
-		reloc_index = ECOFF_R_REFWORD;
-		break;
-	      case 64:
-		abort ();
-	      default:
-		abort ();
-	      }
-	    reloc_chain->relent.howto = ecoff_howto_table + reloc_index;
+	    reloc_chain->relent.howto =
+	      ecoff_backend (abfd)->constructor_reloc;
 
 	    /* Set up the constructor section to hold the reloc.  */
 	    section->flags = SEC_CONSTRUCTOR;
@@ -1062,6 +893,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
 	       based on the bitsize.  These are not real sections--
 	       they are handled specially by the linker--so the ECOFF
 	       16 byte alignment restriction does not apply.  */
+	    bitsize = ecoff_backend (abfd)->constructor_bitsize;
 	    section->alignment_power = 1;
 	    while ((1 << section->alignment_power) < bitsize / 8)
 	      ++section->alignment_power;
@@ -1749,292 +1581,6 @@ ecoff_print_symbol (abfd, filep, symbol, how)
     }
 }
 
-/* ECOFF relocs are either against external symbols, or against
-   sections.  If we are producing relocateable output, and the reloc
-   is against an external symbol, and nothing has given us any
-   additional addend, the resulting reloc will also be against the
-   same symbol.  In such a case, we don't want to change anything
-   about the way the reloc is handled, since it will all be done at
-   final link time.  Rather than put special case code into
-   bfd_perform_relocation, all the reloc types use this howto
-   function.  It just short circuits the reloc if producing
-   relocateable output against an external symbol.  */
-
-static bfd_reloc_status_type
-ecoff_generic_reloc (abfd,
-		     reloc_entry,
-		     symbol,
-		     data,
-		     input_section,
-		     output_bfd)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-{
-  if (output_bfd != (bfd *) NULL
-      && (symbol->flags & BSF_SECTION_SYM) == 0
-      && reloc_entry->addend == 0)
-    {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
-    }
-
-  return bfd_reloc_continue;
-}
-
-/* Do a REFHI relocation.  This has to be done in combination with a
-   REFLO reloc, because there is a carry from the REFLO to the REFHI.
-   Here we just save the information we need; we do the actual
-   relocation when we see the REFLO.  ECOFF requires that the REFLO
-   immediately follow the REFHI, so this ought to work.  */
-
-static bfd_byte *ecoff_refhi_addr;
-static bfd_vma ecoff_refhi_addend;
-
-static bfd_reloc_status_type
-ecoff_refhi_reloc (abfd,
-		   reloc_entry,
-		   symbol,
-		   data,
-		   input_section,
-		   output_bfd)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-{
-  bfd_reloc_status_type ret;
-  bfd_vma relocation;
-
-  /* If we're relocating, and this an external symbol, we don't want
-     to change anything.  */
-  if (output_bfd != (bfd *) NULL
-      && (symbol->flags & BSF_SECTION_SYM) == 0
-      && reloc_entry->addend == 0)
-    {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
-    }
-
-  ret = bfd_reloc_ok;
-  if (symbol->section == &bfd_und_section
-      && output_bfd == (bfd *) NULL)
-    ret = bfd_reloc_undefined;
-
-  if (bfd_is_com_section (symbol->section))
-    relocation = 0;
-  else
-    relocation = symbol->value;
-
-  relocation += symbol->section->output_section->vma;
-  relocation += symbol->section->output_offset;
-  relocation += reloc_entry->addend;
-
-  if (reloc_entry->address > input_section->_cooked_size)
-    return bfd_reloc_outofrange;
-
-  /* Save the information, and let REFLO do the actual relocation.  */
-  ecoff_refhi_addr = (bfd_byte *) data + reloc_entry->address;
-  ecoff_refhi_addend = relocation;
-
-  if (output_bfd != (bfd *) NULL)
-    reloc_entry->address += input_section->output_offset;
-
-  return ret;
-}
-
-/* Do a REFLO relocation.  This is a straightforward 16 bit inplace
-   relocation; this function exists in order to do the REFHI
-   relocation described above.  */
-
-static bfd_reloc_status_type
-ecoff_reflo_reloc (abfd,
-		   reloc_entry,
-		   symbol,
-		   data,
-		   input_section,
-		   output_bfd)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-{
-  if (ecoff_refhi_addr != (bfd_byte *) NULL)
-    {
-      unsigned long insn;
-      unsigned long val;
-      unsigned long vallo;
-
-      /* Do the REFHI relocation.  Note that we actually don't need to
-	 know anything about the REFLO itself, except where to find
-	 the low 16 bits of the addend needed by the REFHI.  */
-      insn = bfd_get_32 (abfd, ecoff_refhi_addr);
-      vallo = (bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address)
-	       & 0xffff);
-      val = ((insn & 0xffff) << 16) + vallo;
-      val += ecoff_refhi_addend;
-
-      /* The low order 16 bits are always treated as a signed value.
-	 Therefore, a negative value in the low order bits requires an
-	 adjustment in the high order bits.  We need to make this
-	 adjustment in two ways: once for the bits we took from the
-	 data, and once for the bits we are putting back in to the
-	 data.  */
-      if ((vallo & 0x8000) != 0)
-	val -= 0x10000;
-      if ((val & 0x8000) != 0)
-	val += 0x10000;
-
-      insn = (insn &~ 0xffff) | ((val >> 16) & 0xffff);
-      bfd_put_32 (abfd, insn, ecoff_refhi_addr);
-
-      ecoff_refhi_addr = (bfd_byte *) NULL;
-    }
-
-  /* Now do the REFLO reloc in the usual way.  */
-  return ecoff_generic_reloc (abfd, reloc_entry, symbol, data,
-			      input_section, output_bfd);
-}
-
-/* Do a GPREL relocation.  This is a 16 bit value which must become
-   the offset from the gp register.  */
-
-static bfd_reloc_status_type
-ecoff_gprel_reloc (abfd,
-		   reloc_entry,
-		   symbol,
-		   data,
-		   input_section,
-		   output_bfd)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-{
-  boolean relocateable;
-  bfd_vma relocation;
-  unsigned long val;
-  unsigned long insn;
-
-  /* If we're relocating, and this is an external symbol with no
-     addend, we don't want to change anything.  We will only have an
-     addend if this is a newly created reloc, not read from an ECOFF
-     file.  */
-  if (output_bfd != (bfd *) NULL
-      && (symbol->flags & BSF_SECTION_SYM) == 0
-      && reloc_entry->addend == 0)
-    {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
-    }
-
-  if (output_bfd != (bfd *) NULL)
-    relocateable = true;
-  else
-    {
-      relocateable = false;
-      output_bfd = symbol->section->output_section->owner;
-    }
-
-  if (symbol->section == &bfd_und_section
-      && relocateable == false)
-    return bfd_reloc_undefined;
-
-  /* We have to figure out the gp value, so that we can adjust the
-     symbol value correctly.  We look up the symbol _gp in the output
-     BFD.  If we can't find it, we're stuck.  We cache it in the ECOFF
-     target data.  We don't need to adjust the symbol value for an
-     external symbol if we are producing relocateable output.  */
-  if (ecoff_data (output_bfd)->gp == 0
-      && (relocateable == false
-	  || (symbol->flags & BSF_SECTION_SYM) != 0))
-    {
-      if (relocateable != false)
-	{
-	  /* Make up a value.  */
-	  ecoff_data (output_bfd)->gp =
-	    symbol->section->output_section->vma + 0x4000;
-	}
-      else
-	{
-	  unsigned int count;
-	  asymbol **sym;
-	  unsigned int i;
-
-	  count = bfd_get_symcount (output_bfd);
-	  sym = bfd_get_outsymbols (output_bfd);
-
-	  /* We should do something more friendly here, but we don't
-	     have a good reloc status to return.  */
-	  if (sym == (asymbol **) NULL)
-	    abort ();
-
-	  for (i = 0; i < count; i++, sym++)
-	    {
-	      register CONST char *name;
-
-	      name = bfd_asymbol_name (*sym);
-	      if (*name == '_' && strcmp (name, "_gp") == 0)
-		{
-		  ecoff_data (output_bfd)->gp = bfd_asymbol_value (*sym);
-		  break;
-		}
-	    }
-
-	  /* We should do something more friendly here, but we don't have
-	     a good reloc status to return.  */
-	  if (i >= count)
-	    abort ();
-	}
-    }
-
-  if (bfd_is_com_section (symbol->section))
-    relocation = 0;
-  else
-    relocation = symbol->value;
-
-  relocation += symbol->section->output_section->vma;
-  relocation += symbol->section->output_offset;
-
-  if (reloc_entry->address > input_section->_cooked_size)
-    return bfd_reloc_outofrange;
-
-  insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
-
-  /* Set val to the offset into the section or symbol.  */
-  val = ((insn & 0xffff) + reloc_entry->addend) & 0xffff;
-  if (val & 0x8000)
-    val -= 0x10000;
-
-  /* Adjust val for the final section location and GP value.  If we
-     are producing relocateable output, we don't want to do this for
-     an external symbol.  */
-  if (relocateable == false
-      || (symbol->flags & BSF_SECTION_SYM) != 0)
-    val += relocation - ecoff_data (output_bfd)->gp;
-
-  insn = (insn &~ 0xffff) | (val & 0xffff);
-  bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
-
-  if (relocateable != false)
-    reloc_entry->address += input_section->output_offset;
-
-  /* Make sure it fit in 16 bits.  */
-  if (val >= 0x8000 && val < 0xffff8000)
-    return bfd_reloc_outofrange;
-
-  return bfd_reloc_ok;
-}
-
 /* Read in the relocs for a section.  */
 
 static boolean
@@ -2088,9 +1634,6 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
 				 external_relocs + i * external_reloc_size,
 				 &intern);
 
-      if (intern.r_type > ECOFF_R_LITERAL)
-	abort ();
-
       if (intern.r_extern)
 	{
 	  /* r_symndx is an index into the external symbols.  */
@@ -2117,27 +1660,26 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
 	    case RELOC_SECTION_INIT:  sec_name = ".init";  break;
 	    case RELOC_SECTION_LIT8:  sec_name = ".lit8";  break;
 	    case RELOC_SECTION_LIT4:  sec_name = ".lit4";  break;
+	    case RELOC_SECTION_XDATA: sec_name = ".xdata"; break;
+	    case RELOC_SECTION_PDATA: sec_name = ".pdata"; break;
+	    case RELOC_SECTION_LITA:  sec_name = ".lita";  break;
+	    case RELOC_SECTION_ABS:   sec_name = ".abs";   break;
 	    default: abort ();
 	    }
 
 	  sec = bfd_get_section_by_name (abfd, sec_name);
 	  if (sec == (asection *) NULL)
-	    abort ();
+	    sec = bfd_make_section (abfd, sec_name);
 	  rptr->sym_ptr_ptr = sec->symbol_ptr_ptr;
 
 	  rptr->addend = - bfd_get_section_vma (abfd, sec);
-	  if (intern.r_type == ECOFF_R_GPREL
-	      || intern.r_type == ECOFF_R_LITERAL)
-	    rptr->addend += ecoff_data (abfd)->gp;
 	}
 
       rptr->address = intern.r_vaddr - bfd_get_section_vma (abfd, section);
-      rptr->howto = &ecoff_howto_table[intern.r_type];
 
-      /* If the type is ECOFF_R_IGNORE, make sure this is a reference
-	 to the absolute section so that the reloc is ignored.  */
-      if (intern.r_type == ECOFF_R_IGNORE)
-	rptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+      /* Let the backend select the howto field and do any other
+	 required processing.  */
+      (*backend->finish_reloc) (abfd, &intern, rptr);
     }
 
   bfd_release (abfd, external_relocs);
@@ -2188,42 +1730,6 @@ ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
   *relptr = (arelent *) NULL;
 
   return section->reloc_count;
-}
-
-/* Get the howto structure for a generic reloc type.  */
-
-CONST struct reloc_howto_struct *
-ecoff_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
-     bfd_reloc_code_real_type code;
-{
-  int ecoff_type;
-
-  switch (code)
-    {
-    case BFD_RELOC_16:
-      ecoff_type = ECOFF_R_REFHALF;
-      break;
-    case BFD_RELOC_32:
-      ecoff_type = ECOFF_R_REFWORD;
-      break;
-    case BFD_RELOC_MIPS_JMP:
-      ecoff_type = ECOFF_R_JMPADDR;
-      break;
-    case BFD_RELOC_HI16_S:
-      ecoff_type = ECOFF_R_REFHI;
-      break;
-    case BFD_RELOC_LO16:
-      ecoff_type = ECOFF_R_REFLO;
-      break;
-    case BFD_RELOC_MIPS_GPREL:
-      ecoff_type = ECOFF_R_GPREL;
-      break;
-    default:
-      return (CONST struct reloc_howto_struct *) NULL;
-    }
-
-  return &ecoff_howto_table[ecoff_type];
 }
 
 /* Provided a BFD, a section and an offset into the section, calculate
@@ -3713,24 +3219,8 @@ ecoff_write_object_contents (abfd)
 	  reloc = *reloc_ptr_ptr;
 	  sym = *reloc->sym_ptr_ptr;
 
-	  /* This must be an ECOFF reloc.  */
-	  BFD_ASSERT (reloc->howto != (reloc_howto_type *) NULL
-		      && reloc->howto >= ecoff_howto_table
-		      && (reloc->howto
-			  < (ecoff_howto_table + ECOFF_HOWTO_COUNT)));
-
 	  in.r_vaddr = reloc->address + bfd_get_section_vma (abfd, current);
 	  in.r_type = reloc->howto->type;
-
-	  /* If this is a REFHI reloc, the next one must be a REFLO
-	     reloc for the same symbol.  */
-	  BFD_ASSERT (in.r_type != ECOFF_R_REFHI
-		      || (reloc_ptr_ptr < reloc_end
-			  && (reloc_ptr_ptr[1]->howto
-			      != (reloc_howto_type *) NULL)
-			  && (reloc_ptr_ptr[1]->howto->type
-			      == ECOFF_R_REFLO)
-			  && (sym == *reloc_ptr_ptr[1]->sym_ptr_ptr)));
 
 	  if ((sym->flags & BSF_SECTION_SYM) == 0)
 	    {

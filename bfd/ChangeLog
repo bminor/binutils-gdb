@@ -18,6 +18,15 @@ Thu Aug 12 10:32:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 Thu Aug 12 08:30:05 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* coff-aplha.alpha.c (alpha_howto_table, alpha_finish_reloc,
+	alpha_ecoff_swap_reloc_{in,out}, alpha_bfd_reloc_type_lookup):
+	Read and write Alpha relocs.  Can't process them yet.
+	* ecoff.c (ecoff_slurp_reloc_table): Recognize new reloc sections.
+	If the section does not already exist, create it.
+
+	* ecoffswap.h (ecoff_swap_pdr_{in,out}): Handle new fields defined
+	on the Alpha.
+
 	* libecoff.h (ecoff_backend_data): Added constructor_reloc and
 	finish_reloc fields.
 	* ecoff.c: Move MIPS reloc support from here...
