@@ -1,3 +1,8 @@
+2003-04-04  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (create_sentinel_frame): Initialize the sentinel frame's
+	ID to NULL.
+
 2003-04-01  Adam Fedor  <fedor@gnu.org>
 
 	* gdb/objc-lang.c (selectors_info): Replace calls to

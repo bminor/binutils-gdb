@@ -512,6 +512,10 @@ create_sentinel_frame (struct regcache *regcache)
      frame's PC may require information such as the frame's thread's
      stop reason.  Is it possible to get to that?  */
   frame->pc = frame_pc_unwind (frame);
+  /* Make the sentinel frame's ID valid, but invalid.  That way all
+     comparisons with it should fail.  */
+  frame->id_p = 1;
+  frame->id = null_frame_id;
   return frame;
 }
 
