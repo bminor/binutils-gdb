@@ -104,12 +104,18 @@ md_begin ()
   cgen_set_parse_operand_fn (gas_cgen_cpu_desc, gas_cgen_parse_operand);
 }
 
+static bfd_boolean skipping_fptr = FALSE;
+
 void
 md_assemble (str)
      char * str;
 {
   xstormy16_insn insn;
   char *    errmsg;
+
+  /* Make sure that if we had an erroneous input line which triggered
+     the skipping_fptr boolean that it does not affect following lines.  */
+  skipping_fptr = FALSE;
 
   /* Initialize GAS's cgen interface for a new instruction.  */
   gas_cgen_init_parse ();
@@ -154,9 +160,28 @@ md_operand (e)
 	  goto err;
 	}
       input_line_pointer++;
+      SKIP_WHITESPACE ();
 
       if (e->X_op != O_symbol)
 	as_bad ("Not a symbolic expression");
+      else if (* input_line_pointer == '-')
+	/* We are computing the difference of two function pointers
+	   like this:
+
+	    .hword  @fptr (foo) - @fptr (bar)
+
+	  In this situation we do not want to generate O_fptr_symbol
+	  operands because the result is an absolute value, not a
+	  function pointer.
+
+	  We need to make the check here, rather than when the fixup
+	  is generated as the function names (foo & bar in the above
+	  example) might be local symbols and we want the expression
+	  to be evaluated now.  This kind of thing can happen when
+	  gcc is generating computed gotos.  */
+	skipping_fptr = TRUE;
+      else if (skipping_fptr)
+	skipping_fptr = FALSE;
       else
         e->X_op = O_fptr_symbol;
     }
