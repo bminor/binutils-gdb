@@ -3857,6 +3857,9 @@ The display for frame zero does not begin with a program counter
 value, indicating that your program has stopped at the beginning of the
 code for line @code{993} of @code{builtin.c}.
 
+@kindex set backtrace-below-main
+@kindex show backtrace-below-main
+
 Most programs have a standard entry point---a place where system libraries
 and startup code transition into user code.  For C this is @code{main}.
 When @value{GDBN} finds the entry function in a backtrace it will terminate
@@ -12533,6 +12536,7 @@ current ABI.
 
 @cindex OS ABI
 @kindex set osabi
+@kindex show osabi
 
 One @value{GDBN} configuration can debug binaries for multiple operating
 system targets, either via remote debugging or native emulation. 

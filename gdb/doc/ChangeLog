@@ -1,5 +1,11 @@
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.texinfo (Controlling GDB): Add @kindex for
+	"show osabi".
+	(Backtraces): Add @kindex's for backtrace-below-main.
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.texinfo (Controlling GDB): Document "set osabi".
 
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
