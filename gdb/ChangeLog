@@ -1,5 +1,8 @@
 Fri Oct 15 21:29:40 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* h8300-tdep.c, h8500-tdep.c: Define sim_load only, but not
+	sim_kill, sim_open, or sim_set_args.
+
 	* stack.c (print_stack_frame): Put catch_errors around
 	print_frame_info so (for example) error printing source doesn't
 	cause auto-displays to get skipped in normal_stop.
