@@ -48,6 +48,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #  define TERMINAL struct sgttyb
 #endif
 
+extern void make_xmodem_packet();
+extern void print_xmodem_packet();
+
 struct monitor_ops *current_monitor;
 extern struct cmd_list_element *setlist;
 extern struct cmd_list_element *unsetlist;
@@ -58,7 +61,6 @@ extern char *target_name;
 
 static int hashmark;				/* flag set by "set hash" */
 
-/* FIXME: Replace with sr_get_debug ().  */
 #define LOG_FILE "monitor.log"
 #if defined (LOG_FILE)
 FILE *log_file;
@@ -66,9 +68,10 @@ FILE *log_file;
 
 static int timeout = 24;
 
-/* Descriptor for I/O to remote machine.  Initialize it to NULL so that
-   monitor_open knows that we don't have a file open when the program starts.
-   */
+/* 
+ * Descriptor for I/O to remote machine.  Initialize it to NULL so that
+ * monitor_open knows that we don't have a file open when the program starts.
+ */
 static serial_t monitor_desc = NULL;
 
 /* sets the download protocol, choices are srec, generic, boot */
@@ -77,6 +80,20 @@ static char *loadtype_str;
 static void set_loadtype_command();
 static void monitor_load_srec();
 static int monitor_write_srec();
+
+/*
+ * these definitions are for xmodem protocol
+ */
+#define SOH	0x01
+#define ACK	0x06
+#define NAK	0x15
+#define EOT	0x04
+#define CANCEL	0x18
+#define GETACK		getacknak(ACK)
+#define GETNAK		getacknak(NAK)
+#define XMODEM_DATASIZE	128		/* the data   size is ALWAYS 128 */
+#define XMODEM_PACKETSIZE	131	/* the packet size is ALWAYS 132 (zero based) */
+#define XMODEM		1
 
 /*
  * set_loadtype_command -- set the type for downloading. Check to make
@@ -134,6 +151,21 @@ printf_monitor(va_alist)
   if (SERIAL_WRITE(monitor_desc, buf, strlen(buf)))
     fprintf(stderr, "SERIAL_WRITE failed: %s\n", safe_strerror(errno));
 }
+/*
+ * write_monitor -- send raw data to monitor.
+ */
+static void
+write_monitor(data, len)
+     char data[];
+     int len;
+{
+  if (SERIAL_WRITE(monitor_desc, data, len))
+    fprintf(stderr, "SERIAL_WRITE failed: %s\n", safe_strerror(errno));
+ 
+  *(data + len+1) = '\0';
+  debuglogs (1, "write_monitor(), Sending: \"%s\".", data);
+
+}
 
 /*
  * debuglogs -- deal with debugging info to multiple sources. This takes
@@ -155,7 +187,7 @@ debuglogs(va_alist)
 
   level = va_arg(args, int);			/* get the debug level */
   if ((level <0) || (level > 100)) {
-    error ("Bad argument passed to debuglogs()");
+    error ("Bad argument passed to debuglogs(), needs debug level");
     return;
   }
       
@@ -222,7 +254,7 @@ readchar(timeout)
 
   c = SERIAL_READCHAR(monitor_desc, timeout);
 
-  if (sr_get_debug() > 4)
+  if (sr_get_debug() > 5)
     putchar(c & 0x7f);
 
 #ifdef LOG_FILE
@@ -238,7 +270,7 @@ readchar(timeout)
       return c;		/* Polls shouldn't generate timeout errors */
     error("Timeout reading from remote system.");
 #ifdef LOG_FILE
-      fputc ("ERROR: Timeout reading from remote system", log_file);
+      fputs ("ERROR: Timeout reading from remote system", log_file);
 #endif
   }
   perror_with_name("remote-monitor");
@@ -300,11 +332,6 @@ static void
 expect_prompt(discard)
      int discard;
 {
-#if defined (LOG_FILE)
-  /* This is a convenient place to do this.  The idea is to do it often
-     enough that we never lose much data if we terminate abnormally.  */
-  fflush(log_file);
-#endif
   expect (PROMPT, discard);
 }
 
@@ -316,6 +343,7 @@ junk(ch)
      char ch;
 {
   switch (ch) {
+  case '\0':
   case ' ':
   case '-':
   case '\t':
@@ -357,7 +385,7 @@ get_hex_digit(ignore)
       ;
     else {
       expect_prompt(1);
-      error("Invalid hex digit from remote system.");
+      error("Invalid hex digit from remote system. (0x%x)", ch);
     }
   }
 }
@@ -963,7 +991,8 @@ monitor_remove_breakpoint (addr, shadow)
 /* monitor_load -- load a file. This file determines which of the
  *	supported formats to use. The current types are:
  *	FIXME: not all types supported yet.
- *	default - reads any file using bfd and writes it to memory.
+ *	default - reads any file using bfd and writes it to memory. This
+ *		is really slow.
  *	srec    - reads binary file using bfd and writes it as an
  *		ascii srecord.
  *	xmodem-bin - reads a binary file using bfd, and  downloads it
@@ -990,7 +1019,7 @@ monitor_load (file, fromtty)
   }
 
   if (STREQ (loadtype_str, "srec")) {		/* load an srecord by converting */
-    monitor_load_srec(file, fromtty);		/* if from a binary */
+    monitor_load_srec(file, 0);			/* if from a binary */
   }
 
   if (STREQ (loadtype_str, "ascii-srec")) {	/* load an srecord file */
@@ -998,7 +1027,7 @@ monitor_load (file, fromtty)
   }
 
   if (STREQ (loadtype_str, "xmodem-srec")) {	/* load an srecord using the */
-   error ("This protocol is not implemented yet.");	/* xmodem protocol */
+    monitor_load_srec(file, XMODEM);
   }
 }
 
@@ -1024,7 +1053,7 @@ monitor_load_ascii_srec (file, fromtty)
   }
 
   printf_monitor (LOAD_CMD);
-
+  sleep(1);
   while (!feof (download)) {
     bytes_read = fread (buf, sizeof (char), DOWNLOAD_LINE_SIZE, download);
     if (hashmark) {
@@ -1083,17 +1112,41 @@ monitor_command (args, fromtty)
 }
 
 /*
- * monitor_load_srec -- download a binary file by converting it to srecords.
+ * monitor_load_srec -- download a binary file by converting it to srecords. This
+ *	will also use xmodem to download the resulting file.
+ *
+ *	A download goes like this when using xmodem:
+ *	Receiver:		Sender
+ *	NAK ---------->
+ *		<-------- (packet)	[SOH|1|1|data|SUM]
+ *	ACK ---------->
+ *		<-------- (packet)	[SOH|2|2|data|SUM]
+ *	ACK ---------->
+ *		<-------- EOT
+ *	ACK ---------->
+ *
+ *	ACK = 0x06
+ *	NAK = 0x15
+ *	EOT = 0x04
+ *
  */
 static void
-monitor_load_srec (args, fromtty)
+monitor_load_srec (args, protocol)
      char *args;
-     int fromtty;
+     int protocol;
 {
   bfd *abfd;
   asection *s;
   char buffer[1024];
-  int srec_frame = SREC_SIZE;
+  char srec[1024];
+  char packet[XMODEM_PACKETSIZE];
+  int i;
+  int retries;
+  int type = 0;					/* default to a type 0, header record */
+  int srec_frame = 57;				/* FIXME: this must be 57 There is 12 bytes
+						 of header, and 2 bytes of checksum at the end.
+						 The problem is an xmodem packet holds exactly
+						 128 bytes. */
 
   abfd = bfd_openr (args, 0);
   if (!abfd) {
@@ -1106,174 +1159,309 @@ monitor_load_srec (args, fromtty)
     return;
   }
   
+  printf_monitor (LOAD_CMD);			/* tell the monitor to load */
+  if (protocol == XMODEM) {			/* get the NAK from the target */
+    if (GETNAK) {
+      debuglogs (3, "Got the NAK to start loading");
+    } else {
+      printf_monitor ("%c", EOT);
+      debuglogs (3, "Never got the NAK to start loading");
+      error ("Never got the NAK to start loading");
+    }
+  }
+  
   s = abfd->sections;
   while (s != (asection *) NULL) {
-    srec_frame = SREC_SIZE;
     if (s->flags & SEC_LOAD) {
-      int i;
       char *buffer = xmalloc (srec_frame);
-      printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma, s->vma + s
-		       ->_raw_size);
+      printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma, s->vma + s->_raw_size);
       fflush (stdout);
       for (i = 0; i < s->_raw_size; i += srec_frame) {
 	if (srec_frame > s->_raw_size - i)
 	  srec_frame = s->_raw_size - i;
 	
 	bfd_get_section_contents (abfd, s, buffer, i, srec_frame);
-	monitor_write_srec (s->vma + i, buffer, srec_frame);
-	printf_filtered ("*");
+	monitor_make_srec (srec, type, s->vma + i, buffer, srec_frame);
+	if (protocol == XMODEM) {		/* send a packet using xmodem */
+	  make_xmodem_packet (packet, srec, XMODEM_DATASIZE);
+	  write_monitor (packet, XMODEM_PACKETSIZE+1);
+	  retries = 0;
+	  while (retries++ <= 3) {
+	    if (GETNAK) {			/* Resend packet */
+	      debuglogs (3, "Got a NAK, resending packet");
+	      sleep(1);
+	      write_monitor (packet, XMODEM_PACKETSIZE+1); /* send it again */
+	      if (GETACK)			/* ACKnowledged, get next data chunk */
+		break;
+	    }
+	  }
+	  if (retries >= 4) {		/* too many tries, must be hosed */
+	    printf_monitor ("%c", EOT);
+	    error ("Never got a ACK after sending an xmodem packet");
+	  }
+	} else {				/* no protocols at all */
+	  printf_monitor ("%s\n", srec);
+	}
+	if (hashmark)
+	  printf_filtered ("#");
+	type = 3;				/* switch to a 4 byte address record */
 	fflush (stdout);
       }
       printf_filtered ("\n");
       free (buffer);
+    } else {
+      debuglogs (3, "%s doesn't need to be loaded", s->name);
     }
     s = s->next;
   }
-  sprintf (buffer, "rs ip %lx", (unsigned long) abfd->start_address);
-  printf_monitor (buffer);
+  
+  /*
+     write a type 7 terminator record. no data for a type 7,
+     and there is no data, so len is 0. 
+   */
+  monitor_make_srec (srec, 7, abfd->start_address, "", 0);
+  printf_monitor ("%s\n", srec);
+  if (protocol == XMODEM) {
+    printf_monitor ("%c", EOT);
+    if (!GETACK)
+      error ("Never got ACK after sending EOT");
+  }
+
+  if (hashmark) 
+    putchar ('\n');
+  
   expect_prompt ();
 }
 
+/*
+ * getacknak -- get an ACK or a NAK from the target.
+ *		returns 1 (true) or 0 (false) This is
+ *		for xmodem. ANy string starting with "***"
+ *		is an error message from the target.
+ *	Here's a few from the WinBond w89k "Cougar" PA board.
+ *		*** Too many errors found.
+ *		*** Bad command
+ *		*** Command syntax error
+ */
+int
+getacknak (byte)
+     int byte;
+{
+  char character;
+  int i;
+  
+  i = 0;
+  while (i++ < 60) {
+    character = (char)readchar (0);
+    if (character == 0xfffffffe) {		/* empty uart */
+      if (sr_get_debug() > 3)
+	putchar ('.');
+      fflush (stdout);
+      sleep (1);
+      continue;
+    }
+    if (character == CANCEL) {			/* target aborted load */
+      expect_prompt (0);
+      error ("Got a CANCEL from the target.");
+    }
+    if (character == '*') {			/* look for missed error message */
+      expect_prompt (0);
+      error ("Got an error message from the target");
+    }
+    debuglogs (3, "Got a %s (0x%x or \'%c\'), expecting a %s.\n",
+	       (character == ACK) ? "ACK" : (character == NAK) ? "NAK" : "BOGUS",
+	       character,  character, (byte == ACK) ? "ACK" : "NAK");
+    if (character == byte)			/* got what we wanted */
+      return 1;
+    if (character == ((byte == ACK) ? NAK : ACK)) {	/* got the opposite */
+      debuglogs (3, "Got the opposite, wanted 0x%x, got a 0x%x", byte, character);
+      return 0;
+    }
+    sleep (1); 
+  }
+  return 0;
+}
 
-static int
-monitor_write_srec (memaddr, myaddr, len)
+/*
+ * monitor_make_srec -- make an srecord. This writes each line, one at a
+ *	time, each with it's own header and trailer line.
+ *	An srecord looks like this:
+ *
+ * byte count-+     address
+ * start ---+ |        |       data        +- checksum
+ *	    | |        |                   |
+ *	  S01000006F6B692D746573742E73726563E4
+ *	  S315000448600000000000000000FC00005900000000E9
+ *	  S31A0004000023C1400037DE00F023604000377B009020825000348D
+ *	  S30B0004485A0000000000004E
+ *	  S70500040000F6
+ *
+ *	S<type><length><address><data><checksum>
+ *
+ *      Where
+ *      - length
+ *        is the number of bytes following upto the checksum. Note that
+ *        this is not the number of chars following, since it takes two
+ *        chars to represent a byte.
+ *      - type
+ *        is one of:
+ *        0) header record
+ *        1) two byte address data record
+ *        2) three byte address data record
+ *        3) four byte address data record
+ *        7) four byte address termination record
+ *        8) three byte address termination record
+ *        9) two byte address termination record
+ *       
+ *      - address
+ *        is the start address of the data following, or in the case of
+ *        a termination record, the start address of the image
+ *      - data
+ *        is the data.
+ *      - checksum
+ *	  is the sum of all the raw byte data in the record, from the length
+ *        upwards, modulo 256 and subtracted from 255.
+ */
+int
+monitor_make_srec (buffer, type, memaddr, myaddr, len)
+     char *buffer;
+     int type;
      CORE_ADDR memaddr;
      unsigned char *myaddr;
      int len;
 {
-  int done;
   int checksum;
-  int x;
-  int retries;
-  int srec_bytes = 40;
-  int srec_max_retries = 3;
-  int srec_echo_pace = 0;
-  int srec_sleep = 0;
-  int srec_noise = 0;
-  char *buffer = alloca ((srec_bytes + 8) << 1);
+  int i;
+  char *buf;
 
-  retries = 0;
-
-  while (1) {					/* FIXME !!! */
-    done = 0;
-    
-    if (retries > srec_max_retries)
-      return(-1);
-    
-      if (retries > 0) {
-	if (sr_get_debug() > 0)
-	  printf("\n<retrying...>\n");
-	
-          /* This gr_expect_prompt call is extremely important.  Without
-             it, we will tend to resend our packet so fast that it
-             will arrive before the bug monitor is ready to receive
-             it.  This would lead to a very ugly resend loop.  */
-	
-	gr_expect_prompt();
-      }
-    
-    /* FIXME: this is just start_load pasted in... */
-    { char *command;
-    command = (srec_echo_pace ? "lo 0 ;x" : "lo 0");
-    sr_write_cr (command);
-    sr_expect (command);
-    sr_expect ("\r\n");
-#if 0
-    bug_srec_write_cr ("S0030000FC");
-#endif
-    }
-    /* end of hack */
-
-      while (done < len) {
-	int thisgo;
-	int idx;
-	char *buf = buffer;
-	CORE_ADDR address;
-	
-	checksum = 0;
-	thisgo = len - done;
-	if (thisgo > srec_bytes)
-	  thisgo = srec_bytes;
-	
-	address = memaddr + done;
-	sprintf (buf, "S3%02X%08X", thisgo + 4 + 1, address);
-	buf += 12;
-	
-	checksum += (thisgo + 4 + 1
-		     + (address & 0xff)
-		     + ((address >>  8) & 0xff)
-		     + ((address >> 16) & 0xff)
-		     + ((address >> 24) & 0xff));
-	
-	for (idx = 0; idx < thisgo; idx++) {
-	  sprintf (buf, "%02X", myaddr[idx + done]);
-	  checksum += myaddr[idx + done];
-	  buf += 2;
-	}
-	
-	if (srec_noise > 0) {
-	  /* FIXME-NOW: insert a deliberate error every now and then.
-	     This is intended for testing/debugging the error handling
-	     stuff.  */
-	  static int counter = 0;
-	  if (++counter > srec_noise) {
-	    counter = 0;
-	    ++checksum;
-	  }
-	}
-	
-	sprintf(buf, "%02X", ~checksum & 0xff);
-#if 0
-	bug_srec_write_cr (buffer);
-#endif
-	
-	if (srec_sleep != 0)
-	  sleep(srec_sleep);
-	
-	/* This pollchar is probably redundant to the gr_multi_scan
-	   below.  Trouble is, we can't be sure when or where an
-	   error message will appear.  Apparently, when running at
-	   full speed from a typical sun4, error messages tend to
-	   appear to arrive only *after* the s7 record.   */
-	
-	if ((x = sr_pollchar()) != 0) {
-	  if (sr_get_debug() > 0)
-	    printf("\n<retrying...>\n");
-
-	  ++retries;
-	  
-	  /* flush any remaining input and verify that we are back
-	     at the prompt level. */
-	  gr_expect_prompt();
-	  /* start all over again. */
-    /* FIXME: this is just start_load pasted in... */
-    { char *command;
-    command = (srec_echo_pace ? "lo 0 ;x" : "lo 0");
-    sr_write_cr (command);
-    sr_expect (command);
-    sr_expect ("\r\n");
-#if 0
-    bug_srec_write_cr ("S0030000FC");
-#endif
-    }
-    /* end of hack */
-
-	  done = 0;
-	  continue;
-	}
-	
-	done += thisgo;
-      }
-#if 0    
-    bug_srec_write_cr("S7060000000000F9");
-#endif
-    ++retries;
-    
-    /* Having finished the load, we need to figure out whether we
-       had any errors.  */
+  buf = buffer;
+  debuglogs (4, "monitor_make_srec (buffer=0x%x, type=%d, memaddr=0x%x, len=%d",
+	                            buffer, type, memaddr, len); 
+  checksum = 0;
+  
+  /*
+     create the header for the srec. 4 is the number of bytes in the address,
+     and 1 is the number of bytes in the count.
+   */
+  if (type == 0)				/* FIXME: type 0 is optional */
+    type = 3;					/* so use data as it works */
+  sprintf (buf, "S%d%02X%08X", type, len + 4 + 1, memaddr);
+  buf += 12;
+  
+  checksum += (len + 4 + 1			/* calculate the checksum */
+	       + (memaddr & 0xff)
+	       + ((memaddr >>  8) & 0xff)
+	       + ((memaddr >> 16) & 0xff)
+	       + ((memaddr >> 24) & 0xff));
+  
+  for (i = 0; i < len; i++) {		/* build the srecord */
+    sprintf (buf, "%02X", myaddr[i]);
+    checksum += myaddr[i];
+    buf += 2;
   }
+
+  sprintf(buf, "%02X", ~checksum & 0xff);	/* add the checksum */
+  debuglogs (3, "srec is \"%s\"", buffer);
   
   return(0);
+}
+
+/*
+ * make_xmodem_packet -- this takes a 128 bytes of data and makes a packet
+ *	out of it.
+ *
+ *	Each packet looks like this:
+ *	+-----+-------+-------+------+-----+
+ *	| SOH | Seq1. | Seq2. | data | SUM |
+ *	+-----+-------+-------+------+-----+
+ *	SOH  = 0x01
+ *	Seq1 = The sequence number.
+ *	Seq2 = The complement of the sequence number.
+ *	Data = A 128 bytes of data.
+ *	SUM  = Add the contents of the 128 bytes and use the low-order
+ *	       8 bits of the result.
+ */
+void
+make_xmodem_packet (packet, data, len)
+     unsigned char packet[];
+     unsigned char *data;
+     int len;
+{
+  static int sequence = 1;
+  int i, sum;
+  unsigned char *buf;
+  
+  buf = data;
+  /* build the packet header */
+  packet[0] = SOH;
+  packet[1] = sequence;
+  packet[2] = 255 - sequence;
+  sequence++;
+#if 0
+  packet[2] = ~sequence++;			/* the complement is the sequence checksum */
+#endif
+  
+  sum = 0;					/* calculate the data checksum */
+  for (i = 3; i <= len + 2; i++) {
+    packet[i] = *buf;
+    sum += *buf;
+    buf++;
+  }
+
+  for (i = len+1 ; i <= XMODEM_DATASIZE ; i++) {	/* add padding for the rest of the packet */
+    packet[i] = '0';
+  }
+
+  packet[XMODEM_PACKETSIZE] = sum & 0xff;	/* add the checksum */
+
+  if (sr_get_debug() > 4)
+    debuglogs (4, "The xmodem checksum is %d (0x%x)\n", sum & 0xff, sum & 0xff);
+    print_xmodem_packet (packet);
+}
+
+/*
+ * print_xmodem_packet -- print the packet as a debug check
+ */
+void
+print_xmodem_packet(packet)
+     char packet[];
+{
+  int i;
+  static int lastseq;
+  int sum;
+
+  /* take apart the packet header the packet header */
+  if (packet[0] == SOH) {
+     ("SOH");
+  } else {
+    error ("xmodem: SOH is wrong");
+  }
+  
+  /* check the sequence */
+  if (packet[1] != 0) {
+    lastseq = packet[1];
+    if (packet[2] != ~lastseq)
+      error ("xmodem: Sequence checksum is wrong");
+    else
+      printf_filtered (" %d %d", lastseq, ~lastseq);
+  }
+  
+  /* check the data checksum */
+  sum = 0;
+  for (i = 3; i <= XMODEM_DATASIZE; i++) {
+    sum += packet[i];
+  }
+
+  /* ignore the data */
+#if 0
+  printf (" [128 bytes of data] %d\n", sum & 0xff);
+#endif
+  printf_filtered (" [%s] %d\n", packet, sum & 0xff);
+
+  if ((packet[XMODEM_PACKETSIZE] & 0xff) != (sum & 0xff)) {
+    debuglogs (4, "xmodem: data checksum wrong, got a %d", packet[XMODEM_PACKETSIZE] & 0xff);
+  }
+  putchar ('\n');
 }
 
 /*

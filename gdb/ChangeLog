@@ -1,3 +1,10 @@
+Thu Nov 10 15:16:21 1994  Rob Savoye  <rob@rtl.cygnus.com>
+
+	* rom68k-rom.c: New file. Replaces the old remote-mon.c and uses
+	the new generic ROM interface in monitor.c.
+	* config/m68k/monitor.mt: Use new ROM support.
+	* monitor.c: Add support for xmodem download protocol.
+
 Wed Nov  9 18:46:24 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* findvar.c (find_saved_register): Fix a frame variable name.
