@@ -1,3 +1,11 @@
+Wed Aug  2 14:46:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (enum packet_detect, packet_support_enums,
+ 	packet_support_auto, packet_enable, packet_disable): Delete.
+	(show_packet_config_cmd, set_packet_config_cmd,
+ 	init_packet_config): Use add_set_auto_boolean_cmd.
+	* TODO: Update.
+	
 Wed Aug  2 13:06:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-udi.c (udi_xfer_inferior_memory, udi_files_info,

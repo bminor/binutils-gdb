@@ -518,52 +518,18 @@ enum packet_support
     PACKET_DISABLE
   };
 
-enum packet_detect
-  {
-    PACKET_AUTO_DETECT = 0,
-    PACKET_MANUAL_DETECT
-  };
-
 struct packet_config
   {
-    const char *state;
     char *name;
     char *title;
-    enum packet_detect detect;
+    enum cmd_auto_boolean detect;
     enum packet_support support;
   };
-
-static const char packet_support_auto[] = "auto";
-static const char packet_enable[] = "enable";
-static const char packet_disable[] = "disable";
-static const char *packet_support_enums[] =
-{
-  packet_support_auto,
-  packet_enable,
-  packet_disable,
-  0,
-};
 
 static void
 set_packet_config_cmd (struct packet_config *config, struct cmd_list_element *c)
 {
-  if (config->state == packet_enable)
-    {
-      config->detect = PACKET_MANUAL_DETECT;
-      config->support = PACKET_ENABLE;
-    }
-  else if (config->state == packet_disable)
-    {
-      config->detect = PACKET_MANUAL_DETECT;
-      config->support = PACKET_DISABLE;
-    }
-  else if (config->state == packet_support_auto)
-    {
-      config->detect = PACKET_AUTO_DETECT;
-      config->support = PACKET_SUPPORT_UNKNOWN;
-    }
-  else
-    internal_error ("Bad enum value");
+  init_packet_config (config);
 }
 
 static void
@@ -584,13 +550,15 @@ show_packet_config_cmd (struct packet_config *config)
     }
   switch (config->detect)
     {
-    case PACKET_AUTO_DETECT:
+    case CMD_AUTO_BOOLEAN_AUTO:
       printf_filtered ("Support for remote protocol `%s' (%s) packet is auto-detected, currently %s.\n",
 		       config->name, config->title, support);
       break;
-    case PACKET_MANUAL_DETECT:
-      printf_filtered ("Support for remote protocol `%s' (%s) is currently %s.\n",
+    case CMD_AUTO_BOOLEAN_TRUE:
+    case CMD_AUTO_BOOLEAN_FALSE:
+      printf_filtered ("Support for remote protocol `%s' (%s) packet is currently %s.\n",
 		       config->name, config->title, support);
+      break;
     }
 }
 
@@ -611,15 +579,15 @@ add_packet_config_cmd (config, name, title, set_func, show_func,
   char *full_name;
   config->name = name;
   config->title = title;
+  config->detect = CMD_AUTO_BOOLEAN_AUTO;
+  config->support = PACKET_SUPPORT_UNKNOWN;
   asprintf (&set_doc, "Set use of remote protocol `%s' (%s) packet",
 	    name, title);
   asprintf (&show_doc, "Show current use of remote protocol `%s' (%s) packet",
 	    name, title);
   asprintf (&full_name, "%s-packet", name);
-  c = add_set_enum_cmd (full_name,
-			class_obscure, packet_support_enums,
-			&config->state,
-			set_doc, setlist);
+  c = add_set_auto_boolean_cmd (full_name, class_obscure,
+				&config->detect, set_doc, setlist);
   c->function.sfunc = set_func;
   add_cmd (full_name, class_obscure, show_func, show_doc, showlist);
 }
@@ -629,11 +597,14 @@ init_packet_config (struct packet_config *config)
 {
   switch (config->detect)
     {
-    case PACKET_AUTO_DETECT:
-      config->support = PACKET_SUPPORT_UNKNOWN;
+    case CMD_AUTO_BOOLEAN_TRUE:
+      config->support = PACKET_ENABLE;
       break;
-    case PACKET_MANUAL_DETECT:
-      /* let the user beware */
+    case CMD_AUTO_BOOLEAN_FALSE:
+      config->support = PACKET_DISABLE;
+      break;
+    case CMD_AUTO_BOOLEAN_AUTO:
+      config->support = PACKET_SUPPORT_UNKNOWN;
       break;
     }
 }

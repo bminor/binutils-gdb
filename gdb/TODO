@@ -632,13 +632,6 @@ Get DEC/Compaq to contribute their Modula-3 support.
 
 --
 
-set/show remote X-packet ...
-
-``(gdb) help set remote X-packet'' doesn't list the applicable
-responses.  The help message needs to be expanded.
-
---
-
 Remote protocol doco feedback.
 
 Too much feedback to mention needs to be merged in (901660).  Search
