@@ -1,0 +1,517 @@
+\input texinfo
+@setfilename binutils.info
+@synindex ky cp
+@c
+@c This file documents the GNU binary utilities "ar", "ld", "objdump", "nm", 
+@c "size", "strip", and "ranlib".
+@c
+@c Copyright (C) 1991 Free Software Foundation, Inc.
+@c 
+@c This text may be freely distributed under the terms of the GNU
+@c General Public License.
+@c
+@c $Id$
+@tex
+@finalout
+@c @smallbook
+@end tex
+@c @cropmarks
+@setchapternewpage odd
+@settitle GNU Binary Utilities
+@titlepage
+@title{The GNU Binary Utilities}
+@sp 1
+@subtitle January 1991
+@author{Roland H. Pesch}
+@author{Cygnus Support}
+@page
+
+@tex
+\def\$#1${{#1}} % Kluge: collect RCS revision info without $...$
+\xdef\manvers{\$Revision$} % For use in headers, footers too
+{\parskip=0pt \hfill Cygnus Support\par \hfill \manvers\par \hfill
+\TeX{}info \texinfoversion\par }
+@end tex
+
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1991 Free Software Foundation, Inc.
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions.
+@end titlepage
+
+@ifinfo
+@node Top, ar, (dir), (dir)
+This file documents the GNU binary utilities @samp{ar}, @samp{ld},
+@samp{objdump}, @samp{nm}, @samp{size}, @samp{strip}, and
+@samp{ranlib}.@refill 
+
+Copyright @copyright{} 1991 Free Software Foundation, Inc.
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries a copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+
+@end ignore
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions.
+@end ifinfo
+
+@menu
+* ar::				ar
+* ld::				ld
+* nm::				nm
+* objdump::			objdump
+* ranlib::			ranlib
+* size::			size
+* strip::			strip
+
+@end menu
+
+@node ar, ld, Top, Top
+@chapter ar
+
+@smallexample
+  ar [-]@var{Op}@var{Mod} [ @var{membername} ] @var{archive} @var{files}@dots{}
+@end smallexample
+
+The GNU @code{ar} program creates, modifies, and extracts
+archives.  An @dfn{archive} is a single file holding a collection of
+other files in a structure that makes it possible to retrieve
+the original individual files (called @dfn{members} of the archive).
+
+The original files' contents, mode (permissions), timestamp, owner, and
+group are preserved in the archive, and may be reconstituted on
+extraction.  
+
+Only the first fifteen characters of a file name are kept in archives.
+@c Note: with next (BFD) version, this will depend on obj format.
+
+@code{ar} is considered a binary utility because archives of this sort
+are most often used as @dfn{libraries} holding commonly needed
+subroutines.
+
+@code{ar} will create an index to the symbols defined in relocatable
+object modules in the archive when you specify the option @samp{s}.
+Once created, this index is updated in the archive whenever @code{ar}
+makes a change to its contents.  An archive with such an index speeds up
+linking to the library, and allows routines in the library to call each
+other without regard to their placement in the archive.
+@c This auto-update may happen-always only for WRS version; Gumby says, for
+@c instance, that it doesn't happen with 'q' updates elsewhere.
+
+You may use @samp{nm -s} or @samp{nm +print-symdefs} to list this index
+table.  If an archive lacks the table, another form of @code{ar} called
+@code{ranlib} can be used to add just the table.
+
+@code{ar} insists on at least two arguments to execute: one
+keyletter specifying the @emph{operation} (optionally accompanied by other
+keyletters specifying @emph{modifiers}), and the archive name to act on.
+
+Most operations can also accept further @var{files} arguments,
+specifying particular files to operate on.
+
+GNU @code{ar} allows you to mix the operation code and modifier flags in
+any order, within the first command-line argument.
+
+If you wish, you may precede the first command-line argument with a
+dash.
+
+The @var{Op} keyletter specifies what operation to execute; it may be
+any of the following, but you must specify only one of them:
+
+@table @code
+@item d
+@emph{Delete} modules from the archive.  Specify the names of modules to
+be deleted as @var{files}; the archive is untouched if you
+specify no files to delete.
+
+If you wish to delete an archive's index, you can use this option to do
+it; the internal name of the index (which you will need to specify in
+@var{files} to delete it) is @samp{__.SYMDEF}.
+
+If you specify the @samp{v} option flag, @code{ar} will list each module
+as it is deleted.
+
+@item m
+Use this operation to @emph{move} members in an archive.
+
+The ordering of members in an archive can make a difference in how
+programs are linked using the library, if a symbol is defined in more
+than one member.  
+
+If no option flags are used with @code{m}, any members you name in the
+@var{files} arguments are moved to the @emph{end} of the archive;
+you can use the @samp{a}, @samp{b}, or @samp{i} options to move them to a
+specified place instead.
+
+@item p
+@emph{Print} the specified members of the archive, to the standard
+output file.  If the @samp{v} option flag is specified, show the member
+name before copying its contents to standard output.
+
+If you specify no @var{files}, all the files in the archive are printed,
+save for the index (if any), which is listed only if you ask for it by
+name: @samp{__.SYMDEF}.
+
+@item q
+@emph{Quick append}; add @var{files} to the end of @var{archive},
+without checking for replacement.
+
+The options @samp{a}, @samp{b}, and @samp{i} do @emph{not} affect this
+operation; new members are always placed at the end of the archive.
+
+The option @samp{v} makes @code{ar} list each file as it is appended.
+
+@c per Gumby, versions other than WRS of this will *not* auto-update
+@c SYMDEF index on 'q' updates.
+
+@item r
+Insert @var{files} into @var{archive} (with @emph{replacement}). This
+operation differs from @samp{q} in that any previously existing members
+are deleted if their names match those being added.
+
+If one of the files named in @var{files} doesn't exist, @code{ar}
+displays an error message, and leaves undisturbed any existing members
+of the archive matching that name.
+
+By default, new members are added at the end of the file; but you may
+use one of the options @samp{a}, @samp{b}, or @samp{i} to request
+placement relative to some existing member.
+
+The option flag @samp{v} used with this operation elicits a line of
+output for each file inserted, along with one of the letters @samp{a} or
+@samp{r} to indicate whether the file was appended (no old member
+deleted) or replaced.
+
+@item t
+Display a @emph{table} listing the contents of @var{archive}, or those
+of the files listed in @var{files} that are present in the
+archive.  Normally only the member name is shown; if you also want to
+see the modes (permissions), timestamp, owner, group, and size, you can
+request that by also specifying the @samp{v} option flag.
+
+If you do not specify any @var{files}, all files in the archive
+are listed; but the index to symbols from relocatable modules, called
+@samp{__.SYMDEF}, is not listed unless you explicitly request it by
+name.
+
+If there is more than one file with the same name (say, @samp{fie}) in
+an archive (say @samp{b.a}), @samp{ar t b.a fie} will list only the
+first instance; to see them all, you must ask for a complete
+listing---in our example, @samp{ar t b.a}.
+@c WRS only; per Gumby, this is implementation-dependent, and in a more
+@c recent case in fact works the other way.
+
+@item x
+@emph{Extract} a member from the archive.  The @samp{v} option flag
+requests that @code{ar} list each name as it extracts it.
+
+If you do not specify any @var{files}, all files in the archive
+are extracted; but the index to symbols from relocatable modules, called
+@samp{__.SYMDEF}, is not extracted unless you explicitly request it by
+name.
+
+@end table
+
+A number of modifiers may immediately follow the @var{Op} keyletter, to
+specify variations on an operation's behavior:
+
+@table @code
+@item a
+Add new files @emph{after} an existing member of the
+archive.  If you use the modifier @code{a}, the name of an existing archive
+member must be present as the @var{membername} argument, before the
+@var{archive} specification.
+
+@item b
+Add new files @emph{before} an existing member of the
+archive.  If you use the modifier @code{b}, the name of an existing archive
+member must be present as the @var{membername} argument, before the
+@var{archive} specification.  (same as @samp{i}).
+
+@item c
+@emph{Create} the archive.  The specified @var{archive} is always
+created if it didn't exist, when you request an update.  But a warning is
+issued unless you specify in advance that you expect to create it, by
+using this option flag.
+
+@item i
+Insert new files @emph{before} an existing member of the
+archive.  If you use the modifier @code{i}, the name of an existing archive
+member must be present as the @var{membername} argument, before the
+@var{archive} specification.  (same as @samp{b}).
+
+@item l
+This option flag is recognized but not used; it is permitted for
+compatibility with other forms of @code{ar}.
+@c ???---pesch@@cygnus.com, 25jan91
+
+@item o
+Preserve the @emph{original} dates of members when extracting them.  If
+you do not specify this option flag, files extracted from the archive
+will be stamped with the time of extraction.
+
+@item s
+Write an object-file index into the archive, or update an existing one,
+even if no other change is made to the archive.  You may use this option
+flag either with any operation, or alone.  Running @samp{ar s} on an
+archive is equivalent to running @samp{ranlib} on it.
+
+@item u
+Normally, @code{ar r}@dots{} or @code{ar q}@dots{} insert all files
+listed into the archive.  If you would like to insert @emph{only} those
+of the files you list that are newer than existing members of the same
+names, use this option.  The option-flag combination @samp{qu} is
+equivalent to @samp{ru}; checking the timestamps loses any speed
+advantage, so @code{ar} treats both commands as replace operations with
+the @samp{u} option appended.
+
+@c u actually turns *anything* into a replace.  I claim this is a bug;
+@c 'du' and 'tu' for example should either be rejected or equivalent to
+@c plain 'd' and 't'.  ---pesch@@cygnus.com, 25jan91
+
+@item v
+This option requests the @emph{verbose} version of an operations.  Many
+operations display additional information, such as filenames processed,
+when the option @samp{v} is appended.
+
+@end table
+
+@node ld, nm, ar, Top
+@chapter ld
+The GNU linker @code{ld} is now described in a separate manual.
+@xref{Top, , Overview, , GLD: the GNU linker}.
+
+@node nm, objdump, ld, Top
+@chapter nm
+
+@smallexample
+  nm [ -a | +debug-syms ]  [ -g | +extern-only ]
+      [ -n | +numeric-sort ]  [ -o | +print-file-name ]  
+      [ -p | +no-sort ]  [ -r | +reverse-sort ]  
+      [ -s | +print-symdefs ]  [ -u | +undefined-only ]  
+      [ @var{objfiles}@dots{} ]
+@end smallexample
+
+GNU @code{nm} will list the symbols from object files @var{objfiles}.
+Any command-line options must precede all object files; no option takes
+an argument.
+
+The long and short forms of options, shown here as alternatives, are
+equivalent.
+
+@table @code
+@item @var{objfiles}@dots{}
+Object files whose symbols are to be listed.  If no object files are
+listed as arguments, @code{nm} assumes @samp{a.out}.
+
+@item -a | +debug-syms 
+Display debugger-only symbols; normally these are not listed.
+
+@item -g | +extern-only 
+Display only external symbols.
+
+@item -n | +numeric-sort 
+Sort symbols numerically by their addresses, not alphabetically by their
+names. 
+
+@item -o | +print-file-name 
+Precede each symbol by the name of the input file where it was found,
+rather than identifying the input file once only before all of its
+symbols. 
+
+@item -p | +no-sort 
+Don't bother to sort the symbols in any order; just print them in the
+order encountered.
+
+@item -r | +reverse-sort 
+Reverse the sense of the sort (whether numeric or alphabetic); let the
+last come first.
+
+@item -s | +print-symdefs 
+When listing symbols from archives, list the index: a mapping (stored in
+the archive by @code{ar} or @code{ranlib} of what modules contain
+definitions for what names.
+
+@item -u | +undefined-only 
+Display only undefined symbols (those external to each object file).
+
+@end table
+
+@node objdump, ranlib, nm, Top
+@chapter objdump
+
+@smallexample
+  objdump [ -h | +header ]  [ -n | +nstuff ]  [ -r | +reloc ]  
+           [ -t | +syms ]   @var{objfiles}@dots{}
+@end smallexample
+
+@code{objdump} displays information about one or more object files.
+The options control what particular information to display.  This
+information is mostly useful to programmers who are working on the
+compilation tools, as opposed to programmers who just want their
+program to compile and work.
+
+The long and short forms of options, shown here as alternatives, are
+equivalent.
+
+@table @code
+@item @var{objfiles}@dots{}
+The object files to be examined.
+
+@item -h | +header
+Header.  Print summary information from the header of the object file.
+
+@item -n | +nstuff
+@samp{N_} symbols.  Print the values of various macros from @file{a.out.h}
+as applied to the object file; e.g. @code{N_TXTOFF}.
+
+@item -r | +reloc
+Relocation.  Print the relocation entries of the file.
+
+@item -t | +syms
+Symbol Table.  Print the symbol table entries of the file.
+This is similar to the information provided by the @samp{nm} program.
+
+@end table
+
+@node ranlib, size, objdump, Top
+@chapter ranlib
+
+@smallexample
+  ranlib  [ -t | +touch ]  [ -v | +verbose ] @var{archive}
+@end smallexample
+
+@code{ranlib} generates the an index to the contents of an archive, and
+stores it in the archive.  The index lists each symbol defined by a
+member of an archive that is a relocatable object file.  
+
+You may use @code{nm -s} or @code{nm +print-symdefs} to list this table.
+The index is internally stored in the archive under the name
+@samp{__.SYMDEF}.
+
+An archive with such an index speeds up linking to the library, and
+allows routines in the library to call each other without regard to
+their placement in the archive.
+
+The GNU @code{ranlib} program is another form of GNU @code{ar}.
+
+@code{ranlib}'s options make it report on what it's doing and fake an
+update of a particular archive's index.
+
+Any command-line options must precede the archive name.
+
+The long and short forms of options, shown here as alternatives, are
+equivalent.
+
+@table @code
+
+@item -t | +touch 
+You can use the ``touch'' option to fake an update of the index
+table in archives; @code{ranlib} will first set the current date for the
+index object module in the archive (to make it appear to have changed).
+
+@item -v | +verbose 
+Use this option if you'd like informational messages about what
+@code{ranlib} is up to, while it loops through the specified archives.
+
+@end table
+
+@node size, strip, ranlib, Top
+@chapter size
+
+@smallexample
+  size @var{objfiles}@dots{}
+@end smallexample
+
+The GNU @code{size} utility lists the segment (@code{text}, @code{data},
+@code{bss} sizes ---and the total size--- for the object files
+@var{objfiles} in its argument list.  For archives, one line of output
+is generated for each module.
+
+@code{size} has no command-line options.
+
+If more than one object module is listed, @code{size} labels each line
+of output with the module's name:
+@smallexample
+% size a.out libX11.a
+text    data    bss     dec     hex
+49152   49152   0       98304   18000   a.out
+1256    16      0       1272    4f8     libX11.a(Context.o)
+176     0       0       176     b0      libX11.a(Depths.o)
+1360    56      0       1416    588     libX11.a(ParseCmd.o)
+904     24      4096    5024    13a0    libX11.a(Quarks.o)
+216     0       0       216     d8      libX11.a(XAllCells.o)
+        .
+        .
+        .
+
+@end smallexample
+[sample output truncated]
+
+@node strip,  , size, Top
+@chapter strip
+
+@smallexample
+  strip [ -s | +strip-all ]  [ -S | +strip-debug ]
+         [ -x | +discard-all ]  [ -X | +discard-locals ]
+         @var{objfiles}@dots{}
+@end smallexample
+
+GNU @code{strip} will discard all symbols from object files
+@var{objfiles}, if no options are specified; or only certain symbols,
+depending on its command-line options.
+
+@code{strip} will not execute unless at least one object file is listed.
+
+@emph{WARNING:} @code{strip} modifies the files named in its argument,
+rather than writing modified copies under different names.
+
+The long and short forms of options, shown here as alternatives, are
+equivalent.
+
+@table @code
+@item -s | +strip-all 
+This is the default case: strip all symbol entries from @var{objfiles}.
+
+@item -S | +strip-debug 
+Discard only debugging symbol information from @var{objfiles}.
+
+@item -x | +discard-all 
+Discard all symbols local to each file in @var{objfiles}.
+@emph{WARNING:} Note that @code{+discard-all} discards only @emph{local}
+symbols, in spite of its name.
+
+@item -X | +discard-locals 
+Discard local symbols starting with @samp{L} from each file in
+@var{objfiles}.  (Some compilers produce internally-used symbols that
+begin with @samp{L}.)
+@end table
+
+
+@contents
+@bye
+
+
