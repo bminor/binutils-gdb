@@ -1837,7 +1837,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_tic80_arch)		ta="$ta tic80-dis.lo tic80-opc.lo" ;;
 # end-sanitize-tic80
 # start-sanitize-sky
-	bfd_txvu_arch)		ta="$ta" ;;
+	bfd_txvu_arch)		ta="$ta txvu-dis.lo txvu-opc.lo" ;;
 # end-sanitize-sky
 	bfd_v850_arch)		ta="$ta v850-opc.lo v850-dis.lo" ;;
 # start-sanitize-v850e

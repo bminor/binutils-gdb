@@ -173,6 +173,10 @@ ALL_MACHINES = \
 	tic80-dis.lo \
 	tic80-opc.lo \
 	$(end-sanitize-tic80) \
+	$(start-sanitize-sky) \
+	txvu-dis.lo \
+	txvu-opc.lo \
+	$(end-sanitize-sky) \
 	v850-dis.lo \
 	v850-opc.lo \
 	w65-dis.lo \
@@ -496,6 +500,12 @@ tic80-dis.lo: tic80-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
 	$(INCDIR)/opcode/tic80.h
 tic80-opc.lo: tic80-opc.c $(INCDIR)/opcode/tic80.h
 # end-sanitize-tic80
+
+# start-sanitize-sky
+txvu-dis.lo: txvu-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
+	$(INCDIR)/opcode/txvu.h
+txvu-opc.lo: txvu-opc.c $(INCDIR)/opcode/txvu.h
+# end-sanitize-sky
 
 # This dependency stuff is copied from BFD.
 
