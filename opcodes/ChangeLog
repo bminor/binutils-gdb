@@ -1,3 +1,12 @@
+Tue Mar  3 18:51:22 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-asm.in: Move insertion of generated routines to top of file.
+ 	(insert_normal): Add prototype.  Delete `shift' arg.
+	* cgen-dis.in: Move insertion of generated routines to top of file.
+	(extract_normal): Add prototype.  Delete `shift' arg.
+	(print_normal): Add prototype.  Call CGEN_PRINT_NORMAL if defined.
+	(print_keyword): Add prototype.  Fix type of `attrs' arg.
+
 start-sanitize-vr4320
 Tue Mar  3 11:47:58 1998  Gavin Koch  <gavin@cygnus.com>
 
