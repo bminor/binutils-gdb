@@ -173,7 +173,7 @@ this directive unless you specified an ABI on the command line, and the
 ABIs specified must match.
 
 @item .uaquad
-Like .uaword and .ualong, this allows you to specify an intensionally
+Like .uaword and .ualong, this allows you to specify an intentionally
 unaligned quadword (64 bit word).
 
 @end table

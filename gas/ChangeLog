@@ -1,5 +1,9 @@
 2003-10-26  Kazu Hirata  <kazu@cs.umass.edu>
 
+	* doc/c-sh64.texi: Fix a typo.
+
+2003-10-26  Kazu Hirata  <kazu@cs.umass.edu>
+
 	* doc/c-alpha.texi: Fix typos.
 	* doc/c-ia64.texi: Likewise.
 	* doc/c-mmix.texi: Likewise.
