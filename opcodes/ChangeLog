@@ -1,3 +1,14 @@
+Fri Sep 25 12:50:32 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* configure.in:  Add ncr* configuration.
+	* z8k-dis.c (struct instr_data_s):  Make instr_asmsrc char to make
+	picayune ANSI compilers happy.
+
+Sep 20 08:50:55 1992  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in (i386):  Make i386 and i486 synonymous for now.
+	* configure.in (i[34]86-*-sysv4):  Add my_host definition.
+
 Fri Sep 18 17:01:23 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (install): Fix typo.

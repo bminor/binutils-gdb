@@ -15,7 +15,7 @@ typedef struct {
    unsigned char instr_buf[24];
    unsigned long bytes_fetched;
    unsigned long tabl_index;
-   unsigned char instr_asmsrc[80];
+   char instr_asmsrc[80];
    unsigned long arg_reg[0x0f];
    unsigned long immediate;
    unsigned long displacement;
