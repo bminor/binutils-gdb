@@ -1444,6 +1444,43 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	}
 
+      /* If we are relaxing, and this is a reloc against the .text
+	 segment, we may need to adjust it if some branches have been
+	 expanded.  The reloc types which are likely to occur in the
+	 .text section are handled efficiently by mips_relax_section,
+	 and thus do not need to be handled here.  */
+      if (ecoff_data (input_bfd)->debug_info.adjust != NULL
+	  && ! int_rel.r_extern
+	  && int_rel.r_symndx == RELOC_SECTION_TEXT
+	  && (strcmp (bfd_get_section_name (input_bfd, input_section),
+		      ".text") != 0
+	      || (int_rel.r_type != MIPS_R_PCREL16
+		  && int_rel.r_type != MIPS_R_SWITCH
+		  && int_rel.r_type != MIPS_R_RELHI
+		  && int_rel.r_type != MIPS_R_RELLO)))
+	{
+	  bfd_vma adr;
+	  struct ecoff_value_adjust *a;
+
+	  /* We need to get the addend so that we know whether we need
+	     to adjust the address.  */
+	  BFD_ASSERT (int_rel.r_type == MIPS_R_REFWORD);
+
+	  adr = bfd_get_32 (input_bfd,
+			    (contents
+			     + adjust
+			     + int_rel.r_vaddr
+			     - input_section->vma));
+
+	  for (a = ecoff_data (input_bfd)->debug_info.adjust;
+	       a != (struct ecoff_value_adjust *) NULL;
+	       a = a->next)
+	    {
+	      if (adr >= a->start && adr < a->end)
+		addend += a->adjust;
+	    }
+	}
+
       if (info->relocateable)
 	{
 	  /* We are generating relocateable output, and must convert
@@ -1587,6 +1624,7 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 
 	  relocation += addend;
+	  addend = 0;
 
 	  /* Adjust a PC relative relocation by removing the reference
 	     to the original address in the section and including the
@@ -1696,6 +1734,23 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	      r = bfd_reloc_ok;
 	    }
 	}
+
+      /* MIPS_R_JMPADDR requires peculiar overflow detection.  The
+	 instruction provides a 28 bit address (the two lower bits are
+	 implicit zeroes) which is combined with the upper four bits
+	 of the instruction address.  */
+      if (r == bfd_reloc_ok
+	  && int_rel.r_type == MIPS_R_JMPADDR
+	  && (((relocation
+		+ addend
+		+ (int_rel.r_extern ? 0 : s->vma))
+	       & 0xf0000000)
+	      != ((input_section->output_section->vma
+		   + input_section->output_offset
+		   + (int_rel.r_vaddr - input_section->vma)
+		   + adjust)
+		  & 0xf0000000)))
+	r = bfd_reloc_overflow;
 
       if (r != bfd_reloc_ok)
 	{

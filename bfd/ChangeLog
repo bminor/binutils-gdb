@@ -1,3 +1,17 @@
+Tue Jun 14 13:00:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* libecoff.h (struct ecoff_link_hash_entry): Change type of
+	written from boolean to char.  Add new field small.
+	* ecoff.c (ecoff_link_hash_newfunc): Initialize written to 0
+	rather than false.  Initialize small to 0.
+	(ecoff_link_add_externals): If ECOFF type is scSUndefined, set
+	small.  If small is set, and hash table type is common, force the
+	symbol into a section named SCOMMON and change the ECOFF type from
+	scCommon to scSCommon.
+	(ecoff_link_write_external): Set written to 1 rather than true.
+	* coff-mips.c (mips_relocate_section): Correct JMPADDR reloc
+	overflow check to consider section VMA of input file.
+
 Mon Jun 13 14:20:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* aoutf1.h (aout_32_sunos4_write_object_contents): Handle a

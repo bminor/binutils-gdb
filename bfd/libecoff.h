@@ -206,6 +206,10 @@ struct ecoff_link_hash_entry
   bfd *abfd;
   /* ECOFF external symbol information.  */
   EXTR esym;
+  /* Nonzero if this symbol has been written out.  */
+  char written;
+  /* Nonzero if this symbol was referred to as small undefined.  */
+  char small;
 };
 
 /* ECOFF linker hash table.  */

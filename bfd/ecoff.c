@@ -3575,6 +3575,8 @@ ecoff_link_hash_newfunc (entry, table, string)
       /* Set local fields.  */
       ret->indx = -1;
       ret->abfd = NULL;
+      ret->written = 0;
+      ret->small = 0;
     }
   memset ((PTR) &ret->esym, 0, sizeof ret->esym);
 
@@ -4171,6 +4173,25 @@ ecoff_link_add_externals (abfd, info, external_ext, ssext)
 	      h->abfd = abfd;
 	      h->esym = esym;
 	    }
+
+	  /* Remember whether this symbol was small undefined.  */
+	  if (esym.asym.sc == scSUndefined)
+	    h->small = 1;
+
+	  /* If this symbol was ever small undefined, it needs to wind
+	     up in a GP relative section.  We can't control the
+	     section of a defined symbol, but we can control the
+	     section of a common symbol.  This case is actually needed
+	     on Ultrix 4.2 to handle the symbol cred in -lckrb.  */
+	  if (h->small
+	      && h->root.type == bfd_link_hash_common
+	      && strcmp (h->root.u.c.section->name, SCOMMON) != 0)
+	    {
+	      h->root.u.c.section = bfd_make_section_old_way (abfd, SCOMMON);
+	      h->root.u.c.section->flags = SEC_ALLOC;
+	      if (h->esym.asym.sc == scCommon)
+		h->esym.asym.sc = scSCommon;
+	    }
 	}
     }
 
@@ -4506,7 +4527,7 @@ ecoff_link_write_external (h, data)
 
   /* FIXME: We should check if this symbol is being stripped.  */
 
-  if (h->root.written)
+  if (h->written)
     return true;
 
   if (h->abfd == (bfd *) NULL)
@@ -4607,7 +4628,7 @@ ecoff_link_write_external (h, data)
   /* bfd_ecoff_debug_one_external uses iextMax to keep track of the
      symbol number.  */
   h->indx = ecoff_data (output_bfd)->debug_info.symbolic_header.iextMax;
-  h->root.written = true;
+  h->written = 1;
 
   return (bfd_ecoff_debug_one_external
 	  (output_bfd, &ecoff_data (output_bfd)->debug_info,
