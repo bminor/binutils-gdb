@@ -1281,10 +1281,10 @@ show_user_1 (c, stream)
   fputs_filtered ("User command ", stream);
   fputs_filtered (c->name, stream);
   fputs_filtered (":\n", stream);
+
   while (cmdlines)
     {
-      fputs_filtered (cmdlines->line, stream); 
-      fputs_filtered ("\n", stream); 
+      print_command_line (cmdlines, 4);
       cmdlines = cmdlines->next;
     }
   fputs_filtered ("\n", stream);

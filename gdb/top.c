@@ -3394,7 +3394,7 @@ End with a line of just \"end\".");
 Definition appears on following lines, one command per line.\n\
 End with a line of just \"end\".\n\
 Use the \"document\" command to give documentation for the new command.\n\
-Commands defined in this way do not take arguments.");
+Commands defined in this way may have up to ten arguments.");
 
 #ifdef __STDC__
   c = add_cmd ("source", class_support, source_command,
