@@ -943,20 +943,25 @@ md_begin ()
       {
 	segT seg;
 	subsegT subseg;
+	flagword flags;
 	segT sec;
 
 	seg = now_seg;
 	subseg = now_subseg;
 
+	/* The ABI says this section should be loaded so that the
+	   running program can access it.  However, we don't load it
+	   if we are configured for an embedded target */
+	flags = SEC_READONLY | SEC_DATA;
+	if (strcmp (TARGET_OS, "elf") != 0)
+	  flags |= SEC_ALLOC | SEC_LOAD;
+
 	if (! mips_64)
 	  {
 	    sec = subseg_new (".reginfo", (subsegT) 0);
 
-	    /* The ABI says this section should be loaded so that the
-	       running program can access it.  */
-	    (void) bfd_set_section_flags (stdoutput, sec,
-					  (SEC_ALLOC | SEC_LOAD
-					   | SEC_READONLY | SEC_DATA));
+
+	    (void) bfd_set_section_flags (stdoutput, sec, flags);
 	    (void) bfd_set_section_alignment (stdoutput, sec, 2);
 	
 #ifdef OBJ_ELF
@@ -968,9 +973,7 @@ md_begin ()
 	    /* The 64-bit ABI uses a .MIPS.options section rather than
                .reginfo section.  */
 	    sec = subseg_new (".MIPS.options", (subsegT) 0);
-	    (void) bfd_set_section_flags (stdoutput, sec,
-					  (SEC_ALLOC | SEC_LOAD
-					   | SEC_READONLY | SEC_DATA));
+	    (void) bfd_set_section_flags (stdoutput, sec, flags);
 	    (void) bfd_set_section_alignment (stdoutput, sec, 3);
 
 #ifdef OBJ_ELF

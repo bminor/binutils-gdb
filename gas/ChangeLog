@@ -12,6 +12,10 @@ Mon Jan 20 10:39:36 1997  J.T. Conklin  <jtc@cygnus.com>
 
 Mon Jan 20 12:42:06 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (md_begin): Don't set SEC_ALLOC or SEC_LOAD for
+	the .reginfo or .MIPS.options section if configured for an
+	embedded target.
+
 	* config/tc-mips.c (md_begin): Don't set interlocks for
 	mips_4650.
 
