@@ -85,23 +85,14 @@ Mon Jan 27 18:51:03 1992  John Gilmore  (gnu at cygnus.com)
 	sal's PC value.
 	(set_breakpoint, break_command_1, until_break_command,
 	catch_command_1, breakpoint_re_set_one):  Use it.
-	(breakpoint_re_set_one):  Disable bkpts that don't re-set cleanly.
-	(breakpoint_re_set):  Mention breakpoint number in error messages.
 	* symtab.h (resolve_sal_pc):  Declare.
 	* infcmd.c (jump_command):  Use resolve_sal_pc.
 
-	* source.c (find_source_lines):  Avoid "Source file is more
-	recent than executable" when bfd_get_mtime gives 0.
-	(list_command):  Shorten "FILE, line N" to "FILE:N".
+	* source.c (list_command):  Shorten "FILE, line N" to "FILE:N".
 
 	* putenv.c (putenv):  Avoid unportably casting pointers to unsigneds.
 
-	* buildsym.c (read_struct_type):  Circumvent sun3 sunos "--"
-	compiler bug.
-
 	* c-exp.y (yylex):  `this' and `template' are only tokens in C++.
-
-	* target.c (target_xfer_memory):  Return errno in preference to EIO.
 
 	* xm-convex.h, xm-hp300bsd.h, xm-isi.h, xm-merlin.h, xm-news.h,
 	xm-np1.h, xm-pn.h, xm-pyr.h, xm-rtbsd.h, xm-symmetry.h, xm-umax.h:
