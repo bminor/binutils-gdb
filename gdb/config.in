@@ -68,6 +68,9 @@
 /* Define if your struct reg has r_gs.  */
 #undef HAVE_STRUCT_REG_R_GS
 
+/* Define if <sys/link.h> has struct link_map32 */
+#undef HAVE_STRUCT_LINK_MAP32
+
 /* Define if the prfpregset_t type is broken. */
 #undef PRFPREGSET_T_BROKEN
 
@@ -245,9 +248,6 @@
 
 /* Define if you have the <link.h> header file.  */
 #undef HAVE_LINK_H
-
-/* Define if <link.h> defines struct link_map32.  */
-#undef HAVE_STRUCT_LINK_MAP32
 
 /* Define if you have the <locale.h> header file.  */
 #undef HAVE_LOCALE_H
