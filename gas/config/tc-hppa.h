@@ -178,7 +178,8 @@ int hppa_fix_adjustable PARAMS((struct fix *));
 
 #define tc_frob_symbol(sym,punt) \
   { \
-    if ((S_GET_SEGMENT (sym) == &bfd_und_section && ! symbol_used_p (sym)) \
+    if ((S_GET_SEGMENT (sym) == &bfd_und_section && ! symbol_used_p (sym) && \
+  	 ELF_ST_VISIBILITY (S_GET_OTHER (sym)) == STV_DEFAULT) \
 	|| (S_GET_SEGMENT (sym) == &bfd_abs_section \
 	    && ! S_IS_EXTERNAL (sym)) \
 	|| strcmp (S_GET_NAME (sym), "$global$") == 0 \

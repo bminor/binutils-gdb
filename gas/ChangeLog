@@ -1,3 +1,8 @@
+2002-11-21  Randolph Chung  <randolph@tausq.org>
+
+	* config/tc-hppa.h (tc_frob_symbol):  Frob undefined unused symbols
+	only if they have default visibility.
+
 2002-11-21  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-alpha.c (alpha_fix_adjustable): Remove redundant
