@@ -1,3 +1,8 @@
+2000-10-02  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-hppa.c (elf32_hppa_check_relocs): Correct call to
+	_bfd_elf32_gc_record_vtable.  Correct a comment.
+
 2000-10-01  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	From  Ralf Baechle  <ralf@gnu.org>
@@ -6,7 +11,7 @@
 	produces binaries with got[1] = 0x80000001 to differenciate them
 	for the dynamic linker from the broken binaries produced by old
 	versions.
-	
+
 2000-09-30  Petr Sorfa <petrs@sco.com>
 
 	* elf.c (elfcore_grok_pstatus): Check for size of pxstatus_t.
@@ -287,7 +292,7 @@
 	(sh_elf_relocate_section): Likewise.
 
 2000-09-13  Anders Norlander  <anorland@acc.umu.se>
-	
+
  	* cpu-mips.c (arch_info_struct): Add mips:4K
  	* bfd-in2.h (bfd_mach_mips4K): New define.
  	* archures.c: Add bfd_mach_mips4K to comment.

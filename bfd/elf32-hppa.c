@@ -1386,7 +1386,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 	     used.  Record for later use during GC.  */
 	case R_PARISC_GNU_VTENTRY:
 	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec,
-					     &h->elf, rel->r_offset))
+					     &h->elf, rel->r_addend))
 	    return false;
 	  continue;
 
@@ -1489,10 +1489,9 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 		  else
 		    h->elf.plt.refcount += 1;
 
-		  /* If this .plt entry is for a plabel, we need an
-		     extra word for ld.so.  adjust_dynamic_symbol will
-		     also keep the entry even if it appears to be
-		     local.  */
+		  /* If this .plt entry is for a plabel, mark it so
+		     that adjust_dynamic_symbol will keep the entry
+		     even if it appears to be local.  */
 		  if (need_entry & PLT_PLABEL)
 		    h->plabel = 1;
 		}
