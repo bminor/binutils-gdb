@@ -793,7 +793,7 @@ static char *
 get_reg_name (regno)
      int regno;
 {
-  static char *rn[NUM_REGS] = REGISTER_NAMES;
+  static char *rn[] = REGISTER_NAMES;
 
   return rn[regno];
 }
@@ -1217,6 +1217,7 @@ hms_read_inferior_memory (memaddr, myaddr, len)
 
 	}
     }
+  expect("emory>");
   hms_write_cr (" ");
   expect_prompt ();
   return len;

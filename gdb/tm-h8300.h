@@ -102,8 +102,8 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 
 #define REGISTER_TYPE  unsigned short
 
-#  define NUM_REGS 10 
-#  define REGISTER_BYTES (10*2)
+#  define NUM_REGS 10 /* 20 for fake HW support */
+#  define REGISTER_BYTES (NUM_REGS*2)
 
 
 /* Index within `registers' of the first byte of the space for
@@ -154,7 +154,8 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
    Entries beyond the first NUM_REGS are ignored.  */
 
 #define REGISTER_NAMES  \
- {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "sp","ccr","pc"} 
+ {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "sp",\
+  "ccr","pc","cycles","hcheck","tier","tcsr","frc","ocra","ocrb","tcr","tocr","icra"} 
 
 
 /* Register numbers of various important registers.

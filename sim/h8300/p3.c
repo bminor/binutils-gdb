@@ -22,7 +22,7 @@ goto next;
  goto next;
  setflags:;
 SET_CCR(tmp);
-break;
+ goto next;
  logflags:
  shiftflags:
  v = 0;
@@ -32,13 +32,20 @@ break;
 goto next;
  next: ;
 pc = npc;
+if (ni > checkfreq) 
+{
+  ni = 0;
+  SAVE_INTERPRETER_STATE();
+  perifs();
+  LOAD_INTERPRETER_STATE();
 #ifdef __GO32__
-if (kbhit())
-      exception = SIGINT;
+  if (kbhit())
+   saved_state.exception = SIGINT;
 #endif
-} while (!exception);
+}
+ni++;
+} while (!saved_state.exception);
 
-saved_state.cycles = cycles;
-saved_state.reg[PC] = pc - mem;
-saved_state.reg[CCR] = GET_CCR();
+
+SAVE_INTERPRETER_STATE();
 }

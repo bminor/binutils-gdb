@@ -44,21 +44,21 @@ char *nibs[] =
   "(b0&0xf)",
   "((b1>>4)&0xf)",
   "((b1)&0xf)",
-  "((pc[2]>>4)&0xf)",
-  "((pc[2])&0xf)",
-  "((pc[3]>>4)&0xf)",
-  "((pc[3])&0xf)",
+  "((pc[1]>>12)&0xf)",
+  "((pc[1]>>8)&0xf)",
+  "((pc[1]>>4)&0xf)",
+  "((pc[1])&0xf)",
   0, 0};
 
 /* how to get at the 3 bit immediate in the instruction */
 char *imm3[] =
 {"foo",
  "foo",
- "((pc[1]>>4)&0x7)",
+ "((b1>>4)&0x7)",
  "foo",
  "foo",
  "foo",
- "((pc[3]>>4)&0x7)"};
+ "(pc[1]>>4)&0x7"};
 
 /* How to get at a byte register from an index in the instruction at
    nibble n */
@@ -225,7 +225,7 @@ decode (p, fetch, size)
 	case MEMIND:
 	  if (fetch)
 	    {
-	      printf ("lval = ((pc[2]<<8)|pc[3]);\n");
+	      printf ("lval = pc[1];\n");
 	    }
 	  break;
 	case RDDEC:
@@ -246,7 +246,7 @@ decode (p, fetch, size)
 	  break;
 	case IMM16:
 	  if (fetch)
-	    printf ("srca =( pc[2] << 8) | pc[3];\n");
+	    printf ("srca =( pc[1]);\n");
 	  break;
 	case ABS8SRC:
 	  if (fetch)
@@ -276,7 +276,7 @@ decode (p, fetch, size)
 	case ABS16SRC:
 	  if (fetch)
 	    {
-	      printf ("lval = ((pc[2] << 8) + pc[3]);\n");
+	      printf ("lval = pc[1];\n");
 	      printf ("srca = %s_MEM(lval);\n", size == 8 ? "BYTE" : "WORD");
 	    }
 	  break;
@@ -288,14 +288,14 @@ decode (p, fetch, size)
 	case DISPSRC:
 	  if (fetch)
 	    {
-	      printf ("lval = 0xffff&((pc[2] << 8) + pc[3] +reg[rn]);\n");
+	      printf ("lval = 0xffff&(pc[1] +reg[rn]);\n");
 	      printf ("srca = %s_MEM(lval);\n", size == 8 ? "BYTE" : "WORD");
 	    }
 	  break;
 	case DISPDST:
 	  if (fetch)
 	    {
-	      printf ("lval = 0xffff&((pc[2] << 8) + pc[3] +reg[rn]);\n");
+	      printf ("lval = 0xffff&(pc[1] +reg[rn]);\n");
 	      printf ("srcb = %s_MEM(lval);\n", size == 8 ? "BYTE" : "WORD");
 	    }
 	  else
@@ -306,7 +306,7 @@ decode (p, fetch, size)
 	case ABS16DST:
 	  if (fetch)
 	    {
-	      printf ("lval = ((pc[2] << 8) + pc[3]);\n");
+	      printf ("lval = (pc[1]);\n");
 	      printf ("srcb = %s_MEM(lval);\n", ss);
 	    }
 	  else
@@ -322,7 +322,7 @@ decode (p, fetch, size)
 	default:
 	  if (p->data.nib[i] > HexF)
 	    {
-	      printf ("exception = SIGILL;\n");
+	      printf ("saved_state.exception = SIGILL;\n");
 	    }
 	}
     }
@@ -332,7 +332,7 @@ decode (p, fetch, size)
 static void
 esleep ()
 {
-  printf ("exception = SIGSTOP;\n");
+  printf ("saved_state.exception = SIGSTOP;\n");
 }
 
 static void
@@ -387,7 +387,7 @@ bra (p, a)
      struct h8_opcode *p;
      char *a;
 {
-  printf ("if (%s) npc += (((char *)pc)[1]);\n", a);
+  printf ("if (%s) npc += ((char )b1)>>1;\n", a);
 }
 
 static void
@@ -397,8 +397,8 @@ bsr (p, a)
 {
   printf ("reg[7]-=2;\n");
   printf ("tmp = reg[7];\n");
-  printf ("SET_WORD_MEM(tmp, npc-mem);\n");
-  printf ("npc += (((char *)pc)[1]);\n");
+  printf ("SET_WORD_MEM(tmp, (npc-saved_state.mem)*2);\n");
+  printf ("npc += (((char *)pc)[1])>>1;\n");
 }
 
 static void
@@ -425,8 +425,8 @@ jsr (p, a, s)
   printf ("else {\n");
   printf ("reg[7]-=2;\n");
   printf ("tmp = reg[7];\n");
-  printf ("SET_WORD_MEM(tmp, npc-mem);\n");
-  printf ("npc = lval + mem;\n");
+  printf ("SET_WORD_MEM(tmp, (npc-saved_state.mem)*2);\n");
+  printf ("npc = (lval>>1) + saved_state.mem;\n");
   printf ("}");
 }
 
@@ -436,7 +436,7 @@ jmp (p, a, s)
      char *a;
      int s;
 {
-  printf ("npc = lval + mem;\n");
+  printf ("npc = (lval>>1) + saved_state.mem;\n");
 }
 
 static void
@@ -447,7 +447,20 @@ rts (p, a, s)
 {
   printf ("tmp = reg[7];\n");
   printf ("reg[7]+=2;\n");
-  printf ("npc = mem + WORD_MEM(tmp);\n");
+  printf ("npc = saved_state.mem + (WORD_MEM(tmp)>>1);\n");
+}
+
+static void
+rte (p, a, s)
+     struct h8_opcode *p;
+     char *a;
+     int s;
+{
+  printf ("reg[7]+=2;\n");
+  printf ("tmp = reg[7];\n");
+  printf ("reg[7]+=2;\n");
+  printf ("SET_CCR(tmp);\n");
+  printf("npc = saved_state.mem + (WORD_MEM(tmp)>>1);\n");
 }
 
 static void
@@ -466,7 +479,7 @@ bpt (p, a, s)
      char *a;
      int s;
 {
-  printf ("exception = SIGTRAP;\n");
+  printf ("saved_state.exception = SIGTRAP;\n");
   printf ("npc = pc;\n");
 }
 
@@ -675,6 +688,7 @@ table  [] =
   {    nx, 1, "jsr", jsr, 0, 0  }  ,
   {    nx, 1, "jmp", jmp, 0, 0  }  ,
   {    nx, 0, "rts", rts, 0, 0  }  ,
+  {    nx, 0, "rte", rte, 0, 0  }  ,
   {    nx, 1, "andc", andc, 0, 0  }  ,
   {    sf, 1, "shal", shal, 0, 0  }  ,
   {    sf, 1, "shar", shar, 0, 0  }  ,
@@ -727,7 +741,7 @@ edo (p)
 	  if (table[i].decode)
 	    decode (p, 1, table[i].size);
 	  printf ("cycles += %d;\n", p->time);
-	  printf ("npc = pc + %d;\n", p->length);
+	  printf ("npc = pc + %d;\n", p->length/2);
 	  table[i].func (p, table[i].arg, table[i].size);
 	  if (table[i].decode)
 	    decode (p, 0, table[i].size);
@@ -740,7 +754,7 @@ edo (p)
 	}
     }
   printf ("%s not found %s\n", cs, ce);
-  printf ("exception = SIGILL;\n");
+  printf ("saved_state.exception = SIGILL;\n");
   printf ("break;\n");
 }
 
@@ -834,10 +848,19 @@ owrite (i)
 		{
 		  if (mask0[c] | mask1[c])
 		    {
+		      int sh;
 		      if (needand)
 			printf ("\n&&");
-		      printf ("((pc[%d]&0x%02x)==0x%x)",
-			      c, mask0[c] | mask1[c], mask1[c]);
+		      if (c & 1) sh = 0;else sh = 8;
+		      if (c/2 == 0 && sh == 0)
+		       printf("((b1&0x%x)==0x%x)", mask0[c]| mask1[c],
+			      mask1[c]);
+		      else {
+		      printf ("((pc[%d]&(0x%02x<<%d))==(0x%x<<%d))",
+			      c/2, mask0[c] | mask1[c],sh,
+			      mask1[c],sh);
+		    }
+
 		      needand = 1;
 		    }
 		}

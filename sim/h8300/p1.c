@@ -22,41 +22,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-
-#define SET_WORD_MEM(x,y)  {mem[x] = (y)>>8;mem[x+1] = y;}
-#define SET_BYTE_MEM(x,y)  mem[x]=y
-
-#define WORD_MEM(x)  ((mem[x]<<8) | (mem[x+1]))
-#define BYTE_MEM(x)  mem[x]
-
-
-#define PC 9
-#define CCR 8
-
-struct state
-{
-  int cycles;
-  unsigned short int reg[10];
-  unsigned char *(bregp[16]);
-  unsigned char *(bregp_NNNNxxxx[256]);
-  unsigned char *(bregp_xxxxNNNN[256]);
-  unsigned short int *(wregp_xNNNxxxx[256]);
-  unsigned short int *(wregp_xxxxxNNN[256]);
-}
-
-saved_state;
+#include "state.h"
 
 #define V (v!=0)
 #define C (c!=0)
 #define N (n!=0)
 #define Z (z!=0)
 
-#define SET_CCR(x) n = x & 0x8; v = x & 0x2; z = x & 0x4;  c = x & 0x1;
-#define GET_CCR() ((N << 3) |  (Z<<2) | (V<<1) | C)
+#define SET_CCR(x) n = x & 0x8; v = x & 0x2; z = x & 0x4;  c = x & 0x1;saved_state.ienable=x&0x80;
+#define GET_CCR() ((N << 3) |  (Z<<2) | (V<<1) | C) | ((!saved_state.ienable)<<7)
 
-int exception;
-
-static unsigned char *mem;
 
 
 static union
@@ -76,11 +51,11 @@ littleendian;
 static void
 meminit ()
 {
-  if (!mem)
+  if (!saved_state.mem)
     {
       int tmp;
 
-      mem = calloc (1024, 64);
+      saved_state.mem = calloc (1024, 64);
       littleendian.i = 1;
       /* initialze the array of pointers to byte registers */
       for (tmp = 0; tmp < 8; tmp++)
@@ -89,11 +64,15 @@ meminit ()
 	    {
 	      saved_state.bregp[tmp] = (unsigned char *) (saved_state.reg + tmp);
 	      saved_state.bregp[tmp + 8] = saved_state.bregp[tmp] + 1;
+	      if (HOST_IS_LITTLE_ENDIAN) 
+	       abort();
 	    }
 	  else
 	    {
 	      saved_state.bregp[tmp + 8] = (unsigned char *) (saved_state.reg + tmp);
 	      saved_state.bregp[tmp] = saved_state.bregp[tmp + 8] + 1;
+	      if (!HOST_IS_LITTLE_ENDIAN) 
+	       abort();
 	    }
 	}
 
@@ -113,7 +92,10 @@ meminit ()
 	  saved_state.wregp_xxxxxNNN[tmp] = &saved_state.reg[tmp & 0x7];
 	}
 
+  saved_state.reg[HCHECK] = 10000000; /* don't check the hardware
+					 often */
     }
+
 }
 
 
@@ -124,7 +106,7 @@ control_c (sig, code, scp, addr)
      char *scp;
      char *addr;
 {
-  exception = SIGINT;
+  saved_state.exception = SIGINT;
 }
 
 void
@@ -151,8 +133,11 @@ sim_write (to, from, len)
      char *from;
      int len;
 {
+  int i;
   meminit ();
-  memcpy (mem + to, from, len);
+
+  for ( i = 0; i < len; i++)
+   SET_BYTE_MEM(to + i, from[i]);
 }
 
 void
@@ -162,14 +147,46 @@ sim_read (from, to, len)
 
      int len;
 {
+  int i;
   meminit ();
-  memcpy (to, mem + from, len);
+  for (i = 0; i < len; i++) {
+    to[i] = BYTE_MEM(from + i);
+  }
 }
 
 int
 sim_stop_signal ()
 {
-  return exception;
+  return saved_state.exception;
+}
+
+ void
+load_timer_state_from_mem()
+{
+
+  saved_state.reg[TIER] = BYTE_MEM(0xff90);
+  saved_state.reg[TCSR] = BYTE_MEM(0xff91);
+  saved_state.reg[FRC] = WORD_MEM(0xff92);
+  saved_state.reg[TCR] = BYTE_MEM(0xff96);
+  saved_state.reg[TOCR] = BYTE_MEM(0xff97);
+
+
+  if ((saved_state.reg[TOCR] & OCRS) == 0) 
+  {
+    saved_state.reg[OCRA] = WORD_MEM(0xff94);
+  }
+  else 
+  {
+    saved_state.reg[OCRB] = WORD_MEM(0xff94);
+  }
+}
+
+void
+store_timer_state_to_mem()
+{
+
+  BYTE_MEM(0xff91) = saved_state.reg[TCSR];
+  SET_WORD_MEM(0xff92, saved_state.reg[FRC]);
 }
 
 void
@@ -181,30 +198,31 @@ int sig;
   int tmp;
   int b0;
   int b1;
+  int checkfreq;
+   int ni; /* Number of insts to execute before checking hw state */
   unsigned char **blow;
   unsigned char **bhigh;
   unsigned short **wlow;
   unsigned short **whigh;
-  unsigned char *npc;
+  unsigned short *npc;
   int rn;
   unsigned short int *reg;
   unsigned char **bregp;
   void (*prev) ();
-  unsigned char *pc;
+  unsigned short *pc;
 
   int srca;
   int srcb;
   int dst;
-  int cycles = saved_state.cycles;
+  int cycles ;
 
   int n;
   int v;
   int z;
   int c;
 
-  SET_CCR (saved_state.reg[CCR]);
-  pc = saved_state.reg[PC] + mem;
 
+/* Set up pointers to areas */
   reg = saved_state.reg;
   bregp = saved_state.bregp;
   blow = saved_state.bregp_xxxxNNNN;
@@ -213,17 +231,21 @@ int sig;
   wlow = saved_state.wregp_xxxxxNNN;
   whigh = saved_state.wregp_xNNNxxxx;
 
+
   prev = signal (SIGINT, control_c);
   meminit();
+LOAD_INTERPRETER_STATE();
   if (step)
-    exception = SIGTRAP;
+    saved_state.exception = SIGTRAP;
   else
     {
-      exception = sig;
+      saved_state.exception = sig;
     }
   do
     {
-      b0 = pc[0];
-      b1 = pc[1];
+      b1 = pc[0];
+      b0 = b1>> 8;
+      b1 &= 0xff;
+
 
 

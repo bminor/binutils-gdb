@@ -61,8 +61,8 @@ DEP = mkdep
 
 all:	run 
 
-run:	code.o run.o
-	$(CC) -o run code.o run.o ../bfd/libbfd.a ../libiberty/libiberty.a
+run:	code.o run.o perifs.o
+	$(CC) -o run code.o perifs.o run.o ../bfd/libbfd.a ../libiberty/libiberty.a
  
 code.c:p1.c p2.c p3.c
 	cat $(VPATH)/p1.c p2.c $(VPATH)/p3.c | cb >code.c
@@ -73,7 +73,7 @@ p2.c:writecode
 
 
 writecode:writecode.c
-	$(CC_FOR_BUILD) -o writecode -g $(CSEARCH)  $(srcdir)/writecode.c 
+	$(CC) -o writecode -g $(CSEARCH)  $(srcdir)/writecode.c 
 
 
 
