@@ -1,5 +1,9 @@
 Tue Nov 21 13:24:39 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	* hist.c (scale_and_align_entries): Don't use DEFUN_VOID.  Do
+	UNITS_TO_CODE adjustment unconditionally; compiler can optimize
+	away zero-offset case.  Refer to scaled_addr, not aligned_addr.
+
 	* vax.c: Don't include vax.h here.
 
 Thu Nov 16 03:41:37 1995  Ken Raeburn  <raeburn@cygnus.com>
