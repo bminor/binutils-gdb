@@ -169,6 +169,11 @@ static boolean som_write_headers PARAMS ((bfd *));
 static boolean som_build_and_write_symbol_table PARAMS ((bfd *));
 static void som_prep_for_fixups PARAMS ((bfd *, asymbol **, unsigned long));
 static boolean som_write_fixups PARAMS ((bfd *, unsigned long, unsigned int *));
+static boolean som_write_space_strings PARAMS ((bfd *, unsigned long,
+						unsigned int *));
+static boolean som_write_symbol_strings PARAMS ((bfd *, unsigned long,
+						 asymbol **, unsigned int,
+						 unsigned *));
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -1792,6 +1797,181 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
       section = section->next;
     }
   *total_reloc_sizep = total_reloc_size;
+  return true;
+}
+
+/* Write out the space/subspace string table.  */
+
+static boolean
+som_write_space_strings (abfd, current_offset, string_sizep)
+     bfd *abfd;
+     unsigned long current_offset;
+     unsigned int *string_sizep;
+{
+  unsigned char *tmp_space, *p;
+  unsigned int strings_size = 0;
+  asection *section;
+
+  /* Get a chunk of memory that we can use as buffer space, then throw
+     away.  */
+  tmp_space = alloca (SOM_TMP_BUFSIZE);
+  bzero (tmp_space, SOM_TMP_BUFSIZE);
+  p = tmp_space;
+
+  /* Seek to the start of the space strings in preparation for writing
+     them out.  */
+  if (bfd_seek (abfd, current_offset, SEEK_SET) != 0)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* Walk through all the spaces and subspaces (order is not important)
+     building up and writing string table entries for their names.  */
+  for (section = abfd->sections; section != NULL; section = section->next)
+    {
+      int length;
+
+      /* Only work with space/subspaces; avoid any other sections
+	 which might have been made (.text for example).  */
+      if (som_section_data (section)->is_space == 0
+	  && som_section_data (section)->is_subspace == 0)
+	continue;
+
+      /* Get the length of the space/subspace name.  */
+      length = strlen (section->name);
+
+      /* If there is not enough room for the next entry, then dump the
+	 current buffer contents now.  Each entry will take 4 bytes to
+	 hold the string length + the string itself + null terminator.  */
+      if (p - tmp_space + 5 + length > SOM_TMP_BUFSIZE)
+	{
+	  if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd)
+	      != p - tmp_space) 
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+	  /* Reset to beginning of the buffer space.  */
+	  p = tmp_space;
+	}
+
+      /* First element in a string table entry is the length of the
+	 string.  Alignment issues are already handled.  */
+      bfd_put_32 (abfd, length, p);
+      p += 4;
+      strings_size += 4;
+
+      /* Record the index in the space/subspace records.  */
+      if (som_section_data (section)->is_space)
+	som_section_data (section)->space_dict.name.n_strx = strings_size;
+      else
+	som_section_data (section)->subspace_dict.name.n_strx = strings_size;
+
+      /* Next comes the string itself + a null terminator.  */
+      strcpy (p, section->name);
+      p += length + 1;
+      strings_size += length + 1;
+
+      /* Always align up to the next word boundary.  */
+      while (strings_size % 4)
+	{
+	  bfd_put_8 (abfd, 0, p);
+	  p++;
+	  strings_size++;
+	}
+    }
+
+  /* Done with the space/subspace strings.  Write out any information
+     contained in a partial block.  */
+  if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd) != p - tmp_space)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+  *string_sizep = strings_size;
+  return true;
+}
+
+/* Write out the symbol string table.  */
+
+static boolean
+som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep)
+     bfd *abfd;
+     unsigned long current_offset;
+     asymbol **syms;
+     unsigned int num_syms;
+     unsigned int *string_sizep;
+{
+  unsigned int i;
+  unsigned char *tmp_space, *p;
+  unsigned int strings_size = 0;
+
+  /* Get a chunk of memory that we can use as buffer space, then throw
+     away.  */
+  tmp_space = alloca (SOM_TMP_BUFSIZE);
+  bzero (tmp_space, SOM_TMP_BUFSIZE);
+  p = tmp_space;
+
+  /* Seek to the start of the space strings in preparation for writing
+     them out.  */
+  if (bfd_seek (abfd, current_offset, SEEK_SET) != 0)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  for (i = 0; i < num_syms; i++)
+    {
+      int length = strlen (syms[i]->name);
+
+      /* If there is not enough room for the next entry, then dump the
+	 current buffer contents now.  */
+     if (p - tmp_space + 5 + length > SOM_TMP_BUFSIZE)
+	{
+	  if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd)
+	      != p - tmp_space)
+	    {
+	      bfd_error = system_call_error;
+	      return false;
+	    }
+	  /* Reset to beginning of the buffer space.  */
+	  p = tmp_space;
+	}
+
+      /* First element in a string table entry is the length of the
+	 string.  This must always be 4 byte aligned.  This is also
+	 an appropriate time to fill in the string index field in the
+	 symbol table entry.  */
+      bfd_put_32 (abfd, length, p);
+      strings_size += 4;
+      p += 4;
+
+      /* Next comes the string itself + a null terminator.  */
+      strcpy (p, syms[i]->name);
+
+      /* ACK.  FIXME.  */
+      syms[i]->name = (char *)strings_size;
+      p += length + 1;
+      strings_size += length + 1;
+
+      /* Always align up to the next word boundary.  */
+      while (strings_size % 4)
+        {
+	  bfd_put_8 (abfd, 0, p);
+	  strings_size++;
+	  p++;
+        }
+    }
+
+  /* Scribble out any partial block.  */
+  if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd) != p - tmp_space)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  *string_sizep = strings_size;
   return true;
 }
 
