@@ -1,3 +1,11 @@
+2001-12-18  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* elf.c (elfcore_netbsd_get_lwpid): New function.
+	(elfcore_grok_netbsd_procinfo): New function.
+	(elfcore_grok_netbsd_note): New function.
+	(elfcore_read_notes): Call elfcore_grok_netbsd_note to process
+	NetBSD ELF core file notes.
+
 2001-12-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfcode.h (struct bfd_preserve): New.
@@ -11,7 +19,7 @@
 
 2001-12-17  Tom Rix  <trix@redhat.com>
 
-	* coffcode.h (sec_to_styp_flags): Add STYP_EXCEPT and STYP_TYPCHK for 
+	* coffcode.h (sec_to_styp_flags): Add STYP_EXCEPT and STYP_TYPCHK for
 	xcoff.
 
 2001-12-17  Jakub Jelinek  <jakub@redhat.com>
@@ -722,7 +730,7 @@
 2001-11-14  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* elf32-s390.c (elf_s390_relocate_section): Use the "unresolved_reloc"
-	scheme to get rid of an ugly complicated test. 
+	scheme to get rid of an ugly complicated test.
 	* elf64-s390.c (elf_s390_relocate_section): Likewise.
 
 2001-11-14  Andreas Jaeger  <aj@suse.de>
