@@ -1080,8 +1080,9 @@ type number.
 
 After the equals sign is a type descriptor, ar, which says that the
 type being defined is an array.  Following the type descriptor for an
-array is the type of the index, a null field, the upper bound of the
-array indexing, and the type of the array elements.
+array is the type of the index, the lower bound for array indexing
+(always 0 in C), the upper bound for array indexing (in C: one less
+than the length of the array), and the type of the array elements.
 
 The array definition above generates the assembly language that
 follows.

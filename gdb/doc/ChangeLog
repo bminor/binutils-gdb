@@ -1,3 +1,7 @@
+Sun Feb 21 17:09:38 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* stabs.texinfo:  Fix for array types to mention lower bounds.
+
 Thu Feb 18 01:19:49 1993  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Update PTRACE_ARG3_TYPE doc, pull PT_*.
