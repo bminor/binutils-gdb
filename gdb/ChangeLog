@@ -1,3 +1,9 @@
+2004-08-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in (PTRACE_TYPE_ARG3, PTRACE_TYPE_ARG5): Don't use
+	parenthesis in definition.
+	* configure: Regenerated.
+
 2004-08-12  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* PROBLEMS: Mention build/1411.

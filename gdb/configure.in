@@ -540,10 +540,10 @@ ac_save_IFS=$IFS; IFS=','
 set dummy `echo "$gdb_cv_func_ptrace_args" | sed 's/\*/\*/g'`
 IFS=$ac_save_IFS
 shift
-AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG3, ($[3]),
+AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG3, $[3],
   [Define to the type of arg 3 for ptrace.])
 if test -n "$[5]"; then
-  AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG5, ($[5]),
+  AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG5, $[5],
     [Define to the type of arg 5 for ptrace.])
 fi
 

@@ -7362,12 +7362,12 @@ set dummy `echo "$gdb_cv_func_ptrace_args" | sed 's/\*/\*/g'`
 IFS=$ac_save_IFS
 shift
 cat >> confdefs.h <<EOF
-#define PTRACE_TYPE_ARG3 ($3)
+#define PTRACE_TYPE_ARG3 $3
 EOF
 
 if test -n "$5"; then
   cat >> confdefs.h <<EOF
-#define PTRACE_TYPE_ARG5 ($5)
+#define PTRACE_TYPE_ARG5 $5
 EOF
 
 fi
