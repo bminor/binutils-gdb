@@ -4936,7 +4936,6 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
   opd_adjust = get_opd_info (sym_sec);
   if (opd_adjust != NULL)
     {
-      eh->elf.root.u.def.value += opd_adjust[eh->elf.root.u.def.value / 24];
       long adjust = opd_adjust[eh->elf.root.u.def.value / 24];
       if (adjust == -1)
 	{
