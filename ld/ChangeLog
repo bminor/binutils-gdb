@@ -1,3 +1,14 @@
+Tue Nov 10 17:53:17 1998  DJ Delorie  <dj@cygnus.com>
+
+	* pe-dll.c (process_def_file): properly note undefined exported
+ 	symbols, clean up old code.
+	(pe_dll_generate_def_file): don't crash if pe_def_file is NULL
+	* emultempl/pe.em (gld_i386_parse_args): add
+ 	(en/dis)able-stdcall-fixups
+	(pe_fixup_stdcalls): warn about stdcall fixups
+	(gld_i386_unrecognized_file): make exported symbols undefs so that
+ 	archive members get pulled in
+
 Tue Nov 10 14:50:51 1998  Catherine Moore  <clm@cygnus.com>
 
         * scripttempl/elfd10v.sc: Add KEEP attribute to .init,

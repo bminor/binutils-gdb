@@ -342,11 +342,18 @@ process_def_file (abfd, info)
 	      count_with_ordinals++;
 	    }
 	}
+      else if (blhe && blhe->type == bfd_link_hash_undefined)
+	{
+	  /* xgettext:c-format */
+	  einfo (_("%XCannot export %s: symbol not defined\n"),
+		 pe_def_file->exports[i].internal_name);
+	}
       else if (blhe)
 	{
 	  /* xgettext:c-format */
-	  einfo (_("%XCannot export %s: symbol wrong type\n"),
-		 pe_def_file->exports[i].internal_name);
+	  einfo (_("%XCannot export %s: symbol wrong type (%d vs %d)\n"),
+		 pe_def_file->exports[i].internal_name,
+		 blhe->type, bfd_link_hash_defined);
 	}
       else
 	{
@@ -356,19 +363,6 @@ process_def_file (abfd, info)
 	}
       free(name);
     }
-
-#if 0
-  /* For now, just export all global functions.  Read DEF files later */
-  for (i = 0; i < num_input_bfds; i++)
-    {
-      for (j = 0; j < symtab[i].nsyms; j++)
-	{
-	  if ((symtab[i].symbols[j]->flags & (BSF_FUNCTION | BSF_GLOBAL))
-	      == (BSF_FUNCTION | BSF_GLOBAL))
-	    symtab[i].exported[j] = 1;
-	}
-    }
-#endif
 }
 
 /************************************************************************
@@ -755,119 +749,124 @@ pe_dll_generate_def_file (pe_out_def_filename)
 	     program_name, pe_out_def_filename);
     }
 
-  if (pe_def_file->name)
+  if (pe_def_file)
     {
-      if (pe_def_file->is_dll)
-	fprintf (out, "LIBRARY ");
-      else
-	fprintf (out, "NAME ");
-      quoteput (pe_def_file->name, out, 1);
-      if (pe_def_file->base_address != (bfd_vma) (-1))
-	fprintf (out, " BASE=0x%x", pe_def_file->base_address);
-      fprintf (out, "\n");
-    }
-
-  if (pe_def_file->description)
-    {
-      fprintf (out, "DESCRIPTION ");
-      quoteput (pe_def_file->description, out, 1);
-      fprintf (out, "\n");
-    }
-
-  if (pe_def_file->version_minor)
-    fprintf (out, "VERSION %d.%d\n", pe_def_file->version_major,
-	     pe_def_file->version_minor);
-  else
-    fprintf (out, "VERSION %d\n", pe_def_file->version_major);
-
-  if (pe_def_file->stack_reserve != -1 || pe_def_file->heap_reserve != -1)
-    fprintf (out, "\n");
-
-  if (pe_def_file->stack_commit != -1)
-    fprintf (out, "STACKSIZE 0x%x,0x%x\n",
-	     pe_def_file->stack_reserve, pe_def_file->stack_commit);
-  else if (pe_def_file->stack_reserve != -1)
-    fprintf (out, "STACKSIZE 0x%x\n", pe_def_file->stack_reserve);
-  if (pe_def_file->heap_commit != -1)
-    fprintf (out, "HEAPSIZE 0x%x,0x%x\n",
-	     pe_def_file->heap_reserve, pe_def_file->heap_commit);
-  else if (pe_def_file->heap_reserve != -1)
-    fprintf (out, "HEAPSIZE 0x%x\n", pe_def_file->heap_reserve);
-
-  if (pe_def_file->num_section_defs > 0)
-    {
-      fprintf (out, "\nSECTIONS\n\n");
-      for (i = 0; i < pe_def_file->num_section_defs; i++)
+      if (pe_def_file->name)
 	{
-	  fprintf (out, "    ");
-	  quoteput (pe_def_file->section_defs[i].name, out, 0);
-	  if (pe_def_file->section_defs[i].class)
-	    {
-	      fprintf (out, " CLASS ");
-	      quoteput (pe_def_file->section_defs[i].class, out, 0);
-	    }
-	  if (pe_def_file->section_defs[i].flag_read)
-	    fprintf (out, " READ");
-	  if (pe_def_file->section_defs[i].flag_write)
-	    fprintf (out, " WRITE");
-	  if (pe_def_file->section_defs[i].flag_execute)
-	    fprintf (out, " EXECUTE");
-	  if (pe_def_file->section_defs[i].flag_shared)
-	    fprintf (out, " SHARED");
-	  fprintf (out, "\n");
-	}
-    }
-
-  if (pe_def_file->num_exports > 0)
-    {
-      fprintf (out, "\nEXPORTS\n\n");
-      for (i = 0; i < pe_def_file->num_exports; i++)
-	{
-	  def_file_export *e = pe_def_file->exports + i;
-	  fprintf (out, "    ");
-	  quoteput (e->name, out, 0);
-	  if (e->internal_name && strcmp (e->internal_name, e->name))
-	    {
-	      fprintf (out, " = ");
-	      quoteput (e->internal_name, out, 0);
-	    }
-	  if (e->ordinal != -1)
-	    fprintf (out, " @%d", e->ordinal);
-	  if (e->flag_private)
-	    fprintf (out, " PRIVATE");
-	  if (e->flag_constant)
-	    fprintf (out, " CONSTANT");
-	  if (e->flag_noname)
-	    fprintf (out, " NONAME");
-	  if (e->flag_data)
-	    fprintf (out, " DATA");
-
-	  fprintf (out, "\n");
-	}
-    }
-
-  if (pe_def_file->num_imports > 0)
-    {
-      fprintf (out, "\nIMPORTS\n\n");
-      for (i = 0; i < pe_def_file->num_imports; i++)
-	{
-	  def_file_import *im = pe_def_file->imports + i;
-	  fprintf (out, "    ");
-	  if (im->internal_name
-	      && (!im->name || strcmp (im->internal_name, im->name)))
-	    {
-	      quoteput (im->internal_name, out, 0);
-	      fprintf (out, " = ");
-	    }
-	  quoteput (im->module->name, out, 0);
-	  fprintf (out, ".");
-	  if (im->name)
-	    quoteput (im->name, out, 0);
+	  if (pe_def_file->is_dll)
+	    fprintf (out, "LIBRARY ");
 	  else
-	    fprintf (out, "%d", im->ordinal);
+	    fprintf (out, "NAME ");
+	  quoteput (pe_def_file->name, out, 1);
+	  if (pe_def_file->base_address != (bfd_vma) (-1))
+	    fprintf (out, " BASE=0x%x", pe_def_file->base_address);
 	  fprintf (out, "\n");
 	}
+
+      if (pe_def_file->description)
+	{
+	  fprintf (out, "DESCRIPTION ");
+	  quoteput (pe_def_file->description, out, 1);
+	  fprintf (out, "\n");
+	}
+
+      if (pe_def_file->version_minor)
+	fprintf (out, "VERSION %d.%d\n", pe_def_file->version_major,
+		 pe_def_file->version_minor);
+      else
+	fprintf (out, "VERSION %d\n", pe_def_file->version_major);
+
+      if (pe_def_file->stack_reserve != -1 || pe_def_file->heap_reserve != -1)
+	fprintf (out, "\n");
+
+      if (pe_def_file->stack_commit != -1)
+	fprintf (out, "STACKSIZE 0x%x,0x%x\n",
+		 pe_def_file->stack_reserve, pe_def_file->stack_commit);
+      else if (pe_def_file->stack_reserve != -1)
+	fprintf (out, "STACKSIZE 0x%x\n", pe_def_file->stack_reserve);
+      if (pe_def_file->heap_commit != -1)
+	fprintf (out, "HEAPSIZE 0x%x,0x%x\n",
+		 pe_def_file->heap_reserve, pe_def_file->heap_commit);
+      else if (pe_def_file->heap_reserve != -1)
+	fprintf (out, "HEAPSIZE 0x%x\n", pe_def_file->heap_reserve);
+
+      if (pe_def_file->num_section_defs > 0)
+	{
+	  fprintf (out, "\nSECTIONS\n\n");
+	  for (i = 0; i < pe_def_file->num_section_defs; i++)
+	    {
+	      fprintf (out, "    ");
+	      quoteput (pe_def_file->section_defs[i].name, out, 0);
+	      if (pe_def_file->section_defs[i].class)
+		{
+		  fprintf (out, " CLASS ");
+		  quoteput (pe_def_file->section_defs[i].class, out, 0);
+		}
+	      if (pe_def_file->section_defs[i].flag_read)
+		fprintf (out, " READ");
+	      if (pe_def_file->section_defs[i].flag_write)
+		fprintf (out, " WRITE");
+	      if (pe_def_file->section_defs[i].flag_execute)
+		fprintf (out, " EXECUTE");
+	      if (pe_def_file->section_defs[i].flag_shared)
+		fprintf (out, " SHARED");
+	      fprintf (out, "\n");
+	    }
+	}
+
+      if (pe_def_file->num_exports > 0)
+	{
+	  fprintf (out, "\nEXPORTS\n\n");
+	  for (i = 0; i < pe_def_file->num_exports; i++)
+	    {
+	      def_file_export *e = pe_def_file->exports + i;
+	      fprintf (out, "    ");
+	      quoteput (e->name, out, 0);
+	      if (e->internal_name && strcmp (e->internal_name, e->name))
+		{
+		  fprintf (out, " = ");
+		  quoteput (e->internal_name, out, 0);
+		}
+	      if (e->ordinal != -1)
+		fprintf (out, " @%d", e->ordinal);
+	      if (e->flag_private)
+		fprintf (out, " PRIVATE");
+	      if (e->flag_constant)
+		fprintf (out, " CONSTANT");
+	      if (e->flag_noname)
+		fprintf (out, " NONAME");
+	      if (e->flag_data)
+		fprintf (out, " DATA");
+
+	      fprintf (out, "\n");
+	    }
+	}
+
+      if (pe_def_file->num_imports > 0)
+	{
+	  fprintf (out, "\nIMPORTS\n\n");
+	  for (i = 0; i < pe_def_file->num_imports; i++)
+	    {
+	      def_file_import *im = pe_def_file->imports + i;
+	      fprintf (out, "    ");
+	      if (im->internal_name
+		  && (!im->name || strcmp (im->internal_name, im->name)))
+		{
+		  quoteput (im->internal_name, out, 0);
+		  fprintf (out, " = ");
+		}
+	      quoteput (im->module->name, out, 0);
+	      fprintf (out, ".");
+	      if (im->name)
+		quoteput (im->name, out, 0);
+	      else
+		fprintf (out, "%d", im->ordinal);
+	      fprintf (out, "\n");
+	    }
+	}
     }
+  else
+    fprintf (out, _("; no contents available\n"));
 
   if (fclose (out) == EOF)
     {

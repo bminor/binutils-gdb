@@ -69,6 +69,7 @@ int pe_dll_export_everything = 0;
 int pe_dll_do_default_excludes = 1;
 int pe_dll_kill_ats = 0;
 int pe_dll_stdcall_aliases = 0;
+int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable */
 
 extern const char *output_filename;
 
@@ -105,6 +106,8 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_EXCLUDE_SYMBOLS		(OPTION_EXPORT_ALL + 1)
 #define OPTION_KILL_ATS			(OPTION_EXCLUDE_SYMBOLS + 1)
 #define OPTION_STDCALL_ALIASES		(OPTION_KILL_ATS + 1)
+#define OPTION_ENABLE_STDCALL_FIXUP	(OPTION_STDCALL_ALIASES + 1)
+#define OPTION_DISABLE_STDCALL_FIXUP	(OPTION_ENABLE_STDCALL_FIXUP + 1)
 
 static struct option longopts[] =
 {
@@ -132,6 +135,8 @@ static struct option longopts[] =
   {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMBOLS},
   {"kill-at", no_argument, NULL, OPTION_KILL_ATS},
   {"add-stdcall-alias", no_argument, NULL, OPTION_STDCALL_ALIASES},
+  {"enable-stdcall-fixup", no_argument, NULL, OPTION_ENABLE_STDCALL_FIXUP},
+  {"disable-stdcall-fixup", no_argument, NULL, OPTION_DISABLE_STDCALL_FIXUP},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -198,6 +203,8 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"));
   fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
   fprintf (file, _("  --add-stdcall-alias                Export symbols with and without @nn\n"));
+  fprintf (file, _("  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"));
+  fprintf (file, _("  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"));
 }
 
 static void
@@ -411,6 +418,12 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
     case OPTION_STDCALL_ALIASES:
       pe_dll_stdcall_aliases = 1;
       break;
+    case OPTION_ENABLE_STDCALL_FIXUP:
+      pe_enable_stdcall_fixup = 1;
+      break;
+    case OPTION_DISABLE_STDCALL_FIXUP:
+      pe_enable_stdcall_fixup = 0;
+      break;
     }
   return 1;
 }
@@ -516,6 +529,7 @@ pe_undef_cdecl_match (h, string)
 static void
 pe_fixup_stdcalls ()
 {
+  static int gave_warning_message = 0;
   struct bfd_link_hash_entry *undef, *sym;
   char *at;
   for (undef = link_info.hash->undefs; undef; undef=undef->next)
@@ -535,6 +549,17 @@ pe_fixup_stdcalls ()
 	  undef->type = bfd_link_hash_defined;
 	  undef->u.def.value = sym->u.def.value;
 	  undef->u.def.section = sym->u.def.section;
+	  if (pe_enable_stdcall_fixup == -1)
+	    {
+	      einfo (_("Warning: resolving %s by linking to %s\n"),
+		     undef->root.string, cname);
+	      if (! gave_warning_message)
+		{
+		  gave_warning_message = 1;
+		  einfo(_("Use --enable-stdcall-fixup to disable these warnings\n"));
+		  einfo(_("Use --disable-stdcall-fixup to disable these fixups\n"));
+		}
+	    }
 	}
       }
       else
@@ -550,6 +575,17 @@ pe_fixup_stdcalls ()
 	  undef->type = bfd_link_hash_defined;
 	  undef->u.def.value = sym->u.def.value;
 	  undef->u.def.section = sym->u.def.section;
+	  if (pe_enable_stdcall_fixup == -1)
+	    {
+	      einfo (_("Warning: resolving %s by linking to %s\n"),
+		     undef->root.string, sym->root.string);
+	      if (! gave_warning_message)
+		{
+		  gave_warning_message = 1;
+		  einfo(_("Use --enable-stdcall-fixup to disable these warnings\n"));
+		  einfo(_("Use --disable-stdcall-fixup to disable these fixups\n"));
+		}
+	    }
 	}
       }
     }
@@ -568,7 +604,8 @@ gld_${EMULATION_NAME}_after_open ()
   pe_data (output_bfd)->pe_opthdr = pe;
   pe_data (output_bfd)->dll = init[DLLOFF].value;
 
-  pe_fixup_stdcalls ();
+  if (pe_enable_stdcall_fixup) /* -1=warn or 1=disable */
+    pe_fixup_stdcalls ();
 
 #ifdef TARGET_IS_i386pe
   if (link_info.shared)
@@ -660,6 +697,32 @@ gld_${EMULATION_NAME}_unrecognized_file(entry)
     def_file_parse (entry->filename, pe_def_file);
     if (pe_def_file)
     {
+      int i, buflen=0, len;
+      char *buf;
+      for (i=0; i<pe_def_file->num_exports; i++)
+	{
+	  len = strlen(pe_def_file->exports[i].internal_name);
+	  if (buflen < len+2)
+	    buflen = len+2;
+	}
+      buf = (char *) xmalloc (buflen);
+      for (i=0; i<pe_def_file->num_exports; i++)
+	{
+	  struct bfd_link_hash_entry *h;
+	  sprintf(buf, "_%s", pe_def_file->exports[i].internal_name);
+
+	  h = bfd_link_hash_lookup (link_info.hash, buf, true, true, true);
+	  if (h == (struct bfd_link_hash_entry *) NULL)
+	    einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
+	  if (h->type == bfd_link_hash_new)
+	    {
+	      h->type = bfd_link_hash_undefined;
+	      h->u.undef.abfd = NULL;
+	      bfd_link_add_undef (link_info.hash, h);
+	    }
+	}
+      free (buf);
+
       /* def_file_print (stdout, pe_def_file); */
       if (pe_def_file->is_dll == 1)
 	link_info.shared = 1;
