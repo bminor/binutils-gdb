@@ -1,4 +1,4 @@
-Wed May 22 14:13:40 2002  J"orn Rennecke <joern.rennecke@superh.com>
+Wed May 22 19:13:27 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* sh-dis.c (print_insn_sh): If coff and bfd_mach_sh, use arch_sh4
 	for disassembly.
