@@ -1,5 +1,8 @@
 -*- text -*-
 
+* An assembler test generator has been contributed and an example file that
+  uses it (gas/testsuite/gas/all/test-gen.c and test-exmaple.c).
+  
 * Support for SH2E added.
 
 * GASP has now been removed.

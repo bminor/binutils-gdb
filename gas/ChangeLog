@@ -1,3 +1,7 @@
+2003-02-21  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention availability of test generator program.
+
 2003-02-21  Miles Bader  <miles@gnu.org>
 
 	* config/tc-v850.c (system_registers): Add v850e debug registers.

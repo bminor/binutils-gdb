@@ -1,3 +1,16 @@
+2003-02-21  Nick Clifton  <nickc@redhat.com>
+
+	* gas/all/test-gen.c: New file: Framework for automatically
+	generating assembler test files.
+        * gas/all/test-examples.c: New file: Example of a file using
+	test-gen.c.
+
+        * gas/arm/maverick.c: Rework to produce correct test files and
+	fix formatting.
+        * gas/arm/maverick.s: Regenerate.
+        * gas/arm/maverick.d: Regenerate.
+        * gas/arm/arm.exp: Always run Maverick tests.
+
 2003-02-21  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/elf-rel14.[sd]: New test.

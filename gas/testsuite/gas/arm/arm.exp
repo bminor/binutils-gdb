@@ -62,6 +62,8 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     run_dump_test "adrl"
 
+    run_dump_test "maverick"
+    
     if {[istarget *-*-elf*] || [istarget *-*-linux*]} then {
 	run_dump_test "pic"
     }
@@ -77,6 +79,3 @@ if [istarget arm-*-pe] {
     #run_dump_test "be-fpconst"
 }
 
-if [istarget arm9e-*] {
-    run_dump_test "maverick"
-}
