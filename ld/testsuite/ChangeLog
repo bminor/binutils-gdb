@@ -1,3 +1,8 @@
+2003-06-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-elfcomm/elfcomm.exp (dump_common1): Use $READELF, not plain
+	readelf as found using default path.
+
 2003-06-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* lib/ld-lib.exp (default_ld_simple_link): Trim ld parms before

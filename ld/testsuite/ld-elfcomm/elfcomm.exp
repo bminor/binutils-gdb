@@ -41,9 +41,10 @@ if { [which $CC] == 0 } {
 
 proc dump_common1 { testname } {
     global exec_output
+    global READELF
 
-    send_log "readelf -s tmpdir/common1.o | grep foo\n"
-    catch "exec readelf -s tmpdir/common1.o | grep foo" exec_output
+    send_log "$READELF -s tmpdir/common1.o | grep foo\n"
+    catch "exec $READELF -s tmpdir/common1.o | grep foo" exec_output
     if { ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0\]*)80(\[ 	\]+)4(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)COM(\[ 	\]+)_?foo2" $exec_output]
  	 || ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0-9\]+)(\[ 	\]+)21(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)_?foo1" $exec_output] } {
 	send_log "$exec_output\n"
