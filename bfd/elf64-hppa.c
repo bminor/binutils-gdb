@@ -682,7 +682,8 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	   i < symtab_hdr->sh_info;
 	   i++, esym++, isym++, shndx = (shndx != NULL ? shndx + 1 : NULL))
 	{
-	  bfd_elf64_swap_symbol_in (abfd, esym, shndx, isym);
+	  bfd_elf64_swap_symbol_in (abfd, (const PTR *) esym,
+				    (const PTR *) shndx, isym);
 	  if (isym->st_shndx > highest_shndx)
 	    highest_shndx = isym->st_shndx;
 	}
@@ -2673,6 +2674,7 @@ const struct elf_size_info hppa64_elf_size_info =
   bfd_elf64_write_out_phdrs,
   bfd_elf64_write_shdrs_and_ehdr,
   bfd_elf64_write_relocs,
+  bfd_elf64_swap_symbol_in,
   bfd_elf64_swap_symbol_out,
   bfd_elf64_slurp_reloc_table,
   bfd_elf64_slurp_symbol_table,

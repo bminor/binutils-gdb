@@ -3067,6 +3067,7 @@ const struct elf_size_info sparc64_elf_size_info =
   bfd_elf64_write_out_phdrs,
   bfd_elf64_write_shdrs_and_ehdr,
   sparc64_elf_write_relocs,
+  bfd_elf64_swap_symbol_in,
   bfd_elf64_swap_symbol_out,
   sparc64_elf_slurp_reloc_table,
   bfd_elf64_slurp_symbol_table,

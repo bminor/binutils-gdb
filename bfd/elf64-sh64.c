@@ -2234,7 +2234,8 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
 	{
 	  asection *isec;
 
-	  bfd_elf64_swap_symbol_in (input_bfd, esym, shndx, isymp);
+	  bfd_elf64_swap_symbol_in (input_bfd, (const PTR *) esym,
+				    (const PTR *) shndx, isymp);
 
 	  if (isymp->st_shndx == SHN_UNDEF)
 	    isec = bfd_und_section_ptr;

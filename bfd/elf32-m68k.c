@@ -2211,7 +2211,8 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 	  /* A local symbol.  */
 	  esym = extsyms + ELF32_R_SYM (irel->r_info);
 	  shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (irel->r_info) : 0);
-	  bfd_elf32_swap_symbol_in (abfd, esym, shndx, &isym);
+	  bfd_elf32_swap_symbol_in (abfd, (const PTR *) esym,
+				    (const PTR *) shndx, &isym);
 
 	  targetsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 	}

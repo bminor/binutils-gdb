@@ -812,7 +812,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	  /* A local symbol.  */
 	  esym = extsyms + ELFNN_R_SYM (irel->r_info);
 	  shndx = shndx_buf + (shndx_buf ? ELFNN_R_SYM (irel->r_info) : 0);
-	  bfd_elfNN_swap_symbol_in (abfd, esym, shndx, &isym);
+	  bfd_elfNN_swap_symbol_in (abfd, (const PTR *) esym,
+				    (const PTR *) shndx, &isym);
 	  if (isym.st_shndx == SHN_UNDEF)
 	    continue;	/* We can't do anthing with undefined symbols.  */
 	  else if (isym.st_shndx == SHN_ABS)

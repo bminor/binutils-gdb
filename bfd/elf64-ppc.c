@@ -4594,7 +4594,8 @@ get_local_syms (input_bfd, htab)
 	     isym = local_syms, shndx = shndx_buf;
 	   esym < end_sy;
 	   esym++, isym++, shndx = (shndx ? shndx + 1 : NULL))
-	bfd_elf64_swap_symbol_in (input_bfd, esym, shndx, isym);
+	bfd_elf64_swap_symbol_in (input_bfd, (const PTR *) esym,
+				  (const PTR *) shndx, isym);
 
       /* Now we can free the external symbols.  */
       free (shndx_buf);
