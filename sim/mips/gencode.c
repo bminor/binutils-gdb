@@ -1622,7 +1622,7 @@ build_instruction (doisa, features, mips16, insn)
        if (insn->flags & UNSIGNED)
 	 printf("   uword64 temp = ((uword64)(op1 & 0xffffffff) * (uword64)(op2 & 0xffffffff));\n");
        else
-	 printf("   uword64 temp = (op1 * op2);\n");
+	 printf("   uword64 temp = ((word64) op1 * (word64) op2);\n");
        printf("   LO = SIGNEXTEND((%s)WORD64LO(temp),32);\n",regtype);
        printf("   HI = SIGNEXTEND((%s)WORD64HI(temp),32);\n",regtype);
      }
@@ -1795,6 +1795,11 @@ build_instruction (doisa, features, mips16, insn)
      break ;
 
     case OR:
+     /* The default mips16 nop instruction does an or to register
+        zero; catch that case, so that we don't get useless warnings
+        from the simulator.  */
+     if (mips16)
+       printf ("   if (destreg != 0)\n");
      printf("   GPR[destreg] = %s(op1 | op2);\n",((insn->flags & NOT) ? "~" : ""));
      break ;
 

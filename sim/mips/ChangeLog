@@ -1,3 +1,11 @@
+Thu Dec 19 14:07:27 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gencode.c (build_instruction) [MUL]: Cast operands to word64, to
+	force a 64 bit multiplication.
+	(build_instruction) [OR]: In mips16 mode, don't do anything if the
+	destination register is 0, since that is the default mips16 nop
+	instruction.
+
 Mon Dec 16 14:59:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gencode.c (MIPS16_DECODE): SWRASP is I8, not RI.
