@@ -1,3 +1,8 @@
+2000-11-21  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-sparc.c (md_pseudo_table): Add .file and .loc.
+	(output_insn): Call dwarf2_emit_insn.
+
 2000-11-17  Richard Henderson  <rth@redhat.com>
 
 	* ehopt.c (eh_frame_code_alignment): New arg `in_seg', update all

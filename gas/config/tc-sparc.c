@@ -28,6 +28,7 @@
 
 #ifdef OBJ_ELF
 #include "elf/sparc.h"
+#include "dwarf2dbg.h"
 #endif
 
 static struct sparc_arch *lookup_arch PARAMS ((char *));
@@ -151,6 +152,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"uaword", s_uacons, 4},
   {"uaxword", s_uacons, 8},
 #ifdef OBJ_ELF
+  {"file", dwarf2_directive_file, 0},
+  {"loc", dwarf2_directive_loc, 0},
   /* These are specific to sparc/svr4.  */
   {"2byte", s_uacons, 2},
   {"4byte", s_uacons, 4},
@@ -2769,6 +2772,10 @@ output_insn (insn, the_insn)
 
   last_insn = insn;
   last_opcode = the_insn->opcode;
+
+#ifdef OBJ_ELF
+  dwarf2_emit_insn (4);
+#endif
 }
 
 /* This is identical to the md_atof in m68k.c.  I think this is right,
