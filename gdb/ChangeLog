@@ -1,3 +1,14 @@
+2000-03-15  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* ser-go32.c (dos_noop, dos_raw, dos_noflush_set_tty_state)
+	(dos_print_tty_state, dos_info, _initialize_ser_dos): Convert
+	to ISO C.  Use ATTRIBUTE_UNUSED to avoid compiler warnings.
+	(dos_info): Avoid compiler warning when printing a ptrdiff_t.
+
+	* ser-go32.c (dos_get_tty_state): Fail if the (fake) handle was
+	not opened by dos_open, but let the 3 standard handles go through
+	unharmed.
+
 2000-03-14  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* eval.c (evaluate_subexp_with_coercion): Add call to
