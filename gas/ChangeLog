@@ -1,3 +1,15 @@
+Thu  8 Jun 19:33:02 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/obj-vms.c (myname): Delete all references.
+	(VMS_stab_parse, Write_VMS_MHD_Records, VMS_Case_Hack_Symbol):
+	Replace printf calls with as_tsktsk.
+	(PUT_LONG, PUT_SHORT): Use COPY_LONG, COPY_SHORT.
+	(VMS_Store_Immediate_Data): Move second buffer capacity check
+	below bottom of loop; first check at top suffices for loop itself.
+	(find_file): Remove redundant pointer checks in first two loops;
+	replace third loop with pointer to last list element determined
+	in first loop.
+
 start-sanitize-arc
 Thu Jun  8 11:44:35 1995  Doug Evans  <dje@chestnut.cygnus.com>
 

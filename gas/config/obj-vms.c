@@ -59,7 +59,6 @@ extern int flag_no_hash_mixed_case;	/* -h NUM */
 
 char vms_name_mapping = 0;
 
-extern char *myname;
 static symbolS *Entry_Point_Symbol = 0;	/* Pointer to "_main" */
 
 /*
@@ -236,7 +235,7 @@ static int total_len;		/* used to calculate the total length of variable
 
 /* Flag if we have told user about finding global constants in the text
    section. */
-static gave_compiler_message = 0;
+static int gave_compiler_message = 0;
 
 /* A pointer to the current routine that we are working on.  */
 
@@ -268,15 +267,12 @@ static int Current_Object_Record_Type;	/* Type of record in above	   */
 /*
  *	Macros for placing data into the object record buffer
  */
-
 #define	PUT_LONG(val) \
-{ md_number_to_chars(Object_Record_Buffer + \
-		     Object_Record_Offset, val, 4); \
+{ COPY_LONG(&Object_Record_Buffer[Object_Record_Offset], val); \
 			 Object_Record_Offset += 4; }
 
 #define	PUT_SHORT(val) \
-{ md_number_to_chars(Object_Record_Buffer + \
-		     Object_Record_Offset, val, 2); \
+{ COPY_SHORT(&Object_Record_Buffer[Object_Record_Offset], val); \
 			 Object_Record_Offset += 2; }
 
 #define	PUT_CHAR(val)	Object_Record_Buffer[Object_Record_Offset++] = val
@@ -617,6 +613,7 @@ vms_tir_stack_psect (Psect_Index, Offset, Force)
   offset_width = (Force || Offset > 32767 || Offset < -32768) ? 4
 		 : (Offset > 127 || Offset < -128) ? 2 : 1;
 #define Sta_P(p,o) (((o)<<1) | ((p)-1))
+  /* byte or word psect; byte, word, or longword offset */
   switch (Sta_P(psect_width,offset_width))
     {
       case Sta_P(1,1):	PUT_CHAR (TIR_S_C_STA_PB);
@@ -676,8 +673,7 @@ VMS_Store_Immediate_Data (Pointer, Size, Record_Type)
        *	If we cannot accommodate this record, flush the
        *	buffer.
        */
-      if ((Object_Record_Offset + i + 1) >=
-	  sizeof (Object_Record_Buffer))
+      if ((Object_Record_Offset + i + 1) >= sizeof (Object_Record_Buffer))
 	Flush_VMS_Object_Record_Buffer ();
       /*
        *	If the buffer is empty we must insert record type
@@ -693,13 +689,12 @@ VMS_Store_Immediate_Data (Pointer, Size, Record_Type)
        */
       while (--i >= 0)
 	PUT_CHAR (*Pointer++);
-      /*
-       *	Flush the buffer if it is more than 75% full
-       */
-      if (Object_Record_Offset >
-	  (sizeof (Object_Record_Buffer) * 3 / 4))
-	Flush_VMS_Object_Record_Buffer ();
     }
+  /*
+   *	Flush the buffer if it is more than 75% full.
+   */
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
+    Flush_VMS_Object_Record_Buffer ();
 }
 
 /*
@@ -732,8 +727,7 @@ VMS_Set_Data (Psect_Index, Offset, Record_Type, Force)
   /*
    *	Flush the buffer if it is more than 75% full
    */
-  if (Object_Record_Offset >
-      (sizeof (Object_Record_Buffer) * 3 / 4))
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
@@ -760,8 +754,7 @@ VMS_Store_Struct (Struct_Index)
   /*
    *	Flush the buffer if it is more than 75% full
    */
-  if (Object_Record_Offset >
-      (sizeof (Object_Record_Buffer) * 3 / 4))
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
@@ -787,8 +780,7 @@ VMS_Def_Struct (Struct_Index)
   /*
    *	Flush the buffer if it is more than 75% full
    */
-  if (Object_Record_Offset >
-      (sizeof (Object_Record_Buffer) * 3 / 4))
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
@@ -802,8 +794,7 @@ VMS_Set_Struct (Struct_Index)
   PUT_CHAR (TIR_S_C_STA_UW);
   PUT_SHORT (Struct_Index);
   PUT_CHAR (TIR_S_C_CTL_STLOC);
-  if (Object_Record_Offset >
-      (sizeof (Object_Record_Buffer) * 3 / 4))
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
@@ -1119,11 +1110,8 @@ VMS_TBT_Block_End (Size)
    */
   Local[0] = 6;
   Local[1] = DST_S_C_BLKEND;
+  Local[2] = 0;		/* unused, must be zero */
   COPY_LONG (&Local[3], Size);
-  /*
-   *	Unused
-   */
-  Local[2] = 0;
   VMS_Store_Immediate_Data (Local, 7, OBJ_S_C_DBG);
 }
 
@@ -1454,29 +1442,29 @@ VMS_TBT_Source_Lines (ID_Number, Starting_Line_Number, Number_Of_Lines)
 
 
 
-
-/* This routine locates a file in the list of files.  If an entry does not
+/*
+ * This routine locates a file in the list of files.  If an entry does not
  * exist, one is created.  For include files, a new entry is always created
- * such that inline functions can be properly debugged. */
+ * such that inline functions can be properly debugged.
+ */
 static struct input_file *
 find_file (sp)
      symbolS *sp;
 {
-  struct input_file *same_file;
-  struct input_file *fpnt;
-  same_file = (struct input_file *) NULL;
+  struct input_file *same_file = 0;
+  struct input_file *fpnt, *last = 0;
+  char *sp_name;
+
   for (fpnt = file_root; fpnt; fpnt = fpnt->next)
     {
-      if (fpnt == (struct input_file *) NULL)
-	break;
       if (fpnt->spnt == sp)
 	return fpnt;
+      last = fpnt;
     }
+  sp_name = S_GET_NAME (sp);
   for (fpnt = file_root; fpnt; fpnt = fpnt->next)
     {
-      if (fpnt == (struct input_file *) NULL)
-	break;
-      if (strcmp (S_GET_NAME (sp), fpnt->name) == 0)
+      if (strcmp (sp_name, fpnt->name) == 0)
 	{
 	  if (fpnt->flag == 1)
 	    return fpnt;
@@ -1485,16 +1473,12 @@ find_file (sp)
 	}
     }
   fpnt = (struct input_file *) xmalloc (sizeof (struct input_file));
-  if (file_root == (struct input_file *) NULL)
+  if (!file_root)
     file_root = fpnt;
   else
-    {
-      struct input_file *fpnt1;
-      for (fpnt1 = file_root; fpnt1->next; fpnt1 = fpnt1->next) ;
-      fpnt1->next = fpnt;
-    }
-  fpnt->next = (struct input_file *) NULL;
-  fpnt->name = S_GET_NAME (sp);
+    last->next = fpnt;
+  fpnt->next = 0;
+  fpnt->name = sp_name;
   fpnt->min_line = 0x7fffffff;
   fpnt->max_line = 0;
   fpnt->offset = 0;
@@ -1837,7 +1821,7 @@ gen1 (spnt, array_suffix_len)
       else
 	i = gen1 (spnt1, 0);
       if (i)
-	{			/* (*void) is a special case, do not put pointer suffix*/
+	{	/* (*void) is a special case, do not put pointer suffix */
 	  rpush (DBG_S_C_POINTER, 1);
 	  total_len += 3;
 	  rpush (total_len, 2);
@@ -1926,7 +1910,8 @@ generate_suffix (spnt, dbx_type)
  */
   if ((total_len >= MAX_DEBUG_RECORD) || overflow)
     {
-      as_warn ("Variable descriptor %d too complicated. Defined as void*", spnt->dbx_type);
+      as_warn ("Variable descriptor %d too complicated.  Defined as `void *'.",
+		spnt->dbx_type);
       VMS_Store_Immediate_Data (pvoid, 6, OBJ_S_C_DBG);
       return;
     }
@@ -1941,10 +1926,10 @@ generate_suffix (spnt, dbx_type)
       Lpnt = 0;
       VMS_Store_Struct (struct_number);
     }
-/* we use this for a forward reference to a structure that has yet to be
-*defined.  We store four bytes of zero to make room for the actual address once
-* it is known
-*/
+/* We use this for a forward reference to a structure that has yet to be
+ * defined.  We store four bytes of zero to make room for the actual address
+ * once it is known.
+ */
   if (struct_number < 0)
     {
       struct_number = -struct_number;
@@ -2038,6 +2023,7 @@ setup_basic_type (spnt)
   VMS_Store_Immediate_Data (Local, Lpnt, OBJ_S_C_DBG);
   Lpnt = 0;
 #endif	/* SETUP_BASIC_TYPES */
+  return;
 }
 
 /* This routine generates a symbol definition for a C symbol for the debugger.
@@ -2236,13 +2222,16 @@ VMS_stab_parse (sp, expected_type, type1, type2, Text_Psect)
 	    {
 	      if (!gave_compiler_message && expected_type == 'G')
 		{
-		  printf ("***Warning - the assembly code generated by the compiler has placed\n");
-		  printf ("global constant(s) in the text psect.  These will not be available to\n");
-		  printf ("other modules, since this is not the correct way to handle this. You\n");
-		  printf ("have two options: 1) get a patched compiler that does not put global\n");
-		  printf ("constants in the text psect, or 2) remove the 'const' keyword from\n");
-		  printf ("definitions of global variables in your source module(s).  Don't say\n");
-		  printf ("I didn't warn you!");
+		  static const char long_const_msg[] = "\
+***Warning - the assembly code generated by the compiler has placed \n\
+ global constant(s) in the text psect.  These will not be available to \n\
+ other modules, since this is not the correct way to handle this. You \n\
+ have two options: 1) get a patched compiler that does not put global \n\
+ constants in the text psect, or 2) remove the 'const' keyword from \n\
+ definitions of global variables in your source module(s).  Don't say \n\
+ I didn't warn you! \n";
+
+		  as_tsktsk (long_const_msg);
 		  gave_compiler_message = 1;
 		}
 	      VMS_DBG_record (spnt,
@@ -2990,15 +2979,17 @@ VMS_LSYM_Parse ()
 		      pnt2 = (char *) strchr (pnt1, '=');
 		      if (pnt2 != (char *) NULL)
 			incomplete += VMS_typedef_parse (pnt2);
-		      if (parse_buffer){
-			/*  At this point the parse buffer should just contain name:nn.
-			    If it does not, then we are in real trouble. Anyway, 
-			    this is always shorter than the original line. */
-			strcpy(S_GET_NAME (sp), parse_buffer);
-			free (parse_buffer);
-			parse_buffer = 0;
-		      }
-		      *pnt = ':';	/* put back colon so variable def code finds dbx_type*/
+		      if (parse_buffer)
+			{
+			  /*  At this point the parse buffer should just
+			      contain name:nn.  If it does not, then we
+			      are in real trouble.  Anyway, this is always
+			      shorter than the original line.  */
+			  strcpy (S_GET_NAME (sp), parse_buffer);
+			  free (parse_buffer);
+			  parse_buffer = 0;
+			}
+		      *pnt = ':';	/* put back colon to restore dbx_type */
 		    }
 		  break;
 		}		/*switch*/
@@ -3183,13 +3174,11 @@ Write_VMS_MHD_Records ()
   register const char *cp;
   register char *cp1;
   register int i;
-  struct
-  {
-    int Size;
-    char *Ptr;
-  } Descriptor;
-  char Module_Name[256];
-  char Now[18];
+#ifdef VMS
+  struct { unsigned short len, mbz; char *ptr; } Descriptor;
+#endif
+  char Module_Name[255+1];
+  char Now[17+1];
 
   /*
    *	We are writing a module header record
@@ -3212,6 +3201,12 @@ Write_VMS_MHD_Records ()
    *	Maximum record size is size of the object record buffer
    */
   PUT_SHORT (sizeof (Object_Record_Buffer));
+
+	/*
+	 *	FIXME:  module name and version should be user
+	 *		specifiable via `.ident' and/or `#pragma ident'.
+	 */
+
   /*
    *	Get module name (the FILENAME part of the object file)
    */
@@ -3238,7 +3233,7 @@ Write_VMS_MHD_Records ()
   if (strlen (Module_Name) > 31)
     {
       if (flag_hash_long_names)
-	printf ("%s: Module name truncated: %s\n", myname, Module_Name);
+	as_tsktsk ("Module name truncated: %s\n", Module_Name);
       Module_Name[31] = 0;
     }
   PUT_COUNTED_STRING (Module_Name);
@@ -3247,14 +3242,15 @@ Write_VMS_MHD_Records ()
    */
   PUT_COUNTED_STRING ("V1.0");
   /*
-   *	Creation time is "now" (17 chars of time string)
+   *	Creation time is "now" (17 chars of time string): "dd-MMM-yyyy hh:mm".
    */
 #ifndef VMS
-  get_VMS_time_on_unix (&Now[0]);
+  get_VMS_time_on_unix (Now);
 #else /* VMS */
-  Descriptor.Size = 17;
-  Descriptor.Ptr = Now;
-  sys$asctim (0, &Descriptor, 0, 0);
+  Descriptor.len = sizeof Now - 1;
+  Descriptor.mbz = 0;		/* type & class unspecified */
+  Descriptor.ptr = Now;
+  (void) sys$asctim ((unsigned short *)0, &Descriptor, (long *)0, 0);
 #endif /* VMS */
   for (i = 0; i < 17; i++)
     PUT_CHAR (Now[i]);
@@ -3421,7 +3417,7 @@ VMS_Case_Hack_Symbol (In, Out)
 
   old_name = In;
 /*	if (strlen(In) > 31 && flag_hash_long_names)
-		printf("%s: Symbol name truncated: %s\n",myname,In);*/
+		as_tsktsk("Symbol name truncated: %s\n", In); */
   /*
    *	Do the case conversion
    */
@@ -3546,7 +3542,7 @@ VMS_Case_Hack_Symbol (In, Out)
    */
   *Out = 0;
   if (truncate == 1 && flag_hash_long_names && flag_show_after_trunc)
-    printf ("%s: Symbol %s replaced by %s\n", myname, old_name, new_name);
+    as_tsktsk ("Symbol %s replaced by %s\n", old_name, new_name);
 }
 
 
@@ -3722,13 +3718,9 @@ VMS_Global_Symbol_Spec (Name, Psect_Number, Psect_Offset, Flags)
        *	Psect Number
        */
       if ((Flags & GBLSYM_LCL) == 0 && (unsigned) Psect_Number <= 255)
-	{
-	  PUT_CHAR (Psect_Number);
-	}
+	PUT_CHAR (Psect_Number);
       else
-	{
-	  PUT_SHORT (Psect_Number);
-	}
+	PUT_SHORT (Psect_Number);
       /*
        *	Offset
        */
@@ -3914,8 +3906,7 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
   /*
    *	Flush the buffer if it is more than 75% full
    */
-  if (Object_Record_Offset >
-      (sizeof (Object_Record_Buffer) * 3 / 4))
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
   return 0;
 }
@@ -4074,7 +4065,7 @@ VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment)
 				      GBLSYM_DEF|GBLSYM_VAL);
 	      break;
 	    default:
-	      as_tsktsk ("Invalid globalvalue of %s", stripped_name);
+	      as_warn ("Invalid globalvalue of %s", stripped_name);
 	      break;
 	    }			/* switch */
 	}			/* if */
@@ -4121,13 +4112,9 @@ VMS_Procedure_Entry_Pt (Name, Psect_Number, Psect_Offset, Entry_Mask)
    *	Psect Number
    */
   if ((unsigned) Psect_Number <= 255)
-    {
-      PUT_CHAR (Psect_Number);
-    }
+    PUT_CHAR (Psect_Number);
   else
-    {
-      PUT_SHORT (Psect_Number);
-    }
+    PUT_SHORT (Psect_Number);
   /*
    *	Offset
    */
@@ -4144,8 +4131,7 @@ VMS_Procedure_Entry_Pt (Name, Psect_Number, Psect_Offset, Entry_Mask)
   /*
    *	Flush the buffer if it is more than 75% full
    */
-  if (Object_Record_Offset >
-      (sizeof (Object_Record_Buffer) * 3 / 4))
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
@@ -4179,8 +4165,7 @@ VMS_Set_Psect (Psect_Index, Offset, Record_Type)
   /*
    *	Flush the buffer if it is more than 75% full
    */
-  if (Object_Record_Offset >
-      (sizeof (Object_Record_Buffer) * 3 / 4))
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
@@ -4248,8 +4233,7 @@ VMS_Store_Repeated_Data (Repeat_Count, Pointer, Size, Record_Type)
   /*
    *	Flush the buffer if it is more than 75% full
    */
-  if (Object_Record_Offset >
-      (sizeof (Object_Record_Buffer) * 3 / 4))
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
@@ -4281,23 +4265,14 @@ VMS_Store_PIC_Symbol_Reference (Symbol, Offset, PC_Relative,
   if (Object_Record_Offset == 0)
     PUT_CHAR (Record_Type);
   /*
-   *	Set to the appropriate offset in the Psect
+   *	Set to the appropriate offset in the Psect.
+   *	For a Code reference we need to fix the operand
+   *	specifier as well, so back up 1 byte;
+   *	for a Data reference we just store HERE.
    */
-  if (PC_Relative)
-    {
-      /*
-       *	For a Code reference we need to fix the operand
-       *	specifier as well (so back up 1 byte)
-       */
-      VMS_Set_Psect (Psect, Psect_Offset - 1, Record_Type);
-    }
-  else
-    {
-      /*
-       *	For a Data reference we just store HERE
-       */
-      VMS_Set_Psect (Psect, Psect_Offset, Record_Type);
-    }
+  VMS_Set_Psect (Psect,
+		 PC_Relative ? Psect_Offset - 1 : Psect_Offset,
+		 Record_Type);
   /*
    *	Make sure we are still generating a "Record Type" record
    */
@@ -4397,8 +4372,7 @@ VMS_Store_PIC_Symbol_Reference (Symbol, Offset, PC_Relative,
   /*
    *	Flush the buffer if it is more than 75% full
    */
-  if (Object_Record_Offset >
-      (sizeof (Object_Record_Buffer) * 3 / 4))
+  if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
 }
 
@@ -4448,7 +4422,7 @@ VMS_Fix_Indirect_Reference (Text_Psect, Offset, fragP, text_frag_root)
    */
   if (fragP->fr_literal[Offset - fragP->fr_address] == (char) 0xff)
     {
-      static char Address_Mode = 0xff;
+      static char Address_Mode = (char) 0xff;
 
       /*
        *	Yes: Store the indirect mode back into the image
@@ -4462,6 +4436,17 @@ VMS_Fix_Indirect_Reference (Text_Psect, Offset, fragP, text_frag_root)
 /*
  *	If the procedure "main()" exists we have to add the instruction
  *	"jsb c$main_args" at the beginning to be compatible with VAX-11 "C".
+ *
+ *	FIXME:  the macro name `HACK_DEC_C_STARTUP' should be renamed
+ *		to `HACK_VAXCRTL_STARTUP' because Digital's compiler
+ *		named "DEC C" uses run-time library "DECC$SHR", but this
+ *		startup code is for "VAXCRTL", the library for Digital's
+ *		older "VAX C".  Also, this extra code isn't needed for
+ *		supporting gcc because it already generates the VAXCRTL
+ *		startup call when compiling main().  The reference to
+ *		`flag_hash_long_names' looks very suspicious too;
+ *		probably an old-style command line option was inadvertently
+ *		overloaded here, then blindly converted into the new one.
  */
 void
 vms_check_for_main ()
@@ -4633,7 +4618,8 @@ vms_check_for_main ()
 		      symbolP->sy_resolved = 0;
 		      symbolP->sy_resolving = 0;
 		      /* this actually inserts at the beginning of the list */
-		      symbol_append (symbol_rootP, symbolP, &symbol_rootP, &symbol_lastP);
+		      symbol_append (symbol_rootP, symbolP,
+				     &symbol_rootP, &symbol_lastP);
 
 		      symbol_rootP = symbolP;
 		      /*
@@ -5452,16 +5438,17 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  }
       }
 
-    /* now we take a quick sweep through the files and assign offsets
-    to each one.  This will essentially be the starting line number to the
-   debugger for each file.  Output the info for the debugger to specify the
-   files, and then tell it how many lines to use */
+    /* Now we take a quick sweep through the files and assign offsets
+       to each one.  This will essentially be the starting line number to
+       the debugger for each file.  Output the info for the debugger to
+       specify the files, and then tell it how many lines to use.  */
     {
       int File_Number = 0;
       int Debugger_Offset = 0;
       int file_available;
       Current_File = file_root;
-      for (Current_File = file_root; Current_File; Current_File = Current_File->next)
+      for (Current_File = file_root; Current_File;
+	   Current_File = Current_File->next)
 	{
 	  if (Current_File == (struct input_file *) NULL)
 	    break;
@@ -5717,7 +5704,8 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
   else
     Write_VMS_EOM_Record (Text_Psect,
 			  S_GET_VALUE (Entry_Point_Symbol));
-
+
+
   /*
    *	All done, close the object file
    */
