@@ -85,7 +85,16 @@ enum {
   last_spr_regnum = 148,
 
   /* The total number of registers we know exist.  */
-  frv_num_regs = last_spr_regnum + 1
+  frv_num_regs = last_spr_regnum + 1,
+
+  /* Pseudo registers */
+  first_pseudo_regnum = frv_num_regs,
+
+  /* iacc0 - the 64-bit concatenation of iacc0h and iacc0l.  */
+  iacc0_regnum = first_pseudo_regnum + 0,
+
+  last_pseudo_regnum = iacc0_regnum,
+  frv_num_pseudo_regs = last_pseudo_regnum + first_pseudo_regnum + 1,
 };
 
 static LONGEST frv_call_dummy_words[] =
@@ -161,8 +170,10 @@ new_variant (void)
 
   /* By default, don't supply any general-purpose or floating-point
      register names.  */
-  var->register_names = (char **) xmalloc (frv_num_regs * sizeof (char *));
-  for (r = 0; r < frv_num_regs; r++)
+  var->register_names 
+    = (char **) xmalloc ((frv_num_regs + frv_num_pseudo_regs)
+                         * sizeof (char *));
+  for (r = 0; r < frv_num_regs + frv_num_pseudo_regs; r++)
     var->register_names[r] = "";
 
   /* Do, however, supply default names for the known special-purpose
@@ -187,6 +198,7 @@ new_variant (void)
   /* iacc0 (Only found on MB93405.)  */
   var->register_names[iacc0h_regnum] = "iacc0h";
   var->register_names[iacc0l_regnum] = "iacc0l";
+  var->register_names[iacc0_regnum] = "iacc0";
 
   return var;
 }
@@ -235,7 +247,7 @@ frv_register_name (int reg)
 {
   if (reg < 0)
     return "?toosmall?";
-  if (reg >= frv_num_regs)
+  if (reg >= frv_num_regs + frv_num_pseudo_regs)
     return "?toolarge?";
 
   return CURRENT_VARIANT->register_names[reg];
@@ -247,8 +259,32 @@ frv_register_type (struct gdbarch *gdbarch, int reg)
 {
   if (reg >= first_fpr_regnum && reg <= last_fpr_regnum)
     return builtin_type_float;
+  else if (reg == iacc0_regnum)
+    return builtin_type_int64;
   else
     return builtin_type_int32;
+}
+
+static void
+frv_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+                          int reg, void *buffer)
+{
+  if (reg == iacc0_regnum)
+    {
+      regcache_raw_read (regcache, iacc0h_regnum, buffer);
+      regcache_raw_read (regcache, iacc0l_regnum, (bfd_byte *) buffer + 4);
+    }
+}
+
+static void
+frv_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
+                          int reg, const void *buffer)
+{
+  if (reg == iacc0_regnum)
+    {
+      regcache_raw_write (regcache, iacc0h_regnum, buffer);
+      regcache_raw_write (regcache, iacc0l_regnum, (bfd_byte *) buffer + 4);
+    }
 }
 
 static int
@@ -1202,6 +1238,8 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ptr_bit (gdbarch, 32);
 
   set_gdbarch_num_regs (gdbarch, frv_num_regs);
+  set_gdbarch_num_pseudo_regs (gdbarch, frv_num_pseudo_regs);
+
   set_gdbarch_sp_regnum (gdbarch, sp_regnum);
   set_gdbarch_deprecated_fp_regnum (gdbarch, fp_regnum);
   set_gdbarch_pc_regnum (gdbarch, pc_regnum);
@@ -1209,6 +1247,9 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, frv_register_name);
   set_gdbarch_register_type (gdbarch, frv_register_type);
   set_gdbarch_register_sim_regno (gdbarch, frv_register_sim_regno);
+
+  set_gdbarch_pseudo_register_read (gdbarch, frv_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, frv_pseudo_register_write);
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);

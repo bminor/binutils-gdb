@@ -1,3 +1,14 @@
+2003-11-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (first_pseudo_regnum, iacc0_regnum, frv_num_pseudo_regs):
+	Define.
+	(new_variant): Set name for iacc0_regnum.
+	(frv_register_name): Accommodate pseudo-registers.
+	(frv_register_type): Add case for iacc0_regnum.
+	(frv_pseudo_register_read, frv_pseudo_register_write): New functions.
+	(frv_gdbarch_init): Set number of pseudo registers.  Establish
+	pseudo-register read/write methods.
+
 2003-11-06  Andrew Cagney  <cagney@redhat.com>
 
 	* valops.c (destructor_name_p): Replace STREQN with strncmp.
