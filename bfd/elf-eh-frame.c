@@ -1,5 +1,5 @@
 /* .eh_frame section optimization.
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -867,8 +867,8 @@ _bfd_elf_eh_frame_section_offset (output_bfd, sec, offset)
 	      + sec_info->entry[mid].lsda_offset)))
     return (bfd_vma) -1;
 
-  return (offset
-	  + (sec_info->entry[mid].new_offset - sec_info->entry[mid].offset));
+  return (offset + sec_info->entry[mid].new_offset
+	  - sec_info->entry[mid].offset);
 }
 
 /* Write out .eh_frame section.  This is called with the relocated

@@ -1,3 +1,8 @@
+2002-01-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-eh-frame.c (_bfd_elf_eh_frame_section_offset): Avoid
+	unsigned overflow when new_offset < old_offset.
+
 2002-24-01  Philipp Thomas  <pthomas@suse.de>
 
 	* bfd.c (_bfd_abort): Fix typo.
