@@ -82,7 +82,7 @@ maintainer works with the native maintainer when resolving API issues.
 	frv		--target=frv-elf ,-Werror
 			Maintenance only
 
-	h8300		--target=h8300hms ,-Werror
+	h8300		--target=h8300hms broken
 			Maintenance only
 
 	h8500		Deleted.
@@ -107,7 +107,7 @@ maintainer works with the native maintainer when resolving API issues.
 	m88k		--target=m88k-openbsd ,-Werror
 			Mark Kettenis		kettenis@gnu.org
 
-	mcore		--target=mcore-elf ,-Werror
+	mcore		--target=mcore-elf broken
 			Maintenance only
 
 	mips		--target=mips-elf ,-Werror
@@ -115,10 +115,10 @@ maintainer works with the native maintainer when resolving API issues.
 
 	mn10200		Deleted.
 
-	mn10300		--target=mn10300-elf ,-Werror
+	mn10300		--target=mn10300-elf broken
 			Maintenance only
 
-	ns32k		--target=ns32k-netbsd ,-Werror
+	ns32k		--target=ns32k-netbsd broken
 			Maintenance only
 
 	pa		--target=hppa-elf ,-Werror
@@ -131,6 +131,7 @@ maintainer works with the native maintainer when resolving API issues.
 			(contact DJ Barrow	djbarrow@de.ibm.com)
 
 	sh		--target=sh-elf ,-Werror
+			--target=sh64-elf broken
 			Elena Zannoni		ezannoni@redhat.com
 
 	sparc		--target=sparc-elf ,-Werror
@@ -138,7 +139,7 @@ maintainer works with the native maintainer when resolving API issues.
 
 	tic80		Deleted.
 
-	v850		--target=v850-elf ,-Werror
+	v850		--target=v850-elf broken
 			Maintenance only
 
 	vax		--target=vax-netbsd ,-Werror
@@ -149,7 +150,7 @@ maintainer works with the native maintainer when resolving API issues.
 	x86-64		--target=x86_64-linux-gnu ,-Werror
 			Maintenance only
 
-	xstormy16	--target=xstormy16-elf ,-Werror
+	xstormy16	--target=xstormy16-elf broken
 			Corinna Vinschen	vinschen@redhat.com
 
 	z8k		Deleted.

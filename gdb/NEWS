@@ -52,6 +52,29 @@ OpenBSD/powerpc					powerpc-*-openbsd*
 NetBSD/vax					vax-*-netbsd*
 OpenBSD/vax					vax-*-openbsd*
 
+* END-OF-LIFE frame compatibility module
+
+GDB's internal frame infrastructure has been completely rewritten.
+The new infrastructure making it possible to support key new features
+including DWARF 2 Call Frame Information.  To aid in the task of
+migrating old configurations to this new infrastructure, a
+compatibility module, that allowed old configurations to continue to
+work, was also included.
+
+GDB 6.2 will be the last release to include this frame compatibility
+module.  This change directly impacts the following configurations:
+
+h8300-*-*
+mcore-*-*
+mn10300-*-*
+ns32k-*-*
+sh64-*-*
+v850-*-*
+xstormy16-*-*
+
+Unless there is activity to revive these configurations, they will be
+made OBSOLETE in GDB 6.3, and REMOVED from GDB 6.4.
+
 * REMOVED configurations and files
 
 Sun 3, running SunOS 3				m68*-*-sunos3*
