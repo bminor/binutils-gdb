@@ -3,6 +3,9 @@
 	* config/tc-ia64.c (errata_nop_necessary_p): Prototype.
 	(make_unw_section_name): Constify local variables.
 
+	* config/tc-ia64.c (has_suffix_p): New.
+	(note_register_values): Use it instead of strstr.
+
 Mon Dec 31 16:48:07 2001  Jeffrey A Law  (law@redhat.com)
 
         * config/tc-hppa.c (pa_ip): Handle new 'c' mode completers,

@@ -733,6 +733,7 @@ static void add_qp_imply PARAMS((int p1, int p2));
 static void clear_qp_branch_flag PARAMS((valueT mask));
 static void clear_qp_mutex PARAMS((valueT mask));
 static void clear_qp_implies PARAMS((valueT p1_mask, valueT p2_mask));
+static int has_suffix_p PARAMS((const char *, const char *));
 static void clear_register_values PARAMS ((void));
 static void print_dependency PARAMS ((const char *action, int depind));
 static void instruction_serialization PARAMS ((void));
@@ -8630,6 +8631,19 @@ add_qp_mutex (mask)
   qp_mutexes[qp_mutexeslen++].prmask = mask;
 }
 
+static int
+has_suffix_p (name, suffix)
+      const char *name;
+      const char *suffix;
+{
+  size_t namelen = strlen (name);
+  size_t sufflen = strlen (suffix);
+
+  if (namelen <= sufflen)
+    return 0;
+  return strcmp (name + namelen - sufflen, suffix) == 0;
+}
+
 static void
 clear_register_values ()
 {
@@ -8747,21 +8761,19 @@ note_register_values (idesc)
 	}
       /* In general, clear mutexes and implies which include P1 or P2,
 	 with the following exceptions.  */
-      else if (strstr (idesc->name, ".or.andcm") != NULL)
+      else if (has_suffix_p (idesc->name, ".or.andcm")
+	       || has_suffix_p (idesc->name, ".and.orcm"))
 	{
 	  add_qp_mutex (p1mask | p2mask);
 	  clear_qp_implies (p2mask, p1mask);
 	}
-      else if (strstr (idesc->name, ".and.orcm") != NULL)
-	{
-	  add_qp_mutex (p1mask | p2mask);
-	  clear_qp_implies (p1mask, p2mask);
-	}
-      else if (strstr (idesc->name, ".and") != NULL)
+      else if (has_suffix_p (idesc->name, ".andcm")
+	       || has_suffix_p (idesc->name, ".and"))
 	{
 	  clear_qp_implies (0, p1mask | p2mask);
 	}
-      else if (strstr (idesc->name, ".or") != NULL)
+      else if (has_suffix_p (idesc->name, ".orcm")
+	       || has_suffix_p (idesc->name, ".or"))
 	{
 	  clear_qp_mutex (p1mask | p2mask);
 	  clear_qp_implies (p1mask | p2mask, 0);
@@ -8769,7 +8781,7 @@ note_register_values (idesc)
       else
 	{
 	  clear_qp_implies (p1mask | p2mask, p1mask | p2mask);
-	  if (strstr (idesc->name, ".unc") != NULL)
+	  if (has_suffix_p (idesc->name, ".unc"))
 	    {
 	      add_qp_mutex (p1mask | p2mask);
 	      if (CURR_SLOT.qp_regno != 0)
