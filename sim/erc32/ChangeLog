@@ -1,3 +1,16 @@
+Thu May 14 23:10:48 1998  Mark Alexander  <marka@cygnus.com>
+
+	* sis.h (uint64, int64): Define.
+	* exec.c (SDIV, SDIVCC, UDIV, UDIVCC): Define new opcodes.
+	* (mul64): Simplify calculation of negative result.
+	* (div64): New helper function for 64-bit division.
+	* (dispatch_instruction): Add emulation of SDIV, SDIVCC, UDIV,
+	and UDIVCC.
+	
+Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
