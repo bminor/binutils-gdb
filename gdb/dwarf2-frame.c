@@ -674,9 +674,13 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
 	   table.  We need a way of iterating through all the valid
 	   DWARF2 register numbers.  */
 	if (fs->regs.reg[column].how == DWARF2_FRAME_REG_UNSPECIFIED)
-	  complaint (&symfile_complaints,
-		     "Incomplete CFI data; unspecified registers at 0x%s",
-		     paddr (fs->pc));
+	  {
+	    if (cache->reg[regnum].how == DWARF2_FRAME_REG_UNSPECIFIED)
+	      complaint (&symfile_complaints, "\
+incomplete CFI data; unspecified registers (e.g., %s) at 0x%s",
+			 gdbarch_register_name (gdbarch, regnum),
+			 paddr_nz (fs->pc));
+	  }
 	else
 	  cache->reg[regnum] = fs->regs.reg[column];
       }

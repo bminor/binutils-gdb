@@ -1,3 +1,10 @@
+2004-11-05  Andrew Cagney  <cagney@gnu.org>
+
+	* dwarf2-frame.c (dwarf2_frame_cache): Only complain when both the
+	CFI and the init_reg method leave the register unspecified.
+	Include the register name in the "Incomplete CFI data" complaint.
+	Supress leading zeros in the address.
+
 2004-11-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (decode_frame_entry_1): Avoid indirection when
