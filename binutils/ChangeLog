@@ -1,5 +1,8 @@
 1999-09-12  Donn Terry  <donn@interix.com>
 
+	* ar.c (print_contents): Change printing of member name for
+	POSIX.2 conformance.
+
 	* ar.c (output_filename): Make const.
 	(open_inarch): If creating a new empty archive, set
 	output_filename.
