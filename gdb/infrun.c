@@ -585,7 +585,7 @@ wait_for_inferior ()
 		remove_breakpoints ();
 		target_resume (pid, 1, 0); /* Single step */
 		/* FIXME: What if a signal arrives instead of the single-step
-		   happening?  *?
+		   happening?  */
 		target_wait (pid, NULL);
 		insert_breakpoints ();
 	      }
