@@ -83,6 +83,8 @@ static asection * sh_elf_gc_mark_hook
 static boolean sh_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
+static enum elf_reloc_type_class sh_elf_reloc_type_class
+  PARAMS ((int));
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -1111,11 +1113,11 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 	}
 
       /* Get the address from which the register is being loaded.  The
-      	 displacement in the mov.l instruction is quadrupled.  It is a
-      	 displacement from four bytes after the movl instruction, but,
-      	 before adding in the PC address, two least significant bits
-      	 of the PC are cleared.  We assume that the section is aligned
-      	 on a four byte boundary.  */
+	 displacement in the mov.l instruction is quadrupled.  It is a
+	 displacement from four bytes after the movl instruction, but,
+	 before adding in the PC address, two least significant bits
+	 of the PC are cleared.  We assume that the section is aligned
+	 on a four byte boundary.  */
       paddr = insn & 0xff;
       paddr *= 4;
       paddr += (laddr + 4) & ~3;
@@ -2761,14 +2763,13 @@ sh_elf_adjust_dynamic_symbol (info, h)
 
 static boolean
 sh_elf_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   bfd *dynobj;
   asection *s;
   boolean plt;
   boolean relocs;
-  boolean reltext;
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
@@ -2810,7 +2811,6 @@ sh_elf_size_dynamic_sections (output_bfd, info)
      memory for them.  */
   plt = false;
   relocs = false;
-  reltext = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char *name;
@@ -2856,29 +2856,10 @@ sh_elf_size_dynamic_sections (output_bfd, info)
 	    }
 	  else
 	    {
-	      asection *target;
-
 	      /* Remember whether there are any reloc sections other
 		 than .rela.plt.  */
 	      if (strcmp (name, ".rela.plt") != 0)
-		{
-		  const char *outname;
-
-		  relocs = true;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL
-		     entry.  The entries in the .rela.plt section
-		     really apply to the .got section, which we
-		     created ourselves and so know is not readonly.  */
-		  outname = bfd_get_section_name (output_bfd,
-						  s->output_section);
-		  target = bfd_get_section_by_name (output_bfd, outname + 5);
-		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext = true;
-		}
+		relocs = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -2934,7 +2915,7 @@ sh_elf_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
-      if (reltext)
+      if ((info->flags & DF_TEXTREL) != 0)
 	{
 	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
@@ -3957,6 +3938,8 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return false;
 		    }
+		  if (sec->flags & SEC_READONLY)
+		    info->flags |= DF_TEXTREL;
 		}
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rela);
@@ -4441,6 +4424,23 @@ sh_elf_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
+static enum elf_reloc_type_class
+sh_elf_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_SH_RELATIVE:
+      return reloc_class_relative;
+    case R_SH_JMP_SLOT:
+      return reloc_class_plt;
+    case R_SH_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
+
 #ifndef ELF_ARCH
 #define TARGET_BIG_SYM		bfd_elf32_sh_vec
 #define TARGET_BIG_NAME		"elf32-sh"
@@ -4484,6 +4484,7 @@ sh_elf_finish_dynamic_sections (output_bfd, info)
 					sh_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
 					sh_elf_finish_dynamic_sections
+#define elf_backend_reloc_type_class	sh_elf_reloc_type_class
 
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1

@@ -91,6 +91,9 @@ boolean bfd_elf32_arm_get_bfd_for_interworking
   PARAMS ((bfd *, struct bfd_link_info *));
 boolean bfd_elf32_arm_process_before_allocation
   PARAMS ((bfd *, struct bfd_link_info *, int));
+static enum elf_reloc_type_class elf32_arm_reloc_type_class
+  PARAMS ((int));
+
 #define INTERWORK_FLAG(abfd)   (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK)
 
 /* The linker script knows the section names for placement.
@@ -125,7 +128,7 @@ static const unsigned long elf32_arm_plt0_entry [PLT_ENTRY_SIZE / 4] =
 /* Subsequent entries in a procedure linkage table look like
    this.  */
 static const unsigned long elf32_arm_plt_entry [PLT_ENTRY_SIZE / 4] =
- { 
+ {
    0xe59fc004,	/* ldr   ip, [pc, #4]       */
    0xe08fc00c,	/* add   ip, pc, ip         */
    0xe59cf000,	/* ldr   pc, [ip]           */
@@ -1058,7 +1061,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
   /* If the start address has been set, then set the EF_ARM_HASENTRY
      flag.  Setting this more than once is redundant, but the cost is
      not too high, and it keeps the code simple.
-     
+
      The test is done  here, rather than somewhere else, because the
      start address is only set just before the final link commences.
 
@@ -1066,7 +1069,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
      flag will not be set.  */
   if (bfd_get_start_address (output_bfd) != 0)
     elf_elfheader (output_bfd)->e_flags |= EF_ARM_HASENTRY;
-      
+
   globals = elf32_arm_hash_table (info);
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1110,7 +1113,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	 into the output file to be resolved at run time.  */
       if (info->shared
 	  && (r_type != R_ARM_PC24
- 	      || (h != NULL
+	      || (h != NULL
 	          && h->dynindx != -1
 		  && (! info->symbolic
 		      || (h->elf_link_hash_flags
@@ -1493,7 +1496,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	     corresponding bit one in the target address will be set from bit
 	     one of the source address.  */
 	  lower_insn &= ~1;
-#endif	
+#endif
 	/* Put the relocated value back in the object file:  */
 	bfd_put_16 (input_bfd, upper_insn, hit_data);
 	bfd_put_16 (input_bfd, lower_insn, hit_data + 2);
@@ -1533,8 +1536,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
          calculation.  */
       value -= sgot->output_section->vma;
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
-      				       contents, rel->r_offset, value,
-      				       (bfd_vma) 0);
+				       contents, rel->r_offset, value,
+				       (bfd_vma) 0);
 
     case R_ARM_GOTPC:
       /* Use global offset table as symbol value.  */
@@ -1545,8 +1548,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
       value = sgot->output_section->vma;
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
-      				       contents, rel->r_offset, value,
-      				       (bfd_vma) 0);
+				       contents, rel->r_offset, value,
+				       (bfd_vma) 0);
 
     case R_ARM_GOT32:
       /* Relocation is to the entry for this symbol in the
@@ -1629,8 +1632,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	}
 
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
-      				       contents, rel->r_offset, value,
-      				       (bfd_vma) 0);
+				       contents, rel->r_offset, value,
+				       (bfd_vma) 0);
 
     case R_ARM_PLT32:
       /* Relocation is to the entry for this symbol in the
@@ -1640,8 +1643,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
          without using the procedure linkage table.  */
       if (h == NULL)
         return _bfd_final_link_relocate (howto, input_bfd, input_section,
-        				 contents, rel->r_offset, value,
-        				 (bfd_vma) 0);
+				 contents, rel->r_offset, value,
+				 (bfd_vma) 0);
 
       if (h->plt.offset == (bfd_vma) -1)
         /* We didn't make a PLT entry for this symbol.  This
@@ -1659,8 +1662,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	       + splt->output_offset
 	       + h->plt.offset);
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
-        			       contents, rel->r_offset, value,
-        			       (bfd_vma) 0);
+			       contents, rel->r_offset, value,
+			       (bfd_vma) 0);
 
     case R_ARM_SBREL32:
       return bfd_reloc_notsupported;
@@ -1872,7 +1875,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	        case R_ARM_ABS32:
 	          if (info->shared
 	              && (
-	              	  (!info->symbolic && h->dynindx != -1)
+		  (!info->symbolic && h->dynindx != -1)
 	                  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
 			  )
 	              && ((input_section->flags & SEC_ALLOC) != 0
@@ -2310,7 +2313,7 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
       if (flags & EF_ARM_MAPSYMSFIRST)
 	fprintf (file, _(" [mapping symbols precede others]"));
 
-      flags &= ~(EF_ARM_SYMSARESORTED | EF_ARM_DYNSYMSUSESEGIDX 
+      flags &= ~(EF_ARM_SYMSARESORTED | EF_ARM_DYNSYMSUSESEGIDX
 		 | EF_ARM_MAPSYMSFIRST);
       break;
 
@@ -2506,7 +2509,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 		    srelgot = bfd_make_section (dynobj, ".rel.got");
 		    if (srelgot == NULL
 		        || ! bfd_set_section_flags (dynobj, srelgot,
-		  				    (SEC_ALLOC
+						    (SEC_ALLOC
 						     | SEC_LOAD
 						     | SEC_HAS_CONTENTS
 						     | SEC_IN_MEMORY
@@ -2534,7 +2537,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 	      }
 	    else
 	      {
-     	        /* This is a global offset table entry for a local
+	        /* This is a global offset table entry for a local
                    symbol.  */
 	        if (local_got_offsets == NULL)
 		  {
@@ -2566,7 +2569,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 	    sgot->_raw_size += 4;
 	    break;
 
-  	  case R_ARM_PLT32:
+	  case R_ARM_PLT32:
 	    /* This symbol requires a procedure linkage table entry.  We
                actually build the entry in adjust_dynamic_symbol,
                because this might be a case of linking PIC code which is
@@ -2619,7 +2622,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 		      return false;
 
 		    BFD_ASSERT (strncmp (name, ".rel", 4) == 0
-		 	        && strcmp (bfd_get_section_name (abfd, sec),
+			        && strcmp (bfd_get_section_name (abfd, sec),
 					   name + 4) == 0);
 
 		    sreloc = bfd_get_section_by_name (dynobj, name);
@@ -2637,6 +2640,8 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 			    || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			  return false;
 		      }
+		  if (sec->flags & SEC_READONLY)
+		    info->flags |= DF_TEXTREL;
 		  }
 
 	        sreloc->_raw_size += sizeof (Elf32_External_Rel);
@@ -2951,14 +2956,13 @@ elf32_arm_adjust_dynamic_symbol (info, h)
 
 static boolean
 elf32_arm_size_dynamic_sections (output_bfd, info)
-     bfd * output_bfd;
+     bfd * output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info * info;
 {
   bfd * dynobj;
   asection * s;
   boolean plt;
   boolean relocs;
-  boolean reltext;
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
@@ -3000,7 +3004,6 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
      memory for them.  */
   plt = false;
   relocs = false;
-  reltext = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char * name;
@@ -3046,30 +3049,10 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 	    }
 	  else
 	    {
-	      asection * target;
-
 	      /* Remember whether there are any reloc sections other
                  than .rel.plt.  */
 	      if (strcmp (name, ".rel.plt") != 0)
-		{
-		  const char *outname;
-
-		  relocs = true;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL
-		     entry.  The entries in the .rel.plt section
-		     really apply to the .got section, which we
-		     created ourselves and so know is not readonly.  */
-		  outname = bfd_get_section_name (output_bfd,
-						  s->output_section);
-		  target = bfd_get_section_by_name (output_bfd, outname + 4);
-
-		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext = true;
-		}
+		relocs = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -3133,7 +3116,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
-      if (reltext)
+      if ((info->flags & DF_TEXTREL) != 0)
 	{
 	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
@@ -3457,29 +3440,48 @@ elf32_arm_post_process_headers (abfd, link_info)
   i_ehdrp->e_ident[EI_ABIVERSION] = ARM_ELF_ABI_VERSION;
 }
 
+static enum elf_reloc_type_class
+elf32_arm_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_ARM_RELATIVE:
+      return reloc_class_relative;
+    case R_ARM_JUMP_SLOT:
+      return reloc_class_plt;
+    case R_ARM_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
+
+
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
 #define ELF_MAXPAGESIZE			0x8000
 
-#define bfd_elf32_bfd_copy_private_bfd_data 	elf32_arm_copy_private_bfd_data
-#define bfd_elf32_bfd_merge_private_bfd_data 	elf32_arm_merge_private_bfd_data
+#define bfd_elf32_bfd_copy_private_bfd_data	elf32_arm_copy_private_bfd_data
+#define bfd_elf32_bfd_merge_private_bfd_data	elf32_arm_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		elf32_arm_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	elf32_arm_print_private_bfd_data
 #define bfd_elf32_bfd_link_hash_table_create    elf32_arm_link_hash_table_create
-#define bfd_elf32_bfd_reloc_type_lookup 	elf32_arm_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_type_lookup	elf32_arm_reloc_type_lookup
 #define bfd_elf32_find_nearest_line	        elf32_arm_find_nearest_line
 
 #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
 #define elf_backend_gc_mark_hook                elf32_arm_gc_mark_hook
 #define elf_backend_gc_sweep_hook               elf32_arm_gc_sweep_hook
 #define elf_backend_check_relocs                elf32_arm_check_relocs
-#define elf_backend_relocate_section    	elf32_arm_relocate_section
+#define elf_backend_relocate_section	elf32_arm_relocate_section
 #define elf_backend_adjust_dynamic_symbol	elf32_arm_adjust_dynamic_symbol
 #define elf_backend_create_dynamic_sections	_bfd_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_symbol	elf32_arm_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	elf32_arm_finish_dynamic_sections
 #define elf_backend_size_dynamic_sections	elf32_arm_size_dynamic_sections
 #define elf_backend_post_process_headers	elf32_arm_post_process_headers
+#define elf_backend_reloc_type_class		elf32_arm_reloc_type_class
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_plt_readonly    1

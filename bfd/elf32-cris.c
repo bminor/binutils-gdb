@@ -85,6 +85,8 @@ static boolean elf_cris_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static void elf_cris_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+static enum elf_reloc_type_class elf_cris_reloc_type_class
+  PARAMS ((int));
 
 static reloc_howto_type cris_elf_howto_table [] =
 {
@@ -2575,6 +2577,8 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 		      || !bfd_set_section_alignment (dynobj, sreloc, 2))
 		    return false;
 		}
+	      if (sec->flags & SEC_READONLY)
+		info->flags |= DF_TEXTREL;
 	    }
 
 	  sreloc->_raw_size += sizeof (Elf32_External_Rela);
@@ -2642,14 +2646,13 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
 static boolean
 elf_cris_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   bfd *dynobj;
   asection *s;
   boolean plt;
   boolean relocs;
-  boolean reltext;
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
@@ -2703,7 +2706,6 @@ elf_cris_size_dynamic_sections (output_bfd, info)
      memory for them.  */
   plt = false;
   relocs = false;
-  reltext = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char *name;
@@ -2749,40 +2751,10 @@ elf_cris_size_dynamic_sections (output_bfd, info)
 	    }
 	  else
 	    {
-	      asection *target;
-
 	      /* Remember whether there are any reloc sections other
                  than .rela.plt.  */
 	      if (strcmp (name, ".rela.plt") != 0)
-		{
-		  const char *outname;
-
 		  relocs = true;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL entry.
-		     The entries in the .rela.plt section are actually
-		     associated with .got.plt, which we created ourselves
-		     and so know is not readonly.  */
-		  outname = bfd_get_section_name (output_bfd,
-						  s->output_section);
-		  target
-		    = bfd_get_section_by_name (output_bfd,
-					       outname + strlen (".rela"));
-
-		  /* We have to test the .text section by name, becase for
-		     some reason it does not have SEC_READONLY set at this
-		     time.  That flag is actually set in ldmain.c:main
-		     specifically for ".text" at a time long after this
-		     function is called.  FIXME: This might be due to a
-		     general bug.  FIXME: Have testcase for this.  */
-		  if (target != NULL
-		      && (target->flags & SEC_ALLOC) != 0
-		      && ((target->flags & SEC_READONLY) != 0
-			  || strcmp (outname + strlen (".rela"),
-				     ".text") == 0))
-		    reltext = true;
-		}
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -2842,7 +2814,7 @@ elf_cris_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
-      if (reltext)
+      if ((info->flags & DF_TEXTREL) != 0)
 	{
 	  if (!bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
@@ -3020,6 +2992,24 @@ cris_elf_merge_private_bfd_data (ibfd, obfd)
 
   return true;
 }
+
+
+static enum elf_reloc_type_class
+elf_cris_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_CRIS_RELATIVE:
+      return reloc_class_relative;
+    case R_CRIS_JUMP_SLOT:
+      return reloc_class_plt;
+    case R_CRIS_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
 
 #define ELF_ARCH		bfd_arch_cris
 #define ELF_MACHINE_CODE	EM_CRIS
@@ -3063,6 +3053,7 @@ cris_elf_merge_private_bfd_data (ibfd, obfd)
 #define bfd_elf32_bfd_final_link \
 	_bfd_elf32_gc_common_final_link
 #define elf_backend_hide_symbol			elf_cris_hide_symbol
+#define elf_backend_reloc_type_class		elf_cris_reloc_type_class
 
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1

@@ -1,3 +1,26 @@
+2001-08-26  Andreas Jaeger  <aj@suse.de>
+
+	* elf32-cris.c (cris_elf_check_relocs): Set DF_TEXTREL if the
+	reloc is against read-only section.
+	(elf_cris_size_dynamic_sections): Use DF_TEXTREL flag instead of
+	looking up section names for DT_TEXTREL.
+	(elf_cris_reloc_type_class): New.
+	(elf_backend_reloc_type_class): Define.
+
+	* elf32-sh.c (sh_elf_check_relocs): Set DF_TEXTREL if the reloc is
+	against read-only section.
+	(elf_backend_reloc_type_class): Define.
+	(sh_elf_reloc_type_class): New.
+	(sh_elf_size_dynamic_sections): Use DF_TEXTREL flag instead of
+	looking up section names for DT_TEXTREL.
+
+	* elf32-arm.h (elf32_arm_check_relocs): Set DF_TEXTREL if the
+	reloc is against read-only section.
+	(elf32_arm_size_dynamic_sections): Use DF_TEXTREL flag instead of
+	looking up section names for DT_TEXTREL.
+	(elf32_arm_reloc_type_class): New.
+	(elf_backend_reloc_type_class): Define.
+
 2001-08-25  Andreas Jaeger  <aj@suse.de>
 
 	* oasys.c: Add missing prototypes.
