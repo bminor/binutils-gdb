@@ -1,3 +1,10 @@
+Wed Nov  6 13:42:32 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c (mn10300_operands): Remove many redundant
+	operands.  Update opcode table as appropriate.
+	(IMM32): Add MN10300_OPERAND_SPLIT flag.
+	(mn10300_opcodes): Fix single bit error in mov imm32,dn insn.
+
 Tue Nov  5 13:26:58 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (mn10300_operands): Add DN2, DM2, AN2, AM2
