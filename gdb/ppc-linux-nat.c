@@ -872,7 +872,7 @@ store_altivec_registers (int tid)
 }
 
 static void
-store_spe_registers (tid)
+store_spe_registers (int tid)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   struct gdb_evrregset_t evrregs;
