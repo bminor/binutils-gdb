@@ -1,3 +1,8 @@
+2001-04-16  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.in: Add the em type for FreeBSD targets.
+	* configure: Regenerate.
+
 2001-04-14  Alexandre Oliva  <aoliva@redhat.com>
 
 	* struc-symbol.h (struct local_symbol): New TC_LOCAL_SYMFIELD_TYPE.

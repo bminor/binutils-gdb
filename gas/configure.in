@@ -450,7 +450,7 @@ changequote([,])dnl
 
       *-*-aout | *-*-scout)
 			    fmt=aout ;;
-      *-*-freebsd*)	    fmt=elf bfd_gas=yes ;;
+      *-*-freebsd*)	    fmt=elf em=freebsd bfd_gas=yes ;;
       *-*-nindy*)
 			    fmt=bout ;;
       *-*-bsd*)
