@@ -611,6 +611,10 @@ read_attribute (attr, abbrev, unit, info_ptr)
       DW_UNSND (attr) = read_4_bytes (abfd, info_ptr);
       info_ptr += 4;
       break;
+    case DW_FORM_ref8:
+      DW_UNSND (attr) = read_8_bytes (abfd, info_ptr);
+      info_ptr += 8;
+      break;
     case DW_FORM_ref_udata:
       DW_UNSND (attr) = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;

@@ -2148,6 +2148,7 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_gc_sweep_hook	_bfd_mips_elf_gc_sweep_hook
 #define elf_backend_got_header_size	(4*MIPS_RESERVED_GOTNO)
 #define elf_backend_plt_header_size	0
+#define elf_backend_may_use_rel_p       1
 
 /* We don't set bfd_elf64_bfd_is_local_label_name because the 32-bit 
    MIPS-specific function only applies to IRIX5, which had no 64-bit
