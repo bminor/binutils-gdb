@@ -54,10 +54,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SIZE_TRACE_BUF 1024
 #endif
 
-static void
-disassemble_insn (SIM_CPU *, const CGEN_INSN *,
-		  const struct argbuf *, IADDR, char *);
-
 /* Text is queued in TRACE_BUF because we want to output the insn's cycle
    count first but that isn't known until after the insn has executed.
    This also handles the queueing of trace results, TRACE_RESULT may be

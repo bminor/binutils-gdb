@@ -1,3 +1,8 @@
+2000-12-04  Ben Elliston  <bje@redhat.com>
+
+	* cgen-trace.c (disassemble_insn): Remove unused declaration.
+	* cgen-scache.c (scache_option_handler): Remove unused local var.
+
 2000-12-03  Ben Elliston  <bje@redhat.com>
 
 	* sim-profile.c (profile_option_handler): Remove unused prof_nr.
