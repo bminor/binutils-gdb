@@ -1480,7 +1480,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "cmp_xor",	0xf74a0000,  0xffff0000,  0xa,  FMT_D10, AM33,	 {RM2, RN0, RM6, RN4}},
 { "cmp_xor",	0xf75a0000,  0xffff0000,  0xa,  FMT_D10, AM33,	 {SIMM4_2, RN0, RM6, RN4}},
 { "lsr_add",	0xf7a00000,  0xffff0000,  0xa,  FMT_D10, AM33,	 {RM2, RN0, RM6, RN4}},
-{ "lsr_add",	0xf7900000,  0xffff0000,  0xa,  FMT_D10, AM33,	 {IMM4_2, RN0, RM6, RN4}},
+{ "lsr_add",	0xf7b00000,  0xffff0000,  0xa,  FMT_D10, AM33,	 {IMM4_2, RN0, RM6, RN4}},
 { "lsr_add",	0xf7a40000,  0xffff0000,  0xa,  FMT_D10, AM33,	 {RM2, RN0, SIMM4_6, RN4}},
 { "lsr_add",	0xf7b40000,  0xffff0000,  0xa,  FMT_D10, AM33,	 {IMM4_2, RN0, SIMM4_6, RN4}},
 { "lsr_and",	0xf7a80000,  0xffff0000,  0xa,  FMT_D10, AM33,	 {RM2, RN0, RM6, RN4}},
