@@ -299,6 +299,7 @@ ser-unix.c
 serial.c
 serial.h
 sh-tdep.c
+sh3-rom.c
 signals.h
 solib.c
 solib.h

@@ -117,6 +117,7 @@ extern CORE_ADDR sh_skip_prologue ();
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
+#define R0_REGNUM	0
 #define FP_REGNUM 	14
 #define SP_REGNUM 	15
 #define PC_REGNUM 	16

@@ -24,12 +24,6 @@
 
 #include "serial.h"
 
-struct rom_cmd_data {
-  char *cmd;			/* command to send */
-  char *delim;			/* the delimiter */
-  char *result;			/* the result */
-};
-
 /* This structure describes the strings necessary to give small command
    sequences to the monitor, and parse the response.
 
