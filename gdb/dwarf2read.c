@@ -6924,7 +6924,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 		   this objfile, so we don't need to duplicate it for
 		   the type.  */
 		if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-		  TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_NATURAL_NAME (sym);
+		  TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_SEARCH_NAME (sym);
 		add_symbol_to_list (typedef_sym, list_to_add);
 	      }
 	  }

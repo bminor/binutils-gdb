@@ -1,3 +1,9 @@
+2004-02-15  Joel Brobecker  <brobecker@gnat.com>
+
+	From Paul Hilfinger <hilfinger@gnat.com>
+	* dwarf2read.c (new_symbol): Use SYMBOL_SEARCH_NAME rather than
+	SYMBOL_NATURAL_NAME to set type names.
+
 2005-02-15  Andrew Cagney  <cagney@gnu.org>
 
 	Mark up add_com, add_info and add_prefix_cmd.
