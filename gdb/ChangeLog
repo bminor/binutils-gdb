@@ -1,5 +1,30 @@
 2004-12-03  Mark Kettenis  <kettenis@gnu.org>
 
+	* inf-ttrace.c: Include <sys/mman.h>.
+	(struct inf_ttrace_page): New.
+	(struct inf_ttrace_page_dict): New.
+	(inf_ttrace_num_threads_in_syscall)
+	(inf_ttrace_reenable_page_protections): New variables.
+	(inf_ttrace_enable_syscall_events)
+	(inf_ttrace_disable_syscall_events, inf_ttrace_get_page)
+ 	(inf_ttrace_add_page, inf_ttrace_insert_page)
+	(inf_ttrace_remove_page, inf_ttrace_mask_page_protections)
+	(inf_ttrace_enable_page_protections)
+	(inf_ttrace_disable_page_protections)
+	(inf_ttrace_insert_watchpoint, inf_ttrace_remove_watchpoint)
+	(inf_ttrace_can_use_hw_breakpoint)
+	(inf_ttrace_region_size_ok_for_hw_watchpoint)
+	(inf_ttrace_stopped_by_watchpoint): New functions.
+	(inf_ttrace_him): Remove unsused varaible `tts'.
+	(inf_ttrace_create_inferior): Add assertionts.
+	(inf_ttrace_mourn_inferior): Clear page dictionary.
+	(inf_ttrace_attach): Set initial event mask.
+	(inf_ttrace_detach): Reset number of threads in system call.
+	(inf_ttrace_wait): Deal with system call events.
+	(inf_ttrace_target): Initialize "hardware" watchpoint-related
+	parts of the target vector.
+	(_initialize_inf_ttrace): New prototype and function.
+
 	* hppa-hpux-tdep.c (hppa_hpux_push_dummy_code): Use ULONGEST as
 	type of `gp' variable.
 

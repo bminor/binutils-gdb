@@ -33,6 +33,7 @@
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
+#include <sys/mman.h>
 #include <sys/ttrace.h>
 
 #include "inf-child.h"
@@ -40,6 +41,347 @@
 
 /* HACK: Save the ttrace ops returned by inf_ttrace_target.  */
 static struct target_ops *ttrace_ops_hack;
+
+
+/* On HP-UX versions that have the ttrace(2) system call, we can
+   implement "hardware" watchpoints by fiddling with the protection of
+   pages in the address space that contain the variable being watched.
+   In order to implement this, we keep a dictionary of pages for which
+   we have changed the protection.  */
+
+struct inf_ttrace_page
+{
+  CORE_ADDR addr;		/* Page address.  */
+  int prot;			/* Protection.  */
+  int refcount;			/* Reference count.  */
+  struct inf_ttrace_page *next;
+  struct inf_ttrace_page *prev;
+};
+
+struct inf_ttrace_page_dict
+{
+  struct inf_ttrace_page buckets[128];
+  int pagesize;			/* Page size.  */
+  int count;			/* Number of pages in this dictionary.  */
+} inf_ttrace_page_dict;
+
+/* Number of threads that are currently in a system call.  */
+static int inf_ttrace_num_threads_in_syscall;
+
+/* Flag to indicate whether we should re-enable page protections after
+   the next wait.  */
+static int inf_ttrace_reenable_page_protections;
+
+/* Enable system call events for process PID.  */
+
+static void
+inf_ttrace_enable_syscall_events (pid_t pid)
+{
+  ttevent_t tte;
+  ttstate_t tts;
+
+  gdb_assert (inf_ttrace_num_threads_in_syscall == 0);
+
+  if (ttrace (TT_PROC_GET_EVENT_MASK, pid, 0,
+	      (uintptr_t)&tte, sizeof tte, 0) == -1)
+    perror_with_name ("ttrace");
+
+  tte.tte_events |= (TTEVT_SYSCALL_ENTRY | TTEVT_SYSCALL_RETURN);
+
+  if (ttrace (TT_PROC_SET_EVENT_MASK, pid, 0,
+	      (uintptr_t)&tte, sizeof tte, 0) == -1)
+    perror_with_name ("ttrace");
+
+  if (ttrace (TT_PROC_GET_FIRST_LWP_STATE, pid, 0,
+	      (uintptr_t)&tts, sizeof tts, 0) == -1)
+    perror_with_name ("ttrace");
+
+  if (tts.tts_flags & TTS_INSYSCALL)
+    inf_ttrace_num_threads_in_syscall++;
+
+  /* FIXME: Handle multiple threads.  */
+}
+
+/* Disable system call events for process PID.  */
+
+static void
+inf_ttrace_disable_syscall_events (pid_t pid)
+{
+  ttevent_t tte;
+
+  gdb_assert (inf_ttrace_page_dict.count == 0);
+
+  if (ttrace (TT_PROC_GET_EVENT_MASK, pid, 0,
+	      (uintptr_t)&tte, sizeof tte, 0) == -1)
+    perror_with_name ("ttrace");
+
+  tte.tte_events &= ~(TTEVT_SYSCALL_ENTRY | TTEVT_SYSCALL_RETURN);
+
+  if (ttrace (TT_PROC_SET_EVENT_MASK, pid, 0,
+	      (uintptr_t)&tte, sizeof tte, 0) == -1)
+    perror_with_name ("ttrace");
+
+  inf_ttrace_num_threads_in_syscall = 0;
+}
+
+/* Get information about the page at address ADDR for process PID from
+   the dictionary.  */
+
+static struct inf_ttrace_page *
+inf_ttrace_get_page (pid_t pid, CORE_ADDR addr)
+{
+  const int num_buckets = ARRAY_SIZE (inf_ttrace_page_dict.buckets);
+  const int pagesize = inf_ttrace_page_dict.pagesize;
+  int bucket;
+  struct inf_ttrace_page *page;
+
+  bucket = (addr / pagesize) % num_buckets;
+  page = &inf_ttrace_page_dict.buckets[bucket];
+  while (page)
+    {
+      if (page->addr == addr)
+	break;
+
+      page = page->next;
+    }
+
+  return page;
+}
+
+/* Add the page at address ADDR for process PID to the dictionary.  */
+
+static struct inf_ttrace_page *
+inf_ttrace_add_page (pid_t pid, CORE_ADDR addr)
+{
+  const int num_buckets = ARRAY_SIZE (inf_ttrace_page_dict.buckets);
+  const int pagesize = inf_ttrace_page_dict.pagesize;
+  int bucket;
+  struct inf_ttrace_page *page;
+  struct inf_ttrace_page *prev = NULL;
+
+  bucket = (addr / pagesize) % num_buckets;
+  page = &inf_ttrace_page_dict.buckets[bucket];
+  while (page)
+    {
+      if (page->addr == addr)
+	break;
+
+      prev = page;
+      page = page->next;
+    }
+  
+  if (!page)
+    {
+      int prot;
+
+      if (ttrace (TT_PROC_GET_MPROTECT, pid, 0,
+		  addr, 0, (uintptr_t)&prot) == -1)
+	perror_with_name ("ttrace");
+      
+      page = XMALLOC (struct inf_ttrace_page);
+      page->addr = addr;
+      page->prot = prot;
+      page->refcount = 0;
+      page->next = NULL;
+
+      page->prev = prev;
+      prev->next = page;
+
+      inf_ttrace_page_dict.count++;
+      if (inf_ttrace_page_dict.count == 1)
+	inf_ttrace_enable_syscall_events (pid);
+
+      if (inf_ttrace_num_threads_in_syscall == 0)
+	{
+	  if (ttrace (TT_PROC_SET_MPROTECT, pid, 0,
+		      addr, pagesize, prot & ~PROT_WRITE) == -1)
+	    perror_with_name ("ttrace");
+	}
+    }
+
+  return page;
+}
+
+/* Insert the page at address ADDR of process PID to the dictionary.  */
+
+static void
+inf_ttrace_insert_page (pid_t pid, CORE_ADDR addr)
+{
+  struct inf_ttrace_page *page;
+
+  page = inf_ttrace_get_page (pid, addr);
+  if (!page)
+    page = inf_ttrace_add_page (pid, addr);
+
+  page->refcount++;
+}
+
+/* Remove the page at address ADDR of process PID from the dictionary.  */
+
+static void
+inf_ttrace_remove_page (pid_t pid, CORE_ADDR addr)
+{
+  const int pagesize = inf_ttrace_page_dict.pagesize;
+  struct inf_ttrace_page *page;
+
+  page = inf_ttrace_get_page (pid, addr);
+  page->refcount--;
+
+  gdb_assert (page->refcount >= 0);
+
+  if (page->refcount == 0)
+    {
+      if (inf_ttrace_num_threads_in_syscall == 0)
+	{
+	  if (ttrace (TT_PROC_SET_MPROTECT, pid, 0,
+		      addr, pagesize, page->prot) == -1)
+	    perror_with_name ("ttrace");
+	}
+
+      inf_ttrace_page_dict.count--;
+      if (inf_ttrace_page_dict.count == 0)
+	inf_ttrace_disable_syscall_events (pid);
+
+      page->prev->next = page->next;
+      if (page->next)
+	page->next->prev = page->prev;
+
+      xfree (page);
+    }
+}
+
+/* Mask the bits in PROT from the page protections that are currently
+   in the dictionary for process PID.  */
+
+static void
+inf_ttrace_mask_page_protections (pid_t pid, int prot)
+{
+  const int num_buckets = ARRAY_SIZE (inf_ttrace_page_dict.buckets);
+  const int pagesize = inf_ttrace_page_dict.pagesize;
+  int bucket;
+
+  for (bucket = 0; bucket < num_buckets; bucket++)
+    {
+      struct inf_ttrace_page *page;
+
+      page = inf_ttrace_page_dict.buckets[bucket].next;
+      while (page)
+	{
+	  if (ttrace (TT_PROC_SET_MPROTECT, pid, 0,
+		      page->addr, pagesize, page->prot & ~prot) == -1)
+	    perror_with_name ("ttrace");
+
+	  page = page->next;
+	}
+    }
+}
+
+/* Write-protect the pages in the dictionary for process PID.  */
+
+static void
+inf_ttrace_enable_page_protections (pid_t pid)
+{
+  inf_ttrace_mask_page_protections (pid, PROT_WRITE);
+}
+
+/* Restore the protection of the pages in the dictionary for process
+   PID.  */
+
+static void
+inf_ttrace_disable_page_protections (pid_t pid)
+{
+  inf_ttrace_mask_page_protections (pid, 0);
+}
+
+/* Insert a "hardware" watchpoint for LEN bytes at address ADDR of
+   type TYPE.  */
+
+static int
+inf_ttrace_insert_watchpoint (CORE_ADDR addr, int len, int type)
+{
+  const int pagesize = inf_ttrace_page_dict.pagesize;
+  pid_t pid = ptid_get_pid (inferior_ptid);
+  CORE_ADDR page_addr;
+  int num_pages;
+  int page;
+
+  gdb_assert (type == hw_write);
+
+  page_addr = (addr / pagesize) * pagesize;
+  num_pages = (len + pagesize - 1) / pagesize;
+
+  for (page = 0; page < num_pages; page++, page_addr += pagesize)
+    inf_ttrace_insert_page (pid, page_addr);
+
+  return 1;
+}
+
+/* Remove a "hardware" watchpoint for LEN bytes at address ADDR of
+   type TYPE.  */
+
+static int
+inf_ttrace_remove_watchpoint (CORE_ADDR addr, int len, int type)
+{
+  const int pagesize = inf_ttrace_page_dict.pagesize;
+  pid_t pid = ptid_get_pid (inferior_ptid);
+  CORE_ADDR page_addr;
+  int num_pages;
+  int page;
+
+  gdb_assert (type == hw_write);
+
+  page_addr = (addr / pagesize) * pagesize;
+  num_pages = (len + pagesize - 1) / pagesize;
+
+  for (page = 0; page < num_pages; page++, page_addr += pagesize)
+    inf_ttrace_remove_page (pid, page_addr);
+
+  return 1;
+}
+
+static int
+inf_ttrace_can_use_hw_breakpoint (int type, int len, int ot)
+{
+  return (type == bp_hardware_watchpoint);
+}
+
+static int
+inf_ttrace_region_size_ok_for_hw_watchpoint (int len)
+{
+  return 1;
+}
+
+/* Return non-zero if the current inferior was (potentially) stopped
+   by hitting a "hardware" watchpoint.  */
+
+static int
+inf_ttrace_stopped_by_watchpoint (void)
+{
+  pid_t pid = ptid_get_pid (inferior_ptid);
+  lwpid_t lwpid = ptid_get_lwp (inferior_ptid);
+  ttstate_t tts;
+
+  if (inf_ttrace_page_dict.count > 0)
+    {
+      if (ttrace (TT_LWP_GET_STATE, pid, lwpid,
+		  (uintptr_t)&tts, sizeof tts, 0) == -1)
+	perror_with_name ("ttrace");
+
+      if (tts.tts_event == TTEVT_SIGNAL
+	  && tts.tts_u.tts_signal.tts_signo == SIGBUS)
+	{
+	  const int pagesize = inf_ttrace_page_dict.pagesize;
+	  void *addr = tts.tts_u.tts_signal.tts_siginfo.si_addr;
+	  CORE_ADDR page_addr = ((uintptr_t)addr / pagesize) * pagesize;
+
+	  if (inf_ttrace_get_page (pid, page_addr))
+	    return 1;
+	}
+    }
+
+  return 0;
+}
+
 
 /* File descriptors for pipes used as semaphores during initial
    startup of an inferior.  */
@@ -99,7 +441,6 @@ inf_ttrace_him (int pid)
 {
   struct cleanup *old_chain = make_cleanup (do_cleanup_pfds, 0);
   ttevent_t tte;
-  ttstate_t tts;
   char c;
 
   /* Wait until our child is ready to be traced.  */
@@ -143,6 +484,10 @@ static void
 inf_ttrace_create_inferior (char *exec_file, char *allargs, char **env,
 			    int from_tty)
 {
+  gdb_assert (inf_ttrace_page_dict.count == 0);
+  gdb_assert (inf_ttrace_num_threads_in_syscall == 0);
+  gdb_assert (inf_ttrace_reenable_page_protections == 0);
+
   fork_inferior (exec_file, allargs, env, inf_ttrace_me, inf_ttrace_him,
 		 inf_ttrace_prepare, NULL);
 
@@ -170,6 +515,26 @@ inf_ttrace_kill_inferior (void)
 static void
 inf_ttrace_mourn_inferior (void)
 {
+  const int num_buckets = ARRAY_SIZE (inf_ttrace_page_dict.buckets);
+  int bucket;
+
+  inf_ttrace_num_threads_in_syscall = 0;
+
+  for (bucket = 0; bucket < num_buckets; bucket++)
+    {
+      struct inf_ttrace_page *page;
+      struct inf_ttrace_page *next;
+
+      page = inf_ttrace_page_dict.buckets[bucket].next;
+      while (page)
+	{
+	  next = page->next;
+	  xfree (page);
+	  page = next;
+	}
+    }
+  inf_ttrace_page_dict.count = 0;
+
   unpush_target (ttrace_ops_hack);
   generic_mourn_inferior ();
 }
@@ -180,6 +545,7 @@ inf_ttrace_attach (char *args, int from_tty)
   char *exec_file;
   pid_t pid;
   char *dummy;
+  ttevent_t tte;
 
   if (!args)
     error_no_arg ("process-id to attach");
@@ -209,6 +575,15 @@ inf_ttrace_attach (char *args, int from_tty)
   if (ttrace (TT_PROC_ATTACH, pid, 0, TT_KILL_ON_EXIT, TT_VERSION, 0) == -1)
     perror_with_name ("ttrace");
   attach_flag = 1;
+
+  /* Set the initial event mask.  */
+  gdb_assert (inf_ttrace_num_threads_in_syscall == 0);
+  memset (&tte, 0, sizeof (tte));
+  tte.tte_events = TTEVT_EXEC | TTEVT_EXIT;
+  tte.tte_opts = TTEO_NOSTRCCHLD;
+  if (ttrace (TT_PROC_SET_EVENT_MASK, pid, 0,
+	      (uintptr_t)&tte, sizeof tte, 0) == -1)
+    perror_with_name ("ttrace");
 
   inferior_ptid = pid_to_ptid (pid);
   push_target (ttrace_ops_hack);
@@ -241,8 +616,10 @@ inf_ttrace_detach (char *args, int from_tty)
   if (ttrace (TT_PROC_DETACH, pid, 0, 0, sig, 0) == -1)
     perror_with_name ("ttrace");
 
-  inferior_ptid = null_ptid;
+  inf_ttrace_num_threads_in_syscall = 0;
+
   unpush_target (ttrace_ops_hack);
+  inferior_ptid = null_ptid;
 }
 
 static void
@@ -277,6 +654,7 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   lwpid_t lwpid = ptid_get_lwp (ptid);
   ttstate_t tts;
 
+  /* Until proven otherwise.  */
   ourstatus->kind = TARGET_WAITKIND_IGNORE;
 
   if (pid == -1)
@@ -297,6 +675,14 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
     }
   while (tts.tts_event == TTEVT_NONE);
 
+  /* Now that we've waited, we can re-enable the page protections.  */
+  if (inf_ttrace_reenable_page_protections)
+    {
+      gdb_assert (inf_ttrace_num_threads_in_syscall == 0);
+      inf_ttrace_enable_page_protections (tts.tts_pid);
+      inf_ttrace_reenable_page_protections = 0;
+    }
+
   switch (tts.tts_event)
     {
     case TTEVT_EXEC:
@@ -304,13 +690,43 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
       ourstatus->value.sig = TARGET_SIGNAL_TRAP;
       break;
+
     case TTEVT_EXIT:
       store_waitstatus (ourstatus, tts.tts_u.tts_exit.tts_exitcode);
       break;
+
     case TTEVT_SIGNAL:
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
       ourstatus->value.sig =
 	target_signal_from_host (tts.tts_u.tts_signal.tts_signo);
+      break;
+
+    case TTEVT_SYSCALL_ENTRY:
+      gdb_assert (inf_ttrace_reenable_page_protections == 0);
+      inf_ttrace_num_threads_in_syscall++;
+      if (inf_ttrace_num_threads_in_syscall == 1)
+	{
+	  /* A thread has just entered a system call.  Disable any
+             page protections as the kernel can't deal with them.  */
+	  inf_ttrace_disable_page_protections (tts.tts_pid);
+	}
+      ourstatus->kind = TARGET_WAITKIND_SYSCALL_ENTRY;
+      ourstatus->value.syscall_id = tts.tts_scno;
+      break;
+
+    case TTEVT_SYSCALL_RETURN:
+      if (inf_ttrace_num_threads_in_syscall > 0)
+	{
+	  /* If the last thread has just left the system call, this
+	     would be a logical place to re-enable the page
+	     protections, but that doesn't work.  We can't re-enable
+	     them until we've done another wait.  */
+	  inf_ttrace_reenable_page_protections = 
+	    (inf_ttrace_num_threads_in_syscall == 1);
+	  inf_ttrace_num_threads_in_syscall--;
+	}
+      ourstatus->kind = TARGET_WAITKIND_SYSCALL_RETURN;
+      ourstatus->value.syscall_id = tts.tts_scno;
       break;
     }
 
@@ -405,9 +821,24 @@ inf_ttrace_target (void)
   t->to_wait = inf_ttrace_wait;
   t->to_xfer_partial = inf_ttrace_xfer_partial;
   t->to_files_info = inf_ttrace_files_info;
+  t->to_can_use_hw_breakpoint = inf_ttrace_can_use_hw_breakpoint;
+  t->to_region_size_ok_for_hw_watchpoint =
+    inf_ttrace_region_size_ok_for_hw_watchpoint;
+  t->to_insert_watchpoint = inf_ttrace_insert_watchpoint;
+  t->to_remove_watchpoint = inf_ttrace_remove_watchpoint;
+  t->to_stopped_by_watchpoint = inf_ttrace_stopped_by_watchpoint;
 
   ttrace_ops_hack = t;
   return t;
 }
+
 
+/* Prevent warning from -Wmissing-prototypes.  */
+void _initialize_hppa_hpux_nat (void);
+
+void
+_initialize_inf_ttrace (void)
+{
+  inf_ttrace_page_dict.pagesize = getpagesize();
+}
 #endif
