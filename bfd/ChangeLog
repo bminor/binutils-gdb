@@ -1,3 +1,8 @@
+Fri Feb 25 13:19:04 1994  Ted Lemon  (mellon@pepper.ncd.com)
+
+	* bfd.c (bfd_get_gp_size): Can't return gp value on an archive.
+	(bfd_set_gp_size):  Can't set gp value on an archive.
+
 Fri Feb 25 12:57:00 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* srec.c (pass_over): Don't skip too many characters when
