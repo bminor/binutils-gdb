@@ -1,3 +1,8 @@
+2003-12-13  Jim Blandy  <jimb@redhat.com>
+
+	* osabi.c (gdbarch_init_osabi): Reformat error message with better
+	line breaks.
+
 2003-12-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* blockframe.c (inside_main_func): Reformat.  Introduce new local
