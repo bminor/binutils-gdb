@@ -189,7 +189,7 @@ unimp_device_interrupt_ack(const device *me,
   error("device_interrupt_ack_callback for %s not implemented\n", me->name);
 }
 
-INLINE_DEVICES void
+STATIC_DEVICES void
 unimp_device_ioctl(const device *me,
 		   psim *system,
 		   cpu *processor,
@@ -834,7 +834,7 @@ vm_io_write_buffer_callback(const device *me,
 }
 
 
-STATIC_INLINE_DEVICES void
+static void
 vm_ioctl_callback(const device *me,
 		  psim *system,
 		  cpu *processor,
@@ -1485,7 +1485,7 @@ create_aix_stack_frame(psim *system,
 
 
 
-STATIC_INLINE_DEVICES void
+static void
 stack_ioctl_callback(const device *me,
 		     psim *system,
 		     cpu *processor,

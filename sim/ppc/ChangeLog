@@ -1,3 +1,106 @@
+Thu Oct 12 11:35:53 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (INLINE_CFLAGS): Add -DDEFAULT_INLINE=2 to add
+	default inline support.  Pass INLINE_CFLAGS when compiling.
+
+	* devices.{h,c} (unimp_device_ioctl): Use STATIC_DEVICES, not
+	INLINE_DEVICES since GCC doesn't like inline functions that
+	accept variable arguments.
+	(stack_ioctl_callback): Make function just static because GCC
+	doesn't like inline functions that accept variable arguments.
+
+	* devices.h (STATIC_DEVICES): Define as empty if not defined.
+
+	* inline.c: Correct pathnames of included C files to match current
+	implementation.
+
+	* inline.h (STATIC_DEVICES): If DEVICES_INLINE is defined to be
+	non-zero, define STATIC_DEVICES to be static.
+
+	* std-config.h (INLINE): If GNU C and optimizing, define this as
+	__inline__.
+	(DEFAULT_INLINE): If not defined, define as 0.
+	(ENDIAN_INLINE): If not defined, define as DEFAULT_INLINE.
+	({CORE,VM,CPU,EVENTS,REGISTERS,INTERRUPTS}_INLINE): Ditto.
+	({SPREG,IDECODE}_INLINE): Ditto.	
+	
+Wed Oct 11 17:13:15 1995  Andrew Cagney  <cagney@kremvax>
+
+        * ppc-instructions: Initial cut of floating point suport added.
+  	Of note include - use of host IEEE floating point instructions,
+ 	use of PowerPC manual pseudo code to handle the FPSCR.  It is not
+ 	currently a pretty sight.
+	
+	* memory_map.h, memory_map.c, memory_map_n.h, core.h, core.c:
+ 	merge into core.h, core.c, core_n.h. The type memory_map replaced
+ 	with core_map.  This removes a level of pointer indirection when
+ 	translating an address.
+
+	* memory_map.h, memory_map.c, memory_map_n.h: delete.
+
+	* Makefile.in et.al (sorry): tweek to use new core, core_map and
+ 	core.h.
+	
+Wed Oct 11 12:10:26 1995  Andrew Cagney  <cagney@kremvax>
+
+	* sim_calls.c, main.c: Add -g (trace_gdb) option, add tracing to
+ 	most of the other functions in sim_calls.c.
+
+	* basics.h (CONCAT3), memory_map.c, memory_map_n.h, Makefile.in:
+ 	Add macros to better cover up `generic' code.  Makes it possible
+ 	to step through the generic code!
+
+	* vm.c, vm_n.h, Makefile.in: ditto
+	
+Tue Oct 10 15:42:59 1995  Andrew Cagney  <cagney@kremvax>
+
+	* devices.h, devices.c, memory_map.h, memory_map.c: Changed
+ 	callback interface so that there is a read/write buffer but no
+ 	read/write_word.  VEA default memory read/write handler sometimes
+ 	couldn't resolve an access and of those some were for a memory
+ 	fault and some were because gdb was making a bogus request.
+
+	* devices.h, devices.c, memory_map.h, memory_map.c, vm.h, vm.c:
+ 	eliminate transfer_mode (raw or cooked) parameter from read/write
+ 	buffer.
+	
+Fri Oct  6 20:23:56 1995  Andrew Cagney  <cagney@kremvax>
+
+	* ppc-instructions (fmul, fmuls): correct instruction format - had
+ 	FRB instead of FRC.
+
+Wed Oct  4 17:31:12 1995  Andrew Cagney  <cagney@kremvax>
+
+	* psim.c, device_tree.h, device_tree.c, devices.c (printd_*,
+ 	scand_*): new functions to parse/print fields in device names
+ 	while hiding any machine dependency.
+
+	* devices.c, psim.c: Change the stack init code so that it is
+ 	handled by a device.  Arguments passed across using a device ioctl
+ 	(hack).
+
+	* devices.h, devices.c: device ioctl callback changed to allow a
+ 	variable number of arguments.  This gives greater flexability and
+ 	greater chance of bugs.
+
+Tue Oct  3 22:01:56 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+
+	* main.c (printf_filtered, error): Missing va_end() to close off
+        variable argument use.
+
+	* Makefile.in (tmp-gencode): comment out hack to get around some
+        versions of make not handling files being created as side-effects.
+
+	* gen.c (lf_open): Add -n (real_file_name) option.  Specifies an
+        alternative file name to use in output files for things like #line
+        macros.
+
+        Makefile.in (tmp-gencode): Use gen -n so that debug info is
+        correct.
+
+	* Makefile.in (TARGETLIB): Use this instead of libsim.a in the
+	Makefile.
+
 Sat Oct  7 22:40:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* sim_calls.c (sim_set_callbacks): Define new function.

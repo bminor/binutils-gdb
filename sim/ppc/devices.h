@@ -26,6 +26,10 @@
 #define INLINE_DEVICES
 #endif
 
+#ifndef STATIC_DEVICES
+#define STATIC_DEVICES
+#endif
+
 
 /* forward declaration of types */
 /* typedef struct _device device; -- in devices.h */
@@ -313,7 +317,7 @@ INLINE_DEVICES device_config_interrupt_callback unimp_device_attach_interrupt;
 INLINE_DEVICES device_config_interrupt_callback unimp_device_detach_interrupt;
 INLINE_DEVICES device_interrupt_callback unimp_device_interrupt;
 INLINE_DEVICES device_interrupt_ack_callback unimp_device_interrupt_ack;
-INLINE_DEVICES device_ioctl_callback unimp_device_ioctl;
+STATIC_DEVICES device_ioctl_callback unimp_device_ioctl;
 
 /* Pass through and ignore callback functions.  A call going towards
    the root device are passed on up, local calls are ignored and call

@@ -18,6 +18,8 @@
 #   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+default: all
+
 VPATH = @srcdir@
 srcdir = @srcdir@
 srcroot = $(srcdir)/../..
@@ -77,15 +79,18 @@ INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES)
 
 CONFIG_FILE	= std-config.h
 
+# See inline.h for appropriate flags to set
+INLINE_CFLAGS	= -DDEFAULT_INLINE=2
+
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
 BFD_LIB		= ../../bfd/libbfd.a
 
 TARGETLIB = libsim.a
 
-all:	run libsim.a $(GDB_OBJ)
+all:	run $(TARGETLIB) $(GDB_OBJ)
 
 .c.o:
-	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
+	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
 
 
 
@@ -104,7 +109,6 @@ PSIM_H = \
 
 IDECODE_H = \
 	idecode.h \
-	idecode_insn.h \
 	idecode_expression.h \
 	idecode_branch.h \
 	idecode_fields.h \
@@ -119,7 +123,6 @@ CPU_H = \
 	$(BASICS_H) \
 	$(REGISTERS_H) \
 	device_tree.h \
-	memory_map.h \
 	core.h \
 	vm.h \
 	events.h \
@@ -145,7 +148,6 @@ LIB_SRC = \
 	bits.c \
 	ppc-endian.c \
 	debug.c \
-	memory_map.c \
 	vm.c \
 	core.c \
 	events.c \
@@ -167,7 +169,6 @@ LIB_OBJ = \
 	ppc-endian.o \
 	system.o \
 	registers.o \
-	memory_map.o \
 	vm.o \
 	core.o \
 	spreg.o \
@@ -184,14 +185,14 @@ LIB_OBJ = \
 GDB_OBJ = sim_calls.o 
 
 
-psim: libsim.a main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o psim main.o libsim.a $(BFD_LIB) $(LIBIBERTY_LIB) $(LIBS)
+psim: $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o psim main.o $(TARGETLIB) $(BFD_LIB) $(LIBIBERTY_LIB) $(LIBS)
 
 run: psim
 	rm -f run
 	ln psim run
 
-libsim.a: $(BUILT_SRC) $(LIB_OBJ) $(GDB_OBJ)
+$(TARGETLIB): tmp-gencode $(LIB_OBJ) $(GDB_OBJ)
 	rm -f $(TARGETLIB)
 	$(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(RANLIB) $(TARGETLIB)
@@ -215,15 +216,12 @@ interrupts.o: interrupts.c $(CPU_H) $(IDECODE_H) system.h
 
 idecode.o: idecode.c $(CPU_H) $(IDECODE_H) semantics.h
 
-memory_map.o: memory_map.c memory_map.h $(BASICS_H) device_tree.h interrupts.h
-
 # double.o: double.c dp-bit.c
 
-vm.o: vm.c vm.h $(BASICS_H) $(REGISTERS_H) \
-	device_tree.h memory_map.h core.h interrupts.h
+vm.o: vm.c vm.h vm_n.h $(BASICS_H) $(REGISTERS_H) \
+	device_tree.h core.h interrupts.h
 
-core.o: core.c core.h $(BASICS_H) \
-	device_tree.h memory_map.h
+core.o: core.c core.h $(BASICS_H) device_tree.h
 
 events.o: events.c events.h $(BASICS_H) 
 
@@ -251,14 +249,14 @@ ppc-config.h: $(CONFIG_FILE)
 
 tmp-gencode: gen ppc-instructions ppc-spr-table $(srcdir)/../../move-if-change
 	./gen	-r $(srcdir)/ppc-spr-table \
-		-P tmp-spreg.h \
-		-p tmp-spreg.c \
 		-i $(srcdir)/ppc-instructions \
-		-C tmp-icache.h \
-		-S tmp-semantics.h \
-		-s tmp-semantics.c \
-		-D tmp-idecode.h \
-		-d tmp-idecode.c
+		-n spreg.h     -P tmp-spreg.h \
+		-n spreg.c     -p tmp-spreg.c \
+		-n icache.h    -C tmp-icache.h \
+		-n semantics.h -S tmp-semantics.h \
+		-n semantics.c -s tmp-semantics.c \
+		-n idecode.h   -D tmp-idecode.h \
+		-n idecode.c   -d tmp-idecode.c
 	$(srcdir)/../../move-if-change tmp-icache.h icache.h
 	$(srcdir)/../../move-if-change tmp-idecode.h idecode.h
 	$(srcdir)/../../move-if-change tmp-idecode.c idecode.c
@@ -268,7 +266,11 @@ tmp-gencode: gen ppc-instructions ppc-spr-table $(srcdir)/../../move-if-change
 	$(srcdir)/../../move-if-change tmp-spreg.c spreg.c
 	touch tmp-gencode
 
-icache.h idecode.h idecode.c semantics.h semantics.c spreg.h spreg.c: tmp-gencode
+# NOTE: Some versions of make don't handle files created as side-effects
+# uncomment the below if that is the case.
+#
+# $(TARGETLIB): tmp-gencode
+# icache.h idecode.h idecode.c semantics.h semantics.c spreg.h spreg.c: tmp-gencode
 
 gen.o: gen.c config.h ppc-config.h
 	$(CC_FOR_BUILD) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $(srcdir)/gen.c
@@ -286,7 +288,7 @@ TAGS: tmp-gencode config.h ppc-config.h
 clean mostlyclean:
 	rm -f tmp-* *.[oas] core psim run gen config.log
 
-distclean realclean: clean
+distclean maintainer-clean realclean: clean
 	rm -f TAGS $(BUILT_SRC) Makefile config.cache config.status config.h stamp-h
 
 Makefile: Makefile.in config.status
