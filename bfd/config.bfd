@@ -74,6 +74,11 @@ case "${targ}" in
     targ_defvec=aout_arm_big_vec
     targ_selvecs=aout_arm_little_vec
     ;;
+  arm-*-coff)
+    targ_defvec=armcoff_little_vec
+    targ_selvecs=armcoff_big_vec
+    targ_underscore=yes
+    ;;
 
   a29k-*-ebmon* | a29k-*-udi* | a29k-*-coff* | a29k-*-sym1* | \
   a29k-*-vxworks* | a29k-*-sysv*)

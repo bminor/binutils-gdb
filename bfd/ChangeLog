@@ -1,3 +1,11 @@
+Thu Sep 28 00:58:05 1995  Doug Evans  <dje@deneb.cygnus.com>
+
+	* config.bfd: Add arm-*-coff.
+	* configure.in, configure: Add armcoff_{little,big}_vec.
+	* targets.c (armcoff_{little,big}_vec): Declare.
+	(bfd_target_vector): Add armcoff_{little,big}_vec.
+	* coff-arm.c (armcoff_{little,big}_vec): Always define.
+
 Wed Sep 27 10:37:14 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* targets.c (bfd_find_target): Remove debugging code.

@@ -459,6 +459,8 @@ extern const bfd_target aout_mips_big_vec;
 extern const bfd_target aout_mips_little_vec;
 extern const bfd_target aout0_big_vec;
 extern const bfd_target apollocoff_vec;
+extern const bfd_target armcoff_little_vec;
+extern const bfd_target armcoff_big_vec;
 extern const bfd_target armpe_little_vec;
 extern const bfd_target armpe_big_vec;
 extern const bfd_target armpei_little_vec;
@@ -669,6 +671,8 @@ const bfd_target * const bfd_target_vector[] = {
 	&i386os9k_vec,
 	&i386pe_vec,
 	&i386pei_vec,
+	&armcoff_little_vec,
+	&armcoff_big_vec,
 	&armpe_little_vec,
 	&armpe_big_vec,
 	&armpei_little_vec,
