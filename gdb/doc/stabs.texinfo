@@ -110,7 +110,7 @@ Other sources of information on stabs are @cite{Dbx and Dbxtool
 Interfaces}, 2nd edition, by Sun, 1988, and @cite{AIX Version 3.2 Files
 Reference}, Fourth Edition, September 1992, "dbx Stabstring Grammar" in
 the a.out section, page 2-31.  This document is believed to incorporate
-the information from those two sources except where it explictly directs
+the information from those two sources except where it explicitly directs
 you to them for more information.
 
 @menu
@@ -2534,45 +2534,50 @@ pointer.
 @node Protections
 @section Protections
 
-
 In the simple class definition shown above all member data and
 functions were publicly accessable.  The example that follows
 contrasts public, protected and privately accessable fields and shows
 how these protections are encoded in C++ stabs.
 
-Protections for class member data are signified by two characters
-embedded in the stab defining the class type.  These characters are
-located after the @samp{name:} part of the string.  @samp{/0} means private,
-@samp{/1} means protected, and @samp{/2} means public.  If these
-characters are omited this means that the member is public.  The
-following C++ source:
+If the character following the @samp{@var{field-name}:} part of the
+string is @samp{/}, then the next character is the visibility.  @samp{0}
+means private, @samp{1} means protected, and @samp{2} means public.
+Debuggers should ignore visibility characters they do not recognize, and
+assume a reasonable default (such as public) (GDB 4.11 does not, but
+this should be fixed in the next GDB release).  If no visibility is
+specified the field is public.  The visibility @samp{9} means that the
+field has been optimized out and is public (there is no way to specify
+an optimized out field with a private or protected visibility).
+Visibility @samp{9} is not supported by GDB 4.11; this should be fixed
+in the next GDB release.
+
+The following C++ source:
 
 @example
-class all_data @{
+class vis @{
 private:
-        int   priv_dat;
+        int   priv;
 protected:
-        char  prot_dat;
+        char  prot;
 public:
-        float pub_dat;
+        float pub;
 @};
 @end example
 
 @noindent
-generates the following stab to describe the class type all_data.
+generates the following stab:
 
-@display
-.stabs "class_name:sym_desc(type)type_def(19)=type_desc(struct)struct_bytes
-        data_name:/protection(private)type_ref(int),bit_offset,num_bits;
-        data_name:/protection(protected)type_ref(char),bit_offset,num_bits;
-        data_name:(/num omited, private)type_ref(float),bit_offset,num_bits;;"
-        N_LSYM,NIL,NIL,NIL
-@end display
+@example
+# @r{128 is N_LSYM}
+.stabs "vis:T19=s12priv:/01,0,32;prot:/12,32,8;pub:12,64,32;;",128,0,0,0
+@end example
 
-@smallexample
-.stabs "all_data:t19=s12
-        priv_dat:/01,0,32;prot_dat:/12,32,8;pub_dat:12,64,32;;",128,0,0,0
-@end smallexample
+@samp{vis:T19=s12} indicates that type number 19 is a 12 byte structure
+named @code{vis} The @code{priv} field has public visibility
+(@samp{/0}), type int (@samp{1}), and offset and size @samp{,0,32;}.
+The @code{prot} field has protected visibility (@samp{/1}), type char
+(@samp{2}) and offset and size @samp{,32,8;}.  The @code{pub} field has
+type float (@samp{12}), and offset and size @samp{,64,32;}.
 
 Protections for member functions are signified by one digit embeded in
 the field part of the stab describing the method.  The digit is 0 if
@@ -2751,14 +2756,21 @@ This additional information is embeded in the class stab following the
 number of bytes in the struct.  First the number of base classes
 appears bracketed by an exclamation point and a comma.
 
-Then for each base type there repeats a series: two digits, a number,
-a comma, another number, and a semi-colon.
+Then for each base type there repeats a series: a virtual character, a
+visibilty character, a number, a comma, another number, and a
+semi-colon.
 
-The first of the two digits is 1 if the base class is virtual and 0 if
-not.  The second digit is 2 if the derivation is public and 0 if not.
+The virtual character is @samp{1} if the base class is virtual and
+@samp{0} if not.  The visibility character is @samp{2} if the derivation
+is public, @samp{1} if it is protected, and @samp{0} if it is private.
+Debuggers should ignore virtual or visibility characters they do not
+recognize, and assume a reasonable default (such as public and
+non-virtual) (GDB 4.11 does not, but this should be fixed in the next
+GDB release).
 
-The number following the first two digits is the offset from the start
-of the object to the part of the object pertaining to the base class.
+The number following the virtual and visibility characters is the offset
+from the start of the object to the part of the object pertaining to the
+base class.
 
 After the comma, the second number is a type_descriptor for the base
 type.  Finally a semi-colon ends the series, which repeats for each
@@ -3481,6 +3493,10 @@ desc   -> unit_number
 value  -> 0 (main unit)
           1 (any other unit)
 @end example
+
+See @cite{Dbx and Dbxtool Interfaces}, 2nd edition, by Sun, 1988, for
+more information.
+
 @end deffn
 
 @node N_BROWS

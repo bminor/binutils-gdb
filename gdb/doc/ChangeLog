@@ -1,3 +1,10 @@
+Mon Nov  8 11:47:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo: Clean up stuff about visibility and virtual
+	characters.
+
+	* stabs.texinfo (N_M2C): Cite Sun doc.
+
 Fri Nov  5 16:27:27 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo: updates re threads.
