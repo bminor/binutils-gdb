@@ -1,5 +1,6 @@
 1999-01-11  Doug Evans  <devans@casey.cygnus.com>
 
+	* Makefile.in (m32r-clean): rm eng.h.
 	* sim-main.h: Delete inclusion of ansidecl.h.
 	* cpu.h: Regenerate.
 start-sanitize-m32rx

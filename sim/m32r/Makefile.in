@@ -1,3 +1,4 @@
+
 # Makefile template for Configure for the m32r simulator
 # Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 # Contributed by Cygnus Support.
@@ -120,9 +121,9 @@ modelx.o: modelx.c $(M32RXF_INCLUDE_DEPS)
 # end-sanitize-m32rx
 
 m32r-clean:
-	rm -f mloop.c stamp-arch stamp-cpu stamp-mloop
+	rm -f mloop.c eng.h stamp-arch stamp-cpu stamp-mloop
 # start-sanitize-m32rx
-	rm -f mloopx.c stamp-xcpu stamp-xmloop
+	rm -f mloopx.c engx.h stamp-xcpu stamp-xmloop
 # end-sanitize-m32rx
 	rm -f tmp-*
 
