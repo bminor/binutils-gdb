@@ -1,3 +1,21 @@
+2002-02-22  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (dot_restore): Issue error message of epilogue
+	count exceeds prologue count.
+	(md_show_usage): Describe -mconstant-gp and -mauto-pic.
+	(unwind.label_prologue_count): New member.
+
+	Based on a patch by Hans Boehm <hboehm@hpl.hp.com>:
+
+	(get_saved_prologue_count): New function.
+	(save_prologue_count): New function.
+	(free_saved_prologue_count): New function.
+	(dot_label_state): Record state label by calling save_prologue_count().
+	(dot_copy_state): Restore prologue count by calling
+	get_saved_prologue_count().
+	(generate_unwind_image): Free up list of saved prologue
+	counts by calling free_saved_prologue_counts().
+
 2002-02-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (md_parse_option): Complain about invalid -mabi
