@@ -2186,13 +2186,11 @@ Sat Sep 18 10:13:18 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
 	* remote-sim.h: New file.
 	* remote-sim.c: Add remote debug feature.  Rename stuff to distinguish
 	interface to simulator from gdb-specific stuff.  Other changes.
-start-sanitize-v9
 	* remote-sp64sim.c: Renamed to remote-sim.c.
 	Use sr_get_debug instead of our own sim_verbose/simif_snoop.
 	Use gnutarget in call to bfd_openr.
 	Rename simif_* to gdbsim_*.
 	* config/sparc/sp64sim.mt: Change remote-sp64sim.c to remote-sim.c.
-end-sanitize-v9
 
 Fri Sep 17 04:41:17 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -3155,12 +3153,10 @@ Tue Aug  3 10:58:04 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (SFILES): Add thread.c
 
-start-sanitize-v9
 Tue Aug  3 10:21:58 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* remote-sp64sim.c (simif_create_inferior): Add FIXME regarding
 	sim_set_args return code.
-end-sanitize-v9
 
 Mon Aug  2 16:35:31 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
@@ -3246,9 +3242,7 @@ Sun Aug  1 22:58:18 1993  Stu Grossman  (grossman at cygnus.com)
 	* remote-nindy.c (nindy_resume):  Pass in pid as argument.
 	* remote-sa.sparc.c (remote_resume):  Pass in pid as argument.
 	* remote-sim.c (rem_resume):  Pass in pid as argument.
-	start-sanitize-v9
 	* remote-sp64sim.c (simif_resume):  Pass in pid as argument.
-	end-sanitize-v9
 	* remote-st.c (st2000_resume):  Pass in pid as argument.
 	* remote-udi.c (udi_resume):  Pass in pid as argument.
 	* remote-vx.c (vx_resume):  Pass in pid as argument.
@@ -3310,7 +3304,6 @@ Fri Jul 30 14:44:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* c-exp.y (yylex): Detect C++ nested types.
 
-start-sanitize-v9
 Fri Jul 30 11:07:37 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* sp64-tdep.c (sparc64_frame_chain, sparc64_frame_saved_pc): Deleted.
@@ -3321,7 +3314,6 @@ Fri Jul 30 11:07:37 1993  Doug Evans  (dje@canuck.cygnus.com)
 	* config/sparc/sp64.mt: New file.
 	* config/sparc/tm-sp64.h (FRAME_CHAIN, FRAME_SAVED_PC): Deleted.
 	(PRINT_REGISTER_HOOK): Call new fn sparc_print_register_hook.
-end-sanitize-v9
 
 Fri Jul 30 10:15:01 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
@@ -3700,11 +3692,9 @@ Wed Jul 14 09:45:52 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* configure.in: Recognize h8300h (variant of h8300).
 
-start-sanitize-v9
 Wed Jul 14 09:45:52 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* configure.in: Recognize sparc64-*-*.
-end-sanitize-v9
 
 Tue Jul 13 14:03:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
@@ -3847,13 +3837,11 @@ Thu Jul  8 14:48:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hppa-tdep.c: Change _initialize_hppab_tdep to _initialize_hppa_tdep.
 
-start-sanitize-v9
 Thu Jul  8 14:47:00 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* sparc-tdep.c (sparc_frame_chain): Handle sizeof (CORE_ADDR)
 	!= sizeof (REGISTER_TYPE).
 	(frame_saved_pc): Ditto.
-end-sanitize-v9
 
 Thu Jul  8 08:22:05 1993  Doug Evans  (dje@canuck.cygnus.com)
 
