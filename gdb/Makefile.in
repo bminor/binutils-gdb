@@ -1474,9 +1474,9 @@ procfs.o: $(srcdir)/procfs.c
 
 # FIXME: Thread-db.o gets warnings because the definitions of the register
 # sets are different from kernel to kernel.
-thread-db.o: $(srcdir)/thread-db.c
+linux-thread-db.o: $(srcdir)/linux-thread-db.c
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
-		$(srcdir)/thread-db.c
+		$(srcdir)/linux-thread-db.c
 
 v850ice.o: $(srcdir)/v850ice.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
@@ -2612,9 +2612,10 @@ target.o: target.c $(defs_h) $(gdb_string_h) $(target_h) $(gdbcmd_h) \
 thread.o: thread.c $(defs_h) $(symtab_h) $(frame_h) $(inferior_h) \
 	$(environ_h) $(value_h) $(target_h) $(gdbthread_h) $(command_h) \
 	$(gdbcmd_h) $(regcache_h) $(gdb_h) $(gdb_string_h) $(ui_out_h)
-thread-db.o: thread-db.c $(defs_h) $(gdb_assert_h) $(gdb_proc_service_h) \
-	$(gdb_thread_db_h) $(bfd_h) $(gdbthread_h) $(inferior_h) \
-	$(symfile_h) $(objfiles_h) $(target_h) $(regcache_h) $(solib_svr4_h)
+linux-thread-db.o: linux-thread-db.c $(defs_h) $(gdb_assert_h)
+	$(gdb_proc_service_h) $(gdb_thread_db_h) $(bfd_h) $(gdbthread_h) \
+	$(inferior_h) $(symfile_h) $(objfiles_h) $(target_h) $(regcache_h) \
+	$(solib_svr4_h)
 top.o: top.c $(defs_h) $(gdbcmd_h) $(call_cmds_h) $(cli_cmds_h) \
 	$(cli_script_h) $(cli_setshow_h) $(cli_decode_h) $(symtab_h) \
 	$(inferior_h) $(target_h) $(breakpoint_h) $(gdbtypes_h) \

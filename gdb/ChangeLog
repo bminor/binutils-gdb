@@ -1,3 +1,24 @@
+2004-11-14  Daniel Jacobowitz  <dan@debian.org>
+
+	* linux-thread-db.c: New file, renamed from thread-db.c.
+	* thread-db.c: Remove.
+	* Makefile.in (linux-thread-db.o): Rename from thread-db.o rule.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Rename thread-db.o
+	to linux-thread-db.o.
+	* config/arm/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux64.mh (NATDEPFILES): Likewise.
+	* config/ia64/linux.mh (NATDEPFILES): Likewise.
+	* config/m32r/linux.mh (NATDEPFILES): Likewise.
+	* config/m68k/linux.mh (NATDEPFILES): Likewise.
+	* config/mips/linux.mh (NATDEPFILES): Likewise.
+	* config/pa/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Likewise.
+	* config/s390/s390.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux64.mh (NATDEPFILES): Likewise.
+
 2004-11-13  Andrew Cagney  <cagney@gnu.org>
 
 	* config/i386/i386lynx.mh: Delete file.
