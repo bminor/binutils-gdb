@@ -1,3 +1,9 @@
+Tue Nov 14 11:52:23 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-sh.c (shlcoff_vec): Use _bfd_generic_archive_p, not
+	_bfd_dummy_target, matching the recent change to archive
+	recognition.
+
 Mon Nov 13 13:24:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libbfd.c (bfd_get_file_window): Use casts to avoid doing
