@@ -1,3 +1,41 @@
+start-sanitize-d30v
+Wed Dec 17 15:29:03 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-d30v.c (md_shortopts): Add 'n' and 'N' options.
+	(exec_type_enum): Enumeration giving all of the exec types.
+	(warn_nops): New static variable to give nop warning level.
+	({cur,prev}_mul32_p): New static variable to keep track of whether
+	the current/previous instruction is a 32-bit multiply.
+	(Optimizing): Make static.
+	(NOP{2,_LEFT,_RIGHT}): Macros for word of nops and left/right
+	nops.
+	(d30v_insert_operand): Delete declaration of unused function.
+	(write_2_short): Make exec_type argument enum, not int.
+	(parallel_ok): Ditto.
+	(check_range): Delete unused variable(s).
+	(build_insn): Ditto.
+	(find_format): Ditto.
+	(md_apply_fix3): Ditto.
+	(md_show_usage): Document -n and -N.
+	(md_parse_option): Parse -n and -N.
+	(write_1_short): If -n, warn about adding a nop.  Use
+	NOP_{LEFT,RIGHT}.
+	(write_2_short): Use enumeration values instead of hard coded
+	integers.  Reset exec_type for default operations.  For explicit
+	parallel operations, call parallel_ok to make sure everything is
+	ok.  If writing out a parallel operation, and the previous
+	instruction was a 32-bit multiply, indicate current instruction
+	is.
+	(parallel_ok): Allow add/tx ... to be done in parallel with
+	another add/tx ... assuming the gpr registers don't overlap.
+	(md_assemble): Use exec type enumeration values, not hard coded
+	ints.  Check for loads or 16-bit multiplies following in the next
+	cycle after a 32-bit multiply.  Add nops if that is the case.
+	(do_assemble): Copy prev_mul32_p to cur_mul32_p, and set
+	cur_mul32_p if current instruction is a 32-bit multiply.
+	(find_format): Change spacing and layout.
+
+end-sanitize-d30v
 start-sanitize-tic80
 Tue Dec 16 16:55:45 1997  Fred Fish  <fnf@cygnus.com>
 

@@ -28,14 +28,26 @@
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "";
-const char *md_shortopts = "O";
+const char *md_shortopts = "OnN";
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
-int Optimizing = 0;
+#define NOP_MULTIPLY 1
+#define NOP_ALL 2
+static int warn_nops = 0;
+static int Optimizing = 0;
 
 #define FORCE_SHORT	1
 #define FORCE_LONG	2
+
+/* EXEC types.  */
+typedef enum _exec_type
+{
+  EXEC_UNKNOWN,			/* no order specified */
+  EXEC_PARALLEL,		/* done in parallel */
+  EXEC_SEQ,			/* sequential */
+  EXEC_REVSEQ			/* reverse sequential */
+} exec_type_enum;
 
 /* fixups */
 #define MAX_INSN_FIXUPS (5)
@@ -58,6 +70,15 @@ typedef struct _fixups
 static Fixups FixUps[2];
 static Fixups *fixups;
 
+/* Whether current and previous instruction is a word multiply.  */
+int cur_mul32_p = 0;
+int prev_mul32_p = 0;
+
+/* Two nops */
+#define NOP_LEFT ((long long)NOP << 32)
+#define NOP_RIGHT ((long long)NOP)
+#define NOP2 (FM00 | NOP_LEFT | NOP_RIGHT)
+
 /* local functions */
 static int reg_name_search PARAMS ((char *name));
 static int register_name PARAMS ((expressionS *expressionP));
@@ -71,13 +92,11 @@ static long long build_insn PARAMS ((struct d30v_insn *opcode, expressionS *oper
 static void write_long PARAMS ((struct d30v_insn *opcode, long long insn, Fixups *fx));
 static void write_1_short PARAMS ((struct d30v_insn *opcode, long long insn, Fixups *fx));
 static int write_2_short PARAMS ((struct d30v_insn *opcode1, long long insn1, 
-		   struct d30v_insn *opcode2, long long insn2, int exec_type, Fixups *fx));
+		   struct d30v_insn *opcode2, long long insn2, exec_type_enum exec_type, Fixups *fx));
 static long long do_assemble PARAMS ((char *str, struct d30v_insn *opcode));
-static unsigned long d30v_insert_operand PARAMS (( unsigned long insn, int op_type,
-						   offsetT value, int left, fixS *fix));
 static int parallel_ok PARAMS ((struct d30v_insn *opcode1, unsigned long insn1, 
 				struct d30v_insn *opcode2, unsigned long insn2,
-				int exec_type));
+				exec_type_enum exec_type));
 static void d30v_number_to_chars PARAMS ((char *buf, long long value, int nbytes));
 static void check_size PARAMS ((long value, int bits, char *file, int line));
 
@@ -167,7 +186,7 @@ check_range (num, bits, flags)
      int bits;
      int flags;
 {
-  long min, max, bit1;
+  long min, max;
   int retval=0;
 
   /* don't bother checking 32-bit values */
@@ -196,8 +215,10 @@ void
 md_show_usage (stream)
   FILE *stream;
 {
-  fprintf(stream, "D30V options:\n\
--O                      optimize.  Will do some operations in parallel.\n");
+  fprintf(stream, "\nD30V options:\n\
+-O                      Make adjacent short instructions parallel if possible.\n\
+-n                      Warn about all NOPs inserted by the assembler.\n\
+-N			Warn about NOPs inserted after word multiplies.\n");
 } 
 
 int
@@ -207,10 +228,22 @@ md_parse_option (c, arg)
 {
   switch (c)
     {
-    case 'O':
       /* Optimize. Will attempt to parallelize operations */
+    case 'O':
       Optimizing = 1;
       break;
+
+      /* Warn about all NOPS that the assembler inserts.  */
+    case 'n':
+      warn_nops = NOP_ALL;
+      break;
+
+      /* Warn about the NOPS that the assembler inserts because of the
+	 multiply hazard.  */
+    case 'N':
+      warn_nops = NOP_MULTIPLY;
+      break;
+
     default:
       return 0;
     }
@@ -465,7 +498,7 @@ build_insn (opcode, opers)
      struct d30v_insn *opcode;
      expressionS *opers;
 {
-  int i, length, bits, shift, flags, format;
+  int i, length, bits, shift, flags;
   unsigned int number, id=0;
   long long insn;
   struct d30v_opcode *op = opcode->op;
@@ -593,13 +626,16 @@ write_1_short (opcode, insn, fx)
   char *f = frag_more(8);
   int i, where;
 
+  if (warn_nops == NOP_ALL)
+    as_warn ("NOP inserted");
+
   /* the other container needs to be NOP */
   /* according to 4.3.1: for FM=00, sub-instructions performed only
      by IU cannot be encoded in L-container. */
   if (opcode->op->unit == IU)
-    insn |= FM00 | ((long long)NOP << 32);		/* right container */
+    insn |= FM00 | NOP_LEFT;			/* right container */
   else
-    insn = FM00 | (insn << 32) | (long long)NOP;	/* left container */
+    insn = FM00 | (insn << 32) | NOP_RIGHT;	/* left container */
 
   d30v_number_to_chars (f, insn, 8);
 
@@ -625,14 +661,14 @@ static int
 write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx) 
      struct d30v_insn *opcode1, *opcode2;
      long long insn1, insn2;
-     int exec_type;
+     exec_type_enum exec_type;
      Fixups *fx;
 {
-  long long insn;
+  long long insn = NOP2;
   char *f;
   int i,j, where;
 
-  if(exec_type != 1 && (opcode1->op->flags_used == FLAG_JSR))
+  if(exec_type != EXEC_PARALLEL && (opcode1->op->flags_used == FLAG_JSR))
     {
       /* subroutines must be called from 32-bit boundaries */
       /* so the return address will be correct */
@@ -642,10 +678,11 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 
   switch (exec_type) 
     {
-    case 0:	/* order not specified */
-      if ( Optimizing && parallel_ok (opcode1, insn1, opcode2, insn2, exec_type))
+    case EXEC_UNKNOWN:	/* order not specified */
+      if (Optimizing && parallel_ok (opcode1, insn1, opcode2, insn2, exec_type))
 	{
 	  /* parallel */
+	  exec_type = EXEC_PARALLEL;
 	  if (opcode1->op->unit == IU)
 	    insn = FM00 | (insn2 << 32) | insn1;
 	  else if (opcode2->op->unit == MU)
@@ -656,20 +693,25 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	      fx = fx->next;
 	    }
 	}
-      else if (opcode1->op->unit == IU) 
+      else if (opcode1->op->unit == IU)
 	{
 	  /* reverse sequential */
 	  insn = FM10 | (insn2 << 32) | insn1;
+	  exec_type = EXEC_REVSEQ;
 	}
       else
 	{
 	  /* sequential */
 	  insn = FM01 | (insn1 << 32) | insn2;
-	  fx = fx->next;  
+	  fx = fx->next;
+	  exec_type = EXEC_SEQ;
 	}
       break;
-    case 1:	/* parallel */
-      if (opcode1->op->unit == IU)
+
+    case EXEC_PARALLEL:	/* parallel */
+      if (! parallel_ok (opcode1, insn1, opcode2, insn2, exec_type))
+	as_fatal ("Instructions may not be executed in parallel");
+      else if (opcode1->op->unit == IU)
 	{
 	  if (opcode2->op->unit == IU)
 	    as_fatal ("Two IU instructions may not be executed in parallel");
@@ -689,18 +731,21 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	  fx = fx->next;
 	}
       break;
-    case 2:	/* sequential */
+
+    case EXEC_SEQ:	/* sequential */
       if (opcode1->op->unit == IU)
 	as_fatal ("IU instruction may not be in the left container");
       insn = FM01 | (insn1 << 32) | insn2;  
       fx = fx->next;
       break;
-    case 3:	/* reverse sequential */
+
+    case EXEC_REVSEQ:	/* reverse sequential */
       if (opcode2->op->unit == MU)
 	as_fatal ("MU instruction may not be in the right container");
       insn = FM10 | (insn1 << 32) | insn2;  
       fx = fx->next;
       break;
+
     default:
       as_fatal("unknown execution type passed to write_2_short()");
     }
@@ -708,6 +753,12 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   /*  printf("writing out %llx\n",insn); */
   f = frag_more(8);
   d30v_number_to_chars (f, insn, 8);
+
+  /* If the previous instruction was a 32-bit multiply but it is put into a
+     parallel container, mark the current instruction as being a 32-bit
+     multiply.  */
+  if (prev_mul32_p && exec_type == EXEC_PARALLEL)
+    cur_mul32_p = 1;
 
   for (j=0; j<2; j++) 
     {
@@ -738,22 +789,23 @@ static int
 parallel_ok (op1, insn1, op2, insn2, exec_type)
      struct d30v_insn *op1, *op2;
      unsigned long insn1, insn2;
-     int exec_type;
+     exec_type_enum exec_type;
 {
   int i, j, shift, regno, bits, ecc;
   unsigned long flags, mask, flags_set1, flags_set2, flags_used1, flags_used2;
-  unsigned long ins, mod_reg[2][3], used_reg[2][3];
+  unsigned long ins, mod_reg[2][3], used_reg[2][3], flag_reg[2];
   struct d30v_format *f;
   struct d30v_opcode *op;
-  int reverse_p;
 
   /* section 4.3: both instructions must not be IU or MU only */
   if ((op1->op->unit == IU && op2->op->unit == IU)
       || (op1->op->unit == MU && op2->op->unit == MU))
     return 0;
 
-  /* first instruction must not be a jump to safely optimize */
-  if (op1->op->flags_used & (FLAG_JMP | FLAG_JSR))
+  /* first instruction must not be a jump to safely optimize, unless this
+     is an explicit parallel operation.  */
+  if (exec_type != EXEC_PARALLEL
+      && (op1->op->flags_used & (FLAG_JMP | FLAG_JSR)))
     return 0;
 
   /* If one instruction is /TX or /XT and the other is /FX or /XF respectively,
@@ -785,6 +837,7 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 	  ecc = op2->ecc;
 	  ins = insn2;
 	}
+      flag_reg[j] = 0;
       mod_reg[j][0] = mod_reg[j][1] = 0;
       mod_reg[j][2] = (op->flags_set & FLAG_ALL);
       used_reg[j][0] = used_reg[j][1] = 0;
@@ -799,17 +852,17 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 	{
 	case ECC_TX:
 	case ECC_FX:
-	  used_reg[j][2] |= FLAG_0;
+	  used_reg[j][2] |= flag_reg[j] = FLAG_0;
 	  break;
 
 	case ECC_XT:
 	case ECC_XF:
-	  used_reg[j][2] |= FLAG_1;
+	  used_reg[j][2] |= flag_reg[j] = FLAG_1;
 	  break;
 
 	case ECC_TT:
 	case ECC_TF:
-	  used_reg[j][2] |= (FLAG_0 | FLAG_1);
+	  used_reg[j][2] |= flag_reg[j] = (FLAG_0 | FLAG_1);
 	  break;
 	}
 
@@ -935,7 +988,8 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
      subb.  */
 
   if (mod_reg[0][2] == FLAG_CVVA && mod_reg[1][2] == FLAG_CVVA
-      && used_reg[0][2] == 0 && used_reg[1][2] == 0
+      && (used_reg[0][2] & ~flag_reg[0]) == 0
+      && (used_reg[1][2] & ~flag_reg[1]) == 0
       && op1->op->unit == EITHER && op2->op->unit == EITHER)
     {
       mod_reg[0][2] = mod_reg[1][2] = 0;
@@ -958,8 +1012,7 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 /* This is the main entry point for the machine-dependent assembler.  str points to a
    machine-dependent instruction.  This function is supposed to emit the frags/bytes 
    it assembles to.  For the D30V, it mostly handles the special VLIW parsing and packing
-   and leaves the difficult stuff to do_assemble().
- */
+   and leaves the difficult stuff to do_assemble().  */
 
 static long long prev_insn = -1;
 static struct d30v_insn prev_opcode;
@@ -972,29 +1025,29 @@ md_assemble (str)
 {
   struct d30v_insn opcode;
   long long insn;
-  int extype=0;			/* execution type; parallel, etc */
-  static int etype=0;		/* saved extype.  used for multiline instructions */
+  exec_type_enum extype = EXEC_UNKNOWN;		/* execution type; parallel, etc */
+  static exec_type_enum etype = EXEC_UNKNOWN;	/* saved extype.  used for multiline instructions */
   char *str2;
 
   if ( (prev_insn != -1) && prev_seg && ((prev_seg != now_seg) || (prev_subseg != now_subseg)))
     d30v_cleanup();
 
-  if (etype == 0)
+  if (etype == EXEC_UNKNOWN)
     {
       /* look for the special multiple instruction separators */
       str2 = strstr (str, "||");
       if (str2) 
-	extype = 1;
+	extype = EXEC_PARALLEL;
       else
 	{
 	  str2 = strstr (str, "->");
 	  if (str2) 
-	    extype = 2;
+	    extype = EXEC_SEQ;
 	  else
 	    {
 	      str2 = strstr (str, "<-");
 	      if (str2) 
-		extype = 3;
+		extype = EXEC_REVSEQ;
 	    }
 	}
       /* str2 points to the separator, if one */
@@ -1034,6 +1087,43 @@ md_assemble (str)
       etype = 0;
     }
 
+  /* Word multiply instructions must not be followed by either a load or a
+     16-bit multiply instruction in the next cycle.  */
+  if (prev_mul32_p && (opcode.op->flags_used & (FLAG_MEM | FLAG_MUL16)))
+    {
+      /* However, load and multiply should able to be combined in a parallel
+	 operation, so check for that first.  */
+
+      if (prev_insn != -1
+	  && (opcode.op->flags_used & FLAG_MEM)
+	  && opcode.form->form < LONG
+	  && (extype == EXEC_PARALLEL || (Optimizing && extype == EXEC_UNKNOWN))
+	  && parallel_ok (&prev_opcode, (long)prev_insn,
+			  &opcode, (long)insn, extype)
+	  && write_2_short (&prev_opcode, (long)prev_insn,
+			    &opcode, (long)insn, extype, fixups) == 0)
+	{
+	  /* no instructions saved */
+	  prev_insn = -1;
+	  return;
+	}
+
+      /* Can't parallelize, flush current instruction and emit a word of NOPS */
+      else
+	{
+	  char *f;
+	  d30v_cleanup();
+
+	  f = frag_more(8);
+	  d30v_number_to_chars (f, NOP2, 8);
+	  if (warn_nops == NOP_ALL || warn_nops == NOP_MULTIPLY)
+	    as_warn ("word of NOPs added between word multiply and %s",
+		     ((opcode.op->flags_used & FLAG_MEM)
+		      ? "load"
+		      : "16-bit multiply"));
+	}
+    }
+
   /* if this is a long instruction, write it and any previous short instruction */
   if (opcode.form->form >= LONG) 
     {
@@ -1044,19 +1134,20 @@ md_assemble (str)
       prev_insn = -1;
       return;
     }
-    
-  if ( (prev_insn != -1) && 
-       (write_2_short (&prev_opcode, (long)prev_insn, &opcode, (long)insn, extype, fixups) == 0)) 
+
+  if ((prev_insn != -1) && 
+      (write_2_short (&prev_opcode, (long)prev_insn, &opcode, (long)insn, extype, fixups) == 0)) 
     {
       /* no instructions saved */
       prev_insn = -1;
     }
+
   else
     {
       if (extype) 
 	as_fatal("Unable to mix instructions as specified");
       /* save off last instruction so it may be packed on next pass */
-      memcpy( &prev_opcode, &opcode, sizeof(prev_opcode));
+      memcpy(&prev_opcode, &opcode, sizeof(prev_opcode));
       prev_insn = insn;
       prev_seg = now_seg;
       prev_subseg = now_subseg;
@@ -1134,7 +1225,7 @@ do_assemble (str, opcode)
       else
 	p = 3;
 
-      for(i=1; *str && strncmp(*str,&name[p],2); i++, *str++)
+      for(i=1; *str && strncmp(*str,&name[p],2); i++, str++)
 	;
 
       /* cmpu only supports some condition codes */
@@ -1192,6 +1283,14 @@ do_assemble (str, opcode)
   input_line_pointer = save;
 
   insn = build_insn (opcode, myops); 
+
+  /* Propigate multiply status */
+  if (insn != -1)
+    {
+      prev_mul32_p = cur_mul32_p;
+      cur_mul32_p = (opcode->op->flags_used & FLAG_MUL32) != 0;
+    }
+
   return (insn);
 }
 
@@ -1209,12 +1308,11 @@ find_format (opcode, myops, fsize, cmp_hack)
 {
   int numops, match, index, i=0, j, k;
   struct d30v_format *fm;
-  struct d30v_operand *op;
 
   /* get all the operands and save them as expressions */
   numops = get_operands (myops, cmp_hack);
 
-  while (index = opcode->format[i++])
+  while ((index = opcode->format[i++]) != 0)
     {
       if ((fsize == FORCE_SHORT) && (index >= LONG))
 	continue;
@@ -1240,20 +1338,21 @@ find_format (opcode, myops, fsize, cmp_hack)
 		match = 0;
 	      else if (flags & OPERAND_REG)
 		{
-		  if ((X_op != O_register) ||
-		      ((flags & OPERAND_ACC) && !(num & OPERAND_ACC)) ||
-		      ((flags & OPERAND_FLAG) && !(num & OPERAND_FLAG)) ||
-		      (flags & OPERAND_CONTROL && !(num & OPERAND_CONTROL | num & OPERAND_FLAG)))
+		  if ((X_op != O_register)
+		      || ((flags & OPERAND_ACC) && !(num & OPERAND_ACC))
+		      || ((flags & OPERAND_FLAG) && !(num & OPERAND_FLAG))
+		      || ((flags & OPERAND_CONTROL)
+			  && !(num & (OPERAND_CONTROL | OPERAND_FLAG))))
 		    {
 		      match = 0;
 		    }
 		}
-	      else 
-		if (((flags & OPERAND_MINUS) && ((X_op != O_absent) || (num != OPERAND_MINUS))) ||
-		    ((flags & OPERAND_PLUS) && ((X_op != O_absent) || (num != OPERAND_PLUS))) ||
-		    ((flags & OPERAND_ATMINUS) && ((X_op != O_absent) || (num != OPERAND_ATMINUS))) ||
-		    ((flags & OPERAND_ATPAR) && ((X_op != O_absent) || (num != OPERAND_ATPAR))) ||
-		    ((flags & OPERAND_ATSIGN) && ((X_op != O_absent) || (num != OPERAND_ATSIGN)))) 
+	      else
+		if (((flags & OPERAND_MINUS) && ((X_op != O_absent) || (num != OPERAND_MINUS)))
+		    || ((flags & OPERAND_PLUS) && ((X_op != O_absent) || (num != OPERAND_PLUS)))
+		    || ((flags & OPERAND_ATMINUS) && ((X_op != O_absent) || (num != OPERAND_ATMINUS)))
+		    || ((flags & OPERAND_ATPAR) && ((X_op != O_absent) || (num != OPERAND_ATPAR)))
+		    || ((flags & OPERAND_ATSIGN) && ((X_op != O_absent) || (num != OPERAND_ATSIGN))))
 		  {
 		    match=0;
 		  }
@@ -1362,8 +1461,6 @@ md_apply_fix3 (fixp, valuep, seg)
   char *where;
   unsigned long insn, insn2;
   long value;
-  int op_type;
-  int left=0;
 
   if (fixp->fx_addsy == (symbolS *) NULL)
     {
@@ -1402,6 +1499,7 @@ md_apply_fix3 (fixp, valuep, seg)
       insn |= value & 0x3F;
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       break;
+
     case BFD_RELOC_D30V_9_PCREL:
       if (fixp->fx_where & 0x7)
 	{
@@ -1414,11 +1512,13 @@ md_apply_fix3 (fixp, valuep, seg)
       insn |= ((value >> 3) & 0x3F) << 12;
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       break;
+
     case BFD_RELOC_D30V_15:
       check_size (value, 15, fixp->fx_file, fixp->fx_line);
       insn |= (value >> 3) & 0xFFF;
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       break;
+
     case BFD_RELOC_D30V_15_PCREL:
       if (fixp->fx_where & 0x7)
 	{
@@ -1431,11 +1531,13 @@ md_apply_fix3 (fixp, valuep, seg)
       insn |= (value >> 3) & 0xFFF;
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       break;
+
     case BFD_RELOC_D30V_21:
       check_size (value, 21, fixp->fx_file, fixp->fx_line);
       insn |= (value >> 3) & 0x3FFFF;
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       break;
+
     case BFD_RELOC_D30V_21_PCREL:
       if (fixp->fx_where & 0x7)
 	{
@@ -1448,25 +1550,29 @@ md_apply_fix3 (fixp, valuep, seg)
       insn |= (value >> 3) & 0x3FFFF;
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       break;
+
     case BFD_RELOC_D30V_32:
       insn2 = bfd_getb32 ((unsigned char *) where + 4);
-      insn |= (value >> 26) & 0x3F;	/* top 6 bits */
-      insn2 |= ((value & 0x03FC0000) << 2);  /* next 8 bits */ 
+      insn |= (value >> 26) & 0x3F;		/* top 6 bits */
+      insn2 |= ((value & 0x03FC0000) << 2);	/* next 8 bits */ 
       insn2 |= value & 0x0003FFFF;		/* bottom 18 bits */
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       bfd_putb32 ((bfd_vma) insn2, (unsigned char *) where + 4);
       break;
+
     case BFD_RELOC_D30V_32_PCREL:
       insn2 = bfd_getb32 ((unsigned char *) where + 4);
-      insn |= (value >> 26) & 0x3F;	/* top 6 bits */
-      insn2 |= ((value & 0x03FC0000) << 2);  /* next 8 bits */ 
+      insn |= (value >> 26) & 0x3F;		/* top 6 bits */
+      insn2 |= ((value & 0x03FC0000) << 2);	/* next 8 bits */ 
       insn2 |= value & 0x0003FFFF;		/* bottom 18 bits */
       bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       bfd_putb32 ((bfd_vma) insn2, (unsigned char *) where + 4);
       break;
+
     case BFD_RELOC_32:
       bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
       break;
+
     default:
       as_fatal ("line %d: unknown relocation type: 0x%x",fixp->fx_line,fixp->fx_r_type);
     }
