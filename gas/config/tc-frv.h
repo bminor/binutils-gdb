@@ -45,8 +45,6 @@
 /* Values passed to md_apply_fix3 don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
-#define md_apply_fix3 gas_cgen_md_apply_fix3
-
 extern void frv_tomcat_workaround PARAMS ((void));
 #define md_cleanup frv_tomcat_workaround
 
@@ -62,6 +60,11 @@ extern bfd_boolean frv_fix_adjustable PARAMS ((struct fix *));
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) frv_force_relocation (fix)
 extern int frv_force_relocation PARAMS ((struct fix *));
+
+/* If we simplify subtractions that aren't SUB_SAME or SUB_ABS, we end
+   up with PCrel fixups, but since we don't have any PCrel relocs, we
+   crash.  Preventing simplification gets us a good, early error.  */
+#define TC_FORCE_RELOCATION_SUB_LOCAL(fixP) 1
 
 #undef GAS_CGEN_MAX_FIXUPS
 #define GAS_CGEN_MAX_FIXUPS 1

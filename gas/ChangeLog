@@ -1,3 +1,23 @@
+2004-01-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	2003-12-19  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-frv.h (md_apply_fix3): Don't define.
+	* config/tc-frv.c (md_apply_fix3): New.  Shift/truncate %hi/%lo
+	operands.
+	* config/tc-frv.h (TC_FORCE_RELOCATION_SUB_LOCAL): Define.
+	2003-10-07  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-frv.c (line_separator_chars): Add `!'.
+	2003-09-19  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-frv.c (md_assemble): Clear insn upfront.
+	2003-09-18  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-frv.c (OPTION_FDPIC): New macro.
+	(md_longopts): Add mfdpic.
+	(md_parse_option): Handle it.
+	2003-08-04  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-frv.c (md_cgen_lookup_reloc) <FRV_OPERAND_D12,
+	FRV_OPERAND_S12>: Use reloc type encoded in fix-up.
+	(frv_pic_ptr): Parse funcdesc.
+
 2004-01-05  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* doc/as.texinfo: Let texi2pod parse asconfig.texi and

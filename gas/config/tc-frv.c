@@ -115,7 +115,7 @@ static struct vliw_insn_list	*current_vliw_insn;
 
 const char comment_chars[]        = ";";
 const char line_comment_chars[]   = "#";
-const char line_separator_chars[] = ""; 
+const char line_separator_chars[] = "!"; 
 const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "dD";
 
@@ -218,6 +218,7 @@ const char * md_shortopts = FRV_SHORTOPTS;
 #define OPTION_TOMCAT_STATS	(OPTION_MD_BASE + 18)
 #define OPTION_PACK	        (OPTION_MD_BASE + 19)
 #define OPTION_NO_PACK	        (OPTION_MD_BASE + 20)
+#define OPTION_FDPIC		(OPTION_MD_BASE + 21)
 
 struct option md_longopts[] =
 {
@@ -243,6 +244,7 @@ struct option md_longopts[] =
   { "mtomcat-stats",	no_argument,		NULL, OPTION_TOMCAT_STATS  },
   { "mpack",        	no_argument,		NULL, OPTION_PACK          },
   { "mno-pack",        	no_argument,		NULL, OPTION_NO_PACK       },
+  { "mfdpic",		no_argument,		NULL, OPTION_FDPIC	   },
   { NULL,		no_argument,		NULL, 0                 },
 };
 
@@ -404,6 +406,11 @@ md_parse_option (c, arg)
       frv_pic_p = 1;
       frv_pic_flag = "-mlibrary-pic";
       g_switch_value = 0;
+      break;
+
+    case OPTION_FDPIC:
+      frv_flags |= EF_FRV_FDPIC;
+      frv_pic_flag = "-mfdpic";
       break;
 
     case OPTION_TOMCAT_DEBUG:
@@ -1050,6 +1057,8 @@ md_assemble (str)
   /* Initialize GAS's cgen interface for a new instruction.  */
   gas_cgen_init_parse ();
 
+  memset (&insn, 0, sizeof (insn));
+
   insn.insn = frv_cgen_assemble_insn
     (gas_cgen_cpu_desc, str, & insn.fields, insn.buffer, &errmsg);
   
@@ -1312,6 +1321,9 @@ md_cgen_lookup_reloc (insn, operand, fixP)
 
     case FRV_OPERAND_D12:
     case FRV_OPERAND_S12:
+      if (fixP->fx_cgen.opinfo != 0)
+	return fixP->fx_cgen.opinfo;
+
       return BFD_RELOC_FRV_GPREL12;
 
     case FRV_OPERAND_U12:
@@ -1338,6 +1350,30 @@ frv_force_relocation (fix)
 
   return generic_force_reloc (fix);
 }
+
+/* Apply a fixup that could be resolved within the assembler.  */
+
+void
+md_apply_fix3 (fixP, valP, seg)
+     fixS *   fixP;
+     valueT * valP;
+     segT     seg;
+{
+  if (fixP->fx_addsy == 0)
+    switch (fixP->fx_cgen.opinfo)
+      {
+      case BFD_RELOC_FRV_HI16:
+	*valP >>= 16;
+	/* Fall through.  */
+      case BFD_RELOC_FRV_LO16:
+	*valP &= 0xffff;
+	break;
+      }
+
+  gas_cgen_md_apply_fix3 (fixP, valP, seg);
+  return;
+}
+
 
 /* Write a value out to the object file, using the appropriate endianness.  */
 
@@ -1483,12 +1519,25 @@ frv_pic_ptr (nbytes)
 
   do
     {
-      expression (&exp);
+      bfd_reloc_code_real_type reloc_type = BFD_RELOC_CTOR;
+      
+      if (strncasecmp (input_line_pointer, "funcdesc(", 9) == 0)
+	{
+	  input_line_pointer += 9;
+	  expression (&exp);
+	  if (*input_line_pointer == ')')
+	    input_line_pointer++;
+	  else
+	    as_bad ("missing ')'");
+	  reloc_type = BFD_RELOC_FRV_FUNCDESC;
+	}
+      else
+	expression (&exp);
 
       p = frag_more (4);
       memset (p, 0, 4);
       fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &exp, 0,
-		   BFD_RELOC_CTOR);
+		   reloc_type);
     }
   while (*input_line_pointer++ == ',');
 
