@@ -258,12 +258,12 @@ coff_swap_scnhdr_in (abfd, ext, in)
 #ifndef COFF_NO_HACK_SCNHDR_SIZE
   /* If this section holds uninitialized data and is from an object file
      or from an executable image that has not initialized the field,
-     or if the physical size is padded, use the virtual size (stored in
-     s_paddr) instead.  */
+     or if the image is an executable file and the physical size is padded,
+     use the virtual size (stored in s_paddr) instead.  */
   if (scnhdr_int->s_paddr > 0
       && (((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0
-          && (! bfd_pe_executable_p (abfd) || scnhdr_int->s_size == 0))
-          || scnhdr_int->s_size > scnhdr_int->s_paddr))
+	   && (! bfd_pe_executable_p (abfd) || scnhdr_int->s_size == 0))
+          || (bfd_pe_executable_p (abfd) && scnhdr_int->s_size > scnhdr_int->s_paddr)))
     {
       scnhdr_int->s_size = scnhdr_int->s_paddr;
 

@@ -1,3 +1,8 @@
+2003-10-22  Nick Clifton  <nickc@redhat.com>
+
+	* peicode.h (coff_swap_scnhdr_in): Only remove padding when
+	processing an executable.
+
 2003-10-22  Jakub Jelinek  <jakub@redhat.com>
 
 	* elflink.c (_bfd_elf_export_symbol): Adjust for globals and locals
