@@ -1,3 +1,8 @@
+1998-12-14  J.T. Conklin  <jtc@redbacknetworks.com>
+
+	* config/i386/nbsd.mh, config/m68k/nbsd.mh, config/ns32k/nbsd.mh
+	(XDEPFILES): Add ser-tcp.o.
+
 Mon Dec 14 14:46:13 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* monitor.c (monitor_expect, monitor_printf_noecho,
