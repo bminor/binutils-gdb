@@ -1,3 +1,12 @@
+Mon Sep 18 14:53:22 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patches by Alan Modra <alan@spri.levels.unisa.edu.au>:
+	* Makefile.in (CC_FOR_TARGET): Remove brokensed stuff.
+	(CXX_FOR_TARGET): Likewise.
+	(install): Likewise.
+	(GENERATED_HFILES): Remove config.h.
+	(.dep): Depend upon config.h.
+
 Mon Sep 18 14:39:38 1995  Arne H. Juul  <arnej@pvv.unit.no>
 
 	* configure.tgt (mips*-dec-netbsd*): New target.
@@ -8,8 +17,7 @@ Fri Sep 15 20:01:52 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 Fri Sep 15 23:28:05 1995  Andrew Cagney  <cagney@highland.com.au>
 
-	* configure.host (NATIVE_LIB_DIRS): fix syntax error.
-        `='.
+	* configure.host (i[345]86-*-bsd*): Fix shell syntax error.
 
 Thu Sep 12 12:50:49 1995  steve chamberlain  <sac@slash.cygnus.com>
 

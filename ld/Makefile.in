@@ -72,7 +72,7 @@ EMULATION_OFILES = @EMULATION_OFILES@
 
 # Seach path to override the default search path for -lfoo libraries.
 # If LIB_PATH is empty, the ones in the script (if any) are left alone.
-# (The default is usually /lib:usr/lib:/usr/local/lib, unless building
+# (The default is usually /lib:/usr/lib:/usr/local/lib, unless building
 # a cross-linker, in which case the default is empty.  See genscripts.sh.)
 # Otherwise, they are replaced with the ones given in LIB_PATH,
 # which may have the form: LIB_PATH=/lib:/usr/local/lib
@@ -141,7 +141,7 @@ CC_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
+      echo gcc | sed $(program_transform_name); \
     fi; \
   fi`
 
@@ -157,7 +157,7 @@ CXX_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CXX); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
+      echo gcc | sed $(program_transform_name); \
     fi; \
   fi`
 
@@ -213,7 +213,7 @@ HFILES = config.h ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldwrite.h mri.h
 
 GENERATED_CFILES = ldgram.c ldlex.c
-GENERATED_HFILES = ldgram.h ldemul-list.h config.h
+GENERATED_HFILES = ldgram.h ldemul-list.h
 
 OFILES = ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o \
 	ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o \
@@ -797,7 +797,7 @@ install:
 	for f in ldscripts/*; do \
 	  $(INSTALL_DATA) $$f $(scriptdir)/$$f ; \
 	done
-	-n=`t='$(program_transform_name)'; echo ld | sed -e "" $$t`; \
+	-n=`echo ld | sed $(program_transform_name)`; \
 	  rm -f $(tooldir)/bin/ld; \
 	  ln $(bindir)/$$n $(tooldir)/bin/ld >/dev/null 2>/dev/null \
 	   || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld
@@ -819,7 +819,7 @@ clean-info:
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
-.dep: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES)
+.dep: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES) config.h
 	rm -f .dep1
 	$(MAKE) DEP=$(DEP) .dep1
 	sed -f dep.sed <.dep1 >.dep
