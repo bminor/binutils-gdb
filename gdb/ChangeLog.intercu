@@ -1,5 +1,28 @@
 2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (struct dwarf2_per_cu_data): Add psymtab member.
+	(struct dwarf2_pinfo): Add dwarf_info_size and type_hash.
+	Rearrange and update comments.
+	(DWARF_INFO_SIZE): Define.
+	(set_die_type, get_die_type, reset_die_and_siblings_types): New
+	fucntions.
+	(dwarf2_build_psymtabs_hard): Save dwarf_info_size.  Initialize
+	type_hash.
+	(psymtab_to_symtab_1): Restore dwarf_info_size.  Create per_cu
+	data for the current compilation unit.
+	(read_structure_scope, read_enumeration_type, read_array_type)
+	(read_tag_pointer_type, read_tag_ptr_to_member_type)
+	(read_tag_reference_type, read_tag_const_type)
+	(read_tag_volatile_type, read_tag_string_type)
+	(read_subroutine_type, read_typedef, read_base_type): Call
+	set_die_type.
+	(read_subrange_type): Likewise.  Use dwarf2_attr_with_cu, since
+	array bounds may be DIE references.
+	(struct dwarf2_offset_and_type, offset_and_type_hash)
+	(offset_and_type_eq): New.
+
+2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (REF_HASH_SIZE): Move above struct dwarf2_cu.
 	(struct dwarf2_cu): Add die_ref_table.
 	(die_ref_table): Delete static variable.

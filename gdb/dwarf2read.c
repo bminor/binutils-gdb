@@ -296,9 +296,9 @@ static const struct objfile_data *dwarf2_cu_tree;
 struct dwarf2_per_cu_data
 {
   unsigned long offset, length;
-#if 0
+
+  /* Only set during full symbol reading.  */
   struct partial_symtab *psymtab;
-#endif
 
   /* Set iff currently read in.  */
   struct dwarf2_cu *cu;
@@ -494,13 +494,23 @@ static int isreg;		/* Object lives in register.
 
 struct dwarf2_pinfo
   {
-    /* Pointer to start of dwarf info buffer for the objfile.  */
-
-    char *dwarf_info_buffer;
+    /* If this partial symbol table has been read in, a map of DIE
+       offsets to types.  */
+    htab_t type_hash;
 
     /* Offset in dwarf_info_buffer for this compilation unit. */
 
     unsigned long dwarf_info_offset;
+
+    /* FIXME: All the rest is actually per-objfile.  */
+
+    /* Pointer to start of dwarf info buffer for the objfile.  */
+
+    char *dwarf_info_buffer;
+
+    /* Size of dwarf info section for the objfile.  */
+
+    unsigned int dwarf_info_size;
 
     /* Pointer to start of dwarf abbreviation buffer for the objfile.  */
 
@@ -553,6 +563,7 @@ struct dwarf2_pinfo
 
 #define PST_PRIVATE(p) ((struct dwarf2_pinfo *)(p)->read_symtab_private)
 #define DWARF_INFO_BUFFER(p) (PST_PRIVATE(p)->dwarf_info_buffer)
+#define DWARF_INFO_SIZE(p)   (PST_PRIVATE(p)->dwarf_info_size)
 #define DWARF_INFO_OFFSET(p) (PST_PRIVATE(p)->dwarf_info_offset)
 #define DWARF_ABBREV_BUFFER(p) (PST_PRIVATE(p)->dwarf_abbrev_buffer)
 #define DWARF_ABBREV_SIZE(p) (PST_PRIVATE(p)->dwarf_abbrev_size)
@@ -998,6 +1009,12 @@ static void free_cached_comp_units (void *);
 
 static void free_one_cached_comp_unit (struct dwarf2_cu *, struct dwarf2_cu *);
 
+static void set_die_type (struct die_info *, struct type *,
+			  struct dwarf2_cu *);
+
+static void reset_die_and_siblings_types (struct die_info *,
+					  struct dwarf2_cu *);
+
 /* Allocation function for the libiberty splay tree which uses an obstack.  */
 static void *
 splay_tree_obstack_allocate (int size, void *data)
@@ -1393,8 +1410,9 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       pst->read_symtab_private = (char *)
 	obstack_alloc (&objfile->objfile_obstack, sizeof (struct dwarf2_pinfo));
-      DWARF_INFO_BUFFER (pst) = dwarf_info_buffer;
       DWARF_INFO_OFFSET (pst) = beg_of_comp_unit - dwarf_info_buffer;
+      DWARF_INFO_BUFFER (pst) = dwarf_info_buffer;
+      DWARF_INFO_SIZE (pst) = dwarf_info_size;
       DWARF_ABBREV_BUFFER (pst) = dwarf_abbrev_buffer;
       DWARF_ABBREV_SIZE (pst) = dwarf_abbrev_size;
       DWARF_LINE_BUFFER (pst) = dwarf_line_buffer;
@@ -1407,6 +1425,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       DWARF_RANGES_SIZE (pst) = dwarf_ranges_size;
       DWARF_LOC_BUFFER (pst) = dwarf_loc_buffer;
       DWARF_LOC_SIZE (pst) = dwarf_loc_size;
+      PST_PRIVATE (pst)->type_hash = NULL;
       baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
       /* Store the function that reads in the rest of the symbol table */
@@ -2285,6 +2304,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   /* Set local variables from the partial symbol table info.  */
   offset = DWARF_INFO_OFFSET (pst);
   dwarf_info_buffer = DWARF_INFO_BUFFER (pst);
+  dwarf_info_size = DWARF_INFO_SIZE (pst);
   dwarf_abbrev_buffer = DWARF_ABBREV_BUFFER (pst);
   dwarf_abbrev_size = DWARF_ABBREV_SIZE (pst);
   dwarf_line_buffer = DWARF_LINE_BUFFER (pst);
@@ -2319,6 +2339,20 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   make_cleanup (dwarf2_empty_abbrev_table, &cu);
 
   cu.header.offset = offset;
+
+  /* NOTE drow/2004-02-23: this reads in the comp_unit_tree that we went to
+     so much trouble to keep lazy during partial symbol reading.  If this
+     proves to be unavoidable then we may want to strip out the lazy code
+     during partial symbol reading also.  */
+  cu.per_cu = dwarf2_find_containing_comp_unit (offset + 1, &cu);
+  /* As in partial symbol table building, this leaks a pointer to our stack
+     frame into a global data structure.  Be sure to clear it before we
+     return.  */
+  cu.per_cu->cu = &cu;
+  make_cleanup (clear_per_cu_pointer, &cu);
+  cu.read_in_chain = NULL;
+
+  cu.per_cu->psymtab = pst;
 
   cu.list_in_scope = &file_symbols;
 
@@ -3545,7 +3579,7 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* We need to add the type field to the die immediately so we don't
      infinitely recurse when dealing with pointers to the structure
      type within the structure itself. */
-  die->type = type;
+  set_die_type (die, type, cu);
 
   if (die->child != NULL && ! die_is_declaration (die, cu))
     {
@@ -3768,7 +3802,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_LENGTH (type) = 0;
     }
 
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 /* Given a pointer to a die which begins an enumeration, process all
@@ -3875,7 +3909,8 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       index_type = dwarf2_fundamental_type (objfile, FT_INTEGER, cu);
       range_type = create_range_type (NULL, index_type, 0, -1);
-      die->type = create_array_type (NULL, element_type, range_type);
+      set_die_type (die, create_array_type (NULL, element_type, range_type),
+		    cu);
       return;
     }
 
@@ -3924,7 +3959,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   do_cleanups (back_to);
 
   /* Install the type in the die. */
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 /* First cut: install each common block member as a global variable.  */
@@ -4128,7 +4163,7 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   TYPE_LENGTH (type) = byte_size;
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 /* Extract all information from a DW_TAG_ptr_to_member_type DIE and add to
@@ -4152,7 +4187,7 @@ read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
   domain = die_containing_type (die, cu);
   smash_to_member_type (type, domain, to_type);
 
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 /* Extract all information from a DW_TAG_reference_type DIE and add to
@@ -4180,7 +4215,7 @@ read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       TYPE_LENGTH (type) = cu_header->addr_size;
     }
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 static void
@@ -4194,7 +4229,8 @@ read_tag_const_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   base_type = die_type (die, cu);
-  die->type = make_cv_type (1, TYPE_VOLATILE (base_type), base_type, 0);
+  set_die_type (die, make_cv_type (1, TYPE_VOLATILE (base_type), base_type, 0),
+		cu);
 }
 
 static void
@@ -4208,7 +4244,8 @@ read_tag_volatile_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   base_type = die_type (die, cu);
-  die->type = make_cv_type (TYPE_CONST (base_type), 1, base_type, 0);
+  set_die_type (die, make_cv_type (TYPE_CONST (base_type), 1, base_type, 0),
+		cu);
 }
 
 /* Extract all information from a DW_TAG_string_type DIE and add to
@@ -4260,7 +4297,7 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
       char_type = dwarf2_fundamental_type (objfile, FT_CHAR, cu);
       type = create_string_type (char_type, range_type);
     }
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 /* Handle DIES due to C code like:
@@ -4341,7 +4378,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  die->type = ftype;
+  set_die_type (die, ftype, cu);
 }
 
 static void
@@ -4358,7 +4395,8 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  name = DW_STRING (attr);
 	}
-      die->type = init_type (TYPE_CODE_TYPEDEF, 0, TYPE_FLAG_TARGET_STUB, name, objfile);
+      set_die_type (die, init_type (TYPE_CODE_TYPEDEF, 0,
+				    TYPE_FLAG_TARGET_STUB, name, objfile), cu);
       TYPE_TARGET_TYPE (die->type) = die_type (die, cu);
     }
 }
@@ -4446,7 +4484,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       type = dwarf_base_type (encoding, size, cu);
     }
-  die->type = type;
+  set_die_type (die, type, cu);
 }
 
 /* Read the given DW_AT_subrange DIE.  */
@@ -4459,6 +4497,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
   int low = 0;
   int high = -1;
+  struct dwarf2_cu *spec_cu;
   
   /* If we have already decoded this die, then nothing more to do.  */
   if (die->type)
@@ -4481,11 +4520,14 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       low = 1;
     }
 
-  attr = dwarf2_attr (die, DW_AT_lower_bound, cu);
+  /* FIXME: For variable sized arrays either of these could be
+     a variable rather than a constant value.  We'll allow it,
+     but we don't know how to handle it.  */
+  attr = dwarf2_attr_with_cu (die, DW_AT_lower_bound, cu, &spec_cu);
   if (attr)
     low = dwarf2_get_attr_constant_value (attr, 0);
 
-  attr = dwarf2_attr (die, DW_AT_upper_bound, cu);
+  attr = dwarf2_attr_with_cu (die, DW_AT_upper_bound, cu, &spec_cu);
   if (attr)
     {       
       if (attr->form == DW_FORM_block1)
@@ -4517,7 +4559,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   if (attr)
     TYPE_LENGTH (range_type) = DW_UNSND (attr);
 
-  die->type = range_type;
+  set_die_type (die, range_type, cu);
 }
   
 
@@ -8954,6 +8996,86 @@ static void
 free_one_cached_comp_unit (struct dwarf2_cu *cu, struct dwarf2_cu *target_cu)
 {
   free_comp_units_worker (cu, 0, target_cu);
+}
+
+struct dwarf2_offset_and_type
+{
+  unsigned int offset;
+  struct type *type;
+};
+
+static hashval_t
+offset_and_type_hash (const void *item)
+{
+  const struct dwarf2_offset_and_type *ofs = item;
+  return ofs->offset;
+}
+
+static int
+offset_and_type_eq (const void *item_lhs, const void *item_rhs)
+{
+  const struct dwarf2_offset_and_type *ofs_lhs = item_lhs;
+  const struct dwarf2_offset_and_type *ofs_rhs = item_rhs;
+  return ofs_lhs->offset == ofs_rhs->offset;
+}
+
+/* Functions used to regenerate die->type, given a tree of DIEs and an
+   already completed symtab.  Types without names can't necessarily be
+   reconstituted, so we save them.  */
+static void
+set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
+{
+  htab_t type_hash;
+  struct dwarf2_offset_and_type **slot, ofs;
+
+  die->type = type;
+
+  type_hash = PST_PRIVATE (cu->per_cu->psymtab)->type_hash;
+  if (type_hash == NULL)
+    {
+      type_hash = htab_create_alloc_ex (cu->header.length / 24,
+					offset_and_type_hash,
+					offset_and_type_eq,
+					NULL,
+					&cu->objfile->objfile_obstack,
+					hash_obstack_allocate,
+					splay_tree_obstack_deallocate);
+      PST_PRIVATE (cu->per_cu->psymtab)->type_hash = type_hash;
+    }
+  ofs.offset = die->offset;
+  ofs.type = type;
+  slot = (struct dwarf2_offset_and_type **)
+    htab_find_slot_with_hash (type_hash, &ofs, ofs.offset, INSERT);
+  *slot = obstack_alloc (&cu->objfile->objfile_obstack, sizeof (**slot));
+  **slot = ofs;
+}
+
+static struct type *
+get_die_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  htab_t type_hash;
+  struct dwarf2_offset_and_type *slot, ofs;
+
+  type_hash = PST_PRIVATE (cu->per_cu->psymtab)->type_hash;
+  ofs.offset = die->offset;
+  slot = htab_find_with_hash (type_hash, &ofs, ofs.offset);
+  if (slot)
+    return slot->type;
+  else
+    return NULL;
+}
+
+static void
+reset_die_and_siblings_types (struct die_info *start_die, struct dwarf2_cu *cu)
+{
+  struct die_info *die;
+
+  for (die = start_die; die != NULL; die = die->sibling)
+    {
+      die->type = get_die_type (die, cu);
+      if (die->child != NULL)
+	reset_die_and_siblings_types (die->child, cu);
+    }
 }
 
 void _initialize_dwarf2_read (void);
