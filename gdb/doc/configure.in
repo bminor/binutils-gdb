@@ -2,6 +2,14 @@ srcname="GDB doc"
 srctrigger=gdb.texinfo
 # per-host:
 
+case "${host_os}" in
+
+sysv4*  )	
+	host_makefile_frag=config/mh-sysv4
+	;;
+
+esac
+
 # per-target:
 
 files="gdbinv-m.m4.in gdbinv-s.m4.in"

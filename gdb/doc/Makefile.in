@@ -51,8 +51,6 @@ AR_FLAGS = qv
 BISON = bison
 RANLIB = ranlib
 
-#### Host, target, and site specific Makefile fragments come in here.
-###
 # main GDB source directory
 gdbdir = ..
 
@@ -81,6 +79,9 @@ SFILES_DOCDIR = \
 
 # Which version of GDB manual? default includes everything
 CONFIG=all
+
+#### Host, target, and site specific Makefile fragments come in here.
+###
 
 all install:
 
