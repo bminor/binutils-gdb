@@ -70,10 +70,6 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 #define ABOUT_TO_RETURN(pc) about_to_return(pc)
 
-/* Return 1 if P points to an invalid floating point value.  */
-
-#define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
-
 /* Say how long registers are.  */
 
 #define REGISTER_TYPE unsigned int

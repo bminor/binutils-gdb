@@ -74,6 +74,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 1) == 0x12)
 
+#if 0 /* Disable until fixed *correctly*.  */
 #ifndef INVALID_FLOAT
 #ifndef NaN
 #include <nan.h>
@@ -86,6 +87,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		NaF (*(float *) p) :	\
 		NaD (*(double *) p))
 #endif /* INVALID_FLOAT */
+#endif
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the

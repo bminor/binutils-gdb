@@ -70,10 +70,6 @@ extern CORE_ADDR sh_skip_prologue ();
 /* Nonzero if instruction at PC is a return instruction.  */
 #define ABOUT_TO_RETURN(pc) (read_memory_integer(pc,2) == 0x000b)
 
-/* Return 1 if P points to an invalid floating point value.  */
-
-#define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
-
 /* Say how long registers are.  */
 #define REGISTER_TYPE  long
 

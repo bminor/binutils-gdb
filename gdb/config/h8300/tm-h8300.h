@@ -91,10 +91,6 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define ABOUT_TO_RETURN(pc) ((read_memory_unsigned_integer (pc, 2) & ~0x3) == 0x4e74)
 
-/* Return 1 if P points to an invalid floating point value.  */
-
-#define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
-
 /* Say how long registers are.  */
 
 #define REGISTER_SIZE 4

@@ -21,8 +21,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define START_INFERIOR_TRAPS_EXPECTED 2
 
 /* Most definitions from umax could be used. */
-#define INVALID_FLOAT(p, s) isa_NAN(p, s)
+
 #include "ns32k/tm-umax.h"
+
+/* Generic NetBSD definitions.  */
+
 #include "tm-nbsd.h"
 
 /* Saved Pc.  Get it from sigcontext if within sigtramp.  */

@@ -675,11 +675,13 @@ unpack_double (type, valaddr, invp)
   *invp = 0;			/* Assume valid.   */
   if (code == TYPE_CODE_FLT)
     {
+#ifdef INVALID_FLOAT
       if (INVALID_FLOAT (valaddr, len))
 	{
 	  *invp = 1;
 	  return 1.234567891011121314;
 	}
+#endif
       return extract_floating (valaddr, len);
     }
   else if (nosign)

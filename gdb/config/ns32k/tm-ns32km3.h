@@ -43,8 +43,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* we can do it */
 #define ATTACH_DETACH 1
 
-#define INVALID_FLOAT(p, s) isa_NAN(p, s)
-
 /* Address of end of stack space.
  * for MACH, see <ns532/vmparam.h>
  */

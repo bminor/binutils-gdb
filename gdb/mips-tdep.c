@@ -328,7 +328,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
     CORE_ADDR start_pc, limit_pc;
     FRAME next_frame;
 {
-    CORE_ADDR sp = next_frame ? next_frame->frame : read_register (SP_REGNUM);
+    CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
     CORE_ADDR cur_pc;
     int frame_size;
     int has_frame_reg = 0;
@@ -578,7 +578,7 @@ setup_arbitrary_frame (argc, argv)
 CORE_ADDR
 mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   int nargs;
-  value *args;
+  value_ptr *args;
   CORE_ADDR sp;
   int struct_return;
   CORE_ADDR struct_addr;
@@ -592,8 +592,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   int fake_args = 0;
 
   for (i = 0, m_arg = mips_args; i < nargs; i++, m_arg++) {
-    extern value value_arg_coerce();
-    value arg = value_arg_coerce (args[i]);
+    value_ptr arg = value_arg_coerce (args[i]);
     m_arg->len = TYPE_LENGTH (VALUE_TYPE (arg));
     /* This entire mips-specific routine is because doubles must be aligned
      * on 8-byte boundaries. It still isn't quite right, because MIPS decided
@@ -861,20 +860,13 @@ mips_print_register (regnum, all)
     printf_filtered (": ");
 
   /* If virtual format is floating, print it that way.  */
-  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT
-      && ! INVALID_FLOAT (raw_buffer, REGISTER_VIRTUAL_SIZE(regnum))) {
+  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
     val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0,
 	       gdb_stdout, 0, 1, 0, Val_pretty_default);
-  }
   /* Else print as integer in hex.  */
   else
-    {
-      print_scalar_formatted (raw_buffer,
-			      REGISTER_VIRTUAL_TYPE (regnum),
-			      'x',
-			      0,
-			      gdb_stdout);
-    }
+    print_scalar_formatted (raw_buffer, REGISTER_VIRTUAL_TYPE (regnum),
+			    'x', 0, gdb_stdout);
 }
 
 /* Replacement for generic do_registers_info.  */
@@ -966,6 +958,7 @@ mips_skip_prologue (pc, lenient)
     unsigned long inst;
     int offset;
     int seen_sp_adjust = 0;
+    int load_immediate_bytes = 0;
 
     /* Skip the typical prologue instructions. These are the stack adjustment
        instruction and the instructions that save registers on the stack
@@ -987,6 +980,9 @@ mips_skip_prologue (pc, lenient)
 
 	if ((inst & 0xffff0000) == 0x27bd0000)	/* addiu $sp,$sp,offset */
 	    seen_sp_adjust = 1;
+	else if (inst == 0x03a1e823 || 	        /* subu $sp,$sp,$at */
+		 inst == 0x03a8e823)   	        /* subu $sp,$sp,$t0 */
+	    seen_sp_adjust = 1;
 	else if ((inst & 0xFFE00000) == 0xAFA00000 && (inst & 0x001F0000))
 	    continue;				/* sw reg,n($sp) */
 						/* reg != $zero */
@@ -1006,39 +1002,40 @@ mips_skip_prologue (pc, lenient)
 	else if (inst == 0x0399e021		/* addu $gp,$gp,$t9 */
 		 || inst == 0x033ce021)		/* addu $gp,$t9,$gp */
 	  continue;
+	/* The following instructions load $at or $t0 with an immediate
+	   value in preparation for a stack adjustment via
+	   subu $sp,$sp,[$at,$t0]. These instructions could also initialize
+	   a local variable, so we accept them only before a stack adjustment
+	   instruction was seen.  */
+	else if (!seen_sp_adjust)
+	  {
+	    if ((inst & 0xffff0000) == 0x3c010000 ||	  /* lui $at,n */
+		(inst & 0xffff0000) == 0x3c080000)	  /* lui $t0,n */
+	      {
+		load_immediate_bytes += 4;
+		continue;
+	      }
+	    else if ((inst & 0xffff0000) == 0x34210000 || /* ori $at,$at,n */
+		     (inst & 0xffff0000) == 0x35080000 || /* ori $t0,$t0,n */
+		     (inst & 0xffff0000) == 0x34010000 || /* ori $at,$zero,n */
+		     (inst & 0xffff0000) == 0x34080000)   /* ori $t0,$zero,n */
+	      {
+		load_immediate_bytes += 4;
+		continue;
+	      }
+	    else
+	      break;
+	  }
 	else
-	    break;
+	  break;
     }
+
+    /* In a frameless function, we might have incorrectly
+       skipped some load immediate instructions. Undo the skipping
+       if the load immediate was not followed by a stack adjustment.  */
+    if (load_immediate_bytes && !seen_sp_adjust)
+      offset -= load_immediate_bytes;
     return pc + offset;
-
-/* FIXME schauer. The following code seems no longer necessary if we
-   always skip the typical prologue instructions.  */
-
-#if 0
-    if (seen_sp_adjust)
-      return pc + offset;
-
-    /* Well, it looks like a frameless. Let's make sure.
-       Note that we are not called on the current PC,
-       but on the function`s start PC, and I have definitely
-       seen optimized code that adjusts the SP quite later */
-    b = block_for_pc(pc);
-    if (!b) return pc;
-
-    f = lookup_symbol(MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, 0, NULL);
-    if (!f) return pc;
-    /* Ideally, I would like to use the adjusted info
-       from mips_frame_info(), but for all practical
-       purposes it will not matter (and it would require
-       a different definition of SKIP_PROLOGUE())
-
-       Actually, it would not hurt to skip the storing
-       of arguments on the stack as well. */
-    if (((mips_extra_func_info_t)SYMBOL_VALUE(f))->pdr.frameoffset)
-	return pc + 4;
-
-    return pc;
-#endif
 }
 
 #if 0

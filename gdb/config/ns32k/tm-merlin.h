@@ -66,10 +66,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 1) == 0x12)
 
-/* Return 1 if P points to an invalid floating point value.  */
-
-#define INVALID_FLOAT(p, len) 0
-
 /* Define this to say that the "svc" insn is followed by
    codes in memory saying which kind of system call it is.  */
 

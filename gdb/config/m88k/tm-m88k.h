@@ -96,10 +96,6 @@ extern CORE_ADDR skip_prologue ();
 
 #define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 2) == 0xF800)
 
-/* This is taken care of in print_floating [IEEE_FLOAT].  */
-
-#define INVALID_FLOAT(p,len) 0
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */

@@ -68,11 +68,6 @@ extern CORE_ADDR saved_pc_after_call ();
 
 #define ABOUT_TO_RETURN(ip) (read_memory_integer(ip,4) == 0x0a000000)
 
-/* Return 1 if P points to an invalid floating point value.
-   LEN is the length in bytes.  */
-
-#define INVALID_FLOAT(p, len) (0)
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */

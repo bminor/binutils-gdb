@@ -126,10 +126,6 @@ extern CORE_ADDR sparc_pc_adjust();
 #define ABOUT_TO_RETURN(pc) \
   ((read_memory_integer (pc, 4)|0x00040000) == 0x81c7e008)
 
-/* Return 1 if P points to an invalid floating point value.  */
-
-#define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
