@@ -1,3 +1,8 @@
+2002-07-05  Jim Wilson  <wilson@redhat.com>
+
+	* syms.c (decode_section_type): New.
+	(bfd_decode_symclass): Call decode_section_type.
+
 2002-07-04  Jakub Jelinek  <jakub@redhat.com>
 
 	* merge.c (_bfd_merged_section_offset): Avoid accessing byte before

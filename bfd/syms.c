@@ -315,6 +315,7 @@ CODE_FRAGMENT
 #include "aout/stab_gnu.h"
 
 static char coff_section_type PARAMS ((const char *));
+static char decode_section_type PARAMS ((const struct sec *));
 static int cmpindexentry PARAMS ((const PTR, const PTR));
 
 /*
@@ -589,6 +590,41 @@ coff_section_type (s)
   return '?';
 }
 
+/* Return the single-character symbol type corresponding to section
+   SECTION, or '?' for an unknown section.  This uses section flags to
+   identify sections.
+
+   FIXME These types are unhandled: c, i, e, p.  If we handled these also,
+   we could perhaps obsolete coff_section_type.  */
+
+static char
+decode_section_type (section)
+     const struct sec *section;
+{
+  if (section->flags & SEC_CODE)
+    return 't';
+  if (section->flags & SEC_DATA)
+    {
+      if (section->flags & SEC_READONLY)
+	return 'r';
+      else if (section->flags & SEC_SMALL_DATA)
+	return 'g';
+      else
+	return 'd';
+    }
+  if ((section->flags & SEC_HAS_CONTENTS) == 0)
+    {
+      if (section->flags & SEC_SMALL_DATA)
+	return 's';
+      else
+	return 'b';
+    }
+  if (section->flags & SEC_DEBUGGING)
+    return 'N';
+
+  return '?';
+}
+
 /*
 FUNCTION
 	bfd_decode_symclass
@@ -639,7 +675,11 @@ bfd_decode_symclass (symbol)
   if (bfd_is_abs_section (symbol->section))
     c = 'a';
   else if (symbol->section)
-    c = coff_section_type (symbol->section->name);
+    {
+      c = coff_section_type (symbol->section->name);
+      if (c == '?')
+	c = decode_section_type (symbol->section);
+    }
   else
     return '?';
   if (symbol->flags & BSF_GLOBAL)
