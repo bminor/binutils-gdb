@@ -5,23 +5,21 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
-#include "param.h"
 #include "frame.h"  /* required by inferior.h */
 #include "inferior.h"
 #include "target.h"
@@ -29,18 +27,20 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "ieee-float.h"		/* Required by REGISTER_CONVERT_TO_XXX */
 
-extern int fetch_inferior_registers();
-extern int store_inferior_registers();
-extern int child_xfer_memory();
-extern int memory_insert_breakpoint(), memory_remove_breakpoint();
-extern void terminal_init_inferior(), terminal_ours(), terminal_inferior();
-extern void terminal_ours_for_output(), child_terminal_info();
-extern void kill_inferior(), add_syms_addr_command();
-extern struct value *call_function_by_hand();
-extern void child_resume();
-extern void child_create_inferior();
-extern void child_mourn_inferior();
-extern void child_attach ();
+static void
+child_prepare_to_store PARAMS ((void));
+
+static int
+child_wait PARAMS ((int *));
+
+static void
+child_open PARAMS ((char *, int));
+
+static void
+child_files_info PARAMS ((struct target_ops *));
+
+static void
+child_detach PARAMS ((char *, int));
 
 /* Forward declaration */
 extern struct target_ops child_ops;
@@ -48,14 +48,18 @@ extern struct target_ops child_ops;
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer STATUS.  */
 
-int
+static int
 child_wait (status)
      int *status;
 {
   int pid;
 
   do {
+#ifdef USE_PROC_FS
+    pid = proc_wait (status);
+#else
     pid = wait (status);
+#endif
     if (pid == -1)		/* No more children to wait for */
       {
 	fprintf (stderr, "Child process unexpectedly missing.\n");
@@ -112,7 +116,7 @@ child_detach (args, from_tty)
    that registers contains all the registers from the program being
    debugged.  */
 
-void
+static void
 child_prepare_to_store ()
 {
 #ifdef CHILD_PREPARE_TO_STORE
@@ -120,37 +124,11 @@ child_prepare_to_store ()
 #endif
 }
 
-/* Convert data from raw format for register REGNUM
-   to virtual format for register REGNUM.  */
-
-/* Some machines won't need to use regnum.  */
-/* ARGSUSED */
-void
-host_convert_to_virtual (regnum, from, to)
-     int regnum;
-     char *from;
-     char *to;
-{
-  REGISTER_CONVERT_TO_VIRTUAL (regnum, from, to);
-}
-
-/* Convert data from virtual format for register REGNUM
-   to raw format for register REGNUM.  */
-
-/* ARGSUSED */
-void
-host_convert_from_virtual (regnum, from, to)
-     int regnum;
-     char *from;
-     char *to;
-{
-  REGISTER_CONVERT_TO_RAW (regnum, from, to);
-}
-
 /* Print status information about what we're accessing.  */
 
 static void
-child_files_info ()
+child_files_info (ignore)
+     struct target_ops *ignore;
 {
   printf ("\tUsing the running image of %s process %d.\n",
 	  attach_flag? "attached": "child", inferior_pid);
@@ -166,26 +144,42 @@ child_open (arg, from_tty)
 }
 
 struct target_ops child_ops = {
-	"child", "Unix child process",
-	"Unix child process (started by the \"run\" command).",
-	child_open, 0,  /* open, close */
-	child_attach, child_detach, 
-	child_resume,
-	child_wait,
-	fetch_inferior_registers, store_inferior_registers,
-	child_prepare_to_store,
-	host_convert_to_virtual, host_convert_from_virtual,
-	child_xfer_memory, child_files_info,
-	memory_insert_breakpoint, memory_remove_breakpoint,
-	terminal_init_inferior, terminal_inferior, 
-	terminal_ours_for_output, terminal_ours, child_terminal_info,
-	kill_inferior, 0, add_syms_addr_command,  /* load */
-	call_function_by_hand,
-	0, /* lookup_symbol */
-	child_create_inferior, child_mourn_inferior,
-	process_stratum, 0, /* next */
-	1, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
-	OPS_MAGIC,		/* Always the last thing */
+  "child",			/* to_shortname */
+  "Unix child process",		/* to_longname */
+  "Unix child process (started by the \"run\" command).",	/* to_doc */
+  child_open,			/* to_open */
+  0,				/* to_close */
+  child_attach,			/* to_attach */
+  child_detach, 		/* to_detach */
+  child_resume,			/* to_resume */
+  child_wait,			/* to_wait */
+  fetch_inferior_registers,	/* to_fetch_registers */
+  store_inferior_registers,	/* to_store_registers */
+  child_prepare_to_store,	/* to_prepare_to_store */
+  child_xfer_memory,		/* to_xfer_memory */
+  child_files_info,		/* to_files_info */
+  memory_insert_breakpoint,	/* to_insert_breakpoint */
+  memory_remove_breakpoint,	/* to_remove_breakpoint */
+  terminal_init_inferior,	/* to_terminal_init */
+  terminal_inferior, 		/* to_terminal_inferior */
+  terminal_ours_for_output,	/* to_terminal_ours_for_output */
+  terminal_ours,		/* to_terminal_ours */
+  child_terminal_info,		/* to_terminal_info */
+  kill_inferior,		/* to_kill */
+  0,				/* to_load */
+  0,				/* to_lookup_symbol */
+  child_create_inferior,	/* to_create_inferior */
+  child_mourn_inferior,		/* to_mourn_inferior */
+  process_stratum,		/* to_stratum */
+  0,				/* to_next */
+  1,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  1,				/* to_has_stack */
+  1,				/* to_has_registers */
+  1,				/* to_has_execution */
+  0,				/* sections */
+  0,				/* sections_end */
+  OPS_MAGIC			/* to_magic */
 };
 
 void

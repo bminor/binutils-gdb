@@ -1,3 +1,21 @@
+Wed Sep 16 20:04:54 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* target.h (struct target_ops):  removed to_convert_to_virtual and
+	to_convert_from_virtual elements.  Initializations removed from
+	all static initializations.
+	(target_convert_to_virtual, target_convert_from_virtual):
+	removed.
+	(host_convert_to_virtual, host_convert_from_virtual):  Removed
+	forward declarations.
+	* target.c (cleanup_target): removed default assignments for
+	to_convert_to_virtual and to_convert_from_virtual.
+	* inftarg.c (host_convert_to_virtual, host_convert_from_virtual):
+	removed.
+	* findvar.c (value_of_register, value_from_register):  
+	target_convert_to_virtual inlined.
+	* infcmd.c (do_registers_info):  target_convert_to_virtual inlined.
+	* valops.c (value_assign):  target_convert_from_virtual inlined.
+
 Fri Sep 18 02:07:39 1992  John Gilmore  (gnu@cygnus.com)
 
 	* main.c (gdb_readline):  Avoid printf_filtered, which sets char

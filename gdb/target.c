@@ -78,7 +78,7 @@ unsigned target_struct_allocsize;
 struct target_ops dummy_target = {"None", "None", "",
     0, 0, 0, 0,		/* open, close, attach, detach */
     0, 0,		/* resume, wait */
-    0, 0, 0, 0, 0,	/* registers */
+    0, 0, 0,		/* registers */
     0, 0, 		/* memory */
     0, 0, 		/* bkpts */
     0, 0, 0, 0, 0, 	/* terminal */
@@ -309,8 +309,6 @@ cleanup_target (t)
   de_fault (to_fetch_registers, 	(void (*)())ignore);
   de_fault (to_store_registers,		(void (*)())noprocess);
   de_fault (to_prepare_to_store,	(void (*)())noprocess);
-  de_fault (to_convert_to_virtual,	host_convert_to_virtual);
-  de_fault (to_convert_from_virtual,	host_convert_from_virtual);
   de_fault (to_xfer_memory,		(int (*)())nomemory);
   de_fault (to_files_info,		(void (*)())ignore);
   de_fault (to_insert_breakpoint,	memory_insert_breakpoint);

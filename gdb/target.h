@@ -65,8 +65,6 @@ struct target_ops
   void 	      (*to_fetch_registers) PARAMS ((int));
   void 	      (*to_store_registers) PARAMS ((int));
   void 	      (*to_prepare_to_store) PARAMS ((void));
-  void 	      (*to_convert_to_virtual) PARAMS ((int, char *, char *));
-  void 	      (*to_convert_from_virtual) PARAMS ((int, char *, char *));
   int  	      (*to_xfer_memory) PARAMS ((CORE_ADDR, char *, int, int,
 					 struct target_ops *));
   void 	      (*to_files_info) PARAMS ((struct target_ops *));
@@ -178,18 +176,6 @@ extern struct target_ops	*current_target;
 
 #define	target_prepare_to_store()	\
 	(*current_target->to_prepare_to_store) ()
-
-/* Convert data from raw format for register REGNUM
-   to virtual format for register REGNUM.  */
-
-#define	target_convert_to_virtual(regnum, from, to)	\
-	(*current_target->to_convert_to_virtual) (regnum, from, to)
-	
-/* Convert data from virtual format for register REGNUM
-   to raw format for register REGNUM.  */
-
-#define	target_convert_from_virtual(regnum, from, to)	\
-	(*current_target->to_convert_from_virtual) (regnum, from, to)
 
 /* Reading and writing memory actually happens through a glue
    function which iterates across the various targets.  Result is
@@ -395,14 +381,6 @@ extern int
 build_section_table PARAMS ((bfd *, struct section_table **,
 			     struct section_table **));
 
-/* From inftarg.c */
-
-extern void
-host_convert_from_virtual PARAMS ((int, char *, char *));
-
-extern void
-host_convert_to_virtual PARAMS ((int, char *, char *));
-
 /* From mem-break.c */
 
 extern int
@@ -410,5 +388,10 @@ memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
 
 extern int
 memory_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+
+/* From target.c */
+
+void
+noprocess PARAMS ((void));
 
 #endif	/* !defined (TARGET_H) */
