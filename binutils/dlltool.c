@@ -3234,8 +3234,8 @@ main (ac, av)
     }
 
   for (i = 0; mtable[i].type; i++)
-      if (strcmp (mtable[i].type, mname) == 0)
-	break;
+    if (strcmp (mtable[i].type, mname) == 0)
+      break;
 
   if (!mtable[i].type)
     /* xgettext:c-format */
@@ -3296,7 +3296,7 @@ main (ac, av)
   
   if (output_def)
     gen_def_file ();
-
+  
 #ifdef DLLTOOL_MCORE_ELF
   if (mcore_elf_out_file)
     mcore_elf_gen_out_file ();
@@ -3363,6 +3363,10 @@ mcore_elf_cache_filename (char * filename)
     ptr->next->next = NULL;
 }
 
+#define MCORE_ELF_TMP_OBJ "mcoreelf.o"
+#define MCORE_ELF_TMP_EXP "mcoreelf.exp"
+#define MCORE_ELF_TMP_LIB "mcoreelf.lib"
+
 static void
 mcore_elf_gen_out_file (void)
 {
@@ -3392,7 +3396,8 @@ mcore_elf_gen_out_file (void)
       ptr = ptr->next;
     }
 
-  strcat (outfile, "-o mcoreelf.tmp");
+  strcat (outfile, "-o ");
+  strcat (outfile, MCORE_ELF_TMP_OBJ);
 
   if (mcore_elf_linker == NULL)
     mcore_elf_linker = deduce_name ("ld");
@@ -3403,30 +3408,50 @@ mcore_elf_gen_out_file (void)
      Do this by recursively invoking dlltool....*/
   sprintf (outfile, "-S %s", as_name);
   
-  strcat (outfile, " -e mcoreelf.exp -l mcoreelf.lib mcoreelf.tmp");
+  strcat (outfile, " -e ");
+  strcat (outfile, MCORE_ELF_TMP_EXP);
+  strcat (outfile, " -l ");
+  strcat (outfile, MCORE_ELF_TMP_LIB);
+  strcat (outfile, " " );
+  strcat (outfile, MCORE_ELF_TMP_OBJ);
 
   if (verbose)
     strcat (outfile, " -v");
   
   if (dontdeltemps)
-    strcat (outfile, " -n");
+    {
+      strcat (outfile, " -n");
   
-  if (dontdeltemps > 1)
-    strcat (outfile, " -n");
+      if (dontdeltemps > 1)
+	strcat (outfile, " -n");
+    }
 
   /* XXX - FIME: ought to check/copy other command line options as well.  */
   
   run (program_name, outfile);
 
-  /* Step four. Feed the two new files to ld -shared.  */
+  /* Step four. Feed the .exp and .lib files to ld -shared to create the dll.  */
   strcpy (outfile, "-shared ");
 
   if (mcore_elf_linker_flags)
     strcat (outfile, mcore_elf_linker_flags);
 
-  strcat (outfile, " mcoreelf.exp mcoreelf.lib -o ");
+  strcat (outfile, " ");
+  strcat (outfile, MCORE_ELF_TMP_EXP);
+  strcat (outfile, " ");
+  strcat (outfile, MCORE_ELF_TMP_LIB);
+  strcat (outfile, " -o ");
   strcat (outfile, mcore_elf_out_file);
 
   run (mcore_elf_linker, outfile);
+
+  if (dontdeltemps == 0)
+    {
+      unlink (MCORE_ELF_TMP_EXP);
+      unlink (MCORE_ELF_TMP_LIB);
+    }
+
+  if (dontdeltemps < 2)
+    unlink (MCORE_ELF_TMP_OBJ);
 }
 #endif /* DLLTOOL_MCORE_ELF */

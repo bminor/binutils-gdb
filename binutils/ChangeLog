@@ -1,3 +1,8 @@
+1999-06-03  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (mcore_elf_gen_out_file): Use constants for temporary
+	file names. 
+
 Wed Jun  2 12:34:36 1999  Richard Henderson  <rth@cygnus.com>
 
 	* dlltool.c (gen_exp_file): Revert 19990411 change.
