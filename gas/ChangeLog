@@ -1,5 +1,12 @@
 Mon Mar 31 14:15:19 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (mips_pseudo_table): Add "stabn".
+	(mips16_mark_labels): New static function.
+	(append_insn): Call mips16_mark_labels.
+	(mips_emit_delays): Likewise.
+	(s_insn): Likewise.  Don't call mips_clear_insn_labels.
+	(s_mips_stab): New static function.
+
 	* configure.in: Use ELF for mips-*-gnu*.
 	* configure: Rebuild.
 
