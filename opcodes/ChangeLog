@@ -1,3 +1,11 @@
+2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-dis.c (PC_REGNUM): Define.
+	(print_indexed_operand): Need an adjustment for some PC-relative
+	operand modes; print the final address of PC-relative modes.
+	(print_insn): Take into account movw/movb to adjust the PC-relative
+	operand addresses.
+
 2002-11-30  Alan Modra  <amodra@bigpond.net.au>
 
 	*arm-dis.c, cris-dis.c, h8300-dis.c, mips-dis.c, mmix-dis.c, sh-dis.c,
