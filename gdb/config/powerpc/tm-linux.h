@@ -48,10 +48,6 @@ extern int at_subroutine_call_instruction_target();
    in symfile.c) */
 #undef IBM6000_TARGET
 
-extern CORE_ADDR ppc_linux_skip_trampoline_code (CORE_ADDR pc);
-#undef SKIP_TRAMPOLINE_CODE
-#define	SKIP_TRAMPOLINE_CODE(pc) ppc_linux_skip_trampoline_code (pc)
-
 extern int ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name);
 #undef IN_SIGTRAMP
 #define IN_SIGTRAMP(pc,func_name) ppc_linux_in_sigtramp (pc,func_name)

@@ -229,7 +229,7 @@ ppc_linux_at_sigtramp_return_path (CORE_ADDR pc)
 	    && insn_is_sigreturn (extract_unsigned_integer (buf, 4))));
 }
 
-CORE_ADDR
+static CORE_ADDR
 ppc_linux_skip_trampoline_code (CORE_ADDR pc)
 {
   char buf[4];
@@ -749,7 +749,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
   /* Shared library handling.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
-  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+  set_gdbarch_skip_trampoline_code (gdbarch, ppc_linux_skip_trampoline_code);
 }
 
 void
