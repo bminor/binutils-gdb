@@ -1,3 +1,11 @@
+Fri Dec 12 10:35:01 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/c-arm.texi (ARM Options): Document support for new ARM
+	processor names.
+
+	* config/tc-arm.c (md_parse_option): Add support for new ARM
+	processor names.
+
 Thu Dec 11 17:46:50 1997  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Don't overwrite opcode table data.
