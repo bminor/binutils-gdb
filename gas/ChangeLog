@@ -1,3 +1,8 @@
+2002-10-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-mips.h (TC_FORCE_RELOCATION_SUB_SAME): Define.
+	(TC_FORCE_RELOCATION): Tidy arg.
+
 2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
             Ken Raeburn  <raeburn@cygnus.com>
             Aldy Hernandez  <aldyh@redhat.com>
