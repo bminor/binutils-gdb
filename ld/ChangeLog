@@ -1,3 +1,7 @@
+2002-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (load_symbols): Revert last change.
+
 2002-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (load_symbols): Don't call bfd_link_add_symbols when

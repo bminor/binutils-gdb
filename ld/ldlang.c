@@ -1590,9 +1590,7 @@ load_symbols (entry, place)
       break;
     }
 
-  if (entry->just_syms_flag)
-    entry->loaded = true;
-  else if (bfd_link_add_symbols (entry->the_bfd, &link_info))
+  if (bfd_link_add_symbols (entry->the_bfd, &link_info))
     entry->loaded = true;
   else
     einfo (_("%F%B: could not read symbols: %E\n"), entry->the_bfd);
