@@ -1,3 +1,41 @@
+Mon Jul 10 11:13:39 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-versados/versados.exp: If a test fails, report it correctly:
+	don't try to run the next test, and don't report a pass as well as
+	a fail.
+
+Mon May 22 20:19:38 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* lib/ld.exp (default_ld_compile): If cc argument is multiple
+	words, use only the first when trying to verify the availability
+	of the compiler.
+
+Mon Feb  6 11:46:49 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/defined.t: Mention .data and .bss explicitly.
+
+Tue Jan 24 14:51:48 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ld-bootstrap/bootstrap.exp: If not in the ld build directory,
+	call untested for each test, rather than ignoring it.  If one test
+	fails, go on to the next one instead of returning.
+	* ld-cdtest/cdtest.exp: If compilations fail, mark tests as
+	unresolved.
+	* ld-empic/empic.exp: Likewise.  Also, always pass the same test
+	name to pass or fail.
+	* ld-shared/shared.exp: Likewise.  Also, always run all tests.
+	* ld-scripts/defined.exp: If as or nm fail, mark test as
+	unresolved.  Always pass the same test name to pass or fail.
+	* ld-scripts/script.exp: Likewise.
+	* ld-scripts/sizeof.exp: Likewise.
+
+Wed Jan 11 11:48:31 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ld-scripts/sizeof.exp: New test, based on bug report from
+	anders.blomdell@control.lth.se.
+	* ld-scripts/sizeof.s: New file.
+	* ld-scripts/sizeof.t: New file.
+
 Wed Jan  4 18:56:27 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* lib/ld.exp: Use [which $ld] rather than [file exists $ld] to see
