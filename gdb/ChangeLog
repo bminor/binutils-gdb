@@ -1,3 +1,8 @@
+Mon May 10 16:03:03 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+        Patch from Jeffrey Law:
+        * gdb/config/pa/nm-hppab.h (PTRACE_ARG3_TYPE): Define as caddr_t.
+
 Mon May 10 15:28:27 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* hppa-tdep.c (hppa_push_arguments): Allocate correct amount of

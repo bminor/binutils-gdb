@@ -23,3 +23,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define REGISTER_U_ADDR(addr, blockend, regno)				\
 { addr = (int)(blockend) + REGISTER_BYTE (regno);}
 
+#define	PTRACE_ARG3_TYPE	caddr_t
