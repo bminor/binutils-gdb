@@ -1,3 +1,13 @@
+Mon Oct  9 19:59:53 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.c (ppc_macro): Make count unsigned.
+	(ppc_biei): Set segment to now_seg and value to coff_n_line_nos.
+	(ppc_frob_symbol): Handle C_BINCL and C_EINCL symbols by setting
+	the fix_line field.
+	* config/obj-coff.c (coff_n_line_nos): Rename from n_line_nos, and
+	make non-static.  Change all users.
+	* config/obj-coff.h (coff_n_line_nos): Declare.
+
 Fri Oct  6 16:24:27 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	Mon Sep 25 22:49:32 1995  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
