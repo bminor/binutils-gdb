@@ -1,4 +1,5 @@
-configdirs="doc testsuite"
+#configdirs="doc testsuite"
+configdirs="doc"
 srcname="GDB"
 srctrigger=main.c
 
@@ -124,6 +125,9 @@ m68*)			gdb_target_cpu=m68k ;;
 np1)			gdb_target_cpu=gould ;;
 pn)			gdb_target_cpu=gould ;;
 pyramid)		gdb_target_cpu=pyr ;;
+sparclite)		gdb_target_cpu=sparc
+			configdirs="${configdirs} sparclite"
+			;;
 sparc*)			gdb_target_cpu=sparc ;;
 *)			gdb_target_cpu=$target_cpu ;;
 
@@ -164,6 +168,9 @@ i[34]86-*-elf)		gdb_target=i386v ;;
 
 i[34]86-*-bsd*)		gdb_target=i386bsd ;;
 i[34]86-*-go32)		gdb_target=i386aout ;;
+i[34]86-*-lynx*)	gdb_target=i386lynx
+			configdirs="${configdirs} gdbserver"
+			;;
 i[34]86-*-solaris*)	gdb_target=i386sol2 ;;
 i[34]86-*-sunos*)	gdb_target=sun386 ;;
 i[34]86-*-sysv4*)	gdb_target=i386v4 ;;
@@ -302,10 +309,6 @@ if [ "${nativefile}" != "" ]; then
 else
 	files="${files} config/nm-trash.h"
 	links="${links} nm.h"
-fi
-
-if [ ${target_cpu} = "sparclite" ]; then
-	configdirs="${configdirs} sparclite"
 fi
 
 # post-target:

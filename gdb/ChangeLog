@@ -1,5 +1,8 @@
 Wed May 26 13:46:16 1993  Stu Grossman  (grossman@cygnus.com)
 
+	* configure.in:  Add config for Lynx target.  Configure gdbserver
+	only for Lynx.  Re-do selective configuration of sparclite.
+
 	* gdbserver/{remote-gutils.c remote-server.c Makefile.in
 	configure.in remote-inflow.c remote-utils.c}:  New files to
 	support GDB remote server.  Currently only works for Lynx.
