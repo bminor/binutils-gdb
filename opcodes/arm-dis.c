@@ -622,7 +622,8 @@ print_insn_thumb (pc, info, given)
 	      info->bytes_per_chunk = 4;
 	      info->bytes_per_line  = 4;
 	      
-              func (stream, "bl\t");
+                func (stream, "bl\t");
+		
               info->print_address_func (BDISP23 (given) * 2 + pc + 4, info);
               return 4;
             }
@@ -827,8 +828,8 @@ print_insn_thumb (pc, info, given)
 }
 
 /* Parse an individual disassembler option.  */
-static void
-parse_disassembler_option (option)
+void
+parse_arm_disassembler_option (option)
      char * option;
 {
   if (option == NULL)
@@ -877,12 +878,12 @@ parse_disassembler_options (options)
       if (space)
 	{
 	  * space = '\0';
-	  parse_disassembler_option (options);
+	  parse_arm_disassembler_option (options);
 	  * space = ' ';
 	  options = space + 1;
 	}
       else
-	parse_disassembler_option (options);
+	parse_arm_disassembler_option (options);
     }
   while (space);
 }
