@@ -1,3 +1,23 @@
+Fri Apr  5 10:13:28 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/h8300/{addsub.s,bitops1.s,bitops2.s}: New h8300 tests.
+	* gas/h8300/{bitops3.s,bitops4.s,branches.s}: New h8300 tests.
+	* gas/h8300/{cbranch.s,compare.s,decimal.s}: New h8300 tests.
+	* gas/h8300/{divmul.s,incdec.s,logical.s}: New h8300 tests.
+	* gas/h8300/{misc.s,movb.s,movw.s}: New h8300 tests.
+	* gas/h8300/{pushpop.s,rotshift.s}: New h8300 tests.
+	* gas/h8300/h8300.exp: Run them.
+
+Fri Mar 15 17:16:24 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/sparc/synth.d: Don't require sparc in the file format, since
+	it won't be there on SunOS.
+
+Thu Mar  7 14:51:23 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* gas/sparc/synth.[ds]: New testcase.
+	* gas/sparc/sparc.exp: Run it.
+
 Fri Mar  1 12:01:48 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/all/gas.exp: xfail difference of two undefined symbols

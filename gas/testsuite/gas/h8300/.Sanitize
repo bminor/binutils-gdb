@@ -26,10 +26,28 @@ Do-first:
 
 Things-to-keep:
 
-h8300.exp
+CVS
+addsub.s
+bitops1.s
+bitops2.s
+bitops3.s
+bitops4.s
+branches.s
+cbranch.s
 cmpsi2.s
+compare.s
+decimal.s
+divmul.s
 ffxx1.d
 ffxx1.s
+h8300.exp
+incdec.s
+logical.s
+misc.s
+movb.s
+movw.s
+pushpop.s
+rotshift.s
 
 Things-to-lose:
 
