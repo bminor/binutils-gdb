@@ -1,3 +1,8 @@
+Sat Jan 25 15:57:59 1992  Fred Fish  (fnf at cygnus.com)
+
+	* infptrace.c (child_xfer_memory):  Parameter "target" should
+	be a pointer to a structure, not the entire structure.
+
 Fri Jan 24 01:30:27 1992  Fred Fish  (fnf at cygnus.com)
 
 	* depend:  Convert the couple of references to ansidecl.h that
