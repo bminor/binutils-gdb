@@ -63,7 +63,7 @@ i386)
 
 sparc)
 	case "${host_os}" in
-	sunos64)	my_host=sparc-64 ;;
+	sunos64)	my_host=sparc-ll ;;
 	*)		my_host=sparc ;;
 	esac
 	;;
