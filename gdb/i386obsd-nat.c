@@ -52,8 +52,8 @@ _initialize_i386obsd_nat (void)
     len = sizeof (_ps);
     if (sysctl (mib, 2, &_ps, &len, NULL, 0) == 0)
       {
-	i386obsd_sigtramp_start_addr = (CORE_ADDR)_ps.val - 128;
-	i386obsd_sigtramp_end_addr = (CORE_ADDR)_ps.val;
+	i386obsd_sigtramp_start_addr = (u_long) _ps.val - 128;
+	i386obsd_sigtramp_end_addr = (u_long) _ps.val;
       }
   }
 #endif

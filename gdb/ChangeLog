@@ -1,3 +1,13 @@
+2004-11-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* bsd-kvm.c (bsd_kvm_pcb_cmd): Cast return value from
+	parse_and_eval_address to u_long before converting it to a pointer
+	type.
+	* i386fbsd-nat.c (_initialize_i386fbsd_nat): Change type of
+	ps_strings from int to u_long.
+	* i386obsd-nat.c (_initialize_i386obsd_nat): Cast _ps.val to
+	u_long instead of CORE_ADDR.
+
 2004-11-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* dbxread.c (process_one_symbol): Do not adjust address of first

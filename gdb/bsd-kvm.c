@@ -259,7 +259,7 @@ bsd_kvm_pcb_cmd (char *arg, int fromtty)
   if (core_kd == NULL)
     error ("No kernel memory image.");
 
-  bsd_kvm_paddr = (struct pcb *) parse_and_eval_address (arg);
+  bsd_kvm_paddr = (struct pcb *)(u_long) parse_and_eval_address (arg);
 
   target_fetch_registers (-1);
 
