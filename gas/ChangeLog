@@ -1,3 +1,8 @@
+Tue Oct  1 16:16:01 1996  Joel Sherrill  <joel@oarcorp.com>
+
+	* configure.in (mips-*-rtems*): New target, like mips-*-elf*.
+	* configure: Rebuild.
+
 Tue Oct  1 12:37:48 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* as.c (show_usage): Print bug report address.

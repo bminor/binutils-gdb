@@ -223,7 +223,8 @@ changequote([,])dnl
       mips-*-irix*)         fmt=ecoff targ=mips-big ;;
       mips-*-riscos*)       fmt=ecoff targ=mips-big ;;
       mips-*-sysv*)         fmt=ecoff targ=mips-big ;;
-      mips-*-elf*)          fmt=elf 
+      mips-*-elf* | mips-*-rtems*)
+			    fmt=elf 
 			    case "$endian" in
 			    big) targ=mips-big ;;
 			    *)   targ=mips-lit ;;
@@ -267,7 +268,8 @@ changequote([,])dnl
 			    fmt=coff em=macos ;;
       ppc-*-netware*)       fmt=elf em=ppcnw ;;
 
-      sh-*-coff)            fmt=coff ;;
+      sh-*-elf*)	    fmt=elf ;;
+      sh-*-coff*)           fmt=coff ;;
 
       ns32k-pc532-mach* | ns32k-pc532-ux*)    fmt=aout em=pc532mach ;;
       ns32k-pc532-netbsd* | ns32k-pc532-lites*)  fmt=aout em=nbsd532 ;;
@@ -275,7 +277,7 @@ changequote([,])dnl
       sparc-*-rtems*)       fmt=aout ;;
       sparc-*-sunos4*)      fmt=aout em=sun3 ;;
       sparc-*-aout | sparc*-*-vxworks*)
-			    fmt=aout ;;
+			    fmt=aout em=sparcaout ;;
       sparc-*-coff)         fmt=coff ;;
       sparc-*-lynxos*)      fmt=coff em=lynx ;;
       sparc-fujitsu-none)   fmt=aout ;;
@@ -685,6 +687,7 @@ GAS_CHECK_DECL_NEEDED(errno, f, int f, [
 ])
 
 HLDFLAGS=
+HLDENV=
 RPATH_ENVVAR=LD_LIBRARY_PATH
 # If we have shared libraries, try to set rpath reasonably.
 if test "${shared}" = "true"; then
@@ -701,8 +704,11 @@ if test "${shared}" = "true"; then
   *-*-linux*)
     HLDFLAGS='-Wl,-rpath,$(libdir)'
     ;;
-  *-*-sysv4* | *-*-solaris*)
+  *-*-solaris*)
     HLDFLAGS='-R $(libdir)'
+    ;;
+  *-*-sysv4*)
+    HLDENV='if test -z "$${LD_RUN_PATH}"; then LD_RUN_PATH=$(libdir); else LD_RUN_PATH=$${LD_RUN_PATH}:$(libdir); fi; export LD_RUN_PATH;'
     ;;
   esac
 fi
@@ -729,6 +735,7 @@ case "${host}" in
     ;;
 esac
 AC_SUBST(HLDFLAGS)
+AC_SUBST(HLDENV)
 AC_SUBST(RPATH_ENVVAR)
 
 dnl This must come last.
