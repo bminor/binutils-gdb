@@ -92,9 +92,6 @@ static boolean ppc64_elf_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
 
-/* Branch prediction bit for branch taken relocs.  */
-#define BRANCH_PREDICT_BIT 0x200000
-
 /* Mask to set RA in memory instructions.  */
 #define RA_REGISTER_MASK 0x001f0000
 
@@ -3161,6 +3158,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
 
       /* First handle relocations that tweak non-addend part of insn.  */
+      insn = 0;
       switch (r_type)
 	{
 	default:
@@ -3169,22 +3167,23 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* Branch taken prediction relocations.  */
 	case R_PPC64_ADDR14_BRTAKEN:
 	case R_PPC64_REL14_BRTAKEN:
-	  insn = bfd_get_32 (output_bfd, contents + offset);
-	  if ((relocation - offset) & 0x8000)
-	    insn &= ~BRANCH_PREDICT_BIT;
-	  else
-	    insn |= BRANCH_PREDICT_BIT;
-	  bfd_put_32 (output_bfd, (bfd_vma) insn, contents + offset);
-	  break;
+	  insn = 0x01 << 21; /* Set 't' bit, lowest bit of BO field. */
+	  /* Fall thru. */
 
-	  /* Branch not taken predicition relocations.  */
+	  /* Branch not taken prediction relocations.  */
 	case R_PPC64_ADDR14_BRNTAKEN:
 	case R_PPC64_REL14_BRNTAKEN:
-	  insn = bfd_get_32 (output_bfd, contents + offset);
-	  if ((relocation - offset) & 0x8000)
-	    insn |= BRANCH_PREDICT_BIT;
+	  insn |= bfd_get_32 (output_bfd, contents + offset) & ~(0x01 << 21);
+	  /* Set 'a' bit.  This is 0b00010 in BO field for branch on CR(BI)
+	     insns (BO == 001at or 011at), and 0b01000 for branch on CTR
+	     insns (BO == 1a00t or 1a01t).  */
+	  if ((insn & (0x14 << 21)) == (0x04 << 21))
+	    insn |= 0x02 << 21;
+	  else if ((insn & (0x14 << 21)) == (0x10 << 21))
+	    insn |= 0x08 << 21;
 	  else
-	    insn &= ~BRANCH_PREDICT_BIT;
+	    break;
+
 	  bfd_put_32 (output_bfd, (bfd_vma) insn, contents + offset);
 	  break;
 
