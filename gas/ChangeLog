@@ -1,3 +1,7 @@
+2002-02-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/obj-coff.h: Check !target_big_endian, not shl, for coff-sh.
+
 2002-02-18  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* config/tc-hppa.c (hppa_fix_adjustable): Don't adjust final types
