@@ -1,6 +1,6 @@
 /* Common target dependent code for GDB on ARM systems.
    Copyright 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1998, 1999, 2000,
-   2001 Free Software Foundation, Inc.
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -107,12 +107,11 @@ static void convert_from_extended (void *ptr, void *dbl);
    we're still in the prologue of a function with a frame) */
 
 struct frame_extra_info
-  {
-    struct frame_saved_regs fsr;
-    int framesize;
-    int frameoffset;
-    int framereg;
-  };
+{
+  int framesize;
+  int frameoffset;
+  int framereg;
+};
 
 /* Addresses for calling Thumb functions have the bit 0 set.
    Here are some macros to test, set, or clear bit 0 of addresses.  */
@@ -534,7 +533,7 @@ thumb_scan_prologue (struct frame_info *fi)
      frame pointer, adjust the stack pointer, and save registers.
      Do this until all basic prolog instructions are found.  */
 
-  fi->framesize = 0;
+  fi->extra_info->framesize = 0;
   for (current_pc = prologue_start;
        (current_pc < prologue_end) && ((findmask & 7) != 7);
        current_pc += 2)
@@ -557,8 +556,9 @@ thumb_scan_prologue (struct frame_info *fi)
 	  for (regno = LR_REGNUM; regno >= 0; regno--)
 	    if (mask & (1 << regno))
 	      {
-		fi->framesize += 4;
-		fi->fsr.regs[saved_reg[regno]] = -(fi->framesize);
+		fi->extra_info->framesize += 4;
+		fi->saved_regs[saved_reg[regno]] =
+		  -(fi->extra_info->framesize);
 		saved_reg[regno] = regno;	/* reset saved register map */
 	      }
 	}
@@ -572,22 +572,23 @@ thumb_scan_prologue (struct frame_info *fi)
 	  offset = (insn & 0x7f) << 2;	/* get scaled offset */
 	  if (insn & 0x80)	/* is it signed? (==subtracting) */
 	    {
-	      fi->frameoffset += offset;
+	      fi->extra_info->frameoffset += offset;
 	      offset = -offset;
 	    }
-	  fi->framesize -= offset;
+	  fi->extra_info->framesize -= offset;
 	}
       else if ((insn & 0xff00) == 0xaf00)	/* add r7, sp, #imm */
 	{
 	  findmask |= 2;  /* setting of r7 found */
-	  fi->framereg = THUMB_FP_REGNUM;
-	  fi->frameoffset = (insn & 0xff) << 2;		/* get scaled offset */
+	  fi->extra_info->framereg = THUMB_FP_REGNUM;
+	  /* get scaled offset */
+	  fi->extra_info->frameoffset = (insn & 0xff) << 2;
 	}
       else if (insn == 0x466f)			/* mov r7, sp */
 	{
 	  findmask |= 2;  /* setting of r7 found */
-	  fi->framereg = THUMB_FP_REGNUM;
-	  fi->frameoffset = 0;
+	  fi->extra_info->framereg = THUMB_FP_REGNUM;
+	  fi->extra_info->frameoffset = 0;
 	  saved_reg[THUMB_FP_REGNUM] = SP_REGNUM;
 	}
       else if ((insn & 0xffc0) == 0x4640)	/* mov r0-r7, r8-r15 */
@@ -627,11 +628,11 @@ check_prologue_cache (struct frame_info *fi)
 
   if (fi->pc == prologue_cache.pc)
     {
-      fi->framereg = prologue_cache.framereg;
-      fi->framesize = prologue_cache.framesize;
-      fi->frameoffset = prologue_cache.frameoffset;
-      for (i = 0; i < NUM_REGS; i++)
-	fi->fsr.regs[i] = prologue_cache.fsr.regs[i];
+      fi->extra_info->framereg = prologue_cache.extra_info->framereg;
+      fi->extra_info->framesize = prologue_cache.extra_info->framesize;
+      fi->extra_info->frameoffset = prologue_cache.extra_info->frameoffset;
+      for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+	fi->saved_regs[i] = prologue_cache.saved_regs[i];
       return 1;
     }
   else
@@ -647,12 +648,12 @@ save_prologue_cache (struct frame_info *fi)
   int i;
 
   prologue_cache.pc = fi->pc;
-  prologue_cache.framereg = fi->framereg;
-  prologue_cache.framesize = fi->framesize;
-  prologue_cache.frameoffset = fi->frameoffset;
+  prologue_cache.extra_info->framereg = fi->extra_info->framereg;
+  prologue_cache.extra_info->framesize = fi->extra_info->framesize;
+  prologue_cache.extra_info->frameoffset = fi->extra_info->frameoffset;
 
-  for (i = 0; i < NUM_REGS; i++)
-    prologue_cache.fsr.regs[i] = fi->fsr.regs[i];
+  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+    prologue_cache.saved_regs[i] = fi->saved_regs[i];
 }
 
 
@@ -735,9 +736,9 @@ arm_scan_prologue (struct frame_info *fi)
     return;
 
   /* Assume there is no frame until proven otherwise.  */
-  fi->framereg = SP_REGNUM;
-  fi->framesize = 0;
-  fi->frameoffset = 0;
+  fi->extra_info->framereg = SP_REGNUM;
+  fi->extra_info->framesize = 0;
+  fi->extra_info->frameoffset = 0;
 
   /* Check for Thumb prologue.  */
   if (arm_pc_is_thumb (fi->pc))
@@ -840,7 +841,7 @@ arm_scan_prologue (struct frame_info *fi)
 	    if (mask & (1 << regno))
 	      {
 		sp_offset -= 4;
-		fi->fsr.regs[regno] = sp_offset;
+		fi->saved_regs[regno] = sp_offset;
 	      }
 	}
       else if ((insn & 0xfffff000) == 0xe24cb000)	/* sub fp, ip #n */
@@ -849,7 +850,7 @@ arm_scan_prologue (struct frame_info *fi)
 	  unsigned rot = (insn & 0xf00) >> 7;	/* rotate amount */
 	  imm = (imm >> rot) | (imm << (32 - rot));
 	  fp_offset = -imm;
-	  fi->framereg = FP_REGNUM;
+	  fi->extra_info->framereg = FP_REGNUM;
 	}
       else if ((insn & 0xfffff000) == 0xe24dd000)	/* sub sp, sp #n */
 	{
@@ -862,7 +863,7 @@ arm_scan_prologue (struct frame_info *fi)
 	{
 	  sp_offset -= 12;
 	  regno = F0_REGNUM + ((insn >> 12) & 0x07);
-	  fi->fsr.regs[regno] = sp_offset;
+	  fi->saved_regs[regno] = sp_offset;
 	}
       else if ((insn & 0xffbf0fff) == 0xec2d0200)	/* sfmfd f0, 4, [sp!] */
 	{
@@ -889,7 +890,7 @@ arm_scan_prologue (struct frame_info *fi)
 	  for (; fp_start_reg < fp_bound_reg; fp_start_reg++)
 	    {
 	      sp_offset -= 12;
-	      fi->fsr.regs[fp_start_reg++] = sp_offset;
+	      fi->saved_regs[fp_start_reg++] = sp_offset;
 	    }
 	}
       else if ((insn & 0xf0000000) != 0xe0000000)
@@ -905,11 +906,11 @@ arm_scan_prologue (struct frame_info *fi)
   /* The frame size is just the negative of the offset (from the original SP)
      of the last thing thing we pushed on the stack.  The frame offset is
      [new FP] - [new SP].  */
-  fi->framesize = -sp_offset;
-  if (fi->framereg == FP_REGNUM)
-    fi->frameoffset = fp_offset - sp_offset;
+  fi->extra_info->framesize = -sp_offset;
+  if (fi->extra_info->framereg == FP_REGNUM)
+    fi->extra_info->frameoffset = fp_offset - sp_offset;
   else
-    fi->frameoffset = 0;
+    fi->extra_info->frameoffset = 0;
 
   save_prologue_cache (fi);
 }
@@ -931,8 +932,8 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
       return generic_read_register_dummy (fi->pc, fi->frame, regnum);
     else
 #endif
-    if (fi->fsr.regs[regnum] != 0)
-      return read_memory_integer (fi->fsr.regs[regnum],
+    if (fi->saved_regs[regnum] != 0)
+      return read_memory_integer (fi->saved_regs[regnum],
 				  REGISTER_RAW_SIZE (regnum));
   return read_register (regnum);
 }
@@ -975,8 +976,7 @@ arm_frame_chain (struct frame_info *fi)
       return 0;			/* in _start fn, don't chain further */
 #endif
   CORE_ADDR caller_pc, fn_start;
-  struct frame_info caller_fi;
-  int framereg = fi->framereg;
+  int framereg = fi->extra_info->framereg;
 
   if (fi->pc < LOWEST_PC)
     return 0;
@@ -991,12 +991,31 @@ arm_frame_chain (struct frame_info *fi)
      the frame register of the caller is different from ours.
      So we must scan the prologue of the caller to determine its
      frame register number. */
+  /* XXX Fixme, we should try to do this without creating a temporary
+     caller_fi.  */
   if (arm_pc_is_thumb (caller_pc) != arm_pc_is_thumb (fi->pc))
     {
+      struct frame_info caller_fi;
+      struct cleanup *old_chain;
+
+      /* Create a temporary frame suitable for scanning the caller's
+	 prologue.  (Ugh.)  */
       memset (&caller_fi, 0, sizeof (caller_fi));
+      caller_fi.extra_info = (struct frame_extra_info *)
+	xcalloc (1, sizeof (struct frame_extra_info));
+      old_chain = make_cleanup (xfree, caller_fi.extra_info);
+      caller_fi.saved_regs = (CORE_ADDR *)
+	xcalloc (1, SIZEOF_FRAME_SAVED_REGS);
+      make_cleanup (xfree, caller_fi.saved_regs);
+
+      /* Now, scan the prologue and obtain the frame register.  */
       caller_fi.pc = caller_pc;
       arm_scan_prologue (&caller_fi);
-      framereg = caller_fi.framereg;
+      framereg = caller_fi.extra_info->framereg;
+
+      /* Deallocate the storage associated with the temporary frame
+	 created above.  */
+      do_cleanups (old_chain);
     }
 
   /* If the caller used a frame register, return its value.
@@ -1004,7 +1023,7 @@ arm_frame_chain (struct frame_info *fi)
   if (framereg == FP_REGNUM || framereg == THUMB_FP_REGNUM)
     return arm_find_callers_reg (fi, framereg);
   else
-    return fi->frame + fi->framesize;
+    return fi->frame + fi->extra_info->framesize;
 }
 
 /* This function actually figures out the frame address for a given pc
@@ -1022,10 +1041,20 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   int reg;
   CORE_ADDR sp;
 
+  if (fi->saved_regs == NULL)
+    frame_saved_regs_zalloc (fi);
+
+  fi->extra_info = (struct frame_extra_info *)
+    frame_obstack_alloc (sizeof (struct frame_extra_info));
+
+  fi->extra_info->framesize = 0;
+  fi->extra_info->frameoffset = 0;
+  fi->extra_info->framereg = 0;
+
   if (fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
 
-  memset (fi->fsr.regs, '\000', sizeof fi->fsr.regs);
+  memset (fi->saved_regs, '\000', sizeof fi->saved_regs);
 
 #if 0				/* FIXME: enable this code if we convert to new call dummy scheme.  */
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
@@ -1033,8 +1062,8 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
       fi->frame = generic_read_register_dummy (fi->pc, fi->frame, SP_REGNUM);
-      fi->framesize = 0;
-      fi->frameoffset = 0;
+      fi->extra_info->framesize = 0;
+      fi->extra_info->frameoffset = 0;
       return;
     }
   else
@@ -1045,7 +1074,8 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (!fi->next)
     sp = read_sp();
   else
-    sp = fi->next->frame - fi->next->frameoffset + fi->next->framesize;
+    sp = (fi->next->frame - fi->next->extra_info->frameoffset
+	  + fi->next->extra_info->framesize);
 
   /* Determine whether or not we're in a sigtramp frame. 
      Unfortunately, it isn't sufficient to test
@@ -1063,14 +1093,15 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       && (fi->signal_handler_caller || IN_SIGTRAMP (fi->pc, (char *)0)))
     {
       for (reg = 0; reg < NUM_REGS; reg++)
-	fi->fsr.regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, fi->pc, reg);
+	fi->saved_regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, fi->pc, reg);
 
       /* FIXME: What about thumb mode? */
-      fi->framereg = SP_REGNUM;
-      fi->frame = read_memory_integer (fi->fsr.regs[fi->framereg],
-                                       REGISTER_RAW_SIZE (fi->framereg));
-      fi->framesize = 0;
-      fi->frameoffset = 0;
+      fi->extra_info->framereg = SP_REGNUM;
+      fi->frame =
+	read_memory_integer (fi->saved_regs[fi->extra_info->framereg],
+			     REGISTER_RAW_SIZE (fi->extra_info->framereg));
+      fi->extra_info->framesize = 0;
+      fi->extra_info->frameoffset = 0;
 
     }
   else if (PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
@@ -1082,19 +1113,19 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       rp = fi->frame - REGISTER_SIZE;
 
       /* Fill in addresses of saved registers.  */
-      fi->fsr.regs[PS_REGNUM] = rp;
+      fi->saved_regs[PS_REGNUM] = rp;
       rp -= REGISTER_RAW_SIZE (PS_REGNUM);
       for (reg = PC_REGNUM; reg >= 0; reg--)
 	{
-	  fi->fsr.regs[reg] = rp;
+	  fi->saved_regs[reg] = rp;
 	  rp -= REGISTER_RAW_SIZE (reg);
 	}
 
-      callers_sp = read_memory_integer (fi->fsr.regs[SP_REGNUM],
+      callers_sp = read_memory_integer (fi->saved_regs[SP_REGNUM],
                                         REGISTER_RAW_SIZE (SP_REGNUM));
-      fi->framereg = FP_REGNUM;
-      fi->framesize = callers_sp - sp;
-      fi->frameoffset = fi->frame - sp;
+      fi->extra_info->framereg = FP_REGNUM;
+      fi->extra_info->framesize = callers_sp - sp;
+      fi->extra_info->frameoffset = fi->frame - sp;
     }
   else
     {
@@ -1102,14 +1133,16 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
       if (!fi->next)
 	/* this is the innermost frame? */
-	fi->frame = read_register (fi->framereg);
-      else if (fi->framereg == FP_REGNUM || fi->framereg == THUMB_FP_REGNUM)
+	fi->frame = read_register (fi->extra_info->framereg);
+      else if (fi->extra_info->framereg == FP_REGNUM
+	       || fi->extra_info->framereg == THUMB_FP_REGNUM)
 	{
 	  /* not the innermost frame */
 	  /* If we have an FP, the callee saved it. */
-	  if (fi->next->fsr.regs[fi->framereg] != 0)
+	  if (fi->next->saved_regs[fi->extra_info->framereg] != 0)
 	    fi->frame =
-	      read_memory_integer (fi->next->fsr.regs[fi->framereg], 4);
+	      read_memory_integer (fi->next
+				   ->saved_regs[fi->extra_info->framereg], 4);
 	  else if (fromleaf)
 	    /* If we were called by a frameless fn.  then our frame is
 	       still in the frame pointer register on the board... */
@@ -1119,8 +1152,9 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       /* Calculate actual addresses of saved registers using offsets
          determined by arm_scan_prologue.  */
       for (reg = 0; reg < NUM_REGS; reg++)
-	if (fi->fsr.regs[reg] != 0)
-	  fi->fsr.regs[reg] += fi->frame + fi->framesize - fi->frameoffset;
+	if (fi->saved_regs[reg] != 0)
+	  fi->saved_regs[reg] += (fi->frame + fi->extra_info->framesize
+				  - fi->extra_info->frameoffset);
     }
 }
 
@@ -1141,9 +1175,11 @@ arm_frame_saved_pc (struct frame_info *fi)
     return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
   else
 #endif
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->frameoffset, fi->frame))
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->extra_info->frameoffset,
+			fi->frame))
     {
-      return read_memory_integer (fi->fsr.regs[PC_REGNUM], REGISTER_RAW_SIZE (PC_REGNUM));
+      return read_memory_integer (fi->saved_regs[PC_REGNUM],
+				  REGISTER_RAW_SIZE (PC_REGNUM));
     }
   else
     {
@@ -1167,10 +1203,13 @@ arm_target_read_fp (void)
 /* Calculate the frame offsets of the saved registers (ARM version).  */
 
 void
-arm_frame_find_saved_regs (struct frame_info *fi,
-			   struct frame_saved_regs *regaddr)
+arm_frame_init_saved_regs (struct frame_info *fip)
 {
-  memcpy (regaddr, &fi->fsr, sizeof (struct frame_saved_regs));
+
+  if (fip->saved_regs)
+    return;
+
+  arm_init_extra_frame_info (0, fip);
 }
 
 void
@@ -1424,12 +1463,13 @@ arm_pop_frame (void)
 {
   int regnum;
   struct frame_info *frame = get_current_frame ();
-  CORE_ADDR old_SP = frame->frame - frame->frameoffset + frame->framesize;
+  CORE_ADDR old_SP = (frame->frame - frame->extra_info->frameoffset
+		      + frame->extra_info->framesize);
 
   for (regnum = 0; regnum < NUM_REGS; regnum++)
-    if (frame->fsr.regs[regnum] != 0)
+    if (frame->saved_regs[regnum] != 0)
       write_register (regnum,
-		  read_memory_integer (frame->fsr.regs[regnum],
+		  read_memory_integer (frame->saved_regs[regnum],
 				       REGISTER_RAW_SIZE (regnum)));
 
   write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
@@ -2240,6 +2280,12 @@ The valid values are:\n");
 
   add_com ("othernames", class_obscure, arm_othernames,
 	   "Switch to the next set of register names.");
+
+  /* Fill in the prologue_cache fields.  */
+  prologue_cache.extra_info = (struct frame_extra_info *)
+    xcalloc (1, sizeof (struct frame_extra_info));
+  prologue_cache.saved_regs = (CORE_ADDR *)
+    xcalloc (1, SIZEOF_FRAME_SAVED_REGS);
 }
 
 /* Test whether the coff symbol specific value corresponds to a Thumb

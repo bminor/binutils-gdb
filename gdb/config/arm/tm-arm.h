@@ -1,6 +1,6 @@
 /* Definitions to target GDB to ARM targets.
    Copyright 1986, 1987, 1988, 1989, 1991, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000 Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -316,18 +316,6 @@ extern void convert_to_extended (void *dbl, void *ptr);
 #define VARIABLES_INSIDE_BLOCK(desc, gcc_p) (!(gcc_p))
 
 
-/* Define other aspects of the stack frame.  We keep the offsets of
-   all saved registers, 'cause we need 'em a lot!  We also keep the
-   current size of the stack frame, and the offset of the frame
-   pointer from the stack pointer (for frameless functions, and when
-   we're still in the prologue of a function with a frame) */
-
-#define EXTRA_FRAME_INFO  	\
-  struct frame_saved_regs fsr;	\
-  int framesize;		\
-  int frameoffset;		\
-  int framereg;
-
 extern void arm_init_extra_frame_info (int fromleaf, struct frame_info * fi);
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
 	arm_init_extra_frame_info ((fromleaf), (fi))
@@ -398,13 +386,9 @@ extern CORE_ADDR arm_frame_saved_pc (struct frame_info *);
    ways in the stack frame.  sp is even more special: the address we
    return for it IS the sp for the next frame.  */
 
-struct frame_saved_regs;
-struct frame_info;
-void arm_frame_find_saved_regs (struct frame_info * fi,
-				struct frame_saved_regs * fsr);
-
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
-	arm_frame_find_saved_regs (frame_info, &(frame_saved_regs));
+void arm_frame_init_saved_regs (struct frame_info *);
+#define FRAME_INIT_SAVED_REGS(frame_info) \
+	arm_frame_init_saved_regs (frame_info);
 
 /* Things needed for making the inferior call functions.  */
 

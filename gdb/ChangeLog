@@ -1,3 +1,24 @@
+2002-01-21  Richard Earnshaw  <rearnsha@arm.com>
+	    Kevin Buettner  <kevinb@redhat.com>
+
+	Convert arm targets to new FRAME interface.
+	* arm-tdep.c (struct frame_extra_info): Remove fsr.
+	(arm_frame_find_save_regs): Delete.
+	(arm_frame_init_saved_regs): New.
+	(arm_init_extra_frame_info): Alloacte saved_regs as required.
+	Allocate extra_info as required.  Convert all uses of fsr.regs
+	to use saved_regs, similarly all uses of EXTRA_FRAME_INFO fields
+	to use extra_info.
+	(thumb_scan_prologue, arm_scan_prologue, arm_find_callers_reg)
+	(arm_frame_chain, arm_frame_saved_pc, arm_pop_frame): Likewise.
+	(check_prologue_cache, save_prologue_cache): Likewise.
+	(_initialize_arm_tdep): Ensure prologue_cache is correctly set up.
+	* config/arm/tm-arm.h (EXTRA_FRAME_INFO): Delete.
+	(FRAME_FIND_SAVED_REGS): Delete.
+	(arm_frame_find_saved_regs): Delete prototype.
+	(arm_frame_init_saved_regs): New prototype.
+	(FRAME_INIT_SAVED_REGS): Define.
+
 2002-01-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/arc/tm-arc.h (IEEE_FLOAT): Delete.
