@@ -1,8 +1,10 @@
+start-sanitize-v8plus
 Wed Jan 17 09:09:16 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* common.h: Define EM_SPARC32PLUS.
 
 	* sparc.h: New file.
+end-sanitize-v8plus
 
 Thu Jan 11 16:27:34 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
