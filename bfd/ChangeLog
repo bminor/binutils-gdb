@@ -1,3 +1,9 @@
+Wed Feb 17 12:28:13 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* aout-adobe.c (aout_adobe_object_p): eliminate a warning from vax
+	  ultrix cc by forward declaring getenv as is done in
+	  bfd_find_target.
+
 Tue Feb 16 17:56:58 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* elf.c (elf_info_to_howto): cast an enum into unsigned char
