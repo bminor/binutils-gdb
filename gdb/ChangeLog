@@ -1,3 +1,9 @@
+2001-11-15  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (is_simple_arg): Structs and unions exactly eight
+	bytes long should be handled as DOUBLE_ARGs; don't recognize them
+	as SIMPLE_ARGs.
+
 2001-11-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote.c (struct packet_reg): Declare.

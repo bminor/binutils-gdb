@@ -1243,10 +1243,13 @@ is_simple_arg (struct type *type)
   enum type_code code = TYPE_CODE (type);
   unsigned length = TYPE_LENGTH (type);
 
+  /* This is almost a direct translation of the ABI's language, except
+     that we have to exclude 8-byte structs; those are DOUBLE_ARGs.  */
   return ((is_integer_like (type) && length <= 4)
           || is_pointer_like (type)
-          || code == TYPE_CODE_STRUCT
-          || code == TYPE_CODE_UNION
+          || ((code == TYPE_CODE_STRUCT
+               || code == TYPE_CODE_UNION)
+              && length != 8)
           || (code == TYPE_CODE_FLT && length == 16));
 }
 
