@@ -1,3 +1,9 @@
+Sat Mar 15 17:13:05 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* arm-dis.c (print_insn_arm): Don't print instruction bytes.
+	(print_insn_big_arm): Set bytes_per_chunk and display_endian.
+	(print_insn_little_arm): Likewise.
+
 Fri Mar 14 15:08:59 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patches from H.J. Lu <hjl@lucon.org>:
