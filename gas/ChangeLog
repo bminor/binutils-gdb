@@ -1,3 +1,8 @@
+2001-01-08  Bo Thorsen  <bo@suse.de>
+
+        * config/tc-i386.c (i386_immediate, i386_displacement):
+        GOTPCREL check fix.
+
 2001-01-07  Ian Lance Taylor  <ian@zembu.com>
 
 	* doc/c-i386.texi (i386-Arch): Remove spaces incorrectly inserted

@@ -1,5 +1,5 @@
 /* i386.c -- Assemble code for the Intel 80386
-   Copyright (C) 1989, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright (C) 1989, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -245,7 +245,7 @@ static enum flag_code flag_code;
 static int use_rela_relocations = 0;
 
 /* The names used to print error messages.  */
-static const char *flag_code_names[] = 
+static const char *flag_code_names[] =
   {
     "32",
     "16",
@@ -2084,12 +2084,12 @@ md_assemble (line)
     if ((overlap0 & (Imm8 | Imm8S | Imm16 | Imm32 | Imm32S))
 	&& overlap0 != Imm8 && overlap0 != Imm8S
         && overlap0 != Imm16 && overlap0 != Imm32S
- 	&& overlap0 != Imm32 && overlap0 != Imm64)
+	&& overlap0 != Imm32 && overlap0 != Imm64)
       {
 	if (i.suffix)
 	  {
 	    overlap0 &= (i.suffix == BYTE_MNEM_SUFFIX ? (Imm8 | Imm8S) :
-			(i.suffix == WORD_MNEM_SUFFIX ? Imm16 : 
+			(i.suffix == WORD_MNEM_SUFFIX ? Imm16 :
 			(i.suffix == QWORD_MNEM_SUFFIX ? Imm64 | Imm32S : Imm32)));
 	  }
 	else if (overlap0 == (Imm16 | Imm32S | Imm32)
@@ -2110,13 +2110,13 @@ md_assemble (line)
     if ((overlap1 & (Imm8 | Imm8S | Imm16 | Imm32S | Imm32))
 	&& overlap1 != Imm8 && overlap1 != Imm8S
         && overlap1 != Imm16 && overlap1 != Imm32S
- 	&& overlap1 != Imm32 && overlap1 != Imm64)
+	&& overlap1 != Imm32 && overlap1 != Imm64)
       {
 	if (i.suffix)
 	  {
 	    overlap1 &= (i.suffix == BYTE_MNEM_SUFFIX ? (Imm8 | Imm8S) :
-			(i.suffix == WORD_MNEM_SUFFIX ? Imm16 : 
-	 		(i.suffix == QWORD_MNEM_SUFFIX ? Imm64 | Imm32S : Imm32)));
+			(i.suffix == WORD_MNEM_SUFFIX ? Imm16 :
+			(i.suffix == QWORD_MNEM_SUFFIX ? Imm64 | Imm32S : Imm32)));
 	  }
 	else if (overlap1 == (Imm16 | Imm32 | Imm32S)
 		 || overlap1 == (Imm16 | Imm32)
@@ -3132,20 +3132,20 @@ i386_immediate (imm_start)
 	    i.disp_reloc[this_operand] = BFD_RELOC_386_GOTOFF;
 	    len = 6;
 	  }
+	else if (strncmp (cp + 1, "GOTPCREL", 8) == 0)
+	  {
+	    if (flag_code == CODE_64BIT)
+	      i.disp_reloc[this_operand] = BFD_RELOC_X86_64_GOTPCREL;
+	    else
+	      as_bad ("GOTPCREL relocations are supported only in 64bit mode.");
+	    len = 8;
+	  }
 	else if (strncmp (cp + 1, "GOT", 3) == 0)
 	  {
 	    if (flag_code == CODE_64BIT)
 	      i.disp_reloc[this_operand] = BFD_RELOC_X86_64_GOT32;
 	    else
 	      i.disp_reloc[this_operand] = BFD_RELOC_386_GOT32;
-	    len = 3;
-	  }
-	else if (strncmp (cp + 1, "GOTPCREL", 3) == 0)
-	  {
-	    if (flag_code == CODE_64BIT)
-	      i.disp_reloc[this_operand] = BFD_RELOC_X86_64_GOTPCREL;
-	    else
-	      as_bad ("GOTPCREL relocations are supported only in 64bit mode.");
 	    len = 3;
 	  }
 	else
@@ -3370,19 +3370,19 @@ i386_displacement (disp_start, disp_end)
 	    i.disp_reloc[this_operand] = BFD_RELOC_386_GOTOFF;
 	    len = 6;
 	  }
+	else if (strncmp (cp + 1, "GOTPCREL", 8) == 0)
+	  {
+	    if (flag_code != CODE_64BIT)
+	      as_bad ("GOTPCREL relocation is supported only in 64bit mode.");
+	    i.disp_reloc[this_operand] = BFD_RELOC_X86_64_GOTPCREL;
+	    len = 8;
+	  }
 	else if (strncmp (cp + 1, "GOT", 3) == 0)
 	  {
 	    if (flag_code == CODE_64BIT)
 	      i.disp_reloc[this_operand] = BFD_RELOC_X86_64_GOT32;
 	    else
 	      i.disp_reloc[this_operand] = BFD_RELOC_386_GOT32;
-	    len = 3;
-	  }
-	else if (strncmp (cp + 1, "GOTPCREL", 3) == 0)
-	  {
-	    if (flag_code != CODE_64BIT)
-	      as_bad ("GOTPCREL relocation is supported only in 64bit mode.");
-	    i.disp_reloc[this_operand] = BFD_RELOC_X86_64_GOTPCREL;
 	    len = 3;
 	  }
 	else
@@ -4798,16 +4798,16 @@ tc_coff_sizemachdep (frag)
     dataType		BYTE | WORD | DWORD | QWORD | XWORD
 
     digits		decdigit
-    			| digits decdigit
-       			| digits hexdigit
+			| digits decdigit
+			| digits hexdigit
 
     decdigit		[0-9]
 
     e05			e05 addOp e06
-    			| e06
+			| e06
 
     e06			e06 mulOp e09
-    			| e09
+			| e09
 
     e09			OFFSET e10
 			| e09 PTR e10
@@ -4815,10 +4815,10 @@ tc_coff_sizemachdep (frag)
 			| e10
 
     e10			e10 [ expr ]
-    			| e11
+			| e11
 
     e11			( expr )
-     			| [ expr ]
+			| [ expr ]
 			| constant
 			| dataType
 			| id
@@ -4826,16 +4826,16 @@ tc_coff_sizemachdep (frag)
 			| register
 
  => expr		SHORT e05
-    			| e05
+			| e05
 
     gpRegister		AX | EAX | BX | EBX | CX | ECX | DX | EDX
-    			| BP | EBP | SP | ESP | DI | EDI | SI | ESI
+			| BP | EBP | SP | ESP | DI | EDI | SI | ESI
 
     hexdigit		a | b | c | d | e | f
-    			| A | B | C | D | E | F
+			| A | B | C | D | E | F
 
     id			alpha
-    			| id alpha
+			| id alpha
 			| id decdigit
 
     mulOp		* | / | MOD
@@ -4843,13 +4843,13 @@ tc_coff_sizemachdep (frag)
     quote		" | '
 
     register		specialRegister
-    			| gpRegister
+			| gpRegister
 			| byteRegister
 
     segmentRegister	CS | DS | ES | FS | GS | SS
 
     specialRegister	CR0 | CR2 | CR3
-    			| DR0 | DR1 | DR2 | DR3 | DR6 | DR7
+			| DR0 | DR1 | DR2 | DR3 | DR6 | DR7
 			| TR3 | TR4 | TR5 | TR6 | TR7
 
     We simplify the grammar in obvious places (e.g., register parsing is
@@ -4857,32 +4857,32 @@ tc_coff_sizemachdep (frag)
     to implement a recursive-descent parser.
 
     expr	SHORT e05
-    		| e05
+		| e05
 
     e05		e06 e05'
 
     e05'	addOp e06 e05'
-    		| Empty
+		| Empty
 
     e06		e09 e06'
 
     e06'	mulOp e09 e06'
-    		| Empty
+		| Empty
 
     e09		OFFSET e10 e09'
-   		| e10 e09'
+		| e10 e09'
 
     e09'	PTR e10 e09'
-   		| : e10 e09'
+		| : e10 e09'
 		| Empty
 
     e10		e11 e10'
 
     e10'	[ expr ] e10'
-    		| Empty
+		| Empty
 
     e11		( expr )
-   		| [ expr ]
+		| [ expr ]
 		| BYTE
 		| WORD
 		| DWORD
@@ -5020,7 +5020,7 @@ i386_intel_operand (operand_string, got_a_float)
 }
 
 /* expr	SHORT e05
-   	| e05  */
+	| e05  */
 static int
 intel_expr ()
 {
@@ -5068,7 +5068,7 @@ intel_e05_1 ()
 /* e06	e09 e06'
 
    e06'	mulOp e09 e06'
-   	| Empty  */
+	| Empty  */
 static int
 intel_e06 ()
 {
@@ -5093,10 +5093,10 @@ intel_e06_1 ()
 }
 
 /* e09	OFFSET e10 e09'
-   	| e10 e09'
+	| e10 e09'
 
    e09'	PTR e10 e09'
-   	| : e10 e09'
+	| : e10 e09'
 	| Empty */
 static int
 intel_e09 ()
@@ -5182,7 +5182,7 @@ intel_e09_1 ()
 /* e10	e11 e10'
 
    e10'	[ expr ] e10'
-   	| Empty  */
+	| Empty  */
 static int
 intel_e10 ()
 {
@@ -5228,7 +5228,7 @@ intel_e10_1 ()
 }
 
 /* e11	( expr )
-   	| [ expr ]
+	| [ expr ]
 	| BYTE
 	| WORD
 	| DWORD
