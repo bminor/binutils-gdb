@@ -95,7 +95,12 @@ struct elf_backend_data
      the output BFD.  If not, put a comment here explaining why.  */
   /* @@ Was pointer to elfNAME(symbol_type).  This makes it size-
      independent.  */
-  PTR global_sym;
+  void (*elf_backend_symbol_processing) PARAMS ((bfd *, asymbol *));
+  boolean (*elf_backend_symbol_table_processing) PARAMS ((bfd *, elf32_symbol_type *, int));
+  boolean (*elf_backend_section_processing) PARAMS ((bfd *, Elf32_Internal_Shdr *));
+  boolean (*elf_backend_section_from_shdr) PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
+  boolean (*elf_backend_fake_sections) PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
+  boolean (*elf_backend_section_from_bfd_section) PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
 };
 
 struct elf_sym_extra
@@ -193,6 +198,8 @@ extern bfd_reloc_status_type bfd_elf_generic_reloc PARAMS ((bfd *,
 							    asection *,
 							    bfd *));
 extern boolean bfd_elf_mkobject PARAMS ((bfd *));
+extern Elf_Internal_Shdr *bfd_elf_find_section PARAMS ((bfd *, char *));
+
 extern boolean bfd_elf32_write_object_contents PARAMS ((bfd *));
 extern boolean bfd_elf64_write_object_contents PARAMS ((bfd *));
 

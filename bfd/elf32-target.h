@@ -59,6 +59,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ELF_MAXPAGESIZE 1
 #endif
 
+#ifndef elf_backend_symbol_processing
+#define elf_backend_symbol_processing	0	/* elf_backend_symbol_processing */
+#endif
+#ifndef elf_backend_symbol_table_processing
+#define elf_backend_symbol_table_processing	0	/* elf_backend_symbol_table_processing */
+#endif
+#ifndef elf_backend_section_processing
+#define elf_backend_section_processing	0	/* elf_backend_section_processing */
+#endif
+#ifndef elf_backend_section_from_shdr
+#define elf_backend_section_from_shdr	0	/* elf_backend_section_from_shdr */
+#endif
+#ifndef elf_backend_fake_sections
+#define elf_backend_fake_sections	0	/* elf_backend_fake_sections */
+#endif
+#ifndef elf_backend_section_from_bfd_section
+#define elf_backend_section_from_bfd_section	0	/* elf_backend_section_from_bfd_section */
+#endif
+
 static CONST struct elf_backend_data elf32_bed =
 {
 #ifdef USE_REL
@@ -72,6 +91,12 @@ static CONST struct elf_backend_data elf32_bed =
   elf_info_to_howto_rel,	/* elf_info_to_howto_rel */
   ELF_MAXPAGESIZE,		/* maxpagesize */
   bfd_elf32__write_relocs,	/* write_relocs */
+  elf_backend_symbol_processing,	/* elf_backend_symbol_processing */
+  elf_backend_symbol_table_processing,	/* elf_backend_symbol_table_processing */
+  elf_backend_section_processing,	/* elf_backend_section_processing */
+  elf_backend_section_from_shdr,	/* elf_backend_section_from_shdr */
+  elf_backend_fake_sections,		/* elf_backend_fake_sections */
+  elf_backend_section_from_bfd_section,	/* elf_backend_section_from_bfd_section */
 };
 
 #ifdef TARGET_BIG_SYM

@@ -1,3 +1,109 @@
+Tue Aug 24 16:32:35 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	Merged changes from Jeff Law and Pete Hoogenboom at Utah:
+
+	* elfcode.h (elf_section_from_bfd_section): Add detection of
+	SHT_NOTE sections.
+
+	* elf32-hppa.c:
+	(hppa_elf_build_long_branch_stub,hppa_elf_long_branch_needed_p):
+	New functions for support of long branch stubs.
+	(hppa_elf_stub_check,hppa_look_for_stubs_in_section):  Add
+	check for long branch stubs.
+	(hppa_look_for_stubs):  Unused function.  Removed.
+	(hppa_elf_set_section_contents): Implement a PA/ELF-specific
+	version of bfd_set_section_contents.
+	(hppa_elf_long_branch_needed_p): Only output debugging diagnostics
+	when BFD is configured for debugging.
+
+	* elf32-hppa.c: (elf32_hppa_get_symextn_chain):  New function
+	to return a list of symbols that have non-zero argument
+	relocation bits.
+	(hppa_elf_stub_finish): Make sure stub generation is done only
+	once.
+
+	* elf32-hppa.c: (hppa_elf_stub_reloc):  New function for
+	generation relocation entries within a stub.
+	(hppa_elf_build_arg_reloc_stub): Corrections to argument
+	relocation stubs.
+
+	* elf32-hppa.c: New #define's for argument relocation types.
+	(mismatches, retval_mismatches): Updated to reflect new
+	argument relocation types.
+	(CURRENT_STUB_OFFSET): New macro.
+
+	* elfcode.h (map_program_segments): Set the PF_X bit for data
+	segments.
+
+	* elf32-hppa.c: (elf_hppa_howto_table): Add
+	R_HPPA_STUB_CALL_17 for support of linker stub generation.
+	(hppa_elf_reloc): Add support of R_HPPA_STUB_CALL_17
+	relocation type.
+
+	* elf32-hppa.h: (elf32_hppa_reloc_type): Add
+	R_HPPA_STUB_CALL_17 for support of linker stub generation.
+
+	* hppa_stubs.h: Add new instructions that are used in linker
+	stub generation.
+
+	* elf32-hppa.c (hppa_elf_relocate_unwind_table): The offsets in an
+	unwind descriptor were incorrect.
+
+	* libelf.h (bfd_elf_find_section): Declare.
+
+	* elf32-hppa.c: (elf32_hppa_backend_symbol_processing):  New
+	function in place of global_sym field in elf_backend_data
+	structure.
+	(elf32_hppa_backend_symbol_table_processing,
+	elf32_hppa_backend_section_processing,
+	elf32_hppa_backend_fake_sections,
+	elf32_hppa_backend_section_from_shdr,
+	elf32_hppa_backend_section_from_bfd_section):  New functions to
+	provide support of symbol extension sections and argument
+	relocation stubs.
+	(elf_info_to_howto):  Remove call to abort().
+
+	* elf32-target.h:  Support for special processing by the backend.
+	(struct elf_backend_data):  Added elf_backend_symbol_processing,
+	elf_backend_symbol_table_processing,
+	elf_backend_section_processing, elf_backend_section_from_shdr,
+	elf_backend_fake_sections, and
+	elf_backend_section_from_bfd_section fields.
+	* elfcode.h: (bfd_section_from_shdr): Add a check for
+	processor-specific section types.
+	(elf_fake_sections):  Add a check for processor-specific
+	section types.
+	(bfd_elf32_write_object_contents):  Add a check to see if
+	there is any final section processing to be done by the
+	backend.
+	(elf_section_from_bfd_section):  Add a check for
+	processor-specific section types.
+	(elf_slurp_symbol_table):  Remove reference to global_sym in the
+	elf_backend_data structure.  Replace it with a call to
+	elf_backend_symbol_processing.
+	* libelf.h: Remove global_sym field in the elf_backend_data
+	structure.  Replace it with a series of backend-specific
+	functions.
+
+	* elf32-hppa.c (hppa_elf_stub_branch_reloc): The formal argument
+	stub_sym should be called target_sym.
+	(hppa_elf_build_arg_reloc_stub): Refer to the stub bfd (abfd)
+	rather than the output bfd (output_bfd).
+	(hppa_elf_reloc): Get rid of references to the global_sym field in
+	the elf_backend_data structure.
+
+	* elfcode.h (elf_fake_sections): Check the correct condition for
+	.bss.  Also, detect the existence of a .note section.
+
+	* elf32-hppa.c (hppa_elf_relocate_insn): r_format argument should
+	have been r_field.
+
+	* hosts/hppabsd.h (HOST_MACHINE_ARCH): Reference to bfd_arch_m68k
+	should be a reference to bfd_arch_hppa.
+
+	* hppa.c (hppa_vec): Replace bfd_false with _bfd_dummy_target in
+	the bfd_check_format structure to avoid a type mismatch.
+
 Mon Aug 23 1993  Sean Fagan  (sef@cygnus.com)
 		 and Jim Kingdon  (kingdon@cygnus.com)
 

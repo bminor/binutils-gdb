@@ -26,7 +26,7 @@ extern void free   PARAMS ((PTR));
 
 #define	HOST_PAGE_SIZE		NBPG
 #define	HOST_SEGMENT_SIZE	NBPG	/* Data seg start addr rounds to NBPG */
-#define	HOST_MACHINE_ARCH	bfd_arch_m68k
+#define	HOST_MACHINE_ARCH	bfd_arch_hppa
 /* #define	HOST_MACHINE_MACHINE	 */
 
 #define	HOST_TEXT_START_ADDR		UTEXTSEG

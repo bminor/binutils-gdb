@@ -940,7 +940,7 @@ bfd_target hppa_vec =
   {_bfd_dummy_target,
    hppa_object_p,		/* bfd_check_format */
    bfd_generic_archive_p,
-   bfd_false
+   _bfd_dummy_target
   },
   {
     bfd_false,
