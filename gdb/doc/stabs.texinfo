@@ -2324,13 +2324,20 @@ baseA::Ameth(int in, char other)
 
 
 This method definition yields three stabs following the code of the
-method.  One stab describes the method itself and following two
-describe its parameters.  Although there is only one formal argument
-all methods have an implicit argument which is the `this' pointer.
-The `this' pointer is a pointer to the object on which the method was
-called.  Note that the method name is mangled to encode the class name
-and argument types.  << Name mangling is not described by this
-document - Is there already such a doc? >>
+method.  One stab describes the method itself and following two describe
+its parameters.  Although there is only one formal argument all methods
+have an implicit argument which is the `this' pointer.  The `this'
+pointer is a pointer to the object on which the method was called.  Note
+that the method name is mangled to encode the class name and argument
+types.  Name mangling is described in the @sc{arm} (@cite{The Annotated
+C++ Reference Manual}, by Ellis and Stroustrup, @sc{isbn}
+0-201-51459-1); @file{gpcompare.texi} in Cygnus GCC distributions
+describes the differences between @sc{gnu} mangling and @sc{arm}
+mangling.
+@c FIXME: Use @xref, especially if this is generally installed in the
+@c info tree.
+@c FIXME: This information should be in a net release, either of GCC or
+@c GDB.  But gpcompare.texi doesn't seem to be in the FSF GCC.
 
 @example
 .stabs "name:symbol_desriptor(global function)return_type(int)",

@@ -1,3 +1,7 @@
+Thu Aug 12 15:11:51 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo: Point to mangling info in gcc's gpcompare.texi.
+
 Tue Aug 10 16:57:49 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	* gdbint.texinfo: Removed many nonsensical machine-collected
