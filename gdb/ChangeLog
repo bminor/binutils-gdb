@@ -1,3 +1,11 @@
+Sun Jul 11 19:35:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* sparc-tdep.c (sparc_frame_chain, frame_saved_pc):
+	Keep unswapped value in array of char, not REGISTER_TYPE.
+	Use REGISTER_RAW_SIZE not sizeof (REGISTER_TYPE).
+	(sparc_extract_struct_value_address): Use TARGET_PTR_BIT not
+	sizeof (CORE_ADDR).
+
 Thu Jul  1 15:50:05 1993  Frederic Pierresteguy (F.Pierresteguy@frcl.bull.fr)
 
 	* configure.in (m68*-bull-sysv*): added support for Bull dpx2.
