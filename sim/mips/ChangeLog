@@ -1,3 +1,8 @@
+Wed Apr 10 09:51:38 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* interp.c (sim_do_command): Complain if callback structure not
+ 	initialised.
+
 Thu Mar 28 13:50:51 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* interp.c (Convert): Provide round-to-nearest and round-to-zero

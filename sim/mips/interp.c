@@ -1235,6 +1235,11 @@ sim_do_command (cmd)
 {
   struct t_sim_command *cptr;
 
+  if (callback == NULL) {
+    fprintf(stderr,"Simulator not enabled: \"target sim\" should be used to activate\n");
+    return;
+  }
+
   if (!(cmd && *cmd != '\0'))
    cmd = "help";
 
