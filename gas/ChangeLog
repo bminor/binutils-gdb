@@ -42,7 +42,6 @@ end-sanitize-v850e
 	* config/obj-coff.c (c_symbol_merge): Replace complex expresion
 	with call to macro SYM_AUXINFO.
 
->>>>>>> 1.2596
 Tue Jun 23 15:09:27 1998  Mike Stump  <mrs@wrs.com>
 
 	* Makefile.am (install-exec-local): Don't let EXEEXT interfere
