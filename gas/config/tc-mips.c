@@ -5846,7 +5846,23 @@ macro (ip)
 	     range is shifted down by 32768 here.  This code should
 	     probably attempt to generate 64-bit constants more
 	     efficiently in general.
-	   */
+
+	     As an extension for architectures with 64-bit registers,
+	     we don't truncate 64-bit addresses given as literal
+	     constants down to 32 bits, to support existing practice
+	     in the mips64 Linux (the kernel), that compiles source
+	     files with -mabi=64, assembling them as o32 or n32 (with
+	     -Wa,-32 or -Wa,-n32).  This is not beautiful, but since
+	     the whole kernel is loaded into a memory region that is
+	     addressible with sign-extended 32-bit addresses, it is
+	     wasteful to compute the upper 32 bits of every
+	     non-literal address, that takes more space and time.
+	     Some day this should probably be implemented as an
+	     assembler option, such that the kernel doesn't have to
+	     use such ugly hacks, even though it will still have to
+	     end up converting the binary to ELF32 for a number of
+	     platforms whose boot loaders don't support ELF64
+	     binaries.  */
 	  if ((offset_expr.X_op != O_constant && HAVE_64BIT_ADDRESSES)
 	      || (offset_expr.X_op == O_constant
 		  && !IS_SEXT_32BIT_NUM (offset_expr.X_add_number + 0x8000)

@@ -1,3 +1,8 @@
+2003-04-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mips.c (macro): Add comments explaining the rationale
+	for Chris' change.
+
 2003-04-09  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (macro): Put back `+ 0x8000' in test for 64-bit
