@@ -1,3 +1,27 @@
+2003-07-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (_bfd_elf_create_linker_section) Don't declare.
+	(_bfd_elf_find_pointer_linker_section): Likewise.
+	(bfd_elf32_create_pointer_linker_section): Likewise.
+	(bfd_elf32_finish_pointer_linker_section): Likewise.
+	(bfd_elf64_create_pointer_linker_section): Likewise.
+	(bfd_elf64_finish_pointer_linker_section): Likewise.
+	(_bfd_elf_make_linker_section_rela): Likewise.
+	* elfcode.h (elf_create_pointer_linker_section): Don't define.
+	(elf_finish_pointer_linker_section): Likewise.
+	* elflink.c (_bfd_elf_make_linker_section_rela): Delete.
+	(_bfd_elf_create_linker_section): Move this function..
+	(_bfd_elf_find_pointer_linker_section): ..and this..
+	* elflink.h (elf_create_pointer_linker_section): ..and this..
+	(elf_finish_pointer_linker_section): ..and this..
+	* elf32-ppc.c: ..to here, renaming to the following, and adjusting
+	calls.
+	(elf_create_linker_section): Convert to C90, tidy.
+	(elf_find_pointer_linker_section): Likewise.
+	(elf_create_pointer_linker_section): Likewise.
+	(elf_finish_pointer_linker_section): Likewise.
+	* elf32-i370.c: Delete #if 0 code.
+
 2003-07-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Don't allow _savef* and
@@ -3565,8 +3589,8 @@
 	(aout_link_write_symbols): Cast enums in comparisons, int values to
 	boolean, enums in assignments to int.
 	(aout_link_input_section_std): Cast rel->r_index to unsigned int.
-	(aout_link_input_section_ext): Likewise.  Cast enums used in comparisons
-	with unsigned ints.
+	(aout_link_input_section_ext): Likewise.  Cast enums used in
+	comparisons with unsigned ints.
 	(aout_link_reloc_link_order): Cast enum to int in assignment.
 	* archive.c (_bfd_generic_read_ar_hdr_mag): Cast result of memchr
 	calls to char *.
@@ -3597,8 +3621,8 @@
 	(merge_strings): Add casts to const unsigned char *.
 	* reloc.c (bfd_get_reloc_code_name): Cast enums in comparison to int.
 	(bfd_generic_get_relocated_section_content): Cast enum to unsigned int.
-	* section.c (bfd_section_hash_newfunc): Cast bfd_hash_allocate result to
-	struct bfd_hash_entry *.
+	* section.c (bfd_section_hash_newfunc): Cast bfd_hash_allocate result
+	to struct bfd_hash_entry *.
 	(bfd_set_section_content): Add cast to PTR in comparison.
 	* simple.c (simple_dummy_warning, simple_dummy_undefined_symbol,
 	simple_dummy_reloc_overflow, simple_dummy_reloc_dangerous,

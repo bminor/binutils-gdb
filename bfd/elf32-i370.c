@@ -290,11 +290,6 @@ static bfd_boolean i370_elf_section_from_shdr
   PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static bfd_boolean i370_elf_fake_sections
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
-#if 0
-static elf_linker_section_t *i370_elf_create_linker_section
-  PARAMS ((bfd *abfd, struct bfd_link_info *info,
-	   enum elf_linker_section_enum));
-#endif
 static bfd_boolean i370_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
@@ -433,84 +428,6 @@ i370_elf_fake_sections (abfd, shdr, asect)
 
   return TRUE;
 }
-
-#if 0
-/* Create a special linker section */
-/* XXX hack alert bogus This routine is mostly all junk and almost
- * certainly does the wrong thing.  Its here simply because it does
- * just enough to allow glibc-2.1 ld.so to compile & link.
- */
-
-static elf_linker_section_t *
-i370_elf_create_linker_section (abfd, info, which)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     enum elf_linker_section_enum which;
-{
-  bfd *dynobj = elf_hash_table (info)->dynobj;
-  elf_linker_section_t *lsect;
-
-  /* Record the first bfd section that needs the special section */
-  if (!dynobj)
-    dynobj = elf_hash_table (info)->dynobj = abfd;
-
-  /* If this is the first time, create the section */
-  lsect = elf_linker_section (dynobj, which);
-  if (!lsect)
-    {
-      elf_linker_section_t defaults;
-      static elf_linker_section_t zero_section;
-
-      defaults = zero_section;
-      defaults.which = which;
-      defaults.hole_written_p = FALSE;
-      defaults.alignment = 2;
-
-      /* Both of these sections are (technically) created by the user
-	 putting data in them, so they shouldn't be marked
-	 SEC_LINKER_CREATED.
-
-	 The linker creates them so it has somewhere to attach their
-	 respective symbols. In fact, if they were empty it would
-	 be OK to leave the symbol set to 0 (or any random number), because
-	 the appropriate register should never be used.  */
-      defaults.flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-			| SEC_IN_MEMORY);
-
-      switch (which)
-	{
-	default:
-	  (*_bfd_error_handler) ("%s: Unknown special linker type %d",
-				 bfd_archive_filename (abfd),
-				 (int) which);
-
-	  bfd_set_error (bfd_error_bad_value);
-	  return (elf_linker_section_t *)0;
-
-	case LINKER_SECTION_SDATA:	/* .sdata/.sbss section */
-	  defaults.name		  = ".sdata";
-	  defaults.rel_name	  = ".rela.sdata";
-	  defaults.bss_name	  = ".sbss";
-	  defaults.sym_name	  = "_SDA_BASE_";
-	  defaults.sym_offset	  = 32768;
-	  break;
-
-	case LINKER_SECTION_SDATA2:	/* .sdata2/.sbss2 section */
-	  defaults.name		  = ".sdata2";
-	  defaults.rel_name	  = ".rela.sdata2";
-	  defaults.bss_name	  = ".sbss2";
-	  defaults.sym_name	  = "_SDA2_BASE_";
-	  defaults.sym_offset	  = 32768;
-	  defaults.flags	 |= SEC_READONLY;
-	  break;
-	}
-
-      lsect = _bfd_elf_create_linker_section (abfd, info, which, &defaults);
-    }
-
-  return lsect;
-}
-#endif
 
 /* We have to create .dynsbss and .rela.sbss here so that they get mapped
    to output sections (just like _bfd_elf_create_dynamic_sections has

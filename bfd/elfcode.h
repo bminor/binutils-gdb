@@ -125,8 +125,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_reloc_symbol_deleted_p	NAME(_bfd_elf,reloc_symbol_deleted_p)
 #define elf_link_record_dynamic_symbol  _bfd_elf_link_record_dynamic_symbol
 #define elf_bfd_final_link		NAME(bfd_elf,bfd_final_link)
-#define elf_create_pointer_linker_section NAME(bfd_elf,create_pointer_linker_section)
-#define elf_finish_pointer_linker_section NAME(bfd_elf,finish_pointer_linker_section)
 #define elf_gc_sections			NAME(_bfd_elf,gc_sections)
 #define elf_gc_common_finalize_got_offsets \
   NAME(_bfd_elf,gc_common_finalize_got_offsets)

@@ -1554,35 +1554,6 @@ extern bfd_boolean _bfd_elfcore_make_pseudosection
 extern char *_bfd_elfcore_strndup
   PARAMS ((bfd *, char *, size_t));
 
-extern elf_linker_section_t *_bfd_elf_create_linker_section
-  PARAMS ((bfd *, struct bfd_link_info *, enum elf_linker_section_enum,
-	   elf_linker_section_t *));
-
-extern elf_linker_section_pointers_t *_bfd_elf_find_pointer_linker_section
-  PARAMS ((elf_linker_section_pointers_t *, bfd_vma,
-	   elf_linker_section_enum_t));
-
-extern bfd_boolean bfd_elf32_create_pointer_linker_section
-  PARAMS ((bfd *, struct bfd_link_info *, elf_linker_section_t *,
-	   struct elf_link_hash_entry *, const Elf_Internal_Rela *));
-
-extern bfd_vma bfd_elf32_finish_pointer_linker_section
-  PARAMS ((bfd *, bfd *, struct bfd_link_info *, elf_linker_section_t *,
-	   struct elf_link_hash_entry *, bfd_vma,
-	   const Elf_Internal_Rela *, int));
-
-extern bfd_boolean bfd_elf64_create_pointer_linker_section
-  PARAMS ((bfd *, struct bfd_link_info *, elf_linker_section_t *,
-	   struct elf_link_hash_entry *, const Elf_Internal_Rela *));
-
-extern bfd_vma bfd_elf64_finish_pointer_linker_section
-  PARAMS ((bfd *, bfd *, struct bfd_link_info *, elf_linker_section_t *,
-	   struct elf_link_hash_entry *, bfd_vma,
-	   const Elf_Internal_Rela *, int));
-
-extern bfd_boolean _bfd_elf_make_linker_section_rela
-  PARAMS ((bfd *, elf_linker_section_t *, int));
-
 extern Elf_Internal_Rela *_bfd_elf_link_read_relocs
   PARAMS ((bfd *, asection *, PTR, Elf_Internal_Rela *, bfd_boolean));
 
