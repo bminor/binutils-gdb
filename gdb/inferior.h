@@ -472,29 +472,6 @@ extern int deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc,
 						       CORE_ADDR sp,
 						       CORE_ADDR frame_address);
 
-/* It's often not enough for our clients to know whether the PC is merely
-   somewhere within the call dummy.  They may need to know whether the
-   call dummy has actually completed.  (For example, wait_for_inferior
-   wants to know when it should truly stop because the call dummy has
-   completed.  If we're single-stepping because of slow watchpoints,
-   then we may find ourselves stopped at the entry of the call dummy,
-   and want to continue stepping until we reach the end.)
-
-   Note that this macro is intended for targets (like HP-UX) which
-   require more than a single breakpoint in their call dummies, and
-   therefore cannot use the DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET
-   mechanism.
-
-   If a target does define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET,
-   then this default implementation of CALL_DUMMY_HAS_COMPLETED is
-   sufficient.  Else, a target may wish to supply an implementation
-   that works in the presense of multiple breakpoints in its call
-   dummy.  */
-#if !defined(CALL_DUMMY_HAS_COMPLETED)
-#define CALL_DUMMY_HAS_COMPLETED(pc, sp, frame_address) \
-  DEPRECATED_PC_IN_CALL_DUMMY((pc), (sp), (frame_address))
-#endif
-
 /* If STARTUP_WITH_SHELL is set, GDB's "run"
    will attempts to start up the debugee under a shell.
    This is in order for argument-expansion to occur. E.g.,

@@ -1,3 +1,10 @@
+2003-10-31  Andrew Cagney  <cagney@redhat.com>
+
+	* stack.c (return_command): Use get_frame_type, instead of
+	CALL_DUMMY_HAS_COMPLETED.
+	* inferior.h (CALL_DUMMY_HAS_COMPLETED): Delete definition.
+	* config/pa/tm-hppa.h (CALL_DUMMY_HAS_COMPLETED): Delete macro.
+
 2003-10-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-linux-tdep.c (x86_64_linux_sc_reg_offset): Don't

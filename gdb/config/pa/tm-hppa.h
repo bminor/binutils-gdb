@@ -208,7 +208,7 @@ extern void hppa_frame_init_saved_regs (struct frame_info *);
 /* If we've reached a trap instruction within the call dummy, then
    we'll consider that to mean that we've reached the call dummy's
    end after its successful completion. */
-#define CALL_DUMMY_HAS_COMPLETED(pc, sp, frame_address) \
+#define DEPRECATED_CALL_DUMMY_HAS_COMPLETED(pc, sp, frame_address) \
   (DEPRECATED_PC_IN_CALL_DUMMY((pc), (sp), (frame_address)) && \
    (read_memory_integer((pc), 4) == BREAKPOINT32))
 
