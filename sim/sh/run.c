@@ -36,6 +36,8 @@ main (ac, av)
   int verbose = 0;
   int trace = 0;
   char *name = "";
+  sim_set_timeout(10000000);
+  
   for (i = 1; i < ac; i++)
     {
       if (strcmp (av[i], "-v") == 0)
@@ -55,6 +57,11 @@ main (ac, av)
       else if (strcmp (av[i], "-s") == 0)
 	{
 	  sim_set_profile_size(atoi(av[i+1]));
+	  i++;
+	}
+      else if (strcmp (av[i], "-k") == 0)
+	{
+	  sim_set_timeout(atoi(av[i+1]));
 	  i++;
 	}
       else if (strcmp (av[i], "-m") == 0)
@@ -106,7 +113,13 @@ main (ac, av)
 	  if (verbose)
 	    sim_info ();
 
-	  return 0;
+	  /* Find out what was in r0 and return that */
+	  {
+	    unsigned char b[4];
+	    sim_fetch_register(0, b);
+	    return b[3];
+	  }
+	  
 	}
     }
 
