@@ -1,3 +1,7 @@
+2001-07-05  Jim Wilson  <wilson@redhat.com>
+
+	* syms.c (bfd_is_local_label): Return false if BSF_SECTION_SYM.
+
 2001-07-05  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* peicode.h (coff_swap_scnhdr_in): For sections containing

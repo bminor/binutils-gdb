@@ -353,7 +353,10 @@ bfd_is_local_label (abfd, sym)
      bfd *abfd;
      asymbol *sym;
 {
-  if ((sym->flags & (BSF_GLOBAL | BSF_WEAK)) != 0)
+  /* The BSF_SECTION_SYM check is needed for IA-64, where every label that
+     starts with '.' is local.  This would accidentally catch section names
+     if we didn't reject them here.  */
+  if ((sym->flags & (BSF_GLOBAL | BSF_WEAK | BSF_SECTION_SYM)) != 0)
     return false;
   if (sym->name == NULL)
     return false;
