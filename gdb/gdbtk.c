@@ -348,6 +348,62 @@ gdb_sourcelines (clientData, interp, argc, argv)
   return TCL_OK;
 }
 
+static int
+map_arg_registers (argc, argv, func, argp)
+     int argc;
+     char *argv[];
+     int (*func) PARAMS ((int regnum, void *argp));
+     void *argp;
+{
+  int regnum;
+
+  /* Note that the test for a valid register must include checking the
+     reg_names array because NUM_REGS may be allocated for the union of the
+     register sets within a family of related processors.  In this case, the
+     trailing entries of reg_names will change depending upon the particular
+     processor being debugged.  */
+
+  if (argc == 0)		/* No args, just do all the regs */
+    {
+      for (regnum = 0;
+	   regnum < NUM_REGS
+	   && reg_names[regnum] != NULL
+	   && *reg_names[regnum] != '\000';
+	   regnum++)
+	func (regnum, argp);
+
+      return TCL_OK;
+    }
+
+  /* Else, list of register #s, just do listed regs */
+  for (; argc > 0; argc--, argv++)
+    {
+      regnum = atoi (*argv);
+
+      if (regnum >= 0
+	  && regnum < NUM_REGS
+	  && reg_names[regnum] != NULL
+	  && *reg_names[regnum] != '\000')
+	func (regnum, argp);
+      else
+	{
+	  Tcl_SetResult (interp, "bad register number", TCL_STATIC);
+
+	  return TCL_ERROR;
+	}
+    }
+
+  return TCL_OK;
+}
+
+static int
+get_register_name (regnum, argp)
+     int regnum;
+     void *argp;		/* Ignored */
+{
+  Tcl_AppendElement (interp, reg_names[regnum]);
+}
+
 /* This implements the TCL command `gdb_regnames', which returns a list of
    all of the register names. */
 
@@ -358,18 +414,142 @@ gdb_regnames (clientData, interp, argc, argv)
      int argc;
      char *argv[];
 {
-  int i;
+  argc--;
+  argv++;
 
-  if (argc != 1)
+  return map_arg_registers (argc, argv, get_register_name, 0);
+}
+
+static char reg_value[200];
+static char *reg_valp = reg_value;
+
+static void
+save_reg_value (ptr)
+     const char *ptr;
+{
+  int len;
+
+  len = strlen (ptr);
+
+  strncpy (reg_valp, ptr, len + 1);
+
+  reg_valp += len;
+}
+
+#ifndef REGISTER_CONVERTIBLE
+#define REGISTER_CONVERTIBLE(x) (0 != 0)
+#endif
+
+#ifndef REGISTER_CONVERT_TO_VIRTUAL
+#define REGISTER_CONVERT_TO_VIRTUAL(x, y, z, a)
+#endif
+
+#ifndef INVALID_FLOAT
+#define INVALID_FLOAT(x, y) (0 != 0)
+#endif
+
+static int
+get_register (regnum, fp)
+     void *fp;
+{
+  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
+  int format = (int)fp;
+
+  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+    {
+      Tcl_AppendElement (interp, "Optimized out");
+      return;
+    }
+
+  fputs_unfiltered_hook = save_reg_value;
+  flush_hook = 0;
+  reg_valp = reg_value;
+
+  /* Convert raw data to virtual format if necessary.  */
+
+  if (REGISTER_CONVERTIBLE (regnum))
+    {
+      REGISTER_CONVERT_TO_VIRTUAL (regnum, REGISTER_VIRTUAL_TYPE (regnum),
+				   raw_buffer, virtual_buffer);
+    }
+  else
+    memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (regnum));
+
+  val_print (REGISTER_VIRTUAL_TYPE (regnum), virtual_buffer, 0,
+	     gdb_stdout, format, 1, 0, Val_pretty_default);
+
+  fputs_unfiltered_hook = gdbtk_fputs;
+  flush_hook = gdbtk_flush;
+
+  Tcl_AppendElement (interp, reg_value);
+}
+
+static int
+gdb_fetch_registers (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  int format;
+
+  if (argc < 2)
     {
       Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
       return TCL_ERROR;
     }
 
-  for (i = 0; i < NUM_REGS; i++)
-    Tcl_AppendElement (interp, reg_names[i]);
+  argc--;
+  argv++;
 
-  return TCL_OK;
+  argc--;
+  format = **argv++;
+
+  return map_arg_registers (argc, argv, get_register, format);
+}
+
+/* This contains the previous values of the registers, since the last call to
+   gdb_changed_register_list.  */
+
+static char old_regs[REGISTER_BYTES];
+
+static int
+register_changed_p (regnum, argp)
+     void *argp;		/* Ignored */
+{
+  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  char buf[100];
+
+  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+    return;
+
+  if (memcmp (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
+	      REGISTER_RAW_SIZE (regnum)) == 0)
+    return;
+
+  /* Found a changed register.  Save new value and return it's number. */
+
+  memcpy (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
+	  REGISTER_RAW_SIZE (regnum));
+
+  sprintf (buf, "%d", regnum);
+  Tcl_AppendElement (interp, buf);
+}
+
+static int
+gdb_changed_register_list (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  int format;
+
+  argc--;
+  argv++;
+
+  return map_arg_registers (argc, argv, register_changed_p, NULL);
 }
 
 static int
@@ -563,9 +743,13 @@ gdbtk_init ()
   Tcl_CreateCommand (interp, "gdb_cmd", gdb_cmd, NULL, NULL);
   Tcl_CreateCommand (interp, "gdb_loc", gdb_loc, NULL, NULL);
   Tcl_CreateCommand (interp, "gdb_sourcelines", gdb_sourcelines, NULL, NULL);
-  Tcl_CreateCommand (interp, "gdb_regnames", gdb_regnames, NULL, NULL);
   Tcl_CreateCommand (interp, "gdb_listfiles", gdb_listfiles, NULL, NULL);
   Tcl_CreateCommand (interp, "gdb_stop", gdb_stop, NULL, NULL);
+  Tcl_CreateCommand (interp, "gdb_regnames", gdb_regnames, NULL, NULL);
+  Tcl_CreateCommand (interp, "gdb_fetch_registers", gdb_fetch_registers, NULL,
+		     NULL);
+  Tcl_CreateCommand (interp, "gdb_changed_register_list",
+		     gdb_changed_register_list, NULL, NULL);
 
   gdbtk_filename = getenv ("GDBTK_FILENAME");
   if (!gdbtk_filename)

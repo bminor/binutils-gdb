@@ -11,6 +11,7 @@ set cfunc NIL
 #option add *Foreground Black
 #option add *Background White
 #option add *Font -*-*-medium-r-normal--18-*-*-*-m-*-*-1
+tk colormodel . monochrome
 
 proc echo string {puts stdout $string}
 
@@ -341,7 +342,11 @@ proc insert_breakpoint_tag {win line} {
 proc delete_breakpoint_tag {win line} {
 	$win configure -state normal
 	$win delete $line.0
-	$win insert $line.0 " "
+	if {[string range $win 0 3] == ".src"} then {
+		$win insert $line.0 "\xa4"
+	} else {
+		$win insert $line.0 " "
+	}
 	$win tag delete $line
 	$win tag add delete $line.0 "$line.0 lineend"
 	$win tag add margin $line.0 "$line.0 lineend"
@@ -631,7 +636,7 @@ proc asm_window_button_1 {win x y xrel yrel} {
 
 # If we're in the margin, then toggle the breakpoint
 
-	if {$selected_col < 8} {
+	if {$selected_col < 11} {
 		set tmp pos_to_breakpoint($pc)
 		if [info exists $tmp] {
 			set bpnum [set $tmp]
@@ -724,33 +729,36 @@ proc display_expression {expression} {
 #	numbers are added.
 #
 
-proc create_file_win {filename} {
+proc create_file_win {filename debug_file} {
 	global breakpoint_file
 	global breakpoint_line
 
 # Replace all the dirty characters in $filename with clean ones, and generate
 # a unique name for the text widget.
 
-	regsub -all {\.|/} $filename {} temp
+	regsub -all {\.} $filename {} temp
 	set win .src.text$temp
 
 # Open the file, and read it into the text widget
 
 	if [catch "open $filename" fh] {
-# File can't be read.  Put error message into .nofile window and return.
+# File can't be read.  Put error message into .src.nofile window and return.
 
-		catch {destroy .nofile}
-		text .nofile -height 25 -width 88 -relief raised -borderwidth 2 -yscrollcommand textscrollproc -setgrid true -cursor hand2
-		.nofile insert 0.0 $fh
-		.nofile configure -state disabled
-		bind .nofile <1> do_nothing
-		bind .nofile <B1-Motion> do_nothing
-		return .nofile
+		catch {destroy .src.nofile}
+		text .src.nofile -height 25 -width 88 -relief raised \
+			-borderwidth 2 -yscrollcommand textscrollproc \
+			-setgrid true -cursor hand2
+		.src.nofile insert 0.0 $fh
+		.src.nofile configure -state disabled
+		bind .src.nofile <1> do_nothing
+		bind .src.nofile <B1-Motion> do_nothing
+		return .src.nofile
 	}
 
 # Actually create and do basic configuration on the text widget.
 
-	text $win -height 25 -width 88 -relief raised -borderwidth 2 -yscrollcommand textscrollproc -setgrid true -cursor hand2
+	text $win -height 25 -width 88 -relief raised -borderwidth 2 \
+		-yscrollcommand textscrollproc -setgrid true -cursor hand2
 
 # Setup all the bindings
 
@@ -776,8 +784,15 @@ proc create_file_win {filename} {
 	set numlines [lindex [split $numlines .] 0]
 	for {set i 1} {$i <= $numlines} {incr i} {
 		$win insert $i.0 [format "   %4d " $i]
-		$win tag add margin $i.0 $i.8
 		$win tag add source $i.8 "$i.0 lineend"
+		}
+
+# Add the breakdots
+
+	foreach i [gdb_sourcelines $debug_file] {
+		$win delete $i.0
+		$win insert $i.0 "\xa4"
+		$win tag add margin $i.0 $i.8
 		}
 
 	$win tag bind margin <1> {listing_window_button_1 %W %X %Y %x %y}
@@ -973,6 +988,7 @@ proc update_listing {linespec} {
 	global current_label
 	global win_to_file
 	global file_to_debug_file
+	global .src.label
 
 # Rip the linespec apart
 
@@ -995,8 +1011,8 @@ proc update_listing {linespec} {
 # Create a text widget for this file if necessary
 
 		if ![info exists wins($cfile)] then {
-			set wins($cfile) [create_file_win $cfile]
-			if {$wins($cfile) != ".nofile"} {
+			set wins($cfile) [create_file_win $cfile $debug_file]
+			if {$wins($cfile) != ".src.nofile"} {
 				set win_to_file($wins($cfile)) $cfile
 				set file_to_debug_file($cfile) $debug_file
 				set pointers($cfile) 1.1
@@ -1005,7 +1021,13 @@ proc update_listing {linespec} {
 
 # Pack the text widget into the listing widget, and scroll to the right place
 
-		pack $wins($cfile) -side left -expand yes -in .src.info -fill both -after .src.scroll
+		pack $wins($cfile) -side left -expand yes -in .src.info \
+			-fill both -after .src.scroll
+
+# Make the scrollbar point at the new text widget
+
+		.src.scroll configure -command "$wins($cfile) yview"
+
 		$wins($cfile) yview [expr $line - $screen_height / 2]
 		}
 
@@ -1013,7 +1035,8 @@ proc update_listing {linespec} {
 
 	if {$current_label != "$filename.$funcname"} then {
 		set tail [expr [string last / $filename] + 1]
-		.src.label configure -text "[string range $filename $tail end] : ${funcname}()"
+		set .src.label "[string range $filename $tail end] : ${funcname}()"
+#		.src.label configure -text "[string range $filename $tail end] : ${funcname}()"
 		set current_label $filename.$funcname
 		}
 
@@ -1024,14 +1047,14 @@ proc update_listing {linespec} {
 		$wins($cfile) configure -state normal
 		set pointer_pos $pointers($cfile)
 		$wins($cfile) configure -state normal
-		$wins($cfile) delete $pointer_pos
-		$wins($cfile) insert $pointer_pos " "
+		$wins($cfile) delete $pointer_pos "$pointer_pos + 2 char"
+		$wins($cfile) insert $pointer_pos "  "
 
 		set pointer_pos [$wins($cfile) index $line.1]
 		set pointers($cfile) $pointer_pos
 
-		$wins($cfile) delete $pointer_pos
-		$wins($cfile) insert $pointer_pos "\xbb"
+		$wins($cfile) delete $pointer_pos "$pointer_pos + 2 char"
+		$wins($cfile) insert $pointer_pos "->"
 
 		if {$line < $screen_top + 1
 		    || $line > $screen_bot} then {
@@ -1045,14 +1068,14 @@ proc update_listing {linespec} {
 #
 # Local procedure:
 #
-#	asm_command - Open up the assembly window.
+#	create_asm_window - Open up the assembly window.
 #
 # Description:
 #
 #	Create an assembly window if it doesn't exist.
 #
 
-proc asm_command {} {
+proc create_asm_window {} {
 	global cfunc
 
 	if ![winfo exists .asm] {
@@ -1093,26 +1116,180 @@ proc asm_command {} {
 	}
 }
 
+proc reg_config_menu {} {
+	global reg_format
+
+    	catch {destroy .reg.config}
+	toplevel .reg.config
+	wm geometry .reg.config +300+300
+	wm title .reg.config "Register configuration"
+	wm iconname .reg.config "Reg config"
+	set regnames [gdb_regnames]
+	set num_regs [llength $regnames]
+
+	button .reg.config.done -text Done -command {destroy .reg.config}
+
+	pack .reg.config.done -side bottom -fill x
+
+# Since there can be lots of registers, we build the window with no more than
+# 32 rows, and as many columns as needed.
+
+# First, figure out how many columns we need and create that many column frame
+# widgets
+
+	set ncols [expr ($num_regs + 31) / 32]
+
+	for {set col 0} {$col < $ncols} {incr col} {
+		frame .reg.config.col$col
+		pack .reg.config.col$col -side left -anchor n
+	}
+
+# Now, create the checkbutton widgets and pack them in the appropriate columns
+
+	set col 0
+	set row 0
+	for {set regnum 0} {$regnum < $num_regs} {incr regnum} {
+		set regname [lindex $regnames $regnum]
+		checkbutton .reg.config.col$col.$row -text $regname -pady 0 \
+			-variable regena.$regnum -relief flat -anchor w -bd 1 \
+			-command "recompute_reg_display_list $num_regs
+				  populate_reg_window
+				  update_registers all"
+
+		pack .reg.config.col$col.$row -side top -fill both
+
+		incr row
+		if {$row >= 32} {
+			incr col
+			set row 0
+		}
+	}
+}
+
 #
 # Local procedure:
 #
-#	registers_command - Open up the register display window.
+#	create_registers_window - Open up the register display window.
 #
 # Description:
 #
 #	Create the register display window, with automatic updates.
 #
 
-proc registers_command {} {
-	global cfunc
+proc create_registers_window {} {
+	global reg_format
 
-	if ![winfo exists .reg] {
-		build_framework .reg Registers
+	if [winfo exists .reg] return
 
-		.reg.text configure -height 40 -width 45
+# Create an initial register display list consisting of all registers
 
-		destroy .reg.label
+	if ![info exists reg_format] {
+		global reg_display_list
+		global changed_reg_list
+
+		set reg_format {}
+		set num_regs [llength [gdb_regnames]]
+		for {set regnum 0} {$regnum < $num_regs} {incr regnum} {
+			global regena.$regnum
+			set regena.$regnum 1
+		}
+		recompute_reg_display_list $num_regs
+		set changed_reg_list $reg_display_list
 	}
+
+	build_framework .reg Registers
+
+	.reg.menubar.view.menu add command -label Natural
+	.reg.menubar.view.menu add command -label Config -command {
+		reg_config_menu }
+
+# Hex menu item
+	.reg.menubar.view.menu entryconfigure 0 -command {
+		global reg_format
+
+		set reg_format x
+		update_registers all
+	}
+# Decimal menu item
+	.reg.menubar.view.menu entryconfigure 1 -command {
+		global reg_format
+
+		set reg_format d
+		update_registers all
+	}
+# Octal menu item
+	.reg.menubar.view.menu entryconfigure 2 -command {
+		global reg_format
+
+		set reg_format o
+		update_registers all
+	}
+# Natural menu item
+	.reg.menubar.view.menu entryconfigure 3 -command {
+		global reg_format
+
+		set reg_format {}
+		update_registers all
+	}
+
+	destroy .reg.label
+
+# Install the reg names
+
+	populate_reg_window
+}
+
+# Convert all of the regena.$regnums into a list of the enabled $regnums
+
+proc recompute_reg_display_list {num_regs} {
+	global reg_display_list
+
+	catch {unset reg_display_list}
+	for {set regnum 0} {$regnum < $num_regs} {incr regnum} {
+		global regena.$regnum
+
+		if {[set regena.$regnum] != 0} {
+			lappend reg_display_list $regnum
+		}
+	}
+}
+
+# Fill out the register window with the names of the regs specified in
+# reg_display_list.
+
+proc populate_reg_window {} {
+	global max_regname_width
+	global reg_display_list
+
+	.reg.text configure -state normal
+
+	.reg.text delete 0.0 end
+
+	set regnames [eval gdb_regnames $reg_display_list]
+
+# Figure out the longest register name
+
+	set max_regname_width 0
+
+	foreach reg $regnames {
+		set len [string length $reg]
+		if {$len > $max_regname_width} {set max_regname_width $len}
+	}
+
+	set width [expr $max_regname_width + 15]
+
+	set height [llength $regnames]
+
+	if {$height > 60} {set height 60}
+
+	.reg.text configure -height $height -width $width
+
+	foreach reg $regnames {
+		.reg.text insert end [format "%-*s \n" $max_regname_width ${reg}]
+	}
+
+	.reg.text yview 0
+	.reg.text configure -state disabled
 }
 
 #
@@ -1125,21 +1302,54 @@ proc registers_command {} {
 #	This procedure updates the registers window.
 #
 
-proc update_registers {} {
-	global current_output_win
+proc update_registers {which} {
+	global max_regname_width
+	global reg_format
+	global reg_display_list
+	global changed_reg_list
+	global highlight
 
+	set margin [expr $max_regname_width + 1]
 	set win .reg.text
+	set winwidth [lindex [$win configure -width] 4]
+	set valwidth [expr $winwidth - $margin]
 
 	$win configure -state normal
 
-	$win delete 0.0 end
+	if {$which == "all"} {
+		set row 1
+		foreach regnum $reg_display_list {
+			set regval [gdb_fetch_registers $reg_format $regnum]
+			set regval [format "%-*s" $valwidth $regval]
+			$win delete $row.$margin "$row.0 lineend"
+			$win insert $row.$margin $regval
+			incr row
+		}
+		$win configure -state disabled
+		return
+	}
 
-	set temp $current_output_win
-	set current_output_win $win
-	gdb_cmd "info registers"
-	set current_output_win $temp
+# Unhighlight the old values
 
-	$win yview 0
+	foreach regnum $changed_reg_list {
+		$win tag delete $win.$regnum
+	}
+
+# Now, highlight the changed values of the interesting registers
+
+	set changed_reg_list [eval gdb_changed_register_list $reg_display_list]
+
+	foreach regnum $changed_reg_list {
+		set regval [gdb_fetch_registers $reg_format $regnum]
+		set regval [format "%-*s" $valwidth $regval]
+		set lineindex $regnum
+		incr lineindex
+		$win delete $lineindex.$margin "$lineindex.0 lineend"
+		$win insert $lineindex.$margin $regval
+		$win tag add $win.$regnum $lineindex.0 "$lineindex.0 lineend"
+		eval $win tag configure $win.$regnum $highlight
+	}
+
 	$win configure -state disabled
 }
 
@@ -1165,6 +1375,7 @@ proc update_assembly {linespec} {
 	global current_asm_label
 	global pclist
 	global asm_screen_height asm_screen_top asm_screen_bot
+	global .asm.label
 
 # Rip the linespec apart
 
@@ -1201,6 +1412,7 @@ proc update_assembly {linespec} {
 
 		pack $win -side left -expand yes -fill both \
 			-after .asm.scroll
+		.asm.scroll configure -command "$win yview"
 		set line [pc_to_line $pclist($cfunc) $pc]
 		$win yview [expr $line - $asm_screen_height / 2]
 		}
@@ -1208,7 +1420,8 @@ proc update_assembly {linespec} {
 # Update the label widget in case the filename or function name has changed
 
 	if {$current_asm_label != "$pc $funcname"} then {
-		.asm.label configure -text "$pc $funcname"
+		set .asm.label "$pc $funcname"
+#		.asm.label configure -text "$pc $funcname"
 		set current_asm_label "$pc $funcname"
 		}
 
@@ -1219,8 +1432,8 @@ proc update_assembly {linespec} {
 		$win configure -state normal
 		set pointer_pos $asm_pointers($cfunc)
 		$win configure -state normal
-		$win delete $pointer_pos
-		$win insert $pointer_pos " "
+		$win delete $pointer_pos "$pointer_pos + 2 char"
+		$win insert $pointer_pos "  "
 
 # Map the PC back to a line in the window		
 
@@ -1234,8 +1447,8 @@ proc update_assembly {linespec} {
 		set pointer_pos [$win index $line.1]
 		set asm_pointers($cfunc) $pointer_pos
 
-		$win delete $pointer_pos
-		$win insert $pointer_pos "\xbb"
+		$win delete $pointer_pos "$pointer_pos + 2 char"
+		$win insert $pointer_pos "->"
 
 		if {$line < $asm_screen_top + 1
 		    || $line > $asm_screen_bot} then {
@@ -1266,32 +1479,13 @@ proc update_ptr {} {
 		update_assembly [gdb_loc]
 	}
 	if [winfo exists .reg] {
-		update_registers
+		update_registers changed
 	}
 }
-
-#
-# Window:
-#
-#	listing window - Define the listing window.
-#
-# Description:
-#
-#
 
 # Make toplevel window disappear
 
 wm withdraw .
-
-# Setup listing window
-
-#if {[tk colormodel .text] == "color"} {
-#	set highlight "-background red2 -borderwidth 2 -relief sunk"
-#} else {
-#	set fg [lindex [.text config -foreground] 4]
-#	set bg [lindex [.text config -background] 4]
-#	set highlight "-foreground $bg -background $fg -borderwidth 0"
-#}
 
 proc files_command {} {
 	toplevel .files_window
@@ -1316,6 +1510,7 @@ button .files -text Files -command files_command
 # Setup command window
 
 proc build_framework {win {title GDBtk} {label {}}} {
+	global ${win}.label
 
 	toplevel ${win}
 	wm title ${win} $title
@@ -1352,9 +1547,9 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	${win}.menubar.window.menu add command -label Command \
 		-command {echo Command}
 	${win}.menubar.window.menu add command -label Assembly \
-		-command {asm_command ; update_ptr}
+		-command {create_asm_window ; update_ptr}
 	${win}.menubar.window.menu add command -label Register \
-		-command {registers_command ; update_ptr}
+		-command {create_registers_window ; update_ptr}
 
 	menubutton ${win}.menubar.help -padx 12 -text Help \
 		-menu ${win}.menubar.help.menu -underline 0
@@ -1377,7 +1572,8 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	text ${win}.text -height 25 -width 80 -relief raised -borderwidth 2 \
 		-setgrid true -cursor hand2 -yscrollcommand "${win}.scroll set"
 
-	label ${win}.label -text $label -borderwidth 2 -relief raised
+	set ${win}.label $label
+	label ${win}.label -textvariable ${win}.label -borderwidth 2 -relief raised
 
 	scrollbar ${win}.scroll -orient vertical -command "${win}.text yview"
 
@@ -1389,89 +1585,117 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	pack ${win}.info -side top -fill both -expand yes
 }
 
-build_framework .src Source "*No file*"
+proc create_source_window {} {
+	global wins
+	global cfile
 
-frame .src.row1
-frame .src.row2
+	build_framework .src Source "*No file*"
 
-button .src.start -width 6 -text Start -command \
-	{gdb_cmd {break main}
-	 gdb_cmd {enable delete $bpnum}
-	 gdb_cmd run
-	 update_ptr }
-button .src.stop -width 6 -text Stop -fg red -activeforeground red \
-	-state disabled -command gdb_stop
-button .src.step -width 6 -text Step -command {gdb_cmd step ; update_ptr}
-button .src.next -width 6 -text Next -command {gdb_cmd next ; update_ptr}
-button .src.continue -width 6 -text Cont \
-	-command {gdb_cmd continue ; update_ptr}
-button .src.finish -width 6 -text Finish -command {gdb_cmd finish ; update_ptr}
-button .src.up -width 6 -text Up -command {gdb_cmd up ; update_ptr}
-button .src.down -width 6 -text Down -command {gdb_cmd down ; update_ptr}
-button .src.bottom -width 6 -text Bottom \
-	-command {gdb_cmd {frame 0} ; update_ptr}
+	frame .src.row1
+	frame .src.row2
 
-pack .src.start .src.step .src.continue .src.up .src.bottom -side left \
-	-padx 3 -pady 5 -in .src.row1
-pack .src.stop .src.next .src.finish .src.down -side left -padx 3 -pady 5 -in .src.row2
+	button .src.start -width 6 -text Start -command \
+		{gdb_cmd {break main}
+		 gdb_cmd {enable delete $bpnum}
+		 gdb_cmd run
+		 update_ptr }
+	button .src.stop -width 6 -text Stop -fg red -activeforeground red \
+		-state disabled -command gdb_stop
+	button .src.step -width 6 -text Step \
+		-command {gdb_cmd step ; update_ptr}
+	button .src.next -width 6 -text Next \
+		-command {gdb_cmd next ; update_ptr}
+	button .src.continue -width 6 -text Cont \
+		-command {gdb_cmd continue ; update_ptr}
+	button .src.finish -width 6 -text Finish \
+		-command {gdb_cmd finish ; update_ptr}
+	button .src.up -width 6 -text Up -command {gdb_cmd up ; update_ptr}
+	button .src.down -width 6 -text Down \
+		-command {gdb_cmd down ; update_ptr}
+	button .src.bottom -width 6 -text Bottom \
+		-command {gdb_cmd {frame 0} ; update_ptr}
 
-pack .src.row1 .src.row2 -side top -anchor w
+	pack .src.start .src.step .src.continue .src.up .src.bottom \
+		-side left -padx 3 -pady 5 -in .src.row1
+	pack .src.stop .src.next .src.finish .src.down -side left -padx 3 \
+		-pady 5 -in .src.row2
 
-$wins($cfile) insert 0.0 "  This page intentionally left blank."
-$wins($cfile) configure -width 88 -state disabled -yscrollcommand textscrollproc
+	pack .src.row1 .src.row2 -side top -anchor w
 
-proc textscrollproc {args} {global screen_height screen_top screen_bot
-			    eval ".src.scroll set $args"
-			    set screen_height [lindex $args 1]
-			    set screen_top [lindex $args 2]
-			    set screen_bot [lindex $args 3]}
+	$wins($cfile) insert 0.0 "  This page intentionally left blank."
+	$wins($cfile) configure -width 88 -state disabled \
+		-yscrollcommand textscrollproc
 
-#.src.label configure -text "*No file*" -borderwidth 2 -relief raised
-
-build_framework .cmd Command "* Command Buffer *"
-
-set command_line {}
-
-gdb_cmd {set language c}
-gdb_cmd {set height 0}
-gdb_cmd {set width 0}
-
-bind .cmd.text <Enter> {focus %W}
-bind .cmd.text <Delete> {delete_char %W}
-bind .cmd.text <BackSpace> {delete_char %W}
-bind .cmd.text <Control-u> {delete_line %W}
-bind .cmd.text <Any-Key> {
-	global command_line
-
-	%W insert end %A
-	%W yview -pickplace end
-	append command_line %A
-	}
-bind .cmd.text <Key-Return> {
-	global command_line
-
-	%W insert end \n
-	%W yview -pickplace end
-	gdb_cmd $command_line
-	set command_line {}
-	update_ptr
-	%W insert end "(gdb) "
-	%W yview -pickplace end
-	}
-
-proc delete_char {win} {
-	global command_line
-
-	tk_textBackspace $win
-	$win yview -pickplace insert
-	set tmp [expr [string length $command_line] - 2]
-	set command_line [string range $command_line 0 $tmp]
+	proc textscrollproc {args} {global screen_height screen_top screen_bot
+				    eval ".src.scroll set $args"
+				    set screen_height [lindex $args 1]
+				    set screen_top [lindex $args 2]
+				    set screen_bot [lindex $args 3]}
 }
 
-proc delete_line {win} {
+proc create_command_window {} {
 	global command_line
 
-	$win delete {end linestart + 6 chars} end
-	$win yview -pickplace insert
+	build_framework .cmd Command "* Command Buffer *"
+
 	set command_line {}
+
+	gdb_cmd {set language c}
+	gdb_cmd {set height 0}
+	gdb_cmd {set width 0}
+
+	bind .cmd.text <Enter> {focus %W}
+	bind .cmd.text <Delete> {delete_char %W}
+	bind .cmd.text <BackSpace> {delete_char %W}
+	bind .cmd.text <Control-u> {delete_line %W}
+	bind .cmd.text <Any-Key> {
+		global command_line
+
+		%W insert end %A
+		%W yview -pickplace end
+		append command_line %A
+		}
+	bind .cmd.text <Key-Return> {
+		global command_line
+
+		%W insert end \n
+		%W yview -pickplace end
+		gdb_cmd $command_line
+		set command_line {}
+		update_ptr
+		%W insert end "(gdb) "
+		%W yview -pickplace end
+		}
+
+	proc delete_char {win} {
+		global command_line
+
+		tk_textBackspace $win
+		$win yview -pickplace insert
+		set tmp [expr [string length $command_line] - 2]
+		set command_line [string range $command_line 0 $tmp]
+	}
+
+	proc delete_line {win} {
+		global command_line
+
+		$win delete {end linestart + 6 chars} end
+		$win yview -pickplace insert
+		set command_line {}
+	}
 }
+
+# Setup the initial windows
+
+create_source_window
+
+if {[tk colormodel .src.text] == "color"} {
+	set highlight "-background red2 -borderwidth 2 -relief sunk"
+} else {
+	set fg [lindex [.src.text config -foreground] 4]
+	set bg [lindex [.src.text config -background] 4]
+	set highlight "-foreground $bg -background $fg -borderwidth 0"
+}
+
+create_command_window
+update

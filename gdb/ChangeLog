@@ -1,3 +1,18 @@
+Mon Dec 12 12:22:21 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c:  New tcl commands:  gdb_fetch_registers,
+	gdb_changed_register_list, and gdb_regnames.
+	* gdbtk.tcl:  Use monochrome color model for now.
+	* (delete_breakpoint_tag create_file_win):  Add breakdot support.
+	* (create_file_win create_asm_win update_listing build_framework
+	create_source_window create_command_window):  Re-org window
+	creation to give all windows consistent look and feel.
+	* (update_listing update_asm):  Change pc pointer to '->'.
+	* (registers_command reg_config_menu create_registers_window
+	populate_reg_window update_registers):  Revamp register window.
+	Allow selection of registers to be displayed.  Highlight changed
+	registers.
+
 Fri Dec  9 15:50:05 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote.c (remote_wait): Pass string instead of char to strcpy.
