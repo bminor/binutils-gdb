@@ -33,12 +33,21 @@ Wed Sep  4 11:35:17 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(sim_info): Print out statistics on instructions.
 	(sim_{trace,create_inferior}): Eliminate extraneous output unless
 	debugging.
+	(sim_open): If args == -t and DEBUG was defined, set d10v_debug.
+	Only initialize the hash table the first time sim_open is called.
 
 	* Makefile.in: Make objects depend on d10v_sim.h.
-	({,SIM_}CFLAGS): Include configure dependent switches.
+	({,SIM_}CFLAGS): Include configure dependent switches.  Setting
+	CFLAGS does not override host/target defines or SIM_CFLAGS.
+	(CC_FOR_BUILD,gencode): Use CC_FOR_BUILD to compile gencode.
+	(run): By default, the math library is not needed to be linked
+	in.
+	({BFD,OPCODES,LIBIBERTY}_LIB): Define as variables so they can be
+	overridden.
 
 	* configure.in (--enable-sim-cflags): New switch to allow user to
 	set the defaults.
+	(CC_FOR_BUILD): Deal with canadian crosses.
 	* configure: Regenerate.
 
 Wed Sep 04 04:45:34 1996  Mark Alexander  <marka@cygnus.com>

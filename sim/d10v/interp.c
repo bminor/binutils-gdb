@@ -291,26 +291,38 @@ sim_open (args)
 {
   struct simops *s;
   struct hash_entry *h, *prev;
+  static int init_p = 0;
+
   if (args != NULL)
-    (*d10v_callback->printf_filtered) (d10v_callback, "sim_open %s\n",args);
+    {
+#ifdef DEBUG
+      if (strcmp (args, "-t") == 0)
+	d10v_debug = DEBUG;
+      else
+#endif
+	(*d10v_callback->printf_filtered) (d10v_callback, "ERROR: unsupported option(s): %s\n",args);
+    }
 
   /* put all the opcodes in the hash table */
-  for (s = Simops; s->func; s++)
+  if (!init_p++)
     {
-      h = &hash_table[hash(s->opcode,s->format)];
-      
-      /* go to the last entry in the chain */
-      while (h->next)
-	  h = h->next;
-
-      if (h->ops)
+      for (s = Simops; s->func; s++)
 	{
-	  h->next = calloc(1,sizeof(struct hash_entry));
-	  h = h->next;
+	  h = &hash_table[hash(s->opcode,s->format)];
+      
+	  /* go to the last entry in the chain */
+	  while (h->next)
+	    h = h->next;
+
+	  if (h->ops)
+	    {
+	      h->next = calloc(1,sizeof(struct hash_entry));
+	      h = h->next;
+	    }
+	  h->ops = s;
+	  h->mask = s->mask;
+	  h->opcode = s->opcode;
 	}
-      h->ops = s;
-      h->mask = s->mask;
-      h->opcode = s->opcode;
     }
 }
 

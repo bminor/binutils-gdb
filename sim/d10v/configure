@@ -932,6 +932,39 @@ EOF
 fi
 
 
+# Put a plausible default for CC_FOR_BUILD in Makefile.
+# If we cannot run a trivial program, we must be cross compiling.
+echo $ac_n "checking whether cross-compiling""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_c_cross'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  if test "$cross_compiling" = yes; then
+  ac_cv_c_cross=yes
+else
+cat > conftest.$ac_ext <<EOF
+#line 946 "configure"
+#include "confdefs.h"
+main(){return(0);}
+EOF
+{ (eval echo configure:950: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
+  ac_cv_c_cross=no
+else
+  ac_cv_c_cross=yes
+fi
+fi
+rm -fr conftest*
+fi
+
+echo "$ac_t""$ac_cv_c_cross" 1>&6
+cross_compiling=$ac_cv_c_cross
+
+if test "x$cross_compiling" = "xno"; then
+  CC_FOR_BUILD='$(CC)'
+else
+  CC_FOR_BUILD=gcc
+fi
+
 . ${srcdir}/../../bfd/configure.host
 
 # Check whether --enable-sim-cflags or --disable-sim-cflags was given.
@@ -949,6 +982,7 @@ fi
 else
   sim_cflags=""
 fi
+
 
 
 
@@ -994,11 +1028,11 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 998 "configure"
+#line 1032 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
-{ (eval echo configure:1002: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+{ (eval echo configure:1036: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   ac_cv_c_cross=no
 else
@@ -1165,11 +1199,11 @@ s%@build_os@%$build_os%g
 s%@CC@%$CC%g
 s%@INSTALL_PROGRAM@%$INSTALL_PROGRAM%g
 s%@INSTALL_DATA@%$INSTALL_DATA%g
+s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
 s%@HDEFINES@%$HDEFINES%g
 s%@AR@%$AR%g
 s%@RANLIB@%$RANLIB%g
 s%@sim_cflags@%$sim_cflags%g
-s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
 
 CEOF
 EOF

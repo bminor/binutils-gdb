@@ -16,6 +16,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+default: all
+
 VPATH = @srcdir@:@srcdir@/../common:@srcdir@/../../gdb/
 srcdir = @srcdir@
 srcroot = $(srcdir)/../..
@@ -56,11 +58,13 @@ INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 AR = @AR@
 AR_FLAGS = rc
 CC = @CC@
+CC_FOR_BUILD = @CC_FOR_BUILD@
+CFLAGS = @CFLAGS@
 SIM_CFLAGS = @sim_cflags@
-CFLAGS = @CFLAGS@ @DEFS@ $(SIM_CFLAGS)
+CONFIG_CFLAGS = @DEFS@ $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) -DINSIDE_SIMULATOR
+BUILD_CFLAGS = -g -O $(CSEARCH)
 MAKEINFO = makeinfo
 RANLIB = @RANLIB@
-CC_FOR_BUILD = @CC_FOR_BUILD@
 
 HDEFINES = @HDEFINES@
 TDEFINES =
@@ -69,9 +73,11 @@ TDEFINES =
 MAKEOVERRIDES=
 
 #X=xstuff.o
-#XL=-lX11
+#X_LIB=-lX11
 X=
-XL=
+X_LIB=
+MATH_LIB=
+
 
 INCLUDE = d10v_sim.h
 INCDIR = $(srcdir)/../../include 
@@ -79,10 +85,14 @@ CSEARCH = -I. -I$(srcdir)  -I../../include  \
   -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb -I$(srcdir)/../../newlib/libc/sys/d10v
 DEP = mkdep
 
-all:	run libsim.a
+LIBIBERTY_LIB	= ../../libiberty/libiberty.a
+BFD_LIB		= ../../bfd/libbfd.a
+OPCODES_LIB	= ../../opcodes/libopcodes.a
 
-run:	interp.o $(X) run.o table.o callback.o simops.o
-	$(CC) $(CFLAGS) -o run $(X) interp.o table.o callback.o simops.o run.o ../../bfd/libbfd.a ../../libiberty/libiberty.a $(XL) -lm
+all: run libsim.a
+
+run: interp.o $(X) run.o table.o callback.o simops.o
+	$(CC) $(CFLAGS) $(CONFIG_CFLAGS) -o run $(X) interp.o table.o callback.o simops.o run.o $(BFD_LIB) $(LIBIBERTY_LIB) $(X_LIB) $(MATH_LIB)
 
 interp.o:interp.c table.c $(INCLUDE)
 run.o:run.c $(INCLUDE)
@@ -92,17 +102,17 @@ libsim.a:interp.o table.o simops.o
 	$(AR) $(ARFLAGS) libsim.a interp.o table.o simops.o
 	$(RANLIB) libsim.a
 
-simops.h:	gencode
+simops.h: gencode
 	./gencode -h >$@
 
-table.c:	gencode simops.h
+table.c: gencode simops.h
 	./gencode >$@
 
-gencode:	gencode.c ../../opcodes/libopcodes.a $(INCLUDE)
-	$(CC) $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHE) -o gencode $(srcdir)/gencode.c ../../opcodes/libopcodes.a -lc
+gencode: gencode.c ../../opcodes/libopcodes.a $(INCLUDE)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode $(srcdir)/gencode.c $(OPCODES_LIB)
 
 .c.o:
-	$(CC) -c -DINSIDE_SIMULATOR $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $<
+	$(CC) -c $(CFLAGS) $(CONFIG_CFLAGS) $<
 
 check:
 
