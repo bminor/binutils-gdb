@@ -1,5 +1,10 @@
 2004-04-03  Andrew Cagney  <cagney@redhat.com>
 
+	* frame-unwind.c (frame_unwind_find_by_frame): Delete check for
+	generic dummy frames.
+	* dummy-frame.c: Update copyright.
+	(dummy_frame_sniffer): Delete check for generic dummy frames.
+
 	* config/pa/tm-hppa.h (REG_PARM_STACK_SPACE): Delete.
 	* config/pa/tm-hppa64.h (PA20W_CALLING_CONVENTIONS) 
 	(REG_PARM_STACK_SPACE): Delete.

@@ -1,8 +1,8 @@
 /* Code dealing with dummy stack frames, for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -398,7 +398,6 @@ const struct frame_unwind *
 dummy_frame_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
   if (pc_in_dummy_frame (pc))
     return &dummy_frame_unwind;
   else
