@@ -1,7 +1,7 @@
 # frv testcase for maddaccs $ACC40Si,$ACC40Sk
 # mach: fr400
 
-	.include "testutils.inc"
+	.include "../testutils.inc"
 
 	start
 

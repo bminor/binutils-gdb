@@ -1,3 +1,9 @@
+2003-09-09  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/maddaccs.cgs: move to fr400 subdirectory.
+	* sim/frv/msubaccs.cgs: move to fr400 subdirectory.
+	* sim/frv/masaccs.cgs: move to fr400 subdirectory.
+
 2003-09-03  Michael Snyder  <msnyder@redhat.com>
 
 	* sim/frv/fr500/mclracc.cgs: Change mach to 'all', to be
