@@ -162,3 +162,27 @@ For a list of all of them, see common/tconfig.in.
 It contains them all, commented out.
 The intent is that a new port can just copy this file and
 define the ones it needs.
+
+C Language Assumptions
+======================
+
+The programmer may assume that the simulator is being built using an
+ANSI C compiler that supports a 64 bit data type.  Consequently:
+
+	o	prototypes can be used (although using
+		PARAMS() and K&R declarations wouldn't
+		go astray).
+
+	o	If sim-types.h is included, the two
+		types signed64 and unsigned64 are
+		available.
+
+	o	The type `unsigned' is valid.
+
+However, the user should not assume:
+
+	o	`<number>LL' is acceptable.  Microsoft-C
+		doesn't reconize it.
+
+	o	`long long' or `_int64' provides a 64 bit
+		integer data type.
