@@ -1,5 +1,7 @@
 Tue Feb 28 14:38:39 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
+	* vx-share/ptrace.h: merge in WRS new ptrace requests.
+
 	* defs.h: fix a syntax error.
 
 	* a29k-tdep.c (get_longjmp_target): add this function, from WRS.
