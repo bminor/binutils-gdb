@@ -1223,7 +1223,7 @@ OP_2600 ()
 {
   trace_input ("max", OP_REG, OP_REG, OP_VOID);
   State.F1 = State.F0;
-  if (State.regs[OP[1]] > State.regs[OP[0]])
+  if ((int16)State.regs[OP[1]] > (int16)State.regs[OP[0]])
     {
       State.regs[OP[0]] = State.regs[OP[1]];
       State.F0 = 1;
@@ -1275,7 +1275,7 @@ OP_2601 ()
 {
   trace_input ("min", OP_REG, OP_REG, OP_VOID);
   State.F1 = State.F0;
-  if (State.regs[OP[1]] < State.regs[OP[0]])
+  if ((int16)State.regs[OP[1]] < (int16)State.regs[OP[0]])
     {
       State.regs[OP[0]] = State.regs[OP[1]];
       State.F0 = 1;

@@ -1,3 +1,8 @@
+Fri Sep  6 17:56:17 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* simops.c (OP_2600, OP_2601): Changed min and max comparisons
+	to use signed register values.
+
 Wed Sep  4 11:35:17 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* d10v_sim.h (DEBUG_*): Add bit flags for controlling debug
