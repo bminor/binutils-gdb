@@ -26,16 +26,21 @@ extern const pseudo_typeS md_pseudo_table[];
 /* JF moved this here from as.h under the theory that nobody except MACHINE.c
    and write.c care about it anyway. */
 
-typedef struct
+struct relax_type
 {
-  long rlx_forward;		/* Forward  reach. Signed number. > 0. */
-  long rlx_backward;		/* Backward reach. Signed number. < 0. */
-  unsigned char rlx_length;	/* Bytes length of this address. */
-  relax_substateT rlx_more;	/* Next longer relax-state. */
-  /* 0 means there is no 'next' relax-state. */
-}
+  /* Forward reach. Signed number. > 0. */
+  long rlx_forward;
+  /* Backward reach. Signed number. < 0. */
+  long rlx_backward;
 
-relax_typeS;
+  /* Bytes length of this address. */
+  unsigned char rlx_length;
+
+  /* Next longer relax-state.  0 means there is no 'next' relax-state. */
+  relax_substateT rlx_more;
+};
+
+typedef struct relax_type relax_typeS;
 
 extern const relax_typeS md_relax_table[];	/* Define it in MACHINE.c */
 
@@ -43,67 +48,56 @@ extern int md_reloc_size;	/* Size of a relocation record */
 
 extern void (*md_emit_relocations) ();
 
-#if __STDC__ == 1
+char *md_atof PARAMS ((int what_statement_type, char *literalP, int *sizeP));
+int md_estimate_size_before_relax PARAMS ((fragS * fragP, segT segment));
+int md_parse_option PARAMS ((char **argP, int *cntP, char ***vecP));
+long md_pcrel_from PARAMS ((fixS * fixP));
+short tc_coff_fix2rtype PARAMS ((fixS * fixP));
+void md_assemble PARAMS ((char *str));
+void md_begin PARAMS ((void));
+void md_create_long_jump PARAMS ((char *ptr, long from_addr, long to_addr,
+				  fragS * frag, symbolS * to_symbol));
+void md_create_short_jump PARAMS ((char *ptr, long from_addr, long to_addr,
+				   fragS * frag, symbolS * to_symbol));
+void md_end PARAMS ((void));
+void md_number_to_chars PARAMS ((char *buf, long val, int n));
 
-char *md_atof (int what_statement_type, char *literalP, int *sizeP);
-int md_estimate_size_before_relax (fragS * fragP, segT segment);
-int md_parse_option (char **argP, int *cntP, char ***vecP);
-long md_pcrel_from (fixS * fixP);
-long md_section_align (segT seg, long align);
-short tc_coff_fix2rtype (fixS * fixP);
-symbolS *md_undefined_symbol (char *name);
-void md_apply_fix (fixS * fixP, long val);
-void md_assemble (char *str);
-void md_begin (void);
-void md_convert_frag (object_headers * headers, fragS * fragP);
-void md_create_long_jump (char *ptr, long from_addr, long to_addr, fragS * frag, symbolS * to_symbol);
-void md_create_short_jump (char *ptr, long from_addr, long to_addr, fragS * frag, symbolS * to_symbol);
-void md_end (void);
-void md_number_to_chars (char *buf, long val, int n);
-void md_operand (expressionS * expressionP);
+#ifndef md_operand
+void md_operand PARAMS ((expressionS * expressionP));
+#endif
 
-#ifndef tc_crawl_symbol_chain
-void tc_crawl_symbol_chain (object_headers * headers);
-#endif /* tc_crawl_symbol_chain */
-
+#ifdef BFD_ASSEMBLER
+int md_apply_fix PARAMS ((fixS * fixP, long *val));
+#ifndef md_convert_frag
+void md_convert_frag PARAMS ((bfd * headers, segT sec, fragS * fragP));
+#endif
 #ifndef tc_headers_hook
-void tc_headers_hook (object_headers * headers);
-#endif /* tc_headers_hook */
-
+void tc_headers_hook PARAMS ((segT *, fixS *));
+#endif
 #else
-
-char *md_atof ();
-int md_estimate_size_before_relax ();
-int md_parse_option ();
-long md_pcrel_from ();
-long md_section_align ();
-short tc_coff_fix2rtype ();
-symbolS *md_undefined_symbol ();
-void md_apply_fix ();
-void md_assemble ();
-void md_begin ();
-void md_convert_frag ();
-void md_create_long_jump ();
-void md_create_short_jump ();
-void md_end ();
-void md_number_to_chars ();
-void md_operand ();
-
-#ifndef tc_headers_hook
-void tc_headers_hook ();
-#endif /* tc_headers_hook */
+void md_apply_fix PARAMS ((fixS * fixP, long val));
+#ifndef md_convert_frag
+void md_convert_frag PARAMS ((object_headers * headers, fragS * fragP));
+#endif
 
 #ifndef tc_crawl_symbol_chain
-void tc_crawl_symbol_chain ();
+void tc_crawl_symbol_chain PARAMS ((object_headers * headers));
 #endif /* tc_crawl_symbol_chain */
 
-#endif /* __STDC_ */
+#ifndef tc_headers_hook
+void tc_headers_hook PARAMS ((object_headers * headers));
+#endif /* tc_headers_hook */
+#endif /* BFD_ASSEMBLER */
 
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
+#ifndef md_section_align
+long md_section_align PARAMS ((segT seg, long align));
+#endif
 
+#ifndef md_undefined_symbol
+symbolS *md_undefined_symbol PARAMS ((char *name));
+#endif
+
+#define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
 /* end of tc.h */
+
+
