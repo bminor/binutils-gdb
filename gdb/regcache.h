@@ -129,11 +129,6 @@ extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 extern int max_register_size (struct gdbarch *gdbarch);
 
 
-/* DEPRECATED: Character array containing an image of the inferior
-   programs' registers for the most recently referenced thread. */
-
-extern char *registers;
-
 /* Save/restore a register cache.  The registers saved/restored is
    determined by the save_reggroup and restore_reggroup (although you
    can't restore a register that wasn't saved as well :-).  You can
@@ -191,6 +186,15 @@ extern void deprecated_write_register_bytes (int regbyte, char *myaddr,
    regcache_valid_p() and set_register_cached() functions are
    available.  */
 extern signed char *deprecated_register_valid;
+
+/* Character array containing an image of the inferior programs'
+   registers for the most recently referenced thread.
+
+   NOTE: cagney/2002-11-14: Target side code should be using
+   supply_register() and/or regcache_collect() while architecture side
+   code should use the more generic regcache methods.  */
+
+extern char *deprecated_registers;
 
 /* NOTE: cagney/2002-11-05: This function, and its co-conspirator
    deprecated_registers[], have been superseeded by supply_register().  */

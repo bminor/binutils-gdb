@@ -295,7 +295,7 @@ bdm_ppc_store_registers (int regno)
           && ((i < FP0_REGNUM) || (i > FPLAST_REGNUM)))
 	{
 /*          printf("write valid reg %d\n", bdm_regno); */
-	  ocd_write_bdm_registers (bdm_regno, registers + REGISTER_BYTE (i), 4);
+	  ocd_write_bdm_registers (bdm_regno, deprecated_registers + REGISTER_BYTE (i), 4);
 	}
 /*
    else if (i == gdbarch_tdep (current_gdbarch)->ppc_mq_regnum)

@@ -528,7 +528,7 @@ sds_store_registers (int regno)
   *p++ = 0;
   *p++ = 0;
   for (i = 0; i < 4 * 6; i++)
-    *p++ = registers[i + 4 * 32 + 8 * 32];
+    *p++ = deprecated_registers[i + 4 * 32 + 8 * 32];
   for (i = 0; i < 4 * 1; i++)
     *p++ = 0;
   for (i = 0; i < 4 * 4; i++)
@@ -543,7 +543,7 @@ sds_store_registers (int regno)
   *p++ = 0;
   *p++ = 0;
   for (i = 0; i < 4 * 32; i++)
-    *p++ = registers[i];
+    *p++ = deprecated_registers[i];
 
   sds_send (buf, p - buf);
 

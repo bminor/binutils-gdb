@@ -560,7 +560,7 @@ v850ice_store_registers (int regno)
       return;
     }
 
-  regval = extract_unsigned_integer (&registers[REGISTER_BYTE (regno)],
+  regval = extract_unsigned_integer (&deprecated_registers[REGISTER_BYTE (regno)],
 				     REGISTER_RAW_SIZE (regno));
   strcpy (cmd, "reg ");
   if (!convert_register (regno, &cmd[4]))

@@ -133,17 +133,19 @@ fetch_elf_core_registers (char *core_reg_sect, unsigned core_reg_size,
   if (which == 2)
     {
       /* The FPU Registers.  */
-      memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], core_reg_sect, 31 * 8);
-      memset (&registers[REGISTER_BYTE (FP0_REGNUM + 31)], 0, 8);
+      memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+	      core_reg_sect, 31 * 8);
+      memset (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM + 31)], 0, 8);
       memset (&deprecated_register_valid[FP0_REGNUM], 1, 32);
     }
   else
     {
       /* The General Registers.  */
-      memcpy (&registers[REGISTER_BYTE (ALPHA_V0_REGNUM)], core_reg_sect,
-              31 * 8);
-      memcpy (&registers[REGISTER_BYTE (PC_REGNUM)], core_reg_sect + 31 * 8, 8);
-      memset (&registers[REGISTER_BYTE (ALPHA_ZERO_REGNUM)], 0, 8);
+      memcpy (&deprecated_registers[REGISTER_BYTE (ALPHA_V0_REGNUM)],
+	      core_reg_sect, 31 * 8);
+      memcpy (&deprecated_registers[REGISTER_BYTE (PC_REGNUM)],
+	      core_reg_sect + 31 * 8, 8);
+      memset (&deprecated_registers[REGISTER_BYTE (ALPHA_ZERO_REGNUM)], 0, 8);
       memset (&deprecated_register_valid[ALPHA_V0_REGNUM], 1, 32);
       deprecated_register_valid[PC_REGNUM] = 1;
     }
@@ -209,10 +211,10 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 
   for (regi = 0; regi < 31; regi++)
     if ((regno == -1) || (regno == regi))
-      *(regp + regi) = *(long *) &registers[REGISTER_BYTE (regi)];
+      *(regp + regi) = *(long *) &deprecated_registers[REGISTER_BYTE (regi)];
 
   if ((regno == -1) || (regno == PC_REGNUM))
-    *(regp + 31) = *(long *) &registers[REGISTER_BYTE (PC_REGNUM)];
+    *(regp + 31) = *(long *) &deprecated_registers[REGISTER_BYTE (PC_REGNUM)];
 }
 
 /*
@@ -241,7 +243,7 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
       if ((regno == -1) || (regno == regi))
 	{
 	  *(regp + regi - FP0_REGNUM) =
-	    *(long *) &registers[REGISTER_BYTE (regi)];
+	    *(long *) &deprecated_registers[REGISTER_BYTE (regi)];
 	}
     }
 }

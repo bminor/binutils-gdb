@@ -36,12 +36,12 @@ fetch_inferior_registers (int regno)
 
   ptrace (PT_GETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_registers, 0);
-  memcpy (&registers[REGISTER_BYTE (0)], &inferior_registers,
+  memcpy (&deprecated_registers[REGISTER_BYTE (0)], &inferior_registers,
 	  sizeof (inferior_registers));
 
   ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0);
-  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
+  memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
 	  sizeof (inferior_fp_registers));
 
   deprecated_registers_fetched ();
@@ -53,12 +53,12 @@ store_inferior_registers (int regno)
   struct reg inferior_registers;
   struct fpreg inferior_fp_registers;
 
-  memcpy (&inferior_registers, &registers[REGISTER_BYTE (0)],
+  memcpy (&inferior_registers, &deprecated_registers[REGISTER_BYTE (0)],
 	  sizeof (inferior_registers));
   ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_registers, 0);
 
-  memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
+  memcpy (&inferior_fp_registers, &deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	  sizeof (inferior_fp_registers));
   ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0);
@@ -77,10 +77,10 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   struct md_core *core_reg = (struct md_core *) core_reg_sect;
 
   /* Integer registers */
-  memcpy (&registers[REGISTER_BYTE (0)],
+  memcpy (&deprecated_registers[REGISTER_BYTE (0)],
 	  &core_reg->intreg, sizeof (struct reg));
   /* Floating point registers */
-  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
+  memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	  &core_reg->freg, sizeof (struct fpreg));
 }
 

@@ -648,7 +648,8 @@ sol_thread_store_registers (int regno)
     {				/* Not writing all the regs */
       /* save new register value */
       char* old_value = (char*) alloca (REGISTER_SIZE);
-      memcpy (old_value, &registers[REGISTER_BYTE (regno)], REGISTER_SIZE);
+      memcpy (old_value, &deprecated_registers[REGISTER_BYTE (regno)],
+	      REGISTER_SIZE);
 
       val = p_td_thr_getgregs (&thandle, gregset);
       if (val != TD_OK)
@@ -660,7 +661,8 @@ sol_thread_store_registers (int regno)
 	       td_err_string (val));
 
       /* restore new register value */
-      memcpy (&registers[REGISTER_BYTE (regno)], old_value, REGISTER_SIZE);
+      memcpy (&deprecated_registers[REGISTER_BYTE (regno)], old_value,
+	      REGISTER_SIZE);
 
 #if 0
 /* thread_db doesn't seem to handle this right */

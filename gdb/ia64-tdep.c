@@ -1902,7 +1902,7 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		float_elt_type,
 		floatreg,
 	        VALUE_CONTENTS (arg) + argoffset,
-		&registers[REGISTER_BYTE (floatreg)]);
+		&deprecated_registers[REGISTER_BYTE (floatreg)]);
 	      floatreg++;
 	      argoffset += TYPE_LENGTH (float_elt_type);
 	      len -= TYPE_LENGTH (float_elt_type);
@@ -1913,7 +1913,7 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   /* Store the struct return value in r8 if necessary. */
   if (struct_return)
     {
-      store_address (&registers[REGISTER_BYTE (IA64_GR8_REGNUM)],
+      store_address (&deprecated_registers[REGISTER_BYTE (IA64_GR8_REGNUM)],
                      REGISTER_RAW_SIZE (IA64_GR8_REGNUM),
 		     struct_addr);
     }
@@ -1954,7 +1954,7 @@ ia64_store_return_value (struct type *type, char *valbuf)
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       ia64_register_convert_to_raw (type, IA64_FR8_REGNUM, valbuf,
-				  &registers[REGISTER_BYTE (IA64_FR8_REGNUM)]);
+				    &deprecated_registers[REGISTER_BYTE (IA64_FR8_REGNUM)]);
       target_store_registers (IA64_FR8_REGNUM);
     }
   else

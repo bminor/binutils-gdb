@@ -256,7 +256,7 @@ gnu_store_registers (int regno)
 	}
 
 #define fill(state, regno)                                               \
-  memcpy (REG_ADDR(state, regno), &registers[REGISTER_BYTE (regno)],     \
+  memcpy (REG_ADDR(state, regno), &deprecated_registers[REGISTER_BYTE (regno)],     \
           REGISTER_RAW_SIZE (regno))
 
       if (regno == -1)

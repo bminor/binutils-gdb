@@ -837,16 +837,16 @@ fill_gregset (gregset_t *gregsetp, int regno)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  *(regp + regi) = *(int *) &registers[REGISTER_BYTE (regi)];
+	  *(regp + regi) = *(int *) &deprecated_registers[REGISTER_BYTE (regi)];
 	}
     }
   if ((regno == -1) || (regno == PS_REGNUM))
     {
-      *(regp + R_PS) = *(int *) &registers[REGISTER_BYTE (PS_REGNUM)];
+      *(regp + R_PS) = *(int *) &deprecated_registers[REGISTER_BYTE (PS_REGNUM)];
     }
   if ((regno == -1) || (regno == PC_REGNUM))
     {
-      *(regp + R_PC) = *(int *) &registers[REGISTER_BYTE (PC_REGNUM)];
+      *(regp + R_PC) = *(int *) &deprecated_registers[REGISTER_BYTE (PC_REGNUM)];
     }
 }
 
@@ -888,22 +888,22 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  from = (char *) &registers[REGISTER_BYTE (regi)];
+	  from = (char *) &deprecated_registers[REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->f_fpregs[regi - FP0_REGNUM][0]);
 	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
   if ((regno == -1) || (regno == E_FPC_REGNUM))
     {
-      fpregsetp->f_pcr = *(int *) &registers[REGISTER_BYTE (E_FPC_REGNUM)];
+      fpregsetp->f_pcr = *(int *) &deprecated_registers[REGISTER_BYTE (E_FPC_REGNUM)];
     }
   if ((regno == -1) || (regno == E_FPS_REGNUM))
     {
-      fpregsetp->f_psr = *(int *) &registers[REGISTER_BYTE (E_FPS_REGNUM)];
+      fpregsetp->f_psr = *(int *) &deprecated_registers[REGISTER_BYTE (E_FPS_REGNUM)];
     }
   if ((regno == -1) || (regno == E_FPI_REGNUM))
     {
-      fpregsetp->f_fpiaddr = *(int *) &registers[REGISTER_BYTE (E_FPI_REGNUM)];
+      fpregsetp->f_fpiaddr = *(int *) &deprecated_registers[REGISTER_BYTE (E_FPI_REGNUM)];
     }
 }
 

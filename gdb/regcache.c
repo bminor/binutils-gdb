@@ -489,7 +489,7 @@ struct regcache *current_regcache;
 
 /* REGISTERS contains the cached register values (in target byte order). */
 
-char *registers;
+char *deprecated_registers;
 
 /* DEPRECATED_REGISTER_VALID is 0 if the register needs to be fetched,
                      1 if it has been fetched, and
@@ -657,7 +657,7 @@ deprecated_read_register_bytes (int in_start, char *in_buf, int in_len)
 	/* FIXME: cagney/2001-08-18: This is just silly.  It defeats
            the entire register read/write flow of control.  Must
            resist temptation to return 0xdeadbeef.  */
-	memcpy (reg_buf, registers + reg_start, reg_len);
+	memcpy (reg_buf, &deprecated_registers[reg_start], reg_len);
 
       /* Legacy note: This function, for some reason, allows a NULL
          input buffer.  If the buffer is NULL, the registers are still
@@ -1000,7 +1000,7 @@ deprecated_write_register_bytes (int myregstart, char *myaddr, int inlen)
 	     Update it from the target before scribbling on it.  */
 	  deprecated_read_register_gen (regnum, regbuf);
 
-	  memcpy (registers + overlapstart,
+	  memcpy (&deprecated_registers[overlapstart],
 		  myaddr + (overlapstart - myregstart),
 		  overlapend - overlapstart);
 
@@ -1413,7 +1413,7 @@ build_regcache (void)
 {
   current_regcache = regcache_xmalloc (current_gdbarch);
   current_regcache->readonly_p = 0;
-  registers = deprecated_grub_regcache_for_registers (current_regcache);
+  deprecated_registers = deprecated_grub_regcache_for_registers (current_regcache);
   deprecated_register_valid = deprecated_grub_regcache_for_register_valid (current_regcache);
 }
 
@@ -1695,7 +1695,7 @@ _initialize_regcache (void)
   regcache_descr_handle = register_gdbarch_data (init_regcache_descr,
 						 xfree_regcache_descr);
   REGISTER_GDBARCH_SWAP (current_regcache);
-  register_gdbarch_swap (&registers, sizeof (registers), NULL);
+  register_gdbarch_swap (&deprecated_registers, sizeof (deprecated_registers), NULL);
   register_gdbarch_swap (&deprecated_register_valid, sizeof (deprecated_register_valid), NULL);
   register_gdbarch_swap (NULL, 0, build_regcache);
 

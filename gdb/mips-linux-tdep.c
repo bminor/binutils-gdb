@@ -132,7 +132,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
 
   if (regno < 32)
     {
-      src = &registers[REGISTER_BYTE (regno)];
+      src = &deprecated_registers[REGISTER_BYTE (regno)];
       dst = regp + regno + EF_REG0;
       memcpy (dst, src, sizeof (elf_greg_t));
       return;
@@ -163,7 +163,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
 
   if (regaddr != -1)
     {
-      src = &registers[REGISTER_BYTE (regno)];
+      src = &deprecated_registers[REGISTER_BYTE (regno)];
       dst = regp + regaddr;
       memcpy (dst, src, sizeof (elf_greg_t));
     }
@@ -199,13 +199,13 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
 
   if ((regno >= FP0_REGNUM) && (regno < FP0_REGNUM + 32))
     {
-      from = (char *) &registers[REGISTER_BYTE (regno)];
+      from = (char *) &deprecated_registers[REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + regno - FP0_REGNUM);
       memcpy (to, from, REGISTER_RAW_SIZE (regno - FP0_REGNUM));
     }
   else if (regno == FCRCS_REGNUM)
     {
-      from = (char *) &registers[REGISTER_BYTE (regno)];
+      from = (char *) &deprecated_registers[REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + 32);
       memcpy (to, from, REGISTER_RAW_SIZE (regno));
     }

@@ -83,27 +83,27 @@ fill_gregset (gregset_t *gregsetp, int regno)
   for (regi = 0; regi <= CTX_RA; regi++)
     if ((regno == -1) || (regno == regi))
       *(regp + regi) =
-	extract_signed_integer (&registers[REGISTER_BYTE (regi)],
+	extract_signed_integer (&deprecated_registers[REGISTER_BYTE (regi)],
 				REGISTER_RAW_SIZE (regi));
 
   if ((regno == -1) || (regno == PC_REGNUM))
     *(regp + CTX_EPC) =
-      extract_signed_integer (&registers[REGISTER_BYTE (PC_REGNUM)],
+      extract_signed_integer (&deprecated_registers[REGISTER_BYTE (PC_REGNUM)],
 			      REGISTER_RAW_SIZE (PC_REGNUM));
 
   if ((regno == -1) || (regno == CAUSE_REGNUM))
     *(regp + CTX_CAUSE) =
-      extract_signed_integer (&registers[REGISTER_BYTE (CAUSE_REGNUM)],
+      extract_signed_integer (&deprecated_registers[REGISTER_BYTE (CAUSE_REGNUM)],
 			      REGISTER_RAW_SIZE (CAUSE_REGNUM));
 
   if ((regno == -1) || (regno == HI_REGNUM))
     *(regp + CTX_MDHI) =
-      extract_signed_integer (&registers[REGISTER_BYTE (HI_REGNUM)],
+      extract_signed_integer (&deprecated_registers[REGISTER_BYTE (HI_REGNUM)],
 			      REGISTER_RAW_SIZE (HI_REGNUM));
 
   if ((regno == -1) || (regno == LO_REGNUM))
     *(regp + CTX_MDLO) =
-      extract_signed_integer (&registers[REGISTER_BYTE (LO_REGNUM)],
+      extract_signed_integer (&deprecated_registers[REGISTER_BYTE (LO_REGNUM)],
 			      REGISTER_RAW_SIZE (LO_REGNUM));
 }
 
@@ -145,14 +145,14 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  from = (char *) &registers[REGISTER_BYTE (regi)];
+	  from = (char *) &deprecated_registers[REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
 	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
 
   if ((regno == -1) || (regno == FCRCS_REGNUM))
-    fpregsetp->fp_csr = *(unsigned *) &registers[REGISTER_BYTE (FCRCS_REGNUM)];
+    fpregsetp->fp_csr = *(unsigned *) &deprecated_registers[REGISTER_BYTE (FCRCS_REGNUM)];
 }
 
 
@@ -198,7 +198,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 {
   if (core_reg_size == REGISTER_BYTES)
     {
-      memcpy ((char *) registers, core_reg_sect, core_reg_size);
+      memcpy ((char *) deprecated_registers, core_reg_sect, core_reg_size);
     }
   else if (MIPS_REGSIZE == 4 &&
 	   core_reg_size == (2 * MIPS_REGSIZE) * NUM_REGS)
@@ -206,7 +206,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       /* This is a core file from a N32 executable, 64 bits are saved
          for all registers.  */
       char *srcp = core_reg_sect;
-      char *dstp = registers;
+      char *dstp = deprecated_registers;
       int regno;
 
       for (regno = 0; regno < NUM_REGS; regno++)

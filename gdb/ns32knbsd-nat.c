@@ -32,10 +32,10 @@
 #include "regcache.h"
 
 #define RF(dst, src) \
-	memcpy(&registers[REGISTER_BYTE(dst)], &src, sizeof(src))
+	memcpy(&deprecated_registers[REGISTER_BYTE(dst)], &src, sizeof(src))
 
 #define RS(src, dst) \
-	memcpy(&dst, &registers[REGISTER_BYTE(src)], sizeof(dst))
+	memcpy(&dst, &deprecated_registers[REGISTER_BYTE(src)], sizeof(dst))
 
 void
 fetch_inferior_registers (int regno)

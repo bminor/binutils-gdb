@@ -1,3 +1,19 @@
+2002-11-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.h (deprecated_registers): Rename registers.
+	* a68v-nat.c, alpha-nat.c, arch-utils.c, core-sol2.c: Update.
+	* hp300ux-nat.c, hppab-nat.c, hppah-nat.c: Update.
+	* hppam3-nat.c, hpux-thread.c, i386gnu-nat.c: Update.
+	* ia64-aix-nat.c, ia64-linux-nat.c, ia64-tdep.c: Update.
+	* irix4-nat.c, irix5-nat.c, lynx-nat.c, m68k-tdep.c: Update.
+	* m68knbsd-nat.c, mips-linux-tdep.c, mipsm3-nat.c: Update.
+	* mipsv4-nat.c, ns32knbsd-nat.c, ppc-bdm.c: Update.
+	* ppc-sysv-tdep.c, ptx4-nat.c, regcache.c, remote-es.c: Update.
+	* remote-sds.c, remote-vx68.c, remote-vxmips.c: Update.
+	* remote-vxsparc.c, rs6000-tdep.c, sol-thread.c: Update.
+	* sparc-nat.c, sparc-tdep.c, sun3-nat.c, symm-nat.c: Update.
+	* v850ice.c: Update.
+
 Wed Nov 13 19:51:05 2002  Andrew Cagney  <cagney@redhat.com>
 
 	* utils.c (gdb_realpath): Add comment mentioning realpath with a

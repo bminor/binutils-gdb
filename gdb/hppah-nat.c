@@ -121,7 +121,7 @@ store_inferior_registers (int regno)
 	{
 	  CORE_ADDR temp;
 
-	  temp = *(CORE_ADDR *)&registers[REGISTER_BYTE (regno)];
+	  temp = *(CORE_ADDR *)&deprecated_registers[REGISTER_BYTE (regno)];
 
 	  /* Set the priv level (stored in the low two bits of the PC.  */
 	  temp |= 0x3;
@@ -146,7 +146,7 @@ store_inferior_registers (int regno)
 	 the high part of IPSW.  What will it take for HP to catch a
 	 clue about building sensible interfaces?  */
      if (regno == IPSW_REGNUM && len == 8)
-	*(int *)&registers[REGISTER_BYTE (regno)] = 0;
+	*(int *)&deprecated_registers[REGISTER_BYTE (regno)] = 0;
 #endif
 
       for (i = 0; i < len; i += sizeof (int))
@@ -154,7 +154,7 @@ store_inferior_registers (int regno)
 	  errno = 0;
 	  call_ptrace (PT_WUREGS, PIDGET (inferior_ptid),
 	               (PTRACE_ARG3_TYPE) addr + i,
-		       *(int *) &registers[REGISTER_BYTE (regno) + i]);
+		       *(int *) &deprecated_registers[REGISTER_BYTE (regno) + i]);
 	  if (errno != 0)
 	    {
 	      /* Warning, not error, in case we are attached; sometimes

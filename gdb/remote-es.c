@@ -623,7 +623,7 @@ es1800_fetch_register (int regno)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = (fromhex (p[k * 2 + 1]) * 16) + fromhex (p[k * 2 + 2]);
+	  deprecated_registers[r++] = (fromhex (p[k * 2 + 1]) * 16) + fromhex (p[k * 2 + 2]);
 	}
     }
   else
@@ -666,7 +666,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = (fromhex (p[i + 0]) * 16) + fromhex (p[i + 1]);
+	  deprecated_registers[r++] = (fromhex (p[i + 0]) * 16) + fromhex (p[i + 1]);
 	  i += 2;
 	}
     }
@@ -685,7 +685,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = (fromhex (p[i + 0])) * 16 + fromhex (p[i + 1]);
+	  deprecated_registers[r++] = (fromhex (p[i + 0])) * 16 + fromhex (p[i + 1]);
 	  i += 2;
 	}
     }
@@ -725,7 +725,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
+	  deprecated_registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
 	}
 
       p = SR_buf;
@@ -735,7 +735,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] =
+	  deprecated_registers[r++] =
 	    fromhex (SR_buf[k * 2 + 1]) * 16 + fromhex (SR_buf[k * 2 + 2]);
 	}
       send_with_reply ("PC", buf, sizeof (buf));
@@ -746,7 +746,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
+	  deprecated_registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
 	}
     }
   else
@@ -771,7 +771,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
+	  deprecated_registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
 	}
 
       /* fetch STATUS */
@@ -783,7 +783,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] =
+	  deprecated_registers[r++] =
 	    fromhex (SR_buf[k * 2 + 1]) * 16 + fromhex (SR_buf[k * 2 + 2]);
 	}
 
@@ -797,7 +797,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
+	  deprecated_registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
 	}
     }
 }
@@ -827,7 +827,7 @@ es1800_store_register (int regno)
   int k;
   unsigned char *r;
 
-  r = (unsigned char *) registers;
+  r = (unsigned char *) deprecated_registers;
 
   if (regno == -1)		/* write all registers */
     {
