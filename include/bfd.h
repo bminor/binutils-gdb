@@ -2,7 +2,7 @@
    Copyright 1990, 1991 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
-This file is part of BFD, the Binary File Diddler.
+This file is part of BFD, the Binary File Descriptor library.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1071,7 +1071,7 @@ instead.
   flagword flags;
 
 /*
-Aointer to the section to which this symbol is relative, or 0 if the
+A pointer to the section to which this symbol is relative, or 0 if the
 symbol is absolute or undefined. Note that it is not sufficient to set
 this location to 0 to mark a symbol as absolute - the flag
 @code{BSF_ABSOLUTE} must be set also.
@@ -1142,14 +1142,15 @@ problems later on.
      BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))
 
 /*:bfd.c*/
-/* @section typedef bfd
+/* @section @code{typedef bfd}
 
-Pointers to bfd structs are the cornerstone of any application using
-@code{libbfd}. References though the BFD and to data in the BFD give the
-entire BFD functionality.
+A BFD is has type @code{bfd}; objects of this type are the cornerstone
+of any application using @code{libbfd}. References though the BFD and
+to data in the BFD give the entire BFD functionality.
 
-Here is the BFD struct itself.  This contains the major data about
-the file, and contains pointers to the rest of the data.
+Here is the struct used to define the type @code{bfd}.  This contains
+the major data about the file, and contains pointers to the rest of
+the data.
 */
 
 struct _bfd 
@@ -1220,7 +1221,7 @@ and here:
   long mtime;          
 
 /*
-For output files, channel we locked (is this used?).
+Reserved for an unimplemented file locking extension.
 */
 
 int ifd;
@@ -1394,14 +1395,17 @@ What this does
 /*
 
  bfd_set_archive_head
+
 Used whilst processing archives. Sets the head of the chain of BFDs
 contained in an archive to @var{new_head}. (see chapter on archives)
 */
+
  PROTO(boolean, bfd_set_archive_head, (bfd *output, bfd *new_head));
 
 /*
 
  bfd_get_elt_at_index
+Return the sub bfd contained within the archive at archive index n.
 */
 
  PROTO(bfd *, bfd_get_elt_at_index, (bfd *, int));
@@ -1501,7 +1505,7 @@ The symbol to relocate against was undefined.
   bfd_reloc_undefined,
 
 /*
-The relocaction was performed, but may not be ok - presently generated
+The relocation was performed, but may not be ok - presently generated
 only when linking i960 coff files with i960 b.out symbols.
 */
 
