@@ -1,3 +1,192 @@
+Tue Feb  8 08:57:31 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	Make all callers of malloc or realloc (including via obstacks)
+	check the result for NULL.  Most set bfd_error to no_memory and
+	return in that case; a few are harder to fix, and are marked
+	with "FIXME <return type>".
+
+	* elf32-hppa.c (hppa_elf_build_arg_reloc_stub
+	hppa_elf_build_long_branch_stub):  Check bfd_make_empty_symbol return.
+	* linker.c (_bfd_generic_link_output_symbols
+	_bfd_generic_link_write_global_symbol): Ditto
+	* section.c (bfd_make_section_anyway): Ditto.
+
+	* tekhex.c (find_chunk tekhex_mkobject): Check bfd_alloc.
+	(first_phase): Ditto.  FIXME void
+	(tekhex_make_empty_symbol): Check bfd_zalloc.
+
+	* sunos.c (sunos_read_dynamic_info): Check bfd_zalloc.
+	(MY(read_dynamic_symbols) MY(read_dynamic_relocs)): Check bfd_alloc.
+
+	* stringhash.c (_bfd_stringtab_hash_newfunc): Check bfd_hash_allocate.
+
+	* srec.c: Indent.
+	(fillup_symbols): Check bfd_alloc.  FIXME void
+	(srec_mkobject srec_get_section_contents
+	srec_set_section_contents): Check bfd_alloc. 
+	(srec_make_empty_symbol): Check bfd_zalloc.
+
+	* som.c (hppa_som_gen_reloc_type): Check bfd_alloc_by_size_t.
+	(make_unique_section): Check bfd_alloc.
+	(som_new_section_hook): Check bfd_zalloc.
+	(bfd_som_attach_aux_hdr): Ditto.  FIXME void
+
+	* rs6000-core.c (rs6000coff_core_p): Check bfd_zalloc.
+
+	* osf-core.c (osf_core_make_empty_symbol): Check bfd_zalloc.
+	(osf_core_core_file_p): Check bfd_alloc.
+
+	* oasys.c (oasys_slurp_symbol_table oasys_archive_p
+	oasys_mkobject oasys_object_p oasys_new_section_hook
+	oasys_set_section_contents): Check bfd_alloc.
+	(oasys_slurp_section_data): Check bfd_zalloc and bfd_alloc.
+	(oasys_make_empty_symbol): Check bfd_zalloc.
+
+	* nlmcode.h (nlm_make_empty_symbol): Check bfd_zalloc.
+	(nlm_slurp_symbol_table): Check bfd_zalloc and bfd_alloc.
+
+	* nlm32-sparc.c (nlm_sparc_read_import): Check bfd_alloc.
+
+	* nlm32-i386.c (nlm_i386_read_import): Check bfd_alloc.
+
+	* nlm32-alpha.c (nlm_alpha_read_import): Check bfd_alloc.
+
+	* linker.c (_bfd_link_hash_newfunc
+	(generic_link_hash_newfunc
+	(archive_hash_newfunc
+	(_bfd_generic_link_add_one_symbol): Check bfd_hash_allocate.
+	(_bfd_generic_final_link
+	(_bfd_generic_link_output_symbols
+	(default_indirect_link_order): Check bfd_alloc.
+	(bfd_new_link_order): Check bfd_alloc_by_size_t.
+
+	* irix-core.c (irix_core_make_empty_symbol): Check bfd_zalloc.
+
+	* ieee.c: Indent.
+	(read_id get_symbol get_section_entry ieee_archive_p ieee_object_p
+	ieee_slurp_section_data ieee_new_section_hook): Check bfd_alloc.
+	(do_one): Check bfd_alloc.  Return a boolean.
+	(ieee_slurp_section_data): Check it.
+	(init_for_output): Check bfd_alloc.  Return a boolean.
+	(ieee_set_section_contents): Check it.
+	(do_with_relocs):  Check bfd_alloc.  Return a boolean.
+	(ieee_bfd_debug_info_accumulate): Ditto.  FIXME void.
+	(ieee_mkobject): Check bfd_zalloc.
+	(ieee_make_empty_symbol): Check bfd_zmalloc.
+
+	* hpux-core.c (hpux_core_make_empty_symbol): Check
+	bfd_zalloc.
+
+	* hppabsd-core.c (hppabsd_core_make_empty_symbol): Check
+	bfd_zalloc.
+	(hppabsd_core_core_file_p): Check bfd_zalloc.
+
+	* hp300hpux.c (MY(slurp_symbol_table)): Check bfd_alloc.
+
+	* elfcode.h (elf_new_section_hook): Check bfd_alloc.
+	(bfd_section_from_phdr): Ditto.
+	(write_relocs): Ditto.  FIXME void
+	(elf_map_symbols assign_section_numbers map_program_segments):
+	Ditto.  Return a boolean. 
+	(swap_out_syms): Ditto.  Check elf_map_symbols.
+	(elf_slurp_symbol_table): Check bfd_zalloc.
+	(elf_slurp_reloca_table): Check bfd_alloc.
+	(elf_slurp_reloc_table): Ditto.
+	(elf_compute_section_file_positions): Check assign_section_numbers.
+	(assign_file_positions_except_relocs): Return a boolean.
+	Check map_program_segments.
+	(elf_compute_section_file_positions): Check it.
+
+	* elf32-mips.c (mips_elf_final_link): Check bfd_alloc.
+
+	* elf32-hppa.c (hppa_elf_stub_branch_reloc): Check bfd_zmalloc and
+	realloc. 
+	(hppa_elf_stub_reloc): Ditto.
+	(hppa_elf_build_arg_reloc_stub): Check bfd_zalloc.
+	(hppa_elf_build_long_branch_stub): Ditto.
+	(elf32_hppa_backend_symbol_table_processing): Ditto.
+
+	* ecoff.c (ecoff_set_symbol_info): Check bfd_alloc.  Return a boolean.
+	(ecoff_slurp_symbol_table): Check it.
+	(ecoff_slurp_armap): Check bfd_alloc.
+	(ecoff_write_armap): Check bfd_zalloc.
+	(ecoff_link_hash_newfunc): Check bfd_hash_allocate and
+	_bfd_link_hash_newfunc. 
+	(ecoff_link_add_externals): Check bfd_alloc.
+
+	* ctor.c (bfd_constructor_entry): Check bfd_alloc.
+
+	* coffgen.c (coff_real_object_p): Check bfd_alloc.
+	(coff_renumber_symbols): Check bfd_alloc_by_size_t.  Return a boolean.
+	(coff_write_symbol): Check bfd_alloc.  FIXME int
+	(coff_write_linenumbers): Check bfd_alloc.  Return a boolean.
+	(coff_section_symbol): Check bfd_alloc_by_size_t.
+	(coff_get_normalized_symtab): Check bfd_alloc.
+	(coff_bfd_make_debug_symbol): Check bfd_zalloc.
+	* libcoff-in.h: Change decls of coff_renumber_symbols,
+	coff_write_linenumbers.
+	* libcoff.h: Rebuilt.
+	* coffcode.h (coff_write_object_contents): Check
+	coff_renumber_symbols, coff_write_linenumbers.
+
+	* coffcode.h: Indent.
+	(coff_add_missing_symbols): Check bfd_alloc_by_size_t.  Return a
+	boolean. 
+	(coff_write_object_contents): Check it.
+
+	* coff-alpha.c (alpha_relocate_section): Check bfd_alloc.
+	* coff-mips.c (mips_relocate_section): Ditto.
+
+	* archive.c (bfd_slurp_bsd_armap_f2): Check bfd_alloc value.
+	(do_slurp_bsd_armap): Ditto.
+	(compute_and_write_armap): Check bfd_realloc value.
+
+	* aoutx.h (translate_from_native_sym_flags): Check bfd_alloc
+	return value.  Return boolean value.
+	(NAME(aout,make_empty_symbol)): Check bfd_zalloc return value.
+	(NAME(aout,slurp_symbol_table)): Check bf_alloc and bfd_zalloc
+	return value.
+	(add_to_stringtab): Ditto.  FIXME void
+	(aout_link_hash_newfunc): Check bfd_hash_allocate return value.
+	(aout_link_add_symbols): Check bfd_alloc value.
+	(translate_symbol_table): Check translate_from_native_sym_flags.
+	* hp300hpux.c (MY(slurp_symbol_table)): Ditto.
+	* aoutx.h (aout_link_hash_newfunc): Check _bfd_link_hash_newfunc.
+
+	* opncls.c (bfd_zalloc bfd_realloc): Check result of bfd_alloc.
+
+	* opncls.c (obstack_chunk_alloc): Define as malloc, not
+	bfd_xmalloc_by_size_t. 
+	(_bfd_new_bfd): Check obstack_begin for 0 return.
+
+	* ieee.c (obstack_chunk_alloc): Define as malloc, not
+	bfd_xmalloc_by_size_t. 
+	(ieee_archive_p): Check obstack_begin for 0 return and
+	obstack_finish for NULL return.
+
+	* hash.c (obstack_chunk_alloc): Define as malloc, not
+	bfd_xmalloc_by_size_t. 
+	(bfd_hash_table_init_n): Check obstack_begin for 0 return and
+	obstack_finish for NULL return.
+	(bfd_hash_lookup): Check obstack_alloc for NULL return.
+
+	* ecofflink.c (obstack_chunk_alloc): Define as malloc, not
+	bfd_xmalloc_by_size_t. 
+	bfd_ecoff_debug_accumulate
+	bfd_ecoff_debug_accumulate_other): Check obstack_alloc.
+	(add_file_shuffle add_memory_shuffle): Check obstack_alloc for
+	NULL return.  Return boolean, not void.
+	(bfd_ecoff_debug_init): Check obstack_begin for 0 return.
+	(bfd_ecoff_debug_accumulate): Check add_file_shuffle
+	and add_memory_shuffle return. 
+	(string_hash_newfunc): Check bfd_hash_allocate and bfd_hash_newfunc.
+	(bfd_ecoff_debug_accumulate): Check bfd_alloc.
+	(ecoff_add_string): Check add_memory_shuffle return.
+
+	* libbfd-in.h (xmalloc, bfd_xmalloc, bfd_xmalloc_by_size_t):
+	Remove decls. 
+	* libbfd.h: Rebuilt.
+
 Fri Feb 11 15:35:32 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* configure.host:  Add Lynx/rs6000 support.

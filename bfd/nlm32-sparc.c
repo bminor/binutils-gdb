@@ -173,7 +173,7 @@ nlm_sparc_write_reloc (abfd, sec, rel)
      arelent *rel;
 {
   bfd_vma val;
-  struct nlm32_sparc_reloc_ext tmp_reloc = {0};
+  struct nlm32_sparc_reloc_ext tmp_reloc;
   int index;
   int type = -1;
   reloc_howto_type *tmp;
@@ -283,6 +283,11 @@ nlm_sparc_read_import (abfd, sym)
     }
   sym -> symbol.the_bfd = abfd;
   sym -> symbol.name = bfd_alloc (abfd, symlength + 1);
+  if (!sym -> symbol.name)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   
   /*
    * Then read in the symbol
@@ -304,6 +309,11 @@ nlm_sparc_read_import (abfd, sym)
   
   nlm_relocs = ((struct nlm_relent *)
 		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
+  if (!nlm_relocs)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   sym -> relocs = nlm_relocs;
   sym -> rcnt = 0;
   while (sym -> rcnt < rcount)

@@ -111,7 +111,8 @@ hppabsd_core_make_empty_symbol (abfd)
      bfd *abfd;
 {
   asymbol *new = (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
-  new->the_bfd = abfd;
+  if (new)
+    new->the_bfd = abfd;
   return new;
 }
 
@@ -165,6 +166,11 @@ hppabsd_core_core_file_p (abfd)
 
   coredata = (struct hppabsd_core_struct *)
     bfd_zalloc (abfd, sizeof (struct hppabsd_core_struct));
+  if (!coredata)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
 
   /* Make the core data and available via the tdata part of the BFD.  */
   abfd->tdata.hppabsd_core_data = coredata;
@@ -234,7 +240,7 @@ hppabsd_core_core_file_matches_executable_p (core_bfd, exec_bfd)
 #define	hppabsd_core_close_and_cleanup		bfd_generic_close_and_cleanup
 #define	hppabsd_core_set_section_contents	(boolean (*) PARAMS	\
         ((bfd *abfd, asection *section, PTR data, file_ptr offset,	\
-        bfd_size_type count))) bfd_false
+        bfd_size_type count))) bfd_generic_set_section_contents
 #define	hppabsd_core_get_section_contents \
 	bfd_generic_get_section_contents
 #define	hppabsd_core_new_section_hook		(boolean (*) PARAMS	\
@@ -288,9 +294,10 @@ swap_abort ()
   abort ();	
 }
 
-#define	NO_GET	((bfd_vma (*) PARAMS ((         bfd_byte *))) swap_abort )
+#define	NO_GET	((bfd_vma (*) PARAMS ((   const bfd_byte *))) swap_abort )
 #define	NO_PUT	((void    (*) PARAMS ((bfd_vma, bfd_byte *))) swap_abort )
-#define	NO_SIGNED_GET ((bfd_signed_vma (*) PARAMS ((bfd_byte *))) swap_abort )
+#define	NO_SIGNED_GET \
+  ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort )
 
 bfd_target hppabsd_core_vec =
   {

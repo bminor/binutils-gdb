@@ -1,5 +1,5 @@
 /* BFD back-end for s-record objects.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -26,12 +26,12 @@ DESCRIPTION
 	
 	Ordinary S-Records cannot hold anything but addresses and
 	data, so that's all that we implement.
-   
+
 	The only interesting thing is that S-Records may come out of
 	order and there is no header, so an initial scan is required
 	to discover the minimum and maximum addresses used to create
 	the vma and size of the only section we create.  We
-	arbitrarily call this section ".text". 
+	arbitrarily call this section ".text".
 
 	When bfd_get_section_contents is called the file is read
 	again, and this time the data is placed into a bfd_alloc'd
@@ -95,7 +95,7 @@ EXAMPLE
 	  _etext $8036
 	  _edata $8036
  	  _end $8036
-	$$ 
+	$$
 
 DESCRIPTION
 	We allow symbols to be anywhere in the data stream - the module names
@@ -111,7 +111,7 @@ DESCRIPTION
 
 static CONST char digs[] = "0123456789ABCDEF";
 
-static char hex_value[1 + (unsigned char)~0];
+static char hex_value[1 + (unsigned char) ~0];
 
 #define NOT_HEX 20
 #define NIBBLE(x) hex_value[(unsigned char)(x)]
@@ -125,37 +125,37 @@ static char hex_value[1 + (unsigned char)~0];
 
 
 static void
-DEFUN_VOID(srec_init) 
+DEFUN_VOID (srec_init)
 {
-    unsigned int i;
-    static boolean inited = false;
-    
-    if (inited == false) 
+  unsigned int i;
+  static boolean inited = false;
+
+  if (inited == false)
     {
-	
-	inited = true;
-	
-	for (i = 0; i < sizeof (hex_value); i++) 
+
+      inited = true;
+
+      for (i = 0; i < sizeof (hex_value); i++)
 	{
-	    hex_value[i] = NOT_HEX;
+	  hex_value[i] = NOT_HEX;
 	}
-    
-	for (i = 0; i < 10; i++) 
+
+      for (i = 0; i < 10; i++)
 	{
-	    hex_value[i + '0'] = i;
-	
+	  hex_value[i + '0'] = i;
+
 	}
-	for (i = 0; i < 6; i++) 
+      for (i = 0; i < 6; i++)
 	{
-	    hex_value[i + 'a'] = i+10;
-	    hex_value[i + 'A'] = i+10;
+	  hex_value[i + 'a'] = i + 10;
+	  hex_value[i + 'A'] = i + 10;
 	}
-    }    
+    }
 }
 
 
 /* The maximum number of bytes on a line is FF */
-#define MAXCHUNK 0xff 
+#define MAXCHUNK 0xff
 /* The number of bytes we fit onto a line on output */
 #define CHUNK 21
 
@@ -164,21 +164,21 @@ DEFUN_VOID(srec_init)
 
 struct srec_data_list_struct
 {
-    unsigned    char *data;
-    bfd_vma where;
-    bfd_size_type size;
-    struct srec_data_list_struct *next;
+  unsigned char *data;
+  bfd_vma where;
+  bfd_size_type size;
+  struct srec_data_list_struct *next;
 
-    
-} ;
+
+};
 typedef struct srec_data_list_struct srec_data_list_type;
 
 
-typedef struct  srec_data_struct
-{
-    srec_data_list_type *head;    
+typedef struct srec_data_struct
+  {
+    srec_data_list_type *head;
     unsigned int type;
-    
+
     int done_symbol_read;
     int count;
     asymbol *symbols;
@@ -186,67 +186,75 @@ typedef struct  srec_data_struct
     int symbol_idx;
     int string_size;
     int string_idx;
-} tdata_type;
+  }
+tdata_type;
 
 
-/* 
+/*
    called once per input S-Record, used to work out vma and size of data.
  */
 
-static bfd_vma low,high;
+static bfd_vma low, high;
 
+/*ARGSUSED*/
 static void
-size_symbols(abfd, buf, len, val)
-bfd *abfd;
-char *buf;
-int len;
-int val;
+size_symbols (abfd, buf, len, val)
+     bfd *abfd;
+     char *buf;
+     int len;
+     int val;
 {
-  abfd->symcount ++;
-  abfd->tdata.srec_data->string_size  += len + 1;
+  abfd->symcount++;
+  abfd->tdata.srec_data->string_size += len + 1;
 }
 
 static void
-fillup_symbols(abfd, buf, len, val)
-bfd *abfd;
-char *buf;
-int len;
-int val;
+fillup_symbols (abfd, buf, len, val)
+     bfd *abfd;
+     char *buf;
+     int len;
+     int val;
 {
   if (!abfd->tdata.srec_data->done_symbol_read)
-  {
-    asymbol *p;
-    if (abfd->tdata.srec_data->symbols == 0)
     {
-      abfd->tdata.srec_data->symbols = (asymbol *)bfd_alloc(abfd, abfd->symcount * sizeof(asymbol));
-      abfd->tdata.srec_data->strings = (char*)bfd_alloc(abfd, abfd->tdata.srec_data->string_size);
-      abfd->tdata.srec_data->symbol_idx = 0;
-      abfd->tdata.srec_data->string_idx = 0;
-    }
+      asymbol *p;
+      if (abfd->tdata.srec_data->symbols == 0)
+	{
+	  abfd->tdata.srec_data->symbols = (asymbol *) bfd_alloc (abfd, abfd->symcount * sizeof (asymbol));
+	  abfd->tdata.srec_data->strings = (char *) bfd_alloc (abfd, abfd->tdata.srec_data->string_size);
+	  if (!abfd->tdata.srec_data->symbols || !abfd->tdata.srec_data->strings)
+	    {
+	      bfd_error = no_memory;
+	      abort ();		/* FIXME */
+	    }
+	  abfd->tdata.srec_data->symbol_idx = 0;
+	  abfd->tdata.srec_data->string_idx = 0;
+	}
 
-    p = abfd->tdata.srec_data->symbols + abfd->tdata.srec_data->symbol_idx++;
-    p->the_bfd = abfd;
-    p->name = abfd->tdata.srec_data->strings + abfd->tdata.srec_data->string_idx;
-    memcpy((char *)(p->name), buf, len+1);
-    abfd->tdata.srec_data->string_idx += len + 1;
-    p->value = val;
-    p->flags = BSF_EXPORT | BSF_GLOBAL;
-    p->section = &bfd_abs_section;
-    p->udata = 0;
-  }
+      p = abfd->tdata.srec_data->symbols + abfd->tdata.srec_data->symbol_idx++;
+      p->the_bfd = abfd;
+      p->name = abfd->tdata.srec_data->strings + abfd->tdata.srec_data->string_idx;
+      memcpy ((char *) (p->name), buf, len + 1);
+      abfd->tdata.srec_data->string_idx += len + 1;
+      p->value = val;
+      p->flags = BSF_EXPORT | BSF_GLOBAL;
+      p->section = &bfd_abs_section;
+      p->udata = 0;
+    }
 }
+/*ARGSUSED*/
 static void
-DEFUN(size_srec,(abfd, section, address, raw, length),
-      bfd *abfd AND
-      asection *section AND
-      bfd_vma address AND
-      bfd_byte *raw AND
-      unsigned int length)
+DEFUN (size_srec, (abfd, section, address, raw, length),
+       bfd * abfd AND
+       asection * section AND
+       bfd_vma address AND
+       bfd_byte * raw AND
+       unsigned int length)
 {
   if (address < low)
     low = address;
-  if (address + length > high) 
-    high = address + length -1;
+  if (address + length > high)
+    high = address + length - 1;
 }
 
 
@@ -254,280 +262,298 @@ DEFUN(size_srec,(abfd, section, address, raw, length),
  called once per input S-Record, copies data from input into bfd_alloc'd area
  */
 
+/*ARGSUSED*/
 static void
-DEFUN(fillup,(abfd, section, address, raw, length),
-bfd *abfd AND
-asection *section AND
-bfd_vma address AND
-bfd_byte *raw AND
-unsigned int length)
+DEFUN (fillup, (abfd, section, address, raw, length),
+       bfd * abfd AND
+       asection * section AND
+       bfd_vma address AND
+       bfd_byte * raw AND
+       unsigned int length)
 {
-    unsigned int i;
-    bfd_byte *dst =
-     (bfd_byte *)(section->used_by_bfd) + address - section->vma;
-    /* length -1 because we don't read in the checksum */
-    for (i = 0; i < length -1 ; i++) {
-	    *dst = HEX(raw);
-	    dst++;
-	    raw+=2;
-	}
+  unsigned int i;
+  bfd_byte *dst =
+  (bfd_byte *) (section->used_by_bfd) + address - section->vma;
+  /* length -1 because we don't read in the checksum */
+  for (i = 0; i < length - 1; i++)
+    {
+      *dst = HEX (raw);
+      dst++;
+      raw += 2;
+    }
 }
 
 /* Pass over an S-Record file, calling one of the above functions on each
    record.  */
 
-static int white(x)
-char x;
+static int 
+white (x)
+     char x;
 {
-  return (x== ' ' || x == '\t' || x == '\n' || x == '\r');
+  return (x == ' ' || x == '\t' || x == '\n' || x == '\r');
 }
 static int
-skipwhite(src,abfd)
-char *src;
-bfd *abfd;
+skipwhite (src, abfd)
+     char *src;
+     bfd *abfd;
 {
   int eof = 0;
-  while (white(*src) && !eof)
-  {
-    eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);	  
-  }
+  while (white (*src) && !eof)
+    {
+      eof = (boolean) (bfd_read (src, 1, 1, abfd) != 1);
+    }
   return eof;
 }
 
 static boolean
-DEFUN(srec_mkobject, (abfd), 
-      bfd *abfd)
+DEFUN (srec_mkobject, (abfd),
+       bfd * abfd)
 {
-  if (abfd->tdata.srec_data == 0) 
-  {
-    tdata_type *tdata = (tdata_type *)bfd_alloc(abfd,  sizeof(tdata_type));
-    abfd->tdata.srec_data = tdata;
-    tdata->type = 1;
-    tdata->head = (srec_data_list_type *)NULL;
-  }
+  if (abfd->tdata.srec_data == 0)
+    {
+      tdata_type *tdata = (tdata_type *) bfd_alloc (abfd, sizeof (tdata_type));
+      if (!tdata)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
+      abfd->tdata.srec_data = tdata;
+      tdata->type = 1;
+      tdata->head = (srec_data_list_type *) NULL;
+    }
   return true;
-    
+
 }
 
-static void pass_over(abfd, func, symbolfunc, section)
+static void 
+pass_over (abfd, func, symbolfunc, section)
      bfd *abfd;
-     void (*func)();
-     void (*symbolfunc)();
+     void (*func) ();
+     void (*symbolfunc) ();
      asection *section;
 {
   unsigned int bytes_on_line;
   boolean eof = false;
 
-  srec_mkobject(abfd);
+  srec_mkobject (abfd);
   /* To the front of the file */
-  bfd_seek(abfd, (file_ptr)0, SEEK_SET);
+  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
   while (eof == false)
-  {
-    char buffer[MAXCHUNK];
-    char *src = buffer;
-    char type;
-    bfd_vma address = 0;
-
-    /* Find first 'S' or $ */
-    eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);
-    switch (*src) 
     {
-     default:
-      eof = (boolean)(bfd_read(src, 1, 1, abfd) != 1);
-      if (eof)  return;
-      break;
+      char buffer[MAXCHUNK];
+      char *src = buffer;
+      char type;
+      bfd_vma address = 0;
 
-     case '$':
-      /* Inside a symbol definition - just ignore the module name */
-      while (*src != '\n' && !eof) 
-      {
-	eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);	  
-      }
-      break;
-
-     case ' ':
-      /* spaces - maybe just before a symbol */
-      while (*src != '\n' && *src != '\r' && white(*src)) 
+      /* Find first 'S' or $ */
+      eof = (boolean) (bfd_read (src, 1, 1, abfd) != 1);
+      switch (*src)
 	{
-	  eof = skipwhite(src, abfd);
+	default:
+	  eof = (boolean) (bfd_read (src, 1, 1, abfd) != 1);
+	  if (eof)
+	    return;
+	  break;
 
-	  {
-	    int val = 0;
-	    int slen = 0;
-	    char symbol[MAXCHUNK];
+	case '$':
+	  /* Inside a symbol definition - just ignore the module name */
+	  while (*src != '\n' && !eof)
+	    {
+	      eof = (boolean) (bfd_read (src, 1, 1, abfd) != 1);
+	    }
+	  break;
 
-	    /* get the symbol part */
-	    while (!eof && !white(*src) && slen < MAXCHUNK)
-	      {
-		symbol[slen++] = *src;
-		eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);	  
-	      }
-	    symbol[slen] = 0;
-	    eof = skipwhite(src, abfd);
-	    /* skip the $ for the hex value */
-	    if (*src == '$') 
-	      {
-		eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);
-	      }
+	case ' ':
+	  /* spaces - maybe just before a symbol */
+	  while (*src != '\n' && *src != '\r' && white (*src))
+	    {
+	      eof = skipwhite (src, abfd);
 
-	    /* Scan off the hex number */
-	    while (isxdigit(*src ))
 	      {
-		val *= 16;
-		if (isdigit(*src))
-		  val += *src - '0';
-		else if (isupper(*src)) {
-		  val += *src - 'A' + 10;
-		}
-		else {
-		  val += *src - 'a' + 10;
-		}
-		eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);
+		int val = 0;
+		int slen = 0;
+		char symbol[MAXCHUNK];
+
+		/* get the symbol part */
+		while (!eof && !white (*src) && slen < MAXCHUNK)
+		  {
+		    symbol[slen++] = *src;
+		    eof = (boolean) (bfd_read (src, 1, 1, abfd) != 1);
+		  }
+		symbol[slen] = 0;
+		eof = skipwhite (src, abfd);
+		/* skip the $ for the hex value */
+		if (*src == '$')
+		  {
+		    eof = (boolean) (bfd_read (src, 1, 1, abfd) != 1);
+		  }
+
+		/* Scan off the hex number */
+		while (isxdigit (*src))
+		  {
+		    val *= 16;
+		    if (isdigit (*src))
+		      val += *src - '0';
+		    else if (isupper (*src))
+		      {
+			val += *src - 'A' + 10;
+		      }
+		    else
+		      {
+			val += *src - 'a' + 10;
+		      }
+		    eof = (boolean) (bfd_read (src, 1, 1, abfd) != 1);
+		  }
+		symbolfunc (abfd, symbol, slen, val);
 	      }
-	    symbolfunc(abfd, symbol, slen, val);
-	  }
+	    }
+	  break;
+	case 'S':
+	  src++;
+
+	  /* Fetch the type and the length */
+	  bfd_read (src, 1, 3, abfd);
+
+	  type = *src++;
+
+	  if (!ISHEX (src[0]) || !ISHEX (src[1]))
+	    break;
+
+	  bytes_on_line = HEX (src);
+
+	  if (bytes_on_line > MAXCHUNK / 2)
+	    break;
+	  src += 2;
+
+	  bfd_read (src, 1, bytes_on_line * 2, abfd);
+
+	  switch (type)
+	    {
+	    case '0':
+	    case '5':
+	      /* Prologue - ignore */
+	      break;
+	    case '3':
+	      address = HEX (src);
+	      src += 2;
+	      bytes_on_line--;
+
+	    case '2':
+	      address = HEX (src) | (address << 8);
+	      src += 2;
+	      bytes_on_line--;
+	    case '1':
+	      address = HEX (src) | (address << 8);
+	      src += 2;
+	      address = HEX (src) | (address << 8);
+	      src += 2;
+	      bytes_on_line -= 2;
+	      func (abfd, section, address, src, bytes_on_line);
+	      break;
+	    default:
+	      return;
+	    }
 	}
-      break;
-     case 'S':
-      src++;
-
-      /* Fetch the type and the length */
-      bfd_read(src, 1, 3, abfd);
-
-      type = *src++;
-
-      if (!ISHEX (src[0]) || !ISHEX (src[1]))
-       break;
-
-      bytes_on_line = HEX(src);
-
-      if (bytes_on_line > MAXCHUNK/2)
-       break;
-      src+=2 ;
-
-      bfd_read(src, 1 , bytes_on_line * 2, abfd);
-
-      switch (type) {
-       case '0':
-       case '5':
-	/* Prologue - ignore */
-	break;
-       case '3':
-	address = HEX(src);
-	src+=2;
-	bytes_on_line--;
-		
-       case '2':
-	address = HEX(src) | (address<<8) ;
-	src+=2;
-	bytes_on_line--;
-       case '1':
-	address = HEX(src) | (address<<8) ;
-	src+=2;
-	address = HEX(src) | (address<<8) ;
-	src+=2;
-	bytes_on_line-=2;
-	func(abfd,section, address, src, bytes_on_line);
-	break;
-       default:
-	return;
-      }
     }
-  }
 
 }
 
 static bfd_target *
-object_p(abfd)
-bfd *abfd;
+object_p (abfd)
+     bfd *abfd;
 {
   asection *section;
-  /* We create one section called .text for all the contents, 
+  /* We create one section called .text for all the contents,
      and allocate enough room for the entire file.  */
-  
-  section =  bfd_make_section(abfd, ".text");
+
+  section = bfd_make_section (abfd, ".text");
   section->_raw_size = 0;
   section->vma = 0xffffffff;
   low = 0xffffffff;
   high = 0;
-  pass_over(abfd, size_srec, size_symbols, section);
+  pass_over (abfd, size_srec, size_symbols, section);
   section->_raw_size = high - low;
   section->vma = low;
   section->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
 
   if (abfd->symcount)
-   abfd->flags |= HAS_SYMS;  
+    abfd->flags |= HAS_SYMS;
   return abfd->xvec;
 }
 
 static bfd_target *
-DEFUN(srec_object_p, (abfd),
-      bfd *abfd)
+DEFUN (srec_object_p, (abfd),
+       bfd * abfd)
 {
   char b[4];
 
-  srec_init();
-  
-  bfd_seek(abfd, (file_ptr)0, SEEK_SET);
-  bfd_read(b, 1, 4, abfd);
+  srec_init ();
 
-  if (b[0] != 'S' || !ISHEX(b[1]) || !ISHEX(b[2]) || !ISHEX(b[3]))
-   return (bfd_target*) NULL;
-  
-  /* We create one section called .text for all the contents, 
+  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  bfd_read (b, 1, 4, abfd);
+
+  if (b[0] != 'S' || !ISHEX (b[1]) || !ISHEX (b[2]) || !ISHEX (b[3]))
+    return (bfd_target *) NULL;
+
+  /* We create one section called .text for all the contents,
      and allocate enough room for the entire file.  */
 
-  return object_p(abfd); 
+  return object_p (abfd);
 }
 
 
 static bfd_target *
-DEFUN(symbolsrec_object_p, (abfd),
-      bfd *abfd)
+DEFUN (symbolsrec_object_p, (abfd),
+       bfd * abfd)
 {
   char b[4];
 
-  srec_init();
-  
-  bfd_seek(abfd, (file_ptr)0, SEEK_SET);
-  bfd_read(b, 1, 4, abfd);
+  srec_init ();
+
+  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  bfd_read (b, 1, 4, abfd);
 
   if (b[0] != '$' || b[1] != '$')
-    return (bfd_target*) NULL;
+    return (bfd_target *) NULL;
 
-  return object_p(abfd);   
+  return object_p (abfd);
 }
 
 
 static boolean
-DEFUN(srec_get_section_contents,(abfd, section, location, offset, count),
-      bfd *abfd AND
-      asection *section AND
-      PTR location AND
-      file_ptr offset AND
-      bfd_size_type count)
+DEFUN (srec_get_section_contents, (abfd, section, location, offset, count),
+       bfd * abfd AND
+       asection * section AND
+       PTR location AND
+       file_ptr offset AND
+       bfd_size_type count)
 {
-    if (section->used_by_bfd == (PTR)NULL) 
+  if (section->used_by_bfd == (PTR) NULL)
     {
-	section->used_by_bfd = (PTR)bfd_alloc (abfd, section->_raw_size);
-	
-	pass_over(abfd, fillup, fillup_symbols, section);
+      section->used_by_bfd = (PTR) bfd_alloc (abfd, section->_raw_size);
+      if (!section->used_by_bfd)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
+
+      pass_over (abfd, fillup, fillup_symbols, section);
     }
-    (void) memcpy((PTR)location,
-		  (PTR)((char *)(section->used_by_bfd) + offset),
-		  count);
-    return true;
+  memcpy ((PTR) location,
+		 (PTR) ((char *) (section->used_by_bfd) + offset),
+		 count);
+  return true;
 }
-      
+
 
 
 boolean
-DEFUN(srec_set_arch_mach,(abfd, arch, machine),
-      bfd *abfd AND
-      enum bfd_architecture arch AND
-      unsigned long machine)
+DEFUN (srec_set_arch_mach, (abfd, arch, machine),
+       bfd * abfd AND
+       enum bfd_architecture arch AND
+       unsigned long machine)
 {
-  return bfd_default_set_arch_mach(abfd, arch, machine);
+  return bfd_default_set_arch_mach (abfd, arch, machine);
 }
 
 
@@ -535,33 +561,44 @@ DEFUN(srec_set_arch_mach,(abfd, arch, machine),
    also remember   */
 
 static boolean
-DEFUN(srec_set_section_contents,(abfd, section, location, offset, bytes_to_do),
-      bfd *abfd AND
-      sec_ptr section AND
-      PTR location AND
-      file_ptr offset AND
-      bfd_size_type bytes_to_do)
+DEFUN (srec_set_section_contents, (abfd, section, location, offset, bytes_to_do),
+       bfd * abfd AND
+       sec_ptr section AND
+       PTR location AND
+       file_ptr offset AND
+       bfd_size_type bytes_to_do)
 {
-  tdata_type  *tdata = abfd->tdata.srec_data;
+  tdata_type *tdata = abfd->tdata.srec_data;
   srec_data_list_type *entry = (srec_data_list_type *)
-    bfd_alloc(abfd, sizeof(srec_data_list_type));
+    bfd_alloc (abfd, sizeof (srec_data_list_type));
+
+  if (!entry)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
 
   if ((section->flags & SEC_ALLOC)
-      && (section->flags & SEC_LOAD)) 
+      && (section->flags & SEC_LOAD))
     {
-      unsigned  char *data = (unsigned char *) bfd_alloc(abfd, bytes_to_do);
-      memcpy(data, location, bytes_to_do);
+      unsigned char *data = (unsigned char *) bfd_alloc (abfd, bytes_to_do);
+      if (!data)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
+      memcpy (data, location, bytes_to_do);
 
-      if ((section->lma + offset + bytes_to_do) <= 0xffff)  
+      if ((section->lma + offset + bytes_to_do) <= 0xffff)
 	{
 
 	}
-      else if ((section->lma + offset + bytes_to_do) <= 0xffffff 
-	       && tdata->type < 2) 
+      else if ((section->lma + offset + bytes_to_do) <= 0xffffff
+	       && tdata->type < 2)
 	{
 	  tdata->type = 2;
 	}
-      else 
+      else
 	{
 	  tdata->type = 3;
 	}
@@ -572,7 +609,7 @@ DEFUN(srec_set_section_contents,(abfd, section, location, offset, bytes_to_do),
       entry->next = tdata->head;
       tdata->head = entry;
     }
-  return true;    
+  return true;
 }
 
 /* Write a record of type, of the supplied number of bytes. The
@@ -580,303 +617,305 @@ DEFUN(srec_set_section_contents,(abfd, section, location, offset, bytes_to_do),
    here
 */
 static
-void DEFUN(srec_write_record,(abfd, type, address, data, end),
-	   bfd *abfd AND
-	   char type AND
-	   bfd_vma address AND
-	   CONST unsigned char *data AND
-	   CONST unsigned char *end)
+void 
+DEFUN (srec_write_record, (abfd, type, address, data, end),
+       bfd * abfd AND
+       char type AND
+       bfd_vma address AND
+       CONST unsigned char *data AND
+       CONST unsigned char *end)
 
 {
-    char buffer[MAXCHUNK];
-    
-    unsigned int check_sum = 0;
-    unsigned CONST char *src = data;
-    char *dst =buffer;
-    char *length;
-    
+  char buffer[MAXCHUNK];
 
-    *dst++ = 'S';
-    *dst++ = '0' + type;
+  unsigned int check_sum = 0;
+  CONST unsigned char *src = data;
+  char *dst = buffer;
+  char *length;
 
-    length = dst;
-    dst+=2;			/* leave room for dst*/
-    
-    switch (type) 
+
+  *dst++ = 'S';
+  *dst++ = '0' + type;
+
+  length = dst;
+  dst += 2;			/* leave room for dst*/
+
+  switch (type)
     {
-      case 3:
-      case 7:
-	TOHEX(dst, (address >> 24), check_sum);
-	dst+=2;
-      case 8:
-      case 2:
-	TOHEX(dst, (address >> 16), check_sum);
-	dst+=2;
-      case 9:
-      case 1:
-      case 0:
-	TOHEX(dst, (address >> 8), check_sum);
-	dst+=2;
-	TOHEX(dst, (address), check_sum);
-	dst+=2;
-	break;
+    case 3:
+    case 7:
+      TOHEX (dst, (address >> 24), check_sum);
+      dst += 2;
+    case 8:
+    case 2:
+      TOHEX (dst, (address >> 16), check_sum);
+      dst += 2;
+    case 9:
+    case 1:
+    case 0:
+      TOHEX (dst, (address >> 8), check_sum);
+      dst += 2;
+      TOHEX (dst, (address), check_sum);
+      dst += 2;
+      break;
 
     }
-    for (src = data; src < end; src++) 
+  for (src = data; src < end; src++)
     {
-	TOHEX(dst, *src, check_sum);
-	dst+=2;
+      TOHEX (dst, *src, check_sum);
+      dst += 2;
     }
 
-    /* Fill in the length */
-    TOHEX(length, (dst - length)/2, check_sum);
-    check_sum &= 0xff;
-    check_sum = 255 - check_sum;
-    TOHEX(dst, check_sum, check_sum);
-    dst+=2;
-    
-    *dst ++ = '\r';
-    *dst ++ = '\n';
-    bfd_write((PTR)buffer, 1, dst - buffer , abfd);
+  /* Fill in the length */
+  TOHEX (length, (dst - length) / 2, check_sum);
+  check_sum &= 0xff;
+  check_sum = 255 - check_sum;
+  TOHEX (dst, check_sum, check_sum);
+  dst += 2;
+
+  *dst++ = '\r';
+  *dst++ = '\n';
+  bfd_write ((PTR) buffer, 1, dst - buffer, abfd);
 }
 
 
 
 static void
-DEFUN(srec_write_header,(abfd),
-      bfd *abfd)
+DEFUN (srec_write_header, (abfd),
+       bfd * abfd)
 {
-    unsigned char buffer[MAXCHUNK];
-    unsigned char *dst = buffer;
-    unsigned int i;
+  unsigned char buffer[MAXCHUNK];
+  unsigned char *dst = buffer;
+  unsigned int i;
 
-    /* I'll put an arbitary 40 char limit on header size */
-    for (i = 0; i < 40 && abfd->filename[i];  i++) 
+  /* I'll put an arbitary 40 char limit on header size */
+  for (i = 0; i < 40 && abfd->filename[i]; i++)
     {
-	*dst++ = abfd->filename[i];
+      *dst++ = abfd->filename[i];
     }
-    srec_write_record(abfd,0, 0, buffer, dst);
+  srec_write_record (abfd, 0, 0, buffer, dst);
 }
 
 static void
-DEFUN(srec_write_section,(abfd, tdata, list),
-       bfd *abfd AND
-       tdata_type *tdata AND
-       srec_data_list_type *list)
+DEFUN (srec_write_section, (abfd, tdata, list),
+       bfd * abfd AND
+       tdata_type * tdata AND
+       srec_data_list_type * list)
 {
-    unsigned int bytes_written = 0;
-    unsigned char *location = list->data;
+  unsigned int bytes_written = 0;
+  unsigned char *location = list->data;
 
-    while (bytes_written < list->size)
+  while (bytes_written < list->size)
     {
-	bfd_vma address;
-	
-	unsigned int bytes_this_chunk = list->size - bytes_written;
+      bfd_vma address;
 
-	if (bytes_this_chunk > CHUNK) 
+      unsigned int bytes_this_chunk = list->size - bytes_written;
+
+      if (bytes_this_chunk > CHUNK)
 	{
-	    bytes_this_chunk = CHUNK;
+	  bytes_this_chunk = CHUNK;
 	}
 
-	address = list->where +  bytes_written;
+      address = list->where + bytes_written;
 
-	srec_write_record(abfd,
-			  tdata->type,
-			  address,
-			  location,
-			  location + bytes_this_chunk);
+      srec_write_record (abfd,
+			 tdata->type,
+			 address,
+			 location,
+			 location + bytes_this_chunk);
 
-	bytes_written += bytes_this_chunk;
-	location += bytes_this_chunk;
+      bytes_written += bytes_this_chunk;
+      location += bytes_this_chunk;
     }
 
 }
 
 static void
-DEFUN(srec_write_terminator,(abfd, tdata),
-      bfd *abfd AND
-      tdata_type *tdata)
+DEFUN (srec_write_terminator, (abfd, tdata),
+       bfd * abfd AND
+       tdata_type * tdata)
 {
-    unsigned    char buffer[2];
-    
-    srec_write_record(abfd, 10 - tdata->type,
-		      abfd->start_address, buffer, buffer);
+  unsigned char buffer[2];
+
+  srec_write_record (abfd, 10 - tdata->type,
+		     abfd->start_address, buffer, buffer);
 }
 
 
-      
+
 static void
-srec_write_symbols(abfd)
+srec_write_symbols (abfd)
      bfd *abfd;
 {
   char buffer[MAXCHUNK];
   /* Dump out the symbols of a bfd */
   int i;
-  int len = bfd_get_symcount(abfd);
+  int len = bfd_get_symcount (abfd);
 
-  if (len) 
-  {
-    asymbol **table = bfd_get_outsymbols(abfd);
-    sprintf(buffer, "$$ %s\r\n", abfd->filename);
-
-    bfd_write(buffer, strlen(buffer), 1, abfd);
-
-    for (i = 0; i < len; i++) 
+  if (len)
     {
-      asymbol *s = table[i];
-#if 0
-      int len = strlen(s->name);
+      asymbol **table = bfd_get_outsymbols (abfd);
+      sprintf (buffer, "$$ %s\r\n", abfd->filename);
 
-      /* If this symbol has a .[ocs] in it, it's probably a file name
+      bfd_write (buffer, strlen (buffer), 1, abfd);
+
+      for (i = 0; i < len; i++)
+	{
+	  asymbol *s = table[i];
+#if 0
+	  int len = strlen (s->name);
+
+	  /* If this symbol has a .[ocs] in it, it's probably a file name
 	 and we'll output that as the module name */
 
-      if (len > 3 && s->name[len-2] == '.') 
-      {
-	int l;
-	sprintf(buffer, "$$ %s\r\n", s->name);
-	l = strlen(buffer);
-	bfd_write(buffer, l, 1, abfd);
-      }
-      else
+	  if (len > 3 && s->name[len - 2] == '.')
+	    {
+	      int l;
+	      sprintf (buffer, "$$ %s\r\n", s->name);
+	      l = strlen (buffer);
+	      bfd_write (buffer, l, 1, abfd);
+	    }
+	  else
 #endif
-       if (s->flags & (BSF_GLOBAL | BSF_LOCAL) 
-	       && (s->flags & BSF_DEBUGGING) == 0
-	       && s->name[0] != '.'
-	       && s->name[0] != 't')
-      {
-	/* Just dump out non debug symbols */
+	    if (s->flags & (BSF_GLOBAL | BSF_LOCAL)
+		&& (s->flags & BSF_DEBUGGING) == 0
+		&& s->name[0] != '.'
+		&& s->name[0] != 't')
+	    {
+	      /* Just dump out non debug symbols */
 
-	int l;
-	char buf2[40], *p;
+	      int l;
+	      char buf2[40], *p;
 
-	sprintf_vma (buf2,
-		     s->value + s->section->output_section->lma 
-		     + s->section->output_offset);
-	p = buf2;
-	while (p[0] == '0' && p[1] != 0)
-	  p++;
-	sprintf (buffer, "  %s $%s\r\n", s->name, p);
-	l = strlen(buffer);
-	bfd_write(buffer, l, 1,abfd);
-      }
+	      sprintf_vma (buf2,
+			   s->value + s->section->output_section->lma
+			   + s->section->output_offset);
+	      p = buf2;
+	      while (p[0] == '0' && p[1] != 0)
+		p++;
+	      sprintf (buffer, "  %s $%s\r\n", s->name, p);
+	      l = strlen (buffer);
+	      bfd_write (buffer, l, 1, abfd);
+	    }
+	}
+      sprintf (buffer, "$$ \r\n");
+      bfd_write (buffer, strlen (buffer), 1, abfd);
     }
-    sprintf(buffer, "$$ \r\n");
-    bfd_write(buffer, strlen(buffer), 1, abfd);
-  }
 }
 
 static boolean
-internal_srec_write_object_contents(abfd, symbols)
+internal_srec_write_object_contents (abfd, symbols)
      bfd *abfd;
      int symbols;
 {
-    int bytes_written;
-    tdata_type *tdata = abfd->tdata.srec_data;
-    srec_data_list_type *list;
+  tdata_type *tdata = abfd->tdata.srec_data;
+  srec_data_list_type *list;
 
-    bytes_written = 0;
-    
-    
-    if (symbols)
-     srec_write_symbols(abfd);
+  if (symbols)
+    srec_write_symbols (abfd);
 
-    srec_write_header(abfd);
+  srec_write_header (abfd);
 
-    /* Now wander though all the sections provided and output them */
-    list = tdata->head;
+  /* Now wander though all the sections provided and output them */
+  list = tdata->head;
 
-    while (list != (srec_data_list_type*)NULL) 
+  while (list != (srec_data_list_type *) NULL)
     {
-	srec_write_section(abfd, tdata, list); 
-	list = list->next;
+      srec_write_section (abfd, tdata, list);
+      list = list->next;
     }
-    srec_write_terminator(abfd, tdata);
-    return true;
+  srec_write_terminator (abfd, tdata);
+  return true;
 }
 
 static boolean
-srec_write_object_contents(abfd)
+srec_write_object_contents (abfd)
      bfd *abfd;
 {
-  return internal_srec_write_object_contents(abfd, 0);
+  return internal_srec_write_object_contents (abfd, 0);
 }
 
 static boolean
-symbolsrec_write_object_contents(abfd)
+symbolsrec_write_object_contents (abfd)
      bfd *abfd;
 {
-  return internal_srec_write_object_contents(abfd, 1);
+  return internal_srec_write_object_contents (abfd, 1);
 }
 
-static int 
-DEFUN(srec_sizeof_headers,(abfd, exec),
-      bfd *abfd AND
-      boolean exec)
+/*ARGSUSED*/
+static int
+DEFUN (srec_sizeof_headers, (abfd, exec),
+       bfd * abfd AND
+       boolean exec)
 {
-return 0;
+  return 0;
 }
 
 static asymbol *
-DEFUN(srec_make_empty_symbol, (abfd),
-      bfd*abfd)
+DEFUN (srec_make_empty_symbol, (abfd),
+       bfd * abfd)
 {
-  asymbol *new=  (asymbol *)bfd_zalloc (abfd, sizeof (asymbol));
-  new->the_bfd = abfd;
+  asymbol *new = (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
+  if (new)
+    new->the_bfd = abfd;
   return new;
 }
 
 static unsigned int
-srec_get_symtab_upper_bound(abfd)
-bfd *abfd;
+srec_get_symtab_upper_bound (abfd)
+     bfd *abfd;
 {
   /* Read in all the info */
-  srec_get_section_contents(abfd,abfd->sections,0,0,0);
-  return (bfd_get_symcount(abfd) + 1) * (sizeof(asymbol *));
+  srec_get_section_contents (abfd, abfd->sections, 0, 0, 0);
+  return (bfd_get_symcount (abfd) + 1) * (sizeof (asymbol *));
 }
 
 static unsigned int
-DEFUN(srec_get_symtab, (abfd, alocation),
-      bfd            *abfd AND
-      asymbol       **alocation)
+DEFUN (srec_get_symtab, (abfd, alocation),
+       bfd * abfd AND
+       asymbol ** alocation)
 {
   int lim = abfd->symcount;
   int i;
-  for (i = 0; i < lim; i++) {
-    alocation[i] = abfd->tdata.srec_data->symbols + i;
-  }
+  for (i = 0; i < lim; i++)
+    {
+      alocation[i] = abfd->tdata.srec_data->symbols + i;
+    }
   alocation[i] = 0;
   return lim;
 }
 
-void 
-DEFUN(srec_get_symbol_info,(ignore_abfd, symbol, ret),
-      bfd *ignore_abfd AND
-      asymbol *symbol AND
-      symbol_info *ret)
+/*ARGSUSED*/
+void
+DEFUN (srec_get_symbol_info, (ignore_abfd, symbol, ret),
+       bfd * ignore_abfd AND
+       asymbol * symbol AND
+       symbol_info * ret)
 {
   bfd_symbol_info (symbol, ret);
 }
 
-void 
-DEFUN(srec_print_symbol,(ignore_abfd, afile, symbol, how),
-      bfd *ignore_abfd AND
-      PTR afile AND
-      asymbol *symbol AND
-      bfd_print_symbol_type how)
+/*ARGSUSED*/
+void
+DEFUN (srec_print_symbol, (ignore_abfd, afile, symbol, how),
+       bfd * ignore_abfd AND
+       PTR afile AND
+       asymbol * symbol AND
+       bfd_print_symbol_type how)
 {
-  FILE *file = (FILE *)afile;
-  switch (how) 
-  {
-   case bfd_print_symbol_name:
-    fprintf (file, "%s", symbol->name);
-    break;
-   default:
-    bfd_print_symbol_vandf ((PTR) file, symbol);
-    fprintf (file, " %-5s %s",
-	     symbol->section->name,
-	     symbol->name);
+  FILE *file = (FILE *) afile;
+  switch (how)
+    {
+    case bfd_print_symbol_name:
+      fprintf (file, "%s", symbol->name);
+      break;
+    default:
+      bfd_print_symbol_vandf ((PTR) file, symbol);
+      fprintf (file, " %-5s %s",
+	       symbol->section->name,
+	       symbol->name);
 
-  }
+    }
 }
 
 #define FOO PROTO
@@ -916,90 +955,89 @@ DEFUN(srec_print_symbol,(ignore_abfd, afile, symbol, how),
 
 bfd_target srec_vec =
 {
-    "srec",			/* name */
-    bfd_target_srec_flavour,
-    true,			/* target byte order */
-    true,			/* target headers byte order */
-    (HAS_RELOC | EXEC_P |	/* object flags */
-     HAS_LINENO | HAS_DEBUG |
-     HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
-    (SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
-     |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-     0,				/* leading underscore */
-    ' ',			/* ar_pad_char */
-    16,				/* ar_max_namelen */
-    1,				/* minimum alignment */
-    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-      bfd_getb32, bfd_getb_signed_32,     bfd_putb32,
-      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
-    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-      bfd_getb32, bfd_getb_signed_32,     bfd_putb32,
-      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
+  "srec",			/* name */
+  bfd_target_srec_flavour,
+  true,				/* target byte order */
+  true,				/* target headers byte order */
+  (HAS_RELOC | EXEC_P |		/* object flags */
+   HAS_LINENO | HAS_DEBUG |
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+  (SEC_CODE | SEC_DATA | SEC_ROM | SEC_HAS_CONTENTS
+   | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* section flags */
+  0,				/* leading underscore */
+  ' ',				/* ar_pad_char */
+  16,				/* ar_max_namelen */
+  1,				/* minimum alignment */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* hdrs */
 
   {
-      _bfd_dummy_target,
-      srec_object_p,		/* bfd_check_format */
-      (struct bfd_target *(*)()) bfd_nullvoidptr,
-      (struct bfd_target *(*)())     bfd_nullvoidptr,
+    _bfd_dummy_target,
+    srec_object_p,		/* bfd_check_format */
+    (struct bfd_target * (*)()) bfd_nullvoidptr,
+    (struct bfd_target * (*)()) bfd_nullvoidptr,
   },
   {
-      bfd_false,
-      srec_mkobject,
-      _bfd_generic_mkarchive,
-      bfd_false,
+    bfd_false,
+    srec_mkobject,
+    _bfd_generic_mkarchive,
+    bfd_false,
   },
   {				/* bfd_write_contents */
-      bfd_false,
-      srec_write_object_contents,
-      _bfd_write_archive_contents,
-      bfd_false,
+    bfd_false,
+    srec_write_object_contents,
+    _bfd_write_archive_contents,
+    bfd_false,
   },
-    JUMP_TABLE(srec)
- };
+  JUMP_TABLE (srec)
+};
 
 
 
 bfd_target symbolsrec_vec =
 {
-    "symbolsrec",		/* name */
-    bfd_target_srec_flavour,
-    true,			/* target byte order */
-    true,			/* target headers byte order */
-    (HAS_RELOC | EXEC_P |	/* object flags */
-     HAS_LINENO | HAS_DEBUG |
-     HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
-    (SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
-     |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-     0,				/* leading underscore */
-    ' ',			/* ar_pad_char */
-    16,				/* ar_max_namelen */
-    1,				/* minimum alignment */
-    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-      bfd_getb32, bfd_getb_signed_32,     bfd_putb32,
-      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
-    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-      bfd_getb32, bfd_getb_signed_32,     bfd_putb32,
-      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
+  "symbolsrec",			/* name */
+  bfd_target_srec_flavour,
+  true,				/* target byte order */
+  true,				/* target headers byte order */
+  (HAS_RELOC | EXEC_P |		/* object flags */
+   HAS_LINENO | HAS_DEBUG |
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+  (SEC_CODE | SEC_DATA | SEC_ROM | SEC_HAS_CONTENTS
+   | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* section flags */
+  0,				/* leading underscore */
+  ' ',				/* ar_pad_char */
+  16,				/* ar_max_namelen */
+  1,				/* minimum alignment */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* hdrs */
 
   {
-      _bfd_dummy_target,
-      symbolsrec_object_p,		/* bfd_check_format */
-      (struct bfd_target *(*)()) bfd_nullvoidptr,
-      (struct bfd_target *(*)())     bfd_nullvoidptr,
+    _bfd_dummy_target,
+    symbolsrec_object_p,	/* bfd_check_format */
+    (struct bfd_target * (*)()) bfd_nullvoidptr,
+    (struct bfd_target * (*)()) bfd_nullvoidptr,
   },
   {
-      bfd_false,
-      srec_mkobject,
-      _bfd_generic_mkarchive,
-      bfd_false,
+    bfd_false,
+    srec_mkobject,
+    _bfd_generic_mkarchive,
+    bfd_false,
   },
   {				/* bfd_write_contents */
-      bfd_false,
-      symbolsrec_write_object_contents,
-      _bfd_write_archive_contents,
-      bfd_false,
+    bfd_false,
+    symbolsrec_write_object_contents,
+    _bfd_write_archive_contents,
+    bfd_false,
   },
-    JUMP_TABLE(srec),
-    (PTR) 0
- };
-
+  JUMP_TABLE (srec),
+  (PTR) 0
+};

@@ -96,6 +96,7 @@ nlm_alpha_write_prefix (abfd)
       bfd_error = system_call_error;
       return false;
     }
+  return true;
 }
 
 /* How to process the various reloc types.  */
@@ -469,13 +470,13 @@ nlm_alpha_read_reloc (abfd, sym, secp, rel)
 	  rel->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
 	  rel->addend = 0;
 	}
-      else if (r_symndx == RELOC_SECTION_TEXT)
+      else if (r_symndx == ALPHA_RELOC_SECTION_TEXT)
 	{
 	  rel->sym_ptr_ptr = code_sec->symbol_ptr_ptr;
 	  BFD_ASSERT (bfd_get_section_vma (abfd, code_sec) == 0);
 	  rel->addend = 0;
 	}
-      else if (r_symndx == RELOC_SECTION_DATA)
+      else if (r_symndx == ALPHA_RELOC_SECTION_DATA)
 	{
 	  rel->sym_ptr_ptr = data_sec->symbol_ptr_ptr;
 	  rel->addend = - bfd_get_section_vma (abfd, data_sec);
@@ -573,14 +574,23 @@ nlm_alpha_read_reloc (abfd, sym, secp, rel)
       break;
 
     case ALPHA_R_NW_RELOC:
+      /* If this is SETGP, we set the addend to 0.  Otherwise we set
+	 the addend to the size of the .lita section (this is
+	 r_symndx) plus 1.  We have already set the address of the
+	 reloc to r_vaddr.  */
       if (r_size == ALPHA_R_NW_RELOC_SETGP)
-	gp_value = r_vaddr;
+	{
+	  gp_value = r_vaddr;
+	  rel->addend = 0;
+	}
       else if (r_size == ALPHA_R_NW_RELOC_LITA)
-	lita_address = r_vaddr;
+	{
+	  lita_address = r_vaddr;
+	  rel->addend = r_symndx + 1;
+	}
       else
 	BFD_ASSERT (0);
       rel->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
-      rel->addend = r_size;
       break;
 
     default:
@@ -628,6 +638,11 @@ nlm_alpha_read_import (abfd, sym)
     }
   sym -> symbol.the_bfd = abfd;
   sym -> symbol.name = bfd_alloc (abfd, symlength + 1);
+  if (!sym -> symbol.name)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   if (bfd_read ((PTR) sym -> symbol.name, symlength, 1, abfd)
       != symlength)
     {
@@ -645,6 +660,11 @@ nlm_alpha_read_import (abfd, sym)
   rcount = bfd_h_get_32 (abfd, temp);
   nlm_relocs = ((struct nlm_relent *)
 		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
+  if (!nlm_relocs)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   sym -> relocs = nlm_relocs;
   sym -> rcnt = 0;
   while (sym -> rcnt < rcount)
@@ -680,52 +700,72 @@ nlm_alpha_write_import (abfd, sec, rel)
   sym = *rel->sym_ptr_ptr;
 
   /* Get values for the relocation fields.  */
-  r_vaddr = bfd_get_section_vma (abfd, sec) + rel->address;
-  if (bfd_get_section (sym) == &bfd_und_section)
+  r_type = rel->howto->type;
+  if (r_type != ALPHA_R_NW_RELOC)
     {
-      r_extern = 1;
-      r_symndx = 0;
+      r_vaddr = bfd_get_section_vma (abfd, sec) + rel->address;
+      if ((sec->flags & SEC_CODE) == 0)
+	r_vaddr += bfd_section_size (abfd,
+				     bfd_get_section_by_name (abfd,
+							      NLM_CODE_NAME));
+      if (bfd_get_section (sym) == &bfd_und_section)
+	{
+	  r_extern = 1;
+	  r_symndx = 0;
+	}
+      else
+	{
+	  r_extern = 0;
+	  if (bfd_get_section_flags (abfd, bfd_get_section (sym)) & SEC_CODE)
+	    r_symndx = ALPHA_RELOC_SECTION_TEXT;
+	  else
+	    r_symndx = ALPHA_RELOC_SECTION_DATA;
+	}
+      r_offset = 0;
+      r_size = 0;
+
+      switch (r_type)
+	{
+	case ALPHA_R_LITUSE:
+	case ALPHA_R_GPDISP:
+	  r_symndx = rel->addend;
+	  break;
+
+	case ALPHA_R_OP_STORE:
+	  r_size = rel->addend & 0xff;
+	  r_offset = (rel->addend >> 8) & 0xff;
+	  break;
+
+	case ALPHA_R_OP_PUSH:
+	case ALPHA_R_OP_PSUB:
+	case ALPHA_R_OP_PRSHIFT:
+	  r_vaddr = rel->addend;
+	  break;
+
+	case ALPHA_R_IGNORE:
+	  r_vaddr = rel->address;
+	  break;
+
+	default:
+	  break;
+	}
     }
   else
     {
-      r_extern = 0;
-      if (bfd_get_section_flags (abfd, bfd_get_section (sym)) & SEC_CODE)
-	r_symndx = RELOC_SECTION_TEXT;
-      else
-	r_symndx = RELOC_SECTION_DATA;
-    }
-  r_type = rel->howto->type;
-  r_offset = 0;
-  r_size = 0;
-
-  switch (r_type)
-    {
-    case ALPHA_R_LITUSE:
-    case ALPHA_R_GPDISP:
-      r_symndx = rel->addend;
-      break;
-
-    case ALPHA_R_OP_STORE:
-      r_size = rel->addend & 0xff;
-      r_offset = (rel->addend >> 8) & 0xff;
-      break;
-
-    case ALPHA_R_OP_PUSH:
-    case ALPHA_R_OP_PSUB:
-    case ALPHA_R_OP_PRSHIFT:
-      r_vaddr = rel->addend;
-      break;
-
-    case ALPHA_R_IGNORE:
+      /* r_type == ALPHA_R_NW_RELOC */
       r_vaddr = rel->address;
-      break;
-
-    case ALPHA_R_NW_RELOC:
-      r_size = rel->addend;
-      break;
-
-    default:
-      break;
+      if (rel->addend == 0)
+	{
+	  r_symndx = 0;
+	  r_size = ALPHA_R_NW_RELOC_SETGP;
+	}
+      else
+	{
+	  r_symndx = rel->addend - 1;
+	  r_size = ALPHA_R_NW_RELOC_LITA;
+	}
+      r_extern = 0;
+      r_offset = 0;
     }
 
   /* Swap out the relocation fields.  */
@@ -800,13 +840,14 @@ nlm_alpha_get_public_offset (abfd, sym)
 static boolean
 nlm_alpha_write_external (abfd, count, sym, relocs)
      bfd *abfd;
-     bfd_vma count;
+     bfd_size_type count;
      asymbol *sym;
      struct reloc_and_sec *relocs;
 {
   int i;
   bfd_byte len;
   unsigned char temp[NLM_TARGET_LONG_SIZE];
+  arelent r;
 
   len = strlen (sym->name);
   if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd) != sizeof(bfd_byte))
@@ -816,12 +857,27 @@ nlm_alpha_write_external (abfd, count, sym, relocs)
       return false;
     }
 
-  bfd_put_32 (abfd, count, temp);
+  bfd_put_32 (abfd, count + 2, temp);
   if (bfd_write (temp, sizeof (temp), 1, abfd) != sizeof (temp))
     {
       bfd_error = system_call_error;
       return false;
     }
+
+  /* The first two relocs for each external symbol are the .lita
+     address and the GP value.  */
+  r.sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+  r.howto = &nlm32_alpha_nw_howto;
+
+  r.address = nlm_alpha_backend_data (abfd)->lita_address;
+  r.addend = nlm_alpha_backend_data (abfd)->lita_size + 1;
+  if (nlm_alpha_write_import (abfd, (asection *) NULL, &r) == false)
+    return false;
+
+  r.address = nlm_alpha_backend_data (abfd)->gp;
+  r.addend = 0;
+  if (nlm_alpha_write_import (abfd, (asection *) NULL, &r) == false)
+    return false;
 
   for (i = 0; i < count; i++)
     {
@@ -842,6 +898,7 @@ static const struct nlm_backend_data nlm32_alpha_backend =
   sizeof (struct nlm32_alpha_external_prefix_header),
   bfd_arch_alpha,
   0,
+  true, /* no uninitialized data permitted by Alpha NetWare.  */
   nlm_alpha_backend_object_p,
   nlm_alpha_write_prefix,
   nlm_alpha_read_reloc,
@@ -853,6 +910,7 @@ static const struct nlm_backend_data nlm32_alpha_backend =
   nlm_swap_fixed_header_in,
   nlm_swap_fixed_header_out,
   nlm_alpha_write_external,
+  0,	/* write_export */
 };
 
 #define TARGET_LITTLE_NAME		"nlm32-alpha"

@@ -1021,16 +1021,16 @@ som_reloc_queue_find (p, size, queue)
      unsigned int size;
      struct reloc_queue *queue;
 {
-  if (!bcmp (p, queue[0].reloc, size)
+  if (queue[0].reloc && !bcmp (p, queue[0].reloc, size)
       && size == queue[0].size)
     return 0;
-  if (!bcmp (p, queue[1].reloc, size)
+  if (queue[1].reloc && !bcmp (p, queue[1].reloc, size)
       && size == queue[1].size)
     return 1;
-  if (!bcmp (p, queue[2].reloc, size)
+  if (queue[2].reloc && !bcmp (p, queue[2].reloc, size)
       && size == queue[2].size)
     return 2;
-  if (!bcmp (p, queue[3].reloc, size)
+  if (queue[3].reloc && !bcmp (p, queue[3].reloc, size)
       && size == queue[3].size)
     return 3;
   return -1;
@@ -1347,6 +1347,11 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
 
   final_types = (int **) bfd_alloc_by_size_t (abfd, sizeof (int *) * 3);
   final_type = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+  if (!final_types || !final_type)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
 
   /* The field selector may require additional relocations to be 
      generated.  It's impossible to know at this moment if additional
@@ -1369,6 +1374,11 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
       case e_ltsel:
       case e_rtsel:
 	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	if (!final_types[0])
+	  {
+	    bfd_error = no_memory;
+	    return NULL;
+	  }
 	if (field == e_tsel)
 	  *final_types[0] = R_FSEL;
 	else if (field == e_ltsel)
@@ -1383,6 +1393,11 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
       case e_lssel:
       case e_rssel:
 	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	if (!final_types[0])
+	  {
+	    bfd_error = no_memory;
+	    return NULL;
+	  }
 	*final_types[0] = R_S_MODE;
 	final_types[1] = final_type;
 	final_types[2] = NULL;
@@ -1392,6 +1407,11 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
       case e_lsel:
       case e_rsel:
 	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	if (!final_types[0])
+	  {
+	    bfd_error = no_memory;
+	    return NULL;
+	  }
 	*final_types[0] = R_N_MODE;
 	final_types[1] = final_type;
 	final_types[2] = NULL;
@@ -1401,6 +1421,11 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
       case e_ldsel:
       case e_rdsel:
 	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	if (!final_types[0])
+	  {
+	    bfd_error = no_memory;
+	    return NULL;
+	  }
 	*final_types[0] = R_D_MODE;
 	final_types[1] = final_type;
 	final_types[2] = NULL;
@@ -1410,6 +1435,11 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
       case e_lrsel:
       case e_rrsel:
 	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	if (!final_types[0])
+	  {
+	    bfd_error = no_memory;
+	    return NULL;
+	  }
 	*final_types[0] = R_R_MODE;
 	final_types[1] = final_type;
 	final_types[2] = NULL;
@@ -1541,6 +1571,11 @@ make_unique_section (abfd, name, num)
     }
 
   newname = bfd_alloc (abfd, strlen (sect->name) + 1);
+  if (!newname)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
   strcpy (newname, sect->name);
 
   sect->name = newname;
@@ -3879,8 +3914,13 @@ som_new_section_hook (abfd, newsect)
      bfd *abfd;
      asection *newsect;
 {
-  newsect->used_by_bfd
-    = (PTR) bfd_zalloc (abfd, sizeof (struct som_section_data_struct));
+  newsect->used_by_bfd =
+    (PTR) bfd_zalloc (abfd, sizeof (struct som_section_data_struct));
+  if (!newsect->used_by_bfd)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   newsect->alignment_power = 3;
 
   /* Initialize the subspace_index field to -1 so that it does
@@ -3976,7 +4016,12 @@ bfd_som_attach_aux_hdr (abfd, type, string)
 	pad = (4 - (len % 4));
       obj_som_version_hdr (abfd) = (struct user_string_aux_hdr *)
 	bfd_zalloc (abfd, sizeof (struct aux_id)
-			    + sizeof (unsigned int) + len + pad);
+			      + sizeof (unsigned int) + len + pad);
+      if (!obj_som_version_hdr (abfd))
+	{
+	  bfd_error = no_memory;
+	  abort();		/* FIXME */
+	}
       obj_som_version_hdr (abfd)->header_id.type = VERSION_AUX_ID;
       obj_som_version_hdr (abfd)->header_id.length = len + pad;
       obj_som_version_hdr (abfd)->header_id.length += sizeof (int);
@@ -3993,6 +4038,11 @@ bfd_som_attach_aux_hdr (abfd, type, string)
       obj_som_copyright_hdr (abfd) = (struct copyright_aux_hdr *)
 	bfd_zalloc (abfd, sizeof (struct aux_id)
 			    + sizeof (unsigned int) + len + pad);
+      if (!obj_som_copyright_hdr (abfd))
+	{
+	  bfd_error = no_error;
+	  abort();		/* FIXME */
+	}
       obj_som_copyright_hdr (abfd)->header_id.type = COPYRIGHT_AUX_ID;
       obj_som_copyright_hdr (abfd)->header_id.length = len + pad;
       obj_som_copyright_hdr (abfd)->header_id.length += sizeof (int);

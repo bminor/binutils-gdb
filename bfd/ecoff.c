@@ -46,7 +46,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static int ecoff_get_magic PARAMS ((bfd *abfd));
 static boolean ecoff_slurp_symbolic_header PARAMS ((bfd *abfd));
-static void ecoff_set_symbol_info PARAMS ((bfd *abfd, SYMR *ecoff_sym,
+static boolean ecoff_set_symbol_info PARAMS ((bfd *abfd, SYMR *ecoff_sym,
 					   asymbol *asym, int ext,
 					   asymbol **indirect_ptr_ptr));
 static void ecoff_emit_aggregate PARAMS ((bfd *abfd, char *string,
@@ -831,7 +831,7 @@ ecoff_make_empty_symbol (abfd)
 
 /* Set the BFD flags and section for an ECOFF symbol.  */
 
-static void
+static boolean
 ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
      bfd *abfd;
      SYMR *ecoff_sym;
@@ -859,7 +859,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
       asym->flags = BSF_DEBUGGING;
       asym->section = &bfd_und_section;
       *indirect_ptr_ptr = NULL;
-      return;
+      return true;
     }
 
   if (ECOFF_IS_STAB (ecoff_sym)
@@ -869,7 +869,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
       asym->section = &bfd_ind_section;
       /* Pass this symbol on to the next call to this function.  */
       *indirect_ptr_ptr = asym;
-      return;
+      return true;
     }
 
   /* Most symbol types are just for debugging.  */
@@ -885,12 +885,12 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
       if (ECOFF_IS_STAB (ecoff_sym))
 	{
 	  asym->flags = BSF_DEBUGGING;
-	  return;
+	  return true;
 	}
       break;
     default:
       asym->flags = BSF_DEBUGGING;
-      return;
+      return true;
     }
 
   if (ext)
@@ -1042,6 +1042,11 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
 		char *copy;
 
 		copy = (char *) bfd_alloc (abfd, strlen (name) + 1);
+		if (!copy)
+		  {
+		    bfd_error = no_memory;
+		    return false;
+		  }
 		strcpy (copy, name);
 		section = bfd_make_section (abfd, copy);
 	      }
@@ -1049,6 +1054,11 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
 	    /* Build a reloc pointing to this constructor.  */
 	    reloc_chain =
 	      (arelent_chain *) bfd_alloc (abfd, sizeof (arelent_chain));
+	    if (!reloc_chain)
+	      {
+		bfd_error = no_memory;
+		return false;
+	      }
 	    reloc_chain->relent.sym_ptr_ptr =
 	      bfd_get_section (asym)->symbol_ptr_ptr;
 	    reloc_chain->relent.address = section->_raw_size;
@@ -1079,6 +1089,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
 	  break;
 	}
     }
+  return true;
 }
 
 /* Read an ECOFF symbol table.  */
@@ -1136,8 +1147,9 @@ ecoff_slurp_symbol_table (abfd)
       (*swap_ext_in) (abfd, (PTR) eraw_src, &internal_esym);
       internal_ptr->symbol.name = (ecoff_data (abfd)->debug_info.ssext
 				   + internal_esym.asym.iss);
-      ecoff_set_symbol_info (abfd, &internal_esym.asym,
-			     &internal_ptr->symbol, 1, &indirect_ptr);
+      if (!ecoff_set_symbol_info (abfd, &internal_esym.asym,
+			     &internal_ptr->symbol, 1, &indirect_ptr))
+	return false;
       /* The alpha uses a negative ifd field for section symbols.  */
       if (internal_esym.ifd >= 0)
 	internal_ptr->fdr = (ecoff_data (abfd)->debug_info.fdr
@@ -1171,8 +1183,9 @@ ecoff_slurp_symbol_table (abfd)
 	  internal_ptr->symbol.name = (ecoff_data (abfd)->debug_info.ss
 				       + fdr_ptr->issBase
 				       + internal_sym.iss);
-	  ecoff_set_symbol_info (abfd, &internal_sym,
-				 &internal_ptr->symbol, 0, &indirect_ptr);
+	  if (!ecoff_set_symbol_info (abfd, &internal_sym,
+				      &internal_ptr->symbol, 0, &indirect_ptr))
+	    return false;
 	  internal_ptr->fdr = fdr_ptr;
 	  internal_ptr->local = true;
 	  internal_ptr->native = (PTR) lraw_src;
@@ -3047,6 +3060,12 @@ ecoff_slurp_armap (abfd)
   symdef_ptr = ((struct symdef *)
 		bfd_alloc (abfd,
 			   ardata->symdef_count * sizeof (struct symdef)));
+  if (!symdef_ptr)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
+
   ardata->symdefs = (carsym *) symdef_ptr;
 
   raw_ptr = raw_armap + 4;
@@ -3158,6 +3177,11 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
     return false;
   
   hashtable = (bfd_byte *) bfd_zalloc (abfd, symdefsize);
+  if (!hashtable)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
 
   current = abfd->archive_head;
   last_elt = current;
@@ -3308,15 +3332,23 @@ ecoff_link_hash_newfunc (entry, table, string)
   if (ret == (struct ecoff_link_hash_entry *) NULL)
     ret = ((struct ecoff_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct ecoff_link_hash_entry)));
+  if (ret == (struct ecoff_link_hash_entry *) NULL)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct ecoff_link_hash_entry *)
 	 _bfd_link_hash_newfunc ((struct bfd_hash_entry *) ret,
 				 table, string));
 
-  /* Set local fields.  */
-  ret->indx = -1;
-  ret->abfd = NULL;
+  if (ret)
+    {
+      /* Set local fields.  */
+      ret->indx = -1;
+      ret->abfd = NULL;
+    }
   memset (&ret->esym, 0, sizeof ret->esym);
 
   return (struct bfd_hash_entry *) ret;
@@ -3710,6 +3742,11 @@ ecoff_link_add_externals (abfd, info, external_ext, ssext)
   sym_hash = ((struct ecoff_link_hash_entry **)
 	      bfd_alloc (abfd,
 			 ext_count * sizeof (struct bfd_link_hash_entry *)));
+  if (!sym_hash)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   ecoff_data (abfd)->sym_hashes = sym_hash;
 
   ext_ptr = (char *) external_ext;

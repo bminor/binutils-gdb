@@ -1,5 +1,5 @@
 /* opncls.c -- open and close a BFD.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990 91, 92, 93, 94 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -29,7 +29,7 @@ FILE *bfd_open_file PARAMS ((bfd *));
    if we do that we can't use fcntl.  */
 
 
-#define obstack_chunk_alloc xmalloc
+#define obstack_chunk_alloc malloc
 #define obstack_chunk_free free
 
 /* Return a new BFD.  All BFD's are allocated through this routine.  */
@@ -41,10 +41,17 @@ _bfd_new_bfd ()
 
   nbfd = (bfd *)bfd_zmalloc (sizeof (bfd));
   if (!nbfd)
-    return 0;
+    {
+      bfd_error = no_memory;
+      return 0;
+    }
 
   bfd_check_init();
-  obstack_begin(&nbfd->memory, 128);
+  if (!obstack_begin(&nbfd->memory, 128))
+    {
+      bfd_error = no_memory;
+      return 0;
+    }
 
   nbfd->arch_info = &bfd_default_arch_struct;
 
@@ -490,8 +497,7 @@ bfd_alloc_by_size_t (abfd, size)
      bfd *abfd;
      size_t size;
 {
-  PTR res = obstack_alloc(&(abfd->memory), size);
-  return res;
+  return obstack_alloc(&(abfd->memory), size);
 }
 
 void
@@ -525,7 +531,8 @@ bfd_zalloc (abfd, size)
 {
   PTR res;
   res = bfd_alloc(abfd, size);
-  memset(res, 0, (size_t)size);
+  if (res)
+    memset(res, 0, (size_t)size);
   return res;
 }
 
@@ -536,6 +543,7 @@ bfd_realloc (abfd, old, size)
      size_t size;
 {
   PTR res = bfd_alloc(abfd, size);
-  memcpy(res, old, (size_t)size);
+  if (res)
+    memcpy(res, old, (size_t)size);
   return res;
 }

@@ -553,6 +553,8 @@ bfd_make_section_anyway (abfd, name)
      useful for things like relocs which are relative to the base of a
      section.  */
   newsect->symbol = bfd_make_empty_symbol(abfd);
+  if (!newsect)
+    return NULL;
   newsect->symbol->name = name;
   newsect->symbol->value = 0;
   newsect->symbol->section = newsect;
@@ -637,6 +639,7 @@ DESCRIPTION
 
 */
 
+/*ARGSUSED*/
 boolean
 DEFUN(bfd_set_section_flags,(abfd, section, flags),
      bfd *abfd AND

@@ -363,6 +363,11 @@ nlm_i386_read_import (abfd, sym)
     }
   sym -> symbol.the_bfd = abfd;
   sym -> symbol.name = bfd_alloc (abfd, symlength + 1);
+  if (!sym -> symbol.name)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   if (bfd_read ((PTR) sym -> symbol.name, symlength, 1, abfd)
       != symlength)
     {
@@ -380,6 +385,11 @@ nlm_i386_read_import (abfd, sym)
   rcount = bfd_h_get_32 (abfd, temp);
   nlm_relocs = ((struct nlm_relent *)
 		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
+  if (!nlm_relocs)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   sym -> relocs = nlm_relocs;
   sym -> rcnt = 0;
   while (sym -> rcnt < rcount)
@@ -444,6 +454,7 @@ static const struct nlm_backend_data nlm32_i386_backend =
   0,	/* optional_prefix_size */
   bfd_arch_i386,
   0,
+  false,
   0,	/* backend_object_p */
   0,	/* write_prefix_func */
   nlm_i386_read_reloc,
@@ -455,6 +466,7 @@ static const struct nlm_backend_data nlm32_i386_backend =
   nlm_swap_fixed_header_in,
   nlm_swap_fixed_header_out,
   nlm_i386_write_external,
+  0,	/* write_export */
 };
 
 #define TARGET_LITTLE_NAME		"nlm32-i386"

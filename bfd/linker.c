@@ -1,22 +1,22 @@
 /* linker.c -- BFD linker routines
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94 Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support
 
-This file is part of BFD
+This file is part of BFD, the Binary File Descriptor library.
 
-GLD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GLD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GLD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -443,15 +443,23 @@ _bfd_link_hash_newfunc (entry, table, string)
   if (ret == (struct bfd_link_hash_entry *) NULL)
     ret = ((struct bfd_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct bfd_link_hash_entry)));
+  if (ret == (struct bfd_link_hash_entry *) NULL)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct bfd_link_hash_entry *)
 	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
 
-  /* Initialize the local fields.  */
-  ret->type = bfd_link_hash_new;
-  ret->written = false;
-  ret->next = NULL;
+  if (ret)
+    {
+      /* Initialize the local fields.  */
+      ret->type = bfd_link_hash_new;
+      ret->written = false;
+      ret->next = NULL;
+    }
 
   return (struct bfd_hash_entry *) ret;
 }
@@ -549,14 +557,22 @@ generic_link_hash_newfunc (entry, table, string)
   if (ret == (struct generic_link_hash_entry *) NULL)
     ret = ((struct generic_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct generic_link_hash_entry)));
+  if (ret == (struct generic_link_hash_entry *) NULL)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct generic_link_hash_entry *)
 	 _bfd_link_hash_newfunc ((struct bfd_hash_entry *) ret,
 				 table, string));
 
-  /* Set local fields.  */
-  ret->sym = NULL;
+  if (ret)
+    {
+      /* Set local fields.  */
+      ret->sym = NULL;
+    }
 
   return (struct bfd_hash_entry *) ret;
 }
@@ -570,7 +586,12 @@ _bfd_generic_link_hash_table_create (abfd)
   struct generic_link_hash_table *ret;
 
   ret = ((struct generic_link_hash_table *)
-	 bfd_xmalloc (sizeof (struct generic_link_hash_table)));
+	 malloc (sizeof (struct generic_link_hash_table)));
+  if (!ret)
+      {
+	bfd_error = no_memory;
+	return (struct bfd_link_hash_table *) NULL;
+      }
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
 				   generic_link_hash_newfunc))
     {
@@ -683,13 +704,21 @@ archive_hash_newfunc (entry, table, string)
   if (ret == (struct archive_hash_entry *) NULL)
     ret = ((struct archive_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct archive_hash_entry)));
+  if (ret == (struct archive_hash_entry *) NULL)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct archive_hash_entry *)
 	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
 
-  /* Initialize the local fields.  */
-  ret->defs = (struct archive_list *) NULL;
+  if (ret)
+    {
+      /* Initialize the local fields.  */
+      ret->defs = (struct archive_list *) NULL;
+    }
 
   return (struct bfd_hash_entry *) ret;
 }
@@ -1405,6 +1434,11 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	    sub = ((struct bfd_link_hash_entry *)
 		   bfd_hash_allocate (&info->hash->table,
 				      sizeof (struct bfd_link_hash_entry)));
+	    if (!sub)
+	      {
+		bfd_error = no_memory;
+		return false;
+	      }
 	    *sub = *h;
 	    h->type = bfd_link_hash_warning;
 	    h->u.i.link = sub;
@@ -1452,6 +1486,7 @@ _bfd_generic_final_link (abfd, info)
       return false;
 
   /* Accumulate the global symbols.  */
+  wginfo.info = info;
   wginfo.output_bfd = abfd;
   wginfo.psymalloc = &outsymalloc;
   _bfd_generic_link_hash_traverse (_bfd_generic_hash_table (info),
@@ -1482,7 +1517,12 @@ _bfd_generic_final_link (abfd, info)
 		  input_bfd = input_section->owner;
 		  relsize = bfd_get_reloc_upper_bound (input_bfd,
 						       input_section);
-		  relocs = (arelent **) bfd_xmalloc (relsize);
+		  relocs = (arelent **) malloc ((size_t) relsize);
+		  if (!relocs)
+		    {
+		      bfd_error = no_memory;
+		      return false;
+		    }
 		  reloc_count =
 		    bfd_canonicalize_reloc (input_bfd, input_section,
 					    relocs,
@@ -1498,6 +1538,11 @@ _bfd_generic_final_link (abfd, info)
 				bfd_alloc (abfd,
 					   (o->reloc_count
 					    * sizeof (arelent *))));
+	      if (!o->orelocation)
+		{
+		  bfd_error = no_memory;
+		  return false;
+		}
 	      /* Reset the count so that it can be used as an index
 		 when putting in the output relocs.  */
 	      o->reloc_count = 0;
@@ -1572,6 +1617,11 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 
   symsize = get_symtab_upper_bound (input_bfd);
   input_bfd->outsymbols = (asymbol **) bfd_alloc (input_bfd, symsize);
+  if (!input_bfd->outsymbols)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   input_bfd->symcount = bfd_canonicalize_symtab (input_bfd,
 						 input_bfd->outsymbols);
 
@@ -1589,6 +1639,8 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 	      asymbol *newsym;
 
 	      newsym = bfd_make_empty_symbol (input_bfd);
+	      if (!newsym)
+		return false;
 	      newsym->name = input_bfd->filename;
 	      newsym->value = 0;
 	      newsym->flags = BSF_LOCAL | BSF_FILE;
@@ -1767,6 +1819,14 @@ _bfd_generic_link_write_global_symbol (h, data)
   if (h->root.written)
     return true;
 
+  h->root.written = true;
+
+  if (wginfo->info->strip == strip_all
+      || (wginfo->info->strip == strip_some
+	  && bfd_hash_lookup (wginfo->info->keep_hash, h->root.root.string,
+			      false, false) == NULL))
+    return true;
+
   if (h->sym != (asymbol *) NULL)
     {
       sym = h->sym;
@@ -1775,6 +1835,8 @@ _bfd_generic_link_write_global_symbol (h, data)
   else
     {
       sym = bfd_make_empty_symbol (wginfo->output_bfd);
+      if (!sym)
+	return false;
       sym->name = h->root.root.string;
       sym->flags = 0;
     }
@@ -1820,8 +1882,6 @@ _bfd_generic_link_write_global_symbol (h, data)
       abort ();
     }
 
-  h->root.written = true;
-
   return true;
 }
 
@@ -1836,6 +1896,11 @@ bfd_new_link_order (abfd, section)
 
   new = ((struct bfd_link_order *)
 	 bfd_alloc_by_size_t (abfd, sizeof (struct bfd_link_order)));
+  if (!new)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
 
   new->type = bfd_undefined_link_order;
   new->offset = 0;
@@ -1948,6 +2013,11 @@ default_indirect_link_order (output_bfd, info, output_section, link_order)
 
       symsize = get_symtab_upper_bound (input_bfd);
       input_bfd->outsymbols = (asymbol **) bfd_alloc (input_bfd, symsize);
+      if (!input_bfd->outsymbols)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
       input_bfd->symcount = bfd_canonicalize_symtab (input_bfd,
 						     input_bfd->outsymbols);
     }
@@ -1957,6 +2027,8 @@ default_indirect_link_order (output_bfd, info, output_section, link_order)
   contents = (bfd_get_relocated_section_contents
 	      (output_bfd, info, link_order, contents, info->relocateable,
 	       bfd_get_outsymbols (input_bfd)));
+  if (!contents)
+    return false;
 
   /* Output the section contents.  */
   if (! bfd_set_section_contents (output_bfd, output_section, (PTR) contents,

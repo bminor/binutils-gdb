@@ -485,10 +485,10 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
   int i;
 
   final_types = (elf32_hppa_reloc_type **) bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type *) * 2);
-  BFD_ASSERT (final_types != 0);
+  BFD_ASSERT (final_types != 0); /* FIXME */
 
   finaltype = (elf32_hppa_reloc_type *) bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type));
-  BFD_ASSERT (finaltype != 0);
+  BFD_ASSERT (finaltype != 0);	/* FIXME */
 
   final_types[0] = finaltype;
   final_types[1] = NULL;
@@ -1090,10 +1090,10 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
     case R_HPPA_COMPLEX_PCREL_CALL:
     case R_HPPA_COMPLEX_ABS_CALL:
       final_types = (elf32_hppa_reloc_type **) bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type *) * 6);
-      BFD_ASSERT (final_types != 0);
+      BFD_ASSERT (final_types != 0); /* FIXME */
 
       finaltype = (elf32_hppa_reloc_type *) bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type) * 5);
-      BFD_ASSERT (finaltype != 0);
+      BFD_ASSERT (finaltype != 0); /* FIXME */
 
       for (i = 0; i < 5; i++)
 	final_types[i] = &finaltype[i];
@@ -1747,6 +1747,11 @@ elf_hppa_tc_symbol (abfd, symbolP, sym_idx)
     return;
 
   symextP = (symext_chainS *) bfd_alloc (abfd, sizeof (symext_chainS) * 2);
+  if (!symextP)
+    {
+      bfd_error = no_memory;
+      abort();			/* FIXME */
+    }
 
   symextP[0].entry = ELF32_HPPA_SX_WORD (HPPA_SXT_SYMNDX, sym_idx);
   symextP[0].next = &symextP[1];
@@ -1808,6 +1813,11 @@ elf_hppa_tc_make_sections (abfd, ignored)
       bfd_set_section_alignment (abfd, symextn_sec, 2);
     }
   symextn_contents = (symext_entryS *) bfd_alloc (abfd, size);
+  if (!symextn_contents)
+    {
+      bfd_error = no_memory;
+      abort();			/* FIXME */
+    }
 
   for (i = 0, symextP = symext_rootP; symextP; symextP = symextP->next, ++i)
     symextn_contents[i] = symextP->entry;
@@ -1965,7 +1975,7 @@ new_stub (abfd, stub_sec, link_info)
   else
     {
       bfd_error = no_memory;
-      bfd_perror ("new_stub");
+      abort();			/* FIXME */
     }
 
   return stub;
@@ -2031,7 +2041,7 @@ add_stub_by_name(abfd, stub_sec, sym, link_info)
       else
 	{
 	  bfd_error = no_memory;
-	  bfd_perror("add_stub_by_name");
+	  abort();		/* FIXME */
 	}
     }
 
@@ -2141,8 +2151,8 @@ type_of_mismatch (caller_bits, callee_bits, type)
 }
 
 #define CURRENT_STUB_OFFSET(entry)	\
-  ((int)(entry)->stub_desc->stub_secp \
-   - (int)(entry)->stub_desc->stub_contents - 4)
+  ((char *)(entry)->stub_desc->stub_secp \
+   - (char *)(entry)->stub_desc->stub_contents - 4)
 
 static boolean stubs_finished = false;
 
@@ -2275,13 +2285,18 @@ hppa_elf_stub_branch_reloc (stub_desc,	/* the bfd */
 	  stub_desc->stub_sec->relocation = (arelent *) realloc (stub_desc->stub_sec->relocation,
 								 size);
 	}
+      if (!stub_desc->stub_sec->relocation)
+	{
+	  bfd_error = no_memory;
+	  abort();		/* FIXME */
+	}
     }
 
   /* Fill in the details. */
   relent.address = offset;
   relent.addend = 0;
   relent.sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd, sizeof (asymbol *));
-  BFD_ASSERT (relent.sym_ptr_ptr);
+  BFD_ASSERT (relent.sym_ptr_ptr); /* FIXME */
 
   relent.sym_ptr_ptr[0] = target_sym;
   relent.howto = bfd_reloc_type_lookup (stub_desc->this_bfd, R_HPPA_PCREL_CALL_17);
@@ -2325,6 +2340,11 @@ hppa_elf_stub_reloc (stub_desc,	/* the bfd */
 	  stub_desc->stub_sec->relocation = (arelent *) realloc (stub_desc->stub_sec->relocation,
 								 size);
 	}
+      if (!stub_desc->stub_sec->relocation)
+	{
+	  bfd_error = no_memory;
+	  abort();		/* FIXME */
+	}
     }
 
   rela_hdr = &elf_section_data(stub_desc->stub_sec)->rel_hdr;
@@ -2334,7 +2354,7 @@ hppa_elf_stub_reloc (stub_desc,	/* the bfd */
   relent.address = offset;
   relent.addend = 0;
   relent.sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd, sizeof (asymbol *));
-  BFD_ASSERT (relent.sym_ptr_ptr);
+  BFD_ASSERT (relent.sym_ptr_ptr); /* FIXME */
 
   relent.sym_ptr_ptr[0] = target_sym;
   relent.howto = bfd_reloc_type_lookup (stub_desc->this_bfd, type);
@@ -2407,7 +2427,12 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
   if (!stub_desc->stub_contents)
     {
       stub_desc->allocated_size = STUB_BUFFER_INCR;
-      stub_desc->stub_contents = (char *) bfd_xmalloc (STUB_BUFFER_INCR);
+      stub_desc->stub_contents = (char *) malloc (STUB_BUFFER_INCR);
+      if (!stub_desc->stub_contents)
+	{
+	  bfd_error = no_memory;
+	  return NULL;
+	}
     }
   else if ((stub_desc->allocated_size - stub_desc->real_size) < STUB_MAX_SIZE)
     {
@@ -2435,6 +2460,11 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
 	 change the relocation type?  */
       reloc_entry->sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd,
 							  sizeof (asymbol *));
+      if (!reloc_entry->sym_ptr_ptr)
+	{
+	  bfd_error = no_memory;
+	  return NULL;
+	}
       reloc_entry->sym_ptr_ptr[0] = stub_sym;
       if (reloc_entry->howto->type != R_HPPA_PLABEL_32
 	  && (get_opcode(insn) == BLE
@@ -2446,10 +2476,20 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
     {
       /* Create a new symbol to point to this stub.  */
       stub_sym = bfd_make_empty_symbol (abfd);
+      if (!stub_sym)
+	{
+	  bfd_error = no_memory;
+	  return NULL;
+	}
       stub_sym->name = bfd_zalloc (abfd, strlen (stub_sym_name) + 1);
+      if (!stub_sym->name)
+	{
+	  bfd_error = no_memory;
+	  return NULL;
+	}
       strcpy ((char *) stub_sym->name, stub_sym_name);
       stub_sym->value
-	= (int) stub_desc->stub_secp - (int) stub_desc->stub_contents;
+	= (char *) stub_desc->stub_secp - (char *) stub_desc->stub_contents;
       stub_sym->section = stub_sec;
       stub_sym->flags = BSF_LOCAL | BSF_FUNCTION;
       stub_entry = add_stub_by_name (abfd, stub_sec, stub_sym, link_info);
@@ -2459,6 +2499,11 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
 	 relocation to be the internal use only stub R_HPPA_STUB_CALL_17.  */
       reloc_entry->sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd,
 							  sizeof (asymbol *));
+      if (!reloc_entry->sym_ptr_ptr)
+	{
+	  bfd_error = no_memory;
+	  return NULL;
+	}
       reloc_entry->sym_ptr_ptr[0] = stub_sym;
       if (reloc_entry->howto->type != R_HPPA_PLABEL_32
 	  && (get_opcode (insn) == BLE
@@ -2929,6 +2974,11 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, link_info, reloc_entry,
 	 FIXME.  Is there a need to change the relocation type too?  */
       reloc_entry->sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd,
 							  sizeof (asymbol *));
+      if (!reloc_entry->sym_ptr_ptr)
+	{
+	  bfd_error = no_memory;
+	  return NULL;
+	}
       reloc_entry->sym_ptr_ptr[0] = stub_sym;
       reloc_entry->howto = bfd_reloc_type_lookup (abfd, R_HPPA_STUB_CALL_17);
     }
@@ -2936,10 +2986,20 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, link_info, reloc_entry,
     {
       /* We will need to allocate a new stub.  */
       stub_sym = bfd_make_empty_symbol (abfd);
+      if (!stub_sym)
+	{
+	  bfd_error = no_memory;
+	  return NULL;
+	}
       stub_sym->name = bfd_zalloc (abfd, strlen (stub_sym_name) + 1);
+      if (!stub_sym->name)
+	{
+	  bfd_error = no_memory;
+	  return NULL;
+	}
       strcpy ((char *) stub_sym->name, stub_sym_name);
       stub_sym->value
-	= (int) stub_desc->stub_secp - (int) stub_desc->stub_contents;
+	= (char *) stub_desc->stub_secp - (char *) stub_desc->stub_contents;
       stub_sym->section = stub_sec;
       stub_sym->flags = BSF_LOCAL | BSF_FUNCTION;
       stub_entry = add_stub_by_name (abfd, stub_sec, stub_sym, link_info);
@@ -2950,6 +3010,11 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, link_info, reloc_entry,
 	 FIXME.  Is there a need to change the relocation type too?  */
       reloc_entry->sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd,
 							  sizeof (asymbol *));
+      if (!reloc_entry->sym_ptr_ptr)
+	{
+	  bfd_error = no_memory;
+	  return NULL;
+	}
       reloc_entry->sym_ptr_ptr[0] = stub_sym;
       reloc_entry->howto = bfd_reloc_type_lookup (abfd, R_HPPA_STUB_CALL_17);
       
@@ -3458,6 +3523,11 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
   /* allocate a buffer of the appropriate size for the symextn section */
 
   symextn_hdr->contents = bfd_zalloc(abfd,symextn_hdr->sh_size);
+  if (!symextn_hdr->contents)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   symextn_hdr->size = symextn_hdr->sh_size;
 	
   /* read in the symextn section */

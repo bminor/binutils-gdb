@@ -132,7 +132,7 @@ static boolean elf_slurp_symbol_table PARAMS ((bfd *, asymbol **));
 static int elf_symbol_from_bfd_symbol PARAMS ((bfd *,
 					       struct symbol_cache_entry **));
 
-static void elf_map_symbols PARAMS ((bfd *));
+static boolean elf_map_symbols PARAMS ((bfd *));
 static boolean swap_out_syms PARAMS ((bfd *));
 
 #ifdef DEBUG
@@ -412,7 +412,7 @@ DEFUN (bfd_add_to_strtab, (abfd, ss, str),
   /* should this be using obstacks? */
   ss->tab = realloc (ss->tab, ss->length + ln);
 
-  BFD_ASSERT (ss->tab != 0);
+  BFD_ASSERT (ss->tab != 0);	/* FIXME */
   strcpy (ss->tab + ss->length, str);
   ss->nentries++;
   ss->length += ln;
@@ -437,7 +437,7 @@ DEFUN (bfd_add_2_to_strtab, (abfd, ss, str, str2),
   else
     ss->tab = malloc (ln);
 
-  BFD_ASSERT (ss->tab != 0);
+  BFD_ASSERT (ss->tab != 0);	/* FIXME */
   strcpy (ss->tab + ss->length, str);
   strcpy (ss->tab + ss->length + strlen (str), str2);
   ss->nentries++;
@@ -596,8 +596,8 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 	  newsect->flags = SEC_HAS_CONTENTS;
 	  hdr->rawdata = (PTR) newsect;
 	  newsect->_raw_size = hdr->sh_size;
-	  newsect->alignment_power = 0;
-	  newsect->vma = 0;
+	  newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
+	  newsect->vma = hdr->sh_addr;
 	  newsect->filepos = hdr->sh_offset;
 
 	  if (hdr->sh_flags & SHF_ALLOC)
@@ -710,6 +710,11 @@ DEFUN (elf_new_section_hook, (abfd, sec),
   struct bfd_elf_section_data *sdata;
 
   sdata = (struct bfd_elf_section_data *) bfd_alloc (abfd, sizeof (*sdata));
+  if (!sdata)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   sec->used_by_bfd = (PTR) sdata;
   memset (sdata, 0, sizeof (*sdata));
   return true;
@@ -753,6 +758,11 @@ DEFUN (bfd_section_from_phdr, (abfd, hdr, index),
 	   (hdr->p_memsz > hdr->p_filesz));
   sprintf (namebuf, split ? "segment%da" : "segment%d", index);
   name = bfd_alloc (abfd, strlen (namebuf) + 1);
+  if (!name)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   strcpy (name, namebuf);
   newsect = bfd_make_section (abfd, name);
   newsect->vma = hdr->p_vaddr;
@@ -779,6 +789,11 @@ DEFUN (bfd_section_from_phdr, (abfd, hdr, index),
     {
       sprintf (namebuf, "segment%db", index);
       name = bfd_alloc (abfd, strlen (namebuf) + 1);
+      if (!name)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
       strcpy (name, namebuf);
       newsect = bfd_make_section (abfd, name);
       newsect->vma = hdr->p_vaddr + hdr->p_filesz;
@@ -1149,6 +1164,11 @@ write_relocs (abfd, sec, xxx)
 
   rela_hdr->sh_size = rela_hdr->sh_entsize * sec->reloc_count;
   rela_hdr->contents = (void *) bfd_alloc (abfd, rela_hdr->sh_size);
+  if (!rela_hdr->contents)
+    {
+      bfd_error = no_memory;
+      abort();			/* FIXME */
+    }
 
   /* orelocation has the data, reloc_count has the count... */
   if (use_rela_p)
@@ -1378,7 +1398,7 @@ sym_is_global (abfd, sym)
   return 0;
 }
 
-static void
+static boolean
 DEFUN (elf_map_symbols, (abfd), bfd * abfd)
 {
   int symcount = bfd_get_symcount (abfd);
@@ -1414,11 +1434,20 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
   sect_syms = (asymbol **) bfd_zalloc (abfd, max_index * sizeof (asymbol *));
   elf_section_syms (abfd) = sect_syms;
 
-  BFD_ASSERT (sect_syms != 0);
+  if (sect_syms != 0)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
 
   for (asect = abfd->sections; asect; asect = asect->next)
     {
       asymbol *sym = bfd_make_empty_symbol (abfd);
+      if (!sym)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
       sym->the_bfd = abfd;
       sym->name = asect->name;
       sym->value = asect->vma;
@@ -1442,6 +1471,11 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
       else
 	syms = (asymbol **) bfd_alloc (abfd,
 				       (num_sections + 1) * sizeof (asymbol *));
+      if (!syms)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
 
       for (asect = abfd->sections; asect; asect = asect->next)
 	{
@@ -1455,6 +1489,11 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
 
   elf_sym_extra (abfd) = sym_extra
     = (Elf_Sym_Extra *) bfd_alloc (abfd, symcount * sizeof (Elf_Sym_Extra));
+  if (!sym_extra)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
 
   /* Identify and classify all of the symbols.  */
   for (idx = 0; idx < symcount; idx++)
@@ -1478,17 +1517,19 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
 
   elf_num_locals (abfd) = num_locals;
   elf_num_globals (abfd) = num_globals;
+  return true;
 }
 
-static void assign_section_numbers ();
-static void assign_file_positions_except_relocs ();
+static boolean assign_section_numbers ();
+static boolean assign_file_positions_except_relocs ();
 
 static boolean
 DEFUN (elf_compute_section_file_positions, (abfd), bfd * abfd)
 {
   bfd_map_over_sections (abfd, elf_fake_sections, 0);
 
-  assign_section_numbers (abfd);
+  if (!assign_section_numbers (abfd))
+    return false;
 
   bfd_map_over_sections (abfd, elf_make_sections, 0);
 
@@ -1497,7 +1538,8 @@ DEFUN (elf_compute_section_file_positions, (abfd), bfd * abfd)
   if (swap_out_syms (abfd) == false)
     return false;
 
-  assign_file_positions_except_relocs (abfd);
+  if (!assign_file_positions_except_relocs (abfd))
+    return false;
 
   return true;
 }
@@ -1531,7 +1573,7 @@ static const Elf_Internal_Shdr null_shdr;
    too.  The link/info pointers for the standard section types are filled
    in here too, while we're at it.  (Link pointers for .stab sections are
    not filled in here.)  */
-static void
+static boolean
 assign_section_numbers (abfd)
      bfd *abfd;
 {
@@ -1573,6 +1615,11 @@ assign_section_numbers (abfd)
      indices.  */
   i_shdrp = (Elf_Internal_Shdr **)
     bfd_alloc (abfd, section_number * sizeof (Elf_Internal_Shdr *));
+  if (!i_shdrp)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   elf_elfsections(abfd) = i_shdrp;
   for (i = 0; i < section_number; i++)
     i_shdrp[i] = 0;
@@ -1595,6 +1642,7 @@ assign_section_numbers (abfd)
   for (i = 0; i < section_number; i++)
     if (i_shdrp[i] == 0)
       abort ();
+  return true;
 }
 
 static INLINE file_ptr
@@ -1645,7 +1693,7 @@ struct seg_info {
   struct seg_info *next;
 };
 
-static void
+static boolean
 map_program_segments (abfd)
      bfd *abfd;
 {
@@ -1708,6 +1756,11 @@ map_program_segments (abfd)
       {
 	struct seg_info *s;
 	s = (struct seg_info *) bfd_alloc (abfd, sizeof (struct seg_info));
+	if (!s)
+	  {
+	    bfd_error = no_memory;
+	    return false;
+	  }
 	s->next = seg;
 	seg = s;
       }
@@ -1787,6 +1840,11 @@ map_program_segments (abfd)
       }
     phdr = (Elf_Internal_Phdr*) bfd_alloc (abfd,
 					   n_segs * sizeof (Elf_Internal_Phdr));
+    if (!phdr)
+      {
+	bfd_error = no_memory;
+	abort();		/* FIXME */
+      }
     elf_tdata (abfd)->phdr = phdr;
     while (seg)
       {
@@ -1810,9 +1868,10 @@ map_program_segments (abfd)
     i_ehdrp->e_phnum = n_segs;
   }
   elf_write_phdrs (abfd, i_ehdrp, elf_tdata (abfd)->phdr, i_ehdrp->e_phnum);
+  return true;
 }
 
-static void
+static boolean
 assign_file_positions_except_relocs (abfd)
      bfd *abfd;
 {
@@ -1912,7 +1971,8 @@ assign_file_positions_except_relocs (abfd)
   if (exec_p)
     {
       elf_tdata (abfd)->next_file_pos = off;
-      map_program_segments (abfd);
+      if (!map_program_segments (abfd))
+	return false;
       off = elf_tdata (abfd)->next_file_pos;
 
       /* Section headers.  */
@@ -1932,6 +1992,7 @@ assign_file_positions_except_relocs (abfd)
 	}
     }
   elf_tdata (abfd)->next_file_pos = off;
+  return true;
 }
 
 static boolean
@@ -2048,7 +2109,8 @@ static boolean
 swap_out_syms (abfd)
      bfd *abfd;
 {
-  elf_map_symbols (abfd);
+  if (!elf_map_symbols (abfd))
+    return false;
 
   /* Dump out the symtabs. */
   {
@@ -2079,6 +2141,11 @@ swap_out_syms (abfd)
 
     outbound_syms = (Elf_External_Sym *)
       bfd_alloc (abfd, (1 + symcount) * sizeof (Elf_External_Sym));
+    if (!outbound_syms)
+      {
+	bfd_error = no_memory;
+	return false;
+      }
     /* now generate the data (for "contents") */
     {
       /* Fill in zeroth symbol and swap it out.  */
@@ -2527,7 +2594,7 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
 
   /* Temporarily allocate room for the raw ELF symbols.  */
   x_symp = (Elf_External_Sym *) malloc (symcount * sizeof (Elf_External_Sym));
-  if (!x_symp)
+  if (!symbase || !x_symp)
     {
       bfd_error = no_memory;
       return false;
@@ -2705,6 +2772,12 @@ DEFUN (elf_slurp_reloca_table, (abfd, asect, symbols),
   bfd_seek (abfd, asect->rel_filepos, SEEK_SET);
   native_relocs = (Elf_External_Rela *)
     bfd_alloc (abfd, asect->reloc_count * sizeof (Elf_External_Rela));
+  if (!native_relocs)
+  if (!reloc_cache)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   bfd_read ((PTR) native_relocs,
 	    sizeof (Elf_External_Rela), asect->reloc_count, abfd);
 
@@ -2847,6 +2920,11 @@ DEFUN (elf_slurp_reloc_table, (abfd, asect, symbols),
   bfd_seek (abfd, asect->rel_filepos, SEEK_SET);
   native_relocs = (Elf_External_Rel *)
     bfd_alloc (abfd, asect->reloc_count * sizeof (Elf_External_Rel));
+  if (!native_relocs)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   bfd_read ((PTR) native_relocs,
 	    sizeof (Elf_External_Rel), asect->reloc_count, abfd);
 

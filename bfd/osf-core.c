@@ -91,7 +91,8 @@ osf_core_make_empty_symbol (abfd)
      bfd *abfd;
 {
   asymbol *new = (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
-  new->the_bfd = abfd;
+  if (new)
+    new->the_bfd = abfd;
   return new;
 }
 
@@ -139,6 +140,11 @@ osf_core_core_file_p (abfd)
 	     for shared libraries), but bfd doesn't permit data sections with
 	     the same name. Construct a unique section name.  */
 	  secname = bfd_alloc (abfd, 40);
+	  if (!secname)
+	    {
+	      bfd_error = no_memory;
+	      return NULL;
+	    }
 	  sprintf (secname, ".data%d", dseccnt++);
 	  break;
 	case SCNSTACK:
@@ -202,7 +208,7 @@ osf_core_core_file_matches_executable_p (core_bfd, exec_bfd)
 #define	osf_core_close_and_cleanup		bfd_generic_close_and_cleanup
 #define	osf_core_set_section_contents		(boolean (*) PARAMS	\
         ((bfd *abfd, asection *section, PTR data, file_ptr offset,	\
-        bfd_size_type count))) bfd_false
+        bfd_size_type count))) bfd_generic_set_section_contents
 #define	osf_core_get_section_contents		bfd_generic_get_section_contents
 #define	osf_core_new_section_hook		(boolean (*) PARAMS	\
 	((bfd *, sec_ptr))) bfd_true
@@ -253,9 +259,10 @@ swap_abort()
 {
   abort(); /* This way doesn't require any declaration for ANSI to fuck up */
 }
-#define	NO_GET	((bfd_vma (*) PARAMS ((         bfd_byte *))) swap_abort )
+#define	NO_GET	((bfd_vma (*) PARAMS ((   const bfd_byte *))) swap_abort )
 #define	NO_PUT	((void    (*) PARAMS ((bfd_vma, bfd_byte *))) swap_abort )
-#define	NO_SIGNED_GET ((bfd_signed_vma (*) PARAMS ((bfd_byte *))) swap_abort )
+#define	NO_SIGNED_GET \
+  ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort )
 
 bfd_target osf_core_vec =
   {

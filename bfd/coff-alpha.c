@@ -1323,6 +1323,11 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 			   bfd_alloc (input_bfd,
 				      (NUM_RELOC_SECTIONS
 				       * sizeof (asection *))));
+      if (!symndx_to_section)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
 
       symndx_to_section[RELOC_SECTION_NONE] = NULL;
       symndx_to_section[RELOC_SECTION_TEXT] =
@@ -1456,12 +1461,15 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	     not currently implemented.  */
 
 	  /* I believe that the LITERAL reloc will only apply to a ldq
-	     instruction, so check my assumption.  */
-	  BFD_ASSERT (((bfd_get_32 (input_bfd,
-				    contents + r_vaddr - input_section->vma)
-			>> 26)
-		       & 0x3f)
-		      == 0x29);
+	     or ldl instruction, so check my assumption.  */
+	  {
+	    unsigned long insn;
+
+	    insn = bfd_get_32 (input_bfd,
+			       contents + r_vaddr - input_section->vma);
+	    BFD_ASSERT (((insn >> 26) & 0x3f) == 0x29
+			|| ((insn >> 26) & 0x3f) == 0x28);
+	  }
 
 	  relocatep = true;
 	  addend = ecoff_data (input_bfd)->gp - gp;

@@ -33,6 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define offsetof(type, identifier) (size_t) &(((type *) 0)->identifier) 
 #endif
 
+static boolean oasys_write_sections PARAMS ((bfd *));
+
 /* Read in all the section data and relocation stuff too */
 PROTO(static boolean,oasys_slurp_section_data,(bfd *CONST abfd));
 
@@ -99,7 +101,11 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
 #else
   data->strings = bfd_alloc(abfd, data->symbol_string_length);
 #endif
-
+  if (!data->symbols || !data->strings)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
 
   dest_defined = data->symbols + abfd->symcount -1;
 
@@ -267,8 +273,13 @@ DEFUN(oasys_archive_p,(abfd),
       oasys_module_info_type *module = 
 	(oasys_module_info_type*)
 	  bfd_alloc(abfd, sizeof(oasys_module_info_type) * header.mod_count);
-
       oasys_module_table_type record;
+
+      if (!ar || !module)
+	{
+	  bfd_error = no_memory;
+	  return NULL;
+	}
 
       abfd->tdata.oasys_ar_data = ar;
       ar->module = module;
@@ -292,6 +303,11 @@ DEFUN(oasys_archive_p,(abfd),
 	  record.sect_count = bfd_h_get_32(abfd, record_ext.sect_count);
 
 	  module[i].name = bfd_alloc(abfd,33);
+	  if (!module[i].name)
+	    {
+	      bfd_error = no_error;
+	      return NULL;
+	    }
 
 	  memcpy(module[i].name, record_ext.mod_name, 33);
 	  filepos +=
@@ -313,6 +329,11 @@ DEFUN(oasys_archive_p,(abfd),
 	  record.module_name_size = bfd_h_get_32(abfd, record_ext.mod_name_length);
 
 	  module[i].name = bfd_alloc(abfd,record.module_name_size + 1);
+	  if (!module[i].name)
+	    {
+	      bfd_error = no_error;
+	      return NULL;
+	    }
 	  bfd_read((PTR)module[i].name, 1, record.module_name_size, abfd);
 	  module[i].name[record.module_name_size] = 0;
 	  filepos +=
@@ -338,7 +359,7 @@ DEFUN(oasys_mkobject,(abfd),
 {
 
   abfd->tdata.oasys_obj_data =    (oasys_data_type*)bfd_alloc(abfd, sizeof(oasys_data_type));
-  return true;
+  return abfd->tdata.oasys_obj_data ? true : false;
 }
 
 #define MAX_SECS 16
@@ -391,6 +412,11 @@ DEFUN(oasys_object_p,(abfd),
 		goto fail;
 	      }
 	  buffer = bfd_alloc(abfd, 3);
+	  if (!buffer)
+	    {
+	      bfd_error = no_memory;
+	      goto fail;
+	    }
 	  section_number= record.section.relb & RELOCATION_SECT_BITS;
 	  sprintf(buffer,"%u", section_number);
 	  s = bfd_make_section(abfd,buffer);
@@ -548,6 +574,11 @@ DEFUN(oasys_slurp_section_data,(abfd),
 	      if (per->initialized == false) 
 		  {
 		    per->data = (bfd_byte *) bfd_zalloc(abfd, section->_raw_size);
+		    if (!per->data)
+		      {
+			bfd_error = no_memory;
+			return false;
+		      }
 		    per->reloc_tail_ptr = (oasys_reloc_type **)&(section->relocation);
 		    per->had_vma = false;
 		    per->initialized = true;
@@ -607,6 +638,11 @@ DEFUN(oasys_slurp_section_data,(abfd),
 				      (oasys_reloc_type *)
 					bfd_alloc(abfd,
 						  sizeof(oasys_reloc_type));
+				    if (!r)
+				      {
+					bfd_error = no_memory;
+					return false;
+				      }
 				    *(per->reloc_tail_ptr) = r;
 				    per->reloc_tail_ptr = &r->next;
 				    r->next= (oasys_reloc_type *)NULL;
@@ -648,6 +684,11 @@ DEFUN(oasys_slurp_section_data,(abfd),
 				      (oasys_reloc_type *)
 					bfd_alloc(abfd,
 						  sizeof(oasys_reloc_type));
+				    if (!r)
+				      {
+					bfd_error = no_memory;
+					return false;
+				      }
 				    *(per->reloc_tail_ptr) = r;
 				    per->reloc_tail_ptr = &r->next;
 				    r->next= (oasys_reloc_type *)NULL;
@@ -704,10 +745,6 @@ DEFUN(oasys_slurp_section_data,(abfd),
 
 }
 
-
-
-extern bfd_error_vector_type bfd_error_vector;
-
 static boolean
 DEFUN(oasys_new_section_hook,(abfd, newsect),
       bfd *abfd AND
@@ -715,6 +752,11 @@ DEFUN(oasys_new_section_hook,(abfd, newsect),
 {
   newsect->used_by_bfd = (PTR)
     bfd_alloc(abfd, sizeof(oasys_per_section_type));
+  if (!newsect->used_by_bfd)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   oasys_per_section( newsect)->data = (bfd_byte *)NULL;
   oasys_per_section(newsect)->section = newsect;
   oasys_per_section(newsect)->offset  = 0;
@@ -897,9 +939,9 @@ DEFUN(oasys_write_syms, (abfd),
 
 
   /* Write a section header for each section */
-static void 
-DEFUN(oasys_write_sections, (abfd),
-      bfd *CONST abfd)
+static boolean
+oasys_write_sections (abfd)
+     bfd *abfd;
 {
   asection *s;
   static oasys_section_record_type out;
@@ -907,8 +949,8 @@ DEFUN(oasys_write_sections, (abfd),
   for (s = abfd->sections; s != (asection *)NULL; s = s->next) {
     if (!isdigit(s->name[0])) 
 	{
-          bfd_error_vector.nonrepresentable_section(abfd,
-						    s->name);
+	  bfd_error = nonrepresentable_section;
+	  return false;
 	}
     out.relb = RELOCATION_TYPE_REL | s->target_index;
     bfd_h_put_32(abfd, s->_cooked_size, out.value);
@@ -919,6 +961,7 @@ DEFUN(oasys_write_sections, (abfd),
 		       (oasys_record_union_type *) &out,
 		       sizeof(out));
   }
+  return true;
 }
 
 static void
@@ -1032,7 +1075,7 @@ DEFUN(oasys_write_data, (abfd),
 
 		if (relocs_to_go != 0) {	
 		  arelent *r = *p;
-		  reloc_howto_type *CONST how=r->howto;
+		  const reloc_howto_type * const how=r->howto;
 		  /* There is a relocation, is it for this byte ? */
 		  if (r->address == current_byte_index) {
 		    unsigned char rel_byte;
@@ -1152,7 +1195,8 @@ DEFUN(oasys_write_object_contents, (abfd),
 {
   oasys_write_header(abfd);
   oasys_write_syms(abfd);
-  oasys_write_sections(abfd);
+  if (! oasys_write_sections(abfd))
+    return false;
   oasys_write_data(abfd);
   oasys_write_end(abfd);
   return true;
@@ -1179,6 +1223,11 @@ DEFUN(oasys_set_section_contents,(abfd, section, location, offset, count),
 	{
 	  oasys_per_section(section)->data =
 	    (bfd_byte *)(bfd_alloc(abfd,section->_cooked_size));    
+	  if (!	  oasys_per_section(section)->data)
+	    {
+	      bfd_error = no_memory;
+	      return false;
+	    }
 	}
     (void) memcpy((PTR)(oasys_per_section(section)->data + offset),
 		  location,
@@ -1202,9 +1251,13 @@ DEFUN(oasys_make_empty_symbol,(abfd),
 
   oasys_symbol_type  *new =
     (oasys_symbol_type *)bfd_zalloc (abfd, sizeof (oasys_symbol_type));
+  if (!new)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
   new->symbol.the_bfd = abfd;
   return &new->symbol;
-
 }
 
 
@@ -1306,11 +1359,13 @@ return 0;
 #define oasys_bfd_debug_info_accumulate  (FOO(void, (*), (bfd *, asection *)))bfd_void
 #define oasys_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define oasys_bfd_relax_section bfd_generic_relax_section
-#define oasys_bfd_seclet_link bfd_generic_seclet_link
 #define oasys_bfd_reloc_type_lookup \
   ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
 #define oasys_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
+#define oasys_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define oasys_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define oasys_bfd_final_link _bfd_generic_final_link
 
 /*SUPPRESS 460 */
 bfd_target oasys_vec =
@@ -1321,7 +1376,7 @@ bfd_target oasys_vec =
   true,				/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
   (SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
    0,				/* leading underscore */

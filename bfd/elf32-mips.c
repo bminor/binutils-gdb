@@ -1,5 +1,5 @@
 /* MIPS-specific support for 32-bit ELF
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -1061,6 +1061,7 @@ mips_elf_read_ecoff_info (abfd, section, debug)
 	return false;							\
     }
 
+  READ (external_ext, cbExtOffset, iextMax, swap->external_ext_size, PTR);
   READ (line, cbLineOffset, cbLine, sizeof (unsigned char), unsigned char *);
   READ (external_dnr, cbDnOffset, idnMax, swap->external_dnr_size, PTR);
   READ (external_pdr, cbPdOffset, ipdMax, swap->external_pdr_size, PTR);
@@ -1072,7 +1073,8 @@ mips_elf_read_ecoff_info (abfd, section, debug)
   READ (ssext, cbSsExtOffset, issExtMax, sizeof (char), char *);
   READ (external_fdr, cbFdOffset, ifdMax, swap->external_fdr_size, PTR);
   READ (external_rfd, cbRfdOffset, crfd, swap->external_rfd_size, PTR);
-  READ (external_ext, cbExtOffset, iextMax, swap->external_ext_size, PTR);
+
+  debug->fdr = NULL;
 
   return true;
 }
@@ -1084,6 +1086,8 @@ mips_elf_get_extr (sym, esym)
      asymbol *sym;
      EXTR *esym;
 {
+  const struct ecoff_debug_swap *swap;
+
   if (sym->flags & BSF_SECTION_SYM)
     return false;
 
@@ -1103,7 +1107,11 @@ mips_elf_get_extr (sym, esym)
       return true;
     }
 
-  *esym = *((elf_symbol_type *) sym)->tc_data.mips_extr;
+  swap = (get_elf_backend_data (bfd_asymbol_bfd (sym))
+	  ->elf_backend_ecoff_debug_swap);
+  (*swap->swap_ext_in) (bfd_asymbol_bfd (sym),
+			((elf_symbol_type *) sym)->tc_data.mips_extr,
+			esym);
 
   return true;
 }
@@ -1140,6 +1148,7 @@ mips_elf_final_link (abfd, info)
   const struct ecoff_debug_swap *swap
     = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
   HDRR *symhdr = &debug.symbolic_header;
+  PTR mdebug_handle = NULL;
 
   abfd->outsymbols = (asymbol **) NULL;
   abfd->symcount = 0;
@@ -1152,6 +1161,7 @@ mips_elf_final_link (abfd, info)
       return false;
 
   /* Accumulate the global symbols.  */
+  wginfo.info = info;
   wginfo.output_bfd = abfd;
   wginfo.psymalloc = &outsymalloc;
   _bfd_generic_link_hash_traverse (_bfd_generic_hash_table (info),
@@ -1167,7 +1177,10 @@ mips_elf_final_link (abfd, info)
   secpp = &abfd->sections;
   while (*secpp != NULL)
     {
-      if ((*secpp)->_raw_size == 0
+      if (((*secpp)->_raw_size == 0
+	   && strcmp ((*secpp)->name, ".data") != 0
+	   && strcmp ((*secpp)->name, ".text") != 0
+	   && strcmp ((*secpp)->name, ".bss") != 0)
 	  || strcmp ((*secpp)->name, ".options") == 0
 	  || strncmp ((*secpp)->name, ".gptab", 6) == 0)
 	{
@@ -1182,6 +1195,8 @@ mips_elf_final_link (abfd, info)
      information.  We don't write out the information until we have
      set the section sizes, because the ELF backend only assigns space
      in the file once.  */
+  reginfo_sec = NULL;
+  mdebug_sec = NULL;
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     {
       if (strcmp (o->name, ".reginfo") == 0)
@@ -1258,17 +1273,21 @@ mips_elf_final_link (abfd, info)
 
 	  /* We accumulate the debugging information itself in the
 	     debug_info structure.  */
-	  debug.line = debug.line_end = NULL;
-	  debug.external_dnr = debug.external_dnr_end = NULL;
-	  debug.external_pdr = debug.external_pdr_end = NULL;
-	  debug.external_sym = debug.external_sym_end = NULL;
-	  debug.external_opt = debug.external_opt_end = NULL;
-	  debug.external_aux = debug.external_aux_end = NULL;
-	  debug.ss = debug.ss_end = NULL;
+	  debug.line = NULL;
+	  debug.external_dnr = NULL;
+	  debug.external_pdr = NULL;
+	  debug.external_sym = NULL;
+	  debug.external_opt = NULL;
+	  debug.external_aux = NULL;
+	  debug.ss = NULL;
 	  debug.ssext = debug.ssext_end = NULL;
-	  debug.external_fdr = debug.external_fdr_end = NULL;
-	  debug.external_rfd = debug.external_rfd_end = NULL;
+	  debug.external_fdr = NULL;
+	  debug.external_rfd = NULL;
 	  debug.external_ext = debug.external_ext_end = NULL;
+
+	  mdebug_handle = bfd_ecoff_debug_init (abfd, &debug, swap, info);
+	  if (mdebug_handle == (PTR) NULL)
+	    return false;
 
 	  for (p = o->link_order_head;
 	       p != (struct bfd_link_order *) NULL;
@@ -1281,6 +1300,10 @@ mips_elf_final_link (abfd, info)
 
 	      if (p->type != bfd_indirect_link_order)
 		continue;
+
+#ifndef alloca
+	      alloca (0);
+#endif
 
 	      input_section = p->u.indirect.section;
 	      input_bfd = input_section->owner;
@@ -1308,9 +1331,8 @@ mips_elf_final_link (abfd, info)
 		return false;
 
 	      if (! (bfd_ecoff_debug_accumulate
-		     (abfd, &debug, swap,
-		      input_bfd, &input_debug, input_swap,
-		      info->relocateable)))
+		     (mdebug_handle, abfd, &debug, swap, input_bfd,
+		      &input_debug, input_swap, info)))
 		return false;
 
 	      /* Loop through the external symbols.  For each one with
@@ -1355,15 +1377,21 @@ mips_elf_final_link (abfd, info)
 		      if (elf_sym->tc_data.mips_extr != NULL)
 			continue;
 
-		      elf_sym->tc_data.mips_extr =
-			(EXTR *) bfd_alloc (abfd, sizeof (EXTR));
+		      if (ext.ifd != -1)
+			{
+			  BFD_ASSERT (ext.ifd
+				      < input_debug.symbolic_header.ifdMax);
+			  ext.ifd = input_debug.ifdmap[ext.ifd];
+			}
 
-		      ext.ifd += input_debug.ifdbase;
-		      *elf_sym->tc_data.mips_extr = ext;
+		      (*input_swap->swap_ext_out) (input_bfd, &ext,
+						   (PTR) eraw_src);
+		      elf_sym->tc_data.mips_extr = (PTR) eraw_src;
 		    }
 		}
 
-	      /* Free up the information we just read.  */
+	      /* Free up the information we just read, except for the
+		 external symbols which we may have pointers to.  */
 	      free (input_debug.line);
 	      free (input_debug.external_dnr);
 	      free (input_debug.external_pdr);
@@ -1374,7 +1402,6 @@ mips_elf_final_link (abfd, info)
 	      free (input_debug.ssext);
 	      free (input_debug.external_fdr);
 	      free (input_debug.external_rfd);
-	      free (input_debug.external_ext);
 	    }
 
 	  /* Build the external symbol information.  */
@@ -1418,7 +1445,12 @@ mips_elf_final_link (abfd, info)
 		  input_bfd = input_section->owner;
 		  relsize = bfd_get_reloc_upper_bound (input_bfd,
 						       input_section);
-		  relocs = (arelent **) bfd_xmalloc (relsize);
+		  relocs = (arelent **) malloc (relsize);
+		  if (!relocs)
+		    {
+		      bfd_error = no_memory;
+		      return false;
+		    }
 		  reloc_count =
 		    bfd_canonicalize_reloc (input_bfd, input_section,
 					    relocs,
@@ -1434,6 +1466,11 @@ mips_elf_final_link (abfd, info)
 				bfd_alloc (abfd,
 					   (o->reloc_count
 					    * sizeof (arelent *))));
+	      if (!o->orelocation)
+		{
+		  bfd_error = no_memory;
+		  return false;
+		}
 	      /* Reset the count so that it can be used as an index
 		 when putting in the output relocs.  */
 	      o->reloc_count = 0;
@@ -1461,8 +1498,12 @@ mips_elf_final_link (abfd, info)
 				    (file_ptr) 0, (bfd_size_type) 0);
 	  BFD_ASSERT (abfd->output_has_begun);
 	}
-      if (! bfd_ecoff_write_debug (abfd, &debug, swap, mdebug_sec->filepos))
+      if (! bfd_ecoff_write_accumulated_debug (mdebug_handle, abfd, &debug,
+					       swap, info,
+					       mdebug_sec->filepos))
 	return false;
+
+      bfd_ecoff_debug_free (mdebug_handle, abfd, &debug, swap, info);
     }
 
   /* Handle all the link order information for the sections.  */

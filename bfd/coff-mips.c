@@ -796,6 +796,11 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 			   bfd_alloc (input_bfd,
 				      (NUM_RELOC_SECTIONS
 				       * sizeof (asection *))));
+      if (!symndx_to_section)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
 
       symndx_to_section[RELOC_SECTION_NONE] = NULL;
       symndx_to_section[RELOC_SECTION_TEXT] =
@@ -1166,10 +1171,10 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 {
   /* COFF backend structure.  */
   {
-    (void (*) PARAMS ((bfd *,PTR,int,int,PTR))) bfd_void, /* aux_in */
+    (void (*) PARAMS ((bfd *,PTR,int,int,int,int,PTR))) bfd_void, /* aux_in */
     (void (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* sym_in */
     (void (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* lineno_in */
-    (unsigned (*) PARAMS ((bfd *,PTR,int,int,PTR))) bfd_void, /* aux_out */
+    (unsigned (*) PARAMS ((bfd *,PTR,int,int,int,int,PTR)))bfd_void,/*aux_out*/
     (unsigned (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* sym_out */
     (unsigned (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* lineno_out */
     (unsigned (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* reloc_out */

@@ -1,5 +1,5 @@
 /* BFD semi-generic back-end for a.out binaries.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -452,7 +452,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
 #ifdef THIS_IS_ONLY_DOCUMENTATION
   /* The common code can't fill in these things because they depend
      on either the start address of the text segment, the rounding
-     up of virtual addersses between segments, or the starting file
+     up of virtual addresses between segments, or the starting file
      position of the text segment -- all of which varies among different
      versions of a.out.  */
 
@@ -1083,7 +1083,7 @@ DEFUN(NAME(aout,set_section_contents),(abfd, section, location, offset, count),
 /* Only in their own functions for ease of debugging; when sym flags have
   stabilised these should be inlined into their (single) caller */
 
-static void
+static boolean
 DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
        struct external_nlist *sym_pointer AND
        aout_symbol_type * cache_ptr AND
@@ -1100,8 +1100,14 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
 	char *copy = bfd_alloc (abfd, strlen (cache_ptr->symbol.name) + 1);
 	asection *section;
 	asection *into_section;
-
 	arelent_chain *reloc = (arelent_chain *) bfd_alloc (abfd, sizeof (arelent_chain));
+
+	if (!copy || !reloc)
+	  {
+	    bfd_error = no_memory;
+	    return false;
+	  }
+
 	strcpy (copy, cache_ptr->symbol.name);
 
 	/* Make sure that this bfd has a section with the right contructor
@@ -1130,7 +1136,8 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
 	    cache_ptr->type = N_BSS;
 	    break;
 	  default:
-	    abort ();
+	    bfd_error = bad_value;
+	    return false;
 	  }
 
 	/* Build a relocation pointing into the constuctor section
@@ -1292,8 +1299,8 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
     }
   if (cache_ptr->symbol.section == 0)
     abort ();
+  return true;
 }
-
 
 
 static boolean
@@ -1384,6 +1391,11 @@ DEFUN(NAME(aout,make_empty_symbol),(abfd),
 {
   aout_symbol_type  *new =
     (aout_symbol_type *)bfd_zalloc (abfd, sizeof (aout_symbol_type));
+  if (!new)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
   new->symbol.the_bfd = abfd;
 
   return &new->symbol;
@@ -1429,7 +1441,8 @@ translate_symbol_table (abfd, in, ext, count, str, strsize, dynamic)
       in->type = bfd_h_get_8 (abfd,  ext->e_type);
       in->symbol.udata = 0;
 
-      translate_from_native_sym_flags (ext, in, abfd);
+      if (!translate_from_native_sym_flags (ext, in, abfd))
+	return false;
 
       if (dynamic)
 	in->symbol.flags |= BSF_DYNAMIC;
@@ -1489,7 +1502,12 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
 			 * sizeof (aout_symbol_type))));
 
   /* Don't allocate on the obstack, so we can free it easily.  */
-  syms = (struct external_nlist *) bfd_xmalloc(symbol_size);
+  syms = (struct external_nlist *) malloc(symbol_size);
+  if (!strings || !cached || !syms)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
   if (bfd_read ((PTR)syms, 1, symbol_size, abfd) != symbol_size)
     {
@@ -1823,6 +1841,11 @@ add_to_stringtab (abfd, str, tab)
  add_it:
   entry = (struct stringtab_entry *)
     bfd_alloc_by_size_t (abfd, sizeof (struct stringtab_entry));
+  if (!entry)
+    {
+      bfd_error = no_memory;
+      abort();			/* FIXME */
+    }
 
   entry->less = entry->greater = 0;
   entry->hash = hashval;
@@ -2806,14 +2829,19 @@ aout_link_hash_newfunc (entry, table, string)
   if (ret == (struct aout_link_hash_entry *) NULL)
     ret = ((struct aout_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct aout_link_hash_entry)));
+  if (ret == (struct aout_link_hash_entry *) NULL)
+    {
+      bfd_error = no_memory;
+      return (struct bfd_hash_entry *) ret;
+    }
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct aout_link_hash_entry *)
 	 _bfd_link_hash_newfunc ((struct bfd_hash_entry *) ret,
 				 table, string));
-
-  /* Set local fields.  */
-  ret->indx = -1;
+  if (ret)
+    /* Set local fields.  */
+    ret->indx = -1;
 
   return (struct bfd_hash_entry *) ret;
 }
@@ -2827,7 +2855,12 @@ NAME(aout,link_hash_table_create) (abfd)
   struct aout_link_hash_table *ret;
 
   ret = ((struct aout_link_hash_table *)
-	 bfd_xmalloc (sizeof (struct aout_link_hash_table)));
+	 malloc (sizeof (struct aout_link_hash_table)));
+  if (ret == (struct aout_link_hash_table *) NULL)
+      {
+	bfd_error = no_memory;
+	return (struct bfd_link_hash_table *) NULL;
+      }
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
 				   aout_link_hash_newfunc))
     {
@@ -2952,11 +2985,16 @@ aout_link_get_symbols (abfd)
 
   count = exec_hdr (abfd)->a_syms / EXTERNAL_NLIST_SIZE;
 
-  /* We allocate using bfd_xmalloc to make the values easy to free
+  /* We allocate using malloc to make the values easy to free
      later on.  If we put them on the obstack it might not be possible
      to free them.  */
   syms = ((struct external_nlist *)
-	  bfd_xmalloc ((size_t) count * EXTERNAL_NLIST_SIZE));
+	  malloc ((size_t) count * EXTERNAL_NLIST_SIZE));
+  if (syms == (struct external_nlist *) NULL)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
 
   if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
       || (bfd_read ((PTR) syms, 1, exec_hdr (abfd)->a_syms, abfd)
@@ -2969,7 +3007,12 @@ aout_link_get_symbols (abfd)
 	  != BYTES_IN_WORD))
     return false;
   stringsize = GET_WORD (abfd, string_chars);
-  strings = (char *) bfd_xmalloc ((size_t) stringsize);
+  strings = (char *) malloc ((size_t) stringsize);
+  if (strings == NULL)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
 
   /* Skip space for the string count in the buffer for convenience
      when using indexes.  */
@@ -3155,6 +3198,11 @@ aout_link_add_symbols (abfd, info)
 	      bfd_alloc (abfd,
 			 ((size_t) sym_count
 			  * sizeof (struct aout_link_hash_entry *))));
+  if (!sym_hash)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   obj_aout_sym_hashes (abfd) = sym_hash;
 
   p = obj_aout_external_syms (abfd);
@@ -3855,6 +3903,14 @@ aout_link_write_other_symbol (h, data)
   struct external_nlist outsym;
 
   if (h->root.written)
+    return true;
+
+  h->root.written = true;
+
+  if (finfo->info->strip == strip_all
+      || (finfo->info->strip == strip_some
+	  && bfd_hash_lookup (finfo->info->keep_hash, h->root.root.string,
+			      false, false) == NULL))
     return true;
 
   output_bfd = finfo->output_bfd;

@@ -754,6 +754,11 @@ do_slurp_bsd_armap (abfd)
   ardata->symdefs = (carsym *) bfd_alloc (abfd,
 					  (ardata->symdef_count
 					   * sizeof (carsym)));
+  if (!ardata->symdefs)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
 
   for (counter = 0, set = ardata->symdefs;
        counter < ardata->symdef_count;
@@ -985,6 +990,11 @@ bfd_slurp_bsd_armap_f2 (abfd)
   ardata->symdefs = (carsym *) bfd_alloc (abfd,
 					  (ardata->symdef_count
 					   * BSD_SYMDEF_SIZE));
+  if (!ardata->symdefs)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
 
   for (counter = 0, set = ardata->symdefs;
        counter < ardata->symdef_count;

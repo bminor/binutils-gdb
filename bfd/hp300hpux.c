@@ -1,5 +1,5 @@
 /* BFD backend for hp-ux 9000/300
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1994 Free Software Foundation, Inc.
    Written by Glenn Engel.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -28,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
     Support for the 9000/[34]00 has several limitations.
       1. Shared libraries are not supported.
       2. The output format from this bfd is not usable by native tools.
-      3. Core files are not supported (yet).
 
     The primary motivation for writing this bfd was to allow use of
     gdb and gcc for host based debugging and not to mimic the hp-ux tools
@@ -126,10 +125,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /***********************************************/
 /* provide overrides for routines in this file */
 /***********************************************/
-#define MY_get_symtab MY(get_symtab)
-#define MY_get_symtab_upper_bound MY(get_symtab_upper_bound)
-#define MY_canonicalize_reloc MY(canonicalize_reloc)
-#define MY_write_object_contents MY(write_object_contents)
+/* these don't use MY because that causes problems within JUMP_TABLE
+   (CAT winds up being expanded recursively, which ANSI C compilers
+   will not do).  */
+#define MY_get_symtab hp300hpux_get_symtab
+#define MY_get_symtab_upper_bound hp300hpux_get_symtab_upper_bound
+#define MY_canonicalize_reloc hp300hpux_canonicalize_reloc
+#define MY_write_object_contents hp300hpux_write_object_contents
+
+#define MY_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define MY_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define MY_bfd_final_link _bfd_generic_final_link
 
 #define hp300hpux_write_syms aout_32_write_syms
 
@@ -167,6 +173,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define HP_RLENGTH_ALIGN	0x03
 
 #define NAME(x,y) CAT3(hp300hpux,_32_,y)
+#define ARCH_SIZE 32
 #include "aoutx.h"
 
 /* Since the hpux symbol table has nlist elements interspersed with
@@ -232,6 +239,8 @@ DEFUN(MY(callback),(abfd),
   return abfd->xvec;
 }
 
+extern boolean aout_32_write_syms PARAMS ((bfd *abfd));
+
 static boolean
 DEFUN(MY(write_object_contents),(abfd),
       bfd *abfd)
@@ -272,7 +281,19 @@ DEFUN(MY(write_object_contents),(abfd),
     bfd_seek (abfd, 0L, false);					
     bfd_write ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd);
 
-    /* Now write out reloc info, followed by syms and strings */	
+    /* Write out the symbols, and then the relocs.  We must write out
+       the symbols first so that we know the symbol indices.  */
+
+    if (bfd_get_symcount (abfd) != 0)
+      {
+	/* Skip the relocs to where we want to put the symbols.  */
+	if (bfd_seek (abfd, (file_ptr) N_DRELOFF (*execp) + execp->a_drsize,
+		      SEEK_SET) != 0)
+	  return false;
+      }
+
+    if (! MY(write_syms) (abfd))
+      return false;
 
     if (bfd_get_symcount (abfd) != 0) 				
     {								
@@ -284,7 +305,6 @@ DEFUN(MY(write_object_contents),(abfd),
         if (!NAME(aout,squirt_out_relocs)(abfd, obj_datasec (abfd))) return false;
     }
 
-    MY(write_syms)(abfd);
     return true;
 }									
 
@@ -340,7 +360,7 @@ DEFUN(convert_sym_type,(sym_pointer, cache_ptr, abfd),
 	    break;
 
 	  default:
-	    printf ("unknown symbol type encountered: %x", name_type);
+	    fprintf (stderr, "unknown symbol type encountered: %x", name_type);
 	  }
 	if (name_type & HP_SYMTYPE_EXTERNAL)
 	  new_type |= N_EXT;
@@ -462,6 +482,11 @@ DEFUN(MY(slurp_symbol_table),(abfd),
 
   strings = (char *) bfd_alloc(abfd,
                                symbol_bytes + SYM_EXTRA_BYTES);
+  if (!strings)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   syms = (struct external_nlist *) (strings + SYM_EXTRA_BYTES);
   bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
   if (bfd_read ((PTR)syms, symbol_bytes, 1, abfd) != symbol_bytes)
@@ -489,6 +514,11 @@ DEFUN(MY(slurp_symbol_table),(abfd),
   cached = (aout_symbol_type *)
     bfd_zalloc(abfd, (bfd_size_type)(bfd_get_symcount (abfd) *
                                      sizeof(aout_symbol_type)));
+  if (!cached)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
 
   /* as we march thru the hp symbol table, convert it into a list of
      null terminated strings to hold the symbol names.  Make sure any
@@ -515,7 +545,8 @@ DEFUN(MY(slurp_symbol_table),(abfd),
 
             cache_save = *cache_ptr;
             convert_sym_type(sym_pointer, cache_ptr, abfd);
-	    translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd);
+	    if (!translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd))
+	      return false;
 
             /********************************************************/
             /* for hpux, the 'lenght' value indicates the length of */
@@ -560,8 +591,9 @@ DEFUN(MY(slurp_symbol_table),(abfd),
                 strings += length+10;
                 cache_ptr2->type &= ~HP_SECONDARY_SYMBOL;  /* clear secondary */
                 convert_sym_type(sym_pointer, cache_ptr2, abfd);
-                translate_from_native_sym_flags (sym_pointer, cache_ptr2,
-						 abfd);
+                if (!translate_from_native_sym_flags (sym_pointer, cache_ptr2,
+						      abfd))
+		  return false;
             }
 
             /* skip over the embedded symbol. */
@@ -618,8 +650,8 @@ DEFUN(MY(swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
   case HP_RSEGMENT_NOOP:
       break;
   default:
-      printf
-          ("illegal relocation segment type: %x\n", (bytes->r_type[0]));
+      fprintf (stderr, "illegal relocation segment type: %x\n",
+	       (bytes->r_type[0]));
   }
 
   switch (bytes->r_length[0])
@@ -634,7 +666,7 @@ DEFUN(MY(swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
       r_length = 2;
       break;
     default:
-      printf("illegal relocation length: %x\n",bytes->r_length[0] );
+      fprintf (stderr, "illegal relocation length: %x\n",bytes->r_length[0] );
       r_length = 0;
     }
 

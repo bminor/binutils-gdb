@@ -85,6 +85,11 @@ sunos_read_dynamic_info (abfd)
 
   info = ((struct sunos_dynamic_info *)
 	  bfd_zalloc (abfd, sizeof (struct sunos_dynamic_info)));
+  if (!info)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   info->valid = false;
   info->dynsym = NULL;
   info->dynstr = NULL;
@@ -203,6 +208,11 @@ MY(read_dynamic_symbols) (abfd, syms, strs, strsize)
 				 (info->dynsym_count
 				  * EXTERNAL_NLIST_SIZE)));
       info->dynstr = (char *) bfd_alloc (abfd, info->dyninfo.ld_symb_size);
+      if (!info->dynsym || !info->dynstr)
+	{
+	  bfd_error = no_memory;
+	  return 0;
+	}
       if (bfd_seek (abfd, info->dyninfo.ld_stab, SEEK_SET) != 0
 	  || (bfd_read ((PTR) info->dynsym, info->dynsym_count,
 			EXTERNAL_NLIST_SIZE, abfd)
@@ -277,11 +287,16 @@ MY(read_dynamic_relocs) (abfd, relocs)
   if (! info->valid || info->dynrel_count == 0)
     return 0;
 
-  if (info->dynrel == (struct external_nlist *) NULL)
+  if (info->dynrel == NULL)
     {
       info->dynrel = (PTR) bfd_alloc (abfd,
 				      (info->dynrel_count
 				       * obj_reloc_entry_size (abfd)));
+      if (!info->dynrel)
+	{
+	  bfd_error = no_memory;
+	  return (bfd_size_type) -1;
+	}
       if (bfd_seek (abfd, info->dyninfo.ld_rel, SEEK_SET) != 0
 	  || (bfd_read ((PTR) info->dynrel, info->dynrel_count,
 			obj_reloc_entry_size (abfd), abfd)

@@ -111,14 +111,11 @@ DEFUN (nlm_object_p, (abfd), bfd * abfd)
 
   /* Read in the fixed length portion of the NLM header in external format.  */
 
-  x_fxdhdr = alloca (nlm_fixed_header_size (abfd));
+  x_fxdhdr = (PTR) alloca (nlm_fixed_header_size (abfd));
 
   if (bfd_read ((PTR) x_fxdhdr, nlm_fixed_header_size (abfd), 1, abfd) !=
       nlm_fixed_header_size (abfd))
-    {
-      bfd_error = system_call_error;
-      goto got_no_match;
-    }
+    goto got_wrong_format_error;
 
   /* Allocate an instance of the nlm_obj_tdata structure and hook it up to
      the tdata pointer in the bfd.  */
@@ -561,7 +558,7 @@ DEFUN (nlm_swap_auxiliary_headers_in, (abfd),
 	}
       else if (strncmp (tempstr, "CoPyRiGhT=", 10) == 0)
 	{
-	  if (bfd_read ((PTR) &nlm_copyright_header (abfd)->stamp,
+	  if (bfd_read ((PTR) nlm_copyright_header (abfd)->stamp,
 			sizeof (nlm_copyright_header (abfd)->stamp),
 			1, abfd)
 	      != sizeof (nlm_copyright_header (abfd)->stamp))
@@ -859,7 +856,8 @@ nlm_make_empty_symbol (abfd)
   nlm_symbol_type *new;
 
   new = (nlm_symbol_type *) bfd_zalloc (abfd, sizeof (nlm_symbol_type));
-  new->symbol.the_bfd = abfd;
+  if (new)
+    new->symbol.the_bfd = abfd;
   return &new->symbol;
 }
 
@@ -964,6 +962,11 @@ nlm_slurp_symbol_table (abfd)
 
   sym = ((nlm_symbol_type *)
 	 bfd_zalloc (abfd, totsymcount * sizeof (nlm_symbol_type)));
+  if (!sym)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   nlm_set_symbols (abfd, sym);
 
   /* We use the bfd's symcount directly as the control count, so that early
@@ -982,6 +985,11 @@ nlm_slurp_symbol_table (abfd)
 	}
       sym -> symbol.the_bfd = abfd;
       sym -> symbol.name = bfd_alloc (abfd, symlength + 1);
+      if (!sym -> symbol.name)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
       if (bfd_read ((PTR) sym -> symbol.name, symlength, 1, abfd)
 	  != symlength)
 	{
@@ -1048,6 +1056,11 @@ nlm_slurp_symbol_table (abfd)
 	    }
 	  sym -> symbol.the_bfd = abfd;
 	  sym -> symbol.name = bfd_alloc (abfd, symlength + 1);
+	  if (!sym -> symbol.name)
+	    {
+	      bfd_error = no_memory;
+	      return false;
+	    }
 	  if (bfd_read ((PTR) sym -> symbol.name, symlength, 1, abfd)
 	      != symlength)
 	    {
@@ -1399,6 +1412,15 @@ nlm_compute_section_file_positions (abfd)
   nlm_set_text_low (abfd, text_low);
   nlm_set_data_low (abfd, data_low);
 
+  if (nlm_no_uninitialized_data (abfd))
+    {
+      /* This NetWare format does not use uninitialized data.  We must
+	 increase the size of the data section.  We will never wind up
+	 writing those file locations, so they will remain zero.  */
+      data += bss;
+      bss = 0;
+    }
+
   text_ptr = BFD_ALIGN (sofar, 1 << text_align);
   data_ptr = BFD_ALIGN (text_ptr + text, 1 << data_align);
   other_ptr = BFD_ALIGN (data_ptr + data, 1 << other_align);
@@ -1465,8 +1487,17 @@ nlm_compute_section_file_positions (abfd)
 	  add += size;
 	  add = BFD_ALIGN (add, 1 << bss_sec->alignment_power);
 	}
-      nlm_fixed_header (abfd)->uninitializedDataSize += add;
-      bss_sec->_raw_size += add;
+      if (add != 0)
+	{
+	  if (nlm_no_uninitialized_data (abfd))
+	    {
+	      /* We could handle this case, but so far it hasn't been
+		 necessary.  */
+	      abort ();
+	    }
+	  nlm_fixed_header (abfd)->uninitializedDataSize += add;
+	  bss_sec->_raw_size += add;
+	}
     }
 
   return true;
@@ -1530,9 +1561,17 @@ nlm_external_reloc_compare (p1, p2)
 {
   const struct reloc_and_sec *r1 = (const struct reloc_and_sec *) p1;
   const struct reloc_and_sec *r2 = (const struct reloc_and_sec *) p2;
+  int cmp;
 
-  return strcmp ((*r1->rel->sym_ptr_ptr)->name,
-		 (*r2->rel->sym_ptr_ptr)->name);
+  cmp = strcmp ((*r1->rel->sym_ptr_ptr)->name,
+		(*r2->rel->sym_ptr_ptr)->name);
+  if (cmp != 0)
+    return cmp;
+
+  /* We sort by address within symbol to make the sort more stable and
+     increase the chances that different hosts will generate bit for
+     bit equivalent results.  */
+  return (int) (r1->rel->address - r2->rel->address);
 }
 
 /* Write out an NLM file.  We write out the information in this order:
@@ -1574,7 +1613,7 @@ nlm_write_object_contents (abfd)
   asymbol **sym_ptr_ptr;
   file_ptr last;
   boolean (*write_prefix_func) PARAMS ((bfd *));
-  unsigned char *fixed_header = alloca (nlm_fixed_header_size (abfd));
+  unsigned char *fixed_header = (unsigned char *) alloca (nlm_fixed_header_size (abfd));
 
   if (abfd->output_has_begun == false
       && nlm_compute_section_file_positions (abfd) == false)
@@ -1705,7 +1744,7 @@ nlm_write_object_contents (abfd)
   BFD_ASSERT (i == external_reloc_count);
 
   /* Sort the external relocs by name.  */
-  qsort (external_relocs, external_reloc_count,
+  qsort ((PTR) external_relocs, (size_t) external_reloc_count,
 	 sizeof (struct reloc_and_sec), nlm_external_reloc_compare);
 
   /* Write out the external relocs.  */
@@ -1745,10 +1784,13 @@ nlm_write_object_contents (abfd)
   if (sym_ptr_ptr != (asymbol **) NULL)
     {
       bfd_vma (*get_public_offset_func) PARAMS ((bfd *, asymbol *));
+      boolean (*write_export_func) PARAMS ((bfd*, asymbol *, bfd_vma));
+
       asymbol **sym_end;
 
       nlm_fixed_header (abfd)->publicsOffset = bfd_tell (abfd);
       get_public_offset_func = nlm_get_public_offset_func (abfd);
+      write_export_func = nlm_write_export_func (abfd);
       c = 0;
       sym_end = sym_ptr_ptr + bfd_get_symcount (abfd);
       for (; sym_ptr_ptr < sym_end; sym_ptr_ptr++)
@@ -1765,15 +1807,6 @@ nlm_write_object_contents (abfd)
 	    continue;
 
 	  ++c;
-
-	  len = strlen (sym->name);
-	  if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd)
-	       != sizeof (bfd_byte))
-	      || bfd_write (sym->name, len, 1, abfd) != len)
-	    {
-	      bfd_error = system_call_error;
-	      return false;
-	    }
 
 	  if (get_public_offset_func)
 	    {
@@ -1804,13 +1837,30 @@ nlm_write_object_contents (abfd)
 		}
 	    }
 
-	  put_word (abfd, offset, temp);
-	  if (bfd_write (temp, sizeof (temp), 1, abfd) != sizeof (temp))
+	  if (write_export_func)
 	    {
-	      bfd_error = system_call_error;
-	      return false;
+	      if ((*write_export_func) (abfd, sym, offset) == false)
+		return false;
 	    }
-	}	  
+	  else
+	    {
+	      len = strlen (sym->name);
+	      if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd)
+		   != sizeof (bfd_byte))
+		  || bfd_write (sym->name, len, 1, abfd) != len)
+		{
+		  bfd_error = system_call_error;
+		  return false;
+		}
+	      
+	      put_word (abfd, offset, temp);
+	      if (bfd_write (temp, sizeof (temp), 1, abfd) != sizeof (temp))
+		{
+		  bfd_error = system_call_error;
+		  return false;
+		}
+	    }	  
+	}
       nlm_fixed_header (abfd)->numberOfPublics = c;
 
       /* Write out the debugging records.  The NLM conversion program
@@ -1849,16 +1899,18 @@ nlm_write_object_contents (abfd)
 
 	      ++c;
 
-	      offset = sym->value;
+	      offset = bfd_asymbol_value (sym);
 	      sec = sym->section;
 	      if (sec->flags & SEC_CODE)
-		type = 1;
-	      else if (sec->flags & SEC_DATA)
-		type = 0;
-	      else if (sec->flags & SEC_ALLOC)
 		{
+		  offset -= nlm_get_text_low (abfd);
+		  type = 1;
+		}
+	      else if (sec->flags & (SEC_DATA | SEC_ALLOC))
+		{
+		  /* SEC_ALLOC is for the .bss section.  */
+		  offset -= nlm_get_data_low (abfd);
 		  type = 0;
-		  offset += nlm_fixed_header (abfd)->dataImageSize;
 		}
 	      else
 		type = 2;

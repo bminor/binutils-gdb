@@ -41,7 +41,7 @@ static boolean ecoff_write_symhdr PARAMS ((bfd *, struct ecoff_debug_info *,
 					   file_ptr where));
 
 /* Obstack allocation and deallocation routines.  */
-#define obstack_chunk_alloc bfd_xmalloc_by_size_t
+#define obstack_chunk_alloc malloc
 #define obstack_chunk_free free
 
 /* The minimum amount of data to allocate.  */
@@ -115,14 +115,22 @@ string_hash_newfunc (entry, table, string)
   if (ret == (struct string_hash_entry *) NULL)
     ret = ((struct string_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct string_hash_entry)));
+  if (ret == (struct string_hash_entry *) NULL)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct string_hash_entry *)
 	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
 
-  /* Initialize the local fields.  */
-  ret->val = -1;
-  ret->next = NULL;
+  if (ret)
+    {
+      /* Initialize the local fields.  */
+      ret->val = -1;
+      ret->next = NULL;
+    }
 
   return (struct bfd_hash_entry *) ret;
 }
@@ -197,12 +205,12 @@ struct accumulate
 
 /* Add a file entry to a shuffle list.  */
 
-static void add_file_shuffle PARAMS ((struct accumulate *,
+static boolean add_file_shuffle PARAMS ((struct accumulate *,
 				      struct shuffle **,
 				      struct shuffle **, bfd *, file_ptr,
 				      unsigned long));
 
-static void
+static boolean
 add_file_shuffle (ainfo, head, tail, input_bfd, offset, size)
      struct accumulate *ainfo;
      struct shuffle **head;
@@ -222,11 +230,16 @@ add_file_shuffle (ainfo, head, tail, input_bfd, offset, size)
       (*tail)->size += size;
       if ((*tail)->size > ainfo->largest_file_shuffle)
 	ainfo->largest_file_shuffle = (*tail)->size;
-      return;
+      return true;
     }
 
   n = (struct shuffle *) obstack_alloc (&ainfo->memory,
 					sizeof (struct shuffle));
+  if (!n)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   n->next = NULL;
   n->size = size;
   n->filep = true;
@@ -239,16 +252,17 @@ add_file_shuffle (ainfo, head, tail, input_bfd, offset, size)
   *tail = n;
   if (size > ainfo->largest_file_shuffle)
     ainfo->largest_file_shuffle = size;
+  return true;
 }
 
 /* Add a memory entry to a shuffle list.  */
 
-static void add_memory_shuffle PARAMS ((struct accumulate *,
-					struct shuffle **head,
-					struct shuffle **tail,
-					bfd_byte *data, unsigned long size));
+static boolean add_memory_shuffle PARAMS ((struct accumulate *,
+					   struct shuffle **head,
+					   struct shuffle **tail,
+					   bfd_byte *data, unsigned long size));
 
-static void
+static boolean
 add_memory_shuffle (ainfo, head, tail, data, size)
      struct accumulate *ainfo;
      struct shuffle **head;
@@ -260,6 +274,11 @@ add_memory_shuffle (ainfo, head, tail, data, size)
      
   n = (struct shuffle *) obstack_alloc (&ainfo->memory,
 					sizeof (struct shuffle));
+  if (!n)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   n->next = NULL;
   n->size = size;
   n->filep = false;
@@ -269,6 +288,7 @@ add_memory_shuffle (ainfo, head, tail, data, size)
   if (*tail != (struct shuffle *) NULL)
     (*tail)->next = n;
   *tail = n;
+  return true;
 }
 
 /* Initialize the FDR hash table.  This returns a handle which is then
@@ -284,7 +304,12 @@ bfd_ecoff_debug_init (output_bfd, output_debug, output_swap, info)
 {
   struct accumulate *ainfo;
 
-  ainfo = (struct accumulate *) bfd_xmalloc (sizeof (struct accumulate));
+  ainfo = (struct accumulate *) malloc (sizeof (struct accumulate));
+  if (!ainfo)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
   if (! bfd_hash_table_init_n (&ainfo->fdr_hash.table, string_hash_newfunc,
 			       1021))
     return NULL;
@@ -319,7 +344,11 @@ bfd_ecoff_debug_init (output_bfd, output_debug, output_swap, info)
       output_debug->symbolic_header.issMax = 1;
     }
 
-  obstack_begin (&ainfo->memory, 4050);
+  if (!obstack_begin (&ainfo->memory, 4050))
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
 
   return (PTR) ainfo;
 }
@@ -447,7 +476,13 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 
   sz = (input_symhdr->crfd + input_symhdr->ifdMax) * external_rfd_size;
   rfd_out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
-  add_memory_shuffle (ainfo, &ainfo->rfd, &ainfo->rfd_end, rfd_out, sz);
+  if (!input_debug->ifdmap || !rfd_out)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
+  if (!add_memory_shuffle (ainfo, &ainfo->rfd, &ainfo->rfd_end, rfd_out, sz))
+    return false;
 
   copied = 0;
 
@@ -537,7 +572,13 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
      information.  */
   sz = copied * external_fdr_size;
   fdr_out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
-  add_memory_shuffle (ainfo, &ainfo->fdr, &ainfo->fdr_end, fdr_out, sz);
+  if (!fdr_out)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
+  if (!add_memory_shuffle (ainfo, &ainfo->fdr, &ainfo->fdr_end, fdr_out, sz))
+    return false;
   for (fdr_ptr = fdr_start, i = 0;
        fdr_ptr < fdr_end;
        fdr_ptr += fdr_add, i++)
@@ -569,7 +610,13 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
       fgotfilename = false;
       sz = fdr.csym * external_sym_size;
       sym_out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
-      add_memory_shuffle (ainfo, &ainfo->sym, &ainfo->sym_end, sym_out, sz);
+      if (!sym_out)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
+      if (!add_memory_shuffle (ainfo, &ainfo->sym, &ainfo->sym_end, sym_out, sz))
+	return false;
       lraw_src = ((bfd_byte *) input_debug->external_sym
 		  + fdr.isymBase * input_swap->external_sym_size);
       lraw_end = lraw_src + fdr.csym * input_swap->external_sym_size;
@@ -658,10 +705,11 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
       /* Copy the information that does not need swapping.  */
       if (fdr.cbLine > 0)
 	{
-	  add_file_shuffle (ainfo, &ainfo->line, &ainfo->line_end,
+	  if (!add_file_shuffle (ainfo, &ainfo->line, &ainfo->line_end,
 			    input_bfd,
 			    input_symhdr->cbLineOffset + fdr.cbLineOffset,
-			    fdr.cbLine);
+			    fdr.cbLine))
+	    return false;
 	  fdr.ilineBase = output_symhdr->ilineMax;
 	  fdr.cbLineOffset = output_symhdr->cbLine;
 	  output_symhdr->ilineMax += fdr.cline;
@@ -669,11 +717,12 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	}
       if (fdr.caux > 0)
 	{
-	  add_file_shuffle (ainfo, &ainfo->aux, &ainfo->aux_end,
+	  if (!add_file_shuffle (ainfo, &ainfo->aux, &ainfo->aux_end,
 			    input_bfd,
 			    (input_symhdr->cbAuxOffset
 			     + fdr.iauxBase * sizeof (union aux_ext)),
-			    fdr.caux * sizeof (union aux_ext));
+			    fdr.caux * sizeof (union aux_ext)))
+	    return false;
 	  fdr.iauxBase = output_symhdr->iauxMax;
 	  output_symhdr->iauxMax += fdr.caux;
 	}
@@ -689,10 +738,11 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	}
       else if (fdr.cbSs > 0)
 	{
-	  add_file_shuffle (ainfo, &ainfo->ss, &ainfo->ss_end,
+	  if (!add_file_shuffle (ainfo, &ainfo->ss, &ainfo->ss_end,
 			    input_bfd,
 			    input_symhdr->cbSsOffset + fdr.issBase,
-			    fdr.cbSs);
+			    fdr.cbSs))
+	    return false;
 	  fdr.issBase = output_symhdr->issMax;
 	  output_symhdr->issMax += fdr.cbSs;
 	}
@@ -704,18 +754,24 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	     the information will suffice.  */
 	  BFD_ASSERT (external_pdr_size == input_swap->external_pdr_size);
 	  if (fdr.cpd > 0)
-	    add_file_shuffle (ainfo, &ainfo->pdr, &ainfo->pdr_end,
-			      input_bfd,
-			      (input_symhdr->cbPdOffset
-			       + fdr.ipdFirst * external_pdr_size),
-			      fdr.cpd * external_pdr_size);
+	    {
+	      if (!add_file_shuffle (ainfo, &ainfo->pdr, &ainfo->pdr_end,
+				     input_bfd,
+				     (input_symhdr->cbPdOffset
+				      + fdr.ipdFirst * external_pdr_size),
+				     fdr.cpd * external_pdr_size))
+		return false;
+	    }
 	  BFD_ASSERT (external_opt_size == input_swap->external_opt_size);
 	  if (fdr.copt > 0)
-	    add_file_shuffle (ainfo, &ainfo->opt, &ainfo->opt_end,
-			      input_bfd,
-			      (input_symhdr->cbOptOffset
-			       + fdr.ioptBase * external_opt_size),
-			      fdr.copt * external_opt_size);
+	    {
+	      if (!add_file_shuffle (ainfo, &ainfo->opt, &ainfo->opt_end,
+				     input_bfd,
+				     (input_symhdr->cbOptOffset
+				      + fdr.ioptBase * external_opt_size),
+				     fdr.copt * external_opt_size))
+		return false;
+	    }
 	}
       else
 	{
@@ -734,7 +790,13 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	  end = in + fdr.cpd * insz;
 	  sz = fdr.cpd * outsz;
 	  out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
-	  add_memory_shuffle (ainfo, &ainfo->pdr, &ainfo->pdr_end, out, sz);
+	  if (!out)
+	    {
+	      bfd_error = no_memory;
+	      return false;
+	    }
+	  if (!add_memory_shuffle (ainfo, &ainfo->pdr, &ainfo->pdr_end, out, sz))
+	    return false;
 	  for (; in < end; in += insz, out += outsz)
 	    {
 	      PDR pdr;
@@ -751,7 +813,13 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	  end = in + fdr.copt * insz;
 	  sz = fdr.copt * outsz;
 	  out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
-	  add_memory_shuffle (ainfo, &ainfo->opt, &ainfo->opt_end, out, sz);
+	  if (!out)
+	    {
+	      bfd_error = no_memory;
+	      return false;
+	    }
+	  if (!add_memory_shuffle (ainfo, &ainfo->opt, &ainfo->opt_end, out, sz))
+	    return false;
 	  for (; in < end; in += insz, out += outsz)
 	    {
 	      OPTR opt;
@@ -810,8 +878,9 @@ ecoff_add_string (ainfo, info, debug, fdr, string)
   len = strlen (string);
   if (info->relocateable)
     {
-      add_memory_shuffle (ainfo, &ainfo->ss, &ainfo->ss_end, (PTR) string,
-			  len + 1);
+      if (!add_memory_shuffle (ainfo, &ainfo->ss, &ainfo->ss_end, (PTR) string,
+			       len + 1))
+	return -1;
       ret = symhdr->issMax;
       symhdr->issMax += len + 1;
       fdr->cbSs += len + 1;
@@ -921,6 +990,11 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
 
       external_sym = (PTR) obstack_alloc (&ainfo->memory,
 					  output_swap->external_sym_size);
+      if (!external_sym)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
       (*swap_sym_out) (output_bfd, &internal_sym, external_sym);
       add_memory_shuffle (ainfo, &ainfo->sym, &ainfo->sym_end,
 			  external_sym, output_swap->external_sym_size);
@@ -936,6 +1010,11 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
      it only applies to aux fields and there are none.  */
   external_fdr = (PTR) obstack_alloc (&ainfo->memory,
 				      output_swap->external_fdr_size);
+  if (!external_fdr)
+    {
+      bfd_error = no_memory;
+      return false;
+    }
   (*output_swap->swap_fdr_out) (output_bfd, &fdr, external_fdr);
   add_memory_shuffle (ainfo, &ainfo->fdr, &ainfo->fdr_end,
 		      external_fdr, output_swap->external_fdr_size);
