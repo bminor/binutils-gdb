@@ -164,6 +164,9 @@ case "${host}" in
   i[34]86-*-netbsd*)
     noconfigdirs="tk fileutils"
     ;;
+  i[34]86-*-vsta)
+    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
+    ;;
   i[34]86-*-go32)
     noconfigdirs="tcl expect deja-gnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
     ;;
@@ -237,6 +240,8 @@ case "${target}" in
     ;;
   sh-*-*)
     case "${host}" in
+      i[34]86-*-vsta) ;; # don't add gprof back in
+      *) configdirs=`echo gprof ${configdirs}` ;;
       i[34]86-*-go32) ;; # don't add gprof back in
       *) configdirs=`echo gprof ${configdirs}` ;;
     esac
