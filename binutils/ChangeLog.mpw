@@ -1,3 +1,9 @@
+Mon Jun 27 19:18:25 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-config.in: New file, MPW configure fragment for binutils.
+	* mpw-make.in (install-only): New target.
+	(install): Also depend on install-only.
+
 Sat Feb 26 13:31:44 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-make (install): Replace with MPW-specific actions.

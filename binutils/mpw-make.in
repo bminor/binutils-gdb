@@ -458,7 +458,9 @@ etags tags \Option-f  TAGS
 TAGS \Option-f  force
 	etags {INCDIR}:\Option-x.h "{srcdir}"\Option-x.[hc] 
 
-install \Option-f  all
+install \Option-f  all install-only
+
+install-only \Option-f
 	If "`Exists "{prefix}"`" == ""
 		Echo "{prefix}" does not exist, cannot install anything
 		Exit 1
