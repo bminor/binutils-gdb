@@ -2047,6 +2047,15 @@ static const CGEN_INSN_TABLE insn_table =
 
 static const CGEN_INSN macro_insn_table_entries[] =
 {
+/* ldi32 $i32,$Ri */
+  {
+    { 1, 1, 1, 1 },
+    -1, "ldi32m", "ldi32",
+    { { MNEM, ' ', OP (I32), ',', OP (RI), 0 } },
+    { 16, 48, 0xfff0 }, 0x9f80,
+    (PTR) 0,
+    { 0, 0|A(ALIAS), { 0 } }
+  },
 };
 
 #undef A
