@@ -1,3 +1,39 @@
+Tue Jul 21 16:53:10 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cpu.h,extract.c: Regenerate.  pc-rel calcs done on f_dispNN now.
+start-sanitize-m32rx
+	* cpux.h,readx.c,semx.c: Ditto.
+end-sanitize-m32rx
+
+Wed Jul  1 16:51:15 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.in: cgen_maint -> CGEN_MAINT.
+	* configure.in: AC_SUBST cgen,cgendir.  No longer look for guile.
+	* configure: Regenerate.
+	* arch.c,arch.h,cpuall.h: Regenerate.
+	* cpu.c,cpu.h,decode.c,decode.h,extract.c,model.c: Regenerate.
+	* sem-switch.c,sem.c: Regenerate.
+start-sanitize-m32rx
+	* cpux.c,cpux.h,decodex.c,decodex.h,modelx.c,readx.c: Regenerate.
+	* semx.c: Regenerate.
+	* mloopx.in (icount): Moved here from genmloop.sh.
+end-sanitize-m32rx
+
+Sat Jun 13 07:49:23 1998  Doug Evans  <devans@fallis.cygnus.com>
+
+	* m32r-sim.h (M32R_MISC_PROFILE): New members insn_cycles, cti_stall,
+	load_stall,biggest_cycles.
+	* m32r.c (m32r_model_mark_get_h_gr): Update.
+	(m32r_model_init_insn_cycles,m32r_model_update_insn_cycles): New fns.
+	(m32r_model_record_cti,m32r_model_record_cycles): New functions.
+	* mloop.in: Call cycle init/update fns.
+	* model.c: Regenerate.
+start-sanitize-m32rx
+	* m32rx.c (m32rx_model_mark_get_h_gr): Update.
+	* mloopx.in: Call cycle init/update fns.
+	* modelx.c: Regenerate.
+end-sanitize-m32rx
+
 Thu Jun 11 23:39:53 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Makefile.in (stamp-{arch,cpu,decode}): Pass CGEN_FLAGS_TO_PASS

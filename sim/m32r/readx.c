@@ -279,7 +279,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_BC8_CODE
       /* Fetch the input operands for the semantic handler.  */
       OPRND (condbit) = CPU (h_cond);
-      OPRND (disp8) = (pc & -4L) + f_disp8;
+      OPRND (disp8) = f_disp8;
 #undef OPRND
     }
     BREAK (read);
@@ -291,7 +291,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_BC24_CODE
       /* Fetch the input operands for the semantic handler.  */
       OPRND (condbit) = CPU (h_cond);
-      OPRND (disp24) = pc + f_disp24;
+      OPRND (disp24) = f_disp24;
 #undef OPRND
     }
     BREAK (read);
@@ -304,7 +304,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
       /* Fetch the input operands for the semantic handler.  */
       OPRND (src1) = CPU (h_gr[f_r1]);
       OPRND (src2) = CPU (h_gr[f_r2]);
-      OPRND (disp16) = pc + f_disp16;
+      OPRND (disp16) = f_disp16;
 #undef OPRND
     }
     BREAK (read);
@@ -316,7 +316,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_BEQZ_CODE
       /* Fetch the input operands for the semantic handler.  */
       OPRND (src2) = CPU (h_gr[f_r2]);
-      OPRND (disp16) = pc + f_disp16;
+      OPRND (disp16) = f_disp16;
 #undef OPRND
     }
     BREAK (read);
@@ -328,7 +328,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_BL8_CODE
       /* Fetch the input operands for the semantic handler.  */
       OPRND (pc) = CPU (h_pc);
-      OPRND (disp8) = (pc & -4L) + f_disp8;
+      OPRND (disp8) = f_disp8;
 #undef OPRND
     }
     BREAK (read);
@@ -340,7 +340,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_BL24_CODE
       /* Fetch the input operands for the semantic handler.  */
       OPRND (pc) = CPU (h_pc);
-      OPRND (disp24) = pc + f_disp24;
+      OPRND (disp24) = f_disp24;
 #undef OPRND
     }
     BREAK (read);
@@ -353,7 +353,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
       /* Fetch the input operands for the semantic handler.  */
       OPRND (condbit) = CPU (h_cond);
       OPRND (pc) = CPU (h_pc);
-      OPRND (disp8) = (pc & -4L) + f_disp8;
+      OPRND (disp8) = f_disp8;
 #undef OPRND
     }
     BREAK (read);
@@ -366,7 +366,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
       /* Fetch the input operands for the semantic handler.  */
       OPRND (condbit) = CPU (h_cond);
       OPRND (pc) = CPU (h_pc);
-      OPRND (disp24) = pc + f_disp24;
+      OPRND (disp24) = f_disp24;
 #undef OPRND
     }
     BREAK (read);
@@ -377,7 +377,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_BRA8_VARS /* f-op1 f-r1 f-disp8 */
   EXTRACT_FMT_BRA8_CODE
       /* Fetch the input operands for the semantic handler.  */
-      OPRND (disp8) = (pc & -4L) + f_disp8;
+      OPRND (disp8) = f_disp8;
 #undef OPRND
     }
     BREAK (read);
@@ -388,7 +388,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_BRA24_VARS /* f-op1 f-r1 f-disp24 */
   EXTRACT_FMT_BRA24_CODE
       /* Fetch the input operands for the semantic handler.  */
-      OPRND (disp24) = pc + f_disp24;
+      OPRND (disp24) = f_disp24;
 #undef OPRND
     }
     BREAK (read);
