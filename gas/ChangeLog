@@ -1,5 +1,8 @@
 2004-07-06  Nick Clifton  <nickc@redhat.com>
 
+	* output-file.c (output_file_create): Report the target format
+	chosen when bfd_openw reports that it is invalid.
+
 	* config/obj-coff.c (coff_pseudo_table): Only define the weak
 	pseudo for BFD based assemblers.
 

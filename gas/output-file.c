@@ -48,7 +48,10 @@ output_file_create (char *name)
 
   else if (!(stdoutput = bfd_openw (name, TARGET_FORMAT)))
     {
-      as_perror (_("FATAL: can't create %s"), name);
+      if (bfd_get_error () == bfd_error_invalid_target)
+	as_perror (_("Selected target format '%s' unknown"), TARGET_FORMAT);
+      else
+	as_perror (_("FATAL: can't create %s"), name);
       exit (EXIT_FAILURE);
     }
 
