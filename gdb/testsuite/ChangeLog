@@ -1,3 +1,7 @@
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.c++/overload.exp: Remove some fixed XFAILs.
+
 2003-01-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/detach.exp: New test.
