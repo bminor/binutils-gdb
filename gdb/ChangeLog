@@ -1,4 +1,7 @@
-Sat Apr 26 02:42:52 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+Sat Apr 26 03:38:02 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* alpha-tdep.c (heuristic_proc_desc):  Increase search limit
+	for return address register, handle `ret' instruction.
 
 	* corelow.c (get_core_registers):  Initialize cf.
 

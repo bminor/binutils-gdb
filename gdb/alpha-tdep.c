@@ -1,5 +1,5 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
-   Copyright 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -519,14 +519,18 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 	       rearrange the register saves.
 	       So we recognize only a few registers (t7, t9, ra) within
 	       the procedure prologue as valid return address registers.
+	       If we encounter a return instruction, we extract the
+	       the return address register from it.
 
 	       FIXME: Rewriting GDB to access the procedure descriptors,
 	       e.g. via the minimal symbol table, might obviate this hack.  */
 	    if (pcreg == -1
-		&& cur_pc < (start_pc + 20)
+		&& cur_pc < (start_pc + 80)
 		&& (reg == T7_REGNUM || reg == T9_REGNUM || reg == RA_REGNUM))
 	      pcreg = reg;
 	  }
+	else if ((word & 0xffe0ffff) == 0x6be08001)	/* ret zero,reg,1 */
+	  pcreg = (word >> 16) & 0x1f;
 	else if (word == 0x47de040f)			/* bis sp,sp fp */
 	  has_frame_reg = 1;
       }
@@ -534,15 +538,13 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
       {
 	/* If we haven't found a valid return address register yet,
 	   keep searching in the procedure prologue.  */
-	while (cur_pc < (limit_pc + 20) && cur_pc < (start_pc + 20))
+	while (cur_pc < (limit_pc + 80) && cur_pc < (start_pc + 80))
 	  {
 	    char buf[4];
 	    unsigned long word;
-	    int status;
 
-	    status = read_memory_nobpt (cur_pc, buf, 4); 
-	    if (status)
-	      memory_error (status, cur_pc);
+	    if (read_memory_nobpt (cur_pc, buf, 4))
+	      break;
 	    cur_pc += 4;
 	    word = extract_unsigned_integer (buf, 4);
 
@@ -555,6 +557,11 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 		    pcreg = reg;
 		    break;
 		  }
+	      }
+	    else if ((word & 0xffe0ffff) == 0x6be08001)	/* ret zero,reg,1 */
+	      {
+		pcreg = (word >> 16) & 0x1f;
+		break;
 	      }
 	  }
       }
