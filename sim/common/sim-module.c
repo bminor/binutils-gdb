@@ -81,7 +81,7 @@ sim_pre_argv_init (SIM_DESC sd, const char *myname)
     int i;
     for (i = 0; i < MAX_NR_PROCESSORS; ++i)
       {
-	const char *name;
+	char *name;
 	asprintf (&name, "cpu%d", i);
 	CPU_NAME (STATE_CPU (sd, i)) = name;
       }

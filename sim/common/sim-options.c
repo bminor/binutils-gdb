@@ -553,9 +553,11 @@ sim_parse_args (sd, argv)
 	      }
 	    if (opt->opt.name != NULL)
 	      {
+		char *name;
 		*lp = opt->opt;
 		/* Prepend --<cpuname>- to the option.  */
-		asprintf (&lp->name, "%s-%s", CPU_NAME (cpu), lp->name);
+		asprintf (&name, "%s-%s", CPU_NAME (cpu), lp->name);
+		lp->name = name;
 		/* Dynamically assign `val' numbers for long options. */
 		lp->val = i++;
 		handlers[lp->val] = opt->handler;
@@ -851,10 +853,9 @@ sim_args_command (SIM_DESC sd, char *cmd)
       const OPTION *matching_opt = NULL;
       int matching_argi;
       sim_cpu *cpu;
-      int argi = 0;
 
       if (argv [0] == NULL)
-	return;
+	return SIM_RC_OK; /* FIXME - perhaphs help would be better */
 
       /* First check for a cpu selector.  */
       {
