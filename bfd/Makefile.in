@@ -670,7 +670,7 @@ install: $(ALLLIBS)
 	    ts=lib`echo $(SHLIB) | sed -e 's/^lib//' | sed '$(program_transform_name)'`; \
 	    ln -sf $$ts $(libdir)/$$tf; \
 	  elif [ "$$f" = "$(SHLIB)" ]; then \
-	    $(INSTALL_PROGRAM) $$f $(libdir)/$$tf; \
+	    @INSTALL_SHLIB@ \
 	  else \
 	    $(INSTALL_DATA) $$f $(libdir)/$$tf; \
 	    $(RANLIB) $(libdir)/$$tf; \

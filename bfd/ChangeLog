@@ -1,5 +1,10 @@
 Thu Jul 18 15:39:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.host: Set INSTALL_SHLIB.
+	* configure.in: Call AC_SUBST (INSTALL_SHLIB).
+	* configure: Rebuild.
+	* Makefile.in (install): Use @INSTALL_SHLIB@.
+
 	* config.bfd (mips*-*-irix6*): New target.
 	* configure.host: Handle Irix 6 shared library like Irix 5.
 

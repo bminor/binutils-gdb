@@ -17,6 +17,7 @@
 #  ALLLIBS		may be set to libraries to build
 #  HLDFLAGS		LDFLAGS specific to the host
 #  RPATH_ENVVAR		environment variable used to find shared libraries
+#  INSTALL_SHLIB	install a shared library
 
 HDEFINES=
 host64=false
@@ -54,6 +55,7 @@ HLDFLAGS=
 RPATH_ENVVAR=LD_LIBRARY_PATH
 SHLIB_CC='$(CC)'
 SHLIB_CFLAGS='-shared'
+INSTALL_SHLIB='$(INSTALL_PROGRAM) $$f $(libdir)/$$tf;'
 if [ "${shared}" = "true" ]; then
   case "${host}" in
   hppa*-*-*)		picfrag=${srcdir}/../config/mh-papic ;;
@@ -80,6 +82,7 @@ if [ "${shared}" = "true" ]; then
     SHLIB_CFLAGS='-shared $(PICFLAG)'
     HLDFLAGS='-Wl,+s,+b,$(libdir)'
     RPATH_ENVVAR=SHLIB_PATH
+    INSTALL_SHLIB='$(INSTALL_PROGRAM) $$f $(libdir)/$$tf; chmod -w $(libdir)/$$tf;'
     ;;
   *-*-irix[56]*)
     # -fpic is not needed on Irix 5 or 6.
