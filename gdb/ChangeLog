@@ -1,3 +1,7 @@
+Thu Sep  1 12:36:39 1994  Jim Kingdon  (kingdon@cygnus.com)
+
+	* config/xm-nbsd.h: Don't define SET_STACK_LIMIT_HUGE; it is obsolete.
+
 Thu Sep  1 11:01:40 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* config/tm-nbsd.h: New file, support for all NetBSD targets.
