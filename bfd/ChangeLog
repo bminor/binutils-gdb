@@ -1,4 +1,12 @@
 2005-03-16  Nick Clifton  <nickc@redhat.com>
+	    Ben Elliston  <bje@au.ibm.com>
+
+	* configure.in (error-on-warning): New switch: Add -Werror to the
+	compiler command line.  Enabled by default.  Disable via
+	--disable-error-on-warning.
+	* configure: Regenerate.
+
+2005-03-16  Nick Clifton  <nickc@redhat.com>
 
 	* ecoff.c: Convert to ISO C90 formatting.
 
