@@ -1,5 +1,9 @@
 2003-08-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-ia64.c (get_got): Align the .got section at 8 bytes.
+
+2003-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-ia64.c (elfNN_ia64_finish_dynamic_symbol): Use
 	ElfNN_External_Rela instead of Elf64_External_Rela.
 

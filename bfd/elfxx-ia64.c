@@ -1907,6 +1907,10 @@ get_got (abfd, info, ia64_info)
       BFD_ASSERT (got);
       ia64_info->got_sec = got;
 
+      /* The .got section is always aligned at 8 bytes.  */
+      if (!bfd_set_section_alignment (abfd, got, 3))
+	return 0;
+
       flags = bfd_get_section_flags (abfd, got);
       bfd_set_section_flags (abfd, got, SEC_SMALL_DATA | flags);
     }
