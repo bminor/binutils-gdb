@@ -72,6 +72,10 @@ char *program_name;
 /* The prefix for system library directories.  */
 char *ld_sysroot;
 
+/* The canonical representation of ld_sysroot.  */
+char * ld_canon_sysroot;
+int ld_canon_sysroot_len;
+
 /* The file that we're creating.  */
 bfd *output_bfd = 0;
 
@@ -233,6 +237,14 @@ main (argc, argv)
   if (! ld_sysroot)
 #endif
     ld_sysroot = TARGET_SYSTEM_ROOT;
+
+  if (ld_sysroot && *ld_sysroot)
+    ld_canon_sysroot = lrealpath (ld_sysroot);
+
+  if (ld_canon_sysroot)
+    ld_canon_sysroot_len = strlen (ld_canon_sysroot);
+  else
+    ld_canon_sysroot_len = -1;
 
   /* Set the default BFD target based on the configured target.  Doing
      this permits the linker to be configured for a particular target,

@@ -2,22 +2,22 @@
    Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
-This file is part of GLD, the Gnu Linker.
+   This file is part of GLD, the Gnu Linker.
 
-GLD is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   GLD is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-GLD is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GLD is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GLD; see the file COPYING.  If not, write to the Free
-Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with GLD; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 /* ldfile.c:  look after all the file stuff.  */
 
@@ -35,42 +35,76 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldlex.h"
 #include "ldemul.h"
 #include "libiberty.h"
+#include "filenames.h"
 
-const char *ldfile_input_filename;
-bfd_boolean ldfile_assumed_script = FALSE;
-const char *ldfile_output_machine_name = "";
+const char * ldfile_input_filename;
+bfd_boolean  ldfile_assumed_script = FALSE;
+const char * ldfile_output_machine_name = "";
 unsigned long ldfile_output_machine;
 enum bfd_architecture ldfile_output_architecture;
-search_dirs_type *search_head;
+search_dirs_type * search_head;
 
 #ifndef MPW
 #ifdef VMS
-char *slash = "";
+char * slash = "";
 #else
 #if defined (_WIN32) && ! defined (__CYGWIN32__)
-char *slash = "\\";
+char * slash = "\\";
 #else
-char *slash = "/";
+char * slash = "/";
 #endif
 #endif
 #else /* MPW */
 /* The MPW path char is a colon.  */
-char *slash = ":";
+char * slash = ":";
 #endif /* MPW */
 
-/* LOCAL */
-
-static search_dirs_type **search_tail_ptr = &search_head;
-
-typedef struct search_arch {
+typedef struct search_arch
+{
   char *name;
   struct search_arch *next;
 } search_arch_type;
 
+static search_dirs_type **search_tail_ptr = &search_head;
 static search_arch_type *search_arch_head;
 static search_arch_type **search_arch_tail_ptr = &search_arch_head;
 
-static FILE *try_open PARAMS ((const char *name, const char *exten));
+static FILE *try_open
+  PARAMS ((const char *, const char *));
+static bfd_boolean is_sysrooted_pathname
+  PARAMS ((const char *, bfd_boolean));
+
+/* Test whether a pathname, after canonicalization, is the same or a
+   sub-directory of the sysroot directory.  */
+
+static bfd_boolean
+is_sysrooted_pathname (name, notsame)
+     const char *name;
+     bfd_boolean notsame;
+{
+  char * realname = ld_canon_sysroot ? lrealpath (name) : NULL;
+  int len;
+  bfd_boolean result;
+
+  if (! realname)
+    return FALSE;
+  
+  len = strlen (realname);
+
+  if (((! notsame && len == ld_canon_sysroot_len)
+       || (len >= ld_canon_sysroot_len
+	   && IS_DIR_SEPARATOR (realname[ld_canon_sysroot_len])
+	   && (realname[ld_canon_sysroot_len] = '\0') == '\0'))
+      && FILENAME_CMP (ld_canon_sysroot, realname) == 0)
+    result = TRUE;
+  else
+    result = FALSE;
+
+  if (realname)
+    free (realname);
+
+  return result;
+}
 
 void
 ldfile_add_library_path (name, cmdline)
@@ -97,7 +131,7 @@ ldfile_add_library_path (name, cmdline)
       new->sysrooted = TRUE;
     }
   else
-    new->sysrooted = FALSE;
+    new->sysrooted = is_sysrooted_pathname (new->name, FALSE);
 }
 
 /* Try to open a BFD for a lang_input_statement.  */
@@ -271,7 +305,7 @@ ldfile_open_file_search (arch, entry, lib, suffix)
      directory first.  */
   if (! entry->is_archive)
     {
-      if (entry->sysrooted && entry->filename[0] == '/')
+      if (entry->sysrooted && IS_ABSOLUTE_PATH (entry->filename))
 	{
 	  char *name = concat (ld_sysroot, entry->filename,
 			       (const char *) NULL);
@@ -284,9 +318,13 @@ ldfile_open_file_search (arch, entry, lib, suffix)
 	}
       else if (ldfile_try_open_bfd (entry->filename, entry))
 	{
-	  entry->sysrooted = FALSE;
+	  entry->sysrooted = IS_ABSOLUTE_PATH (entry->filename)
+	    && is_sysrooted_pathname (entry->filename, TRUE);
 	  return TRUE;
 	}
+
+      if (IS_ABSOLUTE_PATH (entry->filename))
+	return FALSE;
     }
 
   for (search = search_head;
@@ -315,14 +353,6 @@ ldfile_open_file_search (arch, entry, lib, suffix)
       if (entry->is_archive)
 	sprintf (string, "%s%s%s%s%s%s", search->name, slash,
 		 lib, entry->filename, arch, suffix);
-      else if (entry->filename[0] == '/' || entry->filename[0] == '.'
-#if defined (__MSDOS__) || defined (_WIN32)
-	       || entry->filename[0] == '\\'
-	       || (ISALPHA (entry->filename[0])
-	           && entry->filename[1] == ':')
-#endif
-	  )
-	strcpy (string, entry->filename);
       else
 	sprintf (string, "%s%s%s", search->name, slash, entry->filename);
 
@@ -385,6 +415,11 @@ ldfile_open_file (entry)
 	 again.  */
       if (found)
 	entry->search_dirs_flag = FALSE;
+      else if (entry->sysrooted
+	       && ld_sysroot
+	       && IS_ABSOLUTE_PATH (entry->local_sym_name))
+	einfo (_("%F%P: cannot find %s inside %s\n"),
+	       entry->local_sym_name, ld_sysroot);
       else
 	einfo (_("%F%P: cannot find %s\n"), entry->local_sym_name);
     }

@@ -2313,7 +2313,7 @@ ldfile.o: ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h ld.h $(INCDIR)/bin-bugs.h \
   ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldgram.h \
-  ldlex.h ldemul.h $(INCDIR)/libiberty.h
+  ldlex.h ldemul.h $(INCDIR)/libiberty.h $(INCDIR)/filenames.h
 ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h \

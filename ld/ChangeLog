@@ -1,3 +1,18 @@
+2003-03-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ldmain.h (ld_canon_sysroot, ld_canon_sysroot_len): Declare.
+	* ldmain.c (ld_canon_sysroot, ld_canon_sysroot_len): Define.
+	(main): Initialize them.
+	* ldfile.c: Include pathnames.h.
+	(is_sysrooted_pathname): New.
+	(ldfile_add_library_path): Use it.
+	(ldfile_open_file_search): Likewise.  Use IS_ABSOLUTE_PATH.  Don't
+	search_dirs if given an absolute pathname.
+	(ldfile_open_file): Issue error message for sysrooted
+	absolute pathnames.
+	* Makefile.am: Updated dependencies.
+	* Makefile.in: Rebuild.
+
 2003-03-24  Daniel Néri  <dne@mayonnaise.net>
 
 	* ld.texinfo: Rename all occurances of C54X to TIC54X.

@@ -24,6 +24,8 @@
 
 extern char *program_name;
 extern char *ld_sysroot;
+extern char *ld_canon_sysroot;
+extern int ld_canon_sysroot_len;
 extern bfd *output_bfd;
 extern char *default_target;
 extern bfd_boolean trace_files;
@@ -37,6 +39,6 @@ extern struct bfd_link_info link_info;
 
 extern void add_ysym PARAMS ((const char *));
 extern void add_wrap PARAMS ((const char *));
-extern void add_keepsyms_file PARAMS ((const char *filename));
+extern void add_keepsyms_file PARAMS ((const char *));
 
 #endif
