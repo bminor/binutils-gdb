@@ -466,6 +466,7 @@ md_assemble (str)
       fc = 0;
       match = 0;
       next_opindex = 0;
+      insn = opcode->opcode;
       for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
 	{
 	  const struct v850_operand *operand;

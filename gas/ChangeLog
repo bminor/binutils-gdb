@@ -1,6 +1,9 @@
 start-sanitize-v850
 Fri Aug 23 10:41:32 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-v850.c (md_assemble): Don't forget to initialize
+	"insn"!
+
 	* config/tc-v850.c (reg_name_search): Generalize to search
 	any given register table.
 	(register_name): Pass appropriate table and size to reg_name_search.
