@@ -1,5 +1,30 @@
 2005-01-13  Andrew Cagney  <cagney@gnu.org>
 
+	* breakpoint.c (gdb_breakpoint_query): Update, use
+	catch_exceptions_with_msg.
+	(do_captured_breakpoint): Add uiout parameter.
+	(gdb_breakpoint): Update, use catch_exceptions_with_msg.
+	* mi/mi-main.c (mi_cmd_thread_select): Pass mi_error_message to
+	gdb_thread_select.  Return MI_CMD_ERROR instead of
+	MI_CMD_CAUGHT_ERROR.
+	(mi_cmd_thread_list_ids): Ditto for gdb_list_thread_ids.
+	(enum captured_mi_execute_command_actions): Delete
+	EXECUTE_COMMAND_DISPLAY_ERROR.
+	(captured_mi_execute_command): Delete code handling
+	MI_CMD_CAUGHT_ERROR.
+	(mi_execute_command): Don't check for
+	EXECUTE_COMMAND_DISPLAY_ERROR.
+	* mi/mi-cmd-break.c (breakpoint_notify): Update call to
+	gdb_breakpoint_query.
+	(mi_cmd_break_insert): Pass mi_error_message to gdb_breakpoint.
+	* mi/mi-cmds.h (enum mi_cmd_result): Delete MI_CMD_CAUGHT_ERROR.
+	* gdb.h (gdb_thread_select, gdb_list_thread_ids)
+	(gdb_breakpoint, gdb_breakpoint_query): Add error_message
+	parameter.
+	* thread.c (thread_command): Update call.
+	(gdb_thread_select, gdb_list_thread_ids): Update, call
+	catch_exceptions_with_msg.
+
 	* mi/mi-main.c (mi_execute_command): Use catch_exception,
 	eliminate call to error_last_message.
 	(captured_mi_execute_command): Change return type to void.

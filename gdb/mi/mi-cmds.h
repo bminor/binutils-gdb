@@ -38,10 +38,6 @@ enum mi_cmd_result
        asprintf'd into the mi_error_message buffer.  The main loop will
        display the error message and the completion prompt. */
     MI_CMD_ERROR,
-    /* An error condition was detected and caught.  The error message is
-       in the global error message buffer. The main loop will display
-       the error message and the completion prompt. */
-    MI_CMD_CAUGHT_ERROR,
     /* The MI command has already displayed its completion message.
        Main loop will not display a completion message but will display
        the completion prompt. */

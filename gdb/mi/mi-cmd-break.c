@@ -39,7 +39,7 @@ enum
 static void
 breakpoint_notify (int b)
 {
-  gdb_breakpoint_query (uiout, b);
+  gdb_breakpoint_query (uiout, b, NULL);
 }
 
 
@@ -140,12 +140,14 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
     case REG_BP:
       rc = gdb_breakpoint (address, condition,
 			   0 /*hardwareflag */ , temp_p,
-			   thread, ignore_count);
+			   thread, ignore_count,
+			   &mi_error_message);
       break;
     case HW_BP:
       rc = gdb_breakpoint (address, condition,
 			   1 /*hardwareflag */ , temp_p,
-			   thread, ignore_count);
+			   thread, ignore_count,
+			   &mi_error_message);
       break;
 #if 0
     case REGEXP_BP:
@@ -163,7 +165,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
   deprecated_set_gdb_event_hooks (old_hooks);
 
   if (rc == GDB_RC_FAIL)
-    return MI_CMD_CAUGHT_ERROR;
+    return MI_CMD_ERROR;
   else
     return MI_CMD_DONE;
 }

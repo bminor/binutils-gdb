@@ -61,8 +61,7 @@ enum
 enum captured_mi_execute_command_actions
   {
     EXECUTE_COMMAND_DISPLAY_PROMPT,
-    EXECUTE_COMMAND_SUPRESS_PROMPT,
-    EXECUTE_COMMAND_DISPLAY_ERROR
+    EXECUTE_COMMAND_SUPRESS_PROMPT
   };
 
 /* This structure is used to pass information from captured_mi_execute_command
@@ -233,12 +232,12 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
   else
-    rc = gdb_thread_select (uiout, argv[0]);
+    rc = gdb_thread_select (uiout, argv[0], &mi_error_message);
 
   /* RC is enum gdb_rc if it is successful (>=0)
      enum return_reason if not (<0). */
   if ((int) rc < 0 && (enum return_reason) rc == RETURN_ERROR)
-    return MI_CMD_CAUGHT_ERROR;
+    return MI_CMD_ERROR;
   else if ((int) rc >= 0 && rc == GDB_RC_FAIL)
     return MI_CMD_ERROR;
   else
@@ -256,10 +255,10 @@ mi_cmd_thread_list_ids (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
   else
-    rc = gdb_list_thread_ids (uiout);
+    rc = gdb_list_thread_ids (uiout, &mi_error_message);
 
   if (rc == GDB_RC_FAIL)
-    return MI_CMD_CAUGHT_ERROR;
+    return MI_CMD_ERROR;
   else
     return MI_CMD_DONE;
 }
@@ -1091,12 +1090,6 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 		}
 	      mi_out_rewind (uiout);
 	    }
-	  else if (args->rc == MI_CMD_CAUGHT_ERROR)
-	    {
-	      mi_out_rewind (uiout);
-	      args->action = EXECUTE_COMMAND_DISPLAY_ERROR;
-	      return;
-	    }
 	  else
 	    mi_out_rewind (uiout);
 	}
@@ -1171,8 +1164,7 @@ mi_execute_command (char *cmd, int from_tty)
 	  mi_parse_free (command);
 	  return;
 	}
-      if (args.action == EXECUTE_COMMAND_DISPLAY_ERROR
-	  || result.reason < 0)
+      if (result.reason < 0)
 	{
 	  char *msg = result.message;
 	  struct cleanup *cleanup = make_cleanup (xfree, msg);

@@ -3603,14 +3603,14 @@ do_captured_breakpoint_query (struct ui_out *uiout, void *data)
 }
 
 enum gdb_rc
-gdb_breakpoint_query (struct ui_out *uiout, int bnum)
+gdb_breakpoint_query (struct ui_out *uiout, int bnum, char **error_message)
 {
   struct captured_breakpoint_query_args args;
   args.bnum = bnum;
   /* For the moment we don't trust print_one_breakpoint() to not throw
      an error. */
-  return catch_exceptions (uiout, do_captured_breakpoint_query, &args,
-			   NULL, RETURN_MASK_ALL);
+  return catch_exceptions_with_msg (uiout, do_captured_breakpoint_query, &args,
+				    NULL, error_message, RETURN_MASK_ALL);
 }
 
 /* Return non-zero if B is user settable (breakpoints, watchpoints,
@@ -5334,7 +5334,7 @@ struct captured_breakpoint_args
   };
 
 static int
-do_captured_breakpoint (void *data)
+do_captured_breakpoint (struct ui_out *uiout, void *data)
 {
   struct captured_breakpoint_args *args = data;
   struct symtabs_and_lines sals;
@@ -5432,7 +5432,8 @@ do_captured_breakpoint (void *data)
 enum gdb_rc
 gdb_breakpoint (char *address, char *condition,
 		int hardwareflag, int tempflag,
-		int thread, int ignore_count)
+		int thread, int ignore_count,
+		char **error_message)
 {
   struct captured_breakpoint_args args;
   args.address = address;
@@ -5441,8 +5442,8 @@ gdb_breakpoint (char *address, char *condition,
   args.tempflag = tempflag;
   args.thread = thread;
   args.ignore_count = ignore_count;
-  return catch_errors (do_captured_breakpoint, &args,
-		       NULL, RETURN_MASK_ALL);
+  return catch_exceptions_with_msg (uiout, do_captured_breakpoint, &args,
+				    NULL, error_message, RETURN_MASK_ALL);
 }
 
 

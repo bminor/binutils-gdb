@@ -282,10 +282,10 @@ do_captured_list_thread_ids (struct ui_out *uiout, void *arg)
 /* Official gdblib interface function to get a list of thread ids and
    the total number. */
 enum gdb_rc
-gdb_list_thread_ids (struct ui_out *uiout)
+gdb_list_thread_ids (struct ui_out *uiout, char **error_message)
 {
-  return catch_exceptions (uiout, do_captured_list_thread_ids, NULL,
-			   NULL, RETURN_MASK_ALL);
+  return catch_exceptions_with_msg (uiout, do_captured_list_thread_ids, NULL,
+				    NULL, error_message, RETURN_MASK_ALL);
 }
 
 /* Load infrun state for the thread PID.  */
@@ -635,7 +635,7 @@ thread_command (char *tidstr, int from_tty)
       return;
     }
 
-  gdb_thread_select (uiout, tidstr);
+  gdb_thread_select (uiout, tidstr, NULL);
 }
 
 static int
@@ -667,10 +667,10 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
 }
 
 enum gdb_rc
-gdb_thread_select (struct ui_out *uiout, char *tidstr)
+gdb_thread_select (struct ui_out *uiout, char *tidstr, char **error_message)
 {
-  return catch_exceptions (uiout, do_captured_thread_select, tidstr,
-			   NULL, RETURN_MASK_ALL);
+  return catch_exceptions_with_msg (uiout, do_captured_thread_select, tidstr,
+				    NULL, error_message, RETURN_MASK_ALL);
 }
 
 /* Commands with a prefix of `thread'.  */
