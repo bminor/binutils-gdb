@@ -1,3 +1,9 @@
+2003-11-29  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/complex.exp: Replace reference to gcc_compiled with
+	call to test_compiler_info.
+
 2003-11-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.asm/asm-source.exp: Initialize asm-note to "empty".  Set
