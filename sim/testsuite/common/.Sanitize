@@ -28,6 +28,7 @@ Makefile.in
 bits-gen.c
 bits-tst.c
 fpu-tst.c
+alu-n-tst.h
 alu-tst.c
 
 Things-to-lose:
