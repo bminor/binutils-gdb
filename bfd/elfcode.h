@@ -57,6 +57,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    (3)	ELF section symbols are handled rather sloppily now.  This should
 	be cleaned up, and ELF section symbols reconciled with BFD section
 	symbols.
+
+   (4)  We need a published spec for 64-bit ELF.  We've got some stuff here
+	that we're using for SPARC V9 64-bit chips, but don't assume that
+	it's cast in stone.
  */
 
 #include <string.h>		/* For strrchr and friends */
@@ -2133,12 +2137,11 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_NONE;
       break;
     case bfd_arch_sparc:
-      i_ehdrp->e_machine = EM_SPARC;
-      /* start-sanitize-v9 */
 #if ARCH_SIZE == 64
       i_ehdrp->e_machine = EM_SPARC64;
+#else
+      i_ehdrp->e_machine = EM_SPARC;
 #endif
-      /* end-sanitize-v9 */
       break;
     case bfd_arch_i386:
       i_ehdrp->e_machine = EM_386;
