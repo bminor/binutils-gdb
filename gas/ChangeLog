@@ -1,3 +1,44 @@
+Sun Jan 30 14:58:26 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* write.c (write_object_file): If tc_frob_file is defined, call it
+	just before calling obj_frob_file.
+	* config/tc-alpha.c (alpha_gp_value): Renamed from gp_value
+	(references changed), and made non-static.
+	(getExpression): Return void.
+	(select_gp_value): Abort if gp_value is non-zero.  Delete call to
+	non-existent bfd_set_gp_value.
+	(alpha_validate_fix): Function deleted.
+	(alpha_frob_symbol): Function deleted.
+	(alpha_local_label): Function deleted.
+	(alpha_frob_file): Renamed from alpha_end.
+	* config/tc-alpha.h (alpha_frob_symbol, alpha_validate_fix,
+	alpha_local_label, alpha_end): Declarations deleted.
+	(alpha_gp_value, alpha_frob_file): Declare.
+	(tc_frob_symbol, TC_VALIDATE_FIX, md_end): Macros deleted.
+	(LOCAL_LABEL): Move code here from tc-alpha.c:alpha_local_label.
+	(md_convert_frag): Simplified slightly.
+	(tc_frob_file): New macro.
+
+	* read.c (do_align): New function, most of guts of s_align_*
+	functions.  Look for md_do_align macro, give it a chance to bypass
+	all but recording of section alignment.
+	(s_align_bytes, s_align_ptwo): Call do_align.
+	(s_lcomm) [TC_ALPHA]: Align object to largest power of two that
+	divides object size.
+
+	* frags.c (frag_align_pattern): New function.
+	(frag_align): Rewrite for clarity.
+
+	* config/tc-vax.c (md_assemble): Handle O_constant expression.
+	(vip_begin): Returns pointer to const char.  Cast hash_insert arg
+	to PTR to avoid compiler complaints about const.
+	(md_begin): Local variable errtxt must point to const.
+
+	* configure.in: Handle host vax-*-ultrix* like vax-*-bsd*.  Don't
+	bother with *-*-ultrix or *-*-sysv*, except *-*-sysv, since only
+	the last has an existing host support file.  Do handle vax-bsd and
+	vax-ultrix targets.
+
 Fri Jan 28 11:26:40 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-coff.c (obj_coff_section_header_append): Do not
