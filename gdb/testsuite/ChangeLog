@@ -1,5 +1,9 @@
 2003-11-25  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/method.exp: Accept output of new demangler.
+
+2003-11-25  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb/class2.exp: New file.
 	* gdb/class2.cc: New file.
 
