@@ -51,3 +51,15 @@
 	mov r1,(r2+,0x7ffefdfc)
 	movhu (r1+,0x7ffefdfc),r2
 	movhu r1,(r2+,0x7ffefdfc)
+	mov (-16,sp),r2
+	mov r2,(-16,sp)
+	movbu (-16,sp),r2
+	movbu r2,(-16,sp)
+	movhu (-16,sp),r2
+	movhu r2,(-16,sp)
+	mov (-1024,sp),r2
+	mov r2,(-1024,sp)
+	movbu (-1024,sp),r2
+	movbu r2,(-1024,sp)
+	movhu (-1024,sp),r2
+	movhu r2,(-1024,sp)

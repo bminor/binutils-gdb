@@ -1418,6 +1418,30 @@ proc do_am33_5 {} {
 	    -re "^ +52 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0158 FEFA12FC\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +53 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 015f FE8A20F0\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +54 +FFFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0166 FE9A20F0\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +55 +FFFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 016d FEAA20F0\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +56 +FFFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0174 FEBA20F0\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +57 +FFFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 017b FECA20F0\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +58 +FFFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0182 FEDA20F0\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +59 +FFFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0189 FE8A2000\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +60 +FCFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0190 FE9A2000\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +61 +FCFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0197 FEAA2000\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +62 +FCFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 019e FEBA2000\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +63 +FCFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 01a5 FECA2000\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +64 +FCFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 01ac FEDA2000\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +65 +FCFFFF\[^\n\]*\n"		{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -1429,7 +1453,7 @@ proc do_am33_5 {} {
     gas_finish
 
     # Did we find what we were looking for?  If not, flunk it.
-    if [expr $x==100] then { pass $testname } else { fail $testname }
+    if [expr $x==124] then { pass $testname } else { fail $testname }
 }
 
 proc do_am33_6 {} {
