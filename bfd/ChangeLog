@@ -1,5 +1,8 @@
 Tue Aug  2 10:43:21 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* hp300hpux.c (BMAGIC): Define as HPUX_DOT_O_MAGIC, to make test
+	in aoutx.h work correctly.
+
 	* coff-i960.c (coff_i960_relocate): New function.
 	(howto_rellong, howto_iprmed): Use it as special_function.
 
