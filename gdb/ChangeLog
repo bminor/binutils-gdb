@@ -1,4 +1,13 @@
 start-sanitize-carp start-sanitize-vr4xxx
+Thu Dec 17 02:06:17 1998  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* mips-tdep.c (mips_gdbarch_init): New function. Initialize a MIPS
+ 	architecture vector.
+	(_initialize_mips_tdep): Register MIPS with GDBARCH.
+	(struct gdbarch_tdep): Define.
+	(MIPS_EABI, MIPS_LAST_FP_ARG_REGNUM, MIPS_LAST_ARG_REGNUM): When
+ 	multi-arch, get value from gdbarch->tdep.
+
 Thu Dec 17 02:01:58 1998  Andrew Cagney  <cagney@chook>
 
 	* gdbtypes.c (_initialize_gdbtypes): Register all builtin types

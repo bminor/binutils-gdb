@@ -35,6 +35,39 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 
 #include "opcode/mips.h"
+/* start-sanitize-carp start-sanitize-vr4xxx */
+#include "elf/mips.h"
+#include "elf-bfd.h"
+
+/* MIPS specific per-architecture information */
+struct gdbarch_tdep
+{
+  int elf_abi;
+  /* mips options */
+  int mips_eabi;
+  /* int mips_default_fpu_type;
+     Not yet.  The MIPS_DEFAULT_FPU_TYPE is set independant of the
+     current mips architecture.  */
+  int mips_last_arg_regnum;
+  int mips_last_fp_arg_regnum;
+};
+
+#if GDB_MULTI_ARCH
+#undef MIPS_EABI
+#define MIPS_EABI (gdbarch_tdep (current_gdbarch)->mips_eabi)
+#endif
+
+#if GDB_MULTI_ARCH
+#undef MIPS_LAST_FP_ARG_REGNUM
+#define MIPS_LAST_FP_ARG_REGNUM (gdbarch_tdep (current_gdbarch)->mips_last_fp_arg_regnum)
+#endif
+
+#if GDB_MULTI_ARCH
+#undef MIPS_LAST_ARG_REGNUM
+#define MIPS_LAST_ARG_REGNUM (gdbarch_tdep (current_gdbarch)->mips_last_arg_regnum)
+#endif
+
+/* end-sanitize-carp start-sanitize-vr4xxx */
 
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
@@ -3191,11 +3224,105 @@ mips_call_dummy_address ()
     return entry_point_address ();
 }
 
+/* start-sanitize-carp start-sanitize-vr4xxx */
+
+static gdbarch_init_ftype mips_gdbarch_init;
+static struct gdbarch *
+mips_gdbarch_init (info, arches)
+     const struct gdbarch_info *info;
+     struct gdbarch_list *arches;
+{
+  struct gdbarch *gdbarch;
+  struct gdbarch_tdep *tdep;
+  int elf_abi;
+  if (info->abfd != NULL)
+    elf_abi = elf_elfheader (info->abfd)->e_flags & EF_MIPS_ABI;
+  else if (gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_mips)
+    elf_abi = gdbarch_tdep (current_gdbarch)->elf_abi;
+  else
+    elf_abi = 0;
+
+  /* try to find a pre-existing architecture */
+  for (arches = gdbarch_list_lookup_by_info (arches, info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, info))
+    {
+      /* MIPS needs to be pedantic about which ABI the object is
+         using. */
+      if (gdbarch_tdep (current_gdbarch)->elf_abi != elf_abi)
+	continue;
+      return arches->gdbarch;
+    }
+
+  /* Need a new architecture. Fill in a target specific vector. */
+  tdep = (struct gdbarch_tdep*) xmalloc (sizeof (struct gdbarch_tdep));
+  gdbarch = gdbarch_alloc (info, tdep);
+  tdep->elf_abi = elf_abi;
+  switch (elf_abi)
+    {
+    case E_MIPS_ABI_O32:
+      tdep->mips_eabi = 0;
+      set_gdbarch_long_bit (gdbarch, 32);
+      set_gdbarch_ptr_bit (gdbarch, 32);
+      break;
+    case E_MIPS_ABI_O64:
+      tdep->mips_eabi = 0;
+      set_gdbarch_long_bit (gdbarch, 32);
+      set_gdbarch_ptr_bit (gdbarch, 32);
+      break;
+    case E_MIPS_ABI_EABI32:
+      tdep->mips_eabi = 1;
+      set_gdbarch_long_bit (gdbarch, 32);
+      set_gdbarch_ptr_bit (gdbarch, 32);
+      break;
+    case E_MIPS_ABI_EABI64:
+      tdep->mips_eabi = 1;
+      set_gdbarch_long_bit (gdbarch, 64);
+      set_gdbarch_ptr_bit (gdbarch, 64);
+      break;
+    default:
+      tdep->mips_eabi = 0;
+      set_gdbarch_long_bit (gdbarch, 32);
+      set_gdbarch_ptr_bit (gdbarch, 32);
+      break;
+    }
+  if (tdep->mips_eabi)
+    {
+      /* EABI uses R4 through R11 for args */
+      tdep->mips_last_arg_regnum = 11;
+      /* EABI uses F12 through F19 for args */
+      tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 19;
+    }
+  else
+    {
+      /* old ABI uses R4 through R7 for args */
+      tdep->mips_last_arg_regnum = 7;
+      /* old ABI uses F12 through F15 for args */
+      tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 15;
+    }
+  set_gdbarch_long_long_bit (gdbarch, 64);
+
+  if (gdbarch_debug)
+    {
+      fprintf_unfiltered (stderr, "MIPS_EABI = %d\n", tdep->mips_eabi);
+      fprintf_unfiltered (stderr, "MIPS_LAST_ARG_REGNUM = %d\n", tdep->mips_last_arg_regnum);
+      fprintf_unfiltered (stderr, "MIPS_LAST_FP_ARG_REGNUM = %d (%d)\n", tdep->mips_last_fp_arg_regnum, tdep->mips_last_fp_arg_regnum - FP0_REGNUM);
+    }
+
+  return gdbarch;
+}
+
+/* end-sanitize-carp start-sanitize-vr4xxx */
+
 void
 _initialize_mips_tdep ()
 {
   struct cmd_list_element *c;
 
+  /* start-sanitize-carp start-sanitize-vr4xxx */
+  if (GDB_MULTI_ARCH)
+    register_gdbarch_init (bfd_arch_mips, mips_gdbarch_init);
+  /* end-sanitize-carp start-sanitize-vr4xxx */
   if (!tm_print_insn) /* Someone may have already set it */
     tm_print_insn = gdb_print_insn_mips;
 
