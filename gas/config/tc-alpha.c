@@ -4521,7 +4521,12 @@ s_alpha_prologue (ignore)
     sym = ecoff_get_cur_proc_sym ();
   else
     sym = alpha_cur_ent_sym;
-  know (sym != NULL);
+
+  if (sym == NULL)
+    {
+      as_bad (_(".prologue directive without a preceding .ent directive"));
+      return;
+    }
 
   switch (arg)
     {

@@ -1,3 +1,7 @@
+2002-11-19  Luke Deller <luked@cse.unsw.edu.au>
+
+	* config/tc-alpha.c (s_alpha_prologue): as_bad when sym is NULL.
+
 2002-11-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2dbg.h (dwarf2_format): New enum.
