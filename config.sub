@@ -480,6 +480,10 @@ case $basic_machine in
 		basic_machine=m68k-hp
 		os=-hpux
 		;;
+	hppaosf)
+		basic_machine=hppa1.1-hp
+		os=-osf
+		;;
 	ncr3000)
 		basic_machine=i486-ncr
 		os=-sysv4

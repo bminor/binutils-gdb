@@ -159,6 +159,9 @@ case "${target}" in
   rs6000-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
+  hppa*-*-osf)
+# Do configure ld/binutils/gas for this case.
+    ;;
   hppa*-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;

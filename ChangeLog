@@ -1,3 +1,18 @@
+Thu Apr 29 10:33:22 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config.sub: Recognize hppaosf.
+	* configure.in: Do configure ld/binutils/gas for it.
+
+Tue Apr 27 06:25:34 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* configure (tooldir): Alter syntax used to set this, for systems
+	where "\$" isn't handled right, like i386-aix.
+
+Thu Apr 22 08:17:35 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure: Pass program-transform-name, not
+	program_transform_name, to recursive configures.
+
 Thu Apr 22 02:58:21 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* Makefile.in (gas+binutils.tar.z): New rule for building snapshots
