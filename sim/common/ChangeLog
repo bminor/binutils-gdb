@@ -1,5 +1,7 @@
 2002-06-17  Andrew Cagney  <cagney@redhat.com>
 
+	* hw-events.c (hw_event_queue_schedule): Initialize `dummy'.
+
 	* sim-memopt.c: Include <unistd.h>.
 	(do_memopt_add): Fix printf format.
 	* sim-events.c (sim_events_schedule): Initialize ``dummy''.
