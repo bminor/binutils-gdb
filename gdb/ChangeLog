@@ -1,5 +1,7 @@
 2001-12-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-nat.c (reg_offset): Fix typo.
+
 	* i386-tdep.c (i386_push_dummy_frame): Don't write back the
 	modified frame pointer until the old frame pointer has been saved.
 

@@ -71,7 +71,7 @@ static int reg_offset[] =
   REG_OFFSET (r_eax),
   REG_OFFSET (r_ecx),
   REG_OFFSET (r_edx),
-  REG_OFFSET (r_edx),
+  REG_OFFSET (r_ebx),
   REG_OFFSET (r_esp),
   REG_OFFSET (r_ebp),
   REG_OFFSET (r_esi),
