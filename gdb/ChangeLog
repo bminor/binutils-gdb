@@ -1,3 +1,19 @@
+Fri Sep 29 02:10:05 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* remote-rdp.c (rdp_init): Take out variable baud rate stuff.
+	(remote_rdp_detatch): Delete.
+	* breakpoint.c (ctype.h): Don't include twice.
+
+	* Makefile.in (remote-rdp.o): Doesn't need remote-rdp.h
+	* callback.c (os_printf_filtered): fix protos.
+	* defs.h (puts_filtered, puts_unfiltered
+	[v|f|]printf_[un]filtered): Make format arg const.
+	* remote-rdp.c (rdp_init): Attept to sync at different
+	baudrates.
+	* utils.c (puts_filtered, puts_unfiltered
+	[v|f|]printf_[un]filtered): Define prototypes with
+	const in the right place.
+
 Thu Sep 28 17:43:39 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* defs.h (enum language):  Add language_scm.
@@ -46,7 +62,7 @@ Thu Sep 28 14:32:11 1995  steve chamberlain  <sac@slash.cygnus.com>
 	(INST_xx): New
 	(FRAME_FIND_SAVED_REGS): Pass the right argument.
 	(arm_get_next_pc): Declare.
-	* mswin/prebuilt/*/bfdtarget.h (SELECT_ARCHITECTURES): Need leading &.
+
 
 Wed Sep 27 10:14:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 

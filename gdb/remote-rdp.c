@@ -46,26 +46,32 @@
 #else
 #include <varargs.h>
 #endif
-
+#include <ctype.h>
 #include <fcntl.h>
 #include "symfile.h"
 #include "remote-utils.h"
+#include "gdb_string.h"
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 
 extern struct target_ops remote_rdp_ops;
 static serial_t io;
 static host_callback *callback = &default_callback;
 
 struct
-{
-  int step_info;
-  int break_info;
-  int model_info;
-  int target_info;
-  int can_step;
-  char command_line[10];
-  int rdi_level;
-  int rdi_stopped_status;
-} ds;
+  {
+    int step_info;
+    int break_info;
+    int model_info;
+    int target_info;
+    int can_step;
+    char command_line[10];
+    int rdi_level;
+    int rdi_stopped_status;
+  }
+ds;
 
 
 
@@ -103,8 +109,8 @@ struct
 #define RDP_FPU_READWRITE_MASK_FPS 	(1<<8)
 
 #define RDP_SET_BREAK			0xa
-#define RDP_SET_BREAK_TYPE_PC_EQUAL     0		
-#define RDP_SET_BREAK_TYPE_GET_HANDLE   (0x10)		
+#define RDP_SET_BREAK_TYPE_PC_EQUAL     0
+#define RDP_SET_BREAK_TYPE_GET_HANDLE   (0x10)
 
 #define RDP_CLEAR_BREAK 		0xb
 
@@ -153,10 +159,10 @@ static int timeout = 2;
 
 static int
 remote_rdp_xfer_inferior_memory PARAMS ((CORE_ADDR memaddr,
-				     char *myaddr,
-				     int len,
-				     int write,
-				     struct target_ops * target));
+					 char *myaddr,
+					 int len,
+					 int write,
+					 struct target_ops * target));
 
 
 /* Stuff for talking to the serial layer. */
@@ -167,7 +173,7 @@ get_byte ()
   int c = SERIAL_READCHAR (io, timeout);
 
   if (remote_debug)
-    printf ("[%02x]", c);
+    printf ("[%02x]\n", c);
 
   if (c == SERIAL_TIMEOUT)
     {
@@ -201,13 +207,13 @@ put_byte (val)
      char val;
 {
   if (remote_debug)
-    printf("(%02x)", val);
+    printf ("(%02x)\n", val);
   SERIAL_WRITE (io, &val, 1);
 }
 
 static void
 put_word (val)
-     long val;
+     int val;
 {
   /* We always send in little endian */
   unsigned char b[4];
@@ -217,7 +223,7 @@ put_word (val)
   b[3] = val >> 24;
 
   if (remote_debug)
-    printf("(%04x)", val);
+    printf ("(%04x)", val);
 
   SERIAL_WRITE (io, b, 4);
 }
@@ -226,96 +232,95 @@ put_word (val)
 
 /* Stuff for talking to the RDP layer. */
 
-/* This is a bit more fancy that need be so that it syncs even in nasty cases. */
+/* This is a bit more fancy that need be so that it syncs even in nasty cases.
 
+   I'be been unable to make it reliably sync up with the change
+   baudrate open command.  It likes to sit and say it's been reset,
+   with no more action.  So I took all that code out.  I'd rather sync
+   reliably at 9600 than wait forever for a possible 19200 connection.
+
+ */
 static void
-rdp_init (int cold)
+rdp_init (cold, tty)
+     int cold;
+     int tty;
 {
-  int oloop;
   int sync = 0;
   int type = cold ? RDP_OPEN_TYPE_COLD : RDP_OPEN_TYPE_WARM;
-  int try;
-  int rcount = 0;
-  int bi;
+  int baudtry = 9600;
 
-  for (try = 0; !sync && try < 10 ; try++)
+  time_t now = time (0);
+  time_t stop_time = now + 10;	/* Try and sync for 10 seconds, then give up */
+
+
+  while (time (0) < stop_time && !sync)
     {
       int restype;
       QUIT;
+
       SERIAL_FLUSH_INPUT (io);
+      SERIAL_FLUSH_OUTPUT (io);
+
+      if (tty)
+	printf_unfiltered ("Trying to connect at %d baud.\n", baudtry);
       put_byte (RDP_OPEN);
 
-      if (baud_rate == 19200) 
-	{
-	  put_byte (type | RDP_OPEN_TYPE_RETURN_SEX | RDP_OPEN_TYPE_BAUDRATE);
-	  put_word (0);
-	  put_word (RDP_OPEN_BAUDRATE_19200);
-	}
-      else 
-	{
-	  put_byte (type | RDP_OPEN_TYPE_RETURN_SEX);
-	  put_word (0);
-	}
+      put_byte (type | RDP_OPEN_TYPE_RETURN_SEX);
+      put_word (0);
 
-      restype = SERIAL_READCHAR (io, 1);
-
-      if (remote_debug)
-	printf_unfiltered ("[%02x]\n", restype);
-
-      if (restype == RDP_RESET) 
+      while (!sync && (restype = SERIAL_READCHAR (io, 1)) > 0)
 	{
-	  put_byte (RDP_RESET);
-	  while ((restype = SERIAL_READCHAR (io, 1)) == RDP_RESET)
-	    ;
-	  while ((restype = SERIAL_READCHAR (io, 1)) > 0) 
+	  if (remote_debug)
+	    printf_unfiltered ("[%02x]\n", restype);
+
+	  switch (restype)
 	    {
-	      printf_unfiltered ("%c", isgraph(restype) ? restype : ' ');
-	    }
-	  while ((restype = SERIAL_READCHAR (io, 1)) > 0)  
-	    ;
-	  printf_unfiltered("\n");
-	  error("board reset, try again.\n");
-	  continue;
-	} 
-	  
-      switch (restype)
-	{
-	case SERIAL_TIMEOUT:
-	  break;
-	case RDP_RESET:
-	  /* Ignore a load of these */
-	  break;
-	default:
-	  break;
-	case RDP_RES_VALUE:
-	  {
-	    int resval = SERIAL_READCHAR (io, 1);
-	    switch (resval)
+	    case SERIAL_TIMEOUT:
+	      break;
+	    case RDP_RESET:
+	      while ((restype = SERIAL_READCHAR (io, 1)) == RDP_RESET)
+		;
+	      while ((restype = SERIAL_READCHAR (io, 1)) > 0)
+		{
+		  printf_unfiltered ("%c", isgraph (restype) ? restype : ' ');
+		}
+	      while ((restype = SERIAL_READCHAR (io, 1)) > 0)
+		;
+	      if (tty)
+		{
+		  printf_unfiltered ("\nThe board has sent notification that it was reset.\n");
+		  printf_unfiltered ("Waiting for it to settle down...\n");
+		}
+	      sleep (3);
+	      if (tty)
+		printf_unfiltered ("\nTrying again.\n");
+	      break;
+	    default:
+	      break;
+	    case RDP_RES_VALUE:
 	      {
-	      case SERIAL_TIMEOUT:
-		break;
-	      case RDP_RES_VALUE_LITTLE_ENDIAN:
-		target_byte_order = LITTLE_ENDIAN;
-		sync =1 ;
-		break;
-	      case RDP_RES_VALUE_BIG_ENDIAN:
-		target_byte_order = BIG_ENDIAN;
-		sync =1 ;
-		break;
-	      default:
-		break;
+		int resval = SERIAL_READCHAR (io, 1);
+		switch (resval)
+		  {
+		  case SERIAL_TIMEOUT:
+		    break;
+		  case RDP_RES_VALUE_LITTLE_ENDIAN:
+		    target_byte_order = LITTLE_ENDIAN;
+		    sync = 1;
+		    break;
+		  case RDP_RES_VALUE_BIG_ENDIAN:
+		    target_byte_order = BIG_ENDIAN;
+		    sync = 1;
+		    break;
+		  default:
+		    break;
+		  }
 	      }
-	  }
+	    }
 	}
     }
 
-  if (sync)
-    {
-      SERIAL_FLUSH_INPUT (io);
-      SERIAL_SETBAUDRATE (io, baud_rate);
-      SERIAL_FLUSH_INPUT (io);
-    }
-  else 
+  if (!sync)
     {
       error ("Couldn't reset the board, try pressing the reset button");
     }
@@ -495,7 +500,7 @@ rdp_fetch_one_fpu_register (mask, buf)
     {
       /* There are 12 bytes long 
          !! fixme about endianness 
-	 */
+       */
       int dummy;		/* I've seen these come back as four words !! */
       send_rdp ("bbw-SWWWWZ", RDP_COPRO_READ, FPU_COPRO_NUMBER, mask, buf + 0, buf + 4, buf + 8, &dummy);
     }
@@ -552,8 +557,8 @@ rdp_store_one_fpu_register (mask, buf)
     }
 #endif
 }
-
 
+
 /* Convert between GDB requests and the RDP layer. */
 
 static void
@@ -787,7 +792,7 @@ exec_swi (swi, args)
 }
 
 
-static void 
+static void
 handle_swi ()
 {
   argsin args[3];
@@ -871,7 +876,7 @@ rdp_execute_finish ()
       res = SERIAL_READCHAR (io, 1);
       while (res == SERIAL_TIMEOUT)
 	{
-	  QUIT ;
+	  QUIT;
 	  printf_filtered ("Waiting for target..\n");
 	  res = SERIAL_READCHAR (io, 1);
 	}
@@ -984,9 +989,8 @@ remote_rdp_open (args, from_tty)
   if (!args)
     error_no_arg ("serial port device name");
 
-  if (baud_rate != 19200)
-    baud_rate = 9600;
-    
+  baud_rate = 9600;
+
   target_preopen (from_tty);
 
   io = SERIAL_OPEN (args);
@@ -996,7 +1000,7 @@ remote_rdp_open (args, from_tty)
 
   SERIAL_RAW (io);
 
-  rdp_init (0);
+  rdp_init (1, from_tty);
 
 
   if (from_tty)
@@ -1031,15 +1035,6 @@ remote_rdp_close (quitting)
   io = 0;
 }
 
-/* Terminate the open connection to the remote debugger. */
-
-static void
-remote_rdp_detach (args, from_tty)
-     char *args;
-     int from_tty;
-{
-  pop_target (); 
-}
 
 /* Resume execution of the target process.  STEP says whether to single-step
    or to run free; SIGGNAL is the signal value (e.g. SIGINT) to be given
@@ -1167,8 +1162,8 @@ static struct yn breakinfo[] =
   {"watchpoints for half-word writes supported", RDP_INFO_ABOUT_BREAK_HALFWORD_WRITE},
   {"watchpoints for word writes supported", RDP_INFO_ABOUT_BREAK_WORD_WRITE},
   {"mask break/watch-points supported", RDP_INFO_ABOUT_BREAK_MASK},
-  {"thread-specific breakpoints supported", RDP_INFO_ABOUT_BREAK_THREAD_BREAK},
-  {"thread-specific watchpoints supported", RDP_INFO_ABOUT_BREAK_THREAD_WATCH},
+{"thread-specific breakpoints supported", RDP_INFO_ABOUT_BREAK_THREAD_BREAK},
+{"thread-specific watchpoints supported", RDP_INFO_ABOUT_BREAK_THREAD_WATCH},
   {"conditional breakpoints supported", RDP_INFO_ABOUT_BREAK_COND},
   {0}
 };
@@ -1203,7 +1198,7 @@ struct target_ops remote_rdp_ops =
 {
   "rdp",			/* to_shortname */
   /* to_longname */
-  "Remote Target using the RDProtocol",	
+  "Remote Target using the RDProtocol",
   /* to_doc */
   "Use a remote ARM system which uses the ARM Remote Debugging Protocol",
   remote_rdp_open,		/* to_open */
@@ -1215,7 +1210,7 @@ struct target_ops remote_rdp_ops =
   remote_rdp_fetch_register,	/* to_fetch_registers */
   remote_rdp_store_register,	/* to_store_registers */
   remote_rdp_prepare_to_store,	/* to_prepare_to_store */
-  remote_rdp_xfer_inferior_memory, /* to_xfer_memory */
+  remote_rdp_xfer_inferior_memory,	/* to_xfer_memory */
   remote_rdp_files_info,	/* to_files_info */
   remote_rdp_insert_breakpoint,	/* to_insert_breakpoint */
   remote_rdp_remove_breakpoint,	/* to_remove_breakpoint */
