@@ -984,10 +984,12 @@ parse_at (src, op)
 		  /* Turn a plain @(4,pc) into @(.+4,pc).  */
 		  if (op->immediate.X_op == O_constant)
 		    {
-		      op->immediate.X_add_symbol = dot();
+		      op->immediate.X_add_symbol = dot ();
 		      op->immediate.X_op = O_symbol;
+		      op->type = A_DISP_PC;
 		    }
-		  op->type = A_DISP_PC;
+		  else
+		    op->type = A_DISP_PC_ABS;
 		}
 	      else
 		{
@@ -1169,11 +1171,14 @@ get_specific (opcode, operands)
 
 	  switch (arg)
 	    {
+	    case A_DISP_PC:
+	      if (user->type == A_DISP_PC_ABS)
+		break;
+	      /* Fall through.  */
 	    case A_IMM:
 	    case A_BDISP12:
 	    case A_BDISP8:
 	    case A_DISP_GBR:
-	    case A_DISP_PC:
 	    case A_MACH:
 	    case A_PR:
 	    case A_MACL:
@@ -1603,10 +1608,12 @@ build_Mytes (opcode, operand)
 	      insert (output + low_byte, BFD_RELOC_SH_IMM8, 0, operand + 1);
 	      break;
 	    case PCRELIMM_8BY4:
-	      insert (output, BFD_RELOC_SH_PCRELIMM8BY4, 1, operand);
+	      insert (output, BFD_RELOC_SH_PCRELIMM8BY4,
+		      operand->type != A_DISP_PC_ABS, operand);
 	      break;
 	    case PCRELIMM_8BY2:
-	      insert (output, BFD_RELOC_SH_PCRELIMM8BY2, 1, operand);
+	      insert (output, BFD_RELOC_SH_PCRELIMM8BY2,
+		      operand->type != A_DISP_PC_ABS, operand);
 	      break;
 	    case REPEAT:
 	      output = insert_loop_bounds (output, operand);
