@@ -2,6 +2,11 @@ Tue May  5 17:47:33 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* relax.c (build_it): don't allocate space in the output file for
 	stuff if -R flag applys to it.
+	* ldfile.c: merge in VMS filename support
+	* ldmain.c (main): take out ./ from library path, and close file
+	before unlinking. Make multiple defs of a symbol create an
+	unexecable file.
+	* ldmisc.c: fatal errosrs delete output file 
 
 Tue May  5 14:05:05 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
