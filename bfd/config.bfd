@@ -70,7 +70,7 @@ esac
 case "${targ}" in
 # START OF targmatch.h
 #ifdef BFD64
-  alpha*-*-netbsd* | alpha*-*-freebsd*)
+  alpha*-*-netbsd* | alpha*-*-freebsd* | alpha*-*-openbsd*)
     targ_defvec=bfd_elf64_alpha_vec
     targ_selvecs=ecoffalpha_little_vec
     ;;
@@ -104,7 +104,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_ia64_hpux_big_vec
     targ_selvecs="bfd_elf64_ia64_hpux_big_vec"
     ;;
-  sparc64-*-freebsd* | sparc64-*-netbsd*)
+  sparc64-*-freebsd* | sparc64-*-netbsd* | sparc64-*-openbsd*)
     targ_defvec=bfd_elf64_sparc_vec
     targ_selvecs="bfd_elf32_sparc_vec sunos_big_vec"
     ;;
@@ -303,7 +303,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_hppa_linux_vec
     targ_selvecs=bfd_elf32_hppa_vec
     ;;
-  hppa*-*-*elf* | hppa*-*-lites* | hppa*-*-netbsd* | hppa*-*-sysv4* | hppa*-*-rtems*)
+  hppa*-*-*elf* | hppa*-*-lites* | hppa*-*-netbsd* | hppa*-*-sysv4* | hppa*-*-rtems* | hppa*-*-openbsd*)
     targ_defvec=bfd_elf32_hppa_vec
     targ_selvecs=bfd_elf32_hppa_linux_vec
     ;;
