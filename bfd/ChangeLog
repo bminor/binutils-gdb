@@ -1,5 +1,9 @@
 Thu Oct 21 13:05:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* dep-in.sed: Create our own line breaks for a more aesthetic
+	Makefile.
+	* Makefile.in: Rebuilt dependencies.
+
 	* elf32-mips.c: Include "seclet.h".
 	(mips_elf_fake_sections): Force size of .reginfo section to sizeof
 	Elf32_External_RegInfo.
