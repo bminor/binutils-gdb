@@ -1766,6 +1766,8 @@ pa_ip (str)
 			    else
 			      break;
 			  }
+			else if (*s == '*')
+			  break;
 			name = s;
 
 			while (*s != ',' && *s != ' ' && *s != '\t')
@@ -1893,6 +1895,8 @@ pa_ip (str)
 			    else
 			      break;
 			  }
+			else if (*s == '*')
+			  break;
 
 			if (strncmp (s, "<", 1) == 0)
 			  {
@@ -1926,6 +1930,8 @@ pa_ip (str)
 			    else
 			      break;
 			  } 
+			else if (*s == '*')
+			  break;
 			name = s;
 			    
 			while (*s != ',' && *s != ' ' && *s != '\t')
@@ -2061,6 +2067,8 @@ pa_ip (str)
 			    else
 			      break;
 			  }
+			else if (*s == '*')
+			  break;
 			name = s;
 			    
 			while (*s != ',' && *s != ' ' && *s != '\t')
@@ -2127,6 +2135,8 @@ pa_ip (str)
 			    else
 			      break;
 			  }
+			else if (*s == '*')
+			  break;
 			name = s;
 			    
 			while (*s != ',' && *s != ' ' && *s != '\t')
@@ -2179,6 +2189,8 @@ pa_ip (str)
 			    else
 			      break;
 			  }
+			else if (*s == '*')
+			  break;
 			    
 			if (strncasecmp (s, "sbz", 3) == 0)
 			  {
