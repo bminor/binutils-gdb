@@ -84,6 +84,7 @@ DEFUN (arc_add, (parent, child, count),
       return;
     }
   arc = (Arc *) xmalloc (sizeof (*arc));
+  memset (arc, 0, sizeof (*arc));
   arc->parent = parent;
   arc->child = child;
   arc->count = count;

@@ -1,3 +1,8 @@
+Mon Mar 17 10:54:47 1997  David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* cg_arcs.c (arc_add): memset() newly alloced arc to ensure
+	all fields are initialized with 0.
+
 Sat Mar 15 19:17:31 1997  H.J. Lu  <hjl@lucon.org>
 
 	* symtab.h (find_call): Declare.
