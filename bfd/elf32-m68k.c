@@ -224,11 +224,11 @@ static const bfd_byte elf_m68k_plt_entry[PLT_ENTRY_SIZE] =
 /* Procedure linkage table entries for the cpu32 */
 static const bfd_byte elf_cpu32_plt0_entry[PLT_CPU32_ENTRY_SIZE] =
 {
-  0x22, 0x7b, 0x01, 0x70, /* moveal %pc@(0xc), %a1 */
+  0x2f, 0x3b, 0x01, 0x70, /* move.l (%pc,addr),-(%sp) */
   0, 0, 0, 0,             /* replaced with offset to .got + 4.  */
-  0x4e, 0xd1,             /* jmp %a1@ */
+  0x22, 0x7b, 0x01, 0x70, /* moveal %pc@(0xc), %a1 */
   0, 0, 0, 0,             /* replace with offset to .got +8. */
-  0, 0, 0, 0,             /* pad out to 24 bytes.  */
+  0x4e, 0xd1,             /* jmp %a1@ */
   0, 0, 0, 0,             /* pad out to 24 bytes.  */
   0, 0
 };
@@ -2154,7 +2154,7 @@ elf_m68k_finish_dynamic_sections (output_bfd, info)
 		          (sgot->output_section->vma
 		           + sgot->output_offset + 8
 		           - (splt->output_section->vma + 10)),
-		          splt->contents + 10);
+		          splt->contents + 12);
               elf_section_data (splt->output_section)->this_hdr.sh_entsize 
                = PLT_CPU32_ENTRY_SIZE;
             }

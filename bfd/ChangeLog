@@ -1,3 +1,10 @@
+2000-09-19  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* elf32-m68k.c (elf_cpu32_plt0_entry): Change the PLT entry 0
+	instruction sequence to actually work.
+	(elf_m68k_finish_dynamic_sections): Change the patch-in offset
+	accordingly.
+
 2000-09-18  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-sh.c (sh_elf_relocate_section): Use
