@@ -656,7 +656,7 @@ funcsymbol( symp )
 {
   extern char	*strtab;	/* string table from a.out */
   extern int	aflag;		/* if static functions aren't desired */
-  char	*name;
+  CONST char	*name;
   int i;
 
   /*
