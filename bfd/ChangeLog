@@ -1,5 +1,21 @@
 Thu Apr 17 11:10:54 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-i386.c (struct elf_i386_pcrel_relocs_copied): Define.
+	(struct elf_i386_link_hash_entry): Define.
+	(struct elf_i386_link_hash_table): Define.
+	(elf_i386_link_hash_traverse): Define.
+	(elf_i386_hash_table): Define.
+	(elf_i386_link_hash_newfunc): New static function.
+	(elf_i386_link_hash_table_create): New static function.
+	(elf_i386_check_relocs): If linking with -Bsymbolic, don't copy
+	PC relative relocs for a global symbol defined in a regular
+	object, and count the number of PC relative relocs copied for any
+	global symbol.
+	(elf_i386_size_dynamic_sections): If linking with -Bsymbolic,
+	traverse with elf_i386_discard_copies.
+	(elf_i386_discard_copies): New static function.
+	(bfd_elf32_bfd_link_hash_table_create): Define.
+
 	From Gordon W. Ross <gwr@mc.com>:
 	* aoutf1.h (MY_entry_is_text_address): Define if not defined.
 	(sunos4_aout_backend): Use MY_entry_is_text_address.
