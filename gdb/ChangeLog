@@ -1,3 +1,8 @@
+2002-02-14  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* config/i386/i386sol2.mh (NATDEPFILES): Add i387-nat.o, needed by
+	i386v4-nat.o now. Add gcore.o, Solaris x86 supports gcore.
+
 2002-02-13  Martin M. Hunt  <hunt@redhat.com>
 
 	* stack.c (print_frame_info_base): When calling 
