@@ -1,3 +1,20 @@
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
+	Eliminate the need for POP_FRAME.
+	* frame.c (do_frame_unwind_register): New function.
+	(frame_pop): When no POP_FRAME, pop the frame using register
+	unwind and a scratch regcache.
+	(frame_saved_regs_pop): Delete function.
+	(trad_frame_unwinder): Update.
+	* d10v-tdep.c (d10v_frame_pop): Delete function.
+	(d10v_frame_unwind): Update.
+	* sentinel-frame.c (sentinel_frame_pop): Delete function.
+	(sentinel_frame_unwinder): Update.
+	* dummy-frame.c (dummy_frame_pop): Delete function.
+	(dummy_frame_unwind): Update.
+	* frame-unwind.h (frame_unwind_pop_ftype): Delete definition.
+	(struct frame_unwind): Update.
+
 2003-03-11  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-tdep.c (mips_ecoff_reg_to_regnum): Rename to

@@ -1572,45 +1572,7 @@ d10v_frame_register_unwind (struct frame_info *frame,
 }
 
 
-static void
-d10v_frame_pop (struct frame_info *fi, void **unwind_cache,
-		struct regcache *regcache)
-{
-  struct d10v_unwind_cache *info = d10v_frame_unwind_cache (fi, unwind_cache);
-  CORE_ADDR fp;
-  int regnum;
-  char raw_buffer[8];
-
-  fp = get_frame_base (fi);
-
-  /* now update the current registers with the old values */
-  for (regnum = A0_REGNUM; regnum < A0_REGNUM + NR_A_REGS; regnum++)
-    {
-      frame_unwind_register (fi, regnum, raw_buffer);
-      regcache_cooked_write (regcache, regnum, raw_buffer);
-    }
-  for (regnum = 0; regnum < SP_REGNUM; regnum++)
-    {
-      frame_unwind_register (fi, regnum, raw_buffer);
-      regcache_cooked_write (regcache, regnum, raw_buffer);
-    }
-  frame_unwind_register (fi, PSW_REGNUM, raw_buffer);
-  regcache_cooked_write (regcache, PSW_REGNUM, raw_buffer);
-
-  frame_unwind_register (fi, PC_REGNUM, raw_buffer);
-  regcache_cooked_write (regcache, PC_REGNUM, raw_buffer);
-
-  store_unsigned_integer (raw_buffer,
-			  register_size (current_gdbarch, SP_REGNUM),
-			  fp + info->size);
-  regcache_cooked_write (regcache, SP_REGNUM, raw_buffer);
-
-  target_store_registers (-1);
-  flush_cached_frames ();
-}
-
 static struct frame_unwind d10v_frame_unwind = {
-  d10v_frame_pop,
   d10v_frame_id_unwind,
   d10v_frame_register_unwind
 };

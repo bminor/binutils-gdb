@@ -185,16 +185,44 @@ frame_pc_unwind (struct frame_info *this_frame)
   return this_frame->pc_unwind_cache;
 }
 
-void
-frame_pop (struct frame_info *frame)
+static int
+do_frame_unwind_register (void *src, int regnum, void *buf)
 {
-  /* FIXME: cagney/2003-01-18: There is probably a chicken-egg problem
-     with passing in current_regcache.  The pop function needs to be
-     written carefully so as to not overwrite registers whose [old]
-     values are needed to restore other registers.  Instead, this code
-     should pass in a scratch cache and, as a second step, restore the
-     registers using that.  */
-  frame->unwind->pop (frame, &frame->unwind_cache, current_regcache);
+  frame_unwind_register (src, regnum, buf);
+  return 1;
+}
+
+void
+frame_pop (struct frame_info *this_frame)
+{
+  struct regcache *scratch_regcache;
+  struct cleanup *cleanups;
+
+  if (POP_FRAME_P ())
+    {
+      /* A legacy architecture that has implemented a custom pop
+	 function.  All new architectures should instead be using the
+	 generic code below.  */
+      POP_FRAME;
+    }
+  else
+    {
+      /* Make a copy of all the register values unwound from this
+	 frame.  Save them in a scratch buffer so that there isn't a
+	 race betweening trying to extract the old values from the
+	 current_regcache while, at the same time writing new values
+	 into that same cache.  */
+      struct regcache *scratch = regcache_xmalloc (current_gdbarch);
+      struct cleanup *cleanups = make_cleanup_regcache_xfree (scratch);
+      regcache_save (scratch, do_frame_unwind_register, this_frame);
+      /* Now copy those saved registers into the current regcache.
+         Here, regcache_cpy() calls regcache_restore().  */
+      regcache_cpy (current_regcache, scratch);
+      do_cleanups (cleanups);
+    }
+  /* We've made right mess of GDB's local state, just discard
+     everything.  */
+  target_store_registers (-1);
   flush_cached_frames ();
 }
 
@@ -768,16 +796,7 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
   id->base = base;
 }
 	
-static void
-frame_saved_regs_pop (struct frame_info *fi, void **cache,
-		      struct regcache *regcache)
-{
-  gdb_assert (POP_FRAME_P ());
-  POP_FRAME;
-}
-
 const struct frame_unwind trad_frame_unwinder = {
-  frame_saved_regs_pop,
   frame_saved_regs_id_unwind,
   frame_saved_regs_register_unwind
 };

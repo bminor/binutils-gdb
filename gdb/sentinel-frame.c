@@ -83,17 +83,8 @@ sentinel_frame_id_unwind (struct frame_info *frame,
   id->pc = read_pc ();
 }
 
-static void
-sentinel_frame_pop (struct frame_info *frame,
-		    void **cache,
-		    struct regcache *regcache)
-{
-  internal_error (__FILE__, __LINE__, "Function sentinal_frame_pop called");
-}
-
 const struct frame_unwind sentinel_frame_unwinder =
 {
-  sentinel_frame_pop,
   sentinel_frame_id_unwind,
   sentinel_frame_register_unwind
 };

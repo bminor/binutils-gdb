@@ -282,37 +282,6 @@ discard_innermost_dummy (struct dummy_frame **stack)
   xfree (tbd);
 }
 
-/* Function: dummy_frame_pop.  Restore the machine state from a saved
-   dummy stack frame. */
-
-static void
-dummy_frame_pop (struct frame_info *fi, void **cache,
-		 struct regcache *regcache)
-{
-  struct dummy_frame *dummy = cached_find_dummy_frame (fi, cache);
-
-  /* If it isn't, what are we even doing here?  */
-  gdb_assert (get_frame_type (fi) == DUMMY_FRAME);
-
-  if (dummy == NULL)
-    error ("Can't pop dummy frame!");
-
-  /* Discard all dummy frames up-to but not including this one.  */
-  while (dummy_frame_stack != dummy)
-    discard_innermost_dummy (&dummy_frame_stack);
-
-  /* Restore this one.  */
-  regcache_cpy (regcache, dummy->regcache);
-  flush_cached_frames ();
-
-  /* Now discard it.  */
-  discard_innermost_dummy (&dummy_frame_stack);
-
-  /* Note: target changed would be better.  Registers, memory and
-     frame are all invalid.  */
-  flush_cached_frames ();
-}
-
 void
 generic_pop_dummy_frame (void)
 {
@@ -390,7 +359,6 @@ dummy_frame_id_unwind (struct frame_info *frame,
 
 static struct frame_unwind dummy_frame_unwind =
 {
-  dummy_frame_pop,
   dummy_frame_id_unwind,
   dummy_frame_register_unwind
 };
