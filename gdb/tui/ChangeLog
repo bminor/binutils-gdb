@@ -1,5 +1,11 @@
 2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tui-out.c (tui_out_new): Clear start_of_line.
+	* tuiSource.c (tuiVerticalSourceScroll): Use print_source_lines
+	to update the current source line.
+
+2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tui-hooks.c (tui_detach_hook): New hook to know when a process dies.
 	(tui_install_hooks): Install it.
 	(tui_remove_hooks): Remove it.

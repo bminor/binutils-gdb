@@ -359,7 +359,7 @@ tuiVerticalSourceScroll (TuiScrollDirection scrollDirection,
 	  if (l.lineNo <= 0)
 	    l.lineNo = 1;
 	}
-      if (identify_source_line (s, l.lineNo, 0, -1) == 1)
-        tuiUpdateSourceWindowAsIs (srcWin, s, l, FALSE);
+
+      print_source_lines (s, l.lineNo, l.lineNo + 1, 0);
     }
 }
