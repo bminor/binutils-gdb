@@ -1,3 +1,11 @@
+2004-04-30  Brian Ford  <ford@vss.fsi.com>
+
+	Revert 2004-04-16 change.
+	* i386-tdep.c (i386_gdbarch_init): Fix comment typos.
+	(i386_coff_init_abi): Remove.
+	* i386-tdep.h (i386_coff_init_abi): Remove.
+	* i386-cygwin-tdep.c (i386_cygwin_init_abi): Remove call to above.
+
 2004-04-30  Andrew Cagney  <cagney@redhat.com>
 
 	* blockframe.c (find_pc_partial_function): Delete use of

@@ -1788,16 +1788,6 @@ i386_svr4_sigcontext_addr (struct frame_info *next_frame)
 }
 
 
-/* Generic COFF.  */
-
-void
-i386_coff_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  /* We typically use DWARF-in-COFF with the dbx register numbering.  */
-  set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_dbx_reg_to_regnum);
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_dbx_reg_to_regnum);
-}
-
 /* Generic ELF.  */
 
 void
@@ -2006,7 +1996,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      gcc/config/i386.c.  GCC also defines a third numbering scheme in
      gcc/config/i386.c, which it designates as the "default" register
      map used in 64bit mode.  This last register numbering scheme is
-     implemented in dbx64_register_map, and us used for AMD64; see
+     implemented in dbx64_register_map, and is used for AMD64; see
      amd64-tdep.c.
 
      Currently, each GCC i386 target always uses the same register
@@ -2025,8 +2015,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      native compiler (FreeBSD, NetBSD, OpenBSD, GNU/Linux) or for
      targets where the native toolchain uses a different numbering
      scheme for a particular debug format (stabs-in-ELF on Solaris)
-     the defaults below will have to be overridden, like the functions
-     i386_coff_init_abi() and i386_elf_init_abi() do.  */
+     the defaults below will have to be overridden, like
+     i386_elf_init_abi() does.  */
 
   /* Use the dbx register numbering scheme for stabs and COFF.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, i386_dbx_reg_to_regnum);
