@@ -1,3 +1,14 @@
+start-sanitize-am33
+Thu Jul 16 18:16:49 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/am33_5.s: Test 4 operand mul, mulu.
+	* gas/mn10300/basic.exp: Corresponding changes.
+
+end-sanitize-am33
+Mon Jul 13 18:15:11 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/*: All new i386 testsuite.
+
 1998-07-02  Ken Raeburn  <raeburn@cygnus.com>
 
 	* lib/gas-defs.exp (gas_init): Complain if target name isn't in
