@@ -4,6 +4,12 @@
 * New "if" and "while" commands.  This makes it possible to write
 somewhat more sophisticated user-defined commands.
 
+* Most debugging facilities now work on dynamic executables for HPPAs
+running hpux9 or later.  For the best results, include /usr/lib/end.o
+when linking dynamic programs you plan to debug.  Post-mortem debugging
+of dynamic executables and attaching to already running dynamic executables
+is not yet supported.
+
 *** Changes in GDB-4.13:
 
 * New "complete" command
