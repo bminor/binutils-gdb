@@ -21,7 +21,6 @@ Tue Jul  4 12:55:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 Mon Jul  3 14:26:37 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* configure.in (i386-*-win32): New target.
-	* ld/testsuite/versados/(t1,t2).ld: End in newlines.
 
 Mon Jul  3 14:39:22 1995  Ian Lance Taylor  <ian@cygnus.com>
 
