@@ -1,3 +1,48 @@
+Thu Jun  2 12:07:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* gasp.c (hash_new_table): Clear newly allocated table.
+
+	* config/tc-m68k.c (enum _register): Add 68060 control registers
+	BUSCR and PCR.
+	(last_movec_reg): New macro.
+	(m68000_control_regs, m68010_control_regs, m68020_control_regs,
+	m68040_control_regs, m68060_control_regs): New arrays.
+	(control_regs): New pointer.
+	(m68k_ip): Use control_regs instead of testing CPU every time.
+	Use last_movec_reg too.  In error messages, handle 68060, and
+	print 68060 for mfloat, too.
+	(m68k_init_after_args): Handle "68060".  Use m68040up for making
+	m68851 choice.  Set control_regs.
+	(md_parse_option): Handle "68060".
+	* configure.in: Setting cpu_type, recognize m68060 too.
+
+	* config/obj-coff.c (fixup_segment) [!BFD_ASSEMBLER]
+	[DIFF_EXPR_OK]: Do conversion to pc-relative for difference, even
+	if pcrel is already set.
+
+	* read.c (potable): Add this_gcc_requires_the_gnu_assembler in all
+	lower-case, in case we're ignoring case of opcodes in the input
+	file.
+
+	* doc/as.texinfo (.section): Document as unavailable for a.out
+	type formats.
+
+	* config/tc-alpha.c (machine): New variable.
+	(load_insn): New macro.
+	(load_insn_table): New function.
+	(md_begin): Call load_insn_table, once for basic instructions and
+	once for appropriate PAL instruction table.
+	(md_parse_option): Set `machine' based on -m##### arguments.
+	* config/alpha-opcode.h (alpha_pal21064_opcodes): Split out from
+	alpha_opcodes.
+	(alpha_pal21164_opcodes): New table.
+	(NUM21064OPCODES, NUM21164OPCODES): New macros.
+
+	* configure.in (target i386-*-netbsd0.8): Use 386bsd emulation.
+
+	* doc/Makefile.in (install-info-gasp): Use $$dir when installing
+	file.
+
 Wed Jun  1 10:48:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (mips_ip): Force floating point values to be
@@ -15,8 +60,8 @@ Fri May 27 10:05:53 1994  Ken Raeburn  (raeburn@cygnus.com)
 	* listing.c (list_symbol_table): Only test BFD64, not
 	BFD_ASSEMBLER too.
 
-	* config/obj-coff.c (fixup_segment) [DIFF_EXPR_OK]: Don't check
-	pcrel, just convert it.
+	* config/obj-coff.c (fixup_segment) [BFD_ASSEMBLER]
+	[DIFF_EXPR_OK]: Don't check pcrel, just convert it.
 
 	* config/obj-vms.c: Removed lots of extra semicolons after
 	compound statements.
