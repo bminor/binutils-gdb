@@ -136,6 +136,9 @@ static void lang_set_startof PARAMS ((void));
 static void gc_section_callback
   PARAMS ((lang_wild_statement_type *, struct wildcard_list *, asection *,
 	   lang_input_statement_type *, PTR));
+static void lang_get_regions PARAMS ((struct memory_region_struct **,
+				      struct memory_region_struct **,
+				      const char *, const char *, int));
 static void lang_record_phdrs PARAMS ((void));
 static void lang_gc_wild PARAMS ((lang_wild_statement_type *));
 static void lang_gc_sections_1 PARAMS ((lang_statement_union_type *));
@@ -3053,26 +3056,14 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 		if (os->lma_region == NULL && os->load_base == NULL)
 		  os->lma_region = os->region;
 
-		if (os->lma_region != NULL)
+		if (os->lma_region != NULL && os->lma_region != os->region)
 		  {
-		    if (os->load_base != NULL)
-		      {
-			einfo (_("%X%P: use an absolute load address or a load memory region, not both\n"));
-		      }
-		    else
-		      {
-			/* Don't allocate twice.  */
-			if (os->lma_region != os->region)
-			  {
-			    /* Set load_base, which will be handled later.  */
-			    os->load_base =
-			      exp_intop (os->lma_region->current);
-			    os->lma_region->current +=
-			      os->bfd_section->_raw_size / opb;
-			    os_region_check (os, os->lma_region, NULL,
-					     os->bfd_section->lma);
-			  }
-		      }
+		    /* Set load_base, which will be handled later.  */
+		    os->load_base = exp_intop (os->lma_region->current);
+		    os->lma_region->current +=
+		      os->bfd_section->_raw_size / opb;
+		    os_region_check (os, os->lma_region, NULL,
+				     os->bfd_section->lma);
 		  }
 	      }
 	  }
@@ -4517,6 +4508,36 @@ lang_float (maybe)
   lang_float_flag = maybe;
 }
 
+
+/* Work out the load- and run-time regions from a script statement, and
+   store them in *LMA_REGION and *REGION respectively.
+
+   MEMSPEC is the name of the run-time region, or "*default*" if the
+   statement didn't specify one.  LMA_MEMSPEC is the name of the
+   load-time region, or null if the statement didn't specify one.
+   HAVE_LMA_P is true if the statement had an explicit load address.
+
+   It is an error to specify both a load region and a load address.  */
+
+static void
+lang_get_regions (region, lma_region, memspec, lma_memspec, have_lma_p)
+     struct memory_region_struct **region, **lma_region;
+     const char *memspec, *lma_memspec;
+     int have_lma_p;
+{
+  *lma_region = lang_memory_region_lookup (lma_memspec);
+
+  /* If no runtime region has been given, but the load region has
+     been, use the load region.  */
+  if (lma_memspec != 0 && strcmp (memspec, "*default*") == 0)
+    *region = *lma_region;
+  else
+    *region = lang_memory_region_lookup (memspec);
+
+  if (have_lma_p && lma_memspec != 0)
+    einfo (_("%X%P:%S: section has both a load address and a load region\n"));
+}
+
 void
 lang_leave_output_section_statement (fill, memspec, phdrs, lma_memspec)
      fill_type *fill;
@@ -4524,15 +4545,11 @@ lang_leave_output_section_statement (fill, memspec, phdrs, lma_memspec)
      struct lang_output_section_phdr_list *phdrs;
      const char *lma_memspec;
 {
+  lang_get_regions (&current_section->region,
+		    &current_section->lma_region,
+		    memspec, lma_memspec,
+		    current_section->load_base != 0);
   current_section->fill = fill;
-  current_section->region = lang_memory_region_lookup (memspec);
-  current_section->lma_region = lang_memory_region_lookup (lma_memspec);
-
-  /* If no runtime region has been given, but the load region has
-     been, use the load region.  */
-  if (current_section->lma_region != 0 && strcmp (memspec, "*default*") == 0)
-    current_section->region = current_section->lma_region;
-
   current_section->phdrs = phdrs;
   stat_ptr = &statement_list;
 }
@@ -4934,8 +4951,9 @@ lang_leave_overlay (lma_expr, nocrossrefs, fill, memspec, phdrs, lma_memspec)
   struct overlay_list *l;
   struct lang_nocrossref *nocrossref;
 
-  region = lang_memory_region_lookup (memspec);
-  lma_region = lang_memory_region_lookup (lma_memspec);
+  lang_get_regions (&region, &lma_region,
+		    memspec, lma_memspec,
+		    lma_expr != 0);
 
   nocrossref = NULL;
 

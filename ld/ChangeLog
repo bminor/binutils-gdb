@@ -1,3 +1,16 @@
+2002-05-27  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ldlang.c (lang_size_sections_1): Move check for conflicting load
+	addresses and regions from here...
+	(lang_get_regions): ...to this new function.
+	(lang_leave_output_section_statement): Use lang_get_regions.
+	(lang_leave_overlay): Likewise.
+	* mri.c (mri_draw_tree): Pass null as last argument to
+	lang_leave_output_section_statement.
+	* emultempl/elf32.em (gld*_place_orphan): Likewise.
+	* emultempl/mmo.em (mmo_place_orphan): Likewise.
+	* emultempl/pe.em (gld*_place_orphan): Likewise.
+
 2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.tgt: Use ns32k-*-netbsd* instead of ns32k-pc532-netbsd*.
