@@ -1,3 +1,8 @@
+Tue Dec 13 15:15:33 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* breakpoint.c, infrun.c, printcmd.c: Change long command help
+        strings into concats of shorter ones, for picky ANSI compilers.
+
 Mon Dec 12 17:08:02 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
 	Sparc flat register window support.
