@@ -632,6 +632,7 @@ s390-dis.lo: s390-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   $(INCDIR)/opcode/s390.h
 sh-dis.lo: sh-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   sh-opc.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
+	$(LIBTOOL) --mode=compile $(COMPILE) -c @archdefs@ $<
 sh64-dis.lo: sh64-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
   sh64-opc.h $(INCDIR)/libiberty.h $(BFDDIR)/elf-bfd.h \

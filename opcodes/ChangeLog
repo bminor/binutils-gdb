@@ -1,4 +1,7 @@
-Wed May 22 19:13:27 2002  J"orn Rennecke <joern.rennecke@superh.com>
+Wed May 22 20:11:51 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* Makefile.am (sh-dis.lo): Compile with @archdefs@.
+	* Makefile.in: regenerate.
 
 	* sh-dis.c (print_insn_sh): If coff and bfd_mach_sh, use arch_sh4
 	for disassembly.
