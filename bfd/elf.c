@@ -571,15 +571,10 @@ _bfd_elf_merge_sections (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  struct elf_link_hash_table * hash_table;
-
-  hash_table = elf_hash_table (info);
-
-  if (hash_table == NULL)
+  if (!is_elf_hash_table (info))
     return false;
-
-  if (hash_table->merge_info)
-    _bfd_merge_sections (abfd, hash_table->merge_info);
+  if (elf_hash_table (info)->merge_info)
+    _bfd_merge_sections (abfd, elf_hash_table (info)->merge_info);
   return true;
 }
 

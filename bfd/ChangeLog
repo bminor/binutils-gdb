@@ -1,3 +1,8 @@
+2001-08-24  H.J. Lu  <hjl@gnu.org>
+
+	* elf.c (_bfd_elf_merge_sections): Fail if not using an ELF
+	hash structure.
+
 2001-08-24  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf-bfd.h (elf_hash_table): Revert definition.
