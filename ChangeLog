@@ -1,3 +1,9 @@
+Tue Apr 21 12:31:33 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* configure: test for config.sub with "config.sub sun4" rather
+	  than "config.sub ${host_alias}".  Otherwise we can't tell a bad
+	  host alias from a missing config.sub.
+
 Mon Apr 20 18:16:36 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: explicitly pass CFLAGS on recursion. no longer pass
