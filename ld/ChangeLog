@@ -1,3 +1,8 @@
+Thu Apr 17 13:07:18 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldctor.c (ldctor_build_sets): Make sure the set is aligned
+	appropriately.
+
 Tue Apr 15 13:19:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (INSTALL): Set to @INSTALL@.
