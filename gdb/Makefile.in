@@ -1309,7 +1309,8 @@ breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 buildsym.o: buildsym.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
 	$(objfiles_h) $(symfile_h) $(symtab_h) $(gdb_string_h) \
 	$(obstack_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
-	$(language_h) $(bcache_h) $(filenames_h) $(stabsread_h)
+	$(language_h) $(bcache_h) $(filenames_h) $(stabsread_h) \
+	$(macrotab_h)
 
 builtin-regs.o: builtin-regs.c $(defs.h) $(builtin_regs_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(value_h) $(frame_h)

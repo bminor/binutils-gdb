@@ -277,6 +277,7 @@ struct objfile
        will not change. */
 
     struct bcache psymbol_cache;	/* Byte cache for partial syms */
+    struct bcache macro_cache;          /* Byte cache for macros */
 
     /* Vectors of all partial symbols read in from file.  The actual data
        is stored in the psymbol_obstack. */

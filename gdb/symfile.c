@@ -1741,6 +1741,7 @@ reread_symbols (void)
 
 	      /* Free the obstacks for non-reusable objfiles */
 	      free_bcache (&objfile->psymbol_cache);
+	      free_bcache (&objfile->macro_cache);
 	      obstack_free (&objfile->psymbol_obstack, 0);
 	      obstack_free (&objfile->symbol_obstack, 0);
 	      obstack_free (&objfile->type_obstack, 0);
@@ -1765,6 +1766,8 @@ reread_symbols (void)
 	      /* obstack_specify_allocation also initializes the obstack so
 	         it is empty.  */
 	      obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
+					  xmalloc, xfree);
+	      obstack_specify_allocation (&objfile->macro_cache.cache, 0, 0,
 					  xmalloc, xfree);
 	      obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0,
 					  xmalloc, xfree);

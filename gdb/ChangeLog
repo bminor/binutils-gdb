@@ -1,3 +1,30 @@
+2002-05-15  Jim Blandy  <jimb@redhat.com>
+
+	Add macro structures to GDB's symbol tables.  Nobody puts anything
+	in them yet.
+	* symtab.h (struct symtab): New member: `macro_table'.
+	* buildsym.h (pending_macros): New global variable.
+	* buildsym.c: #include "macrotab.h".
+	(buildsym_init): Initialize `pending_macros'.
+	(end_symtab): If we found macro information while reading a CU's
+	debugging info, do build a symtab structure for it.  Make the
+	symtab point to the macro information, and clear the
+	`pending_macros' pointer which held it while we were reading the
+	debug info.
+	(really_free_pendings): Free any pending macro table.
+	* objfiles.h (struct objfile): New member: `macro_cache'.
+	* objfiles.c (allocate_objfile): Set allocate and free functions
+	for the macro cache's objstack.
+	(free_objfile): Empty the macro cache's obstack.
+	* symfile.c (reread_symbols): Empty the macro cache's obstack, and
+	set new allocate and free functions for it.
+	* solib-sunos.c (allocate_rt_common_objfile): Set allocate and
+	free functions for the macro cache's objstack.  (Why is this
+	function building its own objfile?)
+	* symmisc.c (print_objfile_statistics): Print statistics on the
+	macro bcache.
+	* Makefile.in: Note that buildsym.o depends on macrotab.h.
+
 2002-05-15  Richard Earnshaw  <rearnsha@arm.com>
 
 	* config/arm/nm-nbsd.h: Use <> for include of config/nm-nbsd.h.

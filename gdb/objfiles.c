@@ -190,6 +190,8 @@ allocate_objfile (bfd *abfd, int flags)
 	      /* Update pointers to functions to *our* copies */
 	      obstack_chunkfun (&objfile->psymbol_cache.cache, xmmalloc);
 	      obstack_freefun (&objfile->psymbol_cache.cache, xmfree);
+	      obstack_chunkfun (&objfile->macro_cache.cache, xmmalloc);
+	      obstack_freefun (&objfile->macro_cache.cache, xmfree);
 	      obstack_chunkfun (&objfile->psymbol_obstack, xmmalloc);
 	      obstack_freefun (&objfile->psymbol_obstack, xmfree);
 	      obstack_chunkfun (&objfile->symbol_obstack, xmmalloc);
@@ -218,6 +220,9 @@ allocate_objfile (bfd *abfd, int flags)
 	      objfile->flags |= OBJF_MAPPED;
 	      mmalloc_setkey (objfile->md, 0, objfile);
 	      obstack_specify_allocation_with_arg (&objfile->psymbol_cache.cache,
+						   0, 0, xmmalloc, xmfree,
+						   objfile->md);
+	      obstack_specify_allocation_with_arg (&objfile->macro_cache.cache,
 						   0, 0, xmmalloc, xmfree,
 						   objfile->md);
 	      obstack_specify_allocation_with_arg (&objfile->psymbol_obstack,
@@ -265,6 +270,8 @@ allocate_objfile (bfd *abfd, int flags)
       memset (objfile, 0, sizeof (struct objfile));
       objfile->md = NULL;
       obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
+				  xmalloc, xfree);
+      obstack_specify_allocation (&objfile->macro_cache.cache, 0, 0,
 				  xmalloc, xfree);
       obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0, xmalloc,
 				  xfree);
@@ -477,6 +484,7 @@ free_objfile (struct objfile *objfile)
 	xmfree (objfile->md, objfile->static_psymbols.list);
       /* Free the obstacks for non-reusable objfiles */
       free_bcache (&objfile->psymbol_cache);
+      free_bcache (&objfile->macro_cache);
       obstack_free (&objfile->psymbol_obstack, 0);
       obstack_free (&objfile->symbol_obstack, 0);
       obstack_free (&objfile->type_obstack, 0);
