@@ -1,3 +1,7 @@
+Tue Oct  8 10:23:44 1991  Steve Chamberlain  (steve at cygnus.com)
+
+	* objdump.c (print_address) Print addresses nicely.
+
 Mon Oct  7 11:31:05 1991  Per Bothner  (bothner at cygnus.com)
 
 	* ar.c, Makefile.in, new files {is,not,maybe}-ranlib.c:
