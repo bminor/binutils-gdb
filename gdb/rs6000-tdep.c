@@ -2959,6 +2959,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      revisited.  */
   if (sysv_abi && wordsize == 4)
     set_gdbarch_push_dummy_call (gdbarch, ppc_sysv_abi_push_dummy_call);
+  else if (sysv_abi && wordsize == 8)
+    set_gdbarch_push_dummy_call (gdbarch, ppc64_sysv_abi_push_dummy_call);
   else
     set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);
 

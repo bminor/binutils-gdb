@@ -1,3 +1,14 @@
+2003-10-10  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (ppc-sysv-tdep.o): Add $(gdb_assert_h).
+	* rs6000-tdep.c (rs6000_gdbarch_init): When 64 bit SysV ABI, set
+	push_dummy_call to ppc64_sysv_abi_push_dummy_call.
+	* ppc-sysv-tdep.c: Include "gdb_assert.h".
+	(ppc64_sysv_abi_push_dummy_call): New function.
+	(ppc64_sysv_abi_broken_push_dummy_call): New function.
+	* ppc-tdep.h (ppc64_sysv_abi_push_dummy_call): Declare.
+	(ppc64_sysv_abi_broken_push_dummy_call): Declare.
+
 2003-10-10  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* NEWS: Replace "Hitachi" and "Mitsubishi" with "Renesas".
