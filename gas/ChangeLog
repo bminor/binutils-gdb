@@ -1,7 +1,8 @@
 Wed Jun 15 12:32:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	* config/tc-mips.c (mips_ip): Permit non constant expressions in
-	'u' case: lets lui %hi(foo) work correctly.
+	* config/tc-mips.c (mips_ip): Permit a modifier in 'o' case, and
+	permit non constant expressions in 'u' case.  Lets ``lui
+	$8,%hi(foo); lw $8,%lo(foo)($8)'' work correctly.
 
 Mon Jun 13 12:08:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
