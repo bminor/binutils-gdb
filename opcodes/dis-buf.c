@@ -1,5 +1,5 @@
 /* Disassemble from a buffer, for GNU.
-   Copyright (C) 1993 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "dis-asm.h"
+#include <string.h>
 #include <errno.h>
 
 /* Get LENGTH bytes from info's buffer, at target address memaddr.
@@ -51,4 +52,19 @@ perror_memory (status, memaddr, info)
        out of bounds.  */
     (*info->fprintf_func) (info->stream,
 			   "Address 0x%x is out of bounds.\n", memaddr);
+}
+
+/* This could be in a separate file, to save miniscule amounts of space
+   in statically linked executables.  */
+
+/* Just print the address is hex.  This is included for completeness even
+   though both GDB and objdump provide their own (to print symbolic
+   addresses).  */
+
+void
+generic_print_address (addr, info)
+     bfd_vma addr;
+     struct disassemble_info *info;
+{
+  (*info->fprintf_func) (info->stream, "0x%x", addr);
 }

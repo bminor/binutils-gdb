@@ -1,5 +1,5 @@
 /* Print i386 instructions for GDB, the GNU debugger.
-   Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1988, 1989, 1991, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 
 #include "dis-asm.h"
+#include <string.h>
 
 #define MAXLEN 20
 
@@ -1045,11 +1046,17 @@ print_insn_i386 (pc, info)
   else
     dp = &dis386[*codep];
   codep++;
+
+  /* Fetch the mod/reg/rm byte.  FIXME: We should be only fetching
+     this if we need it.  As it is, this code loses if there is a
+     one-byte instruction (without a mod/reg/rm byte) at the end of
+     the address space.  */
+
   FETCH_DATA (info, codep + 1);
   mod = (*codep >> 6) & 3;
   reg = (*codep >> 3) & 7;
   rm = *codep & 7;
-  
+
   if (dp->name == NULL && dp->bytemode1 == FLOATCODE)
     {
       dofloat ();

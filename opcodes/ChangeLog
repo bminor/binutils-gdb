@@ -1,3 +1,17 @@
+Tue Feb  8 00:32:28 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dis-buf.c, i386-dis.c:  Include <string.h>.
+
+Mon Feb  7 19:22:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in (bfd_powerpc_arch): Use ppc-dis.o and ppc-opc.o.
+
+	* ppc-opc.c (powerpc_opcodes): Mark POWER instructions supported
+	by Motorola PowerPC 601 with PPC_OPCODE_601.
+	* ppc-dis.c (print_insn_big_powerpc, print_insn_little_powerpc):
+	Disassemble Motorola PowerPC 601 instructions as well as normal
+	PowerPC instructions.
+
 Sun Feb  6 07:45:17 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* i960-dis.c (reg, mem): Just use a static array instead of
