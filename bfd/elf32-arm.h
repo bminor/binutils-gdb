@@ -420,7 +420,7 @@ record_arm_to_thumb_glue (link_info, h)
      struct elf_link_hash_entry * h;
 {
   const char * name = h->root.root.string;
-  register asection * s;
+  asection * s;
   char * tmp_name;
   struct elf_link_hash_entry * myh;
   struct elf32_arm_link_hash_table * globals;
@@ -475,7 +475,7 @@ record_thumb_to_arm_glue (link_info, h)
      struct elf_link_hash_entry *h;
 {
   const char *name = h->root.root.string;
-  register asection *s;
+  asection *s;
   char *tmp_name;
   struct elf_link_hash_entry *myh;
   struct elf32_arm_link_hash_table *hash_table;
@@ -2041,9 +2041,9 @@ elf32_arm_set_private_flags (abfd, flags)
 Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"),
 				   bfd_archive_filename (abfd));
 	  else
-	    (*_bfd_error_handler) (_("\
+	    _bfd_error_handler (_("\
 Warning: Clearing the interwork flag of %s due to outside request"),
-				   bfd_archive_filename (abfd));
+				bfd_archive_filename (abfd));
 	}
     }
   else
@@ -2089,12 +2089,10 @@ elf32_arm_copy_private_bfd_data (ibfd, obfd)
       if ((in_flags & EF_ARM_INTERWORK) != (out_flags & EF_ARM_INTERWORK))
 	{
 	  if (out_flags & EF_ARM_INTERWORK)
-	    {
-	      (*_bfd_error_handler) (_("\
+	    _bfd_error_handler (_("\
 Warning: Clearing the interwork flag in %s because non-interworking code in %s has been linked with it"),
-				     bfd_get_filename (obfd),
-				     bfd_archive_filename (ibfd));
-	    }
+				bfd_archive_filename (obfd),
+				bfd_archive_filename (ibfd));
 
 	  in_flags &= ~EF_ARM_INTERWORK;
 	}
@@ -2186,12 +2184,12 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
   /* Complain about various flag mismatches.  */
   if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_VERSION (out_flags))
     {
-      (*_bfd_error_handler) (_("\
+      _bfd_error_handler (_("\
 Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
-			     bfd_archive_filename (ibfd),
-			     (in_flags & EF_ARM_EABIMASK) >> 24,
-			     bfd_get_filename (obfd),
-			     (out_flags & EF_ARM_EABIMASK) >> 24);
+			  bfd_archive_filename (ibfd),
+			  (in_flags & EF_ARM_EABIMASK) >> 24,
+			  bfd_archive_filename (obfd),
+			  (out_flags & EF_ARM_EABIMASK) >> 24);
       return false;
     }
 
@@ -2200,35 +2198,37 @@ Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
     {
       if ((in_flags & EF_ARM_APCS_26) != (out_flags & EF_ARM_APCS_26))
 	{
-	  (*_bfd_error_handler) (_("\
+	  _bfd_error_handler (_("\
 Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"),
-				 bfd_archive_filename (ibfd),
-				 in_flags & EF_ARM_APCS_26 ? 26 : 32,
-				 bfd_get_filename (obfd),
-				 out_flags & EF_ARM_APCS_26 ? 26 : 32);
+			      bfd_archive_filename (ibfd),
+			      in_flags & EF_ARM_APCS_26 ? 26 : 32,
+			      bfd_archive_filename (obfd),
+			      out_flags & EF_ARM_APCS_26 ? 26 : 32);
 	  flags_compatible = false;
 	}
 
       if ((in_flags & EF_ARM_APCS_FLOAT) != (out_flags & EF_ARM_APCS_FLOAT))
 	{
-	  char *s1 = in_flags & EF_ARM_APCS_FLOAT ? _("float") : _("integer");
-	  char *s2 = out_flags & EF_ARM_APCS_26 ? _("float") : _("integer");
-	  (*_bfd_error_handler) (_("\
+	  char *s1 = in_flags  & EF_ARM_APCS_FLOAT ? _("float") : _("integer");
+	  char *s2 = out_flags & EF_ARM_APCS_FLOAT ? _("float") : _("integer");
+
+	  _bfd_error_handler (_("\
 Error: %s passes floats in %s registers, whereas %s passes them in %s registers"),
-				 bfd_archive_filename (ibfd), s1,
-				 bfd_get_filename (obfd), s2);
+			      bfd_archive_filename (ibfd), s1,
+			      bfd_archive_filename (obfd), s2);
 	  flags_compatible = false;
 	}
 
 #ifdef EF_ARM_SOFT_FLOAT
       if ((in_flags & EF_ARM_SOFT_FLOAT) != (out_flags & EF_ARM_SOFT_FLOAT))
 	{
-	  char *s1 = in_flags & EF_ARM_SOFT_FLOAT ? _("soft") : _("hard");
+	  char *s1 = in_flags  & EF_ARM_SOFT_FLOAT ? _("soft") : _("hard");
 	  char *s2 = out_flags & EF_ARM_SOFT_FLOAT ? _("soft") : _("hard");
-	  (*_bfd_error_handler) (_ ("\
+
+	  _bfd_error_handler (_ ("\
 Error: %s uses %s floating point, whereas %s uses %s floating point"),
-				 bfd_archive_filename (ibfd), s1,
-				 bfd_get_filename (obfd), s2);
+			      bfd_archive_filename (ibfd), s1,
+			      bfd_archive_filename (obfd), s2);
 	  flags_compatible = false;
 	}
 #endif
@@ -2239,12 +2239,14 @@ Error: %s uses %s floating point, whereas %s uses %s floating point"),
 	  char *s1 = (in_flags & EF_ARM_INTERWORK
 		      ? _("supports") : _("does not support"));
 	  char *s2 = out_flags & EF_ARM_INTERWORK ? _("does") : _("does not");
-	  (*_bfd_error_handler) (_("\
+
+	  _bfd_error_handler (_("\
 Warning: %s %s interworking, whereas %s %s"),
-				 bfd_archive_filename (ibfd), s1,
-				 bfd_get_filename (obfd), s2);
+			      bfd_archive_filename (ibfd), s1,
+			      bfd_archive_filename (obfd), s2);
 	}
     }
+
   return flags_compatible;
 }
 
@@ -2557,7 +2559,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 	        if (local_got_offsets == NULL)
 		  {
 		    bfd_size_type size;
-		    register unsigned int i;
+		    unsigned int i;
 
 		    size = symtab_hdr->sh_info;
 		    size *= sizeof (bfd_vma);
