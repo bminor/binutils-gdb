@@ -1,3 +1,10 @@
+2005-04-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (dec_dynrel_count): New function split out from
+	ppc64_elf_edit_toc, with additional code from ppc64_elf_edit_opd.
+	(ppc64_elf_edit_toc, ppc64_elf_edit_opd): Use it.
+	(ppc64_elf_tls_optimize): Likewise.
+
 2005-04-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* netbsd-core.c (SPARC_WCOOKIE_OFFSET): Renamed from

@@ -5951,6 +5951,125 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
   return TRUE;
 }
 
+/* Handles decrementing dynamic reloc counts for the reloc specified by
+   R_INFO in section SEC.  If LOCAL_SYMS is NULL, then H and SYM_SEC
+   have already been determined.  */
+
+static bfd_boolean
+dec_dynrel_count (bfd_vma r_info,
+		  asection *sec,
+		  struct bfd_link_info *info,
+		  Elf_Internal_Sym **local_syms,
+		  struct elf_link_hash_entry *h,
+		  asection *sym_sec)
+{
+  enum elf_ppc64_reloc_type r_type;
+  struct ppc_dyn_relocs *p;
+  struct ppc_dyn_relocs **pp;
+
+  /* Can this reloc be dynamic?  This switch, and later tests here
+     should be kept in sync with the code in check_relocs.  */
+  r_type = ELF64_R_TYPE (r_info);
+  switch (r_type)
+    {
+    default:
+      return TRUE;
+
+    case R_PPC64_TPREL16:
+    case R_PPC64_TPREL16_LO:
+    case R_PPC64_TPREL16_HI:
+    case R_PPC64_TPREL16_HA:
+    case R_PPC64_TPREL16_DS:
+    case R_PPC64_TPREL16_LO_DS:
+    case R_PPC64_TPREL16_HIGHER:
+    case R_PPC64_TPREL16_HIGHERA:
+    case R_PPC64_TPREL16_HIGHEST:
+    case R_PPC64_TPREL16_HIGHESTA:
+      if (!info->shared)
+	return TRUE;
+
+    case R_PPC64_TPREL64:
+    case R_PPC64_DTPMOD64:
+    case R_PPC64_DTPREL64:
+    case R_PPC64_ADDR64:
+    case R_PPC64_REL30:
+    case R_PPC64_REL32:
+    case R_PPC64_REL64:
+    case R_PPC64_ADDR14:
+    case R_PPC64_ADDR14_BRNTAKEN:
+    case R_PPC64_ADDR14_BRTAKEN:
+    case R_PPC64_ADDR16:
+    case R_PPC64_ADDR16_DS:
+    case R_PPC64_ADDR16_HA:
+    case R_PPC64_ADDR16_HI:
+    case R_PPC64_ADDR16_HIGHER:
+    case R_PPC64_ADDR16_HIGHERA:
+    case R_PPC64_ADDR16_HIGHEST:
+    case R_PPC64_ADDR16_HIGHESTA:
+    case R_PPC64_ADDR16_LO:
+    case R_PPC64_ADDR16_LO_DS:
+    case R_PPC64_ADDR24:
+    case R_PPC64_ADDR32:
+    case R_PPC64_UADDR16:
+    case R_PPC64_UADDR32:
+    case R_PPC64_UADDR64:
+    case R_PPC64_TOC:
+      break;
+    }
+
+  if (local_syms != NULL)
+    {
+      unsigned long r_symndx;
+      Elf_Internal_Sym *sym;
+      bfd *ibfd = sec->owner;
+
+      r_symndx = ELF64_R_SYM (r_info);
+      if (!get_sym_h (&h, &sym, &sym_sec, NULL, local_syms, r_symndx, ibfd))
+	return FALSE;
+    }
+
+  if ((info->shared
+       && (MUST_BE_DYN_RELOC (r_type)
+	   || (h != NULL
+	       && (!info->symbolic
+		   || h->root.type == bfd_link_hash_defweak
+		   || !h->def_regular))))
+      || (ELIMINATE_COPY_RELOCS
+	  && !info->shared
+	  && h != NULL
+	  && (h->root.type == bfd_link_hash_defweak
+	      || !h->def_regular)))
+    ;
+  else
+    return TRUE;
+
+  if (h != NULL)
+    pp = &((struct ppc_link_hash_entry *) h)->dyn_relocs;
+  else if (sym_sec != NULL)
+    pp = (struct ppc_dyn_relocs **) &elf_section_data (sym_sec)->local_dynrel;
+  else
+    pp = (struct ppc_dyn_relocs **) &elf_section_data (sec)->local_dynrel;
+
+  while ((p = *pp) != NULL)
+    {
+      if (p->sec == sec)
+	{
+	  if (!MUST_BE_DYN_RELOC (r_type))
+	    p->pc_count -= 1;
+	  p->count -= 1;
+	  if (p->count == 0)
+	    *pp = p->next;
+	  return TRUE;
+	}
+      pp = &p->next;
+    }
+
+  (*_bfd_error_handler) (_("dynreloc miscount for %B, section %A"),
+			   sec->owner, sec);
+  bfd_set_error (bfd_error_bad_value);
+  return FALSE;
+}
+
 /* Remove unused Official Procedure Descriptor entries.  Currently we
    only remove those associated with functions in discarded link-once
    sections, or weakly defined functions that have been overridden.  It
@@ -6271,33 +6390,9 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 
 	      if (skip)
 		{
-		  BFD_ASSERT (MUST_BE_DYN_RELOC (ELF64_R_TYPE (rel->r_info)));
-		  if (info->shared)
-		    {
-		      /* We won't be needing dynamic relocs here.  */
-		      struct ppc_dyn_relocs **pp;
-		      struct ppc_dyn_relocs *p;
-
-		      if (h != NULL)
-			pp = &((struct ppc_link_hash_entry *) h)->dyn_relocs;
-		      else if (sym_sec != NULL)
-			pp = ((struct ppc_dyn_relocs **)
-			      &elf_section_data (sym_sec)->local_dynrel);
-		      else
-			pp = ((struct ppc_dyn_relocs **)
-			      &elf_section_data (sec)->local_dynrel);
-		      while ((p = *pp) != NULL)
-			{
-			  if (p->sec == sec)
-			    {
-			      p->count -= 1;
-			      if (p->count == 0)
-				*pp = p->next;
-			      break;
-			    }
-			  pp = &p->next;
-			}
-		    }
+		  if (!dec_dynrel_count (rel->r_info, sec, info,
+					 NULL, h, sym_sec))
+		    goto error_ret;
 		}
 	      else
 		{
@@ -6668,29 +6763,20 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 			  ent->got.refcount -= 1;
 		      }
 		  }
-		else if (h != NULL)
+		else
 		  {
-		    struct ppc_link_hash_entry * eh;
-		    struct ppc_dyn_relocs **pp;
-		    struct ppc_dyn_relocs *p;
+		    /* If we got rid of a DTPMOD/DTPREL reloc pair then
+		       we'll lose one or two dyn relocs.  */
+		    if (!dec_dynrel_count (rel->r_info, sec, info,
+					   NULL, h, sym_sec))
+		      return FALSE;
 
-		    /* Adjust dynamic relocs.  */
-		    eh = (struct ppc_link_hash_entry *) h;
-		    for (pp = &eh->dyn_relocs;
-			 (p = *pp) != NULL;
-			 pp = &p->next)
-		      if (p->sec == sec)
-			{
-			  /* If we got rid of a DTPMOD/DTPREL reloc
-			     pair then we'll lose one or two dyn
-			     relocs.  */
-			  if (tls_set == (TLS_EXPLICIT | TLS_GD))
-			    p->count -= 1;
-			  p->count -= 1;
-			  if (p->count == 0)
-			    *pp = p->next;
-			  break;
-			}
+		    if (tls_set == (TLS_EXPLICIT | TLS_GD))
+		      {
+			if (!dec_dynrel_count ((rel + 1)->r_info, sec, info,
+					       NULL, h, sym_sec))
+			  return FALSE;
+		      }
 		  }
 
 		*tls_mask |= tls_set;
@@ -7056,106 +7142,9 @@ ppc64_elf_edit_toc (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		    wrel->r_addend = rel->r_addend;
 		    ++wrel;
 		  }
-		else
-		  {
-		    unsigned long r_symndx;
-		    enum elf_ppc64_reloc_type r_type;
-		    asection *sym_sec;
-		    struct elf_link_hash_entry *h;
-		    Elf_Internal_Sym *sym;
-		    struct ppc_dyn_relocs *p;
-		    struct ppc_dyn_relocs **head;
-
-		    /* Can this reloc be dynamic?
-		       This switch, and later tests here should be kept
-		       in sync with the code in check_relocs.  */
-		    r_type = ELF64_R_TYPE (rel->r_info);
-		    switch (r_type)
-		      {
-		      default:
-			continue;
-
-		      case R_PPC64_TPREL16:
-		      case R_PPC64_TPREL16_LO:
-		      case R_PPC64_TPREL16_HI:
-		      case R_PPC64_TPREL16_HA:
-		      case R_PPC64_TPREL16_DS:
-		      case R_PPC64_TPREL16_LO_DS:
-		      case R_PPC64_TPREL16_HIGHER:
-		      case R_PPC64_TPREL16_HIGHERA:
-		      case R_PPC64_TPREL16_HIGHEST:
-		      case R_PPC64_TPREL16_HIGHESTA:
-			if (!info->shared)
-			  continue;
-
-		      case R_PPC64_TPREL64:
-		      case R_PPC64_DTPMOD64:
-		      case R_PPC64_DTPREL64:
-		      case R_PPC64_ADDR64:
-		      case R_PPC64_REL30:
-		      case R_PPC64_REL32:
-		      case R_PPC64_REL64:
-		      case R_PPC64_ADDR14:
-		      case R_PPC64_ADDR14_BRNTAKEN:
-		      case R_PPC64_ADDR14_BRTAKEN:
-		      case R_PPC64_ADDR16:
-		      case R_PPC64_ADDR16_DS:
-		      case R_PPC64_ADDR16_HA:
-		      case R_PPC64_ADDR16_HI:
-		      case R_PPC64_ADDR16_HIGHER:
-		      case R_PPC64_ADDR16_HIGHERA:
-		      case R_PPC64_ADDR16_HIGHEST:
-		      case R_PPC64_ADDR16_HIGHESTA:
-		      case R_PPC64_ADDR16_LO:
-		      case R_PPC64_ADDR16_LO_DS:
-		      case R_PPC64_ADDR24:
-		      case R_PPC64_ADDR32:
-		      case R_PPC64_UADDR16:
-		      case R_PPC64_UADDR32:
-		      case R_PPC64_UADDR64:
-		      case R_PPC64_TOC:
-			break;
-		      }
-
-		    r_symndx = ELF64_R_SYM (rel->r_info);
-		    if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
-				    r_symndx, ibfd))
-		      goto error_ret;
-
-		    if ((info->shared
-			 && (MUST_BE_DYN_RELOC (r_type)
-			     || (h != NULL
-				 && (!info->symbolic
-				     || h->root.type == bfd_link_hash_defweak
-				     || !h->def_regular))))
-			|| (ELIMINATE_COPY_RELOCS
-			    && !info->shared
-			    && h != NULL
-			    && (h->root.type == bfd_link_hash_defweak
-				|| !h->def_regular)))
-		      ;
-		    else
-		      continue;
-
-		    if (h != NULL)
-		      head = &((struct ppc_link_hash_entry *) h)->dyn_relocs;
-		    else
-		      {
-			if (sym_sec == NULL)
-			  goto error_ret;
-
-			head = ((struct ppc_dyn_relocs **)
-				&elf_section_data (sym_sec)->local_dynrel);
-		      }
-		    for (p = *head; p != NULL; p = p->next)
-		      if (p->sec == toc)
-			{
-			  p->count -= 1;
-			  if (!MUST_BE_DYN_RELOC (r_type))
-			    p->pc_count -= 1;
-			  break;
-			}
-		  }
+		else if (!dec_dynrel_count (rel->r_info, toc, info,
+					    &local_syms, NULL, NULL))
+		  goto error_ret;
 
 	      toc->reloc_count = wrel - relstart;
 	      sz = elf_section_data (toc)->rel_hdr.sh_entsize;
