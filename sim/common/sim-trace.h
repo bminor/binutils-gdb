@@ -23,44 +23,76 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SIM_TRACE_H
 #define SIM_TRACE_H
 
-#ifndef __attribute__
-#if !defined(__GNUC__) || (__GNUC__ < 2) || (__GNUC__ == 2 && __GNU_MINOR__ < 7)
-#define __attribute__(attr)
-#endif
-#endif
-
 /* Standard traceable entities.  */
-#define TRACE_SEMANTICS_IDX -1	/* set ALU, FPU, MEMORY tracing */
-#define TRACE_INSN_IDX 0
-#define TRACE_DECODE_IDX 1
-#define TRACE_EXTRACT_IDX 2
-#define TRACE_LINENUM_IDX 3
-#define TRACE_MEMORY_IDX 4
-#define TRACE_MODEL_IDX 5
-#define TRACE_ALU_IDX 6
-#define TRACE_CORE_IDX 7
-#define TRACE_EVENTS_IDX 8
-#define TRACE_FPU_IDX 9
-#define TRACE_BRANCH_IDX 10
-#define TRACE_NEXT_IDX 16 /* simulator specific trace bits begin here */
 
+enum {
+  /* Trace insn execution.  */
+  TRACE_INSN_IDX = 1,
+
+  /* Trace insn decoding.
+     ??? This is more of a simulator debugging operation and might best be
+     moved to --debug-decode.  */
+  TRACE_DECODE_IDX,
+
+  /* Trace insn extraction.
+     ??? This is more of a simulator debugging operation and might best be
+     moved to --debug-extract.  */
+  TRACE_EXTRACT_IDX,
+
+  /* Trace insn execution but include line numbers.  */
+  TRACE_LINENUM_IDX,
+
+  /* Trace memory operations.
+     The difference between this and TRACE_CORE_IDX is (I think) that this
+     is intended to apply to a higher level.  TRACE_CORE_IDX applies to the
+     low level core operations.  */
+  TRACE_MEMORY_IDX,
+
+  /* Include model performance data in tracing output.  */
+  TRACE_MODEL_IDX,
+
+  /* Trace ALU operations.  */
+  TRACE_ALU_IDX,
+
+  /* Trace memory core operations.  */
+  TRACE_CORE_IDX,
+
+  /* Trace events.  */
+  TRACE_EVENTS_IDX,
+
+  /* Trace fpu operations.  */
+  TRACE_FPU_IDX,
+
+  /* Trace branching.  */
+  TRACE_BRANCH_IDX,
+
+  /* Add information useful for debugging the simulator to trace output.  */
+  TRACE_DEBUG_IDX,
+
+  /* Simulator specific trace bits begin here.  */
+  TRACE_NEXT_IDX,
+
+};
 /* Maximum number of traceable entities.  */
 #ifndef MAX_TRACE_VALUES
 #define MAX_TRACE_VALUES 32
 #endif
-
-/* Masks so WITH_TRACE can have symbolic values.  */
-#define TRACE_insn 1
-#define TRACE_decode 2
-#define TRACE_extract 4
-#define TRACE_linenum 8
-#define TRACE_memory 16
-#define TRACE_model 32
-#define TRACE_alu 64
-#define TRACE_core 128
-#define TRACE_events 256
-#define TRACE_fpu 512
-#define TRACE_branch 1024
+
+/* Masks so WITH_TRACE can have symbolic values.
+   The case choice here is on purpose.  The lowercase parts are args to
+   --with-trace.  */
+#define TRACE_insn     (1 << TRACE_INSN_IDX)
+#define TRACE_decode   (1 << TRACE_DECODE_IDX)
+#define TRACE_extract  (1 << TRACE_EXTRACT_IDX)
+#define TRACE_linenum  (1 << TRACE_LINENUM_IDX)
+#define TRACE_memory   (1 << TRACE_MEMORY_IDX)
+#define TRACE_model    (1 << TRACE_MODEL_IDX)
+#define TRACE_alu      (1 << TRACE_ALU_IDX)
+#define TRACE_core     (1 << TRACE_CORE_IDX)
+#define TRACE_events   (1 << TRACE_EVENTS_IDX)
+#define TRACE_fpu      (1 << TRACE_FPU_IDX)
+#define TRACE_branch   (1 << TRACE_BRANCH_IDX)
+#define TRACE_debug    (1 << TRACE_DEBUG_IDX)
 
 /* Preprocessor macros to simplify tests of WITH_TRACE.  */
 #define WITH_TRACE_INSN_P	(WITH_TRACE & TRACE_insn)
@@ -74,13 +106,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define WITH_TRACE_EVENTS_P	(WITH_TRACE & TRACE_events)
 #define WITH_TRACE_FPU_P	(WITH_TRACE & TRACE_fpu)
 #define WITH_TRACE_BRANCH_P	(WITH_TRACE & TRACE_branch)
+#define WITH_TRACE_DEBUG_P	(WITH_TRACE & TRACE_debug)
 
 /* Tracing install handler.  */
 MODULE_INSTALL_FN trace_install;
 
-/* Struct containing all trace data.  */
+/* Struct containing all system and cpu trace data.
 
-typedef struct {
+   System trace data is stored with the associated module.
+   System and cpu tracing must share the same space of bitmasks as they
+   are arguments to --with-trace.  One could have --with-trace and
+   --with-cpu-trace or some such but that's an over-complication at this point
+   in time.  Also, there may be occasions where system and cpu tracing may
+   wish to share a name.  */
+
+typedef struct _trace_data {
+
   /* Boolean array of specified tracing flags.  */
   /* ??? It's not clear that using an array vs a bit mask is faster.
      Consider the case where one wants to test whether any of several bits
@@ -92,23 +133,57 @@ typedef struct {
      We can't store `stderr' here as stderr goes through a callback.  */
   FILE *trace_file;
 #define TRACE_FILE(t) ((t)->trace_file)
+
+  /* Buffer to store the prefix to be printed before any trace line */
+  char trace_prefix[256];
+#define TRACE_PREFIX(t) ((t)->trace_prefix)
+
+  /* Buffer to save the inputs for the current instruction.  Use a
+     union to force the buffer into correct alignment */
+  union {
+    unsigned8 i8;
+    unsigned16 i16;
+    unsigned32 i32;
+    unsigned64 i64;
+  } trace_input_data[16];
+  unsigned8 trace_input_fmt[16];
+  unsigned8 trace_input_size[16];
+  int trace_input_idx;
+#define TRACE_INPUT_DATA(t) ((t)->trace_input_data)
+#define TRACE_INPUT_FMT(t) ((t)->trace_input_fmt)
+#define TRACE_INPUT_SIZE(t) ((t)->trace_input_size)
+#define TRACE_INPUT_IDX(t) ((t)->trace_input_idx)
+  
+  /* Category of trace being performed */
+  int trace_idx;
+#define TRACE_IDX(t) ((t)->trace_idx)
+  
 } TRACE_DATA;
+
 
-/* Usage macros.  */
+/* System tracing support.  */
+
+#define STATE_TRACE_FLAGS(sd) TRACE_FLAGS (STATE_TRACE_DATA (sd))
+
+/* Return non-zero if tracing of IDX is enabled for non-cpu specific
+   components.  The "S" in "STRACE" refers to "System".  */
+#define STRACE_P(sd,idx) \
+((WITH_TRACE & (1 << (idx))) != 0 \
+ && STATE_TRACE_FLAGS (sd)[idx] != 0)
+
+/* Non-zero if --trace-<xxxx> was specified for SD.  */
+#define STRACE_DEBUG_P(sd)	STRACE_P (sd, TRACE_DEBUG_IDX)
+
+/* CPU tracing support.  */
 
 #define CPU_TRACE_FLAGS(cpu) TRACE_FLAGS (CPU_TRACE_DATA (cpu))
-
-/* forward reference */
-struct _sim_cpu;
-
-/* Tracing support.  */
 
 /* Return non-zero if tracing of IDX is enabled for CPU.  */
 #define TRACE_P(cpu,idx) \
 ((WITH_TRACE & (1 << (idx))) != 0 \
  && CPU_TRACE_FLAGS (cpu)[idx] != 0)
 
-/* Non-zero if  a certain --trace-<xxxx> was specified for CPU.  */
+/* Non-zero if --trace-<xxxx> was specified for CPU.  */
 #define TRACE_INSN_P(cpu)	TRACE_P (cpu, TRACE_INSN_IDX)
 #define TRACE_DECODE_P(cpu)	TRACE_P (cpu, TRACE_DECODE_IDX)
 #define TRACE_EXTRACT_P(cpu)	TRACE_P (cpu, TRACE_EXTRACT_IDX)
@@ -120,7 +195,155 @@ struct _sim_cpu;
 #define TRACE_EVENTS_P(cpu)	TRACE_P (cpu, TRACE_EVENTS_IDX)
 #define TRACE_FPU_P(cpu)	TRACE_P (cpu, TRACE_FPU_IDX)
 #define TRACE_BRANCH_P(cpu)	TRACE_P (cpu, TRACE_BRANCH_IDX)
+#define TRACE_DEBUG_P(cpu)	TRACE_P (cpu, TRACE_DEBUG_IDX)
+
+/* Traceing functions.
 
+ */
+
+/* Prime the trace buffers ready for any trace output.
+   Must be called prior to any other trace operation */
+extern void trace_prefix PARAMS ((SIM_DESC sd,
+				  sim_cpu * cpu,
+				  address_word cia,
+				  int print_linenum_p,
+				  const char *file_name,
+				  int line_nr,
+				  const char *fmt,
+				  ...))
+       __attribute__((format (printf, 7, 8)));
+
+/* Generic trace print, assumes trace_prefix() has been called */
+
+extern void trace_generic PARAMS ((SIM_DESC sd,
+				   sim_cpu *cpu,
+				   int trace_idx,
+				   char *fmt,
+				   ...))
+     __attribute__((format (printf, 4, 5)));
+
+/* Trace a varying number of word sized inputs/outputs.  trace_result*
+   must be called to close the trace operation. */
+
+extern void trace_input0 PARAMS ((SIM_DESC sd,
+				  sim_cpu *cpu,
+				  int trace_idx));
+extern void trace_input_word1 PARAMS ((SIM_DESC sd,
+				       sim_cpu *cpu,
+				       int trace_idx,
+				       unsigned_word d0));
+extern void trace_input_word2 PARAMS ((SIM_DESC sd,
+				       sim_cpu *cpu,
+				       int trace_idx,
+				       unsigned_word d0,
+				       unsigned_word d1));
+extern void trace_input_word3 PARAMS ((SIM_DESC sd,
+				       sim_cpu *cpu,
+				       int trace_idx,
+				       unsigned_word d0,
+				       unsigned_word d1,
+				       unsigned_word d2));
+
+extern void trace_input_fp1 PARAMS ((SIM_DESC sd,
+				     sim_cpu *cpu,
+				     int trace_idx,
+				     fp_word f0));
+
+extern void trace_input_fp2 PARAMS ((SIM_DESC sd,
+				     sim_cpu *cpu,
+				     int trace_idx,
+				     fp_word f0,
+				     fp_word f1));
+
+extern void trace_input_fp3 PARAMS ((SIM_DESC sd,
+				     sim_cpu *cpu,
+				     int trace_idx,
+				     fp_word f0,
+				     fp_word f1,
+				     fp_word f2));
+
+extern void trace_input_fpu1 PARAMS ((SIM_DESC sd,
+				     sim_cpu *cpu,
+				     int trace_idx,
+				     struct _sim_fpu *f0));
+
+extern void trace_input_fpu2 PARAMS ((SIM_DESC sd,
+				     sim_cpu *cpu,
+				     int trace_idx,
+				     struct _sim_fpu *f0,
+				     struct _sim_fpu *f1));
+
+extern void trace_input_fpu3 PARAMS ((SIM_DESC sd,
+				     sim_cpu *cpu,
+				     int trace_idx,
+				     struct _sim_fpu *f0,
+				     struct _sim_fpu *f1,
+				     struct _sim_fpu *f2));
+
+/* Other trace_input{_<fmt><nr-inputs>} functions can go here */
+
+extern void trace_result_word1 PARAMS ((SIM_DESC sd,
+					sim_cpu *cpu,
+					int trace_idx,
+					unsigned_word r0));
+
+extern void trace_result_fp1 PARAMS ((SIM_DESC sd,
+				      sim_cpu *cpu,
+				      int trace_idx,
+				      fp_word f0));
+
+extern void trace_result_fpu1 PARAMS ((SIM_DESC sd,
+				       sim_cpu *cpu,
+				       int trace_idx,
+				       struct _sim_fpu *f0));
+
+extern void trace_result_string1 PARAMS ((SIM_DESC sd,
+					  sim_cpu *cpu,
+					  int trace_idx,
+					  char *str0));
+
+extern void trace_result_word1_string1 PARAMS ((SIM_DESC sd,
+						sim_cpu *cpu,
+						int trace_idx,
+						unsigned_word r0,
+						char *s0));
+
+/* Other trace_result{_<type><nr-results>} */
+
+
+/* Macro's for tracing ALU instructions */
+#define TRACE_ALU_INPUT0() \
+do { \
+  if (TRACE_ALU_P (CPU)) \
+    trace_input0 (SD, CPU, TRACE_ALU_IDX); \
+} while (0)
+    
+#define TRACE_ALU_INPUT1(V0) \
+do { \
+  if (TRACE_ALU_P (CPU)) \
+    trace_input_word1 (SD, CPU, TRACE_ALU_IDX, (V0)); \
+} while (0)
+
+#define TRACE_ALU_INPUT2(V0,V1) \
+do { \
+  if (TRACE_ALU_P (CPU)) \
+    trace_input_word2 (SD, CPU, TRACE_ALU_IDX, (V0), (V1)); \
+} while (0)
+
+#define TRACE_ALU_INPUT3(V0,V1,V2) \
+do { \
+  if (TRACE_ALU_P (CPU)) \
+    trace_input_word3 (SD, CPU, TRACE_ALU_IDX, (V0), (V1), (V2)); \
+} while (0)
+
+#define TRACE_ALU_RESULT(R0) \
+do { \
+  if (TRACE_ALU_P (CPU)) \
+    trace_result_word1 (SD, CPU, TRACE_ALU_IDX, (R0)); \
+} while (0)
+
+
+/* The function trace_one_insn has been replaced by trace_generic */
 extern void trace_one_insn PARAMS ((SIM_DESC sd,
 				    sim_cpu * cpu,
 				    address_word cia,
@@ -149,7 +372,7 @@ extern void trace_vprintf PARAMS ((SIM_DESC, sim_cpu *, const char *, va_list));
 /* Non-zero if "--debug-insn" specified.  */
 #define DEBUG_INSN_P(cpu) DEBUG_P (cpu, DEBUG_INSN_IDX)
 
-extern void debug_printf PARAMS ((struct _sim_cpu *, const char *, ...))
+extern void debug_printf PARAMS ((sim_cpu *, const char *, ...))
      __attribute__((format (printf, 2, 3)));
 
 #endif /* SIM_TRACE_H */

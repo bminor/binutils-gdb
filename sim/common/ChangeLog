@@ -1,3 +1,22 @@
+Wed Feb 18 12:42:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-basics.h: Declare struct _sim_fpu.
+
+Tue Feb 17 16:27:46 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-trace.h (TRACE_ALU_INPUT*, TRACE_ALU_RESULT): Define.
+	(trace_prefix, trace_input*, trace_result*): Declare.
+	(trace_one_insn): Change declaration, assume trace_prefix called.
+	(trace_generic): Like trace_one_insn.
+	(TRACE_ALU_IDX, TRACE_*_IDX): Change #define's to enum.
+	(TRACE_alu, TRACE_[a-z]*): Update.
+	
+	* sim-trace.c (trace_prefix, trace_input*, trace_result*,
+ 	trace_insn, save_data, trace_idx_to_str, print_data): New
+ 	functions.
+	(trace_one_insn): Rewrite.
+	(trace_generic): New function.
+	
 Tue Feb 17 17:27:30 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Make-common.in (CGEN_MAIN_SCM): Update.
