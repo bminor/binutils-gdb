@@ -1,3 +1,8 @@
+2001-07-30  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
+	* libecoff.h (_bfd_ecoff_styp_to_sec_flags): Changed return type
+	to match corresponding bfd_coff_backend data member.
+
 2001-07-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Update dependencies with "make dep-am".
