@@ -1,5 +1,10 @@
 2002-02-07  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Andreas Schwab is GNU/Linux m68k maintainer.
+	Add Richard Earnshaw to Arm maintainers.
+
+2002-02-07  Andrew Cagney  <ac131313@redhat.com>
+
 	* defs.h (warning_begin): Delete declaration.
 
 	* config/powerpc/tm-ppcle-eabi.h (TARGET_BYTE_ORDER_DEFAULT):
