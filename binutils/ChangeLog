@@ -1,3 +1,9 @@
+2003-06-19  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_vma): When printing DEC_5 values, if the
+	number is bigger than 99999 switch to using hexadecimal
+	notation.
+
 2003-06-11  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (gnu_debuglink_filename): New variable.

@@ -624,13 +624,34 @@ print_vma (vma, mode)
     {
       switch (mode)
 	{
-	case FULL_HEX: printf ("0x"); /* drop through */
-	case LONG_HEX: printf ("%8.8lx", (unsigned long) vma); break;
-	case PREFIX_HEX: printf ("0x"); /* drop through */
-	case HEX: printf ("%lx", (unsigned long) vma); break;
-	case DEC: printf ("%ld", (unsigned long) vma); break;
-	case DEC_5: printf ("%5ld", (long) vma); break;
-	case UNSIGNED: printf ("%lu", (unsigned long) vma); break;
+	case FULL_HEX:
+	  printf ("0x");
+	  /* Drop through.  */
+	case LONG_HEX:
+	  printf ("%8.8lx", (unsigned long) vma);
+	  break;
+
+	case DEC_5:
+	  if (vma <= 99999)
+	    {
+	      printf ("** %5ld", (long) vma);
+	      break;
+	    }
+	  /* Drop through.  */
+	case PREFIX_HEX:
+	  printf ("0x");
+	  /* Drop through.  */
+	case HEX:
+	  printf ("%lx", (unsigned long) vma);
+	  break;
+
+	case DEC:
+	  printf ("%ld", (unsigned long) vma);
+	  break;
+
+	case UNSIGNED:
+	  printf ("%lu", (unsigned long) vma);
+	  break;
 	}
     }
 #ifdef BFD64
@@ -640,7 +661,7 @@ print_vma (vma, mode)
 	{
 	case FULL_HEX:
 	  printf ("0x");
-	  /* drop through */
+	  /* Drop through.  */
 
 	case LONG_HEX:
 	  printf_vma (vma);
@@ -648,7 +669,7 @@ print_vma (vma, mode)
 
 	case PREFIX_HEX:
 	  printf ("0x");
-	  /* drop through */
+	  /* Drop through.  */
 
 	case HEX:
 #if BFD_HOST_64BIT_LONG
@@ -675,13 +696,18 @@ print_vma (vma, mode)
 
 	case DEC_5:
 #if BFD_HOST_64BIT_LONG
-	  printf ("%5ld", vma);
+	  if (vma <= 99999)
+	    printf ("%5ld", vma);
+	  else
+	    printf ("%#lx", vma);
 #else
 	  if (_bfd_int64_high (vma))
 	    /* ugg */
 	    printf ("++%ld", _bfd_int64_low (vma));
-	  else
+	  else if (vma <= 99999)
 	    printf ("%5ld", _bfd_int64_low (vma));
+	  else
+	    printf ("%#lx", _bfd_int64_low (vma));
 #endif
 	  break;
 
