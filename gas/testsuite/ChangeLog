@@ -1,3 +1,8 @@
+2001-06-18  Tom Rix  <trix@redhat.com>
+
+	* gas/ppc/aix.exp: New file, aix specific tests.
+	* gas/ppc/align.s: New file, .comm alignment test.
+	
 2001-06-13  Andreas Jaeger  <aj@suse.de>
 
 	* gas/vtable/vtable.exp (run_list_test): Don't run on sparc64.
