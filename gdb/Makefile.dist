@@ -122,7 +122,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 3.95
+VERSION = 3.96
 DIST=gdb-$(VERSION)
 
 LINT=/usr/5bin/lint
@@ -231,7 +231,7 @@ OPCODES = $(OPCODE_DIR)pn-opcode.h $(OPCODE_DIR)np1-opcode.h \
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c rem-multi.shar
 
 MALLOCSRC = gmalloc.c mcheck.c mtrace.c mtrace.awk \
-	    ansidecl.h stdlib.h gmalloc.h stddef.h
+	    ansidecl.h gmalloc.h
 
 POSSLIBS_MAINDIR = regex.c regex.h alloca.c $(MALLOCSRC)
 POSSLIBS = $(POSSLIBS_MAINDIR)
@@ -241,7 +241,7 @@ TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 # tdesc-lib cannot be named simply tdesc, because if it were, GNU make
 # would try to make it from tdesc.c.
 # tdesc-lib removed from the list due to Motorola copyrights...gnu@cygnus.com
-OTHERS = Makefile.dist depend alldeps.mak Makefile.sdir \
+OTHERS = Makefile Makefile.dist depend alldeps.mak Makefile.sdir \
 	 createtags munch config.gdb config.status \
 	 ChangeLog ChangeLog-3.x \
 	 README TODO TAGS WHATS.NEW Projects \

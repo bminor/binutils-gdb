@@ -177,7 +177,6 @@ tconfig
 tdesc.c
 tdesc.h
 terminal.h
-tests
 tm-29k.h
 tm-3b1.h
 tm-68k.h
@@ -257,8 +256,11 @@ xm-vax.h
 
 Do-last:
 
-echo "Making 'depend'."
-make -f Makefile.dist depend
+echo "Configuring GDB for host and target 'none', and making depend."
+echo >depend
+./config.gdb none
+rm depend
+make depend
 echo Done in `pwd`.
 
 # End of file.
