@@ -49,6 +49,7 @@ if { ![istarget i386-*-sysv4*] \
      && ![istarget sparc*-*-sunos4*] \
      && ![istarget sparc*-*-linux*] \
      && ![istarget arm*-*-linux*] \
+     && ![istarget alpha*-*-linux*] \
      && ![istarget rs6000*-*-aix*] \
      && ![istarget powerpc*-*-aix*] } {
     return

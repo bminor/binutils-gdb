@@ -33,6 +33,7 @@ if { ![istarget i386-*-linux*] \
      && ![istarget m68k-*-linux*] \
      && ![istarget powerpc-*-linux*] \
      && ![istarget arm*-*-linux*] \
+     && ![istarget alpha*-*-linux*] \
      && ![istarget sparc*-*-linux*] } {
     return
 }
