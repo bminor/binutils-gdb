@@ -242,9 +242,15 @@ struct xcoff_link_hash_entry
      section which holds it.  */
   asection *toc_section;
 
-  /* If we have created a TOC entry, this is the offset in
-     toc_section.  */
-  bfd_vma toc_offset;
+  union
+    {
+      /* If we have created a TOC entry (the XCOFF_SET_TOC flag is
+	 set), this is the offset in toc_section.  */
+      bfd_vma toc_offset;
+      /* If the TOC entry comes from an input file, this is set to the
+         symbo lindex of the C_HIDEXT XMC_TC symbol.  */
+      long toc_indx;
+    } u;
 
   /* If this symbol is a function entry point which is called, this
      field holds a pointer to the function descriptor.  */
@@ -505,7 +511,7 @@ xcoff_link_hash_newfunc (entry, table, string)
       /* Set local fields.  */
       ret->indx = -1;
       ret->toc_section = NULL;
-      ret->toc_offset = 0;
+      ret->u.toc_indx = -1;
       ret->descriptor = NULL;
       ret->ldsym = NULL;
       ret->ldindx = -1;
@@ -1385,10 +1391,7 @@ xcoff_link_add_symbols (abfd, info)
 
 	    /* If this is a TOC section for a symbol, record it.  */
 	    if (set_toc != NULL)
-	      {
-		set_toc->toc_section = csect;
-		set_toc->toc_offset = 0;
-	      }
+	      set_toc->toc_section = csect;
 	  }
 	  break;
 
@@ -2562,7 +2565,7 @@ xcoff_build_ldsyms (h, p)
       if (hds->toc_section == NULL)
 	{
 	  hds->toc_section = xcoff_hash_table (ldinfo->info)->toc_section;
-	  hds->toc_offset = hds->toc_section->_raw_size;
+	  hds->u.toc_offset = hds->toc_section->_raw_size;
 	  hds->toc_section->_raw_size += 4;
 	  ++xcoff_hash_table (ldinfo->info)->ldrel_count;
 	  ++hds->toc_section->reloc_count;
@@ -3658,6 +3661,18 @@ xcoff_link_input_bfd (finfo, input_bfd)
 	      h->indx = output_index;
 	    }
 
+	  /* If this is a symbol in the TOC which we may have merged
+             (class XMC_TC), remember the symbol index of the TOC
+             symbol.  */
+	  if (isym.n_sclass == C_HIDEXT
+	      && aux.x_csect.x_smclas == XMC_TC
+	      && *sym_hash != NULL)
+	    {
+	      BFD_ASSERT (((*sym_hash)->flags & XCOFF_SET_TOC) == 0);
+	      BFD_ASSERT ((*sym_hash)->toc_section != NULL);
+	      (*sym_hash)->u.toc_indx = output_index;
+	    }
+
 	  output_index += add;
 	  outsym += add * osymesz;
 	}
@@ -4044,7 +4059,34 @@ xcoff_link_input_bfd (finfo, input_bfd)
 	      if (r_symndx != -1)
 		{
 		  h = obj_xcoff_sym_hashes (input_bfd)[r_symndx];
-		  if (h != NULL)
+		  if  (h != NULL
+		       && (irel->r_type == R_TOC
+			   || irel->r_type == R_GL
+			   || irel->r_type == R_TCL
+			   || irel->r_type == R_TRL
+			   || irel->r_type == R_TRLA))
+		    {
+		      /* This is a TOC relative reloc with a symbol
+                         attached.  The symbol should be the one which
+                         this reloc is for.  We want to make this
+                         reloc against the TOC address of the symbol,
+                         not the symbol itself.  */
+		      BFD_ASSERT (h->toc_section != NULL);
+		      BFD_ASSERT ((h->flags & XCOFF_SET_TOC) == 0);
+		      if (h->u.toc_indx == -1)
+			{
+			  /* We could handle this case if we had to,
+                             but I don't think it can arise.  */
+			  (*_bfd_error_handler)
+			    ("%s: unattached TOC reloc against `%s'",
+			     bfd_get_filename (input_bfd),
+			     h->root.root.string);
+			  bfd_set_error (bfd_error_bad_value);
+			  return false;
+			}
+		      irel->r_symndx = h->u.toc_indx;
+		    }
+		  else if (h != NULL)
 		    {
 		      /* This is a global symbol.  */
 		      if (h->indx >= 0)
@@ -4344,8 +4386,9 @@ xcoff_write_global_symbol (h, p)
          specific TOC element.  */
       tocoff = (h->descriptor->toc_section->output_section->vma
 		+ h->descriptor->toc_section->output_offset
-		+ h->descriptor->toc_offset
 		- xcoff_data (output_bfd)->toc);
+      if ((h->descriptor->flags & XCOFF_SET_TOC) != 0)
+	tocoff += h->descriptor->u.toc_offset;
       bfd_put_32 (output_bfd, XCOFF_GLINK_FIRST | tocoff, p);
       for (i = 0, p += 4;
 	   i < sizeof xcoff_glink_code / sizeof xcoff_glink_code[0];
@@ -4369,7 +4412,7 @@ xcoff_write_global_symbol (h, p)
       irel = finfo->section_info[oindx].relocs + osec->reloc_count;
       irel->r_vaddr = (osec->vma
 		       + tocsec->output_offset
-		       + h->toc_offset);
+		       + h->u.toc_offset);
       if (h->indx >= 0)
 	irel->r_symndx = h->indx;
       else
@@ -4838,9 +4881,11 @@ _bfd_ppc_xcoff_relocate_section (output_bfd, info, input_bfd,
 	      return false;
 	    }
 	  if (h != NULL)
-	    val = (h->toc_section->output_section->vma
-		   + h->toc_section->output_offset
-		   + h->toc_offset);
+	    {
+	      BFD_ASSERT ((h->flags & XCOFF_SET_TOC) == 0);
+	      val = (h->toc_section->output_section->vma
+		     + h->toc_section->output_offset);
+	    }
 	  val = ((val - xcoff_data (output_bfd)->toc)
 		 - (sym->n_value - xcoff_data (input_bfd)->toc));
 	  addend = 0;
