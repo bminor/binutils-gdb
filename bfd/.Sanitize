@@ -17,6 +17,8 @@
 
 Do-first:
 
+recover=aoutx.h
+
 echo Sanitizing `pwd`.
 
 # All files listed between the "Things-to-keep:" line and the
@@ -98,7 +100,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.18  1991/08/29 00:35:06  gnu
+# Revision 1.19  1991/09/03 22:21:30  rich
+# "recover" aoutx.h
+#
+# Revision 1.18  1991/08/29  00:35:06  gnu
 # paperwork handled for AMD Coff.
 #
 # Revision 1.17  1991/08/22  20:23:12  steve
