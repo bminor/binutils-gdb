@@ -3277,26 +3277,12 @@ Given @var{frame}, return a pointer to the calling frame.
 
 @item FRAME_CHAIN_VALID(@var{chain}, @var{thisframe})
 @findex FRAME_CHAIN_VALID
-Define this to be an expression that returns zero if the given frame is
-an outermost frame, with no caller, and nonzero otherwise.  Several
-common definitions are available:
-
-@itemize @bullet
-@item
-@code{file_frame_chain_valid} is nonzero if the chain pointer is nonzero
-and given frame's PC is not inside the startup file (such as
-@file{crt0.o}).
-
-@item
-@code{func_frame_chain_valid} is nonzero if the chain
-pointer is nonzero and the given frame's PC is not in @code{main} or a
-known entry point function (such as @code{_start}).
-
-@item
-@code{generic_file_frame_chain_valid} and
-@code{generic_func_frame_chain_valid} are equivalent implementations for
-targets using generic dummy frames.
-@end itemize
+Define this to be an expression that returns zero if the given frame is an
+outermost frame, with no caller, and nonzero otherwise.  Most normal
+situations can be handled without defining this macro, including @code{NULL}
+chain pointers, dummy frames, and frames whose PC values are inside the
+startup file (e.g.@: @file{crt0.o}), inside @code{main}, or inside
+@code{_start}.
 
 @item FRAME_INIT_SAVED_REGS(@var{frame})
 @findex FRAME_INIT_SAVED_REGS

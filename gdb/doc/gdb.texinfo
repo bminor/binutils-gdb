@@ -3857,6 +3857,26 @@ The display for frame zero does not begin with a program counter
 value, indicating that your program has stopped at the beginning of the
 code for line @code{993} of @code{builtin.c}.
 
+Most programs have a standard entry point---a place where system libraries
+and startup code transition into user code.  For C this is @code{main}.
+When @value{GDBN} finds the entry function in a backtrace it will terminate
+the backtrace, to avoid tracing into highly system-specific (and generally
+uninteresting) code.  If you need to examine the startup code, then you can
+change this behavior.
+
+@table @code
+@item set backtrace-below-main off
+Backtraces will stop when they encounter the user entry point.  This is the
+default.
+
+@item set backtrace-below-main
+@itemx set backtrace-below-main on
+Backtraces will continue past the user entry point to the top of the stack.
+
+@item show backtrace-below-main
+Display the current backtrace policy.
+@end table
+
 @node Selection
 @section Selecting a frame
 
