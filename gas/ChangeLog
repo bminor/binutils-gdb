@@ -1,3 +1,18 @@
+Tue Aug 25 15:50:48 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-m68k.c (init_table): Now const.  Always include 68851
+	data, so that "bc" is available to 68040 cache instructions.
+	Added "tt0", "tt1", and 68ec030 variants.
+	(md_assemble): Complain if 68000 (only) and 68881 are specified.
+	(enum _register): Added TT0, TT1.
+	(m68k_ip, cases '3' and 't'): Handle new operand type codes.  Pass
+	line number correctly in "internal error" messages.  Don't print
+	architecture-mismatch message for operand errors.
+
+	From Colin Smith (colin@wrs.com):
+	* config/tc-m68k.c (m68k_ip, case '_'): Use addword twice rather
+	than install_operand.
+
 Tue Aug 25 15:13:48 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* listing.c (buffer_line): rewind to the start of include
