@@ -1,3 +1,9 @@
+2000-09-22  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* config/tc-m68k.c (md_relax_table, m68k_ip, md_convert_frag_1, 
+	md_estimate_size_before_relax): Redesign and clean up the
+	relaxation mechanism.
+
 2000-09-21  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-ns32k.c: Fix formatting.

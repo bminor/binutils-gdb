@@ -133,35 +133,6 @@ static struct label_line *current_label;
 /* See flames below */
 static struct obstack robyn;
 
-#define TAB(x,y)	(((x)<<2)+(y))
-#define TABTYPE(xy)     ((xy) >> 2)
-#define BYTE		0
-#define SHORT		1
-#define LONG		2
-#define SZ_UNDEF	3
-#undef BRANCH
-/* Case `g' except when BCC68000 is applicable.  */
-#define ABRANCH		1
-/* Coprocessor branches.  */
-#define FBRANCH		2
-/* Mode 7.2 -- program counter indirect with (16-bit) displacement,
-   supported on all cpus.  Widens to 32-bit absolute.  */
-#define PCREL		3
-/* For inserting an extra jmp instruction with long offset on 68000,
-   for expanding conditional branches.  (Not bsr or bra.)  Since the
-   68000 doesn't support 32-bit displacements for conditional
-   branches, we fake it by reversing the condition and branching
-   around a jmp with an absolute long operand.  */
-#define BCC68000        4
-/* For the DBcc "instructions".  If the displacement requires 32 bits,
-   the branch-around-a-jump game is played here too.  */
-#define DBCC            5
-/* Not currently used?  */
-#define PCLEA		6
-/* Mode AINDX (apc-relative) using PC, with variable target, might fit
-   in 16 or 8 bits.  */
-#define PCINDEX		7
-
 struct m68k_incant
   {
     const char *m_operands;
@@ -433,11 +404,60 @@ static const struct m68k_cpu archs[] = {
 
 static const int n_archs = sizeof (archs) / sizeof (archs[0]);
 
-/* BCC68000 is for patching in an extra jmp instruction for long offsets
-   on the 68000.  The 68000 doesn't support long branches with branchs */
+/* This is the assembler relaxation table for m68k. m68k is a rich CISC
+   architecture and we have a lot of relaxation modes.  */
 
-/* This table desribes how you change sizes for the various types of variable
-   size expressions.  This version only supports two kinds.  */
+/* Macros used in the relaxation code.  */
+#define TAB(x,y)	(((x) << 2) + (y))
+#define TABTYPE(x)      ((x) >> 2)
+
+/* Relaxation states.  */
+#define BYTE		0
+#define SHORT		1
+#define LONG		2
+#define SZ_UNDEF	3
+
+/* Here are all the relaxation modes we support.  First we can relax ordinary
+   branches.  On 68020 and higher and on CPU32 all branch instructions take
+   three forms, so on these CPUs all branches always remain as such.  When we
+   have to expand to the LONG form on a 68000, though, we substitute an
+   absolute jump instead.  This is a direct replacement for unconditional
+   branches and a branch over a jump for conditional branches.  However, if the
+   user requires PIC and disables this with --pcrel, we can only relax between
+   BYTE and SHORT forms, punting if that isn't enough.  This gives us four
+   different relaxation modes for branches:  */
+
+#define BRANCHBWL	1	/* branch byte, word, or long */
+#define BRABSJUNC	2	/* absolute jump for LONG, unconditional */
+#define BRABSJCOND	3	/* absolute jump for LONG, conditional */
+#define BRANCHBW	4	/* branch byte or word */
+
+/* We also relax coprocessor branches and DBcc's.  All CPUs that support
+   coprocessor branches support them in word and long forms, so we have only
+   one relaxation mode for them.  DBcc's are word only on all CPUs.  We can
+   relax them to the LONG form with a branch-around sequence.  This sequence
+   can use a long branch (if available) or an absolute jump (if acceptable).
+   This gives us two relaxation modes.  If long branches are not available and
+   absolute jumps are not acceptable, we don't relax DBcc's.  */
+
+#define FBRANCH		5	/* coprocessor branch */
+#define DBCCLBR		6	/* DBcc relaxable with a long branch */
+#define DBCCABSJ	7	/* DBcc relaxable with an absolute jump */
+
+/* That's all for instruction relaxation.  However, we also relax PC-relative
+   operands.  Specifically, we have three operand relaxation modes.  On the
+   68000 PC-relative operands can only be 16-bit, but on 68020 and higher and
+   on CPU32 they may be 16-bit or 32-bit.  For the latter we relax between the
+   two.  Also PC+displacement+index operands in their simple form (with a non-
+   suppressed index without memory indirection) are supported on all CPUs, but
+   on the 68000 the displacement can be 8-bit only, whereas on 68020 and higher
+   and on CPU32 we relax it to SHORT and LONG forms as well using the extended
+   form of the PC+displacement+index operand.  Finally, some absolute operands
+   can be relaxed down to 16-bit PC-relative.  */
+
+#define PCREL1632	8	/* 16-bit or 32-bit PC-relative */
+#define PCINDEX		9	/* PC+displacement+index */
+#define ABSTOPCREL	10	/* absolute relax down to 16-bit PC-relative */
 
 /* Note that calls to frag_var need to specify the maximum expansion
    needed; this is currently 10 bytes for DBCC.  */
@@ -455,9 +475,24 @@ relax_typeS md_relax_table[] =
   {1, 1, 0, 0},			/* that the VAX doesn't either */
   {1, 1, 0, 0},
 
-  {(127), (-128), 0, TAB (ABRANCH, SHORT)},
-  {(32767), (-32768), 2, TAB (ABRANCH, LONG)},
+  {(127), (-128), 0, TAB (BRANCHBWL, SHORT)},
+  {(32767), (-32768), 2, TAB (BRANCHBWL, LONG)},
   {0, 0, 4, 0},
+  {1, 1, 0, 0},
+
+  {(127), (-128), 0, TAB (BRABSJUNC, SHORT)},
+  {(32767), (-32768), 2, TAB (BRABSJUNC, LONG)},
+  {0, 0, 4, 0},
+  {1, 1, 0, 0},
+
+  {(127), (-128), 0, TAB (BRABSJCOND, SHORT)},
+  {(32767), (-32768), 2, TAB (BRABSJCOND, LONG)},
+  {0, 0, 6, 0},
+  {1, 1, 0, 0},
+
+  {(127), (-128), 0, TAB (BRANCHBW, SHORT)},
+  {0, 0, 2, 0},
+  {1, 1, 0, 0},
   {1, 1, 0, 0},
 
   {1, 1, 0, 0},			/* FBRANCH doesn't come BYTE */
@@ -465,29 +500,28 @@ relax_typeS md_relax_table[] =
   {0, 0, 4, 0},
   {1, 1, 0, 0},
 
-  {1, 1, 0, 0},			/* PCREL doesn't come BYTE */
-  {(32767), (-32768), 2, TAB (PCREL, LONG)},
-  {0, 0, 4, 0},
-  {1, 1, 0, 0},
-
-  {(127), (-128), 0, TAB (BCC68000, SHORT)},
-  {(32767), (-32768), 2, TAB (BCC68000, LONG)},
-  {0, 0, 6, 0},			/* jmp long space */
+  {1, 1, 0, 0},			/* DBCC doesn't come BYTE */
+  {(32767), (-32768), 2, TAB (DBCCLBR, LONG)},
+  {0, 0, 10, 0},
   {1, 1, 0, 0},
 
   {1, 1, 0, 0},			/* DBCC doesn't come BYTE */
-  {(32767), (-32768), 2, TAB (DBCC, LONG)},
-  {0, 0, 10, 0},		/* bra/jmp long space */
+  {(32767), (-32768), 2, TAB (DBCCABSJ, LONG)},
+  {0, 0, 10, 0},
   {1, 1, 0, 0},
 
-  {1, 1, 0, 0},			/* PCLEA doesn't come BYTE */
-  {32767, -32768, 2, TAB (PCLEA, LONG)},
+  {1, 1, 0, 0},			/* PCREL1632 doesn't come BYTE */
+  {32767, -32768, 2, TAB (PCREL1632, LONG)},
   {0, 0, 6, 0},
   {1, 1, 0, 0},
 
-  /* For, e.g., jmp pcrel indexed.  */
   {125, -130, 0, TAB (PCINDEX, SHORT)},
   {32765, -32770, 2, TAB (PCINDEX, LONG)},
+  {0, 0, 4, 0},
+  {1, 1, 0, 0},
+
+  {1, 1, 0, 0},			/* ABSTOPCREL doesn't come BYTE */
+  {(32767), (-32768), 2, TAB (ABSTOPCREL, LONG)},
   {0, 0, 4, 0},
   {1, 1, 0, 0},
 };
@@ -2064,7 +2098,7 @@ m68k_ip (instring)
 			    {
 			      add_frag (adds (&opP->disp),
 					offs (&opP->disp),
-					TAB (PCLEA, SZ_UNDEF));
+					TAB (PCREL1632, SZ_UNDEF));
 			      break;
 			    }
 			}
@@ -2372,15 +2406,13 @@ m68k_ip (instring)
 			 cannot be relaxed.  */
 		      && opP->disp.pic_reloc == pic_none
 #endif
-		      && S_GET_SEGMENT (adds (&opP->disp)) == now_seg
-		      && relaxable_symbol (adds (&opP->disp))
 		      && !flag_long_jumps
 		      && !strchr ("~%&$?", s[0]))
 		    {
 		      tmpreg = 0x3A;	/* 7.2 */
 		      add_frag (adds (&opP->disp),
 				offs (&opP->disp),
-				TAB (PCREL, SZ_UNDEF));
+				TAB (ABSTOPCREL, SZ_UNDEF));
 		      break;
 		    }
 		  /* Fall through into long */
@@ -2512,9 +2544,9 @@ m68k_ip (instring)
 	      break;
 	    case 'L':
 	    long_branch:
-	      if (!HAVE_LONG_BRANCH(current_architecture))
-		as_warn (_("Can't use long branches on 68000/68010/5200"));
-	      the_ins.opcode[the_ins.numo - 1] |= 0xff;
+	      if (! HAVE_LONG_BRANCH (current_architecture))
+		as_warn (_("Can't use long branches on 68000/68010/5200"));	
+	      the_ins.opcode[0] |= 0xff;
 	      add_fix ('l', &opP->disp, 1, 0);
 	      addword (0);
 	      addword (0);
@@ -2529,37 +2561,66 @@ m68k_ip (instring)
 	      if (opP->disp.pic_reloc != pic_none)
 		goto long_branch;
 #endif
-
 	      /* This could either be a symbol, or an absolute
-		 address.  No matter, the frag hacking will finger it
-		 out.  Not quite: it can't switch from BRANCH to
-		 BCC68000 for the case where opnd is absolute (it
-		 needs to use the 68000 hack since no conditional abs
-		 jumps).  */
-	      if (( !HAVE_LONG_BRANCH(current_architecture)
-		   || (0 == adds (&opP->disp)))
-		  && (the_ins.opcode[0] >= 0x6200)
-		  && (the_ins.opcode[0] <= 0x6f00))
+		 address.  If it's an absolute address, turn it into
+		 an absolute jump right here and keep it out of the
+		 relaxer.  */
+	      if (adds (&opP->disp) == 0)
+		{
+		  if (the_ins.opcode[0] == 0x6000)	/* jbra */
+		    the_ins.opcode[0] = 0x4EF1;
+		  else if (the_ins.opcode[0] == 0x6100)	/* jbsr */
+		    the_ins.opcode[0] = 0x4EB1;
+		  else					/* jCC */
+		    {
+		      the_ins.opcode[0] ^= 0x0100;
+		      the_ins.opcode[0] |= 0x0006;
+		      addword (0x4EF1);
+		    }
+		  add_fix ('l', &opP->disp, 0, 0);
+		  addword (0);
+		  addword (0);
+		  break;
+		}
+
+	      /* Now we know it's going into the relaxer.  Now figure
+		 out which mode.  We try in this order of preference:
+		 long branch, absolute jump, byte/word branches only.  */
+	      if (HAVE_LONG_BRANCH (current_architecture))
 		add_frag (adds (&opP->disp), offs (&opP->disp),
-			  TAB (BCC68000, SZ_UNDEF));
+			  TAB (BRANCHBWL, SZ_UNDEF));
+	      else if (! flag_keep_pcrel)
+		{
+		  if ((the_ins.opcode[0] == 0x6000)
+		      || (the_ins.opcode[0] == 0x6100))
+		    add_frag (adds (&opP->disp), offs (&opP->disp),
+			      TAB (BRABSJUNC, SZ_UNDEF));
+		  else
+		    add_frag (adds (&opP->disp), offs (&opP->disp),
+			      TAB (BRABSJCOND, SZ_UNDEF));
+		}
 	      else
 		add_frag (adds (&opP->disp), offs (&opP->disp),
-			  TAB (ABRANCH, SZ_UNDEF));
+			  TAB (BRANCHBW, SZ_UNDEF));
 	      break;
 	    case 'w':
 	      if (isvar (&opP->disp))
 		{
-#if 1
-		  /* check for DBcc instruction */
-		  if ((the_ins.opcode[0] & 0xf0f8) == 0x50c8)
+		  /* Check for DBcc instructions.  We can relax them,
+		     but only if we have long branches and/or absolute
+		     jumps.  */
+		  if (((the_ins.opcode[0] & 0xf0f8) == 0x50c8)
+		      && (HAVE_LONG_BRANCH (current_architecture)
+			  || (! flag_keep_pcrel)))
 		    {
-		      /* size varies if patch */
-		      /* needed for long form */
-		      add_frag (adds (&opP->disp), offs (&opP->disp),
-				TAB (DBCC, SZ_UNDEF));
+		      if (HAVE_LONG_BRANCH (current_architecture))
+			add_frag (adds (&opP->disp), offs (&opP->disp),
+				  TAB (DBCCLBR, SZ_UNDEF));
+		      else
+			add_frag (adds (&opP->disp), offs (&opP->disp),
+				  TAB (DBCCABSJ, SZ_UNDEF));
 		      break;
 		    }
-#endif
 		  add_fix ('w', &opP->disp, 1, 0);
 		}
 	      addword (0);
@@ -2570,23 +2631,16 @@ m68k_ip (instring)
 	      addword (0);
 	      break;
 	    case 'c':		/* Var size Coprocesssor branches */
-	      if (subs (&opP->disp))
+	      if (subs (&opP->disp) || (adds (&opP->disp) == 0))
 		{
-		  add_fix ('l', &opP->disp, 1, 0);
-		  add_frag ((symbolS *) 0, (offsetT) 0, TAB (FBRANCH, LONG));
-		}
-	      else if (adds (&opP->disp))
-		add_frag (adds (&opP->disp), offs (&opP->disp),
-			  TAB (FBRANCH, SZ_UNDEF));
-	      else
-		{
-		  /* add_frag ((symbolS *) 0, offs (&opP->disp),
-		     	       TAB(FBRANCH,SHORT)); */
 		  the_ins.opcode[the_ins.numo - 1] |= 0x40;
 		  add_fix ('l', &opP->disp, 1, 0);
 		  addword (0);
 		  addword (0);
 		}
+	      else
+		add_frag (adds (&opP->disp), offs (&opP->disp),
+			  TAB (FBRANCH, SZ_UNDEF));
 	      break;
 	    default:
 	      abort ();
@@ -4275,7 +4329,6 @@ md_convert_frag_1 (fragP)
      register fragS *fragP;
 {
   long disp;
-  long ext = 0;
   fixS *fixP;
 
   /* Address in object code of the displacement.  */
@@ -4298,76 +4351,59 @@ md_convert_frag_1 (fragP)
 
   switch (fragP->fr_subtype)
     {
-    case TAB (BCC68000, BYTE):
-    case TAB (ABRANCH, BYTE):
+    case TAB (BRANCHBWL, BYTE):
+    case TAB (BRABSJUNC, BYTE):
+    case TAB (BRABSJCOND, BYTE):
+    case TAB (BRANCHBW, BYTE):
       know (issbyte (disp));
       if (disp == 0)
 	as_bad (_("short branch with zero offset: use :w"));
-      fragP->fr_opcode[1] = disp;
-      ext = 0;
+      fixP = fix_new (fragP, fragP->fr_fix - 1, 1, fragP->fr_symbol,
+		      fragP->fr_offset, 1, BFD_RELOC_8_PCREL);
+      fixP->fx_pcrel_adjust = -1;
       break;
-    case TAB (DBCC, SHORT):
-      know (issword (disp));
-      ext = 2;
-      break;
-    case TAB (BCC68000, SHORT):
-    case TAB (ABRANCH, SHORT):
-      know (issword (disp));
+    case TAB (BRANCHBWL, SHORT):
+    case TAB (BRABSJUNC, SHORT):
+    case TAB (BRABSJCOND, SHORT):
+    case TAB (BRANCHBW, SHORT):
       fragP->fr_opcode[1] = 0x00;
-      ext = 2;
+      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
+	       1, BFD_RELOC_16_PCREL);
+      fragP->fr_fix += 2;
       break;
-    case TAB (ABRANCH, LONG):
-      if (!HAVE_LONG_BRANCH (current_architecture))
+    case TAB (BRANCHBWL, LONG):
+      fragP->fr_opcode[1] = (char) 0xFF;
+      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
+	       1, BFD_RELOC_32_PCREL);
+      fragP->fr_fix += 4;
+      break;
+    case TAB (BRABSJUNC, LONG):
+      if (fragP->fr_opcode[0] == 0x61)		/* jbsr */
 	{
-	  if (flag_keep_pcrel)
-	    as_bad (_("long branch not supported"));
-
-	  if (fragP->fr_opcode[0] == 0x61)
-	    /* BSR */
-	    {
-	      fragP->fr_opcode[0] = 0x4E;
-	      fragP->fr_opcode[1] = (char) 0xB9; /* JBSR with ABSL LONG offset */
-
-	      fix_new (fragP,
-		       fragP->fr_fix,
-		       4,
-		       fragP->fr_symbol,
-		       fragP->fr_offset,
-		       0,
-		       NO_RELOC);
-
-	      fragP->fr_fix += 4;
-	      ext = 0;
-	    }
-	  /* BRA */
-	  else if (fragP->fr_opcode[0] == 0x60)
-	    {
-	      fragP->fr_opcode[0] = 0x4E;
-	      fragP->fr_opcode[1] = (char) 0xF9; /* JMP  with ABSL LONG offset */
-	      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-		       fragP->fr_offset, 0, NO_RELOC);
-	      fragP->fr_fix += 4;
-	      ext = 0;
-	    }
-	  else
-	    {
-	      /* This should never happen, because if it's a conditional
-	         branch and we are on a 68000, BCC68000 should have been
-	         picked instead of ABRANCH.  */
-	      abort ();
-	    }
+	  fragP->fr_opcode[0] = 0x4E;
+	  fragP->fr_opcode[1] = (char) 0xB9; /* JSR with ABSL LONG operand */
+	  fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
+		   0, BFD_RELOC_32);
+	  fragP->fr_fix += 4;
+	}
+      else if (fragP->fr_opcode[0] == 0x60)	/* jbra */
+	{
+	  fragP->fr_opcode[0] = 0x4E;
+	  fragP->fr_opcode[1] = (char) 0xF9; /* JMP with ABSL LONG operand */
+	  fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
+		   0, BFD_RELOC_32);
+	  fragP->fr_fix += 4;
 	}
       else
 	{
-	  fragP->fr_opcode[1] = (char) 0xff;
-	  ext = 4;
+	  /* This cannot happen, because jbsr and jbra are the only two
+	     unconditional branches.  */
+	  abort ();
 	}
       break;
-    case TAB (BCC68000, LONG):
-      /* only Bcc 68000 instructions can come here */
-      /* change bcc into b!cc/jmp absl long */
-      if (flag_keep_pcrel)
-	as_bad (_("long branch not supported"));
+    case TAB (BRABSJCOND, LONG):
+      /* Only Bcc 68000 instructions can come here.  */
+      /* Change bcc into b!cc/jmp absl long.  */
 
       fragP->fr_opcode[0] ^= 0x01;	/* invert bcc */
       fragP->fr_opcode[1] = 0x6;/* branch offset = 6 */
@@ -4379,125 +4415,120 @@ md_convert_frag_1 (fragP)
       *buffer_address++ = (char) 0xf9;
       fragP->fr_fix += 2;	/* account for jmp instruction */
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 0, NO_RELOC);
+	       fragP->fr_offset, 0, BFD_RELOC_32);
       fragP->fr_fix += 4;
-      ext = 0;
       break;
-    case TAB (DBCC, LONG):
-      /* only DBcc 68000 instructions can come here */
+    case TAB (FBRANCH, SHORT):
+      know ((fragP->fr_opcode[1] & 0x40) == 0);
+      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
+	       1, BFD_RELOC_16_PCREL);
+      fragP->fr_fix += 2;
+      break;
+    case TAB (FBRANCH, LONG):
+      fragP->fr_opcode[1] |= 0x40;	/* Turn on LONG bit */
+      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
+	       1, BFD_RELOC_32_PCREL);
+      fragP->fr_fix += 4;
+      break;
+    case TAB (DBCCLBR, SHORT):
+    case TAB (DBCCABSJ, SHORT):
+      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
+	       1, BFD_RELOC_16_PCREL);
+      fragP->fr_fix += 2;
+      break;
+    case TAB (DBCCLBR, LONG):
+      /* only DBcc instructions can come here */
       /* Change dbcc into dbcc/bral.  */
-      if (! HAVE_LONG_BRANCH (current_architecture) && flag_keep_pcrel)
-	as_bad (_("long branch not supported"));
 
       /* JF: these used to be fr_opcode[2-7], but that's wrong */
       *buffer_address++ = 0x00;	/* branch offset = 4 */
       *buffer_address++ = 0x04;
       *buffer_address++ = 0x60;	/* put in bra pc+6 */
       *buffer_address++ = 0x06;
-      if (HAVE_LONG_BRANCH (current_architecture))
-	{
-	  *buffer_address++ = 0x60;     /* Put in bral (0x60ff).  */
-	  *buffer_address++ = (char) 0xff;
-	}
-      else
-	{
-	  *buffer_address++ = 0x4e;     /* Put in jmp long (0x4ef9).  */
-	  *buffer_address++ = (char) 0xf9;
-	}
+      *buffer_address++ = 0x60;     /* Put in bral (0x60ff).  */
+      *buffer_address++ = (char) 0xff;
 
       fragP->fr_fix += 6;	/* account for bra/jmp instructions */
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-	       fragP->fr_offset, HAVE_LONG_BRANCH (current_architecture),
-	       NO_RELOC);
+      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset, 1,
+	       BFD_RELOC_32_PCREL);
       fragP->fr_fix += 4;
-      ext = 0;
       break;
-    case TAB (FBRANCH, SHORT):
-      know ((fragP->fr_opcode[1] & 0x40) == 0);
-      ext = 2;
-      break;
-    case TAB (FBRANCH, LONG):
-      fragP->fr_opcode[1] |= 0x40;	/* Turn on LONG bit */
-      ext = 4;
-      break;
-    case TAB (PCREL, SHORT):
-      ext = 2;
-      break;
-    case TAB (PCREL, LONG):
-      /* The thing to do here is force it to ABSOLUTE LONG, since
-	PCREL is really trying to shorten an ABSOLUTE address anyway */
-      /* JF FOO This code has not been tested */
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
-	       0, NO_RELOC);
-      if ((fragP->fr_opcode[1] & 0x3F) != 0x3A)
-	as_bad (_("Internal error (long PC-relative operand) for insn 0x%04x at 0x%lx"),
-		(unsigned) fragP->fr_opcode[0],
-		(unsigned long) fragP->fr_address);
-      fragP->fr_opcode[1] &= ~0x3F;
-      fragP->fr_opcode[1] |= 0x39;	/* Mode 7.1 */
+    case TAB (DBCCABSJ, LONG):
+      /* only DBcc instructions can come here */
+      /* Change dbcc into dbcc/jmp.  */
+
+      /* JF: these used to be fr_opcode[2-7], but that's wrong */
+      *buffer_address++ = 0x00;	/* branch offset = 4 */
+      *buffer_address++ = 0x04;
+      *buffer_address++ = 0x60;	/* put in bra pc+6 */
+      *buffer_address++ = 0x06;
+      *buffer_address++ = 0x4e;     /* Put in jmp long (0x4ef9).  */
+      *buffer_address++ = (char) 0xf9;
+
+      fragP->fr_fix += 6;	/* account for bra/jmp instructions */
+      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset, 0,
+	       BFD_RELOC_32);
       fragP->fr_fix += 4;
-      ext = 0;
       break;
-    case TAB (PCLEA, SHORT):
-      fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
-	       fragP->fr_offset, 1, NO_RELOC);
+    case TAB (PCREL1632, SHORT):
       fragP->fr_opcode[1] &= ~0x3F;
       fragP->fr_opcode[1] |= 0x3A; /* 072 - mode 7.2 */
-      ext = 2;
+      fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
+	       fragP->fr_offset, 1, BFD_RELOC_16_PCREL);
+      fragP->fr_fix += 2;
       break;
-    case TAB (PCLEA, LONG):
-      fixP = fix_new (fragP, (int) (fragP->fr_fix) + 2, 4, fragP->fr_symbol,
-		      fragP->fr_offset, 1, NO_RELOC);
-      fixP->fx_pcrel_adjust = 2;
+    case TAB (PCREL1632, LONG):
       /* Already set to mode 7.3; this indicates: PC indirect with
 	 suppressed index, 32-bit displacement.  */
       *buffer_address++ = 0x01;
       *buffer_address++ = 0x70;
       fragP->fr_fix += 2;
-      ext = 4;
+      fixP = fix_new (fragP, (int) (fragP->fr_fix), 4, fragP->fr_symbol,
+		      fragP->fr_offset, 1, BFD_RELOC_32_PCREL);
+      fixP->fx_pcrel_adjust = 2;
+      fragP->fr_fix += 4;
       break;
-
     case TAB (PCINDEX, BYTE):
-      disp += 2;
-      if (!issbyte (disp))
-	{
-	  as_bad (_("displacement doesn't fit in one byte"));
-	  disp = 0;
-	}
       assert (fragP->fr_fix >= 2);
       buffer_address[-2] &= ~1;
-      buffer_address[-1] = disp;
-      ext = 0;
+      fixP = fix_new (fragP, fragP->fr_fix - 1, 1, fragP->fr_symbol,
+		      fragP->fr_offset, 1, BFD_RELOC_8_PCREL);
+      fixP->fx_pcrel_adjust = 1;
       break;
     case TAB (PCINDEX, SHORT):
-      disp += 2;
-      assert (issword (disp));
       assert (fragP->fr_fix >= 2);
       buffer_address[-2] |= 0x1;
       buffer_address[-1] = 0x20;
       fixP = fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
-		      fragP->fr_offset, (fragP->fr_opcode[1] & 077) == 073,
-		      NO_RELOC);
+		      fragP->fr_offset, 1, BFD_RELOC_16_PCREL);
       fixP->fx_pcrel_adjust = 2;
-      ext = 2;
+      fragP->fr_fix += 2;
       break;
     case TAB (PCINDEX, LONG):
-      disp += 2;
-      fixP = fix_new (fragP, (int) (fragP->fr_fix), 4, fragP->fr_symbol,
-		      fragP->fr_offset, (fragP->fr_opcode[1] & 077) == 073,
-		      NO_RELOC);
-      fixP->fx_pcrel_adjust = 2;
       assert (fragP->fr_fix >= 2);
       buffer_address[-2] |= 0x1;
       buffer_address[-1] = 0x30;
-      ext = 4;
+      fixP = fix_new (fragP, (int) (fragP->fr_fix), 4, fragP->fr_symbol,
+		      fragP->fr_offset, 1, BFD_RELOC_32_PCREL);
+      fixP->fx_pcrel_adjust = 2;
+      fragP->fr_fix += 4;
       break;
-    }
-
-  if (ext)
-    {
-      md_number_to_chars (buffer_address, (long) disp, (int) ext);
-      fragP->fr_fix += ext;
+    case TAB (ABSTOPCREL, SHORT):
+      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
+	       1, BFD_RELOC_16_PCREL);
+      fragP->fr_fix += 2;
+      break;
+    case TAB (ABSTOPCREL, LONG):
+      /* The thing to do here is force it to ABSOLUTE LONG, since
+	 ABSTOPCREL is really trying to shorten an ABSOLUTE address anyway */
+      if ((fragP->fr_opcode[1] & 0x3F) != 0x3A)
+	abort ();
+      fragP->fr_opcode[1] &= ~0x3F;
+      fragP->fr_opcode[1] |= 0x39;	/* Mode 7.1 */
+      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
+	       0, BFD_RELOC_32);
+      fragP->fr_fix += 4;
+      break;
     }
 }
 
@@ -4537,70 +4568,69 @@ md_estimate_size_before_relax (fragP, segment)
 
   old_fix = fragP->fr_fix;
 
-  /* handle SZ_UNDEF first, it can be changed to BYTE or SHORT */
+  /* Handle SZ_UNDEF first, it can be changed to BYTE or SHORT.  */
   switch (fragP->fr_subtype)
     {
-
-    case TAB (ABRANCH, SZ_UNDEF):
+    case TAB (BRANCHBWL, SZ_UNDEF):
+    case TAB (BRABSJUNC, SZ_UNDEF):
       {
-	if ((fragP->fr_symbol != NULL)	/* Not absolute */
-	    && S_GET_SEGMENT (fragP->fr_symbol) == segment
+	if (S_GET_SEGMENT (fragP->fr_symbol) == segment
 	    && relaxable_symbol (fragP->fr_symbol))
 	  {
 	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), BYTE);
-	    break;
 	  }
-	else if ((fragP->fr_symbol != NULL)
-		 && (flag_short_refs || flag_keep_pcrel))
-	  {			/* Symbol is undefined and we want short ref */
-	    fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
-		     fragP->fr_offset, 1, NO_RELOC);
-	    fragP->fr_fix += 2;
-	    frag_wane (fragP);
-	    break;
-	  }
-	else if ((fragP->fr_symbol == 0) || !HAVE_LONG_BRANCH(current_architecture))
+	else if (flag_short_refs)
 	  {
-	    /* On 68000, or for absolute value, switch to abs long */
-	    /* FIXME, we should check abs val, pick short or long */
-	    if (fragP->fr_opcode[0] == 0x61)
-	      {
-		fragP->fr_opcode[0] = 0x4E;
-		fragP->fr_opcode[1] = (char) 0xB9; /* JBSR with ABSL LONG offset */
-		fix_new (fragP, fragP->fr_fix, 4,
-			 fragP->fr_symbol, fragP->fr_offset, 0, NO_RELOC);
-		fragP->fr_fix += 4;
-		frag_wane (fragP);
-	      }
-	    else if (fragP->fr_opcode[0] == 0x60)
-	      {
-		fragP->fr_opcode[0] = 0x4E;
-		fragP->fr_opcode[1] = (char) 0xF9; /* JMP  with ABSL LONG offset */
-		fix_new (fragP, fragP->fr_fix, 4,
-			 fragP->fr_symbol, fragP->fr_offset, 0, NO_RELOC);
-		fragP->fr_fix += 4;
-		frag_wane (fragP);
-	      }
-	    else
-	      {
-		/* This should never happen, because if it's a conditional
-		   branch and we are on a 68000, BCC68000 should have been
-		   picked instead of ABRANCH.  */
-		abort ();
-	      }
+	    /* Symbol is undefined and we want short ref.  */
+	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
+	    fragP->fr_var += 2;
 	  }
 	else
-	  {			/* Symbol is still undefined.  Make it simple */
-	    fix_new (fragP, (int) (fragP->fr_fix), 4, fragP->fr_symbol,
-		     fragP->fr_offset, 1, NO_RELOC);
-	    fragP->fr_fix += 4;
-	    fragP->fr_opcode[1] = (char) 0xff;
-	    frag_wane (fragP);
-	    break;
+	  {
+	    /* Symbol is still undefined.  Make it LONG.  */
+	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), LONG);
+	    fragP->fr_var += 4;
 	  }
-
 	break;
-      }				/* case TAB(ABRANCH,SZ_UNDEF) */
+      }
+
+    case TAB (BRABSJCOND, SZ_UNDEF):
+      {
+	if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+	    && relaxable_symbol (fragP->fr_symbol))
+	  {
+	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), BYTE);
+	  }
+	else if (flag_short_refs)
+	  {
+	    /* Symbol is undefined and we want short ref.  */
+	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
+	    fragP->fr_var += 2;
+	  }
+	else
+	  {
+	    /* Symbol is still undefined.  Make it LONG.  */
+	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), LONG);
+	    fragP->fr_var += 6;
+	  }
+	break;
+      }
+
+    case TAB (BRANCHBW, SZ_UNDEF):
+      {
+	if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+	    && relaxable_symbol (fragP->fr_symbol))
+	  {
+	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), BYTE);
+	  }
+	else
+	  {
+	    /* Symbol is undefined and we don't have long branches.  */
+	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
+	    fragP->fr_var += 2;
+	  }
+	break;
+      }
 
     case TAB (FBRANCH, SZ_UNDEF):
       {
@@ -4613,142 +4643,50 @@ md_estimate_size_before_relax (fragP, segment)
 	  }
 	else
 	  {
-	    fix_new (fragP, (int) fragP->fr_fix, 4, fragP->fr_symbol,
-		     fragP->fr_offset, 1, NO_RELOC);
-	    fragP->fr_fix += 4;
-	    fragP->fr_opcode[1] |= 0x40; /* Turn on LONG bit */
-	    frag_wane (fragP);
-	  }
-	break;
-      }				/* TAB(FBRANCH,SZ_UNDEF) */
-
-    case TAB (PCREL, SZ_UNDEF):
-      {
-	if ((S_GET_SEGMENT (fragP->fr_symbol) == segment
-	     && relaxable_symbol (fragP->fr_symbol))
-	    || flag_short_refs)
-	  {
-	    fragP->fr_subtype = TAB (PCREL, SHORT);
-	    fragP->fr_var += 2;
-	  }
-	else
-	  {
-	    fragP->fr_subtype = TAB (PCREL, LONG);
+	    fragP->fr_subtype = TAB (FBRANCH, LONG);
 	    fragP->fr_var += 4;
 	  }
 	break;
-      }				/* TAB(PCREL,SZ_UNDEF) */
+      }
 
-    case TAB (BCC68000, SZ_UNDEF):
+    case TAB (DBCCLBR, SZ_UNDEF):
+    case TAB (DBCCABSJ, SZ_UNDEF):
       {
-	if ((fragP->fr_symbol != NULL)
-	    && S_GET_SEGMENT (fragP->fr_symbol) == segment
-	    && relaxable_symbol (fragP->fr_symbol))
+	if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+	    && relaxable_symbol (fragP->fr_symbol)
+	    || flag_short_refs)
 	  {
-	    fragP->fr_subtype = TAB (BCC68000, BYTE);
-	    break;
-	  }
-	/* only Bcc 68000 instructions can come here */
-	if ((fragP->fr_symbol != NULL) && (flag_short_refs || flag_keep_pcrel))
-	  {
-	    /* the user wants short refs, so emit one */
-	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
-		     fragP->fr_offset, 1, NO_RELOC);
-	    fragP->fr_fix += 2;
-	  }
-	else
-	  {
-	    /* change bcc into b!cc/jmp absl long */
-	    fragP->fr_opcode[0] ^= 0x01;	/* invert bcc */
-	    fragP->fr_opcode[1] = 0x06;	/* branch offset = 6 */
-	    /* JF: these were fr_opcode[2,3] */
-	    buffer_address[0] = 0x4e;	/* put in jmp long (0x4ef9) */
-	    buffer_address[1] = (char) 0xf9;
-	    fragP->fr_fix += 2;	/* account for jmp instruction */
-	    fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-		     fragP->fr_offset, 0, NO_RELOC);
-	    fragP->fr_fix += 4;
-	  }
-	frag_wane (fragP);
-	break;
-      }				/* case TAB(BCC68000,SZ_UNDEF) */
-
-    case TAB (DBCC, SZ_UNDEF):
-      {
-	if (fragP->fr_symbol != NULL
-	    && S_GET_SEGMENT (fragP->fr_symbol) == segment
-	    && relaxable_symbol (fragP->fr_symbol))
-	  {
-	    fragP->fr_subtype = TAB (DBCC, SHORT);
+	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
 	    fragP->fr_var += 2;
-	    break;
-	  }
-	/* only DBcc 68000 instructions can come here */
-
-	if (fragP->fr_symbol != NULL
-	    && (flag_short_refs
-		|| (! HAVE_LONG_BRANCH (current_architecture)
-		    && flag_keep_pcrel)))
-	  {
-	    /* the user wants short refs, so emit one */
-	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
-		     fragP->fr_offset, 1, NO_RELOC);
-	    fragP->fr_fix += 2;
 	  }
 	else
 	  {
-	    /* Change dbcc into dbcc/bral.  */
-	    /* JF: these used to be fr_opcode[2-4], which is wrong.  */
-	    buffer_address[0] = 0x00;	/* branch offset = 4 */
-	    buffer_address[1] = 0x04;
-	    buffer_address[2] = 0x60;	/* put in bra pc + ...  */
-	    /* JF: these were fr_opcode[5-7] */
-	    buffer_address[3] = 0x06;	/* Plus 6 */
-	    if (HAVE_LONG_BRANCH (current_architecture))
-	      {
-		buffer_address[4] = 0x60;       /* Put in bral (0x60ff).  */
-		buffer_address[5] = (char) 0xff;
-	      }
-	    else
-	      {
-		buffer_address[4] = 0x4e;       /* Put in jmp long (0x4ef9).  */
-		buffer_address[5] = (char) 0xf9;
-	      }
-	    fragP->fr_fix += 6;	/* account for bra/jmp instruction */
-	    fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-		     fragP->fr_offset, HAVE_LONG_BRANCH (current_architecture),
-		     NO_RELOC);
-	    fragP->fr_fix += 4;
+	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), LONG);
+	    fragP->fr_var += 10;
 	  }
-
-	frag_wane (fragP);
 	break;
-      }				/* case TAB(DBCC,SZ_UNDEF) */
+      }
 
-    case TAB (PCLEA, SZ_UNDEF):
+    case TAB (PCREL1632, SZ_UNDEF):
       {
 	if (((S_GET_SEGMENT (fragP->fr_symbol)) == segment
 	     && relaxable_symbol (fragP->fr_symbol))
-	    || flag_short_refs
-	    || cpu_of_arch (current_architecture) < m68020
-	    || cpu_of_arch (current_architecture) == mcf5200)
+	    || flag_short_refs)
 	  {
-	    fragP->fr_subtype = TAB (PCLEA, SHORT);
+	    fragP->fr_subtype = TAB (PCREL1632, SHORT);
 	    fragP->fr_var += 2;
 	  }
 	else
 	  {
-	    fragP->fr_subtype = TAB (PCLEA, LONG);
+	    fragP->fr_subtype = TAB (PCREL1632, LONG);
 	    fragP->fr_var += 6;
 	  }
 	break;
-      }				/* TAB(PCLEA,SZ_UNDEF) */
-
+      }
+      
     case TAB (PCINDEX, SZ_UNDEF):
       if ((S_GET_SEGMENT (fragP->fr_symbol) == segment
-	   && relaxable_symbol (fragP->fr_symbol))
-	  || cpu_of_arch (current_architecture) < m68020
-	  || cpu_of_arch (current_architecture) == mcf5200)
+	   && relaxable_symbol (fragP->fr_symbol)))
 	{
 	  fragP->fr_subtype = TAB (PCINDEX, BYTE);
 	}
@@ -4759,15 +4697,33 @@ md_estimate_size_before_relax (fragP, segment)
 	}
       break;
 
+    case TAB (ABSTOPCREL, SZ_UNDEF):
+      {
+	if ((S_GET_SEGMENT (fragP->fr_symbol) == segment
+	     && relaxable_symbol (fragP->fr_symbol)))
+	  {
+	    fragP->fr_subtype = TAB (ABSTOPCREL, SHORT);
+	    fragP->fr_var += 2;
+	  }
+	else
+	  {
+	    fragP->fr_subtype = TAB (ABSTOPCREL, LONG);
+	    fragP->fr_var += 4;
+	  }
+	break;
+      }
+
     default:
       break;
     }
 
-  /* now that SZ_UNDEF are taken care of, check others */
+  /* Now that SZ_UNDEF are taken care of, check others.  */
   switch (fragP->fr_subtype)
     {
-    case TAB (BCC68000, BYTE):
-    case TAB (ABRANCH, BYTE):
+    case TAB (BRANCHBWL, BYTE):
+    case TAB (BRABSJUNC, BYTE):
+    case TAB (BRABSJCOND, BYTE):
+    case TAB (BRANCHBW, BYTE):
       /* We can't do a short jump to the next instruction, so in that
 	 case we force word mode.  At this point S_GET_VALUE should
 	 return the offset of the symbol within its frag.  If the
