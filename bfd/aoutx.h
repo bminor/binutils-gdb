@@ -819,6 +819,18 @@ adjust_o_magic (abfd, execp)
       vma += pad;
       obj_bsssec(abfd)->vma = vma;
     }
+  else
+    {
+      /* The VMA of the .bss section is set by the the VMA of the
+         .data section plus the size of the .data section.  We may
+         need to add padding bytes to make this true.  */
+      pad = obj_bsssec (abfd)->vma - vma;
+      if (pad > 0)
+	{
+	  obj_datasec (abfd)->_raw_size += pad;
+	  pos += pad;
+	}
+    }
   obj_bsssec(abfd)->filepos = pos;
 
   /* Fix up the exec header.  */
@@ -3301,6 +3313,15 @@ aout_link_add_symbols (abfd, info)
 	(*sym_hash)->root.u.c.alignment_power =
 	  bfd_get_arch_info (abfd)->section_align_power;
 
+      /* If this is a set symbol, and we are not building sets, then
+	 it is possible for the hash entry to not have been set.  In
+	 such a case, treat the symbol as not globally defined.  */
+      if ((*sym_hash)->root.type == bfd_link_hash_new)
+	{
+	  BFD_ASSERT ((flags & BSF_CONSTRUCTOR) != 0);
+	  *sym_hash = NULL;
+	}
+
       if (type == (N_INDR | N_EXT) || type == N_WARNING)
 	++sym_hash;
     }
@@ -3823,11 +3844,32 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 	      if ((type & N_TYPE) == N_INDR)
 		skip_indirect = true;
 
+	      symsec = NULL;
+
 	      /* We need to get the value from the hash table.  We use
 		 hresolve so that if we have defined an indirect
 		 symbol we output the final definition.  */
 	      if (h == (struct aout_link_hash_entry *) NULL)
-		val = 0;
+		{
+		  switch (type & N_TYPE)
+		    {
+		    case N_SETT:
+		      symsec = obj_textsec (input_bfd);
+		      break;
+		    case N_SETD:
+		      symsec = obj_datasec (input_bfd);
+		      break;
+		    case N_SETB:
+		      symsec = obj_bsssec (input_bfd);
+		      break;
+		    case N_SETA:
+		      symsec = bfd_abs_section_ptr;
+		      break;
+		    default:
+		      val = 0;
+		      break;
+		    }
+		}
 	      else if (hresolve->root.type == bfd_link_hash_defined)
 		{
 		  asection *input_section;
@@ -3872,8 +3914,6 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 		}
 	      else
 		val = 0;
-
-	      symsec = NULL;
 	    }
 	  if (symsec != (asection *) NULL)
 	    val = (symsec->output_section->vma
@@ -3888,7 +3928,10 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 	      h->written = true;
 	      h->indx = obj_aout_external_sym_count (output_bfd);
 	    }
-	  else
+	  else if ((type & N_TYPE) != N_SETT
+		   && (type & N_TYPE) != N_SETD
+		   && (type & N_TYPE) != N_SETB
+		   && (type & N_TYPE) != N_SETA)
 	    {
 	      switch (discard)
 		{
@@ -4007,9 +4050,12 @@ aout_link_write_other_symbol (h, data)
   switch (h->root.type)
     {
     default:
-    case bfd_link_hash_new:
       abort ();
       /* Avoid variable not initialized warnings.  */
+      return true;
+    case bfd_link_hash_new:
+      /* This can happen for set symbols when sets are not being
+         built.  */
       return true;
     case bfd_link_hash_undefined:
       type = N_UNDF | N_EXT;

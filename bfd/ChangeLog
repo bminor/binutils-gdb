@@ -1,5 +1,16 @@
 Thu Aug 18 16:29:57 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	Get ld -x -r to handle a.out set symbols correctly.
+	* aoutx.h (adjust_o_magic): If the .bss VMA was set outside of
+	BFD, pad the .data section up to the VMA of the .bss section.
+	(aout_link_add_symbols): If a set symbol does not get modified,
+	treat it as a local symbol.
+	(aout_link_write_symbols): Set the value of set symbols
+	correctly.  Don't discard set symbols even if discarding local
+	symbols.
+	(aout_link_write_other_symbol): Don't abort on bfd_link_hash_new,
+	since it can now happen for set symbols.
+
 	* elfcode.h (elf_fake_sections): Just check for ".rela" and
 	".rel", not ".rela." and ".rel."; make this work by checking
 	use_rela_p.
