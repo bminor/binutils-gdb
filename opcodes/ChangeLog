@@ -1,3 +1,11 @@
+Fri Jun 18 14:15:15 1993  Per Bothner  (bothner@deneb.cygnus.com)
+
+	* m68k-dis.c (print_insn_arg):  Change return value to byte count
+	or error code.
+	* m68k-dis.c:  Re-write to detect invalid operands before
+	printing anything, so we can handle this the same way we
+	handle invalid opcodes.
+
 Thu Jun 17 15:01:36 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* sh-dis.c, sh-opc.h: Understand some more opcodes.
