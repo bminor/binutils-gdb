@@ -1,5 +1,7 @@
 2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-cris/libdso-13.d: Adjust for being identified as warning.
+
 	* ld-cris/globsymw2.s: New file.
 	* ld-cris/warn3.d, ld-cris/warn4.d: New tests.
 
