@@ -2007,6 +2007,7 @@ ecoff_find_nearest_line (abfd,
   char *pdr_ptr;
   char *pdr_end;
   PDR pdr;
+  bfd_vma first_off;
   unsigned char *line_ptr;
   unsigned char *line_end;
   int lineno;
@@ -2052,10 +2053,12 @@ ecoff_find_nearest_line (abfd,
 	     + fdr_ptr->ipdFirst * external_pdr_size);
   pdr_end = pdr_ptr + fdr_ptr->cpd * external_pdr_size;
   (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
+  if (offset < pdr.adr)
+    return false;
 
   /* The address of the first PDR is an offset which applies to the
      addresses of all the PDR's.  */
-  offset += pdr.adr;
+  first_off = pdr.adr;
 
   for (pdr_ptr += external_pdr_size;
        pdr_ptr < pdr_end;
@@ -2080,7 +2083,7 @@ ecoff_find_nearest_line (abfd,
   pdr_ptr -= external_pdr_size;
   (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
 
-  offset -= pdr.adr;
+  offset -= pdr.adr - first_off;
   lineno = pdr.lnLow;
   line_ptr = (ecoff_data (abfd)->debug_info.line
 	      + fdr_ptr->cbLineOffset
