@@ -63,7 +63,7 @@ extern CORE_ADDR sh_skip_prologue ();
 
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */
-#define DECR_PC_AFTER_BREAK 0
+#define DECR_PC_AFTER_BREAK 2
 
 /* Nonzero if instruction at PC is a return instruction.  */
 #define ABOUT_TO_RETURN(pc) (read_memory_integer(pc,2) == 0x000b)
@@ -128,8 +128,8 @@ extern CORE_ADDR sh_skip_prologue ();
 #define VBR_REGNUM 	19
 #define MACH_REGNUM 	20
 #define MACL_REGNUM 	21
-#define CR_REGNUM 	22
-
+#define SR_REGNUM 	22
+#define NUM_REALREGS     23
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. 
 
@@ -208,7 +208,7 @@ extern CORE_ADDR sh_skip_prologue ();
 
 typedef unsigned short INSN_WORD;
 
-#define ADDR_BITS_REMOVE(addr) ((addr) & 0xffffff)
+#define ADDR_BITS_REMOVE(addr) ((addr))
 
 #define CALL_DUMMY_LENGTH 10
 
@@ -216,4 +216,5 @@ typedef unsigned short INSN_WORD;
    restoring all saved registers.  */
 
 #define POP_FRAME pop_frame();
+
 
