@@ -101,7 +101,6 @@ kill_inferior (void)
     return;
   ptrace (PTRACE_KILL, inferior_pid, 0, 0);
   wait (0);
-/*************inferior_died ();****VK**************/
 }
 
 /* Return nonzero if the given thread is still alive.  */
