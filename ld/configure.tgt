@@ -86,7 +86,7 @@ i[3456]86-*-freebsdelf*) targ_emul=elf_i386 ;;
 i[3456]86-*-sysv*)	targ_emul=i386coff ;;
 i[3456]86-*-ptx*)	targ_emul=i386coff ;;
 i[3456]86-*-mach*)	targ_emul=i386mach ;;
-i[3456]86-*-gnu*)	targ_emul=elf_i386; targ_extra_emuls=i386mach ;;
+i[3456]86-*-gnu*)	targ_emul=elf_i386 ;;
 i[3456]86-*-msdos*)	targ_emul=i386msdos; targ_extra_emuls=i386aout ;;
 i[3456]86-*-moss*)	targ_emul=i386moss; targ_extra_emuls=i386msdos ;;
 i[3456]86-*-winnt)	targ_emul=i386pe ;;
@@ -149,8 +149,7 @@ mips*vr4100-*-elf*)	targ_emul=elf32b4300 ;;
 mips*vr5000el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr5000-*-elf*)	targ_emul=elf32b4300 ;;
 # start-sanitize-r5900 
-mips*vr5900el-*-elf*)	targ_emul=elf32l4300 ;;
-mips*vr5900-*-elf*)	targ_emul=elf32b4300 ;;
+mips*vr5900-*-elf*)	targ_emul=elf32l4300 ;;
 # end-sanitize-r5900 
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
