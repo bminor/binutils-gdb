@@ -268,6 +268,7 @@ usage (stream, status)
       --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n\
 \n"));
       list_supported_targets (program_name, stream);
+      list_supported_architectures (program_name, stream);
 
       disassembler_usage (stream);
     }

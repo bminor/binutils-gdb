@@ -168,6 +168,25 @@ list_supported_targets (name, f)
     fprintf (f, " %s", bfd_target_vector[t]->name);
   fprintf (f, "\n");
 }
+
+/* List the supported architectures.  */
+
+void
+list_supported_architectures (name, f)
+     const char *name;
+     FILE *f;
+{
+  const char** arch;
+
+  if (name == NULL)
+    fprintf (f, _("Supported architectures:"));
+  else
+    fprintf (f, _("%s: supported architectures:"), name);
+
+  for (arch = bfd_arch_list (); *arch; arch++)
+    fprintf (f, " %s", *arch);
+  fprintf (f, "\n");
+}
 
 /* Display the archive header for an element as if it were an ls -l listing:
 
