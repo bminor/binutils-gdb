@@ -2072,7 +2072,7 @@ proc do_fp_fcmp {} {
 }
 
 proc do_media {} {
-    set testname "media.s: purge tests"
+    set testname "media.s: media tests"
     set x 0
 
     gas_start "media.s" "-al"
@@ -2092,7 +2092,7 @@ proc do_media {} {
 	    -re "^ +\[0-9\]+ 000c 096707CC\[^\n]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0010 0967054C\[^\n]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0014 0967058C\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0014 096705CC\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 096705CC\[^\n]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -2104,7 +2104,7 @@ proc do_media {} {
     gas_finish
 
     # Did we find what we were looking for?  If not, flunk it.
-    if [expr $x==18] then { pass $testname } else { fail $testname }
+    if [expr $x==7] then { pass $testname } else { fail $testname }
 }
 
 proc do_special {} {
