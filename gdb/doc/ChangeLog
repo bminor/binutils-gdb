@@ -1,3 +1,10 @@
+2003-01-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document `maint print
+	reggroups' and `maint print register-groups'.
+	* gdbint.texinfo (Target Architecture Definition): Document
+	register_reggroup_p.
+
 2003-01-23  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (Separate Debug Files): New section.

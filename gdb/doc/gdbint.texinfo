@@ -3510,6 +3510,28 @@ Return the raw size of @var{reg}; defaults to the size of the register's
 virtual type.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
 
+@item register_reggroup_p (@var{gdbarch}, @var{regnum}, @var{reggroup})
+@findex register_reggroup_p
+@cindex register groups
+Return non-zero if register @var{regnum} is a member of the register
+group @var{reggroup}.
+
+By default, registers are grouped as follows:
+
+@table @code
+@item float_reggroup
+Any register with a valid name and a floating-point type.
+@item vector_reggroup
+Any register with a valid name and a vector type.
+@item general_reggroup
+Any register with a valid name and a type other than vector or
+floating-point.  @samp{float_reggroup}.
+@item save_reggroup
+@itemx restore_reggroup
+@itemx all_reggroup
+Any register with a valid name.
+@end table
+
 @item REGISTER_VIRTUAL_SIZE (@var{reg})
 @findex REGISTER_VIRTUAL_SIZE
 Return the virtual size of @var{reg}; defaults to the size of the

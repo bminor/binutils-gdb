@@ -14631,17 +14631,39 @@ warning message.
 @kindex maint print registers
 @kindex maint print raw-registers
 @kindex maint print cooked-registers
+@kindex maint print register-groups
 @item maint print registers
 @itemx maint print raw-registers
 @itemx maint print cooked-registers
+@itemx maint print register-groups
 Print @value{GDBN}'s internal register data structures.
 
-The command @samp{maint print raw-registers} includes the contents of
-the raw register cache; and the command @samp{maint print
-cooked-registers} includes the (cooked) value of all registers.
-@xref{Registers,, Registers, gdbint, @value{GDBN} Internals}.
+The command @code{maint print raw-registers} includes the contents of
+the raw register cache; the command @code{maint print cooked-registers}
+includes the (cooked) value of all registers; and the command
+@code{maint print register-groups} includes the groups that each
+register is a member of.  @xref{Registers,, Registers, gdbint,
+@value{GDBN} Internals}.
 
 Takes an optional file parameter.
+
+@kindex maint print reggroups
+@item maint print reggroups
+Print @value{GDBN}'s internal register group data structures.
+
+Takes an optional file parameter.
+
+@smallexample
+(gdb) @kbd{maint print reggroups}
+ Group      Type      
+ general    user      
+ float      user      
+ all        user      
+ vector     user      
+ system     user      
+ save       internal  
+ restore    internal  
+@end smallexample
 
 @kindex maint set profile
 @kindex maint show profile
