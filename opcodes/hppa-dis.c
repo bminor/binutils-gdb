@@ -490,6 +490,12 @@ print_insn_hppa (memaddr, info)
 		      (*info->fprintf_func) (info->stream, "%s ",
 					     short_ldst_compl_names[GET_COMPL (insn)]);
 		      break;
+		    case 'q':
+		      (*info->fprintf_func)
+			(info->stream, "%s ",
+			 short_ldst_compl_names[(GET_FIELD (insn, 28, 28)
+						 | GET_FIELD (insn, 29, 29))]);
+		      break;
 		    case 's':
 		      (*info->fprintf_func) (info->stream, "%s ",
 					     short_bytes_compl_names[GET_COMPL (insn)]);
@@ -902,6 +908,37 @@ print_insn_hppa (memaddr, info)
 					   float_format_names[GET_FIELD
 							      (insn, 20, 20)]);
 		  break;
+		case '#':
+		  {
+		    int sign = GET_FIELD (insn, 31, 31);
+		    int imm10 = GET_FIELD (insn, 18, 27);
+		    int disp;
+
+		    if (sign)
+		      disp = (-1 << 10) | imm10;
+		    else
+		      disp = imm10;
+
+		    disp <<= 3;
+		    fput_const (disp, info);
+		    break;
+		  }
+		case 'd':
+		  {
+		    int sign = GET_FIELD (insn, 31, 31);
+		    int imm11 = GET_FIELD (insn, 18, 28);
+		    int disp;
+
+		    if (sign)
+		      disp = (-1 << 11) | imm11;
+		    else
+		      disp = imm11;
+
+		    disp <<= 2;
+		    fput_const (disp, info);
+		    break;
+		  }
+
 		/* ?!? FIXME */
 		case '_':
 		case '{':
