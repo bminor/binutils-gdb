@@ -1,3 +1,8 @@
+2001-06-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/djgpp/fnchange.lst: Rename mi0-var-block.exp,
+	mi0-var-cmd.exp, mi0-var-child.exp and mi0-var-display.exp.
+
 2001-06-29  Andreas Jaeger  <aj@suse.de>
 
 	* MAINTAINERS: Add myself to the write-after-approval list.
@@ -77,6 +82,7 @@
 	* coff-solib.c: Include symfile.h and objfiles.h to make
 	OBJF_SHARED visible.
 
+>>>>>>> 1.1391
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure.in (--enable-gdbmi): Enable by default.

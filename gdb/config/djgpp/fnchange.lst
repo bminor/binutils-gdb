@@ -92,6 +92,10 @@
 @V@/gdb/gdbtk/generic/gdbtk-varobj.c @V@/gdb/gdbtk/generic/gdbtk-vobj.c
 @V@/gdb/osf-share/cma_stack_int.h @V@/gdb/osf-share/cma_stkint.h
 @V@/gdb/testsuite/gdb.base/coremaker2.c @V@/gdb/testsuite/gdb.base/core2maker.c
+@V@/gdb/testsuite/gdb.mi/mi0-var-block.exp @V@/gdb/testsuite/gdb.mi/mi0varblock.exp
+@V@/gdb/testsuite/gdb.mi/mi0-var-cmd.exp @V@/gdb/testsuite/gdb.mi/mi0varcmd.exp
+@V@/gdb/testsuite/gdb.mi/mi0-var-child.exp @V@/gdb/testsuite/gdb.mi/mi0varchild.exp
+@V@/gdb/testsuite/gdb.mi/mi0-var-display.exp @V@/gdb/testsuite/gdb.mi/mi0vardisplay.exp
 @V@/gdb/tui/tuiSourceWin.c @V@/gdb/tui/tuiWinSource.c
 @V@/gdb/tui/tuiSourceWin.h @V@/gdb/tui/tuiWinSource.h
 @V@/bfd/ChangeLog-9193 @V@/bfd/ChangeLog.9193
