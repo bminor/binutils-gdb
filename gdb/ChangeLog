@@ -1,3 +1,14 @@
+2004-06-21  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbarch.sh: Check that multi-arch methods do not provide a
+	macro.
+	(register_type, unwind_dummy_id, push_dummy_call, push_dummy_code)
+	(print_registers_info, print_float_info, print_vector_info)
+	(adjust_breakpoint_address, remote_translate_xfer_address)
+	(construct_inferior_arguments, skip_solib_resolver, unwind_pc)
+	(address_class_type_flags_to_name, unwind_sp): Remove the macro
+	name from the multi-arch definition.
+	
 2004-06-20  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbarch.sh: Sort by the function, instead of macro name.
