@@ -1631,7 +1631,8 @@ coff-solib.o: coff-solib.c $(defs_h) $(frame_h) $(bfd_h) $(gdbcore_h) \
 complaints.o: complaints.c $(defs_h) $(complaints_h) $(gdb_assert_h) \
 	$(command_h) $(gdbcmd_h)
 completer.o: completer.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
-	$(filenames_h) $(cli_decode_h) $(gdbcmd_h) $(completer_h)
+	$(filenames_h) $(cli_decode_h) $(gdbcmd_h) $(completer_h) \
+	$(language_h)
 copying.o: copying.c $(defs_h) $(command_h) $(gdbcmd_h)
 core-aout.o: core-aout.c $(defs_h) $(gdbcore_h) $(value_h) $(regcache_h) \
 	$(gdb_dirent_h) $(gdb_stat_h)

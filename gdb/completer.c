@@ -23,6 +23,7 @@
 #include "gdbtypes.h"
 #include "expression.h"
 #include "filenames.h"		/* for DOSish file names */
+#include "language.h"
 
 #include "cli/cli-decode.h"
 
@@ -51,13 +52,11 @@ char *line_completion_function (const char *text, int matches, char *line_buffer
    it does affect how much stuff M-? lists.
    (2) If one of the matches contains a word break character, readline
    will quote it.  That's why we switch between
-   gdb_completer_word_break_characters and
+   current_language->la_word_break_characters() and
    gdb_completer_command_word_break_characters.  I'm not sure when
    we need this behavior (perhaps for funky characters in C++ symbols?).  */
 
 /* Variables which are necessary for fancy command line editing.  */
-static char *gdb_completer_word_break_characters =
-" \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";
 
 /* When completing on command names, we remove '-' from the list of
    word break characters, since we use it in command names.  If the
@@ -89,12 +88,6 @@ static char *gdb_completer_loc_break_characters = " \t\n*|\"';:?><,";
 static char *gdb_completer_quote_characters = "'";
 
 /* Accessor for some completer data that may interest other files. */
-
-char *
-get_gdb_completer_word_break_characters (void)
-{
-  return gdb_completer_word_break_characters;
-}
 
 char *
 get_gdb_completer_quote_characters (void)
@@ -251,7 +244,7 @@ location_completer (char *text, char *word)
 	  colon = p;
 	  symbol_start = p + 1;
 	}
-      else if (strchr (gdb_completer_word_break_characters, *p))
+      else if (strchr (current_language->la_word_break_characters(), *p))
 	symbol_start = p + 1;
     }
 
@@ -399,7 +392,7 @@ complete_line (const char *text, char *line_buffer, int point)
      '-' character used in some commands.  */
 
   rl_completer_word_break_characters =
-    gdb_completer_word_break_characters;
+    current_language->la_word_break_characters();
 
       /* Decide whether to complete on a list of gdb commands or on symbols. */
   tmp_command = (char *) alloca (point + 1);
@@ -674,7 +667,7 @@ line_completion_function (const char *text, int matches, char *line_buffer, int 
     /* Make sure the word break characters are set back to normal for the
        next time that readline tries to complete something.  */
     rl_completer_word_break_characters =
-      gdb_completer_word_break_characters;
+      current_language->la_word_break_characters();
 #endif
 
   return (output);
@@ -696,7 +689,7 @@ skip_quoted_chars (char *str, char *quotechars, char *breakchars)
     quotechars = gdb_completer_quote_characters;
 
   if (breakchars == NULL)
-    breakchars = gdb_completer_word_break_characters;
+    breakchars = current_language->la_word_break_characters();
 
   for (scan = str; *scan != '\0'; scan++)
     {

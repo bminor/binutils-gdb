@@ -1,5 +1,20 @@
 2003-10-06  J. Brobecker  <brobecker@gnat.com>
 
+	* completer.h (get_gdb_completer_word_break_characters): Delete.
+	* completer.c: include language.h.
+	(gdb_completer_word_break_characters): Delete.
+	(get_gdb_completer_word_break_characters): Delete.
+	(location_completer): Use the word break characters of the current
+	language.
+	(complete_line): Likewise.
+	(line_completion_function): Likewise.
+	(skip_quoted_chars): Likewise.
+	* Makefile.in (completer.o): Add dependency on language.h.
+	* top.c (init_main): Set the readline word break characters
+	to GDB's default word break characters.
+
+2003-10-06  J. Brobecker  <brobecker@gnat.com>
+
 	* language.h (language_defn): new field, la_word_break_characters.
 	* language.c (unknown_language_defn): Set new field to
 	default_word_break_characters.
