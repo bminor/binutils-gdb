@@ -1,5 +1,8 @@
 Thu Oct  5 20:17:30 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	* Makefile.in (comparison): Only check *.o; we don't care if
+	timestamps inserted by the native linker differ.
+
 	* config/tc-alpha.c (alpha_align): Only fill with a no-op pattern
 	if alignment stricter than 4 bytes is requested; in that case,
 	align to a 4-byte boundary first.

@@ -430,7 +430,9 @@ distclean: clean-here
 	-rm -f config.status Makefile targ-env.h targ-cpu.h \
 		targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
 		config-stamp config.h conf config.log config.cache .gdbinit
-realclean: clean distclean
+maintainer-clean realclean: clean distclean
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
 	-rm -rf $(DISTSTUFF)
 
 # Entry points `install', `includes' and `uninstall'.
@@ -508,7 +510,7 @@ against=stage2
 # temporary assembly file names.
 comparison: force
 	x=0 ; \
-	for file in $(STAGESTUFF) ; do \
+	for file in *.o ; do \
 	  tail +16c ./$$file > tmp-foo1; \
 	  if tail +16c ${against}/$$file > tmp-foo2 2>/dev/null ; then \
 	    if cmp tmp-foo1 tmp-foo2 ; then \
