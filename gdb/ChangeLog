@@ -1,3 +1,37 @@
+2002-12-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (mips-linux-tdep.o): Add $(mips_tdep_h) and
+	$(gdb_assert_h).
+	* configure.tgt: Recognize mips64*-*-linux*.
+	* mips-linux-tdep.c (mips-tdep.h, gdb_assert.h): Include.
+	(supply_32_bit_reg): New function.
+	(supply_gregset): Call supply_32bit_reg() instead of supply_register().
+	(fill_gregset): Use regcache_collect() instead of
+	deprecated_registers[].
+	(register_addr): Change name to mips_linux_register_addr().
+	(MIPS64_ELF_NGREG, MIPS64_ELF_NFPREG, MIPS64_FPR_BASE, MIPS64_PC)
+	(MIPS64_CAUSE, MIPS64_BADVADDR, MIPS64_MMHI, MIPS64_MMLO)
+	(MIPS64_FPC_CSR, MIPS64_FPC_EIR, MIPS64_EF_REG0, MIPS64_EF_REG31)
+	(MIPS64_EF_LO, MIPS64_EF_HI, MIPS64_EF_CP0_EPC, MIPS64_EF_CP0_BADVADDR)
+	(MIPS64_EF_CP0_STATUS, MIPS64_EF_CP0_CAUSE, MIPS64_EF_SIZE)
+	(MIPS64_LINUX_JB_PC): New defines.
+	(mips64_elf_greg_t, mips64_elf_gregset_t, mips64_elf_fpreg_t)
+	(mips64_elf_fpregset_t): New typedefs.
+	(mips64_linux_get_longhmp_target, mips64_supply_gregset)
+	(mips64_fill_gregset, mips64_supply_fpregset, mips64_fill_fpregset)
+	(mips64_linux_register_addr, set_mips_linux_register_addr)
+	(register_addr, mips64_linux_svr4_fetch_link_map_offsets):
+	(init_register_addr_data)
+	New functions.
+	(fetch_core_registers): Add support for core file formats with 64-bit
+	registers.
+	(mips_linux_init_abi): Distinguish o32, n32, and n64 ABIs.
+	(register_addr_data): New static global variable.
+	(_initialize_mips_linux_tdep): Initialize register_addr_data.  Invoke
+	gdbarch_register_osabi() for each MIPS machine.
+	* config/mips/linux64.mt: New file.
+	* config/mips/tm-linux64.h: New file.
+
 2002-12-23  Adam Fedor  <fedor@gnu.org>
 
 	* maint.c (maintenance_demangle): Add switch to demangle
@@ -8,7 +42,7 @@
 	* objc-lang.c (lookup_objc_class, lookup_child_selector): Remove 
 	last argument from complaint function call.
 
-2002-12-20  Kevin Buettner  <kevinb@redhat.com>
+2002-12-23  Kevin Buettner  <kevinb@redhat.com>
 
 	* exec.c (print_section_info): Add FIXME comments regarding format
 	string choices.

@@ -189,6 +189,7 @@ mips*tx39*el*-elf*)	gdb_target=tx39l ;;
 mips*tx39*-elf*)	gdb_target=tx39 ;;
 mips64*el-*-elf*)	gdb_target=embedl64 ;;
 mips64*-*-elf*)		gdb_target=embed64 ;;
+mips64*-*-linux*)	gdb_target=linux64 ;;
 mips*el-*-ecoff*)	gdb_target=embedl ;;
 mips*-*-ecoff*)		gdb_target=embed ;;
 mips*el-*-elf*)		gdb_target=embedl ;;
