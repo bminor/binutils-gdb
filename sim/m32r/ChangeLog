@@ -1,3 +1,11 @@
+Tue Nov 18 15:33:48 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Use $(SIM_NEW_COMMON_OBJS).
+
+Fri Oct 31 18:46:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-if.c (sim_open): Delete dead call to sim_core_attach.
+
 Mon Oct 27 12:43:54 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sem-ops.h (U{DIV,MOD}[BHSD]I): Use unsigned division.
