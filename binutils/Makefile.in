@@ -60,9 +60,9 @@ LIBDIR  = $(srcdir)/../bfd$(subdir)
 #### host and target dependant Makefile fragments come in here.
 ###
 
-INCDIR = $(BASEDIR)/include-cygnus
+INCDIR = $(BASEDIR)/include
 
-CFLAGS  = -g -I$(INCDIR) $(DEFINES) $(CDEFINES)
+CFLAGS  = -g -I$(srcdir)/../include-cygnus -I$(INCDIR) $(DEFINES) $(CDEFINES)
 
 
 bindir=$(BASEDIR)/bin
@@ -84,11 +84,8 @@ DISASMS = m68k-pinsn.o i960-pinsn.o sparc-pinsn.o
 # Use the GNU getopt unless you have problems with it.
 # The IRIS version could probably benefit from being assembled with
 # libmalloc rather than the ordinary malloc.
-GNU_GETOPT = getopt.o $(ALLOCA)
-GNU_GETOPT_LONG = getopt1.o $(GNU_GETOPT)
-
-
-
+#GNU_GETOPT = $(srcdir)/../getopt$(subdir)/libgetopt.a
+GNU_GETOPT_LONG = $(srcdir)/../getopt$(subdir)/libgetopt.a
 
 # Code shared by all the binutils.
 BULIBS = bucomm.o version.o filemode.o
