@@ -56,8 +56,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yyact	c_act		
 #define	yyexca	c_exca
 
+/* Forward decls */
 void yyerror ();
 static int parse_number ();
+int yyparse ();
 
 /* #define	YYDEBUG	1 */
 

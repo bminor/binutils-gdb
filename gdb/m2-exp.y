@@ -56,8 +56,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yyact	m2_act
 #define	yyexca	m2_exca
 
+/* Forward decl's */
 void yyerror ();
 static int yylex ();
+int yyparse ();
 
 /* The sign of the number being parsed. */
 int number_sign = 1;
@@ -1122,8 +1124,7 @@ yyerror()
    if (yychar < 256)
      error("Invalid syntax in expression near character '%c'.",yychar);
    else
-     error("Invalid syntax in expression near a '%s'.",
-	   yytname[yychar-255]);
+     error("Invalid syntax in expression");
 }
 
 /* Table of operators and their precedences for printing expressions.  */
