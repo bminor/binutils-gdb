@@ -63,6 +63,8 @@ if ![info exists gdb_prompt] then {
     set gdb_prompt "\[(\]gdb\[)\]"
 }
 
+### Only procedures should come after this point.
+
 #
 # gdb_version -- extract and print the version number of GDB
 #
@@ -893,7 +895,40 @@ proc get_compiler_info {binfile args} {
 	}
     }
     
-    source ${binfile}.ci
+    uplevel \#0 { set gcc_compiled 0 }
+
+    if { [llength $args] == 0 || $args != "f77" } {
+        source ${binfile}.ci
+    }
+
+    # Most compilers will evaluate comparisons and other boolean
+    # operations to 0 or 1.
+    uplevel \#0 { set true 1 }
+    uplevel \#0 { set false 0 }
+
+    uplevel \#0 { set hp_cc_compiler 0 }
+    uplevel \#0 { set hp_aCC_compiler 0 }
+    uplevel \#0 { set hp_f77_compiler 0 }
+    uplevel \#0 { set hp_f90_compiler 0 }
+    if { !$gcc_compiled && [istarget "hppa*-*-hpux*"] } {
+	# Check for the HP compilers
+	set compiler [lindex [split [get_compiler $args] " "] 0]
+	catch "exec what $compiler" output
+	if [regexp ".*HP aC\\+\\+.*" $output] {
+	    uplevel \#0 { set hp_aCC_compiler 1 }
+	    # Use of aCC results in boolean results being displayed as
+	    # "true" or "false"
+	    uplevel \#0 { set true true }
+	    uplevel \#0 { set false false }
+	} elseif [regexp ".*HP C Compiler.*" $output] {
+	    uplevel \#0 { set hp_cc_compiler 1 }
+	} elseif [regexp ".*HP-UX f77.*" $output] {
+	    uplevel \#0 { set hp_f77_compiler 1 }
+	} elseif [regexp ".*HP-UX f90.*" $output] {
+	    uplevel \#0 { set hp_f90_compiler 1 }
+	}
+    }
+
     return 0;
 }
 
@@ -1060,6 +1095,52 @@ proc gdb_expect { args } {
     }
 }
 
+#
+# Check for long sequence of output by parts.
+# TEST: is the test message.
+# SENTINEL: Is the terminal pattern indicating that output has finished.
+# LIST: is the sequence of outputs to match.
+# If the sentinel is recognized early, it is considered an error.
+#
+proc gdb_expect_list {test sentinal list} {
+    global gdb_prompt
+    set index 0
+    while { ${index} >= 0 && ${index} < [llength ${list}] } {
+	set pattern [lindex ${list} ${index}]
+        set index [expr ${index} + 1]
+	if { ${index} == [llength ${list}] } {
+	    gdb_expect {
+		-re "${pattern}${sentinal}" {
+		    pass "${test} (sentinal)"
+		}
+		timeout {
+		    fail "(timeout on sentinal) ${test}"
+		    set index -1
+		}
+	    }
+	} else {
+	    gdb_expect {
+		-re "${pattern}" {
+		    pass "${test} (line ${index})"
+		}
+		-re "${sentinal}" {
+		    fail "${test} (line ${index})"
+		    set index -1
+		}
+		timeout {
+		    fail "(timeout on line ${index}) ${test}"
+		    set index -1
+		}
+	    }
+	}
+    }
+    if { ${index} >= 0 } {
+	pass "${test}"
+    }
+}
+
+#
+#
 proc gdb_suppress_entire_file { reason } {
     global suppress_flag;
 

@@ -13,7 +13,7 @@
 case "${target_cpu}" in
 
 alpha*)			gdb_target_cpu=alpha ;;
-c[12])			gdb_target_cpu=convex ;;
+# OBSOLETE c[12])		gdb_target_cpu=convex ;;
 hppa*)			gdb_target_cpu=pa ;;
 i[3456]86*)		gdb_target_cpu=i386 ;;
 m68*)			gdb_target_cpu=m68k ;;
@@ -53,8 +53,8 @@ arc-*-*)		gdb_target=arc ;;
 arm-*-* | thumb-*-* | strongarm-*-*)
 			gdb_target=arm ;;
 
-c1-*-*)			gdb_target=convex ;;
-c2-*-*)			gdb_target=convex ;;
+# OBSOLETE c1-*-*)		gdb_target=convex ;;
+# OBSOLETE c2-*-*)		gdb_target=convex ;;
 
 d10v-*-*)		gdb_target=d10v ;;
 d30v-*-*)		gdb_target=d30v ;;
@@ -126,7 +126,7 @@ m68*-apollo*-bsd*)	gdb_target=apollo68b ;;
 m68*-bull-sysv*)	gdb_target=dpx2 ;;
 m68*-hp-bsd*)		gdb_target=hp300bsd ;;
 m68*-hp-hpux*)		gdb_target=hp300hpux ;;
-m68*-altos-*)		gdb_target=altos ;;
+# OBSOLETE m68*-altos-*)	gdb_target=altos ;;
 m68*-att-*)		gdb_target=3b1 ;;
 m68*-cisco*-*)		gdb_target=cisco ;;
 m68*-ericsson-*)	gdb_target=es1800 ;;

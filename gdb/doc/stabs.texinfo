@@ -872,7 +872,7 @@ produces the following stabs:
 .stabn 224,0,0,LBE2             # @r{224 is N_RBRAC}
 @end example
 
-@xref{Procedures} for more information on the @code{N_FUN} stab, and
+See @ref{Procedures} for more information on the @code{N_FUN} stab, and
 @ref{Block Structure} for more information on the @code{N_LBRAC} and
 @code{N_RBRAC} stabs.
 
@@ -3370,7 +3370,7 @@ for more information about their use.
 Variable on the stack; see @ref{Stack Variables}.
 
 @item :
-C++ nested symbol; see @xref{Nested Symbols}
+C++ nested symbol; see @xref{Nested Symbols}.
 
 @item a
 Parameter passed by reference in register; see @ref{Reference Parameters}.

@@ -7,6 +7,10 @@
 
 TI TMS320C80					tic80-*-*
 
+* OBSOLETE configurations
+
+Altos 3068					m68*-altos-*
+Convex						c1-*-*, c2-*-*
 
 *** Changes in GDB-4.18:
 

@@ -29,6 +29,7 @@ char *arg;
 
 #else /* ! vxworks */
 #  include <stdio.h>
+#  include <stdlib.h>
 #endif /* ! vxworks */
 
 /*
@@ -38,20 +39,34 @@ char *arg;
  * of gcc have or have had problems with this).
  */
 
+#ifdef PROTOTYPES
+int marker1 (void) { return (0); }
+int marker2 (int a) { return (1); }
+void marker3 (char *a, char *b) {}
+void marker4 (long d) {}
+#else
 int marker1 () { return (0); }
 int marker2 (a) int a; { return (1); }
 void marker3 (a, b) char *a, *b; {}
 void marker4 (d) long d; {}
+#endif
 
 /*
  *	This simple classical example of recursion is useful for
  *	testing stack backtraces and such.
  */
 
+#ifdef PROTOTYPES
+int factorial(int);
+
+int
+main (int argc, char **argv, char **envp)
+#else
 int
 main (argc, argv, envp)
 int argc;
 char *argv[], **envp;
+#endif
 {
 #ifdef usestubs
     set_debug_traps();
@@ -70,8 +85,12 @@ char *argv[], **envp;
     return 0;
 }
 
+#ifdef PROTOTYPES
+int factorial (int value)
+#else
 int factorial (value)
 int value;
+#endif
 {
     if (value > 1) {
 	value *= factorial (value - 1);

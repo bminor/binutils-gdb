@@ -48,23 +48,14 @@ if [get_compiler_info ${binfile}] {
     return -1
 }
 
-if {$gcc_compiled == 0} {
-    if [istarget "hppa*-hp-hpux*"] then {
-	set additional_flags "additional_flags=-Ae"
-    } else {
-	# don't know what the compiler is, hope for the best, maybe it's ANSI...
-	set additional_flags ""
-    }
+if {$hp_cc_compiler} {
+    set additional_flags "additional_flags=-Ae"
 } else {
     set additional_flags ""
 }
 
 # build the first test case
-#if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
-#     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-#}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug ${additional_flags}}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
@@ -84,6 +75,18 @@ if ![runto_main] then {
     continue
 }
 
+if { $hp_aCC_compiler } {
+    # When compiled w/ aCC we need to disable overload resolution
+    # for command line calls.
+    # We need it for vararg calls since the aCC compiler gives us no
+    # information about the undeclared arguments, or even that there 
+    # _are_ undeclared arguments. As far as gdb is concerned it only
+    # knows about the declared arguments. So we need to force the call
+    # even though the overload resolution mechanism says that the types
+    # don't match. 
+    # - guo
+    gdb_test "set overload-resolution 0" ""
+}
 
 send_gdb "print find_max1(5,1,2,3,4,5)\n"
 gdb_expect {

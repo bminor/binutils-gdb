@@ -43,6 +43,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
     }
 
+if [get_compiler_info ${binfile}] {
+    return -1;
+}
 
 gdb_exit
 gdb_start
@@ -153,7 +156,7 @@ gdb_expect {
 
 send_gdb "print v_int_pointer == v_int_pointer2\n"
 gdb_expect {
-    -re ".*= 0.*$gdb_prompt $" {
+    -re ".*= $false.*$gdb_prompt $" {
         pass "pointer1==pointer2"
       }
     -re ".*$gdb_prompt $" { fail "pointer1==pointer2" }
@@ -162,7 +165,7 @@ gdb_expect {
 
 send_gdb "print v_int_pointer != v_int_pointer2\n"
 gdb_expect {
-    -re ".*= 1.*$gdb_prompt $" {
+    -re ".*= $true.*$gdb_prompt $" {
         pass "pointer1!=pointer2"
       }
     -re ".*$gdb_prompt $" { fail "pointer1!=pointer2" }
@@ -172,7 +175,7 @@ gdb_expect {
 
 send_gdb "print v_int_pointer <= v_int_pointer2\n"
 gdb_expect {
-    -re ".*= 1.*$gdb_prompt $" {
+    -re ".*= $true.*$gdb_prompt $" {
         pass "pointer1<=pointer2"
       }
     -re ".*$gdb_prompt $" { fail "pointer1<=pointer2" }
@@ -182,7 +185,7 @@ gdb_expect {
 
 send_gdb "print v_int_pointer >= v_int_pointer2\n"
 gdb_expect {
-    -re ".*= 0.*$gdb_prompt $" {
+    -re ".*= $false.*$gdb_prompt $" {
         pass "pointer1>=pointer2"
       }
     -re ".*$gdb_prompt $" { fail "pointer1>=pointer2" }
@@ -192,7 +195,7 @@ gdb_expect {
 
 send_gdb "print v_int_pointer < v_int_pointer2\n"
 gdb_expect {
-    -re ".*= 1.*$gdb_prompt $" {
+    -re ".*= $true.*$gdb_prompt $" {
         pass "pointer1<pointer2"
       }
     -re ".*$gdb_prompt $" { fail "pointer1<pointer2" }
@@ -201,7 +204,7 @@ gdb_expect {
 
 send_gdb "print v_int_pointer > v_int_pointer2\n"
 gdb_expect {
-    -re ".*= 0.*$gdb_prompt $" {
+    -re ".*= $false.*$gdb_prompt $" {
         pass "pointer1>pointer2"
       }
     -re ".*$gdb_prompt $" { fail "pointer1>pointer2" }

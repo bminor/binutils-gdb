@@ -119,8 +119,10 @@ sighandler_list;
    function. */
 static int async_handler_ready = 0;
 
+static void create_file_handler PARAMS ((int, int, file_handler_func *, gdb_client_data));
 static void invoke_async_signal_handler PARAMS ((void));
 static int gdb_wait_for_event PARAMS ((void));
+static int gdb_do_one_event PARAMS ((void));
 static int check_async_ready PARAMS ((void));
 
 
@@ -236,7 +238,7 @@ process_event ()
    wait for something to happen (via gdb_wait_for_event), then process
    it.  Returns 1 if something was done otherwise returns 0 (this can
    happen if there are no event sources to wait for). */
-int
+static int
 gdb_do_one_event ()
 {
   int result = 0;
@@ -278,6 +280,9 @@ gdb_do_one_event ()
 	}			/* end of if !set_top_level */
       else
 	{
+	  /* FIXME: this should really be a call to a hook that is
+	     interface specific, because interfaces can display the
+	     prompt in their own way. */
 	  display_gdb_prompt (0);
 	  /* Maybe better to set a flag to be checked somewhere as to
 	     whether display the prompt or not. */
@@ -285,7 +290,41 @@ gdb_do_one_event ()
     }
   return result;
 }
+
+/* Start up the event loop. This is the entry point to the event loop
+   from the command loop. */
+void 
+start_event_loop ()
+{
+  /* Loop until there is something to do. This is the entry point to
+     the event loop engine. gdb_do_one_event will process one event
+     for each invocation.  It always returns 1, unless there are no
+     more event sources registered. In this case it returns 0.  */
+  while (gdb_do_one_event () != 0)
+    ;
+
+  /* We are done with the event loop. There are no more event sources
+     to listen to.  So we exit GDB. */
+  return;
+}
+
 
+
+/* Wrapper function for create_file_handler, so that the caller
+   doesn't have to know implementation details about the use of poll
+   vs. select. */
+void 
+add_file_handler (fd, proc, client_data)
+     int fd;
+     file_handler_func *proc;
+     gdb_client_data client_data;
+{
+#ifdef HAVE_POLL
+  create_file_handler (fd, POLLIN, (file_handler_func *) proc, client_data);
+#else
+  create_file_handler (fd, GDB_READABLE, (file_handler_func *) proc, client_data);
+#endif
+}
 
 /* Add a file handler/descriptor to the list of descriptors we are
    interested in.  
@@ -297,7 +336,7 @@ gdb_do_one_event ()
    For the select case, MASK is a combination of READABLE, WRITABLE, EXCEPTION.
    PROC is the procedure that will be called when an event occurs for
    FD.  CLIENT_DATA is the argument to pass to PROC. */
-void
+static void
 create_file_handler (fd, mask, proc, client_data)
      int fd;
      int mask;

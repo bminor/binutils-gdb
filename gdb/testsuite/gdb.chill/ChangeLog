@@ -1,3 +1,9 @@
+1999-06-25  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Jimmy Guo  <guo@cup.hp.com>:
+	* xstruct-grt.ch, xstruct.ch, xstruct.exp: Rename to mollify
+	doschk.
+
 Thu May 21 02:45:18 1998  Felix Lee  <flee@zog.cygnus.com>
 
 	* chexp.exp: fix tests that assume >16-bit ints.

@@ -1,7 +1,7 @@
 /* This table is used as a source for every ascii character.
    It is explicitly unsigned to avoid differences due to native characters
    being either signed or unsigned. */
-
+#include <stdlib.h>
 unsigned char ctable1[256] = {
   0000, 0001, 0002, 0003, 0004, 0005, 0006, 0007,
   0010, 0011, 0012, 0013, 0014, 0015, 0016, 0017,
@@ -64,7 +64,7 @@ int int2dim[3][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11}};
 int int3dim[2][3][2] = {{{0,1},{2,3},{4,5}},{{6,7},{8,9},{10,11}}};
 int int4dim[1][2][3][2] = {{{{0,1},{2,3},{4,5}},{{6,7},{8,9},{10,11}}}};
 
-char *teststring = "teststring contents";
+char *teststring = (char*)"teststring contents";
 
 /* Test printing of a struct containing character arrays. */
 
@@ -86,7 +86,7 @@ struct some_arrays *parrays = &arrays;
 
 /* -- */
 
-main ()
+int main ()
 {
 #ifdef usestubs
   set_debug_traps();

@@ -180,7 +180,7 @@ gdb_test "break shr2" \
     "Breakpoint.*file.*shr2.c, line.*" \
     "breakpoint function shr2"
 
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, shr2 \\(.*\\) at.*shr2\\.c:3.*3.*return 2.x;" \
+gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, shr2 \\(.*\\) at.*shr2\\.c:7.*7.*return 2.x;" \
 "run until breakpoint set at a function"
 
 
@@ -249,10 +249,10 @@ send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"
 
 # PR's 16495, 18213
 # test that we can re-set breakpoints in shared libraries
-gdb_test "break shr1" "Breakpoint 1 at .*" "set bp in shared library"
+gdb_test "break shr1" "Breakpoint 1.*" "set bp in shared library"
 gdb_test "run" "Starting program:.*Breakpoint 1,.*" "run to bp in shared library"
-gdb_test "cont" "Program exited normally."
+gdb_test "cont" ".*Program exited normally..*"
 gdb_test "run" "Starting program:.*Breakpoint 1,.*" "re-run to bp in shared library (PR's 16495, 18213)"
-gdb_test "cont" "Program exited normally."
+gdb_test "cont" ".*Program exited normally..*"
 
 return 0

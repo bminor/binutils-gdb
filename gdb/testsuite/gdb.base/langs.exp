@@ -49,6 +49,8 @@ if  { [gdb_compile "${binfile}0.o ${binfile}1.o ${binfile}2.o" ${binfile} execut
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
+set oldtimeout $timeout
+set timeout 10
 
 
 
@@ -63,12 +65,31 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
 
-gdb_test "b langs0" {Function "langs0" not defined\.} \
+gdb_test "b langs0" "Function \"langs0\" not defined\.|Breakpoint .* (deferred).*" \
     "break on nonexistent function in langs.exp"
+
+if {$hp_aCC_compiler} {
+    set isfixed 1
+    set lang c\\+\\+
+    set ext cxx
+    set foo_func foo__Fi__Fi
+    set do_func do::langs0
+} else {
+    if {$hp_cc_compiler} {
+        set isfixed 1
+        set lang c
+        set ext c
+    } else {
+        set isfixed 0
+    }
+    set foo_func foo__Fi
+    set do_func langs0__2do
+}
 
 if [runto csub] then {
 
-    gdb_test "show language" "currently c\".*" \
+    if { !$isfixed } { set lang c }
+    gdb_test "show language" "currently $lang\".*" \
 	"show language at csub in langs.exp"
     # On some machines, foo doesn't get demangled because the N_SOL for
     # langs2.cxx is seen only after the function stab for foo.  So
@@ -76,36 +97,41 @@ if [runto csub] then {
     # even though only the latter is correct.  I haven't tried to xfail it
     # because it depends on details of the compiler.
     
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
-    gdb_test "bt" "#0.*csub.*#1.*(foo|foo__Fi) \\(.*#2.*cppsub_ .*#3.*fsub.*#4.*langs0__2do \\(.*#5  \[0-9a-fx\]* in main.*" "backtrace in langs.exp"
+    # Take out xfail. This test has been passing for some time now.
+    #if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
+    gdb_test "bt" "#0.*csub.*#1.*(foo|$foo_func) \\(.*#2.*cppsub_ .*#3.*fsub.*#4.*$do_func \\(.*#5  \[0-9a-fx\]* in main.*" "backtrace in langs.exp"
 
+    if { !$isfixed } { set lang c\\+\\+; set ext cxx }
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
-    gdb_test "up" ".* in (foo|foo__Fi) .* at langs2\\.cxx.*return csub \\(.*" \
+    gdb_test "up" ".* in (foo|$foo_func).* at langs2\\.$ext.*return csub \\(.*" \
 	"up to foo in langs.exp"
-    gdb_test "show language" "currently c\\+\\+.*" \
+    gdb_test "show language" "currently $lang.*" \
 	"show language at foo in langs.exp"
 
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
-    gdb_test "up" ".* in cppsub_ .* at langs2\\.cxx.*return foo \\(.*" \
+    gdb_test "up" ".* in cppsub_ .* at langs2\\.$ext.*return foo \\(.*" \
 	"up to cppsub_ in langs.exp"
-    gdb_test "show language" "currently c\\+\\+.*" \
+    gdb_test "show language" "currently $lang.*" \
 	"show language at cppsub_ in langs.exp"
 
+    if { !$isfixed } { set lang fortran }
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
-    gdb_test "up" ".* in fsub.* at langs1\\.f.*return \\(cppsub .*" \
+    gdb_test "up" ".* in fsub.* at langs1\\.f.*" \
 	"up to fsub in langs.exp"
-    gdb_test "show language" "currently fortran.*" \
+    gdb_test "show language" "currently $lang.*" \
 	"show language at fsub in langs.exp"
 
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
-    gdb_test "up" ".* in langs0__2do .* at .*langs0\\.c.*return fsub.*" \
+    # Take out xfail. This test has been passing for sometime now.
+    #if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
+    if { !$isfixed } { set lang c }
+    gdb_test "up" ".* in $do_func .* at .*langs0\\.c.*return fsub.*" \
 	"up to langs0__2do in langs.exp"
-    gdb_test "show language" "currently c\".*" \
+    gdb_test "show language" "currently $lang\".*" \
 	"show language at langs0__2do in langs.exp"
 
     gdb_test "up" ".* in main .* at .*langs0\\.c.*if \\(langs0__2do \\(.*" \
 	"up to main in langs.exp"
-    gdb_test "show language" "currently c\".*" \
+    gdb_test "show language" "currently $lang\".*" \
 	"show language at main in langs.exp"
 
     if [target_info exists gdb,noresults] { return }
@@ -119,4 +145,5 @@ if [runto csub] then {
     }
 }
 
+set timeout $oldtimeout
 return 0

@@ -89,6 +89,8 @@ INFODIRS=doc
 info:
 install-info:
 dvi:
+html:
+install-html:
 
 install:
 

@@ -28,6 +28,7 @@ sharedstatedir = @sharedstatedir@
 localstatedir = @localstatedir@
 libdir = @libdir@
 infodir = @infodir@
+htmldir = $(prefix)/html
 mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
@@ -234,6 +235,8 @@ distdir: $(DISTFILES)
 info:
 dvi:
 check:
+html:
+install-html:
 installcheck:
 install-info:
 install-exec: 

@@ -1941,7 +1941,7 @@ void
 gdb_file_rewind (file)
      struct gdb_file *file;
 {
-  return file->to_rewind (file);
+  file->to_rewind (file);
 }
 
 void
@@ -1949,7 +1949,7 @@ gdb_file_put (file, dest)
      struct gdb_file *file;
      struct gdb_file *dest;
 {
-  return file->to_put (file, dest);
+  file->to_put (file, dest);
 }
 
 void

@@ -6,6 +6,7 @@
 /*
  *	First the basic C types.
  */
+#include <stdlib.h>
 
 #if !defined (__STDC__) && !defined (_AIX)
 #define signed  /**/
@@ -213,21 +214,22 @@ enum cars {bmw, porsche} sportscar;
 
 typedef enum {FALSE, TRUE} boolean;
 boolean v_boolean;
-typedef enum bvals {false, true} boolean2;
+/*note: aCC has bool type predefined with 'false' and 'true'*/
+typedef enum bvals {my_false, my_true} boolean2;
 boolean2 v_boolean2;
 
 enum misordered {two = 2, one = 1, zero = 0, three = 3};
 
+/* Seems like we need a variable of this type to get the type to be put
+   in the executable, at least for AIX xlc.  */
+enum misordered v_misordered = three;
+
 /***********/
 
-main ()
+int main ()
 {
   /* Ensure that malloc is a pointer type; avoid use of "void" and any include files. */
-  extern char *malloc();
-
-  /* Seems like we need a variable of this type to get the type to be put
-     in the executable, at least for AIX xlc.  */
-  enum misordered v_misordered = three;
+/*  extern char *malloc();*/
 
   /* Some of the tests in ptype.exp require invoking malloc, so make
      sure it is linked in to this program.  */
@@ -309,5 +311,6 @@ main ()
   v_t_struct_p = 0;
 
   v_boolean = FALSE;
-  v_boolean2 = false;
+  v_boolean2 = my_false;
+  return 0;
 }

@@ -68,7 +68,7 @@ gdb_expect {
 #
 send_gdb "nextwhere\n"
 gdb_expect {
-  -re ".*64\[ \t\]*printf.*#0\[ \t\]*main.*:64.*$gdb_prompt $"\
+  -re ".*79\[ \t\]*printf.*#0\[ \t\]*main.*:79.*$gdb_prompt $"\
           {pass "use user command: nextwhere"}
   -re "$gdb_prompt $"\
           {fail "use user command: nextwhere"}
@@ -224,7 +224,7 @@ gdb_expect {
 
 send_gdb "next\n"
 gdb_expect {
-  -re "#0\[ \t\]*main.*:66.*$gdb_prompt $"\
+  -re "#0\[ \t\]*main.*:81.*$gdb_prompt $"\
           {pass "use hook-stop command"}
   -re "$gdb_prompt $"\
           {fail "use hook-stop command"}

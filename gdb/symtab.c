@@ -2408,6 +2408,8 @@ build_canonical_line_spec (sal, symname, canonical)
    FILE:FUNCTION -- likewise, but prefer functions in that file.
    *EXPR -- line in which address EXPR appears.
 
+   This may all be followed by an "if EXPR", which we ignore.
+
    FUNCTION may be an undebuggable function found in minimal symbol table.
 
    If the argument FUNFIRSTLINE is nonzero, we want the first line

@@ -248,7 +248,7 @@ driver (void)
 
 /* generated code ends here */
 
-main ()
+int main ()
 {
   register int local;
 #ifdef usestubs

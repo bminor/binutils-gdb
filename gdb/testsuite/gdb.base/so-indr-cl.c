@@ -3,21 +3,28 @@
    */
 
 #include <stdio.h>
+#ifdef PROTOTYPES
+extern "C" int solib_main (int);
 
+static int
+solib_wrapper (int (*function)(int))
+#else
 extern int solib_main (int);
 
 static int
 solib_wrapper (function)
   int (*function)(int);
+#endif
 {
   return (*function)(100);
 }
 
 
-main ()
+int main ()
 {
   int  result;
 
   /* This is an indirect call to solib_main. */
   result = solib_wrapper (solib_main);
+  return 0;
 }

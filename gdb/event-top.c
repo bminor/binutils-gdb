@@ -20,9 +20,6 @@
 
 #include "defs.h"
 #include "top.h"
-#ifdef HAVE_POLL
-#include <poll.h>
-#endif
 #include "inferior.h"
 #include "terminal.h" /* for job_control*/
 #include <signal.h>
@@ -38,7 +35,7 @@
 extern void _initialize_event_loop PARAMS ((void));
 
 static void command_line_handler PARAMS ((char *));
-static void gdb_readline2 PARAMS ((void));
+void gdb_readline2 PARAMS ((void));
 static void pop_prompt PARAMS ((void));
 static void push_prompt PARAMS ((char *, char *, char *));
 static void change_line_handler PARAMS ((void));
@@ -160,9 +157,9 @@ readline_input_state;
 
 
 /* Initialize all the necessary variables, start the event loop,
-   register readline, and stdin. */
+   register readline, and stdin, start the loop. */
 void
-start_event_loop ()
+cli_command_loop ()
 {
   int length;
   char *a_prompt;
@@ -185,16 +182,8 @@ start_event_loop ()
   else
     display_gdb_prompt (0);
 
-  /* Loop until there is something to do. This is the entry point to
-     the event loop engine. gdb_do_one_event will process one event
-     for each invocation.  It always returns 1, unless there are no
-     more event sources registered. In this case it returns 0.  */
-  while (gdb_do_one_event () != 0)
-    ;
-
-  /* We are done with the event loop. There are no more event sources
-     to listen to.  So we exit GDB. */
-  return;
+  /* Now it's time to start the event loop. */
+  start_event_loop ();
 }
 
 /* Change the function to be invoked every time there is a character
@@ -227,14 +216,13 @@ change_line_handler ()
      input file descriptor, we need to create a new event source,
      corresponding to the same fd, but with a new event handler
      function. */
+  /* NOTE: this operates on input_fd, not instream. If we are reading
+     commands from a file, instream will point to the file. However in
+     async mode, we always read commands from a file with editing
+     off. This means that the 'set editing on/off' will have effect
+     only on the interactive session. */
   delete_file_handler (input_fd);
-#ifdef HAVE_POLL
-  create_file_handler (input_fd, POLLIN,
-		       (file_handler_func *) call_readline, 0);
-#else
-  create_file_handler (input_fd, GDB_READABLE,
-		       (file_handler_func *) call_readline, 0);
-#endif
+  add_file_handler (input_fd, (file_handler_func *) call_readline, 0);
 }
 
 /* Displays the prompt. The prompt that is displayed is the current
@@ -682,7 +670,7 @@ command_line_handler (rl)
 /* NOTE: 1999-04-30 Asynchronous version of gdb_readline. gdb_readline
    will become obsolete when the event loop is made the default
    execution for gdb. */
-static void
+void
 gdb_readline2 ()
 {
   int c;
@@ -1001,8 +989,11 @@ _initialize_event_loop ()
       rl_instream = instream;
 
       /* Get a file descriptor for the input stream, so that we can
-	 register it with the event loop. */
+         register it with the event loop. */
       input_fd = fileno (instream);
+
+      /* Tell gdb to use the cli_command_loop as the main loop. */
+      command_loop_hook = cli_command_loop;
 
       /* Now we need to create the event sources for the input file
          descriptor. */
@@ -1011,13 +1002,12 @@ _initialize_event_loop ()
 	 the target program (inferior), but that must be registered
 	 only when it actually exists (I.e. after we say 'run' or
 	 after we connect to a remote target. */
-#ifdef HAVE_POLL
-      create_file_handler (input_fd, POLLIN,
-			   (file_handler_func *) call_readline, 0);
-#else
-      create_file_handler (input_fd, GDB_READABLE,
-			   (file_handler_func *) call_readline, 0);
-#endif
+      add_file_handler (input_fd, (file_handler_func *) call_readline, 0);
+      
+      /* Tell gdb that we will be using the readline library. This
+	 could be overwritten by a command in .gdbinit like 'set
+	 editing on' or 'off'. */
+      async_command_editing_p = 1;
     }
 }
 

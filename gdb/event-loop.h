@@ -222,28 +222,33 @@ struct prompts
 #define PREFIX(X) the_prompts.prompt_stack[the_prompts.top + X].prefix
 #define SUFFIX(X) the_prompts.prompt_stack[the_prompts.top + X].suffix
 
-/* Exported functions from event-top.c */
+/* Exported functions from event-loop.c */
 
+extern void start_event_loop PARAMS ((void));
 extern void delete_file_handler PARAMS ((int));
-extern void 
-  create_file_handler PARAMS ((int, int, file_handler_func, gdb_client_data));
-extern int gdb_do_one_event PARAMS ((void));
+extern void add_file_handler PARAMS ((int, file_handler_func, gdb_client_data));
 extern void mark_async_signal_handler PARAMS ((async_signal_handler *));
 extern async_signal_handler *
   create_async_signal_handler PARAMS ((async_handler_func *, gdb_client_data));
 extern void delete_async_signal_handler PARAMS ((async_signal_handler *async_handler_ptr));
+
+/* Exported functions from event-top.c. 
+   FIXME: these should really go into top.h. */
+
 extern void display_gdb_prompt PARAMS ((char*));
-extern void start_event_loop PARAMS ((void));
 extern void async_init_signals PARAMS ((void));
 extern void set_async_editing_command PARAMS ((char *, int, struct cmd_list_element *));
 extern void set_async_annotation_level PARAMS ((char *, int, struct cmd_list_element *));
 extern void set_async_prompt PARAMS ((char *, int, struct cmd_list_element *));
 extern void handle_stop_sig PARAMS ((int));
+extern void gdb_readline2 PARAMS ((void));
 
-/* Exported variables from event-top.c */
+/* Exported variables from event-top.c.
+   FIXME: these should really go into top.h. */
 
 extern int async_command_editing_p;
 extern char *async_annotation_suffix;
 extern char *new_async_prompt;
 extern struct prompts the_prompts;
-
+extern void (*call_readline) PARAMS ((void));
+extern void (*input_handler) PARAMS ((char *));

@@ -41,6 +41,7 @@ man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
 infodir = @infodir@
+htmldir = $(prefix)/html
 includedir = @includedir@
 
 SHELL = @SHELL@
@@ -115,6 +116,8 @@ check:
 info dvi:
 install-info:
 clean-info:
+html:
+install-html:
 
 gdbserve.nlm:	gdbserve.O $(srcdir)/gdbserve.def
 	${NLMCONV_FOR_TARGET} -T $(srcdir)/gdbserve.def

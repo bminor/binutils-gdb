@@ -5,7 +5,7 @@
    this may cause some tests to fail.  But at least we can still compile
    the test program and run the tests... */
 
-#ifndef __STDC__
+#if !defined(__STDC__) && !defined(__cplusplus)
 #define signed  /**/
 #endif
 

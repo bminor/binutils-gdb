@@ -35,20 +35,14 @@ if [get_compiler_info ${binfile}] {
     return -1
 }
 
-if {$gcc_compiled == 0} {
-    if [istarget "hppa*-hp-hpux*"] then {
-	### FIXME +e only works with HP's compiler
-	set additional_flags "additional_flags=+e -w"
-    } else {
-	# don't know what the compiler is, hope it supports long long!
-	set additional_flags "additional_flags=-w"
-    }
+if {$hp_cc_compiler} {
+    set flag "+e"
 } else {
-    set additional_flags "additional_flags=-w"
+    set flag ""
 }
 
-if  { [gdb_compile "${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+if  { [gdb_compile "${srcfile}" "${binfile}" executable [concat debug "additional_flags=$flag -w"]] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
 # use this to debug:
@@ -64,35 +58,40 @@ if { ![runto known_types] } then {
    return 
 }
 
-gdb_test "n 4"   ".*34.*" "get to known place"
+gdb_test "n 4"   ".*38.*" "get to known place"
 
 # Check the hack for long long prints.
 #
-gdb_test "p/x hex" ".*0x0.*" "default print hex"
-gdb_test "p/x dec" ".*0xab54a98ceb1f0ad2.*" "default print dec"
-gdb_test "p/x bin" ".*0x123456789abcdef.*" "default print bin"
-gdb_test "p/x oct" ".*0xa72ee53977053977.*" "default print oct"
+gdb_test "p/x hex" ".*0x0*0.*" "hex print p/x"
+gdb_test "p/x dec" ".*0xab54a98ceb1f0ad2.*" "decimal print p/x"
+# see if 'p/<code>' is handled same as 'p /<code>'
+#
+gdb_test "p /x dec" ".*0xab54a98ceb1f0ad2.*" "default print dec"
+gdb_test "p /x bin" ".*0x0*123456789abcdef.*" "default print bin"
+gdb_test "p /x oct" ".*0xa72ee53977053977.*" "default print oct"
+gdb_test "p hex" ".*= 0*x*0*0.*" "default print hex"
 
-gdb_test "p/x hex" ".*0x0.*" "hex print"
-gdb_test "p/u dec" ".*12345678901234567890.*" "decimal print"
-gdb_test "p/t bin" ".*100100011010001010110011110001001101010111100110111101111.*" "binary print"
+gdb_test "p/u dec" ".*12345678901234567890.*" "decimal print p/u"
+gdb_test "p/t bin" ".*0*100100011010001010110011110001001101010111100110111101111.*" "binary print"
 gdb_test "p/o oct" ".*01234567123456701234567.*" "octal print"
+gdb_test "p /d bin" ".*81985529216486895.*" "print +ve long long"
+gdb_test "p/d dec" ".*-6101065172474983726.*" "decimal print p/d"
 
 # Try all the combinations to bump up coverage.
 #
 gdb_test "p/d oct" ".*12046818088235383159.*" ""
-gdb_test "p/u oct" ".*0xa72ee53977053977.*" ""
+gdb_test "p/u oct" ".*12046818088235383159.*" ""
 gdb_test "p/o oct" ".*.*" ""
 gdb_test "p/t oct" ".*1010011100101110111001010011100101110111000001010011100101110111.*" ""
-gdb_test "p/a oct" ".*That operation is not available.*" ""
-gdb_test "p/c oct" ".*0xa72ee53977053977.*" ""
+gdb_test "p/a oct" ".*0x.*77053977.*" ""
+gdb_test "p/c oct" ".*'w'.*" ""
 gdb_test "p/f oct" ".*-5.9822653797615723e-120.*" ""
 
 gdb_test "p/d *(int *)&oct" ".*-1490098887.*" ""
 gdb_test "p/u *(int *)&oct" ".*2804868409.*" ""
 gdb_test "p/o *(int *)&oct" ".*024713562471.*" ""
 gdb_test "p/t *(int *)&oct" ".*10100111001011101110010100111001.*" ""
-gdb_test "p/a *(int *)&oct" ".*0xa72ee539.*" ""
+gdb_test "p/a *(int *)&oct" ".*0xf*a72ee539.*" ""
 gdb_test "p/c *(int *)&oct" ".*57 '9'.*" ""
 gdb_test "p/f *(int *)&oct" ".*-2.42716126e-15.*" ""
 
@@ -100,9 +99,9 @@ gdb_test "p/d *(short *)&oct" ".*-22738.*" ""
 gdb_test "p/u *(short *)&oct" ".*42798.*" ""
 gdb_test "p/o *(short *)&oct" ".*0123456.*" ""
 gdb_test "p/t *(short *)&oct" ".*1010011100101110.*" ""
-gdb_test "p/a *(short *)&oct" ".*0xffffa72e.*" ""
+gdb_test "p/a *(short *)&oct" ".*0xf*ffffa72e.*" ""
 gdb_test "p/c *(short *)&oct" ".* 46 '.'.*" ""
-gdb_test "p/a **short *)&oct" ".*0xffffa72e <.*" ""
+gdb_test "p/a *(short *)&oct" ".*0xf*ffffa72e.*" ""
 gdb_test "p/f *(short *)&oct" ".*-22738.*" ""
 
 gdb_test "x/x &oct" ".*0xa72ee539.*" ""
@@ -110,8 +109,8 @@ gdb_test "x/d &oct" ".*.-1490098887*" ""
 gdb_test "x/u &oct" ".*2804868409.*" ""
 gdb_test "x/o &oct" ".*024713562471.*" ""
 gdb_test "x/t &oct" ".*10100111001011101110010100111001.*" ""
-gdb_test "x/a &oct" ".*0xa72ee539 <.*" ""
-gdb_test "x/c &oct" ".*-89 'M-''.*" ""
+gdb_test "x/a &oct" ".*0xa72ee539.*" ""
+gdb_test "x/c &oct" ".*-89 '\\\\247'.*" ""
 gdb_test "x/f &oct" ".*-5.9822653797615723e-120.*" ""
 
 gdb_test "x/2x &oct" ".*.*" ""

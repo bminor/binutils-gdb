@@ -66,7 +66,7 @@ gdb_test "next" ".*${decimal}.*callee.*INTO.*" "next over"
 
 # Step into call
 #
-gdb_test "step" ".*${decimal}.*glob.*"   "step into"
+gdb_test "step" ".*${decimal}.*myglob.*"   "step into"
 
 # Step out of call
 #
@@ -74,7 +74,18 @@ gdb_test "step" ".*${decimal}.*glob.*"   "step into"
 # platforms, on which `finish' will return you to some kind of pop
 # instruction, which is attributed to the line containing the function
 # call?
-gdb_test "finish" ".*${decimal}.*a.*5.*= a.*3.*" "step out"
+
+# On PA64 we end up at a different instruction than PA32
+if { [istarget "hppa2.0w-hp-hpux*"] } {
+    send_gdb "finish\n"
+    gdb_expect {
+        -re ".*${decimal}.*a.*5.*= a.*3.*$gdb_prompt $" { pass "step out 1" }
+        -re ".*${decimal}.*callee.*INTO.*$gdb_prompt $" { pass "step out 2" }
+        timeout { fail "step out" }
+    }
+} else {
+    gdb_test "finish" ".*${decimal}.*a.*5.*= a.*3.*" "step out"
+}
 
 ### Testing nexti and stepi.
 ###
@@ -153,6 +164,16 @@ gdb_expect {
   -re ".*${decimal}.*callee.*NEXTI.*$gdb_prompt $" {
     puts "*** Matched success..."
     pass "stepi: finish call"
+  }
+  -re ".*${decimal}.*callee.*STEPI.*$gdb_prompt $" {
+    # On PA64 we end up at a different instruction than PA32
+    if { [istarget "hppa2.0w-hp-hpux*"] } {
+        puts "*** Matched success..."
+        pass "stepi: finish call 2"
+    } else {
+	fail "stepi: finish call 2"
+        return
+    }
   }
   -re "$gdb_prompt $" {
     # We got something else.  Fail.

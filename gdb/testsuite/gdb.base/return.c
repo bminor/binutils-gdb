@@ -1,7 +1,7 @@
 #include <stdio.h>
 /*  Test "return" command.  */
 
-func1 ()
+void func1 ()
 {
   printf("in func1\n");
 }
@@ -21,7 +21,7 @@ func3 ()
 int tmp2;
 double tmp3;
 
-main ()
+int main ()
 {
 #ifdef usestubs
   set_debug_traps();
@@ -32,4 +32,5 @@ main ()
   tmp2 = func2 ();
   tmp3 = func3 ();
   printf("exiting\n");
+  return 0;
 }

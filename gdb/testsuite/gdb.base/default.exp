@@ -67,6 +67,11 @@ if ![target_info exists use_gdb_stub] {
     
     setup_xfail "mips-idt-*" "a29k-*-udi"
     gdb_test "backtrace" "No stack."
+
+    # ba and bac are no longer unique command prefixes. So these tests
+    # elict an error from GDB.
+    # GDB needs to be fixed to map unique alias here for ba bac.
+    #
     foreach i "bt ba bac" {
 	setup_xfail "mips-idt-*" "a29k-*-udi"
 	gdb_test $i "No stack." "backtrace \"$i\" abbreviation"
@@ -335,6 +340,7 @@ gdb_test "info types" "All defined types:" "info types"
 #test info variables
 gdb_test "info variables" "All defined variables:" "info variables"
 #test info warranty
+setup_xfail "hppa*-hp-hpux*"
 gdb_test "info warranty" "NO WARRANTY.*\[\r\n\]+  *11.  *BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY.*\[\r\n\]+FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN.*\[\r\n\]+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES.*\[\r\n\]+PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED.*\[\r\n\]+OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF.*\[\r\n\]+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS.*\[\r\n\]+TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE.*\[\r\n\]+PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,.*\[\r\n\]+REPAIR OR CORRECTION..*\[\r\n\]+  *12.  *IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING.*\[\r\n\]+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR.*\[\r\n\]+REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,.*\[\r\n\]+INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING.*\[\r\n\]+OUT OF THE USE OR INABILITY TO USE THE PROGRAM .INCLUDING BUT NOT LIMITED.*\[\r\n\]+TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY.*\[\r\n\]+YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER.*\[\r\n\]+PROGRAMS., EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE.*\[\r\n\]+POSSIBILITY OF SUCH DAMAGES.*" "info warranty"
 #test info watchpoints
 gdb_test "info watchpoints" "No breakpoints or watchpoints." "info watchpoints"
@@ -646,7 +652,7 @@ gdb_test "show values" "" "show values"
 #test show verbose
 gdb_test "show verbose" "Verbose printing of informational messages is o.*|Verbosity is off.*" "show verbose"
 #test show version
-
+setup_xfail "hppa*-hp-hpux*"
 gdb_test "show version" "GNU gdb \[0-9\.\]*.*\[\r\n\]+Copyright \[0-9\]* Free Software Foundation, Inc.*\[\r\n\]+GDB is free software, covered by the GNU General Public License, and you are.*\[\r\n\]+welcome to change it and/or distribute copies of it under certain conditions.*\[\r\n\]+Type \"show copying\" to see the conditions.*\[\r\n\]+There is absolutely no warranty for GDB.  Type \"show warranty\" for details.*\[\r\n\]+This GDB was configured as .*|GDB is free software and you are welcome to distribute copies of it.*\[\r\n\]+ under certain conditions; type \"show copying\" to see the conditions..*\[\r\n\]+There is absolutely no warranty for GDB; type \"show warranty\" for details..*\[\r\n\]+GDB.*Copyright \[0-9\]* Free Software Foundation, Inc.*" "show version"
 #test show width
 gdb_test "show width" "Number of characters gdb thinks are in a line is.*" "show width"
@@ -719,8 +725,7 @@ gdb_expect {
 if ![istarget "*-*-udi*"] then {
     send_gdb "target remote\n"
     gdb_expect {
-	-re "To open a remote debug connection, you need to specify what.*
-serial device is attached to the remote system .e.g. /dev/ttya.*$gdb_prompt $"\
+	-re "To open a remote debug connection, you need to specify what.*serial.*device is attached to the remote system .e.g. /dev/ttya.*$gdb_prompt $"\
 			{ pass "target remote" }
 	-re ".*A program is being debugged already.  Kill it. .y or n.*$" {
 	    send_gdb "n\n"
@@ -792,6 +797,16 @@ setup_xfail "a29k-*-udi"
 gdb_test "where" "No stack." "where"
 #test x
 #The case in which it prints a number is for vxgdb.
-gdb_test "x" "0x0:.*0x\[0-9\]*|0x0:.*Cannot access memory at address 0x0." "x"
+send_gdb "x\n"
+gdb_expect {
+    -re "0x0:.*Cannot access memory at address 0x0..*$gdb_prompt $" {
+        pass "x"
+    }
+    -re "0x0:.*Error accessing memory address 0x0:.*$gdb_prompt $" {
+        pass "x"
+    }
+    -re ".*$gdb_prompt $" { fail "x" }
+    timeout { fail "(timeout) x" }
+}
 
 gdb_exit

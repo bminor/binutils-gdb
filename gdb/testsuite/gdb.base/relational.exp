@@ -42,6 +42,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
     }
 
+if [get_compiler_info ${binfile}] {
+    return -1;
+}
 
 gdb_exit
 gdb_start
@@ -108,7 +111,7 @@ gdb_expect {
 
 send_gdb "print x < y\n"
 gdb_expect {
-    -re ".*0.*$gdb_prompt $" {
+    -re ".*$false.*$gdb_prompt $" {
         pass "print value of x<y"
       }
     -re ".*$gdb_prompt $" { fail "print value of x<y" }
@@ -117,7 +120,7 @@ gdb_expect {
 
 send_gdb "print x <= y\n"
 gdb_expect {
-    -re ".*0.*$gdb_prompt $" {
+    -re ".*$false.*$gdb_prompt $" {
         pass "print value of x<=y"
       }
     -re ".*$gdb_prompt $" { fail "print value of x<=y" }
@@ -126,7 +129,7 @@ gdb_expect {
 
 send_gdb "print x > y\n"
 gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
+    -re ".*$true.*$gdb_prompt $" {
         pass "print value of x>y"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>y" }
@@ -135,7 +138,7 @@ gdb_expect {
 
 send_gdb "print x >= y\n"
 gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
+    -re ".*$true.*$gdb_prompt $" {
         pass "print value of x>=y"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>=y" }
@@ -144,7 +147,7 @@ gdb_expect {
 
 send_gdb "print x == y\n"
 gdb_expect {
-    -re ".*0.*$gdb_prompt $" {
+    -re ".*$false.*$gdb_prompt $" {
         pass "print value of x==y"
       }
     -re ".*$gdb_prompt $" { fail "print value of x==y" }
@@ -153,7 +156,7 @@ gdb_expect {
 
 send_gdb "print x != y\n"
 gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
+    -re ".*$true.*$gdb_prompt $" {
         pass "print value of x!=y"
       }
     -re ".*$gdb_prompt $" { fail "print value of x!=y" }
@@ -172,7 +175,7 @@ gdb_test "set variable z=2" ""  "set variable z"
 
 send_gdb "print x < y < z\n"
 gdb_expect {
-    -re ".*1\r\n$gdb_prompt $" {
+    -re ".*$true.*\r\n$gdb_prompt $" {
         pass "print value of x<y<z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x<y<z" }
@@ -181,7 +184,7 @@ gdb_expect {
 
 send_gdb "print x <= y <= z\n"
 gdb_expect {
-    -re ".*1\r\n$gdb_prompt $" {
+    -re ".*$true\r\n$gdb_prompt $" {
         pass "print value of x<=y<=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x<=y<=z" }
@@ -190,7 +193,7 @@ gdb_expect {
 
 send_gdb "print x > y > z\n"
 gdb_expect {
-    -re ".*0\r\n$gdb_prompt $" {
+    -re ".*$false.*\r\n$gdb_prompt $" {
         pass "print value of x>y>z"
       }
     -re 8".*$gdb_prompt $" { fail "print value of x>y>z" }
@@ -199,7 +202,7 @@ gdb_expect {
 
 send_gdb "print x >= y >= z\n"
 gdb_expect {
-    -re ".*0\r\n$gdb_prompt $" {
+    -re ".*$false.*\r\n$gdb_prompt $" {
         pass "print value of x>=y>=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>=y>=z" }
@@ -213,7 +216,7 @@ gdb_test "set variable z=1" ""  "set variable z"
 
 send_gdb "print x == y == z\n"
 gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
+    -re ".*$true.*$gdb_prompt $" {
         pass "print value of x==y==z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x==y==z" }
@@ -225,7 +228,7 @@ gdb_test "set variable z=0" ""  "set variable z"
 
 send_gdb "print x != y != z\n"
 gdb_expect {
-    -re ".*0\r\n$gdb_prompt $" {
+    -re ".*$false\r\n$gdb_prompt $" {
         pass "print value of x!=y!=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x!=y!=z" }
@@ -242,7 +245,7 @@ gdb_test "set variable z=2" ""  "set variable z"
 
 send_gdb "print x < y == z\n"
 gdb_expect {
-    -re ".*0.*$gdb_prompt $" {
+    -re ".*$false.*$gdb_prompt $" {
         pass "print value of x<y==z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x<y==z" }
@@ -252,7 +255,7 @@ gdb_expect {
 # 0  2  2
 send_gdb "print x < y != z\n"
 gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
+    -re ".*$true.*$gdb_prompt $" {
         pass "print value of x<y!=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x<y!=z" }
@@ -267,7 +270,7 @@ gdb_test "set variable z=1" ""  "set variable z"
 # 2 3 1
 send_gdb "print x < y <= z\n"
 gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
+    -re ".*$true.*$gdb_prompt $" {
         pass "print value of x<y<=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x<y<=z" }
@@ -278,7 +281,7 @@ gdb_expect {
 # 2 3 1
 send_gdb "print x < y >= z\n"
 gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
+    -re ".*$true.*$gdb_prompt $" {
         pass "print value of x<y>=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x<y>=z" }
@@ -292,7 +295,7 @@ gdb_test "set variable z=0" "" " set variable z"
 # 2 3 0
 send_gdb "print x < y > z\n"
 gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
+    -re ".*$true.*$gdb_prompt $" {
         pass "print value of x<y>z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x<y>z" }
@@ -305,7 +308,7 @@ gdb_test "set variable x=1" "" " set variable x"
 # 1 3 0
 send_gdb "print x > y >= z\n"
 gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
+    -re ".*$true.*$gdb_prompt $" {
         pass "print value of x>y>=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>y>=z" }
@@ -318,7 +321,7 @@ gdb_test "set variable z=2" "" " set variable z"
 # 1 3 2
 send_gdb "print x > y == z\n"
 gdb_expect {
-    -re ".*0.*$gdb_prompt $" {
+    -re ".*$false.*$gdb_prompt $" {
         pass "print value of x>y==z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>y==z" }
@@ -332,7 +335,7 @@ gdb_test "set variable z=0" "" " set variable z"
 # 2 3 0
 send_gdb "print x > y != z\n"
 gdb_expect {
-    -re ".*0.*$gdb_prompt $" {
+    -re ".*$false.*$gdb_prompt $" {
         pass "print value of x>y!=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>y!=z" }
@@ -345,7 +348,7 @@ gdb_test "set variable x=4" "" "set x to 4"
 # 4 3 0
 send_gdb "print x > y <= z\n"
 gdb_expect {
-    -re ".*0.*$gdb_prompt $" {
+    -re ".*$false.*$gdb_prompt $" {
         pass "print value of x>y<=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>y<=z" }
@@ -355,7 +358,7 @@ gdb_expect {
 # 4 3 0
 send_gdb "print x >= y == z\n"
 gdb_expect {
-    -re ".*0\r\n$gdb_prompt $" {
+    -re ".*$false\r\n$gdb_prompt $" {
         pass "print value of x>=y==z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>=y==z" }
@@ -368,7 +371,7 @@ gdb_test "set variable x=2" "" " set variable x"
 # 2 3 0
 send_gdb "print x >= y != z\n"
 gdb_expect {
-    -re ".*0\r\n$gdb_prompt $" {
+    -re ".*$false\r\n$gdb_prompt $" {
         pass "print value of x>=y!=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>=y!=z" }
@@ -382,7 +385,7 @@ gdb_test "set variable z=4" "" " set variable z"
 # 0 3 4 
 send_gdb "print x >= y <= z\n"
 gdb_expect {
-    -re ".*1\r\n$gdb_prompt $" {
+    -re ".*$true\r\n$gdb_prompt $" {
         pass "print value of x>=y<=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>=y<=z" }
@@ -392,7 +395,7 @@ gdb_expect {
 # 0 3 4
 send_gdb "print x <= y == z\n"
 gdb_expect {
-    -re ".*0\r\n$gdb_prompt $" {
+    -re ".*$false\r\n$gdb_prompt $" {
         pass "print value of x<=y==z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x<=y==z" }
@@ -404,7 +407,7 @@ gdb_test "set variable x=2" "" " set variable x"
 # 2 3 4
 send_gdb "print x <= y != z\n"
 gdb_expect {
-    -re ".*1\r\n$gdb_prompt $" {
+    -re ".*$true\r\n$gdb_prompt $" {
         pass "print value of x<=y!=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x<=y!=z" }
@@ -415,7 +418,7 @@ gdb_expect {
 # 2 3 4
 send_gdb "print x == y != z\n"
 gdb_expect {
-    -re ".*1\r\n$gdb_prompt $" {
+    -re ".*$true\r\n$gdb_prompt $" {
         pass "print value of x==y!=z"
       }
     -re ".*$gdb_prompt $" { fail "print value of x==y!=z" }
@@ -432,7 +435,7 @@ gdb_test "set variable z=0" "" " set variable z"
 # 2 3 0
 send_gdb "print x >= (y < z)\n"
 gdb_expect {
-    -re ".*1\r\n$gdb_prompt $" {
+    -re ".*$true\r\n$gdb_prompt $" {
         pass "print value of x>=(y<z)"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>=(y<z)" }
@@ -443,7 +446,7 @@ gdb_expect {
 # 2 3 0
 send_gdb "print x >= (y != z)\n"
 gdb_expect {
-    -re ".*1\r\n$gdb_prompt $" {
+    -re ".*$true\r\n$gdb_prompt $" {
         pass "print value of x>=(y!=z)"
       }
     -re ".*$gdb_prompt $" { fail "print value of x>=(y*!=z)" }
@@ -453,7 +456,7 @@ gdb_expect {
 # 2 3 0
 send_gdb "print x == (y == z)\n"
 gdb_expect {
-    -re ".*0\r\n$gdb_prompt $" {
+    -re ".*$false\r\n$gdb_prompt $" {
         pass "print value of x==(y==z)"
       }
     -re ".*$gdb_prompt $" { fail "print value of x==(y==z)" }
@@ -467,7 +470,7 @@ gdb_test "set variable z=4" "" " set variable z"
 # 1 3 4
 send_gdb "print (x == y) < z\n"
 gdb_expect {
-    -re ".*1\r\n$gdb_prompt $" {
+    -re ".*$true\r\n$gdb_prompt $" {
         pass "print value of (x==y)<z"
       }
     -re ".*$gdb_prompt $" { fail "print value of (x==y)<z" }

@@ -86,6 +86,31 @@ if [istarget "hppa*-*-hpux*"] {
     gdb_compile "${binfile}1.o" "${binfile}1.sl" executable [list debug $additional_flags]
     gdb_compile "${binfile}2.o" "${binfile}2.sl" executable [list debug $additional_flags]
 }
+
+# Build a version where the main program is in a shared library.  For
+# testing an indirect call made in a shared library.
+
+if {[gdb_compile "${srcdir}/${subdir}/${testfile}.c" "${binfile}_sl.o" object [list debug $additional_flags]] != ""} {
+    perror "Couldn't compile ${testfile}.c for ${binfile}_sl.o"
+    #return -1
+}
+
+if { [istarget "hppa*-*-hpux*"] } {
+    remote_exec build "ld -b ${binfile}_sl.o -o ${binfile}_sl.sl"
+} else {
+    set additional_flags "additional_flags=-shared"
+    gdb_compile "${binfile}_sl.o" "${binfile}_sl.sl" executable [list debug $additional_flags]
+}
+
+if { [istarget "hppa*-*-hpux*"] } {
+    set additional_flags "-Wl,-u,main"
+    if { [gdb_compile "${binfile}_sl.sl" "${binfile}_sl" executable [list debug $additional_flags]] != "" } {
+        gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    }
+} else {
+    # FIXME: need to fill this part in for non-HP build
+}
+
 #cd ..
 
 # Start with a fresh gdb
@@ -316,4 +341,20 @@ gdb_expect {
 #
 
 gdb_exit
+
+#
+# Test stepping into an indirect call in a shared library.
+#
+
+gdb_start
+gdb_load ${binfile}_sl
+gdb_test "break main" ".*deferred. at .main..*" "break on main"
+gdb_test "run" ".*Breakpoint.*main.*solib.c.*" "hit breakpoint at main"
+gdb_test "break 45" "Breakpoint.*solib.c, line 45.*" "break on indirect call"
+gdb_test "continue" "Continuing.*solib.c:45.*" \
+	"continue to break on indirect call"
+gdb_test "step" "solib_main.*solib1.c:17.*return arg.arg.*" \
+	"step into indirect call from a shared library"
+gdb_exit
+
 return 0

@@ -73,150 +73,145 @@ proc test_expr { args } {
 #
 # test expressions with "char" types
 #
-test_expr "set variable v_char=127" "print v_char == 0" "\\$\[0-9\]* = 0"  "print v_char == 127" "\\$\[0-9\]* = 1"  "print char =="
-test_expr "set variable v_char=127" "print v_char != 0" "\\$\[0-9\]* = 1"  "print v_char != 127" "\\$\[0-9\]* = 0"  "print char !="
-test_expr "set variable v_char=127" "print v_char < 0" "\\$\[0-9\]* = 0"  "print v_char < 127" "\\$\[0-9\]* = 0"  "print char <"
-test_expr "set variable v_char=127" "print v_char > 0" "\\$\[0-9\]* = 1"  "print v_char > 127" "\\$\[0-9\]* = 0"  "print char >"
+test_expr "set variable v_char=127" "print v_char == 0" "\\$\[0-9\]* = $false"  "print v_char == 127" "\\$\[0-9\]* = $true"  "print char =="
+test_expr "set variable v_char=127" "print v_char != 0" "\\$\[0-9\]* = $true"  "print v_char != 127" "\\$\[0-9\]* = $false"  "print char !="
+test_expr "set variable v_char=127" "print v_char < 0" "\\$\[0-9\]* = $false"  "print v_char < 127" "\\$\[0-9\]* = $false"  "print char <"
+test_expr "set variable v_char=127" "print v_char > 0" "\\$\[0-9\]* = $true"  "print v_char > 127" "\\$\[0-9\]* = $false"  "print char >"
 #
 # test expressions with "signed char" types
 #
-test_expr "set variable v_signed_char=127" "print v_signed_char == 0" "\\$\[0-9\]* = 0"  "print v_signed_char == 127" "\\$\[0-9\]* = 1"  "print signed char =="
-test_expr "set variable v_signed_char=127" "print v_signed_char != 0" "\\$\[0-9\]* = 1"  "print v_signed_char != 127" "\\$\[0-9\]* = 0"  "print signed char !="
-test_expr "set variable v_signed_char=127" "print v_signed_char < 0" "\\$\[0-9\]* = 0"  "print v_signed_char < 127" "\\$\[0-9\]* = 0"  "print signed char <"
-test_expr "set variable v_signed_char=127" "print v_signed_char > 0" "\\$\[0-9\]* = 1"  "print v_signed_char > 127" "\\$\[0-9\]* = 0"  "print signed char >"
+test_expr "set variable v_signed_char=127" "print v_signed_char == 0" "\\$\[0-9\]* = $false"  "print v_signed_char == 127" "\\$\[0-9\]* = $true"  "print signed char =="
+test_expr "set variable v_signed_char=127" "print v_signed_char != 0" "\\$\[0-9\]* = $true"  "print v_signed_char != 127" "\\$\[0-9\]* = $false"  "print signed char !="
+test_expr "set variable v_signed_char=127" "print v_signed_char < 0" "\\$\[0-9\]* = $false"  "print v_signed_char < 127" "\\$\[0-9\]* = $false"  "print signed char <"
+test_expr "set variable v_signed_char=127" "print v_signed_char > 0" "\\$\[0-9\]* = $true"  "print v_signed_char > 127" "\\$\[0-9\]* = $false"  "print signed char >"
 # make char a minus
-test_expr "set variable v_signed_char=-1" "print v_signed_char == 0" "\\$\[0-9\]* = 0"  "print v_signed_char == -1" "\\$\[0-9\]* = 1"  "print signed char == (minus)"
-test_expr "set variable v_signed_char=-1" "print v_signed_char != 0" "\\$\[0-9\]* = 1"  "print v_signed_char != -1" "\\$\[0-9\]* = 0"  "print signed char != (minus)"
-test_expr "set variable v_signed_char=-1" "print v_signed_char < 0" "\\$\[0-9\]* = 1"  "print v_signed_char < 127" "\\$\[0-9\]* = 1"  "print signed char < (minus)"
-test_expr "set variable v_signed_char=-1" "print v_signed_char > 0" "\\$\[0-9\]* = 0"  "print v_signed_char > 127" "\\$\[0-9\]* = 0"  "print signed char > (minus)"
+test_expr "set variable v_signed_char=-1" "print v_signed_char == 0" "\\$\[0-9\]* = $false"  "print v_signed_char == -1" "\\$\[0-9\]* = $true"  "print signed char == (minus)"
+test_expr "set variable v_signed_char=-1" "print v_signed_char != 0" "\\$\[0-9\]* = $true"  "print v_signed_char != -1" "\\$\[0-9\]* = $false"  "print signed char != (minus)"
+test_expr "set variable v_signed_char=-1" "print v_signed_char < 0" "\\$\[0-9\]* = $true"  "print v_signed_char < 127" "\\$\[0-9\]* = $true"  "print signed char < (minus)"
+test_expr "set variable v_signed_char=-1" "print v_signed_char > 0" "\\$\[0-9\]* = $false"  "print v_signed_char > 127" "\\$\[0-9\]* = $false"  "print signed char > (minus)"
 #
 # test expressions with "unsigned char" types
 #
-test_expr "set variable v_unsigned_char=127" "print v_unsigned_char == 0" "\\$\[0-9\]* = 0"  "print v_unsigned_char == 127" "\\$\[0-9\]* = 1"  "print unsigned char =="
-test_expr "set variable v_unsigned_char=127" "print v_unsigned_char != 0" "\\$\[0-9\]* = 1"  "print v_unsigned_char != 127" "\\$\[0-9\]* = 0"  "print unsigned char !="
-test_expr "set variable v_unsigned_char=127" "print v_unsigned_char < 0" "\\$\[0-9\]* = 0"  "print v_unsigned_char < 127" "\\$\[0-9\]* = 0"  "print unsigned char <"
-test_expr "set variable v_unsigned_char=127" "print v_unsigned_char > 0" "\\$\[0-9\]* = 1"  "print v_unsigned_char > 127" "\\$\[0-9\]* = 0"  "print unsigned char >"
+test_expr "set variable v_unsigned_char=127" "print v_unsigned_char == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_char == 127" "\\$\[0-9\]* = $true"  "print unsigned char =="
+test_expr "set variable v_unsigned_char=127" "print v_unsigned_char != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_char != 127" "\\$\[0-9\]* = $false"  "print unsigned char !="
+test_expr "set variable v_unsigned_char=127" "print v_unsigned_char < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_char < 127" "\\$\[0-9\]* = $false"  "print unsigned char <"
+test_expr "set variable v_unsigned_char=127" "print v_unsigned_char > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_char > 127" "\\$\[0-9\]* = $false"  "print unsigned char >"
 # make char a minus
 # FIXME:  gdb mishandles the cast (unsigned char) on the i960, so I've
 # set up an expected failure for this case.
 setup_xfail "i960-*-*" 1821
-test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char == 0" "\\$\[0-9\]* = 0"  "print v_unsigned_char == ~0" "\\$\[0-9\]* = 0"  "print v_unsigned_char == (unsigned char)~0" "\\$\[0-9\]* = 1"  "print unsigned char == (~0)"
+test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_char == ~0" "\\$\[0-9\]* = $false"  "print v_unsigned_char == (unsigned char)~0" "\\$\[0-9\]* = $true"  "print unsigned char == (~0)"
 # FIXME:  gdb mishandles the cast (unsigned char) on the i960, so I've
 # set up an expected failure for this case.
 setup_xfail "i960-*-*" 1821
-test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char != 0" "\\$\[0-9\]* = 1"  "print v_unsigned_char != (unsigned char)~0" "\\$\[0-9\]* = 0"  "print unsigned char != (~0)"
-test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char < 0" "\\$\[0-9\]* = 0"  "print v_unsigned_char < 127" "\\$\[0-9\]* = 0"  "print unsigned char < (~0)"
-test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char > 0" "\\$\[0-9\]* = 1"  "print v_unsigned_char > 127" "\\$\[0-9\]* = 1"  "print unsigned char > (~0)"
+test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_char != (unsigned char)~0" "\\$\[0-9\]* = $false"  "print unsigned char != (~0)"
+test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_char < 127" "\\$\[0-9\]* = $false"  "print unsigned char < (~0)"
+test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_char > 127" "\\$\[0-9\]* = $true"  "print unsigned char > (~0)"
 #
 # test expressions with "short" types
 #
-test_expr "set variable v_short=0x7FFF" "print v_short == 0" "\\$\[0-9\]* = 0"  "print v_short == 0x7FFF" "\\$\[0-9\]* = 1"  "print signed short =="
-test_expr "set variable v_short=0x7FFF" "print v_short != 0" "\\$\[0-9\]* = 1"  "print v_short != 0x7FFF" "\\$\[0-9\]* = 0"  "print signed short !="
-test_expr "set variable v_short=0x7FFF" "print v_short < 0" "\\$\[0-9\]* = 0"  "print v_short < 0x7FFF" "\\$\[0-9\]* = 0"  "print signed short <"
-test_expr "set variable v_short=0x7FFF" "print v_short > 0" "\\$\[0-9\]* = 1"  "print v_short > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed short >"
+test_expr "set variable v_short=0x7FFF" "print v_short == 0" "\\$\[0-9\]* = $false"  "print v_short == 0x7FFF" "\\$\[0-9\]* = $true"  "print signed short =="
+test_expr "set variable v_short=0x7FFF" "print v_short != 0" "\\$\[0-9\]* = $true"  "print v_short != 0x7FFF" "\\$\[0-9\]* = $false"  "print signed short !="
+test_expr "set variable v_short=0x7FFF" "print v_short < 0" "\\$\[0-9\]* = $false"  "print v_short < 0x7FFF" "\\$\[0-9\]* = $false"  "print signed short <"
+test_expr "set variable v_short=0x7FFF" "print v_short > 0" "\\$\[0-9\]* = $true"  "print v_short > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed short >"
 # make short a minus
-test_expr "set variable v_short=-1" "print v_short == 0" "\\$\[0-9\]* = 0"  "print v_short == -1" "\\$\[0-9\]* = 1"  "print signed short == (minus)"
-test_expr "set variable v_short=-1" "print v_short != 0" "\\$\[0-9\]* = 1"  "print v_short != -1" "\\$\[0-9\]* = 0"  "print signed short != (minus)"
-test_expr "set variable v_short=-1" "print v_short < 0" "\\$\[0-9\]* = 1"  "print v_short < 0x7FFF" "\\$\[0-9\]* = 1"  "print signed short < (minus)"
-test_expr "set variable v_short=-1" "print v_short > 0" "\\$\[0-9\]* = 0"  "print v_short > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed short > (minus)"
+test_expr "set variable v_short=-1" "print v_short == 0" "\\$\[0-9\]* = $false"  "print v_short == -1" "\\$\[0-9\]* = $true"  "print signed short == (minus)"
+test_expr "set variable v_short=-1" "print v_short != 0" "\\$\[0-9\]* = $true"  "print v_short != -1" "\\$\[0-9\]* = $false"  "print signed short != (minus)"
+test_expr "set variable v_short=-1" "print v_short < 0" "\\$\[0-9\]* = $true"  "print v_short < 0x7FFF" "\\$\[0-9\]* = $true"  "print signed short < (minus)"
+test_expr "set variable v_short=-1" "print v_short > 0" "\\$\[0-9\]* = $false"  "print v_short > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed short > (minus)"
 #
 # test expressions with "signed short" types
 #
-test_expr "set variable v_signed_short=0x7FFF" "print v_signed_short == 0" "\\$\[0-9\]* = 0"  "print v_signed_short == 0x7FFF" "\\$\[0-9\]* = 1"  "print signed signed short =="
-test_expr "set variable v_signed_short=0x7FFF" "print v_signed_short != 0" "\\$\[0-9\]* = 1"  "print v_signed_short != 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed short !="
-test_expr "set variable v_signed_short=0x7FFF" "print v_signed_short < 0" "\\$\[0-9\]* = 0"  "print v_signed_short < 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed short <"
-test_expr "set variable v_signed_short=0x7FFF" "print v_signed_short > 0" "\\$\[0-9\]* = 1"  "print v_signed_short > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed short >"
+test_expr "set variable v_signed_short=0x7FFF" "print v_signed_short == 0" "\\$\[0-9\]* = $false"  "print v_signed_short == 0x7FFF" "\\$\[0-9\]* = $true"  "print signed signed short =="
+test_expr "set variable v_signed_short=0x7FFF" "print v_signed_short != 0" "\\$\[0-9\]* = $true"  "print v_signed_short != 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed short !="
+test_expr "set variable v_signed_short=0x7FFF" "print v_signed_short < 0" "\\$\[0-9\]* = $false"  "print v_signed_short < 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed short <"
+test_expr "set variable v_signed_short=0x7FFF" "print v_signed_short > 0" "\\$\[0-9\]* = $true"  "print v_signed_short > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed short >"
 # make short a minus
-test_expr "set variable v_signed_short=-1" "print v_signed_short == 0" "\\$\[0-9\]* = 0"  "print v_signed_short == -1" "\\$\[0-9\]* = 1"  "print signed signed short == (minus)"
-test_expr "set variable v_signed_short=-1" "print v_signed_short != 0" "\\$\[0-9\]* = 1"  "print v_signed_short != -1" "\\$\[0-9\]* = 0"  "print signed signed short != (minus)"
-test_expr "set variable v_signed_short=-1" "print v_signed_short < 0" "\\$\[0-9\]* = 1"  "print v_signed_short < 0x7FFF" "\\$\[0-9\]* = 1"  "print signed signed short < (minus)"
-test_expr "set variable v_signed_short=-1" "print v_signed_short > 0" "\\$\[0-9\]* = 0"  "print v_signed_short > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed short > (minus)"
+test_expr "set variable v_signed_short=-1" "print v_signed_short == 0" "\\$\[0-9\]* = $false"  "print v_signed_short == -1" "\\$\[0-9\]* = $true"  "print signed signed short == (minus)"
+test_expr "set variable v_signed_short=-1" "print v_signed_short != 0" "\\$\[0-9\]* = $true"  "print v_signed_short != -1" "\\$\[0-9\]* = $false"  "print signed signed short != (minus)"
+test_expr "set variable v_signed_short=-1" "print v_signed_short < 0" "\\$\[0-9\]* = $true"  "print v_signed_short < 0x7FFF" "\\$\[0-9\]* = $true"  "print signed signed short < (minus)"
+test_expr "set variable v_signed_short=-1" "print v_signed_short > 0" "\\$\[0-9\]* = $false"  "print v_signed_short > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed short > (minus)"
 #
 # test expressions with "unsigned short" types
 #
-test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short == 0" "\\$\[0-9\]* = 0"  "print v_unsigned_short == 0x7FFF" "\\$\[0-9\]* = 1"  "print unsigned short =="
-test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short != 0" "\\$\[0-9\]* = 1"  "print v_unsigned_short != 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned short !="
-test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short < 0" "\\$\[0-9\]* = 0"  "print v_unsigned_short < 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned short <"
-test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short > 0" "\\$\[0-9\]* = 1"  "print v_unsigned_short > 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned short >"
+test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_short == 0x7FFF" "\\$\[0-9\]* = $true"  "print unsigned short =="
+test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_short != 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned short !="
+test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_short < 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned short <"
+test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_short > 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned short >"
 # make short a minus
-# note that (unsigned short) ~0 == ~0 iff sizeof(short) == sizeof(int),
-# so we can't test v_unsigned_short != ~0
-test_expr "set variable v_unsigned_short=~0" \
-	"print v_unsigned_short == 0" "\\$\[0-9\]* = 0" \
-	"print v_unsigned_short == (unsigned short)~0" "\\$\[0-9\]* = 1" \
-	"print unsigned short == (~0)"
-test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short != 0" "\\$\[0-9\]* = 1"  "print v_unsigned_short != (unsigned short)~0" "\\$\[0-9\]* = 0"  "print unsigned short != (~0)"
-test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short < 0" "\\$\[0-9\]* = 0"  "print v_unsigned_short < 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned short < (~0)"
-test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short > 0" "\\$\[0-9\]* = 1"  "print v_unsigned_short > 0x7FFF" "\\$\[0-9\]* = 1"  "print unsigned short > (~0)"
+test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_short == ~0" "\\$\[0-9\]* = $false"  "print v_unsigned_short == (unsigned short)~0" "\\$\[0-9\]* = $true"  "print unsigned short == (~0)"
+test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_short != (unsigned short)~0" "\\$\[0-9\]* = $false"  "print unsigned short != (~0)"
+test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_short < 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned short < (~0)"
+test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_short > 0x7FFF" "\\$\[0-9\]* = $true"  "print unsigned short > (~0)"
 #
 # test expressions with "int" types
 #
-test_expr "set variable v_int=0x7FFF" "print v_int == 0" "\\$\[0-9\]* = 0"  "print v_int == 0x7FFF" "\\$\[0-9\]* = 1"  "print signed int =="
-test_expr "set variable v_int=0x7FFF" "print v_int != 0" "\\$\[0-9\]* = 1"  "print v_int != 0x7FFF" "\\$\[0-9\]* = 0"  "print signed int !="
-test_expr "set variable v_int=0x7FFF" "print v_int < 0" "\\$\[0-9\]* = 0"  "print v_int < 0x7FFF" "\\$\[0-9\]* = 0"  "print signed int <"
-test_expr "set variable v_int=0x7FFF" "print v_int > 0" "\\$\[0-9\]* = 1"  "print v_int > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed int >"
+test_expr "set variable v_int=0x7FFF" "print v_int == 0" "\\$\[0-9\]* = $false"  "print v_int == 0x7FFF" "\\$\[0-9\]* = $true"  "print signed int =="
+test_expr "set variable v_int=0x7FFF" "print v_int != 0" "\\$\[0-9\]* = $true"  "print v_int != 0x7FFF" "\\$\[0-9\]* = $false"  "print signed int !="
+test_expr "set variable v_int=0x7FFF" "print v_int < 0" "\\$\[0-9\]* = $false"  "print v_int < 0x7FFF" "\\$\[0-9\]* = $false"  "print signed int <"
+test_expr "set variable v_int=0x7FFF" "print v_int > 0" "\\$\[0-9\]* = $true"  "print v_int > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed int >"
 # make int a minus
-test_expr "set variable v_int=-1" "print v_int == 0" "\\$\[0-9\]* = 0"  "print v_int == -1" "\\$\[0-9\]* = 1"  "print signed int == (minus)"
-test_expr "set variable v_int=-1" "print v_int != 0" "\\$\[0-9\]* = 1"  "print v_int != -1" "\\$\[0-9\]* = 0"  "print signed int != (minus)"
-test_expr "set variable v_int=-1" "print v_int < 0" "\\$\[0-9\]* = 1"  "print v_int < 0x7FFF" "\\$\[0-9\]* = 1"  "print signed int < (minus)"
-test_expr "set variable v_int=-1" "print v_int > 0" "\\$\[0-9\]* = 0"  "print v_int > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed int > (minus)"
+test_expr "set variable v_int=-1" "print v_int == 0" "\\$\[0-9\]* = $false"  "print v_int == -1" "\\$\[0-9\]* = $true"  "print signed int == (minus)"
+test_expr "set variable v_int=-1" "print v_int != 0" "\\$\[0-9\]* = $true"  "print v_int != -1" "\\$\[0-9\]* = $false"  "print signed int != (minus)"
+test_expr "set variable v_int=-1" "print v_int < 0" "\\$\[0-9\]* = $true"  "print v_int < 0x7FFF" "\\$\[0-9\]* = $true"  "print signed int < (minus)"
+test_expr "set variable v_int=-1" "print v_int > 0" "\\$\[0-9\]* = $false"  "print v_int > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed int > (minus)"
 #
 # test expressions with "signed int" types
 #
-test_expr "set variable v_signed_int=0x7FFF" "print v_signed_int == 0" "\\$\[0-9\]* = 0"  "print v_signed_int == 0x7FFF" "\\$\[0-9\]* = 1"  "print signed signed int =="
-test_expr "set variable v_signed_int=0x7FFF" "print v_signed_int != 0" "\\$\[0-9\]* = 1"  "print v_signed_int != 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed int !="
-test_expr "set variable v_signed_int=0x7FFF" "print v_signed_int < 0" "\\$\[0-9\]* = 0"  "print v_signed_int < 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed int <"
-test_expr "set variable v_signed_int=0x7FFF" "print v_signed_int > 0" "\\$\[0-9\]* = 1"  "print v_signed_int > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed int >"
+test_expr "set variable v_signed_int=0x7FFF" "print v_signed_int == 0" "\\$\[0-9\]* = $false"  "print v_signed_int == 0x7FFF" "\\$\[0-9\]* = $true"  "print signed signed int =="
+test_expr "set variable v_signed_int=0x7FFF" "print v_signed_int != 0" "\\$\[0-9\]* = $true"  "print v_signed_int != 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed int !="
+test_expr "set variable v_signed_int=0x7FFF" "print v_signed_int < 0" "\\$\[0-9\]* = $false"  "print v_signed_int < 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed int <"
+test_expr "set variable v_signed_int=0x7FFF" "print v_signed_int > 0" "\\$\[0-9\]* = $true"  "print v_signed_int > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed int >"
 # make int a minus
-test_expr "set variable v_signed_int=-1" "print v_signed_int == 0" "\\$\[0-9\]* = 0"  "print v_signed_int == -1" "\\$\[0-9\]* = 1"  "print signed signed int == (minus)"
-test_expr "set variable v_signed_int=-1" "print v_signed_int != 0" "\\$\[0-9\]* = 1"  "print v_signed_int != -1" "\\$\[0-9\]* = 0"  "print signed signed int != (minus)"
-test_expr "set variable v_signed_int=-1" "print v_signed_int < 0" "\\$\[0-9\]* = 1"  "print v_signed_int < 0x7FFF" "\\$\[0-9\]* = 1"  "print signed signed int < (minus)"
-test_expr "set variable v_signed_int=-1" "print v_signed_int > 0" "\\$\[0-9\]* = 0"  "print v_signed_int > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed int > (minus)"
+test_expr "set variable v_signed_int=-1" "print v_signed_int == 0" "\\$\[0-9\]* = $false"  "print v_signed_int == -1" "\\$\[0-9\]* = $true"  "print signed signed int == (minus)"
+test_expr "set variable v_signed_int=-1" "print v_signed_int != 0" "\\$\[0-9\]* = $true"  "print v_signed_int != -1" "\\$\[0-9\]* = $false"  "print signed signed int != (minus)"
+test_expr "set variable v_signed_int=-1" "print v_signed_int < 0" "\\$\[0-9\]* = $true"  "print v_signed_int < 0x7FFF" "\\$\[0-9\]* = $true"  "print signed signed int < (minus)"
+test_expr "set variable v_signed_int=-1" "print v_signed_int > 0" "\\$\[0-9\]* = $false"  "print v_signed_int > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed int > (minus)"
 #
 # test expressions with "unsigned int" types
 #
-test_expr "set variable v_unsigned_int=0x7FFF" "print v_unsigned_int == 0" "\\$\[0-9\]* = 0"  "print v_unsigned_int == 0x7FFF" "\\$\[0-9\]* = 1"  "print unsigned int =="
-test_expr "set variable v_unsigned_int=0x7FFF" "print v_unsigned_int != 0" "\\$\[0-9\]* = 1"  "print v_unsigned_int != 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned int !="
-test_expr "set variable v_unsigned_int=0x7FFF" "print v_unsigned_int < 0" "\\$\[0-9\]* = 0"  "print v_unsigned_int < 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned int <"
-test_expr "set variable v_unsigned_int=0x7FFF" "print v_unsigned_int > 0" "\\$\[0-9\]* = 1"  "print v_unsigned_int > 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned int >"
+test_expr "set variable v_unsigned_int=0x7FFF" "print v_unsigned_int == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_int == 0x7FFF" "\\$\[0-9\]* = $true"  "print unsigned int =="
+test_expr "set variable v_unsigned_int=0x7FFF" "print v_unsigned_int != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_int != 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned int !="
+test_expr "set variable v_unsigned_int=0x7FFF" "print v_unsigned_int < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_int < 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned int <"
+test_expr "set variable v_unsigned_int=0x7FFF" "print v_unsigned_int > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_int > 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned int >"
 # make int a minus
-test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int == 0" "\\$\[0-9\]* = 0"  "print v_unsigned_int == ~0" "\\$\[0-9\]* = 1"  "print v_unsigned_int == (unsigned int)~0" "\\$\[0-9\]* = 1"  "print unsigned int == (~0)"
-test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int != 0" "\\$\[0-9\]* = 1"  "print v_unsigned_int != (unsigned int)~0" "\\$\[0-9\]* = 0"  "print unsigned int != (~0)"
-test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int < 0" "\\$\[0-9\]* = 0"  "print v_unsigned_int < 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned int < (~0)"
-test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int > 0" "\\$\[0-9\]* = 1"  "print v_unsigned_int > 0x7FFF" "\\$\[0-9\]* = 1"  "print unsigned int > (~0)"
+test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_int == ~0" "\\$\[0-9\]* = $true"  "print v_unsigned_int == (unsigned int)~0" "\\$\[0-9\]* = $true"  "print unsigned int == (~0)"
+test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_int != (unsigned int)~0" "\\$\[0-9\]* = $false"  "print unsigned int != (~0)"
+test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_int < 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned int < (~0)"
+test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_int > 0x7FFF" "\\$\[0-9\]* = $true"  "print unsigned int > (~0)"
 #
 # test expressions with "long" types
 #
-test_expr "set variable v_long=0x7FFF" "print v_long == 0" "\\$\[0-9\]* = 0"  "print v_long == 0x7FFF" "\\$\[0-9\]* = 1"  "print signed long =="
-test_expr "set variable v_long=0x7FFF" "print v_long != 0" "\\$\[0-9\]* = 1"  "print v_long != 0x7FFF" "\\$\[0-9\]* = 0"  "print signed long !="
-test_expr "set variable v_long=0x7FFF" "print v_long < 0" "\\$\[0-9\]* = 0"  "print v_long < 0x7FFF" "\\$\[0-9\]* = 0"  "print signed long <"
-test_expr "set variable v_long=0x7FFF" "print v_long > 0" "\\$\[0-9\]* = 1"  "print v_long > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed long >"
+test_expr "set variable v_long=0x7FFF" "print v_long == 0" "\\$\[0-9\]* = $false"  "print v_long == 0x7FFF" "\\$\[0-9\]* = $true"  "print signed long =="
+test_expr "set variable v_long=0x7FFF" "print v_long != 0" "\\$\[0-9\]* = $true"  "print v_long != 0x7FFF" "\\$\[0-9\]* = $false"  "print signed long !="
+test_expr "set variable v_long=0x7FFF" "print v_long < 0" "\\$\[0-9\]* = $false"  "print v_long < 0x7FFF" "\\$\[0-9\]* = $false"  "print signed long <"
+test_expr "set variable v_long=0x7FFF" "print v_long > 0" "\\$\[0-9\]* = $true"  "print v_long > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed long >"
 # make long a minus
-test_expr "set variable v_long=-1" "print v_long == 0" "\\$\[0-9\]* = 0"  "print v_long == -1" "\\$\[0-9\]* = 1"  "print signed long == (minus)"
-test_expr "set variable v_long=-1" "print v_long != 0" "\\$\[0-9\]* = 1"  "print v_long != -1" "\\$\[0-9\]* = 0"  "print signed long != (minus)"
-test_expr "set variable v_long=-1" "print v_long < 0" "\\$\[0-9\]* = 1"  "print v_long < 0x7FFF" "\\$\[0-9\]* = 1"  "print signed long < (minus)"
-test_expr "set variable v_long=-1" "print v_long > 0" "\\$\[0-9\]* = 0"  "print v_long > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed long > (minus)"
+test_expr "set variable v_long=-1" "print v_long == 0" "\\$\[0-9\]* = $false"  "print v_long == -1" "\\$\[0-9\]* = $true"  "print signed long == (minus)"
+test_expr "set variable v_long=-1" "print v_long != 0" "\\$\[0-9\]* = $true"  "print v_long != -1" "\\$\[0-9\]* = $false"  "print signed long != (minus)"
+test_expr "set variable v_long=-1" "print v_long < 0" "\\$\[0-9\]* = $true"  "print v_long < 0x7FFF" "\\$\[0-9\]* = $true"  "print signed long < (minus)"
+test_expr "set variable v_long=-1" "print v_long > 0" "\\$\[0-9\]* = $false"  "print v_long > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed long > (minus)"
 #
 # test expressions with "signed long" types
 #
-test_expr "set variable v_signed_long=0x7FFF" "print v_signed_long == 0" "\\$\[0-9\]* = 0"  "print v_signed_long == 0x7FFF" "\\$\[0-9\]* = 1"  "print signed signed long =="
-test_expr "set variable v_signed_long=0x7FFF" "print v_signed_long != 0" "\\$\[0-9\]* = 1"  "print v_signed_long != 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed long !="
-test_expr "set variable v_signed_long=0x7FFF" "print v_signed_long < 0" "\\$\[0-9\]* = 0"  "print v_signed_long < 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed long <"
-test_expr "set variable v_signed_long=0x7FFF" "print v_signed_long > 0" "\\$\[0-9\]* = 1"  "print v_signed_long > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed long >"
+test_expr "set variable v_signed_long=0x7FFF" "print v_signed_long == 0" "\\$\[0-9\]* = $false"  "print v_signed_long == 0x7FFF" "\\$\[0-9\]* = $true"  "print signed signed long =="
+test_expr "set variable v_signed_long=0x7FFF" "print v_signed_long != 0" "\\$\[0-9\]* = $true"  "print v_signed_long != 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed long !="
+test_expr "set variable v_signed_long=0x7FFF" "print v_signed_long < 0" "\\$\[0-9\]* = $false"  "print v_signed_long < 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed long <"
+test_expr "set variable v_signed_long=0x7FFF" "print v_signed_long > 0" "\\$\[0-9\]* = $true"  "print v_signed_long > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed long >"
 # make long a minus
-test_expr "set variable v_signed_long=-1" "print v_signed_long == 0" "\\$\[0-9\]* = 0"  "print v_signed_long == -1" "\\$\[0-9\]* = 1"  "print signed signed long == (minus)"
-test_expr "set variable v_signed_long=-1" "print v_signed_long != 0" "\\$\[0-9\]* = 1"  "print v_signed_long != -1" "\\$\[0-9\]* = 0"  "print signed signed long != (minus)"
-test_expr "set variable v_signed_long=-1" "print v_signed_long < 0" "\\$\[0-9\]* = 1"  "print v_signed_long < 0x7FFF" "\\$\[0-9\]* = 1"  "print signed signed long < (minus)"
-test_expr "set variable v_signed_long=-1" "print v_signed_long > 0" "\\$\[0-9\]* = 0"  "print v_signed_long > 0x7FFF" "\\$\[0-9\]* = 0"  "print signed signed long > (minus)"
+test_expr "set variable v_signed_long=-1" "print v_signed_long == 0" "\\$\[0-9\]* = $false"  "print v_signed_long == -1" "\\$\[0-9\]* = $true"  "print signed signed long == (minus)"
+test_expr "set variable v_signed_long=-1" "print v_signed_long != 0" "\\$\[0-9\]* = $true"  "print v_signed_long != -1" "\\$\[0-9\]* = $false"  "print signed signed long != (minus)"
+test_expr "set variable v_signed_long=-1" "print v_signed_long < 0" "\\$\[0-9\]* = $true"  "print v_signed_long < 0x7FFF" "\\$\[0-9\]* = $true"  "print signed signed long < (minus)"
+test_expr "set variable v_signed_long=-1" "print v_signed_long > 0" "\\$\[0-9\]* = $false"  "print v_signed_long > 0x7FFF" "\\$\[0-9\]* = $false"  "print signed signed long > (minus)"
 #
 # test expressions with "unsigned long" types
 #
-test_expr "set variable v_unsigned_long=0x7FFF" "print v_unsigned_long == 0" "\\$\[0-9\]* = 0"  "print v_unsigned_long == 0x7FFF" "\\$\[0-9\]* = 1"  "print unsigned long =="
-test_expr "set variable v_unsigned_long=0x7FFF" "print v_unsigned_long != 0" "\\$\[0-9\]* = 1"  "print v_unsigned_long != 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned long !="
-test_expr "set variable v_unsigned_long=0x7FFF" "print v_unsigned_long < 0" "\\$\[0-9\]* = 0"  "print v_unsigned_long < 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned long <"
-test_expr "set variable v_unsigned_long=0x7FFF" "print v_unsigned_long > 0" "\\$\[0-9\]* = 1"  "print v_unsigned_long > 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned long >"
+test_expr "set variable v_unsigned_long=0x7FFF" "print v_unsigned_long == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_long == 0x7FFF" "\\$\[0-9\]* = $true"  "print unsigned long =="
+test_expr "set variable v_unsigned_long=0x7FFF" "print v_unsigned_long != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_long != 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned long !="
+test_expr "set variable v_unsigned_long=0x7FFF" "print v_unsigned_long < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_long < 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned long <"
+test_expr "set variable v_unsigned_long=0x7FFF" "print v_unsigned_long > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_long > 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned long >"
 # make long a minus
-test_expr "set variable v_unsigned_long=~0" "print v_unsigned_long == 0" "\\$\[0-9\]* = 0"  "print v_unsigned_long == ~0" "\\$\[0-9\]* = 1"  "print v_unsigned_long == (unsigned long)~0" "\\$\[0-9\]* = 1"  "print unsigned long == (~0)"
-test_expr "set variable v_unsigned_long=~0" "print v_unsigned_long != 0" "\\$\[0-9\]* = 1"  "print v_unsigned_long != (unsigned long)~0" "\\$\[0-9\]* = 0"  "print unsigned long != (~0)"
-test_expr "set variable v_unsigned_long=~0" "print v_unsigned_long < 0" "\\$\[0-9\]* = 0"  "print v_unsigned_long < 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned long < (~0)"
-test_expr "set variable v_unsigned_long=~0" "print v_unsigned_long > 0" "\\$\[0-9\]* = 1"  "print v_unsigned_long > 0x7FFF" "\\$\[0-9\]* = 1"  "print unsigned long > (~0)"
+test_expr "set variable v_unsigned_long=~0" "print v_unsigned_long == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_long == ~0" "\\$\[0-9\]* = $true"  "print v_unsigned_long == (unsigned long)~0" "\\$\[0-9\]* = $true"  "print unsigned long == (~0)"
+test_expr "set variable v_unsigned_long=~0" "print v_unsigned_long != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_long != (unsigned long)~0" "\\$\[0-9\]* = $false"  "print unsigned long != (~0)"
+test_expr "set variable v_unsigned_long=~0" "print v_unsigned_long < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_long < 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned long < (~0)"
+test_expr "set variable v_unsigned_long=~0" "print v_unsigned_long > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_long > 0x7FFF" "\\$\[0-9\]* = $true"  "print unsigned long > (~0)"

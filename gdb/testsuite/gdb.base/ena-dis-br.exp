@@ -74,7 +74,7 @@ if ![runto_main] then { fail "enable/disable break tests suppressed" }
 #
 send_gdb "break marker1\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 41.*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line 4\[38\].*$gdb_prompt $"\
           {pass "break marker1"}
   -re "$gdb_prompt $"\
           {fail "break marker1"}
@@ -118,7 +118,7 @@ gdb_expect {
 #
 send_gdb "break marker2\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 42.*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line 4\[49\].*$gdb_prompt $"\
           {pass "break marker2"}
   -re "$gdb_prompt $"\
           {fail "break marker2"}
@@ -172,7 +172,7 @@ if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
 send_gdb "break marker3\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 43.*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line (45|50).*$gdb_prompt $"\
           {pass "break marker3"}
   -re "$gdb_prompt $"\
           {fail "break marker3"}
@@ -197,7 +197,7 @@ gdb_expect {
 
 send_gdb "continue\n"
 gdb_expect {
-  -re ".*marker3 .*:43.*$gdb_prompt $"\
+  -re ".*marker3 .*:(45|50).*$gdb_prompt $"\
           {pass "continue to auto-deleted break marker3"}
   -re "Breakpoint \[0-9\]*, marker3.*$gdb_prompt $"\
           {fail "continue to auto-deleted break marker3"}
@@ -222,7 +222,7 @@ gdb_expect {
 #
 send_gdb "break marker4\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 44.*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line (46|51).*$gdb_prompt $"\
           {pass "break marker4"}
   -re "$gdb_prompt $"\
           {fail "break marker4"}
@@ -253,7 +253,7 @@ if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
 send_gdb "break marker1\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 41.*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line 4\[38\].*$gdb_prompt $"\
           {pass "break marker1"}
   -re "$gdb_prompt $"\
           {fail "break marker1"}
@@ -340,7 +340,7 @@ if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
 send_gdb "break marker1\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 41.*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line 4\[38\].*$gdb_prompt $"\
           {pass "break marker1"}
   -re "$gdb_prompt $"\
           {fail "break marker1"}
@@ -377,7 +377,7 @@ rerun_to_main
 
 send_gdb "continue\n"
 gdb_expect {
-  -re ".*marker1 .*:41.*$gdb_prompt $"\
+  -re ".*marker1 .*:4\[38\].*$gdb_prompt $"\
           {pass "continue to ignored & auto-deleted break marker1"}
   -re "Breakpoint \[0-9\]*, marker1.*$gdb_prompt $"\
           {fail "continue to ignored & auto-deleted break marker1"}
@@ -393,7 +393,7 @@ if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
 send_gdb "break marker1\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 41.*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line 4\[38\].*$gdb_prompt $"\
           {pass "break marker1"}
   -re "$gdb_prompt $"\
           {fail "break marker1"}
@@ -435,9 +435,9 @@ gdb_expect {
 #
 if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
-send_gdb "break 64\n"
+send_gdb "break 79\n"
 gdb_expect {
-  -re "Breakpoint \[0-9\]*.*, line 64.*$gdb_prompt $"\
+  -re "Breakpoint \[0-9\]*.*, line 79.*$gdb_prompt $"\
           {pass "prepare to continue with ignore count"}
   -re "$gdb_prompt $"\
           {fail "prepare to continue with ignore count"}
@@ -454,7 +454,7 @@ gdb_expect {
 
 send_gdb "next\n"
 gdb_expect {
-  -re ".*66\[ \t\]*marker1.*$gdb_prompt $"\
+  -re ".*81\[ \t\]*marker1.*$gdb_prompt $"\
           {pass "step after continue with ignore count"}
   -re "$gdb_prompt $"\
           {fail "step after continue with ignore count"}

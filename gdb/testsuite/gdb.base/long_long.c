@@ -7,8 +7,12 @@
  * cc +e +DA2.0 -g -o long_long long_long.c
  */
 
+#ifdef PROTOTYPES
+long long callee(long long i)
+#else
 long long callee( i )
 long long i;
+#endif
 {
    register long long result;
 
@@ -32,6 +36,8 @@ int known_types()
    /* Stop here and look!
     */
    hex = bin - dec | oct;
+
+   return 0;
 }
 
 int main() {

@@ -42,6 +42,12 @@ if [get_compiler_info ${binfile}] {
     return -1;
 }
 
+if {$hp_cc_compiler} {
+    set void 0
+} else {
+    set void void
+}
+
 proc signal_tests_1 {} {
     global gdb_prompt
     if [runto_main] then {
@@ -380,7 +386,7 @@ if [runto_main] then {
     # lose its cool, this is not a problem, it just has to note
     # that the breakpoint condition is false and keep going.
 
-    gdb_test "p func1 ()" "^p func1 \\(\\)\r\n.\[0-9\]* = void" \
+    gdb_test "p func1 ()" "^p func1 \\(\\)\r\n.\[0-9\]* = $void" \
 	"p func1 () #1 in signals.exp"
 
     # Make sure the count got incremented.

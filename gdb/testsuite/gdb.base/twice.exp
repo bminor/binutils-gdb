@@ -60,4 +60,5 @@ if [runto_main] then {
 
     gdb_test "step" "nothing \\(\\) at.*"
 }
+remote_exec build "rm -f twice.c" 
 return 0

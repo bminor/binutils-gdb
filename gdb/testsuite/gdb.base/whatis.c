@@ -188,7 +188,7 @@ enum cars {chevy, ford, porsche} clunker;
 
 /***********/
 
-main ()
+int main ()
 {
 #ifdef usestubs
   set_debug_traps();

@@ -3,8 +3,10 @@
 #include "ss.h"
 #include <stdio.h>
 
-extern int shr1();
-extern int shr2();
+extern int structarg(struct s);
+extern int pstructarg(struct s*);
+extern int shr1(int);
+extern int shr2(int);
 extern float sg;
 
 int eglob;
@@ -16,13 +18,27 @@ struct {
 
 int g;
 
+#ifdef PROTOTYPES
+int local_structarg(struct s x)
+#else
 int local_structarg(x)
 struct s x;
+#endif
 {
   return x.b;
 }
 
-main()
+#ifdef PROTOTYPES
+int mainshr1(int g)
+#else
+int mainshr1(g)
+int g;
+#endif
+{
+  return 2*g;
+}
+
+int main()
 {
   struct s y;
   g = 1;
@@ -36,12 +52,5 @@ main()
   g = local_structarg(y);
   g = structarg(y);
   g = pstructarg(&y);
-
-  return (0);
-}
-
-int mainshr1(g)
-int g;
-{
-  return 2*g;
+  return 0;
 }

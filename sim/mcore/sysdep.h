@@ -46,7 +46,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /*#include <string.h>*/
 #else
 extern char * mktemp ();
+#ifndef memset
 extern PTR    memset ();
+#endif
 
 #ifndef	DONTDECLARE_MALLOC
 extern PTR   malloc ();
@@ -65,7 +67,9 @@ extern void free ();
 extern int free();
 #endif
 
+#ifndef strchr
 extern char * strchr();
+#endif
 extern char * getenv();
 extern PTR    memchr();
 extern char * strrchr();

@@ -1,5 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 1999
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -48,7 +48,7 @@ int display_space;
 invoked on the command line with the -nw --async options.  In this
 version, the usual command_loop is substituted by and event loop which
 processes UI events asynchronously. */
-int async_p = 0;
+int async_p = 1;
 
 /* Whether this is the command line version or not */
 int tui_version = 0;
@@ -390,10 +390,6 @@ main (argc, argv)
       quiet = 1;
   }
 
-  /* Get ready to invoke the event loop instead of the
-     command_loop. See event-loop.h for more details.*/
-  if (async_p)
-    command_loop_hook = start_event_loop;
 #if defined(TUI)
   /* Should this be moved to tui-top.c:_initialize_tui()? */
   if (tui_version)

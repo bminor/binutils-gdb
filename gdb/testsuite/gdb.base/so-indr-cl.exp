@@ -51,13 +51,8 @@ if [get_compiler_info ${binfile}] {
 #remote_exec build "$CC -g +z -c ${libfile}1.c -o ${libfile}1.o"
 
 
-if {$gcc_compiled == 0} {
-    if [istarget "hppa*-hp-hpux*"] then {
-	set additional_flags "additional_flags=+z"
-    } else {
-	# don't know what the compiler is...
-	set additional_flags ""
-    }
+if {$hp_cc_compiler || $hp_aCC_compiler} {
+    set additional_flags "additional_flags=+z"
 } else {
     set additional_flags "additional_flags=-fpic"
 }
@@ -77,13 +72,8 @@ if [istarget "hppa*-hp-hpux*"] then {
 #remote_exec build "$CC -Aa -g ${srcfile} ${libfile}1.sl -o ${binfile}"
 
 
-if {$gcc_compiled == 0} {
-    if [istarget "hppa*-hp-hpux*"] then {
-	set additional_flags "additional_flags=-Ae"
-    } else {
-	# don't know what the compiler is, hope for the best, maybe it's ANSI...
-	set additional_flags ""
-    }
+if {$hp_cc_compiler} {
+    set additional_flags "additional_flags=-Ae"
 } else {
     set additional_flags ""
 }
@@ -119,6 +109,8 @@ send_gdb "break solib_main\n"
 gdb_expect {
   -re "Cannot break on solib_main without a running program.*$gdb_prompt $"\
           {pass "break on indirect solib call before running"}
+  -re "Breakpoint.*deferred.*\\(\"solib_main\" was not found.*$gdb_prompt $"\
+	  {pass "break on indirect solib call before running 2"}
   -re "$gdb_prompt $"\
           {fail "break on indirect solib call before running"}
   timeout {fail "(timeout) break on indirect solib call before running"}

@@ -1,3 +1,8 @@
+1999-06-23  Nick Clifton  <nickc@cygnus.com>
+
+	* sysdep.h: Do not define prototypes for memcpy and strchr if they
+	are macros.
+
 1999-05-21  Nick Clifton  <nickc@cygnus.com>
 
 	* interp.c (sim_resume): Add more tracing output.

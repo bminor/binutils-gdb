@@ -59,10 +59,15 @@ if ![runto_main] then { fail "section command tests suppressed" }
 # not clear that there'll be a section named "$CODE$" in such
 # programs.)
 #
+
+set address1 ""
+set address2 ""
 send_gdb "info files\n"
 gdb_expect {
-  -re ".*(0x\[0-9a-fA-F\]*) - (0x\[0-9a-fA-F\]*) is .CODE..*$gdb_prompt $"\
-          {pass "info files"}
+  -re ".*(0x\[0-9a-fA-F\]*) - (0x\[0-9a-fA-F\]*) is .(CODE|text).*$gdb_prompt $"\
+          {pass "info files"
+	   set address1 $expect_out(1,string)
+	   set address2 $expect_out(2,string)}
   -re "$gdb_prompt $"\
           {fail "info files"}
   timeout {fail "(timeout) info files"}
@@ -71,13 +76,24 @@ gdb_expect {
 # Reset the section to that same starting address, which should be
 # harmless (i.e., we just want to exercise the section command).
 #
-send_gdb "section \$CODE\$ $expect_out(1,string)\n"
-gdb_expect {
-  -re ".*$expect_out(1,string) \- $expect_out(2,string) is .CODE..*$gdb_prompt $"\
-          {pass "set section command"}
-  -re "$gdb_prompt $"\
-          {fail "set section command"}
-  timeout {fail "(timeout) set section command"}
+if [istarget "hppa2.0w-*-*"] then {
+  send_gdb "section \.text $address1\n"
+  gdb_expect {
+    -re ".*$address1 \- $address2 is .text.*$gdb_prompt $"\
+            {pass "set section command"}
+    -re "$gdb_prompt $"\
+            {fail "set section command"}
+    timeout {fail "(timeout) set section command"}
+  }
+} else {
+  send_gdb "section \$CODE\$ $address1\n"
+  gdb_expect {
+    -re ".*$address1 \- $address2 is .CODE..*$gdb_prompt $"\
+            {pass "set section command"}
+    -re "$gdb_prompt $"\
+            {fail "set section command"}
+    timeout {fail "(timeout) set section command"}
+  }
 }
 
 # Verify that GDB responds gracefully to a non-existent section name.

@@ -56,10 +56,10 @@ if ![runto_main] then {
 # Set a breakpoint on the statement that we're about to jump to.
 # The statement doesn't contain a function call.
 #
-send_gdb "break 18\n"
+send_gdb "break 22\n"
 set bp_on_non_call 0
 gdb_expect {
-  -re "\[Bb\]reakpoint (\[0-9\]*) at 0x\[0-9a-fA-F\]*: file .*${srcfile}, line 18.*$gdb_prompt $"\
+  -re "\[Bb\]reakpoint (\[0-9\]*) at 0x\[0-9a-fA-F\]*: file .*${srcfile}, line 22.*$gdb_prompt $"\
           {set bp_on_non_call $expect_out(1,string)
            pass "break before jump to non-call"}
   -re "$gdb_prompt $"\
@@ -69,9 +69,9 @@ gdb_expect {
 
 # Can we jump to the statement?  Do we stop there?
 #
-send_gdb "jump 18\n"
+send_gdb "jump 22\n"
 gdb_expect {
-  -re "Breakpoint \[0-9\]*, .*${srcfile}:18.*$gdb_prompt $"\
+  -re "Breakpoint \[0-9\]*, .*${srcfile}:22.*$gdb_prompt $"\
           {pass "jump to non-call"}
   -re "$gdb_prompt $"\
           {fail "jump to non-call"}
@@ -81,10 +81,10 @@ gdb_expect {
 # Set a breakpoint on the statement that we're about to jump to.
 # The statement does contain a function call.
 #
-send_gdb "break 17\n"
+send_gdb "break 21\n"
 set bp_on_call 0
 gdb_expect {
-  -re "\[Bb\]reakpoint (\[0-9\]*) at 0x\[0-9a-fA-F\]*: file .*${srcfile}, line 17.*$gdb_prompt $"\
+  -re "\[Bb\]reakpoint (\[0-9\]*) at 0x\[0-9a-fA-F\]*: file .*${srcfile}, line 21.*$gdb_prompt $"\
           {set bp_on_call $expect_out(1,string)
            pass "break before jump to call"}
   -re "$gdb_prompt $"\
@@ -94,9 +94,9 @@ gdb_expect {
 
 # Can we jump to the statement?  Do we stop there?
 #
-send_gdb "jump 17\n"
+send_gdb "jump 21\n"
 gdb_expect {
-  -re "Breakpoint \[0-9\]*, .*${srcfile}:17.*$gdb_prompt $"\
+  -re "Breakpoint \[0-9\]*, .*${srcfile}:21.*$gdb_prompt $"\
           {pass "jump to call"}
   -re "$gdb_prompt $"\
           {fail "jump to call"}
@@ -114,9 +114,9 @@ gdb_expect {
   timeout {fail "(timeout) disable breakpoint on call"}
 }
 
-send_gdb "jump 17\n"
+send_gdb "jump 21\n"
 gdb_expect {
-  -re "Breakpoint \[0-9\]*, .*${srcfile}:18.*$gdb_prompt $"\
+  -re "Breakpoint \[0-9\]*, .*${srcfile}:22.*$gdb_prompt $"\
           {pass "jump to call with disabled breakpoint"}
   -re "$gdb_prompt $"\
           {fail "jump to call with disabled breakpoint"}
@@ -138,7 +138,7 @@ gdb_expect {
 # Verify that GDB responds gracefully to the "jump" command with
 # trailing junk.
 #
-send_gdb "jump 17 100\n"
+send_gdb "jump 21 100\n"
 gdb_expect {
   -re "Junk at end of line specification: 100.*$gdb_prompt $"\
           {pass "jump with trailing argument junk"}
@@ -154,9 +154,9 @@ gdb_expect {
 #
 # Try it both ways: confirming and not confirming the jump.
 #
-send_gdb "jump 8\n"
+send_gdb "jump 12\n"
 gdb_expect {
-  -re "Line 8 is not in `main'.  Jump anyway.*y or n. $"\
+  -re "Line 12 is not in `main'.  Jump anyway.*y or n. $"\
           {send_gdb "n\n"
            gdb_expect {
              -re "Not confirmed.*$gdb_prompt $"\
@@ -171,9 +171,9 @@ gdb_expect {
   timeout {fail "(timeout) aborted jump out of current function"}
 }
 
-send_gdb "jump 8\n"
+send_gdb "jump 12\n"
 gdb_expect {
-  -re "Line 8 is not in `main'.  Jump anyway.*y or n. $"\
+  -re "Line 12 is not in `main'.  Jump anyway.*y or n. $"\
           {send_gdb "y\n"
            gdb_expect {
              -re "Continuing at.*$gdb_prompt $"\

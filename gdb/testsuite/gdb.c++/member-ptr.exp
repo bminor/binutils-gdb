@@ -42,6 +42,20 @@ set testfile "member-ptr"
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
 
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
+
+if [get_compiler_info ${binfile} "c++"] {
+    return -1
+}
+
+# Nearly all of these tests fail when compiled with G++, so just give up
+# until GDB gets enhanced. -sts 1999-06-22
+
+if {$gcc_compiled} {
+    continue 
+}
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }

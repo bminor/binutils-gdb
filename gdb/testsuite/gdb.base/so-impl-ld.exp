@@ -68,28 +68,23 @@ if {[gdb_compile "${srcdir}/${subdir}/${libfile}1.c" "${libfile}1.o" object [lis
 }
 
 if [istarget "hppa*-hp-hpux*"] then {
-    remote_exec build "ld -b ${libfile}1.o -o ${libfile}1.sl"
+    remote_exec build "ld -b ${libfile}1.o -o ${objdir}/${subdir}/${libfile}1.sl"
 } else {
     set additional_flags "additional_flags=-shared"
-    gdb_compile "${libfile}1.o" "${libfile}1.sl" executable [list debug $additional_flags]
+    gdb_compile "${libfile}1.o" "${objdir}/${subdir}/${libfile}1.sl" executable [list debug $additional_flags]
 }
 
 # Build the test case
 #remote_exec build "$CC -Aa -g ${srcfile} ${libfile}1.sl -o ${binfile}"
 
 
-if {$gcc_compiled == 0} {
-    if [istarget "hppa*-hp-hpux*"] then {
-	set additional_flags "additional_flags=-Ae"
-    } else {
-	# don't know what the compiler is, hope for the best, maybe it's ANSI...
-	set additional_flags ""
-    }
+if {$hp_cc_compiler} {
+    set additional_flags "additional_flags=-Ae"
 } else {
     set additional_flags ""
 }
 
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile} ${libfile}1.sl" "${binfile}" executable [list debug $additional_flags]] != ""} {
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile} ${objdir}/${subdir}/${libfile}1.sl" "${binfile}" executable [list debug $additional_flags]] != ""} {
     perror "Couldn't build ${binfile}"
     return -1
 }
@@ -110,7 +105,7 @@ if ![runto_main] then { fail "implicit solibs tests suppressed" }
 #
 send_gdb "next\n"
 gdb_expect {
-  -re "17\[ \t\]*result = solib_main .result.*$gdb_prompt $"\
+  -re "21\[ \t\]*result = solib_main .result.*$gdb_prompt $"\
           {pass "step over solib call"}
   -re "$gdb_prompt $"\
           {fail "step over solib call"}
@@ -121,7 +116,7 @@ gdb_expect {
 #
 send_gdb "step\n"
 gdb_expect {
-  -re "solib_main .arg=10000. at.*${libfile}1.c:8.*$gdb_prompt $"\
+  -re "solib_main .arg=10000. at.*${libfile}1.c:17.*$gdb_prompt $"\
           {pass "step into solib call"}
   -re "$gdb_prompt $"\
           {fail "step into solib call"}
@@ -132,7 +127,7 @@ gdb_expect {
 #
 send_gdb "next\n"
 gdb_expect {
-  -re "9\[ \t\]*\}.*$gdb_prompt $"\
+  -re "18\[ \t\]*\}.*$gdb_prompt $"\
           {pass "step in solib call"}
   -re "$gdb_prompt $"\
           {fail "step in solib call"}
@@ -148,7 +143,7 @@ gdb_expect {
 	# we haven't left the callee yet, so do another next
 	send_gdb "next\n"
 	gdb_expect {
-	    -re "main .. at.*so-impl-ld.c:18.*$gdb_prompt $"\
+	    -re "main .. at.*so-impl-ld.c:22.*$gdb_prompt $"\
 		{pass "step out of solib call"}
 	    -re "$gdb_prompt $"\
 		{fail "step out of solib call"}
@@ -156,7 +151,7 @@ gdb_expect {
 	}
     }
 
-    -re "main .. at.*so-impl-ld.c:18.*$gdb_prompt $"\
+    -re "main .. at.*so-impl-ld.c:22.*$gdb_prompt $"\
 	{pass "step out of solib call"}
     -re "$gdb_prompt $"\
 	{fail "step out of solib call"}

@@ -1,3 +1,105 @@
+1999-06-25  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Jimmy Guo <guo@cup.hp.com> and others at HP:
+	* lib/gdb.exp (get_compiler_info): Add detection for assorted
+	HP compilers, also set the globals $true and $false.
+
+	* gdb.base/annota1.c, bitfields.c, break.c, call-ar-st.c,
+ 	call-rt-st.c, call-strs.c, callfuncs.c, callfuncs2.c, condbreak.c,
+ 	coremaker.c, ending-run.c, exprs.c, funcargs.c, interrupt.c,
+ 	jump.c, langs0.c, langs1.c, langs2.c, list0.c, list1.c,
+ 	long_long.c, mips_pro.c, nodebug.c, opaque0.c, opaque1.c,
+ 	printcmds.c, ptype.c, recurse.c, restore.c, return.c, run.c,
+ 	scope0.c, scope1.c, setshow.c, setvar.c, shmain.c, shr1.c, shr2.c,
+ 	sigall.c, signals.c, so-impl-ld.c, so-indr-cl.c, solib.c,
+ 	solib1.c, solib2.c, step-test.c, twice.c, varargs.c, watchpoint.c,
+ 	whatis.c} Add C++ compatible function definitions and return
+ 	types, add includes for library functions.
+	* gdb.base/ptype.c (my_false, my_true): Use instead of false/true.
+	* gdb.base/step-test.c (myglob): Rename from glob.
+	* gdb.base/attach.c, attach2.c, average.c, execd-prog.c,
+ 	foll-exec.c, foll-fork.c, foll-vfork.c, sum.c, vforked-prog.c: New
+ 	files, move here from gdb.hp.
+	* gdb.base/annota1.exp, break.exp, call-ar-st.exp, call-rt-st.exp,
+ 	commands.exp, condbreak.exp, define.exp, ena-dis-br.exp,
+ 	ending-run.exp, jump.exp. list.exp, long_long.exp, so-impl-ld.exp:
+ 	Adjust line numbers in regexps.
+
+	* gdb.base/all-bin.exp, eval-skip.exp, exprs.exp, logical.exp,
+	miscexprs.exp, pointers.exp, relational.exp: Use $true and $false
+	instead of 0/1.
+
+	* gdb.base/attach.exp, dbx.exp, foll-exec.exp, foll-fork.exp,
+	foll-vfork.exp: New files, move here from gdb.hp.
+	* gdb.base/page.exp: New file, test of pagination command.
+
+	* gdb.base/watchpoint.c (recurser): New function, for watchpoint
+	recursion test.
+	* gdb.base/watchpoint.exp: Add more test cases for watchpoints.
+
+	* gdb.base/so-impl-ld.exp, gdb.base/so-indr-cl.exp,
+ 	gdb.base/solib.exp: Fix compiler invocation process.
+
+	* gdb.base/callfuncs.exp, gdb.base/callfuncs2.exp: Don't xfail for
+ 	HP-UX 11, turn off overload resolution explicitly.
+	* gdb.base/commands.exp: Set argument list explicitly, add
+ 	watchpoint test.
+	* gdb.base/completion.exp: Enable if HP-UX, tweak tests to make
+	them work.
+	* gdb.base/constvars.exp, gdb.base/volatile.exp: Escape the
+	expressions properly.
+	* gdb.base/corefile.exp: Loosen the match slightly.
+	* gdb.base/default.exp: Allow "Error accessing memory" message
+	also.
+	* gdb.base/display.exp: Skip over x/0 j if PA64.
+	* gdb.base/funcargs.exp: Add xfails for HP-UX.
+	* gdb.base/interrupt.exp: Ditto.
+	* gdb.base/langs.exp: Add symbolic matches governed by compiler
+	in use.
+	* gdb.base/list.exp: Add xfails for HP-UX.
+	* gdb.base/long_long.exp: Refine some of the numeric matches.
+	* gdb.base/mips_pro.exp: Xfail on HP-UX.
+	* gdb.base/miscexprs.exp: Add PA2.0 case for array size test.
+	* gdb.base/nodebug.exp: Succeed on more varieties of output.
+	* gdb.base/opaque.exp: Remove some HP-UX xfails.
+	* gdb.base/ptype.exp: Succeed on more varieties of output.
+	* gdb.base/scope.exp: Add xfails for HP-UX.
+	* gdb.base/sect-cmd.exp: Add more cases.
+	* gdb.base/setvar.exp: Add xfails for HP-UX.
+	* gdb.base/shlib-call.exp: Loosen some matches slightly.
+	* gdb.base/signals.exp: Match on void symbolically.
+	* gdb.base/step-test.exp: Add case for PA64.
+	* gdb.base/term.exp: Add exit and restart.
+	* gdb.base/twice.exp: Clean up after self.
+	* gdb.base/varargs.exp: Disable overload resolution explicitly.
+	* gdb.base/whatis.exp: Allow more ways to pass tests.
+
+	* gdb.base/smoke.exp, gdb.base/smoke.c, gdb.base/smoke.cc: Remove,
+ 	no longer useful.
+
+Fri Jun 25 19:27:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* lib/gdb.exp (proc gdb_expect_list): New procedure.  Matches a
+ 	list of patterns.
+	* gdb.base/call-ar-st.exp: Use gdb_expect_list in "print
+ 	print_double_array(double_array)", "continuing to breakpoint
+ 	1018", "print print_double_array(array_d)" and "continuing to
+ 	1034" tests.
+	
+1999-06-24  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+        * Makefile.in: Add empty html and install-html targets.
+
+1999-06-24  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/mt-*: Remove, these haven't been used since 1996.
+
+1999-06-22  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/call-strs.c, gdb.base/ending-run.c,
+ 	gdb.base/step-test.c: Include stdlib.h and string.h as needed.
+	* gdb.c++/member-ptr.exp: Skip over these tests if using G++.
+
 1999-06-18  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.c++/overload.exp: XFAIL everything if using G++, add a

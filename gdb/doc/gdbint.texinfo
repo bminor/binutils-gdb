@@ -86,6 +86,7 @@ as the mechanisms that adapt GDB to specific hosts and targets.
 * Support Libraries::
 * Coding::
 * Porting GDB::
+* Testsuite::
 * Hints::
 @end menu
 
@@ -2558,6 +2559,149 @@ distribution, generate @file{gdb-all.texinfo} locally, and include the
 files @file{gdb.info*} in the distribution.  Note the plural;
 @code{makeinfo} will split the document into one overall file and five
 or so included files.
+
+@node Testsuite
+
+@chapter Testsuite
+
+The testsuite is an important component of the GDB package.  While it is
+always worthwhile to encourage user testing, in practice this is rarely
+sufficient; users typically use only a small subset of the available
+commands, and it has proven all too common for a change to cause a
+significant regression that went unnoticed for some time.
+
+The GDB testsuite uses the DejaGNU testing framework.  DejaGNU is built
+using tcl and expect.  The tests themselves are calls to various tcl
+procs; the framework runs all the procs and summarizes the passes and
+fails.
+
+@section Using the Testsuite
+
+To run the testsuite, simply go to the GDB object directory (or to the
+testsuite's objdir) and type @code{make check}.  This just sets up some
+environment variables and invokes DejaGNU's @code{runtest} script.  While
+the testsuite is running, you'll get mentions of which test file is in use,
+and a mention of any unexpected passes or fails.  When the testsuite is
+finished, you'll get a summary that looks like this:
+@example
+                === gdb Summary ===
+
+# of expected passes            6016
+# of unexpected failures        58
+# of unexpected successes       5
+# of expected failures          183
+# of unresolved testcases       3
+# of untested testcases         5
+@end example
+The ideal test run consists of expected passes only; however, reality
+conspires to keep us from this ideal.  Unexpected failures indicate
+real problems, whether in GDB or in the testsuite.  Expected failures
+are still failures, but ones which have been decided are too hard to
+deal with at the time; for instance, a test case might work everywhere
+except on AIX, and there is no prospect of the AIX case being fixed in
+the near future.  Expected failures should not be added lightly, since
+you may be masking serious bugs in GDB.  Unexpected successes are expected
+fails that are passing for some reason, while unresolved and untested
+cases often indicate some minor catastrophe, such as the compiler being
+unable to deal with a test program.
+
+When making any significant change to GDB, you should run the testsuite
+before and after the change, to confirm that there are no regressions.
+Note that truly complete testing would require that you run the
+testsuite with all supported configurations and a variety of compilers;
+however this is more than really necessary.  In many cases testing with
+a single configuration is sufficient.  Other useful options are to test
+one big-endian (Sparc) and one little-endian (x86) host, a cross config
+with a builtin simulator (powerpc-eabi, mips-elf), or a 64-bit host
+(Alpha).
+
+If you add new functionality to GDB, please consider adding tests for it
+as well; this way future GDB hackers can detect and fix their changes
+that break the functionality you added.  Similarly, if you fix a bug
+that was not previously reported as a test failure, please add a test
+case for it.  Some cases are extremely difficult to test, such as code
+that handles host OS failures or bugs in particular versions of
+compilers, and it's OK not to try to write tests for all of those.
+
+@section Testsuite Organization
+
+The testsuite is entirely contained in @file{gdb/testsuite}.  While the
+testsuite includes some makefiles and configury, these are very minimal,
+and used for little besides cleaning up, since the tests themselves
+handle the compilation of the programs that GDB will run.  The file
+@file{testsuite/lib/gdb.exp} contains common utility procs useful for
+all GDB tests, while the directory @file{testsuite/config} contains
+configuration-specific files, typically used for special-purpose
+definitions of procs like @code{gdb_load} and @code{gdb_start}.
+
+The tests themselves are to be found in @file{testsuite/gdb.*} and
+subdirectories of those.  The names of the test files must always end
+with @file{.exp}.  DejaGNU collects the test files by wildcarding
+in the test directories, so both subdirectories and individual files
+get chosen and run in alphabetical order.
+
+The following table lists the main types of subdirectories and what they
+are for.  Since DejaGNU finds test files no matter where they are
+located, and since each test file sets up its own compilation and
+execution environment, this organization is simply for convenience and
+intelligibility.
+
+@table @code
+
+@item gdb.base
+
+This is the base testsuite.  The tests in it should apply to all
+configurations of GDB (but generic native-only tests may live here).
+The test programs should be in the subset of C that is valid K&R,
+ANSI/ISO, and C++ (ifdefs are allowed if necessary, for instance
+for prototypes).
+
+@item gdb.@var{lang}
+
+Language-specific tests for all languages besides C.  Examples are
+@file{gdb.c++} and @file{gdb.java}.
+
+@item gdb.@var{platform}
+
+Non-portable tests.  The tests are specific to a specific configuration
+(host or target), such as HP-UX or eCos.  Example is @file{gdb.hp}, for
+HP-UX.
+
+@item gdb.@var{compiler}
+
+Tests specific to a particular compiler.  As of this writing (June
+1999), there aren't currently any groups of tests in this category that
+couldn't just as sensibly be made platform-specific, but one could
+imagine a gdb.gcc, for tests of GDB's handling of GCC extensions.
+
+@item gdb.@var{subsystem}
+
+Tests that exercise a specific GDB subsystem in more depth.  For
+instance, @file{gdb.disasm} exercises various disassemblers, while
+@file{gdb.stabs} tests pathways through the stabs symbol reader.
+
+@end table
+
+@section Writing Tests
+
+In many areas, the GDB tests are already quite comprehensive; you
+should be able to copy existing tests to handle new cases.
+
+You should try to use @code{gdb_test} whenever possible, since it
+includes cases to handle all the unexpected errors that might happen.
+However, it doesn't cost anything to add new test procedures; for
+instance, @file{gdb.base/exprs.exp} defines a @code{test_expr} that
+calls @code{gdb_test} multiple times.
+
+Only use @code{send_gdb} and @code{gdb_expect} when absolutely
+necessary, such as when GDB has several valid responses to a command.
+
+The source language programs do @emph{not} need to be in a consistent
+style.  Since GDB is used to debug programs written in many different
+styles, it's worth having a mix of styles in the testsuite; for
+instance, some GDB bugs involving the display of source lines would
+never manifest themselves if the programs used GNU coding style
+uniformly.
 
 @node Hints
 

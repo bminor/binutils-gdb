@@ -217,26 +217,25 @@ gdb_expect {
     timeout           { fail "(timeout) call str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")" }
   }
 
-#print str_func(s,s,s,s,s,s,s,s)
-send_gdb "print  str_func(s,s,s,s,s,s,s,s)\n"
+#print str_func(s,s,s,s,s,s,s)
+send_gdb "print  str_func(s,s,s,s,s,s,s)\n"
 gdb_expect {
     -re "first string arg is: test string\[ \t\r\n\]+second string arg is: test string\[ \t\r\n\]+third string arg is: test string\[ \t\r\n\]+fourth string arg is: test string\[ \t\r\n\]+fifth string arg is: test string\[ \t\r\n\]+sixth string arg is: test string\[ \t\r\n\]+seventh string arg is: test string\[ \t\r\n\]+.*\"test stringtest stringtest stringtest stringtest stringtest stringtest string\".*$gdb_prompt $" {
-        pass "print str_func(s,s,s,s,s,s,s,s)"
+        pass "print str_func(s,s,s,s,s,s,s)"
       }
-    -re ".*$gdb_prompt $" { fail "print str_func(s,s,s,s,s,s,s,s)" }
-    timeout           { fail "(timeout) print str_func(s,s,s,s,s,s,s,s)" }
+    -re ".*$gdb_prompt $" { fail "print str_func(s,s,s,s,s,s,s)" }
+    timeout           { fail "(timeout) print str_func(s,s,s,s,s,s,s)" }
   }
 
-#call str_func(s,s,s,s,s,s,s,s)
-send_gdb "call  str_func(s,s,s,s,s,s,s,s)\n"
+#call str_func(s,s,s,s,s,s,s)
+send_gdb "call  str_func(s,s,s,s,s,s,s)\n"
 gdb_expect {
     -re "first string arg is: test string\[ \t\r\n\]+second string arg is: test string\[ \t\r\n\]+third string arg is: test string\[ \t\r\n\]+fourth string arg is: test string\[ \t\r\n\]+fifth string arg is: test string\[ \t\r\n\]+sixth string arg is: test string\[ \t\r\n\]+seventh string arg is: test string\[ \t\r\n\]+.*\"test stringtest stringtest stringtest stringtest stringtest stringtest string\".*$gdb_prompt $" {
-        pass "call str_func(s,s,s,s,s,s,s,s)"
+        pass "call str_func(s,s,s,s,s,s,s)"
       }
-    -re ".*$gdb_prompt $" { fail "call str_func(s,s,s,s,s,s,s,s)" }
-    timeout           { fail "(timeout) call str_func(s,s,s,s,s,s,s,s)" }
+    -re ".*$gdb_prompt $" { fail "call str_func(s,s,s,s,s,s,s)" }
+    timeout           { fail "(timeout) call str_func(s,s,s,s,s,s,s)" }
   }
 
 gdb_exit
 return 0
-~

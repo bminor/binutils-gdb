@@ -1,5 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -3770,7 +3770,6 @@ init_main ()
 
   /* Set the important stuff up for command editing.  */
   command_editing_p = 1;
-  async_command_editing_p = 1;
   history_expansion_p = 0;
   write_history_p = 0;
 

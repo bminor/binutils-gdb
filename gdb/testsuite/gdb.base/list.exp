@@ -84,6 +84,8 @@ proc set_listsize { arg } {
 
 proc test_listsize {} {
     global gdb_prompt
+    global hp_cc_compiler
+    global hp_aCC_compiler
 
     # Show default size
 
@@ -101,10 +103,10 @@ proc test_listsize {} {
 
     # Ensure we can limit printouts to one line
 
-    if [ set_listsize 1 ] then {
-	setup_xfail "*-*-*"
+    if [set_listsize 1] {
+        if {!$hp_cc_compiler && !$hp_aCC_compiler} { setup_xfail "*-*-*" }
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"" "list line 1 with listsize 1"
-	setup_xfail "*-*-*"
+        if {!$hp_cc_compiler && !$hp_aCC_compiler} { setup_xfail "*-*-*" }
 	gdb_test "list 2" "2\[ \t\]+" "list line 2 with listsize 1"
     }    
 
@@ -113,7 +115,7 @@ proc test_listsize {} {
     if [ set_listsize 2 ] {
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"" "list line 1 with listsize 2"
 	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\"\r\n2\[ \t\]+" "list line 2 with listsize 2"
-	gdb_test "list 3" "2\[ \t\]+\r\n3\[ \t\]+main \[)(\]+" "list line 3 with listsize 2"
+	gdb_test "list 3" "2\[ \t\]+\r\n3\[ \t\]+int main \[)(\]+" "list line 3 with listsize 2"
     }
 
     # Try small listsize > 1 that is an odd number
@@ -121,18 +123,18 @@ proc test_listsize {} {
     if [ set_listsize 3 ] {
 	setup_xfail "*-*-*"
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"2\[ \t\]+" "list line 1 with listsize 3"
-	setup_xfail "*-*-*"
-	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\".*3\[ \t\]+main \[)(\]+" "list line 2 with listsize 3"
+        if {!$hp_cc_compiler && !$hp_aCC_compiler} { setup_xfail "*-*-*" }
+	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\".*3\[ \t\]+int main \[)(\]+" "list line 2 with listsize 3"
 	
-	setup_xfail "*-*-*"
-	gdb_test "list 3" "2\[ \t\]+\r\n3\[ \t\]+main \[(\]+\[)\]+\r\n4\[ \t\]+\{" "list line 3 with listsize 3"
+        if {!$hp_cc_compiler && !$hp_aCC_compiler} { setup_xfail "*-*-*" }
+	gdb_test "list 3" "2\[ \t\]+\r\n3\[ \t\]+int main \[(\]+\[)\]+\r\n4\[ \t\]+\{" "list line 3 with listsize 3"
     }
 
     # Try small listsize > 2 that is an even number.
 
     if [ set_listsize 4 ] then {
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"\r\n2\[ \t\]+" "list line 1 with listsize 4"
-	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\".*3\[ \t\]+main \[)(\]+" "list line 2 with listsize 4"
+	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\".*3\[ \t\]+int main \[)(\]+" "list line 2 with listsize 4"
 	
 	gdb_test "list 3" "1\[ \t\]+#include \"list0.h\".*4\[ \t\]+\{" "list line 3 with listsize 4"
 	gdb_test "list 4" "2\[ \t\]+\r\n.*5\[ \t\]+int x;.*" "list line 4 with listsize 4"
@@ -141,9 +143,9 @@ proc test_listsize {} {
     # Try a size larger than the entire file.
 
     if [ set_listsize 100 ] then {
-	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\".*\r\n42\[ \t\]+\}" "list line 1 with listsize 100"
+	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\".*\r\n4\[23\]\[ \t\]+\}" "list line 1 with listsize 100"
 	
-	gdb_test "list 10" "1\[ \t\]+#include \"list0.h\".*\r\n42\[ \t\]+\}" "list line 10 with listsize 100"
+	gdb_test "list 10" "1\[ \t\]+#include \"list0.h\".*\r\n4\[23\]\[ \t\]+\}" "list line 10 with listsize 100"
     }
 
     # Try listsize of 0 which suppresses printing.
@@ -168,12 +170,12 @@ proc test_list_include_file {} {
     setup_xfail "a29k-*-udi"
     setup_xfail_format "DWARF 1"
     setup_xfail_format "COFF"
-    gdb_test "list list0.h:1" "1\[ \t\]+/\[*\]+ An include file .*5\[ \t\]+foo \[(\]+x\[)\]+" "list line 1 in include file"
+    gdb_test "list list0.h:1" "1\[ \t\]+/\[*\]+ An include file .*4\[ \t\]+.*foo \(.*x.*\).*" "list line 1 in include file"
 
     setup_xfail "a29k-*-udi"
     setup_xfail_format "DWARF 1"
     setup_xfail_format "COFF"
-    gdb_test "list list0.h:100" "Line number 95 out of range; .*list0.h has 36 lines." "list message for lines past EOF"
+    gdb_test "list list0.h:100" "Line number 95 out of range; .*list0.h has 3\[67\] lines." "list message for lines past EOF"
 }
 
 #
@@ -203,7 +205,7 @@ proc test_list_filename_and_number {} {
     }
     send_gdb "list list1.c:1\n"
     gdb_expect {
-	-re "1\[ \t\]+void.*5\[ \t\]+printf \[(\]+.*\[)\]+;\r\n$gdb_prompt $" {
+	-re "1\[ \t\]+\#include.*4\[ \t\]+.*int oof\[ \t\]*\(.*\);\r\n.*$gdb_prompt $" {
 	    incr testcnt 
 	}
 	-re ".*$gdb_prompt $" { fail "list list1.c:1" ; gdb_suppress_tests }
@@ -211,7 +213,7 @@ proc test_list_filename_and_number {} {
     }
     send_gdb "list list1.c:12\n"
     gdb_expect {
-	-re "7\[ \t\]+long_line \[(\]+.*\[)\]+;.*14\[ \t\]+\}\r\n.*$gdb_prompt $" {
+	-re "12\[ \t\]+long_line \[(\]+.*\[)\]+;.*13\[ \t\]+\}\r\n.*$gdb_prompt $" {
 	    incr testcnt 
 	}
 	-re ".*$gdb_prompt $" { fail "list list1.c:12" ; gdb_suppress_tests }
@@ -237,7 +239,7 @@ proc test_list_function {} {
 
     # Ultrix gdb takes the second case below; it's also correct.
     # SunPRO cc is the third case.
-    gdb_test "list bar" "(1\[ \t\]+void.*7\[ \t\]*long_line ..;.*9\[ \t\]*|1\[ \t\]+void.*8\[ \t\]+\}|1\[ \t\]+void.*7\[ \t\]*long_line ..;)" "list function in source file 2"
+    gdb_test "list bar" "(4\[ \t\]+void.*\[ \t\]*long_line.*;.*bar.*9\[ \t\]*.*|1\[ \t\]+void.*8\[ \t\]+\}|1\[ \t\]+void.*7\[ \t\]*long_line ..;|7\[ \t\]+void.*14\[ \t\]+\})" "list function in source file 2"
 
     # Test "list function" for C include file
     # Ultrix gdb is the second case, still correct.
@@ -275,7 +277,7 @@ proc test_list_forward {} {
 
     send_gdb "list\n"
     gdb_expect {
-	-re "35\[ \t\]+foo \[(\]+.*\[)\]+;.*42\[ \t\]+\}\r\n$gdb_prompt $" { incr testcnt }
+	-re "35\[ \t\]+foo \\(.*\\);.*42\[ \t\]+.*\}\r\n$gdb_prompt $" { incr testcnt }
 	-re ".*$gdb_prompt $" { fail "list 35-42" ; gdb_suppress_tests }
 	timeout { fail "list 35-42 (timeout)" ; gdb_suppress_tests }
     }
@@ -291,7 +293,7 @@ proc test_list_backwards {} {
 
     send_gdb "list list0.c:33\n"
     gdb_expect {
-	-re "28\[ \t\]+foo \[(\]+.*\[)\]+;.*37\[ \t\]+\r\n$gdb_prompt $" { incr testcnt }
+	-re "28\[ \t\]+foo \\(.*\\);.*37\[ \t\]+\}\r\n$gdb_prompt $" { incr testcnt }
 	-re ".*$gdb_prompt $" { fail "list list0.c:33" ; gdb_suppress_tests }
 	timeout { fail "list list0.c:33 (timeout)" ; gdb_suppress_tests }
     }
@@ -328,17 +330,17 @@ proc test_list_backwards {} {
 proc test_list_range {} {
     global gdb_prompt
 
-    gdb_test "list list0.c:2,list0.c:5" "2\[ \t\]+\r\n3\[ \t\]+main \[)(\]+.*5\[ \t\]+int x;" "list range; filename:line1,filename:line2"
+    gdb_test "list list0.c:2,list0.c:5" "2\[ \t\]+\r\n3\[ \t\]+int main \[)(\]+.*5\[ \t\]+int x;" "list range; filename:line1,filename:line2"
 
-    gdb_test "list 2,5" "2\[ \t\]+\r\n3\[ \t\]+main \[)(\]+.*5\[ \t\]+int x;" "list range; line1,line2"
+    gdb_test "list 2,5" "2\[ \t\]+\r\n3\[ \t\]+int main \[)(\]+.*5\[ \t\]+int x;" "list range; line1,line2"
 
 #    gdb_test     "list -1,6" 	"Line number 0 out of range; .*list0.c has 39 lines." "list range; lower bound negative"
 
 #    gdb_test     "list -100,-40" 	"Line number -60 out of range; .*list0.c has 39 lines." "list range; both bounds negative"
 
-    gdb_test "list 30,43" "30\[ \t\]+foo \[(\]+.*\[)\]+;.*42\[ \t\]+\}" "list range; upper bound past EOF"
+    gdb_test "list 30,45" "30\[ \t\]+foo \(.*\);.*43\[ \t\]+\}" "list range; upper bound past EOF"
 
-    gdb_test "list 43,100" "Line number 43 out of range; .*list0.c has 42 lines." "list range; both bounds past EOF"
+    gdb_test "list 45,100" "Line number 45 out of range; .*list0.c has 43 lines." "list range; both bounds past EOF"
 
     gdb_test "list list0.c:2,list1.c:17" "Specified start and end are in different files." "list range, must be same files"
 }
@@ -375,7 +377,7 @@ proc test_list_filename_and_function {} {
     setup_xfail "rs6000-*-aix*"
     send_gdb "list list0.c:unused\n"
     gdb_expect {
-	-re "36\[ \t\]+\}.*42\[ \t\]+\}\r\n$gdb_prompt $" {
+	-re "40\[ \t\]+unused.*43\[ \t\]+\}\r\n$gdb_prompt $" {
 	    incr testcnt
 	}
 	-re "37.*42\[ \t\]+\}\r\n$gdb_prompt $" {
@@ -417,13 +419,13 @@ proc test_list_filename_and_function {} {
     # a29k-amd-udi is the third case.
     send_gdb "list list1.c:bar\n"
     gdb_expect {
-	-re "1\[ \t\]+void.*8\[ \t\]+\}\r\n$gdb_prompt $" {
+	-re "4\[ \t\]+void.*13\[ \t\]+\}\r\n$gdb_prompt $" {
 	    incr testcnt
 	}
-	-re "1\[ \t\]+void.*7\[ \t\]*long_line ..;\r\n$gdb_prompt $" {
+	-re "4\[ \t\]+void.*12\[ \t\]*long_line ..;\r\n$gdb_prompt $" {
 	    incr testcnt
 	}
-	-re "1\[ \t\]+void.*9\[ \t\]*\r\n$gdb_prompt $" {
+	-re "4\[ \t\]+void.*11\[ \t\]*\r\n$gdb_prompt $" {
 	    incr testcnt
 	}
 	-re ".*$gdb_prompt $" { fail "list list1.c:bar" }
@@ -437,10 +439,10 @@ proc test_list_filename_and_function {} {
     setup_xfail "rs6000-*-aix*"
     send_gdb "list list1.c:unused\n"
     gdb_expect {
-	-re "7\[ \t\]+long_line \[(\]\[)\];.*14\[ \t\]+\}\r\n.*$gdb_prompt $" {
+	-re "12\[ \t\]+long_line \[(\]\[)\];.*13\[ \t\]+\}\r\n.*$gdb_prompt $" {
 	    incr testcnt
 	}
-	-re "9.*14\[ \t\]+\}\r\n.*$gdb_prompt $" {
+	-re "14.*19\[ \t\]+\}\r\n.*$gdb_prompt $" {
 	    incr testcnt
 	}
 	-re ".*$gdb_prompt $" { fail "list list1.c:unused" }
@@ -463,10 +465,10 @@ proc test_list_filename_and_function {} {
 
     gdb_test "list list0.c:foo" "Function \"foo\" not defined in .*list0.c" "list filename:function; wrong filename rejected"
 
-    gdb_test "list foobar.c:main" "No source file named foobar.c." "list filename:function; nonexistant file"
+    gdb_test "list foobar.c:main" "No source file named foobar.c.|Location not found" "list filename:function; nonexistant file"
 
     setup_xfail_format "DWARF 1"
-    gdb_test "list list0.h:foobar" "Function \"foobar\" not defined." "list filename:function; nonexistant function"
+    gdb_test "list list0.h:foobar" "Function \"foobar\" not defined.|Location not found" "list filename:function; nonexistant function"
 
 }
 
@@ -478,11 +480,11 @@ proc test_forward_search {} {
 	# lines 20-23.  This depends on whether the line number of a function
 	# is considered to be the openbrace or the first statement--either one
 	# is acceptable.
-	gdb_test "list long_line" "20\[ \t\]+long_line .*"
+	gdb_test "list long_line" "24\[ \t\]+long_line .*"
 
 	gdb_test "search 4321" " not found"
 
-	gdb_test "search 6789" "24\[ \t\]+oof .6789.;"
+	gdb_test "search 6789" "28\[ \t\]+oof .6789.;"
 
 	# Test that GDB won't crash if the line being searched is extremely long.
 
@@ -519,3 +521,5 @@ if [ set_listsize 10 ] then {
     test_list_filename_and_function
     test_forward_search
 }
+
+remote_exec build "rm -f list0.h"

@@ -279,7 +279,7 @@ do { \
 #define SEM_BRANCH_INIT \
   int taken_p = 0;
 
-#ifndef TARGET_SEM_BRANCH_FINI(pcvar, taken_p)
+#ifndef TARGET_SEM_BRANCH_FINI
 #define TARGET_SEM_BRANCH_FINI(pcvar, taken_p)
 #endif
 #define SEM_BRANCH_FINI(pcvar) \

@@ -37,6 +37,7 @@ man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
 infodir = $(prefix)/info
+htmldir = $(prefix)/html
 includedir = $(prefix)/include
 
 SHELL = /bin/sh
@@ -159,6 +160,8 @@ installcheck:
 check:
 info dvi:
 install-info:
+html:
+install-html:
 clean-info:
 
 gdbserver: $(OBS) ${ADD_DEPS} ${CDEPS}

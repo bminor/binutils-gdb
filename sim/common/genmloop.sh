@@ -463,8 +463,6 @@ static INLINE SCACHE *
      fetch and decode the instruction.  */
   if (sc->argbuf.addr != vpc)
     {
-      insn_t insn;
-
       if (FAST_P)
 	PROFILE_COUNT_SCACHE_MISS (current_cpu);
 
@@ -771,7 +769,8 @@ cat << EOF
 	++sc;
       }
 
-      /* Update the pointer to the next free entry.  */
+      /* Update the pointer to the next free entry, may not have used as
+	 many entries as was asked for.  */
       CPU_SCACHE_NEXT_FREE (current_cpu) = sc;
       /* Record length of chain if profiling.
 	 This includes virtual insns since they count against
@@ -827,8 +826,6 @@ INLINE SEM_PC
 @cpu@_pbb_cti_chain (SIM_CPU *current_cpu, SEM_ARG sem_arg,
 		     SEM_PC *new_vpc_ptr, PCADDR new_pc)
 {
-  ARGBUF *abuf;
-
   PBB_UPDATE_INSN_COUNT (current_cpu, sem_arg);
 
   /* If not running forever, exit back to main loop.  */
@@ -854,7 +851,7 @@ INLINE SEM_PC
      next chain ptr.  */
   if (new_vpc_ptr == SEM_BRANCH_UNTAKEN)
     {
-      abuf = SEM_ARGBUF (sem_arg);
+      ARGBUF *abuf = SEM_ARGBUF (sem_arg);
       SET_H_PC (abuf->addr);
       new_vpc_ptr = &abuf->fields.chain.next;
     }

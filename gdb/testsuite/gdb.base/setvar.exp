@@ -329,8 +329,12 @@ gdb_test "print *(v_signed_short_pointer+1)" ".\[0-9\]*.*=.*-456"
 gdb_test "set v_unsigned_short_pointer=v_unsigned_short_array" ""
 gdb_test "set variable *(v_unsigned_short_pointer)=123" ""
 gdb_test "set variable *(v_unsigned_short_pointer+1)=-456" ""
+# DTS 10060CLLbs - bad type info from cc
+if {$hp_cc_compiler} {setup_xfail hppa*-*-*11*}
 gdb_test "print v_unsigned_short_array" ".\[0-9\]* =.*\{123,.*65080\}" \
     "set variable unsigned short pointer"
+# DTS 10060CLLbs - bad type info from cc
+if {$hp_cc_compiler} {setup_xfail hppa*-*-*11*}
 gdb_test "print *(v_unsigned_short_pointer+1)" ".\[0-9\]* = 65080"
 #
 # test "set variable" for type "int *"
@@ -385,6 +389,8 @@ v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\}" \
 # the type of the structure to be specified, as in
 # v_struct1 = (struct t_struct) {32, 33, 34, 35, 36, 37}
 # GDB should do the same if it wants to provide this feature.
+# However, for HP's aCC this is OK, so we skip the tests for aCC
+if {! $hp_aCC_compiler} {
 if [target_info exists gdb,cannot_call_functions] {
     setup_xfail "*-*-*" 2416
     fail "set variable v_struct1 = {32, 33, 34, 35, 36, 37}"
@@ -398,6 +404,7 @@ gdb_test "print v_struct1" \
 .*v_int_member = 2,.*\
 v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\}" \
   "set print structure #2"
+}
 
 # Test printing of enumeration bitfields.
 # GNU C supports them, some other compilers don't.

@@ -245,7 +245,7 @@ extern void generic_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR
 					    int nargs, struct value **args,
 					    struct type *type, int gcc_p));
 
-#ifdef __GNUC__
+#ifdef __STDC__
 /* Some native compilers, even ones that are supposed to be ANSI and for which __STDC__
    is true, complain about forward decls of enums. */
 enum lval_type;

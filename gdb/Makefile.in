@@ -39,6 +39,7 @@ man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
 infodir = @infodir@
+htmldir = $(prefix)/html
 includedir = @includedir@
 
 # This can be referenced by `INTLDEPS' as computed by CY_GNU_GETTEXT.
@@ -88,6 +89,10 @@ YLWRAP = $(srcdir)/../ylwrap
 
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
+
+MAKEHTML = texi2html
+
+MAKEHTMLFLAGS = -glossary -menu -split_chapter
 
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefined references.
@@ -219,7 +224,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990621
+VERSION = 19990628
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -276,6 +281,8 @@ FLAGS_TO_PASS = \
 	"DLLTOOL=$(DLLTOOL)" \
 	"RANLIB=$(RANLIB)" \
 	"MAKEINFO=$(MAKEINFO)" \
+	"MAKEHTML=$(MAKEHTML)" \
+	"MAKEHTMLFLAGS=$(MAKEHTMLFLAGS)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
@@ -358,6 +365,7 @@ TARGET_FLAGS_TO_PASS = \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"MAKEINFO=$(MAKEINFO)" \
+	"MAKEHTML=$(MAKEHTML)" \
 	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
 
@@ -557,7 +565,7 @@ check: force
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check; \
 	else true; fi
 
-info dvi install-info clean-info: force
+info dvi install-info clean-info html install-html: force
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 gdb.z:gdb.1
@@ -986,7 +994,7 @@ alpha-nat.o: alpha-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(symtab_h) $(dis-asm.h) gdb_string.h
 
-altos-xdep.o: altos-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
+# OBSOLETE altos-xdep.o: altos-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 annotate.o: annotate.c $(defs_h) annotate.h $(value_h) target.h $(gdbtypes_h)
 
@@ -1048,11 +1056,11 @@ command.o: command.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 
 complaints.o: complaints.c complaints.h $(defs_h) $(gdbcmd_h)
 
-convex-tdep.o: convex-tdep.c $(wait_h) $(defs_h) $(gdbcmd_h) \
-	$(gdbcore_h) $(inferior_h)
+# OBSOLETE convex-tdep.o: convex-tdep.c $(wait_h) $(defs_h) $(gdbcmd_h) \
+# OBSOLETE	$(gdbcore_h) $(inferior_h)
 
-convex-xdep.o: convex-xdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h)
+# OBSOLETE convex-xdep.o: convex-xdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
+# OBSOLETE	$(inferior_h)
 
 copying.o: copying.c $(defs_h) $(gdbcmd_h)
 

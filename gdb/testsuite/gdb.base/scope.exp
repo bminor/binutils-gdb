@@ -59,6 +59,7 @@ proc test_at_main {} {
     global srcdir
     global subdir
     global gcc_compiled
+    global hp_cc_compiler
 
     # skip past init.  There may be a call to __main at the start of
     # main, so the first next may only get us to the init0 call.
@@ -111,6 +112,8 @@ proc test_at_main {} {
     # Print scope1.c::filelocal, which is 2
 
     if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    #DTS 11747CLLbs
+    if {$hp_cc_compiler} then { setup_xfail "hppa2.0w-*-*"}
     if [gdb_test "print 'scope1.c'::filelocal" "\\\$$decimal = 2" "print 'scope1.c'::filelocal"  "No symbol \"scope1.c\" in current context.*" "print '$srcdir/$subdir/scope1.c'::filelocal"] { 
       gdb_suppress_tests ; 
     }
@@ -119,6 +122,8 @@ proc test_at_main {} {
     # Print scope1.c::filelocal_bss, which is 102
 
     if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    #DTS 11747CLLbs
+    if {$hp_cc_compiler} then { setup_xfail "hppa2.0w-*-*"}
     if [gdb_test "print 'scope1.c'::filelocal_bss" "\\\$$decimal = 102" "print 'scope1.c'::filelocal_bss"  "No symbol \"scope1.c\" in current context.*" "print '$srcdir/$subdir/scope1.c'::filelocal_bss"] { 
       gdb_suppress_tests ; 
     }
@@ -127,6 +132,8 @@ proc test_at_main {} {
     # Print scope1.c::filelocal_ro, which is 202
 
     if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    #DTS 11747CLLbs
+    if {$hp_cc_compiler} then { setup_xfail "hppa2.0w-*-*"}
     if [gdb_test "print 'scope1.c'::filelocal_ro" "\\\$$decimal = 202" "print 'scope1.c'::filelocal_ro"  "No symbol \"scope1.c\" in current context.*" "print '$srcdir/$subdir/scope1.c'::filelocal_ro"] { 
       gdb_suppress_tests ; 
     }
@@ -134,7 +141,6 @@ proc test_at_main {} {
 
     # Print scope1.c::foo::funclocal, which is 3
 
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     if [gdb_test "print foo::funclocal" "\\\$$decimal = 3" "print foo::funclocal" ] { 
       gdb_suppress_tests ; 
     }
@@ -238,12 +244,10 @@ proc test_at_foo {} {
 
     gdb_test "print funclocal" "\\\$$decimal = 3" "print funclocal at foo"
 
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     gdb_test "print foo::funclocal" "\\\$$decimal = 3" \
 	"print foo::funclocal at foo"
 
     if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     gdb_test "print 'scope1.c'::foo::funclocal" "\\\$$decimal = 3" "print 'scope1.c'::foo::funclocal at foo"  "No symbol \"scope1.c\" in current context.*" "print '$srcdir/$subdir/scope1.c'::foo::funclocal"
 
 
@@ -252,12 +256,10 @@ proc test_at_foo {} {
     gdb_test "print funclocal_bss" "\\\$$decimal = 103" \
 	"print funclocal_bss at foo"
 
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     gdb_test "print foo::funclocal_bss" "\\\$$decimal = 103" \
 	"print foo::funclocal_bss at foo"
 
     if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     gdb_test "print 'scope1.c'::foo::funclocal_bss" "\\\$$decimal = 103" "print 'scope1.c'::foo::funclocal_bss at foo"  "No symbol \"scope1.c\" in current context.*" "print '$srcdir/$subdir/scope1.c'::foo::funclocal_bss"
 
 
@@ -266,23 +268,19 @@ proc test_at_foo {} {
     gdb_test "print funclocal_ro" "\\\$$decimal = 203" \
 	"print funclocal_ro at foo"
 
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     gdb_test "print foo::funclocal_ro" "\\\$$decimal = 203" \
 	"print foo::funclocal_ro at foo"
 
     if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     gdb_test "print 'scope1.c'::foo::funclocal_ro" "\\\$$decimal = 203" "print 'scope1.c'::foo::funclocal_ro at foo"  "No symbol \"scope1.c\" in current context.*" "print '$srcdir/$subdir/scope1.c'::foo::funclocal_ro"
 
 
     # Print scope1.c::bar::funclocal, which is 4
 
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     gdb_test "print bar::funclocal" "\\\$$decimal = 4" \
 	"print bar::funclocal at foo"
 
     if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     gdb_test "print 'scope1.c'::bar::funclocal" "\\\$$decimal = 4" "print 'scope1.c'::bar::funclocal at foo"  "No symbol \"scope1.c\" in current context.*" "print '$srcdir/$subdir/scope1.c'::bar::funclocal"
     gdb_stop_suppressing_tests;
 
@@ -365,7 +363,6 @@ proc test_at_bar {} {
 
     # Print scope1.c::foo::funclocal, which is 3
 
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     if [gdb_test "print foo::funclocal" "\\\$$decimal = 3" "print foo::funclocal at bar" ] { 
       gdb_suppress_tests ; 
     }

@@ -72,28 +72,28 @@ if [runto inner] then {
     
     if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" "mips-sgi-irix6*" }
     gdb_test "p top" \
-	"{(<(text variable|function), no debug info>|short \\(\\))} \[0-9a-fx]* <top>"
+	"\{(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))\} \[0-9a-fx]* <top(\\(int\\)|)>"
     if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" "mips-sgi-irix6*" }
     gdb_test "whatis top" \
-	"(<(text variable|function), no debug info>|short \\(\\))"
+	"(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))"
     if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
-    gdb_test "ptype top" "(short|int) \\((|<non-float parameter>|<non-float parameter>, <non-float parameter>)\\)"
+    gdb_test "ptype top" "(short|int) \\((|void|int|<non-float parameter>|<non-float parameter>, <non-float parameter>)\\)"
     
     if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" }
     setup_xfail "mips-sgi-irix6*"
     gdb_test "p middle" \
-	"{(<(text variable|function), no debug info>|short \\(\\))} \[0-9a-fx]* <middle>"
+	"\{(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))\} \[0-9a-fx]* <middle(\\(int\\)|)>"
     if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" }
     setup_xfail "mips-sgi-irix6*"
     gdb_test "whatis middle" \
-	"(<(text variable|function), no debug info>|short \\(\\))"
+	"(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))"
     setup_xfail "mips-sgi-irix6*"
-    gdb_test "ptype middle" "(short|int) \\((|<non-float parameter>|<non-float parameter>, <non-float parameter>)\\)"
+    gdb_test "ptype middle" "(short|int) \\((|void|int|<non-float parameter>|<non-float parameter>, <non-float parameter>)\\)"
     
     gdb_test "p dataglobal" "= 3"
     gdb_test "whatis dataglobal" \
-	"<(data variable|variable), no debug info>"
-    gdb_test "ptype dataglobal" "<(data variable|variable), no debug info>"
+	"<(data variable|variable), no debug info>|int"
+    gdb_test "ptype dataglobal" "<(data variable|variable), no debug info>|int"
     
     # The only symbol xcoff puts out for statics is for the TOC entry.
     # Possible, but hairy, for gdb to deal.  Right now it doesn't, it
@@ -115,8 +115,8 @@ if [runto inner] then {
     gdb_test "ptype datalocal" "<(data variable|variable), no debug info>"
     
     gdb_test "p bssglobal" "= 0"
-    gdb_test "whatis bssglobal" "<(data variable|variable), no debug info>"
-    gdb_test "ptype bssglobal" "<(data variable|variable), no debug info>"
+    gdb_test "whatis bssglobal" "<(data variable|variable), no debug info>|int"
+    gdb_test "ptype bssglobal" "<(data variable|variable), no debug info>|int"
     
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
@@ -145,12 +145,27 @@ if [runto inner] then {
     
     # This test is not as obscure as it might look.  `p getenv ("TERM")'
     # is a real-world example, at least on many systems.
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" "mips-sgi-irix6*" }
+    if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
     if [target_info exists gdb,cannot_call_functions] {
 	setup_xfail "*-*-*" 2416
 	fail "p/c array_index(\"abcdef\",2)"
     } else {
-	gdb_test {p/c array_index("abcdef",2)} " = 99 'c'"
+	#
+	# On HP-UX, a support function (__d_plt_call) necessary to
+	# implement an inferior call is normally only available when
+	# the inferior was compiled with -g.  Thus, we expect this
+	# testpoint to fail on HP-UX.
+	if { [istarget "hppa*-hpux*"] } {
+	    send_gdb "p/c array_index(\"abcdef\",2)\n"
+	    gdb_expect {
+		-re ".*Suggest linking executable with -g.*$gdb_prompt $" { pass "p/c array_index(\"abcdef\",2)" }
+		-re ".*Cannot find __wdb_call_dummy in.*end.o.*" { pass "p/c array_index(\"abcdef\",2)" }
+		-re ".*99 'c'.*" { pass "p/c array_index(\"abcdef\",2)" }
+		timeout { fail "(timeout) p/c array_index" }
+	    }
+	} else {
+	    gdb_test {p/c array_index("abcdef",2)} " = 99 'c'"
+	}
     }
     
     # Now, try that we can give names of file-local symbols which happen

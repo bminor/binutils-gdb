@@ -45,7 +45,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    a power of two. */
 #define ROUND_DOWN(n,a) 	((n) & ~((a) - 1))
 #define ROUND_UP(n,a) 		(((n) + (a) - 1) & ~((a) - 1))
-  
+
+static char *APCS_register_names[] =
+{ "a1", "a2", "a3", "a4", /*  0  1  2  3 */
+  "v1", "v2", "v3", "v4", /*  4  5  6  7 */
+  "v5", "v6", "sl", "fp", /*  8  9 10 11 */
+  "ip", "sp", "lr", "pc", /* 12 13 14 15 */
+  "f0", "f1", "f2", "f3", /* 16 17 18 19 */
+  "f4", "f5", "f6", "f7", /* 20 21 22 23 */
+  "fps","ps" }            /* 24 25       */;
+
+/* These names are the ones which gcc emits, and 
+   I find them less confusing.  Toggle between them
+   using the `othernames' command. */
+static char *additional_register_names[] =
+{ "r0", "r1", "r2", "r3", /*  0  1  2  3 */
+  "r4", "r5", "r6", "r7",    /*  4  5  6  7 */
+  "r8", "r9", "r10", "r11",  /*  8  9 10 11 */
+  "r12", "r13", "r14", "pc", /* 12 13 14 15 */
+  "f0", "f1", "f2", "f3",    /* 16 17 18 19 */
+  "f4", "f5", "f6", "f7",    /* 20 21 22 23 */
+  "fps","ps" }               /* 24 25       */;
+
+/* By default use the APCS registers names */
+
+char **arm_register_names = APCS_register_names;
+
 /* Should call_function allocate stack space for a struct return?  */
 /* The system C compiler uses a similar structure return convention to gcc */
 int
@@ -1029,38 +1054,18 @@ arm_float_info ()
     print_fpu_flags (status);
 }
 
-static char *original_register_names[] =
-{ "a1", "a2", "a3", "a4", /*  0  1  2  3 */
-  "v1", "v2", "v3", "v4", /*  4  5  6  7 */
-  "v5", "v6", "sl", "fp", /*  8  9 10 11 */
-  "ip", "sp", "lr", "pc", /* 12 13 14 15 */
-  "f0", "f1", "f2", "f3", /* 16 17 18 19 */
-  "f4", "f5", "f6", "f7", /* 20 21 22 23 */
-  "fps","ps" }            /* 24 25       */;
-
-/* These names are the ones which gcc emits, and 
-   I find them less confusing.  Toggle between them
-   using the `othernames' command. */
-static char *additional_register_names[] =
-{ "r0", "r1", "r2", "r3", /*  0  1  2  3 */
-  "r4", "r5", "r6", "r7", /*  4  5  6  7 */
-  "r8", "r9", "sl", "fp", /*  8  9 10 11 */
-  "ip", "sp", "lr", "pc", /* 12 13 14 15 */
-  "f0", "f1", "f2", "f3", /* 16 17 18 19 */
-  "f4", "f5", "f6", "f7", /* 20 21 22 23 */
-  "fps","ps" }            /* 24 25       */;
-
-char **arm_register_names = original_register_names;
-
-
 static void
 arm_othernames ()
 {
-  static int toggle;
-  arm_register_names = (toggle
-			? additional_register_names
-			: original_register_names);
-  toggle = !toggle;
+
+  if (arm_register_names ==  APCS_register_names) { 
+    arm_register_names =  additional_register_names;
+    arm_toggle_regnames ();
+  } else {
+    arm_register_names =  APCS_register_names;
+    arm_toggle_regnames ();
+  }    
+    
 }
 
 /* FIXME:  Fill in with the 'right thing', see asm 
@@ -1616,8 +1621,15 @@ arm_skip_stub (pc)
 void
 _initialize_arm_tdep ()
 {
-  tm_print_insn = gdb_print_insn_arm;
+  int regname_is_APCS = (arm_register_names ==  APCS_register_names);
 
+  tm_print_insn = gdb_print_insn_arm;
+  
+  /* Sync the opcode insn printer with our register viewer: */
+
+  if (arm_toggle_regnames () != regname_is_APCS)
+    arm_toggle_regnames ();
+     
   add_com ("othernames", class_obscure, arm_othernames,
 	   "Switch to the other set of register names.");
 

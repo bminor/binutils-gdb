@@ -19,7 +19,7 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-# SAME tests as in callfuncs.exp but here the inferior program does not call malloc.
+# SAME tests as in callfns.exp but here the inferior program does not call malloc.
 
 
 
@@ -34,14 +34,8 @@ set testfile "callfuncs2"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-set prototypes 1
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    set prototypes 0;
-    # built the second test case since we can't use prototypes
-    warning "Prototypes not supported, rebuilding with -DNO_PROTOTYPES"
-    if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DNO_PROTOTYPES}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-    }
 }
 
 # Create and source the file that provides information about the compiler
@@ -51,6 +45,11 @@ if [get_compiler_info ${binfile}] {
     return -1;
 }
 
+if {$hp_aCC_compiler} {
+    set prototypes 1
+} else {
+    set prototypes 0
+}
 
 
 # The a29k can't call functions, so don't even bother with this test.
@@ -134,13 +133,13 @@ proc do_function_calls {} {
 	# Gcc emits different stabs for the two parameters; the first is
 	# claimed to be a float, the second a double.
 	# dbxout.c in gcc claims this is the desired behavior.
-	setup_xfail "mn10300-*-*"
+	setup_xfail "mn10300-*-*" "hppa*-*-*11*"
 	gdb_test "p t_float_values(3.14159,-2.3765)" " = 1"
-	setup_xfail "mn10300-*-*"
+	setup_xfail "mn10300-*-*" "hppa*-*-*11*"
 	gdb_test "p t_float_values(float_val1,float_val2)" " = 1"
-	setup_xfail "mn10300-*-*"
+	setup_xfail "mn10300-*-*" "hppa*-*-*11*"
 	gdb_test "p t_float_values(3.14159,float_val2)" " = 1"
-	setup_xfail "mn10300-*-*"
+	setup_xfail "mn10300-*-*" "hppa*-*-*11*"
 	gdb_test "p t_float_values(float_val1,-2.3765)" " = 1"
 
 	# Test passing of arguments which might not be widened.
@@ -149,7 +148,7 @@ proc do_function_calls {} {
 	# Although PR 5318 mentions SunOS specifically, this seems
 	# to be a generic problem on quite a few platforms.
 	if $prototypes then {
-	    setup_xfail "hppa*-*-*" "sparc-*-*" "mips*-*-*" 5318
+	    setup_xfail "sparc-*-*" "mips*-*-*" 5318
 	    if {!$gcc_compiled} then {
 		setup_xfail "alpha-dec-osf2*" "i*86-*-sysv4*" 5318
 	    }
@@ -193,7 +192,17 @@ proc do_function_calls {} {
     setup_xfail "powerpc*-*-*"
 
     if {!$gcc_compiled && [istarget hppa*-*-hpux*]} then {
-	gdb_test "p t_func_values(add,func_val2)" "You cannot.*ignored.*"
+        send_gdb "p t_func_values(add,func_val2)\n"
+        gdb_expect {
+          -re "You cannot.*ignored.*" {pass "p t_func_values(add,func_val2)"}
+          -re "Program received signal SIGBUS, Bus error.*" {
+            if [istarget hppa*-*-hpux*] {
+                pass "p t_func_values(add,func_val2)"
+            } else {
+                fail "p t_func_values(add,func_val2)"
+            }
+          }
+        }
     } else {
 	gdb_test "p t_func_values(add,func_val2)" " = 1"
     }
@@ -202,7 +211,17 @@ proc do_function_calls {} {
     setup_xfail "powerpc*-*-*"
 
     if {!$gcc_compiled && [istarget hppa*-*-hpux*]} then {
-	gdb_test "p t_func_values(func_val1,doubleit)" "You cannot.*ignored.*"
+        send_gdb "p t_func_values(func_val1,doubleit)\n"
+        gdb_expect {
+          -re "You cannot.*ignored.*" {pass "p t_func_values(func_val1,doubleit)"}
+          -re "Program received signal SIGBUS, Bus error.*" {
+            if [istarget hppa*-*-hpux*] {
+                pass "p t_func_values(func_val1,doubleit)"
+            } else {
+                fail "p t_func_values(func_val1,doubleit)"
+            }
+          }
+        }
     } else {
 	gdb_test "p t_func_values(func_val1,doubleit)" " = 1"
     }
@@ -213,7 +232,17 @@ proc do_function_calls {} {
     setup_xfail "powerpc*-*-*"
 
     if {!$gcc_compiled && [istarget hppa*-*-hpux*]} then {
-	gdb_test "p t_call_add(add,3,4)" "You cannot.*ignored.*"
+        send_gdb "p t_call_add(add,3,4)\n"
+        gdb_expect {
+          -re "You cannot.*ignored.*" {pass "p t_call_add(add,3,4)"}
+          -re "Program received signal SIGBUS, Bus error.*" {
+            if [istarget hppa*-*-hpux*] {
+                pass "p t_call_add(add,3,4)"
+            } else {
+                fail "p t_call_add(add,3,4)"
+            }
+          }
+        }
     } else {
 	gdb_test "p t_call_add(add,3,4)" " = 7"
     }
@@ -262,11 +291,23 @@ gdb_test "set print sevenbit-strings" ""
 gdb_test "set print address off" ""
 gdb_test "set width 0" ""
 
-if { ![set_lang_c] } {
-    gdb_suppress_tests;
-} else {
+if { $hp_aCC_compiler } {
+    # Do not set language explicitly to 'C'.  This will cause aCC
+    # tests to fail because promotion rules are different.  Just let
+    # the language be set to the default.
+
     if { ![runto_main] } {
 	gdb_suppress_tests;
+    }
+
+    gdb_test "set overload-resolution 0" ".*"
+} else {
+    if { ![set_lang_c] } {
+	gdb_suppress_tests;
+    } else {
+	if { ![runto_main] } {
+	    gdb_suppress_tests;
+	}
     }
 }
 

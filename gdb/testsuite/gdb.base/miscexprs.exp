@@ -44,6 +44,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
+if [get_compiler_info ${binfile}] {
+    return -1;
+}
 
 gdb_exit
 gdb_start
@@ -88,6 +91,9 @@ gdb_expect {
 send_gdb "print &cbig.c\[0\]\n"
 gdb_expect {
     -re ".\[0-9\]* = $hex \"\".*$gdb_prompt $" {
+        pass "print value of &cbig.c\[0\]"
+      }
+    -re ".\[0-9\]* = $hex \"*\".*$gdb_prompt $" {
         pass "print value of &cbig.c\[0\]"
       }
     -re ".*$gdb_prompt $" { fail "print value of &cbig.c\[0\]" }
@@ -158,7 +164,7 @@ gdb_expect {
 
 send_gdb "print !ibig.i\[100\]\n"
 gdb_expect {
-    -re ".\[0-9\]* = 0.*$gdb_prompt $" {
+    -re ".\[0-9\]* = $false.*$gdb_prompt $" {
         pass "print value of !ibig.i\[100\]"
       }
     -re ".*$gdb_prompt $" { fail "print value of !ibig.i\[100\]" }
@@ -167,7 +173,7 @@ gdb_expect {
 
 send_gdb "print !sbig.s\[90\]\n"
 gdb_expect {
-    -re ".\[0-9\]* = 0.*$gdb_prompt $" {
+    -re ".\[0-9\]* = $false.*$gdb_prompt $" {
         pass "print value of !sbig.s\[90\]"
       }
     -re ".*$gdb_prompt $" { fail "print value of !sbig.s\[90\]" }
@@ -177,7 +183,7 @@ gdb_expect {
 
 send_gdb "print !fbig.f\[100\]\n"
 gdb_expect {
-    -re ".\[0-9\]* = 0.*$gdb_prompt $" {
+    -re ".\[0-9\]* = $false.*$gdb_prompt $" {
         pass "print value of !ibig.i\[100\]"
       }
     -re ".*$gdb_prompt $" { fail "print value of !ibig.i\[100\]" }
@@ -186,7 +192,7 @@ gdb_expect {
 
 send_gdb "print !dbig.d\[202\]\n"
 gdb_expect {
-    -re ".\[0-9\]* = 0.*$gdb_prompt $" {
+    -re ".\[0-9\]* = $false.*$gdb_prompt $" {
         pass "print value of !ibig.i\[100\]"
       }
     -re ".*$gdb_prompt $" { fail "print value of !ibig.i\[100\]" }
@@ -224,7 +230,7 @@ gdb_expect {
 
 send_gdb "print !(sbig.s\[90\] * 2)\n"
 gdb_expect {
-    -re ".\[0-9\]* = 0.*$gdb_prompt $" {
+    -re ".\[0-9\]* = $false.*$gdb_prompt $" {
         pass "print value of !(sbig.s\[90\] * 2)"
       }
     -re ".*$gdb_prompt $" { fail "print value of !(sbig.s\[90\] * 2)" }
@@ -252,6 +258,18 @@ gdb_expect {
   }
 
 
+if [istarget "hppa2.0w*-*-*"] then {
+send_gdb "print sizeof(lbig)\n"
+gdb_expect {
+    -re ".\[0-9\]* = 7200.*$gdb_prompt $" {
+        pass "print value of sizeof(lbig)"
+      }
+    -re ".*$gdb_prompt $" { fail "print value of sizeof(lbig)" }
+    timeout           { fail "(timeout) print value of sizeof(lbig)" }
+  }
+}
+
+if ![istarget "hppa2.0w*-*-*"] then {
 send_gdb "print sizeof(lbig)\n"
 gdb_expect {
     -re ".\[0-9\]* = 3600.*$gdb_prompt $" {
@@ -260,6 +278,7 @@ gdb_expect {
     -re ".*$gdb_prompt $" { fail "print value of sizeof(lbig)" }
     timeout           { fail "(timeout) print value of sizeof(lbig)" }
   }
+}
 
 send_gdb "print ibig.i\[100\] << 2\n"
 gdb_expect {

@@ -1,3 +1,109 @@
+1999-06-28  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* solib.c (clear_solib): Don't disable breakpoints if we're
+	running an a.out executable (Solaris's SunOS emulation).
+
+1999-06-25  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* main.c (main): Remove intialization of command_loop_hook, it
+	is now done in _initialize_event_loop().
+	* event-loop.c (gdb_do_one_event): Make static.
+	(start_event_loop): New function. Just start the event loop.
+	* event-top.c (cli_command_loop): New name for start_event_loop().
+	(gdb_readline2): Make non static.
+	(_initialize_event_loop): Set command_loop_hook to cli_command_loop.
+	* event-loop.h: Adjust exported functions accordingly.
+
+	* top.c (init_main): Move setting of async_command_editing_p from
+ 	here.  
+	* event-top.c (_initialize_event_loop): To here.
+	(change_line_handler): Revert previous change. Add comment.
+	(_initialize_event_loop): Revert previous change.
+	(cli_command_loop): New name for start_event_loop().
+	(start_event_loop): New function. This just starts up the event loop.
+	(gdb_readline2): Make non static.
+	(_initialize_event_loop): Set command_loop_hook to cli_command_loop.
+
+1999-06-25  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-top.c (change_line_handler): Get rid of the global
+ 	variable input_fd, use `fileno (instream)' instead.
+	(_initialize_event_loop): Ditto
+	
+	* event-loop.c (add_file_handler): New function. Wrapper for
+ 	create_file_handler.
+ 	(create_file_handler): Make static.  
+	* event-top.c (_initialize_event_loop): Call add_file_handler,
+ 	instead of create_file_handler.
+	(change_line_handler): Ditto.  
+	Remove poll.h include.
+	* event-loop.h: Export add_file_handler instead of
+ 	create_file_handler.	
+
+1999-06-24  Stan Shebs  <shebs@andros.cygnus.com>
+
+	Declare Altos configuration obsolete.
+	* configure.host, configure.tgt: Comment out Altos config.
+	* Makefile.in: Comment out Altos-related actions.
+	* altos-xdep.c, config/m68k/altos.mh, altos.mt, tm-altos.h,
+ 	xm-altos.h: Comment out.
+	* NEWS: Mention obsolete status.
+
+1999-06-24  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* Makefile.in: Add MAKEHTML and MAKEHTMLFLAGS; pass them down;
+	recognize html and install-html targets.
+	* gdbserver/Makefile.in: Add empty html and install-html targets.
+	* nlm/Makefile.in: Ditto.
+	* rdi-share/Makefile.in: Ditto.
+
+1999-06-24  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* ax-gdb.c (agent_command): Remove vestigial call to ax_reqs.
+
+1999-06-24  James Ingham  <jingham@leda.cygnus.com>
+
+	* arm-tdep.c (arm_othernames): Change both gdb's register display
+	AND the opcode disassembly register naming if the othernames
+	command.  Fixes the gdb part of CR 101177.
+
+1999-06-23  Stan Shebs  <shebs@andros.cygnus.com>
+
+	Declare Convex configuration obsolete.
+	* configure.host, configure.tgt: Comment out Convex configs.
+	* Makefile.in: Comment out Convex-related actions.
+	* convex-xdep.c, convex-tdep.c, config/convex/*: Comment out.
+	* NEWS: Mention obsolete status.
+
+1999-06-23  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* main.c: Turn on async by default by setting async_p to 1.
+
+Wed Jun 23 15:44:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Jimmy Guo <guo@cup.hp.com>:
+	* frame.h (enum lval_type): Delcare when an __STDC__ compiler.
+  	Reverts Mon Aug 11 16:08:52 1997 Fred Fish <fnf@cygnus.com>
+ 	change.
+	* utils.c (gdb_file_rewind, gdb_file_put): Fix.  A void function
+ 	does not return a result.
+
+Wed Jun 23 15:30:46 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (set_thread, remote_get_threadinfo,
+ 	remote_threads_info, remote_current_thread, remote_get_threadlist,
+ 	extended_remote_restart, get_offsets, remote_open_1,
+ 	remote_detach, remote_resume, remote_wait, remote_fetch_registers,
+ 	remote_store_registers, check_binary_download, remote_write_bytes,
+ 	remote_read_bytes, remote_search, putpkt_binary, putpkt_binary,
+ 	read_frame, compare_sections_command, remote_query,
+ 	packet_command, remote_info_process): Use alloca to create space
+ 	for arrays of size PBUFSIZ.
+
+1999-06-22  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* top.c: Update copyright years to include 1999.
+
 1999-06-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* top.c: Move include of event-loop.h, to avoid redefinition of

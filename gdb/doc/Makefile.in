@@ -23,6 +23,7 @@ VPATH = @srcdir@
 prefix = @prefix@
 
 infodir = @infodir@
+htmldir = $(prefix)/html
 
 SHELL = @SHELL@
 
@@ -38,6 +39,9 @@ TEXIDIR=${gdbdir}/../texinfo
 
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
+
+MAKEHTML = texi2html
+MAKEHTMLFLAGS = -glossary -menu -split_chapter
 
 # where to find texi2roff, ditto
 TEXI2ROFF=texi2roff
@@ -94,11 +98,17 @@ all install:
 info: gdb.info gdbint.info stabs.info
 dvi: gdb.dvi gdbint.dvi stabs.dvi refcard.dvi
 ps: gdb.ps gdbint.ps stabs.ps refcard.ps
+html: gdb_toc.html gdbint_toc.html stabs_toc.html
 all-doc: info dvi ps
 
 install-info: info
 	for i in *.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
+	done
+
+install-html: html
+	for i in *.html ; do \
+		$(INSTALL_DATA) $$i $(htmldir)/$$i ; \
 	done
 
 STAGESTUFF = *.info* gdb-all.texi GDBvn.texi *.ps *.dvi
@@ -152,7 +162,7 @@ distclean: clean
 # "clean" or "distclean".  Use maintainer-clean to remove them.
 
 maintainer-clean realclean: distclean
-	rm -f GDBvn.texi *.info* *.dvi *.ps
+	rm -f GDBvn.texi *.info* *.dvi *.ps *.html
 
 # GDB QUICK REFERENCE (dvi output)
 refcard.dvi : refcard.tex $(REFEDITS)
@@ -303,6 +313,11 @@ gdb.mm: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texi
 	sed -e 's/---/\\(em/g' \
 	>gdb.mm 
 
+# GDB MANUAL: HTML file
+
+gdb_toc.html: ${SFILES_DOC}
+	$(MAKEHTML) $(MAKEHTMLFLAGS) -I ${READLINE_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
+
 
 # GDB INTERNALS MANUAL: TeX dvi file
 gdbint.dvi : gdbint.texinfo
@@ -320,8 +335,18 @@ gdbint.ps : gdbint.dvi
 gdbint.info: gdbint.texinfo
 	$(MAKEINFO) -o gdbint.info $(srcdir)/gdbint.texinfo
 
+# GDB INTERNALS MANUAL: HTML file
+
+gdbint_toc.html: gdbint.texinfo
+	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/gdbint.texinfo
+
 stabs.info: stabs.texinfo
 	$(MAKEINFO) -o stabs.info $(srcdir)/stabs.texinfo
+
+# STABS DOCUMENTATION: HTML file
+
+stabs_toc.html: stabs.texinfo
+	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/stabs.texinfo
 
 # STABS DOCUMENTATION: TeX dvi file
 stabs.dvi : stabs.texinfo

@@ -1,3 +1,29 @@
+Fri Jun 25 11:47:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.texi (Communication Protocol): ``v'' is in use. Fix
+ 	numerous formatting errors.  Clarify ``i''.  Mark ``i'', ``Z'',
+ 	``z'' and ``qRcmd'' as draft instead of reserved.  Identify
+ 	packets that are not supported on all hosts. Expand examples.
+  	Spell check.
+
+1999-06-24  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* Makefile.in: Recognize html, install-html.  Add targets
+	to build HTML versions of documentation via texi2html.
+
+Thu Jun 24 15:59:03 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbint.texinfo (Testsuite): New chapter, information about the
+ 	testsuite.
+
+Fri Jun 25 02:40:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.texi (Communication Protocol): Rewrite.
+
+Thu Jun 24 16:59:54 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* stabs.texinfo: Fix uses of xref.
+
 Thu Jun 17 17:23:25 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdbint.texinfo: Add an anti-printf exhortation, and update the

@@ -1901,7 +1901,6 @@ agent_command (exp, from_tty)
   struct cleanup *old_chain = 0;
   struct expression *expr;
   struct agent_expr *agent;
-  struct agent_reqs reqs;
   struct frame_info *fi = get_current_frame ();	/* need current scope */
 
   /* We don't deal with overlay debugging at the moment.  We need to
@@ -1919,7 +1918,9 @@ agent_command (exp, from_tty)
   agent = gen_trace_for_expr (fi->pc, expr);
   make_cleanup ((make_cleanup_func) free_agent_expr, agent);
   ax_print (gdb_stdout, agent);
-  ax_reqs (agent, &reqs);
+
+  /* It would be nice to call ax_reqs here to gather some general info
+     about the expression, and then print out the result.  */
 
   do_cleanups (old_chain);
   dont_repeat ();

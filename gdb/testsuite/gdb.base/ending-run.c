@@ -2,15 +2,20 @@
  * <leaves-core-file-on-quit> bugs.
  */
 #include <stdio.h>
+#include <stdlib.h>
 
+#ifdef PROTOTYPES
+int callee (int x)
+#else
 int callee( x )
 int x;
+#endif
 {
     int y = x * x;
     return (y - 2);
 }
 
-main()
+int main()
 {
 
     int *p;
@@ -24,4 +29,5 @@ main()
             
         }
     printf( " Goodbye!\n" );
+    return 0;
 }

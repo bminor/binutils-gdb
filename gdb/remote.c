@@ -485,7 +485,7 @@ set_thread (th, gen)
      int th;
      int gen;
 {
-  char buf[PBUFSIZ];
+  char *buf = alloca (PBUFSIZ);
   int state = gen ? general_thread : continue_thread;
 
   if (state == th)
@@ -1059,7 +1059,7 @@ remote_get_threadinfo (threadid, fieldset, info)
      struct gdb_ext_thread_info *info;
 {
   int result;
-  char threadinfo_pkt[PBUFSIZ];
+  char *threadinfo_pkt = alloca (PBUFSIZ);
 
   pack_threadinfo_request (threadinfo_pkt, fieldset, threadid);
   putpkt (threadinfo_pkt);
@@ -1146,8 +1146,8 @@ remote_get_threadlist (startflag, nextthread, result_limit,
 
 {
   static threadref echo_nextthread;
-  char threadlist_packet[PBUFSIZ];
-  char t_response[PBUFSIZ];
+  char *threadlist_packet = alloca (PBUFSIZ);
+  char *t_response = alloca (PBUFSIZ);
   int result = 1;
 
   /* Trancate result limit to be smaller than the packet size */
@@ -1267,7 +1267,7 @@ static int
 remote_current_thread (oldpid)
      int oldpid;
 {
-  char buf[PBUFSIZ];
+  char *buf = alloca (PBUFSIZ);
 
   putpkt ("qC");
   getpkt (buf, 0);
@@ -1291,7 +1291,8 @@ remote_find_new_threads ()
 static void
 remote_threads_info (void)
 {
-  char buf[PBUFSIZ], *bufp;
+  char *buf = alloca (PBUFSIZ);
+  char *bufp;
   int tid;
 
   if (remote_desc == 0)		/* paranoia */
@@ -1323,7 +1324,7 @@ remote_threads_info (void)
 static void
 extended_remote_restart ()
 {
-  char buf[PBUFSIZ];
+  char *buf = alloca (PBUFSIZ);
 
   /* Send the restart command; for reasons I don't understand the
      remote side really expects a number after the "R".  */
@@ -1354,7 +1355,8 @@ remote_close (quitting)
 static void
 get_offsets ()
 {
-  char buf[PBUFSIZ], *ptr;
+  char *buf = alloca (PBUFSIZ);
+  char *ptr;
   int lose;
   CORE_ADDR text_addr, data_addr, bss_addr;
   struct section_offsets *offs;
@@ -1414,7 +1416,7 @@ get_offsets ()
   if (symfile_objfile == NULL)
     return;
 
-  offs = (struct section_offsets *) alloca (sizeof (struct section_offsets)
+  offs = alloca (sizeof (struct section_offsets)
 					    + symfile_objfile->num_sections
 					    * sizeof (offs->offsets));
   memcpy (offs, symfile_objfile->section_offsets,
@@ -1697,7 +1699,7 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
   if (extended_p)
     {
       /* tell the remote that we're using the extended protocol.  */
-      char buf[PBUFSIZ];
+      char *buf = alloca (PBUFSIZ);
       putpkt ("!");
       getpkt (buf, 0);
     }
@@ -1713,7 +1715,7 @@ remote_detach (args, from_tty)
      char *args;
      int from_tty;
 {
-  char buf[PBUFSIZ];
+  char *buf = alloca (PBUFSIZ);
 
   if (args)
     error ("Argument given to \"detach\" when remotely debugging.");
@@ -1766,7 +1768,7 @@ remote_resume (pid, step, siggnal)
      int pid, step;
      enum target_signal siggnal;
 {
-  char buf[PBUFSIZ];
+  char *buf = alloca (PBUFSIZ);
 
   if (pid == -1)
     set_thread (0, 0);		/* run any thread */
@@ -1896,7 +1898,7 @@ remote_wait (pid, status)
      int pid;
      struct target_waitstatus *status;
 {
-  unsigned char buf[PBUFSIZ];
+  unsigned char *buf = alloca (PBUFSIZ);
   int thread_num = -1;
 
   status->kind = TARGET_WAITKIND_EXITED;
@@ -2119,7 +2121,7 @@ static void
 remote_fetch_registers (regno)
      int regno;
 {
-  char buf[PBUFSIZ];
+  char *buf = alloca (PBUFSIZ);
   int i;
   char *p;
   char regs[REGISTER_BYTES];
@@ -2207,7 +2209,7 @@ static void
 remote_store_registers (regno)
      int regno;
 {
-  char buf[PBUFSIZ];
+  char *buf = alloca (PBUFSIZ);
   int i;
   char *p;
 
@@ -2360,7 +2362,8 @@ check_binary_download (addr)
 {
   if (remote_binary_download && !remote_binary_checked)
     {
-      char buf[PBUFSIZ], *p;
+      char *buf = alloca (PBUFSIZ);
+      char *p;
       remote_binary_checked = 1;
 
       p = buf;
@@ -2403,6 +2406,7 @@ remote_write_bytes (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
+  unsigned char *buf = alloca (PBUFSIZ);
   int max_buf_size;		/* Max size of packet output buffer */
   int origlen;
 
@@ -2421,7 +2425,6 @@ remote_write_bytes (memaddr, myaddr, len)
   origlen = len;
   while (len > 0)
     {
-      unsigned char buf[PBUFSIZ];
       unsigned char *p, *plen;
       int todo;
       int i;
@@ -2534,6 +2537,7 @@ remote_read_bytes (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
+  char *buf = alloca (PBUFSIZ);
   int max_buf_size;		/* Max size of packet output buffer */
   int origlen;
 
@@ -2546,7 +2550,6 @@ remote_read_bytes (memaddr, myaddr, len)
   origlen = len;
   while (len > 0)
     {
-      char buf[PBUFSIZ];
       char *p;
       int todo;
       int i;
@@ -2647,7 +2650,7 @@ remote_search (len, data, mask, startaddr, increment, lorange, hirange
       long mask_long, data_long;
       long data_found_long;
       CORE_ADDR addr_we_found;
-      char buf[PBUFSIZ];
+      char *buf = alloca (PBUFSIZ);
       long returned_long[2];
       char *p;
 
@@ -2779,7 +2782,9 @@ putpkt_binary (buf, cnt)
 {
   int i;
   unsigned char csum = 0;
-  char buf2[PBUFSIZ];
+  char *buf2 = alloca (PBUFSIZ);
+  char *junkbuf = alloca (PBUFSIZ);
+
   int ch;
   int tcount = 0;
   char *p;
@@ -2850,8 +2855,6 @@ putpkt_binary (buf, cnt)
 	      break;		/* Retransmit buffer */
 	    case '$':
 	      {
-		char junkbuf[PBUFSIZ];
-
 	      /* It's probably an old response, and we're out of sync.
 		 Just gobble up the packet and ignore it.  */
 		getpkt (junkbuf, 0);
@@ -2956,7 +2959,7 @@ read_frame (buf)
 	      {
 		if (remote_cisco_mode)	/* variant run-length-encoding */
 		  {
-		    char tmp_buf[PBUFSIZ];
+		    char *tmp_buf = alloca (PBUFSIZ);
 
 		    remote_cisco_expand (buf, tmp_buf);
 		    strcpy (buf, tmp_buf);
@@ -3329,7 +3332,10 @@ compare_sections_command (args, from_tty)
   unsigned long host_crc, target_crc;
   extern bfd *exec_bfd;
   struct cleanup *old_chain;
-  char *tmp, *sectdata, *sectname, buf[PBUFSIZ];
+  char *tmp;
+  char *sectdata;
+  char *sectname;
+  char *buf = alloca (PBUFSIZ);
   bfd_size_type size;
   bfd_vma lma;
   int matched = 0;
@@ -3403,7 +3409,7 @@ remote_query (query_type, buf, outbuf, bufsiz)
      int *bufsiz;
 {
   int i;
-  char buf2[PBUFSIZ];
+  char *buf2 = alloca (PBUFSIZ);
   char *p2 = &buf2[0];
   char *p = buf;
 
@@ -3470,7 +3476,7 @@ packet_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  char buf[PBUFSIZ];
+  char *buf = alloca (PBUFSIZ);
 
   if (! remote_desc)
     error ("command can only be used with remote target");
@@ -3726,7 +3732,7 @@ remote_info_process (args, from_tty)
      char *args;
      int from_tty;
 {
-  char buf[PBUFSIZ];
+  char *buf = alloca (PBUFSIZ);
 
   if (remote_desc == 0)
     error ("Command can only be used when connected to the remote target.");

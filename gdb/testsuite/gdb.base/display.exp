@@ -46,6 +46,15 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
+# Some coverage stuff
+#
+gdb_test "kill" ".*The program is not being run.*" ""
+gdb_test "detach" ".*" ""
+gdb_test "run" ".*" ""
+
+gdb_load ${binfile}
+gdb_test "kill" ".*" ""
+gdb_test "detach" ".*" ""
 
 # Ok, on to real life
 #
@@ -132,8 +141,14 @@ gdb_test "printf \"%d\" j" ".*Invalid argument syntax.*" ""
 # play with "p", too
 #
 gdb_test "p/r j" ".*Undefined output format.*" ""
+gdb_test "p j" ".*" "debug test output"
 #gdb_test "x/rx j" ".*Cannot access memory.*" "no error!"
-gdb_test "x/0 j" ".*" "x/0 j"
+# x/0 j doesn't produce any output and terminates PA64 process when testing
+if [istarget "hppa*-hp-hpux11*"] {
+    xfail "'x/0 j' terminate PA64 process - skipped test point"
+} else {
+    gdb_test "x/0 j" ".*" "x/0 j"
+}
 gdb_test "p/0 j" ".*Item count other than 1 is meaningless.*" "p/0 j"
 gdb_test "p/s sum" ".*Format letter.*is meaningless.*" " no s"
 gdb_test "p/i sum" ".*Format letter.*is meaningless.*.*" "no i"

@@ -105,7 +105,14 @@ if ![file exists $binfile] then {
 		fail "child died when we called func1, skipped rest of tests"
 		return
 	    }
-	    -re "$gdb_prompt $" { fail "call function when asleep (wrong output)" }
+	    -re "$gdb_prompt $" {
+		# On HPUX-11.0 'send "p func1 ()"' above
+		# terminates the program. A defect is pending on this
+		# issue [defect #DTS CHFts24203]. Hence calling setup_xfail
+		# below.
+	        setup_xfail "hppa*-*-*11*"
+		fail "call function when asleep (wrong output)"
+	    }
 	    default {
 
 		# This fail probably happens whenever we use /proc (we
@@ -114,7 +121,6 @@ if ![file exists $binfile] then {
 
 		setup_xfail "sparc*-*-solaris2*"
 		setup_xfail "mips-*-ultrix*"
-		setup_xfail "hppa*-*-*"
 		setup_xfail "i386*-*-bsd*"
 		setup_xfail "i*86-*-solaris2*"
 		setup_xfail "*-*-sysv4*"
@@ -154,6 +160,9 @@ if ![file exists $binfile] then {
 	# The optional leading \r\n is in case we sent a newline above
 	# to wake the program, in which case the program now sends it
 	# back.
+        # FIXME: The pattern below leads to an expected success on HPUX-11.0
+        # but the success is spurious. Need to provide the right reg.expr.
+        # here.
 	gdb_expect {
 	    -re "^(\r\n|)data\r\n(|data\r\n)$" { pass "echo data" }
 	    timeout { fail "echo data (timeout)" }

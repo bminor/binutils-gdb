@@ -95,7 +95,7 @@ recently added stubs.
 * Stub Contents::       What the stub can do for you
 * Bootstrapping::       What you must do for the stub
 * Debug Session::       Putting it all together
-* Protocol::            Outline of the communication protocol
+* Protocol::            Definition of the communication protocol
 * Server::		Using the `gdbserver' program
 * NetWare::		Using the `gdbserve.nlm' program
 @end menu
@@ -365,79 +365,620 @@ the protocol---for example, if there is only one serial port to your
 target machine, you might want your program to do something special if
 it recognizes a packet meant for @value{GDBN}.
 
+In the examples below, @samp{<-} and @samp{->} are used to indicate
+transmitted and received data respectfully.
+
 @cindex protocol, @value{GDBN} remote serial
 @cindex serial protocol, @value{GDBN} remote
 @cindex remote serial protocol
-All @value{GDBN} commands and responses (other than acknowledgements, which
-are single characters) are sent as a packet which includes a
-checksum.  A packet is introduced with the character @samp{$}, and ends
-with the character @samp{#} followed by a two-digit checksum:
+All @value{GDBN} commands and responses (other than acknowledgments)
+are sent as a @var{packet}.  A @var{packet} is introduced with the
+character @samp{$}, this is followed by an optional two-digit
+@var{sequence-id} and the character @samp{:}, the actual
+@var{packet-data}, and the terminating character @samp{#} followed by a
+two-digit @var{checksum}:
 
 @example
-$@var{packet info}#@var{checksum}
+@code{$}@var{packet-data}@code{#}@var{checksum}
+@end example
+@noindent
+or, with the optional @var{sequence-id}:
+@example
+@code{$}@var{sequence-id}@code{:}@var{packet-data}@code{#}@var{checksum}
 @end example
 
 @cindex checksum, for @value{GDBN} remote
 @noindent
-@var{checksum} is computed as the modulo 256 sum of the @var{packet
-info} characters.
+The two-digit @var{checksum} is computed as the modulo 256 sum of all
+characters between the leading @samp{$} and the trailing @samp{#} (that
+consisting of both the optional @var{sequence-id}@code{:} and the actual
+@var{packet-data}).
+
+@cindex sequence-id, for @value{GDBN} remote
+@noindent
+The two-digit @var{sequence-id}, when present, is returned with the
+acknowledgment.  Beyond that its meaning is poorly defined.
+@value{GDBN} is not known to output @var{sequence-id}s.
 
 When either the host or the target machine receives a packet, the first
-response expected is an acknowledgement: a single character, either
-@samp{+} (to indicate the package was received correctly) or @samp{-}
-(to request retransmission).
+response expected is an acknowledgment: either @samp{+} (to indicate
+the package was received correctly) or @samp{-} (to request
+retransmission):
 
-The host (@value{GDBN}) sends commands, and the target (the debugging stub
-incorporated in your program) sends data in response.  The target also
-sends data when your program stops.
+@example
+<- @code{$}@var{packet-data}@code{#}@var{checksum}
+-> @code{+}
+@end example
+@noindent
+If the received packet included a @var{sequence-id} than that is
+appended to a positive acknowledgment:
 
-Command packets are distinguished by their first character, which
-identifies the kind of command.
+@example
+<- @code{$}@var{sequence-id}@code{:}@var{packet-data}@code{#}@var{checksum}
+-> @code{+}@var{sequence-id}
+@end example
 
-These are some of the commands currently supported (for a complete list of 
-commands, look in @file{gdb/remote.c.}):
+The host (@value{GDBN}) sends @var{command}s, and the target (the
+debugging stub incorporated in your program) sends a @var{response}.  In
+the case of step and continue @var{command}s, the response is only sent
+when the operation has completed (the target has again stopped).
 
-@table @code
-@item g
-Requests the values of CPU registers.
+@var{packet-data} consists of a sequence of characters with the
+exception of @samp{#} and @samp{$} (see @samp{X} packet for an
+exception). @samp{:} can not appear as the third character in a packet.
+Fields within the packet should be separated using @samp{,} and @samp{;}
+(unfortunately some packets chose to use @samp{:}).  Except where
+otherwise noted all numbers are represented in HEX with leading zeros
+suppressed.
 
-@item G
-Sets the values of CPU registers.
+Response @var{data} can be run-length encoded to save space.  A @samp{*}
+means that the next character is an ASCII encoding giving a repeat count
+which stands for that many repetitions of the character preceding the
+@samp{*}.  The encoding is @code{n+29}, yielding a printable character
+where @code{n >=3} (which is where rle starts to win).  Don't use an
+@code{n > 126}.
 
-@item m@var{addr},@var{count}
-Read @var{count} bytes at location @var{addr}.
+So:
+@example
+"@code{0* }"
+@end example
+@noindent
+means the same as "0000".
 
-@item M@var{addr},@var{count}:@dots{}
-Write @var{count} bytes at location @var{addr}.
+The error response, returned for some packets includes a two character
+error number.  That number is not well defined.
 
-@need 500
-@item c
-@itemx c@var{addr}
-Resume execution at the current address (or at @var{addr} if supplied).
+For any @var{command} not supported by the stub, an empty response
+(@samp{$#00}) should be returned.  That way it is possible to extend the
+protocol.  A newer @value{GDBN} can tell if a packet is supported based
+on the response.
 
-@need 500
-@item s
-@itemx s@var{addr}
-Step the target program for one instruction, from either the current
-program counter or from @var{addr} if supplied.
+Below is a complete list of all currently defined @var{command}s and
+their corresponding response @var{data}:
 
-@item k
-Kill the target program.
+@multitable @columnfractions .30 .30 .40
+@item Packet
+@tab Request
+@tab Description
 
-@item ?
-Report the most recent signal.  To allow you to take advantage of the
-@value{GDBN} signal handling commands, one of the functions of the debugging
-stub is to report CPU traps as the corresponding POSIX signal values.
+@item extended ops @emph{(optional)}
+@tab @code{!}
+@tab
+Use the extended remote protocol. Sticky -- only needs to be set once.
+The extended remote protocol support the @samp{R} packet.
+@item
+@tab reply @samp{}
+@tab
+Stubs that support the extended remote protocol return @samp{} which,
+unfortunately, is identical to the response returned by stubs that do not
+support protocol extensions.
 
-@item T
-Allows the remote stub to send only the registers that @value{GDBN} needs
-to make a quick decision about single-stepping or conditional breakpoints.
-This eliminates the need to fetch the entire register set for each instruction
-being stepped through.
+@item last signal
+@tab @code{?}
+@tab
+Reply the current reason for stopping.  This is the same reply as is
+generated for step or cont : @code{S}@var{AA} where @var{AA} is the
+signal number.
 
-@value{GDBN} now implements a write-through cache for registers and only
-re-reads the registers if the target has run.
-@end table
+@item reserved
+@tab @code{a}
+@tab Reserved for future use 
+
+@item set program arguments @strong{(reserved)} @emph{(optional)}
+@tab @code{A}@var{arglen}@code{,}@var{argnum}@code{,}@var{arg}@code{,...}
+@tab
+Initialized @samp{argv[]} array passed into program. @var{arglen}
+specifies the number of bytes in the hex encoded byte stream @var{arg}.
+@item
+@tab reply @code{OK}
+@item
+@tab reply @code{E}@var{NN}
+
+@item set baud @strong{(deprecated)}
+@tab @code{b}@var{baud}
+@tab
+Change the serial line speed to @var{baud}.  JTC: @emph{When does the
+transport layer state change?  When it's received, or after the ACK is
+transmitted.  In either case, there are problems if the command or the
+acknowledgment packet is dropped.} Stan: @emph{If people really wanted
+to add something like this, and get it working for the first time, they
+ought to modify ser-unix.c to send some kind of out-of-band message to a
+specially-setup stub and have the switch happen "in between" packets, so
+that from remote protocol's point of view, nothing actually
+happened.}
+
+@item set breakpoint @strong{(deprecated)}
+@tab @code{B}@var{addr},@var{mode}
+@tab
+Set (@var{mode} is @samp{S}) or clear (@var{mode} is @samp{C}) a
+breakpoint at @var{addr}.  @emph{This has been replaced by the @samp{Z} and
+@samp{z} packets.}
+
+@item continue
+@tab @code{c}@var{addr}
+@tab
+@var{addr} is address to resume. If @var{addr} is omitted, resume at
+current address.
+@item
+@tab reply
+@tab see below
+
+@item continue with signal @emph{(optional)}
+@tab @code{C}@var{sig}@code{;}@var{addr}
+@tab
+Continue with signal @var{sig} (hex signal number).  If
+@code{;}@var{addr} is omitted, resume at same address.
+@item
+@tab reply
+@tab see below
+
+@item toggle debug @emph{(optional)}
+@tab @code{d}
+@tab
+toggle debug flag (see 386 & 68k stubs)
+
+@item detach @emph{(optional)}
+@tab @code{D}
+@tab Reply OK.
+
+@item reserved
+@tab @code{e}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{E}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{f}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{F}
+@tab Reserved for future use 
+
+@item read registers
+@tab @code{g}
+@tab Read general registers.
+@item
+@tab reply @var{XX...}
+@tab
+Each byte of register data is described by two hex digits.  The bytes
+with the register are transmitted in target byte order.  The size of
+each register and their position within the @samp{g} @var{packet} is
+determined by the @var{REGISTER_RAW_SIZE} and @var{REGISTER_NAME}
+macros.
+@item
+@tab @code{E}@var{NN}
+@tab for an error.
+
+@item write regs
+@tab @code{G}@var{XX...}
+@tab
+See @samp{g} for a description of the @var{XX...} data.
+@item
+@tab reply @code{OK}
+@tab for success
+@item
+@tab reply @code{E}@var{NN}
+@tab for an error
+
+@item reserved
+@tab @code{h}
+@tab Reserved for future use 
+
+@item set thread @emph{(optional)}
+@tab @code{H}@var{c}@var{t...}
+@tab
+Set thread for subsequent operations.  @var{c} = @samp{c} for thread
+used in step and continue; @var{t...} can be -1 for all threads.
+@var{c} = @samp{g} for thread used in other operations.  If zero, pick a
+thread, any thread.
+@item
+@tab reply @code{OK}
+@tab for success
+@item
+@tab reply @code{E}@var{NN}
+@tab for an error
+
+@item cycle step @strong{(draft)} @emph{(optional)}
+@tab @code{i}@var{addr}@code{,}@var{nnn}
+@tab
+Step the remote target by a single clock cycle.  If @code{,}@var{nnn} is
+present, cycle step @var{nnn} cycles.  If @var{addr} is present, cycle
+step starting at that address.
+
+@item signal then cycle step @strong{(reserved)} @emph{(optional)}
+@tab @code{I}
+@tab
+See @samp{i} and @samp{S} for likely syntax and semantics.
+
+@item reserved
+@tab @code{j}
+@tab Reserved for future use
+
+@item reserved
+@tab @code{J}
+@tab Reserved for future use 
+
+@item kill request @emph{(optional)}
+@tab @code{k}
+@tab
+
+@item reserved
+@tab @code{l}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{L}
+@tab Reserved for future use 
+
+@item read memory
+@tab @code{m}@var{addr}@code{,}@var{length}
+@tab
+Read @var{length} bytes of memory starting at address @var{addr}.
+@item
+@tab reply @var{XX...}
+@tab
+@var{XX...} is mem contents. Can be fewer bytes than requested if able to
+read only part of the data.
+@item
+@tab reply @code{E}@var{NN}
+@tab @var{NN} is errno
+
+@item write mem
+@tab @code{M}@var{addr},@var{length}@code{:}@var{XX...}
+@tab
+Write @var{length} bytes of memory starting at address @var{addr}.
+@var{XX...} is the data.
+@item
+@tab reply @code{OK}
+@tab for success
+@item
+@tab reply @code{E}@var{NN}
+@tab
+for an error (this includes the case where only part of the data was
+written).
+
+@item reserved
+@tab @code{n}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{N}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{o}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{O}
+@tab Reserved for future use 
+
+@item read reg @strong{(reserved)}
+@tab @code{p}@var{n...}
+@tab
+See write register.
+@item
+@tab return @var{r....}
+@tab The hex encoded value of the register in target byte order.
+
+@item write reg @emph{(optional)}
+@tab @code{P}@var{n...}@code{=}@var{r...}
+@tab
+Write register @var{n...} with value @var{r...}, which contains two hex
+digits for each byte in the register (target byte order).
+@item
+@tab reply @code{OK}
+@tab for success
+@item
+@tab reply @code{E}@var{NN}
+@tab for an error
+
+@item general query @emph{(optional)}
+@tab @code{q}@var{query}
+@tab
+Request info about @var{query}. In general @value{GDBN} @var{query}'s
+have a leading upper case letter.  Custom vendor queries should use a
+leading lower case letter and a company prefix, ex: @samp{qfsf.var}.
+@var{query} may optionally be followed by a @samp{,} or @samp{;}
+separated list.  Stubs should ensure that they fully match any
+@var{query} name.
+@item
+@tab reply @code{XX...}
+@tab Hex encoded data from query. The reply can not be empty.
+@item
+@tab reply @code{E}@var{NN}
+@tab error reply
+@item
+@tab reply @samp{}
+@tab Indicating an unrecognized @var{query}.
+
+@item current thread
+@tab @code{q}@code{C}
+@tab Return the current thread id.
+@item
+@tab reply @code{QC}@var{pid}
+@tab
+Where @var{pid} is a HEX encoded 16 bit process id.
+@item
+@tab reply *
+@tab Any other reply implies the old pid.
+
+@item compute CRC of memory block
+@tab @code{q}@code{CRC:}@var{addr}@code{,}@var{length}
+@tab
+@item
+@tab reply @code{E}@var{NN}
+@tab An error (such as memory fault)
+@item
+@tab reply @code{C}@var{CRC32}
+@tab A 32 bit cyclic redundancy check of the specified memory region.
+
+@item query @var{LIST} or @var{threadLIST}
+@tab @code{q}@code{L}@var{startflag}@var{threadcount}@var{nextthread}
+@tab
+Obtain thread information from RTOS.  @var{startflag} is one hex digit;
+@var{threadcount} is two hex digits; and @var{nextthread} is 16 hex
+digits.
+@item
+@tab reply *
+@tab
+See @code{remote.c:parse_threadlist_response()}.
+
+@item query sect offs
+@tab @code{q}@code{Offsets}
+@tab Get section offsets.
+@item
+@tab reply @code{Text=}@var{xxx}@code{;Data=}@var{yyy}@code{;Bss=}@var{zzz}
+
+@item thread info request
+@tab @code{q}@code{P}@var{mode}@var{threadid}
+@tab
+Returns information on @var{threadid}.  Where: @var{mode} is a hex
+encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
+@item
+@tab reply *
+@tab
+See @code{remote.c:remote_unpack_thread_info_response()}.
+
+@item remote command @strong{(reserved)}
+@tab @code{q}@code{Rcmd,}@var{COMMAND}
+@tab
+@var{COMMAND} (hex encoded) is passed to the local interpreter for
+execution.  @emph{Implementors should note that providing access to a
+stubs's interpreter may have security implications}.
+@item
+@tab reply @var{OUTPUT}
+@tab
+The @var{OUTPUT} (hex encoded).  Must be non-empty.
+@item
+@tab reply @samp{}
+@tab
+When @samp{q}@samp{Rcmd} is not recognized.
+
+@item general set @emph{(optional)}
+@tab @code{Q}@var{var}@code{=}@var{val}
+@tab
+Set value of @var{var} to @var{val}.  See @samp{q} for a discussing of
+naming conventions.
+
+@item reset @emph{(optional)}
+@tab r
+@tab reset -- see sparc stub.
+
+@item remote restart @emph{(optional)}
+@tab @code{R}@var{XX}
+@tab
+Restart the remote server. @var{XX} while needed has no clear
+definition.
+
+@item step @emph{(optional)}
+@tab @code{s}@var{addr}
+@tab
+@var{addr} is address to resume.  If @var{addr} is omitted, resume at
+same address.
+@item
+@tab reply
+@tab see below
+
+@item step with signal @emph{(optional)}
+@tab @code{S}@var{sig}@code{;}@var{addr}
+@tab
+Like @samp{C} but step not continue.
+@item
+@tab reply
+@tab see below
+
+@item search @emph{(optional)}
+@tab @code{t}@var{addr}@code{:}@var{PP}@code{,}@var{MM}
+@tab
+Search backwards starting at address @var{addr} for a match with pattern
+@var{PP} and mask @var{MM}.  @var{PP} and @var{MM} are 4
+bytes. @var{addr} must be at least 3 digits.
+
+@item thread alive @emph{(optional)}
+@tab @code{T}@var{XX}
+@tab Find out if the thread XX is alive.
+@item
+@tab reply @code{OK}
+@tab thread is still alive
+@item
+@tab reply @code{E}@var{NN}
+@tab thread is dead
+	
+@item reserved
+@tab @code{u}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{U}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{v}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{V}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{w}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{W}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{x}
+@tab Reserved for future use 
+
+@item write mem (binary) @emph{(optional)}
+@tab @code{X}@var{addr}@code{,}@var{length}@var{:}@var{XX...}
+@tab
+@var{addr} is address, @var{length} is number of bytes, @var{XX...} is
+binary data.
+@item
+@tab reply @code{OK}
+@tab for success
+@item
+@tab reply @code{E}@var{NN}
+@tab for an error
+
+@item reserved
+@tab @code{y}
+@tab Reserved for future use 
+
+@item reserved
+@tab @code{Y}
+@tab Reserved for future use 
+
+@item remove break or watchpoint @strong{(draft)} @emph{(optional)}
+@tab @code{z}@var{t}@code{,}@var{addr}@code{,}@var{length}
+@tab
+See @samp{Z}.
+
+@item insert break or watchpoint @strong{(draft)} @emph{(optional)}
+@tab @code{Z}@var{t}@code{,}@var{addr}@code{,}@var{length}
+@tab
+@var{t} is type: @samp{0} - software breakpoint, @samp{1} - hardware
+breakpoint, @samp{2} - write watchpoint, @samp{3} - read watchpoint,
+@samp{4} - access watchpoint; @var{addr} is address; @var{length} is in
+bytes.  For a software breakpoint, @var{length} specifies the size of
+the instruction to be patched.  For hardware breakpoints and watchpoints
+@var{length} specifies the memory region to be monitored.
+@item
+@tab reply @code{E}@var{NN}
+@tab for an error
+@item
+@tab reply @code{OK}
+@tab for success
+@item
+@tab @samp{}
+@tab If not supported.
+
+@item reserved
+@tab <other>
+@tab Reserved for future use 
+
+@end multitable
+
+In the case of the @samp{C}, @samp{c}, @samp{S} and @samp{s} packets,
+there is no immediate response.  The reply, described below, comes when
+the machine stops:
+
+@multitable @columnfractions .4 .6
+
+@item @code{S}@var{AA}
+@tab @var{AA} is the signal number
+
+@item @code{T}@var{AA}@var{n...}@code{:}@var{r...}@code{;}@var{n...}@code{:}@var{r...}@code{;}@var{n...}@code{:}@var{r...}@code{;}
+@tab
+@var{AA} = two hex digit signal number; @var{n...} = register number
+(hex), @var{r...}  = target byte ordered register contents, size defined
+by @code{REGISTER_RAW_SIZE}; @var{n...} = @samp{thread}, @var{r...} =
+thread process ID, this is a hex integer; @var{n...} = other string not
+starting with valid hex digit. @value{GDBN} should ignore this
+@var{n...}, @var{r...} pair and go on to the next.  This way we can
+extend the protocol.
+
+@item @code{W}@var{AA}
+@tab
+The process exited, and @var{AA} is the exit status.  This is only
+applicable for certains sorts of targets.
+
+@item @code{X}@var{AA}
+@tab
+The process terminated with signal @var{AA}.
+
+@item @code{N}@var{AA}@code{;}@var{tttttttt}@code{;}@var{dddddddd}@code{;}@var{bbbbbbbb} @strong{(obsolete)}
+@tab
+@var{AA} = signal number; @var{tttttttt} = address of symbol "_start";
+@var{dddddddd} = base of data section; @var{bbbbbbbb} = base of bss
+section. @emph{Note: only used by Cisco Systems targets.  The difference
+between this reply and the "qOffsets" query is that the 'N' packet may
+arrive spontaneously whereas the 'qOffsets' is a query initiated by the
+host debugger.}
+
+@item @code{O}@var{XX...}
+@tab
+@var{XX...} is hex encoding of ASCII data. This can happen at any time
+while the program is running and the debugger should continue to wait
+for 'W', 'T', etc.
+
+@end multitable
+
+Example sequence of a target being re-started.  Notice how the restart
+does not get any direct output:
+
+@example
+<- @code{R00}
+-> @code{+}
+@emph{target restarts}
+<- @code{?}
+-> @code{+}
+-> @code{T001:1234123412341234}
+<- @code{+}
+@end example
+
+Example sequence of a target being stepped by a single instruction:
+
+@example
+<- @code{G1445...}
+-> @code{+}
+<- @code{s}
+-> @code{+}
+@emph{time passes}
+-> @code{T001:1234123412341234}
+<- @code{+}
+<- @code{g}
+-> @code{+}
+-> @code{1455...}
+<- @code{+}
+@end example
 
 @kindex set remotedebug
 @kindex show remotedebug
