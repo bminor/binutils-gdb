@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994, 1995 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,51 +54,41 @@ proc integral_args {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-
-    expect_after {
-	-re ".* call0a \[(\]+c=97 'a', s=1, i=2, l=3\[)\]+ .*$prompt $" {}
+    gdb_run_cmd
+    expect {
+	-re ".* call0a \[(\]+c=97 'a', s=1, i=2, l=3\[)\]+ .*$prompt $" {
+	    pass "run to call0a"
+	}
 	-re "$prompt $"  { fail "run to call0a" ; return }
 	timeout { fail "(timeout) run to call0a" ; return }
     }
-    gdb_run_cmd
-    expect_after;
 
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
-    if [gdb_test "print c" ".* = 97 'a'" ""] {
-	fail "print c"; return
-    }
-    if [gdb_test "print s" ".* = 1" ""] {
-	fail "print s"; return
-    }
-    if [gdb_test "print i" ".* = 2" ""] {
-	fail "print i"; return
-    }
-    if [gdb_test "print l" ".* = 3" ""] {
-	fail "print l"; return
-    }
+    gdb_test "print c" ".* = 97 'a'"
+    gdb_test "print s" ".* = 1"
+    gdb_test "print i" ".* = 2"
+    gdb_test "print l" ".* = 3"
 
     # Continue; should stop at call0b and print actual arguments.
-    if [gdb_test "cont" ".* call0b \[(\]+s=1, i=2, l=3, c=97 'a'\[)\]+ " ""] {
-	fail "continue to call0b"; return 
+    if [gdb_test "cont" ".* call0b \[(\]+s=1, i=2, l=3, c=97 'a'\[)\]+ " "continue to call0b"] {
+	return 
     }
 
     # Continue; should stop at call0c and print actual arguments.
-    if [gdb_test "cont" ".* call0c \[(\]+i=2, l=3, c=97 'a', s=1\[)\]+ " ""] {
-	fail "continue to call0c"; return
+    if [gdb_test "cont" ".* call0c \[(\]+i=2, l=3, c=97 'a', s=1\[)\]+ " "continue to call0c"] {
+	return
     }
 
     # Continue; should stop at call0d and print actual arguments.
-    if [gdb_test "cont" ".* call0d \[(\]+l=3, c=97 'a', s=1, i=2\[)\]+ " ""] {
-	fail "continue to call0d"; return
+    if [gdb_test "cont" ".* call0d \[(\]+l=3, c=97 'a', s=1, i=2\[)\]+ " "continue to call0d";] {
+	return
     }
 
     # Continue; should stop at call0e and print actual arguments.
-    if [gdb_test "cont" ".* call0e \[(\]+c1=97 'a', l=3, c2=97 'a', i=2, c3=97 'a', s=1, c4=97 'a', c5=97 'a'\[)\]+ " "" ] {
-	fail "continue to call0e"; return
+    if [gdb_test "cont" ".* call0e \[(\]+c1=97 'a', l=3, c2=97 'a', i=2, c3=97 'a', s=1, c4=97 'a', c5=97 'a'\[)\]+ " "continue to call0e" ] {
+	return
     }
-
-    pass "locate actual args, signed integral types"
 }
 
 #
@@ -121,50 +111,41 @@ proc unsigned_integral_args {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    expect_after {
-	-re ".* call1a \[(\]+uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*$prompt $" {}
+    gdb_run_cmd
+    expect {
+	-re ".* call1a \[(\]+uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*$prompt $" {
+	    pass "run to call1a"
+	}
 	-re "$prompt $" { fail "run to call1a" ; return }
 	timeout { fail "(timeout) run to call1a" ; return }
     }
-    gdb_run_cmd
-    expect_after;
 
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
-    if [gdb_test "print uc" ".* = 98 'b'" ""] {
-	fail "print uc"; return
-    }
-    if [gdb_test "print us" ".* = 6" ""] {
-	fail "print us"; return
-    }
-    if [gdb_test "print ui" ".* = 7" ""] { 
-	fail "print ui"; return
-    }
-    if [gdb_test "print ul" ".* = 8" ""] {
-	fail "print ul"; return
-    }
+    gdb_test "print uc" ".* = 98 'b'"
+    gdb_test "print us" ".* = 6"
+    gdb_test "print ui" ".* = 7"
+    gdb_test "print ul" ".* = 8"
     
     # Continue; should stop at call1b and print actual arguments.
-    if [gdb_test "cont" ".* call1b \[(\]+us=6, ui=7, ul=8, uc=98 'b'\[)\]+ " ""] {
-	fail "continue to call1b"; return 
+    if [gdb_test "cont" ".* call1b \[(\]+us=6, ui=7, ul=8, uc=98 'b'\[)\]+ " "continue to call1b"] {
+	return 
     }
 
     # Continue; should stop at call1c and print actual arguments.
-    if [gdb_test "cont" ".* call1c \[(\]+ui=7, ul=8, uc=98 'b', us=6\[)\]+ " ""] {
-	fail "continue to call1c"; return 
+    if [gdb_test "cont" ".* call1c \[(\]+ui=7, ul=8, uc=98 'b', us=6\[)\]+ " "continue to call1c"] {
+	return 
     }
 
     # Continue; should stop at call1d and print actual arguments.
-    if [gdb_test "cont" ".* call1d \[(\]+ul=8, uc=98 'b', us=6, ui=7\[)\]+ " ""] {
-	fail "continue to call1d"; return
+    if [gdb_test "cont" ".* call1d \[(\]+ul=8, uc=98 'b', us=6, ui=7\[)\]+ " "continue to call1d"] {
+	return
     }
 
     # Continue; should stop at call1e and print actual arguments.
-    if [gdb_test "cont" ".* call1e \[(\]+uc1=98 'b', ul=8, uc2=98 'b', ui=7, uc3=98 'b', us=6, uc4=98 'b', uc5=98 'b'\[)\]+ " ""] {
-	fail "continue to call1e"; return
+    if [gdb_test "cont" ".* call1e \[(\]+uc1=98 'b', ul=8, uc2=98 'b', ui=7, uc3=98 'b', us=6, uc4=98 'b', uc5=98 'b'\[)\]+ " "continue to call1e"] {
+	return
     }
-
-    pass "locate actual args, unsigned integral types"
 }
 
 #
@@ -193,81 +174,62 @@ proc float_and_integral_args {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    expect_after {
-	-re ".* call2a \[(\]+c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5\[)\]+ .*$prompt $" {}
+    gdb_run_cmd
+    expect {
+	-re ".* call2a \[(\]+c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5\[)\]+ .*$prompt $" { pass "run to call2a" }
 	-re "$prompt $" { fail "run to call2a" ; return }
 	timeout { fail "(timeout) run to call2a" ; return }
     }
-    gdb_run_cmd
-    expect_after;
 
     # Print each arg as a double check to see if we can print
-    if [gdb_test "print c" ".* = 97 'a'" ""] {
-	fail "print c"; return
-    }
-    if [gdb_test "print f1" ".* = 4" ""] {
-	fail "print f1"; return
-    }
-    if [gdb_test "print s" ".* = 1" ""] {
-	fail "print s"; return
-    }
-    if [gdb_test "print d1" ".* = 5" ""] {
-	fail "print d1"; return
-    }
-    if [gdb_test "print i" ".* = 2" ""] {
-	fail "print i"; return
-    }
-    if [gdb_test "print f2" ".* = 4" ""] {
-	fail "print f2"; return
-    }
-    if [gdb_test "print l" ".* = 3" ""] {
-	fail "print l"; return
-    }
-    if [gdb_test "print d2" ".* = 5" ""] {
-	fail "print d2"; return
-    }
+    gdb_test "print c" ".* = 97 'a'"
+    gdb_test "print f1" ".* = 4"
+    gdb_test "print s" ".* = 1"
+    gdb_test "print d1" ".* = 5"
+    gdb_test "print i" ".* = 2"
+    gdb_test "print f2" ".* = 4" 
+    gdb_test "print l" ".* = 3"
+    gdb_test "print d2" ".* = 5"
 
     # Continue; should stop at call2b and print actual arguments.
-    if [gdb_test "cont" ".* call2b \[(\]+f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a'\[)\]+ " ""] {
-	fail "continue to call2b"; return
+    if [gdb_test "cont" ".* call2b \[(\]+f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a'\[)\]+ " "continue to call2b"] {
+	return
     }
 
     # Continue; should stop at call2c and print actual arguments.
-    if [gdb_test "cont" ".* call2c \[(\]+s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4\[)\]+ " ""] {
-	fail "continue to call2c"; return
+    if [gdb_test "cont" ".* call2c \[(\]+s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4\[)\]+ " "continue to call2c"] {
+	return
     }
 
     # Continue; should stop at call2d and print actual arguments.
-    if [gdb_test "cont" ".* call2d \[(\]+d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1\[)\]+ " ""] {
-	fail "continue to call2d"; return
+    if [gdb_test "cont" ".* call2d \[(\]+d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1\[)\]+ " "continue to call2d"] {
+	return
     }
 
     # Continue; should stop at call2e and print actual arguments.
-    if [gdb_test "cont" ".* call2e \[(\]+i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5\[)\]+ " ""] {
-	fail "continue to call2e"; return
+    if [gdb_test "cont" ".* call2e \[(\]+i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5\[)\]+ " "continue to call2e"] {
+	return
     }
 
     # Continue; should stop at call2f and print actual arguments.
-    if [gdb_test "cont" ".* call2f \[(\]+f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2\[)\]+ " ""] {
-	fail "continue to call2f"; return
+    if [gdb_test "cont" ".* call2f \[(\]+f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2\[)\]+ " "continue to call2f"] {
+	return
     }
 
     # Continue; should stop at call2g and print actual arguments.
-    if [gdb_test "cont" ".* call2g \[(\]+l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4\[)\]+ " ""] {
-	fail "continue to call2g"; return
+    if [gdb_test "cont" ".* call2g \[(\]+l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4\[)\]+ " "continue to call2g"] {
+	return
     }
 
     # Continue; should stop at call2h and print actual arguments.
-    if [gdb_test "cont" ".* call2h \[(\]+d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3\[)\]+ " ""] {
-	fail "continue to call2h"; return
+    if [gdb_test "cont" ".* call2h \[(\]+d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3\[)\]+ " "continue to call2h"] {
+	return
     }
 
     # Continue; should stop at call2i and print actual arguments.
-    if [gdb_test "cont" ".* call2i \[(\]+c1=97 'a', f1=4, c2=97 'a', c3=97 'a', d1=5, c4=97 'a', c5=97 'a', c6=97 'a', f2=4, s=1, c7=97 'a', d2=5\[)\]+ " ""] {
-	fail "continue to call2i"; return
+    if [gdb_test "cont" ".* call2i \[(\]+c1=97 'a', f1=4, c2=97 'a', c3=97 'a', d1=5, c4=97 'a', c5=97 'a', c6=97 'a', f2=4, s=1, c7=97 'a', d2=5\[)\]+ " "continue to call2i"] {
+	return
     }
-
-    pass "locate actual args, mixed integral and float types"
 }
 
 #
@@ -291,58 +253,37 @@ proc pointer_args {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    expect_after {
-	-re ".* call3a \[(\]+cp=$hex \"a\", sp=$hex, ip=$hex, lp=$hex\[)\]+ .*$prompt $" {}
+    gdb_run_cmd
+    expect {
+	-re ".* call3a \[(\]+cp=$hex \"a\", sp=$hex, ip=$hex, lp=$hex\[)\]+ .*$prompt $" { pass "run to call3a" }
 	-re "$prompt $" { fail "run to call3a" ; return }
 	timeout { fail "(timeout) run to call3a" ; return }
     }
-    gdb_run_cmd
-    expect_after;
 
-    if [gdb_test "print *cp" ".* = 97 'a'" ""] {
-	fail "print *cp"; return
-    }
-    if [gdb_test "print *sp" ".* = 1" ""] {
-	fail "print *sp"; return
-    }
-    if [gdb_test "print *ip" ".* = 2" ""] {
-	fail "print *ip"; return
-    }
-    if [gdb_test "print *lp" ".* = 3" ""] {
-	fail "print *lp"; return
-    }
+    gdb_test "print *cp" ".* = 97 'a'"
+    gdb_test "print *sp" ".* = 1"
+    gdb_test "print *ip" ".* = 2"
+    gdb_test "print *lp" ".* = 3"
 
     # Continue; should stop at call3b and print actual arguments.
     # Try dereferencing the arguments.
-    if [gdb_test "cont" ".* call3b \[(\]+ucp=$hex \"b\", usp=$hex, uip=$hex, ulp=$hex\[)\]+ " ""] {
-	fail "continue to call3b"; return
+    if [gdb_test "cont" ".* call3b \[(\]+ucp=$hex \"b\", usp=$hex, uip=$hex, ulp=$hex\[)\]+ " "continue to call3b"] {
+	return
     }
 
-    if [gdb_test "print *ucp" ".* = 98 'b'" ""] {
-	fail "print *ucp"; return
-    }
-    if [gdb_test "print *usp" ".* = 6" ""] {
-	fail "print *usp"; return
-    }
-    if [gdb_test "print *uip" ".* = 7" ""] {
-	fail "print *uip"; return
-    }
-    if [gdb_test "print *ulp" ".* = 8" ""] {
-	fail "print *ulp"; return
-    }
+    gdb_test "print *ucp" ".* = 98 'b'"
+    gdb_test "print *usp" ".* = 6"
+    gdb_test "print *uip" ".* = 7"
+    gdb_test "print *ulp" ".* = 8"
 
     # Continue; should stop at call3c and print actual arguments.
     # Try dereferencing the arguments.
-    if [gdb_test "cont" ".* call3c \[(\]+fp=$hex, dp=$hex\[)\]+ " ""] {
-	fail "continue to call3c"; return
+    if [gdb_test "cont" ".* call3c \[(\]+fp=$hex, dp=$hex\[)\]+ " "continue to call3c"] {
+	return
     }
 
-    if [gdb_test "print *fp" ".* = 4" ""] {
-	fail "print *fp"; return
-    }
-    if [gdb_test "print *dp" ".* = 5" ""] {
-	fail "print *dp"; return
-    }
+    gdb_test "print *fp" ".* = 4"
+    gdb_test "print *dp" ".* = 5"
 
     pass "locate actual args, pointer types"
 }
@@ -367,28 +308,23 @@ proc structs_by_reference {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    expect_after {
-	-re ".* call4a \[(\]+stp=$hex\[)\]+ .*$prompt $" {}
+    gdb_run_cmd
+    expect {
+	-re ".* call4a \[(\]+stp=$hex\[)\]+ .*$prompt $" {
+	    pass "run to call4a"
+	}
 	-re "$prompt $" { fail "run to call4a" ; return }
 	timeout { fail "(timeout) run to call4a" ; return }
     }
-    gdb_run_cmd
-    expect_after;
 
-    if [gdb_test "print *stp" ".* = \{s1 = 101, s2 = 102\}" ""] {
-	fail "print *stp"; return
-    }
+    gdb_test "print *stp" ".* = \{s1 = 101, s2 = 102\}"
 
     # Continue; should stop at call4b and print actual arguments.
     # Try dereferencing the arguments.
 
-    if [gdb_test "cont" ".* call4b \[(\]+unp=$hex\[)\]+ " ""] {
-	fail "continue to call4b"; return
-    }
+    gdb_test "cont" ".* call4b \[(\]+unp=$hex\[)\]+ " "continue to call4b"
 
-    if [gdb_test "print *unp" ".* = \{u1 = 1, u2 = 1\}" ""] {
-	fail "print *unp"; return
-    }
+    gdb_test "print *unp" ".* = \{u1 = 1, u2 = 1\}"
 
     pass "locate actual args, structs/unions passed by reference"
 }
@@ -413,29 +349,23 @@ proc structs_by_value {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    expect_after {
-	-re ".* call5a \[(\]+st=\{s1 = 101, s2 = 102\}\[)\]+ .*$prompt $" {}
+    gdb_run_cmd
+    expect {
+	-re ".* call5a \[(\]+st=\{s1 = 101, s2 = 102\}\[)\]+ .*$prompt $" {
+	    pass "run to call5a"
+	}
 	-re "$prompt $" { fail "run to call5a" ; return }
 	timeout { fail "(timeout) run to call5a" ; return }
     }
-    gdb_run_cmd
-    expect_after;
 
-    if [gdb_test "print st" ".* = \{s1 = 101, s2 = 102\}" ""] {
-	fail "print st"; return
-    }
+    gdb_test "print st" ".* = \{s1 = 101, s2 = 102\}"
 
     # Continue; should stop at call5b and print actual arguments.
     # Try dereferencing the arguments.
-    if [gdb_test "cont" ".* call5b \[(\]+un=\{u1 = 2, u2 = 2\}\[)\]+ " ""] {
-	fail "continue to call5b"; return
-    }
+    gdb_test "cont" ".* call5b \[(\]+un=\{u1 = 2, u2 = 2\}\[)\]+ " \
+	"continue to call5b"
 
-    if [gdb_test "print un" ".* = \{u1 = 2, u2 = 2\}" ""] {
-	fail "print un"; return
-    }
-
-    pass "locate actual args, structs/unions passed by value"
+    gdb_test "print un" ".* = \{u1 = 2, u2 = 2\}"
 }
 
 #
@@ -468,20 +398,19 @@ proc discard_and_shuffle {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    expect_after {
-	-re ".*Breakpoint $decimal, call6a .*$prompt $" {}
+    gdb_run_cmd
+    expect {
+	-re ".*Breakpoint $decimal, call6a .*$prompt $" { pass "run to call6a" }
 	-re "$prompt $" { fail "run to call6a" ; return }
 	timeout { fail "(timeout) run to call6a" ; return }
     }
-    gdb_run_cmd
-    expect_after;
 
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
 .* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call6a" }
 	-re "$prompt $" { fail "backtrace from call6a" ; return }
 	timeout { fail "(timeout) backtrace from call6a" ; return }
     }
@@ -491,7 +420,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call6b .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call6b .*$prompt $" { pass "continue to call6b" }
 	-re "$prompt $" { fail "continue to call6b" ; return }
 	timeout { fail "(timeout) continue to call6b" ; return }
     }
@@ -502,7 +431,7 @@ $prompt $" {}
 .* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call6b" }
 	-re "$prompt $" { fail "backtrace from call6b" ; return }
 	timeout { fail "(timeout) backtrace from call6b" ; return }
     }
@@ -512,7 +441,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call6c .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call6c .*$prompt $" { pass "continue to call6c" }
 	-re "$prompt $" { fail "continue to call6c" ; return }
 	timeout { fail "(timeout) continue to call6c" ; return }
     }
@@ -524,7 +453,7 @@ $prompt $" {}
 .* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call6c" }
 	-re "$prompt $" { fail "backtrace from call6c" ; return }
 	timeout { fail "(timeout) backtrace from call6c" ; return }
     }
@@ -534,7 +463,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call6d .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call6d .*$prompt $" { pass "continue to call6d" }
 	-re "$prompt $" { fail "continue to call6d" ; return }
 	timeout { fail "(timeout) continue to call6d" ; return }
     }
@@ -547,7 +476,7 @@ $prompt $" {}
 .* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call6d" }
 	-re "$prompt $" { fail "backtrace from call6d" ; return }
 	timeout { fail "(timeout) backtrace from call6d" ; return }
     }
@@ -557,7 +486,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call6e .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call6e .*$prompt $" { pass "continue to call6e" }
 	-re "$prompt $" { fail "continue to call6e" ; return }
 	timeout { fail "(timeout) continue to call6e" ; return }
     }
@@ -571,7 +500,7 @@ $prompt $" {}
 .* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call6e" }
 	-re "$prompt $" { fail "backtrace from call6e" ; return }
 	timeout { fail "(timeout) backtrace from call6e" ; return }
     }
@@ -581,7 +510,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call6f .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call6f .*$prompt $" { pass "continue to call6f" }
 	-re "$prompt $" { fail "continue to call6f" ; return }
 	timeout { fail "(timeout) continue to call6f" ; return }
     }
@@ -596,7 +525,7 @@ $prompt $" {}
 .* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call6f" }
 	-re "$prompt $" { fail "backtrace from call6f" ; return }
 	timeout { fail "(timeout) backtrace from call6f" ; return }
     }
@@ -606,7 +535,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call6g .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call6g .*$prompt $" { pass "continue to call6g" }
 	-re "$prompt $" { fail "continue to call6g" ; return }
 	timeout { fail "(timeout) continue to call6g" ; return }
     }
@@ -622,7 +551,7 @@ $prompt $" {}
 .* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call6g" }
 	-re "$prompt $" { fail "backtrace from call6g" ; return }
 	timeout { fail "(timeout) backtrace from call6g" ; return }
     }
@@ -632,7 +561,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call6h .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call6h .*$prompt $" { pass "continue to call6h" }
 	-re "$prompt $" { fail "continue to call6h" ; return }
 	timeout { fail "(timeout) continue to call6h" ; return }
     }
@@ -649,7 +578,7 @@ $prompt $" {}
 .* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call6h" }
 	-re "$prompt $" { fail "backtrace from call6h" ; return }
 	timeout { fail "(timeout) backtrace from call6h" ; return }
     }
@@ -659,7 +588,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call6i .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call6i .*$prompt $" { pass "continue to call6i" }
 	-re "$prompt $" { fail "continue to call6i" ; return }
 	timeout { fail "(timeout) continue to call6i" ; return }
     }
@@ -677,7 +606,7 @@ $prompt $" {}
 .* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call6i" }
 	-re "$prompt $" { fail "backtrace from call6i" ; return }
 	timeout { fail "(timeout) backtrace from call6i" ; return }
     }
@@ -687,7 +616,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call6j .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call6j .*$prompt $" { pass "continue to call6j" }
 	-re "$prompt $" { fail "continue to call6j" ; return }
 	timeout { fail "(timeout) continue to call6j" ; return }
     }
@@ -706,7 +635,7 @@ $prompt $" {}
 .* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call6j" }
 	-re "$prompt $" { fail "backtrace from call6j" ; return }
 	timeout { fail "(timeout) backtrace from call6j" ; return }
     }
@@ -718,7 +647,9 @@ $prompt $" {}
     setup_xfail "i960-*-vxworks" 1786
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call6k .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call6k .*$prompt $" {
+	    pass "continue to call6k"
+	}
 	-re "$prompt $" { fail "continue to call6k"; return }
 	timeout { fail "(timeout) continue to call6k"; return }
     }
@@ -738,12 +669,10 @@ $prompt $" {}
 .* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call6k" }
 	-re "$prompt $" { fail "backtrace from call6k" ; return }
 	timeout { fail "(timeout) backtrace from call6k" ; return }
     }
-
-    pass "locate actual args, discard, shuffle, and call"
 }
 
 #
@@ -776,13 +705,14 @@ proc shuffle_round_robin {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    expect_after {
-	-re ".*Breakpoint $decimal, call7a .*$prompt $" {}
+    gdb_run_cmd
+    expect {
+	-re ".*Breakpoint $decimal, call7a .*$prompt $" {
+	    pass "run to call7a"
+	}
 	-re "$prompt $" { fail "run to call7a" ; return }
 	timeout { fail "(timeout) run to call7a" ; return }
     }
-    gdb_run_cmd
-    expect_after;
 
     setup_xfail "i960-*-*" 1813
     send "backtrace 100\n"
@@ -790,7 +720,7 @@ proc shuffle_round_robin {} {
 	-re "backtrace 100\r
 .* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call7a" }
 	-re "$prompt $" { fail "backtrace from call7a" ; return }
 	timeout { fail "(timeout) backtrace from call7a" ; return }
     }
@@ -800,7 +730,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call7b .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call7b .*$prompt $" { pass "continue to call7b" }
 	-re "$prompt $" { fail "continue to call7b" ; return }
 	timeout { fail "(timeout) continue to call7b" ; return }
     }
@@ -811,7 +741,7 @@ $prompt $" {}
 .* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
 .* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call7b" }
 	-re "$prompt $" { fail "backtrace from call7b" ; return }
 	timeout { fail "(timeout) backtrace from call7b" ; return }
     }
@@ -821,7 +751,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call7c .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call7c .*$prompt $" { pass "continue to call7c" }
 	-re "$prompt $" { fail "continue to call7c" ; return }
 	timeout { fail "(timeout) continue to call7c" ; return }
     }
@@ -833,7 +763,7 @@ $prompt $" {}
 .* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
 .* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call7c" }
 	-re "$prompt $" { fail "backtrace from call7c" ; return }
 	timeout { fail "(timeout) backtrace from call7c" ; return }
     }
@@ -843,7 +773,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call7d .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call7d .*$prompt $" { pass "continue to call7d" }
 	-re "$prompt $" { fail "continue to call7d" ; return }
 	timeout { fail "(timeout) continue to call7d" ; return }
     }
@@ -856,7 +786,7 @@ $prompt $" {}
 .* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
 .* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call7d" }
 	-re "$prompt $" { fail "backtrace from call7d" ; return }
 	timeout { fail "(timeout) backtrace from call7d" ; return }
     }
@@ -866,7 +796,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re "Breakpoint $decimal, call7e .*$prompt $" {}
+	-re "Breakpoint $decimal, call7e .*$prompt $" { pass "continue to call7e" }
 	-re "$prompt $" { fail "continue to call7e" ; return }
 	timeout { fail "(timeout) continue to call7e" ; return }
     }
@@ -880,7 +810,7 @@ $prompt $" {}
 .* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
 .* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call7e" }
 	-re "$prompt $" { fail "backtrace from call7e" ; return }
 	timeout { fail "(timeout) backtrace from call7e" ; return }
     }
@@ -890,7 +820,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call7f .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call7f .*$prompt $" { pass "continue to call7f" }
 	-re "$prompt $" { fail "continue to call7f" ; return }
 	timeout { fail "(timeout) continue to call7f" ; return }
     }
@@ -905,7 +835,7 @@ $prompt $" {}
 .* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
 .* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call7f" }
 	-re "$prompt $" { fail "backtrace from call7f" ; return }
 	timeout { fail "(timeout) backtrace from call7f" ; return }
     }
@@ -915,7 +845,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call7g .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call7g .*$prompt $" { pass "continue to call7g" }
 	-re "$prompt $" { fail "continue to call7g" ; return }
 	timeout { fail "(timeout) continue to call7g" ; return }
     }
@@ -931,7 +861,7 @@ $prompt $" {}
 .* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
 .* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call7g" }
 	-re "$prompt $" { fail "backtrace from call7g" ; return }
 	timeout { fail "(timeout) backtrace from call7g" ; return }
     }
@@ -941,7 +871,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call7h .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call7h .*$prompt $" { pass "continue to call7h" }
 	-re "$prompt $" { fail "continue to call7h" ; return }
 	timeout { fail "(timeout) continue to call7h" ; return }
     }
@@ -958,7 +888,7 @@ $prompt $" {}
 .* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
 .* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call7h" }
 	-re "$prompt $" { fail "backtrace from call7h" ; return }
 	timeout { fail "(timeout) backtrace from call7h" ; return }
     }
@@ -968,7 +898,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call7i .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call7i .*$prompt $" { pass "continue to call7i" }
 	-re "$prompt $" { fail "continue to call7i" ; return }
 	timeout { fail "(timeout) continue to call7i" ; return }
     }
@@ -986,7 +916,7 @@ $prompt $" {}
 .* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
 .* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call7i" }
 	-re "$prompt $" { fail "backtrace from call7i" ; return }
 	timeout { fail "(timeout) backtrace from call7i" ; return }
     }
@@ -996,7 +926,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call7j .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call7j .*$prompt $" { pass "continue to call7j" }
 	-re "$prompt $" { fail "continue to call7j" ; return }
 	timeout { fail "(timeout) continue to call7j" ; return }
     }
@@ -1015,7 +945,7 @@ $prompt $" {}
 .* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
 .* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call7j" }
 	-re "$prompt $" { fail "backtrace from call7j" ; return }
 	timeout { fail "(timeout) backtrace from call7j" ; return }
     }
@@ -1025,7 +955,7 @@ $prompt $" {}
 
     send "continue\n"
     expect {
-	-re ".*Breakpoint $decimal, call7k .*$prompt $" {}
+	-re ".*Breakpoint $decimal, call7k .*$prompt $" { pass "continue to call7k" }
 	-re "$prompt $" { fail "continue to call7k" ; return }
 	timeout { fail "(timeout) continue to call7k" ; return }
     }
@@ -1045,12 +975,10 @@ $prompt $" {}
 .* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
 .* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "backtrace from call7k" }
 	-re "$prompt $" { fail "backtrace from call7k" ; return }
 	timeout { fail "(timeout) backtrace from call7k" ; return }
     }
-
-    pass "locate actual args, shuffle round robin and call"
 }
 
 #
@@ -1069,13 +997,12 @@ proc recursive_structs_by_value {} {
 
     # Run; should stop at hitbottom and print actual arguments.
     # Print backtrace.
-    expect_after {
-	-re ".*Breakpoint $decimal, hitbottom .*$prompt $" {}
+    gdb_run_cmd
+    expect {
+	-re ".*Breakpoint $decimal, hitbottom .*$prompt $" { pass "run to hitbottom" }
 	-re "$prompt $" { fail "run to hitbottom" ; return }
 	timeout { fail "(timeout) run to hitbottom" ; return }
     }
-    gdb_run_cmd
-    expect_after;
 
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
@@ -1091,12 +1018,10 @@ proc recursive_structs_by_value {} {
 .* recurse \[(\]+a=\{s = 4, i = 4, l = 4\}, depth=4\[)\]+ .*\r
 .* test_struct_args \[(\]+\[)\]+ .*\r
 .* main \[(\]+.*\[)\]+ .*\r
-$prompt $" {}
+$prompt $" { pass "recursive passing of structs by value" }
 	-re "$prompt $" { fail "recursive passing of structs by value" ; return }
 	timeout { fail "(timeout) recursive passing of structs by value" ; return }
     }
-
-    pass "locate actual args, recursive structs by value"
 }
 
 proc funcargs_reload { } {
@@ -1134,19 +1059,37 @@ proc localvars_after_alloca { } {
 
     send "next\n"
     expect {
-	-re ".*$prompt $" {}
+	-re ".*$prompt $" { pass "next in localvars_after_alloca()" }
 	timeout { fail "next in localvars_after_alloca()" ; return }
     }
 
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
 
-    gdb_test "print c" " = 97 'a'"
-    gdb_test "print s" " = 1"
-    gdb_test "print i" " = 2"
-    gdb_test "print l" " = 3"
+    gdb_test "print c" " = 97 'a'" "print c in localvars_after_alloca"
+    gdb_test "print s" " = 1" "print s in localvars_after_alloca"
+    gdb_test "print i" " = 2" "print i in localvars_after_alloca"
+    gdb_test "print l" " = 3" "print l in localvars_after_alloca"
 
     gdb_test "backtrace 8" "#0.*localvars_after_alloca \[(\]+c=97 'a', s=1, i=2, l=3\[)\]+.*#1.*main" "backtrace after alloca"
+}
+
+proc call_after_alloca { } {
+    global prompt
+    global hex
+    global decimal
+
+    if { ! [ runto call_after_alloca_subr ] } then { return 0 }
+
+    # Print each arg as a double check to see if we can print
+    # them here as well as with backtrace.
+
+    gdb_test "print c" " = 97 'a'" "print c in call_after_alloca"
+    gdb_test "print s" " = 1" "print s in call_after_alloca"
+    gdb_test "print i" " = 2" "print i in call_after_alloca"
+    gdb_test "print l" " = 3" "print l in call_after_alloca"
+
+    gdb_test "backtrace 8" "#0.*call_after_alloca_subr \\(c=97 'a', s=1, i=2, l=3, uc=98 'b', us=11, ui=12, ul=13\\).*#1.*call_after_alloca \\(c=97 'a', s=1, i=2, l=3\\).*#2.*main" "backtrace from call_after_alloca_subr"
 }
 
 #
@@ -1166,17 +1109,18 @@ proc localvars_in_indirect_call { } {
 
     # break on the next call to call0a, then delete all the breakpoints
     # and start testing.
-    gdb_test "break call0a" "Breakpoint .*"
-    gdb_test "continue" "call0a .*"
+    gdb_test "break call0a" "Breakpoint .*" \
+	"break call0a in localvars_in_indirect_call"
+    gdb_test "continue" "call0a .*" "continue in localvars_in_indirect_call"
     delete_breakpoints
     
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
 
-    gdb_test "print c" " = 97 'a'"
-    gdb_test "print s" " = 1"
-    gdb_test "print i" " = 2"
-    gdb_test "print l" " = 3"
+    gdb_test "print c" " = 97 'a'" "print c in localvars_in_indirect_call"
+    gdb_test "print s" " = 1" "print s in localvars_in_indirect_call"
+    gdb_test "print i" " = 2" "print i in localvars_in_indirect_call"
+    gdb_test "print l" " = 3" "print l in localvars_in_indirect_call"
 
     gdb_test "backtrace 8" "#0.*call0a \[(\]+c=97 'a', s=1, i=2, l=3\[)\]+.*#1.*main" "backtrace in indirectly called function"
 
@@ -1197,6 +1141,10 @@ proc localvars_in_indirect_call { } {
 	}
 	-re "\[(\]+\[*\]+pointer_to_call0a\[)\]+ \[(\]+c, s, i, l\[)\]+;.*Second.*$prompt $" {
 	    pass "finish from indirectly called function"
+	}
+	-re ".*$prompt $" {
+	    fail "finish from indirectly called function"
+	    return
 	}
 	default { fail "finish from indirectly called function" ; return }
     }
@@ -1292,6 +1240,8 @@ funcargs_reload
 recursive_structs_by_value
 funcargs_reload
 localvars_after_alloca
+funcargs_reload
+call_after_alloca
 funcargs_reload
 localvars_in_indirect_call
 funcargs_reload

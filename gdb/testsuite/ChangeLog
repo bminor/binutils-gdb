@@ -1,3 +1,22 @@
+Fri Mar 10 02:49:40 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/funcargs.exp (call_after_alloca):  Remove `next'
+	test, it causes stepping out of call_after_alloca_subr with
+	optimizing compilers.
+	(localvars_in_indirect_call):  Consume GDB prompt if `finish'
+	fails.
+
+	* gdb.c++/misc.cc (class Contains_static_instance,
+	class Contains_nested_static_instance),
+	gdb.c++/classes.exp (test_static_members):  Test printing of
+	a class that contains a static instance of the class.
+
+Thu Mar  9 11:43:55 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/langs2.c (cppsub_): Don't prototype.
+	* gdb.base/langs2.cxx (cppsub_): Fix prototype (cosmetic value
+	only, I believe).
+
 Wed Mar  8 10:29:33 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* lib/gdb.exp (skip_chill_tests): New procedure.
