@@ -1,3 +1,7 @@
+2001-10-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* arm-linux-nat.c: Include <asm/ptrace.h> explicitly.
+
 2001-10-30  Keith Seitz  <keiths@redhat.com>
 
 	* wrapper.h (gdb_value_struct_elt): New function.

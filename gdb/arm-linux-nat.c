@@ -29,6 +29,8 @@
 #include <sys/utsname.h>
 #include <sys/procfs.h>
 
+#include <asm/ptrace.h>
+
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 
