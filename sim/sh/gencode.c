@@ -49,7 +49,7 @@ op tab[] =
 {
 
   { "n", "", "add #<imm>,<REG_N>", "0111nnnni8*1....",
-    "R[n] += SEXT(i);",
+    "R[n] += SEXT (i);",
     "if (i == 0) {",
     "  UNDEF(n); /* see #ifdef PARANOID */",
     "  break;",
@@ -85,7 +85,7 @@ op tab[] =
 
   { "", "", "bf <bdisp8>", "10001011i8p1....",
     "if (!T) {",
-    "  SET_NIP (PC + 4 + (SEXT(i) * 2));",
+    "  SET_NIP (PC + 4 + (SEXT (i) * 2));",
     "  cycles += 2;",
     "}",
   },
@@ -235,7 +235,7 @@ op tab[] =
   /* sh2e */
   { "", "", "fabs <FREG_N>", "1111nnnn01011101",
     "FP_UNARY (n, fabs);",
-    "/* FIXME: FR(n) &= 0x7fffffff; */",
+    "/* FIXME: FR (n) &= 0x7fffffff; */",
   },
 
   /* sh2e */
@@ -263,7 +263,7 @@ op tab[] =
     "    int i;",
     "    float f;",
     "  } u;",
-    "  u.f = DR(n);",
+    "  u.f = DR (n);",
     "  FPUL = u.i;",
     "}",
   },
@@ -280,7 +280,7 @@ op tab[] =
     "    float f;",
     "  } u;",
     "  u.i = FPUL;",
-    "  SET_DR(n, u.f);",
+    "  SET_DR (n, u.f);",
     "}",
   },
 
@@ -308,13 +308,13 @@ op tab[] =
 
   /* sh2e */
   { "", "", "fldi0 <FREG_N>", "1111nnnn10001101",
-    "SET_FR (n, (float)0.0);",
+    "SET_FR (n, (float) 0.0);",
     "/* FIXME: check for DP and (n & 1) == 0? */",
   },
 
   /* sh2e */
   { "", "", "fldi1 <FREG_N>", "1111nnnn10011101",
-    "SET_FR (n, (float)1.0);",
+    "SET_FR (n, (float) 1.0);",
     "/* FIXME: check for DP and (n & 1) == 0? */",
   },
 
@@ -325,7 +325,7 @@ op tab[] =
     "    int i;",
     "    float f;",
     "  } u;",
-    "  u.f = FR(n);",
+    "  u.f = FR (n);",
     "  FPUL = u.i;",
   },
 
@@ -333,16 +333,16 @@ op tab[] =
   { "", "", "float FPUL,<FREG_N>", "1111nnnn00101101",
     /* sh4 */
     "if (FPSCR_PR)",
-    "  SET_DR (n, (double)FPUL);",
+    "  SET_DR (n, (double) FPUL);",
     "else",
     "{",
-    "  SET_FR (n, (float)FPUL);",
+    "  SET_FR (n, (float) FPUL);",
     "}",
   },
 
   /* sh2e */
   { "", "", "fmac <FREG_0>,<FREG_M>,<FREG_N>", "1111nnnnmmmm1110",
-    "SET_FR (n, FR(m) * FR(0) + FR(n));",
+    "SET_FR (n, FR (m) * FR (0) + FR (n));",
     "/* FIXME: check for DP and (n & 1) == 0? */",
   },
 
@@ -370,7 +370,7 @@ op tab[] =
     "else",
     "{",
     "  MA (1);",
-    "  WLAT (R[n], FI(m));",
+    "  WLAT (R[n], FI (m));",
     "}",
   },
   /* sh2e */
@@ -383,7 +383,7 @@ op tab[] =
     "else",
     "{",
     "  MA (1);",
-    "  SET_FI(n, RLAT(R[m]));",
+    "  SET_FI (n, RLAT (R[m]));",
     "}",
   },
   /* sh2e */
@@ -413,7 +413,7 @@ op tab[] =
     "{",
     "  MA (1);",
     "  R[n] -= 4;",
-    "  WLAT (R[n], FI(m));",
+    "  WLAT (R[n], FI (m));",
     "}",
   },
   /* sh2e */
@@ -426,7 +426,7 @@ op tab[] =
     "else",
     "{",
     "  MA (1);",
-    "  SET_FI(n, RLAT(R[0] + R[m]));",
+    "  SET_FI (n, RLAT (R[0] + R[m]));",
     "}",
   },
   /* sh2e */
@@ -439,7 +439,7 @@ op tab[] =
     "else",
     "{",
     "  MA (1);",
-    "  WLAT((R[0]+R[n]), FI(m));",
+    "  WLAT ((R[0]+R[n]), FI (m));",
     "}",
   },
 
@@ -447,17 +447,17 @@ op tab[] =
 
   /* sh2e */
   { "", "", "fmul <FREG_M>,<FREG_N>", "1111nnnnmmmm0010",
-    "FP_OP(n, *, m);",
+    "FP_OP (n, *, m);",
   },
 
   /* sh2e */
   { "", "", "fneg <FREG_N>", "1111nnnn01001101",
-    "FP_UNARY(n, -);",
+    "FP_UNARY (n, -);",
   },
 
   /* sh4a */
   { "", "", "fpchg", "1111011111111101",
-    "SET_FPSCR (GET_FPSCR() ^ FPSCR_MASK_PR);",
+    "SET_FPSCR (GET_FPSCR () ^ FPSCR_MASK_PR);",
   },
 
   /* sh4 */
@@ -465,7 +465,7 @@ op tab[] =
     "if (FPSCR_PR)",
     "  RAISE_EXCEPTION (SIGILL);",
     "else",
-    "  SET_FPSCR (GET_FPSCR() ^ FPSCR_MASK_FR);",
+    "  SET_FPSCR (GET_FPSCR () ^ FPSCR_MASK_FR);",
   },
 
   /* sh4 */
@@ -481,12 +481,12 @@ op tab[] =
 
   /* sh4 */
   { "", "", "fschg", "1111001111111101",
-    "SET_FPSCR (GET_FPSCR() ^ FPSCR_MASK_SZ);",
+    "SET_FPSCR (GET_FPSCR () ^ FPSCR_MASK_SZ);",
   },
 
   /* sh3e */
   { "", "", "fsqrt <FREG_N>", "1111nnnn01101101",
-    "FP_UNARY(n, sqrt);",
+    "FP_UNARY (n, sqrt);",
   },
 
   /* sh4 */
@@ -499,23 +499,23 @@ op tab[] =
 
   /* sh2e */
   { "", "", "fsub <FREG_M>,<FREG_N>", "1111nnnnmmmm0001",
-    "FP_OP(n, -, m);",
+    "FP_OP (n, -, m);",
   },
 
   /* sh2e */
   { "", "", "ftrc <FREG_N>, FPUL", "1111nnnn00111101",
     /* sh4 */
     "if (FPSCR_PR) {",
-    "  if (DR(n) != DR(n)) /* NaN */",
+    "  if (DR (n) != DR (n)) /* NaN */",
     "    FPUL = 0x80000000;",
     "  else",
-    "    FPUL =  (int)DR(n);",
+    "    FPUL =  (int) DR (n);",
     "}",
     "else",
-    "if (FR(n) != FR(n)) /* NaN */",
+    "if (FR (n) != FR (n)) /* NaN */",
     "  FPUL = 0x80000000;",
     "else",
-    "  FPUL = (int)FR(n);",
+    "  FPUL = (int) FR (n);",
   },
 
   /* sh4 */
@@ -643,17 +643,17 @@ op tab[] =
   },
   { "n", "n", "lds.l @<REG_N>+,<SREG_M>", "0100nnnnssss0110",
     "MA (1);",
-    "SREG (m) = RLAT(R[n]);",
+    "SREG (m) = RLAT (R[n]);",
     "R[n] += 4;",
   },
   /* sh2e / sh-dsp (lds <REG_N>,DSR) */
   { "", "n", "lds <REG_N>,FPSCR", "0100nnnn01101010",
-    "SET_FPSCR(R[n]);",
+    "SET_FPSCR (R[n]);",
   },
   /* sh2e / sh-dsp (lds.l @<REG_N>+,DSR) */
   { "n", "n", "lds.l @<REG_N>+,FPSCR", "0100nnnn01100110",
     "MA (1);",
-    "SET_FPSCR (RLAT(R[n]));",
+    "SET_FPSCR (RLAT (R[n]));",
     "R[n] += 4;",
   },
 
@@ -662,15 +662,15 @@ op tab[] =
   },
 
   { "nm", "nm", "mac.l @<REG_M>+,@<REG_N>+", "0000nnnnmmmm1111",
-    "macl(&R0,memory,n,m);",
+    "macl (&R0,memory,n,m);",
   },
 
   { "nm", "nm", "mac.w @<REG_M>+,@<REG_N>+", "0100nnnnmmmm1111",
-    "macw(&R0,memory,n,m,endianw);",
+    "macw (&R0,memory,n,m,endianw);",
   },
 
   { "n", "", "mov #<imm>,<REG_N>", "1110nnnni8*1....",
-    "R[n] = SEXT(i);",
+    "R[n] = SEXT (i);",
   },
   { "n", "m", "mov <REG_M>,<REG_N>", "0110nnnnmmmm0011",
     "R[n] = R[m];",
@@ -890,13 +890,13 @@ op tab[] =
 
   /* muls.w - see muls */
   { "", "mn", "muls <REG_M>,<REG_N>", "0010nnnnmmmm1111",
-    "MACL = ((int)(short)R[n]) * ((int)(short)R[m]);",
+    "MACL = ((int) (short) R[n]) * ((int) (short) R[m]);",
   },
 
   /* mulu.w - see mulu */
   { "", "mn", "mulu <REG_M>,<REG_N>", "0010nnnnmmmm1110",
-    "MACL = (((unsigned int)(unsigned short)R[n])",
-    "        * ((unsigned int)(unsigned short)R[m]));",
+    "MACL = (((unsigned int) (unsigned short) R[n])",
+    "        * ((unsigned int) (unsigned short) R[m]));",
   },
 
   { "n", "m", "neg <REG_M>,<REG_N>", "0110nnnnmmmm1011",
@@ -1184,9 +1184,9 @@ op tab[] =
 
   { "", "n", "tas.b @<REG_N>", "0100nnnn00011011",
     "MA (1);",
-    "ult = RBAT(R[n]);",
+    "ult = RBAT (R[n]);",
     "SET_SR_T (ult == 0);",
-    "WBAT(R[n],ult|0x80);",
+    "WBAT (R[n],ult|0x80);",
   },
 
   { "0", "", "trapa #<imm>", "11000011i8*1....", 
@@ -1196,15 +1196,15 @@ op tab[] =
 #if 0
     "else {",
     /* SH-[12] */
-    "  R[15]-=4;",
-    "  WLAT (R[15], GET_SR());",
-    "  R[15]-=4;",
+    "  R[15] -= 4;",
+    "  WLAT (R[15], GET_SR ());",
+    "  R[15] -= 4;",
     "  WLAT (R[15], PH2T (PC + 2));",
 #else
     "else if (!SR_BL) {",
-    "  SSR = GET_SR();",
+    "  SSR = GET_SR ();",
     "  SPC = PH2T (PC + 2);",
-    "  SET_SR (GET_SR() | SR_MASK_MD | SR_MASK_BL | SR_MASK_RB);",
+    "  SET_SR (GET_SR () | SR_MASK_MD | SR_MASK_BL | SR_MASK_RB);",
     "  /* FIXME: EXPEVT = 0x00000160; */",
 #endif
     "  SET_NIP (PT2H (RLAT (VBR + (imm<<2))));",
@@ -1242,10 +1242,10 @@ op tab[] =
 
 #if 0
   { "divs.l <REG_M>,<REG_N>", "0100nnnnmmmm1110",
-    "divl(0,R[n],R[m]);",
+    "divl (0,R[n],R[m]);",
   },
   { "divu.l <REG_M>,<REG_N>", "0100nnnnmmmm1101",
-    "divl(0,R[n],R[m]);",
+    "divl (0,R[n],R[m]);",
   },
 #endif
 
@@ -2619,10 +2619,10 @@ gensim_caselist (p)
 		case '1':
 		  break;
 		case '2':
-		  printf ("<<1");
+		  printf (" << 1");
 		  break;
 		case '4':
-		  printf ("<<2");
+		  printf (" << 2");
 		  break;
 		}
 	      printf (";\n");
@@ -2631,27 +2631,27 @@ gensim_caselist (p)
 	}
       if (sextbit > 0)
 	{
-	  printf ("      i = (i ^ (1<<%d))-(1<<%d);\n",
+	  printf ("      i = (i ^ (1 << %d)) - (1 << %d);\n",
 		  sextbit - 1, sextbit - 1);
 	}
 
       if (needm && needn)
-	printf ("      TB(m,n);\n");  
+	printf ("      TB (m,n);\n");  
       else if (needm)
-	printf ("      TL(m);\n");
+	printf ("      TL (m);\n");
       else if (needn)
-	printf ("      TL(n);\n");
+	printf ("      TL (n);\n");
 
       {
 	/* Do the refs */
 	char *r;
 	for (r = p->refs; *r; r++)
 	  {
-	    if (*r == '0') printf("      CREF(0);\n"); 
-	    if (*r == '8') printf("      CREF(8);\n"); 
-	    if (*r == '9') printf("      CREF(9);\n"); 
-	    if (*r == 'n') printf("      CREF(n);\n"); 
-	    if (*r == 'm') printf("      CREF(m);\n"); 
+	    if (*r == '0') printf ("      CREF (0);\n"); 
+	    if (*r == '8') printf ("      CREF (8);\n"); 
+	    if (*r == '9') printf ("      CREF (9);\n"); 
+	    if (*r == 'n') printf ("      CREF (n);\n"); 
+	    if (*r == 'm') printf ("      CREF (m);\n"); 
 	  }
       }
 
@@ -2670,9 +2670,9 @@ gensim_caselist (p)
 	char *r;
 	for (r = p->defs; *r; r++) 
 	  {
-	    if (*r == '0') printf("      CDEF(0);\n"); 
-	    if (*r == 'n') printf("      CDEF(n);\n"); 
-	    if (*r == 'm') printf("      CDEF(m);\n"); 
+	    if (*r == '0') printf("      CDEF (0);\n"); 
+	    if (*r == 'n') printf("      CDEF (n);\n"); 
+	    if (*r == 'm') printf("      CDEF (m);\n"); 
 	  }
       }
 
@@ -2720,22 +2720,26 @@ gendefines ()
       char *s = p->name;
       printf ("#define OPC_");
       while (*s) {
-	if (isupper(*s)) 
-	  *s = tolower(*s);
-	if (isalpha(*s)) printf("%c", *s);
-	if (*s == ' ') printf("_");
-	if (*s == '@') printf("ind_");
-	if (*s == ',') printf("_");
+	if (isupper (*s)) 
+	  *s = tolower (*s);
+	if (isalpha (*s))
+	  printf ("%c", *s);
+	if (*s == ' ')
+	  printf ("_");
+	if (*s == '@')
+	  printf ("ind_");
+	if (*s == ',')
+	  printf ("_");
 	s++;
       }
-      printf(" %d\n",p->index);
+      printf (" %d\n",p->index);
     }
 }
 
 static int ppi_index;
 
 /* Take a ppi code, expand all varying fields in it and fill all the
-   right entries in 'table' with the opcode index.  
+   right entries in 'table' with the opcode index.
    NOTE: tail recursion optimization removed for simplicity.  */
 
 static void

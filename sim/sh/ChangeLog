@@ -1,5 +1,8 @@
 2004-01-07  Michael Snyder  <msnyder@redhat.com>
 
+	* gencode.c: Whitespace cleanup.
+	* interp.c: Ditto.
+
 	* gencode.c: Replace 'Hitachi' with 'Renesas'.
 	(op tab): Add new instructions for sh4a, DBR, SBR.
 	(expand_opcode): Add handling for new movxy combinations.
