@@ -1734,12 +1734,20 @@ map_sections_to_segments (abfd)
       && (dynsec->flags & SEC_LOAD) == 0)
     dynsec = NULL;
 
-  /* Deal with -Ttext or something similar such that the
-     first section is not adjacent to the program headers.  */
-  if (count
-      && ((sections[0]->lma % maxpagesize) <
-	  (elf_tdata (abfd)->program_header_size % maxpagesize)))
-    phdr_in_section = false;
+  /* Deal with -Ttext or something similar such that the first section
+     is not adjacent to the program headers.  This is an
+     approximation, since at this point we don't know exactly how many
+     program headers we will need.  */
+  if (count > 0)
+    {
+      bfd_size_type phdr_size;
+
+      phdr_size = elf_tdata (abfd)->program_header_size;
+      if (phdr_size == 0)
+	phdr_size = get_elf_backend_data (abfd)->s->sizeof_phdr;
+      if (sections[0]->lma % maxpagesize < phdr_size % maxpagesize)
+	phdr_in_section = false;
+    }
 
   for (i = 0, hdrpp = sections; i < count; i++, hdrpp++)
     {
@@ -2582,9 +2590,9 @@ _bfd_elf_section_from_bfd_section (abfd, asect)
 int
 _bfd_elf_symbol_from_bfd_symbol (abfd, asym_ptr_ptr)
      bfd *abfd;
-     struct symbol_cache_entry **asym_ptr_ptr;
+     asymbol **asym_ptr_ptr;
 {
-  struct symbol_cache_entry *asym_ptr = *asym_ptr_ptr;
+  asymbol *asym_ptr = *asym_ptr_ptr;
   int idx;
   flagword flags = asym_ptr->flags;
 
@@ -3316,3 +3324,101 @@ _bfd_elf_no_info_to_howto_rel (abfd, cache_ptr, dst)
   abort ();
 }
 #endif
+
+/* Try to convert a non-ELF reloc into an ELF one.  */
+
+boolean
+_bfd_elf_validate_reloc (abfd, areloc)
+     bfd *abfd;
+     arelent *areloc;
+{
+  /* Check whether we really have an ELF howto. */
+
+  if ((*areloc->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec) 
+    {
+      bfd_reloc_code_real_type code;
+      reloc_howto_type *howto;
+      
+      /* Alien reloc: Try to determine its type to replace it with an
+	 equivalent ELF reloc. */
+
+      if (areloc->howto->pc_relative)
+	{
+	  switch (areloc->howto->bitsize)
+	    {
+	    case 8:
+	      code = BFD_RELOC_8_PCREL; 
+	      break;
+	    case 12:
+	      code = BFD_RELOC_12_PCREL; 
+	      break;
+	    case 16:
+	      code = BFD_RELOC_16_PCREL; 
+	      break;
+	    case 24:
+	      code = BFD_RELOC_24_PCREL; 
+	      break;
+	    case 32:
+	      code = BFD_RELOC_32_PCREL; 
+	      break;
+	    case 64:
+	      code = BFD_RELOC_64_PCREL; 
+	      break;
+	    default:
+	      goto fail;
+	    }
+
+	  howto = bfd_reloc_type_lookup (abfd, code);
+
+	  if (areloc->howto->pcrel_offset != howto->pcrel_offset)
+	    {
+	      if (howto->pcrel_offset)
+		areloc->addend += areloc->address;
+	      else
+		areloc->addend -= areloc->address; /* addend is unsigned!! */
+	    }
+	}
+      else
+	{
+	  switch (areloc->howto->bitsize)
+	    {
+	    case 8:
+	      code = BFD_RELOC_8; 
+	      break;
+	    case 14:
+	      code = BFD_RELOC_14; 
+	      break;
+	    case 16:
+	      code = BFD_RELOC_16; 
+	      break;
+	    case 26:
+	      code = BFD_RELOC_26; 
+	      break;
+	    case 32:
+	      code = BFD_RELOC_32; 
+	      break;
+	    case 64:
+	      code = BFD_RELOC_64; 
+	      break;
+	    default:
+	      goto fail;
+	    }
+
+	  howto = bfd_reloc_type_lookup (abfd, code);
+	}
+
+      if (howto)
+	areloc->howto = howto;
+      else
+	goto fail;
+    }
+
+  return true;
+
+ fail:
+  (*_bfd_error_handler)
+    ("%s: unsupported relocation type %s",
+     bfd_get_filename (abfd), areloc->howto->name);
+  bfd_set_error (bfd_error_bad_value);
+  return false;
+}

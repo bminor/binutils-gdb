@@ -1,5 +1,8 @@
 Wed Jun 19 11:37:52 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (map_sections_to_segments): Fix up the test for -Ttext to
+	approximate the correct answer if SIZEOF_HEADERS was not used.
+
 	* binary.c (binary_set_section_contents): Set section file
 	position based on LMA rather than VMA.
 
