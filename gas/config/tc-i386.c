@@ -1413,6 +1413,8 @@ md_assemble (line)
 
   if (i.tm.opcode_modifier & ImmExt)
     {
+      expressionS *exp;
+
       if ((i.tm.cpu_flags & CpuPNI) && i.operands > 0)
 	{
           /* These Intel Precott New Instructions have the fixed
@@ -1432,8 +1434,6 @@ md_assemble (line)
 	 opcode suffix which is coded in the same place as an 8-bit
 	 immediate field would be.  Here we fake an 8-bit immediate
 	 operand from the opcode suffix stored in tm.extension_opcode.  */
-
-      expressionS *exp;
 
       assert (i.imm_operands == 0 && i.operands <= 2 && 2 < MAX_OPERANDS);
 

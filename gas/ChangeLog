@@ -1,3 +1,7 @@
+2003-06-26  H.J. Lu <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_assemble): Declare "exp" before "if".
+
 2003-06-25  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-h8300.c (get_specific): Allow ':8' to be used for
