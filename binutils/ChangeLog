@@ -1,3 +1,12 @@
+2003-07-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c: Remove unnecessary prototypes.
+	(disassemble_bytes): Add rel_offset parameter.  Simplify reloc skipping
+	code, and print relocs when dump_dynamic_reloc_info.
+	(disassemble_data): Read and handle dynamic relocs.  Correct reloc
+	skip code.  Formatting.
+	(dump_bfd): Don't dump dynamic relocs when disassembling.
+
 2003-07-29  Ben Elliston  <bje@wasabisystems.com>
 
 	* MAINTAINERS: Remove self as M88k maintainer.  Future M88k
