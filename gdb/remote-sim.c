@@ -700,9 +700,8 @@ gdbsim_wait (pid, status)
     prev_sigint = osa.sa_handler;
   }
 #else
-  prev_sigint = signal (SIGINT, cntrl_c);
-#endif
   prev_sigint = signal (SIGINT, gdbsim_cntrl_c);
+#endif
   sim_resume (gdbsim_desc, resume_step,
 	      target_signal_to_host (resume_siggnal));
   signal (SIGINT, prev_sigint);

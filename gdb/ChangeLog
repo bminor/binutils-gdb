@@ -1,5 +1,9 @@
 Mon Dec 15 15:13:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* remote-sim.c (gdbsim_wait): When HAVE_SIGACTION and SA_RESTART
+ 	intall cntrl-c handler with SA_RESTART clear.  On BSD systems this
+ 	stops read syscalls's being restarted.
+
 	* configure.in (configdirs): Check for sigaction.
 	* configure: Re-generate.
 
