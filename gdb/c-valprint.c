@@ -30,6 +30,26 @@
 #include "c-lang.h"
 
 
+/* Print function pointer with inferior address ADDRESS onto stdio
+   stream STREAM.  */
+
+static void
+print_function_pointer_address (CORE_ADDR address, struct ui_file *stream)
+{
+  CORE_ADDR func_addr = CONVERT_FROM_FUNC_PTR_ADDR (address);
+
+  /* If the function pointer is represented by a description, print the
+     address of the description.  */
+  if (addressprint && func_addr != address)
+    {
+      fputs_filtered ("@", stream);
+      print_address_numeric (address, 1, stream);
+      fputs_filtered (": ", stream);
+    }
+  print_address_demangle (func_addr, stream, demangle);
+}
+
+
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
    the inferior at address ADDRESS, onto stdio stream STREAM according to
    FORMAT (a letter or 0 for natural format).  The data at VALADDR is in
@@ -129,7 +149,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.) */
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
-	  print_address_demangle (addr, stream, demangle);
+	  print_function_pointer_address (addr, stream);
 	  break;
 	}
       elttype = check_typedef (TYPE_TARGET_TYPE (type));
@@ -152,7 +172,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
 	      /* Try to print what function it points to.  */
-	      print_address_demangle (addr, stream, demangle);
+	      print_function_pointer_address (addr, stream);
 	      /* Return value is irrelevant except for string pointers.  */
 	      return (0);
 	    }
@@ -294,7 +314,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + offset, field_type);
 
-	  print_address_demangle (addr, stream, demangle);
+	  print_function_pointer_address (addr, stream);
 	}
       else
 	cp_print_value_fields (type, type, valaddr, embedded_offset, address, stream, format,

@@ -1,3 +1,11 @@
+2000-11-20  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* c-valprint.c (print_function_pointer_address):  New function
+	to automatically dereference a function pointer for printing
+	if necessary.
+	(c_val_print):  Use print_function_pointer_address when printing
+	function pointer addresses.
+
 2000-11-20  J.T. Conklin  <jtc@redback.com>
 
 	* gdbserver/low-nbsd.c: Fix typos.
