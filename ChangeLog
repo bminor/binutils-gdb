@@ -1,3 +1,7 @@
+Sat Mar 15 22:50:15 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config.sub: Add BeOS support.
+
 Mon Mar 10 13:30:11 1997  Tom Tromey  <tromey@cygnus.com>
 
 	* Makefile.in (CHECK_X11_MODULES): Don't run check-tk.
@@ -7,7 +11,7 @@ Wed Mar  5 12:09:29 1997  Martin  <hunt@cygnus.com>
 	* configure.in (noconfigdirs): Remove tcl and tk from
 	noconfigdirs for cygwin32 builds.
 
-start-sanitize-d30v
+start-sanitize-tic80
 Fri Feb 28 18:20:15 1997  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in (tic80-*-*): Remove ld from noconfigdirs.
@@ -22,6 +26,7 @@ Tue Feb 25 18:46:14 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config.sub: Accept -lnews*.
 
+start-sanitize-d30v
 Tue Feb 25 13:19:14 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
 
 	* configure.in (noconfigdirs): Disable target-newlib,
@@ -44,10 +49,12 @@ Tue Feb 25 11:41:51 1997  Tom Tromey  <tromey@cygnus.com>
 	(INSTALL_MODULES): Added install-sn.
 	(CLEAN_MODULES): Added clean-sn.
 
+end-sanitize-tic80
 start-sanitize-d30v
 Fri Feb 21 17:56:25 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* configure.in (noconfigdirs): Enable ld for d30v.
+
 end-sanitize-d30v
 start-sanitize-tic80
 Fri Feb 21 20:58:51 1997  Michael Meissner  <meissner@cygnus.com>
