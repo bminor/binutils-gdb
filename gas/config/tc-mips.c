@@ -24,6 +24,7 @@
 #include "as.h"
 #include "config.h"
 #include "subsegs.h"
+#include "libiberty.h"
 
 #include <ctype.h>
 
@@ -51,6 +52,8 @@ static char *mips_regmask_frag;
 
 #define AT  1
 #define PIC_CALL_REG 25
+#define KT0 26
+#define KT1 27
 #define GP  28
 #define SP  29
 #define FP  30
@@ -117,6 +120,9 @@ static int file_mips_isa;
 
 /* The CPU type as a number: 2000, 3000, 4000, 4400, etc.  */
 static int mips_cpu = -1;
+
+/* Whether the 4650 instructions (mad/madu) are permitted.  */
+static int mips_4650 = -1;
 
 /* MIPS PIC level.  */
 
@@ -561,6 +567,14 @@ md_begin ()
 	  if (mips_cpu == -1)
 	    mips_cpu = 4600;
 	}
+      else if (strcmp (cpu, "r4650") == 0)
+	{
+	  mips_isa = 3;
+	  if (mips_cpu == -1)
+	    mips_cpu = 4650;
+	  if (mips_4650 == -1)
+	    mips_4650 = 1;
+	}
       else
 	{
 	  mips_isa = 1;
@@ -571,6 +585,9 @@ md_begin ()
       if (a != NULL)
 	free (a);
     }
+
+  if (mips_4650 < 0)
+    mips_4650 = 0;
 
   if (mips_isa < 2 && mips_trap)
     as_bad ("trap exception not supported at ISA 1");
@@ -892,18 +909,20 @@ append_insn (place, ip, address_expr, reloc_type)
 	{
 	  /* The previous instruction reads the LO register; if the
 	     current instruction writes to the LO register, we must
-	     insert two NOPS.  */
-	  if (mips_optimize == 0
-	      || (pinfo & INSN_WRITE_LO))
+	     insert two NOPS.  The R4650 has interlocks.  */
+	  if (! mips_4650
+	      && (mips_optimize == 0
+		  || (pinfo & INSN_WRITE_LO)))
 	    nops += 2;
 	}
       else if (prev_insn.insn_mo->pinfo & INSN_READ_HI)
 	{
 	  /* The previous instruction reads the HI register; if the
 	     current instruction writes to the HI register, we must
-	     insert a NOP.  */
-	  if (mips_optimize == 0
-	      || (pinfo & INSN_WRITE_HI))
+	     insert a NOP.  The R4650 has interlocks.  */
+	  if (! mips_4650
+	      && (mips_optimize == 0
+		  || (pinfo & INSN_WRITE_HI)))
 	    nops += 2;
 	}
 
@@ -911,18 +930,20 @@ append_insn (place, ip, address_expr, reloc_type)
 	 instructions: 1) setting the condition codes using a move to
 	 coprocessor instruction which requires a general coprocessor
 	 delay and then reading the condition codes 2) reading the HI
-	 or LO register and then writing to it.  If we are not already
-	 emitting a NOP instruction, we must check for these cases
-	 compared to the instruction previous to the previous
-	 instruction.  */
+	 or LO register and then writing to it (except on the R4650,
+	 which has interlocks).  If we are not already emitting a NOP
+	 instruction, we must check for these cases compared to the
+	 instruction previous to the previous instruction.  */
       if (nops == 0
 	  && (((prev_prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
 	       && (prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
 	       && (pinfo & INSN_READ_COND_CODE))
 	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
-		  && (pinfo & INSN_WRITE_LO))
+		  && (pinfo & INSN_WRITE_LO)
+		  && ! mips_4650)
 	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
-		  && (pinfo & INSN_WRITE_HI))))
+		  && (pinfo & INSN_WRITE_HI)
+		  && ! mips_4650)))
 	++nops;
 
       /* If we are being given a nop instruction, don't bother with
@@ -1079,9 +1100,11 @@ append_insn (place, ip, address_expr, reloc_type)
 	      || (prev_pinfo
 		  & (INSN_LOAD_COPROC_DELAY
 		     | INSN_COPROC_MOVE_DELAY
-		     | INSN_WRITE_COND_CODE
-		     | INSN_READ_LO
-		     | INSN_READ_HI))
+		     | INSN_WRITE_COND_CODE))
+	      || (! mips_4650
+		  && (prev_pinfo
+		      & (INSN_READ_LO
+			 | INSN_READ_HI)))
 	      || (mips_isa < 2
 		  && (prev_pinfo
 		      & (INSN_LOAD_MEMORY_DELAY
@@ -1265,9 +1288,11 @@ mips_emit_delays ()
       if ((prev_insn.insn_mo->pinfo
 	   & (INSN_LOAD_COPROC_DELAY
 	      | INSN_COPROC_MOVE_DELAY
-	      | INSN_WRITE_COND_CODE
-	      | INSN_READ_LO
-	      | INSN_READ_HI))
+	      | INSN_WRITE_COND_CODE))
+	  || (! mips_4650
+	      && (prev_insn.insn_mo->pinfo
+		  & (INSN_READ_LO
+		     | INSN_READ_HI)))
 	  || (mips_isa < 2
 	      && (prev_insn.insn_mo->pinfo
 		  & (INSN_LOAD_MEMORY_DELAY
@@ -1275,13 +1300,15 @@ mips_emit_delays ()
 	{
 	  nop = 1;
 	  if ((prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
-	      || (prev_insn.insn_mo->pinfo & INSN_READ_HI)
-	      || (prev_insn.insn_mo->pinfo & INSN_READ_LO))
+	      || (! mips_4650
+		  && ((prev_insn.insn_mo->pinfo & INSN_READ_HI)
+		      || (prev_insn.insn_mo->pinfo & INSN_READ_LO))))
 	    emit_nop ();
 	}
       else if ((prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
-	       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
-	       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_LO))
+	       || (! mips_4650
+		   && ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
+		       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_LO))))
 	nop = 1;
       if (nop)
 	{
@@ -1814,6 +1841,7 @@ macro (ip)
   int likely = 0;
   int dbl = 0;
   int coproc = 0;
+  int lr = 0;
   offsetT maxnum;
   bfd_reloc_code_real_type r;
   char *p;
@@ -2821,9 +2849,11 @@ macro (ip)
       goto ld;
     case M_LWL_AB:
       s = "lwl";
+      lr = 1;
       goto ld;
     case M_LWR_AB:
       s = "lwr";
+      lr = 1;
       goto ld;
     case M_LDC1_AB:
       s = "ldc1";
@@ -2839,9 +2869,11 @@ macro (ip)
       goto ld;
     case M_LDL_AB:
       s = "ldl";
+      lr = 1;
       goto ld;
     case M_LDR_AB:
       s = "ldr";
+      lr = 1;
       goto ld;
     case M_LL_AB:
       s = "ll";
@@ -2852,7 +2884,7 @@ macro (ip)
     case M_LWU_AB:
       s = "lwu";
     ld:
-      if (breg == treg || coproc)
+      if (breg == treg || coproc || lr)
 	{
 	  tempreg = AT;
 	  used_at = 1;
@@ -4186,14 +4218,16 @@ mips_ip (str, ip)
 
       if (insn->pinfo == INSN_MACRO)
 	insn_isa = insn->match;
-      else if (insn->pinfo & INSN_ISA2)
+      else if ((insn->pinfo & INSN_ISA) == INSN_ISA2)
 	insn_isa = 2;
-      else if (insn->pinfo & INSN_ISA3)
+      else if ((insn->pinfo & INSN_ISA) == INSN_ISA3)
 	insn_isa = 3;
       else
 	insn_isa = 1;
 
-      if (insn_isa > mips_isa)
+      if (insn_isa > mips_isa
+	  || ((insn->pinfo & INSN_ISA) == INSN_4650
+	      && ! mips_4650))
 	{
 	  if (insn + 1 < &mips_opcodes[NUMOPCODES]
 	      && strcmp (insn->name, insn[1].name) == 0)
@@ -4386,6 +4420,16 @@ mips_ip (str, ip)
 			{
 			  s += 3;
 			  regno = AT;
+			}
+		      else if (s[1] == 'k' && s[2] == 't' && s[3] == '0')
+			{
+			  s += 4;
+			  regno = KT0;
+			}
+		      else if (s[1] == 'k' && s[2] == 't' && s[3] == '1')
+			{
+			  s += 4;
+			  regno = KT1;
 			}
 		      else
 			goto notreg;
@@ -5035,6 +5079,10 @@ struct option md_longopts[] = {
   {"EB", no_argument, NULL, OPTION_EB},
 #define OPTION_EL (OPTION_MD_BASE + 11)
   {"EL", no_argument, NULL, OPTION_EL},
+#define OPTION_M4650 (OPTION_MD_BASE + 12)
+  {"m4650", no_argument, NULL, OPTION_M4650},
+#define OPTION_NO_M4650 (OPTION_MD_BASE + 13)
+  {"no-m4650", no_argument, NULL, OPTION_NO_M4650},
 
 #ifdef OBJ_ELF
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 6)
@@ -5159,6 +5207,12 @@ md_parse_option (c, arg)
 		  mips_cpu = 4400;
 		else if (strcmp (p, "4600") == 0)
 		  mips_cpu = 4600;
+		else if (strcmp (p, "4650") == 0)
+		  {
+		    mips_cpu = 4650;
+		    if (mips_4650 < 0)
+		      mips_4650 = 1;
+		  }
 		break;
 
 	      case '6':
@@ -5181,6 +5235,14 @@ md_parse_option (c, arg)
 	      }
 	  }
       }
+      break;
+
+    case OPTION_M4650:
+      mips_4650 = 1;
+      break;
+
+    case OPTION_NO_M4650:
+      mips_4650 = 0;
       break;
 
     case OPTION_MEMBEDDED_PIC:

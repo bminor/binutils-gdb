@@ -1,4 +1,12 @@
+Wed Feb 15 11:46:02 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (macro): Don't use the target register as a
+	base register when building the address for M_L{W,D}{L,R}_AB.
+
 Mon Feb 13 14:44:32 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (KT0, KT1): Define.
+	(mips_ip): Recognize $kt0 and $kt1 as register names.
 
 	* config/tc-sparc.h (tc_fix_adjustable): Define if OBJ_ELF.
 	* config/tc-sparc.c (md_apply_fix): If OBJ_ELF, subtract out the
