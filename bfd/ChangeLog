@@ -1,3 +1,9 @@
+Sun Jul  2 17:49:32 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Cast base_file
+	to FILE * before using it.
+	* stab-syms.c: Revert yesterday's patch.
+
 Sat Jul  1 12:10:42 1995  Fred Fish  <fnf@cygnus.com>
 
 	* stab-syms.c (stdio.h):  Include prior to libaout.h, which

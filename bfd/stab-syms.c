@@ -21,7 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 
 #define ARCH_SIZE 32		/* Value doesn't matter. */
-#include <stdio.h>		/* Required by bfdlink.h, from libaout.h */
 #include "libaout.h"
 #include "aout/aout64.h"
 

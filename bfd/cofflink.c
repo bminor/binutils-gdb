@@ -2471,7 +2471,7 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	      bfd_vma addr = rel->r_vaddr 
 		+ input_section->output_offset 
 		  + input_section->output_section->vma;
-	      fwrite (&addr, 1,4, info->base_file);
+	      fwrite (&addr, 1,4, (FILE *) info->base_file);
 	    }
 	}
   
