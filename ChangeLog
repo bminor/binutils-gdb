@@ -1,3 +1,7 @@
+Tue Mar  5 08:21:44 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in (m68k-*-netbsd*): Build everything now.
+
 Wed Feb 28 12:25:46 1996  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* Makefile.in (taz): Fix quoting.

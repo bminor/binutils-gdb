@@ -460,9 +460,6 @@ case "${target}" in
   rs6000-*-*)
     noconfigdirs="$noconfigdirs gprof"
     ;;
-  m68k-*-netbsd*)
-    noconfigdirs="$noconfigdirs gdb"
-    ;;
   m68k-apollo-*)
     noconfigdirs="$noconfigdirs ld binutils gprof"
     ;;
