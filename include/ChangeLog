@@ -1,3 +1,20 @@
+Tue Sep 17 07:52:59 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* stab.def (N_DEFD):  Add GNU Modula-2 debug stab, from Andrew
+	Beers.
+
+Thu Sep 12 14:12:59 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* internalcoff.h (SYMNMLEN, FILNMLEN, DIMNUM):  Define these
+	for internalcoff, separately from the various external coff's.
+	* amdcoff.h, bcs88kcoff.h, i386coff.h, intel-coff.h, m68kcoff.h,
+	m88k-bcs.h: Prefix SYMNMLEN, FILNMLEN, and DIMNUM with E_'s for
+	the external struct definitions.
+	* ecoff.h: Remove these #define's, kludge no longer needed.
+
+	* sys/h-ultra3.h:  Add new Ultracomputer host.
+	* sysdep.h:  Add ULTRA3_SYM1_SYS and use it.
+
 Tue Sep 10 10:11:46 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* i386coff.h (LINESZ):  Always 6, not based on sizeof().

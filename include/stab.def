@@ -70,6 +70,12 @@ __define_stab (N_BSLINE, 0x48, "BSLINE")
    OVERLAPS WITH N_BSLINE!  */
 __define_stab (N_BROWS, 0x48, "BROWS")
 
+/* GNU Modula-2 definition module dependency.  Value is the modification time
+   of the definition file.  Other is non-zero if it is imported with the
+   GNU M2 keyword %INITIALIZE.  Perhaps N_M2C can be used if there
+   are enough empty fields? */
+__define_stab(N_DEFD, 0x4a, "DEFD")
+
 /* THE FOLLOWING TWO STAB VALUES CONFLICT.  Happily, one is for Modula-2
    and one is for C++.   Still,... */
 /* GNU C++ exception variable.  Name is variable name.  */
@@ -177,7 +183,7 @@ __define_stab (N_LENG, 0xfe, "LENG")
 	| 30 PC	    | 32 NSYMS	| 34 NOMAP  | 36	|
 	| 38	    | 3A	| 3C	    | 3E	|
 	| 40 RSYM   | 42 M2C	| 44 SLINE  | 46 DSLINE |
-	| 48 BSLINE*| 4A	| 4C        | 4E	|
+	| 48 BSLINE*| 4A DEFD	| 4C        | 4E	|
 	| 50 EHDECL*| 52	| 54 CATCH  | 56        |
 	| 58        | 5A        | 5C        | 5E	|
 	| 60 SSYM   | 62	| 64 SO	    | 66 	|
