@@ -195,15 +195,15 @@ void yyerror (char *);
 static int parse_number (char *, int, int, YYSTYPE *);
 %}
 
-%type <comp> exp exp1 type start operator qualified
+%type <comp> exp exp1 type start operator colon_name
 %type <comp> unqualified_name scope_id ext_name colon_ext_name
 %type <comp> template template_arg basic_exp
-%type <comp> /* base_function typed_function */ colon_name
 %type <comp> builtin_type function_arglist
-%type <comp> decl1b
+%type <comp> typespec abstract_declarator direct_abstract_declarator
+%type <comp> declarator direct_declarator typespec_2
 
 %type <nested> template_params function_args
-%type <nested> ptr_operator_1 ptr_operator_2 ptr_operator ptr_operator_seq
+%type <nested> ptr_operator ptr_operator_seq
 
 %type <nested1> nested_name
 
@@ -234,8 +234,15 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %token TRUEKEYWORD
 %token FALSEKEYWORD
 
-/* i.e., lower precedence than COLONCOLON.  */
+/* Precedence declarations.  */
+
+/* Give NAME lower precedence than COLONCOLON, so that nested_name will
+   associate greedily.  */
 %nonassoc NAME
+
+/* Give NEW and DELETE higher precedence than '[', because we can not
+   have an array of type operator new.  */
+%nonassoc NEW DELETE
 
 %left ','
 %right '=' ASSIGN_MODIFY
@@ -260,8 +267,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 
 start		:	type
 			{ result = $1; }
-		|	qualified
-			{ result = $1; }
+		|	typespec_2 declarator
 		;
 
 operator	:	OPERATOR NEW
@@ -330,11 +336,11 @@ operator	:	OPERATOR NEW
 			{ $$ = d_op_from_string ("->*"); }
 		|	OPERATOR '[' ']'
 			{ $$ = d_op_from_string ("[]"); }
-/* FIXME conversion operators are sorta important */
-/*
-		|	OPERATOR type
+/* FIXME actions */
+		|	OPERATOR typespec
 			{ $$ = d_make_node (di, D_COMP_CAST, $2, NULL); }
-*/
+		|	OPERATOR typespec ptr_operator_seq
+			{ $$ = d_make_node (di, D_COMP_CAST, $2, NULL); }
 		;
 
 /* D_COMP_NAME */
@@ -446,48 +452,6 @@ function_arglist:	'(' function_args ')' qualifiers_opt
 			  $$ = d_qualify ($$, $3, 1); }
 		;
 
-/*
-base_function	:	ext_name '(' function_args ')'
-			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1,
-					    d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, $3.comp)); }
-		|	ext_name '(' ')'
-			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1,
-					    d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, NULL)); }
-		;
-
-typed_function	:	type base_function
-			{ $$ = $2; d_left (d_right ($2)) = $1; }
-		|	type1a COLONCOLON base_function
-			{ $$ = $3; d_left (d_right ($3)) = $1; }
-		;
-*/
-
-/* FIXME actions all wrong */
-qualified	:	ext_name function_arglist
-		{}
-		|	type ext_name function_arglist
-		{}
-		|	type COLONCOLON ext_name function_arglist
-		{}
-		|	decl1b function_arglist
-		{}
-		;
-/* base_function qualifiers_opt 
-			{ $$ = $1;
-			  d_left ($$) = d_qualify (d_left ($$), $2, 1); }
-*/
-/*
-		|	COLONCOLON base_function qualifiers_opt
-			{ $$ = $2;
-			  d_left ($$) = d_qualify (d_left ($$), $3, 1); }
-*/
-/*
-		|	typed_function qualifiers_opt
-			{ $$ = $1;
-			  d_left ($$) = d_qualify (d_left ($$), $2, 1); }
-		;
-*/
-
 /* Should do something about D_COMP_VENDOR_TYPE_QUAL */
 qualifiers_opt	:	/* epsilon */
 			{ $$ = 0; }
@@ -571,11 +535,12 @@ builtin_type	:	int_type
 			{ $$ = d_make_builtin_type (di, &d_builtin_types['v' - 'a']); }
 		;
 
-ptr_operator_1	:	'*' qualifiers_opt
+ptr_operator	:	'*' qualifiers_opt
 			{ $$.comp = d_make_empty (di, D_COMP_POINTER);
 			  $$.comp->u.s_binary.left = $$.comp->u.s_binary.right = NULL;
 			  $$.last = &d_left ($$.comp);
 			  $$.comp = d_qualify ($$.comp, $2, 0); }
+		/* g++ seems to allow qualifiers after the reference?  */
 		|	'&'
 			{ $$.comp = d_make_empty (di, D_COMP_REFERENCE);
 			  $$.comp->u.s_binary.left = $$.comp->u.s_binary.right = NULL;
@@ -588,9 +553,7 @@ ptr_operator_1	:	'*' qualifiers_opt
 			  $$.comp->u.s_binary.right = NULL;
 			  $$.last = &d_right ($$.comp);
 			  $$.comp = d_qualify ($$.comp, $3, 0); }
-		;
-
-ptr_operator_2	:	COLONCOLON nested_name '*' qualifiers_opt
+		|	COLONCOLON nested_name '*' qualifiers_opt
 			{ $$.comp = d_make_empty (di, D_COMP_PTRMEM_TYPE);
 			  $$.comp->u.s_binary.left = $2.comp;
 			  /* Convert the innermost D_COMP_QUAL_NAME to a D_COMP_NAME.  */
@@ -600,10 +563,6 @@ ptr_operator_2	:	COLONCOLON nested_name '*' qualifiers_opt
 			  $$.comp = d_qualify ($$.comp, $4, 0); }
 		;
 
-ptr_operator	:	ptr_operator_1
-		|	ptr_operator_2
-		;
-
 ptr_operator_seq:	ptr_operator
 		|	ptr_operator_seq ptr_operator
 			{ $$.comp = $1.comp;
@@ -611,66 +570,56 @@ ptr_operator_seq:	ptr_operator
 			  *$1.last = $2.comp; }
 		;
 
-type		:	builtin_type qualifiers_opt
-			{ $$ = d_qualify ($1, $2, 0); }
-		|	qualifiers builtin_type qualifiers_opt
-			{ $$ = d_qualify ($2, $1 | $3, 0); }
-		|	colon_name qualifiers
-			{ $$ = d_qualify ($1, $2, 0); }
-		|	qualifiers colon_name qualifiers
-			{ $$ = d_qualify ($2, $1 | $3, 0); }
+/* Details of this approach inspired by the G++ < 3.4 parser.  */
 
-		|	type ptr_operator_1
-			{ $$ = $2.comp;
-			  *$2.last = $1; }
-/*
-		|	type qualifier
-			{ $$ = d_qualify ($1, $2, 0); }
-*/
-		|	type '[' ']'
-			{ $$ = d_make_comp (di, D_COMP_ARRAY_TYPE, $1, NULL); }
-		|	type '[' INT ']'
-			{ struct d_comp *i;
-			  /* FIXME: Blatant memory leak.  */
-			  char *buf = malloc (24);
-			  sprintf (buf, "%d", (int) $3.val);
-			  i = d_make_name (di, buf, strlen (buf));
-			  $$ = d_make_comp (di, D_COMP_ARRAY_TYPE, $1,
-					    d_make_comp (di, D_COMP_LITERAL, $3.type, i));
-			}
-		|	qualifiers colon_name
-			{ $$ = d_qualify ($2, $1, 0); }
-		|	name
-		|	type ptr_operator_2
-			{ $$ = d_make_comp (di, D_COMP_POINTER, $1, NULL); }
-
-		/* FIXME this comment is completely wrong; this is not allowing, it's rejecting */
-		/* This ext_name and the one below for
-		   pointer-to-member-function should normally be
-		   "type" instead.  That causes a reduce/reduce
-		   conflict.  Allow a few invalid inputs to keep life
-		   simple.  */
-		|	ext_name '(' ptr_operator_seq ')' '(' function_args ')'
-			{ struct d_comp *funtype;
-			  funtype = d_make_comp (di, D_COMP_FUNCTION_TYPE, $1, $6.comp);
-			  $$ = $3.comp;
-			  *$3.last = funtype; }
+typespec	:	builtin_type
+		|	colon_name
 		;
 
-/* FIXME ACTION is quite wrong; need a new type for identifiers? */
-decl1b		:	ext_name '(' ptr_operator_seq ext_name '(' function_args ')' ')'
-			{ struct d_comp *funtype;
-			  funtype = d_make_comp (di, D_COMP_FUNCTION_TYPE, $1, $6.comp);
-			  *$3.last = funtype;
-			  $$ = d_make_comp (di, D_COMP_TYPED_NAME, $4, $3.comp); }
+typespec_2	:	typespec qualifiers_opt
+			{ $$ = d_qualify ($1, $2, 0); }
+		|	qualifiers typespec qualifiers_opt
+			{ $$ = d_qualify ($2, $1 | $3, 0); }
+		;
 
-/*
-		|	COLONCOLON ext_name '(' ptr_operator_seq ')' '(' function_args ')'
-			{ struct d_comp *funtype;
-			  funtype = d_make_comp (di, D_COMP_FUNCTION_TYPE, $2, $7.comp);
-			  $$ = $4.comp;
-			  *$4.last = funtype; }
-*/
+abstract_declarator
+		:	ptr_operator
+		|	ptr_operator abstract_declarator
+		|	direct_abstract_declarator
+		;
+
+direct_abstract_declarator
+		:	'(' abstract_declarator ')'
+		|	direct_abstract_declarator '(' function_arglist ')' qualifiers_opt
+		|	direct_abstract_declarator '[' ']'
+		|	direct_abstract_declarator '[' INT ']'
+		|	'[' ']'
+		|	'[' INT ']'
+		/* G++ has the following except for () and (type).  Then
+		   (type) is handled in regcast_or_absdcl and () is handled
+		   in fcast_or_absdcl.  */
+		/* However, this is only useful for function types, and
+		   generates reduce/reduce conflicts with direct_declarators.
+		   We're interested in pointer-to-function types, and in
+		   functions, but not in function types - so leave this
+		   out.  */
+		/* |	'(' function_arglist ')' qualifiers_opt */
+		;
+
+type		:	typespec_2
+		|	typespec_2 abstract_declarator
+		;
+
+declarator	:	ptr_operator declarator
+		|	direct_declarator
+		;
+
+direct_declarator
+		:	'(' declarator ')'
+		|	direct_declarator '(' function_arglist ')' qualifiers_opt
+		|	direct_declarator '[' ']'
+		|	direct_declarator '[' INT ']'
+		|	colon_ext_name
 		;
 
 basic_exp	:	exp
@@ -735,10 +684,12 @@ exp	:	REINTERPRET_CAST '<' type '>' '(' exp1 ')' %prec UNARY
 	;
 
 /* Another form of C++-style cast.  "type ( exp1 )" is not allowed (it's too
-   ambiguous), but "name ( exp1 )" is.  We don't support that since it looks
-   too much like a function type, and doesn't appear in the output of any of
-   the demanglers.  */
-exp	:	builtin_type '(' exp1 ')' %prec UNARY
+   ambiguous), but "name ( exp1 )" is.  Because we don't need to support
+   function types, we can handle this unambiguously (the use of typespec_2
+   prevents a silly, harmless conflict with qualifiers_opt).  This does not
+   appear in demangler output so it's not a great loss if we need to
+   disable it.  */
+exp	:	typespec_2 '(' exp1 ')' %prec UNARY
 		{ $$ = d_make_comp (di, D_COMP_UNARY,
 				    d_make_comp (di, D_COMP_CAST, $1, NULL),
 				    $3);

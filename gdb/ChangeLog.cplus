@@ -1,5 +1,18 @@
 2003-12-17  Daniel Jacobowitz  <drow@mvista.com>
 
+	* cp-names.y (ptr_operator_1, ptr_operator_2): Merge back into
+	ptr_operator.
+	(qualified, decl1b): Remove.
+	(NEW, DELETE): Give higher precedence than '['.
+	(typespec, typespec_2, declarator, direct_declarator)
+	(abstract_declarator, direct_abstract_declarator): New.
+	(start, type): Use them.
+	(operator): Add rules for conversion operators.
+	(exp): Avoid a conflict for function-style casts; allow
+	function-style casts to typenames.
+
+2003-12-17  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cp-names.y: Use precedence to resolve shift/reduce conflicts for
 	COLONCOLON.  Merge type1a, type1b, and type2 rules.
 
