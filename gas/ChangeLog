@@ -1,3 +1,18 @@
+Thu Jan  2 13:37:29 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c: Throughout, check target_big_endian rather
+ 	than byte_order.
+ 	(byte_order): Remove.
+	(mips_init_after_args): Remove.
+	* config/tc-mips.h (LITTLE_ENDIAN, BIG_ENDIAN): Don't define.
+	(mips_init_after_args): Don't declare.
+	(tc_init_after_args): Don't define.
+
+	* config/tc-mips.h (tc_frob_after_relocs): Define if
+	OBJ_MAYBE_ELF.
+	(mips_elf_final_processing): Likewise.
+	(ELF_TC_SPECIAL_SECTIONS): Likewise.
+
 start-sanitize-v850
 Tue Dec 31 15:12:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 

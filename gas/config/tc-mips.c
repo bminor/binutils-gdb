@@ -1,5 +1,5 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright (C) 1993, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -254,8 +254,6 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
  */
 
 static char *insn_error;
-
-static int byte_order;
 
 static int auto_align = 1;
 
@@ -4690,13 +4688,13 @@ macro (ip)
     dob:
       assert (mips_isa < 2);
       macro_build ((char *) NULL, &icnt, &offset_expr, "lwc1", "T,o(b)",
-		   byte_order == LITTLE_ENDIAN ? treg : treg + 1,
+		   target_big_endian ? treg + 1 : treg,
 		   (int) r, breg);
       /* FIXME: A possible overflow which I don't know how to deal
 	 with.  */
       offset_expr.X_add_number += 4;
       macro_build ((char *) NULL, &icnt, &offset_expr, "lwc1", "T,o(b)",
-		   byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
+		   target_big_endian ? treg : treg + 1,
 		   (int) r, breg);
 
       /* To avoid confusion in tc_gen_reloc, we must ensure that this
@@ -4775,7 +4773,7 @@ macro (ip)
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when loading from memory.  We set coproc if we must
 	 load $fn+1 first.  */
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	coproc = 0;
 
       if (mips_pic == NO_PIC
@@ -5238,11 +5236,11 @@ macro2 (ip)
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when storing to memory.  */
       macro_build ((char *) NULL, &icnt, &offset_expr, "swc1", "T,o(b)",
-		   byte_order == LITTLE_ENDIAN ? treg : treg + 1,
+		   target_big_endian ? treg + 1 : treg,
 		   (int) BFD_RELOC_LO16, breg);
       offset_expr.X_add_number += 4;
       macro_build ((char *) NULL, &icnt, &offset_expr, "swc1", "T,o(b)",
-		   byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
+		   target_big_endian ? treg : treg + 1,
 		   (int) BFD_RELOC_LO16, breg);
       return;
 
@@ -5557,11 +5555,11 @@ macro2 (ip)
       if (offset_expr.X_add_number >= 0x7fff)
 	as_bad ("operand overflow");
       /* avoid load delay */
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	offset_expr.X_add_number += 1;
       macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	offset_expr.X_add_number -= 1;
       else
 	offset_expr.X_add_number += 1;
@@ -5583,11 +5581,11 @@ macro2 (ip)
     ulw:
       if (offset_expr.X_add_number >= 0x8000 - off)
 	as_bad ("operand overflow");
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	offset_expr.X_add_number += off;
       macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	offset_expr.X_add_number -= off;
       else
 	offset_expr.X_add_number += off;
@@ -5610,13 +5608,13 @@ macro2 (ip)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     mips_isa < 3 ? "addu" : "daddu",
 		     "d,v,t", AT, AT, breg);
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	expr1.X_add_number = off;
       else
 	expr1.X_add_number = 0;
       macro_build ((char *) NULL, &icnt, &expr1, s, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, AT);
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	expr1.X_add_number = 0;
       else
 	expr1.X_add_number = off;
@@ -5631,12 +5629,12 @@ macro2 (ip)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     mips_isa < 3 ? "addu" : "daddu",
 		     "d,v,t", AT, AT, breg);
-      if (byte_order == BIG_ENDIAN)
+      if (target_big_endian)
 	expr1.X_add_number = 0;
       macro_build ((char *) NULL, &icnt, &expr1,
 		   mask == M_ULH_A ? "lb" : "lbu", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, AT);
-      if (byte_order == BIG_ENDIAN)
+      if (target_big_endian)
 	expr1.X_add_number = 1;
       else
 	expr1.X_add_number = 0;
@@ -5651,12 +5649,12 @@ macro2 (ip)
     case M_USH:
       if (offset_expr.X_add_number >= 0x7fff)
 	as_bad ("operand overflow");
-      if (byte_order == BIG_ENDIAN)
+      if (target_big_endian)
 	offset_expr.X_add_number += 1;
       macro_build ((char *) NULL, &icnt, &offset_expr, "sb", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", AT, treg, 8);
-      if (byte_order == BIG_ENDIAN)
+      if (target_big_endian)
 	offset_expr.X_add_number -= 1;
       else
 	offset_expr.X_add_number += 1;
@@ -5676,11 +5674,11 @@ macro2 (ip)
     usw:
       if (offset_expr.X_add_number >= 0x8000 - off)
 	as_bad ("operand overflow");
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	offset_expr.X_add_number += off;
       macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	offset_expr.X_add_number -= off;
       else
 	offset_expr.X_add_number += off;
@@ -5703,13 +5701,13 @@ macro2 (ip)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     mips_isa < 3 ? "addu" : "daddu",
 		     "d,v,t", AT, AT, breg);
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	expr1.X_add_number = off;
       else
 	expr1.X_add_number = 0;
       macro_build ((char *) NULL, &icnt, &expr1, s, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, AT);
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	expr1.X_add_number = 0;
       else
 	expr1.X_add_number = off;
@@ -5723,19 +5721,19 @@ macro2 (ip)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     mips_isa < 3 ? "addu" : "daddu",
 		     "d,v,t", AT, AT, breg);
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	expr1.X_add_number = 0;
       macro_build ((char *) NULL, &icnt, &expr1, "sb", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, AT);
       macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", treg,
 		   treg, 8);
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	expr1.X_add_number = 1;
       else
 	expr1.X_add_number = 0;
       macro_build ((char *) NULL, &icnt, &expr1, "sb", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, AT);
-      if (byte_order == LITTLE_ENDIAN)
+      if (! target_big_endian)
 	expr1.X_add_number = 0;
       else
 	expr1.X_add_number = 1;
@@ -6497,7 +6495,7 @@ mips_ip (str, ip)
 			))
 		  {
 		    imm_expr.X_op = O_constant;
-		    if (byte_order == LITTLE_ENDIAN)
+		    if (! target_big_endian)
 		      imm_expr.X_add_number =
 			(((((((int) temp[3] << 8)
 			     | temp[2]) << 8)
@@ -7536,7 +7534,7 @@ md_atof (type, litP, sizeP)
 
   *sizeP = prec * 2;
 
-  if (byte_order == LITTLE_ENDIAN)
+  if (! target_big_endian)
     {
       for (i = prec - 1; i >= 0; i--)
 	{
@@ -7562,19 +7560,10 @@ md_number_to_chars (buf, val, n)
      valueT val;
      int n;
 {
-  switch (byte_order)
-    {
-    case LITTLE_ENDIAN:
-      number_to_chars_littleendian (buf, val, n);
-      break;
-
-    case BIG_ENDIAN:
-      number_to_chars_bigendian (buf, val, n);
-      break;
-
-    default:
-      internalError ();
-    }
+  if (target_big_endian)
+    number_to_chars_bigendian (buf, val, n);
+  else
+    number_to_chars_littleendian (buf, val, n);
 }
 
 CONST char *md_shortopts = "O::g::G:";
@@ -7990,15 +7979,6 @@ MIPS options:\n\
 -64			create 64 bit object file\n");
 #endif
 }
-
-void
-mips_init_after_args ()
-{
-  if (target_big_endian)
-    byte_order = BIG_ENDIAN;
-  else
-    byte_order = LITTLE_ENDIAN;
-}
 
 long
 md_pcrel_from (fixP)
@@ -8033,7 +8013,7 @@ cons_fix_new_mips (frag, where, nbytes, exp)
      4 byte reloc.  */
   if (nbytes == 8 && ! mips_64)
     {
-      if (byte_order == BIG_ENDIAN)
+      if (target_big_endian)
 	where += 4;
       nbytes = 4;
     }
@@ -8218,7 +8198,7 @@ md_apply_fix (fixP, valueP)
 	value += 0x10000;
       value >>= 16;
       buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
-      if (byte_order == BIG_ENDIAN)
+      if (target_big_endian)
 	buf += 2;
       md_number_to_chars (buf, value, 2);
       break;
@@ -8229,7 +8209,7 @@ md_apply_fix (fixP, valueP)
       if ((fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) == 0)
 	value += fixP->fx_frag->fr_address + fixP->fx_where;
       buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
-      if (byte_order == BIG_ENDIAN)
+      if (target_big_endian)
 	buf += 2;
       md_number_to_chars (buf, value, 2);
       break;
@@ -8249,7 +8229,7 @@ md_apply_fix (fixP, valueP)
 	      long hiv;
 
 	      w1 = w2 = fixP->fx_where;
-	      if (byte_order == BIG_ENDIAN)
+	      if (target_big_endian)
 		w1 += 4;
 	      else
 		w2 += 4;
@@ -8293,7 +8273,7 @@ md_apply_fix (fixP, valueP)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  "relocation overflow");
 	  buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
-	  if (byte_order == BIG_ENDIAN)
+	  if (target_big_endian)
 	    buf += 2;
 	  md_number_to_chars (buf, value, 2);
 	}
@@ -8312,20 +8292,10 @@ md_apply_fix (fixP, valueP)
 
       /* update old instruction data */
       buf = (unsigned char *) (fixP->fx_where + fixP->fx_frag->fr_literal);
-      switch (byte_order)
-	{
-	case LITTLE_ENDIAN:
-	  insn = (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
-	  break;
-
-	case BIG_ENDIAN:
-	  insn = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
-	  break;
-
-	default:
-	  internalError ();
-	  return 0;
-	}
+      if (target_big_endian)
+	insn = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
+      else
+	insn = (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
 
       if (value >= -0x8000 && value < 0x8000)
 	insn |= value & 0xffff;
@@ -9718,17 +9688,10 @@ md_convert_frag (abfd, asec, fragp)
 
       buf = (bfd_byte *) (fragp->fr_literal + fragp->fr_fix);
 
-      switch (byte_order)
-	{
-	default:
-	  internalError ();
-	case LITTLE_ENDIAN:
-	  insn = bfd_getl16 (buf);
-	  break;
-	case BIG_ENDIAN:
-	  insn = bfd_getb16 (buf);
-	  break;
-	}
+      if (target_big_endian)
+	insn = bfd_getb16 (buf);
+      else
+	insn = bfd_getl16 (buf);
 
       mips16_immed (fragp->fr_file, fragp->fr_line, type, val, false, small,
 		    ext, &insn, &use_extend, &extend);
