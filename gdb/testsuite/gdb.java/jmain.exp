@@ -48,7 +48,7 @@ gdb_test "set print sevenbit-strings" ".*"
 
 # Where the breakpoint should always land
 
-set bpmain "Breakpoint .* file .*jmain.java, line 6\."
+set bpmain "Breakpoint .* file .*jmain.java, line 5\."
 
 gdb_load "${binfile}"
 setup_kfail *-*-* java/1567
@@ -63,4 +63,5 @@ gdb_test "break jmain.main" "${bpmain}"
 
 # Check that a fully qualified "main" works.
 gdb_load "${binfile}"
+setup_xfail *-*-* gcc/16439
 gdb_test "break \'${testfile}.main(java.lang.String\[\])\'" "${bpmain}"

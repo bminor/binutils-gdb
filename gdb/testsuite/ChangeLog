@@ -1,3 +1,9 @@
+2004-07-08  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.java/jmain.exp: Fix expected line number for main to
+	break at.  Set XFAIL for break at main test since gcj does not 
+	provide line number info for first statement in main.
+
 2004-07-08  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb.base/attach.exp: Cleanup copyright.  Re-indent.
