@@ -1,3 +1,7 @@
+2003-06-06  Michael Snyder  <msnyder@redhat.com>
+
+	* h8300-tdep.c: Make tidy (long lines).
+
 2003-06-06  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-tdep.c (x86_64_fill_fxsave): Pass correct regnums 

@@ -270,7 +270,9 @@ gdb_print_insn_h8300 (bfd_vma memaddr, disassemble_info * info)
    of the instruction. */
 
 static CORE_ADDR
-h8300_next_prologue_insn (CORE_ADDR addr, CORE_ADDR lim, unsigned short* pword1)
+h8300_next_prologue_insn (CORE_ADDR addr, 
+			  CORE_ADDR lim, 
+			  unsigned short* pword1)
 {
   char buf[2];
   if (addr < lim + 8)
@@ -452,7 +454,8 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
 
   if (have_fp)
     /* We keep the old FP in the SP spot */
-    fsr[E_SP_REGNUM] = read_memory_unsigned_integer (fsr[E_FP_REGNUM], BINWORD);
+    fsr[E_SP_REGNUM] = read_memory_unsigned_integer (fsr[E_FP_REGNUM], 
+						     BINWORD);
   else
     fsr[E_SP_REGNUM] = after_prolog_fp + auto_depth;
 
@@ -470,10 +473,12 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
 
       /* Find the beginning of this function, so we can analyze its
 	 prologue. */
-      if (find_pc_partial_function (get_frame_pc (fi), NULL, &func_addr, &func_end))
+      if (find_pc_partial_function (get_frame_pc (fi), NULL, 
+				    &func_addr, &func_end))
         {
 	  struct symtab_and_line sal = find_pc_line (func_addr, 0);
-	  CORE_ADDR limit = (sal.end && sal.end < get_frame_pc (fi)) ? sal.end : get_frame_pc (fi);
+	  CORE_ADDR limit = (sal.end && sal.end < get_frame_pc (fi)) 
+	    ? sal.end : get_frame_pc (fi);
 	  /* This will fill in fields in fi. */
 	  h8300_examine_prologue (func_addr, limit, get_frame_base (fi),
 				  get_frame_saved_regs (fi), fi);
@@ -489,7 +494,8 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
    will be called for the new frame.
 
    For us, the frame address is its stack pointer value, so we look up
-   the function prologue to determine the caller's sp value, and return it.  */
+   the function prologue to determine the caller's sp value, and
+   return it.  */
 
 static CORE_ADDR
 h8300_frame_chain (struct frame_info *thisframe)
@@ -532,7 +538,7 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
       get_frame_extra_info (fi)->from_pc = 0;
-      get_frame_extra_info (fi)->args_pointer = 0;		/* Unknown */
+      get_frame_extra_info (fi)->args_pointer = 0;	/* Unknown */
       get_frame_extra_info (fi)->locals_pointer = 0;	/* Unknown */
       
       if (!get_frame_pc (fi))
@@ -706,7 +712,8 @@ h8300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
               for (offset = 0; offset < padded_len; offset += wordsize)
                 {
-                  ULONGEST word = extract_unsigned_integer (padded + offset, wordsize);
+                  ULONGEST word = extract_unsigned_integer (padded + offset, 
+							    wordsize);
                   write_register (reg++, word);
                 }
             }
@@ -769,8 +776,8 @@ h8300_pop_frame (void)
 	     actual value we want, not the address of the value we want.  */
 	  if (get_frame_saved_regs (frame)[regno] && regno != E_SP_REGNUM)
 	    write_register (regno,
-			    read_memory_integer (get_frame_saved_regs (frame)[regno],
-			    			 BINWORD));
+			    read_memory_integer 
+			    (get_frame_saved_regs (frame)[regno], BINWORD));
 	  else if (get_frame_saved_regs (frame)[regno] && regno == E_SP_REGNUM)
 	    write_register (regno, get_frame_base (frame) + 2 * BINWORD);
 	}
@@ -808,8 +815,9 @@ h8300_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	  memcpy (valbuf + 2, regbuf + REGISTER_BYTE (1), 2);
 	}
       break;
-    case 8:			/* (double) (doesn't seem to happen, which is good,
-				   because this almost certainly isn't right.  */
+    case 8:		/* (double) (doesn't seem to happen, which is good,
+			   because this almost certainly isn't right.  
+			   FIXME: it will happen for h8sx...  */
       error ("I don't know how a double is returned.");
       break;
     }
@@ -845,7 +853,7 @@ h8300_store_return_value (struct type *type, char *valbuf)
 	  write_register (1, regval & 0xffff);
 	}
       break;
-    case 8:			/* presumeably double, but doesn't seem to happen */
+    case 8:		/* presumeably double, but doesn't seem to happen */
       error ("I don't know how to return a double.");
       break;
     }
@@ -1032,8 +1040,9 @@ h8300_use_struct_convention (int gcc_p, struct type *type)
 static CORE_ADDR
 h8300_extract_struct_value_address (char *regbuf)
 {
-  return extract_unsigned_integer (regbuf + h8300_register_byte (E_ARG0_REGNUM),
-				   h8300_register_raw_size (E_ARG0_REGNUM));
+  return 
+    extract_unsigned_integer (regbuf + h8300_register_byte (E_ARG0_REGNUM),
+			      h8300_register_raw_size (E_ARG0_REGNUM));
 }
 
 const static unsigned char *
@@ -1128,10 +1137,13 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /*
    * Frame Info
    */
-  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, h8300_frame_init_saved_regs);
-  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, h8300_init_extra_frame_info);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, 
+						h8300_frame_init_saved_regs);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, 
+						h8300_init_extra_frame_info);
   set_gdbarch_deprecated_frame_chain (gdbarch, h8300_frame_chain);
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, h8300_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, 
+					      h8300_saved_pc_after_call);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, h8300_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, h8300_skip_prologue);
   set_gdbarch_frame_args_address (gdbarch, h8300_frame_args_address);
@@ -1158,13 +1170,18 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Call Dummies
    * 
    * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_deprecated_push_return_address (gdbarch, h8300_push_return_address);
-  set_gdbarch_deprecated_extract_return_value (gdbarch, h8300_extract_return_value);
+  set_gdbarch_deprecated_push_return_address (gdbarch, 
+					      h8300_push_return_address);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, 
+					       h8300_extract_return_value);
   set_gdbarch_deprecated_push_arguments (gdbarch, h8300_push_arguments);
   set_gdbarch_deprecated_pop_frame (gdbarch, h8300_pop_frame);
-  set_gdbarch_deprecated_store_struct_return (gdbarch, h8300_store_struct_return);
-  set_gdbarch_deprecated_store_return_value (gdbarch, h8300_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, h8300_extract_struct_value_address);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, 
+					      h8300_store_struct_return);
+  set_gdbarch_deprecated_store_return_value (gdbarch, 
+					     h8300_store_return_value);
+  set_gdbarch_deprecated_extract_struct_value_address 
+    (gdbarch, h8300_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, h8300_use_struct_convention);
   set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
