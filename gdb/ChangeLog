@@ -1,3 +1,7 @@
+2003-11-11  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* mips-tdep.c (msymbol_size): Delete.
+
 2003-11-07  Michael Chastain  <mec@shout.net>
 
 	* symtab.h (struct minimal_symbol): Add size.

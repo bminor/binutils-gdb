@@ -251,12 +251,6 @@ msymbol_is_special (struct minimal_symbol *msym)
   return (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0);
 }
 
-static long
-msymbol_size (struct minimal_symbol *msym)
-{
-  return ((long) MSYMBOL_INFO (msym) & 0x7fffffff);
-}
-
 /* XFER a value from the big/little/left end of the register.
    Depending on the size of the value it might occupy the entire
    register or just part of it.  Make an allowance for this, aligning
