@@ -42,20 +42,6 @@ typedef struct  user_section_struct {
 #define get_userdata(x) ((x)->userdata)
 #define as_output_section_statement(x) ((x)->otheruserdata)
 
-#if 0
-/*
- * Structure for communication between do_file_warnings and it's
- * helper routines.  Will in practice be an array of three of these:
- * 0) Current line, 1) Next line, 2) Source file info.
- */
-struct line_debug_entry
-{
-  int line;
-  char *filename;
-  struct nlist *sym;
-};
-
-#endif
 
 
 /* Which symbols should be stripped (omitted from the output):
@@ -76,19 +62,8 @@ enum { DISCARD_NONE, DISCARD_ALL, DISCARD_L } discard_locals;
 
 
 #define ALIGN(this, boundary)  ((( (this) + ((boundary) -1)) & (~((boundary)-1))))
-#if 0
-#define FOREACHGLOBALSYMBOL(x)   ldsym_type *x; for (x = symbol_head; x; x=x->next)
 
-
-
-
-#define SECTIONLOOP(abfd, ptr) \
-  asection *ptr; for(ptr = abfd->sections; ptr;ptr=ptr->next)
-
-
-#endif
 typedef struct {
-
   /* 1 => assign space to common symbols even if `relocatable_output'.  */
   boolean force_common_definition;
 
@@ -112,10 +87,10 @@ typedef struct
 
 
 } ld_config_type;
-#define set_asymbol_chain(x,y) ((x)->udata = (void *)y)
+#define set_asymbol_chain(x,y) ((x)->udata = (PTR)y)
 #define get_asymbol_chain(x) ((asymbol **)((x)->udata))
 #define get_loader_symbol(x) ((loader_global_asymbol *)((x)->udata))
-#define set_loader_symbol(x,y) ((x)->udata = (void *)y)
+#define set_loader_symbol(x,y) ((x)->udata = (PTR)y)
 
 
 

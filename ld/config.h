@@ -22,6 +22,7 @@
 #define EMULATION_ENVIRON "LDEMULATION"
 /* If in there look for the strings: */
 #define GLD_EMULATION_NAME "gld"
+#define VANILLA_EMULATION_NAME "vanilla"
 #define GLD68K_EMULATION_NAME "gld68k"
 #define GLD960_EMULATION_NAME "gld960"
 #define LNK960_EMULATION_NAME "lnk960"
@@ -36,6 +37,7 @@
 #define GLD68K_TARGET "a.out-generic-big"
 #define LNK960_TARGET "coff-Intel-big"
 #define GLD960_TARGET "b.out.big"
+#define VANILLA_TARGET "a.out-generic-big"
 
 
 

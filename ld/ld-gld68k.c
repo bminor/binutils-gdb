@@ -105,96 +105,16 @@ char  *ignore;
   info("%S HLL ignored\n");
 }
 
-static char *gld68k_script = "  \
-SEARCH_DIR(/lib) 			\
-SEARCH_DIR(/usr/lib) 			\
-SEARCH_DIR(/usr/local/lib) 		\
-__DYNAMIC = 0; 				\
-SECTIONS 				\
-{ 					\
-  .text 0x2020 BLOCK(0x2000): 		\
-  { 					\
-   CREATE_OBJECT_SYMBOLS 		\
-    *(.text) 				\
-    _etext = ALIGN( 0x2000);       	\
-    }  					\
-  .data  ALIGN(0x20000)  :		\
-  { 					\
-    *(.data) 				\
-    ___DTOR_LIST__=. ;               	\
-    LONG((___CTOR_LIST__ - .)/4 -2)  	\
-    *(___DTOR_LIST__)                   \
-    LONG(0)                             \
-    ___CTOR_LIST__=. ;               	\
-    LONG((_edata  - .)/4 -2)            \
-    *(___CTOR_LIST__)                   \
-    LONG(0)                             \
-      _edata = .; 			\
-  }  					\
-  .bss   SIZEOF(.data) + ADDR(.data) :	\
-  { 					\
-   *(.bss)	 			\
-   [COMMON] 				\
-     _end=.;				\
-    } 					\
-}";
+static char *gld68k_script  =  
+#include "ld-gld68k.x"
+;
 
-
-static char *gld68k_script_option_Ur = "\
-SEARCH_DIR(/lib) 			\
-SEARCH_DIR(/usr/lib) 			\
-SEARCH_DIR(/usr/local/lib) 		\
-SECTIONS 				\
-{ 					\
-  .text 0: 				\
-  { 					\
-   CREATE_OBJECT_SYMBOLS                \
-    *(.text) 				\
-    } 					\
-  .data SIZEOF(.text) + ADDR(.text) :	\
-  { 					\
-    *(.data) 				\
-    ___DTOR_LIST__=. ;               	\
-    LONG((___CTOR_LIST__ - .)/4 -2)  	\
-    *(___DTOR_LIST__)                   \
-    LONG(0)                             \
-    ___CTOR_LIST__=. ;               	\
-    LONG((___end_list__  - .)/4 -2)     \
-    *(___CTOR_LIST__)                   \
-    LONG(0)                             \
-    ___end_list__ = . ;			\
-    } 					\
-  .bss SIZEOF(.data) + ADDR(.data) :	\
-  {					\
-    *(.bss)				\
-   [COMMON]				\
-    } 					\
-} 					\
-";			     
-
-static char *gld68k_script_option_r = "\
-SEARCH_DIR(/lib) 			\
-SEARCH_DIR(/usr/lib) 			\
-SEARCH_DIR(/usr/local/lib) 		\
-SECTIONS 				\
-{ 					\
-  .text 0: 				\
-  { 					\
-   CREATE_OBJECT_SYMBOLS                \
-    *(.text) 				\
-    } 					\
-  .data SIZEOF(.text) + ADDR(.text) :	\
-  { 					\
-    *(.data) 				\
-    } 					\
-  .bss SIZEOF(.data) + ADDR(.data) :	\
-  {					\
-    *(.bss)				\
-   [COMMON]				\
-    } 					\
-} 					\
-";			     
-			     
+static char *gld68k_script_option_Ur  =  
+#include "ld-gld68k-Ur.x"
+;
+static char *gld68k_script_option_r  =  
+#include "ld-gld68k-r.x"
+;			     
 static char *gld68k_get_script()
 {			     
   extern ld_config_type config;

@@ -18,40 +18,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
    $Id$ 
-
-   $Log$
-   Revision 1.3  1991/04/08 23:21:26  steve
-   *** empty log message ***
-
- * Revision 1.2  1991/03/22  23:02:31  steve
- * Brought up to sync with Intel again.
- *
- * Revision 1.2  1991/03/15  18:45:55  rich
- * foo
- *
- * Revision 1.1  1991/03/13  00:48:13  chrisb
- * Initial revision
- *
- * Revision 1.6  1991/03/10  09:31:20  rich
- *  Modified Files:
- *  	Makefile config.h ld-emul.c ld-emul.h ld-gld.c ld-gld960.c
- *  	ld-lnk960.c ld.h lddigest.c ldexp.c ldexp.h ldfile.c ldfile.h
- *  	ldgram.y ldinfo.h ldlang.c ldlang.h ldlex.h ldlex.l ldmain.c
- *  	ldmain.h ldmisc.c ldmisc.h ldsym.c ldsym.h ldversion.c
- *  	ldversion.h ldwarn.h ldwrite.c ldwrite.h y.tab.h
- *
- * As of this round of changes, ld now builds on all hosts of (Intel960)
- * interest and copy passes my copy test on big endian hosts again.
- *
- * Revision 1.5  1991/03/09  03:23:47  sac
- * Now looks in G960BASE if I960BASE isn't defined.
- *
- * Revision 1.4  1991/03/06  02:23:35  sac
- * Added support for partial linking.
- *
- * Revision 1.3  1991/02/22  17:14:58  sac
- * Added RCS keywords and copyrights
- *
 */
 
 /* 
@@ -131,6 +97,33 @@ char *name;
 
 
 
+#ifdef GNU960
+
+static void 
+lnk960_before_parse()
+{
+  static char *env_variables[] = { "G960LIB", "G960BASE", 0 };
+  char **p;
+  char *env ;
+
+  for ( p = env_variables; *p; p++ ){
+    env =  (char *) getenv(*p);
+    if (env) {
+      ldfile_add_library_path(concat(env,"/lib/libcoff",""));
+    }
+  }
+
+  env= (char *) getenv("I960BASE");
+  if ( env ) {
+    ldfile_add_library_path(concat(env,"/lib",""));
+  }
+
+  ldfile_output_architecture = bfd_arch_i960;
+  ldfile_output_machine = bfd_mach_i960_core;
+}
+
+#else	/* not GNU960 */
+
 static void 
 lnk960_before_parse()
 {
@@ -149,6 +142,9 @@ lnk960_before_parse()
   ldfile_output_machine = bfd_mach_i960_core;
 }
 
+#endif	/* GNU960 */
+
+
 static void
 add_on(list, search)
 lib_list_type *list;
@@ -166,7 +162,7 @@ static void lnk960_after_parse()
 
   /* If there has been no arch, default to -KB */
   if (ldfile_output_machine_name[0] ==0) {
-    ldfile_add_arch("kb");
+    ldfile_add_arch("KB");
   }
 
   /* if there has been no hll list then add our own */
@@ -210,6 +206,7 @@ lnk960_after_allocation()
     lang_abs_symbol_at_end_of(".bss","_end");
   }
 }
+
 
 static struct
  {
@@ -255,64 +252,37 @@ lnk960_set_output_arch()
 static char *
 lnk960_choose_target()
 {
+#ifdef GNU960
+
+  return bfd_make_targ_name(BFD_COFF_FORMAT,HOST_BYTE_ORDER_BIG_P);
+
+#else
+
   char *from_outside = getenv(TARGET_ENVIRON);
   if (from_outside != (char *)NULL)
     return from_outside;
   return LNK960_TARGET;
+
+#endif
 }
 
 /* The default script if none is offered */
-static char *lnk960_script = "\
-SECTIONS \
-{ \
-  .text : \
-  { \
-    *(.text) \
-    }  \
-_etext = .;\
-  .data  SIZEOF(.text) + ADDR(.text):\
-  { \
-    *(.data) \
-    }  \
-_edata = .; \
-  .bss   SIZEOF(.data) + ADDR(.data) :    \
-  { \
-   _bss_start = . ;\
-   *(.bss)  \
-   [COMMON] \
-    } \
-_end = . ; \
-} \
-";
+static char *lnk960_script = 
+#include "ld-lnk960.x"
+;
 
-static char *lnk960_script_relocateable = "\
-SECTIONS \
-{ \
-  .text 0x40000000: \
-  { \
-    *(.text) \
-    }  \
-  .data  0:\
-  { \
-    *(.data) \
-    }  \
-  .bss   SIZEOF(.data) + ADDR(.data) :    \
-  { \
-   *(.bss)  \
-   [COMMON] \
-    } \
-} \
-";
+
+static char *lnk960_script_relocateable = 
+#include "ld-lnk960-r.x"
+;
 
 static char *lnk960_get_script()
 {
-extern ld_config_type config;
-if (config.relocateable_output) {
-  return lnk960_script_relocateable;
-}
-return lnk960_script;
-
-
+  extern ld_config_type config;
+  if (config.relocateable_output) {
+    return lnk960_script_relocateable;
+  }
+  return lnk960_script;
 }
 struct ld_emulation_xfer_struct ld_lnk960_emulation = 
 {

@@ -18,34 +18,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
    $Id$ 
-
-   $Log$
-   Revision 1.1  1991/03/21 21:28:34  gumby
-   Initial revision
-
- * Revision 1.1  1991/03/13  00:48:16  chrisb
- * Initial revision
- *
- * Revision 1.6  1991/03/10  09:31:22  rich
- *  Modified Files:
- *  	Makefile config.h ld-emul.c ld-emul.h ld-gld.c ld-gld960.c
- *  	ld-lnk960.c ld.h lddigest.c ldexp.c ldexp.h ldfile.c ldfile.h
- *  	ldgram.y ldinfo.h ldlang.c ldlang.h ldlex.h ldlex.l ldmain.c
- *  	ldmain.h ldmisc.c ldmisc.h ldsym.c ldsym.h ldversion.c
- *  	ldversion.h ldwarn.h ldwrite.c ldwrite.h y.tab.h
- *
- * As of this round of changes, ld now builds on all hosts of (Intel960)
- * interest and copy passes my copy test on big endian hosts again.
- *
- * Revision 1.5  1991/03/09  03:25:04  sac
- * Added support for LONG, SHORT and BYTE keywords in scripts
- *
- * Revision 1.4  1991/03/06  02:27:15  sac
- * Added LONG, SHORT and BYTE keywords
- *
- * Revision 1.3  1991/02/22  17:14:59  sac
- * Added RCS keywords and copyrights
- *
 */
 
 /*
@@ -519,7 +491,7 @@ bfd_vma *dotp;
 	      }
 
 
-	      def->udata = (void *)NULL;
+	      def->udata = (PTR)NULL;
 	      def->name = sy->name;
 	      Q_enter_global_ref(def_ptr);
 	    }

@@ -20,9 +20,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    $Id$ 
 
    $Log$
-   Revision 1.2  1991/03/22 23:02:30  steve
-   Brought up to sync with Intel again.
+   Revision 1.3  1991/04/14 03:22:11  steve
+   checkpoint before a merge
 
+ * Revision 1.2  1991/03/22  23:02:30  steve
+ * Brought up to sync with Intel again.
+ *
  * Revision 1.3  1991/03/16  22:27:24  rich
  * fish
  *
@@ -143,31 +146,10 @@ gld960_hll()
 }
 
 
-static char *script = "\
- \
-SECTIONS \
-{ \
-  .text : \
-  { \
-   CREATE_OBJECT_SYMBOLS \
-    *(.text) \
-      _etext =.;\
-    }  \
- \
-  .data  SIZEOF(.text) + ADDR(.text):\
-  { \
- \
-    *(.data) \
-      _edata = .; \
-    }  \
-  .bss   SIZEOF(.data) + ADDR(.data) :    \
-  { _bss_start = .;\
-      *(.bss)	 \
-	[COMMON] \
-      _end = . ; \
-    } \
-} \
-";
+static char *script = 
+#include "ld-gld960.x"
+;
+
 
 static char *
 gld960_get_script()

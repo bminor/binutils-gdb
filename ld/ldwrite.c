@@ -20,17 +20,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * $Id$ 
  *
  *  $Log$
- *  Revision 1.3  1991/03/22 22:32:22  steve
- *  *** empty log message ***
+ *  Revision 1.5  1991/04/14 03:22:42  steve
+ *  checkpoint before a merge
  *
- * Revision 1.2  1991/03/22  22:31:37  steve
- * *** empty log message ***
- *
- * Revision 1.1.1.1  1991/03/21  21:29:05  gumby
- * Back from Intel with Steve
- *
- * Revision 1.1  1991/03/21  21:29:04  gumby
- * Initial revision
+ * Revision 1.4  1991/03/22  23:02:40  steve
+ * Brought up to sync with Intel again.
  *
  * Revision 1.2  1991/03/15  18:45:55  rich
  * foo
@@ -134,7 +128,7 @@ static void perform_relocation(input_bfd,
 			       symbols)
 bfd *input_bfd;
 asection *input_section;
-void *data;
+PTR data;
 asymbol **symbols;
 {
   static asymbol *error_symbol = (asymbol *)NULL;
@@ -264,104 +258,109 @@ lang_statement_union_type *statement;
 {
   switch (statement->header.type) {
   case lang_fill_statement_enum: 
-    {
+      {
 #if 0
-      bfd_byte play_area[SHORT_SIZE];
-      unsigned int i;
-      bfd_putshort(output_bfd, statement->fill_statement.fill, play_area);
-      /* Write out all entire shorts */
-      for (i = 0;
-	   i < statement->fill_statement.size - SHORT_SIZE + 1;
-	   i+= SHORT_SIZE)
-	{
-	  bfd_set_section_contents(output_bfd,
-				   statement->fill_statement.output_section,
-				   play_area,
-				   statement->data_statement.output_offset +i,
-				   SHORT_SIZE);
+	bfd_byte play_area[SHORT_SIZE];
+	unsigned int i;
+	bfd_putshort(output_bfd, statement->fill_statement.fill, play_area);
+	/* Write out all entire shorts */
+	for (i = 0;
+	     i < statement->fill_statement.size - SHORT_SIZE + 1;
+	     i+= SHORT_SIZE)
+	    {
+	      bfd_set_section_contents(output_bfd,
+				       statement->fill_statement.output_section,
+				       play_area,
+				       statement->data_statement.output_offset +i,
+				       SHORT_SIZE);
 
-	}
+	    }
 
-      /* Now write any remaining byte */
-      if (i < statement->fill_statement.size) 
-	{
-	  bfd_set_section_contents(output_bfd,
-				   statement->fill_statement.output_section,
-				   play_area,
-				   statement->data_statement.output_offset +i,
-				   1);
+	/* Now write any remaining byte */
+	if (i < statement->fill_statement.size) 
+	    {
+	      bfd_set_section_contents(output_bfd,
+				       statement->fill_statement.output_section,
+				       play_area,
+				       statement->data_statement.output_offset +i,
+				       1);
 
-	}
+	    }
 #endif
-    }
+      }
     break;
   case lang_data_statement_enum:
-    {
-      bfd_vma value = statement->data_statement.value;
-      bfd_byte play_area[LONG_SIZE];
-      unsigned int size;
-      switch (statement->data_statement.type) {
-      case LONG:
-	bfd_putlong(output_bfd, value,  play_area);
-	size = LONG_SIZE;
-	break;
-      case SHORT:
-	bfd_putshort(output_bfd, value,  play_area);
-	size = SHORT_SIZE;
-	break;
-      case BYTE:
-	bfd_putchar(output_bfd, value,  play_area);
-	size = BYTE_SIZE;
-	break;
-      }
+      {
+	bfd_vma value = statement->data_statement.value;
+	bfd_byte play_area[LONG_SIZE];
+	unsigned int size;
+	switch (statement->data_statement.type) {
+	case LONG:
+	  bfd_putlong(output_bfd, value,  play_area);
+	  size = LONG_SIZE;
+	  break;
+	case SHORT:
+	  bfd_putshort(output_bfd, value,  play_area);
+	  size = SHORT_SIZE;
+	  break;
+	case BYTE:
+	  bfd_putchar(output_bfd, value,  play_area);
+	  size = BYTE_SIZE;
+	  break;
+	}
       
-      bfd_set_section_contents(output_bfd,
-			       statement->data_statement.output_section,
-			       play_area,
-			       statement->data_statement.output_vma,
-			       size);
+	bfd_set_section_contents(output_bfd,
+				 statement->data_statement.output_section,
+				 play_area,
+				 statement->data_statement.output_vma,
+				 size);
 			       
 			       
 
 
-    }
+      }
     break;
   case lang_input_section_enum:
-    {
-    
-      asection *i  = statement->input_section.section;
-      asection *output_section = i->output_section;
-      lang_input_statement_type *ifile = statement->input_section.ifile;
-      bfd *inbfd = ifile->the_bfd;
-      if (output_section->flags & SEC_LOAD && i->size != 0) 
-	{
-	  if(bfd_get_section_contents(inbfd,
-				      i,
-				      data_area,
-				      0L,
-				      i->size) == false) 
-	    {
-	      info("%F%B error reading section contents %E\n",
-		   inbfd);
-	    }
-	  perform_relocation (inbfd,  i,  data_area, ifile->asymbols);
+      {
+
+	asection *i  = statement->input_section.section;
+	asection *output_section = i->output_section;
+	lang_input_statement_type *ifile =
+	  statement->input_section.ifile;
+	if (ifile->just_syms_flag == false) {
+	  bfd *inbfd = ifile->the_bfd;
+
+	  if (output_section->flags & SEC_LOAD && i->size != 0) 
+	      {
+		if(bfd_get_section_contents(inbfd,
+					    i,
+					    data_area,
+					    0L,
+					    i->size) == false) 
+		    {
+		      info("%F%B error reading section contents %E\n",
+			   inbfd);
+		    }
+		perform_relocation (inbfd,  i,  data_area, ifile->asymbols);
 
 
-	  if(bfd_set_section_contents(output_bfd,
-				      output_section,
-				      data_area,
-				      (file_ptr)i->output_offset,
-				      i->size) == false) 
-	    {
-	      info("%F%B error writing section contents of %E\n",
-		   output_bfd);
-	    }
+		if(bfd_set_section_contents(output_bfd,
+					    output_section,
+					    data_area,
+					    (file_ptr)i->output_offset,
+					    i->size) == false) 
+		    {
+		      info("%F%B error writing section contents of %E\n",
+			   output_bfd);
+		    }
 
+	      }
 	}
-    }
+
+      }
     break;
 
- default:
+  default:
     /* All the other ones fall through */
     ;
 

@@ -60,7 +60,6 @@ union  lang_statement_union  *next;
     lang_address_statement_enum,
     lang_wild_statement_enum,
     lang_input_section_enum,
-    lang_common_statement_enum,
     lang_object_symbols_statement_enum,
     lang_fill_statement_enum,
     lang_data_statement_enum,
@@ -83,13 +82,13 @@ typedef struct
 
 typedef struct lang_target_statement_struct {
   lang_statement_header_type header;
-  char *target;
+  CONST char *target;
 } lang_target_statement_type;
 
 
 typedef struct lang_output_statement_struct {
   lang_statement_header_type header;
-  char *name;
+  CONST char *name;
 } lang_output_statement_type;
 
 
@@ -98,9 +97,9 @@ typedef struct lang_output_section_statement_struct
   lang_statement_header_type header;
   union etree_union *addr_tree;
   lang_statement_list_type children;
-  char *memspec;
+  CONST char *memspec;
   union lang_statement_union *next;
-  char *name;
+  CONST char *name;
   unsigned long subsection_alignment;
   boolean processed;
 
@@ -122,7 +121,7 @@ typedef struct {
 
 typedef struct {
   lang_statement_header_type header;
-fill_type fill;
+  fill_type fill;
 } lang_fill_statement_type;
 
 typedef struct {
@@ -141,11 +140,11 @@ typedef struct lang_input_statement_struct
   {
     lang_statement_header_type header;
     /* Name of this file.  */
-    char *filename;
+    CONST char *filename;
     /* Name to use for the symbol giving address of text start */
     /* Usually the same as filename, but for a file spec'd with -l
        this is the -l switch itself rather than the filename.  */
-    char *local_sym_name;
+    CONST char *local_sym_name;
 
     /* Describe the layout of the contents of the file */
 
@@ -165,15 +164,6 @@ typedef struct lang_input_statement_struct
     asymbol **asymbols;
     unsigned int symbol_count;
 
-    /* Next two used only if `relocatable_output' or if needed for */
-    /* output of undefined reference line numbers. */
-    /* Text reloc info saved by `write_text' for `coptxtrel'.  */
-
-
-    /* Offset in bytes in the output file symbol table
-       of the first local symbol for this file.  Set by `write_file_symbols'.  */
-    int local_syms_offset;
-
     /* For library members only */
 
     /* For a library, points to chain of entries for the library members.  */
@@ -187,15 +177,14 @@ typedef struct lang_input_statement_struct
     struct lang_input_statement_struct *superfile;
     /* For library member, points to next entry for next member.  */
     struct lang_input_statement_struct *chain;
-    /* Point to the next file - whatever it is, wanders up and down archives */
+    /* Point to the next file - whatever it is, wanders up and down
+       archives */
+
     union lang_statement_union  *next;
     /* Point to the next file, but skips archive contents */
     union  lang_statement_union  *next_real_file;
 
     boolean is_archive;
-
-    /* 1 if file's header has been read into this structure.  */
-    boolean header_read_flag;
 
     /* 1 means search a set of directories for this file.  */
     boolean search_dirs_flag;
@@ -203,13 +192,14 @@ typedef struct lang_input_statement_struct
     /* 1 means this is base file of incremental load.
        Do not load this file's text or data.
        Also default text_start to after this file's bss. */
+
     boolean just_syms_flag;
 
     boolean loaded;
 
 
     /*    unsigned int globals_in_this_file;*/
-    char *target;
+    CONST char *target;
     boolean real;
 
     asection *common_section;
@@ -220,6 +210,7 @@ typedef struct {
   lang_statement_header_type header;
   asection *section;
   lang_input_statement_type *ifile;
+
 } lang_input_section_type;
 
 
@@ -231,14 +222,14 @@ typedef struct {
 
 typedef struct lang_wild_statement_struct {
   lang_statement_header_type header;
-  char *section_name;
-  char *filename;
+CONST char *section_name;
+CONST char *filename;
   lang_statement_list_type children;
 } lang_wild_statement_type;
 
 typedef struct lang_address_statement_struct {
   lang_statement_header_type header;
-  char *section_name;
+  CONST  char *section_name;
   union  etree_union *address;
 } lang_address_statement_type;
 
@@ -273,32 +264,34 @@ typedef union lang_statement_union
 
 
 PROTO(void,lang_init,(void));
-PROTO(struct memory_region_struct ,*lang_memory_region_lookup,(char *));
-PROTO(struct lang_output_section_statement_struct *,lang_output_section_find,(char *));
+PROTO(struct memory_region_struct ,
+      *lang_memory_region_lookup,(CONST
+				  char *CONST));
 
-PROTO(void ,lang_map,(struct _iobuf *));
-PROTO(void,lang_set_flags,(lang_section_flags_type *, char *));
-PROTO(void,lang_add_output,(char *));
+
+PROTO(void ,lang_map,(FILE *));
+PROTO(void,lang_set_flags,(lang_section_flags_type *, CONST char *));
+PROTO(void,lang_add_output,(CONST char *));
 
 PROTO(void,lang_final,(void));
-PROTO(struct symbol_cache_entry *,create_symbol,(char *, unsigned int, struct sec_struct *));
+PROTO(struct symbol_cache_entry *,create_symbol,(CONST char *, unsigned int, struct sec_struct *));
 PROTO(void ,lang_process,(void));
-PROTO(void ,lang_section_start,(char *, union etree_union *));
-PROTO(void,lang_add_entry,(char *));
-PROTO(void,lang_add_target,(char *));
-PROTO(void,lang_add_wild,(char *, char *));
-PROTO(void,lang_add_map,(char *));
+PROTO(void ,lang_section_start,(CONST char *, union etree_union *));
+PROTO(void,lang_add_entry,(CONST char *));
+PROTO(void,lang_add_target,(CONST char *));
+PROTO(void,lang_add_wild,(CONST char *CONST , CONST char *CONST));
+PROTO(void,lang_add_map,(CONST char *));
 PROTO(void,lang_add_fill,(int));
 PROTO(void,lang_add_assignment,(union etree_union *));
 PROTO(void,lang_add_attribute,(enum statement_enum));
-PROTO(void,lang_startup,(char *));
+PROTO(void,lang_startup,(CONST char *));
 PROTO(void,lang_float,(enum boolean));
-PROTO(void,lang_leave_output_section_statement,(bfd_vma, char *));
-PROTO(void,lang_abs_symbol_at_end_of,(char *, char *));
+PROTO(void,lang_leave_output_section_statement,(bfd_vma, CONST char *));
+PROTO(void,lang_abs_symbol_at_end_of,(CONST char *, CONST char *));
+PROTO(void,lang_abs_symbol_at_beginning_of,(CONST char *, CONST char *));
 PROTO(void,lang_statement_append,(struct statement_list *, union lang_statement_union *, union lang_statement_union **));
 PROTO(void, lang_for_each_file,(void (*dothis)(lang_input_statement_type *)));
 
-#define LANG_FOR_EACH_ASYMBOL(asymbol) \
      
 #define LANG_FOR_EACH_INPUT_STATEMENT(statement)               \
   extern lang_statement_list_type file_chain;			\
@@ -337,11 +330,15 @@ PROTO(void, lang_for_each_file,(void (*dothis)(lang_input_statement_type *)));
 PROTO(void, lang_process,(void));
 PROTO(void, ldlang_add_file,(lang_input_statement_type *));
 
-PROTO(lang_output_section_statement_type *,lang_output_section_find,());
+PROTO(lang_output_section_statement_type
+      *,lang_output_section_find,(CONST char * CONST));
 
 PROTO(lang_input_statement_type *,
        lang_add_input_file,(char *name,
 			    lang_input_file_enum_type file_type,
 			    char *target));
 PROTO(lang_output_section_statement_type *,
-lang_output_section_statement_lookup,(char *name));
+lang_output_section_statement_lookup,(CONST char * CONST name));
+
+PROTO(void, ldlang_add_undef,(CONST char *CONST name));
+

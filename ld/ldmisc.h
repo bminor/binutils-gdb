@@ -24,9 +24,9 @@
 PROTO(void,info,());
 PROTO(void,info_assert,(char *, unsigned int));
 PROTO(void,yyerror,(char *));
-PROTO(char *,concat,(char *, char *, char *));
+PROTO(char *,concat,(CONST char *, CONST char *, CONST char *));
 PROTO(char *, ldmalloc,(size_t));
-PROTO(char *,buystring,(char *));
+PROTO(char *,buystring,(CONST char *CONST));
 #define ASSERT(x) \
 { if (!(x)) info_assert(__FILE__,__LINE__); }
 

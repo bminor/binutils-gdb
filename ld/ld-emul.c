@@ -36,6 +36,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern ld_emulation_xfer_type ld_lnk960_emulation;
 extern ld_emulation_xfer_type ld_gld_emulation;
+extern ld_emulation_xfer_type ld_vanilla_emulation;
 extern ld_emulation_xfer_type ld_gld68k_emulation;
 extern ld_emulation_xfer_type ld_gld960_emulation;
 
@@ -111,6 +112,9 @@ char *target;
   }
   else if (strcmp(target,GLD_EMULATION_NAME)==0) {
     ld_emulation = &ld_gld_emulation;
+  }
+  else if (strcmp(target,VANILLA_EMULATION_NAME)==0) {
+    ld_emulation = &ld_vanilla_emulation;
   }
   else if (strcmp(target,GLD68K_EMULATION_NAME)==0) {
     ld_emulation = &ld_gld68k_emulation;

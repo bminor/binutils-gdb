@@ -19,31 +19,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
    $Id$ 
-
-   $Log$
-   Revision 1.1  1991/03/21 21:28:37  gumby
-   Initial revision
-
- * Revision 1.2  1991/03/15  18:45:55  rich
- * foo
- *
- * Revision 1.1  1991/03/13  00:48:18  chrisb
- * Initial revision
- *
- * Revision 1.4  1991/03/10  09:31:24  rich
- *  Modified Files:
- *  	Makefile config.h ld-emul.c ld-emul.h ld-gld.c ld-gld960.c
- *  	ld-lnk960.c ld.h lddigest.c ldexp.c ldexp.h ldfile.c ldfile.h
- *  	ldgram.y ldinfo.h ldlang.c ldlang.h ldlex.h ldlex.l ldmain.c
- *  	ldmain.h ldmisc.c ldmisc.h ldsym.c ldsym.h ldversion.c
- *  	ldversion.h ldwarn.h ldwrite.c ldwrite.h y.tab.h
- *
- * As of this round of changes, ld now builds on all hosts of (Intel960)
- * interest and copy passes my copy test on big endian hosts again.
- *
- * Revision 1.3  1991/02/22  17:15:00  sac
- * Added RCS keywords and copyrights
- *
 */
 
 /*
@@ -60,11 +35,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldlang.h"
 #include "ldfile.h"
 
-#include <ctype.h>
-
 /* EXPORT */
 char *ldfile_input_filename;
-char *ldfile_output_machine_name;
+CONST char * ldfile_output_machine_name;
 unsigned long ldfile_output_machine;
 enum bfd_architecture ldfile_output_architecture;
 boolean had_script;
@@ -96,6 +69,8 @@ typedef struct search_arch_struct
 static search_arch_type *search_arch_head;
 static search_arch_type **search_arch_tail_ptr = &search_arch_head;
  
+
+
 void
 ldfile_add_library_path(name)
 char *name;
@@ -115,8 +90,9 @@ char *attempt;
 lang_input_statement_type  *entry;
 {
   entry->the_bfd = bfd_openr(attempt, entry->target);
-
-
+  if (option_v == true && entry->the_bfd == (bfd *)NULL) {
+    info("attempt to open %s failed\n", attempt);
+  }
   return entry->the_bfd;
 }
 
@@ -143,11 +119,11 @@ char *suffix;
 		entry->filename, arch, suffix);
       }
       else {
-	      if (entry->filename[0] == '/') {
-		      strcpy(buffer, entry->filename);
-	      } else {
-		      sprintf(buffer,"%s/%s",search->name, entry->filename);
-	      }			/*  */
+	if (entry->filename[0] == '/' || entry->filename[0] == '.') {
+	  strcpy(buffer, entry->filename);
+	} else {
+	  sprintf(buffer,"%s/%s",search->name, entry->filename);
+	} 
       }
       string = buystring(buffer);      
       desc = cached_bfd_openr (string, entry);
@@ -178,6 +154,8 @@ lang_input_statement_type *entry;
   if (entry->search_dirs_flag)
     {
       search_arch_type *arch;
+      /* Try to open <filename><suffix> or lib<filename><suffix>.a */
+  
       for (arch = search_arch_head;
 	   arch != (search_arch_type *)NULL;
 	   arch = arch->next) {
@@ -213,14 +191,21 @@ char *exten;
   FILE *result;
   char buff[1000];
   result = fopen(name, "r");
-  if (result && option_v == true) {
+  if (option_v == true) {
+    if (result == (FILE *)NULL) {
+      info("can't find ");
+    }
     info("%s\n",name);
+    
     return result;
   }
   sprintf(buff, "%s%s", name, exten);
   result = fopen(buff, "r");
 
-  if (result && option_v == true) {
+  if (option_v == true) {
+    if (result == (FILE *)NULL) {
+      info("can't find ");
+    }
     info("%s\n", buff);
   }
   return result;
@@ -265,12 +250,14 @@ char *name;
 
 
 void
-ldfile_add_arch(name)
-char *name;
+DEFUN(ldfile_add_arch,(in_name),
+      CONST char *CONST in_name)
 {
+  char *name = buystring(in_name);
   search_arch_type *new =
     (search_arch_type *)ldmalloc(sizeof(search_arch_type));
-  ldfile_output_machine_name = name;
+
+  ldfile_output_machine_name = in_name;
 
   new->name = name;
   new->next = (search_arch_type*)NULL;

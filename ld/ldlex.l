@@ -28,7 +28,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /*SUPPRESS 529*/
 /*SUPPRESS 26*/
 /*SUPPRESS 29*/
-#define LEXDEBUG
+#define LEXDEBUG 0
 #include "sysdep.h"
 #include "bfd.h"
 
@@ -48,7 +48,7 @@ int debug;
 
 extern boolean ldgram_in_expression;
 extern boolean ldgram_in_defsym;
-
+extern boolean ldgram_in_script;
 static char *command_line;
 
 extern int fgetc();
@@ -69,6 +69,8 @@ keyword_type keywords[] =
 "SUBSECTION_ALIGN",SUBSECTION_ALIGN,
 "ADDR",ADDR,
 "ENTRY",ENTRY,
+"SCRIPT", SCRIPT,
+"ENDSCRIPT", ENDSCRIPT,
 "NEXT",NEXT,
 "MAP",MAP,
 "SIZEOF",SIZEOF,
@@ -101,17 +103,15 @@ static unsigned int have_pushback;
 int pushback[NPUSHBACK];
 int thischar;
 extern char *ldfile_input_filename;
-
+int donehash = 0;
 int
 lex_input()
 {
-
-
   if (have_pushback > 0) 
-    {
-      have_pushback --;
-      return thischar = pushback[have_pushback];
-    }
+      {
+	have_pushback --;
+	return thischar = pushback[have_pushback];
+      }
   if (ldlex_input_stack) {
     thischar = fgetc(ldlex_input_stack);
 
@@ -119,14 +119,18 @@ lex_input()
       fclose(ldlex_input_stack);
       ldlex_input_stack = (FILE *)NULL;
       ldfile_input_filename = (char *)NULL;
-      thischar = lex_input();
+      /* First char after script eof is a @ so that we can tell the grammer
+	 that we've eft */
+      thischar = '@';
 
     }
   }
   else if (command_line && *command_line)  {
     thischar = *(command_line++);
   }
-  else thischar = 0;
+  else {
+ thischar = 0;
+  }
   if(thischar == '\t') thischar = ' ';
   if (thischar == '\n') { thischar = ' '; lineno++; }
   return thischar ;
@@ -213,7 +217,7 @@ long number(text, base)
 char *text;
 int base;
 {
-unsigned  long l = 0;
+  unsigned  long l = 0;
   char *p;
   for (p = text; *p != 0; p++) {
     if (*p == 'K') {
@@ -241,7 +245,7 @@ unsigned  long l = 0;
 
 %a 4000
 %o 5000
-FILENAMECHAR	[a-zA-Z0-9\/\.\-\_\+]
+FILENAMECHAR	[a-zA-Z0-9\/\.\-\_\+\=]
 FILENAME	{FILENAMECHAR}+
 
 
@@ -249,28 +253,30 @@ WHITE		[ \t]+
 
 %%
 
-
-"\ -defsym" { return OPTION_defsym; }
-"\ -noinhibit_exec" { return OPTION_noinhibit_exec; }
-"\ -format" { return OPTION_format; }
-"\ -n"		{ return OPTION_n; }
-"\ -r"		{ return OPTION_r; }
-"\ -Ur"		{ return OPTION_Ur; }
-"\ -o"		{ return OPTION_o; }
-"\ -g"		{ return OPTION_g; }
-"\ -e"		{ return OPTION_e; }
-"\ -b"		{ return OPTION_b; }
-"\ -dc"		{ return OPTION_dc; }
-"\ -dp"		{ return OPTION_dp; }
-"\ -d"		{ return OPTION_d; }
-"\ -v"		{ return OPTION_v; }
-"\ -M"		{ return OPTION_M; }
-"\ -t"		{ return OPTION_t; }
-"\ -X"		{ return OPTION_X; }
-"\ -x"		{ return OPTION_x; }
-"\ -c"		{ return OPTION_c; }
-"\ -s"            { return OPTION_s; }
-"\ -S"            { return OPTION_S; }
+"@" { return ENDSCRIPT; }
+"\ -defsym\ " { return OPTION_defsym; }
+"\ -noinhibit_exec\ " { return OPTION_noinhibit_exec; }
+"\ -format\ " { return OPTION_format; }
+"\ -n\ "		{ return OPTION_n; }
+"\ -r\ "		{ return OPTION_r; }
+"\ -Ur\ "		{ return OPTION_Ur; }
+"\ -o\ "		{ return OPTION_o; }
+"\ -g\ "		{ return OPTION_g; }
+"\ -e\ "		{ return OPTION_e; }
+"\ -b\ "		{ return OPTION_b; }
+"\ -dc\ "		{ return OPTION_dc; }
+"\ -dp\ "		{ return OPTION_dp; }
+"\ -d\ "		{ return OPTION_d; }
+"\ -v\ "		{ return OPTION_v; }
+"\ -M\ "		{ return OPTION_M; }
+"\ -t\ "		{ return OPTION_t; }
+"\ -X\ "		{ return OPTION_X; }
+"\ -x\ "		{ return OPTION_x; }
+"\ -c\ "		{ return OPTION_c; }
+"\ -R\ "		{ return OPTION_R; }
+"\ -u\ "		{ return OPTION_u; }
+"\ -s\ "            { return OPTION_s; }
+"\ -S\ "            { return OPTION_S; }
 "\ -l"{FILENAME} {
 	 	yylval.name = buystring(yytext+3);
 		return OPTION_l; 
@@ -280,15 +286,15 @@ WHITE		[ \t]+
 		yylval.name = buystring(yytext+3);
 	 	return OPTION_L; 
 	 }
-"\ -Ttext"  {
+"\ -Ttext\ "  {
 		 yylval.name = ".text";
 		 return OPTION_Texp;
 	       }
-"\ -Tdata"  {
+"\ -Tdata\ "  {
 		 yylval.name = ".data";
 		 return OPTION_Texp;
 	       }
-"\ -Tbss"  {
+"\ -Tbss\ "  {
 		 yylval.name = ".bss";
 		 return OPTION_Texp;
 	       }
@@ -297,14 +303,14 @@ WHITE		[ \t]+
 		 yylval.name = buystring(yytext+3);
 		 return OPTION_Tfile;
 	       }
-"\ -T"          {
+"\ -T\ "          {
 		 return OPTION_T;
 	       }
 
 "\ -F"{FILENAME}  {
 		 return OPTION_F;
 	       }
-"\ -F"          {
+"\ -F\ "          {
 		 return OPTION_F;
 	       }
 
@@ -328,7 +334,6 @@ WHITE		[ \t]+
 "/="		{ RTOKEN(DIVEQ);}
 "&="		{ RTOKEN(ANDEQ);}
 "|="		{ RTOKEN(OREQ);}
-
 "&&"		{ RTOKEN(ANDAND);}
 ">"		{ RTOKEN('>');}
 ","		{ RTOKEN(',');}
@@ -340,7 +345,6 @@ WHITE		[ \t]+
 "*"		{ RTOKEN('*');}
 "%"		{ RTOKEN('%');}
 "<"		{ RTOKEN('<');}
-"+"		{ RTOKEN('+');}
 ">"		{ RTOKEN('>');}
 "}"		{ RTOKEN('}') ; }
 "{"		{ RTOKEN('{'); }
@@ -351,7 +355,7 @@ WHITE		[ \t]+
 ":"		{ RTOKEN(':'); }
 ";"		{ RTOKEN(';');}
 "-"		{ RTOKEN('-');}
-"="		{ RTOKEN('=');}
+
 
 
 "/*"		{ 
@@ -412,18 +416,58 @@ WHITE		[ \t]+
     Tokenize a name, this is really pain, since a name can be a
     filename or a symbol name. filenames have slashes and stuff whist
     in an expression those things are seperate tokens. We hack this by
-    setting lang_in_expression when we are expecting a symbol, so that
+    setting ldlang_in_script when we are expecting a symbol, so that
     [/+-] get taken to be seperate tokens. An extra gotcha is
     expressions after defsyms, we only allow +s and -s in a defsym
     expression, so -defsym foo=bar+9 /file.o is parsed ok.
     
+    The more I think about this the more I hate it. I've got a problem
+    now with the = sign, what should I do ? imagine:
+    __start=.;
+    You'd think that was pretty unambiguous wouldn't you. Well it's
+    not since __start=. is (at the moment) a perfectly valid
+    filename. And in some cases we don't know what's going on. I'm
+    going to have to hack this. If we see a '/' before the = sign then
+    we say we've got an = in a filename, otherwise it's an operator.
+    (later)
+    That's it, I've had enough. From now on, an =s on a command line
+    will be taken to be part of a file name unless its in a defsym,
+    and an = in a file will be taken to be an operator.
     */
   int ch;
   keyword_type *k;
+
+  if (hex_mode) {
+    ch = yytext[0];
+    /* Then always read a number */
+    while (isxdigit(ch)) {
+      yytext[yyleng++] = ch;
+      ch = input();
+    }
+    yytext[yyleng] = 0;
+    unput(ch);
+
+    yylval.integer = number(yytext,16);
+    return INT;
+  }
+
+  if (ldfile_input_filename) {
+    /* We're inside a file */
+    if (yytext[0]== '=') {
+      RTOKEN('=');
+    }
+  }
+
+    
+
+    /* Otherwise we only notice special things if were in an
+       expression */
+
   if (ldgram_in_expression) {
     if (yytext[0] != '/' ||  ldgram_in_defsym == false)  {
       switch (yytext[0]) {
       case '/': RTOKEN('/');
+      case '=': RTOKEN('=');
       case '+': RTOKEN('+');
       case '-': RTOKEN('-');
       }
@@ -433,10 +477,14 @@ WHITE		[ \t]+
   ch = input();
   while (true)
       {
-	if (isalpha(ch) || isdigit(ch) || ch == '.'  || ch == '_') {
+	if (isalpha(ch) || isdigit(ch) || ch == '.'  || ch == '_' ) {
 	  yytext[yyleng++] = ch;
 	}
-	else if (ch == '+' || ch == '-' || ch == '/') {
+else if (ch == '=' && ldgram_in_script) {
+/* An = within a script is always taken to be an operator */
+break;
+}
+	else if (ch == '+' || ch == '-' || ch == '/' || ch == '=') {
 	  if (ldgram_in_expression) break;
 	  yytext[yyleng++] = ch;
 	}
@@ -447,7 +495,10 @@ WHITE		[ \t]+
 
   yytext[yyleng] = 0;
   unput(ch);
-
+  /* Filenames  of just =signs are tokens */
+  if (yyleng == 1 && yytext[0] == '=') {
+    RTOKEN('=');
+  }
   for(k = keywords; k ->name != (char *)NULL; k++) {
 
     if (strcmp(k->name, yytext)==0) {

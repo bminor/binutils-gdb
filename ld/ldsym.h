@@ -47,11 +47,11 @@ typedef struct user_symbol_struct
 } ldsym_type;
 
 
-PROTO(ldsym_type *, ldsym_get, (char *));
-PROTO(ldsym_type *, ldsym_get_soft, (char *));
+PROTO(ldsym_type *, ldsym_get, (CONST char *));
+PROTO(ldsym_type *, ldsym_get_soft, (CONST char *));
 PROTO(void, ldsym_print_symbol_table,(void));
 PROTO(void, ldsym_write, (void));
-PROTO(boolean, ldsym_undefined, (char *));
+PROTO(boolean, ldsym_undefined, (CONST char *));
 #define FOR_EACH_LDSYM(x)						\
 	extern ldsym_type *symbol_head;					\
 	ldsym_type *x;							\

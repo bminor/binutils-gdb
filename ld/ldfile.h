@@ -20,7 +20,7 @@
 
  
 
-PROTO(void,ldfile_add_arch,(char *));
+PROTO(void,ldfile_add_arch,(CONST char *CONST));
 PROTO(void,ldfile_add_library_path,(char *));
 PROTO(void,ldfile_open_command_file,(char *name));
 PROTO(void,ldfile_open_file,(struct lang_input_statement_struct *));

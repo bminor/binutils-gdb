@@ -1,4 +1,4 @@
-
+%{
 /*
  * $Id$ 
  *
@@ -59,10 +59,8 @@ char *current_file;
 boolean ldgram_want_filename = true;
 boolean had_script = false;
 boolean force_make_executable = false;
-boolean ldgram_has_inputfile = false;
-
 boolean ldgram_in_expression = false;
-
+boolean ldgram_in_script = false;
 boolean ldgram_in_defsym = false;
 /* LOCALS */
 
@@ -114,16 +112,16 @@ boolean ldgram_in_defsym = false;
 %token SECTIONS  
 %token '{' '}'
 %token ALIGNMENT SIZEOF_HEADERS
-%token NEXT SIZEOF ADDR 
+%token NEXT SIZEOF ADDR  SCRIPT ENDSCRIPT
 %token MEMORY 
 %token DSECT NOLOAD COPY INFO OVERLAY 
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
 %token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S
-%token OPTION_format  OPTION_F
+%token OPTION_format  OPTION_F OPTION_u
 
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X
 %token OPTION_v OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT NOFLOAT OPTION_defsym
-%token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_A
+%token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_A OPTION_R
 %token <name> OPTION_l OPTION_L  OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
 %token OPTION_Ur 
 %token ORIGIN FILL OPTION_g
@@ -152,7 +150,8 @@ command_line:
 	;
 
 command_line_option:
-		OPTION_v
+		SCRIPT ifile_list ENDSCRIPT
+	|	OPTION_v
 			{	
 			ldversion();
 			option_v = true;
@@ -173,7 +172,10 @@ command_line_option:
 	|	OPTION_S {
 			strip_symbols = STRIP_DEBUGGER;
 			}
-			
+        |       OPTION_u NAME {
+			ldlang_add_undef($2);
+	      	}
+	    
 	|	OPTION_r {
 			config.relocateable_output = true;
 			config.build_constructors = false;
@@ -202,10 +204,10 @@ command_line_option:
 			{
 			force_make_executable = true;
 			}
-    |      OPTION_d {
+    	|      OPTION_d {
 			  command_line.force_common_definition = true;
 			}
-    |      OPTION_dc
+    	|      OPTION_dc
 			 {
 			  command_line.force_common_definition = true;
 			}
@@ -213,23 +215,28 @@ command_line_option:
 			{
 			/* Ignored */
 			}
-    |      	OPTION_dp
+	|      	OPTION_dp
 			 {
 			  command_line.force_common_definition = true;
 			}
-    | 	OPTION_format NAME
+	| 	OPTION_format NAME
 	           {
 			  lang_add_target($2);
        		   }
-
 	| 	OPTION_Texp 
-               { hex_mode  =true; } 
-		  exp
-		{ lang_section_start($1, $3);
-		  hex_mode = false; }
+		{ 
+			hex_mode  =true; 
+		} 
+		INT
+		{ 
+			lang_section_start($1,exp_intop($3));
+			hex_mode = false; 
+		}
 	
 	| 	OPTION_Aarch 
-		{ ldfile_add_arch($1); }
+		{ 
+			ldfile_add_arch($1); 
+		}
 	|	 OPTION_b NAME
 			{
 			lang_add_target($2);
@@ -237,21 +244,21 @@ command_line_option:
 	|	OPTION_L
 			{
 			ldfile_add_library_path($1);
-		}
+			}
 	|	OPTION_F
 		{
 		/* Ignore */
 		}
-
-	|	ifile_p1
-	|	input_list
-	|	OPTION_c filename
+        | 	NAME
+		{ lang_add_input_file($1,lang_input_file_is_file_enum,
+				 (char *)NULL); }
+	|	OPTION_c filename script_file
 			{ ldfile_open_command_file($2); }
-	|	OPTION_Tfile
-			{ ldfile_open_command_file($1); }
+	|	OPTION_Tfile 
+			{ ldfile_open_command_file($1); } script_file
 
-	|	OPTION_T filename
-			{ ldfile_open_command_file($2); }
+	|	OPTION_T filename 
+			{ ldfile_open_command_file($2); } script_file
 
 	|	OPTION_l
 			{
@@ -259,7 +266,7 @@ command_line_option:
 					 lang_input_file_is_l_enum,
 					 (char *)NULL);
 			}
-	| 	OPTION_A filename
+	| 	OPTION_R filename
 			{
 			lang_add_input_file($2,
 				lang_input_file_is_symbols_only_enum,
@@ -268,47 +275,38 @@ command_line_option:
 	|	OPTION_defsym 
 			{
 			ldgram_in_defsym = true;
+			ldgram_in_expression = true;	
 			hex_mode = true;
 			}
 			 assignment
 			{
 			hex_mode = false;
 			ldgram_in_defsym = false;
+			ldgram_in_expression = false;
 			}	
+	| '-' NAME
+		 { info("%P%F Unrecognised option -%s\n", $2);  }
 
 	;
 
 
-input_section_spec:
-		NAME
-		{
-		lang_add_wild((char *)NULL, $1);
-		}
-        |	'[' 
-			{
-			current_file = (char *)NULL;
-			}
-			file_NAME_list  
-		']' 
-	|	NAME
-			{
-			current_file  =$1;
-			} 
-		'(' file_NAME_list ')'
-	|	'*' 
-			{	
-			current_file = (char *)NULL;
-			} 
-		'(' file_NAME_list ')'
-	;
+  
 
 
 
-file_NAME_list:
-		NAME
-			{ lang_add_wild($1, current_file); }
-	|	file_NAME_list opt_comma NAME 
-			{ lang_add_wild($3, current_file); }
+
+
+script_file:
+	{ ldgram_in_script = true; }
+       ifile_list ENDSCRIPT
+        { ldgram_in_script = false; }
+
+        ;
+
+
+ifile_list:
+       ifile_list ifile_p1 
+  |
 	;
 
 
@@ -358,6 +356,36 @@ statement_anywhere:
 		ENTRY '(' NAME ')'
 		{ lang_add_entry($3); }
 	|	assignment end
+	;
+
+file_NAME_list:
+		NAME
+			{ lang_add_wild($1, current_file); }
+	|	file_NAME_list opt_comma NAME 
+			{ lang_add_wild($3, current_file); }
+	;
+
+input_section_spec:
+		NAME
+		{
+		lang_add_wild((char *)NULL, $1);
+		}
+        |	'[' 
+			{
+			current_file = (char *)NULL;
+			}
+			file_NAME_list  
+		']' 
+	|	NAME
+			{
+			current_file  =$1;
+			} 
+		'(' file_NAME_list ')'
+	|	'*' 
+			{	
+			current_file = (char *)NULL;
+			} 
+		'(' file_NAME_list ')'
 	;
 
 statement:

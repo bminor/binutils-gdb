@@ -21,36 +21,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  *
  * $Id$ 
  *
- * $Log$
- * Revision 1.2  1991/03/22 23:02:36  steve
- * Brought up to sync with Intel again.
- *
- * Revision 1.1  1991/03/13  00:48:27  chrisb
- * Initial revision
- *
- * Revision 1.7  1991/03/10  19:15:45  sac
- * Fixed a prototype problem
- *
- * Revision 1.6  1991/03/10  09:31:32  rich
- *  Modified Files:
- *  	Makefile config.h ld-emul.c ld-emul.h ld-gld.c ld-gld960.c
- *  	ld-lnk960.c ld.h lddigest.c ldexp.c ldexp.h ldfile.c ldfile.h
- *  	ldgram.y ldinfo.h ldlang.c ldlang.h ldlex.h ldlex.l ldmain.c
- *  	ldmain.h ldmisc.c ldmisc.h ldsym.c ldsym.h ldversion.c
- *  	ldversion.h ldwarn.h ldwrite.c ldwrite.h y.tab.h
- *
- * As of this round of changes, ld now builds on all hosts of (Intel960)
- * interest and copy passes my copy test on big endian hosts again.
- *
- * Revision 1.5  1991/03/09  03:31:02  sac
- * After a fatal info message, the output file is deleted.
- *
- * Revision 1.4  1991/03/06  02:28:31  sac
- * Fixed partial linking and error messages.
- *
- * Revision 1.3  1991/02/22  17:15:02  sac
- * Added RCS keywords and copyrights
- *
  *
  */
 
@@ -72,7 +42,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* IMPORTS */
 extern boolean lang_has_input_file;
-
+extern boolean trace_files;
 /* EXPORTS */
 
 char *default_target;
@@ -167,7 +137,6 @@ main (argc, argv)
   char *emulation;
   program_name = argv[0];
   output_filename = "a.out";
-
   emulation =  getenv(EMULATION_ENVIRON); 
 
   /* Initialize the data about options.  */
@@ -198,16 +167,20 @@ main (argc, argv)
   if (emulation == (char *)NULL) {
     emulation= DEFAULT_EMULATION;
   }
+
+
   ldemul_choose_mode(emulation);
 
   default_target =  ldemul_choose_target();
 
   lang_init();
   ldemul_before_parse();
-
   lang_has_input_file = false;
   parse_args(argc, argv);
-
+  lang_final(); 
+  if (trace_files) {
+    info("%P: mode %s\n", emulation);
+  }
   if (lang_has_input_file == false) {
     info("%P%F: No input files\n");
   }
@@ -438,7 +411,6 @@ lang_input_statement_type *entry;
 
       if (flag_is_undefined_or_global_or_common(p->flags))
 	{
-	  
 	  Q_enter_global_ref(q);
 	}
       ASSERT(p->flags != 0);
@@ -474,7 +446,7 @@ search_library (entry)
 
 
 void
-Q_read_file_symbols (entry)
+ldmain_open_file_read_symbol (entry)
 struct lang_input_statement_struct *entry;
 {
   if (entry->asymbols == (asymbol **)NULL
@@ -528,7 +500,7 @@ decode_library_subfile (library_entry, subfile_offset)
   subentry->next = 0;
   subentry->superfile = library_entry;
   subentry->is_archive = false;
-  subentry->header_read_flag = false;
+
   subentry->just_syms_flag = false;
   subentry->loaded = false;
   subentry->chain = 0;
@@ -773,6 +745,8 @@ struct lang_input_statement_struct *entry;
 		      (*(sp->scoms_chain))->udata = (void*)NULL;
 
 		      (*(  sp->scoms_chain))->flags = BSF_FORT_COMM;
+		      /* Remember the size of this item */
+		      sp->scoms_chain[0]->value = p->value;
 		      commons_pending++;
 		      undefined_global_sym_count--;
 		    } {
@@ -803,4 +777,3 @@ struct lang_input_statement_struct *entry;
   return false;
 }
 
- 

@@ -32,7 +32,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ld.h"
 #include "ldmisc.h"
 #include "ldlang.h"
-
+#include "ldlex.h"
 /* IMPORTS */
 
 extern char *program_name;
@@ -156,14 +156,14 @@ va_dcl
 	else {
 	  int ch;
 	  int n = 0;
-	  fprintf(stderr,"command (before <");
+	  fprintf(stderr,"command (just before \"");
 	  ch = lex_input();
 	  while (ch != 0 && n < 10) {
 	    fprintf(stderr, "%c", ch);
 	    ch = lex_input();
 	    n++;
 	  }
-	  fprintf(stderr,")");
+	  fprintf(stderr,"\")");
 	    
 	}
 	break;
@@ -269,8 +269,8 @@ size_t size;
 
 
 
-char *buystring(x)
-char *x;
+char *DEFUN(buystring,(x),
+	    CONST char *CONST x)
 {
   size_t  l = strlen(x)+1;
   char *r = ldmalloc(l);
