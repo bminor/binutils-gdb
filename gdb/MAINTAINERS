@@ -355,6 +355,7 @@ David Anderson					davea@sgi.com
 Philip Blundell					philb@gnu.org
 Joel Brobecker					brobecker@act-europe.fr
 Nick Clifton					nickc@redhat.com
+Chris G. Demetriou				cgd@broadcom.com
 Richard Earnshaw				rearnsha@arm.com
 Matthew Green					mrg@eterna.com.au
 Orjan Friberg					orjanf@axis.com
@@ -406,7 +407,6 @@ David Taylor (d10v, sparc, utils, defs,
 Folks that have been caught up in a paper trail:
 
 Jim Kingdon					jkingdon@engr.sgi.com
-Chris G. Demetriou				cgd@sibyte.com
 Michael Chastain				mec@shout.net
 
 --

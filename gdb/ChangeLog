@@ -1,3 +1,8 @@
+2002-02-08  Chris Demetriou  <cgd@broadcom.com>
+
+	* MAINTAINERS (write-after-approval): Add myself.
+	(paper-trail): I've escaped!
+	
 2002-02-08  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (cygwin_pid_to_str): Revert 2002-02-08 change xasprintf
