@@ -1,3 +1,8 @@
+2000-02-28  Christopher Faylor  <cgf@cygnus.com>
+
+	* win32-nat.c: Remove unneeded header.
+	* wince.c: Ditto.
+
 Mon Feb 28 13:34:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* wince.c: Include "gdb_wait.h" and not "wait.h".

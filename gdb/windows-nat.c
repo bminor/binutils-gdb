@@ -28,7 +28,6 @@
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "target.h"
-#include "gdb_wait.h"
 #include "gdbcore.h"
 #include "command.h"
 #include <signal.h>
