@@ -113,6 +113,7 @@ struct frame_extra_info
   CORE_ADDR sig_fixed_saved_pc_valid;
   CORE_ADDR sig_fixed_saved_pc;
   CORE_ADDR frame_pointer_saved_pc;	/* frame pointer needed for alloca */
+  CORE_ADDR stack_bought_valid;
   CORE_ADDR stack_bought;	/* amount we decrement the stack pointer by */
   CORE_ADDR sigcontext;
 };
@@ -1392,6 +1393,7 @@ s390_get_frame_info (CORE_ADDR start_pc,
 
         if (frame_size != -1)
           {
+            fextra_info->stack_bought_valid = 1;
             fextra_info->stack_bought = frame_size;
           }
 
@@ -1604,7 +1606,8 @@ s390_frameless_function_invocation (struct frame_info *fi)
 	  s390_get_frame_info (s390_sniff_pc_function_start (get_frame_pc (fi), fi),
 			       fextra_info_ptr, fi, 1);
 	}
-      frameless = ((fextra_info_ptr->stack_bought == 0));
+      frameless = (fextra_info_ptr->stack_bought_valid
+                   && fextra_info_ptr->stack_bought == 0);
     }
   return frameless;
 

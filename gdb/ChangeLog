@@ -1,5 +1,13 @@
 2003-07-02  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (struct frame_extra_info): new member:
+	'stack_bought_valid'.
+	(s390_get_frame_info): Set fextra_info->stack_bought_valid if we
+	initialize fextra_info->stack_bought.
+	(s390_frameless_function_invocation): Don't trust the value of
+	fextra_info_ptr->stack_bought unless
+	fextra_info->stack_bought_valid is set.
+
 	New S390 prologue analyzer.
 	* s390-tdep.c (struct prologue_value, enum pv_boolean): New types.
 	(pv_set_to_unknown, pv_set_to_constant, pv_set_to_register,
