@@ -1265,12 +1265,6 @@ create_longjmp_breakpoint(func_name)
   struct breakpoint *b;
   static int internal_breakpoint_number = -1;
 
-  if (*bpt != NULL)
-    {
-      delete_breakpoint(*bpt);
-      *bpt = NULL;
-    }
-
   if (func_name != NULL)
     {
       struct minimal_symbol *m;
