@@ -68,6 +68,11 @@ static int enable_m32rx = 0;
 /* Non-zero if the programmer should be warned when an explicit parallel
    instruction might have constraint violations.  */
 static int warn_explicit_parallel_conflicts = 1;
+
+/* start-sanitize-phase2-m32rx */
+/* Non-zero if insns can be made parallel.  */
+static int optimize;
+/* end-sanitize-phase2-m32rx */
 /* end-sanitize-m32rx */
 
 /* stuff for .scomm symbols.  */
@@ -118,7 +123,12 @@ allow_m32rx (on)
 }
 /* end-sanitize-m32rx */
 
-const char * md_shortopts = "";
+#define M32R_SHORTOPTS ""
+/* start-sanitize-phase2-m32rx */
+#undef M32R_SHORTOPTS
+#define M32R_SHORTOPTS "O"
+/* end-sanitize-phase2-m32rx */
+const char * md_shortopts = M32R_SHORTOPTS;
 
 struct option md_longopts[] =
 {
@@ -152,6 +162,12 @@ md_parse_option (c, arg)
   switch (c)
     {
 /* start-sanitize-m32rx */
+/* start-sanitize-phase2-m32rx */
+    case 'O':
+      optimize = 1;
+      break;
+/* end-sanitize-phase2-m32rx */
+
     case OPTION_M32RX:
       allow_m32rx (1);
       break;
@@ -183,26 +199,31 @@ void
 md_show_usage (stream)
   FILE * stream;
 {
-  fprintf (stream, "M32R/X options:\n");
 /* start-sanitize-m32rx */
-  fprintf (stream, "\
---m32rx			support the extended m32rx instruction set\n");
-  
-  fprintf (stream, "\
---warn-explicit-parallel-conflicts	Warn when parallel instrucitons violate contraints\n");
-  fprintf (stream, "\
---no-warn-explicit-parallel-conflicts	Do not warn when parallel instrucitons violate contraints\n");
-  fprintf (stream, "\
---Wp					Synonym for --warn-explicit-parallel-conflicts\n");
-  fprintf (stream, "\
---Wnp					Synonym for --no-warn-explicit-parallel-conflicts\n");
+  fprintf (stream, _("M32R/X options:\n"));
+  fprintf (stream, _("\
+--m32rx			support the extended m32rx instruction set\n"));
+
+/* start-sanitize-phase2-m32rx */
+  fprintf (stream, _("\
+-O			try to combine instructions in parallel\n"));
+/* end-sanitize-phase2-m32rx */
+
+  fprintf (stream, _("\
+--warn-explicit-parallel-conflicts	warn when parallel instrucitons violate contraints\n"));
+  fprintf (stream, _("\
+--no-warn-explicit-parallel-conflicts	do not warn when parallel instrucitons violate contraints\n"));
+  fprintf (stream, _("\
+--Wp					synonym for --warn-explicit-parallel-conflicts\n"));
+  fprintf (stream, _("\
+--Wnp					synonym for --no-warn-explicit-parallel-conflicts\n"));
 /* end-sanitize-m32rx */
 
 #if 0
-  fprintf (stream, "\
---relax			create linker relaxable code\n");
-  fprintf (stream, "\
---cpu-desc		provide runtime cpu description file\n");
+  fprintf (stream, _("\
+--relax			create linker relaxable code\n"));
+  fprintf (stream, _("\
+--cpu-desc		provide runtime cpu description file\n"));
 #endif
 } 
 
@@ -312,14 +333,11 @@ int
 m32r_fill_insn (done)
      int done;
 {
-  segT    seg;
-  subsegT subseg;
-
   if (prev_seg != NULL)
     {
-      seg    = now_seg;
-      subseg = now_subseg;
-      
+      segT    seg    = now_seg;
+      subsegT subseg = now_subseg;
+
       subseg_set (prev_seg, prev_subseg);
       
       fill_insn (0);
@@ -403,6 +421,7 @@ md_begin ()
 /* Returns true if an output of instruction 'a' is referenced by an operand
    of instruction 'b'.  If 'check_outputs' is true then b's outputs are
    checked, otherwise its inputs are examined.  */
+
 static int
 first_writes_to_seconds_operands (a, b, check_outputs)
      m32r_insn * a;
@@ -471,6 +490,7 @@ first_writes_to_seconds_operands (a, b, check_outputs)
 }
 
 /* Returns true if the insn can (potentially) alter the program counter.  */
+
 static int
 writes_to_pc (a)
      m32r_insn * a;
@@ -499,6 +519,7 @@ writes_to_pc (a)
 
 /* Returns NULL if the two 16 bit insns can be executed in parallel,
    otherwise it returns a pointer to an error message explaining why not.  */
+
 static const char *
 can_make_parallel (a, b)
      m32r_insn * a;
@@ -595,14 +616,14 @@ assemble_parallel_insn (str, str2)
   /* Check to see if this is an allowable parallel insn.  */
   if (CGEN_INSN_ATTR (first.insn, CGEN_INSN_PIPE) == PIPE_NONE)
     {
-      as_bad ("instruction '%s' cannot be executed in parallel.", str);
+      as_bad (_("instruction '%s' cannot be executed in parallel."), str);
       return;
     }
   
   if (! enable_m32rx
       && CGEN_INSN_ATTR (first.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
     {
-      as_bad ("instruction '%s' is for the M32RX only", str);
+      as_bad (_("instruction '%s' is for the M32RX only"), str);
       return;
     }
   
@@ -658,7 +679,7 @@ assemble_parallel_insn (str, str2)
   first.insn = m32r_cgen_get_insn_operands (first.insn, bfd_getb16 ((char *) first.buffer), 16,
 					    first.indices);
   if (first.insn == NULL)
-    as_fatal ("internal error: m32r_cgen_get_insn_operands failed for first insn");
+    as_fatal (_("internal error: m32r_cgen_get_insn_operands failed for first insn"));
 
   /* Parse the second instruction.  */
   if (! (second.insn = CGEN_SYM (assemble_insn)
@@ -672,7 +693,7 @@ assemble_parallel_insn (str, str2)
   if (! enable_m32rx
       && CGEN_INSN_ATTR (second.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
     {
-      as_bad ("instruction '%s' is for the M32RX only", str);
+      as_bad (_("instruction '%s' is for the M32RX only"), str);
       return;
     }
   
@@ -681,7 +702,7 @@ assemble_parallel_insn (str, str2)
       if (   strcmp (first.insn->name, "nop") != 0
 	  && strcmp (second.insn->name, "nop") != 0)
 	{
-	  as_bad ("'%s': only the NOP instruction can be issued in parallel on the m32r", str2);
+	  as_bad (_("'%s': only the NOP instruction can be issued in parallel on the m32r"), str2);
 	  return;
 	}
     }
@@ -716,7 +737,7 @@ assemble_parallel_insn (str, str2)
   second.insn = m32r_cgen_get_insn_operands (second.insn, bfd_getb16 ((char *) second.buffer), 16,
 					     second.indices);
   if (second.insn == NULL)
-    as_fatal ("internal error: m32r_cgen_get_insn_operands failed for second insn");
+    as_fatal (_("internal error: m32r_cgen_get_insn_operands failed for second insn"));
 
   /* We assume that if the first instruction writes to a register that is
      read by the second instruction it is because the programmer intended
@@ -729,10 +750,10 @@ assemble_parallel_insn (str, str2)
   if (warn_explicit_parallel_conflicts)
     {
       if (first_writes_to_seconds_operands (& first, & second, false))
-	as_warn ("%s: output of 1st instruction is the same as an input to 2nd instruction - is this intentional ?", str2);
+	as_warn (_("%s: output of 1st instruction is the same as an input to 2nd instruction - is this intentional ?"), str2);
       
       if (first_writes_to_seconds_operands (& second, & first, false))
-	as_warn ("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?", str2);
+	as_warn (_("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?"), str2);
     }
       
   if ((errmsg = (char *) can_make_parallel (& first, & second)) == NULL)
@@ -817,7 +838,7 @@ md_assemble (str)
 /* start-sanitize-m32rx */
   if (! enable_m32rx && CGEN_INSN_ATTR (insn.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
     {
-      as_bad ("instruction '%s' is for the M32RX only", str);
+      as_bad (_("instruction '%s' is for the M32RX only"), str);
       return;
     }
 /* end-sanitize-m32rx */
@@ -852,7 +873,7 @@ md_assemble (str)
 					       16,
 					       insn.indices);
       if (insn.insn == NULL)
-	as_fatal ("internal error: m32r_cgen_get_insn_operands failed");
+	as_fatal (_("internal error: m32r_cgen_get_insn_operands failed"));
 
       /* Keep track of whether we've seen a pair of 16 bit insns.
 	 prev_insn.insn is NULL when we're on a 32 bit boundary.  */
@@ -870,8 +891,9 @@ md_assemble (str)
 	     input to the current instruction then it cannot be combined.
 	     Otherwise call can_make_parallel() with both orderings of the
 	     instructions to see if they can be combined.  */
-	  if (     enable_m32rx
-	      &&   CGEN_INSN_ATTR (insn.insn, CGEN_INSN_RELAXABLE) == 0
+	  if (      enable_m32rx
+	      &&    optimize
+	      &&    CGEN_INSN_ATTR (insn.insn, CGEN_INSN_RELAXABLE) == 0
 	      && ! writes_to_pc (& prev_insn)
 	      && ! first_writes_to_seconds_operands (& prev_insn, &insn, false)
 		 )
@@ -999,7 +1021,7 @@ m32r_scomm (ignore)
   SKIP_WHITESPACE ();
   if (* input_line_pointer != ',')
     {
-      as_bad ("Expected comma after symbol-name: rest of line ignored.");
+      as_bad (_("Expected comma after symbol-name: rest of line ignored."));
       ignore_rest_of_line ();
       return;
     }
@@ -1007,7 +1029,7 @@ m32r_scomm (ignore)
   input_line_pointer ++;		/* skip ',' */
   if ((size = get_absolute_expression ()) < 0)
     {
-      as_warn (".SCOMMon length (%ld.) <0! Ignored.", (long) size);
+      as_warn (_(".SCOMMon length (%ld.) <0! Ignored."), (long) size);
       ignore_rest_of_line ();
       return;
     }
@@ -1021,7 +1043,7 @@ m32r_scomm (ignore)
       align = get_absolute_expression ();
       if (align <= 0)
 	{
-	  as_warn ("ignoring bad alignment");
+	  as_warn (_("ignoring bad alignment"));
 	  align = 8;
 	}
     }
@@ -1032,7 +1054,7 @@ m32r_scomm (ignore)
 	continue;
       if (align != 1)
 	{
-	  as_bad ("Common alignment not a power of 2");
+	  as_bad (_("Common alignment not a power of 2"));
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -1046,7 +1068,7 @@ m32r_scomm (ignore)
 
   if (S_IS_DEFINED (symbolP))
     {
-      as_bad ("Ignoring attempt to re-define symbol `%s'.",
+      as_bad (_("Ignoring attempt to re-define symbol `%s'."),
 	      S_GET_NAME (symbolP));
       ignore_rest_of_line ();
       return;
@@ -1054,7 +1076,7 @@ m32r_scomm (ignore)
 
   if (S_GET_VALUE (symbolP) && S_GET_VALUE (symbolP) != (valueT) size)
     {
-      as_bad ("Length of .scomm \"%s\" is already %ld. Not changed to %ld.",
+      as_bad (_("Length of .scomm \"%s\" is already %ld. Not changed to %ld."),
 	      S_GET_NAME (symbolP),
 	      (long) S_GET_VALUE (symbolP),
 	      (long) size);
@@ -1299,7 +1321,7 @@ md_convert_frag (abfd, sec, fragP)
     {
       /* symbol must be resolved by linker */
       if (fragP->fr_offset & 3)
-	as_warn ("Addend to unresolved symbol not on word boundary.");
+	as_warn (_("Addend to unresolved symbol not on word boundary."));
       addend = fragP->fr_offset >> 2;
     }
   else
@@ -1521,7 +1543,7 @@ m32r_frob_file ()
 
 	  if (pass == 1)
 	    as_warn_where (l->fixp->fx_file, l->fixp->fx_line,
-			   "Unmatched high/shigh reloc");
+			   _("Unmatched high/shigh reloc"));
 	}
     }
 }
@@ -1596,7 +1618,7 @@ md_atof (type, litP, sizeP)
 
     default:
       * sizeP = 0;
-      return "Bad call to md_atof()";
+      return _("Bad call to md_atof()");
     }
 
   t = atof_ieee (input_line_pointer, type, words);
@@ -1624,4 +1646,15 @@ md_atof (type, litP, sizeP)
     }
      
   return 0;
+}
+
+void
+m32r_elf_section_change_hook ()
+{
+  /* If we have reached the end of a section and we have just emitted a
+     16 bit insn, then emit a nop to make sure that the section ends on
+     a 32 bit boundary.  */
+  
+  if (prev_insn.insn || seen_relaxable_p)
+    (void) m32r_fill_insn (0);
 }

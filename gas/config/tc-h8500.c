@@ -1,5 +1,5 @@
 /* tc-h8500.c -- Assemble code for the Hitachi H8/500
-   Copyright (C) 1993 Free Software Foundation.
+   Copyright (C) 1993, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -293,7 +293,7 @@ parse_exp (s, op, page)
 
   expression (op);
   if (op->X_op == O_absent)
-    as_bad ("missing operand");
+    as_bad (_("missing operand"));
   new = input_line_pointer;
   input_line_pointer = save;
   return new;
@@ -333,14 +333,14 @@ skip_colonthing (sign, ptr, exp, def, size8, size16, size24)
 	{
 	  if (!size24)
 	    {
-	      as_bad (":24 not valid for this opcode");
+	      as_bad (_(":24 not valid for this opcode"));
 	    }
 	  ptr += 2;
 	  exp->type = size24;
 	}
       else
 	{
-	  as_bad ("expect :8,:16 or :24");
+	  as_bad (_("expect :8,:16 or :24"));
 	  exp->type = size16;
 	}
     }
@@ -397,7 +397,7 @@ parse_reglist (src, op)
 	}
       else
 	{
-	  as_bad ("syntax error in reg list");
+	  as_bad (_("syntax error in reg list"));
 	  return 0;
 	}
       if (src[idx] == '-')
@@ -415,7 +415,7 @@ parse_reglist (src, op)
 	    }
 	  else
 	    {
-	      as_bad ("missing final register in range");
+	      as_bad (_("missing final register in range"));
 	    }
 	}
       if (src[idx] == ',')
@@ -502,20 +502,20 @@ get_operand (ptr, op, ispage)
 
 	  if (*src != ',')
 	    {
-	      as_bad ("expected @(exp, Rn)");
+	      as_bad (_("expected @(exp, Rn)"));
 	      return;
 	    }
 	  src++;
 	  len = parse_reg (src, &mode, &op->reg);
 	  if (len == 0 || mode != RN)
 	    {
-	      as_bad ("expected @(exp, Rn)");
+	      as_bad (_("expected @(exp, Rn)"));
 	      return;
 	    }
 	  src += len;
 	  if (*src != ')')
 	    {
-	      as_bad ("expected @(exp, Rn)");
+	      as_bad (_("expected @(exp, Rn)"));
 	      return;
 	    }
 	  *ptr = src + 1;
@@ -531,7 +531,7 @@ get_operand (ptr, op, ispage)
 	      src++;
 	      if (mode != RN)
 		{
-		  as_bad ("@Rn+ needs word register");
+		  as_bad (_("@Rn+ needs word register"));
 		  return;
 		}
 	      op->type = RNINC;
@@ -541,7 +541,7 @@ get_operand (ptr, op, ispage)
 	    }
 	  if (mode != RN)
 	    {
-	      as_bad ("@Rn needs word register");
+	      as_bad (_("@Rn needs word register"));
 	      return;
 	    }
 	  op->type = RNIND;
@@ -841,7 +841,7 @@ get_specific (opcode, operands)
 		}
 	      break;
 	    default:
-	      printf ("unhandled %d\n", this_try->arg_type[i]);
+	      printf (_("unhandled %d\n"), this_try->arg_type[i]);
 	      break;
 	    }
 
@@ -869,7 +869,7 @@ check (operand, low, high)
       || operand->X_add_number < low
       || operand->X_add_number > high)
     {
-      as_bad ("operand must be absolute in range %d..%d", low, high);
+      as_bad (_("operand must be absolute in range %d..%d"), low, high);
     }
   return operand->X_add_number;
 }
@@ -959,7 +959,7 @@ build_bytes (opcode, operand)
 	  switch (opcode->bytes[index].insert)
 	    {
 	    default:
-	      printf ("failed for %d\n", opcode->bytes[index].insert);
+	      printf (_("failed for %d\n"), opcode->bytes[index].insert);
 	      break;
 	    case 0:
 	      break;
@@ -1118,14 +1118,14 @@ DEFUN (md_assemble, (str),
 
   if (op_end == op_start)
     {
-      as_bad ("can't find opcode ");
+      as_bad (_("can't find opcode "));
     }
 
   opcode = (h8500_opcode_info *) hash_find (opcode_hash_control, name);
 
   if (opcode == NULL)
     {
-      as_bad ("unknown opcode");
+      as_bad (_("unknown opcode"));
       return;
     }
 
@@ -1141,7 +1141,7 @@ DEFUN (md_assemble, (str),
 
       where[0] = 0x0;
       where[1] = 0x0;
-      as_bad ("invalid operands for opcode");
+      as_bad (_("invalid operands for opcode"));
       return;
     }
 
@@ -1153,7 +1153,7 @@ void
 DEFUN (tc_crawl_symbol_chain, (headers),
        object_headers * headers)
 {
-  printf ("call to tc_crawl_symbol_chain \n");
+  printf (_("call to tc_crawl_symbol_chain \n"));
 }
 
 symbolS *
@@ -1167,7 +1167,7 @@ void
 DEFUN (tc_headers_hook, (headers),
        object_headers * headers)
 {
-  printf ("call to tc_headers_hook \n");
+  printf (_("call to tc_headers_hook \n"));
 }
 
 /* Various routines to kill one day */
@@ -1218,7 +1218,7 @@ md_atof (type, litP, sizeP)
 
     default:
       *sizeP = 0;
-      return "Bad call to MD_ATOF()";
+      return _("Bad call to MD_ATOF()");
     }
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
@@ -1258,7 +1258,7 @@ int md_short_jump_size;
 void
 tc_aout_fix_to_chars ()
 {
-  printf ("call to tc_aout_fix_to_chars \n");
+  printf (_("call to tc_aout_fix_to_chars \n"));
   abort ();
 }
 
@@ -1270,7 +1270,7 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  as_fatal ("failed sanity check.");
+  as_fatal (_("failed sanity check."));
 }
 
 void
@@ -1280,7 +1280,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  as_fatal ("failed sanity check.");
+  as_fatal (_("failed sanity check."));
 }
 
 static

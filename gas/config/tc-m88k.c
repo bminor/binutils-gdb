@@ -8,7 +8,7 @@ This file is part of GAS, the GNU Assembler.
 
 GAS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GAS is distributed in the hope that it will be useful,
@@ -203,7 +203,7 @@ md_begin ()
       retval = hash_insert (op_hash, name, &m88k_opcodes[i]);
 
       if (retval != NULL)
-	as_fatal ("Can't hash instruction '%s':%s",
+	as_fatal (_("Can't hash instruction '%s':%s"),
 		  m88k_opcodes[i].name, retval);
 
       /* skip to next unique mnemonic or end of list */
@@ -255,7 +255,7 @@ md_assemble (op)
 
   if ((format = (struct m88k_opcode *) hash_find (op_hash, op)) == NULL)
     {
-      as_bad ("Invalid mnemonic '%s'", op);
+      as_bad (_("Invalid mnemonic '%s'"), op);
       return;
     }
 
@@ -275,7 +275,7 @@ md_assemble (op)
 	format++;
       else
 	{
-	  as_fatal ("Parameter syntax error");
+	  as_fatal (_("Parameter syntax error"));
 	  return;
 	}
     }
@@ -330,7 +330,7 @@ md_assemble (op)
       break;
 
     default:
-      as_fatal ("Unknown relocation type");
+      as_fatal (_("Unknown relocation type"));
       break;
     }
 }
@@ -443,7 +443,7 @@ calcop (format, param, insn)
 	case '?':
 	  /* Having this here repeats the warning somtimes.
 	   But can't we stand that?  */
-	  as_warn ("Use of obsolete instruction");
+	  as_warn (_("Use of obsolete instruction"));
 	  break;
 	}
     }
@@ -560,7 +560,7 @@ get_imm16 (param, insn)
 	{
 	  /* Warn about too big expressions if not surrounded by xx16.  */
 	  if (val > 0xffff)
-	    as_warn ("Expression truncated to 16 bits");
+	    as_warn (_("Expression truncated to 16 bits"));
 	}
 
       if (reloc == RELOC_HI16)
@@ -626,7 +626,7 @@ get_cmp (param, valp)
 
       if (val >= 32)
 	{
-	  as_warn ("Expression truncated to 5 bits");
+	  as_warn (_("Expression truncated to 5 bits"));
 	  val %= 32;
 	}
     }
@@ -648,7 +648,7 @@ get_cnd (param, valp)
 
       if (val >= 32)
 	{
-	  as_warn ("Expression truncated to 5 bits");
+	  as_warn (_("Expression truncated to 5 bits"));
 	  val %= 32;
 	}
     }
@@ -870,7 +870,7 @@ get_vec9 (param, valp)
   input_line_pointer = save_ptr;
 
   if (val >= 1 << 9)
-    as_warn ("Expression truncated to 9 bits");
+    as_warn (_("Expression truncated to 9 bits"));
 
   *valp = val % (1 << 9);
 
@@ -892,7 +892,7 @@ get_o6 (param, valp)
   input_line_pointer = save_ptr;
 
   if (val & 0x3)
-    as_warn ("Removed lower 2 bits of expression");
+    as_warn (_("Removed lower 2 bits of expression"));
 
   *valp = val;
 
@@ -1031,7 +1031,7 @@ md_number_to_imm (buf, val, nbytes, fixP, seg_type)
       break;
 
     default:
-      as_fatal ("Bad relocation type");
+      as_fatal (_("Bad relocation type"));
       break;
     }
 }
@@ -1044,7 +1044,7 @@ md_number_to_disp (buf, val, nbytes)
      int val;
      int nbytes;
 {
-  as_fatal ("md_number_to_disp not defined");
+  as_fatal (_("md_number_to_disp not defined"));
   md_number_to_chars (buf, val, nbytes);
 }
 
@@ -1054,7 +1054,7 @@ md_number_to_field (buf, val, nbytes)
      int val;
      int nbytes;
 {
-  as_fatal ("md_number_to_field not defined");
+  as_fatal (_("md_number_to_field not defined"));
   md_number_to_chars (buf, val, nbytes);
 }
 
@@ -1103,7 +1103,7 @@ md_atof (type, litP, sizeP)
 
     default:
       *sizeP = 0;
-      return "Bad call to MD_ATOF()";
+      return _("Bad call to MD_ATOF()");
     }
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
@@ -1167,7 +1167,7 @@ md_estimate_size_before_relax (fragP, segment_type)
      fragS *fragP;
      segT segment_type;
 {
-  as_fatal ("Relaxation should never occur");
+  as_fatal (_("Relaxation should never occur"));
   return (-1);
 }
 
@@ -1257,14 +1257,14 @@ s_bss ()
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_warn ("Expected comma after name");
+      as_warn (_("Expected comma after name"));
       ignore_rest_of_line ();
       return;
     }
   input_line_pointer++;
   if ((temp = get_absolute_expression ()) < 0)
     {
-      as_warn ("BSS length (%d.) <0! Ignored.", temp);
+      as_warn (_("BSS length (%d.) <0! Ignored."), temp);
       ignore_rest_of_line ();
       return;
     }
@@ -1308,7 +1308,7 @@ s_bss ()
     }
   else
     {
-      as_warn ("Ignoring attempt to re-define symbol %s.", name);
+      as_warn (_("Ignoring attempt to re-define symbol %s."), name);
     }
 
   while (!is_end_of_line[*input_line_pointer])

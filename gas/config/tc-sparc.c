@@ -1,6 +1,5 @@
 /* tc-sparc.c -- Assemble for the SPARC
-   Copyright (C) 1989, 90-96, 1997 Free Software Foundation, Inc.
-
+   Copyright (C) 1989, 90-96, 97, 1998 Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
    GAS is free software; you can redistribute it and/or modify
@@ -26,7 +25,9 @@
 
 #include "opcode/sparc.h"
 
+#ifdef OBJ_ELF
 #include "elf/sparc.h"
+#endif
 
 static struct sparc_arch *lookup_arch PARAMS ((char *));
 static void init_default_arch PARAMS ((void));
@@ -66,10 +67,15 @@ static enum sparc_opcode_arch_val max_architecture;
 
 /* Either 32 or 64, selects file format.  */
 static int sparc_arch_size;
-static enum { MM_TSO, MM_PSO, MM_RMO } sparc_memory_model = MM_RMO;
 /* Initial (default) value, recorded separately in case a user option
    changes the value before md_show_usage is called.  */
 static int default_arch_size;
+
+#ifdef OBJ_ELF
+/* The currently selected v9 memory model.  Currently only used for
+   ELF.  */
+static enum { MM_TSO, MM_PSO, MM_RMO } sparc_memory_model = MM_RMO;
+#endif
 
 static int architecture_requested;
 static int warn_on_bump;
@@ -86,12 +92,15 @@ static int enforce_aligned_data;
 
 extern int target_big_endian;
 
-/* V9 has big and little endian data, but instructions are always big endian.
-   The sparclet has bi-endian support but both data and insns have the same
-   endianness.  Global `target_big_endian' is used for data.  The following
-   macro is used for instructions.  */
+/* V9 and 86x have big and little endian data, but instructions are always big
+   endian.  The sparclet has bi-endian support but both data and insns have
+   the same endianness.  Global `target_big_endian' is used for data.
+   The following macro is used for instructions.  */
+#ifndef INSN_BIG_ENDIAN
 #define INSN_BIG_ENDIAN (target_big_endian \
+			 || default_arch_type == sparc86x \
 			 || SPARC_OPCODE_ARCH_V9_P (max_architecture))
+#endif
 
 /* handle of the OPCODE hash table */
 static struct hash_control *op_hash;
@@ -186,29 +195,37 @@ static void output_insn
    for this use.  That table is for opcodes only.  This table is for opcodes
    and file formats.  */
 
+enum sparc_arch_types {v6, v7, v8, sparclet, sparclite, sparc86x, v8plus,
+		       v8plusa, v9, v9a, v9_64};
+
 static struct sparc_arch {
   char *name;
   char *opcode_arch;
+  enum sparc_arch_types arch_type;
   /* Default word size, as specified during configuration.
      A value of zero means can't be used to specify default architecture.  */
   int default_arch_size;
   /* Allowable arg to -A?  */
   int user_option_p;
 } sparc_arch_table[] = {
-  { "v6", "v6", 0, 1 },
-  { "v7", "v7", 0, 1 },
-  { "v8", "v8", 32, 1 },
-  { "sparclet", "sparclet", 32, 1 },
-  { "sparclite", "sparclite", 32, 1 },
-  { "v8plus", "v9", 0, 1 },
-  { "v8plusa", "v9a", 0, 1 },
-  { "v9", "v9", 0, 1 },
-  { "v9a", "v9a", 0, 1 },
+  { "v6", "v6", v6, 0, 1 },
+  { "v7", "v7", v7, 0, 1 },
+  { "v8", "v8", v8, 32, 1 },
+  { "sparclet", "sparclet", sparclet, 32, 1 },
+  { "sparclite", "sparclite", sparclite, 32, 1 },
+  { "sparc86x", "sparclite", sparc86x, 32, 1 },
+  { "v8plus", "v9", v9, 0, 1 },
+  { "v8plusa", "v9a", v9, 0, 1 },
+  { "v9", "v9", v9, 0, 1 },
+  { "v9a", "v9a", v9, 0, 1 },
   /* This exists to allow configure.in/Makefile.in to pass one
      value to specify both the default machine and default word size.  */
-  { "v9-64", "v9", 64, 0 },
-  { NULL, NULL, 0 }
+  { "v9-64", "v9", v9, 64, 0 },
+  { NULL, NULL, v8, 0, 0 }
 };
+
+/* Variant of default_arch */
+static enum sparc_arch_types default_arch_type;
 
 static struct sparc_arch *
 lookup_arch (name)
@@ -234,13 +251,14 @@ init_default_arch ()
 
   if (sa == NULL
       || sa->default_arch_size == 0)
-    as_fatal ("Invalid default architecture, broken assembler.");
+    as_fatal (_("Invalid default architecture, broken assembler."));
 
   max_architecture = sparc_opcode_lookup_arch (sa->opcode_arch);
   if (max_architecture == SPARC_OPCODE_ARCH_BAD)
-    as_fatal ("Bad opcode table, broken assembler.");
+    as_fatal (_("Bad opcode table, broken assembler."));
   default_arch_size = sparc_arch_size = sa->default_arch_size;
   default_init_p = 1;
+  default_arch_type = sa->arch_type;
 }
 
 /* Called by TARGET_FORMAT.  */
@@ -397,7 +415,7 @@ md_parse_option (c, arg)
       if (strcmp (arg, "v8plus") != 0
 	  && strcmp (arg, "v8plusa") != 0)
 	{
-	  as_bad ("invalid architecture -xarch=%s", arg);
+	  as_bad (_("invalid architecture -xarch=%s"), arg);
 	  return 0;
 	}
 
@@ -412,13 +430,13 @@ md_parse_option (c, arg)
 	if (sa == NULL
 	    || ! sa->user_option_p)
 	  {
-	    as_bad ("invalid architecture -A%s", arg);
+	    as_bad (_("invalid architecture -A%s"), arg);
 	    return 0;
 	  }
 
 	opcode_arch = sparc_opcode_lookup_arch (sa->opcode_arch);
 	if (opcode_arch == SPARC_OPCODE_ARCH_BAD)
-	  as_fatal ("Bad opcode table, broken assembler.");
+	  as_fatal (_("Bad opcode table, broken assembler."));
 
 	max_architecture = opcode_arch;
 	architecture_requested = 1;
@@ -436,6 +454,10 @@ md_parse_option (c, arg)
 #ifdef SPARC_BIENDIAN
     case OPTION_LITTLE_ENDIAN:
       target_big_endian = 0;
+      if (default_arch_type != sparc86x
+	  && default_arch_type != sparclet
+	  && default_arch_type != v9)
+	as_fatal ("This target does not support -EL");
       break;
     case OPTION_BIG_ENDIAN:
       target_big_endian = 1;
@@ -470,7 +492,7 @@ md_parse_option (c, arg)
 	      }
 	  }
 	if (*l == NULL)
-	  as_fatal ("No compiled in support for %d bit object file format",
+	  as_fatal (_("No compiled in support for %d bit object file format"),
 		    sparc_arch_size);
 	free (list);
       }
@@ -507,7 +529,7 @@ md_parse_option (c, arg)
 
     case 'K':
       if (strcmp (arg, "PIC") != 0)
-	as_warn ("Unrecognized option following -K");
+	as_warn (_("Unrecognized option following -K"));
       else
 	sparc_pic_code = 1;
       break;
@@ -531,7 +553,7 @@ md_show_usage (stream)
   if (! default_init_p)
     init_default_arch ();
 
-  fprintf(stream, "SPARC options:\n");
+  fprintf(stream, _("SPARC options:\n"));
   for (arch = &sparc_arch_table[0]; arch->name; arch++)
     {
       if (arch != &sparc_arch_table[0])
@@ -539,39 +561,39 @@ md_show_usage (stream)
       if (arch->user_option_p)
 	fprintf (stream, "-A%s", arch->name);
     }
-  fprintf (stream, "\n-xarch=v8plus | -xarch=v8plusa\n");
-  fprintf (stream, "\
+  fprintf (stream, _("\n-xarch=v8plus | -xarch=v8plusa\n"));
+  fprintf (stream, _("\
 			specify variant of SPARC architecture\n\
 -bump			warn when assembler switches architectures\n\
 -sparc			ignored\n\
---enforce-aligned-data	force .long, etc., to be aligned correctly\n");
+--enforce-aligned-data	force .long, etc., to be aligned correctly\n"));
 #ifdef OBJ_AOUT
-  fprintf (stream, "\
--k			generate PIC\n");
+  fprintf (stream, _("\
+-k			generate PIC\n"));
 #endif
 #ifdef OBJ_ELF
-  fprintf (stream, "\
+  fprintf (stream, _("\
 -32			create 32 bit object file\n\
--64			create 64 bit object file\n");
-  fprintf (stream, "\
-			[default is %d]\n", default_arch_size);
-  fprintf (stream, "\
+-64			create 64 bit object file\n"));
+  fprintf (stream, _("\
+			[default is %d]\n"), default_arch_size);
+  fprintf (stream, _("\
 -TSO			use Total Store Ordering\n\
 -PSO			use Partial Store Ordering\n\
--RMO			use Relaxed Memory Ordering\n");
-  fprintf (stream, "\
-			[default is %s]\n", (default_arch_size == 64) ? "RMO" : "TSO");
-  fprintf (stream, "\
+-RMO			use Relaxed Memory Ordering\n"));
+  fprintf (stream, _("\
+			[default is %s]\n"), (default_arch_size == 64) ? "RMO" : "TSO");
+  fprintf (stream, _("\
 -KPIC			generate PIC\n\
 -V			print assembler version number\n\
 -q			ignored\n\
 -Qy, -Qn		ignored\n\
--s			ignored\n");
+-s			ignored\n"));
 #endif
 #ifdef SPARC_BIENDIAN
-  fprintf (stream, "\
+  fprintf (stream, _("\
 -EL			generate code for a little endian machine\n\
--EB			generate code for a big endian machine\n");
+-EB			generate code for a big endian machine\n"));
 #endif
 }
 
@@ -649,13 +671,13 @@ md_begin ()
 
   op_hash = hash_new ();
 
-  while (i < sparc_num_opcodes)
+  while (i < (unsigned int) sparc_num_opcodes)
     {
       const char *name = sparc_opcodes[i].name;
       retval = hash_insert (op_hash, name, (PTR) &sparc_opcodes[i]);
       if (retval != NULL)
 	{
-	  fprintf (stderr, "internal error: can't hash `%s': %s\n",
+	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
 		   sparc_opcodes[i].name, retval);
 	  lose = 1;
 	}
@@ -663,18 +685,18 @@ md_begin ()
 	{
 	  if (sparc_opcodes[i].match & sparc_opcodes[i].lose)
 	    {
-	      fprintf (stderr, "internal error: losing opcode: `%s' \"%s\"\n",
+	      fprintf (stderr, _("internal error: losing opcode: `%s' \"%s\"\n"),
 		       sparc_opcodes[i].name, sparc_opcodes[i].args);
 	      lose = 1;
 	    }
 	  ++i;
 	}
-      while (i < sparc_num_opcodes
+      while (i < (unsigned int) sparc_num_opcodes
 	     && !strcmp (sparc_opcodes[i].name, name));
     }
 
   if (lose)
-    as_fatal ("Broken assembler.  No assembly attempted.");
+    as_fatal (_("Broken assembler.  No assembly attempted."));
 
   for (i = '0'; i < '8'; ++i)
     octal[i] = 1;
@@ -806,7 +828,7 @@ BSR (val, amount)
      int amount;
 {
   if (sizeof (bfd_vma) <= 4 && amount >= 32)
-    as_fatal ("Support for 64-bit arithmetic not compiled in.");
+    as_fatal (_("Support for 64-bit arithmetic not compiled in."));
   return val >> amount;
 }
 
@@ -861,7 +883,7 @@ md_assemble (str)
 	 F_{UNBR,CONDBR,FBR} set is annullable.  */
       && ((last_insn->flags & (F_UNBR | F_CONDBR | F_FBR)) == 0
 	  || (last_opcode & ANNUL) == 0))
-    as_warn ("FP branch in delay slot");
+    as_warn (_("FP branch in delay slot"));
 
   /* SPARC before v9 requires a nop instruction between a floating
      point instruction and a floating point branch.  We insert one
@@ -877,7 +899,7 @@ md_assemble (str)
       nop_insn.opcode = NOP_INSN;
       nop_insn.reloc = BFD_RELOC_NONE;
       output_insn (insn, &nop_insn);
-      as_warn ("FP branch preceded by FP instruction; NOP inserted");
+      as_warn (_("FP branch preceded by FP instruction; NOP inserted"));
     }
 
   switch (special_case)
@@ -897,9 +919,9 @@ md_assemble (str)
 	    && the_insn.exp.X_op == O_constant)
 	  {
 	    if (the_insn.exp.X_add_number < 0)
-	      as_warn ("set: used with negative number");
-	    else if (the_insn.exp.X_add_number > 0xffffffff)
-	      as_warn ("set: number larger than 4294967295");
+	      as_warn (_("set: used with negative number"));
+	    else if (the_insn.exp.X_add_number > (offsetT) 0xffffffff)
+	      as_warn (_("set: number larger than 4294967295"));
 	  }
 
 	/* See if operand is absolute and small; skip sethi if so.  */
@@ -950,7 +972,7 @@ md_assemble (str)
 
 	/* The tmp reg should not be the dst reg.  */
 	if (tmpreg == dstreg)
-	  as_warn ("setx: temporary register same as destination register");
+	  as_warn (_("setx: temporary register same as destination register"));
 
 	/* Reset X_add_number, we've extracted it as upper32/lower32.
 	   Otherwise fixup_segment will complain about not being able to
@@ -1095,7 +1117,7 @@ md_assemble (str)
       }
 
     default:
-      as_fatal ("failed special case insn sanity check");
+      as_fatal (_("failed special case insn sanity check"));
     }
 }
 
@@ -1118,7 +1140,7 @@ sparc_ip (str, pinsn)
   int comma = 0;
   int v9_arg_p;
 
-  for (s = str; islower (*s) || (*s >= '0' && *s <= '3'); ++s)
+  for (s = str; islower ((unsigned char) *s) || (*s >= '0' && *s <= '3'); ++s)
     ;
 
   switch (*s)
@@ -1136,13 +1158,13 @@ sparc_ip (str, pinsn)
       break;
 
     default:
-      as_fatal ("Unknown opcode: `%s'", str);
+      as_fatal (_("Unknown opcode: `%s'"), str);
     }
   insn = (struct sparc_opcode *) hash_find (op_hash, str);
   *pinsn = insn;
   if (insn == NULL)
     {
-      as_bad ("Unknown opcode: `%s'", str);
+      as_bad (_("Unknown opcode: `%s'"), str);
       return;
     }
   if (comma)
@@ -1180,7 +1202,7 @@ sparc_ip (str, pinsn)
 			if (! parse_keyword_arg (sparc_encode_membar, &s,
 						 &mask))
 			  {
-			    error_message = ": invalid membar mask name";
+			    error_message = _(": invalid membar mask name");
 			    goto error;
 			  }
 			kmask |= mask;
@@ -1194,12 +1216,12 @@ sparc_ip (str, pinsn)
 		  {
 		    if (! parse_const_expr_arg (&s, &kmask))
 		      {
-			error_message = ": invalid membar mask expression";
+			error_message = _(": invalid membar mask expression");
 			goto error;
 		      }
 		    if (kmask < 0 || kmask > 127)
 		      {
-			error_message = ": invalid membar mask number";
+			error_message = _(": invalid membar mask number");
 			goto error;
 		      }
 		  }
@@ -1217,7 +1239,7 @@ sparc_ip (str, pinsn)
 		  {
 		    if (! parse_keyword_arg (sparc_encode_prefetch, &s, &fcn))
 		      {
-			error_message = ": invalid prefetch function name";
+			error_message = _(": invalid prefetch function name");
 			goto error;
 		      }
 		  }
@@ -1225,12 +1247,12 @@ sparc_ip (str, pinsn)
 		  {
 		    if (! parse_const_expr_arg (&s, &fcn))
 		      {
-			error_message = ": invalid prefetch function expression";
+			error_message = _(": invalid prefetch function expression");
 			goto error;
 		      }
 		    if (fcn < 0 || fcn > 31)
 		      {
-			error_message = ": invalid prefetch function number";
+			error_message = _(": invalid prefetch function number");
 			goto error;
 		      }
 		  }
@@ -1258,7 +1280,7 @@ sparc_ip (str, pinsn)
 		    }
 		  if (p->name[0] != s[0])
 		    {
-		      error_message = ": unrecognizable privileged register";
+		      error_message = _(": unrecognizable privileged register");
 		      goto error;
 		    }
 		  if (*args == '?')
@@ -1270,7 +1292,7 @@ sparc_ip (str, pinsn)
 		}
 	      else
 		{
-		  error_message = ": unrecognizable privileged register";
+		  error_message = _(": unrecognizable privileged register");
 		  goto error;
 		}
 
@@ -1294,12 +1316,12 @@ sparc_ip (str, pinsn)
 		    }
 		  if (p->name[0] != s[0])
 		    {
-		      error_message = ": unrecognizable v9a ancillary state register";
+		      error_message = _(": unrecognizable v9a ancillary state register");
 		      goto error;
 		    }
 		  if (*args == '/' && (p->regnum == 20 || p->regnum == 21))
 		    {
-		      error_message = ": rd on write only ancillary state register";
+		      error_message = _(": rd on write only ancillary state register");
 		      goto error;
 		    }		      
 		  if (*args == '/')
@@ -1311,7 +1333,7 @@ sparc_ip (str, pinsn)
 		}
 	      else
 		{
-		  error_message = ": unrecognizable v9a ancillary state register";
+		  error_message = _(": unrecognizable v9a ancillary state register");
 		  goto error;
 		}
 
@@ -1321,11 +1343,11 @@ sparc_ip (str, pinsn)
 		{
 		  s += 4;
 
-		  if (isdigit (*s))
+		  if (isdigit ((unsigned char) *s))
 		    {
 		      long num = 0;
 
-		      while (isdigit (*s))
+		      while (isdigit ((unsigned char) *s))
 			{
 			  num = num * 10 + *s - '0';
 			  ++s;
@@ -1335,7 +1357,7 @@ sparc_ip (str, pinsn)
 			{
 			  if (num < 16 || 31 < num)
 			    {
-			      error_message = ": asr number must be between 16 and 31";
+			      error_message = _(": asr number must be between 16 and 31");
 			      goto error;
 			    }
 			}
@@ -1343,7 +1365,7 @@ sparc_ip (str, pinsn)
 			{
 			  if (num < 0 || 31 < num)
 			    {
-			      error_message = ": asr number must be between 0 and 31";
+			      error_message = _(": asr number must be between 0 and 31");
 			      goto error;
 			    }
 			}
@@ -1353,7 +1375,7 @@ sparc_ip (str, pinsn)
 		    }
 		  else
 		    {
-		      error_message = ": expecting %asrN";
+		      error_message = _(": expecting %asrN");
 		      goto error;
 		    }
 		} /* if %asr */
@@ -1529,9 +1551,9 @@ sparc_ip (str, pinsn)
 	      break;
 
 	    case '#':		/* must be at least one digit */
-	      if (isdigit (*s++))
+	      if (isdigit ((unsigned char) *s++))
 		{
-		  while (isdigit (*s))
+		  while (isdigit ((unsigned char) *s))
 		    {
 		      ++s;
 		    }
@@ -1550,10 +1572,10 @@ sparc_ip (str, pinsn)
 	    case 'b':		/* next operand is a coprocessor register */
 	    case 'c':
 	    case 'D':
-	      if (*s++ == '%' && *s++ == 'c' && isdigit (*s))
+	      if (*s++ == '%' && *s++ == 'c' && isdigit ((unsigned char) *s))
 		{
 		  mask = *s++;
-		  if (isdigit (*s))
+		  if (isdigit ((unsigned char) *s))
 		    {
 		      mask = 10 * (mask - '0') + (*s++ - '0');
 		      if (mask >= 32)
@@ -1642,7 +1664,7 @@ sparc_ip (str, pinsn)
 		      goto error;
 
 		    case 'r':	/* any register */
-		      if (!isdigit (c = *s++))
+		      if (!isdigit ((unsigned char) (c = *s++)))
 			{
 			  goto error;
 			}
@@ -1657,7 +1679,7 @@ sparc_ip (str, pinsn)
 		    case '7':
 		    case '8':
 		    case '9':
-		      if (isdigit (*s))
+		      if (isdigit ((unsigned char) *s))
 			{
 			  if ((c = 10 * (c - '0') + (*s++ - '0')) >= 32)
 			    {
@@ -1718,9 +1740,9 @@ sparc_ip (str, pinsn)
 
 		if (*s++ == '%'
 		    && ((format = *s) == 'f')
-		    && isdigit (*++s))
+		    && isdigit ((unsigned char) *++s))
 		  {
-		    for (mask = 0; isdigit (*s); ++s)
+		    for (mask = 0; isdigit ((unsigned char) *s); ++s)
 		      {
 			mask = 10 * mask + (*s - '0');
 		      }		/* read the number */
@@ -1744,9 +1766,9 @@ sparc_ip (str, pinsn)
 		    if (mask >= 64)
 		      {
 			if (SPARC_OPCODE_ARCH_V9_P (max_architecture))
-			  error_message = ": There are only 64 f registers; [0-63]";
+			  error_message = _(": There are only 64 f registers; [0-63]");
 			else
-			  error_message = ": There are only 32 f registers; [0-31]";
+			  error_message = _(": There are only 32 f registers; [0-31]");
 			goto error;
 		      }	/* on error */
 		    else if (mask >= 32)
@@ -1758,7 +1780,7 @@ sparc_ip (str, pinsn)
 			  }
 			else
 			  {
-			    error_message = ": There are only 32 f registers; [0-31]";
+			    error_message = _(": There are only 32 f registers; [0-31]");
 			    goto error;
 			  }
 		      }
@@ -1891,7 +1913,7 @@ sparc_ip (str, pinsn)
 
 		for (s1 = s; *s1 && *s1 != ',' && *s1 != ']'; s1++) ;
 
-		if (s1 != s && isdigit (s1[-1]))
+		if (s1 != s && isdigit ((unsigned char) s1[-1]))
 		  {
 		    if (s1[-2] == '%' && s1[-3] == '+')
 		      {
@@ -1927,7 +1949,7 @@ sparc_ip (str, pinsn)
 		      && the_insn.reloc == BFD_RELOC_32_PCREL_S2
 		      && in_signed_range (the_insn.exp.X_add_number, 0x3fff))
 		    {
-		      error_message = ": PC-relative operand can't be a constant";
+		      error_message = _(": PC-relative operand can't be a constant");
 		      goto error;
 		    }
 
@@ -1960,7 +1982,7 @@ sparc_ip (str, pinsn)
 		  {
 		    if (! parse_keyword_arg (sparc_encode_asi, &s, &asi))
 		      {
-			error_message = ": invalid ASI name";
+			error_message = _(": invalid ASI name");
 			goto error;
 		      }
 		  }
@@ -1968,12 +1990,12 @@ sparc_ip (str, pinsn)
 		  {
 		    if (! parse_const_expr_arg (&s, &asi))
 		      {
-			error_message = ": invalid ASI expression";
+			error_message = _(": invalid ASI expression");
 			goto error;
 		      }
 		    if (asi < 0 || asi > 255)
 		      {
-			error_message = ": invalid ASI number";
+			error_message = _(": invalid ASI number");
 			goto error;
 		      }
 		  }
@@ -2070,12 +2092,12 @@ sparc_ip (str, pinsn)
 		  {
 		    int n = e.X_add_number;
 		    if (n != e.X_add_number || (n & ~0x1ff) != 0)
-		      as_bad ("OPF immediate operand out of range (0-0x1ff)");
+		      as_bad (_("OPF immediate operand out of range (0-0x1ff)"));
 		    else
 		      opcode |= e.X_add_number << 5;
 		  }
 		else
-		  as_bad ("non-immediate OPF operand, ignored");
+		  as_bad (_("non-immediate OPF operand, ignored"));
 		s = input_line_pointer;
 		input_line_pointer = push;
 		continue;
@@ -2094,7 +2116,7 @@ sparc_ip (str, pinsn)
 		int cpreg;
 		if (! parse_keyword_arg (sparc_encode_sparclet_cpreg, &s, &cpreg))
 		  {
-		    error_message = ": invalid cpreg name";
+		    error_message = _(": invalid cpreg name");
 		    goto error;
 		  }
 		opcode |= (*args == 'U' ? RS1 (cpreg) : RD (cpreg));
@@ -2102,7 +2124,7 @@ sparc_ip (str, pinsn)
 	      }
 
 	    default:
-	      as_fatal ("failed sanity check.");
+	      as_fatal (_("failed sanity check."));
 	    }			/* switch on arg code */
 
 	  /* Break out of for() loop.  */
@@ -2113,7 +2135,7 @@ sparc_ip (str, pinsn)
       if (match == 0)
 	{
 	  /* Args don't match. */
-	  if (((unsigned) (&insn[1] - sparc_opcodes)) < sparc_num_opcodes
+	  if (&insn[1] - sparc_opcodes < sparc_num_opcodes
 	      && (insn->name == insn[1].name
 		  || !strcmp (insn->name, insn[1].name)))
 	    {
@@ -2123,7 +2145,7 @@ sparc_ip (str, pinsn)
 	    }
 	  else
 	    {
-	      as_bad ("Illegal operands%s", error_message);
+	      as_bad (_("Illegal operands%s"), error_message);
 	      return;
 	    }
 	}
@@ -2152,7 +2174,7 @@ sparc_ip (str, pinsn)
 	      if (warn_on_bump
 		  && needed_architecture > warn_after_architecture)
 		{
-		  as_warn ("architecture bumped from \"%s\" to \"%s\" on \"%s\"",
+		  as_warn (_("architecture bumped from \"%s\" to \"%s\" on \"%s\""),
 			   sparc_opcode_archs[current_architecture].name,
 			   sparc_opcode_archs[needed_architecture].name,
 			   str);
@@ -2188,8 +2210,8 @@ sparc_ip (str, pinsn)
 		  ++arch;
 		}
 
-	      as_bad ("Architecture mismatch on \"%s\".", str);
-	      as_tsktsk (" (Requires %s; requested architecture is %s.)",
+	      as_bad (_("Architecture mismatch on \"%s\"."), str);
+	      as_tsktsk (_(" (Requires %s; requested architecture is %s.)"),
 			 required_archs,
 			 sparc_opcode_archs[max_architecture].name);
 	      return;
@@ -2217,7 +2239,9 @@ parse_keyword_arg (lookup_fn, input_pointerP, valueP)
   char c, *p, *q;
 
   p = *input_pointerP;
-  for (q = p + (*p == '#' || *p == '%'); isalnum (*q) || *q == '_'; ++q)
+  for (q = p + (*p == '#' || *p == '%');
+       isalnum ((unsigned char) *q) || *q == '_';
+       ++q)
     continue;
   c = *q;
   *q = 0;
@@ -2281,7 +2305,7 @@ get_expression (str)
       && seg != bss_section
       && seg != undefined_section)
     {
-      the_insn.error = "bad segment";
+      the_insn.error = _("bad segment");
       expr_end = input_line_pointer;
       input_line_pointer = save_in;
       return 1;
@@ -2376,7 +2400,7 @@ md_atof (type, litP, sizeP)
 
     default:
       *sizeP = 0;
-      return "Bad call to MD_ATOF()";
+      return _("Bad call to MD_ATOF()");
     }
 
   t = atof_ieee (input_line_pointer, type, words);
@@ -2533,31 +2557,36 @@ md_apply_fix3 (fixP, value, segment)
 
 	case BFD_RELOC_SPARC_11:
 	  if (! in_signed_range (val, 0x7ff))
-	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("relocation overflow"));
 	  insn |= val & 0x7ff;
 	  break;
 
 	case BFD_RELOC_SPARC_10:
 	  if (! in_signed_range (val, 0x3ff))
-	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("relocation overflow"));
 	  insn |= val & 0x3ff;
 	  break;
 
 	case BFD_RELOC_SPARC_7:
 	  if (! in_bitfield_range (val, 0x7f))
-	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("relocation overflow"));
 	  insn |= val & 0x7f;
 	  break;
 
 	case BFD_RELOC_SPARC_6:
 	  if (! in_bitfield_range (val, 0x3f))
-	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("relocation overflow"));
 	  insn |= val & 0x3f;
 	  break;
 
 	case BFD_RELOC_SPARC_5:
 	  if (! in_bitfield_range (val, 0x1f))
-	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("relocation overflow"));
 	  insn |= val & 0x1f;
 	  break;
 
@@ -2565,7 +2594,8 @@ md_apply_fix3 (fixP, value, segment)
 	  /* FIXME: simplify */
 	  if (((val > 0) && (val & ~0x3fffc))
 	      || ((val < 0) && (~(val - 1) & ~0x3fffc)))
-	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("relocation overflow"));
 	  /* FIXME: The +1 deserves a comment.  */
 	  val = (val >> 2) + 1;
 	  insn |= ((val & 0xc000) << 6) | (val & 0x3fff);
@@ -2575,7 +2605,8 @@ md_apply_fix3 (fixP, value, segment)
 	  /* FIXME: simplify */
 	  if (((val > 0) && (val & ~0x1ffffc))
 	      || ((val < 0) && (~(val - 1) & ~0x1ffffc)))
-	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("relocation overflow"));
 	  /* FIXME: The +1 deserves a comment.  */
 	  val = (val >> 2) + 1;
 	  insn |= val & 0x7ffff;
@@ -2600,7 +2631,8 @@ md_apply_fix3 (fixP, value, segment)
 
 	case BFD_RELOC_SPARC22:
 	  if (val & ~0x003fffff)
-	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("relocation overflow"));
 	  insn |= (val & 0x3fffff);
 	  break;
 
@@ -2622,7 +2654,8 @@ md_apply_fix3 (fixP, value, segment)
 
 	case BFD_RELOC_SPARC13:
 	  if (! in_signed_range (val, 0x1fff))
-	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("relocation overflow"));
 	  insn |= val & 0x1fff;
 	  break;
 
@@ -2668,7 +2701,7 @@ md_apply_fix3 (fixP, value, segment)
 	case BFD_RELOC_NONE:
 	default:
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			"bad or unhandled relocation type: 0x%02x",
+			_("bad or unhandled relocation type: 0x%02x"),
 			fixP->fx_r_type);
 	  break;
 	}
@@ -2734,6 +2767,7 @@ tc_gen_reloc (section, fixp)
       break;
     default:
       abort ();
+      return NULL;
     }
 
 #if defined (OBJ_ELF) || defined (OBJ_AOUT)
@@ -2784,7 +2818,7 @@ tc_gen_reloc (section, fixp)
   if (reloc->howto == 0)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    "internal error: can't export reloc type %d (`%s')",
+		    _("internal error: can't export reloc type %d (`%s')"),
 		    fixp->fx_r_type, bfd_get_reloc_code_name (code));
       return 0;
     }
@@ -2893,7 +2927,7 @@ s_reserve (ignore)
 
   if (*input_line_pointer != ',')
     {
-      as_bad ("Expected comma after name");
+      as_bad (_("Expected comma after name"));
       ignore_rest_of_line ();
       return;
     }
@@ -2902,7 +2936,7 @@ s_reserve (ignore)
 
   if ((size = get_absolute_expression ()) < 0)
     {
-      as_bad ("BSS length (%d.) <0! Ignored.", size);
+      as_bad (_("BSS length (%d.) <0! Ignored."), size);
       ignore_rest_of_line ();
       return;
     }				/* bad length */
@@ -2914,7 +2948,7 @@ s_reserve (ignore)
   if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0
       && strncmp (input_line_pointer, ",\".bss\"", 7) != 0)
     {
-      as_bad ("bad .reserve segment -- expected BSS segment");
+      as_bad (_("bad .reserve segment -- expected BSS segment"));
       return;
     }
 
@@ -2931,7 +2965,7 @@ s_reserve (ignore)
       SKIP_WHITESPACE ();
       if (*input_line_pointer == '\n')
 	{
-	  as_bad ("Missing alignment");
+	  as_bad (_("Missing alignment"));
 	  return;
 	}
 
@@ -2940,13 +2974,13 @@ s_reserve (ignore)
       if (align > max_alignment)
 	{
 	  align = max_alignment;
-	  as_warn ("Alignment too large: %d. assumed.", align);
+	  as_warn (_("Alignment too large: %d. assumed."), align);
 	}
 #endif
       if (align < 0)
 	{
 	  align = 0;
-	  as_warn ("Alignment negative. 0 assumed.");
+	  as_warn (_("Alignment negative. 0 assumed."));
 	}
 
       record_alignment (bss_section, align);
@@ -2956,7 +2990,7 @@ s_reserve (ignore)
 
       if (align != 1)
 	{
-	  as_bad ("Alignment not a power of 2");
+	  as_bad (_("Alignment not a power of 2"));
 	  ignore_rest_of_line ();
 	  return;
 	}			/* not a power of two */
@@ -3025,14 +3059,14 @@ s_common (ignore)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad ("Expected comma after symbol-name");
+      as_bad (_("Expected comma after symbol-name"));
       ignore_rest_of_line ();
       return;
     }
   input_line_pointer++;		/* skip ',' */
   if ((temp = get_absolute_expression ()) < 0)
     {
-      as_bad (".COMMon length (%d.) <0! Ignored.", temp);
+      as_bad (_(".COMMon length (%d.) <0! Ignored."), temp);
       ignore_rest_of_line ();
       return;
     }
@@ -3042,15 +3076,15 @@ s_common (ignore)
   *p = c;
   if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
-      as_bad ("Ignoring attempt to re-define symbol");
+      as_bad (_("Ignoring attempt to re-define symbol"));
       ignore_rest_of_line ();
       return;
     }
   if (S_GET_VALUE (symbolP) != 0)
     {
-      if (S_GET_VALUE (symbolP) != size)
+      if (S_GET_VALUE (symbolP) != (valueT) size)
 	{
-	  as_warn ("Length of .comm \"%s\" is already %ld. Not changed to %d.",
+	  as_warn (_("Length of .comm \"%s\" is already %ld. Not changed to %d."),
 		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
 	}
     }
@@ -3064,7 +3098,7 @@ s_common (ignore)
   know (symbolP->sy_frag == &zero_address_frag);
   if (*input_line_pointer != ',')
     {
-      as_bad ("Expected comma after common length");
+      as_bad (_("Expected comma after common length"));
       ignore_rest_of_line ();
       return;
     }
@@ -3077,13 +3111,13 @@ s_common (ignore)
       if (temp > max_alignment)
 	{
 	  temp = max_alignment;
-	  as_warn ("Common alignment too large: %d. assumed", temp);
+	  as_warn (_("Common alignment too large: %d. assumed"), temp);
 	}
 #endif
       if (temp < 0)
 	{
 	  temp = 0;
-	  as_warn ("Common alignment negative; 0 assumed");
+	  as_warn (_("Common alignment negative; 0 assumed"));
 	}
 #ifdef OBJ_ELF
       if (symbolP->local)
@@ -3156,7 +3190,7 @@ s_common (ignore)
       p++;
     c = *p;
     *p = '\0';
-    as_bad ("bad .common segment %s", input_line_pointer + 1);
+    as_bad (_("bad .common segment %s"), input_line_pointer + 1);
     *p = c;
     input_line_pointer = p;
     ignore_rest_of_line ();
@@ -3208,7 +3242,7 @@ s_seg (ignore)
       subseg_set (data_section, 255);	/* FIXME-SOMEDAY */
       return;
     }
-  as_bad ("Unknown segment type");
+  as_bad (_("Unknown segment type"));
   demand_empty_rest_of_line ();
 }
 
@@ -3290,7 +3324,7 @@ sparc_cons_align (nbytes)
   if (now_seg == absolute_section)
     {
       if ((abs_section_offset & ((1 << nalign) - 1)) != 0)
-	as_bad ("misaligned data");
+	as_bad (_("misaligned data"));
       return;
     }
 
@@ -3309,7 +3343,7 @@ sparc_handle_align (fragp)
 {
   if (fragp->fr_type == rs_align_code && !fragp->fr_subtype
       && fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix != 0)
-    as_bad_where (fragp->fr_file, fragp->fr_line, "misaligned data");
+    as_bad_where (fragp->fr_file, fragp->fr_line, _("misaligned data"));
   if (fragp->fr_type == rs_align_code && fragp->fr_subtype == 1024)
     {
       int count = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;

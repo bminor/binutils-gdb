@@ -261,14 +261,14 @@ v850_comm (area)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad ("Expected comma after symbol-name");
+      as_bad (_("Expected comma after symbol-name"));
       ignore_rest_of_line ();
       return;
     }
   input_line_pointer++;		/* skip ',' */
   if ((temp = get_absolute_expression ()) < 0)
     {
-      as_bad (".COMMon length (%d.) <0! Ignored.", temp);
+      as_bad (_(".COMMon length (%d.) <0! Ignored."), temp);
       ignore_rest_of_line ();
       return;
     }
@@ -278,7 +278,7 @@ v850_comm (area)
   *p = c;
   if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
-      as_bad ("Ignoring attempt to re-define symbol");
+      as_bad (_("Ignoring attempt to re-define symbol"));
       ignore_rest_of_line ();
       return;
     }
@@ -286,7 +286,7 @@ v850_comm (area)
     {
       if (S_GET_VALUE (symbolP) != size)
 	{
-	  as_warn ("Length of .comm \"%s\" is already %ld. Not changed to %d.",
+	  as_warn (_("Length of .comm \"%s\" is already %ld. Not changed to %d."),
 		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
 	}
     }
@@ -309,7 +309,7 @@ v850_comm (area)
 	  if (temp < 0)
 	    {
 	      temp = 0;
-	      as_warn ("Common alignment negative; 0 assumed");
+	      as_warn (_("Common alignment negative; 0 assumed"));
 	    }
 	}
       if (symbolP->local)
@@ -328,7 +328,7 @@ v850_comm (area)
 	      for (align = 0; (temp & 1) == 0; temp >>= 1, ++align);
 	      if (temp != 1)
 		{
-		  as_bad ("Common alignment not a power of 2");
+		  as_bad (_("Common alignment not a power of 2"));
 		  ignore_rest_of_line ();
 		  return;
 		}
@@ -451,7 +451,7 @@ v850_comm (area)
       p++;
     c = *p;
     *p = '\0';
-    as_bad ("bad .common segment %s", input_line_pointer + 1);
+    as_bad (_("bad .common segment %s"), input_line_pointer + 1);
     *p = c;
     input_line_pointer = p;
     ignore_rest_of_line ();
@@ -907,8 +907,8 @@ parse_register_list
     case 0xfff8000f: regs = type2_regs; break;
     case 0xfff8001f: regs = type3_regs; break;
     default:
-      as_bad ("unknown operand shift: %x\n", operand->shift );		    
-      return "internal failure in parse_register_list";
+      as_bad (_("unknown operand shift: %x\n"), operand->shift );
+      return _("internal failure in parse_register_list");
     }
 
   skip_white_space();
@@ -1003,26 +1003,26 @@ parse_register_list
 
 	  if (i == 32)
 	    {
-	      return "illegal register included in list";
+	      return _("illegal register included in list");
 	    }
 	}
       else if (system_register_name (& exp, true, true))
 	{
 	  if (regs == type1_regs)
 	    {
-	      return "system registers cannot be included in list";
+	      return _("system registers cannot be included in list");
 	    }
 	  else if (exp.X_add_number == 5)
 	    {
 	      if (regs == type2_regs)
-		return "PSW cannot be included in list";
+		return _("PSW cannot be included in list");
 	      else
 		* insn |= 0x8;
 	    }
 	  else if (exp.X_add_number < 4)
 	    * insn |= 0x80000;
 	  else
-	    return "High value system registers cannot be included in list";
+	    return _("High value system registers cannot be included in list");
 	}
       else if (* input_line_pointer == '}')
 	{
@@ -1097,13 +1097,14 @@ void
 md_show_usage (stream)
   FILE * stream;
 {
-  fprintf (stream, "V850 options:\n");
-  fprintf (stream, "\t-mwarn-signed-overflow    Warn if signed immediate values overflow\n");
-  fprintf (stream, "\t-mwarn-unsigned-overflow  Warn if unsigned immediate values overflow\n");
-  fprintf (stream, "\t-mv850                    The code is targeted at the v850\n");
+  fprintf (stream, _("V850 options:\n"));
+  fprintf (stream, _("\t-mwarn-signed-overflow    Warn if signed immediate values overflow\n"));
+  fprintf (stream, _("\t-mwarn-unsigned-overflow  Warn if unsigned immediate values overflow\n"));
+  fprintf (stream, _("\t-mv850                    The code is targeted at the v850\n"));
 /* start-sanitize-v850e */
-  fprintf (stream, "\t-mv850e                   The code is targeted at the v850e\n");
-  fprintf (stream, "\t-mv850ea                  The code is targeted at the v850ea\n");
+  fprintf (stream, _("\t-mv850e                   The code is targeted at the v850e\n"));
+  fprintf (stream, _("\t-mv850ea                  The code is targeted at the v850ea\n"));
+  fprintf (stream, _("\t-mv850any                 The code is generic, despite any processor specific instructions\n"));
 /* end-sanitize-v850e */
 } 
 
@@ -1141,6 +1142,11 @@ md_parse_option (c, arg)
     {
       machine = bfd_mach_v850ea;
       processor_mask = PROCESSOR_V850EA;
+    }
+  else if (strcmp (arg, "v850any") == 0)
+    {
+      machine = 0;                       /* Tell the world that this is for any v850 chip.  */
+      processor_mask = PROCESSOR_V850EA; /* But support instructions for the extended versions.  */
     }
 /* end-sanitize-v850e */
   else
@@ -1182,7 +1188,7 @@ md_atof (type, litp, sizep)
 
     default:
       *sizep = 0;
-      return "bad call to md_atof";
+      return _("bad call to md_atof");
     }
   
   t = atof_ieee (input_line_pointer, type, words);
@@ -1300,7 +1306,7 @@ md_begin ()
 	processor_mask = PROCESSOR_V850;
     }
   else
-    as_bad ("Unable to determine default target processor from string: %s", 
+    as_bad (_("Unable to determine default target processor from string: %s"), 
             TARGET_CPU);
 
   v850_hash = hash_new();
@@ -1381,7 +1387,7 @@ handle_ctoff (const struct v850_operand * operand)
   if (   operand->bits  != 6
       || operand->shift != 0)
     {
-      as_bad ("ctoff() relocation used on an instruction which does not support it");
+      as_bad (_("ctoff() relocation used on an instruction which does not support it"));
       return BFD_RELOC_64;  /* Used to indicate an error condition.  */
     }
       
@@ -1401,7 +1407,7 @@ handle_sdaoff (const struct v850_operand * operand)
   if (   operand->bits  != 16
       || operand->shift != 16)
     {
-      as_bad ("sdaoff() relocation used on an instruction which does not support it");
+      as_bad (_("sdaoff() relocation used on an instruction which does not support it"));
       return BFD_RELOC_64;  /* Used to indicate an error condition.  */
     }
   
@@ -1420,7 +1426,7 @@ handle_zdaoff (const struct v850_operand * operand)
   if (   operand->bits  != 16
       || operand->shift != 16)
     {
-      as_bad ("zdaoff() relocation used on an instruction which does not support it");
+      as_bad (_("zdaoff() relocation used on an instruction which does not support it"));
       return BFD_RELOC_64;  /* Used to indicate an error condition.  */
     }
   
@@ -1440,7 +1446,7 @@ handle_tdaoff (const struct v850_operand * operand)
   
   if (operand->bits != 7)
     {
-      as_bad ("tdaoff() relocation used on an instruction which does not support it");
+      as_bad (_("tdaoff() relocation used on an instruction which does not support it"));
       return BFD_RELOC_64;  /* Used to indicate an error condition.  */
     }
   
@@ -1638,7 +1644,7 @@ md_assemble (str)
   opcode = (struct v850_opcode *) hash_find (v850_hash, str);
   if (opcode == NULL)
     {
-      as_bad ("Unrecognized opcode: `%s'", str);
+      as_bad (_("Unrecognized opcode: `%s'"), str);
       ignore_rest_of_line ();
       return;
     }
@@ -1659,7 +1665,7 @@ md_assemble (str)
       
       if ((opcode->processors & processor_mask) == 0)
 	{
-	  errmsg = "Target processor does not support this instruction.";
+	  errmsg = _("Target processor does not support this instruction.");
 	  goto error;
 	}
       
@@ -1750,7 +1756,7 @@ md_assemble (str)
 		    case BFD_RELOC_32:
 		      if ((operand->flags & V850E_IMMEDIATE32) == 0)
 			{
-			  errmsg = "immediate operand is too large";
+			  errmsg = _("immediate operand is too large");
 			  goto error;
 			}
 		      
@@ -1763,13 +1769,17 @@ md_assemble (str)
 		      
 		    default:
 		      fprintf (stderr, "reloc: %d\n", reloc);
-		      as_bad ("AAARG -> unhandled constant reloc");
+		      as_bad (_("AAARG -> unhandled constant reloc"));
 		      break;
 		    }
 
-		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
-					      (char *) NULL, 0,
-					      copy_of_instruction);
+ 		  if (fc > MAX_INSN_FIXUPS)
+ 		    as_fatal ("too many fixups");
+  
+ 		  fixups[ fc ].exp     = ex;
+ 		  fixups[ fc ].opindex = * opindex_ptr;
+ 		  fixups[ fc ].reloc   = reloc;
+ 		  fc++;
 		}
 	      else
 		{
@@ -1778,7 +1788,7 @@ md_assemble (str)
 		    {
 		      if ((operand->flags & V850E_IMMEDIATE32) == 0)
 			{
-			  errmsg = "immediate operand is too large";
+			  errmsg = _("immediate operand is too large");
 			  goto error;
 			}
 		      
@@ -1789,7 +1799,7 @@ md_assemble (str)
 /* end-sanitize-v850e */
 		      
 		  if (fc > MAX_INSN_FIXUPS)
-		    as_fatal ("too many fixups");
+		    as_fatal (_("too many fixups"));
 
 		  fixups[ fc ].exp     = ex;
 		  fixups[ fc ].opindex = * opindex_ptr;
@@ -1805,12 +1815,12 @@ md_assemble (str)
 		{
 		  if (!register_name (& ex))
 		    {
-		      errmsg = "invalid register name";
+		      errmsg = _("invalid register name");
 		    }
 		  else if ((operand->flags & V850_NOT_R0)
 		      && ex.X_add_number == 0)
 		    {
-		      errmsg = "register r0 cannot be used here";
+		      errmsg = _("register r0 cannot be used here");
 		      
 		      /* Force an error message to be generated by
 			 skipping over any following potential matches
@@ -1826,7 +1836,7 @@ md_assemble (str)
 					     /* end-sanitize-v850e */
 					     ))
 		    {
-		      errmsg = "invalid system register name";
+		      errmsg = _("invalid system register name");
 		    }
 		}
 	      else if ((operand->flags & V850_OPERAND_EP) != 0)
@@ -1839,7 +1849,7 @@ md_assemble (str)
 		      /* Put things back the way we found them.  */
 		      *input_line_pointer = c;
 		      input_line_pointer = start;
-		      errmsg = "expected EP register";
+		      errmsg = _("expected EP register");
 		      goto error;
 		    }
 		  
@@ -1856,7 +1866,7 @@ md_assemble (str)
 		{
 		  if (!cc_name (& ex))
 		    {
-		      errmsg = "invalid condition code name";
+		      errmsg = _("invalid condition code name");
 		    }
 		}
 /* start-sanitize-v850e */
@@ -1874,15 +1884,15 @@ md_assemble (str)
 		  expression (& ex);
 
 		  if (ex.X_op != O_constant)
-		    errmsg = "constant expression expected";
+		    errmsg = _("constant expression expected");
 		  else if (ex.X_add_number & 0xffff0000)
 		    {
 		      if (ex.X_add_number & 0xffff)
-			errmsg = "constant too big to fit into instruction";
+			errmsg = _("constant too big to fit into instruction");
 		      else if ((insn & 0x001fffc0) == 0x00130780)
 			ex.X_add_number >>= 16;
 		      else
-			errmsg = "constant too big to fit into instruction";
+			errmsg = _("constant too big to fit into instruction");
 		    }
 		  
 		  extra_data_after_insn = true;
@@ -1895,7 +1905,7 @@ md_assemble (str)
 		  expression (& ex);
 		  
 		  if (ex.X_op != O_constant)
-		    errmsg = "constant expression expected";
+		    errmsg = _("constant expression expected");
 		  
 		  extra_data_after_insn = true;
 		  extra_data_len        = 4;
@@ -1924,9 +1934,9 @@ md_assemble (str)
 			 field is missing) then report this.  */
 		      if (opindex_ptr[1] != 0
 			  && (v850_operands [opindex_ptr [1]].flags & V850_OPERAND_REG))
-			errmsg = "syntax error: value is missing before the register name";
+			errmsg = _("syntax error: value is missing before the register name");
 		      else
-			errmsg = "syntax error: register not expected";
+			errmsg = _("syntax error: register not expected");
 		    }
 		}
 	      else if (system_register_name (& ex, false
@@ -1936,12 +1946,12 @@ md_assemble (str)
 					     )
 		       && (operand->flags & V850_OPERAND_SRG) == 0)
 		{
-		  errmsg = "syntax error: system register not expected";
+		  errmsg = _("syntax error: system register not expected");
 		}
 	      else if (cc_name (&ex)
 		       && (operand->flags & V850_OPERAND_CC) == 0)
 		{
-		  errmsg = "syntax error: condition code not expected";
+		  errmsg = _("syntax error: condition code not expected");
 		}
 	      else
 		{
@@ -1957,7 +1967,7 @@ md_assemble (str)
 		  if (((insn & 0x07e0) == 0x0200)
 		      && ex.X_op == O_constant
 		      && (ex.X_add_number < (- (1 << (operand->bits - 1))) || ex.X_add_number > ((1 << operand->bits) - 1)))
-		    errmsg = "immediate operand is too large";
+		    errmsg = _("immediate operand is too large");
 /* end-sanitize-v850e */
 		}
 
@@ -1969,15 +1979,15 @@ md_assemble (str)
 	      switch (ex.X_op) 
 		{
 		case O_illegal:
-		  errmsg = "illegal operand";
+		  errmsg = _("illegal operand");
 		  goto error;
 		case O_absent:
-		  errmsg = "missing operand";
+		  errmsg = _("missing operand");
 		  goto error;
 		case O_register:
 		  if ((operand->flags & (V850_OPERAND_REG | V850_OPERAND_SRG)) == 0)
 		    {
-		      errmsg = "invalid operand";
+		      errmsg = _("invalid operand");
 		      goto error;
 		    }
 		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
@@ -1994,7 +2004,7 @@ md_assemble (str)
 		default:
 		  /* We need to generate a fixup for this expression.  */
 		  if (fc >= MAX_INSN_FIXUPS)
-		    as_fatal ("too many fixups");
+		    as_fatal (_("too many fixups"));
 
 		  fixups[ fc ].exp     = ex;
 		  fixups[ fc ].opindex = * opindex_ptr;
@@ -2046,7 +2056,7 @@ md_assemble (str)
     ++str;
 
   if (*str != '\0')
-    as_bad ("junk at end of line: `%s'", str);
+    as_bad (_("junk at end of line: `%s'"), str);
 
   input_line_pointer = str;
 
@@ -2193,7 +2203,7 @@ tc_gen_reloc (seg, fixp)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-                    "reloc %d not supported by object file format",
+                    _("reloc %d not supported by object file format"),
 		    (int)fixp->fx_r_type);
 
       xfree (reloc);
@@ -2262,7 +2272,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	    {
 	      /* We don't actually support subtracting a symbol.  */
 	      as_bad_where (fixp->fx_file, fixp->fx_line,
-			    "expression too complex");
+			    _("expression too complex"));
 	    }
 	}
     }
@@ -2306,7 +2316,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  /* fprintf (stderr, "bits: %d, insn: %x\n", operand->bits, insn); */
 	  
 	  as_bad_where(fixp->fx_file, fixp->fx_line,
-		       "unresolved expression that must be resolved");
+		       _("unresolved expression that must be resolved"));
 	  fixp->fx_done = 1;
 	  return 1;
 	}

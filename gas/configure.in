@@ -625,6 +625,9 @@ AC_PROG_CC
 AC_PROG_YACC
 AM_PROG_LEX
 
+ALL_LINGUAS=
+CY_GNU_GETTEXT
+
 AM_MAINTAINER_MODE
 AM_CYGWIN32
 AM_EXEEXT
@@ -700,7 +703,7 @@ dnl the build directory which include the right .h file.  Make sure
 dnl the old symlinks don't exist, so that a reconfigure in an existing
 dnl directory behaves reasonably.
 
-AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in,
+AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in po/Makefile.in:po/Make-in,
 [rm -f targ-cpu.c targ-cpu.h obj-format.h obj-format.c targ-env.h atof-targ.c itbl-cpu.h
  echo '#include "tc-'"${target_cpu_type}"'.h"' > targ-cpu.h
  echo '#include "obj-'"${obj_format}"'.h"' > obj-format.h
@@ -708,7 +711,9 @@ AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in,
  echo '#include "itbl-'"${target_cpu_type}"'.h"' > itbl-cpu.h
  case ${target_cpu_type} in
  m32r) echo '#include "opcodes/'"${target_cpu_type}"'-opc.h"' > cgen-opc.h ;;
- esac],
+ esac
+
+ sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile],
 [target_cpu_type=${target_cpu_type}
  obj_format=${obj_format}
  te_file=${te_file}])

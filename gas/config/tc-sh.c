@@ -1,5 +1,5 @@
 /* tc-sh.c -- Assemble code for the Hitachi Super-H
-   Copyright (C) 1993, 94, 95, 96, 1997 Free Software Foundation.
+   Copyright (C) 1993, 94, 95, 96, 1997, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -79,6 +79,10 @@ const pseudo_typeS md_pseudo_table[] =
 /*int md_reloc_size; */
 
 int sh_relax;		/* set if -relax seen */
+
+/* Whether -small was seen.  */
+
+int sh_small;
 
 const char EXP_CHARS[] = "eE";
 
@@ -262,6 +266,18 @@ parse_reg (src, mode, reg)
       return 3;
     }
 
+  if (src[0] == 's' && src[1] == 'g' && src[2] == 'r' && ! isalnum (src[3]))
+    {
+      *mode = A_SGR;
+      return 3;
+    }
+
+  if (src[0] == 'd' && src[1] == 'b' && src[2] == 'r' && ! isalnum (src[3]))
+    {
+      *mode = A_DBR;
+      return 3;
+    }
+
   if (src[0] == 's' && src[1] == 'r' && ! isalnum (src[2]))
     {
       *mode = A_SR;
@@ -327,6 +343,61 @@ parse_reg (src, mode, reg)
 	  return 3;
 	}
     }
+  if (src[0] == 'd' && src[1] == 'r')
+    {
+      if (src[2] == '1')
+	{
+	  if (src[3] >= '0' && src[3] <= '4' && ! ((src[3] - '0') & 1)
+	      && ! isalnum (src[4]))
+	    {
+	      *mode = D_REG_N;
+	      *reg = 10 + src[3] - '0';
+	      return 4;
+	    }
+	}
+      if (src[2] >= '0' && src[2] <= '8' && ! ((src[2] - '0') & 1)
+	  && ! isalnum (src[3]))
+	{
+	  *mode = D_REG_N;
+	  *reg = (src[2] - '0');
+	  return 3;
+	}
+    }
+  if (src[0] == 'x' && src[1] == 'd')
+    {
+      if (src[2] == '1')
+	{
+	  if (src[3] >= '0' && src[3] <= '4' && ! ((src[3] - '0') & 1)
+	      && ! isalnum (src[4]))
+	    {
+	      *mode = X_REG_N;
+	      *reg = 11 + src[3] - '0';
+	      return 4;
+	    }
+	}
+      if (src[2] >= '0' && src[2] <= '8' && ! ((src[2] - '0') & 1)
+	  && ! isalnum (src[3]))
+	{
+	  *mode = X_REG_N;
+	  *reg = (src[2] - '0') + 1;
+	  return 3;
+	}
+    }
+  if (src[0] == 'f' && src[1] == 'v')
+    {
+      if (src[2] == '1'&& src[3] == '2' && ! isalnum (src[4]))
+	{
+	  *mode = V_REG_N;
+	  *reg = 12;
+	  return 4;
+	}
+      if ((src[2] == '0' || src[2] == '4' || src[2] == '8') && ! isalnum (src[3]))
+	{
+	  *mode = V_REG_N;
+	  *reg = (src[2] - '0');
+	  return 3;
+	}
+    }
   if (src[0] == 'f' && src[1] == 'p' && src[2] == 'u' && src[3] == 'l'
       && ! isalnum (src[4]))
     {
@@ -338,6 +409,13 @@ parse_reg (src, mode, reg)
       && src[4] == 'r' && ! isalnum (src[5]))
     {
       *mode = FPSCR_N;
+      return 5;
+    }
+
+  if (src[0] == 'x' && src[1] == 'm' && src[2] == 't' && src[3] == 'r'
+      && src[4] == 'x' && ! isalnum (src[5]))
+    {
+      *mode = XMTRX_M4;
       return 5;
     }
 
@@ -371,7 +449,7 @@ parse_exp (s)
   input_line_pointer = s;
   expression (&immediate);
   if (immediate.X_op == O_absent)
-    as_bad ("missing operand");
+    as_bad (_("missing operand"));
   new = input_line_pointer;
   input_line_pointer = save;
   return new;
@@ -414,7 +492,7 @@ parse_at (src, op)
 
       len = parse_reg (src, &mode, &(op->reg));
       if (mode != A_REG_N)
-	as_bad ("illegal register after @-");
+	as_bad (_("illegal register after @-"));
 
       op->type = A_DEC_N;
       src += len;
@@ -430,7 +508,7 @@ parse_at (src, op)
 	  src += len;
 	  if (op->reg != 0)
 	    {
-	      as_bad ("must be @(r0,...)");
+	      as_bad (_("must be @(r0,...)"));
 	    }
 	  if (src[0] == ',')
 	    src++;
@@ -446,7 +524,7 @@ parse_at (src, op)
 	    }
 	  else
 	    {
-	      as_bad ("syntax error in @(r0,...)");
+	      as_bad (_("syntax error in @(r0,...)"));
 	    }
 	}
       else
@@ -478,17 +556,17 @@ parse_at (src, op)
 		}
 	      else
 		{
-		  as_bad ("syntax error in @(disp,[Rn, gbr, pc])");
+		  as_bad (_("syntax error in @(disp,[Rn, gbr, pc])"));
 		}
 	    }
 	  else
 	    {
-	      as_bad ("syntax error in @(disp,[Rn, gbr, pc])");
+	      as_bad (_("syntax error in @(disp,[Rn, gbr, pc])"));
 	    }
 	}
       src += len;
       if (src[0] != ')')
-	as_bad ("expecting )");
+	as_bad (_("expecting )"));
       else
 	src++;
     }
@@ -497,7 +575,7 @@ parse_at (src, op)
       src += parse_reg (src, &mode, &(op->reg));
       if (mode != A_REG_N)
 	{
-	  as_bad ("illegal register after @");
+	  as_bad (_("illegal register after @"));
 	}
       if (src[0] == '+')
 	{
@@ -665,10 +743,23 @@ get_specific (opcode, operands)
 	    case A_IND_R0_REG_N:
 	    case A_DISP_REG_N:
 	    case F_REG_N:
+	    case D_REG_N:
+	    case X_REG_N:
+	    case V_REG_N:
 	    case FPUL_N:
 	    case FPSCR_N:
 	      /* Opcode needs rn */
 	      if (user->type != arg)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	    case FD_REG_N:
+	      if (user->type != F_REG_N && user->type != D_REG_N)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	    case DX_REG_N:
+	      if (user->type != D_REG_N && user->type != X_REG_N)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
@@ -677,6 +768,8 @@ get_specific (opcode, operands)
 	    case A_VBR:
 	    case A_SSR:
 	    case A_SPC:
+	    case A_SGR:
+	    case A_DBR:
 	      if (user->type != arg)
 		goto fail;
 	      break;
@@ -700,6 +793,9 @@ get_specific (opcode, operands)
 	      break;
 
 	    case F_REG_M:
+	    case D_REG_M:
+	    case X_REG_M:
+	    case V_REG_M:
 	    case FPUL_M:
 	    case FPSCR_M:
 	      /* Opcode needs rn */
@@ -707,9 +803,19 @@ get_specific (opcode, operands)
 		goto fail;
 	      reg_m = user->reg;
 	      break;
+	    case DX_REG_M:
+	      if (user->type != D_REG_N && user->type != X_REG_N)
+		goto fail;
+	      reg_m = user->reg;
+	      break;
+	    case XMTRX_M4:
+	      if (user->type != XMTRX_M4)
+		goto fail;
+	      reg_m = 4;
+	      break;
 	
 	    default:
-	      printf ("unhandled %d\n", arg);
+	      printf (_("unhandled %d\n"), arg);
 	      goto fail;
 	    }
 	}
@@ -730,7 +836,7 @@ check (operand, low, high)
       || operand->X_add_number < low
       || operand->X_add_number > high)
     {
-      as_bad ("operand must be absolute in range %d..%d", low, high);
+      as_bad (_("operand must be absolute in range %d..%d"), low, high);
     }
   return operand->X_add_number;
 }
@@ -816,6 +922,9 @@ build_Mytes (opcode, operand)
 	    case REG_M:
 	      nbuf[index] = reg_m;
 	      break;
+	    case REG_NM:
+	      nbuf[index] = reg_n | (reg_m >> 2);
+	      break;
             case REG_B:
 	      nbuf[index] = reg_b | 0x08;
 	      break;
@@ -847,7 +956,7 @@ build_Mytes (opcode, operand)
 	      insert (output, BFD_RELOC_SH_PCRELIMM8BY2, 1);
 	      break;
 	    default:
-	      printf ("failed for %d\n", i);
+	      printf (_("failed for %d\n"), i);
 	    }
 	}
     }
@@ -894,14 +1003,14 @@ md_assemble (str)
 
   if (nlen == 0)
     {
-      as_bad ("can't find opcode ");
+      as_bad (_("can't find opcode "));
     }
 
   opcode = (sh_opcode_info *) hash_find (opcode_hash_control, name);
 
   if (opcode == NULL)
     {
-      as_bad ("unknown opcode");
+      as_bad (_("unknown opcode"));
       return;
     }
 
@@ -936,7 +1045,7 @@ md_assemble (str)
 
 	  where[0] = 0x0;
 	  where[1] = 0x0;
-	  as_bad ("invalid operands for opcode");
+	  as_bad (_("invalid operands for opcode"));
 	  return;
 	}
 
@@ -998,14 +1107,14 @@ void
 DEFUN (tc_crawl_symbol_chain, (headers),
        object_headers * headers)
 {
-  printf ("call to tc_crawl_symbol_chain \n");
+  printf (_("call to tc_crawl_symbol_chain \n"));
 }
 
 void
 DEFUN (tc_headers_hook, (headers),
        object_headers * headers)
 {
-  printf ("call to tc_headers_hook \n");
+  printf (_("call to tc_headers_hook \n"));
 }
 
 #endif
@@ -1041,7 +1150,7 @@ md_atof (type, litP, sizeP)
 
     default:
       *sizeP = 0;
-      return "bad call to md_atof";
+      return _("bad call to md_atof");
     }
 
   t = atof_ieee (input_line_pointer, type, words);
@@ -1082,13 +1191,13 @@ s_uses (ignore)
   expressionS ex;
 
   if (! sh_relax)
-    as_warn (".uses pseudo-op seen when not relaxing");
+    as_warn (_(".uses pseudo-op seen when not relaxing"));
 
   expression (&ex);
 
   if (ex.X_op != O_symbol || ex.X_add_number != 0)
     {
-      as_bad ("bad .uses format");
+      as_bad (_("bad .uses format"));
       ignore_rest_of_line ();
       return;
     }
@@ -1102,10 +1211,12 @@ CONST char *md_shortopts = "";
 struct option md_longopts[] = {
 
 #define OPTION_RELAX  (OPTION_MD_BASE)
-#define OPTION_LITTLE (OPTION_MD_BASE+1)
+#define OPTION_LITTLE (OPTION_MD_BASE + 1)
+#define OPTION_SMALL (OPTION_LITTLE + 1)
 
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"little", no_argument, NULL, OPTION_LITTLE},
+  {"small", no_argument, NULL, OPTION_SMALL},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -1120,9 +1231,14 @@ md_parse_option (c, arg)
     case OPTION_RELAX:
       sh_relax = 1;
       break;
+
     case OPTION_LITTLE:
       shl = 1;
       target_big_endian = 0;
+      break;
+
+    case OPTION_SMALL:
+      sh_small = 1;
       break;
 
     default:
@@ -1136,10 +1252,11 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf(stream, "\
+  fprintf(stream, _("\
 SH options:\n\
 -little			generate little endian code\n\
--relax			alter jump instructions for long displacements\n");
+-relax			alter jump instructions for long displacements\n\
+-small			align sections to 4 byte boundaries, not 16\n"));
 }
 
 int md_short_jump_size;
@@ -1147,7 +1264,7 @@ int md_short_jump_size;
 void
 tc_Nout_fix_to_chars ()
 {
-  printf ("call to tc_Nout_fix_to_chars \n");
+  printf (_("call to tc_Nout_fix_to_chars \n"));
   abort ();
 }
 
@@ -1159,7 +1276,7 @@ md_create_short_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  as_fatal ("failed sanity check.");
+  as_fatal (_("failed sanity check."));
 }
 
 void
@@ -1169,7 +1286,7 @@ md_create_long_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  as_fatal ("failed sanity check.");
+  as_fatal (_("failed sanity check."));
 }
 
 /* This struct is used to pass arguments to sh_count_relocs through
@@ -1254,7 +1371,7 @@ sh_frob_section (abfd, sec, ignore)
 	  || S_IS_EXTERNAL (sym))
 	{
 	  as_warn_where (fix->fx_file, fix->fx_line,
-			 ".uses does not refer to a local symbol in the same section");
+			 _(".uses does not refer to a local symbol in the same section"));
 	  continue;
 	}
 
@@ -1273,7 +1390,7 @@ sh_frob_section (abfd, sec, ignore)
       if (fscan == NULL)
 	{
 	  as_warn_where (fix->fx_file, fix->fx_line,
-			 "can't find fixup pointed to by .uses");
+			 _("can't find fixup pointed to by .uses"));
 	  continue;
 	}
 
@@ -1296,7 +1413,7 @@ sh_frob_section (abfd, sec, ignore)
 	  || S_IS_EXTERNAL (sym))
 	{
 	  as_warn_where (fix->fx_file, fix->fx_line,
-			 ".uses target does not refer to a local symbol in the same section");
+			 _(".uses target does not refer to a local symbol in the same section"));
 	  continue;
 	}
 
@@ -1391,12 +1508,15 @@ md_convert_frag (headers, seg, fragP)
     case C (UNCOND_JUMP, UNCOND32):
     case C (UNCOND_JUMP, UNDEF_WORD_DISP):
       if (fragP->fr_symbol == NULL)
-	as_bad ("at 0x%lx, displacement overflows 12-bit field",
+	as_bad (_("at 0x%lx, displacement overflows 12-bit field"),
 		(unsigned long) fragP->fr_address);
-      else
-	as_bad ("at 0x%lx, displacement to %sdefined symbol %s overflows 12-bit field",
+      else if (S_IS_DEFINED (fragP->fr_address))
+	as_bad (_("at 0x%lx, displacement to defined symbol %s overflows 12-bit field"),
 		(unsigned long) fragP->fr_address,		
-		S_IS_DEFINED (fragP->fr_symbol) ? "" : "un",
+		S_GET_NAME (fragP->fr_symbol));
+      else
+	as_bad (_("at 0x%lx, displacement to undefined symbol %s overflows 12-bit field"),
+		(unsigned long) fragP->fr_address,		
 		S_GET_NAME (fragP->fr_symbol));
 
 #if 0				/* This code works, but generates poor code and the compiler
@@ -1482,12 +1602,15 @@ md_convert_frag (headers, seg, fragP)
     case C (COND_JUMP, COND32):
     case C (COND_JUMP, UNDEF_WORD_DISP):
       if (fragP->fr_symbol == NULL)
-	as_bad ("at 0x%lx, displacement overflows 8-bit field", 
+	as_bad (_("at 0x%lx, displacement overflows 8-bit field"), 
 		(unsigned long) fragP->fr_address);
-      else  
-	as_bad ("at 0x%lx, displacement to %sdefined symbol %s overflows 8-bit field ",
+      else if (S_IS_DEFINED (fragP->fr_symbol))
+	as_bad (_("at 0x%lx, displacement to defined symbol %s overflows 8-bit field "),
 		(unsigned long) fragP->fr_address,		
-		S_IS_DEFINED (fragP->fr_symbol) ? "" : "un",
+		S_GET_NAME (fragP->fr_symbol));
+      else
+	as_bad (_("at 0x%lx, displacement to undefined symbol %s overflows 8-bit field "),
+		(unsigned long) fragP->fr_address,		
 		S_GET_NAME (fragP->fr_symbol));
 
 #if 0				/* This code works, but generates poor code, and the compiler
@@ -1539,7 +1662,7 @@ md_convert_frag (headers, seg, fragP)
 
   if (donerelax && !sh_relax)
     as_warn_where (fragP->fr_file, fragP->fr_line,
-		   "overflow in branch to %s; converted into longer instruction sequence",
+		   _("overflow in branch to %s; converted into longer instruction sequence"),
 		   (fragP->fr_symbol != NULL
 		    ? S_GET_NAME (fragP->fr_symbol)
 		    : ""));
@@ -1614,7 +1737,7 @@ sh_cons_align (nbytes)
   if (now_seg == absolute_section)
     {
       if ((abs_section_offset & ((1 << nalign) - 1)) != 0)
-	as_warn ("misaligned data");
+	as_warn (_("misaligned data"));
       return;
     }
 
@@ -1642,7 +1765,7 @@ sh_handle_align (frag)
 
   if (frag->fr_type == rs_align_code
       && frag->fr_next->fr_address - frag->fr_address - frag->fr_fix != 0)
-    as_warn_where (frag->fr_file, frag->fr_line, "misaligned data");
+    as_warn_where (frag->fr_file, frag->fr_line, _("misaligned data"));
 }
 
 /* This macro decides whether a particular reloc is an entry in a
@@ -1656,6 +1779,7 @@ sh_handle_align (frag)
 #define SWITCH_TABLE_CONS(fix)				\
   ((fix)->fx_r_type == 0				\
    && ((fix)->fx_size == 2				\
+       || (fix)->fx_size == 1				\
        || (fix)->fx_size == 4))
 #endif
 
@@ -1666,6 +1790,7 @@ sh_handle_align (frag)
    && S_GET_SEGMENT ((fix)->fx_subsy) == text_section	\
    && ((fix)->fx_r_type == BFD_RELOC_32			\
        || (fix)->fx_r_type == BFD_RELOC_16		\
+       || (fix)->fx_r_type == BFD_RELOC_8		\
        || SWITCH_TABLE_CONS (fix)))
 
 /* See whether we need to force a relocation into the output file.
@@ -1708,6 +1833,8 @@ md_apply_fix (fixP, val)
 #ifdef BFD_ASSEMBLER
   long val = *valp;
 #endif
+  long max, min;
+  int shift;
 
 #ifndef BFD_ASSEMBLER
   if (fixP->fx_r_type == 0)
@@ -1717,36 +1844,53 @@ md_apply_fix (fixP, val)
       else if (fixP->fx_size == 4)
 	fixP->fx_r_type = BFD_RELOC_32;
       else if (fixP->fx_size == 1)
-	fixP->fx_r_type = BFD_RELOC_SH_IMM8;
+	fixP->fx_r_type = BFD_RELOC_8;
       else
 	abort ();
     }
 #endif
 
+  max = min = 0;
+  shift = 0;
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_SH_IMM4:
+      max = 0xf;
       *buf = (*buf & 0xf0) | (val & 0xf);
       break;
 
     case BFD_RELOC_SH_IMM4BY2:
+      max = 0xf;
+      shift = 1;
       *buf = (*buf & 0xf0) | ((val >> 1) & 0xf);
       break;
 
     case BFD_RELOC_SH_IMM4BY4:
+      max = 0xf;
+      shift = 2;
       *buf = (*buf & 0xf0) | ((val >> 2) & 0xf);
       break;
 
     case BFD_RELOC_SH_IMM8BY2:
+      max = 0xff;
+      shift = 1;
       *buf = val >> 1;
       break;
 
     case BFD_RELOC_SH_IMM8BY4:
+      max = 0xff;
+      shift = 2;
       *buf = val >> 2;
       break;
 
     case BFD_RELOC_8:
     case BFD_RELOC_SH_IMM8:
+      /* Sometimes the 8 bit value is sign extended (e.g., add) and
+         sometimes it is not (e.g., and).  We permit any 8 bit value.
+         Note that adding further restrictions may invalidate
+         reasonable looking assembly code, such as ``and -0x1,r0''.  */
+      max = 0xff;
+      min = - 0xff;
       *buf++ = val;
       break;
 
@@ -1766,28 +1910,28 @@ md_apply_fix (fixP, val)
 	 variable val.  */
       val = (val + 2) / 4;
       if (val & ~0xff)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
+	as_bad_where (fixP->fx_file, fixP->fx_line, _("pcrel too far"));
       buf[lowbyte] = val;
       break;
 
     case BFD_RELOC_SH_PCRELIMM8BY2:
       val /= 2;
       if (val & ~0xff)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
+	as_bad_where (fixP->fx_file, fixP->fx_line, _("pcrel too far"));
       buf[lowbyte] = val;
       break;
 
     case BFD_RELOC_SH_PCDISP8BY2:
       val /= 2;
       if (val < -0x80 || val > 0x7f)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
+	as_bad_where (fixP->fx_file, fixP->fx_line, _("pcrel too far"));
       buf[lowbyte] = val;
       break;
 
     case BFD_RELOC_SH_PCDISP12BY2:
       val /= 2;
       if (val < -0x800 || val >= 0x7ff)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
+	as_bad_where (fixP->fx_file, fixP->fx_line, _("pcrel too far"));
       buf[lowbyte] = val & 0xff;
       buf[highbyte] |= (val >> 8) & 0xf;
       break;
@@ -1838,6 +1982,19 @@ md_apply_fix (fixP, val)
     default:
       abort ();
     }
+
+  if (shift != 0)
+    {
+      if ((val & ((1 << shift) - 1)) != 0)
+	as_bad_where (fixP->fx_file, fixP->fx_line, _("misaligned offset"));
+      if (val >= 0)
+	val >>= shift;
+      else
+	val = ((val >> shift)
+	       | ((long) -1 & ~ ((long) -1 >> shift)));
+    }
+  if (max != 0 && (val < min || val > max))
+    as_bad_where (fixP->fx_file, fixP->fx_line, _("offset out of range"));
 
 #ifdef BFD_ASSEMBLER
   return 0;
@@ -2000,6 +2157,7 @@ static const struct reloc_map coff_reloc_map[] =
   { BFD_RELOC_SH_IMM8BY4, R_SH_IMM8BY4 },
   { BFD_RELOC_SH_PCRELIMM8BY2, R_SH_PCRELIMM8BY2 },
   { BFD_RELOC_SH_PCRELIMM8BY4, R_SH_PCRELIMM8BY4 },
+  { BFD_RELOC_8_PCREL, R_SH_SWITCH8 },
   { BFD_RELOC_SH_SWITCH16, R_SH_SWITCH16 },
   { BFD_RELOC_SH_SWITCH32, R_SH_SWITCH32 },
   { BFD_RELOC_SH_USES, R_SH_USES },
@@ -2035,7 +2193,7 @@ sh_coff_reloc_mangle (seg, fix, intr, paddr)
 	  break;
       if (rm->bfd_reloc == BFD_RELOC_UNUSED)
 	as_bad_where (fix->fx_file, fix->fx_line,
-		      "Can not represent %s relocation in this object file format",
+		      _("Can not represent %s relocation in this object file format"),
 		      bfd_get_reloc_code_name (fix->fx_r_type));
       intr->r_type = rm->sh_reloc;
       intr->r_offset = 0;
@@ -2046,6 +2204,8 @@ sh_coff_reloc_mangle (seg, fix, intr, paddr)
 
       if (fix->fx_r_type == BFD_RELOC_16)
 	intr->r_type = R_SH_SWITCH16;
+      else if (fix->fx_r_type == BFD_RELOC_8)
+	intr->r_type = R_SH_SWITCH8;
       else if (fix->fx_r_type == BFD_RELOC_32)
 	intr->r_type = R_SH_SWITCH32;
       else
@@ -2146,6 +2306,8 @@ tc_gen_reloc (section, fixp)
       rel->addend = rel->address - S_GET_VALUE (fixp->fx_subsy);
       if (r_type == BFD_RELOC_16)
 	r_type = BFD_RELOC_SH_SWITCH16;
+      else if (r_type == BFD_RELOC_8)
+	r_type = BFD_RELOC_8_PCREL;
       else if (r_type == BFD_RELOC_32)
 	r_type = BFD_RELOC_SH_SWITCH32;
       else
@@ -2166,7 +2328,7 @@ tc_gen_reloc (section, fixp)
   if (rel->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    "Cannot represent relocation type %s",
+		    _("Cannot represent relocation type %s"),
 		    bfd_get_reloc_code_name (r_type));
       /* Set howto to a garbage value so that we can keep going.  */
       rel->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);

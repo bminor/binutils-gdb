@@ -2,7 +2,7 @@
 
 AUTOMAKE_OPTIONS = cygnus dejagnu
 
-SUBDIRS = doc
+SUBDIRS = doc po
 
 tooldir = $(exec_prefix)/$(target_alias)
 
@@ -153,6 +153,7 @@ CFILES = $(GAS_CFILES) gasp.c itbl-ops.c
 
 HFILES = \
 	as.h \
+	asintl.h \
 	bignum.h \
 	bit_fix.h \
 	ecoff.h \
@@ -340,6 +341,13 @@ GENERIC_OBJS = \
 
 OBJS = $(CONFIG_OBJS) $(GENERIC_OBJS)
 
+POTFILES = $(MULTI_CFILES) $(TARGET_ENV_HFILES) $(OBJ_FORMAT_HFILES) \
+	$(OBJ_FORMAT_CFILES) $(TARGET_CPU_HFILES) $(TARGET_CPU_CFILES) \
+	$(HFILES) $(CFILES) $(GAS_CFILES)
+po/POTFILES.in: @MAINT@ Makefile
+	for file in $(POTFILES); do echo $$file; done | sort > tmp \
+	  && mv tmp $(srcdir)/po/POTFILES.in
+
 noinst_PROGRAMS = as-new gasp-new
 noinst_SCRIPTS = .gdbinit
 
@@ -367,13 +375,13 @@ INCDIR = $(BASEDIR)/include
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR)
+INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
 # This should be parallel to INCLUDES, but should replace $(srcdir)
 # with $${srcdir}, and should work in a subdirectory.  This is used
 # when building dependencies, because the dependency building is done
 # in a subdirectory.
-DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd -I$${srcdir}/config -I$${srcdir}/../include -I$${srcdir}/.. -I$${srcdir}/../bfd
+DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd -I$${srcdir}/config -I$${srcdir}/../include -I$${srcdir}/.. -I$${srcdir}/../bfd -I$${srcdir}/../intl -I../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
 # How to link with both our special library facilities
 # and the system's installed libraries.
@@ -387,18 +395,19 @@ $(OBJS): @ALL_OBJ_DEPS@
 
 as_new_SOURCES = $(GAS_CFILES)
 as_new_LDADD = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
-	$(extra_objects) $(GASLIBS)
+	$(extra_objects) $(GASLIBS) $(INTLLIBS)
 as_new_DEPENDENCIES = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
-	$(extra_objects) $(GASLIBS)
+	$(extra_objects) $(GASLIBS) $(INTLDEPS)
 
 # Stuff that every object file depends upon.  If anything is removed
 # from this list, remove it from dep-in.sed as well.
 $(OBJS): config.h as.h $(TARG_ENV_H) $(OBJ_FORMAT_H) $(TARG_CPU_H) flonum.h \
 	expr.h struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h \
-	obj.h listing.h bignum.h bit_fix.h $(INCDIR)/libiberty.h
+	obj.h listing.h bignum.h bit_fix.h $(INCDIR)/libiberty.h asintl.h
 
 gasp_new_SOURCES = gasp.c macro.c sb.c hash.c
-gasp_new_LDADD = ../libiberty/libiberty.a
+gasp_new_LDADD = ../libiberty/libiberty.a $(INTLLIBS)
+gasp_new_DEPENDENCIES = ../libiberty/libiberty.a $(INTLDEPS)
 
 EXPECT = `if [ -f $${rootme}/../expect/expect ] ; then \
           echo $${rootme}/../expect/expect ; \
@@ -657,7 +666,8 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	echo '' > itbl-cpu.h; \
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
 	$(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) $?
-	mv -f .depdir/.dep .dep1
+	sed -e '/IF YOU PUT ANYTHING/,$$d' < .depdir/.dep > .dep1
+	rm -f .depdir/.dep
 
 # Work out the special dependencies for the tc-*.c files.
 .tcdep: $(TARGET_CPU_CFILES)
@@ -686,9 +696,9 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	    else true; fi; \
 	  done; \
 	done
-	echo 'TCDEP_hppa_som = $(srcdir)/config/tc-hppa.h subsegs.h \' >> .tcdepa
-	echo '  $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h \' >> .tcdepa
-	echo '  $(INCDIR)/opcode/hppa.h $(BFDDIR)/som.h' >> .tcdepa
+	echo 'TCDEP_hppa_som = $$(srcdir)/config/tc-hppa.h subsegs.h \' >> .tcdepa
+	echo '  $$(INCDIR)/obstack.h $$(BFDDIR)/libhppa.h \' >> .tcdepa
+	echo '  $$(INCDIR)/opcode/hppa.h $$(BFDDIR)/som.h' >> .tcdepa
 	# We don't try to handle all multi cases.
 	for c in $(CPU_TYPES); do \
 	  $(CPU_MULTI_VALID) \
@@ -731,10 +741,10 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	    else true; fi; \
 	  done; \
 	done
-	echo 'OBJDEP_hppa_som = $(srcdir)/config/obj-som.h subsegs.h \' >> .objdepa
-	echo '  $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h \' >> .objdepa
-	echo '  $(BFDDIR)/som.h  $(INCDIR)/aout/stab_gnu.h \' >> .objdepa
-	echo '  $(INCDIR)/aout/stab.def' >> .objdepa
+	echo 'OBJDEP_hppa_som = $$(srcdir)/config/obj-som.h subsegs.h \' >> .objdepa
+	echo '  $$(INCDIR)/obstack.h $$(BFDDIR)/libhppa.h \' >> .objdepa
+	echo '  $$(BFDDIR)/som.h  $$(INCDIR)/aout/stab_gnu.h \' >> .objdepa
+	echo '  $$(INCDIR)/aout/stab.def' >> .objdepa
 	# We don't try to handle all multi cases.
 	for c in $(CPU_TYPES); do \
 	  $(CPU_MULTI_VALID) \
@@ -773,7 +783,7 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	    else true; fi; \
 	  done; \
 	done
-	echo 'DEP_hppa_som = $(srcdir)/../bfd/som.h' >> .dep2a
+	echo 'DEP_hppa_som = $$(BFDDIR)/som.h' >> .dep2a
 	# We don't try to handle all multi cases.
 	for c in $(CPU_TYPES); do \
 	  $(CPU_MULTI_VALID) \
@@ -791,10 +801,11 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	mv -f .dep2a .dep2
 
 dep.sed: dep-in.sed config.status
+	srcdir=`cd $(srcdir); pwd`; \
 	sed <$(srcdir)/dep-in.sed >dep.sed \
-		-e 's!@INCDIR@!$(INCDIR)!' \
-		-e 's!@BFDDIR@!$(BFDDIR)!' \
-		-e 's!@SRCDIR@!$(srcdir)!'
+		-e "s!@INCDIR@!$${srcdir}/../include!" \
+		-e "s!@BFDDIR@!$${srcdir}/../bfd!" \
+		-e "s!@SRCDIR@!$${srcdir}!"
 
 dep: .dep
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
@@ -855,7 +866,6 @@ e-mipsecoff.o: $(srcdir)/config/e-mipsecoff.c emul.h \
   emul-target.h
 e-mipself.o: $(srcdir)/config/e-mipself.c emul.h emul-target.h
 
-# IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 TCDEP_a29k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-a29k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/opcode/a29k.h
 TCDEP_a29k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-a29k.h \
@@ -957,12 +967,12 @@ TCDEP_i960_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/opcode/i960.h
 TCDEP_m32r_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m32r.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h cgen-opc.h $(srcdir)/../opcodes/m32r-opc.h \
-  $(INCDIR)/opcode/cgen.h
+  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/symcat.h cgen-opc.h \
+  $(srcdir)/../opcodes/m32r-opc.h $(INCDIR)/opcode/cgen.h
 TCDEP_m32r_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h subsegs.h \
-  $(INCDIR)/obstack.h cgen-opc.h $(srcdir)/../opcodes/m32r-opc.h \
+  $(INCDIR)/obstack.h $(INCDIR)/symcat.h cgen-opc.h $(srcdir)/../opcodes/m32r-opc.h \
   $(INCDIR)/opcode/cgen.h
 TCDEP_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
@@ -1129,7 +1139,7 @@ OBJDEP_alpha_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-alpha.h subsegs.h \
   $(INCDIR)/obstack.h ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
-  $(INCDIR)/aout/aout64.h
+  $(INCDIR)/elf/alpha.h $(INCDIR)/aout/aout64.h
 OBJDEP_alpha_evax = $(srcdir)/config/obj-evax.h $(srcdir)/config/tc-alpha.h
 OBJDEP_arc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arc.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \

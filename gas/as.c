@@ -116,9 +116,11 @@ print_version_id ()
     return;
   printed = 1;
 
-  fprintf (stderr, "GNU assembler version %s (%s)", VERSION, TARGET_ALIAS);
 #ifdef BFD_ASSEMBLER
-  fprintf (stderr, ", using BFD version %s", BFD_VERSION);
+  fprintf (stderr, _("GNU assembler version %s (%s) using BFD version %s"),
+	   VERSION, TARGET_ALIAS, BFD_VERSION);
+#else
+  fprintf (stderr, _("GNU assembler version %s (%s)"), VERSION, TARGET_ALIAS);
 #endif
   fprintf (stderr, "\n");
 }
@@ -127,9 +129,9 @@ static void
 show_usage (stream)
      FILE *stream;
 {
-  fprintf (stream, "Usage: %s [option...] [asmfile...]\n", myname);
+  fprintf (stream, _("Usage: %s [option...] [asmfile...]\n"), myname);
 
-  fprintf (stream, "\
+  fprintf (stream, _("\
 Options:\n\
 -a[sub-option...]	turn on listings\n\
   Sub-options [default hls]:\n\
@@ -140,8 +142,8 @@ Options:\n\
   m     include macro expansions\n\
   n	omit forms processing\n\
   s	include symbols\n\
-  =file set listing file name (must be last sub-option)\n");
-  fprintf (stream, "\
+  =file set listing file name (must be last sub-option)\n"));
+  fprintf (stream, _("\
 -D			produce assembler debugging messages\n\
 --defsym SYM=VAL	define symbol SYM to given value\n\
 -f			skip whitespace and comment preprocessing\n\
@@ -150,8 +152,8 @@ Options:\n\
 -I DIR			add DIR to search list for .include directives\n\
 -J			don't warn about signed overflow\n\
 -K			warn when differences altered for long displacements\n\
--L,--keep-locals	keep local symbols (e.g. starting with `L')\n");
-  fprintf (stream, "\
+-L,--keep-locals	keep local symbols (e.g. starting with `L')\n"));
+  fprintf (stream, _("\
 -M,--mri		assemble in MRI compatibility mode\n\
 --MD FILE		write dependency information in FILE (default none)\n\
 -nocpp			ignored\n\
@@ -166,8 +168,8 @@ Options:\n\
 			matching the specifications defined in file INSTTBL\n\
 -w			ignored\n\
 -X			ignored\n\
--Z			generate object file even after errors\n");
-  fprintf (stream, "\
+-Z			generate object file even after errors\n"));
+  fprintf (stream, _("\
 --listing-lhs-width	set the width in words of the output data column of\n\
 			the listing\n\
 --listing-lhs-width2	set the width in words of the continuation lines\n\
@@ -176,11 +178,11 @@ Options:\n\
 --listing-rhs-width	set the max width in characters of the lines from\n\
 			the source file\n\
 --listing-cont-lines	set the maximum number of continuation lines used\n\
-			for the output data column of the listing\n");
+			for the output data column of the listing\n"));
 
   md_show_usage (stream);
 
-  fprintf (stream, "\nReport bugs to bug-gnu-utils@prep.ai.mit.edu\n");
+  fprintf (stream, _("\nReport bugs to bug-gnu-utils@gnu.org\n"));
 }
 
 #ifdef USE_EMULATIONS
@@ -217,7 +219,7 @@ select_emulation_mode (argc, argv)
     p = argv[i+1];
 
   if (!p || !*p)
-    as_fatal ("missing emulation mode name");
+    as_fatal (_("missing emulation mode name"));
   em = p;
 
  do_default:
@@ -232,7 +234,7 @@ select_emulation_mode (argc, argv)
 	if (!strcmp (emulations[i]->name, em))
 	  break;
       if (i == n_emulations)
-	as_fatal ("unrecognized emulation name `%s'", em);
+	as_fatal (_("unrecognized emulation name `%s'"), em);
       this_emulation = emulations[i];
     }
   else
@@ -450,33 +452,33 @@ parse_args (pargc, pargv)
 
 	case OPTION_VERSION:
 	  /* This output is intended to follow the GNU standards document.  */
-	  printf ("GNU assembler %s\n", VERSION);
-	  printf ("Copyright 1997 Free Software Foundation, Inc.\n");
-	  printf ("\
+	  printf (_("GNU assembler %s\n"), VERSION);
+	  printf (_("Copyright 1997 Free Software Foundation, Inc.\n"));
+	  printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
-the GNU General Public License.  This program has absolutely no warranty.\n");
-	  printf ("This assembler was configured for a target of `%s'.\n",
+the GNU General Public License.  This program has absolutely no warranty.\n"));
+	  printf (_("This assembler was configured for a target of `%s'.\n"),
 		  TARGET_ALIAS);
 	  exit (EXIT_SUCCESS);
 
 	case OPTION_EMULATION:
 #ifdef USE_EMULATIONS
 	  if (strcmp (optarg, this_emulation->name))
-	    as_fatal ("multiple emulation names specified");
+	    as_fatal (_("multiple emulation names specified"));
 #else
-	  as_fatal ("emulations not handled in this configuration");
+	  as_fatal (_("emulations not handled in this configuration"));
 #endif
 	  break;
 
 	case OPTION_DUMPCONFIG:
-	  fprintf (stderr, "alias = %s\n", TARGET_ALIAS);
-	  fprintf (stderr, "canonical = %s\n", TARGET_CANONICAL);
-	  fprintf (stderr, "cpu-type = %s\n", TARGET_CPU);
+	  fprintf (stderr, _("alias = %s\n"), TARGET_ALIAS);
+	  fprintf (stderr, _("canonical = %s\n"), TARGET_CANONICAL);
+	  fprintf (stderr, _("cpu-type = %s\n"), TARGET_CPU);
 #ifdef TARGET_OBJ_FORMAT
-	  fprintf (stderr, "format = %s\n", TARGET_OBJ_FORMAT);
+	  fprintf (stderr, _("format = %s\n"), TARGET_OBJ_FORMAT);
 #endif
 #ifdef TARGET_FORMAT
-	  fprintf (stderr, "bfd-target = %s\n", TARGET_FORMAT);
+	  fprintf (stderr, _("bfd-target = %s\n"), TARGET_FORMAT);
 #endif
 	  exit (EXIT_SUCCESS);
 
@@ -489,7 +491,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 	    for (s = optarg; *s != '\0' && *s != '='; s++)
 	      ;
 	    if (*s == '\0')
-	      as_fatal ("bad defsym; format is --defsym name=value");
+	      as_fatal (_("bad defsym; format is --defsym name=value"));
 	    *s++ = '\0';
 	    i = strtol (s, (char **) NULL, 0);
 	    n = (struct defsym_list *) xmalloc (sizeof *n);
@@ -509,7 +511,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 
 	    if (optarg == NULL)
 	      {
-		as_warn ( "No file name following -t option\n" );
+		as_warn ( _("No file name following -t option\n") );
 		break;
 	      }
 	    
@@ -525,7 +527,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 	    itbl_files->name = xstrdup (optarg);
 	    if (itbl_parse (itbl_files->name) != 0)
 	      {
-		fprintf (stderr, "Failed to read instruction table %s\n", 
+		fprintf (stderr, _("Failed to read instruction table %s\n"), 
 			 itbl_files->name);
 		exit (EXIT_SUCCESS);
 	      }
@@ -625,7 +627,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 		      optarg += strlen (listing_filename);
 		      break;
 		    default:
-		      as_fatal ("invalid listing option `%c'", *optarg);
+		      as_fatal (_("invalid listing option `%c'"), *optarg);
 		      break;
 		    }
 		  optarg++;
@@ -685,6 +687,9 @@ main (argc, argv)
 
   start_time = get_run_time ();
 
+  setlocale (LC_MESSAGES, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
 
   if (debug_memory)
     {
@@ -843,10 +848,10 @@ dump_statistics ()
 #endif
   long run_time = get_run_time () - start_time;
 
-  fprintf (stderr, "%s: total time in assembly: %ld.%06ld\n",
+  fprintf (stderr, _("%s: total time in assembly: %ld.%06ld\n"),
 	   myname, run_time / 1000000, run_time % 1000000);
 #ifdef HAVE_SBRK
-  fprintf (stderr, "%s: data size %ld\n",
+  fprintf (stderr, _("%s: data size %ld\n"),
 	   myname, (long) (lim - (char *) &environ));
 #endif
 
@@ -921,9 +926,9 @@ perform_an_assembly_pass (argc, argv)
 #else /* BFD_ASSEMBLER */
   /* Create the standard sections, and those the assembler uses
      internally.  */
-  text_section = subseg_new (".text", 0);
-  data_section = subseg_new (".data", 0);
-  bss_section = subseg_new (".bss", 0);
+  text_section = subseg_new (TEXT_SECTION_NAME, 0);
+  data_section = subseg_new (DATA_SECTION_NAME, 0);
+  bss_section = subseg_new (BSS_SECTION_NAME, 0);
   /* @@ FIXME -- we're setting the RELOC flag so that sections are assumed
      to have relocs, otherwise we don't find out in time. */
   applicable = bfd_applicable_section_flags (stdoutput);

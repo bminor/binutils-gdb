@@ -1,5 +1,5 @@
 /* tc-tic80.c -- Assemble for the TI TMS320C80 (MV)
-   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -22,9 +22,9 @@
 #include "opcode/tic80.h"
 
 #define internal_error(what) \
-  as_fatal("internal error:%s:%d: %s\n",__FILE__,__LINE__,what)
+  as_fatal(_("internal error:%s:%d: %s\n"),__FILE__,__LINE__,what)
 #define internal_error_a(what,arg) \
-  as_fatal("internal error:%s:%d: %s %d\n",__FILE__,__LINE__,what,arg)
+  as_fatal(_("internal error:%s:%d: %s %d\n"),__FILE__,__LINE__,what,arg)
 
 
 /* Generic assembler global variables which must be defined by all targets. */
@@ -87,7 +87,7 @@ md_estimate_size_before_relax (fragP, segment_type)
      fragS *fragP;
      segT segment_type;
 {
-  internal_error ("Relaxation is a luxury we can't afford");
+  internal_error (_("Relaxation is a luxury we can't afford"));
   return (-1);
 }
 
@@ -138,7 +138,7 @@ md_atof (type, litP, sizeP)
 
     default:
       *sizeP = 0;
-      return "bad call to md_atof ()";
+      return _("bad call to md_atof ()");
     }
 
   t = atof_ieee (input_line_pointer, type, words);
@@ -242,7 +242,7 @@ get_operands (exp)
 	    }
 	  else
 	    {
-	      as_bad ("':' not followed by 'm' or 's'");
+	      as_bad (_("':' not followed by 'm' or 's'"));
 	    }
 	  numexp++;
 	  continue;
@@ -256,7 +256,7 @@ get_operands (exp)
 	{
 	  if (++parens != 1)
 	    {
-	      as_bad ("paren nesting");
+	      as_bad (_("paren nesting"));
 	    }
 	  p++;
 	  continue;
@@ -271,7 +271,7 @@ get_operands (exp)
 	  /* Record that we have left a paren group and continue */
 	  if (--parens < 0)
 	    {
-	      as_bad ("mismatched parenthesis");
+	      as_bad (_("mismatched parenthesis"));
 	    }
 	  p++;
 	  continue;
@@ -284,11 +284,11 @@ get_operands (exp)
 
       if (exp[numexp].X_op == O_illegal)
 	{
-	  as_bad ("illegal operand");
+	  as_bad (_("illegal operand"));
 	}
       else if (exp[numexp].X_op == O_absent)
 	{
-	  as_bad ("missing operand");
+	  as_bad (_("missing operand"));
 	}
 
       numexp++;
@@ -464,7 +464,7 @@ find_opcode (opcode, myops)
 	    case O_logical_or:
 	    case O_max:
 	    default:
-	      internal_error_a ("unhandled expression type", X_op);
+	      internal_error_a (_("unhandled expression type"), X_op);
 	    }
 	}
       if (!match)
@@ -534,7 +534,7 @@ find_opcode (opcode, myops)
 
   if (!match)  
     {
-      as_bad ("bad opcode or operands");
+      as_bad (_("bad opcode or operands"));
       return (0);
     }
 
@@ -545,7 +545,7 @@ find_opcode (opcode, myops)
     {
       if ((tic80_operands[opcode->operands[i]].flags & TIC80_OPERAND_EVEN) &&
 	  (myops[i].X_add_number & 1)) 
-	as_fatal ("Register number must be EVEN");
+	as_fatal (_("Register number must be EVEN"));
       if (myops[i].X_op == O_register)
 	{
 	  if (!(tic80_operands[opcode->operands[i]].flags & TIC80_OPERAND_REG)) 
@@ -679,7 +679,7 @@ build_insn (opcode, opers)
 	    }
 	  else
 	    {
-	      internal_error ("symbol reloc that is not PC relative or 32 bits");
+	      internal_error (_("symbol reloc that is not PC relative or 32 bits"));
 	    }
 	  break;
 	case O_absent:
@@ -702,7 +702,7 @@ build_insn (opcode, opers)
 	    }
 	  else
 	    {
-	      internal_error_a ("unhandled operand modifier", opers[expi].X_add_number);
+	      internal_error_a (_("unhandled operand modifier"), opers[expi].X_add_number);
 	    }
 	  break;
 	case O_big:
@@ -743,7 +743,7 @@ build_insn (opcode, opers)
 	case O_logical_or:
 	case O_max:
 	default:
-	  internal_error_a ("unhandled expression", X_op);
+	  internal_error_a (_("unhandled expression"), X_op);
 	  break;
 	}
     }
@@ -794,7 +794,7 @@ md_assemble (str)
   /* Try to find this mnemonic in the hash table */
   if ((opcode = (struct tic80_opcode *) hash_find (tic80_hash, str)) == NULL)
     {
-      as_bad ("Invalid mnemonic: '%s'", str);
+      as_bad (_("Invalid mnemonic: '%s'"), str);
       return;
     }
 
@@ -810,7 +810,7 @@ md_assemble (str)
   opcode = find_opcode (opcode, myops);
   if (opcode == NULL)
     {
-      as_bad ("Invalid operands: '%s'", input_line_save);
+      as_bad (_("Invalid operands: '%s'"), input_line_save);
     }
 
   input_line_pointer = input_line_save;
@@ -887,7 +887,7 @@ md_begin ()
 	  valu = PDS_VALUE (pdsp) & ~TIC80_OPERAND_MASK;
 	  break;
 	default:
-	  internal_error_a ("unhandled predefined symbol bits", symtype);
+	  internal_error_a (_("unhandled predefined symbol bits"), symtype);
 	  break;
 	}
       symbol_table_insert (symbol_create (PDS_NAME (pdsp), segment, valu,
@@ -983,7 +983,7 @@ md_apply_fix (fixP, val)
       if (overflow)
 	{
 	  as_bad_where (fixP -> fx_file, fixP -> fx_line,
-			"PC offset 0x%lx outside range 0x%lx-0x%lx",
+			_("PC offset 0x%lx outside range 0x%lx-0x%lx"),
 			val, -65536L, 65532L);
 	}
       else
@@ -998,7 +998,7 @@ md_apply_fix (fixP, val)
       md_number_to_chars (dest, (valueT) val, fixP -> fx_size);
       break;
     default:
-      internal_error_a ("unhandled relocation type in fixup", fixP -> fx_r_type);
+      internal_error_a (_("unhandled relocation type in fixup"), fixP -> fx_r_type);
       break;
     }
 }
@@ -1035,7 +1035,7 @@ md_convert_frag (headers, seg, fragP)
      segT seg;
      fragS *fragP;
 {
-  internal_error ("md_convert_frag() not implemented yet");
+  internal_error (_("md_convert_frag() not implemented yet"));
   abort ();
 }
 

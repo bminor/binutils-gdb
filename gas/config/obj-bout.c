@@ -309,7 +309,7 @@ obj_crawl_symbol_chain (headers)
 	{
 	  if (S_IS_EXTERNAL (symbolP) || !S_IS_DEFINED (symbolP))
 	    {
-	      as_bad ("Local symbol %s never defined", S_GET_NAME (symbolP));
+	      as_bad (_("Local symbol %s never defined"), S_GET_NAME (symbolP));
 	    }			/* oops. */
 
 	  /* Unhook it from the chain */

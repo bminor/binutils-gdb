@@ -1,5 +1,5 @@
 /* coff object file format
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -30,6 +30,7 @@
 #define KEEP_RELOC_INFO
 #endif
 
+static void obj_coff_bss PARAMS ((int));
 const char *s_get_name PARAMS ((symbolS * s));
 static symbolS *def_symbol_in_progress;
 
@@ -129,7 +130,7 @@ tag_insert (name, symbolP)
 
   if ((error_string = hash_jam (tag_hash, name, (char *) symbolP)))
     {
-      as_fatal ("Inserting \"%s\" into structure table failed: %s",
+      as_fatal (_("Inserting \"%s\" into structure table failed: %s"),
 		name, error_string);
     }
 }
@@ -165,7 +166,18 @@ tag_find_or_make (name)
   return symbolP;
 }
 
+/* We accept the .bss directive to set the section for backward
+   compatibility with earlier versions of gas.  */
 
+static void
+obj_coff_bss (ignore)
+     int ignore;
+{
+  if (*input_line_pointer == '\n')
+    subseg_new (".bss", get_absolute_expression ());
+  else
+    s_lcomm (0);
+}
 
 #ifdef BFD_ASSEMBLER
 
@@ -401,7 +413,7 @@ obj_coff_ln (appline)
 
   if (! appline && def_symbol_in_progress != NULL)
     {
-      as_warn (".ln pseudo-op inside .def/.endef: ignored.");
+      as_warn (_(".ln pseudo-op inside .def/.endef: ignored."));
       demand_empty_rest_of_line ();
       return;
     }
@@ -461,7 +473,7 @@ obj_coff_def (what)
 
   if (def_symbol_in_progress != NULL)
     {
-      as_warn (".def pseudo-op used inside of .def/.endef: ignored.");
+      as_warn (_(".def pseudo-op used inside of .def/.endef: ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -506,7 +518,7 @@ obj_coff_endef (ignore)
   dim_index = 0;
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".endef pseudo-op used outside of .def/.endef: ignored.");
+      as_warn (_(".endef pseudo-op used outside of .def/.endef: ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -540,7 +552,7 @@ obj_coff_endef (ignore)
 	if (name[1] == 'b' && name[2] == 'f')
 	  {
 	    if (! in_function ())
-	      as_warn ("`%s' symbol without preceding function", name);
+	      as_warn (_("`%s' symbol without preceding function"), name);
 /*	    SA_SET_SYM_LNNO (def_symbol_in_progress, 12345);*/
 	    /* Will need relocating */
 	    SF_SET_PROCESS (def_symbol_in_progress);
@@ -577,7 +589,7 @@ obj_coff_endef (ignore)
     case C_USTATIC:
     case C_EXTDEF:
     case C_ULABEL:
-      as_warn ("unexpected storage class %d",
+      as_warn (_("unexpected storage class %d"),
 	       S_GET_STORAGE_CLASS (def_symbol_in_progress));
       break;
     }				/* switch on storage class */
@@ -679,7 +691,7 @@ obj_coff_dim (ignore)
 
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".dim pseudo-op used outside of .def/.endef: ignored.");
+      as_warn (_(".dim pseudo-op used outside of .def/.endef: ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -699,7 +711,7 @@ obj_coff_dim (ignore)
 	  break;
 
 	default:
-	  as_warn ("badly formed .dim directive ignored");
+	  as_warn (_("badly formed .dim directive ignored"));
 	  /* intentional fallthrough */
 	case '\n':
 	case ';':
@@ -750,7 +762,7 @@ obj_coff_size (ignore)
 {
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".size pseudo-op used outside of .def/.endef ignored.");
+      as_warn (_(".size pseudo-op used outside of .def/.endef ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -766,7 +778,7 @@ obj_coff_scl (ignore)
 {
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".scl pseudo-op used outside of .def/.endef ignored.");
+      as_warn (_(".scl pseudo-op used outside of .def/.endef ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -784,7 +796,7 @@ obj_coff_tag (ignore)
 
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".tag pseudo-op used outside of .def/.endef ignored.");
+      as_warn (_(".tag pseudo-op used outside of .def/.endef ignored."));
       demand_empty_rest_of_line ();
       return;
     }
@@ -803,7 +815,7 @@ obj_coff_tag (ignore)
 		     tag_find_or_make (symbol_name));
   if (SA_GET_SYM_TAGNDX (def_symbol_in_progress) == 0L)
     {
-      as_warn ("tag not found for .tag %s", symbol_name);
+      as_warn (_("tag not found for .tag %s"), symbol_name);
     }				/* not defined */
 
   SF_SET_TAGGED (def_symbol_in_progress);
@@ -818,7 +830,7 @@ obj_coff_type (ignore)
 {
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".type pseudo-op used outside of .def/.endef ignored.");
+      as_warn (_(".type pseudo-op used outside of .def/.endef ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -840,7 +852,7 @@ obj_coff_val (ignore)
 {
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".val pseudo-op used outside of .def/.endef ignored.");
+      as_warn (_(".val pseudo-op used outside of .def/.endef ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -958,7 +970,7 @@ coff_frob_symbol (symp, punt)
 		  symbolS *begin;
 		  begin = *(symbolS **) stack_pop (block_stack);
 		  if (begin == 0)
-		    as_warn ("mismatched .eb");
+		    as_warn (_("mismatched .eb"));
 		  else
 		    next_set_end = begin;
 		}
@@ -976,7 +988,7 @@ coff_frob_symbol (symp, punt)
 	  if (S_GET_STORAGE_CLASS (symp) == C_EFCN)
 	    {
 	      if (coff_last_function == 0)
-		as_fatal ("C_EFCN symbol out of scope");
+		as_fatal (_("C_EFCN symbol out of scope"));
 	      SA_SET_SYM_FSIZE (coff_last_function,
 				(long) (S_GET_VALUE (symp)
 					- S_GET_VALUE (coff_last_function)));
@@ -1088,8 +1100,9 @@ coff_adjust_section_syms (abfd, sec, x)
     fixS *fixp = seginfo->fix_root;
     while (fixp)
       {
+	if (! fixp->fx_done)
+	  nrelocs++;
 	fixp = fixp->fx_next;
-	nrelocs++;
       }
   }
   if (bfd_get_section_size_before_reloc (sec) == 0
@@ -1105,7 +1118,7 @@ coff_adjust_section_syms (abfd, sec, x)
 }
 
 void
-coff_frob_file ()
+coff_frob_file_after_relocs ()
 {
   bfd_map_over_sections (stdoutput, coff_adjust_section_syms, (char*) 0);
 }
@@ -1184,12 +1197,12 @@ obj_coff_section (ignore)
 		case 'i': /* STYP_INFO */
 		case 'l': /* STYP_LIB */
 		case 'o': /* STYP_OVER */
-		  as_warn ("unsupported section attribute '%c'",
+		  as_warn (_("unsupported section attribute '%c'"),
 			   *input_line_pointer);
 		  break;
 
 		default:
-		  as_warn("unknown section attribute '%c'",
+		  as_warn(_("unknown section attribute '%c'"),
 			  *input_line_pointer);
 		  break;
 		}
@@ -1205,7 +1218,7 @@ obj_coff_section (ignore)
   if (flags != SEC_NO_FLAGS)
     {
       if (! bfd_set_section_flags (stdoutput, sec, flags))
-	as_warn ("error setting flags for \"%s\": %s",
+	as_warn (_("error setting flags for \"%s\": %s"),
 		 bfd_section_name (stdoutput, sec),
 		 bfd_errmsg (bfd_get_error ()));
     }
@@ -1324,7 +1337,7 @@ symbol_dump ()
 
   for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
     {
-      printf("0x%lx: \"%s\" type = %ld, class = %d, segment = %d\n",
+      printf(_("0x%lx: \"%s\" type = %ld, class = %d, segment = %d\n"),
 	     (unsigned long) symbolP,
 	     S_GET_NAME(symbolP),
 	     (long) S_GET_DATA_TYPE(symbolP),
@@ -1433,7 +1446,6 @@ static void adjust_stab_section PARAMS ((bfd *abfd, segT seg));
 static void obj_coff_lcomm PARAMS ((int));
 static void obj_coff_text PARAMS ((int));
 static void obj_coff_data PARAMS ((int));
-static void obj_coff_bss PARAMS ((int));
 static void obj_coff_ident PARAMS ((int));
 void obj_coff_section PARAMS ((int));
 
@@ -1519,7 +1531,7 @@ size_section (abfd, idx)
       size = frag->fr_address;
       if (frag->fr_address != size)
 	{
-	  fprintf (stderr, "Out of step\n");
+	  fprintf (stderr, _("Out of step\n"));
 	  size = frag->fr_address;
 	}
 
@@ -1684,7 +1696,7 @@ do_relocs_for (abfd, h, file_cursor)
 		      /* Turn the segment of the symbol into an offset.  */
 		      if (symbol_ptr)
 			{
-			  resolve_symbol_value (symbol_ptr);
+			  resolve_symbol_value (symbol_ptr, 1);
 			  if (! symbol_ptr->sy_resolved)
 			    {
 			      char *file;
@@ -1692,9 +1704,9 @@ do_relocs_for (abfd, h, file_cursor)
 
 			      if (expr_symbol_where (symbol_ptr, &file, &line))
 				as_bad_where (file, line,
-					      "unresolved relocation");
+					      _("unresolved relocation"));
 			      else
-				as_bad ("bad relocation: symbol `%s' not in symbol table",
+				as_bad (_("bad relocation: symbol `%s' not in symbol table"),
 					S_GET_NAME (symbol_ptr));
 			    }
 			  dot = segment_info[S_GET_SEGMENT (symbol_ptr)].dot;
@@ -1954,7 +1966,7 @@ coff_header_append (abfd, h)
 					   &(segment_info[i].scnhdr),
 					   buffer);
 	  if (size == 0)
-	    as_bad ("bfd_coff_swap_scnhdr_out failed");
+	    as_bad (_("bfd_coff_swap_scnhdr_out failed"));
 	  bfd_write (buffer, size, 1, abfd);
 	}
     }
@@ -2039,7 +2051,7 @@ obj_coff_ln (appline)
 
   if (! appline && def_symbol_in_progress != NULL)
     {
-      as_warn (".ln pseudo-op inside .def/.endef: ignored.");
+      as_warn (_(".ln pseudo-op inside .def/.endef: ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* wrong context */
@@ -2096,7 +2108,7 @@ obj_coff_def (what)
 
   if (def_symbol_in_progress != NULL)
     {
-      as_warn (".def pseudo-op used inside of .def/.endef: ignored.");
+      as_warn (_(".def pseudo-op used inside of .def/.endef: ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -2149,7 +2161,7 @@ obj_coff_endef (ignore)
   dim_index = 0;
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".endef pseudo-op used outside of .def/.endef: ignored.");
+      as_warn (_(".endef pseudo-op used outside of .def/.endef: ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -2181,7 +2193,7 @@ obj_coff_endef (ignore)
 	{			/* .bf */
 	  if (function_lineoff < 0)
 	    {
-	      fprintf (stderr, "`.bf' symbol without preceding function\n");
+	      fprintf (stderr, _("`.bf' symbol without preceding function\n"));
 	    }			/* missing function symbol */
 	  SA_GET_SYM_LNNOPTR (last_line_symbol) = function_lineoff;
 
@@ -2220,7 +2232,7 @@ obj_coff_endef (ignore)
     case C_USTATIC:
     case C_EXTDEF:
     case C_ULABEL:
-      as_warn ("unexpected storage class %d", S_GET_STORAGE_CLASS (def_symbol_in_progress));
+      as_warn (_("unexpected storage class %d"), S_GET_STORAGE_CLASS (def_symbol_in_progress));
       break;
     }				/* switch on storage class */
 
@@ -2327,7 +2339,7 @@ obj_coff_dim (ignore)
 
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".dim pseudo-op used outside of .def/.endef: ignored.");
+      as_warn (_(".dim pseudo-op used outside of .def/.endef: ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -2347,7 +2359,7 @@ obj_coff_dim (ignore)
 	  break;
 
 	default:
-	  as_warn ("badly formed .dim directive ignored");
+	  as_warn (_("badly formed .dim directive ignored"));
 	  /* intentional fallthrough */
 	case '\n':
 	case ';':
@@ -2410,7 +2422,7 @@ obj_coff_size (ignore)
 {
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".size pseudo-op used outside of .def/.endef ignored.");
+      as_warn (_(".size pseudo-op used outside of .def/.endef ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -2426,7 +2438,7 @@ obj_coff_scl (ignore)
 {
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".scl pseudo-op used outside of .def/.endef ignored.");
+      as_warn (_(".scl pseudo-op used outside of .def/.endef ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -2444,7 +2456,7 @@ obj_coff_tag (ignore)
 
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".tag pseudo-op used outside of .def/.endef ignored.");
+      as_warn (_(".tag pseudo-op used outside of .def/.endef ignored."));
       demand_empty_rest_of_line ();
       return;
     }
@@ -2462,7 +2474,7 @@ obj_coff_tag (ignore)
 		     (long) tag_find_or_make (symbol_name));
   if (SA_GET_SYM_TAGNDX (def_symbol_in_progress) == 0L)
     {
-      as_warn ("tag not found for .tag %s", symbol_name);
+      as_warn (_("tag not found for .tag %s"), symbol_name);
     }				/* not defined */
 
   SF_SET_TAGGED (def_symbol_in_progress);
@@ -2477,7 +2489,7 @@ obj_coff_type (ignore)
 {
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".type pseudo-op used outside of .def/.endef ignored.");
+      as_warn (_(".type pseudo-op used outside of .def/.endef ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -2499,7 +2511,7 @@ obj_coff_val (ignore)
 {
   if (def_symbol_in_progress == NULL)
     {
-      as_warn (".val pseudo-op used outside of .def/.endef ignored.");
+      as_warn (_(".val pseudo-op used outside of .def/.endef ignored."));
       demand_empty_rest_of_line ();
       return;
     }				/* if not inside .def/.endef */
@@ -2618,7 +2630,7 @@ yank_symbols ()
       if (symbolP->sy_mri_common)
 	{
 	  if (S_GET_STORAGE_CLASS (symbolP) == C_EXT)
-	    as_bad ("%s: global symbols not supported in common sections",
+	    as_bad (_("%s: global symbols not supported in common sections"),
 		    S_GET_NAME (symbolP));
 	  symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);
 	  continue;
@@ -2660,7 +2672,7 @@ yank_symbols ()
 	      S_SET_SEGMENT (symbolP, SEG_E0);
 	    }			/* push data into text */
 
-	  resolve_symbol_value (symbolP);
+	  resolve_symbol_value (symbolP, 1);
 
 	  if (S_GET_STORAGE_CLASS (symbolP) == C_NULL)
 	    {
@@ -2691,7 +2703,7 @@ yank_symbols ()
 		      register symbolS *begin_symbolP;
 		      begin_symbolP = *(symbolS **) stack_pop (block_stack);
 		      if (begin_symbolP == (symbolS *) 0)
-			as_warn ("mismatched .eb");
+			as_warn (_("mismatched .eb"));
 		      else
 			SA_SET_SYM_ENDNDX (begin_symbolP, symbol_number + 2);
 		    }
@@ -2731,7 +2743,7 @@ yank_symbols ()
 		  /* I don't even know if this is needed for sdb. But
 		     the standard assembler generates it, so...  */
 		  if (last_functionP == (symbolS *) 0)
-		    as_fatal ("C_EFCN symbol out of scope");
+		    as_fatal (_("C_EFCN symbol out of scope"));
 		  SA_SET_SYM_FSIZE (last_functionP,
 				    (long) (S_GET_VALUE (symbolP) -
 					    S_GET_VALUE (last_functionP)));
@@ -3126,7 +3138,7 @@ write_object_file ()
 
   if (abfd == 0)
     {
-      as_perror ("FATAL: Can't create %s", out_file_name);
+      as_perror (_("FATAL: Can't create %s"), out_file_name);
       exit (EXIT_FAILURE);
     }
   bfd_set_format (abfd, bfd_object);
@@ -3204,7 +3216,11 @@ write_object_file ()
 
       /* I think the section alignment is only used on the i960; the
 	 i960 needs it, and it should do no harm on other targets.  */
+#ifdef ALIGNMENT_IN_S_FLAGS
+      segment_info[i].scnhdr.s_flags |= (section_alignment[i] & 0xF) << 8;
+#else
       segment_info[i].scnhdr.s_align = 1 << section_alignment[i];
+#endif
 
       if (i == SEG_E0)
 	H_SET_TEXT_SIZE (&headers, size);
@@ -3296,7 +3312,7 @@ write_object_file ()
   /* Recent changes to write need this, but where it should
      go is up to Ken.. */
   if (bfd_close_all_done (abfd) == false)
-    as_fatal ("Can't close %s: %s", out_file_name,
+    as_fatal (_("Can't close %s: %s"), out_file_name,
 	      bfd_errmsg (bfd_get_error ()));
 #else
   {
@@ -3330,7 +3346,7 @@ obj_coff_add_segment (name)
 
   if (i == SEG_LAST)
     {
-      as_bad ("Too many new sections; can't add \"%s\"", name);
+      as_bad (_("Too many new sections; can't add \"%s\""), name);
       return now_seg;
     }
 
@@ -3422,7 +3438,7 @@ obj_coff_section (ignore)
 		case 'x': flags |= STYP_TEXT;   break;
 		case 'r': flags |= STYP_LIT;	break;
 		default:
-		  as_warn("unknown section attribute '%c'",
+		  as_warn(_("unknown section attribute '%c'"),
 			  *input_line_pointer);
 		  break;
 		}
@@ -3457,16 +3473,6 @@ obj_coff_data (ignore)
     subseg_new (".text", get_absolute_expression () + 1000);
   else
     subseg_new (".data", get_absolute_expression ());
-}
-
-static void
-obj_coff_bss (ignore)
-     int ignore;
-{
-  if (*input_line_pointer == '\n')	/* .bss 		*/
-    subseg_new(".bss", get_absolute_expression());
-  else					/* .bss id,expr		*/
-    obj_coff_lcomm(0);
 }
 
 static void
@@ -3744,19 +3750,19 @@ obj_coff_lcomm (ignore)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad ("Expected comma after name");
+      as_bad (_("Expected comma after name"));
       ignore_rest_of_line ();
       return;
     }
   if (*input_line_pointer == '\n')
     {
-      as_bad ("Missing size expression");
+      as_bad (_("Missing size expression"));
       return;
     }
   input_line_pointer++;
   if ((temp = get_absolute_expression ()) < 0)
     {
-      as_warn ("lcomm length (%d.) <0! Ignored.", temp);
+      as_warn (_("lcomm length (%d.) <0! Ignored."), temp);
       ignore_rest_of_line ();
       return;
     }
@@ -3784,7 +3790,7 @@ obj_coff_lcomm (ignore)
 	}
     }
   else
-    as_bad("Symbol %s already defined", name);
+    as_bad(_("Symbol %s already defined"), name);
 
   demand_empty_rest_of_line();
 #endif
@@ -3878,7 +3884,7 @@ fixup_segment (segP, this_segment_type)
 	  if (!SF_GET_BALNAME (tc_get_bal_of_call (add_symbolP)))
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    "No 'bal' entry point for leafproc %s",
+			    _("No 'bal' entry point for leafproc %s"),
 			    S_GET_NAME (add_symbolP));
 	      continue;
 	    }
@@ -3889,7 +3895,7 @@ fixup_segment (segP, this_segment_type)
       /* Make sure the symbols have been resolved; this may not have
          happened if these are expression symbols.  */
       if (add_symbolP != NULL && ! add_symbolP->sy_resolved)
-	resolve_symbol_value (add_symbolP);
+	resolve_symbol_value (add_symbolP, 1);
 
       if (add_symbolP != NULL)
 	{
@@ -3919,7 +3925,7 @@ fixup_segment (segP, this_segment_type)
 	}
 
       if (sub_symbolP != NULL && ! sub_symbolP->sy_resolved)
-	resolve_symbol_value (sub_symbolP);
+	resolve_symbol_value (sub_symbolP, 1);
 
       if (add_symbolP != NULL
 	  && add_symbolP->sy_mri_common)
@@ -3957,7 +3963,7 @@ fixup_segment (segP, this_segment_type)
 		{
 #ifndef TC_M68K
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				"Negative of non-absolute symbol %s",
+				_("Negative of non-absolute symbol %s"),
 				S_GET_NAME (sub_symbolP));
 #endif
 		  add_number -= S_GET_VALUE (sub_symbolP);
@@ -3978,7 +3984,7 @@ fixup_segment (segP, this_segment_type)
 	      if (fixP->fx_tcbit)
 		{
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				"callj to difference of 2 symbols");
+				_("callj to difference of 2 symbols"));
 		}
 #endif /* TC_I960 */
 	      add_number += S_GET_VALUE (add_symbolP) -
@@ -4024,7 +4030,7 @@ fixup_segment (segP, this_segment_type)
 	      else
 		{
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				"Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %ld.",
+				_("Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %ld."),
 				segment_name (S_GET_SEGMENT (sub_symbolP)),
 				S_GET_NAME (sub_symbolP),
 				(long) (fragP->fr_address + where));
@@ -4114,7 +4120,7 @@ fixup_segment (segP, this_segment_type)
 		       * relocation.
 		       */
 		      as_bad_where (fixP->fx_file, fixP->fx_line,
-				    "can't use COBR format with external label");
+				    _("can't use COBR format with external label"));
 		      fixP->fx_addsy = NULL;
 		      fixP->fx_done = 1;
 		      continue;
@@ -4188,7 +4194,7 @@ fixup_segment (segP, this_segment_type)
 		      || (add_number & 0x8000) == 0)))
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    "Value of %ld too large for field of %d bytes at 0x%lx",
+			    _("Value of %ld too large for field of %d bytes at 0x%lx"),
 			    (long) add_number, size,
 			    (unsigned long) (fragP->fr_address + where));
 	    }
@@ -4202,7 +4208,7 @@ fixup_segment (segP, this_segment_type)
 	      && size == 2
 	      && add_number > 0x7fff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  "Signed .word overflow; switch may be too large; %ld at 0x%lx",
+			  _("Signed .word overflow; switch may be too large; %ld at 0x%lx"),
 			  (long) add_number,
 			  (unsigned long) (fragP->fr_address + where));
 #endif
@@ -4210,7 +4216,7 @@ fixup_segment (segP, this_segment_type)
       /* Once this fix has been applied, we don't have to output
 	 anything nothing more need be done.  */
 #ifdef MD_APPLY_FIX3
-      md_apply_fix3 (fixP, &add_number, this_segment_type);
+      md_apply_fix3 (fixP, (valueT *) &add_number, this_segment_type);
 #else
       md_apply_fix (fixP, add_number);
 #endif
@@ -4314,11 +4320,13 @@ const pseudo_typeS obj_pseudo_table[] =
   /* FIXME: We ignore the MRI short attribute.  */
   {"section.s", obj_coff_section, 0},
   {"sect.s", obj_coff_section, 0},
+  /* We accept the .bss directive for backward compatibility with
+     earlier versions of gas.  */
+  {"bss", obj_coff_bss, 0},
 #ifndef BFD_ASSEMBLER
   {"use", obj_coff_section, 0},
   {"text", obj_coff_text, 0},
   {"data", obj_coff_data, 0},
-  {"bss", obj_coff_bss, 0},
   {"lcomm", obj_coff_lcomm, 0},
   {"ident", obj_coff_ident, 0},
 #else
@@ -4363,8 +4371,8 @@ const struct format_ops coff_format_ops =
   0,
   1,
   coff_frob_symbol,
-  coff_frob_file,
   no_func,
+  coff_frob_file_after_relocs,
   0, 0,
   0, 0,
   0,

@@ -224,10 +224,10 @@ void
 md_show_usage (stream)
   FILE *stream;
 {
-  fprintf(stream, "\nD30V options:\n\
+  fprintf(stream, (_"\nD30V options:\n\
 -O                      Make adjacent short instructions parallel if possible.\n\
 -n                      Warn about all NOPs inserted by the assembler.\n\
--N			Warn about NOPs inserted after word multiplies.\n");
+-N			Warn about NOPs inserted after word multiplies.\n"));
 } 
 
 int
@@ -291,7 +291,7 @@ md_atof (type, litP, sizeP)
       break;
     default:
       *sizeP = 0;
-      return "bad call to md_atof";
+      return _("bad call to md_atof");
     }
 
   t = atof_ieee (input_line_pointer, type, words);
@@ -386,14 +386,14 @@ get_reloc (op, rel_flag)
       break;
     case 12:
       if (!(op->flags & OPERAND_SHIFT))
-	as_warn("unexpected 12-bit reloc type");
+	as_warn(_("unexpected 12-bit reloc type"));
       if (rel_flag == RELOC_PCREL)
 	return BFD_RELOC_D30V_15_PCREL;
       else
 	return BFD_RELOC_D30V_15;
     case 18:
       if (!(op->flags & OPERAND_SHIFT))
-	as_warn("unexpected 18-bit reloc type");
+	as_warn(_("unexpected 18-bit reloc type"));
       if (rel_flag == RELOC_PCREL)
 	return BFD_RELOC_D30V_21_PCREL;
       else
@@ -474,9 +474,9 @@ get_operands (exp, cmp_hack)
 	}
 
       if (exp[numops].X_op == O_illegal) 
-	as_bad ("illegal operand");
+	as_bad (_("illegal operand"));
       else if (exp[numops].X_op == O_absent) 
-	as_bad ("missing operand");
+	as_bad (_("missing operand"));
 
       numops++;
       p = input_line_pointer;
@@ -559,7 +559,7 @@ build_insn (opcode, opers)
 	  /* now create a fixup */
 
 	  if (fixups->fc >= MAX_INSN_FIXUPS)
-	    as_fatal ("too many fixups");
+	    as_fatal (_("too many fixups"));
 
 	  fixups->fix[fixups->fc].reloc = 
 	    get_reloc((struct d30v_operand *)&d30v_operand_table[form->operands[i]], op->reloc_flag);
@@ -575,7 +575,7 @@ build_insn (opcode, opers)
 
       /* truncate to the proper number of bits */
       if ((opers[i].X_op == O_constant) && check_range (number, bits, flags))
-	as_bad("operand out of range: %d",number);
+	as_bad(_("operand out of range: %d"),number);
       if (bits < 31)
 	number &= 0x7FFFFFFF >> (31 - bits);
       if (flags & OPERAND_SHIFT)
@@ -636,7 +636,7 @@ write_1_short (opcode, insn, fx)
   int i, where;
 
   if (warn_nops == NOP_ALL)
-    as_warn ("NOP inserted");
+    as_warn (_("NOP inserted"));
 
   /* the other container needs to be NOP */
   /* according to 4.3.1: for FM=00, sub-instructions performed only
@@ -677,7 +677,8 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   char *f;
   int i,j, where;
 
-  if(exec_type != EXEC_PARALLEL && (opcode1->op->flags_used == FLAG_JSR))
+  if(exec_type != EXEC_PARALLEL &&
+     ((opcode1->op->flags_used & (FLAG_JSR | FLAG_DELAY)) == FLAG_JSR))
     {
       /* subroutines must be called from 32-bit boundaries */
       /* so the return address will be correct */
@@ -720,19 +721,19 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
     case EXEC_PARALLEL:	/* parallel */
       flag_explicitly_parallel = flag_xp_state;
       if (! parallel_ok (opcode1, insn1, opcode2, insn2, exec_type))
-	as_fatal ("Instructions may not be executed in parallel");
+	as_fatal (_("Instructions may not be executed in parallel"));
       else if (opcode1->op->unit == IU)
 	{
 	  if (opcode2->op->unit == IU)
-	    as_fatal ("Two IU instructions may not be executed in parallel");
-	  as_warn ("Swapping instruction order");
+	    as_fatal (_("Two IU instructions may not be executed in parallel"));
+	  as_warn (_("Swapping instruction order"));
  	  insn = FM00 | (insn2 << 32) | insn1;
 	}
       else if (opcode2->op->unit == MU)
 	{
 	  if (opcode1->op->unit == MU)
-	    as_fatal ("Two MU instructions may not be executed in parallel");
-	  as_warn ("Swapping instruction order");
+	    as_fatal (_("Two MU instructions may not be executed in parallel"));
+	  as_warn (_("Swapping instruction order"));
 	  insn = FM00 | (insn2 << 32) | insn1;
 	}
       else
@@ -745,20 +746,20 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 
     case EXEC_SEQ:	/* sequential */
       if (opcode1->op->unit == IU)
-	as_fatal ("IU instruction may not be in the left container");
+	as_fatal (_("IU instruction may not be in the left container"));
       insn = FM01 | (insn1 << 32) | insn2;  
       fx = fx->next;
       break;
 
     case EXEC_REVSEQ:	/* reverse sequential */
       if (opcode2->op->unit == MU)
-	as_fatal ("MU instruction may not be in the right container");
+	as_fatal (_("MU instruction may not be in the right container"));
       insn = FM10 | (insn1 << 32) | insn2;  
       fx = fx->next;
       break;
 
     default:
-      as_fatal("unknown execution type passed to write_2_short()");
+      as_fatal(_("unknown execution type passed to write_2_short()"));
     }
 
   /*  printf("writing out %llx\n",insn); */
@@ -1090,9 +1091,9 @@ md_assemble (str)
 	  /* assemble first instruction and save it */
 	  prev_insn = do_assemble (str, &prev_opcode);
 	  if (prev_insn == -1)
-	    as_fatal ("cannot assemble instruction ");
+	    as_fatal (_("cannot assemble instruction "));
 	  if (prev_opcode.form->form >= LONG)
-	    as_fatal ("First opcode is long.  Unable to mix instructions as specified."); 
+	    as_fatal (_("First opcode is long.  Unable to mix instructions as specified.")); 
 	  fixups = fixups->next;
 	  str = str2 + 2;
 	}
@@ -1106,7 +1107,7 @@ md_assemble (str)
 	  etype = extype;
 	  return;
 	}
-      as_fatal ("cannot assemble instruction ");
+      as_fatal (_("cannot assemble instruction "));
     }
 
   if (etype)
@@ -1145,10 +1146,12 @@ md_assemble (str)
 	  f = frag_more(8);
 	  d30v_number_to_chars (f, NOP2, 8);
 	  if (warn_nops == NOP_ALL || warn_nops == NOP_MULTIPLY)
-	    as_warn ("word of NOPs added between word multiply and %s",
-		     ((opcode.op->flags_used & FLAG_MEM)
-		      ? "load"
-		      : "16-bit multiply"));
+	    {
+	      if ((opcode.op->flags_used & FLAG_MEM))
+		as_warn (_("word of NOPs added between word multiply and load"));
+	      else
+		as_warn (_("word of NOPs added between word multiply and 16-bit multiply"));
+	    }
 	}
     }
 
@@ -1156,7 +1159,7 @@ md_assemble (str)
   if (opcode.form->form >= LONG) 
     {
       if (extype) 
-	as_fatal("Unable to mix instructions as specified");
+	as_fatal(_("Unable to mix instructions as specified"));
       d30v_cleanup();
       write_long (&opcode, insn, fixups);
       prev_insn = -1;
@@ -1173,7 +1176,7 @@ md_assemble (str)
   else
     {
       if (extype) 
-	as_fatal("Unable to mix instructions as specified");
+	as_fatal(_("Unable to mix instructions as specified"));
       /* save off last instruction so it may be packed on next pass */
       memcpy(&prev_opcode, &opcode, sizeof(prev_opcode));
       prev_insn = insn;
@@ -1232,7 +1235,7 @@ do_assemble (str, opcode)
 	  char tmp[4];
 	  strncpy(tmp,op_end+1,2);
 	  tmp[2] = 0;
-	  as_fatal ("unknown condition code: %s",tmp);
+	  as_fatal (_("unknown condition code: %s"),tmp);
 	  return -1;
 	}
       /*      printf("condition code=%d\n",i); */
@@ -1262,14 +1265,14 @@ do_assemble (str, opcode)
 	  if (i < 3 || i > 6)
 	    {
 	      name[p+2]=0;
-	      as_fatal ("cmpu doesn't support condition code %s",&name[p]);      
+	      as_fatal (_("cmpu doesn't support condition code %s"),&name[p]);      
 	    }
 	}
 
       if (!*str)
 	{
 	  name[p+2]=0;
-	  as_fatal ("unknown condition code: %s",&name[p]);      
+	  as_fatal (_("unknown condition code: %s"),&name[p]);      
 	}
       
       cmp_hack = i;
@@ -1298,7 +1301,7 @@ do_assemble (str, opcode)
   /* find the first opcode with the proper name */  
   opcode->op = (struct d30v_opcode *)hash_find (d30v_hash, name);
   if (opcode->op == NULL)
-      as_fatal ("unknown opcode: %s",name);
+      as_fatal (_("unknown opcode: %s"),name);
 
   save = input_line_pointer;
   input_line_pointer = op_end;
@@ -1453,7 +1456,7 @@ tc_gen_reloc (seg, fixp)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-                    "reloc %d not supported by object file format", (int)fixp->fx_r_type);
+                    _("reloc %d not supported by object file format"), (int)fixp->fx_r_type);
       return NULL;
     }
   reloc->addend = fixp->fx_addnumber;
@@ -1510,7 +1513,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	    {
 	      /* We don't actually support subtracting a symbol.  */
 	      as_bad_where (fixp->fx_file, fixp->fx_line,
-			    "expression too complex");
+			    _("expression too complex"));
 	    }
 	}
     }
@@ -1602,7 +1605,7 @@ md_apply_fix3 (fixp, valuep, seg)
       break;
 
     default:
-      as_fatal ("line %d: unknown relocation type: 0x%x",fixp->fx_line,fixp->fx_r_type);
+      as_fatal (_("line %d: unknown relocation type: 0x%x"),fixp->fx_line,fixp->fx_r_type);
     }
   return 0;
 }

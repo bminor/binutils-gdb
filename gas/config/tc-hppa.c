@@ -1,11 +1,11 @@
 /* tc-hppa.c -- Assemble for the PA
-   Copyright (C) 1989, 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1996, 1997, 1998 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    GAS is distributed in the hope that it will be useful,
@@ -538,7 +538,7 @@ static void pa_ip PARAMS ((char *));
 static void fix_new_hppa PARAMS ((fragS *, int, int, symbolS *,
 				  long, expressionS *, int,
 				  bfd_reloc_code_real_type,
-				  enum hppa_reloc_field_selector_type,
+				  enum hppa_reloc_field_selector_type_alt,
 				  int, long, int *));
 static int is_end_of_statement PARAMS ((void));
 static int reg_name_search PARAMS ((char *));
@@ -1058,7 +1058,7 @@ static struct default_space_dict pa_def_spaces[] =
     if ((FIELD) > (HIGH) || (FIELD) < (LOW)) \
       { \
 	if (! IGNORE) \
-          as_bad ("Field out of range [%d..%d] (%d).", (LOW), (HIGH), \
+          as_bad (_("Field out of range [%d..%d] (%d)."), (LOW), (HIGH), \
 		  (int) (FIELD));\
         break; \
       } \
@@ -1087,10 +1087,10 @@ void
 pa_check_eof ()
 {
   if (within_entry_exit)
-    as_fatal ("Missing .exit\n");
+    as_fatal (_("Missing .exit\n"));
 
   if (within_procedure)
-    as_fatal ("Missing .procend\n");
+    as_fatal (_("Missing .procend\n"));
 }
 
 /* Check to make sure we have a valid space and subspace.  */
@@ -1099,10 +1099,10 @@ static void
 pa_check_current_space_and_subspace ()
 {
   if (current_space == NULL)
-    as_fatal ("Not in a space.\n");
+    as_fatal (_("Not in a space.\n"));
 
   if (current_subspace == NULL)
-    as_fatal ("Not in a subspace.\n");
+    as_fatal (_("Not in a subspace.\n"));
 }
 
 /* Returns a pointer to the label_symbol_struct for the current space.
@@ -1264,7 +1264,7 @@ cons_fix_new_hppa (frag, where, size, exp)
     rel_type = R_HPPA;
 
   if (hppa_field_selector != e_psel && hppa_field_selector != e_fsel)
-    as_warn ("Invalid field selector.  Assuming F%%.");
+    as_warn (_("Invalid field selector.  Assuming F%%."));
 
   fix_new_hppa (frag, where, size,
 		(symbolS *) NULL, (offsetT) 0, exp, 0, rel_type,
@@ -1289,13 +1289,13 @@ md_begin ()
 
   /* Set the default machine type.  */
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 10))
-    as_warn ("could not set architecture and machine");
+    as_warn (_("could not set architecture and machine"));
 
   /* Folding of text and data segments fails miserably on the PA.
      Warn user and disable "-R" option.  */
   if (flag_readonly_data_in_text)
     {
-      as_warn ("-R option not supported on this target.");
+      as_warn (_("-R option not supported on this target."));
       flag_readonly_data_in_text = 0;
     }
 
@@ -1309,7 +1309,7 @@ md_begin ()
       retval = hash_insert (op_hash, name, (struct pa_opcode *) &pa_opcodes[i]);
       if (retval != NULL && *retval != '\0')
 	{
-	  as_fatal ("Internal error: can't hash `%s': %s\n", name, retval);
+	  as_fatal (_("Internal error: can't hash `%s': %s\n"), name, retval);
 	  lose = 1;
 	}
       do
@@ -1317,7 +1317,7 @@ md_begin ()
 	  if ((pa_opcodes[i].match & pa_opcodes[i].mask)
 	      != pa_opcodes[i].match)
 	    {
-	      fprintf (stderr, "internal error: losing opcode: `%s' \"%s\"\n",
+	      fprintf (stderr, _("internal error: losing opcode: `%s' \"%s\"\n"),
 		       pa_opcodes[i].name, pa_opcodes[i].args);
 	      lose = 1;
 	    }
@@ -1327,7 +1327,7 @@ md_begin ()
     }
 
   if (lose)
-    as_fatal ("Broken assembler.  No assembly attempted.");
+    as_fatal (_("Broken assembler.  No assembly attempted."));
 
   /* SOM will change text_section.  To make sure we never put
      anything into the old one switch to the new one now.  */
@@ -1379,10 +1379,10 @@ md_assemble (str)
 #endif
 	    }
 	  else
-	    as_bad ("Missing function name for .PROC (corrupted label chain)");
+	    as_bad (_("Missing function name for .PROC (corrupted label chain)"));
 	}
       else
-	as_bad ("Missing function name for .PROC");
+	as_bad (_("Missing function name for .PROC"));
     }
 
   /* Assemble the instruction.  Results are saved into "the_insn".  */
@@ -1441,7 +1441,7 @@ pa_ip (str)
       break;
 
     default:
-      as_fatal ("Unknown opcode: `%s'", str);
+      as_fatal (_("Unknown opcode: `%s'"), str);
     }
 
   save_s = str;
@@ -1482,7 +1482,7 @@ pa_ip (str)
       if (bfd_get_mach (stdoutput) < insn->arch)
 	{
 	  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, insn->arch))
-	    as_warn ("could not update architecture and machine");
+	    as_warn (_("could not update architecture and machine"));
 	}
 
       /* Build the opcode, checking as we go to make
@@ -1608,12 +1608,12 @@ pa_ip (str)
 		    else if (strncasecmp (s, "s", 1) == 0)
 		      uu = 1;
 		    else
-		      as_bad ("Invalid Indexed Load Completer.");
+		      as_bad (_("Invalid Indexed Load Completer."));
 		    s++;
 		    i++;
 		  }
 		if (i > 2)
-		  as_bad ("Invalid Indexed Load Completer Syntax.");
+		  as_bad (_("Invalid Indexed Load Completer Syntax."));
 		opcode |= m << 5;
 		INSERT_FIELD_AND_CONTINUE (opcode, uu, 13);
 	      }
@@ -1637,7 +1637,7 @@ pa_ip (str)
 			m = 1;
 		      }
 		    else
-		      as_bad ("Invalid Short Load/Store Completer.");
+		      as_bad (_("Invalid Short Load/Store Completer."));
 		    s += 2;
 		  }
 		opcode |= m << 5;
@@ -1660,12 +1660,12 @@ pa_ip (str)
 		    else if (strncasecmp (s, "e", 1) == 0)
 		      a = 1;
 		    else
-		      as_bad ("Invalid Store Bytes Short Completer");
+		      as_bad (_("Invalid Store Bytes Short Completer"));
 		    s++;
 		    i++;
 		  }
 		if (i > 2)
-		  as_bad ("Invalid Store Bytes Short Completer");
+		  as_bad (_("Invalid Store Bytes Short Completer"));
 		opcode |= m << 5;
 		INSERT_FIELD_AND_CONTINUE (opcode, a, 13);
 	      }
@@ -1675,7 +1675,7 @@ pa_ip (str)
 	      cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s, 1);
 	      if (cmpltr < 0)
 		{
-		  as_bad ("Invalid Compare/Subtract Condition: %c", *s);
+		  as_bad (_("Invalid Compare/Subtract Condition: %c"), *s);
 		  cmpltr = 0;
 		}
 	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
@@ -1690,7 +1690,7 @@ pa_ip (str)
 		  cmpltr = pa_parse_neg_cmpsub_cmpltr (&s, 1);
 		  if (cmpltr < 0)
 		    {
-		      as_bad ("Invalid Compare/Subtract Condition.");
+		      as_bad (_("Invalid Compare/Subtract Condition."));
 		      cmpltr = 0;
 		    }
 		  else
@@ -1706,7 +1706,7 @@ pa_ip (str)
 	      cmpltr = pa_parse_nonneg_add_cmpltr (&s, 1);
 	      if (cmpltr < 0)
 		{
-		  as_bad ("Invalid Compare/Subtract Condition: %c", *s);
+		  as_bad (_("Invalid Compare/Subtract Condition: %c"), *s);
 		  cmpltr = 0;
 		}
 	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
@@ -1721,7 +1721,7 @@ pa_ip (str)
 		  cmpltr = pa_parse_neg_add_cmpltr (&s, 1);
 		  if (cmpltr < 0)
 		    {
-		      as_bad ("Invalid Compare/Subtract Condition");
+		      as_bad (_("Invalid Compare/Subtract Condition"));
 		      cmpltr = 0;
 		    }
 		  else
@@ -1747,7 +1747,7 @@ pa_ip (str)
 		      cmpltr = pa_parse_neg_cmpsub_cmpltr (&s, 0);
 		      if (cmpltr < 0)
 			{
-			  as_bad ("Invalid Compare/Subtract Condition");
+			  as_bad (_("Invalid Compare/Subtract Condition"));
 			}
 		    }
 		}
@@ -1824,7 +1824,7 @@ pa_ip (str)
 		      flag = 1;
 		    }
 		  else
-		    as_bad ("Invalid Add Condition: %s", name);
+		    as_bad (_("Invalid Add Condition: %s"), name);
 		  *s = c;
 		}
 	      nullif = pa_parse_nullif (&s);
@@ -1878,7 +1878,7 @@ pa_ip (str)
 		      flag = 1;
 		    }
 		  else
-		    as_bad ("Invalid Logical Instruction Condition.");
+		    as_bad (_("Invalid Logical Instruction Condition."));
 		  *s = c;
 		}
 	      opcode |= cmpltr << 13;
@@ -1953,7 +1953,7 @@ pa_ip (str)
 		      s += 3;
 		    }
 		  else
-		    as_bad ("Invalid Logical Instruction Condition.");
+		    as_bad (_("Invalid Logical Instruction Condition."));
 		}
 	      opcode |= cmpltr << 13;
 	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
@@ -1993,7 +1993,7 @@ pa_ip (str)
 		      continue;
 		    }
 		  else
-		    as_bad ("Invalid Shift/Extract/Deposit Condition.");
+		    as_bad (_("Invalid Shift/Extract/Deposit Condition."));
 		  *s = c;
 		}
 	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
@@ -2015,7 +2015,7 @@ pa_ip (str)
 		      s += 2;
 		    }
 		  else
-		    as_bad ("Invalid Bit Branch Condition: %c", *s);
+		    as_bad (_("Invalid Bit Branch Condition: %c"), *s);
 		}
 	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
@@ -2126,7 +2126,7 @@ pa_ip (str)
 		  num = evaluate_absolute (&the_insn);
 		  if (num % 4)
 		    {
-		      as_bad ("Branch to unaligned address");
+		      as_bad (_("Branch to unaligned address"));
 		      break;
 		    }
 		  CHECK_FIELD (num, 8199, -8184, 0);
@@ -2159,7 +2159,7 @@ pa_ip (str)
 		  num = evaluate_absolute (&the_insn);
 		  if (num % 4)
 		    {
-		      as_bad ("Branch to unaligned address");
+		      as_bad (_("Branch to unaligned address"));
 		      break;
 		    }
 		  CHECK_FIELD (num, 262143, -262144, 0);
@@ -2196,7 +2196,7 @@ pa_ip (str)
 		  num = evaluate_absolute (&the_insn);
 		  if (num % 4)
 		    {
-		      as_bad ("Branch to unaligned address");
+		      as_bad (_("Branch to unaligned address"));
 		      break;
 		    }
 		  CHECK_FIELD (num, 262143, -262144, 0);
@@ -2256,7 +2256,7 @@ pa_ip (str)
 	    /* Handle a 3 bit SFU identifier at 25.  */
 	    case 'f':
 	      if (*s++ != ',')
-		as_bad ("Invalid SFU identifier");
+		as_bad (_("Invalid SFU identifier"));
 	      num = pa_get_absolute_expression (&the_insn, &s);
 	      s = expr_end;
 	      CHECK_FIELD (num, 7, 0, 0);
@@ -2296,7 +2296,7 @@ pa_ip (str)
 	    /* Handle a 3-bit co-processor ID field.  */
 	    case 'u':
 	      if (*s++ != ',')
-		as_bad ("Invalid COPR identifier");
+		as_bad (_("Invalid COPR identifier"));
 	      num = pa_get_absolute_expression (&the_insn, &s);
 	      s = expr_end;
 	      CHECK_FIELD (num, 7, 0, 0);
@@ -2391,7 +2391,7 @@ pa_ip (str)
 		  {
 		    if (result.number_part < 16)
 		      {
-			as_bad  ("Invalid register for single precision fmpyadd or fmpysub");
+			as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
 			break;
 		      }
 
@@ -2412,7 +2412,7 @@ pa_ip (str)
 		  {
 		    if (result.number_part < 16)
 		      {
-			as_bad  ("Invalid register for single precision fmpyadd or fmpysub");
+			as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
 			break;
 		      }
 		    result.number_part &= 0xF;
@@ -2432,7 +2432,7 @@ pa_ip (str)
 		  {
 		    if (result.number_part < 16)
 		      {
-			as_bad  ("Invalid register for single precision fmpyadd or fmpysub");
+			as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
 			break;
 		      }
 		    result.number_part &= 0xF;
@@ -2452,7 +2452,7 @@ pa_ip (str)
 		  {
 		    if (result.number_part < 16)
 		      {
-			as_bad  ("Invalid register for single precision fmpyadd or fmpysub");
+			as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
 			break;
 		      }
 		    result.number_part &= 0xF;
@@ -2472,7 +2472,7 @@ pa_ip (str)
 		  {
 		    if (result.number_part < 16)
 		      {
-			as_bad  ("Invalid register for single precision fmpyadd or fmpysub");
+			as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
 			break;
 		      }
 		    result.number_part &= 0xF;
@@ -2496,7 +2496,7 @@ pa_ip (str)
 		case QUAD:
 		case ILLEGAL_FMT:
 		default:
-		  as_bad ("Invalid Floating Point Operand Format.");
+		  as_bad (_("Invalid Floating Point Operand Format."));
 		}
 	      break;
 
@@ -2518,7 +2518,7 @@ pa_ip (str)
 	    }
 	  else
 	    {
-	      as_bad ("Invalid operands %s", error_message);
+	      as_bad (_("Invalid operands %s"), error_message);
 	      return;
 	    }
 	}
@@ -2574,7 +2574,7 @@ md_atof (type, litP, sizeP)
 
     default:
       *sizeP = 0;
-      return "Bad call to MD_ATOF()";
+      return _("Bad call to MD_ATOF()");
     }
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
@@ -2845,7 +2845,7 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  fprintf (stderr, "pa_create_short_jmp\n");
+  fprintf (stderr, _("pa_create_short_jmp\n"));
   abort ();
 }
 
@@ -2857,7 +2857,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  fprintf (stderr, "pa_create_long_jump\n");
+  fprintf (stderr, _("pa_create_long_jump\n"));
   abort ();
 }
 
@@ -3047,16 +3047,27 @@ md_apply_fix (fixP, valp)
 
 	/* Handle some of the opcodes with the 'W' operand type.  */
 	case 17:
-	  CHECK_FIELD (new_val, 262143, -262144, 0);
+	  {
+	    int distance = *valp;
 
-	  /* Mask off 17 bits to be changed.  */
-	  bfd_put_32 (stdoutput,
-		      bfd_get_32 (stdoutput, buf) & 0xffe0e002,
-		      buf);
-	  sign_unext ((new_val - 8) >> 2, 17, &resulti);
-	  dis_assemble_17 (resulti, &w1, &w2, &w);
-	  result = ((w2 << 2) | (w1 << 16) | w);
-	  break;
+	    CHECK_FIELD (new_val, 262143, -262144, 0);
+
+	    /* If this is an absolute branch (ie no link) with an out of
+	       range target, then we want to complain.  */
+	    if (fixP->fx_r_type == R_HPPA_PCREL_CALL
+		&& (distance > 262143 || distance < -262144)
+		&& (bfd_get_32 (stdoutput, buf) & 0xffe00000) == 0xe8000000)
+	      CHECK_FIELD (distance, 262143, -262144, 0);
+
+	    /* Mask off 17 bits to be changed.  */
+	    bfd_put_32 (stdoutput,
+			bfd_get_32 (stdoutput, buf) & 0xffe0e002,
+			buf);
+	    sign_unext ((new_val - 8) >> 2, 17, &resulti);
+	    dis_assemble_17 (resulti, &w1, &w2, &w);
+	    result = ((w2 << 2) | (w1 << 16) | w);
+	    break;
+	  }
 
 	case 32:
 	  result = 0;
@@ -3064,7 +3075,7 @@ md_apply_fix (fixP, valp)
 	  break;
 
 	default:
-	  as_bad ("Unknown relocation encountered in md_apply_fix.");
+	  as_bad (_("Unknown relocation encountered in md_apply_fix."));
 	  return 0;
 	}
 
@@ -3074,7 +3085,7 @@ md_apply_fix (fixP, valp)
     }
   else
     {
-      printf ("no hppa_fixup entry for this fixup (fixP = 0x%x, type = 0x%x)\n",
+      printf (_("no hppa_fixup entry for this fixup (fixP = 0x%x, type = 0x%x)\n"),
 	      (unsigned int) fixP, fixP->fx_r_type);
       return 0;
     }
@@ -3216,7 +3227,7 @@ pa_parse_number (s, result)
 	  else if (!isdigit (*p))
 	    {
 	      if (print_errors)
-		as_bad ("Undefined register: '%s'.", name);
+		as_bad (_("Undefined register: '%s'."), name);
 	      num = -1;
 	    }
 	  else
@@ -3241,7 +3252,7 @@ pa_parse_number (s, result)
 	  else
 	    {
 	      if (print_errors)
-		as_bad ("Undefined register: '%s'.", name);
+		as_bad (_("Undefined register: '%s'."), name);
 	      num = -1;
 	    }
 	  *p = c;
@@ -3279,7 +3290,7 @@ pa_parse_number (s, result)
 	  else
 	    {
 	      if (print_errors)
-		as_bad ("Non-absolute symbol: '%s'.", name);
+		as_bad (_("Non-absolute symbol: '%s'."), name);
 	      num = -1;
 	    }
 	}
@@ -3294,7 +3305,7 @@ pa_parse_number (s, result)
 	  else
 	    {
 	      if (print_errors)
-		as_bad ("Undefined absolute constant: '%s'.", name);
+		as_bad (_("Undefined absolute constant: '%s'."), name);
 	      num = -1;
 	    }
 	}
@@ -3364,7 +3375,7 @@ need_pa11_opcode (insn, result)
       if (bfd_get_mach (stdoutput) < pa11)
 	{
 	  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, pa11))
-	    as_warn ("could not update architecture and machine");
+	    as_warn (_("could not update architecture and machine"));
 	}
       return TRUE;
     }
@@ -3403,7 +3414,7 @@ pa_parse_fp_cmp_cond (s)
 	}
     }
 
-  as_bad ("Invalid FP Compare Condition: %s", *s);
+  as_bad (_("Invalid FP Compare Condition: %s"), *s);
 
   /* Advance over the bogus completer.  */
   while (**s != ',' && **s != ' ' && **s != '\t')
@@ -3443,7 +3454,7 @@ pa_parse_fp_format (s)
       else
 	{
 	  format = ILLEGAL_FMT;
-	  as_bad ("Invalid FP Operand Format: %3s", *s);
+	  as_bad (_("Invalid FP Operand Format: %3s"), *s);
 	}
     }
 
@@ -3524,7 +3535,7 @@ get_expression (str)
 	|| seg == undefined_section
 	|| SEG_NORMAL (seg)))
     {
-      as_warn ("Bad segment in expression.");
+      as_warn (_("Bad segment in expression."));
       expr_end = input_line_pointer;
       input_line_pointer = save_in;
       return 1;
@@ -3548,7 +3559,7 @@ pa_get_absolute_expression (insn, strp)
   expression (&insn->exp);
   if (insn->exp.X_op != O_constant)
     {
-      as_bad ("Bad segment (should be absolute).");
+      as_bad (_("Bad segment (should be absolute)."));
       expr_end = input_line_pointer;
       input_line_pointer = save_in;
       return 0;
@@ -3647,7 +3658,7 @@ pa_build_arg_reloc (type_name)
   else if (strncasecmp (type_name, "fu", 2) == 0)
     return 3;
   else
-    as_bad ("Invalid argument location: %s\n", type_name);
+    as_bad (_("Invalid argument location: %s\n"), type_name);
 
   return 0;
 }
@@ -3678,7 +3689,7 @@ pa_align_arg_reloc (reg, arg_reloc)
       new_reloc <<= 2;
       break;
     default:
-      as_bad ("Invalid argument description: %d", reg);
+      as_bad (_("Invalid argument description: %d"), reg);
     }
 
   return new_reloc;
@@ -3701,7 +3712,7 @@ pa_parse_nullif (s)
 	nullif = 1;
       else
 	{
-	  as_bad ("Invalid Nullification: (%c)", **s);
+	  as_bad (_("Invalid Nullification: (%c)"), **s);
 	  nullif = 0;
 	}
       *s = *s + 1;
@@ -4163,7 +4174,7 @@ pa_call_args (call_desc)
 	}
       else
 	{
-	  as_bad ("Invalid .CALL argument: %s", name);
+	  as_bad (_("Invalid .CALL argument: %s"), name);
 	}
       p = input_line_pointer;
       *p = c;
@@ -4282,7 +4293,7 @@ pa_callinfo (unused)
 
   /* .CALLINFO must appear within a procedure definition.  */
   if (!within_procedure)
-    as_bad (".callinfo is not within a procedure definition");
+    as_bad (_(".callinfo is not within a procedure definition"));
 
   /* Mark the fact that we found the .CALLINFO for the
      current procedure.  */
@@ -4302,7 +4313,7 @@ pa_callinfo (unused)
 	  temp = get_absolute_expression ();
 	  if ((temp & 0x3) != 0)
 	    {
-	      as_bad ("FRAME parameter must be a multiple of 8: %d\n", temp);
+	      as_bad (_("FRAME parameter must be a multiple of 8: %d\n"), temp);
 	      temp = 0;
 	    }
 
@@ -4321,7 +4332,7 @@ pa_callinfo (unused)
 	     even though %r19 is caller saved.  I think this is a bug in
 	     the HP assembler, and we are not going to emulate it.  */
 	  if (temp < 3 || temp > 18)
-	    as_bad ("Value for ENTRY_GR must be in the range 3..18\n");
+	    as_bad (_("Value for ENTRY_GR must be in the range 3..18\n"));
 	  last_call_info->ci_unwind.descriptor.entry_gr = temp - 2;
 	}
       else if ((strncasecmp (name, "entry_fr", 8) == 0))
@@ -4333,7 +4344,7 @@ pa_callinfo (unused)
 	  /* Similarly the HP assembler takes 31 as the high bound even
 	     though %fr21 is the last callee saved floating point register.  */
 	  if (temp < 12 || temp > 21)
-	    as_bad ("Value for ENTRY_FR must be in the range 12..21\n");
+	    as_bad (_("Value for ENTRY_FR must be in the range 12..21\n"));
 	  last_call_info->ci_unwind.descriptor.entry_fr = temp - 11;
 	}
       else if ((strncasecmp (name, "entry_sr", 8) == 0))
@@ -4343,7 +4354,7 @@ pa_callinfo (unused)
 	  input_line_pointer++;
 	  temp = get_absolute_expression ();
 	  if (temp != 3)
-	    as_bad ("Value for ENTRY_SR must be 3\n");
+	    as_bad (_("Value for ENTRY_SR must be 3\n"));
 	}
       /* Note whether or not this function performs any calls.  */
       else if ((strncasecmp (name, "calls", 5) == 0) ||
@@ -4399,7 +4410,7 @@ pa_callinfo (unused)
 	}
       else
 	{
-	  as_bad ("Invalid .CALLINFO argument: %s", name);
+	  as_bad (_("Invalid .CALLINFO argument: %s"), name);
 	  *input_line_pointer = c;
 	}
       if (!is_end_of_statement ())
@@ -4502,11 +4513,11 @@ pa_entry (unused)
   pa_check_current_space_and_subspace ();
 
   if (!within_procedure)
-    as_bad ("Misplaced .entry. Ignored.");
+    as_bad (_("Misplaced .entry. Ignored."));
   else
     {
       if (!callinfo_found)
-	as_bad ("Missing .callinfo.");
+	as_bad (_("Missing .callinfo."));
     }
   demand_empty_rest_of_line ();
   within_entry_exit = TRUE;
@@ -4554,9 +4565,9 @@ pa_equ (reg)
   else
     {
       if (reg)
-	as_bad (".REG must use a label");
+	as_bad (_(".REG must use a label"));
       else
-	as_bad (".EQU must use a label");
+	as_bad (_(".EQU must use a label"));
     }
 
   pa_undefine_label ();
@@ -4607,15 +4618,15 @@ pa_exit (unused)
   pa_check_current_space_and_subspace ();
 
   if (!within_procedure)
-    as_bad (".EXIT must appear within a procedure");
+    as_bad (_(".EXIT must appear within a procedure"));
   else
     {
       if (!callinfo_found)
-	as_bad ("Missing .callinfo");
+	as_bad (_("Missing .callinfo"));
       else
 	{
 	  if (!within_entry_exit)
-	    as_bad ("No .ENTRY for this .EXIT");
+	    as_bad (_("No .ENTRY for this .EXIT"));
 	  else
 	    {
 	      within_entry_exit = FALSE;
@@ -4642,7 +4653,7 @@ pa_export (unused)
   /* Make sure the given symbol exists.  */
   if ((symbol = symbol_find_or_make (name)) == NULL)
     {
-      as_bad ("Cannot define export symbol: %s\n", name);
+      as_bad (_("Cannot define export symbol: %s\n"), name);
       p = input_line_pointer;
       *p = c;
       input_line_pointer++;
@@ -4695,7 +4706,7 @@ pa_type_args (symbolP, is_export)
       if (symbolP->bsym->flags & BSF_FUNCTION)
 	{
 	  if (is_export)
-	    as_tsktsk ("Using ENTRY rather than CODE in export directive for %s", symbolP->bsym->name);
+	    as_tsktsk (_("Using ENTRY rather than CODE in export directive for %s"), symbolP->bsym->name);
 
 	  symbolP->bsym->flags |= BSF_FUNCTION;
 	  type = SYMBOL_TYPE_ENTRY;
@@ -4795,7 +4806,7 @@ pa_type_args (symbolP, is_export)
 	}
       else
 	{
-	  as_bad ("Undefined .EXPORT/.IMPORT argument (ignored): %s", name);
+	  as_bad (_("Undefined .EXPORT/.IMPORT argument (ignored): %s"), name);
 	  p = input_line_pointer;
 	  *p = c;
 	}
@@ -4877,12 +4888,12 @@ pa_label (unused)
     }
   else
     {
-      as_warn ("Missing label name on .LABEL");
+      as_warn (_("Missing label name on .LABEL"));
     }
 
   if (!is_end_of_statement ())
     {
-      as_warn ("extra .LABEL arguments ignored.");
+      as_warn (_("extra .LABEL arguments ignored."));
       ignore_rest_of_line ();
     }
   demand_empty_rest_of_line ();
@@ -4913,17 +4924,17 @@ pa_level (unused)
     {
       input_line_pointer += 3;
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 10))
-	as_warn ("could not set architecture and machine");
+	as_warn (_("could not set architecture and machine"));
     }
   else if (strncmp (level, "1.1", 3) == 0)
     {
       input_line_pointer += 3;
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 11))
-	as_warn ("could not set architecture and machine");
+	as_warn (_("could not set architecture and machine"));
     }
   else
     {
-      as_bad ("Unrecognized .LEVEL argument\n");
+      as_bad (_("Unrecognized .LEVEL argument\n"));
       ignore_rest_of_line ();
     }
   demand_empty_rest_of_line ();
@@ -4957,7 +4968,7 @@ pa_param (unused)
 
   if ((symbol = symbol_find_or_make (name)) == NULL)
     {
-      as_bad ("Cannot define static symbol: %s\n", name);
+      as_bad (_("Cannot define static symbol: %s\n"), name);
       p = input_line_pointer;
       *p = c;
       input_line_pointer++;
@@ -4990,7 +5001,7 @@ pa_proc (unused)
   pa_check_current_space_and_subspace ();
 
   if (within_procedure)
-    as_fatal ("Nested procedures");
+    as_fatal (_("Nested procedures"));
 
   /* Reset global variables for new procedure.  */
   callinfo_found = FALSE;
@@ -5000,7 +5011,7 @@ pa_proc (unused)
   call_info = (struct call_info *) xmalloc (sizeof (struct call_info));
 
   if (!call_info)
-    as_fatal ("Cannot allocate unwind descriptor\n");
+    as_fatal (_("Cannot allocate unwind descriptor\n"));
 
   bzero (call_info, sizeof (struct call_info));
 
@@ -5036,7 +5047,7 @@ pa_proc (unused)
 	    label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
 	  }
 	else
-	  as_bad ("Missing function name for .PROC (corrupted label chain)");
+	  as_bad (_("Missing function name for .PROC (corrupted label chain)"));
       }
     else
       last_call_info->start_symbol = NULL;
@@ -5088,20 +5099,20 @@ pa_procend (unused)
 #endif
 	    }
 	  else
-	    as_bad ("Missing function name for .PROC (corrupted label chain)");
+	    as_bad (_("Missing function name for .PROC (corrupted label chain)"));
 	}
       else
-	as_bad ("Missing function name for .PROC");
+	as_bad (_("Missing function name for .PROC"));
     }
 
   if (!within_procedure)
-    as_bad ("misplaced .procend");
+    as_bad (_("misplaced .procend"));
 
   if (!callinfo_found)
-    as_bad ("Missing .callinfo for this procedure");
+    as_bad (_("Missing .callinfo for this procedure"));
 
   if (within_entry_exit)
-    as_bad ("Missing .EXIT for a .ENTRY");
+    as_bad (_("Missing .EXIT for a .ENTRY"));
 
 #ifdef OBJ_ELF
   /* ELF needs to mark the end of each function so that it can compute
@@ -5201,7 +5212,7 @@ pa_parse_space_stmt (space_name, create_flag)
 		}
 	      else
 		{
-		  as_bad ("Invalid .SPACE argument");
+		  as_bad (_("Invalid .SPACE argument"));
 		  *input_line_pointer = c;
 		  if (!is_end_of_statement ())
 		    input_line_pointer++;
@@ -5249,7 +5260,7 @@ pa_space (unused)
 
   if (within_procedure)
     {
-      as_bad ("Can\'t change spaces within a procedure definition. Ignored");
+      as_bad (_("Can\'t change spaces within a procedure definition. Ignored"));
       ignore_rest_of_line ();
     }
   else
@@ -5376,7 +5387,7 @@ pa_spnum (unused)
       md_number_to_chars (p, SPACE_SPNUM (space), 4);
     }
   else
-    as_warn ("Undefined space: '%s' Assuming space number = 0.", name);
+    as_warn (_("Undefined space: '%s' Assuming space number = 0."), name);
 
   *input_line_pointer = c;
   demand_empty_rest_of_line ();
@@ -5418,11 +5429,11 @@ pa_subspace (create_new)
   asection *section;
 
   if (current_space == NULL)
-    as_fatal ("Must be in a space before changing or declaring subspaces.\n");
+    as_fatal (_("Must be in a space before changing or declaring subspaces.\n"));
 
   if (within_procedure)
     {
-      as_bad ("Can\'t change subspaces within a procedure definition. Ignored");
+      as_bad (_("Can\'t change subspaces within a procedure definition. Ignored"));
       ignore_rest_of_line ();
     }
   else
@@ -5458,7 +5469,7 @@ pa_subspace (create_new)
 	  subseg_set (ssd->ssd_seg, ssd->ssd_subseg);
 	  current_subspace = ssd;
 	  if (!is_end_of_statement ())
-	    as_warn ("Parameters of an existing subspace can\'t be modified");
+	    as_warn (_("Parameters of an existing subspace can\'t be modified"));
 	  demand_empty_rest_of_line ();
 	  return;
 	}
@@ -5511,7 +5522,7 @@ pa_subspace (create_new)
 		  alignment = get_absolute_expression ();
 		  if (log2 (alignment) == -1)
 		    {
-		      as_bad ("Alignment must be a power of 2");
+		      as_bad (_("Alignment must be a power of 2"));
 		      alignment = 1;
 		    }
 		}
@@ -5553,9 +5564,9 @@ pa_subspace (create_new)
 		  zero = 1;
 		}
 	      else if ((strncasecmp (name, "first", 5) == 0))
-		as_bad ("FIRST not supported as a .SUBSPACE argument");
+		as_bad (_("FIRST not supported as a .SUBSPACE argument"));
 	      else
-		as_bad ("Invalid .SUBSPACE argument");
+		as_bad (_("Invalid .SUBSPACE argument"));
 	      if (!is_end_of_statement ())
 		input_line_pointer++;
 	    }
@@ -5595,7 +5606,7 @@ pa_subspace (create_new)
 	section = subseg_new (alias, 0);
       else if (!alias && USE_ALIASES)
 	{
-	  as_warn ("Ignoring subspace decl due to ELF BFD bugs.");
+	  as_warn (_("Ignoring subspace decl due to ELF BFD bugs."));
 	  demand_empty_rest_of_line ();
 	  return;
 	}
@@ -5758,7 +5769,7 @@ pa_spaces_begin ()
 						 def_space_index].segment);
       if (space == NULL)
 	{
-	  as_fatal ("Internal error: Unable to find containing space for %s.",
+	  as_fatal (_("Internal error: Unable to find containing space for %s."),
 		    pa_def_subspaces[i].name);
 	}
 
@@ -5799,7 +5810,7 @@ create_new_space (name, spnum, loadable, defined, private,
 
   chain_entry = (sd_chain_struct *) xmalloc (sizeof (sd_chain_struct));
   if (!chain_entry)
-    as_fatal ("Out of memory: could not allocate new space chain entry: %s\n",
+    as_fatal (_("Out of memory: could not allocate new space chain entry: %s\n"),
 	      name);
 
   SPACE_NAME (chain_entry) = (char *) xmalloc (strlen (name) + 1);
@@ -5885,7 +5896,7 @@ create_new_subspace (space, name, loadable, code_only, common,
 
   chain_entry = (ssd_chain_struct *) xmalloc (sizeof (ssd_chain_struct));
   if (!chain_entry)
-    as_fatal ("Out of memory: could not allocate new subspace chain entry: %s\n", name);
+    as_fatal (_("Out of memory: could not allocate new subspace chain entry: %s\n"), name);
 
   SUBSPACE_NAME (chain_entry) = (char *) xmalloc (strlen (name) + 1);
   strcpy (SUBSPACE_NAME (chain_entry), name);
@@ -6113,6 +6124,7 @@ pa_subspace_start (space, quadrant)
      sd_chain_struct *space;
      int quadrant;
 {
+#ifdef OBJ_SOM
   /* FIXME.  Assumes everyone puts read/write data at 0x4000000, this
      is not correct for the PA OSF1 port.  */
   if ((strcmp (SPACE_NAME (space), "$PRIVATE$") == 0) && quadrant == 1)
@@ -6121,6 +6133,8 @@ pa_subspace_start (space, quadrant)
     return 0x40000000;
   else
     return 0;
+#endif
+  return 0;
 }
 
 /* FIXME.  Needs documentation.  */
@@ -6414,6 +6428,10 @@ hppa_fix_adjustable (fixp)
   if (fixp->fx_addsy && fixp->fx_addsy->bsym->flags & BSF_GLOBAL)
     return 0;
 
+  /* Reject absolute calls (jumps).  */
+  if (hppa_fix->fx_r_type == R_HPPA_ABS_CALL)
+    return 0;
+
   /* Reject reductions of function symbols.  */
   if (fixp->fx_addsy == 0
       || (fixp->fx_addsy->bsym->flags & BSF_FUNCTION) == 0)
@@ -6464,6 +6482,8 @@ hppa_force_relocation (fixp)
       && (distance > 262143 || distance < -262144))
     return 1;
 
+  if (fixp->fx_r_type == R_HPPA_ABS_CALL)
+    return 1;
 #undef arg_reloc_stub_needed
 
   /* No need (yet) to force another relocations to be emitted.  */
@@ -6518,11 +6538,11 @@ hppa_elf_mark_end_of_function ()
       if (symbolP)
 	last_call_info->end_symbol = symbolP;
       else
-	as_bad ("Symbol '%s' could not be created.", name);
+	as_bad (_("Symbol '%s' could not be created."), name);
 
     }
   else
-    as_bad ("No memory for symbol name.");
+    as_bad (_("No memory for symbol name."));
 
 }
 

@@ -20,6 +20,7 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include <setjmp.h>
 #include "ansidecl.h"
 #include "bfd.h"
+#include "symcat.h"
 #include "cgen-opc.h"
 #include "as.h"
 #include "subsegs.h"
@@ -80,7 +81,7 @@ cgen_queue_fixup (opindex, opinfo, expP)
 {
   /* We need to generate a fixup for this expression.  */
   if (num_fixups >= MAX_FIXUPS)
-    as_fatal ("too many fixups");
+    as_fatal (_("too many fixups"));
   fixups[num_fixups].exp     = * expP;
   fixups[num_fixups].opindex = opindex;
   fixups[num_fixups].opinfo  = opinfo;
@@ -281,11 +282,11 @@ cgen_parse_operand (want, strP, opindex, opinfo, resultP, valueP)
   switch (exp.X_op)
     {
     case O_illegal :
-      errmsg = "illegal operand";
+      errmsg = _("illegal operand");
       * resultP = CGEN_PARSE_OPERAND_RESULT_ERROR;
       break;
     case O_absent :
-      errmsg = "missing operand";
+      errmsg = _("missing operand");
       * resultP = CGEN_PARSE_OPERAND_RESULT_ERROR;
       break;
     case O_constant :
@@ -475,8 +476,8 @@ cgen_md_apply_fix3 (fixP, valueP, seg)
      valueT * valueP;
      segT     seg;
 {
-  char *      where = fixP->fx_frag->fr_literal + fixP->fx_where;
-  valueT      value;
+  char * where = fixP->fx_frag->fr_literal + fixP->fx_where;
+  valueT value;
 
   /* FIXME FIXME FIXME: The value we are passed in *valuep includes
      the symbol values.  Since we are using BFD_ASSEMBLER, if we are
@@ -507,7 +508,7 @@ cgen_md_apply_fix3 (fixP, valueP, seg)
 	    {
 	      /* We don't actually support subtracting a symbol.  */
  	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    "expression too complex");
+			    _("expression too complex"));
 	    }
 	}
     }
@@ -528,14 +529,11 @@ cgen_md_apply_fix3 (fixP, valueP, seg)
 	     finish the job.  Testing for pcrel is a temporary hack.  */
 	  || fixP->fx_pcrel)
 	{
-	  /* This may seem like overkill, and using bfd_install_relocation or
-	     some such may be preferable, but this is simple.  */
 	  CGEN_FIELDS_BITSIZE (& fields) = CGEN_INSN_BITSIZE (insn);
 	  CGEN_SYM (set_operand) (opindex, & value, & fields);
-	  errmsg = CGEN_SYM (validate_operand) (opindex, & fields);
+	  errmsg = CGEN_SYM (insert_operand) (opindex, & fields, where);
 	  if (errmsg)
 	    as_warn_where (fixP->fx_file, fixP->fx_line, "%s\n", errmsg);
-	  CGEN_SYM (insert_operand) (opindex, & fields, where);
 	}
 
       if (fixP->fx_done)
@@ -554,7 +552,7 @@ cgen_md_apply_fix3 (fixP, valueP, seg)
       else
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			"unresolved expression that must be resolved");
+			_("unresolved expression that must be resolved"));
 	  fixP->fx_done = 1;
 	  return 1;
 	}
@@ -609,7 +607,7 @@ cgen_tc_gen_reloc (section, fixP)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
-		    "internal error: can't export reloc type %d (`%s')",
+		    _("internal error: can't export reloc type %d (`%s')"),
 		    fixP->fx_r_type, bfd_get_reloc_code_name (fixP->fx_r_type));
       return NULL;
     }

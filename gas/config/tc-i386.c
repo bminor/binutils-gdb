@@ -171,8 +171,6 @@ static char digit_chars[256];
 /* put here all non-digit non-letter charcters that may occur in an operand */
 static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:[@]";
 
-static char *ordinal_names[] = {"first", "second", "third"}; /* for printfs */
-
 /* md_assemble() always leaves the strings it's passed unaltered.  To
    effect this we maintain a stack of saved characters that we've smashed
    with '\0's (indicating end of strings for various sub-fields of the
@@ -588,7 +586,7 @@ md_begin ()
 	    if (hash_err)
 	      {
 	      hash_error:
-		as_fatal ("Internal Error:  Can't hash %s: %s", prev_name,
+		as_fatal (_("Internal Error:  Can't hash %s: %s"), prev_name,
 			  hash_err);
 	      }
 	    prev_name = optab->name;
@@ -838,7 +836,7 @@ pt (t)
 
   if (t == Unknown)
     {
-      fprintf (stdout, "Unknown");
+      fprintf (stdout, _("Unknown"));
     }
   else
     {
@@ -875,8 +873,11 @@ reloc (size, pcrel, other)
       case 4: return BFD_RELOC_32;
       }
 
-  as_bad ("Can not do %d byte %srelocation", size,
-	  pcrel ? "pc-relative " : "");
+  if (pcrel)
+    as_bad (_("Can not do %d byte pc-relative relocation"), size);
+  else
+    as_bad (_("Can not do %d byte relocation"), size);
+
   return BFD_RELOC_NONE;
 }
 
@@ -955,7 +956,7 @@ md_assemble (line)
       {
 	if (!is_opcode_char (*l))
 	  {
-	    as_bad ("invalid character %s in opcode", output_invalid (*l));
+	    as_bad (_("invalid character %s in opcode"), output_invalid (*l));
 	    return;
 	  }
 	else if (*l != PREFIX_SEPERATOR)
@@ -971,14 +972,14 @@ md_assemble (line)
 
 	    if (l == token_start)
 	      {
-		as_bad ("expecting prefix; got nothing");
+		as_bad (_("expecting prefix; got nothing"));
 		return;
 	      }
 	    END_STRING_AND_SAVE (l);
 	    prefix = (prefix_entry *) hash_find (prefix_hash, token_start);
 	    if (!prefix)
 	      {
-		as_bad ("no such opcode prefix `%s'", token_start);
+		as_bad (_("no such opcode prefix `%s'"), token_start);
 		RESTORE_END_STRING (l);
 		return;
 	      }
@@ -1004,7 +1005,7 @@ md_assemble (line)
     END_STRING_AND_SAVE (l);
     if (token_start == l)
       {
-	as_bad ("expecting opcode; got nothing");
+	as_bad (_("expecting opcode; got nothing"));
 	RESTORE_END_STRING (l);
 	return;
       }
@@ -1028,7 +1029,7 @@ md_assemble (line)
 	  }
 	if (!current_templates)
 	  {
-	    as_bad ("no such 386 instruction: `%s'", token_start);
+	    as_bad (_("no such 386 instruction: `%s'"), token_start);
 	    RESTORE_END_STRING (l);
 	    return;
 	  }
@@ -1039,7 +1040,7 @@ md_assemble (line)
     if (expecting_string_instruction &&
 	!(current_templates->start->opcode_modifier & IsString))
       {
-	as_bad ("expecting string instruction after `%s'",
+	as_bad (_("expecting string instruction after `%s'"),
 		expecting_string_instruction);
 	return;
       }
@@ -1055,9 +1056,8 @@ md_assemble (line)
 	      {
 		if (!is_space_char (*l))
 		  {
-		    as_bad ("invalid character %s before %s operand",
-			    output_invalid (*l),
-			    ordinal_names[i.operands]);
+		    as_bad (_("invalid character %s before operand %d"),
+			    output_invalid (*l), i.operands);
 		    return;
 		  }
 		l++;
@@ -1070,8 +1070,8 @@ md_assemble (line)
 		  {
 		    if (paren_not_balanced)
 		      {
-			as_bad ("unbalanced parenthesis in %s operand.",
-				ordinal_names[i.operands]);
+			as_bad (_("unbalanced parenthesis in operand %d."),
+				i.operands);
 			return;
 		      }
 		    else
@@ -1079,9 +1079,8 @@ md_assemble (line)
 		  }
 		else if (!is_operand_char (*l) && !is_space_char (*l))
 		  {
-		    as_bad ("invalid character %s in %s operand",
-			    output_invalid (*l),
-			    ordinal_names[i.operands]);
+		    as_bad (_("invalid character %s in operand %d"),
+			    output_invalid (*l), i.operands);
 		    return;
 		  }
 		if (*l == '(')
@@ -1096,7 +1095,7 @@ md_assemble (line)
 		this_operand = i.operands++;
 		if (i.operands > MAX_OPERANDS)
 		  {
-		    as_bad ("spurious operands; (%d operands/instruction max)",
+		    as_bad (_("spurious operands; (%d operands/instruction max)"),
 			    MAX_OPERANDS);
 		    return;
 		  }
@@ -1112,12 +1111,12 @@ md_assemble (line)
 		if (expecting_operand)
 		  {
 		  expecting_operand_after_comma:
-		    as_bad ("expecting operand after ','; got nothing");
+		    as_bad (_("expecting operand after ','; got nothing"));
 		    return;
 		  }
 		if (*l == ',')
 		  {
-		    as_bad ("expecting operand before ','; got nothing");
+		    as_bad (_("expecting operand before ','; got nothing"));
 		    return;
 		  }
 	      }
@@ -1242,7 +1241,7 @@ md_assemble (line)
       }				/* for (t = ... */
     if (t == current_templates->end)
       {				/* we found no match */
-	as_bad ("suffix or operands invalid for `%s'",
+	as_bad (_("suffix or operands invalid for `%s'"),
 		current_templates->start->name);
 	return;
       }
@@ -1294,7 +1293,7 @@ md_assemble (line)
       {
 	if (i.suffix)
 	  {
-	    as_bad ("extraneous opcode suffix given");
+	    as_bad (_("extraneous opcode suffix given"));
 	    return;
 	  }
 	if (i.tm.opcode_modifier & Data16)
@@ -1350,7 +1349,7 @@ md_assemble (line)
 	      bad = 1;
 	  }
 	if (bad)
-	  as_bad ("register does not match opcode suffix");
+	  as_bad (_("register does not match opcode suffix"));
       }
 
     /* Make still unresolved immediate matches conform to size of immediate
@@ -1362,7 +1361,7 @@ md_assemble (line)
       {
 	if (!i.suffix)
 	  {
-	    as_bad ("no opcode suffix given; can't determine immediate size");
+	    as_bad (_("no opcode suffix given; can't determine immediate size"));
 	    return;
 	  }
 	overlap0 &= (i.suffix == BYTE_OPCODE_SUFFIX ? (Imm8 | Imm8S) :
@@ -1374,7 +1373,7 @@ md_assemble (line)
       {
 	if (!i.suffix)
 	  {
-	    as_bad ("no opcode suffix given; can't determine immediate size");
+	    as_bad (_("no opcode suffix given; can't determine immediate size"));
 	    return;
 	  }
 	overlap1 &= (i.suffix == BYTE_OPCODE_SUFFIX ? (Imm8 | Imm8S) :
@@ -1400,7 +1399,7 @@ md_assemble (line)
 
     if (!i.suffix && (i.tm.opcode_modifier & W))
       {
-	as_bad ("no opcode suffix given and no register operands; can't size instruction");
+	as_bad (_("no opcode suffix given and no register operands; can't size instruction"));
 	return;
       }
 
@@ -1772,7 +1771,7 @@ md_assemble (line)
 		int jmp_size = flag_16bit_code ? 2 : 4;
 	      	if (flag_16bit_code && !fits_in_signed_word (n))
 		  {
-		    as_bad ("16-bit jump out of range");
+		    as_bad (_("16-bit jump out of range"));
 		    return;
 		  }
 
@@ -1886,7 +1885,7 @@ md_assemble (line)
 	    md_number_to_chars (p, (valueT) n, size);
 	    if (size == 1 && !fits_in_signed_byte (n))
 	      {
-		as_bad ("loop/jecx only takes byte displacement; %lu shortened to %d",
+		as_bad (_("loop/jecx only takes byte displacement; %lu shortened to %d"),
 			n, *p);
 	      }
 	  }
@@ -1917,7 +1916,7 @@ md_assemble (line)
 	  fix_new_exp (frag_now, p + 1 - frag_now->fr_literal, 4,
 		       i.imms[1], 0, BFD_RELOC_32);
 	if (i.imms[0]->X_op != O_constant)
-	  as_bad ("can't handle non absolute segment in long call/jmp");
+	  as_bad (_("can't handle non absolute segment in long call/jmp"));
 	md_number_to_chars (p + 5, (valueT) i.imms[0]->X_add_number, 2);
       }
     else
@@ -2161,7 +2160,7 @@ i386_operand (operand_string)
       register reg_entry *r;
       if (!(r = parse_register (op_string)))
 	{
-	  as_bad ("bad register name `%s'", op_string);
+	  as_bad (_("bad register name `%s'"), op_string);
 	  return 0;
 	}
       /* Check for segment override, rather than segment register by
@@ -2194,7 +2193,7 @@ i386_operand (operand_string)
 	  if (!is_digit_char (*op_string) && !is_identifier_char (*op_string)
 	      && *op_string != '(' && *op_string != ABSOLUTE_PREFIX)
 	    {
-	      as_bad ("bad memory operand `%s'", op_string);
+	      as_bad (_("bad memory operand `%s'"), op_string);
 	      return 0;
 	    }
 	  /* Handle case of %es:*foo. */
@@ -2217,7 +2216,7 @@ i386_operand (operand_string)
 
       if (i.imm_operands == MAX_IMMEDIATE_OPERANDS)
 	{
-	  as_bad ("only 1 or 2 immediate operands are allowed");
+	  as_bad (_("only 1 or 2 immediate operands are allowed"));
 	  return 0;
 	}
 
@@ -2234,7 +2233,7 @@ i386_operand (operand_string)
              in certain cases.  Oddly, the code in question turns out
              to work correctly anyhow, so we make this just a warning
              until those versions of gcc are obsolete.  */
-	  as_warn ("unrecognized characters `%s' in expression",
+	  as_warn (_("unrecognized characters `%s' in expression"),
 		   input_line_pointer);
 	}
       input_line_pointer = save_input_line_pointer;
@@ -2242,7 +2241,7 @@ i386_operand (operand_string)
       if (exp->X_op == O_absent)
 	{
 	  /* missing or bad expr becomes absolute 0 */
-	  as_bad ("missing or invalid immediate expression `%s' taken as 0",
+	  as_bad (_("missing or invalid immediate expression `%s' taken as 0"),
 		  operand_string);
 	  exp->X_op = O_constant;
 	  exp->X_add_number = 0;
@@ -2266,7 +2265,7 @@ i386_operand (operand_string)
 	       )
 	{
 	seg_unimplemented:
-	  as_bad ("Unimplemented segment type %d in parse_operand", exp_seg);
+	  as_bad (_("Unimplemented segment type %d in parse_operand"), exp_seg);
 	  return 0;
 	}
 #endif
@@ -2302,7 +2301,7 @@ i386_operand (operand_string)
 	   && (current_templates->start->opcode_modifier & IsString) == 0)
 	  || i.mem_operands == 2)
 	{
-	  as_bad ("too many memory references for `%s'",
+	  as_bad (_("too many memory references for `%s'"),
 		  current_templates->start->name);
 	  return 0;
 	}
@@ -2379,14 +2378,14 @@ i386_operand (operand_string)
 		base_string++;
 	      if (base_string == base_reg_name + 1)
 		{
-		  as_bad ("can't find base register name after `(%c'",
+		  as_bad (_("can't find base register name after `(%c'"),
 			  REGISTER_PREFIX);
 		  return 0;
 		}
 	      END_STRING_AND_SAVE (base_string);
 	      if (!(i.base_reg = parse_register (base_reg_name)))
 		{
-		  as_bad ("bad base register name `%s'", base_reg_name);
+		  as_bad (_("bad base register name `%s'"), base_reg_name);
 		  RESTORE_END_STRING (base_string);
 		  return 0;
 		}
@@ -2398,7 +2397,7 @@ i386_operand (operand_string)
 			   OR ')' ==> end. (scale factor = 1) */
 	  if (*base_string != ',' && *base_string != ')')
 	    {
-	      as_bad ("expecting `,' or `)' after base register in `%s'",
+	      as_bad (_("expecting `,' or `)' after base register in `%s'"),
 		      operand_string);
 	      return 0;
 	    }
@@ -2411,7 +2410,7 @@ i386_operand (operand_string)
 	      END_STRING_AND_SAVE (base_string);
 	      if (!(i.index_reg = parse_register (index_reg_name)))
 		{
-		  as_bad ("bad index register name `%s'", index_reg_name);
+		  as_bad (_("bad index register name `%s'"), index_reg_name);
 		  RESTORE_END_STRING (base_string);
 		  return 0;
 		}
@@ -2426,14 +2425,14 @@ i386_operand (operand_string)
 		base_string++;
 	      if (base_string == num_string)
 		{
-		  as_bad ("can't find a scale factor after `,'");
+		  as_bad (_("can't find a scale factor after `,'"));
 		  return 0;
 		}
 	      END_STRING_AND_SAVE (base_string);
 	      /* We've got a scale factor. */
 	      if (!sscanf (num_string, "%d", &num))
 		{
-		  as_bad ("can't parse scale factor from `%s'", num_string);
+		  as_bad (_("can't parse scale factor from `%s'"), num_string);
 		  RESTORE_END_STRING (base_string);
 		  return 0;
 		}
@@ -2453,7 +2452,7 @@ i386_operand (operand_string)
 		  i.log2_scale_factor = 3;
 		  break;
 		default:
-		  as_bad ("expecting scale factor of 1, 2, 4, 8; got %d", num);
+		  as_bad (_("expecting scale factor of 1, 2, 4, 8; got %d"), num);
 		  return 0;
 		}
 	    }
@@ -2461,7 +2460,7 @@ i386_operand (operand_string)
 	    {
 	      if (!i.index_reg && *base_string == ',')
 		{
-		  as_bad ("expecting index register or scale factor after `,'; got '%c'",
+		  as_bad (_("expecting index register or scale factor after `,'; got '%c'"),
 			  *(base_string + 1));
 		  return 0;
 		}
@@ -2529,7 +2528,7 @@ i386_operand (operand_string)
 		    *cp = '@';
 		  }
 		else
-		  as_bad ("Bad reloc specifier `%s' in expression", cp + 1);
+		  as_bad (_("Bad reloc specifier `%s' in expression"), cp + 1);
 
 		input_line_pointer = tmpbuf;
 	      }
@@ -2555,13 +2554,14 @@ i386_operand (operand_string)
 #endif
 
 	  if (*input_line_pointer)
-	    as_bad ("Ignoring junk `%s' after expression", input_line_pointer);
+	    as_bad (_("Ignoring junk `%s' after expression"),
+		    input_line_pointer);
 	  RESTORE_END_STRING (displacement_string_end);
 	  input_line_pointer = save_input_line_pointer;
 	  if (exp->X_op == O_absent)
 	    {
 	      /* missing expr becomes absolute 0 */
-	      as_bad ("missing or invalid displacement `%s' taken as 0",
+	      as_bad (_("missing or invalid displacement `%s' taken as 0"),
 		      operand_string);
 	      i.types[this_operand] |= (Disp | Abs);
 	      exp->X_op = O_constant;
@@ -2594,7 +2594,7 @@ i386_operand (operand_string)
       if (i.base_reg && i.index_reg &&
 	  !(i.base_reg->reg_type & i.index_reg->reg_type & Reg))
 	{
-	  as_bad ("register size mismatch in (base,index,scale) expression");
+	  as_bad (_("register size mismatch in (base,index,scale) expression"));
 	  return 0;
 	}
       /*
@@ -2610,18 +2610,19 @@ i386_operand (operand_string)
       if ((i.base_reg && (i.base_reg->reg_type & Reg32) == 0) ||
 	  (i.index_reg && (i.index_reg->reg_type & Reg32) == 0))
 	{
-	  as_bad ("base/index register must be 32 bit register");
+	  as_bad (_("base/index register must be 32 bit register"));
 	  return 0;
 	}
       if (i.index_reg && i.index_reg == esp)
 	{
-	  as_bad ("`%%s' may not be used as an index register", esp->reg_name);
+	  as_bad (_("`%%s' may not be used as an index register"),
+		  esp->reg_name);
 	  return 0;
 	}
     }
   else
     {				/* it's not a memory operand; argh! */
-      as_bad ("invalid char %s begining %s operand `%s'",
+      as_bad (_("invalid char %s begining %s operand `%s'"),
 	      output_invalid (*op_string), ordinal_names[this_operand],
 	      op_string);
       return 0;
@@ -3007,7 +3008,7 @@ md_atof (type, litP, sizeP)
 
     default:
       *sizeP = 0;
-      return "Bad call to md_atof ()";
+      return _("Bad call to md_atof ()");
     }
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
@@ -3104,8 +3105,8 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf (stream, "\
--m			do long jump\n");
+  fprintf (stream, _("\
+-m			do long jump\n"));
 }
 
 #ifdef BFD_ASSEMBLER
@@ -3144,7 +3145,7 @@ md_undefined_symbol (name)
 	    if(!GOT_symbol)
 	      {
 		if(symbol_find(name)) 
-		  as_bad("GOT already in symbol table");
+		  as_bad(_("GOT already in symbol table"));
 		GOT_symbol = symbol_new (name, undefined_section, 
 					 (valueT) 0, &zero_address_frag);
 	      };
@@ -3245,8 +3246,11 @@ tc_gen_reloc (section, fixp)
 	  MAP (2, 1, BFD_RELOC_16_PCREL);
 	  MAP (4, 1, BFD_RELOC_32_PCREL);
 	default:
-	  as_bad ("Can not do %d byte %srelocation", fixp->fx_size,
-		  fixp->fx_pcrel ? "pc-relative " : "");
+	  if (fixp->fx_pcrel)
+	    as_bad (_("Can not do %d byte pc-relative relocation"),
+		    fixp->fx_size);
+	  else
+	    as_bad (_("Can not do %d byte relocation"), fixp->fx_size);
 	}
     }
 #undef MAP
@@ -3269,7 +3273,7 @@ tc_gen_reloc (section, fixp)
   if (rel->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    "Cannot represent relocation type %s",
+		    _("Cannot represent relocation type %s"),
 		    bfd_get_reloc_code_name (code));
       /* Set howto to a garbage value so that we can keep going.  */
       rel->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);

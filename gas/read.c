@@ -124,33 +124,33 @@ char lex_type[256] =
  * In: a character.
  * Out: 1 if this character ends a line.
  */
-#define _ (0)
+#define Z_ (0)
 char is_end_of_line[256] =
 {
 #ifdef CR_EOL
-  99, _, _, _, _, _, _, _, _, _, 99, _, _, 99, _, _,	/* @abcdefghijklmno */
+  99, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, 99, Z_, Z_, 99, Z_, Z_,	/* @abcdefghijklmno */
 #else
-  99, _, _, _, _, _, _, _, _, _, 99, _, _, _, _, _,	/* @abcdefghijklmno */
+  99, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, 99, Z_, Z_, Z_, Z_, Z_,	/* @abcdefghijklmno */
 #endif
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* */
 #ifdef TC_HPPA
-  _,99, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* _!"#$%&'()*+,-./ */
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* 0123456789:;<=>? */
+  Z_,99, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* _!"#$%&'()*+,-./ */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* 0123456789:;<=>? */
 #else
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-  _, _, _, _, _, _, _, _, _, _, _, 99, _, _, _, _,	/* 0123456789:;<=>? */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, 99, Z_, Z_, Z_, Z_,	/* 0123456789:;<=>? */
 #endif
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
-  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,	/* */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* */
+  Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_, Z_,	/* */
 };
-#undef _
+#undef Z_
 
 /* Functions private to this file. */
 
@@ -419,7 +419,7 @@ pop_insert (table)
     {
       errtxt = hash_insert (po_hash, pop->poc_name, (char *) pop);
       if (errtxt && (!pop_override_ok || strcmp (errtxt, "exists")))
-	as_fatal ("error constructing %s pseudo-op table: %s", pop_table_name,
+	as_fatal (_("error constructing %s pseudo-op table: %s"), pop_table_name,
 		  errtxt);
     }
 }
@@ -712,7 +712,7 @@ read_a_source_file (name)
 		    char *s2 = s;
 		    while (*s2)
 		      {
-			if (isupper (*s2))
+			if (isupper ((unsigned char) *s2))
 			  *s2 = tolower (*s2);
 			s2++;
 		      }
@@ -779,7 +779,7 @@ read_a_source_file (name)
 		      /* Print the error msg now, while we still can */
 		      if (pop == NULL)
 			{
-			  as_bad ("Unknown pseudo-op:  `%s'", s);
+			  as_bad (_("Unknown pseudo-op:  `%s'"), s);
 			  *input_line_pointer = c;
 			  s_ignore (0);
 			  continue;
@@ -897,7 +897,7 @@ read_a_source_file (name)
 	    continue;
 
 	  if ((LOCAL_LABELS_DOLLAR || LOCAL_LABELS_FB)
-	      && isdigit (c))
+	      && isdigit ((unsigned char) c))
 	    {
 	      /* local label  ("4:") */
 	      char *backup = input_line_pointer;
@@ -906,7 +906,7 @@ read_a_source_file (name)
 
 	      temp = c - '0';
 
-	      while (isdigit (*input_line_pointer))
+	      while (isdigit ((unsigned char) *input_line_pointer))
 		{
 		  temp = (temp * 10) + *input_line_pointer - '0';
 		  ++input_line_pointer;
@@ -920,7 +920,7 @@ read_a_source_file (name)
 
 		  if (dollar_label_defined (temp))
 		    {
-		      as_fatal ("label \"%d$\" redefined", temp);
+		      as_fatal (_("label \"%d$\" redefined"), temp);
 		    }
 
 		  define_dollar_label (temp);
@@ -1137,7 +1137,7 @@ void
 s_abort (ignore)
      int ignore;
 {
-  as_fatal (".abort detected.  Abandoning ship.");
+  as_fatal (_(".abort detected.  Abandoning ship."));
 }
 
 /* Guts of .align directive.  N is the power of two to which to align.
@@ -1242,7 +1242,7 @@ s_align (arg, bytes_p)
 	  for (i = 0; (align & 1) == 0; align >>= 1, ++i)
 	    ;
 	  if (align != 1)
-	    as_bad ("Alignment not a power of 2");
+	    as_bad (_("Alignment not a power of 2"));
 	  align = i;
 	}
     }
@@ -1250,7 +1250,7 @@ s_align (arg, bytes_p)
   if (align > 15)
     {
       align = 15;
-      as_bad ("Alignment too large: %u assumed", align);
+      as_bad (_("Alignment too large: %u assumed"), align);
     }
 
   if (*input_line_pointer != ',')
@@ -1282,7 +1282,7 @@ s_align (arg, bytes_p)
   if (! fill_p)
     {
       if (arg < 0)
-	as_warn ("expected fill pattern missing");
+	as_warn (_("expected fill pattern missing"));
       do_align (align, (char *) NULL, 0, max);
     }
   else
@@ -1304,7 +1304,7 @@ s_align (arg, bytes_p)
 	{
 	  char ab[16];
 
-	  if (fill_len > sizeof ab)
+	  if ((size_t) fill_len > sizeof ab)
 	    abort ();
 	  md_number_to_chars (ab, fill, fill_len);
 	  do_align (align, ab, fill_len, max);
@@ -1360,7 +1360,7 @@ s_comm (ignore)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad ("Expected comma after symbol-name: rest of line ignored.");
+      as_bad (_("Expected comma after symbol-name: rest of line ignored."));
       if (flag_mri)
 	mri_comment_end (stop, stopc);
       ignore_rest_of_line ();
@@ -1369,7 +1369,7 @@ s_comm (ignore)
   input_line_pointer++;		/* skip ',' */
   if ((temp = get_absolute_expression ()) < 0)
     {
-      as_warn (".COMMon length (%ld.) <0! Ignored.", (long) temp);
+      as_warn (_(".COMMon length (%ld.) <0! Ignored."), (long) temp);
       if (flag_mri)
 	mri_comment_end (stop, stopc);
       ignore_rest_of_line ();
@@ -1380,7 +1380,7 @@ s_comm (ignore)
   *p = c;
   if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
-      as_bad ("Ignoring attempt to re-define symbol `%s'.",
+      as_bad (_("Ignoring attempt to re-define symbol `%s'."),
 	      S_GET_NAME (symbolP));
       if (flag_mri)
 	mri_comment_end (stop, stopc);
@@ -1390,7 +1390,7 @@ s_comm (ignore)
   if (S_GET_VALUE (symbolP))
     {
       if (S_GET_VALUE (symbolP) != (valueT) temp)
-	as_bad ("Length of .comm \"%s\" is already %ld. Not changed to %ld.",
+	as_bad (_("Length of .comm \"%s\" is already %ld. Not changed to %ld."),
 		S_GET_NAME (symbolP),
 		(long) S_GET_VALUE (symbolP),
 		(long) temp);
@@ -1479,7 +1479,7 @@ s_mri_common (small)
 
   if (S_IS_DEFINED (sym) && ! S_IS_COMMON (sym))
     {
-      as_bad ("attempt to re-define symbol `%s'", S_GET_NAME (sym));
+      as_bad (_("attempt to re-define symbol `%s'"), S_GET_NAME (sym));
       mri_comment_end (stop, stopc);
       ignore_rest_of_line ();
       return;
@@ -1601,7 +1601,7 @@ s_app_line (ignore)
   if (l < 0)
     /* Some of the back ends can't deal with non-positive line numbers.
        Besides, it's silly.  */
-    as_warn ("Line numbers must be positive; line number %d rejected.", l+1);
+    as_warn (_("Line numbers must be positive; line number %d rejected."), l+1);
   else
     {
       new_logical_line ((char *) NULL, l);
@@ -1628,7 +1628,7 @@ s_end (ignore)
       if (! is_end_of_line[(unsigned char) *input_line_pointer]
 	  && *input_line_pointer != '*'
 	  && *input_line_pointer != '!')
-	as_warn ("start address not supported");
+	as_warn (_("start address not supported"));
     }
 }
 
@@ -1638,7 +1638,7 @@ void
 s_err (ignore)
      int ignore;
 {
-  as_bad (".err encountered");
+  as_bad (_(".err encountered"));
   demand_empty_rest_of_line ();
 }
 
@@ -1657,9 +1657,9 @@ s_fail (ignore)
 
   temp = get_absolute_expression ();
   if (temp >= 500)
-    as_warn (".fail %ld encountered", (long) temp);
+    as_warn (_(".fail %ld encountered"), (long) temp);
   else
-    as_bad (".fail %ld encountered", (long) temp);
+    as_bad (_(".fail %ld encountered"), (long) temp);
 
   if (flag_mri)
     mri_comment_end (stop, stopc);
@@ -1671,61 +1671,91 @@ void
 s_fill (ignore)
      int ignore;
 {
-  long temp_repeat = 0;
-  long temp_size = 1;
-  register long temp_fill = 0;
+  expressionS rep_exp;
+  long size = 1;
+  register long fill = 0;
   char *p;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
 #endif
 
-  temp_repeat = get_absolute_expression ();
+  get_known_segmented_expression (&rep_exp);
   if (*input_line_pointer == ',')
     {
       input_line_pointer++;
-      temp_size = get_absolute_expression ();
+      size = get_absolute_expression ();
       if (*input_line_pointer == ',')
 	{
 	  input_line_pointer++;
-	  temp_fill = get_absolute_expression ();
+	  fill = get_absolute_expression ();
 	}
     }
+
   /* This is to be compatible with BSD 4.2 AS, not for any rational reason.  */
 #define BSD_FILL_SIZE_CROCK_8 (8)
-  if (temp_size > BSD_FILL_SIZE_CROCK_8)
+  if (size > BSD_FILL_SIZE_CROCK_8)
     {
-      as_warn (".fill size clamped to %d.", BSD_FILL_SIZE_CROCK_8);
-      temp_size = BSD_FILL_SIZE_CROCK_8;
+      as_warn (_(".fill size clamped to %d."), BSD_FILL_SIZE_CROCK_8);
+      size = BSD_FILL_SIZE_CROCK_8;
     }
-  if (temp_size < 0)
+  if (size < 0)
     {
-      as_warn ("Size negative: .fill ignored.");
-      temp_size = 0;
+      as_warn (_("Size negative: .fill ignored."));
+      size = 0;
     }
-  else if (temp_repeat <= 0)
+  else if (rep_exp.X_op == O_constant && rep_exp.X_add_number <= 0)
     {
-      if (temp_repeat < 0)
-	as_warn ("Repeat < 0, .fill ignored");
-      temp_size = 0;
+      if (rep_exp.X_add_number < 0)
+	as_warn (_("Repeat < 0, .fill ignored"));
+      size = 0;
     }
 
-  if (temp_size && !need_pass_2)
+  if (size && !need_pass_2)
     {
-      p = frag_var (rs_fill, (int) temp_size, (int) temp_size,
-		    (relax_substateT) 0, (symbolS *) 0, (offsetT) temp_repeat,
-		    (char *) 0);
-      memset (p, 0, (unsigned int) temp_size);
+      if (rep_exp.X_op == O_constant)
+	{
+	  p = frag_var (rs_fill, (int) size, (int) size,
+			(relax_substateT) 0, (symbolS *) 0,
+			(offsetT) rep_exp.X_add_number,
+			(char *) 0);
+	}
+      else
+	{
+	  /* We don't have a constant repeat count, so we can't use
+	     rs_fill.  We can get the same results out of rs_space,
+	     but its argument is in bytes, so we must multiply the
+	     repeat count by size.  */
+
+	  symbolS *rep_sym;
+	  rep_sym = make_expr_symbol (&rep_exp);
+	  if (size != 1)
+	    {
+	      expressionS size_exp;
+	      size_exp.X_op = O_constant;
+	      size_exp.X_add_number = size;
+
+	      rep_exp.X_op = O_multiply;
+	      rep_exp.X_add_symbol = rep_sym;
+	      rep_exp.X_op_symbol = make_expr_symbol (&size_exp);
+	      rep_exp.X_add_number = 0;
+	      rep_sym = make_expr_symbol (&rep_exp);
+	    }
+
+	  p = frag_var (rs_space, (int) size, (int) size,
+			(relax_substateT) 0, rep_sym, (offsetT) 0, (char *) 0);
+	}
+      memset (p, 0, (unsigned int) size);
       /* The magic number BSD_FILL_SIZE_CROCK_4 is from BSD 4.2 VAX
        * flavoured AS.  The following bizzare behaviour is to be
        * compatible with above.  I guess they tried to take up to 8
        * bytes from a 4-byte expression and they forgot to sign
        * extend. Un*x Sux. */
 #define BSD_FILL_SIZE_CROCK_4 (4)
-      md_number_to_chars (p, (valueT) temp_fill,
-			  (temp_size > BSD_FILL_SIZE_CROCK_4
+      md_number_to_chars (p, (valueT) fill,
+			  (size > BSD_FILL_SIZE_CROCK_4
 			   ? BSD_FILL_SIZE_CROCK_4
-			   : (int) temp_size));
+			   : (int) size));
       /* Note: .fill (),0 emits no frag (since we are asked to .fill 0 bytes)
        * but emits no error message because it seems a legal thing to do.
        * It is a degenerate case of .fill but could be emitted by a compiler.
@@ -1833,7 +1863,7 @@ s_linkonce (ignore)
       else if (strcasecmp (s, "same_contents") == 0)
 	type = LINKONCE_SAME_CONTENTS;
       else
-	as_warn ("unrecognized .linkonce type `%s'", s);
+	as_warn (_("unrecognized .linkonce type `%s'"), s);
 
       *input_line_pointer = c;
     }
@@ -1846,7 +1876,7 @@ s_linkonce (ignore)
     flagword flags;
 
     if ((bfd_applicable_section_flags (stdoutput) & SEC_LINK_ONCE) == 0)
-      as_warn (".linkonce is not supported for this object file format");
+      as_warn (_(".linkonce is not supported for this object file format"));
 
     flags = bfd_get_section_flags (stdoutput, now_seg);
     flags |= SEC_LINK_ONCE;
@@ -1868,11 +1898,11 @@ s_linkonce (ignore)
 	break;
       }
     if (! bfd_set_section_flags (stdoutput, now_seg, flags))
-      as_bad ("bfd_set_section_flags: %s",
+      as_bad (_("bfd_set_section_flags: %s"),
 	      bfd_errmsg (bfd_get_error ()));
   }
 #else /* ! defined (BFD_ASSEMBLER) */
-  as_warn (".linkonce is not supported for this object file format");
+  as_warn (_(".linkonce is not supported for this object file format"));
 #endif /* ! defined (BFD_ASSEMBLER) */
 #endif /* ! defined (obj_handle_link_once) */
 
@@ -1915,13 +1945,13 @@ s_lcomm_internal (needs_align, bytes_p)
 
   if (*input_line_pointer == '\n')
     {
-      as_bad ("Missing size expression");
+      as_bad (_("Missing size expression"));
       return;
     }
 
   if ((temp = get_absolute_expression ()) < 0)
     {
-      as_warn ("BSS length (%d.) <0! Ignored.", temp);
+      as_warn (_("BSS length (%d.) <0! Ignored."), temp);
       ignore_rest_of_line ();
       return;
     }
@@ -1937,7 +1967,7 @@ s_lcomm_internal (needs_align, bytes_p)
 	  seg_info (bss_seg)->bss = 1;
 #ifdef BFD_ASSEMBLER
 	  if (! bfd_set_section_flags (stdoutput, bss_seg, SEC_ALLOC))
-	    as_warn ("error setting flags for \".sbss\": %s",
+	    as_warn (_("error setting flags for \".sbss\": %s"),
 		     bfd_errmsg (bfd_get_error ()));
 #endif
 	}
@@ -1969,7 +1999,7 @@ s_lcomm_internal (needs_align, bytes_p)
       SKIP_WHITESPACE ();
       if (*input_line_pointer != ',')
 	{
-	  as_bad ("Expected comma after size");
+	  as_bad (_("Expected comma after size"));
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -1977,7 +2007,7 @@ s_lcomm_internal (needs_align, bytes_p)
       SKIP_WHITESPACE ();
       if (*input_line_pointer == '\n')
 	{
-	  as_bad ("Missing alignment");
+	  as_bad (_("Missing alignment"));
 	  return;
 	}
       align = get_absolute_expression ();
@@ -1991,19 +2021,19 @@ s_lcomm_internal (needs_align, bytes_p)
 	      for (i = 0; (align & 1) == 0; align >>= 1, ++i)
 		;
 	      if (align != 1)
-		as_bad ("Alignment not a power of 2");
+		as_bad (_("Alignment not a power of 2"));
 	      align = i;
 	    }
 	}
       if (align > max_alignment)
 	{
 	  align = max_alignment;
-	  as_warn ("Alignment too large: %d. assumed.", align);
+	  as_warn (_("Alignment too large: %d. assumed."), align);
 	}
       else if (align < 0)
 	{
 	  align = 0;
-	  as_warn ("Alignment negative. 0 assumed.");
+	  as_warn (_("Alignment negative. 0 assumed."));
 	}
       record_alignment (bss_seg, align);
     }				/* if needs align */
@@ -2064,7 +2094,7 @@ s_lcomm_internal (needs_align, bytes_p)
 #endif
     }
   else
-    as_bad ("Ignoring attempt to re-define symbol `%s'.",
+    as_bad (_("Ignoring attempt to re-define symbol `%s'."),
 	    S_GET_NAME (symbolP));
 
   subseg_set (current_seg, current_subseg);
@@ -2104,7 +2134,7 @@ s_lsym (ignore)
   if (*input_line_pointer != ',')
     {
       *p = 0;
-      as_bad ("Expected comma after name \"%s\"", name);
+      as_bad (_("Expected comma after name \"%s\""), name);
       *p = c;
       ignore_rest_of_line ();
       return;
@@ -2114,7 +2144,7 @@ s_lsym (ignore)
   if (exp.X_op != O_constant
       && exp.X_op != O_register)
     {
-      as_bad ("bad expression");
+      as_bad (_("bad expression"));
       ignore_rest_of_line ();
       return;
     }
@@ -2141,7 +2171,7 @@ s_lsym (ignore)
     }
   else
     {
-      as_bad ("Symbol %s already defined", name);
+      as_bad (_("Symbol %s already defined"), name);
     }
   *p = c;
   demand_empty_rest_of_line ();
@@ -2249,7 +2279,7 @@ s_macro (ignore)
 	  || (! flag_m68k_mri
 	      && *name == '.'
 	      && hash_find (po_hash, name + 1) != NULL))
-	as_warn ("attempt to redefine pseudo-op `%s' ignored",
+	as_warn (_("attempt to redefine pseudo-op `%s' ignored"),
 		 name);
     }
 
@@ -2307,16 +2337,16 @@ do_org (segment, exp, fill)
      int fill;
 {
   if (segment != now_seg && segment != absolute_section)
-    as_bad ("invalid segment \"%s\"; segment \"%s\" assumed",
+    as_bad (_("invalid segment \"%s\"; segment \"%s\" assumed"),
 	    segment_name (segment), segment_name (now_seg));
 
   if (now_seg == absolute_section)
     {
       if (fill != 0)
-	as_warn ("ignoring fill value in absolute section");
+	as_warn (_("ignoring fill value in absolute section"));
       if (exp->X_op != O_constant)
 	{
-	  as_bad ("only constant offsets supported in absolute section");
+	  as_bad (_("only constant offsets supported in absolute section"));
 	  exp->X_add_number = 0;
 	}
       abs_section_offset = exp->X_add_number;
@@ -2344,7 +2374,7 @@ s_org (ignore)
      support that--use a linker script instead.  */
   if (flag_m68k_mri)
     {
-      as_bad ("MRI style ORG pseudo-op not supported");
+      as_bad (_("MRI style ORG pseudo-op not supported"));
       ignore_rest_of_line ();
       return;
     }
@@ -2432,7 +2462,7 @@ s_mri_sect (type)
       if (c == 'C' || c == 'D' || c == 'M' || c == 'R')
 	*type = c;
       else
-	as_bad ("unrecognized section type");
+	as_bad (_("unrecognized section type"));
       ++input_line_pointer;
 
 #ifdef BFD_ASSEMBLER
@@ -2449,7 +2479,7 @@ s_mri_sect (type)
 	if (flags != SEC_NO_FLAGS)
 	  {
 	    if (! bfd_set_section_flags (stdoutput, seg, flags))
-	      as_warn ("error setting flags for \"%s\": %s",
+	      as_warn (_("error setting flags for \"%s\": %s"),
 		       bfd_section_name (stdoutput, seg),
 		       bfd_errmsg (bfd_get_error ()));
 	  }
@@ -2500,7 +2530,7 @@ s_mri_sect (type)
       else if (strcasecmp (sectype, "romdata") == 0)
 	*type = 'R';
       else
-	as_warn ("unrecognized section type `%s'", sectype);
+	as_warn (_("unrecognized section type `%s'"), sectype);
       *input_line_pointer = c;
     }
 
@@ -2514,7 +2544,7 @@ s_mri_sect (type)
       c = get_symbol_end ();
       if (strcasecmp (seccmd, "absolute") == 0)
 	{
-	  as_bad ("absolute sections are not supported");
+	  as_bad (_("absolute sections are not supported"));
 	  *input_line_pointer = c;
 	  ignore_rest_of_line ();
 	  return;
@@ -2529,7 +2559,7 @@ s_mri_sect (type)
 	}
       else
 	{
-	  as_warn ("unrecognized section command `%s'", seccmd);
+	  as_warn (_("unrecognized section command `%s'"), seccmd);
 	  *input_line_pointer = c;
 	}
     }
@@ -2539,7 +2569,8 @@ s_mri_sect (type)
 #else /* ! TC_I960 */
   /* The MRI assembler seems to use different forms of .sect for
      different targets.  */
-  abort ();
+  as_bad ("MRI mode not supported for this target");
+  ignore_rest_of_line ();
 #endif /* ! TC_I960 */
 #endif /* ! TC_M68K */
 }
@@ -2603,7 +2634,7 @@ s_rept (ignore)
   sb_new (&one);
   if (! buffer_and_nest ("REPT", "ENDR", &one, get_line_sb))
     {
-      as_bad ("rept without endr");
+      as_bad (_("rept without endr"));
       return;
     }
 
@@ -2645,7 +2676,7 @@ s_set (equiv)
   if (*input_line_pointer != ',')
     {
       *end_name = 0;
-      as_bad ("Expected comma after name \"%s\"", name);
+      as_bad (_("Expected comma after name \"%s\""), name);
       *end_name = delim;
       ignore_rest_of_line ();
       return;
@@ -2672,7 +2703,24 @@ s_set (equiv)
   if ((symbolP = symbol_find (name)) == NULL
       && (symbolP = md_undefined_symbol (name)) == NULL)
     {
-      symbolP = symbol_new (name, undefined_section, 0, &zero_address_frag);
+#ifndef NO_LISTING
+      /* When doing symbol listings, play games with dummy fragments living
+	 outside the normal fragment chain to record the file and line info
+         for this symbol.  */
+      if (listing & LISTING_SYMBOLS)
+	{
+	  extern struct list_info_struct *listing_tail;
+	  fragS *dummy_frag = xmalloc (sizeof(fragS));
+	  memset (dummy_frag, 0, sizeof(fragS));
+	  dummy_frag->fr_type = rs_fill;
+	  dummy_frag->line = listing_tail;
+	  symbolP = symbol_new (name, undefined_section, 0, dummy_frag);
+	  dummy_frag->fr_symbol = symbolP;
+	}
+      else
+#endif
+        symbolP = symbol_new (name, undefined_section, 0, &zero_address_frag);
+			    
 #ifdef OBJ_COFF
       /* "set" symbols are local unless otherwise specified. */
       SF_SET_LOCAL (symbolP);
@@ -2687,7 +2735,7 @@ s_set (equiv)
   if (equiv
       && S_IS_DEFINED (symbolP)
       && S_GET_SEGMENT (symbolP) != reg_section)
-    as_bad ("symbol `%s' already defined", S_GET_NAME (symbolP));
+    as_bad (_("symbol `%s' already defined"), S_GET_NAME (symbolP));
 
   pseudo_set (symbolP);
   demand_empty_rest_of_line ();
@@ -2770,7 +2818,7 @@ s_space (mult)
       || (mult != 0 && mult != 1 && val.X_add_number != 0))
     {
       if (exp.X_op != O_constant)
-	as_bad ("Unsupported variable size or fill value");
+	as_bad (_("Unsupported variable size or fill value"));
       else
 	{
 	  offsetT i;
@@ -2794,9 +2842,10 @@ s_space (mult)
 	  bytes = repeat;
 	  if (repeat <= 0)
 	    {
-	      if (! flag_mri || repeat < 0)
-		as_warn (".space repeat count is %s, ignored",
-			 repeat ? "negative" : "zero");
+	      if (! flag_mri)
+		as_warn (_(".space repeat count is zero, ignored"));
+	      else if (repeat < 0)
+		as_warn (_(".space repeat count is negative, ignored"));
 	      goto getout;
 	    }
 
@@ -2825,12 +2874,12 @@ s_space (mult)
 	{
 	  if (now_seg == absolute_section)
 	    {
-	      as_bad ("space allocation too complex in absolute section");
+	      as_bad (_("space allocation too complex in absolute section"));
 	      subseg_set (text_section, 0);
 	    }
 	  if (mri_common_symbol != NULL)
 	    {
-	      as_bad ("space allocation too complex in common section");
+	      as_bad (_("space allocation too complex in common section"));
 	      mri_common_symbol = NULL;
 	    }
 	  if (!need_pass_2)
@@ -2878,7 +2927,7 @@ s_float_space (float_type)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad ("missing value");
+      as_bad (_("missing value"));
       if (flag_mri)
 	mri_comment_end (stop, stopc);
       ignore_rest_of_line ();
@@ -2891,7 +2940,8 @@ s_float_space (float_type)
 
   /* Skip any 0{letter} that may be present.  Don't even check if the
    * letter is legal.  */
-  if (input_line_pointer[0] == '0' && isalpha (input_line_pointer[1]))
+  if (input_line_pointer[0] == '0'
+      && isalpha ((unsigned char) input_line_pointer[1]))
     input_line_pointer += 2;
 
   /* Accept :xxxx, where the x's are hex digits, for a floating point
@@ -2916,7 +2966,7 @@ s_float_space (float_type)
       know (flen > 0);
       if (err)
 	{
-	  as_bad ("Bad floating literal: %s", err);
+	  as_bad (_("Bad floating literal: %s"), err);
 	  if (flag_mri)
 	    mri_comment_end (stop, stopc);
 	  ignore_rest_of_line ();
@@ -2991,11 +3041,11 @@ ignore_rest_of_line ()		/* For suspect lines: gives warning. */
 {
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      if (isprint (*input_line_pointer))
-	as_bad ("Rest of line ignored. First ignored character is `%c'.",
+      if (isprint ((unsigned char) *input_line_pointer))
+	as_bad (_("Rest of line ignored. First ignored character is `%c'."),
 		*input_line_pointer);
       else
-	as_bad ("Rest of line ignored. First ignored character valued 0x%x.",
+	as_bad (_("Rest of line ignored. First ignored character valued 0x%x."),
 		*input_line_pointer);
       while (input_line_pointer < buffer_limit
 	     && !is_end_of_line[(unsigned char) *input_line_pointer])
@@ -3034,12 +3084,16 @@ pseudo_set (symbolP)
   (void) expression (&exp);
 
   if (exp.X_op == O_illegal)
-    as_bad ("illegal expression; zero assumed");
+    as_bad (_("illegal expression; zero assumed"));
   else if (exp.X_op == O_absent)
-    as_bad ("missing expression; zero assumed");
+    as_bad (_("missing expression; zero assumed"));
   else if (exp.X_op == O_big)
-    as_bad ("%s number invalid; zero assumed",
-	    exp.X_add_number > 0 ? "bignum" : "floating point");
+    {
+      if (exp.X_add_number > 0)
+	as_bad (_("bignum invalid; zero assumed"));
+      else
+	as_bad (_("floating point number invalid; zero assumed"));
+    }
   else if (exp.X_op == O_subtract
 	   && (S_GET_SEGMENT (exp.X_add_symbol)
 	       == S_GET_SEGMENT (exp.X_op_symbol))
@@ -3067,7 +3121,8 @@ pseudo_set (symbolP)
 	S_CLEAR_EXTERNAL (symbolP);
 #endif /* OBJ_AOUT or OBJ_BOUT */
       S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
-      symbolP->sy_frag = &zero_address_frag;
+      if (exp.X_op != O_constant)
+        symbolP->sy_frag = &zero_address_frag;
       break;
 
     case O_register:
@@ -3197,7 +3252,7 @@ cons_worker (nbytes, rva)
 	  if (exp.X_op == O_symbol)
 	    exp.X_op = O_symbol_rva;
 	  else
-	    as_fatal ("rva without symbol");
+	    as_fatal (_("rva without symbol"));
 	}
       emit_expr (&exp, (unsigned int) nbytes);
       ++c;
@@ -3232,7 +3287,6 @@ s_rva (size)
 {
   cons_worker (size, 1);
 }
-
 
 /* Put the contents of expression EXP into the object file using
    NBYTES bytes.  If need_pass_2 is 1, this does nothing.  */
@@ -3314,13 +3368,16 @@ emit_expr (exp, nbytes)
 #endif
 #endif
 
+  if (check_eh_frame (exp, &nbytes))
+    return;
+
   op = exp->X_op;
 
   /* Allow `.word 0' in the absolute section.  */
   if (now_seg == absolute_section)
     {
       if (op != O_constant || exp->X_add_number != 0)
-	as_bad ("attempt to store value in absolute section");
+	as_bad (_("attempt to store value in absolute section"));
       abs_section_offset += nbytes;
       return;
     }
@@ -3358,19 +3415,19 @@ emit_expr (exp, nbytes)
 
   if (op == O_absent || op == O_illegal)
     {
-      as_warn ("zero assumed for missing expression");
+      as_warn (_("zero assumed for missing expression"));
       exp->X_add_number = 0;
       op = O_constant;
     }
   else if (op == O_big && exp->X_add_number <= 0)
     {
-      as_bad ("floating point number invalid; zero assumed");
+      as_bad (_("floating point number invalid; zero assumed"));
       exp->X_add_number = 0;
       op = O_constant;
     }
   else if (op == O_register)
     {
-      as_warn ("register value used as expression");
+      as_warn (_("register value used as expression"));
       op = O_constant;
     }
 
@@ -3458,7 +3515,7 @@ emit_expr (exp, nbytes)
 	  && ((get & mask) != mask
 	      || (get & hibit) == 0))
 	{		/* Leading bits contain both 0s & 1s. */
-	  as_warn ("Value 0x%lx truncated to 0x%lx.",
+	  as_warn (_("Value 0x%lx truncated to 0x%lx."),
 		   (unsigned long) get, (unsigned long) use);
 	}
       /* put bytes in right order. */
@@ -3466,7 +3523,7 @@ emit_expr (exp, nbytes)
     }
   else if (op == O_big)
     {
-      int size;
+      unsigned int size;
       LITTLENUM_TYPE *nums;
 
       know (nbytes % CHARS_PER_LITTLENUM == 0);
@@ -3474,7 +3531,7 @@ emit_expr (exp, nbytes)
       size = exp->X_add_number * CHARS_PER_LITTLENUM;
       if (nbytes < size)
 	{
-	  as_warn ("Bignum truncated to %d bytes", nbytes);
+	  as_warn (_("Bignum truncated to %d bytes"), nbytes);
 	  size = nbytes;
 	}
 
@@ -3551,7 +3608,7 @@ emit_expr (exp, nbytes)
 	    r = BFD_RELOC_64;
 	    break;
 	  default:
-	    as_bad ("unsupported BFD relocation size %u", nbytes);
+	    as_bad (_("unsupported BFD relocation size %u"), nbytes);
 	    r = BFD_RELOC_32;
 	    break;
 	  }
@@ -3640,7 +3697,7 @@ parse_bitfield_cons (exp, nbytes)
 
 	  if (exp->X_op == O_absent)
 	    {
-	      as_warn ("using a bit field width of zero");
+	      as_warn (_("using a bit field width of zero"));
 	      exp->X_add_number = 0;
 	      exp->X_op = O_constant;
 	    }			/* implied zero width bitfield */
@@ -3648,7 +3705,7 @@ parse_bitfield_cons (exp, nbytes)
 	  if (exp->X_op != O_constant)
 	    {
 	      *input_line_pointer = '\0';
-	      as_bad ("field width \"%s\" too complex for a bitfield", hold);
+	      as_bad (_("field width \"%s\" too complex for a bitfield"), hold);
 	      *input_line_pointer = ':';
 	      demand_empty_rest_of_line ();
 	      return;
@@ -3656,7 +3713,7 @@ parse_bitfield_cons (exp, nbytes)
 
 	  if ((width = exp->X_add_number) > (BITS_PER_CHAR * nbytes))
 	    {
-	      as_warn ("field width %lu too big to fit in %d bytes: truncated to %d bits",
+	      as_warn (_("field width %lu too big to fit in %d bytes: truncated to %d bits"),
 		       width, nbytes, (BITS_PER_CHAR * nbytes));
 	      width = BITS_PER_CHAR * nbytes;
 	    }			/* too big */
@@ -3677,7 +3734,7 @@ parse_bitfield_cons (exp, nbytes)
 	      char cache = *input_line_pointer;
 
 	      *input_line_pointer = '\0';
-	      as_bad ("field value \"%s\" too complex for a bitfield", hold);
+	      as_bad (_("field value \"%s\" too complex for a bitfield"), hold);
 	      *input_line_pointer = cache;
 	      demand_empty_rest_of_line ();
 	      return;
@@ -3719,7 +3776,7 @@ parse_mri_cons (exp, nbytes)
     TC_PARSE_CONS_EXPRESSION (exp, nbytes);
   else
     {
-      int scan = 0;
+      unsigned int scan;
       unsigned int result = 0;
 
       /* An MRI style string.  Cut into as many bytes as will fit into
@@ -3729,7 +3786,7 @@ parse_mri_cons (exp, nbytes)
 	++input_line_pointer;
       else if (*input_line_pointer == 'E')
 	{
-	  as_bad ("EBCDIC constants are not supported");
+	  as_bad (_("EBCDIC constants are not supported"));
 	  ++input_line_pointer;
 	}
 
@@ -3799,7 +3856,7 @@ parse_repeat_cons (exp, nbytes)
   if (count.X_op != O_constant
       || count.X_add_number <= 0)
     {
-      as_warn ("Unresolvable or nonpositive repeat count; using 1");
+      as_warn (_("Unresolvable or nonpositive repeat count; using 1"));
       return;
     }
 
@@ -3850,7 +3907,7 @@ hex_float (float_type, bytes)
       break;
 
     default:
-      as_bad ("Unknown floating type type '%c'", float_type);
+      as_bad (_("Unknown floating type type '%c'"), float_type);
       return -1;
     }
 
@@ -3872,7 +3929,7 @@ hex_float (float_type, bytes)
 
       if (i >= length)
 	{
-	  as_warn ("Floating point constant too large");
+	  as_warn (_("Floating point constant too large"));
 	  return -1;
 	}
       d = hex_value (*input_line_pointer) << 4;
@@ -3952,7 +4009,8 @@ float_cons (float_type)
        * has no use for such information. Lusers beware: you get
        * diagnostics if your input is ill-conditioned.
        */
-      if (input_line_pointer[0] == '0' && isalpha (input_line_pointer[1]))
+      if (input_line_pointer[0] == '0'
+	  && isalpha ((unsigned char) input_line_pointer[1]))
 	input_line_pointer += 2;
 
       /* Accept :xxxx, where the x's are hex digits, for a floating
@@ -3974,7 +4032,7 @@ float_cons (float_type)
 	  know (length > 0);
 	  if (err)
 	    {
-	      as_bad ("Bad floating literal: %s", err);
+	      as_bad (_("Bad floating literal: %s"), err);
 	      ignore_rest_of_line ();
 	      return;
 	    }
@@ -3996,7 +4054,7 @@ float_cons (float_type)
 	      if (count_exp.X_op != O_constant
 		  || count_exp.X_add_number <= 0)
 		{
-		  as_warn ("unresolvable or nonpositive repeat count; using 1");
+		  as_warn (_("unresolvable or nonpositive repeat count; using 1"));
 		}
 	      else
 		count = count_exp.X_add_number;
@@ -4146,7 +4204,7 @@ output_big_sleb128 (p, bignum, size)
      int size;
 {
   char *orig = p;
-  valueT val;
+  valueT val = 0;
   int loaded = 0;
   unsigned byte;
 
@@ -4192,7 +4250,7 @@ output_big_uleb128 (p, bignum, size)
      int size;
 {
   char *orig = p;
-  valueT val;
+  valueT val = 0;
   int loaded = 0;
   unsigned byte;
 
@@ -4251,19 +4309,19 @@ emit_leb128_expr(exp, sign)
 
   if (op == O_absent || op == O_illegal)
     {
-      as_warn ("zero assumed for missing expression");
+      as_warn (_("zero assumed for missing expression"));
       exp->X_add_number = 0;
       op = O_constant;
     }
   else if (op == O_big && exp->X_add_number <= 0)
     {
-      as_bad ("floating point number invalid; zero assumed");
+      as_bad (_("floating point number invalid; zero assumed"));
       exp->X_add_number = 0;
       op = O_constant;
     }
   else if (op == O_register)
     {
-      as_warn ("register value used as expression");
+      as_warn (_("register value used as expression"));
       op = O_constant;
     }
 
@@ -4400,7 +4458,7 @@ stringer (append_zero)		/* Worker to do .ascii etc statements. */
 	  FRAG_APPEND_1_CHAR (c);
 	  if (*input_line_pointer != '>')
 	    {
-	      as_bad ("Expected <nn>");
+	      as_bad (_("Expected <nn>"));
 	    }
 	  input_line_pointer++;
 	  break;
@@ -4433,7 +4491,7 @@ next_char_of_string ()
       break;
 
     case '\n':
-      as_warn ("Unterminated string: Newline inserted.");
+      as_warn (_("Unterminated string: Newline inserted."));
       bump_line_counters ();
       break;
 
@@ -4516,7 +4574,7 @@ next_char_of_string ()
 
 	case '\n':
 	  /* To be compatible with BSD 4.2 as: give the luser a linefeed!! */
-	  as_warn ("Unterminated string: Newline inserted.");
+	  as_warn (_("Unterminated string: Newline inserted."));
 	  c = '\n';
 	  bump_line_counters ();
 	  break;
@@ -4524,7 +4582,7 @@ next_char_of_string ()
 	default:
 
 #ifdef ONLY_STANDARD_ESCAPES
-	  as_bad ("Bad escaped character in string, '?' assumed");
+	  as_bad (_("Bad escaped character in string, '?' assumed"));
 	  c = '?';
 #endif /* ONLY_STANDARD_ESCAPES */
 
@@ -4550,7 +4608,7 @@ get_segmented_expression (expP)
       || expP->X_op == O_absent
       || expP->X_op == O_big)
     {
-      as_bad ("expected address expression; zero assumed");
+      as_bad (_("expected address expression; zero assumed"));
       expP->X_op = O_constant;
       expP->X_add_number = 0;
       retval = absolute_section;
@@ -4570,10 +4628,10 @@ get_known_segmented_expression (expP)
 	 expression.  */
       if (expP->X_add_symbol != NULL
 	  && S_GET_SEGMENT (expP->X_add_symbol) != expr_section)
-	as_warn ("symbol \"%s\" undefined; zero assumed",
+	as_warn (_("symbol \"%s\" undefined; zero assumed"),
 		 S_GET_NAME (expP->X_add_symbol));
       else
-	as_warn ("some symbol undefined; zero assumed");
+	as_warn (_("some symbol undefined; zero assumed"));
       retval = absolute_section;
       expP->X_op = O_constant;
       expP->X_add_number = 0;
@@ -4591,7 +4649,7 @@ get_absolute_expression ()
   if (exp.X_op != O_constant)
     {
       if (exp.X_op != O_absent)
-	as_bad ("bad or irreducible absolute expression; zero assumed");
+	as_bad (_("bad or irreducible absolute expression; zero assumed"));
       exp.X_add_number = 0;
     }
   return exp.X_add_number;
@@ -4629,7 +4687,7 @@ demand_copy_C_string (len_pointer)
 	      s = 0;
 	      len = 1;
 	      *len_pointer = 0;
-	      as_bad ("This string may not contain \'\\0\'");
+	      as_bad (_("This string may not contain \'\\0\'"));
 	    }
 	}
     }
@@ -4668,7 +4726,7 @@ demand_copy_string (lenP)
     }
   else
     {
-      as_warn ("Missing string");
+      as_warn (_("Missing string"));
       retval = NULL;
       ignore_rest_of_line ();
     }
@@ -4698,7 +4756,7 @@ equals (sym_name, reassign)
      int reassign;
 {
   register symbolS *symbolP;	/* symbol we are working with */
-  char *stop;
+  char *stop = NULL;
   char stopc;
 
   input_line_pointer++;
@@ -4728,7 +4786,7 @@ equals (sym_name, reassign)
       if (! reassign
 	  && S_IS_DEFINED (symbolP)
 	  && S_GET_SEGMENT (symbolP) != reg_section)
-	as_bad ("symbol `%s' already defined", S_GET_NAME (symbolP));
+	as_bad (_("symbol `%s' already defined"), S_GET_NAME (symbolP));
       pseudo_set (symbolP);
     }
 

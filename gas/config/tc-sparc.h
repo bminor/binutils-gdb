@@ -1,5 +1,5 @@
 /* tc-sparc.h - Macros and type defines for the sparc.
-   Copyright (C) 1989, 90-96, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90-96, 97, 1998 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -35,19 +35,23 @@ struct frag;
 extern const char *sparc_target_format PARAMS ((void));
 #define TARGET_FORMAT sparc_target_format ()
 
+#if 0
 #ifdef TE_SPARCAOUT
 /* Bi-endian support may eventually be unconditional, but until things are
    working well it's only provided for targets that need it.  */
 #define SPARC_BIENDIAN
 #endif
+#endif
+/* Make it unconditional and check if -EL is valid after option parsing */
+#define SPARC_BIENDIAN
 
 #define WORKING_DOT_WORD
 
-#define md_convert_frag(b,s,f)		{as_fatal ("sparc convert_frag\n");}
-#define md_create_long_jump(p,f,t,fr,s)	as_fatal("sparc_create_long_jump")
-#define md_create_short_jump(p,f,t,fr,s) as_fatal("sparc_create_short_jump")
+#define md_convert_frag(b,s,f)		{as_fatal (_("sparc convert_frag\n"));}
+#define md_create_long_jump(p,f,t,fr,s)	as_fatal(_("sparc_create_long_jump"))
+#define md_create_short_jump(p,f,t,fr,s) as_fatal(_("sparc_create_short_jump"))
 #define md_estimate_size_before_relax(f,s) \
-			(as_fatal("estimate_size_before_relax called"),1)
+			(as_fatal(_("estimate_size_before_relax called")),1)
 
 #define LISTING_HEADER "SPARC GAS "
 

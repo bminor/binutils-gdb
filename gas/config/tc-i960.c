@@ -1,6 +1,6 @@
-/* to sanitize : grep -v XL */
 /* tc-i960.c - All the i80960-specific stuff
-   Copyright (C) 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 1997
+   Free Software Foundation, Inc.
 
    This file is part of GAS.
 
@@ -15,8 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 /* See comment on md_parse_option for 80960-specific invocation options. */
 
@@ -446,8 +447,8 @@ static struct hash_control *areg_hash;	/* Abase register hash table */
 #define ARCH_KB		2
 #define ARCH_MC		3
 #define ARCH_CA		4
-#define ARCH_HX		5
-#define ARCH_XL		6
+#define ARCH_JX		5
+#define ARCH_HX		6
 int architecture = ARCH_ANY;	/* Architecture requested on invocation line */
 int iclasses_seen;		/* OR of instruction classes (I_* constants)
 				 *    for which we've actually assembled
@@ -540,7 +541,7 @@ md_begin ()
 			  (char *) &aregs[i].areg_num);
 
   if (retval)
-    as_fatal ("Hashing returned \"%s\".", retval);
+    as_fatal (_("Hashing returned \"%s\"."), retval);
 }
 
 /*****************************************************************************
@@ -574,7 +575,7 @@ md_assemble (textP)
 
   int n;			/* Offset of last character in opcode mnemonic */
 
-  static const char bp_error_msg[] = "branch prediction invalid on this opcode";
+  static const char bp_error_msg[] = _("branch prediction invalid on this opcode");
 
 
   /* Parse instruction into opcode and operands */
@@ -617,12 +618,12 @@ md_assemble (textP)
   oP = (struct i960_opcode *) hash_find (op_hash, args[0]);
   if (!oP || !targ_has_iclass (oP->iclass))
     {
-      as_bad ("invalid opcode, \"%s\".", args[0]);
+      as_bad (_("invalid opcode, \"%s\"."), args[0]);
 
     }
   else if (n_ops != oP->num_ops)
     {
-      as_bad ("improper number of operands.  expecting %d, got %d",
+      as_bad (_("improper number of operands.  expecting %d, got %d"),
 	      oP->num_ops, n_ops);
     }
   else
@@ -767,7 +768,7 @@ md_atof (type, litP, sizeP)
 
     default:
       *sizeP = 0;
-      return "Bad call to md_atof()";
+      return _("Bad call to md_atof()");
     }
 
   t = atof_ieee (input_line_pointer, type, words);
@@ -857,7 +858,7 @@ md_number_to_field (instrP, val, bfixP)
   if (((val < 0) && (sign != -1))
       || ((val > 0) && (sign != 0)))
     {
-      as_bad ("Fixup of %ld too large for field width of %d",
+      as_bad (_("Fixup of %ld too large for field width of %d"),
 	      val, numbits);
     }
   else
@@ -939,8 +940,8 @@ static const struct tabentry arch_tab[] =
   {"KC", ARCH_MC},		/* Synonym for MC */
   {"MC", ARCH_MC},
   {"CA", ARCH_CA},
+  {"JX", ARCH_JX},
   {"HX", ARCH_HX},
-  {"XL", ARCH_XL},
   {NULL, 0}
 };
 
@@ -975,7 +976,7 @@ md_parse_option (c, arg)
 
 	if (tp->flag == NULL)
 	  {
-	    as_bad ("invalid architecture %s", p);
+	    as_bad (_("invalid architecture %s"), p);
 	    return 0;
 	  }
 	else
@@ -995,16 +996,16 @@ md_show_usage (stream)
      FILE *stream;
 {
   int i;
-  fprintf (stream, "I960 options:\n");
+  fprintf (stream, _("I960 options:\n"));
   for (i = 0; arch_tab[i].flag; i++)
     fprintf (stream, "%s-A%s", i ? " | " : "", arch_tab[i].flag);
-  fprintf (stream, "\n\
+  fprintf (stream, _("\n\
 			specify variant of 960 architecture\n\
 -b			add code to collect statistics about branches taken\n\
 -link-relax		preserve individual alignment directives so linker\n\
 			can do relaxing (b.out format only)\n\
 -no-relax		don't alter compare-and-branch instructions for\n\
-			long displacements\n");
+			long displacements\n"));
 }
 
 
@@ -1126,7 +1127,7 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  as_fatal ("failed sanity check.");
+  as_fatal (_("failed sanity check."));
 }
 
 void
@@ -1136,7 +1137,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  as_fatal ("failed sanity check.");
+  as_fatal (_("failed sanity check."));
 }
 
 #endif
@@ -1205,7 +1206,7 @@ brtab_emit ()
     }
 
   subseg_set (data_section, 0);	/*      .data */
-  frag_align (2, 0);		/*      .align 2 */
+  frag_align (2, 0, 0);		/*      .align 2 */
   record_alignment (now_seg, 2);
   colon (BR_TAB_NAME);		/* BR_TAB_NAME: */
   emit (0);			/*      .word 0 #link to next table */
@@ -1222,7 +1223,6 @@ brtab_emit ()
 		      0,
 		      0,
 		      NO_RELOC);
-      fixP->fx_im_disp = 2;	/* 32-bit displacement fix */
     }
 }
 
@@ -1423,7 +1423,7 @@ get_args (p, args)
 	  /* Start of operand */
 	  if (n == 3)
 	    {
-	      as_bad ("too many operands");
+	      as_bad (_("too many operands"));
 	      return -1;
 	    }
 	  *to++ = '\0';		/* Terminate argument */
@@ -1483,7 +1483,7 @@ get_cdisp (dispP, ifmtP, instr, numbits, var_frag, callj)
   switch (e.X_op)
     {
     case O_illegal:
-      as_bad ("expression syntax error");
+      as_bad (_("expression syntax error"));
 
     case O_symbol:
       if (S_GET_SEGMENT (e.X_add_symbol) == now_seg
@@ -1521,11 +1521,11 @@ get_cdisp (dispP, ifmtP, instr, numbits, var_frag, callj)
 	    }
 	}
       else
-	as_bad ("attempt to branch into different segment");
+	as_bad (_("attempt to branch into different segment"));
       break;
 
     default:
-      as_bad ("target of %s instruction must be a label", ifmtP);
+      as_bad (_("target of %s instruction must be a label"), ifmtP);
       break;
     }
 }
@@ -1565,7 +1565,7 @@ get_ispec (textP)
 
       if (end == NULL)
 	{
-	  as_bad ("unmatched '['");
+	  as_bad (_("unmatched '['"));
 
 	}
       else
@@ -1576,7 +1576,7 @@ get_ispec (textP)
 	  *end = '\0';
 	  if (*(end + 1) != '\0')
 	    {
-	      as_bad ("garbage after index spec ignored");
+	      as_bad (_("garbage after index spec ignored"));
 	    }
 	}
     }
@@ -1643,7 +1643,7 @@ i_scan (iP, args)
 	  if (args[0] == iP)
 	    {
 	      /* We never moved: there was no opcode either! */
-	      as_bad ("missing opcode");
+	      as_bad (_("missing opcode"));
 	      return -1;
 	    }
 	  return 0;
@@ -1697,6 +1697,10 @@ mem_fmt (args, oP, callx)
 	}
     }
 
+  /* Parse the displacement; this must be done before emitting the
+     opcode, in case it is an expression using `.'.  */
+  parse_expr (instr.e, &expr);
+
   /* Output opcode */
   outP = emit (instr.opcode);
 
@@ -1705,12 +1709,11 @@ mem_fmt (args, oP, callx)
       return;
     }
 
-  /* Parse and process the displacement */
-  parse_expr (instr.e, &expr);
+  /* Process the displacement */
   switch (expr.X_op)
     {
     case O_illegal:
-      as_bad ("expression syntax error");
+      as_bad (_("expression syntax error"));
       break;
 
     case O_constant:
@@ -1761,7 +1764,6 @@ mem_fmt (args, oP, callx)
 			  &expr,
 			  0,
 			  NO_RELOC);
-      fixP->fx_im_disp = 2;	/* 32-bit displacement fix */
       /* Steve's linker relaxing hack.  Mark this 32-bit relocation as
          being in the instruction stream, specifically as part of a callx
          instruction.  */
@@ -1949,7 +1951,7 @@ parse_ldconst (arg)
       break;
 
     case O_illegal:
-      as_bad ("invalid constant");
+      as_bad (_("invalid constant"));
       return -1;
       break;
     }
@@ -2062,7 +2064,7 @@ parse_memop (memP, argP, optype)
       regnum = get_regnum (indexP);	/* Get index reg. # */
       if (!IS_RG_REG (regnum))
 	{
-	  as_bad ("invalid index register");
+	  as_bad (_("invalid index register"));
 	  return;
 	}
 
@@ -2085,7 +2087,7 @@ parse_memop (memP, argP, optype)
 	  scale = 4 << 7;
 	  break;
 	default:
-	  as_bad ("invalid scale factor");
+	  as_bad (_("invalid scale factor"));
 	  return;
 	};
 
@@ -2268,7 +2270,7 @@ parse_regop (regopP, optext, opdesc)
 	  /* global or local register */
 	  if (!REG_ALIGN (opdesc, n))
 	    {
-	      as_bad ("unaligned register");
+	      as_bad (_("unaligned register"));
 	    }
 	  regopP->n = n;
 	  regopP->mode = 0;
@@ -2291,7 +2293,7 @@ parse_regop (regopP, optext, opdesc)
 	  regopP->special = 1;
 	  if (!targ_has_sfr (regopP->n))
 	    {
-	      as_bad ("no such sfr in this architecture");
+	      as_bad (_("no such sfr in this architecture"));
 	    }
 	  return;
 	}
@@ -2329,7 +2331,7 @@ parse_regop (regopP, optext, opdesc)
 	  if (e.X_op != O_constant
 	      || (offs (e) < 0) || (offs (e) > 31))
 	    {
-	      as_bad ("illegal literal");
+	      as_bad (_("illegal literal"));
 	      offs (e) = 0;
 	    }
 	  regopP->n = offs (e);
@@ -2562,7 +2564,7 @@ reloc_callj (fixP)
   else if (TC_S_IS_CALLNAME (fixP->fx_addsy))
     {
       /* Should not happen: see block comment above */
-      as_fatal ("Trying to 'bal' to %s", S_GET_NAME (fixP->fx_addsy));
+      as_fatal (_("Trying to 'bal' to %s"), S_GET_NAME (fixP->fx_addsy));
     }
   else if (TC_S_IS_BALNAME (fixP->fx_addsy))
     {
@@ -2573,7 +2575,7 @@ reloc_callj (fixP)
     }
   else if (TC_S_IS_BADPROC (fixP->fx_addsy))
     {
-      as_bad ("Looks like a proc, but can't tell what kind.\n");
+      as_bad (_("Looks like a proc, but can't tell what kind.\n"));
     }				/* switch on proc type */
 
   /* else Symbol is neither a sysproc nor a leafproc */
@@ -2605,7 +2607,7 @@ s_leafproc (n_ops, args)
 
   if ((n_ops != 1) && (n_ops != 2))
     {
-      as_bad ("should have 1 or 2 operands");
+      as_bad (_("should have 1 or 2 operands"));
       return;
     }				/* Check number of arguments */
 
@@ -2614,7 +2616,7 @@ s_leafproc (n_ops, args)
 
   if (TC_S_IS_CALLNAME (callP))
     {
-      as_warn ("Redefining leafproc %s", S_GET_NAME (callP));
+      as_warn (_("Redefining leafproc %s"), S_GET_NAME (callP));
     }				/* is leafproc */
 
   /* If that was the only argument, use it as the 'bal' entry point.
@@ -2633,7 +2635,7 @@ s_leafproc (n_ops, args)
       balP = symbol_find_or_make (args[2]);
       if (TC_S_IS_CALLNAME (balP))
 	{
-	  as_warn ("Redefining leafproc %s", S_GET_NAME (balP));
+	  as_warn (_("Redefining leafproc %s"), S_GET_NAME (balP));
 	}
       TC_S_FORCE_TO_BALNAME (balP);
 
@@ -2663,7 +2665,7 @@ s_sysproc (n_ops, args)
 
   if (n_ops != 2)
     {
-      as_bad ("should have two operands");
+      as_bad (_("should have two operands"));
       return;
     }				/* bad arg count */
 
@@ -2673,7 +2675,7 @@ s_sysproc (n_ops, args)
       || (offs (exp) < 0)
       || (offs (exp) > 31))
     {
-      as_bad ("'entry_num' must be absolute number in [0,31]");
+      as_bad (_("'entry_num' must be absolute number in [0,31]"));
       return;
     }
 
@@ -2682,7 +2684,7 @@ s_sysproc (n_ops, args)
 
   if (TC_S_IS_SYSPROC (symP))
     {
-      as_warn ("Redefining entrynum for sysproc %s", S_GET_NAME (symP));
+      as_warn (_("Redefining entrynum for sysproc %s"), S_GET_NAME (symP));
     }				/* redefining */
 
   TC_S_SET_SYSPROC (symP, offs (exp));	/* encode entry number */
@@ -2732,7 +2734,7 @@ shift_ok (n)
 static void
 syntax ()
 {
-  as_bad ("syntax error");
+  as_bad (_("syntax error"));
 }				/* syntax() */
 
 
@@ -2751,7 +2753,7 @@ targ_has_sfr (n)
     case ARCH_KA:
     case ARCH_KB:
     case ARCH_MC:
-    case ARCH_XL:
+    case ARCH_JX:
       return 0;
     case ARCH_HX:
       return ((0 <= n) && (n <= 4));
@@ -2785,15 +2787,15 @@ targ_has_iclass (ic)
       return ic & (I_BASE | I_KX | I_FP | I_DEC | I_MIL);
     case ARCH_CA:
       return ic & (I_BASE | I_CX | I_CX2 | I_CASIM);
+    case ARCH_JX:
+      return ic & (I_BASE | I_CX2 | I_JX);
     case ARCH_HX:
-      return ic & (I_BASE | I_CX2 | I_HX | I_HX2);
-    case ARCH_XL:
-      return ic & (I_BASE | I_CX2 | I_HX2); /* XL */
+      return ic & (I_BASE | I_CX2 | I_JX | I_HX);
     default:
       if ((iclasses_seen & (I_KX | I_FP | I_DEC | I_MIL))
 	  && (iclasses_seen & (I_CX | I_CX2)))
 	{
-	  as_warn ("architecture of opcode conflicts with that of earlier instruction(s)");
+	  as_warn (_("architecture of opcode conflicts with that of earlier instruction(s)"));
 	  iclasses_seen &= ~ic;
 	}
       return 1;
@@ -2814,9 +2816,9 @@ s_endian (ignore)
   if (strcasecmp (name, "little") == 0)
     ;
   else if (strcasecmp (name, "big") == 0)
-    as_bad ("big endian mode is not supported");
+    as_bad (_("big endian mode is not supported"));
   else
-    as_warn ("ignoring unrecognized .endian type `%s'", name);
+    as_warn (_("ignoring unrecognized .endian type `%s'"), name);
 
   *input_line_pointer = c;
 
@@ -2851,31 +2853,15 @@ md_apply_fix (fixP, val)
   char *place = fixP->fx_where + fixP->fx_frag->fr_literal;
 
   if (!fixP->fx_bit_fixP)
-    switch (fixP->fx_im_disp)
-      {
-      case 0:
-	/* For callx, we always want to write out zero, and emit a
-	   symbolic relocation.  */
-	if (fixP->fx_bsr)
-	  val = 0;
+    {
+      /* For callx, we always want to write out zero, and emit a
+	 symbolic relocation.  */
+      if (fixP->fx_bsr)
+	val = 0;
 
-	fixP->fx_addnumber = val;
-	md_number_to_imm (place, val, fixP->fx_size, fixP);
-	break;
-      case 1:
-	md_number_to_disp (place,
-			   (fixP->fx_pcrel
-			    ? val + fixP->fx_pcrel_adjust
-			    : val),
-			   fixP->fx_size);
-	break;
-      case 2:			/* fix requested for .long .word etc */
-	md_number_to_chars (place, val, fixP->fx_size);
-	break;
-      default:
-	as_fatal ("Internal error in md_apply_fix() in file \"%s\"",
-		  __FILE__);
-      }
+      fixP->fx_addnumber = val;
+      md_number_to_imm (place, val, fixP->fx_size, fixP);
+    }
   else
     md_number_to_field (place, val, fixP->fx_bit_fixP);
 }
@@ -3005,21 +2991,23 @@ tc_headers_hook (headers)
       coff_flags |= F_I960CA;
       break;
 
+    case ARCH_JX:
+      coff_flags |= F_I960JX;
+      break;
+
     case ARCH_HX:
       coff_flags |= F_I960HX;
       break;
-
-    case ARCH_XL:
-      coff_flags |= F_I960XL;
-      break; /* XL */
 
     default:
       if (iclasses_seen == I_BASE)
 	coff_flags |= F_I960CORE;
       else if (iclasses_seen & I_CX)
 	coff_flags |= F_I960CA;
-      else if (iclasses_seen & (I_HX | I_HX2))
+      else if (iclasses_seen & I_HX)
 	coff_flags |= F_I960HX;
+      else if (iclasses_seen & I_JX)
+	coff_flags |= F_I960JX;
       else if (iclasses_seen & I_CX2)
 	coff_flags |= F_I960CA;
       else if (iclasses_seen & I_MIL)
@@ -3087,7 +3075,7 @@ tc_crawl_symbol_chain (headers)
 
       if (!S_IS_DEFINED (symbolP))
 	{
-	  as_bad ("leafproc symbol '%s' undefined", S_GET_NAME (symbolP));
+	  as_bad (_("leafproc symbol '%s' undefined"), S_GET_NAME (symbolP));
 	}			/* undefined leaf */
 
       if (TC_S_IS_CALLNAME (symbolP))
@@ -3097,7 +3085,7 @@ tc_crawl_symbol_chain (headers)
 	    {
 	      S_SET_EXTERNAL (symbolP);
 	      S_SET_EXTERNAL (balP);
-	      as_warn ("Warning: making leafproc entries %s and %s both global\n",
+	      as_warn (_("Warning: making leafproc entries %s and %s both global\n"),
 		       S_GET_NAME (symbolP), S_GET_NAME (balP));
 	    }			/* externality mismatch */
 	}			/* if callname */
@@ -3127,7 +3115,7 @@ tc_set_bal_of_call (callP, balP)
 
 #ifdef OBJ_COFF
 
-  callP->sy_symbol.ost_auxent[1].x_bal.x_balntry = (int) balP;
+  callP->sy_tc = balP;
   S_SET_NUMBER_AUXILIARY (callP, 2);
 
 #else /* ! OBJ_COFF */
@@ -3148,8 +3136,8 @@ tc_set_bal_of_call (callP, balP)
 #endif /* ! OBJ_COFF */
 }
 
-char *
-_tc_get_bal_of_call (callP)
+symbolS *
+tc_get_bal_of_call (callP)
      symbolS *callP;
 {
   symbolS *retval;
@@ -3157,7 +3145,7 @@ _tc_get_bal_of_call (callP)
   know (TC_S_IS_CALLNAME (callP));
 
 #ifdef OBJ_COFF
-  retval = (symbolS *) (callP->sy_symbol.ost_auxent[1].x_bal.x_balntry);
+  retval = callP->sy_tc;
 #else
 #ifdef OBJ_ABOUT
   retval = symbol_next (callP);
@@ -3167,7 +3155,7 @@ _tc_get_bal_of_call (callP)
 #endif /* ! OBJ_COFF */
 
   know (TC_S_IS_BALNAME (retval));
-  return ((char *) retval);
+  return retval;
 }				/* _tc_get_bal_of_call() */
 
 void
@@ -3184,7 +3172,10 @@ tc_coff_symbol_emit_hook (symbolP)
       S_SET_NUMBER_AUXILIARY (symbolP, 2);
 #endif
       symbolP->sy_symbol.ost_auxent[1].x_bal.x_balntry = S_GET_VALUE (balP);
-      S_SET_STORAGE_CLASS (symbolP, (!SF_GET_LOCAL (symbolP) ? C_LEAFEXT : C_LEAFSTAT));
+      if (S_GET_STORAGE_CLASS (symbolP) == C_EXT)
+	S_SET_STORAGE_CLASS (symbolP, C_LEAFEXT);
+      else
+	S_SET_STORAGE_CLASS (symbolP, C_LEAFSTAT);
       S_SET_DATA_TYPE (symbolP, S_GET_DATA_TYPE (symbolP) | (DT_FCN << N_BTSHFT));
       /* fix up the bal symbol */
       S_SET_STORAGE_CLASS (balP, C_LABEL);
@@ -3201,7 +3192,7 @@ i960_handle_align (fragp)
 
 #ifndef OBJ_BOUT
 
-  as_bad ("option --link-relax is only supported in b.out format");
+  as_bad (_("option --link-relax is only supported in b.out format"));
   linkrelax = 0;
   return;
 
@@ -3233,7 +3224,7 @@ i960_validate_fix (fixP, this_segment_type, add_symbolPP)
 
       if (!TC_S_IS_BALNAME (tc_get_bal_of_call (add_symbolP)))
 	{
-	  as_bad ("No 'bal' entry point for leafproc %s",
+	  as_bad (_("No 'bal' entry point for leafproc %s"),
 		  S_GET_NAME (add_symbolP));
 	  return 1;
 	}
@@ -3244,7 +3235,7 @@ i960_validate_fix (fixP, this_segment_type, add_symbolPP)
   {
     if (fixP->fx_tcbit)
       {
-	as_bad ("callj to difference of two symbols");
+	as_bad (_("callj to difference of two symbols"));
 	return 1;
       }
     reloc_callj (fixP);
@@ -3253,7 +3244,7 @@ i960_validate_fix (fixP, this_segment_type, add_symbolPP)
 	/* This is a COBR instruction.  They have only a 13-bit
 	   displacement and are only to be used for local branches:
 	   flag as error, don't generate relocation.  */
-	as_bad ("can't use COBR format with external label");
+	as_bad (_("can't use COBR format with external label"));
 	fixP->fx_addsy = NULL;	/* No relocations please. */
 	return 1;
       }
