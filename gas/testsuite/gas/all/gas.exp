@@ -107,6 +107,7 @@ case $target_triplet in {
     default {
 	run_dump_test struct
 	run_dump_test align
+	run_dump_test align2
     }
 }
 

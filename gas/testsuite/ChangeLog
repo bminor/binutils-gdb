@@ -1,3 +1,10 @@
+2002-05-23  H.J. Lu <hjl@gnu.org>
+
+	* gas/all/align2.d: New.
+	* gas/all/align2.s: New.
+
+	* gas/all/gas.exp: Run align2.
+
 2002-05-22  H.J. Lu <hjl@gnu.org>
 
 	* gas/mips/elf-rel.d: Updated for the subsegs_finish change in
