@@ -1,5 +1,11 @@
 Mon May  4 16:12:23 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-i386.h (TC_RELOC_RTSYM_LOC_FIXUP): Keep relocs for all
+	references to externally visible symbols.
+	* config/tc-i386.c (md_apply_fix3): When OBJ_ELF, don't add the
+ 	values in twice for a PC relative reloc if the symbol is
+ 	externally defined.
+
 	* config/tc-sparc.h (tc_fix_adjustable) [OBJ_AOUT]: When PIC,
 	don't adjust a PC relative reloc against an externally visible
 	symbol.
