@@ -255,8 +255,7 @@ STAB ("const70:c=e190=bs2;0;16;,70", N_LSYM, 0)
 STAB("attr38:G@& !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,attr38)
 
 /* Unrecognized negative type number.  */
-STAB ("bad_neg0type:t201=s8field0:1,0,32;field2:-534,32,64;field3:-1,96,32;;",
-      N_LSYM, 0)
+STAB ("bad_neg0type:t201=s8field0:1,0,32;field2:-534,32,64;field3:-1,96,32;;", N_LSYM, 0)
 
 STAB ("bad_neg0:G201", N_GSYM, bad_neg0)
 
@@ -390,8 +389,7 @@ STAB ("consth:c=e1,4294967296", N_LSYM, 0)
 STAB ("consth2:c=e1,-734723985732642758928475678987234563284937456", N_LSYM, 0)
 
 /* Test a struct constant using S.  */
-STAB ("bad_neg0const:c=S201,128,128,11222211343434345656565677888877",
-      N_LSYM, 0)
+STAB ("bad_neg0const:c=S201,128,128,11222211343434345656565677888877", N_LSYM, 0)
 
 /* Bad filenumbers.  */
 /* This one is totally bogus.  */
