@@ -2435,10 +2435,12 @@ cons_worker (nbytes, rva)
 
 #ifdef BFD_ASSEMBLER
 	  reloc = BFD_RELOC_RVA;
-#elif defined(TC_RVA_RELOC)
+#else
+#ifdef TC_RVA_RELOC
 	  reloc = TC_RVA_RELOC;
 #else
 	  abort();
+#endif
 #endif
 	  fix_new_exp (frag_now, p - frag_now->fr_literal,
 		       nbytes, &exp, 0, reloc);

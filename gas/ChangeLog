@@ -1,3 +1,8 @@
+Thu Sep  7 12:33:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (cons_worker): Don't use #elif; old compilers don't
+	support it.
+
 Wed Sep  6 21:13:06 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* app.c (do_scrub_chars): In MRI mode, silently end quoted strings
