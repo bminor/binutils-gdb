@@ -1,3 +1,8 @@
+2000-04-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* config/djgpp/config.sed: Fix the lines which edit clean: and
+        uninstall-info: targets.
+
 2000-04-14  Jim Blandy  <jimb@redhat.com>
 
 	Provide the hooks needed to support architectures on which
