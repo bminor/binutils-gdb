@@ -35,8 +35,6 @@ prelude.c
 
 Things-to-lose:
 
-alpha-regdef.h
-
 Do-last:
 
 # End of file.
