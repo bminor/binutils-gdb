@@ -429,66 +429,136 @@ OP_80 ()
 {
 }
 
-/* sar zero_extend(imm5),reg1
-
-   XXX condition codes.  */
+/* sar zero_extend(imm5),reg1 */
 void
 OP_2A0 ()
 {
-  int temp = State.regs[OP[1]];
+  unsigned int op0, op1, result, z, s, cy, ov;
 
-  temp >>= (OP[0] & 0x1f);
+  op0 = OP[0] & 0x1f;
+  op1 = State.regs[OP[1]];
+  result = (signed)op1 >> op0;
 
-  State.regs[OP[1]] = temp;
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (op1 & (1 << (op0 - 1)));
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
-/* sar reg1, reg2
-
-   XXX condition codes.  */
+/* sar reg1, reg2 */
 void
 OP_A007E0 ()
 {
-  int temp = State.regs[OP[1]];
+  unsigned int op0, op1, result, z, s, cy, ov;
 
-  temp >>= (State.regs[OP[0]] & 0x1f);
+  op0 = State.regs[OP[0]] & 0x1f;
+  op1 = State.regs[OP[1]];
+  result = (signed)op1 >> op0;
 
-  State.regs[OP[1]] = temp;
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (op1 & (1 << (op0 - 1)));
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0));
 }
 
-/* shl zero_extend(imm5),reg1
-
-   XXX condition codes.  */
+/* shl zero_extend(imm5),reg1 */
 void
 OP_2C0 ()
 {
-  State.regs[OP[1]] <<= (OP[0] & 0x1f);
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  op0 = OP[0] & 0x1f;
+  op1 = State.regs[OP[1]];
+  result = op1 << op0;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (op1 & (1 << (32 - op0)));
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0));
 }
 
-/* shl reg1, reg2
-
-   XXX condition codes.  */
+/* shl reg1, reg2 */
 void
 OP_C007E0 ()
 {
-  State.regs[OP[1]] <<= (State.regs[OP[0]] & 0x1f);
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  op0 = State.regs[OP[0]] & 0x1f;
+  op1 = State.regs[OP[1]];
+  result = op1 << op0;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (op1 & (1 << (32 - op0)));
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0));
 }
 
-/* shr zero_extend(imm5),reg1
-
-   XXX condition codes.  */
+/* shr zero_extend(imm5),reg1 */
 void
 OP_280 ()
 {
-  State.regs[OP[1]] >>= (OP[0] & 0x1f);
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  op0 = OP[0] & 0x1f;
+  op1 = State.regs[OP[1]];
+  result = op1 >> op0;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (op1 & (1 << (op0 - 1)));
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0));
 }
 
-/* shr reg1, reg2
-
-   XXX condition codes.  */
+/* shr reg1, reg2 */
 void
 OP_8007E0 ()
 {
-  State.regs[OP[1]] >>= (State.regs[OP[0]] & 0x1f);
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  op0 = State.regs[OP[0]] & 0x1f;
+  op1 = State.regs[OP[1]];
+  result = op1 >> op0;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (op1 & (1 << (op0 - 1)));
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0));
 }
 
 void
@@ -545,7 +615,6 @@ OP_680 ()
   State.regs[OP[2]] = result;
   State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
   State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
-  State.psw |= (z ? PSW_Z : 0);
 }
 
 /* and reg, reg */
@@ -627,7 +696,6 @@ OP_6A0 ()
   State.regs[OP[2]] = result;
   State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
   State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
-  State.psw |= (z ? PSW_Z : 0);
 }
 
 /* not reg1, reg2 */

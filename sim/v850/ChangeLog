@@ -1,5 +1,8 @@
 Thu Aug 29 13:53:29 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Add condition code handling to shift insns.
+	Fix minor typos in condition code handling for other insns.
+
 	* Makefile.in: Fix typo.
 	* simops.c: Add condition code handling to "sub" "subr" and
 	"divh" instructions.
