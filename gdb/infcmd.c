@@ -1776,6 +1776,26 @@ attach_command (char *args, int from_tty)
 	error ("Not killed.");
     }
 
+  /* Clear out solib state. Otherwise the solib state of the previous
+     inferior might have survived and is entirely wrong for the new
+     target.  This has been observed on Linux using glibc 2.3. How to
+     reproduce:
+
+     bash$ ./foo&
+     [1] 4711
+     bash$ ./foo&
+     [1] 4712
+     bash$ gdb ./foo
+     [...]
+     (gdb) attach 4711
+     (gdb) detach
+     (gdb) attach 4712
+     Cannot access memory at address 0xdeadbeef
+  */
+#ifdef CLEAR_SOLIB
+      CLEAR_SOLIB ();
+#endif
+
   target_attach (args, from_tty);
 
   /* Set up the "saved terminal modes" of the inferior
