@@ -1,3 +1,25 @@
+2002-05-16  Jim Blandy  <jimb@redhat.com>
+
+	Teach the Dwarf 2 reader to read macro information.
+	* dwarf2read.c: #include "macrotab.h".
+	(dwarf_macinfo_buffer): New variable.
+	(struct dwarf2_pinfo): New members: dwarf_macinfo_buffer, and
+	dwarf_macinfo_size.
+	(DWARF_MACINFO_BUFFER, DWARF_MACINFO_SIZE): New macros.
+	(dwarf2_missing_macinfo_section, dwarf2_macros_too_long,
+	dwarf2_macros_not_terminated, dwarf2_macro_outside_file,
+	dwarf2_macro_unmatched_end_file, dwarf2_macro_malformed_definition,
+	dwarf2_macro_spaces_in_definition): New complaints.
+	(dwarf2_has_info): Initialize dwarf_macinfo_offset.
+	(dwarf2_build_psymtabs): Read the .dwarf_macinfo section.
+	(dwarf2_build_psymtabs_hard): Record the buffer and its size in
+	the partial symbol table.
+	(psymtab_to_symtab_1): Set the macinfo buffer and size globals
+	from what's recorded in the partial symbol table.
+	(read_file_scope): If the compilation unit has a
+	`DW_AT_macro_info' attribute, read its macro information.
+	* Makefile.in (dwarf2read.o): Depend on macrotab.h.
+
 2002-05-16  Daniel Jacobowitz  <drow@mvista.com>
 
 	Fix PR gdb/546

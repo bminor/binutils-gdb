@@ -37,6 +37,7 @@
 #include "demangle.h"
 #include "expression.h"
 #include "filenames.h"	/* for DOSish file names */
+#include "macrotab.h"
 
 #include "language.h"
 #include "complaints.h"
@@ -350,6 +351,7 @@ static char *dwarf_info_buffer;
 static char *dwarf_abbrev_buffer;
 static char *dwarf_line_buffer;
 static char *dwarf_str_buffer;
+static char *dwarf_macinfo_buffer;
 
 /* A zeroed version of a partial die for initialization purposes.  */
 static struct partial_die_info zeroed_partial_die;
@@ -443,6 +445,15 @@ struct dwarf2_pinfo
     /* Size of dwarf string section for the objfile.  */
 
     unsigned int dwarf_str_size;
+
+    /* Pointer to start of dwarf macro buffer for the objfile.  */
+
+    char *dwarf_macinfo_buffer;
+
+    /* Size of dwarf macinfo section for the objfile.  */
+    
+    unsigned int dwarf_macinfo_size;
+
   };
 
 #define PST_PRIVATE(p) ((struct dwarf2_pinfo *)(p)->read_symtab_private)
@@ -454,6 +465,8 @@ struct dwarf2_pinfo
 #define DWARF_LINE_SIZE(p)   (PST_PRIVATE(p)->dwarf_line_size)
 #define DWARF_STR_BUFFER(p)  (PST_PRIVATE(p)->dwarf_str_buffer)
 #define DWARF_STR_SIZE(p)    (PST_PRIVATE(p)->dwarf_str_size)
+#define DWARF_MACINFO_BUFFER(p) (PST_PRIVATE(p)->dwarf_macinfo_buffer)
+#define DWARF_MACINFO_SIZE(p)   (PST_PRIVATE(p)->dwarf_macinfo_size)
 
 /* Maintain an array of referenced fundamental types for the current
    compilation unit being read.  For DWARF version 1, we have to construct
@@ -616,6 +629,34 @@ static struct complaint dwarf2_misplaced_line_number =
 static struct complaint dwarf2_line_header_too_long =
 {
   "line number info header doesn't fit in `.debug_line' section", 0, 0
+};
+static struct complaint dwarf2_missing_macinfo_section =
+{
+  "missing .debug_macinfo section", 0, 0
+};
+static struct complaint dwarf2_macros_too_long =
+{
+  "macro info runs off end of `.debug_macinfo' section", 0, 0
+};
+static struct complaint dwarf2_macros_not_terminated =
+{
+  "no terminating 0-type entry for macros in `.debug_macinfo' section", 0, 0
+};
+static struct complaint dwarf2_macro_outside_file =
+{
+  "debug info gives macro %s outside of any file: %s", 0, 0
+};
+static struct complaint dwarf2_macro_unmatched_end_file =
+{
+  "macro debug info has an unmatched `close_file' directive", 0, 0
+};
+static struct complaint dwarf2_macro_malformed_definition =
+{
+  "macro debug info contains a malformed macro definition:\n`%s'", 0, 0
+};
+static struct complaint dwarf2_macro_spaces_in_definition =
+{
+  "macro definition contains spaces in formal argument list:\n`%s'", 0, 0
 };
 
 /* local function prototypes */
@@ -862,15 +903,23 @@ static void initialize_cu_func_list (void);
 
 static void add_to_cu_func_list (const char *, CORE_ADDR, CORE_ADDR);
 
+static void dwarf_decode_macros (struct line_header *, unsigned int,
+                                 char *, bfd *, const struct comp_unit_head *,
+                                 struct objfile *);
+
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
 
 int
 dwarf2_has_info (bfd *abfd)
 {
-  dwarf_info_offset = dwarf_abbrev_offset = dwarf_line_offset = 0;
+  dwarf_info_offset = 0;
+  dwarf_abbrev_offset = 0;
+  dwarf_line_offset = 0;
   dwarf_str_offset = 0;
-  dwarf_frame_offset = dwarf_eh_frame_offset = 0;
+  dwarf_macinfo_offset = 0;
+  dwarf_frame_offset = 0;
+  dwarf_eh_frame_offset = 0;
   bfd_map_over_sections (abfd, dwarf2_locate_sections, NULL);
   if (dwarf_info_offset && dwarf_abbrev_offset)
     {
@@ -965,6 +1014,13 @@ dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
 					    dwarf_str_size);
   else
     dwarf_str_buffer = NULL;
+
+  if (dwarf_macinfo_offset)
+    dwarf_macinfo_buffer = dwarf2_read_section (objfile,
+                                                dwarf_macinfo_offset,
+                                                dwarf_macinfo_size);
+  else
+    dwarf_macinfo_buffer = NULL;
 
   if (mainline
       || (objfile->global_psymbols.size == 0
@@ -1174,6 +1230,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       DWARF_LINE_SIZE (pst) = dwarf_line_size;
       DWARF_STR_BUFFER (pst) = dwarf_str_buffer;
       DWARF_STR_SIZE (pst) = dwarf_str_size;
+      DWARF_MACINFO_BUFFER (pst) = dwarf_macinfo_buffer;
+      DWARF_MACINFO_SIZE (pst) = dwarf_macinfo_size;
       baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
       /* Store the function that reads in the rest of the symbol table */
@@ -1476,6 +1534,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   dwarf_line_size = DWARF_LINE_SIZE (pst);
   dwarf_str_buffer = DWARF_STR_BUFFER (pst);
   dwarf_str_size = DWARF_STR_SIZE (pst);
+  dwarf_macinfo_buffer = DWARF_MACINFO_BUFFER (pst);
+  dwarf_macinfo_size = DWARF_MACINFO_SIZE (pst);
   baseaddr = ANOFFSET (pst->section_offsets, SECT_OFF_TEXT (objfile));
   cu_header_offset = offset;
   info_ptr = dwarf_info_buffer + offset;
@@ -1738,6 +1798,17 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
         }
     }
 
+  /* Decode macro information, if present.  Dwarf 2 macro information
+     refers to information in the line number info statement program
+     header, so we can only read it if we've read the header
+     successfully.  */
+  attr = dwarf_attr (die, DW_AT_macro_info);
+  if (attr)
+    {
+      unsigned int macro_offset = DW_UNSND (attr);
+      dwarf_decode_macros (line_header, macro_offset,
+                           comp_dir, abfd, cu_header, objfile);
+    }
   do_cleanups (back_to);
 }
 
@@ -6366,4 +6437,377 @@ dwarf_alloc_die (void)
   die = (struct die_info *) xmalloc (sizeof (struct die_info));
   memset (die, 0, sizeof (struct die_info));
   return (die);
+}
+
+
+/* Macro support.  */
+
+
+/* Return the full name of file number I in *LH's file name table.
+   Use COMP_DIR as the name of the current directory of the
+   compilation.  The result is allocated using xmalloc; the caller is
+   responsible for freeing it.  */
+static char *
+file_full_name (int file, struct line_header *lh, const char *comp_dir)
+{
+  struct file_entry *fe = &lh->file_names[file - 1];
+  
+  if (IS_ABSOLUTE_PATH (fe->name))
+    return xstrdup (fe->name);
+  else
+    {
+      const char *dir;
+      int dir_len;
+      char *full_name;
+
+      if (fe->dir_index)
+        dir = lh->include_dirs[fe->dir_index - 1];
+      else
+        dir = comp_dir;
+
+      if (dir)
+        {
+          dir_len = strlen (dir);
+          full_name = xmalloc (dir_len + 1 + strlen (fe->name) + 1);
+          strcpy (full_name, dir);
+          full_name[dir_len] = '/';
+          strcpy (full_name + dir_len + 1, fe->name);
+          return full_name;
+        }
+      else
+        return xstrdup (fe->name);
+    }
+}
+
+
+static struct macro_source_file *
+macro_start_file (int file, int line,
+                  struct macro_source_file *current_file,
+                  const char *comp_dir,
+                  struct line_header *lh, struct objfile *objfile)
+{
+  /* The full name of this source file.  */
+  char *full_name = file_full_name (file, lh, comp_dir);
+
+  /* We don't create a macro table for this compilation unit
+     at all until we actually get a filename.  */
+  if (! pending_macros)
+    pending_macros = new_macro_table (&objfile->symbol_obstack,
+                                      &objfile->macro_cache);
+
+  if (! current_file)
+    /* If we have no current file, then this must be the start_file
+       directive for the compilation unit's main source file.  */
+    current_file = macro_set_main (pending_macros, full_name);
+  else
+    current_file = macro_include (current_file, line, full_name);
+
+  xfree (full_name);
+              
+  return current_file;
+}
+
+
+/* Copy the LEN characters at BUF to a xmalloc'ed block of memory,
+   followed by a null byte.  */
+static char *
+copy_string (const char *buf, int len)
+{
+  char *s = xmalloc (len + 1);
+  memcpy (s, buf, len);
+  s[len] = '\0';
+
+  return s;
+}
+
+
+static const char *
+consume_improper_spaces (const char *p, const char *body)
+{
+  if (*p == ' ')
+    {
+      complain (&dwarf2_macro_spaces_in_definition, body);
+
+      while (*p == ' ')
+        p++;
+    }
+
+  return p;
+}
+
+
+static void
+parse_macro_definition (struct macro_source_file *file, int line,
+                        const char *body)
+{
+  const char *p;
+
+  /* The body string takes one of two forms.  For object-like macro
+     definitions, it should be:
+
+        <macro name> " " <definition>
+
+     For function-like macro definitions, it should be:
+
+        <macro name> "() " <definition>
+     or
+        <macro name> "(" <arg name> ( "," <arg name> ) * ") " <definition>
+
+     Spaces may appear only where explicitly indicated, and in the
+     <definition>.
+
+     The Dwarf 2 spec says that an object-like macro's name is always
+     followed by a space, but versions of GCC around March 2002 omit
+     the space when the macro's definition is the empty string. 
+
+     The Dwarf 2 spec says that there should be no spaces between the
+     formal arguments in a function-like macro's formal argument list,
+     but versions of GCC around March 2002 include spaces after the
+     commas.  */
+
+
+  /* Find the extent of the macro name.  The macro name is terminated
+     by either a space or null character (for an object-like macro) or
+     an opening paren (for a function-like macro).  */
+  for (p = body; *p; p++)
+    if (*p == ' ' || *p == '(')
+      break;
+
+  if (*p == ' ' || *p == '\0')
+    {
+      /* It's an object-like macro.  */
+      int name_len = p - body;
+      char *name = copy_string (body, name_len);
+      const char *replacement;
+
+      if (*p == ' ')
+        replacement = body + name_len + 1;
+      else
+        {
+          complain (&dwarf2_macro_malformed_definition, body);
+          replacement = body + name_len;
+        }
+      
+      macro_define_object (file, line, name, replacement);
+
+      xfree (name);
+    }
+  else if (*p == '(')
+    {
+      /* It's a function-like macro.  */
+      char *name = copy_string (body, p - body);
+      int argc = 0;
+      int argv_size = 1;
+      char **argv = xmalloc (argv_size * sizeof (*argv));
+
+      p++;
+
+      p = consume_improper_spaces (p, body);
+
+      /* Parse the formal argument list.  */
+      while (*p && *p != ')')
+        {
+          /* Find the extent of the current argument name.  */
+          const char *arg_start = p;
+
+          while (*p && *p != ',' && *p != ')' && *p != ' ')
+            p++;
+
+          if (! *p || p == arg_start)
+            complain (&dwarf2_macro_malformed_definition,
+                      body);
+          else
+            {
+              /* Make sure argv has room for the new argument.  */
+              if (argc >= argv_size)
+                {
+                  argv_size *= 2;
+                  argv = xrealloc (argv, argv_size * sizeof (*argv));
+                }
+
+              argv[argc++] = copy_string (arg_start, p - arg_start);
+            }
+
+          p = consume_improper_spaces (p, body);
+
+          /* Consume the comma, if present.  */
+          if (*p == ',')
+            {
+              p++;
+
+              p = consume_improper_spaces (p, body);
+            }
+        }
+
+      if (*p == ')')
+        {
+          p++;
+
+          if (*p == ' ')
+            /* Perfectly formed definition, no complaints.  */
+            macro_define_function (file, line, name,
+                                   argc, (const char **) argv, 
+                                   p + 1);
+          else if (*p == '\0')
+            {
+              /* Complain, but do define it.  */
+              complain (&dwarf2_macro_malformed_definition, body);
+              macro_define_function (file, line, name,
+                                     argc, (const char **) argv, 
+                                     p);
+            }
+          else
+            /* Just complain.  */
+            complain (&dwarf2_macro_malformed_definition, body);
+        }
+      else
+        /* Just complain.  */
+        complain (&dwarf2_macro_malformed_definition, body);
+
+      xfree (name);
+      {
+        int i;
+
+        for (i = 0; i < argc; i++)
+          xfree (argv[i]);
+      }
+      xfree (argv);
+    }
+  else
+    complain (&dwarf2_macro_malformed_definition, body);
+}
+
+
+static void
+dwarf_decode_macros (struct line_header *lh, unsigned int offset,
+                     char *comp_dir, bfd *abfd,
+                     const struct comp_unit_head *cu_header,
+                     struct objfile *objfile)
+{
+  char *mac_ptr, *mac_end;
+  struct macro_source_file *current_file = 0;
+
+  if (dwarf_macinfo_buffer == NULL)
+    {
+      complain (&dwarf2_missing_macinfo_section);
+      return;
+    }
+
+  mac_ptr = dwarf_macinfo_buffer + offset;
+  mac_end = dwarf_macinfo_buffer + dwarf_macinfo_size;
+
+  for (;;)
+    {
+      enum dwarf_macinfo_record_type macinfo_type;
+
+      /* Do we at least have room for a macinfo type byte?  */
+      if (mac_ptr >= mac_end)
+        {
+          complain (&dwarf2_macros_too_long);
+          return;
+        }
+
+      macinfo_type = read_1_byte (abfd, mac_ptr);
+      mac_ptr++;
+
+      switch (macinfo_type)
+        {
+          /* A zero macinfo type indicates the end of the macro
+             information.  */
+        case 0:
+          return;
+
+        case DW_MACINFO_define:
+        case DW_MACINFO_undef:
+          {
+            int bytes_read;
+            int line;
+            char *body;
+
+            line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+            mac_ptr += bytes_read;
+            body = read_string (abfd, mac_ptr, &bytes_read);
+            mac_ptr += bytes_read;
+
+            if (! current_file)
+              complain (&dwarf2_macro_outside_file,
+                        macinfo_type == DW_MACINFO_define ? "definition" :
+                        macinfo_type == DW_MACINFO_undef ? "undefinition" :
+                        "something-or-other",
+                        body);
+            else
+              {
+                if (macinfo_type == DW_MACINFO_define)
+                  parse_macro_definition (current_file, line, body);
+                else if (macinfo_type == DW_MACINFO_undef)
+                  macro_undef (current_file, line, body);
+              }
+          }
+          break;
+
+        case DW_MACINFO_start_file:
+          {
+            int bytes_read;
+            int line, file;
+
+            line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+            mac_ptr += bytes_read;
+            file = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+            mac_ptr += bytes_read;
+
+            current_file = macro_start_file (file, line,
+                                             current_file, comp_dir,
+                                             lh, objfile);
+          }
+          break;
+
+        case DW_MACINFO_end_file:
+          if (! current_file)
+            complain (&dwarf2_macro_unmatched_end_file);
+          else
+            {
+              current_file = current_file->included_by;
+              if (! current_file)
+                {
+                  enum dwarf_macinfo_record_type next_type;
+
+                  /* GCC circa March 2002 doesn't produce the zero
+                     type byte marking the end of the compilation
+                     unit.  Complain if it's not there, but exit no
+                     matter what.  */
+
+                  /* Do we at least have room for a macinfo type byte?  */
+                  if (mac_ptr >= mac_end)
+                    {
+                      complain (&dwarf2_macros_too_long);
+                      return;
+                    }
+
+                  /* We don't increment mac_ptr here, so this is just
+                     a look-ahead.  */
+                  next_type = read_1_byte (abfd, mac_ptr);
+                  if (next_type != 0)
+                    complain (&dwarf2_macros_not_terminated);
+
+                  return;
+                }
+            }
+          break;
+
+        case DW_MACINFO_vendor_ext:
+          {
+            int bytes_read;
+            int constant;
+            char *string;
+
+            constant = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+            mac_ptr += bytes_read;
+            string = read_string (abfd, mac_ptr, &bytes_read);
+            mac_ptr += bytes_read;
+
+            /* We don't recognize any vendor extensions.  */
+          }
+          break;
+        }
+    }
 }

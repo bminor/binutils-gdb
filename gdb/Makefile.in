@@ -1426,7 +1426,7 @@ dwarfread.o: dwarfread.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
 
 dwarf2read.o: dwarf2read.c $(bfd_h) $(buildsym_h) $(defs_h) \
 	$(expression_h) $(gdbtypes_h) $(language_h) $(objfiles_h) \
-	$(symfile_h) $(symtab_h) $(gdb_string_h)
+	$(symfile_h) $(symtab_h) $(gdb_string_h) $(macrotab_h)
 
 elfread.o: elfread.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
 	$(gdb_stabs_h) $(objfiles_h) $(symfile_h) $(symtab_h) $(gdb_string_h) \
