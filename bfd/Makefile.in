@@ -41,11 +41,15 @@ CFLAGS = -g $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) # -DINTEL960VERSION
 
 
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
-	archures.o core.o section.o format.o syms.o reloc.o
+	archures.o core.o section.o format.o syms.o reloc.o init.o
+
+BFD_MACHINES=cpu-h8300.o cpu-i960.o  cpu-sparc.o cpu-m68k.o cpu-m88k.o \
+	cpu-vax.o cpu-mips.o cpu-a29k.o  cpu-i386.o
 
 BFD_BACKENDS = oasys.o ieee.o srec.o \
 	aout64.o aout32.o demo64.o sunos.o newsos3.o bout.o \
 	icoff.o amdcoff.o m68kcoff.o i386coff.o m88k-bcs.o ecoff.o
+
 
 OPTIONAL_BACKENDS = trad-core.o
 
@@ -56,15 +60,18 @@ SYSDEP_H=$(INCDIR)/sysdep.h
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 i386coff.c aout64.c aout32.c sunos.c demo64.c icoff.c srec.c \
 	 oasys.c ieee.c m68kcoff.c amdcoff.c \
-	 format.c section.c core.c syms.c reloc.c \
-	 m88k-bcs.c ecoff.c trad-core.c newsos3.c bout.c
+	 format.c section.c core.c syms.c reloc.c init.c \
+	 m88k-bcs.c ecoff.c trad-core.c newsos3.c bout.c \
+	cpu-h8300.c cpu-i960.c   cpu-sparc.c cpu-m68k.c cpu-m88k.c \
+ 	cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.o
+
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
 all: $(TARGETLIB) 
 
 # XDEPFILES comes from the host config; TDEPFILES from the target config.
-OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(XDEPFILES) $(TDEPFILES)
+OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) $(XDEPFILES) $(TDEPFILES)
 
 $(TARGETLIB): $(OFILES)
 	 rm -f $(TARGETLIB)
@@ -202,6 +209,9 @@ headers:
 	cp $(docdir)/bfd.h $(BFD_H)
 	cp $(docdir)/libbfd.h $(srcdir)/libbfd.h
 	cp $(docdir)/libcoff.h $(srcdir)/libcoff.h
+	rm -f $(docdir)/bfd-in.h 
+	rm -f $(docdir)/libbfd-in.h 
+	rm -f $(docdir)/libcoff-in.h 
 
 bfd.info:
 	( cd $(docdir); $(MAKE) bfd.info)

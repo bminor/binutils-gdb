@@ -1,3 +1,4 @@
+
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
    Copyright (C) 1990-1991 Free Software Foundation, Inc.
@@ -72,7 +73,7 @@ PROTO(PTR, bfd_alloc_finish,(bfd *abfd));
 
 
 PROTO (bfd_size_type, bfd_read, (PTR ptr, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
-PROTO (bfd_size_type, bfd_write, (PTR ptr, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
+PROTO (bfd_size_type, bfd_write, (CONST PTR ptr, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
 
 
 
@@ -179,22 +180,32 @@ extern bfd *bfd_last_cache;
 
 /* THE FOLLOWING IS EXTRACTED FROM THE SOURCE*/
 
-/* FROM libbfd.c*/
-/* ------------------------------START FROM libbfd.c
+/*:init.c*/
+/* bfd_check_init
 
-*i bfd_log2
+This routine is called before any other bfd function using initialized
+data is used to ensure that the structures have been initialized.
+Soon this function will go away, and the bfd library will assume that
+bfd_init has been called.
+*/
+
+ void EXFUN(bfd_check_init,(void));
+
+/*
+*/
+
+/*:libbfd.c*/
+/* *i bfd_log2
 Return the log base 2 of the value supplied, rounded up. eg an arg
 of 1025 would return 11.
 */
  PROTO(bfd_vma, bfd_log2,(bfd_vma x));
 
 /*
+*/
 
- --------------------------------END FROM libbfd.c*/
-
-/* FROM cache.c*/
-/* ------------------------------START FROM cache.c
- BFD_CACHE_MAX_OPEN
+/*:cache.c*/
+/* BFD_CACHE_MAX_OPEN
 The maxiumum number of files which the cache will keep open at one
 time.
 */
@@ -258,8 +269,76 @@ one first, to avoid running out of file descriptors.
  PROTO(FILE *, bfd_cache_lookup_worker, (bfd *));
 
 /*
+*/
 
- --------------------------------END FROM cache.c*/
 
-/* FROM reloc.c*/
+/*:reloc.c*/
+
+/*:cpu-h8300.c*/
+
+/*:cpu-i960.c*/
+
+/*:cpu-empty.c*/
+
+/*:howto.c*/
+
+/*:archures.c*/
+/* bfd_default_arch_struct
+
+What bfds are seeded with 
+*/
+
+extern bfd_arch_info_struct_type bfd_default_arch_struct;
+
+/*
+ bfd_default_set_arch_mach
+
+Set the architecture and machine type in a bfd. This finds the correct
+pointer to structure and inserts it into the arch_info pointer. 
+*/
+
+  boolean EXFUN(bfd_default_set_arch_mach,(bfd *abfd,
+          enum bfd_architecture arch,
+	 unsigned long mach));
+
+/*
+
+This routine initializes the architecture dispatch table by calling
+all installed architecture packages and getting them to poke around.
+*/
+
+ PROTO(void, bfd_arch_init,(void));
+
+/*
+
+ bfd_arch_linkin
+
+Link the provided arch info structure into the list
+*/
+
+ void EXFUN(bfd_arch_linkin,(bfd_arch_info_struct_type *));
+
+/*
+
+ bfd_default_compatible
+
+The default function for testing for compatibility 
+*/
+
+ CONST bfd_arch_info_struct_type *EXFUN(bfd_default_compatible,
+     (CONST bfd_arch_info_struct_type *a,
+     CONST bfd_arch_info_struct_type *b));
+
+/*
+
+ bfd_default_scan
+The default function for working out whether this is an architecture
+hit and a machine hit 
+*/
+
+ boolean EXFUN(bfd_default_scan,(CONST struct bfd_arch_info_struct *, CONST char *));
+
+/*
+*/
+
 

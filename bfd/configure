@@ -323,7 +323,7 @@ for host in ${hosts} ; do
 	host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 	host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 	host=${host_cpu}-${host_vendor}-${host_os}
-	host_makefile_frag=config/h-${host}
+	host_makefile_frag=config/hmake-${host}
 
 #### configure.in per-host parts come in here.
 
@@ -335,6 +335,7 @@ else
 	mips)
 		case "${host_vendor}" in
 		dec)	bfd_host=dec3100 ;;
+		sgi)	bfd_host=irix3 ;;
 		esac
 		;;
 	m88k)
@@ -376,8 +377,15 @@ else
 		esac
 		;;
 
-	rtpc)	bfd_host=rtbsd ;;
-	tahoe | vax)	bfd_host=${host_cpu} ;;
+	rtpc)	bfd_host=rtbsd
+		;;
+
+	a29k)	bfd_host=ultra3
+		;;
+
+	tahoe | vax)
+		bfd_host=${host_cpu}
+		;;
 	esac
 fi
 
@@ -397,7 +405,7 @@ host_makefile_frag=config/h-${bfd_host}
 		target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 		target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 		target=${target_cpu}-${target_vendor}-${target_os}
-		target_makefile_frag=config/t-${target}
+		target_makefile_frag=config/tmake-${target}
 
 #### configure.in per-target parts come in here.
 
@@ -432,9 +440,30 @@ hp)
 		;;
 	esac
 	;;
-none)
+sgi)
+	case "${target_cpu}" in
+	mips)
+		bfd_target=irix3 ;;
+	esac
+	;;
+
+hitachi)
+	case "${target_cpu}" in
+	h8300) bfd_target=h8300-ieee ;;
+	*) echo "bad hitachi cpu" ;;
+	esac
+	;;
+
+
+none|nyu)
 	case "${target_cpu}" in
 	i386) bfd_target=i386-coff ;;
+	a29k) case "${target_os}" in
+		aout) bfd_target=a29k-aout ;;
+		coff) bfd_target=a29k-coff ;;
+		sym1) bfd_target=a29k-coff ;;
+	       esac
+	       ;;
 	esac
 	;;
 *)
@@ -711,19 +740,102 @@ exit 0
 
 #
 # $Log$
-# Revision 1.25  1991/09/03 20:48:23  steve
-# *** empty log message ***
+# Revision 1.28  1991/10/01 03:55:37  steve
+# Insert the incidentals and things I forgot to ci last time, same log message:
 #
-# Revision 1.24  1991/08/23  20:55:21  gnu
-# 	* configure.in:  Tix typo.
-#         * ecoff.c:  If compiling for DEC3100, use trad_unix core files,
-#         else dummy out the core file support.
-#         * trad-core.c (trad_unix_core_file_p):  If HOST_DATA_START_ADDR is
-#         specified, use it to locate the data section.
-#         * coffcode.h (coff_write_symbols):  Declare buffer as bfd_bytes
-#         rather than as chars (lint).
+# Mon Sep 30 15:13:46 1991  Steve Chamberlain  (steve at cygnus.com)
 #
-# Revision 1.23  1991/08/23  04:48:43  rich
+# 	* cpu-a29k.c, cpu-i386.c, cpu-m68k.c, cpu-mips.c, cpu-vax.c,
+# 	cpu-h8300.c, cpu-i960.c, cpu-m88k.c, cpu-sparc.c: added. These
+# 	files will eventually contain processor specific bits for bfd,
+# 	like strange relocation information and dis/assembly.  So far only
+# 	the H8 has been even partially done.  This work also ties in with
+# 	the change in handling architectures.
+#
+# 	* amdcoff.c: (a29k_reloc) fix error message.
+#
+# 	* aout-f1.h: (choose_reloc_size) now calls bfd_get_arch to
+# 	discover the architecture of the bfd. (sunos4_callback) calls the
+# 	function bfd_set_arch_mach rather than stuffing stuff directly
+# 	into the bfd. (sunos4_write_object_contents), changed names of
+# 	accessor functions.
+#
+# 	* aoutx.h: (set_arch_mach) now calls bfd_default_set_arch_mach to
+# 	setup the environment.
+#
+# 	* archive.c: (bfd_slurp_coff_armap) coff archives always have the
+# 	headers in big endian format, regardless of the endianess of the
+# 	host or target.
+#
+# 	* archures.c: totally changed. Now an architecture is represented
+# 	with a pointer to an info structure rather than an enumerated type
+# 	and a long. The old info is available as two elements in the
+# 	structure.  Future enhancements to architecure support will
+# 	involve pointers to methods being placed into the info structure.
+#
+# 	* bfd.c: changed the definition of the bfd structure for the new
+# 	architecture stuff.
+#
+# 	* bout.c: (b_out_set_arch_mach) changed to use the new
+# 	architecture mechanism.
+#
+# 	* coffcode.h: (coff_set_arch_mach, coff_set_flags) changed to use
+# 	the new architecture mechanism.
+#
+# 	* configure.in: added h8 stuff.
+#
+# 	* ieee.c: too many changes to note.  Now ieee files written with
+# 	bfd gas and ld can be read by gld and ieee only linkers and
+# 	simulators.
+#
+# 	* libbfd.c, libbfd.h: changed prototype of bfd_write.
+#
+# 	* newsos3.c: (newos3_callback) now calls bfd_set_arch_mach rather
+# 	than fixing the structure directly.
+#
+# 	* oasys.c: (oasys_object_p) now calls bfd_default_set_arch_mach rather
+# 	than fixing the structure directly.
+#
+# 	* opncls.c: (new_bfd) makes sure that bfd_init has been called
+# 	before opening a bfd.
+#
+# 	* srec.c: (srec_set_arch_mach) now calls bfd_default_set_arch_mach
+# 	rather than fixing the structure directly.
+#
+# 	* targets.c: (target_vector) now by defining SELECT_VECS (perhaps
+# 	in the t/hmake file) a user can select which backends they want
+# 	linked with bfd without changing the source.
+#
+# 	* init.c: new, looks after initializing modules.
+#
+# 	* howto.c: for future use, will allow an application to work out
+# 	what cookie to use as a handle on a relcoatio howto.
+#
+# Revision 1.27  1991/09/17  00:36:44  rich
+# Updated from configure.in.
+#
+# Revision 1.26  1991/09/13  02:19:42  gnu
+# Propagate
+#
+# Revision 1.37  1991/09/12  00:33:18  rich
+# Add gdbm.
+#
+# Revision 1.36  1991/08/31  03:54:36  rich
+# Welcome emacs to the mess.
+#
+# Revision 1.35  1991/08/26  04:29:31  rich
+# Welcome cvs to the big time.
+#
+# Revision 1.34  1991/08/25  23:40:23  rich
+# rcs enters the soup.
+#
+# Revision 1.33  1991/08/25  21:48:38  rich
+# Adding diff to the fray.
+#
+# Revision 1.32  1991/08/25  20:18:20  rich
+# Adding grep to the fray.
+#
+# Revision 1.31  1991/08/23  04:50:57  rich
 # Minor config polish.
 #
 # Revision 1.22  1991/08/23  03:31:43  rich

@@ -104,7 +104,7 @@ asection *input_section;
 			value -= reloc_entry->address;
 			if (value > 0x3ffff) {
 				fprintf(stderr,"Relocation problem : ");
-				fprintf(stderr,"Jmp/call too far; to %d from %s\n",
+				fprintf(stderr,"Jmp/call too far; to %s from %s\n",
 					symbol_in->name,abfd->filename); 
 				return(bfd_reloc_outofrange);
 			}

@@ -59,6 +59,17 @@ icoff.c
 ieee.c
 libaout.h
 libbfd-in.h
+cpu-a29k.c
+cpu-i386.c
+cpu-m68k.c
+cpu-mips.c
+cpu-vax.c
+cpu-h8300.c
+cpu-i960.c
+cpu-m88k.c
+init.c
+howto.c
+cpu-sparc.c
 libbfd.c
 libbfd.h
 libcoff-in.h
@@ -102,7 +113,78 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.20  1991/09/04 03:59:15  rich
+# Revision 1.21  1991/10/01 03:55:34  steve
+# Insert the incidentals and things I forgot to ci last time, same log message:
+#
+# Mon Sep 30 15:13:46 1991  Steve Chamberlain  (steve at cygnus.com)
+#
+# 	* cpu-a29k.c, cpu-i386.c, cpu-m68k.c, cpu-mips.c, cpu-vax.c,
+# 	cpu-h8300.c, cpu-i960.c, cpu-m88k.c, cpu-sparc.c: added. These
+# 	files will eventually contain processor specific bits for bfd,
+# 	like strange relocation information and dis/assembly.  So far only
+# 	the H8 has been even partially done.  This work also ties in with
+# 	the change in handling architectures.
+#
+# 	* amdcoff.c: (a29k_reloc) fix error message.
+#
+# 	* aout-f1.h: (choose_reloc_size) now calls bfd_get_arch to
+# 	discover the architecture of the bfd. (sunos4_callback) calls the
+# 	function bfd_set_arch_mach rather than stuffing stuff directly
+# 	into the bfd. (sunos4_write_object_contents), changed names of
+# 	accessor functions.
+#
+# 	* aoutx.h: (set_arch_mach) now calls bfd_default_set_arch_mach to
+# 	setup the environment.
+#
+# 	* archive.c: (bfd_slurp_coff_armap) coff archives always have the
+# 	headers in big endian format, regardless of the endianess of the
+# 	host or target.
+#
+# 	* archures.c: totally changed. Now an architecture is represented
+# 	with a pointer to an info structure rather than an enumerated type
+# 	and a long. The old info is available as two elements in the
+# 	structure.  Future enhancements to architecure support will
+# 	involve pointers to methods being placed into the info structure.
+#
+# 	* bfd.c: changed the definition of the bfd structure for the new
+# 	architecture stuff.
+#
+# 	* bout.c: (b_out_set_arch_mach) changed to use the new
+# 	architecture mechanism.
+#
+# 	* coffcode.h: (coff_set_arch_mach, coff_set_flags) changed to use
+# 	the new architecture mechanism.
+#
+# 	* configure.in: added h8 stuff.
+#
+# 	* ieee.c: too many changes to note.  Now ieee files written with
+# 	bfd gas and ld can be read by gld and ieee only linkers and
+# 	simulators.
+#
+# 	* libbfd.c, libbfd.h: changed prototype of bfd_write.
+#
+# 	* newsos3.c: (newos3_callback) now calls bfd_set_arch_mach rather
+# 	than fixing the structure directly.
+#
+# 	* oasys.c: (oasys_object_p) now calls bfd_default_set_arch_mach rather
+# 	than fixing the structure directly.
+#
+# 	* opncls.c: (new_bfd) makes sure that bfd_init has been called
+# 	before opening a bfd.
+#
+# 	* srec.c: (srec_set_arch_mach) now calls bfd_default_set_arch_mach
+# 	rather than fixing the structure directly.
+#
+# 	* targets.c: (target_vector) now by defining SELECT_VECS (perhaps
+# 	in the t/hmake file) a user can select which backends they want
+# 	linked with bfd without changing the source.
+#
+# 	* init.c: new, looks after initializing modules.
+#
+# 	* howto.c: for future use, will allow an application to work out
+# 	what cookie to use as a handle on a relcoatio howto.
+#
+# Revision 1.20  1991/09/04  03:59:15  rich
 # Added "recover"'ability.
 #
 # Revision 1.19  1991/09/03  22:21:30  rich
