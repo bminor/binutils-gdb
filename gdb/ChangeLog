@@ -1,3 +1,7 @@
+2000-03-29  Jason Merrill  <jason@casey.cygnus.com>
+
+	* configure.in: -linux-gnu*, not -linux-gnu.
+
 Tue Mar 28 18:28:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (remote_threads_extra_info): Replace qfThreadExtraInfo

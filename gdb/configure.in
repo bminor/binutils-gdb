@@ -810,7 +810,7 @@ if test "${shared}" = "true"; then
     ;;
   *-*-linux*aout*)
     ;;
-  *-*-linux* | *-pc-linux-gnu)
+  *-*-linux* | *-pc-linux-gnu*)
     HLDFLAGS='-Wl,-rpath,$(libdir)'
     ;;
   *-*-solaris*)
