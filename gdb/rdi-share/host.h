@@ -214,4 +214,7 @@ extern double strtod(const char *str, char **ptr);
 
 #endif
 
+/* Needs to be supplied by the host.  */
+extern void Fail (const char *, ...);
+
 /* end of host.h */

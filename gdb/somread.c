@@ -37,6 +37,8 @@
 
 /* Various things we might complain about... */
 
+static int init_import_symbols (struct objfile *objfile);
+
 static void som_symfile_init (struct objfile *);
 
 static void som_new_init (struct objfile *);
@@ -45,11 +47,10 @@ static void som_symfile_read (struct objfile *, int);
 
 static void som_symfile_finish (struct objfile *);
 
-static void
-som_symtab_read (bfd *, struct objfile *, struct section_offsets *);
+static void som_symtab_read (bfd *, struct objfile *,
+			     struct section_offsets *);
 
-static void
-som_symfile_offsets (struct objfile *, struct section_addr_info *);
+static void som_symfile_offsets (struct objfile *, struct section_addr_info *);
 
 /* FIXME: These should really be in a common header somewhere */
 
@@ -354,6 +355,14 @@ som_symfile_read (struct objfile *objfile, int mainline)
 
   som_symtab_read (abfd, objfile, objfile->section_offsets);
 
+  /* Install any minimal symbols that have been collected as the current
+     minimal symbols for this objfile. 
+     Further symbol-reading is done incrementally, file-by-file,
+     in a step known as "psymtab-to-symtab" expansion. hp-symtab-read.c
+     contains the code to do the actual DNTT scanning and symtab building. */
+  install_minimal_symbols (objfile);
+  do_cleanups (back_to);
+
   /* Now read information from the stabs debug sections.
      This is a no-op for SOM.
      Perhaps it is intended for some kind of mixed STABS/SOM
@@ -367,16 +376,8 @@ som_symfile_read (struct objfile *objfile, int mainline)
      together with a scan of the GNTT. See hp-psymtab-read.c. */
   hpread_build_psymtabs (objfile, mainline);
 
-  /* Install any minimal symbols that have been collected as the current
-     minimal symbols for this objfile. 
-     Further symbol-reading is done incrementally, file-by-file,
-     in a step known as "psymtab-to-symtab" expansion. hp-symtab-read.c
-     contains the code to do the actual DNTT scanning and symtab building. */
-  install_minimal_symbols (objfile);
-
   /* Force hppa-tdep.c to re-read the unwind descriptors.  */
   objfile->obj_private = NULL;
-  do_cleanups (back_to);
 }
 
 /* Initialize anything that needs initializing when a completely new symbol
@@ -429,9 +430,10 @@ som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
   int i;
   CORE_ADDR text_addr;
 
-  objfile->num_sections = SECT_OFF_MAX;
+  objfile->num_sections = bfd_count_sections (objfile->obfd);
   objfile->section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
+    obstack_alloc (&objfile->psymbol_obstack, 
+		   SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
 
   /* FIXME: ezannoni 2000-04-20 The section names in SOM are not
      .text, .data, etc, but $TEXT$, $DATA$,... We should initialize
@@ -451,12 +453,12 @@ som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
       /* Note: Here is OK to compare with ".text" because this is the
          name that gdb itself gives to that section, not the SOM
          name. */
-      for (i = 0; i < SECT_OFF_MAX && addrs->other[i].name; i++)
+      for (i = 0; i < objfile->num_sections && addrs->other[i].name; i++)
 	if (strcmp (addrs->other[i].name, ".text") == 0)
 	  break;
       text_addr = addrs->other[i].addr;
 
-      for (i = 0; i < SECT_OFF_MAX; i++)
+      for (i = 0; i < objfile->num_sections; i++)
 	(objfile->section_offsets)->offsets[i] = text_addr;
     }
 }
@@ -467,7 +469,7 @@ som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
    not defined there.  (Variables that are imported are dealt
    with as "loc_indirect" vars.)
    Return value = number of import symbols read in. */
-int
+static int
 init_import_symbols (struct objfile *objfile)
 {
   unsigned int import_list;
@@ -475,9 +477,9 @@ init_import_symbols (struct objfile *objfile)
   unsigned int string_table;
   unsigned int string_table_size;
   char *string_buffer;
-  register int i;
-  register int j;
-  register int k;
+  int i;
+  int j;
+  int k;
   asection *text_section;	/* section handle */
   unsigned int dl_header[12];	/* SOM executable header */
 
@@ -595,9 +597,9 @@ init_export_symbols (struct objfile *objfile)
   unsigned int string_table;
   unsigned int string_table_size;
   char *string_buffer;
-  register int i;
-  register int j;
-  register int k;
+  int i;
+  int j;
+  int k;
   asection *text_section;	/* section handle */
   unsigned int dl_header[12];	/* SOM executable header */
 

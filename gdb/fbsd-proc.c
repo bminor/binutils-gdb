@@ -1,5 +1,6 @@
 /* FreeBSD-specific methods for using the /proc file system.
-   Copyright 2002 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -48,34 +49,29 @@ child_pid_to_exec_file (int pid)
 }
 
 static int
-read_mapping (FILE *mapfile,
-	      unsigned long *start,
-	      unsigned long *end,
+read_mapping (FILE *mapfile, unsigned long *start, unsigned long *end,
 	      char *protection)
 {
+  /* FreeBSD 5.1-RELEASE uses a 256-byte buffer.  */
+  char buf[256];
   int resident, privateresident;
   unsigned long obj;
-  int ref_count, shadow_count;
-  unsigned flags;
-  char cow[5], access[4];
-  char type[8];
-  int ret;
+  int ret = EOF;
 
-  /* The layout is described in /usr/src/miscfs/procfs/procfs_map.c.  */
-  ret = fscanf (mapfile, "%lx %lx %d %d %lx %s %d %d %x %s %s %s\n",
-		start, end,
-		&resident, &privateresident, &obj,
-		protection,
-		&ref_count, &shadow_count, &flags, cow, access, type);
+  /* As of FreeBSD 5.0-RELEASE, the layout is described in
+     /usr/src/sys/fs/procfs/procfs_map.c.  Somewhere in 5.1-CURRENT a
+     new column was added to the procfs map.  Therefore we can't use
+     fscanf since we need to support older releases too.  */
+  if (fgets (buf, sizeof buf, mapfile) != NULL)
+    ret = sscanf (buf, "%lx %lx %d %d %lx %s", start, end,
+		  &resident, &privateresident, &obj, protection);
 
   return (ret != 0 && ret != EOF);
 }
 
 static int
-fbsd_find_memory_regions (int (*func) (CORE_ADDR,
-				       unsigned long,
-				       int, int, int,
-				       void *),
+fbsd_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
+				       int, int, int, void *),
 			  void *obfd)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
@@ -127,21 +123,20 @@ fbsd_make_corefile_notes (bfd *obfd, int *note_size)
   gregset_t gregs;
   fpregset_t fpregs;
   char *note_data = NULL;
+  Elf_Internal_Ehdr *i_ehdrp;
+
+  /* Put a "FreeBSD" label in the ELF header.  */
+  i_ehdrp = elf_elfheader (obfd);
+  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
 
   fill_gregset (&gregs, -1);
-  note_data = (char *) elfcore_write_prstatus (obfd,
-					       note_data,
-					       note_size,
-					       ptid_get_pid (inferior_ptid),
-					       stop_signal,
-					       &gregs);
+  note_data = elfcore_write_prstatus (obfd, note_data, note_size,
+				      ptid_get_pid (inferior_ptid),
+				      stop_signal, &gregs);
 
   fill_fpregset (&fpregs, -1);
-  note_data = (char *) elfcore_write_prfpreg (obfd,
-					      note_data,
-					      note_size,
-					      &fpregs,
-					      sizeof (fpregs));
+  note_data = elfcore_write_prfpreg (obfd, note_data, note_size,
+				     &fpregs, sizeof (fpregs));
 
   if (get_exec_file (0))
     {
@@ -151,11 +146,8 @@ fbsd_make_corefile_notes (bfd *obfd, int *note_size)
       if (get_inferior_args ())
 	psargs = reconcat (psargs, psargs, " ", get_inferior_args (), NULL);
 
-      note_data = (char *) elfcore_write_prpsinfo (obfd,
-						   note_data,
-						   note_size,
-						   fname,
-						   psargs);
+      note_data = elfcore_write_prpsinfo (obfd, note_data, note_size,
+					  fname, psargs);
     }
 
   make_cleanup (xfree, note_data);

@@ -1,6 +1,7 @@
 /* Output generating routines for GDB CLI.
 
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Inc.
 
    Contributed by Cygnus Solutions.
    Written by Fernando Nasser for Cygnus.
@@ -35,6 +36,7 @@ struct ui_out_data
     int line;
     int start_of_line;
   };
+typedef struct ui_out_data tui_out_data;
 
 /* These are the CLI output functions */
 
@@ -88,6 +90,7 @@ static struct ui_out_impl tui_ui_out_impl =
   tui_message,
   tui_wrap_hint,
   tui_flush,
+  NULL,
   0, /* Does not need MI hacks (i.e. needs CLI hacks).  */
 };
 
@@ -112,11 +115,11 @@ tui_table_begin (struct ui_out *uiout, int nbrofcols,
 		 int nr_rows,
 		 const char *tblid)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (nr_rows == 0)
     data->suppress_output = 1;
   else
-    /* Only the table suppresses the output and, fortunatly, a table
+    /* Only the table suppresses the output and, fortunately, a table
        is not a recursive data structure. */
     gdb_assert (data->suppress_output == 0);
 }
@@ -126,7 +129,7 @@ tui_table_begin (struct ui_out *uiout, int nbrofcols,
 void
 tui_table_body (struct ui_out *uiout)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
   /* first, close the table header line */
@@ -138,7 +141,7 @@ tui_table_body (struct ui_out *uiout)
 void
 tui_table_end (struct ui_out *uiout)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   data->suppress_output = 0;
 }
 
@@ -149,7 +152,7 @@ tui_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 		  const char *col_name,
 		  const char *colhdr)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
   tui_field_string (uiout, 0, width, alignment, 0, colhdr);
@@ -163,7 +166,7 @@ tui_begin (struct ui_out *uiout,
 	   int level,
 	   const char *id)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
 }
@@ -175,7 +178,7 @@ tui_end (struct ui_out *uiout,
 	 enum ui_out_type type,
 	 int level)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
 }
@@ -189,7 +192,7 @@ tui_field_int (struct ui_out *uiout, int fldno, int width,
 {
   char buffer[20];		/* FIXME: how many chars long a %d can become? */
 
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
 
@@ -212,7 +215,7 @@ tui_field_skip (struct ui_out *uiout, int fldno, int width,
 		enum ui_align alignment,
 		const char *fldname)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
   tui_field_string (uiout, fldno, width, alignment, fldname, "");
@@ -232,7 +235,7 @@ tui_field_string (struct ui_out *uiout,
   int before = 0;
   int after = 0;
 
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
 
@@ -290,7 +293,7 @@ tui_field_fmt (struct ui_out *uiout, int fldno,
 	       const char *format,
 	       va_list args)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
 
@@ -304,7 +307,7 @@ tui_field_fmt (struct ui_out *uiout, int fldno,
 void
 tui_spaces (struct ui_out *uiout, int numspaces)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
   print_spaces_filtered (numspaces, data->stream);
@@ -313,7 +316,7 @@ tui_spaces (struct ui_out *uiout, int numspaces)
 void
 tui_text (struct ui_out *uiout, const char *string)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
   data->start_of_line ++;
@@ -335,7 +338,7 @@ void
 tui_message (struct ui_out *uiout, int verbosity,
 	     const char *format, va_list args)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
   if (ui_out_get_verblvl (uiout) >= verbosity)
@@ -345,7 +348,7 @@ tui_message (struct ui_out *uiout, int verbosity,
 void
 tui_wrap_hint (struct ui_out *uiout, char *identstring)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
   wrap_here (identstring);
@@ -354,7 +357,7 @@ tui_wrap_hint (struct ui_out *uiout, char *identstring)
 void
 tui_flush (struct ui_out *uiout)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   gdb_flush (data->stream);
 }
 
@@ -369,7 +372,7 @@ out_field_fmt (struct ui_out *uiout, int fldno,
 	       const char *fldname,
 	       const char *format,...)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   va_list args;
 
   va_start (args, format);
@@ -383,7 +386,7 @@ out_field_fmt (struct ui_out *uiout, int fldno,
 static void
 field_separator (void)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  tui_out_data *data = ui_out_data (uiout);
   fputc_filtered (' ', data->stream);
 }
 
@@ -394,7 +397,7 @@ tui_out_new (struct ui_file *stream)
 {
   int flags = 0;
 
-  struct ui_out_data *data = XMALLOC (struct ui_out_data);
+  tui_out_data *data = XMALLOC (tui_out_data);
   data->stream = stream;
   data->suppress_output = 0;
   data->line = -1;

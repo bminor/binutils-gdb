@@ -1,5 +1,5 @@
 /* Target-dependent code for OpenBSD/i386.
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -23,6 +23,7 @@
 #include "arch-utils.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "osabi.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -65,7 +66,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   i386obsd_supply_reg (regs, -1);
 
   /* Floating point registers.  */
-  i387_supply_fsave (fsave);
+  i387_supply_fsave (current_regcache, -1, fsave);
 }
 
 static struct core_fns i386obsd_core_fns =
@@ -82,8 +83,25 @@ CORE_ADDR i386obsd_sigtramp_start = 0xbfbfdf20;
 CORE_ADDR i386obsd_sigtramp_end = 0xbfbfdff0;
 
 /* From <machine/signal.h>.  */
-int i386obsd_sc_pc_offset = 44;
-int i386obsd_sc_sp_offset = 56;
+int i386obsd_sc_reg_offset[I386_NUM_GREGS] =
+{
+  10 * 4,			/* %eax */
+  9 * 4,			/* %ecx */
+  8 * 4,			/* %edx */
+  7 * 4,			/* %ebx */
+  14 * 4,			/* %esp */
+  6 * 4,			/* %ebp */
+  5 * 4,			/* %esi */
+  4 * 4,			/* %edi */
+  11 * 4,			/* %eip */
+  13 * 4,			/* %eflags */
+  12 * 4,			/* %cs */
+  15 * 4,			/* %ss */
+  3 * 4,			/* %ds */
+  2 * 4,			/* %es */
+  1 * 4,			/* %fs */
+  0 * 4				/* %gs */
+};
 
 static void 
 i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -102,8 +120,8 @@ i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* OpenBSD has a `struct sigcontext' that's different from the
      origional 4.3 BSD.  */
-  tdep->sc_pc_offset = i386obsd_sc_pc_offset;
-  tdep->sc_sp_offset = i386obsd_sc_sp_offset;
+  tdep->sc_reg_offset = i386obsd_sc_reg_offset;
+  tdep->sc_num_regs = I386_NUM_GREGS;
 }
 
 void
@@ -117,6 +135,6 @@ _initialize_i386obsd_tdep (void)
      expected.  */
 #define GDB_OSABI_OPENBSD_AOUT GDB_OSABI_NETBSD_AOUT
 
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_OPENBSD_AOUT,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_OPENBSD_AOUT,
 			  i386obsd_init_abi);
 }

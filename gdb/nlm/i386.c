@@ -92,7 +92,7 @@ do_status (char *ptr, struct StackFrame *frame)
   ptr = mem2hex (&frame->ExceptionESP, ptr + 3, 4, 0);
   *ptr++ = ';';
 
-  sprintf (ptr, "%02x:", FP_REGNUM);
+  sprintf (ptr, "%02x:", DEPRECATED_FP_REGNUM);
   ptr = mem2hex (&frame->ExceptionEBP, ptr + 3, 4, 0);
   *ptr++ = ';';
 

@@ -36,6 +36,7 @@
 #include "gdb_stat.h"
 #include "regcache.h"
 #include <ctype.h>
+#include "mips-tdep.h"
 
 
 /* Breakpoint types.  Values 0, 1, and 2 must agree with the watch
@@ -483,7 +484,7 @@ mips_error (char *string,...)
   wrap_here ("");		/* Force out any buffered output */
   gdb_flush (gdb_stdout);
   if (error_pre_print)
-    fprintf_filtered (gdb_stderr, error_pre_print);
+    fputs_filtered (error_pre_print, gdb_stderr);
   vfprintf_filtered (gdb_stderr, string, args);
   fprintf_filtered (gdb_stderr, "\n");
   va_end (args);
@@ -536,7 +537,7 @@ fputs_readable (const char *string, struct ui_file *file)
    timed out.  TIMEOUT specifies timeout value in seconds.
  */
 
-int
+static int
 mips_expect_timeout (const char *string, int timeout)
 {
   const char *p = string;
@@ -592,7 +593,7 @@ mips_expect_timeout (const char *string, int timeout)
    mips_expect_timeout if a different timeout value is needed.
  */
 
-int
+static int
 mips_expect (const char *string)
 {
   return mips_expect_timeout (string, remote_timeout);
@@ -600,7 +601,7 @@ mips_expect (const char *string)
 
 /* Read the required number of characters into the given buffer (which
    is assumed to be large enough). The only failure is a timeout. */
-int
+static int
 mips_getstring (char *string, int n)
 {
   char *p = string;
@@ -816,9 +817,9 @@ mips_receive_trailer (unsigned char *trlr, int *pgarbage, int *pch, int timeout)
 static int
 mips_cksum (const unsigned char *hdr, const unsigned char *data, int len)
 {
-  register const unsigned char *p;
-  register int c;
-  register int cksum;
+  const unsigned char *p;
+  int c;
+  int cksum;
 
   cksum = 0;
 
@@ -843,7 +844,7 @@ mips_send_packet (const char *s, int get_ack)
 {
   /* unsigned */ int len;
   unsigned char *packet;
-  register int cksum;
+  int cksum;
   int try;
 
   len = strlen (s);
@@ -1283,13 +1284,13 @@ mips_request (int cmd,
 }
 
 static void
-mips_initialize_cleanups (PTR arg)
+mips_initialize_cleanups (void *arg)
 {
   mips_initializing = 0;
 }
 
 static void
-mips_exit_cleanups (PTR arg)
+mips_exit_cleanups (void *arg)
 {
   mips_exiting = 0;
 }
@@ -1494,8 +1495,6 @@ mips_initialize (void)
      the request itself succeeds or fails.  */
 
   mips_request ('r', 0, 0, &err, mips_receive_wait, NULL);
-  set_current_frame (create_new_frame (read_fp (), read_pc ()));
-  select_frame (get_current_frame ());
 }
 
 /* Open a connection to the remote board.  */
@@ -1608,21 +1607,17 @@ device is attached to the target board (e.g., /dev/ttya).\n"
   /* FIXME: Should we call start_remote here?  */
 
   /* Try to figure out the processor model if possible.  */
-  ptype = mips_read_processor_type ();
-  if (ptype)
-    mips_set_processor_type_command (xstrdup (ptype), 0);
+  deprecated_mips_set_processor_regs_hack ();
 
-/* This is really the job of start_remote however, that makes an assumption
-   that the target is about to print out a status message of some sort.  That
-   doesn't happen here (in fact, it may not be possible to get the monitor to
-   send the appropriate packet).  */
+  /* This is really the job of start_remote however, that makes an
+     assumption that the target is about to print out a status message
+     of some sort.  That doesn't happen here (in fact, it may not be
+     possible to get the monitor to send the appropriate packet).  */
 
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  set_current_frame (create_new_frame (read_fp (), stop_pc));
-  select_frame (get_current_frame ());
-  print_stack_frame (selected_frame, -1, 1);
+  print_stack_frame (get_selected_frame (), -1, 1);
   xfree (serial_port_name);
 }
 
@@ -1721,7 +1716,7 @@ mips_resume (ptid_t ptid, int step, enum target_signal siggnal)
 
 /* Return the signal corresponding to SIG, where SIG is the number which
    the MIPS protocol uses for the signal.  */
-enum target_signal
+static enum target_signal
 mips_signal_from_protocol (int sig)
 {
   /* We allow a few more signals than the IDT board actually returns, on
@@ -1791,19 +1786,19 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
 		    &rpc, &rfp, &rsp, flags);
   if (nfields >= 3)
     {
-      char buf[MAX_REGISTER_RAW_SIZE];
+      char buf[MAX_REGISTER_SIZE];
 
-      store_unsigned_integer (buf, REGISTER_RAW_SIZE (PC_REGNUM), rpc);
+      store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM), rpc);
       supply_register (PC_REGNUM, buf);
 
-      store_unsigned_integer (buf, REGISTER_RAW_SIZE (PC_REGNUM), rfp);
+      store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM), rfp);
       supply_register (30, buf);	/* This register they are avoiding and so it is unnamed */
 
-      store_unsigned_integer (buf, REGISTER_RAW_SIZE (SP_REGNUM), rsp);
+      store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (SP_REGNUM), rsp);
       supply_register (SP_REGNUM, buf);
 
-      store_unsigned_integer (buf, REGISTER_RAW_SIZE (FP_REGNUM), 0);
-      supply_register (FP_REGNUM, buf);
+      store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (DEPRECATED_FP_REGNUM), 0);
+      supply_register (DEPRECATED_FP_REGNUM, buf);
 
       if (nfields == 9)
 	{
@@ -1906,26 +1901,24 @@ mips_map_regno (int regno)
 {
   if (regno < 32)
     return regno;
-  if (regno >= FP0_REGNUM && regno < FP0_REGNUM + 32)
-    return regno - FP0_REGNUM + 32;
-  switch (regno)
-    {
-    case PC_REGNUM:
-      return REGNO_OFFSET + 0;
-    case CAUSE_REGNUM:
-      return REGNO_OFFSET + 1;
-    case HI_REGNUM:
-      return REGNO_OFFSET + 2;
-    case LO_REGNUM:
-      return REGNO_OFFSET + 3;
-    case FCRCS_REGNUM:
-      return REGNO_OFFSET + 4;
-    case FCRIR_REGNUM:
-      return REGNO_OFFSET + 5;
-    default:
-      /* FIXME: Is there a way to get the status register?  */
-      return 0;
-    }
+  if (regno >= mips_regnum (current_gdbarch)->fp0
+      && regno < mips_regnum (current_gdbarch)->fp0 + 32)
+    return regno - mips_regnum (current_gdbarch)->fp0 + 32;
+  else if (regno == mips_regnum (current_gdbarch)->pc)
+    return REGNO_OFFSET + 0;
+  else if (regno == mips_regnum (current_gdbarch)->cause)
+    return REGNO_OFFSET + 1;
+  else if (regno == mips_regnum (current_gdbarch)->hi)
+    return REGNO_OFFSET + 2;
+  else if (regno == mips_regnum (current_gdbarch)->lo)
+    return REGNO_OFFSET + 3;
+  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+    return REGNO_OFFSET + 4;
+  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+    return REGNO_OFFSET + 5;
+  else
+    /* FIXME: Is there a way to get the status register?  */
+    return 0;
 }
 
 /* Fetch the remote registers.  */
@@ -1943,9 +1936,9 @@ mips_fetch_registers (int regno)
       return;
     }
 
-  if (regno == FP_REGNUM || regno == ZERO_REGNUM)
-    /* FP_REGNUM on the mips is a hack which is just supposed to read
-       zero (see also mips-nat.c).  */
+  if (regno == DEPRECATED_FP_REGNUM || regno == ZERO_REGNUM)
+    /* DEPRECATED_FP_REGNUM on the mips is a hack which is just
+       supposed to read zero (see also mips-nat.c).  */
     val = 0;
   else
     {
@@ -1972,11 +1965,11 @@ mips_fetch_registers (int regno)
     }
 
   {
-    char buf[MAX_REGISTER_RAW_SIZE];
+    char buf[MAX_REGISTER_SIZE];
 
     /* We got the number the register holds, but gdb expects to see a
        value in the target byte ordering.  */
-    store_unsigned_integer (buf, REGISTER_RAW_SIZE (regno), val);
+    store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regno), val);
     supply_register (regno, buf);
   }
 }
@@ -2251,13 +2244,13 @@ mips_mourn_inferior (void)
 /* We can write a breakpoint and read the shadow contents in one
    operation.  */
 
-/* Insert a breakpoint.  On targets that don't have built-in breakpoint
-   support, we read the contents of the target location and stash it,
-   then overwrite it with a breakpoint instruction.  ADDR is the target
-   location in the target machine.  CONTENTS_CACHE is a pointer to 
-   memory allocated for saving the target contents.  It is guaranteed
-   by the caller to be long enough to save sizeof BREAKPOINT bytes (this
-   is accomplished via BREAKPOINT_MAX).  */
+/* Insert a breakpoint.  On targets that don't have built-in
+   breakpoint support, we read the contents of the target location and
+   stash it, then overwrite it with a breakpoint instruction.  ADDR is
+   the target location in the target machine.  CONTENTS_CACHE is a
+   pointer to memory allocated for saving the target contents.  It is
+   guaranteed by the caller to be long enough to save the breakpoint
+   length returned by BREAKPOINT_FROM_PC.  */
 
 static int
 mips_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
@@ -2405,7 +2398,7 @@ pmon_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
    implements the TARGET_CAN_USE_HARDWARE_WATCHPOINT macro.  */
 
 int
-remote_mips_can_use_hardware_watchpoint (int cnt)
+mips_can_use_watchpoint (int type, int cnt, int othertype)
 {
   return cnt < MAX_LSI_BREAKPOINTS && strcmp (target_shortname, "lsi") == 0;
 }
@@ -2437,7 +2430,7 @@ calculate_mask (CORE_ADDR addr, int len)
 /* Insert a hardware breakpoint.  This works only on LSI targets, which
    implement ordinary breakpoints using hardware facilities.  */
 
-int
+static int
 remote_mips_insert_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   if (strcmp (target_shortname, "lsi") == 0)
@@ -2450,7 +2443,7 @@ remote_mips_insert_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
 /* Remove a hardware breakpoint.  This works only on LSI targets, which
    implement ordinary breakpoints using hardware facilities.  */
 
-int
+static int
 remote_mips_remove_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   if (strcmp (target_shortname, "lsi") == 0)
@@ -2464,7 +2457,7 @@ remote_mips_remove_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
    watchpoint. */
 
 int
-remote_mips_set_watchpoint (CORE_ADDR addr, int len, int type)
+mips_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
   if (set_breakpoint (addr, len, type))
     return -1;
@@ -2473,7 +2466,7 @@ remote_mips_set_watchpoint (CORE_ADDR addr, int len, int type)
 }
 
 int
-remote_mips_remove_watchpoint (CORE_ADDR addr, int len, int type)
+mips_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
   if (clear_breakpoint (addr, len, type))
     return -1;
@@ -2482,7 +2475,7 @@ remote_mips_remove_watchpoint (CORE_ADDR addr, int len, int type)
 }
 
 int
-remote_mips_stopped_by_watchpoint (void)
+mips_stopped_by_watchpoint (void)
 {
   return hit_watchpoint;
 }
@@ -3443,7 +3436,7 @@ mips_load (char *file, int from_tty)
       /* Work around problem where PMON monitor updates the PC after a load
          to a different value than GDB thinks it has. The following ensures
          that the write_pc() WILL update the PC value: */
-      register_valid[PC_REGNUM] = 0;
+      deprecated_register_valid[PC_REGNUM] = 0;
     }
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
@@ -3477,6 +3470,8 @@ pmon_command (char *args, int from_tty)
   printf_filtered ("Received packet: %s\n", buf);
 }
 
+extern initialize_file_ftype _initialize_remote_mips; /* -Wmissing-prototypes */
+
 void
 _initialize_remote_mips (void)
 {
@@ -3492,6 +3487,10 @@ _initialize_remote_mips (void)
   mips_ops.to_files_info = mips_files_info;
   mips_ops.to_insert_breakpoint = mips_insert_breakpoint;
   mips_ops.to_remove_breakpoint = mips_remove_breakpoint;
+  mips_ops.to_insert_watchpoint = mips_insert_watchpoint;
+  mips_ops.to_remove_watchpoint = mips_remove_watchpoint;
+  mips_ops.to_stopped_by_watchpoint = mips_stopped_by_watchpoint;
+  mips_ops.to_can_use_hw_breakpoint = mips_can_use_watchpoint;
   mips_ops.to_kill = mips_kill;
   mips_ops.to_load = mips_load;
   mips_ops.to_create_inferior = mips_create_inferior;

@@ -1,5 +1,5 @@
 /* YACC parser for Ada expressions, for GDB.
-   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994, 1997, 2000
+   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994, 1997, 2000, 2003
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -49,6 +49,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h" /* Required by objfiles.h.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 #include "frame.h"
+#include "block.h"
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
@@ -801,7 +802,7 @@ write_object_renaming (orig_left_context, renaming)
      struct block* orig_left_context;
      struct symbol* renaming;
 {
-  const char* qualification = SYMBOL_NAME (renaming);
+  const char* qualification = DEPRECATED_SYMBOL_NAME (renaming);
   const char* simple_tail;
   const char* expr = TYPE_FIELD_NAME (SYMBOL_TYPE (renaming), 0);
   const char* suffix;
@@ -822,7 +823,7 @@ write_object_renaming (orig_left_context, renaming)
 	  simple_tail += 1;
 	  break;
 	} 
-      else if (STREQN (simple_tail, "__", 2))
+      else if (DEPRECATED_STREQN (simple_tail, "__", 2))
 	{
 	  simple_tail += 2;
 	  break;
@@ -839,7 +840,7 @@ write_object_renaming (orig_left_context, renaming)
      parser-defs.h, implemented in parse.c */    
   strncpy (name, expr, suffix-expr);
   name[suffix-expr] = '\000';
-  sym = lookup_symbol (name, orig_left_context, VAR_NAMESPACE, 0, NULL);
+  sym = lookup_symbol (name, orig_left_context, VAR_DOMAIN, 0, NULL);
   /*  if (sym == NULL) 
     error ("Could not find renamed variable: %s", ada_demangle (name));
   */
@@ -892,7 +893,7 @@ write_object_renaming (orig_left_context, renaming)
 	    suffix = end;
 
 	    index_sym = 
-	      lookup_symbol (index_name, NULL, VAR_NAMESPACE, 0, NULL);
+	      lookup_symbol (index_name, NULL, VAR_DOMAIN, 0, NULL);
 	    if (index_sym == NULL)
 	      error ("Could not find %s", index_name);
 	    write_var_from_sym (NULL, block_found, sym);
@@ -943,7 +944,7 @@ write_object_renaming (orig_left_context, renaming)
 
  BadEncoding:
   error ("Internal error in encoding of renaming declaration: %s",
-	 SYMBOL_NAME (renaming));
+	 DEPRECATED_SYMBOL_NAME (renaming));
 }
 
 /* Convert the character literal whose ASCII value would be VAL to the
@@ -961,7 +962,7 @@ convert_char_literal (struct type* type, LONGEST val)
   sprintf (name, "QU%02x", (int) val);
   for (f = 0; f < TYPE_NFIELDS (type); f += 1) 
     {
-      if (STREQ (name, TYPE_FIELD_NAME (type, f)))
+      if (DEPRECATED_STREQ (name, TYPE_FIELD_NAME (type, f)))
 	return TYPE_FIELD_BITPOS (type, f);
     }
   return val;

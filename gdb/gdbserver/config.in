@@ -25,6 +25,9 @@
 /* Define if you have the <sgtty.h> header file.  */
 #undef HAVE_SGTTY_H
 
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
+
 /* Define if you have the <string.h> header file.  */
 #undef HAVE_STRING_H
 
@@ -45,6 +48,9 @@
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
+
+/* Define if strerror is not declared in system header files. */
+#undef NEED_DECLARATION_STRERROR
 
 /* Define if <sys/procfs.h> has lwpid_t. */
 #undef HAVE_LWPID_T

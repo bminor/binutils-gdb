@@ -1,4 +1,4 @@
-# Copyright (C) 1996, 1997, 2002 Free Software Foundation, Inc.
+# Copyright (C) 1996, 1997, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,41 +38,7 @@ set binfile ${objdir}/${subdir}/${testfile}
 # carriage return)
 set horiz "\[^\n\r\]*"
 
-set built_binfile 0
-
-# Default to the usual (only?) -lpthread on GNU/Linux to quiet noise
-if [istarget "*-*-linux*"] then {
-    set possible_libs "-lpthread -lpthreads -lthread"
-} else {
-    set possible_libs "-lpthreads -lpthread -lthread"
-}
-
-set why_msg "unrecognized error"
-foreach lib $possible_libs {
-    set options "debug"
-    lappend options "incdir=${objdir}/${subdir}"
-    lappend options "libs=$lib"
-    set ccout [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $options]
-    switch -regexp -- $ccout {
-	".*no posix threads support.*" {
-	    set why_msg "missing threads include file"
-	    break
-	}
-	".*cannot open -lpthread.*" {
-	    set why_msg "missing runtime threads library"
-	}
-	".*Can't find library for -lpthread.*" {
-	    set why_msg "missing runtime threads library"
-	}
-	{^$} {
-	    pass "successfully compiled posix threads test case"
-	    set built_binfile 1
-	    break
-	}
-    }
-}
-if {$built_binfile == "0"} {
-    unsupported "Couldn't compile ${srcfile}, ${why_msg}"
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "incdir=${objdir}"]] != "" } {
     return -1
 }
 
@@ -126,6 +92,13 @@ proc test_all_threads { name kill } {
 		pass "all threads ran once ($name)"
 	    } else {
 		fail "all threads ran once ($name) (total $i threads ran)"
+	    }
+	}
+	-re "Program received signal SIGTRAP.*(Thread \[0-9\]* \\(zombie\\)|0x00000000 in ).*$gdb_prompt $" {
+	    if { $kill == 1 } {
+		kfail "gdb/1265" "Running threads ($name) (zombie thread)"
+	    } else {
+		fail "Running threads ($name) (unknown output)"
 	    }
 	}
 	-re "$gdb_prompt" {

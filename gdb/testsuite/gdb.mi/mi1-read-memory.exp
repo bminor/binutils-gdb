@@ -1,4 +1,4 @@
-#   Copyright 1999, 2000 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,19 +48,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 mi_run_to_main
 
 #mi_next "do initialization"
-send_gdb "101-exec-next\n"
-gdb_expect {
-    -re "101\\^running\r\n$mi_gdb_prompt" {
-	gdb_expect {
-	    -re "\[\r\n\]*101\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*mi-read-memory.c\",line=\"20\"\}.*$mi_gdb_prompt$" \
-		    { pass "do initialization" }
-	    -re ".*$mi_gdb_prompt$" {fail "do initialization (2)"}
-	    timeout {fail "do initialization (timeout 2)"}
-        }
-    }
-      -re ".*$mi_gdb_prompt$" {fail "do initialization (1)"}
-      timeout {fail "do initialization (timeout 1)"}
-}
+
+mi_next_to "main" "" "mi-read-memory.c" "20" "next at main"
 
 mi_gdb_test "1-data-read-memory" \
 	"1\\^error,msg=\".*\"" \

@@ -27,6 +27,8 @@
 #define	SYS_stat	38
 #define	SYS_pipe	42
 #define	SYS_execve	59
+#define	SYS_truncate	129
+#define	SYS_ftruncate	130
 #define	SYS_argc	172
 #define	SYS_argnlen	173
 #define	SYS_argn	174

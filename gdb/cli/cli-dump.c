@@ -31,6 +31,7 @@
 #include "gdb_assert.h"
 #include <ctype.h>
 #include "target.h"
+#include <readline/readline.h>
 
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
@@ -131,7 +132,8 @@ bfd_openr_with_cleanup (const char *filename, const char *target)
 {
   bfd *ibfd;
 
-  if ((ibfd = bfd_openr (filename, target)) == NULL)
+  ibfd = bfd_openr (filename, target);
+  if (ibfd == NULL)
     error ("Failed to open %s: %s.", filename, 
 	   bfd_errmsg (bfd_get_error ()));
 
@@ -149,7 +151,8 @@ bfd_openw_with_cleanup (char *filename, const char *target, char *mode)
 
   if (*mode == 'w')	/* Write: create new file */
     {
-      if ((obfd = bfd_openw (filename, target)) == NULL)
+      obfd = bfd_openw (filename, target);
+      if (obfd == NULL)
 	error ("Failed to open %s: %s.", filename, 
 	       bfd_errmsg (bfd_get_error ()));
       make_cleanup_bfd_close (obfd);
@@ -694,6 +697,8 @@ binary_append_command (char *cmd, int from_tty)
   printf_unfiltered ("\"append binary\" must be followed by a subcommand.\n");
   help_list (binary_append_cmdlist, "append binary ", -1, gdb_stdout);
 }
+
+extern initialize_file_ftype _initialize_cli_dump; /* -Wmissing-prototypes */
 
 void
 _initialize_cli_dump (void)

@@ -1,6 +1,6 @@
 /* Tracing functionality for remote targets in custom GDB protocol
 
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -37,6 +37,8 @@
 #include "regcache.h"
 #include "completer.h"
 #include "gdb-events.h"
+#include "block.h"
+#include "dictionary.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -73,12 +75,6 @@ extern int addressprint;	/* Print machine addresses? */
  */  
 
 extern void output_command (char *, int);
-
-/* If this definition isn't overridden by the header files, assume
-   that isatty and fileno exist on this system.  */
-#ifndef ISATTY
-#define ISATTY(FP)	(isatty (fileno (FP)))
-#endif
 
 /* 
    Tracepoint.c:
@@ -270,7 +266,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
       set_internalvar (lookup_internalvar ("trace_file"),
 		       value_from_pointer (charstar, (LONGEST) 0));
       set_internalvar (lookup_internalvar ("trace_line"),
-		       value_from_pointer (builtin_type_int, (LONGEST) - 1));
+		       value_from_longest (builtin_type_int, (LONGEST) - 1));
       return;
     }
 
@@ -285,12 +281,12 @@ set_traceframe_context (CORE_ADDR trace_pc)
 
   /* save func name as "$trace_func", a debugger variable visible to users */
   if (traceframe_fun == NULL ||
-      SYMBOL_NAME (traceframe_fun) == NULL)
+      DEPRECATED_SYMBOL_NAME (traceframe_fun) == NULL)
     set_internalvar (lookup_internalvar ("trace_func"),
 		     value_from_pointer (charstar, (LONGEST) 0));
   else
     {
-      len = strlen (SYMBOL_NAME (traceframe_fun));
+      len = strlen (DEPRECATED_SYMBOL_NAME (traceframe_fun));
       func_range = create_range_type (func_range,
 				      builtin_type_int, 0, len - 1);
       func_string = create_array_type (func_string,
@@ -298,7 +294,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
       func_val = allocate_value (func_string);
       VALUE_TYPE (func_val) = func_string;
       memcpy (VALUE_CONTENTS_RAW (func_val),
-	      SYMBOL_NAME (traceframe_fun),
+	      DEPRECATED_SYMBOL_NAME (traceframe_fun),
 	      len);
       func_val->modifiable = 0;
       set_internalvar (lookup_internalvar ("trace_func"), func_val);
@@ -338,7 +334,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
 static struct tracepoint *
 set_raw_tracepoint (struct symtab_and_line sal)
 {
-  register struct tracepoint *t, *tc;
+  struct tracepoint *t, *tc;
   struct cleanup *old_chain;
 
   t = (struct tracepoint *) xmalloc (sizeof (struct tracepoint));
@@ -514,7 +510,7 @@ tracepoints_info (char *tpnum_exp, int from_tty)
 	  if (sym)
 	    {
 	      fputs_filtered ("in ", gdb_stdout);
-	      fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
+	      fputs_filtered (SYMBOL_PRINT_NAME (sym), gdb_stdout);
 	      wrap_here (wrap_indent);
 	      fputs_filtered (" at ", gdb_stdout);
 	    }
@@ -965,14 +961,14 @@ validate_actionline (char **line, struct tracepoint *t)
 	      if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
 		{
 		  warning ("constant %s (value %ld) will not be collected.",
-			   SYMBOL_NAME (exp->elts[2].symbol),
+			   DEPRECATED_SYMBOL_NAME (exp->elts[2].symbol),
 			   SYMBOL_VALUE (exp->elts[2].symbol));
 		  return BADLINE;
 		}
 	      else if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_OPTIMIZED_OUT)
 		{
 		  warning ("%s is optimized away and cannot be collected.",
-			   SYMBOL_NAME (exp->elts[2].symbol));
+			   DEPRECATED_SYMBOL_NAME (exp->elts[2].symbol));
 		  return BADLINE;
 		}
 	    }
@@ -1120,7 +1116,7 @@ memrange_sortmerge (struct collection_list *memranges)
 	{
 	  if (memranges->list[a].type == memranges->list[b].type &&
 	      memranges->list[b].start - memranges->list[a].end <=
-	      MAX_REGISTER_VIRTUAL_SIZE)
+	      MAX_REGISTER_SIZE)
 	    {
 	      /* memrange b starts before memrange a ends; merge them.  */
 	      if (memranges->list[b].end > memranges->list[a].end)
@@ -1192,11 +1188,11 @@ collect_symbol (struct collection_list *collect, struct symbol *sym,
     {
     default:
       printf_filtered ("%s: don't know symbol class %d\n",
-		       SYMBOL_NAME (sym), SYMBOL_CLASS (sym));
+		       DEPRECATED_SYMBOL_NAME (sym), SYMBOL_CLASS (sym));
       break;
     case LOC_CONST:
       printf_filtered ("constant %s (value %ld) will not be collected.\n",
-		       SYMBOL_NAME (sym), SYMBOL_VALUE (sym));
+		       DEPRECATED_SYMBOL_NAME (sym), SYMBOL_VALUE (sym));
       break;
     case LOC_STATIC:
       offset = SYMBOL_VALUE_ADDRESS (sym);
@@ -1206,7 +1202,7 @@ collect_symbol (struct collection_list *collect, struct symbol *sym,
 
 	  sprintf_vma (tmp, offset);
 	  printf_filtered ("LOC_STATIC %s: collect %ld bytes at %s.\n",
-			   SYMBOL_NAME (sym), len, tmp /* address */);
+			   DEPRECATED_SYMBOL_NAME (sym), len, tmp /* address */);
 	}
       add_memrange (collect, -1, offset, len);	/* 0 == memory */
       break;
@@ -1214,18 +1210,18 @@ collect_symbol (struct collection_list *collect, struct symbol *sym,
     case LOC_REGPARM:
       reg = SYMBOL_VALUE (sym);
       if (info_verbose)
-	printf_filtered ("LOC_REG[parm] %s: ", SYMBOL_NAME (sym));
+	printf_filtered ("LOC_REG[parm] %s: ", DEPRECATED_SYMBOL_NAME (sym));
       add_register (collect, reg);
       /* check for doubles stored in two registers */
       /* FIXME: how about larger types stored in 3 or more regs? */
       if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FLT &&
-	  len > REGISTER_RAW_SIZE (reg))
+	  len > DEPRECATED_REGISTER_RAW_SIZE (reg))
 	add_register (collect, reg + 1);
       break;
     case LOC_REF_ARG:
       printf_filtered ("Sorry, don't know how to do LOC_REF_ARG yet.\n");
       printf_filtered ("       (will not collect %s)\n",
-		       SYMBOL_NAME (sym));
+		       DEPRECATED_SYMBOL_NAME (sym));
       break;
     case LOC_ARG:
       reg = frame_regno;
@@ -1233,7 +1229,7 @@ collect_symbol (struct collection_list *collect, struct symbol *sym,
       if (info_verbose)
 	{
 	  printf_filtered ("LOC_LOCAL %s: Collect %ld bytes at offset ",
-			   SYMBOL_NAME (sym), len);
+			   DEPRECATED_SYMBOL_NAME (sym), len);
 	  printf_vma (offset);
 	  printf_filtered (" from frame ptr reg %d\n", reg);
 	}
@@ -1245,7 +1241,7 @@ collect_symbol (struct collection_list *collect, struct symbol *sym,
       if (info_verbose)
 	{
 	  printf_filtered ("LOC_REGPARM_ADDR %s: Collect %ld bytes at offset ",
-			   SYMBOL_NAME (sym), len);
+			   DEPRECATED_SYMBOL_NAME (sym), len);
 	  printf_vma (offset);
 	  printf_filtered (" from reg %d\n", reg);
 	}
@@ -1258,7 +1254,7 @@ collect_symbol (struct collection_list *collect, struct symbol *sym,
       if (info_verbose)
 	{
 	  printf_filtered ("LOC_LOCAL %s: Collect %ld bytes at offset ",
-			   SYMBOL_NAME (sym), len);
+			   DEPRECATED_SYMBOL_NAME (sym), len);
 	  printf_vma (offset);
 	  printf_filtered (" from frame ptr reg %d\n", reg);
 	}
@@ -1271,18 +1267,18 @@ collect_symbol (struct collection_list *collect, struct symbol *sym,
       if (info_verbose)
 	{
 	  printf_filtered ("LOC_BASEREG %s: collect %ld bytes at offset ",
-			   SYMBOL_NAME (sym), len);
+			   DEPRECATED_SYMBOL_NAME (sym), len);
 	  printf_vma (offset);
 	  printf_filtered (" from basereg %d\n", reg);
 	}
       add_memrange (collect, reg, offset, len);
       break;
     case LOC_UNRESOLVED:
-      printf_filtered ("Don't know LOC_UNRESOLVED %s\n", SYMBOL_NAME (sym));
+      printf_filtered ("Don't know LOC_UNRESOLVED %s\n", DEPRECATED_SYMBOL_NAME (sym));
       break;
     case LOC_OPTIMIZED_OUT:
       printf_filtered ("%s has been optimized out of existence.\n",
-		       SYMBOL_NAME (sym));
+		       DEPRECATED_SYMBOL_NAME (sym));
       break;
     }
 }
@@ -1294,19 +1290,20 @@ add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
 {
   struct symbol *sym;
   struct block *block;
-  int i, count = 0;
+  struct dict_iterator iter;
+  int count = 0;
 
   block = block_for_pc (pc);
   while (block != 0)
     {
       QUIT;			/* allow user to bail out with ^C */
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
 	  switch (SYMBOL_CLASS (sym))
 	    {
 	    default:
 	      warning ("don't know how to trace local symbol %s", 
-		       SYMBOL_NAME (sym));
+		       DEPRECATED_SYMBOL_NAME (sym));
 	    case LOC_LOCAL:
 	    case LOC_STATIC:
 	    case LOC_REGISTER:
@@ -1862,7 +1859,7 @@ finish_tfind_command (char *msg,
   struct symbol *old_func;
   char *reply;
 
-  old_frame_addr = FRAME_FP (get_current_frame ());
+  old_frame_addr = get_frame_base (get_current_frame ());
   old_func = find_pc_function (read_pc ());
 
   putpkt (msg);
@@ -1948,13 +1945,14 @@ finish_tfind_command (char *msg,
 
       if (old_func == find_pc_function (read_pc ()) &&
 	  (old_frame_addr == 0 ||
-	   FRAME_FP (get_current_frame ()) == 0 ||
-	   old_frame_addr == FRAME_FP (get_current_frame ())))
+	   get_frame_base (get_current_frame ()) == 0 ||
+	   old_frame_addr == get_frame_base (get_current_frame ())))
 	source_only = -1;
       else
 	source_only = 1;
 
-      print_stack_frame (selected_frame, frame_relative_level (selected_frame),
+      print_stack_frame (deprecated_selected_frame,
+			 frame_relative_level (deprecated_selected_frame),
 			 source_only);
       do_displays ();
     }
@@ -2104,7 +2102,7 @@ trace_find_line_command (char *args, int from_tty)
     {
       if (args == 0 || *args == 0)
 	{
-	  sal = find_pc_line ((get_current_frame ())->pc, 0);
+	  sal = find_pc_line (get_frame_pc (get_current_frame ()), 0);
 	  sals.nelts = 1;
 	  sals.sals = (struct symtab_and_line *)
 	    xmalloc (sizeof (struct symtab_and_line));
@@ -2337,7 +2335,8 @@ scope_info (char *args, int from_tty)
   struct minimal_symbol *msym;
   struct block *block;
   char **canonical, *symname, *save_args = args;
-  int i, j, count = 0;
+  struct dict_iterator iter;
+  int j, count = 0;
 
   if (args == 0 || *args == 0)
     error ("requires an argument (function, line or *addr) to define a scope");
@@ -2353,14 +2352,14 @@ scope_info (char *args, int from_tty)
   while (block != 0)
     {
       QUIT;			/* allow user to bail out with ^C */
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
 	  QUIT;			/* allow user to bail out with ^C */
 	  if (count == 0)
 	    printf_filtered ("Scope for %s:\n", save_args);
 	  count++;
 
-	  symname = SYMBOL_NAME (sym);
+	  symname = DEPRECATED_SYMBOL_NAME (sym);
 	  if (symname == NULL || *symname == '\0')
 	    continue;		/* probably botched, certainly useless */
 
@@ -2436,7 +2435,7 @@ scope_info (char *args, int from_tty)
 			       REGISTER_NAME (SYMBOL_BASEREG (sym)));
 	      break;
 	    case LOC_UNRESOLVED:
-	      msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, NULL);
+	      msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, NULL);
 	      if (msym == NULL)
 		printf_filtered ("Unresolved Static");
 	      else
@@ -2512,7 +2511,7 @@ trace_dump_command (char *args, int from_tty)
      to the tracepoint PC.  If not, then the current frame was
      collected during single-stepping.  */
 
-  stepping_frame = (t->address != read_pc ());
+  stepping_frame = (t->address != (read_pc () - DECR_PC_AFTER_BREAK));
 
   for (action = t->actions; action; action = action->next)
     {

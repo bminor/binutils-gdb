@@ -45,6 +45,7 @@ set srcfile  ${testfile}.c
 set srcfile2 ${testfile}2.c
 set binfile  ${objdir}/${subdir}/${testfile}
 set binfile2 ${objdir}/${subdir}/${testfile}2
+set escapedbinfile  [string_to_regexp ${objdir}/${subdir}/${testfile}]
 set cleanupfile ${objdir}/${subdir}/${testfile}.awk
 
 #execute_anywhere "rm -f ${binfile} ${binfile2}"
@@ -63,30 +64,11 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-# Because we can't attach over nfs, copy binfile to /tmp/${binfile}.${pid}
-# and replace binfile with a symbolic link
-
-  set pid [pid]
-  exec /bin/cp -f ${binfile} /tmp/attach1.${pid}
-  exec rm -f ${binfile}
-  set binfile /tmp/attach1.${pid}
-#  exec ln -s /tmp/attach1.${pid} ${binfile}
-
 # Build the in-system-call test
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {debug}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
-
-# Because we can't attach over nfs, copy binfile2 to /tmp/${binfile2}.${pid}
-# and replace binfile2 with a symbolic link
-
-  set pid [pid]
-  exec cp -f ${binfile2} /tmp/attach2.${pid} 
-  exec rm -f ${binfile2}
-  set binfile2 /tmp/attach2.${pid}
-#  exec ln -s /tmp/attach2.${pid} ${binfile2}
-
 
 if [get_compiler_info ${binfile}] {
     return -1
@@ -95,6 +77,7 @@ if [get_compiler_info ${binfile}] {
 proc do_attach_tests {} {
    global gdb_prompt
    global binfile
+   global escapedbinfile
    global srcfile
    global testfile
    global objdir
@@ -125,30 +108,42 @@ proc do_attach_tests {} {
    }
 
    # Verify that we cannot attach to what appears to be a valid
-   # process ID, but is a process that doesn't exist.  (I don't
-   # believe any process is ever assigned #0, at least on HPUX.)
+   # process ID, but is a process that doesn't exist.  Traditionally,
+   # most systems didn't have a process with ID 0, so we take that as
+   # the default.  However, there are a few exceptions.
    #
-   send_gdb "attach 0\n"
+   set boguspid 0
+   if { [istarget "*-*-*bsd*"] } {
+       # In FreeBSD 5.0, PID 0 is used for "swapper".  Use -1 instead
+       # (which should have the desired effect on any version of
+       # FreeBSD, and probably other *BSD's too).
+       set boguspid -1
+   }
+   send_gdb "attach $boguspid\n"
    gdb_expect {
-      -re "Attaching to.*, process 0.*No such process.*$gdb_prompt $"\
-                      {
-                        # Response expected on HP-UX 10.20 (i.e., ptrace-based).
-                        pass "attach to nonexistent process is prohibited"
-                      }
-      -re "Attaching to.*, process 0 failed.*Hint.*$gdb_prompt $"\
-                      {
-                        # Response expected on HP-UX 11.0 (i.e., ttrace-based).
-                        pass "attach to nonexistent process is prohibited"
-                      }
-      -re "Attaching to.*, process 0.*denied.*$gdb_prompt $"\
-                      {pass "attach to nonexistent process is prohibited"}
-      -re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $"\
-                      {
-                        # Response expected from /proc-based systems.
-                        pass "attach to nonexistent process is prohibited"
-                      }
-      -re "$gdb_prompt $" {fail "attach to nonexistent process is prohibited"}
-      timeout         {fail "(timeout) attach to nonexistent process is prohibited"}
+       -re "Attaching to.*, process $boguspid.*No such process.*$gdb_prompt $"\
+	       {
+	   # Response expected on ptrace-based systems (i.e. HP-UX 10.20).
+	   pass "attach to nonexistent process is prohibited"
+       }
+       -re "Attaching to.*, process $boguspid failed.*Hint.*$gdb_prompt $"\
+	       {
+	   # Response expected on ttrace-based systems (i.e. HP-UX 11.0).
+	   pass "attach to nonexistent process is prohibited"
+       }
+       -re "Attaching to.*, process $boguspid.*denied.*$gdb_prompt $"\
+	       {pass "attach to nonexistent process is prohibited"}
+       -re "Attaching to.*, process $boguspid.*not permitted.*$gdb_prompt $"\
+	       {pass "attach to nonexistent process is prohibited"}
+       -re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $"\
+	       {
+	   # Response expected from /proc-based systems.
+	   pass "attach to nonexistent process is prohibited"
+       }
+       -re "$gdb_prompt $" {fail "attach to nonexistent process is prohibited"}
+       timeout {
+	   fail "(timeout) attach to nonexistent process is prohibited"
+       }
    }
 
    # Verify that we can attach to the process by first giving its
@@ -164,13 +159,13 @@ proc do_attach_tests {} {
       -re "Load new symbol table from.*y or n.*$" {
          send_gdb "y\n"
          gdb_expect {
-            -re "Reading symbols from $binfile\.\.\.*done.*$gdb_prompt $"\
+            -re "Reading symbols from $escapedbinfile\.\.\.*done.*$gdb_prompt $"\
                             {pass "(re)set file, before attach1"}
             -re "$gdb_prompt $" {fail "(re)set file, before attach1"}
             timeout         {fail "(timeout) (re)set file, before attach1"}
          }
       }
-      -re "Reading symbols from $binfile\.\.\.*done.*$gdb_prompt $"\
+      -re "Reading symbols from $escapedbinfile\.\.\.*done.*$gdb_prompt $"\
                       {pass "set file, before attach1"}
       -re "$gdb_prompt $" {fail "set file, before attach1"}
       timeout         {fail "(timeout) set file, before attach1"}
@@ -178,7 +173,7 @@ proc do_attach_tests {} {
 
    send_gdb "attach $testpid\n"
    gdb_expect {
-      -re "Attaching to program.*`?$binfile'?, process $testpid.*main.*at .*$srcfile:.*$gdb_prompt $"\
+      -re "Attaching to program.*`?$escapedbinfile'?, process $testpid.*main.*at .*$srcfile:.*$gdb_prompt $"\
                       {pass "attach1, after setting file"}
       -re "$gdb_prompt $" {fail "attach1, after setting file"}
       timeout         {fail "(timeout) attach1, after setting file"}
@@ -199,7 +194,7 @@ proc do_attach_tests {} {
    #
    send_gdb "detach\n"
    gdb_expect {
-      -re "Detaching from program: .*$binfile.*$gdb_prompt $"\
+      -re "Detaching from program: .*$escapedbinfile.*$gdb_prompt $"\
                       {pass "attach1 detach"}
       -re "$gdb_prompt $" {fail "attach1 detach"}
       timeout         {fail "(timeout) attach1 detach"}
@@ -241,7 +236,7 @@ proc do_attach_tests {} {
    #
    send_gdb "attach $testpid\n"
    gdb_expect {
-      -re "Attaching to process $testpid.*Reading symbols from $binfile.*main.*at .*$gdb_prompt $"\
+      -re "Attaching to process $testpid.*Reading symbols from $escapedbinfile.*main.*at .*$gdb_prompt $"\
                       {pass "attach2"}
       -re "$gdb_prompt $" {fail "attach2"}
       timeout         {fail "(timeout) attach2"}
@@ -342,7 +337,7 @@ proc do_attach_tests {} {
 
    send_gdb "attach $testpid\n"
    gdb_expect {
-      -re "Attaching to process $testpid.*Reading symbols from $binfile.*main.*at .*$gdb_prompt $"\
+      -re "Attaching to process $testpid.*Reading symbols from $escapedbinfile.*main.*at .*$gdb_prompt $"\
                       {pass "attach when process' a.out not in cwd"}
       -re "$gdb_prompt $" {fail "attach when process' a.out not in cwd"}
       timeout         {fail "(timeout) attach when process' a.out not in cwd"}
@@ -428,19 +423,7 @@ do_attach_tests
 gdb_exit
 gdb_start
 
-# this seems not necessary. - guo
-#
-# # Since we have moved the executable to /tmp, it will be hard for gdb
-# # to find the object file/executable to read the symbols.  This is
-# # a known limitation.  We try and get the name of the executable the
-# # process is running from a variety of methods, but none is foolproof.
-# # Using "dir" will get us the symbols.
-# 
-# gdb_test "dir ./gdb.base" ".*" "set up directory before attach"
 gdb_reinitialize_dir $srcdir/$subdir
 do_call_attach_tests
-
-# Cleanup the files placed in /tmp and the symlinks
-  remote_exec build "rm -f ${binfile} ${binfile2} /tmp/attach1.${pid} /tmp/attach2.${pid}"
 
 return 0

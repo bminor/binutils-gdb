@@ -1,7 +1,8 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,6 +38,7 @@
 #include "event-loop.h"
 #include "ui-out.h"
 
+#include "interps.h"
 #include "main.h"
 
 /* If nonzero, display time usage both at startup and for each command.  */
@@ -53,11 +55,10 @@ int display_space;
    processes UI events asynchronously. */
 int event_loop_p = 1;
 
-/* Has an interpreter been specified and if so, which. */
+/* The selected interpreter.  This will be used as a set command
+   variable, so it should always be malloc'ed - since
+   do_setshow_command will free it. */
 char *interpreter_p;
-
-/* Whether this is the command line version or not */
-int tui_version = 0;
 
 /* Whether xdb commands will be handled */
 int xdb_commands = 0;
@@ -65,14 +66,17 @@ int xdb_commands = 0;
 /* Whether dbx commands will be handled */
 int dbx_commands = 0;
 
+/* System root path, used to find libraries etc.  */
+char *gdb_sysroot = 0;
+
 struct ui_file *gdb_stdout;
 struct ui_file *gdb_stderr;
 struct ui_file *gdb_stdlog;
 struct ui_file *gdb_stdtarg;
-
-/* Used to initialize error() - defined in utils.c */
-
-extern void error_init (void);
+struct ui_file *gdb_stdin;
+/* target IO streams */
+struct ui_file *gdb_stdtargin;
+struct ui_file *gdb_stdtargerr;
 
 /* Whether to enable writing into executable and core files */
 extern int write_files;
@@ -90,10 +94,7 @@ extern char *external_editor_command;
 static int
 captured_command_loop (void *data)
 {
-  if (command_loop_hook == NULL)
-    command_loop ();
-  else
-    command_loop_hook ();
+  current_interp_command_loop ();
   /* FIXME: cagney/1999-11-05: A correct command_loop() implementaton
      would clean things up (restoring the cleanup chain) to the state
      they were just prior to the call.  Technically, this means that
@@ -149,7 +150,7 @@ captured_main (void *data)
   struct stat homebuf, cwdbuf;
   char *homedir, *homeinit;
 
-  register int i;
+  int i;
 
   long time_at_startup = get_run_time ();
 
@@ -164,13 +165,12 @@ captured_main (void *data)
 
   START_PROGRESS (argv[0], 0);
 
-#ifdef MPW
-  /* Do all Mac-specific setup. */
-  mac_init ();
-#endif /* MPW */
-
   /* This needs to happen before the first use of malloc.  */
-  init_malloc ((PTR) NULL);
+  init_malloc (NULL);
+
+#ifdef HAVE_SBRK
+  lim_at_start = (char *) sbrk (0);
+#endif
 
 #if defined (ALIGN_STACK_ON_STARTUP)
   i = (int) &count & 0x3;
@@ -197,9 +197,46 @@ captured_main (void *data)
   gdb_stderr = stdio_fileopen (stderr);
   gdb_stdlog = gdb_stderr;	/* for moment */
   gdb_stdtarg = gdb_stderr;	/* for moment */
+  gdb_stdin = stdio_fileopen (stdin);
+  gdb_stdtargerr = gdb_stderr;	/* for moment */
+  gdb_stdtargin = gdb_stdin;	/* for moment */
 
   /* initialize error() */
   error_init ();
+
+  /* Set the sysroot path.  */
+#ifdef TARGET_SYSTEM_ROOT_RELOCATABLE
+  gdb_sysroot = make_relative_prefix (argv[0], BINDIR, TARGET_SYSTEM_ROOT);
+  if (gdb_sysroot)
+    {
+      struct stat s;
+      int res = 0;
+
+      if (stat (gdb_sysroot, &s) == 0)
+	if (S_ISDIR (s.st_mode))
+	  res = 1;
+
+      if (res == 0)
+	{
+	  xfree (gdb_sysroot);
+	  gdb_sysroot = TARGET_SYSTEM_ROOT;
+	}
+    }
+  else
+    gdb_sysroot = TARGET_SYSTEM_ROOT;
+#else
+#if defined (TARGET_SYSTEM_ROOT)
+  gdb_sysroot = TARGET_SYSTEM_ROOT;
+#else
+  gdb_sysroot = "";
+#endif
+#endif
+
+  /* There will always be an interpreter.  Either the one passed into
+     this captured main, or one specified by the user at start up, or
+     the console.  Initialize the interpreter to the one requested by 
+     the application.  */
+  interpreter_p = xstrdup (context->interpreter_p);
 
   /* Parse arguments and options.  */
   {
@@ -207,12 +244,21 @@ captured_main (void *data)
     /* When var field is 0, use flag field to record the equivalent
        short option (or arbitrary numbers starting at 10 for those
        with no equivalent).  */
+    enum {
+      OPT_SE = 10,
+      OPT_CD,
+      OPT_ANNOTATE,
+      OPT_STATISTICS,
+      OPT_TUI,
+      OPT_NOWINDOWS,
+      OPT_WINDOWS
+    };
     static struct option long_options[] =
     {
       {"async", no_argument, &event_loop_p, 1},
       {"noasync", no_argument, &event_loop_p, 0},
 #if defined(TUI)
-      {"tui", no_argument, &tui_version, 1},
+      {"tui", no_argument, 0, OPT_TUI},
 #endif
       {"xdb", no_argument, &xdb_commands, 1},
       {"dbx", no_argument, &dbx_commands, 1},
@@ -234,9 +280,9 @@ captured_main (void *data)
       {"fullname", no_argument, 0, 'f'},
       {"f", no_argument, 0, 'f'},
 
-      {"annotate", required_argument, 0, 12},
+      {"annotate", required_argument, 0, OPT_ANNOTATE},
       {"help", no_argument, &print_help, 1},
-      {"se", required_argument, 0, 10},
+      {"se", required_argument, 0, OPT_SE},
       {"symbols", required_argument, 0, 's'},
       {"s", required_argument, 0, 's'},
       {"exec", required_argument, 0, 'e'},
@@ -258,21 +304,17 @@ captured_main (void *data)
       {"i", required_argument, 0, 'i'},
       {"directory", required_argument, 0, 'd'},
       {"d", required_argument, 0, 'd'},
-      {"cd", required_argument, 0, 11},
+      {"cd", required_argument, 0, OPT_CD},
       {"tty", required_argument, 0, 't'},
       {"baud", required_argument, 0, 'b'},
       {"b", required_argument, 0, 'b'},
-      {"nw", no_argument, &use_windows, 0},
-      {"nowindows", no_argument, &use_windows, 0},
-      {"w", no_argument, &use_windows, 1},
-      {"windows", no_argument, &use_windows, 1},
-      {"statistics", no_argument, 0, 13},
+      {"nw", no_argument, NULL, OPT_NOWINDOWS},
+      {"nowindows", no_argument, NULL, OPT_NOWINDOWS},
+      {"w", no_argument, NULL, OPT_WINDOWS},
+      {"windows", no_argument, NULL, OPT_WINDOWS},
+      {"statistics", no_argument, 0, OPT_STATISTICS},
       {"write", no_argument, &write_files, 1},
       {"args", no_argument, &set_args, 1},
-/* Allow machine descriptions to add more options... */
-#ifdef ADDITIONAL_OPTIONS
-      ADDITIONAL_OPTIONS
-#endif
       {0, no_argument, 0, 0}
     };
 
@@ -294,21 +336,37 @@ captured_main (void *data)
 	  case 0:
 	    /* Long option that just sets a flag.  */
 	    break;
-	  case 10:
+	  case OPT_SE:
 	    symarg = optarg;
 	    execarg = optarg;
 	    break;
-	  case 11:
+	  case OPT_CD:
 	    cdarg = optarg;
 	    break;
-	  case 12:
+	  case OPT_ANNOTATE:
 	    /* FIXME: what if the syntax is wrong (e.g. not digits)?  */
 	    annotation_level = atoi (optarg);
 	    break;
-	  case 13:
+	  case OPT_STATISTICS:
 	    /* Enable the display of both time and space usage.  */
 	    display_time = 1;
 	    display_space = 1;
+	    break;
+	  case OPT_TUI:
+	    /* --tui is equivalent to -i=tui.  */
+	    xfree (interpreter_p);
+	    interpreter_p = xstrdup ("tui");
+	    break;
+	  case OPT_WINDOWS:
+	    /* FIXME: cagney/2003-03-01: Not sure if this option is
+               actually useful, and if it is, what it should do.  */
+	    use_windows = 1;
+	    break;
+	  case OPT_NOWINDOWS:
+	    /* -nw is equivalent to -i=console.  */
+	    xfree (interpreter_p);
+	    interpreter_p = xstrdup (INTERP_CONSOLE);
+	    use_windows = 0;
 	    break;
 	  case 'f':
 	    annotation_level = 1;
@@ -359,7 +417,8 @@ extern int gdbtk_test (char *);
 	    }
 #endif /* GDBTK */
 	  case 'i':
-	    interpreter_p = optarg;
+	    xfree (interpreter_p);
+	    interpreter_p = xstrdup (optarg);
 	    break;
 	  case 'd':
 	    dirarg[ndir++] = optarg;
@@ -413,9 +472,6 @@ extern int gdbtk_test (char *);
 	    }
 	    break;
 
-#ifdef ADDITIONAL_OPTION_CASES
-	    ADDITIONAL_OPTION_CASES
-#endif
 	  case '?':
 	    fprintf_unfiltered (gdb_stderr,
 			_("Use `%s --help' for a complete list of options.\n"),
@@ -428,18 +484,7 @@ extern int gdbtk_test (char *);
     if (print_help || print_version)
       {
 	use_windows = 0;
-#ifdef TUI
-	/* Disable the TUI as well.  */
-	tui_version = 0;
-#endif
       }
-
-#ifdef TUI
-    /* An explicit --tui flag overrides the default UI, which is the
-       window system.  */
-    if (tui_version)
-      use_windows = 0;
-#endif
 
     if (set_args)
       {
@@ -490,7 +535,10 @@ extern int gdbtk_test (char *);
   gdb_init (argv[0]);
 
   /* Do these (and anything which might call wrap_here or *_filtered)
-     after initialize_all_files.  */
+     after initialize_all_files() but before the interpreter has been
+     installed.  Otherwize the help/version messages will be eaten by
+     the interpreter's output handler.  */
+
   if (print_version)
     {
       print_gdb_version (gdb_stdout);
@@ -506,7 +554,45 @@ extern int gdbtk_test (char *);
       exit (0);
     }
 
-  if (!quiet)
+  /* FIXME: cagney/2003-02-03: The big hack (part 1 of 2) that lets
+     GDB retain the old MI1 interpreter startup behavior.  Output the
+     copyright message before the interpreter is installed.  That way
+     it isn't encapsulated in MI output.  */
+  if (!quiet && strcmp (interpreter_p, INTERP_MI1) == 0)
+    {
+      /* Print all the junk at the top, with trailing "..." if we are about
+         to read a symbol file (possibly slowly).  */
+      print_gdb_version (gdb_stdout);
+      if (symarg)
+	printf_filtered ("..");
+      wrap_here ("");
+      gdb_flush (gdb_stdout);	/* Force to screen during slow operations */
+    }
+
+
+  /* Install the default UI.  All the interpreters should have had a
+     look at things by now.  Initialize the default interpreter. */
+
+  {
+    /* Find it.  */
+    struct interp *interp = interp_lookup (interpreter_p);
+    if (interp == NULL)
+      error ("Interpreter `%s' unrecognized", interpreter_p);
+    /* Install it.  */
+    if (!interp_set (interp))
+      {
+        fprintf_unfiltered (gdb_stderr,
+			    "Interpreter `%s' failed to initialize.\n",
+                            interpreter_p);
+        exit (1);
+      }
+  }
+
+  /* FIXME: cagney/2003-02-03: The big hack (part 2 of 2) that lets
+     GDB retain the old MI1 interpreter startup behavior.  Output the
+     copyright message after the interpreter is installed when it is
+     any sane interpreter.  */
+  if (!quiet && !current_interp_named_p (INTERP_MI1))
     {
       /* Print all the junk at the top, with trailing "..." if we are about
          to read a symbol file (possibly slowly).  */
@@ -566,7 +652,7 @@ extern int gdbtk_test (char *);
 
   if (execarg != NULL
       && symarg != NULL
-      && STREQ (execarg, symarg))
+      && strcmp (execarg, symarg) == 0)
     {
       /* The exec file and the symbol-file are the same.  If we can't
          open it, better only print one error message.
@@ -611,10 +697,6 @@ extern int gdbtk_test (char *);
 
   if (ttyarg != NULL)
     catch_command_errors (tty_command, ttyarg, !batch, RETURN_MASK_ALL);
-
-#ifdef ADDITIONAL_OPTION_HANDLER
-  ADDITIONAL_OPTION_HANDLER;
-#endif
 
   /* Error messages should no longer be distinguished with extra output. */
   error_pre_print = NULL;
@@ -736,7 +818,9 @@ gdb_main (struct captured_main_args *args)
 {
   use_windows = args->use_windows;
   catch_errors (captured_main, args, "", RETURN_MASK_ALL);
-  return 0;
+  /* The only way to end up here is by an error (normal exit is
+     handled by quit_force()), hence always return an error status.  */
+  return 1;
 }
 
 
@@ -804,9 +888,6 @@ Options:\n\n\
   --write            Set writing into executable and core files.\n\
   --xdb              XDB compatibility mode.\n\
 "), stream);
-#ifdef ADDITIONAL_OPTION_HELP
-  fputs_unfiltered (ADDITIONAL_OPTION_HELP, stream);
-#endif
   fputs_unfiltered (_("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\

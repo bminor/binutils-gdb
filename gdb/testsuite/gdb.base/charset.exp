@@ -48,11 +48,23 @@ proc parse_show_charset_output {testname} {
         -re "The current host and target character set is `(.*)'\\.\[\r\n\]+$gdb_prompt $" {
             set host_charset $expect_out(1,string)
             set target_charset $expect_out(1,string)
+	    set retlist [list $host_charset $target_charset]
             pass $testname
         }
         -re "The current host character set is `(.*)'\\.\[\r\n\]+The current target character set is `(.*)'\\.\[\r\n\]+$gdb_prompt $" {
             set host_charset $expect_out(1,string)
             set target_charset $expect_out(2,string)
+	    set retlist [list $host_charset $target_charset]
+            pass $testname
+        }
+        -re "The host character set is \"(.*)\"\\.\[\r\n\]+$gdb_prompt $" {
+            set host_charset $expect_out(1,string)
+	    set retlist [list $host_charset]
+            pass $testname
+        }
+        -re "The target character set is \"(.*)\"\\.\[\r\n\]+$gdb_prompt $" {
+            set target_charset $expect_out(1,string)
+	    set retlist [list $target_charset]
             pass $testname
         }
         -re ".*$gdb_prompt $" {
@@ -63,7 +75,7 @@ proc parse_show_charset_output {testname} {
         }
     }
 
-    return [list $host_charset $target_charset]
+    return $retlist
 }
 
 
@@ -77,7 +89,7 @@ set show_charset [parse_show_charset_output "show charset"]
 send_gdb "show target-charset\n"
 set show_target_charset [parse_show_charset_output "show target-charset"]
 
-if {! [string compare $show_charset $show_target_charset]} {
+if {[lsearch $show_charset $show_target_charset] >= 0} {
     pass "check `show target-charset' against `show charset'"
 } else {
     fail "check `show target-charset' against `show charset'"
@@ -86,21 +98,71 @@ if {! [string compare $show_charset $show_target_charset]} {
 send_gdb "show host-charset\n"
 set show_host_charset [parse_show_charset_output "show host-charset"]
 
-if {! [string compare $show_charset $show_host_charset]} {
+if {[lsearch $show_charset $show_host_charset] >= 0} {
     pass "check `show host-charset' against `show charset'"
 } else {
     fail "check `show host-charset' against `show charset'"
 }
 
 
-# Get the list of supported charsets.
-send_gdb "set charset\n"
+# Get the list of supported (host) charsets as possible completions.
+send_gdb "set charset \t\t"
 
-# True iff we've seen the "Valid character sets are:" message.
-set seen_valid 0
+# Check that we can at least use ASCII as a host character set.
+sleep 1
+gdb_expect {
+    -re "^set charset .*\r\nASCII.*\r\n$gdb_prompt set charset " {
+	# We got the output that we wanted, including ASCII as possible
+	# charset. Send a newline to get us back to the prompt. This will
+	# also generate an error message. Let's not check here that the error
+	# message makes sense, we do that below, as a separate testcase.
+        send_gdb "\n"
+        gdb_expect {
+	    -re ".*Requires an argument.*$gdb_prompt $" {
+		pass "get valid character sets"
+	    }
+	    -re ".*$gdb_prompt $" {
+		send_gdb "\n"
+		gdb_expect {
+		    -re ".*$gdb_prompt $" {
+			fail "get valid character sets"
+		    }
+		}
+	    }
+	    timeout {
+		fail "(timeout) get valid character sets"
+	    }
+	}
+    }
+    -re ".*$gdb_prompt $" {
+	# We got some output that ended with a regular prompt
+        fail "get valid character sets"
+    }
+    -re "^set charset.*$" {
+	# We got some other output, send a cntrl-c to gdb to get us back
+        # to the prompt.
+	send_gdb "\003"
+        fail "get valid character sets"
+    }
+    timeout {
+        fail "get valid character sets (timeout)"
+    }
+}
 
-# True iff we've seen the "can be used as a host character set" message.
-set seen_can_host 0
+# Try a malformed `set charset'.
+gdb_test "set charset" \
+         "Requires an argument. Valid arguments are.*" \
+         "try malformed `set charset'"
+
+# Try using `set host-charset' on an invalid character set.
+gdb_test "set host-charset my_grandma_bonnie" \
+         "Undefined item: \"my_grandma_bonnie\"." \
+         "try `set host-charset' with invalid charset"
+
+# Try using `set target-charset' on an invalid character set.
+gdb_test "set target-charset my_grandma_bonnie" \
+         "Undefined item: \"my_grandma_bonnie\"." \
+         "try `set target-charset' with invalid charset"
 
 # A Tcl array mapping the names of all the character sets we've seen
 # to "1" if the character set can be used as a host character set, or
@@ -113,73 +175,73 @@ proc all_charset_names {} {
     return [array names charsets]
 }
 
-proc charset_exists {charset} {
-    global charsets
-    return [info exists charsets($charset)]
-}
-
 proc valid_host_charset {charset} {
     global charsets
     return $charsets($charset)
 }
 
+send_gdb "set host-charset\n"
 gdb_expect {
-    -re "Valid character sets are:\[\r\n\]+" {
-        # There's no ^ at the beginning of the pattern above, so that
-        # expect can skip the echoed `set charset' command.
-        set seen_valid 1
-        exp_continue
+    -re "Requires an argument. Valid arguments are (\[^ \t\n\r,.\]*)" {
+	#set host_charset_list $expect_out(1,string)
+	set charsets($expect_out(1,string)) 1
+	exp_continue
+	#pass "capture valid host charsets"
     }
-    -re "^  (\[^ \t\n\]*) \\*\[\r\n\]+" {
-        set charsets($expect_out(1,string)) 1
-        exp_continue
+
+    -re ", (\[^ \t\n\r,.\]*)" {
+	#set host_charset_list $expect_out(1,string)
+	set charsets($expect_out(1,string)) 1
+	exp_continue
+	#pass "capture valid host charsets"
     }
-    -re "^  (\[^ \t\n\]*)\[ \t\]*\[\r\n\]+" {
-        set charsets($expect_out(1,string)) 0
-        exp_continue
+
+    -re "\\.\r\n$gdb_prompt $" {
+	#set host_charset_list $expect_out(1,string)
+	set charsets($expect_out(1,string)) 1
+	pass "capture valid host charsets"
     }
-    -re "^\\* - can be used as a host character set\[\r\n\]+" {
-        set seen_can_host 1
-        exp_continue
-    }
-    -re ".*${gdb_prompt} $" {
-        # We don't do an exp_continue here.
+
+    -re ".*$gdb_prompt $" {
+	fail "capture valid host charsets"
     }
     timeout {
-        fail "get valid character sets (timeout)"
+	fail "(timeout) capture valid host charsets"
     }
 }
 
 
-# Check that we've seen all the right pieces of the output, and that
-# we can at least use ASCII as a host character set.
-if {$seen_valid && $seen_can_host && [charset_exists ascii]} {
-    # We can't do the below as part of the test above, since all the
-    # [] substitution takes place before any expression evaluation
-    # takes place; && doesn't really short circuit things the way
-    # you'd like.  We'd get an "can't read $charsets(ascii)" error
-    # even when `info exists' had returned zero.
-    if {[valid_host_charset ascii]} {
-        pass "get valid character sets"
-    } else {
-        fail "get valid character sets"
+send_gdb "set target-charset\n"
+gdb_expect {
+    -re "Requires an argument. Valid arguments are (\[^ \t\n\r,.\]*)" {
+	set target_charset $expect_out(1,string)
+	if {! [info exists charsets($target_charset)]} {
+	    set charsets($target_charset) 0
+	}
+	exp_continue
     }
-} else {
-    fail "get valid character sets (no ascii charset)"
+
+    -re ", (\[^ \t\n\r,.\]*)" {
+	set target_charset $expect_out(1,string)
+	if {! [info exists charsets($target_charset)]} {
+	    set charsets($target_charset) 0
+	}
+	exp_continue
+    }
+
+    -re "\\.\r\n$gdb_prompt $" {
+	pass "capture valid target charsets"
+
+    }
+
+    -re ".*$gdb_prompt $" {
+	fail "capture valid target charsets"
+    }
+
+    timeout {
+	fail "(timeout) capture valid target charsets"
+    }
 }
-
-
-# Try using `set host-charset' on an invalid character set.
-gdb_test "set host-charset my_grandma_bonnie" \
-         "GDB doesn't know of any character set named `my_grandma_bonnie'." \
-         "try `set host-charset' with invalid charset"
-
-
-# Try using `set target-charset' on an invalid character set.
-gdb_test "set target-charset my_grandma_bonnie" \
-         "GDB doesn't know of any character set named `my_grandma_bonnie'." \
-         "try `set target-charset' with invalid charset"
-
 
 # Make sure that GDB supports every host/target charset combination.
 foreach host_charset [all_charset_names] {
@@ -341,7 +403,7 @@ gdb_expect {
 }
 
 
-gdb_test "set host-charset ascii" ""
+gdb_test "set host-charset ASCII" ""
 foreach target_charset [all_charset_names] {
     send_gdb "set target-charset $target_charset\n" 
     gdb_expect {

@@ -1,3 +1,82 @@
+2003-06-14  H.J. Lu <hongjiu.lu@intel.com>
+ 
+	* support/config.guess: Update to 2003-06-12 version.
+	* support/config.sub: Update to 2003-06-13 version.
+
+2003-05-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* aclocal.m4: Don't add wcwidth.o if we don't have wchar.h.
+	* configure: Regenerate.
+
+2003-05-13  Andreas Jaeger  <aj@suse.de>
+
+        * support/config.guess: Update to 2003-05-09 version.
+        * support/config.sub: Update to 2003-05-09 version.
+
+2003-03-03  Joel Brobecker  <brobecker@gnat.com>
+
+	* aclocal.m4: Add check for mbrtowc.
+	* config.h.in: Regenerate.
+	* configure: Regenerate.
+	* rlmbutil.h: Disable multi-byte if mbrtowc is not defined.
+
+2003-03-03  Kris Warkentin  <kewarken@qnx.com>
+
+	* aclocal.m4: Cause wcwidth check to substitute
+	HAVE_WCWIDTH for building.
+	* Makefile.in: Add wcwidth object to lib if required.
+	* shlib/Makefile.in: Likewise.
+	* configure: Regenerate.
+	
+2003-01-09  Michael Chastain  <mec@shout.net>
+
+	From Chet Ramey, <chet@po.cwru.edu>, the readline maintainer:
+	* display.c: Fix perverse screen refresh with UTF-8.
+
+2003-01-08  Chris Demetriou  <cgd@broadcom.com>
+
+	* config.guess: Update to 2003-01-03 version.
+	* config.sub: Update to 2003-01-03 version.
+
+2002-12-16  Christopher Faylor  <cgf@redhat.com>
+
+	* configure.in: Remove --enable-shared option.  It shouldn't be used
+	for gdb.
+	* configure: Regenerate.
+
+2002-12-16  Christopher Faylor  <cgf@redhat.com>
+
+	* config/cygwin.cache: Prime mbstate_t.
+
+2002-12-06  Elena Zannoni  <ezannoni@redhat.com>
+
+        Import of readline 4.3:
+
+        * compat.c, mbutil.c, misc.c, rlmbutil.h, rltypedefs.h,
+        text.c, doc/history.0, doc/history.3, support/wcwidth.c,
+        examples/readlinebuf.h, examples/rlcat.c: New files.
+
+        * CHANGELOG, CHANGES, INSTALL,  MANIFEST, Makefile.in, README,
+        aclocal.m4, ansi_stdlib.h, bind.c, callback.c, chardefs.h,
+        complete.c, config.h.in, configure, configure.in, display.c,
+        emacs_keymap.c, funmap.c, histexpand.c, histfile.c, histlib.h,
+        history.c, history.h, histsearch.c, input.c, isearch.c,
+        keymaps.c, keymaps.h, kill.c, macro.c, nls.c, parens.c,
+        posixdir.h, readline.c, readline.h, rlconf.h, rldefs.h,
+        rlprivate.h, rlshell.h, rlstdc.h, rltty.c, savestring.c,
+        search.c, shell.c, signals.c, terminal.c, tilde.c, tilde.h,
+        undo.c, util.c, vi_keymap.c, vi_mode.c, xmalloc.c, xmalloc.h,
+        doc/Makefile.in, doc/hist.texinfo, doc/hstech.texinfo,
+        doc/hsuser.texinfo, doc/manvers.texinfo, doc/readline.3,
+        doc/rlman.texinfo, doc/rltech.texinfo, doc/rluser.texinfo
+        doc/rluserman.texinfo, doc/texi2dvi, doc/texi2html,
+        shlib/Makefile.in, support/install.sh, support/mkdirs,
+        support/mkdist, support/shlib-install, support/shobj-conf,
+        examples/Inputrc, examples/Makefile.in, examples/fileman.c,
+        examples/histexamp.c, examples/manexamp.c, examples/rl.c,
+        examples/rlfe.c, examples/rltest.c, examples/rlversion.c:
+        Modified files.
+
 2002-08-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* support/config.guess: Import version 2002-08-23.

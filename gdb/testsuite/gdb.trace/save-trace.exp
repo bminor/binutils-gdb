@@ -145,9 +145,10 @@ remote_file host delete savetrace.tr
 
 # 10.3 repeat with a path to the file
 
+set escapedfilename [string_to_regexp $objdir/savetrace.tr]
 remote_file host delete $objdir/savetrace.tr
 gdb_test "save-tracepoints $objdir/savetrace.tr" \
-	"Tracepoints saved to file '$objdir/savetrace.tr'." \
+	"Tracepoints saved to file '${escapedfilename}'." \
 	"10.3: save tracepoint definitions, full path"
 
 gdb_delete_tracepoints

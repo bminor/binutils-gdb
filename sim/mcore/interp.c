@@ -1,5 +1,5 @@
 /* Simulator for Motorola's MCore processor
-   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
 This file is part of GDB, the GNU debugger.
@@ -1901,7 +1901,7 @@ SIM_DESC
 sim_open (kind, cb, abfd, argv)
      SIM_OPEN_KIND kind;
      host_callback * cb;
-     struct _bfd * abfd;
+     struct bfd * abfd;
      char ** argv;
 {
   int osize = sim_memory_size;
@@ -1981,9 +1981,11 @@ sim_load (sd, prog, abfd, from_tty)
     /* figure the end of the bss section */
 #if 0
     printf ("bss section at 0x%08x for 0x%08x bytes\n",
-	(unsigned long) s_bss->vma , (unsigned long) s_bss->_cooked_size);
+	    (unsigned long) bfd_get_section_vma (handle, s_bss),
+	    (unsigned long) bfd_section_size (handle, s_bss));
 #endif
-    heap_ptr = (unsigned long) s_bss->vma + (unsigned long) s_bss->_cooked_size;
+    heap_ptr = ((unsigned long) bfd_get_section_vma (handle, s_bss)
+		+ (unsigned long) bfd_section_size (handle, s_bss));
 
     /* Clean up after ourselves.  */
     bfd_close (handle);
@@ -2009,7 +2011,7 @@ sim_load (sd, prog, abfd, from_tty)
 SIM_RC
 sim_create_inferior (sd, prog_bfd, argv, env)
      SIM_DESC sd;
-     struct _bfd * prog_bfd;
+     struct bfd * prog_bfd;
      char ** argv;
      char ** env;
 {

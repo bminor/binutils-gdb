@@ -1,5 +1,5 @@
 /* Target-dependent code for SuperH running NetBSD, for GDB.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -23,6 +23,7 @@
 #include "gdbcore.h"
 #include "regcache.h"
 #include "value.h"
+#include "osabi.h"
 
 #include "solib-svr4.h"
 
@@ -188,5 +189,6 @@ _initialize_shnbsd_tdep (void)
   add_core_fns (&shnbsd_core_fns);
   add_core_fns (&shnbsd_elfcore_fns);
 
-  gdbarch_register_osabi (bfd_arch_sh, GDB_OSABI_NETBSD_ELF, shnbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_sh, 0, GDB_OSABI_NETBSD_ELF,
+			  shnbsd_init_abi);
 }

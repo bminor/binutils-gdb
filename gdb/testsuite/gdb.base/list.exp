@@ -1,4 +1,4 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2002
+# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2002, 2003
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -164,11 +164,9 @@ proc test_listsize {} {
 proc test_list_include_file {} {
     global gdb_prompt
 
-    setup_xfail_format "DWARF 1"
     setup_xfail_format "COFF"
     gdb_test "list list0.h:1" "1\[ \t\]+/\[*\]+ An include file .*10\[ \t\]+bar \\(x\\+\\+\\);" "list line 1 in include file"
 
-    setup_xfail_format "DWARF 1"
     setup_xfail_format "COFF"
     gdb_test "list list0.h:100" "Line number 95 out of range; .*list0.h has 3\[67\] lines." "list message for lines past EOF"
 }
@@ -224,7 +222,6 @@ proc test_list_filename_and_number {} {
 
 proc test_list_function {} {
     global gdb_prompt
-    global gcc_compiled
 
     # gcc appears to generate incorrect debugging information for code
     # in include files, which breaks this test.
@@ -239,7 +236,6 @@ proc test_list_function {} {
     # Ultrix gdb is the second case, still correct.
     # SunPRO cc is the third case.
     setup_xfail "powerpc-*-*"
-    setup_xfail_format "DWARF 1"
     gdb_test "list foo" "(3\[ \t\]+.*12\[ \t\]+bar \[(\]+.*\[)\]+;|2\[ \t\]+including file.*11\[ \t\]+bar \[(\]+.*\[)\]+;|1\[ \t\]+/. An include file.*10\[ \t\]+bar \[(\]+.*\[)\]+;)" "list function in include file"
 }
 
@@ -405,8 +401,6 @@ proc test_list_filename_and_function {} {
 	timeout { fail "list list0.c:main (timeout)" }
     }
 
-    # The i960 is a second case
-
     # Not sure what the point of having this function be unused is.
     # AIX is legitimately removing it.
     setup_xfail "rs6000-*-aix*"
@@ -429,7 +423,6 @@ proc test_list_filename_and_function {} {
     # SunPRO cc is the third case.
     setup_xfail "rs6000-*-*" 1804
     setup_xfail "powerpc-*-*" 1804
-    setup_xfail_format "DWARF 1"
     setup_xfail_format "COFF"
     send_gdb "list list0.h:foo\n"
     gdb_expect {
@@ -465,8 +458,6 @@ proc test_list_filename_and_function {} {
 	timeout { fail "list list1.c:bar (timeout)" }
     }
 
-    # The i960 is a second case
-
     # Not sure what the point of having this function be unused is.
     # AIX is legitimately removing it.
     setup_xfail "rs6000-*-aix*"
@@ -500,7 +491,6 @@ proc test_list_filename_and_function {} {
 
     gdb_test "list foobar.c:main" "No source file named foobar.c.|Location not found" "list filename:function; nonexistant file"
 
-    setup_xfail_format "DWARF 1"
     gdb_test "list list0.h:foobar" "Function \"foobar\" not defined.|Location not found" "list filename:function; nonexistant function"
 
 }

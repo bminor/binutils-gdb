@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -124,6 +124,9 @@ union sem_fields {
     int empty;
   } fmt_empty;
   struct { /*  */
+    UINT f_uimm8;
+  } sfmt_clrpsw;
+  struct { /*  */
     UINT f_uimm4;
   } sfmt_trap;
   struct { /*  */
@@ -152,6 +155,13 @@ union sem_fields {
     unsigned char in_sr;
     unsigned char out_h_gr_SI_14;
   } sfmt_jl;
+  struct { /*  */
+    SI* i_sr;
+    INT f_simm16;
+    UINT f_r2;
+    UINT f_uimm3;
+    unsigned char in_sr;
+  } sfmt_bset;
   struct { /*  */
     SI* i_dr;
     UINT f_r1;
@@ -627,6 +637,49 @@ struct scache {
   f_r1 = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
   f_op2 = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
   f_uimm4 = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
+
+#define EXTRACT_IFMT_CLRPSW_VARS \
+  UINT f_op1; \
+  UINT f_r1; \
+  UINT f_uimm8; \
+  unsigned int length;
+#define EXTRACT_IFMT_CLRPSW_CODE \
+  length = 2; \
+  f_op1 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_uimm8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8); \
+
+#define EXTRACT_IFMT_BSET_VARS \
+  UINT f_op1; \
+  UINT f_bit4; \
+  UINT f_uimm3; \
+  UINT f_op2; \
+  UINT f_r2; \
+  INT f_simm16; \
+  unsigned int length;
+#define EXTRACT_IFMT_BSET_CODE \
+  length = 4; \
+  f_op1 = EXTRACT_MSB0_UINT (insn, 32, 0, 4); \
+  f_bit4 = EXTRACT_MSB0_UINT (insn, 32, 4, 1); \
+  f_uimm3 = EXTRACT_MSB0_UINT (insn, 32, 5, 3); \
+  f_op2 = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16); \
+
+#define EXTRACT_IFMT_BTST_VARS \
+  UINT f_op1; \
+  UINT f_bit4; \
+  UINT f_uimm3; \
+  UINT f_op2; \
+  UINT f_r2; \
+  unsigned int length;
+#define EXTRACT_IFMT_BTST_CODE \
+  length = 2; \
+  f_op1 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_bit4 = EXTRACT_MSB0_UINT (insn, 16, 4, 1); \
+  f_uimm3 = EXTRACT_MSB0_UINT (insn, 16, 5, 3); \
+  f_op2 = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
 
 /* Collection of various things for the trace handler to use.  */
 

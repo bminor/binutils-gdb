@@ -33,6 +33,7 @@ proc java_init { args } {
 		set GCJ_UNDER_TEST $env(GCJ)
 	    } else {
 		global tool_root_dir
+		global target_alias
 		
 		if ![is_remote host] {
 		    set file [lookfor_file $tool_root_dir gcj];

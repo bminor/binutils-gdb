@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1995, 1996, 1997, 2003 Andrew Cagney
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,6 +46,24 @@ static const name_map cache_type_map[] = {
 };
 
 
+void
+append_cache_rule (cache_table **table, char *type, char *field_name,
+		   char *derived_name, char *type_def,
+		   char *expression, table_entry *file_entry)
+{
+  while ((*table) != NULL)
+    table = &(*table)->next;
+  (*table) = ZALLOC(cache_table);
+  (*table)->type = name2i(type, cache_type_map);
+  (*table)->field_name = field_name;
+  (*table)->derived_name = derived_name;
+  (*table)->type_def = (strlen(type_def) > 0 ? type_def : NULL);
+  (*table)->expression = (strlen(expression) > 0 ? expression : NULL);
+  (*table)->file_entry = file_entry;
+  (*table)->next = NULL;
+}
+
+
 cache_table *
 load_cache_table(char *file_name,
 		 int hi_bit_nr)
@@ -55,19 +73,13 @@ load_cache_table(char *file_name,
   cache_table *table = NULL;
   cache_table **curr_rule = &table;
   while ((entry = table_entry_read(file)) != NULL) {
-    cache_table *new_rule = ZALLOC(cache_table);
-    new_rule->type = name2i(entry->fields[ca_type], cache_type_map);
-    new_rule->field_name = entry->fields[ca_field_name];
-    new_rule->derived_name = entry->fields[ca_derived_name];
-    new_rule->type_def = (strlen(entry->fields[ca_type_def])
-			  ? entry->fields[ca_type_def]
-			  : NULL);
-    new_rule->expression = (strlen(entry->fields[ca_expression]) > 0
-			    ? entry->fields[ca_expression]
-			    : NULL);
-    new_rule->file_entry = entry;
-    *curr_rule = new_rule;
-    curr_rule = &new_rule->next;
+    append_cache_rule (curr_rule, entry->fields[ca_type],
+		       entry->fields[ca_field_name],
+		       entry->fields[ca_derived_name],
+		       entry->fields[ca_type_def],
+		       entry->fields[ca_expression],
+		       entry);
+    curr_rule = &(*curr_rule)->next;
   }
   return table;
 }

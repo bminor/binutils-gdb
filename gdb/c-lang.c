@@ -31,6 +31,8 @@
 #include "gdb_assert.h"
 #include "charset.h"
 #include "gdb_string.h"
+#include "demangle.h"
+#include "cp-support.h"
 
 extern void _initialize_c_language (void);
 static void c_emit_char (int c, struct ui_file * stream, int quoter);
@@ -40,7 +42,7 @@ static void c_emit_char (int c, struct ui_file * stream, int quoter);
    characters and strings is language specific. */
 
 static void
-c_emit_char (register int c, struct ui_file *stream, int quoter)
+c_emit_char (int c, struct ui_file *stream, int quoter)
 {
   const char *escape;
   int host_char;
@@ -86,11 +88,10 @@ void
 c_printstr (struct ui_file *stream, char *string, unsigned int length,
 	    int width, int force_ellipses)
 {
-  register unsigned int i;
+  unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
-  extern int inspect_it;
 
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in traditional C
@@ -206,7 +207,7 @@ c_printstr (struct ui_file *stream, char *string, unsigned int length,
 struct type *
 c_create_fundamental_type (struct objfile *objfile, int typeid)
 {
-  register struct type *type = NULL;
+  struct type *type = NULL;
 
   switch (typeid)
     {
@@ -542,9 +543,9 @@ const struct language_defn c_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_standard,
   c_preprocess_and_parse,
   c_error,
-  evaluate_subexp_standard,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
@@ -552,6 +553,10 @@ const struct language_defn c_language_defn =
   c_print_type,			/* Print a type using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
+  NULL,				/* Language specific skip_trampoline */
+  NULL,				/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -560,6 +565,7 @@ const struct language_defn c_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 
@@ -594,9 +600,9 @@ const struct language_defn cplus_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_standard,
   c_preprocess_and_parse,
   c_error,
-  evaluate_subexp_standard,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
@@ -604,6 +610,10 @@ const struct language_defn cplus_language_defn =
   c_print_type,			/* Print a type using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
+  NULL,				/* Language specific skip_trampoline */
+  value_of_this,		/* value_of_this */
+  cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  cplus_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -612,6 +622,7 @@ const struct language_defn cplus_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 
@@ -623,9 +634,9 @@ const struct language_defn asm_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_standard,
   c_preprocess_and_parse,
   c_error,
-  evaluate_subexp_standard,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
@@ -633,6 +644,10 @@ const struct language_defn asm_language_defn =
   c_print_type,			/* Print a type using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
+  NULL,				/* Language specific skip_trampoline */
+  NULL,				/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -641,6 +656,46 @@ const struct language_defn asm_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
+  default_word_break_characters,
+  LANG_MAGIC
+};
+
+/* The following language_defn does not represent a real language.
+   It just provides a minimal support a-la-C that should allow users
+   to do some simple operations when debugging applications that use
+   a language currently not supported by GDB.  */
+
+const struct language_defn minimal_language_defn =
+{
+  "minimal",			/* Language name */
+  language_minimal,
+  c_builtin_types,
+  range_check_off,
+  type_check_off,
+  case_sensitive_on,
+  &exp_descriptor_standard,
+  c_preprocess_and_parse,
+  c_error,
+  c_printchar,			/* Print a character constant */
+  c_printstr,			/* Function to print string constant */
+  c_emit_char,			/* Print a single char */
+  c_create_fundamental_type,	/* Create fundamental type in this language */
+  c_print_type,			/* Print a type using appropriate syntax */
+  c_val_print,			/* Print a value using appropriate syntax */
+  c_value_print,		/* Print a top-level value */
+  NULL,				/* Language specific skip_trampoline */
+  NULL,				/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  NULL,				/* Language specific symbol demangler */
+  {"", "", "", ""},		/* Binary format info */
+  {"0%lo", "0", "o", ""},	/* Octal format info */
+  {"%ld", "", "d", ""},		/* Decimal format info */
+  {"0x%lx", "0x", "x", ""},	/* Hex format info */
+  c_op_print_tab,		/* expression operators for printing */
+  1,				/* c-style arrays */
+  0,				/* String lower bound */
+  &builtin_type_char,		/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 
@@ -650,4 +705,5 @@ _initialize_c_language (void)
   add_language (&c_language_defn);
   add_language (&cplus_language_defn);
   add_language (&asm_language_defn);
+  add_language (&minimal_language_defn);
 }

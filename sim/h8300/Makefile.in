@@ -18,10 +18,20 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_OBJS = compile.o sim-load.o
+# List of main object files for `run'.
+SIM_RUN_OBJS = nrun.o
+
+SIM_OBJS = compile.o \
+	   $(SIM_NEW_COMMON_OBJS) \
+	   sim-cpu.o \
+	   sim-engine.o \
+	   sim-load.o \
+	   $(SIM_EXTRA_OBJS)
+
 ## COMMON_POST_CONFIG_FRAG
 
 compile.o: compile.c inst.h config.h \
-	    $(srcdir)/../../include/gdb/sim-h8300.h \
-	    $(srcdir)/../../include/gdb/remote-sim.h \
-	    $(srcdir)/../../include/gdb/callback.h
+	   $(srcdir)/../../include/gdb/sim-h8300.h \
+	   $(srcdir)/../../include/opcode/h8300.h \
+	   $(srcdir)/../../include/gdb/remote-sim.h \
+	   $(srcdir)/../../include/gdb/callback.h

@@ -1,6 +1,6 @@
 /* Target definitions for NN-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -32,14 +32,18 @@
 #define bfd_elfNN_get_section_contents _bfd_generic_get_section_contents
 #endif
 
-#define bfd_elfNN_canonicalize_dynamic_symtab _bfd_elf_canonicalize_dynamic_symtab
+#define bfd_elfNN_canonicalize_dynamic_symtab \
+  _bfd_elf_canonicalize_dynamic_symtab
+#ifndef bfd_elfNN_canonicalize_reloc
 #define bfd_elfNN_canonicalize_reloc	_bfd_elf_canonicalize_reloc
+#endif
 #ifndef bfd_elfNN_find_nearest_line
 #define bfd_elfNN_find_nearest_line	_bfd_elf_find_nearest_line
 #endif
 #define bfd_elfNN_read_minisymbols	_bfd_elf_read_minisymbols
 #define bfd_elfNN_minisymbol_to_symbol	_bfd_elf_minisymbol_to_symbol
-#define bfd_elfNN_get_dynamic_symtab_upper_bound _bfd_elf_get_dynamic_symtab_upper_bound
+#define bfd_elfNN_get_dynamic_symtab_upper_bound \
+  _bfd_elf_get_dynamic_symtab_upper_bound
 #define bfd_elfNN_get_lineno		_bfd_elf_get_lineno
 #ifndef bfd_elfNN_get_reloc_upper_bound
 #define bfd_elfNN_get_reloc_upper_bound _bfd_elf_get_reloc_upper_bound
@@ -47,13 +51,12 @@
 #ifndef bfd_elfNN_get_symbol_info
 #define bfd_elfNN_get_symbol_info	_bfd_elf_get_symbol_info
 #endif
-#define bfd_elfNN_get_symtab		_bfd_elf_get_symtab
+#define bfd_elfNN_canonicalize_symtab	_bfd_elf_canonicalize_symtab
 #define bfd_elfNN_get_symtab_upper_bound _bfd_elf_get_symtab_upper_bound
-#if 0 /* done in elf-bfd.h */
-#define bfd_elfNN_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
-#endif
 #define bfd_elfNN_make_empty_symbol	_bfd_elf_make_empty_symbol
+#ifndef bfd_elfNN_new_section_hook
 #define bfd_elfNN_new_section_hook	_bfd_elf_new_section_hook
+#endif
 #define bfd_elfNN_set_arch_mach		_bfd_elf_set_arch_mach
 #ifndef bfd_elfNN_set_section_contents
 #define bfd_elfNN_set_section_contents	_bfd_elf_set_section_contents
@@ -96,11 +99,11 @@
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
 #define bfd_elfNN_bfd_debug_info_end	bfd_void
 #define bfd_elfNN_bfd_debug_info_accumulate \
-  (void (*) PARAMS ((bfd*, struct sec *))) bfd_void
+  ((void (*) (bfd*, struct bfd_section *)) bfd_void)
 
 #ifndef bfd_elfNN_bfd_get_relocated_section_contents
 #define bfd_elfNN_bfd_get_relocated_section_contents \
- bfd_generic_get_relocated_section_contents
+  bfd_generic_get_relocated_section_contents
 #endif
 
 #ifndef bfd_elfNN_bfd_relax_section
@@ -137,7 +140,7 @@
 
 #ifndef bfd_elfNN_bfd_make_debug_symbol
 #define bfd_elfNN_bfd_make_debug_symbol \
-  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
+  ((asymbol * (*) (bfd *, void *, unsigned long)) bfd_nullvoidptr)
 #endif
 
 #ifndef bfd_elfNN_bfd_copy_private_symbol_data
@@ -159,11 +162,11 @@
 #endif
 #ifndef bfd_elfNN_bfd_merge_private_bfd_data
 #define bfd_elfNN_bfd_merge_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
 #endif
 #ifndef bfd_elfNN_bfd_set_private_flags
 #define bfd_elfNN_bfd_set_private_flags \
-  ((boolean (*) PARAMS ((bfd *, flagword))) bfd_true)
+  ((bfd_boolean (*) (bfd *, flagword)) bfd_true)
 #endif
 #ifndef bfd_elfNN_bfd_is_local_label_name
 #define bfd_elfNN_bfd_is_local_label_name _bfd_elf_is_local_label_name
@@ -250,10 +253,10 @@
 #endif
 
 #ifndef elf_backend_collect
-#define elf_backend_collect false
+#define elf_backend_collect FALSE
 #endif
 #ifndef elf_backend_type_change_ok
-#define elf_backend_type_change_ok false
+#define elf_backend_type_change_ok FALSE
 #endif
 
 #ifndef elf_backend_sym_is_global
@@ -334,11 +337,11 @@
 #ifndef elf_backend_ecoff_debug_swap
 #define elf_backend_ecoff_debug_swap	0
 #endif
+#ifndef elf_backend_bfd_from_remote_memory
+#define elf_backend_bfd_from_remote_memory _bfd_elfNN_bfd_from_remote_memory
+#endif
 #ifndef elf_backend_got_header_size
 #define elf_backend_got_header_size	0
-#endif
-#ifndef elf_backend_plt_header_size
-#define elf_backend_plt_header_size	0
 #endif
 #ifndef elf_backend_post_process_headers
 #define elf_backend_post_process_headers	NULL
@@ -354,6 +357,9 @@
 #endif
 #ifndef elf_backend_hide_symbol
 #define elf_backend_hide_symbol		_bfd_elf_link_hash_hide_symbol
+#endif
+#ifndef elf_backend_merge_symbol_attribute
+#define elf_backend_merge_symbol_attribute	NULL
 #endif
 #ifndef elf_backend_emit_relocs
 #define elf_backend_emit_relocs			NULL
@@ -384,15 +390,6 @@
 #endif
 #ifndef elf_backend_write_section
 #define elf_backend_write_section		NULL
-#endif
-#ifndef elf_backend_set_nonloadable_filepos
-#define elf_backend_set_nonloadable_filepos	NULL
-#endif
-#ifndef elf_backend_is_contained_by_filepos
-#define elf_backend_is_contained_by_filepos	NULL
-#endif
-#ifndef elf_backend_copy_private_bfd_data_p
-#define elf_backend_copy_private_bfd_data_p	NULL
 #endif
 #ifndef elf_backend_mips_irix_compat
 #define elf_backend_mips_irix_compat		NULL
@@ -434,6 +431,10 @@
 
 #ifndef elf_backend_size_info
 #define elf_backend_size_info _bfd_elfNN_size_info
+#endif
+
+#ifndef elf_backend_special_sections
+#define elf_backend_special_sections NULL
 #endif
 
 #ifndef elf_backend_sign_extend_vma
@@ -482,6 +483,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_output_arch_syms,
   elf_backend_copy_indirect_symbol,
   elf_backend_hide_symbol,
+  elf_backend_merge_symbol_attribute,
   elf_backend_emit_relocs,
   elf_backend_count_relocs,
   elf_backend_grok_prstatus,
@@ -492,18 +494,16 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_discard_info,
   elf_backend_ignore_discarded_relocs,
   elf_backend_write_section,
-  elf_backend_set_nonloadable_filepos,
-  elf_backend_is_contained_by_filepos,
-  elf_backend_copy_private_bfd_data_p,
   elf_backend_mips_irix_compat,
   elf_backend_mips_rtype_to_howto,
   elf_backend_ecoff_debug_swap,
+  elf_backend_bfd_from_remote_memory,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
   &elf_backend_size_info,
+  elf_backend_special_sections,
   elf_backend_got_symbol_offset,
   elf_backend_got_header_size,
-  elf_backend_plt_header_size,
   elf_backend_collect,
   elf_backend_type_change_ok,
   elf_backend_may_use_rel_p,
@@ -599,19 +599,19 @@ const bfd_target TARGET_BIG_SYM =
     bfd_elfNN_write_corefile_contents,
   },
 
-      BFD_JUMP_TABLE_GENERIC (bfd_elfNN),
-      BFD_JUMP_TABLE_COPY (bfd_elfNN),
-      BFD_JUMP_TABLE_CORE (bfd_elfNN),
+  BFD_JUMP_TABLE_GENERIC (bfd_elfNN),
+  BFD_JUMP_TABLE_COPY (bfd_elfNN),
+  BFD_JUMP_TABLE_CORE (bfd_elfNN),
 #ifdef bfd_elfNN_archive_functions
-      BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
+  BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
 #else
-      BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
 #endif
-      BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),
-      BFD_JUMP_TABLE_RELOCS (bfd_elfNN),
-      BFD_JUMP_TABLE_WRITE (bfd_elfNN),
-      BFD_JUMP_TABLE_LINK (bfd_elfNN),
-      BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
+  BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),
+  BFD_JUMP_TABLE_RELOCS (bfd_elfNN),
+  BFD_JUMP_TABLE_WRITE (bfd_elfNN),
+  BFD_JUMP_TABLE_LINK (bfd_elfNN),
+  BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
 
   /* Alternative endian target.  */
 #ifdef TARGET_LITTLE_SYM
@@ -621,7 +621,7 @@ const bfd_target TARGET_BIG_SYM =
 #endif
 
   /* backend_data: */
-  (PTR) &elfNN_bed
+  &elfNN_bed
 };
 #endif
 
@@ -695,19 +695,19 @@ const bfd_target TARGET_LITTLE_SYM =
     bfd_elfNN_write_corefile_contents,
   },
 
-      BFD_JUMP_TABLE_GENERIC (bfd_elfNN),
-      BFD_JUMP_TABLE_COPY (bfd_elfNN),
-      BFD_JUMP_TABLE_CORE (bfd_elfNN),
+  BFD_JUMP_TABLE_GENERIC (bfd_elfNN),
+  BFD_JUMP_TABLE_COPY (bfd_elfNN),
+  BFD_JUMP_TABLE_CORE (bfd_elfNN),
 #ifdef bfd_elfNN_archive_functions
-      BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
+  BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
 #else
-      BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
 #endif
-      BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),
-      BFD_JUMP_TABLE_RELOCS (bfd_elfNN),
-      BFD_JUMP_TABLE_WRITE (bfd_elfNN),
-      BFD_JUMP_TABLE_LINK (bfd_elfNN),
-      BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
+  BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),
+  BFD_JUMP_TABLE_RELOCS (bfd_elfNN),
+  BFD_JUMP_TABLE_WRITE (bfd_elfNN),
+  BFD_JUMP_TABLE_LINK (bfd_elfNN),
+  BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
 
   /* Alternative endian target.  */
 #ifdef TARGET_BIG_SYM
@@ -717,6 +717,6 @@ const bfd_target TARGET_LITTLE_SYM =
 #endif
 
   /* backend_data: */
-  (PTR) &elfNN_bed
+  &elfNN_bed
 };
 #endif

@@ -23,7 +23,7 @@
 
 #include <machine/reg.h>
 
-/* this table must line up with REGISTER_NAMES in tm-i386.h */
+/* This table must line up with REGISTER_NAME in "i386-tdep.c".  */
 /* symbols like 'tEAX' come from <machine/reg.h> */
 static int tregmap[] =
 {

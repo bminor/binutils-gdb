@@ -1,5 +1,7 @@
-/* Low level interface to HP800 running mach 4.0.
-   Copyright 1995, 2000, 2001 Free Software Foundation, Inc.
+/* Low level interface to HP800 running mach 4.0 for GDB, the GNU
+   debugger.
+
+   Copyright 1995, 2000, 2001, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -81,7 +83,7 @@ store_inferior_registers (int regno)
   kern_return_t ret;
   thread_state_data_t state;
   unsigned int stateCnt = TRACE_FLAVOR_SIZE;
-  register int index;
+  int index;
 
   if (!MACH_PORT_VALID (current_thread))
     error ("store inferior registers: Invalid thread");
@@ -113,15 +115,15 @@ store_inferior_registers (int regno)
    */
   if (regno > 0 && regno < NUM_REGS)
     {
-      memcpy (&state[regno], &registers[REGISTER_BYTE (regno)],
-	      REGISTER_RAW_SIZE (regno));
+      memcpy (&state[regno], &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
+	      DEPRECATED_REGISTER_RAW_SIZE (regno));
     }
   else
     {
       for (index = 0; index < NUM_REGS; index++)
-	memcpy (&state[index], &registers[REGISTER_BYTE (index)],
-		REGISTER_RAW_SIZE (index));
-/*      state[index] = registers[REGISTER_BYTE (index)]; */
+	memcpy (&state[index], &deprecated_registers[DEPRECATED_REGISTER_BYTE (index)],
+		DEPRECATED_REGISTER_RAW_SIZE (index));
+/*      state[index] = deprecated_registers[DEPRECATED_REGISTER_BYTE (index)]; */
 
     }
 

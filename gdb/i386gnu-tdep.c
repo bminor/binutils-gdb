@@ -1,5 +1,5 @@
 /* Target-dependent code for the GNU Hurd.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,6 +19,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "osabi.h"
 
 #include "i386-tdep.h"
 
@@ -39,5 +40,5 @@ extern void _initialize_i386gnu_tdep (void);
 void
 _initialize_i386gnu_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_HURD, i386gnu_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_HURD, i386gnu_init_abi);
 }

@@ -1,5 +1,7 @@
 /* Simulator Floating-point support.
-   Copyright (C) 1997, 1998, 2002 Free Software Foundation, Inc.
+
+   Copyright 1997, 1998, 2002, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -316,6 +318,8 @@ INLINE_SIM_FPU (int) sim_fpu_is_denorm (const sim_fpu *s); /* !zero */
 
 INLINE_SIM_FPU (int) sim_fpu_sign (const sim_fpu *s);
 INLINE_SIM_FPU (int) sim_fpu_exp (const sim_fpu *s);
+INLINE_SIM_FPU (unsigned64) sim_fpu_fraction (const sim_fpu *s);
+INLINE_SIM_FPU (unsigned64) sim_fpu_guard (const sim_fpu *s, int is_double);
 
 
 

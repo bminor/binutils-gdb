@@ -1,5 +1,7 @@
 /* Simulator pseudo baseclass.
-   Copyright (C) 1997-1998 Free Software Foundation, Inc.
+
+   Copyright 1997, 1998, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -90,9 +92,6 @@ typedef struct _sim_cpu sim_cpu;
 #include "sim-engine.h"
 #include "sim-watch.h"
 #include "sim-memopt.h"
-#ifdef SIM_HAVE_BREAKPOINTS
-#include "sim-break.h"
-#endif
 #include "sim-cpu.h"
 
 /* Global pointer to current state while sim_resume is running.
@@ -172,15 +171,15 @@ typedef struct {
 #define STATE_PROG_ARGV(sd) ((sd)->base.prog_argv)
 
   /* The program's bfd.  */
-  struct _bfd *prog_bfd;
+  struct bfd *prog_bfd;
 #define STATE_PROG_BFD(sd) ((sd)->base.prog_bfd)
 
   /* Symbol table for prog_bfd */
-  struct symbol_cache_entry **prog_syms;
+  struct bfd_symbol **prog_syms;
 #define STATE_PROG_SYMS(sd) ((sd)->base.prog_syms)
 
   /* The program's text section.  */
-  struct sec *text_section;
+  struct bfd_section *text_section;
   /* Starting and ending text section addresses from the bfd.  */
   SIM_ADDR text_start, text_end;
 #define STATE_TEXT_SECTION(sd) ((sd)->base.text_section)
@@ -226,10 +225,6 @@ typedef struct {
   /* generic watchpoint support */
   sim_watchpoints watchpoints;
 #define STATE_WATCHPOINTS(sd) (&(sd)->base.watchpoints)
-
-  /* Pointer to list of breakpoints */
-  struct sim_breakpoint *breakpoints;
-#define STATE_BREAKPOINTS(sd) ((sd)->base.breakpoints)
 
 #if WITH_HW
   struct sim_hw *hw;

@@ -83,6 +83,15 @@ struct macro_table;
    tree mapping the #inclusions that contributed to the compilation
    unit, with the main source file as its root.
 
+   Beware --- not every source file mentioned in a compilation unit's
+   symtab structures will appear in the #inclusion tree!  As of Oct
+   2002, GCC does record the effect of #line directives in the source
+   line info, but not in macro info.  This means that GDB's symtabs
+   (built from the former, among other things) may mention filenames
+   that the #inclusion tree (built from the latter) doesn't have any
+   record of.  See macroscope.c:sal_macro_scope for how to accomodate
+   this.
+
    It's worth noting that libcpp has a simpler way of representing all
    this, which we should consider switching to.  It might even be
    suitable for ordinary non-macro line number info.

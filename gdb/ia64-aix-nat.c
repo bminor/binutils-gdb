@@ -1,5 +1,6 @@
-/* Functions specific to running gdb native on IA-64 running AIX.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+/* Low level interface to IA-64 running AIX for GDB, the GNU debugger.
+
+   Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -71,11 +72,11 @@ supply_gregset (prgregset_t *gregsetp)
      by other means.  Those that aren't are already handled by the
      code above.  */
   for (regi = IA64_GR32_REGNUM; regi <= IA64_GR127_REGNUM; regi++)
-    register_valid[regi] = 1;
+    deprecated_register_valid[regi] = 1;
   for (regi = IA64_PR0_REGNUM; regi <= IA64_PR63_REGNUM; regi++)
-    register_valid[regi] = 1;
+    deprecated_register_valid[regi] = 1;
   for (regi = IA64_VFP_REGNUM; regi <= NUM_REGS; regi++)
-    register_valid[regi] = 1;
+    deprecated_register_valid[regi] = 1;
 }
 
 void
@@ -85,8 +86,8 @@ fill_gregset (prgregset_t *gregsetp, int regno)
 
 #define COPY_REG(_fld_,_regi_) \
   if ((regno == -1) || regno == _regi_) \
-    memcpy (&(gregsetp->_fld_), &registers[REGISTER_BYTE (_regi_)], \
-	    REGISTER_RAW_SIZE (_regi_))
+    memcpy (&(gregsetp->_fld_), &deprecated_registers[DEPRECATED_REGISTER_BYTE (_regi_)], \
+	    DEPRECATED_REGISTER_RAW_SIZE (_regi_))
 
   for (regi = IA64_GR0_REGNUM; regi <= IA64_GR31_REGNUM; regi++)
     {
@@ -108,11 +109,11 @@ fill_gregset (prgregset_t *gregsetp, int regno)
   if (regno == IA64_BSP_REGNUM || regno == -1)
     {
       memcpy (&(gregsetp->__bspstore),
-	      &registers[REGISTER_BYTE (IA64_BSP_REGNUM)],
-	      REGISTER_RAW_SIZE (IA64_BSP_REGNUM));
-      memcpy (&registers[REGISTER_BYTE (IA64_BSPSTORE_REGNUM)],
-	      &registers[REGISTER_BYTE (IA64_BSP_REGNUM)],
-	      REGISTER_RAW_SIZE (IA64_BSP_REGNUM));
+	      &deprecated_registers[DEPRECATED_REGISTER_BYTE (IA64_BSP_REGNUM)],
+	      DEPRECATED_REGISTER_RAW_SIZE (IA64_BSP_REGNUM));
+      memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (IA64_BSPSTORE_REGNUM)],
+	      &deprecated_registers[DEPRECATED_REGISTER_BYTE (IA64_BSP_REGNUM)],
+	      DEPRECATED_REGISTER_RAW_SIZE (IA64_BSP_REGNUM));
     }
 
 #if 0
@@ -135,7 +136,7 @@ fill_gregset (prgregset_t *gregsetp, int regno)
 void
 supply_fpregset (prfpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
 
   for (regi = IA64_FR0_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
     supply_register (regi, 
@@ -153,9 +154,9 @@ fill_fpregset (prfpregset_t *fpregsetp, int regno)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  from = (char *) &registers[REGISTER_BYTE (regi)];
+	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->__fpr[regi - IA64_FR0_REGNUM]);
-	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
+	  memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regi));
 	}
     }
 }

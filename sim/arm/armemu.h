@@ -530,3 +530,16 @@ extern void     ARMul_CoProAttach   (ARMul_State *, unsigned, ARMul_CPInits *, A
 extern void     ARMul_CoProDetach   (ARMul_State *, unsigned);
 extern ARMword  read_cp15_reg       (unsigned, unsigned, unsigned);
 
+extern unsigned DSPLDC4 (ARMul_State *, unsigned, ARMword, ARMword);
+extern unsigned DSPMCR4 (ARMul_State *, unsigned, ARMword, ARMword);
+extern unsigned DSPMRC4 (ARMul_State *, unsigned, ARMword, ARMword *);
+extern unsigned	DSPSTC4 (ARMul_State *, unsigned, ARMword, ARMword *);
+extern unsigned	DSPCDP4 (ARMul_State *, unsigned, ARMword);
+extern unsigned DSPMCR5 (ARMul_State *, unsigned, ARMword, ARMword);
+extern unsigned DSPMRC5 (ARMul_State *, unsigned, ARMword, ARMword *);
+extern unsigned DSPLDC5 (ARMul_State *, unsigned, ARMword, ARMword);
+extern unsigned	DSPSTC5 (ARMul_State *, unsigned, ARMword, ARMword *);
+extern unsigned	DSPCDP5 (ARMul_State *, unsigned, ARMword);
+extern unsigned DSPMCR6 (ARMul_State *, unsigned, ARMword, ARMword);
+extern unsigned DSPMRC6 (ARMul_State *, unsigned, ARMword, ARMword *);
+extern unsigned	DSPCDP6 (ARMul_State *, unsigned, ARMword);

@@ -1,3 +1,122 @@
+2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (linux_resume): Take a struct thread_resume *
+	argument.
+	(linux_wait): Update call.
+	(resume_ptr): New static variable.
+	(linux_continue_one_thread): Renamed from
+	linux_continue_one_process.  Use resume_ptr.
+	(linux_resume): Use linux_continue_one_thread.
+	* server.c (handle_v_cont, handle_v_requests): New functions.
+	(myresume): New function.
+	(main): Handle 'v' case.
+	* target.h (struct thread_resume): New type.
+	(struct target_ops): Change argument of "resume" to struct
+	thread_resume *.
+	(myresume): Delete macro.
+
+2003-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (install-only): Create dest dir. Support DESTDIR.
+	(uninstall): Support DESTDIR.
+
+Mon Jul 21 20:09:34 UTC 2003  Brendan Conoboy  <blc@redhat.com>
+
+	* configure.srv: Add xscale*linux copy of arm*linux entry.
+
+2003-07-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-arm-low.c (arm_reinsert_addr): New function.
+	(the_low_target): Add arm_reinsert_addr.
+
+2003-07-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* mem-break.c: Remove whitespace at end of file.
+
+2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Check whether we need to prototype strerror.
+	* server.h: Optionally prototype strerror.
+	* gdbreplay.c (perror_with_name): Use strerror.
+	* linux-low.c (linux_attach_lwp): Use strerror.
+	* utils.c (perror_with_name): Use strerror.
+	* config.in, configure: Regenerated.
+
+2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-sh-low.c (sh_regmap): Fix FP register offsets, reported by
+	SUGIOKA Toshinobu <sugioka@itonet.co.jp>.
+
+2003-06-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (SFILES): Update.
+	* low-hppabsd.c, low-lynx.c, low-nbsd.c, low-sim.c, low-sparc.c,
+	low-sun3.c: Remove files.
+
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c: Move comment to linux_thread_alive where it belonged.
+	(linux_detach_one_process, linux_detach): New functions.
+	(linux_target_ops): Add linux_detach.
+	* server.c (main): Handle 'D' packet.
+	* target.h (struct target_ops): Add "detach" member.
+	(detach_inferior): Define.
+
+2003-06-13  Mark Kettenis  <kettenis@gnu.org>
+
+	From Kelley Cook  <kelleycook@wideopenwest.com>:
+	* configure.srv: Accept i[34567]86 variants.
+
+2003-06-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (linux_wait_for_event): Correct comment typos.
+	(linux_resume_one_process): Call check_removed_breakpoint.
+	(linux_send_signal): New function.
+	(linux_target_ops): Add linux_send_signal.
+	* remote-utils.c (putpkt, input_interrupt): Use send_signal instead
+	of kill.
+	* target.h (struct target_ops): Add send_signal.
+
+2003-05-29  Jim Blandy  <jimb@redhat.com>
+
+	* linux-low.c (usr_store_inferior_registers): Transfer buf in
+	PTRACE_XFER_TYPE-sized chunks, not int-sized chunks.  Otherwise,
+	if 'int' is smaller than PTRACE_XFER_TYPE, you end up throwing
+	away part of the register's value.
+
+2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (linux_create_inferior): Use __SIGRTMIN.
+	(linux_wait_for_event, linux_init_signals): Likewise.
+
+2003-03-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Check for stdlib.h.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+
+2003-01-04  Andreas Schwab  <schwab@suse.de>
+
+	* linux-m68k-low.c (m68k_num_regs): Define to 29 instead of 31.
+
+2003-01-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in: Remove obsolete code.
+
+2002-11-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-s390-low.c (s390_regmap): Check GPR_SIZE instead of
+	defined(PT_FPR0_HI).
+
+2002-11-17  Stuart Hughes  <seh@zee2.com>
+
+	* linux-arm-low.c (arm_num_regs): Increase.
+	(arm_regmap): Include status register.
+
+2002-11-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (register_addr): Remove incorrect -1 check.
+
 2002-08-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* linux-low.c (linux_create_inferior): Call setpgid.  Return

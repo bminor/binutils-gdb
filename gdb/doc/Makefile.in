@@ -1,4 +1,4 @@
-##Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2002
+##Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2002, 2003
 ##Free Software Foundation, Inc.
 
 # Makefile for GDB documentation.
@@ -67,7 +67,7 @@ SET_TEXINPUTS = \
    TEXINPUTS=${TEXIDIR}:.:$(srcdir):$(READLINE_DIR):$(GDBMI_DIR):$$TEXINPUTS
 
 # Files which should be generated via 'info' and installed by 'install-info'
-INFO_DEPS = gdb.info gdbint.info stabs.info
+INFO_DEPS = gdb.info gdbint.info stabs.info annotate.info
 
 # There may be alternate predefined collections of switches to configure
 # the GDB manual.  Normally this is not done in synch with the software
@@ -98,10 +98,9 @@ DVIPS = dvips
 
 # Main GDB manual
 GDB_DOC_SOURCE_INCLUDES = \
-	$(srcdir)/annotate.texi \
 	$(srcdir)/fdl.texi \
 	$(srcdir)/gpl.texi \
-	$(GDBMI_DIR)/gdbmi.texinfo \
+	$(srcdir)/agentexpr.texi \
 	$(READLINE_DIR)/rluser.texinfo \
 	$(READLINE_DIR)/inc-hist.texinfo
 GDB_DOC_BUILD_INCLUDES = \
@@ -114,7 +113,8 @@ GDB_DOC_FILES = \
 
 # Internals Manual
 GDBINT_DOC_SOURCE_INCLUDES = \
-	$(srcdir)/fdl.texi
+	$(srcdir)/fdl.texi \
+	$(srcdir)/observer.texi
 GDBINT_DOC_BUILD_INCLUDES = \
 	gdb-cfg.texi \
 	GDBvn.texi
@@ -124,49 +124,77 @@ GDBINT_DOC_FILES = \
 	$(GDBINT_DOC_BUILD_INCLUDES)
 
 # Stabs manual: All files
-STABS_DOC_SOURCE_INCLUDES =
+STABS_DOC_SOURCE_INCLUDES = \
+	$(srcdir)/fdl.texi
 STABS_DOC_BUILD_INCLUDES =
 STABS_DOC_FILES = \
 	$(srcdir)/stabs.texinfo \
 	$(STABS_DOC_SOURCE_INCLUDES) \
 	$(STABS_DOC_BUILD_INCLUDES)
 
+# Annotate migration document
+ANNOTATE_DOC_SOURCE_INCLUDES = \
+	$(srcdir)/fdl.texi
+ANNOTATE_DOC_BUILD_INCLUDES = \
+	gdb-cfg.texi
+ANNOTATE_DOC_FILES = \
+	$(srcdir)/annotate.texinfo \
+	$(ANNOTATE_DOC_SOURCE_INCLUDES) \
+	$(ANNOTATE_DOC_BUILD_INCLUDES)
+
 #### Host, target, and site specific Makefile fragments come in here.
 ###
 
-all install:
+all:
 
 info: $(INFO_DEPS)
-dvi: gdb.dvi gdbint.dvi stabs.dvi refcard.dvi
-ps: gdb.ps gdbint.ps stabs.ps refcard.ps
-html: gdb_toc.html gdbint_toc.html stabs_toc.html
-pdf: gdb.pdf gdbint.pdf stabs.pdf
+dvi: gdb.dvi gdbint.dvi stabs.dvi refcard.dvi annotate.dvi
+ps: gdb.ps gdbint.ps stabs.ps refcard.ps annotate.ps
+html: gdb_toc.html gdbint_toc.html stabs_toc.html annotate_toc.html
+pdf: gdb.pdf gdbint.pdf stabs.pdf annotate.pdf
 all-doc: info dvi ps # pdf
 diststuff: info
 
 install-info: $(INFO_DEPS)
-	$(SHELL) $(srcdir)/../../mkinstalldirs $(infodir)
+	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(infodir)
 	@list='$(INFO_DEPS)'; \
 	for file in $$list; do \
 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
 	  for ifile in `cd $$d && echo $$file $$file-[0-9] $$file-[0-9][0-9]`; do \
 	    if test -f $$d/$$ifile; then \
-	      echo " $(INSTALL_DATA) $$d/$$ifile $(infodir)/$$ifile"; \
-	      $(INSTALL_DATA) $$d/$$ifile $(infodir)/$$ifile; \
+	      echo " $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile"; \
+	      $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile; \
 	    else : ; fi; \
 	  done; \
 	done
+	$(POST_INSTALL)
 	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
 	  list='$(INFO_DEPS)'; \
 	  for file in $$list; do \
-	    echo " install-info --info-dir=$(infodir) $(infodir)/$$file";\
-	    install-info --info-dir=$(infodir) $(infodir)/$$file || :;\
+	    echo " install-info --info-dir=$(infodir) $(DESTDIR)$(infodir)/$$file";\
+	    install-info --info-dir=$(infodir) $(DESTDIR)$(infodir)/$$file || :;\
 	  done; \
 	else : ; fi
 
+uninstall-info:
+	$(PRE_UNINSTALL)
+	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
+	  ii=yes; \
+	else ii=; fi; \
+	list='$(INFO_DEPS)'; \
+	for file in $$list; do \
+	  test -z "$$ii" \
+	    || install-info --info-dir=$(DESTDIR)$(infodir) --remove $$file; \
+	done
+	$(NORMAL_UNINSTALL)
+	list='$(INFO_DEPS)'; \
+	for file in $$list; do \
+	  (cd $(DESTDIR)$(infodir) && rm -f $$file $$file-[0-9] $$file-[0-9][0-9]); \
+	done
+
 install-html: html
 	for i in *.html ; do \
-		$(INSTALL_DATA) $$i $(htmldir)/$$i ; \
+		$(INSTALL_DATA) $$i $(DESTDIR)$(htmldir)/$$i ; \
 	done
 
 STAGESTUFF = *.info* gdb-all.texi GDBvn.texi *.ps *.dvi *.pdf
@@ -218,7 +246,7 @@ refcard.ps : refcard.dvi
 
 # File to record current GDB version number (copied from main dir version.in)
 GDBvn.texi : ${gdbdir}/version.in
-	echo "@set GDBVN `head -1 $(srcdir)/../version.in`" > ./GDBvn.new
+	echo "@set GDBVN `sed q $(srcdir)/../version.in`" > ./GDBvn.new
 	mv GDBvn.new GDBvn.texi
 
 # Updated atomically
@@ -229,7 +257,7 @@ GDBvn.texi : ${gdbdir}/version.in
 # not one for their binary config---which may not be specifically
 # defined anyways).
 gdb-cfg.texi: ${srcdir}/${DOC_CONFIG}-cfg.texi
-	(test "$$LN_S" = "ln -s" && \
+	(test "$(LN_S)" = "ln -s" && \
 	  ln -s ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi) || \
 	ln ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi || \
 	cp ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi
@@ -252,7 +280,7 @@ GDB_TEX_TMPS = gdb.aux gdb.cp* gdb.fn* gdb.ky* gdb.log gdb.pg* gdb.toc \
 # GDB MANUAL: TeX dvi file
 gdb.dvi: ${GDB_DOC_FILES}
 	if [ ! -f ./GDBvn.texi ]; then \
-		(test "$$LN_S" = "ln -s" && ln -s $(srcdir)/GDBvn.texi .) || \
+		(test "$(LN_S)" = "ln -s" && ln -s $(srcdir)/GDBvn.texi .) || \
 		ln $(srcdir)/GDBvn.texi . || \
 		cp $(srcdir)/GDBvn.texi . ; else true; fi
 	rm -f $(GDB_TEX_TMPS)
@@ -263,7 +291,7 @@ gdb.ps: gdb.dvi
 
 gdb.pdf: ${GDB_DOC_FILES}
 	if [ ! -f ./GDBvn.texi ]; then \
-		(test "$$LN_S" = "ln -s" && ln -s $(srcdir)/GDBvn.texi .) || \
+		(test "$(LN_S)" = "ln -s" && ln -s $(srcdir)/GDBvn.texi .) || \
 		ln $(srcdir)/GDBvn.texi . || \
 		cp $(srcdir)/GDBvn.texi . ; else true; fi
 	rm -f $(GDB_TEX_TMPS)
@@ -290,7 +318,7 @@ gdb.info: ${GDB_DOC_FILES}
 # in main sourcedir.
 links2roff: $(GDB_DOC_SOURCE_INCLUDES)
 	if [ ! -f gdb.texinfo ]; then \
-		(test "$$LN_S" = "ln -s" && ln -s $(GDB_DOC_SOURCE_INCLUDES) .) || \
+		(test "$(LN_S)" = "ln -s" && ln -s $(GDB_DOC_SOURCE_INCLUDES) .) || \
 		ln $(GDB_DOC_SOURCE_INCLUDES)    . || \
 		cp $(GDB_DOC_SOURCE_INCLUDES)    . ; \
 	fi
@@ -378,7 +406,7 @@ gdbint_toc.html: $(GDBINT_DOC_FILES)
 	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/gdbint.texinfo
 
 stabs.info: $(STABS_DOC_FILES)
-	$(MAKEINFO) -o stabs.info $(srcdir)/stabs.texinfo
+	$(MAKEINFO) -I $(srcdir) -o stabs.info $(srcdir)/stabs.texinfo
 
 # STABS DOCUMENTATION: HTML file
 
@@ -403,6 +431,30 @@ stabs.pdf: $(STABS_DOC_FILES)
 	rm -f $(STABS_TEX_TMPS)
 	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/stabs.texinfo
 
+# Clean these up before each run.  Avoids a catch 22 with not being
+# able to re-generate these files (to fix a corruption) because these
+# files contain a corruption.
+ANNOTATE_TEX_TMPS = annotate.aux annotate.cp* annotate.fn* annotate.ky* \
+	annotate.log annotate.pg* annotate.toc annotate.tp* annotate.vr*
+
+# ANNOTATE DOCUMENTATION: TeX dvi file
+annotate.dvi : $(ANNOTATE_DOC_FILES)
+	rm -f $(ANNOTATE_TEX_TMPS)
+	$(SET_TEXINPUTS) $(TEXI2DVI) $(srcdir)/annotate.texinfo
+
+annotate.ps: annotate.dvi
+	$(DVIPS) -o $@ $?
+
+annotate.pdf: $(ANNOTATE_DOC_FILES)
+	rm -f $(ANNOTATE_TEX_TMPS)
+	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/annotate.texinfo
+
+annotate.info: $(ANNOTATE_DOC_FILES)
+	$(MAKEINFO)  -I $(srcdir) -o annotate.info $(srcdir)/annotate.texinfo
+
+annotate_toc.html: $(ANNOTATE_DOC_FILES)
+	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/annotate.texinfo
+
 force:
 
 Makefile: Makefile.in $(host_makefile_frag) $(target_makefile_frag) config.status
@@ -417,13 +469,14 @@ mostlyclean:
 	rm -f $(GDB_TEX_TMPS)
 	rm -f $(GDBINT_TEX_TMPS)
 	rm -f $(STABS_TEX_TMPS)
+	rm -f $(ANNOTATE_TEX_TMPS)
 	rm -f sedref.dvi sedref.tex tmp.sed
 
 clean: mostlyclean
 	rm -f gdb-cfg.texi
 
 distclean: clean
-	rm -f Makefile config.status
+	rm -f Makefile config.status config.log
 
 # GDBvn.texi, the dvi files, the info files, and the postscript files, 
 # are all part of the distribution, so it should not be removed by
@@ -432,3 +485,6 @@ distclean: clean
 maintainer-clean realclean: distclean
 	rm -f GDBvn.texi *.info* *.dvi *.ps *.html *.pdf
 
+install: install-info
+
+uninstall: uninstall-info

@@ -1,5 +1,5 @@
 /* Target-dependent code for OSF/1 on Alpha.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,33 +22,27 @@
 #include "frame.h"
 #include "gdbcore.h"
 #include "value.h"
+#include "osabi.h"
+#include "gdb_string.h"
+#include "objfiles.h"
 
 #include "alpha-tdep.h"
-
-/* Under OSF/1, the __sigtramp routine is frameless and has a frame
-   size of zero, but we are able to backtrace through it.  */
-static CORE_ADDR
-alpha_osf1_skip_sigtramp_frame (struct frame_info *frame, CORE_ADDR pc)
-{
-  char *name;
-
-  find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  if (PC_IN_SIGTRAMP (pc, name))
-    return frame->frame;
-  return 0;
-}
 
 static int
 alpha_osf1_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 {
-  return (func_name != NULL && STREQ ("__sigtramp", func_name));
+  return (func_name != NULL && strcmp ("__sigtramp", func_name) == 0);
 }
 
 static CORE_ADDR
 alpha_osf1_sigcontext_addr (struct frame_info *frame)
 {
-  return (read_memory_integer (frame->next ? frame->next->frame
-					   : frame->frame, 8));
+  struct frame_info *next_frame = get_next_frame (frame);
+
+  if (next_frame != NULL)
+    return (read_memory_integer (get_frame_base (next_frame), 8));
+  else
+    return (read_memory_integer (get_frame_base (frame), 8));
 }
 
 static void
@@ -57,13 +51,15 @@ alpha_osf1_init_abi (struct gdbarch_info info,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  /* Hook into the MDEBUG frame unwinder.  */
+  alpha_mdebug_init_abi (info, gdbarch);
+
   set_gdbarch_pc_in_sigtramp (gdbarch, alpha_osf1_pc_in_sigtramp);
   /* The next/step support via procfs on OSF1 is broken when running
      on multi-processor machines. We need to use software single stepping
      instead.  */
   set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
 
-  tdep->skip_sigtramp_frame = alpha_osf1_skip_sigtramp_frame;
   tdep->sigcontext_addr = alpha_osf1_sigcontext_addr;
 
   tdep->jb_pc = 2;
@@ -73,5 +69,6 @@ alpha_osf1_init_abi (struct gdbarch_info info,
 void
 _initialize_alpha_osf1_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_alpha, GDB_OSABI_OSF1, alpha_osf1_init_abi);
+  gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_OSF1,
+			  alpha_osf1_init_abi);
 }

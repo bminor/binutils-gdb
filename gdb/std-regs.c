@@ -22,7 +22,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "builtin-regs.h"
+#include "user-regs.h"
 #include "frame.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -64,7 +64,8 @@ value_of_builtin_frame_reg (struct frame_info *frame)
   memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
   /* frame.base.  */
   if (frame != NULL)
-    ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf, frame->frame);
+    ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
+			get_frame_base (frame));
   buf += TYPE_LENGTH (builtin_type_void_data_ptr);
   /* frame.XXX.  */
   return val;
@@ -73,37 +74,43 @@ value_of_builtin_frame_reg (struct frame_info *frame)
 static struct value *
 value_of_builtin_frame_fp_reg (struct frame_info *frame)
 {
-#ifdef FP_REGNUM
-  if (FP_REGNUM >= 0)
-    return value_of_register (FP_REGNUM, frame);
-#endif
-  {
-    struct value *val = allocate_value (builtin_type_void_data_ptr);
-    char *buf = VALUE_CONTENTS_RAW (val);
-    if (frame == NULL)
-      memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
-    else
-      ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf, frame->frame);
-    return val;
-  }
+  if (DEPRECATED_FP_REGNUM >= 0)
+    /* NOTE: cagney/2003-04-24: Since the mere presence of "fp" in the
+       register name table overrides this built-in $fp register, there
+       is no real reason for this DEPRECATED_FP_REGNUM trickery here.
+       An architecture wanting to implement "$fp" as alias for a raw
+       register can do so by adding "fp" to register name table (mind
+       you, doing this is probably a dangerous thing).  */
+    return value_of_register (DEPRECATED_FP_REGNUM, frame);
+  else
+    {
+      struct value *val = allocate_value (builtin_type_void_data_ptr);
+      char *buf = VALUE_CONTENTS_RAW (val);
+      if (frame == NULL)
+	memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
+      else
+	ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
+			    get_frame_base_address (frame));
+      return val;
+    }
 }
 
 static struct value *
 value_of_builtin_frame_pc_reg (struct frame_info *frame)
 {
-#ifdef PC_REGNUM
   if (PC_REGNUM >= 0)
     return value_of_register (PC_REGNUM, frame);
-#endif
-  {
-    struct value *val = allocate_value (builtin_type_void_data_ptr);
-    char *buf = VALUE_CONTENTS_RAW (val);
-    if (frame == NULL)
-      memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
-    else
-      ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf, frame->pc);
-    return val;
-  }
+  else
+    {
+      struct value *val = allocate_value (builtin_type_void_data_ptr);
+      char *buf = VALUE_CONTENTS_RAW (val);
+      if (frame == NULL)
+	memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
+      else
+	ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
+			    get_frame_pc (frame));
+      return val;
+    }
 }
 
 static struct value *
@@ -126,6 +133,8 @@ value_of_builtin_frame_ps_reg (struct frame_info *frame)
   error ("Standard register ``$ps'' is not available for this target");
 }
 
+extern initialize_file_ftype _initialize_frame_reg; /* -Wmissing-prototypes */
+
 void
 _initialize_frame_reg (void)
 {
@@ -138,14 +147,14 @@ _initialize_frame_reg (void)
   /* Frame based $fp, $pc, $sp and $ps.  These only come into play
      when the target does not define its own version of these
      registers.  */
-  add_builtin_reg ("fp", value_of_builtin_frame_fp_reg);
-  add_builtin_reg ("pc", value_of_builtin_frame_pc_reg);
-  add_builtin_reg ("sp", value_of_builtin_frame_sp_reg);
-  add_builtin_reg ("ps", value_of_builtin_frame_ps_reg);
+  user_reg_add_builtin ("fp", value_of_builtin_frame_fp_reg);
+  user_reg_add_builtin ("pc", value_of_builtin_frame_pc_reg);
+  user_reg_add_builtin ("sp", value_of_builtin_frame_sp_reg);
+  user_reg_add_builtin ("ps", value_of_builtin_frame_ps_reg);
 
   /* NOTE: cagney/2002-04-05: For moment leave the $frame / $gdbframe
      / $gdb.frame disabled.  It isn't yet clear which of the many
      options is the best.  */
   if (0)
-    add_builtin_reg ("frame", value_of_builtin_frame_reg);
+    user_reg_add_builtin ("frame", value_of_builtin_frame_reg);
 }

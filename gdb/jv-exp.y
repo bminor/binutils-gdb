@@ -48,6 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h" /* Required by objfiles.h.  */
 #include "symfile.h" /* Required by objfiles.h.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
+#include "block.h"
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
@@ -681,16 +682,16 @@ Expression:
 
 static int
 parse_number (p, len, parsed_float, putithere)
-     register char *p;
-     register int len;
+     char *p;
+     int len;
      int parsed_float;
      YYSTYPE *putithere;
 {
-  register ULONGEST n = 0;
+  ULONGEST n = 0;
   ULONGEST limit, limit_div_base;
 
-  register int c;
-  register int base = input_radix;
+  int c;
+  int base = input_radix;
 
   struct type *type;
 
@@ -871,7 +872,7 @@ yylex ()
   tokstart = lexptr;
   /* See if it is a special token of length 3.  */
   for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
-    if (STREQN (tokstart, tokentab3[i].operator, 3))
+    if (strncmp (tokstart, tokentab3[i].operator, 3) == 0)
       {
 	lexptr += 3;
 	yylval.opcode = tokentab3[i].opcode;
@@ -880,7 +881,7 @@ yylex ()
 
   /* See if it is a special token of length 2.  */
   for (i = 0; i < sizeof tokentab2 / sizeof tokentab2[0]; i++)
-    if (STREQN (tokstart, tokentab2[i].operator, 2))
+    if (strncmp (tokstart, tokentab2[i].operator, 2) == 0)
       {
 	lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
@@ -966,7 +967,7 @@ yylex ()
       {
 	/* It's a number.  */
 	int got_dot = 0, got_e = 0, toktype;
-	register char *p = tokstart;
+	char *p = tokstart;
 	int hex = input_radix > 10;
 
 	if (c == '0' && (p[1] == 'x' || p[1] == 'X'))
@@ -1132,43 +1133,43 @@ yylex ()
   switch (namelen)
     {
     case 7:
-      if (STREQN (tokstart, "boolean", 7))
+      if (DEPRECATED_STREQN (tokstart, "boolean", 7))
 	return BOOLEAN;
       break;
     case 6:
-      if (STREQN (tokstart, "double", 6))      
+      if (DEPRECATED_STREQN (tokstart, "double", 6))      
 	return DOUBLE;
       break;
     case 5:
-      if (STREQN (tokstart, "short", 5))
+      if (DEPRECATED_STREQN (tokstart, "short", 5))
 	return SHORT;
-      if (STREQN (tokstart, "false", 5))
+      if (DEPRECATED_STREQN (tokstart, "false", 5))
 	{
 	  yylval.lval = 0;
 	  return BOOLEAN_LITERAL;
 	}
-      if (STREQN (tokstart, "super", 5))
+      if (DEPRECATED_STREQN (tokstart, "super", 5))
 	return SUPER;
-      if (STREQN (tokstart, "float", 5))
+      if (DEPRECATED_STREQN (tokstart, "float", 5))
 	return FLOAT;
       break;
     case 4:
-      if (STREQN (tokstart, "long", 4))
+      if (DEPRECATED_STREQN (tokstart, "long", 4))
 	return LONG;
-      if (STREQN (tokstart, "byte", 4))
+      if (DEPRECATED_STREQN (tokstart, "byte", 4))
 	return BYTE;
-      if (STREQN (tokstart, "char", 4))
+      if (DEPRECATED_STREQN (tokstart, "char", 4))
 	return CHAR;
-      if (STREQN (tokstart, "true", 4))
+      if (DEPRECATED_STREQN (tokstart, "true", 4))
 	{
 	  yylval.lval = 1;
 	  return BOOLEAN_LITERAL;
 	}
       break;
     case 3:
-      if (STREQN (tokstart, "int", 3))
+      if (strncmp (tokstart, "int", 3) == 0)
 	return INT;
-      if (STREQN (tokstart, "new", 3))
+      if (strncmp (tokstart, "new", 3) == 0)
 	return NEW;
       break;
     default:
@@ -1227,14 +1228,12 @@ java_type_from_name (name)
    Otherwise, return 0. */
 
 static int
-push_variable (name)
-     struct stoken name;
- 
+push_variable (struct stoken name)
 {
   char *tmp = copy_name (name);
   int is_a_field_of_this = 0;
   struct symbol *sym;
-  sym = lookup_symbol (tmp, expression_context_block, VAR_NAMESPACE,
+  sym = lookup_symbol (tmp, expression_context_block, VAR_DOMAIN,
 		       &is_a_field_of_this, (struct symtab **) NULL);
   if (sym && SYMBOL_CLASS (sym) != LOC_TYPEDEF)
     {
@@ -1301,9 +1300,7 @@ push_fieldnames (name)
    Handle a qualified name, where DOT_INDEX is the index of the first '.' */
 
 static void
-push_qualified_expression_name (name, dot_index)
-     struct stoken name;
-     int dot_index;
+push_qualified_expression_name (struct stoken name, int dot_index)
 {
   struct stoken token;
   char *tmp;

@@ -1,7 +1,8 @@
 /* Symbol table definitions for GDB.
-   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,35 +25,73 @@
 #define SYMTAB_H 1
 
 /* Opaque declarations.  */
+struct ui_file;
+struct frame_info;
+struct symbol;
 struct obstack;
-struct namespace_info;
-struct using_direct_node;
-struct obstack;
+struct objfile;
+struct block;
+struct blockvector;
+struct axs_value;
+struct agent_expr;
 
-/* Don't do this; it means that if some .o's are compiled with GNU C
-   and some are not (easy to do accidentally the way we configure
-   things; also it is a pain to have to "make clean" every time you
-   want to switch compilers), then GDB dies a horrible death.  */
-/* GNU C supports enums that are bitfields.  Some compilers don't. */
-#if 0 && defined(__GNUC__) && !defined(BYTE_BITFIELD)
-#define	BYTE_BITFIELD	:8;
-#else
-#define	BYTE_BITFIELD		/*nothing */
-#endif
+/* Some of the structures in this file are space critical.
+   The space-critical structures are:
+
+     struct general_symbol_info
+     struct symbol
+     struct partial_symbol
+
+   These structures are layed out to encourage good packing.
+   They use ENUM_BITFIELD and short int fields, and they order the
+   structure members so that fields less than a word are next
+   to each other so they can be packed together. */
+
+/* Rearranged: used ENUM_BITFIELD and rearranged field order in
+   all the space critical structures (plus struct minimal_symbol).
+   Memory usage dropped from 99360768 bytes to 90001408 bytes.
+   I measured this with before-and-after tests of
+   "HEAD-old-gdb -readnow HEAD-old-gdb" and
+   "HEAD-new-gdb -readnow HEAD-old-gdb" on native i686-pc-linux-gnu,
+   red hat linux 8, with LD_LIBRARY_PATH=/usr/lib/debug,
+   typing "maint space 1" at the first command prompt.
+
+   Here is another measurement (from andrew c):
+     # no /usr/lib/debug, just plain glibc, like a normal user
+     gdb HEAD-old-gdb
+     (gdb) break internal_error
+     (gdb) run
+     (gdb) maint internal-error
+     (gdb) backtrace
+     (gdb) maint space 1
+
+   gdb gdb_6_0_branch  2003-08-19  space used: 8896512
+   gdb HEAD            2003-08-19  space used: 8904704
+   gdb HEAD            2003-08-21  space used: 8396800 (+symtab.h)
+   gdb HEAD            2003-08-21  space used: 8265728 (+gdbtypes.h)
+
+   The third line shows the savings from the optimizations in symtab.h.
+   The fourth line shows the savings from the optimizations in
+   gdbtypes.h.  Both optimizations are in gdb HEAD now.
+
+   --chastain 2003-08-21  */
+
+
 
 /* Define a structure for the information that is common to all symbol types,
    including minimal symbols, partial symbols, and full symbols.  In a
    multilanguage environment, some language specific information may need to
-   be recorded along with each symbol.
+   be recorded along with each symbol. */
 
-   These fields are ordered to encourage good packing, since we frequently
-   have tens or hundreds of thousands of these.  */
+/* This structure is space critical.  See space comments at the top. */
 
 struct general_symbol_info
 {
-  /* Name of the symbol.  This is a required field.  Storage for the name is
-     allocated on the psymbol_obstack or symbol_obstack for the associated
-     objfile. */
+  /* Name of the symbol.  This is a required field.  Storage for the
+     name is allocated on the psymbol_obstack or symbol_obstack for
+     the associated objfile.  For languages like C++ that make a
+     distinction between the mangled name and demangled name, this is
+     the mangled name.  */
 
   char *name;
 
@@ -86,24 +125,12 @@ struct general_symbol_info
 
   union
   {
-    struct cplus_specific	/* For C++ */
-      /*  and Java */
+    struct cplus_specific
     {
+      /* This is in fact used for C++, Java, and Objective C.  */
       char *demangled_name;
     }
     cplus_specific;
-    struct objc_specific
-    {
-      char *demangled_name;
-    }
-    objc_specific;
-#if 0
-/* OBSOLETE struct chill_specific        *//* For Chill */
-    /* OBSOLETE   { */
-    /* OBSOLETE     char *demangled_name; */
-    /* OBSOLETE   } */
-    /* OBSOLETE chill_specific; */
-#endif
   }
   language_specific;
 
@@ -111,7 +138,7 @@ struct general_symbol_info
      This is used to select one of the fields from the language specific
      union above. */
 
-  enum language language BYTE_BITFIELD;
+  ENUM_BITFIELD(language) language : 8;
 
   /* Which section is this symbol in?  This is an index into
      section_offsets for this objfile.  Negative means that the symbol
@@ -137,7 +164,7 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
    functions, unless the callers are changed to pass in the ginfo
    field only, instead of the SYMBOL parameter.  */
 
-#define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
+#define DEPRECATED_SYMBOL_NAME(symbol)	(symbol)->ginfo.name
 #define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
 #define SYMBOL_VALUE_ADDRESS(symbol)	(symbol)->ginfo.value.address
 #define SYMBOL_VALUE_BYTES(symbol)	(symbol)->ginfo.value.bytes
@@ -158,9 +185,46 @@ extern void symbol_init_language_specific (struct general_symbol_info *symbol,
 					   enum language language);
 
 #define SYMBOL_INIT_DEMANGLED_NAME(symbol,obstack) \
-  (symbol_init_demangled_name (&symbol->ginfo, (obstack)))
+  (symbol_init_demangled_name (&(symbol)->ginfo, (obstack)))
 extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
 					struct obstack *obstack);
+
+#define SYMBOL_SET_NAMES(symbol,linkage_name,len,objfile) \
+  symbol_set_names (&(symbol)->ginfo, linkage_name, len, objfile)
+extern void symbol_set_names (struct general_symbol_info *symbol,
+			      const char *linkage_name, int len,
+			      struct objfile *objfile);
+
+/* Now come lots of name accessor macros.  Short version as to when to
+   use which: Use SYMBOL_NATURAL_NAME to refer to the name of the
+   symbol in the original source code.  Use SYMBOL_LINKAGE_NAME if you
+   want to know what the linker thinks the symbol's name is.  Use
+   SYMBOL_PRINT_NAME for output.  Use SYMBOL_DEMANGLED_NAME if you
+   specifically need to know whether SYMBOL_NATURAL_NAME and
+   SYMBOL_LINKAGE_NAME are different.  Don't use
+   DEPRECATED_SYMBOL_NAME at all: instances of that macro should be
+   replaced by SYMBOL_NATURAL_NAME, SYMBOL_LINKAGE_NAME, or perhaps
+   SYMBOL_PRINT_NAME.  */
+
+/* Return SYMBOL's "natural" name, i.e. the name that it was called in
+   the original source code.  In languages like C++ where symbols may
+   be mangled for ease of manipulation by the linker, this is the
+   demangled name.  */
+
+#define SYMBOL_NATURAL_NAME(symbol) \
+  (symbol_natural_name (&(symbol)->ginfo))
+extern char *symbol_natural_name (const struct general_symbol_info *symbol);
+
+/* Return SYMBOL's name from the point of view of the linker.  In
+   languages like C++ where symbols may be mangled for ease of
+   manipulation by the linker, this is the mangled name; otherwise,
+   it's the same as SYMBOL_NATURAL_NAME.  This is currently identical
+   to DEPRECATED_SYMBOL_NAME, but please use SYMBOL_LINKAGE_NAME when
+   appropriate: it conveys the additional semantic information that
+   you really have thought about the issue and decided that you mean
+   SYMBOL_LINKAGE_NAME instead of SYMBOL_NATURAL_NAME.  */
+
+#define SYMBOL_LINKAGE_NAME(symbol)	(symbol)->ginfo.name
 
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL. */
@@ -168,32 +232,16 @@ extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
   (symbol_demangled_name (&(symbol)->ginfo))
 extern char *symbol_demangled_name (struct general_symbol_info *symbol);
 
-/* OBSOLETE #define SYMBOL_CHILL_DEMANGLED_NAME(symbol) */
-/* OBSOLETE (symbol)->ginfo.language_specific.chill_specific.demangled_name */
+/* Macro that returns a version of the name of a symbol that is
+   suitable for output.  In C++ this is the "demangled" form of the
+   name if demangle is on and the "mangled" form of the name if
+   demangle is off.  In other languages this is just the symbol name.
+   The result should never be NULL.  Don't use this for internal
+   purposes (e.g. storing in a hashtable): it's only suitable for
+   output.  */
 
-#define SYMBOL_OBJC_DEMANGLED_NAME(symbol)				\
-   (symbol)->ginfo.language_specific.objc_specific.demangled_name
-
-/* Macro that returns the "natural source name" of a symbol.  In C++ this is
-   the "demangled" form of the name if demangle is on and the "mangled" form
-   of the name if demangle is off.  In other languages this is just the
-   symbol name.  The result should never be NULL. */
-
-#define SYMBOL_SOURCE_NAME(symbol)					\
-  (demangle && SYMBOL_DEMANGLED_NAME (symbol) != NULL			\
-   ? SYMBOL_DEMANGLED_NAME (symbol)					\
-   : SYMBOL_NAME (symbol))
-
-/* Macro that returns the "natural assembly name" of a symbol.  In C++ this is
-   the "mangled" form of the name if demangle is off, or if demangle is on and
-   asm_demangle is off.  Otherwise if asm_demangle is on it is the "demangled"
-   form.  In other languages this is just the symbol name.  The result should
-   never be NULL. */
-
-#define SYMBOL_LINKAGE_NAME(symbol)					\
-  (demangle && asm_demangle && SYMBOL_DEMANGLED_NAME (symbol) != NULL	\
-   ? SYMBOL_DEMANGLED_NAME (symbol)					\
-   : SYMBOL_NAME (symbol))
+#define SYMBOL_PRINT_NAME(symbol)					\
+  (demangle ? SYMBOL_NATURAL_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
 
 /* Macro that tests a symbol for a match against a specified name string.
    First test the unencoded name, then looks for and test a C++ encoded
@@ -202,20 +250,44 @@ extern char *symbol_demangled_name (struct general_symbol_info *symbol);
    "foo :: bar (int, long)".
    Evaluates to zero if the match fails, or nonzero if it succeeds. */
 
-#define SYMBOL_MATCHES_NAME(symbol, name)				\
-  (STREQ (SYMBOL_NAME (symbol), (name))					\
-   || (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
-       && strcmp_iw (SYMBOL_DEMANGLED_NAME (symbol), (name)) == 0))
+/* Macro that tests a symbol for a match against a specified name
+   string.  It tests against SYMBOL_NATURAL_NAME, and it ignores
+   whitespace and trailing parentheses.  (See strcmp_iw for details
+   about its behavior.)  */
 
-/* Macro that tests a symbol for an re-match against the last compiled regular
-   expression.  First test the unencoded name, then look for and test a C++
-   encoded name if it exists.
-   Evaluates to zero if the match fails, or nonzero if it succeeds. */
+#define SYMBOL_MATCHES_NATURAL_NAME(symbol, name)			\
+  (strcmp_iw (SYMBOL_NATURAL_NAME (symbol), (name)) == 0)
 
-#define SYMBOL_MATCHES_REGEXP(symbol)					\
-  (re_exec (SYMBOL_NAME (symbol)) != 0					\
-   || (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
-       && re_exec (SYMBOL_DEMANGLED_NAME (symbol)) != 0))
+/* Classification types for a minimal symbol.  These should be taken as
+   "advisory only", since if gdb can't easily figure out a
+   classification it simply selects mst_unknown.  It may also have to
+   guess when it can't figure out which is a better match between two
+   types (mst_data versus mst_bss) for example.  Since the minimal
+   symbol info is sometimes derived from the BFD library's view of a
+   file, we need to live with what information bfd supplies. */
+
+enum minimal_symbol_type
+{
+  mst_unknown = 0,		/* Unknown type, the default */
+  mst_text,			/* Generally executable instructions */
+  mst_data,			/* Generally initialized data */
+  mst_bss,			/* Generally uninitialized data */
+  mst_abs,			/* Generally absolute (nonrelocatable) */
+  /* GDB uses mst_solib_trampoline for the start address of a shared
+     library trampoline entry.  Breakpoints for shared library functions
+     are put there if the shared library is not yet loaded.
+     After the shared library is loaded, lookup_minimal_symbol will
+     prefer the minimal symbol from the shared library (usually
+     a mst_text symbol) over the mst_solib_trampoline symbol, and the
+     breakpoints will be moved to their true address in the shared
+     library via breakpoint_re_set.  */
+  mst_solib_trampoline,		/* Shared library trampoline code */
+  /* For the mst_file* types, the names are only guaranteed to be unique
+     within a given .o file.  */
+  mst_file_text,		/* Static version of mst_text */
+  mst_file_data,		/* Static version of mst_data */
+  mst_file_bss			/* Static version of mst_bss */
+};
 
 /* Define a simple structure used to hold some very basic information about
    all defined global symbols (text, data, bss, abs, etc).  The only required
@@ -253,42 +325,20 @@ struct minimal_symbol
 
   char *info;
 
+  /* Size of this symbol.  end_psymtab in dbxread.c uses this
+     information to calculate the end of the partial symtab based on the
+     address of the last symbol plus the size of the last symbol.  */
+
+  unsigned long size;
+
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
   /* Which source file is this symbol in?  Only relevant for mst_file_*.  */
   char *filename;
 #endif
 
-  /* Classification types for this symbol.  These should be taken as "advisory
-     only", since if gdb can't easily figure out a classification it simply
-     selects mst_unknown.  It may also have to guess when it can't figure out
-     which is a better match between two types (mst_data versus mst_bss) for
-     example.  Since the minimal symbol info is sometimes derived from the
-     BFD library's view of a file, we need to live with what information bfd
-     supplies. */
+  /* Classification type for this minimal symbol.  */
 
-  enum minimal_symbol_type
-  {
-    mst_unknown = 0,		/* Unknown type, the default */
-    mst_text,			/* Generally executable instructions */
-    mst_data,			/* Generally initialized data */
-    mst_bss,			/* Generally uninitialized data */
-    mst_abs,			/* Generally absolute (nonrelocatable) */
-    /* GDB uses mst_solib_trampoline for the start address of a shared
-       library trampoline entry.  Breakpoints for shared library functions
-       are put there if the shared library is not yet loaded.
-       After the shared library is loaded, lookup_minimal_symbol will
-       prefer the minimal symbol from the shared library (usually
-       a mst_text symbol) over the mst_solib_trampoline symbol, and the
-       breakpoints will be moved to their true address in the shared
-       library via breakpoint_re_set.  */
-    mst_solib_trampoline,	/* Shared library trampoline code */
-    /* For the mst_file* types, the names are only guaranteed to be unique
-       within a given .o file.  */
-    mst_file_text,		/* Static version of mst_text */
-    mst_file_data,		/* Static version of mst_data */
-    mst_file_bss		/* Static version of mst_bss */
-  }
-  type BYTE_BITFIELD;
+  ENUM_BITFIELD(minimal_symbol_type) type : 8;
 
   /* Minimal symbols with the same hash key are kept on a linked
      list.  This is the link.  */
@@ -302,214 +352,57 @@ struct minimal_symbol
 };
 
 #define MSYMBOL_INFO(msymbol)		(msymbol)->info
+#define MSYMBOL_SIZE(msymbol)		(msymbol)->size
 #define MSYMBOL_TYPE(msymbol)		(msymbol)->type
-
 
-
-/* All of the name-scope contours of the program
-   are represented by `struct block' objects.
-   All of these objects are pointed to by the blockvector.
-
-   Each block represents one name scope.
-   Each lexical context has its own block.
-
-   The blockvector begins with some special blocks.
-   The GLOBAL_BLOCK contains all the symbols defined in this compilation
-   whose scope is the entire program linked together.
-   The STATIC_BLOCK contains all the symbols whose scope is the
-   entire compilation excluding other separate compilations.
-   Blocks starting with the FIRST_LOCAL_BLOCK are not special.
-
-   Each block records a range of core addresses for the code that
-   is in the scope of the block.  The STATIC_BLOCK and GLOBAL_BLOCK
-   give, for the range of code, the entire range of code produced
-   by the compilation that the symbol segment belongs to.
-
-   The blocks appear in the blockvector
-   in order of increasing starting-address,
-   and, within that, in order of decreasing ending-address.
-
-   This implies that within the body of one function
-   the blocks appear in the order of a depth-first tree walk.  */
-
-struct blockvector
-{
-  /* Number of blocks in the list.  */
-  int nblocks;
-  /* The blocks themselves.  */
-  struct block *block[1];
-};
-
-#define BLOCKVECTOR_NBLOCKS(blocklist) (blocklist)->nblocks
-#define BLOCKVECTOR_BLOCK(blocklist,n) (blocklist)->block[n]
-
-/* Special block numbers */
-
-#define GLOBAL_BLOCK		0
-#define	STATIC_BLOCK		1
-#define	FIRST_LOCAL_BLOCK	2
-
-struct block
-{
-
-  /* Addresses in the executable code that are in this block.  */
-
-  CORE_ADDR startaddr;
-  CORE_ADDR endaddr;
-
-  /* The symbol that names this block, if the block is the body of a
-     function; otherwise, zero.  */
-
-  struct symbol *function;
-
-  /* The `struct block' for the containing block, or 0 if none.
-
-     The superblock of a top-level local block (i.e. a function in the
-     case of C) is the STATIC_BLOCK.  The superblock of the
-     STATIC_BLOCK is the GLOBAL_BLOCK.  */
-
-  struct block *superblock;
-
-  /* Used for language-specific info.  */
-
-  union
-  {
-    struct
-    {
-      /* Contains information about namespace-related info relevant to
-	 this block: using directives and the current namespace
-	 scope.  */
-      
-      struct namespace_info *namespace;
-    }
-    cplus_specific;
-  }
-  language_specific;
-
-  /* Version of GCC used to compile the function corresponding
-     to this block, or 0 if not compiled with GCC.  When possible,
-     GCC should be compatible with the native compiler, or if that
-     is not feasible, the differences should be fixed during symbol
-     reading.  As of 16 Apr 93, this flag is never used to distinguish
-     between gcc2 and the native compiler.
-
-     If there is no function corresponding to this block, this meaning
-     of this flag is undefined.  */
-
-  unsigned char gcc_compile_flag;
-
-  /* The symbols for this block are either in a simple linear list or
-     in a simple hashtable.  Blocks which correspond to a function
-     (which have a list of symbols corresponding to arguments) use
-     a linear list, as do some older symbol readers (currently only
-     mdebugread and dstread).  Other blocks are hashed.
-
-     The hashtable uses the same hash function as the minsym hashtables,
-     found in minsyms.c:minsym_hash_iw.  Symbols are hashed based on
-     their demangled name if appropriate, and on their name otherwise.
-     The hash function ignores space, and stops at the beginning of the
-     argument list if any.
-
-     The table is laid out in NSYMS/5 buckets and symbols are chained via
-     their hash_next field.  */
-
-  /* If this is really a hashtable of the symbols, this flag is 1.  */
-
-  unsigned char hashtable;
-
-  /* Number of local symbols.  */
-
-  int nsyms;
-
-  /* The symbols.  If some of them are arguments, then they must be
-     in the order in which we would like to print them.  */
-
-  struct symbol *sym[1];
-};
-
-#define BLOCK_START(bl)		(bl)->startaddr
-#define BLOCK_END(bl)		(bl)->endaddr
-#define BLOCK_FUNCTION(bl)	(bl)->function
-#define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
-#define BLOCK_NAMESPACE(bl)	(bl)->language_specific.cplus_specific.namespace
-#define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
-#define BLOCK_HASHTABLE(bl)	(bl)->hashtable
-
-/* For blocks without a hashtable (BLOCK_HASHTABLE (bl) == 0) only.  */
-#define BLOCK_NSYMS(bl)		(bl)->nsyms
-#define BLOCK_SYM(bl, n)	(bl)->sym[n]
-
-/* For blocks with a hashtable, but these are valid for non-hashed blocks as
-   well - each symbol will appear to be one bucket by itself.  */
-#define BLOCK_BUCKETS(bl)	(bl)->nsyms
-#define BLOCK_BUCKET(bl, n)	(bl)->sym[n]
-
-/* Macro used to set the size of a hashtable for N symbols.  */
-#define BLOCK_HASHTABLE_SIZE(n)	((n)/5 + 1)
-
-/* Macro to loop through all symbols in a block BL, in no particular order.
-   i counts which bucket we are in, and sym points to the current symbol.  */
-
-#define ALL_BLOCK_SYMBOLS(bl, i, sym)				\
-	for ((i) = 0; (i) < BLOCK_BUCKETS ((bl)); (i)++)	\
-	  for ((sym) = BLOCK_BUCKET ((bl), (i)); (sym);		\
-	       (sym) = (sym)->hash_next)
-
-/* Nonzero if symbols of block BL should be sorted alphabetically.
-   Don't sort a block which corresponds to a function.  If we did the
-   sorting would have to preserve the order of the symbols for the
-   arguments.  Also don't sort any block that we chose to hash.  */
-
-#define BLOCK_SHOULD_SORT(bl) (! BLOCK_HASHTABLE (bl) \
-			       && BLOCK_FUNCTION (bl) == NULL)
 
 
 /* Represent one symbol name; a variable, constant, function or typedef.  */
 
-/* Different name spaces for symbols.  Looking up a symbol specifies a
-   namespace and ignores symbol definitions in other name spaces. */
+/* Different name domains for symbols.  Looking up a symbol specifies a
+   domain and ignores symbol definitions in other name domains. */
 
-typedef enum
+typedef enum domain_enum_tag
 {
-  /* UNDEF_NAMESPACE is used when a namespace has not been discovered or
+  /* UNDEF_DOMAIN is used when a domain has not been discovered or
      none of the following apply.  This usually indicates an error either
      in the symbol information or in gdb's handling of symbols. */
 
-  UNDEF_NAMESPACE,
+  UNDEF_DOMAIN,
 
-  /* VAR_NAMESPACE is the usual namespace.  In C, this contains variables,
+  /* VAR_DOMAIN is the usual domain.  In C, this contains variables,
      function names, typedef names and enum type values. */
 
-  VAR_NAMESPACE,
+  VAR_DOMAIN,
 
-  /* STRUCT_NAMESPACE is used in C to hold struct, union and enum type names.
+  /* STRUCT_DOMAIN is used in C to hold struct, union and enum type names.
      Thus, if `struct foo' is used in a C program, it produces a symbol named
-     `foo' in the STRUCT_NAMESPACE. */
+     `foo' in the STRUCT_DOMAIN. */
 
-  STRUCT_NAMESPACE,
+  STRUCT_DOMAIN,
 
-  /* LABEL_NAMESPACE may be used for names of labels (for gotos);
+  /* LABEL_DOMAIN may be used for names of labels (for gotos);
      currently it is not used and labels are not recorded at all.  */
 
-  LABEL_NAMESPACE,
+  LABEL_DOMAIN,
 
-  /* Searching namespaces. These overlap with VAR_NAMESPACE, providing
+  /* Searching domains. These overlap with VAR_DOMAIN, providing
      some granularity with the search_symbols function. */
 
-  /* Everything in VAR_NAMESPACE minus FUNCTIONS_-, TYPES_-, and
-     METHODS_NAMESPACE */
-  VARIABLES_NAMESPACE,
+  /* Everything in VAR_DOMAIN minus FUNCTIONS_-, TYPES_-, and
+     METHODS_DOMAIN */
+  VARIABLES_DOMAIN,
 
   /* All functions -- for some reason not methods, though. */
-  FUNCTIONS_NAMESPACE,
+  FUNCTIONS_DOMAIN,
 
   /* All defined types */
-  TYPES_NAMESPACE,
+  TYPES_DOMAIN,
 
   /* All class methods -- why is this separated out? */
-  METHODS_NAMESPACE
+  METHODS_DOMAIN
 }
-namespace_enum;
+domain_enum;
 
 /* An address-class says where to find the value of a symbol.  */
 
@@ -542,8 +435,9 @@ enum address_class
   /* Value is in register number SYMBOL_VALUE.  Just like LOC_REGISTER
      except this is an argument.  Probably the cleaner way to handle
      this would be to separate address_class (which would include
-     separate ARG and LOCAL to deal with FRAME_ARGS_ADDRESS versus
-     FRAME_LOCALS_ADDRESS), and an is_argument flag.
+     separate ARG and LOCAL to deal with the frame's arguments
+     (get_frame_args_address) versus the frame's locals
+     (get_frame_locals_address), and an is_argument flag.
 
      For some symbol formats (stabs, for some compilers at least),
      the compiler generates two symbols, an argument and a register.
@@ -565,8 +459,8 @@ enum address_class
 
   LOC_LOCAL,
 
-  /* Value not used; definition in SYMBOL_TYPE.  Symbols in the namespace
-     STRUCT_NAMESPACE all have this class.  */
+  /* Value not used; definition in SYMBOL_TYPE.  Symbols in the domain
+     STRUCT_DOMAIN all have this class.  */
 
   LOC_TYPEDEF,
 
@@ -587,9 +481,9 @@ enum address_class
 
   /* Value is arg at SYMBOL_VALUE offset in stack frame. Differs from
      LOC_LOCAL in that symbol is an argument; differs from LOC_ARG in
-     that we find it in the frame (FRAME_LOCALS_ADDRESS), not in the
-     arglist (FRAME_ARGS_ADDRESS).  Added for i960, which passes args
-     in regs then copies to frame.  */
+     that we find it in the frame (get_frame_locals_address), not in
+     the arglist (get_frame_args_address).  Added for i960, which
+     passes args in regs then copies to frame.  */
 
   LOC_LOCAL_ARG,
 
@@ -629,14 +523,6 @@ enum address_class
 
   LOC_HP_THREAD_LOCAL_STATIC,
 
-  /* Value is at a thread-specific location calculated by a
-     target-specific method.  SYMBOL_OBJFILE gives the object file
-     in which the symbol is defined; the symbol's value is the
-     offset into that objfile's thread-local storage for the current
-     thread.  */
-      
-  LOC_THREAD_LOCAL_STATIC,
-
   /* The variable does not actually exist in the program.
      The value is ignored.  */
 
@@ -650,24 +536,61 @@ enum address_class
    * with a level of indirection.
    */
 
-  LOC_INDIRECT
+  LOC_INDIRECT,
+
+  /* The variable's address is computed by a set of location
+     functions (see "struct location_funcs" below).  */
+  LOC_COMPUTED,
+
+  /* Same as LOC_COMPUTED, but for function arguments.  */
+  LOC_COMPUTED_ARG
 };
 
-/* Linked list of symbol's live ranges. */
+/* A structure of function pointers describing the location of a
+   variable, structure member, or structure base class.
 
-struct range_list
+   These functions' BATON arguments are generic data pointers, holding
+   whatever data the functions need --- the code which provides this
+   structure also provides the actual contents of the baton, and
+   decides its form.  However, there may be other rules about where
+   the baton data must be allocated; whoever is pointing to this
+   `struct location_funcs' object will know the rules.  For example,
+   when a symbol S's location is LOC_COMPUTED, then
+   SYMBOL_LOCATION_FUNCS(S) is pointing to a location_funcs structure,
+   and SYMBOL_LOCATION_BATON(S) is the baton, which must be allocated
+   on the same obstack as the symbol itself.  */
+
+struct location_funcs
 {
-  CORE_ADDR start;
-  CORE_ADDR end;
-  struct range_list *next;
+
+  /* Return the value of the variable SYMBOL, relative to the stack
+     frame FRAME.  If the variable has been optimized out, return
+     zero.
+
+     Iff `read_needs_frame (SYMBOL)' is zero, then FRAME may be zero.  */
+
+  struct value *(*read_variable) (struct symbol * symbol,
+				  struct frame_info * frame);
+
+  /* Return non-zero if we need a frame to find the value of the SYMBOL.  */
+  int (*read_needs_frame) (struct symbol * symbol);
+
+  /* Write to STREAM a natural-language description of the location of
+     SYMBOL.  */
+  int (*describe_location) (struct symbol * symbol, struct ui_file * stream);
+
+  /* Tracepoint support.  Append bytecodes to the tracepoint agent
+     expression AX that push the address of the object SYMBOL.  Set
+     VALUE appropriately.  Note --- for objects in registers, this
+     needn't emit any code; as long as it sets VALUE properly, then
+     the caller will generate the right code in the process of
+     treating this as an lvalue or rvalue.  */
+
+  void (*tracepoint_var_ref) (struct symbol * symbol, struct agent_expr * ax,
+			      struct axs_value * value);
 };
 
-/* Linked list of aliases for a particular main/primary symbol.  */
-struct alias_list
-{
-  struct symbol *sym;
-  struct alias_list *next;
-};
+/* This structure is space critical.  See space comments at the top. */
 
 struct symbol
 {
@@ -680,18 +603,13 @@ struct symbol
 
   struct type *type;
 
-  /* Name space code.  */
+  /* Domain code.  */
 
-#ifdef __MFC4__
-  /* FIXME: don't conflict with C++'s namespace */
-  /* would be safer to do a global change for all namespace identifiers. */
-#define namespace _namespace
-#endif
-  namespace_enum namespace BYTE_BITFIELD;
+  ENUM_BITFIELD(domain_enum_tag) domain : 6;
 
   /* Address class */
 
-  enum address_class aclass BYTE_BITFIELD;
+  ENUM_BITFIELD(address_class) aclass : 6;
 
   /* Line number of definition.  FIXME:  Should we really make the assumption
      that nobody will try to debug files longer than 64K lines?  What about
@@ -707,42 +625,44 @@ struct symbol
     /* Used by LOC_BASEREG and LOC_BASEREG_ARG.  */
     short basereg;
 
-    /* Used by LOC_THREAD_LOCAL_STATIC.  The objfile in which this
-       symbol is defined.  To find a thread-local variable (e.g., a
-       variable declared with the `__thread' storage class), we may
-       need to know which object file it's in.  */
-    struct objfile *objfile;
+    /* For a LOC_COMPUTED or LOC_COMPUTED_ARG symbol, this is the
+       baton and location_funcs structure to find its location.  For a
+       LOC_BLOCK symbol for a function in a compilation unit compiled
+       with DWARF 2 information, this is information used internally
+       by the DWARF 2 code --- specifically, the location expression
+       for the frame base for this function.  */
+    /* FIXME drow/2003-02-21: For the LOC_BLOCK case, it might be better
+       to add a magic symbol to the block containing this information,
+       or to have a generic debug info annotation slot for symbols.  */
+    struct
+    {
+      void *baton;
+      struct location_funcs *funcs;
+    } loc;
   }
   aux_value;
-
-
-  /* Link to a list of aliases for this symbol.
-     Only a "primary/main symbol may have aliases.  */
-  struct alias_list *aliases;
-
-  /* List of ranges where this symbol is active.  This is only
-     used by alias symbols at the current time.  */
-  struct range_list *ranges;
 
   struct symbol *hash_next;
 };
 
 
-#define SYMBOL_NAMESPACE(symbol)	(symbol)->namespace
+#define SYMBOL_DOMAIN(symbol)	(symbol)->domain
 #define SYMBOL_CLASS(symbol)		(symbol)->aclass
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
 #define SYMBOL_OBJFILE(symbol)          (symbol)->aux_value.objfile
-#define SYMBOL_ALIASES(symbol)		(symbol)->aliases
-#define SYMBOL_RANGES(symbol)		(symbol)->ranges
+#define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value.loc.baton
+#define SYMBOL_LOCATION_FUNCS(symbol)   (symbol)->aux_value.loc.funcs
 
-/* A partial_symbol records the name, namespace, and address class of
+/* A partial_symbol records the name, domain, and address class of
    symbols whose types we have not parsed yet.  For functions, it also
    contains their memory address, so we can find them from a PC value.
    Each partial_symbol sits in a partial_symtab, all of which are chained
    on a  partial symtab list and which points to the corresponding 
    normal symtab once the partial_symtab has been referenced.  */
+
+/* This structure is space critical.  See space comments at the top. */
 
 struct partial_symbol
 {
@@ -753,15 +673,15 @@ struct partial_symbol
 
   /* Name space code.  */
 
-  namespace_enum namespace BYTE_BITFIELD;
+  ENUM_BITFIELD(domain_enum_tag) domain : 6;
 
   /* Address class (for info_symbols) */
 
-  enum address_class aclass BYTE_BITFIELD;
+  ENUM_BITFIELD(address_class) aclass : 6;
 
 };
 
-#define PSYMBOL_NAMESPACE(psymbol)	(psymbol)->namespace
+#define PSYMBOL_DOMAIN(psymbol)	(psymbol)->domain
 #define PSYMBOL_CLASS(psymbol)		(psymbol)->aclass
 
 
@@ -823,11 +743,10 @@ struct section_offsets
     ? (internal_error (__FILE__, __LINE__, "Section index is uninitialized"), -1) \
     : secoff->offsets[whichone])
 
-/* The maximum possible size of a section_offsets table.  */
-
-#define SIZEOF_SECTION_OFFSETS \
+/* The size of a section_offsets table for N sections.  */
+#define SIZEOF_N_SECTION_OFFSETS(n) \
   (sizeof (struct section_offsets) \
-   + sizeof (((struct section_offsets *) 0)->offsets) * (SECT_OFF_MAX-1))
+   + sizeof (((struct section_offsets *) 0)->offsets) * ((n)-1))
 
 /* Each source file or header is represented by a struct symtab. 
    These objects are chained through the `next' field.  */
@@ -887,10 +806,10 @@ struct symtab
   }
   free_code;
 
-  /* Pointer to one block of storage to be freed, if nonzero.  */
-  /* This is IN ADDITION to the action indicated by free_code.  */
+  /* A function to call to free space, if necessary.  This is IN
+     ADDITION to the action indicated by free_code.  */
 
-  char *free_ptr;
+  void (*free_func)(struct symtab *symtab);
 
   /* Total number of lines found in source file.  */
 
@@ -1068,14 +987,60 @@ extern struct symtab *lookup_symtab (const char *);
 /* lookup a symbol by name (optional block, optional symtab) */
 
 extern struct symbol *lookup_symbol (const char *, const struct block *,
-				     const namespace_enum, int *,
+				     const domain_enum, int *,
 				     struct symtab **);
+
+/* A default version of lookup_symbol_nonlocal for use by languages
+   that can't think of anything better to do.  */
+
+extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
+						    const char *,
+						    const struct block *,
+						    const domain_enum,
+						    struct symtab **);
+
+/* Some helper functions for languages that need to write their own
+   lookup_symbol_nonlocal functions.  */
+
+/* Lookup a symbol in the static block associated to BLOCK, if there
+   is one; do nothing if BLOCK is NULL or a global block.  */
+
+extern struct symbol *lookup_symbol_static (const char *name,
+					    const char *linkage_name,
+					    const struct block *block,
+					    const domain_enum domain,
+					    struct symtab **symtab);
+
+/* Lookup a symbol in all files' global blocks (searching psymtabs if
+   necessary).  */
+
+extern struct symbol *lookup_symbol_global (const char *name,
+					    const char *linkage_name,
+					    const domain_enum domain,
+					    struct symtab **symtab);
+
+/* Lookup a symbol within the block BLOCK.  This, unlike
+   lookup_symbol_block, will set SYMTAB and BLOCK_FOUND correctly, and
+   will fix up the symbol if necessary.  */
+
+extern struct symbol *lookup_symbol_aux_block (const char *name,
+					       const char *linkage_name,
+					       const struct block *block,
+					       const domain_enum domain,
+					       struct symtab **symtab);
+
+/* Lookup a partial symbol.  */
+
+extern struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
+						     const char *,
+						     const char *, int,
+						     domain_enum);
 
 /* lookup a symbol by name, within a specified block */
 
 extern struct symbol *lookup_block_symbol (const struct block *, const char *,
 					   const char *,
-					   const namespace_enum);
+					   const domain_enum);
 
 /* lookup a [struct, union, enum] by name, within a specified block */
 
@@ -1084,10 +1049,6 @@ extern struct type *lookup_struct (char *, struct block *);
 extern struct type *lookup_union (char *, struct block *);
 
 extern struct type *lookup_enum (char *, struct block *);
-
-/* lookup the function corresponding to the block */
-
-extern struct symbol *block_function (struct block *);
 
 /* from blockframe.c: */
 
@@ -1101,8 +1062,8 @@ extern struct symbol *find_pc_sect_function (CORE_ADDR, asection *);
 
 /* lookup function from address, return name, start addr and end addr */
 
-extern int
-find_pc_partial_function (CORE_ADDR, char **, CORE_ADDR *, CORE_ADDR *);
+extern int find_pc_partial_function (CORE_ADDR, char **, CORE_ADDR *,
+				     CORE_ADDR *);
 
 extern void clear_pc_function_cache (void);
 
@@ -1142,21 +1103,6 @@ extern struct partial_symbol *find_pc_sect_psymbol (struct partial_symtab *,
 						    CORE_ADDR, asection *);
 
 extern int find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
-
-extern int contained_in (struct block *, struct block *);
-
-extern struct using_direct_node *block_using (const struct block *);
-
-extern struct using_direct_node *block_all_usings (const struct block *block);
-
-extern void block_set_using (struct block *block,
-			     struct using_direct_node *using,
-			     struct obstack *obstack);
-
-extern const char *block_scope (const struct block *block);
-
-extern void block_set_scope (struct block *block, const char *scope,
-			     struct obstack *obstack);
 
 extern void reread_symbols (void);
 
@@ -1198,11 +1144,9 @@ extern struct minimal_symbol *lookup_minimal_symbol (const char *,
 						     struct objfile *);
 
 extern struct minimal_symbol *lookup_minimal_symbol_text (const char *,
-							  const char *,
 							  struct objfile *);
 
 struct minimal_symbol *lookup_minimal_symbol_solib_trampoline (const char *,
-							       const char *,
 							       struct objfile
 							       *);
 
@@ -1294,19 +1238,12 @@ extern struct symtab_and_line find_pc_line (CORE_ADDR, int);
 
 extern struct symtab_and_line find_pc_sect_line (CORE_ADDR, asection *, int);
 
-/* Given an address, return the nearest symbol at or below it in memory.
-   Optionally return the symtab it's from through 2nd arg, and the
-   address in inferior memory of the symbol through 3rd arg.  */
-
-extern struct symbol *find_addr_symbol (CORE_ADDR, struct symtab **,
-					CORE_ADDR *);
-
 /* Given a symtab and line number, return the pc there.  */
 
 extern int find_line_pc (struct symtab *, int, CORE_ADDR *);
 
-extern int
-find_line_pc_range (struct symtab_and_line, CORE_ADDR *, CORE_ADDR *);
+extern int find_line_pc_range (struct symtab_and_line, CORE_ADDR *,
+			       CORE_ADDR *);
 
 extern void resolve_sal_pc (struct symtab_and_line *);
 
@@ -1326,6 +1263,10 @@ void maintenance_print_psymbols (char *, int);
 void maintenance_print_msymbols (char *, int);
 
 void maintenance_print_objfiles (char *, int);
+
+void maintenance_info_symtabs (char *, int);
+
+void maintenance_info_psymtabs (char *, int);
 
 void maintenance_check_symtabs (char *, int);
 
@@ -1355,8 +1296,6 @@ extern char **make_symbol_completion_list (char *, char *);
 
 extern char **make_file_symbol_completion_list (char *, char *, char *);
 
-extern struct symbol **make_symbol_overload_list (struct symbol *);
-
 extern char **make_source_files_completion_list (char *, char *);
 
 /* symtab.c */
@@ -1367,13 +1306,6 @@ extern struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
 
 extern struct symtab_and_line find_function_start_sal (struct symbol *sym,
 						       int);
-
-/* blockframe.c */
-
-extern struct blockvector *blockvector_for_pc (CORE_ADDR, int *);
-
-extern struct blockvector *blockvector_for_pc_sect (CORE_ADDR, asection *,
-						    int *, struct symtab *);
 
 /* symfile.c */
 
@@ -1417,7 +1349,7 @@ struct symbol_search
   struct symbol_search *next;
 };
 
-extern void search_symbols (char *, namespace_enum, int, char **,
+extern void search_symbols (char *, domain_enum, int, char **,
 			    struct symbol_search **);
 extern void free_search_symbols (struct symbol_search *);
 extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search

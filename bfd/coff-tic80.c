@@ -1,5 +1,6 @@
 /* BFD back-end for Texas Instruments TMS320C80 Multimedia Video Processor (MVP).
-   Copyright 1996, 1997, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    Written by Fred Fish (fnf@cygnus.com)
 
@@ -48,7 +49,7 @@ static bfd_reloc_status_type glob16_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type local16_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static boolean coff_tic80_relocate_section
+static bfd_boolean coff_tic80_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
 static reloc_howto_type * coff_tic80_rtype_to_howto
@@ -63,295 +64,295 @@ static reloc_howto_type tic80_howto_table[] =
 	 0,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 32,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "RELLONG",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0xffffffff,			/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_MPPCR,			/* type */
 	 2,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 32,				/* bitsize */
-	 true,				/* pc_relative */
+	 TRUE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_signed,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "MPPCR",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0xffffffff,			/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 true),				/* pcrel_offset */
+	 TRUE),				/* pcrel_offset */
 
   HOWTO (R_ABS,				/* type */
 	 0,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 32,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "ABS",				/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0xffffffff,			/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 false),				/* pcrel_offset */
+	 FALSE),				/* pcrel_offset */
 
   HOWTO (R_PPBASE,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 32,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 ppbase_reloc,			/* special_function */
 	 "PPBASE",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0xffffffff,			/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPLBASE,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 32,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 ppbase_reloc,			/* special_function */
 	 "PPLBASE",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0xffffffff,			/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PP15,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 6,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PP15",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x1ffc0,			/* src_mask */
 	 0x1ffc0,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PP15W,			/* type */
 	 2,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 6,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PP15W",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x1ffc0,			/* src_mask */
 	 0x1ffc0,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PP15H,			/* type */
 	 1,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 6,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PP15H",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x1ffc0,			/* src_mask */
 	 0x1ffc0,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PP16B,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 16,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 6,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob16_reloc,			/* special_function */
 	 "PP16B",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x3ffc0,			/* src_mask */
 	 0x3ffc0,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPL15,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPL15",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x7fff,			/* src_mask */
 	 0x7fff,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPL15W,			/* type */
 	 2,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPL15W",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x7fff,			/* src_mask */
 	 0x7fff,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPL15H,			/* type */
 	 1,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPL15H",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x7fff,			/* src_mask */
 	 0x7fff,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPL16B,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 16,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 local16_reloc,			/* special_function */
 	 "PPL16B",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0xffff,			/* src_mask */
 	 0xffff,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPN15,			/* type */
 	 0,				/* rightshift */
 	 -2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 6,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PPN15",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x1ffc0,			/* src_mask */
 	 0x1ffc0,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPN15W,			/* type */
 	 2,				/* rightshift */
 	 -2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 6,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PPN15W",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x1ffc0,			/* src_mask */
 	 0x1ffc0,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPN15H,			/* type */
 	 1,				/* rightshift */
 	 -2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 6,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob15_reloc,			/* special_function */
 	 "PPN15H",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x1ffc0,			/* src_mask */
 	 0x1ffc0,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPN16B,			/* type */
 	 0,				/* rightshift */
 	 -2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 16,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 6,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 glob16_reloc,			/* special_function */
 	 "PPN16B",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x3ffc0,			/* src_mask */
 	 0x3ffc0,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPLN15,			/* type */
 	 0,				/* rightshift */
 	 -2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPLN15",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x7fff,			/* src_mask */
 	 0x7fff,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPLN15W,			/* type */
 	 2,				/* rightshift */
 	 -2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPLN15W",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x7fff,			/* src_mask */
 	 0x7fff,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPLN15H,			/* type */
 	 1,				/* rightshift */
 	 -2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "PPLN15H",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0x7fff,			/* src_mask */
 	 0x7fff,			/* dst_mask */
-	 false),			/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_PPLN16B,			/* type */
 	 0,				/* rightshift */
 	 -2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 15,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 local16_reloc,			/* special_function */
 	 "PPLN16B",			/* name */
-	 true,				/* partial_inplace */
+	 TRUE,				/* partial_inplace */
 	 0xffff,			/* src_mask */
 	 0xffff,			/* dst_mask */
-	 false)				/* pcrel_offset */
+	 FALSE)				/* pcrel_offset */
 };
 
 /* Special relocation functions, used when the output file is not
@@ -485,7 +486,7 @@ coff_tic80_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 /* We need a special relocation routine to handle the PP relocs.  Most
    of this is a copy of _bfd_coff_generic_relocate_section.  */
 
-static boolean
+static bfd_boolean
 coff_tic80_relocate_section (output_bfd, info, input_bfd,
 			     input_section, contents, relocs, syms,
 			     sections)
@@ -540,7 +541,7 @@ coff_tic80_relocate_section (output_bfd, info, input_bfd,
       howto = bfd_coff_rtype_to_howto (input_bfd, input_section, rel, h,
 				       sym, &addend);
       if (howto == NULL)
-	return false;
+	return FALSE;
 
       val = 0;
 
@@ -576,12 +577,12 @@ coff_tic80_relocate_section (output_bfd, info, input_bfd,
 		     + sec->output_offset);
 	      }
 
-	  else if (! info->relocateable)
+	  else if (! info->relocatable)
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,
-		      rel->r_vaddr - input_section->vma, true)))
-		return false;
+		      rel->r_vaddr - input_section->vma, TRUE)))
+		return FALSE;
 	    }
 	}
 
@@ -687,7 +688,7 @@ coff_tic80_relocate_section (output_bfd, info, input_bfd,
 	     bfd_archive_filename (input_bfd),
 	     (unsigned long) rel->r_vaddr,
 	     bfd_get_section_name (input_bfd, input_section));
-	  return false;
+	  return FALSE;
 	case bfd_reloc_overflow:
 	  {
 	    const char *name;
@@ -701,17 +702,17 @@ coff_tic80_relocate_section (output_bfd, info, input_bfd,
 	      {
 		name = _bfd_coff_internal_syment_name (input_bfd, sym, buf);
 		if (name == NULL)
-		  return false;
+		  return FALSE;
 	      }
 
 	    if (! ((*info->callbacks->reloc_overflow)
 		   (info, name, howto->name, (bfd_vma) 0, input_bfd,
 		    input_section, rel->r_vaddr - input_section->vma)))
-	      return false;
+	      return FALSE;
 	  }
 	}
     }
-  return true;
+  return TRUE;
 }
 
 #define TIC80COFF 1		/* Customize coffcode.h */
@@ -719,4 +720,4 @@ coff_tic80_relocate_section (output_bfd, info, input_bfd,
 #undef C_LASTENT		/* Clashes with TIc80's C_STATLAB */
 #include "coffcode.h"
 
-CREATE_LITTLE_COFF_TARGET_VEC (tic80coff_vec, "coff-tic80", D_PAGED, 0, '_', NULL)
+CREATE_LITTLE_COFF_TARGET_VEC (tic80coff_vec, "coff-tic80", D_PAGED, 0, '_', NULL, COFF_SWAP_TABLE)

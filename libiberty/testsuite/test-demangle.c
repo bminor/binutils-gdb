@@ -65,7 +65,7 @@ getline(buf)
      line: copy this line into the buffer and return.  */
   while (c != EOF && c != '\n')
     {
-      if (count >= alloc)
+      if (count + 1 >= alloc)
 	{
 	  alloc *= 2;
 	  data = xrealloc (data, alloc);
@@ -146,7 +146,7 @@ main(argc, argv)
       cplus_demangle_set_style (style);
 
       result = cplus_demangle (input.data,
-			       DMGL_PARAMS|DMGL_ANSI|DMGL_VERBOSE|DMGL_TYPES);
+			       DMGL_PARAMS|DMGL_ANSI|DMGL_TYPES);
 
       if (result
 	  ? strcmp (result, expect.data)

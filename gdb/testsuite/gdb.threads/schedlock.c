@@ -13,12 +13,15 @@ int main() {
     int res;
     pthread_t threads[NUM];
     void *thread_result;
-    int i;
+    long i;
 
     for (i = 0; i < NUM; i++)
       {
 	args[i] = 1;
-	res = pthread_create(&threads[i], NULL, thread_function, (void *)i);
+	res = pthread_create(&threads[i],
+		             NULL,
+			     thread_function,
+			     (void *) i);
       }
 
     /* schedlock.exp: last thread start.  */
@@ -29,7 +32,7 @@ int main() {
 }
 
 void *thread_function(void *arg) {
-    int my_number = (int) arg;
+    int my_number =  (long) arg;
     int *myp = &args[my_number];
 
     /* Don't run forever.  Run just short of it :)  */

@@ -1,5 +1,5 @@
 /* GNU/Linux on ARM target support.
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,25 +27,24 @@
 #include "frame.h"
 #include "regcache.h"
 #include "doublest.h"
+#include "solib-svr4.h"
+#include "osabi.h"
 
 #include "arm-tdep.h"
-
-/* For shared library handling.  */
-#include "symtab.h"
-#include "symfile.h"
-#include "objfiles.h"
+#include "glibc-tdep.h"
 
 /* Under ARM GNU/Linux the traditional way of performing a breakpoint
    is to execute a particular software interrupt, rather than use a
    particular undefined instruction to provoke a trap.  Upon exection
    of the software interrupt the kernel stops the inferior with a
-   SIGTRAP, and wakes the debugger.  Since ARM GNU/Linux is little
-   endian, and doesn't support Thumb at the moment we only override
-   the ARM little-endian breakpoint.  */
+   SIGTRAP, and wakes the debugger.  Since ARM GNU/Linux doesn't support
+   Thumb at the moment we only override the ARM breakpoints.  */
 
-static const char arm_linux_arm_le_breakpoint[] = {0x01,0x00,0x9f,0xef};
+static const char arm_linux_arm_le_breakpoint[] = { 0x01, 0x00, 0x9f, 0xef };
 
-/* CALL_DUMMY_WORDS:
+static const char arm_linux_arm_be_breakpoint[] = { 0xef, 0x9f, 0x00, 0x01 };
+
+/* DEPRECATED_CALL_DUMMY_WORDS:
    This sequence of words is the instructions
 
    mov  lr, pc
@@ -72,7 +71,7 @@ LONGEST arm_linux_call_dummy_words[] =
    hidden behind the regcache abstraction.  */
 static void
 arm_linux_extract_return_value (struct type *type,
-				char regbuf[REGISTER_BYTES],
+				char regbuf[],
 				char *valbuf)
 {
   /* ScottB: This needs to be looked at to handle the different
@@ -83,7 +82,7 @@ arm_linux_extract_return_value (struct type *type,
 
   int regnum = ((TYPE_CODE_FLT == TYPE_CODE (type))
 		? ARM_F0_REGNUM : ARM_A1_REGNUM);
-  memcpy (valbuf, &regbuf[REGISTER_BYTE (regnum)], TYPE_LENGTH (type));
+  memcpy (valbuf, &regbuf[DEPRECATED_REGISTER_BYTE (regnum)], TYPE_LENGTH (type));
 }
 
 /* Note: ScottB
@@ -114,10 +113,10 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   /* Walk through the list of args and determine how large a temporary
      stack is required.  Need to take care here as structs may be
      passed on the stack, and we have to to push them.  */
-  nstack_size = -4 * REGISTER_SIZE;	/* Some arguments go into A1-A4.  */
+  nstack_size = -4 * DEPRECATED_REGISTER_SIZE;	/* Some arguments go into A1-A4.  */
 
   if (struct_return)			/* The struct address goes in A1.  */
-    nstack_size += REGISTER_SIZE;
+    nstack_size += DEPRECATED_REGISTER_SIZE;
 
   /* Walk through the arguments and add their size to nstack_size.  */
   for (argnum = 0; argnum < nargs; argnum++)
@@ -130,7 +129,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
       /* ANSI C code passes float arguments as integers, K&R code
          passes float arguments as doubles.  Correct for this here.  */
-      if (TYPE_CODE_FLT == TYPE_CODE (arg_type) && REGISTER_SIZE == len)
+      if (TYPE_CODE_FLT == TYPE_CODE (arg_type) && DEPRECATED_REGISTER_SIZE == len)
 	nstack_size += FP_REGISTER_VIRTUAL_SIZE;
       else
 	nstack_size += len;
@@ -177,13 +176,13 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
          .stabs records the type as FP_FLOAT.  In this latter case
          the compiler converts the float arguments to double before
          calling the function.  */
-      if (TYPE_CODE_FLT == typecode && REGISTER_SIZE == len)
+      if (TYPE_CODE_FLT == typecode && DEPRECATED_REGISTER_SIZE == len)
 	{
 	  DOUBLEST dblval;
-	  dblval = extract_floating (val, len);
+	  dblval = deprecated_extract_floating (val, len);
 	  len = TARGET_DOUBLE_BIT / TARGET_CHAR_BIT;
 	  val = alloca (len);
-	  store_floating (val, len, dblval);
+	  deprecated_store_floating (val, len, dblval);
 	}
 
       /* If the argument is a pointer to a function, and it is a Thumb
@@ -192,9 +191,9 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  && NULL != target_type
 	  && TYPE_CODE_FUNC == TYPE_CODE (target_type))
 	{
-	  CORE_ADDR regval = extract_address (val, len);
+	  CORE_ADDR regval = extract_unsigned_integer (val, len);
 	  if (arm_pc_is_thumb (regval))
-	    store_address (val, len, MAKE_THUMB_ADDR (regval));
+	    store_unsigned_integer (val, len, MAKE_THUMB_ADDR (regval));
 	}
 
       /* Copy the argument to general registers or the stack in
@@ -202,19 +201,19 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
          registers and stack.  */
       while (len > 0)
 	{
-	  int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
+	  int partial_len = len < DEPRECATED_REGISTER_SIZE ? len : DEPRECATED_REGISTER_SIZE;
 
 	  if (argreg <= ARM_LAST_ARG_REGNUM)
 	    {
 	      /* It's an argument being passed in a general register.  */
-	      regval = extract_address (val, partial_len);
+	      regval = extract_unsigned_integer (val, partial_len);
 	      write_register (argreg++, regval);
 	    }
 	  else
 	    {
 	      /* Push the arguments onto the stack.  */
-	      write_memory ((CORE_ADDR) fp, val, REGISTER_SIZE);
-	      fp += REGISTER_SIZE;
+	      write_memory ((CORE_ADDR) fp, val, DEPRECATED_REGISTER_SIZE);
+	      fp += DEPRECATED_REGISTER_SIZE;
 	    }
 
 	  len -= partial_len;
@@ -345,91 +344,47 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    with.  Before the fixup/resolver code returns, it actually calls
    the requested function and repairs &GOT[n+3].  */
 
-/* Find the minimal symbol named NAME, and return both the minsym
-   struct and its objfile.  This probably ought to be in minsym.c, but
-   everything there is trying to deal with things like C++ and
-   SOFUN_ADDRESS_MAYBE_TURQUOISE, ...  Since this is so simple, it may
-   be considered too special-purpose for general consumption.  */
+/* Fetch, and possibly build, an appropriate link_map_offsets structure
+   for ARM linux targets using the struct offsets defined in <link.h>.
+   Note, however, that link.h is not actually referred to in this file.
+   Instead, the relevant structs offsets were obtained from examining
+   link.h.  (We can't refer to link.h from this file because the host
+   system won't necessarily have it, or if it does, the structs which
+   it defines will refer to the host system, not the target).  */
 
-static struct minimal_symbol *
-find_minsym_and_objfile (char *name, struct objfile **objfile_p)
+static struct link_map_offsets *
+arm_linux_svr4_fetch_link_map_offsets (void)
 {
-  struct objfile *objfile;
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = 0;
 
-  ALL_OBJFILES (objfile)
+  if (lmp == 0)
     {
-      struct minimal_symbol *msym;
+      lmp = &lmo;
 
-      ALL_OBJFILE_MSYMBOLS (objfile, msym)
-	{
-	  if (SYMBOL_NAME (msym)
-	      && strcmp (SYMBOL_NAME (msym), name) == 0)
-	    {
-	      *objfile_p = objfile;
-	      return msym;
-	    }
-	}
+      lmo.r_debug_size = 8;	/* Actual size is 20, but this is all we
+                                   need.  */
+
+      lmo.r_map_offset = 4;
+      lmo.r_map_size   = 4;
+
+      lmo.link_map_size = 20;	/* Actual size is 552, but this is all we
+                                   need.  */
+
+      lmo.l_addr_offset = 0;
+      lmo.l_addr_size   = 4;
+
+      lmo.l_name_offset = 4;
+      lmo.l_name_size   = 4;
+
+      lmo.l_next_offset = 12;
+      lmo.l_next_size   = 4;
+
+      lmo.l_prev_offset = 16;
+      lmo.l_prev_size   = 4;
     }
 
-  return 0;
-}
-
-
-static CORE_ADDR
-skip_hurd_resolver (CORE_ADDR pc)
-{
-  /* The HURD dynamic linker is part of the GNU C library, so many
-     GNU/Linux distributions use it.  (All ELF versions, as far as I
-     know.)  An unresolved PLT entry points to "_dl_runtime_resolve",
-     which calls "fixup" to patch the PLT, and then passes control to
-     the function.
-
-     We look for the symbol `_dl_runtime_resolve', and find `fixup' in
-     the same objfile.  If we are at the entry point of `fixup', then
-     we set a breakpoint at the return address (at the top of the
-     stack), and continue.
-  
-     It's kind of gross to do all these checks every time we're
-     called, since they don't change once the executable has gotten
-     started.  But this is only a temporary hack --- upcoming versions
-     of GNU/Linux will provide a portable, efficient interface for
-     debugging programs that use shared libraries.  */
-
-  struct objfile *objfile;
-  struct minimal_symbol *resolver 
-    = find_minsym_and_objfile ("_dl_runtime_resolve", &objfile);
-
-  if (resolver)
-    {
-      struct minimal_symbol *fixup
-	= lookup_minimal_symbol ("fixup", NULL, objfile);
-
-      if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
-	return (SAVED_PC_AFTER_CALL (get_current_frame ()));
-    }
-
-  return 0;
-}      
-
-/* See the comments for SKIP_SOLIB_RESOLVER at the top of infrun.c.
-   This function:
-   1) decides whether a PLT has sent us into the linker to resolve
-      a function reference, and 
-   2) if so, tells us where to set a temporary breakpoint that will
-      trigger when the dynamic linker is done.  */
-
-CORE_ADDR
-arm_linux_skip_solib_resolver (CORE_ADDR pc)
-{
-  CORE_ADDR result;
-
-  /* Plug in functions for other kinds of resolvers here.  */
-  result = skip_hurd_resolver (pc);
-
-  if (result)
-    return result;
-  
-  return 0;
+    return lmp;
 }
 
 /* The constants below were determined by examining the following files
@@ -521,27 +476,36 @@ arm_linux_init_abi (struct gdbarch_info info,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   tdep->lowest_pc = 0x8000;
-  tdep->arm_breakpoint = arm_linux_arm_le_breakpoint;
+  if (info.byte_order == BFD_ENDIAN_BIG)
+    tdep->arm_breakpoint = arm_linux_arm_be_breakpoint;
+  else
+    tdep->arm_breakpoint = arm_linux_arm_le_breakpoint;
   tdep->arm_breakpoint_size = sizeof (arm_linux_arm_le_breakpoint);
+
+  tdep->fp_model = ARM_FLOAT_FPA;
 
   tdep->jb_pc = ARM_LINUX_JB_PC;
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
 
-  set_gdbarch_call_dummy_words (gdbarch, arm_linux_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch,
-				       sizeof (arm_linux_call_dummy_words));
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, arm_linux_svr4_fetch_link_map_offsets);
+
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, arm_linux_call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (arm_linux_call_dummy_words));
 
   /* The following two overrides shouldn't be needed.  */
   set_gdbarch_deprecated_extract_return_value (gdbarch, arm_linux_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, arm_linux_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, arm_linux_push_arguments);
 
   /* Shared library handling.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+  set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 }
 
 void
 _initialize_arm_linux_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_LINUX, arm_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_LINUX,
+			  arm_linux_init_abi);
 }

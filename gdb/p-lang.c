@@ -28,6 +28,7 @@
 #include "language.h"
 #include "p-lang.h"
 #include "valprint.h"
+#include "value.h"
 #include <ctype.h>
  
 extern void _initialize_pascal_language (void);
@@ -98,7 +99,7 @@ static void pascal_one_char (int, struct ui_file *, int *);
    In_quotes is reset to 0 if a char is written with #4 notation */
 
 static void
-pascal_one_char (register int c, struct ui_file *stream, int *in_quotes)
+pascal_one_char (int c, struct ui_file *stream, int *in_quotes)
 {
 
   c &= 0xFF;			/* Avoid sign bit follies */
@@ -131,7 +132,7 @@ static void pascal_emit_char (int c, struct ui_file *stream, int quoter);
    characters and strings is language specific. */
 
 static void
-pascal_emit_char (register int c, struct ui_file *stream, int quoter)
+pascal_emit_char (int c, struct ui_file *stream, int quoter)
 {
   int in_quotes = 0;
   pascal_one_char (c, stream, &in_quotes);
@@ -157,11 +158,10 @@ void
 pascal_printstr (struct ui_file *stream, char *string, unsigned int length,
 		 int width, int force_ellipses)
 {
-  register unsigned int i;
+  unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
-  extern int inspect_it;
 
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in traditional C
@@ -274,7 +274,7 @@ pascal_printstr (struct ui_file *stream, char *string, unsigned int length,
 struct type *
 pascal_create_fundamental_type (struct objfile *objfile, int typeid)
 {
-  register struct type *type = NULL;
+  struct type *type = NULL;
 
   switch (typeid)
     {
@@ -451,9 +451,9 @@ const struct language_defn pascal_language_defn =
   range_check_on,
   type_check_on,
   case_sensitive_on,
+  &exp_descriptor_standard,
   pascal_parse,
   pascal_error,
-  evaluate_subexp_standard,
   pascal_printchar,		/* Print a character constant */
   pascal_printstr,		/* Function to print string constant */
   pascal_emit_char,		/* Print a single char */
@@ -461,6 +461,10 @@ const struct language_defn pascal_language_defn =
   pascal_print_type,		/* Print a type using appropriate syntax */
   pascal_val_print,		/* Print a value using appropriate syntax */
   pascal_value_print,		/* Print a top-level value */
+  NULL,				/* Language specific skip_trampoline */
+  value_of_this,		/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  NULL,				/* Language specific symbol demangler */
   {"", "%", "b", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -469,6 +473,7 @@ const struct language_defn pascal_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 

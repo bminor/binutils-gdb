@@ -75,7 +75,6 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 static int
 getregs_supplies (int regno)
 {
-
   return ((regno >= ALPHA_V0_REGNUM && regno <= ALPHA_ZERO_REGNUM)
 	  || regno >= PC_REGNUM);
 }
@@ -87,7 +86,6 @@ getregs_supplies (int regno)
 void
 fetch_inferior_registers (int regno)
 {
-
   if (regno == -1 || getregs_supplies (regno))
     {
       struct reg gregs;
@@ -111,9 +109,6 @@ fetch_inferior_registers (int regno)
 
       alphabsd_supply_fpreg ((char *) &fpregs, regno);
     }
-
-  /* Reset virtual frame pointer.  */
-  supply_register (FP_REGNUM, NULL);
 }
 
 /* Store register REGNO back into the inferior.  If REGNO is -1, do
@@ -122,7 +117,6 @@ fetch_inferior_registers (int regno)
 void
 store_inferior_registers (int regno)
 {
-
   if (regno == -1 || getregs_supplies (regno))
     {
       struct reg gregs;

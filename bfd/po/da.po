@@ -1,12 +1,12 @@
 # Danish messages for bfd.
 # Copyright (C) 2001, 2002 Free Software Foundation, Inc.
-# Keld Simonsen <keld@dkuug.dk>, 2002
+# Keld Simonsen <keld@dkuug.dk>, 2002-2003
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: bfd 2.12.91\n"
 "POT-Creation-Date: 2002-07-23 15:55-0400\n"
-"PO-Revision-Date: 2002-09-07 21:55+0200\n"
+"PO-Revision-Date: 2003-03-01 23:25+0100\n"
 "Last-Translator: Keld Simonsen <keld@dkuug.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
 "MIME-Version: 1.0\n"
@@ -21,27 +21,27 @@ msgstr "%s: Ukendt sektionstype i a.out.adobe-fil: %x\n"
 #: aout-cris.c:208
 #, c-format
 msgid "%s: Invalid relocation type exported: %d"
-msgstr "%s: Ugyldig relokaliseringstype eksporteret: %d"
+msgstr "%s: Ugyldig relokeringstype eksporteret: %d"
 
 #: aout-cris.c:252
 #, c-format
 msgid "%s: Invalid relocation type imported: %d"
-msgstr "%s: Ugyldig relokaliseringstype importeret: %d"
+msgstr "%s: Ugyldig relokeringstype importeret: %d"
 
 #: aout-cris.c:263
 #, c-format
 msgid "%s: Bad relocation record imported: %d"
-msgstr "%s: Fejlagtig relokaliseringstype importeret: %d"
+msgstr "%s: Fejlagtig relokeringstype importeret: %d"
 
 #: aoutx.h:1282 aoutx.h:1699
 #, c-format
 msgid "%s: can not represent section `%s' in a.out object file format"
-msgstr "%s: kan ikke representere sektionen \"%s\" i a.out-objektfilformat"
+msgstr "%s: kan ikke repræsentere sektionen \"%s\" i a.out-objektfilformat"
 
 #: aoutx.h:1669
 #, c-format
 msgid "%s: can not represent section for symbol `%s' in a.out object file format"
-msgstr "%s: kan ikke representere sektion for symbolet \"%s\" i a.out-objektfilformat"
+msgstr "%s: kan ikke repræsentere sektion for symbolet \"%s\" i a.out-objektfilformat"
 
 #: aoutx.h:1671
 msgid "*unknown*"
@@ -50,7 +50,7 @@ msgstr "*ukendt*"
 #: aoutx.h:3732
 #, c-format
 msgid "%s: relocateable link from %s to %s not supported"
-msgstr "%s: relokaliseringsbar lænke fra %s til %s understøttes inte"
+msgstr "%s: relokérbar lænke fra %s til %s understøttes ikke"
 
 #: archive.c:1826
 msgid "Warning: writing archive was slow: rewriting timestamp\n"
@@ -99,7 +99,7 @@ msgstr "Ingen symboler"
 
 #: bfd.c:282
 msgid "Archive has no index; run ranlib to add one"
-msgstr "Arkivet har intet index; kør ranlib for at tilføje ét"
+msgstr "Arkivet har intet indeks; kør ranlib til at tilføje ét"
 
 #: bfd.c:283
 msgid "No more archived files"
@@ -181,19 +181,19 @@ msgstr "IHIHALF mangler"
 
 #: coff-a29k.c:212 coff-or32.c:229
 msgid "Unrecognized reloc"
-msgstr "Ukendt relokalisering"
+msgstr "Ukendt relokering"
 
 #: coff-a29k.c:408
 msgid "missing IHCONST reloc"
-msgstr "IHCONST-relokalisering mangler"
+msgstr "IHCONST-relokering mangler"
 
 #: coff-a29k.c:498
 msgid "missing IHIHALF reloc"
-msgstr "IHIHALF-relokalisering mangler"
+msgstr "IHIHALF-relokering mangler"
 
 #: coff-alpha.c:881 coff-alpha.c:918 coff-alpha.c:1989 coff-mips.c:1432
 msgid "GP relative relocation used when GP not defined"
-msgstr "GP-relativ relokalisering bruges når GP ikke er defineret"
+msgstr "GP-relativ relokering bruges når GP ikke er defineret"
 
 #: coff-alpha.c:1485
 msgid "using multiple gp values"
@@ -231,22 +231,22 @@ msgstr "  overvej omlænkning med --support-old-code aktiveret"
 #: coff-arm.c:1785 coff-tic80.c:686 cofflink.c:3031
 #, c-format
 msgid "%s: bad reloc address 0x%lx in section `%s'"
-msgstr "%s: fejlagtig relokaliseringsadresse 0x%lx i sektionen \"%s\""
+msgstr "%s: fejlagtig relokeringsadresse 0x%lx i sektionen \"%s\""
 
 #: coff-arm.c:2127
 #, c-format
 msgid "%s: illegal symbol index in reloc: %d"
-msgstr "%s: utilladt symbolindex i relokalisering: %d"
+msgstr "%s: ikke tilladt symbolindeks i relokering: %d"
 
 #: coff-arm.c:2255
 #, c-format
 msgid "ERROR: %s is compiled for APCS-%d, whereas %s is compiled for APCS-%d"
-msgstr "FEJL: %s kompileret for APCS-%d, mens %s er kompileret for APCS-%d"
+msgstr "FEJL: %s oversat for APCS-%d, mens %s er oversat for APCS-%d"
 
 #: coff-arm.c:2270 elf32-arm.h:2297
 #, c-format
 msgid "ERROR: %s passes floats in float registers, whereas %s passes them in integer registers"
-msgstr "FEJL: %s overfører flydende tal i flydende talsregister, mens %s overfører dem i heltalsregister"
+msgstr "FEJL: %s overfører flydende tal i flydendetalsregister, mens %s overfører dem i heltalsregister"
 
 #: coff-arm.c:2273 elf32-arm.h:2302
 #, c-format
@@ -256,12 +256,12 @@ msgstr "FEJL: %s overfører flydende tal i heltalsregister, mens %s overfører dem
 #: coff-arm.c:2288
 #, c-format
 msgid "ERROR: %s is compiled as position independent code, whereas target %s is absolute position"
-msgstr "FEJL: %s er kompileret som positionsuafhængig kode, mens målet %s har absolut position"
+msgstr "FEJL: %s er oversat som positionsuafhængig kode, mens målet %s har absolut position"
 
 #: coff-arm.c:2291
 #, c-format
 msgid "ERROR: %s is compiled as absolute position code, whereas target %s is position independent"
-msgstr "FEJL: %s er kompileret som kode med absolut position, mens målet %s er positionsuafhængigt"
+msgstr "FEJL: %s er oversat som kode med absolut position, mens målet %s er positionsuafhængigt"
 
 #: coff-arm.c:2320 elf32-arm.h:2358
 #, c-format
@@ -322,31 +322,31 @@ msgstr "usikker kaldskonvention for ikke-COFF-symbol"
 
 #: coff-m68k.c:481 coff-mips.c:2429 elf32-m68k.c:2157 elf32-mips.c:1844
 msgid "unsupported reloc type"
-msgstr "relokaliseringstypen understøttes ikke"
+msgstr "relokeringstypen understøttes ikke"
 
 #: coff-mips.c:874 elf32-mips.c:1062 elf64-mips.c:1609
 msgid "GP relative relocation when _gp not defined"
-msgstr "GP-relativ relokalisering når _gp ikke var defineret"
+msgstr "GP-relativ relokering når _gp ikke var defineret"
 
 #. No other sections should appear in -membedded-pic
 #. code.
 #: coff-mips.c:2466
 msgid "reloc against unsupported section"
-msgstr "relokalisering mod sektion som ikke understøttes"
+msgstr "relokering mod sektion som ikke understøttes"
 
 #: coff-mips.c:2474
 msgid "reloc not properly aligned"
-msgstr "relokalisering ikke på lige grænse"
+msgstr "relokering ikke på passende afrundet adresse"
 
 #: coff-rs6000.c:2766
 #, c-format
 msgid "%s: unsupported relocation type 0x%02x"
-msgstr "%s: relokaliseringstypen 0x%02x understøttes ikke"
+msgstr "%s: relokeringstypen 0x%02x understøttes ikke"
 
 #: coff-rs6000.c:2859
 #, c-format
 msgid "%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry"
-msgstr "%s: TOC-relokalisering ved 0x%x til symbolet \"%s\" uden nogen TOC-post"
+msgstr "%s: TOC-relokering ved 0x%x til symbolet \"%s\" uden nogen TOC-post"
 
 #: coff-rs6000.c:3590 coff64-rs6000.c:2091
 #, c-format
@@ -356,17 +356,17 @@ msgstr "%s: symbolet \"%s\" har ukendt smclas %d"
 #: coff-tic54x.c:279 coff-tic80.c:449
 #, c-format
 msgid "Unrecognized reloc type 0x%x"
-msgstr "Ukendt relokaliseringstype 0x%x"
+msgstr "Ukendt relokeringstype 0x%x"
 
 #: coff-tic54x.c:390 coffcode.h:4974
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in relocs"
-msgstr "%s: advarsel: utilladt symbolindex %ld i relokaliseringerne"
+msgstr "%s: advarsel: ikke tilladt symbolindeks %ld i relokeringerne"
 
 #: coff-w65.c:363
 #, c-format
 msgid "ignoring reloc %s\n"
-msgstr "ignorerer relokalisering %s\n"
+msgstr "ignorerer relokering %s\n"
 
 #: coffcode.h:1086
 #, c-format
@@ -381,7 +381,7 @@ msgstr "Ukendt TI COFF-mål-id \"0x%x\""
 #: coffcode.h:4365
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in line numbers"
-msgstr "%s: advarsel: utilladt symbolindex %ld i linjenummer"
+msgstr "%s: advarsel: ikke tilladt symbolindeks %ld i linjenumre"
 
 #: coffcode.h:4379
 #, c-format
@@ -401,7 +401,7 @@ msgstr "advarsel: %s: lokalt symbol \"%s\" har ingen sektion"
 #: coffcode.h:5012
 #, c-format
 msgid "%s: illegal relocation type %d at address 0x%lx"
-msgstr "%s: utilladt relokaliseringstype %d på adresse 0x%lx"
+msgstr "%s: ikke tilladt relokeringstype %d på adresse 0x%lx"
 
 #: coffgen.c:1661
 #, c-format
@@ -416,12 +416,12 @@ msgstr "Advarsel: typen på symbol \"%s\" ændredes fra %d til %d i %s"
 #: cofflink.c:2321
 #, c-format
 msgid "%s: relocs in section `%s', but it has no contents"
-msgstr "%s: relokaliseringer i sektionen \"%s\", men den har intet indhold"
+msgstr "%s: relokeringer i sektionen \"%s\", men den har intet indhold"
 
 #: cofflink.c:2664 coffswap.h:877
 #, c-format
 msgid "%s: %s: reloc overflow: 0x%lx > 0xffff"
-msgstr "%s: %s: relokalisering giver overløb: 0x%lx > 0xffff"
+msgstr "%s: %s: relokering giver overløb: 0x%lx > 0xffff"
 
 #: cofflink.c:2673 coffswap.h:864
 #, c-format
@@ -444,7 +444,7 @@ msgstr "Dwarf-fejl: Kan ikke finde sektionen .debug_abbrev."
 #: dwarf2.c:560
 #, c-format
 msgid "Dwarf Error: Abbrev offset (%lu) greater than or equal to .debug_abbrev size (%lu)."
-msgstr "Dwarf-fejl: Forkortningsafstanden (%lu) større end eller lig med størrelsen .debug_abbrev (%lu)."
+msgstr "Dwarf-fejl: Forkortelsesafstanden (%lu) større end eller lig med størrelsen .debug_abbrev (%lu)."
 
 #: dwarf2.c:757
 #, c-format
@@ -471,7 +471,7 @@ msgstr "Dwarf-fejl: vanskabt linjenummerssektion."
 #: dwarf2.c:1355 dwarf2.c:1566
 #, c-format
 msgid "Dwarf Error: Could not find abbrev number %u."
-msgstr "Dwarf-fejl: Kunne ikke finde forkortningsnumret %u."
+msgstr "Dwarf-fejl: Kunne ikke finde forkortelsesnumret %u."
 
 #: dwarf2.c:1527
 #, c-format
@@ -486,7 +486,7 @@ msgstr "Dwarf-fejl: fandt adressestørrelsen \"%u\", denne læser kan ikke håndter
 #: dwarf2.c:1557
 #, c-format
 msgid "Dwarf Error: Bad abbrev number: %u."
-msgstr "Dwarf-fejl: Fejlagtigt forkortningsnummer: %u."
+msgstr "Dwarf-fejl: Fejlagtigt forkortelsesnummer: %u."
 
 #: ecoff.c:1318
 #, c-format
@@ -518,7 +518,7 @@ msgid ""
 "      End+1 symbol: %-7ld   Type:  %s"
 msgstr ""
 "\n"
-"      Symbol slut+1: %-7ld  Typ:  %s"
+"      Symbol slut+1: %-7ld  Type:  %s"
 
 #: ecoff.c:1607
 #, c-format
@@ -569,21 +569,21 @@ msgstr ""
 #: elf64-sh64.c:1659
 #, c-format
 msgid "%s: warning: unresolvable relocation against symbol `%s' from %s section"
-msgstr "%s: advarsel: uløselig relokalisering mod symbol \"%s\" fra sektionen %s"
+msgstr "%s: advarsel: uløselig relokering mod symbol \"%s\" fra sektionen %s"
 
 #: elf-m10200.c:446 elf-m10300.c:656 elf32-arm.h:2084 elf32-avr.c:833
 #: elf32-cris.c:1403 elf32-d10v.c:481 elf32-fr30.c:635 elf32-frv.c:809
 #: elf32-h8300.c:548 elf32-i860.c:1031 elf32-m32r.c:1278 elf32-openrisc.c:439
 #: elf32-v850.c:1691 elf32-xstormy16.c:933 elf64-mmix.c:1302
 msgid "internal error: out of range error"
-msgstr "intern fejl: udenfor intervallet"
+msgstr "intern fejl: uden for intervallet"
 
 #: elf-m10200.c:450 elf-m10300.c:660 elf32-arm.h:2088 elf32-avr.c:837
 #: elf32-cris.c:1407 elf32-d10v.c:485 elf32-fr30.c:639 elf32-frv.c:813
 #: elf32-h8300.c:552 elf32-i860.c:1035 elf32-m32r.c:1282 elf32-openrisc.c:443
 #: elf32-v850.c:1695 elf32-xstormy16.c:937 elf64-mmix.c:1306 elfxx-mips.c:5264
 msgid "internal error: unsupported relocation error"
-msgstr "intern fejl: relokaliseringen understøttes ikke"
+msgstr "intern fejl: relokeringen understøttes ikke"
 
 #: elf-m10200.c:454 elf-m10300.c:664 elf32-arm.h:2092 elf32-d10v.c:489
 #: elf32-h8300.c:556 elf32-m32r.c:1286
@@ -652,7 +652,7 @@ msgstr "  kræves fra %s:\n"
 #: elf.c:1902
 #, c-format
 msgid "%s: invalid link %lu for reloc section %s (index %u)"
-msgstr "%s: ugyldig lænke %lu for relokaliseringssektion %s (index %u)"
+msgstr "%s: ugyldig lænke %lu for relokeringssektion %s (indeks %u)"
 
 #: elf.c:3603
 #, c-format
@@ -677,7 +677,7 @@ msgstr "%s: advarsel: allokeret sektion \"%s\" ikke i segment"
 #: elf.c:4472
 #, c-format
 msgid "%s: symbol `%s' required but not present"
-msgstr "%s: symbol \"%s\" kræves men er ikke tilstede"
+msgstr "%s: symbol \"%s\" kræves, men er ikke tilstede"
 
 #: elf.c:4749
 #, c-format
@@ -687,7 +687,7 @@ msgstr "%s: advarsel: Tomt indlæsningsbart segment opdaget, er dette meningen?\n
 #: elf.c:6193
 #, c-format
 msgid "%s: unsupported relocation type %s"
-msgstr "%s: relokaliseringstypen %s understøttes ikke"
+msgstr "%s: relokeringstypen %s understøttes ikke"
 
 #: elf32-arm.h:1221
 #, c-format
@@ -702,12 +702,12 @@ msgstr "%s: Advarsel: Thumb BLX-instruktionen bruger thumb-funktionen \"%s\" som
 #: elf32-arm.h:1914 elf32-sh.c:4125
 #, c-format
 msgid "%s(%s+0x%lx): %s relocation against SEC_MERGE section"
-msgstr "%s(%s+0x%lx): %s relokalisering mod SEC_MERGE-sektion"
+msgstr "%s(%s+0x%lx): %s relokering mod SEC_MERGE-sektion"
 
 #: elf32-arm.h:2008
 #, c-format
 msgid "%s: warning: unresolvable relocation %d against symbol `%s' from %s section"
-msgstr "%s: advarsel: uløselig relokalisering %d mod symbol \"%s\" fra sektionen %s"
+msgstr "%s: advarsel: uløselig relokering %d mod symbol \"%s\" fra sektionen %s"
 
 #: elf32-arm.h:2176
 #, c-format
@@ -717,12 +717,12 @@ msgstr "Advarsel: Fjerner samvirkendeflaget i %s eftersom ikke-samvirkende kode 
 #: elf32-arm.h:2271
 #, c-format
 msgid "ERROR: %s is compiled for EABI version %d, whereas %s is compiled for version %d"
-msgstr "FEJL: %s er kompileret for EABI version %d, mens %s er kompileret for version %d"
+msgstr "FEJL: %s er oversat for EABI version %d, mens %s er oversat for version %d"
 
 #: elf32-arm.h:2285
 #, c-format
 msgid "ERROR: %s is compiled for APCS-%d, whereas target %s uses APCS-%d"
-msgstr "FEJL: %s er kompileret for APCS-%d, mens målet %s bruger APCS-%d"
+msgstr "FEJL: %s er oversat for APCS-%d, mens målet %s bruger APCS-%d"
 
 #: elf32-arm.h:2313
 #, c-format
@@ -794,7 +794,7 @@ msgstr " [Version2 EABI]"
 
 #: elf32-arm.h:2457
 msgid " [dynamic symbols use segment index]"
-msgstr " [dynamiske symboler bruger segmentindex]"
+msgstr " [dynamiske symboler bruger segmentindeks]"
 
 #: elf32-arm.h:2460
 msgid " [mapping symbols precede others]"
@@ -806,7 +806,7 @@ msgstr " <EABI-version genkendes ikke>"
 
 #: elf32-arm.h:2474
 msgid " [relocatable executable]"
-msgstr " [relokaliseringsbar kørbar fil]"
+msgstr " [relokérbar kørbar fil]"
 
 #: elf32-arm.h:2477
 msgid " [has entry point]"
@@ -820,17 +820,17 @@ msgstr "<Ukendte flagbit er sat>"
 #: elf32-i860.c:1039 elf32-openrisc.c:447 elf32-v850.c:1699
 #: elf32-xstormy16.c:941 elf64-mmix.c:1310
 msgid "internal error: dangerous relocation"
-msgstr "intern fejl: farlig relokalisering"
+msgstr "intern fejl: farlig relokering"
 
 #: elf32-cris.c:949
 #, c-format
 msgid "%s: unresolvable relocation %s against symbol `%s' from %s section"
-msgstr "%s: uløselig relokalisering %s mod symbol \"%s\" fra sektionen %s"
+msgstr "%s: uløselig relokering %s mod symbol \"%s\" fra sektionen %s"
 
 #: elf32-cris.c:1012
 #, c-format
 msgid "%s: No PLT nor GOT for relocation %s against symbol `%s' from %s section"
-msgstr "%s: Hverken nogen PLT eller GOT for relokalisering %s  mod symbol \"%s\" fra sektionen %s"
+msgstr "%s: Hverken nogen PLT eller GOT for relokering %s mod symbol \"%s\" fra sektionen %s"
 
 #: elf32-cris.c:1015 elf32-cris.c:1141
 msgid "[whose name is lost]"
@@ -839,27 +839,27 @@ msgstr "[hvis navn er tabt]"
 #: elf32-cris.c:1130
 #, c-format
 msgid "%s: relocation %s with non-zero addend %d against local symbol from %s section"
-msgstr "%s: relokalisering %s med ikke-tomt addendum %d mod lokalt symbol fra sektionen %s"
+msgstr "%s: relokering %s med ikke-tomt addendum %d mod lokalt symbol fra sektionen %s"
 
 #: elf32-cris.c:1137
 #, c-format
 msgid "%s: relocation %s with non-zero addend %d against symbol `%s' from %s section"
-msgstr "%s: relokalisering %s med ikke-tomt addendum %d mod symbol \"%s\" fra sektionen %s"
+msgstr "%s: relokering %s med ikke-tomt addendum %d mod symbol \"%s\" fra sektionen %s"
 
 #: elf32-cris.c:1155
 #, c-format
 msgid "%s: relocation %s is not allowed for global symbol: `%s' from %s section"
-msgstr "%s: relokaliseringen %s er ikke tilladt for globalt symbol: \"%s\" fra sektionen %s"
+msgstr "%s: relokeringen %s er ikke tilladt for globalt symbol: \"%s\" fra sektionen %s"
 
 #: elf32-cris.c:1170
 #, c-format
 msgid "%s: relocation %s in section %s with no GOT created"
-msgstr "%s: relokalisering %s i sektionen %s uden GOT oprettet"
+msgstr "%s: relokering %s i sektionen %s uden GOT oprettet"
 
 #: elf32-cris.c:1288
 #, c-format
 msgid "%s: Internal inconsistency; no relocation section %s"
-msgstr "%s: Intern inkonsistens; ingen relokaliseringssektion %s"
+msgstr "%s: Intern inkonsistens; ingen relokeringssektion %s"
 
 #: elf32-cris.c:2514
 #, c-format
@@ -868,31 +868,31 @@ msgid ""
 "  relocation %s should not be used in a shared object; recompile with -fPIC"
 msgstr ""
 "%s, sektion %s:\n"
-"  relokaliseringen %s bør ikke bruges i et delt objekt; genoversæt med -fPIC"
+"  relokeringen %s bør ikke bruges i et delt objekt; genoversæt med -fPIC"
 
 #: elf32-cris.c:2991
 msgid " [symbols have a _ prefix]"
-msgstr " [symboler har et _-prefix]"
+msgstr " [symboler har et _-præfiks]"
 
 #: elf32-cris.c:3030
 #, c-format
 msgid "%s: uses _-prefixed symbols, but writing file with non-prefixed symbols"
-msgstr "%s: bruger symboler med _-prefix, men skriver fil med symboler uden prefix"
+msgstr "%s: bruger symboler med _-præfiks, men skriver fil med symboler uden præfiks"
 
 #: elf32-cris.c:3031
 #, c-format
 msgid "%s: uses non-prefixed symbols, but writing file with _-prefixed symbols"
-msgstr "%s: bruger symboler uden prefix, men skriver fil med symboler med _-prefix"
+msgstr "%s: bruger symboler uden præfiks, men skriver fil med symboler med _-præfiks"
 
 #: elf32-frv.c:1217
 #, c-format
 msgid "%s: compiled with %s and linked with modules that use non-pic relocations"
-msgstr "%s: kompileret med %s og lænket med moduler som bruger ikke-pic-relokalisering"
+msgstr "%s: oversat med %s og lænket med moduler som bruger ikke-pic-relokering"
 
 #: elf32-frv.c:1267
 #, c-format
 msgid "%s: compiled with %s and linked with modules compiled with %s"
-msgstr "%s: kompileret med %s og lænket med moduler som kompileredes med %s"
+msgstr "%s: oversat med %s og lænket med moduler som oversattes med %s"
 
 #: elf32-frv.c:1279
 #, c-format
@@ -907,7 +907,7 @@ msgstr "private flag = 0x%lx:"
 #: elf32-gen.c:82 elf64-gen.c:82
 #, c-format
 msgid "%s: Relocations in generic ELF (EM: %d)"
-msgstr "%s: Relokalisering i generisk ELF (EM: %d)"
+msgstr "%s: Relokering i generisk ELF (EM: %d)"
 
 #: elf32-hppa.c:671 elf64-ppc.c:2323
 #, c-format
@@ -922,17 +922,17 @@ msgstr "%s(%s+0x%lx): kan ikke nå %s, genoversæt med -ffunction-sections"
 #: elf32-hppa.c:1338 elf64-x86-64.c:673
 #, c-format
 msgid "%s: relocation %s can not be used when making a shared object; recompile with -fPIC"
-msgstr "%s: relokaliseringen %s kan ikke bruges når et delt objekt oprettes; genoversæt med -fPIC"
+msgstr "%s: relokeringen %s kan ikke bruges når et delt objekt oprettes; genoversæt med -fPIC"
 
 #: elf32-hppa.c:1358
 #, c-format
 msgid "%s: relocation %s should not be used when making a shared object; recompile with -fPIC"
-msgstr "%s: relokaliseringen %s bør ikke bruges når et delt objekt oprettes; genoversæt med -fPIC"
+msgstr "%s: relokeringen %s bør ikke bruges når et delt objekt oprettes; genoversæt med -fPIC"
 
 #: elf32-hppa.c:1551
 #, c-format
 msgid "Could not find relocation section for %s"
-msgstr "Kunne ikke finde relokaliseringssektion for %s"
+msgstr "Kunne ikke finde relokeringssektion for %s"
 
 #: elf32-hppa.c:2855
 #, c-format
@@ -956,12 +956,12 @@ msgstr ".got-sektionen følger ikke umiddelbart efter .plt-sektion"
 #: elf32-i386.c:379
 #, c-format
 msgid "%s: invalid relocation type %d"
-msgstr "%s: ugyldig relokaliseringstype %d"
+msgstr "%s: ugyldig relokeringstype %d"
 
 #: elf32-i386.c:876 elf32-s390.c:649 elf64-s390.c:595 elf64-x86-64.c:591
 #, c-format
 msgid "%s: bad symbol index: %d"
-msgstr "%s: fejlagtigt symbolindex: %d"
+msgstr "%s: fejlagtigt symbolindeks: %d"
 
 #: elf32-i386.c:948
 #, c-format
@@ -972,7 +972,7 @@ msgstr "%s: \"%s\" kaldt både som lokalt normalt symbol og lokalt trådsymbol"
 #: elf64-x86-64.c:761
 #, c-format
 msgid "%s: bad relocation section name `%s'"
-msgstr "%s: fejlagtig relokaliseringssektionsnavn \"%s\""
+msgstr "%s: fejlagtig relokeringssektionsnavn \"%s\""
 
 #: elf32-i386.c:1159 elf64-alpha.c:4768
 #, c-format
@@ -983,28 +983,28 @@ msgstr "%s: lokal TLS-eksekveringskode kan ikke lænkes ind i delte objekter"
 #: elf64-s390.c:1945 elf64-sparc.c:2578 elf64-x86-64.c:1948
 #, c-format
 msgid "%s(%s+0x%lx): unresolvable relocation against symbol `%s'"
-msgstr "%s(%s+0x%lx): uløselig relokalisering mod symbol \"%s\""
+msgstr "%s(%s+0x%lx): uløselig relokering mod symbol \"%s\""
 
 #: elf32-i386.c:2784 elf32-s390.c:2019 elf64-ppc.c:5977 elf64-s390.c:1983
 #: elf64-x86-64.c:1986
 #, c-format
 msgid "%s(%s+0x%lx): reloc against `%s': error %d"
-msgstr "%s(%s+0x%lx): relokalisering mod \"%s\": fejl %d"
+msgstr "%s(%s+0x%lx): relokering mod \"%s\": fejl %d"
 
 #: elf32-m32r.c:924
 msgid "SDA relocation when _SDA_BASE_ not defined"
-msgstr "SDA-relokalisering når _SDA_BASE_ ikke er defineret"
+msgstr "SDA-relokering når _SDA_BASE_ ikke er defineret"
 
 #: elf32-ia64.c:3687 elf32-m32r.c:1013 elf32-ppc.c:2987 elf64-alpha.c:4185
 #: elf64-alpha.c:4313 elf64-ia64.c:3687
 #, c-format
 msgid "%s: unknown relocation type %d"
-msgstr "%s: ukendt relokaliseringstype %d"
+msgstr "%s: ukendt relokeringstype %d"
 
 #: elf32-m32r.c:1221
 #, c-format
 msgid "%s: The target (%s) of an %s relocation is in the wrong section (%s)"
-msgstr "%s: Målet (%s) for en %s-relokalisering er i forkert sektion (%s)"
+msgstr "%s: Målet (%s) for en %s-relokering er i forkert sektion (%s)"
 
 #: elf32-m32r.c:1947
 #, c-format
@@ -1035,16 +1035,16 @@ msgstr " [m68000]"
 #: elf32-mcore.c:354 elf32-mcore.c:457
 #, c-format
 msgid "%s: Relocation %s (%d) is not currently supported.\n"
-msgstr "%s: Relokalisering %s (%d) understøttes ikke i øjeblikket.\n"
+msgstr "%s: Relokering %s (%d) understøttes ikke i øjeblikket.\n"
 
 #: elf32-mcore.c:442
 #, c-format
 msgid "%s: Unknown relocation type %d\n"
-msgstr "%s: Ukendt relokaliseringstype %d\n"
+msgstr "%s: Ukendt relokeringstype %d\n"
 
 #: elf32-mips.c:1152 elf64-mips.c:1783
 msgid "32bits gp relative relocation occurs for an external symbol"
-msgstr "32-bit gp-relativ relokalisering forekom for et eksternt symbol"
+msgstr "32-bit gp-relativ relokering forekom for et eksternt symbol"
 
 #: elf32-mips.c:1301
 #, c-format
@@ -1054,12 +1054,12 @@ msgstr "Lænkning af mips16-objekter til %s-format understøttes ikke"
 #: elf32-ppc.c:1460
 #, c-format
 msgid "%s: compiled with -mrelocatable and linked with modules compiled normally"
-msgstr "%s: kompileret med -mrelocatable og lænket med moduler som kompileredes normalt"
+msgstr "%s: oversat med -mrelocatable og lænket med moduler som oversattes normalt"
 
 #: elf32-ppc.c:1468
 #, c-format
 msgid "%s: compiled normally and linked with modules compiled with -mrelocatable"
-msgstr "%s: kompileret normalt og lænket med moduler som kompileredes med -mrelocatable"
+msgstr "%s: oversat normalt og lænket med moduler som oversattes med -mrelocatable"
 
 #: elf32-ppc.c:1494 elf64-sparc.c:2989 elfxx-mips.c:7713
 #, c-format
@@ -1074,22 +1074,22 @@ msgstr "%s: Ukendt speciallænkertype %d"
 #: elf32-ppc.c:2273 elf32-ppc.c:2307 elf32-ppc.c:2342
 #, c-format
 msgid "%s: relocation %s cannot be used when making a shared object"
-msgstr "%s: relokaliseringen %s kan ikke bruges når et delt objekt oprettes"
+msgstr "%s: relokeringen %s kan ikke bruges når et delt objekt oprettes"
 
 #: elf32-ppc.c:3126 elf64-ppc.c:5473
 #, c-format
 msgid "%s: unknown relocation type %d for symbol %s"
-msgstr "%s: ukendt relokaliseringstype %d for symbol %s"
+msgstr "%s: ukendt relokeringstype %d for symbol %s"
 
 #: elf32-ppc.c:3482 elf32-ppc.c:3503 elf32-ppc.c:3553
 #, c-format
 msgid "%s: The target (%s) of a %s relocation is in the wrong output section (%s)"
-msgstr "%s: Målet (%s) for en %s-relokalisering er i forkert uddatasektion (%s)"
+msgstr "%s: Målet (%s) for en %s-relokering er i forkert uddatasektion (%s)"
 
 #: elf32-ppc.c:3619
 #, c-format
 msgid "%s: Relocation %s is not yet supported for symbol %s."
-msgstr "%s: Relokaliseringen %s understøttes ikke endnu for symbol %s."
+msgstr "%s: Relokeringen %s understøttes ikke endnu for symbol %s."
 
 #: elf32-sh.c:1964
 #, c-format
@@ -1109,7 +1109,7 @@ msgstr "%s: 0x%lx: advarsel: fejlagtig R_SH_USES-indlæsningsafstand"
 #: elf32-sh.c:2008
 #, c-format
 msgid "%s: 0x%lx: warning: could not find expected reloc"
-msgstr "%s: 0x%lx: advarsel: kunne ikke finde forventet relokalisering"
+msgstr "%s: 0x%lx: advarsel: kunne ikke finde forventet relokering"
 
 #: elf32-sh.c:2036
 #, c-format
@@ -1119,7 +1119,7 @@ msgstr "%s: 0x%lx: advarsel: symbol i uventet sektion"
 #: elf32-sh.c:2153
 #, c-format
 msgid "%s: 0x%lx: warning: could not find expected COUNT reloc"
-msgstr "%s: 0x%lx: advarsel: kunne ikke finde forventet COUNT-relokalisering"
+msgstr "%s: 0x%lx: advarsel: kunne ikke finde forventet COUNT-relokering"
 
 #: elf32-sh.c:2162
 #, c-format
@@ -1129,7 +1129,7 @@ msgstr "%s: 0x%lx: advarsel: fejlagtigt antal"
 #: elf32-sh.c:2550 elf32-sh.c:2926
 #, c-format
 msgid "%s: 0x%lx: fatal: reloc overflow while relaxing"
-msgstr "%s: 0x%lx: fatalt: relokalisering giver overløb ved forenklingen"
+msgstr "%s: 0x%lx: fatalt: relokering giver overløb ved forenklingen"
 
 #: elf32-sh.c:4073 elf64-sh64.c:1576
 msgid "Unexpected STO_SH5_ISA32 on local symbol is not handled"
@@ -1138,17 +1138,17 @@ msgstr "Uventet STO_SH5_ISA32 på lokalt symbol håndteres ikke"
 #: elf32-sh.c:4284
 #, c-format
 msgid "%s: 0x%lx: fatal: unaligned branch target for relax-support relocation"
-msgstr "%s: 0x%lx: fatalt: ujusteret grenmål for relokalisering for forenklingsunderstøttelse"
+msgstr "%s: 0x%lx: fatalt: ujusteret grenmål for relokering for forenklingsunderstøttelse"
 
 #: elf32-sh64.c:203 elf64-sh64.c:2364
 #, c-format
 msgid "%s: compiled as 32-bit object and %s is 64-bit"
-msgstr "%s: kompileret som 32-bitsobjekt og %s er 64-bit"
+msgstr "%s: oversat som 32-bitsobjekt og %s er 64-bit"
 
 #: elf32-sh64.c:206 elf64-sh64.c:2367
 #, c-format
 msgid "%s: compiled as 64-bit object and %s is 32-bit"
-msgstr "%s: kompileret som 64-bitsobjekt og %s er 32-bit"
+msgstr "%s: oversat som 64-bitsobjekt og %s er 32-bit"
 
 #: elf32-sh64.c:208 elf64-sh64.c:2369
 #, c-format
@@ -1176,7 +1176,7 @@ msgstr "%s: GAS-fejl: uventet PTB-instruktion med R_SH_PT_16"
 #: elf32-sh64.c:593 elf64-sh64.c:1703
 #, c-format
 msgid "%s: error: unaligned relocation type %d at %08x reloc %08x\n"
-msgstr "%s: fejl: ojusteret relokaliseringstype %d på %08x relokalisering %08x\n"
+msgstr "%s: fejl: ujusteret relokeringstype %d på %08x relokering %08x\n"
 
 #: elf32-sh64.c:677
 #, c-format
@@ -1191,12 +1191,12 @@ msgstr "%s: kunne ikke udskrive sorterede cranges-poster"
 #: elf32-sparc.c:1535 elf64-sparc.c:2224
 #, c-format
 msgid "%s: probably compiled without -fPIC?"
-msgstr "%s: nok kompileret uden -fPIC?"
+msgstr "%s: nok oversat uden -fPIC?"
 
 #: elf32-sparc.c:2002
 #, c-format
 msgid "%s: compiled for a 64 bit system and target is 32 bit"
-msgstr "%s: kompileret for et 64-bitssystem og målet er 32-bit"
+msgstr "%s: oversat for et 64-bitssystem og målet er 32-bit"
 
 #: elf32-sparc.c:2016
 #, c-format
@@ -1211,7 +1211,7 @@ msgstr "Variabel \"%s\" kan ikke befinde sig i flere små dataområder"
 #: elf32-v850.c:685
 #, c-format
 msgid "Variable `%s' can only be in one of the small, zero, and tiny data regions"
-msgstr "Variabel \"%s\" kan kun være i et af de små, tomme og bittesmå dataområder"
+msgstr "Variabel \"%s\" kan kun være i ét af de små, tomme og bittesmå dataområder"
 
 #: elf32-v850.c:688
 #, c-format
@@ -1230,7 +1230,7 @@ msgstr "Variabel \"%s\" kan ikke være i både tomme og bittesmå dataområder samti
 
 #: elf32-v850.c:1072
 msgid "FAILED to find previous HI16 reloc\n"
-msgstr "MISLYKKEDES med at finde tidligere HI16-relokalisering\n"
+msgstr "MISLYKKEDES med at finde tidligere HI16-relokering\n"
 
 #: elf32-v850.c:1703
 msgid "could not locate special linker symbol __gp"
@@ -1291,20 +1291,20 @@ msgstr "%s: advarsel: PLT-addendum %d til \"%s\" fra sektionen %s ignoreredes"
 #: elf32-vax.c:1814
 #, c-format
 msgid "%s: warning: %s relocation against symbol `%s' from %s section"
-msgstr "%s: advarsel: %s-relokalisering mod symbol \"%s\" fra sektionen %s"
+msgstr "%s: advarsel: %s-relokering mod symbol \"%s\" fra sektionen %s"
 
 #: elf32-vax.c:1820
 #, c-format
 msgid "%s: warning: %s relocation to 0x%x from %s section"
-msgstr "%s: advarsel: %s-relokalisering til 0x%x fra sektionen %s"
+msgstr "%s: advarsel: %s-relokering til 0x%x fra sektionen %s"
 
 #: elf32-ia64.c:2280 elf32-xstormy16.c:414 elf64-ia64.c:2280
 msgid "non-zero addend in @fptr reloc"
-msgstr "ikke-tomt addendum i @fptr-relokalisering"
+msgstr "ikke-tomt addendum i @fptr-relokering"
 
 #: elf64-alpha.c:1097
 msgid "GPDISP relocation did not find ldah and lda instructions"
-msgstr "GPDISP-relokalisering fandt ingen ldah- og lda-instruktioner"
+msgstr "GPDISP-relokering fandt ingen ldah- og lda-instruktioner"
 
 #: elf64-alpha.c:3675
 #, c-format
@@ -1314,12 +1314,12 @@ msgstr "%s: .got-subsegment overskrider 64 kB (størrelse %d)"
 #: elf64-alpha.c:4498 elf64-alpha.c:4510
 #, c-format
 msgid "%s: gp-relative relocation against dynamic symbol %s"
-msgstr "%s: gp-relativ relokalisering mod dynamisk symbol %s"
+msgstr "%s: gp-relativ relokering mod dynamisk symbol %s"
 
 #: elf64-alpha.c:4536 elf64-alpha.c:4676
 #, c-format
 msgid "%s: pc-relative relocation against dynamic symbol %s"
-msgstr "%s: pc-relativ relokalisering mod dynamisk symbol %s"
+msgstr "%s: pc-relativ relokering mod dynamisk symbol %s"
 
 #: elf64-alpha.c:4564
 #, c-format
@@ -1333,27 +1333,27 @@ msgstr "<ukendt>"
 #: elf64-alpha.c:4594
 #, c-format
 msgid "%s: !samegp reloc against symbol without .prologue: %s"
-msgstr "%s: !samegp-relokalisering mod symbol uden .prologue: %s"
+msgstr "%s: !samegp-relokering mod symbol uden .prologue: %s"
 
 #: elf64-alpha.c:4639
 #, c-format
 msgid "%s: unhandled dynamic relocation against %s"
-msgstr "%s: uhåndteret dynamisk relokalisering mod %s"
+msgstr "%s: uhåndteret dynamisk relokering mod %s"
 
 #: elf64-alpha.c:4752
 #, c-format
 msgid "%s: dtp-relative relocation against dynamic symbol %s"
-msgstr "%s: dtp-relativ relokalisering mod dynamisk symbol %s"
+msgstr "%s: dtp-relativ relokering mod dynamisk symbol %s"
 
 #: elf64-alpha.c:4775
 #, c-format
 msgid "%s: tp-relative relocation against dynamic symbol %s"
-msgstr "%s: tp-relativ relokalisering mod dynamisk symbol %s"
+msgstr "%s: tp-relativ relokering mod dynamisk symbol %s"
 
 #: elf64-hppa.c:2080
 #, c-format
 msgid "stub entry for %s cannot load .plt, dp offset = %ld"
-msgstr "stubpost for %s kan ikke læse in .plt, dp-afstand = %ld"
+msgstr "stubpost for %s kan ikke indlæse .plt, dp-afstand = %ld"
 
 #: elf64-mmix.c:1002
 #, c-format
@@ -1361,28 +1361,28 @@ msgid ""
 "%s: Internal inconsistency error for value for\n"
 " linker-allocated global register: linked: 0x%lx%08lx != relaxed: 0x%lx%08lx\n"
 msgstr ""
-"%s: Intern inkkonsistensfejl for værdien for\n"
-" lænkerallokeret globalt register: lænket: 0x%lx%08lx != afslappet: 0x%lx%08lx\n"
+"%s: Intern inkonsistensfejl for værdien for\n"
+" lænkerallokeret globalt register: lænket: 0x%lx%08lx != forenklet: 0x%lx%08lx\n"
 
 #: elf64-mmix.c:1386
 #, c-format
 msgid "%s: base-plus-offset relocation against register symbol: (unknown) in %s"
-msgstr "%s: base-plus-afstandsrelokalisering mod registersymbol: (ukendt) i %s"
+msgstr "%s: base-plus-afstandsrelokering mod registersymbol: (ukendt) i %s"
 
 #: elf64-mmix.c:1391
 #, c-format
 msgid "%s: base-plus-offset relocation against register symbol: %s in %s"
-msgstr "%s: base-plus-afstandsrelokalisering mod registersymbol: %s i %s"
+msgstr "%s: base-plus-afstandsrelokering mod registersymbol: %s i %s"
 
 #: elf64-mmix.c:1435
 #, c-format
 msgid "%s: register relocation against non-register symbol: (unknown) in %s"
-msgstr "%s: registerrelokalisering mod ikke-registersymbol: (ukendt) i %s"
+msgstr "%s: registerrelokering mod ikke-registersymbol: (ukendt) i %s"
 
 #: elf64-mmix.c:1440
 #, c-format
 msgid "%s: register relocation against non-register symbol: %s in %s"
-msgstr "%s: registerrelokalisering mod ikke-registersymbol: %s i %s"
+msgstr "%s: registerrelokering mod ikke-registersymbol: %s i %s"
 
 #: elf64-mmix.c:1477
 #, c-format
@@ -1415,17 +1415,17 @@ msgstr ""
 #: elf64-ppc.c:1669 libbfd.c:1435
 #, c-format
 msgid "%s: compiled for a big endian system and target is little endian"
-msgstr "%s: kompileret for et big endian-system og målet er little endian"
+msgstr "%s: oversat for et big endian-system og målet er little endian"
 
 #: elf64-ppc.c:1671 libbfd.c:1437
 #, c-format
 msgid "%s: compiled for a little endian system and target is big endian"
-msgstr "%s: kompileret for et little endian-system og målet er big endian"
+msgstr "%s: oversat for et little endian-system og målet er big endian"
 
 #: elf64-ppc.c:3610
 #, c-format
 msgid "%s: unexpected reloc type %u in .opd section"
-msgstr "%s: uventet relokaliseringstype %u i .opd-sektion"
+msgstr "%s: uventet relokeringstype %u i .opd-sektion"
 
 #: elf64-ppc.c:3630
 #, c-format
@@ -1459,17 +1459,17 @@ msgstr "stubbe stemmer ikke overens med beregnet størrelse"
 #: elf64-ppc.c:5828
 #, c-format
 msgid "%s: Relocation %s is not supported for symbol %s."
-msgstr "%s: Relokaliseringen %s understøttes ikke for symbol %s."
+msgstr "%s: Relokeringen %s understøttes ikke for symbol %s."
 
 #: elf64-ppc.c:5872
 #, c-format
 msgid "%s: error: relocation %s not a multiple of 4"
-msgstr "%s: fejl: relokaliseringen %s er ikke en multipel af 4"
+msgstr "%s: fejl: relokeringen %s er ikke en multipel af 4"
 
 #: elf64-sparc.c:1280
 #, c-format
 msgid "%s: check_relocs: unhandled reloc type %d"
-msgstr "%s: check_relocs: uhåndteret relokaliseringstype %d"
+msgstr "%s: check_relocs: uhåndteret relokeringstype %d"
 
 #: elf64-sparc.c:1317
 #, c-format
@@ -1504,7 +1504,7 @@ msgstr "%s: versionsantal (%ld) stemmer ikke med symbolantal (%ld)"
 #: elflink.c:440
 #, c-format
 msgid "%s: Section %s is too large to add hole of %ld bytes"
-msgstr "%s: Sektionen %s er for stor til at stoppa hul med %ld byte i"
+msgstr "%s: Sektionen %s er for stor til at stoppe hul med %ld byte i"
 
 #: elflink.h:1090
 #, c-format
@@ -1547,7 +1547,7 @@ msgstr "Fejl: ikke mere hukommelse"
 
 #: elflink.h:4781
 msgid "Not enough memory to sort relocations"
-msgstr "Ikke nok hukommelse til at sortere relokaliseringer"
+msgstr "Ikke nok hukommelse til at sortere relokeringer"
 
 #: elflink.h:5682 elflink.h:5725
 #, c-format
@@ -1567,15 +1567,15 @@ msgstr "%s: kunne ikke finde uddatasektionen %s for inddatasektionen %s"
 #: elflink.h:6486
 #, c-format
 msgid "%s: relocation size mismatch in %s section %s"
-msgstr "%s: relokaliseringsstørrelsen stemmer ikke overens i %s-sektionen %s"
+msgstr "%s: relokeringsstørrelsen stemmer ikke overens i %s-sektionen %s"
 
 #: elflink.h:6849
 msgid "warning: relocation against removed section; zeroing"
-msgstr "advarsel: relokalisering mod fjernet sektion; nulstiller"
+msgstr "advarsel: relokering mod fjernet sektion; nulstiller"
 
 #: elflink.h:6879
 msgid "warning: relocation against removed section"
-msgstr "advarsel: relokalisering mod fjernet sektion"
+msgstr "advarsel: relokering mod fjernet sektion"
 
 #: elflink.h:6892
 #, c-format
@@ -1598,12 +1598,12 @@ msgstr "%s: %s+0x%lx: hop til stubrutine som ikke er jal"
 #: elfxx-mips.c:4270
 #, c-format
 msgid "%s: Malformed reloc detected for section %s"
-msgstr "%s: Fejlagtig relokalisering for sektion %s opdaget"
+msgstr "%s: Fejlagtig relokering for sektion %s opdaget"
 
 #: elfxx-mips.c:4348
 #, c-format
 msgid "%s: CALL16 reloc at 0x%lx not against global symbol"
-msgstr "%s: CALL16-relokalisering ved 0x%lx er ikke mod globalt symbol"
+msgstr "%s: CALL16-relokering ved 0x%lx er ikke mod globalt symbol"
 
 #: elfxx-mips.c:7301
 #, c-format
@@ -1763,37 +1763,37 @@ msgstr "%s: uventet type efter ATN"
 #: ihex.c:258
 #, c-format
 msgid "%s:%d: unexpected character `%s' in Intel Hex file\n"
-msgstr "%s:%d: uventet tegn \"%s\" i hexadecimal Intel-fil\n"
+msgstr "%s:%d: uventet tegn \"%s\" i heksadecimal Intel-fil\n"
 
 #: ihex.c:366
 #, c-format
 msgid "%s:%u: bad checksum in Intel Hex file (expected %u, found %u)"
-msgstr "%s:%u: fejlagtig kontrolsum i hexadecimal Intel-fil (forventede %u, fandt %u)"
+msgstr "%s:%u: fejlagtig kontrolsum i heksadecimal Intel-fil (forventede %u, fandt %u)"
 
 #: ihex.c:420
 #, c-format
 msgid "%s:%u: bad extended address record length in Intel Hex file"
-msgstr "%s:%u: fejlagtig længde på post for udvidet adresse i hexadecimal Intel-fil"
+msgstr "%s:%u: fejlagtig længde på post for udvidet adresse i heksadecimal Intel-fil"
 
 #: ihex.c:437
 #, c-format
 msgid "%s:%u: bad extended start address length in Intel Hex file"
-msgstr "%s:%u: fejlagtig længde på udvidet startadresse i hexadecimal Intel-fil"
+msgstr "%s:%u: fejlagtig længde på udvidet startadresse i heksadecimal Intel-fil"
 
 #: ihex.c:454
 #, c-format
 msgid "%s:%u: bad extended linear address record length in Intel Hex file"
-msgstr "%s:%u: fejlagtig længde på post for udvidet lineær adresse i hexadecimal Intel-fil"
+msgstr "%s:%u: fejlagtig længde på post for udvidet lineær adresse i heksadecimal Intel-fil"
 
 #: ihex.c:471
 #, c-format
 msgid "%s:%u: bad extended linear start address length in Intel Hex file"
-msgstr "%s:%u: fejlagtig længde på post for udvidet lineær startadresse i hexadecimal Intel-fil"
+msgstr "%s:%u: fejlagtig længde på post for udvidet lineær startadresse i heksadecimal Intel-fil"
 
 #: ihex.c:488
 #, c-format
 msgid "%s:%u: unrecognized ihex type %u in Intel Hex file\n"
-msgstr "%s:%u: ukendt ihex-type %u i hexadecimal Intel-fil\n"
+msgstr "%s:%u: ukendt ihex-type %u i heksadecimal Intel-fil\n"
 
 #: ihex.c:607
 #, c-format
@@ -1808,7 +1808,7 @@ msgstr "%s: fejlagtig sektionslængde i ihex_read_sektion"
 #: ihex.c:860
 #, c-format
 msgid "%s: address 0x%s out of range for Intel Hex file"
-msgstr "%s: adressen 0x%s er udenfor intervallet for hexadecimal Intel-fil"
+msgstr "%s: adressen 0x%s er uden for intervallet for heksadecimal Intel-fil"
 
 #: libbfd.c:492
 #, c-format
@@ -1837,7 +1837,7 @@ msgstr "%s: indirekte symbol \"%s\" til \"%s\" er en løkke"
 #: linker.c:2776
 #, c-format
 msgid "Attempt to do relocateable link with %s input and %s output"
-msgstr "Forsøg at lave en relokaliseringsbar lænke med %s-inddata og %s-uddata"
+msgstr "Forsøg at lave en relokérbar lænke med %s-inddata og %s-uddata"
 
 #: merge.c:892
 #, c-format
@@ -1852,7 +1852,7 @@ msgstr "%s: Ingen kerne til at allokere sektionsnavn %s\n"
 #: mmo.c:536
 #, c-format
 msgid "%s: No core to allocate a symbol %d bytes long\n"
-msgstr "%s: Ingen kerne for at allokere et %d byte langt symbol\n"
+msgstr "%s: Ingen kerne til at allokere et %d byte langt symbol\n"
 
 #: mmo.c:1245
 #, c-format
@@ -1862,12 +1862,12 @@ msgstr "%s: ugyldig mmo-fil: initieringsværdi for $255 er ikke \"Main\"\n"
 #: mmo.c:1391
 #, c-format
 msgid "%s: unsupported wide character sequence 0x%02X 0x%02X after symbol name starting with `%s'\n"
-msgstr "%s: bred tegnsekvens som ikke understøttes 0x%02X 0x%02X efter symbolnavnet som begynder med \"%s\"\n"
+msgstr "%s: bred tegn-sekvens som ikke understøttes 0x%02X 0x%02X efter symbolnavnet som begynder med \"%s\"\n"
 
 #: mmo.c:1633
 #, c-format
 msgid "%s: invalid mmo file: unsupported lopcode `%d'\n"
-msgstr "%s: ugyldig mmo-fil: lopkod \"%d\" understøttes ikke\n"
+msgstr "%s: ugyldig mmo-fil: lopkode \"%d\" understøttes ikke\n"
 
 #: mmo.c:1643
 #, c-format
@@ -2028,7 +2028,7 @@ msgstr "%s: Ukendt maskintype (0x%x) i Import Library Format-arkiv"
 #: peicode.h:1174
 #, c-format
 msgid "%s: Recognised but unhandled machine type (0x%x) in Import Library Format archive"
-msgstr "%s: Kendt men uhåndteret maskintype (0x%x) i Import Library Format-arkiv"
+msgstr "%s: Kendt, men uhåndteret maskintype (0x%x) i Import Library Format-arkiv"
 
 #: peicode.h:1191
 #, c-format
@@ -2101,15 +2101,15 @@ msgstr "som_sizeof_headers er ikke implementeret"
 msgid "%s:%d: Unexpected character `%s' in S-record file\n"
 msgstr "%s:%d: Uventet tegn \"%s\" i S-postfil\n"
 
-# Vad er stabs?
+# Hvad er stabs?
 #: stabs.c:319
 #, c-format
 msgid "%s(%s+0x%lx): Stabs entry has invalid string index."
-msgstr "%s(%s+0x%lx): Stabpost har ugyldigt strengindex."
+msgstr "%s(%s+0x%lx): Stabpost har ugyldigt strengindeks."
 
 #: syms.c:1044
 msgid "Unsupported .stab relocation"
-msgstr ".stab-relokalisering som ikke understøttes"
+msgstr ".stab-relokering som ikke understøttes"
 
 #: vms-gsd.c:356
 #, c-format
@@ -2150,7 +2150,7 @@ msgstr "_bfd_vms_output_counted kaldt med nul byte"
 
 #: vms-misc.c:924
 msgid "_bfd_vms_output_counted called with too many bytes"
-msgstr "_bfd_vms_output_counted called kaldt med for mange byte"
+msgstr "_bfd_vms_output_counted  kaldt med for mange byte"
 
 #: vms-misc.c:1055
 #, c-format
@@ -2169,7 +2169,7 @@ msgstr "Ingen hukommelse!"
 #: vms-tir.c:362
 #, c-format
 msgid "bad section index in %s"
-msgstr "fejlagtigt sektionsindex i %s"
+msgstr "fejlagtigt sektionsindeks i %s"
 
 #: vms-tir.c:375
 #, c-format
@@ -2263,17 +2263,17 @@ msgstr "objektkode %d kunne ikke findes"
 #: vms-tir.c:2019
 #, c-format
 msgid "SEC_RELOC with no relocs in section %s"
-msgstr "SEC_RELOC uden relokaliseringer i sektion %s"
+msgstr "SEC_RELOC uden relokeringer i sektion %s"
 
 #: vms-tir.c:2307
 #, c-format
 msgid "Unhandled relocation %s"
-msgstr "Uhåndteret relokalisering %s"
+msgstr "Uhåndteret relokering %s"
 
 #: xcofflink.c:1243
 #, c-format
 msgid "%s: `%s' has line numbers but no enclosing section"
-msgstr "%s: \"%s\" har linjenumre men ingen omsluttende sektion"
+msgstr "%s: \"%s\" har linjenumre, men ingen omsluttende sektion"
 
 #: xcofflink.c:1296
 #, c-format
@@ -2308,7 +2308,7 @@ msgstr "%s: fejlagtigt placeret XTY_LD \"%s\""
 #: xcofflink.c:1957
 #, c-format
 msgid "%s: reloc %s:%d not in csect"
-msgstr "%s: relokaliseringen %s:%d er ikke i csect"
+msgstr "%s: relokeringen %s:%d er ikke i csect"
 
 #: xcofflink.c:2092
 #, c-format
@@ -2337,26 +2337,26 @@ msgstr "advarsel: forsøg på at eksportere udefineret symbol \"%s\""
 #: xcofflink.c:4447
 #, c-format
 msgid "TOC overflow: 0x%lx > 0x10000; try -mminimal-toc when compiling"
-msgstr "TOC giver overløb: 0x%lx > 0x10000; prøv -mminimal-toc ved kompilering"
+msgstr "TOC giver overløb: 0x%lx > 0x10000; prøv -mminimal-toc ved oversættelse"
 
 #: xcofflink.c:5287 xcofflink.c:5756 xcofflink.c:5818 xcofflink.c:6119
 #, c-format
 msgid "%s: loader reloc in unrecognized section `%s'"
-msgstr "%s: indlæserrelokalisering i ukendt sektion \"%s\""
+msgstr "%s: indlæserrelokering i ukendt sektion \"%s\""
 
 #: xcofflink.c:5309 xcofflink.c:6130
 #, c-format
 msgid "%s: `%s' in loader reloc but not loader sym"
-msgstr "%s: \"%s\" i indlæserrelokalisering men ikke indlæsersym"
+msgstr "%s: \"%s\" i indlæserrelokering, men ikke indlæsersym"
 
 #: xcofflink.c:5324
 #, c-format
 msgid "%s: loader reloc in read-only section %s"
-msgstr "%s: indlæserrelokalisering i skrivebeskyttet sektion %s"
+msgstr "%s: indlæserrelokering i skrivebeskyttet sektion %s"
 
 #: elf32-ia64.c:2222 elf64-ia64.c:2222
 msgid "@pltoff reloc against local symbol"
-msgstr "@pltoff-relokalisering mod lokalt symbol"
+msgstr "@pltoff-relokering mod lokalt symbol"
 
 #: elf32-ia64.c:3562 elf64-ia64.c:3562
 #, c-format
@@ -2376,12 +2376,12 @@ msgstr "%s: lænker ikke-pic-kode i delt bibliotek"
 #: elf32-ia64.c:3891 elf64-ia64.c:3891
 #, c-format
 msgid "%s: @gprel relocation against dynamic symbol %s"
-msgstr "%s: @gprel-relokalisering mod dynamisk symbol %s"
+msgstr "%s: @gprel-relokering mod dynamisk symbol %s"
 
 #: elf32-ia64.c:4030 elf64-ia64.c:4030
 #, c-format
 msgid "%s: dynamic relocation against speculation fixup"
-msgstr "%s: dynamisk relokalisering uden spekulationsrettelser"
+msgstr "%s: dynamisk relokering uden spekulationsrettelser"
 
 #: elf32-ia64.c:4038 elf64-ia64.c:4038
 #, c-format
@@ -2390,7 +2390,7 @@ msgstr "%s: spekulationsfix mod udefineret svagt symbol"
 
 #: elf32-ia64.c:4271 elf64-ia64.c:4271
 msgid "unsupported reloc"
-msgstr "relokaliseringen understøttes ikke"
+msgstr "relokeringen understøttes ikke"
 
 #: elf32-ia64.c:4551 elf64-ia64.c:4551
 #, c-format
@@ -2425,11 +2425,11 @@ msgstr "%s: linjenummer giver overløb: 0x%lx > 0xffff"
 #: peigen.c:979 pepigen.c:979
 #, c-format
 msgid "%s: reloc overflow 1: 0x%lx > 0xffff"
-msgstr "%s: relokalisering giver overløb 1: 0x%lx > 0xffff"
+msgstr "%s: relokering giver overløb 1: 0x%lx > 0xffff"
 
 #: peigen.c:993 pepigen.c:993
 msgid "Export Directory [.edata (or where ever we found it)]"
-msgstr "Exportkatalog [.edata (eller hvor vi fandt det)]"
+msgstr "Eksportkatalog [.edata (eller hvor vi fandt det)]"
 
 #: peigen.c:994 pepigen.c:994
 msgid "Import Directory [parts of .idata]"
@@ -2449,7 +2449,7 @@ msgstr "Sikkerhedskatalog"
 
 #: peigen.c:998 pepigen.c:998
 msgid "Base Relocation Directory [.reloc]"
-msgstr "Baserelokaliseringskatalog [.reloc]"
+msgstr "Baserelokeringskatalog [.reloc]"
 
 #: peigen.c:999 pepigen.c:999
 msgid "Debug Directory"
@@ -2535,7 +2535,7 @@ msgstr ""
 "\n"
 "Importtabellerne (tolket indhold i %s-sektion)\n"
 
-# Vad er thunk?
+# Hvad er thunk?
 #: peigen.c:1130 pepigen.c:1130
 msgid ""
 " vma:            Hint    Time      Forward  DLL       First\n"
@@ -2555,7 +2555,7 @@ msgstr ""
 
 #: peigen.c:1192 pepigen.c:1192
 msgid "\tvma:  Hint/Ord Member-Name Bound-To\n"
-msgstr "\tvma: Tips/Ordn Medlemsnavn Bundet till\n"
+msgstr "\tvma: Tips/Ordn Medlemsnavn Bundet til\n"
 
 #: peigen.c:1217 pepigen.c:1217
 msgid ""
@@ -2580,7 +2580,7 @@ msgid ""
 "There is an export table in %s at 0x%lx\n"
 msgstr ""
 "\n"
-"Det findes en eksporttabel i %s ved 0x%lx\n"
+"Der findes en eksporttabel i %s ved 0x%lx\n"
 
 #: peigen.c:1393 pepigen.c:1393
 #, c-format
@@ -2600,7 +2600,7 @@ msgstr "Eksportflag \t\t\t%lx\n"
 #: peigen.c:1400 pepigen.c:1400
 #, c-format
 msgid "Time/Date stamp \t\t%lx\n"
-msgstr "Tids/datostempel \t\t%lx\n"
+msgstr "Tids-/datostempel \t\t%lx\n"
 
 #: peigen.c:1403 pepigen.c:1403
 #, c-format
@@ -2694,7 +2694,7 @@ msgid ""
 "     \t\tAddress  Address  Handler  Data     Address    Mask\n"
 msgstr ""
 " vma:\t\tStart-    Slut-     EH-        EH-    Prologsluts-  Undtagelses-\n"
-"     \t\tadresse   adresse   håndterere data   adresse       maske\n"
+"     \t\tadresse   adresse   håndterer  data   adresse       maske\n"
 
 #: peigen.c:1624 pepigen.c:1624
 msgid " Register save millicode"
@@ -2716,7 +2716,7 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"PE-filbaserelokaliseringer (tolket indhold i .reloc-sektionen)\n"
+"PE-filbaserelokeringer (tolket indhold i .reloc-sektionen)\n"
 
 #: peigen.c:1712 pepigen.c:1712
 #, c-format
@@ -2730,7 +2730,7 @@ msgstr ""
 #: peigen.c:1725 pepigen.c:1725
 #, c-format
 msgid "\treloc %4d offset %4x [%4lx] %s"
-msgstr "\trelokalisering %4d afstand %4x [%4lx] %s"
+msgstr "\trelokering %4d afstand %4x [%4lx] %s"
 
 #. The MS dumpbin program reportedly ands with 0xff0f before
 #. printing the characteristics field.  Not sure why.  No reason to

@@ -1,22 +1,25 @@
-/*  This file is part of the program psim.
+/* The IGEN simulator generator for GDB, the GNU Debugger.
 
-    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+   Copyright 2002 Free Software Foundation, Inc.
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+   Contributed by Andrew Cagney.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
- 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- 
-    */
+   This file is part of GDB.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 
 /* Read a table, line by line, from a file.
@@ -61,14 +64,17 @@
 
 typedef struct _table table;
 
-typedef enum {
+typedef enum
+{
   table_colon_entry,
   table_code_entry,
-} table_entry_type;
+}
+table_entry_type;
 
 
 typedef struct _table_entry table_entry;
-struct _table_entry {
+struct _table_entry
+{
   table *file;
   line_ref *line;
   table_entry_type type;
@@ -79,7 +85,8 @@ struct _table_entry {
 /* List of directories to search when opening a pushed file.  Current
    directory is always searched first */
 typedef struct _table_include table_include;
-struct _table_include {
+struct _table_include
+{
   char *dir;
   table_include *next;
 };
@@ -88,68 +95,47 @@ struct _table_include {
 /* Open/read a table file.  Since the file is read once during open
    (and then closed immediatly) there is no close method. */
 
-extern table *table_open
-(const char *file_name);
+extern table *table_open (const char *file_name);
 
-extern table_entry *table_read
-(table *file);
+extern table_entry *table_read (table *file);
 
 
 /* Push the the state of the current file and open FILE_NAME.  When
    the end of FILE_NAME is reached, return to the pushed file */
 
 extern void table_push
-(table *file,
- line_ref *line,
- table_include *search,
- const char *file_name);
+  (table *file, line_ref *line, table_include *search, const char *file_name);
 
 
 /* Expand the specified field_nr using the internal expansion table.
    A field is only expanded when explicitly specified.  */
 
-extern void table_expand_field
-(table_entry *entry,
- int field_nr);
+extern void table_expand_field (table_entry *entry, int field_nr);
 
 
 /* Given a code entry, write the code to FILE.  Since any
    leading/trailing braces were striped as part of the read, they are
    not written. */
 
-extern void table_print_code
-(lf *file,
- table_entry *entry);
+extern void table_print_code (lf *file, table_entry *entry);
 
 
 /* Debugging */
 
 extern void dump_line_ref
-(lf *file,
- char *prefix,
- const line_ref *line,
- char *suffix);
+  (lf *file, char *prefix, const line_ref *line, char *suffix);
 
 extern void dump_table_entry
-(lf *file,
- char *prefix,
- const table_entry *entry,
- char *suffix);
+  (lf *file, char *prefix, const table_entry *entry, char *suffix);
 
 
 
 /* Utilities for skipping around text */
 
-extern char *skip_digits
-(char *chp);
+extern char *skip_digits (char *chp);
 
-extern char *skip_spaces
-(char *chp);
+extern char *skip_spaces (char *chp);
 
-extern char *skip_to_separator
-(char *chp,
- char *separators);
+extern char *skip_to_separator (char *chp, char *separators);
 
-extern char *back_spaces
-(char *start,
- char *chp);
+extern char *back_spaces (char *start, char *chp);

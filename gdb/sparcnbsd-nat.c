@@ -1,5 +1,5 @@
 /* Native-dependent code for SPARC systems running NetBSD.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -23,6 +23,7 @@
 #include "inferior.h"
 #include "regcache.h"
 
+#include "sparc-tdep.h"
 #include "sparcnbsd-tdep.h"
 
 #include <sys/types.h>
@@ -38,7 +39,7 @@ getregs_supplies (int regno)
 {
   return (regno == PS_REGNUM
 	  || regno == PC_REGNUM
-	  || regno == NPC_REGNUM
+	  || regno == DEPRECATED_NPC_REGNUM
 	  || regno == Y_REGNUM
 	  || (regno >= G0_REGNUM && regno <= G7_REGNUM)
 	  || (regno >= O0_REGNUM && regno <= O7_REGNUM)

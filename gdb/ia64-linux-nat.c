@@ -1,7 +1,8 @@
 /* Functions specific to running gdb native on IA-64 running
    GNU/Linux.
 
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -21,6 +22,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdb_string.h"
 #include "inferior.h"
 #include "target.h"
 #include "gdbcore.h"
@@ -28,10 +30,11 @@
 
 #include <signal.h>
 #include <sys/ptrace.h>
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
+#include <sys/syscall.h>
 #include <sys/user.h>
 
 #include <asm/ptrace_offsets.h>
@@ -400,8 +403,8 @@ fill_gregset (gregset_t *gregsetp, int regno)
 
 #define COPY_REG(_idx_,_regi_) \
   if ((regno == -1) || regno == _regi_) \
-    memcpy (regp + _idx_, &registers[REGISTER_BYTE (_regi_)], \
-	    REGISTER_RAW_SIZE (_regi_))
+    memcpy (regp + _idx_, &deprecated_registers[DEPRECATED_REGISTER_BYTE (_regi_)], \
+	    DEPRECATED_REGISTER_RAW_SIZE (_regi_))
 
   for (regi = IA64_GR0_REGNUM; regi <= IA64_GR31_REGNUM; regi++)
     {
@@ -439,7 +442,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   char *from;
 
   for (regi = IA64_FR0_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
@@ -465,9 +468,9 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  from = (char *) &registers[REGISTER_BYTE (regi)];
+	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 	  to = (char *) &((*fpregsetp)[regi - IA64_FR0_REGNUM]);
-	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
+	  memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regi));
 	}
     }
 }
@@ -632,7 +635,8 @@ ia64_linux_stopped_by_watchpoint (ptid_t ptid)
   errno = 0;
   ptrace (PTRACE_GETSIGINFO, tid, (PTRACE_ARG3_TYPE) 0, &siginfo);
 
-  if (errno != 0 || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
+  if (errno != 0 || siginfo.si_signo != SIGTRAP || 
+      (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
     return 0;
 
   psr = read_register_pid (IA64_PSR_REGNUM, ptid);
@@ -641,4 +645,14 @@ ia64_linux_stopped_by_watchpoint (ptid_t ptid)
   write_register_pid (IA64_PSR_REGNUM, psr, ptid);
 
   return (CORE_ADDR) siginfo.si_addr;
+}
+
+LONGEST 
+ia64_linux_xfer_unwind_table (struct target_ops *ops,
+			      enum target_object object,
+			      const char *annex,
+			      void *readbuf, const void *writebuf,
+			      ULONGEST offset, LONGEST len)
+{
+  return syscall (__NR_getunwind, readbuf, len);
 }

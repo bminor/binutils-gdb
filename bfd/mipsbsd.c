@@ -1,5 +1,5 @@
 /* BFD backend for MIPS BSD (a.out) binaries.
-   Copyright 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Ralph Campbell.
 
@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#define BYTES_IN_WORD 4
 /* #define ENTRY_CAN_BE_ZERO */
 #define N_HEADER_IN_TEXT(x) 1
 #define N_SHARED_LIB(x) 0
@@ -53,7 +52,7 @@ static void MY(set_arch_mach) PARAMS ((bfd *abfd, unsigned long machtype));
 static void MY(choose_reloc_size) PARAMS ((bfd *abfd));
 
 #define MY_write_object_contents MY(write_object_contents)
-static boolean MY(write_object_contents) PARAMS ((bfd *abfd));
+static bfd_boolean MY(write_object_contents) PARAMS ((bfd *abfd));
 
 /* We can't use MY(x) here because it leads to a recursive call to CONCAT2
    when expanded inside JUMP_TABLE.  */
@@ -71,7 +70,7 @@ static boolean MY(write_object_contents) PARAMS ((bfd *abfd));
 #include "aout-target.h"
 
 static bfd_reloc_status_type mips_fix_jmp_addr
-  PARAMS ((bfd *, arelent *, struct symbol_cache_entry *, PTR, asection *,
+  PARAMS ((bfd *, arelent *, struct bfd_symbol *, PTR, asection *,
 	   bfd *, char **));
 static reloc_howto_type *MY(reloc_howto_type_lookup)
   PARAMS ((bfd *, bfd_reloc_code_real_type));
@@ -130,7 +129,7 @@ MY (choose_reloc_size) (abfd)
   Section contents have already been written.  We write the
   file header, symbols, and relocation.  */
 
-static boolean
+static bfd_boolean
 MY (write_object_contents) (abfd)
      bfd *abfd;
 {
@@ -181,7 +180,7 @@ MY (write_object_contents) (abfd)
 
   WRITE_HEADERS (abfd, execp);
 
-  return true;
+  return TRUE;
 }
 
 /* MIPS relocation types.  */
@@ -204,7 +203,7 @@ mips_fix_jmp_addr (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		   error_message)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
-     struct symbol_cache_entry *symbol;
+     struct bfd_symbol *symbol;
      PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
@@ -221,7 +220,7 @@ mips_fix_jmp_addr (abfd, reloc_entry, symbol, data, input_section, output_bfd,
       && (symbol->flags & BSF_WEAK) == 0)
     return bfd_reloc_undefined;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
   if (bfd_is_com_section (symbol->section))
     relocation = 0;
@@ -272,7 +271,7 @@ mips_fix_hi16_s (abfd, reloc_entry, symbol, data, input_section,
       && (symbol->flags & BSF_WEAK) == 0)
     return bfd_reloc_undefined;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
   if (bfd_is_com_section (symbol->section))
     relocation = 0;
@@ -290,20 +289,20 @@ mips_fix_hi16_s (abfd, reloc_entry, symbol, data, input_section,
 }
 
 static reloc_howto_type mips_howto_table_ext[] = {
-  {MIPS_RELOC_32,      0, 2, 32, false, 0,  complain_overflow_bitfield, 0,
-	"32",       false, 0, 0xffffffff, false},
-  {MIPS_RELOC_JMP,     2, 2, 26, false, 0, complain_overflow_dont,
+  {MIPS_RELOC_32,      0, 2, 32, FALSE, 0,  complain_overflow_bitfield, 0,
+	"32",       FALSE, 0, 0xffffffff, FALSE},
+  {MIPS_RELOC_JMP,     2, 2, 26, FALSE, 0, complain_overflow_dont,
 	mips_fix_jmp_addr,
-	"MIPS_JMP", false, 0, 0x03ffffff, false},
-  {MIPS_RELOC_WDISP16, 2, 2, 16, true,  0, complain_overflow_signed, 0,
-	"WDISP16",  false, 0, 0x0000ffff, false},
-  {MIPS_RELOC_HI16,   16, 2, 16, false, 0, complain_overflow_bitfield, 0,
-	"HI16",     false, 0, 0x0000ffff, false},
-  {MIPS_RELOC_HI16_S, 16, 2, 16, false, 0, complain_overflow_bitfield,
+	"MIPS_JMP", FALSE, 0, 0x03ffffff, FALSE},
+  {MIPS_RELOC_WDISP16, 2, 2, 16, TRUE,  0, complain_overflow_signed, 0,
+	"WDISP16",  FALSE, 0, 0x0000ffff, FALSE},
+  {MIPS_RELOC_HI16,   16, 2, 16, FALSE, 0, complain_overflow_bitfield, 0,
+	"HI16",     FALSE, 0, 0x0000ffff, FALSE},
+  {MIPS_RELOC_HI16_S, 16, 2, 16, FALSE, 0, complain_overflow_bitfield,
         mips_fix_hi16_s,
-        "HI16_S",   false, 0, 0x0000ffff, false},
-  {MIPS_RELOC_LO16,    0, 2, 16, false, 0, complain_overflow_dont, 0,
-	"LO16",     false, 0, 0x0000ffff, false},
+        "HI16_S",   FALSE, 0, 0x0000ffff, FALSE},
+  {MIPS_RELOC_LO16,    0, 2, 16, FALSE, 0, complain_overflow_dont, 0,
+	"LO16",     FALSE, 0, 0x0000ffff, FALSE},
 };
 
 static reloc_howto_type *

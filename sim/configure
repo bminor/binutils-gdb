@@ -1426,7 +1426,13 @@ case "${target}" in
 # OBSOLETE 	extra_subdirs="${extra_subdirs} igen"
 # OBSOLETE 	;;
 # OBSOLETE   fr30-*-*)		sim_target=fr30 ;;
-  h8300*-*-*)		sim_target=h8300 ;;
+  h8300*-*-*)		
+	sim_target=h8300 
+	extra_subdirs="${extra_subdirs} testsuite"
+	;;
+  frv-*-*)		sim_target=frv
+	extra_subdirs="${extra_subdirs} testsuite"
+	;;
   h8500-*-*)		sim_target=h8500 ;;
   i960-*-*)		sim_target=i960 ;;
   m32r-*-*)		sim_target=m32r ;;
@@ -1447,7 +1453,10 @@ case "${target}" in
   mn10200*-*-*)
 	sim_target=mn10200
 	;;
-  sh*-*-*)		sim_target=sh ;;
+  sh*-*-*)
+	sim_target=sh 
+	extra_subdirs="${extra_subdirs} testsuite"
+	;;
   powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | \
   powerpc*-*-elf* | powerpc*-*-linux* | powerpc*-*-netbsd* )
 	# The PowerPC simulator uses the GCC extension long long as well as

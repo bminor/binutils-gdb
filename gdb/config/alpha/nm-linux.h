@@ -1,7 +1,7 @@
 /* Native definitions for alpha running GNU/Linux.
 
-   Copyright 1993, 1994, 1996, 1998, 2000, 2001, 2002 Free Software
-   Foundation, Inc.
+   Copyright 1993, 1994, 1996, 1998, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,5 +44,11 @@
 /* Given a pointer to either a gregset_t or fpregset_t, return a
    pointer to the first register.  */
 #define ALPHA_REGSET_BASE(regsetp)  ((long *) (regsetp))
+
+/* Given a pointer to a gregset_t, locate the UNIQUE value.  */
+#define ALPHA_REGSET_UNIQUE(regsetp)  ((long *)(regsetp) + 32)
+
+/* The address of UNIQUE for ptrace.  */
+#define ALPHA_UNIQUE_PTRACE_ADDR 65
 
 #endif /* NM_LINUX_H */

@@ -1,6 +1,6 @@
 /* Handle set and show GDB commands.
 
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include <readline/tilde.h>
 #include "value.h"
 #include <ctype.h>
 #include "gdb_string.h"
@@ -212,7 +213,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 		    strcat (msg, c->enums[i]);
 		  }
 		strcat (msg, ".");
-		error (msg);
+		error ("%s", msg);
 	      }
 
 	    p = strchr (arg, ' ');
@@ -352,28 +353,35 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 void
 cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 {
-  ui_out_tuple_begin (uiout, "showlist");
+  struct cleanup *showlist_chain;
+
+  showlist_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "showlist");
   for (; list != NULL; list = list->next)
     {
       /* If we find a prefix, run its list, prefixing our output by its
          prefix (with "show " skipped).  */
       if (list->prefixlist && !list->abbrev_flag)
 	{
-	  ui_out_tuple_begin (uiout, "optionlist");
+	  struct cleanup *optionlist_chain
+	    = make_cleanup_ui_out_tuple_begin_end (uiout, "optionlist");
 	  ui_out_field_string (uiout, "prefix", list->prefixname + 5);
 	  cmd_show_list (*list->prefixlist, from_tty, list->prefixname + 5);
-	  ui_out_tuple_end (uiout);
+	  /* Close the tuple.  */
+	  do_cleanups (optionlist_chain);
 	}
       if (list->type == show_cmd)
 	{
-	  ui_out_tuple_begin (uiout, "option");
+	  struct cleanup *option_chain
+	    = make_cleanup_ui_out_tuple_begin_end (uiout, "option");
 	  ui_out_text (uiout, prefix);
 	  ui_out_field_string (uiout, "name", list->name);
 	  ui_out_text (uiout, ":  ");
 	  do_setshow_command ((char *) NULL, from_tty, list);
-	  ui_out_tuple_end (uiout);
+          /* Close the tuple.  */
+	  do_cleanups (option_chain);
 	}
     }
-  ui_out_tuple_end (uiout);
+  /* Close the tuple.  */
+  do_cleanups (showlist_chain);
 }
 

@@ -1,5 +1,5 @@
 /* Disassemble SH64 instructions.
-   Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 /* We need to refer to the ELF header structure.  */
 #include "elf-bfd.h"
 #include "elf/sh.h"
+#include "elf32-sh64.h"
 
 #define ELF_MODE32_CODE_LABEL_P(SYM) \
  (((elf_symbol_type *) (SYM))->internal_elf_sym.st_other & STO_SH5_ISA32)
@@ -48,7 +49,7 @@ struct sh64_disassemble_info
  };
 
 /* Each item in the table is a mask to indicate which bits to be set
-   to determine an instruction's operator. 
+   to determine an instruction's operator.
    The index is as same as the instruction in the opcode table.
    Note that some archs have this as a field in the opcode table.  */
 static unsigned long *shmedia_opcode_mask_table;
@@ -56,7 +57,7 @@ static unsigned long *shmedia_opcode_mask_table;
 static void initialize_shmedia_opcode_mask_table PARAMS ((void));
 static int print_insn_shmedia PARAMS ((bfd_vma, disassemble_info *));
 static const char *creg_name PARAMS ((int));
-static boolean init_sh64_disasm_info PARAMS ((struct disassemble_info *));
+static bfd_boolean init_sh64_disasm_info PARAMS ((struct disassemble_info *));
 static enum sh64_elf_cr_type sh64_get_contents_type_disasm
   PARAMS ((bfd_vma, struct disassemble_info *));
 
@@ -86,7 +87,7 @@ initialize_shmedia_opcode_mask_table ()
 	{
 	  int offset = shmedia_table[n].nibbles[i];
 	  int length;
-	  
+
 	  switch (shmedia_table[n].arg[i])
 	    {
 	    case A_GREG_M:
@@ -118,7 +119,7 @@ initialize_shmedia_opcode_mask_table ()
 	      length = 3;
 	      break;
 
-	    case A_IMMM:	
+	    case A_IMMM:
 	      abort ();
 	      break;
 
@@ -511,7 +512,7 @@ sh64_get_contents_type_disasm (memaddr, info)
 
 /* Initialize static and dynamic disassembly state.  */
 
-static boolean
+static bfd_boolean
 init_sh64_disasm_info (info)
      struct disassemble_info *info;
 {
@@ -519,7 +520,7 @@ init_sh64_disasm_info (info)
     = calloc (sizeof (*sh64_infop), 1);
 
   if (sh64_infop == NULL)
-    return false;
+    return FALSE;
 
   info->private_data = sh64_infop;
 
@@ -529,14 +530,14 @@ init_sh64_disasm_info (info)
   if (shmedia_opcode_mask_table == NULL)
     initialize_shmedia_opcode_mask_table ();
 
-  return true;
+  return TRUE;
 }
 
 /* Main entry to disassemble SHmedia instructions, given an endian set in
    INFO.  Note that the simulator uses this as the main entry and does not
    use any of the functions further below.  */
 
-int 
+int
 print_insn_sh64x_media (memaddr, info)
      bfd_vma memaddr;
      struct disassemble_info *info;
@@ -554,7 +555,7 @@ print_insn_sh64x_media (memaddr, info)
 /* Main entry to disassemble SHmedia insns.
    If we see an SHcompact instruction, return -2.  */
 
-int 
+int
 print_insn_sh64 (memaddr, info)
      bfd_vma memaddr;
      struct disassemble_info *info;

@@ -1,4 +1,4 @@
-#   Copyright (C) 1999, 2000, 2002 Free Software Foundation, Inc.
+# Copyright (C) 1999, 2000, 2002 Free Software Foundation, Inc.
 #
 # This Program Is Free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -70,19 +70,7 @@ mi_gdb_test "113-var-create argc * argc" \
 	"&\"mi_cmd_var_create: unable to create variable object\\\\n\".*113\\^error,msg=\"mi_cmd_var_create: unable to create variable object\"" \
 	"create out of scope variable"
 
-mi_gdb_test "200-break-insert do_locals_tests" \
-	"200\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"do_locals_tests\",file=\".*var-cmd.c\",line=\"106\",times=\"0\"\}" \
-	"break-insert operation"
-
-mi_run_cmd
-# The running part has been checked already by mi_run_cmd
-gdb_expect {
-    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_locals_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"106\"\}\r\n$mi_gdb_prompt$" {
-	pass "run to do_locals_tests"
-    }
-    -re ".*$mi_gdb_prompt$" {fail "run to do_locals_tests (2)"}
-    timeout {fail "run to do_locals_tests (timeout 2)"}
-}
+mi_runto do_locals_tests
 
 # Test: c_variable-1.4
 # Desc: create local variables

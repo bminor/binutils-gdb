@@ -27,11 +27,6 @@
 
 #define U_REGS_OFFSET 0
 
-#ifdef GDBSERVER
-#define REGISTER_U_ADDR(addr,blockend,regno) \
-	 (addr) = arm_register_u_addr ((blockend),(regno))
-#endif /* GDBSERVER */
-
 /* Return sizeof user struct to callers in less machine dependent routines */
 extern int kernel_u_size (void);
 #define KERNEL_U_SIZE	arm_linux_kernel_u_size()

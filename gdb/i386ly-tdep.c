@@ -1,5 +1,5 @@
 /* Target-dependent code for Intel 386 running LynxOS.
-   Copyright 1993, 1996, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1993, 1996, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,7 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "target.h"
+#include "osabi.h"
 
 #include "i386-tdep.h"
 
@@ -52,7 +53,7 @@ i386lynx_saved_pc_after_call (struct frame_info *frame)
 static void
 i386lynx_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  set_gdbarch_saved_pc_after_call (gdbarch, i386lynx_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, i386lynx_saved_pc_after_call);
 }
 
 
@@ -70,11 +71,11 @@ i386lynx_coff_osabi_sniffer (bfd *abfd)
 void _initialize_i386lynx_tdep (void);
 
 void
-_initialize_i386bsd_tdep (void)
+_initialize_i386lynx_tdep (void)
 {
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
 				  i386lynx_coff_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_LYNXOS,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_LYNXOS,
 			  i386lynx_init_abi);
 }

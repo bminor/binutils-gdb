@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -32,6 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ip2k-opc.h"
 #include "opintl.h"
 #include "libiberty.h"
+#include "xregex.h"
 
 /* Attributes.  */
 
@@ -104,7 +105,7 @@ const CGEN_ATTR_TABLE ip2k_cgen_insn_attr_table[] =
   { "SKIP-CTI", &bool_attr[0], &bool_attr[0] },
   { "DELAY-SLOT", &bool_attr[0], &bool_attr[0] },
   { "RELAXABLE", &bool_attr[0], &bool_attr[0] },
-  { "RELAX", &bool_attr[0], &bool_attr[0] },
+  { "RELAXED", &bool_attr[0], &bool_attr[0] },
   { "NO-DIS", &bool_attr[0], &bool_attr[0] },
   { "PBB", &bool_attr[0], &bool_attr[0] },
   { "EXT-SKIP-INSN", &bool_attr[0], &bool_attr[0] },
@@ -347,57 +348,60 @@ const CGEN_OPERAND ip2k_cgen_operand_table[] =
 {
 /* pc: program counter */
   { "pc", IP2K_OPERAND_PC, HW_H_PC, 0, 0,
-    { 0, &(ip2k_cgen_ifld_table[0]) }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_NIL] } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* addr16cjp: 13-bit address */
   { "addr16cjp", IP2K_OPERAND_ADDR16CJP, HW_H_UINT, 12, 13,
-    { 0, &(ip2k_cgen_ifld_table[4]) }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_ADDR16CJP] } }, 
     { 0|A(ABS_ADDR), { (1<<MACH_BASE) } }  },
 /* fr: register */
   { "fr", IP2K_OPERAND_FR, HW_H_REGISTERS, 8, 9,
-    { 0, &(ip2k_cgen_ifld_table[3]) }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_REG] } }, 
     { 0|A(ABS_ADDR), { (1<<MACH_BASE) } }  },
 /* lit8: 8-bit signed literal */
   { "lit8", IP2K_OPERAND_LIT8, HW_H_SINT, 7, 8,
-    { 0, &(ip2k_cgen_ifld_table[2]) }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_IMM8] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* bitno: bit number */
   { "bitno", IP2K_OPERAND_BITNO, HW_H_UINT, 11, 3,
-    { 0, &(ip2k_cgen_ifld_table[6]) }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_BITNO] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* addr16p: page number */
   { "addr16p", IP2K_OPERAND_ADDR16P, HW_H_UINT, 2, 3,
-    { 0, &(ip2k_cgen_ifld_table[16]) }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_PAGE3] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* addr16h: high 8 bits of address */
   { "addr16h", IP2K_OPERAND_ADDR16H, HW_H_UINT, 7, 8,
-    { 0, &(ip2k_cgen_ifld_table[2]) }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_IMM8] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* addr16l: low 8 bits of address */
   { "addr16l", IP2K_OPERAND_ADDR16L, HW_H_UINT, 7, 8,
-    { 0, &(ip2k_cgen_ifld_table[2]) }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_IMM8] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* reti3: reti flags */
   { "reti3", IP2K_OPERAND_RETI3, HW_H_UINT, 2, 3,
-    { 0, &(ip2k_cgen_ifld_table[14]) }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_RETI3] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* pabits: page bits */
   { "pabits", IP2K_OPERAND_PABITS, HW_H_PABITS, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* zbit: zero bit */
   { "zbit", IP2K_OPERAND_ZBIT, HW_H_ZBIT, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* cbit: carry bit */
   { "cbit", IP2K_OPERAND_CBIT, HW_H_CBIT, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* dcbit: digit carry bit */
   { "dcbit", IP2K_OPERAND_DCBIT, HW_H_DCBIT, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0, { (1<<MACH_BASE) } }  },
-  { 0, 0, 0, 0, 0, {0, {0}} }
+/* sentinel */
+  { 0, 0, 0, 0, 0,
+    { 0, { (const PTR) 0 } },
+    { 0, { 0 } } }
 };
 
 #undef A
@@ -1178,7 +1182,7 @@ ip2k_cgen_cpu_close (cd)
      CGEN_CPU_DESC cd;
 {
   unsigned int i;
-  CGEN_INSN *insns;
+  const CGEN_INSN *insns;
 
   if (cd->macro_insn_table.init_entries)
     {
@@ -1186,7 +1190,7 @@ ip2k_cgen_cpu_close (cd)
       for (i = 0; i < cd->macro_insn_table.num_init_entries; ++i, ++insns)
 	{
 	  if (CGEN_INSN_RX ((insns)))
-	    regfree(CGEN_INSN_RX (insns));
+	    regfree (CGEN_INSN_RX (insns));
 	}
     }
 
@@ -1196,7 +1200,7 @@ ip2k_cgen_cpu_close (cd)
       for (i = 0; i < cd->insn_table.num_init_entries; ++i, ++insns)
 	{
 	  if (CGEN_INSN_RX (insns))
-	    regfree(CGEN_INSN_RX (insns));
+	    regfree (CGEN_INSN_RX (insns));
 	}
     }
 

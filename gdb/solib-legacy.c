@@ -142,6 +142,8 @@ legacy_svr4_fetch_link_map_offsets (void)
 
 #endif /* HAVE_LINK_H */
 
+extern initialize_file_ftype _initialize_svr4_lm; /* -Wmissing-prototypes */
+
 void
 _initialize_svr4_lm (void)
 {

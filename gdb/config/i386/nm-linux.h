@@ -39,9 +39,6 @@ extern int kernel_u_size (void);
    the core file of the register values.  */
 #define KERNEL_U_ADDR 0
 
-/* Offset of the registers within the user area.  */
-#define U_REGS_OFFSET 0
-
 extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regnum);
 #define REGISTER_U_ADDR(addr, blockend, regnum) \
   (addr) = register_u_addr (blockend, regnum)
@@ -84,5 +81,14 @@ extern int cannot_store_register (int regno);
 
 /* Override child_resume in `infptrace.c'.  */
 #define CHILD_RESUME
+
+/* `linux-nat.c' and `i386-nat.c' have their own versions of
+   child_post_startup_inferior.  Define this to use the copy in
+   `i386-linux-nat.c' instead, which calls both.
+   
+   NOTE drow/2003-08-17: This is ugly beyond words, but properly
+   fixing it will require some serious surgery.  Ideally the target
+   stack could be used for this.  */
+#define LINUX_CHILD_POST_STARTUP_INFERIOR
 
 #endif /* nm-linux.h */

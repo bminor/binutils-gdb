@@ -224,11 +224,11 @@ lynx_core_file_failing_signal (abfd)
   return core_signal (abfd);
 }
 
-boolean
+bfd_boolean
 lynx_core_file_matches_executable_p  (core_bfd, exec_bfd)
      bfd *core_bfd, *exec_bfd;
 {
-  return true;		/* FIXME, We have no way of telling at this point */
+  return TRUE;		/* FIXME, We have no way of telling at this point */
 }
 
 #endif /* LYNX_CORE */

@@ -19,8 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
-
 #include "sparc/tm-sparc.h"
 #include "config/tm-sysv4.h"
 
@@ -32,7 +30,7 @@
 /* There are two different signal handler trampolines in Solaris2.  */
 #define IN_SIGTRAMP(pc, name) \
   ((name) \
-   && (STREQ ("sigacthandler", name) || STREQ ("ucbsigvechandler", name)))
+   && (DEPRECATED_STREQ ("sigacthandler", name) || DEPRECATED_STREQ ("ucbsigvechandler", name)))
 
 /* The signal handler gets a pointer to an ucontext as third argument
    if it is called from sigacthandler.  This is the offset to the saved
@@ -75,8 +73,6 @@ extern int get_longjmp_target (CORE_ADDR *);
 extern char *sunpro_static_transform_name (char *);
 #define STATIC_TRANSFORM_NAME(x) sunpro_static_transform_name (x)
 #define IS_STATIC_TRANSFORM_NAME(name) ((name)[0] == '$')
-
-#define FAULTED_USE_SIGINFO
 
 /* Enable handling of shared libraries for a.out executables.  */
 #define HANDLE_SVR4_EXEC_EMULATORS

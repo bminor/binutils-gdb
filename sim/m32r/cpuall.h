@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -41,8 +41,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "decodex.h"
 #endif
 
+#ifdef WANT_CPU_M32R2F
+#include "eng2.h"
+#include "cgen-engine.h"
+#include "cpu2.h"
+#include "decode2.h"
+#endif
+
 extern const MACH m32r_mach;
 extern const MACH m32rx_mach;
+extern const MACH m32r2_mach;
 
 #ifndef WANT_CPU
 /* The ARGBUF struct.  */

@@ -1,4 +1,4 @@
-/* Remote target glue for the Hitachi SH-3 ROM monitor.
+/* Remote target glue for the Renesas SH-3 ROM monitor.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
@@ -77,9 +77,9 @@ sh3_supply_register (char *regname, int regnamelen, char *val, int vallen)
 	  break;
 	case 'S':
 	  if (regname[1] == 'S' && regname[2] == 'R')
-	    regno = gdbarch_tdep (current_gdbarch)->SSR_REGNUM;
+	    regno = SSR_REGNUM;
 	  else if (regname[1] == 'P' && regname[2] == 'C')
-	    regno = gdbarch_tdep (current_gdbarch)->SPC_REGNUM;
+	    regno = SPC_REGNUM;
 	  break;
 	}
     }
@@ -281,8 +281,15 @@ sh3_open (char *args, int from_tty)
       parallel_in_use = 1;
     }
 
+
   /* If we connected successfully, we know the processor is an SH3.  */
-  set_architecture_from_arch_mach (bfd_arch_sh, bfd_mach_sh3);
+  {
+    struct gdbarch_info info;
+    gdbarch_info_init (&info);
+    info.bfd_arch_info = bfd_lookup_arch (bfd_arch_sh, bfd_mach_sh3);
+    if (!gdbarch_update_p (info))
+      error ("Target is not an SH3");
+  }
 }
 
 
@@ -329,7 +336,13 @@ sh3e_open (char *args, int from_tty)
     }
 
   /* If we connected successfully, we know the processor is an SH3E.  */
-  set_architecture_from_arch_mach (bfd_arch_sh, bfd_mach_sh3);
+  {
+    struct gdbarch_info info;
+    gdbarch_info_init (&info);
+    info.bfd_arch_info = bfd_lookup_arch (bfd_arch_sh, bfd_mach_sh3);
+    if (!gdbarch_update_p (info))
+      error ("Target is not an SH3");
+  }
 }
 
 static void
@@ -343,6 +356,8 @@ sh3_close (int quitting)
     }
 }
 
+extern initialize_file_ftype _initialize_sh3_rom; /* -Wmissing-prototypes */
+
 void
 _initialize_sh3_rom (void)
 {
@@ -350,11 +365,11 @@ _initialize_sh3_rom (void)
   init_monitor_ops (&sh3_ops);
 
   sh3_ops.to_shortname = "sh3";
-  sh3_ops.to_longname = "Hitachi SH-3 rom monitor";
+  sh3_ops.to_longname = "Renesas SH-3 rom monitor";
 
   sh3_ops.to_doc =
   /* We can download through the parallel port too. */
-    "Debug on a Hitachi eval board running the SH-3E rom monitor.\n"
+    "Debug on a Renesas eval board running the SH-3E rom monitor.\n"
     "Specify the serial device it is connected to.\n"
     "If you want to use the parallel port to download to it, specify that\n"
     "as an additional second argument.";
@@ -369,11 +384,11 @@ _initialize_sh3_rom (void)
   init_monitor_ops (&sh3e_ops);
 
   sh3e_ops.to_shortname = "sh3e";
-  sh3e_ops.to_longname = "Hitachi SH-3E rom monitor";
+  sh3e_ops.to_longname = "Renesas SH-3E rom monitor";
 
   sh3e_ops.to_doc =
   /* We can download through the parallel port too. */
-    "Debug on a Hitachi eval board running the SH-3E rom monitor.\n"
+    "Debug on a Renesas eval board running the SH-3E rom monitor.\n"
     "Specify the serial device it is connected to.\n"
     "If you want to use the parallel port to download to it, specify that\n"
     "as an additional second argument.";

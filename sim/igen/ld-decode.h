@@ -1,22 +1,26 @@
-/*  This file is part of the program psim.
+/* The IGEN simulator generator for GDB, the GNU Debugger.
 
-    Copyright (C) 1994,1995,1996, Andrew Cagney <cagney@highland.com.au>
+   Copyright 2002 Free Software Foundation, Inc.
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+   Contributed by Andrew Cagney.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
- 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- 
-    */
+   This file is part of GDB.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
+
 
 /* Instruction decode table:
 
@@ -129,22 +133,27 @@
 	*/
 
 
-typedef enum {
+typedef enum
+{
   normal_decode_rule,
   boolean_rule,
-} decode_special_type;
+}
+decode_special_type;
 
 
-typedef enum {
+typedef enum
+{
   invalid_gen,
   array_gen,
   switch_gen,
   padded_switch_gen,
   goto_switch_gen,
-} decode_gen_type;
+}
+decode_gen_type;
 
 
-enum {
+enum
+{
   decode_cond_mask_field,
   decode_cond_value_field,
   decode_cond_word_nr_field,
@@ -152,20 +161,23 @@ enum {
 };
 
 typedef struct _decode_path decode_path;
-struct _decode_path {
+struct _decode_path
+{
   int opcode_nr;
   decode_path *parent;
 };
 
 typedef struct _decode_path_list decode_path_list;
-struct _decode_path_list {
+struct _decode_path_list
+{
   decode_path *path;
   decode_path_list *next;
 };
 
 
 typedef struct _decode_cond decode_cond;
-struct _decode_cond {
+struct _decode_cond
+{
   int word_nr;
   int mask[max_insn_bit_size];
   int value[max_insn_bit_size];
@@ -173,13 +185,16 @@ struct _decode_cond {
   decode_cond *next;
 };
 
-typedef enum {
+typedef enum
+{
   decode_find_mixed,
   decode_find_constants,
   decode_find_strings,
-} decode_search_type;
+}
+decode_search_type;
 
-enum {
+enum
+{
   decode_options_field,
   decode_first_field,
   decode_last_field,
@@ -196,7 +211,8 @@ enum {
 
 
 typedef struct _decode_table decode_table;
-struct _decode_table {
+struct _decode_table
+{
   line_ref *line;
   decode_special_type type;
   decode_gen_type gen;
@@ -222,14 +238,9 @@ struct _decode_table {
 };
 
 
-extern decode_table *load_decode_table
-(char *file_name);
+extern decode_table *load_decode_table (char *file_name);
 
-extern int decode_table_max_word_nr
-(decode_table *rule);
+extern int decode_table_max_word_nr (decode_table *rule);
 
 extern void dump_decode_rule
-(lf *file,
- char *prefix,
- decode_table *rule,
- char *suffix);
+  (lf *file, char *prefix, decode_table *rule, char *suffix);

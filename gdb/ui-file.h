@@ -41,6 +41,9 @@ extern void set_ui_file_write (struct ui_file *stream, ui_file_write_ftype *fput
 typedef void (ui_file_fputs_ftype) (const char *, struct ui_file * stream);
 extern void set_ui_file_fputs (struct ui_file *stream, ui_file_fputs_ftype * fputs);
 
+typedef long (ui_file_read_ftype) (struct ui_file * stream, char *buf, long length_buf);
+extern void set_ui_file_read (struct ui_file *stream, ui_file_read_ftype *fread);
+
 typedef int (ui_file_isatty_ftype) (struct ui_file * stream);
 extern void set_ui_file_isatty (struct ui_file *stream, ui_file_isatty_ftype * isatty);
 
@@ -77,6 +80,8 @@ extern void ui_file_put (struct ui_file *src, ui_file_put_method_ftype *write, v
 extern char *ui_file_xstrdup (struct ui_file *file, long *length);
 
 
+
+extern long ui_file_read (struct ui_file *file, char *buf, long length_buf);
 
 /* Create/open a memory based file. Can be used as a scratch buffer
    for collecting output. */

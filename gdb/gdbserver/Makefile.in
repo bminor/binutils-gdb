@@ -113,10 +113,16 @@ LINTFLAGS= $(BFD_CFLAGS)
 
 # All source files that go into linking GDB remote server.
 
-SFILES = $(srcdir)/low-hppabsd.c $(srcdir)/low-linux.c $(srcdir)/low-lynx.c \
-	 $(srcdir)/low-nbsd.c $(srcdir)/low-sim.c $(srcdir)/low-sparc.c \
-	 $(srcdir)/low-sun3.c $(srcdir)/utils.c $(srcdir)/server.c \
-	 $(srcdir)/remote-utils.c
+SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
+	$(srcdir)/mem-break.c $(srcdir)/proc-service.c $(srcdir)/regcache.c \
+	$(srcdir)/remote-utils.c $(srcdir)/server.c $(srcdir)/target.c \
+	$(srcdir)/thread-db.c $(srcdir)/utils.c \
+	$(srcdir)/linux-arm-low.c $(srcdir)/linux-i386-low.c \
+	$(srcdir)/i387-fp.c \
+	$(srcdir)/linux-ia64-low.c $(srcdir)/linux-low.c \
+	$(srcdir)/linux-m68k-low.c $(srcdir)/linux-mips-low.c \
+	$(srcdir)/linux-ppc-low.c $(srcdir)/linux-s390-low.c \
+	$(srcdir)/linux-sh-low.c $(srcdir)/linux-x86-64-low.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -145,13 +151,15 @@ install: all install-only
 install-only: 
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
-	$(INSTALL_PROGRAM) gdbserver $(bindir)/$$n; \
-	$(INSTALL_DATA) $(srcdir)/gdbserver.1 $(man1dir)/$$n.1
+	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir); \
+	$(INSTALL_PROGRAM) gdbserver $(DESTDIR)$(bindir)/$$n; \
+	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(man1dir); \
+	$(INSTALL_DATA) $(srcdir)/gdbserver.1 $(DESTDIR)$(man1dir)/$$n.1
 
 uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
-	rm -f $(bindir)/$$n $(man1dir)/$$n.1
+	rm -f $(bindir)/$$n $(DESTDIR)$(man1dir)/$$n.1
 
 installcheck:
 check:
@@ -227,11 +235,6 @@ version.c: Makefile
 # overrides onto the definition of $(MAKE).  This variable setting
 # will remove them.
 MAKEOVERRIDES=
-
-## This is ugly, but I don't want GNU make to put these variables in
-## the environment.  Older makes will see this as a set of targets
-## with no dependencies and no actions.
-# OBSOLETE unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 
 gdb_proc_service_h = $(srcdir)/../gdb_proc_service.h $(srcdir)/../gregset.h
 regdat_sh = $(srcdir)/../regformats/regdat.sh

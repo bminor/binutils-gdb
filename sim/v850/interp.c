@@ -192,7 +192,7 @@ SIM_DESC
 sim_open (kind, cb, abfd, argv)
      SIM_OPEN_KIND kind;
      host_callback *cb;
-     struct _bfd *abfd;
+     struct bfd *abfd;
      char **argv;
 {
   SIM_DESC sd = sim_state_alloc (kind, cb);
@@ -277,6 +277,7 @@ sim_open (kind, cb, abfd, argv)
     {
     case bfd_mach_v850:
     case bfd_mach_v850e:
+    case bfd_mach_v850e1:
       STATE_CPU (sd, 0)->psw_mask = (PSW_NP | PSW_EP | PSW_ID | PSW_SAT
 				     | PSW_CY | PSW_OV | PSW_S | PSW_Z);
       break;
@@ -297,7 +298,7 @@ sim_close (sd, quitting)
 SIM_RC
 sim_create_inferior (sd, prog_bfd, argv, env)
      SIM_DESC sd;
-     struct _bfd *prog_bfd;
+     struct bfd *prog_bfd;
      char **argv;
      char **env;
 {

@@ -23,7 +23,7 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
-  i[3456]86-*-linux*)	srv_regobj=reg-i386-linux.o
+  i[34567]86-*-linux*)	srv_regobj=reg-i386-linux.o
 			srv_tgtobj="linux-low.o linux-i386-low.o i387-fp.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
@@ -63,6 +63,11 @@ case "${target}" in
   x86_64-*-linux*)	srv_regobj=reg-x86-64.o
 			srv_tgtobj="linux-low.o linux-x86-64-low.o i387-fp.o"
 			srv_linux_regsets=yes
+			;;
+  xscale*-*-linux*)	srv_regobj=reg-arm.o
+			srv_tgtobj="linux-low.o linux-arm-low.o"
+			srv_linux_usrregs=yes
+			srv_linux_thread_db=yes
 			;;
   *)			echo "Error: target not supported by gdbserver."
 			exit 1

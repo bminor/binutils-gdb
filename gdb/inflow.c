@@ -35,22 +35,7 @@
 #include <sys/select.h>
 #endif
 
-#ifdef HAVE_TERMIOS
-#define PROCESS_GROUP_TYPE pid_t
-#endif
-
-#ifdef HAVE_TERMIO
-#define PROCESS_GROUP_TYPE int
-#endif
-
-#ifdef HAVE_SGTTY
-#ifdef SHORT_PGRP
-/* This is only used for the ultra.  Does it have pid_t?  */
-#define PROCESS_GROUP_TYPE short
-#else
-#define PROCESS_GROUP_TYPE int
-#endif
-#endif /* sgtty */
+#include "inflow.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -427,14 +412,12 @@ terminal_ours_1 (int output_only)
     }
 }
 
-/* ARGSUSED */
 void
 term_info (char *arg, int from_tty)
 {
   target_terminal_info (arg, from_tty);
 }
 
-/* ARGSUSED */
 void
 child_terminal_info (char *args, int from_tty)
 {
@@ -530,7 +513,7 @@ new_tty_prefork (char *ttyname)
 void
 new_tty (void)
 {
-  register int tty;
+  int tty;
 
   if (inferior_thisrun_terminal == 0)
     return;
@@ -587,7 +570,6 @@ new_tty (void)
 
 /* Kill the inferior process.  Make us have no inferior.  */
 
-/* ARGSUSED */
 static void
 kill_command (char *arg, int from_tty)
 {
@@ -608,18 +590,17 @@ kill_command (char *arg, int from_tty)
   if (target_has_stack)
     {
       printf_filtered ("In %s,\n", target_longname);
-      if (selected_frame == NULL)
+      if (deprecated_selected_frame == NULL)
 	fputs_filtered ("No selected stack frame.\n", gdb_stdout);
       else
-	print_stack_frame (selected_frame,
-			   frame_relative_level (selected_frame), 1);
+	print_stack_frame (deprecated_selected_frame,
+			   frame_relative_level (deprecated_selected_frame), 1);
     }
 }
 
 /* Call set_sigint_trap when you need to pass a signal on to an attached
    process when handling SIGINT */
 
-/* ARGSUSED */
 static void
 pass_signal (int signo)
 {

@@ -1,4 +1,4 @@
-# Copyright 1998, 1999, 2002 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,8 +38,8 @@
 #   "info ajksdlfk " no completions
 #   "info" " "
 #   "info " ambiguous (all info commands)
-#   "p \"break" unambiguous (completes to filename "break.c")
-#   "p \"break." unambiguous (should complete to "break.c" but does not,
+#   "p \"break1" unambiguous (completes to filename "break1.c")
+#   "p \"break1." unambiguous (should complete to "break1.c" but does not,
 #	due to readline limitations)
 #   "p 'a" ambiguous (all symbols starting with a)
 #   "p b-a" ambiguous (all symbols starting with a)
@@ -64,9 +64,19 @@ set bug_id 0
 
 set testfile "break"
 set srcfile ${testfile}.c
+set srcfile1 ${testfile}1.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-w}] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
 if [get_compiler_info ${binfile}] {
@@ -351,61 +361,61 @@ gdb_expect  {
         }
 
 
-send_gdb "p \"break\t"
+send_gdb "p \"break1\t"
 sleep 1
 gdb_expect  {
-        -re "^p \"break\\\x07$"\
+        -re "^p \"break1\\\x07$"\
             { send_gdb "\n"
               gdb_expect {
-                      -re ".*$gdb_prompt $" { fail "complete 'p \"break'"}
-                      timeout           {fail "(timeout) complete 'p \"break'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'p \"break1'"}
+                      timeout           {fail "(timeout) complete 'p \"break1'"}
                      }
             }
-	-re "^p \"break\\.c\"$"\
+	-re "^p \"break1\\.c\"$"\
 	    {	send_gdb "\n"
 		gdb_expect {
-		    -re ".*$gdb_prompt $" { pass "complete 'p \"break'"}
-		    timeout           {fail "(timeout) complete 'p \"break'"}
+		    -re ".*$gdb_prompt $" { pass "complete 'p \"break1'"}
+		    timeout           {fail "(timeout) complete 'p \"break1'"}
 		}
 	    }
-	-re "^p \"break.*$"
+	-re "^p \"break1.*$"
 	    {	send_gdb "\n"
 		gdb_expect {
-		    -re ".*$gdb_prompt $" { fail "complete 'p \"break'"}
-		    timeout           {fail "(timeout) complete 'p \"break'"}
+		    -re ".*$gdb_prompt $" { fail "complete 'p \"break1'"}
+		    timeout           {fail "(timeout) complete 'p \"break1'"}
 		}
 	    }
-        -re ".*$gdb_prompt $"       { fail "complete 'p \"break'" }
-        timeout         { fail "(timeout) complete 'p \"break'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'p \"break1'" }
+        timeout         { fail "(timeout) complete 'p \"break1'" }
         }
 
 setup_xfail "*-*-*"
-send_gdb "p \"break.\t"
+send_gdb "p \"break1.\t"
 sleep 1
 gdb_expect  {
-        -re "^p \"break\\.\\\x07$"\
+        -re "^p \"break1\\.\\\x07$"\
             { send_gdb "\n"
               gdb_expect {
-                      -re ".*$gdb_prompt $" { fail "complete 'p \"break.'"}
-                      timeout           {fail "(timeout) complete 'p \"break.'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'p \"break1.'"}
+                      timeout           {fail "(timeout) complete 'p \"break1.'"}
                      }
             }
-	-re "^p \"break\\.c\"$"\
+	-re "^p \"break1\\.c\"$"\
 	    {	send_gdb "\n"
 		gdb_expect {
-		    -re ".*$gdb_prompt $" { pass "complete 'p \"break.'"}
-		    timeout           {fail "(timeout) complete 'p \"break.'"}
+		    -re ".*$gdb_prompt $" { pass "complete 'p \"break1.'"}
+		    timeout           {fail "(timeout) complete 'p \"break1.'"}
 		}
 	    }
-	-re "^p \"break\\..*$"
+	-re "^p \"break1\\..*$"
 	    {	send_gdb "\n"
 		gdb_expect {
-		    -re ".*$gdb_prompt $" { fail "complete 'p \"break.'"}
-		    timeout           {fail "(timeout) complete 'p \"break.'"}
+		    -re ".*$gdb_prompt $" { fail "complete 'p \"break1.'"}
+		    timeout           {fail "(timeout) complete 'p \"break1.'"}
 		}
 	    }
-        -re ".*$gdb_prompt $"       { fail "complete 'p \"break.'" }
-        timeout         { fail "(timeout) complete 'p \"break.'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'p \"break1.'" }
+        timeout         { fail "(timeout) complete 'p \"break1.'" }
         }
 
 send_gdb "p 'a\t"
@@ -611,7 +621,7 @@ gdb_expect  {
 }
 
 
-# The following tests used to simply try to complete `${objdir}/Make',
+# The following tests used to simply try to complete `${objdir}/file',
 # and so on.  The problem is that ${objdir} can be very long; the
 # completed filename may be more than eighty characters wide.  When
 # this happens, readline tries to manage things, producing output that
@@ -619,7 +629,7 @@ gdb_expect  {
 # recognize.
 #
 # In the case that motivated this change, the (gdb) prompt occupied
-# the leftmost six columns, and `${objdump}/' was seventy-four
+# the leftmost six columns, and `${objdir}/' was seventy-four
 # characters long --- eighty in all.  After printing the slash,
 # readline emitted a space, a carriage return, and then `Makefile'
 # (the tab character being received as input after `Make'.
@@ -631,36 +641,6 @@ gdb_expect  {
 #
 # So, we avoid long lines.  We `cd' to ${objdir} first, and then do
 # the completion relative to the current directory.
-#
-# Note that if we are building in the source tree, then there will be
-# more than one completion for ./Make, so we need to handle that also.
-# A better long term solution might be to create a temporary directory,
-# populate it with a set of known names, and use that directory to
-# test completions.
-
-gdb_test "cd ${objdir}" "Working directory ${objdir}.*" "cd to \${objdir}"
-send_gdb "file ./Make\t"
-sleep 1
-gdb_expect  {
-        -re "^file ./Make(\\\x07|)file.*$"\
-            { send_gdb "\n"
-              gdb_expect {
-                      -re "\r\nA program is being debugged already\\.  Kill it\\? \\(y or n\\) $"\
-                      { send_gdb "n\n"
-                        gdb_expect {
-                                -re "\r\nProgram not killed\\.\r\n$gdb_prompt $"\
-                                        { pass "complete 'file ./Make'"}
-                                -re ".*$gdb_prompt $" { fail "complete 'file ./Make'"}
-                                timeout           {fail "(timeout) complete 'file ./Make'"}
-                               }
-                      }
-                      -re ".*$gdb_prompt $" { fail "complete 'file ./Make'"}
-                      timeout           {fail "(timeout) complete 'file ./Make'"}
-                     }
-            }
-        -re ".*$gdb_prompt $"       { fail "complete 'file ./Make'" }
-        timeout         { fail "(timeout) complete 'file ./Make'" }
-        }
 
 # ${srcdir} may be a relative path.  We want to make sure we end up
 # in the right directory - so make sure we know where it is.
@@ -669,8 +649,15 @@ cd ${srcdir}
 set fullsrcdir [pwd]
 cd ${mydir}
 
-gdb_test "cd ${fullsrcdir}" "Working directory ${fullsrcdir}.*" "cd to \${srcdir}"
-send_gdb "file ./gdb.base/compl\t"
+# If the directory name contains a '+' we must escape it, adding a backslash.
+# If not, the test below will fail because it will interpret the '+' as a 
+# regexp operator. We use string_to_regexp for this purpose.
+
+gdb_test "cd ${fullsrcdir}" \
+         "Working directory [string_to_regexp ${fullsrcdir}].*" \
+         "cd to \${srcdir}"
+
+send_gdb "file ./gdb.base/complet\t"
 sleep 1
 gdb_expect  {
         -re "^file ./gdb.base/completion\\.exp $"\
@@ -681,23 +668,23 @@ gdb_expect  {
                       { send_gdb "n\n"
                         gdb_expect {
                                 -re "\r\nProgram not killed\\.\r\n$gdb_prompt $"\
-                                        { pass "complete 'file ./gdb.base/compl'"}
-                                -re ".*$gdb_prompt $" { fail "complete 'file ./gdb.base/compl'"}
-                                timeout           {fail "(timeout) complete 'file ./gdb.base/compl'"}
+                                        { pass "complete 'file ./gdb.base/complet'"}
+                                -re ".*$gdb_prompt $" { fail "complete 'file ./gdb.base/complet'"}
+                                timeout           {fail "(timeout) complete 'file ./gdb.base/complet'"}
                                }
                       }
-                      -re ".*$gdb_prompt $" { fail "complete 'file ./gdb.base/compl'"}
-                      timeout           {fail "(timeout) complete 'file ./gdb.base/compl'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'file ./gdb.base/complet'"}
+                      timeout           {fail "(timeout) complete 'file ./gdb.base/complet'"}
                      }
             }
-        -re ".*$gdb_prompt $"       { fail "complete 'file ./gdb.base/compl'" }
-        timeout         { fail "(timeout) complete 'file ./gdb.base/compl'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'file ./gdb.base/complet'" }
+        timeout         { fail "(timeout) complete 'file ./gdb.base/complet'" }
         }
 
-send_gdb "info func mark\t"
+send_gdb "info func marke\t"
 sleep 1
 gdb_expect  {
-        -re "^info func mark.*er$"\
+        -re "^info func marke.*r$"\
             {
 	      send_gdb "\t\t"
               sleep 3
@@ -705,18 +692,18 @@ gdb_expect  {
                       -re "marker1.*$gdb_prompt info func marker$"\
                       { send_gdb "\n"
                         gdb_expect {
-                                -re "All functions matching regular expression \"marker\":.*File.*break.c:\r\nint marker1\\(\\);\r\nint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long int\\);.*$gdb_prompt $"\
-                                                  { pass "complete 'info func mar'"}
-                                -re ".*$gdb_prompt $" { fail "complete 'info func mar'"}
-                                timeout           {fail "(timeout) complete 'info func mar'"}
+                                -re "All functions matching regular expression \"marker\":.*File.*break1.c:\r\nint marker1\\((void|)\\);\r\nint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long int\\);.*$gdb_prompt $"\
+                                                  { pass "complete 'info func marke'"}
+                                -re ".*$gdb_prompt $" { fail "complete 'info func marke'"}
+                                timeout           {fail "(timeout) complete 'info func marke'"}
                                }
                       }
-                      -re ".*$gdb_prompt $" { fail "complete 'info func mar'"}
-                      timeout           {fail "(timeout) complete 'info func mar'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'info func marke'"}
+                      timeout           {fail "(timeout) complete 'info func marke'"}
                      }
             }
-        -re ".*$gdb_prompt $"       { fail "complete 'info func mar'" }
-        timeout         { fail "(timeout) complete 'info func mar'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'info func marke'" }
+        timeout         { fail "(timeout) complete 'info func marke'" }
         }
 
 

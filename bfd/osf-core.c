@@ -32,11 +32,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static asection *make_bfd_asection
   PARAMS ((bfd *, const char *, flagword, bfd_size_type, bfd_vma, file_ptr));
-static const bfd_target *osf_core_core_file_p PARAMS ((bfd *));
-static char *osf_core_core_file_failing_command PARAMS ((bfd *));
-static int osf_core_core_file_failing_signal PARAMS ((bfd *));
-static boolean osf_core_core_file_matches_executable_p PARAMS ((bfd *, bfd *));
-static void swap_abort PARAMS ((void));
+static const bfd_target *osf_core_core_file_p
+  PARAMS ((bfd *));
+static char *osf_core_core_file_failing_command
+  PARAMS ((bfd *));
+static int osf_core_core_file_failing_signal
+  PARAMS ((bfd *));
+static bfd_boolean osf_core_core_file_matches_executable_p
+  PARAMS ((bfd *, bfd *));
+static void swap_abort
+  PARAMS ((void));
 
 /* These are stored in the bfd's tdata */
 
@@ -159,7 +164,6 @@ osf_core_core_file_failing_command (abfd)
   return core_command (abfd);
 }
 
-/* ARGSUSED */
 static int
 osf_core_core_file_failing_signal (abfd)
      bfd *abfd;
@@ -167,13 +171,12 @@ osf_core_core_file_failing_signal (abfd)
   return core_signal (abfd);
 }
 
-/* ARGSUSED */
-static boolean
+static bfd_boolean
 osf_core_core_file_matches_executable_p (core_bfd, exec_bfd)
      bfd *core_bfd ATTRIBUTE_UNUSED;
      bfd *exec_bfd ATTRIBUTE_UNUSED;
 {
-  return true;		/* FIXME, We have no way of telling at this point */
+  return TRUE;		/* FIXME, We have no way of telling at this point */
 }
 
 /* If somebody calls any byte-swapping routines, shoot them.  */

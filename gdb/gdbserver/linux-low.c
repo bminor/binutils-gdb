@@ -52,7 +52,7 @@ int using_threads;
 
 static void linux_resume_one_process (struct inferior_list_entry *entry,
 				      int step, int signal);
-static void linux_resume (int step, int signal);
+static void linux_resume (struct thread_resume *resume_info);
 static void stop_all_processes (void);
 static int linux_wait_for_event (struct thread_info *child);
 
@@ -147,7 +147,7 @@ linux_create_inferior (char *program, char **allargs)
     {
       ptrace (PTRACE_TRACEME, 0, 0, 0);
 
-      signal (SIGRTMIN + 1, SIG_DFL);
+      signal (__SIGRTMIN + 1, SIG_DFL);
 
       setpgid (0, 0);
 
@@ -175,8 +175,7 @@ linux_attach_lwp (int pid, int tid)
   if (ptrace (PTRACE_ATTACH, pid, 0, 0) != 0)
     {
       fprintf (stderr, "Cannot attach to process %d: %s (%d)\n", pid,
-	       errno < sys_nerr ? sys_errlist[errno] : "unknown error",
-	       errno);
+	       strerror (errno), errno);
       fflush (stderr);
 
       /* If we fail to attach to an LWP, just return.  */
@@ -234,13 +233,28 @@ linux_kill_one_process (struct inferior_list_entry *entry)
     } while (WIFSTOPPED (wstat));
 }
 
-/* Return nonzero if the given thread is still alive.  */
 static void
 linux_kill (void)
 {
   for_each_inferior (&all_threads, linux_kill_one_process);
 }
 
+static void
+linux_detach_one_process (struct inferior_list_entry *entry)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+  struct process_info *process = get_thread_process (thread);
+
+  ptrace (PTRACE_DETACH, pid_of (process), 0, 0);
+}
+
+static void
+linux_detach (void)
+{
+  for_each_inferior (&all_threads, linux_detach_one_process);
+}
+
+/* Return nonzero if the given thread is still alive.  */
 static int
 linux_thread_alive (int tid)
 {
@@ -399,7 +413,7 @@ linux_wait_for_event (struct thread_info *child)
   /* Check for a process with a pending status.  */
   /* It is possible that the user changed the pending task's registers since
      it stopped.  We correctly handle the change of PC if we hit a breakpoint
-     (in check_removed_breakpoints); signals should be reported anyway.  */
+     (in check_removed_breakpoint); signals should be reported anyway.  */
   if (child == NULL)
     {
       event_child = (struct process_info *)
@@ -493,8 +507,8 @@ linux_wait_for_event (struct thread_info *child)
 	  /* FIXME drow/2002-06-09: Get signal numbers from the inferior's
 	     thread library?  */
 	  if (WIFSTOPPED (wstat)
-	      && (WSTOPSIG (wstat) == SIGRTMIN
-		  || WSTOPSIG (wstat) == SIGRTMIN + 1))
+	      && (WSTOPSIG (wstat) == __SIGRTMIN
+		  || WSTOPSIG (wstat) == __SIGRTMIN + 1))
 	    {
 	      if (debug_threads)
 		fprintf (stderr, "Ignored signal %d for %d (LWP %d).\n",
@@ -541,7 +555,7 @@ linux_wait_for_event (struct thread_info *child)
       if (check_breakpoints (stop_pc) != 0)
 	{
 	  /* We hit one of our own breakpoints.  We mark it as a pending
-	     breakpoint, so that check_removed_breakpoints () will do the PC
+	     breakpoint, so that check_removed_breakpoint () will do the PC
 	     adjustment for us at the appropriate time.  */
 	  event_child->pending_is_breakpoint = 1;
 	  event_child->pending_stop_pc = stop_pc;
@@ -587,7 +601,7 @@ linux_wait_for_event (struct thread_info *child)
 	 will give us a new action for this thread, but clear it for
 	 consistency anyway.  It's safe to clear the stepping flag
          because the only consumer of get_stop_pc () after this point
-	 is check_removed_breakpoints, and pending_is_breakpoint is not
+	 is check_removed_breakpoint, and pending_is_breakpoint is not
 	 set.  It might be wiser to use a step_completed flag instead.  */
       if (event_child->stepping)
 	{
@@ -638,7 +652,12 @@ retry:
 
       /* No stepping, no signal - unless one is pending already, of course.  */
       if (child == NULL)
-	linux_resume (0, 0);
+	{
+	  struct thread_resume resume_info;
+	  resume_info.thread = -1;
+	  resume_info.step = resume_info.sig = resume_info.leave_stopped = 0;
+	  linux_resume (&resume_info);
+	}
     }
 
   enable_async_io ();
@@ -786,7 +805,7 @@ linux_resume_one_process (struct inferior_list_entry *entry,
       process->pending_signals = p_sig;
     }
 
-  if (process->status_pending_p)
+  if (process->status_pending_p && !check_removed_breakpoint (process))
     return;
 
   saved_inferior = current_inferior;
@@ -854,33 +873,48 @@ linux_resume_one_process (struct inferior_list_entry *entry,
     perror_with_name ("ptrace");
 }
 
-/* This function is called once per process other than the first
-   one.  The first process we are told the signal to continue
-   with, and whether to step or continue; for all others, any
-   existing signals will be marked in status_pending_p to be
-   reported momentarily, and we preserve the stepping flag.  */
+static struct thread_resume *resume_ptr;
+
+/* This function is called once per thread.  We look up the thread
+   in RESUME_PTR, which will tell us whether to resume, step, or leave
+   the thread stopped; and what signal, if any, it should be sent.
+   For threads which we aren't explicitly told otherwise, we preserve
+   the stepping flag; this is used for stepping over gdbserver-placed
+   breakpoints.  If the thread has a status pending, it may not actually
+   be resumed.  */
 static void
-linux_continue_one_process (struct inferior_list_entry *entry)
+linux_continue_one_thread (struct inferior_list_entry *entry)
 {
   struct process_info *process;
+  struct thread_info *thread;
+  int ndx, step;
 
-  process = (struct process_info *) entry;
-  linux_resume_one_process (entry, process->stepping, 0);
+  thread = (struct thread_info *) entry;
+  process = get_thread_process (thread);
+
+  ndx = 0;
+  while (resume_ptr[ndx].thread != -1 && resume_ptr[ndx].thread != entry->id)
+    ndx++;
+
+  if (resume_ptr[ndx].leave_stopped)
+    return;
+
+  if (resume_ptr[ndx].thread == -1)
+    step = process->stepping || resume_ptr[ndx].step;
+  else
+    step = resume_ptr[ndx].step;
+
+  linux_resume_one_process (&process->head, step, resume_ptr[ndx].sig);
 }
 
 static void
-linux_resume (int step, int signal)
+linux_resume (struct thread_resume *resume_info)
 {
-  struct process_info *process;
+  /* Yes, this is quadratic.  If it ever becomes a problem then it's
+     fairly easy to fix.  Yes, the use of a global here is rather ugly.  */
 
-  process = get_thread_process (current_inferior);
-
-  /* If the current process has a status pending, this signal will
-     be enqueued and sent later.  */
-  linux_resume_one_process (&process->head, step, signal);
-
-  if (cont_thread == 0 || cont_thread == -1)
-    for_each_inferior (&all_processes, linux_continue_one_process);
+  resume_ptr = resume_info;
+  for_each_inferior (&all_threads, linux_continue_one_thread);
 }
 
 #ifdef HAVE_LINUX_USRREGS
@@ -894,8 +928,6 @@ register_addr (int regnum)
     error ("Invalid register number %d.", regnum);
 
   addr = the_low_target.regmap[regnum];
-  if (addr == -1)
-    addr = 0;
 
   return addr;
 }
@@ -978,7 +1010,7 @@ usr_store_inferior_registers (int regno)
 	{
 	  errno = 0;
 	  ptrace (PTRACE_POKEUSER, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		  *(int *) (buf + i));
+		  *(PTRACE_XFER_TYPE *) (buf + i));
 	  if (errno != 0)
 	    {
 	      if ((*the_low_target.cannot_store_register) (regno) == 0)
@@ -991,7 +1023,7 @@ usr_store_inferior_registers (int regno)
 		  return;
 		}
 	    }
-	  regaddr += sizeof (int);
+	  regaddr += sizeof (PTRACE_XFER_TYPE);
 	}
     }
   else
@@ -1230,11 +1262,28 @@ linux_look_up_symbols (void)
 #endif
 }
 
+static void
+linux_send_signal (int signum)
+{
+  extern int signal_pid;
+
+  if (cont_thread > 0)
+    {
+      struct process_info *process;
+
+      process = get_thread_process (current_inferior);
+      kill (process->lwpid, signum);
+    }
+  else
+    kill (signal_pid, signum);
+}
+
 
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
   linux_kill,
+  linux_detach,
   linux_thread_alive,
   linux_resume,
   linux_wait,
@@ -1243,6 +1292,7 @@ static struct target_ops linux_target_ops = {
   linux_read_memory,
   linux_write_memory,
   linux_look_up_symbols,
+  linux_send_signal,
 };
 
 static void
@@ -1250,7 +1300,7 @@ linux_init_signals ()
 {
   /* FIXME drow/2002-06-09: As above, we should check with LinuxThreads
      to find what the cancel signal actually is.  */
-  signal (SIGRTMIN+1, SIG_IGN);
+  signal (__SIGRTMIN+1, SIG_IGN);
 }
 
 void

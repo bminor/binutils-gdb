@@ -34,12 +34,6 @@
 #include "cli/cli-decode.h"
 #include "cli/cli-script.h"
 
-/* From gdb/top.c */
-
-extern void dont_repeat (void);
-
-extern void do_restore_instream_cleanup (void *stream);
-
 /* Prototypes for local functions */
 
 static struct cleanup *
@@ -216,7 +210,7 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 
 /* Handle pre-post hooks.  */
 
-void
+static void
 clear_hook_in_cleanup (void *data)
 {
   struct cmd_list_element *c = data;
@@ -248,7 +242,7 @@ execute_cmd_post_hook (struct cmd_list_element *c)
 }
 
 /* Execute the command in CMD.  */
-void
+static void
 do_restore_user_call_depth (void * call_depth)
 {	
   int * depth = call_depth;
@@ -261,7 +255,7 @@ do_restore_user_call_depth (void * call_depth)
 void
 execute_user_command (struct cmd_list_element *c, char *args)
 {
-  register struct command_line *cmdlines;
+  struct command_line *cmdlines;
   struct cleanup *old_chain;
   enum command_control_type ret;
   static int user_call_depth = 0;
@@ -980,8 +974,8 @@ read_command_lines (char *prompt_arg, int from_tty)
 void
 free_command_lines (struct command_line **lptr)
 {
-  register struct command_line *l = *lptr;
-  register struct command_line *next;
+  struct command_line *l = *lptr;
+  struct command_line *next;
   struct command_line **blist;
   int i;
 
@@ -1046,7 +1040,7 @@ copy_command_lines (struct command_line *cmds)
 static void
 validate_comname (char *comname)
 {
-  register char *p;
+  char *p;
 
   if (comname == 0)
     error_no_arg ("name of command to define");
@@ -1076,8 +1070,8 @@ define_command (char *comname, int from_tty)
       CMD_PRE_HOOK,
       CMD_POST_HOOK
     };
-  register struct command_line *cmds;
-  register struct cmd_list_element *c, *newc, *oldc, *hookc = 0;
+  struct command_line *cmds;
+  struct cmd_list_element *c, *newc, *oldc, *hookc = 0;
   char *tem = comname;
   char *tem2; 
   char tmpbuf[MAX_TMPBUF];
@@ -1093,16 +1087,17 @@ define_command (char *comname, int from_tty)
 
   /* Look it up, and verify that we got an exact match.  */
   c = lookup_cmd (&tem, cmdlist, "", -1, 1);
-  if (c && !STREQ (comname, c->name))
+  if (c && strcmp (comname, c->name) != 0)
     c = 0;
 
   if (c)
     {
+      int q;
       if (c->class == class_user || c->class == class_alias)
-	tem = "Redefine command \"%s\"? ";
+	q = query ("Redefine command \"%s\"? ", c->name);
       else
-	tem = "Really redefine built-in command \"%s\"? ";
-      if (!query (tem, c->name))
+	q = query ("Really redefine built-in command \"%s\"? ", c->name);
+      if (!q)
 	error ("Command \"%s\" not redefined.", c->name);
     }
 
@@ -1126,7 +1121,7 @@ define_command (char *comname, int from_tty)
       /* Look up cmd it hooks, and verify that we got an exact match.  */
       tem = comname + hook_name_size;
       hookc = lookup_cmd (&tem, cmdlist, "", -1, 0);
-      if (hookc && !STREQ (comname + hook_name_size, hookc->name))
+      if (hookc && strcmp (comname + hook_name_size, hookc->name) != 0)
 	hookc = 0;
       if (!hookc)
 	{
@@ -1181,7 +1176,7 @@ void
 document_command (char *comname, int from_tty)
 {
   struct command_line *doclines;
-  register struct cmd_list_element *c;
+  struct cmd_list_element *c;
   char *tem = comname;
   char tmpbuf[128];
 
@@ -1199,8 +1194,8 @@ document_command (char *comname, int from_tty)
     xfree (c->doc);
 
   {
-    register struct command_line *cl1;
-    register int len = 0;
+    struct command_line *cl1;
+    int len = 0;
 
     for (cl1 = doclines; cl1; cl1 = cl1->next)
       len += strlen (cl1->line) + 1;
@@ -1228,7 +1223,7 @@ struct source_cleanup_lines_args
 };
 
 static void
-source_cleanup_lines (PTR args)
+source_cleanup_lines (void *args)
 {
   struct source_cleanup_lines_args *p =
   (struct source_cleanup_lines_args *) args;
@@ -1238,7 +1233,6 @@ source_cleanup_lines (PTR args)
   error_pre_print = p->old_error_pre_print;
 }
 
-/* ARGSUSED */
 static void
 do_fclose_cleanup (void *stream)
 {
@@ -1295,7 +1289,7 @@ script_from_file (FILE *stream, char *file)
 void
 show_user_1 (struct cmd_list_element *c, struct ui_file *stream)
 {
-  register struct command_line *cmdlines;
+  struct command_line *cmdlines;
 
   cmdlines = c->user_commands;
   if (!cmdlines)

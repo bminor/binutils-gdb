@@ -79,7 +79,10 @@ sim_engine_halt (SIM_DESC sd,
       longjmp (*halt_buf, sim_engine_halt_jmpval);
     }
   else
-    sim_io_error (sd, "sim_halt - bad long jump");
+    {
+      sim_io_error (sd, "sim_halt - bad long jump");
+      abort ();
+    }
 }
 
 
@@ -127,6 +130,7 @@ sim_engine_vabort (SIM_DESC sd,
       sim_io_evprintf (sd, fmt, ap);
       sim_io_eprintf (sd, "\n");
       sim_io_error (sd, "Quit Simulator");
+      abort ();
     }
   else
     {

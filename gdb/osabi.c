@@ -1,5 +1,5 @@
 /* OS ABI variant handling for GDB.
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,17 +19,37 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+
+#include "gdb_assert.h"
 #include "gdb_string.h"
+
 #include "osabi.h"
+#include "arch-utils.h"
+#include "gdbcmd.h"
+#include "command.h"
 
 #include "elf-bfd.h"
 
+#ifndef GDB_OSABI_DEFAULT
+#define GDB_OSABI_DEFAULT GDB_OSABI_UNKNOWN
+#endif
+
+/* State for the "set osabi" command.  */
+static enum { osabi_auto, osabi_default, osabi_user } user_osabi_state;
+static enum gdb_osabi user_selected_osabi;
+static const char *gdb_osabi_available_names[GDB_OSABI_INVALID + 3] = {
+  "auto",
+  "default",
+  "none",
+  NULL
+};
+static const char *set_osabi_string;
 
 /* This table matches the indices assigned to enum gdb_osabi.  Keep
    them in sync.  */
 static const char * const gdb_osabi_names[] =
 {
-  "<unknown>",
+  "none",
 
   "SVR4",
   "GNU/Hurd",
@@ -46,10 +66,15 @@ static const char * const gdb_osabi_names[] =
   "Irix",
   "LynxOS",
   "Interix",
+  "HP/UX ELF",
+  "HP/UX SOM",
 
   "ARM EABI v1",
   "ARM EABI v2",
   "ARM APCS",
+  "QNX Neutrino",
+
+  "Cygwin",
 
   "<invalid>"
 };
@@ -68,7 +93,7 @@ gdbarch_osabi_name (enum gdb_osabi osabi)
 struct gdb_osabi_handler  
 {
   struct gdb_osabi_handler *next;
-  enum bfd_architecture arch;
+  const struct bfd_arch_info *arch_info;
   enum gdb_osabi osabi;
   void (*init_osabi)(struct gdbarch_info, struct gdbarch *);
 };
@@ -76,11 +101,14 @@ struct gdb_osabi_handler
 static struct gdb_osabi_handler *gdb_osabi_handler_list;
 
 void
-gdbarch_register_osabi (enum bfd_architecture arch, enum gdb_osabi osabi,
+gdbarch_register_osabi (enum bfd_architecture arch, unsigned long machine,
+			enum gdb_osabi osabi,
                         void (*init_osabi)(struct gdbarch_info,
 					   struct gdbarch *))
 {
   struct gdb_osabi_handler **handler_p;
+  const struct bfd_arch_info *arch_info = bfd_lookup_arch (arch, machine);
+  const char **name_ptr;
 
   /* Registering an OS ABI handler for "unknown" is not allowed.  */
   if (osabi == GDB_OSABI_UNKNOWN)
@@ -91,14 +119,16 @@ gdbarch_register_osabi (enum bfd_architecture arch, enum gdb_osabi osabi,
          "OS ABI \"%s\" for architecture %s was made.  The handler will "
 	 "not be registered",
 	 gdbarch_osabi_name (osabi),
-	 bfd_printable_arch_mach (arch, 0));
+	 bfd_printable_arch_mach (arch, machine));
       return;
     }
+
+  gdb_assert (arch_info);
 
   for (handler_p = &gdb_osabi_handler_list; *handler_p != NULL;
        handler_p = &(*handler_p)->next)
     {
-      if ((*handler_p)->arch == arch
+      if ((*handler_p)->arch_info == arch_info
 	  && (*handler_p)->osabi == osabi)
 	{
 	  internal_error
@@ -106,7 +136,7 @@ gdbarch_register_osabi (enum bfd_architecture arch, enum gdb_osabi osabi,
 	     "gdbarch_register_osabi: A handler for OS ABI \"%s\" "
 	     "has already been registered for architecture %s",
 	     gdbarch_osabi_name (osabi),
-	     bfd_printable_arch_mach (arch, 0));
+	     arch_info->printable_name);
 	  /* If user wants to continue, override previous definition.  */
 	  (*handler_p)->init_osabi = init_osabi;
 	  return;
@@ -116,9 +146,19 @@ gdbarch_register_osabi (enum bfd_architecture arch, enum gdb_osabi osabi,
   (*handler_p)
     = (struct gdb_osabi_handler *) xmalloc (sizeof (struct gdb_osabi_handler));
   (*handler_p)->next = NULL;
-  (*handler_p)->arch = arch;
+  (*handler_p)->arch_info = arch_info;
   (*handler_p)->osabi = osabi;
   (*handler_p)->init_osabi = init_osabi;
+
+  /* Add this OS ABI to the list of enum values for "set osabi", if it isn't
+     already there.  */
+  for (name_ptr = gdb_osabi_available_names; *name_ptr; name_ptr ++)
+    {
+      if (*name_ptr == gdbarch_osabi_name (osabi))
+	return;
+    }
+  *name_ptr++ = gdbarch_osabi_name (osabi);
+  *name_ptr = NULL;
 }
 
 
@@ -161,6 +201,20 @@ gdbarch_lookup_osabi (bfd *abfd)
   struct gdb_osabi_sniffer *sniffer;
   enum gdb_osabi osabi, match;
   int match_specific;
+
+  /* If we aren't in "auto" mode, return the specified OS ABI.  */
+  if (user_osabi_state == osabi_user)
+    return user_selected_osabi;
+
+  /* If we don't have a binary, return the default OS ABI (if set) or
+     an inconclusive result (otherwise).  */
+  if (abfd == NULL) 
+    {
+      if (GDB_OSABI_DEFAULT != GDB_OSABI_UNKNOWN)
+	return GDB_OSABI_DEFAULT;
+      else
+	return GDB_OSABI_UNINITIALIZED;
+    }
 
   match = GDB_OSABI_UNKNOWN;
   match_specific = 0;
@@ -221,18 +275,39 @@ gdbarch_lookup_osabi (bfd *abfd)
 	}
     }
 
-  return match;
+  /* If we didn't find a match, but a default was specified at configure
+     time, return the default.  */
+  if (GDB_OSABI_DEFAULT != GDB_OSABI_UNKNOWN && match == GDB_OSABI_UNKNOWN)
+    return GDB_OSABI_DEFAULT;
+  else
+    return match;
 }
 
+
+/* Return non-zero if architecture A can run code written for
+   architecture B.  */
+static int
+can_run_code_for (const struct bfd_arch_info *a, const struct bfd_arch_info *b)
+{
+  /* BFD's 'A->compatible (A, B)' functions return zero if A and B are
+     incompatible.  But if they are compatible, it returns the 'more
+     featureful' of the two arches.  That is, if A can run code
+     written for B, but B can't run code written for A, then it'll
+     return A.
+
+     struct bfd_arch_info objects are singletons: that is, there's
+     supposed to be exactly one instance for a given machine.  So you
+     can tell whether two are equivalent by comparing pointers.  */
+  return (a == b || a->compatible (a, b) == a);
+}
+
+
 void
-gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch,
-                    enum gdb_osabi osabi)
+gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdb_osabi_handler *handler;
-  bfd *abfd = info.abfd;
-  const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (gdbarch);
 
-  if (osabi == GDB_OSABI_UNKNOWN)
+  if (info.osabi == GDB_OSABI_UNKNOWN)
     {
       /* Don't complain about an unknown OSABI.  Assume the user knows
          what they are doing.  */
@@ -242,25 +317,41 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch,
   for (handler = gdb_osabi_handler_list; handler != NULL;
        handler = handler->next)
     {
-      if (handler->arch == bfd_get_arch (abfd)
-	  && handler->osabi == osabi)
+      if (handler->osabi != info.osabi)
+	continue;
+
+      /* If the architecture described by ARCH_INFO can run code for
+         the architcture we registered the handler for, then the
+         handler is applicable.  Note, though, that if the handler is
+         for an architecture that is a superset of ARCH_INFO, we can't
+         use that --- it would be perfectly correct for it to install
+         gdbarch methods that refer to registers / instructions /
+         other facilities ARCH_INFO doesn't have.
+
+         NOTE: kettenis/20021027: There may be more than one machine
+	 type that is compatible with the desired machine type.  Right
+	 now we simply return the first match, which is fine for now.
+	 However, we might want to do something smarter in the future.  */
+      /* NOTE: cagney/2003-10-23: The code for "a can_run_code_for b"
+         is implemented using BFD's compatible method (a->compatible
+         (b) == a -- the lowest common denominator between a and b is
+         a).  That method's definition of compatible may not be as you
+         expect.  For instance the test "amd64 can run code for i386"
+         (or more generally "64-bit ISA can run code for the 32-bit
+         ISA").  BFD doesn't normally consider 32-bit and 64-bit
+         "compatible" so it doesn't succeed.  */
+      if (can_run_code_for (info.bfd_arch_info, handler->arch_info))
 	{
 	  (*handler->init_osabi) (info, gdbarch);
 	  return;
 	}
     }
 
-  /* We assume that if GDB_MULTI_ARCH is less than GDB_MULTI_ARCH_TM
-     that an ABI variant can be supported by overriding definitions in
-     the tm-file.  */
-  if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-    fprintf_filtered
-      (gdb_stderr,
-       "A handler for the OS ABI \"%s\" is not built into this "
-       "configuration of GDB.  "
-       "Attempting to continue with the default %s settings",
-       gdbarch_osabi_name (osabi),
-       bfd_printable_arch_mach (arch_info->arch, arch_info->mach));
+  warning
+    ("A handler for the OS ABI \"%s\" is not built into this configuration\n"
+     "of GDB.  Attempting to continue with the default %s settings.\n",
+     gdbarch_osabi_name (info.osabi),
+     info.bfd_arch_info->printable_name);
 }
 
 
@@ -315,6 +406,14 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	      *os_ident_ptr = GDB_OSABI_SOLARIS;
 	      break;
 
+	    case GNU_ABI_TAG_FREEBSD:
+	      *os_ident_ptr = GDB_OSABI_FREEBSD_ELF;
+	      break;
+	      
+	    case GNU_ABI_TAG_NETBSD:
+	      *os_ident_ptr = GDB_OSABI_NETBSD_ELF;
+	      break;
+	      
 	    default:
 	      internal_error
 		(__FILE__, __LINE__,
@@ -363,6 +462,13 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	}
       return;
     }
+
+  /* .note.netbsdcore.procinfo notes, used by NetBSD.  */
+  if (strcmp (name, ".note.netbsdcore.procinfo") == 0 && sectsize > 0)
+    {
+      *os_ident_ptr = GDB_OSABI_NETBSD_ELF;
+      return;
+    }
 }
 
 static enum gdb_osabi
@@ -404,6 +510,10 @@ generic_elf_osabi_sniffer (bfd *abfd)
     case ELFOSABI_SOLARIS:
       osabi = GDB_OSABI_SOLARIS;
       break;
+
+    case ELFOSABI_HPUX:
+      osabi = GDB_OSABI_HPUX_ELF;
+      break;
     }
 
   if (osabi == GDB_OSABI_UNKNOWN)
@@ -418,10 +528,68 @@ generic_elf_osabi_sniffer (bfd *abfd)
   return osabi;
 }
 
+static void
+set_osabi (char *args, int from_tty, struct cmd_list_element *c)
+{
+  struct gdbarch_info info;
+
+  if (strcmp (set_osabi_string, "auto") == 0)
+    user_osabi_state = osabi_auto;
+  else if (strcmp (set_osabi_string, "default") == 0)
+    {
+      user_selected_osabi = GDB_OSABI_DEFAULT;
+      user_osabi_state = osabi_user;
+    }
+  else if (strcmp (set_osabi_string, "none") == 0)
+    {
+      user_selected_osabi = GDB_OSABI_UNKNOWN;
+      user_osabi_state = osabi_user;
+    }
+  else
+    {
+      int i;
+      for (i = 1; i < GDB_OSABI_INVALID; i++)
+	if (strcmp (set_osabi_string, gdbarch_osabi_name (i)) == 0)
+	  {
+	    user_selected_osabi = i;
+	    user_osabi_state = osabi_user;
+	    break;
+	  }
+      if (i == GDB_OSABI_INVALID)
+	internal_error (__FILE__, __LINE__,
+			"Invalid OS ABI \"%s\" passed to command handler.",
+			set_osabi_string);
+    }
+
+  /* NOTE: At some point (true multiple architectures) we'll need to be more
+     graceful here.  */
+  gdbarch_info_init (&info);
+  if (! gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__, "Updating OS ABI failed.");
+}
+
+static void
+show_osabi (char *args, int from_tty)
+{
+  if (user_osabi_state == osabi_auto)
+    printf_filtered ("The current OS ABI is \"auto\" (currently \"%s\").\n",
+		     gdbarch_osabi_name (gdbarch_osabi (current_gdbarch)));
+  else
+    printf_filtered ("The current OS ABI is \"%s\".\n",
+		     gdbarch_osabi_name (user_selected_osabi));
+
+  if (GDB_OSABI_DEFAULT != GDB_OSABI_UNKNOWN)
+    printf_filtered ("The default OS ABI is \"%s\".\n",
+		     gdbarch_osabi_name (GDB_OSABI_DEFAULT));
+}
+
+extern initialize_file_ftype _initialize_gdb_osabi; /* -Wmissing-prototype */
 
 void
 _initialize_gdb_osabi (void)
 {
+  struct cmd_list_element *c;
+
   if (strcmp (gdb_osabi_names[GDB_OSABI_INVALID], "<invalid>") != 0)
     internal_error
       (__FILE__, __LINE__,
@@ -431,4 +599,13 @@ _initialize_gdb_osabi (void)
   gdbarch_register_osabi_sniffer (bfd_arch_unknown,
 				  bfd_target_elf_flavour,
 				  generic_elf_osabi_sniffer);
+
+  /* Register the "set osabi" command.  */
+  c = add_set_enum_cmd ("osabi", class_support, gdb_osabi_available_names,
+			&set_osabi_string, "Set OS ABI of target.", &setlist);
+
+  set_cmd_sfunc (c, set_osabi);
+  add_cmd ("osabi", class_support, show_osabi, "Show OS/ABI of target.",
+	   &showlist);
+  user_osabi_state = osabi_auto;
 }

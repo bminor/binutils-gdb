@@ -32,10 +32,10 @@
 #include "regcache.h"
 
 #define RF(dst, src) \
-	memcpy(&registers[REGISTER_BYTE(dst)], &src, sizeof(src))
+	memcpy(&deprecated_registers[DEPRECATED_REGISTER_BYTE(dst)], &src, sizeof(src))
 
 #define RS(src, dst) \
-	memcpy(&dst, &registers[REGISTER_BYTE(src)], sizeof(dst))
+	memcpy(&dst, &deprecated_registers[DEPRECATED_REGISTER_BYTE(src)], sizeof(dst))
 
 void
 fetch_inferior_registers (int regno)
@@ -58,7 +58,7 @@ fetch_inferior_registers (int regno)
   RF (R0_REGNUM + 7, inferior_registers.r_r7);
 
   RF (SP_REGNUM, inferior_registers.r_sp);
-  RF (FP_REGNUM, inferior_registers.r_fp);
+  RF (DEPRECATED_FP_REGNUM, inferior_registers.r_fp);
   RF (PC_REGNUM, inferior_registers.r_pc);
   RF (PS_REGNUM, inferior_registers.r_psr);
 
@@ -71,7 +71,7 @@ fetch_inferior_registers (int regno)
   RF (LP0_REGNUM + 3, inferior_fpregisters.r_freg[3]);
   RF (LP0_REGNUM + 5, inferior_fpregisters.r_freg[5]);
   RF (LP0_REGNUM + 7, inferior_fpregisters.r_freg[7]);
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 void
@@ -90,7 +90,7 @@ store_inferior_registers (int regno)
   RS (R0_REGNUM + 7, inferior_registers.r_r7);
 
   RS (SP_REGNUM, inferior_registers.r_sp);
-  RS (FP_REGNUM, inferior_registers.r_fp);
+  RS (DEPRECATED_FP_REGNUM, inferior_registers.r_fp);
   RS (PC_REGNUM, inferior_registers.r_pc);
   RS (PS_REGNUM, inferior_registers.r_psr);
 
@@ -150,7 +150,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   RF (R0_REGNUM + 7, core_reg->intreg.r_r7);
 
   RF (SP_REGNUM, core_reg->intreg.r_sp);
-  RF (FP_REGNUM, core_reg->intreg.r_fp);
+  RF (DEPRECATED_FP_REGNUM, core_reg->intreg.r_fp);
   RF (PC_REGNUM, core_reg->intreg.r_pc);
   RF (PS_REGNUM, core_reg->intreg.r_psr);
 
@@ -164,7 +164,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   RF (LP0_REGNUM + 3, core_reg->freg.r_freg[3]);
   RF (LP0_REGNUM + 5, core_reg->freg.r_freg[5]);
   RF (LP0_REGNUM + 7, core_reg->freg.r_freg[7]);
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 /* Register that we are able to handle ns32knbsd core file formats.
@@ -223,7 +223,7 @@ fetch_kcore_registers (struct pcb *pcb)
 
   dummy = pcb->pcb_kfp + 8;
   RF (SP_REGNUM, dummy);
-  RF (FP_REGNUM, sf.sf_fp);
+  RF (DEPRECATED_FP_REGNUM, sf.sf_fp);
   RF (PC_REGNUM, sf.sf_pc);
   RF (PS_REGNUM, intreg.r_psr);
 
@@ -237,7 +237,7 @@ fetch_kcore_registers (struct pcb *pcb)
   RF (LP0_REGNUM + 3, pcb->pcb_freg[3]);
   RF (LP0_REGNUM + 5, pcb->pcb_freg[5]);
   RF (LP0_REGNUM + 7, pcb->pcb_freg[7]);
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 #endif /* FETCH_KCORE_REGISTERS */
 
@@ -258,7 +258,7 @@ clear_regs (void)
   RF (R0_REGNUM + 7, null);
 
   RF (SP_REGNUM, null);
-  RF (FP_REGNUM, null);
+  RF (DEPRECATED_FP_REGNUM, null);
   RF (PC_REGNUM, null);
   RF (PS_REGNUM, null);
 
@@ -295,7 +295,9 @@ frame_num_args (struct frame_info *fi)
   enter_addr = ns32k_get_enter_addr (fi->pc);
   if (enter_addr = 0)
     return (-1);
-  argp = enter_addr == 1 ? SAVED_PC_AFTER_CALL (fi) : FRAME_SAVED_PC (fi);
+  argp = (enter_addr == 1
+	  ? DEPRECATED_SAVED_PC_AFTER_CALL (fi)
+	  : DEPRECATED_FRAME_SAVED_PC (fi));
   for (i = 0; i < 16; i++)
     {
       /*

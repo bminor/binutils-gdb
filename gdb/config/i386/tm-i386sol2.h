@@ -31,6 +31,4 @@ extern char *sunpro_static_transform_name (char *);
 #define STATIC_TRANSFORM_NAME(x) sunpro_static_transform_name (x)
 #define IS_STATIC_TRANSFORM_NAME(name) ((name)[0] == '.')
 
-#define FAULTED_USE_SIGINFO
-
 #endif /* ifndef TM_I386SOL2_H */

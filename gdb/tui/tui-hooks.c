@@ -1,6 +1,6 @@
 /* GDB hooks for TUI.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,23 +18,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
-
-/* FIXME: cagney/2002-02-28: The GDB coding standard indicates that
-   "defs.h" should be included first.  Unfortunatly some systems
-   (currently Debian GNU/Linux) include the <stdbool.h> via <curses.h>
-   and they clash with "bfd.h"'s definiton of true/false.  The correct
-   fix is to remove true/false from "bfd.h", however, until that
-   happens, hack around it by including "config.h" and <curses.h>
-   first.  */
-
-#include "config.h"
-#ifdef HAVE_NCURSES_H
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
 
 #include "defs.h"
 #include "symtab.h"
@@ -66,11 +49,17 @@
 #include "tuiDataWin.h"
 #include "tuiSourceWin.h"
 
+#ifdef HAVE_NCURSES_H
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
+
 int tui_target_has_run = 0;
 
 static void (* tui_target_new_objfile_chain) (struct objfile*);
-static void tui_event_loop (void);
-static void tui_command_loop (void);
 
 static void
 tui_new_objfile_hook (struct objfile* objfile)
@@ -147,7 +136,7 @@ tui_registers_changed_hook (void)
 {
   struct frame_info *fi;
 
-  fi = selected_frame;
+  fi = deprecated_selected_frame;
   if (fi && tui_refreshing_registers == 0)
     {
       tui_refreshing_registers = 1;
@@ -163,7 +152,7 @@ tui_register_changed_hook (int regno)
 {
   struct frame_info *fi;
 
-  fi = selected_frame;
+  fi = deprecated_selected_frame;
   if (fi && tui_refreshing_registers == 0)
     {
       tui_refreshing_registers = 1;
@@ -245,14 +234,14 @@ tui_selected_frame_level_changed_hook (int level)
 {
   struct frame_info *fi;
 
-  fi = selected_frame;
+  fi = deprecated_selected_frame;
   /* Ensure that symbols for this frame are read in.  Also, determine the
      source language of this frame, and switch to it if desired.  */
   if (fi)
     {
       struct symtab *s;
       
-      s = find_pc_symtab (fi->pc);
+      s = find_pc_symtab (get_frame_pc (fi));
       /* elz: this if here fixes the problem with the pc not being displayed
          in the tui asm layout, with no debug symbols. The value of s 
          would be 0 here, and select_source_symtab would abort the
@@ -279,7 +268,7 @@ tui_print_frame_info_listing_hook (struct symtab *s, int line,
                                    int stopline, int noerror)
 {
   select_source_symtab (s);
-  tuiShowFrameInfo (selected_frame);
+  tuiShowFrameInfo (deprecated_selected_frame);
 }
 
 /* Called when the target process died or is detached.
@@ -325,127 +314,12 @@ tui_remove_hooks (void)
   set_gdb_event_hooks (tui_old_event_hooks);
 }
 
-/* Cleanup the tui before exiting.  */
-static void
-tui_exit (void)
+void _initialize_tui_hooks (void);
+
+void
+_initialize_tui_hooks (void)
 {
-  /* Disable the tui.  Curses mode is left leaving the screen
-     in a clean state (see endwin()).  */
-  tui_disable ();
-}
-
-/* Initialize all the necessary variables, start the event loop,
-   register readline, and stdin, start the loop. */
-static void
-tui_command_loop (void)
-{
-  int length;
-  char *a_prompt;
-  char *gdb_prompt = get_prompt ();
-
-  /* If we are using readline, set things up and display the first
-     prompt, otherwise just print the prompt. */
-  if (async_command_editing_p)
-    {
-      /* Tell readline what the prompt to display is and what function it
-         will need to call after a whole line is read. This also displays
-         the first prompt. */
-      length = strlen (PREFIX (0)) + strlen (gdb_prompt) + strlen (SUFFIX (0)) + 1;
-      a_prompt = (char *) xmalloc (length);
-      strcpy (a_prompt, PREFIX (0));
-      strcat (a_prompt, gdb_prompt);
-      strcat (a_prompt, SUFFIX (0));
-      rl_callback_handler_install (a_prompt, input_handler);
-    }
-  else
-    display_gdb_prompt (0);
-
-  /* Now it's time to start the event loop. */
-  tui_event_loop ();
-}
-
-/* Start up the event loop. This is the entry point to the event loop
-   from the command loop. */
-
-static void
-tui_event_loop (void)
-{
-  /* Loop until there is nothing to do. This is the entry point to the
-     event loop engine. gdb_do_one_event, called via catch_errors()
-     will process one event for each invocation.  It blocks waits for
-     an event and then processes it.  >0 when an event is processed, 0
-     when catch_errors() caught an error and <0 when there are no
-     longer any event sources registered. */
-  while (1)
-    {
-      int result = catch_errors (gdb_do_one_event, 0, "", RETURN_MASK_ALL);
-      if (result < 0)
-	break;
-
-      /* Update gdb output according to TUI mode.  Since catch_errors
-         preserves the uiout from changing, this must be done at top
-         level of event loop.  */
-      if (tui_active)
-        uiout = tui_out;
-      else
-        uiout = tui_old_uiout;
-      
-      if (result == 0)
-	{
-	  /* FIXME: this should really be a call to a hook that is
-	     interface specific, because interfaces can display the
-	     prompt in their own way. */
-	  display_gdb_prompt (0);
-	  /* This call looks bizarre, but it is required.  If the user
-	     entered a command that caused an error,
-	     after_char_processing_hook won't be called from
-	     rl_callback_read_char_wrapper.  Using a cleanup there
-	     won't work, since we want this function to be called
-	     after a new prompt is printed.  */
-	  if (after_char_processing_hook)
-	    (*after_char_processing_hook) ();
-	  /* Maybe better to set a flag to be checked somewhere as to
-	     whether display the prompt or not. */
-	}
-    }
-
-  /* We are done with the event loop. There are no more event sources
-     to listen to.  So we exit GDB. */
-  return;
-}
-
-/* Initialize the tui by installing several gdb hooks, initializing
-   the tui IO and preparing the readline with the kind binding.  */
-static void
-tui_init_hook (char *argv0)
-{
-  /* Install exit handler to leave the screen in a good shape.  */
-  atexit (tui_exit);
-
-  initializeStaticData ();
-
   /* Install the permanent hooks.  */
   tui_target_new_objfile_chain = target_new_objfile_hook;
   target_new_objfile_hook = tui_new_objfile_hook;
-
-  tui_initialize_io ();
-  tui_initialize_readline ();
-
-  /* Tell gdb to use the tui_command_loop as the main loop. */
-  command_loop_hook = tui_command_loop;
-
-  /* Decide in which mode to start using GDB (based on -tui).  */
-  if (tui_version)
-    {
-      tui_enable ();
-    }
 }
-
-/* Initialize the tui.  */
-void
-_initialize_tui (void)
-{
-  /* Setup initialization hook.  */
-  init_ui_hook = tui_init_hook;
-}
-

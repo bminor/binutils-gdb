@@ -30,6 +30,20 @@
 
 #include <signal.h>
 
+/* Always use __SIGRTMIN if it's available.  SIGRTMIN is the lowest
+   _available_ realtime signal, not the lowest supported; glibc takes
+   several for its own use.  */
+
+#ifndef REALTIME_LO
+# if defined(__SIGRTMIN)
+#  define REALTIME_LO __SIGRTMIN
+#  define REALTIME_HI __SIGRTMAX
+# elif defined(SIGRTMIN)
+#  define REALTIME_LO SIGRTMIN
+#  define REALTIME_HI SIGRTMAX
+# endif
+#endif
+
 /* This table must match in order and size the signals in enum target_signal
    in target.h.  */
 /* *INDENT-OFF* */
@@ -492,22 +506,6 @@ target_signal_from_host (int hostsig)
     }
 #endif
 
-#if defined (SIGRTMIN)
-  if (hostsig >= SIGRTMIN && hostsig <= SIGRTMAX)
-    {
-      /* This block of TARGET_SIGNAL_REALTIME value is in order.  */
-      if (33 <= hostsig && hostsig <= 63)
-	return (enum target_signal)
-	  (hostsig - 33 + (int) TARGET_SIGNAL_REALTIME_33);
-      else if (hostsig == 32)
-	return TARGET_SIGNAL_REALTIME_32;
-      else if (64 <= hostsig && hostsig <= 127)
-	return (enum target_signal)
-	  (hostsig - 64 + (int) TARGET_SIGNAL_REALTIME_64);
-      else
-	error ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
-    }
-#endif
   return TARGET_SIGNAL_UNKNOWN;
 }
 
@@ -520,6 +518,8 @@ static int
 do_target_signal_to_host (enum target_signal oursig,
 			  int *oursig_ok)
 {
+  int retsig;
+
   *oursig_ok = 1;
   switch (oursig)
     {
@@ -744,66 +744,33 @@ do_target_signal_to_host (enum target_signal oursig,
 
     default:
 #if defined (REALTIME_LO)
-      if (oursig >= TARGET_SIGNAL_REALTIME_33
-	  && oursig <= TARGET_SIGNAL_REALTIME_63)
-	{
-	  /* This block of signals is continuous, and
-             TARGET_SIGNAL_REALTIME_33 is 33 by definition.  */
-	  int retsig =
-	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_33 + 33;
-	  if (retsig >= REALTIME_LO && retsig < REALTIME_HI)
-	    return retsig;
-	}
-#if (REALTIME_LO < 33)
-      else if (oursig == TARGET_SIGNAL_REALTIME_32)
-	{
-	  /* TARGET_SIGNAL_REALTIME_32 isn't contiguous with
-             TARGET_SIGNAL_REALTIME_33.  It is 32 by definition.  */
-	  return 32;
-	}
-#endif
-#if (REALTIME_HI > 64)
-      if (oursig >= TARGET_SIGNAL_REALTIME_64
-	  && oursig <= TARGET_SIGNAL_REALTIME_127)
-	{
-	  /* This block of signals is continuous, and
-             TARGET_SIGNAL_REALTIME_64 is 64 by definition.  */
-	  int retsig =
-	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_64 + 64;
-	  if (retsig >= REALTIME_LO && retsig < REALTIME_HI)
-	    return retsig;
-	}
-      
-#endif
-#endif
+      retsig = 0;
 
-#if defined (SIGRTMIN)
       if (oursig >= TARGET_SIGNAL_REALTIME_33
 	  && oursig <= TARGET_SIGNAL_REALTIME_63)
 	{
 	  /* This block of signals is continuous, and
              TARGET_SIGNAL_REALTIME_33 is 33 by definition.  */
-	  int retsig =
-	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_33 + 33;
-	  if (retsig >= SIGRTMIN && retsig <= SIGRTMAX)
-	    return retsig;
+	  retsig = (int) oursig - (int) TARGET_SIGNAL_REALTIME_33 + 33;
 	}
       else if (oursig == TARGET_SIGNAL_REALTIME_32)
 	{
 	  /* TARGET_SIGNAL_REALTIME_32 isn't contiguous with
              TARGET_SIGNAL_REALTIME_33.  It is 32 by definition.  */
-	  return 32;
+	  retsig = 32;
 	}
       else if (oursig >= TARGET_SIGNAL_REALTIME_64
 	  && oursig <= TARGET_SIGNAL_REALTIME_127)
 	{
 	  /* This block of signals is continuous, and
              TARGET_SIGNAL_REALTIME_64 is 64 by definition.  */
-	  int retsig =
-	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_64 + 64;
-	  return retsig;
+	  retsig = (int) oursig - (int) TARGET_SIGNAL_REALTIME_64 + 64;
 	}
+
+      if (retsig >= REALTIME_LO && retsig < REALTIME_HI)
+	return retsig;
 #endif
+
       *oursig_ok = 0;
       return 0;
     }
@@ -852,6 +819,8 @@ Use \"info signals\" for a list of symbolic signals.");
 }
 
 #ifndef GDBSERVER
+extern initialize_file_ftype _initialize_signals; /* -Wmissing-prototype */
+
 void
 _initialize_signals (void)
 {

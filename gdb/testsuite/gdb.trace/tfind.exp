@@ -53,8 +53,13 @@ if [istarget "m68k-*-elf"] then {
     set testfile "actions"
     set srcfile ${testfile}.c
     set binfile $objdir/$subdir/$testfile
-    if { [gdb_compile "$srcdir/$subdir/$srcfile" "$binfile -O1" \
-	    executable {debug additional_flags=-w}] != "" } {
+
+    # Why does this test require '-O1' level optimization?  (In
+    # general, the optimization level should be left under the control
+    # of the test framework (target_list and so on), so if we don't
+    # have to override it in individual tests like this, we shouldn't.)
+    if { [gdb_compile "$srcdir/$subdir/$srcfile" "$binfile" \
+	    executable {debug additional_flags=-w optimize=-O1}] != "" } {
 	gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
     }
     gdb_load $binfile

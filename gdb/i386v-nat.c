@@ -60,6 +60,8 @@
 #include "floatformat.h"
 
 #include "target.h"
+
+#include "i386-tdep.h"
 
 
 /* Mapping between the general-purpose registers in `struct user'
@@ -83,7 +85,7 @@ register_u_addr (CORE_ADDR blockend, int regnum)
   struct user u;
   CORE_ADDR fpstate;
 
-  if (FP_REGNUM_P (regnum))
+  if (i386_fp_regnum_p (regnum))
     {
 #ifdef KSTKSZ			/* SCO, and others?  */
       blockend += 4 * (SS + 1) - KSTKSZ;
@@ -118,11 +120,11 @@ static int debug_control_mirror;
 /* Record which address associates with which register.  */
 static CORE_ADDR address_lookup[DR_LASTADDR - DR_FIRSTADDR + 1];
 
-static int
-i386_insert_aligned_watchpoint (int, CORE_ADDR, CORE_ADDR, int, int);
+static int i386_insert_aligned_watchpoint (int, CORE_ADDR, CORE_ADDR, int,
+					   int);
 
-static int
-i386_insert_nonaligned_watchpoint (int, CORE_ADDR, CORE_ADDR, int, int);
+static int i386_insert_nonaligned_watchpoint (int, CORE_ADDR, CORE_ADDR, int,
+					      int);
 
 /* Insert a watchpoint.  */
 

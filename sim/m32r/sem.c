@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -2563,6 +2563,111 @@ if (CPU (h_lock)) {
 #undef FLD
 }
 
+/* clrpsw: clrpsw $uimm8 */
+
+static SEM_PC
+SEM_FN_NAME (m32rbf,clrpsw) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clrpsw.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
+
+  {
+    SI opval = ANDSI (GET_H_CR (((UINT) 0)), ORSI (INVBI (FLD (f_uimm8)), 65280));
+    SET_H_CR (((UINT) 0), opval);
+    TRACE_RESULT (current_cpu, abuf, "cr", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* setpsw: setpsw $uimm8 */
+
+static SEM_PC
+SEM_FN_NAME (m32rbf,setpsw) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clrpsw.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
+
+  {
+    SI opval = FLD (f_uimm8);
+    SET_H_CR (((UINT) 0), opval);
+    TRACE_RESULT (current_cpu, abuf, "cr", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* bset: bset $uimm3,@($slo16,$sr) */
+
+static SEM_PC
+SEM_FN_NAME (m32rbf,bset) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bset.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    QI opval = ORQI (GETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16))), SLLSI (1, SUBSI (7, FLD (f_uimm3))));
+    SETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16)), opval);
+    TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* bclr: bclr $uimm3,@($slo16,$sr) */
+
+static SEM_PC
+SEM_FN_NAME (m32rbf,bclr) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bset.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+  {
+    QI opval = ANDQI (GETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16))), INVQI (SLLSI (1, SUBSI (7, FLD (f_uimm3)))));
+    SETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16)), opval);
+    TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
+/* btst: btst $uimm3,$sr */
+
+static SEM_PC
+SEM_FN_NAME (m32rbf,btst) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bset.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
+
+  {
+    BI opval = ANDQI (SRLSI (* FLD (i_sr), SUBSI (7, FLD (f_uimm3))), 1);
+    CPU (h_cond) = opval;
+    TRACE_RESULT (current_cpu, abuf, "cond", 'x', opval);
+  }
+
+  return vpc;
+#undef FLD
+}
+
 /* Table of all semantic fns.  */
 
 static const struct sem_fn_desc sem_fns[] = {
@@ -2671,6 +2776,11 @@ static const struct sem_fn_desc sem_fns[] = {
   { M32RBF_INSN_SUBX, SEM_FN_NAME (m32rbf,subx) },
   { M32RBF_INSN_TRAP, SEM_FN_NAME (m32rbf,trap) },
   { M32RBF_INSN_UNLOCK, SEM_FN_NAME (m32rbf,unlock) },
+  { M32RBF_INSN_CLRPSW, SEM_FN_NAME (m32rbf,clrpsw) },
+  { M32RBF_INSN_SETPSW, SEM_FN_NAME (m32rbf,setpsw) },
+  { M32RBF_INSN_BSET, SEM_FN_NAME (m32rbf,bset) },
+  { M32RBF_INSN_BCLR, SEM_FN_NAME (m32rbf,bclr) },
+  { M32RBF_INSN_BTST, SEM_FN_NAME (m32rbf,btst) },
   { 0, 0 }
 };
 

@@ -46,22 +46,11 @@
    the requirements above, it's easy to plug an entry into GDB's table
    that uses iconv to handle the details.  */
 
-
-/* Set the host character set to CHARSET.  CHARSET must be a superset
-   of ASCII, since GDB's code assumes this.  */
-void set_host_charset (const char *charset);
-
-
-/* Set the target character set to CHARSET.  */
-void set_target_charset (const char *charset);
-
-
 /* Return the name of the current host/target character set.  The
    result is owned by the charset module; the caller should not free
    it.  */
 const char *host_charset (void);
 const char *target_charset (void);
-
 
 /* In general, the set of C backslash escapes (\n, \f) is specific to
    the character set.  Not all character sets will have form feed

@@ -54,14 +54,28 @@ if [get_compiler_info ${binfile}] {
 # allows us to generate a core on systems where it does.
 #
 # Some systems append "core" to the name of the program; others append
-# the name of the program to "core".
+# the name of the program to "core"; still others (like Linux, as of
+# May 2003) create cores named "core.PID".  In the latter case, we
+# could have many core files lying around, and it may be difficult to
+# tell which one is ours, so let's run the program in a subdirectory.
 set found 0
-catch "system \"(cd ${objdir}/${subdir}; ulimit -c unlimited; ${binfile}; true) >/dev/null 2>&1\""
+set coredir "${objdir}/${subdir}/coredir.[getpid]"
+file mkdir $coredir
+catch "system \"(cd ${coredir}; ulimit -c unlimited; ${binfile}; true) >/dev/null 2>&1\""
 #      remote_exec host "${binfile}"
-foreach i "${objdir}/${subdir}/core ${objdir}/${subdir}/core.coremaker.c ${binfile}.core" {
+foreach i "${coredir}/core ${coredir}/core.coremaker.c ${binfile}.core" {
     if [remote_file build exists $i] {
 	remote_exec build "mv $i ${objdir}/${subdir}/corefile"
 	set found 1
+    }
+}
+# Check for "core.PID".
+if { $found == 0 } {
+    set names [glob -nocomplain -directory $coredir core.*]
+    if {[llength $names] == 1} {
+        set corefile [file join $coredir [lindex $names 0]]
+        remote_exec build "mv $corefile ${objdir}/${subdir}/corefile"
+        set found 1
     }
 }
 if { $found == 0 } {
@@ -77,11 +91,15 @@ if { $found == 0 } {
 	    set found 1
 	}
     }
+}
+
+# Try to clean up after ourselves. 
+remote_file build delete [file join $coredir coremmap.data]
+remote_exec build "rmdir $coredir"
     
-    if { $found == 0  } {
-	warning "can't generate a core file - core tests suppressed - check ulimit -c"
-	return 0
-    }
+if { $found == 0  } {
+    warning "can't generate a core file - core tests suppressed - check ulimit -c"
+    return 0
 }
 
 #
@@ -226,7 +244,6 @@ gdb_expect {
 # test reinit_frame_cache
 
 gdb_load ${binfile}
-setup_xfail "*-*-*" CLLbs17002
-gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(\\)" "up in corefile.exp (reinit)"
+gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(\\).*" "up in corefile.exp (reinit)"
 
 gdb_test "core" "No core file now."

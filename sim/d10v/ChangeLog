@@ -1,3 +1,33 @@
+2003-10-30  Andrew Cagney  <cagney@redhat.com>
+
+	* simops.c: Replace "struct symbol_cache_entry" with "struct
+	bfd_symbol".
+
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (xfer_mem): Simplify.  Only do a single partial
+	transfer.  Problem reported by Tom Rix.
+
+2003-05-07  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_d10v_translate_addr): Add "regcache" parameter.
+	(sim_d10v_translate_imap_addr): Ditto.
+	(sim_d10v_translate_dmap_addr): Ditto.
+	(xfer_mem): Pass NULL regcache to sim_d10v_translate_addr.
+	(dmem_addr): Pass NULL regcache to sim_d10v_translate_dmap_addr.
+	(dmap_register, imap_register): Add "regcache" parameter.
+	(imem_addr): Pass NULL regcache to sim_d10v_translate_imap_addr.
+	(sim_fetch_register): Pass NULL regcache to imap_register and
+	dmap_register.
+
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_open, sim_create_inferior): Rename _bfd to bfd.
+
+2002-11-13  Andrew Cagney  <cagney@redhat.com>
+
+	* simops.c: Include <string.h>.
+
 2002-06-17  Andrew Cagney  <cagney@redhat.com>
 
 	* d10v_sim.h (SET_PSW_BIT): Add cast to avoid inverting an enum.

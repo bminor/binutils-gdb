@@ -1,7 +1,7 @@
 /* Core dump and executable file functions below target vector, for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "gdb_string.h"
 #include <errno.h>
 #include <signal.h>
@@ -37,7 +38,12 @@
 #include "gdbcore.h"
 #include "gdbthread.h"
 #include "regcache.h"
+#include "regset.h"
 #include "symfile.h"
+#include "exec.h"
+#include <readline/readline.h>
+
+#include "gdb_assert.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -54,15 +60,20 @@ static struct core_fns *core_file_fns = NULL;
 
 static struct core_fns *core_vec = NULL;
 
+/* FIXME: kettenis/20031023: Eventually this variable should
+   disappear.  */
+
+struct gdbarch *core_gdbarch = NULL;
+
 static void core_files_info (struct target_ops *);
 
 #ifdef SOLIB_ADD
-static int solib_add_stub (PTR);
+static int solib_add_stub (void *);
 #endif
 
 static struct core_fns *sniff_core_bfd (bfd *);
 
-static boolean gdb_check_format (bfd *);
+static int gdb_check_format (bfd *);
 
 static void core_open (char *, int);
 
@@ -74,7 +85,7 @@ static void core_close_cleanup (void *ignore);
 
 static void get_core_registers (int);
 
-static void add_to_thread_list (bfd *, asection *, PTR);
+static void add_to_thread_list (bfd *, asection *, void *);
 
 static int ignore (CORE_ADDR, char *);
 
@@ -123,6 +134,10 @@ sniff_core_bfd (bfd *abfd)
   struct core_fns *yummy = NULL;
   int matches = 0;;
 
+  /* Don't sniff if we have support for register sets in CORE_GDBARCH.  */
+  if (core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+    return NULL;
+
   for (cf = core_file_fns; cf != NULL; cf = cf->next)
     {
       if (cf->core_sniffer (cf, abfd))
@@ -160,7 +175,7 @@ default_check_format (bfd *abfd)
 
 /* Attempt to recognize core file formats that BFD rejects. */
 
-static boolean 
+static int
 gdb_check_format (bfd *abfd)
 {
   struct core_fns *cf;
@@ -178,7 +193,6 @@ gdb_check_format (bfd *abfd)
 /* Discard all vestiges of any previous core file and mark data and stack
    spaces as empty.  */
 
-/* ARGSUSED */
 static void
 core_close (int quitting)
 {
@@ -208,6 +222,7 @@ core_close (int quitting)
 	}
     }
   core_vec = NULL;
+  core_gdbarch = NULL;
 }
 
 static void
@@ -221,7 +236,7 @@ core_close_cleanup (void *ignore)
    is really an int * which points to from_tty.  */
 
 static int
-solib_add_stub (PTR from_ttyp)
+solib_add_stub (void *from_ttyp)
 {
   SOLIB_ADD (NULL, *(int *) from_ttyp, &current_target, auto_solib_add);
   re_enable_breakpoints_in_shlibs ();
@@ -233,7 +248,7 @@ solib_add_stub (PTR from_ttyp)
    list of threads in a core file.  */
 
 static void
-add_to_thread_list (bfd *abfd, asection *asect, PTR reg_sect_arg)
+add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
 {
   int thread_id;
   asection *reg_sect = (asection *) reg_sect_arg;
@@ -310,6 +325,14 @@ core_open (char *filename, int from_tty)
   core_bfd = temp_bfd;
   old_chain = make_cleanup (core_close_cleanup, 0 /*ignore*/);
 
+  /* FIXME: kettenis/20031023: This is very dangerous.  The
+     CORE_GDBARCH that results from this call may very well be
+     different from CURRENT_GDBARCH.  However, its methods may only
+     work if it is selected as the current architecture, because they
+     rely on swapped data (see gdbarch.c).  We should get rid of that
+     swapped data.  */
+  core_gdbarch = gdbarch_from_bfd (core_bfd);
+
   /* Find a suitable core file handler to munch on core_bfd */
   core_vec = sniff_core_bfd (core_bfd);
 
@@ -364,8 +387,8 @@ core_open (char *filename, int from_tty)
       /* Now, set up the frame cache, and print the top of stack.  */
       flush_cached_frames ();
       select_frame (get_current_frame ());
-      print_stack_frame (selected_frame,
-			 frame_relative_level (selected_frame), 1);
+      print_stack_frame (deprecated_selected_frame,
+			 frame_relative_level (deprecated_selected_frame), 1);
     }
   else
     {
@@ -409,7 +432,7 @@ get_core_register_section (char *name,
 			   int required)
 {
   char section_name[100];
-  sec_ptr section;
+  struct bfd_section *section;
   bfd_size_type size;
   char *contents;
 
@@ -436,6 +459,24 @@ get_core_register_section (char *name,
       return;
     }
 
+  if (core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+    {
+      const struct regset *regset;
+
+      regset = gdbarch_regset_from_core_section (core_gdbarch, name, size);
+      if (regset == NULL)
+	{
+	  if (required)
+	    warning ("Couldn't recognize %s registers in core file.\n",
+		     human_name);
+	  return;
+	}
+
+      regset->supply_regset (regset, current_regcache, -1, contents, size);
+      return;
+    }
+
+  gdb_assert (core_vec);
   core_vec->core_read_registers (contents, size, which, 
 				 ((CORE_ADDR)
 				  bfd_section_vma (core_bfd, section)));
@@ -448,14 +489,13 @@ get_core_register_section (char *name,
 
 /* We just get all the registers, so we don't use regno.  */
 
-/* ARGSUSED */
 static void
 get_core_registers (int regno)
 {
   int status;
 
-  if (core_vec == NULL
-      || core_vec->core_read_registers == NULL)
+  if (!(core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
+      && (core_vec == NULL || core_vec->core_read_registers == NULL))
     {
       fprintf_filtered (gdb_stderr,
 		     "Can't fetch registers from this type of core file\n");
@@ -466,7 +506,7 @@ get_core_registers (int regno)
   get_core_register_section (".reg2", 2, "floating-point", 0);
   get_core_register_section (".reg-xfp", 3, "extended floating-point", 0);
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 static void
@@ -509,16 +549,13 @@ init_core_ops (void)
   core_ops.to_open = core_open;
   core_ops.to_close = core_close;
   core_ops.to_attach = find_default_attach;
-  core_ops.to_require_attach = find_default_require_attach;
   core_ops.to_detach = core_detach;
-  core_ops.to_require_detach = find_default_require_detach;
   core_ops.to_fetch_registers = get_core_registers;
   core_ops.to_xfer_memory = xfer_memory;
   core_ops.to_files_info = core_files_info;
   core_ops.to_insert_breakpoint = ignore;
   core_ops.to_remove_breakpoint = ignore;
   core_ops.to_create_inferior = find_default_create_inferior;
-  core_ops.to_clone_and_follow_inferior = find_default_clone_and_follow_inferior;
   core_ops.to_thread_alive = core_file_thread_alive;
   core_ops.to_stratum = core_stratum;
   core_ops.to_has_memory = 1;

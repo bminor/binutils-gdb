@@ -9,7 +9,6 @@ XM_FILE= xm-go32.h
 NAT_FILE= nm-go32.h
 NATDEPFILES= go32-nat.o i386-nat.o
 
-TERMCAP=
 HOST_IPC=
 CC= gcc
 XM_CLIBS= -ldbg

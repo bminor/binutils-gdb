@@ -1,3 +1,35 @@
+2003-09-05  Andrew Cagney  <cagney@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* interp.c (sim_open): Accept bfd_mach_v850e1.
+	* v850-dc: Add entry for v850e1.
+	* v850.igen: Add support for v850e1.
+	Add code for DBTRAP and DBRET instructions.
+	(dbtrap): Create a separate v850e1 specific instruction.
+	Only generate a trap if the target is not the v850e1.
+	Otherwise treat it as a special kind of branch.
+	(break): Mark as v850/v850e specific.
+	
+2003-05-16  Ian Lance Taylor  <ian@airs.com>
+
+	* Makefile.in (SHELL): Make sure this is defined.
+	(tmp-igen): Use $(SHELL) whenever we invoke move-if-change.
+
+2003-04-06  Nick Clifton  <nickc@redhat.com>
+
+	* simops.c (OP_40): Delete.  Move code to...
+	* v850-igen.c (): ...Here. Sign extend the first operand.
+	* simops.h (OP_40): Remove prototype.
+
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_open, sim_create_inferior): Rename _bfd to bfd.
+
+2002-11-30  Andrew Cagney  <cagney@redhat.com>
+
+	* simops.c: Use int, 1, 0 instead of boolean, true and false.
+	* sim-main.h: Ditto.
+
 2002-09-27  Jim Wilson  <wilson@redhat.com>
 
 	* simops.c (OP_E6077E0): And op1 with 7 after reading register, not

@@ -142,6 +142,8 @@ dink32_open (char *args, int from_tty)
   monitor_open (args, &dink32_cmds, from_tty);
 }
 
+extern initialize_file_ftype _initialize_dink32_rom; /* -Wmissing-prototypes */
+
 void
 _initialize_dink32_rom (void)
 {

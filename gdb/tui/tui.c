@@ -1,6 +1,6 @@
 /* General functions for the WDB TUI.
 
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
    Inc.
 
    Contributed by Hewlett-Packard Company.
@@ -21,23 +21,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
-
-/* FIXME: cagney/2002-02-28: The GDB coding standard indicates that
-   "defs.h" should be included first.  Unfortunatly some systems
-   (currently Debian GNU/Linux) include the <stdbool.h> via <curses.h>
-   and they clash with "bfd.h"'s definiton of true/false.  The correct
-   fix is to remove true/false from "bfd.h", however, until that
-   happens, hack around it by including "config.h" and <curses.h>
-   first.  */
-
-#include "config.h"
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,6 +45,7 @@
 #include "tuiStack.h"
 #include "tuiWin.h"
 #include "tuiSourceWin.h"
+#include "tuiDataWin.h"
 #include "readline/readline.h"
 #include "target.h"
 #include "frame.h"
@@ -69,6 +53,14 @@
 #include "inferior.h"
 #include "symtab.h"
 #include "source.h"
+
+#ifdef HAVE_NCURSES_H       
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
 
 /* Tells whether the TUI is active or not.  */
 int tui_active = 0;
@@ -102,7 +94,7 @@ static Keymap tui_readline_standard_keymap;
 /* TUI readline command.
    Switch the output mode between TUI/standard gdb.  */
 static int
-tui_rl_switch_mode (void)
+tui_rl_switch_mode (int notused1, int notused2)
 {
   if (tui_active)
     {
@@ -138,10 +130,10 @@ tui_rl_switch_mode (void)
    a functionality close to the Emacs split-window command.  We always
    show two windows (src+asm), (src+regs) or (asm+regs).  */
 static int
-tui_rl_change_windows (void)
+tui_rl_change_windows (int notused1, int notused2)
 {
   if (!tui_active)
-    tui_rl_switch_mode ();
+    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
 
   if (tui_active)
     {
@@ -186,10 +178,10 @@ tui_rl_change_windows (void)
 /* TUI readline command.
    Delete the second TUI window to only show one.  */
 static int
-tui_rl_delete_other_windows (void)
+tui_rl_delete_other_windows (int notused1, int notused2)
 {
   if (!tui_active)
-    tui_rl_switch_mode ();
+    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
 
   if (tui_active)
     {
@@ -214,6 +206,27 @@ tui_rl_delete_other_windows (void)
 	  break;
 	}
       tuiSetLayout (new_layout, regs_type);
+    }
+  return 0;
+}
+
+/* TUI readline command.
+   Switch the active window to give the focus to a next window.  */
+static int
+tui_rl_other_window (int count, int key)
+{
+  TuiWinInfoPtr winInfo;
+
+  if (!tui_active)
+    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
+
+  winInfo = tuiNextWin (tuiWinWithFocus ());
+  if (winInfo)
+    {
+      tuiSetWinFocusTo (winInfo);
+      if (dataWin && dataWin->generic.isVisible)
+        tuiRefreshDataWin ();
+      keypad (cmdWin->generic.handle, (winInfo != cmdWin));
     }
   return 0;
 }
@@ -255,8 +268,11 @@ tui_rl_command_mode (int count, int key)
 /* TUI readline command.
    Switch between TUI SingleKey mode and gdb readline editing.  */
 static int
-tui_rl_next_keymap (void)
+tui_rl_next_keymap (int notused1, int notused2)
 {
+  if (!tui_active)
+    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
+
   tui_set_key_mode (tui_current_key_mode == tui_command_mode
                     ? tui_single_key_mode : tui_command_mode);
   return 0;
@@ -335,6 +351,8 @@ tui_initialize_readline ()
   rl_bind_key_in_map ('1', tui_rl_delete_other_windows, tui_ctlx_keymap);
   rl_bind_key_in_map ('2', tui_rl_change_windows, emacs_ctlx_keymap);
   rl_bind_key_in_map ('2', tui_rl_change_windows, tui_ctlx_keymap);
+  rl_bind_key_in_map ('o', tui_rl_other_window, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('o', tui_rl_other_window, tui_ctlx_keymap);
   rl_bind_key_in_map ('q', tui_rl_next_keymap, tui_keymap);
   rl_bind_key_in_map ('s', tui_rl_next_keymap, emacs_ctlx_keymap);
   rl_bind_key_in_map ('s', tui_rl_next_keymap, tui_ctlx_keymap);
@@ -393,14 +411,13 @@ tui_enable (void)
   
   tui_setup_io (1);
 
-  tui_version = 1;
   tui_active = 1;
-  if (selected_frame)
-     tuiShowFrameInfo (selected_frame);
+  if (deprecated_selected_frame)
+     tuiShowFrameInfo (deprecated_selected_frame);
 
   /* Restore TUI keymap.  */
   tui_set_key_mode (tui_current_key_mode);
-  refresh ();
+  tuiRefreshAll ();
 
   /* Update gdb's knowledge of its terminal.  */
   target_terminal_save_ours ();
@@ -435,7 +452,6 @@ tui_disable (void)
   /* Update gdb's knowledge of its terminal.  */
   target_terminal_save_ours ();
 
-  tui_version = 0;
   tui_active = 0;
   tui_update_gdb_sizes ();
 }
@@ -563,7 +579,7 @@ tui_show_assembly (CORE_ADDR addr)
 int
 tui_is_window_visible (TuiWinType type)
 {
-  if (tui_version == 0)
+  if (tui_active == 0)
     return 0;
 
   if (winList[type] == 0)
@@ -575,7 +591,7 @@ tui_is_window_visible (TuiWinType type)
 int
 tui_get_command_dimension (int *width, int *height)
 {
-  if (!tui_version || !m_winPtrNotNull (cmdWin))
+  if (!tui_active || !m_winPtrNotNull (cmdWin))
     {
       return 0;
     }

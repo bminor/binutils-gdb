@@ -49,7 +49,8 @@ static int s390_regmap[] = {
   
   PT_FPC,
 
-#ifdef PT_FPR0_HI
+/* <asm/ptrace.h> defines GPR_SIZE.  */
+#if GPR_SIZE == 4
   PT_FPR0_HI, PT_FPR1_HI, PT_FPR2_HI, PT_FPR3_HI,
   PT_FPR4_HI, PT_FPR5_HI, PT_FPR6_HI, PT_FPR7_HI,
   PT_FPR8_HI, PT_FPR9_HI, PT_FPR10_HI, PT_FPR11_HI,

@@ -1,5 +1,7 @@
 /* Module support.
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+
+   Copyright 1996, 1997, 1998, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -55,9 +57,6 @@ static MODULE_INSTALL_FN * const modules[] = {
 #endif
 #if WITH_SCACHE
   scache_install,
-#endif
-#ifdef SIM_HAVE_BREAKPOINTS
-  sim_break_install,
 #endif
 #if WITH_HW
   sim_hw_install,

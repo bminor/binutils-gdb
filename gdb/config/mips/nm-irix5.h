@@ -36,8 +36,6 @@
      procfs_stopped_by_watchpoint(inferior_ptid)
 extern int procfs_stopped_by_watchpoint (ptid_t);
 
-#define HAVE_NONSTEPPABLE_WATCHPOINT 1
-
 /* Use these macros for watchpoint insertion/deletion.  */
 /* type can be 0: write watch, 1: read watch, 2: access watch (read/write) */
 #define target_insert_watchpoint(ADDR, LEN, TYPE) \

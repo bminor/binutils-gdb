@@ -146,7 +146,7 @@ arm_rdi_start_remote (char *dummy)
 /* Helper callbacks for the "host interface" structure.  RDI functions call
    these to forward output from the target system and so forth.  */
 
-void
+static void
 voiddummy (void *dummy)
 {
   fprintf_unfiltered (gdb_stdout, "void dummy\n");
@@ -524,7 +524,6 @@ arm_rdi_wait (ptid_t ptid, struct target_waitstatus *status)
 
 /* Read the remote registers into the block REGS.  */
 
-/* ARGSUSED */
 static void
 arm_rdi_fetch_registers (int regno)
 {
@@ -598,7 +597,7 @@ arm_rdi_store_registers (int regno)
     }
   else
     {
-      read_register_gen (regno, (char *) rawreg);
+      deprecated_read_register_gen (regno, (char *) rawreg);
       /* RDI manipulates data in host byte order, so convert now. */
       store_unsigned_integer (rawerreg, 4, rawreg[0]);
 
@@ -624,7 +623,6 @@ arm_rdi_store_registers (int regno)
    if SHOULD_WRITE is nonzero.  Returns length of data written or
    read; 0 for error.  TARGET is unused.  */
 
-/* ARGSUSED */
 static int
 arm_rdi_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 		     int should_write, struct mem_attrib *attrib,
@@ -1009,6 +1007,8 @@ rdilogenable_command (char *args, int from_tty)
 		     "              try y or n\n", args);
 }
 
+extern initialize_file_ftype _initialize_remote_rdi; /* -Wmissing-prototypes */
+
 void
 _initialize_remote_rdi (void)
 {
@@ -1063,8 +1063,8 @@ _initialize_remote_rdi (void)
 
 /* A little dummy to make linking with the library succeed. */
 
-int
-Fail (void)
+void
+Fail (const char *ignored, ...)
 {
-  return 0;
+  
 }

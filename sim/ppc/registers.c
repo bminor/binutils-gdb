@@ -150,6 +150,35 @@ register_description(const char reg[])
     description.index = spr_ctr;
     description.size = sizeof(unsigned_word);
   }
+#ifdef WITH_ALTIVEC
+  else if (reg[0] == 'v' && reg[1] == 'r' && are_digits(reg + 2)) {
+    description.type = reg_vr;
+    description.index = atoi(reg+2);
+    description.size = sizeof(vreg);
+  }
+   else if (!strcmp(reg, "vscr")) {
+    description.type = reg_vscr;
+    description.index = 0;
+    description.size = sizeof(vscreg);
+  }
+#endif
+#ifdef WITH_E500
+  else if (reg[0] == 'e' && reg[1] == 'v' && are_digits(reg + 2)) {
+    description.type = reg_evr;
+    description.index = atoi(reg+2);
+    description.size = sizeof(unsigned64);
+  }
+  else if (reg[0] == 'r' && reg[1] == 'h' && are_digits(reg + 2)) {
+    description.type = reg_gprh;
+    description.index = atoi(reg+2);
+    description.size = sizeof(gpreg);
+  }
+  else if (!strcmp(reg, "acc")) {
+    description.type = reg_acc;
+    description.index = 0;
+    description.size = sizeof(unsigned64);
+  }
+#endif
   else {
     sprs spr = find_spr(reg);
     if (spr != nr_of_sprs) {

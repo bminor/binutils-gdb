@@ -22,7 +22,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* This module defines communication with the Mitsubishi m32r monitor */
+/* This module defines communication with the Renesas m32r monitor */
 
 #include "defs.h"
 #include "gdbcore.h"
@@ -40,8 +40,6 @@
 #include <ctype.h>
 #include "regcache.h"
 
-extern void report_transfer_performance (unsigned long, time_t, time_t);
-
 /*
  * All this stuff just to get my host computer's IP address!
  */
@@ -55,6 +53,14 @@ extern void report_transfer_performance (unsigned long, time_t, time_t);
 static char *board_addr;	/* user-settable IP address for M32R-EVA */
 static char *server_addr;	/* user-settable IP address for gdb host */
 static char *download_path;	/* user-settable path for SREC files     */
+
+
+/* REGNUM */
+#define PSW_REGNUM      16
+#define SPI_REGNUM      18
+#define SPU_REGNUM      19
+#define ACCL_REGNUM     22
+#define ACCH_REGNUM     23
 
 
 /* 
@@ -157,7 +163,8 @@ m32r_load (char *filename, int from_tty)
 #endif
   end_time = time (NULL);
   printf_filtered ("Start address 0x%lx\n", bfd_get_start_address (abfd));
-  report_transfer_performance (data_count, start_time, end_time);
+  print_transfer_performance (gdb_stdout, data_count, 0,
+			      end_time - start_time);
 
   /* Finally, make the PC point at the start address */
   if (exec_bfd)
@@ -190,9 +197,9 @@ static void mon2000_open (char *args, int from_tty);
    either. So, typing "info reg sp" becomes an "A7". */
 
 static char *m32r_regnames[] =
-{"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
- "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
- "psw", "cbr", "spi", "spu", "bpc", "pc", "accl", "acch",
+  { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+  "psw", "cbr", "spi", "spu", "bpc", "pc", "accl", "acch",
 };
 
 static void
@@ -256,7 +263,9 @@ m32r_supply_register (char *regname, int regnamelen, char *val, int vallen)
 
       if (regno == SPI_REGNUM || regno == SPU_REGNUM)
 	{			/* special handling for stack pointer (spu or spi) */
-	  unsigned long stackmode = read_register (PSW_REGNUM) & 0x80;
+	  ULONGEST stackmode, psw;
+	  regcache_cooked_read_unsigned (current_regcache, PSW_REGNUM, &psw);
+	  stackmode = psw & 0x80;
 
 	  if (regno == SPI_REGNUM && !stackmode)	/* SP == SPI */
 	    monitor_supply_register (SP_REGNUM, val);
@@ -270,8 +279,7 @@ m32r_supply_register (char *regname, int regnamelen, char *val, int vallen)
 
 static struct target_ops m32r_ops;
 
-static char *m32r_inits[] =
-{"\r", NULL};
+static char *m32r_inits[] = { "\r", NULL };
 
 static struct monitor_ops m32r_cmds;
 
@@ -348,8 +356,8 @@ init_mon2000_cmds (void)
   mon2000_cmds.clr_all_break = "bpoff\r";	/* clear all breakpoints */
   mon2000_cmds.fill = "%x %x %x fill\r";	/* fill (start length val) */
   mon2000_cmds.setmem.cmdb = "%x 1 %x fill\r";	/* setmem.cmdb (addr, value) */
-  mon2000_cmds.setmem.cmdw = "%x 1 %x fillh\r";		/* setmem.cmdw (addr, value) */
-  mon2000_cmds.setmem.cmdl = "%x 1 %x fillw\r";		/* setmem.cmdl (addr, value) */
+  mon2000_cmds.setmem.cmdw = "%x 1 %x fillh\r";	/* setmem.cmdw (addr, value) */
+  mon2000_cmds.setmem.cmdl = "%x 1 %x fillw\r";	/* setmem.cmdl (addr, value) */
   mon2000_cmds.setmem.cmdll = NULL;	/* setmem.cmdll (addr, value) */
   mon2000_cmds.setmem.resp_delim = NULL;	/* setmem.resp_delim */
   mon2000_cmds.setmem.term = NULL;	/* setmem.term */
@@ -473,7 +481,8 @@ m32r_upload_command (char *args, int from_tty)
 	myIPaddress++;
 
       if (!strncmp (myIPaddress, "0.0.", 4))	/* empty */
-	error ("Please use 'set board-address' to set the M32R-EVA board's IP address.");
+	error
+	  ("Please use 'set board-address' to set the M32R-EVA board's IP address.");
       if (strchr (myIPaddress, '('))
 	*(strchr (myIPaddress, '(')) = '\0';	/* delete trailing junk */
       board_addr = xstrdup (myIPaddress);
@@ -483,19 +492,22 @@ m32r_upload_command (char *args, int from_tty)
       buf[0] = 0;
       gethostname (buf, sizeof (buf));
       if (buf[0] != 0)
-	hostent = gethostbyname (buf);
-      if (hostent != 0)
 	{
+	  hostent = gethostbyname (buf);
+	  if (hostent != 0)
+	    {
 #if 1
-	  memcpy (&inet_addr.s_addr, hostent->h_addr,
-		  sizeof (inet_addr.s_addr));
-	  server_addr = (char *) inet_ntoa (inet_addr);
+	      memcpy (&inet_addr.s_addr, hostent->h_addr,
+		      sizeof (inet_addr.s_addr));
+	      server_addr = (char *) inet_ntoa (inet_addr);
 #else
-	  server_addr = (char *) inet_ntoa (hostent->h_addr);
+	      server_addr = (char *) inet_ntoa (hostent->h_addr);
 #endif
+	    }
 	}
       if (server_addr == 0)	/* failed? */
-	error ("Need to know gdb host computer's IP address (use 'set server-address')");
+	error
+	  ("Need to know gdb host computer's IP address (use 'set server-address')");
     }
 
   if (args == 0 || args[0] == 0)	/* no args: upload the current file */
@@ -506,28 +518,31 @@ m32r_upload_command (char *args, int from_tty)
       if (current_directory)
 	download_path = xstrdup (current_directory);
       else
-	error ("Need to know default download path (use 'set download-path')");
+	error
+	  ("Need to know default download path (use 'set download-path')");
     }
 
   start_time = time (NULL);
   monitor_printf ("uhip %s\r", server_addr);
-  resp_len = monitor_expect_prompt (buf, sizeof (buf));		/* parse result? */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result? */
   monitor_printf ("ulip %s\r", board_addr);
-  resp_len = monitor_expect_prompt (buf, sizeof (buf));		/* parse result? */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result? */
   if (args[0] != '/')
     monitor_printf ("up %s\r", download_path);	/* use default path */
   else
     monitor_printf ("up\r");	/* rooted filename/path */
-  resp_len = monitor_expect_prompt (buf, sizeof (buf));		/* parse result? */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result? */
 
   if (strrchr (args, '.') && !strcmp (strrchr (args, '.'), ".srec"))
     monitor_printf ("ul %s\r", args);
   else				/* add ".srec" suffix */
     monitor_printf ("ul %s.srec\r", args);
-  resp_len = monitor_expect_prompt (buf, sizeof (buf));		/* parse result? */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result? */
 
   if (buf[0] == 0 || strstr (buf, "complete") == 0)
-    error ("Upload file not found: %s.srec\nCheck IP addresses and download path.", args);
+    error
+      ("Upload file not found: %s.srec\nCheck IP addresses and download path.",
+       args);
   else
     printf_filtered (" -- Ethernet load complete.\n");
 
@@ -556,8 +571,9 @@ m32r_upload_command (char *args, int from_tty)
 	  }
       /* Finally, make the PC point at the start address */
       write_pc (bfd_get_start_address (abfd));
-      report_transfer_performance (data_count, start_time, end_time);
       printf_filtered ("Start address 0x%lx\n", bfd_get_start_address (abfd));
+      print_transfer_performance (gdb_stdout, data_count, 0,
+				  end_time - start_time);
     }
   inferior_ptid = null_ptid;	/* No process now */
 
@@ -598,29 +614,26 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   mon2000_ops.to_open = mon2000_open;
   add_target (&mon2000_ops);
 
-  add_show_from_set
-    (add_set_cmd ("download-path", class_obscure, var_string,
-		  (char *) &download_path,
-		  "Set the default path for downloadable SREC files.",
-		  &setlist),
-     &showlist);
+  add_setshow_cmd ("download-path", class_obscure,
+		   var_string, &download_path,
+		   "Set the default path for downloadable SREC files.",
+		   "Show the default path for downloadable SREC files.",
+		   NULL, NULL, &setlist, &showlist);
 
-  add_show_from_set
-    (add_set_cmd ("board-address", class_obscure, var_string,
-		  (char *) &board_addr,
-		  "Set IP address for M32R-EVA target board.",
-		  &setlist),
-     &showlist);
+  add_setshow_cmd ("board-address", class_obscure,
+		   var_string, &board_addr,
+		   "Set IP address for M32R-EVA target board.",
+		   "Show IP address for M32R-EVA target board.",
+		   NULL, NULL, &setlist, &showlist);
 
-  add_show_from_set
-    (add_set_cmd ("server-address", class_obscure, var_string,
-		  (char *) &server_addr,
-		"Set IP address for download server (GDB's host computer).",
-		  &setlist),
-     &showlist);
+  add_setshow_cmd ("server-address", class_obscure,
+		   var_string, &server_addr,
+		   "Set IP address for download server (GDB's host computer).",
+		   "Show IP address for download server (GDB's host computer).",
+		   NULL, NULL, &setlist, &showlist);
 
   add_com ("upload", class_obscure, m32r_upload_command,
-      "Upload the srec file via the monitor's Ethernet upload capability.");
+	   "Upload the srec file via the monitor's Ethernet upload capability.");
 
   add_com ("tload", class_obscure, m32r_load, "test upload command.");
 }

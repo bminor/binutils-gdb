@@ -1,3 +1,158 @@
+2003-10-10  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/testutils.inc (or_gr_immed): New macro.
+	* sim/frv/fp_exception-fr550.cgs: Write insns using
+	unaligned registers into the program in order to
+	cause the required exceptions.
+	* sim/frv/fp_exception.cgs: Ditto.
+	* sim/frv/regalign.cgs: Ditto.
+
+2003-10-06  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/fr550: New subdirectory.
+	* sim/frv/fr400/*.cgs: Add fr550 as appropriate.
+	* sim/frv/fr500/*.cgs: Add fr550 as appropriate.
+	* sim/frv/interrupts/*.cgs: Add fr550 as appropriate.
+	* sim/frv/interrupts/*-fr550.cgs: New test cases for fr550.
+
+2003-09-19  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/nldqi.cgs: Remove.  This insn was never implemented
+	by Fujitsu.
+
+2003-09-19  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/rstqf.cgs: Use nldq instead of nldqi.
+	* sim/frv/rstq.cgs: Use nldq instead of nldqi.
+
+2003-09-11  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/testsuite/sim/frv/movgs.cgs: Change lcr to spr[273],
+	which according to the comments seems to be the intent.
+
+2003-09-09  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/maddaccs.cgs: move to fr400 subdirectory.
+	* sim/frv/msubaccs.cgs: move to fr400 subdirectory.
+	* sim/frv/masaccs.cgs: move to fr400 subdirectory.
+
+2003-09-03  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/fr500/mclracc.cgs: Change mach to 'all', to be
+	consistent with other tests in the directory.
+
+2003-09-03  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/interrupts/Ipipe-fr400.cgs: New file.
+	* sim/frv/interrupts/Ipipe-fr500.cgs: New file.
+	* sim/frv/interrupts/Ipipe.cgs: Remove (replaced by above).
+
+2003-08-20  Michael Snyder  <msnyder@redhat.com>
+            On behalf of Dave Brolley
+  
+	* sim/frv: New testsuite.
+	* frv-elf: New testsuite.
+  
+2003-07-09  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/sh: New directory.  Tests for Renesas sh family.
+
+2003-04-13  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/h8300: New directory.  Tests for Renesas h8/300 family.
+
+2003-04-01  Nick Clifton  <nickc@redhat.com>
+
+	* sim/arm: New directory: Tests for ARM simulator.
+	* sim/arm/allinsn.exp: New file: Test script.
+	* sim/arm/testutils.inc: New file: Test macros.
+	* sim/arm/adc.cgs, sim/arm/add.cgs, sim/arm/and.cgs,
+	sim/arm/b.cgs, sim/arm/bic.cgs, sim/arm/bl.cgs, sim/arm/bx.cgs,
+	sim/arm/cmn.cgs, sim/arm/cmp.cgs, sim/arm/eor.cgs,
+	sim/arm/hello.ms, sim/arm/ldm.cgs, sim/arm/ldr.cgs,
+	sim/arm/ldrb.cgs, sim/arm/ldrh.cgs, sim/arm/ldrsb.cgs,
+	sim/arm/ldrsh.cgs, sim/arm/misaligned1.ms, sim/arm/misaligned2.ms,
+	sim/arm/misaligned3.ms, sim/arm/misc.exp, sim/arm/mla.cgs,
+	sim/arm/mov.cgs, sim/arm/mrs.cgs, sim/arm/msr.cgs,
+	sim/arm/mul.cgs, sim/arm/mvn.cgs, sim/arm/orr.cgs,
+	sim/arm/rsb.cgs, sim/arm/rsc.cgs, sim/arm/sbc.cgs,
+	sim/arm/smlal.cgs, sim/arm/smull.cgs, sim/arm/stm.cgs,
+	sim/arm/str.cgs, sim/arm/strb.cgs, sim/arm/strh.cgs,
+	sim/arm/sub.cgs, sim/arm/swi.cgs, sim/arm/swp.cgs,
+	sim/arm/swpb.cgs, sim/arm/teq.cgs,  sim/arm/tst.cgs,
+	sim/arm/umlal.cgs, sim/arm/umull.cgs: New files: ARM tests.
+	* sim/arm/iwmmxt: New Directory: Tests for iWMMXt.
+	* sim/arm/iwmmxt/iwmmxt.exp: New file: Test script.
+	* sim/arm/iwmmxt/testutils.inc: New file: Test macros.
+	* sim/arm/iwmmxt/tbcst.cgs, sim/arm/iwmmxt/textrm.cgs,
+	sim/arm/iwmmxt/tinsr.cgs, sim/arm/iwmmxt/tmia.cgs,
+	sim/arm/iwmmxt/tmiaph.cgs, sim/arm/iwmmxt/tmiaxy.cgs,
+	sim/arm/iwmmxt/tmovmsk.cgss, sim/arm/iwmmxt/wacc.cgs,
+	sim/arm/iwmmxt/wadd.cgs, sim/arm/iwmmxt/waligni.cgs,
+	sim/arm/iwmmxt/walignr.cgs, sim/arm/iwmmxt/wand.cgs,
+	sim/arm/iwmmxt/wandn.cgs, sim/arm/iwmmxt/wavg2.cgs,
+	sim/arm/iwmmxt/wcmpeq.cgs, sim/arm/iwmmxt/wcmpgt.cgs,
+	sim/arm/iwmmxt/wmac.cgs, sim/arm/iwmmxt/wmadd.cgs,
+	sim/arm/iwmmxt/wmax.cgs, sim/arm/iwmmxt/wmin.cgs,
+	sim/arm/iwmmxt/wmov.cgs, sim/arm/iwmmxt/wmul.cgs,
+	sim/arm/iwmmxt/wor.cgs, sim/arm/iwmmxt/wpack.cgs,
+	sim/arm/iwmmxt/wror.cgs, sim/arm/iwmmxt/wsad.cgs,
+	sim/arm/iwmmxt/wshufh.cgs, sim/arm/iwmmxt/wsll.cgs,
+	sim/arm/iwmmxt/wsra.cgs, sim/arm/iwmmxt/wsrl.cgs,
+	sim/arm/iwmmxt/wsub.cgs, sim/arm/iwmmxt/wunpckeh.cgs,
+	sim/arm/iwmmxt/wunpckel.cgs, sim/arm/iwmmxt/wunpckih.cgs,
+	sim/arm/iwmmxt/wunpckil.cgs, sim/arm/iwmmxt/wxor.cgs,
+	sim/arm/iwmmxt/wzero.cgs: New files: iWMMXt tests.
+	* sim/arm/thumb: New Directory: Thumb tests.
+	* sim/arm/thumb/allthumb.exp: New file: Test script.
+	* sim/arm/thumb/testutils.inc: New file: Test macros.
+	* sim/arm/thumb/adc.cgs, sim/arm/thumb/add-hd-hs.cgs,
+	sim/arm/thumb/add-hd-rs.cgs, sim/arm/thumb/add-rd-hs.cgs,
+	sim/arm/thumb/add-sp.cgs, sim/arm/thumb/add.cgs,
+	sim/arm/thumb/addi.cgs, sim/arm/thumb/addi8.cgs,
+	sim/arm/thumb/and.cgs, sim/arm/thumb/asr.cgs, sim/arm/thumb/b.cgs,
+	sim/arm/thumb/bcc.cgs, sim/arm/thumb/bcs.cgs,
+	sim/arm/thumb/beq.cgs, sim/arm/thumb/bge.cgs,
+	sim/arm/thumb/bgt.cgs, sim/arm/thumb/bhi.cgs,
+	sim/arm/thumb/bic.cgs, sim/arm/thumb/bl-hi.cgs,
+	sim/arm/thumb/bl-lo.cgs, sim/arm/thumb/ble.cgs,
+	sim/arm/thumb/bls.cgs, sim/arm/thumb/blt.cgs,
+	sim/arm/thumb/bmi.cgs, sim/arm/thumb/bne.cgs,
+	sim/arm/thumb/bpl.cgs, sim/arm/thumb/bvc.cgs,
+	sim/arm/thumb/bvs.cgs, sim/arm/thumb/bx-hs.cgs,
+	sim/arm/thumb/bx-rs.cgs, sim/arm/thumb/cmn.cgs,
+	sim/arm/thumb/cmp-hd-hs.cgs, sim/arm/thumb/cmp-hd-rs.cgs,
+	sim/arm/thumb/cmp-rd-hs.cgs, sim/arm/thumb/cmp.cgs,
+	sim/arm/thumb/eor.cgs, sim/arm/thumb/lda-pc.cgs,
+	sim/arm/thumb/lda-sp.cgs, sim/arm/thumb/ldmia.cgs,
+	sim/arm/thumb/ldr-imm.cgs, sim/arm/thumb/ldr-pc.cgs,
+	sim/arm/thumb/ldr-sprel.cgs, sim/arm/thumb/ldr.cgs,
+	sim/arm/thumb/ldrb-imm.cgs, sim/arm/thumb/ldrb.cgs,
+	sim/arm/thumb/ldrh-imm.cgs, sim/arm/thumb/ldrh.cgs,
+	sim/arm/thumb/ldsb.cgs, sim/arm/thumb/ldsh.cgs,
+	sim/arm/thumb/lsl.cgs, sim/arm/thumb/lsr.cgs,
+	sim/arm/thumb/mov-hd-hs.cgs, sim/arm/thumb/mov-hd-rs.cgs,
+	sim/arm/thumb/mov-rd-hs.cgs, sim/arm/thumb/mov.cgs,
+	sim/arm/thumb/mul.cgs, sim/arm/thumb/mvn.cgs,
+	sim/arm/thumb/neg.cgs, sim/arm/thumb/orr.cgs,
+	sim/arm/thumb/pop-pc.cgs, sim/arm/thumb/pop.cgs,
+	sim/arm/thumb/push-lr.cgs, sim/arm/thumb/push.cgs,
+	sim/arm/thumb/ror.cgs, sim/arm/thumb/sbc.cgs,
+	sim/arm/thumb/stmia.cgs, sim/arm/thumb/str-imm.cgs,
+	sim/arm/thumb/str-sprel.cgs, sim/arm/thumb/str.cgs,
+	sim/arm/thumb/strb-imm.cgs, sim/arm/thumb/strb.cgs,
+	sim/arm/thumb/strh-imm.cgs, sim/arm/thumb/strh.cgs,
+	sim/arm/thumb/sub-sp.cgs, sim/arm/thumb/sub.cgs,
+	sim/arm/thumb/subi.cgs, sim/arm/thumb/subi8.cgs,
+	sim/arm/thumb/swi.cgs, sim/arm/thumb/tst.cgs: New files: Thumb
+	tests.
+	* sim/arm/xscale: New directory.
+	* sim/arm/xscale/xscale.exp: New file: Test script.
+	* sim/arm/xscale/testutils.inc: New file: Test macros.
+	* sim/arm/xscale/blx.cgs, sim/arm/xscale/mia.cgs,
+	sim/arm/xscale/miaph.cgs, sim/arm/xscale/miaxy.cgs,
+	sim/arm/xscale/mra.cgs: New files: XScale tests.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

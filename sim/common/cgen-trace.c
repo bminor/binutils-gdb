@@ -322,12 +322,12 @@ sim_disasm_sprintf VPARAMS ((SFILE *f, const char *format, ...))
 /* Memory read support for an opcodes disassembler.  */
 
 int
-sim_disasm_read_memory (bfd_vma memaddr, bfd_byte *myaddr, int length,
+sim_disasm_read_memory (bfd_vma memaddr, bfd_byte *myaddr, unsigned int length,
 			struct disassemble_info *info)
 {
   SIM_CPU *cpu = (SIM_CPU *) info->application_data;
   SIM_DESC sd = CPU_STATE (cpu);
-  int length_read;
+  unsigned length_read;
 
   length_read = sim_core_read_buffer (sd, cpu, read_map, myaddr, memaddr,
 				      length);

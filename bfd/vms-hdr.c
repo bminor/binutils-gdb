@@ -1,6 +1,7 @@
 /* vms-hdr.c -- BFD back-end for VMS/VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Free Software Foundation, Inc.
 
    HDR record handling functions
    EMH record handling functions
@@ -205,7 +206,7 @@ _bfd_vms_slurp_hdr (abfd, objtype)
 /*-----------------------------------------------------------------------------*/
 /* Output routines.  */
 
-/* Manufacure a VMS like time on a unix based system.
+/* Manufacture a VMS like time on a unix based system.
    stolen from obj-vms.c  */
 
 static unsigned char *
@@ -408,10 +409,10 @@ _bfd_vms_slurp_eom (abfd, objtype)
 	  bfd_set_error (bfd_error_bad_value);
 	  return -1;
 	}
-      PRIV(eom_data).eom_has_transfer = false;
+      PRIV(eom_data).eom_has_transfer = FALSE;
       if (PRIV(rec_size) > 10)
 	{
-	   PRIV(eom_data).eom_has_transfer = true;
+	   PRIV(eom_data).eom_has_transfer = TRUE;
 	   PRIV(eom_data).eom_b_tfrflg = *(vms_rec + 9);
 	   PRIV(eom_data).eom_l_psindx = bfd_getl32 (vms_rec + 12);
 	   PRIV(eom_data).eom_l_tfradr = bfd_getl32 (vms_rec + 16);

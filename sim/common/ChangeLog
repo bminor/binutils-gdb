@@ -1,3 +1,141 @@
+2003-11-22  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* sim-options.c (standard_options): Fix the names of H8
+	variants.
+
+2003-10-30  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-trace.c, sim-base.h: Replace "struct symbol_cache_entry"
+	with "struct bfd_symbol".
+
+2003-10-21  Andrew Cagney  <cagney@redhat.com>
+
+	* callback.c (os_truncate): Call "truncate", and not "stat".
+
+2003-10-20  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-base.h: Replace "struct sec" with "struct bfd_section".
+
+2003-10-15  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* callback.c (os_ftruncate, os_truncate): New functions.
+	(default_callback): Initialize ftruncate and truncate members.
+
+2003-09-08  Dave Brolley  <brolley@redhat.com>
+
+	On behalf of Doug Evans <dje@sebabeach.org>
+	* cgen.sh: New arg archfile.
+	* Make-common.in (cgen-arch,cgen-cpu,cgen-defs,cgen-decode,
+	cgen-cpu-decode,cgen-desc): Update call to cgen.sh.
+
+2003-08-28  Andrew Cagney  <cagney@redhat.com>
+
+	* dv-glue.c (hw_glue_finish): Change %d to %ld to match sizeof.
+	* sim-options.c (print_help): Cast the format with specifier to
+	"int".
+
+2003-08-20  Michael Snyder  <msnyder@redhat.com>
+            Dave Brolley  <brolley@redhat.com>
+
+	* cgen-par.h (flags, word1): New target-specific 
+	fields of CGEN_WRITE_QUEUE_ELEMENT.
+	(CGEN_WRITE_QUEUE_ELEMENT_FLAGS): New accessor macro.
+	(CGEN_WRITE_QUEUE_ELEMENT_WORD1): New accessor macro.
+	* gennltvals.sh: Add frv target.
+	* nltvals.def: Add frv target.
+
+2003-06-23  Michael Snyder  <msnyder@redhat.com>
+
+	* nrun.c (main): Delete h8/300 ifdef (sim now handles signals).
+	* sim-reg.c: Fix cut-and-paste bug in comment.
+
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	From matthew green <mrg@redhat.com>:
+        * sim-fpu.h: Update copyright.
+	(sim_fpu_fraction, sim_fpu_guard): New prototypes.
+        * sim-fpu.c: Update copyright.
+	(sim_fpu_fraction, sim_fpu_guard): New inline functions.
+
+2003-06-17  Frank Ch. Eigler  <fche@redhat.com>
+
+	From Doug Evans <dje@sebabeach.org>:
+	* cgen-trace.h (sim_disasm_read_memory): Update args to be compatible
+	with disassemble_info:read_memory_func.
+	* cgen-trace.c (sim_disasm_read_memory): Ditto.
+
+2003-06-04  Michael Snyder  <msnyder@redhat.com>
+
+	* common/run.c (main): Remove SIM_H8300 ifdef.
+	(usage): Ditto.
+	* common/sim-options.c (STANDARD_OPTIONS): Add SIM_H8300SX.
+	(standard_options): Add '-x' for h8/300sx.
+	(standard_option_handler): Add case for SIM_H8300SX.
+
+2003-04-13  Michael Snyder  <msnyder@redhat.com>
+
+	* Make-common.in (sim-events.o, sim-config.o): Depend on sim-main.h.
+
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-engine.c (sim_engine_halt): If jmpbuf is invalid, abort.
+	(sim_engine_vabort): Ditto.
+
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-utils.h (sim_analyze_program, sim_load_file): Rename _bfd to bfd.
+	* sim-hload.c (sim_load), sim-base.h (sim_state_base): Ditto.
+	* nrun.c (main): Ditto.
+
+2003-02-26  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-engine.h (sim_engine_abort): Add noreturn attribute.
+	(sim_engine_vabort): Ditto.
+	(sim_engine_halt, sim_engine_restart): Ditto.
+
+2003-02-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Remove sim-break.o
+	(sim-break_h): Delete macro.
+	(sim-break.o): Delete rule.
+	* sim-break.c: Delete file.
+	* sim-break.h: Delete file.
+	* sim-base.h [SIM_HAVE_BREAKPOINTS]: Don't include "sim-break.h".
+	(STATE_BREAKPOINTS): Delete macro.
+	(sim_state_base): Delete field breakpoints.
+	* sim-module.c (modules) [SIM_HAVE_BREAKPOINTS]: Don't add
+	sim_break_install to array.
+
+2003-01-08  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* run.c (usage): Fix typos.
+
+2002-11-27  Richard Sandiford  <rsandifo@redhat.com>
+
+	* sim-fpu.c (sim_fpu_inv): Use sim_fpu_div.
+
+2002-11-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* dv-core.c: Update copyright.  sim/common contributed to the FSF.
+	* dv-glue.c, dv-pal.c, hw-base.c, hw-base.h, hw-device.c: Ditto.
+	* hw-device.h, hw-handles.c, hw-handles.h: Ditto.
+	* hw-instances.c, hw-instances.h, hw-properties.c: Ditto.
+	* hw-properties.h, hw-tree.c, hw-tree.h, sim-alu.h: Ditto.
+	* sim-basics.h, sim-bits.c, sim-bits.h, sim-config.c: Ditto.
+	* sim-config.h, sim-core.c, sim-core.h, sim-endian.c: Ditto.
+	* sim-endian.h, sim-events.c, sim-events.h, sim-inline.c: Ditto.
+	* sim-inline.h, sim-io.c, sim-io.h, sim-n-bits.h: Ditto.
+	* sim-n-core.h, sim-n-endian.h, sim-types.h: Ditto.
+
+2002-11-13  Andrew Cagney  <cagney@redhat.com>
+
+	* run.c (main): Remove SIM_HAVE_ENVIRONMENT from #endif.
+
+2002-11-06  Richard Sandiford  <rsandifo@redhat.com>
+
+	* Make-common.in (SIM_EXTRA_DISTCLEAN): New macro.
+	(distclean): Depend on it.
+
 2002-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* cgen-trace.h: Test __BFD_H_SEEN__ rather than BFD_VERSION.

@@ -1,4 +1,4 @@
-/* Target-specific definition for a Hitachi Super-H.
+/* Target-specific definition for a Renesas Super-H.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
@@ -25,9 +25,7 @@
 
 #define NUM_REALREGS 59 /* used in remote-e7000.c which is not multiarched. */
 
-#define REGISTER_TYPE  long /* used in standalone.c */
-
-#define BIG_REMOTE_BREAKPOINT    { 0xc3, 0x20 } /* Used in remote.c */
-#define LITTLE_REMOTE_BREAKPOINT { 0x20, 0xc3 } /* Used in remote.c */
+#define DEPRECATED_BIG_REMOTE_BREAKPOINT    { 0xc3, 0x20 } /* Used in remote.c */
+#define DEPRECATED_LITTLE_REMOTE_BREAKPOINT { 0x20, 0xc3 } /* Used in remote.c */
 
 /*#define NOP   {0x20, 0x0b}*/ /* Who uses this???*/

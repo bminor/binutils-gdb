@@ -1,5 +1,5 @@
 # Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1999,
-# 2000, 2002 Free Software Foundation, Inc.
+# 2000, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -137,7 +137,6 @@ if {!$gcc_compiled && !$hp_aCC_compiler} {
 # For get_debug_format to do its job, we need to have a current source file.
 gdb_test "list main" ""
 get_debug_format
-setup_xfail_format "DWARF 1"
 gdb_test "whatis v_boolean" "type = (enum |)boolean" \
   "whatis unnamed typedef'd enum (compiler bug in IBM's xlc)"
 
@@ -172,7 +171,6 @@ gdb_test "ptype red" "type = enum \{red, green, blue\}.*" "ptype unnamed enumera
 # acts like whatis for basic types.  If it is thought to be necessary to
 # test both whatis and ptype for all the types, the tests should be
 # merged into whatis.exp, or else maintenance will be a royal pain -kingdon
-#setup_xfail "i960-*-*" 1821
 #setup_xfail "mips-idt-*" "mips-sgi-*"
 #send "ptype v_char\n"
 #gdb_expect {
@@ -277,7 +275,6 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 # test ptype command with arrays
 #
-#setup_xfail "i960-*-*" 1821
 #setup_xfail "mips-idt-*" "mips-sgi-*"
 #send "ptype v_char_array\n"
 #gdb_expect {
@@ -372,7 +369,6 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 
 if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "i*86-*-sysv4*" }
-setup_xfail_format "DWARF 1"
 if {$hp_aCC_compiler} {setup_xfail "hppa*-*-*"}
 gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 
@@ -380,7 +376,6 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 ##
 ## test ptype command with pointers
 ##
-#setup_xfail "i960-*-*" 1821
 #setup_xfail "mips-idt-*" "mips-sgi-*"
 #send "ptype v_char_pointer\n"
 #gdb_expect {

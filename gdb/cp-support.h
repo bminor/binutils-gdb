@@ -1,7 +1,8 @@
 /* Helper routines for C++ support in GDB.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
+   Namespace support contributed by David Carlton.
 
    This file is part of GDB.
 
@@ -20,79 +21,95 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef CP_SUPPORT_H
+#define CP_SUPPORT_H
+
+/* We need this for 'domain_enum', alas...  */
+
+#include "symtab.h"
+
 /* Opaque declarations.  */
 
+struct symbol;
 struct obstack;
+struct block;
+struct objfile;
+struct type;
+
+/* This struct is designed to store data from using directives.  It
+   says that names from namespace INNER should be visible within
+   namespace OUTER.  OUTER should always be a strict initial substring
+   of INNER.  These form a linked list; NEXT is the next element of
+   the list.  */
+
+struct using_direct
+{
+  char *inner;
+  char *outer;
+  struct using_direct *next;
+};
+
+
+/* Functions from cp-support.c.  */
 
 extern char *class_name_from_physname (const char *physname);
 
 extern char *method_name_from_physname (const char *physname);
 
-extern const char *cp_find_first_component (const char *name);
+extern unsigned int cp_find_first_component (const char *name);
 
-/* This is a struct to store data from "using directives" and similar
-   language constructs.  NAME is a pointer to a string; its initial
-   substrings of length OUTER_LENGTH and INNER_LENGTH should both be
-   fully-qualified namespace names.  (And OUTER_LENGTH should be
-   strictly less than INNER_LENGTH).  The meaning is that names in the
-   inner namespace should be imported into outer.
+extern unsigned int cp_entire_prefix_len (const char *name);
 
-   For example, if it is used to represent the directive "using
-   namespace std;" then NAME should start with "std", INNER_LENGTH
-   should be 0, and OUTER_LENGTH should be "3".  For a more
-   complicated example, if there is an anonymous namespace with a
-   named namespace A, then NAME should start with "A::(anonymous
-   namespace)", INNER_LENGTH should be 1, and OUTER_LENGTH should be
-   strlen ("A::(anonymous namespace)").  */
+extern struct symbol **make_symbol_overload_list (struct symbol *);
 
-/* FIXME: carlton/2002-10-07: That anonymous namespace example isn't
-   that great, since it really depends not only on what the
-   demangler's output is but also on the fact that the demangler's
-   output doesn't depend on the name of the file in question.  Which,
-   alas, it doesn't, but should, leaving us with no way to distinguish
-   between anonymous namespaces in different files.  Sigh...  */
+extern struct type *cp_lookup_rtti_type (const char *name,
+					 struct block *block);
 
-struct using_direct
-{
-  const char *name;
-  unsigned short outer_length;
-  unsigned short inner_length;
-};
+/* Functions/variables from cp-namespace.c.  */
 
-/* This is a struct for a linked list of using_direct's.  */
+extern unsigned char processing_has_namespace_info;
 
-struct using_direct_node
-{
-  struct using_direct *current;
-  struct using_direct_node *next;
-};
+extern const char *processing_current_namespace;
 
-/* This is used by struct block to store namespace-related info for
-   C++ files, namely using declarations and the current namespace in
-   scope.  */
+extern int cp_is_anonymous (const char *namespace);
 
-struct namespace_info
-{
-  struct using_direct_node *using;
-  const char *scope;
-};
+extern void cp_add_using_directive (const char *name,
+				    unsigned int outer_length,
+				    unsigned int inner_length);
 
-extern struct
-using_direct_node *cp_add_using_obstack (const char *name,
-					 unsigned short outer_length,
-					 unsigned short inner_length,
-					 struct using_direct_node *next,
-					 struct obstack *obstack);
+extern void cp_initialize_namespace (void);
 
-extern
-struct using_direct_node *cp_add_using_xmalloc (const char *name,
-						unsigned short outer_length,
-						unsigned short inner_length,
-						struct using_direct_node
-						*next);
+extern void cp_finalize_namespace (struct block *static_block,
+				   struct obstack *obstack);
 
-extern
-struct using_direct_node *cp_copy_usings (struct using_direct_node *tocopy,
-					  struct using_direct_node *tail);
+extern void cp_set_block_scope (const struct symbol *symbol,
+				struct block *block,
+				struct obstack *obstack);
 
-extern void cp_free_usings (struct using_direct_node *using);
+extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol);
+
+extern struct symbol *cp_lookup_symbol_nonlocal (const char *name,
+						 const char *linkage_name,
+						 const struct block *block,
+						 const domain_enum domain,
+						 struct symtab **symtab);
+
+extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
+						  const char *name,
+						  const char *linkage_name,
+						  const struct block *block,
+						  const domain_enum domain,
+						  struct symtab **symtab);
+
+extern struct type *cp_lookup_nested_type (struct type *parent_type,
+					   const char *nested_name,
+					   const struct block *block);
+
+extern void cp_check_possible_namespace_symbols (const char *name,
+						 struct objfile *objfile);
+
+/* The list of "maint cplus" commands.  */
+
+extern struct cmd_list_element *maint_cplus_cmd_list;
+
+#endif /* CP_SUPPORT_H */

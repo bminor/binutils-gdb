@@ -42,6 +42,7 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "sim-regno.h"
+#include "arch-utils.h"
 
 /* Prototypes */
 
@@ -304,9 +305,9 @@ gdbsim_fetch_register (int regno)
       {
 	/* For moment treat a `does not exist' register the same way
            as an ``unavailable'' register.  */
-	char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+	char buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
-	memset (buf, 0, MAX_REGISTER_RAW_SIZE);
+	memset (buf, 0, MAX_REGISTER_SIZE);
 	supply_register (regno, buf);
 	set_register_cached (regno, -1);
 	break;
@@ -314,24 +315,24 @@ gdbsim_fetch_register (int regno)
     default:
       {
 	static int warn_user = 1;
-	char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+	char buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
 	gdb_assert (regno >= 0 && regno < NUM_REGS);
-	memset (buf, 0, MAX_REGISTER_RAW_SIZE);
+	memset (buf, 0, MAX_REGISTER_SIZE);
 	nr_bytes = sim_fetch_register (gdbsim_desc,
 				       REGISTER_SIM_REGNO (regno),
-				       buf, REGISTER_RAW_SIZE (regno));
-	if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno) && warn_user)
+				       buf, DEPRECATED_REGISTER_RAW_SIZE (regno));
+	if (nr_bytes > 0 && nr_bytes != DEPRECATED_REGISTER_RAW_SIZE (regno) && warn_user)
 	  {
 	    fprintf_unfiltered (gdb_stderr,
 				"Size of register %s (%d/%d) incorrect (%d instead of %d))",
 				REGISTER_NAME (regno),
 				regno, REGISTER_SIM_REGNO (regno),
-				nr_bytes, REGISTER_RAW_SIZE (regno));
+				nr_bytes, DEPRECATED_REGISTER_RAW_SIZE (regno));
 	    warn_user = 0;
 	  }
 	/* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
-	   indicatingthat GDB and the SIM have different ideas about
+	   indicating that GDB and the SIM have different ideas about
 	   which registers are fetchable.  */
 	/* Else if (nr_bytes < 0): an old simulator, that doesn't
 	   think to return the register size.  Just assume all is ok.  */
@@ -340,7 +341,7 @@ gdbsim_fetch_register (int regno)
 	  {
 	    printf_filtered ("gdbsim_fetch_register: %d", regno);
 	    /* FIXME: We could print something more intelligible.  */
-	    dump_mem (buf, REGISTER_RAW_SIZE (regno));
+	    dump_mem (buf, DEPRECATED_REGISTER_RAW_SIZE (regno));
 	  }
 	break;
       }
@@ -359,23 +360,23 @@ gdbsim_store_register (int regno)
     }
   else if (REGISTER_SIM_REGNO (regno) >= 0)
     {
-      char tmp[MAX_REGISTER_RAW_SIZE];
+      char tmp[MAX_REGISTER_SIZE];
       int nr_bytes;
-      read_register_gen (regno, tmp);
+      deprecated_read_register_gen (regno, tmp);
       nr_bytes = sim_store_register (gdbsim_desc,
 				     REGISTER_SIM_REGNO (regno),
-				     tmp, REGISTER_RAW_SIZE (regno));
-      if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno))
+				     tmp, DEPRECATED_REGISTER_RAW_SIZE (regno));
+      if (nr_bytes > 0 && nr_bytes != DEPRECATED_REGISTER_RAW_SIZE (regno))
 	internal_error (__FILE__, __LINE__,
 			"Register size different to expected");
       /* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
-	 indicatingthat GDB and the SIM have different ideas about
+	 indicating that GDB and the SIM have different ideas about
 	 which registers are fetchable.  */
       if (sr_get_debug ())
 	{
 	  printf_filtered ("gdbsim_store_register: %d", regno);
 	  /* FIXME: We could print something more intelligible.  */
-	  dump_mem (tmp, REGISTER_RAW_SIZE (regno));
+	  dump_mem (tmp, DEPRECATED_REGISTER_RAW_SIZE (regno));
 	}
     }
 }
@@ -504,27 +505,23 @@ gdbsim_open (char *args, int from_tty)
   strcpy (arg_buf, "gdbsim");	/* 7 */
   /* Specify the byte order for the target when it is both selectable
      and explicitly specified by the user (not auto detected). */
-  if (!TARGET_BYTE_ORDER_AUTO)
+  switch (selected_byte_order ())
     {
-      switch (TARGET_BYTE_ORDER)
-	{
-	case BFD_ENDIAN_BIG:
-	  strcat (arg_buf, " -E big");
-	  break;
-	case BFD_ENDIAN_LITTLE:
-	  strcat (arg_buf, " -E little");
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__,
-			  "Value of TARGET_BYTE_ORDER unknown");
-	}
+    case BFD_ENDIAN_BIG:
+      strcat (arg_buf, " -E big");
+      break;
+    case BFD_ENDIAN_LITTLE:
+      strcat (arg_buf, " -E little");
+      break;
+    case BFD_ENDIAN_UNKNOWN:
+      break;
     }
   /* Specify the architecture of the target when it has been
      explicitly specified */
-  if (!TARGET_ARCHITECTURE_AUTO)
+  if (selected_architecture_name () != NULL)
     {
       strcat (arg_buf, " --architecture=");
-      strcat (arg_buf, TARGET_ARCHITECTURE->printable_name);
+      strcat (arg_buf, selected_architecture_name ());
     }
   /* finally, any explicit args */
   if (args)
@@ -814,46 +811,13 @@ gdbsim_mourn_inferior (void)
 static int
 gdbsim_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
-#ifdef SIM_HAS_BREAKPOINTS
-  SIM_RC retcode;
-
-  retcode = sim_set_breakpoint (gdbsim_desc, addr);
-
-  switch (retcode)
-    {
-    case SIM_RC_OK:
-      return 0;
-    case SIM_RC_INSUFFICIENT_RESOURCES:
-      return ENOMEM;
-    default:
-      return EIO;
-    }
-#else
   return memory_insert_breakpoint (addr, contents_cache);
-#endif
 }
 
 static int
 gdbsim_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
-#ifdef SIM_HAS_BREAKPOINTS
-  SIM_RC retcode;
-
-  retcode = sim_clear_breakpoint (gdbsim_desc, addr);
-
-  switch (retcode)
-    {
-    case SIM_RC_OK:
-    case SIM_RC_UNKNOWN_BREAKPOINT:
-      return 0;
-    case SIM_RC_INSUFFICIENT_RESOURCES:
-      return ENOMEM;
-    default:
-      return EIO;
-    }
-#else
   return memory_remove_breakpoint (addr, contents_cache);
-#endif
 }
 
 /* Pass the command argument through to the simulator verbatim.  The
@@ -897,14 +861,9 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_doc = "Use the compiled-in simulator.";
   gdbsim_ops.to_open = gdbsim_open;
   gdbsim_ops.to_close = gdbsim_close;
-  gdbsim_ops.to_attach = NULL;
-  gdbsim_ops.to_post_attach = NULL;
-  gdbsim_ops.to_require_attach = NULL;
   gdbsim_ops.to_detach = gdbsim_detach;
-  gdbsim_ops.to_require_detach = NULL;
   gdbsim_ops.to_resume = gdbsim_resume;
   gdbsim_ops.to_wait = gdbsim_wait;
-  gdbsim_ops.to_post_wait = NULL;
   gdbsim_ops.to_fetch_registers = gdbsim_fetch_register;
   gdbsim_ops.to_store_registers = gdbsim_store_register;
   gdbsim_ops.to_prepare_to_store = gdbsim_prepare_to_store;
@@ -912,47 +871,17 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_files_info = gdbsim_files_info;
   gdbsim_ops.to_insert_breakpoint = gdbsim_insert_breakpoint;
   gdbsim_ops.to_remove_breakpoint = gdbsim_remove_breakpoint;
-  gdbsim_ops.to_terminal_init = NULL;
-  gdbsim_ops.to_terminal_inferior = NULL;
-  gdbsim_ops.to_terminal_ours_for_output = NULL;
-  gdbsim_ops.to_terminal_ours = NULL;
-  gdbsim_ops.to_terminal_info = NULL;
   gdbsim_ops.to_kill = gdbsim_kill;
   gdbsim_ops.to_load = gdbsim_load;
-  gdbsim_ops.to_lookup_symbol = NULL;
   gdbsim_ops.to_create_inferior = gdbsim_create_inferior;
-  gdbsim_ops.to_post_startup_inferior = NULL;
-  gdbsim_ops.to_acknowledge_created_inferior = NULL;
-  gdbsim_ops.to_clone_and_follow_inferior = NULL;
-  gdbsim_ops.to_post_follow_inferior_by_clone = NULL;
-  gdbsim_ops.to_insert_fork_catchpoint = NULL;
-  gdbsim_ops.to_remove_fork_catchpoint = NULL;
-  gdbsim_ops.to_insert_vfork_catchpoint = NULL;
-  gdbsim_ops.to_remove_vfork_catchpoint = NULL;
-  gdbsim_ops.to_has_forked = NULL;
-  gdbsim_ops.to_has_vforked = NULL;
-  gdbsim_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  gdbsim_ops.to_post_follow_vfork = NULL;
-  gdbsim_ops.to_insert_exec_catchpoint = NULL;
-  gdbsim_ops.to_remove_exec_catchpoint = NULL;
-  gdbsim_ops.to_has_execd = NULL;
-  gdbsim_ops.to_reported_exec_events_per_exec_call = NULL;
-  gdbsim_ops.to_has_exited = NULL;
   gdbsim_ops.to_mourn_inferior = gdbsim_mourn_inferior;
-  gdbsim_ops.to_can_run = 0;
-  gdbsim_ops.to_notice_signals = 0;
-  gdbsim_ops.to_thread_alive = 0;
   gdbsim_ops.to_stop = gdbsim_stop;
-  gdbsim_ops.to_pid_to_exec_file = NULL;
   gdbsim_ops.to_stratum = process_stratum;
-  gdbsim_ops.DONT_USE = NULL;
   gdbsim_ops.to_has_all_memory = 1;
   gdbsim_ops.to_has_memory = 1;
   gdbsim_ops.to_has_stack = 1;
   gdbsim_ops.to_has_registers = 1;
   gdbsim_ops.to_has_execution = 1;
-  gdbsim_ops.to_sections = NULL;
-  gdbsim_ops.to_sections_end = NULL;
   gdbsim_ops.to_magic = OPS_MAGIC;
 
 #ifdef TARGET_REDEFINE_DEFAULT_OPS

@@ -1,5 +1,5 @@
 /* MI Command Set.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -33,13 +33,15 @@
 #include "mi-console.h"
 #include "ui-out.h"
 #include "mi-out.h"
+#include "interps.h"
 #include "event-loop.h"
 #include "event-top.h"
 #include "gdbcore.h"		/* for write_memory() */
-#include "value.h"		/* for write_register_bytes() */
+#include "value.h"		/* for deprecated_write_register_bytes() */
 #include "regcache.h"
 #include "gdb.h"
 #include "frame.h"
+#include "mi-main.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -79,27 +81,30 @@ struct ui_file *raw_stdout;
 /* The token of the last asynchronous command */
 static char *last_async_command;
 static char *previous_async_command;
-static char *mi_error_message;
+char *mi_error_message;
 static char *old_regs;
 
 extern void _initialize_mi_main (void);
-static char *mi_input (char *);
-static void mi_execute_command (char *cmd, int from_tty);
 static enum mi_cmd_result mi_cmd_execute (struct mi_parse *parse);
 
-static void mi_execute_cli_command (const char *cli, char *args);
+static void mi_execute_cli_command (const char *cmd, int args_p,
+				    const char *args);
 static enum mi_cmd_result mi_execute_async_cli_command (char *mi, char *args, int from_tty);
-static void mi_execute_command_wrapper (char *cmd);
 
-void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg);
+static void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg);
 
 static int register_changed_p (int regnum);
 static int get_register (int regnum, int format);
-static void mi_load_progress (const char *section_name,
-			      unsigned long sent_so_far,
-			      unsigned long total_section,
-			      unsigned long total_sent,
-			      unsigned long grand_total);
+
+/* A helper function which will set mi_error_message to
+   error_last_message.  */
+void
+mi_error_last_message (void)
+{
+  char *s = error_last_message ();
+  xasprintf (&mi_error_message, "%s", s);
+  xfree (s);
+}
 
 /* Command implementations. FIXME: Is this libgdb? No.  This is the MI
    layer that calls libgdb.  Any operation used in the below should be
@@ -183,9 +188,9 @@ mi_cmd_exec_return (char *args, int from_tty)
 
   /* Because we have called return_command with from_tty = 0, we need
      to print the frame here. */
-  show_and_print_stack_frame (selected_frame,
-			      frame_relative_level (selected_frame),
-			      LOC_AND_ADDRESS);
+  print_stack_frame (deprecated_selected_frame,
+		     frame_relative_level (deprecated_selected_frame),
+		     LOC_AND_ADDRESS);
 
   return MI_CMD_DONE;
 }
@@ -395,19 +400,19 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 static int
 register_changed_p (int regnum)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
 
-  if (! frame_register_read (selected_frame, regnum, raw_buffer))
+  if (! frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     return -1;
 
-  if (memcmp (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
-	      REGISTER_RAW_SIZE (regnum)) == 0)
+  if (memcmp (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
+	      DEPRECATED_REGISTER_RAW_SIZE (regnum)) == 0)
     return 0;
 
   /* Found a changed register. Return 1. */
 
-  memcpy (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
-	  REGISTER_RAW_SIZE (regnum));
+  memcpy (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
+	  DEPRECATED_REGISTER_RAW_SIZE (regnum));
 
   return 1;
 }
@@ -508,9 +513,12 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 static int
 get_register (int regnum, int format)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
-  char *virtual_buffer = alloca (MAX_REGISTER_VIRTUAL_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
+  char virtual_buffer[MAX_REGISTER_SIZE];
   int optim;
+  int realnum;
+  CORE_ADDR addr;
+  enum lval_type lval;
   static struct ui_stream *stb = NULL;
 
   stb = ui_out_stream_new (uiout);
@@ -518,8 +526,9 @@ get_register (int regnum, int format)
   if (format == 'N')
     format = 0;
 
-  get_saved_register (raw_buffer, &optim, (CORE_ADDR *) NULL, selected_frame,
-		      regnum, (enum lval_type *) NULL);
+  frame_register (deprecated_selected_frame, regnum, &optim, &lval, &addr,
+		  &realnum, raw_buffer);
+
   if (optim)
     {
       xasprintf (&mi_error_message, "Optimized out");
@@ -528,13 +537,14 @@ get_register (int regnum, int format)
 
   /* Convert raw data to virtual format if necessary.  */
 
-  if (REGISTER_CONVERTIBLE (regnum))
+  if (DEPRECATED_REGISTER_CONVERTIBLE (regnum))
     {
-      REGISTER_CONVERT_TO_VIRTUAL (regnum, REGISTER_VIRTUAL_TYPE (regnum),
+      DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum,
+				   register_type (current_gdbarch, regnum),
 				   raw_buffer, virtual_buffer);
     }
   else
-    memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (regnum));
+    memcpy (virtual_buffer, raw_buffer, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 
   if (format == 'r')
     {
@@ -543,10 +553,10 @@ get_register (int regnum, int format)
 
       strcpy (buf, "0x");
       ptr = buf + 2;
-      for (j = 0; j < REGISTER_RAW_SIZE (regnum); j++)
+      for (j = 0; j < DEPRECATED_REGISTER_RAW_SIZE (regnum); j++)
 	{
-	  register int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
-	  : REGISTER_RAW_SIZE (regnum) - 1 - j;
+	  int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
+	  : DEPRECATED_REGISTER_RAW_SIZE (regnum) - 1 - j;
 	  sprintf (ptr, "%02x", (unsigned char) raw_buffer[idx]);
 	  ptr += 2;
 	}
@@ -555,7 +565,7 @@ get_register (int regnum, int format)
     }
   else
     {
-      val_print (REGISTER_VIRTUAL_TYPE (regnum), virtual_buffer, 0, 0,
+      val_print (register_type (current_gdbarch, regnum), virtual_buffer, 0, 0,
 		 stb->stream, format, 1, 0, Val_pretty_default);
       ui_out_field_stream (uiout, "value", stb);
       ui_out_stream_delete (stb);
@@ -628,11 +638,11 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  /* Get the value as a number */
 	  value = parse_and_eval_address (argv[i + 1]);
 	  /* Get the value into an array */
-	  buffer = xmalloc (REGISTER_SIZE);
+	  buffer = xmalloc (DEPRECATED_REGISTER_SIZE);
 	  old_chain = make_cleanup (xfree, buffer);
-	  store_signed_integer (buffer, REGISTER_SIZE, value);
+	  store_signed_integer (buffer, DEPRECATED_REGISTER_SIZE, value);
 	  /* Write it down */
-	  write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
+	  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (regnum), buffer, DEPRECATED_REGISTER_RAW_SIZE (regnum));
 	  /* Free the buffer.  */
 	  do_cleanups (old_chain);
 	}
@@ -1097,7 +1107,12 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 
       if (!target_can_async_p () || !target_executing)
 	{
-	  /* print the result if there were no errors */
+	  /* print the result if there were no errors
+
+	     Remember that on the way out of executing a command, you have
+	     to directly use the mi_interp's uiout, since the command could 
+	     have reset the interpreter, in which case the current uiout 
+	     will most likely crash in the mi_out_* routines.  */
 	  if (args->rc == MI_CMD_DONE)
 	    {
 	      fputs_unfiltered (context->token, raw_stdout);
@@ -1142,18 +1157,24 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
          mi commands */
       /* echo the command on the console. */
       fprintf_unfiltered (gdb_stdlog, "%s\n", context->command);
-      /* FIXME: If the command string has something that looks like 
-         a format spec (e.g. %s) we will get a core dump */
-      mi_execute_cli_command ("%s", context->command);
-      /* print the result */
-      /* FIXME: Check for errors here. */
-      fputs_unfiltered (context->token, raw_stdout);
-      fputs_unfiltered ("^done", raw_stdout);
-      mi_out_put (uiout, raw_stdout);
-      mi_out_rewind (uiout);
-      fputs_unfiltered ("\n", raw_stdout);
-      args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
-      args->rc = MI_CMD_DONE;
+      mi_execute_cli_command (context->command, 0, NULL);
+
+      /* If we changed interpreters, DON'T print out anything. */
+      if (current_interp_named_p (INTERP_MI)
+	  || current_interp_named_p (INTERP_MI1)
+	  || current_interp_named_p (INTERP_MI2)
+	  || current_interp_named_p (INTERP_MI3))
+	{
+	  /* print the result */
+	  /* FIXME: Check for errors here. */
+	  fputs_unfiltered (context->token, raw_stdout);
+	  fputs_unfiltered ("^done", raw_stdout);
+	  mi_out_put (uiout, raw_stdout);
+	  mi_out_rewind (uiout);
+	  fputs_unfiltered ("\n", raw_stdout);
+	  args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
+	  args->rc = MI_CMD_DONE;
+	}
       break;
 
     }
@@ -1168,7 +1189,7 @@ mi_execute_command (char *cmd, int from_tty)
   struct mi_parse *command;
   struct captured_mi_execute_command_args args;
   struct ui_out *saved_uiout = uiout;
-  int result, rc;
+  int result;
 
   /* This is to handle EOF (^D). We just quit gdb. */
   /* FIXME: we should call some API function here. */
@@ -1255,12 +1276,13 @@ mi_cmd_execute (struct mi_parse *parse)
 	return parse->cmd->args_func (parse->args, 0 /*from_tty */ );
       return parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
     }
-  else if (parse->cmd->cli != 0)
+  else if (parse->cmd->cli.cmd != 0)
     {
       /* FIXME: DELETE THIS. */
       /* The operation is still implemented by a cli command */
       /* Must be a synchronous one */
-      mi_execute_cli_command (parse->cmd->cli, parse->args);
+      mi_execute_cli_command (parse->cmd->cli.cmd, parse->cmd->cli.args_p,
+			      parse->args);
       return MI_CMD_DONE;
     }
   else
@@ -1276,28 +1298,25 @@ mi_cmd_execute (struct mi_parse *parse)
     }
 }
 
-static void
-mi_execute_command_wrapper (char *cmd)
-{
-  mi_execute_command (cmd, stdin == instream);
-}
-
 /* FIXME: This is just a hack so we can get some extra commands going.
    We don't want to channel things through the CLI, but call libgdb directly */
 /* Use only for synchronous commands */
 
 void
-mi_execute_cli_command (const char *cli, char *args)
+mi_execute_cli_command (const char *cmd, int args_p, const char *args)
 {
-  if (cli != 0)
+  if (cmd != 0)
     {
       struct cleanup *old_cleanups;
       char *run;
-      xasprintf (&run, cli, args);
+      if (args_p)
+	xasprintf (&run, "%s %s", cmd, args);
+      else
+	run = xstrdup (cmd);
       if (mi_debug_p)
 	/* FIXME: gdb_???? */
 	fprintf_unfiltered (gdb_stdout, "cli=%s run=%s\n",
-			    cli, run);
+			    cmd, run);
       old_cleanups = make_cleanup (xfree, run);
       execute_command ( /*ui */ run, 0 /*from_tty */ );
       do_cleanups (old_cleanups);
@@ -1384,13 +1403,7 @@ mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg)
   do_exec_cleanups (ALL_CLEANUPS);
 }
 
-static char *
-mi_input (char *buf)
-{
-  return gdb_readline (NULL);
-}
-
-static void
+void
 mi_load_progress (const char *section_name,
 		  unsigned long sent_so_far,
 		  unsigned long total_section,
@@ -1402,7 +1415,8 @@ mi_load_progress (const char *section_name,
   static char *previous_sect_name = NULL;
   int new_section;
 
-  if (!interpreter_p || strncmp (interpreter_p, "mi", 2) != 0)
+  if (!current_interp_named_p (INTERP_MI)
+      && !current_interp_named_p (INTERP_MI1))
     return;
 
   update_threshold.tv_sec = 0;
@@ -1461,119 +1475,16 @@ mi_load_progress (const char *section_name,
     }
 }
 
-static void
-mi_command_loop (int mi_version)
+void
+mi_setup_architecture_data (void)
 {
-  /* HACK: Force stdout/stderr to point at the console.  This avoids
-     any potential side effects caused by legacy code that is still
-     using the TUI / fputs_unfiltered_hook */
-  raw_stdout = stdio_fileopen (stdout);
-  /* Route normal output through the MIx */
-  gdb_stdout = mi_console_file_new (raw_stdout, "~");
-  /* Route error and log output through the MI */
-  gdb_stderr = mi_console_file_new (raw_stdout, "&");
-  gdb_stdlog = gdb_stderr;
-  /* Route target output through the MI. */
-  gdb_stdtarg = mi_console_file_new (raw_stdout, "@");
-
-  /* HACK: Poke the ui_out table directly.  Should we be creating a
-     mi_out object wired up to the above gdb_stdout / gdb_stderr? */
-  uiout = mi_out_new (mi_version);
-
-  /* HACK: Override any other interpreter hooks.  We need to create a
-     real event table and pass in that. */
-  init_ui_hook = 0;
-  /* command_loop_hook = 0; */
-  print_frame_info_listing_hook = 0;
-  query_hook = 0;
-  warning_hook = 0;
-  create_breakpoint_hook = 0;
-  delete_breakpoint_hook = 0;
-  modify_breakpoint_hook = 0;
-  interactive_hook = 0;
-  registers_changed_hook = 0;
-  readline_begin_hook = 0;
-  readline_hook = 0;
-  readline_end_hook = 0;
-  register_changed_hook = 0;
-  memory_changed_hook = 0;
-  context_hook = 0;
-  target_wait_hook = 0;
-  call_command_hook = 0;
-  error_hook = 0;
-  error_begin_hook = 0;
-  show_load_progress = mi_load_progress;
-
-  /* Turn off 8 bit strings in quoted output.  Any character with the
-     high bit set is printed using C's octal format. */
-  sevenbit_strings = 1;
-
-  /* Tell the world that we're alive */
-  fputs_unfiltered ("(gdb) \n", raw_stdout);
-  gdb_flush (raw_stdout);
-
-  if (!event_loop_p)
-    simplified_command_loop (mi_input, mi_execute_command);
-  else
-    start_event_loop ();
-}
-
-static void
-mi1_command_loop (void)
-{
-  mi_command_loop (1);
-}
-
-static void
-mi2_command_loop (void)
-{
-  mi_command_loop (2);
-}
-
-static void
-setup_architecture_data (void)
-{
-  /* don't trust REGISTER_BYTES to be zero. */
-  old_regs = xmalloc (REGISTER_BYTES + 1);
-  memset (old_regs, 0, REGISTER_BYTES + 1);
-}
-
-static void
-mi_init_ui (char *arg0)
-{
-  /* Eventually this will contain code that takes control of the
-     console. */
+  old_regs = xmalloc ((NUM_REGS + NUM_PSEUDO_REGS) * MAX_REGISTER_SIZE + 1);
+  memset (old_regs, 0, (NUM_REGS + NUM_PSEUDO_REGS) * MAX_REGISTER_SIZE + 1);
 }
 
 void
 _initialize_mi_main (void)
 {
-  if (interpreter_p == NULL)
-    return;
-
-  /* If we're _the_ interpreter, take control. */
-  if (strcmp (interpreter_p, "mi") == 0)
-    command_loop_hook = mi2_command_loop;
-  else if (strcmp (interpreter_p, "mi1") == 0)
-    command_loop_hook = mi1_command_loop;
-  else if (strcmp (interpreter_p, "mi2") == 0)
-    command_loop_hook = mi2_command_loop;
-  else
-    return;
-
-  init_ui_hook = mi_init_ui;
-  setup_architecture_data ();
   register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
-  register_gdbarch_swap (NULL, 0, setup_architecture_data);
-  if (event_loop_p)
-    {
-      /* These overwrite some of the initialization done in
-	 _intialize_event_loop. */
-      call_readline = gdb_readline2;
-      input_handler = mi_execute_command_wrapper;
-      add_file_handler (input_fd, stdin_event_handler, 0);
-      async_command_editing_p = 0;
-    }
-  /* FIXME: Should we notify main that we are here as a possible
-     interpreter? */
+  register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);
 }

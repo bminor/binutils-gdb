@@ -25,6 +25,7 @@
 #include <asm/ptrace.h>
 #include <sys/ptrace.h>
 #include <asm/processor.h>
+#include <asm/types.h>
 #include <sys/procfs.h>
 #include <sys/user.h>
 #include <value.h>
@@ -59,20 +60,14 @@ s390_register_u_addr (int blockend, int regnum)
     retval = PT_CR_9 + ((regnum - (S390_FIRST_CR + 9)) * S390_CR_SIZE);
   else
     {
-#ifdef GDBSERVER
-      error ("s390_register_u_addr invalid regnum %s %d regnum=%d",
-             __FILE__, (int) __LINE__, regnum);
-#else
       internal_error (__FILE__, __LINE__,
                       "s390_register_u_addr invalid regnum regnum=%d",
                       regnum);
-#endif
       retval = 0;
     }
   return retval + blockend;
 }
 
-#ifndef GDBSERVER
 /* watch_areas are required if you put 2 or more watchpoints on the same 
    address or overlapping areas gdb will call us to delete the watchpoint 
    more than once when we try to delete them.
@@ -250,9 +245,26 @@ supply_gregset (gregset_t * gregsetp)
   for (regi = 0; regi < S390_NUM_GPRS; regi++)
     supply_register (S390_GP0_REGNUM + regi,
 		     (char *) &gregp[S390_GP0_REGNUM + regi]);
+
+#if defined (CONFIG_ARCH_S390X)
+  /* On the s390x, each element of gregset_t is 8 bytes long, but
+     each access register is still only 32 bits long.  So they're
+     packed two per element.  It's apparently traditional that
+     gregset_t must be an array, so when the registers it provides
+     have different sizes, something has to get strange
+     somewhere.  */
+  {
+    unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
+
+    for (regi = 0; regi < S390_NUM_ACRS; regi++)
+      supply_register (S390_FIRST_ACR + regi, (char *) &acrs[regi]);
+  }
+#else
   for (regi = 0; regi < S390_NUM_ACRS; regi++)
     supply_register (S390_FIRST_ACR + regi,
-		     (char *) &gregp[S390_FIRST_ACR + regi]);
+                     (char *) &gregp[S390_FIRST_ACR + regi]);
+#endif
+
   /* unfortunately this isn't in gregsetp */
   for (regi = 0; regi < S390_NUM_CRS; regi++)
     supply_register (S390_FIRST_CR + regi, NULL);
@@ -283,12 +295,35 @@ fill_gregset (gregset_t * gregsetp, int regno)
       for (regi = 0; regi < S390_NUM_GPRS; regi++)
         regcache_collect (S390_GP0_REGNUM + regi,
 			  &gregp[S390_GP0_REGNUM + regi]);
+#if defined (CONFIG_ARCH_S390X)
+      /* See the comments about the access registers in
+         supply_gregset, above.  */
+      {
+        unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
+        
+        for (regi = 0; regi < S390_NUM_ACRS; regi++)
+          regcache_collect (S390_FIRST_ACR + regi, &acrs[regi]);
+      }
+#else
       for (regi = 0; regi < S390_NUM_ACRS; regi++)
         regcache_collect (S390_FIRST_ACR + regi,
 			  &gregp[S390_FIRST_ACR + regi]);
+#endif
     }
-  else if (regno >= S390_PSWM_REGNUM && regno <= S390_LAST_ACR)
+  else if (regno >= S390_PSWM_REGNUM && regno < S390_FIRST_ACR)
     regcache_collect (regno, &gregp[regno]);
+  else if (regno >= S390_FIRST_ACR && regno <= S390_LAST_ACR)
+    {
+#if defined (CONFIG_ARCH_S390X)
+      /* See the comments about the access registers in
+         supply_gregset, above.  */
+      unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
+        
+      regcache_collect (regno, &acrs[regno - S390_FIRST_ACR]);
+#else
+      regcache_collect (regno, &gregp[regno]);
+#endif
+    }
 }
 
 /*  Given a pointer to a floating point register set in /proc format
@@ -321,4 +356,3 @@ fill_fpregset (fpregset_t * fpregsetp, int regno)
 #error "libc files are inconsistent with linux/include/asm-s390/"
 #error "3) you didn't do a completely clean build & delete config.cache."
 #endif
-#endif /* GDBSERVER */

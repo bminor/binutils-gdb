@@ -1,5 +1,5 @@
 /* BFD back-end for Apollo 68000 COFF binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1999, 2000, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    By Troy Rollo (troy@cbme.unsw.edu.au)
    Based on m68k standard COFF version Written by Cygnus Support.
@@ -34,13 +34,13 @@ extern reloc_howto_type apollocoff_howto_table[];
 #else
 reloc_howto_type apollocoff_howto_table[] =
   {
-    HOWTO (R_RELBYTE,	       0,  0,  	8,  false, 0, complain_overflow_bitfield, 0, "8",	true, 0x000000ff,0x000000ff, false),
-    HOWTO (R_RELWORD,	       0,  1, 	16, false, 0, complain_overflow_bitfield, 0, "16",	true, 0x0000ffff,0x0000ffff, false),
-    HOWTO (R_RELLONG,	       0,  2, 	32, false, 0, complain_overflow_bitfield, 0, "32",	true, 0xffffffff,0xffffffff, false),
-    HOWTO (R_PCRBYTE,	       0,  0, 	8,  true,  0, complain_overflow_signed,   0, "DISP8",   true, 0x000000ff,0x000000ff, false),
-    HOWTO (R_PCRWORD,	       0,  1, 	16, true,  0, complain_overflow_signed,   0, "DISP16",  true, 0x0000ffff,0x0000ffff, false),
-    HOWTO (R_PCRLONG,	       0,  2, 	32, true,  0, complain_overflow_signed,   0, "DISP32",  true, 0xffffffff,0xffffffff, false),
-    HOWTO (R_RELLONG_NEG,      0,  -2, 	32, false, 0, complain_overflow_bitfield, 0, "-32",	true, 0xffffffff,0xffffffff, false),
+    HOWTO (R_RELBYTE,	       0,  0,  	8,  FALSE, 0, complain_overflow_bitfield, 0, "8",	TRUE, 0x000000ff,0x000000ff, FALSE),
+    HOWTO (R_RELWORD,	       0,  1, 	16, FALSE, 0, complain_overflow_bitfield, 0, "16",	TRUE, 0x0000ffff,0x0000ffff, FALSE),
+    HOWTO (R_RELLONG,	       0,  2, 	32, FALSE, 0, complain_overflow_bitfield, 0, "32",	TRUE, 0xffffffff,0xffffffff, FALSE),
+    HOWTO (R_PCRBYTE,	       0,  0, 	8,  TRUE,  0, complain_overflow_signed,   0, "DISP8",   TRUE, 0x000000ff,0x000000ff, FALSE),
+    HOWTO (R_PCRWORD,	       0,  1, 	16, TRUE,  0, complain_overflow_signed,   0, "DISP16",  TRUE, 0x0000ffff,0x0000ffff, FALSE),
+    HOWTO (R_PCRLONG,	       0,  2, 	32, TRUE,  0, complain_overflow_signed,   0, "DISP32",  TRUE, 0xffffffff,0xffffffff, FALSE),
+    HOWTO (R_RELLONG_NEG,      0,  -2, 	32, FALSE, 0, complain_overflow_bitfield, 0, "-32",	TRUE, 0xffffffff,0xffffffff, FALSE),
   };
 #endif /* not ONLY_DECLARE_RELOCS */
 
@@ -115,7 +115,7 @@ apollo_howto2rtype (internal)
 #endif
 
 #ifdef NAMES_HAVE_UNDERSCORE
-CREATE_BIG_COFF_TARGET_VEC (TARGET_SYM, TARGET_NAME, 0, 0, '_', NULL)
+CREATE_BIG_COFF_TARGET_VEC (TARGET_SYM, TARGET_NAME, 0, 0, '_', NULL, COFF_SWAP_TABLE)
 #else
-CREATE_BIG_COFF_TARGET_VEC (TARGET_SYM, TARGET_NAME, 0, 0, 0, NULL)
+CREATE_BIG_COFF_TARGET_VEC (TARGET_SYM, TARGET_NAME, 0, 0, 0, NULL, COFF_SWAP_TABLE)
 #endif

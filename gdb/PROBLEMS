@@ -1,52 +1,41 @@
 
-			Known problems in GDB 5.3
+			Known problems in GDB 6.0
 
 		See also: http://www.gnu.org/software/gdb/bugs/
 
+mips*-*-*
+powerpc*-*-*
+sparc*-*-*
 
-*-*-freebsd*
----------------
+GDB's SPARC, MIPS and PowerPC targets, in 6.0, have not been updated
+to use the new frame mechanism.
 
-Due to a kernel bug (kern/35175), detaching from an attached process
-will very likely cause the process to be stop or die with a Trace/BPT
-trap.
+People encountering problems with these targets should consult GDB's
+web pages and mailing lists (http://www.gnu.org/software/gdb/) to see
+if there is an update.
 
+arm-*-*
 
-i386-*-freebsd[34]*
--------------------
+GDB's ARM target, in 6.0, has not been updated to use the new frame
+mechanism.
 
-There is a bug (bin/41671) in FreeBSD's gcc that causes it to emit bad
-debug information when using the stabs format (which is the default).
-As a result GDB tends to place breakpoints on functions before the
-function prologue, and information about function parameters and local
-variables is lost.  In earlier versions of GDB the effects were rather
-limited, but starting with GDB 5.3 the influence is much more
-prominent.  As a workaround, compile your code with -gdwarf-2.
+Fortunately the ARM target, in the GDB's mainline sources, has been
+updated so people encountering problems should consider downloading a
+more current GDB (http://www.gnu.org/software/gdb/current).
 
+gdb/1091: Constructor breakpoints ignored
+gdb/1193: g++ 3.3 creates multiple constructors: gdb 5.3 can't set breakpoints
 
-hppa2.0-hp-hpux10.20
---------------------
+When gcc 3.x compiles a C++ constructor or C++ destructor, it generates
+2 or 3 different versions of the object code.  These versions have
+unique mangled names (they have to, in order for linking to work), but
+they have identical source code names, which leads to a great deal of
+confusion.  Specifically, if you set a breakpoint in a constructor or a
+destructor, gdb will put a breakpoint in one of the versions, but your
+program may execute the other version.  This makes it impossible to set
+breakpoints reliably in constructors or destructors.
 
-gdb/487: The top level make files used to build GDB are not compatible
-with HP/UX make.  As a workaround, use GNU make.
-
-gdb/486: The HP/UX C compiler defaults to K&R mode but GDB only builds
-with an ISO C compiler.  The top level configuration incorrectly sets
-CC to `cc' instead of `cc -Ae'.  As a workaround, the correct compiler
-can be specified as part of the configuration vis:
-
-    $  'CC=cc -Ae' ./configure
-
-
-s390*-*-*
----------
-
-gdb/513: GDB does not build on s390 GNU/Linux.  The problem should be
-fixed in more recent sources.
-
-
-i386-*-freebsd4.4*
-------------------
-
-gdb/455: GDB doesn't build on a FreeBSD 4.4-STABLE system.  The
-problem is still being investigated.
+gcc 3.x generates these multiple object code functions in order to
+implement virtual base classes.  gcc 2.x generated just one object code
+function with a hidden parameter, but gcc 3.x conforms to a multi-vendor
+ABI for C++ which requires multiple object code functions.

@@ -328,7 +328,6 @@ TuiWinInfo, *TuiWinInfoPtr;
 
 /* Global Data */
 extern TuiWinInfoPtr winList[MAX_MAJOR_WINDOWS];
-extern int tui_version;
 
 /* Macros */
 #define srcWin            winList[SRC_WIN]

@@ -399,6 +399,30 @@ os_fstat (p, fd, buf)
   return wrap (p, fstat (fdmap (p, fd), buf));
 }
 
+static int 
+os_ftruncate (p, fd, len)
+     host_callback *p;
+     int fd;
+     long len;
+{
+  int result;
+
+  result = fdbad (p, fd);
+  if (result)
+    return result;
+  result = wrap (p, ftruncate (fdmap (p, fd), len));
+  return result;
+}
+
+static int
+os_truncate (p, file, len)
+     host_callback *p;
+     const char *file;
+     long len;
+{
+  return wrap (p, truncate (file, len));
+}
+
 static int
 os_shutdown (p)
      host_callback *p;
@@ -537,6 +561,9 @@ host_callback default_callback =
 
   os_stat,
   os_fstat,
+
+  os_ftruncate,
+  os_truncate,
 
   os_poll_quit,
 

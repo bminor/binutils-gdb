@@ -26,6 +26,7 @@
 #include "terminal.h"		/* for job_control */
 #include "event-loop.h"
 #include "event-top.h"
+#include "interps.h"
 #include <signal.h>
 
 /* For dont_repeat() */
@@ -38,15 +39,12 @@
 /* readline defines this.  */
 #undef savestring
 
-extern void _initialize_event_loop (void);
-
 static void rl_callback_read_char_wrapper (gdb_client_data client_data);
 static void command_line_handler (char *rl);
 static void command_line_handler_continuation (struct continuation_arg *arg);
 static void change_line_handler (void);
 static void change_annotation_level (void);
 static void command_handler (char *command);
-void cli_command_loop (void);
 static void async_do_nothing (gdb_client_data arg);
 static void async_disconnect (gdb_client_data arg);
 static void async_stop_sig (gdb_client_data arg);
@@ -250,9 +248,9 @@ display_gdb_prompt (char *new_prompt)
   int prompt_length = 0;
   char *gdb_prompt = get_prompt ();
 
-  /* When an alternative interpreter has been installed, do not
-     display the comand prompt. */
-  if (interpreter_p)
+  /* Each interpreter has its own rules on displaying the command
+     prompt.  */
+  if (!current_interp_display_prompt_p ())
     return;
 
   if (target_executing && sync_execution)
@@ -494,10 +492,8 @@ command_handler (char *command)
   if (display_space)
     {
 #ifdef HAVE_SBRK
-      extern char **environ;
       char *lim = (char *) sbrk (0);
-
-      space_at_cmd_start = (long) (lim - (char *) &environ);
+      space_at_cmd_start = lim - lim_at_start;
 #endif
     }
 
@@ -540,9 +536,8 @@ command_handler (char *command)
       if (display_space)
 	{
 #ifdef HAVE_SBRK
-	  extern char **environ;
 	  char *lim = (char *) sbrk (0);
-	  long space_now = lim - (char *) &environ;
+	  long space_now = lim - lim_at_start;
 	  long space_diff = space_now - space_at_cmd_start;
 
 	  printf_unfiltered ("Space used: %ld (%c%ld for this command)\n",
@@ -579,9 +574,8 @@ command_line_handler_continuation (struct continuation_arg *arg)
   if (display_space)
     {
 #ifdef HAVE_SBRK
-      extern char **environ;
       char *lim = (char *) sbrk (0);
-      long space_now = lim - (char *) &environ;
+      long space_now = lim - lim_at_start;
       long space_diff = space_now - space_at_cmd_start;
 
       printf_unfiltered ("Space used: %ld (%c%ld for this command)\n",
@@ -605,7 +599,7 @@ command_line_handler (char *rl)
 {
   static char *linebuffer = 0;
   static unsigned linelength = 0;
-  register char *p;
+  char *p;
   char *p1;
   extern char *line;
   extern int linesize;
@@ -618,7 +612,7 @@ command_line_handler (char *rl)
   if (annotation_level > 1 && instream == stdin)
     {
       printf_unfiltered ("\n\032\032post-");
-      printf_unfiltered (async_annotation_suffix);
+      puts_unfiltered (async_annotation_suffix);
       printf_unfiltered ("\n");
     }
 
@@ -708,7 +702,7 @@ command_line_handler (char *rl)
 #define SERVER_COMMAND_LENGTH 7
   server_command =
     (p - linebuffer > SERVER_COMMAND_LENGTH)
-    && STREQN (linebuffer, "server ", SERVER_COMMAND_LENGTH);
+    && strncmp (linebuffer, "server ", SERVER_COMMAND_LENGTH) == 0;
   if (server_command)
     {
       /* Note that we don't set `line'.  Between this and the check in
@@ -1090,7 +1084,6 @@ handle_sigwinch (int sig)
 
 
 /* Called by do_setshow_command.  */
-/* ARGSUSED */
 void
 set_async_editing_command (char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -1098,7 +1091,6 @@ set_async_editing_command (char *args, int from_tty, struct cmd_list_element *c)
 }
 
 /* Called by do_setshow_command.  */
-/* ARGSUSED */
 void
 set_async_annotation_level (char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -1106,7 +1098,6 @@ set_async_annotation_level (char *args, int from_tty, struct cmd_list_element *c
 }
 
 /* Called by do_setshow_command.  */
-/* ARGSUSED */
 void
 set_async_prompt (char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -1125,6 +1116,11 @@ gdb_setup_readline (void)
 
   if (event_loop_p)
     {
+      gdb_stdout = stdio_fileopen (stdout);
+      gdb_stderr = stdio_fileopen (stderr);
+      gdb_stdlog = gdb_stderr;  /* for moment */
+      gdb_stdtarg = gdb_stderr; /* for moment */
+
       /* If the input stream is connected to a terminal, turn on
          editing.  */
       if (ISATTY (instream))
@@ -1168,14 +1164,28 @@ gdb_setup_readline (void)
     }
 }
 
+/* Disable command input through the standard CLI channels.  Used in
+   the suspend proc for interpreters that use the standard gdb readline
+   interface, like the cli & the mi.  */
 void
-_initialize_event_loop (void)
+gdb_disable_readline (void)
 {
-  gdb_setup_readline ();
-
-  if (event_loop_p && command_loop_hook == NULL)
+  if (event_loop_p)
     {
-      /* Tell gdb to use the cli_command_loop as the main loop. */
-      command_loop_hook = cli_command_loop;
+      /* FIXME - It is too heavyweight to delete and remake these
+         every time you run an interpreter that needs readline.
+         It is probably better to have the interpreters cache these,
+         which in turn means that this needs to be moved into interpreter
+         specific code. */
+
+#if 0
+      ui_file_delete (gdb_stdout);
+      ui_file_delete (gdb_stderr);
+      gdb_stdlog = NULL;
+      gdb_stdtarg = NULL;
+#endif
+
+      rl_callback_handler_remove ();
+      delete_file_handler (input_fd);
     }
 }

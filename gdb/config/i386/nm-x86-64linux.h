@@ -1,7 +1,8 @@
 /* Native support for GNU/Linux x86-64.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.  Contributed by
-   Jiri Smid, SuSE Labs.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
 
@@ -20,15 +21,16 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef NM_X86_64_H
-#define NM_X86_64_H
+#ifndef NM_X86_64_LINUX_H
+#define NM_X86_64_LINUX_H
 
+/* GNU/Linux supports the i386 hardware debugging registers.  */
+#define I386_USE_GENERIC_WATCHPOINTS
+
+#include "i386/nm-i386.h"
 #include "config/nm-linux.h"
 
-#define I386_USE_GENERIC_WATCHPOINTS
-#include "i386/nm-i386.h"
-
-/* Support for 8-byte wide hw watchpoints.  */
+/* Support for 8-byte wide hardware watchpoints.  */
 #define TARGET_HAS_DR_LEN_8 1
 
 /* Provide access to the i386 hardware debugging registers.  */
@@ -50,41 +52,18 @@ extern unsigned long x86_64_linux_dr_get_status (void);
   x86_64_linux_dr_get_status ()
 
 
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-	(addr) = x86_64_register_u_addr ((blockend),(regno));
-CORE_ADDR x86_64_register_u_addr (CORE_ADDR, int);
+/* Type of the third argument to the `ptrace' system call.  */
+#define PTRACE_ARG3_TYPE long
 
-/* Return the size of the user struct.  */
-#define KERNEL_U_SIZE kernel_u_size()
-extern int kernel_u_size (void);
-
-/* Offset of the registers within the user area.  */
-#define U_REGS_OFFSET 0
-
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-#define KERNEL_U_ADDR 0x0
-
-#define PTRACE_ARG3_TYPE void*
-#define PTRACE_XFER_TYPE unsigned long
-
-
-/* We define this if link.h is available, because with ELF we use SVR4 style
-   shared libraries. */
-
-#ifdef HAVE_LINK_H
-#define SVR4_SHARED_LIBS
-#include "solib.h"		/* Support for shared libraries. */
-#endif
+/* Type of the fourth argument to the `ptrace' system call.  */
+#define PTRACE_XFER_TYPE long
 
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
 
-#undef PREPARE_TO_PROCEED
+/* `linux-nat.c' and `i386-nat.c' have their own versions of
+   child_post_startup_inferior.  Define this to use the copy in
+   `x86-86-linux-nat.c' instead, which calls both.  */
+#define LINUX_CHILD_POST_STARTUP_INFERIOR
 
-#include <signal.h>
-
-extern void lin_thread_get_thread_signals (sigset_t * mask);
-#define GET_THREAD_SIGNALS(mask) lin_thread_get_thread_signals (mask)
-
-#endif /* NM_X86_64.h */
+#endif /* NM_X86_64_LINUX_H */

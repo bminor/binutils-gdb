@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI; the common executable parts.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
@@ -91,10 +91,10 @@
 
 static void add_data_entry
   PARAMS ((bfd *, struct internal_extra_pe_aouthdr *, int, char *, bfd_vma));
-static boolean pe_print_pdata PARAMS ((bfd *, PTR));
-static boolean pe_print_reloc PARAMS ((bfd *, PTR));
-static boolean pe_print_idata PARAMS ((bfd *, PTR));
-static boolean pe_print_edata PARAMS ((bfd *, PTR));
+static bfd_boolean pe_print_pdata PARAMS ((bfd *, PTR));
+static bfd_boolean pe_print_reloc PARAMS ((bfd *, PTR));
+static bfd_boolean pe_print_idata PARAMS ((bfd *, PTR));
+static bfd_boolean pe_print_edata PARAMS ((bfd *, PTR));
 
 
 void
@@ -570,7 +570,8 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
   struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
   PEAOUTHDR *aouthdr_out = (PEAOUTHDR *) out;
   bfd_vma sa, fa, ib;
-
+  IMAGE_DATA_DIRECTORY idata2, idata5, tls;
+  
   if (pe->force_minimum_alignment)
     {
       if (!extra->FileAlignment)
@@ -586,6 +587,10 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
   fa = extra->FileAlignment;
   ib = extra->ImageBase;
 
+  idata2 = pe->pe_opthdr.DataDirectory[1];
+  idata5 = pe->pe_opthdr.DataDirectory[12];
+  tls = pe->pe_opthdr.DataDirectory[9];
+  
   if (aouthdr_in->tsize)
     {
       aouthdr_in->text_start -= ib;
@@ -614,28 +619,35 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
 #define SA(x) (((x) + sa -1 ) & (- sa))
 
   /* We like to have the sizes aligned.  */
-
   aouthdr_in->bsize = FA (aouthdr_in->bsize);
 
   extra->NumberOfRvaAndSizes = IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
 
-  /* first null out all data directory entries ..  */
+  /* First null out all data directory entries.  */
   memset (extra->DataDirectory, 0, sizeof (extra->DataDirectory));
 
   add_data_entry (abfd, extra, 0, ".edata", ib);
-
-  /* Don't call add_data_entry for .idata$2 or .idata$5.  It's done in
-     bfd_coff_final_link where all the required information is
-     available.  */
-
-  /* However, until other .idata fixes are made (pending patch), the
-     entry for .idata is needed for backwards compatability.  FIXME.  */
-  add_data_entry (abfd, extra, 1, ".idata", ib);
-
   add_data_entry (abfd, extra, 2, ".rsrc", ib);
-
   add_data_entry (abfd, extra, 3, ".pdata", ib);
 
+  /* In theory we do not need to call add_data_entry for .idata$2 or
+     .idata$5.  It will be done in bfd_coff_final_link where all the
+     required information is available.  If however, we are not going
+     to perform a final link, eg because we have been invoked by objcopy
+     or strip, then we need to make sure that these Data Directory
+     entries are initialised properly.
+
+     So - we copy the input values into the output values, and then, if
+     a final link is going to be performed, it can overwrite them.  */
+  extra->DataDirectory[1]  = idata2;
+  extra->DataDirectory[12] = idata5;
+  extra->DataDirectory[9] = tls;
+
+  if (extra->DataDirectory[1].VirtualAddress == 0)
+    /* Until other .idata fixes are made (pending patch), the entry for
+       .idata is needed for backwards compatibility.  FIXME.  */
+    add_data_entry (abfd, extra, 1, ".idata", ib);
+    
   /* For some reason, the virtual size (which is what's set by
      add_data_entry) for .reloc is not the same as the size recorded
      in this slot by MSVC; it doesn't seem to cause problems (so far),
@@ -663,7 +675,9 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
 	   5.0 link.exe) where the file size of the .data segment is
 	   quite small compared to the virtual size.  Without this
 	   fix, strip munges the file.  */
-	isize += SA (FA (pei_section_data (abfd, sec)->virt_size));
+	if (coff_section_data (abfd, sec) != NULL
+	    && pei_section_data (abfd, sec) != NULL)
+	  isize += SA (FA (pei_section_data (abfd, sec)->virt_size));
       }
 
     aouthdr_in->dsize = dsize;
@@ -689,7 +703,7 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
 			  aouthdr_out->standard.text_start);
 
 #ifndef COFF_WITH_pep
-  /* PE32+ does not have data_start member! */
+  /* PE32+ does not have data_start member!  */
   PUT_AOUTHDR_DATA_START (abfd, aouthdr_in->data_start,
 			  aouthdr_out->standard.data_start);
 #endif
@@ -895,12 +909,24 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
      sometimes).  */
   if ((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0)
     {
-      ps = scnhdr_int->s_size;
-      ss = 0;
+      if (bfd_pe_executable_p (abfd))
+	{
+	  ps = scnhdr_int->s_size;
+	  ss = 0;
+	}
+      else
+       {
+         ps = 0;
+         ss = scnhdr_int->s_size;
+       }
     }
   else
     {
-      ps = scnhdr_int->s_paddr;
+      if (bfd_pe_executable_p (abfd))
+	ps = scnhdr_int->s_paddr;
+      else
+	ps = 0;
+
       ss = scnhdr_int->s_size;
     }
 
@@ -938,12 +964,12 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
   }
 
   if (coff_data (abfd)->link_info
-      && ! coff_data (abfd)->link_info->relocateable
+      && ! coff_data (abfd)->link_info->relocatable
       && ! coff_data (abfd)->link_info->shared
       && strcmp (scnhdr_int->s_name, ".text") == 0)
     {
       /* By inference from looking at MS output, the 32 bit field
-	 which is the combintion of the number_of_relocs and
+	 which is the combination of the number_of_relocs and
 	 number_of_linenos is used for the line number count in
 	 executables.  A 16-bit field won't do for cc1.  The MS
 	 document says that the number of relocs is zero for
@@ -967,7 +993,11 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
 	  ret = 0;
 	}
 
-      if (scnhdr_int->s_nreloc <= 0xffff)
+      /* Although we could encode 0xffff relocs here, we do not, to be
+         consistent with other parts of bfd. Also it lets us warn, as
+         we should never see 0xffff here w/o having the overflow flag
+         set.  */
+      if (scnhdr_int->s_nreloc < 0xffff)
 	H_PUT_16 (abfd, scnhdr_int->s_nreloc, scnhdr_ext->s_nreloc);
       else
 	{
@@ -1016,7 +1046,7 @@ static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
    PPC- specific code.  */
 #endif
 
-static boolean
+static bfd_boolean
 pe_print_idata (abfd, vfile)
      bfd *abfd;
      PTR vfile;
@@ -1048,12 +1078,12 @@ pe_print_idata (abfd, vfile)
       /* Maybe the extra header isn't there.  Look for the section.  */
       section = bfd_get_section_by_name (abfd, ".idata");
       if (section == NULL)
-	return true;
+	return TRUE;
 
       addr = section->vma;
       datasize = bfd_section_size (abfd, section);
       if (datasize == 0)
-	return true;
+	return TRUE;
     }
   else
     {
@@ -1069,7 +1099,7 @@ pe_print_idata (abfd, vfile)
 	{
 	  fprintf (file,
 		   _("\nThere is an import table, but the section containing it could not be found\n"));
-	  return true;
+	  return TRUE;
 	}
     }
 
@@ -1098,7 +1128,7 @@ pe_print_idata (abfd, vfile)
       amt = bfd_section_size (abfd, rel_section);
       data = (bfd_byte *) bfd_malloc (amt);
       if (data == NULL && amt != 0)
-	return false;
+	return FALSE;
 
       bfd_get_section_contents (abfd, rel_section, (PTR) data, (bfd_vma) 0,
 				amt);
@@ -1134,11 +1164,11 @@ pe_print_idata (abfd, vfile)
   amt = dataoff + datasize;
   data = (bfd_byte *) bfd_malloc (amt);
   if (data == NULL)
-    return false;
+    return FALSE;
 
   /* Read the whole section.  Some of the fields might be before dataoff.  */
   if (! bfd_get_section_contents (abfd, section, (PTR) data, (bfd_vma) 0, amt))
-    return false;
+    return FALSE;
 
   adj = section->vma - extra->ImageBase;
 
@@ -1290,10 +1320,10 @@ pe_print_idata (abfd, vfile)
 
   free (data);
 
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 pe_print_edata (abfd, vfile)
      bfd *abfd;
      PTR vfile;
@@ -1332,12 +1362,12 @@ pe_print_edata (abfd, vfile)
       /* Maybe the extra header isn't there.  Look for the section.  */
       section = bfd_get_section_by_name (abfd, ".edata");
       if (section == NULL)
-	return true;
+	return TRUE;
 
       addr = section->vma;
       datasize = bfd_section_size (abfd, section);
       if (datasize == 0)
-	return true;
+	return TRUE;
     }
   else
     {
@@ -1355,7 +1385,7 @@ pe_print_edata (abfd, vfile)
 	{
 	  fprintf (file,
 		   _("\nThere is an export table, but the section containing it could not be found\n"));
-	  return true;
+	  return TRUE;
 	}
     }
 
@@ -1367,11 +1397,11 @@ pe_print_edata (abfd, vfile)
 
   data = (bfd_byte *) bfd_malloc (datasize);
   if (data == NULL)
-    return false;
+    return FALSE;
 
   if (! bfd_get_section_contents (abfd, section, (PTR) data,
 				  (file_ptr) dataoff, datasize))
-    return false;
+    return FALSE;
 
   /* Go get Export Directory Table.  */
   edt.export_flags   = bfd_get_32 (abfd, data +  0);
@@ -1508,7 +1538,7 @@ pe_print_edata (abfd, vfile)
 
   free (data);
 
-  return true;
+  return TRUE;
 }
 
 /* This really is architecture dependent.  On IA-64, a .pdata entry
@@ -1516,7 +1546,7 @@ pe_print_edata (abfd, vfile)
    specify the start and end address of the code range the entry
    covers and the address of the corresponding unwind info data.  */
 
-static boolean
+static bfd_boolean
 pe_print_pdata (abfd, vfile)
      bfd *abfd;
      PTR vfile;
@@ -1537,7 +1567,7 @@ pe_print_pdata (abfd, vfile)
   if (section == NULL
       || coff_section_data (abfd, section) == NULL
       || pei_section_data (abfd, section) == NULL)
-    return true;
+    return TRUE;
 
   stop = pei_section_data (abfd, section)->virt_size;
   if ((stop % onaline) != 0)
@@ -1558,11 +1588,11 @@ pe_print_pdata (abfd, vfile)
 
   datasize = bfd_section_size (abfd, section);
   if (datasize == 0)
-    return true;
+    return TRUE;
 
   data = (bfd_byte *) bfd_malloc (datasize);
   if (data == NULL && datasize != 0)
-    return false;
+    return FALSE;
 
   bfd_get_section_contents (abfd, section, (PTR) data, (bfd_vma) 0,
 			    datasize);
@@ -1639,7 +1669,7 @@ pe_print_pdata (abfd, vfile)
 
   free (data);
 
-  return true;
+  return TRUE;
 }
 
 #define IMAGE_REL_BASED_HIGHADJ 4
@@ -1660,7 +1690,7 @@ static const char * const tbl[] =
     "UNKNOWN",   /* MUST be last */
   };
 
-static boolean
+static bfd_boolean
 pe_print_reloc (abfd, vfile)
      bfd *abfd;
      PTR vfile;
@@ -1673,10 +1703,10 @@ pe_print_reloc (abfd, vfile)
   bfd_size_type start, stop;
 
   if (section == NULL)
-    return true;
+    return TRUE;
 
   if (bfd_section_size (abfd, section) == 0)
-    return true;
+    return TRUE;
 
   fprintf (file,
 	   _("\n\nPE File Base Relocations (interpreted .reloc section contents)\n"));
@@ -1684,7 +1714,7 @@ pe_print_reloc (abfd, vfile)
   datasize = bfd_section_size (abfd, section);
   data = (bfd_byte *) bfd_malloc (datasize);
   if (data == NULL && datasize != 0)
-    return false;
+    return FALSE;
 
   bfd_get_section_contents (abfd, section, (PTR) data, (bfd_vma) 0,
 			    datasize);
@@ -1743,12 +1773,12 @@ pe_print_reloc (abfd, vfile)
 
   free (data);
 
-  return true;
+  return TRUE;
 }
 
 /* Print out the program headers.  */
 
-boolean
+bfd_boolean
 _bfd_XX_print_private_bfd_data_common (abfd, vfile)
      bfd *abfd;
      PTR vfile;
@@ -1859,20 +1889,20 @@ _bfd_XX_print_private_bfd_data_common (abfd, vfile)
   pe_print_pdata (abfd, vfile);
   pe_print_reloc (abfd, vfile);
 
-  return true;
+  return TRUE;
 }
 
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
-boolean
+bfd_boolean
 _bfd_XX_bfd_copy_private_bfd_data_common (ibfd, obfd)
      bfd *ibfd, *obfd;
 {
   /* One day we may try to grok other private data.  */
   if (ibfd->xvec->flavour != bfd_target_coff_flavour
       || obfd->xvec->flavour != bfd_target_coff_flavour)
-    return true;
+    return TRUE;
 
   pe_data (obfd)->pe_opthdr = pe_data (ibfd)->pe_opthdr;
   pe_data (obfd)->dll = pe_data (ibfd)->dll;
@@ -1884,12 +1914,12 @@ _bfd_XX_bfd_copy_private_bfd_data_common (ibfd, obfd)
       pe_data (obfd)->pe_opthdr.DataDirectory[5].VirtualAddress = 0;
       pe_data (obfd)->pe_opthdr.DataDirectory[5].Size = 0;
     }
-  return true;
+  return TRUE;
 }
 
 /* Copy private section data.  */
 
-boolean
+bfd_boolean
 _bfd_XX_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
      bfd *ibfd;
      asection *isec;
@@ -1898,7 +1928,7 @@ _bfd_XX_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
 {
   if (bfd_get_flavour (ibfd) != bfd_target_coff_flavour
       || bfd_get_flavour (obfd) != bfd_target_coff_flavour)
-    return true;
+    return TRUE;
 
   if (coff_section_data (ibfd, isec) != NULL
       && pei_section_data (ibfd, isec) != NULL)
@@ -1908,7 +1938,7 @@ _bfd_XX_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
 	  bfd_size_type amt = sizeof (struct coff_section_tdata);
 	  osec->used_by_bfd = (PTR) bfd_zalloc (obfd, amt);
 	  if (osec->used_by_bfd == NULL)
-	    return false;
+	    return FALSE;
 	}
 
       if (pei_section_data (obfd, osec) == NULL)
@@ -1916,7 +1946,7 @@ _bfd_XX_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
 	  bfd_size_type amt = sizeof (struct pei_section_tdata);
 	  coff_section_data (obfd, osec)->tdata = (PTR) bfd_zalloc (obfd, amt);
 	  if (coff_section_data (obfd, osec)->tdata == NULL)
-	    return false;
+	    return FALSE;
 	}
 
       pei_section_data (obfd, osec)->virt_size =
@@ -1925,7 +1955,7 @@ _bfd_XX_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
 	pei_section_data (ibfd, isec)->pe_flags;
     }
 
-  return true;
+  return TRUE;
 }
 
 void
@@ -1948,7 +1978,7 @@ _bfd_XX_get_symbol_info (abfd, symbol, ret)
 /* Handle the .idata section and other things that need symbol table
    access.  */
 
-boolean
+bfd_boolean
 _bfd_XXi_final_link_postscript (abfd, pfinfo)
      bfd *abfd;
      struct coff_final_link_info *pfinfo;
@@ -1965,7 +1995,7 @@ _bfd_XXi_final_link_postscript (abfd, pfinfo)
   /* The import directory.  This is the address of .idata$2, with size
      of .idata$2 + .idata$3.  */
   h1 = coff_link_hash_lookup (coff_hash_table (info),
-			      ".idata$2", false, false, true);
+			      ".idata$2", FALSE, FALSE, TRUE);
   if (h1 != NULL)
     {
       pe_data (abfd)->pe_opthdr.DataDirectory[1].VirtualAddress =
@@ -1973,7 +2003,7 @@ _bfd_XXi_final_link_postscript (abfd, pfinfo)
 	 + h1->root.u.def.section->output_section->vma
 	 + h1->root.u.def.section->output_offset);
       h1 = coff_link_hash_lookup (coff_hash_table (info),
-				  ".idata$4", false, false, true);
+				  ".idata$4", FALSE, FALSE, TRUE);
       pe_data (abfd)->pe_opthdr.DataDirectory[1].Size =
 	((h1->root.u.def.value
 	  + h1->root.u.def.section->output_section->vma
@@ -1983,22 +2013,34 @@ _bfd_XXi_final_link_postscript (abfd, pfinfo)
       /* The import address table.  This is the size/address of
          .idata$5.  */
       h1 = coff_link_hash_lookup (coff_hash_table (info),
-				  ".idata$5", false, false, true);
+				  ".idata$5", FALSE, FALSE, TRUE);
       pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress =
 	(h1->root.u.def.value
 	 + h1->root.u.def.section->output_section->vma
 	 + h1->root.u.def.section->output_offset);
       h1 = coff_link_hash_lookup (coff_hash_table (info),
-				  ".idata$6", false, false, true);
+				  ".idata$6", FALSE, FALSE, TRUE);
       pe_data (abfd)->pe_opthdr.DataDirectory[12].Size =
 	((h1->root.u.def.value
 	  + h1->root.u.def.section->output_section->vma
 	  + h1->root.u.def.section->output_offset)
-	 - pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress);
+	 - pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress);      
+    }
+
+  h1 = coff_link_hash_lookup (coff_hash_table (info),
+			      "__tls_used", FALSE, FALSE, TRUE);
+  if (h1 != NULL)
+    {
+      pe_data (abfd)->pe_opthdr.DataDirectory[9].VirtualAddress =
+	(h1->root.u.def.value
+	 + h1->root.u.def.section->output_section->vma
+	 + h1->root.u.def.section->output_offset
+	 - pe_data (abfd)->pe_opthdr.ImageBase);
+      pe_data (abfd)->pe_opthdr.DataDirectory[9].Size = 0x18;
     }
 
   /* If we couldn't find idata$2, we either have an excessively
      trivial program or are in DEEP trouble; we have to assume trivial
      program....  */
-  return true;
+  return TRUE;
 }

@@ -59,6 +59,38 @@ static int big_endian;
 
 int stop_simulator;
 
+/* Cirrus DSP registers.
+
+   We need to define these registers outside of maverick.c because
+   maverick.c might not be linked in unless --target=arm9e-* in which
+   case wrapper.c will not compile because it tries to access Cirrus
+   registers.  This should all go away once we get the Cirrus and ARM
+   Coprocessor to coexist in armcopro.c-- aldyh.  */
+
+struct maverick_regs
+{
+  union
+  {
+    int i;
+    float f;
+  } upper;
+  
+  union
+  {
+    int i;
+    float f;
+  } lower;
+};
+
+union maverick_acc_regs
+{
+  long double ld;		/* Acc registers are 72-bits.  */
+};
+
+struct maverick_regs     DSPregs[16];
+union maverick_acc_regs  DSPacc[4];
+ARMword DSPsc;
+
 static void
 init ()
 {
@@ -71,7 +103,6 @@ init ()
       state->bigendSig = (big_endian ? HIGH : LOW);
       ARMul_MemoryInit (state, mem_size);
       ARMul_OSInit (state);
-      ARMul_CoProInit (state);
       state->verbose = verbosity;
       done = 1;
     }
@@ -204,7 +235,7 @@ sim_resume (sd, step, siggnal)
 SIM_RC
 sim_create_inferior (sd, abfd, argv, env)
      SIM_DESC sd ATTRIBUTE_UNUSED;
-     struct _bfd * abfd;
+     struct bfd * abfd;
      char ** argv;
      char ** env;
 {
@@ -232,8 +263,36 @@ sim_create_inferior (sd, abfd, argv, env)
       /* We wouldn't set the machine type with earlier toolchains, so we
 	 explicitly select a processor capable of supporting all ARMs in
 	 32bit mode.  */
+      /* We choose the XScale rather than the iWMMXt, because the iWMMXt
+	 removes the FPE emulator, since it conflicts with its coprocessors.
+	 For the most generic ARM support, we want the FPE emulator in place.  */
     case bfd_mach_arm_XScale:
       ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_XScale_Prop);
+      break;
+
+    case bfd_mach_arm_iWMMXt:
+      {
+	extern int SWI_vector_installed;
+	ARMword i;
+
+	if (! SWI_vector_installed)
+	  {
+	    /* Intialise the hardware vectors to zero.  */
+	    if (! SWI_vector_installed)
+	      for (i = ARMul_ResetV; i <= ARMFIQV; i += 4)
+		ARMul_WriteWord (state, i, 0);
+
+	    /* ARM_WriteWord will have detected the write to the SWI vector,
+	       but we want SWI_vector_installed to remain at 0 so that thumb
+	       mode breakpoints will work.  */
+	    SWI_vector_installed = 0;
+	  }
+      }
+      ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_XScale_Prop | ARM_iWMMXt_Prop);
+      break;
+
+    case bfd_mach_arm_ep9312:
+      ARMul_SelectProcessor (state, ARM_v4_Prop | ARM_ep9312_Prop);
       break;
 
     case bfd_mach_arm_5:
@@ -422,6 +481,64 @@ sim_store_register (sd, rn, memory, length)
       ARMul_CPSRAltered (state);
       break;
 
+    case SIM_ARM_MAVERIC_COP0R0_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R1_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R2_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R3_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R4_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R5_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R6_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R7_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R8_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R9_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R10_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R11_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R12_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R13_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R14_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R15_REGNUM:
+      memcpy (& DSPregs [rn - SIM_ARM_MAVERIC_COP0R0_REGNUM],
+	      memory, sizeof (struct maverick_regs));
+      return sizeof (struct maverick_regs);
+
+    case SIM_ARM_MAVERIC_DSPSC_REGNUM:
+      memcpy (&DSPsc, memory, sizeof DSPsc);
+      return sizeof DSPsc;
+
+    case SIM_ARM_IWMMXT_COP0R0_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R1_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R2_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R3_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R4_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R5_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R6_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R7_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R8_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R9_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R10_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R11_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R12_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R13_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R14_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R15_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R0_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R1_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R2_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R3_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R4_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R5_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R6_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R7_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R8_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R9_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R10_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R11_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R12_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R13_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R14_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R15_REGNUM:
+      return Store_Iwmmxt_Register (rn - SIM_ARM_IWMMXT_COP0R0_REGNUM, memory);
+
     default:
       return 0;
     }
@@ -476,6 +593,64 @@ sim_fetch_register (sd, rn, memory, length)
     case SIM_ARM_PS_REGNUM:
       regval = ARMul_GetCPSR (state);
       break;
+
+    case SIM_ARM_MAVERIC_COP0R0_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R1_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R2_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R3_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R4_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R5_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R6_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R7_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R8_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R9_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R10_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R11_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R12_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R13_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R14_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R15_REGNUM:
+      memcpy (memory, & DSPregs [rn - SIM_ARM_MAVERIC_COP0R0_REGNUM],
+	      sizeof (struct maverick_regs));
+      return sizeof (struct maverick_regs);
+
+    case SIM_ARM_MAVERIC_DSPSC_REGNUM:
+      memcpy (memory, & DSPsc, sizeof DSPsc);
+      return sizeof DSPsc;
+
+    case SIM_ARM_IWMMXT_COP0R0_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R1_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R2_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R3_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R4_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R5_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R6_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R7_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R8_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R9_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R10_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R11_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R12_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R13_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R14_REGNUM:
+    case SIM_ARM_IWMMXT_COP0R15_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R0_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R1_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R2_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R3_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R4_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R5_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R6_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R7_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R8_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R9_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R10_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R11_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R12_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R13_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R14_REGNUM:
+    case SIM_ARM_IWMMXT_COP1R15_REGNUM:
+      return Fetch_Iwmmxt_Register (rn - SIM_ARM_IWMMXT_COP0R0_REGNUM, memory);
 
     default:
       return 0;
@@ -610,7 +785,7 @@ SIM_DESC
 sim_open (kind, ptr, abfd, argv)
      SIM_OPEN_KIND kind;
      host_callback *ptr;
-     struct _bfd *abfd;
+     struct bfd *abfd;
      char **argv;
 {
   sim_kind = kind;
@@ -739,6 +914,9 @@ sim_stop_reason (sd, reason, sigrc)
       *reason = sim_stopped;
       if (state->EndCondition == RDIError_BreakpointReached)
 	*sigrc = SIGTRAP;
+      else if (   state->EndCondition == RDIError_DataAbort
+	       || state->EndCondition == RDIError_AddressException)
+	*sigrc = SIGBUS;
       else
 	*sigrc = 0;
     }

@@ -1,7 +1,7 @@
 #
 #   This file is part of the program psim.
 #
-#   Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+#   Copyright 1994, 1995, 1996, 1997, 2003 Andrew Cagney
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -112,9 +112,10 @@ CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
   $(STDIO_CFLAGS) \
   $(TERMIO_CFLAGS) \
   $(DEVZERO_CFLAGS)
+SIM_FPU_CFLAGS = @sim_fpu_cflags@
 
-STD_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $(INTL_CFLAGS)
-NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)
+STD_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $(INTL_CFLAGS) $(SIM_FPU_CFLAGS)
+NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)  $(SIM_FPU_CFLAGS)
 BUILD_CFLAGS	= -g -O $(INCLUDES) $(WARNING_CFLAGS)
 
 BUILD_LDFLAGS	=
@@ -147,6 +148,7 @@ MAKEOVERRIDES=
 LIB_INCLUDES	= -I$(srcdir)/../../include
 BFD_INCLUDES	= -I../../bfd -I$(srcdir)/../../bfd
 GDB_INCLUDES	= -I../../gdb -I$(srcdir)/../../gdb  -I$(srcdir)/../../gdb/config -I$(srcdir)/../../mmalloc
+
 INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES)
 
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
@@ -185,13 +187,15 @@ PSIM_H = \
 
 IDECODE_H = \
 	idecode.h \
-	idecode_expression.h \
+	idecode_expression.h e500_expression.h altivec_expression.h \
 	idecode_branch.h \
 	idecode_fields.h \
 	icache.h
 
 REGISTERS_H = \
 	registers.h \
+	e500_registers.h \
+	altivec_registers.h \
 	spreg.h
 
 CPU_H = \
@@ -319,9 +323,6 @@ LIB_OBJ = \
 
 GDB_OBJ = sim_calls.o @sim_callback@
 
-ICACHE_CFLAGS = @sim_fpu_cflags@
-SEMANTICS_CFLAGS = @sim_fpu_cflags@
-
 HW_SRC = @sim_hw_src@
 HW_OBJ = @sim_hw_obj@
 
@@ -367,7 +368,6 @@ interrupts.o: interrupts.c $(CPU_H) $(IDECODE_H) os_emul.h
 # Given that inlines are turned on now, rebuild idecode whenever
 # anything changes.
 idecode.o: idecode.c $(CPU_H) $(IDECODE_H) semantics.h $(LIB_INLINE_SRC) $(BUILT_SRC)
-	$(CC) -c $(NOWARN_CFLAGS) $<
 
 # double.o: double.c dp-bit.c
 
@@ -379,7 +379,7 @@ model.o: model.c $(CPU_H)
 
 events.o: events.c events.h $(BASICS_H) 
 
-sim_calls.o: sim_calls.c $(PSIM_H) itable.h ../../gdb/tm.h options.h
+sim_calls.o: sim_calls.c $(PSIM_H) itable.h options.h
 
 spreg.o: spreg.c spreg.h spreg.c $(BASICS_H)
 
@@ -394,10 +394,8 @@ device_table.o: device_table.c $(DEVICE_TABLE_H) events.h hw.c
 cap.o: cap.c cap.h $(BASICS_H)
 
 semantics.o: semantics.c semantics.h $(CPU_H) $(IDECODE_H)
-	$(CC) -c $(SEMANTICS_CFLAGS) $(NOWARN_CFLAGS) $<
 
 icache.o: icache.c icache.h $(IDECODE_H) $(CPU_H)
-	$(CC) -c $(ICACHE_CFLAGS) $(NOWARN_CFLAGS) $<
 
 support.o: support.c support.h $(IDECODE_H) $(CPU_H)
 
@@ -413,17 +411,17 @@ gentmap: ../common/gentmap.c Makefile targ-vals.def
 targ-vals.def: $(srcdir)/../common/nltvals.def
 	rm -f targ-vals.def tmp-def
 	cat $(srcdir)/../common/nltvals.def > tmp-vals.def
-	$(srcdir)/../../move-if-change tmp-vals.def targ-vals.def
+	$(SHELL) $(srcdir)/../../move-if-change tmp-vals.def targ-vals.def
 
 targ-vals.h: Makefile gentmap $(srcdir)/../../move-if-change
 	rm -f tmp-vals.h
 	./gentmap -h > tmp-vals.h
-	$(srcdir)/../../move-if-change tmp-vals.h targ-vals.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-vals.h targ-vals.h
 
 targ-map.c: Makefile gentmap $(srcdir)/../../move-if-change
 	rm -f tmp-map.c
 	./gentmap -c > tmp-map.c
-	$(srcdir)/../../move-if-change tmp-map.c targ-map.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-map.c targ-map.c
 
 callback.o: ../common/callback.c targ-vals.h config.h
 	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $<
@@ -443,7 +441,7 @@ options.o: options.c $(BASICS_H) $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BU
 
 tmp-defines: config.h Makefile
 	sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < config.h > tmp-defines.h
-	$(srcdir)/../../move-if-change tmp-defines.h defines.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-defines.h defines.h
 	touch tmp-defines
 
 #
@@ -459,15 +457,13 @@ tmp-dgen: dgen ppc-spr-table $(srcdir)/../../move-if-change
 		-r $(srcdir)/ppc-spr-table \
 		-n spreg.h -hp tmp-spreg.h \
 		-n spreg.c -p  tmp-spreg.c
-	$(srcdir)/../../move-if-change tmp-spreg.h spreg.h
-	$(srcdir)/../../move-if-change tmp-spreg.c spreg.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-spreg.h spreg.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-spreg.c spreg.c
 	touch tmp-dgen
 
-
-tmp-igen: igen ppc-instructions $(IGEN_OPCODE_RULES) ppc-cache-rules $(srcdir)/../../move-if-change tmp-ld-decode tmp-ld-cache tmp-ld-insn tmp-filter
+tmp-igen: igen $(srcdir)/ppc-instructions $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcdir)/../../move-if-change tmp-ld-decode tmp-ld-cache tmp-ld-insn tmp-filter
 	./igen	$(IGEN_FLAGS) \
 		-o $(srcdir)/$(IGEN_OPCODE_RULES) \
-		-k $(srcdir)/ppc-cache-rules \
 		-I $(srcdir) -i $(srcdir)/ppc-instructions \
 		-n icache.h    -hc tmp-icache.h \
 		-n icache.c    -c  tmp-icache.c \
@@ -481,18 +477,18 @@ tmp-igen: igen ppc-instructions $(IGEN_OPCODE_RULES) ppc-cache-rules $(srcdir)/.
 		-n model.c     -m  tmp-model.c \
 		-n support.h   -hf tmp-support.h \
 		-n support.c   -f  tmp-support.c
-	$(srcdir)/../../move-if-change tmp-icache.h icache.h
-	$(srcdir)/../../move-if-change tmp-icache.c icache.c
-	$(srcdir)/../../move-if-change tmp-idecode.h idecode.h
-	$(srcdir)/../../move-if-change tmp-idecode.c idecode.c
-	$(srcdir)/../../move-if-change tmp-semantics.h semantics.h
-	$(srcdir)/../../move-if-change tmp-semantics.c semantics.c
-	$(srcdir)/../../move-if-change tmp-itable.h itable.h
-	$(srcdir)/../../move-if-change tmp-itable.c itable.c
-	$(srcdir)/../../move-if-change tmp-model.h model.h
-	$(srcdir)/../../move-if-change tmp-model.c model.c
-	$(srcdir)/../../move-if-change tmp-support.h support.h
-	$(srcdir)/../../move-if-change tmp-support.c support.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-icache.h icache.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-icache.c icache.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-idecode.h idecode.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-idecode.c idecode.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-semantics.h semantics.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-semantics.c semantics.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-itable.h itable.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-itable.c itable.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-model.h model.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-model.c model.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-support.h support.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c support.c
 	touch tmp-igen
 
 # NOTE: Some versions of make don't handle files created as side-effects
@@ -538,12 +534,12 @@ tmp-ld-cache: ld-cache.o misc.o lf.o table.o filter_host.o
 ld-insn.o: ld-insn.c misc.h lf.h table.h ld-insn.h ld-decode.h igen.h
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/ld-insn.c
 tmp-ld-insn: ld-insn.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-insn -DMAIN $(srcdir)/ld-insn.c misc.o lf.o table.o ld-decode.o filter_host.o filter.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-insn -DMAIN $(srcdir)/ld-insn.c ld-cache.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o $(BUILD_LIBS)
 
-gen-model.o: gen-model.c misc.h lf.h table.h gen-model.h ld-decode.h igen.h ld-insn.h
+gen-model.o: gen-model.c misc.h lf.h table.h gen-model.h ld-decode.h igen.h ld-insn.h ld-cache.h
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gen-model.c
 
-gen-itable.o: gen-itable.c misc.h lf.h table.h gen-itable.h ld-decode.h igen.h ld-insn.h igen.h
+gen-itable.o: gen-itable.c misc.h lf.h table.h gen-itable.h ld-decode.h igen.h ld-insn.h igen.h ld-cache.h
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gen-itable.c
 
 gen-icache.o: gen-icache.c misc.h lf.h table.h gen-icache.h ld-decode.h igen.h ld-insn.h gen-semantics.h gen-idecode.h
@@ -596,8 +592,8 @@ tmp-hw: Makefile $(HW_SRC) $(srcdir)/../../move-if-change
 		-e 's/^/    /' \
 		-e 's/$$/_device_descriptor,/' \
 		> tmp-hw.c
-	$(srcdir)/../../move-if-change tmp-hw.h hw.h
-	$(srcdir)/../../move-if-change tmp-hw.c hw.c
+	$(SHELL) $(srcdir)/../../move-if-change tmp-hw.h hw.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-hw.c hw.c
 	touch tmp-hw
 
 hw_cpu.o: hw_cpu.c $(DEVICE_TABLE_H) $(CPU_H)
@@ -635,7 +631,7 @@ tmp-pk: Makefile $(PACKAGE_SRC) $(srcdir)/../../move-if-change
 		-e 's/^/extern package_create_instance_callback pk_/' \
 		-e 's/$$/_create_instance;/' \
 		> tmp-pk.h
-	$(srcdir)/../../move-if-change tmp-pk.h pk.h
+	$(SHELL) $(srcdir)/../../move-if-change tmp-pk.h pk.h
 	touch tmp-pk
 
 pk_disklabel.o: pk.h $(DEVICE_TABLE_H)

@@ -1,5 +1,6 @@
 /* Disassemble support for GDB.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,8 +24,9 @@
 #include "value.h"
 #include "ui-out.h"
 #include "gdb_string.h"
-
 #include "disasm.h"
+#include "gdbcore.h"
+#include "dis-asm.h"
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
@@ -42,31 +44,31 @@ struct dis_line_entry
   CORE_ADDR end_pc;
 };
 
-/* This variable determines where memory used for disassembly is read from. */
-int gdb_disassemble_from_exec = -1;
-
-/* This is the memory_read_func for gdb_disassemble when we are
-   disassembling from the exec file. */
+/* Like target_read_memory, but slightly different parameters.  */
 static int
-gdb_dis_asm_read_memory (bfd_vma memaddr, bfd_byte * myaddr,
-			 unsigned int len, disassemble_info * info)
+dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr, unsigned int len,
+		     struct disassemble_info *info)
 {
-  extern struct target_ops exec_ops;
-  int res;
+  return target_read_memory (memaddr, (char *) myaddr, len);
+}
 
-  errno = 0;
-  res = xfer_memory (memaddr, myaddr, len, 0, 0, &exec_ops);
+/* Like memory_error with slightly different parameters.  */
+static void
+dis_asm_memory_error (int status, bfd_vma memaddr,
+		      struct disassemble_info *info)
+{
+  memory_error (status, memaddr);
+}
 
-  if (res == len)
-    return 0;
-  else if (errno == 0)
-    return EIO;
-  else
-    return errno;
+/* Like print_address with slightly different parameters.  */
+static void
+dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
+{
+  print_address (addr, info->stream);
 }
 
 static int
-compare_lines (const PTR mle1p, const PTR mle2p)
+compare_lines (const void *mle1p, const void *mle2p)
 {
   struct dis_line_entry *mle1, *mle2;
   int val;
@@ -83,7 +85,7 @@ compare_lines (const PTR mle1p, const PTR mle2p)
 }
 
 static int
-dump_insns (struct ui_out *uiout, disassemble_info * di,
+dump_insns (struct ui_out *uiout, struct disassemble_info * di,
 	    CORE_ADDR low, CORE_ADDR high,
 	    int how_many, struct ui_stream *stb)
 {
@@ -92,13 +94,15 @@ dump_insns (struct ui_out *uiout, disassemble_info * di,
 
   /* parts of the symbolic representation of the address */
   int unmapped;
-  char *filename = NULL;
-  char *name = NULL;
   int offset;
   int line;
+  struct cleanup *ui_out_chain;
 
   for (pc = low; pc < high;)
     {
+      char *filename = NULL;
+      char *name = NULL;
+
       QUIT;
       if (how_many >= 0)
 	{
@@ -107,7 +111,7 @@ dump_insns (struct ui_out *uiout, disassemble_info * di,
 	  else
 	    num_displayed++;
 	}
-      ui_out_tuple_begin (uiout, NULL);
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_core_addr (uiout, "address", pc);
 
       if (!build_address_symbolic (pc, 0, &name, &offset, &filename,
@@ -121,6 +125,9 @@ dump_insns (struct ui_out *uiout, disassemble_info * di,
 	  ui_out_field_int (uiout, "offset", offset);
 	  ui_out_text (uiout, ">:\t");
 	}
+      else
+	ui_out_text (uiout, ":\t");
+
       if (filename != NULL)
 	xfree (filename);
       if (name != NULL)
@@ -130,7 +137,7 @@ dump_insns (struct ui_out *uiout, disassemble_info * di,
       pc += TARGET_PRINT_INSN (pc, di);
       ui_out_field_stream (uiout, "inst", stb);
       ui_file_rewind (stb->stream);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
     }
   return num_displayed;
@@ -156,6 +163,7 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
   int next_line = 0;
   CORE_ADDR pc;
   int num_displayed = 0;
+  struct cleanup *ui_out_chain;
 
   mle = (struct dis_line_entry *) alloca (nlines
 					  * sizeof (struct dis_line_entry));
@@ -209,11 +217,14 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
      they have been emitted before), followed by the assembly code
      for that line.  */
 
-  ui_out_list_begin (uiout, "asm_insns");
+  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
 
   for (i = 0; i < newlines; i++)
     {
+      struct cleanup *ui_out_tuple_chain = NULL;
+      struct cleanup *ui_out_list_chain = NULL;
       int close_list = 1;
+      
       /* Print out everything from next_line to the current line.  */
       if (mle[i].line >= next_line)
 	{
@@ -222,7 +233,9 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 	      /* Just one line to print. */
 	      if (next_line == mle[i].line)
 		{
-		  ui_out_tuple_begin (uiout, "src_and_asm_line");
+		  ui_out_tuple_chain
+		    = make_cleanup_ui_out_tuple_begin_end (uiout,
+							   "src_and_asm_line");
 		  print_source_lines (symtab, next_line, mle[i].line + 1, 0);
 		}
 	      else
@@ -230,27 +243,38 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 		  /* Several source lines w/o asm instructions associated. */
 		  for (; next_line < mle[i].line; next_line++)
 		    {
-		      ui_out_tuple_begin (uiout, "src_and_asm_line");
+		      struct cleanup *ui_out_list_chain_line;
+		      struct cleanup *ui_out_tuple_chain_line;
+		      
+		      ui_out_tuple_chain_line
+			= make_cleanup_ui_out_tuple_begin_end (uiout,
+							       "src_and_asm_line");
 		      print_source_lines (symtab, next_line, next_line + 1,
 					  0);
-		      ui_out_list_begin (uiout, "line_asm_insn");
-		      ui_out_list_end (uiout);
-		      ui_out_tuple_end (uiout);
+		      ui_out_list_chain_line
+			= make_cleanup_ui_out_list_begin_end (uiout,
+							      "line_asm_insn");
+		      do_cleanups (ui_out_list_chain_line);
+		      do_cleanups (ui_out_tuple_chain_line);
 		    }
 		  /* Print the last line and leave list open for
 		     asm instructions to be added. */
-		  ui_out_tuple_begin (uiout, "src_and_asm_line");
+		  ui_out_tuple_chain
+		    = make_cleanup_ui_out_tuple_begin_end (uiout,
+							   "src_and_asm_line");
 		  print_source_lines (symtab, next_line, mle[i].line + 1, 0);
 		}
 	    }
 	  else
 	    {
-	      ui_out_tuple_begin (uiout, "src_and_asm_line");
+	      ui_out_tuple_chain
+		= make_cleanup_ui_out_tuple_begin_end (uiout, "src_and_asm_line");
 	      print_source_lines (symtab, mle[i].line, mle[i].line + 1, 0);
 	    }
 
 	  next_line = mle[i].line + 1;
-	  ui_out_list_begin (uiout, "line_asm_insn");
+	  ui_out_list_chain
+	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
 	  /* Don't close the list if the lines are not in order. */
 	  if (i < (newlines - 1) && mle[i + 1].line <= mle[i].line)
 	    close_list = 0;
@@ -260,8 +284,8 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 				   how_many, stb);
       if (close_list)
 	{
-	  ui_out_list_end (uiout);
-	  ui_out_tuple_end (uiout);
+	  do_cleanups (ui_out_list_chain);
+	  do_cleanups (ui_out_tuple_chain);
 	  ui_out_text (uiout, "\n");
 	  close_list = 0;
 	}
@@ -269,22 +293,60 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 	if (num_displayed >= how_many)
 	  break;
     }
-  ui_out_list_end (uiout);
+  do_cleanups (ui_out_chain);
 }
 
 
 static void
-do_assembly_only (struct ui_out *uiout, disassemble_info * di,
+do_assembly_only (struct ui_out *uiout, struct disassemble_info * di,
 		  CORE_ADDR low, CORE_ADDR high,
 		  int how_many, struct ui_stream *stb)
 {
   int num_displayed = 0;
+  struct cleanup *ui_out_chain;
 
-  ui_out_list_begin (uiout, "asm_insns");
+  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
 
   num_displayed = dump_insns (uiout, di, low, high, how_many, stb);
 
-  ui_out_list_end (uiout);
+  do_cleanups (ui_out_chain);
+}
+
+/* Initialize the disassemble info struct ready for the specified
+   stream.  */
+
+static int
+fprintf_disasm (void *stream, const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  vfprintf_filtered (stream, format, args);
+  va_end (args);
+  /* Something non -ve.  */
+  return 0;
+}
+
+static struct disassemble_info
+gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
+{
+  struct disassemble_info di;
+  init_disassemble_info (&di, file, fprintf_disasm);
+  di.flavour = bfd_target_unknown_flavour;
+  di.memory_error_func = dis_asm_memory_error;
+  di.print_address_func = dis_asm_print_address;
+  /* NOTE: cagney/2003-04-28: The original code, from the old Insight
+     disassembler had a local optomization here.  By default it would
+     access the executable file, instead of the target memory (there
+     was a growing list of exceptions though).  Unfortunately, the
+     heuristic was flawed.  Commands like "disassemble &variable"
+     didn't work as they relied on the access going to the target.
+     Further, it has been supperseeded by trust-read-only-sections
+     (although that should be superseeded by target_trust..._p()).  */
+  di.read_memory_func = dis_asm_read_memory;
+  di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
+  di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
+  di.endian = gdbarch_byte_order (gdbarch);
+  return di;
 }
 
 void
@@ -294,63 +356,13 @@ gdb_disassembly (struct ui_out *uiout,
 		int mixed_source_and_assembly,
 		int how_many, CORE_ADDR low, CORE_ADDR high)
 {
-  static disassemble_info di;
-  static int di_initialized;
+  struct ui_stream *stb = ui_out_stream_new (uiout);
+  struct cleanup *cleanups = make_cleanup_ui_out_stream_delete (stb);
+  struct disassemble_info di = gdb_disassemble_info (current_gdbarch, stb->stream);
   /* To collect the instruction outputted from opcodes. */
-  static struct ui_stream *stb = NULL;
   struct symtab *symtab = NULL;
   struct linetable_entry *le = NULL;
   int nlines = -1;
-
-  if (!di_initialized)
-    {
-      /* We don't add a cleanup for this, because the allocation of
-         the stream is done once only for each gdb run, and we need to
-         keep it around until the end. Hopefully there won't be any
-         errors in the init code below, that make this function bail
-         out. */
-      stb = ui_out_stream_new (uiout);
-      INIT_DISASSEMBLE_INFO_NO_ARCH (di, stb->stream,
-				     (fprintf_ftype) fprintf_unfiltered);
-      di.flavour = bfd_target_unknown_flavour;
-      di.memory_error_func = dis_asm_memory_error;
-      di.print_address_func = dis_asm_print_address;
-      di_initialized = 1;
-    }
-
-  di.mach = TARGET_PRINT_INSN_INFO->mach;
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    di.endian = BFD_ENDIAN_BIG;
-  else
-    di.endian = BFD_ENDIAN_LITTLE;
-
-  /* If gdb_disassemble_from_exec == -1, then we use the following heuristic to
-     determine whether or not to do disassembly from target memory or from the
-     exec file:
-
-     If we're debugging a local process, read target memory, instead of the
-     exec file.  This makes disassembly of functions in shared libs work
-     correctly.  Also, read target memory if we are debugging native threads.
-
-     Else, we're debugging a remote process, and should disassemble from the
-     exec file for speed.  However, this is no good if the target modifies its
-     code (for relocation, or whatever).  */
-
-  if (gdb_disassemble_from_exec == -1)
-    {
-      if (strcmp (target_shortname, "child") == 0
-	  || strcmp (target_shortname, "procfs") == 0
-	  || strcmp (target_shortname, "vxprocess") == 0
-	  || strstr (target_shortname, "-threads") != NULL)
-	gdb_disassemble_from_exec = 0;	/* It's a child process, read inferior mem */
-      else
-	gdb_disassemble_from_exec = 1;	/* It's remote, read the exec file */
-    }
-
-  if (gdb_disassemble_from_exec)
-    di.read_memory_func = gdb_dis_asm_read_memory;
-  else
-    di.read_memory_func = dis_asm_read_memory;
 
   /* Assume symtab is valid for whole PC range */
   symtab = find_pc_symtab (low);
@@ -370,5 +382,16 @@ gdb_disassembly (struct ui_out *uiout,
     do_mixed_source_and_assembly (uiout, &di, nlines, le, low,
 				  high, symtab, how_many, stb);
 
+  do_cleanups (cleanups);
   gdb_flush (gdb_stdout);
+}
+
+/* Print the instruction at address MEMADDR in debugged memory,
+   on STREAM.  Returns length of the instruction, in bytes.  */
+
+int
+gdb_print_insn (CORE_ADDR memaddr, struct ui_file *stream)
+{
+  struct disassemble_info di = gdb_disassemble_info (current_gdbarch, stream);
+  return TARGET_PRINT_INSN (memaddr, &di);
 }

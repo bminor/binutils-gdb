@@ -21,8 +21,6 @@
 #ifndef TM_NBSD_H
 #define TM_NBSD_H
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
-
 #include "sparc/tm-sparc.h"
 #include "solib.h"
 

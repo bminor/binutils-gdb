@@ -1,4 +1,4 @@
-# Copyright 2002 Free Software Foundation, Inc.
+# Copyright 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,11 +25,11 @@ if $tracelevel then {
 }
 
 set testfile relocate
-set srcfile ${srcdir}/${subdir}/${testfile}.c
+set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}.o
 
 remote_exec build "rm -f ${binfile}"
-if { [gdb_compile "${srcfile}" "${binfile}" object {debug}] != "" } {
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {debug}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
@@ -67,7 +67,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 # Load the object file.
 gdb_test "add-symbol-file ${binfile} 0" \
-	"Reading symbols from .*${testfile}\\.o\\.\\.\\.done\\." \
+	"Reading symbols from .*${testfile}\\.o\\.\\.\\.done\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
 	"add-symbol-file ${testfile}.o 0" \
 	"add symbol table from file \".*${testfile}\\.o\" at\[ \t\r\n\]+\.text_addr = 0x0\[\r\n\]+\\(y or n\\) " \
 	"y"
@@ -103,6 +103,32 @@ if { "${function_foo_addr}" == "${function_bar_addr}" } {
   fail "functions have different addresses"
 } else {
   pass "functions have different addresses"
+}
+
+# Now use a variable as an offset to add-symbol-file, and check that
+# the functions' addresses change.
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+
+gdb_test "set \$offset = 0x10000" ""
+
+# Load the object file.
+gdb_test "add-symbol-file ${binfile} \$offset" \
+	"Reading symbols from .*${testfile}\\.o\\.\\.\\.done\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
+	"add-symbol-file ${testfile}.o \$offset" \
+	"add symbol table from file \".*${testfile}\\.o\" at\[ \t\r\n\]+\.text_addr = 0x10000\[\r\n\]+\\(y or n\\) " \
+	"y"
+
+# Print the addresses of functions.
+set new_function_foo_addr [get_var_address function_foo]
+
+# Make sure they have different addresses.
+if { "${function_foo_addr}" == "${new_function_foo_addr}" } {
+  fail "function foo has a different address"
+} else {
+  pass "function foo has a different address"
 }
 
 return 0

@@ -1,6 +1,6 @@
 /* Perform non-arithmetic operations on values, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -33,10 +33,15 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "cp-abi.h"
+#include "block.h"
+#include "infcall.h"
+#include "dictionary.h"
+#include "cp-support.h"
 
 #include <errno.h>
 #include "gdb_string.h"
 #include "gdb_assert.h"
+#include "cp-support.h"
 
 /* Flag indicating HP compilers were used; needed to correctly handle some
    value operations with HP aCC code/runtime. */
@@ -48,10 +53,6 @@ extern int overload_debug;
 static int typecmp (int staticp, int varargs, int nargs,
 		    struct field t1[], struct value *t2[]);
 
-static CORE_ADDR find_function_addr (struct value *, struct type **);
-static struct value *value_arg_coerce (struct value *, struct type *, int);
-
-
 static CORE_ADDR value_push (CORE_ADDR, struct value *);
 
 static struct value *search_struct_field (char *, struct value *, int,
@@ -62,6 +63,17 @@ static struct value *search_struct_method (char *, struct value **,
 				       int, int *, struct type *);
 
 static int check_field_in (struct type *, const char *);
+
+
+static struct value *value_struct_elt_for_reference (struct type *domain,
+						     int offset,
+						     struct type *curtype,
+						     char *name,
+						     struct type *intype);
+
+static struct value *value_namespace_elt (const struct type *curtype,
+					  const char *name,
+					  enum noside noside);
 
 static CORE_ADDR allocate_space_in_inferior (int);
 
@@ -83,22 +95,13 @@ static int auto_abandon = 0;
 
 int overload_resolution = 0;
 
-/* This boolean tells what gdb should do if a signal is received while in
-   a function called from gdb (call dummy).  If set, gdb unwinds the stack
-   and restore the context to what as it was before the call.
-   The default is to stop in the frame where the signal was received. */
-
-int unwind_on_signal_p = 0;
-
-
-
 /* Find the address of function name NAME in the inferior.  */
 
 struct value *
 find_function_in_inferior (const char *name)
 {
-  register struct symbol *sym;
-  sym = lookup_symbol (name, 0, VAR_NAMESPACE, 0, NULL);
+  struct symbol *sym;
+  sym = lookup_symbol (name, 0, VAR_DOMAIN, 0, NULL);
   if (sym != NULL)
     {
       if (SYMBOL_CLASS (sym) != LOC_BLOCK)
@@ -166,9 +169,9 @@ allocate_space_in_inferior (int len)
 struct value *
 value_cast (struct type *type, struct value *arg2)
 {
-  register enum type_code code1;
-  register enum type_code code2;
-  register int scalar;
+  enum type_code code1;
+  enum type_code code2;
+  int scalar;
   struct type *type2;
 
   int convert_to_boolean = 0;
@@ -376,49 +379,6 @@ value_cast (struct type *type, struct value *arg2)
       VALUE_POINTED_TO_OFFSET (arg2) = 0;	/* pai: chk_val */
       return arg2;
     }
-  /* OBSOLETE else if (chill_varying_type (type)) */
-  /* OBSOLETE   { */
-  /* OBSOLETE     struct type *range1, *range2, *eltype1, *eltype2; */
-  /* OBSOLETE     struct value *val; */
-  /* OBSOLETE     int count1, count2; */
-  /* OBSOLETE     LONGEST low_bound, high_bound; */
-  /* OBSOLETE     char *valaddr, *valaddr_data; */
-  /* OBSOLETE     *//* For lint warning about eltype2 possibly uninitialized: */
-  /* OBSOLETE     eltype2 = NULL; */
-  /* OBSOLETE     if (code2 == TYPE_CODE_BITSTRING) */
-  /* OBSOLETE       error ("not implemented: converting bitstring to varying type"); */
-  /* OBSOLETE     if ((code2 != TYPE_CODE_ARRAY && code2 != TYPE_CODE_STRING) */
-  /* OBSOLETE         || (eltype1 = check_typedef (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 1))), */
-  /* OBSOLETE       eltype2 = check_typedef (TYPE_TARGET_TYPE (type2)), */
-  /* OBSOLETE                                (TYPE_LENGTH (eltype1) != TYPE_LENGTH (eltype2) */
-  /* OBSOLETE     *//*|| TYPE_CODE (eltype1) != TYPE_CODE (eltype2) *//* ))) */
-  /* OBSOLETE      error ("Invalid conversion to varying type"); */
-  /* OBSOLETE     range1 = TYPE_FIELD_TYPE (TYPE_FIELD_TYPE (type, 1), 0); */
-  /* OBSOLETE     range2 = TYPE_FIELD_TYPE (type2, 0); */
-  /* OBSOLETE     if (get_discrete_bounds (range1, &low_bound, &high_bound) < 0) */
-  /* OBSOLETE       count1 = -1; */
-  /* OBSOLETE     else */
-  /* OBSOLETE       count1 = high_bound - low_bound + 1; */
-  /* OBSOLETE     if (get_discrete_bounds (range2, &low_bound, &high_bound) < 0) */
-  /* OBSOLETE       count1 = -1, count2 = 0;	*//* To force error before */
-  /* OBSOLETE     else */
-  /* OBSOLETE       count2 = high_bound - low_bound + 1; */
-  /* OBSOLETE     if (count2 > count1) */
-  /* OBSOLETE       error ("target varying type is too small"); */
-  /* OBSOLETE     val = allocate_value (type); */
-  /* OBSOLETE     valaddr = VALUE_CONTENTS_RAW (val); */
-  /* OBSOLETE     valaddr_data = valaddr + TYPE_FIELD_BITPOS (type, 1) / 8; */
-  /* OBSOLETE     *//* Set val's __var_length field to count2. */
-  /* OBSOLETE     store_signed_integer (valaddr, TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)), */
-  /* OBSOLETE 	    count2); */
-  /* OBSOLETE     *//* Set the __var_data field to count2 elements copied from arg2. */
-  /* OBSOLETE     memcpy (valaddr_data, VALUE_CONTENTS (arg2), */
-  /* OBSOLETE      count2 * TYPE_LENGTH (eltype2)); */
-  /* OBSOLETE     *//* Zero the rest of the __var_data field of val. */
-  /* OBSOLETE     memset (valaddr_data + count2 * TYPE_LENGTH (eltype2), '\0', */
-  /* OBSOLETE      (count1 - count2) * TYPE_LENGTH (eltype2)); */
-  /* OBSOLETE     return val; */
-  /* OBSOLETE   } */
   else if (VALUE_LVAL (arg2) == lval_memory)
     {
       return value_at_lazy (type, VALUE_ADDRESS (arg2) + VALUE_OFFSET (arg2),
@@ -532,10 +492,11 @@ value_fetch_lazy (struct value *val)
 struct value *
 value_assign (struct value *toval, struct value *fromval)
 {
-  register struct type *type;
+  struct type *type;
   struct value *val;
-  char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   int use_buffer = 0;
+  struct frame_id old_frame;
 
   if (!toval->modifiable)
     error ("Left operand of assignment is not a modifiable lvalue.");
@@ -549,21 +510,10 @@ value_assign (struct value *toval, struct value *fromval)
     COERCE_ARRAY (fromval);
   CHECK_TYPEDEF (type);
 
-  /* If TOVAL is a special machine register requiring conversion
-     of program values to a special raw format,
-     convert FROMVAL's contents now, with result in `raw_buffer',
-     and set USE_BUFFER to the number of bytes to write.  */
-
-  if (VALUE_REGNO (toval) >= 0)
-    {
-      int regno = VALUE_REGNO (toval);
-      if (CONVERT_REGISTER_P (regno))
-	{
-	  struct type *fromtype = check_typedef (VALUE_TYPE (fromval));
-	  VALUE_TO_REGISTER (fromtype, regno, VALUE_CONTENTS (fromval), raw_buffer);
-	  use_buffer = REGISTER_RAW_SIZE (regno);
-	}
-    }
+  /* Since modifying a register can trash the frame chain, and modifying memory
+     can trash the frame cache, we save the old frame and then restore the new
+     frame afterwards.  */
+  old_frame = get_frame_id (deprecated_selected_frame);
 
   switch (VALUE_LVAL (toval))
     {
@@ -630,147 +580,134 @@ value_assign (struct value *toval, struct value *fromval)
       }
       break;
 
-    case lval_register:
-      if (VALUE_BITSIZE (toval))
-	{
-	  char buffer[sizeof (LONGEST)];
-	  int len =
-		REGISTER_RAW_SIZE (VALUE_REGNO (toval)) - VALUE_OFFSET (toval);
-
-	  if (len > (int) sizeof (LONGEST))
-	    error ("Can't handle bitfields in registers larger than %d bits.",
-		   (int) sizeof (LONGEST) * HOST_CHAR_BIT);
-
-	  if (VALUE_BITPOS (toval) + VALUE_BITSIZE (toval)
-	      > len * HOST_CHAR_BIT)
-	    /* Getting this right would involve being very careful about
-	       byte order.  */
-	    error ("Can't assign to bitfields that cross register "
-		   "boundaries.");
-
-	  read_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-			       buffer, len);
-	  modify_field (buffer, value_as_long (fromval),
-			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
-	  write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-				buffer, len);
-	}
-      else if (use_buffer)
-	write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-			      raw_buffer, use_buffer);
-      else
-	{
-	  /* Do any conversion necessary when storing this type to more
-	     than one register.  */
-#ifdef REGISTER_CONVERT_FROM_TYPE
-	  memcpy (raw_buffer, VALUE_CONTENTS (fromval), TYPE_LENGTH (type));
-	  REGISTER_CONVERT_FROM_TYPE (VALUE_REGNO (toval), type, raw_buffer);
-	  write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-				raw_buffer, TYPE_LENGTH (type));
-#else
-	  write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-			      VALUE_CONTENTS (fromval), TYPE_LENGTH (type));
-#endif
-	}
-
-      target_changed_event ();
-
-      /* Assigning to the stack pointer, frame pointer, and other
-         (architecture and calling convention specific) registers may
-         cause the frame cache to be out of date.  We just do this
-         on all assignments to registers for simplicity; I doubt the slowdown
-         matters.  */
-      reinit_frame_cache ();
-      break;
-
     case lval_reg_frame_relative:
+    case lval_register:
       {
-	/* value is stored in a series of registers in the frame
-	   specified by the structure.  Copy that value out, modify
-	   it, and copy it back in.  */
-	int amount_to_copy = (VALUE_BITSIZE (toval) ? 1 : TYPE_LENGTH (type));
-	int reg_size = REGISTER_RAW_SIZE (VALUE_FRAME_REGNUM (toval));
-	int byte_offset = VALUE_OFFSET (toval) % reg_size;
-	int reg_offset = VALUE_OFFSET (toval) / reg_size;
-	int amount_copied;
-
-	/* Make the buffer large enough in all cases.  */
-	/* FIXME (alloca): Not safe for very large data types. */
-	char *buffer = (char *) alloca (amount_to_copy
-					+ sizeof (LONGEST)
-					+ MAX_REGISTER_RAW_SIZE);
-
-	int regno;
 	struct frame_info *frame;
+	int value_reg;
 
 	/* Figure out which frame this is in currently.  */
-	for (frame = get_current_frame ();
-	     frame && FRAME_FP (frame) != VALUE_FRAME (toval);
-	     frame = get_prev_frame (frame))
-	  ;
+	if (VALUE_LVAL (toval) == lval_register)
+	  {
+	    frame = get_current_frame ();
+	    value_reg = VALUE_REGNO (toval);
+	  }
+	else
+	  {
+	    frame = frame_find_by_id (VALUE_FRAME_ID (toval));
+	    value_reg = VALUE_FRAME_REGNUM (toval);
+	  }
 
 	if (!frame)
 	  error ("Value being assigned to is no longer active.");
-
-	amount_to_copy += (reg_size - amount_to_copy % reg_size);
-
-	/* Copy it out.  */
-	for ((regno = VALUE_FRAME_REGNUM (toval) + reg_offset,
-	      amount_copied = 0);
-	     amount_copied < amount_to_copy;
-	     amount_copied += reg_size, regno++)
+	
+	if (VALUE_LVAL (toval) == lval_reg_frame_relative
+	    && CONVERT_REGISTER_P (VALUE_FRAME_REGNUM (toval), type))
 	  {
-	    get_saved_register (buffer + amount_copied,
-				(int *) NULL, (CORE_ADDR *) NULL,
-				frame, regno, (enum lval_type *) NULL);
+	    /* If TOVAL is a special machine register requiring
+	       conversion of program values to a special raw format.  */
+	    VALUE_TO_REGISTER (frame, VALUE_FRAME_REGNUM (toval),
+			       type, VALUE_CONTENTS (fromval));
 	  }
-
-	/* Modify what needs to be modified.  */
-	if (VALUE_BITSIZE (toval))
-	  modify_field (buffer + byte_offset,
-			value_as_long (fromval),
-			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
-	else if (use_buffer)
-	  memcpy (buffer + byte_offset, raw_buffer, use_buffer);
 	else
-	  memcpy (buffer + byte_offset, VALUE_CONTENTS (fromval),
-		  TYPE_LENGTH (type));
-
-	/* Copy it back.  */
-	for ((regno = VALUE_FRAME_REGNUM (toval) + reg_offset,
-	      amount_copied = 0);
-	     amount_copied < amount_to_copy;
-	     amount_copied += reg_size, regno++)
 	  {
-	    enum lval_type lval;
-	    CORE_ADDR addr;
-	    int optim;
+	    /* TOVAL is stored in a series of registers in the frame
+	       specified by the structure.  Copy that value out,
+	       modify it, and copy it back in.  */
+	    int amount_copied;
+	    int amount_to_copy;
+	    char *buffer;
+	    int reg_offset;
+	    int byte_offset;
+	    int regno;
 
-	    /* Just find out where to put it.  */
-	    get_saved_register ((char *) NULL,
-				&optim, &addr, frame, regno, &lval);
+	    /* Locate the first register that falls in the value that
+	       needs to be transfered.  Compute the offset of the
+	       value in that register.  */
+	    {
+	      int offset;
+	      for (reg_offset = value_reg, offset = 0;
+		   offset + DEPRECATED_REGISTER_RAW_SIZE (reg_offset) <= VALUE_OFFSET (toval);
+		   reg_offset++);
+	      byte_offset = VALUE_OFFSET (toval) - offset;
+	    }
 
-	    if (optim)
-	      error ("Attempt to assign to a value that was optimized out.");
-	    if (lval == lval_memory)
-	      write_memory (addr, buffer + amount_copied, reg_size);
-	    else if (lval == lval_register)
-	      write_register_bytes (addr, buffer + amount_copied, reg_size);
+	    /* Compute the number of register aligned values that need
+	       to be copied.  */
+	    if (VALUE_BITSIZE (toval))
+	      amount_to_copy = byte_offset + 1;
 	    else
-	      error ("Attempt to assign to an unmodifiable value.");
-	  }
+	      amount_to_copy = byte_offset + TYPE_LENGTH (type);
+	    
+	    /* And a bounce buffer.  Be slightly over generous.  */
+	    buffer = (char *) alloca (amount_to_copy + MAX_REGISTER_SIZE);
 
+	    /* Copy it in.  */
+	    for (regno = reg_offset, amount_copied = 0;
+		 amount_copied < amount_to_copy;
+		 amount_copied += DEPRECATED_REGISTER_RAW_SIZE (regno), regno++)
+	      frame_register_read (frame, regno, buffer + amount_copied);
+	    
+	    /* Modify what needs to be modified.  */
+	    if (VALUE_BITSIZE (toval))
+	      modify_field (buffer + byte_offset,
+			    value_as_long (fromval),
+			    VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
+	    else if (use_buffer)
+	      memcpy (buffer + VALUE_OFFSET (toval), raw_buffer, use_buffer);
+	    else
+	      memcpy (buffer + byte_offset, VALUE_CONTENTS (fromval),
+		      TYPE_LENGTH (type));
+
+	    /* Copy it out.  */
+	    for (regno = reg_offset, amount_copied = 0;
+		 amount_copied < amount_to_copy;
+		 amount_copied += DEPRECATED_REGISTER_RAW_SIZE (regno), regno++)
+	      put_frame_register (frame, regno, buffer + amount_copied);
+
+	  }
 	if (register_changed_hook)
 	  register_changed_hook (-1);
 	target_changed_event ();
+	break;
       }
-      break;
-
-
+      
     default:
       error ("Left operand of assignment is not an lvalue.");
     }
 
+  /* Assigning to the stack pointer, frame pointer, and other
+     (architecture and calling convention specific) registers may
+     cause the frame cache to be out of date.  Assigning to memory
+     also can.  We just do this on all assignments to registers or
+     memory, for simplicity's sake; I doubt the slowdown matters.  */
+  switch (VALUE_LVAL (toval))
+    {
+    case lval_memory:
+    case lval_register:
+    case lval_reg_frame_relative:
+
+      reinit_frame_cache ();
+
+      /* Having destoroyed the frame cache, restore the selected frame.  */
+
+      /* FIXME: cagney/2002-11-02: There has to be a better way of
+	 doing this.  Instead of constantly saving/restoring the
+	 frame.  Why not create a get_selected_frame() function that,
+	 having saved the selected frame's ID can automatically
+	 re-find the previously selected frame automatically.  */
+
+      {
+	struct frame_info *fi = frame_find_by_id (old_frame);
+	if (fi != NULL)
+	  select_frame (fi);
+      }
+
+      break;
+    default:
+      break;
+    }
+  
   /* If the field does not entirely fill a LONGEST, then zero the sign bits.
      If the field is signed, and is negative, then sign extend. */
   if ((VALUE_BITSIZE (toval) > 0)
@@ -834,9 +771,9 @@ value_of_variable (struct symbol *var, struct block *b)
       if (!frame)
 	{
 	  if (BLOCK_FUNCTION (b)
-	      && SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)))
+	      && SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)))
 	    error ("No frame is currently executing in block %s.",
-		   SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)));
+		   SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)));
 	  else
 	    error ("No frame is currently executing in specified block");
 	}
@@ -844,7 +781,7 @@ value_of_variable (struct symbol *var, struct block *b)
 
   val = read_var_value (var, frame);
   if (!val)
-    error ("Address of symbol \"%s\" is unknown.", SYMBOL_SOURCE_NAME (var));
+    error ("Address of symbol \"%s\" is unknown.", SYMBOL_PRINT_NAME (var));
 
   return val;
 }
@@ -875,7 +812,7 @@ value_of_variable (struct symbol *var, struct block *b)
 struct value *
 value_coerce_array (struct value *arg1)
 {
-  register struct type *type = check_typedef (VALUE_TYPE (arg1));
+  struct type *type = check_typedef (VALUE_TYPE (arg1));
 
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
@@ -995,8 +932,8 @@ value_ind (struct value *arg1)
 CORE_ADDR
 push_word (CORE_ADDR sp, ULONGEST word)
 {
-  register int len = REGISTER_SIZE;
-  char *buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  int len = DEPRECATED_REGISTER_SIZE;
+  char buffer[MAX_REGISTER_SIZE];
 
   store_unsigned_integer (buffer, len, word);
   if (INNER_THAN (1, 2))
@@ -1044,11 +981,11 @@ push_bytes (CORE_ADDR sp, char *buffer, int len)
    it to be an argument to a function.  */
 
 static CORE_ADDR
-value_push (register CORE_ADDR sp, struct value *arg)
+value_push (CORE_ADDR sp, struct value *arg)
 {
-  register int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
-  register int container_len = len;
-  register int offset;
+  int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
+  int container_len = len;
+  int offset;
 
   /* How big is the container we're going to put this value in?  */
   if (PARM_BOUNDARY)
@@ -1078,8 +1015,8 @@ value_push (register CORE_ADDR sp, struct value *arg)
 }
 
 CORE_ADDR
-default_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-			int struct_return, CORE_ADDR struct_addr)
+legacy_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
+		       int struct_return, CORE_ADDR struct_addr)
 {
   /* ASSERT ( !struct_return); */
   int i;
@@ -1087,810 +1024,6 @@ default_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     sp = value_push (sp, args[i]);
   return sp;
 }
-
-
-/* Functions to use for the COERCE_FLOAT_TO_DOUBLE gdbarch method.
-
-   How you should pass arguments to a function depends on whether it
-   was defined in K&R style or prototype style.  If you define a
-   function using the K&R syntax that takes a `float' argument, then
-   callers must pass that argument as a `double'.  If you define the
-   function using the prototype syntax, then you must pass the
-   argument as a `float', with no promotion.
-
-   Unfortunately, on certain older platforms, the debug info doesn't
-   indicate reliably how each function was defined.  A function type's
-   TYPE_FLAG_PROTOTYPED flag may be clear, even if the function was
-   defined in prototype style.  When calling a function whose
-   TYPE_FLAG_PROTOTYPED flag is clear, GDB consults the
-   COERCE_FLOAT_TO_DOUBLE gdbarch method to decide what to do.
-
-   For modern targets, it is proper to assume that, if the prototype
-   flag is clear, that can be trusted: `float' arguments should be
-   promoted to `double'.  You should register the function
-   `standard_coerce_float_to_double' to get this behavior.
-
-   For some older targets, if the prototype flag is clear, that
-   doesn't tell us anything.  So we guess that, if we don't have a
-   type for the formal parameter (i.e., the first argument to
-   COERCE_FLOAT_TO_DOUBLE is null), then we should promote it;
-   otherwise, we should leave it alone.  The function
-   `default_coerce_float_to_double' provides this behavior; it is the
-   default value, for compatibility with older configurations.  */
-int
-default_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-  return formal == NULL;
-}
-
-
-int
-standard_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-  return 1;
-}
-
-
-/* Perform the standard coercions that are specified
-   for arguments to be passed to C functions.
-
-   If PARAM_TYPE is non-NULL, it is the expected parameter type.
-   IS_PROTOTYPED is non-zero if the function declaration is prototyped.  */
-
-static struct value *
-value_arg_coerce (struct value *arg, struct type *param_type,
-		  int is_prototyped)
-{
-  register struct type *arg_type = check_typedef (VALUE_TYPE (arg));
-  register struct type *type
-    = param_type ? check_typedef (param_type) : arg_type;
-
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_REF:
-      if (TYPE_CODE (arg_type) != TYPE_CODE_REF
-	  && TYPE_CODE (arg_type) != TYPE_CODE_PTR)
-	{
-	  arg = value_addr (arg);
-	  VALUE_TYPE (arg) = param_type;
-	  return arg;
-	}
-      break;
-    case TYPE_CODE_INT:
-    case TYPE_CODE_CHAR:
-    case TYPE_CODE_BOOL:
-    case TYPE_CODE_ENUM:
-      /* If we don't have a prototype, coerce to integer type if necessary.  */
-      if (!is_prototyped)
-	{
-	  if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
-	    type = builtin_type_int;
-	}
-      /* Currently all target ABIs require at least the width of an integer
-         type for an argument.  We may have to conditionalize the following
-         type coercion for future targets.  */
-      if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
-	type = builtin_type_int;
-      break;
-    case TYPE_CODE_FLT:
-      /* FIXME: We should always convert floats to doubles in the
-         non-prototyped case.  As many debugging formats include
-         no information about prototyping, we have to live with
-         COERCE_FLOAT_TO_DOUBLE for now.  */
-      if (!is_prototyped && COERCE_FLOAT_TO_DOUBLE (param_type, arg_type))
-	{
-	  if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
-	    type = builtin_type_double;
-	  else if (TYPE_LENGTH (type) > TYPE_LENGTH (builtin_type_double))
-	    type = builtin_type_long_double;
-	}
-      break;
-    case TYPE_CODE_FUNC:
-      type = lookup_pointer_type (type);
-      break;
-    case TYPE_CODE_ARRAY:
-      /* Arrays are coerced to pointers to their first element, unless
-         they are vectors, in which case we want to leave them alone,
-         because they are passed by value.  */
-      if (current_language->c_style_arrays)
-	if (!TYPE_VECTOR (type))
-	  type = lookup_pointer_type (TYPE_TARGET_TYPE (type));
-      break;
-    case TYPE_CODE_UNDEF:
-    case TYPE_CODE_PTR:
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-    case TYPE_CODE_VOID:
-    case TYPE_CODE_SET:
-    case TYPE_CODE_RANGE:
-    case TYPE_CODE_STRING:
-    case TYPE_CODE_BITSTRING:
-    case TYPE_CODE_ERROR:
-    case TYPE_CODE_MEMBER:
-    case TYPE_CODE_METHOD:
-    case TYPE_CODE_COMPLEX:
-    default:
-      break;
-    }
-
-  return value_cast (type, arg);
-}
-
-/* Determine a function's address and its return type from its value.
-   Calls error() if the function is not valid for calling.  */
-
-static CORE_ADDR
-find_function_addr (struct value *function, struct type **retval_type)
-{
-  register struct type *ftype = check_typedef (VALUE_TYPE (function));
-  register enum type_code code = TYPE_CODE (ftype);
-  struct type *value_type;
-  CORE_ADDR funaddr;
-
-  /* If it's a member function, just look at the function
-     part of it.  */
-
-  /* Determine address to call.  */
-  if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
-    {
-      funaddr = VALUE_ADDRESS (function);
-      value_type = TYPE_TARGET_TYPE (ftype);
-    }
-  else if (code == TYPE_CODE_PTR)
-    {
-      funaddr = value_as_address (function);
-      ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
-      if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
-	  || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
-	{
-	  funaddr = CONVERT_FROM_FUNC_PTR_ADDR (funaddr);
-	  value_type = TYPE_TARGET_TYPE (ftype);
-	}
-      else
-	value_type = builtin_type_int;
-    }
-  else if (code == TYPE_CODE_INT)
-    {
-      /* Handle the case of functions lacking debugging info.
-         Their values are characters since their addresses are char */
-      if (TYPE_LENGTH (ftype) == 1)
-	funaddr = value_as_address (value_addr (function));
-      else
-	/* Handle integer used as address of a function.  */
-	funaddr = (CORE_ADDR) value_as_long (function);
-
-      value_type = builtin_type_int;
-    }
-  else
-    error ("Invalid data type for function to be called.");
-
-  *retval_type = value_type;
-  return funaddr;
-}
-
-/* All this stuff with a dummy frame may seem unnecessarily complicated
-   (why not just save registers in GDB?).  The purpose of pushing a dummy
-   frame which looks just like a real frame is so that if you call a
-   function and then hit a breakpoint (get a signal, etc), "backtrace"
-   will look right.  Whether the backtrace needs to actually show the
-   stack at the time the inferior function was called is debatable, but
-   it certainly needs to not display garbage.  So if you are contemplating
-   making dummy frames be different from normal frames, consider that.  */
-
-/* Perform a function call in the inferior.
-   ARGS is a vector of values of arguments (NARGS of them).
-   FUNCTION is a value, the function to be called.
-   Returns a value representing what the function returned.
-   May fail to return, if a breakpoint or signal is hit
-   during the execution of the function.
-
-   ARGS is modified to contain coerced values. */
-
-static struct value *
-hand_function_call (struct value *function, int nargs, struct value **args)
-{
-  register CORE_ADDR sp;
-  register int i;
-  int rc;
-  CORE_ADDR start_sp;
-  /* CALL_DUMMY is an array of words (REGISTER_SIZE), but each word
-     is in host byte order.  Before calling FIX_CALL_DUMMY, we byteswap it
-     and remove any extra bytes which might exist because ULONGEST is
-     bigger than REGISTER_SIZE.
-
-     NOTE: This is pretty wierd, as the call dummy is actually a
-     sequence of instructions.  But CISC machines will have
-     to pack the instructions into REGISTER_SIZE units (and
-     so will RISC machines for which INSTRUCTION_SIZE is not
-     REGISTER_SIZE).
-
-     NOTE: This is pretty stupid.  CALL_DUMMY should be in strict
-     target byte order. */
-
-  static ULONGEST *dummy;
-  int sizeof_dummy1;
-  char *dummy1;
-  CORE_ADDR old_sp;
-  struct type *value_type;
-  unsigned char struct_return;
-  CORE_ADDR struct_addr = 0;
-  struct regcache *retbuf;
-  struct cleanup *retbuf_cleanup;
-  struct inferior_status *inf_status;
-  struct cleanup *inf_status_cleanup;
-  CORE_ADDR funaddr;
-  int using_gcc;		/* Set to version of gcc in use, or zero if not gcc */
-  CORE_ADDR real_pc;
-  struct type *param_type = NULL;
-  struct type *ftype = check_typedef (SYMBOL_TYPE (function));
-  int n_method_args = 0;
-
-  dummy = alloca (SIZEOF_CALL_DUMMY_WORDS);
-  sizeof_dummy1 = REGISTER_SIZE * SIZEOF_CALL_DUMMY_WORDS / sizeof (ULONGEST);
-  dummy1 = alloca (sizeof_dummy1);
-  memcpy (dummy, CALL_DUMMY_WORDS, SIZEOF_CALL_DUMMY_WORDS);
-
-  if (!target_has_execution)
-    noprocess ();
-
-  /* Create a cleanup chain that contains the retbuf (buffer
-     containing the register values).  This chain is create BEFORE the
-     inf_status chain so that the inferior status can cleaned up
-     (restored or discarded) without having the retbuf freed.  */
-  retbuf = regcache_xmalloc (current_gdbarch);
-  retbuf_cleanup = make_cleanup_regcache_xfree (retbuf);
-
-  /* A cleanup for the inferior status.  Create this AFTER the retbuf
-     so that this can be discarded or applied without interfering with
-     the regbuf.  */
-  inf_status = save_inferior_status (1);
-  inf_status_cleanup = make_cleanup_restore_inferior_status (inf_status);
-
-  /* PUSH_DUMMY_FRAME is responsible for saving the inferior registers
-     (and POP_FRAME for restoring them).  (At least on most machines)
-     they are saved on the stack in the inferior.  */
-  PUSH_DUMMY_FRAME;
-
-  old_sp = read_sp ();
-
-  /* Ensure that the initial SP is correctly aligned.  */
-  if (gdbarch_frame_align_p (current_gdbarch))
-    {
-      /* NOTE: cagney/2002-09-18:
-
-	 On a RISC architecture, a void parameterless generic dummy
-	 frame (i.e., no parameters, no result) typically does not
-	 need to push anything the stack and hence can leave SP and
-	 FP.  Similarly, a framelss (possibly leaf) function does not
-	 push anything on the stack and, hence, that too can leave FP
-	 and SP unchanged.  As a consequence, a sequence of void
-	 parameterless generic dummy frame calls to frameless
-	 functions will create a sequence of effectively identical
-	 frames (SP, FP and TOS and PC the same).  This, not
-	 suprisingly, results in what appears to be a stack in an
-	 infinite loop --- when GDB tries to find a generic dummy
-	 frame on the internal dummy frame stack, it will always find
-	 the first one.
-
-	 To avoid this problem, the code below always grows the stack.
-	 That way, two dummy frames can never be identical.  It does
-	 burn a few bytes of stack but that is a small price to pay
-	 :-).  */
-      sp = gdbarch_frame_align (current_gdbarch, old_sp);
-      if (sp == old_sp)
-	{
-	  if (INNER_THAN (1, 2))
-	    /* Stack grows down.  */
-	    sp = gdbarch_frame_align (current_gdbarch, old_sp - 1);
-	  else
-	    /* Stack grows up.  */
-	    sp = gdbarch_frame_align (current_gdbarch, old_sp + 1);
-	}
-      gdb_assert ((INNER_THAN (1, 2) && sp <= old_sp)
-		  || (INNER_THAN (2, 1) && sp >= old_sp));
-    }
-  else
-    /* FIXME: cagney/2002-09-18: Hey, you loose!  Who knows how badly
-       aligned the SP is!  Further, per comment above, if the generic
-       dummy frame ends up empty (because nothing is pushed) GDB won't
-       be able to correctly perform back traces.  If a target is
-       having trouble with backtraces, first thing to do is add
-       FRAME_ALIGN() to its architecture vector.  After that, try
-       adding SAVE_DUMMY_FRAME_TOS() and modifying FRAME_CHAIN so that
-       when the next outer frame is a generic dummy, it returns the
-       current frame's base.  */
-    sp = old_sp;
-
-  if (INNER_THAN (1, 2))
-    {
-      /* Stack grows down */
-      sp -= sizeof_dummy1;
-      start_sp = sp;
-    }
-  else
-    {
-      /* Stack grows up */
-      start_sp = sp;
-      sp += sizeof_dummy1;
-    }
-
-  /* NOTE: cagney/2002-09-10: Don't bother re-adjusting the stack
-     after allocating space for the call dummy.  A target can specify
-     a SIZEOF_DUMMY1 (via SIZEOF_CALL_DUMMY_WORDS) such that all local
-     alignment requirements are met.  */
-
-  funaddr = find_function_addr (function, &value_type);
-  CHECK_TYPEDEF (value_type);
-
-  {
-    struct block *b = block_for_pc (funaddr);
-    /* If compiled without -g, assume GCC 2.  */
-    using_gcc = (b == NULL ? 2 : BLOCK_GCC_COMPILED (b));
-  }
-
-  /* Are we returning a value using a structure return or a normal
-     value return? */
-
-  struct_return = using_struct_return (function, funaddr, value_type,
-				       using_gcc);
-
-  /* Create a call sequence customized for this function
-     and the number of arguments for it.  */
-  for (i = 0; i < (int) (SIZEOF_CALL_DUMMY_WORDS / sizeof (dummy[0])); i++)
-    store_unsigned_integer (&dummy1[i * REGISTER_SIZE],
-			    REGISTER_SIZE,
-			    (ULONGEST) dummy[i]);
-
-#ifdef GDB_TARGET_IS_HPPA
-  real_pc = FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
-			    value_type, using_gcc);
-#else
-  FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
-		  value_type, using_gcc);
-  real_pc = start_sp;
-#endif
-
-  if (CALL_DUMMY_LOCATION == ON_STACK)
-    {
-      write_memory (start_sp, (char *) dummy1, sizeof_dummy1);
-      if (USE_GENERIC_DUMMY_FRAMES)
-	generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
-    }
-
-  if (CALL_DUMMY_LOCATION == BEFORE_TEXT_END)
-    {
-      /* Convex Unix prohibits executing in the stack segment. */
-      /* Hope there is empty room at the top of the text segment. */
-      extern CORE_ADDR text_end;
-      static int checked = 0;
-      if (!checked)
-	for (start_sp = text_end - sizeof_dummy1; start_sp < text_end; ++start_sp)
-	  if (read_memory_integer (start_sp, 1) != 0)
-	    error ("text segment full -- no place to put call");
-      checked = 1;
-      sp = old_sp;
-      real_pc = text_end - sizeof_dummy1;
-      write_memory (real_pc, (char *) dummy1, sizeof_dummy1);
-      if (USE_GENERIC_DUMMY_FRAMES)
-	generic_save_call_dummy_addr (real_pc, real_pc + sizeof_dummy1);
-    }
-
-  if (CALL_DUMMY_LOCATION == AFTER_TEXT_END)
-    {
-      extern CORE_ADDR text_end;
-      int errcode;
-      sp = old_sp;
-      real_pc = text_end;
-      errcode = target_write_memory (real_pc, (char *) dummy1, sizeof_dummy1);
-      if (errcode != 0)
-	error ("Cannot write text segment -- call_function failed");
-      if (USE_GENERIC_DUMMY_FRAMES)
-	generic_save_call_dummy_addr (real_pc, real_pc + sizeof_dummy1);
-    }
-
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
-    {
-      real_pc = funaddr;
-      if (USE_GENERIC_DUMMY_FRAMES)
-	/* NOTE: cagney/2002-04-13: The entry point is going to be
-           modified with a single breakpoint.  */
-	generic_save_call_dummy_addr (CALL_DUMMY_ADDRESS (),
-				      CALL_DUMMY_ADDRESS () + 1);
-    }
-
-#ifdef lint
-  sp = old_sp;			/* It really is used, for some ifdef's... */
-#endif
-
-  if (nargs < TYPE_NFIELDS (ftype))
-    error ("too few arguments in function call");
-
-  for (i = nargs - 1; i >= 0; i--)
-    {
-      int prototyped;
-
-      /* FIXME drow/2002-05-31: Should just always mark methods as
-	 prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
-      if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
-	prototyped = 1;
-      else
-	prototyped = TYPE_PROTOTYPED (ftype);
-
-      if (i < TYPE_NFIELDS (ftype))
-	args[i] = value_arg_coerce (args[i], TYPE_FIELD_TYPE (ftype, i),
-				    prototyped);
-      else
-	args[i] = value_arg_coerce (args[i], NULL, 0);
-
-      /*elz: this code is to handle the case in which the function to be called
-         has a pointer to function as parameter and the corresponding actual argument
-         is the address of a function and not a pointer to function variable.
-         In aCC compiled code, the calls through pointers to functions (in the body
-         of the function called by hand) are made via $$dyncall_external which
-         requires some registers setting, this is taken care of if we call
-         via a function pointer variable, but not via a function address.
-         In cc this is not a problem. */
-
-      if (using_gcc == 0)
-	if (param_type && TYPE_CODE (ftype) != TYPE_CODE_METHOD)
-	  /* if this parameter is a pointer to function */
-	  if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
-	    if (TYPE_CODE (TYPE_TARGET_TYPE (param_type)) == TYPE_CODE_FUNC)
-	      /* elz: FIXME here should go the test about the compiler used
-	         to compile the target. We want to issue the error
-	         message only if the compiler used was HP's aCC.
-	         If we used HP's cc, then there is no problem and no need
-	         to return at this point */
-	      if (using_gcc == 0)	/* && compiler == aCC */
-		/* go see if the actual parameter is a variable of type
-		   pointer to function or just a function */
-		if (args[i]->lval == not_lval)
-		  {
-		    char *arg_name;
-		    if (find_pc_partial_function ((CORE_ADDR) args[i]->aligner.contents[0], &arg_name, NULL, NULL))
-		      error ("\
-You cannot use function <%s> as argument. \n\
-You must use a pointer to function type variable. Command ignored.", arg_name);
-		  }
-    }
-
-  if (REG_STRUCT_HAS_ADDR_P ())
-    {
-      /* This is a machine like the sparc, where we may need to pass a
-	 pointer to the structure, not the structure itself.  */
-      for (i = nargs - 1; i >= 0; i--)
-	{
-	  struct type *arg_type = check_typedef (VALUE_TYPE (args[i]));
-	  if ((TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
-	       || TYPE_CODE (arg_type) == TYPE_CODE_UNION
-	       || TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
-	       || TYPE_CODE (arg_type) == TYPE_CODE_STRING
-	       || TYPE_CODE (arg_type) == TYPE_CODE_BITSTRING
-	       || TYPE_CODE (arg_type) == TYPE_CODE_SET
-	       || (TYPE_CODE (arg_type) == TYPE_CODE_FLT
-		   && TYPE_LENGTH (arg_type) > 8)
-	       )
-	      && REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
-	    {
-	      CORE_ADDR addr;
-	      int len;		/*  = TYPE_LENGTH (arg_type); */
-	      int aligned_len;
-	      arg_type = check_typedef (VALUE_ENCLOSING_TYPE (args[i]));
-	      len = TYPE_LENGTH (arg_type);
-
-	      if (STACK_ALIGN_P ())
-		/* MVS 11/22/96: I think at least some of this
-		   stack_align code is really broken.  Better to let
-		   PUSH_ARGUMENTS adjust the stack in a target-defined
-		   manner.  */
-		aligned_len = STACK_ALIGN (len);
-	      else
-		aligned_len = len;
-	      if (INNER_THAN (1, 2))
-		{
-		  /* stack grows downward */
-		  sp -= aligned_len;
-		  /* ... so the address of the thing we push is the
-		     stack pointer after we push it.  */
-		  addr = sp;
-		}
-	      else
-		{
-		  /* The stack grows up, so the address of the thing
-		     we push is the stack pointer before we push it.  */
-		  addr = sp;
-		  sp += aligned_len;
-		}
-	      /* Push the structure.  */
-	      write_memory (addr, VALUE_CONTENTS_ALL (args[i]), len);
-	      /* The value we're going to pass is the address of the
-		 thing we just pushed.  */
-	      /*args[i] = value_from_longest (lookup_pointer_type (value_type),
-		(LONGEST) addr); */
-	      args[i] = value_from_pointer (lookup_pointer_type (arg_type),
-					    addr);
-	    }
-	}
-    }
-
-
-  /* Reserve space for the return structure to be written on the
-     stack, if necessary.  Make certain that the value is correctly
-     aligned. */
-
-  if (struct_return)
-    {
-      int len = TYPE_LENGTH (value_type);
-      if (STACK_ALIGN_P ())
-	/* MVS 11/22/96: I think at least some of this stack_align
-	   code is really broken.  Better to let PUSH_ARGUMENTS adjust
-	   the stack in a target-defined manner.  */
-	len = STACK_ALIGN (len);
-      if (INNER_THAN (1, 2))
-	{
-	  /* Stack grows downward.  Align STRUCT_ADDR and SP after
-             making space for the return value.  */
-	  sp -= len;
-	  if (gdbarch_frame_align_p (current_gdbarch))
-	    sp = gdbarch_frame_align (current_gdbarch, sp);
-	  struct_addr = sp;
-	}
-      else
-	{
-	  /* Stack grows upward.  Align the frame, allocate space, and
-             then again, re-align the frame??? */
-	  if (gdbarch_frame_align_p (current_gdbarch))
-	    sp = gdbarch_frame_align (current_gdbarch, sp);
-	  struct_addr = sp;
-	  sp += len;
-	  if (gdbarch_frame_align_p (current_gdbarch))
-	    sp = gdbarch_frame_align (current_gdbarch, sp);
-	}
-    }
-
-  /* elz: on HPPA no need for this extra alignment, maybe it is needed
-     on other architectures. This is because all the alignment is
-     taken care of in the above code (ifdef REG_STRUCT_HAS_ADDR) and
-     in hppa_push_arguments */
-  if (EXTRA_STACK_ALIGNMENT_NEEDED)
-    {
-      /* MVS 11/22/96: I think at least some of this stack_align code
-	 is really broken.  Better to let PUSH_ARGUMENTS adjust the
-	 stack in a target-defined manner.  */
-      if (STACK_ALIGN_P () && INNER_THAN (1, 2))
-	{
-	  /* If stack grows down, we must leave a hole at the top. */
-	  int len = 0;
-
-	  for (i = nargs - 1; i >= 0; i--)
-	    len += TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
-	  if (CALL_DUMMY_STACK_ADJUST_P)
-	    len += CALL_DUMMY_STACK_ADJUST;
-	  sp -= STACK_ALIGN (len) - len;
-	}
-    }
-
-  sp = PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr);
-
-  if (PUSH_RETURN_ADDRESS_P ())
-    /* for targets that use no CALL_DUMMY */
-    /* There are a number of targets now which actually don't write
-       any CALL_DUMMY instructions into the target, but instead just
-       save the machine state, push the arguments, and jump directly
-       to the callee function.  Since this doesn't actually involve
-       executing a JSR/BSR instruction, the return address must be set
-       up by hand, either by pushing onto the stack or copying into a
-       return-address register as appropriate.  Formerly this has been
-       done in PUSH_ARGUMENTS, but that's overloading its
-       functionality a bit, so I'm making it explicit to do it here.  */
-    sp = PUSH_RETURN_ADDRESS (real_pc, sp);
-
-  if (STACK_ALIGN_P () && !INNER_THAN (1, 2))
-    {
-      /* If stack grows up, we must leave a hole at the bottom, note
-         that sp already has been advanced for the arguments!  */
-      if (CALL_DUMMY_STACK_ADJUST_P)
-	sp += CALL_DUMMY_STACK_ADJUST;
-      sp = STACK_ALIGN (sp);
-    }
-
-/* XXX This seems wrong.  For stacks that grow down we shouldn't do
-   anything here!  */
-  /* MVS 11/22/96: I think at least some of this stack_align code is
-     really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
-     a target-defined manner.  */
-  if (CALL_DUMMY_STACK_ADJUST_P)
-    if (INNER_THAN (1, 2))
-      {
-	/* stack grows downward */
-	sp -= CALL_DUMMY_STACK_ADJUST;
-      }
-
-  /* Store the address at which the structure is supposed to be
-     written.  Note that this (and the code which reserved the space
-     above) assumes that gcc was used to compile this function.  Since
-     it doesn't cost us anything but space and if the function is pcc
-     it will ignore this value, we will make that assumption.
-
-     Also note that on some machines (like the sparc) pcc uses a
-     convention like gcc's.  */
-
-  if (struct_return)
-    STORE_STRUCT_RETURN (struct_addr, sp);
-
-  /* Write the stack pointer.  This is here because the statements above
-     might fool with it.  On SPARC, this write also stores the register
-     window into the right place in the new stack frame, which otherwise
-     wouldn't happen.  (See store_inferior_registers in sparc-nat.c.)  */
-  write_sp (sp);
-
-  if (SAVE_DUMMY_FRAME_TOS_P ())
-    SAVE_DUMMY_FRAME_TOS (sp);
-
-  {
-    char *name;
-    struct symbol *symbol;
-
-    name = NULL;
-    symbol = find_pc_function (funaddr);
-    if (symbol)
-      {
-	name = SYMBOL_SOURCE_NAME (symbol);
-      }
-    else
-      {
-	/* Try the minimal symbols.  */
-	struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (funaddr);
-
-	if (msymbol)
-	  {
-	    name = SYMBOL_SOURCE_NAME (msymbol);
-	  }
-      }
-    if (name == NULL)
-      {
-	char format[80];
-	sprintf (format, "at %s", local_hex_format ());
-	name = alloca (80);
-	/* FIXME-32x64: assumes funaddr fits in a long.  */
-	sprintf (name, format, (unsigned long) funaddr);
-      }
-
-    /* Execute the stack dummy routine, calling FUNCTION.
-       When it is done, discard the empty frame
-       after storing the contents of all regs into retbuf.  */
-    rc = run_stack_dummy (real_pc + CALL_DUMMY_START_OFFSET, retbuf);
-
-    if (rc == 1)
-      {
-	/* We stopped inside the FUNCTION because of a random signal.
-	   Further execution of the FUNCTION is not allowed. */
-
-        if (unwind_on_signal_p)
-	  {
-	    /* The user wants the context restored. */
-
-            /* We must get back to the frame we were before the dummy call. */
-            POP_FRAME;
-
-	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
-	       a C++ name with arguments and stuff.  */
-	    error ("\
-The program being debugged was signaled while in a function called from GDB.\n\
-GDB has restored the context to what it was before the call.\n\
-To change this behavior use \"set unwindonsignal off\"\n\
-Evaluation of the expression containing the function (%s) will be abandoned.",
-		   name);
-	  }
-	else
-	  {
-	    /* The user wants to stay in the frame where we stopped (default).*/
-
-	    /* If we restored the inferior status (via the cleanup),
-	       we would print a spurious error message (Unable to
-	       restore previously selected frame), would write the
-	       registers from the inf_status (which is wrong), and
-	       would do other wrong things.  */
-	    discard_cleanups (inf_status_cleanup);
-	    discard_inferior_status (inf_status);
-
-	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
-	       a C++ name with arguments and stuff.  */
-	    error ("\
-The program being debugged was signaled while in a function called from GDB.\n\
-GDB remains in the frame where the signal was received.\n\
-To change this behavior use \"set unwindonsignal on\"\n\
-Evaluation of the expression containing the function (%s) will be abandoned.",
-		   name);
-	  }
-      }
-
-    if (rc == 2)
-      {
-	/* We hit a breakpoint inside the FUNCTION. */
-
-	/* If we restored the inferior status (via the cleanup), we
-	   would print a spurious error message (Unable to restore
-	   previously selected frame), would write the registers from
-	   the inf_status (which is wrong), and would do other wrong
-	   things.  */
-	discard_cleanups (inf_status_cleanup);
-	discard_inferior_status (inf_status);
-
-	/* The following error message used to say "The expression
-	   which contained the function call has been discarded."  It
-	   is a hard concept to explain in a few words.  Ideally, GDB
-	   would be able to resume evaluation of the expression when
-	   the function finally is done executing.  Perhaps someday
-	   this will be implemented (it would not be easy).  */
-
-	/* FIXME: Insert a bunch of wrap_here; name can be very long if it's
-	   a C++ name with arguments and stuff.  */
-	error ("\
-The program being debugged stopped while in a function called from GDB.\n\
-When the function (%s) is done executing, GDB will silently\n\
-stop (instead of continuing to evaluate the expression containing\n\
-the function call).", name);
-      }
-
-    /* If we get here the called FUNCTION run to completion. */
-
-    /* Restore the inferior status, via its cleanup.  At this stage,
-       leave the RETBUF alone.  */
-    do_cleanups (inf_status_cleanup);
-
-    /* Figure out the value returned by the function.  */
-    /* elz: I defined this new macro for the hppa architecture only.
-       this gives us a way to get the value returned by the function
-       from the stack, at the same address we told the function to put
-       it.  We cannot assume on the pa that r28 still contains the
-       address of the returned structure. Usually this will be
-       overwritten by the callee.  I don't know about other
-       architectures, so I defined this macro */
-#ifdef VALUE_RETURNED_FROM_STACK
-    if (struct_return)
-      {
-	do_cleanups (retbuf_cleanup);
-	return VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
-      }
-#endif
-    /* NOTE: cagney/2002-09-10: Only when the stack has been correctly
-       aligned (using frame_align()) do we can trust STRUCT_ADDR and
-       fetch the return value direct from the stack.  This lack of
-       trust comes about because legacy targets have a nasty habit of
-       silently, and local to PUSH_ARGUMENTS(), moving STRUCT_ADDR.
-       For such targets, just hope that value_being_returned() can
-       find the adjusted value.  */
-    if (struct_return && gdbarch_frame_align_p (current_gdbarch))
-      {
-        struct value *retval = value_at (value_type, struct_addr, NULL);
-        do_cleanups (retbuf_cleanup);
-        return retval;
-      }
-    else
-      {
-	struct value *retval = value_being_returned (value_type, retbuf,
-						     struct_return);
-	do_cleanups (retbuf_cleanup);
-	return retval;
-      }
-  }
-}
-
-struct value *
-call_function_by_hand (struct value *function, int nargs, struct value **args)
-{
-  if (CALL_DUMMY_P)
-    {
-      return hand_function_call (function, nargs, args);
-    }
-  else
-    {
-      error ("Cannot invoke functions on this machine.");
-    }
-}
-
-
 
 /* Create a value for an array by allocating space in the inferior, copying
    the data into that space, and then setting up an array value.
@@ -2111,7 +1244,7 @@ typecmp (int staticp, int varargs, int nargs,
 
 static struct value *
 search_struct_field (char *name, struct value *arg1, int offset,
-		     register struct type *type, int looking_for_baseclass)
+		     struct type *type, int looking_for_baseclass)
 {
   int i;
   int nbases = TYPE_N_BASECLASSES (type);
@@ -2154,22 +1287,23 @@ search_struct_field (char *name, struct value *arg1, int offset,
 		/* Look for a match through the fields of an anonymous union,
 		   or anonymous struct.  C++ provides anonymous unions.
 
-		   In the GNU Chill (OBSOLETE) implementation of
-		   variant record types, each <alternative field> has
-		   an (anonymous) union type, each member of the union
-		   represents a <variant alternative>.  Each <variant
-		   alternative> is represented as a struct, with a
-		   member for each <variant field>.  */
+		   In the GNU Chill (now deleted from GDB)
+		   implementation of variant record types, each
+		   <alternative field> has an (anonymous) union type,
+		   each member of the union represents a <variant
+		   alternative>.  Each <variant alternative> is
+		   represented as a struct, with a member for each
+		   <variant field>.  */
 
 		struct value *v;
 		int new_offset = offset;
 
 		/* This is pretty gross.  In G++, the offset in an
 		   anonymous union is relative to the beginning of the
-		   enclosing struct.  In the GNU Chill (OBSOLETE)
-		   implementation of variant records, the bitpos is
-		   zero in an anonymous union field, so we have to add
-		   the offset of the union here. */
+		   enclosing struct.  In the GNU Chill (now deleted
+		   from GDB) implementation of variant records, the
+		   bitpos is zero in an anonymous union field, so we
+		   have to add the offset of the union here. */
 		if (TYPE_CODE (field_type) == TYPE_CODE_STRUCT
 		    || (TYPE_NFIELDS (field_type) > 0
 			&& TYPE_FIELD_BITPOS (field_type, 0) == 0))
@@ -2350,7 +1484,7 @@ find_rt_vbase_offset (struct type *type, struct type *basetype, char *valaddr,
 static struct value *
 search_struct_method (char *name, struct value **arg1p,
 		      struct value **args, int offset,
-		      int *static_memfuncp, register struct type *type)
+		      int *static_memfuncp, struct type *type)
 {
   int i;
   struct value *v;
@@ -2495,7 +1629,7 @@ struct value *
 value_struct_elt (struct value **argp, struct value **args,
 		  char *name, int *static_memfuncp, char *err)
 {
-  register struct type *t;
+  struct type *t;
   struct value *v;
 
   COERCE_ARRAY (*argp);
@@ -2776,8 +1910,8 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   int num_fns = 0;		/* Number of overloaded instances being considered */
   struct type *basetype = NULL;
   int boffset;
-  register int jj;
-  register int ix;
+  int jj;
+  int ix;
   int static_offset;
   struct cleanup *cleanups = NULL;
 
@@ -2810,7 +1944,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   else
     {
       int i = -1;
-      func_name = cplus_demangle (SYMBOL_NAME (fsym), DMGL_NO_OPTS);
+      func_name = cplus_demangle (DEPRECATED_SYMBOL_NAME (fsym), DMGL_NO_OPTS);
 
       /* If the name is NULL this must be a C-style function.
          Just return the same symbol. */
@@ -3003,7 +2137,7 @@ destructor_name_p (const char *name, const struct type *type)
 	len = strlen (dname);
       else
 	len = cp - dname;
-      if (strlen (name + 1) != len || !STREQN (dname, name + 1, len))
+      if (strlen (name + 1) != len || strncmp (dname, name + 1, len) != 0)
 	error ("name of destructor must equal name of class");
       else
 	return 1;
@@ -3016,9 +2150,9 @@ destructor_name_p (const char *name, const struct type *type)
    target structure/union is defined, otherwise, return 0. */
 
 static int
-check_field_in (register struct type *type, const char *name)
+check_field_in (struct type *type, const char *name)
 {
-  register int i;
+  int i;
 
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
@@ -3059,7 +2193,7 @@ check_field_in (register struct type *type, const char *name)
 int
 check_field (struct value *arg1, const char *name)
 {
-  register struct type *t;
+  struct type *t;
 
   COERCE_ARRAY (arg1);
 
@@ -3086,6 +2220,30 @@ check_field (struct value *arg1, const char *name)
 }
 
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
+   return the appropriate member.  This function is used to resolve
+   user expressions of the form "DOMAIN::NAME".  For more details on
+   what happens, see the comment before
+   value_struct_elt_for_reference.  */
+
+struct value *
+value_aggregate_elt (struct type *curtype,
+		     char *name,
+		     enum noside noside)
+{
+  switch (TYPE_CODE (curtype))
+    {
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      return value_struct_elt_for_reference (curtype, 0, curtype, name, NULL);
+    case TYPE_CODE_NAMESPACE:
+      return value_namespace_elt (curtype, name, noside);
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "non-aggregate type in value_aggregate_elt");
+    }
+}
+
+/* C++: Given an aggregate type CURTYPE, and a member name NAME,
    return the address of this member as a "pointer to member"
    type.  If INTYPE is non-null, then it will be the type
    of the member we are looking for.  This will help us resolve
@@ -3097,8 +2255,8 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 				struct type *curtype, char *name,
 				struct type *intype)
 {
-  register struct type *t = curtype;
-  register int i;
+  struct type *t = curtype;
+  int i;
   struct value *v;
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
@@ -3109,7 +2267,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
     {
       char *t_field_name = TYPE_FIELD_NAME (t, i);
 
-      if (t_field_name && STREQ (t_field_name, name))
+      if (t_field_name && strcmp (t_field_name, name) == 0)
 	{
 	  if (TYPE_FIELD_STATIC (t, i))
 	    {
@@ -3156,7 +2314,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  else if (cplus_demangle_opname (t_field_name, dem_opname, 0))
 	    t_field_name = dem_opname;
 	}
-      if (t_field_name && STREQ (t_field_name, name))
+      if (t_field_name && strcmp (t_field_name, name) == 0)
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (t, i);
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
@@ -3187,7 +2345,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  else
 	    {
 	      struct symbol *s = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
-						0, VAR_NAMESPACE, 0, NULL);
+						0, VAR_DOMAIN, 0, NULL);
 	      if (s == NULL)
 		{
 		  v = 0;
@@ -3223,6 +2381,37 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	return v;
     }
   return 0;
+}
+
+/* C++: Return the member NAME of the namespace given by the type
+   CURTYPE.  */
+
+static struct value *
+value_namespace_elt (const struct type *curtype,
+		     const char *name,
+		     enum noside noside)
+{
+  const char *namespace_name = TYPE_TAG_NAME (curtype);
+  struct symbol *sym;
+  struct value *retval;
+
+  sym = cp_lookup_symbol_namespace (namespace_name, name, NULL,
+				    get_selected_block (0), VAR_DOMAIN,
+				    NULL);
+
+  if (sym == NULL)
+    retval = NULL;
+  else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
+	   && (SYMBOL_CLASS (sym) == LOC_TYPEDEF))
+    retval = allocate_value (SYMBOL_TYPE (sym));
+  else
+    retval = value_of_variable (sym, get_selected_block (0));
+
+  if (retval == NULL)
+    error ("No symbol \"%s\" in namespace \"%s\".", name,
+	   TYPE_TAG_NAME (curtype));
+
+  return retval;
 }
 
 
@@ -3315,10 +2504,9 @@ value_of_local (const char *name, int complain)
 {
   struct symbol *func, *sym;
   struct block *b;
-  int i;
   struct value * ret;
 
-  if (selected_frame == 0)
+  if (deprecated_selected_frame == 0)
     {
       if (complain)
 	error ("no frame selected");
@@ -3326,7 +2514,7 @@ value_of_local (const char *name, int complain)
 	return 0;
     }
 
-  func = get_frame_function (selected_frame);
+  func = get_frame_function (deprecated_selected_frame);
   if (!func)
     {
       if (complain)
@@ -3336,8 +2524,7 @@ value_of_local (const char *name, int complain)
     }
 
   b = SYMBOL_BLOCK_VALUE (func);
-  i = BLOCK_NSYMS (b);
-  if (i <= 0)
+  if (dict_empty (BLOCK_DICT (b)))
     {
       if (complain)
 	error ("no args, no `%s'", name);
@@ -3347,7 +2534,7 @@ value_of_local (const char *name, int complain)
 
   /* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
      symbol instead of the LOC_ARG one (if both exist).  */
-  sym = lookup_block_symbol (b, name, NULL, VAR_NAMESPACE);
+  sym = lookup_block_symbol (b, name, NULL, VAR_DOMAIN);
   if (sym == NULL)
     {
       if (complain)
@@ -3356,7 +2543,7 @@ value_of_local (const char *name, int complain)
 	return NULL;
     }
 
-  ret = read_var_value (sym, selected_frame);
+  ret = read_var_value (sym, deprecated_selected_frame);
   if (ret == 0 && complain)
     error ("`%s' argument unreadable", name);
   return ret;
@@ -3383,7 +2570,7 @@ struct value *
 value_slice (struct value *array, int lowbound, int length)
 {
   struct type *slice_range_type, *slice_type, *range_type;
-  LONGEST lowerbound, upperbound, offset;
+  LONGEST lowerbound, upperbound;
   struct value *slice;
   struct type *array_type;
   array_type = check_typedef (VALUE_TYPE (array));
@@ -3397,9 +2584,6 @@ value_slice (struct value *array, int lowbound, int length)
     error ("slice from bad array or bitstring");
   if (lowbound < lowerbound || length < 0
       || lowbound + length - 1 > upperbound)
-    /* OBSOLETE Chill allows zero-length strings but not arrays. */
-    /* OBSOLETE || (current_language->la_language == language_chill */
-    /* OBSOLETE && length == 0 && TYPE_CODE (array_type) == TYPE_CODE_ARRAY)) */
     error ("slice out of range");
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
@@ -3434,7 +2618,7 @@ value_slice (struct value *array, int lowbound, int length)
   else
     {
       struct type *element_type = TYPE_TARGET_TYPE (array_type);
-      offset
+      LONGEST offset
 	= (lowbound - lowerbound) * TYPE_LENGTH (check_typedef (element_type));
       slice_type = create_array_type ((struct type *) NULL, element_type,
 				      slice_range_type);
@@ -3453,19 +2637,6 @@ value_slice (struct value *array, int lowbound, int length)
       VALUE_OFFSET (slice) = VALUE_OFFSET (array) + offset;
     }
   return slice;
-}
-
-/* Assuming OBSOLETE chill_varying_type (VARRAY) is true, return an
-   equivalent value as a fixed-length array. */
-
-struct value *
-varying_to_slice (struct value *varray)
-{
-  struct type *vtype = check_typedef (VALUE_TYPE (varray));
-  LONGEST length = unpack_long (TYPE_FIELD_TYPE (vtype, 0),
-				VALUE_CONTENTS (varray)
-				+ TYPE_FIELD_BITPOS (vtype, 0) / 8);
-  return value_slice (value_primitive_field (varray, 0, 1, vtype), 0, length);
 }
 
 /* Create a value for a FORTRAN complex number.  Currently most of
@@ -3535,14 +2706,4 @@ _initialize_valops (void)
 		  &setlist),
      &showlist);
   overload_resolution = 1;
-
-  add_show_from_set (
-  add_set_cmd ("unwindonsignal", no_class, var_boolean,
-	       (char *) &unwind_on_signal_p,
-"Set unwinding of stack if a signal is received while in a call dummy.\n\
-The unwindonsignal lets the user determine what gdb should do if a signal\n\
-is received while in a function called from gdb (call dummy).  If set, gdb\n\
-unwinds the stack and restore the context to what as it was before the call.\n\
-The default is to stop in the frame where the signal was received.", &setlist),
-		     &showlist);
 }

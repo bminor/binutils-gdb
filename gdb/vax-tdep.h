@@ -1,5 +1,5 @@
 /* Common target dependent code for GDB on VAX systems.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,10 +21,8 @@
 #ifndef VAX_TDEP_H
 #define VAX_TDEP_H
 
-#include "osabi.h"
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places;  REGISTER_RAW_SIZE is the
+   used in push_word and a few other places;  DEPRECATED_REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
 #define VAX_REGISTER_SIZE 4
 
@@ -35,10 +33,10 @@
    register state.  */
 #define VAX_REGISTER_BYTES (VAX_NUM_REGS * 4)
 
-/* Largest value REGISTER_RAW_SIZE can have.  */
+/* Largest value DEPRECATED_REGISTER_RAW_SIZE can have.  */
 #define VAX_MAX_REGISTER_RAW_SIZE 4
 
-/* Largest value REGISTER_VIRTUAL_SIZE can have.  */
+/* Largest value DEPRECATED_REGISTER_VIRTUAL_SIZE can have.  */
 #define VAX_MAX_REGISTER_VIRTUAL_SIZE 4
 
 /* Register numbers of various important registers.
@@ -53,11 +51,5 @@
 #define VAX_SP_REGNUM     14  /* Contains address of top of stack */
 #define VAX_PC_REGNUM     15  /* Contains program counter */
 #define VAX_PS_REGNUM     16  /* Contains processor status */
-
-/* Target-dependent structure in gdbarch.  */ 
-struct gdbarch_tdep
-{  
-  enum gdb_osabi osabi;		/* OS/ABI of inferior.  */
-};
 
 #endif /* VAX_TDEP_H */

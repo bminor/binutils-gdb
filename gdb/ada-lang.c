@@ -1,5 +1,6 @@
 /* Ada language support routines for GDB, the GNU debugger.  Copyright
-   1992, 1993, 1994, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   1992, 1993, 1994, 1997, 1998, 1999, 2000, 2003
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -36,9 +37,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "gdbcore.h"
 #include "ada-lang.h"
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
+#include "block.h"
+#include "infcall.h"
+#include "dictionary.h"
 
 struct cleanup *unresolved_names;
 
@@ -89,7 +91,7 @@ static struct value *make_array_descriptor (struct type *, struct value *,
 					    CORE_ADDR *);
 
 static void ada_add_block_symbols (struct block *, const char *,
-				   namespace_enum, struct objfile *, int);
+				   domain_enum, struct objfile *, int);
 
 static void fill_in_ada_prototype (struct symbol *);
 
@@ -99,7 +101,7 @@ static void add_defn_to_vec (struct symbol *, struct block *);
 
 static struct partial_symbol *ada_lookup_partial_symbol (struct partial_symtab
 							 *, const char *, int,
-							 namespace_enum, int);
+							 domain_enum, int);
 
 static struct symtab *symtab_for_sym (struct symbol *);
 
@@ -188,7 +190,7 @@ static struct value *value_pos_atr (struct value *);
 
 static struct value *value_val_atr (struct type *, struct value *);
 
-static struct symbol *standard_lookup (const char *, namespace_enum);
+static struct symbol *standard_lookup (const char *, domain_enum);
 
 extern void markTimeStart (int index);
 extern void markTimeStop (int index);
@@ -251,10 +253,10 @@ field_name_match (const char *field_name, const char *target)
 {
   int len = strlen (target);
   return
-    STREQN (field_name, target, len)
+    DEPRECATED_STREQN (field_name, target, len)
     && (field_name[len] == '\0'
-	|| (STREQN (field_name + len, "___", 3)
-	    && !STREQ (field_name + strlen (field_name) - 6, "___XVN")));
+	|| (DEPRECATED_STREQN (field_name + len, "___", 3)
+	    && !DEPRECATED_STREQ (field_name + strlen (field_name) - 6, "___XVN")));
 }
 
 
@@ -284,7 +286,7 @@ is_suffix (const char *str, const char *suffix)
     return 0;
   len1 = strlen (str);
   len2 = strlen (suffix);
-  return (len1 >= len2 && STREQ (str + len1 - len2, suffix));
+  return (len1 >= len2 && DEPRECATED_STREQ (str + len1 - len2, suffix));
 }
 
 /* Create a value of type TYPE whose contents come from VALADDR, if it
@@ -435,7 +437,7 @@ const struct ada_opname_map ada_opname_table[] = {
 static int
 is_suppressed_name (const char *str)
 {
-  if (STREQN (str, "_ada_", 5))
+  if (DEPRECATED_STREQN (str, "_ada_", 5))
     str += 5;
   if (str[0] == '_' || str[0] == '\000')
     return 1;
@@ -456,7 +458,7 @@ is_suppressed_name (const char *str)
 	    if (*p != 'O')
 	      return 1;
 	    for (i = 0; ada_opname_table[i].mangled != NULL; i += 1)
-	      if (STREQN (ada_opname_table[i].mangled, p,
+	      if (DEPRECATED_STREQN (ada_opname_table[i].mangled, p,
 			  strlen (ada_opname_table[i].mangled)))
 		goto OK;
 	    return 1;
@@ -496,7 +498,7 @@ ada_mangle (const char *demangled)
 
 	  for (mapping = ada_opname_table;
 	       mapping->mangled != NULL &&
-	       !STREQN (mapping->demangled, p, strlen (mapping->demangled));
+	       !DEPRECATED_STREQN (mapping->demangled, p, strlen (mapping->demangled));
 	       p += 1)
 	    ;
 	  if (mapping->mangled == NULL)
@@ -567,7 +569,7 @@ ada_demangle (const char *mangled)
   static char *demangling_buffer = NULL;
   static size_t demangling_buffer_size = 0;
 
-  if (STREQN (mangled, "_ada_", 5))
+  if (DEPRECATED_STREQN (mangled, "_ada_", 5))
     mangled += 5;
 
   if (mangled[0] == '_' || mangled[0] == '<')
@@ -583,9 +585,9 @@ ada_demangle (const char *mangled)
       else
 	goto Suppress;
     }
-  if (len0 > 3 && STREQ (mangled + len0 - 3, "TKB"))
+  if (len0 > 3 && DEPRECATED_STREQ (mangled + len0 - 3, "TKB"))
     len0 -= 3;
-  if (len0 > 1 && STREQ (mangled + len0 - 1, "B"))
+  if (len0 > 1 && DEPRECATED_STREQ (mangled + len0 - 1, "B"))
     len0 -= 1;
 
   /* Make demangled big enough for possible expansion by operator name. */
@@ -614,7 +616,7 @@ ada_demangle (const char *mangled)
 	  for (k = 0; ada_opname_table[k].mangled != NULL; k += 1)
 	    {
 	      int op_len = strlen (ada_opname_table[k].mangled);
-	      if (STREQN
+	      if (DEPRECATED_STREQN
 		  (ada_opname_table[k].mangled + 1, mangled + i + 1,
 		   op_len - 1) && !isalnum (mangled[i + op_len]))
 		{
@@ -630,7 +632,7 @@ ada_demangle (const char *mangled)
 	}
       at_start_name = 0;
 
-      if (i < len0 - 4 && STREQN (mangled + i, "TK__", 4))
+      if (i < len0 - 4 && DEPRECATED_STREQN (mangled + i, "TK__", 4))
 	i += 2;
       if (mangled[i] == 'X' && i != 0 && isalnum (mangled[i - 1]))
 	{
@@ -690,10 +692,10 @@ ada_match_name (const char *sym_name, const char *name, int wild)
   else
     {
       int len_name = strlen (name);
-      return (STREQN (sym_name, name, len_name)
+      return (DEPRECATED_STREQN (sym_name, name, len_name)
 	      && is_name_suffix (sym_name + len_name))
-	|| (STREQN (sym_name, "_ada_", 5)
-	    && STREQN (sym_name + 5, name, len_name)
+	|| (DEPRECATED_STREQN (sym_name, "_ada_", 5)
+	    && DEPRECATED_STREQN (sym_name + 5, name, len_name)
 	    && is_name_suffix (sym_name + len_name + 5));
     }
 }
@@ -704,10 +706,10 @@ ada_match_name (const char *sym_name, const char *name, int wild)
 int
 ada_suppress_symbol_printing (struct symbol *sym)
 {
-  if (SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE)
+  if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN)
     return 1;
   else
-    return is_suppressed_name (SYMBOL_NAME (sym));
+    return is_suppressed_name (DEPRECATED_SYMBOL_NAME (sym));
 }
 
 
@@ -1231,10 +1233,10 @@ decode_packed_array_type (struct type *type)
   /* NOTE: Use ada_lookup_symbol_list because of bug in some versions
    * of gcc (Solaris, e.g.). FIXME when compiler is fixed. */
   n = ada_lookup_symbol_list (name, get_selected_block (NULL),
-			      VAR_NAMESPACE, &syms, &blocks);
+			      VAR_DOMAIN, &syms, &blocks);
   for (i = 0; i < n; i += 1)
     if (syms[i] != NULL && SYMBOL_CLASS (syms[i]) == LOC_TYPEDEF
-	&& STREQ (name, ada_type_name (SYMBOL_TYPE (syms[i]))))
+	&& DEPRECATED_STREQ (name, ada_type_name (SYMBOL_TYPE (syms[i]))))
       break;
   if (i >= n)
     {
@@ -2150,7 +2152,7 @@ ada_resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 
          n_candidates = ada_lookup_symbol_list (exp->elts[pc + 2].name,
          exp->elts[pc + 1].block,
-         VAR_NAMESPACE,
+         VAR_DOMAIN,
          &candidate_syms,
          &candidate_blocks);
 
@@ -2172,6 +2174,8 @@ ada_resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
    case LOC_LOCAL_ARG:
    case LOC_BASEREG:
    case LOC_BASEREG_ARG:
+   case LOC_COMPUTED:
+   case LOC_COMPUTED_ARG:
    goto FoundNonType;
    default:
    break;
@@ -2250,7 +2254,7 @@ ada_resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 
 	   n_candidates = ada_lookup_symbol_list (exp->elts[pc + 5].name,
 	   exp->elts[pc + 4].block,
-	   VAR_NAMESPACE,
+	   VAR_DOMAIN,
 	   &candidate_syms,
 	   &candidate_blocks);
 	   if (n_candidates == 1)
@@ -2304,7 +2308,7 @@ ada_resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 
 	  n_candidates =
 	    ada_lookup_symbol_list (ada_mangle (ada_op_name (op)),
-				    (struct block *) NULL, VAR_NAMESPACE,
+				    (struct block *) NULL, VAR_DOMAIN,
 				    &candidate_syms, &candidate_blocks);
 	  i =
 	    ada_resolve_function (candidate_syms, candidate_blocks,
@@ -2541,7 +2545,7 @@ mangled_ordered_before (char *N0, char *N1)
 	  n1 = k1;
 	  while (N1[n1] == '_' && n1 > 0 && N1[n1 - 1] == '_')
 	    n1 -= 1;
-	  if (n0 == n1 && STREQN (N0, N1, n0))
+	  if (n0 == n1 && DEPRECATED_STREQN (N0, N1, n0))
 	    return (atoi (N0 + k0 + 1) < atoi (N1 + k1 + 1));
 	}
       return (strcmp (N0, N1) < 0);
@@ -2563,8 +2567,8 @@ sort_choices (struct symbol *syms[], struct block *blocks[], int nsyms)
 
       for (j = i - 1; j >= 0; j -= 1)
 	{
-	  if (mangled_ordered_before (SYMBOL_NAME (syms[j]),
-				      SYMBOL_NAME (sym)))
+	  if (mangled_ordered_before (DEPRECATED_SYMBOL_NAME (syms[j]),
+				      DEPRECATED_SYMBOL_NAME (sym)))
 	    break;
 	  syms[j + 1] = syms[j];
 	  blocks[j + 1] = blocks[j];
@@ -2614,7 +2618,7 @@ user_select_syms (struct symbol *syms[], struct block *blocks[], int nsyms,
 	  struct symtab_and_line sal = find_function_start_sal (syms[i], 1);
 	  printf_unfiltered ("[%d] %s at %s:%d\n",
 			     i + first_choice,
-			     SYMBOL_SOURCE_NAME (syms[i]),
+			     SYMBOL_PRINT_NAME (syms[i]),
 			     sal.symtab == NULL
 			     ? "<no source file available>"
 			     : sal.symtab->filename, sal.line);
@@ -2631,28 +2635,28 @@ user_select_syms (struct symbol *syms[], struct block *blocks[], int nsyms,
 	  if (SYMBOL_LINE (syms[i]) != 0 && symtab != NULL)
 	    printf_unfiltered ("[%d] %s at %s:%d\n",
 			       i + first_choice,
-			       SYMBOL_SOURCE_NAME (syms[i]),
+			       SYMBOL_PRINT_NAME (syms[i]),
 			       symtab->filename, SYMBOL_LINE (syms[i]));
 	  else if (is_enumeral && TYPE_NAME (SYMBOL_TYPE (syms[i])) != NULL)
 	    {
 	      printf_unfiltered ("[%d] ", i + first_choice);
 	      ada_print_type (SYMBOL_TYPE (syms[i]), NULL, gdb_stdout, -1, 0);
 	      printf_unfiltered ("'(%s) (enumeral)\n",
-				 SYMBOL_SOURCE_NAME (syms[i]));
+				 SYMBOL_PRINT_NAME (syms[i]));
 	    }
 	  else if (symtab != NULL)
 	    printf_unfiltered (is_enumeral
 			       ? "[%d] %s in %s (enumeral)\n"
 			       : "[%d] %s at %s:?\n",
 			       i + first_choice,
-			       SYMBOL_SOURCE_NAME (syms[i]),
+			       SYMBOL_PRINT_NAME (syms[i]),
 			       symtab->filename);
 	  else
 	    printf_unfiltered (is_enumeral
 			       ? "[%d] %s (enumeral)\n"
 			       : "[%d] %s at ?\n",
 			       i + first_choice,
-			       SYMBOL_SOURCE_NAME (syms[i]));
+			       SYMBOL_PRINT_NAME (syms[i]));
 	}
     }
 
@@ -3018,9 +3022,9 @@ place_on_stack (struct value *val, CORE_ADDR *sp)
 {
   CORE_ADDR old_sp = *sp;
 
-#ifdef STACK_ALIGN
+#ifdef DEPRECATED_STACK_ALIGN
   *sp = push_bytes (*sp, VALUE_CONTENTS_RAW (val),
-		    STACK_ALIGN (TYPE_LENGTH
+		    DEPRECATED_STACK_ALIGN (TYPE_LENGTH
 				 (check_typedef (VALUE_TYPE (val)))));
 #else
   *sp = push_bytes (*sp, VALUE_CONTENTS_RAW (val),
@@ -3172,14 +3176,13 @@ static struct symbol **defn_symbols = NULL;
 static struct block **defn_blocks = NULL;
 
 /* Return the result of a standard (literal, C-like) lookup of NAME in 
- * given NAMESPACE. */
+ * given DOMAIN. */
 
 static struct symbol *
-standard_lookup (const char *name, namespace_enum namespace)
+standard_lookup (const char *name, domain_enum domain)
 {
   struct symbol *sym;
-  struct symtab *symtab;
-  sym = lookup_symbol (name, (struct block *) NULL, namespace, 0, &symtab);
+  sym = lookup_symbol (name, (struct block *) NULL, domain, 0, NULL);
   return sym;
 }
 
@@ -3214,7 +3217,7 @@ equiv_types (struct type *type0, struct type *type1)
   if ((TYPE_CODE (type0) == TYPE_CODE_STRUCT
        || TYPE_CODE (type0) == TYPE_CODE_ENUM)
       && ada_type_name (type0) != NULL && ada_type_name (type1) != NULL
-      && STREQ (ada_type_name (type0), ada_type_name (type1)))
+      && DEPRECATED_STREQ (ada_type_name (type0), ada_type_name (type1)))
     return 1;
 
   return 0;
@@ -3228,7 +3231,7 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
 {
   if (sym0 == sym1)
     return 1;
-  if (SYMBOL_NAMESPACE (sym0) != SYMBOL_NAMESPACE (sym1)
+  if (SYMBOL_DOMAIN (sym0) != SYMBOL_DOMAIN (sym1)
       || SYMBOL_CLASS (sym0) != SYMBOL_CLASS (sym1))
     return 0;
 
@@ -3240,14 +3243,14 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
       {
 	struct type *type0 = SYMBOL_TYPE (sym0);
 	struct type *type1 = SYMBOL_TYPE (sym1);
-	char *name0 = SYMBOL_NAME (sym0);
-	char *name1 = SYMBOL_NAME (sym1);
+	char *name0 = DEPRECATED_SYMBOL_NAME (sym0);
+	char *name1 = DEPRECATED_SYMBOL_NAME (sym1);
 	int len0 = strlen (name0);
 	return
 	  TYPE_CODE (type0) == TYPE_CODE (type1)
 	  && (equiv_types (type0, type1)
-	      || (len0 < strlen (name1) && STREQN (name0, name1, len0)
-		  && STREQN (name1 + len0, "___XV", 5)));
+	      || (len0 < strlen (name1) && DEPRECATED_STREQN (name0, name1, len0)
+		  && DEPRECATED_STREQN (name1 + len0, "___XV", 5)));
       }
     case LOC_CONST:
       return SYMBOL_VALUE (sym0) == SYMBOL_VALUE (sym1)
@@ -3290,13 +3293,13 @@ add_defn_to_vec (struct symbol *sym, struct block *block)
   ndefns += 1;
 }
 
-/* Look, in partial_symtab PST, for symbol NAME in given namespace.
+/* Look, in partial_symtab PST, for symbol NAME in given domain.
    Check the global symbols if GLOBAL, the static symbols if not.  Do
    wild-card match if WILD. */
 
 static struct partial_symbol *
 ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
-			   int global, namespace_enum namespace, int wild)
+			   int global, domain_enum domain, int wild)
 {
   struct partial_symbol **start;
   int name_len = strlen (name);
@@ -3318,8 +3321,8 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	{
 	  struct partial_symbol *psym = start[i];
 
-	  if (SYMBOL_NAMESPACE (psym) == namespace &&
-	      wild_match (name, name_len, SYMBOL_NAME (psym)))
+	  if (SYMBOL_DOMAIN (psym) == domain &&
+	      wild_match (name, name_len, DEPRECATED_SYMBOL_NAME (psym)))
 	    return psym;
 	}
       return NULL;
@@ -3335,11 +3338,11 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	    {
 	      int M = (U + i) >> 1;
 	      struct partial_symbol *psym = start[M];
-	      if (SYMBOL_NAME (psym)[0] < name[0])
+	      if (DEPRECATED_SYMBOL_NAME (psym)[0] < name[0])
 		i = M + 1;
-	      else if (SYMBOL_NAME (psym)[0] > name[0])
+	      else if (DEPRECATED_SYMBOL_NAME (psym)[0] > name[0])
 		U = M - 1;
-	      else if (strcmp (SYMBOL_NAME (psym), name) < 0)
+	      else if (strcmp (DEPRECATED_SYMBOL_NAME (psym), name) < 0)
 		i = M + 1;
 	      else
 		U = M;
@@ -3352,9 +3355,9 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	{
 	  struct partial_symbol *psym = start[i];
 
-	  if (SYMBOL_NAMESPACE (psym) == namespace)
+	  if (SYMBOL_DOMAIN (psym) == domain)
 	    {
-	      int cmp = strncmp (name, SYMBOL_NAME (psym), name_len);
+	      int cmp = strncmp (name, DEPRECATED_SYMBOL_NAME (psym), name_len);
 
 	      if (cmp < 0)
 		{
@@ -3362,7 +3365,7 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 		    break;
 		}
 	      else if (cmp == 0
-		       && is_name_suffix (SYMBOL_NAME (psym) + name_len))
+		       && is_name_suffix (DEPRECATED_SYMBOL_NAME (psym) + name_len))
 		return psym;
 	    }
 	  i += 1;
@@ -3377,11 +3380,11 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	    {
 	      int M = (U + i) >> 1;
 	      struct partial_symbol *psym = start[M];
-	      if (SYMBOL_NAME (psym)[0] < '_')
+	      if (DEPRECATED_SYMBOL_NAME (psym)[0] < '_')
 		i = M + 1;
-	      else if (SYMBOL_NAME (psym)[0] > '_')
+	      else if (DEPRECATED_SYMBOL_NAME (psym)[0] > '_')
 		U = M - 1;
-	      else if (strcmp (SYMBOL_NAME (psym), "_ada_") < 0)
+	      else if (strcmp (DEPRECATED_SYMBOL_NAME (psym), "_ada_") < 0)
 		i = M + 1;
 	      else
 		U = M;
@@ -3394,16 +3397,16 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	{
 	  struct partial_symbol *psym = start[i];
 
-	  if (SYMBOL_NAMESPACE (psym) == namespace)
+	  if (SYMBOL_DOMAIN (psym) == domain)
 	    {
 	      int cmp;
 
-	      cmp = (int) '_' - (int) SYMBOL_NAME (psym)[0];
+	      cmp = (int) '_' - (int) DEPRECATED_SYMBOL_NAME (psym)[0];
 	      if (cmp == 0)
 		{
-		  cmp = strncmp ("_ada_", SYMBOL_NAME (psym), 5);
+		  cmp = strncmp ("_ada_", DEPRECATED_SYMBOL_NAME (psym), 5);
 		  if (cmp == 0)
-		    cmp = strncmp (name, SYMBOL_NAME (psym) + 5, name_len);
+		    cmp = strncmp (name, DEPRECATED_SYMBOL_NAME (psym) + 5, name_len);
 		}
 
 	      if (cmp < 0)
@@ -3412,7 +3415,7 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 		    break;
 		}
 	      else if (cmp == 0
-		       && is_name_suffix (SYMBOL_NAME (psym) + name_len + 5))
+		       && is_name_suffix (DEPRECATED_SYMBOL_NAME (psym) + name_len + 5))
 		return psym;
 	    }
 	  i += 1;
@@ -3431,7 +3434,8 @@ symtab_for_sym (struct symbol *sym)
   struct objfile *objfile;
   struct block *b;
   struct symbol *tmp_sym;
-  int i, j;
+  struct dict_iterator iter;
+  int j;
 
   ALL_SYMTABS (objfile, s)
   {
@@ -3445,10 +3449,10 @@ symtab_for_sym (struct symbol *sym)
       case LOC_BLOCK:
       case LOC_CONST_BYTES:
 	b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-	ALL_BLOCK_SYMBOLS (b, i, tmp_sym) if (sym == tmp_sym)
+	ALL_BLOCK_SYMBOLS (b, iter, tmp_sym) if (sym == tmp_sym)
 	  return s;
 	b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-	ALL_BLOCK_SYMBOLS (b, i, tmp_sym) if (sym == tmp_sym)
+	ALL_BLOCK_SYMBOLS (b, iter, tmp_sym) if (sym == tmp_sym)
 	  return s;
 	break;
       default:
@@ -3466,11 +3470,13 @@ symtab_for_sym (struct symbol *sym)
       case LOC_LOCAL_ARG:
       case LOC_BASEREG:
       case LOC_BASEREG_ARG:
+      case LOC_COMPUTED:
+      case LOC_COMPUTED_ARG:
 	for (j = FIRST_LOCAL_BLOCK;
 	     j < BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (s)); j += 1)
 	  {
 	    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), j);
-	    ALL_BLOCK_SYMBOLS (b, i, tmp_sym) if (sym == tmp_sym)
+	    ALL_BLOCK_SYMBOLS (b, iter, tmp_sym) if (sym == tmp_sym)
 	      return s;
 	  }
 	break;
@@ -3493,7 +3499,7 @@ ada_lookup_minimal_symbol (const char *name)
 
   ALL_MSYMBOLS (objfile, msymbol)
   {
-    if (ada_match_name (SYMBOL_NAME (msymbol), name, wild_match)
+    if (ada_match_name (DEPRECATED_SYMBOL_NAME (msymbol), name, wild_match)
 	&& MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
       return msymbol;
   }
@@ -3502,7 +3508,7 @@ ada_lookup_minimal_symbol (const char *name)
 }
 
 /* For all subprograms that statically enclose the subprogram of the
- * selected frame, add symbols matching identifier NAME in NAMESPACE
+ * selected frame, add symbols matching identifier NAME in DOMAIN
  * and their blocks to vectors *defn_symbols and *defn_blocks, as for
  * ada_add_block_symbols (q.v.).   If WILD, treat as NAME with a
  * wildcard prefix.  At the moment, this function uses a heuristic to
@@ -3511,7 +3517,7 @@ ada_lookup_minimal_symbol (const char *name)
  * frame as a static link, and then searches up the call stack for a
  * frame with that same local-variable base. */
 static void
-add_symbols_from_enclosing_procs (const char *name, namespace_enum namespace,
+add_symbols_from_enclosing_procs (const char *name, domain_enum domain,
 				  int wild_match)
 {
 #ifdef i386
@@ -3527,16 +3533,16 @@ add_symbols_from_enclosing_procs (const char *name, namespace_enum namespace,
       /* Initialize the local variable symbol that stands for the
        * static link (when it exists). */
       static_link = &static_link_sym;
-      SYMBOL_NAME (static_link) = "";
+      DEPRECATED_SYMBOL_NAME (static_link) = "";
       SYMBOL_LANGUAGE (static_link) = language_unknown;
       SYMBOL_CLASS (static_link) = LOC_LOCAL;
-      SYMBOL_NAMESPACE (static_link) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (static_link) = VAR_DOMAIN;
       SYMBOL_TYPE (static_link) = lookup_pointer_type (builtin_type_void);
       SYMBOL_VALUE (static_link) =
 	-(long) TYPE_LENGTH (SYMBOL_TYPE (static_link));
     }
 
-  frame = selected_frame;
+  frame = deprecated_selected_frame;
   while (frame != NULL && ndefns == 0)
     {
       struct block *block;
@@ -3553,7 +3559,7 @@ add_symbols_from_enclosing_procs (const char *name, namespace_enum namespace,
 	  QUIT;
 	  frame = get_prev_frame (frame);
 	}
-      while (frame != NULL && FRAME_LOCALS_ADDRESS (frame) != target_link);
+      while (frame != NULL && DEPRECATED_FRAME_LOCALS_ADDRESS (frame) != target_link);
 
       if (frame == NULL)
 	break;
@@ -3561,7 +3567,7 @@ add_symbols_from_enclosing_procs (const char *name, namespace_enum namespace,
       block = get_frame_block (frame, 0);
       while (block != NULL && block_function (block) != NULL && ndefns == 0)
 	{
-	  ada_add_block_symbols (block, name, namespace, NULL, wild_match);
+	  ada_add_block_symbols (block, name, domain, NULL, wild_match);
 
 	  block = BLOCK_SUPERBLOCK (block);
 	}
@@ -3577,7 +3583,7 @@ static int
 is_nondebugging_type (struct type *type)
 {
   char *name = ada_type_name (type);
-  return (name != NULL && STREQ (name, "<variable, no debug info>"));
+  return (name != NULL && DEPRECATED_STREQ (name, "<variable, no debug info>"));
 }
 
 /* Remove any non-debugging symbols in SYMS[0 .. NSYMS-1] that definitely 
@@ -3596,15 +3602,15 @@ remove_extra_symbols (struct symbol **syms, struct block **blocks, int nsyms)
   i = 0;
   while (i < nsyms)
     {
-      if (SYMBOL_NAME (syms[i]) != NULL
+      if (DEPRECATED_SYMBOL_NAME (syms[i]) != NULL
 	  && SYMBOL_CLASS (syms[i]) == LOC_STATIC
 	  && is_nondebugging_type (SYMBOL_TYPE (syms[i])))
 	{
 	  for (j = 0; j < nsyms; j += 1)
 	    {
 	      if (i != j
-		  && SYMBOL_NAME (syms[j]) != NULL
-		  && STREQ (SYMBOL_NAME (syms[i]), SYMBOL_NAME (syms[j]))
+		  && DEPRECATED_SYMBOL_NAME (syms[j]) != NULL
+		  && DEPRECATED_STREQ (DEPRECATED_SYMBOL_NAME (syms[i]), DEPRECATED_SYMBOL_NAME (syms[j]))
 		  && SYMBOL_CLASS (syms[i]) == SYMBOL_CLASS (syms[j])
 		  && SYMBOL_VALUE_ADDRESS (syms[i])
 		  == SYMBOL_VALUE_ADDRESS (syms[j]))
@@ -3627,7 +3633,7 @@ remove_extra_symbols (struct symbol **syms, struct block **blocks, int nsyms)
   return nsyms;
 }
 
-/* Find symbols in NAMESPACE matching NAME, in BLOCK0 and enclosing 
+/* Find symbols in DOMAIN matching NAME, in BLOCK0 and enclosing 
    scope and in global scopes, returning the number of matches.  Sets 
    *SYMS to point to a vector of matching symbols, with *BLOCKS
    pointing to the vector of corresponding blocks in which those
@@ -3640,7 +3646,7 @@ remove_extra_symbols (struct symbol **syms, struct block **blocks, int nsyms)
 
 int
 ada_lookup_symbol_list (const char *name, struct block *block0,
-			namespace_enum namespace, struct symbol ***syms,
+			domain_enum domain, struct symbol ***syms,
 			struct block ***blocks)
 {
   struct symbol *sym;
@@ -3666,7 +3672,7 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
   block = block0;
   while (block != NULL)
     {
-      ada_add_block_symbols (block, name, namespace, NULL, wild_match);
+      ada_add_block_symbols (block, name, domain, NULL, wild_match);
 
       /* If we found a non-function match, assume that's the one. */
       if (is_nonfunction (defn_symbols, ndefns))
@@ -3692,14 +3698,14 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
       continue;
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-    ada_add_block_symbols (block, name, namespace, objfile, wild_match);
+    ada_add_block_symbols (block, name, domain, objfile, wild_match);
   }
 
-  if (namespace == VAR_NAMESPACE)
+  if (domain == VAR_DOMAIN)
     {
       ALL_MSYMBOLS (objfile, msymbol)
       {
-	if (ada_match_name (SYMBOL_NAME (msymbol), name, wild_match))
+	if (ada_match_name (DEPRECATED_SYMBOL_NAME (msymbol), name, wild_match))
 	  {
 	    switch (MSYMBOL_TYPE (msymbol))
 	      {
@@ -3714,14 +3720,14 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
 		    bv = BLOCKVECTOR (s);
 		    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 		    ada_add_block_symbols (block,
-					   SYMBOL_NAME (msymbol),
-					   namespace, objfile, wild_match);
+					   DEPRECATED_SYMBOL_NAME (msymbol),
+					   domain, objfile, wild_match);
 		    if (ndefns == old_ndefns)
 		      {
 			block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 			ada_add_block_symbols (block,
-					       SYMBOL_NAME (msymbol),
-					       namespace, objfile,
+					       DEPRECATED_SYMBOL_NAME (msymbol),
+					       domain, objfile,
 					       wild_match);
 		      }
 		  }
@@ -3734,14 +3740,14 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
   {
     QUIT;
     if (!ps->readin
-	&& ada_lookup_partial_symbol (ps, name, 1, namespace, wild_match))
+	&& ada_lookup_partial_symbol (ps, name, 1, domain, wild_match))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	if (!s->primary)
 	  continue;
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	ada_add_block_symbols (block, name, namespace, objfile, wild_match);
+	ada_add_block_symbols (block, name, domain, objfile, wild_match);
       }
   }
 
@@ -3759,21 +3765,21 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
 	  continue;
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	ada_add_block_symbols (block, name, namespace, objfile, wild_match);
+	ada_add_block_symbols (block, name, domain, objfile, wild_match);
       }
 
       ALL_PSYMTABS (objfile, ps)
       {
 	QUIT;
 	if (!ps->readin
-	    && ada_lookup_partial_symbol (ps, name, 0, namespace, wild_match))
+	    && ada_lookup_partial_symbol (ps, name, 0, domain, wild_match))
 	  {
 	    s = PSYMTAB_TO_SYMTAB (ps);
 	    bv = BLOCKVECTOR (s);
 	    if (!s->primary)
 	      continue;
 	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	    ada_add_block_symbols (block, name, namespace,
+	    ada_add_block_symbols (block, name, domain,
 				   objfile, wild_match);
 	  }
       }
@@ -3784,7 +3790,7 @@ ada_lookup_symbol_list (const char *name, struct block *block0,
      rare. */
   if (ndefns == 0)
     {
-      add_symbols_from_enclosing_procs (name, namespace, wild_match);
+      add_symbols_from_enclosing_procs (name, domain, wild_match);
       if (ndefns > 0)
 	goto done;
     }
@@ -3801,7 +3807,7 @@ done:
   return ndefns;
 }
 
-/* Return a symbol in NAMESPACE matching NAME, in BLOCK0 and enclosing 
+/* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing 
  * scope and in global scopes, or NULL if none.  NAME is folded to
  * lower case first, unless it is surrounded in single quotes. 
  * Otherwise, the result is as for ada_lookup_symbol_list, but is 
@@ -3809,14 +3815,14 @@ done:
 
 struct symbol *
 ada_lookup_symbol (const char *name, struct block *block0,
-		   namespace_enum namespace)
+		   domain_enum domain)
 {
   struct symbol **candidate_syms;
   struct block **candidate_blocks;
   int n_candidates;
 
   n_candidates = ada_lookup_symbol_list (name,
-					 block0, namespace,
+					 block0, domain,
 					 &candidate_syms, &candidate_blocks);
 
   if (n_candidates == 0)
@@ -3857,7 +3863,7 @@ is_name_suffix (const char *str)
 	return 0;
       if (str[2] == '_')
 	{
-	  if (STREQ (str + 3, "LJM"))
+	  if (DEPRECATED_STREQ (str + 3, "LJM"))
 	    return 1;
 	  if (str[3] != 'X')
 	    return 0;
@@ -3894,14 +3900,14 @@ wild_match (const char *patn, int patn_len, const char *name)
   int s, e;
 
   name_len = strlen (name);
-  if (name_len >= patn_len + 5 && STREQN (name, "_ada_", 5)
-      && STREQN (patn, name + 5, patn_len)
+  if (name_len >= patn_len + 5 && DEPRECATED_STREQN (name, "_ada_", 5)
+      && DEPRECATED_STREQN (patn, name + 5, patn_len)
       && is_name_suffix (name + patn_len + 5))
     return 1;
 
   while (name_len >= patn_len)
     {
-      if (STREQN (patn, name, patn_len) && is_name_suffix (name + patn_len))
+      if (DEPRECATED_STREQN (patn, name, patn_len) && is_name_suffix (name + patn_len))
 	return 1;
       do
 	{
@@ -3932,7 +3938,7 @@ wild_match (const char *patn, int patn_len, const char *name)
 }
 
 
-/* Add symbols from BLOCK matching identifier NAME in NAMESPACE to 
+/* Add symbols from BLOCK matching identifier NAME in DOMAIN to 
    vector *defn_symbols, updating *defn_symbols (if necessary), *SZ (the size of
    the vector *defn_symbols), and *ndefns (the number of symbols
    currently stored in *defn_symbols).  If WILD, treat as NAME with a
@@ -3940,16 +3946,15 @@ wild_match (const char *patn, int patn_len, const char *name)
 
 static void
 ada_add_block_symbols (struct block *block, const char *name,
-		       namespace_enum namespace, struct objfile *objfile,
+		       domain_enum domain, struct objfile *objfile,
 		       int wild)
 {
-  int i;
+  struct dict_iterator iter;
   int name_len = strlen (name);
   /* A matching argument symbol, if any. */
   struct symbol *arg_sym;
   /* Set true when we find a matching non-argument symbol */
   int found_sym;
-  int is_sorted = BLOCK_SHOULD_SORT (block);
   struct symbol *sym;
 
   arg_sym = NULL;
@@ -3957,10 +3962,10 @@ ada_add_block_symbols (struct block *block, const char *name,
   if (wild)
     {
       struct symbol *sym;
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
       {
-	if (SYMBOL_NAMESPACE (sym) == namespace &&
-	    wild_match (name, name_len, SYMBOL_NAME (sym)))
+	if (SYMBOL_DOMAIN (sym) == domain &&
+	    wild_match (name, name_len, DEPRECATED_SYMBOL_NAME (sym)))
 	  {
 	    switch (SYMBOL_CLASS (sym))
 	      {
@@ -3970,6 +3975,7 @@ ada_add_block_symbols (struct block *block, const char *name,
 	      case LOC_REGPARM:
 	      case LOC_REGPARM_ADDR:
 	      case LOC_BASEREG_ARG:
+	      case LOC_COMPUTED_ARG:
 		arg_sym = sym;
 		break;
 	      case LOC_UNRESOLVED:
@@ -3985,45 +3991,14 @@ ada_add_block_symbols (struct block *block, const char *name,
     }
   else
     {
-      if (is_sorted)
-	{
-	  int U;
-	  i = 0;
-	  U = BLOCK_NSYMS (block) - 1;
-	  while (U - i > 4)
-	    {
-	      int M = (U + i) >> 1;
-	      struct symbol *sym = BLOCK_SYM (block, M);
-	      if (SYMBOL_NAME (sym)[0] < name[0])
-		i = M + 1;
-	      else if (SYMBOL_NAME (sym)[0] > name[0])
-		U = M - 1;
-	      else if (strcmp (SYMBOL_NAME (sym), name) < 0)
-		i = M + 1;
-	      else
-		U = M;
-	    }
-	}
-      else
-	i = 0;
-
-      for (; i < BLOCK_BUCKETS (block); i += 1)
-	for (sym = BLOCK_BUCKET (block, i); sym != NULL; sym = sym->hash_next)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	  {
-	    if (SYMBOL_NAMESPACE (sym) == namespace)
+	    if (SYMBOL_DOMAIN (sym) == domain)
 	      {
-		int cmp = strncmp (name, SYMBOL_NAME (sym), name_len);
+		int cmp = strncmp (name, DEPRECATED_SYMBOL_NAME (sym), name_len);
 
-		if (cmp < 0)
-		  {
-		    if (is_sorted)
-		      {
-			i = BLOCK_BUCKETS (block);
-			break;
-		      }
-		  }
-		else if (cmp == 0
-			 && is_name_suffix (SYMBOL_NAME (sym) + name_len))
+		if (cmp == 0
+		    && is_name_suffix (DEPRECATED_SYMBOL_NAME (sym) + name_len))
 		  {
 		    switch (SYMBOL_CLASS (sym))
 		      {
@@ -4033,6 +4008,7 @@ ada_add_block_symbols (struct block *block, const char *name,
 		      case LOC_REGPARM:
 		      case LOC_REGPARM_ADDR:
 		      case LOC_BASEREG_ARG:
+		      case LOC_COMPUTED_ARG:
 			arg_sym = sym;
 			break;
 		      case LOC_UNRESOLVED:
@@ -4059,55 +4035,23 @@ ada_add_block_symbols (struct block *block, const char *name,
     {
       arg_sym = NULL;
       found_sym = 0;
-      if (is_sorted)
-	{
-	  int U;
-	  i = 0;
-	  U = BLOCK_NSYMS (block) - 1;
-	  while (U - i > 4)
-	    {
-	      int M = (U + i) >> 1;
-	      struct symbol *sym = BLOCK_SYM (block, M);
-	      if (SYMBOL_NAME (sym)[0] < '_')
-		i = M + 1;
-	      else if (SYMBOL_NAME (sym)[0] > '_')
-		U = M - 1;
-	      else if (strcmp (SYMBOL_NAME (sym), "_ada_") < 0)
-		i = M + 1;
-	      else
-		U = M;
-	    }
-	}
-      else
-	i = 0;
 
-      for (; i < BLOCK_BUCKETS (block); i += 1)
-	for (sym = BLOCK_BUCKET (block, i); sym != NULL; sym = sym->hash_next)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	  {
-	    struct symbol *sym = BLOCK_SYM (block, i);
-
-	    if (SYMBOL_NAMESPACE (sym) == namespace)
+	    if (SYMBOL_DOMAIN (sym) == domain)
 	      {
 		int cmp;
 
-		cmp = (int) '_' - (int) SYMBOL_NAME (sym)[0];
+		cmp = (int) '_' - (int) DEPRECATED_SYMBOL_NAME (sym)[0];
 		if (cmp == 0)
 		  {
-		    cmp = strncmp ("_ada_", SYMBOL_NAME (sym), 5);
+		    cmp = strncmp ("_ada_", DEPRECATED_SYMBOL_NAME (sym), 5);
 		    if (cmp == 0)
-		      cmp = strncmp (name, SYMBOL_NAME (sym) + 5, name_len);
+		      cmp = strncmp (name, DEPRECATED_SYMBOL_NAME (sym) + 5, name_len);
 		  }
 
-		if (cmp < 0)
-		  {
-		    if (is_sorted)
-		      {
-			i = BLOCK_BUCKETS (block);
-			break;
-		      }
-		  }
-		else if (cmp == 0
-			 && is_name_suffix (SYMBOL_NAME (sym) + name_len + 5))
+		if (cmp == 0
+		    && is_name_suffix (DEPRECATED_SYMBOL_NAME (sym) + name_len + 5))
 		  {
 		    switch (SYMBOL_CLASS (sym))
 		      {
@@ -4117,6 +4061,7 @@ ada_add_block_symbols (struct block *block, const char *name,
 		      case LOC_REGPARM:
 		      case LOC_REGPARM_ADDR:
 		      case LOC_BASEREG_ARG:
+		      case LOC_COMPUTED_ARG:
 			arg_sym = sym;
 			break;
 		      case LOC_UNRESOLVED:
@@ -4153,7 +4098,7 @@ fill_in_ada_prototype (struct symbol *func)
 {
   struct block *b;
   int nargs, nsyms;
-  int i;
+  struct dict_iterator iter;
   struct type *ftype;
   struct type *rtype;
   size_t max_fields;
@@ -4179,7 +4124,7 @@ fill_in_ada_prototype (struct symbol *func)
   max_fields = 8;
   TYPE_FIELDS (ftype) =
     (struct field *) xmalloc (sizeof (struct field) * max_fields);
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
   {
     GROW_VECT (TYPE_FIELDS (ftype), max_fields, nargs + 1);
 
@@ -4189,9 +4134,10 @@ fill_in_ada_prototype (struct symbol *func)
       case LOC_REGPARM_ADDR:
 	TYPE_FIELD_BITPOS (ftype, nargs) = nargs;
 	TYPE_FIELD_BITSIZE (ftype, nargs) = 0;
+	TYPE_FIELD_STATIC_KIND (ftype, nargs) = 0;
 	TYPE_FIELD_TYPE (ftype, nargs) =
 	  lookup_pointer_type (check_typedef (SYMBOL_TYPE (sym)));
-	TYPE_FIELD_NAME (ftype, nargs) = SYMBOL_NAME (sym);
+	TYPE_FIELD_NAME (ftype, nargs) = DEPRECATED_SYMBOL_NAME (sym);
 	nargs += 1;
 
 	break;
@@ -4200,10 +4146,12 @@ fill_in_ada_prototype (struct symbol *func)
       case LOC_REGPARM:
       case LOC_LOCAL_ARG:
       case LOC_BASEREG_ARG:
+      case LOC_COMPUTED_ARG:
 	TYPE_FIELD_BITPOS (ftype, nargs) = nargs;
 	TYPE_FIELD_BITSIZE (ftype, nargs) = 0;
+	TYPE_FIELD_STATIC_KIND (ftype, nargs) = 0;
 	TYPE_FIELD_TYPE (ftype, nargs) = check_typedef (SYMBOL_TYPE (sym));
-	TYPE_FIELD_NAME (ftype, nargs) = SYMBOL_NAME (sym);
+	TYPE_FIELD_NAME (ftype, nargs) = DEPRECATED_SYMBOL_NAME (sym);
 	nargs += 1;
 
 	break;
@@ -4377,10 +4325,10 @@ ada_finish_decode_line_1 (char **spec, struct symtab *file_table,
   n_matches = 0;
   if (lower_name != NULL)
     n_matches = ada_lookup_symbol_list (ada_mangle (lower_name), block,
-					VAR_NAMESPACE, &symbols, &blocks);
+					VAR_DOMAIN, &symbols, &blocks);
   if (n_matches == 0)
     n_matches = ada_lookup_symbol_list (unquoted_name, block,
-					VAR_NAMESPACE, &symbols, &blocks);
+					VAR_DOMAIN, &symbols, &blocks);
   if (n_matches == 0 && line_num >= 0)
     error ("No line number information found for %s.", unquoted_name);
   else if (n_matches == 0)
@@ -4472,7 +4420,7 @@ ada_finish_decode_line_1 (char **spec, struct symtab *file_table,
       for (i = 0; i < selected.nelts; i += 1)
 	(*canonical)[i] =
 	  extended_canonical_line_spec (selected.sals[i],
-					SYMBOL_SOURCE_NAME (symbols[i]));
+					SYMBOL_PRINT_NAME (symbols[i]));
     }
 
   discard_cleanups (old_chain);
@@ -4506,7 +4454,7 @@ find_sal_from_funcs_and_line (const char *filename, int line_num,
 
     QUIT;
 
-    if (!STREQ (filename, s->filename))
+    if (!DEPRECATED_STREQ (filename, s->filename))
       continue;
     l = LINETABLE (s);
     ind = find_line_in_linetable (l, line_num, symbols, nsyms, &exact);
@@ -4626,7 +4574,7 @@ nearest_line_number_in_linetable (struct linetable *linetable, int line_num)
 	      else
 		{
 		  struct symbol *sym =
-		    standard_lookup (func_name, VAR_NAMESPACE);
+		    standard_lookup (func_name, VAR_DOMAIN);
 		  if (is_plausible_func_for_line (sym, line_num))
 		    best = item->line;
 		  else
@@ -4700,7 +4648,7 @@ find_next_line_in_linetable (struct linetable *linetable, int line_num,
 	      if (item->line == line_num)
 		{
 		  struct symbol *sym =
-		    standard_lookup (func_name, VAR_NAMESPACE);
+		    standard_lookup (func_name, VAR_DOMAIN);
 		  if (is_plausible_func_for_line (sym, starting_line))
 		    return i;
 		  else
@@ -4749,21 +4697,19 @@ debug_print_lines (struct linetable *lt)
 static void
 debug_print_block (struct block *b)
 {
-  int i;
-  struct symbol *i;
+  struct dict_iterator iter;
+  struct symbol *sym;
 
   fprintf (stderr, "Block: %p; [0x%lx, 0x%lx]",
 	   b, BLOCK_START (b), BLOCK_END (b));
   if (BLOCK_FUNCTION (b) != NULL)
-    fprintf (stderr, " Function: %s", SYMBOL_NAME (BLOCK_FUNCTION (b)));
+    fprintf (stderr, " Function: %s", DEPRECATED_SYMBOL_NAME (BLOCK_FUNCTION (b)));
   fprintf (stderr, "\n");
   fprintf (stderr, "\t    Superblock: %p\n", BLOCK_SUPERBLOCK (b));
   fprintf (stderr, "\t    Symbols:");
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
   {
-    if (i > 0 && i % 4 == 0)
-      fprintf (stderr, "\n\t\t    ");
-    fprintf (stderr, " %s", SYMBOL_NAME (sym));
+    fprintf (stderr, " %s", DEPRECATED_SYMBOL_NAME (sym));
   }
   fprintf (stderr, "\n");
 }
@@ -4806,7 +4752,7 @@ read_all_symtabs (const char *filename)
   {
     QUIT;
 
-    if (STREQ (filename, ps->filename))
+    if (DEPRECATED_STREQ (filename, ps->filename))
       PSYMTAB_TO_SYMTAB (ps);
   }
 }
@@ -4837,7 +4783,7 @@ all_sals_for_line (const char *filename, int line_num, char ***canonical)
 
     QUIT;
 
-    if (!STREQ (s->filename, filename))
+    if (!DEPRECATED_STREQ (s->filename, filename))
       continue;
 
     target_line_num =
@@ -5015,9 +4961,9 @@ begin_command (char *args, int from_tty)
 int
 is_ada_runtime_file (char *filename)
 {
-  return (STREQN (filename, "s-", 2) ||
-	  STREQN (filename, "a-", 2) ||
-	  STREQN (filename, "g-", 2) || STREQN (filename, "i-", 2));
+  return (DEPRECATED_STREQN (filename, "s-", 2) ||
+	  DEPRECATED_STREQN (filename, "a-", 2) ||
+	  DEPRECATED_STREQN (filename, "g-", 2) || DEPRECATED_STREQN (filename, "i-", 2));
 }
 
 /* find the first frame that contains debugging information and that is not
@@ -5030,17 +4976,7 @@ find_printable_frame (struct frame_info *fi, int level)
 
   for (; fi != NULL; level += 1, fi = get_prev_frame (fi))
     {
-      /* If fi is not the innermost frame, that normally means that fi->pc
-         points to *after* the call instruction, and we want to get the line
-         containing the call, never the next line.  But if the next frame is
-         a signal_handler_caller or a dummy frame, then the next frame was
-         not entered as the result of a call, and we want to get the line
-         containing fi->pc.  */
-      sal =
-	find_pc_line (fi->pc,
-		      fi->next != NULL
-		      && !fi->next->signal_handler_caller
-		      && !frame_in_dummy (fi->next));
+      find_frame_sal (fi, &sal);
       if (sal.symtab && !is_ada_runtime_file (sal.symtab->filename))
 	{
 #if defined(__alpha__) && defined(__osf__) && !defined(VXWORKS_TARGET)
@@ -5048,10 +4984,10 @@ find_printable_frame (struct frame_info *fi, int level)
 	     from finding the right frame */
 
 	  if (sal.symtab->objfile &&
-	      STREQ (sal.symtab->objfile->name, "/usr/shlib/libpthread.so"))
+	      DEPRECATED_STREQ (sal.symtab->objfile->name, "/usr/shlib/libpthread.so"))
 	    continue;
 #endif
-	  selected_frame = fi;
+	  deprecated_selected_frame = fi;
 	  break;
 	}
     }
@@ -5062,7 +4998,6 @@ find_printable_frame (struct frame_info *fi, int level)
 void
 ada_report_exception_break (struct breakpoint *b)
 {
-#ifdef UI_OUT
   /* FIXME: break_on_exception should be defined in breakpoint.h */
   /*  if (b->break_on_exception == 1)
      {
@@ -5100,7 +5035,6 @@ ada_report_exception_break (struct breakpoint *b)
    else if (b->break_on_exception == 3)
    fputs_filtered ("on assert failure", gdb_stdout);
  */
-#endif
 }
 
 int
@@ -5111,7 +5045,7 @@ ada_is_exception_sym (struct symbol *sym)
   return (SYMBOL_CLASS (sym) != LOC_TYPEDEF
 	  && SYMBOL_CLASS (sym) != LOC_BLOCK
 	  && SYMBOL_CLASS (sym) != LOC_CONST
-	  && type_name != NULL && STREQ (type_name, "exception"));
+	  && type_name != NULL && DEPRECATED_STREQ (type_name, "exception"));
 }
 
 int
@@ -5134,7 +5068,7 @@ ada_breakpoint_rewrite (char *arg, int *break_on_exceptionp)
   *break_on_exceptionp = 0;
   /* FIXME: language_ada should be defined in defs.h */
   /*  if (current_language->la_language == language_ada
-     && STREQN (arg, "exception", 9) &&
+     && DEPRECATED_STREQN (arg, "exception", 9) &&
      (arg[9] == ' ' || arg[9] == '\t' || arg[9] == '\0'))
      {
      char *tok, *end_tok;
@@ -5159,7 +5093,7 @@ ada_breakpoint_rewrite (char *arg, int *break_on_exceptionp)
      make_cleanup (xfree, arg);
      if (toklen == 0)
      strcpy (arg, "__gnat_raise_nodefer_with_msg");
-     else if (STREQN (tok, "unhandled", toklen))
+     else if (DEPRECATED_STREQN (tok, "unhandled", toklen))
      {
      *break_on_exceptionp = 2;
      strcpy (arg, "__gnat_unhandled_exception");
@@ -5172,7 +5106,7 @@ ada_breakpoint_rewrite (char *arg, int *break_on_exceptionp)
      }
      }
      else if (current_language->la_language == language_ada
-     && STREQN (arg, "assert", 6) &&
+     && DEPRECATED_STREQN (arg, "assert", 6) &&
      (arg[6] == ' ' || arg[6] == '\t' || arg[6] == '\0'))
      {
      char *tok = arg + 6;
@@ -5204,7 +5138,7 @@ ada_is_ignored_field (struct type *type, int field_num)
     {
       const char *name = TYPE_FIELD_NAME (type, field_num);
       return (name == NULL
-	      || (name[0] == '_' && !STREQN (name, "_parent", 7)));
+	      || (name[0] == '_' && !DEPRECATED_STREQN (name, "_parent", 7)));
     }
 }
 
@@ -5263,7 +5197,7 @@ ada_is_parent_field (struct type *type, int field_num)
 {
   const char *name = TYPE_FIELD_NAME (check_typedef (type), field_num);
   return (name != NULL &&
-	  (STREQN (name, "PARENT", 6) || STREQN (name, "_parent", 7)));
+	  (DEPRECATED_STREQN (name, "PARENT", 6) || DEPRECATED_STREQN (name, "_parent", 7)));
 }
 
 /* True iff field number FIELD_NUM of structure type TYPE is a 
@@ -5277,8 +5211,8 @@ ada_is_wrapper_field (struct type *type, int field_num)
 {
   const char *name = TYPE_FIELD_NAME (type, field_num);
   return (name != NULL
-	  && (STREQN (name, "PARENT", 6) || STREQ (name, "REP")
-	      || STREQN (name, "_parent", 7)
+	  && (DEPRECATED_STREQN (name, "PARENT", 6) || DEPRECATED_STREQ (name, "REP")
+	      || DEPRECATED_STREQN (name, "_parent", 7)
 	      || name[0] == 'S' || name[0] == 'R' || name[0] == 'O'));
 }
 
@@ -5349,7 +5283,7 @@ ada_variant_discrim_name (struct type *type0)
   for (discrim_end = name + strlen (name) - 6; discrim_end != name;
        discrim_end -= 1)
     {
-      if (STREQN (discrim_end, "___XVN", 6))
+      if (DEPRECATED_STREQN (discrim_end, "___XVN", 6))
 	break;
     }
   if (discrim_end == name)
@@ -5360,7 +5294,7 @@ ada_variant_discrim_name (struct type *type0)
     {
       if (discrim_start == name + 1)
 	return "";
-      if ((discrim_start > name + 3 && STREQN (discrim_start - 3, "___", 3))
+      if ((discrim_start > name + 3 && DEPRECATED_STREQN (discrim_start - 3, "___", 3))
 	  || discrim_start[-1] == '.')
 	break;
     }
@@ -5844,7 +5778,7 @@ field_alignment (struct type *type, int f)
   else
     align_offset = len - 1;
 
-  if (align_offset < 7 || !STREQN ("___XV", name + align_offset - 6, 5))
+  if (align_offset < 7 || !DEPRECATED_STREQN ("___XV", name + align_offset - 6, 5))
     return TARGET_CHAR_BIT;
 
   return atoi (name + align_offset) * TARGET_CHAR_BIT;
@@ -5856,11 +5790,11 @@ ada_find_any_type (const char *name)
 {
   struct symbol *sym;
 
-  sym = standard_lookup (name, VAR_NAMESPACE);
+  sym = standard_lookup (name, VAR_DOMAIN);
   if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
     return SYMBOL_TYPE (sym);
 
-  sym = standard_lookup (name, STRUCT_NAMESPACE);
+  sym = standard_lookup (name, STRUCT_DOMAIN);
   if (sym != NULL)
     return SYMBOL_TYPE (sym);
 
@@ -5948,7 +5882,7 @@ dynamic_template_type (struct type *type)
   else
     {
       int len = strlen (ada_type_name (type));
-      if (len > 6 && STREQ (ada_type_name (type) + len - 6, "___XVE"))
+      if (len > 6 && DEPRECATED_STREQ (ada_type_name (type) + len - 6, "___XVE"))
 	return type;
       else
 	return ada_find_parallel_type (type, "___XVE");
@@ -6046,6 +5980,7 @@ template_to_fixed_record_type (struct type *type, char *valaddr,
        * rediscover why we needed field_offset and fix it properly. */
       TYPE_FIELD_BITPOS (rtype, f) = off;
       TYPE_FIELD_BITSIZE (rtype, f) = 0;
+      TYPE_FIELD_STATIC_KIND (rtype, f) = 0;
 
       if (ada_is_variant_part (type, f))
 	{
@@ -6149,6 +6084,7 @@ template_to_static_fixed_type (struct type *templ_type)
     {
       TYPE_FIELD_BITPOS (type, f) = 0;
       TYPE_FIELD_BITSIZE (type, f) = 0;
+      TYPE_FIELD_STATIC_KIND (type, f) = 0;
 
       if (is_dynamic_field (templ_type, f))
 	{
@@ -6218,6 +6154,7 @@ to_record_with_fixed_variant_part (struct type *type, char *valaddr,
       TYPE_FIELD_TYPE (rtype, nfields - 1) = branch_type;
       TYPE_FIELD_NAME (rtype, nfields - 1) = "S";
       TYPE_FIELD_BITSIZE (rtype, nfields - 1) = 0;
+      TYPE_FIELD_STATIC_KIND (rtype, nfields - 1) = 0;
       TYPE_LENGTH (rtype) += TYPE_LENGTH (branch_type);
       -TYPE_LENGTH (TYPE_FIELD_TYPE (type, nfields - 1));
     }
@@ -6610,8 +6547,8 @@ ada_is_character_type (struct type *type)
     && (TYPE_CODE (type) == TYPE_CODE_CHAR
 	|| TYPE_CODE (type) == TYPE_CODE_INT
 	|| TYPE_CODE (type) == TYPE_CODE_RANGE)
-    && (STREQ (name, "character") || STREQ (name, "wide_character")
-	|| STREQ (name, "unsigned char"));
+    && (DEPRECATED_STREQ (name, "character") || DEPRECATED_STREQ (name, "wide_character")
+	|| DEPRECATED_STREQ (name, "unsigned char"));
 }
 
 /* True if TYPE appears to be an Ada string type. */
@@ -6644,7 +6581,7 @@ ada_is_aligner_type (struct type *type)
   CHECK_TYPEDEF (type);
   return (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	  && TYPE_NFIELDS (type) == 1
-	  && STREQ (TYPE_FIELD_NAME (type, 0), "F"));
+	  && DEPRECATED_STREQ (TYPE_FIELD_NAME (type, 0), "F"));
 }
 
 /* If there is an ___XVS-convention type parallel to SUBTYPE, return
@@ -7731,7 +7668,7 @@ ada_is_vax_floating_type (struct type *type)
     name_len > 6
     && (TYPE_CODE (type) == TYPE_CODE_INT
 	|| TYPE_CODE (type) == TYPE_CODE_RANGE)
-    && STREQN (ada_type_name (type) + name_len - 6, "___XF", 5);
+    && DEPRECATED_STREQN (ada_type_name (type) + name_len - 6, "___XF", 5);
 }
 
 /* The type of special VAX floating-point type this is, assuming
@@ -7771,7 +7708,7 @@ ada_vax_float_print_function (struct type *type)
    not alter *PX and *PNEW_K if unsuccessful. */
 
 static int
-scan_discrim_bound (char *, int k, struct value *dval, LONGEST * px,
+scan_discrim_bound (char *str, int k, struct value *dval, LONGEST * px,
 		    int *pnew_k)
 {
   static char *bound_buffer = NULL;
@@ -7819,7 +7756,7 @@ get_var_value (char *name, char *err_msg)
   int nsyms;
 
   nsyms =
-    ada_lookup_symbol_list (name, get_selected_block (NULL), VAR_NAMESPACE,
+    ada_lookup_symbol_list (name, get_selected_block (NULL), VAR_DOMAIN,
 			    &syms, &blocks);
 
   if (nsyms != 1)
@@ -8079,6 +8016,10 @@ const struct language_defn ada_language_defn = {
   ada_print_type,		/* Print a type using appropriate syntax */
   ada_val_print,		/* Print a value using appropriate syntax */
   ada_value_print,		/* Print a top-level value */
+  NULL,				/* Language specific skip_trampoline */
+  value_of_this,		/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal  */
+  NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
 #if 0
   {"8#%lo#", "8#", "o", "#"},	/* Octal format info */
@@ -8094,6 +8035,7 @@ const struct language_defn ada_language_defn = {
   1,				/* c-style arrays (FIXME?) */
   0,				/* String lower bound (FIXME?) */
   &builtin_type_ada_char,
+  default_word_break_characters,
   LANG_MAGIC
 };
 

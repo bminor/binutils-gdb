@@ -1,32 +1,31 @@
 /* m32r exception, interrupt, and trap (EIT) support
-   Copyright (C) 1998 Free Software Foundation, Inc.
+   Copyright (C) 1998, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
-This file is part of GDB, the GNU debugger.
+   This file is part of GDB, the GNU debugger.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sim-main.h"
 #include "targ-vals.h"
 
-/* The semantic code invokes this for invalid (unrecognized) instructions.
-   CIA is the address with the invalid insn.
-   VPC is the virtual pc of the following insn.  */
+#define TRAP_FLUSH_CACHE 12
+/* The semantic code invokes this for invalid (unrecognized) instructions.  */
 
 SEM_PC
-sim_engine_invalid_insn (SIM_CPU *current_cpu, IADDR cia, SEM_PC vpc)
+sim_engine_invalid_insn (SIM_CPU *current_cpu, IADDR cia, SEM_PC pc)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
 
@@ -48,7 +47,8 @@ sim_engine_invalid_insn (SIM_CPU *current_cpu, IADDR cia, SEM_PC vpc)
   else
 #endif
     sim_engine_halt (sd, current_cpu, NULL, cia, sim_stopped, SIM_SIGILL);
-  return vpc;
+
+  return pc;
 }
 
 /* Process an address exception.  */
@@ -60,21 +60,30 @@ m32r_core_signal (SIM_DESC sd, SIM_CPU *current_cpu, sim_cia cia,
 {
   if (STATE_ENVIRONMENT (sd) == OPERATING_ENVIRONMENT)
     {
-      a_m32r_h_cr_set (current_cpu, H_CR_BBPC,
-		       a_m32r_h_cr_get (current_cpu, H_CR_BPC));
-      if (MACH_NUM (CPU_MACH (current_cpu)) == MACH_M32R)
+      m32rbf_h_cr_set (current_cpu, H_CR_BBPC,
+		       m32rbf_h_cr_get (current_cpu, H_CR_BPC));
+      switch (MACH_NUM (CPU_MACH (current_cpu)))
 	{
+	case MACH_M32R:
 	  m32rbf_h_bpsw_set (current_cpu, m32rbf_h_psw_get (current_cpu));
-	  /* sm not changed */
+	  /* sm not changed.  */
 	  m32rbf_h_psw_set (current_cpu, m32rbf_h_psw_get (current_cpu) & 0x80);
+	  break;
+	case MACH_M32RX:
+  	  m32rxf_h_bpsw_set (current_cpu, m32rxf_h_psw_get (current_cpu));
+  	  /* sm not changed.  */
+  	  m32rxf_h_psw_set (current_cpu, m32rxf_h_psw_get (current_cpu) & 0x80);
+	  break;
+	case MACH_M32R2:
+	  m32r2f_h_bpsw_set (current_cpu, m32r2f_h_psw_get (current_cpu));
+	  /* sm not changed.  */
+	  m32r2f_h_psw_set (current_cpu, m32r2f_h_psw_get (current_cpu) & 0x80);
+	  break;
+	default:
+	  abort ();
 	}
-      else
-	{
-	  m32rxf_h_bpsw_set (current_cpu, m32rxf_h_psw_get (current_cpu));
-	  /* sm not changed */
-	  m32rxf_h_psw_set (current_cpu, m32rxf_h_psw_get (current_cpu) & 0x80);
-	}
-      a_m32r_h_cr_set (current_cpu, H_CR_BPC, cia);
+	    
+      m32rbf_h_cr_set (current_cpu, H_CR_BPC, cia);
 
       sim_engine_restart (CPU_STATE (current_cpu), current_cpu, NULL,
 			  EIT_ADDR_EXCP_ADDR);
@@ -131,8 +140,10 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
   if (STATE_ENVIRONMENT (sd) == OPERATING_ENVIRONMENT)
     {
       /* The new pc is the trap vector entry.
-	 We assume there's a branch there to some handler.  */
-      USI new_pc = EIT_TRAP_BASE_ADDR + num * 4;
+	 We assume there's a branch there to some handler.
+         Use cr5 as EVB (EIT Vector Base) register.  */
+      /* USI new_pc = EIT_TRAP_BASE_ADDR + num * 4; */
+      USI new_pc = m32rbf_h_cr_get (current_cpu, 5) + 0x40 + num * 4;
       return new_pc;
     }
 
@@ -143,10 +154,10 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	CB_SYSCALL s;
 
 	CB_SYSCALL_INIT (&s);
-	s.func = a_m32r_h_gr_get (current_cpu, 0);
-	s.arg1 = a_m32r_h_gr_get (current_cpu, 1);
-	s.arg2 = a_m32r_h_gr_get (current_cpu, 2);
-	s.arg3 = a_m32r_h_gr_get (current_cpu, 3);
+	s.func = m32rbf_h_gr_get (current_cpu, 0);
+	s.arg1 = m32rbf_h_gr_get (current_cpu, 1);
+	s.arg2 = m32rbf_h_gr_get (current_cpu, 2);
+	s.arg3 = m32rbf_h_gr_get (current_cpu, 3);
 
 	if (s.func == TARGET_SYS_exit)
 	  {
@@ -158,9 +169,9 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	s.read_mem = syscall_read_mem;
 	s.write_mem = syscall_write_mem;
 	cb_syscall (cb, &s);
-	a_m32r_h_gr_set (current_cpu, 2, s.errcode);
-	a_m32r_h_gr_set (current_cpu, 0, s.result);
-	a_m32r_h_gr_set (current_cpu, 1, s.result2);
+	m32rbf_h_gr_set (current_cpu, 2, s.errcode);
+	m32rbf_h_gr_set (current_cpu, 0, s.result);
+	m32rbf_h_gr_set (current_cpu, 1, s.result2);
 	break;
       }
 
@@ -169,9 +180,15 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 		       sim_stopped, SIM_SIGTRAP);
       break;
 
+    case TRAP_FLUSH_CACHE:
+      /* Do nothing.  */
+      break;
+
     default :
       {
-	USI new_pc = EIT_TRAP_BASE_ADDR + num * 4;
+	/* USI new_pc = EIT_TRAP_BASE_ADDR + num * 4; */
+        /* Use cr5 as EVB (EIT Vector Base) register.  */
+        USI new_pc = m32rbf_h_cr_get (current_cpu, 5) + 0x40 + num * 4;
 	return new_pc;
       }
     }

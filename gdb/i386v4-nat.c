@@ -139,7 +139,7 @@ supply_fpregset (fpregset_t *fpregsetp)
   if (FP0_REGNUM == 0)
     return;
 
-  i387_supply_fsave ((char *) fpregsetp);
+  i387_supply_fsave (current_regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in

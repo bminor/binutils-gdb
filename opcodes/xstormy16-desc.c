@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -32,6 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "xstormy16-opc.h"
 #include "opintl.h"
 #include "libiberty.h"
+#include "xregex.h"
 
 /* Attributes.  */
 
@@ -103,7 +104,7 @@ const CGEN_ATTR_TABLE xstormy16_cgen_insn_attr_table[] =
   { "SKIP-CTI", &bool_attr[0], &bool_attr[0] },
   { "DELAY-SLOT", &bool_attr[0], &bool_attr[0] },
   { "RELAXABLE", &bool_attr[0], &bool_attr[0] },
-  { "RELAX", &bool_attr[0], &bool_attr[0] },
+  { "RELAXED", &bool_attr[0], &bool_attr[0] },
   { "NO-DIS", &bool_attr[0], &bool_attr[0] },
   { "PBB", &bool_attr[0], &bool_attr[0] },
   { 0, 0, 0 }
@@ -296,6 +297,7 @@ const CGEN_IFLD xstormy16_cgen_ifld_table[] =
   { XSTORMY16_F_REL12A, "f-rel12a", 0, 32, 4, 11, { 0|A(PCREL_ADDR), { (1<<MACH_BASE) } }  },
   { XSTORMY16_F_ABS24_1, "f-abs24-1", 0, 32, 8, 8, { 0, { (1<<MACH_BASE) } }  },
   { XSTORMY16_F_ABS24_2, "f-abs24-2", 0, 32, 16, 16, { 0, { (1<<MACH_BASE) } }  },
+  { XSTORMY16_F_ABS24, "f-abs24", 0, 0, 0, 0,{ 0|A(ABS_ADDR)|A(VIRTUAL), { (1<<MACH_BASE) } }  },
   { 0, 0, 0, 0, 0, 0, {0, {0}} }
 };
 
@@ -312,9 +314,9 @@ const CGEN_MAYBE_MULTI_IFLD XSTORMY16_F_ABS24_MULTI_IFIELD [];
 
 const CGEN_MAYBE_MULTI_IFLD XSTORMY16_F_ABS24_MULTI_IFIELD [] =
 {
-    { 0, &(xstormy16_cgen_ifld_table[34]) },
-    { 0, &(xstormy16_cgen_ifld_table[35]) },
-    {0,0}
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_ABS24_1] } },
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_ABS24_2] } },
+    { 0, { (const PTR) 0 } }
 };
 
 /* The operand table.  */
@@ -334,161 +336,164 @@ const CGEN_OPERAND xstormy16_cgen_operand_table[] =
 {
 /* pc: program counter */
   { "pc", XSTORMY16_OPERAND_PC, HW_H_PC, 0, 0,
-    { 0, &(xstormy16_cgen_ifld_table[0]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_NIL] } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* psw-z8:  */
   { "psw-z8", XSTORMY16_OPERAND_PSW_Z8, HW_H_Z8, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* psw-z16:  */
   { "psw-z16", XSTORMY16_OPERAND_PSW_Z16, HW_H_Z16, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* psw-cy:  */
   { "psw-cy", XSTORMY16_OPERAND_PSW_CY, HW_H_CY, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* psw-hc:  */
   { "psw-hc", XSTORMY16_OPERAND_PSW_HC, HW_H_HC, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* psw-ov:  */
   { "psw-ov", XSTORMY16_OPERAND_PSW_OV, HW_H_OV, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* psw-pt:  */
   { "psw-pt", XSTORMY16_OPERAND_PSW_PT, HW_H_PT, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* psw-s:  */
   { "psw-s", XSTORMY16_OPERAND_PSW_S, HW_H_S, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* Rd: general register destination */
   { "Rd", XSTORMY16_OPERAND_RD, HW_H_GR, 12, 4,
-    { 0, &(xstormy16_cgen_ifld_table[2]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_RD] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* Rdm: general register destination */
   { "Rdm", XSTORMY16_OPERAND_RDM, HW_H_GR, 13, 3,
-    { 0, &(xstormy16_cgen_ifld_table[3]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_RDM] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* Rm: general register for memory */
   { "Rm", XSTORMY16_OPERAND_RM, HW_H_GR, 4, 3,
-    { 0, &(xstormy16_cgen_ifld_table[4]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_RM] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* Rs: general register source */
   { "Rs", XSTORMY16_OPERAND_RS, HW_H_GR, 8, 4,
-    { 0, &(xstormy16_cgen_ifld_table[5]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_RS] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* Rb: base register */
   { "Rb", XSTORMY16_OPERAND_RB, HW_H_RB, 17, 3,
-    { 0, &(xstormy16_cgen_ifld_table[6]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_RB] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* Rbj: base register for jump */
   { "Rbj", XSTORMY16_OPERAND_RBJ, HW_H_RBJ, 11, 1,
-    { 0, &(xstormy16_cgen_ifld_table[7]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_RBJ] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* bcond2: branch condition opcode */
   { "bcond2", XSTORMY16_OPERAND_BCOND2, HW_H_BRANCHCOND, 4, 4,
-    { 0, &(xstormy16_cgen_ifld_table[9]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_OP2] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ws2: word size opcode */
   { "ws2", XSTORMY16_OPERAND_WS2, HW_H_WORDSIZE, 7, 1,
-    { 0, &(xstormy16_cgen_ifld_table[11]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_OP2M] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* bcond5: branch condition opcode */
   { "bcond5", XSTORMY16_OPERAND_BCOND5, HW_H_BRANCHCOND, 16, 4,
-    { 0, &(xstormy16_cgen_ifld_table[18]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_OP5] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* imm2: 2 bit unsigned immediate */
   { "imm2", XSTORMY16_OPERAND_IMM2, HW_H_UINT, 10, 2,
-    { 0, &(xstormy16_cgen_ifld_table[21]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_IMM2] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* imm3: 3 bit unsigned immediate */
   { "imm3", XSTORMY16_OPERAND_IMM3, HW_H_UINT, 4, 3,
-    { 0, &(xstormy16_cgen_ifld_table[22]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_IMM3] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* imm3b: 3 bit unsigned immediate for bit tests */
   { "imm3b", XSTORMY16_OPERAND_IMM3B, HW_H_UINT, 17, 3,
-    { 0, &(xstormy16_cgen_ifld_table[23]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_IMM3B] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* imm4: 4 bit unsigned immediate */
   { "imm4", XSTORMY16_OPERAND_IMM4, HW_H_UINT, 8, 4,
-    { 0, &(xstormy16_cgen_ifld_table[24]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_IMM4] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* imm8: 8 bit unsigned immediate */
   { "imm8", XSTORMY16_OPERAND_IMM8, HW_H_UINT, 8, 8,
-    { 0, &(xstormy16_cgen_ifld_table[25]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_IMM8] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* imm8small: 8 bit unsigned immediate */
   { "imm8small", XSTORMY16_OPERAND_IMM8SMALL, HW_H_UINT, 8, 8,
-    { 0, &(xstormy16_cgen_ifld_table[25]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_IMM8] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* imm12: 12 bit signed immediate */
   { "imm12", XSTORMY16_OPERAND_IMM12, HW_H_SINT, 20, 12,
-    { 0, &(xstormy16_cgen_ifld_table[26]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_IMM12] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* imm16: 16 bit immediate */
   { "imm16", XSTORMY16_OPERAND_IMM16, HW_H_UINT, 16, 16,
-    { 0, &(xstormy16_cgen_ifld_table[27]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_IMM16] } }, 
     { 0|A(SIGN_OPT), { (1<<MACH_BASE) } }  },
 /* lmem8: 8 bit unsigned immediate low memory */
   { "lmem8", XSTORMY16_OPERAND_LMEM8, HW_H_UINT, 8, 8,
-    { 0, &(xstormy16_cgen_ifld_table[28]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_LMEM8] } }, 
     { 0|A(ABS_ADDR), { (1<<MACH_BASE) } }  },
 /* hmem8: 8 bit unsigned immediate high memory */
   { "hmem8", XSTORMY16_OPERAND_HMEM8, HW_H_UINT, 8, 8,
-    { 0, &(xstormy16_cgen_ifld_table[29]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_HMEM8] } }, 
     { 0|A(ABS_ADDR), { (1<<MACH_BASE) } }  },
 /* rel8-2: 8 bit relative address */
   { "rel8-2", XSTORMY16_OPERAND_REL8_2, HW_H_UINT, 8, 8,
-    { 0, &(xstormy16_cgen_ifld_table[30]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_REL8_2] } }, 
     { 0|A(PCREL_ADDR), { (1<<MACH_BASE) } }  },
 /* rel8-4: 8 bit relative address */
   { "rel8-4", XSTORMY16_OPERAND_REL8_4, HW_H_UINT, 8, 8,
-    { 0, &(xstormy16_cgen_ifld_table[31]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_REL8_4] } }, 
     { 0|A(PCREL_ADDR), { (1<<MACH_BASE) } }  },
 /* rel12: 12 bit relative address */
   { "rel12", XSTORMY16_OPERAND_REL12, HW_H_UINT, 20, 12,
-    { 0, &(xstormy16_cgen_ifld_table[32]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_REL12] } }, 
     { 0|A(PCREL_ADDR), { (1<<MACH_BASE) } }  },
 /* rel12a: 12 bit relative address */
   { "rel12a", XSTORMY16_OPERAND_REL12A, HW_H_UINT, 4, 11,
-    { 0, &(xstormy16_cgen_ifld_table[33]) }, 
+    { 0, { (const PTR) &xstormy16_cgen_ifld_table[XSTORMY16_F_REL12A] } }, 
     { 0|A(PCREL_ADDR), { (1<<MACH_BASE) } }  },
 /* abs24: 24 bit absolute address */
   { "abs24", XSTORMY16_OPERAND_ABS24, HW_H_UINT, 8, 24,
-    { 2, &(XSTORMY16_F_ABS24_MULTI_IFIELD[0]) }, 
+    { 2, { (const PTR) &XSTORMY16_F_ABS24_MULTI_IFIELD[0] } }, 
     { 0|A(ABS_ADDR)|A(VIRTUAL), { (1<<MACH_BASE) } }  },
 /* psw: program status word */
   { "psw", XSTORMY16_OPERAND_PSW, HW_H_GR, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* Rpsw: N0-N3 of the program status word */
   { "Rpsw", XSTORMY16_OPERAND_RPSW, HW_H_RPSW, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* sp: stack pointer */
   { "sp", XSTORMY16_OPERAND_SP, HW_H_GR, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* R0: R0 */
   { "R0", XSTORMY16_OPERAND_R0, HW_H_GR, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* R1: R1 */
   { "R1", XSTORMY16_OPERAND_R1, HW_H_GR, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* R2: R2 */
   { "R2", XSTORMY16_OPERAND_R2, HW_H_GR, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* R8: R8 */
   { "R8", XSTORMY16_OPERAND_R8, HW_H_GR, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
-  { 0, 0, 0, 0, 0, {0, {0}} }
+/* sentinel */
+  { 0, 0, 0, 0, 0,
+    { 0, { (const PTR) 0 } },
+    { 0, { 0 } } }
 };
 
 #undef A
@@ -1099,6 +1104,26 @@ static const CGEN_IBASE xstormy16_cgen_insn_table[MAX_INSNS] =
     XSTORMY16_INSN_DIV, "div", "div", 16,
     { 0, { (1<<MACH_BASE) } }
   },
+/* sdiv */
+  {
+    XSTORMY16_INSN_SDIV, "sdiv", "sdiv", 16,
+    { 0, { (1<<MACH_BASE) } }
+  },
+/* sdivlh */
+  {
+    XSTORMY16_INSN_SDIVLH, "sdivlh", "sdivlh", 16,
+    { 0, { (1<<MACH_BASE) } }
+  },
+/* divlh */
+  {
+    XSTORMY16_INSN_DIVLH, "divlh", "divlh", 16,
+    { 0, { (1<<MACH_BASE) } }
+  },
+/* reset */
+  {
+    XSTORMY16_INSN_RESET, "reset", "reset", 16,
+    { 0, { (1<<MACH_BASE) } }
+  },
 /* nop */
   {
     XSTORMY16_INSN_NOP, "nop", "nop", 16,
@@ -1459,7 +1484,7 @@ xstormy16_cgen_cpu_close (cd)
      CGEN_CPU_DESC cd;
 {
   unsigned int i;
-  CGEN_INSN *insns;
+  const CGEN_INSN *insns;
 
   if (cd->macro_insn_table.init_entries)
     {
@@ -1467,7 +1492,7 @@ xstormy16_cgen_cpu_close (cd)
       for (i = 0; i < cd->macro_insn_table.num_init_entries; ++i, ++insns)
 	{
 	  if (CGEN_INSN_RX ((insns)))
-	    regfree(CGEN_INSN_RX (insns));
+	    regfree (CGEN_INSN_RX (insns));
 	}
     }
 
@@ -1477,7 +1502,7 @@ xstormy16_cgen_cpu_close (cd)
       for (i = 0; i < cd->insn_table.num_init_entries; ++i, ++insns)
 	{
 	  if (CGEN_INSN_RX (insns))
-	    regfree(CGEN_INSN_RX (insns));
+	    regfree (CGEN_INSN_RX (insns));
 	}
     }
 

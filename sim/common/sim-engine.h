@@ -63,7 +63,7 @@ extern void sim_engine_halt
  sim_cpu *next_cpu, /* NULL -> succ (last_cpu) or event-mgr */
  sim_cia cia,
  enum sim_stop reason,
- int sigrc);
+ int sigrc) __attribute__ ((noreturn));
 
 /* Halt hook - allow target specific operation when halting a
    simulator */
@@ -116,14 +116,14 @@ extern void sim_engine_abort
  sim_cpu *cpu,
  sim_cia cia,
  const char *fmt,
- ...) __attribute__ ((format (printf, 4, 5)));
+ ...) __attribute__ ((format (printf, 4, 5))) __attribute__ ((noreturn));
 
 extern void sim_engine_vabort
 (SIM_DESC sd,
  sim_cpu *cpu,
  sim_cia cia,
  const char *fmt,
- va_list ap);
+ va_list ap) __attribute__ ((noreturn));
 
 /* No abort hook - when possible this function exits using the
    engine_halt function (and SIM_ENGINE_HALT_HOOK). */

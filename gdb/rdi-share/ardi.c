@@ -154,7 +154,7 @@ static int wait_for_debug_message(int *rcode, int *debugID,
 
   unpack_message(BUFFERDATA((*packet)->pk_buffer), "%w%w%w%w%w", &reason, debugID,
                  OSinfo1, OSinfo2, status);
-  if (reason&0xffffff == ADP_HADPUnrecognised)
+  if ((reason&0xffffff) == ADP_HADPUnrecognised)
     return RDIError_UnimplementedMessage;
   if (reason != (unsigned ) *rcode) {
     if((reason&0xffffff) == ADP_HADPUnrecognised)
@@ -1842,7 +1842,7 @@ int angel_RDI_info(unsigned type, ARMword *arg1, ARMword *arg2) {
     len +=msgbuild(BUFFERDATA(packet->pk_buffer)+20, "%b%b%b%b%b", cpnum,
                    cpd->regdesc[cpnum].rmin, cpd->regdesc[cpnum].rmax,
                    cpd->regdesc[cpnum].nbytes, cpd->regdesc[cpnum].access);
-    if (cpd->regdesc[cpnum].access&0x3 == 0x3){
+    if ((cpd->regdesc[cpnum].access&0x3) == 0x3){
       len += msgbuild(BUFFERDATA(packet->pk_buffer)+25, "%b%b%b%b%b",
                       cpd->regdesc[cpnum].accessinst.cprt.read_b0,
                       cpd->regdesc[cpnum].accessinst.cprt.read_b1,

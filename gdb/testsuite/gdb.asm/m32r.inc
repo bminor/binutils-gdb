@@ -11,7 +11,7 @@
 	.endm
 
 	.macro gdbasm_call subr
-	bl	\subr -> nop
+	bl	\subr
 	.endm
 
 	.macro gdbasm_several_nops
@@ -30,6 +30,7 @@
 
 	comment "crt0 startup"
 	.macro gdbasm_startup
-	ld24 sp,_stack
+	seth sp, #shigh(_stack)
+	add3 sp, sp, #low(_stack)
 	ldi fp,#0
 	.endm

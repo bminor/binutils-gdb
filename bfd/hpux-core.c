@@ -103,12 +103,16 @@ struct hpux_core_struct
 static asection *make_bfd_asection
   PARAMS ((bfd *, const char *, flagword, bfd_size_type, bfd_vma,
 	   unsigned int));
-static const bfd_target *hpux_core_core_file_p PARAMS ((bfd *));
-static char *hpux_core_core_file_failing_command PARAMS ((bfd *));
-static int hpux_core_core_file_failing_signal PARAMS ((bfd *));
-static boolean hpux_core_core_file_matches_executable_p
+static const bfd_target *hpux_core_core_file_p
+  PARAMS ((bfd *));
+static char *hpux_core_core_file_failing_command
+  PARAMS ((bfd *));
+static int hpux_core_core_file_failing_signal
+  PARAMS ((bfd *));
+static bfd_boolean hpux_core_core_file_matches_executable_p
   PARAMS ((bfd *, bfd *));
-static void swap_abort PARAMS ((void));
+static void swap_abort
+  PARAMS ((void));
 
 static asection *
 make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
@@ -323,7 +327,6 @@ hpux_core_core_file_failing_command (abfd)
   return core_command (abfd);
 }
 
-/* ARGSUSED */
 static int
 hpux_core_core_file_failing_signal (abfd)
      bfd *abfd;
@@ -331,13 +334,12 @@ hpux_core_core_file_failing_signal (abfd)
   return core_signal (abfd);
 }
 
-/* ARGSUSED */
-static boolean
+static bfd_boolean
 hpux_core_core_file_matches_executable_p (core_bfd, exec_bfd)
      bfd *core_bfd ATTRIBUTE_UNUSED;
      bfd *exec_bfd ATTRIBUTE_UNUSED;
 {
-  return true;			/* FIXME, We have no way of telling at this point */
+  return TRUE;			/* FIXME, We have no way of telling at this point */
 }
 
 /* If somebody calls any byte-swapping routines, shoot them.  */

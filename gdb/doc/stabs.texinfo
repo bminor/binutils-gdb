@@ -3,13 +3,12 @@
 
 @c @finalout
 
-@ifinfo
-@format
-START-INFO-DIR-ENTRY
-* Stabs: (stabs).                 The "stabs" debugging information format.
-END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
+@c This is a dir.info fragment to support semi-automated addition of
+@c manuals to an info tree.
+@dircategory Programming & development tools.
+@direntry
+* Stabs: (stabs).                 The "stabs" debugging information format.   
+@end direntry
 
 @ifinfo
 This document describes the stabs debugging symbol tables.
@@ -22,12 +21,9 @@ and David MacKenzie.
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
 any later version published by the Free Software Foundation; with no
-Invariant Sections, with the Front-Cover Texts being ``A GNU Manual,''
-and with the Back-Cover Texts as in (a) below.
-
-(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
-this GNU Manual, like GNU software.  Copies published by the Free
-Software Foundation raise funds for GNU development.''
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled ``GNU
+Free Documentation License''.
 @end ifinfo
 
 @setchapternewpage odd
@@ -54,13 +50,9 @@ Contributed by Cygnus Support.
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
 any later version published by the Free Software Foundation; with no
-Invariant Sections, with the Front-Cover Texts being ``A GNU Manual,''
-and with the Back-Cover Texts as in (a) below.
-
-(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
-this GNU Manual, like GNU software.  Copies published by the Free
-Software Foundation raise funds for GNU development.''
-
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled ``GNU
+Free Documentation License''.
 @end titlepage
 
 @ifinfo
@@ -85,6 +77,7 @@ This document describes the stabs debugging format.
 * Stab Sections::		In some object file formats, stabs are
                                 in sections.
 * Symbol Types Index::          Index of symbolic stab symbol type names.
+* GNU Free Documentation License::  The license for this documentation
 @end menu
 @end ifinfo
 
@@ -1754,8 +1747,7 @@ Pascal set type.  @var{type-information} must be a small type such as an
 enumeration or a subrange, and the type is a bitmask whose length is
 specified by the number of elements in @var{type-information}.
 
-In CHILL, @c OBSOLETE
-if it is a bitstring instead of a set, also use the @samp{S}
+In CHILL, if it is a bitstring instead of a set, also use the @samp{S}
 type attribute (@pxref{String Field}).
 
 @item * @var{type-information}
@@ -1956,8 +1948,7 @@ string.  I don't know the difference.
 Pascal Stringptr.  What is this?  This is an AIX feature.
 @end table
 
-Languages, such as CHILL @c OBSOLETE
-which have a string type which is basically
+Languages, such as CHILL which have a string type which is basically
 just an array of characters use the @samp{S} type attribute
 (@pxref{String Field}).
 
@@ -2049,8 +2040,9 @@ definition narrows the symbol type to structure.
 
 Following the @samp{s} type descriptor is the number of bytes the
 structure occupies, followed by a description of each structure element.
-The structure element descriptions are of the form @var{name:type, bit
-offset from the start of the struct, number of bits in the element}.
+The structure element descriptions are of the form
+@samp{@var{name}:@var{type}, @var{bit offset from the start of the
+struct}, @var{number of bits in the element}}.
 
 @c FIXME: phony line break.  Can probably be fixed by using an example
 @c with fewer fields.
@@ -2148,8 +2140,8 @@ the stab describes an enumeration, structure, or union tag.  The type
 descriptor @samp{u}, following the @samp{23=} of the type definition,
 narrows it down to a union type definition.  Following the @samp{u} is
 the number of bytes in the union.  After that is a list of union element
-descriptions.  Their format is @var{name:type, bit offset into the
-union, number of bytes for the element;}.
+descriptions.  Their format is @samp{@var{name}:@var{type}, @var{bit
+offset into the union}, @var{number of bytes for the element};}.
 
 The stab for the union variable is:
 
@@ -2726,11 +2718,22 @@ compiler it can also be used in other contexts.
 @node Member Type Descriptor
 @section The @samp{@@} Type Descriptor
 
-The @samp{@@} type descriptor is for a member (class and variable) type.
-It is followed by type information for the offset basetype, a comma, and
-type information for the type of the field being pointed to.  (FIXME:
-this is acknowledged to be gibberish.  Can anyone say what really goes
-here?).
+The @samp{@@} type descriptor is used together with the @samp{*} type
+descriptor for a pointer-to-non-static-member-data type.  It is followed
+by type information for the class (or union), a comma, and type
+information for the member data.
+
+The following C++ source:
+
+@smallexample
+typedef int A::*int_in_a;
+@end smallexample
+
+generates the following stab:
+
+@smallexample
+.stabs "int_in_a:t20=*21=@@19,1",128,0,0,0
+@end smallexample
 
 Note that there is a conflict between this and type attributes
 (@pxref{String Field}); both use type descriptor @samp{@@}.
@@ -4022,6 +4025,8 @@ symbols in the stabs themselves.  Having the linker relocate them there
 is no more work than having the linker relocate ELF symbols, and it
 solves the problem of having to associate the ELF and stab symbols.
 However, no one has yet designed or implemented such a scheme.
+
+@include fdl.texi
 
 @node Symbol Types Index
 @unnumbered Symbol Types Index

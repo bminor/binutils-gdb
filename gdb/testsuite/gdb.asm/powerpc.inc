@@ -36,6 +36,7 @@
 
 	comment "crt0 startup"
 	.macro gdbasm_startup
+	.p2align 2
 	.endm
 
 	comment "Declare a data variable"

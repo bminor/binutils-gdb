@@ -1,6 +1,7 @@
 /* PPC GNU/Linux native support.
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002,
+   2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +21,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdb_string.h"
 #include "frame.h"
 #include "inferior.h"
 #include "gdbcore.h"
@@ -30,7 +32,7 @@
 #include <signal.h>
 #include <sys/user.h>
 #include <sys/ioctl.h>
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #include <fcntl.h>
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
@@ -125,32 +127,39 @@ ppc_register_u_addr (int regno)
 {
   int u_addr = -1;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  /* NOTE: cagney/2003-11-25: This is the word size used by the ptrace
+     interface, and not the wordsize of the program's ABI.  */
+  int wordsize = sizeof (PTRACE_XFER_TYPE);
 
   /* General purpose registers occupy 1 slot each in the buffer */
   if (regno >= tdep->ppc_gp0_regnum && regno <= tdep->ppc_gplast_regnum )
-    u_addr =  ((PT_R0 + regno) * 4);
+    u_addr =  ((PT_R0 + regno) * wordsize);
 
-  /* Floating point regs: 2 slots each */
+  /* Floating point regs: eight bytes each in both 32- and 64-bit
+     ptrace interfaces.  Thus, two slots each in 32-bit interface, one
+     slot each in 64-bit interface.  */
   if (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM)
-    u_addr = ((PT_FPR0 + (regno - FP0_REGNUM) * 2) * 4);
+    u_addr = (PT_FPR0 * wordsize) + ((regno - FP0_REGNUM) * 8);
 
   /* UISA special purpose registers: 1 slot each */
   if (regno == PC_REGNUM)
-    u_addr = PT_NIP * 4;
+    u_addr = PT_NIP * wordsize;
   if (regno == tdep->ppc_lr_regnum)
-    u_addr = PT_LNK * 4;
+    u_addr = PT_LNK * wordsize;
   if (regno == tdep->ppc_cr_regnum)
-    u_addr = PT_CCR * 4;
+    u_addr = PT_CCR * wordsize;
   if (regno == tdep->ppc_xer_regnum)
-    u_addr = PT_XER * 4;
+    u_addr = PT_XER * wordsize;
   if (regno == tdep->ppc_ctr_regnum)
-    u_addr = PT_CTR * 4;
+    u_addr = PT_CTR * wordsize;
+#ifdef PT_MQ
   if (regno == tdep->ppc_mq_regnum)
-    u_addr = PT_MQ * 4;
+    u_addr = PT_MQ * wordsize;
+#endif
   if (regno == tdep->ppc_ps_regnum)
-    u_addr = PT_MSR * 4;
+    u_addr = PT_MSR * wordsize;
   if (regno == tdep->ppc_fpscr_regnum)
-    u_addr = PT_FPSCR * 4;
+    u_addr = PT_FPSCR * wordsize;
 
   return u_addr;
 }
@@ -171,7 +180,7 @@ fetch_altivec_register (int tid, int regno)
   int offset = 0;
   gdb_vrregset_t regs;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  int vrregsize = REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+  int vrregsize = DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
 
   ret = ptrace (PTRACE_GETVRREGS, tid, 0, &regs);
   if (ret < 0)
@@ -189,7 +198,7 @@ fetch_altivec_register (int tid, int regno)
      vector.  VRSAVE is at the end of the array in a 4 bytes slot, so
      there is no need to define an offset for it.  */
   if (regno == (tdep->ppc_vrsave_regnum - 1))
-    offset = vrregsize - REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+    offset = vrregsize - DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
   
   supply_register (regno,
                    regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
@@ -200,9 +209,9 @@ fetch_register (int tid, int regno)
 {
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   char mess[128];              /* For messages */
-  register int i;
+  int i;
   unsigned int offset;         /* Offset of registers within the u area. */
-  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
 
   if (altivec_register_p (regno))
@@ -223,12 +232,15 @@ fetch_register (int tid, int regno)
 
   if (regaddr == -1)
     {
-      memset (buf, '\0', REGISTER_RAW_SIZE (regno));   /* Supply zeroes */
+      memset (buf, '\0', DEPRECATED_REGISTER_RAW_SIZE (regno));   /* Supply zeroes */
       supply_register (regno, buf);
       return;
     }
 
-  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+  /* Read the raw register using PTRACE_XFER_TYPE sized chunks.  On a
+     32-bit platform, 64-bit floating-point registers will require two
+     transfers.  */
+  for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
       *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, tid,
@@ -241,7 +253,19 @@ fetch_register (int tid, int regno)
 	  perror_with_name (mess);
 	}
     }
-  supply_register (regno, buf);
+
+  /* Now supply the register.  Be careful to map between ptrace's and
+     the current_regcache's idea of the current wordsize.  */
+  if ((regno >= FP0_REGNUM && regno < FP0_REGNUM +32)
+      || gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
+    /* FPs are always 64 bits.  Little endian values are always found
+       at the left-hand end of the register.  */
+    regcache_raw_supply (current_regcache, regno, buf);
+  else
+    /* Big endian register, need to fetch the right-hand end.  */
+    regcache_raw_supply (current_regcache, regno,
+                        (buf + sizeof (PTRACE_XFER_TYPE)
+                         - register_size (current_gdbarch, regno)));
 }
 
 static void
@@ -250,8 +274,8 @@ supply_vrregset (gdb_vrregset_t *vrregsetp)
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int num_of_vrregs = tdep->ppc_vrsave_regnum - tdep->ppc_vr0_regnum + 1;
-  int vrregsize = REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
-  int offset = vrregsize - REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+  int vrregsize = DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+  int offset = vrregsize - DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
 
   for (i = 0; i < num_of_vrregs; i++)
     {
@@ -328,7 +352,7 @@ store_altivec_register (int tid, int regno)
   int offset = 0;
   gdb_vrregset_t regs;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  int vrregsize = REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+  int vrregsize = DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
 
   ret = ptrace (PTRACE_GETVRREGS, tid, 0, &regs);
   if (ret < 0)
@@ -344,7 +368,7 @@ store_altivec_register (int tid, int regno)
   /* VSCR is fetched as a 16 bytes quantity, but it is really 4 bytes
      long on the hardware.  */
   if (regno == (tdep->ppc_vrsave_regnum - 1))
-    offset = vrregsize - REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+    offset = vrregsize - DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
 
   regcache_collect (regno,
                     regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
@@ -360,9 +384,9 @@ store_register (int tid, int regno)
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
   char mess[128];              /* For messages */
-  register int i;
+  int i;
   unsigned int offset;         /* Offset of registers within the u area.  */
-  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
 
   if (altivec_register_p (regno))
     {
@@ -373,8 +397,22 @@ store_register (int tid, int regno)
   if (regaddr == -1)
     return;
 
-  regcache_collect (regno, buf);
-  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+  /* First collect the register value from the regcache.  Be careful
+     to to convert the regcache's wordsize into ptrace's wordsize.  */
+  memset (buf, 0, sizeof buf);
+  if ((regno >= FP0_REGNUM && regno < FP0_REGNUM + 32)
+      || TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+    /* Floats are always 64-bit.  Little endian registers are always
+       at the left-hand end of the register cache.  */
+    regcache_raw_collect (current_regcache, regno, buf);
+  else
+    /* Big-endian registers belong at the right-hand end of the
+       buffer.  */
+    regcache_raw_collect (current_regcache, regno,
+                         (buf + sizeof (PTRACE_XFER_TYPE)
+                          - register_size (current_gdbarch, regno)));
+
+  for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
       ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
@@ -403,8 +441,8 @@ fill_vrregset (gdb_vrregset_t *vrregsetp)
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int num_of_vrregs = tdep->ppc_vrsave_regnum - tdep->ppc_vr0_regnum + 1;
-  int vrregsize = REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
-  int offset = vrregsize - REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+  int vrregsize = DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+  int offset = vrregsize - DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
 
   for (i = 0; i < num_of_vrregs; i++)
     {
@@ -424,7 +462,7 @@ store_altivec_registers (int tid)
   int ret;
   gdb_vrregset_t regs;
 
-  ret = ptrace (PTRACE_GETVRREGS, tid, 0, (int) &regs);
+  ret = ptrace (PTRACE_GETVRREGS, tid, 0, &regs);
   if (ret < 0)
     {
       if (errno == EIO)
@@ -437,7 +475,7 @@ store_altivec_registers (int tid)
 
   fill_vrregset (&regs);
   
-  if (ptrace (PTRACE_SETVRREGS, tid, 0, (int) &regs) < 0)
+  if (ptrace (PTRACE_SETVRREGS, tid, 0, &regs) < 0)
     perror_with_name ("Couldn't write AltiVec registers");
 }
 
@@ -501,9 +539,11 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
     regcache_collect (tdep->ppc_xer_regnum, regp + PT_XER);
   if ((regno == -1) || regno == tdep->ppc_ctr_regnum)
     regcache_collect (tdep->ppc_ctr_regnum, regp + PT_CTR);
+#ifdef PT_MQ
   if (((regno == -1) || regno == tdep->ppc_mq_regnum)
       && (tdep->ppc_mq_regnum != -1))
     regcache_collect (tdep->ppc_mq_regnum, regp + PT_MQ);
+#endif
   if ((regno == -1) || regno == tdep->ppc_ps_regnum)
     regcache_collect (tdep->ppc_ps_regnum, regp + PT_MSR);
 }

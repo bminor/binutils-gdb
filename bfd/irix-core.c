@@ -43,16 +43,22 @@ struct sgi_core_struct
 
 static asection *make_bfd_asection
   PARAMS ((bfd *, const char *, flagword, bfd_size_type, bfd_vma, file_ptr));
-static const bfd_target *irix_core_core_file_p PARAMS ((bfd *));
-static char *irix_core_core_file_failing_command PARAMS ((bfd *));
-static int irix_core_core_file_failing_signal PARAMS ((bfd *));
-static boolean irix_core_core_file_matches_executable_p
+static const bfd_target *irix_core_core_file_p
+  PARAMS ((bfd *));
+static char *irix_core_core_file_failing_command
+  PARAMS ((bfd *));
+static int irix_core_core_file_failing_signal
+  PARAMS ((bfd *));
+static bfd_boolean irix_core_core_file_matches_executable_p
   PARAMS ((bfd *, bfd *));
-static void swap_abort PARAMS ((void));
+static void swap_abort
+  PARAMS ((void));
 #ifdef CORE_MAGIC64
-static int do_sections64 PARAMS ((bfd *, struct coreout *));
+static int do_sections64
+  PARAMS ((bfd *, struct coreout *));
 #endif
-static int do_sections PARAMS ((bfd *, struct coreout *));
+static int do_sections
+  PARAMS ((bfd *, struct coreout *));
 
 /* Helper function for irix_core_core_file_p:
    32-bit and 64-bit versions.  */
@@ -280,11 +286,11 @@ irix_core_core_file_failing_signal (abfd)
   return core_signal (abfd);
 }
 
-static boolean
+static bfd_boolean
 irix_core_core_file_matches_executable_p (core_bfd, exec_bfd)
      bfd *core_bfd, *exec_bfd;
 {
-  return true;			/* XXX - FIXME */
+  return TRUE;			/* XXX - FIXME */
 }
 
 /* If somebody calls any byte-swapping routines, shoot them.  */

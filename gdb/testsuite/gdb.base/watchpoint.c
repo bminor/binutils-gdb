@@ -83,6 +83,18 @@ func2 ()
   static_b = local_a;
 }
 
+void
+func3 ()
+{
+  int x;
+  int y;
+
+  x = 0;
+  x = 1;				/* second x assignment */
+  y = 1;
+  y = 2;
+}
+
 int
 func1 ()
 {
@@ -170,5 +182,8 @@ int main ()
   recurser (2);
 
   marker6 ();
+
+  func3 ();
+
   return 0;
 }

@@ -1,6 +1,7 @@
 /* Support routines for building symbol tables in GDB's internal format.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,9 +31,10 @@
 #include "bfd.h"
 #include "gdb_obstack.h"
 #include "symtab.h"
-#include "symfile.h"		/* Needed for "struct complaint", obsavestring */
+#include "symfile.h"
 #include "objfiles.h"
 #include "gdbtypes.h"
+#include "gdb_assert.h"
 #include "complaints.h"
 #include "gdb_string.h"
 #include "expression.h"		/* For "enum exp_opcode" used by... */
@@ -41,8 +43,10 @@
 #include "filenames.h"		/* For DOSish file names */
 #include "macrotab.h"
 #include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
-#include "gdb_assert.h"
+#include "block.h"
 #include "cp-support.h"
+#include "dictionary.h"
+
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
 /**/
@@ -62,21 +66,8 @@ static struct pending *free_pendings;
    otherwise empty symtab from being tossed.  */
 
 static int have_line_numbers;
-
-/* List of using directives that are active in the current file.  */
-
-static struct using_direct_node *using_list;
-
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
-
-static void scan_for_anonymous_namespaces (struct symbol *symbol);
-
-static struct using_direct_node *copy_usings_to_obstack (struct
-							 using_direct_node
-							 *usings,
-							 struct obstack
-							 *obstack);
 
 
 /* Initial sizes of data structures.  These are realloc'd larger if
@@ -87,30 +78,13 @@ static struct using_direct_node *copy_usings_to_obstack (struct
 #define	INITIAL_LINE_VECTOR_LENGTH	1000
 
 
-/* Complaints about the symbols we have encountered.  */
-
-struct complaint block_end_complaint =
-{"block end address less than block start address in %s (patched it)", 0, 0};
-
-struct complaint anon_block_end_complaint =
-{"block end address 0x%lx less than block start address 0x%lx (patched it)", 0, 0};
-
-struct complaint innerblock_complaint =
-{"inner block not inside outer block in %s", 0, 0};
-
-struct complaint innerblock_anon_complaint =
-{"inner block (0x%lx-0x%lx) not inside outer block (0x%lx-0x%lx)", 0, 0};
-
-struct complaint blockvector_complaint =
-{"block at %s out of order", 0, 0};
-
 /* maintain the lists of symbols and blocks */
 
 /* Add a pending list to free_pendings. */
 void
 add_free_pendings (struct pending *list)
 {
-  register struct pending *link = list;
+  struct pending *link = list;
 
   if (list)
     {
@@ -128,7 +102,7 @@ add_free_pendings (struct pending *list)
 void
 add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
 {
-  register struct pending *link;
+  struct pending *link;
 
   /* If this is an alias for another symbol, don't add it.  */
   if (symbol->ginfo.name && symbol->ginfo.name[0] == '#')
@@ -158,46 +132,8 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
   /* Check to see if we might need to look for a mention of anonymous
      namespaces.  */
   
-   if (SYMBOL_LANGUAGE (symbol) == language_cplus
-       && !processing_has_namespace_info
-       && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL
-       && strstr (SYMBOL_CPLUS_DEMANGLED_NAME (symbol),
-		  "(anonymous namespace)") != NULL)
-     scan_for_anonymous_namespaces (symbol);
-}
-
-/* Check to see if a symbol is contained within an anonymous
-   namespace; if so, add an appropriate using directive.  */
-
-/* Optimize away strlen ("(anonymous namespace)").  */
-
-#define ANONYMOUS_NAMESPACE_LEN 21
-
-static void
-scan_for_anonymous_namespaces (struct symbol *symbol)
-{
-  const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
-  const char *beginning = name;
-  const char *end = cp_find_first_component (beginning);
-
-  while (*end == ':')
-    {
-      if ((end - beginning) == ANONYMOUS_NAMESPACE_LEN
-	  && strncmp (beginning, "(anonymous namespace)",
-		      ANONYMOUS_NAMESPACE_LEN) == 0)
-	{
-	  /* We've found a component of the name that's an anonymous
-	     namespace.  So add symbols in it to the namespace given
-	     by the previous component if there is one, or to the
-	     global namespace if there isn't.  */
-	  add_using_directive (name,
-			       beginning == name ? 0 : beginning - name - 2,
-			       end - name);
-	}
-      /* The "+ 2" is for the "::".  */
-       beginning = end + 2;
-       end = cp_find_first_component (beginning);
-    }
+  if (SYMBOL_LANGUAGE (symbol) == language_cplus)
+    cp_scan_for_anonymous_namespaces (symbol);
 }
 
 /* Find a symbol named NAME on a LIST.  NAME need not be
@@ -213,7 +149,7 @@ find_symbol_in_list (struct pending *list, char *name, int length)
     {
       for (j = list->nsyms; --j >= 0;)
 	{
-	  pp = SYMBOL_NAME (list->symbol[j]);
+	  pp = DEPRECATED_SYMBOL_NAME (list->symbol[j]);
 	  if (*pp == *name && strncmp (pp, name, length) == 0 &&
 	      pp[length] == '\0')
 	    {
@@ -225,41 +161,11 @@ find_symbol_in_list (struct pending *list, char *name, int length)
   return (NULL);
 }
 
-/* This adds a using directive to using_list.  NAME is the start of a
-   string that should contain the namespaces we want to add as initial
-   substrings, OUTER_LENGTH is the end of the outer namespace, and
-   INNER_LENGTH is the end of the inner namespace.  If the using
-   directive in question has already been added, don't add it
-   twice.  */
-
-void
-add_using_directive (const char *name, unsigned int outer_length,
-		     unsigned int inner_length)
-{
-  struct using_direct_node *current;
-  struct using_direct_node *new_node;
-  struct using_direct *new;
-
-  gdb_assert (outer_length < inner_length);
-
-  /* Has it already been added?  */
-
-  for (current = using_list; current; current = current->next)
-    if (current->current->outer_length == outer_length
-	&& current->current->inner_length == inner_length
-	&& (strncmp (current->current->name, name, inner_length) == 0))
-      return;
-
-  using_list = cp_add_using_xmalloc (name, outer_length, inner_length,
-				     using_list);
-}
-
 /* At end of reading syms, or in case of quit, really free as many
    `struct pending's as we can easily find. */
 
-/* ARGSUSED */
 void
-really_free_pendings (PTR dummy)
+really_free_pendings (void *dummy)
 {
   struct pending *next, *next1;
 
@@ -319,66 +225,22 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      CORE_ADDR start, CORE_ADDR end,
 	      struct objfile *objfile)
 {
-  register struct pending *next, *next1;
-  register struct block *block;
-  register struct pending_block *pblock;
+  struct pending *next, *next1;
+  struct block *block;
+  struct pending_block *pblock;
   struct pending_block *opblock;
-  register int i;
-  register int j;
 
-  /* Count the length of the list of symbols.  */
-
-  for (next = *listhead, i = 0;
-       next;
-       i += next->nsyms, next = next->next)
-    {
-      /* EMPTY */ ;
-    }
-
-  /* Copy the symbols into the block.  */
+  block = allocate_block (&objfile->symbol_obstack);
 
   if (symbol)
     {
-      block = (struct block *) 
-	obstack_alloc (&objfile->symbol_obstack,
-		       (sizeof (struct block) + 
-			((i - 1) * sizeof (struct symbol *))));
-      BLOCK_NSYMS (block) = i;
-      for (next = *listhead; next; next = next->next)
-	for (j = next->nsyms - 1; j >= 0; j--)
-	  {
-	    BLOCK_SYM (block, --i) = next->symbol[j];
-	  }
+      BLOCK_DICT (block) = dict_create_linear (&objfile->symbol_obstack,
+					       *listhead);
     }
   else
     {
-      int htab_size = BLOCK_HASHTABLE_SIZE (i);
-
-      block = (struct block *) 
-	obstack_alloc (&objfile->symbol_obstack,
-		       (sizeof (struct block) + 
-			((htab_size - 1) * sizeof (struct symbol *))));
-      for (j = 0; j < htab_size; j++)
-	{
-	  BLOCK_BUCKET (block, j) = 0;
-	}
-      BLOCK_BUCKETS (block) = htab_size;
-      for (next = *listhead; next; next = next->next)
-	{
-	  for (j = next->nsyms - 1; j >= 0; j--)
-	    {
-	      struct symbol *sym;
-	      unsigned int hash_index;
-	      const char *name = SYMBOL_DEMANGLED_NAME (next->symbol[j]);
-	      if (name == NULL)
-		name = SYMBOL_NAME (next->symbol[j]);
-	      hash_index = msymbol_hash_iw (name);
-	      hash_index = hash_index % BLOCK_BUCKETS (block);
-	      sym = BLOCK_BUCKET (block, hash_index);
-	      BLOCK_BUCKET (block, hash_index) = next->symbol[j];
-	      next->symbol[j]->hash_next = sym;
-	    }
-	}
+      BLOCK_DICT (block) = dict_create_hashed (&objfile->symbol_obstack,
+					       *listhead);
     }
 
   BLOCK_START (block) = start;
@@ -394,9 +256,9 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   if (symbol)
     {
       struct type *ftype = SYMBOL_TYPE (symbol);
+      struct dict_iterator iter;
       SYMBOL_BLOCK_VALUE (symbol) = block;
       BLOCK_FUNCTION (block) = symbol;
-      BLOCK_HASHTABLE (block) = 0;
 
       if (TYPE_NFIELDS (ftype) <= 0)
 	{
@@ -405,7 +267,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	     parameter symbols. */
 	  int nparams = 0, iparams;
 	  struct symbol *sym;
-	  ALL_BLOCK_SYMBOLS (block, i, sym)
+	  ALL_BLOCK_SYMBOLS (block, iter, sym)
 	    {
 	      switch (SYMBOL_CLASS (sym))
 		{
@@ -415,6 +277,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		case LOC_REGPARM_ADDR:
 		case LOC_BASEREG_ARG:
 		case LOC_LOCAL_ARG:
+		case LOC_COMPUTED_ARG:
 		  nparams++;
 		  break;
 		case LOC_UNDEF:
@@ -430,6 +293,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		case LOC_BASEREG:
 		case LOC_UNRESOLVED:
 		case LOC_OPTIMIZED_OUT:
+		case LOC_COMPUTED:
 		default:
 		  break;
 		}
@@ -440,9 +304,12 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      TYPE_FIELDS (ftype) = (struct field *)
 		TYPE_ALLOC (ftype, nparams * sizeof (struct field));
 
-	      for (i = iparams = 0; iparams < nparams; i++)
+	      iparams = 0;
+	      ALL_BLOCK_SYMBOLS (block, iter, sym)
 		{
-		  sym = BLOCK_SYM (block, i);
+		  if (iparams == nparams)
+		    break;
+
 		  switch (SYMBOL_CLASS (sym))
 		    {
 		    case LOC_ARG:
@@ -451,6 +318,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		    case LOC_REGPARM_ADDR:
 		    case LOC_BASEREG_ARG:
 		    case LOC_LOCAL_ARG:
+		    case LOC_COMPUTED_ARG:
 		      TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
 		      TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 		      iparams++;
@@ -468,6 +336,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		    case LOC_BASEREG:
 		    case LOC_UNRESOLVED:
 		    case LOC_OPTIMIZED_OUT:
+		    case LOC_COMPUTED:
 		    default:
 		      break;
 		    }
@@ -475,55 +344,15 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	    }
 	}
 
-      /* If we're in the C++ case, make sure that we add 'using'
-	 directives for all of the namespaces in which this function
-	 lives.  Also, make sure that the name was originally mangled:
-	 if not, there certainly isn't any namespace information to
-	 worry about!  (Also, if not, the gdb_assert will fail.)  */
-      if (SYMBOL_LANGUAGE (symbol) == language_cplus
-	  && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
+      /* If we're in the C++ case, set the block's scope.  */
+      if (SYMBOL_LANGUAGE (symbol) == language_cplus)
 	{
-	  const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
-	  const char *next;
-
-	  if (processing_has_namespace_info)
-	    block_set_scope (block, processing_current_namespace,
-			     &objfile->symbol_obstack);
-	  else
-	    {
-	      const char *current, *next;
-
-	      /* FIXME: carlton/2002-11-14: For members of classes,
-		 with this include the class name as well?  I don't
-		 think that's a problem yet, but it will be.  */
-
-	      current = name;
-	      next = cp_find_first_component (current);
-	      while (*next == ':')
-		{
-		  current = next;
-		  /* The '+ 2' is to skip the '::'.  */
-		  next = cp_find_first_component (current + 2);
-		}
-	      if (current == name)
-		block_set_scope (block, "", &objfile->symbol_obstack);
-	      else
-		block_set_scope (block,
-				 obsavestring (name, current - name,
-					       &objfile->symbol_obstack),
-				 &objfile->symbol_obstack);
-	      
-	      /* FIXME: carlton/2002-10-09: Until I understand the
-		 possible pitfalls of demangled names a lot better, I
-		 want to make sure I'm not running into surprises.  */
-	      gdb_assert (*next == '\0');
-	    }
+	  cp_set_block_scope (symbol, block, &objfile->symbol_obstack);
 	}
     }
   else
     {
       BLOCK_FUNCTION (block) = NULL;
-      BLOCK_HASHTABLE (block) = 1;
     }
 
   /* Now "free" the links of the list, and empty the list.  */
@@ -544,11 +373,15 @@ finish_block (struct symbol *symbol, struct pending **listhead,
     {
       if (symbol)
 	{
-	  complain (&block_end_complaint, SYMBOL_SOURCE_NAME (symbol));
+	  complaint (&symfile_complaints,
+		     "block end address less than block start address in %s (patched it)",
+		     SYMBOL_PRINT_NAME (symbol));
 	}
       else
 	{
-	  complain (&anon_block_end_complaint, BLOCK_END (block), BLOCK_START (block));
+	  complaint (&symfile_complaints,
+		     "block end address 0x%s less than block start address 0x%s (patched it)",
+		     paddr_nz (BLOCK_END (block)), paddr_nz (BLOCK_START (block)));
 	}
       /* Better than nothing */
       BLOCK_END (block) = BLOCK_START (block);
@@ -574,14 +407,18 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	    {
 	      if (symbol)
 		{
-		  complain (&innerblock_complaint,
-			    SYMBOL_SOURCE_NAME (symbol));
+		  complaint (&symfile_complaints,
+			     "inner block not inside outer block in %s",
+			     SYMBOL_PRINT_NAME (symbol));
 		}
 	      else
 		{
-		  complain (&innerblock_anon_complaint, BLOCK_START (pblock->block),
-			    BLOCK_END (pblock->block), BLOCK_START (block),
-			    BLOCK_END (block));
+		  complaint (&symfile_complaints,
+			     "inner block (0x%s-0x%s) not inside outer block (0x%s-0x%s)",
+			     paddr_nz (BLOCK_START (pblock->block)),
+			     paddr_nz (BLOCK_END (pblock->block)),
+			     paddr_nz (BLOCK_START (block)),
+			     paddr_nz (BLOCK_END (block)));
 		}
 	      if (BLOCK_START (pblock->block) < BLOCK_START (block))
 		BLOCK_START (pblock->block) = BLOCK_START (block);
@@ -597,6 +434,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   record_pending_block (objfile, block, opblock);
 }
 
+
 /* Record BLOCK on the list of all blocks in the file.  Put it after
    OPBLOCK, or at the beginning if opblock is NULL.  This puts the
    block in the list after all its subblocks.
@@ -608,7 +446,7 @@ void
 record_pending_block (struct objfile *objfile, struct block *block,
 		      struct pending_block *opblock)
 {
-  register struct pending_block *pblock;
+  struct pending_block *pblock;
 
   pblock = (struct pending_block *)
     obstack_alloc (&objfile->symbol_obstack, sizeof (struct pending_block));
@@ -625,16 +463,12 @@ record_pending_block (struct objfile *objfile, struct block *block,
     }
 }
 
-/* OBSOLETE Note that this is only used in this file and in dstread.c, which */
-/* OBSOLETE should be fixed to not need direct access to this function.  When */
-/* OBSOLETE that is done, it can be made static again. */
-
 static struct blockvector *
 make_blockvector (struct objfile *objfile)
 {
-  register struct pending_block *next;
-  register struct blockvector *blockvector;
-  register int i;
+  struct pending_block *next;
+  struct blockvector *blockvector;
+  int i;
 
   /* Count the length of the list of blocks.  */
 
@@ -686,8 +520,8 @@ make_blockvector (struct objfile *objfile)
 	      CORE_ADDR start
 		= BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i));
 
-	      complain (&blockvector_complaint,
-			local_hex_string ((LONGEST) start));
+	      complaint (&symfile_complaints, "block at %s out of order",
+			 local_hex_string ((LONGEST) start));
 	    }
 	}
     }
@@ -704,7 +538,7 @@ make_blockvector (struct objfile *objfile)
 void
 start_subfile (char *name, char *dirname)
 {
-  register struct subfile *subfile;
+  struct subfile *subfile;
 
   /* See if this subfile is already known as a subfile of the current
      main source file.  */
@@ -758,15 +592,9 @@ start_subfile (char *name, char *dirname)
      later via a call to record_debugformat. */
   subfile->debugformat = NULL;
 
-  /* cfront output is a C program, so in most ways it looks like a C
-     program.  But to demangle we need to set the language to C++.  We
-     can distinguish cfront code by the fact that it has #line
-     directives which specify a file name ending in .C.
-
-     So if the filename of this subfile ends in .C, then change the
+  /* If the filename of this subfile ends in .C, then change the
      language of any pending subfiles from C to C++.  We also accept
-     any other C++ suffixes accepted by deduce_language_from_filename
-     (in particular, some people use .cxx with cfront).  */
+     any other C++ suffixes accepted by deduce_language_from_filename.  */
   /* Likewise for f2c.  */
 
   if (subfile->name)
@@ -840,7 +668,7 @@ patch_subfile_names (struct subfile *subfile, char *name)
 void
 push_subfile (void)
 {
-  register struct subfile_stack *tem
+  struct subfile_stack *tem
   = (struct subfile_stack *) xmalloc (sizeof (struct subfile_stack));
 
   tem->next = subfile_stack;
@@ -855,8 +683,8 @@ push_subfile (void)
 char *
 pop_subfile (void)
 {
-  register char *name;
-  register struct subfile_stack *link = subfile_stack;
+  char *name;
+  struct subfile_stack *link = subfile_stack;
 
   if (link == NULL)
     {
@@ -872,7 +700,7 @@ pop_subfile (void)
    line vector for SUBFILE.  */
 
 void
-record_line (register struct subfile *subfile, int line, CORE_ADDR pc)
+record_line (struct subfile *subfile, int line, CORE_ADDR pc)
 {
   struct linetable_entry *e;
   /* Ignore the dummy line number in libg.o */
@@ -944,8 +772,6 @@ start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
   global_symbols = NULL;
   within_function = 0;
   have_line_numbers = 0;
-  processing_has_namespace_info = 0;
-  using_list = NULL;
 
   /* Context stack is initially empty.  Allocate first one with room
      for 10 levels; reuse it forever afterward.  */
@@ -956,6 +782,10 @@ start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
 	xmalloc (context_stack_size * sizeof (struct context_stack));
     }
   context_stack_depth = 0;
+
+  /* Set up support for C++ namespace support, in case we need it.  */
+
+  cp_initialize_namespace ();
 
   /* Initialize the list of sub source files with one entry for this
      file (the top-level source file).  */
@@ -985,10 +815,10 @@ start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
 struct symtab *
 end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 {
-  register struct symtab *symtab = NULL;
-  register struct blockvector *blockvector;
-  register struct subfile *subfile;
-  register struct context_stack *cstk;
+  struct symtab *symtab = NULL;
+  struct blockvector *blockvector;
+  struct subfile *subfile;
+  struct context_stack *cstk;
   struct subfile *nextsub;
 
   /* Finish the lexical context of the last function in the file; pop
@@ -1008,9 +838,8 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	     same.  FIXME: Find out why it is happening.  This is not
 	     believed to happen in most cases (even for coffread.c);
 	     it used to be an abort().  */
-	  static struct complaint msg =
-	  {"Context stack not empty in end_symtab", 0, 0};
-	  complain (&msg);
+	  complaint (&symfile_complaints,
+	             "Context stack not empty in end_symtab");
 	  context_stack_depth = 0;
 	}
     }
@@ -1079,14 +908,8 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
       finish_block (0, &global_symbols, 0, last_source_start_addr, end_addr,
 		    objfile);
       blockvector = make_blockvector (objfile);
-      if (using_list != NULL)
-	{
-	  block_set_using (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK),
-			   copy_usings_to_obstack (using_list,
-						   &objfile->symbol_obstack),
-			   &objfile->symbol_obstack);
-	  using_list = NULL;
-	}
+      cp_finalize_namespace (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK),
+			     &objfile->symbol_obstack);
     }
 
 #ifndef PROCESS_LINENUMBER_HOOK
@@ -1159,7 +982,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	      symtab->dirname = NULL;
 	    }
 	  symtab->free_code = free_linetable;
-	  symtab->free_ptr = NULL;
+	  symtab->free_func = NULL;
 
 	  /* Use whatever language we have been using for this
 	     subfile, not the one that was deduced in allocate_symtab
@@ -1217,32 +1040,6 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
   return symtab;
 }
 
-/* This reallocates USINGS using OBSTACK and xfree's USINGS.  It
-   returns the reallocated version of USINGS.  */
-
-static struct using_direct_node *
-copy_usings_to_obstack (struct using_direct_node *usings,
-			struct obstack *obstack)
-{
-  if (usings == NULL)
-    return NULL;
-  else
-    {
-      struct using_direct_node *new_node
-	= cp_add_using_obstack (usings->current->name,
-				usings->current->outer_length,
-				usings->current->inner_length,
-				copy_usings_to_obstack (usings->next,
-							obstack),
-				obstack);
-
-      xfree (usings->current);
-      xfree (usings);
-
-      return new_node;
-    }
-}
-
 /* Push a context block.  Args are an identifying nesting level
    (checkable when you pop it), and the starting PC address of this
    context.  */
@@ -1250,7 +1047,7 @@ copy_usings_to_obstack (struct using_direct_node *usings,
 struct context_stack *
 push_context (int desc, CORE_ADDR valu)
 {
-  register struct context_stack *new;
+  struct context_stack *new;
 
   if (context_stack_depth == context_stack_size)
     {
@@ -1273,6 +1070,17 @@ push_context (int desc, CORE_ADDR valu)
 
   return new;
 }
+
+/* Pop a context block.  Returns the address of the context block just
+   popped. */
+
+struct context_stack *
+pop_context (void)
+{
+  gdb_assert (context_stack_depth > 0);
+  return (&context_stack[--context_stack_depth]);
+}
+
 
 
 /* Compute a small integer hash code for the given name. */
@@ -1301,7 +1109,7 @@ record_debugformat (char *format)
 void
 merge_symbol_lists (struct pending **srclist, struct pending **targetlist)
 {
-  register int i;
+  int i;
 
   if (!srclist || !*srclist)
     return;

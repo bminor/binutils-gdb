@@ -56,6 +56,9 @@
 #include "wince-stub.h"
 #include <time.h>
 #include "regcache.h"
+#ifdef MIPS
+#include "mips-tdep.h"
+#endif
 
 /* The ui's event loop. */
 extern int (*ui_loop_hook) (int signo);
@@ -830,7 +833,7 @@ wince_software_single_step (enum target_signal ignore,
   return;
 }
 #elif SHx
-/* Hitachi SH architecture instruction encoding masks */
+/* Renesas SH architecture instruction encoding masks */
 
 #define COND_BR_MASK   0xff00
 #define UCOND_DBR_MASK 0xe000
@@ -841,7 +844,7 @@ wince_software_single_step (enum target_signal ignore,
 #define UCOND_DISP     0x0fff
 #define UCOND_REG      0x0f00
 
-/* Hitachi SH instruction opcodes */
+/* Renesas SH instruction opcodes */
 
 #define BF_INSTR       0x8b00
 #define BT_INSTR       0x8900
@@ -1139,7 +1142,7 @@ static void
 do_child_store_inferior_registers (int r)
 {
   if (r >= 0)
-    read_register_gen (r, ((char *) &current_thread->context) + mappings[r]);
+    deprecated_read_register_gen (r, ((char *) &current_thread->context) + mappings[r]);
   else
     {
       for (r = 0; r < NUM_REGS; r++)
@@ -1524,7 +1527,6 @@ child_files_info (struct target_ops *ignore)
 		     target_pid_to_str (inferior_ptid));
 }
 
-/* ARGSUSED */
 static void
 child_open (char *arg, int from_tty)
 {
@@ -1924,8 +1926,6 @@ init_child_ops (void)
   child_ops.to_has_stack = 1;
   child_ops.to_has_registers = 1;
   child_ops.to_has_execution = 1;
-  child_ops.to_sections = 0;
-  child_ops.to_sections_end = 0;
   child_ops.to_magic = OPS_MAGIC;
 }
 
@@ -1997,7 +1997,8 @@ _initialize_wince (void)
   add_show_from_set
     (add_set_cmd ((char *) "remoteaddhost", class_support, var_boolean,
 		  (char *) &remote_add_host,
-		  (char *) "Set whether to add this host to remote stub arguments for\n
+		  (char *) "\
+Set whether to add this host to remote stub arguments for\n\
 debugging over a network.", &setlist),
      &showlist);
 

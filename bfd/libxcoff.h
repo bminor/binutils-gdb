@@ -1,5 +1,5 @@
 /* BFD XCOFF object file private structure.
-   Copyright (C) 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
    Written by Tom Rix, Redhat.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -68,11 +68,11 @@ struct xcoff_backend_data_rec
      2 : XCOFF64.  */
   unsigned long _xcoff_ldhdr_version;
 
-  boolean (* _xcoff_put_symbol_name)
+  bfd_boolean (* _xcoff_put_symbol_name)
     PARAMS ((bfd *, struct bfd_strtab_hash *, struct internal_syment *,
 	     const char *));
 
-  boolean (* _xcoff_put_ldsymbol_name)
+  bfd_boolean (* _xcoff_put_ldsymbol_name)
     PARAMS ((bfd *, struct xcoff_loader_info *, struct internal_ldsym *,
 	     const char *));
 
@@ -84,9 +84,9 @@ struct xcoff_backend_data_rec
   /* Line number and relocation overflow.
      XCOFF32 overflows to another section when the line number or the 
      relocation count exceeds 0xffff.  XCOFF64 does not overflow.  */
-  boolean (*_xcoff_is_lineno_count_overflow)
+  bfd_boolean (*_xcoff_is_lineno_count_overflow)
     PARAMS ((bfd *, bfd_vma));
-  boolean (*_xcoff_is_reloc_count_overflow)
+  bfd_boolean (*_xcoff_is_reloc_count_overflow)
     PARAMS ((bfd *, bfd_vma));
 
   /* Loader section symbol and relocation table offset
@@ -106,8 +106,8 @@ struct xcoff_backend_data_rec
 
   /* rtinit.  */
   unsigned int _xcoff_rtinit_size;
-  boolean (*_xcoff_generate_rtinit)
-    PARAMS ((bfd *, const char *, const char *, boolean));
+  bfd_boolean (*_xcoff_generate_rtinit)
+    PARAMS ((bfd *, const char *, const char *, bfd_boolean));
 };
 
 /* Look up an entry in an XCOFF link hash table.  */
@@ -120,7 +120,7 @@ struct xcoff_backend_data_rec
 #define xcoff_link_hash_traverse(table, func, info)			\
   (bfd_link_hash_traverse						\
    (&(table)->root,							\
-    (boolean (*) PARAMS ((struct bfd_link_hash_entry *, PTR))) (func),	\
+    (bfd_boolean (*) PARAMS ((struct bfd_link_hash_entry *, PTR))) (func),	\
     (info)))
 
 /* Get the XCOFF link hash table from the info structure.  This is
@@ -227,19 +227,19 @@ struct xcoff_backend_data_rec
 #define XCOFF_COMPLAIN_FUNCTION_ARGS \
   bfd *, bfd_vma, bfd_vma, struct reloc_howto_struct *howto
 
-extern boolean (*xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
+extern bfd_boolean (*xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
   PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-extern boolean (*xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW])
+extern bfd_boolean (*xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW])
   PARAMS ((XCOFF_COMPLAIN_FUNCTION_ARGS));
 
 /* Relocation functions */
-boolean xcoff_reloc_type_noop PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-boolean xcoff_reloc_type_fail PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-boolean xcoff_reloc_type_pos PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-boolean xcoff_reloc_type_neg PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-boolean xcoff_reloc_type_rel PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-boolean xcoff_reloc_type_toc PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-boolean xcoff_reloc_type_ba PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-boolean xcoff_reloc_type_crel PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+bfd_boolean xcoff_reloc_type_noop PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+bfd_boolean xcoff_reloc_type_fail PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+bfd_boolean xcoff_reloc_type_pos PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+bfd_boolean xcoff_reloc_type_neg PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+bfd_boolean xcoff_reloc_type_rel PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+bfd_boolean xcoff_reloc_type_toc PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+bfd_boolean xcoff_reloc_type_ba PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+bfd_boolean xcoff_reloc_type_crel PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
 
 #endif /* LIBXCOFF_H */

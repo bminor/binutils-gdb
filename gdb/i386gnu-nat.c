@@ -89,7 +89,7 @@ fetch_fpregs (struct proc *thread)
     }
 
   /* Supply the floating-point registers.  */
-  i387_supply_fsave (state.hw_state);
+  i387_supply_fsave (current_regcache, -1, state.hw_state);
 }
 
 #ifdef HAVE_SYS_PROCFS_H
@@ -106,7 +106,7 @@ supply_gregset (gdb_gregset_t *gregs)
 void
 supply_fpregset (gdb_fpregset_t *fpregs)
 {
-  i387_supply_fsave ((char *) fpregs);
+  i387_supply_fsave (current_regcache, -1, fpregs);
 }
 #endif
 
@@ -184,7 +184,7 @@ store_fpregs (struct proc *thread, int regno)
     }
 
   /* FIXME: kettenis/2001-07-15: Is this right?  Should we somehow
-     take into account REGISTER_VALID like the old code did?  */
+     take into account DEPRECATED_REGISTER_VALID like the old code did?  */
   i387_fill_fsave (state.hw_state, regno);
 
   err = thread_set_state (thread->port, i386_FLOAT_STATE,
@@ -242,7 +242,7 @@ gnu_store_registers (int regno)
 	    if ((thread->fetched_regs & (1 << check_regno))
 		&& memcpy (REG_ADDR (&old_state, check_regno),
 			   REG_ADDR (state, check_regno),
-			   REGISTER_RAW_SIZE (check_regno)))
+			   DEPRECATED_REGISTER_RAW_SIZE (check_regno)))
 	      /* Register CHECK_REGNO has changed!  Ack!  */
 	      {
 		warning ("Register %s changed after the thread was aborted",
@@ -256,8 +256,8 @@ gnu_store_registers (int regno)
 	}
 
 #define fill(state, regno)                                               \
-  memcpy (REG_ADDR(state, regno), &registers[REGISTER_BYTE (regno)],     \
-          REGISTER_RAW_SIZE (regno))
+  memcpy (REG_ADDR(state, regno), &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],     \
+          DEPRECATED_REGISTER_RAW_SIZE (regno))
 
       if (regno == -1)
 	{
@@ -266,14 +266,14 @@ gnu_store_registers (int regno)
 	  proc_debug (thread, "storing all registers");
 
 	  for (i = 0; i < I386_NUM_GREGS; i++)
-	    if (register_valid[i])
+	    if (deprecated_register_valid[i])
 	      fill (state, i);
 	}
       else
 	{
 	  proc_debug (thread, "storing register %s", REGISTER_NAME (regno));
 
-	  gdb_assert (register_valid[regno]);
+	  gdb_assert (deprecated_register_valid[regno]);
 	  fill (state, regno);
 	}
 

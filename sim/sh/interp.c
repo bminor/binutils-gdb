@@ -169,6 +169,7 @@ static char **prog_argv;
 
 #if 1
 static int maskw = 0;
+static int maskl = 0;
 #endif
 
 static SIM_OPEN_KIND sim_kind;
@@ -651,6 +652,7 @@ rbat_fast (memory, x, maskb)
 
 #define RUWAT(x)  (RWAT(x) & 0xffff)
 #define RSWAT(x)  ((short)(RWAT(x)))
+#define RSLAT(x)  ((long)(RLAT(x)))
 #define RSBAT(x)  (SEXT(RBAT(x)))
 
 #define RDAT(x, n) (do_rdat (memory, (x), (n), (maskl)))
@@ -1151,6 +1153,17 @@ trap (i, regs, insn_ptr, memory, maskl, maskw, endianw)
 	  case SYS_time:
 	    regs[0] = get_now ();
 	    break;
+	  case SYS_ftruncate:
+	    regs[0] = callback->ftruncate (callback, regs[5], regs[6]);
+	    break;
+	  case SYS_truncate:
+	    {
+	      int len = strswaplen (regs[5]);
+	      strnswap (regs[5], len);
+	      regs[0] = callback->truncate (callback, ptr (regs[5]), regs[6]);
+	      strnswap (regs[5], len);
+	      break;
+	    }
 	  default:
 	    regs[0] = -1;
 	    break;
@@ -1348,6 +1361,105 @@ macw (regs, memory, n, m, endianw)
   MACL = sum;
 }
 
+static void
+macl (regs, memory, n, m)
+     int *regs;
+     unsigned char *memory;
+     int m, n;
+{
+  long tempm, tempn;
+  long prod, macl, mach, sum;
+  long long ans,ansl,ansh,t;
+  unsigned long long high,low,combine;
+  union mac64
+  {
+    long m[2]; /* mach and macl*/
+    long long m64; /* 64 bit MAC */
+  }mac64;
+
+  tempm = RSLAT(regs[m]);
+  regs[m] += 4;
+
+  tempn = RSLAT(regs[n]);
+  regs[n] += 4;
+
+  mach = MACH;
+  macl = MACL;
+
+  mac64.m[0] = macl;
+  mac64.m[1] = mach;
+
+  ans = (long long)tempm * (long long)tempn; /* Multiply 32bit * 32bit */
+
+  mac64.m64 += ans; /* Accumulate   64bit + 64 bit */
+
+  macl = mac64.m[0];
+  mach = mac64.m[1];
+
+  if (S)  /* Store only 48 bits of the result */
+    {
+      if (mach < 0) /* Result is negative */
+        {
+          mach = mach & 0x0000ffff; /* Mask higher 16 bits */
+          mach |= 0xffff8000; /* Sign extend higher 16 bits */
+        }
+      else
+        mach = mach & 0x00007fff; /* Postive Result */
+    }
+
+  MACL = macl;
+  MACH = mach;
+}
+
+float
+fsca_s (int in, double (*f) (double))
+{
+  double rad = ldexp ((in & 0xffff), -15) * 3.141592653589793238462643383;
+  double result = (*f) (rad);
+  double error, upper, lower, frac;
+  int exp;
+
+  /* Search the value with the maximum error that is still within the
+     architectural spec.  */
+  error = ldexp (1., -21);
+  /* compensate for calculation inaccuracy by reducing error.  */
+  error = error - ldexp (1., -50);
+  upper = result + error;
+  frac = frexp (upper, &exp);
+  upper = ldexp (floor (ldexp (frac, 24)), exp - 24);
+  lower = result - error;
+  frac = frexp (lower, &exp);
+  lower = ldexp (ceil (ldexp (frac, 24)), exp - 24);
+  return abs (upper - result) >= abs (lower - result) ? upper : lower;
+}
+
+float
+fsrra_s (float in)
+{
+  double result = 1. / sqrt (in);
+  int exp;
+  double frac, upper, lower, error, eps;
+
+  /* refine result */
+  result = result - (result * result * in - 1) * 0.5 * result;
+  /* Search the value with the maximum error that is still within the
+     architectural spec.  */
+  frac = frexp (result, &exp);
+  frac = ldexp (frac, 24);
+  error = 4.; /* 1 << 24-1-21 */
+  /* use eps to compensate for possible 1 ulp error in our 'exact' result.  */
+  eps = ldexp (1., -29);
+  upper = floor (frac + error - eps);
+  if (upper > 16777216.)
+    upper = floor ((frac + error - eps) * 0.5) * 2.;
+  lower = ceil ((frac - error + eps) * 2) * .5;
+  if (lower > 8388608.)
+    lower = ceil (frac - error + eps);
+  upper = ldexp (upper, exp - 24);
+  lower = ldexp (lower, exp - 24);
+  return upper - result >= result - lower ? upper : lower;
+}
+
 static struct loop_bounds
 get_loop_bounds (rs, re, memory, mem_end, maskw, endianw)
      int rs, re;
@@ -1424,7 +1536,7 @@ sim_size (power)
 
 static void
 init_dsp (abfd)
-     struct _bfd *abfd;
+     struct bfd *abfd;
 {
   int was_dsp = target_dsp;
   unsigned long mach = bfd_get_mach (abfd);
@@ -2140,7 +2252,7 @@ SIM_DESC
 sim_open (kind, cb, abfd, argv)
      SIM_OPEN_KIND kind;
      host_callback *cb;
-     struct _bfd *abfd;
+     struct bfd *abfd;
      char **argv;
 {
   char **p;
@@ -2239,7 +2351,7 @@ sim_load (sd, prog, abfd, from_tty)
 SIM_RC
 sim_create_inferior (sd, prog_bfd, argv, env)
      SIM_DESC sd;
-     struct _bfd *prog_bfd;
+     struct bfd *prog_bfd;
      char **argv;
      char **env;
 {

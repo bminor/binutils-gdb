@@ -25,9 +25,12 @@
 #include "ui-file.h"
 #include "gdb_string.h"
 
+#include <errno.h>
+
 static ui_file_isatty_ftype null_file_isatty;
 static ui_file_write_ftype null_file_write;
 static ui_file_fputs_ftype null_file_fputs;
+static ui_file_read_ftype null_file_read;
 static ui_file_flush_ftype null_file_flush;
 static ui_file_delete_ftype null_file_delete;
 static ui_file_rewind_ftype null_file_rewind;
@@ -39,6 +42,7 @@ struct ui_file
     ui_file_flush_ftype *to_flush;
     ui_file_write_ftype *to_write;
     ui_file_fputs_ftype *to_fputs;
+    ui_file_read_ftype *to_read;
     ui_file_delete_ftype *to_delete;
     ui_file_isatty_ftype *to_isatty;
     ui_file_rewind_ftype *to_rewind;
@@ -56,6 +60,7 @@ ui_file_new (void)
   set_ui_file_flush (file, null_file_flush);
   set_ui_file_write (file, null_file_write);
   set_ui_file_fputs (file, null_file_fputs);
+  set_ui_file_read (file, null_file_read);
   set_ui_file_isatty (file, null_file_isatty);
   set_ui_file_rewind (file, null_file_rewind);
   set_ui_file_put (file, null_file_put);
@@ -123,6 +128,15 @@ null_file_write (struct ui_file *file,
     }
 }
 
+static long
+null_file_read (struct ui_file *file,
+		char *buf,
+		long sizeof_buf)
+{
+  errno = EBADF;
+  return 0;
+}
+
 static void
 null_file_fputs (const char *buf, struct ui_file *file)
 {
@@ -186,6 +200,12 @@ ui_file_write (struct ui_file *file,
   file->to_write (file, buf, length_buf);
 }
 
+long
+ui_file_read (struct ui_file *file, char *buf, long length_buf)
+{
+  return file->to_read (file, buf, length_buf); 
+}
+
 void
 fputs_unfiltered (const char *buf, struct ui_file *file)
 {
@@ -221,6 +241,12 @@ set_ui_file_write (struct ui_file *file,
 		    ui_file_write_ftype *write)
 {
   file->to_write = write;
+}
+
+void
+set_ui_file_read (struct ui_file *file, ui_file_read_ftype *read)
+{
+  file->to_read = read;
 }
 
 void
@@ -383,6 +409,7 @@ mem_file_write (struct ui_file *file,
 
 static ui_file_write_ftype stdio_file_write;
 static ui_file_fputs_ftype stdio_file_fputs;
+static ui_file_read_ftype stdio_file_read;
 static ui_file_isatty_ftype stdio_file_isatty;
 static ui_file_delete_ftype stdio_file_delete;
 static struct ui_file *stdio_file_new (FILE * file, int close_p);
@@ -409,6 +436,7 @@ stdio_file_new (FILE *file, int close_p)
   set_ui_file_flush (ui_file, stdio_file_flush);
   set_ui_file_write (ui_file, stdio_file_write);
   set_ui_file_fputs (ui_file, stdio_file_fputs);
+  set_ui_file_read (ui_file, stdio_file_read);
   set_ui_file_isatty (ui_file, stdio_file_isatty);
   return ui_file;
 }
@@ -435,6 +463,16 @@ stdio_file_flush (struct ui_file *file)
     internal_error (__FILE__, __LINE__,
 		    "stdio_file_flush: bad magic number");
   fflush (stdio->file);
+}
+
+static long
+stdio_file_read (struct ui_file *file, char *buf, long length_buf)
+{
+  struct stdio_file *stdio = ui_file_data (file);
+  if (stdio->magic != &stdio_file_magic)
+    internal_error (__FILE__, __LINE__,
+		    "stdio_file_read: bad magic number");
+  return read (fileno (stdio->file), buf, length_buf);
 }
 
 static void

@@ -17,6 +17,6 @@
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
 
-# Support for testing against a Hitachi SH3 target rom
+# Support for testing against a Renesas SH3 target rom
 
 load_lib ../config/monitor.exp

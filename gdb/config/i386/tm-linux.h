@@ -23,21 +23,11 @@
 #ifndef TM_LINUX_H
 #define TM_LINUX_H
 
-#define I386_GNULINUX_TARGET
-
 #include "i386/tm-i386.h"
 #include "config/tm-linux.h"
 
 /* The following works around a problem with /usr/include/sys/procfs.h  */
 #define sys_quotactl 1
-
-/* When we call a function in a shared library, and the PLT sends us
-   into the dynamic linker to find the function's real address, we
-   need to skip over the dynamic linker call.  This function decides
-   when to skip, and where to skip to.  See the comments for
-   SKIP_SOLIB_RESOLVER at the top of infrun.c.  */
-#define SKIP_SOLIB_RESOLVER i386_linux_skip_solib_resolver
-extern CORE_ADDR i386_linux_skip_solib_resolver (CORE_ADDR pc);
 
 /* N_FUN symbols in shared libaries have 0 for their values and need
    to be relocated. */

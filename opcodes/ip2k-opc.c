@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -32,6 +32,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* -- opc.c */
 
+#include "safe-ctype.h"
+
 /* A better hash function for instruction mnemonics. */
 unsigned int
 ip2k_asm_hash (insn)
@@ -40,8 +42,8 @@ ip2k_asm_hash (insn)
   unsigned int hash;
   const char* m = insn;
 
-  for (hash = 0; *m && !isspace(*m); m++)
-    hash = (hash * 23) ^ (0x1F & tolower(*m));
+  for (hash = 0; *m && !ISSPACE(*m); m++)
+    hash = (hash * 23) ^ (0x1F & TOLOWER(*m));
 
   /* printf ("%s %d\n", insn, (hash % CGEN_ASM_HASH_SIZE)); */
 
@@ -49,6 +51,20 @@ ip2k_asm_hash (insn)
 }
 
 
+/* Special check to ensure that instruction exists for given machine. */
+int
+ip2k_cgen_insn_supported (cd, insn)
+     CGEN_CPU_DESC cd;
+     const CGEN_INSN *insn;
+{
+  int machs = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_MACH);
+
+  /* No mach attribute?  Assume it's supported for all machs.  */
+  if (machs == 0)
+    return 1;
+  
+  return ((machs & cd->machs) != 0);
+}
 
 
 /* -- asm.c */

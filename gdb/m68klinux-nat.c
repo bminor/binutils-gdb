@@ -25,7 +25,10 @@
 #include "inferior.h"
 #include "language.h"
 #include "gdbcore.h"
+#include "gdb_string.h"
 #include "regcache.h"
+
+#include "m68k-tdep.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -51,8 +54,7 @@
 
 #include "target.h"
 
-
-/* This table must line up with REGISTER_NAMES in tm-m68k.h */
+/* This table must line up with REGISTER_NAME in "m68k-tdep.c".  */
 static const int regmap[] =
 {
   PT_D0, PT_D1, PT_D2, PT_D3, PT_D4, PT_D5, PT_D6, PT_D7,
@@ -78,7 +80,7 @@ getregs_supplies (int regno)
 int
 getfpregs_supplies (int regno)
 {
-  return FP0_REGNUM <= regno && regno <= FPI_REGNUM;
+  return FP0_REGNUM <= regno && regno <= M68K_FPI_REGNUM;
 }
 
 /* Does the current host support the GETREGS request?  */
@@ -131,30 +133,32 @@ fetch_register (int regno)
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
   char mess[128];		/* For messages */
-  register int i;
+  int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
-  char buf[MAX_REGISTER_RAW_SIZE];
+  char buf[MAX_REGISTER_SIZE];
   int tid;
 
   if (CANNOT_FETCH_REGISTER (regno))
     {
-      memset (buf, '\0', REGISTER_RAW_SIZE (regno));	/* Supply zeroes */
+      memset (buf, '\0', register_size (current_gdbarch, regno));	/* Supply zeroes */
       supply_register (regno, buf);
       return;
     }
 
   /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
     tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
 
   offset = U_REGS_OFFSET;
 
   regaddr = register_addr (regno, offset);
-  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+  for (i = 0; i < register_size (current_gdbarch, regno);
+       i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, tid,
-					       (PTRACE_ARG3_TYPE) regaddr, 0);
+      *(PTRACE_XFER_TYPE *) &buf[i] = ptrace (PT_READ_U, tid,
+					      (PTRACE_ARG3_TYPE) regaddr, 0);
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
 	{
@@ -194,10 +198,10 @@ store_register (int regno)
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
   char mess[128];		/* For messages */
-  register int i;
+  int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
   int tid;
-  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
 
   if (CANNOT_STORE_REGISTER (regno))
     {
@@ -205,7 +209,8 @@ store_register (int regno)
     }
 
   /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
     tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
 
   offset = U_REGS_OFFSET;
@@ -216,7 +221,8 @@ store_register (int regno)
   regcache_collect (regno, buf);
 
   /* Store the local buffer into the inferior a chunk at the time. */
-  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+  for (i = 0; i < register_size (current_gdbarch, regno);
+       i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
       ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
@@ -275,7 +281,7 @@ supply_gregset (elf_gregset_t *gregsetp)
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int regi;
 
-  for (regi = D0_REGNUM; regi <= SP_REGNUM; regi++)
+  for (regi = M68K_D0_REGNUM; regi <= SP_REGNUM; regi++)
     supply_register (regi, (char *) &regp[regmap[regi]]);
   supply_register (PS_REGNUM, (char *) &regp[PT_SR]);
   supply_register (PC_REGNUM, (char *) &regp[PT_PC]);
@@ -291,7 +297,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
   int i;
 
   for (i = 0; i < NUM_GREGS; i++)
-    if ((regno == -1 || regno == i))
+    if (regno == -1 || regno == i)
       regcache_collect (i, regp + regmap[i]);
 }
 
@@ -359,11 +365,11 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
 {
   int regi;
 
-  for (regi = FP0_REGNUM; regi < FPC_REGNUM; regi++)
+  for (regi = FP0_REGNUM; regi < FP0_REGNUM + 8; regi++)
     supply_register (regi, FPREG_ADDR (fpregsetp, regi - FP0_REGNUM));
-  supply_register (FPC_REGNUM, (char *) &fpregsetp->fpcntl[0]);
-  supply_register (FPS_REGNUM, (char *) &fpregsetp->fpcntl[1]);
-  supply_register (FPI_REGNUM, (char *) &fpregsetp->fpcntl[2]);
+  supply_register (M68K_FPC_REGNUM, (char *) &fpregsetp->fpcntl[0]);
+  supply_register (M68K_FPS_REGNUM, (char *) &fpregsetp->fpcntl[1]);
+  supply_register (M68K_FPI_REGNUM, (char *) &fpregsetp->fpcntl[2]);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -378,12 +384,12 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
   /* Fill in the floating-point registers.  */
   for (i = FP0_REGNUM; i < FP0_REGNUM + 8; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (regno, FPREG_ADDR (fpregsetp, regno - FP0_REGNUM));
+      regcache_collect (i, FPREG_ADDR (fpregsetp, i - FP0_REGNUM));
 
   /* Fill in the floating-point control registers.  */
-  for (i = FPC_REGNUM; i <= FPI_REGNUM; i++)
+  for (i = M68K_FPC_REGNUM; i <= M68K_FPI_REGNUM; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (regno, (char *) &fpregsetp->fpcntl[regno - FPC_REGNUM]);
+      regcache_collect (i, (char *) &fpregsetp->fpcntl[i - M68K_FPC_REGNUM]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS
@@ -448,7 +454,8 @@ fetch_inferior_registers (int regno)
     }
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
     tid = PIDGET (inferior_ptid);		/* Not a threaded program.  */
 
   /* Use the PTRACE_GETFPXREGS request whenever possible, since it
@@ -503,7 +510,8 @@ store_inferior_registers (int regno)
     }
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
     tid = PIDGET (inferior_ptid);	/* Not a threaded program.  */
 
   /* Use the PTRACE_SETFPREGS requests whenever possible, since it
@@ -592,103 +600,6 @@ int
 kernel_u_size (void)
 {
   return (sizeof (struct user));
-}
-
-/* Check whether insn1 and insn2 are parts of a signal trampoline.  */
-
-#define IS_SIGTRAMP(insn1, insn2)					\
-  (/* addaw #20,sp; moveq #119,d0; trap #0 */				\
-   (insn1 == 0xdefc0014 && insn2 == 0x70774e40)				\
-   /* moveq #119,d0; trap #0 */						\
-   || insn1 == 0x70774e40)
-
-#define IS_RT_SIGTRAMP(insn1, insn2)					\
-  (/* movel #173,d0; trap #0 */						\
-   (insn1 == 0x203c0000 && insn2 == 0x00ad4e40)				\
-   /* moveq #82,d0; notb d0; trap #0 */					\
-   || (insn1 == 0x70524600 && (insn2 >> 16) == 0x4e40))
-
-/* Return non-zero if PC points into the signal trampoline.  For the sake
-   of m68k_linux_frame_saved_pc we also distinguish between non-RT and RT
-   signal trampolines.  */
-
-int
-m68k_linux_in_sigtramp (CORE_ADDR pc)
-{
-  CORE_ADDR sp;
-  char buf[12];
-  unsigned long insn0, insn1, insn2;
-
-  if (read_memory_nobpt (pc - 4, buf, sizeof (buf)))
-    return 0;
-  insn1 = extract_unsigned_integer (buf + 4, 4);
-  insn2 = extract_unsigned_integer (buf + 8, 4);
-  if (IS_SIGTRAMP (insn1, insn2))
-    return 1;
-  if (IS_RT_SIGTRAMP (insn1, insn2))
-    return 2;
-
-  insn0 = extract_unsigned_integer (buf, 4);
-  if (IS_SIGTRAMP (insn0, insn1))
-    return 1;
-  if (IS_RT_SIGTRAMP (insn0, insn1))
-    return 2;
-
-  insn0 = (insn0 << 16) | (insn1 >> 16);
-  insn1 = (insn1 << 16) | (insn2 >> 16);
-  if (IS_SIGTRAMP (insn0, insn1))
-    return 1;
-  if (IS_RT_SIGTRAMP (insn0, insn1))
-    return 2;
-
-  return 0;
-}
-
-/* Offset to saved PC in sigcontext, from <asm/sigcontext.h>.  */
-#define SIGCONTEXT_PC_OFFSET 26
-
-/* Offset to saved PC in ucontext, from <asm/ucontext.h>.  */
-#define UCONTEXT_PC_OFFSET 88
-
-/* Get saved user PC for sigtramp from sigcontext or ucontext.  */
-
-static CORE_ADDR
-m68k_linux_sigtramp_saved_pc (struct frame_info *frame)
-{
-  CORE_ADDR sigcontext_addr;
-  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
-  int ptrbytes = TARGET_PTR_BIT / TARGET_CHAR_BIT;
-  int sigcontext_offs = (2 * TARGET_INT_BIT) / TARGET_CHAR_BIT;
-
-  /* Get sigcontext address, it is the third parameter on the stack.  */
-  if (frame->next)
-    sigcontext_addr = read_memory_integer (FRAME_ARGS_ADDRESS (frame->next)
-					   + FRAME_ARGS_SKIP
-					   + sigcontext_offs,
-					   ptrbytes);
-  else
-    sigcontext_addr = read_memory_integer (read_register (SP_REGNUM)
-					   + sigcontext_offs,
-					   ptrbytes);
-
-  /* Don't cause a memory_error when accessing sigcontext in case the
-     stack layout has changed or the stack is corrupt.  */
-  if (m68k_linux_in_sigtramp (frame->pc) == 2)
-    target_read_memory (sigcontext_addr + UCONTEXT_PC_OFFSET, buf, ptrbytes);
-  else
-    target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
-  return extract_unsigned_integer (buf, ptrbytes);
-}
-
-/* Return the saved program counter for FRAME.  */
-
-CORE_ADDR
-m68k_linux_frame_saved_pc (struct frame_info *frame)
-{
-  if (frame->signal_handler_caller)
-    return m68k_linux_sigtramp_saved_pc (frame);
-
-  return read_memory_integer (frame->frame + 4, 4);
 }
 
 /* Register that we are able to handle GNU/Linux ELF core file

@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux x86-64.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Jiri Smid, SuSE Labs.
 
@@ -25,27 +25,256 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "linux-nat.h"
+
 #include "gdb_assert.h"
 #include "gdb_string.h"
-#include "x86-64-tdep.h"
-
 #include <sys/ptrace.h>
 #include <sys/debugreg.h>
 #include <sys/syscall.h>
 #include <sys/procfs.h>
+#include <asm/prctl.h>
+/* FIXME ezannoni-2003-07-09: we need <sys/reg.h> to be included after
+   <asm/ptrace.h> because the latter redefines FS and GS for no apparent
+   reason, and those definitions don't match the ones that libpthread_db
+   uses, which come from <sys/reg.h>.  */
+/* ezannoni-2003-07-09: I think this is fixed. The extraneous defs have
+   been removed from ptrace.h in the kernel.  However, better safe than
+   sorry.  */
+#include <asm/ptrace.h>
 #include <sys/reg.h>
+#include "gdb_proc_service.h"
 
-/* Mapping between the general-purpose registers in `struct user'
-   format and GDB's register array layout.  */
+/* Prototypes for supply_gregset etc.  */
+#include "gregset.h"
 
-static int x86_64_regmap[] = {
-  RAX, RBX, RCX, RDX,
-  RSI, RDI, RBP, RSP,
-  R8, R9, R10, R11,
-  R12, R13, R14, R15,
-  RIP, EFLAGS, CS, SS, 
-  DS, ES, FS, GS
+#include "x86-64-tdep.h"
+#include "x86-64-linux-tdep.h"
+#include "i386-linux-tdep.h"
+#include "amd64-nat.h"
+
+/* Mapping between the general-purpose registers in GNU/Linux x86-64
+   `struct user' format and GDB's register cache layout.  */
+
+static int x86_64_linux_gregset64_reg_offset[] =
+{
+  RAX * 8, RBX * 8,		/* %rax, %rbx */
+  RCX * 8, RDX * 8,		/* %rcx, %rdx */
+  RSI * 8, RDI * 8,		/* %rsi, %rdi */
+  RBP * 8, RSP * 8,		/* %rbp, %rsp */
+  R8 * 8, R9 * 8,		/* %r8 ... */
+  R10 * 8, R11 * 8,
+  R12 * 8, R13 * 8,
+  R14 * 8, R15 * 8,		/* ... %r15 */
+  RIP * 8, EFLAGS * 8,		/* %rip, %eflags */
+  DS * 8, ES * 8,		/* %ds, %es */
+  FS * 8, GS * 8		/* %fs, %gs */
 };
+
+
+/* Mapping between the general-purpose registers in GNU/Linux x86-64
+   `struct user' format and GDB's register cache layout for GNU/Linux
+   i386.
+
+   Note that most GNU/Linux x86-64 registers are 64-bit, while the
+   GNU/Linux i386 registers are all 32-bit, but since we're
+   little-endian we get away with that.  */
+
+/* From <sys/reg.h> on GNU/Linux i386.  */
+static int x86_64_linux_gregset32_reg_offset[] =
+{
+  10 * 8, 11 * 8,		/* %eax, %ecx */
+  12 * 8, 13 * 8,		/* %edx, %ebx */
+  19 * 8, 4 * 8,		/* %esp, %ebp */
+  13 * 8, 14 * 8,		/* %esi, %edi */
+  16 * 8, 18 * 8,		/* %eip, %eflags */
+  17 * 8, 20 * 8,		/* %cs, %ss */
+  23 * 8, 24 * 8,		/* %ds, %es */
+  25 * 4, 26 * 4,		/* %fs, %gs */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  15 * 8			/* "orig_eax" */
+};
+
+/* Which ptrace request retrieves which registers?
+   These apply to the corresponding SET requests as well.  */
+
+#define GETFPREGS_SUPPLIES(regno) \
+  (FP0_REGNUM <= (regno) && (regno) <= MXCSR_REGNUM)
+
+
+/* Transfering the general-purpose registers between GDB, inferiors
+   and core files.  */
+
+/* Fill GDB's register cache with the general-purpose register values
+   in *GREGSETP.  */
+
+void
+supply_gregset (elf_gregset_t *gregsetp)
+{
+  amd64_supply_native_gregset (current_regcache, gregsetp, -1);
+}
+
+/* Fill register REGNUM (if it is a general-purpose register) in
+   *GREGSETP with the value in GDB's register cache.  If REGNUM is -1,
+   do this for all registers.  */
+
+void
+fill_gregset (elf_gregset_t *gregsetp, int regnum)
+{
+  amd64_collect_native_gregset (current_regcache, gregsetp, regnum);
+}
+
+/* Fetch all general-purpose registers from process/thread TID and
+   store their values in GDB's register cache.  */
+
+static void
+fetch_regs (int tid)
+{
+  elf_gregset_t regs;
+
+  if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
+    perror_with_name ("Couldn't get registers");
+
+  supply_gregset (&regs);
+}
+
+/* Store all valid general-purpose registers in GDB's register cache
+   into the process/thread specified by TID.  */
+
+static void
+store_regs (int tid, int regnum)
+{
+  elf_gregset_t regs;
+
+  if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
+    perror_with_name ("Couldn't get registers");
+
+  fill_gregset (&regs, regnum);
+
+  if (ptrace (PTRACE_SETREGS, tid, 0, (long) &regs) < 0)
+    perror_with_name ("Couldn't write registers");
+}
+
+
+/* Transfering floating-point registers between GDB, inferiors and cores.  */
+
+/* Fill GDB's register cache with the floating-point and SSE register
+   values in *FPREGSETP.  */
+
+void
+supply_fpregset (elf_fpregset_t *fpregsetp)
+{
+  x86_64_supply_fxsave (current_regcache, -1, fpregsetp);
+}
+
+/* Fill register REGNUM (if it is a floating-point or SSE register) in
+   *FPREGSETP with the value in GDB's register cache.  If REGNUM is
+   -1, do this for all registers.  */
+
+void
+fill_fpregset (elf_fpregset_t *fpregsetp, int regnum)
+{
+  x86_64_fill_fxsave ((char *) fpregsetp, regnum);
+}
+
+/* Fetch all floating-point registers from process/thread TID and store
+   thier values in GDB's register cache.  */
+
+static void
+fetch_fpregs (int tid)
+{
+  elf_fpregset_t fpregs;
+
+  if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
+    perror_with_name ("Couldn't get floating point status");
+
+  supply_fpregset (&fpregs);
+}
+
+/* Store all valid floating-point registers in GDB's register cache
+   into the process/thread specified by TID.  */
+
+static void
+store_fpregs (int tid, int regnum)
+{
+  elf_fpregset_t fpregs;
+
+  if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
+    perror_with_name ("Couldn't get floating point status");
+
+  fill_fpregset (&fpregs, regnum);
+
+  if (ptrace (PTRACE_SETFPREGS, tid, 0, (long) &fpregs) < 0)
+    perror_with_name ("Couldn't write floating point status");
+}
+
+
+/* Transferring arbitrary registers between GDB and inferior.  */
+
+/* Fetch register REGNUM from the child process.  If REGNUM is -1, do
+   this for all registers (including the floating point and SSE
+   registers).  */
+
+void
+fetch_inferior_registers (int regnum)
+{
+  int tid;
+
+  /* GNU/Linux LWP ID's are process ID's.  */
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+
+  if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
+    {
+      fetch_regs (tid);
+      if (regnum != -1)
+	return;
+    }
+
+  if (regnum == -1 || GETFPREGS_SUPPLIES (regnum))
+    {
+      fetch_fpregs (tid);
+      return;
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "Got request for bad register number %d.", regnum);
+}
+
+/* Store register REGNUM back into the child process.  If REGNUM is
+   -1, do this for all registers (including the floating-point and SSE
+   registers).  */
+
+void
+store_inferior_registers (int regnum)
+{
+  int tid;
+
+  /* GNU/Linux LWP ID's are process ID's.  */
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+
+  if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
+    {
+      store_regs (tid, regnum);
+      if (regnum != -1)
+	return;
+    }
+
+  if (regnum == -1 || GETFPREGS_SUPPLIES (regnum))
+    {
+      store_fpregs (tid, regnum);
+      return;
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "Got request to store bad register number %d.", regnum);
+}
+
 
 static unsigned long
 x86_64_linux_dr_get (int regnum)
@@ -121,372 +350,56 @@ x86_64_linux_dr_get_status (void)
 }
 
 
-/* The register sets used in GNU/Linux ELF core-dumps are identical to
-   the register sets used by `ptrace'.  */
-
-#define GETREGS_SUPPLIES(regno) \
-  (0 <= (regno) && (regno) < x86_64_num_gregs)
-#define GETFPREGS_SUPPLIES(regno) \
-  (FP0_REGNUM <= (regno) && (regno) <= MXCSR_REGNUM)
-
-
-/* Transfering the general-purpose registers between GDB, inferiors
-   and core files.  */
-
-/* Fill GDB's register array with the general-purpose register values
-   in *GREGSETP.  */
-
-void
-supply_gregset (elf_gregset_t * gregsetp)
+ps_err_e
+ps_get_thread_area (const struct ps_prochandle *ph,
+                    lwpid_t lwpid, int idx, void **base)
 {
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
-  int i;
-
-  for (i = 0; i < x86_64_num_gregs; i++)
-    supply_register (i, (char *) (regp + x86_64_regmap[i]));
-}
-
-/* Fill register REGNO (if it is a general-purpose register) in
-   *GREGSETPS with the value in GDB's register array.  If REGNO is -1,
-   do this for all registers.  */
-
-void
-fill_gregset (elf_gregset_t * gregsetp, int regno)
-{
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
-  int i;
-
-  for (i = 0; i < x86_64_num_gregs; i++)
-    if ((regno == -1 || regno == i))
-      read_register_gen (i, (char *) (regp + x86_64_regmap[i]));
-}
-
-/* Fetch all general-purpose registers from process/thread TID and
-   store their values in GDB's register array.  */
-
-static void
-fetch_regs (int tid)
-{
-  elf_gregset_t regs;
-
-  if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
-    perror_with_name ("Couldn't get registers");
-
-  supply_gregset (&regs);
-}
-
-/* Store all valid general-purpose registers in GDB's register array
-   into the process/thread specified by TID.  */
-
-static void
-store_regs (int tid, int regno)
-{
-  elf_gregset_t regs;
-
-  if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
-    perror_with_name ("Couldn't get registers");
-
-  fill_gregset (&regs, regno);
-
-  if (ptrace (PTRACE_SETREGS, tid, 0, (long) &regs) < 0)
-    perror_with_name ("Couldn't write registers");
-}
-
-
-/* Transfering floating-point registers between GDB, inferiors and cores.  */
-
-static void *
-x86_64_fxsave_offset (elf_fpregset_t * fxsave, int regnum)
-{
-  const char *reg_name;
-  int reg_index;
-
-  gdb_assert (x86_64_num_gregs - 1 < regnum && regnum < x86_64_num_regs);
-
-  reg_name = x86_64_register_name (regnum);
-
-  if (reg_name[0] == 's' && reg_name[1] == 't')
-    {
-      reg_index = reg_name[2] - '0';
-      return &fxsave->st_space[reg_index * 2];
-    }
-
-  if (reg_name[0] == 'x' && reg_name[1] == 'm' && reg_name[2] == 'm')
-    {
-      reg_index = reg_name[3] - '0';
-      return &fxsave->xmm_space[reg_index * 4];
-    }
-
-  if (strcmp (reg_name, "mxcsr") == 0)
-    return &fxsave->mxcsr;
-
-  return NULL;
-}
-
-/* Fill GDB's register array with the floating-point and SSE register
-   values in *FXSAVE.  This function masks off any of the reserved
-   bits in *FXSAVE.  */
-
-void
-supply_fpregset (elf_fpregset_t * fxsave)
-{
-  int i, reg_st0, reg_mxcsr;
-
-  reg_st0 = x86_64_register_number ("st0");
-  reg_mxcsr = x86_64_register_number ("mxcsr");
-
-  gdb_assert (reg_st0 > 0 && reg_mxcsr > reg_st0);
-
-  for (i = reg_st0; i <= reg_mxcsr; i++)
-    supply_register (i, x86_64_fxsave_offset (fxsave, i));
-}
-
-/* Fill register REGNUM (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register array.  If REGNUM is -1, do
-   this for all registers.  This function doesn't touch any of the
-   reserved bits in *FXSAVE.  */
-
-void
-fill_fpregset (elf_fpregset_t * fxsave, int regnum)
-{
-  int i, last_regnum = MXCSR_REGNUM;
-  void *ptr;
-
-  if (gdbarch_tdep (current_gdbarch)->num_xmm_regs == 0)
-    last_regnum = FOP_REGNUM;
-
-  for (i = FP0_REGNUM; i <= last_regnum; i++)
-    if (regnum == -1 || regnum == i)
-      {
-	ptr = x86_64_fxsave_offset (fxsave, i);
-	if (ptr)
-	  regcache_collect (i, ptr);
-      }
-}
-
-/* Fetch all floating-point registers from process/thread TID and store
-   thier values in GDB's register array.  */
-
-static void
-fetch_fpregs (int tid)
-{
-  elf_fpregset_t fpregs;
-
-  if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
-    perror_with_name ("Couldn't get floating point status");
-
-  supply_fpregset (&fpregs);
-}
-
-/* Store all valid floating-point registers in GDB's register array
-   into the process/thread specified by TID.  */
-
-static void
-store_fpregs (int tid, int regno)
-{
-  elf_fpregset_t fpregs;
-
-  if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
-    perror_with_name ("Couldn't get floating point status");
-
-  fill_fpregset (&fpregs, regno);
-
-  if (ptrace (PTRACE_SETFPREGS, tid, 0, (long) &fpregs) < 0)
-    perror_with_name ("Couldn't write floating point status");
-}
-
-
-/* Transferring arbitrary registers between GDB and inferior.  */
-
-/* Fetch register REGNO from the child process.  If REGNO is -1, do
-   this for all registers (including the floating point and SSE
-   registers).  */
-
-void
-fetch_inferior_registers (int regno)
-{
-  int tid;
-
-  /* GNU/Linux LWP ID's are process ID's.  */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
-    tid = PIDGET (inferior_ptid);	/* Not a threaded program.  */
-
-  if (regno == -1)
-    {
-      fetch_regs (tid);
-      fetch_fpregs (tid);
-      return;
-    }
-
-  if (GETREGS_SUPPLIES (regno))
-    {
-      fetch_regs (tid);
-      return;
-    }
-
-  if (GETFPREGS_SUPPLIES (regno))
-    {
-      fetch_fpregs (tid);
-      return;
-    }
-
-  internal_error (__FILE__, __LINE__,
-		  "Got request for bad register number %d.", regno);
-}
-
-/* Store register REGNO back into the child process.  If REGNO is -1,
-   do this for all registers (including the floating point and SSE
-   registers).  */
-void
-store_inferior_registers (int regno)
-{
-  int tid;
-
-  /* GNU/Linux LWP ID's are process ID's.  */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
-    tid = PIDGET (inferior_ptid);	/* Not a threaded program.  */
-
-  if (regno == -1)
-    {
-      store_regs (tid, regno);
-      store_fpregs (tid, regno);
-      return;
-    }
-
-  if (GETREGS_SUPPLIES (regno))
-    {
-      store_regs (tid, regno);
-      return;
-    }
-
-  if (GETFPREGS_SUPPLIES (regno))
-    {
-      store_fpregs (tid, regno);
-      return;
-    }
-
-  internal_error (__FILE__, __LINE__,
-		  "Got request to store bad register number %d.", regno);
-}
-
-
-static const unsigned char linux_syscall[] = { 0x0f, 0x05 };
-
-#define LINUX_SYSCALL_LEN (sizeof linux_syscall)
-
-/* The system call number is stored in the %rax register.  */
-#define LINUX_SYSCALL_REGNUM 0	/* %rax */
-
-/* We are specifically interested in the sigreturn and rt_sigreturn
-   system calls.  */
-
-#ifndef SYS_sigreturn
-#define SYS_sigreturn		__NR_sigreturn
-#endif
-#ifndef SYS_rt_sigreturn
-#define SYS_rt_sigreturn	__NR_rt_sigreturn
+/* This definition comes from prctl.h, but some kernels may not have it.  */
+#ifndef PTRACE_ARCH_PRCTL
+#define PTRACE_ARCH_PRCTL      30
 #endif
 
-/* Offset to saved processor flags, from <asm/sigcontext.h>.  */
-#define LINUX_SIGCONTEXT_EFLAGS_OFFSET (152)
-/* Offset to saved processor registers from <asm/ucontext.h> */
-#define LINUX_UCONTEXT_SIGCONTEXT_OFFSET (36)
-
-/* Interpreting register set info found in core files.  */
-/* Provide registers to GDB from a core file.
-
-   CORE_REG_SECT points to an array of bytes, which are the contents
-   of a `note' from a core file which BFD thinks might contain
-   register contents.  CORE_REG_SIZE is its size.
-
-   WHICH says which register set corelow suspects this is:
-     0 --- the general-purpose register set, in elf_gregset_t format
-     2 --- the floating-point register set, in elf_fpregset_t format
-
-   REG_ADDR isn't used on GNU/Linux.  */
-
-static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
-		      int which, CORE_ADDR reg_addr)
-{
-  elf_gregset_t gregset;
-  elf_fpregset_t fpregset;
-  switch (which)
+  /* FIXME: ezannoni-2003-07-09 see comment above about include file order.
+     We could be getting bogus values for these two.  */
+  gdb_assert (FS < ELF_NGREG);
+  gdb_assert (GS < ELF_NGREG);
+  switch (idx)
     {
-    case 0:
-      if (core_reg_size != sizeof (gregset))
-	warning ("Wrong size gregset in core file.");
-      else
-	{
-	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
-	  supply_gregset (&gregset);
-	}
+    case FS:
+      if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_FS) == 0)
+	return PS_OK;
       break;
-
-    case 2:
-      if (core_reg_size != sizeof (fpregset))
-	warning ("Wrong size fpregset in core file.");
-      else
-	{
-	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
-	  supply_fpregset (&fpregset);
-	}
+    case GS:
+      if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_GS) == 0)
+	return PS_OK;
       break;
-
-    default:
-      /* We've covered all the kinds of registers we know about here,
-         so this must be something we wouldn't know what to do with
-         anyway.  Just ignore it.  */
-      break;
+    default:                   /* Should not happen.  */
+      return PS_BADADDR;
     }
+  return PS_ERR;               /* ptrace failed.  */
 }
-
-/* Register that we are able to handle GNU/Linux ELF core file formats.  */
-
-static struct core_fns linux_elf_core_fns = {
-  bfd_target_elf_flavour,	/* core_flavour */
-  default_check_format,		/* check_format */
-  default_core_sniffer,		/* core_sniffer */
-  fetch_core_registers,		/* core_read_registers */
-  NULL				/* next */
-};
 
 
-#if !defined (offsetof)
-#define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
-#endif
-
-/* Return the address of register REGNUM.  BLOCKEND is the value of
-   u.u_ar0, which should point to the registers.  */
-CORE_ADDR
-x86_64_register_u_addr (CORE_ADDR blockend, int regnum)
+void
+child_post_startup_inferior (ptid_t ptid)
 {
-  struct user u;
-  CORE_ADDR fpstate;
-  CORE_ADDR ubase;
-  ubase = blockend;
-  if (IS_FP_REGNUM (regnum))
-    {
-      fpstate = ubase + ((char *) &u.i387.st_space - (char *) &u);
-      return (fpstate + 16 * (regnum - FP0_REGNUM));
-    }
-  else if (IS_SSE_REGNUM (regnum))
-    {
-      fpstate = ubase + ((char *) &u.i387.xmm_space - (char *) &u);
-      return (fpstate + 16 * (regnum - XMM0_REGNUM));
-    }
-  else
-    return (ubase + 8 * x86_64_regmap[regnum]);
+  i386_cleanup_dregs ();
+  linux_child_post_startup_inferior (ptid);
 }
+
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_x86_64_linux_nat (void);
 
 void
 _initialize_x86_64_linux_nat (void)
 {
-  add_core_fns (&linux_elf_core_fns);
-}
+  amd64_native_gregset32_reg_offset = x86_64_linux_gregset32_reg_offset;
+  amd64_native_gregset32_num_regs = I386_LINUX_NUM_REGS;
+  amd64_native_gregset64_reg_offset = x86_64_linux_gregset64_reg_offset;
 
-int
-kernel_u_size (void)
-{
-  return (sizeof (struct user));
+  gdb_assert (ARRAY_SIZE (x86_64_linux_gregset32_reg_offset)
+	      == amd64_native_gregset32_num_regs);
+  gdb_assert (ARRAY_SIZE (x86_64_linux_gregset64_reg_offset)
+	      == amd64_native_gregset64_num_regs);
 }

@@ -329,7 +329,7 @@ Add32 (unsigned long a1, unsigned long a2, int * carry)
 }
 
 static void
-Multiply64 (boolean sign, unsigned long op0)
+Multiply64 (int sign, unsigned long op0)
 {
   unsigned long op1;
   unsigned long lo;
@@ -769,50 +769,6 @@ OP_6E0 ()
   trace_output (OP_IMM16_REG_REG);
   
   return 4;
-}
-
-/* divh reg1, reg2 */
-int
-OP_40 ()
-{
-  unsigned int op0, op1, result, ov, s, z;
-  int temp;
-
-  trace_input ("divh", OP_REG_REG, 0);
-
-  /* Compute the result.  */
-  temp = EXTEND16 (State.regs[ OP[0] ]);
-  op0 = temp;
-  op1 = State.regs[OP[1]];
-  
-  if (op0 == 0xffffffff && op1 == 0x80000000)
-    {
-      result = 0x80000000;
-      ov = 1;
-    }
-  else if (op0 != 0)
-    {
-      result = op1 / op0;
-      ov = 0;
-    }
-  else
-    {
-      result = 0x0;
-      ov = 1;
-    }
-  
-  /* Compute the condition codes.  */
-  z = (result == 0);
-  s = (result & 0x80000000);
-  
-  /* Store the result and condition codes.  */
-  State.regs[OP[1]] = result;
-  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
-	  | (ov ? PSW_OV : 0));
-  trace_output (OP_REG_REG);
-
-  return 2;
 }
 
 /* cmp reg, reg */
@@ -1911,7 +1867,7 @@ OP_22207E0 (void)
 {
   trace_input ("mulu", OP_REG_REG_REG, 0);
 
-  Multiply64 (false, State.regs[ OP[0] ]);
+  Multiply64 (0, State.regs[ OP[0] ]);
 
   trace_output (OP_REG_REG_REG);
 
@@ -1982,7 +1938,7 @@ divun
   unsigned long int  sfi,
   unsigned32 /*unsigned long int*/ *  quotient_ptr,
   unsigned32 /*unsigned long int*/ *  remainder_ptr,
-  boolean *          overflow_ptr
+  int *          overflow_ptr
 )
 {
   unsigned long   ald = sfi >> (N - 1);
@@ -2056,7 +2012,7 @@ divn
   unsigned long int  sfi,
   signed32 /*signed long int*/ *  quotient_ptr,
   signed32 /*signed long int*/ *  remainder_ptr,
-  boolean *          overflow_ptr
+  int *          overflow_ptr
 )
 {
   unsigned long	  ald = (signed long) sfi >> (N - 1);
@@ -2155,7 +2111,7 @@ OP_1C207E0 (void)
   unsigned32 /*unsigned long int*/  remainder;
   unsigned long int  divide_by;
   unsigned long int  divide_this;
-  boolean            overflow = false;
+  int            overflow = 0;
   unsigned int       imm5;
       
   trace_input ("sdivun", OP_IMM_REG_REG_REG, 0);
@@ -2190,7 +2146,7 @@ OP_1C007E0 (void)
   signed32 /*signed long int*/  remainder;
   signed long int  divide_by;
   signed long int  divide_this;
-  boolean          overflow = false;
+  int          overflow = 0;
   unsigned int     imm5;
       
   trace_input ("sdivn", OP_IMM_REG_REG_REG, 0);
@@ -2225,7 +2181,7 @@ OP_18207E0 (void)
   unsigned32 /*unsigned long int*/  remainder;
   unsigned long int  divide_by;
   unsigned long int  divide_this;
-  boolean            overflow = false;
+  int            overflow = 0;
   unsigned int       imm5;
       
   trace_input ("sdivhun", OP_IMM_REG_REG_REG, 0);
@@ -2260,7 +2216,7 @@ OP_18007E0 (void)
   signed32 /*signed long int*/  remainder;
   signed long int  divide_by;
   signed long int  divide_this;
-  boolean          overflow = false;
+  int          overflow = 0;
   unsigned int     imm5;
       
   trace_input ("sdivhn", OP_IMM_REG_REG_REG, 0);
@@ -2295,7 +2251,7 @@ OP_2C207E0 (void)
   unsigned long int remainder;
   unsigned long int divide_by;
   unsigned long int divide_this;
-  boolean           overflow = false;
+  int           overflow = 0;
   
   trace_input ("divu", OP_REG_REG_REG, 0);
   
@@ -2306,7 +2262,7 @@ OP_2C207E0 (void)
   
   if (divide_by == 0)
     {
-      overflow = true;
+      overflow = 1;
       divide_by  = 1;
     }
   
@@ -2333,7 +2289,7 @@ OP_2C007E0 (void)
   signed long int remainder;
   signed long int divide_by;
   signed long int divide_this;
-  boolean         overflow = false;
+  int         overflow = 0;
   
   trace_input ("div", OP_REG_REG_REG, 0);
   
@@ -2344,7 +2300,7 @@ OP_2C007E0 (void)
   
   if (divide_by == 0 || (divide_by == -1 && divide_this == (1 << 31)))
     {
-      overflow  = true;
+      overflow  = 1;
       divide_by = 1;
     }
   
@@ -2371,7 +2327,7 @@ OP_28207E0 (void)
   unsigned long int remainder;
   unsigned long int divide_by;
   unsigned long int divide_this;
-  boolean           overflow = false;
+  int           overflow = 0;
   
   trace_input ("divhu", OP_REG_REG_REG, 0);
   
@@ -2382,7 +2338,7 @@ OP_28207E0 (void)
   
   if (divide_by == 0)
     {
-      overflow = true;
+      overflow = 1;
       divide_by  = 1;
     }
   
@@ -2409,7 +2365,7 @@ OP_28007E0 (void)
   signed long int remainder;
   signed long int divide_by;
   signed long int divide_this;
-  boolean         overflow = false;
+  int         overflow = 0;
   
   trace_input ("divh", OP_REG_REG_REG, 0);
   
@@ -2420,7 +2376,7 @@ OP_28007E0 (void)
   
   if (divide_by == 0 || (divide_by == -1 && divide_this == (1 << 31)))
     {
-      overflow = true;
+      overflow = 1;
       divide_by  = 1;
     }
   
@@ -2445,7 +2401,7 @@ OP_24207E0 (void)
 {
   trace_input ("mulu", OP_IMM_REG_REG, 0);
 
-  Multiply64 (false, (OP[3] & 0x1f) | ((OP[3] >> 13) & 0x1e0));
+  Multiply64 (0, (OP[3] & 0x1f) | ((OP[3] >> 13) & 0x1e0));
 
   trace_output (OP_IMM_REG_REG);
 
@@ -2458,7 +2414,7 @@ OP_24007E0 (void)
 {
   trace_input ("mul", OP_IMM_REG_REG, 0);
 
-  Multiply64 (true, SEXT9 ((OP[3] & 0x1f) | ((OP[3] >> 13) & 0x1e0)));
+  Multiply64 (1, SEXT9 ((OP[3] & 0x1f) | ((OP[3] >> 13) & 0x1e0)));
 
   trace_output (OP_IMM_REG_REG);
 
@@ -2608,7 +2564,7 @@ OP_22007E0 (void)
 {
   trace_input ("mul", OP_REG_REG_REG, 0);
 
-  Multiply64 (true, State.regs[ OP[0] ]);
+  Multiply64 (1, State.regs[ OP[0] ]);
 
   trace_output (OP_REG_REG_REG);
 

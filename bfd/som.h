@@ -1,6 +1,6 @@
 /* HP PA-RISC SOM object file format:  definitions internal to BFD.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000
-   Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001,
+   2002, 2003 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -26,6 +26,9 @@
 #define _SOM_H
 
 #include "libhppa.h"
+
+/* Enable PA2.0 if available */
+#define PA_2_0
 
 #include <a.out.h>
 #include <lst.h>
@@ -207,7 +210,7 @@ struct som_section_data_struct
    should be internal to the BFD backend.
 
    The idea is both SOM and ELF define these basic relocation
-   types so they map into a SOM or ELF specific reloation as
+   types so they map into a SOM or ELF specific relocation as
    appropriate.  This allows GAS to share much more code
    between the two object formats.  */
 
@@ -225,16 +228,16 @@ struct som_section_data_struct
 #define R_HPPA_END_TRY			R_END_TRY
 
 /* Exported functions, mostly for use by GAS.  */
-boolean bfd_som_set_section_attributes PARAMS ((asection *, int, int,
-						unsigned int, int));
-boolean bfd_som_set_subsection_attributes PARAMS ((asection *, asection *,
-						   int, unsigned int, int));
+bfd_boolean bfd_som_set_section_attributes
+  PARAMS ((asection *, int, int, unsigned int, int));
+bfd_boolean bfd_som_set_subsection_attributes
+  PARAMS ((asection *, asection *, int, unsigned int, int));
 void bfd_som_set_symbol_type PARAMS ((asymbol *, unsigned int));
-boolean bfd_som_attach_aux_hdr PARAMS ((bfd *, int, char *));
+bfd_boolean bfd_som_attach_aux_hdr PARAMS ((bfd *, int, char *));
 int ** hppa_som_gen_reloc_type
   PARAMS ((bfd *, int, int, enum hppa_reloc_field_selector_type_alt,
 	   int, asymbol *));
-boolean bfd_som_attach_compilation_unit
+bfd_boolean bfd_som_attach_compilation_unit
   PARAMS ((bfd *, const char *, const char *, const char *, const char *));
 
 #endif /* _SOM_H */

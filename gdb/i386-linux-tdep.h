@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux x86.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,5 +32,8 @@
    pseudo-register contains a value >= 0 it is interpreted as the
    system call number that the kernel is supposed to restart.  */
 #define I386_LINUX_ORIG_EAX_REGNUM I386_SSE_NUM_REGS
+
+/* Total number of registers for GNU/Linux.  */
+#define I386_LINUX_NUM_REGS (I386_LINUX_ORIG_EAX_REGNUM + 1)
 
 #endif /* i386-linux-tdep.h */

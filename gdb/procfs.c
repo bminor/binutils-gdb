@@ -1,5 +1,8 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Inc.
+
    Written by Michael Snyder at Cygnus Solutions.
    Based on work by Fred Fish, Stu Grossman, Geoff Noer, and others.
 
@@ -39,9 +42,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/syscall.h>
 #endif
 #include <sys/errno.h>
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #include <signal.h>
 #include <ctype.h>
+#include "gdb_assert.h"
+#include "inflow.h"
 
 /* 
  * PROCFS.C
@@ -2841,6 +2846,19 @@ proc_parent_pid (procinfo *pi)
 }
 
 
+/* Convert a target address (a.k.a. CORE_ADDR) into a host address
+   (a.k.a void pointer)!  */
+
+static void *
+procfs_address_to_host_pointer (CORE_ADDR addr)
+{
+  void *ptr;
+
+  gdb_assert (sizeof (ptr) == TYPE_LENGTH (builtin_type_void_data_ptr));
+  ADDRESS_TO_POINTER (builtin_type_void_data_ptr, &ptr, addr);
+  return ptr;
+}
+
 /*
  * Function: proc_set_watchpoint
  *
@@ -2863,10 +2881,13 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
   prwatch_t *pwatch;
 
   pwatch            = (prwatch_t *) &arg.watch;
+  /* NOTE: cagney/2003-02-01: Even more horrible hack.  Need to
+     convert a target address into something that can be stored in a
+     native data structure.  */
 #ifdef PCAGENT	/* Horrible hack: only defined on Solaris 2.6+ */
-  pwatch->pr_vaddr  = (uintptr_t) address_to_host_pointer (addr);
+  pwatch->pr_vaddr  = (uintptr_t) procfs_address_to_host_pointer (addr);
 #else
-  pwatch->pr_vaddr  = (caddr_t) address_to_host_pointer (addr);
+  pwatch->pr_vaddr  = (caddr_t) procfs_address_to_host_pointer (addr);
 #endif
   pwatch->pr_size   = len;
   pwatch->pr_wflags = wflags;
@@ -3684,8 +3705,8 @@ procfs_fetch_registers (int regno)
     {
       if ((regno >= 0 && regno < FP0_REGNUM) ||
 	  regno == PC_REGNUM  ||
-	  (NPC_REGNUM >= 0 && regno == NPC_REGNUM) ||
-	  regno == FP_REGNUM  ||
+	  (DEPRECATED_NPC_REGNUM >= 0 && regno == DEPRECATED_NPC_REGNUM) ||
+	  regno == DEPRECATED_FP_REGNUM  ||
 	  regno == SP_REGNUM)
 	return;			/* not a floating point register */
 
@@ -3758,8 +3779,8 @@ procfs_store_registers (int regno)
     {
       if ((regno >= 0 && regno < FP0_REGNUM) ||
 	  regno == PC_REGNUM  ||
-	  (NPC_REGNUM >= 0 && regno == NPC_REGNUM) ||
-	  regno == FP_REGNUM  ||
+	  (DEPRECATED_NPC_REGNUM >= 0 && regno == DEPRECATED_NPC_REGNUM) ||
+	  regno == DEPRECATED_FP_REGNUM  ||
 	  regno == SP_REGNUM)
 	return;			/* not a floating point register */
 
@@ -4142,7 +4163,7 @@ wait_again:
 		wstat = (what << 8) | 0177;
 		break;
 	      case PR_FAULTED:
-		switch (what) {	/* FIXME: FAULTED_USE_SIGINFO */
+		switch (what) {
 #ifdef FLTWATCH
 		case FLTWATCH:
 		  wstat = (SIGTRAP << 8) | 0177;
@@ -4589,8 +4610,6 @@ procfs_can_run (void)
 static void
 procfs_stop (void)
 {
-  extern pid_t inferior_process_group;
-
   kill (-inferior_process_group, SIGINT);
 }
 
@@ -5163,10 +5182,11 @@ procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
   /* Due to the way that proc_set_watchpoint() is implemented, host
      and target pointers must be of the same size.  If they are not,
      we can't use hardware watchpoints.  This limitation is due to the
-     fact that proc_set_watchpoint() calls address_to_host_pointer();
-     a close inspection of address_to_host_pointer will reveal that
-     an internal error will be generated when the host and target
-     pointer sizes are different.  */
+     fact that proc_set_watchpoint() calls
+     procfs_address_to_host_pointer(); a close inspection of
+     procfs_address_to_host_pointer will reveal that an internal error
+     will be generated when the host and target pointer sizes are
+     different.  */
   if (sizeof (void *) != TYPE_LENGTH (builtin_type_void_data_ptr))
     return 0;
 
@@ -5499,7 +5519,6 @@ mappingflags (long flags)
  * Callback function, does the actual work for 'info proc mappings'.
  */
 
-/* ARGSUSED */
 static int
 info_mappings_callback (struct prmap *map, int (*ignore) (), void *unused)
 {

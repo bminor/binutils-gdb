@@ -123,7 +123,26 @@ proc mi_gdb_start { } {
 	return 1;
     }
     gdb_expect {
-	-re ".*$mi_gdb_prompt$" {
+	-re "~\"GNU.*\r\n~\".*$mi_gdb_prompt$" {
+	    # We have a new format mi startup prompt.  If we are
+	    # running mi1, then this is an error as we should be
+	    # using the old-style prompt.
+	    if { $MIFLAGS == "-i=mi1" } {
+	        perror "(mi startup) Got unexpected new mi prompt."
+	        remote_close host;
+	        return -1;
+	    }
+	    verbose "GDB initialized."
+	}
+	-re "\[^~\].*$mi_gdb_prompt$" {
+	    # We have an old format mi startup prompt.  If we are
+	    # not running mi1, then this is an error as we should be
+	    # using the new-style prompt.
+	    if { $MIFLAGS != "-i=mi1" } {
+	        perror "(mi startup) Got unexpected old mi prompt."
+	        remote_close host;
+	        return -1;
+	    }
 	    verbose "GDB initialized."
 	}
 	-re ".*$gdb_prompt $" {
@@ -193,7 +212,7 @@ proc mi_delete_breakpoints {} {
 	 -re ".*102-break-delete\r\n102\\\^done\r\n$mi_gdb_prompt$" {
             # This happens if there were no breakpoints
 	 }
-	 timeout { perror "Delete all breakpoints in delete_breakpoints (timeout)" ; return }
+	 timeout { perror "Delete all breakpoints in mi_delete_breakpoints (timeout)" ; return }
     }
 
 # The correct output is not "No breakpoints or watchpoints." but an
@@ -215,6 +234,7 @@ proc mi_delete_breakpoints {} {
 
 proc mi_gdb_reinitialize_dir { subdir } {
     global mi_gdb_prompt
+    global MIFLAGS
 
     global suppress_flag
     if { $suppress_flag } {
@@ -225,8 +245,9 @@ proc mi_gdb_reinitialize_dir { subdir } {
 	return "";
     }
 
-    send_gdb "104-environment-directory\n"
-    gdb_expect 60 {
+    if { $MIFLAGS == "-i=mi1" } {
+      send_gdb "104-environment-directory\n"
+      gdb_expect 60 {
 	-re ".*Reinitialize source path to empty.*y or n. " {
             warning "Got confirmation prompt for dir reinitialization."
 	    send_gdb "y\n"
@@ -237,6 +258,14 @@ proc mi_gdb_reinitialize_dir { subdir } {
 	}
 	-re "$mi_gdb_prompt$" {}
         timeout {error "Dir reinitialization failed (timeout)"}
+      }
+    } else {
+      send_gdb "104-environment-directory -r\n"
+      gdb_expect 60 {
+	-re "104\\\^done,source-path=.*\r\n$mi_gdb_prompt$" {}
+	-re "$mi_gdb_prompt$" {}
+        timeout {error "Dir reinitialization failed (timeout)"}
+      }
     }
 
     send_gdb "105-environment-directory $subdir\n"
@@ -244,7 +273,7 @@ proc mi_gdb_reinitialize_dir { subdir } {
 	-re "Source directories searched.*$mi_gdb_prompt$" {
 	    verbose "Dir set to $subdir"
 	}
-	-re "105\\\^done\r\n$mi_gdb_prompt$" {
+	-re "105\\\^done.*\r\n$mi_gdb_prompt$" {
             # FIXME: We return just the prompt for now.
 	    verbose "Dir set to $subdir"
 	    # perror "Dir \"$subdir\" failed."
@@ -262,7 +291,14 @@ proc mi_gdb_load { arg } {
     global loadfile
     global GDB
     global mi_gdb_prompt
+    global last_mi_gdb_file
     upvar timeout timeout
+
+    if { $arg == "" } {
+	set arg $last_mi_gdb_file;
+    }
+
+    set last_mi_gdb_file $arg;
 
     # ``gdb_unload''
 
@@ -356,6 +392,26 @@ proc mi_gdb_load { arg } {
 	    }
 	    timeout {
 		perror "Unable to download to sim target"
+		return -1
+	    }
+	}
+    } elseif { [target_info gdb_protocol] == "remote" } {
+	# remote targets
+	send_gdb "target [target_info gdb_protocol] [target_info netport]\n"
+	gdb_expect 60 {
+	    -re "\\^done,.*$mi_gdb_prompt$" {
+	    }
+	    timeout {
+		perror "Unable to connect to remote target"
+		return -1
+	    }
+	}
+	send_gdb "48-target-download\n"
+	gdb_expect 10 {
+	    -re "48\\^done.*$mi_gdb_prompt$" {
+	    }
+	    timeout {
+		perror "Unable to download to remote target"
 		return -1
 	    }
 	}
@@ -493,18 +549,18 @@ proc mi_gdb_test { args } {
 	}
 	 -re "Program exited with code \[0-9\]+.*$mi_gdb_prompt\[ \]*$" {
 	    if ![string match "" $message] then {
-		set errmsg "$message: the program exited"
+		set errmsg "$message (the program exited)"
 	    } else {
-		set errmsg "$command: the program exited"
+		set errmsg "$command (the program exited)"
 	    }
 	    fail "$errmsg"
 	    return -1
 	}
 	 -re "The program is not being run.*$mi_gdb_prompt\[ \]*$" {
 	    if ![string match "" $message] then {
-		set errmsg "$message: the program is no longer running"
+		set errmsg "$message (the program is no longer running)"
 	    } else {
-		set errmsg "$command: the program is no longer running"
+		set errmsg "$command (the program is no longer running)"
 	    }
 	    fail "$errmsg"
 	    return -1
@@ -580,7 +636,7 @@ proc mi_run_cmd {args} {
 	    }
 	    send_gdb "000-exec-continue\n";
 	    gdb_expect 60 {
-		-re "Continu\[^\r\n\]*\[\r\n\]" {}
+		-re "000\\^running\[\r\n\]+$mi_gdb_prompt$" {}
 		default {}
 	    }
 	    return;

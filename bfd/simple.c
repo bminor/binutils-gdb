@@ -1,5 +1,5 @@
 /* simple.c -- BFD simple client routines
-   Copyright 2002
+   Copyright 2002, 2003
    Free Software Foundation, Inc.
    Contributed by MontaVista Software, Inc.
 
@@ -24,7 +24,7 @@
 #include "libbfd.h"
 #include "bfdlink.h"
 
-static boolean
+static bfd_boolean
 simple_dummy_warning (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 		      const char *warning ATTRIBUTE_UNUSED,
 		      const char *symbol ATTRIBUTE_UNUSED,
@@ -32,21 +32,21 @@ simple_dummy_warning (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 		      asection *section ATTRIBUTE_UNUSED,
 		      bfd_vma address ATTRIBUTE_UNUSED)
 {
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 simple_dummy_undefined_symbol (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			       const char *name ATTRIBUTE_UNUSED,
 			       bfd *abfd ATTRIBUTE_UNUSED,
 			       asection *section ATTRIBUTE_UNUSED,
 			       bfd_vma address ATTRIBUTE_UNUSED,
-			       boolean fatal ATTRIBUTE_UNUSED)
+			       bfd_boolean fatal ATTRIBUTE_UNUSED)
 {
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 simple_dummy_reloc_overflow (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			     const char *name ATTRIBUTE_UNUSED,
 			     const char *reloc_name ATTRIBUTE_UNUSED,
@@ -55,27 +55,55 @@ simple_dummy_reloc_overflow (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			     asection *section ATTRIBUTE_UNUSED,
 			     bfd_vma address ATTRIBUTE_UNUSED)
 {
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 simple_dummy_reloc_dangerous (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			      const char *message ATTRIBUTE_UNUSED,
 			      bfd *abfd ATTRIBUTE_UNUSED,
 			      asection *section ATTRIBUTE_UNUSED,
 			      bfd_vma address ATTRIBUTE_UNUSED)
 {
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 simple_dummy_unattached_reloc (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			       const char *name ATTRIBUTE_UNUSED,
 			       bfd *abfd ATTRIBUTE_UNUSED,
 			       asection *section ATTRIBUTE_UNUSED,
 			       bfd_vma address ATTRIBUTE_UNUSED)
 {
-  return true;
+  return TRUE;
+}
+
+struct saved_output_info
+{
+  bfd_vma offset;
+  asection *section;
+};
+
+static void
+simple_save_output_info (bfd *abfd ATTRIBUTE_UNUSED,
+			 asection *section,
+			 void *ptr)
+{
+  struct saved_output_info *output_info = ptr;
+  output_info[section->index].offset = section->output_offset;
+  output_info[section->index].section = section->output_section;
+  section->output_offset = 0;
+  section->output_section = section;
+}
+
+static void
+simple_restore_output_info (bfd *abfd ATTRIBUTE_UNUSED,
+			    asection *section,
+			    void *ptr)
+{
+  struct saved_output_info *output_info = ptr;
+  section->output_offset = output_info[section->index].offset;
+  section->output_section = output_info[section->index].section;
 }
 
 /*
@@ -83,12 +111,14 @@ FUNCTION
 	bfd_simple_relocate_secton
 
 SYNOPSIS
-	bfd_byte *bfd_simple_get_relocated_section_contents (bfd *abfd, asection *sec, bfd_byte *outbuf);
+	bfd_byte *bfd_simple_get_relocated_section_contents
+	  (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);
 
 DESCRIPTION
-	Returns the relocated contents of section @var{sec}.  Only symbols
-	from @var{abfd} and the output offsets assigned to sections in
-	@var{abfd} are used.  The result will be stored at @var{outbuf}
+	Returns the relocated contents of section @var{sec}.  The symbols in
+	@var{symbol_table} will be used, or the symbols from @var{abfd} if
+	@var{symbol_table} is NULL.  The output offsets for all sections will
+	be temporarily reset to 0.  The result will be stored at @var{outbuf}
 	or allocated with @code{bfd_malloc} if @var{outbuf} is @code{NULL}.
 
 	Generally all sections in @var{abfd} should have their
@@ -99,15 +129,54 @@ DESCRIPTION
 */
 
 bfd_byte *
-bfd_simple_get_relocated_section_contents (bfd *abfd, asection *sec,
-					   bfd_byte *outbuf)
+bfd_simple_get_relocated_section_contents (bfd *abfd,
+					   asection *sec,
+					   bfd_byte *outbuf,
+					   asymbol **symbol_table)
 {
   struct bfd_link_info link_info;
   struct bfd_link_order link_order;
   struct bfd_link_callbacks callbacks;
   bfd_byte *contents, *data;
-  int storage_needed, number_of_symbols;
-  asymbol **symbol_table;
+  int storage_needed;
+  void *saved_offsets;
+  bfd_boolean saved_reloc_done = sec->reloc_done;
+
+#undef RETURN
+#define RETURN(x)				\
+  do						\
+    {						\
+      sec->reloc_done = saved_reloc_done;	\
+      return (x);				\
+    }						\
+  while (0)
+
+  /* Foul hack to prevent bfd_section_size aborts.  The reloc_done flag
+     only controls that macro (and the related size macros), selecting
+     between _raw_size and _cooked_size.  We may be called with relocation
+     done or not, so we need to save the done-flag and mark the section as
+     not relocated.
+
+     Debug sections won't change size while we're only relocating.  There
+     may be trouble here someday if it tries to run relaxation
+     unexpectedly, so make sure.  */
+  BFD_ASSERT (sec->_raw_size == sec->_cooked_size);
+  sec->reloc_done = 0;
+
+  if (! (sec->flags & SEC_RELOC))
+    {
+      bfd_size_type size = bfd_section_size (abfd, sec);
+
+      if (outbuf == NULL)
+	contents = bfd_malloc (size);
+      else
+	contents = outbuf;
+
+      if (contents)
+	bfd_get_section_contents (abfd, sec, contents, 0, size);
+
+      RETURN (contents);
+    }
 
   /* In order to use bfd_get_relocated_section_contents, we need
      to forge some data structures that it expects.  */
@@ -116,7 +185,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd, asection *sec,
   memset (&link_info, 0, sizeof (link_info));
   link_info.input_bfds = abfd;
 
-  link_info.hash = bfd_link_hash_table_create (abfd);
+  link_info.hash = _bfd_generic_link_hash_table_create (abfd);
   link_info.callbacks = &callbacks;
   callbacks.warning = simple_dummy_warning;
   callbacks.undefined_symbol = simple_dummy_undefined_symbol;
@@ -136,14 +205,39 @@ bfd_simple_get_relocated_section_contents (bfd *abfd, asection *sec,
     {
       data = bfd_malloc (bfd_section_size (abfd, sec));
       if (data == NULL)
-	return NULL;
+	RETURN (NULL);
       outbuf = data;
     }
-  bfd_link_add_symbols (abfd, &link_info);
 
-  storage_needed = bfd_get_symtab_upper_bound (abfd);
-  symbol_table = (asymbol **) bfd_malloc (storage_needed);
-  number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
+  /* The sections in ABFD may already have output sections and offsets set.
+     Because this function is primarily for debug sections, and GCC uses the
+     knowledge that debug sections will generally have VMA 0 when emitting
+     relocations between DWARF-2 sections (which are supposed to be
+     section-relative offsets anyway), we need to reset the output offsets
+     to zero.  We also need to arrange for section->output_section->vma plus
+     section->output_offset to equal section->vma, which we do by setting
+     section->output_section to point back to section.  Save the original
+     output offset and output section to restore later.  */
+  saved_offsets = malloc (sizeof (struct saved_output_info)
+			  * abfd->section_count);
+  if (saved_offsets == NULL)
+    {
+      if (data)
+	free (data);
+      RETURN (NULL);
+    }
+  bfd_map_over_sections (abfd, simple_save_output_info, saved_offsets);
+
+  if (symbol_table == NULL)
+    {
+      _bfd_generic_link_add_symbols (abfd, &link_info);
+
+      storage_needed = bfd_get_symtab_upper_bound (abfd);
+      symbol_table = bfd_malloc (storage_needed);
+      bfd_canonicalize_symtab (abfd, symbol_table);
+    }
+  else
+    storage_needed = 0;
 
   contents = bfd_get_relocated_section_contents (abfd,
 						 &link_info,
@@ -154,15 +248,24 @@ bfd_simple_get_relocated_section_contents (bfd *abfd, asection *sec,
   if (contents == NULL && data != NULL)
     free (data);
 
-  /* Foul hack to prevent bfd_section_size aborts.  This flag only controls
-     that macro (and the related size macros), selecting between _raw_size
-     and _cooked_size.  Debug sections won't change size while we're only
-     relocating.  There may be trouble here someday if it tries to run
-     relaxation unexpectedly, so make sure.  */
-  BFD_ASSERT (sec->_raw_size == sec->_cooked_size);
-  sec->reloc_done = 0;
+#if 0
+  /* NOTE: cagney/2003-04-05: This free, which was introduced on
+     2003-03-31 to stop a memory leak, caused a memory corruption
+     between GDB and BFD.  The problem, which is stabs specific, can
+     be identified by a bunch of failures in relocate.exp vis:
 
-  bfd_link_hash_table_free (abfd, link_info.hash);
+       gdb.base/relocate.exp: get address of static_bar
 
-  return contents;
+     Details of the problem can be found on the binutils@ mailing
+     list, see the discussion thread: "gdb.mi/mi-cli.exp failures".  */
+  if (storage_needed != 0)
+    free (symbol_table);
+#endif
+
+  bfd_map_over_sections (abfd, simple_restore_output_info, saved_offsets);
+  free (saved_offsets);
+
+  _bfd_generic_link_hash_table_free (link_info.hash);
+
+  RETURN (contents);
 }

@@ -1,22 +1,25 @@
-/*  This file is part of the program psim.
+/* The IGEN simulator generator for GDB, the GNU Debugger.
 
-    Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
+   Copyright 2002 Free Software Foundation, Inc.
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+   Contributed by Andrew Cagney.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
- 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- 
-    */
+   This file is part of GDB.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 
 #include <stdio.h>
@@ -35,15 +38,15 @@
 #include "lf.h"
 #include "filter.h"
 
-struct _filter {
+struct _filter
+{
   char *member;
   filter *next;
 };
 
 
 void
-filter_parse (filter **filters,
-	      const char *filt)
+filter_parse (filter **filters, const char *filt)
 {
   while (strlen (filt) > 0)
     {
@@ -51,7 +54,7 @@ filter_parse (filter **filters,
       filter **last;
       /* break out a member of the filter list */
       const char *flag = filt;
-      unsigned /*size_t*/ len;
+      unsigned /*size_t */ len;
       filt = strchr (filt, ',');
       if (filt == NULL)
 	{
@@ -65,13 +68,12 @@ filter_parse (filter **filters,
 	}
       /* find an insertion point - sorted order */
       last = filters;
-      while (*last != NULL
-	     && strncmp (flag, (*last)->member, len) > 0)
+      while (*last != NULL && strncmp (flag, (*last)->member, len) > 0)
 	last = &(*last)->next;
       if (*last != NULL
 	  && strncmp (flag, (*last)->member, len) == 0
 	  && strlen ((*last)->member) == len)
-	continue; /* duplicate */
+	continue;		/* duplicate */
       /* create an entry for that member */
       new_filter = ZALLOC (filter);
       new_filter->member = NZALLOC (char, len + 1);
@@ -84,14 +86,13 @@ filter_parse (filter **filters,
 
 
 void
-filter_add (filter **set,
-	    filter *add)
+filter_add (filter **set, filter *add)
 {
   while (add != NULL)
     {
       int cmp;
       if (*set == NULL)
-	cmp = 1; /* set->member > add->member */
+	cmp = 1;		/* set->member > add->member */
       else
 	cmp = strcmp ((*set)->member, add->member);
       if (cmp > 0)
@@ -109,7 +110,7 @@ filter_add (filter **set,
 	  /* already in set */
 	  add = add->next;
 	}
-      else /* cmp < 0 */
+      else			/* cmp < 0 */
 	{
 	  /* not reached insertion point */
 	  set = &(*set)->next;
@@ -119,8 +120,7 @@ filter_add (filter **set,
 
 
 int
-filter_is_subset (filter *superset,
-		  filter *subset)
+filter_is_subset (filter *superset, filter *subset)
 {
   while (1)
     {
@@ -128,21 +128,20 @@ filter_is_subset (filter *superset,
       if (subset == NULL)
 	return 1;
       if (superset == NULL)
-	return 0; /* subset isn't finished */
+	return 0;		/* subset isn't finished */
       cmp = strcmp (subset->member, superset->member);
       if (cmp < 0)
-	return 0; /* not found */
+	return 0;		/* not found */
       else if (cmp == 0)
-	subset = subset->next; /* found */
+	subset = subset->next;	/* found */
       else if (cmp > 0)
-	superset = superset->next; /* later in list? */
+	superset = superset->next;	/* later in list? */
     }
 }
 
 
 int
-filter_is_common (filter *l,
-		  filter *r)
+filter_is_common (filter *l, filter *r)
 {
   while (1)
     {
@@ -155,7 +154,7 @@ filter_is_common (filter *l,
       if (cmp < 0)
 	l = l->next;
       else if (cmp == 0)
-	return 1; /* common member */
+	return 1;		/* common member */
       else if (cmp > 0)
 	r = r->next;
     }
@@ -163,8 +162,7 @@ filter_is_common (filter *l,
 
 
 int
-filter_is_member (filter *filt,
-		  const char *flag)
+filter_is_member (filter *filt, const char *flag)
 {
   int index = 1;
   while (filt != NULL)
@@ -179,68 +177,72 @@ filter_is_member (filter *filt,
 
 
 int
-is_filtered_out (filter *filters,
-		 const char *flags)
+is_filtered_out (filter *filters, const char *flags)
 {
-  while (strlen(flags) > 0) {
-    int present;
-    filter *filt = filters;
-    /* break the string up */
-    char *end = strchr(flags, ',');
-    char *next;
-    unsigned /*size_t*/ len;
-    if (end == NULL) {
-      end = strchr(flags, '\0');
-      next = end;
+  while (strlen (flags) > 0)
+    {
+      int present;
+      filter *filt = filters;
+      /* break the string up */
+      char *end = strchr (flags, ',');
+      char *next;
+      unsigned /*size_t */ len;
+      if (end == NULL)
+	{
+	  end = strchr (flags, '\0');
+	  next = end;
+	}
+      else
+	{
+	  next = end + 1;
+	}
+      len = end - flags;
+      /* check that it is present */
+      present = 0;
+      filt = filters;
+      while (filt != NULL)
+	{
+	  if (strncmp (flags, filt->member, len) == 0
+	      && strlen (filt->member) == len)
+	    {
+	      present = 1;
+	      break;
+	    }
+	  filt = filt->next;
+	}
+      if (!present)
+	return 1;
+      flags = next;
     }
-    else {
-      next = end + 1;
-    }
-    len = end - flags;
-    /* check that it is present */
-    present = 0;
-    filt = filters;
-    while (filt != NULL) {
-      if (strncmp(flags, filt->member, len) == 0
-	  && strlen(filt->member) == len) {
-	present = 1;
-	break;
-      }
-      filt = filt->next;
-    }
-    if (!present)
-      return 1;
-    flags = next;
-  }
   return 0;
 }
 
 
 #if 0
 int
-it_is (const char *flag,
-       const char *flags)
+it_is (const char *flag, const char *flags)
 {
-  int flag_len = strlen(flag);
-  while (*flags != '\0') {
-    if (!strncmp(flags, flag, flag_len)
-	&& (flags[flag_len] == ',' || flags[flag_len] == '\0'))
-      return 1;
-    while (*flags != ',') {
-      if (*flags == '\0')
-	return 0;
+  int flag_len = strlen (flag);
+  while (*flags != '\0')
+    {
+      if (!strncmp (flags, flag, flag_len)
+	  && (flags[flag_len] == ',' || flags[flag_len] == '\0'))
+	return 1;
+      while (*flags != ',')
+	{
+	  if (*flags == '\0')
+	    return 0;
+	  flags++;
+	}
       flags++;
     }
-    flags++;
-  }
   return 0;
 }
 #endif
 
 
 char *
-filter_next (filter *set,
-	     char *member)
+filter_next (filter *set, char *member)
 {
   while (set != NULL)
     {
@@ -253,10 +255,7 @@ filter_next (filter *set,
 
 
 void
-dump_filter (lf *file,
-	     char *prefix, 
-	     filter *set,
-	     char *suffix)
+dump_filter (lf *file, char *prefix, filter *set, char *suffix)
 {
   char *member;
   lf_printf (file, "%s", prefix);
@@ -278,20 +277,21 @@ dump_filter (lf *file,
 
 #ifdef MAIN
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
   filter *subset = NULL;
   filter *superset = NULL;
   lf *l;
   int i;
-  if (argc < 2) {
-    printf("Usage: filter <subset> <filter> ...\n");
-    exit (1);
-  }
+  if (argc < 2)
+    {
+      printf ("Usage: filter <subset> <filter> ...\n");
+      exit (1);
+    }
 
   /* load the filter up */
   filter_parse (&subset, argv[1]);
-  for (i = 2; i < argc; i++) 
+  for (i = 2; i < argc; i++)
     filter_parse (&superset, argv[i]);
 
   /* dump various info */
@@ -349,7 +349,7 @@ main(int argc, char **argv)
     dump_filter (l, "{", superset, " }");
     lf_printf (l, "\n");
   }
-      
+
   return 0;
 }
 #endif

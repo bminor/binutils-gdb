@@ -1,5 +1,6 @@
 /* BFD back-end for WDC 65816 COFF binaries.
-   Copyright 1995, 1996, 1997, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -35,16 +36,16 @@ static void w65_reloc16_extra_cases PARAMS ((bfd *,struct bfd_link_info *, struc
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (1)
 static reloc_howto_type howto_table[] =
   {
-    HOWTO (R_W65_ABS8,    0,  0, 8,  false, 0, complain_overflow_bitfield, 0, "abs8", true, 0x000000ff, 0x000000ff, false),
-    HOWTO (R_W65_ABS16,   1,  0, 16, false, 0, complain_overflow_bitfield, 0, "abs16", true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO (R_W65_ABS24,   0,  2, 32, false, 0, complain_overflow_bitfield, 0, "abs24", true, 0x00ffffff, 0x00ffffff, false),
-    HOWTO (R_W65_ABS8S8,  0,  0, 8,  false, 0, complain_overflow_bitfield, 0, ">abs8", true, 0x000000ff, 0x000000ff, false),
-    HOWTO (R_W65_ABS8S16, 0,  0, 8,  false, 0, complain_overflow_bitfield, 0, "^abs8", true, 0x000000ff, 0x000000ff, false),
-    HOWTO (R_W65_ABS16S8, 1,  0, 16, false, 0, complain_overflow_bitfield, 0, ">abs16", true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO (R_W65_ABS16S16,1,  0, 16, false, 0, complain_overflow_bitfield, 0, "^abs16", true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO (R_W65_PCR8,    0,  0, 8,  false, 0, complain_overflow_bitfield, 0, "pcrel8", true, 0x000000ff, 0x000000ff, true),
-    HOWTO (R_W65_PCR16,   1,  0, 16, false, 0, complain_overflow_bitfield, 0, "pcrel16", true, 0x0000ffff, 0x0000ffff, true),
-    HOWTO (R_W65_DP,      0,  0, 8,  false, 0, complain_overflow_bitfield, 0, "dp", true, 0x000000ff, 0x000000ff, false),
+    HOWTO (R_W65_ABS8,    0,  0, 8,  FALSE, 0, complain_overflow_bitfield, 0, "abs8", TRUE, 0x000000ff, 0x000000ff, FALSE),
+    HOWTO (R_W65_ABS16,   1,  0, 16, FALSE, 0, complain_overflow_bitfield, 0, "abs16", TRUE, 0x0000ffff, 0x0000ffff, FALSE),
+    HOWTO (R_W65_ABS24,   0,  2, 32, FALSE, 0, complain_overflow_bitfield, 0, "abs24", TRUE, 0x00ffffff, 0x00ffffff, FALSE),
+    HOWTO (R_W65_ABS8S8,  0,  0, 8,  FALSE, 0, complain_overflow_bitfield, 0, ">abs8", TRUE, 0x000000ff, 0x000000ff, FALSE),
+    HOWTO (R_W65_ABS8S16, 0,  0, 8,  FALSE, 0, complain_overflow_bitfield, 0, "^abs8", TRUE, 0x000000ff, 0x000000ff, FALSE),
+    HOWTO (R_W65_ABS16S8, 1,  0, 16, FALSE, 0, complain_overflow_bitfield, 0, ">abs16", TRUE, 0x0000ffff, 0x0000ffff, FALSE),
+    HOWTO (R_W65_ABS16S16,1,  0, 16, FALSE, 0, complain_overflow_bitfield, 0, "^abs16", TRUE, 0x0000ffff, 0x0000ffff, FALSE),
+    HOWTO (R_W65_PCR8,    0,  0, 8,  FALSE, 0, complain_overflow_bitfield, 0, "pcrel8", TRUE, 0x000000ff, 0x000000ff, TRUE),
+    HOWTO (R_W65_PCR16,   1,  0, 16, FALSE, 0, complain_overflow_bitfield, 0, "pcrel16", TRUE, 0x0000ffff, 0x0000ffff, TRUE),
+    HOWTO (R_W65_DP,      0,  0, 8,  FALSE, 0, complain_overflow_bitfield, 0, "dp", TRUE, 0x000000ff, 0x000000ff, FALSE),
   };
 
 /* Turn a howto into a reloc number.  */
@@ -379,4 +380,4 @@ w65_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
   bfd_coff_reloc16_get_relocated_section_contents
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
-CREATE_LITTLE_COFF_TARGET_VEC (w65_vec, "coff-w65", BFD_IS_RELAXABLE, 0, '_', NULL)
+CREATE_LITTLE_COFF_TARGET_VEC (w65_vec, "coff-w65", BFD_IS_RELAXABLE, 0, '_', NULL, COFF_SWAP_TABLE)

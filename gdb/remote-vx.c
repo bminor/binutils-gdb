@@ -67,7 +67,7 @@
 extern void vx_read_register ();
 extern void vx_write_register ();
 extern void symbol_file_command ();
-extern int stop_soon_quietly;	/* for wait_for_inferior */
+extern enum stop_kind stop_soon;	/* for wait_for_inferior */
 
 static int net_step ();
 static int net_ptrace_clnt_call ();	/* Forward decl */
@@ -243,9 +243,9 @@ vx_create_inferior (char *exec_file, char *args, char **env)
   /* Install inferior's terminal modes.  */
   target_terminal_inferior ();
 
-  stop_soon_quietly = 1;
+  stop_soon = STOP_QUIETLY;
   wait_for_inferior ();		/* Get the task spawn event */
-  stop_soon_quietly = 0;
+  stop_soon = NO_STOP_QUIETLY;
 
   /* insert_step_breakpoint ();  FIXME, do we need this?  */
   proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
@@ -255,11 +255,11 @@ vx_create_inferior (char *exec_file, char *args, char **env)
    argument string ARGSTRING.  */
 
 static void
-parse_args (register char *arg_string, arg_array *arg_struct)
+parse_args (char *arg_string, arg_array *arg_struct)
 {
-  register int arg_count = 0;	/* number of arguments */
-  register int arg_index = 0;
-  register char *p0;
+  int arg_count = 0;	/* number of arguments */
+  int arg_index = 0;
+  char *p0;
 
   memset ((char *) arg_struct, '\0', sizeof (arg_array));
 
@@ -295,7 +295,7 @@ parse_args (register char *arg_string, arg_array *arg_struct)
    to the first non-white character.  */
 
 static char *
-skip_white_space (register char *p)
+skip_white_space (char *p)
 {
   while (*p == ' ' || *p == '\t')
     p++;
@@ -307,9 +307,9 @@ skip_white_space (register char *p)
    if no whitespace is found.  */
 
 static char *
-find_white_space (register char *p)
+find_white_space (char *p)
 {
-  register int c;
+  int c;
 
   while ((c = *p) != ' ' && c != '\t' && c)
     {
@@ -466,7 +466,7 @@ static void
 vx_prepare_to_store (void)
 {
   /* Fetch all registers, if any of them are not yet fetched.  */
-  read_register_bytes (0, NULL, REGISTER_BYTES);
+  deprecated_read_register_bytes (0, NULL, DEPRECATED_REGISTER_BYTES);
 }
 
 /* Copy LEN bytes to or from remote inferior's memory starting at MEMADDR
@@ -638,7 +638,7 @@ struct find_sect_args
 static void find_sect (bfd *, asection *, void *);
 
 static void
-find_sect (bfd *abfd, asection *sect, PTR obj)
+find_sect (bfd *abfd, asection *sect, void *obj)
 {
   struct find_sect_args *args = (struct find_sect_args *) obj;
 
@@ -675,8 +675,11 @@ vx_add_symbols (char *name, int from_tty, CORE_ADDR text_addr,
      free_objfile it.  */
   objfile_to_front (objfile);
 
-  offs = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
-  memcpy (offs, objfile->section_offsets, SIZEOF_SECTION_OFFSETS);
+  offs =
+    (struct section_offsets *)
+    alloca (SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
+  memcpy (offs, objfile->section_offsets,
+          SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
 
   ss.text_start = 0;
   ss.data_start = 0;
@@ -820,9 +823,6 @@ net_get_symbols (ldtabl *pLoadTable)
    Returns status of symbol read on target side (0=success, -1=fail)
    Returns -1 and complain()s if rpc fails.  */
 
-struct complaint cant_contact_target =
-{"Lost contact with VxWorks target", 0, 0};
-
 static int
 vx_lookup_symbol (char *name,	/* symbol name */
 		  CORE_ADDR *pAddr)
@@ -837,7 +837,7 @@ vx_lookup_symbol (char *name,	/* symbol name */
 			  xdr_SYMBOL_ADDR, &symbolAddr);
   if (status != RPC_SUCCESS)
     {
-      complain (&cant_contact_target);
+      complaint (&symfile_complaints, "Lost contact with VxWorks target");
       return -1;
     }
 
@@ -934,7 +934,7 @@ sleep_ms (long ms)
 static ptid_t
 vx_wait (ptid_t ptid_to_wait_for, struct target_waitstatus *status)
 {
-  register int pid;
+  int pid;
   RDB_EVENT rdbEvent;
   int quit_failed;
 
@@ -1139,7 +1139,7 @@ vx_open (char *args, int from_tty)
       pLoadFile = &loadTable.tbl_ent[i];
 #ifdef WRS_ORIG
       {
-	register int desc;
+	int desc;
 	struct cleanup *old_chain;
 	char *fullname = NULL;
 
@@ -1335,7 +1335,6 @@ vx_close (int quitting)
 }
 
 /* A vxprocess target should be started via "run" not "target".  */
-/*ARGSUSED */
 static void
 vx_proc_open (char *name, int from_tty)
 {

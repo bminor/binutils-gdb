@@ -1,6 +1,7 @@
 /* Native-dependent code for LynxOS.
-   Copyright 1993, 1994, 1995, 1996, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1996, 1999, 2000, 2001, 2003 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +28,7 @@
 #include "regcache.h"
 
 #include <sys/ptrace.h>
-#include <sys/wait.h>
+#Include "gdb_wait.h"
 #include <sys/fpp.h>
 
 static unsigned long registers_addr (int pid);
@@ -282,7 +283,7 @@ fetch_inferior_registers (int regno)
   if (whatregs & WHATREGS_GEN)
     {
       struct econtext ec;	/* general regs */
-      char buf[MAX_REGISTER_RAW_SIZE];
+      char buf[MAX_REGISTER_SIZE];
       int retval;
       int i;
 
@@ -292,25 +293,25 @@ fetch_inferior_registers (int regno)
       if (errno)
 	perror_with_name ("ptrace(PTRACE_GETREGS)");
 
-      memset (buf, 0, REGISTER_RAW_SIZE (G0_REGNUM));
+      memset (buf, 0, DEPRECATED_REGISTER_RAW_SIZE (G0_REGNUM));
       supply_register (G0_REGNUM, buf);
       supply_register (TBR_REGNUM, (char *) &ec.tbr);
 
-      memcpy (&registers[REGISTER_BYTE (G1_REGNUM)], &ec.g1,
-	      4 * REGISTER_RAW_SIZE (G1_REGNUM));
+      memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (G1_REGNUM)], &ec.g1,
+	      4 * DEPRECATED_REGISTER_RAW_SIZE (G1_REGNUM));
       for (i = G1_REGNUM; i <= G1_REGNUM + 3; i++)
-	register_valid[i] = 1;
+	deprecated_register_valid[i] = 1;
 
       supply_register (PS_REGNUM, (char *) &ec.psr);
       supply_register (Y_REGNUM, (char *) &ec.y);
       supply_register (PC_REGNUM, (char *) &ec.pc);
-      supply_register (NPC_REGNUM, (char *) &ec.npc);
+      supply_register (DEPRECATED_NPC_REGNUM, (char *) &ec.npc);
       supply_register (WIM_REGNUM, (char *) &ec.wim);
 
-      memcpy (&registers[REGISTER_BYTE (O0_REGNUM)], ec.o,
-	      8 * REGISTER_RAW_SIZE (O0_REGNUM));
+      memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (O0_REGNUM)], ec.o,
+	      8 * DEPRECATED_REGISTER_RAW_SIZE (O0_REGNUM));
       for (i = O0_REGNUM; i <= O0_REGNUM + 7; i++)
-	register_valid[i] = 1;
+	deprecated_register_valid[i] = 1;
     }
 
   if (whatregs & WHATREGS_STACK)
@@ -321,16 +322,16 @@ fetch_inferior_registers (int regno)
       sp = read_register (SP_REGNUM);
 
       target_read_memory (sp + FRAME_SAVED_I0,
-			  &registers[REGISTER_BYTE (I0_REGNUM)],
-			  8 * REGISTER_RAW_SIZE (I0_REGNUM));
+			  &deprecated_registers[DEPRECATED_REGISTER_BYTE (I0_REGNUM)],
+			  8 * DEPRECATED_REGISTER_RAW_SIZE (I0_REGNUM));
       for (i = I0_REGNUM; i <= I7_REGNUM; i++)
-	register_valid[i] = 1;
+	deprecated_register_valid[i] = 1;
 
       target_read_memory (sp + FRAME_SAVED_L0,
-			  &registers[REGISTER_BYTE (L0_REGNUM)],
-			  8 * REGISTER_RAW_SIZE (L0_REGNUM));
+			  &deprecated_registers[DEPRECATED_REGISTER_BYTE (L0_REGNUM)],
+			  8 * DEPRECATED_REGISTER_RAW_SIZE (L0_REGNUM));
       for (i = L0_REGNUM; i <= L0_REGNUM + 7; i++)
-	register_valid[i] = 1;
+	deprecated_register_valid[i] = 1;
     }
 
   if (whatregs & WHATREGS_FLOAT)
@@ -345,10 +346,10 @@ fetch_inferior_registers (int regno)
       if (errno)
 	perror_with_name ("ptrace(PTRACE_GETFPREGS)");
 
-      memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], fc.f.fregs,
-	      32 * REGISTER_RAW_SIZE (FP0_REGNUM));
+      memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)], fc.f.fregs,
+	      32 * DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM));
       for (i = FP0_REGNUM; i <= FP0_REGNUM + 31; i++)
-	register_valid[i] = 1;
+	deprecated_register_valid[i] = 1;
 
       supply_register (FPS_REGNUM, (char *) &fc.fsr);
     }
@@ -383,17 +384,17 @@ store_inferior_registers (int regno)
       int retval;
 
       ec.tbr = read_register (TBR_REGNUM);
-      memcpy (&ec.g1, &registers[REGISTER_BYTE (G1_REGNUM)],
-	      4 * REGISTER_RAW_SIZE (G1_REGNUM));
+      memcpy (&ec.g1, &deprecated_registers[DEPRECATED_REGISTER_BYTE (G1_REGNUM)],
+	      4 * DEPRECATED_REGISTER_RAW_SIZE (G1_REGNUM));
 
       ec.psr = read_register (PS_REGNUM);
       ec.y = read_register (Y_REGNUM);
       ec.pc = read_register (PC_REGNUM);
-      ec.npc = read_register (NPC_REGNUM);
+      ec.npc = read_register (DEPRECATED_NPC_REGNUM);
       ec.wim = read_register (WIM_REGNUM);
 
-      memcpy (ec.o, &registers[REGISTER_BYTE (O0_REGNUM)],
-	      8 * REGISTER_RAW_SIZE (O0_REGNUM));
+      memcpy (ec.o, &deprecated_registers[DEPRECATED_REGISTER_BYTE (O0_REGNUM)],
+	      8 * DEPRECATED_REGISTER_RAW_SIZE (O0_REGNUM));
 
       errno = 0;
       retval = ptrace (PTRACE_SETREGS, PIDGET (inferior_ptid),
@@ -411,29 +412,29 @@ store_inferior_registers (int regno)
 
       if (regno == -1 || regno == SP_REGNUM)
 	{
-	  if (!register_valid[L0_REGNUM + 5])
+	  if (!deprecated_register_valid[L0_REGNUM + 5])
 	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  target_write_memory (sp + FRAME_SAVED_I0,
-			      &registers[REGISTER_BYTE (I0_REGNUM)],
-			      8 * REGISTER_RAW_SIZE (I0_REGNUM));
+			      &deprecated_registers[DEPRECATED_REGISTER_BYTE (I0_REGNUM)],
+			      8 * DEPRECATED_REGISTER_RAW_SIZE (I0_REGNUM));
 
 	  target_write_memory (sp + FRAME_SAVED_L0,
-			      &registers[REGISTER_BYTE (L0_REGNUM)],
-			      8 * REGISTER_RAW_SIZE (L0_REGNUM));
+			      &deprecated_registers[DEPRECATED_REGISTER_BYTE (L0_REGNUM)],
+			      8 * DEPRECATED_REGISTER_RAW_SIZE (L0_REGNUM));
 	}
       else if (regno >= L0_REGNUM && regno <= I7_REGNUM)
 	{
-	  if (!register_valid[regno])
+	  if (!deprecated_register_valid[regno])
 	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  if (regno >= L0_REGNUM && regno <= L0_REGNUM + 7)
-	    regoffset = REGISTER_BYTE (regno) - REGISTER_BYTE (L0_REGNUM)
+	    regoffset = DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (L0_REGNUM)
 	      + FRAME_SAVED_L0;
 	  else
-	    regoffset = REGISTER_BYTE (regno) - REGISTER_BYTE (I0_REGNUM)
+	    regoffset = DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (I0_REGNUM)
 	      + FRAME_SAVED_I0;
 	  target_write_memory (sp + regoffset, 
-			      &registers[REGISTER_BYTE (regno)],
-			      REGISTER_RAW_SIZE (regno));
+			      &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
+			      DEPRECATED_REGISTER_RAW_SIZE (regno));
 	}
     }
 
@@ -449,8 +450,8 @@ store_inferior_registers (int regno)
       if (errno)
 	perror_with_name ("ptrace(PTRACE_GETFPREGS)");
 
-      memcpy (fc.f.fregs, &registers[REGISTER_BYTE (FP0_REGNUM)],
-	      32 * REGISTER_RAW_SIZE (FP0_REGNUM));
+      memcpy (fc.f.fregs, &deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
+	      32 * DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM));
 
       fc.fsr = read_register (FPS_REGNUM);
 
@@ -510,29 +511,31 @@ fetch_inferior_registers (int regno)
 
   ecp = registers_addr (PIDGET (inferior_ptid));
 
-  for (regno = reglo; regno <= reghi; regno++)
-    {
-      char buf[MAX_REGISTER_RAW_SIZE];
-      int ptrace_fun = PTRACE_PEEKTHREAD;
-
+  {
+    char buf[MAX_REGISTER_SIZE];
+    for (regno = reglo; regno <= reghi; regno++)
+      {
+	int ptrace_fun = PTRACE_PEEKTHREAD;
+	
 #ifdef M68K
-      ptrace_fun = regno == SP_REGNUM ? PTRACE_PEEKUSP : PTRACE_PEEKTHREAD;
+	ptrace_fun = regno == SP_REGNUM ? PTRACE_PEEKUSP : PTRACE_PEEKTHREAD;
 #endif
-
-      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
-	{
-	  unsigned int reg;
-
-	  errno = 0;
-	  reg = ptrace (ptrace_fun, PIDGET (inferior_ptid),
-			(PTRACE_ARG3_TYPE) (ecp + regmap[regno] + i), 0);
-	  if (errno)
-	    perror_with_name ("ptrace(PTRACE_PEEKUSP)");
-
-	  *(int *) &buf[i] = reg;
-	}
-      supply_register (regno, buf);
-    }
+	
+	for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (int))
+	  {
+	    unsigned int reg;
+	    
+	    errno = 0;
+	    reg = ptrace (ptrace_fun, PIDGET (inferior_ptid),
+			  (PTRACE_ARG3_TYPE) (ecp + regmap[regno] + i), 0);
+	    if (errno)
+	      perror_with_name ("ptrace(PTRACE_PEEKUSP)");
+	    
+	    *(int *) &buf[i] = reg;
+	  }
+	supply_register (regno, buf);
+      }
+  }
 }
 
 /* Store our register values back into the inferior.
@@ -567,11 +570,11 @@ store_inferior_registers (int regno)
       ptrace_fun = regno == SP_REGNUM ? PTRACE_POKEUSP : PTRACE_POKEUSER;
 #endif
 
-      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
+      for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	{
 	  unsigned int reg;
 
-	  reg = *(unsigned int *) &registers[REGISTER_BYTE (regno) + i];
+	  reg = *(unsigned int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno) + i];
 
 	  errno = 0;
 	  ptrace (ptrace_fun, PIDGET (inferior_ptid),

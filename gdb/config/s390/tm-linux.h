@@ -24,9 +24,7 @@
 
 #ifndef TM_LINUX_H
 #define TM_LINUX_H
-#ifdef GDBSERVER
-#define S390_GNULINUX_TARGET
-#endif /* GDBSERVER */
+
 #undef  TARGET_ELF64
 #define TARGET_ELF64 (gdbarch_tdep (current_gdbarch)->intreg_size==8)
 

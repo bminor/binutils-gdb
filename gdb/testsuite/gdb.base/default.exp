@@ -1,5 +1,5 @@
 #   Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 1999,
-#   2000, 2001, 2002
+#   2000, 2001, 2002, 2003
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -320,15 +320,7 @@ gdb_test "info frame" "No stack.|No selected frame." "info frame"
 #test info files
 gdb_test "info files" "" "info files"
 #test info float
-if { [istarget "arm*-*-*"] || \
-	[istarget "xscale*-*-*"] || \
-	[istarget "strongarm*-*-*"] } then {
-    gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
-} elseif [istarget "i\[3456\]86-*-*"] then {
-    gdb_test "info float" "R7:.*Status Word:.*Opcode:.*" "info float"
-} else {
-    gdb_test "info float" "No floating.point info available for this processor." "info float"
-}
+gdb_test "info float" "The program has no registers now." "info float"
 #test info functions
 gdb_test "info functions" "All defined functions:" "info functions"
 #test info locals
@@ -359,6 +351,8 @@ gdb_test "info terminal" "No saved terminal information." "info terminal"
 gdb_test "info types" "All defined types:" "info types"
 #test info variables
 gdb_test "info variables" "All defined variables:" "info variables"
+#test info vector
+gdb_test "info vector" "The program has no registers now." "info vector"
 #test info warranty
 gdb_test "info warranty" "NO WARRANTY(\[^\r\n\]*\[\r\n\])+  *11.  *BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY(\[^\r\n\]*\[\r\n\])+FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN(\[^\r\n\]*\[\r\n\])+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES(\[^\r\n\]*\[\r\n\])+PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED(\[^\r\n\]*\[\r\n\])+OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF(\[^\r\n\]*\[\r\n\])+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS(\[^\r\n\]*\[\r\n\])+TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE(\[^\r\n\]*\[\r\n\])+PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,(\[^\r\n\]*\[\r\n\])+REPAIR OR CORRECTION.(\[^\r\n\]*\[\r\n\])+  *12.  *IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING(\[^\r\n\]*\[\r\n\])+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR(\[^\r\n\]*\[\r\n\])+REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,(\[^\r\n\]*\[\r\n\])+INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING(\[^\r\n\]*\[\r\n\])+OUT OF THE USE OR INABILITY TO USE THE PROGRAM .INCLUDING BUT NOT LIMITED(\[^\r\n\]*\[\r\n\])+TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY(\[^\r\n\]*\[\r\n\])+YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER(\[^\r\n\]*\[\r\n\])+PROGRAMS., EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE(\[^\r\n\]*\[\r\n\])+POSSIBILITY OF SUCH DAMAGES.*" "info warranty"
 #test info watchpoints
@@ -434,6 +428,9 @@ No executable file specified.*
 Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
 			{ pass "run \"r\" abbreviation" }
 	    -re "Starting program:  .*
+No executable specified, use .target exec.\\..*$gdb_prompt $"\
+			{ pass "run \"r\" abbreviation" }
+	    -re "Starting program:  .*
 No image loaded into target.*$gdb_prompt $"\
 			{ pass "run \"r\" abbreviation" }
 	    -re "Starting program:  .*
@@ -461,6 +458,9 @@ You must specify a function name to run, and arguments if any"
 	    -re "Starting program:  .*
 No executable file specified.*
 Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
+			{ pass "run" }
+	    -re "Starting program:  .*
+No executable specified, use .target exec.\\..*$gdb_prompt $"\
 			{ pass "run" }
 	    -re "Starting program:  .*
 No image loaded into target.*$gdb_prompt $"\

@@ -109,8 +109,9 @@ typedef enum {
 #endif
   OPTION_HELP,
 #ifdef SIM_H8300 /* FIXME: Should be movable to h8300 dir.  */
-  OPTION_H8300,
+  OPTION_H8300H,
   OPTION_H8300S,
+  OPTION_H8300SX,
 #endif
   OPTION_LOAD_LMA,
   OPTION_LOAD_VMA,
@@ -152,11 +153,14 @@ static const OPTION standard_options[] =
       standard_option_handler },
 
 #ifdef SIM_H8300 /* FIXME: Should be movable to h8300 dir.  */
-  { {"h8300h", no_argument, NULL, OPTION_H8300},
-      'h', NULL, "Indicate the CPU is h8/300h",
+  { {"h8300h", no_argument, NULL, OPTION_H8300H},
+      'h', NULL, "Indicate the CPU is H8/300H",
       standard_option_handler },
   { {"h8300s", no_argument, NULL, OPTION_H8300S},
-      'S', NULL, "Indicate the CPU is h8/300s",
+      'S', NULL, "Indicate the CPU is H8S",
+      standard_option_handler },
+  { {"h8300sx", no_argument, NULL, OPTION_H8300SX},
+      'x', NULL, "Indicate the CPU is H8SX",
       standard_option_handler },
 #endif
 
@@ -357,11 +361,14 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
       break;
 
 #ifdef SIM_H8300 /* FIXME: Can be moved to h8300 dir.  */
-    case OPTION_H8300:
-      set_h8300h (1,0);
+    case OPTION_H8300H:
+      set_h8300h (bfd_mach_h8300h);
       break;
     case OPTION_H8300S:
-      set_h8300h (1,1);
+      set_h8300h (bfd_mach_h8300s);
+      break;
+    case OPTION_H8300SX:
+      set_h8300h (bfd_mach_h8300sx);
       break;
 #endif
 
@@ -762,7 +769,10 @@ print_help (SIM_DESC sd, sim_cpu *cpu, const struct option_list *ol, int is_comm
 		end --;
 	      if (end == chp)
 		end = chp + doc_width - 1;
-	      sim_io_printf (sd, "%.*s\n%*s", end - chp, chp, indent, "");
+	      /* The cast should be ok - its distances between to
+                 points in a string.  */
+	      sim_io_printf (sd, "%.*s\n%*s", (int) (end - chp), chp, indent,
+			     "");
 	      chp = end;
 	      while (isspace (*chp) && *chp != '\0')
 		chp++;

@@ -20,20 +20,13 @@
    Boston, MA 02111-1307, USA.  */
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
-
-/* NOTE: ezannoni 2000-07-18: these variables are part of sim, defined
-   in sim/h8300/compile.c.  They really should not be used this
-   way. Because of this we cannot get rid of the macro
-   GDB_TARGET_IS_H8300 in remote-e7000.c */
-extern int h8300hmode;
-extern int h8300smode;
-#define GDB_TARGET_IS_H8300
-
 /* Needed for remote.c */
-#define REMOTE_BREAKPOINT { 0x57, 0x30}		/* trapa #3 */
+#define DEPRECATED_REMOTE_BREAKPOINT { 0x57, 0x30}		/* trapa #3 */
 /* Needed for remote-hms.c */
 #define CCR_REGNUM 8
 /* Needed for remote-e7000.c */
-#define NUM_REALREGS (h8300smode?11:10)
+#define NUM_REALREGS ((TARGET_ARCHITECTURE->mach == bfd_mach_h8300s || \
+		        TARGET_ARCHITECTURE->mach == bfd_mach_h8300sn || \
+		        TARGET_ARCHITECTURE->mach == bfd_mach_h8300sx || \
+		        TARGET_ARCHITECTURE->mach == bfd_mach_h8300sxn) ? 11 : 10)
 

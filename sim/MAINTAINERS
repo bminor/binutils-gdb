@@ -10,10 +10,17 @@ gdb-patches@sources.redhat.com
 	Maintainers for particular sims:
 
 arm	        Nick Clifton <nickc@redhat.com>
+frv		Dave Brolley <brolley@redhat.com>
+igen		(igen simulators)
 ppc		Andrew Cagney <ac131313@redhat.com>
-ppc		Geoff Keating <geoffk@geoffk.org>
 m68hc11		Stephane Carrez <stcarrez@nerim.fr>
-mips		Andrew Cagney <ac131313@redhat.com>
 mips		Chris Demetriou <cgd@broadcom.com>
-common		Ben Elliston <bje@redhat.com>
+sh		(global maintainers)
+common		Ben Elliston <bje@wasabisystems.com>
 common		Frank Ch. Eigler <fche@redhat.com>
+*		(target, then global maintainers)
+
+	Past sim maintainers:
+
+mips		Andrew Cagney <ac131313@redhat.com>
+ppc		Geoff Keating <geoffk@geoffk.org>

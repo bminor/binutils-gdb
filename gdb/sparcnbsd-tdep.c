@@ -1,5 +1,5 @@
 /* Target-dependent code for SPARC systems running NetBSD.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -26,6 +26,9 @@
 #include "value.h"
 #include "osabi.h"
 
+#include "gdb_string.h"
+
+#include "sparc-tdep.h"
 #include "sparcnbsd-tdep.h"
 #include "nbsd-tdep.h"
 
@@ -56,8 +59,8 @@ sparcnbsd_supply_reg32 (char *regs, int regno)
   if (regno == PC_REGNUM || regno == -1)
     supply_register (PC_REGNUM, regs + REG32_OFFSET_PC);
 
-  if (regno == NPC_REGNUM || regno == -1)
-    supply_register (NPC_REGNUM, regs + REG32_OFFSET_NPC);
+  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
+    supply_register (DEPRECATED_NPC_REGNUM, regs + REG32_OFFSET_NPC);
 
   if (regno == Y_REGNUM || regno == -1)
     supply_register (Y_REGNUM, regs + REG32_OFFSET_Y);
@@ -123,8 +126,8 @@ sparcnbsd_supply_reg64 (char *regs, int regno)
   if (regno == PC_REGNUM || regno == -1)
     supply_register (PC_REGNUM, regs + REG64_OFFSET_PC);
 
-  if (regno == NPC_REGNUM || regno == -1)
-    supply_register (NPC_REGNUM, regs + REG64_OFFSET_NPC);
+  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
+    supply_register (DEPRECATED_NPC_REGNUM, regs + REG64_OFFSET_NPC);
 
   if (regno == Y_REGNUM || regno == -1)
     {
@@ -217,8 +220,8 @@ sparcnbsd_fill_reg32 (char *regs, int regno)
   if (regno == PC_REGNUM || regno == -1)
     regcache_collect (PC_REGNUM, regs + REG32_OFFSET_PC);
 
-  if (regno == NPC_REGNUM || regno == -1)
-    regcache_collect (NPC_REGNUM, regs + REG32_OFFSET_NPC);
+  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
+    regcache_collect (DEPRECATED_NPC_REGNUM, regs + REG32_OFFSET_NPC);
 
   if (regno == Y_REGNUM || regno == -1)
     regcache_collect (Y_REGNUM, regs + REG32_OFFSET_Y);
@@ -258,8 +261,8 @@ sparcnbsd_fill_reg64 (char *regs, int regno)
   if (regno == PC_REGNUM || regno == -1)
     regcache_collect (PC_REGNUM, regs + REG64_OFFSET_PC);
 
-  if (regno == NPC_REGNUM || regno == -1)
-    regcache_collect (NPC_REGNUM, regs + REG64_OFFSET_NPC);
+  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
+    regcache_collect (DEPRECATED_NPC_REGNUM, regs + REG64_OFFSET_NPC);
 
   if (regno == Y_REGNUM || regno == -1)
     regcache_collect (Y_REGNUM, regs + REG64_OFFSET_Y);
@@ -445,7 +448,7 @@ sparcnbsd_get_longjmp_target_32 (CORE_ADDR *pc)
   if (target_read_memory (jb_addr + 12, buf, sizeof (buf)))
     return 0;
 
-  *pc = extract_address (buf, sizeof (buf));
+  *pc = extract_unsigned_integer (buf, sizeof (buf));
 
   return 1;
 }
@@ -461,7 +464,7 @@ sparcnbsd_get_longjmp_target_64 (CORE_ADDR *pc)
   if (target_read_memory (jb_addr + 16, buf, sizeof (buf)))
     return 0;
 
-  *pc = extract_address (buf, sizeof (buf));
+  *pc = extract_unsigned_integer (buf, sizeof (buf));
 
   return 1;
 }
@@ -523,9 +526,9 @@ _initialize_sparnbsd_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_sparc, bfd_target_aout_flavour,
 				  sparcnbsd_aout_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_sparc, GDB_OSABI_NETBSD_AOUT,
+  gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_AOUT,
 			  sparcnbsd_init_abi_aout);
-  gdbarch_register_osabi (bfd_arch_sparc, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_ELF,
 			  sparcnbsd_init_abi_elf);
 
   add_core_fns (&sparcnbsd_core_fns);

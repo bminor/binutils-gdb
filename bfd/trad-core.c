@@ -47,13 +47,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include TRAD_HEADER
 #endif
 
-  struct trad_core_struct
-    {
-      asection *data_section;
-      asection *stack_section;
-      asection *reg_section;
-      struct user u;
-    };
+struct trad_core_struct
+{
+  asection *data_section;
+  asection *stack_section;
+  asection *reg_section;
+  struct user u;
+};
 
 #define core_upage(bfd) (&((bfd)->tdata.trad_core_data->u))
 #define core_datasec(bfd) ((bfd)->tdata.trad_core_data->data_section)
@@ -63,15 +63,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* forward declarations */
 
 const bfd_target *trad_unix_core_file_p PARAMS ((bfd *abfd));
-char *		trad_unix_core_file_failing_command PARAMS ((bfd *abfd));
-int		trad_unix_core_file_failing_signal PARAMS ((bfd *abfd));
-boolean		trad_unix_core_file_matches_executable_p
-			 PARAMS ((bfd *core_bfd, bfd *exec_bfd));
-static void	swap_abort PARAMS ((void));
+char * trad_unix_core_file_failing_command PARAMS ((bfd *abfd));
+int trad_unix_core_file_failing_signal PARAMS ((bfd *abfd));
+bfd_boolean trad_unix_core_file_matches_executable_p
+  PARAMS ((bfd *core_bfd, bfd *exec_bfd));
+static void swap_abort PARAMS ((void));
 
 /* Handle 4.2-style (and perhaps also sysV-style) core dump file.  */
 
-/* ARGSUSED */
 const bfd_target *
 trad_unix_core_file_p (abfd)
      bfd *abfd;
@@ -248,7 +247,6 @@ trad_unix_core_file_failing_command (abfd)
     return 0;
 }
 
-/* ARGSUSED */
 int
 trad_unix_core_file_failing_signal (ignore_abfd)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
@@ -260,13 +258,12 @@ trad_unix_core_file_failing_signal (ignore_abfd)
 #endif
 }
 
-/* ARGSUSED */
-boolean
+bfd_boolean
 trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
      bfd *core_bfd ATTRIBUTE_UNUSED;
      bfd *exec_bfd ATTRIBUTE_UNUSED;
 {
-  return true;		/* FIXME, We have no way of telling at this point */
+  return TRUE;		/* FIXME, We have no way of telling at this point */
 }
 
 /* If somebody calls any byte-swapping routines, shoot them.  */

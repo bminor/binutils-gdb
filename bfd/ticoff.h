@@ -19,7 +19,7 @@
 #undef  F_LSYMS
 #define	F_LSYMS		F_LSYMS_TICOFF
 
-static boolean
+static bfd_boolean
 ticoff0_bad_format_hook (abfd, filehdr)
      bfd *abfd;
      PTR filehdr;
@@ -27,12 +27,12 @@ ticoff0_bad_format_hook (abfd, filehdr)
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
 
   if (COFF0_BADMAG (*internal_f))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 ticoff1_bad_format_hook (abfd, filehdr)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR filehdr;
@@ -40,21 +40,21 @@ ticoff1_bad_format_hook (abfd, filehdr)
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
 
   if (COFF1_BADMAG (*internal_f))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 /* Replace the stock _bfd_coff_is_local_label_name
    to recognize TI COFF local labels.  */
-static boolean 
+static bfd_boolean 
 ticoff_bfd_is_local_label_name (abfd, name)
   bfd *abfd ATTRIBUTE_UNUSED;
   const char *name;
 {
   if (TICOFF_LOCAL_LABEL_P(name))
-    return true;
-  return false;
+    return TRUE;
+  return FALSE;
 }
 
 #define coff_bfd_is_local_label_name ticoff_bfd_is_local_label_name
@@ -76,14 +76,14 @@ static const bfd_coff_backend_data ticoff0_swap_table =
   coff_SWAP_scnhdr_out,
   FILHSZ_V0, AOUTSZ, SCNHSZ_V01, SYMESZ, AUXESZ, RELSZ_V0, LINESZ, FILNMLEN,
 #ifdef COFF_LONG_FILENAMES
-  true,
+  TRUE,
 #else
-  false,
+  FALSE,
 #endif
 #ifdef COFF_LONG_SECTION_NAMES
-  true,
+  TRUE,
 #else
-  false,
+  FALSE,
 #endif
   COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
   coff_SWAP_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,
@@ -107,14 +107,14 @@ static const bfd_coff_backend_data ticoff1_swap_table =
   coff_SWAP_scnhdr_out,
   FILHSZ, AOUTSZ, SCNHSZ_V01, SYMESZ, AUXESZ, RELSZ, LINESZ, FILNMLEN,
 #ifdef COFF_LONG_FILENAMES
-  true,
+  TRUE,
 #else
-  false,
+  FALSE,
 #endif
 #ifdef COFF_LONG_SECTION_NAMES
-  true,
+  TRUE,
 #else
-  false,
+  FALSE,
 #endif
   COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
   coff_SWAP_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,

@@ -1,4 +1,4 @@
-/* sh-stub.c -- debugging stub for the Hitachi-SH.
+/* sh-stub.c -- debugging stub for the Renesas-SH.
 
  NOTE!! This code has to be compiled with optimization, otherwise the 
  function inlining which generates the exception handlers won't work.
@@ -147,7 +147,7 @@
 #include <string.h>
 #include <setjmp.h>
 
-/* Hitachi SH architecture instruction encoding masks */
+/* Renesas SH architecture instruction encoding masks */
 
 #define COND_BR_MASK   0xff00
 #define UCOND_DBR_MASK 0xe000
@@ -158,7 +158,7 @@
 #define UCOND_DISP     0x0fff
 #define UCOND_REG      0x0f00
 
-/* Hitachi SH instruction opcodes */
+/* Renesas SH instruction opcodes */
 
 #define BF_INSTR       0x8b00
 #define BT_INSTR       0x8900
@@ -171,7 +171,7 @@
 #define TRAPA_INSTR    0xc300
 #define SSTEP_INSTR    0xc3ff
 
-/* Hitachi SH processor register masks */
+/* Renesas SH processor register masks */
 
 #define T_BIT_MASK     0x0001
 
@@ -450,10 +450,10 @@ retry:
 /* send the packet in buffer. */
 
 static void
-putpacket (register char *buffer)
+putpacket (char *buffer)
 {
-  register  int checksum;
-  register  int count;
+  int checksum;
+  int count;
 
   /*  $<packet info>#<checksum>. */
   do
@@ -824,7 +824,7 @@ breakpoint (void)
 
 /* Note:
 
-   The Hitachi SH family uses two exception architectures:
+   The Renesas SH family uses two exception architectures:
 
    SH1 & SH2:
 

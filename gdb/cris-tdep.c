@@ -1,5 +1,5 @@
 /* Target dependent code for CRIS, for GDB, the GNU debugger.
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hendrik Ruijter, Stefan Andersson, and Orjan Friberg.
 
@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/cris.h"
 #include "arch-utils.h"
 #include "regcache.h"
+#include "gdb_assert.h"
 
 /* To get entry_point_address.  */
 #include "symfile.h"
@@ -38,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "solib.h"              /* Support for shared libraries. */
 #include "solib-svr4.h"         /* For struct link_map_offsets.  */
 #include "gdb_string.h"
+#include "dis-asm.h"
 
 
 enum cris_num_regs
@@ -53,7 +55,7 @@ enum cris_num_regs
 };
 
 /* Register numbers of various important registers.
-   FP_REGNUM   Contains address of executing stack frame.
+   DEPRECATED_FP_REGNUM   Contains address of executing stack frame.
    STR_REGNUM  Contains the address of structure return values.
    RET_REGNUM  Contains the return value when shorter than or equal to 32 bits
    ARG1_REGNUM Contains the first parameter to a function.
@@ -65,8 +67,8 @@ enum cris_num_regs
    SRP_REGNUM  Subroutine return pointer register.
    BRP_REGNUM  Breakpoint return pointer register.  */
 
-/* FP_REGNUM = 8, SP_REGNUM = 14, and PC_REGNUM = 15 have been incorporated
-   into the multi-arch framework.  */
+/* DEPRECATED_FP_REGNUM = 8, SP_REGNUM = 14, and PC_REGNUM = 15 have
+   been incorporated into the multi-arch framework.  */
 
 enum cris_regnums
 {
@@ -373,8 +375,6 @@ static CORE_ADDR cris_skip_prologue_main (CORE_ADDR pc, int frameless_p);
 static struct gdbarch *cris_gdbarch_init (struct gdbarch_info,
                                           struct gdbarch_list *);
 
-static int cris_delayed_get_disassembler (bfd_vma, disassemble_info *);
-
 static void cris_dump_tdep (struct gdbarch *, struct ui_file *);
 
 static void cris_version_update (char *ignore_args, int from_tty, 
@@ -392,7 +392,7 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, const char *);
 
    CORE_ADDR frame
    CORE_ADDR pc
-   int signal_handler_caller
+   enum frame_type type;
    CORE_ADDR return_pc
    int leaf_function
 
@@ -405,8 +405,9 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, const char *);
    of the register PC.  All other frames contain the content of the
    register PC in the next frame.
 
-   The variable signal_handler_caller is non-zero when the frame is
-   associated with the call of a signal handler.
+   The variable `type' indicates the frame's type: normal, SIGTRAMP
+   (associated with a signal handler), dummy (associated with a dummy
+   frame).
 
    The variable return_pc contains the address where execution should be
    resumed when the present frame has finished, the return address.
@@ -463,7 +464,7 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, const char *);
    the entire prologue is examined (0) or just enough instructions to 
    determine that it is a prologue (1).  */
 
-CORE_ADDR 
+static CORE_ADDR 
 cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi, 
               int frameless_p)
 {
@@ -487,7 +488,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
   short source_register; 
 
   /* This frame is with respect to a leaf until a push srp is found.  */
-  fi->extra_info->leaf_function = 1;
+  get_frame_extra_info (fi)->leaf_function = 1;
 
   /* This frame is without the FP until a push fp is found.  */
   have_fp = 0;
@@ -500,10 +501,10 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 
   /* We only want to know the end of the prologue when fi->saved_regs == 0.
      When the saved registers are allocated full information is required.  */
-  if (fi->saved_regs)
+  if (deprecated_get_frame_saved_regs (fi))
     {
       for (regno = 0; regno < NUM_REGS; regno++)
-        fi->saved_regs[regno] = 0;
+        deprecated_get_frame_saved_regs (fi)[regno] = 0;
     }
  
   /* Find the prologue instructions.  */
@@ -526,9 +527,9 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
                 {
                   return ip;
                 }
-              fi->extra_info->leaf_function = 0;
+              get_frame_extra_info (fi)->leaf_function = 0;
             }
-          else if (regno == FP_REGNUM)
+          else if (regno == DEPRECATED_FP_REGNUM)
             {
               have_fp = 1;
             }
@@ -615,7 +616,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
               break;
             }
         }
-      else if (cris_get_operand2 (insn) == FP_REGNUM 
+      else if (cris_get_operand2 (insn) == DEPRECATED_FP_REGNUM 
                /* The size is a fixed-size.  */
                && ((insn & 0x0F00) >> 8) == 0x0001 
                /* A negative offset.  */
@@ -639,7 +640,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
               break;
             }
         }
-      else if (cris_get_operand2 (insn) == FP_REGNUM 
+      else if (cris_get_operand2 (insn) == DEPRECATED_FP_REGNUM 
                /* The size is a fixed-size.  */
                && ((insn & 0x0F00) >> 8) == 0x0001 
                /* A positive offset.  */
@@ -675,34 +676,34 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 
   /* We only want to know the end of the prologue when
      fi->saved_regs == 0.  */ 
-  if (!fi->saved_regs)
+  if (!deprecated_get_frame_saved_regs (fi))
     return ip;
 
   if (have_fp)
     {
-      fi->saved_regs[FP_REGNUM] = FRAME_FP (fi);
+      deprecated_get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM] = get_frame_base (fi);
       
       /* Calculate the addresses.  */
       for (regno = regsave; regno >= 0; regno--)
         {
-          fi->saved_regs[regno] = FRAME_FP (fi) - val;
+          deprecated_get_frame_saved_regs (fi)[regno] = get_frame_base (fi) - val;
           val -= 4;
         }
-      if (fi->extra_info->leaf_function)
+      if (get_frame_extra_info (fi)->leaf_function)
         {
           /* Set the register SP to contain the stack pointer of 
              the caller.  */
-          fi->saved_regs[SP_REGNUM] = FRAME_FP (fi) + 4;
+          deprecated_get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) + 4;
         }
       else
         {
           /* Set the register SP to contain the stack pointer of 
              the caller.  */
-          fi->saved_regs[SP_REGNUM] = FRAME_FP (fi) + 8;
+          deprecated_get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) + 8;
       
           /* Set the register SRP to contain the return address of 
              the caller.  */
-          fi->saved_regs[SRP_REGNUM] = FRAME_FP (fi) + 4;
+          deprecated_get_frame_saved_regs (fi)[SRP_REGNUM] = get_frame_base (fi) + 4;
         }
     }
   return ip;
@@ -711,7 +712,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 /* Advance pc beyond any function entry prologue instructions at pc
    to reach some "real" code.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_skip_prologue (CORE_ADDR pc)
 {
   return cris_skip_prologue_main (pc, 0);
@@ -721,7 +722,7 @@ cris_skip_prologue (CORE_ADDR pc)
    has a frame.  Its result is equal to its input pc if the function is 
    frameless, unequal otherwise.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_skip_prologue_frameless_p (CORE_ADDR pc)
 {
   return cris_skip_prologue_main (pc, 1);
@@ -730,20 +731,18 @@ cris_skip_prologue_frameless_p (CORE_ADDR pc)
 /* Given a PC value corresponding to the start of a function, return the PC
    of the first instruction after the function prologue.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_skip_prologue_main (CORE_ADDR pc, int frameless_p)
 {
-  struct frame_info fi;
-  static struct frame_extra_info fei;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+  struct frame_info *fi;
   struct symtab_and_line sal = find_pc_line (pc, 0);
   int best_limit;
   CORE_ADDR pc_after_prologue;
   
-  /* frame_info now contains dynamic memory.  Since fi is a dummy here,
-     I use static memory for extra_info, and don't bother allocating
-     memory for saved_regs.  */
-  fi.saved_regs = 0;
-  fi.extra_info = &fei;
+  /* frame_info now contains dynamic memory.  Since fi is a dummy
+     here, I don't bother allocating memory for saved_regs.  */
+  fi = deprecated_frame_xmalloc_with_cleanup (0, sizeof (struct frame_extra_info));
 
   /* If there is no symbol information then sal.end == 0, and we end up
      examining only the first instruction in the function prologue. 
@@ -753,7 +752,8 @@ cris_skip_prologue_main (CORE_ADDR pc, int frameless_p)
   else
     best_limit = pc + 100; 
 
-  pc_after_prologue = cris_examine (pc, best_limit, &fi, frameless_p);
+  pc_after_prologue = cris_examine (pc, best_limit, fi, frameless_p);
+  do_cleanups (old_chain);
   return pc_after_prologue;
 }
 
@@ -763,7 +763,7 @@ cris_skip_prologue_main (CORE_ADDR pc, int frameless_p)
    adjusts pcptr (if necessary) to point to the actual memory location where
    the breakpoint should be inserted.  */
 
-const unsigned char *
+static const unsigned char *
 cris_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char break_insn[] = {0x38, 0xe9};
@@ -784,7 +784,7 @@ cris_saved_pc_after_call (struct frame_info *frame)
 /* Returns 1 if spec_reg is applicable to the current gdbarch's CRIS version,
    0 otherwise.  */
 
-int
+static int
 cris_spec_reg_applicable (struct cris_spec_reg spec_reg)
 {
   int version = cris_version ();
@@ -818,7 +818,7 @@ cris_spec_reg_applicable (struct cris_spec_reg spec_reg)
 /* Returns the register size in unit byte.  Returns 0 for an unimplemented
    register, -1 for an invalid register.  */
 
-int
+static int
 cris_register_size (int regno)
 {
   int i;
@@ -857,7 +857,7 @@ cris_register_size (int regno)
 /* Nonzero if regno should not be fetched from the target.  This is the case
    for unimplemented (size 0) and non-existant registers.  */
 
-int
+static int
 cris_cannot_fetch_register (int regno)
 {
   return ((regno < 0 || regno >= NUM_REGS) 
@@ -867,7 +867,7 @@ cris_cannot_fetch_register (int regno)
 /* Nonzero if regno should not be written to the target, for various 
    reasons.  */
 
-int
+static int
 cris_cannot_store_register (int regno)
 {
   /* There are three kinds of registers we refuse to write to.
@@ -903,7 +903,7 @@ cris_cannot_store_register (int regno)
    in the saved register state.  Returns -1 for an invalid or unimplemented
    register.  */
 
-int
+static int
 cris_register_offset (int regno)
 {
   int i;
@@ -929,7 +929,7 @@ cris_register_offset (int regno)
 /* Return the GDB type (defined in gdbtypes.c) for the "standard" data type
    of data in register regno.  */
 
-struct type *
+static struct type *
 cris_register_virtual_type (int regno)
 {
   if (regno == SP_REGNUM || regno == PC_REGNUM
@@ -966,28 +966,29 @@ cris_register_virtual_type (int regno)
 
 /* In the original CRIS ABI, R10 is used to store return values.  */
 
-void
+static void
 cris_abi_original_store_return_value (struct type *type, char *valbuf)
 {
   int len = TYPE_LENGTH (type);
   
-  if (len <= REGISTER_SIZE) 
-    write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf, len);
+  if (len <= DEPRECATED_REGISTER_SIZE) 
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (RET_REGNUM), valbuf, len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_original_store_return_value: type length too large.");
 }
 
 /* In the CRIS ABI V2, R10 and R11 are used to store return values.  */
 
-void
+static void
 cris_abi_v2_store_return_value (struct type *type, char *valbuf)
 {
   int len = TYPE_LENGTH (type);
   
-  if (len <= 2 * REGISTER_SIZE)
+  if (len <= 2 * DEPRECATED_REGISTER_SIZE)
     {
       /* Note that this works since R10 and R11 are consecutive registers.  */
-      write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf, len);
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (RET_REGNUM),
+				       valbuf, len);
     }
   else
     internal_error (__FILE__, __LINE__, "cris_abi_v2_store_return_value: type length too large.");
@@ -996,7 +997,7 @@ cris_abi_v2_store_return_value (struct type *type, char *valbuf)
 /* Return the name of register regno as a string. Return NULL for an invalid or
    unimplemented register.  */
 
-const char *
+static const char *
 cris_register_name (int regno)
 {
   static char *cris_genreg_names[] =
@@ -1038,10 +1039,10 @@ cris_register_name (int regno)
     }
 }
 
-int
+static int
 cris_register_bytes_ok (long bytes)
 {
-  return (bytes == REGISTER_BYTES);
+  return (bytes == DEPRECATED_REGISTER_BYTES);
 }
 
 /* Extract from an array regbuf containing the raw register state a function
@@ -1050,28 +1051,28 @@ cris_register_bytes_ok (long bytes)
 
 /* In the original CRIS ABI, R10 is used to return values.  */
 
-void
+static void
 cris_abi_original_extract_return_value (struct type *type, char *regbuf, 
                                         char *valbuf)
 {
   int len = TYPE_LENGTH (type);
   
-  if (len <= REGISTER_SIZE)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (RET_REGNUM), len);
+  if (len <= DEPRECATED_REGISTER_SIZE)
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (RET_REGNUM), len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_original_extract_return_value: type length too large");
 }
 
 /* In the CRIS ABI V2, R10 and R11 are used to store return values.  */
 
-void
+static void
 cris_abi_v2_extract_return_value (struct type *type, char *regbuf, 
                                   char *valbuf)
 {
   int len = TYPE_LENGTH (type);
   
-  if (len <= 2 * REGISTER_SIZE)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (RET_REGNUM), len);
+  if (len <= 2 * DEPRECATED_REGISTER_SIZE)
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (RET_REGNUM), len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_v2_extract_return_value: type length too large");
 }
@@ -1082,7 +1083,7 @@ cris_abi_v2_extract_return_value (struct type *type, char *regbuf,
    be stored.  R9 is call-clobbered, which means we must save it here for
    later use.  */
 
-void
+static void
 cris_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (STR_REGNUM, addr);
@@ -1093,23 +1094,10 @@ cris_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
    structure value.  It's not there in the CRIS ABI, so we must do it another
    way.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_extract_struct_value_address (char *regbuf)
 {
   return struct_return_address;
-}
-
-/* Returns 1 if a value of the given type being returned from a function 
-   must have space allocated for it on the stack.  gcc_p is true if the 
-   function being considered is known to have been compiled by GCC. 
-   In the CRIS ABI, structure return values are passed to the called 
-   function by reference in register R9 to a caller-allocated area, so
-   this is always true.  */
-
-int
-cris_use_struct_convention (int gcc_p, struct type *type)
-{
-  return 1;
 }
 
 /* Returns 1 if the given type will be passed by pointer rather than 
@@ -1118,7 +1106,7 @@ cris_use_struct_convention (int gcc_p, struct type *type)
 /* In the original CRIS ABI, arguments shorter than or equal to 32 bits are 
    passed by value.  */
 
-int 
+static int 
 cris_abi_original_reg_struct_has_addr (int gcc_p, struct type *type)
 { 
   return (TYPE_LENGTH (type) > 4);
@@ -1127,7 +1115,7 @@ cris_abi_original_reg_struct_has_addr (int gcc_p, struct type *type)
 /* In the CRIS ABI V2, arguments shorter than or equal to 64 bits are passed
    by value.  */
 
-int 
+static int 
 cris_abi_v2_reg_struct_has_addr (int gcc_p, struct type *type)
 { 
   return (TYPE_LENGTH (type) > 8);
@@ -1136,33 +1124,34 @@ cris_abi_v2_reg_struct_has_addr (int gcc_p, struct type *type)
 /* Returns 1 if the function invocation represented by fi does not have a 
    stack frame associated with it.  Otherwise return 0.  */
 
-int
+static int
 cris_frameless_function_invocation (struct frame_info *fi)
 {
-  if (fi->signal_handler_caller)
+  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     return 0;
   else
     return frameless_look_for_prologue (fi);
 }
 
-/* See frame.h.  Determines the address of all registers in the current stack
-   frame storing each in frame->saved_regs.  Space for frame->saved_regs shall
-   be allocated by FRAME_INIT_SAVED_REGS using either frame_saved_regs_zalloc
-   or frame_obstack_alloc.  */
+/* See frame.h.  Determines the address of all registers in the
+   current stack frame storing each in frame->saved_regs.  Space for
+   frame->saved_regs shall be allocated by
+   DEPRECATED_FRAME_INIT_SAVED_REGS using frame_saved_regs_zalloc.  */
 
-void
+static void
 cris_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR ip;
   struct symtab_and_line sal;
   int best_limit;
-  char *dummy_regs = deprecated_generic_find_dummy_frame (fi->pc, fi->frame);
+  char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi),
+							  get_frame_base (fi));
   
   /* Examine the entire prologue.  */
-  register int frameless_p = 0; 
+  int frameless_p = 0; 
 
   /* Has this frame's registers already been initialized?  */
-  if (fi->saved_regs)
+  if (deprecated_get_frame_saved_regs (fi))
     return;
 
   frame_saved_regs_zalloc (fi);
@@ -1172,11 +1161,11 @@ cris_frame_init_saved_regs (struct frame_info *fi)
       /* I don't see this ever happening, considering the context in which
          cris_frame_init_saved_regs is called (always when we're not in
          a dummy frame).  */
-      memcpy (&fi->saved_regs, dummy_regs, sizeof (fi->saved_regs));
+      memcpy (deprecated_get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
     }
   else
     {    
-      ip = get_pc_function_start (fi->pc);
+      ip = get_frame_func (fi);
       sal = find_pc_line (ip, 0);
 
       /* If there is no symbol information then sal.end == 0, and we end up
@@ -1196,32 +1185,33 @@ cris_frame_init_saved_regs (struct frame_info *fi)
    When the call is from get_prev_frame_info, fromleaf is determined by
    cris_frameless_function_invocation.  */
 
-void
+static void
 cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  if (fi->next)
+  if (get_next_frame (fi))
     {
       /* Called from get_prev_frame.  */
-      fi->pc = FRAME_SAVED_PC (fi->next);
+      deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
     }
  
-  fi->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
  
-  fi->extra_info->return_pc = 0;
-  fi->extra_info->leaf_function = 0;
+  get_frame_extra_info (fi)->return_pc = 0;
+  get_frame_extra_info (fi)->leaf_function = 0;
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
+				   get_frame_base (fi),
+				   get_frame_base (fi)))
     {    
-      /* We need to setup fi->frame here because run_stack_dummy gets it wrong
-         by assuming it's always FP.  */
-      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
-						  SP_REGNUM);
-      fi->extra_info->return_pc = 
-        deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
+      /* We need to setup fi->frame here because call_function_by_hand
+         gets it wrong by assuming it's always FP.  */
+      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi), SP_REGNUM));
+      get_frame_extra_info (fi)->return_pc = 
+        deprecated_read_register_dummy (get_frame_pc (fi),
+					get_frame_base (fi), PC_REGNUM);
 
       /* FIXME: Is this necessarily true?  */
-      fi->extra_info->leaf_function = 0;
+      get_frame_extra_info (fi)->leaf_function = 0;
     }
   else
     {
@@ -1229,19 +1219,19 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
       /* Check fromleaf/frameless_function_invocation.  (FIXME)  */
 
-      if (fi->saved_regs[SRP_REGNUM] != 0)
+      if (deprecated_get_frame_saved_regs (fi)[SRP_REGNUM] != 0)
         {
           /* SRP was saved on the stack; non-leaf function.  */
-          fi->extra_info->return_pc =
-            read_memory_integer (fi->saved_regs[SRP_REGNUM], 
-                                 REGISTER_RAW_SIZE (SRP_REGNUM));
+          get_frame_extra_info (fi)->return_pc =
+            read_memory_integer (deprecated_get_frame_saved_regs (fi)[SRP_REGNUM], 
+                                 DEPRECATED_REGISTER_RAW_SIZE (SRP_REGNUM));
         }
       else
         {
           /* SRP is still in a register; leaf function.  */
-          fi->extra_info->return_pc = read_register (SRP_REGNUM);
+          get_frame_extra_info (fi)->return_pc = read_register (SRP_REGNUM);
           /* FIXME: Should leaf_function be set to 1 here?  */
-          fi->extra_info->leaf_function = 1;
+          get_frame_extra_info (fi)->leaf_function = 1;
         }
     }
 }
@@ -1249,16 +1239,18 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 /* Return the content of the frame pointer in the present frame.  In other
    words, determine the address of the calling function's frame.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_frame_chain (struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
+				   get_frame_base (fi),
+				   get_frame_base (fi)))
     {
-      return fi->frame;
+      return get_frame_base (fi);
     }
-  else if (!inside_entry_file (fi->pc))
+  else if (!deprecated_inside_entry_file (get_frame_pc (fi)))
     {
-      return read_memory_unsigned_integer (FRAME_FP (fi), 4);
+      return read_memory_unsigned_integer (get_frame_base (fi), 4);
     }
   else
     {
@@ -1268,33 +1260,15 @@ cris_frame_chain (struct frame_info *fi)
 
 /* Return the saved PC (which equals the return address) of this frame.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_frame_saved_pc (struct frame_info *fi)
 {
-  return fi->extra_info->return_pc;
-}
-
-/* Return the address of the argument block for the frame described 
-   by struct frame_info.  */
-
-CORE_ADDR
-cris_frame_args_address (struct frame_info *fi)
-{
-  return FRAME_FP (fi);
-}
-
-/* Return the address of the locals block for the frame
-   described by struct frame_info.  */
-
-CORE_ADDR
-cris_frame_locals_address (struct frame_info *fi)
-{
-  return FRAME_FP (fi);
+  return get_frame_extra_info (fi)->return_pc;
 }
 
 /* Setup the function arguments for calling a function in the inferior.  */
 
-CORE_ADDR 
+static CORE_ADDR 
 cris_abi_original_push_arguments (int nargs, struct value **args, 
                                   CORE_ADDR sp, int struct_return, 
                                   CORE_ADDR struct_addr)
@@ -1324,13 +1298,13 @@ cris_abi_original_push_arguments (int nargs, struct value **args,
   /* Make sure there's space on the stack.  Allocate space for data and a 
      parameter to refer to that data.  */
   for (argnum = 0, stack_alloc = 0; argnum < nargs; argnum++)
-    stack_alloc += (TYPE_LENGTH (VALUE_TYPE (args[argnum])) + REGISTER_SIZE);
+    stack_alloc += (TYPE_LENGTH (VALUE_TYPE (args[argnum])) + DEPRECATED_REGISTER_SIZE);
   sp -= stack_alloc;
   /* We may over-allocate a little here, but that won't hurt anything.  */
 
   /* Initialize stack frame pointers.  */
   fp_params = sp;
-  fp_data = sp + (nargs * REGISTER_SIZE);
+  fp_data = sp + (nargs * DEPRECATED_REGISTER_SIZE);
 
   /* Now load as many as possible of the first arguments into
      registers, and push the rest onto the stack.  */
@@ -1343,14 +1317,14 @@ cris_abi_original_push_arguments (int nargs, struct value **args,
       len = TYPE_LENGTH (type);
       val = (char *) VALUE_CONTENTS (args[argnum]);
     
-      if (len <= REGISTER_SIZE && argreg <= ARG4_REGNUM)
+      if (len <= DEPRECATED_REGISTER_SIZE && argreg <= ARG4_REGNUM)
         {
           /* Data fits in a register; put it in the first available 
              register.  */
           write_register (argreg, *(unsigned long *) val);
           argreg++;
         }
-      else if (len > REGISTER_SIZE && argreg <= ARG4_REGNUM)
+      else if (len > DEPRECATED_REGISTER_SIZE && argreg <= ARG4_REGNUM)
         {
           /* Data does not fit in register; pass it on the stack and
              put its address in the first available register.  */
@@ -1359,28 +1333,28 @@ cris_abi_original_push_arguments (int nargs, struct value **args,
           fp_data += len;
           argreg++;      
         }
-      else if (len > REGISTER_SIZE)
+      else if (len > DEPRECATED_REGISTER_SIZE)
         {
           /* Data does not fit in register; put both data and 
              parameter on the stack.  */
           write_memory (fp_data, val, len);
-          write_memory (fp_params, (char *) (&fp_data), REGISTER_SIZE);
+          write_memory (fp_params, (char *) (&fp_data), DEPRECATED_REGISTER_SIZE);
           fp_data += len;
-          fp_params += REGISTER_SIZE;
+          fp_params += DEPRECATED_REGISTER_SIZE;
         }
       else
         {
           /* Data fits in a register, but we are out of registers;
              put the parameter on the stack.  */
-          write_memory (fp_params, val, REGISTER_SIZE);
-          fp_params += REGISTER_SIZE;
+          write_memory (fp_params, val, DEPRECATED_REGISTER_SIZE);
+          fp_params += DEPRECATED_REGISTER_SIZE;
         }
     }
 
   return sp;
 }
 
-CORE_ADDR 
+static CORE_ADDR 
 cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp, 
                      int struct_return, CORE_ADDR struct_addr)
 {
@@ -1414,20 +1388,21 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       int reg_demand;
       
       len = TYPE_LENGTH (VALUE_TYPE (args[argnum]));
-      reg_demand = (len / REGISTER_SIZE) + (len % REGISTER_SIZE != 0 ? 1 : 0);
+      reg_demand = (len / DEPRECATED_REGISTER_SIZE) + (len % DEPRECATED_REGISTER_SIZE != 0 ? 1 : 0);
 
-      /* reg_demand * REGISTER_SIZE is the amount of memory we might need to
-         allocate for this argument.  2 * REGISTER_SIZE is the amount of stack
-         space we might need to pass the argument itself (either by value or by
+      /* reg_demand * DEPRECATED_REGISTER_SIZE is the amount of memory
+         we might need to allocate for this argument.  2 *
+         DEPRECATED_REGISTER_SIZE is the amount of stack space we
+         might need to pass the argument itself (either by value or by
          reference).  */
-      stack_alloc += (reg_demand * REGISTER_SIZE + 2 * REGISTER_SIZE);
+      stack_alloc += (reg_demand * DEPRECATED_REGISTER_SIZE + 2 * DEPRECATED_REGISTER_SIZE);
     }
   sp -= stack_alloc;
   /* We may over-allocate a little here, but that won't hurt anything.  */
 
   /* Initialize frame pointers.  */
   fp_arg = sp;
-  fp_mem = sp + (nargs * (2 * REGISTER_SIZE));
+  fp_mem = sp + (nargs * (2 * DEPRECATED_REGISTER_SIZE));
 
   /* Now load as many as possible of the first arguments into registers,
      and push the rest onto the stack.  */
@@ -1445,9 +1420,9 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       val = (char *) VALUE_CONTENTS (args[argnum]);
       
       /* How may registers worth of storage do we need for this argument?  */
-      reg_demand = (len / REGISTER_SIZE) + (len % REGISTER_SIZE != 0 ? 1 : 0);
+      reg_demand = (len / DEPRECATED_REGISTER_SIZE) + (len % DEPRECATED_REGISTER_SIZE != 0 ? 1 : 0);
         
-      if (len <= (2 * REGISTER_SIZE)
+      if (len <= (2 * DEPRECATED_REGISTER_SIZE)
           && (argreg + reg_demand - 1 <= ARG4_REGNUM)) 
         {
           /* Data passed by value.  Fits in available register(s).  */
@@ -1455,10 +1430,10 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
             {
               write_register (argreg, *(unsigned long *) val);
               argreg++;
-              val += REGISTER_SIZE;
+              val += DEPRECATED_REGISTER_SIZE;
             }
         }
-      else if (len <= (2 * REGISTER_SIZE) && argreg <= ARG4_REGNUM)
+      else if (len <= (2 * DEPRECATED_REGISTER_SIZE) && argreg <= ARG4_REGNUM)
         {
           /* Data passed by value. Does not fit in available register(s).  
              Use the register(s) first, then the stack.  */
@@ -1468,28 +1443,29 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
                 {
                   write_register (argreg, *(unsigned long *) val);
                   argreg++;
-                  val += REGISTER_SIZE;
+                  val += DEPRECATED_REGISTER_SIZE;
                 }
               else
                 {
-                  /* I guess this memory write could write the remaining data
-                     all at once instead of in REGISTER_SIZE chunks.  */
-                  write_memory (fp_arg, val, REGISTER_SIZE);
-                  fp_arg += REGISTER_SIZE;
-                  val += REGISTER_SIZE;              
+                  /* I guess this memory write could write the
+                     remaining data all at once instead of in
+                     DEPRECATED_REGISTER_SIZE chunks.  */
+                  write_memory (fp_arg, val, DEPRECATED_REGISTER_SIZE);
+                  fp_arg += DEPRECATED_REGISTER_SIZE;
+                  val += DEPRECATED_REGISTER_SIZE;              
                 }
             }    
         }
-      else if (len > (2 * REGISTER_SIZE))
+      else if (len > (2 * DEPRECATED_REGISTER_SIZE))
         {
           /* Data passed by reference.  Put it on the stack.  */
           write_memory (fp_mem, val, len);
-          write_memory (fp_arg, (char *) (&fp_mem), REGISTER_SIZE);
+          write_memory (fp_arg, (char *) (&fp_mem), DEPRECATED_REGISTER_SIZE);
 
           /* fp_mem need not be word-aligned since it's just a chunk of
              memory being pointed at.  That is, += len would do.  */
-          fp_mem += reg_demand * REGISTER_SIZE;
-          fp_arg += REGISTER_SIZE;
+          fp_mem += reg_demand * DEPRECATED_REGISTER_SIZE;
+          fp_arg += DEPRECATED_REGISTER_SIZE;
         }
       else
         {
@@ -1499,7 +1475,7 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
           /* fp_arg must be word-aligned (i.e., don't += len) to match
              the function prologue.  */
-          fp_arg += reg_demand * REGISTER_SIZE;
+          fp_arg += reg_demand * DEPRECATED_REGISTER_SIZE;
         }
     }
 
@@ -1510,10 +1486,10 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    by the called function unless it is a leaf-function.  Due to the BRP
    register the PC will change when continue is sent.  */
 
-CORE_ADDR
+static CORE_ADDR
 cris_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (SRP_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (SRP_REGNUM, entry_point_address ());
   return sp;
 }
 
@@ -1521,14 +1497,16 @@ cris_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    was created.  Discard the innermost frame from the stack and restore 
    all saved registers.  */
 
-void 
+static void 
 cris_pop_frame (void)
 {
-  register struct frame_info *fi = get_current_frame ();
-  register int regno;
-  register int stack_offset = 0;
+  struct frame_info *fi = get_current_frame ();
+  int regno;
+  int stack_offset = 0;
   
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
+				   get_frame_base (fi),
+				   get_frame_base (fi)))
     {
       /* This happens when we hit a breakpoint set at the entry point,
          when returning from a dummy frame.  */
@@ -1547,32 +1525,32 @@ cris_pop_frame (void)
                                                      
       /* Restore general registers R0 - R7.  They were pushed on the stack 
          after SP was saved.  */
-      for (regno = 0; regno < FP_REGNUM; regno++)
+      for (regno = 0; regno < DEPRECATED_FP_REGNUM; regno++)
         {
-          if (fi->saved_regs[regno])
+          if (deprecated_get_frame_saved_regs (fi)[regno])
             {
               write_register (regno, 
-                              read_memory_integer (fi->saved_regs[regno], 4));
+                              read_memory_integer (deprecated_get_frame_saved_regs (fi)[regno], 4));
             }
         }
      
-      if (fi->saved_regs[FP_REGNUM])
+      if (deprecated_get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM])
         {
           /* Pop the frame pointer (R8).  It was pushed before SP 
              was saved.  */
-          write_register (FP_REGNUM, 
-                          read_memory_integer (fi->saved_regs[FP_REGNUM], 4));
+          write_register (DEPRECATED_FP_REGNUM, 
+                          read_memory_integer (deprecated_get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM], 4));
           stack_offset += 4;
 
           /* Not a leaf function.  */
-          if (fi->saved_regs[SRP_REGNUM])
+          if (deprecated_get_frame_saved_regs (fi)[SRP_REGNUM])
             {     
               /* SRP was pushed before SP was saved.  */
               stack_offset += 4;
             }
       
           /* Restore the SP and adjust for R8 and (possibly) SRP.  */
-          write_register (SP_REGNUM, fi->saved_regs[FP_REGNUM] + stack_offset);
+          write_register (SP_REGNUM, deprecated_get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM] + stack_offset);
         } 
       else
         {
@@ -1581,7 +1559,7 @@ cris_pop_frame (void)
         }
     
       /* Restore the PC.  */
-      write_register (PC_REGNUM, fi->extra_info->return_pc);
+      write_register (PC_REGNUM, get_frame_extra_info (fi)->return_pc);
     }
   flush_cached_frames ();
 }
@@ -1781,7 +1759,7 @@ find_step_target (inst_env_type *inst_env)
    digs through the opcodes in order to find all possible targets. 
    Either one ordinary target or two targets for branches may be found.  */
 
-void
+static void
 cris_software_single_step (enum target_signal ignore, int insert_breakpoints)
 {
   inst_env_type inst_env;
@@ -1825,7 +1803,7 @@ cris_software_single_step (enum target_signal ignore, int insert_breakpoints)
 
 /* Calculates the prefix value for quick offset addressing mode.  */
 
-void
+static void
 quick_mode_bdap_prefix (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to be in a delay slot.  You can't have a prefix to this
@@ -1849,7 +1827,7 @@ quick_mode_bdap_prefix (unsigned short inst, inst_env_type *inst_env)
    from the size of the operation.  The PC is always kept aligned on even
    word addresses.  */
 
-void 
+static void 
 process_autoincrement (int size, unsigned short inst, inst_env_type *inst_env)
 {
   if (size == INST_BYTE_SIZE)
@@ -1880,13 +1858,13 @@ process_autoincrement (int size, unsigned short inst, inst_env_type *inst_env)
 
 /* Just a forward declaration.  */
 
-unsigned long
-get_data_from_address (unsigned short *inst, CORE_ADDR address);
+static unsigned long get_data_from_address (unsigned short *inst,
+					    CORE_ADDR address);
 
 /* Calculates the prefix value for the general case of offset addressing 
    mode.  */
 
-void
+static void
 bdap_prefix (unsigned short inst, inst_env_type *inst_env)
 {
 
@@ -1922,7 +1900,7 @@ bdap_prefix (unsigned short inst, inst_env_type *inst_env)
 
 /* Calculates the prefix value for the index addressing mode.  */
 
-void
+static void
 biap_prefix (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to be in a delay slot.  I can't see that it's possible to
@@ -1957,7 +1935,7 @@ biap_prefix (unsigned short inst, inst_env_type *inst_env)
 
 /* Calculates the prefix value for the double indirect addressing mode.  */
 
-void 
+static void 
 dip_prefix (unsigned short inst, inst_env_type *inst_env)
 {
 
@@ -1990,7 +1968,7 @@ dip_prefix (unsigned short inst, inst_env_type *inst_env)
 
 /* Finds the destination for a branch with 8-bits offset.  */
 
-void
+static void
 eight_bit_offset_branch_op (unsigned short inst, inst_env_type *inst_env)
 {
 
@@ -2027,7 +2005,7 @@ eight_bit_offset_branch_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Finds the destination for a branch with 16-bits offset.  */
 
-void 
+static void 
 sixteen_bit_offset_branch_op (unsigned short inst, inst_env_type *inst_env)
 {
   short offset;
@@ -2058,7 +2036,7 @@ sixteen_bit_offset_branch_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the ABS instruction.  */
 
-void 
+static void 
 abs_op (unsigned short inst, inst_env_type *inst_env)
 {
 
@@ -2100,7 +2078,7 @@ abs_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the ADDI instruction.  */
 
-void 
+static void 
 addi_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to have the PC as base register.  And ADDI can't have
@@ -2119,7 +2097,7 @@ addi_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the ASR instruction.  */
 
-void 
+static void 
 asr_op (unsigned short inst, inst_env_type *inst_env)
 {
   int shift_steps;
@@ -2196,7 +2174,7 @@ asr_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the ASRQ instruction.  */
 
-void 
+static void 
 asrq_op (unsigned short inst, inst_env_type *inst_env)
 {
 
@@ -2243,7 +2221,7 @@ asrq_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the AX, EI and SETF instruction.  */
 
-void 
+static void 
 ax_ei_setf_op (unsigned short inst, inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
@@ -2269,7 +2247,7 @@ ax_ei_setf_op (unsigned short inst, inst_env_type *inst_env)
    register.  Note that check_assign assumes that the caller has checked that
    there is a prefix to this instruction.  The mode check depends on this.  */
 
-void 
+static void 
 check_assign (unsigned short inst, inst_env_type *inst_env)
 {
   /* Check if it's an assign addressing mode.  */
@@ -2282,7 +2260,7 @@ check_assign (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the 2-operand BOUND instruction.  */
 
-void 
+static void 
 two_operand_bound_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to have the PC as the index operand.  */
@@ -2315,7 +2293,7 @@ two_operand_bound_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the 3-operand BOUND instruction.  */
 
-void 
+static void 
 three_operand_bound_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's an error if we haven't got a prefix.  And it's also an error
@@ -2333,7 +2311,7 @@ three_operand_bound_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Clears the status flags in inst_env.  */
 
-void 
+static void 
 btst_nop_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's an error if we have got a prefix.  */
@@ -2351,7 +2329,7 @@ btst_nop_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Clears the status flags in inst_env.  */
 
-void 
+static void 
 clearf_di_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's an error if we have got a prefix.  */
@@ -2369,7 +2347,7 @@ clearf_di_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the CLEAR instruction if it's in register mode.  */
 
-void 
+static void 
 reg_mode_clear_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* Check if the target is the PC.  */
@@ -2406,7 +2384,7 @@ reg_mode_clear_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the TEST instruction if it's in register mode.  */
 
-void
+static void
 reg_mode_test_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's an error if we have got a prefix.  */
@@ -2425,7 +2403,7 @@ reg_mode_test_op (unsigned short inst, inst_env_type *inst_env)
 /* Handles the CLEAR and TEST instruction if the instruction isn't 
    in register mode.  */
 
-void 
+static void 
 none_reg_mode_clear_test_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* Check if we are in a prefix mode.  */
@@ -2450,7 +2428,7 @@ none_reg_mode_clear_test_op (unsigned short inst, inst_env_type *inst_env)
 /* Checks that the PC isn't the destination register or the instructions has
    a prefix.  */
 
-void 
+static void 
 dstep_logshift_mstep_neg_not_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to have the PC as the destination.  The instruction can't
@@ -2469,7 +2447,7 @@ dstep_logshift_mstep_neg_not_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Checks that the instruction doesn't have a prefix.  */
 
-void
+static void
 break_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* The instruction can't have a prefix.  */
@@ -2488,7 +2466,7 @@ break_op (unsigned short inst, inst_env_type *inst_env)
 /* Checks that the PC isn't the destination register and that the instruction
    doesn't have a prefix.  */
 
-void
+static void
 scc_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to have the PC as the destination.  The instruction can't
@@ -2507,7 +2485,7 @@ scc_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the register mode JUMP instruction.  */
 
-void 
+static void 
 reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* It's invalid to do a JUMP in a delay slot.  The mode is register, so 
@@ -2528,7 +2506,8 @@ reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the JUMP instruction for all modes except register.  */
 
-void none_reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
+static void
+none_reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
 {
   unsigned long newpc;
   CORE_ADDR address;
@@ -2572,7 +2551,7 @@ void none_reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles moves to special registers (aka P-register) for all modes.  */
 
-void 
+static void 
 move_to_preg_op (unsigned short inst, inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
@@ -2627,7 +2606,7 @@ move_to_preg_op (unsigned short inst, inst_env_type *inst_env)
 /* Handles moves from special registers (aka P-register) for all modes
    except register.  */
 
-void 
+static void 
 none_reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
@@ -2682,7 +2661,7 @@ none_reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
 /* Handles moves from special registers (aka P-register) when the mode
    is register.  */
 
-void 
+static void 
 reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* Register mode move from special register can't have a prefix.  */
@@ -2717,7 +2696,7 @@ reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the MOVEM from memory to general register instruction.  */
 
-void 
+static void 
 move_mem_to_reg_movem_op (unsigned short inst, inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
@@ -2774,7 +2753,7 @@ move_mem_to_reg_movem_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the MOVEM to memory from general register instruction.  */
 
-void 
+static void 
 move_reg_to_mem_movem_op (unsigned short inst, inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
@@ -2813,7 +2792,7 @@ move_reg_to_mem_movem_op (unsigned short inst, inst_env_type *inst_env)
 /* Handles the pop instruction to a general register. 
    POP is a assembler macro for MOVE.D [SP+], Rd.  */
 
-void 
+static void 
 reg_pop_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* POP can't have a prefix.  */
@@ -2841,7 +2820,7 @@ reg_pop_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles moves from register to memory.  */
 
-void 
+static void 
 move_reg_to_mem_index_inc_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* Check if we have a prefix.  */
@@ -2870,7 +2849,7 @@ move_reg_to_mem_index_inc_op (unsigned short inst, inst_env_type *inst_env)
 /* Handles the intructions that's not yet implemented, by setting 
    inst_env->invalid to true.  */
 
-void 
+static void 
 not_implemented_op (unsigned short inst, inst_env_type *inst_env)
 {
   inst_env->invalid = 1;
@@ -2878,7 +2857,7 @@ not_implemented_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the XOR instruction.  */
 
-void 
+static void 
 xor_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* XOR can't have a prefix.  */
@@ -2907,7 +2886,7 @@ xor_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the MULS instruction.  */
 
-void 
+static void 
 muls_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* MULS/U can't have a prefix.  */
@@ -2931,7 +2910,7 @@ muls_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the MULU instruction.  */
 
-void 
+static void 
 mulu_op (unsigned short inst, inst_env_type *inst_env)
 {
   /* MULS/U can't have a prefix.  */
@@ -2956,7 +2935,7 @@ mulu_op (unsigned short inst, inst_env_type *inst_env)
 /* Calculate the result of the instruction for ADD, SUB, CMP AND, OR and MOVE. 
    The MOVE instruction is the move from source to register.  */
 
-void 
+static void 
 add_sub_cmp_and_or_move_action (unsigned short inst, inst_env_type *inst_env, 
                                 unsigned long source1, unsigned long source2)
 {
@@ -3038,7 +3017,7 @@ add_sub_cmp_and_or_move_action (unsigned short inst, inst_env_type *inst_env,
    is zero extend then the value is extended with zero.  If instead the mode
    is signed extend the sign bit of the value is taken into consideration.  */
 
-unsigned long 
+static unsigned long 
 do_sign_or_zero_extend (unsigned long value, unsigned short *inst)
 {
   /* The size can be either byte or word, check which one it is. 
@@ -3076,7 +3055,7 @@ do_sign_or_zero_extend (unsigned long value, unsigned short *inst)
 /* Handles the register mode for the ADD, SUB, CMP, AND, OR and MOVE
    instruction.  The MOVE instruction is the move from source to register.  */
 
-void 
+static void 
 reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst,
                                      inst_env_type *inst_env)
 {
@@ -3121,7 +3100,7 @@ reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst,
    the size of the operation.  If the instruction is a zero or signed
    extend instruction, the size field is changed in instruction.  */
 
-unsigned long 
+static unsigned long 
 get_data_from_address (unsigned short *inst, CORE_ADDR address)
 {
   int size = cris_get_size (*inst);
@@ -3149,7 +3128,7 @@ get_data_from_address (unsigned short *inst, CORE_ADDR address)
 /* Handles the assign addresing mode for the ADD, SUB, CMP, AND, OR and MOVE 
    instructions.  The MOVE instruction is the move from source to register.  */
 
-void 
+static void 
 handle_prefix_assign_mode_for_aritm_op (unsigned short inst, 
                                         inst_env_type *inst_env)
 {
@@ -3178,7 +3157,7 @@ handle_prefix_assign_mode_for_aritm_op (unsigned short inst,
    OR instructions.  Note that for this to work as expected, the calling
    function must have made sure that there is a prefix to this instruction.  */
 
-void 
+static void 
 three_operand_add_sub_cmp_and_or_op (unsigned short inst, 
                                      inst_env_type *inst_env)
 {
@@ -3206,7 +3185,7 @@ three_operand_add_sub_cmp_and_or_op (unsigned short inst,
 /* Handles the index addresing mode for the ADD, SUB, CMP, AND, OR and MOVE
    instructions.  The MOVE instruction is the move from source to register.  */
 
-void 
+static void 
 handle_prefix_index_mode_for_aritm_op (unsigned short inst, 
                                        inst_env_type *inst_env)
 {
@@ -3234,7 +3213,7 @@ handle_prefix_index_mode_for_aritm_op (unsigned short inst,
    CMP, AND OR and MOVE instruction.  The MOVE instruction is the move from
    source to register.  */
 
-void 
+static void 
 handle_inc_and_index_mode_for_aritm_op (unsigned short inst, 
                                         inst_env_type *inst_env)
 {
@@ -3284,7 +3263,7 @@ handle_inc_and_index_mode_for_aritm_op (unsigned short inst,
 /* Handles the two-operand addressing mode, all modes except register, for
    the ADD, SUB CMP, AND and OR instruction.  */
 
-void 
+static void 
 none_reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst, 
                                           inst_env_type *inst_env)
 {
@@ -3313,7 +3292,7 @@ none_reg_mode_add_sub_cmp_and_or_move_op (unsigned short inst,
 
 /* Handles the quick addressing mode for the ADD and SUB instruction.  */
 
-void 
+static void 
 quick_mode_add_sub_op (unsigned short inst, inst_env_type *inst_env)
 {
   unsigned long operand1;
@@ -3353,7 +3332,7 @@ quick_mode_add_sub_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Handles the quick addressing mode for the CMP, AND and OR instruction.  */
 
-void 
+static void 
 quick_mode_and_cmp_move_or_op (unsigned short inst, inst_env_type *inst_env)
 {
   unsigned long operand1;
@@ -3399,8 +3378,9 @@ quick_mode_and_cmp_move_or_op (unsigned short inst, inst_env_type *inst_env)
 
 /* Translate op_type to a function and call it.  */
 
-static void cris_gdb_func (enum cris_op_type op_type, unsigned short inst, 
-                           inst_env_type *inst_env)
+static void
+cris_gdb_func (enum cris_op_type op_type, unsigned short inst, 
+	       inst_env_type *inst_env)
 {
   switch (op_type)
     {
@@ -3558,10 +3538,16 @@ static void cris_gdb_func (enum cris_op_type op_type, unsigned short inst,
    exec_bfd has been set.  */
 
 static int
-cris_delayed_get_disassembler (bfd_vma addr, disassemble_info *info)
+cris_delayed_get_disassembler (bfd_vma addr, struct disassemble_info *info)
 {
-  tm_print_insn = cris_get_disassembler (exec_bfd);
-  return TARGET_PRINT_INSN (addr, info);
+  int (*print_insn) (bfd_vma addr, struct disassemble_info *info);
+  /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
+     disassembler, even when there is no BFD.  Does something like
+     "gdb; target remote; disassmeble *0x123" work?  */
+  gdb_assert (exec_bfd != NULL);
+  print_insn =  cris_get_disassembler (exec_bfd);
+  gdb_assert (print_insn != NULL);
+  return print_insn (addr, info);
 }
 
 /* Copied from <asm/elf.h>.  */
@@ -3572,7 +3558,7 @@ typedef elf_greg_t elf_gregset_t[35];
 
 /* Unpack an elf_gregset_t into GDB's register cache.  */
 
-void 
+static void 
 supply_gregset (elf_gregset_t *gregsetp)
 {
   int i;
@@ -3637,7 +3623,7 @@ static struct core_fns cris_elf_core_fns =
 
    See gdb/solib-svr4.h for an explanation of these fields.  */
 
-struct link_map_offsets *
+static struct link_map_offsets *
 cris_linux_svr4_fetch_link_map_offsets (void)
 { 
   static struct link_map_offsets lmo;
@@ -3706,8 +3692,8 @@ cris_fpless_backtrace (char *noargs, int from_tty)
      function (since there's no push srp in that case).  */
   int innermost_frame = 1;
   
-  read_register_gen (PC_REGNUM, (char *) &pc);
-  read_register_gen (SP_REGNUM, (char *) &sp);
+  deprecated_read_register_gen (PC_REGNUM, (char *) &pc);
+  deprecated_read_register_gen (SP_REGNUM, (char *) &sp);
   
   /* We make an explicit return when we can't find an outer frame.  */
   while (1)
@@ -3846,7 +3832,7 @@ cris_fpless_backtrace (char *noargs, int from_tty)
           /* We couldn't find a push srp in the prologue, so this must be
              a leaf function, and thus we use the srp register directly.
              This should happen at most once, for the innermost function.  */
-          read_register_gen (SRP_REGNUM, (char *) &pc);
+          deprecated_read_register_gen (SRP_REGNUM, (char *) &pc);
         }
       else
         {
@@ -3865,6 +3851,8 @@ cris_fpless_backtrace (char *noargs, int from_tty)
     }
 }
 
+extern initialize_file_ftype _initialize_cris_tdep; /* -Wmissing-prototypes */
+
 void
 _initialize_cris_tdep (void)
 {
@@ -3872,9 +3860,6 @@ _initialize_cris_tdep (void)
 
   gdbarch_register (bfd_arch_cris, cris_gdbarch_init, cris_dump_tdep);
   
-  /* Used in disassembly.  */
-  tm_print_insn = cris_delayed_get_disassembler;
-
   /* CRIS-specific user-commands.  */
   c = add_set_cmd ("cris-version", class_support, var_integer, 
                    (char *) &usr_cmd_cris_version, 
@@ -3931,7 +3916,7 @@ cris_version_update (char *ignore_args, int from_tty,
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */
@@ -3958,7 +3943,7 @@ cris_mode_update (char *ignore_args, int from_tty,
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */
@@ -3985,7 +3970,7 @@ cris_abi_update (char *ignore_args, int from_tty,
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */
@@ -4020,7 +4005,7 @@ bfd_lookup_symbol (bfd *abfd, const char *symname)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, (PTR) symbol_table);
+      back_to = make_cleanup (free, symbol_table);
       number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
 
       for (i = 0; i < number_of_symbols; i++)
@@ -4139,6 +4124,10 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
+
   tdep->cris_version = cris_version;
   tdep->cris_mode = cris_mode;
   tdep->cris_abi = cris_abi;
@@ -4162,23 +4151,23 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (tdep->cris_abi == CRIS_ABI_ORIGINAL)
     {
       set_gdbarch_double_bit (gdbarch, 32);
-      set_gdbarch_push_arguments (gdbarch, cris_abi_original_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, cris_abi_original_push_arguments);
       set_gdbarch_deprecated_store_return_value (gdbarch, 
                                       cris_abi_original_store_return_value);
       set_gdbarch_deprecated_extract_return_value 
         (gdbarch, cris_abi_original_extract_return_value);
-      set_gdbarch_reg_struct_has_addr 
+      set_gdbarch_deprecated_reg_struct_has_addr 
         (gdbarch, cris_abi_original_reg_struct_has_addr);
     }
   else if (tdep->cris_abi == CRIS_ABI_V2)
     {
       set_gdbarch_double_bit (gdbarch, 64);
-      set_gdbarch_push_arguments (gdbarch, cris_abi_v2_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, cris_abi_v2_push_arguments);
       set_gdbarch_deprecated_store_return_value (gdbarch, cris_abi_v2_store_return_value);
       set_gdbarch_deprecated_extract_return_value
 	(gdbarch, cris_abi_v2_extract_return_value);
-      set_gdbarch_reg_struct_has_addr (gdbarch, 
-                                       cris_abi_v2_reg_struct_has_addr);
+      set_gdbarch_deprecated_reg_struct_has_addr
+	(gdbarch, cris_abi_v2_reg_struct_has_addr);
     }
   else
     internal_error (__FILE__, __LINE__, "cris_gdbarch_init: unknown CRIS ABI");
@@ -4190,14 +4179,15 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* There are 32 registers (some of which may not be implemented).  */
   set_gdbarch_num_regs (gdbarch, 32);
   set_gdbarch_sp_regnum (gdbarch, 14);
-  set_gdbarch_fp_regnum (gdbarch, 8);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, 8);
   set_gdbarch_pc_regnum (gdbarch, 15);
 
   set_gdbarch_register_name (gdbarch, cris_register_name);
   
-  /* Length of ordinary registers used in push_word and a few other places. 
-     REGISTER_RAW_SIZE is the real way to know how big a register is.  */
-  set_gdbarch_register_size (gdbarch, 4);
+  /* Length of ordinary registers used in push_word and a few other
+     places.  DEPRECATED_REGISTER_RAW_SIZE is the real way to know how
+     big a register is.  */
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
   
   /* NEW */
   set_gdbarch_register_bytes_ok (gdbarch, cris_register_bytes_ok);
@@ -4241,70 +4231,48 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       internal_error (__FILE__, __LINE__, "cris_gdbarch_init: unknown CRIS version");
     }
 
-  set_gdbarch_register_bytes (gdbarch, register_bytes);
+  set_gdbarch_deprecated_register_bytes (gdbarch, register_bytes);
 
   /* Returns the register offset for the first byte of register regno's space 
      in the saved register state.  */
-  set_gdbarch_register_byte (gdbarch, cris_register_offset);
+  set_gdbarch_deprecated_register_byte (gdbarch, cris_register_offset);
   
   /* The length of the registers in the actual machine representation.  */
-  set_gdbarch_register_raw_size (gdbarch, cris_register_size);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, cris_register_size);
   
-  /* The largest value REGISTER_RAW_SIZE can have.  */
-  set_gdbarch_max_register_raw_size (gdbarch, 32);
+  /* The largest value DEPRECATED_REGISTER_RAW_SIZE can have.  */
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 32);
   
   /* The length of the registers in the program's representation.  */
-  set_gdbarch_register_virtual_size (gdbarch, cris_register_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, cris_register_size);
   
-  /* The largest value REGISTER_VIRTUAL_SIZE can have.  */
-  set_gdbarch_max_register_virtual_size (gdbarch, 32);
+  /* The largest value DEPRECATED_REGISTER_VIRTUAL_SIZE can have.  */
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 32);
 
-  set_gdbarch_register_virtual_type (gdbarch, cris_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, cris_register_virtual_type);
   
   /* Use generic dummy frames.  */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-  
-  /* Where to execute the call in the memory segments.  */
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  
-  /* Start execution at the beginning of dummy.  */
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  
-  /* Set to 1 since call_dummy_breakpoint_offset was defined.  */
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   
   /* Read all about dummy frames in blockframe.c.  */
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   
   /* Defined to 1 to indicate that the target supports inferior function 
      calls.  */
-  set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_words (gdbarch, 0);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, 0);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
   
-  /* No stack adjustment needed when peforming an inferior function call.  */
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
-
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   
-  /* No register requires conversion from raw format to virtual format.  */
-  set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
+  set_gdbarch_deprecated_push_return_address (gdbarch, cris_push_return_address);
+  set_gdbarch_deprecated_pop_frame (gdbarch, cris_pop_frame);
 
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
-  set_gdbarch_push_return_address (gdbarch, cris_push_return_address);
-  set_gdbarch_pop_frame (gdbarch, cris_pop_frame);
-
-  set_gdbarch_store_struct_return (gdbarch, cris_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, cris_store_struct_return);
   set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, cris_extract_struct_value_address);
-  set_gdbarch_use_struct_convention (gdbarch, cris_use_struct_convention);
+  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);
-  set_gdbarch_init_extra_frame_info (gdbarch, cris_init_extra_frame_info);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, cris_init_extra_frame_info);
   set_gdbarch_skip_prologue (gdbarch, cris_skip_prologue);
   set_gdbarch_prologue_frameless_p (gdbarch, generic_prologue_frameless_p);
   
@@ -4325,25 +4293,25 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation 
     (gdbarch, cris_frameless_function_invocation);
-  set_gdbarch_frame_chain (gdbarch, cris_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
+  set_gdbarch_deprecated_frame_chain (gdbarch, cris_frame_chain);
 
-  set_gdbarch_frame_saved_pc (gdbarch, cris_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, cris_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, cris_frame_locals_address);
-  set_gdbarch_saved_pc_after_call (gdbarch, cris_saved_pc_after_call);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, cris_frame_saved_pc);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, cris_saved_pc_after_call);
 
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-  
-  /* No extra stack alignment needed.  Set to 1 by default.  */
-  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
-  
   /* Helpful for backtracing and returning in a call dummy.  */
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   /* Use target_specific function to define link map offsets.  */
   set_solib_svr4_fetch_link_map_offsets 
     (gdbarch, cris_linux_svr4_fetch_link_map_offsets);
   
+  /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
+     disassembler, even when there is no BFD.  Does something like
+     "gdb; target remote; disassmeble *0x123" work?  */
+  set_gdbarch_print_insn (gdbarch, cris_delayed_get_disassembler);
+
   return gdbarch;
 }

@@ -1,6 +1,6 @@
 /* vms-misc.c -- Miscellaneous functions for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
@@ -49,7 +49,7 @@ static asymbol *new_symbol PARAMS ((bfd *, char *));
    ...
    9	almost everything
 
-   level is also identation level. Indentation is performed
+   level is also indentation level. Indentation is performed
    if level > 0
 	*/
 
@@ -355,8 +355,8 @@ _bfd_vms_get_record (abfd)
 
   if (PRIV (file_format) == FF_UNKNOWN)
     {						/* record length repeats ? */
-      if ( (vms_buf[0] == vms_buf[4])
-        && (vms_buf[1] == vms_buf[5]))
+      if (vms_buf[0] == vms_buf[4]
+	  && vms_buf[1] == vms_buf[5])
 	{
 	  PRIV (file_format) = FF_FOREIGN;	/* Y: foreign environment */
 	  test_start = 2;
@@ -605,14 +605,14 @@ add_new_contents (abfd, section)
   return newptr;
 }
 
-/* Save section data & offset to an vms_section structure
-   vms_section_table[] holds the vms_section chain  */
+/* Save section data & offset to a vms_section structure
+   vms_section_table[] holds the vms_section chain.  */
 
-boolean
+bfd_boolean
 _bfd_save_vms_section (abfd, section, data, offset, count)
      bfd *abfd;
      sec_ptr section;
-     PTR data;
+     const PTR data;
      file_ptr offset;
      bfd_size_type count;
 {
@@ -621,16 +621,16 @@ _bfd_save_vms_section (abfd, section, data, offset, count)
   if (section->index >= VMS_SECTION_COUNT)
     {
       bfd_set_error (bfd_error_nonrepresentable_section);
-      return false;
+      return FALSE;
     }
   if (count == (bfd_size_type)0)
-    return true;
+    return TRUE;
   sptr = add_new_contents (abfd, section);
   if (sptr == NULL)
-    return false;
+    return FALSE;
   memcpy (sptr->contents + offset, data, (size_t) count);
 
-  return true;
+  return TRUE;
 }
 
 /* Get vms_section pointer to saved contents for section # index  */
@@ -668,7 +668,7 @@ _bfd_vms_output_begin (abfd, rectype, rechead)
 
   _bfd_vms_output_short (abfd, (unsigned int) rectype);
 
-  /* save current output position to fill in lenght later  */
+  /* save current output position to fill in length later  */
 
   if (PRIV (push_level) > 0)
     PRIV (length_pos) = PRIV (output_size);
@@ -1092,13 +1092,14 @@ _bfd_vms_enter_symbol (abfd, name)
 #endif
 
   entry = (vms_symbol_entry *)
-	  bfd_hash_lookup (PRIV (vms_symbol_table), name, false, false);
+	  bfd_hash_lookup (PRIV (vms_symbol_table), name, FALSE, FALSE);
   if (entry == 0)
     {
 #if VMS_DEBUG
       _bfd_vms_debug (8,  "creating hash entry for %s\n", name);
 #endif
-      entry = (vms_symbol_entry *)bfd_hash_lookup (PRIV (vms_symbol_table), name, true, false);
+      entry = (vms_symbol_entry *) bfd_hash_lookup (PRIV (vms_symbol_table),
+						    name, TRUE, FALSE);
       if (entry != 0)
 	{
 	  asymbol *symbol;

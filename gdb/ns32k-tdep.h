@@ -1,5 +1,5 @@
 /* Target-dependent definitions for GDB on NS32000 systems.
-   Copyright 1987, 1989, 1991, 1993, 1994, 1998, 1999, 2000, 2001, 2002
+   Copyright 1987, 1989, 1991, 1993, 1994, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -21,8 +21,6 @@
 
 #ifndef NS32K_TDEP_H
 #define NS32K_TDEP_H
-
-#include "osabi.h"
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -54,11 +52,6 @@
 #define NS32K_REGISTER_SIZE             4
 #define NS32K_MAX_REGISTER_RAW_SIZE     8
 #define NS32K_MAX_REGISTER_VIRTUAL_SIZE 8
-
-struct gdbarch_tdep
-{
-  enum gdb_osabi osabi;
-};
 
 void ns32k_gdbarch_init_32082 (struct gdbarch *);
 void ns32k_gdbarch_init_32382 (struct gdbarch *);

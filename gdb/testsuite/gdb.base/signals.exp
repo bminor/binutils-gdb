@@ -1,4 +1,4 @@
-#   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
+#   Copyright 1997, 1998, 1999, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -185,7 +185,7 @@ proc signal_tests_1 {} {
 	# #2, #3, or higher.  At some point this should be fixed (but
 	# it quite possibly would introduce new FAILs on some systems).
 	setup_xfail "i*86-*-bsdi2.0"
-	gdb_test "backtrace 10" "#0.*handler.*#1.*#2.*main.*" \
+	gdb_test "backtrace 10" "#0.*handler.*#1.*signal handler.*#2.* main .*" \
 	    "backtrace in signals_tests_1"
 
 	gdb_test "break func1" "Breakpoint \[0-9\]+ .*"
@@ -195,6 +195,7 @@ proc signal_tests_1 {} {
 	# a SIGTRAP, but with different symptoms.
 	setup_xfail "vax-*-ultrix*"
 	setup_xfail "i*86-*-bsd*"
+	setup_xfail "i*86-*-freebsd*"
 	setup_xfail "i*86-pc-linux-gnu*"
 	setup_xfail "i*86-*-solaris2*"
 	send_gdb "continue\n"
@@ -415,7 +416,7 @@ The program being debugged stopped while in a function called from GDB.*" \
     # But we should be able to backtrace...
     # On alpha-*-osf2.0 this test works when run manually but sometime fails when
     # run under dejagnu, making it very hard to debug the problem.  Weird...
-    gdb_test "bt 10" "#0.*handler.*#1.*#2.*main.*" "bt in signals.exp"
+    gdb_test "bt 10" "#0.*handler.*#1.*signal handler.*#2.* main .*" "bt in signals.exp"
     # ...and continue...
     gdb_test "continue" "Continuing\\." "continue in signals.exp"
     # ...and then count should have been incremented

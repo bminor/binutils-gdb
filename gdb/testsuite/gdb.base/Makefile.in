@@ -17,16 +17,8 @@ EXECUTABLES = all-types annota1 bitfields break \
 MISCELLANEOUS = coremmap.data ../foobar.baz \
 	shr1.sl shr2.sl solib_sl.sl solib1.sl solib2.sl
 
-all:
-	@echo "Nothing to be done for all..."
-
-info:
-install-info:
-dvi:
-install:
-uninstall: force
-installcheck:
-check:
+all info install-info dvi install uninstall installcheck check:
+	@echo "Nothing to be done for $@..."
 
 clean mostlyclean:
 	-rm -f *~ *.o a.out xgdb *.x *.ci *.tmp
@@ -38,6 +30,3 @@ distclean maintainer-clean realclean: clean
 	-rm -f Makefile config.status config.log
 	-rm -f *-init.exp
 	-rm -fr *.log summary detail *.plog *.sum *.psum site.*
-
-Makefile : $(srcdir)/Makefile.in $(srcdir)/configure.in
-	$(SHELL) ./config.status --recheck

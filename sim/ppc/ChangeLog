@@ -1,3 +1,145 @@
+2003-10-16  Michael Snyder  <msnyder@redhat.com>
+
+	* emul_netbsd.c: Only a comment may follow an #endif.
+
+2003-10-15  Michael Snyder  <msnyder@redhat.com>
+
+	* Makefile.in (sim_calls.o): No longer depends on gdb/tm.h.
+
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	Written by matthew green <mrg@redhat.com>, with fixes from Aldy
+	Hernandez <aldyh@redhat.com>, Jim Wilson <wilson@redhat.com>, and
+	Nick Clifton <nickc@redhat.com>.
+	
+	* ppc-instructions: Include altivec.igen and e500.igen.
+	(model_busy, model_data): Add vr_busy and vscr_busy.
+	(model_trace_release): Trace vr_busy and vscr_busy.
+	(model_new_cycle): Update vr_busy and vscr_busy.
+	(model_make_busy): Update vr_busy and vscr_busy.
+	* registers.c (register_description): Add Altivec and e500
+	registers.
+	* psim.c (psim_read_register, psim_read_register): Handle Altivec
+	and e500 registers.
+	* ppc-spr-table (SPEFSCR): Add VRSAVE and SPEFSCR registers.
+	* configure.in (sim_filter): When *altivec* add "av".  When *spe*
+	or *simd* add e500.
+	(sim_float): When *altivec* define WITH_ALTIVEC.  When *spe* add
+	WITH_E500.
+	* configure: Re-generate.
+	* e500.igen, altivec.igen: New files.
+	* e500_expression.h, altivec_expression.h: New files.
+	* idecode_expression.h: Update copyright.  Include
+	"e500_expression.h" and "altivec_expression.h".
+	* e500_registers.h, altivec_registers.h: New files.
+	* registers.h: Update copyright.  Include "e500_registers.h" and
+	"altivec_registers.h".
+	(registers): Add Altivec and e500 specific registers.
+	* Makefile.in (IDECODE_H): Add "idecode_e500.h" and
+	"idecode_altivec.h".
+	(REGISTERS_H): Add "e500_registers.h" and "altivec_registers.h".
+	(tmp-igen): Add dependencies on altivec.igen and e500.igen .
+
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	Problems reported by Joshua LeVasseur.
+	* emul_chirp.c: Update copyright.
+	(chirp_emul_nextprop): Return the first property.
+	* hw_htab.c: Update copyright.
+	(htab_decode_hash_table): Fix check for htab size.
+
+2003-06-21  Andrew Cagney  <cagney@redhat.com>
+
+	* interrupts.c: Update copyright.
+	(external_interrupt): Fix test for already pending interrupt.
+	Problem found by Joshua LeVasseur.
+
+	* ppc-instructions: Add missing +8 line.  Found by blofeldus at
+	yahoo.com.
+	
+2003-06-21  Andrew Cagney  <cagney@redhat.com>
+
+	From Ian Lance Taylor <ian@airs.com>: * hw_nvram.c
+	(hw_nvram_init_address): Correct call to memset--swap second and
+	third arguments.
+
+2003-06-21  Andrew Cagney  <cagney@redhat.com>
+
+	* hw_com.c (hw_com_device_init_data): Check that the output, and
+	not input file opened.  Pointed out by masahino tky3.3web.ne.jp.
+
+2003-06-20  Andrew Cagney  <cagney@redhat.com>
+
+	* sim_calls.c (sim_create_inferior): Assert that
+	psim_write_register succeeded.
+	(sim_fetch_register, sim_store_register): Make "regname" constant.
+	Delete Altivec hack.  Return result from psim_read_register /
+	psim_write_register.
+	* psim.h (psim_read_register, psim_write_register): Change return
+	type to int.  Update comments.
+	* psim.c: Update copyright.
+	(psim_stack): Assert that the psim_read_register worked.
+	(psim_read_register, psim_read_register): Return the register's
+	size.  Allocate the cooked buffer dynamically.
+	* hw_register.c: Update copyright.
+	(do_register_init): Check that psim_write_register succeeded.
+	* hw_init.c: Update copyright.
+	(create_ppc_elf_stack_frame, create_ppc_aix_stack_frame): Assert
+	that the register transfer worked.
+
+2003-06-19  Andrew Cagney  <cagney@redhat.com>
+
+	* ld-insn.h: Update copyright.
+	(cache_fields): Define.
+	(insn_table_fields): Add insn_field_6 and insn_field_7.
+	(load_insn_table): Pass in the "cache_rules".
+	* ld-insn.c: Update copyright.
+	(load_insn_table): Add parameter "cache_rules".  Handle "cache",
+	"computed" and "scratch" fields.
+	(main): Pass "cache_rules" to load_insn_table.
+	* ld-cache.h: Update copyright.
+	(append_cache_table): Declare.
+	* ld-cache.c: Update copyright.
+	(append_cache_table): New function.
+	(load_cache_table): Call.
+	* gen-model.c: Include "ld-cache.h".
+	* gen-itable.c: Include "ld-cache.h".
+	* igen.c: Move #include "ld-cache.h" to earlier.  Update
+	copyright.
+	(main): Permit a NULL "cache_rules".  Pass address of
+	"cache_rules" to load_insn_table.
+	* Makefile.in (tmp-ld-insn): Add "ld-cache.o".
+	(tmp-igen): Do not include ppc-cache-rules.
+	(gen-itable.o, gen-model.o): Add "ld-cache.h".
+	* ppc-cache-rules: Delete file.
+	* ppc-instructions: Add cache rules.
+
+2003-06-19  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (ICACHE_CFLAGS, SEMANTICS_CFLAGS): Delete.
+	(SIM_FPU_FLAGS): Define.
+	(icache.o): Delete explicit compile command.
+	(semantics.o, idecode.o): Delete explicit compile command.
+	(NOWARN_CFLAGS, STD_CFLAGS): Append SIM_FPU_CFLAGS.
+	* gen-support.c (gen_support_c): Generate #include of
+	"sim-inline.h" and "sim-fpu.h", but conditional on
+	HAVE_COMMON_FPU.
+	* gen-idecode.c (gen_idecode_c): Ditto.
+	* igen.c (gen_icache_c, gen_semantics_c): Wrap #include of
+	"sim-inline.h" and "sim-fpu.h" in HAVE_COMMON_FPU conditional.
+	Move to before "support.h".
+	* Makefile.in, gen-support.c, gen-idecode.c, igen.c: Update
+	copyright.
+	
+2003-05-16  Ian Lance Taylor  <ian@airs.com>
+
+	* Makefile.in (various): Use $(SHELL) whenever we invoke
+	move-if-change.
+
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* sim_calls.c (sim_open, sim_create_inferior): Rename _bfd to bfd.
+
 2002-09-27  Andrew Cagney  <ac131313@redhat.com>
 
 	* hw_disk.c (hw_disk_init_address): Set device type to "block",

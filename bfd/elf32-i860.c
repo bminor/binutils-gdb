@@ -1,5 +1,5 @@
 /* Intel i860 specific support for 32-bit ELF.
-   Copyright 1993, 1995, 1999, 2000, 2001, 2002
+   Copyright 1993, 1995, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    Full i860 support contributed by Jason Eckhardt <jle@cygnus.com>.
@@ -26,38 +26,237 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-bfd.h"
 #include "elf/i860.h"
 
-/* Prototypes.  */
-static reloc_howto_type *lookup_howto
-  PARAMS ((unsigned int));
+/* special_function for R_860_PC26 relocation.  */
+static bfd_reloc_status_type
+i860_howto_pc26_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+                       arelent *reloc_entry,
+                       asymbol *symbol,
+                       void *data ATTRIBUTE_UNUSED,
+                       asection *input_section,
+                       bfd *output_bfd,
+                       char **error_message ATTRIBUTE_UNUSED)
+{
+  bfd_vma insn;
+  bfd_vma relocation;
+  bfd_byte *addr;
 
-static reloc_howto_type *elf32_i860_reloc_type_lookup
-  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
 
-static void elf32_i860_info_to_howto_rela
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+  /* Used elf32-mips.c as an example.  */
+  if (bfd_is_und_section (symbol->section)
+      && output_bfd == (bfd *) NULL)
+    return bfd_reloc_undefined;
 
-static bfd_reloc_status_type elf32_i860_relocate_splitn
-  PARAMS ((bfd *,  Elf_Internal_Rela *, bfd_byte *, bfd_vma));
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
 
-static bfd_reloc_status_type elf32_i860_relocate_pc16
-  PARAMS ((bfd *,  asection *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc_entry->addend;
 
-static bfd_reloc_status_type elf32_i860_relocate_pc26
-  PARAMS ((bfd *,  asection *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
 
-static bfd_reloc_status_type elf32_i860_relocate_highadj
-  PARAMS ((bfd *,  Elf_Internal_Rela *, bfd_byte *, bfd_vma));
+  /* Adjust for PC-relative relocation.  */
+  relocation -= (input_section->output_section->vma
+                 + input_section->output_offset
+                 + reloc_entry->address
+                 + 4);
 
-static boolean elf32_i860_relocate_section
-  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+  /* Check for target out of range.  */
+  if ((bfd_signed_vma)relocation > (0x3ffffff << 2)
+      || (bfd_signed_vma)relocation < (-0x4000000 << 2))
+    return bfd_reloc_outofrange;
 
-static bfd_reloc_status_type i860_final_link_relocate
-  PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, bfd_vma));
+  addr = (bfd_byte *) data + reloc_entry->address;
+  insn = bfd_get_32 (abfd, addr);
 
-static boolean elf32_i860_is_local_label_name
-  PARAMS ((bfd *, const char *));
+  relocation >>= reloc_entry->howto->rightshift;
+  insn = (insn & ~reloc_entry->howto->dst_mask)
+         | (relocation & reloc_entry->howto->dst_mask);
+
+  bfd_put_32 (abfd, (bfd_vma) insn, addr);
+
+  return bfd_reloc_ok;
+}
+
+/* special_function for R_860_PC16 relocation.  */
+static bfd_reloc_status_type
+i860_howto_pc16_reloc (bfd *abfd,
+                       arelent *reloc_entry,
+                       asymbol *symbol,
+                       void *data,
+                       asection *input_section,
+                       bfd *output_bfd,
+                       char **error_message ATTRIBUTE_UNUSED)
+{
+  bfd_vma insn;
+  bfd_vma relocation;
+  bfd_byte *addr;
+
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* Used elf32-mips.c as an example.  */
+  if (bfd_is_und_section (symbol->section)
+      && output_bfd == (bfd *) NULL)
+    return bfd_reloc_undefined;
+
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc_entry->addend;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  /* Adjust for PC-relative relocation.  */
+  relocation -= (input_section->output_section->vma
+                 + input_section->output_offset
+                 + reloc_entry->address
+                 + 4);
+
+  /* Check for target out of range.  */
+  if ((bfd_signed_vma)relocation > (0x7fff << 2)
+      || (bfd_signed_vma)relocation < (-0x8000 << 2))
+    return bfd_reloc_outofrange;
+
+  addr = (bfd_byte *) data + reloc_entry->address;
+  insn = bfd_get_32 (abfd, addr);
+
+  relocation >>= reloc_entry->howto->rightshift;
+  relocation = (((relocation & 0xf800) << 5) | (relocation & 0x7ff))
+               & reloc_entry->howto->dst_mask;
+  insn = (insn & ~reloc_entry->howto->dst_mask) | relocation;
+
+  bfd_put_32 (abfd, (bfd_vma) insn, addr);
+
+  return bfd_reloc_ok;
+}
+
+/* special_function for R_860_HIGHADJ relocation.  */
+static bfd_reloc_status_type
+i860_howto_highadj_reloc (bfd *abfd,
+                          arelent *reloc_entry,
+                          asymbol *symbol,
+                          void *data,
+                          asection *input_section,
+                          bfd *output_bfd,
+                          char **error_message ATTRIBUTE_UNUSED)
+{
+  bfd_vma insn;
+  bfd_vma relocation;
+  bfd_byte *addr;
+
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* Used elf32-mips.c as an example.  */
+  if (bfd_is_und_section (symbol->section)
+      && output_bfd == (bfd *) NULL)
+    return bfd_reloc_undefined;
+
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc_entry->addend;
+  relocation += 0x8000;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  addr = (bfd_byte *) data + reloc_entry->address;
+  insn = bfd_get_32 (abfd, addr);
+
+  relocation = ((relocation >> 16) & 0xffff);
+
+  insn = (insn & 0xffff0000) | relocation;
+
+  bfd_put_32 (abfd, (bfd_vma) insn, addr);
+
+  return bfd_reloc_ok;
+}
+
+/* special_function for R_860_SPLITn relocations.  */
+static bfd_reloc_status_type
+i860_howto_splitn_reloc (bfd *abfd,
+                         arelent *reloc_entry,
+                         asymbol *symbol,
+                         void *data,
+                         asection *input_section,
+                         bfd *output_bfd,
+                         char **error_message ATTRIBUTE_UNUSED)
+{
+  bfd_vma insn;
+  bfd_vma relocation;
+  bfd_byte *addr;
+
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* Used elf32-mips.c as an example.  */
+  if (bfd_is_und_section (symbol->section)
+      && output_bfd == (bfd *) NULL)
+    return bfd_reloc_undefined;
+
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc_entry->addend;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  addr = (bfd_byte *) data + reloc_entry->address;
+  insn = bfd_get_32 (abfd, addr);
+
+  relocation = (((relocation & 0xf800) << 5) | (relocation & 0x7ff))
+               & reloc_entry->howto->dst_mask;
+  insn = (insn & ~reloc_entry->howto->dst_mask) | relocation;
+
+  bfd_put_32 (abfd, (bfd_vma) insn, addr);
+
+  return bfd_reloc_ok;
+}
 
 /* This howto table is preliminary.  */
 static reloc_howto_type elf32_i860_howto_table [] =
@@ -67,487 +266,486 @@ static reloc_howto_type elf32_i860_howto_table [] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_NONE",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 32-bit absolute relocation.  */
   HOWTO (R_860_32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_32",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_860_COPY,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_COPY",		/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_860_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_GLOB_DAT",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_860_JUMP_SLOT,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_JUMP_SLOT",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_860_RELATIVE,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_RELATIVE",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 26-bit PC-relative relocation.  */
   HOWTO (R_860_PC26,	        /* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 26,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_pc26_reloc,	/* special_function */
 	 "R_860_PC26",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x3ffffff,		/* src_mask */
 	 0x3ffffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   HOWTO (R_860_PLT26,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 26,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_PLT26",		/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   /* A 16-bit PC-relative relocation.  */
   HOWTO (R_860_PC16,	        /* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_pc16_reloc,	/* special_function */
 	 "R_860_PC16",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x1f07ff,		/* src_mask */
 	 0x1f07ff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   HOWTO (R_860_LOW0,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_LOW0",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_SPLIT0,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_splitn_reloc, /* special_function */
 	 "R_860_SPLIT0",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x1f07ff,		/* src_mask */
 	 0x1f07ff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_LOW1,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_LOW1",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xfffe,		/* src_mask */
 	 0xfffe,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_SPLIT1,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_splitn_reloc, /* special_function */
 	 "R_860_SPLIT1",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x1f07fe,		/* src_mask */
 	 0x1f07fe,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_LOW2,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_LOW2",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xfffc,		/* src_mask */
 	 0xfffc,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_SPLIT2,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_splitn_reloc, /* special_function */
 	 "R_860_SPLIT2",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x1f07fc,		/* src_mask */
 	 0x1f07fc,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_LOW3,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_LOW3",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xfff8,		/* src_mask */
 	 0xfff8,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_LOGOT0,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_LOGOT0",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   HOWTO (R_860_SPGOT0,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_SPGOT0",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   HOWTO (R_860_LOGOT1,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_LOGOT1",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   HOWTO (R_860_SPGOT1,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_SPGOT1",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   HOWTO (R_860_LOGOTOFF0,        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_LOGOTOFF0",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_SPGOTOFF0,        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_SPGOTOFF0",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_LOGOTOFF1,        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_LOGOTOFF1",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_SPGOTOFF1,       /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_SPGOTOFF1",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_LOGOTOFF2,        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_LOGOTOFF2",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_LOGOTOFF3,        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_LOGOTOFF3",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_LOPC,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_LOPC",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   HOWTO (R_860_HIGHADJ,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_highadj_reloc, /* special_function */
 	 "R_860_HIGHADJ",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_HAGOT,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_HAGOT",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   HOWTO (R_860_HAGOTOFF,        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_HAGOTOFF",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_HAPC,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_HAPC",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   HOWTO (R_860_HIGH,	        /* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_HIGH",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_860_HIGOT,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_HIGOT",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   HOWTO (R_860_HIGOTOFF,        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_860_HIGOTOFF",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 };
 
 static unsigned char elf_code_to_howto_index[R_860_max + 1];
 
 static reloc_howto_type *
-lookup_howto (rtype)
-     unsigned int rtype;
+lookup_howto (unsigned int rtype)
 {
   static int initialized = 0;
   int i;
@@ -572,9 +770,8 @@ lookup_howto (rtype)
 
 /* Given a BFD reloc, return the matching HOWTO structure.  */
 static reloc_howto_type *
-elf32_i860_reloc_type_lookup (abfd, code)
-     bfd * abfd ATTRIBUTE_UNUSED;
-     bfd_reloc_code_real_type code;
+elf32_i860_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			      bfd_reloc_code_real_type code)
 {
   unsigned int rtype;
 
@@ -691,10 +888,9 @@ elf32_i860_reloc_type_lookup (abfd, code)
 
 /* Given a ELF reloc, return the matching HOWTO structure.  */
 static void
-elf32_i860_info_to_howto_rela (abfd, bfd_reloc, elf_reloc)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *bfd_reloc;
-     Elf64_Internal_Rela *elf_reloc;
+elf32_i860_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
+			       arelent *bfd_reloc,
+			       Elf_Internal_Rela *elf_reloc)
 {
   bfd_reloc->howto
     = lookup_howto ((unsigned) ELF32_R_TYPE (elf_reloc->r_info));
@@ -703,11 +899,10 @@ elf32_i860_info_to_howto_rela (abfd, bfd_reloc, elf_reloc)
 /* Specialized relocation handler for R_860_SPLITn.  These relocations
    involves a 16-bit field that is split into two contiguous parts.  */
 static bfd_reloc_status_type
-elf32_i860_relocate_splitn (input_bfd, rello, contents, value)
-     bfd *input_bfd;
-     Elf_Internal_Rela *rello;
-     bfd_byte *contents;
-     bfd_vma value;
+elf32_i860_relocate_splitn (bfd *input_bfd,
+			    Elf_Internal_Rela *rello,
+			    bfd_byte *contents,
+			    bfd_vma value)
 {
   bfd_vma insn;
   reloc_howto_type *howto;
@@ -718,7 +913,7 @@ elf32_i860_relocate_splitn (input_bfd, rello, contents, value)
   value += rello->r_addend;
 
   /* Separate the fields and insert.  */
-  value = (((value & 0xf8) << 5) | (value & 0x7ff)) & howto->dst_mask;
+  value = (((value & 0xf800) << 5) | (value & 0x7ff)) & howto->dst_mask;
   insn = (insn & ~howto->dst_mask) | value;
 
   bfd_put_32 (input_bfd, insn, contents + rello->r_offset);
@@ -729,12 +924,11 @@ elf32_i860_relocate_splitn (input_bfd, rello, contents, value)
    involves a 16-bit, PC-relative field that is split into two contiguous
    parts.  */
 static bfd_reloc_status_type
-elf32_i860_relocate_pc16 (input_bfd, input_section, rello, contents, value)
-     bfd *input_bfd;
-     asection *input_section;
-     Elf_Internal_Rela *rello;
-     bfd_byte *contents;
-     bfd_vma value;
+elf32_i860_relocate_pc16 (bfd *input_bfd,
+			  asection *input_section,
+			  Elf_Internal_Rela *rello,
+			  bfd_byte *contents,
+			  bfd_vma value)
 {
   bfd_vma insn;
   reloc_howto_type *howto;
@@ -749,8 +943,9 @@ elf32_i860_relocate_pc16 (input_bfd, input_section, rello, contents, value)
   /* Relocate.  */
   value += rello->r_addend;
 
-  /* Separate the fields and insert.  */
-  value = (((value & 0xf8) << 5) | (value & 0x7ff)) & howto->dst_mask;
+  /* Adjust the value by 4, then separate the fields and insert.  */
+  value = (value - 4) >> howto->rightshift;
+  value = (((value & 0xf800) << 5) | (value & 0x7ff)) & howto->dst_mask;
   insn = (insn & ~howto->dst_mask) | value;
 
   bfd_put_32 (input_bfd, insn, contents + rello->r_offset);
@@ -761,12 +956,11 @@ elf32_i860_relocate_pc16 (input_bfd, input_section, rello, contents, value)
 /* Specialized relocation handler for R_860_PC26.  This relocation
    involves a 26-bit, PC-relative field which must be adjusted by 4.  */
 static bfd_reloc_status_type
-elf32_i860_relocate_pc26 (input_bfd, input_section, rello, contents, value)
-     bfd *input_bfd;
-     asection *input_section;
-     Elf_Internal_Rela *rello;
-     bfd_byte *contents;
-     bfd_vma value;
+elf32_i860_relocate_pc26 (bfd *input_bfd,
+			  asection *input_section,
+			  Elf_Internal_Rela *rello,
+			  bfd_byte *contents,
+			  bfd_vma value)
 {
   bfd_vma insn;
   reloc_howto_type *howto;
@@ -792,18 +986,17 @@ elf32_i860_relocate_pc26 (input_bfd, input_section, rello, contents, value)
 
 /* Specialized relocation handler for R_860_HIGHADJ.  */
 static bfd_reloc_status_type
-elf32_i860_relocate_highadj (input_bfd, rel, contents, value)
-     bfd *input_bfd;
-     Elf_Internal_Rela *rel;
-     bfd_byte *contents;
-     bfd_vma value;
+elf32_i860_relocate_highadj (bfd *input_bfd,
+			     Elf_Internal_Rela *rel,
+			     bfd_byte *contents,
+			     bfd_vma value)
 {
   bfd_vma insn;
 
   insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 
-  value += ((rel->r_addend & 0x8000) << 1);
   value += rel->r_addend;
+  value += 0x8000; 
   value = ((value >> 16) & 0xffff);
 
   insn = (insn & 0xffff0000) | value;
@@ -815,13 +1008,12 @@ elf32_i860_relocate_highadj (input_bfd, rel, contents, value)
 /* Perform a single relocation.  By default we use the standard BFD
    routines. However, we handle some specially.  */
 static bfd_reloc_status_type
-i860_final_link_relocate (howto, input_bfd, input_section, contents, rel, relocation)
-     reloc_howto_type *  howto;
-     bfd *               input_bfd;
-     asection *          input_section;
-     bfd_byte *          contents;
-     Elf_Internal_Rela * rel;
-     bfd_vma             relocation;
+i860_final_link_relocate (reloc_howto_type *howto,
+			  bfd *input_bfd,
+			  asection *input_section,
+			  bfd_byte *contents,
+			  Elf_Internal_Rela *rel,
+			  bfd_vma relocation)
 {
   return _bfd_final_link_relocate (howto, input_bfd, input_section,
 				   contents, rel->r_offset, relocation,
@@ -840,7 +1032,7 @@ i860_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
    zero.
 
    This function is responsible for adjusting the section contents as
-   necessary, and (if using Rela relocs and generating a relocateable
+   necessary, and (if using Rela relocs and generating a relocatable
    output file) adjusting the reloc addend as necessary.
 
    This function does not have to worry about setting the reloc
@@ -854,30 +1046,28 @@ i860_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
    The global hash table entry for the global symbols can be found
    via elf_sym_hashes (input_bfd).
 
-   When generating relocateable output, this function must handle
+   When generating relocatable output, this function must handle
    STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
    going to be the section symbol corresponding to the output
    section, which means that the addend must be adjusted
    accordingly.  */
-static boolean
-elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
-			     contents, relocs, local_syms, local_sections)
-     bfd *                   output_bfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *  info;
-     bfd *                   input_bfd;
-     asection *              input_section;
-     bfd_byte *              contents;
-     Elf_Internal_Rela *     relocs;
-     Elf_Internal_Sym *      local_syms;
-     asection **             local_sections;
+static bfd_boolean
+elf32_i860_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
+			     struct bfd_link_info *info,
+			     bfd *input_bfd,
+			     asection *input_section,
+			     bfd_byte *contents,
+			     Elf_Internal_Rela *relocs,
+			     Elf_Internal_Sym *local_syms,
+			     asection **local_sections)
 {
-  Elf_Internal_Shdr *           symtab_hdr;
-  struct elf_link_hash_entry ** sym_hashes;
-  Elf_Internal_Rela *           rel;
-  Elf_Internal_Rela *           relend;
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes;
+  Elf_Internal_Rela *rel;
+  Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
-    return true;
+  if (info->relocatable)
+    return TRUE;
 
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -914,7 +1104,7 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections [r_symndx];
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
@@ -946,8 +1136,8 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset, true)))
-		return false;
+		      input_section, rel->r_offset, TRUE)))
+		return FALSE;
 	      relocation = 0;
 	    }
 	}
@@ -1021,7 +1211,7 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    case bfd_reloc_undefined:
 	      r = info->callbacks->undefined_symbol
-		(info, name, input_bfd, input_section, rel->r_offset, true);
+		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
 	      break;
 
 	    case bfd_reloc_outofrange:
@@ -1046,11 +1236,11 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 	      (info, msg, name, input_bfd, input_section, rel->r_offset);
 
 	  if (! r)
-	    return false;
+	    return FALSE;
 	}
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Return whether a symbol name implies a local label.  SVR4/860 compilers
@@ -1058,13 +1248,11 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
    function prolog. These should be local.
    ??? Do any other SVR4 compilers have this convention? If so, this should
    be added to the generic routine.  */
-static boolean
-elf32_i860_is_local_label_name (abfd, name)
-     bfd *abfd;
-     const char *name;
+static bfd_boolean
+elf32_i860_is_local_label_name (bfd *abfd, const char *name)
 {
   if (name[0] == '.' && name[1] == 'e' && name[2] == 'p' && name[3] == '.')
-    return true;
+    return TRUE;
 
   return _bfd_elf_is_local_label_name (abfd, name);
 }

@@ -31,6 +31,28 @@ struct small_rep_info_t {
    int   head;
 };
 
+/* 6 bits : really fits in 8 bits and is promoted to 8 bits
+ */
+struct bit_flags_char_t {
+       unsigned char alpha   :1;
+       unsigned char beta    :1;
+       unsigned char gamma   :1;
+       unsigned char delta   :1;
+       unsigned char epsilon :1;
+       unsigned char omega   :1;
+};
+
+/* 6 bits : really fits in 8 bits and is promoted to 16 bits
+ */
+struct bit_flags_short_t {
+       unsigned short alpha   :1;
+       unsigned short beta    :1;
+       unsigned short gamma   :1;
+       unsigned short delta   :1;
+       unsigned short epsilon :1;
+       unsigned short omega   :1;
+};
+
 /* 6 bits : really fits in 8 bits and is promoted to 32 bits
  */
 struct bit_flags_t {
@@ -104,6 +126,90 @@ void loop_count () {
      int index;
 
      for (index=0; index<4; index++);
+}
+
+/*****************************************************************
+ * INIT_BIT_FLAGS_CHAR :
+ * Initializes a bit_flags_char_t structure. Can call this function see
+ * the call command behavior when integer arguments do not fit into
+ * registers and must be placed on the stack.
+ * OUT struct bit_flags_char_t *bit_flags -- structure to be filled
+ * IN  unsigned a  -- 0 or 1 
+ * IN  unsigned b  -- 0 or 1 
+ * IN  unsigned g  -- 0 or 1 
+ * IN  unsigned d  -- 0 or 1 
+ * IN  unsigned e  -- 0 or 1 
+ * IN  unsigned o  -- 0 or 1 
+ *****************************************************************/
+#ifdef PROTOTYPES
+void init_bit_flags_char (
+struct bit_flags_char_t *bit_flags,
+unsigned a,
+unsigned b,
+unsigned g,
+unsigned d,
+unsigned e,
+unsigned o)
+#else
+void init_bit_flags_char (bit_flags,a,b,g,d,e,o) 
+struct bit_flags_char_t *bit_flags;
+unsigned a;
+unsigned b;
+unsigned g;
+unsigned d;
+unsigned e;
+unsigned o; 
+#endif
+{
+
+   bit_flags->alpha = a;
+   bit_flags->beta = b;
+   bit_flags->gamma = g;
+   bit_flags->delta = d;
+   bit_flags->epsilon = e;
+   bit_flags->omega = o;
+}
+
+/*****************************************************************
+ * INIT_BIT_FLAGS_SHORT :
+ * Initializes a bit_flags_short_t structure. Can call this function see
+ * the call command behavior when integer arguments do not fit into
+ * registers and must be placed on the stack.
+ * OUT struct bit_flags_short_t *bit_flags -- structure to be filled
+ * IN  unsigned a  -- 0 or 1 
+ * IN  unsigned b  -- 0 or 1 
+ * IN  unsigned g  -- 0 or 1 
+ * IN  unsigned d  -- 0 or 1 
+ * IN  unsigned e  -- 0 or 1 
+ * IN  unsigned o  -- 0 or 1 
+ *****************************************************************/
+#ifdef PROTOTYPES
+void init_bit_flags_short (
+struct bit_flags_short_t *bit_flags,
+unsigned a,
+unsigned b,
+unsigned g,
+unsigned d,
+unsigned e,
+unsigned o)
+#else
+void init_bit_flags_short (bit_flags,a,b,g,d,e,o) 
+struct bit_flags_short_t *bit_flags;
+unsigned a;
+unsigned b;
+unsigned g;
+unsigned d;
+unsigned e;
+unsigned o; 
+#endif
+{
+
+   bit_flags->alpha = a;
+   bit_flags->beta = b;
+   bit_flags->gamma = g;
+   bit_flags->delta = d;
+   bit_flags->epsilon = e;
+   bit_flags->omega = o;
 }
 
 /*****************************************************************
@@ -345,6 +451,50 @@ int    seed;
 }
 
 /*****************************************************************
+ * PRINT_BIT_FLAGS_CHAR : 
+ * IN struct bit_flags_char_t bit_flags 
+ ****************************************************************/
+#ifdef PROTOTYPES
+struct bit_flags_char_t print_bit_flags_char (struct bit_flags_char_t bit_flags)
+#else
+struct bit_flags_char_t print_bit_flags_char ( bit_flags)
+struct bit_flags_char_t bit_flags;
+#endif
+{
+
+     if (bit_flags.alpha) printf("alpha\n");
+     if (bit_flags.beta) printf("beta\n");
+     if (bit_flags.gamma) printf("gamma\n");
+     if (bit_flags.delta) printf("delta\n");
+     if (bit_flags.epsilon) printf("epsilon\n");
+     if (bit_flags.omega) printf("omega\n");
+     return bit_flags;
+     
+}
+
+/*****************************************************************
+ * PRINT_BIT_FLAGS_SHORT : 
+ * IN struct bit_flags_short_t bit_flags 
+ ****************************************************************/
+#ifdef PROTOTYPES
+struct bit_flags_short_t print_bit_flags_short (struct bit_flags_short_t bit_flags)
+#else
+struct bit_flags_short_t print_bit_flags_short ( bit_flags)
+struct bit_flags_short_t bit_flags;
+#endif
+{
+
+     if (bit_flags.alpha) printf("alpha\n");
+     if (bit_flags.beta) printf("beta\n");
+     if (bit_flags.gamma) printf("gamma\n");
+     if (bit_flags.delta) printf("delta\n");
+     if (bit_flags.epsilon) printf("epsilon\n");
+     if (bit_flags.omega) printf("omega\n");
+     return bit_flags;
+     
+}
+
+/*****************************************************************
  * PRINT_BIT_FLAGS : 
  * IN struct bit_flags_t bit_flags 
  ****************************************************************/
@@ -553,6 +703,8 @@ int main ()  {
   /* variables for testing a small structures and a very long argument list
    */
    struct small_rep_info_t  *struct1;
+   struct bit_flags_char_t  *cflags;
+   struct bit_flags_short_t *sflags;
    struct bit_flags_t       *flags;
    struct bit_flags_combo_t *flags_combo;
    struct three_char_t      *three_char;
@@ -577,6 +729,8 @@ int main ()  {
   /* Allocate space for small structures 
    */
   struct1     = (struct small_rep_info_t  *)malloc(sizeof(struct small_rep_info_t));
+  cflags       = (struct bit_flags_char_t *)malloc(sizeof(struct bit_flags_char_t));
+  sflags       = (struct bit_flags_short_t *)malloc(sizeof(struct bit_flags_short_t));
   flags       = (struct bit_flags_t *)malloc(sizeof(struct bit_flags_t));
   flags_combo = (struct bit_flags_combo_t *)malloc(sizeof(struct bit_flags_combo_t));
   three_char  = (struct three_char_t *)malloc(sizeof(struct three_char_t));
@@ -590,6 +744,10 @@ int main ()  {
    */
   init_one_double ( d1, 1.11111); 
   init_two_floats ( f3, -2.345, 1.0); 
+  init_bit_flags_char(cflags, (unsigned)1, (unsigned)0, (unsigned)1, 
+		      (unsigned)0, (unsigned)1, (unsigned)0 ); 
+  init_bit_flags_short(sflags, (unsigned)1, (unsigned)0, (unsigned)1, 
+		       (unsigned)0, (unsigned)1, (unsigned)0 ); 
   init_bit_flags(flags, (unsigned)1, (unsigned)0, (unsigned)1, 
 		 (unsigned)0, (unsigned)1, (unsigned)0 ); 
   init_bit_flags_combo(flags_combo, (unsigned)1, (unsigned)0, 'y',
@@ -605,6 +763,8 @@ int main ()  {
    */
   print_one_double(*d1);
   print_two_floats(*f3);
+  print_bit_flags_char(*cflags);
+  print_bit_flags_short(*sflags);
   print_bit_flags(*flags);
   print_bit_flags_combo(*flags_combo);
   print_three_chars(*three_char);

@@ -521,7 +521,6 @@ monitor_expect (char *string, char *buf, int buflen)
   char *p = string;
   int obuflen = buflen;
   int c;
-  extern struct target_ops *targ_ops;
 
   if (monitor_debug_p)
     {
@@ -568,12 +567,6 @@ monitor_expect (char *string, char *buf, int buflen)
 	      else
 		return 0;
 	    }
-	}
-      else if ((c == '\021' || c == '\023') &&
-	       (STREQ (targ_ops->to_shortname, "m32r")
-		|| STREQ (targ_ops->to_shortname, "mon2000")))
-	{			/* m32r monitor emits random DC1/DC3 chars */
-	  continue;
 	}
       else
 	{
@@ -894,7 +887,7 @@ char *
 monitor_supply_register (int regno, char *valstr)
 {
   ULONGEST val;
-  unsigned char regbuf[MAX_REGISTER_RAW_SIZE];
+  unsigned char regbuf[MAX_REGISTER_SIZE];
   char *p;
 
   val = 0;
@@ -928,7 +921,7 @@ monitor_supply_register (int regno, char *valstr)
 
   /* supply register stores in target byte order, so swap here */
 
-  store_unsigned_integer (regbuf, REGISTER_RAW_SIZE (regno), val);
+  store_unsigned_integer (regbuf, DEPRECATED_REGISTER_RAW_SIZE (regno), val);
 
   supply_register (regno, regbuf);
 
@@ -1052,12 +1045,11 @@ monitor_wait_cleanup (void *old_timeout)
 
 
 
-void
+static void
 monitor_wait_filter (char *buf,
 		     int bufmax,
 		     int *ext_resp_len,
-		     struct target_waitstatus *status
-)
+		     struct target_waitstatus *status)
 {
   int resp_len;
   do
@@ -1179,9 +1171,9 @@ monitor_fetch_register (int regno)
   char *regbuf;
   int i;
 
-  regbuf  = alloca (MAX_REGISTER_RAW_SIZE * 2 + 1);
-  zerobuf = alloca (MAX_REGISTER_RAW_SIZE);
-  memset (zerobuf, 0, MAX_REGISTER_RAW_SIZE);
+  regbuf  = alloca (MAX_REGISTER_SIZE * 2 + 1);
+  zerobuf = alloca (MAX_REGISTER_SIZE);
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   if (current_monitor->regname != NULL)
     name = current_monitor->regname (regno);
@@ -1235,7 +1227,7 @@ monitor_fetch_register (int regno)
      spaces, but stop reading if something else is seen.  Some monitors
      like to drop leading zeros.  */
 
-  for (i = 0; i < REGISTER_RAW_SIZE (regno) * 2; i++)
+  for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno) * 2; i++)
     {
       int c;
       c = readchar (timeout);
@@ -1352,7 +1344,7 @@ monitor_store_register (int regno)
 
   val = read_register (regno);
   monitor_debug ("MON storeg %d %s\n", regno,
-		 phex (val, REGISTER_RAW_SIZE (regno)));
+		 phex (val, DEPRECATED_REGISTER_RAW_SIZE (regno)));
 
   /* send the register deposit command */
 
@@ -2096,7 +2088,7 @@ monitor_insert_breakpoint (CORE_ADDR addr, char *shadow)
     addr = ADDR_BITS_REMOVE (addr);
 
   /* Determine appropriate breakpoint size for this address.  */
-  bp = memory_breakpoint_from_pc (&addr, &bplen);
+  bp = gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &bplen);
 
   for (i = 0; i < current_monitor->num_breakpoints; i++)
     {
@@ -2294,19 +2286,10 @@ static struct target_ops monitor_ops;
 static void
 init_base_monitor_ops (void)
 {
-  monitor_ops.to_shortname = NULL;
-  monitor_ops.to_longname = NULL;
-  monitor_ops.to_doc = NULL;
-  monitor_ops.to_open = NULL;
   monitor_ops.to_close = monitor_close;
-  monitor_ops.to_attach = NULL;
-  monitor_ops.to_post_attach = NULL;
-  monitor_ops.to_require_attach = NULL;
   monitor_ops.to_detach = monitor_detach;
-  monitor_ops.to_require_detach = NULL;
   monitor_ops.to_resume = monitor_resume;
   monitor_ops.to_wait = monitor_wait;
-  monitor_ops.to_post_wait = NULL;
   monitor_ops.to_fetch_registers = monitor_fetch_registers;
   monitor_ops.to_store_registers = monitor_store_registers;
   monitor_ops.to_prepare_to_store = monitor_prepare_to_store;
@@ -2314,48 +2297,18 @@ init_base_monitor_ops (void)
   monitor_ops.to_files_info = monitor_files_info;
   monitor_ops.to_insert_breakpoint = monitor_insert_breakpoint;
   monitor_ops.to_remove_breakpoint = monitor_remove_breakpoint;
-  monitor_ops.to_terminal_init = 0;
-  monitor_ops.to_terminal_inferior = 0;
-  monitor_ops.to_terminal_ours_for_output = 0;
-  monitor_ops.to_terminal_ours = 0;
-  monitor_ops.to_terminal_info = 0;
   monitor_ops.to_kill = monitor_kill;
   monitor_ops.to_load = monitor_load;
-  monitor_ops.to_lookup_symbol = 0;
   monitor_ops.to_create_inferior = monitor_create_inferior;
-  monitor_ops.to_post_startup_inferior = NULL;
-  monitor_ops.to_acknowledge_created_inferior = NULL;
-  monitor_ops.to_clone_and_follow_inferior = NULL;
-  monitor_ops.to_post_follow_inferior_by_clone = NULL;
-  monitor_ops.to_insert_fork_catchpoint = NULL;
-  monitor_ops.to_remove_fork_catchpoint = NULL;
-  monitor_ops.to_insert_vfork_catchpoint = NULL;
-  monitor_ops.to_remove_vfork_catchpoint = NULL;
-  monitor_ops.to_has_forked = NULL;
-  monitor_ops.to_has_vforked = NULL;
-  monitor_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  monitor_ops.to_post_follow_vfork = NULL;
-  monitor_ops.to_insert_exec_catchpoint = NULL;
-  monitor_ops.to_remove_exec_catchpoint = NULL;
-  monitor_ops.to_has_execd = NULL;
-  monitor_ops.to_reported_exec_events_per_exec_call = NULL;
-  monitor_ops.to_has_exited = NULL;
   monitor_ops.to_mourn_inferior = monitor_mourn_inferior;
-  monitor_ops.to_can_run = 0;
-  monitor_ops.to_notice_signals = 0;
-  monitor_ops.to_thread_alive = 0;
   monitor_ops.to_stop = monitor_stop;
   monitor_ops.to_rcmd = monitor_rcmd;
-  monitor_ops.to_pid_to_exec_file = NULL;
   monitor_ops.to_stratum = process_stratum;
-  monitor_ops.DONT_USE = 0;
   monitor_ops.to_has_all_memory = 1;
   monitor_ops.to_has_memory = 1;
   monitor_ops.to_has_stack = 1;
   monitor_ops.to_has_registers = 1;
   monitor_ops.to_has_execution = 1;
-  monitor_ops.to_sections = 0;
-  monitor_ops.to_sections_end = 0;
   monitor_ops.to_magic = OPS_MAGIC;
 }				/* init_base_monitor_ops */
 
@@ -2371,6 +2324,8 @@ init_monitor_ops (struct target_ops *ops)
 }
 
 /* Define additional commands that are usually only used by monitors.  */
+
+extern initialize_file_ftype _initialize_remote_monitors; /* -Wmissing-prototypes */
 
 void
 _initialize_remote_monitors (void)

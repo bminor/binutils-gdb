@@ -84,7 +84,7 @@ print_reg (reg, info)
 		FPRINTF (F, "r%d", reg); break;
     case 6:	FPRINTF (F, "sp"); break;
     case 7:	FPRINTF (F, "pc"); break;
-    default:	/* error */
+    default: ;	/* error */
     }
 }
 

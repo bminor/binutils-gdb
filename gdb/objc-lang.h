@@ -19,7 +19,13 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#if !defined(OBJC_LANG_H)
+#define OBJC_LANG_H
+
+struct stoken;
+
 struct value;
+struct block;
 
 extern int objc_parse (void);		/* Defined in c-exp.y */
 
@@ -35,21 +41,28 @@ extern int c_value_print (struct value *, struct ui_file *,
 extern CORE_ADDR lookup_objc_class     (char *classname);
 extern int       lookup_child_selector (char *methodname);
 
-char *objc_demangle (const char *mangled);
+extern char *objc_demangle (const char *mangled, int options);
 
-int find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc);
+extern int find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc);
 
-char *parse_selector (char *method, char **selector);
+extern char *parse_selector (char *method, char **selector);
 
-char *parse_method (char *method, char *type, 
-		    char **class, char **category, 
-		    char **selector);
+extern char *parse_method (char *method, char *type, 
+			   char **class, char **category, 
+			   char **selector);
 
-void find_methods (struct symtab *symtab, char type, 
-		   const char *class, const char *category, 
-		   const char *selector, struct symbol **syms, 
-		   unsigned int *nsym, unsigned int *ndebug);
+extern char *find_imps (struct symtab *symtab, struct block *block,
+			char *method, struct symbol **syms, 
+			unsigned int *nsym, unsigned int *ndebug);
 
-char *find_imps (struct symtab *symtab, struct block *block,
-		 char *method, struct symbol **syms, 
-		 unsigned int *nsym, unsigned int *ndebug);
+extern struct value *value_nsstring (char *ptr, int len);
+
+/* for parsing Objective C */
+extern void start_msglist (void);
+extern void add_msglist (struct stoken *str, int addcolon);
+extern int end_msglist (void);
+
+struct symbol *lookup_struct_typedef (char *name, struct block *block,
+				      int noerr);
+
+#endif

@@ -249,7 +249,7 @@ hw_com_device_init_data(device *me)
   if (device_find_property(me, "output-file") != NULL) {
     const char *output_file = device_find_string_property(me, "output-file");
     com->output.file = fopen(output_file, "w");
-    if (com->input.file == NULL)
+    if (com->output.file == NULL)
       device_error(me, "Problem opening output file %s\n", output_file);
     if (device_find_property(me, "output-buffering") != NULL) {
       const char *buffering = device_find_string_property(me, "output-buffering");

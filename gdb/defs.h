@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTR_FORMAT confuses indent, avoid running it for now */
 /* Basic, host-specific, and target-specific definitions for GDB.
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002
+   1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -154,20 +154,31 @@ typedef bfd_vma CORE_ADDR;
    issue is found that we spend the effort on algorithmic
    optimizations than micro-optimizing.'' J.T. */
 
-#define STREQ(a,b) (*(a) == *(b) ? !strcmp ((a), (b)) : 0)
-#define STREQN(a,b,c) (*(a) == *(b) ? !strncmp ((a), (b), (c)) : 0)
+/* NOTE: cagney/2003-11-23: All instances of STREQ[N] covered by
+   testing GDB on a stabs system have been replaced by equivalent
+   str[n]cmp calls.  To avoid the possability of introducing bugs when
+   making untested changes, the remaining references were deprecated
+   rather than replaced.  */
+
+/* DISCLAIMER: cagney/2003-11-23: Simplified definition of these
+   macros so that they just map directly onto strcmp equivalent.  I'm
+   not responsible for any breakage due to code that relied on the old
+   underlying implementation.  */
+
+#define DEPRECATED_STREQ(a,b) (strcmp ((a), (b)) == 0)
+#define DEPRECATED_STREQN(a,b,c) (strncmp ((a), (b), (c)) == 0)
 
 /* Check if a character is one of the commonly used C++ marker characters.  */
 extern int is_cplus_marker (int);
-
-/* use tui interface if non-zero */
-extern int tui_version;
 
 /* enable xdb commands if set */
 extern int xdb_commands;
 
 /* enable dbx commands if set */
 extern int dbx_commands;
+
+/* System root path, used to find libraries etc.  */
+extern char *gdb_sysroot;
 
 extern int quit_flag;
 extern int immediate_quit;
@@ -207,12 +218,12 @@ enum language
     language_cplus,		/* C++ */
     language_objc,		/* Objective-C */
     language_java,		/* Java */
-    /* OBSOLETE language_chill,	*/	/* Chill */
     language_fortran,		/* Fortran */
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
     language_scm,    		/* Scheme / Guile */
-    language_pascal		/* Pascal */
+    language_pascal,		/* Pascal */
+    language_minimal		/* All other languages, minimal support only */
   };
 
 enum precision_type
@@ -230,6 +241,21 @@ enum auto_boolean
   AUTO_BOOLEAN_AUTO
 };
 
+/* Potential ways that a function can return a value of a given type.  */
+enum return_value_convention
+{
+  /* Where the return value has been squeezed into one or more
+     registers.  */
+  RETURN_VALUE_REGISTER_CONVENTION,
+  /* Commonly known as the "struct return convention".  The caller
+     passes an additional hidden first parameter to the caller.  That
+     parameter contains the address at which the value being returned
+     should be stored.  While typically, and historically, used for
+     large structs, this is convention is applied to values of many
+     different types.  */
+  RETURN_VALUE_STRUCT_CONVENTION
+};
+
 /* the cleanup list records things that have to be undone
    if an error happens (descriptors to be closed, memory to be freed, etc.)
    Each link in the chain records a function to call and an
@@ -243,8 +269,8 @@ enum auto_boolean
 struct cleanup
   {
     struct cleanup *next;
-    void (*function) (PTR);
-    PTR arg;
+    void (*function) (void *);
+    void *arg;
   };
 
 
@@ -285,6 +311,15 @@ struct cleanup
 #endif
 #endif
 
+/* Be conservative and use enum bitfields only with GCC.
+   This is copied from gcc 3.3.1, system.h.  */
+
+#if defined(__GNUC__) && (__GNUC__ >= 2)
+#define ENUM_BITFIELD(TYPE) enum TYPE
+#else
+#define ENUM_BITFIELD(TYPE) unsigned int
+#endif
+
 /* Needed for various prototypes */
 
 struct symtab;
@@ -294,13 +329,9 @@ struct breakpoint;
 
 extern int inside_entry_func (CORE_ADDR);
 
-extern int inside_entry_file (CORE_ADDR addr);
+extern int deprecated_inside_entry_file (CORE_ADDR addr);
 
 extern int inside_main_func (CORE_ADDR pc);
-
-/* OBSOLETE From ch-lang.c, for the moment. (FIXME) */
-
-/* OBSOLETE extern char *chill_demangle (const char *); */
 
 /* From utils.c */
 
@@ -309,6 +340,10 @@ extern void initialize_utils (void);
 extern void notice_quit (void);
 
 extern int strcmp_iw (const char *, const char *);
+
+extern int strcmp_iw_ordered (const char *, const char *);
+
+extern int streq (const char *, const char *);
 
 extern int subset_compare (char *, char *);
 
@@ -376,11 +411,11 @@ extern int query (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern void init_page_info (void);
 
-extern CORE_ADDR host_pointer_to_address (void *ptr);
-extern void *address_to_host_pointer (CORE_ADDR addr);
-
 extern char *gdb_realpath (const char *);
 extern char *xfullpath (const char *);
+
+extern unsigned long gnu_debuglink_crc32 (unsigned long crc,
+                                          unsigned char *buf, size_t len);
 
 /* From demangle.c */
 
@@ -405,6 +440,8 @@ extern void reinitialize_more_filter (void);
 
 /* Normal results */
 extern struct ui_file *gdb_stdout;
+/* Input stream */
+extern struct ui_file *gdb_stdin;
 /* Serious error notifications */
 extern struct ui_file *gdb_stderr;
 /* Log/debug/trace messages that should bypass normal stdout/stderr
@@ -417,6 +454,8 @@ extern struct ui_file *gdb_stdlog;
    very near future that restriction shall be removed - either call
    shall be unfiltered. (cagney 1999-07-02). */
 extern struct ui_file *gdb_stdtarg;
+extern struct ui_file *gdb_stdtargerr;
+extern struct ui_file *gdb_stdtargin;
 
 #if defined(TUI)
 #include "tui.h"
@@ -480,7 +519,7 @@ extern void fputstr_unfiltered (const char *str, int quotr, struct ui_file * str
 extern void fputstrn_unfiltered (const char *str, int n, int quotr, struct ui_file * stream);
 
 /* Display the host ADDR on STREAM formatted as ``0x%x''. */
-extern void gdb_print_host_address (void *addr, struct ui_file *stream);
+extern void gdb_print_host_address (const void *addr, struct ui_file *stream);
 
 /* Convert a CORE_ADDR into a HEX string.  paddr() is like %08lx.
    paddr_nz() is like %lx.  paddr_u() is like %lu. paddr_width() is
@@ -572,9 +611,15 @@ extern int source_full_path_of (char *, char **);
 
 extern void mod_path (char *, char **);
 
+extern void add_path (char *, char **, int);
+
 extern void directory_command (char *, int);
 
+extern char *source_path;
+
 extern void init_source_path (void);
+
+extern void init_last_source_visited (void);
 
 extern char *symtab_to_filename (struct symtab *);
 
@@ -613,10 +658,6 @@ enum lval_type
   };
 
 struct frame_info;
-
-/* From readline (but not in any readline .h files).  */
-
-extern char *tilde_expand (char *);
 
 /* Control types for commands */
 
@@ -774,16 +815,6 @@ typedef struct ptid ptid_t;
 #include "tm.h"
 #endif
 
-/* GDB_MULTI_ARCH is normally set by configure.in using information
-   from configure.tgt or the config/%/%.mt Makefile fragment.  Since
-   some targets have defined it in their "tm.h" file, delay providing
-   a default definition until after "tm.h" has been included.. */
-
-#ifndef GDB_MULTI_ARCH
-#define GDB_MULTI_ARCH 0
-#endif
-
-
 /* If the xm.h file did not define the mode string used to open the
    files, assume that binary files are opened the same way as text
    files */
@@ -848,9 +879,10 @@ extern void xmfree (void *md, void *ptr);
    "libiberty.h". */
 extern void xfree (void *);
 
-/* Utility macros to allocate typed memory.  Avoids errors like
-   ``struct foo *foo = xmalloc (sizeof bar)'' and ``struct foo *foo =
-   (struct foo *) xmalloc (sizeof bar)''.  */
+/* Utility macros to allocate typed memory.  Avoids errors like:
+   struct foo *foo = xmalloc (sizeof struct bar); and memset (foo,
+   sizeof (struct foo), 0).  */
+#define XZALLOC(TYPE) ((TYPE*) memset (xmalloc (sizeof (TYPE)), 0, sizeof (TYPE)))
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 #define XCALLOC(NMEMB, TYPE) ((TYPE*) xcalloc ((NMEMB), sizeof (TYPE)))
 
@@ -858,6 +890,9 @@ extern void xfree (void *);
    fails. */
 extern void xasprintf (char **ret, const char *format, ...) ATTR_FORMAT (printf, 2, 3);
 extern void xvasprintf (char **ret, const char *format, va_list ap);
+
+/* Like asprintf, but return the string, throw an error if no memory.  */
+extern char *xstrprintf (const char *format, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern int parse_escape (char **);
 
@@ -878,6 +913,9 @@ extern NORETURN void verror (const char *fmt, va_list ap) ATTR_NORETURN;
 extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 
 extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
+
+/* Initialize the error buffer.  */
+extern void error_init (void);
 
 /* Returns a freshly allocate buffer containing the last error
    message.  */
@@ -967,7 +1005,7 @@ extern int catch_exceptions (struct ui_out *uiout,
 
    This function is superseeded by catch_exceptions().  */
 
-typedef int (catch_errors_ftype) (PTR);
+typedef int (catch_errors_ftype) (void *);
 extern int catch_errors (catch_errors_ftype *, void *, char *, return_mask);
 
 /* Template to catch_errors() that wraps calls to command
@@ -979,6 +1017,42 @@ extern int catch_command_errors (catch_command_errors_ftype *func, char *command
 extern void warning (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern void vwarning (const char *, va_list args);
+
+/* List of known OS ABIs.  If you change this, make sure to update the
+   table in osabi.c.  */
+enum gdb_osabi
+{
+  GDB_OSABI_UNINITIALIZED = -1, /* For struct gdbarch_info.  */
+
+  GDB_OSABI_UNKNOWN = 0,	/* keep this zero */
+
+  GDB_OSABI_SVR4,
+  GDB_OSABI_HURD,
+  GDB_OSABI_SOLARIS,
+  GDB_OSABI_OSF1,
+  GDB_OSABI_LINUX,
+  GDB_OSABI_FREEBSD_AOUT,
+  GDB_OSABI_FREEBSD_ELF,
+  GDB_OSABI_NETBSD_AOUT,
+  GDB_OSABI_NETBSD_ELF,
+  GDB_OSABI_WINCE,
+  GDB_OSABI_GO32,
+  GDB_OSABI_NETWARE,
+  GDB_OSABI_IRIX,
+  GDB_OSABI_LYNXOS,
+  GDB_OSABI_INTERIX,
+  GDB_OSABI_HPUX_ELF,
+  GDB_OSABI_HPUX_SOM,
+
+  GDB_OSABI_ARM_EABI_V1,
+  GDB_OSABI_ARM_EABI_V2,
+  GDB_OSABI_ARM_APCS,
+  GDB_OSABI_QNXNTO,
+
+  GDB_OSABI_CYGWIN,
+
+  GDB_OSABI_INVALID		/* keep this last */
+};
 
 /* Global functions from other, non-gdb GNU thingies.
    Libiberty thingies are no longer declared here.  We include libiberty.h
@@ -1039,14 +1113,22 @@ extern void *alloca ();
 #endif /* Not GNU C */
 #endif /* alloca not defined */
 
+/* Is GDB multi-arch?  If there's a "tm.h" file, it is not.  */
+#ifndef GDB_MULTI_ARCH
+#ifdef GDB_TM_FILE
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
+#else
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PURE
+#endif
+#endif
+
 /* Dynamic target-system-dependent parameters for GDB. */
 #include "gdbarch.h"
-#if (GDB_MULTI_ARCH == 0)
-/* Multi-arch targets _should_ be including "arch-utils.h" directly
-   into their *-tdep.c file.  This is a prop to help old non-
-   multi-arch targets to continue to compile. */
-#include "arch-utils.h"
-#endif
+
+/* Maximum size of a register.  Something small, but large enough for
+   all known ISAs.  If it turns out to be too small, make it bigger.  */
+
+enum { MAX_REGISTER_SIZE = 16 };
 
 /* Static target-system-dependent parameters for GDB. */
 
@@ -1081,17 +1163,13 @@ extern LONGEST extract_signed_integer (const void *, int);
 
 extern ULONGEST extract_unsigned_integer (const void *, int);
 
-extern int extract_long_unsigned_integer (void *, int, LONGEST *);
+extern int extract_long_unsigned_integer (const void *, int, LONGEST *);
 
-extern CORE_ADDR extract_address (void *, int);
-
-extern CORE_ADDR extract_typed_address (void *buf, struct type *type);
+extern CORE_ADDR extract_typed_address (const void *buf, struct type *type);
 
 extern void store_signed_integer (void *, int, LONGEST);
 
 extern void store_unsigned_integer (void *, int, ULONGEST);
-
-extern void store_address (void *, int, LONGEST);
 
 extern void store_typed_address (void *buf, struct type *type, CORE_ADDR addr);
 
@@ -1212,5 +1290,37 @@ extern int use_windows;
 #ifndef ISATTY
 #define ISATTY(FP)	(isatty (fileno (FP)))
 #endif
+
+/* Ensure that V is aligned to an N byte boundary (B's assumed to be a
+   power of 2).  Round up/down when necessary.  Examples of correct
+   use include:
+
+   addr = align_up (addr, 8); -- VALUE needs 8 byte alignment
+   write_memory (addr, value, len);
+   addr += len;
+
+   and:
+
+   sp = align_down (sp - len, 16); -- Keep SP 16 byte aligned
+   write_memory (sp, value, len);
+
+   Note that uses such as:
+
+   write_memory (addr, value, len);
+   addr += align_up (len, 8);
+
+   and:
+
+   sp -= align_up (len, 8);
+   write_memory (sp, value, len);
+
+   are typically not correct as they don't ensure that the address (SP
+   or ADDR) is correctly aligned (relying on previous alignment to
+   keep things right).  This is also why the methods are called
+   "align_..." instead of "round_..." as the latter reads better with
+   this incorrect coding style.  */
+
+extern ULONGEST align_up (ULONGEST v, int n);
+extern ULONGEST align_down (ULONGEST v, int n);
 
 #endif /* #ifndef DEFS_H */

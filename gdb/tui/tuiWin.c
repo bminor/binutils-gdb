@@ -1,6 +1,6 @@
 /* TUI window generic functions.
 
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
    Inc.
 
    Contributed by Hewlett-Packard Company.
@@ -27,25 +27,6 @@
 
    Author: Susan B. Macchia  */
 
-/* FIXME: cagney/2002-02-28: The GDB coding standard indicates that
-   "defs.h" should be included first.  Unfortunatly some systems
-   (currently Debian GNU/Linux) include the <stdbool.h> via <curses.h>
-   and they clash with "bfd.h"'s definiton of true/false.  The correct
-   fix is to remove true/false from "bfd.h", however, until that
-   happens, hack around it by including "config.h" and <curses.h>
-   first.  */
-
-#include "config.h"
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
-
-#include <string.h>
-#include <ctype.h>
 #include "defs.h"
 #include "command.h"
 #include "symtab.h"
@@ -64,6 +45,18 @@
 #include "tuiSource.h"
 #include "tuiSourceWin.h"
 #include "tuiDataWin.h"
+
+#ifdef HAVE_NCURSES_H       
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
+
+#include <string.h>
+#include <ctype.h>
+#include <readline/readline.h>
 
 /*******************************
 ** Static Local Decls
@@ -95,6 +88,25 @@ static void _parseScrollingArgs (char *, TuiWinInfoPtr *, int *);
 /***************************************
 ** PUBLIC FUNCTIONS
 ***************************************/
+
+#ifndef ACS_LRCORNER
+#  define ACS_LRCORNER '+'
+#endif
+#ifndef ACS_LLCORNER
+#  define ACS_LLCORNER '+'
+#endif
+#ifndef ACS_ULCORNER
+#  define ACS_ULCORNER '+'
+#endif
+#ifndef ACS_URCORNER
+#  define ACS_URCORNER '+'
+#endif
+#ifndef ACS_HLINE
+#  define ACS_HLINE '-'
+#endif
+#ifndef ACS_VLINE
+#  define ACS_VLINE '|'
+#endif
 
 /* Possible values for tui-border-kind variable.  */
 static const char *tui_border_kind_enums[] = {
@@ -398,8 +410,9 @@ void
 tui_update_gdb_sizes ()
 {
   char cmd[50];
-  extern int screenheight, screenwidth;		/* in readline */
+  int screenheight, screenwidth;
 
+  rl_get_screen_size (&screenheight, &screenwidth);
   /* Set to TUI command window dimension or use readline values.  */
   sprintf (cmd, "set width %d",
            tui_active ? cmdWin->generic.width : screenwidth);
@@ -615,8 +628,9 @@ void
 tuiResizeAll (void)
 {
   int heightDiff, widthDiff;
-  extern int screenheight, screenwidth;		/* in readline */
+  int screenheight, screenwidth;
 
+  rl_get_screen_size (&screenheight, &screenwidth);
   widthDiff = screenwidth - termWidth ();
   heightDiff = screenheight - termHeight ();
   if (heightDiff || widthDiff)
@@ -1378,13 +1392,13 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 	  tuiUpdateSourceWindow (winInfo,
 				 cursal.symtab, lineOrAddr, TRUE);
 	}
-      else if (selected_frame != (struct frame_info *) NULL)
+      else if (deprecated_selected_frame != (struct frame_info *) NULL)
 	{
 	  TuiLineOrAddress line;
 	  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
 
-	  s = find_pc_symtab (selected_frame->pc);
+	  s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
 	  if (winInfo->generic.type == SRC_WIN)
 	    line.lineNo = cursal.line;
 	  else

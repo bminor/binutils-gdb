@@ -1,6 +1,7 @@
 /* Simulation code for the MIPS MDMX ASE.
    Copyright (C) 2002 Free Software Foundation, Inc.
-   Contributed by Broadcom Corporation (SiByte).
+   Contributed by Ed Satterthwaite and Chris Demetriou, of Broadcom
+   Corporation (SiByte).
 
 This file is part of GDB, the GNU debugger.
 

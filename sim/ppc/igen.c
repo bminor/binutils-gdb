@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1995, 1996, 1997, 2003 Andrew Cagney
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@
 
 #include "filter.h"
 
-#include "ld-decode.h"
 #include "ld-cache.h"
+#include "ld-decode.h"
 #include "ld-insn.h"
 
 #include "igen.h"
@@ -220,9 +220,11 @@ gen_semantics_c(insn_table *table,
     lf_printf(file, "#include \"cpu.h\"\n");
     lf_printf(file, "#include \"idecode.h\"\n");
     lf_printf(file, "#include \"semantics.h\"\n");
-    lf_printf(file, "#include \"support.h\"\n");
+    lf_printf(file, "#ifdef HAVE_COMMON_FPU\n");
     lf_printf(file, "#include \"sim-inline.h\"\n");
     lf_printf(file, "#include \"sim-fpu.h\"\n");
+    lf_printf(file, "#endif\n");
+    lf_printf(file, "#include \"support.h\"\n");
     lf_printf(file, "\n");
     lf_printf(file, "int option_mpc860c0 = 0;\n");
     lf_printf(file, "\n");
@@ -306,9 +308,11 @@ gen_icache_c(insn_table *table,
     lf_printf(file, "#include \"idecode.h\"\n");
     lf_printf(file, "#include \"semantics.h\"\n");
     lf_printf(file, "#include \"icache.h\"\n");
-    lf_printf(file, "#include \"support.h\"\n");
+    lf_printf(file, "#ifdef HAVE_COMMON_FPU\n");
     lf_printf(file, "#include \"sim-inline.h\"\n");
     lf_printf(file, "#include \"sim-fpu.h\"\n");
+    lf_printf(file, "#endif\n");
+    lf_printf(file, "#include \"support.h\"\n");
     lf_printf(file, "\n");
     insn_table_traverse_function(table,
 				 file, NULL,
@@ -476,11 +480,12 @@ main(int argc,
       force_decode_gen_type(optarg);
       break;
     case 'i':
-      if (decode_rules == NULL || cache_rules == NULL) {
-	fprintf(stderr, "Must specify decode and cache tables\n");
+      if (decode_rules == NULL) {
+	fprintf(stderr, "Must specify decode tables\n");
 	exit (1);
       }
-      instructions = load_insn_table(optarg, decode_rules, filters, includes);
+      instructions = load_insn_table(optarg, decode_rules, filters, includes,
+				     &cache_rules);
       fprintf(stderr, "\texpanding ...\n");
       insn_table_expand_insns(instructions);
       break;

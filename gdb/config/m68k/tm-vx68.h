@@ -1,5 +1,6 @@
 /* Target machine description for VxWorks m68k's, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1996, 1998, 1999, 2000
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1996, 1998, 1999, 2000,
+   2002, 2003
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
@@ -38,16 +39,8 @@
    If our current frame pointer is zero, we're at the top; else read out
    the saved FP from memory pointed to by the current FP.  */
 
-#undef	FRAME_CHAIN
-#define FRAME_CHAIN(thisframe) ((thisframe)->frame? read_memory_integer ((thisframe)->frame, 4): 0)
-
-/* If the chain pointer is zero (either because the saved value fetched
-   by FRAME_CHAIN was zero, or because the current FP was zero so FRAME_CHAIN
-   never fetched anything), we are at the top of the stack.  */
-/* We are guaranteed to have a zero frame pointer at bottom of stack, too. */
-
-#undef	FRAME_CHAIN_VALID
-#define FRAME_CHAIN_VALID(chain, thisframe) nonnull_frame_chain_valid (chain, thisframe)
+#undef	DEPRECATED_FRAME_CHAIN
+#define DEPRECATED_FRAME_CHAIN(thisframe) ((thisframe)->frame? read_memory_integer ((thisframe)->frame, 4): 0)
 
 /* FIXME, Longjmp information stolen from Sun-3 config.  Dunno if right.  */
 /* Offsets (in target ints) into jmp_buf.  Not defined by Sun, but at least
@@ -79,11 +72,7 @@
 
 #define GET_LONGJMP_TARGET(ADDR) m68k_get_longjmp_target(ADDR)
 
-/* Number of registers in a ptrace_getregs call. */
-
-#define VX_NUM_REGS (18)
-
 /* Number of registers in a ptrace_getfpregs call. */
 
-#define VX_SIZE_FPREGS (8 * REGISTER_RAW_SIZE (FP0_REGNUM) \
-			+ (3 * REGISTER_SIZE))
+#define VX_SIZE_FPREGS (8 * DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) \
+			+ (3 * DEPRECATED_REGISTER_SIZE))

@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1995, 1996, 2003 Andrew Cagney
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -217,14 +217,21 @@ htab_decode_hash_table(device *me,
     device_error(parent, "must be a htab device");
   htab_ra = device_find_integer_property(parent, "real-address");
   htab_nr_bytes = device_find_integer_property(parent, "nr-bytes");
+  if (htab_nr_bytes < 0x10000) {
+    device_error(parent, "htab size 0x%x less than 0x1000",
+		 htab_nr_bytes);
+  }
   for (n = htab_nr_bytes; n > 1; n = n / 2) {
     if (n % 2 != 0)
       device_error(parent, "htab size 0x%x not a power of two",
 		   htab_nr_bytes);
   }
   *htaborg = htab_ra;
+  /* Position the HTABMASK ready for use against a hashed address and
+     not ready for insertion into SDR1.HTABMASK.  */
   *htabmask = MASKED32(htab_nr_bytes - 1, 7, 31-6);
-  if ((htab_ra & INSERTED32(*htabmask, 7, 15)) != 0) {
+  /* Check that the MASK and ADDRESS do not overlap.  */
+  if ((htab_ra & (*htabmask)) != 0) {
     device_error(parent, "htaborg 0x%lx not aligned to htabmask 0x%lx",
 		 (unsigned long)*htaborg, (unsigned long)*htabmask);
   }

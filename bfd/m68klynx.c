@@ -1,5 +1,5 @@
 /* BFD back-end for m68k binaries under LynxOS.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#define BYTES_IN_WORD 4
 #define N_SHARED_LIB(x) 0
 
 #define TEXT_START_ADDR 0
@@ -45,7 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 char *lynx_core_file_failing_command();
 int lynx_core_file_failing_signal();
-boolean lynx_core_file_matches_executable_p();
+bfd_boolean lynx_core_file_matches_executable_p();
 const bfd_target *lynx_core_file_p();
 
 #define	MY_core_file_failing_command lynx_core_file_failing_command

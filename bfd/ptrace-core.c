@@ -49,13 +49,12 @@ struct trad_core_struct
 /* forward declarations */
 
 const bfd_target *ptrace_unix_core_file_p PARAMS ((bfd *abfd));
-char *		ptrace_unix_core_file_failing_command PARAMS ((bfd *abfd));
-int		ptrace_unix_core_file_failing_signal PARAMS ((bfd *abfd));
-boolean		ptrace_unix_core_file_matches_executable_p
-			 PARAMS ((bfd *core_bfd, bfd *exec_bfd));
-static void	swap_abort PARAMS ((void));
+char * ptrace_unix_core_file_failing_command PARAMS ((bfd *abfd));
+int ptrace_unix_core_file_failing_signal PARAMS ((bfd *abfd));
+bfd_boolean ptrace_unix_core_file_matches_executable_p
+  PARAMS ((bfd *core_bfd, bfd *exec_bfd));
+static void swap_abort PARAMS ((void));
 
-/* ARGSUSED */
 const bfd_target *
 ptrace_unix_core_file_p (abfd)
      bfd *abfd;
@@ -146,7 +145,6 @@ ptrace_unix_core_file_failing_command (abfd)
     return 0;
 }
 
-/* ARGSUSED */
 int
 ptrace_unix_core_file_failing_signal (abfd)
      bfd *abfd;
@@ -154,14 +152,13 @@ ptrace_unix_core_file_failing_signal (abfd)
   return abfd->tdata.trad_core_data->u.pt_sigframe.sig_num;
 }
 
-/* ARGSUSED */
-boolean
+bfd_boolean
 ptrace_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
      bfd *core_bfd, *exec_bfd;
 {
   /* FIXME: Use pt_timdat field of the ptrace_user structure to match
      the date of the executable */
-  return true;
+  return TRUE;
 }
 
 /* If somebody calls any byte-swapping routines, shoot them.  */

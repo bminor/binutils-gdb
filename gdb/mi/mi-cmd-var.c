@@ -81,7 +81,7 @@ mi_cmd_var_create (char *command, char **argv, int argc)
   else
     {
       var_type = USE_SPECIFIED_FRAME;
-      frameaddr = parse_and_eval_address (frame);
+      frameaddr = string_to_core_addr (frame);
     }
 
   if (varobjdebug)
@@ -189,15 +189,15 @@ mi_cmd_var_set_format (char *command, char **argv, int argc)
 
   len = strlen (formspec);
 
-  if (STREQN (formspec, "natural", len))
+  if (strncmp (formspec, "natural", len) == 0)
     format = FORMAT_NATURAL;
-  else if (STREQN (formspec, "binary", len))
+  else if (strncmp (formspec, "binary", len) == 0)
     format = FORMAT_BINARY;
-  else if (STREQN (formspec, "decimal", len))
+  else if (strncmp (formspec, "decimal", len) == 0)
     format = FORMAT_DECIMAL;
-  else if (STREQN (formspec, "hexadecimal", len))
+  else if (strncmp (formspec, "hexadecimal", len) == 0)
     format = FORMAT_HEXADECIMAL;
-  else if (STREQN (formspec, "octal", len))
+  else if (strncmp (formspec, "octal", len) == 0)
     format = FORMAT_OCTAL;
   else
     error ("mi_cmd_var_set_format: Unknown display format: must be: \"natural\", \"binary\", \"decimal\", \"hexadecimal\", or \"octal\"");
@@ -272,7 +272,10 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   if (numchild <= 0)
     return MI_CMD_DONE;
 
-  cleanup_children = make_cleanup_ui_out_tuple_begin_end (uiout, "children");
+  if (mi_version (uiout) == 1)
+    cleanup_children = make_cleanup_ui_out_tuple_begin_end (uiout, "children");
+  else
+    cleanup_children = make_cleanup_ui_out_list_begin_end (uiout, "children");
   cc = childlist;
   while (*cc != NULL)
     {

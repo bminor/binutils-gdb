@@ -24,56 +24,13 @@
 
 #include "defs.h"
 
-/* This file is only useful if BREAKPOINT is set.  If not, we punt.  */
+/* This file is only useful if BREAKPOINT_FROM_PC is set.  If not, we
+   punt.  */
 
 #include "symtab.h"
 #include "breakpoint.h"
 #include "inferior.h"
 #include "target.h"
-
-
-/* Use the program counter to determine the contents and size
-   of a breakpoint instruction.  If no target-dependent macro
-   BREAKPOINT_FROM_PC has been defined to implement this function,
-   assume that the breakpoint doesn't depend on the PC, and
-   use the values of the BIG_BREAKPOINT and LITTLE_BREAKPOINT macros.
-   Return a pointer to a string of bytes that encode a breakpoint
-   instruction, stores the length of the string to *lenptr,
-   and optionally adjust the pc to point to the correct memory location
-   for inserting the breakpoint.  */
-
-const unsigned char *
-memory_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
-{
-  /* {BIG_,LITTLE_}BREAKPOINT is the sequence of bytes we insert for a
-     breakpoint.  On some machines, breakpoints are handled by the
-     target environment and we don't have to worry about them here.  */
-#ifdef BIG_BREAKPOINT
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    {
-      static unsigned char big_break_insn[] = BIG_BREAKPOINT;
-      *lenptr = sizeof (big_break_insn);
-      return big_break_insn;
-    }
-#endif
-#ifdef LITTLE_BREAKPOINT
-  if (TARGET_BYTE_ORDER != BFD_ENDIAN_BIG)
-    {
-      static unsigned char little_break_insn[] = LITTLE_BREAKPOINT;
-      *lenptr = sizeof (little_break_insn);
-      return little_break_insn;
-    }
-#endif
-#ifdef BREAKPOINT
-  {
-    static unsigned char break_insn[] = BREAKPOINT;
-    *lenptr = sizeof (break_insn);
-    return break_insn;
-  }
-#endif
-  *lenptr = 0;
-  return NULL;
-}
 
 
 /* Insert a breakpoint on targets that don't have any better breakpoint

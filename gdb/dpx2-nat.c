@@ -32,7 +32,7 @@
 #include <sys/utsname.h>
 
 
-/* this table must line up with REGISTER_NAMES in tm-68k.h */
+/* This table must line up with REGISTER_NAME in "m68k-tdep.c".  */
 /* symbols like 'A0' come from <sys/reg.h> */
 static int regmap[] =
 {

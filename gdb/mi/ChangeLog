@@ -1,3 +1,282 @@
+2003-11-06  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-cmd-var.c (mi_cmd_var_set_format): Replace STREQN with
+	strncmp.
+
+2003-10-24  Andrew Cagney  <cagney@redhat.com>
+
+	* tui-out.c: Fix "fortunatly"[sic].
+
+2003-10-02  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c: Rename REGISTER_RAW_SIZE to
+	DEPRECATED_REGISTER_RAW_SIZE.
+
+2003-09-30  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c: Rename REGISTER_VIRTUAL_SIZE to
+	DEPRECATED_REGISTER_VIRTUAL_SIZE.
+
+2003-09-17  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c: Rename REGISTER_BYTE to DEPRECATED_REGISTER_BYTE.
+
+2003-09-10  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-main.c (mi_setup_architecture_data): Don't use
+	DEPRECATED_REGISTER_BYTES because some architecture don't set it
+	and its default is 0. 
+
+2003-08-08  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (captured_mi_execute_command): Add "mi2" and "mi3" to
+	interpreters that hack around CLI.
+	* mi-interp.c (mi3_command_loop): New function.
+	(mi_interpreter_resume): Check for "mi3", default to "mi2".
+
+2003-08-07  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-interp.c (_initialize_mi_interp): Register "mi2" and "mi3".
+	Make "mi" select "mi2".
+
+2003-08-05  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-cmd-env.c (env_execute_cli_command): Use an explicit "%s %s"
+	when constructing the run command.
+	(mi_cmd_env_cd, mi_cmd_env_path, mi_cmd_env_dir): Simplify command
+	string removing the "%s".
+
+2003-08-04  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-cmds.h (struct mi_cli): Define.
+	(struct mi_cmd): Change type of "cli" to "struct mi_cli".
+	* mi-cmds.c (mi_cmds): Update table.
+	* mi-parse.c (mi_parse): Update.
+	* mi-main.c (mi_execute_cli_command): Add "args_p" parameter, make
+	others constant.
+	(mi_cmd_execute): Update call.
+	(captured_mi_execute_command): Ditto.
+
+2003-08-04  David Carlton  <carlton@kealia.com>
+
+	* mi-main.c (mi_error_last_message): Add "%s" second argument to
+	xasprintf call.
+
+2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mi-out.c (mi_ui_out_impl): Add NULL for redirect member.
+
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+        * mi-cmds.c (mi_cmds): Add "-target-disconnect".
+
+2003-06-11  David Carlton  <carlton@bactrian.org>
+
+	* mi-cmd-stack.c: Include dictionary.h.
+	(list_args_or_locals): Update use of ALL_BLOCK_SYMBOLS.
+
+2003-06-11  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (get_register): Replace REGISTER_CONVERTIBLE with
+	DEPRECATED_REGISTER_CONVERTIBLE.
+
+2003-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-parse.c (_initialize_mi_parse): Delete function.
+	* mi-main.c: Include "mi-main.h".
+	* mi-interp.c (_initialize_mi_interp): Add declaration.
+	* mi-cmd-stack.c: Include "stack.h".
+	(select_frame_command_wrapper): Delete extern declaration.
+	(mi_cmd_stack_select_frame): Replace select_frame_command_wrapper
+	with select_frame_command.
+
+2003-05-16  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (mi_setup_architecture_data): 
+
+2003-05-12  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-mi-cmd-stack.c (list_args_or_locals): Rename VAR_NAMESPACE to
+	VAR_DOMAIN.
+
+2003-05-11  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-symbol-cmds.c: Rename "mi-cmd-symbol.c", avoid 8.3 problem.
+
+2003-05-08  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (register_changed_p): Use MAX_REGISTER_SIZE instead of
+	MAX_REGISTER_RAW_SIZE.
+
+2003-05-08  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (get_register): Use MAX_REGISTER_SIZE.
+
+2003-05-05  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (mi_cmd_data_write_register_values): Replace
+	REGISTER_SIZE with DEPRECATED_REGISTER_SIZE.
+
+2003-05-03  J. Brobecker  <brobecker@gnat.com>
+
+	From  Thierry Schneider  <tpschneider1@yahoo.com>:
+	* mi-cmds.h (mi_cmd_symbol_list_lines): Add declaration.
+	* mi-cmds.c (mi_cmds): Add entry for new MI command.
+	* mi-cmd-symbol.c (mi_cmd_symbol_list_lines): New source file
+	for all symbol-related commands.
+
+2003-04-02  Bob Rossi  <bob_rossi@cox.net>
+
+	* mi-cmd-file.c: New file to implement mi file commands.
+	* mi-getopt.c (mi_valid_noargs): Added mi_valid_noargs to verify 
+        if a set of parameters passed to an MI function has no arguments
+	* mi-getopt.h (mi_valid_noargs): Declare.
+	* mi-cmds.c (mi_cmds): Added -file-list-exec-source-file command.
+	* mi-cmds.h (mi_cmd_file_list_exec_source_file): Declare.
+
+2003-03-27  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbmi.texinfo: Delete file.  Contents moved to
+	../doc/gdb.texinfo.
+
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (get_register): Use frame_register instead of
+	get_saved_register.
+
+2003-03-08  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-out.c: Update copyright.
+	(mi_out_data): Define typedef.  Use instead of ui_out_data.
+
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (get_register): Use register_type instead of
+	REGISTER_VIRTUAL_TYPE.
+
+2003-02-25  David Carlton  <carlton@math.stanford.edu>
+
+	* mi-cmd-stack.c: Replace all instances of SYMBOL_NAME with
+	DEPRECATED_SYMBOL_NAME.  Update copyright.
+
+2003-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mi-cmd-stack.c (list_args_or_locals): Handle LOC_COMPUTED and
+	LOC_COMPUTED_ARG.
+
+2003-02-19  David Carlton  <carlton@math.stanford.edu>
+
+	* mi-cmd-stack.c: #include "block.h"
+
+2003-02-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-interp.c (mi_remove_notify_hooks): Convert function
+	definition to ISO C.
+
+2003-02-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-cmd-env.c: Include "gdb_stat.h" instead of <sys/stat.h>.
+
+2003-02-04  Jim Ingham <jingham@apple.com>
+	    Keith Seitz  <keiths@redhat.com>
+            Elena Zannoni  <ezannoni@redhat.com>
+            Andrew Cagney  <ac131313@redhat.com>
+	
+	* mi-main.h: New file.
+	* mi-interp.c: New file.
+	* mi-main.c: Include "interps.h".
+	(mi_error_message): Make global.
+	(mi_input): Delete static function, moved to "mi-interp.c".
+	(mi_execute_command, mi_execute_command_wrapper): Ditto.
+	(mi_command_loop, mi1_command_loop, mi2_command_loop): Ditto.
+	(mi_load_progress): Make non-static.
+	(mi_error_last_message): New function.
+	(captured_mi_execute_command): If the interpreter changed, don't
+	print anything.
+	(mi_load_progress): Use current_interp_named_p.
+	(mi_init_ui): Delete function.
+	(_initialize_mi_main): Don't install the mi interpreter, handled
+	by "mi-interp.c".
+	(mi_exec_async_cli_cmd_continuation): Make static.
+	* mi-console.h (mi_console_file_new): Add `quote' parameter.
+	* mi-console.c (struct mi_console_file): Add `quote'.
+	(mi_console_file_new): Add `quote' parameter.  Initialize `quote'.
+	(mi_console_raw_packet): Only quote the output when `quote'.
+	* mi-cmds.h (mi_cmd_interpreter_exec): Declare.
+	(mi_error_message, mi_error_last_message): Declare.
+	(mi_execute_command): Declare.
+	* mi-cmds.c: Add `interpreter-exec' command.
+
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	From Keith Seitz <keiths@redhat.com>:
+	* gdbmi.texinfo (GDB/MI Miscellaneous Commands): Document the
+	interpreter-exec command.
+
+2003-02-02  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-11-10 Jason Molenda (jason-cl@molenda.com):
+        * mi-cmd-var.c (mi_cmd_var_list_children): CHILDREN field is
+        now a list; still a tuple when in mi1.
+        * gdbmi.texinfo: Update var-list-children example.
+
+2003-01-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-cmd-env.c: Update copyright.
+
+2003-01-13  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-main.c (mi_cmd_exec_return): Use print_stack_frame instead of
+	show_and_print_stack_frame.
+
+2003-01-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-cmd-env.c: Include "gdb_string.h" instead of <string.h>.
+	Move all includes to after "defs.h".
+
+2002-12-13  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-cmds.c (-environment-directory) Change to use mi_cmd_env_dir,
+	(-environment-cd): Change to use mi_cmd_env_cd,.
+	(-environment-pwd): Change to use mi_cmd_env_pwd.
+	(-environment-path): Change to use mi_cmd_env_path.
+	* mi-cmds.h (mi_cmd_env_cd, mi_cmd_env_dir): New prototypes.
+	(mi_cmd_env_path, mi_cmd_env_pwd): Ditto.
+	* mi-cmd-env.c: New file.  Part of fix for PR gdb/741.
+	* gdbmi.texinfo (environment-cd): Update output and example.
+	(environment-pwd): Ditto.
+	(environment-dir): Update output, description, and examples.
+	(environment-path): Ditto.
+
+2002-11-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi/mi-cmd-stack.c, mi/mi-main.c: Update to use
+	deprecated_selected_frame.
+
+2002-11-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (mi_cmd_data_write_register_values): Use
+	deprecated_write_register_bytes instead of write_register_bytes.
+
+2002-11-11  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdbmi.texinfo (-var-assign): Add comments about interaction
+	with -var-update and add an example.  Part of fix for gdb/702.
+
+2002-11-08  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-main.c (mi_command_loop): Initialize raw_stdout and gdb_stdout 
+	only if mi version is <= 1.
+	(mi_init_ui): Initialize raw_stdout and gdb_stdout if mi version 
+	is > 1 so startup message is treated as console output.  This is 
+	part of fix for PR gdb/604.
+
+2002-11-06  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-cmd-var.c (mi_cmd_var_create): Change the function used to 
+	parse the frame addr from parse_and_eval_address() to 
+	string_to_core_addr().  This is a fix for PR gdb/494.
+
 2002-10-23  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* mi-cmd-var.c: Change all remaining occurrences of ui_out_tuple_begin 
@@ -73,7 +352,6 @@
 	and tuples. Do the cleanups when returning errors.
 
 2002-07-29  Andrew Cagney  <ac131313@redhat.com>
-
 
 	* mi-cmd-var.c: Include "gdb_string.h".
 	* mi-cmd-disas.c: Ditto.

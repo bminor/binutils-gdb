@@ -2,7 +2,7 @@
    Written by Fred Fish <fnf@cygnus.com>
    Rewritten by Jim Blandy <jimb@cygnus.com>
 
-   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +25,7 @@
 #include "gdb_obstack.h"
 #include "bcache.h"
 #include "gdb_string.h"		/* For memcpy declaration */
+#include "gdb_assert.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -37,8 +38,15 @@
 
 struct bstring
 {
+  /* Hash chain.  */
   struct bstring *next;
-  size_t length;
+  /* Assume the data length is no more than 64k.  */
+  unsigned short length;
+  /* The half hash hack.  This contains the upper 16 bits of the hash
+     value and is used as a pre-check when comparing two strings and
+     avoids the need to do length or memcmp calls.  It proves to be
+     roughly 100% effective.  */
+  unsigned short half_hash;
 
   union
   {
@@ -71,6 +79,17 @@ struct bcache
   long unique_size;	/* size of unique strings, in bytes */
   long total_size;      /* total number of bytes cached, including dups */
   long structure_size;	/* total size of bcache, including infrastructure */
+  /* Number of times that the hash table is expanded and hence
+     re-built, and the corresponding number of times that a string is
+     [re]hashed as part of entering it into the expanded table.  The
+     total number of hashes can be computed by adding TOTAL_COUNT to
+     expand_hash_count.  */
+  unsigned long expand_count;
+  unsigned long expand_hash_count;
+  /* Number of times that the half-hash compare hit (compare the upper
+     16 bits of hash values) hit, but the corresponding combined
+     length/data compare missed.  */
+  unsigned long half_hash_miss_count;
 };
 
 /* The old hash function was stolen from SDBM. This is what DB 3.0 uses now,
@@ -116,6 +135,11 @@ expand_hash_table (struct bcache *bcache)
   unsigned int new_num_buckets;
   struct bstring **new_buckets;
   unsigned int i;
+
+  /* Count the stats.  Every unique item needs to be re-hashed and
+     re-entered.  */
+  bcache->expand_count++;
+  bcache->expand_hash_count += bcache->unique_count;
 
   /* Find the next size.  */
   new_num_buckets = bcache->num_buckets * 2;
@@ -171,9 +195,11 @@ expand_hash_table (struct bcache *bcache)
 /* Find a copy of the LENGTH bytes at ADDR in BCACHE.  If BCACHE has
    never seen those bytes before, add a copy of them to BCACHE.  In
    either case, return a pointer to BCACHE's copy of that string.  */
-void *
-bcache (const void *addr, int length, struct bcache *bcache)
+static void *
+bcache_data (const void *addr, int length, struct bcache *bcache)
 {
+  unsigned long full_hash;
+  unsigned short half_hash;
   int hash_index;
   struct bstring *s;
 
@@ -184,13 +210,24 @@ bcache (const void *addr, int length, struct bcache *bcache)
   bcache->total_count++;
   bcache->total_size += length;
 
-  hash_index = hash (addr, length) % bcache->num_buckets;
+  full_hash = hash (addr, length);
+  half_hash = (full_hash >> 16);
+  hash_index = full_hash % bcache->num_buckets;
 
-  /* Search the hash bucket for a string identical to the caller's.  */
+  /* Search the hash bucket for a string identical to the caller's.
+     As a short-circuit first compare the upper part of each hash
+     values.  */
   for (s = bcache->bucket[hash_index]; s; s = s->next)
-    if (s->length == length
-	&& ! memcmp (&s->d.data, addr, length))
-      return &s->d.data;
+    {
+      if (s->half_hash == half_hash)
+	{
+	  if (s->length == length
+	      && ! memcmp (&s->d.data, addr, length))
+	    return &s->d.data;
+	  else
+	    bcache->half_hash_miss_count++;
+	}
+    }
 
   /* The user's string isn't in the list.  Insert it after *ps.  */
   {
@@ -199,6 +236,7 @@ bcache (const void *addr, int length, struct bcache *bcache)
     memcpy (&new->d.data, addr, length);
     new->length = length;
     new->next = bcache->bucket[hash_index];
+    new->half_hash = half_hash;
     bcache->bucket[hash_index] = new;
 
     bcache->unique_count++;
@@ -209,6 +247,17 @@ bcache (const void *addr, int length, struct bcache *bcache)
   }
 }
 
+void *
+deprecated_bcache (const void *addr, int length, struct bcache *bcache)
+{
+  return bcache_data (addr, length, bcache);
+}
+
+const void *
+bcache (const void *addr, int length, struct bcache *bcache)
+{
+  return bcache_data (addr, length, bcache);
+}
 
 /* Allocating and freeing bcaches.  */
 
@@ -265,12 +314,16 @@ print_bcache_statistics (struct bcache *c, char *type)
   int occupied_buckets;
   int max_chain_length;
   int median_chain_length;
+  int max_entry_size;
+  int median_entry_size;
 
-  /* Count the number of occupied buckets, and measure chain lengths.  */
+  /* Count the number of occupied buckets, tally the various string
+     lengths, and measure chain lengths.  */
   {
     unsigned int b;
-    int *chain_length
-      = (int *) alloca (c->num_buckets * sizeof (*chain_length));
+    int *chain_length = XCALLOC (c->num_buckets + 1, int);
+    int *entry_size = XCALLOC (c->unique_count + 1, int);
+    int stringi = 0;
 
     occupied_buckets = 0;
 
@@ -286,7 +339,10 @@ print_bcache_statistics (struct bcache *c, char *type)
 	    
 	    while (s)
 	      {
+		gdb_assert (b < c->num_buckets);
 		chain_length[b]++;
+		gdb_assert (stringi < c->unique_count);
+		entry_size[stringi++] = s->length;
 		s = s->next;
 	      }
 	  }
@@ -294,6 +350,8 @@ print_bcache_statistics (struct bcache *c, char *type)
 
     /* To compute the median, we need the set of chain lengths sorted.  */
     qsort (chain_length, c->num_buckets, sizeof (chain_length[0]),
+	   compare_ints);
+    qsort (entry_size, c->unique_count, sizeof (entry_size[0]),
 	   compare_ints);
 
     if (c->num_buckets > 0)
@@ -306,6 +364,19 @@ print_bcache_statistics (struct bcache *c, char *type)
 	max_chain_length = 0;
 	median_chain_length = 0;
       }
+    if (c->unique_count > 0)
+      {
+	max_entry_size = entry_size[c->unique_count - 1];
+	median_entry_size = entry_size[c->unique_count / 2];
+      }
+    else
+      {
+	max_entry_size = 0;
+	median_entry_size = 0;
+      }
+
+    xfree (chain_length);
+    xfree (entry_size);
   }
 
   printf_filtered ("  Cached '%s' statistics:\n", type);
@@ -321,6 +392,15 @@ print_bcache_statistics (struct bcache *c, char *type)
   print_percentage (c->total_size - c->unique_size, c->total_size);
   printf_filtered ("\n");
 
+  printf_filtered ("    Max entry size:     %d\n", max_entry_size);
+  printf_filtered ("    Average entry size: ");
+  if (c->unique_count > 0)
+    printf_filtered ("%ld\n", c->unique_size / c->unique_count);
+  else
+    printf_filtered ("(not applicable)\n");    
+  printf_filtered ("    Median entry size:  %d\n", median_entry_size);
+  printf_filtered ("\n");
+
   printf_filtered ("    Total memory used by bcache, including overhead: %ld\n",
 		   c->structure_size);
   printf_filtered ("    Percentage memory overhead: ");
@@ -330,6 +410,12 @@ print_bcache_statistics (struct bcache *c, char *type)
   printf_filtered ("\n");
 
   printf_filtered ("    Hash table size:           %3d\n", c->num_buckets);
+  printf_filtered ("    Hash table expands:        %lu\n",
+		   c->expand_count);
+  printf_filtered ("    Hash table hashes:         %lu\n",
+		   c->total_count + c->expand_hash_count);
+  printf_filtered ("    Half hash misses:          %lu\n",
+		   c->half_hash_miss_count);
   printf_filtered ("    Hash table population:     ");
   print_percentage (occupied_buckets, c->num_buckets);
   printf_filtered ("    Median hash chain length:  %3d\n",

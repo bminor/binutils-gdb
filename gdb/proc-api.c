@@ -1,5 +1,7 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+
    Written by Michael Snyder at Cygnus Solutions.
    Based on work by Fred Fish, Stu Grossman, Geoff Noer, and others.
 
@@ -43,7 +45,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/user.h>	/* for struct user */
 #endif
 #include <fcntl.h>	/* for O_RDWR etc. */
-#include <sys/wait.h>
+#include "gdb_wait.h"
 
 #include "proc-utils.h"
 
@@ -572,16 +574,6 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 	break;
       default:
 	{
-#ifdef BREAKPOINT
-	  static unsigned char break_insn[] = BREAKPOINT;
-
-	  if (len == sizeof (break_insn) &&
-	      memcmp (arg, &break_insn, len) == 0)
-	    fprintf (procfs_file ? procfs_file : stdout, 
-		     "write (<breakpoint at 0x%08lx>) \n", 
-		     (unsigned long) lseek_offset);
-	  else 
-#endif
 	  if (rw_table[i].name)
 	    fprintf (procfs_file ? procfs_file : stdout, 
 		     "write (%s) %s\n", 

@@ -1,3 +1,180 @@
+2003-09-27  Andrew Cagney  <cagney@redhat.com>
+
+	* tuiRegs.c: Rename REGISTER_RAW_SIZE to
+	DEPRECATED_REGISTER_RAW_SIZE.
+
+2003-09-13  Andrew Cagney  <cagney@redhat.com>
+
+	* tui.h (struct ui_file): Add opaque declaration.
+
+2003-08-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* tui-interp.c: Include "cli-out.h".
+	(tui_resume): Update tui_old_uiout's stream to gdb_stdout.
+
+2003-07-24  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui.c (tui_rl_other_window): New function to switch the TUI active
+	window and give focus to a next window.
+	(tui_initialize_readline): Bind it to c-x o.
+	(tui_rl_next_keymap): Activate TUI mode when entering SingleKey mode.
+
+2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui.c (tui_enable): Call tuiRefreshAll to make sure the window
+	is accurate.
+
+2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-interp.c (tui_resume): Enable tui when we expected it.
+	(tui_suspend): Remember in which TUI mode we are.
+	(_initialize_tui_interp): Use the tui interpreter even when no
+	other interpreter was set and define in which TUI mode to start.
+
+2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* tui-out.c (tui_ui_out_impl): Add NULL for redirect member.
+
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* tui-hooks.c: Update include order.
+	* tui.c: Likewise.
+	* tuiCommand.c: Likewise.
+	* tuiData.c: Likewise.
+	* tuiDataWin.c: Likewise.
+	* tuiDisassem.c: Likewise.
+	* tuiGeneralWin.c: Likewise.
+	* tuiIO.c: Likewise.
+	* tuiLayout.c: Likewise.
+	* tuiRegs.c: Likewise.
+	* tuiSource.c: Likewise.
+	* tuiSourceWin.c: Likewise.
+	* tuiStack.c: Likewise.
+	* tuiWin.c: Likewise.
+
+2003-06-12  Andreas Schwab  <schwab@suse.de>
+
+	* tuiSource.c (tuiVerticalSourceScroll): Use get_frame_pc.
+	* tuiSourceWin.c (tuiHorizontalSourceScroll): Likewise.
+	* tuiStack.c (tui_get_function_from_frame): Likewise.
+	(tuiShowFrameInfo): Likewise.
+	* tuiWin.c (_makeVisibleWithNewHeight): Likewise.
+	* tui-hooks.c (tui_selected_frame_level_changed_hook): Likewise.
+	* tuiDisassem.c (tuiVerticalDisassemScroll): Likewise.
+	Include "disasm.h".
+
+2003-05-08  Andrew Cagney  <cagney@redhat.com>
+
+	* tuiRegs.c: Use MAX_REGISTER_SIZE instead of
+	MAX_REGISTER_RAW_SIZE.
+
+2003-05-03  Andrew Cagney  <cagney@redhat.com>
+
+	* tuiDisassem.c (tui_disassemble): Call gdb_print_insn, instead of
+	TARGET_PRINT_INSN.  Do not initialize a disassemble_info object.
+
+2003-04-30  Andrew Cagney  <cagney@redhat.com>
+
+	* tuiDisassem.c (tui_disassemble): Use
+	"deprecated_tm_print_insn_info" instead of TARGET_PRINT_INSN_INFO,
+	add comment.
+
+2003-03-14  Andrew Cagney  <cagney@redhat.com>
+
+	* tuiRegs.c (_tuiGetRegisterRawValue): Use frame_read_register,
+	instead of get_saved_register.
+
+2003-03-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-out.c (tui_out_data): Fix typedef.
+
+2003-03-08  Andrew Cagney  <cagney@redhat.com>
+
+	* tui-out.c: Update copyright.
+	(tui_out_data): Define typedef.  Use instead of ui_out_data.
+
+2003-02-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* tui.c (tui_enable, tui_disable): Don't modify tui_version.
+	(tui_is_window_visible, tui_get_command_dimension): Test
+	tui_active instead of tui_version.
+	* tuiData.h (tui_version): Delete declaration.
+	* tui-hooks.c (tui_init_hook, tui_event_loop): Delete function,
+	moved to "tui-interp.c".
+	(tui_exit, tui_command_loop): Ditto.
+	(_initialize_tui): Don't initialize init_ui_hook.  Initialize
+	target_new_objfile_hook.
+	* tui-interp.c: New file.
+
+2003-02-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiIO.c (tui_prep_terminal): Add one notused parameter.
+	* tui.c (tui_rl_switch_mode): Add two notused parameters.
+	(tui_rl_change_windows, tui_rl_next_keymap): Ditto.
+	(tui_rl_delete_other_windows): Ditto.
+	(tui_rl_change_windows, tui_rl_delete_other_windows): Update
+	calls.
+
+2002-12-08  Elena Zannoni  <ezannoni@redhat.com>
+
+       Import of readline 4.3.
+       Fix PR gdb/675
+       * tuiWin.c: Include readline/readline.h.
+       (tui_update_gdb_sizes): Use accessor function rl_get_screen_size.
+       (tuiResizeAll): Ditto.
+
+2002-12-06  Elena Zannoni  <ezannoni@redhat.com>
+
+	* tuiStack.c (tuiShowFrameInfo): Fix typo.
+
+2002-11-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* tui/tui-hooks.c: Update to use deprecated_selected_frame.
+	* tui/tui.c, tui/tuiDisassem.c, tui/tuiRegs.c: Ditto.
+	* tui/tuiSource.c, tui/tuiSourceWin.c, tui/tuiWin.c: Ditto.
+
+2002-11-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiStack.c (tuiShowFrameInfo): Use find_frame_sal instead of
+	find_pc_line.
+
+2002-11-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiStack.c (tuiShowFrameInfo): Use get_frame_type instead of
+	deprecated_frame_in_dummy.  Fix coding style.
+
+2002-11-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-hooks.c (tui_init_hook): Don't enable the TUI if a specific
+	interpreter is installed.
+
+2002-11-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiStack.c (tuiShowFrameInfo): Use get_frame_type instead of
+	signal_handler_caller.
+	
+2002-11-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiStack.c (tuiShowFrameInfo): Replace frame_in_dummy with
+	deprecated_frame_in_dummy.
+
+2002-10-26  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiIO.c (tui_prep_terminal): Save the prompt registered in readline.
+	(tui_redisplay_readline): Use the last saved prompt.
+	(tui_rl_saved_prompt): New.
+
+2002-10-25  Stephane Carrez  <stcarrez@nerim.fr>
+
+	Fix PR gdb/787
+	* tuiWin.c (ACS_LRCORNER, ACS_LLCORNER, ACS_ULCORNER, ACS_URCORNER,
+	ACS_HLINE, ACS_VLINE): Define if they don't exist.
+
+2002-10-25  Stephane Carrez  <stcarrez@nerim.fr>
+
+	Fix PR gdb/478
+	* tuiIO.c (tui_initialize_io): Use setvbuf since this is portable.
+
 2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
 
 	* tui-hooks.c (selected_frame_level_changed_hook): Use the one

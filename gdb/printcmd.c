@@ -1,7 +1,7 @@
 /* Print values for GNU debugger GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -41,6 +41,8 @@
 #include "completer.h"		/* for completion functions */
 #include "ui-out.h"
 #include "gdb_assert.h"
+#include "block.h"
+#include "disasm.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
@@ -136,12 +138,7 @@ static void enable_display (char *, int);
 
 static void disable_display_command (char *, int);
 
-static void disassemble_command (char *, int);
-
 static void printf_command (char *, int);
-
-static void print_frame_nameless_args (struct frame_info *, long,
-				       int, int, struct ui_file *);
 
 static void display_info (char *, int);
 
@@ -176,8 +173,6 @@ static void print_formatted (struct value *, int, int, struct ui_file *);
 
 static struct format_data decode_format (char **, int, int);
 
-static int print_insn (CORE_ADDR, struct ui_file *);
-
 static void sym_info (char *, int);
 
 
@@ -195,7 +190,7 @@ static struct format_data
 decode_format (char **string_ptr, int oformat, int osize)
 {
   struct format_data val;
-  register char *p = *string_ptr;
+  char *p = *string_ptr;
 
   val.format = '?';
   val.size = '?';
@@ -280,7 +275,7 @@ decode_format (char **string_ptr, int oformat, int osize)
    This is used to pad hex numbers so they line up.  */
 
 static void
-print_formatted (struct value *val, register int format, int size,
+print_formatted (struct value *val, int format, int size,
 		 struct ui_file *stream)
 {
   struct type *type = check_typedef (VALUE_TYPE (val));
@@ -311,7 +306,7 @@ print_formatted (struct value *val, register int format, int size,
       /* We often wrap here if there are long symbolic names.  */
       wrap_here ("    ");
       next_address = VALUE_ADDRESS (val)
-	+ print_insn (VALUE_ADDRESS (val), stream);
+	+ gdb_print_insn (VALUE_ADDRESS (val), stream);
       next_section = VALUE_BFD_SECTION (val);
       break;
 
@@ -320,7 +315,8 @@ print_formatted (struct value *val, register int format, int size,
 	  || TYPE_CODE (type) == TYPE_CODE_ARRAY
 	  || TYPE_CODE (type) == TYPE_CODE_STRING
 	  || TYPE_CODE (type) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (type) == TYPE_CODE_UNION)
+	  || TYPE_CODE (type) == TYPE_CODE_UNION
+	  || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
 	/* If format is 0, use the 'natural' format for
 	 * that type of value.  If the type is non-scalar,
 	 * we have to use language rules to print it as
@@ -344,7 +340,7 @@ print_formatted (struct value *val, register int format, int size,
    with a format.  */
 
 void
-print_scalar_formatted (char *valaddr, struct type *type, int format, int size,
+print_scalar_formatted (void *valaddr, struct type *type, int format, int size,
 			struct ui_file *stream)
 {
   LONGEST val_long;
@@ -512,7 +508,7 @@ print_scalar_formatted (char *valaddr, struct type *type, int format, int size,
 	strcpy (buf, local_binary_format_prefix ());
 	strcat (buf, cp);
 	strcat (buf, local_binary_format_suffix ());
-	fprintf_filtered (stream, buf);
+	fputs_filtered (buf, stream);
       }
       break;
 
@@ -626,15 +622,6 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 	}
     }
 
-  /* On some targets, add in extra "flag" bits to PC for
-     disassembly.  This should ensure that "rounding errors" in
-     symbol addresses that are masked for disassembly favour the
-     the correct symbol. */
-
-#ifdef GDB_TARGET_UNMASK_DISAS_PC
-  addr = GDB_TARGET_UNMASK_DISAS_PC (addr);
-#endif
-
   /* First try to find the address in the symbol table, then
      in the minsyms.  Take the closest one.  */
 
@@ -650,10 +637,10 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
   if (symbol)
     {
       name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (symbol));
-      if (do_demangle)
-	name_temp = SYMBOL_SOURCE_NAME (symbol);
+      if (do_demangle || asm_demangle)
+	name_temp = SYMBOL_PRINT_NAME (symbol);
       else
-	name_temp = SYMBOL_LINKAGE_NAME (symbol);
+	name_temp = DEPRECATED_SYMBOL_NAME (symbol);
     }
 
   if (msymbol != NULL)
@@ -665,22 +652,14 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 	  symbol = 0;
 	  symtab = 0;
 	  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
-	  if (do_demangle)
-	    name_temp = SYMBOL_SOURCE_NAME (msymbol);
+	  if (do_demangle || asm_demangle)
+	    name_temp = SYMBOL_PRINT_NAME (msymbol);
 	  else
-	    name_temp = SYMBOL_LINKAGE_NAME (msymbol);
+	    name_temp = DEPRECATED_SYMBOL_NAME (msymbol);
 	}
     }
   if (symbol == NULL && msymbol == NULL)
     return 1;
-
-  /* On some targets, mask out extra "flag" bits from PC for handsome
-     disassembly. */
-
-#ifdef GDB_TARGET_MASK_DISAS_PC
-  name_location = GDB_TARGET_MASK_DISAS_PC (name_location);
-  addr = GDB_TARGET_MASK_DISAS_PC (addr);
-#endif
 
   /* If the nearest symbol is too far away, don't print anything symbolic.  */
 
@@ -794,12 +773,12 @@ static struct type *examine_g_type;
 static void
 do_examine (struct format_data fmt, CORE_ADDR addr, asection *sect)
 {
-  register char format = 0;
-  register char size;
-  register int count = 1;
+  char format = 0;
+  char size;
+  int count = 1;
   struct type *val_type = NULL;
-  register int i;
-  register int maxelts;
+  int i;
+  int maxelts;
 
   format = fmt.format;
   size = fmt.size;
@@ -894,8 +873,8 @@ static void
 print_command_1 (char *exp, int inspect, int voidprint)
 {
   struct expression *expr;
-  register struct cleanup *old_chain = 0;
-  register char format = 0;
+  struct cleanup *old_chain = 0;
+  char format = 0;
   struct value *val;
   struct format_data fmt;
   int cleanup = 0;
@@ -963,7 +942,6 @@ print_command_1 (char *exp, int inspect, int voidprint)
   inspect_it = 0;		/* Reset print routines to normal */
 }
 
-/* ARGSUSED */
 static void
 print_command (char *exp, int from_tty)
 {
@@ -971,7 +949,6 @@ print_command (char *exp, int from_tty)
 }
 
 /* Same as print, except in epoch, it gets its own window */
-/* ARGSUSED */
 static void
 inspect_command (char *exp, int from_tty)
 {
@@ -981,20 +958,18 @@ inspect_command (char *exp, int from_tty)
 }
 
 /* Same as print, except it doesn't print void results. */
-/* ARGSUSED */
 static void
 call_command (char *exp, int from_tty)
 {
   print_command_1 (exp, 0, 0);
 }
 
-/* ARGSUSED */
 void
 output_command (char *exp, int from_tty)
 {
   struct expression *expr;
-  register struct cleanup *old_chain;
-  register char format = 0;
+  struct cleanup *old_chain;
+  char format = 0;
   struct value *val;
   struct format_data fmt;
 
@@ -1023,18 +998,16 @@ output_command (char *exp, int from_tty)
   do_cleanups (old_chain);
 }
 
-/* ARGSUSED */
 static void
 set_command (char *exp, int from_tty)
 {
   struct expression *expr = parse_expression (exp);
-  register struct cleanup *old_chain =
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
   evaluate_expression (expr);
   do_cleanups (old_chain);
 }
 
-/* ARGSUSED */
 static void
 sym_info (char *arg, int from_tty)
 {
@@ -1062,10 +1035,10 @@ sym_info (char *arg, int from_tty)
 	offset = sect_addr - SYMBOL_VALUE_ADDRESS (msymbol);
 	if (offset)
 	  printf_filtered ("%s + %u in ",
-			   SYMBOL_SOURCE_NAME (msymbol), offset);
+			   SYMBOL_PRINT_NAME (msymbol), offset);
 	else
 	  printf_filtered ("%s in ",
-			   SYMBOL_SOURCE_NAME (msymbol));
+			   SYMBOL_PRINT_NAME (msymbol));
 	if (pc_in_unmapped_range (addr, sect))
 	  printf_filtered ("load address range of ");
 	if (section_is_overlay (sect))
@@ -1079,14 +1052,13 @@ sym_info (char *arg, int from_tty)
     printf_filtered ("No symbol matches %s.\n", arg);
 }
 
-/* ARGSUSED */
 static void
 address_info (char *exp, int from_tty)
 {
-  register struct symbol *sym;
-  register struct minimal_symbol *msymbol;
-  register long val;
-  register long basereg;
+  struct symbol *sym;
+  struct minimal_symbol *msymbol;
+  long val;
+  long basereg;
   asection *section;
   CORE_ADDR load_addr;
   int is_a_field_of_this;	/* C++: lookup_symbol sets this to nonzero
@@ -1095,7 +1067,7 @@ address_info (char *exp, int from_tty)
   if (exp == 0)
     error ("Argument required.");
 
-  sym = lookup_symbol (exp, get_selected_block (0), VAR_NAMESPACE,
+  sym = lookup_symbol (exp, get_selected_block (0), VAR_DOMAIN,
 		       &is_a_field_of_this, (struct symtab **) NULL);
   if (sym == NULL)
     {
@@ -1140,7 +1112,7 @@ address_info (char *exp, int from_tty)
     }
 
   printf_filtered ("Symbol \"");
-  fprintf_symbol_filtered (gdb_stdout, SYMBOL_NAME (sym),
+  fprintf_symbol_filtered (gdb_stdout, DEPRECATED_SYMBOL_NAME (sym),
 			   current_language->la_language, DMGL_ANSI);
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
@@ -1165,6 +1137,11 @@ address_info (char *exp, int from_tty)
 	  print_address_numeric (load_addr, 1, gdb_stdout);
 	  printf_filtered (" in overlay section %s", section->name);
 	}
+      break;
+
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      (SYMBOL_LOCATION_FUNCS (sym)->describe_location) (sym, gdb_stdout);
       break;
 
     case LOC_REGISTER:
@@ -1238,14 +1215,8 @@ address_info (char *exp, int from_tty)
 
     case LOC_BLOCK:
       printf_filtered ("a function at address ");
-#ifdef GDB_TARGET_MASK_DISAS_PC
-      print_address_numeric
-	(load_addr = GDB_TARGET_MASK_DISAS_PC (BLOCK_START (SYMBOL_BLOCK_VALUE (sym))),
-	 1, gdb_stdout);
-#else
       print_address_numeric (load_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
 			     1, gdb_stdout);
-#endif
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
@@ -1259,7 +1230,7 @@ address_info (char *exp, int from_tty)
       {
 	struct minimal_symbol *msym;
 
-	msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, NULL);
+	msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, NULL);
 	if (msym == NULL)
 	  printf_filtered ("unresolved");
 	else
@@ -1283,12 +1254,6 @@ address_info (char *exp, int from_tty)
       printf_filtered (
 			"a thread-local variable at offset %ld from the thread base register %s",
 			val, REGISTER_NAME (basereg));
-      break;
-
-    case LOC_THREAD_LOCAL_STATIC:
-      printf_filtered ("a thread-local variable at offset %ld in the "
-                       "thread-local storage for `%s'",
-                       val, SYMBOL_OBJFILE (sym)->name);
       break;
 
     case LOC_OPTIMIZED_OUT:
@@ -1383,12 +1348,14 @@ static void
 display_command (char *exp, int from_tty)
 {
   struct format_data fmt;
-  register struct expression *expr;
-  register struct display *new;
+  struct expression *expr;
+  struct display *new;
   int display_it = 1;
 
 #if defined(TUI)
-  if (tui_version && *exp == '$')
+  /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+     `tui_version'.  */
+  if (tui_active && *exp == '$')
     display_it = (tui_set_layout (exp) == TUI_FAILURE);
 #endif
 
@@ -1450,7 +1417,7 @@ free_display (struct display *d)
 void
 clear_displays (void)
 {
-  register struct display *d;
+  struct display *d;
 
   while ((d = display_chain) != NULL)
     {
@@ -1465,7 +1432,7 @@ clear_displays (void)
 static void
 delete_display (int num)
 {
-  register struct display *d1, *d;
+  struct display *d1, *d;
 
   if (!display_chain)
     error ("No display number %d.", num);
@@ -1497,9 +1464,9 @@ delete_display (int num)
 static void
 undisplay_command (char *args, int from_tty)
 {
-  register char *p = args;
-  register char *p1;
-  register int num;
+  char *p = args;
+  char *p1;
+  int num;
 
   if (args == 0)
     {
@@ -1620,7 +1587,7 @@ do_one_display (struct display *d)
 void
 do_displays (void)
 {
-  register struct display *d;
+  struct display *d;
 
   for (d = display_chain; d; d = d->next)
     do_one_display (d);
@@ -1632,7 +1599,7 @@ do_displays (void)
 void
 disable_display (int num)
 {
-  register struct display *d;
+  struct display *d;
 
   for (d = display_chain; d; d = d->next)
     if (d->number == num)
@@ -1658,7 +1625,7 @@ disable_current_display (void)
 static void
 display_info (char *ignore, int from_tty)
 {
-  register struct display *d;
+  struct display *d;
 
   if (!display_chain)
     printf_unfiltered ("There are no auto-display expressions now.\n");
@@ -1685,10 +1652,10 @@ Num Enb Expression\n");
 static void
 enable_display (char *args, int from_tty)
 {
-  register char *p = args;
-  register char *p1;
-  register int num;
-  register struct display *d;
+  char *p = args;
+  char *p1;
+  int num;
+  struct display *d;
 
   if (p == 0)
     {
@@ -1720,13 +1687,12 @@ enable_display (char *args, int from_tty)
       }
 }
 
-/* ARGSUSED */
 static void
 disable_display_command (char *args, int from_tty)
 {
-  register char *p = args;
-  register char *p1;
-  register struct display *d;
+  char *p = args;
+  char *p1;
+  struct display *d;
 
   if (p == 0)
     {
@@ -1763,248 +1729,11 @@ print_variable_value (struct symbol *var, struct frame_info *frame,
   value_print (val, stream, 0, Val_pretty_default);
 }
 
-/* Print the arguments of a stack frame, given the function FUNC
-   running in that frame (as a symbol), the info on the frame,
-   and the number of args according to the stack frame (or -1 if unknown).  */
-
-/* References here and elsewhere to "number of args according to the
-   stack frame" appear in all cases to refer to "number of ints of args
-   according to the stack frame".  At least for VAX, i386, isi.  */
-
-void
-print_frame_args (struct symbol *func, struct frame_info *fi, int num,
-		  struct ui_file *stream)
-{
-  struct block *b = NULL;
-  int first = 1;
-  register int i;
-  register struct symbol *sym;
-  struct value *val;
-  /* Offset of next stack argument beyond the one we have seen that is
-     at the highest offset.
-     -1 if we haven't come to a stack argument yet.  */
-  long highest_offset = -1;
-  int arg_size;
-  /* Number of ints of arguments that we have printed so far.  */
-  int args_printed = 0;
-  struct cleanup *old_chain, *list_chain;
-  struct ui_stream *stb;
-
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
-
-  if (func)
-    {
-      b = SYMBOL_BLOCK_VALUE (func);
-      /* Function blocks are order sensitive, and thus should not be
-	 hashed.  */
-      gdb_assert (BLOCK_HASHTABLE (b) == 0);
-
-      ALL_BLOCK_SYMBOLS (b, i, sym)
-        {
-	  QUIT;
-
-	  /* Keep track of the highest stack argument offset seen, and
-	     skip over any kinds of symbols we don't care about.  */
-
-	  switch (SYMBOL_CLASS (sym))
-	    {
-	    case LOC_ARG:
-	    case LOC_REF_ARG:
-	      {
-		long current_offset = SYMBOL_VALUE (sym);
-		arg_size = TYPE_LENGTH (SYMBOL_TYPE (sym));
-
-		/* Compute address of next argument by adding the size of
-		   this argument and rounding to an int boundary.  */
-		current_offset =
-		  ((current_offset + arg_size + sizeof (int) - 1)
-		   & ~(sizeof (int) - 1));
-
-		/* If this is the highest offset seen yet, set highest_offset.  */
-		if (highest_offset == -1
-		    || (current_offset > highest_offset))
-		  highest_offset = current_offset;
-
-		/* Add the number of ints we're about to print to args_printed.  */
-		args_printed += (arg_size + sizeof (int) - 1) / sizeof (int);
-	      }
-
-	      /* We care about types of symbols, but don't need to keep track of
-		 stack offsets in them.  */
-	    case LOC_REGPARM:
-	    case LOC_REGPARM_ADDR:
-	    case LOC_LOCAL_ARG:
-	    case LOC_BASEREG_ARG:
-	      break;
-
-	    /* Other types of symbols we just skip over.  */
-	    default:
-	      continue;
-	    }
-
-	  /* We have to look up the symbol because arguments can have
-	     two entries (one a parameter, one a local) and the one we
-	     want is the local, which lookup_symbol will find for us.
-	     This includes gcc1 (not gcc2) on the sparc when passing a
-	     small structure and gcc2 when the argument type is float
-	     and it is passed as a double and converted to float by
-	     the prologue (in the latter case the type of the LOC_ARG
-	     symbol is double and the type of the LOC_LOCAL symbol is
-	     float).  */
-	  /* But if the parameter name is null, don't try it.
-	     Null parameter names occur on the RS/6000, for traceback tables.
-	     FIXME, should we even print them?  */
-
-	  if (*SYMBOL_NAME (sym))
-	    {
-	      struct symbol *nsym;
-	      nsym = lookup_symbol
-		(SYMBOL_NAME (sym),
-		 b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
-	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
-		{
-		  /* There is a LOC_ARG/LOC_REGISTER pair.  This means that
-		     it was passed on the stack and loaded into a register,
-		     or passed in a register and stored in a stack slot.
-		     GDB 3.x used the LOC_ARG; GDB 4.0-4.11 used the LOC_REGISTER.
-
-		     Reasons for using the LOC_ARG:
-		     (1) because find_saved_registers may be slow for remote
-		     debugging,
-		     (2) because registers are often re-used and stack slots
-		     rarely (never?) are.  Therefore using the stack slot is
-		     much less likely to print garbage.
-
-		     Reasons why we might want to use the LOC_REGISTER:
-		     (1) So that the backtrace prints the same value as
-		     "print foo".  I see no compelling reason why this needs
-		     to be the case; having the backtrace print the value which
-		     was passed in, and "print foo" print the value as modified
-		     within the called function, makes perfect sense to me.
-
-		     Additional note:  It might be nice if "info args" displayed
-		     both values.
-		     One more note:  There is a case with sparc structure passing
-		     where we need to use the LOC_REGISTER, but this is dealt with
-		     by creating a single LOC_REGPARM in symbol reading.  */
-
-		  /* Leave sym (the LOC_ARG) alone.  */
-		  ;
-		}
-	      else
-		sym = nsym;
-	    }
-
-	  /* Print the current arg.  */
-	  if (!first)
-	    ui_out_text (uiout, ", ");
-	  ui_out_wrap_hint (uiout, "    ");
-
-	  annotate_arg_begin ();
-
-	  list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-	  fprintf_symbol_filtered (stb->stream, SYMBOL_SOURCE_NAME (sym),
-				   SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
-	  ui_out_field_stream (uiout, "name", stb);
-	  annotate_arg_name_end ();
-	  ui_out_text (uiout, "=");
-
-	  /* Avoid value_print because it will deref ref parameters.  We just
-	     want to print their addresses.  Print ??? for args whose address
-	     we do not know.  We pass 2 as "recurse" to val_print because our
-	     standard indentation here is 4 spaces, and val_print indents
-	     2 for each recurse.  */
-	  val = read_var_value (sym, fi);
-
-	  annotate_arg_value (val == NULL ? NULL : VALUE_TYPE (val));
-
-	  if (val)
-	    {
-	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
-			 VALUE_ADDRESS (val),
-			 stb->stream, 0, 0, 2, Val_no_prettyprint);
-	      ui_out_field_stream (uiout, "value", stb);
-	    }
-	  else
-	    ui_out_text (uiout, "???");
-
-	  /* Invoke ui_out_tuple_end.  */
-	  do_cleanups (list_chain);
-
-	  annotate_arg_end ();
-
-	  first = 0;
-	}
-    }
-
-  /* Don't print nameless args in situations where we don't know
-     enough about the stack to find them.  */
-  if (num != -1)
-    {
-      long start;
-
-      if (highest_offset == -1)
-	start = FRAME_ARGS_SKIP;
-      else
-	start = highest_offset;
-
-      print_frame_nameless_args (fi, start, num - args_printed,
-				 first, stream);
-    }
-  do_cleanups (old_chain);
-}
-
-/* Print nameless args on STREAM.
-   FI is the frameinfo for this frame, START is the offset
-   of the first nameless arg, and NUM is the number of nameless args to
-   print.  FIRST is nonzero if this is the first argument (not just
-   the first nameless arg).  */
-
-static void
-print_frame_nameless_args (struct frame_info *fi, long start, int num,
-			   int first, struct ui_file *stream)
-{
-  int i;
-  CORE_ADDR argsaddr;
-  long arg_value;
-
-  for (i = 0; i < num; i++)
-    {
-      QUIT;
-#ifdef NAMELESS_ARG_VALUE
-      NAMELESS_ARG_VALUE (fi, start, &arg_value);
-#else
-      argsaddr = FRAME_ARGS_ADDRESS (fi);
-      if (!argsaddr)
-	return;
-
-      arg_value = read_memory_integer (argsaddr + start, sizeof (int));
-#endif
-
-      if (!first)
-	fprintf_filtered (stream, ", ");
-
-#ifdef	PRINT_NAMELESS_INTEGER
-      PRINT_NAMELESS_INTEGER (stream, arg_value);
-#else
-#ifdef PRINT_TYPELESS_INTEGER
-      PRINT_TYPELESS_INTEGER (stream, builtin_type_int, (LONGEST) arg_value);
-#else
-      fprintf_filtered (stream, "%ld", arg_value);
-#endif /* PRINT_TYPELESS_INTEGER */
-#endif /* PRINT_NAMELESS_INTEGER */
-      first = 0;
-      start += sizeof (int);
-    }
-}
-
-/* ARGSUSED */
 static void
 printf_command (char *arg, int from_tty)
 {
-  register char *f = NULL;
-  register char *s = arg;
+  char *f = NULL;
+  char *s = arg;
   char *string = NULL;
   struct value **val_args;
   char *substrings;
@@ -2266,139 +1995,10 @@ printf_command (char *arg, int from_tty)
 	current_substring += strlen (current_substring) + 1;
       }
     /* Print the portion of the format string after the last argument.  */
-    printf_filtered (last_arg);
+    puts_filtered (last_arg);
   }
   do_cleanups (old_cleanups);
 }
-
-/* Dump a specified section of assembly code.  With no command line
-   arguments, this command will dump the assembly code for the
-   function surrounding the pc value in the selected frame.  With one
-   argument, it will dump the assembly code surrounding that pc value.
-   Two arguments are interpeted as bounds within which to dump
-   assembly.  */
-
-/* ARGSUSED */
-static void
-disassemble_command (char *arg, int from_tty)
-{
-  CORE_ADDR low, high;
-  char *name;
-  CORE_ADDR pc, pc_masked;
-  char *space_index;
-#if 0
-  asection *section;
-#endif
-
-  name = NULL;
-  if (!arg)
-    {
-      if (!selected_frame)
-	error ("No frame selected.\n");
-
-      pc = get_frame_pc (selected_frame);
-      if (find_pc_partial_function (pc, &name, &low, &high) == 0)
-	error ("No function contains program counter for selected frame.\n");
-#if defined(TUI)
-      else if (tui_version)
-	low = tuiGetLowDisassemblyAddress (low, pc);
-#endif
-      low += FUNCTION_START_OFFSET;
-    }
-  else if (!(space_index = (char *) strchr (arg, ' ')))
-    {
-      /* One argument.  */
-      pc = parse_and_eval_address (arg);
-      if (find_pc_partial_function (pc, &name, &low, &high) == 0)
-	error ("No function contains specified address.\n");
-#if defined(TUI)
-      else if (tui_version)
-	low = tuiGetLowDisassemblyAddress (low, pc);
-#endif
-      low += FUNCTION_START_OFFSET;
-    }
-  else
-    {
-      /* Two arguments.  */
-      *space_index = '\0';
-      low = parse_and_eval_address (arg);
-      high = parse_and_eval_address (space_index + 1);
-    }
-
-#if defined(TUI)
-  if (!tui_is_window_visible (DISASSEM_WIN))
-#endif
-    {
-      printf_filtered ("Dump of assembler code ");
-      if (name != NULL)
-	{
-	  printf_filtered ("for function %s:\n", name);
-	}
-      else
-	{
-	  printf_filtered ("from ");
-	  print_address_numeric (low, 1, gdb_stdout);
-	  printf_filtered (" to ");
-	  print_address_numeric (high, 1, gdb_stdout);
-	  printf_filtered (":\n");
-	}
-
-      /* Dump the specified range.  */
-      pc = low;
-
-#ifdef GDB_TARGET_MASK_DISAS_PC
-      pc_masked = GDB_TARGET_MASK_DISAS_PC (pc);
-#else
-      pc_masked = pc;
-#endif
-
-      while (pc_masked < high)
-	{
-	  QUIT;
-	  print_address (pc_masked, gdb_stdout);
-	  printf_filtered (":\t");
-	  /* We often wrap here if there are long symbolic names.  */
-	  wrap_here ("    ");
-	  pc += print_insn (pc, gdb_stdout);
-	  printf_filtered ("\n");
-
-#ifdef GDB_TARGET_MASK_DISAS_PC
-	  pc_masked = GDB_TARGET_MASK_DISAS_PC (pc);
-#else
-	  pc_masked = pc;
-#endif
-	}
-      printf_filtered ("End of assembler dump.\n");
-      gdb_flush (gdb_stdout);
-    }
-#if defined(TUI)
-  else
-    {
-      tui_show_assembly (low);
-    }
-#endif
-}
-
-/* Print the instruction at address MEMADDR in debugged memory,
-   on STREAM.  Returns length of the instruction, in bytes.  */
-
-static int
-print_insn (CORE_ADDR memaddr, struct ui_file *stream)
-{
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    TARGET_PRINT_INSN_INFO->endian = BFD_ENDIAN_BIG;
-  else
-    TARGET_PRINT_INSN_INFO->endian = BFD_ENDIAN_LITTLE;
-
-  if (TARGET_ARCHITECTURE != NULL)
-    TARGET_PRINT_INSN_INFO->mach = TARGET_ARCHITECTURE->mach;
-  /* else: should set .mach=0 but some disassemblers don't grok this */
-
-  TARGET_PRINT_INSN_INFO->stream = stream;
-
-  return TARGET_PRINT_INSN (memaddr, TARGET_PRINT_INSN_INFO);
-}
-
 
 void
 _initialize_printcmd (void)
@@ -2426,15 +2026,6 @@ according to the format.\n\n\
 Defaults for format and size letters are those previously used.\n\
 Default count is 1.  Default address is following last thing printed\n\
 with this command or \"print\".", NULL));
-
-  c = add_com ("disassemble", class_vars, disassemble_command,
-	       "Disassemble a specified section of memory.\n\
-Default is the function surrounding the pc of the selected frame.\n\
-With a single argument, the function surrounding that address is dumped.\n\
-Two arguments are taken as a range of memory to dump.");
-  set_cmd_completer (c, location_completer);
-  if (xdb_commands)
-    add_com_alias ("va", "disassemble", class_xdb, 0);
 
 #if 0
   add_com ("whereis", class_vars, whereis_command,

@@ -31,6 +31,8 @@ SIM_OBJS = armemu26.o armemu32.o arminit.o armos.o armsupp.o \
 armos.o: armos.c armdefs.h armos.h armfpe.h
 
 armcopro.o: armcopro.c armdefs.h
+maverick.o: maverick.c armdefs.h
+iwmmxt.o: iwmmxt.c iwmmxt.h armdefs.h
 
 armemu26.o: armemu.c armdefs.h armemu.h 
 	$(CC) -c $(srcdir)/armemu.c -o armemu26.o $(ALL_CFLAGS)

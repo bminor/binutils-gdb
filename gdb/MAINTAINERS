@@ -1,7 +1,7 @@
 			GDB Maintainers
 
 
-			Blanket Write Privs
+			Global Maintainers
 			   (alphabetic)
 
 Jim Blandy			jimb@redhat.com
@@ -9,6 +9,7 @@ Kevin Buettner			kevinb@redhat.com
 Andrew Cagney			ac131313@redhat.com
 J.T. Conklin			jtc@redback.com
 Fred Fish			fnf@ninemoons.com
+Daniel Jacobowitz		dan@debian.org
 Mark Kettenis           	kettenis@gnu.org
 Peter Schauer			Peter.Schauer@regent.e-technik.tu-muenchen.de
 Stan Shebs			shebs@apple.com
@@ -23,7 +24,7 @@ Note individuals who maintain parts of the debugger need approval to
 check in changes outside of the immediate domain that they maintain.
 
 If there is no maintainer for a given domain then the responsibility
-falls to the head maintainer.
+falls to a global maintainer.
 
 If there are several maintainers for a given domain then
 responsibility falls to the first maintainer.  The first maintainer is
@@ -56,19 +57,17 @@ maintainer works with the native maintainer when resolving API issues.
 
 	a29k		Deleted.
 
-	alpha		--target=alpha-elf -Werror
+	alpha		--target=alpha-elf ,-Werror
 			Maintenance only
 
-	arc		(--target=arc-elf OBSOLETE)
+	arc		Deleted.
 
-	arm		--target=arm-elf ,
-			Fernando Nasser		fnasser@redhat.com
+	arm		--target=arm-elf ,-Werror
 			Scott Bambrough		scottb@netwinder.org
 			Richard Earnshaw	rearnsha@arm.com
-			Not multi-arch
 
 	avr		--target=avr ,-Werror
-			Theodore A. Roth	troth@verinet.com
+			Theodore A. Roth	troth@openavr.org
 
 	cris		--target=cris-elf ,-Werror
 			Orjan Friberg		orjanf@axis.com
@@ -76,29 +75,28 @@ maintainer works with the native maintainer when resolving API issues.
 	d10v		--target=d10v-elf ,-Werror
 			Maintenance only
 
-	d30v		(--target=d30v-elf OBSOLETE)
+	d30v		Deleted.
 
-	fr30		(--target=fr30-elf OBSOLETE)
+	fr30		Deleted.
 
-	h8300		--target=h8300hms -Werror
+	frv		--target=frv-elf ,-Werror
 			Maintenance only
 
-	h8500		--target=h8500hms -Werror
+	h8300		--target=h8300hms ,-Werror
 			Maintenance only
-			Not multi-arch, work in progress
+
+	h8500		Deleted.
 
 	i386		--target=i386-elf ,-Werror
 			Mark Kettenis           kettenis@gnu.org
 
-	i960		(--target=i960-coff OBSOLETE)
+	i960		Deleted.
 
 	ia64		--target=ia64-linux-gnu ,-Werror
 			(--target=ia64-elf broken)
 			Kevin Buettner		kevinb@redhat.com
 
-	m32r		(--target=m32r-elf broken)
-			Michael Snyder		msnyder@redhat.com
-			OBSOLETE candidate, not multi-arch
+	m32r		--target=m32r-elf ,-Werror
 
 	m68hc11		--target=m68hc11-elf ,-Werror ,
 			Stephane Carrez		stcarrez@nerim.fr
@@ -106,7 +104,7 @@ maintainer works with the native maintainer when resolving API issues.
 	m68k		--target=m68k-elf ,-Werror
 			Maintenance only
 
-	m88k		(--target=m88k OBSOLETE)
+	m88k		Deleted.
 
 	mcore		--target=mcore-elf ,-Werror
 			Maintenance only
@@ -114,9 +112,7 @@ maintainer works with the native maintainer when resolving API issues.
 	mips		--target=mips-elf ,-Werror
 			Andrew Cagney		cagney@redhat.com
 
-	mn10200		--target=mn10200-elf ,-Werror
-			Maintenance only
-			OBSOLETE candidate, not multi-arch
+	mn10200		Deleted.
 
 	mn10300		--target=mn10300-elf ,-Werror
 			Maintenance only
@@ -126,7 +122,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	pa		(--target=hppa-elf broken)
 			Maintenance only
-			OBSOLETE candidate, not multi-arch
 
 	powerpc		--target=powerpc-eabi ,-Werror
 			Kevin Buettner		kevinb@redhat.com
@@ -156,10 +151,7 @@ maintainer works with the native maintainer when resolving API issues.
 	xstormy16	--target=xstormy16-elf ,-Werror
 			Corinna Vinschen	vinschen@redhat.com
 
-	z8k		--target=z8k-coff ,-Werror
-			Known problem in 5.1
-			Maintenance only
-			OBSOLETE candidate, not multi-arch
+	z8k		Deleted.
 
 All developers recognized by this file can make arbitrary changes to
 OBSOLETE targets.
@@ -171,40 +163,8 @@ All recognized developers can make mechanical changes (by virtue of
 the obvious fix rule) to ``maintenance only'' targets.  The change
 shall be sanity checked by compiling with one of the listed targets.
 
-The Bourne shell script:
-
-cat MAINTAINERS | tr -s '[\t]' '[ ]' | sed -n '
-/^[ ]*[-a-z0-9\.]*[ ]*[(]*--target=.*/ !d
-s/^.*--target=//
-s/).*$//
-h
-:loop
-  g
-  /^[^ ]*,/ !b end
-  s/,[^ ]*//
-  p
-  g
-  s/^[^,]*,//
-  h
-b loop
-:end
-p
-'
-
-can be used to generate a list of buildable targets.  The list
-containing values for the configure options --target=,
---enable-gdb-build-warnings= and optionally
---enable-sim-build-warnings vis:
-
-	arc-elf ,-Werror
-	...
-	m68hc11-elf ,-Werror ,
-	...
-	hppa1.1-hp-proelf broken
-	...
-
-While the ``broken'' targets are included in the listing, the are not
-expected to build.
+The Bourne shell script gdb_mbuild.sh can be used to rebuild all the
+above targets.
 
 
 Host/Native:
@@ -226,7 +186,6 @@ MS Windows (NT, '00, 9x, Me, XP) host & native
 			Chris Faylor		cgf@redhat.com
 GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
-			Jim Blandy		jimb@redhat.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@redhat.com
 GNU/Linux MIPS native & host
 			Daniel Jacobowitz	dan@debian.org
@@ -240,7 +199,7 @@ GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host (devolved)
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 Solaris/SPARC native & host (devolved)
-                        Michael Snyder          msnyder@redhat.com
+                        (Global Maintainers)
 
 
 
@@ -250,8 +209,10 @@ generic arch support	Andrew Cagney		cagney@redhat.com
 			Any host/target maintainer can add to
 			gdbarch.{c,h,sh}.  Send tricky ones to cagney.
 target vector		Andrew Cagney		cagney@redhat.com
-main (main.c, top.c)	Elena Zannoni		ezannoni@redhat.com
+
 event loop		Elena Zannoni           ezannoni@redhat.com
+                        For the part of top.c related to the event loop,
+                        send questions to ezannoni@redhat.com
 
 generic symtabs		Jim Blandy		jimb@redhat.com
 			Elena Zannoni		ezannoni@redhat.com
@@ -264,9 +225,7 @@ generic symtabs		Jim Blandy		jimb@redhat.com
   coff reader		Philippe De Muyter	phdm@macqel.be
   xcoff reader		Any maintainer can modify this; please send tricky
 			ones to Kevin Buettner <kevinb@redhat.com>
-  linespec		Jim Blandy		jimb@redhat.com
-			Elena Zannoni		ezannoni@redhat.com
-			Fernando Nasser		fnasser@redhat.com
+  linespec		Elena Zannoni		ezannoni@redhat.com
   HP/UX readers		Any [past] maintainer can modify this.
 			Please send tricky ones to the symtabs maintainers.
 
@@ -274,31 +233,28 @@ tracing bytecode stuff  Jim Blandy              jimb@redhat.com
 tracing			Michael Snyder		msnyder@redhat.com
 threads			Michael Snyder		msnyder@redhat.com
 			Mark Kettenis		kettenis@gnu.org
-breakpoints		Michael Snyder		msnyder@redhat.com
-			Jim Blandy		jimb@redhat.com
+breakpoints		(Global Maintainers)
 language support	(Blanket Write Privs Maintainers)
   C++			Daniel Jacobowitz	dan@debian.org
-  Java support (devolved)
-			Per Bothner		per@bothner.com
-			Anthony Green 		green@redhat.com
+  Java support		(Global Maintainers)
   Pascal support	Pierre Muller		muller@sources.redhat.com
-  Scheme support	Jim Blandy		jimb@redhat.com
-
-shared libs (devolved)	Jim Blandy		jimb@redhat.com
-			Kevin Buettner		kevinb@redhat.com
+  Objective C support   Adam Fedor		fedor@gnu.org
+shared libs (devolved)	Kevin Buettner		kevinb@redhat.com
   xcoffsolib		Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 
 remote.c		Andrew Cagney		cagney@redhat.com
 include/remote-sim.h, remote-sim.c
 			Andrew Cagney		cagney@redhat.com
-sds protocol		Fernando Nasser		fnasser@redhat.com
-rdi/adp protocol	Fernando Nasser		fnasser@redhat.com
+sds protocol		(vacant)
+rdi/adp protocol	(vacant)
 documentation		Eli Zaretskii		eliz@gnu.org
-testsuite		Fernando Nasser		fnasser@redhat.com
+testsuite		(Global Maintainers)
   config                Mark Salter             msalter@redhat.com
-  lib                   Mark Salter             msalter@redhat.com
+  lib                   Fernando Nasser         fnasser@redhat.com
+                        Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
-  c++ (gdb.c++)		Michael Chastain	mec@shout.net
+  c++ (gdb.cp) 		Michael Chastain	mec.gnu@mindspring.com
+			David Carlton		carlton@kealia.com
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
                         Andrew Cagney           cagney@redhat.com
   stabs (gdb.stabs)     Elena Zannoni           ezannoni@redhat.com
@@ -311,7 +267,7 @@ Kernel Object Display	Fernando Nasser		fnasser@redhat.com
 
 UI: External (user) interfaces.
 
-command interpreter	Fernando Nasser		fnasser@redhat.com
+command interpreter	(Global Maintainers)
 gdbtk (c & tcl)		Jim Ingham		jingham@apple.com
 			Fernando Nasser         fnasser@redhat.com
 			Keith Seitz		keiths@redhat.com
@@ -320,8 +276,8 @@ libgui (w/foundry, sn)	Jim Ingham              jingham@apple.com
 mi (gdb/mi)		Andrew Cagney		cagney@redhat.com
 			Elena Zannoni           ezannoni@redhat.com
 			Fernando Nasser		fnasser@redhat.com
-tui			(vacant)
-			Technical Contact Point	wdb@cup.hp.com
+tui			Stephane Carrez		stcarrez@nerim.fr
+			(Global Maintainers)
 
 
 Misc:
@@ -353,6 +309,7 @@ To get recommended for the Write After Approval list you need a valid
 FSF assignment and have submitted one good patch.
 
 David Anderson					davea@sgi.com
+Shrinivas Atre					shrinivasa@kpitcummins.com
 Scott Bambrough					scottb@netwinder.org
 Jim Blandy					jimb@redhat.com
 Philip Blundell					philb@gnu.org
@@ -361,20 +318,24 @@ Joel Brobecker					brobecker@act-europe.fr
 Dave Brolley					brolley@redhat.com
 Kevin Buettner					kevinb@redhat.com
 Andrew Cagney					ac131313@redhat.com
-David Carlton					carlton@math.stanford.edu
+David Carlton					carlton@kealia.com
 Stephane Carrez					stcarrez@nerim.fr
-Michael Chastain				mec@shout.net
+Michael Chastain				mec.gnu@mindspring.com
 Eric Christopher				echristo@redhat.com
 Nick Clifton					nickc@redhat.com
+Brendan Conoboy					blc@redhat.com
 DJ Delorie					dj@redhat.com
 Chris G. Demetriou				cgd@broadcom.com
 Philippe De Muyter				phdm@macqel.be
+Dhananjay Deshpande				dhananjayd@kpitcummins.com
 Klee Dienes					kdienes@apple.com
 Richard Earnshaw				rearnsha@arm.com
 Frank Ch. Eigler				fche@redhat.com
-Ben Elliston					bje@redhat.com
+Ben Elliston					bje@wasabisystems.com
+Raoul Gough					RaoulGough@yahoo.co.uk
 Anthony Green			 		green@redhat.com
 Matthew Green					mrg@eterna.com.au
+Jerome Guitton					guitton@act-europe.fr
 Chris Faylor					cgf@redhat.com
 Adam Fedor					fedor@gnu.org
 Fred Fish					fnf@ninemoons.com
@@ -384,7 +345,7 @@ Richard Henderson				rth@redhat.com
 Aldy Hernandez					aldyh@redhat.com
 Paul Hilfinger					hilfinger@gnat.com
 Matt Hiller					hiller@redhat.com
-Kazu Hirata					kazu@hxi.com
+Kazu Hirata					kazu@cs.umass.edu
 Jeff Holcomb					jeffh@redhat.com
 Don Howard					dhoward@redhat.com
 Martin Hunt					hunt@redhat.com
@@ -397,6 +358,7 @@ Mark Kettenis					kettenis@gnu.org
 Jim Kingdon					jkingdon@engr.sgi.com  ++
 Jonathan Larmour				jlarmour@redhat.co.uk
 Jeff Law					law@redhat.com
+David Lecomber					david@streamline-computing.com
 Robert Lipe					rjl@sco.com
 H.J. Lu						hjl@lucon.org
 Michal Ludvig                                   mludvig@suse.cz
@@ -413,9 +375,11 @@ Hans-Peter Nilsson				hp@bitrange.com
 David O'Brien					obrien@freebsd.org
 Alexandre Oliva					aoliva@redhat.com
 Tom Rix						trix@redhat.com
-Theodore A. Roth				troth@verinet.com
+Bob Rossi 					bob_rossi@cox.net 
+Theodore A. Roth				troth@openavr.org
 Ian Roxborough					irox@redhat.com
 Grace Sainsbury					graces@redhat.com
+Kei Sakamoto					sakamoto.kei@renesas.com
 Mark Salter					msalter@redhat.com
 Peter Schauer					Peter.Schauer@regent
 Andreas Schwab					schwab@suse.de
@@ -424,16 +388,19 @@ Stan Shebs					shebs@apple.com
 Aidan Skinner					aidan@velvet.net
 Jiri Smid					smid@suse.cz
 David Smith					dsmith@redhat.com
-Stephen P. Smith				ischis2@home.com
+Stephen P. Smith				ischis2@cox.net
 Jackie Smith Cashion				jsmith@redhat.com
 Michael Snyder					msnyder@redhat.com
 Petr Sorfa					petrs@caldera.com
+Ian Lance Taylor				ian@wasabisystems.com
 Gary Thomas					gthomas@redhat.com
 Jason Thorpe					thorpej@wasabisystems.com
 Tom Tromey					tromey@redhat.com
+D Venkatasubramanian				dvenkat@noida.hcltech.com
 Corinna Vinschen				vinschen@redhat.com
 Keith Walker					keith.walker@arm.com
-Jim Wilson					wilson@redhat.com
+Kris Warkentin					kewarken@qnx.com
+Jim Wilson					wilson@specifixinc.com
 Elena Zannoni					ezannoni@redhat.com
 Eli Zaretskii					eliz@gnu.org
 
@@ -449,6 +416,8 @@ David Taylor (d10v, sparc, utils, defs,
   expression evaluator, language support)	taylor at candd dot org
 J.T. Conklin (dcache, NetBSD, remote)		jtc at redback dot com
 Frank Ch. Eigler (sim)				fche at redhat dot com
+Per Bothner (Java)				per at bothner dot com
+Anthony Green (Java)				green at redhat dot com
 
 
 

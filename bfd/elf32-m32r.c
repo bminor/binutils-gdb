@@ -1,22 +1,22 @@
 /* M32R-specific support for 32-bit ELF.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -43,37 +43,37 @@ static bfd_reloc_status_type m32r_elf_sda16_reloc
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void m32r_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
-boolean _bfd_m32r_elf_section_from_bfd_section
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+bfd_boolean _bfd_m32r_elf_section_from_bfd_section
   PARAMS ((bfd *, asection *, int *));
 void _bfd_m32r_elf_symbol_processing
   PARAMS ((bfd *, asymbol *));
-static boolean m32r_elf_add_symbol_hook
+static bfd_boolean m32r_elf_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
-static boolean m32r_elf_relocate_section
+static bfd_boolean m32r_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 #if 0 /* not yet */
-static boolean m32r_elf_relax_delete_bytes
+static bfd_boolean m32r_elf_relax_delete_bytes
   PARAMS ((bfd *, asection *, bfd_vma, int));
 #endif
 static bfd_reloc_status_type m32r_elf_final_sda_base
   PARAMS ((bfd *, struct bfd_link_info *, const char **, bfd_vma *));
-static boolean m32r_elf_object_p
+static bfd_boolean m32r_elf_object_p
   PARAMS ((bfd *));
 static void m32r_elf_final_write_processing
-  PARAMS ((bfd *, boolean));
-static boolean m32r_elf_set_private_flags
+  PARAMS ((bfd *, bfd_boolean));
+static bfd_boolean m32r_elf_set_private_flags
   PARAMS ((bfd *, flagword));
-static boolean m32r_elf_merge_private_bfd_data
+static bfd_boolean m32r_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
-static boolean m32r_elf_print_private_bfd_data
+static bfd_boolean m32r_elf_print_private_bfd_data
   PARAMS ((bfd *, PTR));
-static boolean m32r_elf_gc_sweep_hook
+static bfd_boolean m32r_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
-static boolean m32r_elf_check_relocs
+static bfd_boolean m32r_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 
@@ -101,60 +101,60 @@ static reloc_howto_type m32r_elf_howto_table[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M32R_NONE",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 16 bit absolute relocation.  */
   HOWTO (R_M32R_16,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 m32r_elf_generic_reloc,/* special_function */
 	 "R_M32R_16",		/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 32 bit absolute relocation.  */
   HOWTO (R_M32R_32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 m32r_elf_generic_reloc,/* special_function */
 	 "R_M32R_32",		/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 24 bit address.  */
   HOWTO (R_M32R_24,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 24,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
 	 m32r_elf_generic_reloc,/* special_function */
 	 "R_M32R_24",		/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffff,		/* src_mask */
 	 0xffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* An PC Relative 10-bit relocation, shifted by 2.
      This reloc is complicated because relocations are relative to pc & -4.
@@ -168,30 +168,30 @@ static reloc_howto_type m32r_elf_howto_table[] =
 	 2,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 10,	                /* bitsize */
-	 true,	                /* pc_relative */
+	 TRUE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 m32r_elf_10_pcrel_reloc, /* special_function */
 	 "R_M32R_10_PCREL",	/* name */
-	 false,	                /* partial_inplace */
+	 FALSE,	                /* partial_inplace */
 	 0xff,		        /* src_mask */
 	 0xff,   		/* dst_mask */
-	 true),			/* pcrel_offset */
+	 TRUE),			/* pcrel_offset */
 
   /* A relative 18 bit relocation, right shifted by 2.  */
   HOWTO (R_M32R_18_PCREL,	/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M32R_18_PCREL",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 true),			/* pcrel_offset */
+	 TRUE),			/* pcrel_offset */
 
   /* A relative 26 bit relocation, right shifted by 2.  */
   /* ??? It's not clear whether this should have partial_inplace set or not.
@@ -202,105 +202,105 @@ static reloc_howto_type m32r_elf_howto_table[] =
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 26,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M32R_26_PCREL",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffffff,		/* src_mask */
 	 0xffffff,		/* dst_mask */
-	 true),			/* pcrel_offset */
+	 TRUE),			/* pcrel_offset */
 
   /* High 16 bits of address when lower 16 is or'd in.  */
   HOWTO (R_M32R_HI16_ULO,	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 m32r_elf_hi16_reloc,	/* special_function */
 	 "R_M32R_HI16_ULO",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* High 16 bits of address when lower 16 is added in.  */
   HOWTO (R_M32R_HI16_SLO,	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 m32r_elf_hi16_reloc,	/* special_function */
 	 "R_M32R_HI16_SLO",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* Lower 16 bits of address.  */
   HOWTO (R_M32R_LO16,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 m32r_elf_lo16_reloc,	/* special_function */
 	 "R_M32R_LO16",		/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* Small data area 16 bits offset.  */
   HOWTO (R_M32R_SDA16,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 m32r_elf_sda16_reloc,	/* special_function */
 	 "R_M32R_SDA16",	/* name */
-	 true,			/* partial_inplace */  /* FIXME: correct? */
+	 TRUE,			/* partial_inplace */  /* FIXME: correct? */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_M32R_GNU_VTINHERIT, /* type */
          0,                     /* rightshift */
          2,                     /* size (0 = byte, 1 = short, 2 = long) */
          0,                     /* bitsize */
-         false,                 /* pc_relative */
+         FALSE,                 /* pc_relative */
          0,                     /* bitpos */
          complain_overflow_dont, /* complain_on_overflow */
          NULL,                  /* special_function */
          "R_M32R_GNU_VTINHERIT", /* name */
-         false,                 /* partial_inplace */
+         FALSE,                 /* partial_inplace */
          0,                     /* src_mask */
          0,                     /* dst_mask */
-         false),                /* pcrel_offset */
+         FALSE),                /* pcrel_offset */
 
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_M32R_GNU_VTENTRY,     /* type */
          0,                     /* rightshift */
          2,                     /* size (0 = byte, 1 = short, 2 = long) */
          0,                     /* bitsize */
-         false,                 /* pc_relative */
+         FALSE,                 /* pc_relative */
          0,                     /* bitpos */
          complain_overflow_dont, /* complain_on_overflow */
          _bfd_elf_rel_vtable_reloc_fn,  /* special_function */
          "R_M32R_GNU_VTENTRY",   /* name */
-         false,                 /* partial_inplace */
+         FALSE,                 /* partial_inplace */
          0,                     /* src_mask */
          0,                     /* dst_mask */
-         false),                /* pcrel_offset */
+         FALSE),                /* pcrel_offset */
 
 };
 
@@ -571,7 +571,7 @@ m32r_elf_lo16_reloc (input_bfd, reloc_entry, symbol, data,
 
   /* Now do the LO16 reloc in the usual way.
      ??? It would be nice to call bfd_elf_generic_reloc here,
-     but we have partial_inplace == TRUE.  bfd_elf_generic_reloc will
+     but we have partial_inplace set.  bfd_elf_generic_reloc will
      pass the handling back to bfd_install_relocation which will install
      a section relative addend which is wrong.  */
   return m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
@@ -609,7 +609,7 @@ m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
 
   /* Now do the reloc in the usual way.
      ??? It would be nice to call bfd_elf_generic_reloc here,
-     but we have partial_inplace == TRUE.  bfd_elf_generic_reloc will
+     but we have partial_inplace set.  bfd_elf_generic_reloc will
      pass the handling back to bfd_install_relocation which will install
      a section relative addend which is wrong.  */
 
@@ -756,7 +756,7 @@ static void
 m32r_info_to_howto_rel (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf32_Internal_Rel *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned int r_type;
 
@@ -768,7 +768,7 @@ m32r_info_to_howto_rel (abfd, cache_ptr, dst)
 /* Given a BFD section, try to locate the corresponding ELF section
    index.  */
 
-boolean
+bfd_boolean
 _bfd_m32r_elf_section_from_bfd_section (abfd, sec, retval)
      bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
@@ -777,9 +777,9 @@ _bfd_m32r_elf_section_from_bfd_section (abfd, sec, retval)
   if (strcmp (bfd_get_section_name (abfd, sec), ".scommon") == 0)
     {
       *retval = SHN_M32R_SCOMMON;
-      return true;
+      return TRUE;
     }
-  return false;
+  return FALSE;
 }
 
 /* M32R ELF uses two common sections.  One is the usual one, and the other
@@ -830,7 +830,7 @@ _bfd_m32r_elf_symbol_processing (abfd, asym)
    We also keep watching for whether we need to create the sdata special
    linker sections.  */
 
-static boolean
+static bfd_boolean
 m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -840,10 +840,10 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      asection **secp;
      bfd_vma *valp;
 {
-  if (! info->relocateable
+  if (! info->relocatable
       && (*namep)[0] == '_' && (*namep)[1] == 'S'
       && strcmp (*namep, "_SDA_BASE_") == 0
-      && info->hash->creator->flavour == bfd_target_elf_flavour)
+      && is_elf_hash_table (info->hash))
     {
       /* This is simpler than using _bfd_elf_create_linker_section
 	 (our needs are simpler than ppc's needs).  Also
@@ -863,13 +863,13 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
 	  s = bfd_make_section_anyway (abfd, ".sdata");
 	  if (s == NULL)
-	    return false;
+	    return FALSE;
 	  bfd_set_section_flags (abfd, s, flags);
 	  bfd_set_section_alignment (abfd, s, 2);
 	}
 
       bh = bfd_link_hash_lookup (info->hash, "_SDA_BASE_",
-				 false, false, false);
+				 FALSE, FALSE, FALSE);
 
       if ((bh == NULL || bh->type == bfd_link_hash_undefined)
 	  && !(_bfd_generic_link_add_one_symbol (info,
@@ -879,10 +879,10 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 						 s,
 						 (bfd_vma) 32768,
 						 (const char *) NULL,
-						 false,
+						 FALSE,
 						 get_elf_backend_data (abfd)->collect,
 						 &bh)))
-	return false;
+	return FALSE;
       h = (struct elf_link_hash_entry *) bh;
       h->type = STT_OBJECT;
     }
@@ -896,14 +896,14 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       break;
     }
 
-  return true;
+  return TRUE;
 }
 
 /* We have to figure out the SDA_BASE value, so that we can adjust the
    symbol value correctly.  We look up the symbol _SDA_BASE_ in the output
    BFD.  If we can't find it, we're stuck.  We cache it in the ELF
    target data.  We don't need to adjust the symbol value for an
-   external symbol if we are producing relocateable output.  */
+   external symbol if we are producing relocatable output.  */
 
 static bfd_reloc_status_type
 m32r_elf_final_sda_base (output_bfd, info, error_message, psb)
@@ -916,7 +916,7 @@ m32r_elf_final_sda_base (output_bfd, info, error_message, psb)
     {
       struct bfd_link_hash_entry *h;
 
-      h = bfd_link_hash_lookup (info->hash, "_SDA_BASE_", false, false, true);
+      h = bfd_link_hash_lookup (info->hash, "_SDA_BASE_", FALSE, FALSE, TRUE);
       if (h != (struct bfd_link_hash_entry *) NULL
 	  && h->type == bfd_link_hash_defined)
 	elf_gp (output_bfd) = (h->u.def.value
@@ -948,7 +948,7 @@ m32r_elf_final_sda_base (output_bfd, info, error_message, psb)
 
    This function is responsible for adjust the section contents as
    necessary, and (if using Rela relocs and generating a
-   relocateable output file) adjusting the reloc addend as
+   relocatable output file) adjusting the reloc addend as
    necessary.
 
    This function does not have to worry about setting the reloc
@@ -962,13 +962,13 @@ m32r_elf_final_sda_base (output_bfd, info, error_message, psb)
    The global hash table entry for the global symbols can be found
    via elf_sym_hashes (input_bfd).
 
-   When generating relocateable output, this function must handle
+   When generating relocatable output, this function must handle
    STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
    going to be the section symbol corresponding to the output
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static boolean
+static bfd_boolean
 m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			   contents, relocs, local_syms, local_sections)
      bfd *output_bfd ATTRIBUTE_UNUSED;
@@ -984,11 +984,11 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
   Elf_Internal_Rela *rel, *relend;
   /* Assume success.  */
-  boolean ret = true;
+  bfd_boolean ret = TRUE;
 
 #if !USE_REL
-  if (info->relocateable)
-    return true;
+  if (info->relocatable)
+    return TRUE;
 #endif
 
   rel = relocs;
@@ -1019,7 +1019,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				 bfd_archive_filename (input_bfd),
 				 (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
-	  ret = false;
+	  ret = FALSE;
 	  continue;
 	}
 
@@ -1031,9 +1031,9 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       r_symndx = ELF32_R_SYM (rel->r_info);
 
 #if USE_REL
-      if (info->relocateable)
+      if (info->relocatable)
 	{
-	  /* This is a relocateable link.  We don't have to change
+	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */
@@ -1107,7 +1107,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      sec = local_sections[r_symndx];
 	      sym_name = "<local symbol>";
 #if !USE_REL
-	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	      addend = rel->r_addend;
 #else
 	      /* FIXME: This won't handle local relocations against SEC_MERGE
@@ -1143,8 +1143,8 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  if (! ((*info->callbacks->undefined_symbol)
 			 (info, h->root.root.string, input_bfd,
-			  input_section, offset, true)))
-		    return false;
+			  input_section, offset, TRUE)))
+		    return FALSE;
 		  relocation = 0;
 		}
 	    }
@@ -1211,7 +1211,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 						 &sda_base);
 		    if (r != bfd_reloc_ok)
 		      {
-			ret = false;
+			ret = FALSE;
 			goto check_reloc;
 		      }
 
@@ -1229,7 +1229,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		       m32r_elf_howto_table[(int) r_type].name,
 		       bfd_get_section_name (abfd, sec));
 		    /*bfd_set_error (bfd_error_bad_value); ??? why? */
-		    ret = false;
+		    ret = FALSE;
 		    continue;
 		  }
 	      }
@@ -1269,14 +1269,14 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (! ((*info->callbacks->reloc_overflow)
 		     (info, name, howto->name, (bfd_vma) 0,
 		      input_bfd, input_section, offset)))
-		return false;
+		return FALSE;
 	      break;
 
 	    case bfd_reloc_undefined:
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, name, input_bfd, input_section,
-		      offset, true)))
-		return false;
+		      offset, TRUE)))
+		return FALSE;
 	      break;
 
 	    case bfd_reloc_outofrange:
@@ -1299,7 +1299,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (!((*info->callbacks->warning)
 		    (info, errmsg, name, input_bfd, input_section,
 		     offset)))
-		return false;
+		return FALSE;
 	      break;
 	    }
 	}
@@ -1331,16 +1331,16 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
    When the chip supports parallel 16 bit insns, things may change.
 */
 
-static boolean
+static bfd_boolean
 m32r_elf_relax_section (abfd, sec, link_info, again)
      bfd *abfd;
      asection *sec;
      struct bfd_link_info *link_info;
-     boolean *again;
+     bfd_boolean *again;
 {
   Elf_Internal_Shdr *symtab_hdr;
   /* The Rela structures are used here because that's what
-     _bfd_elf32_link_read_relocs uses [for convenience - it sets the addend
+     _bfd_elf_link_read_relocs uses [for convenience - it sets the addend
      field to 0].  */
   Elf_Internal_Rela *internal_relocs = NULL;
   Elf_Internal_Rela *irel, *irelend;
@@ -1348,17 +1348,17 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
   Elf_Internal_Sym *isymbuf = NULL;
 
   /* Assume nothing changes.  */
-  *again = false;
+  *again = FALSE;
 
-  /* We don't have to do anything for a relocateable link, if
+  /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocateable
+  if (link_info->relocatable
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0
       || 0 /* FIXME: check SHF_M32R_CAN_RELAX */)
-    return true;
+    return TRUE;
 
   /* If this is the first time we have been called for this section,
      initialize the cooked size.  */
@@ -1368,7 +1368,7 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
   /* Get a copy of the native relocations.  */
-  internal_relocs = (_bfd_elf32_link_read_relocs
+  internal_relocs = (_bfd_elf_link_read_relocs
 		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
@@ -1608,7 +1608,7 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
 
 	  /* That will change things, so we should relax again.
 	     Note that this is not required, and it may be slow.  */
-	  *again = true;
+	  *again = TRUE;
 
 	  continue;
 	}
@@ -1644,7 +1644,7 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
       && elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
-  return true;
+  return TRUE;
 
  error_return:
   if (isymbuf != NULL
@@ -1657,12 +1657,12 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
       && elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
-  return false;
+  return FALSE;
 }
 
 /* Delete some bytes from a section while relaxing.  */
 
-static boolean
+static bfd_boolean
 m32r_elf_relax_delete_bytes (abfd, sec, addr, count)
      bfd *abfd;
      asection *sec;
@@ -1736,7 +1736,7 @@ m32r_elf_relax_delete_bytes (abfd, sec, addr, count)
 	}
     }
 
-  return true;
+  return TRUE;
 }
 
 /* This is a version of bfd_generic_get_relocated_section_contents
@@ -1744,12 +1744,12 @@ m32r_elf_relax_delete_bytes (abfd, sec, addr, count)
 
 static bfd_byte *
 m32r_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
-					 data, relocateable, symbols)
+					 data, relocatable, symbols)
      bfd *output_bfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     boolean relocateable;
+     bfd_boolean relocatable;
      asymbol **symbols;
 {
   Elf_Internal_Shdr *symtab_hdr;
@@ -1762,11 +1762,11 @@ m32r_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 
   /* We only need to handle the case of relaxing, or of having a
      particular set of section contents, specially.  */
-  if (relocateable
+  if (relocatable
       || elf_section_data (input_section)->this_hdr.contents == NULL)
     return bfd_generic_get_relocated_section_contents (output_bfd, link_info,
 						       link_order, data,
-						       relocateable,
+						       relocatable,
 						       symbols);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -1781,9 +1781,9 @@ m32r_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       asection **secpp;
       Elf32_External_Sym *esym, *esymend;
 
-      internal_relocs = (_bfd_elf32_link_read_relocs
+      internal_relocs = (_bfd_elf_link_read_relocs
 			 (input_bfd, input_section, (PTR) NULL,
-			  (Elf_Internal_Rela *) NULL, false));
+			  (Elf_Internal_Rela *) NULL, FALSE));
       if (internal_relocs == NULL)
 	goto error_return;
 
@@ -1854,7 +1854,7 @@ m32r_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 #endif /* #if 0 */
 
 /* Set the right machine number.  */
-static boolean
+static bfd_boolean
 m32r_elf_object_p (abfd)
      bfd *abfd;
 {
@@ -1863,15 +1863,16 @@ m32r_elf_object_p (abfd)
     default:
     case E_M32R_ARCH:   (void) bfd_default_set_arch_mach (abfd, bfd_arch_m32r, bfd_mach_m32r);  break;
     case E_M32RX_ARCH:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_m32r, bfd_mach_m32rx); break;
+    case E_M32R2_ARCH:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_m32r, bfd_mach_m32r2); break;
     }
-  return true;
+  return TRUE;
 }
 
 /* Store the machine number in the flags field.  */
 static void
 m32r_elf_final_write_processing (abfd, linker)
-     bfd *   abfd;
-     boolean linker ATTRIBUTE_UNUSED;
+     bfd *abfd;
+     bfd_boolean linker ATTRIBUTE_UNUSED;
 {
   unsigned long val;
 
@@ -1880,6 +1881,7 @@ m32r_elf_final_write_processing (abfd, linker)
     default:
     case bfd_mach_m32r:  val = E_M32R_ARCH; break;
     case bfd_mach_m32rx: val = E_M32RX_ARCH; break;
+    case bfd_mach_m32r2: val = E_M32R2_ARCH; break;
     }
 
   elf_elfheader (abfd)->e_flags &=~ EF_M32R_ARCH;
@@ -1887,32 +1889,32 @@ m32r_elf_final_write_processing (abfd, linker)
 }
 
 /* Function to keep M32R specific file flags.  */
-static boolean
+static bfd_boolean
 m32r_elf_set_private_flags (abfd, flags)
-     bfd *    abfd;
+     bfd *abfd;
      flagword flags;
 {
   BFD_ASSERT (!elf_flags_init (abfd)
 	      || elf_elfheader (abfd)->e_flags == flags);
 
   elf_elfheader (abfd)->e_flags = flags;
-  elf_flags_init (abfd) = true;
-  return true;
+  elf_flags_init (abfd) = TRUE;
+  return TRUE;
 }
 
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
-static boolean
+static bfd_boolean
 m32r_elf_merge_private_bfd_data (ibfd, obfd)
-     bfd * ibfd;
-     bfd * obfd;
+     bfd *ibfd;
+     bfd *obfd;
 {
   flagword out_flags;
   flagword in_flags;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
+    return TRUE;
 
   in_flags  = elf_elfheader (ibfd)->e_flags;
   out_flags = elf_elfheader (obfd)->e_flags;
@@ -1926,9 +1928,9 @@ m32r_elf_merge_private_bfd_data (ibfd, obfd)
 	 unitialised values, which surprise surprise, correspond
 	 to the default values.  */
       if (bfd_get_arch_info (ibfd)->the_default)
-	return true;
+	return TRUE;
 
-      elf_flags_init (obfd) = true;
+      elf_flags_init (obfd) = TRUE;
       elf_elfheader (obfd)->e_flags = in_flags;
 
       if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
@@ -1937,34 +1939,36 @@ m32r_elf_merge_private_bfd_data (ibfd, obfd)
 	  return bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
 	}
 
-      return true;
+      return TRUE;
     }
 
   /* Check flag compatibility.  */
   if (in_flags == out_flags)
-    return true;
+    return TRUE;
 
   if ((in_flags & EF_M32R_ARCH) != (out_flags & EF_M32R_ARCH))
     {
-      if ((in_flags & EF_M32R_ARCH) != E_M32R_ARCH)
+      if (   ((in_flags  & EF_M32R_ARCH) != E_M32R_ARCH)
+          || ((out_flags & EF_M32R_ARCH) == E_M32R_ARCH)
+          || ((in_flags  & EF_M32R_ARCH) == E_M32R2_ARCH))
 	{
 	  (*_bfd_error_handler)
 	    (_("%s: Instruction set mismatch with previous modules"),
 	     bfd_archive_filename (ibfd));
 
 	  bfd_set_error (bfd_error_bad_value);
-	  return false;
+	  return FALSE;
 	}
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Display the flags field */
-static boolean
+static bfd_boolean
 m32r_elf_print_private_bfd_data (abfd, ptr)
-     bfd *   abfd;
-     PTR     ptr;
+     bfd *abfd;
+     PTR ptr;
 {
   FILE * file = (FILE *) ptr;
 
@@ -1979,11 +1983,12 @@ m32r_elf_print_private_bfd_data (abfd, ptr)
     default:
     case E_M32R_ARCH:  fprintf (file, _(": m32r instructions"));  break;
     case E_M32RX_ARCH: fprintf (file, _(": m32rx instructions")); break;
+    case E_M32R2_ARCH: fprintf (file, _(": m32r2 instructions")); break;
     }
 
   fputc ('\n', file);
 
-  return true;
+  return TRUE;
 }
 
 asection *
@@ -2023,7 +2028,7 @@ m32r_elf_gc_mark_hook (sec, info, rel, h, sym)
   return NULL;
 }
 
-static boolean
+static bfd_boolean
 m32r_elf_gc_sweep_hook (abfd, info, sec, relocs)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
@@ -2031,14 +2036,14 @@ m32r_elf_gc_sweep_hook (abfd, info, sec, relocs)
      const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
   /* we don't use got and plt entries for m32r */
-  return true;
+  return TRUE;
 }
 
 /* Look through the relocs for a section during the first phase.
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */
 
-static boolean
+static bfd_boolean
 m32r_elf_check_relocs (abfd, info, sec, relocs)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -2050,8 +2055,8 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (info->relocateable)
-    return true;
+  if (info->relocatable)
+    return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
@@ -2077,20 +2082,27 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
            Reconstruct it for later use during GC.  */
         case R_M32R_GNU_VTINHERIT:
           if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-            return false;
+            return FALSE;
           break;
 
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_M32R_GNU_VTENTRY:
           if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_offset))
-            return false;
+            return FALSE;
           break;
         }
     }
 
-  return true;
+  return TRUE;
 }
+
+static struct bfd_elf_special_section const m32r_elf_special_sections[]=
+{
+  { ".sdata",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".sbss",    5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { NULL,       0,  0, 0,            0 }
+};
 
 #define ELF_ARCH		bfd_arch_m32r
 #define ELF_MACHINE_CODE	EM_M32R
@@ -2126,5 +2138,6 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
 #define bfd_elf32_bfd_merge_private_bfd_data 	m32r_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		m32r_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	m32r_elf_print_private_bfd_data
+#define elf_backend_special_sections		m32r_elf_special_sections
 
 #include "elf32-target.h"

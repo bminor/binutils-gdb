@@ -1,6 +1,6 @@
 /* TUI display registers in window.
 
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
    Inc.
 
    Contributed by Hewlett-Packard Company.
@@ -22,23 +22,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* FIXME: cagney/2002-02-28: The GDB coding standard indicates that
-   "defs.h" should be included first.  Unfortunatly some systems
-   (currently Debian GNU/Linux) include the <stdbool.h> via <curses.h>
-   and they clash with "bfd.h"'s definiton of true/false.  The correct
-   fix is to remove true/false from "bfd.h", however, until that
-   happens, hack around it by including "config.h" and <curses.h>
-   first.  */
-
-#include "config.h"
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
-
 #include "defs.h"
 #include "tui.h"
 #include "tuiData.h"
@@ -54,6 +37,14 @@
 #include "tuiDataWin.h"
 #include "tuiGeneralWin.h"
 #include "tui-file.h"
+
+#ifdef HAVE_NCURSES_H       
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
 
 /*****************************************
 ** LOCAL DEFINITIONS                    **
@@ -489,7 +480,7 @@ tuiCheckRegisterValues (struct frame_info *frame)
       else
 	{
 	  int i, j;
-	  char rawBuf[MAX_REGISTER_RAW_SIZE];
+	  char rawBuf[MAX_REGISTER_SIZE];
 
 	  for (i = 0;
 	       (i < dataWin->detail.dataDisplayInfo.regsContentCount); i++)
@@ -509,7 +500,7 @@ tuiCheckRegisterValues (struct frame_info *frame)
 		{
                   int size;
 
-                  size = REGISTER_RAW_SIZE (dataElementPtr->itemNo);
+                  size = DEPRECATED_REGISTER_RAW_SIZE (dataElementPtr->itemNo);
 		  for (j = 0; j < size; j++)
 		    ((char *) dataElementPtr->value)[j] = rawBuf[j];
 		  _tuiDisplayRegister (
@@ -638,7 +629,7 @@ _tuiRegisterFormat (char *buf, int bufLen, int regNum,
   stream = tui_sfileopen (bufLen);
   gdb_stdout = stream;
   cleanups = make_cleanup (tui_restore_gdbout, (void*) old_stdout);
-  gdbarch_print_registers_info (current_gdbarch, stream, selected_frame,
+  gdbarch_print_registers_info (current_gdbarch, stream, deprecated_selected_frame,
                                 regNum, 1);
 
   /* Save formatted output in the buffer.  */
@@ -679,7 +670,7 @@ _tuiSetGeneralRegsContent (int refreshValuesOnly)
 {
   return (_tuiSetRegsContent (0,
 			      NUM_GENERAL_REGS - 1,
-			      selected_frame,
+			      deprecated_selected_frame,
 			      TUI_GENERAL_REGS,
 			      refreshValuesOnly));
 
@@ -705,7 +696,7 @@ _tuiSetSpecialRegsContent (int refreshValuesOnly)
   endRegNum = FP0_REGNUM - 1;
   ret = _tuiSetRegsContent (START_SPECIAL_REGS,
 			    endRegNum,
-			    selected_frame,
+			    deprecated_selected_frame,
 			    TUI_SPECIAL_REGS,
 			    refreshValuesOnly);
 
@@ -725,7 +716,7 @@ _tuiSetGeneralAndSpecialRegsContent (int refreshValuesOnly)
 
   endRegNum = FP0_REGNUM - 1;
   ret = _tuiSetRegsContent (
-	 0, endRegNum, selected_frame, TUI_SPECIAL_REGS, refreshValuesOnly);
+	 0, endRegNum, deprecated_selected_frame, TUI_SPECIAL_REGS, refreshValuesOnly);
 
   return ret;
 }				/* _tuiSetGeneralAndSpecialRegsContent */
@@ -743,7 +734,7 @@ _tuiSetFloatRegsContent (TuiRegisterDisplayType dpyType, int refreshValuesOnly)
   startRegNum = FP0_REGNUM;
   ret = _tuiSetRegsContent (startRegNum,
 			    NUM_REGS - 1,
-			    selected_frame,
+			    deprecated_selected_frame,
 			    dpyType,
 			    refreshValuesOnly);
 
@@ -766,13 +757,13 @@ _tuiRegValueHasChanged (TuiDataElementPtr dataElement,
   if (dataElement->itemNo != UNDEFINED_ITEM &&
       _tuiRegisterName (dataElement->itemNo) != (char *) NULL)
     {
-      char rawBuf[MAX_REGISTER_RAW_SIZE];
+      char rawBuf[MAX_REGISTER_SIZE];
       int i;
 
       if (_tuiGetRegisterRawValue (
 			 dataElement->itemNo, rawBuf, frame) == TUI_SUCCESS)
 	{
-          int size = REGISTER_RAW_SIZE (dataElement->itemNo);
+          int size = DEPRECATED_REGISTER_RAW_SIZE (dataElement->itemNo);
           
 	  for (i = 0; (i < size && !hasChanged); i++)
 	    hasChanged = (((char *) dataElement->value)[i] != rawBuf[i]);
@@ -799,10 +790,10 @@ _tuiGetRegisterRawValue (int regNum, char *regValue, struct frame_info *frame)
 
   if (target_has_registers)
     {
-      int opt;
-      
-      get_saved_register (regValue, &opt, (CORE_ADDR*) NULL, frame,
-			  regNum, (enum lval_type*) NULL);
+      get_frame_register (frame, regNum, regValue);
+      /* NOTE: cagney/2003-03-13: This is bogus.  It is refering to
+         the register cache and not the frame which could have pulled
+         the register value off the stack.  */
       if (register_cached (regNum) >= 0)
 	ret = TUI_SUCCESS;
     }
@@ -830,7 +821,7 @@ _tuiSetRegisterElement (int regNum, struct frame_info *frame,
 	  dataElement->highlight = FALSE;
 	}
       if (dataElement->value == (Opaque) NULL)
-	dataElement->value = (Opaque) xmalloc (MAX_REGISTER_RAW_SIZE);
+	dataElement->value = (Opaque) xmalloc (MAX_REGISTER_SIZE);
       if (dataElement->value != (Opaque) NULL)
 	_tuiGetRegisterRawValue (regNum, dataElement->value, frame);
     }

@@ -1,6 +1,6 @@
 /* List lines of source files for GDB, the GNU debugger.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -44,6 +44,7 @@
 #include "filenames.h"		/* for DOSish file names */
 #include "completer.h"
 #include "ui-out.h"
+#include <readline/readline.h>
 
 #ifdef CRLF_SOURCE_FILES
 
@@ -218,7 +219,7 @@ clear_current_source_symtab_and_line (void)
    before we need to would make things slower than necessary.  */
 
 void
-select_source_symtab (register struct symtab *s)
+select_source_symtab (struct symtab *s)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -238,7 +239,7 @@ select_source_symtab (register struct symtab *s)
 
   /* Make the default place to list be the function `main'
      if one exists.  */
-  if (lookup_symbol (main_name (), 0, VAR_NAMESPACE, 0, NULL))
+  if (lookup_symbol (main_name (), 0, VAR_DOMAIN, 0, NULL))
     {
       sals = decode_line_spec (main_name (), 1);
       sal = sals.sals[0];
@@ -259,7 +260,7 @@ select_source_symtab (register struct symtab *s)
 	{
 	  char *name = s->filename;
 	  int len = strlen (name);
-	  if (!(len > 2 && (STREQ (&name[len - 2], ".h"))))
+	  if (!(len > 2 && (DEPRECATED_STREQ (&name[len - 2], ".h"))))
 	    {
 	      current_source_symtab = s;
 	    }
@@ -276,7 +277,7 @@ select_source_symtab (register struct symtab *s)
 	{
 	  char *name = ps->filename;
 	  int len = strlen (name);
-	  if (!(len > 2 && (STREQ (&name[len - 2], ".h"))))
+	  if (!(len > 2 && (DEPRECATED_STREQ (&name[len - 2], ".h"))))
 	    {
 	      cs_pst = ps;
 	    }
@@ -316,8 +317,8 @@ show_directories (char *ignore, int from_tty)
 void
 forget_cached_source_info (void)
 {
-  register struct symtab *s;
-  register struct objfile *objfile;
+  struct symtab *s;
+  struct objfile *objfile;
   struct partial_symtab *pst;
 
   for (objfile = object_files; objfile != NULL; objfile = objfile->next)
@@ -357,6 +358,12 @@ init_source_path (void)
   forget_cached_source_info ();
 }
 
+void
+init_last_source_visited (void)
+{
+  last_source_visited = NULL;
+}
+
 /* Add zero or more directories to the front of the source path.  */
 
 void
@@ -387,6 +394,18 @@ directory_command (char *dirname, int from_tty)
 void
 mod_path (char *dirname, char **which_path)
 {
+  add_path (dirname, which_path, 1);
+}
+
+/* Workhorse of mod_path.  Takes an extra argument to determine
+   if dirname should be parsed for separators that indicate multiple
+   directories.  This allows for interfaces that pre-parse the dirname
+   and allow specification of traditional separator characters such
+   as space or tab. */
+
+void
+add_path (char *dirname, char **which_path, int parse_separators)
+{
   char *old = *which_path;
   int prefix = 0;
 
@@ -399,13 +418,20 @@ mod_path (char *dirname, char **which_path)
   do
     {
       char *name = dirname;
-      register char *p;
+      char *p;
       struct stat st;
 
       {
-	char *separator = strchr (name, DIRNAME_SEPARATOR);
-	char *space = strchr (name, ' ');
-	char *tab = strchr (name, '\t');
+	char *separator = NULL;
+	char *space = NULL;
+	char *tab = NULL;
+
+	if (parse_separators)
+	  {
+	    separator = strchr (name, DIRNAME_SEPARATOR);
+	    space = strchr (name, ' ');
+	    tab = strchr (name, '\t');
+	  }
 
 	if (separator == 0 && space == 0 && tab == 0)
 	  p = dirname = name + strlen (name);
@@ -500,7 +526,7 @@ mod_path (char *dirname, char **which_path)
 
     append:
       {
-	register unsigned int len = strlen (name);
+	unsigned int len = strlen (name);
 
 	p = *which_path;
 	while (1)
@@ -536,7 +562,8 @@ mod_path (char *dirname, char **which_path)
 	    tinybuf[0] = DIRNAME_SEPARATOR;
 	    tinybuf[1] = '\0';
 
-	    /* If we have already tacked on a name(s) in this command,                     be sure they stay on the front as we tack on some more.  */
+	    /* If we have already tacked on a name(s) in this command, be sure they stay 
+	       on the front as we tack on some more.  */
 	    if (prefix)
 	      {
 		char *temp, c;
@@ -567,7 +594,7 @@ mod_path (char *dirname, char **which_path)
 static void
 source_info (char *ignore, int from_tty)
 {
-  register struct symtab *s = current_source_symtab;
+  struct symtab *s = current_source_symtab;
 
   if (!s)
     {
@@ -633,11 +660,11 @@ openp (const char *path, int try_cwd_first, const char *string,
        int mode, int prot,
        char **filename_opened)
 {
-  register int fd;
-  register char *filename;
+  int fd;
+  char *filename;
   const char *p;
   const char *p1;
-  register int len;
+  int len;
   int alloclen;
 
   if (!path)
@@ -647,14 +674,24 @@ openp (const char *path, int try_cwd_first, const char *string,
   mode |= O_BINARY;
 #endif
 
-  if ((try_cwd_first || IS_ABSOLUTE_PATH (string)) && is_regular_file (string))
+  if (try_cwd_first || IS_ABSOLUTE_PATH (string))
     {
       int i;
-      filename = alloca (strlen (string) + 1);
-      strcpy (filename, string);
-      fd = open (filename, mode, prot);
-      if (fd >= 0)
-	goto done;
+
+      if (is_regular_file (string))
+	{
+	  filename = alloca (strlen (string) + 1);
+	  strcpy (filename, string);
+	  fd = open (filename, mode, prot);
+	  if (fd >= 0)
+	    goto done;
+	}
+      else
+	{
+	  filename = NULL;
+	  fd = -1;
+	}
+
       for (i = 0; string[i]; i++)
 	if (IS_DIR_SEPARATOR (string[i]))
 	  goto done;
@@ -870,7 +907,7 @@ void
 find_source_lines (struct symtab *s, int desc)
 {
   struct stat st;
-  register char *data, *p, *end;
+  char *data, *p, *end;
   int nlines = 0;
   int lines_allocated = 1000;
   int *line_charpos;
@@ -982,10 +1019,10 @@ source_line_charpos (struct symtab *s, int line)
 /* Return the line number of character position POS in symtab S.  */
 
 int
-source_charpos_line (register struct symtab *s, register int chr)
+source_charpos_line (struct symtab *s, int chr)
 {
-  register int line = 0;
-  register int *lnp;
+  int line = 0;
+  int *lnp;
 
   if (s == 0 || s->line_charpos == 0)
     return 0;
@@ -1012,7 +1049,7 @@ source_charpos_line (register struct symtab *s, register int chr)
 static int
 get_filename_and_charpos (struct symtab *s, char **fullname)
 {
-  register int desc, linenums_changed = 0;
+  int desc, linenums_changed = 0;
 
   desc = open_source_file (s);
   if (desc < 0)
@@ -1070,9 +1107,9 @@ static void print_source_lines_base (struct symtab *s, int line, int stopline,
 static void
 print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 {
-  register int c;
-  register int desc;
-  register FILE *stream;
+  int c;
+  int desc;
+  FILE *stream;
   int nlines = stopline - line;
 
   /* Regardless of whether we can open the file, set current_source_symtab. */
@@ -1310,13 +1347,12 @@ line_info (char *arg, int from_tty)
 
 /* Commands to search the source file for a regexp.  */
 
-/* ARGSUSED */
 static void
 forward_search_command (char *regex, int from_tty)
 {
-  register int c;
-  register int desc;
-  register FILE *stream;
+  int c;
+  int desc;
+  FILE *stream;
   int line;
   char *msg;
 
@@ -1324,7 +1360,7 @@ forward_search_command (char *regex, int from_tty)
 
   msg = (char *) re_comp (regex);
   if (msg)
-    error (msg);
+    error ("%s", msg);
 
   if (current_source_symtab == 0)
     select_source_symtab (0);
@@ -1353,7 +1389,7 @@ forward_search_command (char *regex, int from_tty)
   while (1)
     {
       static char *buf = NULL;
-      register char *p;
+      char *p;
       int cursize, newsize;
 
       cursize = 256;
@@ -1406,13 +1442,12 @@ forward_search_command (char *regex, int from_tty)
   fclose (stream);
 }
 
-/* ARGSUSED */
 static void
 reverse_search_command (char *regex, int from_tty)
 {
-  register int c;
-  register int desc;
-  register FILE *stream;
+  int c;
+  int desc;
+  FILE *stream;
   int line;
   char *msg;
 
@@ -1420,7 +1455,7 @@ reverse_search_command (char *regex, int from_tty)
 
   msg = (char *) re_comp (regex);
   if (msg)
-    error (msg);
+    error ("%s", msg);
 
   if (current_source_symtab == 0)
     select_source_symtab (0);
@@ -1450,7 +1485,7 @@ reverse_search_command (char *regex, int from_tty)
     {
 /* FIXME!!!  We walk right off the end of buf if we get a long line!!! */
       char buf[4096];		/* Should be reasonable??? */
-      register char *p = buf;
+      char *p = buf;
 
       c = getc (stream);
       if (c == EOF)

@@ -1,3 +1,136 @@
+2003-12-11  Dhananjay Deshpande  <dhananjayd@kpitcummins.com>
+
+        * compile.c (set_h8300h): Initialize globals to zero.
+
+2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
+
+	* compile.c (h8300_normal_mode): New.
+	(SP): Handle normal mode.
+	(bitfrom): Use normal mode flag to return suitable value.
+	(lvalue): Use normal mode flag to return command line location.
+	(decode): Decode instruction correctly for normal mode.
+	(init_pointers): Initialise memory correctly for normal mode.
+	(sim_resume): Handle cases for normal mode using h8300_normal_mode
+	flag.
+	(sim_store_register): Handle 2 byte PC for normal mode.
+	(sim_fetch_register): Handle 2 byte PC for normal mode.
+	(set_h8300h): Set normal mode flag as per architechture.
+	(sim_load): Allocate 64K for normal mode instead of bigger memory.
+
+2003-07-18  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (decode): Enhancements for mova.
+	Initialize cst, reg, and rdisp inside the loop, for each
+	new instruction.  Defer correction of the disp2 values until
+	later, and then adjust them by the size of the first operand,
+	rather than the size of the instruction.
+	(sim_resume): For mova, adjust the size of the second operand
+	according to the type of the first operand (INDEXB vs. INDEXW).
+	In cases where there is only one operand, the other two must
+	both be composed on the fly.
+
+2003-07-22  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_resume): Revert 6-24 change, it does not
+	work with gdb breakpoints.
+
+2003-07-17  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_resume): Handle shll reg, reg and shlr reg, reg.
+	(decode): IMM16 is always zero-extended.
+
+2003-06-24  Michael Snyder  <msnyder@redhat.com>
+
+	* sim-main.h (SIM_WIFSTOPPED, SIM_WSTOPSIG): Define.
+	* compile.c (sim_resume): Use the above to return stop signal.
+
+2003-06-18  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c: Replace "Hitachi" with "Renesas".
+	(decode): Distinguish AV_H8S from AV_H8H.
+	(sim_resume): H8SX can use any register for TAS.
+	(decode): Add support for VECIND.
+	(sim_resume): Implement rte/l and rts/l.
+	(GETSR): New macro (actually old macro reincarnated).
+	(decode): Add handling for IMM2.
+	(sim_resume): Drop extra block around jmp, jsr, rts.
+	Add handling for trapa and rte.
+	For divxu.b, change 0xffff mask to 0xff.
+	(set_h8300h): Add bfd_mach_h8300sxn machine.
+
+2003-06-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sim-main.h (enum h8_regnum): Turn around order of MACH, MACL
+	and SBR, VBR.
+
+2003-06-05  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_fetch_register): Handle SBR, VBR, MACH, MACL.
+	(sim_store_register): Ditto.
+
+2003-06-04  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_info): Fix typo in output.
+
+	* compile.c (set_h8300h): Replace 'flag' arguments
+	with a bfd_machine argument, and decode it inline.
+	Check for bfd_mach_h8300hn and bfd_mach_h8300sn.
+
+2003-06-03  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c: Add h8300sx insns and addressing modes.
+	* sim-main.h: Replaces h8300/inst.h.
+	* Makefile.in: Tweak to bring in some sim/common stuff.
+
+2003-04-13  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_resume): Implement 'daa' and 'das' instructions.
+
+2003-03-20  D.Venkatasubramanian  <dvenkat@noida.hcltech.com>
+
+	* compile.c (cmdline_location): Added function to 
+	return the location of 8-bit (256 locations) where the
+	Command Line arguments would be stored.
+	(decode): Added a TRAP to 0xcc for Commandline 
+	processing using pseudo opcode O_SYS_CMDLINE.
+	(sim_resume): Added handling of O_SYS_CMDLINE Trap.
+	(sim_create_inferior): Setting a pointer to 
+	Commandline Args array.
+	* inst.h: Added a new variable ptr_command_line for
+	storing pointer to Commandline array.
+
+2003-03-14  D.Venkatasubramanian <dvenkat@noida.hcltech.com>
+
+	* compile.c (decode): Added code for some more magic traps.
+	* compile.c (sim_resume): Added support for File I/O system
+	calls through callback to host_system.
+	System calls provided support for :
+	open, read, write, lseek, close, stat, fstat
+	Only basic support for stat and fstat.
+
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* compile.c (sim_open, sim_create_inferior): Rename _bfd to bfd.
+
+2003-02-05  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* compile.c (init_pointers): Abort if wreg never gets initialized.
+	(sim_resume): Fix the handling of exts.w and extu.w.
+
+2003-01-31  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* compile.c (sim_resume): Fix the handling of bxor.
+
+2003-01-16  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c: Change K&R function definitions to ISO.
+	(fetch): Make static, and eliminate unused parameter 'n'.
+
+2002-12-26  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* compile.c: Fix formatting.
+	* inst.h: Likewise.
+
 2002-07-29  Andrey Volkov  <avolkov@transas.com>
 
  	* compile.c: Include "gdb/sim-h8300.h"

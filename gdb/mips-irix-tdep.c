@@ -90,6 +90,6 @@ _initialize_mips_irix_tdep (void)
 				  bfd_target_elf_flavour,
 				  mips_irix_elf_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_mips, GDB_OSABI_IRIX,
+  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_IRIX,
 			  mips_irix_init_abi);
 }

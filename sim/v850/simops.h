@@ -17,7 +17,6 @@ int OP_180 (void);
 int OP_E0 (void);
 int OP_2E0 (void);
 int OP_6E0 (void);
-int OP_40 (void);
 int OP_1E0 (void);
 int OP_260 (void);
 int OP_7E0 (void);

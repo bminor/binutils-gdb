@@ -1,7 +1,7 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1997, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,14 +31,20 @@
 #include "objfiles.h"
 #include "regcache.h"
 #include "value.h"
+#include "osabi.h"
 
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
 
-/* The following two instructions are used in the signal trampoline
-   code on GNU/Linux PPC.  */
-#define INSTR_LI_R0_0x7777	0x38007777
-#define INSTR_SC		0x44000002
+/* The following instructions are used in the signal trampoline code
+   on GNU/Linux PPC. The kernel used to use magic syscalls 0x6666 and
+   0x7777 but now uses the sigreturn syscalls.  We check for both.  */
+#define INSTR_LI_R0_0x6666		0x38006666
+#define INSTR_LI_R0_0x7777		0x38007777
+#define INSTR_LI_R0_NR_sigreturn	0x38000077
+#define INSTR_LI_R0_NR_rt_sigreturn	0x380000AC
+
+#define INSTR_SC			0x44000002
 
 /* Since the *-tdep.c files are platform independent (i.e, they may be
    used to build cross platform debuggers), we can't include system
@@ -143,10 +149,15 @@ static int ppc_linux_at_sigtramp_return_path (CORE_ADDR pc);
    behavior is ever fixed.)
 
    PC_IN_SIGTRAMP is called from blockframe.c as well in order to set
-   the signal_handler_caller flag.  Because of our strange definition
-   of in_sigtramp below, we can't rely on signal_handler_caller
+   the frame's type (if a SIGTRAMP_FRAME).  Because of our strange
+   definition of in_sigtramp below, we can't rely on the frame's type
    getting set correctly from within blockframe.c.  This is why we
-   take pains to set it in init_extra_frame_info().  */
+   take pains to set it in init_extra_frame_info().
+
+   NOTE: cagney/2002-11-10: I suspect the real problem here is that
+   the get_prev_frame() only initializes the frame's type after the
+   call to INIT_FRAME_INFO.  get_prev_frame() should be fixed, this
+   code shouldn't be working its way around a bug :-(.  */
 
 int
 ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
@@ -177,6 +188,21 @@ ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
   return (pc == handler || pc == handler + 4);
 }
 
+static int
+insn_is_sigreturn (unsigned long pcinsn)
+{
+  switch(pcinsn)
+    {
+    case INSTR_LI_R0_0x6666:
+    case INSTR_LI_R0_0x7777:
+    case INSTR_LI_R0_NR_sigreturn:
+    case INSTR_LI_R0_NR_rt_sigreturn:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
 /*
  * The signal handler trampoline is on the stack and consists of exactly
  * two instructions.  The easiest and most accurate way of determining
@@ -196,14 +222,14 @@ ppc_linux_at_sigtramp_return_path (CORE_ADDR pc)
   pcinsn = extract_unsigned_integer (buf + 4, 4);
 
   return (
-	   (pcinsn == INSTR_LI_R0_0x7777
+	   (insn_is_sigreturn (pcinsn)
 	    && extract_unsigned_integer (buf + 8, 4) == INSTR_SC)
 	   ||
 	   (pcinsn == INSTR_SC
-	    && extract_unsigned_integer (buf, 4) == INSTR_LI_R0_0x7777));
+	    && insn_is_sigreturn (extract_unsigned_integer (buf, 4))));
 }
 
-CORE_ADDR
+static CORE_ADDR
 ppc_linux_skip_trampoline_code (CORE_ADDR pc)
 {
   char buf[4];
@@ -269,7 +295,7 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
   /* Get address of the relocation entry (Elf32_Rela) */
   if (target_read_memory (plt_table + reloc_index, buf, 4) != 0)
     return 0;
-  reloc = extract_address (buf, 4);
+  reloc = extract_unsigned_integer (buf, 4);
 
   sect = find_pc_section (reloc);
   if (!sect)
@@ -305,7 +331,7 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
   /* This might not work right if we have multiple symbols with the
      same name; the only way to really get it right is to perform
      the same sort of lookup as the dynamic linker. */
-  msymbol = lookup_minimal_symbol_text (symname, NULL, NULL);
+  msymbol = lookup_minimal_symbol_text (symname, NULL);
   if (!msymbol)
     return 0;
 
@@ -318,17 +344,20 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
 CORE_ADDR
 ppc_linux_frame_saved_pc (struct frame_info *fi)
 {
-  if (fi->signal_handler_caller)
+  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     {
       CORE_ADDR regs_addr =
-	read_memory_integer (fi->frame + PPC_LINUX_REGS_PTR_OFFSET, 4);
+	read_memory_integer (get_frame_base (fi)
+			     + PPC_LINUX_REGS_PTR_OFFSET, 4);
       /* return the NIP in the regs array */
       return read_memory_integer (regs_addr + 4 * PPC_LINUX_PT_NIP, 4);
     }
-  else if (fi->next && fi->next->signal_handler_caller)
+  else if (get_next_frame (fi)
+	   && (get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
     {
       CORE_ADDR regs_addr =
-	read_memory_integer (fi->next->frame + PPC_LINUX_REGS_PTR_OFFSET, 4);
+	read_memory_integer (get_frame_base (get_next_frame (fi))
+			     + PPC_LINUX_REGS_PTR_OFFSET, 4);
       /* return LNK in the regs array */
       return read_memory_integer (regs_addr + 4 * PPC_LINUX_PT_LNK, 4);
     }
@@ -341,15 +370,17 @@ ppc_linux_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   rs6000_init_extra_frame_info (fromleaf, fi);
 
-  if (fi->next != 0)
+  if (get_next_frame (fi) != 0)
     {
       /* We're called from get_prev_frame_info; check to see if
          this is a signal frame by looking to see if the pc points
          at trampoline code */
-      if (ppc_linux_at_sigtramp_return_path (fi->pc))
-	fi->signal_handler_caller = 1;
+      if (ppc_linux_at_sigtramp_return_path (get_frame_pc (fi)))
+	deprecated_set_frame_type (fi, SIGTRAMP_FRAME);
       else
-	fi->signal_handler_caller = 0;
+	/* FIXME: cagney/2002-11-10: Is this double bogus?  What
+           happens if the frame has previously been marked as a dummy?  */
+	deprecated_set_frame_type (fi, NORMAL_FRAME);
     }
 }
 
@@ -358,7 +389,7 @@ ppc_linux_frameless_function_invocation (struct frame_info *fi)
 {
   /* We'll find the wrong thing if we let 
      rs6000_frameless_function_invocation () search for a signal trampoline */
-  if (ppc_linux_at_sigtramp_return_path (fi->pc))
+  if (ppc_linux_at_sigtramp_return_path (get_frame_pc (fi)))
     return 0;
   else
     return rs6000_frameless_function_invocation (fi);
@@ -367,35 +398,36 @@ ppc_linux_frameless_function_invocation (struct frame_info *fi)
 void
 ppc_linux_frame_init_saved_regs (struct frame_info *fi)
 {
-  if (fi->signal_handler_caller)
+  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     {
       CORE_ADDR regs_addr;
       int i;
-      if (fi->saved_regs)
+      if (deprecated_get_frame_saved_regs (fi))
 	return;
 
       frame_saved_regs_zalloc (fi);
 
       regs_addr =
-	read_memory_integer (fi->frame + PPC_LINUX_REGS_PTR_OFFSET, 4);
-      fi->saved_regs[PC_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_NIP;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_ps_regnum] =
+	read_memory_integer (get_frame_base (fi)
+			     + PPC_LINUX_REGS_PTR_OFFSET, 4);
+      deprecated_get_frame_saved_regs (fi)[PC_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_NIP;
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ps_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_MSR;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_cr_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_cr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_CCR;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_lr_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_lr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_LNK;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_CTR;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_xer_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_xer_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_XER;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_mq_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_mq_regnum] =
 	regs_addr + 4 * PPC_LINUX_PT_MQ;
       for (i = 0; i < 32; i++)
-	fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + i] =
+	deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + i] =
 	  regs_addr + 4 * PPC_LINUX_PT_R0 + 4 * i;
       for (i = 0; i < 32; i++)
-	fi->saved_regs[FP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_FPR0 + 8 * i;
+	deprecated_get_frame_saved_regs (fi)[FP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_FPR0 + 8 * i;
     }
   else
     rs6000_frame_init_saved_regs (fi);
@@ -405,8 +437,8 @@ CORE_ADDR
 ppc_linux_frame_chain (struct frame_info *thisframe)
 {
   /* Kernel properly constructs the frame chain for the handler */
-  if (thisframe->signal_handler_caller)
-    return read_memory_integer ((thisframe)->frame, 4);
+  if ((get_frame_type (thisframe) == SIGTRAMP_FRAME))
+    return read_memory_integer (get_frame_base (thisframe), 4);
   else
     return rs6000_frame_chain (thisframe);
 }
@@ -559,6 +591,26 @@ ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
   return val;
 }
 
+/* For historic reasons, PPC 32 GNU/Linux follows PowerOpen rather
+   than the 32 bit SYSV R4 ABI structure return convention - all
+   structures, no matter their size, are put in memory.  Vectors,
+   which were added later, do get returned in a register though.  */
+
+static enum return_value_convention
+ppc_linux_return_value (struct gdbarch *gdbarch, struct type *valtype,
+			struct regcache *regcache, void *readbuf,
+			const void *writebuf)
+{  
+  if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+       || TYPE_CODE (valtype) == TYPE_CODE_UNION)
+      && !((TYPE_LENGTH (valtype) == 16 || TYPE_LENGTH (valtype) == 8)
+	   && TYPE_VECTOR (valtype)))
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else
+    return ppc_sysv_abi_return_value (gdbarch, valtype, regcache, readbuf,
+				      writebuf);
+}
+
 /* Fetch (and possibly build) an appropriate link_map_offsets
    structure for GNU/Linux PPC targets using the struct offsets
    defined in link.h (but without actual reference to that file).
@@ -599,6 +651,306 @@ ppc_linux_svr4_fetch_link_map_offsets (void)
 
   return lmp;
 }
+
+
+/* Macros for matching instructions.  Note that, since all the
+   operands are masked off before they're or-ed into the instruction,
+   you can use -1 to make masks.  */
+
+#define insn_d(opcd, rts, ra, d)                \
+  ((((opcd) & 0x3f) << 26)                      \
+   | (((rts) & 0x1f) << 21)                     \
+   | (((ra) & 0x1f) << 16)                      \
+   | ((d) & 0xffff))
+
+#define insn_ds(opcd, rts, ra, d, xo)           \
+  ((((opcd) & 0x3f) << 26)                      \
+   | (((rts) & 0x1f) << 21)                     \
+   | (((ra) & 0x1f) << 16)                      \
+   | ((d) & 0xfffc)                             \
+   | ((xo) & 0x3))
+
+#define insn_xfx(opcd, rts, spr, xo)            \
+  ((((opcd) & 0x3f) << 26)                      \
+   | (((rts) & 0x1f) << 21)                     \
+   | (((spr) & 0x1f) << 16)                     \
+   | (((spr) & 0x3e0) << 6)                     \
+   | (((xo) & 0x3ff) << 1))
+
+/* Read a PPC instruction from memory.  PPC instructions are always
+   big-endian, no matter what endianness the program is running in, so
+   we can't use read_memory_integer or one of its friends here.  */
+static unsigned int
+read_insn (CORE_ADDR pc)
+{
+  unsigned char buf[4];
+
+  read_memory (pc, buf, 4);
+  return (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
+}
+
+
+/* An instruction to match.  */
+struct insn_pattern
+{
+  unsigned int mask;            /* mask the insn with this... */
+  unsigned int data;            /* ...and see if it matches this. */
+  int optional;                 /* If non-zero, this insn may be absent.  */
+};
+
+/* Return non-zero if the instructions at PC match the series
+   described in PATTERN, or zero otherwise.  PATTERN is an array of
+   'struct insn_pattern' objects, terminated by an entry whose mask is
+   zero.
+
+   When the match is successful, fill INSN[i] with what PATTERN[i]
+   matched.  If PATTERN[i] is optional, and the instruction wasn't
+   present, set INSN[i] to 0 (which is not a valid PPC instruction).
+   INSN should have as many elements as PATTERN.  Note that, if
+   PATTERN contains optional instructions which aren't present in
+   memory, then INSN will have holes, so INSN[i] isn't necessarily the
+   i'th instruction in memory.  */
+static int
+insns_match_pattern (CORE_ADDR pc,
+                     struct insn_pattern *pattern,
+                     unsigned int *insn)
+{
+  int i;
+
+  for (i = 0; pattern[i].mask; i++)
+    {
+      insn[i] = read_insn (pc);
+      if ((insn[i] & pattern[i].mask) == pattern[i].data)
+        pc += 4;
+      else if (pattern[i].optional)
+        insn[i] = 0;
+      else
+        return 0;
+    }
+
+  return 1;
+}
+
+
+/* Return the 'd' field of the d-form instruction INSN, properly
+   sign-extended.  */
+static CORE_ADDR
+insn_d_field (unsigned int insn)
+{
+  return ((((CORE_ADDR) insn & 0xffff) ^ 0x8000) - 0x8000);
+}
+
+
+/* Return the 'ds' field of the ds-form instruction INSN, with the two
+   zero bits concatenated at the right, and properly
+   sign-extended.  */
+static CORE_ADDR
+insn_ds_field (unsigned int insn)
+{
+  return ((((CORE_ADDR) insn & 0xfffc) ^ 0x8000) - 0x8000);
+}
+
+
+/* If DESC is the address of a 64-bit PowerPC GNU/Linux function
+   descriptor, return the descriptor's entry point.  */
+static CORE_ADDR
+ppc64_desc_entry_point (CORE_ADDR desc)
+{
+  /* The first word of the descriptor is the entry point.  */
+  return (CORE_ADDR) read_memory_unsigned_integer (desc, 8);
+}
+
+
+/* Pattern for the standard linkage function.  These are built by
+   build_plt_stub in elf64-ppc.c, whose GLINK argument is always
+   zero.  */
+static struct insn_pattern ppc64_standard_linkage[] =
+  {
+    /* addis r12, r2, <any> */
+    { insn_d (-1, -1, -1, 0), insn_d (15, 12, 2, 0), 0 },
+
+    /* std r2, 40(r1) */
+    { -1, insn_ds (62, 2, 1, 40, 0), 0 },
+
+    /* ld r11, <any>(r12) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 0 },
+
+    /* addis r12, r12, 1 <optional> */
+    { insn_d (-1, -1, -1, -1), insn_d (15, 12, 2, 1), 1 },
+
+    /* ld r2, <any>(r12) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 2, 12, 0, 0), 0 },
+
+    /* addis r12, r12, 1 <optional> */
+    { insn_d (-1, -1, -1, -1), insn_d (15, 12, 2, 1), 1 },
+
+    /* mtctr r11 */
+    { insn_xfx (-1, -1, -1, -1), insn_xfx (31, 11, 9, 467),
+      0 },
+
+    /* ld r11, <any>(r12) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 0 },
+      
+    /* bctr */
+    { -1, 0x4e800420, 0 },
+
+    { 0, 0, 0 }
+  };
+#define PPC64_STANDARD_LINKAGE_LEN \
+  (sizeof (ppc64_standard_linkage) / sizeof (ppc64_standard_linkage[0]))
+
+
+/* Recognize a 64-bit PowerPC GNU/Linux linkage function --- what GDB
+   calls a "solib trampoline".  */
+static int
+ppc64_in_solib_call_trampoline (CORE_ADDR pc, char *name)
+{
+  /* Detecting solib call trampolines on PPC64 GNU/Linux is a pain.
+
+     It's not specifically solib call trampolines that are the issue.
+     Any call from one function to another function that uses a
+     different TOC requires a trampoline, to save the caller's TOC
+     pointer and then load the callee's TOC.  An executable or shared
+     library may have more than one TOC, so even intra-object calls
+     may require a trampoline.  Since executable and shared libraries
+     will all have their own distinct TOCs, every inter-object call is
+     also an inter-TOC call, and requires a trampoline --- so "solib
+     call trampolines" are just a special case.
+
+     The 64-bit PowerPC GNU/Linux ABI calls these call trampolines
+     "linkage functions".  Since they need to be near the functions
+     that call them, they all appear in .text, not in any special
+     section.  The .plt section just contains an array of function
+     descriptors, from which the linkage functions load the callee's
+     entry point, TOC value, and environment pointer.  So
+     in_plt_section is useless.  The linkage functions don't have any
+     special linker symbols to name them, either.
+
+     The only way I can see to recognize them is to actually look at
+     their code.  They're generated by ppc_build_one_stub and some
+     other functions in bfd/elf64-ppc.c, so that should show us all
+     the instruction sequences we need to recognize.  */
+  unsigned int insn[PPC64_STANDARD_LINKAGE_LEN];
+
+  return insns_match_pattern (pc, ppc64_standard_linkage, insn);
+}
+
+
+/* When the dynamic linker is doing lazy symbol resolution, the first
+   call to a function in another object will go like this:
+
+   - The user's function calls the linkage function:
+
+     100007c4:	4b ff fc d5 	bl	10000498
+     100007c8:	e8 41 00 28 	ld	r2,40(r1)
+
+   - The linkage function loads the entry point (and other stuff) from
+     the function descriptor in the PLT, and jumps to it:
+
+     10000498:	3d 82 00 00 	addis	r12,r2,0
+     1000049c:	f8 41 00 28 	std	r2,40(r1)
+     100004a0:	e9 6c 80 98 	ld	r11,-32616(r12)
+     100004a4:	e8 4c 80 a0 	ld	r2,-32608(r12)
+     100004a8:	7d 69 03 a6 	mtctr	r11
+     100004ac:	e9 6c 80 a8 	ld	r11,-32600(r12)
+     100004b0:	4e 80 04 20 	bctr
+
+   - But since this is the first time that PLT entry has been used, it
+     sends control to its glink entry.  That loads the number of the
+     PLT entry and jumps to the common glink0 code:
+
+     10000c98:	38 00 00 00 	li	r0,0
+     10000c9c:	4b ff ff dc 	b	10000c78
+
+   - The common glink0 code then transfers control to the dynamic
+     linker's fixup code:
+
+     10000c78:	e8 41 00 28 	ld	r2,40(r1)
+     10000c7c:	3d 82 00 00 	addis	r12,r2,0
+     10000c80:	e9 6c 80 80 	ld	r11,-32640(r12)
+     10000c84:	e8 4c 80 88 	ld	r2,-32632(r12)
+     10000c88:	7d 69 03 a6 	mtctr	r11
+     10000c8c:	e9 6c 80 90 	ld	r11,-32624(r12)
+     10000c90:	4e 80 04 20 	bctr
+
+   Eventually, this code will figure out how to skip all of this,
+   including the dynamic linker.  At the moment, we just get through
+   the linkage function.  */
+
+/* If the current thread is about to execute a series of instructions
+   at PC matching the ppc64_standard_linkage pattern, and INSN is the result
+   from that pattern match, return the code address to which the
+   standard linkage function will send them.  (This doesn't deal with
+   dynamic linker lazy symbol resolution stubs.)  */
+static CORE_ADDR
+ppc64_standard_linkage_target (CORE_ADDR pc, unsigned int *insn)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  /* The address of the function descriptor this linkage function
+     references.  */
+  CORE_ADDR desc
+    = ((CORE_ADDR) read_register (tdep->ppc_gp0_regnum + 2)
+       + (insn_d_field (insn[0]) << 16)
+       + insn_ds_field (insn[2]));
+
+  /* The first word of the descriptor is the entry point.  Return that.  */
+  return ppc64_desc_entry_point (desc);
+}
+
+
+/* Given that we've begun executing a call trampoline at PC, return
+   the entry point of the function the trampoline will go to.  */
+static CORE_ADDR
+ppc64_skip_trampoline_code (CORE_ADDR pc)
+{
+  unsigned int ppc64_standard_linkage_insn[PPC64_STANDARD_LINKAGE_LEN];
+
+  if (insns_match_pattern (pc, ppc64_standard_linkage,
+                           ppc64_standard_linkage_insn))
+    return ppc64_standard_linkage_target (pc, ppc64_standard_linkage_insn);
+  else
+    return 0;
+}
+
+
+/* Support for CONVERT_FROM_FUNC_PTR_ADDR (ARCH, ADDR, TARG) on PPC64
+   GNU/Linux.
+
+   Usually a function pointer's representation is simply the address
+   of the function. On GNU/Linux on the 64-bit PowerPC however, a
+   function pointer is represented by a pointer to a TOC entry. This
+   TOC entry contains three words, the first word is the address of
+   the function, the second word is the TOC pointer (r2), and the
+   third word is the static chain value.  Throughout GDB it is
+   currently assumed that a function pointer contains the address of
+   the function, which is not easy to fix.  In addition, the
+   conversion of a function address to a function pointer would
+   require allocation of a TOC entry in the inferior's memory space,
+   with all its drawbacks.  To be able to call C++ virtual methods in
+   the inferior (which are called via function pointers),
+   find_function_addr uses this function to get the function address
+   from a function pointer.  */
+
+/* If ADDR points at what is clearly a function descriptor, transform
+   it into the address of the corresponding function.  Be
+   conservative, otherwize GDB will do the transformation on any
+   random addresses such as occures when there is no symbol table.  */
+
+static CORE_ADDR
+ppc64_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
+					CORE_ADDR addr,
+					struct target_ops *targ)
+{
+  struct section_table *s = target_section_by_addr (targ, addr);
+
+  /* Check if ADDR points to a function descriptor.  */
+  if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)
+    return get_target_memory_unsigned (targ, addr, 8);
+
+  return addr;
+}
+
 
 enum {
   ELF_NGREG = 48,
@@ -688,38 +1040,65 @@ ppc_linux_init_abi (struct gdbarch_info info,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  /* Until November 2001, gcc was not complying to the SYSV ABI for
-     returning structures less than or equal to 8 bytes in size. It was
-     returning everything in memory. When this was corrected, it wasn't
-     fixed for native platforms.  */
-  set_gdbarch_use_struct_convention (gdbarch,
-                                   ppc_sysv_abi_broken_use_struct_convention);
-
   if (tdep->wordsize == 4)
     {
+      /* Until November 2001, gcc did not comply with the 32 bit SysV
+	 R4 ABI requirement that structures less than or equal to 8
+	 bytes should be returned in registers.  Instead GCC was using
+	 the the AIX/PowerOpen ABI - everything returned in memory
+	 (well ignoring vectors that is).  When this was corrected, it
+	 wasn't fixed for GNU/Linux native platform.  Use the
+	 PowerOpen struct convention.  */
+      set_gdbarch_return_value (gdbarch, ppc_linux_return_value);
+
       /* Note: kevinb/2002-04-12: See note in rs6000_gdbarch_init regarding
 	 *_push_arguments().  The same remarks hold for the methods below.  */
       set_gdbarch_frameless_function_invocation (gdbarch,
         ppc_linux_frameless_function_invocation);
-      set_gdbarch_frame_chain (gdbarch, ppc_linux_frame_chain);
-      set_gdbarch_frame_saved_pc (gdbarch, ppc_linux_frame_saved_pc);
+      set_gdbarch_deprecated_frame_chain (gdbarch, ppc_linux_frame_chain);
+      set_gdbarch_deprecated_frame_saved_pc (gdbarch, ppc_linux_frame_saved_pc);
 
-      set_gdbarch_frame_init_saved_regs (gdbarch,
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch,
                                          ppc_linux_frame_init_saved_regs);
-      set_gdbarch_init_extra_frame_info (gdbarch,
+      set_gdbarch_deprecated_init_extra_frame_info (gdbarch,
                                          ppc_linux_init_extra_frame_info);
 
       set_gdbarch_memory_remove_breakpoint (gdbarch,
                                             ppc_linux_memory_remove_breakpoint);
+      /* Shared library handling.  */
+      set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
+      set_gdbarch_skip_trampoline_code (gdbarch,
+                                        ppc_linux_skip_trampoline_code);
       set_solib_svr4_fetch_link_map_offsets
         (gdbarch, ppc_linux_svr4_fetch_link_map_offsets);
+    }
+  
+  if (tdep->wordsize == 8)
+    {
+      /* Handle PPC64 GNU/Linux function pointers (which are really
+         function descriptors).  */
+      set_gdbarch_convert_from_func_ptr_addr
+        (gdbarch, ppc64_linux_convert_from_func_ptr_addr);
+
+      set_gdbarch_in_solib_call_trampoline
+        (gdbarch, ppc64_in_solib_call_trampoline);
+      set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
+
+      /* PPC64 malloc's entry-point is called ".malloc".  */
+      set_gdbarch_name_of_malloc (gdbarch, ".malloc");
     }
 }
 
 void
 _initialize_ppc_linux_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_powerpc, GDB_OSABI_LINUX,
-			  ppc_linux_init_abi);
+  /* Register for all sub-familes of the POWER/PowerPC: 32-bit and
+     64-bit PowerPC, and the older rs6k.  */
+  gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc, GDB_OSABI_LINUX,
+                         ppc_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc64, GDB_OSABI_LINUX,
+                         ppc_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_rs6000, bfd_mach_rs6k, GDB_OSABI_LINUX,
+                         ppc_linux_init_abi);
   add_core_fns (&ppc_linux_regset_core_fns);
 }

@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1995, 1996, 1997, 2003 Andrew Cagney
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -584,10 +584,15 @@ chirp_emul_nextprop(os_emul_data *data,
   if (chirp_read_t2h_args(&args, sizeof(args), 3, 1, data, processor, cia))
     return -1;
   phandle = external_to_device(data->root, args.phandle);
-  emul_read_string(previous,
-		   args.previous,
-		   sizeof(previous),
-		   processor, cia);
+  if (args.previous != 0)
+    emul_read_string(previous,
+		     args.previous,
+		     sizeof(previous),
+		     processor, cia);
+  else
+    /* If previous is NULL, make it look like the empty string.  The
+       next property after the empty string is the first property.  */
+    strcpy (previous, "");
   TRACE(trace_os_emul, ("nextprop - in - phandle=0x%lx(0x%lx`%s') previous=`%s' buf=0x%lx\n",
 			(unsigned long)args.phandle,
 			(unsigned long)phandle,
@@ -602,11 +607,19 @@ chirp_emul_nextprop(os_emul_data *data,
   else {
     const device_property *prev_prop = device_find_property(phandle, previous);
     if (prev_prop == NULL) {
-      args.flag = -1; /* name invalid */
+      if (strcmp (previous, "") == 0)
+	args.flag = 0; /* No properties */
+      else
+	args.flag = -1; /* name invalid */
     }
     else {
       const device_property *next_prop;
-      next_prop = device_next_property(prev_prop);
+      if (strcmp (previous, "") == 0) {
+	next_prop = prev_prop;	/* The first property.  */
+      }
+      else {
+	next_prop = device_next_property(prev_prop);
+      }
       if (next_prop == NULL) {
 	args.flag = 0; /* last property */
       }

@@ -1,22 +1,25 @@
-/*  This file is part of the program psim.
+/* The IGEN simulator generator for GDB, the GNU Debugger.
 
-    Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+   Copyright 2002 Free Software Foundation, Inc.
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+   Contributed by Andrew Cagney.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
- 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- 
-    */
+   This file is part of GDB.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 
 /* Creates the files semantics.[hc].
@@ -70,35 +73,29 @@
 
 
 extern void print_semantic_declaration
-(lf *file,
- insn_entry *insn,
- opcode_bits *bits,
- insn_opcodes *opcodes,
- int nr_prefetched_words);
+  (lf *file,
+   insn_entry * insn,
+   opcode_bits *bits, insn_opcodes *opcodes, int nr_prefetched_words);
 
 extern void print_semantic_definition
-(lf *file,
- insn_entry *insn,
- opcode_bits *bits,
- insn_opcodes *opcodes,
- cache_entry *cache_rules,
- int nr_prefetched_words);
+  (lf *file,
+   insn_entry * insn,
+   opcode_bits *bits,
+   insn_opcodes *opcodes, cache_entry *cache_rules, int nr_prefetched_words);
 
 
-typedef enum {
+typedef enum
+{
   invalid_illegal,
   invalid_fp_unavailable,
   invalid_wrong_slot,
-} invalid_type;
+}
+invalid_type;
 
 extern void print_idecode_invalid
-(lf *file,
- const char *result,
- invalid_type type);
+  (lf *file, const char *result, invalid_type type);
 
 extern void print_semantic_body
-(lf *file,
- insn_entry *instruction,
- opcode_bits *expanded_bits,
- insn_opcodes *opcodes);
-
+  (lf *file,
+   insn_entry * instruction,
+   opcode_bits *expanded_bits, insn_opcodes *opcodes);

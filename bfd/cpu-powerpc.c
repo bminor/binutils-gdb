@@ -41,7 +41,7 @@ powerpc_compatible (a,b)
     case bfd_arch_powerpc:
       return bfd_default_compatible (a, b);
     case bfd_arch_rs6000:
-      if (a->mach == bfd_mach_ppc)
+      if (b->mach == bfd_mach_rs6k)
 	return a;
       return NULL;
     }
@@ -61,7 +61,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:common64",
     3,
-    true, /* default for 64 bit target */
+    TRUE, /* default for 64 bit target */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[1]
@@ -77,7 +77,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:common",
     3,
-    false,
+    FALSE,
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[2],
@@ -93,7 +93,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:common",
     3,
-    true, /* default for 32 bit target */
+    TRUE, /* default for 32 bit target */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[1],
@@ -109,7 +109,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:common64",
     3,
-    false,
+    FALSE,
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[2]
@@ -124,7 +124,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:603",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[3]
@@ -138,7 +138,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:EC603e",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[4]
@@ -152,7 +152,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:604",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[5]
@@ -166,7 +166,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:403",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[6]
@@ -180,7 +180,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:601",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[7]
@@ -194,7 +194,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:620",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[8]
@@ -208,7 +208,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:630",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[9]
@@ -222,7 +222,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:a35",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[10]
@@ -236,7 +236,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:rs64ii",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[11]
@@ -250,7 +250,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:rs64iii",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[12]
@@ -264,7 +264,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:7400",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[13]
@@ -278,7 +278,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:e500",
     3,
-    false,
+    FALSE,
     powerpc_compatible,
     bfd_default_scan,
     &bfd_powerpc_archs[14]
@@ -292,7 +292,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     "powerpc",
     "powerpc:MPC8XX",
     3,
-    false, /* not the default */
+    FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
     0

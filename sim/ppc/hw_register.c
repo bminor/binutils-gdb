@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
     
-    Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1995, 1996, 2003 Andrew Cagney
     
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -98,10 +98,11 @@ do_register_init(device *me,
       DTRACE(register, ("%d.%s=0x%lx\n", processor, name,
 			(unsigned long)value));
     }    
-    psim_write_register(system, processor, /* all processors */
-			&value,
-			name,
-			cooked_transfer);
+    if (psim_write_register(system, processor, /* all processors */
+			    &value,
+			    name,
+			    cooked_transfer) <= 0)
+      error("Invalid register name %s\n", name);
   }
 }
 		 

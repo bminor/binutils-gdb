@@ -222,7 +222,7 @@ mi_parse (char *cmd)
   /* For CLI and old ARGS commands, also return the remainder of the
      command line as a single string. */
   if (parse->cmd->args_func != NULL
-      || parse->cmd->cli != NULL)
+      || parse->cmd->cli.cmd != NULL)
     {
       parse->args = xstrdup (chp);
     }
@@ -230,9 +230,4 @@ mi_parse (char *cmd)
   /* Fully parsed. */
   parse->op = MI_COMMAND;
   return parse;
-}
-
-void
-_initialize_mi_parse (void)
-{
 }

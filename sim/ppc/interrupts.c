@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1995, 1996, 1997, 2003 Andrew Cagney
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -522,7 +522,7 @@ external_interrupt(cpu *processor,
 {
   interrupts *ints = cpu_interrupts(processor);
   if (is_asserted) {
-    if (!ints->pending_interrupts & external_interrupt_pending) {
+    if (!(ints->pending_interrupts & external_interrupt_pending)) {
       ints->pending_interrupts |= external_interrupt_pending;
       if (cpu_registers(processor)->msr & msr_external_interrupt_enable)
 	schedule_hardware_interrupt_delivery(processor);

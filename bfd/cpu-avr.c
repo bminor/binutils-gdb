@@ -1,5 +1,5 @@
 /* BFD library support routines for the AVR architecture.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -44,23 +44,23 @@ static const bfd_arch_info_type *compatible
 static const bfd_arch_info_type arch_info_struct[] =
 {
   /* AT90S1200, ATtiny1x, ATtiny28 */
-  N (16, bfd_mach_avr1, "avr:1", false, & arch_info_struct[1]),
+  N (16, bfd_mach_avr1, "avr:1", FALSE, & arch_info_struct[1]),
 
   /* AT90S2xxx, AT90S4xxx, AT90S8xxx, ATtiny22 */
-  N (16, bfd_mach_avr2, "avr:2", false, & arch_info_struct[2]),
+  N (16, bfd_mach_avr2, "avr:2", FALSE, & arch_info_struct[2]),
 
   /* ATmega103, ATmega603 */
-  N (22, bfd_mach_avr3, "avr:3", false, & arch_info_struct[3]),
+  N (22, bfd_mach_avr3, "avr:3", FALSE, & arch_info_struct[3]),
 
   /* ATmega83, ATmega85 */
-  N (16, bfd_mach_avr4, "avr:4", false, & arch_info_struct[4]),
+  N (16, bfd_mach_avr4, "avr:4", FALSE, & arch_info_struct[4]),
 
   /* ATmega161, ATmega163, ATmega32, AT94K */
-  N (22, bfd_mach_avr5, "avr:5", false, NULL)
+  N (22, bfd_mach_avr5, "avr:5", FALSE, NULL)
 };
 
 const bfd_arch_info_type bfd_avr_arch =
-  N (16, bfd_mach_avr2, "avr", true, & arch_info_struct[0]);
+  N (16, bfd_mach_avr2, "avr", TRUE, & arch_info_struct[0]);
 
 /* This routine is provided two arch_infos and works out which AVR
    machine which would be compatible with both and returns a pointer

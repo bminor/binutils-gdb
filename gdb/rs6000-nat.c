@@ -1,7 +1,8 @@
 /* IBM RS/6000 native-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -34,6 +35,7 @@
 #include "arch-utils.h"
 #include "language.h"		/* for local_hex_string().  */
 #include "ppc-tdep.h"
+#include "exec.h"
 
 #include <sys/ptrace.h>
 #include <sys/reg.h>
@@ -71,7 +73,7 @@
 #ifndef ARCH3264
 # define ARCH64() 0
 #else
-# define ARCH64() (REGISTER_RAW_SIZE (0) == 8)
+# define ARCH64() (DEPRECATED_REGISTER_RAW_SIZE (0) == 8)
 #endif
 
 /* Union of 32-bit and 64-bit ".reg" core file sections. */
@@ -127,8 +129,6 @@ typedef union {
 
 extern struct vmap *map_vmap (bfd * bf, bfd * arch);
 
-extern struct target_ops exec_ops;
-
 static void vmap_exec (void);
 
 static void vmap_ldinfo (LdInfo *);
@@ -143,8 +143,7 @@ static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 
 static void exec_one_dummy_insn (void);
 
-extern void
-fixup_breakpoints (CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta);
+extern void fixup_breakpoints (CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta);
 
 /* Given REGNO, a gdb register number, return the corresponding
    number suitable for use as a ptrace() parameter.  Return -1 if
@@ -219,7 +218,7 @@ rs6000_ptrace64 (int req, int id, long long addr, int data, int *buf)
 static void
 fetch_register (int regno)
 {
-  int *addr = alloca (MAX_REGISTER_RAW_SIZE);
+  int addr[MAX_REGISTER_SIZE];
   int nr, isfloat;
 
   /* Retrieved values may be -1, so infer errors from errno. */
@@ -252,7 +251,7 @@ fetch_register (int regno)
 	     even if the register is really only 32 bits. */
 	  long long buf;
 	  rs6000_ptrace64 (PT_READ_GPR, PIDGET (inferior_ptid), nr, 0, (int *)&buf);
-	  if (REGISTER_RAW_SIZE (regno) == 8)
+	  if (DEPRECATED_REGISTER_RAW_SIZE (regno) == 8)
 	    memcpy (addr, &buf, 8);
 	  else
 	    *addr = buf;
@@ -276,7 +275,7 @@ fetch_register (int regno)
 static void
 store_register (int regno)
 {
-  int *addr = alloca (MAX_REGISTER_RAW_SIZE);
+  int addr[MAX_REGISTER_SIZE];
   int nr, isfloat;
 
   /* Fetch the register's value from the register cache.  */
@@ -321,7 +320,7 @@ store_register (int regno)
 	  /* PT_WRITE_GPR requires the buffer parameter to point to an 8-byte
 	     area, even if the register is really only 32 bits. */
 	  long long buf;
-	  if (REGISTER_RAW_SIZE (regno) == 8)
+	  if (DEPRECATED_REGISTER_RAW_SIZE (regno) == 8)
 	    memcpy (&buf, addr, 8);
 	  else
 	    buf = *addr;
@@ -486,7 +485,8 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 
       /* Fetch trailing memory needed for alignment. */
       if (addr + count * sizeof (int) > memaddr + len)
-	if (!read_word (addr, buf + count - 1, arch64))
+	if (!read_word (addr + (count - 1) * sizeof (int),
+                        buf + count - 1, arch64))
 	  return 0;
 
       /* Copy supplied data into memory buffer. */
@@ -646,7 +646,7 @@ vmap_secs (struct vmap *vp, LdInfo *ldi, int arch64)
 static void
 vmap_symtab (struct vmap *vp)
 {
-  register struct objfile *objfile;
+  struct objfile *objfile;
   struct section_offsets *new_offsets;
   int i;
 
@@ -664,7 +664,9 @@ vmap_symtab (struct vmap *vp)
     /* If symbols are not yet loaded, offsets are not yet valid. */
     return;
 
-  new_offsets = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
+  new_offsets =
+    (struct section_offsets *)
+    alloca (SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
 
   for (i = 0; i < objfile->num_sections; ++i)
     new_offsets->offsets[i] = ANOFFSET (objfile->section_offsets, i);
@@ -685,7 +687,7 @@ objfile_symbol_add (void *arg)
 {
   struct objfile *obj = (struct objfile *) arg;
 
-  syms_from_objfile (obj, NULL, 0, 0);
+  syms_from_objfile (obj, NULL, 0, 0, 0, 0);
   new_symfile_objfile (obj, 0, 0);
   return 1;
 }
@@ -718,7 +720,7 @@ static struct vmap *
 add_vmap (LdInfo *ldi)
 {
   bfd *abfd, *last;
-  register char *mem, *objname, *filename;
+  char *mem, *objname, *filename;
   struct objfile *obj;
   struct vmap *vp;
   int fd;
@@ -757,7 +759,7 @@ add_vmap (LdInfo *ldi)
       last = 0;
       /* FIXME??? am I tossing BFDs?  bfd? */
       while ((last = bfd_openr_next_archived_file (abfd, last)))
-	if (STREQ (mem, last->filename))
+	if (DEPRECATED_STREQ (mem, last->filename))
 	  break;
 
       if (!last)
@@ -801,7 +803,7 @@ static void
 vmap_ldinfo (LdInfo *ldi)
 {
   struct stat ii, vi;
-  register struct vmap *vp;
+  struct vmap *vp;
   int got_one, retried;
   int got_exec_file = 0;
   uint next;
@@ -841,8 +843,8 @@ vmap_ldinfo (LdInfo *ldi)
 
 	  /* The filenames are not always sufficient to match on. */
 
-	  if ((name[0] == '/' && !STREQ (name, vp->name))
-	      || (memb[0] && !STREQ (memb, vp->member)))
+	  if ((name[0] == '/' && !DEPRECATED_STREQ (name, vp->name))
+	      || (memb[0] && !DEPRECATED_STREQ (memb, vp->member)))
 	    continue;
 
 	  /* See if we are referring to the same file.
@@ -939,17 +941,17 @@ vmap_exec (void)
 
   for (i = 0; &exec_ops.to_sections[i] < exec_ops.to_sections_end; i++)
     {
-      if (STREQ (".text", exec_ops.to_sections[i].the_bfd_section->name))
+      if (DEPRECATED_STREQ (".text", exec_ops.to_sections[i].the_bfd_section->name))
 	{
 	  exec_ops.to_sections[i].addr += vmap->tstart - vmap->tvma;
 	  exec_ops.to_sections[i].endaddr += vmap->tstart - vmap->tvma;
 	}
-      else if (STREQ (".data", exec_ops.to_sections[i].the_bfd_section->name))
+      else if (DEPRECATED_STREQ (".data", exec_ops.to_sections[i].the_bfd_section->name))
 	{
 	  exec_ops.to_sections[i].addr += vmap->dstart - vmap->dvma;
 	  exec_ops.to_sections[i].endaddr += vmap->dstart - vmap->dvma;
 	}
-      else if (STREQ (".bss", exec_ops.to_sections[i].the_bfd_section->name))
+      else if (DEPRECATED_STREQ (".bss", exec_ops.to_sections[i].the_bfd_section->name))
 	{
 	  exec_ops.to_sections[i].addr += vmap->dstart - vmap->dvma;
 	  exec_ops.to_sections[i].endaddr += vmap->dstart - vmap->dvma;
@@ -1065,7 +1067,7 @@ xcoff_relocate_symtab (unsigned int pid)
 void
 xcoff_relocate_core (struct target_ops *target)
 {
-  sec_ptr ldinfo_sec;
+  struct bfd_section *ldinfo_sec;
   int offset = 0;
   LdInfo *ldi;
   struct vmap *vp;

@@ -377,7 +377,7 @@ proc test_stepping {} {
 	# The problem is that GDB confuses stepping through the call
 	# dummy with hitting the breakpoint at the end of the call dummy.
 	# Will be fixed once all architectures define 
-	# CALL_DUMMY_BREAKPOINT_OFFSET.
+	# DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET.
 	setup_xfail "*-*-*"
 	# This doesn't occur if the call dummy starts with a call,
 	# because we are out of the dummy by the first time the inferior
@@ -388,13 +388,12 @@ proc test_stepping {} {
 	clear_xfail "m68*-*-*"
 	clear_xfail "i*86*-*-*"
 	clear_xfail "vax-*-*"
-	# The following architectures define CALL_DUMMY_BREAKPOINT_OFFSET.
+	# The following architectures define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET.
 	clear_xfail "alpha-*-*"
 	clear_xfail "mips*-*-*"
 	clear_xfail "sparc-*-*"
 	clear_xfail "hppa*-*-*bsd*"
 	# It works with the generic inferior function calling code too.
-	clear_xfail "mn10200*-*-*"
 	clear_xfail "mn10300*-*-*"
 	# The following architectures define CALL_DUMMY_HAS_COMPLETED.
 	clear_xfail "hppa*-*-*hpux*"
@@ -648,6 +647,27 @@ proc test_complex_watchpoint {} {
     }
 }
 
+proc test_watchpoint_and_breakpoint {} {
+    global gdb_prompt
+
+    # This is a test for PR gdb/38, which involves setting a
+    # watchpoint right after you've reached a breakpoint.
+
+    if [runto func3] then {
+	gdb_breakpoint [gdb_get_line_number "second x assignment"]
+	gdb_continue_to_breakpoint "second x assignment"
+	gdb_test "watch x" ".*atchpoint \[0-9\]+: x"
+	gdb_test_multiple "next" "next after watch x" {
+	    -re ".*atchpoint \[0-9\]+: x\r\n\r\nOld value = 0\r\nNew value = 1\r\n.*$gdb_prompt $" {
+		pass "next after watch x"
+	    }
+	    -re "\[0-9\]+\[\t \]+y = 1;\r\n$gdb_prompt $" {
+		kfail "gdb/38" "next after watch x"
+	    }
+	}
+    }
+}
+    
 # Start with a fresh gdb.
 
 gdb_exit
@@ -799,6 +819,17 @@ if [initialize] then {
         timeout {fail "(timeout) access watches disallowed"}
       }
     }
+
+    # See above.
+    if [istarget "mips-idt-*"] then {
+	gdb_exit
+	gdb_start
+	gdb_reinitialize_dir $srcdir/$subdir
+	gdb_load $binfile
+	initialize
+    }
+
+    test_watchpoint_and_breakpoint
 }
 
 # Restore old timeout

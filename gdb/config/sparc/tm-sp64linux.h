@@ -29,8 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef TM_PRINT_INSN_MACH
 #define TM_PRINT_INSN_MACH bfd_mach_sparc_v9a
 
-#define GDB_PTRACE_REGS64
-
 #include "config/tm-sysv4.h"
 
 #endif /* TM_SPARC_LIN64_H */

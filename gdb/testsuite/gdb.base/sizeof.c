@@ -114,6 +114,7 @@ main ()
   printf ("sizeof (long double) == %d\n", sizeof (long double));
 
   /* Signed char?  */
+  printf ("valueof ('\\377') == %d\n", '\377');
   printf ("valueof ((int) (char) -1) == %d\n", (int) (char) -1);
   printf ("valueof ((int) (signed char) -1) == %d\n", (int) (signed char) -1);
   printf ("valueof ((int) (unsigned char) -1) == %d\n", (int) (unsigned char) -1);

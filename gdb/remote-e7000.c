@@ -1,7 +1,7 @@
-/* Remote debugging interface for Hitachi E7000 ICE, for GDB
+/* Remote debugging interface for Renesas E7000 ICE, for GDB
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support. 
 
@@ -24,8 +24,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* The E7000 is an in-circuit emulator for the Hitachi H8/300-H and
-   Hitachi-SH processor.  It has serial port and a lan port.  
+/* The E7000 is an in-circuit emulator for the Renesas H8/300-H and
+   Renesas-SH processor.  It has serial port and a lan port.  
 
    The monitor command set makes it difficult to load large ammounts of
    data over the lan without using ftp - so try not to issue load
@@ -629,9 +629,7 @@ e7000_start_remote (void *dummy)
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  set_current_frame (create_new_frame (read_fp (), stop_pc));
-  select_frame (get_current_frame ());
-  print_stack_frame (selected_frame, -1, 1);
+  print_stack_frame (get_selected_frame (), -1, 1);
 
   return 1;
 }
@@ -658,10 +656,6 @@ e7000_open (char *args, int from_tty)
       perror_with_name (dev_name);
     }
   serial_raw (e7000_desc);
-
-#ifdef GDB_TARGET_IS_H8300
-  h8300hmode = 1;
-#endif
 
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
@@ -783,11 +777,11 @@ gbyte (void)
   return (high << 4) + low;
 }
 
-void
+static void
 fetch_regs_from_dump (int (*nextchar) (), char *want)
 {
   int regno;
-  char buf[MAX_REGISTER_RAW_SIZE];
+  char buf[MAX_REGISTER_SIZE];
 
   int thischar = nextchar ();
 
@@ -858,9 +852,9 @@ fetch_regs_from_dump (int (*nextchar) (), char *want)
 	      want++;
 	      break;
 #endif
-#ifdef FP_REGNUM
+#ifdef DEPRECATED_FP_REGNUM
 	    case 'f':
-	      regno = FP_REGNUM;
+	      regno = DEPRECATED_FP_REGNUM;
 	      want++;
 	      break;
 #endif
@@ -884,7 +878,7 @@ fetch_regs_from_dump (int (*nextchar) (), char *want)
 		internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	    }
 	  store_signed_integer (buf,
-				REGISTER_RAW_SIZE (regno),
+				DEPRECATED_REGISTER_RAW_SIZE (regno),
 				(LONGEST) get_hex (&thischar));
 	  supply_register (regno, buf);
 	  break;
@@ -911,15 +905,18 @@ e7000_fetch_registers (void)
 	  wanted = want_sh3;
 	}
     }
-#ifdef GDB_TARGET_IS_H8300
   if (TARGET_ARCHITECTURE->arch == bfd_arch_h8300)
     {
-      if (h8300smode)
-	wanted = want_h8300s;
-      else
-	wanted = want_h8300h;
+      wanted = want_h8300h;
+      switch (TARGET_ARCHITECTURE->mach)
+	{
+	case bfd_mach_h8300s:
+	case bfd_mach_h8300sn:
+	case bfd_mach_h8300sx:
+	case bfd_mach_h8300sxn:
+	  wanted = want_h8300s;
+	}
     }
-#endif
 
   fetch_regs_from_dump (gch, wanted);
 
@@ -1814,7 +1811,7 @@ e7000_drain_command (char *args, int fromtty)
   puts_e7000debug ("end\r");
   putchar_e7000 (CTRLC);
 
-  while ((c = readchar (1) != -1))
+  while ((c = readchar (1)) != -1)
     {
       if (quit_flag)
 	{
@@ -1875,7 +1872,7 @@ why_stop (void)
 /* Suck characters, if a string match, then return the strings index
    otherwise echo them.  */
 
-int
+static int
 expect_n (char **strings)
 {
   char *(ptr[10]);
@@ -1966,7 +1963,7 @@ sub2_from_pc (void)
   char buf2[200];
 
   store_signed_integer (buf,
-			REGISTER_RAW_SIZE (PC_REGNUM),
+			DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM),
 			read_register (PC_REGNUM) - 2);
   supply_register (PC_REGNUM, buf);
   sprintf (buf2, ".PC %s\r", phex_nz (read_register (PC_REGNUM), 0));
@@ -2048,15 +2045,18 @@ e7000_wait (ptid_t ptid, struct target_waitstatus *status)
 	  wanted_nopc = want_nopc_sh3;
 	}
     }
-#ifdef GDB_TARGET_IS_H8300
   if (TARGET_ARCHITECTURE->arch == bfd_arch_h8300)
     {
-      if (h8300smode)
-	wanted_nopc = want_nopc_h8300s;
-      else
-	wanted_nopc = want_nopc_h8300h;
+      wanted_nopc = want_nopc_h8300h;
+      switch (TARGET_ARCHITECTURE->mach)
+	{
+	case bfd_mach_h8300s:
+	case bfd_mach_h8300sn:
+	case bfd_mach_h8300sx:
+	case bfd_mach_h8300sxn:
+	  wanted_nopc = want_nopc_h8300s;
+	}
     }
-#endif
   fetch_regs_from_dump (gch, wanted_nopc);
 
   /* And supply the extra ones the simulator uses */
@@ -2133,8 +2133,8 @@ static void
 init_e7000_ops (void)
 {
   e7000_ops.to_shortname = "e7000";
-  e7000_ops.to_longname = "Remote Hitachi e7000 target";
-  e7000_ops.to_doc = "Use a remote Hitachi e7000 ICE connected by a serial line;\n\
+  e7000_ops.to_longname = "Remote Renesas e7000 target";
+  e7000_ops.to_doc = "Use a remote Renesas e7000 ICE connected by a serial line;\n\
 or a network connection.\n\
 Arguments are the name of the device for the serial line,\n\
 the speed to connect at in bits per second.\n\
@@ -2143,14 +2143,9 @@ target e7000 /dev/ttya 9600\n\
 target e7000 foobar";
   e7000_ops.to_open = e7000_open;
   e7000_ops.to_close = e7000_close;
-  e7000_ops.to_attach = 0;
-  e7000_ops.to_post_attach = NULL;
-  e7000_ops.to_require_attach = NULL;
   e7000_ops.to_detach = e7000_detach;
-  e7000_ops.to_require_detach = NULL;
   e7000_ops.to_resume = e7000_resume;
   e7000_ops.to_wait = e7000_wait;
-  e7000_ops.to_post_wait = NULL;
   e7000_ops.to_fetch_registers = e7000_fetch_register;
   e7000_ops.to_store_registers = e7000_store_register;
   e7000_ops.to_prepare_to_store = e7000_prepare_to_store;
@@ -2158,49 +2153,21 @@ target e7000 foobar";
   e7000_ops.to_files_info = e7000_files_info;
   e7000_ops.to_insert_breakpoint = e7000_insert_breakpoint;
   e7000_ops.to_remove_breakpoint = e7000_remove_breakpoint;
-  e7000_ops.to_terminal_init = 0;
-  e7000_ops.to_terminal_inferior = 0;
-  e7000_ops.to_terminal_ours_for_output = 0;
-  e7000_ops.to_terminal_ours = 0;
-  e7000_ops.to_terminal_info = 0;
   e7000_ops.to_kill = e7000_kill;
   e7000_ops.to_load = e7000_load;
-  e7000_ops.to_lookup_symbol = 0;
   e7000_ops.to_create_inferior = e7000_create_inferior;
-  e7000_ops.to_post_startup_inferior = NULL;
-  e7000_ops.to_acknowledge_created_inferior = NULL;
-  e7000_ops.to_clone_and_follow_inferior = NULL;
-  e7000_ops.to_post_follow_inferior_by_clone = NULL;
-  e7000_ops.to_insert_fork_catchpoint = NULL;
-  e7000_ops.to_remove_fork_catchpoint = NULL;
-  e7000_ops.to_insert_vfork_catchpoint = NULL;
-  e7000_ops.to_remove_vfork_catchpoint = NULL;
-  e7000_ops.to_has_forked = NULL;
-  e7000_ops.to_has_vforked = NULL;
-  e7000_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  e7000_ops.to_post_follow_vfork = NULL;
-  e7000_ops.to_insert_exec_catchpoint = NULL;
-  e7000_ops.to_remove_exec_catchpoint = NULL;
-  e7000_ops.to_has_execd = NULL;
-  e7000_ops.to_reported_exec_events_per_exec_call = NULL;
-  e7000_ops.to_has_exited = NULL;
   e7000_ops.to_mourn_inferior = e7000_mourn_inferior;
-  e7000_ops.to_can_run = 0;
-  e7000_ops.to_notice_signals = 0;
-  e7000_ops.to_thread_alive = 0;
   e7000_ops.to_stop = e7000_stop;
-  e7000_ops.to_pid_to_exec_file = NULL;
   e7000_ops.to_stratum = process_stratum;
-  e7000_ops.DONT_USE = 0;
   e7000_ops.to_has_all_memory = 1;
   e7000_ops.to_has_memory = 1;
   e7000_ops.to_has_stack = 1;
   e7000_ops.to_has_registers = 1;
   e7000_ops.to_has_execution = 1;
-  e7000_ops.to_sections = 0;
-  e7000_ops.to_sections_end = 0;
   e7000_ops.to_magic = OPS_MAGIC;
 };
+
+extern initialize_file_ftype _initialize_remote_e7000; /* -Wmissing-prototypes */
 
 void
 _initialize_remote_e7000 (void)

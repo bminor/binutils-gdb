@@ -1,6 +1,6 @@
 /* GDB CLI commands.
 
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,17 +20,22 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include <readline/tilde.h>
 #include "completer.h"
 #include "target.h"	 /* For baud_rate, remote_debug and remote_timeout */
 #include "gdb_wait.h"		/* For shell escape implementation */
 #include "gdb_regex.h"		/* Used by apropos_command */
 #include "gdb_string.h"
+#include "gdb_vfork.h"
 #include "linespec.h"
 #include "expression.h"
+#include "frame.h"
+#include "value.h"
 #include "language.h"
 #include "filenames.h"		/* for DOSish file names */
 #include "objfiles.h"
 #include "source.h"
+#include "disasm.h"
 
 #include "ui-out.h"
 
@@ -43,18 +48,6 @@
 #ifndef GDBINIT_FILENAME
 #define GDBINIT_FILENAME        ".gdbinit"
 #endif
-
-/* From gdb/top.c */
-
-extern void dont_repeat (void);
-
-extern void set_verbose (char *, int, struct cmd_list_element *);
-
-extern void show_history (char *, int);
-
-extern void set_history (char *, int);
-
-extern void show_commands (char *, int);
 
 /* Prototypes for local command functions */
 
@@ -191,7 +184,6 @@ error_no_arg (char *why)
 /* The "info" command is defined as a prefix, with allow_unknown = 0.
    Therefore, its own definition is called only for "info" with no args.  */
 
-/* ARGSUSED */
 static void
 info_command (char *arg, int from_tty)
 {
@@ -201,7 +193,6 @@ info_command (char *arg, int from_tty)
 
 /* The "show" command with no arguments shows all the settings.  */
 
-/* ARGSUSED */
 static void
 show_command (char *arg, int from_tty)
 {
@@ -211,7 +202,6 @@ show_command (char *arg, int from_tty)
 /* Provide documentation on command or list given by COMMAND.  FROM_TTY
    is ignored.  */
 
-/* ARGSUSED */
 static void
 help_command (char *command, int from_tty)
 {
@@ -229,7 +219,6 @@ compare_strings (const void *arg1, const void *arg2)
 
 /* The "complete" command is used by Emacs to implement completion.  */
 
-/* ARGSUSED */
 static void
 complete_command (char *arg, int from_tty)
 {
@@ -282,7 +271,6 @@ is_complete_command (struct cmd_list_element *c)
   return cmd_cfunc_eq (c, complete_command);
 }
 
-/* ARGSUSED */
 static void
 show_version (char *args, int from_tty)
 {
@@ -302,7 +290,6 @@ quit_command (char *args, int from_tty)
   quit_force (args, from_tty);
 }
 
-/* ARGSUSED */
 static void
 pwd_command (char *args, int from_tty)
 {
@@ -310,7 +297,7 @@ pwd_command (char *args, int from_tty)
     error ("The \"pwd\" command does not take an argument: %s", args);
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
 
-  if (!STREQ (gdb_dirbuf, current_directory))
+  if (strcmp (gdb_dirbuf, current_directory) != 0)
     printf_unfiltered ("Working directory %s\n (canonically %s).\n",
 		       current_directory, gdb_dirbuf);
   else
@@ -446,12 +433,11 @@ source_command (char *args, int from_tty)
   do_cleanups (old_cleanups);
 }
 
-/* ARGSUSED */
 static void
 echo_command (char *text, int from_tty)
 {
   char *p = text;
-  register int c;
+  int c;
 
   if (text)
     while ((c = *p++) != '\0')
@@ -476,7 +462,6 @@ echo_command (char *text, int from_tty)
   gdb_flush (gdb_stdout);
 }
 
-/* ARGSUSED */
 static void
 shell_escape (char *arg, int from_tty)
 {
@@ -506,19 +491,20 @@ shell_escape (char *arg, int from_tty)
 #endif
 #else /* Can fork.  */
   int rc, status, pid;
-  char *p, *user_shell;
 
-  if ((user_shell = (char *) getenv ("SHELL")) == NULL)
-    user_shell = "/bin/sh";
-
-  /* Get the name of the shell for arg0 */
-  if ((p = strrchr (user_shell, '/')) == NULL)
-    p = user_shell;
-  else
-    p++;			/* Get past '/' */
-
-  if ((pid = fork ()) == 0)
+  if ((pid = vfork ()) == 0)
     {
+      char *p, *user_shell;
+
+      if ((user_shell = (char *) getenv ("SHELL")) == NULL)
+	user_shell = "/bin/sh";
+
+      /* Get the name of the shell for arg0 */
+      if ((p = strrchr (user_shell, '/')) == NULL)
+	p = user_shell;
+      else
+	p++;			/* Get past '/' */
+
       if (!arg)
 	execl (user_shell, p, 0);
       else
@@ -601,7 +587,7 @@ edit_command (char *arg, int from_tty)
 	    {
 	      print_address_numeric (sal.pc, 1, gdb_stdout);
 	      printf_filtered (" is in ");
-	      fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
+	      fputs_filtered (SYMBOL_PRINT_NAME (sym), gdb_stdout);
 	      printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
 	    }
           else
@@ -665,7 +651,7 @@ list_command (char *arg, int from_tty)
 
   /* "l" or "l +" lists next ten lines.  */
 
-  if (arg == 0 || STREQ (arg, "+"))
+  if (arg == 0 || strcmp (arg, "+") == 0)
     {
       print_source_lines (cursal.symtab, cursal.line,
 			  cursal.line + get_lines_to_list (), 0);
@@ -673,7 +659,7 @@ list_command (char *arg, int from_tty)
     }
 
   /* "l -" lists previous ten lines, the ones before the ten just listed.  */
-  if (STREQ (arg, "-"))
+  if (strcmp (arg, "-") == 0)
     {
       print_source_lines (cursal.symtab,
 			  max (get_first_line_listed () - get_lines_to_list (), 1),
@@ -768,7 +754,7 @@ list_command (char *arg, int from_tty)
 	{
 	  print_address_numeric (sal.pc, 1, gdb_stdout);
 	  printf_filtered (" is in ");
-	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
+	  fputs_filtered (SYMBOL_PRINT_NAME (sym), gdb_stdout);
 	  printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
 	}
       else
@@ -819,6 +805,95 @@ list_command (char *arg, int from_tty)
 			0);
 }
 
+/* Dump a specified section of assembly code.  With no command line
+   arguments, this command will dump the assembly code for the
+   function surrounding the pc value in the selected frame.  With one
+   argument, it will dump the assembly code surrounding that pc value.
+   Two arguments are interpeted as bounds within which to dump
+   assembly.  */
+
+static void
+disassemble_command (char *arg, int from_tty)
+{
+  CORE_ADDR low, high;
+  char *name;
+  CORE_ADDR pc, pc_masked;
+  char *space_index;
+#if 0
+  asection *section;
+#endif
+
+  name = NULL;
+  if (!arg)
+    {
+      if (!deprecated_selected_frame)
+	error ("No frame selected.\n");
+
+      pc = get_frame_pc (deprecated_selected_frame);
+      if (find_pc_partial_function (pc, &name, &low, &high) == 0)
+	error ("No function contains program counter for selected frame.\n");
+#if defined(TUI)
+      /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+	 `tui_version'.  */
+      else if (tui_active)
+	low = tuiGetLowDisassemblyAddress (low, pc);
+#endif
+      low += FUNCTION_START_OFFSET;
+    }
+  else if (!(space_index = (char *) strchr (arg, ' ')))
+    {
+      /* One argument.  */
+      pc = parse_and_eval_address (arg);
+      if (find_pc_partial_function (pc, &name, &low, &high) == 0)
+	error ("No function contains specified address.\n");
+#if defined(TUI)
+      /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+	 `tui_version'.  */
+      else if (tui_active)
+	low = tuiGetLowDisassemblyAddress (low, pc);
+#endif
+      low += FUNCTION_START_OFFSET;
+    }
+  else
+    {
+      /* Two arguments.  */
+      *space_index = '\0';
+      low = parse_and_eval_address (arg);
+      high = parse_and_eval_address (space_index + 1);
+    }
+
+#if defined(TUI)
+  if (!tui_is_window_visible (DISASSEM_WIN))
+#endif
+    {
+      printf_filtered ("Dump of assembler code ");
+      if (name != NULL)
+	{
+	  printf_filtered ("for function %s:\n", name);
+	}
+      else
+	{
+	  printf_filtered ("from ");
+	  print_address_numeric (low, 1, gdb_stdout);
+	  printf_filtered (" to ");
+	  print_address_numeric (high, 1, gdb_stdout);
+	  printf_filtered (":\n");
+	}
+
+      /* Dump the specified range.  */
+      gdb_disassembly (uiout, 0, 0, 0, -1, low, high);
+
+      printf_filtered ("End of assembler dump.\n");
+      gdb_flush (gdb_stdout);
+    }
+#if defined(TUI)
+  else
+    {
+      tui_show_assembly (low);
+    }
+#endif
+}
+
 static void
 make_command (char *arg, int from_tty)
 {
@@ -836,7 +911,6 @@ make_command (char *arg, int from_tty)
   shell_escape (p, from_tty);
 }
 
-/* ARGSUSED */
 static void
 show_user (char *args, int from_tty)
 {
@@ -1157,6 +1231,14 @@ With two args if one is empty it stands for ten lines away from the other arg.",
   if (dbx_commands)
     add_com_alias ("file", "list", class_files, 1);
 
+  c = add_com ("disassemble", class_vars, disassemble_command,
+	       "Disassemble a specified section of memory.\n\
+Default is the function surrounding the pc of the selected frame.\n\
+With a single argument, the function surrounding that address is dumped.\n\
+Two arguments are taken as a range of memory to dump.");
+  set_cmd_completer (c, location_completer);
+  if (xdb_commands)
+    add_com_alias ("va", "disassemble", class_xdb, 0);
 
   /* NOTE: cagney/2000-03-20: Being able to enter ``(gdb) !ls'' would
      be a really useful feature.  Unfortunately, the below wont do

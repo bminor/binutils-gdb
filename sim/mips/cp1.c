@@ -1,9 +1,10 @@
 /*> cp1.c <*/
 /* MIPS Simulator FPU (CoProcessor 1) support.
    Copyright (C) 2002 Free Software Foundation, Inc.
-   Originally created by Cygnus Solutions, modified substially
-   by Broadcom Corporation (SiByte).  Paired-single operation support
-   and MIPS-3D support contributed by Broadcom Corporation (SiByte).
+   Originally created by Cygnus Solutions.  Extensive modifications,
+   including paired-single operation support and MIPS-3D support
+   contributed by Ed Satterthwaite and Chris Demetriou, of Broadcom
+   Corporation (SiByte).
 
 This file is part of GDB, the GNU debugger.
 

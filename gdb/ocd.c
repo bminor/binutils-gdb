@@ -42,7 +42,7 @@
 
 static int ocd_read_bytes (CORE_ADDR memaddr, char *myaddr, int len);
 
-static int ocd_start_remote (PTR dummy);
+static int ocd_start_remote (void *dummy);
 
 static int readchar (int timeout);
 
@@ -146,7 +146,7 @@ ocd_error (char *s, int error_code)
       s = buf;
     }
 
-  error (s);
+  error ("%s", s);
 }
 
 /*  Return nonzero if the thread TH is still alive on the remote system.  */
@@ -159,7 +159,6 @@ ocd_thread_alive (ptid_t th)
 
 /* Clean up connection to a remote debugger.  */
 
-/* ARGSUSED */
 void
 ocd_close (int quitting)
 {
@@ -171,7 +170,7 @@ ocd_close (int quitting)
 /* Stub for catch_errors.  */
 
 static int
-ocd_start_remote (PTR dummy)
+ocd_start_remote (void *dummy)
 {
   unsigned char buf[10], *p;
   int pktlen;
@@ -254,9 +253,7 @@ ocd_start_remote (PTR dummy)
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  set_current_frame (create_new_frame (read_fp (), stop_pc));
-  select_frame (get_current_frame ());
-  print_stack_frame (selected_frame, -1, 1);
+  print_stack_frame (get_selected_frame (), -1, 1);
 
   buf[0] = OCD_LOG_FILE;
   buf[1] = 3;			/* close existing WIGGLERS.LOG */
@@ -739,7 +736,6 @@ ocd_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
    nonzero.  Returns length of data written or read; 0 for error.  TARGET
    is ignored.  */
 
-/* ARGSUSED */
 int
 ocd_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int should_write,
 		 struct mem_attrib *attrib, struct target_ops *target)
@@ -1367,6 +1363,8 @@ bdm_read_register_command (char *args, int from_tty)
 
 }
 
+extern initialize_file_ftype _initialize_remote_ocd; /* -Wmissing-prototypes */
+
 void
 _initialize_remote_ocd (void)
 {

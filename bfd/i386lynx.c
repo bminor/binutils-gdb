@@ -1,5 +1,5 @@
 /* BFD back-end for i386 a.out binaries under LynxOS.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 2001, 2002
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#define BYTES_IN_WORD 4
 #define N_SHARED_LIB(x) 0
 
 #define TEXT_START_ADDR 0
@@ -56,29 +55,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0		      \
 	    || bfd_bwrite ((PTR) &exec_bytes, (bfd_size_type) EXEC_BYTES_SIZE, \
 			  abfd) != EXEC_BYTES_SIZE)			      \
-	  return false;							      \
+	  return FALSE;							      \
 	/* Now write out reloc info, followed by syms and strings */	      \
   									      \
 	if (bfd_get_symcount (abfd) != 0) 				      \
 	    {								      \
 	      if (bfd_seek (abfd, (file_ptr) (N_SYMOFF(*execp)), SEEK_SET)    \
 		  != 0)							      \
-	        return false;						      \
+	        return FALSE;						      \
 									      \
-	      if (! NAME(aout,write_syms) (abfd)) return false;		      \
+	      if (! NAME(aout,write_syms) (abfd)) return FALSE;		      \
 									      \
 	      if (bfd_seek (abfd, (file_ptr) (N_TRELOFF(*execp)), SEEK_SET)   \
 		  != 0)							      \
-	        return false;						      \
+	        return FALSE;						      \
 									      \
 	      if (!NAME(lynx,squirt_out_relocs) (abfd, obj_textsec (abfd)))   \
-		return false;						      \
+		return FALSE;						      \
 	      if (bfd_seek (abfd, (file_ptr) (N_DRELOFF(*execp)), SEEK_SET)   \
 		  != 0)							      \
 	        return 0;						      \
 									      \
 	      if (!NAME(lynx,squirt_out_relocs) (abfd, obj_datasec (abfd)))   \
-		return false;						      \
+		return FALSE;						      \
 	    }								      \
       }
 #endif
@@ -86,19 +85,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libaout.h"
 #include "aout/aout64.h"
 
-void NAME (lynx,swap_std_reloc_out) PARAMS ((bfd *, arelent *, struct reloc_std_external *));
-void NAME (lynx,swap_ext_reloc_out) PARAMS ((bfd *, arelent *, struct reloc_ext_external *));
-void NAME (lynx,swap_ext_reloc_in)  PARAMS ((bfd *, struct reloc_ext_external *, arelent *, asymbol **, bfd_size_type));
-void NAME (lynx,swap_std_reloc_in)  PARAMS ((bfd *, struct reloc_std_external *, arelent *, asymbol **, bfd_size_type));
-boolean NAME (lynx,slurp_reloc_table) PARAMS ((bfd *, sec_ptr, asymbol **));
-boolean NAME (lynx,squirt_out_relocs) PARAMS ((bfd *, asection *));
-long NAME (lynx,canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
+void NAME (lynx,swap_std_reloc_out)
+  PARAMS ((bfd *, arelent *, struct reloc_std_external *));
+void NAME (lynx,swap_ext_reloc_out)
+  PARAMS ((bfd *, arelent *, struct reloc_ext_external *));
+void NAME (lynx,swap_ext_reloc_in)
+  PARAMS ((bfd *, struct reloc_ext_external *, arelent *, asymbol **,
+	   bfd_size_type));
+void NAME (lynx,swap_std_reloc_in)
+  PARAMS ((bfd *, struct reloc_std_external *, arelent *, asymbol **,
+	   bfd_size_type));
+bfd_boolean NAME (lynx,slurp_reloc_table)
+  PARAMS ((bfd *, sec_ptr, asymbol **));
+bfd_boolean NAME (lynx,squirt_out_relocs)
+  PARAMS ((bfd *, asection *));
+long NAME (lynx,canonicalize_reloc)
+  PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
 
 #ifdef LYNX_CORE
 
 char *lynx_core_file_failing_command ();
 int lynx_core_file_failing_signal ();
-boolean lynx_core_file_matches_executable_p ();
+bfd_boolean lynx_core_file_matches_executable_p ();
 const bfd_target *lynx_core_file_p ();
 
 #define	MY_core_file_failing_command lynx_core_file_failing_command
@@ -151,7 +159,7 @@ NAME(lynx,swap_std_reloc_out) (abfd, g, natptr)
      Absolute symbols can come in in two ways, either as an offset
      from the abs section, or as a symbol which has an abs value.
      check for that here
-     */
+  */
 
 
   if (bfd_is_com_section (output_section)
@@ -161,7 +169,7 @@ NAME(lynx,swap_std_reloc_out) (abfd, g, natptr)
       if (bfd_abs_section_ptr->symbol == sym)
 	{
 	  /* Whoops, looked like an abs symbol, but is really an offset
-	   from the abs section */
+	     from the abs section */
 	  r_index = 0;
 	  r_extern = 0;
 	}
@@ -388,7 +396,7 @@ NAME(lynx,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
 
 /* Reloc hackery */
 
-boolean
+bfd_boolean
 NAME(lynx,slurp_reloc_table) (abfd, asect, symbols)
      bfd *abfd;
      sec_ptr asect;
@@ -401,10 +409,10 @@ NAME(lynx,slurp_reloc_table) (abfd, asect, symbols)
   size_t each_size;
 
   if (asect->relocation)
-    return true;
+    return TRUE;
 
   if (asect->flags & SEC_CONSTRUCTOR)
-    return true;
+    return TRUE;
 
   if (asect == obj_datasec (abfd))
     {
@@ -419,11 +427,11 @@ NAME(lynx,slurp_reloc_table) (abfd, asect, symbols)
     }
 
   bfd_set_error (bfd_error_invalid_operation);
-  return false;
+  return FALSE;
 
 doit:
   if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
-    return false;
+    return FALSE;
   each_size = obj_reloc_entry_size (abfd);
 
   count = reloc_size / each_size;
@@ -431,20 +439,20 @@ doit:
 
   reloc_cache = (arelent *) bfd_zmalloc (count * sizeof (arelent));
   if (!reloc_cache && count != 0)
-    return false;
+    return FALSE;
 
   relocs = (PTR) bfd_alloc (abfd, reloc_size);
   if (!relocs && reloc_size != 0)
     {
       free (reloc_cache);
-      return false;
+      return FALSE;
     }
 
   if (bfd_bread (relocs, reloc_size, abfd) != reloc_size)
     {
       bfd_release (abfd, relocs);
       free (reloc_cache);
-      return false;
+      return FALSE;
     }
 
   if (each_size == RELOC_EXT_SIZE)
@@ -476,14 +484,14 @@ doit:
   bfd_release (abfd, relocs);
   asect->relocation = reloc_cache;
   asect->reloc_count = count;
-  return true;
+  return TRUE;
 }
 
 
 
 /* Write out a relocation section into an object file.  */
 
-boolean
+bfd_boolean
 NAME(lynx,squirt_out_relocs) (abfd, section)
      bfd *abfd;
      asection *section;
@@ -496,14 +504,14 @@ NAME(lynx,squirt_out_relocs) (abfd, section)
   bfd_size_type natsize;
 
   if (count == 0)
-    return true;
+    return TRUE;
 
   each_size = obj_reloc_entry_size (abfd);
   natsize = count;
   natsize *= each_size;
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native)
-    return false;
+    return FALSE;
 
   generic = section->orelocation;
 
@@ -525,11 +533,11 @@ NAME(lynx,squirt_out_relocs) (abfd, section)
   if (bfd_bwrite ((PTR) native, natsize, abfd) != natsize)
     {
       bfd_release (abfd, native);
-      return false;
+      return FALSE;
     }
   bfd_release (abfd, native);
 
-  return true;
+  return TRUE;
 }
 
 /* This is stupid.  This function should be a boolean predicate */

@@ -1,3 +1,33 @@
+2003-08-28  Andrew Cagney  <cagney@redhat.com>
+
+	* dv-mn103ser.c (do_polling_event): Change type of "serial_reg" to
+	"long".
+	(read_status_reg): Cast "serial_reg" to "long".
+	* dv-mn103tim.c (do_counter_event): Change type of "timer_nr" to
+	"long".
+	(do_counter6_event, write_mode_reg, write_tm6md): Ditto.
+
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_open, sim_create_inferior, sim_open)
+	(sim_create_inferior): Rename _bfd to bfd.
+
+2003-02-26  Andrew Cagney  <cagney@redhat.com>
+
+	* am33.igen: Call sim_engine_abort instead of abort.
+
+2003-02-26  David Carlton  <carlton@math.stanford.edu>
+
+	* dv-mn103tim.c (read_special_timer6_reg): Add break after
+	empty default: label.
+	(write_special_timer6_reg): Ditto.
+	Update copyright.
+
+2002-11-28  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-main.h: Only include "idecode.h" once.
+	* Makefile.in (SIM_EXTRA_DEPS): Define.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -1,4 +1,4 @@
-/* Remote debugging interface for Hitachi HMS Monitor Version 1.0
+/* Remote debugging interface for Renesas HMS Monitor Version 1.0
    Copyright 1995, 1996, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Steve Chamberlain
@@ -140,6 +140,8 @@ hms_open (char *args, int from_tty)
 
 int write_dos_tick_delay;
 
+extern initialize_file_ftype _initialize_remote_hms; /* -Wmissing-prototypes */
+
 void
 _initialize_remote_hms (void)
 {
@@ -147,7 +149,7 @@ _initialize_remote_hms (void)
   init_monitor_ops (&hms_ops);
 
   hms_ops.to_shortname = "hms";
-  hms_ops.to_longname = "Hitachi Microsystems H8/300 debug monitor";
+  hms_ops.to_longname = "Renesas Microsystems H8/300 debug monitor";
   hms_ops.to_doc = "Debug via the HMS monitor.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).";
   hms_ops.to_open = hms_open;

@@ -22,8 +22,6 @@
 #ifndef TM_NS32K_H
 #define TM_NS32K_H
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
-
 /* Need to get function ends by adding this to epilogue address from .bf
    record, not using x_fsize field.  */
 #define FUNCTION_EPILOGUE_SIZE 4
@@ -33,7 +31,5 @@
 #ifndef STACK_END_ADDR
 #define STACK_END_ADDR (0xfffff000)
 #endif
-
-#define NUM_GENERAL_REGS	8
 
 #endif /* TM_NS32K_H */

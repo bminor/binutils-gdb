@@ -36,8 +36,8 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *buf, int length)
   return (* CPU_REG_FETCH (cpu)) (cpu, rn, buf, length);
 }
 
-/* Generic implementation of sim_fetch_register for simulators using
-   CPU_REG_FETCH.
+/* Generic implementation of sim_store_register for simulators using
+   CPU_REG_STORE.
    The contents of BUF are in target byte order.  */
 /* ??? Obviously the interface needs to be extended to handle multiple
    cpus.  */

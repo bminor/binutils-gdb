@@ -1,5 +1,5 @@
 /* BFD back-end for Mach3/532 a.out-ish binaries.
-   Copyright 1990, 1991, 1992, 1994, 1995, 2000, 2001
+   Copyright 1990, 1991, 1992, 1994, 1995, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -79,10 +79,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 reloc_howto_type *ns32kaout_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 
-static boolean MY(write_object_contents)
+static bfd_boolean MY(write_object_contents)
   PARAMS ((bfd *abfd));
 
-static boolean
+static bfd_boolean
 MY(write_object_contents) (abfd)
      bfd *abfd;
 {
@@ -106,7 +106,7 @@ MY(write_object_contents) (abfd)
 
   WRITE_HEADERS(abfd, execp);
 
-  return true;
+  return TRUE;
 }
 
 #define MY_write_object_contents MY(write_object_contents)

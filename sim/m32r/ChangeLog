@@ -1,3 +1,50 @@
+2003-12-11  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* Makefile.in: Add support for new machine m32r2.
+	* cpu2.c: New file for m32r2 support.
+	* cpu2.h: Likewise.
+	* decode2.c: Likewise.
+	* decode2.h: Likewise.
+	* m32r2.c: Likewise.
+	* mloop2.in: Likewise.
+	* model2.c: Likewise.
+	* sem2-switch.c: Likewise.
+	* arch.c: Regenerate.
+	* arch.h: Regenerate.
+	* cpu.c: Regenerate.
+	* arch.c: Regenerate.
+	* cpuall.c: Regenerate.
+	* cpux.c: Regenerate.
+	* cpux.h: Regenerate.
+	* decode.c: Regenerate.
+	* decode.h: Regenerate.
+	* decodex.c: Regenerate.
+	* decodex.h: Regenerate.
+	* model.c: Regenerate.
+	* modelx.c: Regenerate.
+	* sem-switch.c: Regenerate.
+	* sem.c: Regenerate.
+	* semx-switch.c: Regenerate.
+	* m32r-sim.h: Add EVB register support.
+	* sim-if.c: Likewise.
+	* sim-main.h: Likewise.
+	* traps.c: Likewise.
+
+2003-09-08  Dave Brolley  <brolley@redhat.com>
+
+	On behalf of Doug Evans <dje@sebabeach.org>
+	* Makefile.in (stamp-arch,stamp-cpu,stamp-xcpu): Pass archfile to cgen.
+
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-if.c (sim_open, sim_create_inferior): Rename _bfd to bfd.
+
+2002-12-19  Doug Evans  <dje@sebabeach.org>
+
+	* arch.c,arch.h,cpuall.h: Regenerate.
+	* cpu.c,cpu.h,decode.c,decode.h,model.c,sem-switch.c,sem.c: Regenerate.
+	* cpux.c,cpux.h,decodex.c,decodex.h,modelx.c,semx-switch.c: Regenerate.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -1,22 +1,25 @@
-/*  This file is part of the program psim.
-    
-    Copyright (C) 1994-1996,1998 Andrew Cagney <cagney@highland.com.au>
-    
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-    
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-    
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-    
-    */
+/* The common simulator framework for GDB, the GNU Debugger.
+
+   Copyright 2002 Free Software Foundation, Inc.
+
+   Contributed by Andrew Cagney and Red Hat.
+
+   This file is part of GDB.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 
 #include "hw-main.h"
@@ -218,7 +221,7 @@ hw_glue_finish (struct hw *me)
     if (glue->sizeof_output == 0)
       hw_abort (me, "at least one reg property size must be nonzero");
     if (glue->sizeof_output % sizeof (unsigned_word) != 0)
-      hw_abort (me, "reg property size must be %d aligned",
+      hw_abort (me, "reg property size must be %ld aligned",
 		sizeof (unsigned_word));
     /* and the address */
     hw_unit_address_to_attach_address (hw_parent (me),
@@ -227,7 +230,7 @@ hw_glue_finish (struct hw *me)
 				       &glue->address,
 				       me);
     if (glue->address % (sizeof (unsigned_word) * max_nr_ports) != 0)
-      hw_abort (me, "reg property address must be %d aligned",
+      hw_abort (me, "reg property address must be %ld aligned",
 		sizeof (unsigned_word) * max_nr_ports);
     glue->nr_outputs = glue->sizeof_output / sizeof (unsigned_word);
     glue->output = hw_zalloc (me, glue->sizeof_output);

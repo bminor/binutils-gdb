@@ -1,5 +1,6 @@
 /* Target-dependent code for i386 BSD's.
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +24,7 @@
 #include "frame.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "osabi.h"
 
 #include "gdb_string.h"
 
@@ -40,24 +42,19 @@ i386bsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
   return (pc >= tdep->sigtramp_start && pc < tdep->sigtramp_end);
 }
 
-/* Assuming FRAME is for a BSD sigtramp routine, return the address of
-   the associated sigcontext structure.
+/* Assuming NEXT_FRAME is for a frame following a BSD sigtramp
+   routine, return the address of the associated sigcontext structure.  */
 
-   Note: This function is used for Solaris 2 too, so don't make it
-   static.  */
-
-CORE_ADDR
-i386bsd_sigcontext_addr (struct frame_info *frame)
+static CORE_ADDR
+i386bsd_sigcontext_addr (struct frame_info *next_frame)
 {
-  if (frame->next)
-    /* If this isn't the top frame, the next frame must be for the
-       signal handler itself.  A pointer to the sigcontext structure
-       is passed as the third argument to the signal handler.  */
-    return read_memory_unsigned_integer (frame->next->frame + 16, 4);
+  char buf[4];
+  CORE_ADDR sp;
 
-  /* This is the top frame.  We'll have to find the address of the
-     sigcontext structure by looking at the stack pointer.  */
-  return read_memory_unsigned_integer (read_register (SP_REGNUM) + 8, 4);
+  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
+  sp = extract_unsigned_integer (buf, 4);
+
+  return read_memory_unsigned_integer (sp + 8, 4);
 }
 
 /* Return the start address of the sigtramp routine.  */
@@ -90,8 +87,25 @@ i386bsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 /* Traditional BSD (4.3 BSD, still used for BSDI and 386BSD).  */
 
 /* From <machine/signal.h>.  */
-int i386bsd_sc_pc_offset = 20;
-int i386bsd_sc_sp_offset = 8;
+int i386bsd_sc_reg_offset[] =
+{
+  -1,				/* %eax */
+  -1,				/* %ecx */
+  -1,				/* %edx */
+  -1,				/* %ebx */
+  8 + 0 * 4,			/* %esp */
+  8 + 1 * 4,			/* %ebp */
+  -1,				/* %esi */
+  -1,				/* %edi */
+  8 + 3 * 4,			/* %eip */
+  8 + 4 * 4,			/* %eflags */
+  -1,				/* %cs */
+  -1,				/* %ss */
+  -1,				/* %ds */
+  -1,				/* %es */
+  -1,				/* %fs */
+  -1				/* %gs */
+};
 
 void
 i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -113,63 +127,8 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigtramp_start = 0xfdbfdfc0;
   tdep->sigtramp_end = 0xfdbfe000;
   tdep->sigcontext_addr = i386bsd_sigcontext_addr;
-  tdep->sc_pc_offset = i386bsd_sc_pc_offset;
-  tdep->sc_sp_offset = i386bsd_sc_sp_offset;
-}
-
-/* FreeBSD 3.0-RELEASE or later.  */
-
-CORE_ADDR i386fbsd_sigtramp_start = 0xbfbfdf20;
-CORE_ADDR i386fbsd_sigtramp_end = 0xbfbfdff0;
-
-static void
-i386fbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* Obviously FreeBSD is BSD-based.  */
-  i386bsd_init_abi (info, gdbarch);
-
-  /* FreeBSD uses -freg-struct-return by default.  */
-  tdep->struct_return = reg_struct_return;
-
-  /* FreeBSD uses a different memory layout.  */
-  tdep->sigtramp_start = i386fbsd_sigtramp_start;
-  tdep->sigtramp_end = i386fbsd_sigtramp_end;
-}
-
-static void
-i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  /* It's almost identical to FreeBSD a.out.  */
-  i386fbsdaout_init_abi (info, gdbarch);
-
-  /* Except that it uses ELF.  */
-  i386_elf_init_abi (info, gdbarch);
-
-  /* FreeBSD ELF uses SVR4-style shared libraries.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch,
-					generic_in_solib_call_trampoline);
-}
-
-/* FreeBSD 4.0-RELEASE or later.  */
-
-/* From <machine/signal.h>.  */
-int i386fbsd4_sc_pc_offset = 76;
-int i386fbsd4_sc_sp_offset = 88;
-
-static void
-i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* Inherit stuff from older releases.  We assume that FreeBSD
-     4.0-RELEASE always uses ELF.  */
-  i386fbsd_init_abi (info, gdbarch);
-
-  /* FreeBSD 4.0 introduced a new `struct sigcontext'.  */
-  tdep->sc_pc_offset = i386fbsd4_sc_pc_offset;
-  tdep->sc_sp_offset = i386fbsd4_sc_sp_offset;
+  tdep->sc_reg_offset = i386bsd_sc_reg_offset;
+  tdep->sc_num_regs = ARRAY_SIZE (i386bsd_sc_reg_offset);
 }
 
 
@@ -194,9 +153,4 @@ _initialize_i386bsd_tdep (void)
 {
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_aout_flavour,
 				  i386bsd_aout_osabi_sniffer);
-
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_FREEBSD_AOUT,
-			  i386fbsdaout_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_FREEBSD_ELF,
-			  i386fbsd4_init_abi);
 }

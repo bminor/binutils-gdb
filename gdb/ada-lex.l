@@ -627,7 +627,7 @@ block_lookup (name, err_name)
   int nsyms;
   struct symtab *symtab;
   nsyms = ada_lookup_symbol_list (name, left_block_context,
-				  VAR_NAMESPACE, &syms, &blocks);
+				  VAR_DOMAIN, &syms, &blocks);
   if (left_block_context == NULL &&
       (nsyms == 0 || SYMBOL_CLASS (syms[0]) != LOC_BLOCK))
     symtab = lookup_symtab (name);
@@ -652,7 +652,7 @@ block_lookup (name, err_name)
     }
 }
 
-/* Look up NAME0 (assumed to be mangled) as a name in VAR_NAMESPACE,
+/* Look up NAME0 (assumed to be mangled) as a name in VAR_DOMAIN,
    setting *TOKEN_TYPE to NAME or TYPENAME, depending on what is
    found.  Try first the entire name, then the name without the last 
    segment (i.e., after the last .id), etc., and return the number of
@@ -685,10 +685,10 @@ name_lookup (name0, err_name, token_type)
 
       if (left_block_context == NULL) 
 	nsyms = ada_lookup_symbol_list (name, expression_context_block, 
-					VAR_NAMESPACE, &syms, &blocks);
+					VAR_DOMAIN, &syms, &blocks);
       else
 	nsyms = ada_lookup_symbol_list (name, left_block_context, 
-					VAR_NAMESPACE, &syms, &blocks);
+					VAR_DOMAIN, &syms, &blocks);
 
       /* Check for a type definition. */
 
@@ -759,7 +759,7 @@ name_lookup (name0, err_name, token_type)
       if (segments == 0)
 	{
 	  type = lookup_primitive_typename (name);
-	  if (type == NULL && STREQ ("system__address", name))
+	  if (type == NULL && DEPRECATED_STREQ ("system__address", name))
 	    type = builtin_type_ada_system_address;
 	  if (type != NULL)
 	    {

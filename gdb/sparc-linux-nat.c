@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux SPARC.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "regcache.h"
+#include "sparc-tdep.h"
    
 #include <sys/procfs.h>
 
@@ -39,7 +40,7 @@ supply_gregset (elf_gregset_t *gregsetp)
   supply_register (PS_REGNUM, (char *) (regp + 32));
 
   supply_register (PC_REGNUM, (char *) (regp + 33));
-  supply_register (NPC_REGNUM, (char *) (regp + 34));
+  supply_register (DEPRECATED_NPC_REGNUM, (char *) (regp + 34));
   supply_register (Y_REGNUM, (char *) (regp + 35));
 
   supply_register (WIM_REGNUM, (char *) (regp + 36));
@@ -64,8 +65,8 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
 
   if (regno == -1 || regno == PC_REGNUM)
     regcache_collect (PC_REGNUM, regp + 33);
-  if (regno == -1 || regno == NPC_REGNUM)
-    regcache_collect (NPC_REGNUM, regp + 34);
+  if (regno == -1 || regno == DEPRECATED_NPC_REGNUM)
+    regcache_collect (DEPRECATED_NPC_REGNUM, regp + 34);
   if (regno == -1 || regno == Y_REGNUM)
     regcache_collect (Y_REGNUM, regp + 35);
 

@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -2281,6 +2281,107 @@ model_m32r_d_unlock (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
+model_m32r_d_clrpsw (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clrpsw.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_m32r_d_setpsw (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clrpsw.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_m32r_d_bset (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bset.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    referenced |= 1 << 0;
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_m32r_d_bclr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bset.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    referenced |= 1 << 0;
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_m32r_d_btst (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bset.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_sr = -1;
+    INT in_dr = -1;
+    INT out_dr = -1;
+    in_sr = FLD (in_sr);
+    referenced |= 1 << 0;
+    cycles += m32rbf_model_m32r_d_u_exec (current_cpu, idesc, 0, referenced, in_sr, in_dr, out_dr);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
 model_test_add (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_add.f
@@ -3864,6 +3965,86 @@ model_test_unlock (SIM_CPU *current_cpu, void *sem_arg)
 #undef FLD
 }
 
+static int
+model_test_clrpsw (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clrpsw.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_test_setpsw (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_clrpsw.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_test_bset (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bset.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_test_bclr (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bset.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_test_btst (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_bset.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += m32rbf_model_test_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
 /* We assume UNIT_NONE == 0 because the tables don't always terminate
    entries with it.  */
 
@@ -3975,6 +4156,11 @@ static const INSN_TIMING m32r_d_timing[] = {
   { M32RBF_INSN_SUBX, model_m32r_d_subx, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
   { M32RBF_INSN_TRAP, model_m32r_d_trap, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
   { M32RBF_INSN_UNLOCK, model_m32r_d_unlock, { { (int) UNIT_M32R_D_U_LOAD, 1, 1 } } },
+  { M32RBF_INSN_CLRPSW, model_m32r_d_clrpsw, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_SETPSW, model_m32r_d_setpsw, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_BSET, model_m32r_d_bset, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_BCLR, model_m32r_d_bclr, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_BTST, model_m32r_d_btst, { { (int) UNIT_M32R_D_U_EXEC, 1, 1 } } },
 };
 
 /* Model timing data for `test'.  */
@@ -4085,6 +4271,11 @@ static const INSN_TIMING test_timing[] = {
   { M32RBF_INSN_SUBX, model_test_subx, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
   { M32RBF_INSN_TRAP, model_test_trap, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
   { M32RBF_INSN_UNLOCK, model_test_unlock, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_CLRPSW, model_test_clrpsw, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_SETPSW, model_test_setpsw, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_BSET, model_test_bset, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_BCLR, model_test_bclr, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
+  { M32RBF_INSN_BTST, model_test_btst, { { (int) UNIT_TEST_U_EXEC, 1, 1 } } },
 };
 
 #endif /* WITH_PROFILE_MODEL_P */
@@ -4148,7 +4339,7 @@ m32r_init_cpu (SIM_CPU *cpu)
   CPU_PC_FETCH (cpu) = m32rbf_h_pc_get;
   CPU_PC_STORE (cpu) = m32rbf_h_pc_set;
   CPU_GET_IDATA (cpu) = m32rbf_get_idata;
-  CPU_MAX_INSNS (cpu) = M32RBF_INSN_UNLOCK + 1;
+  CPU_MAX_INSNS (cpu) = M32RBF_INSN__MAX;
   CPU_INSN_NAME (cpu) = cgen_insn_name;
   CPU_FULL_ENGINE_FN (cpu) = m32rbf_engine_run_full;
 #if WITH_FAST

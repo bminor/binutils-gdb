@@ -190,15 +190,23 @@ fi])dnl
 
 
 AC_ARG_ENABLE(sim-float,
-[  --enable-sim-float			Specify whether to use host floating point or simulate.],
+[  --enable-sim-float			Specify whether the target has hard, soft, altivec or e500 floating point.],
 [case "${enableval}" in
   yes | hard)	sim_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT";;
   no | soft)	sim_float="-DWITH_FLOATING_POINT=SOFT_FLOATING_POINT";;
+  altivec)      sim_float="-DWITH_ALTIVEC" ; sim_filter="${sim_filter},av" ;;
+  *spe*|*simd*) sim_float="-DWITH_E500" ; sim_filter="${sim_filter},e500" ;;
   *)		AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-float"); sim_float="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_float" != x""; then
   echo "Setting float flags = $sim_float" 6>&1
-fi],[sim_float=""])dnl
+fi],[
+case "${target}" in
+  *altivec*) sim_float="-DWITH_ALTIVEC" ; sim_filter="${sim_filter},av" ;;
+  *spe*|*simd*)	sim_float="-DWITH_E500" ; sim_filter="${sim_filter},e500" ;;
+  *) sim_float=""
+esac
+])dnl
 
 
 AC_ARG_ENABLE(sim-hardware,

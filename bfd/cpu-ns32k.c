@@ -1,5 +1,5 @@
 /* BFD support for the ns32k architecture.
-   Copyright 1990, 1991, 1994, 1995, 1998, 2000, 2001, 2002
+   Copyright 1990, 1991, 1994, 1995, 1998, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Almost totally rewritten by Ian Dall from initial work
    by Andrew Cagney.
@@ -30,14 +30,14 @@
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N(32532,"ns32k:32532",true, 0), /* The word ns32k will match this too.  */
+  N(32532,"ns32k:32532",TRUE, 0), /* The word ns32k will match this too.  */
 };
 
 const bfd_arch_info_type bfd_ns32k_arch =
-  N(32032,"ns32k:32032",false, &arch_info_struct[0]);
+  N(32032,"ns32k:32032",FALSE, &arch_info_struct[0]);
 
 static bfd_reloc_status_type do_ns32k_reloc
-  PARAMS ((bfd *, arelent *, struct symbol_cache_entry *, PTR, asection *,
+  PARAMS ((bfd *, arelent *, struct bfd_symbol *, PTR, asection *,
 	   bfd *, char **,
 	   bfd_vma (*) (bfd_byte *, int),
 	   void (*) (bfd_vma, bfd_byte *, int)));
@@ -158,7 +158,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		error_message, get_data, put_data)
      bfd *abfd;
      arelent *reloc_entry;
-     struct symbol_cache_entry *symbol;
+     struct bfd_symbol *symbol;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
@@ -182,7 +182,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
       return bfd_reloc_ok;
     }
 
-  /* If we are not producing relocateable output, return an error if
+  /* If we are not producing relocatable output, return an error if
      the symbol is not defined.  An undefined weak symbol is
      considered to have a value of zero (SVR4 ABI, p. 4-27).  */
   if (symbol->section == &bfd_und_section
@@ -194,7 +194,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
 
   /* Get symbol value.  (Common symbols are special.)  */
@@ -232,20 +232,20 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 	 of the location within the section.  Some targets arrange for
 	 the addend to be the negative of the position of the location
 	 within the section; for example, i386-aout does this.  For
-	 i386-aout, pcrel_offset is false.  Some other targets do not
+	 i386-aout, pcrel_offset is FALSE.  Some other targets do not
 	 include the position of the location; for example, m88kbcs,
-	 or ELF.  For those targets, pcrel_offset is true.
+	 or ELF.  For those targets, pcrel_offset is TRUE.
 
-	 If we are producing relocateable output, then we must ensure
+	 If we are producing relocatable output, then we must ensure
 	 that this reloc will be correctly computed when the final
-	 relocation is done.  If pcrel_offset is false we want to wind
+	 relocation is done.  If pcrel_offset is FALSE we want to wind
 	 up with the negative of the location within the section,
 	 which means we must adjust the existing addend by the change
-	 in the location within the section.  If pcrel_offset is true
+	 in the location within the section.  If pcrel_offset is TRUE
 	 we do not want to adjust the existing addend at all.
 
 	 FIXME: This seems logical to me, but for the case of
-	 producing relocateable output it is not what the code
+	 producing relocatable output it is not what the code
 	 actually does.  I don't want to change it, because it seems
 	 far too likely that something will break.  */
       relocation -=
@@ -297,7 +297,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		 should not have any tests that depend upon the flavour.  It's
 		 seem like entirely the wrong place for such a thing.  The
 		 second obvious point is that the current code ignores the
-		 reloc addend when producing relocateable output for COFF.
+		 reloc addend when producing relocatable output for COFF.
 		 That's peculiar.  In fact, I really have no idea what the
 		 point of the line you want to remove is.
 
@@ -315,10 +315,10 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		 (coff-i386 does subtract the old value, to be compatible with
 		 existing coff-i386 targets, like SCO).
 
-		 So everything works fine when not producing relocateable
-		 output.  When we are producing relocateable output, logically
+		 So everything works fine when not producing relocatable
+		 output.  When we are producing relocatable output, logically
 		 we should do exactly what we do when not producing
-		 relocateable output.  Therefore, your patch is correct.  In
+		 relocatable output.  Therefore, your patch is correct.  In
 		 fact, it should probably always just set reloc_entry->addend
 		 to 0 for all cases, since it is, in fact, going to add the
 		 value into the object file.  This won't hurt the COFF code,
@@ -326,7 +326,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		 to other formats (the thing to check for would be whether
 		 any formats both use the addend and set partial_inplace).
 
-		 When I wanted to make coff-i386 produce relocateable output,
+		 When I wanted to make coff-i386 produce relocatable output,
 		 I ran into the problem that you are running into: I wanted
 		 to remove that line.  Rather than risk it, I made the
 		 coff-i386 relocs use a special function; it's coff_i386_reloc
@@ -594,7 +594,7 @@ _bfd_do_ns32k_reloc_contents (howto, input_bfd, relocation, location,
 {
   int size;
   bfd_vma x;
-  boolean overflow;
+  bfd_boolean overflow;
 
   /* If the size is negative, negate RELOCATION.  This isn't very
      general.  */
@@ -622,7 +622,7 @@ _bfd_do_ns32k_reloc_contents (howto, input_bfd, relocation, location,
      which we don't check for.  We must either check at every single
      operation, which would be tedious, or we must do the computations
      in a type larger than bfd_vma, which would be inefficient.  */
-  overflow = false;
+  overflow = FALSE;
   if (howto->complain_on_overflow != complain_overflow_dont)
     {
       bfd_vma check;
@@ -678,7 +678,7 @@ _bfd_do_ns32k_reloc_contents (howto, input_bfd, relocation, location,
 
 	  /* For the signed case we use ADD, rather than SIGNED_ADD,
 	     to avoid warnings from SVR4 cc.  This is OK since we
-	     explictly handle the sign bits.  */
+	     explicitly handle the sign bits.  */
 	  if (signed_add >= 0)
 	    signed_check += add >> howto->bitpos;
 	  else
@@ -697,7 +697,7 @@ _bfd_do_ns32k_reloc_contents (howto, input_bfd, relocation, location,
 
 	    if (signed_check > reloc_signed_max
 		|| signed_check < reloc_signed_min)
-	      overflow = true;
+	      overflow = TRUE;
 	  }
 	  break;
 	case complain_overflow_unsigned:
@@ -709,7 +709,7 @@ _bfd_do_ns32k_reloc_contents (howto, input_bfd, relocation, location,
 	    (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
 
 	    if (check > reloc_unsigned_max)
-	      overflow = true;
+	      overflow = TRUE;
 	  }
 	  break;
 	case complain_overflow_bitfield:
@@ -722,7 +722,7 @@ _bfd_do_ns32k_reloc_contents (howto, input_bfd, relocation, location,
 	    if ((check & ~reloc_bits) != 0
 		&& (((bfd_vma) signed_check & ~reloc_bits)
 		    != (-(bfd_vma) 1 & ~reloc_bits)))
-	      overflow = true;
+	      overflow = TRUE;
 	  }
 	  break;
 	default:
@@ -762,7 +762,7 @@ _bfd_ns32k_reloc_disp (abfd, reloc_entry, symbol, data, input_section,
 		       output_bfd, error_message)
      bfd *abfd;
      arelent *reloc_entry;
-     struct symbol_cache_entry *symbol;
+     struct bfd_symbol *symbol;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
@@ -779,7 +779,7 @@ _bfd_ns32k_reloc_imm (abfd, reloc_entry, symbol, data, input_section,
 		      output_bfd, error_message)
      bfd *abfd;
      arelent *reloc_entry;
-     struct symbol_cache_entry *symbol;
+     struct bfd_symbol *symbol;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
@@ -818,9 +818,9 @@ _bfd_ns32k_final_link_relocate (howto, input_bfd, input_section, contents,
      location we are relocating.  Some targets (e.g., i386-aout)
      arrange for the contents of the section to be the negative of the
      offset of the location within the section; for such targets
-     pcrel_offset is false.  Other targets (e.g., m88kbcs or ELF)
+     pcrel_offset is FALSE.  Other targets (e.g., m88kbcs or ELF)
      simply leave the contents of the section as zero; for such
-     targets pcrel_offset is true.  If pcrel_offset is false we do not
+     targets pcrel_offset is TRUE.  If pcrel_offset is FALSE we do not
      need to subtract out the offset of the location within the
      section (which is just ADDRESS).  */
   if (howto->pc_relative)

@@ -1,5 +1,5 @@
 /* Native-dependent code for modern i386 BSD's.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -157,7 +157,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  i387_supply_fsave ((char *) fpregsetp);
+  i387_supply_fsave (current_regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -176,7 +176,6 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 void
 fetch_inferior_registers (int regno)
 {
-
   if (regno == -1 || GETREGS_SUPPLIES (regno))
     {
       gregset_t gregs;
@@ -196,12 +195,12 @@ fetch_inferior_registers (int regno)
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
-      if (have_ptrace_xmmregs != 0 &&
-	  ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
-		 (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
+      if (have_ptrace_xmmregs != 0
+	  && ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
+		    (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
 	{
 	  have_ptrace_xmmregs = 1;
-	  i387_supply_fxsave (xmmregs);
+	  i387_supply_fxsave (current_regcache, -1, xmmregs);
 	}
       else
 	{
@@ -209,14 +208,14 @@ fetch_inferior_registers (int regno)
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	    perror_with_name ("Couldn't get floating point status");
 
-	  supply_fpregset (&fpregs);
+	  i387_supply_fsave (current_regcache, -1, &fpregs);
 	}
 #else
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
-      supply_fpregset (&fpregs);
+      i387_supply_fsave (current_regcache, -1, &fpregs);
 #endif
     }
 }
@@ -227,7 +226,6 @@ fetch_inferior_registers (int regno)
 void
 store_inferior_registers (int regno)
 {
-
   if (regno == -1 || GETREGS_SUPPLIES (regno))
     {
       gregset_t gregs;
@@ -252,9 +250,9 @@ store_inferior_registers (int regno)
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
-      if (have_ptrace_xmmregs != 0 &&
-	  ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
-		 (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
+      if (have_ptrace_xmmregs != 0
+	  && ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
+		    (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
 	{
 	  have_ptrace_xmmregs = 1;
 
@@ -272,7 +270,7 @@ store_inferior_registers (int regno)
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	    perror_with_name ("Couldn't get floating point status");
 
-          fill_fpregset (&fpregs, regno);
+          i387_fill_fsave ((char *) &fpregs, regno);
   
           if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
@@ -386,8 +384,7 @@ kernel_u_size (void)
 void
 _initialize_i386bsd_nat (void)
 {
-  int sc_pc_offset;
-  int sc_sp_offset;
+  int offset;
 
   /* To support the recognition of signal handlers, i386bsd-tdep.c
      hardcodes some constants.  Inclusion of this file means that we
@@ -396,51 +393,64 @@ _initialize_i386bsd_nat (void)
      information.  */
 
 #if defined (__FreeBSD_version) && __FreeBSD_version >= 400011
-  extern int i386fbsd4_sc_pc_offset;
-  extern int i386fbsd4_sc_sp_offset;
-#define SC_PC_OFFSET i386fbsd4_sc_pc_offset
-#define SC_SP_OFFSET i386fbsd4_sc_sp_offset
+#define SC_REG_OFFSET i386fbsd4_sc_reg_offset
+#elif defined (__FreeBSD_version) && __FreeBSD_version >= 300005
+#define SC_REG_OFFSET i386fbsd_sc_reg_offset
 #elif defined (NetBSD) || defined (__NetBSD_Version__)
-  extern int i386nbsd_sc_pc_offset;
-  extern int i386nbsd_sc_sp_offset;
-#define SC_PC_OFFSET i386nbsd_sc_pc_offset
-#define SC_SP_OFFSET i386nbsd_sc_sp_offset
+#define SC_REG_OFFSET i386nbsd_sc_reg_offset
 #elif defined (OpenBSD)
-  extern int i386obsd_sc_pc_offset;
-  extern int i386obsd_sc_sp_offset;
-#define SC_PC_OFFSET i386obsd_sc_pc_offset
-#define SC_SP_OFFSET i386obsd_sc_sp_offset
+#define SC_REG_OFFSET i386obsd_sc_reg_offset
 #else
-  extern int i386bsd_sc_pc_offset;
-  extern int i386bsd_sc_sp_offset;
-#define SC_PC_OFFSET i386bsd_sc_pc_offset
-#define SC_SP_OFFSET i386bsd_sc_sp_offset
+#define SC_REG_OFFSET i386bsd_sc_reg_offset
 #endif
+
+  /* We only check the program counter, stack pointer and frame
+     pointer since these members of `struct sigcontext' are essential
+     for providing backtraces.  More checks could be added, but would
+     involve adding configure checks for the appropriate structure
+     members, since older BSD's don't provide all of them.  */
+
+#define SC_PC_OFFSET SC_REG_OFFSET[I386_EIP_REGNUM]
+#define SC_SP_OFFSET SC_REG_OFFSET[I386_ESP_REGNUM]
+#define SC_FP_OFFSET SC_REG_OFFSET[I386_EBP_REGNUM]
 
   /* Override the default value for the offset of the program counter
      in the sigcontext structure.  */
-  sc_pc_offset = offsetof (struct sigcontext, sc_pc);
+  offset = offsetof (struct sigcontext, sc_pc);
 
-  if (SC_PC_OFFSET != sc_pc_offset)
+  if (SC_PC_OFFSET != offset)
     {
       warning ("\
 offsetof (struct sigcontext, sc_pc) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>.",
-	       sc_pc_offset, SC_PC_OFFSET);
+Please report this to <bug-gdb@gnu.org>.", 
+	       offset, SC_PC_OFFSET);
     }
 
-  SC_PC_OFFSET = sc_pc_offset;
+  SC_PC_OFFSET = offset;
 
   /* Likewise for the stack pointer.  */
-  sc_sp_offset = offsetof (struct sigcontext, sc_sp);
+  offset = offsetof (struct sigcontext, sc_sp);
 
-  if (SC_SP_OFFSET != sc_sp_offset)
+  if (SC_SP_OFFSET != offset)
     {
       warning ("\
 offsetof (struct sigcontext, sc_sp) yields %d instead of %d.\n\
 Please report this to <bug-gdb@gnu.org>.",
-	       sc_sp_offset, SC_SP_OFFSET);
+	       offset, SC_SP_OFFSET);
     }
 
-  SC_SP_OFFSET = sc_sp_offset;
+  SC_SP_OFFSET = offset;
+
+  /* And the frame pointer.  */
+  offset = offsetof (struct sigcontext, sc_fp);
+
+  if (SC_FP_OFFSET != offset)
+    {
+      warning ("\
+offsetof (struct sigcontext, sc_fp) yields %d instead of %d.\n\
+Please report this to <bug-gdb@gnu.org>.",
+	       offset, SC_FP_OFFSET);
+    }
+
+  SC_FP_OFFSET = offset;
 }

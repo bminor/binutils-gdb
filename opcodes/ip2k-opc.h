@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -41,24 +41,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define CGEN_ASM_HASH_SIZE 127
 #define CGEN_ASM_HASH(insn) ip2k_asm_hash(insn)
 
-extern unsigned int ip2k_asm_hash (const char *insn);
-
-
-/* Special check to ensure that instruction exists for given machine. */
-static int
-ip2k_cgen_insn_supported (cd, insn)
-     CGEN_CPU_DESC cd;
-     CGEN_INSN *insn;
-{
-  int machs = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_MACH);
-
-  /* No mach attribute?  Assume it's supported for all machs.  */
-  if (machs == 0)
-    return 1;
-  
-  return ((machs & cd->machs) != 0);
-}
-
+extern unsigned int ip2k_asm_hash PARAMS ((const char *insn));
+extern int ip2k_cgen_insn_supported
+  PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *));
 
 /* -- opc.c */
 /* Enum declaration for ip2k instruction types.  */

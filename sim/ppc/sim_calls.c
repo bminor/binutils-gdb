@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1996,1998, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1995, 1996, 1998, 2003 Andrew Cagney
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ static host_callback *callbacks;
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
 	  host_callback *callback,
-	  struct _bfd *abfd,
+	  struct bfd *abfd,
 	  char **argv)
 {
   callbacks = callback;
@@ -180,7 +180,7 @@ sim_write (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 int
 sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
 {
-  char *regname;
+  const char *regname;
 
   if (simulator == NULL) {
     return 0;
@@ -194,43 +194,33 @@ sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
      But there are loops that just walk through the entire list of
      names and try to get everything.  */
   regname = gdbarch_register_name (current_gdbarch, regno);
-  /* FIXME: ezannoni 2002/04/15 Remove the 'vr' and 'vscr' check
-     once AltiVec support is committed.  */
-  if (! regname || regname[0] == '\0'
-      || (regname[0] == 'v' && regname[1] == 'r')
-      || (strcmp (regname, "vscr") == 0))
+  if (! regname || regname[0] == '\0')
     return -1;
 
   TRACE(trace_gdb, ("sim_fetch_register(regno=%d(%s), buf=0x%lx)\n",
 		    regno, regname, (long)buf));
-  psim_read_register(simulator, MAX_NR_PROCESSORS,
-		     buf, regname, raw_transfer);
-  return -1;
+  return psim_read_register(simulator, MAX_NR_PROCESSORS,
+			    buf, regname, raw_transfer);
 }
 
 
 int
 sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
 {
-  char *regname;
+  const char *regname;
 
   if (simulator == NULL)
     return 0;
 
   /* See comments in sim_fetch_register, above.  */
   regname = gdbarch_register_name (current_gdbarch, regno);
-  /* FIXME: ezannoni 2002/04/15 Remove the 'vr' and 'vscr' check
-     once AltiVec support is committed.  */
-  if (! regname || regname[0] == '\0'
-      || (regname[0] == 'v' && regname[1] == 'r')
-      || (strcmp (regname, "vscr") == 0))
+  if (! regname || regname[0] == '\0')
     return -1;
 
   TRACE(trace_gdb, ("sim_store_register(regno=%d(%s), buf=0x%lx)\n",
 		    regno, regname, (long)buf));
-  psim_write_register(simulator, MAX_NR_PROCESSORS,
-		      buf, regname, raw_transfer);
-  return -1;
+  return psim_write_register(simulator, MAX_NR_PROCESSORS,
+			     buf, regname, raw_transfer);
 }
 
 
@@ -244,7 +234,7 @@ sim_info (SIM_DESC sd, int verbose)
 
 SIM_RC
 sim_create_inferior (SIM_DESC sd,
-		     struct _bfd *abfd,
+		     struct bfd *abfd,
 		     char **argv,
 		     char **envp)
 {
@@ -263,8 +253,8 @@ sim_create_inferior (SIM_DESC sd,
   psim_init(simulator);
   psim_stack(simulator, argv, envp);
 
-  psim_write_register(simulator, -1 /* all start at same PC */,
-		      &entry_point, "pc", cooked_transfer);
+  ASSERT (psim_write_register(simulator, -1 /* all start at same PC */,
+			      &entry_point, "pc", cooked_transfer) > 0);
   return SIM_RC_OK;
 }
 

@@ -1,4 +1,4 @@
-# Copyright 2002 Free Software Foundation, Inc.
+# Copyright 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -191,8 +191,11 @@ proc check_mi_thread_command_set {} {
     "check_mi_thread_command_set: -thread-select 123456789"
 
   foreach thread $thread_list {
+    # line and file are optional.
+    # many of the threads are blocked in libc calls,
+    # and many people have libc's with no symbols.
     mi_gdb_test "-thread-select $thread" \
-      "\\^done,new-thread-id=\"$thread\",frame={.*},line=\"(-)?\[0-9\]+\",file=\".*\"" \
+      "\\^done,new-thread-id=\"$thread\",frame={.*}(,line=\"(-)?\[0-9\]+\",file=\".*\")?" \
       "check_mi_thread_command_set: -thread-select $thread"
   }
 }
@@ -204,11 +207,9 @@ set testfile "pthreads"
 set srcfile "$testfile.c"
 set binfile "$objdir/$subdir/$testfile"
 
-set options [list debug incdir=$subdir]
-if  {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $options]
-     != "" } {
-  gdb_suppress_entire_file \
-    "Testcase compile failed, so all tests in this file will automatically fail."
+set options [list debug incdir=$objdir]
+if {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $options] != "" } {
+    return -1
 }
 
 mi_gdb_reinitialize_dir $srcdir/$subdir

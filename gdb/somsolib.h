@@ -1,6 +1,7 @@
 /* HP SOM Shared library declarations for GDB, the GNU Debugger.
-   Copyright 1992, 1994, 1995, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1992, 1994, 1995, 1998, 1999, 2000, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +23,9 @@
    Written by the Center for Software Science at the Univerity of Utah
    and by Cygnus Support.  */
 
+#ifndef SOMSOLIB_H
+#define SOMSOLIB_H
+
 /* Forward decl's for prototypes */
 struct target_ops;
 struct objfile;
@@ -36,8 +40,8 @@ extern void som_solib_add (char *, int, struct target_ops *, int);
 
 extern CORE_ADDR som_solib_get_got_by_pc (CORE_ADDR);
 
-extern int
-som_solib_section_offsets (struct objfile *, struct section_offsets *);
+extern int som_solib_section_offsets (struct objfile *,
+				      struct section_offsets *);
 
 /* Function to be called when the inferior starts up, to discover the names
    of shared libraries that are dynamically linked, the base addresses to
@@ -163,3 +167,12 @@ extern char *som_solib_address (CORE_ADDR);	/* somsolib.c */
 /* If ADDR lies in a shared library, return its name.  */
 
 #define PC_SOLIB(addr)	som_solib_address (addr)
+
+extern CORE_ADDR som_solib_get_solib_by_pc (CORE_ADDR addr);
+
+struct so_list;
+extern CORE_ADDR so_lib_thread_start_addr (struct so_list *so);
+
+extern void no_shared_libraries (char *ignored, int from_tty);
+
+#endif

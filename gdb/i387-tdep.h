@@ -1,5 +1,6 @@
 /* Target-dependent code for the i387.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +22,33 @@
 #ifndef I387_TDEP_H
 #define I387_TDEP_H
 
+struct gdbarch;
+struct frame_info;
+struct regcache;
+struct type;
+struct ui_file;
+
+/* Because the number of general-purpose registers is different for
+   AMD64, the floating-point registers and SSE registers get shifted.
+   The following definitions are intended to help writing code that
+   needs the register numbers of floating-point registers and SSE
+   registers.  In order to use these, one should provide a definition
+   for I387_ST0_REGNUM, and possibly I387_NUM_XMM_REGS, preferably by
+   using a local "#define" in the body of the function that uses this.
+   Please "#undef" them before the end of the function.  */
+
+#define I387_FCTRL_REGNUM	(I387_ST0_REGNUM + 8)
+#define I387_FSTAT_REGNUM	(I387_FCTRL_REGNUM + 1)
+#define I387_FTAG_REGNUM	(I387_FCTRL_REGNUM + 2)
+#define I387_FISEG_REGNUM	(I387_FCTRL_REGNUM + 3)
+#define I387_FIOFF_REGNUM	(I387_FCTRL_REGNUM + 4)
+#define I387_FOSEG_REGNUM	(I387_FCTRL_REGNUM + 5)
+#define I387_FOOFF_REGNUM	(I387_FCTRL_REGNUM + 6)
+#define I387_FOP_REGNUM		(I387_FCTRL_REGNUM + 7)
+#define I387_XMM0_REGNUM	(I387_ST0_REGNUM + 16)
+#define I387_MXCSR_REGNUM	(I387_XMM0_REGNUM + I387_NUM_XMM_REGS)
+
+
 /* Print out the i387 floating point state.  */
 
 extern void i387_print_float_info (struct gdbarch *gdbarch,
@@ -28,36 +56,55 @@ extern void i387_print_float_info (struct gdbarch *gdbarch,
 				   struct frame_info *frame,
 				   const char *args);
 
-/* Fill register REGNUM in GDB's register array with the appropriate
-   value from *FSAVE.  This function masks off any of the reserved
-   bits in *FSAVE.  */
+/* Read a value of type TYPE from register REGNUM in frame FRAME, and
+   return its contents in TO.  */
 
-extern void i387_supply_register (int regnum, char *fsave);
+extern void i387_register_to_value (struct frame_info *frame, int regnum,
+				    struct type *type, void *to);
 
-/* Fill GDB's register array with the floating-point register values
-   in *FSAVE.  This function masks off any of the reserved
-   bits in *FSAVE.  */
+/* Write the contents FROM of a value of type TYPE into register
+   REGNUM in frame FRAME.  */
 
-extern void i387_supply_fsave (char *fsave);
+extern void i387_value_to_register (struct frame_info *frame, int regnum,
+				    struct type *type, const void *from);
+
+
+/* Size of the memory area use by the 'fsave' and 'fxsave'
+   instructions.  */
+#define I387_SIZEOF_FSAVE	108
+#define I387_SIZEOF_FXSAVE	512
+
+/* Fill register REGNUM in REGCACHE with the appropriate value from
+   *FSAVE.  This function masks off any of the reserved bits in
+   *FSAVE.  */
+
+extern void i387_supply_fsave (struct regcache *regcache, int regnum,
+			       const void *fsave);
 
 /* Fill register REGNUM (if it is a floating-point register) in *FSAVE
-   with the value in GDB's register array.  If REGNUM is -1, do this
+   with the value in GDB's register cache.  If REGNUM is -1, do this
    for all registers.  This function doesn't touch any of the reserved
    bits in *FSAVE.  */
 
-extern void i387_fill_fsave (char *fsave, int regnum);
+extern void i387_fill_fsave (void *fsave, int regnum);
 
-/* Fill GDB's register array with the floating-point and SSE register
-   values in *FXSAVE.  This function masks off any of the reserved
-   bits in *FXSAVE.  */
+/* Fill register REGNUM in REGCACHE with the appropriate
+   floating-point or SSE register value from *FXSAVE.  This function
+   masks off any of the reserved bits in *FXSAVE.  */
 
-extern void i387_supply_fxsave (char *fxsave);
+extern void i387_supply_fxsave (struct regcache *regcache, int regnum,
+				const void *fxsave);
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register array.  If REGNUM is -1, do
+   *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
    this for all registers.  This function doesn't touch any of the
    reserved bits in *FXSAVE.  */
 
-extern void i387_fill_fxsave (char *fxsave, int regnum);
+extern void i387_fill_fxsave (void *fxsave, int regnum);
+
+/* Prepare the FPU stack in REGCACHE for a function return.  */
+
+extern void i387_return_value (struct gdbarch *gdbarch,
+			       struct regcache *regcache);
 
 #endif /* i387-tdep.h */

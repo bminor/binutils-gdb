@@ -138,21 +138,24 @@ extern event_queue *psim_event_queue
  
 
 
-/* manipulate the state (registers or memory) of a processor within
+/* Manipulate the state (registers or memory) of a processor within
    the system.  In the case of memory, the read/write is performed
    using the specified processors address translation tables.
 
    Where applicable, WHICH_CPU == -1 indicates all processors and
-   WHICH_CPU == <nr_cpus> indicates the `current' processor. */
+   WHICH_CPU == <nr_cpus> indicates the `current' processor.
 
-extern void psim_read_register
+   The register functions return the size of the register, or 0 if the
+   register's name is not recognized.  */
+
+extern int psim_read_register
 (psim *system,
  int which_cpu,
  void *host_ordered_buf,
  const char reg[],
  transfer_mode mode);
 
-extern void psim_write_register
+extern int psim_write_register
 (psim *system,
  int which_cpu,
  const void *buf,

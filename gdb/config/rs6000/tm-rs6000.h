@@ -21,6 +21,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+struct frame_info;
+
 #define GDB_MULTI_ARCH 1
 
 /* Minimum possible text address in AIX */
@@ -78,19 +80,9 @@ extern void aix_process_linenos (void);
 
 /* Define other aspects of the stack frame.  */
 
-#define INIT_FRAME_PC_FIRST(fromleaf, prev) \
-  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
-	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
-#define INIT_FRAME_PC(fromleaf, prev)	/* nothing */
-
-/* Flag for machine-specific stuff in shared files.  FIXME */
-#define IBM6000_TARGET
-
-/* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
-
-#define SOFTWARE_SINGLE_STEP_P() 1
-extern void rs6000_software_single_step (enum target_signal, int);
-#define SOFTWARE_SINGLE_STEP(sig,bp_p) rs6000_software_single_step (sig, bp_p)
+#define DEPRECATED_INIT_FRAME_PC_FIRST(fromleaf, prev) \
+  (fromleaf ? DEPRECATED_SAVED_PC_AFTER_CALL (prev->next) : \
+	      prev->next ? DEPRECATED_FRAME_SAVED_PC (prev->next) : read_pc ())
 
 /* Notice when a new child process is started. */
 

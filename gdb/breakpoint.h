@@ -28,6 +28,7 @@
 #include "gdb-events.h"
 
 struct value;
+struct block;
 
 /* This is the maximum number of bytes a breakpoint instruction can take.
    Feel free to increase it.  It's just used in a few places to size
@@ -183,6 +184,97 @@ enum target_hw_bp_type
     hw_execute = 3		/* Execute HW breakpoint */
   };
 
+/* GDB maintains two types of information about each breakpoint (or
+   watchpoint, or other related event).  The first type corresponds
+   to struct breakpoint; this is a relatively high-level structure
+   which contains the source location(s), stopping conditions, user
+   commands to execute when the breakpoint is hit, and so forth.
+
+   The second type of information corresponds to struct bp_location.
+   Each breakpoint has one or (eventually) more locations associated
+   with it, which represent target-specific and machine-specific
+   mechanisms for stopping the program.  For instance, a watchpoint
+   expression may require multiple hardware watchpoints in order to
+   catch all changes in the value of the expression being watched.  */
+
+enum bp_loc_type
+{
+  bp_loc_software_breakpoint,
+  bp_loc_hardware_breakpoint,
+  bp_loc_hardware_watchpoint,
+  bp_loc_other			/* Miscellaneous...  */
+};
+
+struct bp_location
+{
+  /* Chain pointer to the next breakpoint location.  */
+  struct bp_location *next;
+
+  /* Type of this breakpoint location.  */
+  enum bp_loc_type loc_type;
+
+  /* Each breakpoint location must belong to exactly one higher-level
+     breakpoint.  This and the DUPLICATE flag are more straightforward
+     than reference counting.  */
+  struct breakpoint *owner;
+
+  /* Nonzero if this breakpoint is now inserted.  */
+  char inserted;
+
+  /* Nonzero if this is not the first breakpoint in the list
+     for the given address.  */
+  char duplicate;
+
+  /* If we someday support real thread-specific breakpoints, then
+     the breakpoint location will need a thread identifier.  */
+
+  /* Data for specific breakpoint types.  These could be a union, but
+     simplicity is more important than memory usage for breakpoints.  */
+
+  /* Note that zero is a perfectly valid code address on some platforms
+     (for example, the mn10200 (OBSOLETE) and mn10300 simulators).  NULL
+     is not a special value for this field.  Valid for all types except
+     bp_loc_other.  */
+  CORE_ADDR address;
+
+  /* For any breakpoint type with an address, this is the BFD section
+     associated with the address.  Used primarily for overlay debugging.  */
+  asection *section;
+
+  /* "Real" contents of byte where breakpoint has been inserted.
+     Valid only when breakpoints are in the program.  Under the complete
+     control of the target insert_breakpoint and remove_breakpoint routines.
+     No other code should assume anything about the value(s) here.
+     Valid only for bp_loc_software_breakpoint.  */
+  char shadow_contents[BREAKPOINT_MAX];
+
+  /* Address at which breakpoint was requested, either by the user or
+     by GDB for internal breakpoints.  This will usually be the same
+     as ``address'' (above) except for cases in which
+     ADJUST_BREAKPOINT_ADDRESS has computed a different address at
+     which to place the breakpoint in order to comply with a
+     processor's architectual constraints.  */
+  CORE_ADDR requested_address;
+};
+
+/* This structure is a collection of function pointers that, if available,
+   will be called instead of the performing the default action for this
+   bptype.  */
+
+struct breakpoint_ops 
+{
+  /* The normal print routine for this breakpoint, called when we
+     hit it.  */
+  enum print_stop_action (*print_it) (struct breakpoint *);
+
+  /* Display information about this breakpoint, for "info breakpoints".  */
+  void (*print_one) (struct breakpoint *, CORE_ADDR *);
+
+  /* Display information about this breakpoint after setting it (roughly
+     speaking; this is called from "mention").  */
+  void (*print_mention) (struct breakpoint *);
+};
+
 /* Note that the ->silent field is not currently used by any commands
    (though the code is in there if it was to be, and set_raw_breakpoint
    does set it to 0).  I implemented it because I thought it would be
@@ -203,11 +295,8 @@ struct breakpoint
     /* Number assigned to distinguish breakpoints.  */
     int number;
 
-    /* Address to break at.
-       Note that zero is a perfectly valid code address on some
-       platforms (for example, the mn10200 and mn10300 simulators).
-       NULL is not a special value for this field.  */
-    CORE_ADDR address;
+    /* Location(s) associated with this high-level breakpoint.  */
+    struct bp_location *loc;
 
     /* Line number of this address.  */
 
@@ -223,21 +312,11 @@ struct breakpoint
     /* Number of stops at this breakpoint that should
        be continued automatically before really stopping.  */
     int ignore_count;
-    /* "Real" contents of byte where breakpoint has been inserted.
-       Valid only when breakpoints are in the program.  Under the complete
-       control of the target insert_breakpoint and remove_breakpoint routines.
-       No other code should assume anything about the value(s) here.  */
-    char shadow_contents[BREAKPOINT_MAX];
-    /* Nonzero if this breakpoint is now inserted.  */
-    char inserted;
-    /* Nonzero if this is not the first breakpoint in the list
-       for the given address.  */
-    char duplicate;
     /* Chain of command lines to execute when this breakpoint is hit.  */
     struct command_line *commands;
     /* Stack depth (address of frame).  If nonzero, break only if fp
        equals this.  */
-    CORE_ADDR frame;
+    struct frame_id frame_id;
     /* Conditional.  Break only if this expression's value is nonzero.  */
     struct expression *cond;
 
@@ -304,7 +383,8 @@ struct breakpoint
        triggered.  */
     char *exec_pathname;
 
-    asection *section;
+    /* Methods associated with this breakpoint.  */
+    struct breakpoint_ops *ops;
   };
 
 /* The following stuff is an abstract data type "bpstat" ("breakpoint
@@ -521,18 +601,20 @@ enum breakpoint_here
 
 /* Prototypes for breakpoint-related functions.  */
 
-/* Forward declarations for prototypes */
-struct frame_info;
-
 extern enum breakpoint_here breakpoint_here_p (CORE_ADDR);
 
 extern int breakpoint_inserted_here_p (CORE_ADDR);
 
-extern int frame_in_dummy (struct frame_info *);
+/* FIXME: cagney/2002-11-10: The current [generic] dummy-frame code
+   implements a functional superset of this function.  The only reason
+   it hasn't been removed is because some architectures still don't
+   use the new framework.  Once they have been fixed, this can go.  */
+struct frame_info;
+extern int deprecated_frame_in_dummy (struct frame_info *);
 
 extern int breakpoint_thread_match (CORE_ADDR, ptid_t);
 
-extern void until_break_command (char *, int);
+extern void until_break_command (char *, int, int);
 
 extern void breakpoint_re_set (void);
 
@@ -541,7 +623,7 @@ extern void breakpoint_re_set_thread (struct breakpoint *);
 extern int ep_is_exception_catchpoint (struct breakpoint *);
 
 extern struct breakpoint *set_momentary_breakpoint
-  (struct symtab_and_line, struct frame_info *, enum bptype);
+  (struct symtab_and_line, struct frame_id, enum bptype);
 
 extern void set_ignore_count (int, int, int);
 
@@ -615,12 +697,12 @@ extern void disable_longjmp_breakpoint (void);
 extern void enable_overlay_breakpoints (void);
 extern void disable_overlay_breakpoints (void);
 
-extern void set_longjmp_resume_breakpoint (CORE_ADDR, struct frame_info *);
+extern void set_longjmp_resume_breakpoint (CORE_ADDR, struct frame_id);
 /* These functions respectively disable or reenable all currently
    enabled watchpoints.  When disabled, the watchpoints are marked
    call_disabled.  When reenabled, they are marked enabled.
 
-   The intended client of these functions is infcmd.c\run_stack_dummy.
+   The intended client of these functions is call_function_by_hand.
 
    The inferior must be stopped, and all breakpoints removed, when
    these functions are used.

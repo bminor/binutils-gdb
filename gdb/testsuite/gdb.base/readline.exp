@@ -169,7 +169,7 @@ set timeout 30
 # A simple test of operate-and-get-next.
 operate_and_get_next "Simple operate-and-get-next" \
   "p 1" ".* = 1" \
-  "p 2" ".* = 2"\
+  "p 2" ".* = 2" \
   "p 3" ".* = 3"
 
 # Test operate-and-get-next with a secondary prompt.
@@ -179,11 +179,43 @@ operate_and_get_next "operate-and-get-next with secondary prompt" \
   "end" ".* = 5"
 
 
+# Now repeat the first test with a history file that fills the entire
+# history list.
+
+if [info exists env(GDBHISTFILE)] {
+    set old_gdbhistfile $env(GDBHISTFILE)
+}
+if [info exists env(HISTSIZE)] {
+    set old_histsize $env(HISTSIZE)
+}
+set env(GDBHISTFILE) "${srcdir}/${subdir}/gdb_history"
+set env(HISTSIZE) "10"
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+
+operate_and_get_next "Simple operate-and-get-next" \
+  "p 7" ".* = 7" \
+  "p 8" ".* = 8" \
+  "p 9" ".* = 9"
+
+
 # Restore globals modified in this test...
 if [info exists old_inputrc] {
     set env(INPUTRC) $old_inputrc
 } else {
     unset env(INPUTRC)
+}
+if [info exists old_gdbhistfile] {
+    set env(GDBHISTFILE) $old_gdbhistfile
+} else {
+    unset env(GDBHISTFILE)
+}
+if [info exists old_histsize] {
+    set env(HISTSIZE) $old_histsize
+} else {
+    unset env(HISTSIZE)
 }
 set timeout $oldtimeout1
 

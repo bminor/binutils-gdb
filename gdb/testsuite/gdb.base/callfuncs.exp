@@ -1,4 +1,4 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -95,7 +95,6 @@ proc set_lang_c {} {
 
 proc do_function_calls {} {
     global prototypes
-    global gcc_compiled
     global gdb_prompt
 
     # We need to up this because this can be really slow on some boards.
@@ -143,23 +142,17 @@ proc do_function_calls {} {
 	gdb_test "p t_float_values(float_val1,-2.3765)" " = 1"
 
 	# Test passing of arguments which might not be widened.
-        # Under stabs, GCC doesn't tell us whether the function was
-        # prototyped or not.
-        if {$gcc_compiled} { setup_xfail_format "stabs" }
 	gdb_test "p t_float_values2(0.0,0.0)" " = 0"
 
 	# Although PR 5318 mentions SunOS specifically, this seems
 	# to be a generic problem on quite a few platforms.
 	if $prototypes then {
 	    setup_xfail "sparc-*-*" "mips*-*-*" 5318
-	    if {!$gcc_compiled} then {
+	    if { ! [test_compiler_info gcc-*-*] } then {
 		setup_xfail "alpha-dec-osf2*" "i*86-*-sysv4*" 5318
 	    }
 	}
         
-        # Under stabs, GCC doesn't tell us whether the function was
-        # prototyped or not.
-        if {$gcc_compiled} { setup_xfail_format "stabs" }
 	gdb_test "p t_float_values2(3.14159,float_val2)" " = 1"
 
 	gdb_test "p t_small_values(1,2,3,4,5,6,7,8,9,10)" " = 55"
@@ -188,30 +181,27 @@ proc do_function_calls {} {
     gdb_test "p t_func_values(func_val2,func_val1)" " = 0"
     gdb_test "p t_func_values(func_val1,func_val2)" " = 1"
 
-    # On the rs6000, we need to pass the address of the trampoline routine,
-    # not the address of add itself.  I don't know how to go from add to
-    # the address of the trampoline.  Similar problems exist on the HPPA,
-    # and in fact can present an unsolvable problem as the stubs may not
-    # even exist in the user's program.  We've slightly recoded t_func_values
-    # to avoid such problems in the common case.  This may or may not help
-    # the RS6000.
-    setup_xfail "rs6000*-*-*"
-    setup_xfail "powerpc*-*-*"
-    if {![istarget hppa*-*-hpux*]} then {
-	gdb_test "p t_func_values(add,func_val2)" " = 1"
-    }
-
-    setup_xfail "rs6000*-*-*"
-    setup_xfail "powerpc*-*-*"
-    if {![istarget hppa*-*-hpux*]} then {
-	gdb_test "p t_func_values(func_val1,doubleit)" " = 1"
-    }
-
-    setup_xfail "rs6000*-*-*"
-    setup_xfail "powerpc*-*-*"
-    if {![istarget hppa*-*-hpux*]} then {
-	gdb_test "p t_call_add(add,3,4)" " = 7"
-    }
+    # GDB currently screws up the passing of function parameters for
+    # ABIs that use function descriptors.  Instead of passing the
+    # address of te function descriptor, GDB passes the address of the
+    # function body.  This results in the called function treating the
+    # first few instructions of the function proper as a descriptor
+    # and attempting a jump through that (a totally random address).
+    setup_kfail "rs6000*-*-aix*" gdb/1457
+    setup_kfail "powerpc*-*-aix*" gdb/1457
+    setup_kfail "powerpc64*-*-*" gdb/1457
+    setup_kfail hppa*-*-hpux* gdb/1457
+    gdb_test "p t_func_values(add,func_val2)" " = 1"
+    setup_kfail "rs6000*-*-aix*" gdb/1457
+    setup_kfail "powerpc*-*-aix*" gdb/1457
+    setup_kfail "powerpc64*-*-*" gdb/1457
+    setup_kfail hppa*-*-hpux* gdb/1457
+    gdb_test "p t_func_values(func_val1,doubleit)" " = 1"
+    setup_kfail "rs6000*-*-aix*" gdb/1457
+    setup_kfail "powerpc*-*-aix*" gdb/1457
+    setup_kfail "powerpc64*-*-*" gdb/1457
+    setup_kfail hppa*-*-hpux* gdb/1457
+    gdb_test "p t_call_add(add,3,4)" " = 7"
     gdb_test "p t_call_add(func_val1,3,4)" " = 7"
 
     gdb_test "p t_enum_value1(enumval1)" " = 1"
@@ -348,7 +338,8 @@ if ![gdb_test "bt 2" \
 
 # Call function (causing a breakpoint hit in the call dummy) and do a finish,
 # make sure we are back at main and still have the same register contents.
-gdb_test "print add(4,5)" "The program being debugged stopped while.*" ""
+gdb_test "print add(4,5)" "The program being debugged stopped while.*" \
+	"call function causing a breakpoint then do a finish"
 gdb_test "finish" \
 	 "Value returned is .* = 9" \
 	 "finish from call dummy breakpoint returns correct value"
@@ -366,7 +357,8 @@ if ![gdb_test "bt 2" \
 
 # Call function (causing a breakpoint hit in the call dummy) and do a return
 # with a value, make sure we are back at main with the same register contents.
-gdb_test "print add(4,5)" "The program being debugged stopped while.*" ""
+gdb_test "print add(4,5)" "The program being debugged stopped while.*" \
+	"call function causing a breakpoint and then do a return"
 if ![gdb_test "return 7" \
 	      "#0  main.*" \
 	      "back at main after return from call dummy breakpoint" \

@@ -18,6 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+struct serial;
+
 int xmodem_init_xfer (struct serial *desc);
 void send_xmodem_packet (struct serial *desc, unsigned char *packet, int len,
 			 int hashmark);

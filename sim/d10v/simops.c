@@ -7,6 +7,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 
 #include "d10v_sim.h"
 #include "simops.h"
@@ -203,7 +206,7 @@ trace_input_func (name, in1, in2, in3)
 	  filename = (const char *)0;
 	  functionname = (const char *)0;
 	  linenumber = 0;
-	  if (bfd_find_nearest_line (prog_bfd, text, (struct symbol_cache_entry **)0, byte_pc - text_start,
+	  if (bfd_find_nearest_line (prog_bfd, text, (struct bfd_symbol **)0, byte_pc - text_start,
 				     &filename, &functionname, &linenumber))
 	    {
 	      p = buf;

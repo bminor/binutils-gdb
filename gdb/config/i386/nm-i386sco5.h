@@ -63,7 +63,7 @@ extern int kernel_u_size (void);
 /* After a watchpoint trap, the PC points to the instruction which
    caused the trap.  But we can continue over it without disabling the
    trap.  */
-#define HAVE_CONTINUABLE_WATCHPOINT
+#define HAVE_CONTINUABLE_WATCHPOINT 1
 #define HAVE_STEPPABLE_WATCHPOINT
 
 #define STOPPED_BY_WATCHPOINT(W)  \

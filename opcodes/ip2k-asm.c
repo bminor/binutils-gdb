@@ -43,11 +43,22 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
 static const char * parse_insn_normal
-     PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
+  (CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *);
 
 /* -- assembler routines inserted here.  */
 
 /* -- asm.c */
+
+#define PARSE_FUNC_DECL(name) \
+static const char *name PARAMS ((CGEN_CPU_DESC, const char **, int, long *))
+
+PARSE_FUNC_DECL (parse_fr);
+PARSE_FUNC_DECL (parse_addr16);
+PARSE_FUNC_DECL (parse_addr16_p);
+PARSE_FUNC_DECL (parse_addr16_cjp);
+PARSE_FUNC_DECL (parse_lit8);
+PARSE_FUNC_DECL (parse_bit3);
+
 
 static const char *
 parse_fr (cd, strp, opindex, valuep)
@@ -57,12 +68,12 @@ parse_fr (cd, strp, opindex, valuep)
      long *valuep;
 {
   const char *errmsg;
-  char *old_strp;
+  const char *old_strp;
   char *afteroffset; 
   enum cgen_parse_operand_result result_type;
   bfd_vma value;
   extern CGEN_KEYWORD ip2k_cgen_opval_register_names;
-  long tempvalue;
+  bfd_vma tempvalue;
 
   old_strp = *strp;
   afteroffset = NULL; 
@@ -71,36 +82,37 @@ parse_fr (cd, strp, opindex, valuep)
   /* Check here to see if you're about to try parsing a w as the first arg */
   /* and return an error if you are.                                       */
   if ( (strncmp(*strp,"w",1)==0) || (strncmp(*strp,"W",1)==0) )
-  {
-     (*strp)++;
+    {
+      (*strp)++;
 
-     if ( (strncmp(*strp,",",1)==0) || isspace(**strp) )
-     {
-        /* We've been passed a w.  Return with an error message so that  */
-        /* cgen will try the next parsing option.                        */
-        errmsg = _("W keyword invalid in FR operand slot.");
-        return errmsg;
-     }
-     *strp = old_strp;
-  }
+      if ( (strncmp(*strp,",",1)==0) || ISSPACE(**strp) )
+	{
+	  /* We've been passed a w.  Return with an error message so that  */
+	  /* cgen will try the next parsing option.                        */
+	  errmsg = _("W keyword invalid in FR operand slot.");
+	  return errmsg;
+	}
+      *strp = old_strp;
+    }
 
 
   /* Attempt parse as register keyword. */
   /* old_strp = *strp; */
 
-  errmsg = cgen_parse_keyword (cd, strp, & ip2k_cgen_opval_register_names, valuep);
+  errmsg = cgen_parse_keyword (cd, strp, & ip2k_cgen_opval_register_names,
+			       valuep);
   if ( *strp != NULL )
-  if (errmsg == NULL)
-    return errmsg;
+    if (errmsg == NULL)
+      return errmsg;
 
   /* Attempt to parse for "(IP)" */
   afteroffset = strstr(*strp,"(IP)");
 
   if ( afteroffset == NULL)
-  {
-     /* Make sure it's not in lower case */
-     afteroffset = strstr(*strp,"(ip)");
-  }
+    {
+      /* Make sure it's not in lower case */
+      afteroffset = strstr(*strp,"(ip)");
+    }
 
   if ( afteroffset != NULL )
     {
@@ -127,42 +139,44 @@ parse_fr (cd, strp, opindex, valuep)
   afteroffset = strstr(*strp,"(DP)");
 
   if ( afteroffset == NULL)
-  {
-     /* Maybe it's in lower case */
-     afteroffset = strstr(*strp,"(dp)");
-  }
+    {
+      /* Maybe it's in lower case */
+      afteroffset = strstr(*strp,"(dp)");
+    }
 
   if ( afteroffset != NULL )
-  {
-     if ( afteroffset == *strp )
-     {
-        /* No offset present. Use 0 by default. */
-        tempvalue = 0;
-        errmsg = NULL;
-     }
-     else
-     {
-       errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_IP2K_FR_OFFSET,
-				    & result_type, & tempvalue);
-     }
+    {
+      if ( afteroffset == *strp )
+	{
+	  /* No offset present. Use 0 by default. */
+	  tempvalue = 0;
+	  errmsg = NULL;
+	}
+      else
+	{
+	  errmsg = cgen_parse_address (cd, strp, opindex,
+				       BFD_RELOC_IP2K_FR_OFFSET,
+				       & result_type, & tempvalue);
+	}
 
-     if (errmsg == NULL)
-     {
-        if ( (tempvalue >= 0) && (tempvalue <= 127) )
-        {
-           /* Value is ok.  Fix up the first 2 bits and return */       
-           *valuep = 0x0100 | tempvalue;
-           *strp += 4; /* skip over the (DP) in *strp */
-           return errmsg;
-        } else
-        {
-           /* Found something there in front of (DP) but it's out of range. */
-           errmsg = _("(DP) offset out of range.");
-           return errmsg;
-        }
-        
-     }
-  }
+      if (errmsg == NULL)
+	{
+	  if (tempvalue <= 127)
+	    {
+	      /* Value is ok.  Fix up the first 2 bits and return */       
+	      *valuep = 0x0100 | tempvalue;
+	      *strp += 4; /* skip over the (DP) in *strp */
+	      return errmsg;
+	    }
+	  else
+	    {
+	      /* Found something there in front of (DP) but it's out
+		 of range. */
+	      errmsg = _("(DP) offset out of range.");
+	      return errmsg;
+	    }
+	}
+    }
 
 
   /* Attempt to parse for SP. ex: mov w, offset(SP)  */
@@ -172,41 +186,44 @@ parse_fr (cd, strp, opindex, valuep)
   afteroffset = strstr(*strp,"(SP)");
 
   if (afteroffset == NULL)
-  {
-     /* Maybe it's in lower case. */
-     afteroffset = strstr(*strp, "(sp)");
-  }
+    {
+      /* Maybe it's in lower case. */
+      afteroffset = strstr(*strp, "(sp)");
+    }
 
   if ( afteroffset != NULL )
-  {
-     if ( afteroffset ==  *strp )
-     {
-        /* No offset present. Use 0 by default. */
-        tempvalue = 0;
-        errmsg = NULL;
-     }
-     else
-     {
-       errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_IP2K_FR_OFFSET,
-				    & result_type, & tempvalue);
-     }
-     if (errmsg == NULL)
-     {
-        if ( (tempvalue >= 0) && (tempvalue <= 127) )
-        {
-           /* Value is ok.  Fix up the first 2 bits and return */
-           *valuep = 0x0180 | tempvalue;
-           *strp += 4; /* skip over the (SP) in *strp */
-           return errmsg;
-        } else
-        {
-           /* Found something there in front of (SP) but it's out of range. */
-           errmsg = _("(SP) offset out of range.");
-           return errmsg;
-        }
+    {
+      if ( afteroffset ==  *strp )
+	{
+	  /* No offset present. Use 0 by default. */
+	  tempvalue = 0;
+	  errmsg = NULL;
+	}
+      else
+	{
+	  errmsg = cgen_parse_address (cd, strp, opindex,
+				       BFD_RELOC_IP2K_FR_OFFSET,
+				       & result_type, & tempvalue);
+	}
+      if (errmsg == NULL)
+	{
+	  if (tempvalue <= 127)
+	    {
+	      /* Value is ok.  Fix up the first 2 bits and return */
+	      *valuep = 0x0180 | tempvalue;
+	      *strp += 4; /* skip over the (SP) in *strp */
+	      return errmsg;
+	    }
+	  else
+	    {
+	      /* Found something there in front of (SP) but it's out
+		 of range. */
+	      errmsg = _("(SP) offset out of range.");
+	      return errmsg;
+	    }
         
-     }
-  }
+	}
+    }
 
 
   /* Attempt to parse as an address. */
@@ -223,7 +240,8 @@ parse_fr (cd, strp, opindex, valuep)
 	{
 	  errmsg = _("illegal use of parentheses");
         }
-      /* if a numeric value is specified, ensure that it is between 1 and 255 */
+      /* if a numeric value is specified, ensure that it is between
+	 1 and 255 */
       else if (result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
 	{
 	  if (value < 0x1 || value > 0xff)
@@ -243,12 +261,12 @@ parse_addr16 (cd, strp, opindex, valuep)
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
   bfd_reloc_code_real_type code = BFD_RELOC_NONE;
-  long value;
+  bfd_vma value;
 
   if ( opindex == (CGEN_OPERAND_TYPE)IP2K_OPERAND_ADDR16H )
-      code = BFD_RELOC_IP2K_HI8DATA;
+    code = BFD_RELOC_IP2K_HI8DATA;
   else if ( opindex == (CGEN_OPERAND_TYPE)IP2K_OPERAND_ADDR16L )
-      code = BFD_RELOC_IP2K_LO8DATA;
+    code = BFD_RELOC_IP2K_LO8DATA;
   else
     {
       /* Something is very wrong. opindex has to be one of the above. */
@@ -257,93 +275,94 @@ parse_addr16 (cd, strp, opindex, valuep)
     }
   
   errmsg = cgen_parse_address (cd, strp, opindex, code,
-                                  & result_type, & value);
+			       & result_type, & value);
   if (errmsg == NULL)
     {
-       /* We either have a relocation or a number now. */
+      /* We either have a relocation or a number now. */
       if ( result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER )
-      {
-         /* We got a number back. */
-         if ( code == BFD_RELOC_IP2K_HI8DATA )
+	{
+	  /* We got a number back. */
+	  if ( code == BFD_RELOC_IP2K_HI8DATA )
             value >>= 8;
-         else    /* code = BFD_RELOC_IP2K_LOW8DATA */
+	  else    /* code = BFD_RELOC_IP2K_LOW8DATA */
 	    value &= 0x00FF;
-      }   
-         *valuep = value;
-   }
+	}   
+      *valuep = value;
+    }
 
   return errmsg;
 }
 
 
- static const char *
- parse_addr16_p (cd, strp, opindex, valuep)
-      CGEN_CPU_DESC cd;
-      const char **strp;
-      int opindex;
-      long *valuep;
- {
-   const char *errmsg;
-   enum cgen_parse_operand_result result_type;
-   bfd_reloc_code_real_type code = BFD_RELOC_IP2K_PAGE3;
-   long value;
+static const char *
+parse_addr16_p (cd, strp, opindex, valuep)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     long *valuep;
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+  bfd_reloc_code_real_type code = BFD_RELOC_IP2K_PAGE3;
+  bfd_vma value;
  
-   errmsg = cgen_parse_address (cd, strp, opindex, code,
-                                 & result_type, & value);
-   if (errmsg == NULL)
-   {
-       if ( result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER )
-            *valuep = (value >> 13) & 0x7;
-       else if ( result_type == CGEN_PARSE_OPERAND_RESULT_QUEUED )
-            *valuep = value;
-   }
-   return errmsg; 
- }
+  errmsg = cgen_parse_address (cd, strp, opindex, code,
+			       & result_type, & value);
+  if (errmsg == NULL)
+    {
+      if ( result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER )
+	*valuep = (value >> 13) & 0x7;
+      else if ( result_type == CGEN_PARSE_OPERAND_RESULT_QUEUED )
+	*valuep = value;
+    }
+  return errmsg; 
+}
 
 
- static const char *
- parse_addr16_cjp (cd, strp, opindex, valuep)
-      CGEN_CPU_DESC cd;
-      const char **strp;
-      int opindex;
-      long *valuep;
- {
-   const char *errmsg;
-   enum cgen_parse_operand_result result_type;
-   bfd_reloc_code_real_type code = BFD_RELOC_NONE;
-   long value;
+static const char *
+parse_addr16_cjp (cd, strp, opindex, valuep)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     long *valuep;
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+  bfd_reloc_code_real_type code = BFD_RELOC_NONE;
+  bfd_vma value;
  
-   if ( opindex == (CGEN_OPERAND_TYPE)IP2K_OPERAND_ADDR16CJP )
-      code = BFD_RELOC_IP2K_ADDR16CJP;
-   else if ( opindex == (CGEN_OPERAND_TYPE)IP2K_OPERAND_ADDR16P )
-      code = BFD_RELOC_IP2K_PAGE3;
+  if ( opindex == (CGEN_OPERAND_TYPE)IP2K_OPERAND_ADDR16CJP )
+    code = BFD_RELOC_IP2K_ADDR16CJP;
+  else if ( opindex == (CGEN_OPERAND_TYPE)IP2K_OPERAND_ADDR16P )
+    code = BFD_RELOC_IP2K_PAGE3;
 
-   errmsg = cgen_parse_address (cd, strp, opindex, code,
-                                 & result_type, & value);
-   if (errmsg == NULL)
-   {
-       if ( result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER )
-       {
-  	 if ( (value & 0x1) == 0)  /* If the address is even .... */
-         {
-             if ( opindex == (CGEN_OPERAND_TYPE)IP2K_OPERAND_ADDR16CJP )
+  errmsg = cgen_parse_address (cd, strp, opindex, code,
+			       & result_type, & value);
+  if (errmsg == NULL)
+    {
+      if ( result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER )
+	{
+	  if ( (value & 0x1) == 0)  /* If the address is even .... */
+	    {
+	      if ( opindex == (CGEN_OPERAND_TYPE)IP2K_OPERAND_ADDR16CJP )
                 *valuep = (value >> 1) & 0x1FFF;  /* Should mask be 1FFF? */
-             else if ( opindex == (CGEN_OPERAND_TYPE)IP2K_OPERAND_ADDR16P )
+	      else if ( opindex == (CGEN_OPERAND_TYPE)IP2K_OPERAND_ADDR16P )
                 *valuep = (value >> 14) & 0x7;
-          }
+	    }
           else
  	    errmsg = _("Byte address required. - must be even.");
-       }else if ( result_type == CGEN_PARSE_OPERAND_RESULT_QUEUED )
-       {
-            /* This will happen for things like (s2-s1) where s2 and s1 */
- 	    /* are labels.                                	        */
-            *valuep = value;
-        }
+	}
+      else if ( result_type == CGEN_PARSE_OPERAND_RESULT_QUEUED )
+	{
+	  /* This will happen for things like (s2-s1) where s2 and s1
+	     are labels.  */
+	  *valuep = value;
+	}
       else 
         errmsg = _("cgen_parse_address returned a symbol. Literal required.");
-   }
-   return errmsg; 
- }
+    }
+  return errmsg; 
+}
 
 
 static const char *
@@ -356,7 +375,7 @@ parse_lit8 (cd, strp, opindex, valuep)
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
   bfd_reloc_code_real_type code = BFD_RELOC_NONE;
-  long value;
+  bfd_vma value;
 
   /* Parse %OP relocating operators. */
   if (strncmp (*strp, "%bank", 5) == 0)
@@ -444,33 +463,39 @@ parse_bit3 (cd, strp, opindex, valuep)
     }
 
   errmsg = cgen_parse_signed_integer (cd, strp, opindex, valuep);
-  if (errmsg) {
+  if (errmsg)
     return errmsg;
-  }
 
-  if (mode) {
-    value = (unsigned long) *valuep;
-    if (value == 0) {
-      errmsg = _("Attempt to find bit index of 0");
-      return errmsg;
-    }
+  if (mode)
+    {
+      value = (unsigned long) *valuep;
+      if (value == 0)
+	{
+	  errmsg = _("Attempt to find bit index of 0");
+	  return errmsg;
+	}
     
-    if (mode == 1) {
-      count = 31;
-      while ((value & 0x80000000) == 0) {
-        count--;
-        value <<= 1;
-      }
-    } else if (mode == 2) {
-      count = 0;
-      while ((value & 0x00000001) == 0) {
-        count++;
-        value >>= 1;
-      }
-    }
+      if (mode == 1)
+	{
+	  count = 31;
+	  while ((value & 0x80000000) == 0)
+	    {
+	      count--;
+	      value <<= 1;
+	    }
+	}
+      else if (mode == 2)
+	{
+	  count = 0;
+	  while ((value & 0x00000001) == 0)
+	    {
+	      count++;
+	      value >>= 1;
+	    }
+	}
     
-    *valuep = count;
-  }
+      *valuep = count;
+    }
 
   return errmsg;
 }
@@ -582,8 +607,7 @@ ip2k_cgen_init_asm (cd)
    Returns NULL for success, an error message for failure.  */
 
 char * 
-ip2k_cgen_build_insn_regex (insn)
-     CGEN_INSN *insn;
+ip2k_cgen_build_insn_regex (CGEN_INSN *insn)
 {  
   CGEN_OPCODE *opc = (CGEN_OPCODE *) CGEN_INSN_OPCODE (insn);
   const char *mnem = CGEN_INSN_MNEMONIC (insn);
@@ -706,11 +730,10 @@ ip2k_cgen_build_insn_regex (insn)
    Returns NULL for success, an error message for failure.  */
 
 static const char *
-parse_insn_normal (cd, insn, strp, fields)
-     CGEN_CPU_DESC cd;
-     const CGEN_INSN *insn;
-     const char **strp;
-     CGEN_FIELDS *fields;
+parse_insn_normal (CGEN_CPU_DESC cd,
+		   const CGEN_INSN *insn,
+		   const char **strp,
+		   CGEN_FIELDS *fields)
 {
   /* ??? Runtime added insns not handled yet.  */
   const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
@@ -848,12 +871,11 @@ parse_insn_normal (cd, insn, strp, fields)
    mind helps keep the design clean.  */
 
 const CGEN_INSN *
-ip2k_cgen_assemble_insn (cd, str, fields, buf, errmsg)
-     CGEN_CPU_DESC cd;
-     const char *str;
-     CGEN_FIELDS *fields;
-     CGEN_INSN_BYTES_PTR buf;
-     char **errmsg;
+ip2k_cgen_assemble_insn (CGEN_CPU_DESC cd,
+			   const char *str,
+			   CGEN_FIELDS *fields,
+			   CGEN_INSN_BYTES_PTR buf,
+			   char **errmsg)
 {
   const char *start;
   CGEN_INSN_LIST *ilist;
@@ -883,10 +905,10 @@ ip2k_cgen_assemble_insn (cd, str, fields, buf, errmsg)
       if (! ip2k_cgen_insn_supported (cd, insn))
 	continue;
 #endif
-      /* If the RELAX attribute is set, this is an insn that shouldn't be
+      /* If the RELAXED attribute is set, this is an insn that shouldn't be
 	 chosen immediately.  Instead, it is used during assembler/linker
 	 relaxation if possible.  */
-      if (CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_RELAX) != 0)
+      if (CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_RELAXED) != 0)
 	continue;
 
       str = start;
@@ -957,9 +979,7 @@ ip2k_cgen_assemble_insn (cd, str, fields, buf, errmsg)
    FIXME: Not currently used.  */
 
 void
-ip2k_cgen_asm_hash_keywords (cd, opvals)
-     CGEN_CPU_DESC cd;
-     CGEN_KEYWORD *opvals;
+ip2k_cgen_asm_hash_keywords (CGEN_CPU_DESC cd, CGEN_KEYWORD *opvals)
 {
   CGEN_KEYWORD_SEARCH search = cgen_keyword_search_init (opvals, NULL);
   const CGEN_KEYWORD_ENTRY * ke;

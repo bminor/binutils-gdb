@@ -28,10 +28,13 @@ if { ![isnative] } then {
 set prms_id 0
 set bug_id 0
 
-if [istarget "hppa2.0w-hp-hpux*"] {
-  warning "Don't run gdb.base/foll-vfork.exp until JAGaa43495 kernel problem is fixed."
-  return 0
-}
+# NOTE drow/2002-12-06: I don't know what the referenced kernel problem
+# is, but it appears to be fixed in recent HP/UX versions.
+
+##if [istarget "hppa2.0w-hp-hpux*"] {
+##  warning "Don't run gdb.base/foll-vfork.exp until JAGaa43495 kernel problem is fixed."
+##  return 0
+##}
 
 set testfile "foll-vfork"
 set testfile2 "vforked-prog"

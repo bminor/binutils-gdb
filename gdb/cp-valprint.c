@@ -1,6 +1,6 @@
 /* Support for printing C++ values for GDB, the GNU debugger.
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -34,6 +34,7 @@
 #include "c-lang.h"
 #include "target.h"
 #include "cp-abi.h"
+#include "valprint.h"
 
 /* Indication of presence of HP-compiled object files */
 extern int hp_som_som_object_present;	/* defined in symtab.c */
@@ -87,7 +88,7 @@ cp_print_class_method (char *valaddr,
       fprintf_filtered (stream, "<unknown>");
       return;
     }
-  addr = unpack_pointer (lookup_pointer_type (builtin_type_void), valaddr);
+  addr = unpack_pointer (type, valaddr);
   if (METHOD_PTR_IS_VIRTUAL (addr))
     {
       offset = METHOD_PTR_TO_VOFFSET (addr);
@@ -130,7 +131,8 @@ cp_print_class_method (char *valaddr,
 	  check_stub_method_group (domain, i);
 	  for (j = 0; j < len2; j++)
 	    {
-	      if (STREQ (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
+	      if (strcmp (DEPRECATED_SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j))
+		  == 0)
 		goto common;
 	    }
 	}
@@ -141,7 +143,7 @@ cp_print_class_method (char *valaddr,
       char *demangled_name;
 
       fprintf_filtered (stream, "&");
-      fprintf_filtered (stream, kind);
+      fputs_filtered (kind, stream);
       demangled_name = cplus_demangle (TYPE_FN_FIELD_PHYSNAME (f, j),
 				       DMGL_ANSI | DMGL_PARAMS);
       if (demangled_name == NULL)
@@ -259,14 +261,12 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
   if ((len == n_baseclasses)
       || ((len - n_baseclasses == 1)
 	  && TYPE_HAS_VTABLE (type)
-	  && STREQN (TYPE_FIELD_NAME (type, n_baseclasses),
-		     hpacc_vtbl_ptr_name, 5))
+	  && strncmp (TYPE_FIELD_NAME (type, n_baseclasses),
+		      hpacc_vtbl_ptr_name, 5) == 0)
       || !len)
     fprintf_filtered (stream, "<No data fields>");
   else
     {
-      extern int inspect_it;
-
       if (dont_print_statmem == 0)
 	{
 	  /* If we're at top level, carve out a completely fresh
@@ -284,7 +284,8 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
 
 	  /* If a vtable pointer appears, we'll print it out later */
 	  if (TYPE_HAS_VTABLE (type)
-	      && STREQN (TYPE_FIELD_NAME (type, i), hpacc_vtbl_ptr_name, 5))
+	      && strncmp (TYPE_FIELD_NAME (type, i), hpacc_vtbl_ptr_name,
+			  5) == 0)
 	    continue;
 
 	  if (fields_seen)
@@ -407,9 +408,8 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
     }				/* if there are data fields */
   /* Now print out the virtual table pointer if there is one */
   if (TYPE_HAS_VTABLE (type)
-      && STREQN (TYPE_FIELD_NAME (type, n_baseclasses),
-		 hpacc_vtbl_ptr_name, 
-		 5))
+      && strncmp (TYPE_FIELD_NAME (type, n_baseclasses),
+		  hpacc_vtbl_ptr_name, 5) == 0)
     {
       struct value *v;
       /* First get the virtual table pointer and print it out */
@@ -554,7 +554,7 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
 	{
 	  boffset = baseclass_offset (type, i,
 				      valaddr + offset,
-				      address + offset);
+				      address);
 	  skip = ((boffset == -1) || (boffset + offset) < 0) ? 1 : -1;
 
 	  if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -569,9 +569,10 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
 		{
 		  /* FIXME (alloca): unsafe if baseclass is really really large. */
 		  base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
-		  if (target_read_memory (address + offset + boffset, base_valaddr,
+		  if (target_read_memory (address + boffset, base_valaddr,
 					  TYPE_LENGTH (baseclass)) != 0)
 		    skip = 1;
+		  address = address + boffset;
 		  thisoffset = 0;
 		  boffset = 0;
 		  thistype = baseclass;
@@ -600,7 +601,8 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
 	fprintf_filtered (stream, "<invalid address>");
       else
 	cp_print_value_fields (baseclass, thistype, base_valaddr,
-			       thisoffset + boffset, address, stream, format,
+			       thisoffset + boffset, address + boffset,
+			       stream, format,
 			       recurse, pretty,
 			       ((struct type **)
 				obstack_base (&dont_print_vb_obstack)),
@@ -684,7 +686,7 @@ cp_print_class_member (char *valaddr, struct type *domain,
      print it.  */
   int extra = 0;
   int bits = 0;
-  register unsigned int i;
+  unsigned int i;
   unsigned len = TYPE_NFIELDS (domain);
 
   /* @@ Make VAL into bit offset */
@@ -718,7 +720,7 @@ cp_print_class_member (char *valaddr, struct type *domain,
   if (i < len)
     {
       char *name;
-      fprintf_filtered (stream, prefix);
+      fputs_filtered (prefix, stream);
       name = type_name_no_tag (domain);
       if (name)
 	fputs_filtered (name, stream);

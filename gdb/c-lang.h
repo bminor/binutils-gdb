@@ -23,6 +23,8 @@
 #if !defined (C_LANG_H)
 #define C_LANG_H 1
 
+struct ui_file;
+
 #include "value.h"
 #include "macroexp.h"
 

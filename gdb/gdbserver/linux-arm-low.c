@@ -26,11 +26,13 @@
 #include <sys/reg.h>
 #endif
 
-#define arm_num_regs 16
+#define arm_num_regs 26
 
 static int arm_regmap[] = {
   0, 4, 8, 12, 16, 20, 24, 28,
   32, 36, 40, 44, 48, 52, 56, 60,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  64
 };
 
 static int
@@ -78,6 +80,17 @@ arm_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
+/* We only place breakpoints in empty marker functions, and thread locking
+   is outside of the function.  So rather than importing software single-step,
+   we can just run until exit.  */
+static CORE_ADDR
+arm_reinsert_addr ()
+{
+  unsigned long pc;
+  collect_register_by_name ("lr", &pc);
+  return pc;
+}
+
 struct linux_target_ops the_low_target = {
   arm_num_regs,
   arm_regmap,
@@ -87,7 +100,7 @@ struct linux_target_ops the_low_target = {
   arm_set_pc,
   (const char *) &arm_breakpoint,
   arm_breakpoint_len,
-  NULL,
+  arm_reinsert_addr,
   0,
   arm_breakpoint_at,
 };

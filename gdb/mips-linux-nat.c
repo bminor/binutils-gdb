@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,27 +29,35 @@
 int
 mips_linux_cannot_fetch_register (int regno)
 {
-  if (regno == PS_REGNUM)
-    return 1;
-  else if (regno == ZERO_REGNUM)
-    return 1;
-  else
+  if (regno > ZERO_REGNUM && regno < ZERO_REGNUM + 32)
     return 0;
+  else if (regno >= mips_regnum (current_gdbarch)->fp0
+	   && regno <= mips_regnum (current_gdbarch)->fp0 + 32)
+    return 0;
+  else if (regno == mips_regnum (current_gdbarch)->lo
+	   || regno == mips_regnum (current_gdbarch)->hi
+	   || regno == mips_regnum (current_gdbarch)->badvaddr
+	   || regno == mips_regnum (current_gdbarch)->cause
+	   || regno == mips_regnum (current_gdbarch)->pc
+	   || regno == mips_regnum (current_gdbarch)->fp_control_status
+	   || regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+    return 0;
+  else
+    return 1;
 }
 
 int
 mips_linux_cannot_store_register (int regno)
 {
-  if (regno == PS_REGNUM)
-    return 1;
-  else if (regno == ZERO_REGNUM)
-    return 1;
-  else if (regno == BADVADDR_REGNUM)
-    return 1;
-  else if (regno == CAUSE_REGNUM)
-    return 1;
-  else if (regno == FCRIR_REGNUM)
-    return 1;
-  else
+  if (regno > ZERO_REGNUM && regno < ZERO_REGNUM + 32)
     return 0;
+  else if (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 32)
+    return 0;
+  else if (regno == mips_regnum (current_gdbarch)->lo
+	   || regno == mips_regnum (current_gdbarch)->hi
+	   || regno == mips_regnum (current_gdbarch)->pc
+	   || regno == mips_regnum (current_gdbarch)->fp_control_status)
+    return 0;
+  else
+    return 1;
 }

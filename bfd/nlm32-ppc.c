@@ -1,5 +1,6 @@
 /* Support for 32-bit PowerPC NLM (NetWare Loadable Module)
-   Copyright 1994, 1995, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -32,31 +33,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libnlm.h"
 
 #ifdef OLDFORMAT
-static boolean nlm_powerpc_backend_object_p
+static bfd_boolean nlm_powerpc_backend_object_p
   PARAMS ((bfd *));
-static boolean nlm_powerpc_write_prefix
+static bfd_boolean nlm_powerpc_write_prefix
   PARAMS ((bfd *));
 #endif
 
-static boolean nlm_powerpc_read_reloc
+static bfd_boolean nlm_powerpc_read_reloc
   PARAMS ((bfd *, nlmNAME(symbol_type) *, asection **, arelent *));
-static boolean nlm_powerpc_mangle_relocs
-  PARAMS ((bfd *, asection *, PTR, bfd_vma, bfd_size_type));
-static boolean nlm_powerpc_read_import
+static bfd_boolean nlm_powerpc_mangle_relocs
+  PARAMS ((bfd *, asection *, const PTR, bfd_vma, bfd_size_type));
+static bfd_boolean nlm_powerpc_read_import
   PARAMS ((bfd *, nlmNAME(symbol_type) *));
 
 #ifdef OLDFORMAT
-static boolean nlm_powerpc_write_reloc
+static bfd_boolean nlm_powerpc_write_reloc
   PARAMS ((bfd *, asection *, arelent *, int));
 #endif
 
-static boolean nlm_powerpc_write_import
+static bfd_boolean nlm_powerpc_write_import
   PARAMS ((bfd *, asection *, arelent *));
-static boolean nlm_powerpc_write_external
+static bfd_boolean nlm_powerpc_write_external
   PARAMS ((bfd *, bfd_size_type, asymbol *, struct reloc_and_sec *));
 
 #ifndef OLDFORMAT
-static boolean nlm_powerpc_set_public_section
+static bfd_boolean nlm_powerpc_set_public_section
   PARAMS ((bfd *, nlmNAME(symbol_type) *));
 static bfd_vma nlm_powerpc_get_public_offset
   PARAMS ((bfd *, asymbol *));
@@ -70,25 +71,25 @@ static bfd_vma nlm_powerpc_get_public_offset
    function reads it in, verifies the version, and seeks the bfd to
    the location before the regular NLM header.  */
 
-static boolean
+static bfd_boolean
 nlm_powerpc_backend_object_p (abfd)
      bfd *abfd;
 {
   struct nlm32_powerpc_external_prefix_header s;
 
   if (bfd_bread ((PTR) &s, (bfd_size_type) sizeof s, abfd) != sizeof s)
-    return false;
+    return FALSE;
 
   if (memcmp (s.signature, NLM32_POWERPC_SIGNATURE, sizeof s.signature) != 0
       || H_GET_32 (abfd, s.headerVersion) != NLM32_POWERPC_HEADER_VERSION)
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 /* Write out the prefix.  */
 
-static boolean
+static bfd_boolean
 nlm_powerpc_write_prefix (abfd)
      bfd *abfd;
 {
@@ -102,9 +103,9 @@ nlm_powerpc_write_prefix (abfd)
   /* FIXME: What should we do about the date?  */
 
   if (bfd_bwrite ((PTR) &s, (bfd_size_type) sizeof s, abfd) != sizeof s)
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 #endif /* OLDFORMAT */
@@ -118,19 +119,19 @@ static reloc_howto_type nlm_powerpc_howto =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,			/* special_function */
 	 "32",			/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false);		/* pcrel_offset */
+	 FALSE);		/* pcrel_offset */
 
 /* Read a PowerPC NLM reloc.  */
 
-static boolean
+static bfd_boolean
 nlm_powerpc_read_reloc (abfd, sym, secp, rel)
      bfd *abfd;
      nlmNAME(symbol_type) *sym;
@@ -142,7 +143,7 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
   const char *name;
 
   if (bfd_bread (temp, (bfd_size_type) sizeof (temp), abfd) != sizeof (temp))
-    return false;
+    return FALSE;
 
   val = bfd_get_32 (abfd, temp);
 
@@ -187,7 +188,7 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
   rel->address = val << 2;
   rel->addend = 0;
 
-  return true;
+  return TRUE;
 }
 
 #else /* OLDFORMAT */
@@ -204,105 +205,105 @@ static reloc_howto_type nlm_powerpc_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_POS",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,            /* src_mask */
 	 0xffffffff,            /* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* 32 bit relocation, but store negative value.  */
   HOWTO (1,	                /* type */
 	 0,	                /* rightshift */
 	 -2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_NEG",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,            /* src_mask */
 	 0xffffffff,            /* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* 32 bit PC relative relocation.  */
   HOWTO (2,	                /* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 true,	                /* pc_relative */
+	 TRUE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_REL",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,            /* src_mask */
 	 0xffffffff,            /* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* 16 bit TOC relative relocation.  */
   HOWTO (3,	                /* type */
 	 0,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_TOC",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* I don't really know what this is.  */
   HOWTO (4,	                /* type */
 	 1,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_RTB",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* External TOC relative symbol.  */
   HOWTO (5,	                /* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_GL",                /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* Local TOC relative symbol.  */
   HOWTO (6,	                /* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_TCL",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   { 7 },
 
@@ -311,15 +312,15 @@ static reloc_howto_type nlm_powerpc_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 26,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_BA",                /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0x3fffffc,	        /* src_mask */
 	 0x3fffffc,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   { 9 },
 
@@ -328,15 +329,15 @@ static reloc_howto_type nlm_powerpc_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 26,	                /* bitsize */
-	 true,	                /* pc_relative */
+	 TRUE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_BR",                /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0x3fffffc,	        /* src_mask */
 	 0x3fffffc,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   { 0xb },
 
@@ -345,30 +346,30 @@ static reloc_howto_type nlm_powerpc_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_RL",                /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* Load address.  */
   HOWTO (0xd,	                /* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_RLA",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   { 0xe },
 
@@ -377,15 +378,15 @@ static reloc_howto_type nlm_powerpc_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_REF",               /* name */
-	 false,	                /* partial_inplace */
+	 FALSE,	                /* partial_inplace */
 	 0,		        /* src_mask */
 	 0,     	   	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   { 0x10 },
   { 0x11 },
@@ -395,150 +396,150 @@ static reloc_howto_type nlm_powerpc_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_TRL",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* TOC relative load address.  */
   HOWTO (0x13,	                /* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_TRLA",              /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* Modifiable relative branch.  */
   HOWTO (0x14,	                /* type */
 	 1,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_RRTBI",             /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* Modifiable absolute branch.  */
   HOWTO (0x15,	                /* type */
 	 1,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_RRTBA",             /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* Modifiable call absolute indirect.  */
   HOWTO (0x16,	                /* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_CAI",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* Modifiable call relative.  */
   HOWTO (0x17,	                /* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_REL",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* Modifiable branch absolute.  */
   HOWTO (0x18,	                /* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_RBA",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* Modifiable branch absolute.  */
   HOWTO (0x19,	                /* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_RBAC",              /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* Modifiable branch relative.  */
   HOWTO (0x1a,	                /* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 26,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_REL",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* Modifiable branch absolute.  */
   HOWTO (0x1b,	                /* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "R_REL",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false)                 /* pcrel_offset */
+	 FALSE)                 /* pcrel_offset */
 };
 
 #define HOWTO_COUNT (sizeof nlm_powerpc_howto_table		\
@@ -546,7 +547,7 @@ static reloc_howto_type nlm_powerpc_howto_table[] =
 
 /* Read a PowerPC NLM reloc.  */
 
-static boolean
+static bfd_boolean
 nlm_powerpc_read_reloc (abfd, sym, secp, rel)
      bfd *abfd;
      nlmNAME(symbol_type) *sym;
@@ -562,7 +563,7 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
 
   /* Read the reloc from the file.  */
   if (bfd_bread (&ext, (bfd_size_type) sizeof ext, abfd) != sizeof ext)
-    return false;
+    return FALSE;
 
   /* Swap in the fields.  */
   l_vaddr = H_GET_32 (abfd, ext.l_vaddr);
@@ -595,7 +596,7 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
       else
 	{
 	  bfd_set_error (bfd_error_bad_value);
-	  return false;
+	  return FALSE;
 	}
 
       rel->sym_ptr_ptr = sec->symbol_ptr_ptr;
@@ -625,32 +626,32 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
   else
     {
       bfd_set_error (bfd_error_bad_value);
-      return false;
+      return FALSE;
     }
 
   rel->address = l_vaddr;
 
-  return true;
+  return TRUE;
 }
 
 #endif /* OLDFORMAT */
 
 /* Mangle PowerPC NLM relocs for output.  */
 
-static boolean
+static bfd_boolean
 nlm_powerpc_mangle_relocs (abfd, sec, data, offset, count)
      bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec ATTRIBUTE_UNUSED;
-     PTR data ATTRIBUTE_UNUSED;
+     const PTR data ATTRIBUTE_UNUSED;
      bfd_vma offset ATTRIBUTE_UNUSED;
      bfd_size_type count ATTRIBUTE_UNUSED;
 {
-  return true;
+  return TRUE;
 }
 
 /* Read a PowerPC NLM import record */
 
-static boolean
+static bfd_boolean
 nlm_powerpc_read_import (abfd, sym)
      bfd *abfd;
      nlmNAME(symbol_type) *sym;
@@ -663,13 +664,13 @@ nlm_powerpc_read_import (abfd, sym)
 
   if (bfd_bread ((PTR) &symlength, (bfd_size_type) sizeof (symlength), abfd)
       != sizeof (symlength))
-    return (false);
+    return FALSE;
   sym -> symbol.the_bfd = abfd;
   name = bfd_alloc (abfd, (bfd_size_type) symlength + 1);
   if (name == NULL)
-    return false;
+    return FALSE;
   if (bfd_bread (name, (bfd_size_type) symlength, abfd) != symlength)
-    return (false);
+    return FALSE;
   name[symlength] = '\0';
   sym -> symbol.name = name;
   sym -> symbol.flags = 0;
@@ -677,12 +678,12 @@ nlm_powerpc_read_import (abfd, sym)
   sym -> symbol.section = bfd_und_section_ptr;
   if (bfd_bread ((PTR) temp, (bfd_size_type) sizeof (temp), abfd)
       != sizeof (temp))
-    return (false);
+    return FALSE;
   rcount = H_GET_32 (abfd, temp);
   nlm_relocs = ((struct nlm_relent *)
 		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
   if (nlm_relocs == (struct nlm_relent *) NULL)
-    return false;
+    return FALSE;
   sym -> relocs = nlm_relocs;
   sym -> rcnt = 0;
   while (sym -> rcnt < rcount)
@@ -690,19 +691,19 @@ nlm_powerpc_read_import (abfd, sym)
       asection *section;
 
       if (! nlm_powerpc_read_reloc (abfd, sym, &section, &nlm_relocs -> reloc))
-	return false;
+	return FALSE;
       nlm_relocs -> section = section;
       nlm_relocs++;
       sym -> rcnt++;
     }
-  return true;
+  return TRUE;
 }
 
 #ifndef OLDFORMAT
 
 /* Write a PowerPC NLM reloc.  */
 
-static boolean
+static bfd_boolean
 nlm_powerpc_write_import (abfd, sec, rel)
      bfd *abfd;
      asection *sec;
@@ -724,7 +725,7 @@ nlm_powerpc_write_import (abfd, sec, rel)
       || rel->howto->dst_mask != 0xffffffff)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return false;
+      return FALSE;
     }
 
   sym = *rel->sym_ptr_ptr;
@@ -737,7 +738,7 @@ nlm_powerpc_write_import (abfd, sec, rel)
   if ((val & 3) != 0)
     {
       bfd_set_error (bfd_error_bad_value);
-      return false;
+      return FALSE;
     }
   val >>= 2;
 
@@ -762,9 +763,9 @@ nlm_powerpc_write_import (abfd, sec, rel)
 
   bfd_put_32 (abfd, val, temp);
   if (bfd_bwrite (temp, (bfd_size_type) sizeof (temp), abfd) != sizeof (temp))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 #else /* OLDFORMAT */
@@ -773,7 +774,7 @@ nlm_powerpc_write_import (abfd, sec, rel)
 
 /* Write a PowerPC NLM reloc.  */
 
-static boolean
+static bfd_boolean
 nlm_powerpc_write_reloc (abfd, sec, rel, indx)
      bfd *abfd;
      asection *sec;
@@ -813,7 +814,7 @@ nlm_powerpc_write_reloc (abfd, sec, rel, indx)
       else
 	{
 	  bfd_set_error (bfd_error_bad_value);
-	  return false;
+	  return FALSE;
 	}
     }
 
@@ -841,7 +842,7 @@ nlm_powerpc_write_reloc (abfd, sec, rel, indx)
   if (howto >= nlm_powerpc_howto_table + HOWTO_COUNT)
     {
       bfd_set_error (bfd_error_bad_value);
-      return false;
+      return FALSE;
     }
 
   l_rtype = howto->type;
@@ -862,21 +863,21 @@ nlm_powerpc_write_reloc (abfd, sec, rel, indx)
   else
     {
       bfd_set_error (bfd_error_bad_value);
-      return false;
+      return FALSE;
     }
 
   H_PUT_16 (abfd, l_rsecnm, ext.l_rsecnm);
   H_PUT_32 (abfd, address, ext.l_vaddr);
 
   if (bfd_bwrite (&ext, (bfd_size_type) sizeof ext, abfd) != sizeof ext)
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 /* Write a PowerPC NLM import.  */
 
-static boolean
+static bfd_boolean
 nlm_powerpc_write_import (abfd, sec, rel)
      bfd *abfd;
      asection *sec;
@@ -891,7 +892,7 @@ nlm_powerpc_write_import (abfd, sec, rel)
    count of the symbol index.  FIXME: I don't know if this is
    necessary, and the index never gets reset.  */
 
-static boolean
+static bfd_boolean
 nlm_powerpc_write_external (abfd, count, sym, relocs)
      bfd *abfd;
      bfd_size_type count;
@@ -909,21 +910,21 @@ nlm_powerpc_write_external (abfd, count, sym, relocs)
   if ((bfd_bwrite (&len, (bfd_size_type) sizeof (bfd_byte), abfd)
        != sizeof (bfd_byte))
       || bfd_bwrite (sym->name, (bfd_size_type) len, abfd) != len)
-    return false;
+    return FALSE;
 
   bfd_put_32 (abfd, count, temp);
   if (bfd_bwrite (temp, (bfd_size_type) sizeof (temp), abfd) != sizeof (temp))
-    return false;
+    return FALSE;
 
   for (i = 0; i < count; i++)
     {
 #ifndef OLDFORMAT
       if (! nlm_powerpc_write_import (abfd, relocs[i].sec, relocs[i].rel))
-	return false;
+	return FALSE;
 #else
       if (! nlm_powerpc_write_reloc (abfd, relocs[i].sec,
 				     relocs[i].rel, indx))
-	return false;
+	return FALSE;
 #endif
     }
 
@@ -931,7 +932,7 @@ nlm_powerpc_write_external (abfd, count, sym, relocs)
   ++indx;
 #endif
 
-  return true;
+  return TRUE;
 }
 
 #ifndef OLDFORMAT
@@ -941,7 +942,7 @@ nlm_powerpc_write_external (abfd, count, sym, relocs)
 
 /* Set the section for a public symbol.  */
 
-static boolean
+static bfd_boolean
 nlm_powerpc_set_public_section (abfd, sym)
      bfd *abfd;
      nlmNAME(symbol_type) *sym;
@@ -961,7 +962,7 @@ nlm_powerpc_set_public_section (abfd, sym)
 
   sym->symbol.value <<= 2;
 
-  return true;
+  return TRUE;
 }
 
 /* Get the offset to write out for a public symbol.  */
@@ -1013,7 +1014,7 @@ static const struct nlm_backend_data nlm32_powerpc_backend =
 #endif
   bfd_arch_powerpc,
   0,
-  false,
+  FALSE,
 #ifndef OLDFORMAT
   0,	/* backend_object_p */
   0,	/* write_prefix */

@@ -22,6 +22,7 @@
 #include "inferior.h"
 #include "symtab.h"
 #include "target.h"
+#include "regcache.h"
 #include "gdbcore.h"
 
 #if (defined(__alpha__) && defined(__osf__) && !defined(__alpha_vxworks))
@@ -89,8 +90,6 @@ extern void *GET_CURRENT_THREAD ();
 
 #define READ_MEMORY(addr, var) read_memory (addr, (char*) &var, sizeof (var))
 /* external declarations */
-
-extern struct value *find_function_in_inferior (char *);
 
 /* Global visible variables */
 
@@ -795,10 +794,10 @@ task_command (char *tidstr, int from_tty)
     {
       /* FIXME: find_printable_frame should be defined in frame.h, and
          implemented in ada-lang.c */
-      /*      find_printable_frame (selected_frame, frame_relative_level (selected_frame)); */
+      /*      find_printable_frame (deprecated_selected_frame, frame_relative_level (deprecated_selected_frame)); */
       printf_filtered ("[Switching to task %d]\n", num);
-      print_stack_frame (selected_frame,
-			 frame_relative_level (selected_frame), 1);
+      print_stack_frame (deprecated_selected_frame,
+			 frame_relative_level (deprecated_selected_frame), 1);
     }
   else
     printf_filtered ("Unable to switch to task %d\n", num);

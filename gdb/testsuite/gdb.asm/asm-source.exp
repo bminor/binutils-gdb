@@ -1,4 +1,4 @@
-# Copyright 1998, 2000, 2002 Free Software Foundation, Inc.
+# Copyright 1998, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,54 +32,106 @@ set prms_id 0
 set bug_id 0
 
 set asm-arch ""
+set asm-note "empty"
 set asm-flags ""
-set link-flags ""
+set link-flags "--entry _start"
 
-if [istarget "*arm-*-*"] then {
-    set asm-arch arm
+switch -glob -- [istarget] {
+    "alpha*-*-*" {
+        set asm-arch alpha
+	# ??? Won't work with ecoff systems like Tru64, but then we also
+	# don't have any other -g flag that creates mdebug output.
+        set asm-flags "-gdwarf2 -no-mdebug -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "*arm-*-*" {
+        set asm-arch arm
+    }
+    "xscale-*-*" {
+        set asm-arch arm
+    }
+    "d10v-*-*" {
+        set asm-arch d10v
+    }
+    "frv-*-*" {
+	set asm-arch frv
+    }
+    "s390-*-*" {
+        set asm-arch s390
+    }
+    "s390x-*-*" {
+        set asm-arch s390x
+    }
+    "x86_64-*-*" {
+        set asm-arch x86_64
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "i\[3456\]86-*-*" {
+        set asm-arch i386
+    }
+    "m32r*-*" {
+        set asm-arch m32r
+        append link-flags " -Wl,--whole-archive -lgloss -Wl,--no-whole-archive"
+    }
+    "m6811-*-*" {
+        set asm-arch m68hc11
+        set asm-flags "-mshort-double -m68hc11 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "m6812-*-*" {
+        set asm-arch m68hc11
+        set asm-flags "-mshort-double -m68hc12 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "mips*-*" {
+        set asm-arch mips
+    }
+    "powerpc*-*" {
+        set asm-arch powerpc
+    }
+    "sh*-*-*" {
+        set asm-arch sh
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "sparc-*-*" {
+        set asm-arch sparc
+    }
+    "sparc64-*-*" {
+        set asm-arch sparc64
+        set asm-flags "-xarch=v9 -gstabs -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "xstormy16-*-*" {
+        set asm-arch xstormy16
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "v850-*-*" {
+        set asm-arch v850
+        set gdb_wrapper_initialized 1
+    }
+    "m68k-*-*" {
+        set asm-arch m68k
+    }
+    "ia64-*-*" {
+        set asm-arch ia64
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
 }
-if [istarget "xscale-*-*"] then {
-    set asm-arch arm
-}
-if [istarget "d10v-*-*"] then {
-    set asm-arch d10v
-}
-if [istarget "s390-*-*"] then {
-    set asm-arch s390
-}
-if [istarget "x86_64-*-*"] then {
-    set asm-arch x86_64
-    set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "i\[3456\]86-*-*"] then {
-    set asm-arch i386
-}
-if [istarget "m32r*-*"] then {
-    set asm-arch m32r
-}
-if [istarget "mips*-*"] then {
-    set asm-arch mips
-}
-if [istarget "powerpc*-*"] then {
-    set asm-arch powerpc
-}
-if [istarget "sparc-*-*"] then {
-    set asm-arch sparc
-}
-if [istarget "sparc64-*-*"] then {
-    set asm-arch sparc64
-    set asm-flags "-xarch=v9 -gstabs -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "xstormy16-*-*"] then {
-    set asm-arch xstormy16
-    set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "v850-*-*"] then {
-    set asm-arch v850
-    set gdb_wrapper_initialized 1
-}
+
 if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
+}
+
+# On FreeBSD and NetBSD, crt1.o the final link will fail because of
+# unresolved symbols.  It turns out that libc.so references symbols
+# that are normally provided by crt1.o, which isn't linked in since we
+# specify -nostartfiles.  Using -nostdlib doesn't help since
+# target_compile automatically adds -lm.  Linking statically avoids
+# this mess.
+if {[istarget "*-*-freebsd*"] || [istarget "*-*-netbsd*"]} then {
+    append link-flags " -static"
+}
+
+# On NetBSD/ELF we need a special NetBSD-identifying note section.
+if { [istarget "*-*-netbsdelf*"]
+     || [istarget "x86_64-*-netbsd*"] } then {
+    set asm-note "netbsd"
 }
 
 # Watch out, we are invoking the assembler, but the testsuite sets multilib
@@ -99,21 +151,23 @@ if [board_info $dest exists multilib_flags] {
 
 set testfile "asm-source"
 set binfile ${objdir}/${subdir}/${testfile}
-set src1 ${srcdir}/${subdir}/asmsrc1.s
-set src2 ${srcdir}/${subdir}/asmsrc2.s
+set srcfile1 asmsrc1.s
+set srcfile2 asmsrc2.s
 
 remote_exec build "rm -f ${subdir}/arch.inc"
 remote_download host ${srcdir}/${subdir}/${asm-arch}.inc ${subdir}/arch.inc
+remote_exec build "rm -f ${subdir}/note.inc"
+remote_download host ${srcdir}/${subdir}/${asm-note}.inc ${subdir}/note.inc
 
 if { "${asm-flags}" == "" } {
     #set asm-flags "-Wa,-gstabs,-I${srcdir}/${subdir},-I${objdir}/${subdir}"
     set asm-flags "-gstabs -I${srcdir}/${subdir} -I${objdir}/${subdir}"
 }
 
-if {[target_assemble ${src1} asmsrc1.o "${asm-flags}"] != ""} then {
+if {[target_assemble ${srcdir}/${subdir}/${srcfile1} asmsrc1.o "${asm-flags}"] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
-if {[target_assemble ${src2} asmsrc2.o "${asm-flags}"] != ""} then {
+if {[target_assemble ${srcdir}/${subdir}/${srcfile2} asmsrc2.o "${asm-flags}"] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
@@ -209,7 +263,7 @@ gdb_test "n" "12\[ 	\]*.*foo3" "n in foo2"
 # doesn't fall off the stack.
 
 gdb_test "bt 10" \
-	"\#0.*foo2.*asmsrc2\[.\]s:12.*\#1.*main.*asmsrc1\[.\]s:33(.*\#2.*start\[^\r\n\]*)?" \
+	"\#0.*foo2.*asmsrc2\[.\]s:12.*\#1.*main.*asmsrc1\[.\]s:33" \
 	"bt ALL in foo2"
 
 # See if a capped `bt' prints the right source files.
@@ -282,14 +336,39 @@ gdb_test "next" "17\[ \t\]+gdbasm_leave" "next over foo3"
 gdb_test "return" "\#0  main .*37\[ \t\]+gdbasm_exit0" "return from foo2" \
 	"Make (foo2|selected stack frame) return now\?.*" "y"
 
-# See if we can look at a global variable
-gdb_test "print globalvar" ".* = 11" "look at global variable"
+# Disassemble something, check the output
+proc test_dis { command var } {
+    global gdb_prompt
+    send_gdb "${command}\n"
+    gdb_expect {
+	-re "${var}.*:.*(Cannot access|Bad address)" {
+	    # The "disassembler" was only accessing the local
+	    # executable and that would cause attempts to disassemble
+	    # variables to fail (memory not valid).
+	    fail "${command} (memory read error)"
+	}
+	-re "${var}.*:.*${gdb_prompt}" {
+	    pass "${command}"
+	}
+	timeout {
+	    fail "${command} (timeout)"
+	}
+    }
+}
 
-# See if we can look at a static variable
+# See if we can look at a global variable, three ways
+gdb_test "print globalvar" ".* = 11" "look at global variable"
+test_dis "x/i &globalvar" "globalvar"
+test_dis "disassem &globalvar &globalvar+1" "globalvar"
+
+# See if we can look at a static variable, three ways
 gdb_test "print staticvar" ".* = 5" "look at static variable"
+test_dis "x/i &staticvar" "staticvar"
+test_dis "disassem &staticvar &staticvar+1" "staticvar"
 
 # See if we can look at a static function
-gdb_test "disassem foostatic" ".*<foostatic>:.*End of assembler dump." \
+gdb_test "disassem foostatic" ".*<foostatic\\+0>:.*End of assembler dump." \
 	"look at static function"
 
 remote_exec build "rm -f ${subdir}/arch.inc"
+remote_exec build "rm -f ${subdir}/note.inc"

@@ -1,4 +1,4 @@
-# Copyright 2002 Free Software Foundation, Inc.
+# Copyright 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -87,5 +87,31 @@ if ![set_lang_java] then {
 	-re "\\\$2 = \{length: 0\}\[\r\n\ \t]+$gdb_prompt $"                                                             { pass "p *args" }
 	-re ".*$gdb_prompt $"             { fail "p *args" }
 	timeout { fail "p *args (timeout)" ; return }
+    }
+
+    # The idea of running to 'exit' is that 'exit' is in a different
+    # objfile from the rest of the program (provided that program is
+    # linked normally with a shared libc).  That causes gdb to examine
+    # fresh objfiles.  There is nothing important about 'exit'
+    # semantics; it could be any symbol that is in a shared library.
+    # -- chastain 2003-08-06
+
+    gdb_test "break exit" ".*Breakpoint $decimal at .*"
+    gdb_test_multiple "continue" "continue to exit" {
+	-re ".*Breakpoint $decimal, .*exit.*$gdb_prompt $" {
+	    pass "continue to exit"
+	}
+	-re ".*internal-error: sect_index_text not initialized.*\\(y or n\\) " {
+	    # gdb choked on the "anonymous objfile" (probably).
+	    kfail "gdb/1322" "continue to exit"
+	    # get back to the gdb prompt
+	    gdb_test_multiple "no" "internal sync 1" {
+		-re ".*\\(y or n\\) " {
+		    gdb_test_multiple "no" "internal sync 2" {
+			-re ".*$gdb_prompt $" { ; }
+		    }
+		}
+	    }
+	}
     }
 }

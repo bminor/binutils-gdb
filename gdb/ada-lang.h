@@ -20,12 +20,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if !defined (ADA_LANG_H)
 #define ADA_LANG_H 1
 
+struct partial_symbol;
+
 #include "value.h"
 #include "gdbtypes.h"
 
-/* A macro to reorder the bytes of an address depending on the endiannes
-   of the target */
-#define EXTRACT_ADDRESS(x) ((void *) extract_address (&(x), sizeof (x)))
+struct block;
+
+/* A macro to reorder the bytes of an address depending on the
+   endiannes of the target.  */
+#define EXTRACT_ADDRESS(x) ((void *) extract_unsigned_integer (&(x), sizeof (x)))
 /* A macro to reorder the bytes of an int depending on the endiannes
    of the target */
 #define EXTRACT_INT(x) ((int) extract_signed_integer (&(x), sizeof (x)))
@@ -219,13 +223,13 @@ extern struct type *ada_index_type (struct type *, int);
 extern struct value *ada_array_bound (struct value *, int, int);
 
 extern int ada_lookup_symbol_list (const char *, struct block *,
-				   namespace_enum, struct symbol ***,
+				   domain_enum, struct symbol ***,
 				   struct block ***);
 
 extern char *ada_fold_name (const char *);
 
 extern struct symbol *ada_lookup_symbol (const char *, struct block *,
-					 namespace_enum);
+					 domain_enum);
 
 extern struct minimal_symbol *ada_lookup_minimal_symbol (const char *);
 

@@ -74,7 +74,7 @@ if [target_info exists use_gdb_stub] {
 gdb_test "cle" ".*Deleted breakpoints 2 1.*" "clear worked"
 send_gdb "i b\n"
 gdb_expect {
-    -re ".*breakpoint.*breakpoint.*$gdb_prompt $" { 
+    -re ".* breakpoint .* breakpoint .*$gdb_prompt $" { 
 	fail "cleared bp at line before routine" 
     }
     -re ".*3.*main.*31.*$gdb_prompt $" { 
@@ -120,7 +120,7 @@ gdb_expect {
 
 send_gdb "i b\n"
 gdb_expect {
-    -re ".*breakpoint.*breakpoint.*$gdb_prompt $" {
+    -re ".* breakpoint .* breakpoint .*$gdb_prompt $" {
         fail "all set to continue (didn't clear bps)" 
     }
     -re ".*3.*main.*31.*$gdb_prompt $" {
@@ -171,6 +171,10 @@ gdb_expect {
 		# This is what happens on sparc64-elf ultra.
 		pass "step out of main"
 	    }
+	    -re ".*in.*dll_crt0_1.*$gdb_prompt $" {
+		# This is what happens on Cygwin.
+	        pass "step out of main"
+	    }
 	    -re ".*Program exited normally.*$gdb_prompt $" {
 		# This is what happens on Linux i86 (and I would expect others)
 		set program_exited 1
@@ -197,6 +201,11 @@ gdb_expect {
 	    }
 	    -re ".*in __wrap__?main ().*$gdb_prompt $" {
 		pass "step out of main (status wrapper)"
+	    }
+	    -re "__setup_argv_for_main (.*).*$gdb_prompt $" {
+		# On sh, another wrapper function (start_l) exists, so
+		# another `next' is necessary.
+		gdb_test "next" ".*in start_l ().*" "step out of main (on sh)"
 	    }
             -re ".*$gdb_prompt $" { fail "step out of main (at end 2)" }
 	    timeout { 

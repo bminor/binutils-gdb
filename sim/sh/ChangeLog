@@ -1,3 +1,77 @@
+2003-11-03  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* interp.c (fsca_s, fsrra_s): New functions.
+	* gencode.c (tab): Add entries for fsca and fsrra.
+	(expand_opcode): Allow variable length n / m fields.
+
+2003-10-15  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* syscall.h (SYS_truncate, SYS_ftruncate): Define.
+	* interp.c (trap): Add support for SYS_ftruncate and SYS_truncate.
+
+2003-08-11  Shrinivas Atre  <shrinivasa@KPITCummins.com>	
+	* sim/sh/gencode.c ( tab[] ): Addition of MAC.L handler and 
+	correction for MAC.W handler
+	* sim/sh/interp.c ( macl ): New Function. Implementation of 
+	MAC.L handler.
+
+2003-08-07  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (expand_ppi_code): Comment spelling fix.
+
+2003-07-25  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (pshl): Change < to <= (shift by 16 is allowed).
+	Cast argument of >> to unsigned to prevent sign extension.
+	(psha): Change < to <= (shift by 32 is allowed).	
+
+2003-07-24  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c: Fix typo in comment.
+
+2003-07-23  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c: A few more fix-ups of refs and defs.
+	(frchg): Raise SIGILL if in double-precision mode.
+	(ldtlb): We don't simulate cache, so this is a no-op.
+	(movsxy_tab): Correct a few bit pattern errors.
+
+2003-07-09  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (prnd): Clear LSW of result to zeros.
+	* gencode.c (pmuls): Expression is mis-parenthesized.
+	* gencode.c (ppi_gensim): For a conditional ppi insn, if the
+	condition is false, we want to return (not break).  A break
+	will take us to the end of the function where registers will
+	be updated, whereas the desired outcome is for nothing to change.
+
+2003-07-03  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (movs): Fix a couple of text transpositions.
+
+2003-06-27  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (op tab): Some fix-ups of refs and defs.
+	(ocbi, ocbp): Cache not simulated, but may cause memory fault.
+	(gensym_caselist): Add default case to switch statement.
+	(expand_ppi_code): Add default case to switch statement.
+	* gencode.c (op tab): Implement movca.l.
+	* gencode.c (op movsxy_tab): Fix an error in the bit pattern.
+	* gencode.c (gensim_caselist): The movy instructions use
+	registers R6 and R7 (not R4 and R5 like the movx insns).
+
+2003-06-27  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (op movsxy_tab): Fix up some copy/paste errors
+	in name: s/REG_x/REG_y/.
+
+	* gencode.c (op tab): Move misplaced semicolon.
+
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (init_dsp, sim_open, sim_create_inferior): Rename _bfd
+	to bfd.
+
 Fri Oct 11 16:22:28 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* interp.c (trap): Return int.  Take extra parameter for address

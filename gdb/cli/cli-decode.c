@@ -133,7 +133,7 @@ struct cmd_list_element *
 add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
 	 char *doc, struct cmd_list_element **list)
 {
-  register struct cmd_list_element *c
+  struct cmd_list_element *c
   = (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
   struct cmd_list_element *p;
 
@@ -183,20 +183,6 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
   return c;
 }
 
-/* Same as above, except that the abbrev_flag is set. */
-/* Note: Doesn't seem to be used anywhere currently. */
-
-struct cmd_list_element *
-add_abbrev_cmd (char *name, enum command_class class, void (*fun) (char *, int),
-		char *doc, struct cmd_list_element **list)
-{
-  register struct cmd_list_element *c
-  = add_cmd (name, class, fun, doc, list);
-
-  c->abbrev_flag = 1;
-  return c;
-}
-
 /* Deprecates a command CMD.
    REPLACEMENT is the name of the command which should be used in place
    of this command, or NULL if no such command exists.
@@ -226,8 +212,8 @@ add_alias_cmd (char *name, char *oldname, enum command_class class,
 {
   /* Must do this since lookup_cmd tries to side-effect its first arg */
   char *copied_name;
-  register struct cmd_list_element *old;
-  register struct cmd_list_element *c;
+  struct cmd_list_element *old;
+  struct cmd_list_element *c;
   copied_name = (char *) alloca (strlen (oldname) + 1);
   strcpy (copied_name, oldname);
   old = lookup_cmd (&copied_name, *list, "", 1, 1);
@@ -261,7 +247,7 @@ add_prefix_cmd (char *name, enum command_class class, void (*fun) (char *, int),
 		char *prefixname, int allow_unknown,
 		struct cmd_list_element **list)
 {
-  register struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
+  struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
   c->prefixlist = prefixlist;
   c->prefixname = prefixname;
   c->allow_unknown = allow_unknown;
@@ -276,7 +262,7 @@ add_abbrev_prefix_cmd (char *name, enum command_class class,
 		       struct cmd_list_element **prefixlist, char *prefixname,
 		       int allow_unknown, struct cmd_list_element **list)
 {
-  register struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
+  struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
   c->prefixlist = prefixlist;
   c->prefixname = prefixname;
   c->allow_unknown = allow_unknown;
@@ -462,6 +448,26 @@ add_setshow_boolean_cmd (char *name,
   c->enums = boolean_enums;
 }
 
+/* Add element named NAME to both the set and show command LISTs (the
+   list for set/show or some sublist thereof).  CLASS is as in
+   add_cmd.  VAR is address of the variable which will contain the
+   value.  SET_DOC and SHOW_DOR are the documentation strings.  */
+void
+add_setshow_uinteger_cmd (char *name,
+			  enum command_class class,
+			  unsigned int *var, char *set_doc, char *show_doc,
+			  cmd_sfunc_ftype *set_func,
+			  cmd_sfunc_ftype *show_func,
+			  struct cmd_list_element **set_list,
+			  struct cmd_list_element **show_list)
+{
+  add_setshow_cmd_full (name, class, var_uinteger, var,
+			set_doc, show_doc,
+			set_func, show_func,
+			set_list, show_list,
+			NULL, NULL);
+}
+
 /* Where SETCMD has already been added, add the corresponding show
    command to LIST and return a pointer to the added command (not
    necessarily the head of LIST).  */
@@ -494,10 +500,10 @@ add_show_from_set (struct cmd_list_element *setcmd,
 void
 delete_cmd (char *name, struct cmd_list_element **list)
 {
-  register struct cmd_list_element *c;
+  struct cmd_list_element *c;
   struct cmd_list_element *p;
 
-  while (*list && STREQ ((*list)->name, name))
+  while (*list && strcmp ((*list)->name, name) == 0)
     {
       if ((*list)->hookee_pre)
       (*list)->hookee_pre->hook_pre = 0;   /* Hook slips out of its mouth */
@@ -511,7 +517,7 @@ delete_cmd (char *name, struct cmd_list_element **list)
   if (*list)
     for (c = *list; c->next;)
       {
-	if (STREQ (c->next->name, name))
+	if (strcmp (c->next->name, name) == 0)
 	  {
           if (c->next->hookee_pre)
             c->next->hookee_pre->hook_pre = 0; /* hooked cmd gets away.  */
@@ -571,7 +577,7 @@ void
 apropos_cmd (struct ui_file *stream, struct cmd_list_element *commandlist,
 			 struct re_pattern_buffer *regex, char *prefix)
 {
-  register struct cmd_list_element *c;
+  struct cmd_list_element *c;
   int returnvalue=1; /*Needed to avoid double printing*/
   /* Walk through the commands */
   for (c=commandlist;c;c=c->next)
@@ -780,7 +786,7 @@ print_doc_line (struct ui_file *stream, char *str)
 {
   static char *line_buffer = 0;
   static int line_size;
-  register char *p;
+  char *p;
 
   if (!line_buffer)
     {
@@ -824,7 +830,7 @@ void
 help_cmd_list (struct cmd_list_element *list, enum command_class class,
 	       char *prefix, int recurse, struct ui_file *stream)
 {
-  register struct cmd_list_element *c;
+  struct cmd_list_element *c;
 
   for (c = list; c; c = c->next)
     {
@@ -923,10 +929,14 @@ lookup_cmd_1 (char **text, struct cmd_list_element *clist,
   /* Treating underscores as part of command words is important
      so that "set args_foo()" doesn't get interpreted as
      "set args _foo()".  */
+  /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+     `tui_version'.  */
   for (p = *text;
        *p && (isalnum (*p) || *p == '-' || *p == '_' ||
-	      (tui_version &&
+#if defined(TUI)
+	      (tui_active &&
 	       (*p == '+' || *p == '<' || *p == '>' || *p == '$')) ||
+#endif
 	      (xdb_commands && (*p == '!' || *p == '/' || *p == '?')));
        p++)
     ;
@@ -1293,10 +1303,14 @@ lookup_cmd_composition (char *text,
       /* Treating underscores as part of command words is important
        so that "set args_foo()" doesn't get interpreted as
        "set args _foo()".  */
+      /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+	 `tui_version'.  */
       for (p = text;
          *p && (isalnum (*p) || *p == '-' || *p == '_' ||
-                (tui_version &&
+#if defined(TUI)
+                (tui_active &&
                  (*p == '+' || *p == '<' || *p == '>' || *p == '$')) ||
+#endif
                 (xdb_commands && (*p == '!' || *p == '/' || *p == '?')));
          p++)
       ;

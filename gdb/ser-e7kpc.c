@@ -1,4 +1,4 @@
-/* Remote serial interface using Hitachi E7000 PC ISA card in a PC
+/* Remote serial interface using Renesas E7000 PC ISA card in a PC
    Copyright 1994, 1996, 1997, 1998, 1999, 2000
    Free Software Foundation, Inc.
 
@@ -19,8 +19,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#if defined __GO32__ || defined _WIN32
 #include "defs.h"
+#if defined __GO32__ || defined _WIN32
 #include "serial.h"
 #include "gdb_string.h"
 
@@ -424,6 +424,8 @@ static struct serial_ops e7000pc_ops =
 };
 
 #endif /*_WIN32 or __GO32__*/
+
+extern initialize_file_ftype _initialize_ser_e7000pc; /* -Wmissing-prototypes */
 
 void
 _initialize_ser_e7000pc (void)

@@ -1,6 +1,6 @@
 /* BFD back-end for Intel 960 b.out binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -30,30 +30,59 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "aout/stab_gnu.h"
 #include "libaout.h"		/* BFD a.out internal data structures.  */
 
-static int                   aligncode PARAMS ((bfd *abfd, asection *input_section, arelent *r, unsigned int shrink));
-static void                  perform_slip PARAMS ((bfd *abfd, unsigned int slip, asection *input_section, bfd_vma value));
-static boolean               b_out_squirt_out_relocs PARAMS ((bfd *abfd, asection *section));
-static const bfd_target *    b_out_callback PARAMS ((bfd *));
-static bfd_reloc_status_type calljx_callback PARAMS ((bfd *, struct bfd_link_info *, arelent *, PTR src, PTR dst, asection *));
-static bfd_reloc_status_type callj_callback PARAMS ((bfd *, struct bfd_link_info *, arelent *, PTR data, unsigned int srcidx, unsigned int dstidx, asection *, boolean));
-static bfd_vma               get_value PARAMS ((arelent *, struct bfd_link_info *, asection *));
-static int                   abs32code PARAMS ((bfd *, asection *, arelent *, unsigned int, struct bfd_link_info *));
-static boolean               b_out_bfd_relax_section PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
-static bfd_byte *            b_out_bfd_get_relocated_section_contents  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *, bfd_byte *, boolean, asymbol **));
-static int                   b_out_sizeof_headers PARAMS ((bfd *, boolean));
-static boolean               b_out_set_arch_mach PARAMS ((bfd *, enum bfd_architecture, unsigned long));
-static boolean               b_out_set_section_contents PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
-static long                  b_out_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
-static long                  b_out_canonicalize_reloc PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
-static boolean               b_out_slurp_reloc_table PARAMS ((bfd *, sec_ptr, asymbol **));
-static reloc_howto_type *    b_out_bfd_reloc_type_lookup PARAMS ((bfd *, bfd_reloc_code_real_type));
-static boolean               b_out_write_object_contents PARAMS ((bfd *));
-static int                   b_out_symbol_cmp PARAMS ((const void *, const void *));
-static boolean               b_out_mkobject PARAMS ((bfd *));
-static const bfd_target *    b_out_object_p PARAMS ((bfd *));
+static int aligncode
+  PARAMS ((bfd *abfd, asection *input_section, arelent *r,
+	   unsigned int shrink));
+static void perform_slip
+  PARAMS ((bfd *abfd, unsigned int slip, asection *input_section,
+	   bfd_vma value));
+static bfd_boolean b_out_squirt_out_relocs
+  PARAMS ((bfd *abfd, asection *section));
+static const bfd_target *b_out_callback
+  PARAMS ((bfd *));
+static bfd_reloc_status_type calljx_callback
+  PARAMS ((bfd *, struct bfd_link_info *, arelent *, PTR src, PTR dst,
+	   asection *));
+static bfd_reloc_status_type callj_callback
+  PARAMS ((bfd *, struct bfd_link_info *, arelent *, PTR data,
+	   unsigned int srcidx, unsigned int dstidx, asection *, bfd_boolean));
+static bfd_vma get_value
+  PARAMS ((arelent *, struct bfd_link_info *, asection *));
+static int abs32code
+  PARAMS ((bfd *, asection *, arelent *, unsigned int,
+	   struct bfd_link_info *));
+static bfd_boolean b_out_bfd_relax_section
+  PARAMS ((bfd *, asection *, struct bfd_link_info *, bfd_boolean *));
+static bfd_byte *b_out_bfd_get_relocated_section_contents
+  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *, bfd_byte *,
+	   bfd_boolean, asymbol **));
+static int b_out_sizeof_headers
+  PARAMS ((bfd *, bfd_boolean));
+static bfd_boolean b_out_set_arch_mach
+  PARAMS ((bfd *, enum bfd_architecture, unsigned long));
+static bfd_boolean b_out_set_section_contents
+  PARAMS ((bfd *, asection *, const PTR, file_ptr, bfd_size_type));
+static long b_out_get_reloc_upper_bound
+  PARAMS ((bfd *, sec_ptr));
+static long b_out_canonicalize_reloc
+  PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
+static bfd_boolean b_out_slurp_reloc_table
+  PARAMS ((bfd *, sec_ptr, asymbol **));
+static reloc_howto_type *b_out_bfd_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+static bfd_boolean b_out_write_object_contents
+  PARAMS ((bfd *));
+static int b_out_symbol_cmp
+  PARAMS ((const void *, const void *));
+static bfd_boolean b_out_mkobject
+  PARAMS ((bfd *));
+static const bfd_target *b_out_object_p
+  PARAMS ((bfd *));
 
-void bout_swap_exec_header_in  PARAMS ((bfd *, struct external_exec *, struct internal_exec *));
-void bout_swap_exec_header_out PARAMS ((bfd *, struct internal_exec *, struct external_exec *));
+void bout_swap_exec_header_in
+  PARAMS ((bfd *, struct external_exec *, struct internal_exec *));
+void bout_swap_exec_header_out
+  PARAMS ((bfd *, struct internal_exec *, struct external_exec *));
 
 /* Swaps the information in an executable header taken from a raw byte
    stream memory image, into the internal exec_header structure.  */
@@ -201,7 +230,7 @@ struct bout_data_struct
     struct internal_exec e;
   };
 
-static boolean
+static bfd_boolean
 b_out_mkobject (abfd)
      bfd *abfd;
 {
@@ -210,7 +239,7 @@ b_out_mkobject (abfd)
 
   rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, amt);
   if (rawptr == NULL)
-    return false;
+    return FALSE;
 
   abfd->tdata.bout_data = rawptr;
   exec_hdr (abfd) = &rawptr->e;
@@ -219,7 +248,7 @@ b_out_mkobject (abfd)
   obj_datasec (abfd) = (asection *) NULL;
   obj_bsssec (abfd) = (asection *) NULL;
 
-  return true;
+  return TRUE;
 }
 
 static int
@@ -253,7 +282,7 @@ b_out_symbol_cmp (a_ptr, b_ptr)
   return 0;
 }
 
-static boolean
+static bfd_boolean
 b_out_write_object_contents (abfd)
      bfd *abfd;
 {
@@ -261,7 +290,7 @@ b_out_write_object_contents (abfd)
   bfd_size_type amt;
 
   if (! aout_32_make_sections (abfd))
-    return false;
+    return FALSE;
 
   exec_hdr (abfd)->a_info = BMAGIC;
 
@@ -287,7 +316,7 @@ b_out_write_object_contents (abfd)
   amt = EXEC_BYTES_SIZE;
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
       || bfd_bwrite ((PTR) &swapped_hdr, amt, abfd) != amt)
-    return false;
+    return FALSE;
 
   /* Now write out reloc info, followed by syms and strings */
   if (bfd_get_symcount (abfd) != 0)
@@ -319,23 +348,25 @@ b_out_write_object_contents (abfd)
       /* Back to your regularly scheduled program.  */
       if (bfd_seek (abfd, (file_ptr) (N_SYMOFF(*exec_hdr(abfd))), SEEK_SET)
 	  != 0)
-	return false;
+	return FALSE;
 
       if (! aout_32_write_syms (abfd))
-	return false;
+	return FALSE;
 
       if (bfd_seek (abfd, (file_ptr) (N_TROFF(*exec_hdr(abfd))), SEEK_SET)
 	  != 0)
-	return false;
+	return FALSE;
 
-      if (!b_out_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
+      if (!b_out_squirt_out_relocs (abfd, obj_textsec (abfd)))
+	return FALSE;
       if (bfd_seek (abfd, (file_ptr) (N_DROFF(*exec_hdr(abfd))), SEEK_SET)
 	  != 0)
-	return false;
+	return FALSE;
 
-      if (!b_out_squirt_out_relocs (abfd, obj_datasec (abfd))) return false;
+      if (!b_out_squirt_out_relocs (abfd, obj_datasec (abfd)))
+	return FALSE;
     }
-  return true;
+  return TRUE;
 }
 
 /* Some reloc hackery.  */
@@ -400,7 +431,7 @@ callj_callback (abfd, link_info, reloc_entry,  data, srcidx, dstidx,
      unsigned int srcidx;
      unsigned int dstidx;
      asection *input_section;
-     boolean shrinking;
+     bfd_boolean shrinking;
 {
   int word = bfd_get_32 (abfd, (bfd_byte *) data + srcidx);
   asymbol *symbol_in = *(reloc_entry->sym_ptr_ptr);
@@ -467,33 +498,33 @@ callj_callback (abfd, link_info, reloc_entry,  data, srcidx, dstidx,
 #define ALIGNER 10
 #define ALIGNDONE 11
 static reloc_howto_type howto_reloc_callj =
-HOWTO(CALLJ, 0, 2, 24, true, 0, complain_overflow_signed, 0,"callj", true, 0x00ffffff, 0x00ffffff,false);
+HOWTO(CALLJ, 0, 2, 24, TRUE, 0, complain_overflow_signed, 0,"callj", TRUE, 0x00ffffff, 0x00ffffff,FALSE);
 static  reloc_howto_type howto_reloc_abs32 =
-HOWTO(ABS32, 0, 2, 32, false, 0, complain_overflow_bitfield,0,"abs32", true, 0xffffffff,0xffffffff,false);
+HOWTO(ABS32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,0,"abs32", TRUE, 0xffffffff,0xffffffff,FALSE);
 static reloc_howto_type howto_reloc_pcrel24 =
-HOWTO(PCREL24, 0, 2, 24, true, 0, complain_overflow_signed,0,"pcrel24", true, 0x00ffffff,0x00ffffff,false);
+HOWTO(PCREL24, 0, 2, 24, TRUE, 0, complain_overflow_signed,0,"pcrel24", TRUE, 0x00ffffff,0x00ffffff,FALSE);
 
 static reloc_howto_type howto_reloc_pcrel13 =
-HOWTO(PCREL13, 0, 2, 13, true, 0, complain_overflow_signed,0,"pcrel13", true, 0x00001fff,0x00001fff,false);
+HOWTO(PCREL13, 0, 2, 13, TRUE, 0, complain_overflow_signed,0,"pcrel13", TRUE, 0x00001fff,0x00001fff,FALSE);
 
 static reloc_howto_type howto_reloc_abs32codeshrunk =
-HOWTO(ABS32CODE_SHRUNK, 0, 2, 24, true, 0, complain_overflow_signed, 0,"callx->callj", true, 0x00ffffff, 0x00ffffff,false);
+HOWTO(ABS32CODE_SHRUNK, 0, 2, 24, TRUE, 0, complain_overflow_signed, 0,"callx->callj", TRUE, 0x00ffffff, 0x00ffffff,FALSE);
 
 static  reloc_howto_type howto_reloc_abs32code =
-HOWTO(ABS32CODE, 0, 2, 32, false, 0, complain_overflow_bitfield,0,"callx", true, 0xffffffff,0xffffffff,false);
+HOWTO(ABS32CODE, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,0,"callx", TRUE, 0xffffffff,0xffffffff,FALSE);
 
 static reloc_howto_type howto_align_table[] = {
-  HOWTO (ALIGNER, 0, 0x1, 0, false, 0, complain_overflow_dont, 0, "align16", false, 0, 0, false),
-  HOWTO (ALIGNER, 0, 0x3, 0, false, 0, complain_overflow_dont, 0, "align32", false, 0, 0, false),
-  HOWTO (ALIGNER, 0, 0x7, 0, false, 0, complain_overflow_dont, 0, "align64", false, 0, 0, false),
-  HOWTO (ALIGNER, 0, 0xf, 0, false, 0, complain_overflow_dont, 0, "align128", false, 0, 0, false),
+  HOWTO (ALIGNER, 0, 0x1, 0, FALSE, 0, complain_overflow_dont, 0, "align16", FALSE, 0, 0, FALSE),
+  HOWTO (ALIGNER, 0, 0x3, 0, FALSE, 0, complain_overflow_dont, 0, "align32", FALSE, 0, 0, FALSE),
+  HOWTO (ALIGNER, 0, 0x7, 0, FALSE, 0, complain_overflow_dont, 0, "align64", FALSE, 0, 0, FALSE),
+  HOWTO (ALIGNER, 0, 0xf, 0, FALSE, 0, complain_overflow_dont, 0, "align128", FALSE, 0, 0, FALSE),
 };
 
 static reloc_howto_type howto_done_align_table[] = {
-  HOWTO (ALIGNDONE, 0x1, 0x1, 0, false, 0, complain_overflow_dont, 0, "donealign16", false, 0, 0, false),
-  HOWTO (ALIGNDONE, 0x3, 0x3, 0, false, 0, complain_overflow_dont, 0, "donealign32", false, 0, 0, false),
-  HOWTO (ALIGNDONE, 0x7, 0x7, 0, false, 0, complain_overflow_dont, 0, "donealign64", false, 0, 0, false),
-  HOWTO (ALIGNDONE, 0xf, 0xf, 0, false, 0, complain_overflow_dont, 0, "donealign128", false, 0, 0, false),
+  HOWTO (ALIGNDONE, 0x1, 0x1, 0, FALSE, 0, complain_overflow_dont, 0, "donealign16", FALSE, 0, 0, FALSE),
+  HOWTO (ALIGNDONE, 0x3, 0x3, 0, FALSE, 0, complain_overflow_dont, 0, "donealign32", FALSE, 0, 0, FALSE),
+  HOWTO (ALIGNDONE, 0x7, 0x7, 0, FALSE, 0, complain_overflow_dont, 0, "donealign64", FALSE, 0, 0, FALSE),
+  HOWTO (ALIGNDONE, 0xf, 0xf, 0, FALSE, 0, complain_overflow_dont, 0, "donealign128", FALSE, 0, 0, FALSE),
 };
 
 static reloc_howto_type *
@@ -517,7 +548,7 @@ b_out_bfd_reloc_type_lookup (abfd, code)
 
 /* Allocate enough room for all the reloc entries, plus pointers to them all.  */
 
-static boolean
+static bfd_boolean
 b_out_slurp_reloc_table (abfd, asect, symbols)
      bfd *abfd;
      sec_ptr asect;
@@ -536,10 +567,10 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   arelent *reloc_cache;
 
   if (asect->relocation)
-    return true;
+    return TRUE;
 
   if (!aout_32_slurp_symbol_table (abfd))
-    return false;
+    return FALSE;
 
   if (asect == obj_datasec (abfd))
     {
@@ -560,16 +591,16 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     }
 
   bfd_set_error (bfd_error_invalid_operation);
-  return false;
+  return FALSE;
 
  doit:
   if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
-    return false;
+    return FALSE;
   count = reloc_size / sizeof (struct relocation_info);
 
   relocs = (struct relocation_info *) bfd_malloc (reloc_size);
   if (!relocs && reloc_size != 0)
-    return false;
+    return FALSE;
 
   amt = ((bfd_size_type) count + 1) * sizeof (arelent);
   reloc_cache = (arelent *) bfd_malloc (amt);
@@ -577,7 +608,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     {
       if (relocs != NULL)
 	free (relocs);
-      return false;
+      return FALSE;
     }
 
   if (bfd_bread ((PTR) relocs, reloc_size, abfd) != reloc_size)
@@ -585,7 +616,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
       free (reloc_cache);
       if (relocs != NULL)
 	free (relocs);
-      return false;
+      return FALSE;
     }
 
   if (bfd_header_big_endian (abfd))
@@ -740,10 +771,10 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   asect->relocation = reloc_cache;
   asect->reloc_count = count;
 
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 b_out_squirt_out_relocs (abfd, section)
      bfd *abfd;
      asection *section;
@@ -759,13 +790,13 @@ b_out_squirt_out_relocs (abfd, section)
   int extern_mask, pcrel_mask, len_2, callj_mask;
 
   if (count == 0)
-    return true;
+    return TRUE;
 
   generic = section->orelocation;
   natsize = (bfd_size_type) count * sizeof (struct relocation_info);
   native = ((struct relocation_info *) bfd_malloc (natsize));
   if (!native && natsize != 0)
-    return false;
+    return FALSE;
 
   if (bfd_header_big_endian (abfd))
     {
@@ -870,12 +901,12 @@ b_out_squirt_out_relocs (abfd, section)
   if (bfd_bwrite ((PTR) native, natsize, abfd) != natsize)
     {
       free ((PTR)native);
-      return false;
+      return FALSE;
     }
 
   free ((PTR)native);
 
-  return true;
+  return TRUE;
 }
 
 /* This is stupid.  This function should be a boolean predicate.  */
@@ -948,11 +979,11 @@ b_out_get_reloc_upper_bound (abfd, asect)
 }
 
 
-static boolean
+static bfd_boolean
 b_out_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      asection *section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {
@@ -960,7 +991,7 @@ b_out_set_section_contents (abfd, section, location, offset, count)
     {
       /* Set by bfd.c handler.  */
       if (! aout_32_make_sections (abfd))
-	return false;
+	return FALSE;
 
       obj_textsec (abfd)->filepos = sizeof (struct internal_exec);
       obj_datasec(abfd)->filepos = obj_textsec(abfd)->filepos
@@ -969,15 +1000,15 @@ b_out_set_section_contents (abfd, section, location, offset, count)
 
   /* Regardless, once we know what we're doing, we might as well get going.  */
   if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0)
-    return false;
+    return FALSE;
 
   if (count == 0)
-    return true;
+    return TRUE;
 
   return bfd_bwrite ((PTR) location, count, abfd) == count;
 }
 
-static boolean
+static bfd_boolean
 b_out_set_arch_mach (abfd, arch, machine)
      bfd *abfd;
      enum bfd_architecture arch;
@@ -986,7 +1017,7 @@ b_out_set_arch_mach (abfd, arch, machine)
   bfd_default_set_arch_mach(abfd, arch, machine);
 
   if (arch == bfd_arch_unknown)	/* Unknown machine arch is OK.  */
-    return true;
+    return TRUE;
 
   if (arch == bfd_arch_i960)	/* i960 default is OK.  */
     switch (machine)
@@ -1000,18 +1031,18 @@ b_out_set_arch_mach (abfd, arch, machine)
       case bfd_mach_i960_jx:
       case bfd_mach_i960_hx:
       case 0:
-	return true;
+	return TRUE;
       default:
-	return false;
+	return FALSE;
       }
 
-  return false;
+  return FALSE;
 }
 
 static int
 b_out_sizeof_headers (ignore_abfd, ignore)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
-     boolean ignore ATTRIBUTE_UNUSED;
+     bfd_boolean ignore ATTRIBUTE_UNUSED;
 {
   return sizeof (struct internal_exec);
 }
@@ -1040,7 +1071,7 @@ get_value (reloc, link_info, input_section)
 	 generic symbols.  */
       h = bfd_wrapped_link_hash_lookup (input_section->owner, link_info,
 					bfd_asymbol_name (symbol),
-					false, false, true);
+					FALSE, FALSE, TRUE);
       if (h != (struct bfd_link_hash_entry *) NULL
 	  && (h->type == bfd_link_hash_defined
 	      || h->type == bfd_link_hash_defweak))
@@ -1053,7 +1084,7 @@ get_value (reloc, link_info, input_section)
 	  if (! ((*link_info->callbacks->undefined_symbol)
 		 (link_info, bfd_asymbol_name (symbol),
 		  input_section->owner, input_section, reloc->address,
-		  true)))
+		  TRUE)))
 	    abort ();
 	  value = 0;
 	}
@@ -1192,12 +1223,12 @@ aligncode (abfd, input_section, r, shrink)
   return shrink;
 }
 
-static boolean
+static bfd_boolean
 b_out_bfd_relax_section (abfd, i, link_info, again)
      bfd *abfd;
      asection *i;
      struct bfd_link_info *link_info;
-     boolean *again;
+     bfd_boolean *again;
 {
   /* Get enough memory to hold the stuff.  */
   bfd *input_bfd = i->owner;
@@ -1208,11 +1239,11 @@ b_out_bfd_relax_section (abfd, i, link_info, again)
 					       input_section);
 
   if (reloc_size < 0)
-    return false;
+    return FALSE;
 
   /* We only run this relaxation once.  It might work to run it
      multiple times, but it hasn't been tested.  */
-  *again = false;
+  *again = FALSE;
 
   if (reloc_size)
     {
@@ -1258,21 +1289,21 @@ b_out_bfd_relax_section (abfd, i, link_info, again)
 
   if (reloc_vector != NULL)
     free (reloc_vector);
-  return true;
+  return TRUE;
  error_return:
   if (reloc_vector != NULL)
     free (reloc_vector);
-  return false;
+  return FALSE;
 }
 
 static bfd_byte *
 b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
-					  data, relocateable, symbols)
+					  data, relocatable, symbols)
      bfd *output_bfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     boolean relocateable;
+     bfd_boolean relocatable;
      asymbol **symbols;
 {
   /* Get enough memory to hold the stuff.  */
@@ -1286,11 +1317,11 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
   if (reloc_size < 0)
     goto error_return;
 
-  /* If producing relocateable output, don't bother to relax.  */
-  if (relocateable)
+  /* If producing relocatable output, don't bother to relax.  */
+  if (relocatable)
     return bfd_generic_get_relocated_section_contents (output_bfd, link_info,
 						       link_order,
-						       data, relocateable,
+						       data, relocatable,
 						       symbols);
 
   reloc_vector = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);
@@ -1300,11 +1331,11 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
   input_section->reloc_done = 1;
 
   /* Read in the section.  */
-  BFD_ASSERT (true == bfd_get_section_contents (input_bfd,
-						input_section,
-						data,
-						(bfd_vma) 0,
-						input_section->_raw_size));
+  BFD_ASSERT (bfd_get_section_contents (input_bfd,
+					input_section,
+					data,
+					(bfd_vma) 0,
+					input_section->_raw_size));
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,
@@ -1366,7 +1397,7 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 		case CALLJ:
 		  callj_callback (input_bfd, link_info, reloc, data,
 				  src_address, dst_address, input_section,
-				  false);
+				  FALSE);
 		  src_address += 4;
 		  dst_address += 4;
 		  break;
@@ -1383,7 +1414,7 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 		     callj will reach, so do the right thing.  */
 		  callj_callback (input_bfd, link_info, reloc, data,
 				  src_address + 4, dst_address, input_section,
-				  true);
+				  TRUE);
 		  dst_address += 4;
 		  src_address += 8;
 		  break;

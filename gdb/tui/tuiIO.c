@@ -1,6 +1,6 @@
 /* TUI support I/O functions.
 
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
    Inc.
 
    Contributed by Hewlett-Packard Company.
@@ -22,24 +22,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* FIXME: cagney/2002-02-28: The GDB coding standard indicates that
-   "defs.h" should be included first.  Unfortunatly some systems
-   (currently Debian GNU/Linux) include the <stdbool.h> via <curses.h>
-   and they clash with "bfd.h"'s definiton of true/false.  The correct
-   fix is to remove true/false from "bfd.h", however, until that
-   happens, hack around it by including "config.h" and <curses.h>
-   first.  */
-
-#include "config.h"
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
-
-#include <stdio.h>
 #include "defs.h"
 #include "terminal.h"
 #include "target.h"
@@ -59,6 +41,15 @@
 #include "cli-out.h"
 #include <fcntl.h>
 #include <signal.h>
+#include <stdio.h>
+
+#ifdef HAVE_NCURSES_H       
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
 
 /* Use definition from readline 4.3.  */
 #undef CTRL_CHAR
@@ -123,6 +114,10 @@ static FILE *tui_old_rl_outstream;
 #ifdef TUI_USE_PIPE_FOR_READLINE
 static int tui_readline_pipe[2];
 #endif
+
+/* The last gdb prompt that was registered in readline.
+   This may be the main gdb prompt or a secondary prompt.  */
+static char *tui_rl_saved_prompt;
 
 static unsigned int _tuiHandleResizeDuringIO (unsigned int);
 
@@ -194,7 +189,7 @@ tui_redisplay_readline (void)
   if (tui_current_key_mode == tui_single_key_mode)
     prompt = "";
   else
-    prompt = get_prompt ();
+    prompt = tui_rl_saved_prompt;
   
   c_pos = -1;
   c_line = -1;
@@ -256,10 +251,15 @@ tui_redisplay_readline (void)
 }
 
 /* Readline callback to prepare the terminal.  It is called once
-   each time we enter readline.  There is nothing to do in curses mode.  */
+   each time we enter readline.  Terminal is already setup in curses mode.  */
 static void
-tui_prep_terminal (void)
+tui_prep_terminal (int notused1)
 {
+  /* Save the prompt registered in readline to correctly display it.
+     (we can't use gdb_prompt() due to secondary prompts and can't use
+     rl_prompt because it points to an alloca buffer).  */
+  xfree (tui_rl_saved_prompt);
+  tui_rl_saved_prompt = xstrdup (rl_prompt);
 }
 
 /* Readline callback to restore the terminal.  It is called once
@@ -600,7 +600,7 @@ tui_initialize_io ()
       fprintf_unfiltered (gdb_stderr, "Cannot redirect readline output");
       exit (1);
     }
-  setlinebuf (tui_rl_outstream);
+  setvbuf (tui_rl_outstream, (char*) NULL, _IOLBF, 0);
 
 #ifdef O_NONBLOCK
   (void) fcntl (tui_readline_pipe[0], F_SETFL, O_NONBLOCK);

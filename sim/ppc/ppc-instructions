@@ -1,7 +1,7 @@
 #
 #   This file is part of the program psim.
 #
-#   Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+#   Copyright 1994, 1995, 1996, 1997, 2003 Andrew Cagney
 #
 #   --
 #
@@ -33,6 +33,53 @@
 #   along with this program; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+
+:cache::::RA:RA:
+:cache:::signed_word *:rA:RA:(cpu_registers(processor)->gpr + RA)
+:cache:::unsigned32:RA_BITMASK:RA:(1 << RA)
+:compute:::int:RA_is_0:RA:(RA == 0)
+:cache::::RT:RT:
+:cache:::signed_word *:rT:RT:(cpu_registers(processor)->gpr + RT)
+:cache:::unsigned32:RT_BITMASK:RT:(1 << RT)
+:cache::::RS:RS:
+:cache:::signed_word *:rS:RS:(cpu_registers(processor)->gpr + RS)
+:cache:::unsigned32:RS_BITMASK:RS:(1 << RS)
+:cache::::RB:RB:
+:cache:::signed_word *:rB:RB:(cpu_registers(processor)->gpr + RB)
+:cache:::unsigned32:RB_BITMASK:RB:(1 << RB)
+:scratch::::FRA:FRA:
+:cache:::unsigned64 *:frA:FRA:(cpu_registers(processor)->fpr + FRA)
+:cache:::unsigned32:FRA_BITMASK:FRA:(1 << FRA)
+:scratch::::FRB:FRB:
+:cache:::unsigned64 *:frB:FRB:(cpu_registers(processor)->fpr + FRB)
+:cache:::unsigned32:FRB_BITMASK:FRB:(1 << FRB)
+:scratch::::FRC:FRC:
+:cache:::unsigned64 *:frC:FRC:(cpu_registers(processor)->fpr + FRC)
+:cache:::unsigned32:FRC_BITMASK:FRC:(1 << FRC)
+:scratch::::FRS:FRS:
+:cache:::unsigned64 *:frS:FRS:(cpu_registers(processor)->fpr + FRS)
+:cache:::unsigned32:FRS_BITMASK:FRS:(1 << FRS)
+:scratch::::FRT:FRT:
+:cache:::unsigned64 *:frT:FRT:(cpu_registers(processor)->fpr + FRT)
+:cache:::unsigned32:FRT_BITMASK:FRT:(1 << FRT)
+:cache:::unsigned_word:EXTS_SI:SI:((signed_word)(signed16)instruction)
+:scratch::::BI:BI:
+:cache::::BIT32_BI:BI:BIT32(BI)
+:cache::::BF:BF:
+:cache:::unsigned32:BF_BITMASK:BF:(1 << BF)
+:scratch::::BA:BA:
+:cache::::BIT32_BA:BA:BIT32(BA)
+:cache:::unsigned32:BA_BITMASK:BA:(1 << BA)
+:scratch::::BB:BB:
+:cache::::BIT32_BB:BB:BIT32(BB)
+:cache:::unsigned32:BB_BITMASK:BB:(1 << BB)
+:cache::::BT:BT:
+:cache:::unsigned32:BT_BITMASK:BT:(1 << BT)
+:cache:::unsigned_word:EXTS_BD_0b00:BD:(((signed_word)(signed16)instruction) & ~3)
+:cache:::unsigned_word:EXTS_LI_0b00:LI:((((signed_word)(signed32)(instruction << 6)) >> 6) & ~0x3)
+:cache:::unsigned_word:EXTS_D:D:((signed_word)(signed16)(instruction))
+:cache:::unsigned_word:EXTS_DS_0b00:DS:(((signed_word)(signed16)instruction) & ~0x3)
+#:compute:::int:SPR_is_256:SPR:(SPR == 256)
 
 # PowerPC models
 ::model:604:ppc604:  PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  0
@@ -151,6 +198,8 @@
 	  unsigned32 fp_busy;				/* floating point registers that are busy */
 	  unsigned32 cr_fpscr_busy;			/* CR/FPSCR registers that are busy */
 	  signed16 spr_busy;				/* SPR register that is busy or PPC_NO_SPR */
+	  unsigned32 vr_busy;				/* AltiVec registers that are busy */
+	  signed16 vscr_busy;				/* AltiVec status register busy */
 	  signed16 issue;				/* # of cycles until unit can accept another insn */
 	  signed16 done;				/* # of cycles until insn is done */
 	  signed16 nr_writebacks;			/* # of registers this unit writes back */
@@ -181,6 +230,8 @@
 	  unsigned32 fp_busy;				/* floating point registers that are busy */
 	  unsigned32 cr_fpscr_busy;			/* CR/FPSCR registers that are busy */
 	  unsigned8 spr_busy[nr_of_sprs];		/* SPR registers that are busy */
+	  unsigned32 vr_busy;				/* AltiVec registers that are busy */
+	  unsigned8 vscr_busy;				/* AltiVec SC register busy */
 	  unsigned8 busy[nr_ppc_function_units];	/* whether a function is busy or not */
 	};
 
@@ -273,6 +324,15 @@ void::model-static::model_trace_release:model_data *model_ptr, model_busy *busy
 	}
 	if (busy->spr_busy != PPC_NO_SPR)
 	  TRACE(trace_model, ("Register %s is now available.\n", spr_name(busy->spr_busy)));
+	if (busy->vr_busy) {
+	  for(i = 0; i < 32; i++) {
+	    if (((1 << i) & busy->vr_busy) != 0) {
+	      TRACE(trace_model, ("Register v%d is now available.\n", i));
+	    }
+	  }
+	}
+	if (busy->vscr_busy)
+	  TRACE(trace_model, ("VSCR Register is now available.\n", spr_name(busy->spr_busy)));
 
 # Trace making registers busy
 void::model-static::model_trace_make_busy:model_data *model_ptr, unsigned32 int_mask, unsigned32 fp_mask, unsigned32 cr_mask
@@ -351,6 +411,8 @@ void::model-internal::model_new_cycle:model_data *model_ptr
 	      model_ptr->cr_fpscr_busy &= ~cur_busy->cr_fpscr_busy;
 	      if (cur_busy->spr_busy != PPC_NO_SPR)
 		model_ptr->spr_busy[cur_busy->spr_busy] = 0;
+	      model_ptr->vr_busy &= ~cur_busy->vr_busy;
+	      model_ptr->vscr_busy = ~cur_busy->vscr_busy;
 
 	      if (WITH_TRACE && ppc_trace[trace_model])
 		model_trace_release(model_ptr, cur_busy);
@@ -407,6 +469,8 @@ model_busy *::model-internal::model_make_busy:model_data *model_ptr, ppc_functio
 	  busy->fp_busy = 0;
 	  busy->cr_fpscr_busy = 0;
 	  busy->nr_writebacks = 0;
+	  busy->vr_busy = 0;
+	  busy->vscr_busy = 0;
 	}
 
 	busy->unit = unit;
@@ -2256,6 +2320,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	    GPR(r) = 0;
 	  }
 	  GPR(r) |= INSERTED(MEM(unsigned, EA, 1), i, i+7);
+	  i = i + 8;
 	  if (i == 64) i = 32;
 	  EA = EA + 1;
 	  n = n - 1;
@@ -4925,3 +4990,6 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 0.31,6.RT,11.RA,16.RB,21.310,31./:X:earwax::External Control In Word Indexed
 
 0.31,6.RS,11.RA,16.RB,21.438,31./:X:earwax::External Control Out Word Indexed
+
+:include:::altivec.igen
+:include:::e500.igen

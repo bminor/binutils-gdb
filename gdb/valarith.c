@@ -1,7 +1,8 @@
 /* Perform arithmetic and other operations on values, for GDB.
+
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +31,7 @@
 #include "gdb_string.h"
 #include "doublest.h"
 #include <math.h>
+#include "infcall.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C). */
@@ -275,6 +277,7 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
   else
     VALUE_LVAL (v) = VALUE_LVAL (array);
   VALUE_ADDRESS (v) = VALUE_ADDRESS (array);
+  VALUE_REGNO (v) = VALUE_REGNO (array);
   VALUE_OFFSET (v) = VALUE_OFFSET (array) + elt_offs;
   return v;
 }
@@ -859,7 +862,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
     /* Integral operations here.  */
     /* FIXME:  Also mixed integral/booleans, with result an integer. */
     /* FIXME: This implements ANSI C rules (also correct for C++).
-       What about FORTRAN and (OBSOLETE) chill ?  */
+       What about FORTRAN and (the deleted) chill ?  */
     {
       unsigned int promoted_len1 = TYPE_LENGTH (type1);
       unsigned int promoted_len2 = TYPE_LENGTH (type2);
@@ -946,12 +949,6 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	    case BINOP_MOD:
 	      /* Knuth 1.2.4, integer only.  Note that unlike the C '%' op,
 	         v1 mod 0 has a defined value, v1. */
-	      /* OBSOLETE Chill specifies that v2 must be > 0, so check for that. */
-	      /* OBSOLETE if (current_language->la_language == language_chill */
-	      /* OBSOLETE     && value_as_long (arg2) <= 0) */
-	      /* OBSOLETE { */
-	      /* OBSOLETE   error ("Second operand of MOD must be greater than zero."); */
-	      /* OBSOLETE } */
 	      if (v2 == 0)
 		{
 		  v = v1;
@@ -1070,12 +1067,6 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	    case BINOP_MOD:
 	      /* Knuth 1.2.4, integer only.  Note that unlike the C '%' op,
 	         X mod 0 has a defined value, X. */
-	      /* OBSOLETE Chill specifies that v2 must be > 0, so check for that. */
-	      /* OBSOLETE if (current_language->la_language == language_chill */
-	      /* OBSOLETE     && v2 <= 0) */
-	      /* OBSOLETE { */
-	      /* OBSOLETE   error ("Second operand of MOD must be greater than zero."); */
-	      /* OBSOLETE } */
 	      if (v2 == 0)
 		{
 		  v = v1;
@@ -1167,8 +1158,8 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 int
 value_logical_not (struct value *arg1)
 {
-  register int len;
-  register char *p;
+  int len;
+  char *p;
   struct type *type1;
 
   COERCE_NUMBER (arg1);
@@ -1225,8 +1216,8 @@ value_strcmp (struct value *arg1, struct value *arg2)
 int
 value_equal (struct value *arg1, struct value *arg2)
 {
-  register int len;
-  register char *p1, *p2;
+  int len;
+  char *p1, *p2;
   struct type *type1, *type2;
   enum type_code code1;
   enum type_code code2;
@@ -1284,8 +1275,8 @@ value_equal (struct value *arg1, struct value *arg2)
 int
 value_less (struct value *arg1, struct value *arg2)
 {
-  register enum type_code code1;
-  register enum type_code code2;
+  enum type_code code1;
+  enum type_code code2;
   struct type *type1, *type2;
 
   COERCE_NUMBER (arg1);
@@ -1326,8 +1317,8 @@ value_less (struct value *arg1, struct value *arg2)
 struct value *
 value_neg (struct value *arg1)
 {
-  register struct type *type;
-  register struct type *result_type = VALUE_TYPE (arg1);
+  struct type *type;
+  struct type *result_type = VALUE_TYPE (arg1);
 
   COERCE_REF (arg1);
   COERCE_ENUM (arg1);
@@ -1339,7 +1330,7 @@ value_neg (struct value *arg1)
   else if (TYPE_CODE (type) == TYPE_CODE_INT || TYPE_CODE (type) == TYPE_CODE_BOOL)
     {
       /* Perform integral promotion for ANSI C/C++.  FIXME: What about
-         FORTRAN and (OBSOLETE) chill ?  */
+         FORTRAN and (the deleted) chill ?  */
       if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
 	result_type = builtin_type_int;
 
@@ -1355,8 +1346,8 @@ value_neg (struct value *arg1)
 struct value *
 value_complement (struct value *arg1)
 {
-  register struct type *type;
-  register struct type *result_type = VALUE_TYPE (arg1);
+  struct type *type;
+  struct type *result_type = VALUE_TYPE (arg1);
   int typecode;
 
   COERCE_REF (arg1);

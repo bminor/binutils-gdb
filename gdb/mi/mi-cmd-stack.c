@@ -1,5 +1,5 @@
 /* MI Command Set - stack commands.
-   Copyright 2000, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -26,11 +26,9 @@
 #include "mi-cmds.h"
 #include "ui-out.h"
 #include "symtab.h"
-
-/* FIXME: these should go in some .h file but stack.c doesn't have a
-   corresponding .h file. These wrappers will be obsolete anyway, once
-   we pull the plug on the sanitization. */
-extern void select_frame_command_wrapper (char *, int);
+#include "block.h"
+#include "stack.h"
+#include "dictionary.h"
 
 static void list_args_or_locals (int locals, int values, struct frame_info *fi);
 
@@ -142,7 +140,7 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
   if (argc != 1)
     error ("mi_cmd_stack_list_locals: Usage: PRINT_VALUES");
 
-  list_args_or_locals (1, atoi (argv[0]), selected_frame);
+  list_args_or_locals (1, atoi (argv[0]), deprecated_selected_frame);
   return MI_CMD_DONE;
 }
 
@@ -216,7 +214,8 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 {
   struct block *block;
   struct symbol *sym;
-  int i, nsyms;
+  struct dict_iterator iter;
+  int nsyms;
   struct cleanup *cleanup_list;
   static struct ui_stream *stb = NULL;
 
@@ -228,7 +227,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 
   while (block != 0)
     {
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
           int print_me = 0;
 
@@ -252,6 +251,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	    case LOC_REGPARM_ADDR:	/* indirect register arg */
 	    case LOC_LOCAL_ARG:	/* stack arg             */
 	    case LOC_BASEREG_ARG:	/* basereg arg           */
+	    case LOC_COMPUTED_ARG:	/* arg with computed location */
 	      if (!locals)
 		print_me = 1;
 	      break;
@@ -260,6 +260,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	    case LOC_BASEREG:	/* basereg local         */
 	    case LOC_STATIC:	/* static                */
 	    case LOC_REGISTER:	/* register              */
+	    case LOC_COMPUTED:	/* computed location     */
 	      if (locals)
 		print_me = 1;
 	      break;
@@ -270,14 +271,14 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	      if (values)
 		cleanup_tuple = 
 		  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-	      ui_out_field_string (uiout, "name", SYMBOL_NAME (sym));
+	      ui_out_field_string (uiout, "name", DEPRECATED_SYMBOL_NAME (sym));
 
 	      if (values)
 		{
 		  struct symbol *sym2;
 		  if (!locals)
-		    sym2 = lookup_symbol (SYMBOL_NAME (sym),
-					  block, VAR_NAMESPACE,
+		    sym2 = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
+					  block, VAR_DOMAIN,
 					  (int *) NULL,
 					  (struct symtab **) NULL);
 		  else
@@ -308,8 +309,8 @@ mi_cmd_stack_select_frame (char *command, char **argv, int argc)
 
   /* with no args, don't change frame */
   if (argc == 0)
-    select_frame_command_wrapper (0, 1 /* not used */ );
+    select_frame_command (0, 1 /* not used */ );
   else
-    select_frame_command_wrapper (argv[0], 1 /* not used */ );
+    select_frame_command (argv[0], 1 /* not used */ );
   return MI_CMD_DONE;
 }

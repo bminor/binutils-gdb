@@ -1,3 +1,85 @@
+2003-06-17  Richard Sandiford  <rsandifo@redhat.com>
+
+	* mips.igen (do_dmultx): Fix check for negative operands.
+
+2003-05-16  Ian Lance Taylor  <ian@airs.com>
+
+	* Makefile.in (SHELL): Make sure this is defined.
+	(various): Use $(SHELL) whenever we invoke move-if-change.
+
+2003-05-03  Chris Demetriou  <cgd@broadcom.com>
+
+	* cp1.c: Tweak attribution slightly.
+	* cp1.h: Likewise.
+	* mdmx.c: Likewise.
+	* mdmx.igen: Likewise.
+	* mips3d.igen: Likewise.
+	* sb1.igen: Likewise.
+
+2003-04-15  Richard Sandiford  <rsandifo@redhat.com>
+
+	* vr.igen (do_vr_mul_op): Zero-extend the low 32 bits of
+	unsigned operands.
+
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_open): Rename _bfd to bfd.
+	(sim_create_inferior): Ditto.
+
+2003-01-14  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (LUXC1, SUXC1): New, for mipsV and mips64.
+
+2003-01-14  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (EI, DI): Remove.
+
+2003-01-05  Richard Sandiford  <rsandifo@redhat.com>
+
+	* Makefile.in (tmp-run-multi): Fix mips16 filter.
+
+2003-01-04  Richard Sandiford  <rsandifo@redhat.com>
+	    Andrew Cagney  <ac131313@redhat.com>
+	    Gavin Romig-Koch  <gavin@redhat.com>
+	    Graydon Hoare  <graydon@redhat.com>
+	    Aldy Hernandez  <aldyh@redhat.com>
+	    Dave Brolley  <brolley@redhat.com>
+	    Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.in (mips64vr*): Define TARGET_ENABLE_FR to 1.
+	(sim_mach_default): New variable.
+	(mips64vr-*-*, mips64vrel-*-*): New configurations.
+	Add a new simulator generator, MULTI.
+	* configure: Regenerate.
+	* Makefile.in (SIM_MULTI_OBJ, SIM_EXTRA_DISTCLEAN): New variables.
+	(multi-run.o): New dependency.
+	(SIM_MULTI_ALL, SIM_MULTI_IGEN_CONFIGS): New variables.
+	(tmp-mach-multi, tmp-itable-multi, tmp-run-multi): New rules.
+	(tmp-multi): Combine them.
+	(BUILT_SRC_FROM_MULTI): New variable.  Depend on tmp-multi.
+	(clean-extra): Remove sources in BUILT_SRC_FROM_MULTI.
+	(distclean-extra): New rule.
+	* sim-main.h: Include bfd.h.
+	(MIPS_MACH): New macro.
+	* mips.igen (vr4120, vr5400, vr5500): New models.
+	(clo, clz, dclo, dclz, madd, maddu, msub, msub, mul): Add *vr5500.
+	* vr.igen: Replace with new version.
+
+2003-01-04  Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.in: Use SIM_AC_OPTION_RESERVED_BITS(1).
+	* configure: Regenerate.
+
+2002-12-31  Chris Demetriou  <cgd@broadcom.com>
+
+	* sim-main.h (check_branch_bug, mark_branch_bug): Remove.
+	* mips.igen: Remove all invocations of check_branch_bug and
+	mark_branch_bug.
+
+2002-12-16  Chris Demetriou  <cgd@broadcom.com>
+
+        * tconfig.in: Include "gdb/callback.h" and "gdb/remote-sim.h".
+
 2002-07-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen (do_load_double, do_store_double): New functions.

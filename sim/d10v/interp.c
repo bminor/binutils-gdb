@@ -363,7 +363,7 @@ set_dmap_register (int reg_nr, unsigned long value)
 }
 
 static unsigned long
-dmap_register (int reg_nr)
+dmap_register (void *regcache, int reg_nr)
 {
   uint8 *raw = map_memory (SIM_D10V_MEMORY_DATA
 			   + DMAP0_OFFSET + 2 * reg_nr);
@@ -386,7 +386,7 @@ set_imap_register (int reg_nr, unsigned long value)
 }
 
 static unsigned long
-imap_register (int reg_nr)
+imap_register (void *regcache, int reg_nr)
 {
   uint8 *raw = map_memory (SIM_D10V_MEMORY_DATA
 			   + IMAP0_OFFSET + 2 * reg_nr);
@@ -440,7 +440,9 @@ unsigned long
 sim_d10v_translate_dmap_addr (unsigned long offset,
 			      int nr_bytes,
 			      unsigned long *phys,
-			      unsigned long (*dmap_register) (int reg_nr))
+			      void *regcache,
+			      unsigned long (*dmap_register) (void *regcache,
+							      int reg_nr))
 {
   short map;
   int regno;
@@ -457,7 +459,7 @@ sim_d10v_translate_dmap_addr (unsigned long offset,
       /* Don't cross a BLOCK boundary */
       nr_bytes = DMAP_BLOCK_SIZE - (offset % DMAP_BLOCK_SIZE);
     }
-  map = dmap_register (regno);
+  map = dmap_register (regcache, regno);
   if (regno == 3)
     {
       /* Always maps to data memory */
@@ -498,7 +500,9 @@ unsigned long
 sim_d10v_translate_imap_addr (unsigned long offset,
 			      int nr_bytes,
 			      unsigned long *phys,
-			      unsigned long (*imap_register) (int reg_nr))
+			      void *regcache,
+			      unsigned long (*imap_register) (void *regcache,
+							      int reg_nr))
 {
   short map;
   int regno;
@@ -517,7 +521,7 @@ sim_d10v_translate_imap_addr (unsigned long offset,
       /* Don't cross a BLOCK boundary */
       nr_bytes = IMAP_BLOCK_SIZE - offset;
     }
-  map = imap_register (regno);
+  map = imap_register (regcache, regno);
   sp = (map & 0x3000) >> 12;
   segno = (map & 0x007f);
   switch (sp)
@@ -549,8 +553,11 @@ unsigned long
 sim_d10v_translate_addr (unsigned long memaddr,
 			 int nr_bytes,
 			 unsigned long *targ_addr,
-			 unsigned long (*dmap_register) (int reg_nr),
-			 unsigned long (*imap_register) (int reg_nr))
+			 void *regcache,
+			 unsigned long (*dmap_register) (void *regcache,
+							 int reg_nr),
+			 unsigned long (*imap_register) (void *regcache,
+							 int reg_nr))
 {
   unsigned long phys;
   unsigned long seg;
@@ -614,12 +621,12 @@ sim_d10v_translate_addr (unsigned long memaddr,
       break;
 
     case 0x10:			/* in logical data address segment */
-      nr_bytes = sim_d10v_translate_dmap_addr (off, nr_bytes, &phys,
+      nr_bytes = sim_d10v_translate_dmap_addr (off, nr_bytes, &phys, regcache,
 					       dmap_register);
       break;
 
     case 0x11:			/* in logical instruction address segment */
-      nr_bytes = sim_d10v_translate_imap_addr (off, nr_bytes, &phys,
+      nr_bytes = sim_d10v_translate_imap_addr (off, nr_bytes, &phys, regcache,
 					       imap_register);
       break;
 
@@ -713,51 +720,39 @@ xfer_mem (SIM_ADDR virt,
 	  int size,
 	  int write_p)
 {
-  int xfered = 0;
+  uint8 *memory;
+  unsigned long phys;
+  int phys_size;
+  phys_size = sim_d10v_translate_addr (virt, size, &phys, NULL,
+				       dmap_register, imap_register);
+  if (phys_size == 0)
+    return 0;
 
-  while (0 < size)
-    {
-      uint8 *memory;
-      unsigned long phys;
-      int phys_size;
-      phys_size = sim_d10v_translate_addr (virt, size,
-					   &phys,
-					   dmap_register,
-					   imap_register);
-      if (phys_size == 0)
-	return xfered;
-
-      memory = map_memory (phys);
+  memory = map_memory (phys);
 
 #ifdef DEBUG
-      if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
-	{
-	  (*d10v_callback->printf_filtered)
-	    (d10v_callback,
-	     "sim_%s %d bytes: 0x%08lx (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
+  if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
+    {
+      (*d10v_callback->printf_filtered)
+	(d10v_callback,
+	 "sim_%s %d bytes: 0x%08lx (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
 	     (write_p ? "write" : "read"),
-	     phys_size, virt, last_from,
-	     phys, last_to,
-	     (long) memory, last_segname);
-	}
+	 phys_size, virt, last_from,
+	 phys, last_to,
+	 (long) memory, last_segname);
+    }
 #endif
 
-      if (write_p)
-	{
-	  memcpy (memory, buffer, phys_size);
-	}
-      else
-	{
-	  memcpy (buffer, memory, phys_size);
-	}
-
-      virt += phys_size;
-      buffer += phys_size;
-      xfered += phys_size;
-      size -= phys_size;
+  if (write_p)
+    {
+      memcpy (memory, buffer, phys_size);
     }
-
-  return xfered;
+  else
+    {
+      memcpy (buffer, memory, phys_size);
+    }
+  
+  return phys_size;
 }
 
 
@@ -788,7 +783,7 @@ SIM_DESC
 sim_open (kind, callback, abfd, argv)
      SIM_OPEN_KIND kind;
      host_callback *callback;
-     struct _bfd *abfd;
+     struct bfd *abfd;
      char **argv;
 {
   struct simops *s;
@@ -892,7 +887,7 @@ dmem_addr (uint16 offset)
      things like ``0xfffe + 0x0e60 == 0x10e5d''.  Since offset's type
      is uint16 this is modulo'ed onto 0x0e5d. */
 
-  phys_size = sim_d10v_translate_dmap_addr (offset, 1, &phys,
+  phys_size = sim_d10v_translate_dmap_addr (offset, 1, &phys, NULL,
 					    dmap_register);
   if (phys_size == 0)
     {
@@ -919,7 +914,8 @@ imem_addr (uint32 offset)
 {
   unsigned long phys;
   uint8 *mem;
-  int phys_size = sim_d10v_translate_imap_addr (offset, 1, &phys, imap_register);
+  int phys_size = sim_d10v_translate_imap_addr (offset, 1, &phys, NULL,
+						imap_register);
   if (phys_size == 0)
     {
       return State.mem.fault;
@@ -1194,7 +1190,7 @@ sim_info (sd, verbose)
 SIM_RC
 sim_create_inferior (sd, abfd, argv, env)
      SIM_DESC sd;
-     struct _bfd *abfd;
+     struct bfd *abfd;
      char **argv;
      char **env;
 {
@@ -1367,14 +1363,14 @@ sim_fetch_register (sd, rn, memory, length)
       break;
     case SIM_D10V_IMAP0_REGNUM:
     case SIM_D10V_IMAP1_REGNUM:
-      WRITE_16 (memory, imap_register (rn - SIM_D10V_IMAP0_REGNUM));
+      WRITE_16 (memory, imap_register (NULL, rn - SIM_D10V_IMAP0_REGNUM));
       size = 2;
       break;
     case SIM_D10V_DMAP0_REGNUM:
     case SIM_D10V_DMAP1_REGNUM:
     case SIM_D10V_DMAP2_REGNUM:
     case SIM_D10V_DMAP3_REGNUM:
-      WRITE_16 (memory, dmap_register (rn - SIM_D10V_DMAP0_REGNUM));
+      WRITE_16 (memory, dmap_register (NULL, rn - SIM_D10V_DMAP0_REGNUM));
       size = 2;
       break;
     case SIM_D10V_TS2_DMAP_REGNUM:

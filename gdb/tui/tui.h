@@ -33,6 +33,8 @@
 #undef chtype
 #endif
 
+struct ui_file;
+
 /* Opaque data type */
 typedef char *Opaque;
 typedef

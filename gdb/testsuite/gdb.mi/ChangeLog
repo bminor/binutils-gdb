@@ -1,3 +1,65 @@
+2003-08-07  Andrew Cagney  <cagney@redhat.com>
+
+	* mi2-basics.exp: Copy base MI .exp file, set MIFLAGS to -i=mi2.
+	* mi2-break.exp, mi2-cli.exp, mi2-console.exp: Ditto.
+	* mi2-disassemble.exp, mi2-eval.exp, mi2-file.exp: Ditto.
+	* mi2-hack-cli.exp, mi2-pthreads.exp, mi2-read-memory.exp: Ditto.
+	* mi2-regs.exp, mi2-return.exp, mi2-simplerun.exp: Ditto.
+	* mi2-stack.exp, mi2-stepi.exp, mi2-syn-frame.exp: Ditto.
+	* mi2-until.exp, mi2-var-block.exp, mi2-var-child.exp: Ditto.
+	* mi2-var-cmd.exp, mi2-var-display.exp, mi2-watch.exp: Ditto.
+
+2003-05-03  J. Brobecker  <brobecker@gnat.com>
+
+	From Thierry Schneider  <tpschneider1@yahoo.com>:
+	* mi1-symbol.exp (-symbol-list-lines): New test file to
+	validate all symbol-related commands
+
+2003-04-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb792.exp: Skip when C++.
+
+2003-02-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* mi-syn-frame.exp: Don't run this test when gdb,nosignals is set.
+
+2002-12-13  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-basics.exp: Change tests for -environment-directory.  Also add
+	tests for -environment-cd, -environment-pwd, and -environment-path.
+	Part of fix for PR gdb/741.
+
+2002-11-05  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb792.cc: New file to test patch for PR gdb/792.
+	* gdb792.exp: Ditto.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+        * mi-console.exp: Use mi_runto, mi_run_to_main, mi_next_to,
+	mi_step_to wherever possible.  Update copyright notices.
+	* mi-disassemble.exp: Ditto.
+	* mi-eval.exp: Ditto.
+	* mi-read-memory.exp: Ditto.
+	* mi-regs.exp: Ditto.
+	* mi-return.exp: Ditto.
+	* mi-stack.exp: Ditto.
+	* mi-stepi.exp: Ditto.
+	* mi-var-block.exp: Ditto.
+	* mi-var-cmd.exp: Ditto.
+	* mi-watch.exp: Ditto.
+	* mi1-console.exp: Ditto.
+	* mi1-disassemble.exp: Ditto.
+	* mi1-eval.exp: Ditto.
+	* mi1-read-memory.exp: Ditto.
+	* mi1-regs.exp: Ditto.
+	* mi1-return.exp: Ditto.
+	* mi1-stack.exp: Ditto.
+	* mi1-stepi.exp: Ditto.
+	* mi1-var-block.exp: Ditto.
+	* mi1-var-cmd.exp: Ditto.
+        * mi1-watch.exp: Ditto.
+
 2002-10-23  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* mi-var-cmd.exp: Add tests to verify that a -var-assign that changes

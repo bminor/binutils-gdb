@@ -396,6 +396,27 @@ static struct vlist **varobj_table;
 
 /* Creates a varobj (not its children) */
 
+/* Return the full FRAME which corresponds to the given CORE_ADDR
+   or NULL if no FRAME on the chain corresponds to CORE_ADDR.  */
+
+static struct frame_info *
+find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
+{
+  struct frame_info *frame = NULL;
+
+  if (frame_addr == (CORE_ADDR) 0)
+    return NULL;
+
+  while (1)
+    {
+      frame = get_prev_frame (frame);
+      if (frame == NULL)
+	return NULL;
+      if (get_frame_base_address (frame) == frame_addr)
+	return frame;
+    }
+}
+
 struct varobj *
 varobj_create (char *objname,
 	       char *expression, CORE_ADDR frame, enum varobj_type type)
@@ -420,8 +441,14 @@ varobj_create (char *objname,
 
       /* Allow creator to specify context of variable */
       if ((type == USE_CURRENT_FRAME) || (type == USE_SELECTED_FRAME))
-	fi = selected_frame;
+	fi = deprecated_selected_frame;
       else
+	/* FIXME: cagney/2002-11-23: This code should be doing a
+	   lookup using the frame ID and not just the frame's
+	   ``address''.  This, of course, means an interface change.
+	   However, with out that interface change ISAs, such as the
+	   ia64 with its two stacks, won't work.  Similar goes for the
+	   case where there is a frameless function.  */
 	fi = find_frame_addr_in_frame_chain (frame);
 
       /* frame = -2 means always use selected frame */
@@ -460,8 +487,8 @@ varobj_create (char *objname,
          Since select_frame is so benign, just call it for all cases. */
       if (fi != NULL)
 	{
-	  get_frame_id (fi, &var->root->frame);
-	  old_fi = selected_frame;
+	  var->root->frame = get_frame_id (fi);
+	  old_fi = deprecated_selected_frame;
 	  select_frame (fi);
 	}
 
@@ -871,7 +898,7 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
 
   /* Save the selected stack frame, since we will need to change it
      in order to evaluate expressions. */
-  get_frame_id (selected_frame, &old_fid);
+  old_fid = get_frame_id (deprecated_selected_frame);
 
   /* Update the root variable. value_of_root can return NULL
      if the variable is no longer around, i.e. we stepped out of
@@ -1203,7 +1230,7 @@ child_exists (struct varobj *var, char *name)
 
   for (vc = var->children; vc != NULL; vc = vc->next)
     {
-      if (STREQ (vc->child->name, name))
+      if (strcmp (vc->child->name, name) == 0)
 	return vc->child;
     }
 
@@ -1317,8 +1344,7 @@ new_root_variable (void)
   var->root->lang = NULL;
   var->root->exp = NULL;
   var->root->valid_block = NULL;
-  var->root->frame.base = 0;
-  var->root->frame.pc = 0;
+  var->root->frame = null_frame_id;
   var->root->use_selected_frame = 0;
   var->root->rootvar = NULL;
 
@@ -1353,9 +1379,8 @@ make_cleanup_free_variable (struct varobj *var)
   return make_cleanup (do_free_variable_cleanup, var);
 }
 
-/* This returns the type of the variable. This skips past typedefs
-   and returns the real type of the variable. It also dereferences
-   pointers and references.
+/* This returns the type of the variable. It also skips past typedefs
+   to return the real type of the variable.
 
    NOTE: TYPE_TARGET_TYPE should NOT be used anywhere in this file
    except within get_target_type and get_type. */
@@ -1365,8 +1390,8 @@ get_type (struct varobj *var)
   struct type *type;
   type = var->type;
 
-  while (type != NULL && TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
-    type = TYPE_TARGET_TYPE (type);
+  if (type != NULL)
+    type = check_typedef (type);
 
   return type;
 }
@@ -1397,8 +1422,8 @@ get_target_type (struct type *type)
   if (type != NULL)
     {
       type = TYPE_TARGET_TYPE (type);
-      while (type != NULL && TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
-	type = TYPE_TARGET_TYPE (type);
+      if (type != NULL)
+	type = check_typedef (type);
     }
 
   return type;
@@ -2123,9 +2148,9 @@ cplus_number_of_children (struct varobj *var)
       type = get_type_deref (var->parent);
 
       cplus_class_num_children (type, kids);
-      if (STREQ (var->name, "public"))
+      if (strcmp (var->name, "public") == 0)
 	children = kids[v_public];
-      else if (STREQ (var->name, "private"))
+      else if (strcmp (var->name, "private") == 0)
 	children = kids[v_private];
       else
 	children = kids[v_protected];
@@ -2176,7 +2201,6 @@ cplus_name_of_child (struct varobj *parent, int index)
 {
   char *name;
   struct type *type;
-  int children[3];
 
   if (CPLUS_FAKE_CHILD (parent))
     {
@@ -2191,55 +2215,97 @@ cplus_name_of_child (struct varobj *parent, int index)
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      cplus_class_num_children (type, children);
-
       if (CPLUS_FAKE_CHILD (parent))
 	{
-	  int i;
+	  /* The fields of the class type are ordered as they
+	     appear in the class.  We are given an index for a
+	     particular access control type ("public","protected",
+	     or "private").  We must skip over fields that don't
+	     have the access control we are looking for to properly
+	     find the indexed field. */
+	  int type_index = TYPE_N_BASECLASSES (type);
+	  if (strcmp (parent->name, "private") == 0)
+	    {
+	      while (index >= 0)
+		{
+	  	  if (TYPE_VPTR_BASETYPE (type) == type
+	      	      && type_index == TYPE_VPTR_FIELDNO (type))
+		    ; /* ignore vptr */
+		  else if (TYPE_FIELD_PRIVATE (type, type_index))
+		    --index;
+		  ++type_index;
+		}
+	      --type_index;
+	    }
+	  else if (strcmp (parent->name, "protected") == 0)
+	    {
+	      while (index >= 0)
+		{
+	  	  if (TYPE_VPTR_BASETYPE (type) == type
+	      	      && type_index == TYPE_VPTR_FIELDNO (type))
+		    ; /* ignore vptr */
+		  else if (TYPE_FIELD_PROTECTED (type, type_index))
+		    --index;
+		  ++type_index;
+		}
+	      --type_index;
+	    }
+	  else
+	    {
+	      while (index >= 0)
+		{
+	  	  if (TYPE_VPTR_BASETYPE (type) == type
+	      	      && type_index == TYPE_VPTR_FIELDNO (type))
+		    ; /* ignore vptr */
+		  else if (!TYPE_FIELD_PRIVATE (type, type_index) &&
+		      !TYPE_FIELD_PROTECTED (type, type_index))
+		    --index;
+		  ++type_index;
+		}
+	      --type_index;
+	    }
 
-	  /* Skip over vptr, if it exists. */
-	  if (TYPE_VPTR_BASETYPE (type) == type
-	      && index >= TYPE_VPTR_FIELDNO (type))
-	    index++;
-
-	  /* FIXME: This assumes that type orders
-	     inherited, public, private, protected */
-	  i = index + TYPE_N_BASECLASSES (type);
-	  if (STREQ (parent->name, "private")
-	      || STREQ (parent->name, "protected"))
-	    i += children[v_public];
-	  if (STREQ (parent->name, "protected"))
-	    i += children[v_private];
-
-	  name = TYPE_FIELD_NAME (type, i);
+	  name = TYPE_FIELD_NAME (type, type_index);
 	}
       else if (index < TYPE_N_BASECLASSES (type))
+	/* We are looking up the name of a base class */
 	name = TYPE_FIELD_NAME (type, index);
       else
 	{
+	  int children[3];
+	  cplus_class_num_children(type, children);
+
 	  /* Everything beyond the baseclasses can
-	     only be "public", "private", or "protected" */
+	     only be "public", "private", or "protected"
+
+	     The special "fake" children are always output by varobj in
+	     this order. So if INDEX == 2, it MUST be "protected". */
 	  index -= TYPE_N_BASECLASSES (type);
 	  switch (index)
 	    {
 	    case 0:
-	      if (children[v_public] != 0)
-		{
-		  name = "public";
-		  break;
-		}
+	      if (children[v_public] > 0)
+	 	name = "public";
+	      else if (children[v_private] > 0)
+	 	name = "private";
+	      else 
+	 	name = "protected";
+	      break;
 	    case 1:
-	      if (children[v_private] != 0)
+	      if (children[v_public] > 0)
 		{
-		  name = "private";
-		  break;
+		  if (children[v_private] > 0)
+		    name = "private";
+		  else
+		    name = "protected";
 		}
+	      else if (children[v_private] > 0)
+	 	name = "protected";
+	      break;
 	    case 2:
-	      if (children[v_protected] != 0)
-		{
-		  name = "protected";
-		  break;
-		}
+	      /* Must be protected */
+	      name = "protected";
+	      break;
 	    default:
 	      /* error! */
 	      break;

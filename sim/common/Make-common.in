@@ -134,6 +134,8 @@ SIM_EXTRA_ALL =
 SIM_EXTRA_INSTALL =
 # Dependency of `clean' to clean any extra files.
 SIM_EXTRA_CLEAN =
+# Likewise `distclean'
+SIM_EXTRA_DISTCLEAN =
 
 # Every time a new general purpose source file was added every target's
 # Makefile.in needed to be updated to include the file in SIM_OBJS.
@@ -159,7 +161,6 @@ SIM_COMMON_HW_OBJS = \
 SIM_NEW_COMMON_OBJS = \
 	sim-arange.o \
 	sim-bits.o \
-	sim-break.o \
 	sim-config.o \
 	sim-core.o \
 	sim-endian.o \
@@ -333,7 +334,6 @@ sim-events_h = $(srccom)/sim-events.h
 sim-fpu_h = $(srccom)/sim-fpu.h
 sim-io_h = $(srccom)/sim-io.h
 sim-options_h = $(srccom)/sim-options.h
-sim-break_h = $(srccom)/sim-break.h
 sim-signal_h = $(srccom)/sim-signal.h
 
 hw-alloc_h = $(srccom)/hw-alloc.h
@@ -374,7 +374,7 @@ sim-bits.o: $(srccom)/sim-bits.c $(sim-bits_h) $(sim-n-bits_h) \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-bits.c $(ALL_CFLAGS)
 
-sim-config.o: $(srccom)/sim-config.c $(sim-config_h) \
+sim-config.o: $(srccom)/sim-config.c $(sim-config_h) sim-main.h \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-config.c $(ALL_CFLAGS)
 
@@ -391,7 +391,7 @@ sim-endian.o: $(srccom)/sim-endian.c $(sim-endian_h) $(sim-n-endian_h)
 sim-engine.o: $(srccom)/sim-engine.c $(sim_main_headers) $(sim-engine_h)
 	$(CC) -c $(srccom)/sim-engine.c $(ALL_CFLAGS)
 
-sim-events.o: $(srccom)/sim-events.c $(sim-events_h) \
+sim-events.o: $(srccom)/sim-events.c $(sim-events_h) sim-main.h \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-events.c $(ALL_CFLAGS)
 
@@ -474,10 +474,6 @@ sim-watch.o: $(srccom)/sim-watch.c $(sim_main_headers)
 
 sim-load.o: $(srccom)/sim-load.c $(callback_h)
 	$(CC) -c $(srccom)/sim-load.c $(ALL_CFLAGS)
-
-sim-break.o: $(srccom)/sim-break.c $(sim_main_headers) \
-	  $(sim_break_h)
-	$(CC) -c $(srccom)/sim-break.c $(ALL_CFLAGS)
 
 
 # FIXME This is one very simple-minded way of generating the file hw-config.h
@@ -622,7 +618,7 @@ clean: $(SIM_EXTRA_CLEAN)
 	fi
 	rm -f tmp-mloop.hin tmp-mloop.h tmp-mloop.cin tmp-mloop.c
 
-distclean mostlyclean maintainer-clean realclean: clean
+distclean mostlyclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
 	rm -f TAGS
 	rm -f Makefile config.cache config.log config.status .gdbinit
 	rm -f tconfig.h config.h stamp-h
@@ -678,31 +674,37 @@ CGEN_FLAGS_TO_PASS = \
 cgen-arch: force
 	$(SHELL) $(srccom)/cgen.sh arch $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" ignored "$(isa)" $(mach) ignored ignored
+		$(arch) "$(FLAGS)" ignored "$(isa)" $(mach) ignored \
+		$(archfile) ignored
 
 cgen-cpu: force
 	$(SHELL) $(srccom)/cgen.sh cpu $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" "$(EXTRAFILES)"
+		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" \
+		$(archfile) "$(EXTRAFILES)"
 
 cgen-defs: force
 	$(SHELL) $(srccom)/cgen.sh defs $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" ignored
+		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" \
+		$(archfile) ignored
 
 cgen-decode: force
 	$(SHELL) $(srccom)/cgen.sh decode $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" "$(EXTRAFILES)"
+		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" \
+		$(archfile) "$(EXTRAFILES)"
 
 cgen-cpu-decode: force
 	$(SHELL) $(srccom)/cgen.sh cpu-decode $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" "$(EXTRAFILES)"
+		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" \
+		$(archfile) "$(EXTRAFILES)"
 
 cgen-desc: force
 	$(SHELL) $(srccom)/cgen.sh desc $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" ignored
+		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" \
+		$(archfile) ignored
 
 ## End COMMON_POST_CONFIG_FRAG

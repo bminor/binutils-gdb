@@ -1,5 +1,6 @@
 /* Support for 32-bit i386 NLM (NetWare Loadable Module)
-   Copyright 1993, 1994, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -28,15 +29,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "libnlm.h"
 
-static boolean nlm_i386_read_reloc
+static bfd_boolean nlm_i386_read_reloc
   PARAMS ((bfd *, nlmNAME(symbol_type) *, asection **, arelent *));
-static boolean nlm_i386_write_import
+static bfd_boolean nlm_i386_write_import
   PARAMS ((bfd *, asection *, arelent *));
-static boolean nlm_i386_mangle_relocs
-  PARAMS ((bfd *, asection *, PTR, bfd_vma, bfd_size_type));
-static boolean nlm_i386_read_import
+static bfd_boolean nlm_i386_mangle_relocs
+  PARAMS ((bfd *, asection *, const PTR, bfd_vma, bfd_size_type));
+static bfd_boolean nlm_i386_read_import
   PARAMS ((bfd *, nlmNAME(symbol_type) *));
-static boolean nlm_i386_write_external
+static bfd_boolean nlm_i386_write_external
   PARAMS ((bfd *, bfd_size_type, asymbol *, struct reloc_and_sec *));
 
 /* Adjust the reloc location by an absolute value.  */
@@ -46,15 +47,15 @@ static reloc_howto_type nlm_i386_abs_howto =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,			/* special_function */
 	 "32",			/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false);		/* pcrel_offset */
+	 FALSE);		/* pcrel_offset */
 
 /* Adjust the reloc location by a PC relative displacement.  */
 
@@ -63,19 +64,19 @@ static reloc_howto_type nlm_i386_pcrel_howto =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,			/* special_function */
 	 "DISP32",		/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 true);			/* pcrel_offset */
+	 TRUE);			/* pcrel_offset */
 
 /* Read a NetWare i386 reloc.  */
 
-static boolean
+static bfd_boolean
 nlm_i386_read_reloc (abfd, sym, secp, rel)
      bfd *abfd;
      nlmNAME(symbol_type) *sym;
@@ -87,7 +88,7 @@ nlm_i386_read_reloc (abfd, sym, secp, rel)
   const char *name;
 
   if (bfd_bread (temp, (bfd_size_type) sizeof (temp), abfd) != sizeof (temp))
-    return false;
+    return FALSE;
 
   val = bfd_get_32 (abfd, temp);
 
@@ -145,12 +146,12 @@ nlm_i386_read_reloc (abfd, sym, secp, rel)
   rel->address = val;
   rel->addend = 0;
 
-  return true;
+  return TRUE;
 }
 
 /* Write a NetWare i386 reloc.  */
 
-static boolean
+static bfd_boolean
 nlm_i386_write_import (abfd, sec, rel)
      bfd *abfd;
      asection *sec;
@@ -174,7 +175,7 @@ nlm_i386_write_import (abfd, sec, rel)
       || rel->howto->dst_mask != 0xffffffff)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return false;
+      return FALSE;
     }
 
   sym = *rel->sym_ptr_ptr;
@@ -202,7 +203,7 @@ nlm_i386_write_import (abfd, sec, rel)
       if (rel->howto->pc_relative)
 	{
 	  bfd_set_error (bfd_error_invalid_operation);
-	  return false;
+	  return FALSE;
 	}
 
       /* The high bit is 1 if the reloc is against the code section, 0
@@ -222,16 +223,16 @@ nlm_i386_write_import (abfd, sec, rel)
 	  if (! rel->howto->pcrel_offset)
 	    {
 	      bfd_set_error (bfd_error_invalid_operation);
-	      return false;
+	      return FALSE;
 	    }
 	}
     }
 
   bfd_put_32 (abfd, val, temp);
   if (bfd_bwrite (temp, (bfd_size_type) sizeof (temp), abfd) != sizeof (temp))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 /* I want to be able to use objcopy to turn an i386 a.out or COFF file
@@ -243,11 +244,11 @@ nlm_i386_write_import (abfd, sec, rel)
    This is actually a fairly general concept.  However, this is not a
    general implementation.  */
 
-static boolean
+static bfd_boolean
 nlm_i386_mangle_relocs (abfd, sec, data, offset, count)
      bfd *abfd;
      asection *sec;
-     PTR data;
+     const PTR data;
      bfd_vma offset;
      bfd_size_type count;
 {
@@ -335,11 +336,11 @@ nlm_i386_mangle_relocs (abfd, sec, data, offset, count)
 	}
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Read a NetWare i386 import record */
-static boolean
+static bfd_boolean
 nlm_i386_read_import (abfd, sym)
      bfd *abfd;
      nlmNAME(symbol_type) *sym;
@@ -352,13 +353,13 @@ nlm_i386_read_import (abfd, sym)
 
   if (bfd_bread ((PTR) &symlength, (bfd_size_type) sizeof (symlength), abfd)
       != sizeof (symlength))
-    return false;
+    return FALSE;
   sym -> symbol.the_bfd = abfd;
   name = bfd_alloc (abfd, (bfd_size_type) symlength + 1);
   if (name == NULL)
-    return false;
+    return FALSE;
   if (bfd_bread (name, (bfd_size_type) symlength, abfd) != symlength)
-    return false;
+    return FALSE;
   name[symlength] = '\0';
   sym -> symbol.name = name;
   sym -> symbol.flags = 0;
@@ -366,12 +367,12 @@ nlm_i386_read_import (abfd, sym)
   sym -> symbol.section = bfd_und_section_ptr;
   if (bfd_bread ((PTR) temp, (bfd_size_type) sizeof (temp), abfd)
       != sizeof (temp))
-    return false;
+    return FALSE;
   rcount = H_GET_32 (abfd, temp);
   nlm_relocs = ((struct nlm_relent *)
 		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
   if (!nlm_relocs)
-    return false;
+    return FALSE;
   sym -> relocs = nlm_relocs;
   sym -> rcnt = 0;
   while (sym -> rcnt < rcount)
@@ -379,17 +380,17 @@ nlm_i386_read_import (abfd, sym)
       asection *section;
 
       if (! nlm_i386_read_reloc (abfd, sym, &section, &nlm_relocs -> reloc))
-	return false;
+	return FALSE;
       nlm_relocs -> section = section;
       nlm_relocs++;
       sym -> rcnt++;
     }
-  return true;
+  return TRUE;
 }
 
 /* Write out an external reference.  */
 
-static boolean
+static bfd_boolean
 nlm_i386_write_external (abfd, count, sym, relocs)
      bfd *abfd;
      bfd_size_type count;
@@ -404,19 +405,19 @@ nlm_i386_write_external (abfd, count, sym, relocs)
   if ((bfd_bwrite (&len, (bfd_size_type) sizeof (bfd_byte), abfd)
        != sizeof (bfd_byte))
       || bfd_bwrite (sym->name, (bfd_size_type) len, abfd) != len)
-    return false;
+    return FALSE;
 
   bfd_put_32 (abfd, count, temp);
   if (bfd_bwrite (temp, (bfd_size_type) sizeof (temp), abfd) != sizeof (temp))
-    return false;
+    return FALSE;
 
   for (i = 0; i < count; i++)
     {
       if (! nlm_i386_write_import (abfd, relocs[i].sec, relocs[i].rel))
-	return false;
+	return FALSE;
     }
 
-  return true;
+  return TRUE;
 }
 
 #include "nlmswap.h"
@@ -428,7 +429,7 @@ static const struct nlm_backend_data nlm32_i386_backend =
   0,	/* optional_prefix_size */
   bfd_arch_i386,
   0,
-  false,
+  FALSE,
   0,	/* backend_object_p */
   0,	/* write_prefix_func */
   nlm_i386_read_reloc,

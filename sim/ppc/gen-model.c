@@ -25,6 +25,7 @@
 
 #include "filter.h"
 
+#include "ld-cache.h"
 #include "ld-decode.h"
 #include "ld-insn.h"
 

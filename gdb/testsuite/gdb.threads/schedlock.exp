@@ -1,4 +1,4 @@
-# Copyright (C) 1996, 1997, 2002 Free Software Foundation, Inc.
+# Copyright (C) 1996, 1997, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,41 +33,7 @@ set testfile "schedlock"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-set built_binfile 0
-
-# Default to the usual (only?) -lpthread on GNU/Linux to quiet noise
-if [istarget "*-*-linux*"] then {
-    set possible_libs "-lpthread -lpthreads -lthread"
-} else {
-    set possible_libs "-lpthreads -lpthread -lthread"
-}
-
-set why_msg "unrecognized error"
-foreach lib $possible_libs {
-    set options "debug"
-    lappend options "incdir=${objdir}/${subdir}"
-    lappend options "libs=$lib"
-    set ccout [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $options]
-    switch -regexp -- $ccout {
-	".*no posix threads support.*" {
-	    set why_msg "missing threads include file"
-	    break
-	}
-	".*cannot open -lpthread.*" {
-	    set why_msg "missing runtime threads library"
-	}
-	".*Can't find library for -lpthread.*" {
-	    set why_msg "missing runtime threads library"
-	}
-	{^$} {
-	    pass "successfully compiled posix threads test case"
-	    set built_binfile 1
-	    break
-	}
-    }
-}
-if {$built_binfile == "0"} {
-    unsupported "Couldn't compile ${srcfile}, ${why_msg}"
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "incdir=${objdir}"]] != "" } {
     return -1
 }
 
@@ -146,8 +112,8 @@ proc my_continue { msg } {
 
   stop_process "stop all threads ($msg)"
 
-  # Make sure we're in one of the looping threads.
-  gdb_breakpoint [gdb_get_line_number "schedlock.exp: main loop"]
+  # Make sure we're in one of the non-main looping threads.
+  gdb_breakpoint [concat [gdb_get_line_number "schedlock.exp: main loop"] " if arg != 5"]
   gdb_continue_to_breakpoint "return to loop ($msg)"
   delete_breakpoints
 }
@@ -264,12 +230,11 @@ if {$curthread == $newthread} {
 set start_args $cont_args
 set cont_args [get_args]
 
+set num_other_threads 0
 for {set i 0} {[expr $i < 6]} {set i [expr $i + 1]} {
   if {[lindex $start_args $i] == [lindex $cont_args $i]} {
     if {$i == $curthread} {
       fail "current thread stepped (didn't run)"
-    } else {
-      fail "other thread $i ran (didn't run) (1)"
     }
   } else {
     if {$i == $curthread} {
@@ -279,9 +244,14 @@ for {set i 0} {[expr $i < 6]} {set i [expr $i + 1]} {
 	    fail "current thread stepped (wrong amount)"
 	}
     } else {
-      pass "other thread $i ran (1)"
+      set num_other_threads [expr $num_other_threads + 1]
     }
   }
+}
+if {$num_other_threads > 0} {
+  pass "other threads ran (1)"
+} else {
+  fail "other threads ran (no other threads ran) (1)"
 }
 
 # Test continue with scheduler locking
