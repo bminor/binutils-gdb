@@ -152,6 +152,9 @@ static struct complaint storclass_complaint =
 static struct complaint bf_notfound_complaint =
   {"line numbers off, `.bf' symbol not found", 0, 0};
 
+extern struct complaint ef_complaint;
+extern struct complaint eb_complaint;
+
 static void
 enter_line_range PARAMS ((struct subfile *, unsigned, unsigned,
 			  CORE_ADDR, CORE_ADDR, unsigned *));
@@ -1633,10 +1636,13 @@ read_xcoff_symtab (objfile, nsyms)
 
 	      fcn_last_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
 	      new = pop_context ();
-	      if (context_stack_depth != 0)
-		error ("\
-  invalid symbol data; .bf/.ef/.bb/.eb symbol mismatch, at symbol %d.",
-		       symnum);
+	      /* Stack must be empty now.  */
+	      if (context_stack_depth > 0 || new == NULL)
+		{
+		  complain (&ef_complaint, cs->c_symnum);
+		  within_function = 0;
+		  break;
+		}
 
 	      finish_block (new->name, &local_symbols, new->old_blocks,
 			    new->start_addr,
@@ -1665,12 +1671,16 @@ read_xcoff_symtab (objfile, nsyms)
 
 	case C_ARG:
 	case C_REGPARM:
+	case C_REG:
 	case C_TPDEF:
 	case C_STRTAG:
 	case C_UNTAG:
 	case C_ENTAG:
-	  printf_unfiltered
-	    ("ERROR: Unimplemented storage class: %d.\n", cs->c_sclass);
+	  {
+	    static struct complaint msg =
+	      {"Unrecognized storage class %d.", 0, 0};
+	    complain (&msg, cs->c_sclass);
+	  }
 	  break;
 
 	case C_LABEL:
@@ -1741,12 +1751,11 @@ read_xcoff_symtab (objfile, nsyms)
 	  else if (STREQ (cs->c_name, ".eb"))
 	    {
 	      new = pop_context ();
-	      if (depth != new->depth)
-		error ("\
-  Invalid symbol data: .bb/.eb symbol mismatch at symbol %d.",
-		       symnum);
-
-	      depth--;
+	      if (depth-- != new->depth)
+		{
+		  complain (&eb_complaint, symnum);
+		  break;
+		}
 	      if (local_symbols && context_stack_depth > 0)
 		{
 		  /* Make a block for the local symbols within.  */
@@ -1935,15 +1944,6 @@ process_xcoff_symbol (cs, objfile)
 	  SYMBOL_DUP (sym, sym2);
 	  add_symbol_to_list 
 	    (sym2, within_function ? &local_symbols : &file_symbols);
-	  break;
-
-	case C_REG:
-	  printf_unfiltered ("ERROR! C_REG is not fully implemented!\n");
-	  SYMBOL_CLASS (sym) = LOC_REGISTER;
-	  SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
-	  SYMBOL_SECTION (sym) = cs->c_secnum;
-	  SYMBOL_DUP (sym, sym2);
-	  add_symbol_to_list (sym2, &local_symbols);
 	  break;
 
 	case C_RSYM:
