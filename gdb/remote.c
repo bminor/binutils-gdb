@@ -4640,10 +4640,13 @@ remote_stopped_by_watchpoint (void)
     return remote_stopped_by_watchpoint_p;
 }
 
+extern int stepped_after_stopped_by_watchpoint;
+
 static CORE_ADDR
 remote_stopped_data_address (void)
 {
-  if (remote_stopped_by_watchpoint ())
+  if (remote_stopped_by_watchpoint ()
+      || stepped_after_stopped_by_watchpoint)
     return remote_watch_data_address;
   return (CORE_ADDR)0;
 }

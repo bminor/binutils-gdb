@@ -1356,6 +1356,8 @@ adjust_pc_after_break (struct execution_control_state *ecs)
    by an event from the inferior, figure out what it means and take
    appropriate action.  */
 
+int stepped_after_stopped_by_watchpoint;
+
 void
 handle_inferior_event (struct execution_control_state *ecs)
 {
@@ -1364,7 +1366,6 @@ handle_inferior_event (struct execution_control_state *ecs)
      isn't used, then you're wrong!  The macro STOPPED_BY_WATCHPOINT,
      defined in the file "config/pa/nm-hppah.h", accesses the variable
      indirectly.  Mutter something rude about the HP merge.  */
-  int stepped_after_stopped_by_watchpoint;
   int sw_single_step_trap_p = 0;
 
   /* Cache the last pid/waitstatus. */

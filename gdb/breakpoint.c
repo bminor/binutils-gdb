@@ -746,6 +746,23 @@ insert_catchpoint (struct ui_out *uo, void *args)
   return 0;
 }
 
+/* Helper routine: free the value chain for a breakpoint (watchpoint).  */
+
+static void free_valchain (struct bp_location *b)
+{
+  struct value *v;
+  struct value *n;
+
+  /* Free the saved value chain.  We will construct a new one
+     the next time the watchpoint is inserted.  */
+  for (v = b->owner->val_chain; v; v = n)
+    {
+      n = v->next;
+      value_free (v);
+    }
+  b->owner->val_chain = NULL;
+}
+
 /* Insert a low-level "breakpoint" of some type.  BPT is the breakpoint.
    Any error messages are printed to TMP_ERROR_STREAM; and DISABLED_BREAKS,
    PROCESS_WARNING, and HW_BREAKPOINT_ERROR are used to report problems.
@@ -920,6 +937,8 @@ insert_bp_location (struct bp_location *bpt,
 
       if (within_current_scope)
 	{
+	  free_valchain (bpt);
+
 	  /* Evaluate the expression and cut the chain of values
 	     produced off from the value chain.
 
@@ -1505,15 +1524,6 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
       if ((is == mark_uninserted) && (b->inserted))
 	warning ("Could not remove hardware watchpoint %d.",
 		 b->owner->number);
-
-      /* Free the saved value chain.  We will construct a new one
-         the next time the watchpoint is inserted.  */
-      for (v = b->owner->val_chain; v; v = n)
-	{
-	  n = v->next;
-	  value_free (v);
-	}
-      b->owner->val_chain = NULL;
     }
   else if ((b->owner->type == bp_catch_fork ||
 	    b->owner->type == bp_catch_vfork ||
@@ -2616,10 +2626,15 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
     if (!breakpoint_enabled (b) && b->enable_state != bp_permanent)
       continue;
 
+    /* Hardware watchpoints are treated as non-existent if the reason we 
+       stopped wasn't a hardware watchpoint (we didn't stop on some data 
+       address).  Otherwise gdb won't stop on a break instruction in the code
+       (not from a breakpoint) when a hardware watchpoint has been defined.  */
     if (b->type != bp_watchpoint
-	&& b->type != bp_hardware_watchpoint
-	&& b->type != bp_read_watchpoint
-	&& b->type != bp_access_watchpoint
+	&& !((b->type == bp_hardware_watchpoint
+	      || b->type == bp_read_watchpoint
+	      || b->type == bp_access_watchpoint)
+	     && target_stopped_data_address () != 0)
 	&& b->type != bp_hardware_breakpoint
 	&& b->type != bp_catch_fork
 	&& b->type != bp_catch_vfork
@@ -6880,6 +6895,8 @@ delete_breakpoint (struct breakpoint *bpt)
 
   if (bpt->loc->inserted)
     remove_breakpoint (bpt->loc, mark_inserted);
+
+  free_valchain (bpt->loc);
 
   if (breakpoint_chain == bpt)
     breakpoint_chain = bpt->next;

@@ -1,3 +1,17 @@
+2004-04-26  Orjan Friberg <orjanf@axis.com>
+
+	From Paul Koning <pkoning@equallogic.com>:
+	* breakpoint.c (free_valchain): New function.
+	(insert_bp_location, delete_breakpoint): Use free_valchain.
+	(remove_breakpoint): Do not remove the valchain.
+	(bpstat_stop_status): If not stopped by watchpoint, skip
+	watchpoints when generating stop status list.
+	* infrun.c (handle_inferior_event): Make
+	stepped_after_stopped_by_watchpoint a global variable.
+	* remote.c (remote_stopped_data_address): Return watch data
+	address rather than zero if stepped_after_stopped_by_watchpoint is
+	set.
+
 2004-04-25  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Fix PR gdb/1626.
