@@ -226,21 +226,8 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
 	{
 	case STV_INTERNAL:
 	case STV_HIDDEN:
-	  /* This symbol must be defined in the shared object or
-	     executable.  */
-	  if (h->root.type == bfd_link_hash_undefined)
-	    {
-	      bfd * abfd = h->root.u.undef.abfd;
-	      const char * name = h->root.root.string;
-	      
-	      (*info->callbacks->undefined_symbol)
-		(info, name, abfd, bfd_und_section_ptr, 0, true);
-
-	      /* We have flaged a fatal error. We now treat this as
-	         a normal symbol to avoid further error messages. */
-	      h->other ^= ELF_ST_VISIBILITY (h->other);
-	    }
-	  else if (h->root.type != bfd_link_hash_undefweak)
+	  if (h->root.type != bfd_link_hash_undefined
+	      && h->root.type != bfd_link_hash_undefweak)
 	    {
 	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 	      return true;
