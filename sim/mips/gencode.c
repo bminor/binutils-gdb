@@ -3994,7 +3994,7 @@ build_instruction (doisa, features, mips16, insn)
       printf("for(i=0;i<WORDS_IN_MMI_REGS;i++)\n");
       printf("  {\n");
       printf("  int x = RT_UW(i);\n");
-      printf("  GPR_UW(destreg,i) = ((x & (1  << 24)) >> (24 - 15))  \n");
+      printf("  GPR_UW(destreg,i) = ((x & (1  << 31)) >> (31 - 15))  \n");
       printf("                    | ((x & (31 << 19)) >> (19 - 10))  \n");
       printf("                    | ((x & (31 << 11)) >> (11 - 5))   \n");
       printf("                    | ((x & (31 <<  3)) >> (3  - 0));  \n");

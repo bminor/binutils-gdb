@@ -1,5 +1,10 @@
 Wed Jul  2 11:54:10 1997  Jeffrey A Law  (law@cygnus.com)
 
+start-sanitize-r5900
+	* gencode.c (build_instruction): Handle "ppac5" according to
+	version 1.95 of the r5900 ISA.
+end-sanitize-r5900
+
 	* interp.c (sim_engine_run): Reset the ZERO register to zero
 	regardless of FEATURE_WARN_ZERO.
 	* gencode.c (FEATURE_WARNINGS): Remove FEATURE_WARN_ZERO.
