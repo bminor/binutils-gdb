@@ -1,3 +1,11 @@
+2003-04-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-hppa.c (hppa_symbol_chars): Revert 2003-04-28 change.
+	* config/tc-hppa.h (tc_symbol_chars): Likewise.
+	* config/tc-ppc.c (ppc_symbol_chars): Revert 2003-04-24 change.
+	* config/tc-ppc.h (tc_symbol_chars): Likewise.
+	* app.c (do_scrub_chars): Revert 2003-04-23 and 2003-04-22 changes.
+
 2003-04-29  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-elf.c (obj_elf_symver): Skip whitespace before the

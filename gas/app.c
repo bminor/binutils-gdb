@@ -1289,17 +1289,15 @@ do_scrub_chars (get, tostart, tolen)
 	  /* Some relatively `normal' character.  */
 	  if (state == 0)
 	    {
-	      if (IS_SYMBOL_COMPONENT (ch))
-		state = 11;	/* Now seeing label definition.  */
+	      state = 11;	/* Now seeing label definition.  */
 	    }
 	  else if (state == 1)
 	    {
-	      if (IS_SYMBOL_COMPONENT (ch))
-		state = 2;	/* Ditto.  */
+	      state = 2;	/* Ditto.  */
 	    }
 	  else if (state == 9)
 	    {
-	      if (!IS_SYMBOL_COMPONENT (ch))
+	      if (lex[ch] != LEX_IS_SYMBOL_COMPONENT)
 		state = 3;
 	    }
 	  else if (state == 10)
