@@ -38,8 +38,6 @@ maybe-ranlib.c
 binutils.texinfo
 bucomm.c
 config
-config.sub
-configure
 configure.in
 copy.c
 cplus-dem.c
@@ -64,7 +62,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.5  1991/10/08 01:48:04  gnu
+# Revision 1.6  1991/10/08 01:50:59  gnu
+# Remove configure and config.sub from the expected list.
+#
+# Revision 1.5  1991/10/08  01:48:04  gnu
 # Add binutils.texinfo, and change *-ranlib.o to *-ranlib.c.
 #
 # Revision 1.4  1991/10/07  23:14:30  bothner
