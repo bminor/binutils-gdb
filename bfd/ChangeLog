@@ -1,3 +1,7 @@
+Fri Nov  5 15:17:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coffcode.h (coff_write_object_contents): Zero out internal_a.
+
 Fri Nov  5 10:41:07 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* aoutx.h, archive.c, archures.c, bfd.c, cache.c, coffcode.h,
