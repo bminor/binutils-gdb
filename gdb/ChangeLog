@@ -84,7 +84,9 @@ Tue Feb 24 02:53:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 end-sanitize-r5900
 Thu Feb 19 16:49:48 1998 John Metzler  <jmetzler@cygnus.com>
 
-	* target.c - tracing 64 bit targets crashed long long printfs
+	* target.c (debug_to_fetch_registers,debug_to_store-registers,
+	debug-to_insert_breakpoint,debug_to_remove_breakpoint): tracing
+	64 bit targets crashed long long printfs.
 
 Tue Feb 17 16:36:22 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
