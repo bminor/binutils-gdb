@@ -1,6 +1,7 @@
 Wed Aug 21 11:26:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
-	* scripttempl/elf.sc: Put .gnu.linkonce* sections in .text.
+	* scripttempl/elf.sc: Put .gnu.linkonce* sections in appropriate
+	containing sections.
 
 Mon Aug 19 13:01:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
