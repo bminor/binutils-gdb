@@ -1,5 +1,4 @@
-<<<<<<< ChangeLog
-2001-11-26  Geoffrey Keating  <geoffk@redhat.com>
+2001-12-07  Geoffrey Keating  <geoffk@redhat.com>
 	    matthew green  <mrg@redhat.com>
 
 	* gas/xstormy16/allinsn.d: New file.
@@ -14,13 +13,11 @@
 	* gas/xstormy16/reloc-2.d: New file.
 	* gas/xstormy16/reloc-2.s: New file.
 
-=======
 2001-12-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/all/incbin.s: Add spaces before directives.
 	* gas/all/incbin.d: Update.
 
->>>>>>> 1.255
 Fri Dec  7 09:16:07 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/hppa/parse/linesepbug.s: Restore to its original form,
