@@ -98,6 +98,15 @@ trad_frame_set_value (struct trad_frame_saved_reg this_saved_regs[],
 }
 
 void
+trad_frame_set_reg_value (struct trad_frame_cache *this_trad_cache,
+			  int regnum, LONGEST val)
+{
+  /* External interface for users of trad_frame_cache
+     (who cannot access the prev_regs object directly).  */
+  trad_frame_set_value (this_trad_cache->prev_regs, regnum, val);
+}
+
+void
 trad_frame_set_reg_realreg (struct trad_frame_cache *this_trad_cache,
 			    int regnum, int realreg)
 {

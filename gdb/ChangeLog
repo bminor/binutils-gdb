@@ -1,3 +1,8 @@
+2005-03-04  Michael Snyder  <msnyder@redhat.com>
+
+	* trad-frame.c (trad_frame_set_reg_value): New function.
+	* trad-frame.h (trad_frame_set_reg_value): Export.
+
 2005-03-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (remote.o): Update dependencies.
