@@ -1,3 +1,7 @@
+2000-06-03  H.J. Lu  <hjl@gnu.org>
+
+	* read.c (is_end_of_line): Put back `;'.
+
 2000-06-03  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c (md_shortopts): Remove 'm', add 'q' to non-elf.
