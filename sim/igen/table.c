@@ -38,348 +38,598 @@
 #include <stdlib.h>
 #endif
 
-struct _table {
+typedef struct _open_table open_table;
+struct _open_table {
   size_t size;
   char *buffer;
   char *pos;
-  int nr_fields;
-  int nr_model_fields;
-  int line_nr;
-  char *file_name;
-  int current_file_line_offset;
-  char *current_file_name;
+  line_ref pseudo_line;
+  line_ref real_line;
+  open_table *parent;
+  table *root;
+};
+struct _table {
+  open_table *current;
 };
 
-extern table *
-table_open(const char *file_name,
-	   int nr_fields,
-	   int nr_model_fields)
+
+static line_ref *
+current_line (open_table *file)
+{
+  line_ref *entry = ZALLOC (line_ref);
+  *entry = file->pseudo_line;
+  return entry;
+}
+
+static table_entry *
+new_table_entry (open_table *file,
+		 table_entry_type type)
+{
+  table_entry *entry;
+  entry = ZALLOC (table_entry);
+  entry->file = file->root;
+  entry->line = current_line (file);
+  entry->type = type;
+  return entry;
+}
+
+static void
+set_nr_table_entry_fields (table_entry *entry,
+			   int nr_fields)
+{
+  entry->field = NZALLOC (char*, nr_fields + 1);
+  entry->nr_fields = nr_fields;
+}
+
+
+void
+table_push (table *root,
+	    line_ref *line,
+	    table_include *includes,
+	    const char *file_name)
 {
   int fd;
   struct stat stat_buf;
-  table *file;
+  open_table *file;
+  table_include dummy;
+  table_include *include = &dummy;
+
+  /* dummy up a search of this directory */
+  dummy.next = includes;
+  dummy.dir = "";
 
   /* create a file descriptor */
-  file = ZALLOC(table);
-  ASSERT(file != NULL);
-  file->nr_fields = nr_fields;
-  file->nr_model_fields = nr_model_fields;
+  file = ZALLOC (open_table);
+  if (file == NULL)
+    {
+      perror (file_name);
+      exit (1);
+    }
+  file->root = root;
+  file->parent = root->current;
+  root->current = file;
 
-  /* save the file name */
-  file->file_name = (char*)zalloc(strlen(file_name) + 1);
-  ASSERT(file->file_name != NULL);
-  strcpy(file->file_name, file_name);
-  file->current_file_name = file->file_name;
-
-  /* open the file */
-  fd = open(file->file_name, O_RDONLY, 0);
-  if (fd < 0) {
-    perror(file->file_name);
-    exit (1);
+  while (1)
+    {
+      /* save the file name */
+      char *dup_name = NZALLOC (char, strlen (include->dir) + strlen (file_name) + 2);
+      if (dup_name == NULL)
+	{
+	  perror (file_name);
+	  exit (1);
+	}
+      if (include->dir[0] != '\0')
+	{
+	  strcat (dup_name, include->dir);
+	  strcat (dup_name, "/");
+	}
+      strcat (dup_name, file_name);
+      file->real_line.file_name = dup_name;
+      file->pseudo_line.file_name = dup_name;
+printf ("Trying `%s'\n", dup_name);
+      /* open the file */
+      fd = open (dup_name, O_RDONLY, 0);
+      if (fd >= 0)
+	break;
+      /* zfree (dup_name); */
+      if (include->next == NULL)
+	{
+	  if (line != NULL)
+	    error (line, "Problem opening file `%s'\n", file_name);
+	  perror (file_name);
+	  exit (1);
+	}
+      include = include->next;
   }
 
+
   /* determine the size */
-  if (fstat(fd, &stat_buf) < 0) {
-    perror("table_open.fstat");
-    exit(1);
+  if (fstat (fd, &stat_buf) < 0) {
+    perror (file_name);
+    exit (1);
   }
   file->size = stat_buf.st_size;
 
   /* allocate this much memory */
-  file->buffer = (char*)zalloc(file->size+1);
-  ASSERT(file->buffer != NULL);
+  file->buffer = (char*) zalloc (file->size + 1);
+  if (file->buffer == NULL)
+    {
+      perror (file_name);
+      exit (1);
+    }
   file->pos = file->buffer;
 
-  /* read it in */
-  if (read(fd, file->buffer, file->size) < file->size) {
-    perror(file->file_name);
-    exit(1);
+  /* read it all in */
+  if (read (fd, file->buffer, file->size) < file->size) {
+    perror (file_name);
+    exit (1);
   }
   file->buffer[file->size] = '\0';
 
   /* set the initial line numbering */
-  file->line_nr = 0;
-  file->current_file_line_offset = 0;
+  file->real_line.line_nr = 1; /* specifies current line */
+  file->pseudo_line.line_nr = 1; /* specifies current line */
 
   /* done */
-  close(fd);
-  return file;
+  close (fd);
+}
+
+table *
+table_open (const char *file_name)
+{
+  table *root;
+
+  /* create a file descriptor */
+  root = ZALLOC (table);
+  if (root == NULL)
+    {
+      perror (file_name);
+      exit (1);
+    }
+
+  table_push (root, NULL, NULL, file_name);
+  return root;
+}
+
+char *
+skip_spaces (char *chp)
+{
+  while (1)
+    {
+      if (*chp == '\0'
+	  || *chp == '\n'
+	  || !isspace (*chp))
+	return chp;
+      chp++;
+    }
+}
+
+
+char *
+back_spaces (char *start, char *chp)
+{
+  while (1)
+    {
+      if (chp <= start
+	  || !isspace (chp[-1]))
+	return chp;
+      chp--;
+    }
+}
+
+char *
+skip_digits (char *chp)
+{
+  while (1)
+    {
+      if (*chp == '\0'
+	  || *chp == '\n'
+	  || !isdigit (*chp))
+	return chp;
+      chp++;
+    }
+}
+
+char *
+skip_to_separator (char *chp,
+		   char *separators)
+{
+  while (1)
+    {
+      char *sep = separators;
+      while (1)
+	{
+	  if (*chp == *sep)
+	    return chp;
+	  if (*sep == '\0')
+	    break;
+	  sep++;
+	}
+      chp++;
+    }
+}
+
+static char *
+skip_to_null (char *chp)
+{
+  return skip_to_separator (chp, "");
+}
+
+
+static char *
+skip_to_nl (char * chp)
+{
+  return skip_to_separator (chp, "\n");
+}
+
+
+static void
+next_line (open_table *file)
+{
+  file->pos = skip_to_nl (file->pos);
+  if (*file->pos == '0')
+    error (&file->pseudo_line, "Missing <nl> at end of line\n");
+  *file->pos = '\0';
+  file->pos += 1;
+  file->real_line.line_nr += 1;
+  file->pseudo_line.line_nr += 1;
 }
 
 
 extern table_entry *
-table_entry_read(table *file)
+table_read (table *root)
 {
-  int field;
-  table_entry *entry;
+  open_table *file = root->current;
+  table_entry *entry = NULL;
+  while(1)
+    {
 
-  /* skip comments/blanks */
-  while(1) {
-    /* leading white space */
-    while (*file->pos != '\0'
-	   && *file->pos != '\n'
-	   && isspace(*file->pos))
-      file->pos++;
-    /* cpp line nr directive - # <line-nr> "<file>" */
-    if (file->pos[0] == '#'
-	&& file->pos[1] == ' '
-	&& isdigit(file->pos[2])) {
-      file->pos += strlen("# ");
-      /* parse the number */
-      file->current_file_line_offset = atoi(file->pos) - file->line_nr - 2;
-      /* skip to the file name */
-      while (file->pos[0] != '0'
-	     && file->pos[0] != '"'
-	     && file->pos[0] != '\0')
-	file->pos++;
-      if (file->pos[0] != '"') {
-	error("%s:%d: Missing opening quote",
-	      file->file_name,
-	      file->line_nr);
-      }
-      /* parse the file name */
-      file->pos++;
-      file->current_file_name = file->pos;
-      while (file->pos[0] != '"'
-	     && file->pos[0] != '\0')
-	file->pos++;
-      if (file->pos[0] != '"') {
-	error("%s:%d: Missing closing quote",
-	      file->file_name,
-	      file->line_nr);
-      }
-      file->pos[0] = '\0';
-      file->pos ++;
-      while (file->pos[0] != '\0'
-	     && file->pos[0] != '\n')
-	file->pos[0]++;
-      if (file->pos[0] != '\n')
-	error("%s:%d: Missing newline",
-	      file->file_name,
-	      file->line_nr);
-    }
-    /* comment - leading // or # - skip */
-    else if ((file->pos[0] == '/' && file->pos[1] == '/')
-	     || (file->pos[0] == '#')) {
-      do {
-	file->pos++;
-      } while (*file->pos != '\0' && *file->pos != '\n');
-    }
-    /* end of line? */
-    if (*file->pos == '\n') {
-      file->pos++;
-      file->line_nr++;
-    }
-    else
-      break;
-  }
-  if (*file->pos == '\0')
-    return NULL;
-
-  /* create this new entry */
-  entry = (table_entry*)zalloc(sizeof(table_entry)
-			       + (file->nr_fields + 1) * sizeof(char*));
-  ASSERT(entry != NULL);
-  entry->file_name = file->current_file_name;
-  entry->nr_fields = file->nr_fields;
-
-  /* break the line into its colon delimitered fields */
-  for (field = 0; field < file->nr_fields-1; field++) {
-    entry->fields[field] = file->pos;
-    while(*file->pos && *file->pos != ':' && *file->pos != '\n')
-      file->pos++;
-    if (*file->pos == ':') {
-      *file->pos = '\0';
-      file->pos++;
-    }
-  }
-
-  /* any trailing stuff not the last field */
-  ASSERT(field == file->nr_fields-1);
-  entry->fields[field] = file->pos;
-  while (*file->pos && *file->pos != '\n') {
-    file->pos++;
-  }
-  if (*file->pos == '\n') {
-    *file->pos = '\0';
-    file->pos++;
-  }
-  file->line_nr++;
-
-  /* If following lines being with a double quote ("), add them to the
-     list of assembler lines */
-  {
-    table_assembler_entry **current = &entry->assembler;
-    while (*file->pos == '"') {
-      char *tmpchp;
-      const char *format;
-      int strlen_format;
-      const char *condition;
-      int strlen_condition;
-
-      /* skip over the format string */
-      format = file->pos;
-      strlen_format = 0;
-      do {
-	if (file->pos[0] == '\\' && file->pos[1] == '"')
-	  file->pos += 2;
-	else
-	  file->pos += 1;
-      } while (*file->pos != '\0' && *file->pos != '\n' && *file->pos != '"');
-      if (*file->pos != '"')
-	error ("%s:%d: Missing closing quote in assembler line",
-	       file->file_name,
-	       file->line_nr);
-      file->pos++;
-      strlen_format = file->pos - format;
-
-      /* skip over the boolean condition */
-      condition = NULL;
-      strlen_condition = 0;
-      if (*file->pos == ':')
+      /* end-of-file? */
+      while (*file->pos == '\0')
 	{
-	  file->pos++;
-	  while (isspace(*file->pos) && *file->pos != '\0' && *file->pos != '\n')
-	    file->pos++;
-	  condition = file->pos;
-	  while (*file->pos != '\0' && *file->pos != '\n')
-	    file->pos++;
-	  strlen_condition = file->pos - condition;
+	  if (file->parent != NULL)
+	    {
+	      file = file->parent;
+	      root->current = file;
+	    }
+	  else
+	    return NULL;
 	}
 
-      /* create the new assembler entry */
-      *current = ZALLOC (table_assembler_entry);
-      tmpchp = zalloc (strlen_format + 1);
-      strncpy (tmpchp, format, strlen_format);
-      (*current)->format = tmpchp;
-      (*current)->file_name = file->file_name;
-      (*current)->line_nr = file->line_nr;
-      if (condition != NULL && strlen_condition > 0)
+      /* code_block? */
+      if (*file->pos == '{')
 	{
-	  tmpchp = zalloc (strlen_condition + 1);
-	  strncpy (tmpchp, condition, strlen_condition);
-	  (*current)->condition = tmpchp;
+	  char *chp;
+	  next_line (file); /* discard leading brace */
+	  entry = new_table_entry (file, table_code_entry);
+	  chp = file->pos;
+	  /* determine how many lines are involved - look for <nl> "}" */
+	  {
+	    int nr_lines = 0;
+	    while (*file->pos != '}')
+	      {
+		next_line (file);
+		nr_lines++;
+	      }
+	    set_nr_table_entry_fields (entry, nr_lines);
+	  }
+	  /* now enter each line */
+	  {
+	    int line_nr;
+	    for (line_nr = 0; line_nr < entry->nr_fields; line_nr++)
+	      {
+		if (strncmp (chp, "  ", 2) == 0)
+		  entry->field[line_nr] = chp + 2;
+		else
+		  entry->field[line_nr] = chp;
+		chp = skip_to_null (chp) + 1;
+	      }
+	    /* skip trailing brace */
+	    ASSERT (*file->pos == '}');
+	    next_line (file);
+	  }
+	  break;
 	}
-      current = &(*current)->next;
 
-      /* end of line? */
-      if (*file->pos != '\n')
-	error ("%s:%d: Missing eoln in assembler line",
-	       file->file_name,
-	       file->line_nr);
-      file->pos++;
-      file->line_nr++;
-    }
-  }
+      /* tab block? */
+      if (*file->pos == '\t')
+	{
+	  char *chp = file->pos;
+	  entry = new_table_entry (file, table_code_entry);
+	  /* determine how many lines are involved - look for <nl> !<tab> */
+	  {
+	    int nr_lines = 0;
+	    int nr_blank_lines = 0;
+	    while (1)
+	      {
+		if (*file->pos == '\t')
+		  {
+		    nr_lines = nr_lines + nr_blank_lines + 1;
+		    nr_blank_lines = 0;
+		    next_line (file);
+		  }
+		else
+		  {
+		    file->pos = skip_spaces (file->pos);
+		    if (*file->pos != '\n')
+		      break;
+		    nr_blank_lines++;
+		    next_line (file);
+		  }
+	      }
+	    set_nr_table_entry_fields (entry, nr_lines);
+	  }
+	  /* now enter each line */
+	  {
+	    int line_nr;
+	    for (line_nr = 0; line_nr < entry->nr_fields; line_nr++)
+	      {
+		if (*chp == '\t')
+		  entry->field[line_nr] = chp + 1;
+		else
+		  entry->field[line_nr] = ""; /* blank */
+		chp = skip_to_null (chp) + 1;
+	      }
+	  }
+	  break;
+	}
 
-  /* if following lines begin with a star, add them to the model
-     section.  */
-  while ((file->nr_model_fields > 0) && (*file->pos == '*')) {
-    table_model_entry *model = (table_model_entry*)zalloc(sizeof(table_model_entry)
-							  + (file->nr_model_fields + 1) * sizeof(char*));
-    if (entry->model_last)
-      entry->model_last->next = model;
-    else
-      entry->model_first = model;
-    entry->model_last = model;
+      /* cpp directive? */
+      if (file->pos[0] == '#')
+	{
+	  char *chp = skip_spaces (file->pos + 1);
 
-    /* break the line into its colon delimitered fields */
-    file->pos++;
-    for (field = 0; field < file->nr_model_fields-1; field++) {
-      model->fields[field] = file->pos;
-      while(*file->pos && *file->pos != ':' && *file->pos != '\n')
-	file->pos++;
-      if (*file->pos == ':') {
-	*file->pos = '\0';
-	file->pos++;
+	  /* cpp line-nr directive - # <line-nr> "<file>" */
+	  if (isdigit (*chp)
+	      && *skip_digits (chp) == ' '
+	      && *skip_spaces (skip_digits (chp)) == '"')
+	    {
+	      int line_nr;
+	      char *file_name;
+	      file->pos = chp;
+	      /* parse the number */
+	      line_nr = atoi(file->pos) - 1;
+	      /* skip to the file name */
+	      while (file->pos[0] != '0'
+		     && file->pos[0] != '"'
+		     && file->pos[0] != '\0')
+		file->pos++;
+	      if (file->pos[0] != '"')
+		error (&file->real_line, "Missing opening quote in cpp directive\n");
+	      /* parse the file name */
+	      file->pos++;
+	      file_name = file->pos;
+	      while (file->pos[0] != '"'
+		     && file->pos[0] != '\0')
+		file->pos++;
+	      if (file->pos[0] != '"')
+		error (&file->real_line, "Missing closing quote in cpp directive\n");
+	      file->pos[0] = '\0';
+	      file->pos++;
+	      file->pos = skip_to_nl (file->pos);
+	      if (file->pos[0] != '\n')
+		error (&file->real_line, "Missing newline in cpp directive\n");
+	      file->pseudo_line.file_name = file_name;
+	      file->pseudo_line.line_nr = line_nr;
+	      next_line (file);
+	      continue;
+	    }
+
+	  /* #define and #undef - not implemented yet */
+
+	  /* Old style # comment */
+	  next_line (file);
+	  continue;
+	}
+
+      /* blank line or end-of-file? */
+      file->pos = skip_spaces (file->pos);
+      if (*file->pos == '\0')
+	error (&file->pseudo_line, "Missing <nl> at end of file\n");
+      if (*file->pos == '\n')
+	{
+	  next_line (file);
+	  continue;
+	}
+
+      /* comment - leading // or # - skip */
+      if ((file->pos[0] == '/' && file->pos[1] == '/')
+	  || (file->pos[0] == '#'))
+	{
+	  next_line (file);
+	  continue;
+	}
+
+      /* colon field */
+      {
+	char *chp = file->pos;
+	entry = new_table_entry (file, table_colon_entry);
+	next_line (file);
+	/* figure out how many fields */
+	{
+	  int nr_fields = 1;
+	  char *tmpch = chp;
+	  while (1)
+	    {
+	      tmpch = skip_to_separator (tmpch, "\\:");
+	      if (*tmpch == '\\')
+		{
+		  /* eat the escaped character */
+		  char *cp = tmpch;
+		  while (cp[1] != '\0')
+		    {
+		      cp[0] = cp[1];
+		      cp++;
+		    }
+		  cp[0] = '\0';
+		  tmpch++;
+		}
+	      else if (*tmpch != ':')
+		break;
+	      else
+		{
+		  *tmpch = '\0';
+		  tmpch++;
+		  nr_fields++;
+		}
+	    }
+	  set_nr_table_entry_fields (entry, nr_fields);
+	}
+	/* now parse them */
+	{
+	  int field_nr;
+	  for (field_nr = 0; field_nr < entry->nr_fields; field_nr++)
+	    {
+	      chp = skip_spaces (chp);
+	      entry->field[field_nr] = chp;
+	      chp = skip_to_null (chp);
+	      *back_spaces (entry->field[field_nr], chp) = '\0';
+	      chp++;
+	    }
+	}
+	break;
       }
+
     }
 
-    /* any trailing stuff not the last field */
-    ASSERT(field == file->nr_model_fields-1);
-    model->fields[field] = file->pos;
-    while (*file->pos && *file->pos != '\n') {
-      file->pos++;
-    }
-    if (*file->pos == '\n') {
-      *file->pos = '\0';
-      file->pos++;
-    }
-
-    file->line_nr++;
-    model->line_nr = file->current_file_line_offset + file->line_nr;
-  }
-
-  entry->line_nr = file->current_file_line_offset + file->line_nr;
-
-  /* if following lines are tab indented, put in the annex */
-  if (*file->pos == '\t') {
-    entry->annex = file->pos;
-    do {
-      do {
-	file->pos++;
-      } while (*file->pos != '\0' && *file->pos != '\n');
-      if (*file->pos == '\n') {
-	char *save_pos = ++file->pos;
-	int extra_lines = 0;
-	file->line_nr++;
-	/* Allow tab indented to have blank lines */
-	while (*save_pos == '\n') {
-	  save_pos++;
-	  extra_lines++;
-	}
-	if (*save_pos == '\t') {
-	  file->pos = save_pos;
-	  file->line_nr += extra_lines;
-	}
-      }
-    } while (*file->pos != '\0' && *file->pos == '\t');
-    if (file->pos[-1] == '\n')
-      file->pos[-1] = '\0';
-  }
-  else
-    entry->annex = NULL;
-
-  /* return it */
+  ASSERT (entry == NULL || entry->field[entry->nr_fields] == NULL);
   return entry;
-
 }
 
-
 extern void
-dump_table_entry(table_entry *entry,
-		 int indent)
+table_print_code (lf *file,
+		  table_entry *entry)
 {
-  printf("(table_entry*)%p\n", entry);
-
-  if (entry != NULL) {
-    int field;
-    char sep;
-
-    sep = ' ';
-    dumpf(indent, "(fields");
-    for (field = 0; field < entry->nr_fields; field++) {
-      printf("%c%s", sep, entry->fields[field]);
-      sep = ':';
+  int field_nr;
+  int nr = 0;
+  for (field_nr = 0;
+       field_nr < entry->nr_fields;
+       field_nr++)
+    {
+      char *chp = entry->field[field_nr];
+      int in_bit_field = 0;
+      if (*chp == '#')
+	lf_indent_suppress(file);
+      while (*chp != '\0') 
+	{
+	  if (chp[0] == '{'
+	      && !isspace(chp[1])
+	      && chp[1] != '\0')
+	    {
+	      in_bit_field = 1;
+	      nr += lf_putchr(file, '_');
+	    }
+	  else if (in_bit_field && chp[0] == ':')
+	    {
+	      nr += lf_putchr(file, '_');
+	    }
+	  else if (in_bit_field && *chp == '}')
+	    {
+	      nr += lf_putchr(file, '_');
+	      in_bit_field = 0;
+	    }
+	  else 
+	    {
+	      nr += lf_putchr(file, *chp);
+	    }
+	  chp++;
+	}
+      if (in_bit_field)
+	{
+	  line_ref line = *entry->line;
+	  line.line_nr += field_nr;
+	  error (&line, "Bit field brace miss match\n");
+	}
+      nr += lf_putchr(file, '\n');
     }
-    printf(")\n");
-
-    dumpf(indent, "(line_nr %d)\n", entry->line_nr);
-
-    dumpf(indent, "(file_name %s)\n", entry->file_name);
-
-    dumpf(indent, "(annex\n%s\n", entry->annex);
-    dumpf(indent, " )\n");
-
-  }
 }
 
 
-extern void
-table_entry_print_cpp_line_nr(lf *file,
-			      table_entry *entry)
+
+void
+dump_line_ref (lf *file,
+		 char *prefix,
+		 const line_ref *line,
+		 char *suffix)
 {
-  lf_print__external_reference(file, entry->line_nr, entry->file_name);
+  lf_printf (file, "%s(line_ref*) 0x%lx", prefix, (long) line);
+  if (line != NULL)
+    {
+      lf_indent (file, +1);
+      lf_printf (file, "\n(line_nr %d)", line->line_nr);
+      lf_printf (file, "\n(file_name %s)", line->file_name);
+      lf_indent (file, -1);
+    }
+  lf_printf (file, "%s", suffix);
 }
 
 
+static const char *
+table_entry_type_to_str (table_entry_type type)
+{
+  switch (type)
+    {
+    case table_code_entry: return "code-entry";
+    case table_colon_entry: return "colon-entry";
+    }
+  return "*invalid*";
+}
+
+void
+dump_table_entry(lf *file,
+		 char *prefix,
+		 const table_entry *entry,
+		 char *suffix)
+{
+  lf_printf (file, "%s(table_entry*) 0x%lx", prefix, (long) entry);
+  if (entry != NULL)
+    {
+      int field;
+      lf_indent (file, +1);
+      dump_line_ref (file, "\n(line ", entry->line, ")");
+      lf_printf (file, "\n(type %s)", table_entry_type_to_str (entry->type));
+      lf_printf (file, "\n(nr_fields %d)", entry->nr_fields);
+      lf_printf (file, "\n(fields");
+      lf_indent (file, +1);
+      for (field = 0; field < entry->nr_fields; field++)
+	lf_printf (file, "\n\"%s\"", entry->field[field]);
+      lf_indent (file, -1);
+      lf_printf (file, ")");
+      lf_indent (file, -1);
+    }
+  lf_printf (file, "%s", suffix);
+}
+
+
+#ifdef MAIN
+int
+main(int argc, char **argv)
+{
+  table *t;
+  table_entry *entry;
+  lf *l;
+  int line_nr;
+
+  if (argc != 2)
+    {
+      printf("Usage: table <file>\n");
+      exit (1);
+    }
+
+  t = table_open (argv[1]);
+  l = lf_open ("-", "stdout", lf_omit_references, lf_is_text, "tmp-table");
+
+  line_nr = 0;
+  do
+    {
+      char line[10];
+      entry = table_read (t);
+      line_nr ++;
+      sprintf (line, "(%d ", line_nr);
+      dump_table_entry (l, line, entry, ")\n");
+    }
+  while (entry != NULL);
+
+  return 0;
+}
+#endif

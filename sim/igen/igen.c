@@ -979,15 +979,13 @@ main (int argc,
       printf ("\t Set the number of the high (most significant) instruction bit (depreciated).\n");
       printf ("\t This option can now be set directly in the instruction table.\n");
       printf ("\n");
-      printf ("  -I <icache-size>\n");
-      printf ("\t Specify size of the cracking instruction cache (default %d instructions).\n",
-	      options.gen.icache_size);
-      printf ("\t Implies -G icache.\n");
+      printf ("  -I <directory>\n");
+      printf ("\t Add <directory> to the list of directories searched when opening a file\n");
       printf ("\n");
       printf ("  -M <model-list>\n");
       printf ("\t Filter out any instructions that do not support at least one of the listed\n");
       printf ("\t models (An instructions with no model information is considered to support\n");
-      printf ("\n all models.).\n");
+      printf ("\t all models.).\n");
       printf ("\n");
       printf ("  -N <nr-cpus>\n");
       printf ("\t Generate a simulator supporting <nr-cpus>\n");
@@ -1020,7 +1018,8 @@ main (int argc,
       printf ("\t gen-delayed-branch     - need both cia and nia passed around\n");
       printf ("\t gen-direct-access      - use #defines to directly access values\n");
       printf ("\t gen-zero-r<N>          - arch assumes GPR(<N>) == 0, keep it that way\n");
-      printf ("\t gen-icache             - generate an instruction cracking cache\n");
+      printf ("\t gen-icache[=<N>        - generate an instruction cracking cache of size <N>\n");
+      printf ("\t                          Default size is %d\n", options.gen.icache_size);
       printf ("\t gen-insn-in-icache     - save original instruction when cracking\n");
       printf ("\t gen-multi-sim          - generate multiple simulators - one per model\n");
       printf ("\t                          By default, a single simulator that will\n");
@@ -1099,8 +1098,13 @@ main (int argc,
 	  break;
 	  
 	case 'I':
-	  options.gen.icache_size = a2i (optarg);
-	  options.gen.icache = 1;
+	  {
+	    table_include **dir = &options.include;
+	    while ((*dir) != NULL)
+	      dir = &(*dir)->next;
+	    (*dir) = ZALLOC (table_include);
+	    (*dir)->dir = strdup (optarg);
+	  }
 	  break;
 	  
 	case 'B':
@@ -1213,131 +1217,162 @@ main (int argc,
 
 
 	case 'G':
-	  if (strcmp (optarg, "decode-duplicate") == 0)
-	    {
-	      options.decode.duplicate = 1;
-	    }
-	  else if (strcmp (optarg, "decode-combine") == 0)
-	    {
-	      options.decode.combine = 1;
-	    }
-	  else if (strcmp (optarg, "decode-zero-reserved") == 0)
-	    {
-	      options.decode.zero_reserved = 1;
-	    }
-
-	  else if (strcmp (optarg, "gen-conditional-issue") == 0)
-	    {
-	      options.gen.conditional_issue = 1;
-	    }
-	  else if (strcmp (optarg, "conditional-issue") == 0)
-	    {
-	      options.gen.conditional_issue = 1;
-	      options.warning (NULL, "Option conditional-issue replaced by gen-conditional-issue\n");
-	    }
-	  else if (strcmp (optarg, "gen-delayed-branch") == 0)
-	    {
-	      options.gen.delayed_branch = 1;
-	    }
-	  else if (strcmp (optarg, "delayed-branch") == 0)
-	    {
-	      options.gen.delayed_branch = 1;
-	      options.warning (NULL, "Option delayed-branch replaced by gen-delayed-branch\n");
-	    }
-	  else if (strcmp (optarg, "gen-direct-access") == 0)
-	    {
-	      options.gen.direct_access = 1;
-	    }
-	  else if (strcmp (optarg, "direct-access") == 0)
-	    {
-	      options.gen.direct_access = 1;
-	      options.warning (NULL, "Option direct-access replaced by gen-direct-access\n");
-	    }
-	  else if (strncmp (optarg, "gen-zero-r", strlen ("gen-zero-r")) == 0)
-	    {
-	      options.gen.zero_reg = 1;
-	      options.gen.zero_reg_nr = atoi (optarg + strlen ("gen-zero-r"));
-	    }
-	  else if (strncmp (optarg, "zero-r", strlen ("zero-r")) == 0)
-	    {
-	      options.gen.zero_reg = 1;
-	      options.gen.zero_reg_nr = atoi (optarg + strlen ("zero-r"));
-	      options.warning (NULL, "Option zero-r<N> replaced by gen-zero-r<N>\n");
-	    }
-	  else if (strcmp (optarg, "gen-icache") == 0)
-	    {
-	      options.gen.icache = 1;
-	    }
-	  else if (strcmp (optarg, "gen-insn-in-icache") == 0)
-	    {
-	      options.gen.insn_in_icache = 1;
-	    }
-	  else if (strcmp (optarg, "gen-multi-sim") == 0)
-	    {
-	      options.gen.multi_sim = 1;
-	    }
-	  else if (strcmp (optarg, "gen-multi-word") == 0)
-	    {
-	      options.gen.multi_word = 1;
-	    }
-	  else if (strcmp (optarg, "gen-semantic-icache") == 0)
-	    {
-	      options.gen.semantic_icache = 1;
-	    }
-	  else if (strcmp (optarg, "gen-slot-verification") == 0)
-	    {
-	      options.gen.slot_verification = 1;
-	    }
-	  else if (strcmp (optarg, "verify-slot") == 0)
-	    {
-	      options.gen.slot_verification = 1;
-	      options.warning (NULL, "Option verify-slot replaced by gen-slot-verification\n");
-	    }
-	  else if (strcmp (optarg, "gen-nia-invalid") == 0)
-	    {
-	      options.gen.nia = nia_is_invalid;
-	    }
-	  else if (strcmp (optarg, "default-nia-minus-one") == 0)
-	    {
-	      options.gen.nia = nia_is_invalid;
-	      options.warning (NULL, "Option default-nia-minus-one replaced by gen-nia-invalid\n");
-	    }
-	  else if (strcmp (optarg, "gen-nia-void") == 0)
-	    {
-	      options.gen.nia = nia_is_void;
-	    }
-	  else if (strcmp (optarg, "trace-combine") == 0)
-	    {
-	      options.trace.combine = 1;
-	    }
-	  else if (strcmp (optarg, "trace-entries") == 0)
-	    {
-	      options.trace.entries = 1;
-	    }
-	  else if (strcmp (optarg, "trace-rule-rejection") == 0)
-	    {
-	      options.trace.rule_rejection = 1;
-	    }
-	  else if (strcmp (optarg, "trace-rule-selection") == 0)
-	    {
-	      options.trace.rule_selection = 1;
-	    }
-	  else if (strcmp (optarg, "jumps") == 0)
-	    {
-	      options.gen.code = generate_jumps;
-	    }
-	  else if (strcmp (optarg, "field-widths") == 0)
-	    {
-	      options.insn_specifying_widths = 1;
-	    }
-	  else if (strcmp (optarg, "omit-line-numbers") == 0)
-	    {
-	      file_references = lf_omit_references;
-	    }
-	  else
-	    error (NULL, "Unknown option %s\n", optarg);
-	  break;
-	  
+	  {
+	    int enable_p;
+	    char *argp;
+	    if (strncmp (optarg, "no-", strlen ("no-")) == 0)
+	      {
+		argp = optarg + strlen ("no-");
+		enable_p = 0;
+	      }
+	    else if (strncmp (optarg, "!", strlen ("!")) == 0)
+	      {
+		argp = optarg + strlen ("no-");
+		enable_p = 0;
+	      }
+	    else
+	      {
+		argp = optarg;
+		enable_p = 1;
+	      }
+	    if (strcmp (argp, "decode-duplicate") == 0)
+	      {
+		options.decode.duplicate = enable_p;
+	      }
+	    else if (strcmp (argp, "decode-combine") == 0)
+	      {
+		options.decode.combine = enable_p;
+	      }
+	    else if (strcmp (argp, "decode-zero-reserved") == 0)
+	      {
+		options.decode.zero_reserved = enable_p;
+	      }
+	    
+	    else if (strcmp (argp, "gen-conditional-issue") == 0)
+	      {
+		options.gen.conditional_issue = enable_p;
+	      }
+	    else if (strcmp (argp, "conditional-issue") == 0)
+	      {
+		options.gen.conditional_issue = enable_p;
+		options.warning (NULL, "Option conditional-issue replaced by gen-conditional-issue\n");
+	      }
+	    else if (strcmp (argp, "gen-delayed-branch") == 0)
+	      {
+		options.gen.delayed_branch = enable_p;
+	      }
+	    else if (strcmp (argp, "delayed-branch") == 0)
+	      {
+		options.gen.delayed_branch = enable_p;
+		options.warning (NULL, "Option delayed-branch replaced by gen-delayed-branch\n");
+	      }
+	    else if (strcmp (argp, "gen-direct-access") == 0)
+	      {
+		options.gen.direct_access = enable_p;
+	      }
+	    else if (strcmp (argp, "direct-access") == 0)
+	      {
+		options.gen.direct_access = enable_p;
+		options.warning (NULL, "Option direct-access replaced by gen-direct-access\n");
+	      }
+	    else if (strncmp (argp, "gen-zero-r", strlen ("gen-zero-r")) == 0)
+	      {
+		options.gen.zero_reg = enable_p;
+		options.gen.zero_reg_nr = atoi (argp + strlen ("gen-zero-r"));
+	      }
+	    else if (strncmp (argp, "zero-r", strlen ("zero-r")) == 0)
+	      {
+		options.gen.zero_reg = enable_p;
+		options.gen.zero_reg_nr = atoi (argp + strlen ("zero-r"));
+		options.warning (NULL, "Option zero-r<N> replaced by gen-zero-r<N>\n");
+	      }
+	    else if (strncmp (argp, "gen-icache", strlen ("gen-icache")) == 0)
+	      {
+		switch (argp[strlen ("gen-icache")])
+		  {
+		  case '=':
+		    options.gen.icache_size = atoi (argp + strlen ("gen-icache") + 1);
+		    /* fall through */
+		  case '\0':
+		    options.gen.icache = enable_p;
+		    break;
+		  default:
+		    error (NULL, "Expecting -Ggen-icache or -Ggen-icache=<N>\n");
+		  }
+	      }
+	    else if (strcmp (argp, "gen-insn-in-icache") == 0)
+	      {
+		options.gen.insn_in_icache = enable_p;
+	      }
+	    else if (strcmp (argp, "gen-multi-sim") == 0)
+	      {
+		options.gen.multi_sim = enable_p;
+	      }
+	    else if (strcmp (argp, "gen-multi-word") == 0)
+	      {
+		options.gen.multi_word = enable_p;
+	      }
+	    else if (strcmp (argp, "gen-semantic-icache") == 0)
+	      {
+		options.gen.semantic_icache = enable_p;
+	      }
+	    else if (strcmp (argp, "gen-slot-verification") == 0)
+	      {
+		options.gen.slot_verification = enable_p;
+	      }
+	    else if (strcmp (argp, "verify-slot") == 0)
+	      {
+		options.gen.slot_verification = enable_p;
+		options.warning (NULL, "Option verify-slot replaced by gen-slot-verification\n");
+	      }
+	    else if (strcmp (argp, "gen-nia-invalid") == 0)
+	      {
+		options.gen.nia = nia_is_invalid;
+	      }
+	    else if (strcmp (argp, "default-nia-minus-one") == 0)
+	      {
+		options.gen.nia = nia_is_invalid;
+		options.warning (NULL, "Option default-nia-minus-one replaced by gen-nia-invalid\n");
+	      }
+	    else if (strcmp (argp, "gen-nia-void") == 0)
+	      {
+		options.gen.nia = nia_is_void;
+	      }
+	    else if (strcmp (argp, "trace-combine") == 0)
+	      {
+		options.trace.combine = enable_p;
+	      }
+	    else if (strcmp (argp, "trace-entries") == 0)
+	      {
+		options.trace.entries = enable_p;
+	      }
+	    else if (strcmp (argp, "trace-rule-rejection") == 0)
+	      {
+		options.trace.rule_rejection = enable_p;
+	      }
+	    else if (strcmp (argp, "trace-rule-selection") == 0)
+	      {
+		options.trace.rule_selection = enable_p;
+	      }
+	    else if (strcmp (argp, "jumps") == 0)
+	      {
+		options.gen.code = generate_jumps;
+	      }
+	    else if (strcmp (argp, "field-widths") == 0)
+	      {
+		options.insn_specifying_widths = enable_p;
+	      }
+	    else if (strcmp (argp, "omit-line-numbers") == 0)
+	      {
+		file_references = lf_omit_references;
+	      }
+	    else
+	      {
+		error (NULL, "Unknown option %s\n", optarg);
+	      }
+	    break;
+	  }
+	
 	case 'i':
 	  isa = load_insn_table (optarg, cache_rules);
 	  if (isa->illegal_insn == NULL)

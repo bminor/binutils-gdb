@@ -374,6 +374,7 @@ typedef enum {
   function_record,
   internal_record,
   define_record,
+  include_record,
   model_processor_record,
   model_macro_record,
   model_data_record,
@@ -388,6 +389,7 @@ static const name_map insn_type_map[] = {
   { "compute", compute_record },
   { "scratch", scratch_record },
   { "define", define_record },
+  { "include", include_record },
   { "%s", string_function_record },
   { "function", function_record },
   { "internal", internal_record },
@@ -744,6 +746,17 @@ load_insn_table (char *file_name,
       switch (record_type (record))
 	{
 
+	case include_record:
+	  {
+	    if (record->nr_fields < nr_include_record_fields)
+	      error (record->line,
+		     "Incorrect nr of fields for include record\n");
+	    table_push (file, record->line, options.include,
+			record->field[include_record_filename_field]);
+	    record = table_read (file);
+	    break;
+	  }
+
 	case option_record:
 	  {
 	    if (isa->insns != NULL)
@@ -757,7 +770,7 @@ load_insn_table (char *file_name,
 	    /* convert a string function field into an internal function field */
 	    char *name;
 	    if (record->nr_fields < nr_function_fields)
-	      error (record->line, "Incorrect nr of fields for %s record\n");
+	      error (record->line, "Incorrect nr of fields for %%s record\n");
 	    name = NZALLOC (char,
 			    (strlen ("str_")
 			     + strlen (record->field[function_name_field])
@@ -1017,8 +1030,12 @@ load_insn_table (char *file_name,
 	    break;
 	  }
       
-	default:
-	  error (record->line, "Unknown entry\n");
+	case unknown_record:
+	case define_record:
+	case code_record:
+	  error (record->line, "Unknown or unexpected entry\n");
+
+
 	}
     }
   return isa;

@@ -1,3 +1,24 @@
+Mon Oct 27 15:14:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.c (main): Change -I option to -I<directory>.  Add optional
+ 	size to -Ggen-icache option.  Add -Gno-... support.
+	
+	* igen.h (struct _igen_options): Add include field.
+	
+	* ld-insn.c (enum insn_record_type, insn_type_map): Add
+ 	include_record.
+	(load_insn_table): Call table_push when include record.
+	
+	* table.c (struct _open table, struct table): Make table object an
+ 	indirect ptr to the current table file.
+	(current_line, new_table_entry, next_line): Make file arg type
+ 	open_table.
+	(table_open): Use table_push.
+	(table_read): Point variable file at current table, at eof, pop
+ 	last open table.
+
+	* table.h, table.c (table_push): New function.
+
 Thu Oct 16 11:03:27 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen-semantics.c (print_semantic_body): Use CIA not
