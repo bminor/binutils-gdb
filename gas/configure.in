@@ -557,6 +557,8 @@ changequote([,])dnl
 			big)	emulation="mipsbelf mipslelf mipself" ;;
 			*)	emulation="mipslelf mipsbelf mipself" ;;
 			esac ;;
+      # i386-pc-pe-coff != i386-pc-coff.
+      i386-*-pe-coff)	;;
       # Uncommenting the next line will turn on support for i386 AOUT
       # for the default linux configuration
       # i386-*-linux*-elf) emulation="i386elf i386aout" ;;
