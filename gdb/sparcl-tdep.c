@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "serial.h"
 #include <sys/types.h>
 
-#if !defined(__GO32__) && !defined(_WIN32)
+#if (!defined(__GO32__) && !defined(_WIN32)) || defined(__CYGWIN32__)
 #define HAVE_SOCKETS
 #include <sys/time.h>
 #include <unistd.h>

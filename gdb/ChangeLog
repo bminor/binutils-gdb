@@ -1,3 +1,7 @@
+1999-02-09  DJ Delorie  <dj@cygnus.com>
+
+	* sparcl-tdep.c: UDP download works in cygwin
+
 1999-02-08  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* gnu-regex.c: Check ENABLE_NLS instead of HAVE_LIBINTL_H.
