@@ -1,3 +1,10 @@
+Mon Jul 28 18:41:41 1997  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+        * configure.in: Use CYGWIN and EXEEXT autoconf macro to look for
+        win32 dependencies.
+        * configure: Regenerated with autoconf 2.12.
+        * Makefile.in: Add $(EXEEXT) to all executables.
+
 Fri Jul 25 10:54:43 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* tc-hppa.c (md_apply_fix): Improve warnings for out of range
