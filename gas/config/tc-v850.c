@@ -24,6 +24,9 @@
 #include "as.h"
 #include "subsegs.h"     
 #include "opcode/v850.h"
+
+/* Temporarily holds the reloc in a cons expression.  */
+static bfd_reloc_code_real_type hold_cons_reloc;
 
 /* Structure to hold information about predefined registers.  */
 struct reg_name
@@ -1003,4 +1006,48 @@ v850_insert_operand (insn, operand, val, file, line)
   else
     insn |= (((long) val & ((1 << operand->bits) - 1)) << operand->shift);
   return insn;
+}
+
+/* Parse a cons expression.  We have to handle hi(), lo(), etc
+   on the v850.  */
+void
+parse_cons_expression_v850 (exp)
+  expressionS *exp;
+{
+  /* See if there's a reloc prefix like hi() we have to handle.  */
+  hold_cons_reloc = v850_reloc_prefix ();
+
+  /* Do normal expression parsing.  */
+  expression (exp);
+
+  /* If we had to handle a reloc prefix, then eat the trailing
+     close paren.  */
+  if (hold_cons_reloc != BFD_RELOC_UNUSED)
+    input_line_pointer++;
+}
+
+/* Create a fixup for a cons expression.  If parse_cons_expression_v850
+   found a reloc prefix, then we use that reloc, else we choose an
+   appropriate one based on the size of the expression.  */
+void
+cons_fix_new_v850 (frag, where, size, exp)
+     fragS *frag;
+     int where;
+     int size;
+     expressionS *exp;
+{
+  if (hold_cons_reloc == BFD_RELOC_UNUSED)
+    {
+      if (size == 4)
+	hold_cons_reloc = BFD_RELOC_32;
+      if (size == 2)
+	hold_cons_reloc = BFD_RELOC_16;
+      if (size == 1)
+	hold_cons_reloc = BFD_RELOC_8;
+    }
+
+  if (exp != NULL)
+    fix_new_exp (frag, where, size, exp, 0, hold_cons_reloc);
+  else
+    fix_new (frag, where, size, NULL, 0, 0, hold_cons_reloc);
 }

@@ -1,6 +1,11 @@
 start-sanitize-v850
 Thu Oct 24 14:31:04 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-v850.h (TC_PARSE_CONS_EXPRESSION): Define.
+	(TC_CONS_FIX_NEW): Likewise.
+	* config/tc-v850.c (parse_cons_expression_v850): New function.
+	(cons_fix_new_v850): Likewise.
+
 	* config/tc-v850.h (tc_fix_adjustable): Don't adjust TDA relocs.
 
 end-sanitize-v850
