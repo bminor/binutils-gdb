@@ -1,3 +1,8 @@
+2002-12-21  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/psmang.exp, gdb.c++/psmang1.cc, gdb.c++/psmang2.cc: New
+	test.
+
 2002-12-20  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/annota2.exp: KFAIL annotate-quit.
