@@ -4657,10 +4657,7 @@ md_apply_fix3 (fixP, valP, seg)
       case BFD_RELOC_386_GOT32:
       case BFD_RELOC_386_TLS_GD:
       case BFD_RELOC_386_TLS_LDM:
-      case BFD_RELOC_386_TLS_LDO_32:
       case BFD_RELOC_386_TLS_IE_32:
-      case BFD_RELOC_386_TLS_LE_32:
-      case BFD_RELOC_386_TLS_LE:
       case BFD_RELOC_X86_64_GOT32:
 	value = 0; /* Fully resolved at runtime.  No addend.  */
 	break;

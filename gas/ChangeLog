@@ -1,3 +1,9 @@
+2002-09-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-i386.c (md_apply_fix3): Allow addend for
+	BFD_RELOC_386_TLS_LDO_32, BFD_RELOC_386_TLS_LE and
+	BFD_RELOC_386_TLS_LE_32.
+
 2002-09-05  Jeff Law  <law@redhat.com>
 
         * config/tc-hppa.c (md_apply_fix3): Don't set fx_done for
