@@ -1,3 +1,21 @@
+Tue Mar 30 10:11:41 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* doc/as.texinfo: First pass at using new texinfo features --
+	variables, conditional tests.  Far from complete.
+
+Mon Mar 29 16:05:40 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* read.c: Temporary hack to handle some 64-bit constants.  This
+	should be redone later.
+	(target_big_endian): Declare.
+	(big_cons): If it's set, reverse order of bytes being copied.
+	* config/tc-sparc.c (md_begin): Set target_big_endian.
+
+	* read.c (s_ignore): Delete declaration of is_end_of_line.
+
+	* config/obj-coffbfd.c (yank_symbols): Build list of file symbol
+	forward pointers properly.
+
 Mon Mar 29 13:47:33 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/obj-coffbfd.c (do_relocs_for): Fix bug where nrelocs
@@ -15,6 +33,58 @@ Mon Mar 29 12:56:56 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/obj-coffbfd.c (fill_section): Don't set NOLOAD bit for
 	a29k .bss section; the mondfe program doesn't like it.
+
+Sun Mar 28 08:12:53 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* config/tc-m68k.c: Use PARAMS macro, and use CONST instead of
+	const.
+	(current_architecture): Don't need initializer.
+
+Fri Mar 26 08:12:48 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* doc/none.m4: Define Z8000.
+	* doc/Makefile.in (as-*.texinfo): Refer to $(srcdir).  Remove the
+	texinfo file before recreating it.
+	(TEXI2DVI): Need to set TEXINPUTS if "make as.dvi" is to work in
+	this directory.
+	(srcdir): Delete second, bogus definition.
+	(as.info): Look for as-*.texinfo in current directory rather than
+	in $(srcdir).
+	(as.dvi): Ditto.
+	(dvi): New rule.
+	* doc/configure.in: Create links to all as-*.texinfo files in the
+	source directory, if that's not the current directory.
+
+	* configure.in (per-host):  Accept MIPS host with BSD version
+	number.
+	(per-target): Classify i486 as i386.  Use generic cpu_type instead
+	of target_cpu in selecting format etc.
+
+	* app.c (do_scrub_next_char): Use .appfile, not .app-file.
+	* read.c (potable): Change .app-file to .appfile.
+
+	* config/ho-decstatn.h: Renamed from ho-decstation.h.
+	* configure.in: Adjusted.
+
+	* config/obj-bfd-sunos.*: Unused; deleted.
+
+	* Makefile.in (version.c, vers-stamp): Deleted.
+	(config.h): Define GAS_VERSION.
+	* as.c (version_string): Deleted declaration.
+	(main): Look for GAS_VERSION instead.
+
+	* doc/as.texinfo: Updated description of -a* (listing) options,
+	and describe how to pass them through from gcc.
+
+	* config/obj-coffbfd.c (do_relocs_for): Don't allocate storage or
+	process relocs if there aren't any relocs to process.  Avoids
+	malloc/free bug on SCO too.
+
+	* as.h: Move local include files below system include files, to
+	avoid some redefinition complaints on some systems.
+	(const, volatile): Don't need these conditionally defined if we
+	use CONST and VOLATILE from ansidecl.h.
+	(seg_name): Use CONST, not const.
 
 Fri Mar 26 10:22:04 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -158,6 +228,10 @@ Tue Mar  9 07:40:06 1993  Ian Lance Taylor  (ian@cygnus.com)
 	is not NULL.
 	(write_object_file): Call obj_frob_file after setting the symbols,
 	not before.
+
+Tue Mar  9 00:00:00 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* Version 2.0 released.
 
 Mon Mar  8 14:57:10 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
