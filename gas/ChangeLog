@@ -1,3 +1,8 @@
+2000-04-14  Matthew Green  <mrg@cygnus.com>
+
+	* configure.in: Add NetBSD/sparc ELF and NetBSD/sparc64 support.
+	* configure: Rebuilt.
+
 Fri Apr 21 14:29:43 2000  Jeffrey A Law  (law@cygnus.com)
 			  Jason Eckhardt  <jle@cygnus.com>
 
