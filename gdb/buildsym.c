@@ -1082,6 +1082,15 @@ define_symbol (valu, string, desc, type, objfile)
   register int i;
   struct type *temptype;
 
+#ifdef IBM6000_TARGET
+  /* We would like to eliminate nameless symbols, but keep their types.
+     E.g. stab entry ":t10=*2" should produce a type 10, which is a pointer
+     to type 2, but, should not creat a symbol to address that type. Since
+     the symbol will be nameless, there is no way any user can refer to it. */
+
+  int nameless;
+#endif
+
   /* Ignore syms with empty names.  */
   if (string[0] == 0)
     return 0;
@@ -1089,6 +1098,12 @@ define_symbol (valu, string, desc, type, objfile)
   /* Ignore old-style symbols from cc -go  */
   if (p == 0)
     return 0;
+
+#ifdef IBM6000_TARGET
+  /* If a nameless stab entry, all we need is the type, not the symbol.
+     e.g. ":t10=*2" */
+  nameless = (p == string);
+#endif
 
   sym = (struct symbol *)obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
 
@@ -1148,7 +1163,16 @@ define_symbol (valu, string, desc, type, objfile)
      Handle Sun-style local fortran array types 'ar...' . 
      (gnu@cygnus.com) -- this strchr() handles them properly?
      (tiemann@cygnus.com) -- 'C' is for catch.  */
+
+#ifdef IBM6000_TARGET
+
+  /* 'R' is for register parameters. */
+
+  if (!strchr ("cfFGpPrStTvVXCR", *p))
+#else
+
   if (!strchr ("cfFGpPrStTvVXC", *p))
+#endif
     deftype = 'l';
   else
     deftype = *p++;
@@ -1226,6 +1250,12 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_TYPE (sym)
 	= lookup_pointer_type (lookup_function_type (read_type (&p, objfile)));
     }
+
+#ifdef IBM6000_TARGET
+  else if (deftype == 'R')
+      SYMBOL_TYPE (sym) = read_type (&p);
+#endif
+
   else
     {
       struct type *type_read;
@@ -1408,6 +1438,9 @@ define_symbol (valu, string, desc, type, objfile)
       add_symbol_to_list (sym, &local_symbols);
       break;
 
+#ifdef IBM6000_TARGET
+    case 'R':
+#endif
     case 'r':
       /* Register variable (either global or local).  */
       SYMBOL_CLASS (sym) = LOC_REGISTER;
@@ -1433,6 +1466,12 @@ define_symbol (valu, string, desc, type, objfile)
       break;
 
     case 't':
+#ifdef IBM6000_TARGET
+      /* For a nameless type, we don't want a create a symbol, thus we
+	 did not use `sym'. Return without further processing. */
+
+      if (nameless) return NULL;
+#endif
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;

@@ -258,7 +258,7 @@ frame_get_cache_fsr (fi, fdatap)
   if (fi->cache_fsr)
     return;
   
-  if (fdatap = NULL) {
+  if (fdatap == NULL) {
     fdatap = &work_fdata;
     function_frame_info (get_pc_function_start (fi->pc), fdatap);
   }
