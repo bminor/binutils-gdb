@@ -1,3 +1,8 @@
+2004-01-02  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: New file: Russian translation.
+	* configure.in (ALL_LINGUAS): Add ru
+	* configure: Regenerate.
 
 For older changes see ChangeLog-0203
 
