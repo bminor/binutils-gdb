@@ -1,3 +1,10 @@
+Tue May 30 11:22:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh: Add field ``postdefault''.  Rename fields
+ 	``startup'' and ``default'' to ``staticdefault'' and
+ 	``predefault''.  Fix initialization of valid_p.  Create/compare
+ 	gdbarch.log.
+
 Mon May 29 22:47:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/sparc/nm-sun4sol2.h (GDB_GREGSET_T, GDB_FPREGSET_T):
