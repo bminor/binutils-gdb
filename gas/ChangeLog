@@ -1,5 +1,18 @@
 Tue Feb 25 13:17:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	From Stephen Williams <steve@icarus.icarus.com>:
+	* config/tc-i960.h (TC_SYMFIELD_TYPE): Define if OBJ_COFF.
+	(_tc_get_bal_of_call): Don't declare.
+	(tc_get_bal_of_call): Declare as function, don't define as macro.
+	* config/tc-i960.c (tc_set_bal_of_call): If OBJ_COFF, store balP
+	in sy_tc field, not x_balntry field.
+	(tc_get_bal_of_call): Rename from _tc_get_bal_of_call.  Change
+	return type to symbolS *.  If OBJ_COFF, retrieve value from sy_tc
+	field, not x_balntry field.
+
+	* config/obj-elf.c (obj_elf_section): Permit a .note section to
+	have the SHF_ALLOC attribute.
+
 	* Makefile.in ($(OBJS)): Don't depend upon $(IT_HDRS).
 	(TARG_CPU_DEP_mips): Depend upon $(srcdir)/itbl-ops.h.
 	(itbl-lex.o): Depend upon itbl-parse.h.
