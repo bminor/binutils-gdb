@@ -298,7 +298,7 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 		 order problems.  */
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
-		   fputs_filtered ("<no value>", stream);
+		   fputs_filtered ("<optimized out or zero length>", stream);
 		}
 	      else
 		{
@@ -313,7 +313,7 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	    {
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
-		   fputs_filtered ("<no value>", stream);
+		   fputs_filtered ("<optimized out or zero length>", stream);
 		}
 	      else
 		{
