@@ -6001,6 +6001,7 @@ bfd_elf_sprintf_vma (abfd, buf, value)
      char *buf;
      bfd_vma value;
 {
+#ifdef BFD64
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
 
   i_ehdrp = elf_elfheader (abfd);
@@ -6018,6 +6019,9 @@ bfd_elf_sprintf_vma (abfd, buf, value)
       else
 	sprintf (buf, "%08lx", (unsigned long) (value & 0xffffffff));
     }
+#else
+  sprintf_vma (buf, value);
+#endif
 }
 
 void
@@ -6026,6 +6030,7 @@ bfd_elf_fprintf_vma (abfd, stream, value)
      PTR stream;
      bfd_vma value;
 {
+#ifdef BFD64
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
 
   i_ehdrp = elf_elfheader (abfd);
@@ -6044,4 +6049,7 @@ bfd_elf_fprintf_vma (abfd, stream, value)
 	fprintf ((FILE *) stream, "%08lx",
 		 (unsigned long) (value & 0xffffffff));
     }
+#else
+  fprintf_vma ((FILE *) stream, value);
+#endif
 }

@@ -1,5 +1,10 @@
 2001-08-09  H.J. Lu  <hjl@gnu.org>
 
+	* elf.c (bfd_elf_sprintf_vma): Check ELFCLASS64 only in BFD64.
+	(bfd_elf_fprintf_vma): Likewise.
+
+2001-08-09  H.J. Lu  <hjl@gnu.org>
+
 	* bfd-in.h (bfd_elf_sprintf_vma, bfd_elf_fprintf_vma): Moved
 	to ...
 	* elf-bfd.h: Here.
