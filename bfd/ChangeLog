@@ -1,3 +1,11 @@
+Sat Nov  7 18:07:51 1998  Peter Schauer  <peter.schauer@regent.e-technik.tu-muenchen.de>
+
+	* Makefile.am (BFD32_BACKENDS): Move vms files here...
+	(BFD64_BACKENDS): ...from here.
+	(BFD32_BACKENDS_CFILES): Move vms files here...
+	(BFD64_BACKENDS_CFILES): ...from here.
+	* Makefile.in: Rebuild.
+
 Wed Nov  4 15:58:48 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.am: Add FR30 target.
