@@ -1,3 +1,14 @@
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* readelf.c (get_elf_class): Use correct printf format for type.
+	(get_data_encoding): Likewise.
+	(get_osabi_name): Likewise.
+	(process_file_header): Don't pass an extra argument to printf.
+	(process_dynamic_segment): Cast dynamic_size to long before
+	printing.
+	(decode_location_expression): Cast byte_get to long before
+	printing.
+
 Wed Jun  9 11:40:16 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* readelf.c (dump_section): Cast values from byte_get to

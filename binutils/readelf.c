@@ -1495,7 +1495,7 @@ get_elf_class (elf_class)
     case ELFCLASS32:   return _("ELF32");
     case ELFCLASS64:   return _("ELF64");
     default:
-      sprintf (buff, _("<unknown: %lx>"), elf_class);
+      sprintf (buff, _("<unknown: %x>"), elf_class);
       return buff;
     }
 }
@@ -1512,7 +1512,7 @@ get_data_encoding (encoding)
     case ELFDATA2LSB: return _("2's complement, little endian");
     case ELFDATA2MSB: return _("2's complement, big endian");
     default:          
-      sprintf (buff, _("<unknown: %lx>"), encoding);
+      sprintf (buff, _("<unknown: %x>"), encoding);
       return buff;
     }
 }
@@ -1529,7 +1529,7 @@ get_osabi_name (osabi)
     case ELFOSABI_HPUX:       return _("UNIX - HP-UX");
     case ELFOSABI_STANDALONE: return _("Standalone App");
     default:
-      sprintf (buff, _("<unknown: %lx>"), osabi);
+      sprintf (buff, _("<unknown: %x>"), osabi);
       return buff;
     }
 }
@@ -1563,9 +1563,11 @@ process_file_header ()
 	      get_data_encoding (elf_header.e_ident [EI_DATA]));
       printf (_("  Version:                           %d %s\n"),
 	      elf_header.e_ident [EI_VERSION],
-	      elf_header.e_ident [EI_VERSION] == EV_CURRENT ? "(current)" :
-	      elf_header.e_ident [EI_VERSION] != EV_NONE ? "<unknown: %lx>" : "",
-	      elf_header.e_ident [EI_VERSION]);
+	      (elf_header.e_ident [EI_VERSION] == EV_CURRENT
+	       ? "(current)"
+	       : (elf_header.e_ident [EI_VERSION] != EV_NONE
+		  ? "<unknown: %lx>"
+		  : "")));
       printf (_("  OS/ABI:                            %s\n"),
 	      get_osabi_name (elf_header.e_ident [EI_OSABI]));
       printf (_("  ABI Version:                       %d\n"),
@@ -2553,8 +2555,8 @@ process_dynamic_segment (file)
     }
 
   if (do_dynamic && dynamic_addr)
-    printf (_("\nDynamic segment at offset 0x%x contains %d entries:\n"),
-	    dynamic_addr, dynamic_size);
+    printf (_("\nDynamic segment at offset 0x%x contains %ld entries:\n"),
+	    dynamic_addr, (long) dynamic_size);
   if (do_dynamic)
     printf (_("  Tag        Type                         Name/Value\n"));
 
@@ -4912,7 +4914,7 @@ decode_location_expression (data, pointer_size)
       printf ("DW_OP_xor");
       break;
     case DW_OP_bra:
-      printf ("DW_OP_bra: %ld", byte_get (data, 2));
+      printf ("DW_OP_bra: %ld", (long) byte_get (data, 2));
       break;
     case DW_OP_eq:
       printf ("DW_OP_eq");
