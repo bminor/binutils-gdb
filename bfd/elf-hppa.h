@@ -292,6 +292,9 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
   {R_PARISC_LTOFF_TP16DF, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_LTOFF_TP16DF", false, 0, 0, false},
 };
 
+#define OFFSET_14R_FROM_21L 4
+#define OFFSET_14F_FROM_21L 5
+
 /* Return one (or more) BFD relocations which implement the base
    relocation with modifications based on format and field.  */
 
@@ -404,6 +407,18 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    }
 	  break;
 
+	case 64:
+	  switch (field)
+	    {
+	    case e_fsel:
+	      final_type = R_PARISC_DIR64;
+	      break;
+	    case e_psel:
+	    default:
+	      return NULL;
+	    }
+	  break;
+
 	default:
 	  return NULL;
 	}
@@ -418,10 +433,10 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    {
 	    case e_rsel:
 	    case e_rrsel:
-	      final_type = R_PARISC_DPREL14R;
+	      final_type = base_type + OFFSET_14R_FROM_21L;
 	      break;
 	    case e_fsel:
-	      final_type = R_PARISC_DPREL14F;
+	      final_type = base_type + OFFSET_14F_FROM_21L;
 	      break;
 	    default:
 	      return NULL;
@@ -433,7 +448,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    {
 	    case e_lrsel:
 	    case e_lsel:
-	      final_type = R_PARISC_DPREL21L;
+	      final_type = base_type;
 	      break;
 	    default:
 	      return NULL;
