@@ -1,5 +1,10 @@
 2001-11-20  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.asm/i386.inc: New file.
+	* gdb.asm/asm-source.exp: Recognize ix86 target.
+	* gdb.asm/configure.in: Recognize ix86 target.
+	* gdb.asm/configure: Regenerate.
+
 	* gdb.c++/namespace.exp: Fix quotes in output messages.
 
 2001-11-14  Michael Snyder  <msnyder@redhat.com>
