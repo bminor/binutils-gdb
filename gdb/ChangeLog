@@ -1,3 +1,9 @@
+2002-05-16 Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbtypes.h (struct cplus_struct_type): Remove args field.
+	* hpread.c (hpread_read_struct_type): Remove assignments to args.
+	(fixup_class_method_type): Likewise.
+
 2002-05-15  Daniel Jacobowitz  <drow@mvista.com>
 
 	From Martin Pool <mbp@samba.org>:

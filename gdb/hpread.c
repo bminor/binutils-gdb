@@ -3961,7 +3961,6 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	      if (TYPE_INCOMPLETE (memtype))
 		{
 		  fn_p->field.fn_fields[ix].type = NULL;
-		  fn_p->field.fn_fields[ix].args = NULL;
 		}
 	      else
 		{
@@ -3979,18 +3978,8 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 		  /* void termination */
 		  TYPE_TYPE_SPECIFIC (fn_p->field.fn_fields[ix].type)
 		    .arg_types[TYPE_NFIELDS (memtype)] = builtin_type_void;
-
-		  /* pai: It's not clear why this args field has to be set.  Perhaps
-		   * it should be eliminated entirely. */
-		  fn_p->field.fn_fields[ix].args =
-		    (struct type **) obstack_alloc (&objfile->type_obstack,
-			   sizeof (struct type *) * (TYPE_NFIELDS (memtype) + 1));
-		  for (i = 0; i < TYPE_NFIELDS (memtype); i++)
-		    fn_p->field.fn_fields[ix].args[i]
-		      = TYPE_FIELDS (memtype)[i].type;
-		  /* null-terminated, unlike arg_types above e */
-		  fn_p->field.fn_fields[ix].args[TYPE_NFIELDS (memtype)] = NULL;
 		}
+
 	      /* For virtual functions, fill in the voffset field with the
 	       * virtual table offset. (This is just copied over from the
 	       * SOM record; not sure if it is what GDB expects here...).
@@ -4474,16 +4463,6 @@ fixup_class_method_type (struct type *class, struct type *method,
 	    TYPE_TYPE_SPECIFIC (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j)).arg_types[k] = TYPE_FIELDS (method)[k].type;
 	  /* void termination */
 	  TYPE_TYPE_SPECIFIC (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j)).arg_types[TYPE_NFIELDS (method)] = builtin_type_void;
-
-	  /* pai: It's not clear why this args field has to be set.  Perhaps
-	   * it should be eliminated entirely. */
-	  (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args
-	    = (struct type **) obstack_alloc (&objfile->type_obstack,
-			    sizeof (struct type *) * (TYPE_NFIELDS (method) + 1));
-	  for (k = 0; k < TYPE_NFIELDS (method); k++)
-	    (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args[k] = TYPE_FIELDS (method)[k].type;
-	  /* null-terminated, unlike arg_types above */
-	  (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args[TYPE_NFIELDS (method)] = NULL;
 
 	  /* Break out of both loops -- only one method to fix up in a class */
 	  goto finish;
