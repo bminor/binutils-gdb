@@ -1,3 +1,7 @@
+2002-04-04  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/ovlymgr.c: Add overlay event breakpoint support.
+
 2002-04-03  Daniel Jacobowitz  <drow@mvista.com>
 
 	* lib/gdb.exp (gdb_test): Move -notransfer inside of gdb_expect.

@@ -30,6 +30,15 @@ FlushCache (void)
 #endif
 }
 
+/* _ovly_debug_event:
+ * Debuggers may set a breakpoint here, to be notified 
+ * when the overlay table has been modified.
+ */
+static void
+_ovly_debug_event (void)
+{
+}
+
 /* OverlayLoad:
  * Copy the overlay into its runtime region,
  * and mark the overlay as "mapped".
@@ -57,7 +66,7 @@ OverlayLoad (unsigned long ovlyno)
 	     _ovly_table[ovlyno][SIZE]);
 
   FlushCache ();
-
+  _ovly_debug_event ();
   return TRUE;
 }
 
@@ -80,6 +89,7 @@ OverlayUnload (unsigned long ovlyno)
 	     _ovly_table[ovlyno][VMA],
 	     _ovly_table[ovlyno][SIZE]);
 
+  _ovly_debug_event ();
   return TRUE;
 }
 
