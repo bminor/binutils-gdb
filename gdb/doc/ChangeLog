@@ -1,3 +1,7 @@
+2001-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Protocol): Fix typo.  Extra parenthesis.
+
 2001-06-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.texinfo (Remote Protocol): Document that the ``!'' packet

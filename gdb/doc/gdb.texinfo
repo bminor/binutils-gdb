@@ -9782,7 +9782,7 @@ their corresponding response @var{data}:
 @tab @code{!}
 @tab
 Enable extended mode.  In extended mode, the remote server is made
-persistent.  The (@samp{R}) packet is used to restart the program being
+persistent.  The @samp{R} packet is used to restart the program being
 debugged.
 @item
 @tab reply @samp{OK}
