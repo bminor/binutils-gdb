@@ -1,3 +1,23 @@
+Mon Aug  3 14:02:52 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.h (GAS_CGEN_MAX_FIXUPS): GAS_ prepended, all uses updated.
+	(gas_cgen_opcode_desc): Declare.
+	(gas_cgen_parse_operand): Declare.
+	(*): Prepend gas_ to gas specific fns to denote them as such.
+	All uses updated.
+	* cgen.c (gas_cgen_opcode_desc): New global
+	(gas_cgen_init_parse): Renamed from cgen_asm_init_parse.
+	(queue_fixup): Renamed from cgen_queue_fixup.
+	(*): Prepend gas_ to gas specific fns to denote them as such.
+	All uses updated.
+	(gas_cgen_md_apply_fix3): Update call to insert_operand.
+	(gas_cgen_finish_insn): Renamed from cgen_asm_finish_insn.
+	* config/tc-m32r.c (md_begin): Remove use of CGEN_SYM.
+	Open opcode table and initialize it.
+	(make_parallel): Use gas_cgen_opcode_desc.
+	(assemble_parallel_insn): Ditto.  Remove use of CGEN_SYM.
+	(md_assemble): Ditto.
+
 Sat Aug  1 19:27:30 1998  Richard Henderson  <rth@cygnus.com>
 
 	* as.h (debug_info_type): Add entries for unspecified and dwarf*.
