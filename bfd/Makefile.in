@@ -93,6 +93,7 @@ BFD_LIBS = \
 ALL_MACHINES = \
 	cpu-a29k.o \
 	cpu-alpha.o \
+	cpu-arm.o \
 	cpu-h8300.o \
 	cpu-h8500.o \
 	cpu-hppa.o \
@@ -669,8 +670,8 @@ elf32-m68k.o: elf32-m68k.c libelf.h $(INCDIR)/elf/common.h \
   elf32-target.h
 elf32-hppa.o: elf32-hppa.c $(INCDIR)/bfdlink.h libelf.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  elf32-hppa.h libhppa.h $(INCDIR)/elf/hppa.h $(INCDIR)/aout/aout64.h \
-  hppa_stubs.h elf32-target.h
+  elf32-hppa.h libhppa.h $(INCDIR)/elf/hppa.h hppa_stubs.h \
+  elf32-target.h
 elf32-m88k.o: elf32-m88k.c libelf.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h

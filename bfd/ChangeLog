@@ -1,3 +1,7 @@
+Tue Sep  6 14:00:45 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* Makefile.in (ALL_MACHINES): Added cpu-arm.o.
+
 Sun Sep 04 17:58:10 1994  Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
 	* aoutx.h (NAME(aout,machine_type)): Recognize the ARM processor.
