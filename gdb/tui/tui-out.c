@@ -36,7 +36,7 @@ struct ui_out_data
     int line;
     int start_of_line;
   };
-struct ui_out_data tui_out_data;
+typedef struct ui_out_data tui_out_data;
 
 /* These are the CLI output functions */
 

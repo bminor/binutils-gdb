@@ -1,3 +1,7 @@
+2003-03-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-out.c (tui_out_data): Fix typedef.
+
 2003-03-08  Andrew Cagney  <cagney@redhat.com>
 
 	* tui-out.c: Update copyright.
