@@ -432,7 +432,7 @@ clean:
 	rm -f init.c init.o version.c
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]
-	rm -f gdb.dvi gdb-all*
+	rm -f gdb.dvi rdl-apps.texinfo gdb-all*
 
 distclean: clean expread.tab.c TAGS
 	rm -f tm.h xm.h config.status
@@ -444,11 +444,15 @@ realclean: clean
 	rm -f tm.h xm.h config.status
 	rm -f Makefile
 
+rdl-apps.texinfo: ${READLINE_DIR}/inc-readline.texinfo \
+			${READLINE_DIR}/inc-history.texinfo
+	echo "@include ${READLINE_DIR}/inc-readline.texinfo" >rdl-apps.texinfo
+	echo "@include ${READLINE_DIR}/inc-history.texinfo" >>rdl-apps.texinfo
+
 gdb-all.texinfo: ${srcdir}/doc/gdb.texinfo
 	${M4} $(srcdir)/doc/pretex.m4 $(srcdir)/doc/none.m4 $(srcdir)/doc/all.m4 $(srcdir)/doc/gdb.texinfo >gdb-all.texinfo
 
-gdb.dvi : gdb-all.texinfo ${READLINE_DIR}/inc-readline.texinfo \
-		${READLINE_DIR}/inc-history.texinfo
+gdb.dvi : gdb-all.texinfo rdl-apps.texinfo
 	tex gdb-all.texinfo
 	texindex gdb-all.??
 	tex gdb-all.texinfo

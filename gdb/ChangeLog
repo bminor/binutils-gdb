@@ -1,4 +1,15 @@
+Mon May 20 12:15:04 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
+
+	* Makefile.dist, doc/gdb.texinfo: respectively create, and use,
+	the new target "rdl-apps.texinfo" which captures the Makefile
+	variable that records where to find the Readline libraries.
+
 Sun May 19 05:36:59 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* tahoe-pinsn.c:  #include "tahoe-opcode.h", not "opcode.h".
+	* tm-tahoe.h (FIX_CALL_DUMMY):  Ignore more parameters.
+	* defs.h (const, volatile):  Only define if not already defined.
+	* Makefile.dist (gdb.tar.Z):  Create doc subdir w/out CVS/RCS crud.
 
 	* README:  Update for release 3.95.
 	* config.gdb:  Don't create readline dir in subdir builds.
