@@ -150,13 +150,13 @@ int string_count[max_power_two];
 #define SEPBIT   4
 #define WHITEBIT 8
 #define COMMENTBIT 16
-
+#define BASEBIT  32
 #define ISCOMMENTCHAR(x) (chartype[(unsigned)(x)] & COMMENTBIT)
 #define ISFIRSTCHAR(x)  (chartype[(unsigned)(x)] & FIRSTBIT)
 #define ISNEXTCHAR(x)   (chartype[(unsigned)(x)] & NEXTBIT)
 #define ISSEP(x)        (chartype[(unsigned)(x)] & SEPBIT)
 #define ISWHITE(x)      (chartype[(unsigned)(x)] & WHITEBIT)
-
+#define ISBASE(x)       (chartype[(unsigned)(x)] & BASEBIT)
 static char chartype[256];
 
 
@@ -714,10 +714,10 @@ hash_lookup (tab, key)
  expression precedence:
   ( )
  unary + - ~
-* /
-+ -
-&
-| ~
+  * /
+  + -
+  &
+  | ~
 
 */
 
@@ -1708,12 +1708,16 @@ get_any_string (idx, in, out, expand)
   sb_reset (out);
   idx = sb_skip_white (idx, in);
 
-
   if (idx < in->len)
     {
-      if (in->ptr[idx] == '%'
-	  && alternate
-	  && expand)
+      if (in->len > 2 && in->ptr[idx+1] == '\'' && ISBASE (in->ptr[idx]))
+	{
+	  while (!ISSEP (in->ptr[idx]))
+	    sb_add_char (out, in->ptr[idx++]);
+	}
+      else if (in->ptr[idx] == '%'
+	       && alternate
+	       && expand)
 	{
 	  int val;
 	  char buf[20];
@@ -1725,16 +1729,16 @@ get_any_string (idx, in, out, expand)
 	  sprintf(buf, "%d", val);
 	  sb_add_string (out, buf);
 	}
-      else   if (in->ptr[idx] == '"'
-		 || in->ptr[idx] == '<'
-		 || (alternate && in->ptr[idx] == '\''))
+      else if (in->ptr[idx] == '"'
+	       || in->ptr[idx] == '<'
+	       || (alternate && in->ptr[idx] == '\''))
 	{
 	  if (alternate && !expand)
 	    {
 	      /* Keep the quotes */
-/*	      sb_add_char (out,  '\"');*/
+	      /*	      sb_add_char (out,  '\"');*/
 	      idx =  getstring (idx, in, out);
-/*	      sb_add_char (out,  '\"');*/
+	      /*	      sb_add_char (out,  '\"');*/
 
 	    }
 	  else {
@@ -1756,12 +1760,14 @@ get_any_string (idx, in, out, expand)
 		  while (idx < in->len
 			 && in->ptr[idx] != tchar)
 		    sb_add_char (out, in->ptr[idx++]);		    
+		  if (idx == in->len)
+		    return idx;	      
 		}
 	      sb_add_char (out, in->ptr[idx++]);
-
 	    }
 	}
     }
+
   return idx;
 }
 
@@ -2367,7 +2373,7 @@ do_aif (idx, in)
       FATAL ((stderr, "AIF nesting unreasonable.\n"));
     }
   ifi++;
-  ifstack[ifi].on = istrue (idx, in);
+  ifstack[ifi].on = ifstack[ifi-1].on ? istrue (idx, in) : 0;
   ifstack[ifi].hadelse = 0;
 }
 
@@ -2376,7 +2382,7 @@ do_aif (idx, in)
 static void
 do_aelse ()
 {
-  ifstack[ifi].on = !ifstack[ifi].on;
+  ifstack[ifi].on = ifstack[ifi-1].on ? !ifstack[ifi].on : 0;
   if (ifstack[ifi].hadelse)
     {
       ERROR ((stderr, "Multiple AELSEs in AIF.\n"));
@@ -3368,6 +3374,12 @@ chartype_init ()
 	  || x == '"' || x == '<' || x == '>' || x == ')' || x == '(')
 	chartype[x] |= SEPBIT;
 
+      if (x == 'b' || x == 'B'
+	  || x == 'q' || x == 'Q'
+	  || x == 'h' || x == 'H'
+	  || x == 'd' || x == 'D')
+	chartype [x] |= BASEBIT;
+	  
       if (x == ' ' || x == '\t')
 	chartype[x] |= WHITEBIT;
 
@@ -3552,6 +3564,9 @@ process_pseudo_op (idx, line, acc)
 	{
 	  switch (ptr->value.i)
 	    {
+	    case K_AIF:
+	      do_aif ();
+	      break;
 	    case K_AELSE:
 	      do_aelse ();
 	      break;

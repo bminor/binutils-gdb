@@ -1,4 +1,21 @@
+Thu Jul  7 17:04:03 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* gasp.c (get_any_string): Cope with getting a string with an
+	alternate base specifier.
+	(do_aif, do_aelse): Only enable output if expression is true and previous
+	level was on.
+	(chartype_init):  Add BASEBIT chartype.
+	(process_pseudo_op):  Notice nesteed AIFs.
+
+Thu Jul  7 12:30:22 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* h8300.c (do_a_fix_imm): Code for 2 bit reloc type using in trapa
+	insn.  (fix pr 5165, 5174)
+
 Thu Jul  7 11:31:32 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (R_DLT_REL): If it isn't defined, then define
+	to an appropriate value to avoid losing on old hpux systems.
 
 	* config/tc-hppa.c (hppa_fix_adjustable): Reject reductions for
 	symbols in DLT relative relocs.
