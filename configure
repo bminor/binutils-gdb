@@ -975,6 +975,7 @@ export CXX
 export CFLAGS
 export CXXFLAGS
 
+# start-sanitize-gdbtk
 # FIXME: This should be in configure.in, not configure
 case "$host" in
 	*go32*)
@@ -997,6 +998,7 @@ if [ "$enable_gdbtk" != "no" ]; then
 else
 	GDB_TK=""
 fi
+# end-sanitize-gdbtk
 
 for subdir in . ${subdirs} ; do
 
@@ -1295,7 +1297,6 @@ EOF
 			s%^CXXFLAGS[ 	]*=.*$%CXXFLAGS = ${CXXFLAGS}%
 			}" \
 		    -e "s|^SHELL[	 ]*=.*$|SHELL = ${config_shell}|" \
-		    -e "s:^GDB_TK[	 ]*=.*$:GDB_TK = ${GDB_TK}:" \
                     -e "s|^srcdir[ 	]*=.*$|srcdir = ${makesrcdir}|" \
                     -e "s///" \
                     -e "s:^program_prefix[ 	]*=.*$:program_prefix = ${program_prefix}:" \
@@ -1305,6 +1306,10 @@ EOF
 		    -e "s:^DEFAULT_YACC[	 ]*=.*$:DEFAULT_YACC = ${DEFAULT_YACC}:" \
 		    -e "s:^DEFAULT_LEX[	 ]*=.*$:DEFAULT_LEX = ${DEFAULT_LEX}:" \
                     ${subdir}/Makefile.tem >> ${Makefile}
+	    # start-sanitize-gdbtk
+	    sed -e "s:^GDB_TK[	 ]*=.*$:GDB_TK = ${GDB_TK}:" ${Makefile} >${Makefile}.tem
+	    mv -f ${Makefile}.tem ${Makefile}
+	    # end-sanitize-gdbtk
 
 	    # If this is a Canadian Cross, preset the values of many more
 	    # tools.

@@ -293,11 +293,13 @@ Wed Sep 24 15:18:32 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ltmain.sh: Tweak shell pattern to avoid bug in NetBSD /bin/sh.
 
+start-sanitize-gdbtk
 Thu Sep 18 15:37:42 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure (tooldir): enable_gdbtk=YES for cygwin32, NO for
  	windows.  Consistent with gdb/configure.
 
+end-sanitize-gdbtk
 1997-09-15 02:37  Ulrich Drepper  <drepper@cygnus.com>
 
 	* config/mt-linux: Define CXXFLAGS to make sure -fvtable-thunks is
@@ -1471,7 +1473,9 @@ Mon Jun 17 16:34:46 1996  Jason Merrill  <jason@yorick.cygnus.com>
 
 Sat Jun 15 17:13:25 1996  Geoffrey Noer <noer@cygnus.com>
 
+start-sanitize-gdbtk
 	* configure: enable_gdbtk=no for cygwin32-hosted toolchains
+end-sanitize-gdbtk
 	* configure.in: remove make from disable-if-Can-Cross list
 		enable gdb if ${host} and ${target} are cygwin32
 
@@ -1864,12 +1868,14 @@ Fri Jan 12 15:25:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* configure.in: Make sure that ${CC} can be used to compile an
 	executable.
 
+start-sanitize-gdbtk
 Sat Jan  6 07:23:33 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
 
 	* Makefile.in (all-gdb): Depend on $(GDB_TK).
 	* configure (GDB_TK): Set GDB_TK to either "all-tcl all-tk" or
 	nothing depending on whether gdbtk is being built.
 
+end-sanitize-gdbtk
 Wed Jan  3 17:54:41 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (newlib.tar.gz): Delete building of newlib's info files.
@@ -2467,11 +2473,13 @@ Mon Aug  7 09:21:35 1995  Doug Evans  <dje@canuck.cygnus.com>
 	* configure.in (i386-go32 host): Fix typo (deja-gnu -> dejagnu).
 	(i386-win32 host): Likewise.  Don't build readline.
 
+start-sanitize-gdbtk
 Sat Aug  5 09:51:49 1995  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* Makefile.in (GDBTK_SUPPORT_DIRS):  Define and pass as part of
 	SUPPORT_FILES to submakes.
 
+end-sanitize-gdbtk
 Fri Aug  4 13:04:36 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (GDB_SUPPORT_DIRS): Add utils.
@@ -2650,11 +2658,13 @@ Tue Apr 11 18:55:40 1995  Doug Evans  <dje@canuck.cygnus.com>
 	* configure.in: Recognize --with-newlib.
 	(sparc-*-sunos4*): Build sim, dejagnu, expect, tcl if cross target.
 
+start-sanitize-gdbtk
 Mon Apr 10 14:38:20 1995  Jason Molenda (crash@phydeaux.cygnus.com)
 
 	* Makefile.in: move {all,check,install}-gdb from *_MODULES 
 	to *_X11_MODULES due to gdbtk needing X include files et al.
 
+end-sanitize-gdbtk
 Mon Apr 10 11:42:22 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	Merge in support for Mac MPW as a host.
