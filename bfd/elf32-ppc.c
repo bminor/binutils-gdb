@@ -1160,6 +1160,22 @@ ppc_elf_section_from_shdr (abfd, hdr, name)
 }
 
 
+/* Set up any other section flags and such that may be necessary.  */
+
+boolean
+ppc_elf_fake_sections (abfd, shdr, asect)
+     bfd *abfd;
+     Elf32_Internal_Shdr *shdr;
+     asection *asect;
+{
+  if ((asect->flags & SEC_EXCLUDE) != 0)
+    shdr->sh_flags |= SHF_EXCLUDE;
+
+  if ((asect->flags & SEC_SORT_ENTRIES) != 0)
+    shdr->sh_type = SHT_ORDERED;
+}
+
+
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -2301,6 +2317,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   return ret;
 }
 
+
 #define TARGET_LITTLE_SYM	bfd_elf32_powerpcle_vec
 #define TARGET_LITTLE_NAME	"elf32-powerpcle"
 #define TARGET_BIG_SYM		bfd_elf32_powerpc_vec
@@ -2330,5 +2347,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 #define elf_backend_size_dynamic_sections	ppc_elf_size_dynamic_sections
 #define elf_backend_finish_dynamic_symbol	ppc_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	ppc_elf_finish_dynamic_sections
+#define elf_backend_fake_sections		ppc_elf_fake_sections
 
 #include "elf32-target.h"
