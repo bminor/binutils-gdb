@@ -1,3 +1,8 @@
+Tue Apr 14 15:09:19 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-info.c (sim_info): Be verbose when either VERBOSE or
+ 	STATE_VERBOSE_P.
+
 Sat Apr  4 23:24:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* aclocal.m4 (sim-inline): By default, disable sim-inline when
