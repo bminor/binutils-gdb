@@ -126,8 +126,11 @@ static char *gld<target>_script_option_Ur  =
 static char *gld<target>_script_option_r  =  
 #include "<ldtarget>.xr"
 ;
-static char *gld<target>_script_option_n  =  /* Used with -n and -N flags. */
+static char *gld<target>_script_option_n  =  /* Used with -n flag. */
 #include "<ldtarget>.xn"
+;
+static char *gld<target>_script_option_N  =  /* Used with -N flag. */
+#include "<ldtarget>.xN"
 ;
 
 static char *gld<target>_get_script()
@@ -140,7 +143,9 @@ static char *gld<target>_get_script()
   if (config.relocateable_output == true) {
     return gld<target>_script_option_r;
   }
-  if (config.magic_demand_paged == false)
+  if (!config.text_read_only)
+    return gld<target>_script_option_N;
+  if (!config.magic_demand_paged)
     return gld<target>_script_option_n;
   return gld<target>_script;
 }

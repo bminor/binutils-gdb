@@ -1,3 +1,8 @@
+Mon Oct 14 17:27:24 1991  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in, ldtemplate:  Need to use separate scripts
+	for -n and -N options.  Yet more complication.
+
 Fri Oct 11 22:40:46 1991  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in:  Avoid using $< in explicit Make rules (it doesn't
