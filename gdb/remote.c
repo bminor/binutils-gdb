@@ -563,10 +563,21 @@ remote_store_registers (regno)
   remote_send (buf);
 }
 
+#if 0
+
+/* Use of the data cache is disabled because it loses for looking at
+   and changing hardware I/O ports and the like.  Accepting `volatile'
+   would perhaps be one way to fix it, but a better way which would
+   win for more cases would be to use the executable file for the text
+   segment, like the `icache' code below but done cleanly (in some
+   target-independent place, perhaps in target_xfer_memory, perhaps
+   based on assigning each target a speed or perhaps by some simpler
+   mechanism).  */
+
 /* Read a word from remote address ADDR and return it.
    This goes through the data cache.  */
 
-int
+static int
 remote_fetch_word (addr)
      CORE_ADDR addr;
 {
@@ -589,14 +600,14 @@ remote_fetch_word (addr)
 /* Write a word WORD into remote address ADDR.
    This goes through the data cache.  */
 
-void
+static void
 remote_store_word (addr, word)
      CORE_ADDR addr;
      int word;
 {
   dcache_poke (remote_dcache, addr, word);
 }
-
+#endif /* 0 */
 
 /* Write memory data directly to the remote machine.
    This does not inform the data cache; the data cache uses this.
