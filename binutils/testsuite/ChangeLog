@@ -1,3 +1,7 @@
+2005-03-08  Ben Elliston  <bje@au.ibm.com>
+
+       * config/default.exp: Remove send_user call for stray output.
+
 2005-01-04  Martin Koegler  <mkoegler@auto.tuwien.ac.at>
 
 	* binutils-all/testprog.c: Add prototype for printf() and make

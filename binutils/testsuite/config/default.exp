@@ -76,7 +76,6 @@ if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
 # to force it to use the newly built assembler/linker.
 if {![file isdirectory tmpdir/gas]} then {
     catch "exec mkdir tmpdir/gas" status
-    send_user "file isfile ../gas/as-new[exe_ext]: [file isfile ../gas/as-new[exe_ext]]\n"
     if {[file isfile ../gas/as-new[exe_ext]]} then {
 	catch "exec cp ../gas/as-new[exe_ext] tmpdir/gas/as[exe_ext]" status
     } else {
