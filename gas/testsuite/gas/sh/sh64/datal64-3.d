@@ -21,7 +21,7 @@ Idx Name          Size      VMA               LMA               File off  Algn
                   CONTENTS, ALLOC, LOAD, DATA
   2 \.bss          0+  0+  0+  0+104  2\*\*0
                   ALLOC
-  3 \.rodata       0+10  0+  0+  0+104  2\*\*0
+  3 \.rodata       0+10  0+  0+  0+104  2\*\*2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, DATA
 SYMBOL TABLE:
 0+ l    d  \.text	0+ 

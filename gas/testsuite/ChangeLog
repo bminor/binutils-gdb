@@ -1,3 +1,14 @@
+2003-12-01  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/sh/basic.exp: Define ASFLAGS appropriately and don't do
+	dsp test for sh64/sh5 targets.
+	* gas/sh/sh64/crange1.s: Tidy up to match data alignment.
+	* gas/sh/sh64/crange1-1.d: Update.
+	* gas/sh/sh64/crange1-2.d: Likewise.
+	* gas/sh/sh64/datal32-3.d: Likewise.
+	* gas/sh/sh64/datal64-3.d: Likewise.
+	* gas/sh/sh64/localcom-1.d: Likewise.
+
 2003-11-27  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/frv/reloc1.[sd]: Test references to external symbols and

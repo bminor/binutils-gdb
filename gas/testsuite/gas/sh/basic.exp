@@ -23,7 +23,7 @@ if [istarget "sh*-*-linux-gnu"] {
     global ASFLAGS
     set ASFLAGS "$ASFLAGS -big"
 }
-if [istarget "sh64*-*-linux*"] {
+if {[istarget "sh64*-*-*"] || [istarget "sh5*-*-*"]} then {
     global ASFLAGS
 
     set old_ASFLAGS $ASFLAGS
@@ -130,7 +130,7 @@ if [istarget sh*-*-*] then {
     # dumped as sh4.
     if {[istarget sh*-*coff] || [istarget sh*-pe*] || [istarget sh*-rtems]} then {
 	run_dump_test "pcrel-coff"
-    } elseif {![istarget sh64*-*-linux*]} {
+    } elseif {![istarget sh64*-*-*] && ![istarget sh5*-*-*] } {
 	# Test DSP instructions
 	run_dump_test "dsp"
 
