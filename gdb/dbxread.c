@@ -1167,10 +1167,10 @@ end_symtab (end_addr)
       symtab->language = language_unknown;
       symtab->fullname = NULL;
 
-      /* If there is already a symtab for a file of this name, remove it,
-	 and clear out other dependent data structures such as
-	 breakpoints.  This happens in VxWorks maybe?  -gnu@cygnus */
-      free_named_symtab (symtab->filename);
+      /* There should never already be a symtab for this name, since
+	 any prev dups have been removed when the psymtab was read in.
+  	 FIXME, there ought to be a way to check this here.  */
+      /* FIXME blewit |= free_named_symtabs (symtab->filename);  */
 
       /* Link the new symtab into the list of such.  */
       symtab->next = symtab_list;
@@ -2010,12 +2010,15 @@ read_dbx_symtab (symfile_name, addr,
 	  /* In C++, one may expect the same filename to come round many
 	     times, when code is coming alternately from the main file
 	     and from inline functions in other files. So I check to see
-	     if this is a file we've seen before.
+	     if this is a file we've seen before -- either the main
+	     source file, or a previously included file.
 
 	     This seems to be a lot of time to be spending on N_SOL, but
 	     things like "break expread.y:435" need to work (I
 	     suppose the psymtab_include_list could be hashed or put
 	     in a binary tree, if profiling shows this is a major hog).  */
+	  if (!strcmp (namestring, pst->filename))
+	    continue;
 	  {
 	    register int i;
 	    for (i = 0; i < includes_used; i++)
@@ -2204,6 +2207,17 @@ read_dbx_symtab (symfile_name, addr,
 				   static_psymbols, bufp->n_value);
 	      continue;
 
+	      /* Global functions were ignored here, but now they
+	         are put into the global psymtab like one would expect.
+		 They're also in the misc fn vector... 
+		 FIXME, why did it used to ignore these?  That broke
+		 "i fun" on these functions.  */
+	    case 'F':
+	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+				   VAR_NAMESPACE, LOC_BLOCK,
+				   global_psymbols, bufp->n_value);
+	      continue;
+
 	      /* Two things show up here (hopefully); static symbols of
 		 local scope (static used inside braces) or extensions
 		 of structure symbols.  We can ignore both.  */
@@ -2219,10 +2233,6 @@ read_dbx_symtab (symfile_name, addr,
 	    case '7':
 	    case '8':
 	    case '9':
-	      /* Global functions are ignored here.  I'm not
-		 sure what psymtab they go into (or just the misc
-		 function vector).  */
-	    case 'F':
 	      continue;
 
 	    default:
@@ -2494,6 +2504,11 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
   /* Sort the global list; don't sort the static list */
   qsort (global_psymbols.list + pst->globals_offset, pst->n_global_syms,
 	 sizeof (struct partial_symbol), compare_psymbols);
+
+  /* If there is already a psymtab or symtab for a file of this name, remove it.
+     (If there is a symtab, more drastic things also happen.)
+     This happens in VxWorks.  */
+  free_named_symtabs (pst->filename);
 
   /* Put the psymtab on the psymtab list */
   pst->next = partial_symtab_list;
