@@ -54,6 +54,24 @@ calc (const char *call,
   if (strcmp (call, "INSERT64") == 0)
     return INSERTED64 (val, row, col);
 
+  if (strcmp (call, "LSINSERT") == 0)
+    return LSINSERTED (val, row, col);
+  if (strcmp (call, "LSINSERT16") == 0)
+    return LSINSERTED16 (val, row, col);
+  if (strcmp (call, "LSINSERT32") == 0)
+    return LSINSERTED32 (val, row, col);
+  if (strcmp (call, "LSINSERT64") == 0)
+    return LSINSERTED64 (val, row, col);
+
+  if (strcmp (call, "MSINSERT") == 0)
+    return MSINSERTED (val, row, col);
+  if (strcmp (call, "MSINSERT16") == 0)
+    return MSINSERTED16 (val, row, col);
+  if (strcmp (call, "MSINSERT32") == 0)
+    return MSINSERTED32 (val, row, col);
+  if (strcmp (call, "MSINSERT64") == 0)
+    return MSINSERTED64 (val, row, col);
+
   if (strcmp (call, "MSMASK") == 0)
     return MSMASKED (val, row, col);
   if (strcmp (call, "MSMASK16") == 0)
@@ -87,6 +105,24 @@ calc (const char *call,
     return SEXT64 (val, col);
   if (strcmp (call, "SEXT") == 0)
     return SEXT (val, col);
+
+  if (strcmp (call, "LSSEXT16") == 0)
+    return LSSEXT16 (val, col);
+  if (strcmp (call, "LSSEXT32") == 0)
+    return LSSEXT32 (val, col);
+  if (strcmp (call, "LSSEXT64") == 0)
+    return LSSEXT64 (val, col);
+  if (strcmp (call, "LSSEXT") == 0)
+    return LSSEXT (val, col);
+
+  if (strcmp (call, "MSSEXT16") == 0)
+    return MSSEXT16 (val, col);
+  if (strcmp (call, "MSSEXT32") == 0)
+    return MSSEXT32 (val, col);
+  if (strcmp (call, "MSSEXT64") == 0)
+    return MSSEXT64 (val, col);
+  if (strcmp (call, "MSSEXT") == 0)
+    return MSSEXT (val, col);
 
   else
     {
@@ -296,20 +332,16 @@ main (argc, argv)
   errors += check_extract (64, "EXTRACT64", "INSERT64", "MASK64");
   errors += check_extract (64, "EXTRACT", "INSERT", "MASK");
 
-
-
   printf ("Checking SEXT*\n");
   errors += check_sext (16, "SEXT16", "MASK16", "MSMASK16");
   errors += check_sext (32, "SEXT32", "MASK32", "MSMASK32");
   errors += check_sext (64, "SEXT64", "MASK64", "MSMASK64");
   errors += check_sext (64, "SEXT", "MASK", "MSMASK");
   
-
   printf ("Checking ROT*\n");
   errors += check_rot (16, "ROT16", "MASK16");
   errors += check_rot (32, "ROT32", "MASK32");
   errors += check_rot (64, "ROT64", "MASK64");
-
 
   return errors != 0;
 }
