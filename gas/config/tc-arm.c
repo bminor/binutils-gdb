@@ -10853,9 +10853,14 @@ mav_parse_offset (str, negative)
   for (offset = 0; *p && ISDIGIT (*p); ++p)
     offset = offset * 10 + *p - '0';
 
-  if (offset > 0xff)
+  if (offset > 0x3fc)
     {
       inst.error = _("offset out of range");
+      return 0;
+    }
+  if (offset & 0x3)
+    {
+      inst.error = _("offset not a multiple of 4");
       return 0;
     }
 

@@ -1,3 +1,7 @@
+2004-04-22  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (mav_parse_offset): Value must be multiple of 4.
+
 2004-04-22  Peter Barada <peter@the-baradas.com>
 
 	* NEWS: Added support for EMAC instructions and MAC/EMAC

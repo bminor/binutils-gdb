@@ -1,3 +1,10 @@
+2004-04-22  Paul Brook  <paul@codesourcery.com>
+
+	* maverick.c (off8s): Test full shifted operand range.
+	(MCC2): Define.
+	(MVDSPACC, MVACCDSP): Use it.
+	* maverick.d, maverick.s: Regenerate.
+
 2004-04-22  Peter Barada <peter@the-baradas.com>
 
 	* gas/m68k/mcf-mac.s: New test: Check ColdFire MAC instructions.
