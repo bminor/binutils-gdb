@@ -15,16 +15,20 @@
 
 Do-first:
 
+cygnus_files = "release release-info build-all.mk"
+
 if ( echo $* | grep keep\-cygnus > /dev/null) ; then
-	keep_these_too="${keep_these_too} release release-info build-all.mk"
+	keep_these_too="${keep_these_too} ${cygnus_files}"
 else
-	lose_these_too="${lose_these_too} release release-info build-all.mk"
+	lose_these_too="${lose_these_too} ${cygnus_files}"
 fi
 
+mpw_files = "mpw-README mpw-configure mpw-config.in mpw-build.in ChangeLog.mpw"
+
 if ( echo $* | grep keep\-mpw > /dev/null) ; then
-	keep_these_too="mpw-README mpw-configure mpw-config.in mpw-build.in ChangeLog.mpw ${keep_these_too}"
+	keep_these_too="${keep_these_too} ${mpw_files}"
 else
-	lose_these_too="mpw-README mpw-configure mpw-config.in mpw-build.in ChangeLog.mpw ${lose_these_too}"
+	lose_these_too="${lose_these_too} ${mpw_files}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
