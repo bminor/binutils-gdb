@@ -1,3 +1,7 @@
+2000-02-25  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* config.bfd: Enable 64 bit support for Solaris7+/sparc.
+
 2000-02-24  Catherine Moore  <clm@cygnus.com>
 
 	* som.c (som_misc_symbol_info):  Add field

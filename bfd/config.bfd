@@ -667,10 +667,16 @@ case "${targ}" in
     targ_defvec=sparcnetbsd_vec
     targ_underscore=yes
     ;;
-  sparc-*-elf* | sparc-*-solaris2*)
+  sparc-*-elf* | sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
     targ_defvec=bfd_elf32_sparc_vec
     targ_selvecs=sunos_big_vec
     ;;
+#ifdef BFD64
+  sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
+    targ_defvec=bfd_elf32_sparc_vec
+    targ_selvecs="bfd_elf64_sparc_vec sunos_big_vec"
+    ;;
+#endif
   sparc-*-sysv4*)
     targ_defvec=bfd_elf32_sparc_vec
     ;;
