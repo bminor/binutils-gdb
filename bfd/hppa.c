@@ -610,6 +610,12 @@ bfd_target hppa_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
   (SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+
+   /* leading_symbol_char: is the first char of a user symbol
+      predictable, and if so what is it */
+   0,
+
+
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
     3,				/* minimum alignment */
