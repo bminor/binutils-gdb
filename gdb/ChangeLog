@@ -1,3 +1,8 @@
+2000-10-04  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-tdep.c (skip_prologue): Add new parameter lim_pc.
+	Update all callers.
+
 2000-10-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote-bug.c (bug_xfer_memory, bug_insert_breakpoint,

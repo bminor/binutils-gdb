@@ -118,7 +118,8 @@ void (*rs6000_set_host_arch_hook) (int) = NULL;
 
 static CORE_ADDR branch_dest (int opcode, int instr, CORE_ADDR pc,
 			      CORE_ADDR safety);
-static CORE_ADDR skip_prologue (CORE_ADDR, struct rs6000_framedata *);
+static CORE_ADDR skip_prologue (CORE_ADDR, CORE_ADDR,
+                                struct rs6000_framedata *);
 static void frame_get_saved_regs (struct frame_info * fi,
 				  struct rs6000_framedata * fdatap);
 static CORE_ADDR frame_initial_stack_address (struct frame_info *);
@@ -135,7 +136,7 @@ static CORE_ADDR
 rs6000_skip_prologue (CORE_ADDR pc)
 {
   struct rs6000_framedata frame;
-  pc = skip_prologue (pc, &frame);
+  pc = skip_prologue (pc, 0, &frame);
   return pc;
 }
 
@@ -381,7 +382,7 @@ rs6000_software_single_step (unsigned int signal, int insert_breakpoints_p)
 #define GET_SRC_REG(x) (((x) >> 21) & 0x1f)
 
 static CORE_ADDR
-skip_prologue (CORE_ADDR pc, struct rs6000_framedata *fdata)
+skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 {
   CORE_ADDR orig_pc = pc;
   CORE_ADDR last_prologue_pc;
@@ -403,7 +404,7 @@ skip_prologue (CORE_ADDR pc, struct rs6000_framedata *fdata)
   fdata->nosavedpc = 1;
 
   pc -= 4;
-  for (;;)
+  while (lim_pc == 0 || pc < lim_pc - 4)
     {
       pc += 4;
 
@@ -700,7 +701,7 @@ rs6000_pop_frame (void)
      saved %pc value in the previous frame. */
 
   addr = get_pc_function_start (frame->pc);
-  (void) skip_prologue (addr, &fdata);
+  (void) skip_prologue (addr, frame->pc, &fdata);
 
   wordsize = TDEP->wordsize;
   if (fdata.frameless)
@@ -1106,7 +1107,7 @@ rs6000_frameless_function_invocation (struct frame_info *fi)
 	return 0;
     }
 
-  (void) skip_prologue (func_start, &fdata);
+  (void) skip_prologue (func_start, fi->pc, &fdata);
   return fdata.frameless;
 }
 
@@ -1132,7 +1133,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
   if (!func_start)
     return 0;
 
-  (void) skip_prologue (func_start, &fdata);
+  (void) skip_prologue (func_start, fi->pc, &fdata);
 
   if (fdata.lr_offset == 0 && fi->next != NULL)
     {
@@ -1167,7 +1168,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   if (fdatap == NULL)
     {
       fdatap = &work_fdata;
-      (void) skip_prologue (get_pc_function_start (fi->pc), fdatap);
+      (void) skip_prologue (get_pc_function_start (fi->pc), fi->pc, fdatap);
     }
 
   frame_saved_regs_zalloc (fi);
@@ -1243,7 +1244,7 @@ frame_initial_stack_address (struct frame_info *fi)
 
   /* find out if this function is using an alloca register.. */
 
-  (void) skip_prologue (get_pc_function_start (fi->pc), &fdata);
+  (void) skip_prologue (get_pc_function_start (fi->pc), fi->pc, &fdata);
 
   /* if saved registers of this frame are not known yet, read and cache them. */
 
