@@ -1,3 +1,10 @@
+2003-05-14  Michael Snyder  <msnyder@redhat.com>
+	From Bernd Schmidt  <bernds@redhat.com>
+	and Michael Snyder  <msnyder@redhat.com>
+	and Alexandre Oliva <aoliva@redhat.com>
+	* config/tc-h8300.c: Add insns and addressing modes for h8300sx.
+	* config/tc-h8300.h: Ditto.
+
 2003-06-03  Nick Clifton  <nickc@redhat.com>
 
 	* tc-v850.c (tc-gen_reloc): Translate BFD_RELOC_32 into

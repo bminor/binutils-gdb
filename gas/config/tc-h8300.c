@@ -49,11 +49,13 @@ void h8300hmode  PARAMS ((int));
 void h8300smode  PARAMS ((int));
 void h8300hnmode PARAMS ((int));
 void h8300snmode PARAMS ((int));
+void h8300sxmode PARAMS ((int));
 static void pint PARAMS ((int));
 
 int Hmode;
 int Smode;
 int Nmode;
+int SXmode;
 
 #define PSIZE (Hmode ? L_32 : L_16)
 #define DMODE (L_16)
@@ -123,6 +125,19 @@ h8300snmode (arg)
 }
 
 void
+h8300sxmode (arg)
+     int arg ATTRIBUTE_UNUSED;
+{
+  Smode = 1;
+  Hmode = 1;
+  SXmode = 1;
+#ifdef BFD_ASSEMBLER
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300sx))
+    as_warn (_("could not set architecture and machine"));
+#endif
+}
+
+void
 sbranch (size)
      int size;
 {
@@ -144,10 +159,11 @@ pint (arg)
 
 const pseudo_typeS md_pseudo_table[] =
 {
-  {"h8300h", h8300hmode, 0},
+  {"h8300h",  h8300hmode,  0},
   {"h8300hn", h8300hnmode, 0},
-  {"h8300s", h8300smode, 0},
+  {"h8300s",  h8300smode,  0},
   {"h8300sn", h8300snmode, 0},
+  {"h8300sx", h8300sxmode, 0},
   {"sbranch", sbranch, L_8},
   {"lbranch", sbranch, L_16},
 
@@ -157,8 +173,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"data.l", cons, 4},
   {"form", listing_psize, 0},
   {"heading", listing_title, 0},
-  {"import", s_ignore, 0},
-  {"page", listing_eject, 0},
+  {"import",  s_ignore, 0},
+  {"page",    listing_eject, 0},
   {"program", s_ignore, 0},
   {0, 0, 0}
 };
@@ -182,7 +198,7 @@ void
 md_begin ()
 {
   unsigned int nopcodes;
-  const struct h8_opcode *p;
+  struct h8_opcode *p, *p1;
   struct h8_instruction *pi;
   char prev_buffer[100];
   int idx = 0;
@@ -200,46 +216,83 @@ md_begin ()
   h8_instructions = (struct h8_instruction *)
     xmalloc (nopcodes * sizeof (struct h8_instruction));
 
-  for (p = h8_opcodes, pi = h8_instructions; p->name; p++, pi++)
+  pi = h8_instructions;
+  p1 = h8_opcodes;
+  /* We do a minimum amount of sorting on the opcode table; this is to
+     make it easy to describe the mova instructions without unnecessary
+     code duplication.
+     Sorting only takes place inside blocks of instructions of the form
+     X/Y, so for example mova/b, mova/w and mova/l can be intermixed.  */
+  while (p1)
     {
-      /* Strip off any . part when inserting the opcode and only enter
-         unique codes into the hash table.  */
-      char *src = p->name;
-      unsigned int len = strlen (src);
-      char *dst = malloc (len + 1);
-      char *buffer = dst;
+      struct h8_opcode *first_skipped = 0;
+      int len, cmplen = 0;
+      char *src = p1->name;
+      char *dst, *buffer;
 
-      pi->size = 0;
+      if (p1->name == 0)
+	break;
+      /* Strip off any . part when inserting the opcode and only enter
+	 unique codes into the hash table.  */
+      dst = buffer = malloc (strlen (src) + 1);
       while (*src)
 	{
 	  if (*src == '.')
 	    {
 	      src++;
-	      pi->size = *src;
 	      break;
 	    }
+	  if (*src == '/')
+	    cmplen = src - p1->name + 1;
 	  *dst++ = *src++;
 	}
-      *dst++ = 0;
-      if (strcmp (buffer, prev_buffer))
+      *dst = 0;
+      len = dst - buffer;
+      if (cmplen == 0)
+	cmplen = len;
+      hash_insert (opcode_hash_control, buffer, (char *) pi);
+      strcpy (prev_buffer, buffer);
+      idx++;
+
+      for (p = p1; p->name; p++)
 	{
-	  hash_insert (opcode_hash_control, buffer, (char *) pi);
-	  strcpy (prev_buffer, buffer);
-	  idx++;
+	  /* A negative TIME is used to indicate that we've added this opcode
+	     already.  */
+	  if (p->time == -1)
+	    continue;
+	  if (strncmp (p->name, buffer, cmplen) != 0
+	      || (p->name[cmplen] != '\0' && p->name[cmplen] != '.'
+		  && p->name[cmplen - 1] != '/'))
+	    {
+	      if (first_skipped == 0)
+		first_skipped = p;
+	      break;
+	    }
+	  if (strncmp (p->name, buffer, len) != 0)
+	    {
+	      if (first_skipped == 0)
+		first_skipped = p;
+	      continue;
+	    }
+
+	  p->time = -1;
+	  pi->size = p->name[len] == '.' ? p->name[len + 1] : 0;
+	  pi->idx = idx;
+
+	  /* Find the number of operands.  */
+	  pi->noperands = 0;
+	  while (pi->noperands < 3 && p->args.nib[pi->noperands] != (op_type) E)
+	    pi->noperands++;
+
+	  /* Find the length of the opcode in bytes.  */
+	  pi->length = 0;
+	  while (p->data.nib[pi->length * 2] != (op_type) E)
+	    pi->length++;
+
+	  pi->opcode = p;
+	  pi++;
 	}
-      pi->idx = idx;
-
-      /* Find the number of operands.  */
-      pi->noperands = 0;
-      while (p->args.nib[pi->noperands] != E)
-	pi->noperands++;
-
-      /* Find the length of the opcode in bytes.  */
-      pi->length = 0;
-      while (p->data.nib[pi->length * 2] != E)
-	pi->length++;
-
-      pi->opcode = p;
+      p1 = first_skipped;
     }
 
   /* Add entry for the NULL vector terminator.  */
@@ -247,7 +300,7 @@ md_begin ()
   pi->noperands = 0;
   pi->idx = 0;
   pi->size = 0;
-  pi->opcode = p;
+  pi->opcode = 0;
 
   linkrelax = 1;
 }
@@ -259,9 +312,6 @@ struct h8_exp
   expressionS e_exp;
 };
 
-int dispreg;
-int opsize;			/* Set when a register size is seen.  */
-
 struct h8_op
 {
   op_type mode;
@@ -271,15 +321,18 @@ struct h8_op
 
 static void clever_message PARAMS ((const struct h8_instruction *, struct h8_op *));
 static void build_bytes    PARAMS ((const struct h8_instruction *, struct h8_op *));
-static void do_a_fix_imm   PARAMS ((int, struct h8_op *, int));
+static void do_a_fix_imm   PARAMS ((int, int, struct h8_op *, int));
 static void check_operand  PARAMS ((struct h8_op *, unsigned int, char *));
 static const struct h8_instruction * get_specific PARAMS ((const struct h8_instruction *, struct h8_op *, int));
 static char * get_operands PARAMS ((unsigned, char *, struct h8_op *));
-static void   get_operand  PARAMS ((char **, struct h8_op *, unsigned, int));
+static void   get_operand  PARAMS ((char **, struct h8_op *, int));
 static char * skip_colonthing PARAMS ((char *, expressionS *, int *));
 static char * parse_exp PARAMS ((char *, expressionS *));
 static int    parse_reg PARAMS ((char *, op_type *, unsigned *, int));
 char * colonmod24 PARAMS ((struct h8_op *, char *));
+
+static int constant_fits_width_p PARAMS ((struct h8_op *, unsigned int));
+static int constant_fits_size_p PARAMS ((struct h8_op *, int, int));
 
 /*
   parse operands
@@ -308,36 +361,60 @@ parse_reg (src, mode, reg, direction)
   if (!is_name_beginner (*src) || *src == '\001')
     return 0;
   end = src + 1;
-  while (is_part_of_name (*end) || *end == '\001')
+  while ((is_part_of_name (*end) && *end != '.') || *end == '\001')
     end++;
   len = end - src;
 
-  if (len == 2 && src[0] == 's' && src[1] == 'p')
+  if (len == 2 && TOLOWER (src[0]) == 's' && TOLOWER (src[1]) == 'p')
     {
       *mode = PSIZE | REG | direction;
       *reg = 7;
       return len;
     }
-  if (len == 3 && src[0] == 'c' && src[1] == 'c' && src[2] == 'r')
+  if (len == 3 && 
+      TOLOWER (src[0]) == 'c' && 
+      TOLOWER (src[1]) == 'c' && 
+      TOLOWER (src[2]) == 'r')
     {
       *mode = CCR;
       *reg = 0;
       return len;
     }
-  if (len == 3 && src[0] == 'e' && src[1] == 'x' && src[2] == 'r')
+  if (len == 3 && 
+      TOLOWER (src[0]) == 'e' && 
+      TOLOWER (src[1]) == 'x' && 
+      TOLOWER (src[2]) == 'r')
     {
       *mode = EXR;
-      *reg = 0;
+      *reg = 1;
       return len;
     }
-  if (len == 2 && src[0] == 'f' && src[1] == 'p')
+  if (len == 3 && 
+      TOLOWER (src[0]) == 'v' && 
+      TOLOWER (src[1]) == 'b' && 
+      TOLOWER (src[2]) == 'r')
+    {
+      *mode = VBR;
+      *reg = 6;
+      return len;
+    }
+  if (len == 3 && 
+      TOLOWER (src[0]) == 's' && 
+      TOLOWER (src[1]) == 'b' && 
+      TOLOWER (src[2]) == 'r')
+    {
+      *mode = SBR;
+      *reg = 7;
+      return len;
+    }
+  if (len == 2 && TOLOWER (src[0]) == 'f' && TOLOWER (src[1]) == 'p')
     {
       *mode = PSIZE | REG | direction;
       *reg = 6;
       return len;
     }
-  if (len == 3 && src[0] == 'e' && src[1] == 'r'
-      && src[2] >= '0' && src[2] <= '7')
+  if (len == 3 && TOLOWER (src[0]) == 'e' && TOLOWER (src[1]) == 'r' &&
+      src[2] >= '0' && src[2] <= '7')
     {
       *mode = L_32 | REG | direction;
       *reg = src[2] - '0';
@@ -345,7 +422,7 @@ parse_reg (src, mode, reg, direction)
 	as_warn (_("Reg not valid for H8/300"));
       return len;
     }
-  if (len == 2 && src[0] == 'e' && src[1] >= '0' && src[1] <= '7')
+  if (len == 2 && TOLOWER (src[0]) == 'e' && src[1] >= '0' && src[1] <= '7')
     {
       *mode = L_16 | REG | direction;
       *reg = src[1] - '0' + 8;
@@ -354,17 +431,17 @@ parse_reg (src, mode, reg, direction)
       return len;
     }
 
-  if (src[0] == 'r')
+  if (TOLOWER (src[0]) == 'r')
     {
       if (src[1] >= '0' && src[1] <= '7')
 	{
-	  if (len == 3 && src[2] == 'l')
+	  if (len == 3 && TOLOWER (src[2]) == 'l')
 	    {
 	      *mode = L_8 | REG | direction;
 	      *reg = (src[1] - '0') + 8;
 	      return len;
 	    }
-	  if (len == 3 && src[2] == 'h')
+	  if (len == 3 && TOLOWER (src[2]) == 'h')
 	    {
 	      *mode = L_8 | REG | direction;
 	      *reg = (src[1] - '0');
@@ -409,30 +486,27 @@ skip_colonthing (ptr, exp, mode)
     {
       ptr++;
       *mode &= ~SIZE;
-      if (*ptr == '8')
-	{
-	  ptr++;
-	  /* ff fill any 8 bit quantity.  */
-	  /* exp->X_add_number -= 0x100; */
-	  *mode |= L_8;
-	}
+      if (ptr[0] == '8' && ! ISDIGIT (ptr[1]))
+	*mode |= L_8;
+      else if (ptr[0] == '2' && ! ISDIGIT (ptr[1]))
+	*mode |= L_2;
+      else if (ptr[0] == '3' && ! ISDIGIT (ptr[1]))
+	*mode |= L_3;
+      else if (ptr[0] == '4' && ! ISDIGIT (ptr[1]))
+	*mode |= L_4;
+      else if (ptr[0] == '5' && ! ISDIGIT (ptr[1]))
+	*mode |= L_5;
+      else if (ptr[0] == '2' && ptr[1] == '4')
+	*mode |= L_24;
+      else if (ptr[0] == '3' && ptr[1] == '2')
+	*mode |= L_32;
+      else if (ptr[0] == '1' && ptr[1] == '6')
+	*mode |= L_16;
       else
-	{
-	  if (*ptr == '2')
-	    {
-	      *mode |= L_24;
-	    }
-	  else if (*ptr == '3')
-	    {
-	      *mode |= L_32;
-	    }
-	  else if (*ptr == '1')
-	    {
-	      *mode |= L_16;
-	    }
-	  while (ISDIGIT (*ptr))
-	    ptr++;
-	}
+	as_bad (_("invalid operand size requested"));
+
+      while (ISDIGIT (*ptr))
+	ptr++;
     }
   return ptr;
 }
@@ -482,11 +556,55 @@ colonmod24 (op, src)
   return src;
 }
 
+static int
+constant_fits_width_p (operand, width)
+     struct h8_op *operand;
+     unsigned int width;
+{
+  return ((operand->exp.X_add_number & ~width) == 0
+	  || (operand->exp.X_add_number | width) == (unsigned)(~0));
+}
+
+static int
+constant_fits_size_p (operand, size, no_symbols)
+     struct h8_op *operand;
+     int size, no_symbols;
+{
+  offsetT num = operand->exp.X_add_number;
+  if (no_symbols
+      && (operand->exp.X_add_symbol != 0 || operand->exp.X_op_symbol != 0))
+    return 0;
+  switch (size)
+    {
+    case L_2:
+      return (num & ~3) == 0;
+    case L_3:
+      return (num & ~7) == 0;
+    case L_3NZ:
+      return num >= 1 && num < 8;
+    case L_4:
+      return (num & ~15) == 0;
+    case L_5:
+      return num >= 1 && num < 32;
+    case L_8:
+      return (num & ~0xFF) == 0 || ((unsigned)num | 0x7F) == ~0u;
+    case L_8U:
+      return (num & ~0xFF) == 0;
+    case L_16:
+      return (num & ~0xFFFF) == 0 || ((unsigned)num | 0x7FFF) == ~0u;
+    case L_16U:
+      return (num & ~0xFFFF) == 0;
+    case L_32:
+      return 1;
+    default:
+      abort ();
+    }
+}
+
 static void
-get_operand (ptr, op, dst, direction)
+get_operand (ptr, op, direction)
      char **ptr;
      struct h8_op *op;
-     unsigned int dst ATTRIBUTE_UNUSED;
      int direction;
 {
   char *src = *ptr;
@@ -494,7 +612,7 @@ get_operand (ptr, op, dst, direction)
   unsigned int num;
   unsigned int len;
 
-  op->mode = E;
+  op->mode = 0;
 
   /* Check for '(' and ')' for instructions ldm and stm.  */
   if (src[0] == '(' && src[8] == ')')
@@ -502,26 +620,23 @@ get_operand (ptr, op, dst, direction)
 
   /* Gross.  Gross.  ldm and stm have a format not easily handled
      by get_operand.  We deal with it explicitly here.  */
-  if (src[0] == 'e' && src[1] == 'r' && ISDIGIT (src[2])
-      && src[3] == '-' && src[4] == 'e' && src[5] == 'r' && ISDIGIT (src[6]))
+  if (TOLOWER (src[0]) == 'e' && TOLOWER (src[1]) == 'r' && 
+      ISDIGIT (src[2]) && src[3] == '-' &&
+      TOLOWER (src[4]) == 'e' && TOLOWER (src[5]) == 'r' && ISDIGIT (src[6]))
     {
       int low, high;
 
       low = src[2] - '0';
       high = src[6] - '0';
 
+      if (high == low)
+	as_bad (_("Invalid register list for ldm/stm\n"));
+
       if (high < low)
 	as_bad (_("Invalid register list for ldm/stm\n"));
 
-      if (low % 2)
-	as_bad (_("Invalid register list for ldm/stm\n"));
-
       if (high - low > 3)
-	as_bad (_("Invalid register list for ldm/stm\n"));
-
-      if (high - low != 1
-	  && low % 4)
-	as_bad (_("Invalid register list for ldm/stm\n"));
+	as_bad (_("Invalid register list for ldm/stm)\n"));
 
       /* Even sicker.  We encode two registers into op->reg.  One
 	 for the low register to save, the other for the high
@@ -539,7 +654,37 @@ get_operand (ptr, op, dst, direction)
   len = parse_reg (src, &op->mode, &op->reg, direction);
   if (len)
     {
-      *ptr = src + len;
+      src += len;
+      if (*src == '.')
+	{
+	  int size = op->mode & SIZE;
+	  switch (src[1])
+	    {
+	    case 'l': case 'L':
+	      if (size != L_32)
+		as_warn (_("mismatch between register and suffix"));
+	      op->mode = (op->mode & ~MODE) | LOWREG;
+	      break;
+	    case 'w': case 'W':
+	      if (size != L_32 && size != L_16)
+		as_warn (_("mismatch between register and suffix"));
+	      op->mode = (op->mode & ~MODE) | LOWREG;
+	      op->mode = (op->mode & ~SIZE) | L_16;
+	      break;
+	    case 'b': case 'B':
+	      op->mode = (op->mode & ~MODE) | LOWREG;
+	      if (size != L_32 && size != L_8)
+		as_warn (_("mismatch between register and suffix"));
+	      op->mode = (op->mode & ~MODE) | LOWREG;
+	      op->mode = (op->mode & ~SIZE) | L_8;
+	      break;
+	    default:
+	      as_warn ("invalid suffix after register.");
+	      break;
+	    }
+	  src += 2;
+	}
+      *ptr = src;
       return;
     }
 
@@ -555,12 +700,30 @@ get_operand (ptr, op, dst, direction)
 
 	  *ptr = src;
 
-	  op->mode = MEMIND;
+	  if (op->exp.X_add_number >= 0x100)
+	    {
+	      int divisor;
+
+	      op->mode = VECIND;
+	      /* FIXME : 2?  or 4?  */
+	      if (op->exp.X_add_number >= 0x400)
+		as_bad (_("address too high for vector table jmp/jsr"));
+	      else if (op->exp.X_add_number >= 0x200)
+		divisor = 4;
+	      else
+		divisor = 2;
+
+	      op->exp.X_add_number = op->exp.X_add_number / divisor - 0x80;
+	    }
+	  else
+	    op->mode = MEMIND;
+
 	  return;
 	}
 
-      if (*src == '-')
+      if (*src == '-' || *src == '+')
 	{
+	  char c = *src;
 	  src++;
 	  len = parse_reg (src, &mode, &num, direction);
 	  if (len == 0)
@@ -577,15 +740,50 @@ get_operand (ptr, op, dst, direction)
 
 	  if ((mode & SIZE) != PSIZE)
 	    as_bad (_("Wrong size pointer register for architecture."));
-	  op->mode = RDDEC;
+	  op->mode = c == '-' ? RDPREDEC : RDPREINC;
 	  op->reg = num;
 	  *ptr = src + len;
 	  return;
 	}
       if (*src == '(')
 	{
-	  /* Disp.  */
 	  src++;
+
+	  /* See if this is @(ERn.x, PC).  */
+	  len = parse_reg (src, &mode, &op->reg, direction);
+	  if (len != 0 && (mode & MODE) == REG && src[len] == '.')
+	    {
+	      switch (TOLOWER (src[len + 1]))
+		{
+		case 'b':
+		  mode = PCIDXB | direction;
+		  break;
+		case 'w':
+		  mode = PCIDXW | direction;
+		  break;
+		case 'l':
+		  mode = PCIDXL | direction;
+		  break;
+		default:
+		  mode = 0;
+		  break;
+		}
+	      if (mode
+		  && src[len + 2] == ','
+		  && TOLOWER (src[len + 3]) != 'p' 
+		  && TOLOWER (src[len + 4]) != 'c'
+		  && src[len + 5] != ')')
+		{
+		  *ptr = src + len + 6;
+		  op->mode |= mode;
+		  return;
+		}
+	      /* Fall through into disp case - the grammar is somewhat
+		 ambiguous, so we should try whether it's a DISP operand
+		 after all ("ER3.L" might be a poorly named label...).  */
+	    }
+
+	  /* Disp.  */
 
 	  /* Start off assuming a 16 bit offset.  */
 
@@ -610,14 +808,33 @@ get_operand (ptr, op, dst, direction)
 	  src++;
 
 	  len = parse_reg (src, &mode, &op->reg, direction);
-	  if (len == 0 || !(mode & REG))
+	  if (len == 0 || (mode & MODE) != REG)
 	    {
 	      as_bad (_("expected @(exp, reg16)"));
 	      return;
 	    }
-	  op->mode |= DISP | direction;
-	  dispreg = op->reg;
 	  src += len;
+	  if (src[0] == '.')
+	    {
+	      switch (TOLOWER (src[1]))
+		{
+		case 'b':
+		  op->mode |= INDEXB | direction;
+		  break;
+		case 'w':
+		  op->mode |= INDEXW | direction;
+		  break;
+		case 'l':
+		  op->mode |= INDEXL | direction;
+		  break;
+		default:
+		  as_bad (_("expected .L, .W or .B for register in indexed addressing mode"));
+		}
+	      src += 2;
+	      op->reg &= 7;
+	    }
+	  else
+	    op->mode |= DISP | direction;
 	  src = skip_colonthing (src, &op->exp, &op->mode);
 
 	  if (*src != ')' && '(')
@@ -634,13 +851,13 @@ get_operand (ptr, op, dst, direction)
       if (len)
 	{
 	  src += len;
-	  if (*src == '+')
+	  if (*src == '+' || *src == '-')
 	    {
-	      src++;
 	      if ((mode & SIZE) != PSIZE)
 		as_bad (_("Wrong size pointer register for architecture."));
-	      op->mode = RSINC;
+	      op->mode = *src == '+' ? RSPOSTINC : RSPOSTDEC;
 	      op->reg = num;
+	      src++;
 	      *ptr = src;
 	      return;
 	    }
@@ -675,10 +892,12 @@ get_operand (ptr, op, dst, direction)
 
       return;
     }
-  else if (strncmp (src, "mach", 4) == 0
-	   || strncmp (src, "macl", 4) == 0)
+  else if (strncmp (src, "mach", 4) == 0 || 
+	   strncmp (src, "macl", 4) == 0 ||
+	   strncmp (src, "MACH", 4) == 0 || 
+	   strncmp (src, "MACL", 4) == 0)
     {
-      op->reg = src[3] == 'l';
+      op->reg = TOLOWER (src[3]) == 'l';
       op->mode = MACREG;
       *ptr = src + 4;
       return;
@@ -703,7 +922,15 @@ get_operand (ptr, op, dst, direction)
 	    as_bad (_("expect :8 or :16 here"));
 	}
       else
-	op->mode = PCREL | bsize;
+	{
+	  int val = op->exp.X_add_number;
+
+	  op->mode = PCREL;
+	  if (-128 < val && val < 127)
+	    op->mode |= L_8;
+	  else
+	    op->mode |= L_16;
+	}
 
       *ptr = src;
     }
@@ -720,30 +947,35 @@ get_operands (noperands, op_end, operand)
   switch (noperands)
     {
     case 0:
-      operand[0].mode = 0;
-      operand[1].mode = 0;
       break;
 
     case 1:
       ptr++;
-      get_operand (&ptr, operand + 0, 0, SRC);
+      get_operand (&ptr, operand + 0, SRC);
       if (*ptr == ',')
 	{
 	  ptr++;
-	  get_operand (&ptr, operand + 1, 1, DST);
-	}
-      else
-	{
-	  operand[1].mode = 0;
+	  get_operand (&ptr, operand + 1, DST);
 	}
       break;
 
     case 2:
       ptr++;
-      get_operand (&ptr, operand + 0, 0, SRC);
+      get_operand (&ptr, operand + 0, SRC);
       if (*ptr == ',')
 	ptr++;
-      get_operand (&ptr, operand + 1, 1, DST);
+      get_operand (&ptr, operand + 1, DST);
+      break;
+
+    case 3:
+      ptr++;
+      get_operand (&ptr, operand + 0, SRC);
+      if (*ptr == ',')
+	ptr++;
+      get_operand (&ptr, operand + 1, DST);
+      if (*ptr == ',')
+	ptr++;
+      get_operand (&ptr, operand + 2, OP3);
       break;
 
     default:
@@ -751,6 +983,134 @@ get_operands (noperands, op_end, operand)
     }
 
   return ptr;
+}
+
+/* MOVA has special requirements.  Rather than adding twice the amount of
+   addressing modes, we simply special case it a bit.  */
+static void
+get_mova_operands (char *op_end, struct h8_op *operand)
+{
+  char *ptr = op_end;
+
+  if (ptr[1] != '@' || ptr[2] != '(')
+    goto error;
+  ptr += 3;
+  operand[0].mode = 0;
+  ptr = parse_exp (ptr, &operand[0].exp);
+  ptr = colonmod24 (operand + 0, ptr);
+
+  if (*ptr !=',')
+    goto error;
+  ptr++;
+  get_operand (&ptr, operand + 1, DST);
+
+  if (*ptr =='.')
+    {
+      ptr++;
+      switch (*ptr++)
+	{
+	case 'b': case 'B':
+	  operand[0].mode = (operand[0].mode & ~MODE) | INDEXB;
+	  break;
+	case 'w': case 'W':
+	  operand[0].mode = (operand[0].mode & ~MODE) | INDEXW;
+	  break;
+	case 'l': case 'L':
+	  operand[0].mode = (operand[0].mode & ~MODE) | INDEXL;
+	  break;
+	default:
+	  goto error;
+	}
+    }
+  else if ((operand[1].mode & MODE) == LOWREG)
+    {
+      switch (operand[1].mode & SIZE) 
+	{
+	case L_8:
+	  operand[0].mode = (operand[0].mode & ~MODE) | INDEXB;
+	  break;
+	case L_16:
+	  operand[0].mode = (operand[0].mode & ~MODE) | INDEXW;
+	  break;
+	case L_32:
+	  operand[0].mode = (operand[0].mode & ~MODE) | INDEXL;
+	  break;
+	default:
+	  goto error;
+	}
+    }
+  else
+    goto error;
+
+  if (*ptr++ != ')' || *ptr++ != ',')
+    goto error;
+  get_operand (&ptr, operand + 2, OP3);
+  /* See if we can use the short form of MOVA.  */
+  if (((operand[1].mode & MODE) == REG || (operand[1].mode & MODE) == LOWREG)
+      && (operand[2].mode & MODE) == REG
+      && (operand[1].reg & 7) == (operand[2].reg & 7))
+    {
+      operand[1].mode = operand[2].mode = 0;
+      operand[0].reg = operand[2].reg & 7;
+    }
+  return;
+
+ error:
+  as_bad (_("expected valid addressing mode for mova: \"@(disp, ea.sz),ERn\""));
+  return;
+}
+
+static void
+get_rtsl_operands (char *ptr, struct h8_op *operand)
+{
+  int mode, num, num2, len, type = 0;
+
+  ptr++;
+  if (*ptr == '(')
+    {
+      ptr++;
+      type = 1;
+    }
+  len = parse_reg (ptr, &mode, &num, SRC);
+  if (len == 0 || (mode & MODE) != REG)
+    {
+      as_bad (_("expected register"));
+      return;
+    }
+  if (type == 1)
+    {
+      ptr += len;
+      if (*ptr++ != '-')
+	{
+	  as_bad (_("expected register list"));
+	  return;
+	}
+      len = parse_reg (ptr, &mode, &num2, SRC);
+      if (len == 0 || (mode & MODE) != REG)
+	{
+	  as_bad (_("expected register"));
+	  return;
+	}
+      ptr += len;
+      if (*ptr++ != ')')
+	{
+	  as_bad (_("expected closing paren"));
+	  return;
+	}
+      /* CONST_xxx are used as placeholders in the opcode table.  */
+      num = num2 - num;
+      if (num < 1 || num > 3)
+	{
+	  as_bad (_("invalid register list"));
+	  return;
+	}
+    }
+  else
+    num2 = num, num = 0;
+  operand[0].mode = RS32;
+  operand[1].mode = RD32;
+  operand[0].reg = num;
+  operand[1].reg = num2;
 }
 
 /* Passed a pointer to a list of opcodes which use different
@@ -764,113 +1124,222 @@ get_specific (instruction, operands, size)
      int size;
 {
   const struct h8_instruction *this_try = instruction;
+  const struct h8_instruction *found_other = 0, *found_mismatched = 0;
   int found = 0;
   int this_index = instruction->idx;
+  int noperands = 0;
 
   /* There's only one ldm/stm and it's easier to just
      get out quick for them.  */
-  if (strcmp (instruction->opcode->name, "stm.l") == 0
-      || strcmp (instruction->opcode->name, "ldm.l") == 0)
+  if (OP_KIND (instruction->opcode->how) == O_LDM
+      || OP_KIND (instruction->opcode->how) == O_STM)
     return this_try;
+
+  while (noperands < 3 && operands[noperands].mode != 0)
+    noperands++;
 
   while (this_index == instruction->idx && !found)
     {
+      int this_size;
+
       found = 1;
-
       this_try = instruction++;
-      if (this_try->noperands == 0)
-	{
-	  int this_size;
+      this_size = this_try->opcode->how & SN;
 
-	  this_size = this_try->opcode->how & SN;
-	  if (this_size != size && (this_size != SB || size != SN))
-	    found = 0;
-	}
-      else
+      if (this_try->noperands != noperands)
+	found = 0;
+      else if (this_try->noperands > 0)
 	{
 	  int i;
 
 	  for (i = 0; i < this_try->noperands && found; i++)
 	    {
 	      op_type op = this_try->opcode->args.nib[i];
+	      int op_mode = op & MODE;
+	      int op_size = op & SIZE;
 	      int x = operands[i].mode;
+	      int x_mode = x & MODE;
+	      int x_size = x & SIZE;
 
-	      if ((op & (DISP | REG)) == (DISP | REG)
-		  && ((x & (DISP | REG)) == (DISP | REG)))
+	      if (op_mode == LOWREG && (x_mode == REG || x_mode == LOWREG))
 		{
-		  dispreg = operands[i].reg;
+		  if ((x_size == L_8 && (operands[i].reg & 8) == 0)
+		      || (x_size == L_16 && (operands[i].reg & 8) == 8))
+		    as_warn (_("can't use high part of register in operand %d"), i);
+
+		  if (x_size != op_size)
+		    found = 0;
 		}
-	      else if (op & REG)
+	      else if (op_mode == REG)
 		{
-		  if (!(x & REG))
+		  if (x_mode == LOWREG)
+		    x_mode = REG;
+		  if (x_mode != REG)
 		    found = 0;
 
-		  if (x & L_P)
-		    x = (x & ~L_P) | (Hmode ? L_32 : L_16);
-		  if (op & L_P)
-		    op = (op & ~L_P) | (Hmode ? L_32 : L_16);
-
-		  opsize = op & SIZE;
+		  if (x_size == L_P)
+		    x_size = (Hmode ? L_32 : L_16);
+		  if (op_size == L_P)
+		    op_size = (Hmode ? L_32 : L_16);
 
 		  /* The size of the reg is v important.  */
-		  if ((op & SIZE) != (x & SIZE))
+		  if (op_size != x_size)
 		    found = 0;
 		}
-	      else if ((op & ABSJMP) && (x & ABS))
+	      else if (op_mode & CTRL)	/* control register */
 		{
-		  operands[i].mode &= ~ABS;
+		  if (!(x_mode & CTRL))
+		    found = 0;
+
+		  switch (x_mode)
+		    {
+		    case CCR:
+		      if (op_mode != CCR &&
+			  op_mode != CCR_EXR &&
+			  op_mode != CC_EX_VB_SB)
+			found = 0;
+		      break;
+		    case EXR:
+		      if (op_mode != EXR &&
+			  op_mode != CCR_EXR &&
+			  op_mode != CC_EX_VB_SB)
+			found = 0;
+		      break;
+		    case MACH:
+		      if (op_mode != MACH &&
+			  op_mode != MACREG)
+			found = 0;
+		      break;
+		    case MACL:
+		      if (op_mode != MACL &&
+			  op_mode != MACREG)
+			found = 0;
+		      break;
+		    case VBR:
+		      if (op_mode != VBR &&
+			  op_mode != VBR_SBR &&
+			  op_mode != CC_EX_VB_SB)
+			found = 0;
+		      break;
+		    case SBR:
+		      if (op_mode != SBR &&
+			  op_mode != VBR_SBR &&
+			  op_mode != CC_EX_VB_SB)
+			found = 0;
+		      break;
+		    }
+		}
+	      else if ((op & ABSJMP) && (x_mode == ABS || x_mode == PCREL))
+		{
+		  operands[i].mode &= ~MODE;
 		  operands[i].mode |= ABSJMP;
 		  /* But it may not be 24 bits long.  */
-		  if (!Hmode)
+		  if (x_mode == ABS && !Hmode)
 		    {
 		      operands[i].mode &= ~SIZE;
 		      operands[i].mode |= L_16;
 		    }
+		  if ((operands[i].mode & SIZE) == L_32
+		      && (op_mode & SIZE) != L_32)
+		   found = 0;
 		}
-	      else if ((op & (KBIT | DBIT)) && (x & IMM))
+	      else if (x_mode == IMM && op_mode != IMM)
 		{
-		  /* This is ok if the immediate value is sensible.  */
-		}
-	      else if (op & PCREL)
-		{
-		  /* The size of the displacement is important.  */
-		  if ((op & SIZE) != (x & SIZE))
+		  offsetT num = operands[i].exp.X_add_number;
+		  if (op_mode == KBIT || op_mode == DBIT)
+		    /* This is ok if the immediate value is sensible.  */;
+		  else if (op_mode == CONST_2)
+		    found = num == 2;
+		  else if (op_mode == CONST_4)
+		    found = num == 4;
+		  else if (op_mode == CONST_8)
+		    found = num == 8;
+		  else if (op_mode == CONST_16)
+		    found = num == 16;
+		  else
 		    found = 0;
 		}
-	      else if ((op & (DISP | IMM | ABS))
-		       && (op & (DISP | IMM | ABS)) == (x & (DISP | IMM | ABS)))
+	      else if (op_mode == PCREL && op_mode == x_mode)
+		{
+		  /* movsd only comes in PCREL16 flavour:
+		     If x_size is L_8, promote it.  */
+		  if (OP_KIND (this_try->opcode->how) == O_MOVSD)
+		    if (x_size == L_8)
+		      x_size = L_16;
+
+		  /* The size of the displacement is important.  */
+		  if (op_size != x_size)
+		    found = 0;
+		}
+	      else if ((op_mode == DISP || op_mode == IMM || op_mode == ABS
+			|| op_mode == INDEXB || op_mode == INDEXW
+			|| op_mode == INDEXL)
+		       && op_mode == x_mode)
 		{
 		  /* Promote a L_24 to L_32 if it makes us match.  */
-		  if ((x & L_24) && (op & L_32))
+		  if (x_size == L_24 && op_size == L_32)
 		    {
-		      x &= ~L_24;
-		      x |= L_32;
+		      x &= ~SIZE;
+		      x |= x_size = L_32;
 		    }
+
+#if 0 /* ??? */
 		  /* Promote an L8 to L_16 if it makes us match.  */
-		  if (op & ABS && op & L_8 && op & DISP)
+		  if ((op_mode == ABS || op_mode == DISP) && x_size == L_8)
 		    {
-		      if (x & L_16)
-			found = 1;
+		      if (op_size == L_16)
+			x_size = L_16;
 		    }
-		  else if ((x & SIZE) != 0
-			   && ((op & SIZE) != (x & SIZE)))
+#endif
+
+		  if (((x_size == L_16 && op_size == L_16U)
+		       || (x_size == L_3 && op_size == L_3NZ))
+		      /* We're deliberately more permissive for ABS modes.  */
+		      && (op_mode == ABS
+			  || constant_fits_size_p (operands + i, op_size,
+						   op & NO_SYMBOLS)))
+		    x_size = op_size;
+
+		  if (x_size != 0 && op_size != x_size)
+		    found = 0;
+		  else if (x_size == 0
+			   && ! constant_fits_size_p (operands + i, op_size,
+						      op & NO_SYMBOLS))
 		    found = 0;
 		}
-	      else if ((op & MACREG) != (x & MACREG))
-		{
-		  found = 0;
-		}
-	      else if ((op & MODE) != (x & MODE))
+	      else if (op_mode != x_mode)
 		{
 		  found = 0;
 		}
 	    }
 	}
+      if (found)
+	{
+	  if ((this_try->opcode->available == AV_H8SX && ! SXmode)
+	      || (this_try->opcode->available == AV_H8H && ! Hmode))
+	    found = 0, found_other = this_try;
+	  else if (this_size != size && (this_size != SN && size != SN))
+	    found_mismatched = this_try, found = 0;
+
+	}
     }
   if (found)
     return this_try;
-  else
-    return 0;
+  if (found_other)
+    {
+      as_warn (_("Opcode `%s' with these operand types not available in %s mode"),
+	       found_other->opcode->name,
+	       (! Hmode && ! Smode ? "H8/300"
+		: SXmode ? "H8sx"
+		: Smode ? "H8/300S"
+		: "H8/300H"));
+    }
+  else if (found_mismatched)
+    {
+      as_warn (_("mismatch between opcode size and operand size"));
+      return found_mismatched;
+    }
+  return 0;
 }
 
 static void
@@ -887,8 +1356,7 @@ check_operand (operand, width, string)
 	 anding with the width and seeing if the answer is 0 or all
 	 fs.  */
 
-      if ((operand->exp.X_add_number & ~width) != 0 &&
-	  (operand->exp.X_add_number | width) != (unsigned)(~0))
+      if (! constant_fits_width_p (operand, width))
 	{
 	  if (width == 255
 	      && (operand->exp.X_add_number & 0xff00) == 0xff00)
@@ -925,52 +1393,63 @@ check_operand (operand, width, string)
      (may relax into an 8bit absolute address).  */
 
 static void
-do_a_fix_imm (offset, operand, relaxmode)
-     int offset;
+do_a_fix_imm (offset, nibble, operand, relaxmode)
+     int offset, nibble;
      struct h8_op *operand;
      int relaxmode;
 {
   int idx;
   int size;
   int where;
+  char *bytes = frag_now->fr_literal + offset;
 
-  char *t = operand->mode & IMM ? "#" : "@";
+  char *t = ((operand->mode & MODE) == IMM) ? "#" : "@";
 
   if (operand->exp.X_add_symbol == 0)
     {
-      char *bytes = frag_now->fr_literal + offset;
       switch (operand->mode & SIZE)
 	{
 	case L_2:
 	  check_operand (operand, 0x3, t);
-	  bytes[0] |= (operand->exp.X_add_number) << 4;
+	  bytes[0] |= (operand->exp.X_add_number & 3) << (nibble ? 0 : 4);
 	  break;
 	case L_3:
+	case L_3NZ:
 	  check_operand (operand, 0x7, t);
-	  bytes[0] |= (operand->exp.X_add_number) << 4;
+	  bytes[0] |= (operand->exp.X_add_number & 7) << (nibble ? 0 : 4);
+	  break;
+	case L_4:
+	  check_operand (operand, 0xF, t);
+	  bytes[0] |= (operand->exp.X_add_number & 15) << (nibble ? 0 : 4);
+	  break;
+	case L_5:
+	  check_operand (operand, 0x1F, t);
+	  bytes[0] |= operand->exp.X_add_number & 31;
 	  break;
 	case L_8:
+	case L_8U:
 	  check_operand (operand, 0xff, t);
-	  bytes[0] = operand->exp.X_add_number;
+	  bytes[0] |= operand->exp.X_add_number;
 	  break;
 	case L_16:
+	case L_16U:
 	  check_operand (operand, 0xffff, t);
-	  bytes[0] = operand->exp.X_add_number >> 8;
-	  bytes[1] = operand->exp.X_add_number >> 0;
+	  bytes[0] |= operand->exp.X_add_number >> 8;
+	  bytes[1] |= operand->exp.X_add_number >> 0;
 	  break;
 	case L_24:
 	  check_operand (operand, 0xffffff, t);
-	  bytes[0] = operand->exp.X_add_number >> 16;
-	  bytes[1] = operand->exp.X_add_number >> 8;
-	  bytes[2] = operand->exp.X_add_number >> 0;
+	  bytes[0] |= operand->exp.X_add_number >> 16;
+	  bytes[1] |= operand->exp.X_add_number >> 8;
+	  bytes[2] |= operand->exp.X_add_number >> 0;
 	  break;
 
 	case L_32:
 	  /* This should be done with bfd.  */
-	  bytes[0] = operand->exp.X_add_number >> 24;
-	  bytes[1] = operand->exp.X_add_number >> 16;
-	  bytes[2] = operand->exp.X_add_number >> 8;
-	  bytes[3] = operand->exp.X_add_number >> 0;
+	  bytes[0] |= operand->exp.X_add_number >> 24;
+	  bytes[1] |= operand->exp.X_add_number >> 16;
+	  bytes[2] |= operand->exp.X_add_number >> 8;
+	  bytes[3] |= operand->exp.X_add_number >> 0;
 	  if (relaxmode != 0)
 	    {
 	      idx = (relaxmode == 2) ? R_MOV24B1 : R_MOVL1;
@@ -997,6 +1476,7 @@ do_a_fix_imm (offset, operand, relaxmode)
 	default:
 	  as_bad (_("Can't work out size of operand.\n"));
 	case L_16:
+	case L_16U:
 	  size = 2;
 	  where = 0;
 	  if (relaxmode == 2)
@@ -1005,6 +1485,7 @@ do_a_fix_imm (offset, operand, relaxmode)
 	    idx = R_RELWORD;
 	  operand->exp.X_add_number =
 	    ((operand->exp.X_add_number & 0xffff) ^ 0x8000) - 0x8000;
+	  operand->exp.X_add_number |= (bytes[0] << 8) | bytes[1];
 	  break;
 	case L_8:
 	  size = 1;
@@ -1012,6 +1493,7 @@ do_a_fix_imm (offset, operand, relaxmode)
 	  idx = R_RELBYTE;
 	  operand->exp.X_add_number =
 	    ((operand->exp.X_add_number & 0xff) ^ 0x80) - 0x80;
+	  operand->exp.X_add_number |= bytes[0];
 	}
 
       fix_new_exp (frag_now,
@@ -1035,50 +1517,65 @@ build_bytes (this_try, operand)
   op_type *nibble_ptr = this_try->opcode->data.nib;
   op_type c;
   unsigned int nibble_count = 0;
-  int absat = 0;
-  int immat = 0;
+  int op_at[3];
   int nib = 0;
   int movb = 0;
-  char asnibbles[30];
+  char asnibbles[100];
   char *p = asnibbles;
+  int high, low;
 
-  if (!(this_try->opcode->inbase || Hmode))
+  if (!(this_try->opcode->available == AV_H8 || Hmode))
     as_warn (_("Opcode `%s' with these operand types not available in H8/300 mode"),
 	     this_try->opcode->name);
 
-  while (*nibble_ptr != E)
+  while (*nibble_ptr != (op_type) E)
     {
       int d;
+
+      nib = 0;
       c = *nibble_ptr++;
 
-      d = (c & (DST | SRC_IN_DST)) != 0;
+      d = (c & OP3) == OP3 ? 2 : (c & DST) == DST ? 1 : 0;
 
       if (c < 16)
 	nib = c;
       else
 	{
-	  if (c & (REG | IND | INC | DEC))
+	  int c2 = c & MODE;
+
+	  if (c2 == REG || c2 == LOWREG
+	      || c2 == IND || c2 == PREINC || c2 == PREDEC
+	      || c2 == POSTINC || c2 == POSTDEC)
+	    {
+	      nib = operand[d].reg;
+	      if (c2 == LOWREG)
+		nib &= 7;
+	    }
+
+	  else if (c & CTRL)	/* Control reg operand.  */
 	    nib = operand[d].reg;
 
 	  else if ((c & DISPREG) == (DISPREG))
-	    nib = dispreg;
-
-	  else if (c & ABS)
+	    {
+	      nib = operand[d].reg;
+	    }
+	  else if (c2 == ABS)
 	    {
 	      operand[d].mode = c;
-	      absat = nibble_count / 2;
+	      op_at[d] = nibble_count;
 	      nib = 0;
 	    }
-	  else if (c & (IMM | PCREL | ABS | ABSJMP | DISP))
+	  else if (c2 == IMM || c2 == PCREL || c2 == ABS
+		   || (c & ABSJMP) || c2 == DISP)
 	    {
 	      operand[d].mode = c;
-	      immat = nibble_count / 2;
+	      op_at[d] = nibble_count;
 	      nib = 0;
 	    }
-	  else if (c & IGNORE)
+	  else if ((c & IGNORE) || (c & DATA))
 	    nib = 0;
 
-	  else if (c & DBIT)
+	  else if (c2 == DBIT)
 	    {
 	      switch (operand[0].exp.X_add_number)
 		{
@@ -1092,7 +1589,7 @@ build_bytes (this_try, operand)
 		  as_bad (_("Need #1 or #2 here"));
 		}
 	    }
-	  else if (c & KBIT)
+	  else if (c2 == KBIT)
 	    {
 	      switch (operand[0].exp.X_add_number)
 		{
@@ -1122,7 +1619,16 @@ build_bytes (this_try, operand)
 	  if (c & B31)
 	    nib |= 0x8;
 
-	  if (c & MACREG)
+	  if (c & B21)
+	    nib |= 0x4;
+
+	  if (c & B11)
+	    nib |= 0x2;
+
+	  if (c & B01)
+	    nib |= 0x1;
+
+	  if (c2 == MACREG)
 	    {
 	      if (operand[0].mode == MACREG)
 		/* stmac has mac[hl] as the first operand.  */
@@ -1139,15 +1645,19 @@ build_bytes (this_try, operand)
 
   /* Disgusting.  Why, oh why didn't someone ask us for advice
      on the assembler format.  */
-  if (strcmp (this_try->opcode->name, "stm.l") == 0
-      || strcmp (this_try->opcode->name, "ldm.l") == 0)
+  if (OP_KIND (this_try->opcode->how) == O_LDM)
     {
-      int high, low;
-      high = (operand[this_try->opcode->name[0] == 'l' ? 1 : 0].reg >> 8) & 0xf;
-      low = operand[this_try->opcode->name[0] == 'l' ? 1 : 0].reg & 0xf;
-
+      high = (operand[1].reg >> 8) & 0xf;
+      low  = (operand[1].reg) & 0xf;
       asnibbles[2] = high - low;
-      asnibbles[7] = (this_try->opcode->name[0] == 'l') ? high : low;
+      asnibbles[7] = high;
+    }
+  else if (OP_KIND (this_try->opcode->how) == O_STM)
+    {
+      high = (operand[0].reg >> 8) & 0xf;
+      low  = (operand[0].reg) & 0xf;
+      asnibbles[2] = high - low;
+      asnibbles[7] = low;
     }
 
   for (i = 0; i < this_try->length; i++)
@@ -1155,26 +1665,27 @@ build_bytes (this_try, operand)
 
   /* Note if this is a movb instruction -- there's a special relaxation
      which only applies to them.  */
-  if (strcmp (this_try->opcode->name, "mov.b") == 0)
+  if (this_try->opcode->how == O (O_MOV, SB))
     movb = 1;
 
   /* Output any fixes.  */
-  for (i = 0; i < 2; i++)
+  for (i = 0; i < this_try->noperands; i++)
     {
       int x = operand[i].mode;
+      int x_mode = x & MODE;
 
-      if (x & (IMM | DISP))
-	do_a_fix_imm (output - frag_now->fr_literal + immat,
-		      operand + i, (x & MEMRELAX) != 0);
+      if (x_mode == IMM || x_mode == DISP)
+	do_a_fix_imm (output - frag_now->fr_literal + op_at[i] / 2,
+		      op_at[i] & 1, operand + i, (x & MEMRELAX) != 0);
 
-      else if (x & ABS)
-	do_a_fix_imm (output - frag_now->fr_literal + absat,
-		      operand + i, (x & MEMRELAX) ? movb + 1 : 0);
+      else if (x_mode == ABS)
+	do_a_fix_imm (output - frag_now->fr_literal + op_at[i] / 2,
+		      op_at[i] & 1, operand + i,
+		      (x & MEMRELAX) ? movb + 1 : 0);
 
-      else if (x & PCREL)
+      else if (x_mode == PCREL)
 	{
-	  int size16 = x & (L_16);
-	  int where = size16 ? 2 : 1;
+	  int size16 = (x & SIZE) == L_16;
 	  int size = size16 ? 2 : 1;
 	  int type = size16 ? R_PCRWORD : R_PCRBYTE;
 	  fixS *fixP;
@@ -1192,20 +1703,45 @@ build_bytes (this_try, operand)
 	     compatible with the proposed ELF format from Hitachi.  */
 	  operand[i].exp.X_add_number -= 1;
 #endif
-	  operand[i].exp.X_add_number =
-	    ((operand[i].exp.X_add_number & 0xff) ^ 0x80) - 0x80;
+	  if (size16)
+	    {
+	      operand[i].exp.X_add_number =
+		((operand[i].exp.X_add_number & 0xffff) ^ 0x8000) - 0x8000;
+	    }
+	  else
+	    {
+	      operand[i].exp.X_add_number =
+		((operand[i].exp.X_add_number & 0xff) ^ 0x80) - 0x80;
+	    }
+
+	  /* For BRA/S.  */
+	  if (! size16)
+	    operand[i].exp.X_add_number |= output[op_at[i] / 2];
 
 	  fixP = fix_new_exp (frag_now,
-			      output - frag_now->fr_literal + where,
+			      output - frag_now->fr_literal + op_at[i] / 2,
 			      size,
 			      &operand[i].exp,
 			      1,
 			      type);
 	  fixP->fx_signed = 1;
 	}
-      else if (x & MEMIND)
+      else if (x_mode == MEMIND)
 	{
 	  check_operand (operand + i, 0xff, "@@");
+	  fix_new_exp (frag_now,
+		       output - frag_now->fr_literal + 1,
+		       1,
+		       &operand[i].exp,
+		       0,
+		       R_MEM_INDIRECT);
+	}
+      else if (x_mode == VECIND)
+	{
+	  check_operand (operand + i, 0x7f, "@@");
+	  /* FIXME: approximating the effect of "B31" here...
+	     This is very hackish, and ought to be done a better way.  */
+	  operand[i].exp.X_add_number |= 0x80;
 	  fix_new_exp (frag_now,
 		       output - frag_now->fr_literal + 1,
 		       1,
@@ -1216,17 +1752,27 @@ build_bytes (this_try, operand)
       else if (x & ABSJMP)
 	{
 	  int where = 0;
+	  bfd_reloc_code_real_type reloc_type = R_JMPL1;
 
 #ifdef OBJ_ELF
 	  /* To be compatible with the proposed H8 ELF format, we
 	     want the relocation's offset to point to the first byte
 	     that will be modified, not to the start of the instruction.  */
-	  where += 1;
+	  
+	  if ((operand->mode & SIZE) == L_32)
+	    {
+	      where = 2;
+	      reloc_type = R_RELLONG;
+	    }
+	  else
+	    where = 1;
 #endif
 
 	  /* This jmp may be a jump or a branch.  */
 
-	  check_operand (operand + i, Hmode ? 0xffffff : 0xffff, "@");
+	  check_operand (operand + i, 
+			 SXmode ? 0xffffffff : Hmode ? 0xffffff : 0xffff, 
+			 "@");
 
 	  if (operand[i].exp.X_add_number & 1)
 	    as_warn (_("branch operand has odd offset (%lx)\n"),
@@ -1240,7 +1786,7 @@ build_bytes (this_try, operand)
 		       4,
 		       &operand[i].exp,
 		       0,
-		       R_JMPL1);
+		       reloc_type);
 	}
     }
 }
@@ -1321,13 +1867,13 @@ md_assemble (str)
 {
   char *op_start;
   char *op_end;
-  struct h8_op operand[2];
+  struct h8_op operand[3];
   const struct h8_instruction *instruction;
   const struct h8_instruction *prev_instruction;
 
   char *dot = 0;
   char c;
-  int size;
+  int size, i;
 
   /* Drop leading whitespace.  */
   while (*str == ' ')
@@ -1367,7 +1913,20 @@ md_assemble (str)
   /* We used to set input_line_pointer to the result of get_operands,
      but that is wrong.  Our caller assumes we don't change it.  */
 
-  (void) get_operands (instruction->noperands, op_end, operand);
+  operand[0].mode = 0;
+  operand[1].mode = 0;
+  operand[2].mode = 0;
+
+  if (OP_KIND (instruction->opcode->how) == O_MOVAB
+      || OP_KIND (instruction->opcode->how) == O_MOVAW
+      || OP_KIND (instruction->opcode->how) == O_MOVAL)
+    get_mova_operands (op_end, operand);
+  else if (OP_KIND (instruction->opcode->how) == O_RTEL
+	   || OP_KIND (instruction->opcode->how) == O_RTSL)
+    get_rtsl_operands (op_end, operand);
+  else
+    get_operands (instruction->noperands, op_end, operand);
+
   *op_end = c;
   prev_instruction = instruction;
 
@@ -1402,12 +1961,54 @@ md_assemble (str)
 
       return;
     }
-  if (instruction->size && dot)
+
+  /* This is the earliest point at which we can do this:
+     any DISP2 operands need to be fixed-up according to 
+     the size of the operation.  */
+  /* MOVA is a whole different set of rules...  */
+  if (OP_KIND (instruction->opcode->how) == O_MOVAB ||
+      OP_KIND (instruction->opcode->how) == O_MOVAW ||
+      OP_KIND (instruction->opcode->how) == O_MOVAL)
     {
-      if (instruction->size != *dot)
-	{
-	  as_warn (_("mismatch between opcode size and operand size"));
+      if ((operand[1].mode & MODE) == DISP &&
+	  (operand[1].mode & SIZE) == L_2)
+	switch (operand[0].mode & MODE) {
+	case INDEXB:
+	default:
+	  break;
+	case INDEXW:
+	  if (operand[1].exp.X_add_number % 2)
+	    as_warn (_("operand/size mis-match"));
+	  operand[1].exp.X_add_number /= 2;
+	  break;
+	case INDEXL:
+	  if (operand[1].exp.X_add_number % 4)
+	    as_warn (_("operand/size mis-match"));
+	  operand[1].exp.X_add_number /= 4;
+	  break;
 	}
+    }
+  else
+    {
+      for (i = 0; i < instruction->noperands; i++)
+	if ((operand[i].mode & MODE) == DISP &&
+	    (operand[i].mode & SIZE) == L_2)
+	  switch (size) {
+	  case SN:
+	  case SB:
+	  default:
+	    break;
+	  case SW:
+	    if (operand[i].exp.X_add_number % 2)
+	      as_warn (_("operand/size mis-match"));
+	    operand[i].exp.X_add_number /= 2;
+	    break;
+	  case SL:
+	    if (operand[i].exp.X_add_number % 4)
+	      as_warn (_("operand/size mis-match"));
+	    operand[i].exp.X_add_number /= 4;
+	    break;
+	  }
     }
 
   build_bytes (instruction, operand);

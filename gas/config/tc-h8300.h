@@ -32,6 +32,9 @@
 #endif
 #ifdef OBJ_ELF
 #define TARGET_FORMAT "elf32-h8300"
+#define LOCAL_LABEL_PREFIX '.'
+#define LOCAL_LABEL(NAME) (NAME[0] == '.' && NAME[1] == 'L')
+#define FAKE_LABEL_NAME ".L0\001"
 #endif
 
 #if ANSI_PROTOTYPES
@@ -96,5 +99,6 @@ extern void tc_reloc_mangle
 extern int Hmode;
 extern int Smode;
 extern int Nmode;
+extern int SXmode;
 
 #define md_operand(x)
