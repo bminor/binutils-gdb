@@ -1,3 +1,8 @@
+2001-09-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/completion.exp: Remove incorrect 'p "a' test.
+	Add tests for 'p "break' (pass) and 'p "break.' (xfail).
+
 2001-09-27  Michael Snyder  <msnyder@redhat.com>
 
 	* lib/gdb.exp (test_debug_format): New proc.
