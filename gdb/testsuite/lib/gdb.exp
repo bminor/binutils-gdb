@@ -594,17 +594,17 @@ proc default_gdb_exit {} {
 	    }
 	    -i $gdb_spawn_id timeout { }
 	}
-	remote_close host;
     } else {
 	# We used to try to send_gdb "quit" to GDB, and wait for it to die.
 	# Dealing with all the cases and errors got pretty hairy.  Just close it, 
 	# that is simpler.
-	close -i $gdb_spawn_id
+	catch "close -i $gdb_spawn_id"
 
 	# Omitting this probably would cause strange timing-dependent failures.
-	wait -i $gdb_spawn_id
+	catch "wait -i $gdb_spawn_id"
     }
 
+    remote_close host;
     unset gdb_spawn_id
 }
 
