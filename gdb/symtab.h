@@ -461,8 +461,8 @@ enum address_class
      For some symbol formats (stabs, for some compilers at least),
      the compiler generates two symbols, an argument and a register.
      In some cases we combine them to a single LOC_REGPARM in symbol
-     reading, but I'm not sure whether we do for all cases (I'm thinking
-     of when it's passed on the stack and then loaded into a register).  */
+     reading, but currently not for all cases (e.g. it's passed on the
+     stack and then loaded into a register).  */
 
   LOC_REGPARM,
 
