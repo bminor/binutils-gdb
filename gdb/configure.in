@@ -466,6 +466,14 @@ ENABLE_CLIBS = $(TCL) $(TK) $(X11_LIB_SWITCHES) $(X11_LIBS) -lm
 fi
 # end-sanitize-gdbtk
 
+if [ "${enable_netrom}" = "yes" ] ; then
+	sed -e '/# End of host and/i\
+\
+NETROM_OBS = remote-nrom.o\
+' < Makefile > Makefile.tem
+	mv -f Makefile.tem Makefile
+fi
+
 sed -e '/^TM_FILE[ 	]*=/s,^TM_FILE[ 	]*=[ 	]*,&config/'"${gdb_target_cpu}"'/,
 /^XM_FILE[ 	]*=/s,^XM_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,
 /^NAT_FILE[ 	]*=/s,^NAT_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,' <Makefile >Makefile.tmp
