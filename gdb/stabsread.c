@@ -172,21 +172,18 @@ read_cfront_member_functions PARAMS ((struct field_info *, char **,
 
 /* end new functions added for cfront support */
 
-static void 
+static void
 add_live_range PARAMS ((struct objfile *, struct symbol *, 
 			CORE_ADDR, CORE_ADDR));
 
-static void 
+static int
 resolve_live_range PARAMS ((struct objfile *, struct symbol *, char *));
 
-static int 
+static int
 process_reference PARAMS ((char **string));
 
-static CORE_ADDR 
+static CORE_ADDR
 ref_search_value PARAMS ((int refnum));
-
-static void 
-ref_init PARAMS ((void));
 
 static int
 resolve_symbol_reference PARAMS ((struct objfile *, struct symbol *, char *));
@@ -203,43 +200,46 @@ static const char vb_name[] =   { '_','v','b',CPLUS_MARKER,'\0' };
 #define BELIEVE_PCC_PROMOTION 0
 #endif
 
-struct complaint invalid_cpp_abbrev_complaint =
+static struct complaint invalid_cpp_abbrev_complaint =
   {"invalid C++ abbreviation `%s'", 0, 0};
 
-struct complaint invalid_cpp_type_complaint =
+static struct complaint invalid_cpp_type_complaint =
   {"C++ abbreviated type name unknown at symtab pos %d", 0, 0};
 
-struct complaint member_fn_complaint =
+static struct complaint member_fn_complaint =
   {"member function type missing, got '%c'", 0, 0};
 
-struct complaint const_vol_complaint =
+static struct complaint const_vol_complaint =
   {"const/volatile indicator missing, got '%c'", 0, 0};
 
-struct complaint error_type_complaint =
+static struct complaint error_type_complaint =
   {"debug info mismatch between compiler and debugger", 0, 0};
 
-struct complaint invalid_member_complaint =
+static struct complaint invalid_member_complaint =
   {"invalid (minimal) member type data format at symtab pos %d.", 0, 0};
 
-struct complaint range_type_base_complaint =
+static struct complaint range_type_base_complaint =
   {"base type %d of range type is not defined", 0, 0};
 
-struct complaint reg_value_complaint =
+static struct complaint reg_value_complaint =
   {"register number %d too large (max %d) in symbol %s", 0, 0};
 
-struct complaint vtbl_notfound_complaint =
+static struct complaint vtbl_notfound_complaint =
   {"virtual function table pointer not found when defining class `%s'", 0, 0};
 
-struct complaint unrecognized_cplus_name_complaint =
+static struct complaint unrecognized_cplus_name_complaint =
   {"Unknown C++ symbol name `%s'", 0, 0};
 
-struct complaint rs6000_builtin_complaint =
+static struct complaint rs6000_builtin_complaint =
   {"Unknown builtin type %d", 0, 0};
 
-struct complaint unresolved_sym_chain_complaint =
+static struct complaint unresolved_sym_chain_complaint =
   {"%s: common block `%s' from global_sym_chain unresolved", 0, 0};
 
-struct complaint stabs_general_complaint =
+static struct complaint stabs_general_complaint =
+  {"%s", 0, 0};
+
+static struct complaint lrs_general_complaint =
   {"%s", 0, 0};
 
 /* Make a list of forward references which haven't been defined.  */
@@ -1079,8 +1079,10 @@ resolve_symbol_reference (objfile, sym, p)
   refnum = process_reference (&p);
   ref_sym = ref_search (refnum);
   if (!ref_sym)
-    error ("error: symbol for reference not found.\n");
-
+    {
+      complain (&lrs_general_complaint, "symbol for reference not found");
+      return 0;
+    }
 
   /* Parse the stab of the referencing symbol
      now that we have the referenced symbol.
@@ -1113,7 +1115,10 @@ resolve_symbol_reference (objfile, sym, p)
   alias = (struct alias_list *) obstack_alloc (&objfile->type_obstack,
 					       sizeof (struct alias_list));
   if (!alias)
-    error ("Unable to allocate alias list memory");
+    {
+      complain (&lrs_general_complaint, "Unable to allocate alias list memory");
+      return 0;
+    }
 
   alias->next = 0;
   alias->sym = sym;
@@ -1144,36 +1149,27 @@ resolve_symbol_reference (objfile, sym, p)
   return 0;  
 }
 
-#define MAX_CHUNK_REFS 100	
-#define REF_CHUNK_SIZE \
-    MAX_CHUNK_REFS * sizeof (struct ref_map_s)
-#define REF_MAP_SIZE(ref_chunk) \
-    ref_chunk * REF_CHUNK_SIZE
-
 /* Structure for storing pointers to reference definitions for fast lookup 
    during "process_later". */
-static struct ref_map_s
+
+struct ref_map
 {
   char *stabs;
   CORE_ADDR value;
   struct symbol *sym;
-} *ref_map;	
+};
+
+#define MAX_CHUNK_REFS 100
+#define REF_CHUNK_SIZE (MAX_CHUNK_REFS * sizeof (struct ref_map))
+#define REF_MAP_SIZE(ref_chunk) ((ref_chunk) * REF_CHUNK_SIZE)
+
+static struct ref_map *ref_map;	
 
 /* Ptr to free cell in chunk's linked list. */
 static int ref_count = 0;	
 
 /* Number of chunks malloced. */
 static int ref_chunk = 0;
-
-/* Initialize our list of references.
-   This should be called before any symbol table is read.  */
-
-static void 
-ref_init ()
-{
-  ref_count = 0;
-  ref_chunk = 0;
-}
 
 /* Create array of pointers mapping refids to symbols and stab strings.
    Add pointers to reference definition symbols and/or their values as we 
@@ -1187,18 +1183,16 @@ ref_add (refnum, sym, stabs, value)
      CORE_ADDR value;
 {
   if (ref_count == 0)
-    ref_init ();
+    ref_chunk = 0;
   if (refnum >= ref_count)
     ref_count = refnum + 1;
   if (ref_count > ref_chunk * MAX_CHUNK_REFS)
     {
       int new_slots = ref_count - ref_chunk * MAX_CHUNK_REFS; 
       int new_chunks = new_slots / MAX_CHUNK_REFS + 1;
-      ref_map = (struct ref_map_s *)
-	xrealloc (ref_map, REF_MAP_SIZE(ref_chunk + new_chunks));
-      if (!ref_map) 
-	error ("no more free slots in chain\n");
-      memset (ref_map + REF_MAP_SIZE(ref_chunk), 0, new_chunks * REF_CHUNK_SIZE);
+      ref_map = (struct ref_map *)
+	xrealloc (ref_map, REF_MAP_SIZE (ref_chunk + new_chunks));
+      memset (ref_map + ref_chunk * MAX_CHUNK_REFS, 0, new_chunks * REF_CHUNK_SIZE);
       ref_chunk += new_chunks;
     }
   ref_map[refnum].stabs = stabs;
@@ -2158,36 +2152,47 @@ define_symbol (valu, string, desc, type, objfile)
              the end of the stab string.  eg. "l(#1,#2);l(#3,#5)" */
 
 	  /* Resolve the live range and add it to SYM's live range list.  */
-	  resolve_live_range (objfile, sym, p);
+	  if (!resolve_live_range (objfile, sym, p))
+	    return NULL;
 
 	  /* Find end of live range info. */
 	  p = strchr (p, ')');
           if (!*p || *p != ')')
-            error ("Internal error: live range format not recognized.\n");
+	    {
+	      complain (&lrs_general_complaint, "live range format not recognized");
+	      return NULL;
+	    }
           p++;
        }
     }
   return sym;
 }
 
-/* Add the live range found in P to the symbol SYM in objfile OBJFILE.  */
+/* Add the live range found in P to the symbol SYM in objfile OBJFILE.  Returns
+   non-zero on success, zero otherwise.  */
 
-static void 
+static int
 resolve_live_range (objfile, sym, p)
-  struct objfile * objfile;
-  struct symbol *sym;
-  char *p;
+     struct objfile *objfile;
+     struct symbol *sym;
+     char *p;
 {
   int refnum;
   CORE_ADDR start, end;
 
   /* Sanity check the beginning of the stabs string.  */
   if (!*p || *p != 'l')
-    error ("Internal error: live range string.\n");
+    {
+      complain (&lrs_general_complaint, "live range string 1");
+      return 0;
+    }
   p++;
 
   if (!*p || *p != '(')
-    error ("Internal error: live range string.\n");
+    {
+      complain (&lrs_general_complaint, "live range string 2");
+      return 0;
+    }
   p++;
 	
   /* Get starting value of range and advance P past the reference id.
@@ -2197,10 +2202,16 @@ resolve_live_range (objfile, sym, p)
   refnum = process_reference (&p);
   start = ref_search_value (refnum);
   if (!start)
-    error ("Internal error: live range symbol not found.\n");
+    {
+      complain (&lrs_general_complaint, "Live range symbol not found 1");
+      return 0;
+    }
 
   if (!*p || *p != ',')
-    error ("Internal error: live range string.\n");
+    {
+      complain (&lrs_general_complaint, "live range string 3");
+      return 0;
+    }
   p++;
 
   /* Get ending value of range and advance P past the reference id.
@@ -2210,14 +2221,22 @@ resolve_live_range (objfile, sym, p)
   refnum = process_reference (&p);
   end = ref_search_value (refnum);
   if (!end)
-    error ("Internal error: live range symbol not found.\n");
+    {
+      complain (&lrs_general_complaint, "Live range symbol not found 2");
+      return 0;
+    }
 
   if (!*p || *p != ')')
-    error ("Internal error: live range string.\n");
+    {
+      complain (&lrs_general_complaint, "live range string 4");
+      return 0;
+    }
 
   /* Now that we know the bounds of the range, add it to the
      symbol.  */
   add_live_range (objfile, sym, start, end);
+
+  return 1;
 }
 
 /* Add a new live range defined by START and END to the symbol SYM
@@ -2225,28 +2244,29 @@ resolve_live_range (objfile, sym, p)
 
 static void
 add_live_range (objfile, sym, start, end)
-  struct objfile *objfile;
-  struct symbol *sym;
-  CORE_ADDR start, end;
+     struct objfile *objfile;
+     struct symbol *sym;
+     CORE_ADDR start, end;
 {
   struct range_list *r, *rs;
 
   if (start >= end)
-    error ("Internal error: end of live range follows start.\n");
+    {
+      complain (&lrs_general_complaint, "end of live range follows start");
+      return;
+    }
 
   /* Alloc new live range structure. */
   r = (struct range_list *)
-		obstack_alloc (&objfile->type_obstack, 
-				sizeof (struct range_list));
+    obstack_alloc (&objfile->type_obstack, 
+		   sizeof (struct range_list));
   r->start = start;
   r->end = end;
   r->next = 0;
 
   /* Append this range to the symbol's range list. */
   if (!SYMBOL_RANGES (sym))
-    {
-      SYMBOL_RANGES (sym) = r;
-    }
+    SYMBOL_RANGES (sym) = r;
   else
     {
       /* Get the last range for the symbol. */
