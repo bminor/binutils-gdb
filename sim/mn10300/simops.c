@@ -2219,7 +2219,7 @@ void OP_F284 (insn, extension)
   c = (value & 0x1);
 
   value >>= 1;
-  value |= (c) ? 0x80000000 : 0;
+  value |= ((PSW & PSW_C) != 0) ? 0x80000000 : 0;
   State.regs[REG_D0 + REG0 (insn)] = value;
   z = (value == 0);
   n = (value & 0x80000000) != 0;
@@ -2238,7 +2238,7 @@ void OP_F280 (insn, extension)
   c = (value & 0x80000000) ? 1 : 0;
 
   value <<= 1;
-  value |= c;
+  value |= ((PSW & PSW_C) != 0);
   State.regs[REG_D0 + REG0 (insn)] = value;
   z = (value == 0);
   n = (value & 0x80000000) != 0;

@@ -1,3 +1,8 @@
+Tue Jan 21 15:03:04 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Undo last change to "rol" and "ror", original code
+	was correct!
+
 Thu Jan 16 11:28:14 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: Fix "rol" and "ror".
