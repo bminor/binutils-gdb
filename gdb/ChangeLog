@@ -1,3 +1,12 @@
+2001-07-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c: Include "gdb_assert.h"
+	(i386_register_convert_to_virtual): Fix such that it can handle
+	conversion to any floating-point type.  Assert that we are dealing
+	with a floating-point first.
+	(i386_register_convert_to_raw): Assert that TYPE is a
+	floating-point type with length 12.
+
 2001-07-27  John R. Moore  <jmoore@redhat.com>
 
 	* configure.in: Added dependency of gdb on tcl/tk libraries.

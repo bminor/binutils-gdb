@@ -33,6 +33,8 @@
 #include "arch-utils.h"
 #include "regcache.h"
 
+#include "gdb_assert.h"
+
 /* i386_register_byte[i] is the offset into the register file of the
    start of register number i.  We initialize this from
    i386_register_raw_size.  */
@@ -972,27 +974,39 @@ i386_register_convertible (int regnum)
 }
 
 /* Convert data from raw format for register REGNUM in buffer FROM to
-   virtual format with type TYPE in buffer TO.  In principle both
-   formats are identical except that the virtual format has two extra
-   bytes appended that aren't used.  We set these to zero.  */
+   virtual format with type TYPE in buffer TO.  */
 
 void
 i386_register_convert_to_virtual (int regnum, struct type *type,
 				  char *from, char *to)
 {
-  /* Copy straight over, but take care of the padding.  */
-  memcpy (to, from, FPU_REG_RAW_SIZE);
-  memset (to + FPU_REG_RAW_SIZE, 0, TYPE_LENGTH (type) - FPU_REG_RAW_SIZE);
+  char buf[12];
+  DOUBLEST d;
+
+  /* We only support floating-point values.  */
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+
+  /* First add the necessary padding.  */
+  memcpy (buf, from, FPU_REG_RAW_SIZE);
+  memset (buf + FPU_REG_RAW_SIZE, 0, sizeof buf - FPU_REG_RAW_SIZE);
+
+  /* Convert to TYPE.  This should be a no-op, if TYPE is equivalent
+     to the extended floating-point format used by the FPU.  */
+  d = extract_floating (buf, sizeof buf);
+  store_floating (to, TYPE_LENGTH (type), d);
 }
 
 /* Convert data from virtual format with type TYPE in buffer FROM to
-   raw format for register REGNUM in buffer TO.  Simply omit the two
-   unused bytes.  */
+   raw format for register REGNUM in buffer TO.  */
 
 void
 i386_register_convert_to_raw (struct type *type, int regnum,
 			      char *from, char *to)
 {
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT
+	      && TYPE_LENGTH (type) == 12);
+
+  /* Simply omit the two unused bytes.  */
   memcpy (to, from, FPU_REG_RAW_SIZE);
 }
      
