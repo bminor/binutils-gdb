@@ -1,3 +1,38 @@
+2001-02-09  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.h (md_elf_section_type): New macro.
+	(ELF_TC_SPECIAL_SECTIONS): Drop .IA_64.unwind and .IA_64.unwind_info
+	(they're now handled via ia64_elf_section_type.
+
+	* config/tc-ia64.c (unwind): New members saved_text_seg,
+	saved_text_subseg, and force_unwind_entry.
+	(optimize_unw_records): New function to optimize away unnecessary
+	unwind directives.
+	(ia64_elf_section_type): New function.
+	(output_unw_records): Generate unwind info only if the size is
+	non-zero or if it's forced for some other reason (e.g.,
+	handlerdata or a personality routine).
+	(generate_unwind_image): Don't switch back to previous
+	section---stay inside the unwind info section instead so that
+	handlerdata that may follow goes into the right place.
+	(dot_handlerdata): Force generation of unwind entry and save the
+	current active text segment before generating unwind image.
+	(dot_unwentry): Force generation of unwind entry.
+	(dot_personality): Ditto.
+	(dot_endp): Generate unwind table entry only if there is
+	some unwind info or the unwind entry was forced.
+
+	* config/tc-ia64.c (make_unw_section_name): New macro to form
+	unwind section name.
+	(generate_unwind_image): Add "text_name" argument.  Use it to
+	form unwind section name.
+	(dot_handlerdata): Determine current segment (section) name and
+	pass it to generate_unwind_image().
+	(dot_endp): Determine current segment (section) name and use
+	it to determine the appropriate unwind section name.
+	(ia64_md_do_align): Add missing ATTRIBUTE_UNUSED declarations to
+	n, fill, and max arguments.
+
 2001-02-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.c (md_pseudo_table): Add uaquad.  Use s_uacons for

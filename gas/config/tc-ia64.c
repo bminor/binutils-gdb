@@ -1,5 +1,5 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
-   Copyright (C) 1998, 1999, 2000 Free Software Foundation.
+   Copyright (C) 1998, 1999, 2000, 2001 Free Software Foundation.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -617,6 +617,9 @@ static struct
   symbolS *proc_end;
   symbolS *info;		/* pointer to unwind info */
   symbolS *personality_routine;
+  segT saved_text_seg;
+  subsegT saved_text_subseg;
+  unsigned int force_unwind_entry : 1;	/* force generation of unwind entry? */
 
   /* TRUE if processing unwind directives in a prologue region.  */
   int prologue;
@@ -825,11 +828,28 @@ static void set_imask PARAMS ((unw_rec_list *, unsigned long, unsigned long, uns
 static int count_bits PARAMS ((unsigned long));
 static unsigned long slot_index PARAMS ((unsigned long, fragS *,
 					 unsigned long, fragS *));
+static unw_rec_list *optimize_unw_records PARAMS ((unw_rec_list *));
 static void fixup_unw_records PARAMS ((unw_rec_list *));
 static int output_unw_records PARAMS ((unw_rec_list *, void **));
 static int convert_expr_to_ab_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
 static int convert_expr_to_xy_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
-static int generate_unwind_image PARAMS ((void));
+static int generate_unwind_image PARAMS ((const char *));
+
+/* Build the unwind section name by appending the (possibly stripped)
+   text section NAME to the unwind PREFIX.  The resulting string
+   pointer is assigned to RESULT.  The string is allocated on the
+   stack, so this must be a macro... */
+#define make_unw_section_name(special, text_name, result)		   \
+  {									   \
+    char *_prefix = special_section_name[special];			   \
+    size_t _prefix_len = strlen (_prefix), _text_len = strlen (text_name); \
+    char *_result = alloca (_prefix_len + _text_len + 1);		   \
+    memcpy(_result, _prefix, _prefix_len);				   \
+    memcpy(_result + _prefix_len, text_name, _text_len);		   \
+    _result[_prefix_len + _text_len] = '\0';				   \
+    result = _result;							   \
+  }									   \
+while (0)
 
 /* Determine if application register REGNUM resides in the integer
    unit (as opposed to the memory unit).  */
@@ -872,6 +892,22 @@ ia64_elf_section_flags (flags, attr, type)
   if (attr & SHF_IA_64_SHORT)
     flags |= SEC_SMALL_DATA;
   return flags;
+}
+
+int
+ia64_elf_section_type (str, len)
+	const char *str;
+	size_t len;
+{
+  len = sizeof (ELF_STRING_ia64_unwind_info) - 1;
+  if (strncmp (str, ELF_STRING_ia64_unwind_info, len) == 0)
+    return SHT_PROGBITS;
+
+  len = sizeof (ELF_STRING_ia64_unwind) - 1;
+  if (strncmp (str, ELF_STRING_ia64_unwind, len) == 0)
+    return SHT_IA_64_UNWIND;
+
+  return -1;
 }
 
 static unsigned int
@@ -2495,6 +2531,25 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag)
   return index;
 }
 
+/* Optimize unwind record directives.  */
+
+static unw_rec_list *
+optimize_unw_records (list)
+     unw_rec_list *list;
+{
+  if (!list)
+    return NULL;
+
+  /* If the only unwind record is ".prologue" or ".prologue" followed
+     by ".body", then we can optimize the unwind directives away.  */
+  if (list->r.type == prologue
+      && (list->next == NULL
+	  || (list->next->r.type == body && list->next->next == NULL)))
+    return NULL;
+
+  return list;
+}
+
 /* Given a complete record list, process any records which have
    unresolved fields, (ie length counts for a prologue).  After
    this has been run, all neccessary information should be available
@@ -2681,6 +2736,9 @@ output_unw_records (list, ptr)
   int size, x, extra = 0;
   unsigned char *mem;
 
+  *ptr = NULL;
+
+  list = optimize_unw_records (list);
   fixup_unw_records (list);
   size = calc_record_size (list);
 
@@ -2688,24 +2746,33 @@ output_unw_records (list, ptr)
   x = size % 8;
   if (x != 0)
     extra = 8 - x;
-  /* Add 8 for the header + 8 more bytes for the personality offset.  */
-  mem = xmalloc (size + extra + 16);
 
-  vbyte_mem_ptr = mem + 8;
-  /* Clear the padding area and personality.  */
-  memset (mem + 8 + size, 0 , extra + 8);
-  /* Initialize the header area.  */
-  md_number_to_chars (mem, (((bfd_vma) 1 << 48)     /* version */
-			    | (unwind.personality_routine
-			       ? ((bfd_vma) 3 << 32) /* U & E handler flags */
-			       : 0)
-			    | ((size + extra) / 8)),  /* length (dwords) */
-		      8);
+  if (size > 0 || unwind.force_unwind_entry)
+    {
+      unwind.force_unwind_entry = 0;
 
-  process_unw_records (list, output_vbyte_mem);
+      /* Add 8 for the header + 8 more bytes for the personality offset.  */
+      mem = xmalloc (size + extra + 16);
 
-  *ptr = mem;
-  return size + extra + 16;
+      vbyte_mem_ptr = mem + 8;
+      /* Clear the padding area and personality.  */
+      memset (mem + 8 + size, 0 , extra + 8);
+      /* Initialize the header area.  */
+      md_number_to_chars (mem,
+			  (((bfd_vma) 1 << 48)     /* version */
+			   | (unwind.personality_routine
+			      ? ((bfd_vma) 3 << 32) /* U & E handler flags */
+			      : 0)
+			   | ((size + extra) / 8)),  /* length (dwords) */
+			  8);
+
+      process_unw_records (list, output_vbyte_mem);
+
+      *ptr = mem;
+
+      size += extra + 16;
+    }
+  return size;
 }
 
 static int
@@ -3053,7 +3120,8 @@ dot_restorereg_p (dummy)
 }
 
 static int
-generate_unwind_image ()
+generate_unwind_image (text_name)
+     const char *text_name;
 {
   int size;
   unsigned char *unw_rec;
@@ -3071,8 +3139,13 @@ generate_unwind_image ()
   if (size != 0)
     {
       unsigned char *where;
+      char *sec_name;
       expressionS exp;
-      set_section ((char *) special_section_name[SPECIAL_SECTION_UNWIND_INFO]);
+
+      make_unw_section_name (SPECIAL_SECTION_UNWIND_INFO, text_name, sec_name);
+      set_section (sec_name);
+      bfd_set_section_flags (stdoutput, now_seg,
+			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
 
       /* Make sure the section has 8 byte alignment.  */
       record_alignment (now_seg, 3);
@@ -3088,6 +3161,7 @@ generate_unwind_image ()
       /* Copy the information from the unwind record into this section. The
 	 data is already in the correct byte order.  */
       memcpy (where, unw_rec, size);
+
       /* Add the personality address to the image.  */
       if (unwind.personality_routine != 0)
 	{
@@ -3098,7 +3172,6 @@ generate_unwind_image ()
 	  		     &exp, 0, BFD_RELOC_IA64_LTOFF_FPTR64LSB);
 	  unwind.personality_routine = 0;
 	}
-      obj_elf_previous (0);
     }
 
   free_list_records (unwind.list);
@@ -3111,7 +3184,23 @@ static void
 dot_handlerdata (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
-  generate_unwind_image ();
+  const char *text_name = segment_name (now_seg);
+
+  /* If text section name starts with ".text" (which it should),
+     strip this prefix off.  */
+  if (strcmp (text_name, ".text") == 0)
+    text_name = "";
+
+  unwind.force_unwind_entry = 1;
+
+  /* Remember which segment we're in so we can switch back after .endp */
+  unwind.saved_text_seg = now_seg;
+  unwind.saved_text_subseg = now_subseg;
+
+  /* Generate unwind info into unwind-info section and then leave that
+     section as the currently active one so dataXX directives go into
+     the language specific data area of the unwind info block.  */
+  generate_unwind_image (text_name);
   demand_empty_rest_of_line ();
 }
 
@@ -3119,6 +3208,7 @@ static void
 dot_unwentry (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
+  unwind.force_unwind_entry = 1;
   demand_empty_rest_of_line ();
 }
 
@@ -3583,6 +3673,7 @@ dot_personality (dummy)
   c = get_symbol_end ();
   p = input_line_pointer;
   unwind.personality_routine = symbol_find_or_make (name);
+  unwind.force_unwind_entry = 1;
   *p = c;
   SKIP_WHITESPACE ();
   demand_empty_rest_of_line ();
@@ -3685,57 +3776,115 @@ dot_endp (dummy)
   long where;
   segT saved_seg;
   subsegT saved_subseg;
+  const char *sec_name, *text_name;
 
-  saved_seg = now_seg;
-  saved_subseg = now_subseg;
+  if (unwind.saved_text_seg)
+    {
+      saved_seg = unwind.saved_text_seg;
+      saved_subseg = unwind.saved_text_subseg;
+      unwind.saved_text_seg = NULL;
+    }
+  else
+    {
+      saved_seg = now_seg;
+      saved_subseg = now_subseg;
+    }
+
+  /*
+    Use a slightly ugly scheme to derive the unwind section names from
+    the text section name:
+
+    text sect.  unwind table sect.
+    name:       name:                      comments:
+    ----------  -----------------          --------------------------------
+    .text       .IA_64.unwind
+    .text.foo   .IA_64.unwind.text.foo
+    .foo        .IA_64.unwind.foo
+    _info       .IA_64.unwind_info         gas issues error message (ditto)
+    _infoFOO    .IA_64.unwind_infoFOO      gas issues error message (ditto)
+
+    This mapping is done so that:
+
+	(a) An object file with unwind info only in .text will use
+	    unwind section names .IA_64.unwind and .IA_64.unwind_info.
+	    This follows the letter of the ABI and also ensures backwards
+	    compatibility with older toolchains.
+
+	(b) An object file with unwind info in multiple text sections
+	    will use separate unwind sections for each text section.
+	    This allows us to properly set the "sh_info" and "sh_link"
+	    fields in SHT_IA_64_UNWIND as required by the ABI and also
+	    lets GNU ld support programs with multiple segments
+	    containing unwind info (as might be the case for certain
+	    embedded applications).
+	    
+	(c) An error is issued if there would be a name clash.
+  */
+  text_name = segment_name (saved_seg);
+  if (strncmp (text_name, "_info", 5) == 0)
+    {
+      as_bad ("Illegal section name `%s' (causes unwind section name clash)",
+	      text_name);
+      ignore_rest_of_line ();
+      return;
+    }
+  if (strcmp (text_name, ".text") == 0)
+    text_name = "";
 
   expression (&e);
   demand_empty_rest_of_line ();
 
   insn_group_break (1, 0, 0);
 
-  /* If there was a .handlerdata, we haven't generated an image yet.  */
-  if (unwind.info == 0)
+  /* If there wasn't a .handlerdata, we haven't generated an image yet.  */
+  if (!unwind.info)
+    generate_unwind_image (text_name);
+
+  if (unwind.info || unwind.force_unwind_entry)
     {
-      generate_unwind_image ();
-    }
+      subseg_set (md.last_text_seg, 0);
+      unwind.proc_end = expr_build_dot ();
 
-  subseg_set (md.last_text_seg, 0);
-  unwind.proc_end = expr_build_dot ();
+      make_unw_section_name (SPECIAL_SECTION_UNWIND, text_name, sec_name);
+      set_section ((char *) sec_name);
+      bfd_set_section_flags (stdoutput, now_seg,
+			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
 
-  set_section ((char *) special_section_name[SPECIAL_SECTION_UNWIND]);
+      /* Make sure the section has 8 byte alignment.  */
+      record_alignment (now_seg, 3);
 
-  /* Make sure the section has 8 byte alignment.  */
-  record_alignment (now_seg, 3);
+      ptr = frag_more (24);
+      where = frag_now_fix () - 24;
+      bytes_per_address = bfd_arch_bits_per_address (stdoutput) / 8;
 
-  ptr = frag_more (24);
-  where = frag_now_fix () - 24;
-  bytes_per_address = bfd_arch_bits_per_address (stdoutput) / 8;
-
-  /* Issue the values of  a) Proc Begin,  b) Proc End,  c) Unwind Record.  */
-  e.X_op = O_pseudo_fixup;
-  e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
-  e.X_add_number = 0;
-  e.X_add_symbol = unwind.proc_start;
-  ia64_cons_fix_new (frag_now, where, bytes_per_address, &e);
-
-  e.X_op = O_pseudo_fixup;
-  e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
-  e.X_add_number = 0;
-  e.X_add_symbol = unwind.proc_end;
-  ia64_cons_fix_new (frag_now, where + bytes_per_address, bytes_per_address, &e);
-
-  if (unwind.info != 0)
-    {
+      /* Issue the values of  a) Proc Begin, b) Proc End, c) Unwind Record. */
       e.X_op = O_pseudo_fixup;
       e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
       e.X_add_number = 0;
-      e.X_add_symbol = unwind.info;
-      ia64_cons_fix_new (frag_now, where + (bytes_per_address * 2), bytes_per_address, &e);
-    }
-  else
-    md_number_to_chars (ptr + (bytes_per_address * 2), 0, bytes_per_address);
+      e.X_add_symbol = unwind.proc_start;
+      ia64_cons_fix_new (frag_now, where, bytes_per_address, &e);
 
+      e.X_op = O_pseudo_fixup;
+      e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
+      e.X_add_number = 0;
+      e.X_add_symbol = unwind.proc_end;
+      ia64_cons_fix_new (frag_now, where + bytes_per_address,
+			 bytes_per_address, &e);
+
+      if (unwind.info)
+	{
+	  e.X_op = O_pseudo_fixup;
+	  e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
+	  e.X_add_number = 0;
+	  e.X_add_symbol = unwind.info;
+	  ia64_cons_fix_new (frag_now, where + (bytes_per_address * 2),
+			     bytes_per_address, &e);
+	}
+      else
+	md_number_to_chars (ptr + (bytes_per_address * 2), 0,
+			    bytes_per_address);
+
+    }
   subseg_set (saved_seg, saved_subseg);
   unwind.proc_start = unwind.proc_end = unwind.info = 0;
 }
@@ -9790,10 +9939,10 @@ md_section_align (seg, size)
 
 void
 ia64_md_do_align (n, fill, len, max)
-     int n;
-     const char *fill;
+     int n ATTRIBUTE_UNUSED;
+     const char *fill ATTRIBUTE_UNUSED;
      int len ATTRIBUTE_UNUSED;
-     int max;
+     int max ATTRIBUTE_UNUSED;
 {
   if (subseg_text_p (now_seg))
     ia64_flush_insns ();
