@@ -1,5 +1,5 @@
-# Host machine: IBM RS/6000 running AIX 3.1.
-# Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+# Host machine: IBM RS/6000 running AIX 3.2.
+# Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -17,7 +17,7 @@
 # along with GDB; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-XDEPFILES= xcoffexec.o infptrace.o rs6000-xdep.o
+XDEPFILES= infptrace.o rs6000-xdep.o
 XM_FILE= xm-rs6000.h
 # Prevent gcc from being confused.  This actually belongs in CC...
 # MH_CFLAGS = -bnodelcsect
@@ -26,3 +26,7 @@ XM_FILE= xm-rs6000.h
 # incompatible versions of malloc if we use GNU malloc ...
 MMALLOC_LIB = 
 MMALLOC_DISABLE = -DNO_MMALLOC
+
+# A bug in the AIX 3.2 libc.a results in unresolved references for .scalb and
+# .finite becuase we call ldexp.  Circumvent by adding -lm.  FIXME, IBM.
+XM_CLIBS= -lm
