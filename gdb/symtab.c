@@ -49,6 +49,8 @@ extern void select_source_symtab ();
 static int find_line_common ();
 struct partial_symtab *lookup_partial_symtab ();
 static struct partial_symbol *lookup_partial_symbol ();
+static struct partial_symbol *lookup_demangled_partial_symbol ();
+static struct symbol *lookup_demangled_block_symbol ();
 
 /* These variables point to the objects
    representing the predefined C data types.  */
@@ -867,6 +869,37 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
       block = BLOCK_SUPERBLOCK (block);
     }
 
+  /* But that doesn't do any demangling for the STATIC_BLOCK.
+     I'm not sure whether demangling is needed in the case of
+     nested function in inner blocks; if so this needs to be changed.
+     
+     Don't need to mess with the psymtabs; if we have a block,
+     that file is read in.  If we don't, then we deal later with
+     all the psymtab stuff that needs checking.  */
+  if (namespace == VAR_NAMESPACE && block != NULL)
+    {
+      struct block *b;
+      /* Find the right symtab.  */
+      for (s = symtab_list; s; s = s->next)
+	{
+	  bv = BLOCKVECTOR (s);
+	  b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	  if (BLOCK_START (b) <= BLOCK_START (block)
+	      && BLOCK_END (b) > BLOCK_START (block))
+	    {
+	      sym = lookup_demangled_block_symbol (b, name);
+	      if (sym)
+		{
+		  block_found = b;
+		  if (symtab != NULL)
+		    *symtab = s;
+		  return sym;
+		}
+	    }
+	}
+    }
+
+
   /* C++: If requested to do so by the caller, 
      check to see if NAME is a field of `this'. */
   if (is_a_field_of_this)
@@ -1005,9 +1038,112 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
 	return sym;
       }
 
+  /* Now search all per-file blocks for static mangled symbols.
+     Do the symtabs first, then check the psymtabs.  */
+
+  if (namespace ==  VAR_NAMESPACE)
+    {
+      for (s = symtab_list; s; s = s->next)
+	{
+	  bv = BLOCKVECTOR (s);
+	  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	  sym = lookup_demangled_block_symbol (block, name);
+	  if (sym) 
+	    {
+	      block_found = block;
+	      if (symtab != NULL)
+		*symtab = s;
+	      return sym;
+	    }
+	}
+
+      for (ps = partial_symtab_list; ps; ps = ps->next)
+	if (!ps->readin && lookup_demangled_partial_symbol (ps, name))
+	  {
+	    s = PSYMTAB_TO_SYMTAB(ps);
+	    bv = BLOCKVECTOR (s);
+	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	    sym = lookup_demangled_block_symbol (block, name);
+	    if (!sym)
+	      fatal ("Internal: static symbol found in psymtab but not in symtab");
+	    if (symtab != NULL)
+	      *symtab = s;
+	    return sym;
+	  }
+    }
+
   if (symtab != NULL)
     *symtab = NULL;
   return 0;
+}
+
+/* Look for a static demangled symbol in block BLOCK.  */
+
+static struct symbol *
+lookup_demangled_block_symbol (block, name)
+     register struct block *block;
+     char *name;
+{
+  register int bot, top, inc;
+  register struct symbol *sym;
+
+  bot = 0;
+  top = BLOCK_NSYMS (block);
+  inc = name[0];
+
+  while (bot < top)
+    {
+      sym = BLOCK_SYM (block, bot);
+      if (SYMBOL_NAME (sym)[0] == inc
+	  && SYMBOL_NAMESPACE (sym) == VAR_NAMESPACE)
+	{
+	  char *demangled = cplus_demangle(SYMBOL_NAME (sym), -1);
+	  if (demangled != NULL)
+	    {
+	      int cond = strcmp (demangled, name);
+	      free (demangled);
+	      if (!cond)
+	        return sym;
+	    }
+	}
+      bot++;
+    }
+
+  return 0;
+}
+
+/* Look, in partial_symtab PST, for static mangled symbol NAME. */
+
+static struct partial_symbol *
+lookup_demangled_partial_symbol (pst, name)
+     struct partial_symtab *pst;
+     char *name;
+{
+  struct partial_symbol *start, *psym;
+  int length = pst->n_static_syms;
+  register int inc = name[0];
+
+  if (!length)
+    return (struct partial_symbol *) 0;
+  
+  start = static_psymbols.list + pst->statics_offset;
+  for (psym = start; psym < start + length; psym++)
+    {
+      if (SYMBOL_NAME (psym)[0] == inc
+	  && SYMBOL_NAMESPACE (psym) == VAR_NAMESPACE)
+	{
+	  char *demangled = cplus_demangle(SYMBOL_NAME (psym), -1);
+	  if (demangled != NULL)
+	    {
+	      int cond = strcmp (demangled, name);
+	      free (demangled);
+	      if (!cond)
+	        return psym;
+	    }
+	}
+    }
+
+  return (struct partial_symbol *) 0;
 }
 
 /* Look, in partial_symtab PST, for symbol NAME.  Check the global
