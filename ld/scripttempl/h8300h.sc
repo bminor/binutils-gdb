@@ -1,6 +1,7 @@
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(h8300h)
+ENTRY("_start")
 
 /* The memory size is 256KB to coincide with the simulator.
    Don't change either without considering the other.  */

@@ -1,6 +1,7 @@
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
+ENTRY("_start")
 
 MEMORY
 {
