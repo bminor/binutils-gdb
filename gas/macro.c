@@ -245,9 +245,11 @@ buffer_and_nest (from, to, ptr, get_line)
 	{
 	  if (ptr->ptr[i] == '.')
 	      i++;
-	  if (strncasecmp (ptr->ptr + i, from, from_len) == 0)
+	  if (strncasecmp (ptr->ptr + i, from, from_len) == 0
+	      && ! isalnum (ptr->ptr[i + from_len]))
 	    depth++;
-	  if (strncasecmp (ptr->ptr + i, to, to_len) == 0)
+	  if (strncasecmp (ptr->ptr + i, to, to_len) == 0
+	      && ! isalnum (ptr->ptr[i + to_len]))
 	    {
 	      depth--;
 	      if (depth == 0)

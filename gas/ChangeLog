@@ -1,3 +1,8 @@
+1999-11-11  Nick Clifton  <nickc@cygnus.com>
+
+	* macro.c (buffer_and_nest): Look for seperator after TO and
+	FROM tokens.
+
 1999-11-08  Andrew Haley  <aph@cygnus.com>
 
 	* app.c (do_scrub_chars): When in State 10, treat backslash
