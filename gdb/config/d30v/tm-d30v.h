@@ -228,7 +228,8 @@ extern void d30v_init_extra_frame_info PARAMS (( int fromleaf, struct frame_info
 #define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
 #define FRAME_LOCALS_ADDRESS(fi) (fi)->frame
 
-#define INIT_FRAME_PC(fromleaf, prev)	d30v_init_frame_pc(fromleaf, prev)
+#define INIT_FRAME_PC_FIRST(fromleaf, prev)	d30v_init_frame_pc(fromleaf, prev)
+#define INIT_FRAME_PC(fromleaf, prev)	/* nada */
 
 /* Immediately after a function call, return the saved pc.  We can't */
 /* use frame->return_pc beause that is determined by reading R62 off the */

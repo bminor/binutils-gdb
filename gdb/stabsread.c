@@ -3433,16 +3433,18 @@ read_one_struct_field (fip, pp, p, type, objfile)
 	 Note that forward refs cannot be packed,
 	 and treat enums as if they had the width of ints.  */
 
-      if (TYPE_CODE (FIELD_TYPE (fip->list->field)) != TYPE_CODE_INT
-	  && TYPE_CODE (FIELD_TYPE (fip->list->field)) != TYPE_CODE_RANGE
-	  && TYPE_CODE (FIELD_TYPE (fip->list->field)) != TYPE_CODE_BOOL
-	  && TYPE_CODE (FIELD_TYPE (fip->list->field)) != TYPE_CODE_ENUM)
+      struct type *field_type = check_typedef (FIELD_TYPE (fip->list->field));
+
+      if (TYPE_CODE (field_type) != TYPE_CODE_INT
+	  && TYPE_CODE (field_type) != TYPE_CODE_RANGE
+	  && TYPE_CODE (field_type) != TYPE_CODE_BOOL
+	  && TYPE_CODE (field_type) != TYPE_CODE_ENUM)
 	{
 	  FIELD_BITSIZE (fip->list->field) = 0;
 	}
       if ((FIELD_BITSIZE (fip->list->field) 
-	   == TARGET_CHAR_BIT * TYPE_LENGTH (FIELD_TYPE (fip->list->field))
-	   || (TYPE_CODE (FIELD_TYPE (fip->list->field)) == TYPE_CODE_ENUM
+	   == TARGET_CHAR_BIT * TYPE_LENGTH (field_type)
+	   || (TYPE_CODE (field_type) == TYPE_CODE_ENUM
 	       && FIELD_BITSIZE (fip->list->field) == TARGET_INT_BIT )
 	   )
 	  &&

@@ -1,3 +1,10 @@
+start-sanitize-d30v
+Sat May 16 22:21:48 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* config/d30v/tm-d30v.h (INIT_FRAME_PC_FIRST): Fill in PC into
+ 	frame struct before extracting saved register offsets.
+
+end-sanitize-d30v
 Thu May 14 5:51:00 1998  Ron Unrau  <runrau@cygnus.com>
 
 	* symtab.c (decode_line_1): set section for "break *<addr>"
@@ -24,6 +31,11 @@ start-sanitize-java
 	* Makefile.in (jv-lang.o, jv-typeprint.o, jv-valprint.o): New
 	targets.
 end-sanitize-java
+
+Tue May 12 13:17:35 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* stabsread.c (read_one_struct_field): Check for typedef in type
+ 	tree before clearing bitfield information.
 
 Thu May  7 14:49:38 1998  Bob Manson  <manson@charmed.cygnus.com>
 
@@ -635,11 +647,14 @@ end-sanitize-sky
 Tue Mar 24 16:22:40 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
 
 	* Makefile.in:  Derive SHELL from configure.
-	* config/d10v/d10v.mt config/d30v/d30v.mt config/m32r/m32r.mt
+	* config/d10v/d10v.mt config/m32r/m32r.mt
 	config/mn10200/mn10200.mt config/mn10300/mn10300.mt :  Remove -lm
 	from SIM.  This prevents dependency checking of -lm (under NT
 	native builds).  (It is automatically added by configure if it
 	exists.)
+start-sanitize-d30v
+	* config/d30v/d30v.mt: Ditto.
+end-sanitize-d30v
 	* doc/configure mswin/configure nlm/configure
 	testsuite/gdb.base/configure testsuite/gdb.c++/configure
 	testsuite/gdb.chill/configure testsuite/gdb.disasm/configure
