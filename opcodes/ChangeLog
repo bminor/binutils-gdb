@@ -1,3 +1,7 @@
+Mon Jun 16 14:13:18 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386-dis.c (twobyte_has_modrm): Fix pand.
+
 Mon Jun 16 14:08:38 1997  Michael Taylor  <mbt@mit.edu>
 
 	* i386-dis.c (dis386_twobyte): Fix pand and pandn.
