@@ -454,7 +454,7 @@ sh_opcode_info sh_table[] = {
 
 /* 1111nnnnmmmm0001 fsub <F_REG_M>,<F_REG_N>*/{"fsub",{F_REG_M,F_REG_N},{HEX_F,REG_N,REG_M,HEX_1}},
 
-/* 1111nnnn00111101 ftrc <F_REG_M>,FPUL*/{"ftrc",{F_REG_N,FPUL_N},{HEX_F,REG_N,HEX_3,HEX_D}},
+/* 1111nnnn00111101 ftrc <F_REG_M>,FPUL*/{"ftrc",{F_REG_N,FPUL_M},{HEX_F,REG_N,HEX_3,HEX_D}},
 
 /* 1111nnnn01111101 ftst/nan <F_REG_N>     */{"ftst/nan",{F_REG_N},{HEX_F,REG_N,HEX_7,HEX_D}},
 /* end-sanitize-sh3e */

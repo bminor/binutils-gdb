@@ -1,3 +1,9 @@
+start-sanitize-sh3e
+Thu Aug 31 12:35:32 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* sh-opc.h (ftrc): Change FPUL_N to FPUL_M.
+
+end-sanitize-sh3e
 Wed Aug 30 13:52:28 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (sparc_opcodes): Delete duplicate wr %y insn.
