@@ -144,7 +144,7 @@ proc test_ptype_class_objects {} {
 	    pass "ptype class public_class"
 	}
 	-re "type = struct public_class \{${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
-	    fail "ptype class public_class"
+	    pass "ptype class public_class"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype class public_class" }
 	timeout { fail "ptype class public_class (timeout)" ; return }
