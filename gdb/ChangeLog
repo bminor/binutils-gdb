@@ -1,5 +1,8 @@
 Mon Oct 16 11:27:06 1995  Stu Grossman  (grossman@cygnus.com)
 
+	* remote-mips.c:  Add support for speedy (about 10x faster)
+	downloads.
+
 	* remote-array.c:  Move baud_rate initialization from
 	_initialize_array to array_open.  It was forcing the baud rate of
 	all targets to be 4800 baud!  Seems like I've fixed this before...

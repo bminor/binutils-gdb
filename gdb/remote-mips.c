@@ -100,6 +100,11 @@ static void mips_create_inferior PARAMS ((char *execfile, char *args,
 
 static void mips_mourn_inferior PARAMS ((void));
 
+static void mips_load PARAMS ((char *file, int from_tty));
+
+static int mips_make_srec PARAMS ((char *buffer, char type, CORE_ADDR memaddr,
+				   unsigned char *myaddr, int len));
+
 /* A forward declaration.  */
 extern struct target_ops mips_ops;
 
@@ -311,6 +316,43 @@ mips_error (va_alist)
   target_mourn_inferior ();
 
   return_to_top_level (RETURN_ERROR);
+}
+
+int
+mips_expect (string)
+     char *string;
+{
+  char *p = string;
+  int c;
+
+  immediate_quit = 1;
+  while (1)
+    {
+
+/* Must use SERIAL_READCHAR here cuz mips_readchar would get confused if we
+   were waiting for "<IDT>"... */
+
+      c = SERIAL_READCHAR (mips_desc, 2);
+
+      if (c == SERIAL_TIMEOUT)
+	return 0;
+
+      if (c == *p++)
+	{	
+	  if (*p == '\0')
+	    {
+	      immediate_quit = 0;
+
+	      return 1;
+	    }
+	}
+      else
+	{
+	  p = string;
+	  if (c == *p)
+	    p++;
+	}
+    }
 }
 
 /* Read a character from the remote, aborting on error.  Returns
@@ -568,9 +610,6 @@ mips_send_packet (s, get_ack)
      the sequence number we expect in the acknowledgement.  */
   mips_send_seq = (mips_send_seq + 1) % SEQ_MODULOS;
 
-  if (! get_ack)
-    return;
-
   /* We can only have one outstanding data packet, so we just wait for
      the acknowledgement here.  Keep retransmitting the packet until
      we get one, or until we've tried too many times.  */
@@ -590,6 +629,9 @@ mips_send_packet (s, get_ack)
       if (SERIAL_WRITE (mips_desc, packet,
 			HDR_LENGTH + len + TRLR_LENGTH) != 0)
 	mips_error ("write to target failed: %s", safe_strerror (errno));
+
+      if (! get_ack)
+	return;
 
       garbage = 0;
       ch = 0;
@@ -972,19 +1014,32 @@ mips_initialize ()
   mips_send_seq = 0;
   mips_receive_seq = 0;
 
-  /* The board seems to want to send us a packet.  I don't know what
-     it means.  The packet seems to be triggered by a carriage return
-     character, although perhaps any character would do.  */
-  cr = '\015';
-  /* FIXME check the result from this */
-  SERIAL_WRITE (mips_desc, &cr, 1);
-
   if (mips_receive_packet (buff, 0, 3) < 0)
     {
       char cc;
+      int i;
+      char srec[10];
 
       /* We did not receive the packet we expected; try resetting the
 	 board and trying again.  */
+
+      /* We are possibly in binary download mode, having aborted in the middle
+	 of an S-record.  ^C won't work because of binary mode.  The only
+	 reliable way out is to send enough termination packets (8 bytes) to
+	 fill up and then overflow the largest size S-record (255 bytes in this
+	 case).	 This amounts to 256/8 + 1.  */
+
+      mips_make_srec (srec, '7', 0, NULL, 0);
+
+      for (i = 1; i <= 33; i++)
+	{
+	  SERIAL_WRITE (mips_desc, srec, 8);
+
+	  if (SERIAL_READCHAR (mips_desc, 0) >= 0)
+	    break;		/* Break immediatly if we get something from
+				   the board. */
+	}
+
       printf_filtered ("Failed to initialize; trying to reset board\n");
       cc = '\003';
       SERIAL_WRITE (mips_desc, &cc, 1);
@@ -993,8 +1048,9 @@ mips_initialize ()
       sleep (1);
       cr = '\015';
       SERIAL_WRITE (mips_desc, &cr, 1);
+
+      mips_receive_packet (buff, 1, 3);
     }
-  mips_receive_packet (buff, 1, 3);
 
   do_cleanups (old_cleanups);
 
@@ -1533,6 +1589,236 @@ mips_remove_breakpoint (addr, contents_cache)
 {
   return target_write_memory (addr, contents_cache, BREAK_INSN_SIZE);
 }
+
+static void
+send_srec (srec, len, addr)
+     char *srec;
+     int len;
+     CORE_ADDR addr;
+{
+  while (1)
+    {
+      int ch;
+
+      SERIAL_WRITE (mips_desc, srec, len);
+
+      ch = mips_readchar (2);
+
+      switch (ch)
+	{
+	case SERIAL_TIMEOUT:
+	  error ("Timeout during download.");
+	  break;
+	case 0x6:		/* ACK */
+	  return;
+	case 0x15:		/* NACK */
+	  fprintf_unfiltered (gdb_stderr, "Download got a NACK at byte %d!  Retrying.\n", addr);
+	  continue;
+	default:
+	  error ("Download got unexpected ack char: 0x%x, retrying.\n", ch);
+	}
+    }
+}
+
+/*  Download a binary file by converting it to S records. */
+
+static void
+mips_load_srec (args)
+     char *args;
+{
+  bfd *abfd;
+  asection *s;
+  char *buffer, srec[1024];
+  int i;
+  int srec_frame = 200;
+  int reclen;
+  static int hashmark = 1;
+
+  buffer = alloca (srec_frame * 2 + 256);
+
+  abfd = bfd_openr (args, 0);
+  if (!abfd)
+    {
+      printf_filtered ("Unable to open file %s\n", args);
+      return;
+    }
+
+  if (bfd_check_format (abfd, bfd_object) == 0)
+    {
+      printf_filtered ("File is not an object file\n");
+      return;
+    }
+  
+#define LOAD_CMD "load -b -s tty0\015"
+
+  SERIAL_WRITE (mips_desc, LOAD_CMD, sizeof LOAD_CMD - 1);
+
+  mips_expect (LOAD_CMD);
+  mips_expect ("\012");
+
+  for (s = abfd->sections; s; s = s->next)
+    {
+      if (s->flags & SEC_LOAD)
+	{
+	  int numbytes;
+
+	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma,
+			   s->vma + s->_raw_size);
+	  gdb_flush (gdb_stdout);
+
+	  for (i = 0; i < s->_raw_size; i += numbytes)
+	    {
+	      numbytes = min (srec_frame, s->_raw_size - i);
+
+	      bfd_get_section_contents (abfd, s, buffer, i, numbytes);
+
+	      reclen = mips_make_srec (srec, '3', s->vma + i, buffer, numbytes);
+	      send_srec (srec, reclen, s->vma + i);
+
+	      if (hashmark)
+		{
+		  putchar_unfiltered ('#');
+		  gdb_flush (gdb_stdout);
+		}
+
+	    } /* Per-packet (or S-record) loop */
+	  
+	  putchar_unfiltered ('\n');
+	} /* Loadable sections */
+    }
+  if (hashmark) 
+    putchar_unfiltered ('\n');
+  
+  /* Write a type 7 terminator record. no data for a type 7, and there
+     is no data, so len is 0.  */
+
+  reclen = mips_make_srec (srec, '7', abfd->start_address, NULL, 0);
+
+  send_srec (srec, reclen, abfd->start_address);
+
+  SERIAL_FLUSH_INPUT (mips_desc);
+}
+
+/*
+ * mips_make_srec -- make an srecord. This writes each line, one at a
+ *	time, each with it's own header and trailer line.
+ *	An srecord looks like this:
+ *
+ * byte count-+     address
+ * start ---+ |        |       data        +- checksum
+ *	    | |        |                   |
+ *	  S01000006F6B692D746573742E73726563E4
+ *	  S315000448600000000000000000FC00005900000000E9
+ *	  S31A0004000023C1400037DE00F023604000377B009020825000348D
+ *	  S30B0004485A0000000000004E
+ *	  S70500040000F6
+ *
+ *	S<type><length><address><data><checksum>
+ *
+ *      Where
+ *      - length
+ *        is the number of bytes following upto the checksum. Note that
+ *        this is not the number of chars following, since it takes two
+ *        chars to represent a byte.
+ *      - type
+ *        is one of:
+ *        0) header record
+ *        1) two byte address data record
+ *        2) three byte address data record
+ *        3) four byte address data record
+ *        7) four byte address termination record
+ *        8) three byte address termination record
+ *        9) two byte address termination record
+ *       
+ *      - address
+ *        is the start address of the data following, or in the case of
+ *        a termination record, the start address of the image
+ *      - data
+ *        is the data.
+ *      - checksum
+ *	  is the sum of all the raw byte data in the record, from the length
+ *        upwards, modulo 256 and subtracted from 255.
+ *
+ * This routine returns the length of the S-record.
+ *
+ */
+
+static int
+mips_make_srec (buf, type, memaddr, myaddr, len)
+     char *buf;
+     char type;
+     CORE_ADDR memaddr;
+     unsigned char *myaddr;
+     int len;
+{
+  unsigned char checksum;
+  int i;
+
+  /* Create the header for the srec. addr_size is the number of bytes in the address,
+     and 1 is the number of bytes in the count.  */
+
+  buf[0] = 'S';
+  buf[1] = type;
+  buf[2] = len + 4 + 1;		/* len + 4 byte address + 1 byte checksum */
+  buf[3] = memaddr >> 24;
+  buf[4] = memaddr >> 16;
+  buf[5] = memaddr >> 8;
+  buf[6] = memaddr;
+  memcpy (&buf[7], myaddr, len);
+
+/* Note that the checksum is calculated on the raw data, not the hexified
+   data.  It includes the length, address and the data portions of the
+   packet.  */
+
+  checksum = 0;
+  buf += 2;			/* Point at length byte */
+  for (i = 0; i < len + 4 + 1; i++)
+    checksum += *buf++;
+
+  *buf = ~checksum;
+
+  return len + 8;
+}
+
+/* mips_load -- download a file. */
+
+static void
+mips_load (file, from_tty)
+    char *file;
+    int  from_tty;
+{
+  int err;
+
+  /* Get the board out of remote debugging mode.  */
+
+  mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err,
+		mips_receive_wait);
+
+
+  if (!mips_expect ("\015\012<IDT>"))
+    error ("mips_load:  Couldn't get into monitor mode.");
+
+  mips_load_srec (file);
+
+  SERIAL_WRITE (mips_desc, "\015db tty0\015", sizeof "\015db tty0\015" - 1);
+
+  mips_initialize ();
+
+/* Finally, make the PC point at the start address */
+
+  if (exec_bfd)
+    write_pc (bfd_get_start_address (exec_bfd));
+
+  inferior_pid = 0;		/* No process now */
+
+/* This is necessary because many things were based on the PC at the time that
+   we attached to the monitor, which is no longer valid now that we have loaded
+   new code (and just changed the PC).  Another way to do this might be to call
+   normal_stop, except that the stack may not be valid, and things would get
+   horribly confused... */
+
+  clear_symtab_users ();
+}
 
 /* The target vector.  */
 
@@ -1563,7 +1849,7 @@ HOST:PORT to access a board over a network",  /* to_doc */
   NULL,				/* to_terminal_ours */
   NULL,				/* to_terminal_info */
   mips_kill,			/* to_kill */
-  generic_load,			/* to_load */
+  mips_load,			/* to_load */
   NULL,				/* to_lookup_symbol */
   mips_create_inferior,		/* to_create_inferior */
   mips_mourn_inferior,		/* to_mourn_inferior */
