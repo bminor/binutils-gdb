@@ -1,3 +1,9 @@
+2002-03-10  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-tdep.h (sys/reg.h, x86_64_regmap): Moved to x86-64-linux-nat.c
+	* x86-64-linux-nat.c (sys/reg.h, x86_64_regmap): Moved here 
+	from x86-64-tdep.h
+
 2002-03-10  Daniel Jacobowitz  <drow@mvista.com>
 	    Don Howard <dhoward@redhat.com>
 

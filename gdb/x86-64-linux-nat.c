@@ -33,6 +33,18 @@
 #include <sys/debugreg.h>
 #include <sys/syscall.h>
 #include <sys/procfs.h>
+#include <sys/reg.h>
+
+/* Mapping between the general-purpose registers in `struct user'
+   format and GDB's register array layout.  */
+
+static int x86_64_regmap[] = {
+  RAX, RDX, RCX, RBX,
+  RSI, RDI, RBP, RSP,
+  R8, R9, R10, R11,
+  R12, R13, R14, R15,
+  RIP, EFLAGS
+};
 
 static unsigned long
 x86_64_linux_dr_get (int regnum)
