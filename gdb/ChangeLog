@@ -1,3 +1,7 @@
+2003-12-16  J. Brobecker  <brobecker@gnat.com>
+
+	* irix5-nat.c: Include mips-tdep.h.
+
 2003-12-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* solib.h (SOLIB_CREATE_CATCH_LOAD_HOOK)
