@@ -1,3 +1,8 @@
+2003-12-18  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (s_change_section): When parsing the MIPS-specific
+	.section syntax, map SHT_MIPS_DWARF to SHT_PROGBITS.
+
 2003-12-17  Mark Mitchell  <mark@codesourcery.com>
 
 	* config/tc-arm.c (arm_archs): Change "armv6" to "armv6j".

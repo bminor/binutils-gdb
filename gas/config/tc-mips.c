@@ -11981,6 +11981,22 @@ s_change_section (int ignore ATTRIBUTE_UNUSED)
 
   section_name = xstrdup (section_name);
 
+  /* When using the generic form of .section (as implemented by obj-elf.c),
+     there's no way to set the section type to SHT_MIPS_DWARF.  Users have
+     traditionally had to fall back on the more common @progbits instead.
+
+     There's nothing really harmful in this, since bfd will correct
+     SHT_PROGBITS to SHT_MIPS_DWARF before writing out the file.  But it
+     means that, for backwards compatibiltiy, the special_section entries
+     for dwarf sections must use SHT_PROGBITS rather than SHT_MIPS_DWARF.
+
+     Even so, we shouldn't force users of the MIPS .section syntax to
+     incorrectly label the sections as SHT_PROGBITS.  The best compromise
+     seems to be to map SHT_MIPS_DWARF to SHT_PROGBITS before calling the
+     generic type-checking code.  */
+  if (section_type == SHT_MIPS_DWARF)
+    section_type = SHT_PROGBITS;
+
   obj_elf_change_section (section_name, section_type, section_flag,
 			  section_entry_size, 0, 0, 0);
 
