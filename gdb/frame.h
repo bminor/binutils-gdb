@@ -366,6 +366,16 @@ extern void get_saved_register (char *raw_buffer, int *optimized,
 extern int frame_register_read (struct frame_info *frame, int regnum,
 				void *buf);
 
+/* Return the value of register REGNUM that belongs to FRAME.  The
+   value is obtained by unwinding the register from the next / more
+   inner frame.  */
+/* NOTE: cagney/2002-09-13: Return void as one day these functions may
+   be changed to return an indication that the read succeeded.  */
+extern void frame_read_signed_register (struct frame_info *frame,
+					int regnum, LONGEST *val);
+extern void frame_read_unsigned_register (struct frame_info *frame,
+					  int regnum, ULONGEST *val);
+
 /* Map between a frame register number and its name.  A frame register
    space is a superset of the cooked register space --- it also
    includes builtin registers.  */

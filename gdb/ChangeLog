@@ -1,5 +1,12 @@
 2002-10-31  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (frame_read_unsigned_register): New function.
+	(frame_read_signed_register): New function.
+	* frame.h (frame_read_unsigned_register): Declare.
+	(frame_read_signed_register): Declare.
+
+2002-10-31  Andrew Cagney  <cagney@redhat.com>
+
 	* h8500-tdep.c (h8500_print_registers_info): New static function,
 	clone of infcmd.c's default_print_registers_info.
 	(h8500_do_registers_info): New funtion.
