@@ -67,11 +67,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define SAVED_PC_AFTER_CALL(frame) \
   (read_memory_integer (read_register (SP_REGNUM), 4))
 
-/* This is only supposed to work in execcore.c, where x == 0 and
-   this is called before any other fields are filled in.  */
-#define N_SET_MAGIC(aouthdr, x) \
-  bzero ((char *) &aouthdr, sizeof aouthdr)
-
 /* Address of end of stack space.  */
 
 #define STACK_END_ADDR 0x80000000

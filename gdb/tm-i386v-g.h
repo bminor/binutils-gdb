@@ -29,9 +29,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "tm-i386v.h"
 
-/* The version in m-i386.h is for COFF.  */
-#undef N_SET_MAGIC
-
 #define NAMES_HAVE_UNDERSCORE
 
 #undef COFF_FORMAT

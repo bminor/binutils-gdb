@@ -1,3 +1,7 @@
+Sun Apr 21 21:43:10 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* tm-i386v{,-g}.h: Remove N_SET_MAGIC define.
+
 Sat Apr 20 21:42:47 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
 	* i386-tdep.c: Remove unnecessary #includes.
