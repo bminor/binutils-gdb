@@ -63,11 +63,11 @@ SECTION
 	construction data essential for the linker to be able to
 	perform its job are: 
 
-	o asymbol
+	o asymbol -
 	The asymbol of the contructor entry point contains all the
 	information necessary to call the function. 
 
-	o table id
+	o table id -
 	The type of symbol, ie is it a contructor, a destructor or
 	something else someone dreamed up to make our lives difficult.
 
