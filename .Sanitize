@@ -40,6 +40,7 @@ binutils
 build-all.mk
 byacc
 config
+config.guess
 config.sub
 configure
 configure.bat
@@ -62,7 +63,6 @@ glob
 gprof
 grep
 groff
-guess-systype
 h8300sim
 include
 ispell

@@ -97,7 +97,8 @@ NO_EDIT="This file was generated automatically by configure.  Do not edit."
 ##
 
 progname=$0
-PWD=`pwd`
+# if PWD already has a value, it is probably wrong.
+if [ -n "$PWD" ]; then PWD=`pwd`; fi
 
 case "${progname}" in
 /*) ;;
@@ -149,11 +150,11 @@ do
 
 	else
 		case ${arg} in
-		-exec_prefix=* | --exec_prefix=* | --exec_prefi=* | --exec_pref=* | --exec_pre=* | --exec_pr=* | --exec_p=* | --exec_=* | --exec=* | --exe=* | --ex=* | --e=*)
+		-exec_prefix=* | --exec_prefix=* | --exec_prefi=* | --exec_pref=* | --exec_pre=* | --exec_pr=* | --exec_p=* | --exec_=* | --exec=* | --exe=* | --ex=* | --e=* | -exec-prefix=* | --exec-prefix=* | --exec-prefi=* | --exec-pref=* | --exec-pre=* | --exec-pr=* | --exec-p=* | --exec-=* )
 			exec_prefix=`echo ${arg} | sed 's/^[-a-z_]*=//'`
 			exec_prefixoption=${arg}
 			;;
-		-exec_prefix | --exec_prefix | --exec_prefi | --exec_pref | --exec_pre | --exec_pr | --exec_p | --exec_ | --exec | --exe | --ex | --e)
+		-exec_prefix | --exec_prefix | --exec_prefi | --exec_pref | --exec_pre | --exec_pr | --exec_p | --exec_ | --exec | --exe | --ex | --e | -exec-prefix | --exec-prefix | --exec-prefi | --exec-pref | --exec-pre | --exec-pr | --exec-p | --exec-)
 			next_exec_prefix=yes
 			;;
 		-gas | --g*)
@@ -187,26 +188,26 @@ do
 			next_prefix=yes
 			;;
 		-rm | --rm) removing=${arg} ;;
-		-program_prefix=* | --program_prefix=* | --program_prefi=* | --program_pref=* | --program_pre=* | --program_pr=* | --program_p=*)
+		-program_prefix=* | --program_prefix=* | --program_prefi=* | --program_pref=* | --program_pre=* | --program_pr=* | --program_p=* | -program-prefix=* | --program-prefix=* | --program-prefi=* | --program-pref=* | --program-pre=* | --program-pr=* | --program-p=*)
 			program_prefix=`echo ${arg} | sed 's/^[-a-z_]*=//'`
 			program_prefixoption=${arg}
 			;;
-		-program_prefix | --program_prefix | --program_prefi | --program_pref | --program_pre | --program_pr | --program_p)
+		-program_prefix | --program_prefix | --program_prefi | --program_pref | --program_pre | --program_pr | --program_p | -program-prefix | --program-prefix | --program-prefi | --program-pref | --program-pre | --program-pr | --program-p)
 			next_program_prefix=yes
 			;;
-		-program_suffix=* | --program_suffix=* | --program_suffi=* | --program_suff=* | --program_suf=* | --program_su=* | --program_s=*)
+		-program_suffix=* | --program_suffix=* | --program_suffi=* | --program_suff=* | --program_suf=* | --program_su=* | --program_s=* | -program-suffix=* | --program-suffix=* | --program-suffi=* | --program-suff=* | --program-suf=* | --program-su=* | --program-s=*)
 			program_suffix=`echo ${arg} | sed 's/^[-a-z_]*=//'`
 			program_suffixoption=${arg}
 			;;
-		-program_suffix | --program_suffix | --program_suffi | --program_suff | --program_suf | --program_su | --program_s )
+		-program_suffix | --program_suffix | --program_suffi | --program_suff | --program_suf | --program_su | --program_s |-program-suffix | --program-suffix | --program-suffi | --program-suff | --program-suf | --program-su | --program-s)
 			next_program_suffix=yes
 			;;
-		-program_transform_name=* | --program_transform_name=* | --program_transform_nam=* | --program_transform_na=* | --program_transform_n=* | --program_transform_=* | --program_transform=* | --program_transfor=* | --program_transfo=* | --program_transf=* | --program_trans=* | --program_tran=* | --program_tra=* | --program_tr=* | --program_t=*)
+		-program_transform_name=* | --program_transform_name=* | --program_transform_nam=* | --program_transform_na=* | --program_transform_n=* | --program_transform_=* | --program_transform=* | --program_transfor=* | --program_transfo=* | --program_transf=* | --program_trans=* | --program_tran=* | --program_tra=* | --program_tr=* | --program_t=* | -program-transform-name=* | --program-transform-name=* | --program-transform-nam=* | --program-transform-na=* | --program-transform-n=* | --program-transform-=* | --program-transform=* | --program-transfor=* | --program-transfo=* | --program-transf=* | --program-trans=* | --program-tran=* | --program-tra=* | --program-tr=* | --program-t=*)
 			# Double any \ or $ in the argument
 			program_transform_name="${program_transform_name} -e `echo ${arg} | sed -e 's/^[-a-z_]*=//' -e 's/\\\\/\\\\\\\\/g' -e 's/\\\$/$$/g'`"
 			program_transform_nameoption="${program_transform_nameoption} -program_transform_name='`echo ${arg} | sed 's/^[-a-z_]*=//'`'"
 			;;
-		-program_transform_name | --program_transform_name | --program_transform_nam | --program_transform_na | --program_transform_n | --program_transform_ | --program_transform | --program_transfor | --program_transfo | --program_transf | --program_trans | --program_tran | --program_tra | --program_tr | --program_t)
+		-program_transform_name | --program_transform_name | --program_transform_nam | --program_transform_na | --program_transform_n | --program_transform_ | --program_transform | --program_transfor | --program_transfo | --program_transf | --program_trans | --program_tran | --program_tra | --program_tr | --program_t | -program-transform-name | --program-transform-name | --program-transform-nam | --program-transform-na | --program-transform-n | --program-transform- | --program-transform | --program-transfor | --program-transfo | --program-transf | --program-trans | --program-tran | --program-tra | --program-tr | --program-t)
 			next_program_transform_name=yes
 			;;
 		-site=* | --site=* | --sit=* | --si=*)
@@ -253,6 +254,17 @@ do
 			echo "This is Cygnus Configure version" `echo ${version} | sed 's/[ $:]//g'`
 			exit 0
 			;;
+		-with*=* | --with*=*)
+			withopt=`echo ${arg} | sed 's:^-*\(with[^=]*\)=.*$:\1:;s/-/_/g'`
+			withval=`echo ${arg} | sed 's:^-*with[^=]*=\(.*\)$:\1:'`
+			eval $withopt="$withval"
+			withoptions="$withoptions -$withopt=\"$withval\""
+			;;
+		-with* | --with*)
+			withopt=`echo ${arg} | sed 's:^-*with:with:;s/-/_/g'`
+			eval $withopt=yes
+			withoptions="$withoptions -$withopt"
+			;;
 		-x | --x) ;;
 		-* | --*)
 			(echo ;
@@ -298,8 +310,17 @@ case "${fatal}" in
 		echo '***' Can only configure for one host and one target at a time.  1>&2
 		fatal=yes
 	elif [ -z "${host_alias}" -a -z "${undefs}" ] ; then
-		echo '***' You must tell me for which host you want to configure.  1>&2
-		fatal=yes
+		echo '- You did not tell me what kind of host system you want to configure.
+- I will attempt to guess the kind of system this is.' 1>&2
+		guesssys=`echo ${progname} | sed 's/configure$/config.guess/'`
+		if tmp_alias=`${guesssys}` ; then
+			echo "- Looks like this is a ${tmp_alias}" 1>&2
+			host_alias=${tmp_alias}
+			target_alias=${tmp_alias}
+		else
+			echo '- Failed to guess the system type.  You need to tell me.' 1>&2
+			fatal=yes
+		fi
 	else
 		case "${host_alias}" in
 		"") host_alias=${undefs} ;;
@@ -324,16 +345,16 @@ if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
 	(echo "Usage: configure HOST" ;
 	echo ;
 	echo "Options: [defaults in brackets]" ;
-	echo " -exec_prefix=MYDIR	configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
+	echo " -exec-prefix=MYDIR	configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
 	echo " -gas			configure the compilers for use with gas. [native as]" ;
 	echo " -help			print this message. [normal config]" ;
 	echo " -lang=LANG		configure to build LANG. [gcc]" ;
 	echo " -nfp			configure the compilers default to soft floating point. [hard float]" ;
 	echo " -norecursion		configure this directory only. [recurse]" ;
 	echo " -prefix=MYDIR		configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
-	echo " -program_prefix=FOO	install programs with FOO prepended to their names. [ \"\" ]" ;
-	echo " -program_suffix=FOO	install programs with FOO appended to their names. [ \"\" ]" ;
-	echo " -program_transform_name=FOO	install programs with names transformed by sed pattern FOO. [ \"\" ]" ;
+	echo " -program-prefix=FOO	install programs with FOO prepended to their names. [ \"\" ]" ;
+	echo " -program-suffix=FOO	install programs with FOO appended to their names. [ \"\" ]" ;
+	echo " -program-transform-name=FOO	install programs with names transformed by sed pattern FOO. [ \"\" ]" ;
 	echo " -site=SITE		configure with site specific makefile for SITE" ;
 	echo " -srcdir=DIR		find the sources in DIR. [\".\" or \"..\"]" ;
 	echo " -target=TARGET		configure for TARGET.  [TARGET = HOST]" ;
@@ -673,10 +694,12 @@ host_alias = ${host_alias}
 host_cpu = ${host_cpu}
 host_vendor = ${host_vendor}
 host_os = ${host_os}
+host_canonical = ${host_cpu}-${host_vendor}-${host_os}
 target_alias = ${target_alias}
 target_cpu = ${target_cpu}
 target_vendor = ${target_vendor}
 target_os = ${target_os}
+target_canonical = ${target_cpu}-${target_vendor}-${target_os}
 EOF
 	case "${target_makefile_frag}" in
 	"") ;;
@@ -833,7 +856,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 ### The recursion line is here.
 			if eval ${recprog} ${verbose} ${host_alias} -target=${target_alias} \
 				${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-				${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${removing} ${redirect} ; then
+				${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${removing} ${redirect} ; then
 				true
 			else
 				exit 1

@@ -1,3 +1,9 @@
+Sat Jan 23 13:49:40 1993  Per Bothner  (bothner@cygnus.com)
+
+	* guess-systype: Renamed to ...
+	* config.guess:  ... by popular request.
+	* configure.in, Makefile.in:  Update accordingly.
+
 Thu Jan 21 12:20:55 1993  Per Bothner  (bothner@cygnus.com)
 
 	* guess-systype:  Patches from John Eaton <jwe@che.utexas.edu>:

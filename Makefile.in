@@ -406,15 +406,25 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-fileutils install-find install-gawk install-m4 install-sed install-shellutils \
 	install-textutils install-time install-wdiff
 
+#
+# Install the gcc headers files, but not the fixed include files,
+# which we are not allowed to distribute.  This rule is very dependent
+# on the workings of the gcc Makefile.in.
+#
 gcc-no-fixedincludes:
-	@if [ -f ./gcc/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./gcc; \
-		$(MAKE) $(FLAGS_TO_PASS) install install-man \
-			"INSTALL_HEADERS=install-common-headers install-float-h install-limits-h") ; \
-	else \
-		true ; \
-	fi
+	@if [ -f ./gcc/Makefile ]; then \
+	  rm -rf gcc/tmp-include; \
+	  mv gcc/include gcc/tmp-include 2>/dev/null; \
+	  mkdir gcc/include; \
+	  touch gcc/stmp-fixincludes; \
+	  rm -f gcc/stmp-headers; \
+	  rootme=`pwd`; export rootme; \
+	  srcroot=`cd $(srcdir); pwd` ; export srcroot; \
+	  (cd ./gcc; \
+	   $(MAKE) $(GCC_FLAGS_TO_PASS) install); \
+	  rm -rf gcc/include; \
+	  mv gcc/tmp-include gcc/include 2>/dev/null; \
+	else true; fi
 
 install.cross: install-dirs install-libiberty install-mmalloc \
         install-binutils install-opcodes install-byacc install-flex \
@@ -1439,7 +1449,7 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 # Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
 
 DEVO_SUPPORT= README Makefile.in configure configure.in \
-	config.sub config etc move-if-change \
+	config.guess config.sub config etc move-if-change \
 	COPYING.LIB
 GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline glob
 GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS)
