@@ -371,7 +371,7 @@ add_set_enum_cmd (char *name,
 struct cmd_list_element *
 add_set_auto_boolean_cmd (char *name,
 			  enum command_class class,
-			  enum cmd_auto_boolean *var,
+			  enum auto_boolean *var,
 			  char *doc,
 			  struct cmd_list_element **list)
 {

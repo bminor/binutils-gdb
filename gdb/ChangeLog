@@ -1,3 +1,22 @@
+2002-06-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* defs.h (auto_boolean): Declare enum.
+	* command.h (cmd_auto_boolean): Delete enum.
+	* mips-tdep.c (mask_address_var): Update.
+	(mips_mask_address_p): Update.
+	(show_mask_address): Update.
+	* remote.c (struct packet_config): Update.
+	(update_packet_config): Update.
+	(show_packet_config_cmd): Update.
+	(packet_ok): Update.
+	(add_packet_config_cmd): Update.
+	(_initialize_remote): 
+	* command.h: Update.
+	* cli/cli-setshow.c (parse_auto_binary_operation): Update.
+	(do_setshow_command): Update.
+	* cli/cli-decode.c (add_set_auto_boolean_cmd): Update.
+	* cli/cli-decode.h: Update.
+
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-cygwin.h, config/i386/tm-fbsd.h,

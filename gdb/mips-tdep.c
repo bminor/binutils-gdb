@@ -469,19 +469,19 @@ mips_register_convert_to_raw (struct type *virtual_type, int n,
 }
 
 /* Should the upper word of 64-bit addresses be zeroed? */
-enum cmd_auto_boolean mask_address_var = CMD_AUTO_BOOLEAN_AUTO;
+enum auto_boolean mask_address_var = AUTO_BOOLEAN_AUTO;
 
 static int
 mips_mask_address_p (void)
 {
   switch (mask_address_var)
     {
-    case CMD_AUTO_BOOLEAN_TRUE:
+    case AUTO_BOOLEAN_TRUE:
       return 1;
-    case CMD_AUTO_BOOLEAN_FALSE:
+    case AUTO_BOOLEAN_FALSE:
       return 0;
       break;
-    case CMD_AUTO_BOOLEAN_AUTO:
+    case AUTO_BOOLEAN_AUTO:
       return MIPS_DEFAULT_MASK_ADDRESS_P;
     default:
       internal_error (__FILE__, __LINE__,
@@ -495,13 +495,13 @@ show_mask_address (char *cmd, int from_tty)
 {
   switch (mask_address_var)
     {
-    case CMD_AUTO_BOOLEAN_TRUE:
+    case AUTO_BOOLEAN_TRUE:
       printf_filtered ("The 32 bit mips address mask is enabled\n");
       break;
-    case CMD_AUTO_BOOLEAN_FALSE:
+    case AUTO_BOOLEAN_FALSE:
       printf_filtered ("The 32 bit mips address mask is disabled\n");
       break;
-    case CMD_AUTO_BOOLEAN_AUTO:
+    case AUTO_BOOLEAN_AUTO:
       printf_filtered ("The 32 bit address mask is set automatically.  Currently %s\n",
 		       mips_mask_address_p () ? "enabled" : "disabled");
       break;

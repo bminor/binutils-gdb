@@ -34,9 +34,8 @@
 
 static int parse_binary_operation (char *);
 
-static enum cmd_auto_boolean parse_auto_binary_operation (const char *arg);
 
-static enum cmd_auto_boolean
+static enum auto_boolean
 parse_auto_binary_operation (const char *arg)
 {
   if (arg != NULL && *arg != '\0')
@@ -48,18 +47,18 @@ parse_auto_binary_operation (const char *arg)
 	  || strncmp (arg, "1", length) == 0
 	  || strncmp (arg, "yes", length) == 0
 	  || strncmp (arg, "enable", length) == 0)
-	return CMD_AUTO_BOOLEAN_TRUE;
+	return AUTO_BOOLEAN_TRUE;
       else if (strncmp (arg, "off", length) == 0
 	       || strncmp (arg, "0", length) == 0
 	       || strncmp (arg, "no", length) == 0
 	       || strncmp (arg, "disable", length) == 0)
-	return CMD_AUTO_BOOLEAN_FALSE;
+	return AUTO_BOOLEAN_FALSE;
       else if (strncmp (arg, "auto", length) == 0
 	       || (strncmp (arg, "-1", length) == 0 && length > 1))
-	return CMD_AUTO_BOOLEAN_AUTO;
+	return AUTO_BOOLEAN_AUTO;
     }
   error ("\"on\", \"off\" or \"auto\" expected.");
-  return CMD_AUTO_BOOLEAN_AUTO; /* pacify GCC */
+  return AUTO_BOOLEAN_AUTO; /* pacify GCC */
 }
 
 static int
@@ -167,7 +166,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  *(int *) c->var = parse_binary_operation (arg);
 	  break;
 	case var_auto_boolean:
-	  *(enum cmd_auto_boolean *) c->var = parse_auto_binary_operation (arg);
+	  *(enum auto_boolean *) c->var = parse_auto_binary_operation (arg);
 	  break;
 	case var_uinteger:
 	  if (arg == NULL)
@@ -296,15 +295,15 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  fputs_filtered (*(int *) c->var ? "on" : "off", stb->stream);
 	  break;
 	case var_auto_boolean:
-	  switch (*(enum cmd_auto_boolean*) c->var)
+	  switch (*(enum auto_boolean*) c->var)
 	    {
-	    case CMD_AUTO_BOOLEAN_TRUE:
+	    case AUTO_BOOLEAN_TRUE:
 	      fputs_filtered ("on", stb->stream);
 	      break;
-	    case CMD_AUTO_BOOLEAN_FALSE:
+	    case AUTO_BOOLEAN_FALSE:
 	      fputs_filtered ("off", stb->stream);
 	      break;
-	    case CMD_AUTO_BOOLEAN_AUTO:
+	    case AUTO_BOOLEAN_AUTO:
 	      fputs_filtered ("auto", stb->stream);
 	      break;
 	    default:
