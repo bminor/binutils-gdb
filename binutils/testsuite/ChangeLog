@@ -1,3 +1,8 @@
+2002-01-14  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* binutils-all/objcopy.exp: Expect xscale-coff to fail simple
+	objcopy test for the same reason as arm-coff.
+
 2001-11-29  H.J. Lu <hjl@gnu.org>
 
 	* binutils-all/objcopy.exp (strip_test): Add strip on archive.
