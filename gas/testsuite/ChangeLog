@@ -1,3 +1,8 @@
+2000-03-31  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* lib/gas-defs.exp (regexp_diff): Don't break on the first
+	difference, list them all.
+
 2000-03-29  Nick Clifton <nickc@cygnus.com
 
 	* gas/arm/thumb.s: Add test of bal instruction.
