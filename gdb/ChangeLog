@@ -1,5 +1,10 @@
 2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
 
+	* arm-tdep.c (arm_write_pc): New function.
+	(arm_gdbarch_init): Call set_gdbarch_write_pc.
+
+2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.c (must_shift_inst_regs): Delete.
 	(bpstat_stop_status): Delete references to DECR_PC_AFTER_HW_BREAK
 	and SHIFT_INST_REGS.
