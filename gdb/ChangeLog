@@ -1,5 +1,15 @@
 2003-04-22  J. Brobecker  <brobecker@gnat.com>
 
+	* config/pa/tm-hppa.h (SOFT_FLOAT): Delete this macro.
+	Update all the tests using SOFT_FLOAT considering the fact that
+	this macro was always set to 0. 
+	* config/pa/tm-hppa64.h: Update all the tests using SOFT_FLOAT
+	considering the fact that this macro was always set to 0.
+	* hppa-tdep.h (hppa_store_return_value): Likewise.
+	(hppa_extract_return_value): Likewise.
+
+2003-04-22  J. Brobecker  <brobecker@gnat.com>
+
 	* config/pa/tm-hppa.h: Remove obsolete code, was used by
 	the hppa-pro target only.
 

@@ -4763,7 +4763,7 @@ hppa_store_return_value (struct type *type, char *valbuf)
 				      ? (8 - TYPE_LENGTH (type))
 				      : (4 - TYPE_LENGTH (type))),
 				   valbuf, TYPE_LENGTH (type));
-  if (! SOFT_FLOAT && TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
     deprecated_write_register_bytes (REGISTER_BYTE (FP4_REGNUM),
 				     valbuf, TYPE_LENGTH (type));
 }
@@ -4778,7 +4778,7 @@ hppa_store_return_value (struct type *type, char *valbuf)
 void
 hppa_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
-  if (! SOFT_FLOAT && TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
     memcpy (valbuf,
 	    (char *)regbuf + REGISTER_BYTE (FP4_REGNUM),
 	    TYPE_LENGTH (type));

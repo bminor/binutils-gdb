@@ -537,12 +537,12 @@ call_dummy
  */ 
 #define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   { \
-    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT && !SOFT_FLOAT) \
+    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT) \
       memcpy ((VALBUF), \
 	      ((char *)(REGBUF)) + REGISTER_BYTE (FP4_REGNUM) + \
               (REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
 	      TYPE_LENGTH (TYPE)); \
-    else if  (is_integral_type(TYPE) || SOFT_FLOAT)   \
+    else if  (is_integral_type(TYPE))   \
        memcpy ((VALBUF), \
                (char *)(REGBUF) + REGISTER_BYTE (28) + \
                (REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
@@ -571,13 +571,13 @@ call_dummy
 #undef DEPRECATED_STORE_RETURN_VALUE
 #define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
   { \
-    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT && !SOFT_FLOAT) \
+    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT) \
       deprecated_write_register_bytes \
 	      (REGISTER_BYTE (FP4_REGNUM) + \
               (REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
               (VALBUF), \
 	      TYPE_LENGTH (TYPE)); \
-    else if (is_integral_type(TYPE) || SOFT_FLOAT)   \
+    else if (is_integral_type(TYPE))   \
        deprecated_write_register_bytes \
               (REGISTER_BYTE (28) + \
                  (REGISTER_SIZE - TYPE_LENGTH (TYPE)), \

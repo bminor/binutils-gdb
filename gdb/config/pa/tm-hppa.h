@@ -45,11 +45,6 @@ struct value;
 struct type;
 struct inferior_status;
 
-/* By default assume we don't have to worry about software floating point.  */
-#ifndef SOFT_FLOAT
-#define SOFT_FLOAT 0
-#endif
-
 /* Get at various relevent fields of an instruction word. */
 
 #define MASK_5 0x1f
