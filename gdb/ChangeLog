@@ -1,3 +1,14 @@
+2002-10-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* NEWS: add recent mi fixes.
+	* varobj.c (struct varobj): Add new "updated" flag.
+	(new_variable): Default "updated" flag to 0.
+	(varobj_set_value): Set "updated" flag to 1 if value
+	changes.
+	(varobj_update): Check varobj "updated" flag before
+	comparing old and refreshed values.  Fix for
+	PR gdb/702.
+
 2002-10-23  David Carlton  <carlton@math.stanford.edu>
 
 	* parse.c (parse_exp_1): Use BLOCK_START.

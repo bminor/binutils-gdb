@@ -111,6 +111,9 @@ struct varobj
 
   /* The format of the output for this object */
   enum varobj_display_formats format;
+
+  /* Was this variable updated via a varobj_set_value operation */
+  int updated;
 };
 
 /* Every variable keeps a linked list of its children, described
@@ -753,6 +756,7 @@ int
 varobj_set_value (struct varobj *var, char *expression)
 {
   struct value *val;
+  int error;
   int offset = 0;
 
   /* The argument "expression" contains the variable's new value.
@@ -778,6 +782,8 @@ varobj_set_value (struct varobj *var, char *expression)
 	  return 0;
 	}
 
+      if (!my_value_equal (var->value, value, &error))
+        var->updated = 1;
       if (!gdb_value_assign (var->value, value, &val))
 	return 0;
       value_free (var->value);
@@ -893,10 +899,11 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
   /* If values are not equal, note that it's changed.
      There a couple of exceptions here, though.
      We don't want some types to be reported as "changed". */
-  else if (type_changeable (*varp)
-	   && !my_value_equal ((*varp)->value, new, &error2))
+  else if (type_changeable (*varp) &&
+	   ((*varp)->updated || !my_value_equal ((*varp)->value, new, &error2)))
     {
       vpush (&result, *varp);
+      (*varp)->updated = 0;
       changed++;
       /* error2 replaces var->error since this new value
          WILL replace the old one. */
@@ -933,10 +940,12 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
 
       /* Update this variable */
       new = value_of_child (v->parent, v->index);
-      if (type_changeable (v) && !my_value_equal (v->value, new, &error2))
+      if (type_changeable (v) && 
+          (v->updated || !my_value_equal (v->value, new, &error2)))
 	{
 	  /* Note that it's changed */
 	  vpush (&result, v);
+	  v->updated = 0;
 	  changed++;
 	}
       /* error2 replaces v->error since this new value
@@ -1294,6 +1303,7 @@ new_variable (void)
   var->children = NULL;
   var->format = 0;
   var->root = NULL;
+  var->updated = 0;
 
   return var;
 }
