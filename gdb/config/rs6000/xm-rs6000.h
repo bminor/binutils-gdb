@@ -70,13 +70,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	SETPGRP_ARGS 1
 
-/* /usr/include/stdlib.h always uses void* and void,
-   even when __STDC__ isn't defined. */
-#define MALLOC_INCOMPATIBLE
-extern void *malloc PARAMS ((size_t size));
-extern void *realloc PARAMS ((void *ptr, size_t size));
-extern void free PARAMS ((void *));
-
 /* AIX doesn't have strdup, so we need to declare it for libiberty */
 extern char *strdup PARAMS ((char *));
 
