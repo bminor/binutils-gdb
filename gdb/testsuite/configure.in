@@ -35,6 +35,16 @@ case "${target}" in
 			fi ;;
 esac
 
+# Directory with HP specific tests. They will run only with HP's compilers. 
+# These tests will not work on other platforms and compilers.
+
+hpdir="gdb.hp"
+
+case "${target}" in
+ hppa*-*-hpux*) configdirs="${configdirs} ${hpdir}" ;;
+esac
+
+
 # Begin stuff to support --enable-shared
 AC_ARG_ENABLE(shared,
 [  --enable-shared         use shared libraries],

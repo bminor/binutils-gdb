@@ -575,7 +575,7 @@ else { echo "configure: error: can not run $ac_config_sub" 1>&2; exit 1; }
 fi
 
 echo $ac_n "checking host system type""... $ac_c" 1>&6
-echo "configure:579: checking host system type" >&5
+echo "configure:577: checking host system type" >&5
 
 host_alias=$host
 case "$host_alias" in
@@ -596,7 +596,7 @@ host_os=`echo $host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 echo "$ac_t""$host" 1>&6
 
 echo $ac_n "checking target system type""... $ac_c" 1>&6
-echo "configure:600: checking target system type" >&5
+echo "configure:598: checking target system type" >&5
 
 target_alias=$target
 case "$target_alias" in
@@ -614,7 +614,7 @@ target_os=`echo $target | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 echo "$ac_t""$target" 1>&6
 
 echo $ac_n "checking build system type""... $ac_c" 1>&6
-echo "configure:618: checking build system type" >&5
+echo "configure:616: checking build system type" >&5
 
 build_alias=$build
 case "$build_alias" in
@@ -638,7 +638,7 @@ test "$host_alias" != "$target_alias" &&
 
 
 # Directories to use in all configurations.
-configdirs="gdb.asm gdb.base gdb.c++ gdb.disasm gdb.chill gdb.threads"
+configdirs="gdb.asm gdb.base gdb.c++ gdb.disasm gdb.chill gdb.threads gdb.trace"
 
 # Directories to use for a configuration which uses stabs.
 stabsdirs="gdb.stabs"
@@ -659,6 +659,16 @@ case "${target}" in
 			  configdirs="${configdirs} ${stabsdirs}"
 			fi ;;
 esac
+
+# Directory with HP specific tests. They will run only with HP's compilers. 
+# These tests will not work on other platforms and compilers.
+
+hpdir="gdb.hp"
+
+case "${target}" in
+ hppa*-*-hpux*) configdirs="${configdirs} ${hpdir}" ;;
+esac
+
 
 # Begin stuff to support --enable-shared
 # Check whether --enable-shared or --disable-shared was given.
@@ -681,6 +691,8 @@ if test "${shared}" = "true"; then
 fi
 
 # End stuff to support --enable-shared
+# Start stuff to support --enable-gdbtk
+# start-sanitize-gdbtk
 # Check whether --enable-gdbtk or --disable-gdbtk was given.
 if test "${enable_gdbtk+set}" = set; then
   enableval="$enable_gdbtk"
@@ -715,9 +727,8 @@ fi
 if test "${enable_gdbtk}" = "yes"; then
     configdirs="${configdirs} gdb.gdbtk"
 fi
-# End stuff to suppot --enable-shared
-# start-sanitize-gdbtk
-# Begin stuff to support --enable-gdbtk
+# End stuff to support --enable-shared
+# end-sanitize-gdbtk
 
 # configure the subdirectories too
 subdirs="$configdirs"
@@ -746,7 +757,7 @@ EOF
 # Ultrix sh set writes to stderr and can't be redirected directly,
 # and sets the high bit in the cache file unless we assign to the vars.
 (set) 2>&1 |
-  case `(ac_space=' '; set) 2>&1 | grep ac_space` in
+  case `(ac_space=' '; set) 2>&1` in
   *ac_space=\ *)
     # `set' does not quote correctly, so add quotes (double-quote substitution
     # turns \\\\ into \\, and sed turns \\ into \).
