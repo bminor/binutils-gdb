@@ -33,7 +33,7 @@
 # 	config.status is removed.
 #
 
-# set -e
+set -e
 
 remove=rm
 hard_link=ln
@@ -534,7 +534,7 @@ for host in ${hosts} ; do
 					andandusing="${andusing} and \"${site_makefile_frag}\""
 				fi
 			else
-				andandusing=${using}
+				andandusing=${andusing}
 			fi
 
 			if [ -n "${verbose}" -o -z "${recurring}" ] ; then
@@ -573,12 +573,22 @@ for host in ${hosts} ; do
 						fi
 					fi
 
-					(cd ${configdir} ;
-						${progname} +recurring ${host_alias} +target=${target_alias} \
-							${verbose} ${subdirs} ${removing} +destdir=${destdir} \
-							`if [ -n "${objdir}" ] ; then echo +objdir=${objdir}/${configdir} ; fi` \
-							${tmpdiroption}) \
-						| sed 's/^/	/'
+					POPDIR=`pwd`
+					cd ${configdir} 
+
+					${progname} +recurring ${host_alias} +target=${target_alias} \
+						${verbose} ${subdirs} ${removing} +destdir=${destdir} \
+						`if [ -n "${objdir}" ] ; then echo +objdir=${objdir}/${configdir} ; fi` \
+						${tmpdiroption}
+
+					cd ${POPDIR}
+
+#					(cd ${configdir} ;
+#						if (${progname} +recurring ${host_alias} +target=${target_alias} \
+#							${verbose} ${subdirs} ${removing} +destdir=${destdir} \
+#							`if [ -n "${objdir}" ] ; then echo +objdir=${objdir}/${configdir} ; fi` \
+#							${tmpdiroption}) ; then true ; else exit 1 ; fi) \
+#						| sed 's/^/	/'
 				else
 					if [ -n "${verbose}" ] ; then
 						echo Warning: directory \"${configdir}\" is missing.
@@ -620,7 +630,12 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.54  1991/10/10 01:04:42  rich
+# Revision 1.55  1991/10/10 04:57:23  rich
+# * Die when sub-configure's do.
+# * get the makefile building message line correct.
+# * set -e
+#
+# Revision 1.54  1991/10/10  01:04:42  rich
 # Backed out the "/bin/sh config.sub" change.  Fails when config.sub was
 # on PATH.
 #
