@@ -1173,7 +1173,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    {
 	    case bfd_reloc_overflow:
 	      if (!((*info->callbacks->reloc_overflow)
-		    (info, name, howto->name, (bfd_vma) 0,
+		    (info, NULL, name, howto->name, (bfd_vma) 0,
 		     input_bfd, input_section, rel->r_offset)))
 		return FALSE;
 	      break;

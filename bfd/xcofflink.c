@@ -6043,7 +6043,7 @@ xcoff_reloc_link_order (output_bfd, finfo, output_section, link_order)
 	  abort ();
 	case bfd_reloc_overflow:
 	  if (! ((*finfo->info->callbacks->reloc_overflow)
-		 (finfo->info, link_order->u.reloc.p->u.name,
+		 (finfo->info, NULL, link_order->u.reloc.p->u.name,
 		  howto->name, addend, (bfd *) NULL, (asection *) NULL,
 		  (bfd_vma) 0)))
 	    {

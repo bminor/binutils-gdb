@@ -6416,7 +6416,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      BFD_ASSERT (name != NULL);
 	      if (! ((*info->callbacks->reloc_overflow)
-		     (info, name, howto->name, 0,
+		     (info, NULL, name, howto->name, (bfd_vma) 0,
 		      input_bfd, input_section, rel->r_offset)))
 		return FALSE;
 	    }
@@ -8020,7 +8020,8 @@ _bfd_elf_mips_get_relocated_section_contents
 		  break;
 		case bfd_reloc_overflow:
 		  if (!((*link_info->callbacks->reloc_overflow)
-			(link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+			(link_info, NULL,
+			 bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
 			 (*parent)->howto->name, (*parent)->addend,
 			 input_bfd, input_section, (*parent)->address)))
 		    goto error_return;

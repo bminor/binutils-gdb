@@ -254,7 +254,8 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 	if (gap > 128 || gap < -128)
 	  {
 	    if (! ((*link_info->callbacks->reloc_overflow)
-		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		   (link_info, NULL,
+		    bfd_asymbol_name (*reloc->sym_ptr_ptr),
 		    reloc->howto->name, reloc->addend, input_section->owner,
 		    input_section, reloc->address)))
 	      abort ();
@@ -277,7 +278,8 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 	if (gap > 32767 || gap < -32768)
 	  {
 	    if (! ((*link_info->callbacks->reloc_overflow)
-		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		   (link_info, NULL,
+		    bfd_asymbol_name (*reloc->sym_ptr_ptr),
 		    reloc->howto->name, reloc->addend, input_section->owner,
 		    input_section, reloc->address)))
 	      abort ();

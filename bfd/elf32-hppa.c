@@ -3819,8 +3819,8 @@ elf32_hppa_relocate_section (bfd *output_bfd,
       else
 	{
 	  if (!((*info->callbacks->reloc_overflow)
-		(info, sym_name, howto->name, 0, input_bfd, input_section,
-		 rel->r_offset)))
+		(info, (h ? &h->elf.root : NULL), sym_name, howto->name,
+		 (bfd_vma) 0, input_bfd, input_section, rel->r_offset)))
 	    return FALSE;
 	}
     }

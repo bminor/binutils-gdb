@@ -556,7 +556,7 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case bfd_reloc_overflow:
 	  if (! ((*info->callbacks->reloc_overflow)
-		 (info, my_name, howto->name,
+		 (info, (h ? &h->root : NULL), my_name, howto->name,
 		  (bfd_vma) 0, input_bfd,
 		  input_section, rel->r_vaddr - input_section->vma)))
 	    return FALSE;

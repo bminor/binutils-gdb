@@ -4802,7 +4802,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      break;
 
 	    if (h != NULL)
-	      name = h->root.root.root.string;
+	      name = NULL;
 	    else
 	      {
 		name = (bfd_elf_string_from_elf_section
@@ -4813,8 +4813,9 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		  name = bfd_section_name (input_bfd, sec);
 	      }
 	    if (! ((*info->callbacks->reloc_overflow)
-		   (info, name, howto->name, (bfd_vma) 0,
-		    input_bfd, input_section, rel->r_offset)))
+		   (info, (h ? &h->root.root : NULL), name, howto->name,
+		    (bfd_vma) 0, input_bfd, input_section,
+		    rel->r_offset)))
 	      ret_val = FALSE;
 	  }
 	  break;

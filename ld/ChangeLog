@@ -1,5 +1,12 @@
 2004-10-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR 463
+	* ldmain.c (reloc_overflow): Accept a pointer to struct
+	bfd_link_hash_entry. Report symbol location for relocation
+	overflow.
+
+2004-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* genscripts.sh (libpath.exp): Really generate for first
 	emulation only.
 

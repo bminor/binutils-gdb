@@ -4775,7 +4775,7 @@ fprintf (stderr, "TODO: change the address of the relocation\n");
 		const char *name;
 
 		if (h != NULL)
-		  name = h->root.root.string;
+		  name = NULL;
 		else if (r_extern)
 		  name = strings + GET_WORD (input_bfd,
 					     syms[r_index].e_strx);
@@ -4787,8 +4787,9 @@ fprintf (stderr, "TODO: change the address of the relocation\n");
 		    name = bfd_section_name (input_bfd, s);
 		  }
 		if (! ((*finfo->info->callbacks->reloc_overflow)
-		       (finfo->info, name, howto->name,
-			(bfd_vma) 0, input_bfd, input_section, r_addr)))
+		       (finfo->info, (h ? &h->root : NULL), name,
+			howto->name, (bfd_vma) 0, input_bfd,
+			input_section, r_addr)))
 		  return FALSE;
 	      }
 	      break;
@@ -4954,7 +4955,7 @@ aout_link_reloc_link_order (finfo, o, p)
 	  abort ();
 	case bfd_reloc_overflow:
 	  if (! ((*finfo->info->callbacks->reloc_overflow)
-		 (finfo->info,
+		 (finfo->info, NULL,
 		  (p->type == bfd_section_reloc_link_order
 		   ? bfd_section_name (finfo->output_bfd,
 				       pr->u.section)

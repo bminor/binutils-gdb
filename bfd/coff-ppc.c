@@ -1563,7 +1563,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (symndx == -1)
 	      name = "*ABS*";
 	    else if (h != NULL)
-	      name = h->root.root.root.string;
+	      name = NULL;
 	    else if (sym == NULL)
 	      name = "*unknown*";
 	    else if (sym->_n._n_n._n_zeroes == 0
@@ -1577,7 +1577,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	      }
 
 	    if (! ((*info->callbacks->reloc_overflow)
-		   (info, name, howto->name,
+		   (info, (h ? &h->root.root : NULL), name, howto->name,
 		    (bfd_vma) 0, input_bfd,
 		    input_section, rel->r_vaddr - input_section->vma)))
 	      return FALSE;

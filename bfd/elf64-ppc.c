@@ -9963,7 +9963,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		}
 
 	      if (!((*info->callbacks->reloc_overflow)
-		    (info, sym_name, ppc64_elf_howto_table[r_type]->name,
+		    (info, (h ? &h->elf.root : NULL), sym_name,
+		     ppc64_elf_howto_table[r_type]->name,
 		     rel->r_addend, input_bfd, input_section, rel->r_offset)))
 		return FALSE;
 	    }

@@ -137,8 +137,8 @@ static bfd_boolean undefined_symbol
   (struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma,
    bfd_boolean);
 static bfd_boolean reloc_overflow
-  (struct bfd_link_info *, const char *, const char *, bfd_vma,
-   bfd *, asection *, bfd_vma);
+  (struct bfd_link_info *, struct bfd_link_hash_entry *, const char *,
+   const char *, bfd_vma, bfd *, asection *, bfd_vma);
 static bfd_boolean reloc_dangerous
   (struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma);
 static bfd_boolean unattached_reloc
@@ -1386,6 +1386,7 @@ int overflow_cutoff_limit = 10;
 
 static bfd_boolean
 reloc_overflow (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		struct bfd_link_hash_entry *entry,
 		const char *name,
 		const char *reloc_name,
 		bfd_vma addend,
@@ -1408,7 +1409,32 @@ reloc_overflow (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       return TRUE;
     }
 
-  einfo (_(" relocation truncated to fit: %s %T"), reloc_name, name);
+  if (entry)
+    {
+      while (entry->type == bfd_link_hash_indirect
+	     || entry->type == bfd_link_hash_warning)
+	entry = entry->u.i.link;
+      switch (entry->type)
+	{
+	case bfd_link_hash_undefined:
+	case bfd_link_hash_undefweak:
+	  einfo (_(" relocation truncated to fit: %s against undefined symbol `%T'"),
+		 reloc_name, entry->root.string);
+	  break;
+	case bfd_link_hash_defined:
+	case bfd_link_hash_defweak:
+	  einfo (_(" relocation truncated to fit: %s against symbol `%T' defined in %A section in %B"),
+		 reloc_name, entry->root.string,
+		 entry->u.def.section, entry->u.def.section->owner);
+	  break;
+	default:
+	  abort ();
+	  break;
+	}
+    }
+  else
+    einfo (_(" relocation truncated to fit: %s against `%T'"),
+	   reloc_name, name);
   if (addend != 0)
     einfo ("+%v", addend);
   einfo ("\n");

@@ -4497,7 +4497,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    const char *name;
 
 	    if (h)
-	      name = h->root.root.string;
+	      name = NULL;
 	    else
 	      {
 		name = bfd_elf_string_from_elf_section (input_bfd,
@@ -4506,10 +4506,10 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		if (name == NULL)
 		  return FALSE;
 		if (*name == '\0')
-		  name = bfd_section_name (input_bfd, input_section);
+		  name = bfd_section_name (input_bfd, sym_sec);
 	      }
-	    if (!(*info->callbacks->reloc_overflow) (info, name,
-						     howto->name,
+	    if (!(*info->callbacks->reloc_overflow) (info, &h->root,
+						     name, howto->name,
 						     (bfd_vma) 0,
 						     input_bfd,
 						     input_section,

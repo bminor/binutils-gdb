@@ -2130,7 +2130,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		const char *name;
 
 		if (h != NULL)
-		  name = h->root.root.string;
+		  name = NULL;
 		else
 		  {
 		    name = (bfd_elf_string_from_elf_section
@@ -2141,8 +2141,9 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		      name = bfd_section_name (input_bfd, sec);
 		  }
 		if (! ((*info->callbacks->reloc_overflow)
-		       (info, name, howto->name, (bfd_vma) 0,
-			input_bfd, input_section, rel->r_offset)))
+		       (info, (h ? &h->root : NULL), name, howto->name,
+			(bfd_vma) 0, input_bfd, input_section,
+			rel->r_offset)))
 		  return FALSE;
 	      }
 	      break;

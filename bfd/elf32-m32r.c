@@ -3236,8 +3236,8 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	    case bfd_reloc_overflow:
 	      if (! ((*info->callbacks->reloc_overflow)
-		     (info, name, howto->name, (bfd_vma) 0,
-		      input_bfd, input_section, offset)))
+		     (info, (h ? &h->root : NULL), name, howto->name,
+		      (bfd_vma) 0, input_bfd, input_section, offset)))
 		return FALSE;
 	      break;
 

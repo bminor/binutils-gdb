@@ -1338,7 +1338,6 @@ elf_hppa_relocate_section (bfd *output_bfd,
       asection *sym_sec;
       bfd_vma relocation;
       bfd_reloc_status_type r;
-      const char *sym_name;
       const char *dyn_name;
       char *dynh_buf = NULL;
       size_t dynh_buflen = 0;
@@ -1463,19 +1462,6 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	    }
 	}
 
-      if (h != NULL)
-	sym_name = h->root.root.string;
-      else
-	{
-	  sym_name = bfd_elf_string_from_elf_section (input_bfd,
-						      symtab_hdr->sh_link,
-						      sym->st_name);
-	  if (sym_name == NULL)
-	    return FALSE;
-	  if (*sym_name == '\0')
-	    sym_name = bfd_section_name (input_bfd, sym_sec);
-	}
-
       r = elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 					input_section, contents,
 					relocation, info, sym_sec,
@@ -1489,9 +1475,25 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	      abort ();
 	    case bfd_reloc_overflow:
 	      {
+		const char *sym_name;
+		
+		if (h != NULL)
+		  sym_name = NULL;
+		else
+		  {
+		    sym_name = bfd_elf_string_from_elf_section (input_bfd,
+								symtab_hdr->sh_link,
+								sym->st_name);
+		    if (sym_name == NULL)
+		      return FALSE;
+		    if (*sym_name == '\0')
+		      sym_name = bfd_section_name (input_bfd, sym_sec);
+		  }
+
 		if (!((*info->callbacks->reloc_overflow)
-		      (info, sym_name, howto->name, (bfd_vma) 0,
-			input_bfd, input_section, rel->r_offset)))
+		      (info, (h ? &h->root : NULL), sym_name,
+		       howto->name, (bfd_vma) 0, input_bfd,
+		       input_section, rel->r_offset)))
 		  return FALSE;
 	      }
 	      break;

@@ -48,6 +48,7 @@ simple_dummy_undefined_symbol (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 
 static bfd_boolean
 simple_dummy_reloc_overflow (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+			     struct bfd_link_hash_entry *entry ATTRIBUTE_UNUSED,
 			     const char *name ATTRIBUTE_UNUSED,
 			     const char *reloc_name ATTRIBUTE_UNUSED,
 			     bfd_vma addend ATTRIBUTE_UNUSED,

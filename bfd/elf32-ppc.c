@@ -5746,6 +5746,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		}
 
 	      if (! (*info->callbacks->reloc_overflow) (info,
+							(h ? &h->root : NULL),
 							sym_name,
 							howto->name,
 							rel->r_addend,

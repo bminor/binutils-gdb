@@ -532,7 +532,7 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (symndx == -1)
 	    name = "*ABS*";
 	  else if (h != NULL)
-	    name = h->root.root.string;
+	    name = NULL;
 	  else if (sym == NULL)
 	    name = "*unknown*";
 	  else if (sym->_n._n_n._n_zeroes == 0
@@ -546,9 +546,9 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 
 	  if (! ((*info->callbacks->reloc_overflow)
-		 (info, name, howto_table[rel->r_type].name, (bfd_vma) 0,
-		  input_bfd, input_section,
-		  rel->r_vaddr - input_section->vma)))
+		 (info, (h ? &h->root : NULL), name,
+		  howto_table[rel->r_type].name, (bfd_vma) 0, input_bfd,
+		  input_section, rel->r_vaddr - input_section->vma)))
 	    return FALSE;
 	}
     }

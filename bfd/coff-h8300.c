@@ -685,7 +685,8 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       if (gap < -128 || gap > 126)
 	{
 	  if (! ((*link_info->callbacks->reloc_overflow)
-		 (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		 (link_info, NULL,
+		  bfd_asymbol_name (*reloc->sym_ptr_ptr),
 		  reloc->howto->name, reloc->addend, input_section->owner,
 		  input_section, reloc->address)))
 	    abort ();
@@ -716,7 +717,8 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       if (gap > 32766 || gap < -32768)
 	{
 	  if (! ((*link_info->callbacks->reloc_overflow)
-		 (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		 (link_info, NULL,
+		  bfd_asymbol_name (*reloc->sym_ptr_ptr),
 		  reloc->howto->name, reloc->addend, input_section->owner,
 		  input_section, reloc->address)))
 	    abort ();
@@ -805,7 +807,8 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       else
 	{
 	  if (! ((*link_info->callbacks->reloc_overflow)
-		 (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		 (link_info, NULL,
+		  bfd_asymbol_name (*reloc->sym_ptr_ptr),
 		  reloc->howto->name, reloc->addend, input_section->owner,
 		  input_section, reloc->address)))
 	    abort ();
@@ -828,7 +831,8 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       if (gap < -128 || gap > 126)
 	{
 	  if (! ((*link_info->callbacks->reloc_overflow)
-		 (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		 (link_info, NULL,
+		  bfd_asymbol_name (*reloc->sym_ptr_ptr),
 		  reloc->howto->name, reloc->addend, input_section->owner,
 		  input_section, reloc->address)))
 	    abort ();
@@ -874,7 +878,8 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       if (gap < -128 || gap > 126)
 	{
 	  if (! ((*link_info->callbacks->reloc_overflow)
-		 (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		 (link_info, NULL,
+		  bfd_asymbol_name (*reloc->sym_ptr_ptr),
 		  reloc->howto->name, reloc->addend, input_section->owner,
 		  input_section, reloc->address)))
 	    abort ();
@@ -1073,7 +1078,8 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       if (gap < -128 || gap > 126)
 	{
 	  if (! ((*link_info->callbacks->reloc_overflow)
-		 (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		 (link_info, NULL,
+		  bfd_asymbol_name (*reloc->sym_ptr_ptr),
 		  reloc->howto->name, reloc->addend, input_section->owner,
 		  input_section, reloc->address)))
 	    abort ();
@@ -1155,7 +1161,8 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	    else
 	      {
 		if (! ((*link_info->callbacks->reloc_overflow)
-		       (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		       (link_info, NULL,
+			bfd_asymbol_name (*reloc->sym_ptr_ptr),
 			reloc->howto->name, reloc->addend, input_section->owner,
 			input_section, reloc->address)))
 		  abort ();

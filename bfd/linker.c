@@ -2529,7 +2529,7 @@ _bfd_generic_reloc_link_order (bfd *abfd,
 	  abort ();
 	case bfd_reloc_overflow:
 	  if (! ((*info->callbacks->reloc_overflow)
-		 (info,
+		 (info, NULL,
 		  (link_order->type == bfd_section_reloc_link_order
 		   ? bfd_section_name (abfd, link_order->u.reloc.p->u.section)
 		   : link_order->u.reloc.p->u.name),

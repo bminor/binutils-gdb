@@ -532,7 +532,7 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       struct elf_link_hash_entry *h;
       bfd_vma relocation;
       bfd_reloc_status_type r;
-      const char *name = NULL;
+      const char *name;
       int r_type;
 
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -572,6 +572,8 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
 				   unresolved_reloc, warned);
+
+	  name = h->root.root.string;
 	}
 
       r = fr30_final_link_relocate (howto, input_bfd, input_section,
@@ -585,8 +587,8 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	    case bfd_reloc_overflow:
 	      r = info->callbacks->reloc_overflow
-		(info, name, howto->name, (bfd_vma) 0,
-		 input_bfd, input_section, rel->r_offset);
+		(info, (h ? &h->root : NULL), name, howto->name,
+		 (bfd_vma) 0, input_bfd, input_section, rel->r_offset);
 	      break;
 
 	    case bfd_reloc_undefined:

@@ -2941,8 +2941,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  if (r == bfd_reloc_overflow)
 	    {
 	      if (! ((*info->callbacks->reloc_overflow)
-		     (info, name, howto->name, 0,
-		      input_bfd, input_section, rel->r_offset)))
+		     (info, (h ? &h->root : NULL), name, howto->name,
+		      (bfd_vma) 0, input_bfd, input_section,
+		      rel->r_offset)))
 		return FALSE;
 	    }
 	  else

@@ -1145,7 +1145,8 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	      break;
 	    case bfd_reloc_overflow:
 	      if (! ((*link_info->callbacks->reloc_overflow)
-		     (link_info, bfd_asymbol_name (*rel->sym_ptr_ptr),
+		     (link_info, NULL,
+		      bfd_asymbol_name (*rel->sym_ptr_ptr),
 		      rel->howto->name, rel->addend, input_bfd,
 		      input_section, rel->address)))
 		goto error_return;
@@ -1960,7 +1961,8 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		      name = bfd_section_name (input_bfd,
 					       symndx_to_section[r_symndx]);
 		    if (! ((*info->callbacks->reloc_overflow)
-			   (info, name, alpha_howto_table[r_type].name,
+			   (info, NULL, name,
+			    alpha_howto_table[r_type].name,
 			    (bfd_vma) 0, input_bfd, input_section,
 			    r_vaddr - input_section->vma)))
 		      return FALSE;

@@ -868,8 +868,9 @@ elf32_crx_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	     case bfd_reloc_overflow:
 	       if (!((*info->callbacks->reloc_overflow)
-		     (info, name, howto->name, (bfd_vma) 0,
-		      input_bfd, input_section, rel->r_offset)))
+		     (info, (h ? &h->root : NULL), name, howto->name,
+		      (bfd_vma) 0, input_bfd, input_section,
+		      rel->r_offset)))
 		 return FALSE;
 	       break;
 

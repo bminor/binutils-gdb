@@ -2735,7 +2735,7 @@ _bfd_coff_reloc_link_order (bfd *output_bfd,
 	  abort ();
 	case bfd_reloc_overflow:
 	  if (! ((*finfo->info->callbacks->reloc_overflow)
-		 (finfo->info,
+		 (finfo->info, NULL,
 		  (link_order->type == bfd_section_reloc_link_order
 		   ? bfd_section_name (output_bfd,
 				       link_order->u.reloc.p->u.section)
@@ -3016,7 +3016,7 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	    if (symndx == -1)
 	      name = "*ABS*";
 	    else if (h != NULL)
-	      name = h->root.root.string;
+	      name = NULL;
 	    else
 	      {
 		name = _bfd_coff_internal_syment_name (input_bfd, sym, buf);
@@ -3025,8 +3025,9 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	      }
 
 	    if (! ((*info->callbacks->reloc_overflow)
-		   (info, name, howto->name, (bfd_vma) 0, input_bfd,
-		    input_section, rel->r_vaddr - input_section->vma)))
+		   (info, (h ? &h->root : NULL), name, howto->name,
+		    (bfd_vma) 0, input_bfd, input_section,
+		    rel->r_vaddr - input_section->vma)))
 	      return FALSE;
 	  }
 	}

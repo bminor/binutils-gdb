@@ -1,3 +1,81 @@
+2004-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 463
+	* aoutx.h (aout_link_input_section_std): Pass proper hash entry
+	to linker reloc_overflow callback.
+	(aout_link_input_section_ext): Likewise.
+	(aout_link_reloc_link_order): Likewise.
+	* coff-a29k.c (coff_a29k_relocate_section): Likewise.
+	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents):
+	Likewise.
+	(alpha_relocate_section): Likewise.
+	* coff-arm.c (coff_arm_relocate_section): Likewise.
+	* coff-h8300.c (h8300_reloc16_extra_cases): Likewise.
+	* coff-h8500.c (extra_case): Likewise.
+	* coff-i960.c (coff_i960_relocate_section): Likewise.
+	* coff-mcore.c (coff_mcore_relocate_section): Likewise.
+	* coff-mips.c (mips_relocate_section): Likewise.
+	* coff-or32.c (coff_or32_relocate_section): Likewise.
+	* coff-ppc.c (coff_ppc_relocate_section): Likewise.
+	* coff-rs6000.c (xcoff_ppc_relocate_section): Likewise.
+	* coff-sh.c (sh_relocate_section): Likewise.
+	* coff-tic80.c (coff_tic80_relocate_section): Likewise.
+	* coff-w65.c (w65_reloc16_extra_cases): Likewise.
+	* coff-z8k.c (extra_case): Likewise.
+	* coff64-rs6000.c (xcoff64_ppc_relocate_section): Likewise.
+	* cofflink.c (_bfd_coff_reloc_link_order): Likewise.
+	(_bfd_coff_generic_relocate_section): Likewise.
+	* ecoff.c (ecoff_reloc_link_order): Likewise.
+	* elf-hppa.h (elf_hppa_relocate_section): Likewise.
+	* elf-m10200.c (mn10200_elf_relocate_section): Likewise.
+	* elf-m10300.c (mn10300_elf_relocate_section): Likewise.
+	* elf32-arm.h (elf32_arm_relocate_section): Likewise.
+	* elf32-avr.c (elf32_avr_relocate_section): Likewise.
+	* elf32-cr16c.c (elf32_cr16c_relocate_section): Likewise.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
+	* elf32-crx.c (elf32_crx_relocate_section): Likewise.
+	* elf32-d10v.c (elf32_d10v_relocate_section): Likewise.
+	* elf32-fr30.c (fr30_elf_relocate_section): Likewise.
+	* elf32-frv.c (elf32_frv_relocate_section): Likewise.
+	* elf32-h8300.c (elf32_h8_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
+	* elf32-i370.c (i370_elf_relocate_section): Likewise.
+	* elf32-i386.c (elf_i386_relocate_section): Likewise.
+	* elf32-i860.c (elf32_i860_relocate_section): Likewise.
+	* elf32-ip2k.c (ip2k_elf_relocate_section): Likewise.
+	* elf32-iq2000.c (iq2000_elf_relocate_section): Likewise.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf32-m68hc1x.c (elf32_m68hc11_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-mcore.c (mcore_elf_relocate_section): Likewise.
+	* elf32-msp430.c (elf32_msp430_relocate_section): Likewise.
+	* elf32-openrisc.c (openrisc_elf_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf32-v850.c (v850_elf_relocate_section): Likewise.
+	* elf32-vax.c (elf_vax_relocate_section): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+	* elf64-mmix.c (mmix_elf_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-sh64.c (sh_elf64_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	* elflink.c (elf_reloc_link_order): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Likewise.
+	(_bfd_elf_mips_get_relocated_section_contents): Likewise.
+	* linker.c (_bfd_generic_reloc_link_order): Likewise.
+	* pdp11.c (pdp11_aout_link_input_section): Likewise.
+	(aout_link_reloc_link_order): Likewise.
+	* reloc.c (bfd_generic_get_relocated_section_contents):
+	Likewise.
+	* xcofflink.c (xcoff_reloc_link_order): Likewise.
+	* simple.c (simple_dummy_reloc_overflow): Updated.
+
 2004-10-20  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (elf_m68k_plt_sym_val): New function.

@@ -4697,7 +4697,7 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
 	  abort ();
 	case bfd_reloc_overflow:
 	  if (! ((*info->callbacks->reloc_overflow)
-		 (info,
+		 (info, NULL,
 		  (link_order->type == bfd_section_reloc_link_order
 		   ? bfd_section_name (output_bfd, section)
 		   : link_order->u.reloc.p->u.name),

@@ -3481,7 +3481,7 @@ xcoff_ppc_relocate_section (output_bfd, info, input_bfd,
 	    }
 	  else if (h != NULL)
 	    {
-	      name = h->root.root.string;
+	      name = NULL;
 	    }
 	  else
 	    {
@@ -3492,8 +3492,9 @@ xcoff_ppc_relocate_section (output_bfd, info, input_bfd,
 	  sprintf (reloc_type_name, "0x%02x", rel->r_type);
 
 	  if (! ((*info->callbacks->reloc_overflow)
-		 (info, name, reloc_type_name, (bfd_vma) 0, input_bfd,
-		  input_section, rel->r_vaddr - input_section->vma)))
+		 (info, (h ? &h->root : NULL), name, reloc_type_name,
+		  (bfd_vma) 0, input_bfd, input_section,
+		  rel->r_vaddr - input_section->vma)))
 	    return FALSE;
 	}
 

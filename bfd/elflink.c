@@ -7216,7 +7216,8 @@ elf_reloc_link_order (bfd *output_bfd,
 	  else
 	    sym_name = link_order->u.reloc.p->u.name;
 	  if (! ((*info->callbacks->reloc_overflow)
-		 (info, sym_name, howto->name, addend, NULL, NULL, 0)))
+		 (info, NULL, sym_name, howto->name, addend, NULL,
+		  NULL, (bfd_vma) 0)))
 	    {
 	      free (buf);
 	      return FALSE;
