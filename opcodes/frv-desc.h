@@ -763,6 +763,7 @@ extern CGEN_KEYWORD frv_cgen_opval_h_pack;
 extern CGEN_KEYWORD frv_cgen_opval_h_hint_taken;
 extern CGEN_KEYWORD frv_cgen_opval_h_hint_not_taken;
 
+extern const CGEN_HW_ENTRY frv_cgen_hw_table[];
 
 
 

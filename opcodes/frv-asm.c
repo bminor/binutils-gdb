@@ -476,7 +476,7 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_cccr_names, & fields->f_CCi);
       break;
     case FRV_OPERAND_CPRDOUBLEK :
-      errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_cpr_names, & fields->f_CPRk);
+      errmsg = parse_even_register (cd, strp, & frv_cgen_opval_cpr_names, & fields->f_CPRk);
       break;
     case FRV_OPERAND_CPRI :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_cpr_names, & fields->f_CPRi);
@@ -515,13 +515,13 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_fccr_names, & fields->f_FCCk);
       break;
     case FRV_OPERAND_FRDOUBLEI :
-      errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRi);
+      errmsg = parse_even_register (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRi);
       break;
     case FRV_OPERAND_FRDOUBLEJ :
-      errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRj);
+      errmsg = parse_even_register (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRj);
       break;
     case FRV_OPERAND_FRDOUBLEK :
-      errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRk);
+      errmsg = parse_even_register (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRk);
       break;
     case FRV_OPERAND_FRI :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRi);
@@ -557,7 +557,7 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRk);
       break;
     case FRV_OPERAND_GRDOUBLEK :
-      errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_gr_names, & fields->f_GRk);
+      errmsg = parse_even_register (cd, strp, & frv_cgen_opval_gr_names, & fields->f_GRk);
       break;
     case FRV_OPERAND_GRI :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_gr_names, & fields->f_GRi);

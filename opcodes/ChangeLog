@@ -1,3 +1,7 @@
+2003-10-10  Dave Brolley  <brolley@redhat.com>
+
+	* frv-asm.c,frv-desc.c,frv-opc.c: Regenerated.
+
 2003-10-08  Dave Brolley  <brolley@redhat.com>
 
 	* frv-desc.[ch], frv-opc.[ch]: Regenerated.
