@@ -124,7 +124,6 @@ do_format_1_2 (insn)
      uint32 insn;
 {
   struct hash_entry *h;
-  printf("format 1 or 2 0x%x\n", insn);
 
   h = lookup_hash (insn);
   OP[0] = insn & 0x1f;
@@ -137,7 +136,6 @@ do_format_3 (insn)
      uint32 insn;
 {
   struct hash_entry *h;
-  printf("format 3 0x%x\n", insn);
 
   h = lookup_hash (insn);
   OP[0] = (((insn & 0x70) >> 4) | ((insn & 0xf800) >> 8)) << 1;
@@ -149,7 +147,6 @@ do_format_4 (insn)
      uint32 insn;
 {
   struct hash_entry *h;
-  printf("format 4 0x%x\n", insn);
 
   h = lookup_hash (insn);
   OP[0] = (insn >> 11) & 0x1f;
@@ -162,7 +159,6 @@ do_format_5 (insn)
      uint32 insn;
 {
   struct hash_entry *h;
-  printf("format 5 0x%x\n", insn);
 
   h = lookup_hash (insn);
   OP[0] = ((insn & 0x3f) | (((insn >> 17) & 0x7fff) << 6)) << 1;
@@ -175,7 +171,6 @@ do_format_6 (insn)
      uint32 insn;
 {
   struct hash_entry *h;
-  printf("format 6 0x%x\n", insn);
 
   h = lookup_hash (insn);
   OP[0] = (insn >> 16) & 0xffff;
@@ -189,7 +184,6 @@ do_format_7 (insn)
      uint32 insn;
 {
   struct hash_entry *h;
-  printf("format 7 0x%x\n", insn);
 
   h = lookup_hash (insn);
   OP[0] = insn & 0x1f;
@@ -203,7 +197,6 @@ do_format_8 (insn)
      uint32 insn;
 {
   struct hash_entry *h;
-  printf("format 8 0x%x\n", insn);
 
   h = lookup_hash (insn);
   OP[0] = insn & 0x1f;
@@ -217,7 +210,6 @@ do_formats_9_10 (insn)
      uint32 insn;
 {
   struct hash_entry *h;
-  printf("formats 9 and 10 0x%x\n", insn);
 
   h = lookup_hash (insn);
   OP[0] = insn & 0x1f;
@@ -260,7 +252,6 @@ sim_write (addr, buffer, size)
   int i;
   init_system ();
 
-  /* printf ("sim_write %d bytes to 0x%x\n",size,addr); */
   for (i = 0; i < size; i++)
     {
       State.mem[i+addr] = buffer[i]; 
@@ -327,7 +318,6 @@ sim_resume (step, siggnal)
   int i;
   reg_t oldpc;
 
-/*   printf ("sim_resume (%d,%d)  PC=0x%x\n",step,siggnal,PC); */
 
  if (step)
    State.exception = SIGTRAP;
@@ -408,7 +398,6 @@ sim_create_inferior (start_address, argv, env)
      char **argv;
      char **env;
 {
-  printf ("sim_create_inferior:  PC=0x%x\n",start_address);
   PC = start_address;
 }
 
@@ -423,7 +412,6 @@ void
 sim_set_callbacks(p)
      host_callback *p;
 {
-  printf ("sim_set_callbacks\n");
   /* callback = p; */
 }
 
@@ -432,7 +420,6 @@ sim_stop_reason (reason, sigrc)
      enum sim_stop *reason;
      int *sigrc;
 {
-/*   printf ("sim_stop_reason:  PC=0x%x\n",PC); */
 
   if (State.exception == SIGQUIT)
     {
@@ -452,7 +439,6 @@ sim_fetch_register (rn, memory)
      unsigned char *memory;
 {
   *(uint32 *)memory = State.regs[rn];
-  /* printf ("sim_fetch_register %d 0x%x\n",rn,State.regs[rn]); */
 }
  
 void
@@ -461,7 +447,6 @@ sim_store_register (rn, memory)
      unsigned char *memory;
 {
   State.regs[rn]= *(uint32 *)memory;
-  /* printf ("store: r%d=0x%x\n",rn,State.regs[rn]); */
 }
 
 sim_read (addr, buffer, size)
