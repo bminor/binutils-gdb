@@ -1284,7 +1284,7 @@ bfd_get_section_by_name PARAMS ((bfd *abfd, const char *name));
 
 char *
 bfd_get_unique_section_name PARAMS ((bfd *abfd,
-    const char *template,
+    const char *templat,
     int *count));
 
 asection *

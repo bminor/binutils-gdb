@@ -649,30 +649,30 @@ FUNCTION
 
 SYNOPSIS
 	char *bfd_get_unique_section_name(bfd *abfd,
-					  const char *template,
+					  const char *templat,
 					  int *count);
 
 DESCRIPTION
 	Invent a section name that is unique in @var{abfd} by tacking
-	a digit suffix onto the original @var{template}.  If @var{count}
+	a digit suffix onto the original @var{templat}.  If @var{count}
 	is non-NULL, then it specifies the first number	tried as a
 	suffix to generate a unique name.  The value pointed to by
 	@var{count} will be incremented in this case.
 */
 
 char *
-bfd_get_unique_section_name (abfd, template, count)
+bfd_get_unique_section_name (abfd, templat, count)
      bfd *abfd;
-     const char *template;
+     const char *templat;
      int *count;
 {
   int num;
   unsigned int len;
   char *sname;
 
-  len = strlen (template);
+  len = strlen (templat);
   sname = bfd_malloc (len + 7);
-  strcpy (sname, template);
+  strcpy (sname, templat);
   num = 1;
   if (count != NULL)
     num = *count;

@@ -1,3 +1,9 @@
+2000-09-06  Alan Modra  <alan@linuxcare.com.au>
+
+	* section.c (bfd_get_unique_section_name): Avoid c++ reserved
+	word for variable name.
+	* bfd-in2.h: Regenerate.
+	
 2000-09-05  Nick Clifton  <nickc@redhat.com>
 
 	* config.in: Regenerate.
