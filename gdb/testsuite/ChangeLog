@@ -5,6 +5,11 @@ Mon Jan  4 10:06:43 1999  David Taylor  <taylor@texas.cygnus.com>
  	Edith Epstein <eepstein@cygnus.com> as part of a project to merge
  	in changes by HP.
 	
+	* lib/gdb.exp (get_compiler_info): new, optional argument -- args;
+	test for on hppa*-*-hpux*; use args to see if c++ was specified.
+	(skip_hp_tests): new function.
+	(gdb_preprocess): new function.
+
 	* configure.in (hpdir): decide whether to configure gdb.hp.
 	* configure: regenerated.
 
