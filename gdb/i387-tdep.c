@@ -22,12 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "language.h"
 #include "gdbcore.h"
-#include "ieee-float.h"
-
-struct ext_format ext_format_i387 = {
-/* tot sbyte smask expbyte	manbyte */
-   10, 9,    0x80, 9,8,		4,0		/* i387 */
-};
+#include "floatformat.h"
 
 /* FIXME:  Eliminate these routines when we have the time to change all
    the callers.  */
@@ -37,7 +32,7 @@ i387_to_double (from, to)
      char *from;
      char *to;
 {
-  ieee_extended_to_double (&ext_format_i387, from, (double *)to);
+  floatformat_to_double (&floatformat_i387_ext, from, (double *)to);
 }
 
 void
@@ -45,7 +40,7 @@ double_to_i387 (from, to)
      char *from;
      char *to;
 {
-  double_to_ieee_extended (&ext_format_i387, (double *)from, to);
+  floatformat_from_double (&floatformat_i387_ext, (double *)from, to);
 }
 
 void

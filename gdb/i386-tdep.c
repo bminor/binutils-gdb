@@ -22,7 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "gdbcore.h"
 #include "target.h"
+<<<<<<< i386-tdep.c
+#include "floatformat.h"
+||||||| 1.26
+=======
 #include "symtab.h"
+>>>>>>> 1.27
 
 static long
 i386_get_frame_setup PARAMS ((int));
@@ -618,12 +623,11 @@ i386_extract_return_value(type, regbuf, valbuf)
 {
   if (TYPE_CODE_FLT == TYPE_CODE(type))
     {
-      extern struct ext_format ext_format_i387;
       double d;
       /* 387 %st(0), gcc uses this */
-      ieee_extended_to_double (&ext_format_i387,
-			       &regbuf[REGISTER_BYTE(FP0_REGNUM)],
-			       &d);
+      floatformat_to_double (&floatformat_i387_ext,
+			     &regbuf[REGISTER_BYTE(FP0_REGNUM)],
+			     &d);
       store_floating (valbuf, TYPE_LENGTH (type), d);
     }
   else

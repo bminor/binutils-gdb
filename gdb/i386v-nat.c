@@ -41,11 +41,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/reg.h>
 #endif
 
-#include "ieee-float.h"
+#include "floatformat.h"
 
 #include "target.h"
 
-extern struct ext_format ext_format_i387;
 
 /* this table must line up with REGISTER_NAMES in tm-i386v.h */
 /* symbols like 'EAX' come from <sys/reg.h> */
