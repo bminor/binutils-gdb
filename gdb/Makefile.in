@@ -1548,9 +1548,9 @@ breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(objfiles_h) $(linespec_h) $(completer_h) $(gdb_h) $(ui_out_h) \
 	$(cli_script_h) $(gdb_events_h) $(source_h)
 buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
-	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(complaints_h) \
-	$(gdb_string_h) $(expression_h) $(language_h) $(bcache_h) \
-	$(filenames_h) $(macrotab_h) $(demangle_h) $(buildsym_h) \
+	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(gdb_assert_h) \
+	$(complaints_h)	$(gdb_string_h) $(expression_h) $(language_h) \
+	$(bcache_h) $(filenames_h) $(macrotab_h) $(demangle_h) $(buildsym_h) \
 	$(stabsread_h)
 builtin-regs.o: builtin-regs.c $(defs_h) $(builtin_regs_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(gdb_assert_h)
