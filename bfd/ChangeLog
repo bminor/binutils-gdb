@@ -1,3 +1,9 @@
+Thu Sep 29 15:21:44 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* syms.c (bfd_print_symbol_vandf): Show BSF_LOCAL and BSF_GLOBAL
+	in one column.  Use the column freed up to show BSF_FUNCTION and
+	BSF_FILE.
+
 Thu Sep 29 12:29:01 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* syms.c (stt): Add .rdata and .rodata.
