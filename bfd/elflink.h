@@ -19,12 +19,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* ELF linker code.  */
 
+/* This struct is used to pass information to routines called via
+   elf_link_hash_traverse which must return failure.  */
+
+struct elf_info_failed
+{
+  boolean failed;
+  struct bfd_link_info *info;
+};
+
 static boolean elf_link_add_object_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_link_add_archive_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_export_symbol
   PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean elf_fix_symbol_flags
+  PARAMS ((struct elf_link_hash_entry *, struct elf_info_failed *));
 static boolean elf_adjust_dynamic_symbol
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_link_find_version_dependencies
@@ -35,15 +46,6 @@ static boolean elf_link_assign_sym_version
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_link_renumber_dynsyms
   PARAMS ((struct elf_link_hash_entry *, PTR));
-
-/* This struct is used to pass information to routines called via
-   elf_link_hash_traverse which must return failure.  */
-
-struct elf_info_failed
-{
-  boolean failed;
-  struct bfd_link_info *info;
-};
 
 /* Given an ELF BFD, add symbols to the global hash table as
    appropriate.  */
@@ -2040,6 +2042,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   bfd *dynobj;
   struct elf_backend_data *bed;
   bfd_size_type old_dynsymcount;
+  struct elf_assign_sym_version_info asvinfo;
 
   *sinterpptr = NULL;
 
@@ -2138,6 +2141,20 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    }
 	}
 
+      /* Attach all the symbols to their version information.  */
+      asvinfo.output_bfd = output_bfd;
+      asvinfo.info = info;
+      asvinfo.verdefs = verdefs;
+      asvinfo.export_dynamic = export_dynamic;
+      asvinfo.removed_dynamic = false;
+      asvinfo.failed = false;
+
+      elf_link_hash_traverse (elf_hash_table (info),
+			      elf_link_assign_sym_version,
+			      (PTR) &asvinfo);
+      if (asvinfo.failed)
+	return false;
+
       /* Find all symbols which were defined in a dynamic object and make
 	 the backend pick a reasonable value for them.  */
       eif.failed = false;
@@ -2192,30 +2209,14 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       size_t i;
       size_t bucketcount = 0;
       Elf_Internal_Sym isym;
-      struct elf_assign_sym_version_info sinfo;
 
       /* Set up the version definition section.  */
       s = bfd_get_section_by_name (dynobj, ".gnu.version_d");
       BFD_ASSERT (s != NULL);
 
-      /* Attach all the symbols to their version information.  This
-         may cause some symbols to be unexported.  */
-      sinfo.output_bfd = output_bfd;
-      sinfo.info = info;
-      sinfo.verdefs = verdefs;
-      sinfo.export_dynamic = export_dynamic;
-      sinfo.removed_dynamic = false;
-      sinfo.failed = false;
-
-      elf_link_hash_traverse (elf_hash_table (info),
-			      elf_link_assign_sym_version,
-			      (PTR) &sinfo);
-      if (sinfo.failed)
-	return false;
-
       /* We may have created additional version definitions if we are
          just linking a regular application.  */
-      verdefs = sinfo.verdefs;
+      verdefs = asvinfo.verdefs;
 
       if (verdefs == NULL)
 	{
@@ -2238,7 +2239,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  Elf_Internal_Verdef def;
 	  Elf_Internal_Verdaux defaux;
 
-	  if (sinfo.removed_dynamic)
+	  if (asvinfo.removed_dynamic)
 	    {
 	      /* Some dynamic symbols were changed to be local
 		 symbols.  In this case, we renumber all of the
@@ -2602,23 +2603,17 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   return true;
 }
 
-/* Make the backend pick a good value for a dynamic symbol.  This is
-   called via elf_link_hash_traverse, and also calls itself
-   recursively.  */
+/* Fix up the flags for a symbol.  This handles various cases which
+   can only be fixed after all the input files are seen.  This is
+   currently called by both adjust_dynamic_symbol and
+   assign_sym_version, which is unnecessary but perhaps more robust in
+   the face of future changes.  */
 
 static boolean
-elf_adjust_dynamic_symbol (h, data)
+elf_fix_symbol_flags (h, eif)
      struct elf_link_hash_entry *h;
-     PTR data;
+     struct elf_info_failed *eif;
 {
-  struct elf_info_failed *eif = (struct elf_info_failed *) data;
-  bfd *dynobj;
-  struct elf_backend_data *bed;
-
-  /* Ignore indirect symbols.  These are added by the versioning code.  */
-  if (h->root.type == bfd_link_hash_indirect)
-    return true;
-
   /* If this symbol was mentioned in a non-ELF file, try to set
      DEF_REGULAR and REF_REGULAR correctly.  This is the only way to
      permit a non-ELF file to correctly refer to a symbol defined in
@@ -2638,8 +2633,9 @@ elf_adjust_dynamic_symbol (h, data)
 	    h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	}
 
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-	  || (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0)
+      if (h->dynindx == -1
+	  && ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	      || (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0))
 	{
 	  if (! _bfd_elf_link_record_dynamic_symbol (eif->info, h))
 	    {
@@ -2670,6 +2666,30 @@ elf_adjust_dynamic_symbol (h, data)
       && eif->info->symbolic
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
     h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
+
+  return true;
+}
+
+/* Make the backend pick a good value for a dynamic symbol.  This is
+   called via elf_link_hash_traverse, and also calls itself
+   recursively.  */
+
+static boolean
+elf_adjust_dynamic_symbol (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  struct elf_info_failed *eif = (struct elf_info_failed *) data;
+  bfd *dynobj;
+  struct elf_backend_data *bed;
+
+  /* Ignore indirect symbols.  These are added by the versioning code.  */
+  if (h->root.type == bfd_link_hash_indirect)
+    return true;
+
+  /* Fix the symbol flags.  */
+  if (! elf_fix_symbol_flags (h, eif))
+    return false;
 
   /* If this symbol does not require a PLT entry, and it is not
      defined by a dynamic object, or is not referenced by a regular
@@ -2875,7 +2895,18 @@ elf_link_assign_sym_version (h, data)
   struct elf_assign_sym_version_info *sinfo =
     (struct elf_assign_sym_version_info *) data;
   struct bfd_link_info *info = sinfo->info;
+  struct elf_info_failed eif;
   char *p;
+
+  /* Fix the symbol flags.  */
+  eif.failed = false;
+  eif.info = info;
+  if (! elf_fix_symbol_flags (h, &eif))
+    {
+      if (eif.failed)
+	sinfo->failed = true;
+      return false;
+    }
 
   /* We only need version numbers for symbols defined in regular
      objects.  */
@@ -2939,12 +2970,12 @@ elf_link_assign_sym_version (h, data)
 			{
 			  if (h->dynindx != -1
 			      && info->shared
-			      && ! sinfo->export_dynamic
-			      && (h->elf_link_hash_flags
-				  & ELF_LINK_HASH_NEEDS_PLT) == 0)
+			      && ! sinfo->export_dynamic)
 			    {
 			      sinfo->removed_dynamic = true;
 			      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+			      h->elf_link_hash_flags &=~
+				ELF_LINK_HASH_NEEDS_PLT;
 			      h->dynindx = -1;
 			      /* FIXME: The name of the symbol has
 				 already been recorded in the dynamic
@@ -3024,7 +3055,7 @@ elf_link_assign_sym_version (h, data)
       struct bfd_elf_version_expr *d;
 
       /* See if can find what version this symbol is in.  If the
-         symbol is supposed to eb local, then don't actually register
+         symbol is supposed to be local, then don't actually register
          it.  */
       deflt = NULL;
       for (t = sinfo->verdefs; t != NULL; t = t->next)
@@ -3055,12 +3086,11 @@ elf_link_assign_sym_version (h, data)
 		      h->verinfo.vertree = t;
 		      if (h->dynindx != -1
 			  && info->shared
-			  && ! sinfo->export_dynamic
-			  && (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_NEEDS_PLT) == 0)
+			  && ! sinfo->export_dynamic)
 			{
 			  sinfo->removed_dynamic = true;
 			  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+			  h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
 			  h->dynindx = -1;
 			  /* FIXME: The name of the symbol has already
 			     been recorded in the dynamic string table
@@ -3080,11 +3110,11 @@ elf_link_assign_sym_version (h, data)
 	  h->verinfo.vertree = deflt;
 	  if (h->dynindx != -1
 	      && info->shared
-	      && ! sinfo->export_dynamic
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) == 0)
+	      && ! sinfo->export_dynamic)
 	    {
 	      sinfo->removed_dynamic = true;
 	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+	      h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
 	      h->dynindx = -1;
 	      /* FIXME: The name of the symbol has already been
 		 recorded in the dynamic string table section.  */
@@ -4147,7 +4177,6 @@ elf_link_output_extsym (h, data)
   if (h->dynindx != -1
       && elf_hash_table (finfo->info)->dynamic_sections_created)
     {
-      struct elf_backend_data *bed;
       char *p, *copy;
       const char *name;
       size_t bucketcount;

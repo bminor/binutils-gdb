@@ -1,3 +1,15 @@
+Mon Jun 16 12:31:29 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Call
+	elf_link_assign_sym_version before elf_adjust_dynamic_symbol.
+	(elf_fix_symbol_flags): New static function, broken out of
+	elf_adjust_dynamic_symbol.
+	(elf_adjust_dynamic_symbol): Call elf_fix_symbol_flags.
+	(elf_link_assign_sym_version): Likewise.  Permit a symbol to be
+	forced local even if NEEDS_PLT is set.  When forcing a symbol to
+	be local, clear NEEDS_PLT.
+	(elf_link_output_extsym): Remove unused local bed.
+
 Wed Jun 11 22:44:20 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10300.c (elf32_mn10300_link_hash_entry): New structure
