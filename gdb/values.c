@@ -1212,36 +1212,31 @@ value_from_double (struct type *type, DOUBLEST num)
 /* ARGSUSED */
 struct value *
 value_being_returned (struct type *valtype, struct regcache *retbuf,
-		      int struct_return, CORE_ADDR struct_addr)
+		      int struct_return)
 {
   struct value *val;
   CORE_ADDR addr;
 
-  if (struct_return)
-    {
-      if (struct_addr != 0)
-	{
-	  /* Struct return addr supplied by hand_function_call.  */
-	  return value_at (valtype, struct_addr, NULL);
-	}
-      /* If one of these is not defined, just use EXTRACT_RETURN_VALUE
-	 instead.  */
-      else if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
-	{
-	  addr = EXTRACT_STRUCT_VALUE_ADDRESS (retbuf);
-	  if (!addr)
-	    error ("Function return value unknown.");
-	  return value_at (valtype, addr, NULL);
-	}
-      else if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
-	{
-	  char *buf = deprecated_grub_regcache_for_registers (retbuf);
-	  addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (buf);
-	  if (!addr)
-	    error ("Function return value unknown.");
-	  return value_at (valtype, addr, NULL);
-	}
-    }
+  /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
+  if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
+    if (struct_return)
+      {
+	addr = EXTRACT_STRUCT_VALUE_ADDRESS (retbuf);
+	if (!addr)
+	  error ("Function return value unknown.");
+	return value_at (valtype, addr, NULL);
+      }
+
+  /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
+  if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
+    if (struct_return)
+      {
+	char *buf = deprecated_grub_regcache_for_registers (retbuf);
+	addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (buf);
+	if (!addr)
+	  error ("Function return value unknown.");
+	return value_at (valtype, addr, NULL);
+      }
 
   val = allocate_value (valtype);
   CHECK_TYPEDEF (valtype);

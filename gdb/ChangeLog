@@ -1,3 +1,8 @@
+2003-07-31  Michael Snyder  <msnyder@redhat.com>
+
+	* value.h, values.c, infcall.c, infcmd.c: Revert 07-30 change,
+	which is already covered by the new frames infrastructure.
+
 2003-07-31  Andrew Cagney  <cagney@redhat.com>
 
 	* user-regs.c (struct user_reg): Add "next" link.
@@ -21,7 +26,7 @@
 
 2003-07-30  Michael Snyder  <msnyder@redhat.com>
 
-	* structs.h (value_being_returned): Add a struct_addr argument.
+	* value.h (value_being_returned): Add a struct_addr argument.
 	* infcall.c (call_function_by_hand): Pass struct_addr to 
 	value_being_returned.
 	* infcmd.c (print_return_value): Pass zero as struct_addr.

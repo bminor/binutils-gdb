@@ -1056,10 +1056,8 @@ the function call).", name);
     }
   else
     {
-      struct value *retval = value_being_returned (value_type,
-						   retbuf,
-						   struct_return,
-						   struct_addr);
+      struct value *retval = value_being_returned (value_type, retbuf,
+						   struct_return);
       do_cleanups (retbuf_cleanup);
       return retval;
     }
