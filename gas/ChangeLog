@@ -1,3 +1,7 @@
+Sat Sep  6 19:38:12 1997  Fred Fish  <fnf@ninemoons.com>
+
+	* read.h (s_lcomm_bytes): Add prototype (for real this time).
+
 Thu Sep  4 12:10:01 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-elf.c (elf_frob_symbol): Only set BSF_OBJECT for
