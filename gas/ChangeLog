@@ -1,3 +1,7 @@
+2002-01-26  Nick Clifton <nick@redhat.com>
+
+	* po/fr.po: Updated version
+
 2002-01-24  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-h8300.c (check_operand): Don't print a warning
