@@ -55,6 +55,7 @@ i386go32.sh
 i386linux.sh
 i386lynx.sh
 i386mach.sh
+i386nw.sh
 lnk960.sh
 m68kaout.sh
 m68kcoff.sh
@@ -66,6 +67,7 @@ mipsidt.sh
 mipsidtl.sh
 mipslit.sh
 news.sh
+ppcnw.sh
 sa29200.sh
 sh.sh
 sparclynx.sh

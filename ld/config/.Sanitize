@@ -50,6 +50,7 @@ i386-go32.mt
 i386-linux.mt
 i386-lynx.mt
 i386-mach.mt
+i386-nw.mt
 i386bsd.mh
 i386sco.mh
 i386v.mh
@@ -76,6 +77,7 @@ mips-lit.mt
 news.mt
 ose68.mt
 ppc-elf32.mt
+ppc-nw.mt
 rtbsd.mh
 sa29200.mt
 solaris2.mh

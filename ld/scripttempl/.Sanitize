@@ -48,6 +48,7 @@ m68klynx.sc
 m88kbcs.sc
 mips.sc
 mipsbsd.sc
+nw.sc
 sa29200.sc
 sh.sc
 sparccoff.sc
