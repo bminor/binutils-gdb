@@ -1,3 +1,8 @@
+2002-04-05  J. Brobecker  <brobecker@gnat.com>
+
+	* gdb.gdb/xfullpath.exp: New test, to exercise the new
+	xfullpath () function.
+
 2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.asm/Makefile.in: Correct dependencies.
