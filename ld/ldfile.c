@@ -1,5 +1,5 @@
 /* Linker file opening and searching.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002
+   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -88,6 +88,11 @@ ldfile_add_library_path (name, cmdline)
   new->cmdline = cmdline;
   *search_tail_ptr = new;
   search_tail_ptr = &new->next;
+
+  /* If a directory is marked as honoring sysroot, prepend the sysroot path
+     now.  */
+  if (new->name[0] == '=')
+    new->name = concat (ld_sysroot, &new->name[1], NULL);
 }
 
 /* Try to open a BFD for a lang_input_statement.  */

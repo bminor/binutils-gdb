@@ -1,6 +1,6 @@
 . ${srcdir}/emulparams/hppa64linux.sh
 OUTPUT_FORMAT="elf64-hppa"
-LIB_PATH=/usr/lib/pa20_64:/opt/langtools/lib/pa20_64
+LIB_PATH="=/usr/lib/pa20_64:=/opt/langtools/lib/pa20_64"
 TEXT_START_ADDR=0x4000000000001000
 DATA_ADDR=0x8000000000001000
 TARGET_PAGE_SIZE=4096

@@ -3,12 +3,12 @@
 #
 # Usage: genscripts.sh srcdir libdir exec_prefix \
 #        host target target_alias default_emulation \
-#        native_lib_dirs this_emulation tool_dir
+#        native_lib_dirs use_sysroot this_emulation tool_dir
 #
 # Sample usage:
 # genscripts.sh /djm/ld-devo/devo/ld /usr/local/lib /usr/local \
 #  sparc-sun-sunos4.1.3 sparc-sun-sunos4.1.3 sparc-sun-sunos4.1.3 sun4 \
-#  "" sun3 sparc-sun-sunos4.1.3
+#  "" no sun3 sparc-sun-sunos4.1.3
 # produces sun3.x sun3.xbn sun3.xn sun3.xr sun3.xu em_sun3.c
 
 srcdir=$1
@@ -19,8 +19,10 @@ target=$5
 target_alias=$6
 EMULATION_LIBPATH=$7
 NATIVE_LIB_DIRS=$8
-EMULATION_NAME=$9
+use_sysroot=$9
 shift 9
+EMULATION_NAME=$1
+shift
 # Can't use ${1:-$target_alias} here due to an Ultrix shell bug.
 if [ "x$1" = "x" ] ; then
   tool_lib=${exec_prefix}/${target_alias}/lib
@@ -37,31 +39,66 @@ else
   mkdir ldscripts
 fi
 
+# Set some flags for the emultempl scripts.  USE_LIBPATH will
+# be set for any libpath-using emulation; NATIVE will be set for a
+# libpath-using emulation where ${host} = ${target}.  NATIVE
+# may already have been set by the emulparams file, but that's OK
+# (it'll just get set to "yes" twice).
+
+case " $EMULATION_LIBPATH " in
+  *" ${EMULATION_NAME} "*)
+    if [ "x${host}" = "x${target}" ] ; then
+      NATIVE=yes
+      USE_LIBPATH=yes
+    elif [ "x${use_sysroot}" = "xyes" ] ; then
+      USE_LIBPATH=yes
+    fi
+    ;;
+esac
+
+# If the emulparams file sets NATIVE, make sure USE_LIBPATH is set also.
+if test "x$NATIVE" = "xyes" ; then
+  USE_LIBPATH=yes
+fi
+
 # Set the library search path, for libraries named by -lfoo.
 # If LIB_PATH is defined (e.g., by Makefile) and non-empty, it is used.
 # Otherwise, the default is set here.
 #
 # The format is the usual list of colon-separated directories.
 # To force a logically empty LIB_PATH, do LIBPATH=":".
+#
+# If we are using a sysroot, prefix library paths with "=" to indicate this.
+#
+# If the emulparams file set LIBPATH_SUFFIX, prepend an extra copy of
+# the library path with the suffix applied.
 
-if [ "x${LIB_PATH}" = "x" ] ; then
-  if [ "x${host}" = "x${target}" ] ; then
-    case " $EMULATION_LIBPATH " in
-      *" ${EMULATION_NAME} "*)
-        # Native, and default or emulation requesting LIB_PATH.
-	LIB_PATH=${libdir}
-	for lib in ${NATIVE_LIB_DIRS}; do
-	  case :${LIB_PATH}: in
-	    *:${lib}:*) ;;
-	    *) LIB_PATH=${LIB_PATH}:${lib} ;;
-	  esac
-	done
+if [ "x${LIB_PATH}" = "x" ] && [ "x${USE_LIBPATH}" = xyes ] ; then
+  if [ x"$use_sysroot" != xyes ] ; then
+    LIB_PATH=${libdir}
+  fi
+  for lib in ${NATIVE_LIB_DIRS}; do
+    # The "=" is harmless if we aren't using a sysroot, but also needless.
+    if [ "x${use_sysroot}" = "xyes" ] ; then
+      lib="=${lib}"
+    fi
+    case :${LIB_PATH}: in
+      *:${lib}:*) ;;
+      ::) LIB_PATH=${lib} ;;
+      *) LIB_PATH=${LIB_PATH}:${lib} ;;
     esac
+  done
+  if test -n "$LIBPATH_SUFFIX" ; then
+    LIB_PATH=`echo ${LIB_PATH}: | sed -e s,:,${LIBPATH_SUFFIX}:,g`$LIB_PATH
   fi
 fi
 
-# Always search $(tooldir)/lib, aka /usr/local/TARGET/lib.
-LIB_PATH=${tool_lib}:${LIB_PATH}
+
+# Always search $(tooldir)/lib, aka /usr/local/TARGET/lib, except for
+# sysrooted configurations.
+if [ "x${use_sysroot}" != "xyes" ] ; then
+  LIB_PATH=${tool_lib}:${LIB_PATH}
+fi
 
 LIB_SEARCH_DIRS=`echo ${LIB_PATH} | sed -e 's/:/ /g' -e 's/\([^ ][^ ]*\)/SEARCH_DIR(\\"\1\\");/g'`
 

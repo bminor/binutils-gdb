@@ -18,4 +18,4 @@ OTHER_READONLY_SECTIONS="
   .opd          ${RELOCATING-0} : { *(.opd) }
   .IA_64.unwind_info ${RELOCATING-0} : { *(.IA_64.unwind_info*${RELOCATING+ .gnu.linkonce.ia64unwi.*}) }
   .IA_64.unwind ${RELOCATING-0} : { *(.IA_64.unwind*${RELOCATING+ .gnu.linkonce.ia64unw.*}) }"
-LIB_PATH=/usr/lib/ia64l64:/usr/lib:/usr/local/lib
+LIB_PATH="=/usr/lib/ia64l64:=/usr/lib:=/usr/local/lib"

@@ -13,7 +13,7 @@ cat >e${EMULATION_NAME}.c <<EOF
 
 /* ${ELFSIZE} bit ELF emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    ELF support by Ian Lance Taylor <ian@cygnus.com>
 
@@ -439,12 +439,48 @@ gld${EMULATION_NAME}_search_needed (path, name, force)
 }
 
 EOF
-if [ "x${host}" = "x${target}" ] ; then
-  case " ${EMULATION_LIBPATH} " in
-  *" ${EMULATION_NAME} "*)
-    case ${target} in
-      *-*-linux-gnu*)
-	cat >>e${EMULATION_NAME}.c <<EOF
+if [ "x${USE_LIBPATH}" = xyes ] ; then
+  case ${target} in
+    *-*-linux-gnu*)
+      cat >>e${EMULATION_NAME}.c <<EOF
+
+/* Add the sysroot to every entry in a colon-separated path.  */
+
+static char *
+gld${EMULATION_NAME}_add_sysroot (path)
+     const char *path;
+{
+  int len, colons, i;
+  char *ret, *p;
+
+  len = strlen (path);
+  colons = 0;
+  i = 0;
+  while (path[i])
+    if (path[i++] == ':')
+      colons++;
+
+  if (path[i])
+    colons++;
+
+  len = len + colons * strlen (ld_sysroot);
+  ret = xmalloc (len + 1);
+  strcpy (ret, ld_sysroot);
+  p = ret + strlen (ret);
+  i = 0;
+  while (path[i])
+    if (path[i] == ':')
+      {
+	strcpy (p, ld_sysroot);
+	p = p + strlen (p);
+	i++;
+      }
+    else
+      *p++ = path[i++];
+
+  *p = 0;
+  return ret;
+}
 
 /* For a native linker, check the file /etc/ld.so.conf for directories
    in which we may find shared libraries.  /etc/ld.so.conf is really
@@ -464,8 +500,11 @@ gld${EMULATION_NAME}_check_ld_so_conf (name, force)
   if (! initialized)
     {
       FILE *f;
+      char *tmppath;
 
-      f = fopen ("/etc/ld.so.conf", FOPEN_RT);
+      tmppath = concat (ld_sysroot, "/etc/ld.so.conf", NULL);
+      f = fopen (tmppath, FOPEN_RT);
+      free (tmppath);
       if (f != NULL)
 	{
 	  char *b;
@@ -515,6 +554,13 @@ gld${EMULATION_NAME}_check_ld_so_conf (name, force)
 
 	  fclose (f);
 
+	  if (b)
+	    {
+	      char *d = gld${EMULATION_NAME}_add_sysroot (b);
+	      free (b);
+	      b = d;
+	    }
+
 	  ld_so_conf = b;
 	}
 
@@ -528,9 +574,8 @@ gld${EMULATION_NAME}_check_ld_so_conf (name, force)
 }
 
 EOF
-	# Linux
-	;;
-    esac
+    # Linux
+    ;;
   esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -644,16 +689,12 @@ gld${EMULATION_NAME}_after_open ()
 	  size_t len;
 	  search_dirs_type *search;
 EOF
-if [ "x${host}" = "x${target}" ] ; then
-  case " ${EMULATION_LIBPATH} " in
-  *" ${EMULATION_NAME} "*)
+if [ "x${USE_LIBPATH}" = xyes ] ; then
 cat >>e${EMULATION_NAME}.c <<EOF
 	  const char *lib_path;
 	  struct bfd_link_needed_list *rp;
 	  int found;
 EOF
-  ;;
-  esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
 
@@ -661,13 +702,15 @@ cat >>e${EMULATION_NAME}.c <<EOF
 						  l->name, force))
 	    break;
 EOF
-if [ "x${host}" = "x${target}" ] ; then
-  case " ${EMULATION_LIBPATH} " in
-  *" ${EMULATION_NAME} "*)
+if [ "x${USE_LIBPATH}" = xyes ] ; then
 cat >>e${EMULATION_NAME}.c <<EOF
 	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath,
 						  l->name, force))
 	    break;
+EOF
+fi
+if [ "x${NATIVE}" = xyes ] ; then
+cat >>e${EMULATION_NAME}.c <<EOF
 	  if (command_line.rpath_link == NULL
 	      && command_line.rpath == NULL)
 	    {
@@ -679,22 +722,25 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  lib_path = (const char *) getenv ("LD_LIBRARY_PATH");
 	  if (gld${EMULATION_NAME}_search_needed (lib_path, l->name, force))
 	    break;
-
+EOF
+fi
+if [ "x${USE_LIBPATH}" = xyes ] ; then
+cat >>e${EMULATION_NAME}.c <<EOF
 	  found = 0;
 	  rp = bfd_elf_get_runpath_list (output_bfd, &link_info);
 	  for (; !found && rp != NULL; rp = rp->next)
 	    {
+	      char *tmpname = gld${EMULATION_NAME}_add_sysroot (rp->name);
 	      found = (rp->by == l->by
-		       && gld${EMULATION_NAME}_search_needed (rp->name,
+		       && gld${EMULATION_NAME}_search_needed (tmpname,
 							      l->name,
 							      force));
+	      free (tmpname);
 	    }
 	  if (found)
 	    break;
 
 EOF
-  ;;
-  esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
 	  len = strlen (l->name);
@@ -713,19 +759,15 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  if (search != NULL)
 	    break;
 EOF
-if [ "x${host}" = "x${target}" ] ; then
-  case " ${EMULATION_LIBPATH} " in
-  *" ${EMULATION_NAME} "*)
-    case ${target} in
-      *-*-linux-gnu*)
-	cat >>e${EMULATION_NAME}.c <<EOF
+if [ "x${USE_LIBPATH}" = xyes ] ; then
+  case ${target} in
+    *-*-linux-gnu*)
+      cat >>e${EMULATION_NAME}.c <<EOF
 	  if (gld${EMULATION_NAME}_check_ld_so_conf (l->name, force))
 	    break;
 EOF
-	# Linux
-        ;;
-    esac
-  ;;
+    # Linux
+    ;;
   esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF

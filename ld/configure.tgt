@@ -9,6 +9,8 @@
 #  targ_extra_emuls	additional linker emulations to provide
 #  targ_extra_libpath	additional linker emulations using LIB_PATH
 #  targ_extra_ofiles	additional objects needed by the emulation
+#  NATIVE_LIB_DIRS	library directories to search on this host
+#			(if we are a native or sysrooted linker)
 
 targ_extra_emuls=
 targ_extra_ofiles=
@@ -539,5 +541,51 @@ ip2k-*-elf)		targ_emul=elf32ip2k ;;
   echo 2>&1 "*** ld does not support target ${targ}"
   echo 2>&1 "*** see ld/configure.tgt for supported targets"
   exit 1
+
+esac
+
+NATIVE_LIB_DIRS='/usr/local/lib /lib /usr/lib'
+case "${target}" in
+
+*-*-freebsd*)
+  NATIVE_LIB_DIRS='/lib /usr/lib /usr/local/lib'
+  ;;
+
+hppa*64*-*-hpux11*)
+  NATIVE_LIB_DIRS=/usr/lib/pa20_64
+  ;;
+
+i[3456]86-*-sysv4*)
+  NATIVE_LIB_DIRS='/usr/local/lib /usr/ccs/lib /lib /usr/lib'
+  ;;
+
+i[3456]86-*-solaris*)
+  NATIVE_LIB_DIRS='/usr/local/lib /usr/ccs/lib /lib /usr/lib'
+  ;;
+
+i[3456]86-pc-interix*)
+  NATIVE_LIB_DIRS='/usr/local/lib $$INTERIX_ROOT/usr/lib /lib /usr/lib'
+  ;;
+
+ia64-*-aix*)
+  NATIVE_LIB_DIRS='/usr/local/lib /usr/lib/ia64l64 /lib /usr/lib'
+  ;;
+
+sparc*-*-solaris2*)
+  NATIVE_LIB_DIRS='/usr/local/lib /usr/ccs/lib /lib /usr/lib'
+  ;;
+
+*-*-linux*)
+  ;;
+
+*-*-freebsd*)
+  ;;
+
+*-*-netbsd*)
+  ;;
+
+alpha*-*-*)
+  NATIVE_LIB_DIRS='/usr/local/lib /usr/ccs/lib /lib /usr/lib'
+  ;;
 
 esac

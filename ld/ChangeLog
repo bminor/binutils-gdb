@@ -1,3 +1,43 @@
+2003-01-06  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.am (eelf32iq10.c): Fix tab/whitespace mixup.
+
+	* Makefile.am (ldmain.o): Add @TARGET_SYSTEM_ROOT_DEFINE@.
+	(GENSCRIPTS): Add @use_sysroot@.
+	* Makefile.in: Regenerated.
+	* configure.host: Move setting of NATIVE_LIB_DIRS to...
+	* configure.tgt: ... here.  Use ${target} instead of ${host}
+	for NATIVE_LIB_DIRS.
+	* configure.in: Add --with-sysroot.
+	* configure: Regenerated.
+	* genscripts.sh: Accept use_sysroot option.  Set new variables
+	NATIVE and USE_LIBPATH.  Prepend "=" to directory names if
+	$use_sysroot.  Don't search $tool_lib if $use_sysroot.
+	* ldfile.c (ldfile_add_library_path): Handle leading '='.
+	* ldmain.c (TARGET_SYSTEM_ROOT): Define if not defined.
+	(ld_sysroot): New variable.
+	(main): Initialize ld_sysroot.
+	* ldmain.h (ld_sysroot): New extern.
+	* emultempl/elf32.em: Use NATIVE and USE_LIBPATH instead of
+	searching $EMULATION_LIBPATH.
+	(gld${EMULATION_NAME}_add_sysroot): New function.
+	(gld${EMULATION_NAME}_check_ld_so_conf): Use it.  Honor ld_sysroot.
+	(gld${EMULATION_NAME}_after_open): Likewise.  Only search
+	environment variables if $NATIVE.
+	* ld.texinfo (Options): Mention "=" prefix in the description of -L.
+	* NEWS: Mention --with-sysroot.
+
+	* emulparams/elf32bmipn32-defs.sh: Set NATIVE and LIBPATH_SUFFIX
+	instead of setting LIB_PATH.
+	* emulparams/elf32ppc.sh: Likewise.
+	* emulparams/elf64_s390.sh: Likewise.
+	* emulparams/elf64_sparc.sh: Likewise.
+	* emulparams/elf64ppc.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+
+	* emulparams/elf64_aix.sh: Add "=" prefixes to LIB_PATH.
+	* emulparams/elf64hppa.sh: Add "=" prefixes to LIB_PATH.
+
 2003-01-03  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* ld/pe-dll.c (autofilter_symbollist): Add cygwin_crt0.

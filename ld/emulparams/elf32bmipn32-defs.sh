@@ -21,18 +21,13 @@ esac
 if test `echo "$host" | sed -e s/64//` = `echo "$target" | sed -e s/64//`; then
   case " $EMULATION_LIBPATH " in
     *" ${EMULATION_NAME} "*)
-      LIB_PATH=${libdir}
-      for lib in ${NATIVE_LIB_DIRS}; do
-	case :${LIB_PATH}: in
-	  *:${lib}:*) ;;
-	  *) LIB_PATH=${LIB_PATH}:${lib} ;;
-	esac
-      done
-      # Look for 64 bit target libraries in /lib64, /usr/lib64 etc., first.
-      LIB_PATH=`echo ${LIB_PATH}: | sed -e s,:,$ELFSIZE:,g`$LIB_PATH
-    ;;
+      NATIVE=yes
+      ;;
   esac
 fi
+
+# Look for 64 bit target libraries in /lib64, /usr/lib64 etc., first.
+LIBPATH_SUFFIX=$ELFSIZE
 
 GENERATE_SHLIB_SCRIPT=yes
 

@@ -55,6 +55,10 @@ extern PTR sbrk ();
 #endif
 #endif
 
+#ifndef TARGET_SYSTEM_ROOT
+#define TARGET_SYSTEM_ROOT ""
+#endif
+
 int main PARAMS ((int, char **));
 
 static char *get_emulation PARAMS ((int, char **));
@@ -67,6 +71,9 @@ const char *output_filename = "a.out";
 
 /* Name this program was invoked by.  */
 char *program_name;
+
+/* The prefix for system library directories.  */
+char *ld_sysroot;
 
 /* The file that we're creating.  */
 bfd *output_bfd = 0;
@@ -188,6 +195,23 @@ main (argc, argv)
   bfd_set_error_program_name (program_name);
 
   xatexit (remove_output);
+
+#ifdef TARGET_SYSTEM_ROOT_RELOCATABLE
+  ld_sysroot = make_relative_prefix (program_name, BINDIR,
+				     TARGET_SYSTEM_ROOT);
+  if (ld_sysroot)
+    {
+      struct stat s;
+      int res = stat (ld_sysroot, &s) == 0 && S_ISDIR (s.st_mode);
+      if (!res)
+	{
+	  free (ld_sysroot);
+	  ld_sysroot = TARGET_SYSTEM_ROOT;
+	}
+    }
+#else
+  ld_sysroot = TARGET_SYSTEM_ROOT;
+#endif
 
   /* Set the default BFD target based on the configured target.  Doing
      this permits the linker to be configured for a particular target,

@@ -1,5 +1,5 @@
 /* ldmain.h -
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2002
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -23,6 +23,7 @@
 #define LDMAIN_H
 
 extern char *program_name;
+extern char *ld_sysroot;
 extern bfd *output_bfd;
 extern char *default_target;
 extern bfd_boolean trace_files;

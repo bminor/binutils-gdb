@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Added --with-sysroot configure switch to specify a target system root, for
+  linking against a target filesystem image.
+
 * Added --accept-unknown-linker-format to restore old linker behaviour (pre
   2.14) of silently accepting and linking in any files in an unknown binary
   file format.
