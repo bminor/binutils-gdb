@@ -1,6 +1,5 @@
 srcname="GDB"
 srctrigger=main.c
-echo ZAP
 # per-host:
 
 # map host info into gdb names.
