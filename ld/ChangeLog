@@ -1,3 +1,14 @@
+Fri Aug 16 14:15:41 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* scripttempl/armcoff.sc (__bss_start__, __bss_end__,
+ 	__data_start__, __data_end__): Added to keep in sync. with the
+ 	default ARM crt0.s. Added __CTOR_LIST__ and __DTOR_LIST__ support.
+
+Thu Aug  8 14:24:56 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldcref.c (check_reloc_refs): If info->same, look for any symbol
+	defined in info->defsec, not just the section symbol.
+
 Wed Aug  7 14:40:48 1996  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* configure.in: Call BFD_NEED_DECLARATION on strstr and sbrk.
