@@ -1,3 +1,24 @@
+Thu Jul 13 13:52:10 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/lnk960.em (ld_lnk960_emulation): Initialize
+	after_open field.
+
+	* ldexp.c (exp_intop): Don't cast stat_alloc arg to bfd_size_type;
+	it takes a size_t anyhow.
+	(exp_binop): Likewise.
+	(exp_trinop): Likewise.
+	(exp_unop): Likewise.
+	(exp_nameop): Likewise.
+	(exp_assop): Likewise.
+	* ldlang.c (lang_memory_region_lookup): Likewise.
+	(init_os): Likewise.
+	(ldlang_add_undef): Likewise.
+	(insert_pad): Likewise.
+	* ldfile.c (ldfile_add_arch): Don't cast xmalloc arg to
+	bfd_size_type.
+
+	* Makefile.in (ALL_EMULATIONS): It's earmaoutb.o, not earmoutb.o.
+
 Wed Jul 12 11:32:22 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldemul.h (ldemul_open_dynamic_archive): Add search parameter to
