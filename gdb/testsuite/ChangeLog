@@ -1,3 +1,8 @@
+Fri Jan 27 09:24:51 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/funcargs.exp: Modify many tests so that every test
+	either passes or fails.  Make some test names unique.
+
 Thu Jan 26 19:20:34 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/a1-selftest.exp (test_with_self), gdb.base/interrupt.exp:
