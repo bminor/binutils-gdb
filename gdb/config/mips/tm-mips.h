@@ -506,6 +506,7 @@ extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
    floats regardless of whether the function is prototyped, but the actual
    values are passed as doubles for the non-prototyped case and floats for
    the prototyped case.  Thus we choose to make the non-prototyped case work
-   and break the prototyped case.  (FIXME). */
+   for C and break the prototyped case, since the non-prototyped case is
+   probably much more common.  (FIXME). */
 
-#define COERCE_FLOAT_TO_DOUBLE 1
+#define COERCE_FLOAT_TO_DOUBLE (current_language -> la_language == language_c)

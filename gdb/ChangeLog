@@ -1,3 +1,9 @@
+Tue Mar 26 13:15:32 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config/mips/tm-mips.h (COERCE_FLOAT_TO_DOUBLE): Only prefer
+	non-prototyped case over prototyped case for C.
+	* config/pa/tm-hppa.h (COERCE_FLOAT_TO_DOUBLE):  Ditto.
+
 Sat Mar 23 17:24:28 1996  Fred Fish  <fnf@cygnus.com>
 
 	* os9kread.c (os9k_process_one_symbol): Note nonportable

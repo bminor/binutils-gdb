@@ -639,4 +639,5 @@ extern int deferred_stores;
    information for float parameters, both prototyped and unprototyped, then
    define this macro.  This forces gdb to  always assume that floats are
    passed as doubles and then converted in the callee. */
+
 #define COERCE_FLOAT_TO_DOUBLE 1
