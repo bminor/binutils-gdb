@@ -1,3 +1,8 @@
+2002-11-12  Klee Dienes  <kdienes@apple.com>
+
+	* rddbg.c (read_section_stabs_debugging_info): Also recognize
+	LC_SYMTAB.stab/LC_SYMTAB.stabstr as a valid pair of sections.
+
 2002-11-11  Christopher Faylor  <cgf@redhat.com>
 
 	* MAINTAINERS: Reinstate DJ Delorie as COFF maintainer.  Drop COFF from

@@ -1,5 +1,5 @@
 /* rddbg.c -- Read debugging information into a generic form.
-   Copyright 1995, 1996, 1997, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 2000, 2002 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -106,7 +106,8 @@ read_section_stabs_debugging_info (abfd, syms, symcount, dhandle, pfound)
     {
       const char *secname;
       const char *strsecname;
-    } names[] = { { ".stab", ".stabstr" } };
+    } names[] = { { ".stab", ".stabstr" },
+		  { "LC_SYMTAB.stabs", "LC_SYMTAB.stabstr" } };
   unsigned int i;
   PTR shandle;
 
@@ -176,7 +177,7 @@ read_section_stabs_debugging_info (abfd, syms, symcount, dhandle, pfound)
 	      if (type == 0)
 		{
 		  /* Special type 0 stabs indicate the offset to the
-                     next string table.  */
+		     next string table.  */
 		  stroff = next_stroff;
 		  next_stroff += value;
 		}
@@ -211,8 +212,8 @@ read_section_stabs_debugging_info (abfd, syms, symcount, dhandle, pfound)
 				  (const char *) NULL);
 
 		      /* We have to restore the backslash, because, if
-                         the linker is hashing stabs strings, we may
-                         see the same string more than once.  */
+			 the linker is hashing stabs strings, we may
+			 see the same string more than once.  */
 		      *p = '\\';
 
 		      if (f != NULL)
@@ -230,8 +231,8 @@ read_section_stabs_debugging_info (abfd, syms, symcount, dhandle, pfound)
 		    }
 
 		  /* Don't free f, since I think the stabs code
-                     expects strings to hang around.  This should be
-                     straightened out.  FIXME.  */
+		     expects strings to hang around.  This should be
+		     straightened out.  FIXME.  */
 		}
 	    }
 
@@ -239,8 +240,8 @@ read_section_stabs_debugging_info (abfd, syms, symcount, dhandle, pfound)
 	  free (stabs);
 
 	  /* Don't free strings, since I think the stabs code expects
-             the strings to hang around.  This should be straightened
-             out.  FIXME.  */
+	     the strings to hang around.  This should be straightened
+	     out.  FIXME.  */
 	}
     }
 
