@@ -1,3 +1,8 @@
+2000-06-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/maint.exp: Add 'maint print architecture' item to output
+ 	of 'help maint print' command.
+
 Fri Jun 16 18:22:05 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/call-ar-st.exp: Rewrite all multi-line patterns so that
