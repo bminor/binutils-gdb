@@ -1,3 +1,13 @@
+Sun Oct  4 20:57:43 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (md_assemble): Handle AMD_3DNOW_OPCODE.
+	* config/tc-i386.h (template.extension_opcode): Change to
+        unsigned int to allow full range of 8-bit opcode suffixes.
+	(None): Redefine as 0xffff.
+
+	From Jeff B Epler <jepler@usgs.gov>
+	* doc/c-i386.texi (i386-SIMD): New section.
+
 Thu Oct  1 15:37:54 1998  Richard Henderson  <rth@cygnus.com>
 
 	* read.c (discard_rest_of_line): New function.
