@@ -1,6 +1,7 @@
 /* Perform non-arithmetic operations on values, for GDB.
+
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -457,7 +458,7 @@ value_at (struct type *type, CORE_ADDR addr)
 
   val = allocate_value (type);
 
-  read_memory (addr, VALUE_CONTENTS_ALL_RAW (val), TYPE_LENGTH (type));
+  read_memory (addr, value_contents_all_raw (val), TYPE_LENGTH (type));
 
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = addr;
@@ -504,7 +505,7 @@ value_fetch_lazy (struct value *val)
 
   struct type *type = value_type (val);
   if (length)
-    read_memory (addr, VALUE_CONTENTS_ALL_RAW (val), length);
+    read_memory (addr, value_contents_all_raw (val), length);
 
   VALUE_LAZY (val) = 0;
   return 0;
@@ -728,7 +729,7 @@ value_assign (struct value *toval, struct value *fromval)
     }
 
   val = value_copy (toval);
-  memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS (fromval),
+  memcpy (value_contents_raw (val), VALUE_CONTENTS (fromval),
 	  TYPE_LENGTH (type));
   val->type = type;
   val = value_change_enclosing_type (val, VALUE_ENCLOSING_TYPE (fromval));
@@ -753,7 +754,7 @@ value_repeat (struct value *arg1, int count)
   val = allocate_repeat_value (VALUE_ENCLOSING_TYPE (arg1), count);
 
   read_memory (VALUE_ADDRESS (arg1) + value_offset (arg1),
-	       VALUE_CONTENTS_ALL_RAW (val),
+	       value_contents_all_raw (val),
 	       TYPE_LENGTH (VALUE_ENCLOSING_TYPE (val)));
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = VALUE_ADDRESS (arg1) + value_offset (arg1);
@@ -1021,7 +1022,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
       val = allocate_value (arraytype);
       for (idx = 0; idx < nelem; idx++)
 	{
-	  memcpy (VALUE_CONTENTS_ALL_RAW (val) + (idx * typelength),
+	  memcpy (value_contents_all_raw (val) + (idx * typelength),
 		  VALUE_CONTENTS_ALL (elemvec[idx]),
 		  typelength);
 	}
@@ -1069,7 +1070,7 @@ value_string (char *ptr, int len)
   if (current_language->c_style_arrays == 0)
     {
       val = allocate_value (stringtype);
-      memcpy (VALUE_CONTENTS_RAW (val), ptr, len);
+      memcpy (value_contents_raw (val), ptr, len);
       return val;
     }
 
@@ -1093,7 +1094,7 @@ value_bitstring (char *ptr, int len)
   struct type *type = create_set_type ((struct type *) NULL, domain_type);
   TYPE_CODE (type) = TYPE_CODE_BITSTRING;
   val = allocate_value (type);
-  memcpy (VALUE_CONTENTS_RAW (val), ptr, TYPE_LENGTH (type));
+  memcpy (value_contents_raw (val), ptr, TYPE_LENGTH (type));
   return val;
 }
 
@@ -1297,7 +1298,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	      CORE_ADDR base_addr;
 
 	      base_addr = VALUE_ADDRESS (arg1) + value_offset (arg1) + boffset;
-	      if (target_read_memory (base_addr, VALUE_CONTENTS_RAW (v2),
+	      if (target_read_memory (base_addr, value_contents_raw (v2),
 				      TYPE_LENGTH (basetype)) != 0)
 		error ("virtual baseclass botch");
 	      VALUE_LVAL (v2) = lval_memory;
@@ -1312,8 +1313,8 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	      if (VALUE_LAZY (arg1))
 		VALUE_LAZY (v2) = 1;
 	      else
-		memcpy (VALUE_CONTENTS_RAW (v2),
-			VALUE_CONTENTS_RAW (arg1) + boffset,
+		memcpy (value_contents_raw (v2),
+			value_contents_raw (arg1) + boffset,
 			TYPE_LENGTH (basetype));
 	    }
 
@@ -2744,7 +2745,7 @@ value_slice (struct value *array, int lowbound, int length)
 	      int j = i % TARGET_CHAR_BIT;
 	      if (BITS_BIG_ENDIAN)
 		j = TARGET_CHAR_BIT - 1 - j;
-	      VALUE_CONTENTS_RAW (slice)[i / TARGET_CHAR_BIT] |= (1 << j);
+	      value_contents_raw (slice)[i / TARGET_CHAR_BIT] |= (1 << j);
 	    }
 	}
       /* We should set the address, bitssize, and bitspos, so the clice
@@ -2792,9 +2793,9 @@ value_literal_complex (struct value *arg1, struct value *arg2, struct type *type
   arg1 = value_cast (real_type, arg1);
   arg2 = value_cast (real_type, arg2);
 
-  memcpy (VALUE_CONTENTS_RAW (val),
+  memcpy (value_contents_raw (val),
 	  VALUE_CONTENTS (arg1), TYPE_LENGTH (real_type));
-  memcpy (VALUE_CONTENTS_RAW (val) + TYPE_LENGTH (real_type),
+  memcpy (value_contents_raw (val) + TYPE_LENGTH (real_type),
 	  VALUE_CONTENTS (arg2), TYPE_LENGTH (real_type));
   return val;
 }
@@ -2811,9 +2812,9 @@ cast_into_complex (struct type *type, struct value *val)
       struct value *re_val = allocate_value (val_real_type);
       struct value *im_val = allocate_value (val_real_type);
 
-      memcpy (VALUE_CONTENTS_RAW (re_val),
+      memcpy (value_contents_raw (re_val),
 	      VALUE_CONTENTS (val), TYPE_LENGTH (val_real_type));
-      memcpy (VALUE_CONTENTS_RAW (im_val),
+      memcpy (value_contents_raw (im_val),
 	      VALUE_CONTENTS (val) + TYPE_LENGTH (val_real_type),
 	      TYPE_LENGTH (val_real_type));
 

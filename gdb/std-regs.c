@@ -1,6 +1,6 @@
 /* Builtin frame register, for GDB, the GNU debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2005 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -60,7 +60,7 @@ value_of_builtin_frame_reg (struct frame_info *frame)
   build_builtin_type_frame_reg ();
   val = allocate_value (builtin_type_frame_reg);
   VALUE_LVAL (val) = not_lval;
-  buf = VALUE_CONTENTS_RAW (val);
+  buf = value_contents_raw (val);
   memset (buf, TYPE_LENGTH (value_type (val)), 0);
   /* frame.base.  */
   if (frame != NULL)
@@ -85,7 +85,7 @@ value_of_builtin_frame_fp_reg (struct frame_info *frame)
   else
     {
       struct value *val = allocate_value (builtin_type_void_data_ptr);
-      char *buf = VALUE_CONTENTS_RAW (val);
+      char *buf = value_contents_raw (val);
       if (frame == NULL)
 	memset (buf, TYPE_LENGTH (value_type (val)), 0);
       else
@@ -103,7 +103,7 @@ value_of_builtin_frame_pc_reg (struct frame_info *frame)
   else
     {
       struct value *val = allocate_value (builtin_type_void_data_ptr);
-      char *buf = VALUE_CONTENTS_RAW (val);
+      char *buf = value_contents_raw (val);
       if (frame == NULL)
 	memset (buf, TYPE_LENGTH (value_type (val)), 0);
       else

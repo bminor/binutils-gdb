@@ -1,8 +1,8 @@
 /* Evaluate expressions for GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -360,7 +360,7 @@ init_array_element (struct value *array, struct value *element,
 	error ("tuple range index out of range");
       for (index = low; index <= high; index++)
 	{
-	  memcpy (VALUE_CONTENTS_RAW (array)
+	  memcpy (value_contents_raw (array)
 		  + (index - low_bound) * element_size,
 		  VALUE_CONTENTS (element), element_size);
 	}
@@ -370,7 +370,7 @@ init_array_element (struct value *array, struct value *element,
       index = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
       if (index < low_bound || index > high_bound)
 	error ("tuple index out of range");
-      memcpy (VALUE_CONTENTS_RAW (array) + (index - low_bound) * element_size,
+      memcpy (value_contents_raw (array) + (index - low_bound) * element_size,
 	      VALUE_CONTENTS (element), element_size);
     }
   return index;
@@ -500,7 +500,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  && TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	{
 	  struct value *rec = allocate_value (expect_type);
-	  memset (VALUE_CONTENTS_RAW (rec), '\0', TYPE_LENGTH (type));
+	  memset (value_contents_raw (rec), '\0', TYPE_LENGTH (type));
 	  return evaluate_struct_tuple (rec, exp, pos, noside, nargs);
 	}
 
@@ -518,7 +518,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      high_bound = (TYPE_LENGTH (type) / element_size) - 1;
 	    }
 	  index = low_bound;
-	  memset (VALUE_CONTENTS_RAW (array), 0, TYPE_LENGTH (expect_type));
+	  memset (value_contents_raw (array), 0, TYPE_LENGTH (expect_type));
 	  for (tem = nargs; --nargs >= 0;)
 	    {
 	      struct value *element;
@@ -544,7 +544,7 @@ evaluate_subexp_standard (struct type *expect_type,
 		  if (index > high_bound)
 		    /* to avoid memory corruption */
 		    error ("Too many array elements");
-		  memcpy (VALUE_CONTENTS_RAW (array)
+		  memcpy (value_contents_raw (array)
 			  + (index - low_bound) * element_size,
 			  VALUE_CONTENTS (element),
 			  element_size);
@@ -558,7 +558,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  && TYPE_CODE (type) == TYPE_CODE_SET)
 	{
 	  struct value *set = allocate_value (expect_type);
-	  char *valaddr = VALUE_CONTENTS_RAW (set);
+	  char *valaddr = value_contents_raw (set);
 	  struct type *element_type = TYPE_INDEX_TYPE (type);
 	  struct type *check_type = element_type;
 	  LONGEST low_bound, high_bound;

@@ -1,8 +1,8 @@
 /* Find a variable's value in memory, for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -282,7 +282,7 @@ value_of_register (int regnum, struct frame_info *frame)
 
   reg_val = allocate_value (register_type (current_gdbarch, regnum));
 
-  memcpy (VALUE_CONTENTS_RAW (reg_val), raw_buffer,
+  memcpy (value_contents_raw (reg_val), raw_buffer,
 	  register_size (current_gdbarch, regnum));
   VALUE_LVAL (reg_val) = lval;
   VALUE_ADDRESS (reg_val) = addr;
@@ -400,7 +400,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
     {
     case LOC_CONST:
       /* Put the constant back in target format.  */
-      store_signed_integer (VALUE_CONTENTS_RAW (v), len,
+      store_signed_integer (value_contents_raw (v), len,
 			    (LONGEST) SYMBOL_VALUE (var));
       VALUE_LVAL (v) = not_lval;
       return v;
@@ -412,10 +412,10 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 	  CORE_ADDR addr
 	    = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
 					SYMBOL_BFD_SECTION (var));
-	  store_typed_address (VALUE_CONTENTS_RAW (v), type, addr);
+	  store_typed_address (value_contents_raw (v), type, addr);
 	}
       else
-	store_typed_address (VALUE_CONTENTS_RAW (v), type,
+	store_typed_address (value_contents_raw (v), type,
 			      SYMBOL_VALUE_ADDRESS (var));
       VALUE_LVAL (v) = not_lval;
       return v;
@@ -424,7 +424,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
       {
 	char *bytes_addr;
 	bytes_addr = SYMBOL_VALUE_BYTES (var);
-	memcpy (VALUE_CONTENTS_RAW (v), bytes_addr, len);
+	memcpy (value_contents_raw (v), bytes_addr, len);
 	VALUE_LVAL (v) = not_lval;
 	return v;
       }
@@ -634,7 +634,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
          the corresponding [integer] type (see Alpha).  The assumption
          is that REGISTER_TO_VALUE populates the entire value
          including the location.  */
-      REGISTER_TO_VALUE (frame, regnum, type, VALUE_CONTENTS_RAW (v));
+      REGISTER_TO_VALUE (frame, regnum, type, value_contents_raw (v));
       VALUE_LVAL (v) = lval_register;
       VALUE_FRAME_ID (v) = get_frame_id (frame);
       VALUE_REGNUM (v) = regnum;
@@ -713,7 +713,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 	v->offset = register_size (current_gdbarch, regnum) - len;
       else
 	v->offset = 0;
-      memcpy (VALUE_CONTENTS_RAW (v), value_bytes + value_offset (v), len);
+      memcpy (value_contents_raw (v), value_bytes + value_offset (v), len);
     }
   return v;
 }

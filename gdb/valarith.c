@@ -1,8 +1,8 @@
 /* Perform arithmetic and other operations on values, for GDB.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -806,7 +806,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       else
 	val = allocate_value (builtin_type_double);
 
-      store_typed_floating (VALUE_CONTENTS_RAW (val), value_type (val), v);
+      store_typed_floating (value_contents_raw (val), value_type (val), v);
     }
   else if (TYPE_CODE (type1) == TYPE_CODE_BOOL
 	   &&
@@ -843,7 +843,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	}
 
       val = allocate_value (type1);
-      store_signed_integer (VALUE_CONTENTS_RAW (val),
+      store_signed_integer (value_contents_raw (val),
 			    TYPE_LENGTH (type1),
 			    v);
     }
@@ -1015,7 +1015,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	    (result_len > TARGET_LONG_BIT / HOST_CHAR_BIT
 	     ? builtin_type_unsigned_long_long
 	     : builtin_type_unsigned_long);
-	  store_unsigned_integer (VALUE_CONTENTS_RAW (val),
+	  store_unsigned_integer (value_contents_raw (val),
 				  TYPE_LENGTH (value_type (val)),
 				  v);
 	}
@@ -1139,7 +1139,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	    (result_len > TARGET_LONG_BIT / HOST_CHAR_BIT
 	     ? builtin_type_long_long
 	     : builtin_type_long);
-	  store_signed_integer (VALUE_CONTENTS_RAW (val),
+	  store_signed_integer (value_contents_raw (val),
 				TYPE_LENGTH (value_type (val)),
 				v);
 	}

@@ -181,12 +181,12 @@ extern int value_offset (struct value *);
 #define VALUE_ENCLOSING_TYPE(val) (val)->enclosing_type
 #define VALUE_LAZY(val) (val)->lazy
 
-/* VALUE_CONTENTS and VALUE_CONTENTS_RAW both return the address of
+/* VALUE_CONTENTS and value_contents_raw() both return the address of
    the gdb buffer used to hold a copy of the contents of the lval.
    VALUE_CONTENTS is used when the contents of the buffer are needed
    -- it uses value_fetch_lazy() to load the buffer from the process
    being debugged if it hasn't already been loaded.
-   VALUE_CONTENTS_RAW is used when data is being stored into the
+   value_contents_raw() is used when data is being stored into the
    buffer, or when it is certain that the contents of the buffer are
    valid.
 
@@ -194,18 +194,18 @@ extern int value_offset (struct value *);
    get to the real subobject, if the value happens to represent
    something embedded in a larger run-time object.  */
 
-#define VALUE_CONTENTS_RAW(val) \
- ((val)->aligner.contents + (val)->embedded_offset)
+extern bfd_byte *value_contents_raw (struct value *);
 #define VALUE_CONTENTS(val) \
- ((void)(VALUE_LAZY(val) && value_fetch_lazy(val)), VALUE_CONTENTS_RAW(val))
+ ((void)(VALUE_LAZY(val) && value_fetch_lazy(val)), \
+  (val)->aligner.contents)
 
 /* The ALL variants of the above two macros do not adjust the returned
    pointer by the embedded_offset value.  */
 
-#define VALUE_CONTENTS_ALL_RAW(val) ((char *) (val)->aligner.contents)
+extern bfd_byte *value_contents_all_raw (struct value *);
 #define VALUE_CONTENTS_ALL(val) \
   ((void) (VALUE_LAZY(val) && value_fetch_lazy(val)), \
-   VALUE_CONTENTS_ALL_RAW(val))
+  (val)->aligner.contents)
 
 extern int value_fetch_lazy (struct value *val);
 

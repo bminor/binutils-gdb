@@ -1,8 +1,8 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2002, 2003 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -147,6 +147,19 @@ value_bitsize (struct value *value)
   return value->bitsize;
 }
 
+bfd_byte *
+value_contents_raw (struct value *value)
+{
+  return value->aligner.contents + value->embedded_offset;
+}
+
+bfd_byte *
+value_contents_all_raw (struct value *value)
+{
+  return value->aligner.contents;
+}
+
+
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed
    if a subsequent value_free_to_mark is passed the mark.  */
@@ -256,7 +269,7 @@ value_copy (struct value *arg)
   val->modifiable = arg->modifiable;
   if (!VALUE_LAZY (val))
     {
-      memcpy (VALUE_CONTENTS_ALL_RAW (val), VALUE_CONTENTS_ALL_RAW (arg),
+      memcpy (value_contents_all_raw (val), value_contents_all_raw (arg),
 	      TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg)));
 
     }
@@ -938,7 +951,7 @@ value_primitive_field (struct value *arg1, int offset,
       if (VALUE_LAZY (arg1))
 	VALUE_LAZY (v) = 1;
       else
-	memcpy (VALUE_CONTENTS_ALL_RAW (v), VALUE_CONTENTS_ALL_RAW (arg1),
+	memcpy (value_contents_all_raw (v), value_contents_all_raw (arg1),
 		TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg1)));
       v->offset = value_offset (arg1);
       VALUE_EMBEDDED_OFFSET (v)
@@ -954,8 +967,8 @@ value_primitive_field (struct value *arg1, int offset,
       if (VALUE_LAZY (arg1))
 	VALUE_LAZY (v) = 1;
       else
-	memcpy (VALUE_CONTENTS_RAW (v),
-		VALUE_CONTENTS_RAW (arg1) + offset,
+	memcpy (value_contents_raw (v),
+		value_contents_raw (arg1) + offset,
 		TYPE_LENGTH (type));
       v->offset = (value_offset (arg1) + offset
 		   + VALUE_EMBEDDED_OFFSET (arg1));
@@ -1154,12 +1167,12 @@ retry:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_RANGE:
-      store_signed_integer (VALUE_CONTENTS_RAW (val), len, num);
+      store_signed_integer (value_contents_raw (val), len, num);
       break;
 
     case TYPE_CODE_REF:
     case TYPE_CODE_PTR:
-      store_typed_address (VALUE_CONTENTS_RAW (val), type, (CORE_ADDR) num);
+      store_typed_address (value_contents_raw (val), type, (CORE_ADDR) num);
       break;
 
     default:
@@ -1175,7 +1188,7 @@ struct value *
 value_from_pointer (struct type *type, CORE_ADDR addr)
 {
   struct value *val = allocate_value (type);
-  store_typed_address (VALUE_CONTENTS_RAW (val), type, addr);
+  store_typed_address (value_contents_raw (val), type, addr);
   return val;
 }
 
@@ -1204,7 +1217,7 @@ value_from_string (char *ptr)
 				  string_char_type,
 				  rangetype);
   val = allocate_value (stringtype);
-  memcpy (VALUE_CONTENTS_RAW (val), ptr, len);
+  memcpy (value_contents_raw (val), ptr, len);
   return val;
 }
 
@@ -1218,7 +1231,7 @@ value_from_double (struct type *type, DOUBLEST num)
 
   if (code == TYPE_CODE_FLT)
     {
-      store_typed_floating (VALUE_CONTENTS_RAW (val), base_type, num);
+      store_typed_floating (value_contents_raw (val), base_type, num);
     }
   else
     error ("Unexpected type encountered for floating constant.");

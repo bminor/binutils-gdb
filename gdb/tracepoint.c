@@ -1,7 +1,7 @@
 /* Tracing functionality for remote targets in custom GDB protocol
 
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -297,7 +297,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
 				       builtin_type_char, func_range);
       func_val = allocate_value (func_string);
       func_val->type = func_string;
-      memcpy (VALUE_CONTENTS_RAW (func_val),
+      memcpy (value_contents_raw (func_val),
 	      DEPRECATED_SYMBOL_NAME (traceframe_fun),
 	      len);
       func_val->modifiable = 0;
@@ -319,7 +319,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
 				       builtin_type_char, file_range);
       file_val = allocate_value (file_string);
       file_val->type = file_string;
-      memcpy (VALUE_CONTENTS_RAW (file_val),
+      memcpy (value_contents_raw (file_val),
 	      traceframe_sal.symtab->filename,
 	      len);
       file_val->modifiable = 0;

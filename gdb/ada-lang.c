@@ -422,7 +422,7 @@ value_from_contents_and_address (struct type *type,
   if (valaddr == NULL)
     VALUE_LAZY (v) = 1;
   else
-    memcpy (VALUE_CONTENTS_RAW (v), valaddr, TYPE_LENGTH (type));
+    memcpy (value_contents_raw (v), valaddr, TYPE_LENGTH (type));
   VALUE_ADDRESS (v) = address;
   if (address != 0)
     VALUE_LVAL (v) = lval_memory;
@@ -455,7 +455,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
           || TYPE_LENGTH (type) > TYPE_LENGTH (value_type (val)))
         VALUE_LAZY (result) = 1;
       else
-        memcpy (VALUE_CONTENTS_RAW (result), VALUE_CONTENTS (val),
+        memcpy (value_contents_raw (result), VALUE_CONTENTS (val),
                 TYPE_LENGTH (type));
       return result;
     }
@@ -2038,7 +2038,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
                     len);
 
       val = value_copy (toval);
-      memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS (fromval),
+      memcpy (value_contents_raw (val), VALUE_CONTENTS (fromval),
               TYPE_LENGTH (type));
       val->type = type;
 
@@ -3503,7 +3503,7 @@ ensure_lval (struct value *val, CORE_ADDR *sp)
 	    *sp = gdbarch_frame_align (current_gdbarch, *sp);
 	}
 
-      write_memory (VALUE_ADDRESS (val), VALUE_CONTENTS_RAW (val), len);
+      write_memory (VALUE_ADDRESS (val), value_contents_raw (val), len);
     }
 
   return val;
@@ -3542,7 +3542,7 @@ convert_actual (struct value *actual, struct type *formal_type0,
               struct value *val;
               actual_type = ada_check_typedef (value_type (actual));
               val = allocate_value (actual_type);
-              memcpy ((char *) VALUE_CONTENTS_RAW (val),
+              memcpy ((char *) value_contents_raw (val),
                       (char *) VALUE_CONTENTS (actual),
                       TYPE_LENGTH (actual_type));
               actual = ensure_lval (val, sp);
@@ -7103,7 +7103,7 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
     }
 
   val = allocate_value (type1);
-  store_unsigned_integer (VALUE_CONTENTS_RAW (val),
+  store_unsigned_integer (value_contents_raw (val),
                           TYPE_LENGTH (value_type (val)), v);
   return val;
 }

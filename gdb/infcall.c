@@ -1,7 +1,7 @@
 /* Perform an inferior function call, for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -861,7 +861,7 @@ the function call).", name);
 					  NULL, NULL, NULL)
 		    == RETURN_VALUE_REGISTER_CONVENTION);
 	gdbarch_return_value (current_gdbarch, values_type, retbuf,
-			      VALUE_CONTENTS_RAW (retval) /*read*/,
+			      value_contents_raw (retval) /*read*/,
 			      NULL /*write*/);
       }
     do_cleanups (retbuf_cleanup);
