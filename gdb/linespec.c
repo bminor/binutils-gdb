@@ -37,8 +37,6 @@ extern char *find_template_name_end (char *);
 
 extern char *operator_chars (char *, char **);
 
-extern char *no_symtab_msg;
-
 /* Prototypes for local functions */
 
 static void cplusplus_hint (char *name);
@@ -939,7 +937,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       if (s == 0)
 	{
 	  if (!have_full_symbols () && !have_partial_symbols ())
-	    error (no_symtab_msg);
+	    error ("No symbol table is loaded.  Use the \"file\" command.");
 	  error ("No source file named %s.", copy);
 	}
 
@@ -1259,7 +1257,7 @@ minimal_symbol_found:		/* We also jump here from the case for variables
 
   if (!have_full_symbols () &&
       !have_partial_symbols () && !have_minimal_symbols ())
-    error (no_symtab_msg);
+    error ("No symbol table is loaded.  Use the \"file\" command.");
 
   error ("Function \"%s\" not defined.", copy);
   return values;		/* for lint */

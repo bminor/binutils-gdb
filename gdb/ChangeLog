@@ -1,3 +1,12 @@
+2000-11-19  Jim Blandy  <jimb@redhat.com>
+
+	* symtab.c (no_symtab_msg): Remove definition.
+	(sources_info): Replace use of no_symtab_msg with the string
+ 	itself.
+	* linespec.c (no_symtab_msg): Remove declaration.
+	(decode_line_1): Replace uses of no_symtab_msg with the string
+ 	itself.
+
 2000-11-17  Kevin Buettner  <kevinb@redhat.com>
 
 	* rs6000-tdep.c (refine_prologue_limit): New function.

@@ -116,8 +116,6 @@ struct type *builtin_type_error;
 
 const struct block *block_found;
 
-char no_symtab_msg[] = "No symbol table is loaded.  Use the \"file\" command.";
-
 /* While the C++ support is still in flux, issue a possibly helpful hint on
    using the new command completion feature on single quoted demangled C++
    symbols.  Remove when loose ends are cleaned up.   FIXME -fnf */
@@ -2226,7 +2224,7 @@ sources_info (char *ignore, int from_tty)
 
   if (!have_full_symbols () && !have_partial_symbols ())
     {
-      error (no_symtab_msg);
+      error ("No symbol table is loaded.  Use the \"file\" command.");
     }
 
   printf_filtered ("Source files for which symbols have been read in:\n\n");
