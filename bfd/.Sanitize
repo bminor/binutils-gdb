@@ -65,6 +65,7 @@ host-aout.c
 hosts
 hppa.c
 i386aout.c
+i386linux.c
 ieee.c
 libaout.h
 libbfd-in.h
