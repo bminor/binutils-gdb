@@ -789,16 +789,17 @@ gdb_disassemble (clientData, interp, argc, argv)
 {
   CORE_ADDR pc, low, high;
   int mixed_source_and_assembly;
-  static disassemble_info di = {
-    (fprintf_ftype) fprintf_unfiltered, /* fprintf_func */
-    gdb_stdout,			/* stream */
-    NULL,			/* application_data */
-    0,				/* flags */
-    NULL,			/* private_data */
-    NULL,			/* read_memory_func */
-    dis_asm_memory_error,	/* memory_error_func */
-    dis_asm_print_address	/* print_address_func */
-    };
+  static disassemble_info di;
+  static int di_initialized;
+
+  if (! di_initialized)
+    {
+      INIT_DISASSEMBLE_INFO (di, gdb_stdout);
+      di.fprintf_func = (fprintf_ftype) fprintf_unfiltered;
+      di.memory_error_func = dis_asm_memory_error;
+      di.print_address_func = dis_asm_print_address;
+      di_initialized = 1;
+    }
 
   if (argc != 3 && argc != 4)
     error ("wrong # args");

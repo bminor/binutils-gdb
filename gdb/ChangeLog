@@ -1,3 +1,7 @@
+Tue Jan 23 09:00:48 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* gdbtk.c (gdb_disassemble): Rework disassemble_info initialization.
+
 Mon Jan 22 16:59:40 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote.c (remotebreak): New GDB variable.
