@@ -1,3 +1,27 @@
+2004-08-27  Joel Brobecker  <brobecker@gnat.com>
+
+	* procfs.c (dbx_link_bpt_addr): New static global variable.
+	(dbx_link_shadow_contents): New static global variable.
+	(procfs_wait, case <PR_SYSEXIT>): Handle syssgi events.
+	(procfs_wait, case <FLTBPT>): Remove the __dbx_link brekapoint
+	if we just hit it.
+	(procfs_init_inferior): Enable syssgi() syscall trace if appropriate.
+	Reset dbx_link_bpt_addr as the address of __dbx_link() may change
+	from run to run.
+	(procfs_create_inferior): Remove syssgi syscall-exit notifications
+	after the inferior has been forked.
+	(remove_dbx_link_breakpoint): New function.
+	(dbx_link_addr): New function.
+	(insert_dbx_link_bpt_in_file): New function.
+	(insert_dbx_link_bpt_in_region): New function.
+	(insert_dbx_link_breakpoint): New function.
+	(proc_trace_syscalls_1): New function, extracted from
+	proc_trace_syscalls.
+	(proc_trace_syscalls): Replace extract code by call to
+	proc_trace_syscalls_1.
+	* solib-irix.c (disable_break): Remove stop_pc assertion, as it
+	is no longer valid.
+
 2004-08-25  Jim Blandy  <jimb@redhat.com>
 
 	* gdbtypes.h (TYPE_CODE_ARRAY): Doc fix.
