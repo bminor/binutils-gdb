@@ -1,3 +1,8 @@
+2002-05-06  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Convert
+	'reloc_signed_max' and 'reloc_signed_min' into half-word offsets.
+
 2002-05-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_link_input_bfd <emit_relocs>): Adjust r_offset
