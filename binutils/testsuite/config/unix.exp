@@ -21,21 +21,27 @@
 
 load_lib util-defs.exp
 
+global NM
 if ![info exists NM] then {
     set NM [transform nm]
 }
+global NMFLAGS
 if ![info exists NMFLAGS] then {
     set NMFLAGS ""
 }
+global SIZE
 if ![info exists SIZE] then {
     set SIZE [transform size]
 }
+global SIZEFLAGS
 if ![info exists SIZEFLAGS] then {
     set SIZEFLAGS ""
 }
+global OBJDUMP
 if ![info exists OBJDUMP] then {
     set OBJDUMP [transform objdump]
 }
+global OBJDUMPFLAGS
 if ![info exists OBJDUMPFLAGS] then {
     set OBJDUMPFLAGS ""
 }
