@@ -35,14 +35,15 @@
 #include "buildsym.h"
 #include "demangle.h"
 #include "expression.h"
+
 #include "language.h"
 #include "complaints.h"
-
+#include "bcache.h"
 #include <fcntl.h>
 #include "gdb_string.h"
 #include <sys/types.h>
 
-/* .debug_info header for a compilation unit 
+/* .debug_info header for a compilation unit
    Because of alignment constraints, this structure has padding and cannot
    be mapped directly onto the beginning of the .debug_info section.  */
 typedef struct comp_unit_header
@@ -267,6 +268,11 @@ static struct abbrev_info *dwarf2_abbrevs[ABBREV_HASH_SIZE];
 
 static struct die_info *die_ref_table[REF_HASH_SIZE];
 
+#ifndef TYPE_HASH_SIZE
+#define TYPE_HASH_SIZE 4096
+#endif
+static struct type *dwarf2_cached_types[TYPE_HASH_SIZE];
+
 /* Obstack for allocating temporary storage used during symbol reading.  */
 static struct obstack dwarf2_tmp_obstack;
 
@@ -333,7 +339,7 @@ static int islocal;		/* Variable is at the returned offset
 static int frame_base_reg;
 static CORE_ADDR frame_base_offset;
 
-/* This value is added to each symbol value.  FIXME:  Generalize to 
+/* This value is added to each symbol value.  FIXME:  Generalize to
    the section_offsets structure used by dbxread (once this is done,
    pass the appropriate section number to end_symtab).  */
 static CORE_ADDR baseaddr;	/* Add to each symbol value */
@@ -3960,9 +3966,9 @@ done:
 
    DW_AT_name:          /srcdir/list0.c
    DW_AT_comp_dir:              /compdir
-   files.files[0].name: list0.h         
+   files.files[0].name: list0.h
    files.files[0].dir:  /srcdir
-   files.files[1].name: list0.c         
+   files.files[1].name: list0.c
    files.files[1].dir:  /srcdir
 
    The line number information for list0.c has to end up in a single
@@ -4449,7 +4455,38 @@ tag_type_to_type (die, objfile)
     }
   else
     {
-      read_type_die (die, objfile);
+      struct attribute *attr;
+      attr = dwarf_attr (die, DW_AT_name);
+      if (attr && DW_STRING (attr))
+	{
+	  char *attrname=DW_STRING (attr);
+	  unsigned long hashval=hash(attrname, strlen(attrname)) % TYPE_HASH_SIZE;
+
+	  if (dwarf2_cached_types[hashval] != NULL)
+	    {
+	      const char *nameoftype;
+	      nameoftype = TYPE_NAME(dwarf2_cached_types[hashval]) == NULL ? TYPE_TAG_NAME(dwarf2_cached_types[hashval]) : TYPE_NAME(dwarf2_cached_types[hashval]);
+	      if (strcmp(attrname, nameoftype) == 0)
+		{
+		  die->type=dwarf2_cached_types[hashval];
+		}
+	      else
+		{
+		  read_type_die (die, objfile);
+		  dwarf2_cached_types[hashval] = die->type;
+		}
+	    }
+	  else
+	    {
+	      read_type_die (die, objfile);
+	      dwarf2_cached_types[hashval] = die->type;
+	    }
+	}
+      else
+	{
+	  read_type_die (die, objfile);
+	}
+
       if (!die->type)
 	{
 	  dump_die (die);

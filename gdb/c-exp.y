@@ -1433,8 +1433,6 @@ yylex ()
 
       if (c == '<')
 	{ 
-           if (hp_som_som_object_present)
-             {
                /* Scan ahead to get rest of the template specification.  Note
                   that we look ahead only when the '<' adjoins non-whitespace
                   characters; for comparison expressions, e.g. "a < b > c",
@@ -1444,26 +1442,6 @@ yylex ()
                if (p)
                  namelen = p - tokstart;
                break;
-             }
-           else
-             { 
-	       int i = namelen;
-	       int nesting_level = 1;
-	       while (tokstart[++i])
-		 {
-		   if (tokstart[i] == '<')
-		     nesting_level++;
-		   else if (tokstart[i] == '>')
-		     {
-		       if (--nesting_level == 0)
-			 break;
-		     }
-		 }
-	       if (tokstart[i] == '>')
-		 namelen = i;
-	       else
-		 break;
-	     }
 	}
       c = tokstart[++namelen];
     }

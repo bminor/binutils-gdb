@@ -28,42 +28,25 @@
 #include "bcache.h"
 #include "gdb_string.h"		/* For memcpy declaration */
 
-
+/* The old hash function was stolen from SDBM. This is what DB 3.0 uses now,
+ * and is better than the old one. 
+ */
 
-/* The hash function.  */
-
 unsigned long
-hash (void *addr, int length)
+hash(void *addr, int length)
 {
-  /* If it's a short string, hash on every character.  Otherwise, sample
-     characters from throughout the string.  */
-  if (length <= 64)
-    {
-      char *byte = addr;
-      unsigned long h = 0;
-      int i;
-
-      for (i = 0; i < length; i++)
-	h = h * 65793 ^ (h >> (sizeof (h) * 8 - 6)) ^ byte[i];
-
-      return h;
-    }
-  else
-    {
-      char *byte = addr;
-      int n, i;
-      unsigned long h = 0;
-
-      for (n = i = 0; n < 64; n++)
-	{
-	  h = h * 65793 + (h >> (sizeof (h) * 8 - 6)) + byte[i];
-	  i = h % length;
-	}
-
-      return h;
-    }
+		const unsigned char *k, *e;
+		unsigned long h;
+		
+		k = (const unsigned char *)addr;
+		e = k+length;
+		for (h=0; k< e;++k)
+		{
+				h *=16777619;
+				h ^= *k;
+		}
+		return (h);
 }
-
 
 /* Growing the bcache's hash table.  */
 

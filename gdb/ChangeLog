@@ -1,3 +1,27 @@
+2000-06-05  Daniel Berlin  <dan@cgsoftware.com>
+
+	* c-exp.y (yylex): template handling fixes.
+
+2000-06-03  Daniel Berlin  <dan@cgsoftware.com>
+
+	* symtab.h (VTBL_PREFIX_P): Add newer g++ vtbl prefix to prefix list.
+
+	* symtab.c (lookup_partial_symbol): Change to stop forcing linear searches
+	on C++ when we fail the binary search, by doing the binary search right.
+
+2000-05-30  Daniel Berlin  <dan@cgsoftware.com>
+
+	* buildsym.c (hashname): Change to use hash function from bcache.c/.h
+
+	* bcache.c (hash): Change to newer hash function.
+
+	* bcache.h (hash): Prototype for hash function
+
+	* dwarf2read.c (TYPE_HASH_SIZE): New define for controlling size
+	of type hash.
+	(dwarf2_cached_types): New variable that is the cached types.
+	(tag_type_to_type): Do the actual caching of types here.
+
 2000-06-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* acconfig.h, configure.in, i386bsd.c (HAVE_STRUCT_REG_R_FS):
