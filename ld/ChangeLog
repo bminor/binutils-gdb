@@ -1,3 +1,10 @@
+2003-05-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add earmelfb.o and earmelfb_linux.o.
+	(earmelfb.c, earmelfb_linux.c): New rules.
+	* Makefile.in: Regenerated.
+	* emulparams/armelfb.sh, emulparams/armelfb_linux.sh: New files.
+
 2003-05-09  Nick Clifton  <nickc@redhat.com>
 	
 	* ldlang.c (lang_size_sections_1): Default to generating a
