@@ -483,6 +483,24 @@ find_procinfo (pid, okfail)
 
 /*
 
+LOCAL MACRO
+
+	current_procinfo -- convert inferior_pid to a struct procinfo
+
+SYNOPSIS
+
+	static struct procinfo * current_procinfo;
+
+DESCRIPTION
+	
+	Looks up inferior_pid in the procinfo chain.  Always returns a
+	struct procinfo *.  If process can't be found, we error() out.
+ */
+
+#define current_procinfo find_procinfo (inferior_pid, 0)
+
+/*
+
 LOCAL FUNCTION
 
 	add_fd -- Add the fd to the poll/select list
@@ -540,23 +558,68 @@ remove_fd (pi)
     }
 }
 
-/*
+#define LOSING_POLL unixware_sux
 
-LOCAL MACRO
+static struct procinfo *
+wait_fd ()
+{
+  struct procinfo *pi;
+  int num_fds;
+  int i;
 
-	current_procinfo -- convert inferior_pid to a struct procinfo
+  if (attach_flag)
+    set_sigint_trap ();	/* Causes SIGINT to be passed on to the
+			   attached process. */
 
-SYNOPSIS
+#ifndef LOSING_POLL
+  num_fds = poll (poll_list, num_poll_list, -1);
+#else
+  pi = current_procinfo;
 
-	static struct procinfo * current_procinfo;
+  if (ioctl (pi->fd, PIOCWSTOP, &pi->prstatus) < 0)
+    {
+      print_sys_errmsg (pi->pathname, errno);
+      error ("PIOCWSTOP failed");
+    }
+#endif  
+  
+  if (attach_flag)
+    clear_sigint_trap();
 
-DESCRIPTION
-	
-	Looks up inferior_pid in the procinfo chain.  Always returns a
-	struct procinfo *.  If process can't be found, we error() out.
- */
+#ifndef LOSING_POLL
 
-#define current_procinfo find_procinfo (inferior_pid, 0)
+  if (num_fds <= 0)
+    {
+      print_sys_errmsg ("poll failed\n", errno);
+      error ("Poll failed, returned %d", num_fds);
+    }
+
+  for (i = 0; i < num_poll_list && num_fds > 0; i++)
+    {
+      if ((poll_list[i].revents & (POLLPRI|POLLERR|POLLHUP|POLLNVAL)) == 0)
+	continue;
+      for (pi = procinfo_list; pi; pi = pi->next)
+	{
+	  if (poll_list[i].fd == pi->fd)
+	    {
+	      if (ioctl (pi->fd, PIOCSTATUS, &pi->prstatus) < 0)
+		{
+		  print_sys_errmsg (pi->pathname, errno);
+		  error ("PIOCSTATUS failed");
+		}
+	      num_fds--;
+	      pi->had_event = 1;
+	      break;
+	    }
+	}
+      if (!pi)
+	error ("procfs_wait: Couldn't find procinfo for fd %d\n",
+	       poll_list[i].fd);
+    }
+#endif /* LOSING_POLL */
+
+  return pi;
+}
 
 /*
 
@@ -2163,46 +2226,7 @@ procfs_wait (pid, statloc)
 wait_again:
 
   if (!pi)
-    {
-      int num_fds;
-      int i;
-
-      if (attach_flag)
-	set_sigint_trap();	/* Causes SIGINT to be passed on to the
-				   attached process. */
-
-      num_fds = poll (poll_list, num_poll_list, -1);
-  
-      if (attach_flag)
-	clear_sigint_trap();
-
-      if (num_fds <= 0)
-	{
-	  print_sys_errmsg (pi->pathname, errno);
-	  error ("poll failed, returned %d\n", num_fds);
-	}
-
-      for (i = 0; i < num_poll_list && num_fds > 0; i++)
-	{
-	  if ((poll_list[i].revents & (POLLPRI|POLLERR|POLLHUP|POLLNVAL)) == 0)
-	    continue;
-	  for (pi = procinfo_list; pi; pi = pi->next)
-	    {
-	      if (poll_list[i].fd == pi->fd)
-		{
-		  if (ioctl (pi->fd, PIOCSTATUS, &pi->prstatus) < 0)
-		    checkerr++;
-		  /*		    perror_with_name (pi->pathname);*/
-		  num_fds--;
-		  pi->had_event = 1;
-		  break;
-		}
-	    }
-	  if (!pi)
-	    error ("procfs_wait: Couldn't find procinfo for fd %d\n",
-		   poll_list[i].fd);
-	}
-    }
+    pi = wait_fd ();
 
   if (pid != -1)
     for (pi = procinfo_list; pi; pi = pi->next)

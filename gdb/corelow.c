@@ -84,12 +84,13 @@ solib_add_stub (from_tty)
    list of threads in a core file.  */
 
 static void
-add_to_thread_list (abfd, asect, reg_sect)
+add_to_thread_list (abfd, asect, reg_sect_arg)
      bfd *abfd;
      asection *asect;
-     asection *reg_sect;
+     PTR reg_sect_arg;
 {
   int thread_id;
+  asection *reg_sect = reg_sect_arg;
 
   if (strncmp (bfd_section_name (abfd, asect), ".reg/", 5) != 0)
     return;

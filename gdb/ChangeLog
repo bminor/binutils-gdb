@@ -1,5 +1,9 @@
 Sat Oct 16 15:27:10 1993  Stu Grossman  (grossman at cygnus.com)
 
+	* procfs.c (procfs_wait):  Losing Unixware can't do poll on /proc
+	files.  Use PIOCWSTOP instead.
+	* corelow.c (add_to_thread_list):  Fix arg to match prototype.
+
 	* procfs.c (procfs_set_sproc_trap):  Don't use this if sproc
 	isn't available.
 	* (procfs_notice_signals):  Fix prototype.
