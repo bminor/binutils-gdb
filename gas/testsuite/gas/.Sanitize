@@ -48,6 +48,7 @@ m68k
 m68k-coff
 macros
 mips
+mn10x00
 mri
 sh
 sparc
