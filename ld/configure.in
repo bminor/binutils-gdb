@@ -1,30 +1,53 @@
-# This file is a shell script fragment that supplies the information
-# necessary to tailor a template configure script into the configure
-# script appropriate for this directory.  For more information, check
-# any existing configure script.
+dnl Process this file with autoconf to produce a configure script
+dnl
+AC_PREREG(2.0)
+AC_INIT(ldmain.c)
 
-srctrigger=ldmain.c
-srcname="linker"
-target_dependent=true
+AC_ARG_ENABLE(targets,
+[  --enable-targets        alternative target configurations],
+[case "${enableval}" in
+  yes | "") AC_ERROR(enable-targets option must specify target names or 'all')
+            ;;
+  no)       enable_targets= ;;
+  *)        enable_targets=$enableval ;;
+esac])dnl
 
-# per-host:
+AC_CONFIG_HEADER(config.h:config.in)
 
-. ${srcdir}/../bfd/configure.host
-
-host_makefile_frag=
-
-if [ -f ${srcdir}/config/${my_host}.mh ] ; then
-	host_makefile_frag=config/${my_host}.mh
+AC_CONFIG_AUX_DIR(`cd $srcdir/..; pwd`)
+AC_CANONICAL_SYSTEM
+if test -z "$target" ; then
+    AC_MSG_ERROR(Unrecognized target system type; please check config.sub.)
 fi
+if test -z "$host" ; then
+    AC_MSG_ERROR(Unrecognized host system type; please check config.sub.)
+fi
+AC_ARG_PROGRAM
 
-# per-target:
+# host-specific stuff:
+
+. ${srcdir}/configure.host
+
+AC_PROG_CC
+AC_SUBST(CFLAGS)
+AC_SUBST(HDEFINES)
+AC_SUBST(HOSTING_CRT0)
+AC_SUBST(HOSTING_LIBS)
+AC_SUBST(NATIVE_LIB_DIRS)
+
+AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h)
+AC_CHECK_FUNCS(sbrk)
+
+BFD_BINARY_FOPEN
+
+# target-specific stuff:
 
 # Canonicalize the secondary target names.
-if [ -n "$enable_targets" ]; then
+if test -n "$enable_targets"; then
     for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
-	result=`$configsub $targ 2>/dev/null`
-	if [ -n "$result" ]; then
+	result=`$ac_config_sub $targ 2>/dev/null`
+	if test -n "$result"; then
 	    canon_targets="$canon_targets $result"
 	else
 	    # Allow targets that config.sub doesn't recognize, like "all".
@@ -34,170 +57,43 @@ if [ -n "$enable_targets" ]; then
 fi
 
 all_targets=false
+EMUL=
+all_emuls=
 
 for targ in $target $canon_targets
 do
-
-case "${targ}" in
-  arm-*-pe)		ld_target=arm-pe ;;
-# start-sanitize-arc
-  arc-*-elf*)		ld_target=arc-elf ;;
-# end-sanitize-arc
-  sparc-sun-sunos4*) 	ld_target=sun4 ;;
-  sparclite*-*-coff)	ld_target=coff-sparc ;;
-  sparclite*-fujitsu-*) ld_target=sun4 ;;
-  sparc*-*-aout)	ld_target=sun4 ;;
-  sparc*-*-coff)	ld_target=coff-sparc ;;
-  sparc64-*-elf*)	ld_target=sparc64-elf ;;
-  sparc64*)		ld_target=sun4 ;;
-  sparc*-*-elf)		ld_target=sun4sol2 ;;
-  sparc*-*-lynxos*)	ld_target=sparc-lynx ;;
-  sparc*-*-netbsd*)	ld_target=sparc-nbsd ;;
-  sparc*-*-solaris2*)	ld_target=sun4sol2 ;;
-  sparc*-wrs-vxworks*)  ld_target=sun4 ;;
-  i960-wrs-vxworks5.0*) ld_target=i960 ;;
-  i960-wrs-vxworks5*)   ld_target=i960coff ;;
-  i960-wrs-vxworks*)    ld_target=i960 ;;
-  i960-*-coff)		ld_target=i960coff ;;
-  i960-intel-nindy)	ld_target=i960 ;;
-  m68*-sun-sunos[34]*)	ld_target=sun3 ;;
-  m68*-wrs-vxworks*)    ld_target=vxworks68 ;;
-  m68*-ericsson-ose)	ld_target=ose68 ;;
-  *-tandem-none)	ld_target=st2000 ;; # FIXME needs better name
-  i[345]86-*-vsta)	ld_target=vsta ;;
-  i[345]86-*-go32)	ld_target=i386-go32 ;;
-  i[345]86-*-aix*)	ld_target=i386-coff ;;
-  i[345]86-*-sco*)	ld_target=i386-coff ;;
-  i[345]86-*-lynxos*)	ld_target=i386-lynx ;;
-  i[345]86-*-coff)	ld_target=i386-coff ;;
-  i[345]86-*-bsd)	ld_target=i386-bsd ;;
-  i[345]86-*-bsd386)	ld_target=i386-bsd ;;
-  i[345]86-*-bsdi*)	ld_target=i386-bsd ;;
-  i[345]86-*-aout)	ld_target=i386-aout ;;
-  i[345]86-*-linuxaout*) ld_target=i386-laout ;;
-  i[345]86-*-linuxoldld) ld_target=i386-laout ;;
-  i[345]86-*-linux*)	ld_target=i386-linux ;;
-  i[345]86-*-sysv4*)	ld_target=i386-elf ;;
-  i[345]86-*-unixware)	ld_target=i386-elf ;;
-  i[345]86-*-netbsd*)	ld_target=i386-nbsd ;;
-  i[345]86-*-netware)	ld_target=i386-nw ;;
-  i[345]86-*-elf*)	ld_target=i386-elf ;;
-  i[345]86-*-sysv*)	ld_target=i386-coff ;;
-  i[345]86-*-mach*)	ld_target=i386-mach ;;
-  i[345]86-*-gnu*)	ld_target=i386-gelf ;;
-  i[345]86-*-msdos*)	ld_target=i386-msdos ;;
-  i[345]86-*-moss*)	ld_target=i386-moss ;;
-  i[345]86-*-winnt)	ld_target=i386-pe ;;
-  i[345]86-*-pe)	ld_target=i386-pe ;;
-  i[345]86-*-win32)	ld_target=i386-pe ;;
-  m8*-*-*)		ld_target=m88k-bcs ;;
-  a29k-*-udi)		ld_target=sa29200 ;;
-  a29k-*-ebmon)		ld_target=ebmon29k ;;
-  a29k-*-*)		ld_target=coff-a29k ;;
-#  arm-*-riscix*)	ld_target=riscix ;;
-  arm-*-aout | armel-*-aout)
-			ld_target=arml-aout ;;
-  armeb-*-aout)		ld_target=armb-aout ;;
-  h8300-*-hms)		ld_target=coff-h8300 ;;
-  h8500-*-hms)		ld_target=coff-h8500 ;;
-  sh-*-*)		ld_target=coff-sh ;;
-# start-sanitize-rce
-  rce-*-aout)		ld_target=rce-aout ;;
-# end-sanitize-rce
-  m68k-sony-*)		ld_target=news ;;
-  m68k-hp-bsd*)		ld_target=hp300bsd ;;
-  m68*-*-aout)		ld_target=m68k ;;
-  m68*-*-coff)		ld_target=m68k-coff ;;
-  m68*-*-elf)		ld_target=m68k-elf ;;
-  m68*-*-hpux*)		ld_target=hp300hpux ;;
-  m68*-*-lynxos*)	ld_target=m68k-lynx ;;
-  m68*-*-netbsd*)	ld_target=m68k-nbsd ;;
-  m68*-*-*)
-    echo '***' "Unknown m68k target vendor for ld:" ${target_vendor} 1>&2
-			exit 1 ;;
-  hppa*-*-*elf*)	ld_target=hppaelf ;;
-  hppa*-*-lites*)	ld_target=hppaelf ;;
-  vax-dec-ultrix* | vax-dec-bsd*) ld_target=vax ;;
-  mips*-dec-ultrix*)	ld_target=mips-lit ;;
-  mips*-sgi-irix5*)	ld_target=mipsb-elf32 ;;
-  mips*-sgi-irix*)	ld_target=mips-big ;;
-  mips*el-*-ecoff*)	ld_target=mipsl-idt ;;
-  mips*-*-ecoff*)	ld_target=mips-idt ;;
-  mips*-dec-bsd*)	ld_target=mipsbsd ;;
-# CYGNUS LOCAL jsmith
-  mips*vr4300el-*-elf*)	ld_target=mips-vr4300el ;;
-  mips*vr4300-*-elf*)	ld_target=mips-vr4300 ;;
-# END CYGNUS LOCAL
-  mips*el-*-elf*)	ld_target=mipsl-elf32 ;;
-  mips*-*-elf*)		ld_target=mipsb-elf32 ;;
-  alpha-*-osf*)		ld_target=alpha ;;
-  alpha-*-netware*)	ld_target=alpha ;;
-  z8k-*-coff) 		ld_target=z8k-coff ;;
-  ns32k-pc532-mach* | ns32k-pc532-ux*)	ld_target=pc532mach ;;
-  ns32k-pc532-netbsd* | ns32k-pc532-lites*)  ld_target=ns32k-nbsd ;;
-  powerpc-*-elf* | powerpc-*-eabi*)	ld_target=ppc-elf32 ;;
-  powerpcle-*-elf* | powerpcle-*-eabi*)	ld_target=ppcle-elf32 ;;
-  powerpc-*-netware*)	ld_target=ppc-nw ;;
-  w65-*-*)              ld_target=coff-w65 ;;
-  *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;
-  *-*-coff)		ld_target=${target_cpu}-${target_vendor} ;;
-  *-*-netware)		ld_target=${target_cpu}-nw ;;
-
-  all)			ld_target=all ;;
-esac
-
-    if [ "x$ld_target" = "xall" ]; then
+    if test "x$targ" = "xall"; then
         all_targets=true
     else
-	if [ ! -f ${srcdir}/config/${ld_target}.mt ] ; then
-	    echo '***' No file ${srcdir}/config/${ld_target}.mt 1>&2
-	    echo '***' GNU LD does not support target ${ld_target} 1>&2
-	    echo '***' Look in ld/configure.in for supported targets 1>&2
-	    exit 1
+	. ${srcdir}/configure.tgt
+
+	if test "x$targ" = "x$target"; then
+	    EMUL=${targ_emul}
 	fi
 
-	if [ "x$targ" = "x$target" ]; then
-	    target_makefile_frag=${srcdir}/config/${ld_target}.mt
-	else
-	    target_extra_frags="$target_extra_frags ${srcdir}/config/${ld_target}.mt"
-	fi
+	all_emuls="${all_emuls} ${targ_emul} ${targ_extra_emuls}"
     fi
 done
 
-# We don't do any links based on the target system, just makefile config.
+AC_SUBST(EMUL)
 
-# post-target:
-
-rm -f Makefile.tmp Makefile.2
-mv Makefile Makefile.tmp
-
-if [ x${all_targets} = xfalse ]; then
-
-    allfrags="$target_makefile_frag $target_extra_frags"
-
-    # The emulations in all the configured targets.
-    tb=`sed -n '
-    s/EMUL[ 	]*=[ 	]*\([^ 	]*\)/e\1.o/p
-    s/EMUL_EXTRA.*=[ 	]*\([^ 	]*\)/e\1.o/p
-    ' $allfrags`
+if test x${all_targets} = xfalse; then
     # uniq the list.
     f=""
-    for i in $tb ; do
+    for i in $all_emuls ; do
 	case " $f " in
-	*" $i "*) ;;
-	*) f="$f $i" ;;
+	*" e$i.o "*) ;;
+	*) f="$f e$i.o" ;;
 	esac
     done
-    tb="$f"
 
-    echo "EMULATION_OFILES = $tb" >> Makefile.2
+    EMULATION_OFILES="$f"
 
 else	# all_targets is true
-    echo 'EMULATION_OFILES = $(ALL_EMULATIONS)' >> Makefile.2
+    EMULATION_OFILES='$(ALL_EMULATIONS)'
 fi	# all_targets is true
 
-cat Makefile.tmp >> Makefile.2
-rm -f Makefile.tmp
-mv Makefile.2 Makefile
+AC_SUBST(EMULATION_OFILES)
 
-mkdir ldscripts 2>/dev/null
+AC_OUTPUT(Makefile,
+[case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])

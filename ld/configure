@@ -1,694 +1,1071 @@
-#!/bin/sh
+#! /bin/sh
 
-# Configuration script
-#   Copyright (C) 1988, 1990, 1991 Free Software Foundation, Inc.
-
-#This file is part of GNU.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-# $Id$
-
+# Guess values for system-dependent variables and create Makefiles.
+# Generated automatically using autoconf version 2.4 
+# Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
 #
-# Shell script to create proper links to machine-dependent files in
-# preparation for compilation.
-#
-# If configure succeeds, it leaves its status in config.status.
-# If configure fails after disturbing the status quo, 
-# 	config.status is removed.
-#
+# This configure script is free software; the Free Software Foundation
+# gives unlimited permission to copy, distribute and modify it.
 
-remove=rm
-hard_link=ln
-symbolic_link='ln -s'
+# Defaults:
+ac_help=
+ac_default_prefix=/usr/local
+# Any additions from configure.in:
+ac_help="$ac_help
+  --enable-targets        alternative target configurations"
 
-#for Test
-#remove="echo rm"
-#hard_link="echo ln"
-#symbolic_link="echo ln -s"
-
-progname=$0
-
-# clear some things potentially inherited from environment.
-ansi=
-arguments=$*
-defaulttargets=
-destdir=
-fatal=
-hostsubdir=
-Makefile=Makefile
-Makefile_in=Makefile.in
-norecursion=
-recurring=
-removing=
+# Initialize some variables set by options.
+# The variables have the same names as the options, with
+# dashes changed to underlines.
+build=NONE
+cache_file=./config.cache
+exec_prefix=NONE
+host=NONE
+no_create=
+nonopt=NONE
+no_recursion=
+prefix=NONE
+program_prefix=NONE
+program_suffix=NONE
+program_transform_name=s,x,x,
+silent=
+site=
 srcdir=
-srctrigger=
-target=
-targets=
-commontargets=
-configdirs=
-targetsubdir=
-template=
+target=NONE
 verbose=
+x_includes=NONE
+x_libraries=NONE
 
-for arg in $*;
+# Initialize some other variables.
+subdirs=
+
+ac_prev=
+for ac_option
 do
-	case ${arg} in
-	-ansi | +a*)
-		ansi=true
-		clib=clib
-		;;
-	-destdir=* | +destdir=* | +destdi=* | +destd=* | +dest=* | +des=* | +de=* | +d=*)
-		destdir=`echo ${arg} | sed 's/[+-]d[a-z]*=//'`
-		;;
-	-languages=* | +languages=* | +language=* | +languag=* \
-		| +langua=* | +langu=* | +lang=* | +lan=* | +la=* \
-		| +l=*)
-		languages="${languages} `echo ${arg} | sed 's/[+-]l[a-z]*=//'`"
-		;;
-	-gas | +g*)
-		gas=yes
-		;;
-	-help | +h*)
-		fatal=true
-		;;
-	-nfp | +nf*)
-		nfp=yes
-		;;
-	-norecursion | +no*)
-		norecursion=true
-		;;
-	-recurring | +recurring | +recurrin | +recurri | +recurr | +recur | +recu | +rec | +re)
-		recurring=true
-		;;
-	-rm | +rm)
-		removing=${arg}
-		;;
-#	-srcdir=* | +srcdir=* | +srcdi=* | +srcd=* | +src=* | +sr=* | +s=*)
-#		srcdir=`echo ${arg} | sed 's/[+-]s[a-z]*=//'`
-#		;;
-	-subdirs | +f* | +su*)
-		subdirs=${arg}
-		;;
-	-target=* | +target=* | +targe=* | +targ=* | +tar=* | +ta=*)
-		if [ -n "${targets}" ] ; then
-			subdirs="+subdirs"
-		fi
 
-		newtargets="${targets} `echo ${arg} | sed 's/[+-]t[a-z]*=//'`"
-		targets="${newtargets}"
-		;;
-	-template=* | +template=* | +templat=* | +templa=* | +templ=* | +temp=* | +tem=* | +te=*)
-		template=`echo ${arg} | sed 's/[+-]template=//'`
-		;;
-	-v | -verbose | +v*)
-		verbose=${arg}
-		;;
-	-* | +*)
-		(echo ;
-		echo "Unrecognized option: \"${arg}\"". ;
-		echo) 1>&2
-		fatal=true
-		;;
-	*)
-		if [ -n "${hosts}" ] ; then
-			subdirs="+subdirs"
-		fi
+  # If the previous option needs an argument, assign it.
+  if test -n "$ac_prev"; then
+    eval "$ac_prev=\$ac_option"
+    ac_prev=
+    continue
+  fi
 
-		newhosts="${hosts} ${arg}"
-		hosts=${newhosts}
-		;;
-	esac
+  case "$ac_option" in
+  -*=*) ac_optarg=`echo "$ac_option" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+  *) ac_optarg= ;;
+  esac
+
+  # Accept the important Cygnus configure options, so we can diagnose typos.
+
+  case "$ac_option" in
+
+  -build | --build | --buil | --bui | --bu | --b)
+    ac_prev=build ;;
+  -build=* | --build=* | --buil=* | --bui=* | --bu=* | --b=*)
+    build="$ac_optarg" ;;
+
+  -cache-file | --cache-file | --cache-fil | --cache-fi \
+  | --cache-f | --cache- | --cache | --cach | --cac | --ca | --c)
+    ac_prev=cache_file ;;
+  -cache-file=* | --cache-file=* | --cache-fil=* | --cache-fi=* \
+  | --cache-f=* | --cache-=* | --cache=* | --cach=* | --cac=* | --ca=* | --c=*)
+    cache_file="$ac_optarg" ;;
+
+  -disable-* | --disable-*)
+    ac_feature=`echo $ac_option|sed -e 's/-*disable-//'`
+    # Reject names that are not valid shell variable names.
+    if test -n "`echo $ac_feature| sed 's/[-a-zA-Z0-9_]//g'`"; then
+      { echo "configure: error: $ac_feature: invalid feature name" 1>&2; exit 1; }
+    fi
+    ac_feature=`echo $ac_feature| sed 's/-/_/g'`
+    eval "enable_${ac_feature}=no" ;;
+
+  -enable-* | --enable-*)
+    ac_feature=`echo $ac_option|sed -e 's/-*enable-//' -e 's/=.*//'`
+    # Reject names that are not valid shell variable names.
+    if test -n "`echo $ac_feature| sed 's/[-_a-zA-Z0-9]//g'`"; then
+      { echo "configure: error: $ac_feature: invalid feature name" 1>&2; exit 1; }
+    fi
+    ac_feature=`echo $ac_feature| sed 's/-/_/g'`
+    case "$ac_option" in
+      *=*) ;;
+      *) ac_optarg=yes ;;
+    esac
+    eval "enable_${ac_feature}='$ac_optarg'" ;;
+
+  -exec-prefix | --exec_prefix | --exec-prefix | --exec-prefi \
+  | --exec-pref | --exec-pre | --exec-pr | --exec-p | --exec- \
+  | --exec | --exe | --ex)
+    ac_prev=exec_prefix ;;
+  -exec-prefix=* | --exec_prefix=* | --exec-prefix=* | --exec-prefi=* \
+  | --exec-pref=* | --exec-pre=* | --exec-pr=* | --exec-p=* | --exec-=* \
+  | --exec=* | --exe=* | --ex=*)
+    exec_prefix="$ac_optarg" ;;
+
+  -gas | --gas | --ga | --g)
+    # Obsolete; use --with-gas.
+    with_gas=yes ;;
+
+  -help | --help | --hel | --he)
+    # Omit some internal or obsolete options to make the list less imposing.
+    # This message is too long to be a string in the A/UX 3.1 sh.
+    cat << EOF
+Usage: configure [options] [host]
+Options: [defaults in brackets after descriptions]
+Configuration:
+  --cache-file=FILE       cache test results in FILE
+  --help                  print this message
+  --no-create             do not create output files
+  --quiet, --silent       do not print \`checking...' messages
+  --version               print the version of autoconf that created configure
+Directory and file names:
+  --prefix=PREFIX         install architecture-independent files in PREFIX
+                          [$ac_default_prefix]
+  --exec-prefix=PREFIX    install architecture-dependent files in PREFIX
+                          [same as prefix]
+  --srcdir=DIR            find the sources in DIR [configure dir or ..]
+  --program-prefix=PREFIX prepend PREFIX to installed program names
+  --program-suffix=SUFFIX append SUFFIX to installed program names
+  --program-transform-name=PROGRAM run sed PROGRAM on installed program names
+Host type:
+  --build=BUILD           configure for building on BUILD [BUILD=HOST]
+  --host=HOST             configure for HOST [guessed]
+  --target=TARGET         configure for TARGET [TARGET=HOST]
+Features and packages:
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --x-includes=DIR        X include files are in DIR
+  --x-libraries=DIR       X library files are in DIR
+--enable and --with options recognized:$ac_help
+EOF
+    exit 0 ;;
+
+  -host | --host | --hos | --ho)
+    ac_prev=host ;;
+  -host=* | --host=* | --hos=* | --ho=*)
+    host="$ac_optarg" ;;
+
+  -nfp | --nfp | --nf)
+    # Obsolete; use --without-fp.
+    with_fp=no ;;
+
+  -no-create | --no-create | --no-creat | --no-crea | --no-cre \
+  | --no-cr | --no-c)
+    no_create=yes ;;
+
+  -no-recursion | --no-recursion | --no-recursio | --no-recursi \
+  | --no-recurs | --no-recur | --no-recu | --no-rec | --no-re | --no-r)
+    no_recursion=yes ;;
+
+  -prefix | --prefix | --prefi | --pref | --pre | --pr | --p)
+    ac_prev=prefix ;;
+  -prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
+    prefix="$ac_optarg" ;;
+
+  -program-prefix | --program-prefix | --program-prefi | --program-pref \
+  | --program-pre | --program-pr | --program-p)
+    ac_prev=program_prefix ;;
+  -program-prefix=* | --program-prefix=* | --program-prefi=* \
+  | --program-pref=* | --program-pre=* | --program-pr=* | --program-p=*)
+    program_prefix="$ac_optarg" ;;
+
+  -program-suffix | --program-suffix | --program-suffi | --program-suff \
+  | --program-suf | --program-su | --program-s)
+    ac_prev=program_suffix ;;
+  -program-suffix=* | --program-suffix=* | --program-suffi=* \
+  | --program-suff=* | --program-suf=* | --program-su=* | --program-s=*)
+    program_suffix="$ac_optarg" ;;
+
+  -program-transform-name | --program-transform-name \
+  | --program-transform-nam | --program-transform-na \
+  | --program-transform-n | --program-transform- \
+  | --program-transform | --program-transfor \
+  | --program-transfo | --program-transf \
+  | --program-trans | --program-tran \
+  | --progr-tra | --program-tr | --program-t)
+    ac_prev=program_transform_name ;;
+  -program-transform-name=* | --program-transform-name=* \
+  | --program-transform-nam=* | --program-transform-na=* \
+  | --program-transform-n=* | --program-transform-=* \
+  | --program-transform=* | --program-transfor=* \
+  | --program-transfo=* | --program-transf=* \
+  | --program-trans=* | --program-tran=* \
+  | --progr-tra=* | --program-tr=* | --program-t=*)
+    program_transform_name="$ac_optarg" ;;
+
+  -q | -quiet | --quiet | --quie | --qui | --qu | --q \
+  | -silent | --silent | --silen | --sile | --sil)
+    silent=yes ;;
+
+  -site | --site | --sit)
+    ac_prev=site ;;
+  -site=* | --site=* | --sit=*)
+    site="$ac_optarg" ;;
+
+  -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
+    ac_prev=srcdir ;;
+  -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
+    srcdir="$ac_optarg" ;;
+
+  -target | --target | --targe | --targ | --tar | --ta | --t)
+    ac_prev=target ;;
+  -target=* | --target=* | --targe=* | --targ=* | --tar=* | --ta=* | --t=*)
+    target="$ac_optarg" ;;
+
+  -v | -verbose | --verbose | --verbos | --verbo | --verb)
+    verbose=yes ;;
+
+  -version | --version | --versio | --versi | --vers)
+    echo "configure generated by autoconf version 2.4"
+    exit 0 ;;
+
+  -with-* | --with-*)
+    ac_package=`echo $ac_option|sed -e 's/-*with-//' -e 's/=.*//'`
+    # Reject names that are not valid shell variable names.
+    if test -n "`echo $ac_package| sed 's/[-_a-zA-Z0-9]//g'`"; then
+      { echo "configure: error: $ac_package: invalid package name" 1>&2; exit 1; }
+    fi
+    ac_package=`echo $ac_package| sed 's/-/_/g'`
+    case "$ac_option" in
+      *=*) ;;
+      *) ac_optarg=yes ;;
+    esac
+    eval "with_${ac_package}='$ac_optarg'" ;;
+
+  -without-* | --without-*)
+    ac_package=`echo $ac_option|sed -e 's/-*without-//'`
+    # Reject names that are not valid shell variable names.
+    if test -n "`echo $ac_package| sed 's/[-a-zA-Z0-9_]//g'`"; then
+      { echo "configure: error: $ac_package: invalid package name" 1>&2; exit 1; }
+    fi
+    ac_package=`echo $ac_package| sed 's/-/_/g'`
+    eval "with_${ac_package}=no" ;;
+
+  --x)
+    # Obsolete; use --with-x.
+    with_x=yes ;;
+
+  -x-includes | --x-includes | --x-include | --x-includ | --x-inclu \
+  | --x-incl | --x-inc | --x-in | --x-i)
+    ac_prev=x_includes ;;
+  -x-includes=* | --x-includes=* | --x-include=* | --x-includ=* | --x-inclu=* \
+  | --x-incl=* | --x-inc=* | --x-in=* | --x-i=*)
+    x_includes="$ac_optarg" ;;
+
+  -x-libraries | --x-libraries | --x-librarie | --x-librari \
+  | --x-librar | --x-libra | --x-libr | --x-lib | --x-li | --x-l)
+    ac_prev=x_libraries ;;
+  -x-libraries=* | --x-libraries=* | --x-librarie=* | --x-librari=* \
+  | --x-librar=* | --x-libra=* | --x-libr=* | --x-lib=* | --x-li=* | --x-l=*)
+    x_libraries="$ac_optarg" ;;
+
+  -*) { echo "configure: error: $ac_option: invalid option; use --help to show usage" 1>&2; exit 1; }
+    ;;
+
+  *) 
+    if test -n "`echo $ac_option| sed 's/[-a-z0-9.]//g'`"; then
+      echo "configure: warning: $ac_option: invalid host type" 1>&2
+    fi
+    if test "x$nonopt" != xNONE; then
+      { echo "configure: error: can only configure for one host and one target at a time" 1>&2; exit 1; }
+    fi
+    nonopt="$ac_option"
+    ;;
+
+  esac
 done
 
-if [ -n "${verbose}" ] ; then
-	echo `pwd`/configure $*
+if test -n "$ac_prev"; then
+  { echo "configure: error: missing argument to --`echo $ac_prev | sed 's/_/-/g'`" 1>&2; exit 1; }
 fi
 
-# process host and target only if not rebuilding configure itself or removing.
-if [ -z "${template}" -a -z "${removing}" -a -z "${fatal}" ] ; then
-	# Complain if an arg is missing
-	if [ -z "${hosts}" ] ; then
-		(echo ;
-		echo "configure: No HOST specified." ;
-		echo) 1>&2
-		fatal=true
-	fi
-fi
+trap 'rm -fr conftest* confdefs* core core.* *.core $ac_clean_files; exit 1' 1 2 15
 
-if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
-	(echo "Usage: configure HOST" ;
-	echo ;
-	echo "Options: [defaults in brackets]" ;
-	echo " +ansi		configure w/ANSI library. [no ansi lib]" ;
-	echo " +destdir=MYDIR	configure for installation into MYDIR. [/usr/local]" ;
-	echo " +subdirs		configure in subdirectories.  [in source directories]" ;
-	echo " +lang=LANG	configure to build LANG. [gcc]" ;
-	echo " +help		print this message. [normal config]" ;
-	echo " +gas		configure the compilers for use with gas. [native as]" ;
-	echo " +nfp		configure the compilers default to soft floating point. [hard float]" ;
-	echo " +norecursion	configure this directory only. [recurse]" ;
-	echo " +rm		remove this configuration. [build a configuration]" ;
-	echo " +target=TARGET	configure for TARGET.  [TARGET = HOST]" ;
-	echo " +template=TEM	rebuild configure using TEM. [normal config]" ;
-	echo ;
-	echo "Where HOST and TARGET are something like \"vax\", \"sun3\", \"encore\", etc." ;
-	echo "Asking for more than one \"+target\" implies \"+subdirs\".  Any other" ;
-	echo "options given will apply to all targets.") 1>&2
-
-	if [ -r config.status ] ; then
-		cat config.status
-	fi
-
-	exit 1
-fi
-
-#### configure.in common parts come in here.
-# This file is a shell script fragment that supplies the information
-# necessary to tailor a template configure script into the configure
-# script appropriate for this directory.  For more information, check
-# any existing configure script.
-
-srctrigger=ldmain.c
-srcname="linker"
-
-## end of common part.
-
-# are we rebuilding config itself?
-if [ -n "${template}" ] ; then
-	if [ ! -r ${template} ] ; then
-		echo '***' "Can't find template ${template}." 1>&2
-		exit 1
-	fi
-
-# prep the template
-	sed -e '/^#### configure.in common parts come in here.$/,/^## end of common part.$/c\
-#### configure.in common parts come in here.\
-## end of common part.' \
-	-e '/^#### configure.in per-host parts come in here.$/,/^## end of per-host part.$/c\
-#### configure.in per-host parts come in here.\
-## end of per-host part.' \
-	-e '/^#### configure.in per-target parts come in here.$/,/^## end of per-target part.$/c\
-#### configure.in per-target parts come in here.\
-## end of per-target part.' \
-	-e '/^#### configure.in post-target parts come in here.$/,/^## end of post-target part.$/c\
-#### configure.in post-target parts come in here.\
-## end of post-target part.' \
-	< ${template} > template.new
-
-	if [ -r configure.in ] ; then
-		if [ -z "`grep '^# per\-host:' configure.in`" ] ; then
-			echo '***' `pwd`/configure.in has no "per-host:" line. 1>&2
-			exit 1
-		fi
-
-		if [ -z "`grep '^# per\-target:' configure.in`" ] ; then
-			echo '***' `pwd`/configure.in has no "per-target:" line. 1>&2
-			exit 1
-		fi
-
-		# split configure.in into common, per-host, per-target,
-		# and post-target parts.  Post-target is optional.
-		sed -e '/^# per\-host:/,$d' configure.in > configure.com
-		sed -e '1,/^# per\-host:/d' -e '/^# per\-target:/,$d' configure.in > configure.hst
-		if grep -s '^# post-target:' configure.in ; then
-		  sed -e '1,/^# per\-target:/d' -e '/^# post\-target:/,$d' configure.in > configure.tgt
-		  sed -e '1,/^# post\-target:/d' configure.in > configure.pos
-		else
-		  sed -e '1,/^# per\-target:/d' configure.in > configure.tgt
-		  echo >configure.pos
-		fi
-
-		# and insert them
-		sed -e '/^#### configure.in common parts come in here.$/  r configure.com' \
-			-e '/^#### configure.in per\-host parts come in here.$/  r configure.hst' \
-			-e '/^#### configure.in per\-target parts come in here.$/  r configure.tgt' \
-			-e '/^#### configure.in post\-target parts come in here.$/  r configure.pos' \
-			template.new > configure.new
-
-		rm -f configure.com configure.tgt configure.hst configure.pos
-	else
-		echo Warning: no configure.in in `pwd`
-		cat ${template} >> configure
-	fi
-
-	chmod a+x configure.new
-	rm template.new
-#	mv configure configure.old
-	mv configure.new configure
-
-	if [ -n "${verbose}" ] ; then
-		echo Rebuilt configure in `pwd`
-	fi
-
-	# Now update config.sub from the template directory.
-	if echo "$template" | grep -s 'configure$' ; then
-		cp `echo "$template" | sed s/configure$/config.sub/` ./config.sub.new
-	#	mv config.sub config.sub.old
-		mv config.sub.new config.sub
-
-		if [ -n "${verbose}" ] ; then
-			echo Rebuilt config.sub in `pwd`
-		fi
-	fi
-
-	if [ -z "${norecursion}" ] ; then
-		# If template is relative path, make it absolute for recurring.
-		if echo "${template}" | grep -s '^/' ; then
-		   true
-		else
-		   template=`pwd`/${template}
-		fi
-
-		while [ -n "${configdirs}" ] ; do
-			# set configdir to car of configdirs, configdirs to cdr of configdirs
-			set ${configdirs}; configdir=$1; shift; configdirs=$*
-
-			if [ "`echo ${configdir}.*`" != "${configdir}.*" ] ; then
-				targetspecificdirs=${configdir}.*
-			else
-				targetspecificdirs=
-			fi
-
-			for i in ${configdir} ${targetspecificdirs} ; do
-				if [ -d $i ] ; then
-					if [ -r $i/configure ] ; then
-						(cd $i ;
-							./configure +template=${template} ${verbose})
-					else
-						echo Warning: No configure script in `pwd`/$i
-					fi
-				else
-					if [ -n "${verbose}" ] ; then
-					  echo Warning: directory $i is missing.
-					fi
-				fi
-			done
-		done
-	fi
-
-	exit 0
-fi
-
-# some sanity checks on configure.in
-if [ -z "${srctrigger}" ] ; then
-	echo Warning: srctrigger not set in configure.in. `pwd` not configured.
-	exit 1
-fi
-
-for host in ${hosts} ; do
-	# Default other arg
-	if [ -z "${targets}" -o -n "${defaulttargets}" ] ; then
-		targets=${host}
-		defaulttargets=true
-	fi
-
-	host_alias=${host}
-
-	result=`/bin/sh ./config.sub ${host}`
-	host_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
-	host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
-	host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
-	host=${host_cpu}-${host_vendor}-${host_os}
-	host_makefile_frag=config/hmake-${host}
-
-#### configure.in per-host parts come in here.
-
-if [ "${host_os}" = "posix" ] ; then
-	my_host=posix
+# File descriptor usage:
+# 0 standard input
+# 1 file creation
+# 2 errors and warnings
+# 3 some systems may open it to /dev/tty
+# 4 used on the Kubota Titan
+# 6 checking for... messages and results
+# 5 compiler messages saved in config.log
+if test "$silent" = yes; then
+  exec 6>/dev/null
 else
-	case "${host_cpu}" in
-	rs6000)	my_host=aix ;;
-	mips)
-		case "${host_vendor}" in
-		dec)	my_host=dec3100 ;;
-		esac
-		;;
-	m88k)
-		case "${host_vendor}" in
-		*)
-			case "${host_os}" in
-			dgux)	my_host=dgux ;;
-			esac
-			;;
-		esac
-		;;
+  exec 6>&1
+fi
+exec 5>./config.log
 
-	m68k)
-		case "${host_vendor}" in
-		hp)	my_host=hp9000 ;;
-		sony)	my_host=news ;;
-		sun)	my_host=sun3 ;;
-		esac
-		;;
+echo "\
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+" 1>&5
 
-	i386)
-		case "${host_vendor}" in
-		*)
-			case "${host_os}" in
-			sysv)	my_host=i386v ;;
-			esac
-			;;
-		esac
-		;;
+# Strip out --no-create and --no-recursion so they do not pile up.
+# Also quote any args containing shell metacharacters.
+ac_configure_args=
+for ac_arg
+do
+  case "$ac_arg" in
+  -no-create | --no-create | --no-creat | --no-crea | --no-cre \
+  | --no-cr | --no-c) ;;
+  -no-recursion | --no-recursion | --no-recursio | --no-recursi \
+  | --no-recurs | --no-recur | --no-recu | --no-rec | --no-re | --no-r) ;;
+  *" "*|*"	"*|*[\[\]\~\#\$\^\&\*\(\)\{\}\\\|\;\<\>\?]*)
+  ac_configure_args="$ac_configure_args '$ac_arg'" ;;
+  *) ac_configure_args="$ac_configure_args $ac_arg" ;;
+  esac
+done
 
-	sparc)
-		case "${host_vendor}" in
-		sun)	my_host=sun4 ;;
-		esac
-		;;
+# NLS nuisances.
+# Only set LANG and LC_ALL to C if already set.
+# These must not be set unconditionally because not all systems understand
+# e.g. LANG=C (notably SCO).
+if test "${LC_ALL+set}" = set; then LC_ALL=C; export LC_ALL; fi
+if test "${LANG+set}"   = set; then LANG=C;   export LANG;   fi
 
-	rtpc)	my_host=rtbsd ;;
-	tahoe | vax)	my_host=${host_cpu} ;;
-	esac
+# confdefs.h avoids OS command line length limits that DEFS can exceed.
+rm -rf conftest* confdefs.h
+# AIX cpp loses on an empty file, so make sure it contains at least a newline.
+echo > confdefs.h
+
+# A filename unique to this package, relative to the directory that
+# configure is in, which we can look for to find out if srcdir is correct.
+ac_unique_file=ldmain.c
+
+# Find the source files, if location was not specified.
+if test -z "$srcdir"; then
+  ac_srcdir_defaulted=yes
+  # Try the directory containing this script, then its parent.
+  ac_prog=$0
+  ac_confdir=`echo $ac_prog|sed 's%/[^/][^/]*$%%'`
+  test "x$ac_confdir" = "x$ac_prog" && ac_confdir=.
+  srcdir=$ac_confdir
+  if test ! -r $srcdir/$ac_unique_file; then
+    srcdir=..
+  fi
+else
+  ac_srcdir_defaulted=no
+fi
+if test ! -r $srcdir/$ac_unique_file; then
+  if test "$ac_srcdir_defaulted" = yes; then
+    { echo "configure: error: can not find sources in $ac_confdir or .." 1>&2; exit 1; }
+  else
+    { echo "configure: error: can not find sources in $srcdir" 1>&2; exit 1; }
+  fi
+fi
+srcdir=`echo "${srcdir}" | sed 's%\([^/]\)/*$%\1%'`
+
+# Prefer explicitly selected file to automatically selected ones.
+if test -z "$CONFIG_SITE"; then
+  if test "x$prefix" != xNONE; then
+    CONFIG_SITE="$prefix/share/config.site $prefix/etc/config.site"
+  else
+    CONFIG_SITE="$ac_default_prefix/share/config.site $ac_default_prefix/etc/config.site"
+  fi
+fi
+for ac_site_file in $CONFIG_SITE; do
+  if test -r "$ac_site_file"; then
+    echo "loading site script $ac_site_file"
+    . "$ac_site_file"
+  fi
+done
+
+if test -r "$cache_file"; then
+  echo "loading cache $cache_file"
+  . $cache_file
+else
+  echo "creating cache $cache_file"
+  > $cache_file
 fi
 
-if [ ! -f config/h-${my_host} ] ; then
-	echo '***' The linker do not support host ${host}
-	exit 1
+ac_ext=c
+# CFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='${CC-cc} -c $CFLAGS $CPPFLAGS conftest.$ac_ext 1>&5 2>&5'
+ac_link='${CC-cc} -o conftest $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5 2>&5'
+
+if (echo "testing\c"; echo 1,2,3) | grep c >/dev/null; then
+  # Stardent Vistra SVR4 grep lacks -e, says ghazi@caip.rutgers.edu.
+  if (echo -n testing; echo 1,2,3) | sed s/-n/xn/ | grep xn >/dev/null; then
+    ac_n= ac_c='
+' ac_t='	'
+  else
+    ac_n=-n ac_c= ac_t=
+  fi
+else
+  ac_n= ac_c='\c' ac_t=
 fi
 
-host_makefile_frag=config/h-${my_host}
 
-## end of per-host part.
 
-	for target in ${targets} ; do
+# Check whether --enable-targets or --disable-targets was given.
+enableval="$enable_targets"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes | "") { echo "configure: error: enable-targets option must specify target names or 'all'" 1>&2; exit 1; }
+            ;;
+  no)       enable_targets= ;;
+  *)        enable_targets=$enableval ;;
+esac
+fi
 
-		target_alias=${target}
-		result=`/bin/sh ./config.sub ${target}`
-		target_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
-		target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
-		target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
-		target=${target_cpu}-${target_vendor}-${target_os}
-		target_makefile_frag=config/tmake-${target}
 
-#### configure.in per-target parts come in here.
 
-case ${target_cpu} in
-sparc)
-	case ${target_vendor} in
-	sun) my_target=sun4 ;;
-	esac
-	;;
-m88k)	my_target=m88k-bcs ;;
-a29k)	my_target=coff-a29k ;;
-m68k)	
-	case ${target_vendor} in
-	sun) my_target=sun3 ;;
-	sony) my_target=news;;
-	*) echo "Unknown 68k target vendor:" ${target_vendor} ;;
-	esac
+ac_aux_dir=
+for ac_dir in `cd $srcdir/..; pwd` $srcdir/`cd $srcdir/..; pwd`; do
+  if test -f $ac_dir/install-sh; then
+    ac_aux_dir=$ac_dir
+    ac_install_sh="$ac_aux_dir/install-sh -c"
+    break
+  elif test -f $ac_dir/install.sh; then
+    ac_aux_dir=$ac_dir
+    ac_install_sh="$ac_aux_dir/install.sh -c"
+    break
+  fi
+done
+if test -z "$ac_aux_dir"; then
+  { echo "configure: error: can not find install-sh or install.sh in `cd $srcdir/..; pwd` $srcdir/`cd $srcdir/..; pwd`" 1>&2; exit 1; }
+fi
+ac_config_guess=$ac_aux_dir/config.guess
+ac_config_sub=$ac_aux_dir/config.sub
+ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
+
+
+# Do some error checking and defaulting for the host and target type.
+# The inputs are:
+#    configure --host=HOST --target=TARGET --build=BUILD NONOPT
+#
+# The rules are:
+# 1. You are not allowed to specify --host, --target, and nonopt at the
+#    same time. 
+# 2. Host defaults to nonopt.
+# 3. If nonopt is not specified, then host defaults to the current host,
+#    as determined by config.guess.
+# 4. Target and build default to nonopt.
+# 5. If nonopt is not specified, then target and build default to host.
+
+# The aliases save the names the user supplied, while $host etc.
+# will get canonicalized.
+case $host---$target---$nonopt in
+NONE---*---* | *---NONE---* | *---*---NONE) ;;
+*) { echo "configure: error: can only configure for one host and one target at a time" 1>&2; exit 1; } ;;
 esac
 
-target_makefile_frag=config/t-${my_target}
 
-files=
-links=
-## end of per-target part.
+# Make sure we can run config.sub.
+if $ac_config_sub sun4 >/dev/null 2>&1; then :
+else { echo "configure: error: can not run $ac_config_sub" 1>&2; exit 1; }
+fi
 
-		# Temporarily, we support only direct subdir builds.
-		hostsubdir=H-${host_alias}
-		targetsubdir=T-${target_alias}
+echo $ac_n "checking host system type""... $ac_c" 1>&6
 
-		if [ -n "${removing}" ] ; then
-			if [ -n "${subdirs}" ] ; then
-				if [ -d "${hostsubdir}" ] ; then
-					rm -rf ${hostsubdir}/${targetsubdir}
+host_alias=$host
+case "$host_alias" in
+NONE)
+  case $nonopt in
+  NONE)
+    if host_alias=`$ac_config_guess`; then :
+    else { echo "configure: error: can not guess host type; you must specify one" 1>&2; exit 1; }
+    fi ;;
+  *) host_alias=$nonopt ;;
+  esac ;;
+esac
 
-					if [ -z "`(ls ${hostsubdir}) 2>&1 | grep Target- | grep -v Target-independent`" ] ; then
-						rm -rf ${hostsubdir}
-					fi
-				else
-					echo Warning: no `pwd`/${hostsubdir} to remove.
-				fi
-			else
-				rm -f ${Makefile} config.status ${links}
-			fi
-		else
-			if [ -n "${subdirs}" ] ; then
-				# check for existing status before allowing forced subdirs.
-				if [ -f ${Makefile} ] ; then
-					echo '***' "${Makefile} already exists in source directory.  `pwd` not configured." 1>&2
-					exit 1
-				fi
+host=`$ac_config_sub $host_alias`
+host_cpu=`echo $host | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+host_vendor=`echo $host | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
+host_os=`echo $host | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+echo "$ac_t""$host" 1>&6
 
-				if [ ! -d ${hostsubdir} ] ; then mkdir ${hostsubdir} ; fi
-				cd ${hostsubdir}
+echo $ac_n "checking target system type""... $ac_c" 1>&6
 
-				if [ ! -d ${targetsubdir} ] ; then
-					if [ -z "${commontargets}" ] ; then
-						mkdir ${targetsubdir}
-					else
-						if [ ! -d Target-independent ] ; then
-							mkdir Target-independent
-						fi
+target_alias=$target
+case "$target_alias" in
+NONE)
+  case $nonopt in
+  NONE) target_alias=$host_alias ;;
+  *) target_alias=$nonopt ;;
+  esac ;;
+esac
 
-						${symbolic_link} Target-independent ${targetsubdir}
-					fi # if target independent
-				fi # if no target dir yet
+target=`$ac_config_sub $target_alias`
+target_cpu=`echo $target | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+target_vendor=`echo $target | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
+target_os=`echo $target | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+echo "$ac_t""$target" 1>&6
 
-				cd ${targetsubdir}
+echo $ac_n "checking build system type""... $ac_c" 1>&6
 
-				srcdir=../..
-			else
-				# if not subdir builds, then make sure none exist.
-				if [ -n "`(ls .) 2>&1 | grep Host-`" ] ; then
-					echo '***' "Configured subdirs exist.  `pwd` not configured." 1>&2
-					exit 1
-				fi
-			fi
+build_alias=$build
+case "$build_alias" in
+NONE)
+  case $nonopt in
+  NONE) build_alias=$host_alias ;;
+  *) build_alias=$nonopt ;;
+  esac ;;
+esac
 
-			# Find the source files, if location was not specified.
-			if [ -z "${srcdir}" ] ; then
-				srcdirdefaulted=1
-				srcdir=.
-				if [ -n "${srctrigger}" -a ! -r ${srctrigger} ] ; then
-					srcdir=..
-				fi
-			fi
+build=`$ac_config_sub $build_alias`
+build_cpu=`echo $build | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+build_vendor=`echo $build | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
+build_os=`echo $build | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+echo "$ac_t""$build" 1>&6
 
-			if [ -n "${srctrigger}" -a ! -r ${srcdir}/${srctrigger} ] ; then
-				if [ -z "${srcdirdefaulted}" ] ; then
-					echo '***' "${progname}: Can't find ${srcname} sources in `pwd`/${srcdir}" 1>&2
-				else
-					echo '***' "${progname}: Can't find ${srcname} sources in `pwd`/. or `pwd`/.." 1>&2
-				fi
+test "$host_alias" != "$target_alias" &&
+  test "$program_prefix$program_suffix$program_transform_name" = \
+    NONENONEs,x,x, &&
+  program_prefix=${target_alias}-
 
-				echo '***' \(At least ${srctrigger} is missing.\) 1>&2
-				exit 1
-			fi
+if test -z "$target" ; then
+    { echo "configure: error: Unrecognized target system type; please check config.sub." 1>&2; exit 1; }
+fi
+if test -z "$host" ; then
+    { echo "configure: error: Unrecognized host system type; please check config.sub." 1>&2; exit 1; }
+fi
+if test "$program_transform_name" = s,x,x,; then
+  program_transform_name=
+else
+  # Double any \ or $.
+  echo 's,\\,\\\\,g; s,\$,$$,g' > conftestsed
+  program_transform_name="`echo $program_transform_name|sed -f conftestsed`"
+  rm -f conftestsed
+fi
+test "$program_prefix" != NONE &&
+  program_transform_name="s,^,${program_prefix},; $program_transform_name"
+# Use a double $ so make ignores it.
+test "$program_suffix" != NONE &&
+  program_transform_name="s,\$\$,${program_suffix},; $program_transform_name"
 
-			# Set up the list of links to be made.
-			# ${links} is the list of link names, and ${files} is the list of names to link to.
+# sed with no file args requires a program.
+test "$program_transform_name" = "" && program_transform_name="s,x,x,"
 
-			# Make the links.
-			while [ -n "${files}" ] ; do
-				# set file to car of files, files to cdr of files
-				set ${files}; file=$1; shift; files=$*
-				set ${links}; link=$1; shift; links=$*
 
-				if [ ! -r ${srcdir}/${file} ] ; then
-					echo '***' "${progname}: cannot create a link \"${link}\"," 1>&2
-					echo '***' "since the file \"${file}\" does not exist." 1>&2
-					exit 1
-				fi
+# host-specific stuff:
 
-				${remove} -f ${link}
-				rm -f config.status
-				# Make a symlink if possible, otherwise try a hard link
-				${symbolic_link} ${srcdir}/${file} ${link} 2>/dev/null || ${hard_link} ${srcdir}/${file} ${link}
+. ${srcdir}/configure.host
 
-				if [ ! -r ${link} ] ; then
-					echo '***' "${progname}: unable to link \"${link}\" to \"${srcdir}/${file}\"." 1>&2
-					exit 1
-				fi
+echo $ac_n "checking for CC""... $ac_c" 1>&6
+test -z "$CC" && test -r ../Makefile && CC=`egrep '^CC *=' ../Makefile | tail -1 | sed 's/^CC *= *//'`
+test -z "$CC" && CC=cc
+echo "$ac_t""setting CC to $CC" 1>&6
 
-				if [ -n "${verbose}" ] ; then
-					echo "Linked \"${link}\" to \"${srcdir}/${file}\"."
-				fi
-			done
+cat > conftest.c <<EOF
+#ifdef __GNUC__
+  yes;
+#endif
+EOF
+if ${CC-cc} -E conftest.c 2>&5 | egrep yes >/dev/null 2>&1; then
+  GCC=yes
+  if test "${CFLAGS+set}" != set; then
+    echo 'void f(){}' > conftest.c
+    if test -z "`${CC-cc} -g -c conftest.c 2>&1`"; then
+      CFLAGS="-g -O"
+    else
+      CFLAGS="-O"
+    fi
+  fi
+else
+  GCC=
+  test "${CFLAGS+set}" = set || CFLAGS="-g"
+fi
+rm -f conftest*
 
-			# Create a .gdbinit file which runs the one in srcdir
-			# and tells GDB to look there for source files.
 
-			case ${srcdir} in
-			.)
-				;;
-			*)
-				echo "dir ." > .gdbinit
-				echo "dir ${srcdir}" >> .gdbinit
-				echo "source ${srcdir}/.gdbinit" >> .gdbinit
-				;;
-			esac
 
-			# Install a makefile, and make it set VPATH
-			# if necessary so that the sources are found.
-			# Also change its value of srcdir.
 
-		# FIXME-someday: This business of always writing to .tem and mv back
-		# is so that I don't screw things up while developing.  Once this
-		# template is stable, these should be optimized. xoxorich.
 
-			# Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
-			if [ "${host}" != "${target}" ] ; then
-				echo "CROSS=-DCROSS_COMPILE" > ${Makefile}
-				echo "ALL=start.encap" >> ${Makefile}
-			else
-				echo "ALL=all.internal" > ${Makefile}
-			fi
 
-			# set target, host, VPATH
-			echo "host_alias = ${host_alias}" >> ${Makefile}
-			echo "host_cpu = ${host_cpu}" >> ${Makefile}
-			echo "host_vendor = ${host_vendor}" >> ${Makefile}
-			echo "host_os = ${host_os}" >> ${Makefile}
 
-			echo "target_alias = ${target_alias}" >> ${Makefile}
-			echo "target_cpu = ${target_cpu}" >> ${Makefile}
-			echo "target_vendor = ${target_vendor}" >> ${Makefile}
-			echo "target_os = ${target_os}" >> ${Makefile}
+echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
+# On Suns, sometimes $CPP names a directory.
+if test -n "$CPP" && test -d "$CPP"; then
+  CPP=
+fi
+if test -z "$CPP"; then
+if eval "test \"`echo '$''{'ac_cv_prog_CPP'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+    # This must be in double quotes, not single quotes, because CPP may get
+  # substituted into the Makefile and "${CC-cc}" will confuse make.
+  CPP="${CC-cc} -E"
+  # On the NeXT, cc -E runs the code through the compiler's parser,
+  # not just through cpp.
+  cat > conftest.$ac_ext <<EOF
+#line 598 "configure"
+#include "confdefs.h"
+#include <assert.h>
+Syntax Error
+EOF
+eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+ac_err=`grep -v '^ *+' conftest.out`
+if test -z "$ac_err"; then
+  :
+else
+  echo "$ac_err" >&5
+  rm -rf conftest*
+  CPP="${CC-cc} -E -traditional-cpp"
+  cat > conftest.$ac_ext <<EOF
+#line 612 "configure"
+#include "confdefs.h"
+#include <assert.h>
+Syntax Error
+EOF
+eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+ac_err=`grep -v '^ *+' conftest.out`
+if test -z "$ac_err"; then
+  :
+else
+  echo "$ac_err" >&5
+  rm -rf conftest*
+  CPP=/lib/cpp
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+  ac_cv_prog_CPP="$CPP"
+fi
+  CPP="$ac_cv_prog_CPP"
+else
+  ac_cv_prog_CPP="$CPP"
+fi
+echo "$ac_t""$CPP" 1>&6
 
-			if [ -n "${subdirs}" ] ; then
-				echo "subdir = /${hostsubdir}/${targetsubdir}" >> ${Makefile}
-			else
-				echo "subdir =" >> ${Makefile}
-			fi
+for ac_hdr in string.h strings.h stdlib.h unistd.h
+do
+ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
+echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 645 "configure"
+#include "confdefs.h"
+#include <$ac_hdr>
+EOF
+eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+ac_err=`grep -v '^ *+' conftest.out`
+if test -z "$ac_err"; then
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=yes"
+else
+  echo "$ac_err" >&5
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=no"
+fi
+rm -f conftest*
+fi
+if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_hdr=HAVE_`echo $ac_hdr | tr '[a-z]./\055' '[A-Z]___'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_hdr 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
 
-		#	echo "workdir = `pwd`" >> ${Makefile}
-			echo "VPATH = ${srcdir}" >> ${Makefile}
+for ac_func in sbrk
+do
+echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 680 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+char $ac_func(); 
 
-			# add "Makefile.in" (or whatever it's called)
-			cat ${srcdir}/${Makefile_in} >> ${Makefile}
+int main() { return 0; }
+int t() {
 
-			# Conditionalize the makefile for this host.
-			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
-				(echo "host_makefile_frag = ${srcdir}/${host_makefile_frag}" ; 
-					sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" ${Makefile}) > Makefile.tem
-				mv Makefile.tem ${Makefile}
-			fi
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+$ac_func();
+#endif
 
-			# Conditionalize the makefile for this target.
-			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
-				(echo "target_makefile_frag = ${srcdir}/${target_makefile_frag}" ; 
-					sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" ${Makefile}) > Makefile.tem
-				mv Makefile.tem ${Makefile}
-			fi
+; return 0; }
+EOF
+if eval $ac_link; then
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=yes"
+else
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=no"
+fi
+rm -f conftest*
 
-			# set srcdir
-			sed "s@^srcdir = \.@srcdir = ${srcdir}@" ${Makefile} > Makefile.tem
-			mv Makefile.tem ${Makefile}
+fi
+if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_func=HAVE_`echo $ac_func | tr '[a-z]' '[A-Z]'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_func 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
 
-			# set destdir
-			if [ -n "${destdir}" ] ; then
-				sed "s:^destdir =.*$:destdir = ${destdir}:" ${Makefile} > Makefile.tem
-				mv Makefile.tem ${Makefile}
-			fi
 
-			# reset SUBDIRS
-			sed "s:^SUBDIRS =.*$:SUBDIRS = ${configdirs}:" ${Makefile} > Makefile.tem
-			mv Makefile.tem ${Makefile}
+case "${host}" in
+i[345]86-*-msdos* | i[345]86-*-go32* | i[345]86-*-win32)
+  cat >> confdefs.h <<\EOF
+#define USE_BINARY_FOPEN 1
+EOF
+ ;;
+esac
 
-			# reset NONSUBDIRS
-			sed "s:^NONSUBDIRS =.*$:NONSUBDIRS = ${noconfigdirs}:" ${Makefile} > Makefile.tem
-			mv Makefile.tem ${Makefile}
+# target-specific stuff:
 
-			using=
-			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
-				using=" using \"${host_makefile_frag}\""
-			fi
-
-			# remove any form feeds.
-			sed -e "s///" ${Makefile} > Makefile.tem
-			mv Makefile.tem ${Makefile}
-
-			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
-				if [ -z "${using}" ] ; then
-					andusing=" using \"${target_makefile_frag}\""
-				else
-					andusing="${using} and \"${target_makefile_frag}\""
-				fi
-			else
-				andusing=${using}
-			fi
-
-			if [ -n "${verbose}" -o -z "${recurring}" ] ; then
-				echo "Created \"${Makefile}\"" in `pwd`${andusing}.
-			fi
-
-#### configure.in post-target parts come in here.
-
-## end of post-target part.
-
-			# describe the chosen configuration in config.status.
-			# Make that file a shellscript which will reestablish
-			# the same configuration.  Used in Makefiles to rebuild
-			# Makefiles.
-
-			echo "#!/bin/sh
-# ${srcname} was configured as follows:
-${srcdir}/configure" ${arguments} `if [ -z "${norecursion}" ] ; then echo +norecursion ; else true ; fi` > config.status
-			chmod a+x config.status
-
-			originaldir=`pwd`
-			cd ${srcdir}
-		fi
-
-		# If there are subdirectories, then recurse. 
-		if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then 
-			for configdir in ${configdirs} ; do
-				if [ -n "${verbose}" ] ; then
-					echo Configuring ${configdir}...
-				fi
-
-				if [ -d ${configdir} ] ; then
-					(cd ${configdir} ;
-						./configure +recurring ${host_alias} +target=${target_alias} \
-							${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
-						| sed 's/^/	/'
-				else
-					if [ -n "${verbose}" ] ; then
-						echo Warning: directory \"${configdir}\" is missing.
-					fi
-				fi
-			done
-		fi
-	done # for each target
-
-	# Now build a Makefile for this host.
-	if [ -n "${subdirs}" -a ! -n "${removing}" ] ; then
-		cd ${hostsubdir}
-		cat > GNUmakefile << E!O!F
-# Makefile generated by configure for host ${host_alias}.
-
-ALL := $(shell ls -d Target-*)
-
-%:
-	$(foreach subdir,$(ALL),$(MAKE) -C $(subdir) \$@ &&) true
-
-all:
-E!O!F
-		cd ..
+# Canonicalize the secondary target names.
+if test -n "$enable_targets"; then
+    for targ in `echo $enable_targets | sed 's/,/ /g'`
+    do
+	result=`$ac_config_sub $targ 2>/dev/null`
+	if test -n "$result"; then
+	    canon_targets="$canon_targets $result"
+	else
+	    # Allow targets that config.sub doesn't recognize, like "all".
+	    canon_targets="$canon_targets $targ"
 	fi
-done # for each host
+    done
+fi
 
+all_targets=false
+EMUL=
+all_emuls=
+
+for targ in $target $canon_targets
+do
+    if test "x$targ" = "xall"; then
+        all_targets=true
+    else
+	. ${srcdir}/configure.tgt
+
+	if test "x$targ" = "x$target"; then
+	    EMUL=${targ_emul}
+	fi
+
+	all_emuls="${all_emuls} ${targ_emul} ${targ_extra_emuls}"
+    fi
+done
+
+
+
+if test x${all_targets} = xfalse; then
+    # uniq the list.
+    f=""
+    for i in $all_emuls ; do
+	case " $f " in
+	*" e$i.o "*) ;;
+	*) f="$f e$i.o" ;;
+	esac
+    done
+
+    EMULATION_OFILES="$f"
+
+else	# all_targets is true
+    EMULATION_OFILES='$(ALL_EMULATIONS)'
+fi	# all_targets is true
+
+
+
+trap '' 1 2 15
+cat > confcache <<\EOF
+# This file is a shell script that caches the results of configure
+# tests run on this system so they can be shared between configure
+# scripts and configure runs.  It is not useful on other systems.
+# If it contains results you don't want to keep, you may remove or edit it.
+#
+# By default, configure uses ./config.cache as the cache file,
+# creating it if it does not exist already.  You can give configure
+# the --cache-file=FILE option to use a different cache file; that is
+# what configure does when it calls configure scripts in
+# subdirectories, so they share the cache.
+# Giving --cache-file=/dev/null disables caching, for debugging configure.
+# config.status only pays attention to the cache file if you give it the
+# --recheck option to rerun configure.
+#
+EOF
+# Ultrix sh set writes to stderr and can't be redirected directly,
+# and sets the high bit in the cache file unless we assign to the vars.
+(set) 2>&1 |
+  sed -n "s/^\([a-zA-Z0-9_]*_cv_[a-zA-Z0-9_]*\)=\(.*\)/\1=\${\1='\2'}/p" \
+  >> confcache
+if cmp -s $cache_file confcache; then
+  :
+else
+  if test -w $cache_file; then
+    echo "updating cache $cache_file"
+    cat confcache > $cache_file
+  else
+    echo "not updating unwritable cache $cache_file"
+  fi
+fi
+rm -f confcache
+
+trap 'rm -fr conftest* confdefs* core core.* *.core $ac_clean_files; exit 1' 1 2 15
+
+test "x$prefix" = xNONE && prefix=$ac_default_prefix
+# Let make expand exec_prefix.
+test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+
+# Any assignment to VPATH causes Sun make to only execute
+# the first set of double-colon rules, so remove it if not needed.
+# If there is a colon in the path, we need to keep it.
+if test "x$srcdir" = x.; then
+  ac_vpsub='/^[ 	]*VPATH[ 	]*=[^:]*$/d'
+fi
+
+trap 'rm -f $CONFIG_STATUS conftest*; exit 1' 1 2 15
+
+DEFS=-DHAVE_CONFIG_H
+
+# Without the "./", some shells look in PATH for config.status.
+: ${CONFIG_STATUS=./config.status}
+
+echo creating $CONFIG_STATUS
+rm -f $CONFIG_STATUS
+cat > $CONFIG_STATUS <<EOF
+#! /bin/sh
+# Generated automatically by configure.
+# Run this file to recreate the current configuration.
+# This directory was configured as follows,
+# on host `(hostname || uname -n) 2>/dev/null | sed 1q`:
+#
+# $0 $ac_configure_args
+#
+# Compiler output produced by configure, useful for debugging
+# configure, is in ./config.log if it exists.
+
+ac_cs_usage="Usage: $CONFIG_STATUS [--recheck] [--version] [--help]"
+for ac_option
+do
+  case "\$ac_option" in
+  -recheck | --recheck | --rechec | --reche | --rech | --rec | --re | --r)
+    echo "running \${CONFIG_SHELL-/bin/sh} $0 $ac_configure_args --no-create --no-recursion"
+    exec \${CONFIG_SHELL-/bin/sh} $0 $ac_configure_args --no-create --no-recursion ;;
+  -version | --version | --versio | --versi | --vers | --ver | --ve | --v)
+    echo "$CONFIG_STATUS generated by autoconf version 2.4"
+    exit 0 ;;
+  -help | --help | --hel | --he | --h)
+    echo "\$ac_cs_usage"; exit 0 ;;
+  *) echo "\$ac_cs_usage"; exit 1 ;;
+  esac
+done
+
+ac_given_srcdir=$srcdir
+
+trap 'rm -fr `echo "Makefile config.h:config.in" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+
+# Protect against being on the right side of a sed subst in config.status. 
+sed 's/%@/@@/; s/@%/@@/; s/%g$/@g/; /@g$/s/[\\\\&%]/\\\\&/g; 
+ s/@@/%@/; s/@@/@%/; s/@g$/%g/' > conftest.subs <<\CEOF
+$ac_vpsub
+$extrasub
+s%@CFLAGS@%$CFLAGS%g
+s%@CPPFLAGS@%$CPPFLAGS%g
+s%@CXXFLAGS@%$CXXFLAGS%g
+s%@DEFS@%$DEFS%g
+s%@LDFLAGS@%$LDFLAGS%g
+s%@LIBS@%$LIBS%g
+s%@exec_prefix@%$exec_prefix%g
+s%@prefix@%$prefix%g
+s%@program_transform_name@%$program_transform_name%g
+s%@host@%$host%g
+s%@host_alias@%$host_alias%g
+s%@host_cpu@%$host_cpu%g
+s%@host_vendor@%$host_vendor%g
+s%@host_os@%$host_os%g
+s%@target@%$target%g
+s%@target_alias@%$target_alias%g
+s%@target_cpu@%$target_cpu%g
+s%@target_vendor@%$target_vendor%g
+s%@target_os@%$target_os%g
+s%@build@%$build%g
+s%@build_alias@%$build_alias%g
+s%@build_cpu@%$build_cpu%g
+s%@build_vendor@%$build_vendor%g
+s%@build_os@%$build_os%g
+s%@CC@%$CC%g
+s%@HDEFINES@%$HDEFINES%g
+s%@HOSTING_CRT0@%$HOSTING_CRT0%g
+s%@HOSTING_LIBS@%$HOSTING_LIBS%g
+s%@NATIVE_LIB_DIRS@%$NATIVE_LIB_DIRS%g
+s%@CPP@%$CPP%g
+s%@EMUL@%$EMUL%g
+s%@EMULATION_OFILES@%$EMULATION_OFILES%g
+
+CEOF
+EOF
+cat >> $CONFIG_STATUS <<EOF
+
+CONFIG_FILES=\${CONFIG_FILES-"Makefile"}
+EOF
+cat >> $CONFIG_STATUS <<\EOF
+for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
+  # Support "outfile[:infile]", defaulting infile="outfile.in".
+  case "$ac_file" in
+  *:*) ac_file_in=`echo "$ac_file"|sed 's%.*:%%'`
+       ac_file=`echo "$ac_file"|sed 's%:.*%%'` ;;
+  *) ac_file_in="${ac_file}.in" ;;
+  esac
+
+  # Adjust relative srcdir, etc. for subdirectories.
+
+  # Remove last slash and all that follows it.  Not all systems have dirname.
+  ac_dir=`echo $ac_file|sed 's%/[^/][^/]*$%%'`
+  if test "$ac_dir" != "$ac_file" && test "$ac_dir" != .; then
+    # The file is in a subdirectory.
+    test ! -d "$ac_dir" && mkdir "$ac_dir"
+    ac_dir_suffix="/`echo $ac_dir|sed 's%^\./%%'`"
+    # A "../" for each directory in $ac_dir_suffix.
+    ac_dots=`echo $ac_dir_suffix|sed 's%/[^/]*%../%g'`
+  else
+    ac_dir_suffix= ac_dots=
+  fi
+
+  case "$ac_given_srcdir" in
+  .)  srcdir=.
+      if test -z "$ac_dots"; then top_srcdir=.
+      else top_srcdir=`echo $ac_dots|sed 's%/$%%'`; fi ;;
+  /*) srcdir="$ac_given_srcdir$ac_dir_suffix"; top_srcdir="$ac_given_srcdir" ;;
+  *) # Relative path.
+    srcdir="$ac_dots$ac_given_srcdir$ac_dir_suffix"
+    top_srcdir="$ac_dots$ac_given_srcdir" ;;
+  esac
+
+  echo creating "$ac_file"
+  rm -f "$ac_file"
+  configure_input="Generated automatically from `echo $ac_file_in|sed 's%.*/%%'` by configure."
+  case "$ac_file" in
+  *Makefile*) ac_comsub="1i\\
+# $configure_input" ;;
+  *) ac_comsub= ;;
+  esac
+  sed -e "$ac_comsub
+s%@configure_input@%$configure_input%g
+s%@srcdir@%$srcdir%g
+s%@top_srcdir@%$top_srcdir%g
+" -f conftest.subs $ac_given_srcdir/$ac_file_in > $ac_file
+fi; done
+rm -f conftest.subs
+
+# These sed commands are passed to sed as "A NAME B NAME C VALUE D", where
+# NAME is the cpp macro being defined and VALUE is the value it is being given.
+#
+# ac_d sets the value in "#define NAME VALUE" lines.
+ac_dA='s%^\([ 	]*\)#\([ 	]*define[ 	][ 	]*\)'
+ac_dB='\([ 	][ 	]*\)[^ 	]*%\1#\2'
+ac_dC='\3'
+ac_dD='%g'
+# ac_u turns "#undef NAME" with trailing blanks into "#define NAME VALUE".
+ac_uA='s%^\([ 	]*\)#\([ 	]*\)undef\([ 	][ 	]*\)'
+ac_uB='\([ 	]\)%\1#\2define\3'
+ac_uC=' '
+ac_uD='\4%g'
+# ac_e turns "#undef NAME" without trailing blanks into "#define NAME VALUE".
+ac_eA='s%^\([ 	]*\)#\([ 	]*\)undef\([ 	][ 	]*\)'
+ac_eB='$%\1#\2define\3'
+ac_eC=' '
+ac_eD='%g'
+
+CONFIG_HEADERS=${CONFIG_HEADERS-"config.h:config.in"}
+for ac_file in .. $CONFIG_HEADERS; do if test "x$ac_file" != x..; then
+  # Support "outfile[:infile]", defaulting infile="outfile.in".
+  case "$ac_file" in
+  *:*) ac_file_in=`echo "$ac_file"|sed 's%.*:%%'`
+       ac_file=`echo "$ac_file"|sed 's%:.*%%'` ;;
+  *) ac_file_in="${ac_file}.in" ;;
+  esac
+
+  echo creating $ac_file
+
+  rm -f conftest.frag conftest.in conftest.out
+  cp $ac_given_srcdir/$ac_file_in conftest.in
+
+EOF
+
+# Transform confdefs.h into a sed script conftest.vals that substitutes
+# the proper values into config.h.in to produce config.h.  And first:
+# Protect against being on the right side of a sed subst in config.status. 
+# Protect against being in an unquoted here document in config.status.
+rm -f conftest.vals
+cat > conftest.hdr <<\EOF
+s/[\\&%]/\\&/g
+s%[\\$`]%\\&%g
+s%#define \([A-Za-z_][A-Za-z0-9_]*\) \(.*\)%${ac_dA}\1${ac_dB}\1${ac_dC}\2${ac_dD}%gp
+s%ac_d%ac_u%gp
+s%ac_u%ac_e%gp
+EOF
+sed -n -f conftest.hdr confdefs.h > conftest.vals
+rm -f conftest.hdr
+
+# This sed command replaces #undef with comments.  This is necessary, for
+# example, in the case of _POSIX_SOURCE, which is predefined and required
+# on some systems where configure will not decide to define it.
+cat >> conftest.vals <<\EOF
+s%^[ 	]*#[ 	]*undef[ 	][ 	]*[a-zA-Z_][a-zA-Z_0-9]*%/* & */%
+EOF
+
+# Break up conftest.vals because some shells have a limit on
+# the size of here documents, and old seds have small limits too.
+# Maximum number of lines to put in a single here document.
+ac_max_here_lines=12
+
+rm -f conftest.tail
+while :
+do
+  ac_lines=`grep -c . conftest.vals`
+  # grep -c gives empty output for an empty file on some AIX systems.
+  if test -z "$ac_lines" || test "$ac_lines" -eq 0; then break; fi
+  # Write a limited-size here document to conftest.frag.
+  echo '  cat > conftest.frag <<CEOF' >> $CONFIG_STATUS
+  sed ${ac_max_here_lines}q conftest.vals >> $CONFIG_STATUS
+  echo 'CEOF
+  sed -f conftest.frag conftest.in > conftest.out
+  rm -f conftest.in
+  mv conftest.out conftest.in
+' >> $CONFIG_STATUS
+  sed 1,${ac_max_here_lines}d conftest.vals > conftest.tail
+  rm -f conftest.vals
+  mv conftest.tail conftest.vals
+done
+rm -f conftest.vals
+
+cat >> $CONFIG_STATUS <<\EOF
+  rm -f conftest.frag conftest.h
+  echo "/* $ac_file.  Generated automatically by configure.  */" > conftest.h
+  cat conftest.in >> conftest.h
+  rm -f conftest.in
+  if cmp -s $ac_file conftest.h 2>/dev/null; then
+    echo "$ac_file is unchanged"
+    rm -f conftest.h
+  else
+    rm -f $ac_file
+    mv conftest.h $ac_file
+  fi
+fi; done
+
+
+case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac
 exit 0
+EOF
+chmod +x $CONFIG_STATUS
+rm -fr confdefs* $ac_clean_files
+test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
-#
-# Local Variables:
-# fill-column: 131
-# End:
-#
-
-# end of configure

@@ -30,7 +30,7 @@ README
 TODO
 acconfig.h
 aclocal.m4
-config.h.in
+config.in
 configure
 configure.bat
 configure.host
