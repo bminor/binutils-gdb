@@ -2309,6 +2309,8 @@ _bfd_mips_elf_print_private_bfd_data (abfd, ptr)
     fprintf (file, _ (" [abi=EABI64]"));
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI))
     fprintf (file, _ (" [abi unknown]"));
+  else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI2))
+    fprintf (file, _ (" [abi=N32]"));
   else
     fprintf (file, _ (" [no abi set]"));
 
