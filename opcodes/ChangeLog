@@ -1,5 +1,8 @@
 Thu Oct 10 10:25:58 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300-opc.c (mn10300_opcodes): Fix typo in opcode field
+	for mov (abs16),DN.
+
 	* mn10300-opc.c (FMT*): Remove definitions.
 
 	* mn10300-opc.c (mn10300_opcodes): Fix destination register
