@@ -4,14 +4,14 @@
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-* Binutils::                    The GNU binary utilities "ar", "ld", "objcopy",
+* Binutils: (binutils).         The GNU binary utilities "ar", "ld", "objcopy",
 				"objdump", "nm", "size", "strings", "strip", and "ranlib".
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
 
 @ifinfo
-Copyright @copyright{} 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -47,8 +47,6 @@ into another language, under the above conditions for modified versions.
 
 @setchapternewpage odd
 @settitle GNU Binary Utilities
-@c @smallbook
-@c @cropmarks
 @titlepage
 @finalout
 @title The GNU Binary Utilities
@@ -66,7 +64,7 @@ into another language, under the above conditions for modified versions.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -82,8 +80,7 @@ into another language, under the above conditions for modified versions.
 @end titlepage
 
 @node Top
-@top
-@chapter Introduction
+@top Introduction
 
 @cindex version
 This brief manual contains preliminary documentation for the GNU binary
@@ -737,25 +734,25 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         @var{infile} [@var{outfile}]
 @end smallexample
 
-The GNU @code{objcopy} utility copies the contents of an object file to
-another.  @code{objcopy} uses the GNU BFD Library to read and write the
-object files.  It can write the destination object file in a format
-different from that of the source object file.  The exact behavior of
-@code{objcopy} is controlled by command-line options.
+The @sc{gnu} @code{objcopy} utility copies the contents of an object
+file to another.  @code{objcopy} uses the @sc{gnu} @sc{bfd} Library to
+read and write the object files.  It can write the destination object
+file in a format different from that of the source object file.  The
+exact behavior of @code{objcopy} is controlled by command-line options.
 
 @code{objcopy} creates temporary files to do its translations and
-deletes them afterward.  @code{objcopy} uses BFD to do all its
-translation work; it knows about all the formats BFD knows about, and
-thus is able to recognize most formats without being told explicitly.
-@xref{BFD,,BFD,ld.info,Using LD}.
+deletes them afterward.  @code{objcopy} uses @sc{bfd} to do all its
+translation work; it has access to all the formats described in @sc{bfd}
+and thus is able to recognize most formats without being told
+explicitly.  @xref{BFD,,BFD,ld.info,Using LD}.
 
 @table @code
 @item @var{infile}
 @itemx @var{outfile}
-The source and output files respectively.
+The source and output files, respectively.
 If you do not specify @var{outfile}, @code{objcopy} creates a
 temporary file and destructively renames the result with
-the name of the input file.
+the name of @var{infile}.
 
 @item -I @var{bfdname}	
 @itemx --input-target=@var{bfdname}
@@ -797,14 +794,15 @@ Keep only every @var{byte}th byte of the input file (header data is not
 affected).  @var{byte} can be in the range from 0 to @var{interleave}-1,
 where @var{interleave} is given by the @samp{-i} or @samp{--interleave}
 option, or the default of 4.  This option is useful for creating files
-to program ROMs.  It is typically used with an @code{srec} output
+to program @sc{rom}.  It is typically used with an @code{srec} output
 target.
 
 @item -i @var{interleave}
 @itemx --interleave=@var{interleave}
-Only copy one out of every @var{interleave} bytes.  Which one to copy is
-selected by the @var{-b} or @samp{--byte} option.  The default is 4.
-The interleave is ignored if neither @samp{-b} nor @samp{--byte} is given.
+Only copy one out of every @var{interleave} bytes.  Select which byte to
+copy with the @var{-b} or @samp{--byte} option.  The default is 4.
+@code{objcopy} ignores this option if you do not specify either @samp{-b} or
+@samp{--byte}.
 
 @item -V
 @itemx --version
@@ -1329,12 +1327,16 @@ c++filt @var{option} @var{symbol}
 @chapter nlmconv
 
 @code{nlmconv} converts a relocatable object file into a NetWare
-Loadable Module.  @code{nlmconv} currently works with @samp{i386} object
+Loadable Module.
+
+@ignore
+@code{nlmconv} currently works with @samp{i386} object
 files in @code{coff}, @sc{elf}, or @code{a.out} format, and @sc{SPARC}
 object files in @sc{elf}, or @code{a.out} format@footnote{
 @code{nlmconv} should work with any @samp{i386} or @sc{sparc} object
 format in the Binary File Descriptor library.  It has only been tested
 with the above formats.}.
+@end ignore
 
 @quotation
 @emph{Warning:} @code{nlmconv} is not always built as part of the binary
@@ -1394,31 +1396,30 @@ Prints the version number for @code{nlmconv}.
 @node Selecting The Target System
 @chapter Selecting the target system
 
-You can specify three aspects of the target system to the GNU binary
-file utilities, each in several ways.  The three aspects of the target
-system that you can specify are
+You can specify three aspects of the target system to the @sc{gnu}
+binary file utilities, each in several ways:
 
 @itemize @bullet
 @item
-the target,
+the target
 
 @item
-the architecture, and
+the architecture
 
 @item
-the linker emulation (which applies to the linker only).
+the linker emulation (which applies to the linker only)
 @end itemize
 
 In the following summaries, the lists of ways to specify values are in
-order of decreasing precedence.  In other words, the ways listed earlier
-override the ways listed later.
+order of decreasing precedence.  The ways listed first override those
+listed later.
 
-The commands to list valid values only list the values that the programs
-you are running were configured for.  If they were configured with
+The commands to list valid values only list the values for which the
+programs you are running were configured.  If they were configured with
 @samp{--with-targets=all}, the commands list most of the available
 values, but a few are left out; not all targets can be configured in at
-once because some of them can only be compiled ``native'' (on hosts with
-the same type as the target system).
+once because some of them can only be configured @dfn{native} (on hosts
+with the same type as the target system).
 
 @menu
 * Target Selection::            
@@ -1427,34 +1428,26 @@ the same type as the target system).
 @end menu
 
 @node Target Selection
-@section Target selection
+@section Target Selection
 
 A @dfn{target} is an object file format.  A given target may be
 supported for multiple architectures (@pxref{Architecture Selection}).
-It may also have variations for different operating systems or architectures.
+A target selection may also have variations for different operating
+systems or architectures.
 
-Command to list valid values: @samp{objdump -i} (first column).
+The command to list valid target values is @samp{objdump -i}
+(the first column of output contains the relevant information).
 
 Some sample values are: @samp{a.out-hp300bsd}, @samp{ecoff-littlemips},
 @samp{a.out-sunos-big}.
 
-@menu
-* objdump Target::              
-* objcopy strip Input Target::  
-* objcopy strip Output Target::  
-* nm size strings Target::  
-* Linker Input Target::         
-* Linker Output Target::        
-@end menu
-
-@node objdump Target
-@subsection @code{objdump} target
+@subheading @code{objdump} Target
 
 Ways to specify:
 
 @enumerate
 @item
-command line option @samp{-b}, @samp{--target}
+command line option: @samp{-b} or @samp{--target}
 
 @item
 environment variable @code{GNUTARGET}
@@ -1463,14 +1456,13 @@ environment variable @code{GNUTARGET}
 deduced from the input file
 @end enumerate
 
-@node objcopy strip Input Target
-@subsection @code{objcopy} and @code{strip} input target
+@subheading @code{objcopy} and @code{strip} Input Target
 
 Ways to specify:
 
 @enumerate
 @item
-command line option @samp{-I}, @samp{--input-target}, @samp{-F}, @samp{--target}
+command line options: @samp{-I} or @samp{--input-target}, or @samp{-F} or @samp{--target}
 
 @item
 environment variable @code{GNUTARGET}
@@ -1479,17 +1471,16 @@ environment variable @code{GNUTARGET}
 deduced from the input file
 @end enumerate
 
-@node objcopy strip Output Target
-@subsection @code{objcopy} and @code{strip} output target
+@subheading @code{objcopy} and @code{strip} Output Target
 
 Ways to specify:
 
 @enumerate
 @item
-command line option @samp{-O}, @samp{-F}, @samp{--output-target}, @samp{--target}
+command line options: @samp{-O} or @samp{--output-target}, or @samp{-F} or @samp{--target}
 
 @item
-the input target (@pxref{objcopy strip Input Target})
+the input target (see ``@code{objcopy} and @code{strip} Input Target'' above)
 
 @item
 environment variable @code{GNUTARGET}
@@ -1498,14 +1489,13 @@ environment variable @code{GNUTARGET}
 deduced from the input file
 @end enumerate
 
-@node nm size strings Target
-@subsection @code{nm}, @code{size}, and @code{strings} target
+@subheading @code{nm}, @code{size}, and @code{strings} Target
 
 Ways to specify:
 
 @enumerate
 @item
-command line option @samp{--target}
+command line option: @samp{--target}
 
 @item
 environment variable @code{GNUTARGET}
@@ -1514,14 +1504,13 @@ environment variable @code{GNUTARGET}
 deduced from the input file
 @end enumerate
 
-@node Linker Input Target
-@subsection Linker input target
+@subheading Linker Input Target
 
 Ways to specify:
 
 @enumerate
 @item
-command line option @samp{-b}, @samp{-format}
+command line option: @samp{-b} or @samp{--format}
 (@pxref{Options,,Options,ld.info,Using LD})
 
 @item
@@ -1537,14 +1526,13 @@ the default target of the selected linker emulation
 (@pxref{Linker Emulation Selection})
 @end enumerate
 
-@node Linker Output Target
-@subsection Linker output target
+@subheading Linker Output Target
 
 Ways to specify:
 
 @enumerate
 @item
-command line option @samp{-oformat}
+command line option: @samp{-oformat}
 (@pxref{Options,,Options,ld.info,Using LD})
 
 @item
@@ -1552,42 +1540,34 @@ script command @code{OUTPUT_FORMAT}
 (@pxref{Option Commands,,Option Commands,ld.info,Using LD})
 
 @item
-the linker input target (@pxref{Linker Input Target})
+the linker input target (see ``Linker Input Target'' above)
 @end enumerate
 
 @node Architecture Selection
 @section Architecture selection
 
-An @dfn{architecture} is a type of CPU on which an object file is to
-run.  Its name may contain a colon, separating the name of the
-processor family from the name of the particular CPU.
+An @dfn{architecture} is a type of @sc{cpu} on which an object file is
+to run.  Its name may contain a colon, separating the name of the
+processor family from the name of the particular @sc{cpu}.
 
-Command to list valid values: @samp{objdump -i} (second column).
+The command to list valid architecture values is @samp{objdump -i} (the
+second column contains the relevant information).
 
 Sample values: @samp{m68k:68020}, @samp{mips:3000}, @samp{sparc}.
 
-@menu
-* objdump Architecture::        
-* objcopy nm size strings Architecture::  
-* Linker Input Architecture::  
-* Linker Output Architecture::  
-@end menu
-
-@node objdump Architecture
-@subsection @code{objdump} architecture
+@subheading @code{objdump} Architecture
 
 Ways to specify:
 
 @enumerate
 @item
-command line option @samp{-m}, @samp{--architecture}
+command line option: @samp{-m} or @samp{--architecture}
 
 @item
 deduced from the input file
 @end enumerate
 
-@node objcopy nm size strings Architecture
-@subsection @code{objcopy}, @code{nm}, @code{size}, @code{strings} architecture
+@subheading @code{objcopy}, @code{nm}, @code{size}, @code{strings} Architecture
 
 Ways to specify:
 
@@ -1596,8 +1576,7 @@ Ways to specify:
 deduced from the input file
 @end enumerate
 
-@node Linker Input Architecture
-@subsection Linker input architecture
+@subheading Linker Input Architecture
 
 Ways to specify:
 
@@ -1606,8 +1585,7 @@ Ways to specify:
 deduced from the input file
 @end enumerate
 
-@node Linker Output Architecture
-@subsection Linker output architecture
+@subheading Linker Output Architecture
 
 Ways to specify:
 
@@ -1618,7 +1596,7 @@ script command @code{OUTPUT_ARCH}
 
 @item
 the default architecture from the linker output target
-(@pxref{Linker Output Target})
+(@pxref{Target Selection})
 @end enumerate
 
 @node Linker Emulation Selection
@@ -1630,17 +1608,17 @@ In particular, it consists of
 
 @itemize @bullet
 @item
-the linker script,
+the linker script
 
 @item
-the target, and
+the target
 
 @item
 several ``hook'' functions that are run at certain stages of the linking
-process to do special things that some targets require.
+process to do special things that some targets require
 @end itemize
 
-Command to list valid values: @samp{ld -V}.
+The command to list valid linker emulation values is @samp{ld -V}.
 
 Sample values: @samp{hp300bsd}, @samp{mipslit}, @samp{sun4}.
 
@@ -1648,7 +1626,7 @@ Ways to specify:
 
 @enumerate
 @item
-command line option @samp{-m}
+command line option: @samp{-m}
 (@pxref{Options,,Options,ld.info,Using LD})
 
 @item
