@@ -1,5 +1,13 @@
 2002-09-06  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-tdep.c (i386bsd_init_abi): Set sigtramp_start and
+	sigtramp_end to i386bsd_sigtramp_start and i386bsd_sigtramp_end.
+	* i386nbsd-tdep.c (i386nbsd_init_abi): Set sigtramp_start and
+	sigtramp_end to NULL.
+	* config/i386/tm-fbsd.h (SIGTRAMP_START, SIGTRAMP_END): Remove
+	defines.
+	(i386bsd_sigtramp_start, i386_sigtramp_end): Remove prototypes.
+
 	* i386nbsd-tdep.c (i386nbsd_pc_in_sigtramp): Remove spurious
 	whitespace.
 

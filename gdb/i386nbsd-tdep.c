@@ -251,6 +251,11 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* NetBSD has different signal trampoline conventions.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, i386nbsd_pc_in_sigtramp);
+  /* FIXME: kettenis/20020906: We should probably provide
+     NetBSD-specific versions of these functions if we want to
+     recognize signal trampolines that live on the stack.  */
+  set_gdbarch_sigtramp_start (gdbarch, NULL);
+  set_gdbarch_sigtramp_end (gdbarch, NULL);
 
   /* NetBSD uses -freg-struct-return by default.  */
   tdep->struct_return = reg_struct_return;
