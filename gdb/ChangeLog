@@ -1,3 +1,8 @@
+2004-08-12  Andrew Cagney  <cagney@gnu.org>
+
+	* NEWS: Mention fixes in GDB 6.2.1.
+	* PROBLEMS: Remove mention of mips-irix.
+
 2004-08-11  Joel Brobecker  <brobecker@gnat.com>
 
 	* config/powerpc/xm-aix.h: Delete.

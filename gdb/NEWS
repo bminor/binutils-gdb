@@ -3,6 +3,25 @@
 
 *** Changes since GDB 6.2:
 
+*** Changes in GDB 6.2.1:
+
+* MIPS `break main; run' gave an heuristic-fence-post warning
+
+When attempting to run even a simple program, a warning about
+heuristic-fence-post being hit would be reported.  This problem has
+been fixed.
+
+* MIPS IRIX 'long double' crashed GDB
+
+When examining a long double variable, GDB would get a segmentation
+fault.  The crash has been fixed (but GDB 6.2 cannot correctly examine
+IRIX long double values).
+
+* VAX and "next"
+
+A bug in the VAX stack code was causing problems with the "next"
+command.  This problem has been fixed.
+
 *** Changes in GDB 6.2:
 
 * Fix for ``many threads''
