@@ -1,7 +1,13 @@
 # Linker script for PE.
 
+if test -z "${RELOCATEABLE_OUTPUT_FORMAT}"; then
+  RELOCATEABLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
+fi
+
 cat <<EOF
-OUTPUT_FORMAT(${OUTPUT_FORMAT})
+${RELOCATING+OUTPUT_FORMAT(${OUTPUT_FORMAT})}
+${RELOCATING-OUTPUT_FORMAT(${RELOCATEABLE_OUTPUT_FORMAT})}
+
 ${LIB_SEARCH_DIRS}
 
 ENTRY(_mainCRTStartup)
@@ -12,6 +18,7 @@ SECTIONS
   {
     ${RELOCATING+ *(.init)}
     *(.text)
+    ${RELOCATING+*(.text\$*)}
     ${CONSTRUCTING+ ___CTOR_LIST__ = .; __CTOR_LIST__ = . ; 
 			LONG (-1); *(.ctors); *(.ctor); LONG (0); }
     ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ; 
@@ -20,44 +27,40 @@ SECTIONS
     /* ??? Why is .gcc_exc here?  */
     ${RELOCATING+ *(.gcc_exc)}
     ${RELOCATING+ etext = .;}
-    /* Grouped section support currently must be explicitly provided for
-	in the linker script.  */
-    *(.text\$)
     *(.gcc_except_table)
   }
 
-  .bss BLOCK(__section_alignment__)  :
+  .data ${RELOCATING+BLOCK(__section_alignment__)} : 
   {
-    __bss_start__ = . ;
-    *(.bss)
-    *(COMMON)
-    __bss_end__ = . ;
-  }
-  .data BLOCK(__section_alignment__) : 
-  {
-    __data_start__ = . ; 
+    ${RELOCATING+__data_start__ = . ;}
     *(.data)
     *(.data2)
-    __data_end__ = . ; 
-    /* Grouped section support currently must be explicitly provided for
-	in the linker script.  */
-    *(.data\$)
+    ${RELOCATING+*(.data\$*)}
+    ${RELOCATING+__data_end__ = . ;}
+    ${RELOCATING+*(.data_cygwin_nocopy)}
   }
 
-  .rdata BLOCK(__section_alignment__) :
+  .bss ${RELOCATING+BLOCK(__section_alignment__)} :
+  {
+    ${RELOCATING+__bss_start__ = . ;}
+    *(.bss)
+    *(COMMON)
+    ${RELOCATING+__bss_end__ = . ;}
+  }
+
+  .rdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
     *(.rdata)
-    /* Grouped section support currently must be explicitly provided for
-	in the linker script.  */
-    *(.rdata\$)
+    ${RELOCATING+*(.rdata\$*)}
+    *(.eh_frame)
   }
 
-  .edata BLOCK(__section_alignment__) :
+  .edata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
     *(.edata)
   }
 
-  /DISCARD/ BLOCK(__section_alignment__) :
+  /DISCARD/ :
   {
     *(.debug\$S)
     *(.debug\$T)
@@ -65,7 +68,7 @@ SECTIONS
     *(.drectve)
   }
 
-  .idata BLOCK(__section_alignment__) :
+  .idata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
     /* This cannot currently be handled with grouped sections.
 	See pe.em:sort_sections.  */
@@ -78,37 +81,35 @@ SECTIONS
     *(.idata\$6)
     *(.idata\$7)
   }
-  .CRT BLOCK(__section_alignment__) :
+  .CRT ${RELOCATING+BLOCK(__section_alignment__)} :
   { 					
-    /* Grouped sections are used to handle .CRT\$foo.  */
-    *(.CRT\$)
+    ${RELOCATING+*(.CRT\$*)}
   }
 
-  .endjunk BLOCK(__section_alignment__) :
+  .endjunk ${RELOCATING+BLOCK(__section_alignment__)} :
   {
     /* end is deprecated, don't use it */
     ${RELOCATING+ end = .;}
     ${RELOCATING+ __end__ = .;}
   }
 
-  .reloc BLOCK(__section_alignment__) :
+  .reloc ${RELOCATING+BLOCK(__section_alignment__)} :
   { 					
     *(.reloc)
   }
 
-  .rsrc BLOCK(__section_alignment__) :
+  .rsrc ${RELOCATING+BLOCK(__section_alignment__)} :
   { 					
     *(.rsrc)
-    /* Grouped sections are used to handle .rsrc\$0[12].  */
-    *(.rsrc\$)
+    ${RELOCATING+*(.rsrc\$*)}
   }
 
-  .stab BLOCK(__section_alignment__)  ${RELOCATING+(NOLOAD)} : 
+  .stab ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
   {
     [ .stab ]
   }
 
-  .stabstr BLOCK(__section_alignment__) ${RELOCATING+(NOLOAD)} :
+  .stabstr ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
   {
     [ .stabstr ]
   }
