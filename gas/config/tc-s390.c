@@ -28,24 +28,27 @@
 #include "opcode/s390.h"
 #include "elf/s390.h"
 
-/* The default architecture */
+/* The default architecture.  */
 #ifndef DEFAULT_ARCH
 #define DEFAULT_ARCH "s390"
 #endif
 static char *default_arch = DEFAULT_ARCH;
 /* Either 32 or 64, selects file format.  */
 static int s390_arch_size;
-/* Current architecture. Start with the smallest instruction set */
+/* Current architecture. Start with the smallest instruction set.  */
 static enum s390_opcode_arch_val current_architecture = S390_OPCODE_ESA;
 static int current_arch_mask = 1 << S390_OPCODE_ESA;
 static int current_arch_requested = 0;
 
-/* Whether to use user friendly register names. Default is true. */
+/* Whether to use user friendly register names. Default is true.  */
 #ifndef TARGET_REG_NAMES_P
 #define TARGET_REG_NAMES_P true
 #endif
 
 static boolean reg_names_p = TARGET_REG_NAMES_P;
+
+/* Set to TRUE if we want to warn about zero base/index registers.  */
+static boolean warn_areg_zero = FALSE;
 
 /* Generic assembler global variables which must be defined by all
    targets.  */
@@ -367,6 +370,9 @@ md_parse_option (c, arg)
       else if (arg != NULL && strcmp (arg, "no-regnames") == 0)
 	reg_names_p = false;
 
+      else if (arg != NULL && strcmp (arg, "warn-areg-zero") == 0)
+	warn_areg_zero = TRUE;
+
       else
 	{
 	  as_bad (_("invalid switch -m%s"), arg);
@@ -413,17 +419,18 @@ md_show_usage (stream)
      FILE *stream;
 {
   fprintf (stream, _("\
-          S390 options:\n\
-          -mregnames   \tAllow symbolic names for registers\n\
-          -mno-regnames\tDo not allow symbolic names for registers\n"));
+        S390 options:\n\
+        -mregnames        Allow symbolic names for registers\n\
+        -mwarn-areg-zero  Warn about zero base/index registers\n\
+        -mno-regnames     Do not allow symbolic names for registers\n"));
   fprintf (stream, _("\
-          -V       \tprint assembler version number\n\
-          -Qy, -Qn \tignored\n"));
+        -V                print assembler version number\n\
+        -Qy, -Qn          ignored\n"));
 }
 
 /* This function is called when the assembler starts up.  It is called
    after the options have been parsed and the output file has been
-   opened. */
+   opened.  */
 
 void
 md_begin ()
@@ -433,7 +440,7 @@ md_begin ()
   boolean dup_insn = false;
   const char *retval;
 
-  /* Set the ELF flags if desired. */
+  /* Set the ELF flags if desired.  */
   if (s390_flags)
     bfd_set_private_flags (stdoutput, s390_flags);
 
@@ -638,8 +645,8 @@ s390_elf_suffix (str_p, exp_p)
   len = str - ident;
 
   for (ptr = &mapping[0]; ptr->length > 0; ptr++)
-    if (len == ptr->length &&
-	strncasecmp (ident, ptr->string, ptr->length) == 0)
+    if (len == ptr->length
+	&& strncasecmp (ident, ptr->string, ptr->length) == 0)
       {
 	if (exp_p->X_add_number != 0)
 	  as_warn (_("identifier+constant@%s means identifier@%s+constant"),
@@ -732,8 +739,8 @@ s390_exp_compare(exp1, exp2)
     case O_uminus:
     case O_bit_not:
     case O_logical_not:
-      return (exp1->X_add_symbol == exp2->X_add_symbol) &&
-	(exp1->X_add_number == exp2->X_add_number);
+      return (exp1->X_add_symbol == exp2->X_add_symbol)
+	&&   (exp1->X_add_number == exp2->X_add_number);
 
     case O_multiply:   /* X_add_symbol,X_op_symbol&X_add_number must be equal.  */
     case O_divide:
@@ -754,9 +761,9 @@ s390_exp_compare(exp1, exp2)
     case O_gt:
     case O_logical_and:
     case O_logical_or:
-      return (exp1->X_add_symbol == exp2->X_add_symbol) &&
-	     (exp1->X_op_symbol == exp2->X_op_symbol) &&
-	     (exp1->X_add_number == exp2->X_add_number);
+      return (exp1->X_add_symbol == exp2->X_add_symbol)
+	&&   (exp1->X_op_symbol  == exp2->X_op_symbol)
+	&&   (exp1->X_add_number == exp2->X_add_number);
     default:
     return 0;
   }
@@ -785,8 +792,8 @@ s390_lit_suffix (str_p, exp_p, suffix)
   while (ISALNUM (*str))
     str++;
   len = str - ident;
-  if (len != 4 || strncasecmp (ident, "lit", 3) != 0 ||
-      (ident[3]!='1' && ident[3]!='2' && ident[3]!='4' && ident[3]!='8'))
+  if (len != 4 || strncasecmp (ident, "lit", 3) != 0
+      || (ident[3]!='1' && ident[3]!='2' && ident[3]!='4' && ident[3]!='8'))
     return suffix;      /* no modification */
   nbytes = ident[3] - '0';
 
@@ -838,8 +845,8 @@ s390_lit_suffix (str_p, exp_p, suffix)
     {
       /* Processing for 'normal' data types.  */
       for (lpe = lpe_list; lpe != NULL; lpe = lpe->next)
-	if (lpe->nbytes == nbytes && lpe->reloc == reloc &&
-	    s390_exp_compare(exp_p, &lpe->ex) != 0)
+	if (lpe->nbytes == nbytes && lpe->reloc == reloc
+	    && s390_exp_compare(exp_p, &lpe->ex) != 0)
 	  break;
     }
 
@@ -1062,9 +1069,13 @@ md_gather_operands (str, insn, opcode)
 	    }
 	  else
 	    {
-	      if ((operand->flags & S390_OPERAND_INDEX) && ex.X_add_number == 0)
+	      if ((operand->flags & S390_OPERAND_INDEX)
+		  && ex.X_add_number == 0
+		  && warn_areg_zero == TRUE)
 		as_warn ("index register specified but zero");
-	      if ((operand->flags & S390_OPERAND_BASE) && ex.X_add_number == 0)
+	      if ((operand->flags & S390_OPERAND_BASE)
+		  && ex.X_add_number == 0
+		  && warn_areg_zero == TRUE)
 		as_warn ("base register specified but zero");
 	      s390_insert_operand (insn, operand, ex.X_add_number, NULL, 0);
 	    }
@@ -1079,26 +1090,26 @@ md_gather_operands (str, insn, opcode)
 	    {
 	      if (operand->flags & S390_OPERAND_DISP)
 		reloc = BFD_RELOC_390_GOT12;
-	      else if ((operand->flags & S390_OPERAND_SIGNED) &&
-		       (operand->bits == 16))
+	      else if ((operand->flags & S390_OPERAND_SIGNED)
+		       && (operand->bits == 16))
 		reloc = BFD_RELOC_390_GOT16;
-	      else if ((operand->flags & S390_OPERAND_PCREL) &&
-		       (operand->bits == 32))
+	      else if ((operand->flags & S390_OPERAND_PCREL)
+		       && (operand->bits == 32))
 		reloc = BFD_RELOC_390_GOTENT;
 	    }
 	  else if (suffix == ELF_SUFFIX_PLT)
 	    {
-	      if ((operand->flags & S390_OPERAND_PCREL) &&
-		  (operand->bits == 16))
+	      if ((operand->flags & S390_OPERAND_PCREL)
+		  && (operand->bits == 16))
 		reloc = BFD_RELOC_390_PLT16DBL;
-	      else if ((operand->flags & S390_OPERAND_PCREL) &&
-		       (operand->bits == 32))
+	      else if ((operand->flags & S390_OPERAND_PCREL)
+		       && (operand->bits == 32))
 		reloc = BFD_RELOC_390_PLT32DBL;
 	    }
 	  else if (suffix == ELF_SUFFIX_GOTENT)
 	    {
-	      if ((operand->flags & S390_OPERAND_PCREL) &&
-		  (operand->bits == 32))
+	      if ((operand->flags & S390_OPERAND_PCREL)
+		  && (operand->bits == 32))
 		reloc = BFD_RELOC_390_GOTENT;
 	    }
 
@@ -1243,8 +1254,8 @@ md_gather_operands (str, insn, opcode)
 	  /* Turn off overflow checking in fixup_segment. This is necessary
 	     because fixup_segment will signal an overflow for large 4 byte
 	     quantities for GOT12 relocations.  */
-	  if (fixups[i].reloc == BFD_RELOC_390_GOT12 ||
-	      fixups[i].reloc == BFD_RELOC_390_GOT16)
+	  if (   fixups[i].reloc == BFD_RELOC_390_GOT12
+	      || fixups[i].reloc == BFD_RELOC_390_GOT16)
 	    fixP->fx_no_overflow = 1;
 	}
       else
@@ -1354,18 +1365,18 @@ s390_insn (ignore)
   expression (&exp);
   if (exp.X_op == O_constant)
     {
-      if ((opformat->oplen == 6 && exp.X_op > 0 && exp.X_op < (1ULL << 48)) ||
-	  (opformat->oplen == 4 && exp.X_op > 0 && exp.X_op < (1ULL << 32)) ||
-	  (opformat->oplen == 2 && exp.X_op > 0 && exp.X_op < (1ULL << 16)))
+      if (   ((opformat->oplen == 6) && (exp.X_op > 0) && (exp.X_op < (1ULL << 48)))
+	  || ((opformat->oplen == 4) && (exp.X_op > 0) && (exp.X_op < (1ULL << 32)))
+	  || ((opformat->oplen == 2) && (exp.X_op > 0) && (exp.X_op < (1ULL << 16))))
 	md_number_to_chars (insn, exp.X_add_number, opformat->oplen);
       else
 	as_bad (_("Invalid .insn format\n"));
     }
   else if (exp.X_op == O_big)
     {
-      if (exp.X_add_number > 0 &&
-	  opformat->oplen == 6 &&
-	  generic_bignum[3] == 0)
+      if (exp.X_add_number > 0
+	  && opformat->oplen == 6
+	  && generic_bignum[3] == 0)
 	{
 	  md_number_to_chars (insn, generic_bignum[2], 2);
 	  md_number_to_chars (&insn[2], generic_bignum[1], 2);
@@ -1614,7 +1625,7 @@ tc_s390_fix_adjustable(fixP)
   if (S_IS_WEAK (fixP->fx_addsy))
     return 0;
   /* adjust_reloc_syms doesn't know about the GOT.  */
-  if (fixP->fx_r_type == BFD_RELOC_32_GOTOFF
+  if (   fixP->fx_r_type == BFD_RELOC_32_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_390_PLT16DBL
       || fixP->fx_r_type == BFD_RELOC_390_PLT32
       || fixP->fx_r_type == BFD_RELOC_390_PLT32DBL
@@ -1726,8 +1737,8 @@ md_apply_fix3 (fixp, valuep, seg)
 	  else
 	    fixp->fx_r_type = BFD_RELOC_16;
 	}
-      else if (operand->bits == 32 && operand->shift == 16 &&
-	       (operand->flags & S390_OPERAND_PCREL))
+      else if (operand->bits == 32 && operand->shift == 16
+	       && (operand->flags & S390_OPERAND_PCREL))
 	{
 	  fixp->fx_size = 4;
 	  fixp->fx_where += 2;
@@ -1890,8 +1901,8 @@ tc_gen_reloc (seg, fixp)
   code = fixp->fx_r_type;
   if (GOT_symbol && fixp->fx_addsy == GOT_symbol)
     {
-      if ((s390_arch_size == 32 && code == BFD_RELOC_32_PCREL) ||
-	  (s390_arch_size == 64 && code == BFD_RELOC_64_PCREL))
+      if (   (s390_arch_size == 32 && code == BFD_RELOC_32_PCREL)
+	  || (s390_arch_size == 64 && code == BFD_RELOC_64_PCREL))
 	code = BFD_RELOC_390_GOTPC;
       if (code == BFD_RELOC_390_PC32DBL)
 	code = BFD_RELOC_390_GOTPCDBL;

@@ -1,3 +1,7 @@
+2001-09-19  Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+	* gas/config/tc-s390.c: Add option -mwarn-areg-zero.
+
 2001-09-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i370.c: Fix typo in last change.
