@@ -440,9 +440,9 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	      if (reg < 14)
 		{
 		  sav_reg = reg;
-		  offset = (((inst & 0xff) ^ 0x80) - 0x80) << 1;
+		  offset = (inst & 0xff) << 1;
 		  sav_offset =
-		    read_memory_integer (((pc + 4) & ~3) + offset, 2);
+		    read_memory_integer ((pc + 4) + offset, 2);
 		}
 	    }
 	}
@@ -450,13 +450,13 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	{
 	  if (sav_reg < 0)
 	    {
-	      reg = (inst & 0x0f00) >> 8;
+	      reg = GET_TARGET_REG (inst);
 	      if (reg < 14)
 		{
 		  sav_reg = reg;
-		  offset = (((inst & 0xff) ^ 0x80) - 0x80) << 1;
+		  offset = (inst & 0xff) << 2;
 		  sav_offset =
-		    read_memory_integer (((pc + 4) & ~3) + offset, 4);
+		    read_memory_integer (((pc & 0xfffffffc) + 4) + offset, 4);
 		}
 	    }
 	}
