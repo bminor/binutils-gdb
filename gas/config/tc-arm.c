@@ -8816,7 +8816,7 @@ arm_handle_align (fragP)
   fix = 0;
   
   if (bytes > MAX_MEM_FOR_RS_ALIGN_CODE)
-    bytes = MAX_MEM_FOR_RS_ALIGN_CODE;
+    bytes &= MAX_MEM_FOR_RS_ALIGN_CODE;
   
   if (fragP->tc_frag_data)
     {
