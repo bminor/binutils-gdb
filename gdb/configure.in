@@ -482,10 +482,16 @@ if test "${enable_netrom}" = "yes"; then
 fi
 
 
+# Don't add -Wall or -Wunused, they include -Wunused-parameter which
+# causes noise.
 build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
 -Wformat -Wparentheses -Wpointer-arith"
-# Not yet: -Wall -Wpointer-arith -Wstrict-prototypes
-# -Wmissing-prototypes -Wmissing-declarations
+# Up for debate: -Wswitch -Wcomment -trigraphs -Wtrigraphs
+# -Wunused-function -Wunused-label -Wunused-variable -Wunused-value
+# -Wchar-subscripts -Wuninitialized -Wtraditional -Wshadow -Wcast-qual
+# -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes
+# -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
+# -Woverloaded-virtual -Winline -Werror"
 AC_ARG_ENABLE(build-warnings,
 [  --enable-build-warnings Enable build-time compiler warnings if gcc is used],
 [case "${enableval}" in

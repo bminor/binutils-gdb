@@ -209,6 +209,21 @@ supress unused parameter warnings.
 
 --
 
+Eliminate more compiler warnings.
+
+Of course there also needs to be the usual debate over which warnings
+are valid and how to best go about this.
+
+One method: choose a single option; get agreement that it is
+reasonable; try it out to see if there isn't anything silly about it
+(-Wunused-parameters is an example of that) then incrementally hack
+away.
+
+The other method is to enable all warnings and eliminate them from one
+file at a time.
+
+--
+
 Delete macro TARGET_BYTE_ORDER_SELECTABLE.
 
 Patches in the database.
@@ -425,6 +440,18 @@ Is there a command already?
 
 --
 
+Eliminate PTR.  ISO-C allows ``void *''.
+
+--
+
+Eliminate abort ().
+
+GDB should never abort.  GDB should either throw ``error ()'' or
+``internal_error ()''.  Better still GDB should naturally unwind with
+an error status.
+
+--
+
 			Architectural Changes
 			=====================
 
@@ -575,6 +602,12 @@ code, initially a blanket rename of write_register_bytes() to
 deprecated_write_register_bytes() would help.
 
 Following that would, finaly be the corresponding changes to the target.
+
+--
+
+Fix ``I'm sorry, Dave, I can't do that.'' from symfile.c.
+
+This requires internationalization.
 
 --
 

@@ -1,3 +1,11 @@
+Wed May 17 18:27:45 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (build_warnings): List possible warnings.
+	* configure: Regenerate.
+	* TODO: More updates.
+	* MAINTAINERS: Add Gary Thomas and Joern Renneck to Write After
+ 	Approval.
+
 Wed May 17 16:48:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-04-14 Gary Thomas <gthomas@redhat.com>:

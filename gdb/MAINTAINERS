@@ -61,8 +61,8 @@ djgpp native		Eli Zaretskii		eliz@gnu.org
 MS Windows (N.T., CE, '00) host & native
 			Chris Faylor		cgf@cygnus.com
 GNU/Linux/x86 native & host
-			Jim Blandy		jimb@cygnus.com
 			Mark Kettenis		kettenis@gnu.org
+			Jim Blandy		jimb@cygnus.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
 hurd native		Mark Kettenis		kettenis@gnu.org
 macos host & native	Stan Shebs		shebs@apple.com
@@ -80,6 +80,8 @@ Solaris/SPARC native & host
 Core: Generic components used by all of GDB
 
 generic arch support	Andrew Cagney		cagney@cygnus.com
+			Any host/target maintainer can add to
+			gdbarch.{c,h,sh}.  Send tricky ones to cagney.
 target vector		Andrew Cagney		cagney@cygnus.com
 main (main.c, top.c)	Elena Zannoni		ezannoni@cygnus.com
 event loop		Elena Zannoni           ezannoni@cygnus.com
@@ -164,6 +166,7 @@ H.J. Lu						hjl@lucon.org
 Nick Clifton					nickc@cygnus.com
 Jonathan Larmour				jlarmour@redhat.co.uk
 Glen McCready					gkm@cygnus.com
+Gary Thomas					gthomas@redhat.com
 
 
 * Indicates folks we need to get Kerberos/SSH accounts ready so they
