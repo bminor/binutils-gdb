@@ -614,7 +614,23 @@ static reloc_howto_type mips_elf64_howto_table_rel[] =
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false)			/* pcrel_offset */
+	 false),		/* pcrel_offset */
+
+  /* Protected jump conversion.  This is an optimization hint.  No 
+     relocation is required for correctness.  */
+  HOWTO (R_MIPS_JALR,	        /* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_JALR",	        /* name */
+	 false,			/* partial_inplace */
+	 0x00000000,		/* src_mask */
+	 0x00000000,		/* dst_mask */
+	 false),		/* pcrel_offset */
 };
 
 /* The relocation table used for SHT_RELA sections.  */
@@ -1152,7 +1168,23 @@ static reloc_howto_type mips_elf64_howto_table_rela[] =
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false)			/* pcrel_offset */
+	 false),		/* pcrel_offset */
+
+  /* Protected jump conversion.  This is an optimization hint.  No 
+     relocation is required for correctness.  */
+  HOWTO (R_MIPS_JALR,	        /* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_JALR",	        /* name */
+	 false,			/* partial_inplace */
+	 0x00000000,		/* src_mask */
+	 0x00000000,		/* dst_mask */
+	 false),		/* pcrel_offset */
 };
 
 /* Swap in a MIPS 64-bit Rel reloc.  */
