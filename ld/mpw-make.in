@@ -39,7 +39,7 @@ prefix = :usr:local
 
 program_transform_name =
 exec_prefix = {prefix}
-bindir = {exec_prefix}:bin
+bindir = {exec_prefix}bin:
 libdir = {exec_prefix}:lib
 tooldir = {exec_prefix}:{target_alias}
 datadir = {prefix}:lib
@@ -225,12 +225,14 @@ info \Option-f  ld.info
 	{CC} {INCLUDES} {HDEFINES} {TDEFINES} {CDEFINES} -d DEFAULT_EMULATION=\Option-d"{EMUL}\Option-d" -d SCRIPTDIR=\Option-d"{scriptdir}\Option-d" {CFLAGS} "{s}"ldmain.c -o "{o}"ldmain.c.o
 	fi
 
-
+# Use this when flex is working correctly.
 :ldlex.c \Option-f  "{s}"ldlex.l
 	{LEX} -i  -Cem "{srcdir}"ldlex.l
 	Catenate :lex.yy.c >:ldlex.c.new
 	Delete -y :lex.yy.c
 	Rename -y :ldlex.c.new :ldlex.c
+#:ldlex.c \Option-f  "{s}"mpw-ldlex.c
+#	Catenate "{s}"mpw-ldlex.c >:ldlex.c
 
 # These all start with em_ so 'make clean' can find them.
 
@@ -622,15 +624,14 @@ TAGS \Option-f
 
 
 install \Option-f  
-	{INSTALL_XFORM} ld.new {bindir}:ld
-	{INSTALL_XFORM1} "{srcdir}"ld.1 {man1dir}:ld.1
-	for f in ldscripts:\Option-x; do \Option-d
-	  {INSTALL_DATA} $$f {scriptdir}:$$f ; \Option-d
-	done
-	n=`t='{program_transform_name}'; echo ld | sed -e "" $$t`; \Option-d
-	  Delete -y {tooldir}:bin:ld; \Option-d
-	  # ln {bindir}:$$n {tooldir}:bin:ld \Option-d
-	   || {INSTALL_PROGRAM} ld.new {tooldir}:bin:ld
+	If "`Exists "{prefix}"`" == ""
+		Echo "{prefix}" does not exist, cannot install anything
+		Exit 1
+	End If
+	If "`Exists "{bindir}"`" == ""
+		NewFolder "{bindir}"
+	End If
+	Duplicate -y :ld.new "{bindir}"ld
 
 install-info \Option-f  
 	for i in ld.info\Option-x ; do \Option-d
