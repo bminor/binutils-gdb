@@ -59,7 +59,7 @@
 /* This redefines CTRL if it is not already defined, so it must come
    after terminal state releated include files like <term.h> and
    "gdb_ncurses.h".  */
-#include <readline/readline.h>
+#include "readline/readline.h"
 
 /* Tells whether the TUI is active or not.  */
 int tui_active = 0;

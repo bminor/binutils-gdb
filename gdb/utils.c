@@ -63,7 +63,7 @@
 #include <term.h>
 #endif
 
-#include <readline/readline.h>
+#include "readline/readline.h"
 
 #ifdef NEED_DECLARATION_MALLOC
 extern PTR malloc ();		/* OK: PTR */

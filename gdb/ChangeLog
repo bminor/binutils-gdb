@@ -1,3 +1,15 @@
+2004-02-28  Andrew Cagney  <cagney@redhat.com>
+
+	* utils.c: Use "", instead of <>, to include readline.
+	tui/tui-win.c, tui/tui.c, tui/tui-hooks.c: Ditto.
+	* tracepoint.c, top.c, symmisc.c, symfile.c: Ditto.
+	* source.c, solib.c, exec.c, event-top.c: Ditto.
+	* corelow.c, completer.c, cli/cli-setshow.c: Ditto.
+	* cli/cli-dump.c, cli/cli-cmds.c: Ditto.
+	* Makefile.in: Update all dependencies.
+	(readline_tilde_h, readline_history_h): Define.
+	(readline_headers): Delete.
+
 2004-02-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/djgpp/fnchange.lst: Rename "config/i386/nm-linux64.h" to

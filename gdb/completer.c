@@ -33,7 +33,7 @@
 
 /* Needed for rl_completer_word_break_characters() and for
    rl_filename_completion_function.  */
-#include <readline/readline.h>
+#include "readline/readline.h"
 
 /* readline defines this.  */
 #undef savestring

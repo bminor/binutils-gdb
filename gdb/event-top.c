@@ -33,8 +33,8 @@
 #include "gdbcmd.h"
 
 /* readline include files */
-#include <readline/readline.h>
-#include <readline/history.h>
+#include "readline/readline.h"
+#include "readline/history.h"
 
 /* readline defines this.  */
 #undef savestring
