@@ -1,3 +1,8 @@
+2000-05-17  Alan Modra  <alan@linuxcare.com.au>
+
+	* Makefile.am: Regenerate dependencies.
+	* Makefile.in: Regenerate.
+
 2000-05-15  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (struct asm_psr): Add boolean field
@@ -12,7 +17,6 @@
 	only once.
 	(md_undefined_name): Mark 'name' parameter as unused, since
 	the COFF target does not use it.
-	
 
 2000-05-14  David O'Brien  <obrien@FreeBSD.org>
 
