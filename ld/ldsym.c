@@ -467,7 +467,7 @@ asymbol **output_buffer;
       {
 	/* We are only interested in outputting 
 	   globals at this stage in special circumstances */
-	if (p->the_bfd == entry->the_bfd 
+	if (bfd_asymbol_bfd(p) == entry->the_bfd
 	    && flag_is_not_at_end(p->flags)) {
 	  /* And this is one of them */
 	  *(output_buffer++) = p;

@@ -1,3 +1,23 @@
+Mon Dec 21 16:06:59 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* ldexp.c, ldlang.c, ldmain.c, ldsym.c, ldwarn.c:  Use new
+	macro bfd_asymbol_bfd as appropriate.
+	* Makefile.in:  Un-duplicate ldlex.c dependency.
+	* condigure.in:  Replace my_host case table by sourcing
+	../bfd/configure.host.  Allow std-host as the default.
+	* ldmisc.c:  Change logic for C++ name demangling:  There is
+	no initial '_' to remove from stab-derived function names.
+
+Sun Dec 13 16:31:26 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldlang.c (lang_init_script_file): don't attach the output file
+	sections to the script file.
+
+Wed Dec  9 08:38:05 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+	* ldlang.c (wild): run expansion loop over command line bfd too.
+	(lang_ini_script_file): initialize more parts of the command line
+	bfd.
+	* ldlex.l: fix DEFINED start states.
 Mon Dec  7 08:43:41 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	 -y support
 	* ld.texinfo: new doc.

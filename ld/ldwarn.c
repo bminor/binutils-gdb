@@ -87,7 +87,7 @@ DEFUN(produce_warnings,(lgs,it),
   ptr  = lgs->srefs_chain;
   while (ptr != (asymbol **)NULL) {
     asymbol *ref = *ptr;
-    info("%B: %s\n", ref->the_bfd, fetch_warning(it));
+    info("%B: %s\n", bfd_asymbol_bfd(ref), fetch_warning(it));
     ptr = (asymbol **)(ref->udata);
   }
 }
