@@ -1853,19 +1853,16 @@ rs6000_do_registers_info (int regnum, int fpregs)
         }
       else
 	{
-	  /* Print as integer in hex and in decimal.  */
+	  /* Print the register in hex.  */
+	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+		     gdb_stdout, 'x', 1, 0, Val_pretty_default);
+          /* If not a vector register, print it also in decimal.  */
 	  if (!altivec_register_p (i))
 	    {
-	      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
-			 gdb_stdout, 'x', 1, 0, Val_pretty_default);
 	      printf_filtered ("\t");
 	      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
 			 gdb_stdout, 0, 1, 0, Val_pretty_default);
 	    }
-	  else
-	    /* Print as integer in hex only.  */
-	    val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
-		       gdb_stdout, 'x', 1, 0, Val_pretty_default);
 	}
       printf_filtered ("\n");
     }
