@@ -1,3 +1,10 @@
+2003-05-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_sigtramp_frame_p): Only handle frames if we
+	have a sigcontext_addr handler.
+	* x86-64-tdep.c (x86_64_sigtramp_frame_p): Assert that we have a
+	sigcontext_addr handler.
+
 2003-05-31  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (print_gp_register_row): Replace do_gp_register_row.

@@ -930,6 +930,11 @@ i386_sigtramp_frame_p (CORE_ADDR pc)
 {
   char *name;
 
+  /* We shouldn't even bother to try if the OSABI didn't register
+     a sigcontext_addr handler.  */
+  if (!gdbarch_tdep (current_gdbarch)->sigcontext_addr)
+    return NULL;
+
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (PC_IN_SIGTRAMP (pc, name))
     return &i386_sigtramp_frame_unwind;

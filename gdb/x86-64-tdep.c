@@ -1094,7 +1094,11 @@ x86_64_sigtramp_frame_p (CORE_ADDR pc)
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (PC_IN_SIGTRAMP (pc, name))
-    return &x86_64_sigtramp_frame_unwind;
+    {
+      gdb_assert (gdbarch_tdep (current_gdbarch)->sigcontext_addr);
+
+      return &x86_64_sigtramp_frame_unwind;
+    }
 
   return NULL;
 }
