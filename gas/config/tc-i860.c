@@ -1233,7 +1233,7 @@ md_section_align (segT segment ATTRIBUTE_UNUSED,
 }
 
 /* On the i860, a PC-relative offset is relative to the address of the
-   of the offset plus its size.  */
+   offset plus its size.  */
 long
 md_pcrel_from (fixS *fixP)
 {

@@ -1,3 +1,7 @@
+2003-10-31  Christian Groessler  <chris@groessler.org>
+
+	* config/tc-i860.c (md_pcrel_from): Fix typo in comment.
+
 2003-10-29  Phil Edwards  <phil@codesourcery.com>
 
 	* configure.in (arm-*-vxworks, i386-*-vxworks, mips-*-vxworks,
