@@ -1,3 +1,9 @@
+Mon Apr 19 16:45:12 1993  Fred Fish  (fnf@cygnus.com)
+
+	* trad-core.c (trad_core_vec):  Add 6 new initializers to match
+	  new signed get/put fields.  Minor reformatting to label
+	  some fields.
+
 Mon Apr 19 06:09:41 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* bfd-in.h: Insert comment about SVR3 compiler warnings.
