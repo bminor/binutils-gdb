@@ -73,7 +73,7 @@ int debug;
 
 static cpu_state_type cpu;
 
-int HMODE = 1;
+int HMODE = 0;
 
 
 static int

@@ -1,5 +1,7 @@
 Thu Jul 15 09:59:01 1993  Doug Evans  (dje@canuck.cygnus.com)
 
+	* compile.c: Reset HMODE back to zero (accidently set it to 1).
+
 	* run.c (main): If h8/300h binary detected, call set_h8300h.
 	* compile.c (sim_resume): Fix O_NEG insn.
 
