@@ -27,6 +27,10 @@ void init_vu(VectorUnitState *state,
 	     char* mem_buffer, unsigned mem_qw_size);
 
 #if 0
+int vu1_busy(void) {
+    if (vu1_state.runState == VU_READY) { return 0; } else { return 1; }
+}
+
 static void dump_mem() {
     int i;
     typedef int T[2048][4];  

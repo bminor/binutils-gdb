@@ -10,6 +10,7 @@
 void vu1_issue(void);
 void vu1_init(SIM_DESC sd);
 int vu1_status(void);
+int vu1_busy(void);
 
 #define VU1_MEM0_WINDOW_START 	0x11008000
 #define VU1_MEM0_SIZE		0x4000    /* 16K = 16384 */
@@ -40,7 +41,6 @@ int vu1_status(void);
 #define VPU_STAT		0x110073d0
 
 #define VU1_CIA			0x110073e0
-
 
 #define VU1_REGISTER_WINDOW_END   0x110073f0
 
