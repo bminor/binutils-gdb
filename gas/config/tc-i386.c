@@ -465,19 +465,19 @@ offset_in_range (val, size)
      offsetT val;
      int size;
 {
-  bfd_vma mask;
+  addressT mask;
 
   switch (size)
     {
-    case 1: mask = ((bfd_vma) 1 <<  8) - 1; break;
-    case 2: mask = ((bfd_vma) 1 << 16) - 1; break;
-    case 4: mask = ((bfd_vma) 1 << 32) - 1; break;
+    case 1: mask = ((addressT) 1 <<  8) - 1; break;
+    case 2: mask = ((addressT) 1 << 16) - 1; break;
+    case 4: mask = ((addressT) 1 << 32) - 1; break;
     default: abort();
     }
 
   /* If BFD64, sign extend val.  */
-  if ((val & ~ (((bfd_vma) 1 << 32) - 1)) == 0)
-    val = (val ^ ((bfd_vma) 1 << 31)) - ((bfd_vma) 1 << 31);
+  if ((val & ~ (((addressT) 1 << 32) - 1)) == 0)
+    val = (val ^ ((addressT) 1 << 31)) - ((addressT) 1 << 31);
 
   if ((val & ~ mask) != 0 && (val & ~ mask) != ~ mask)
     {

@@ -1,3 +1,8 @@
+2000-04-18  H.J. Lu  (hjl@gnu.org)
+
+	* config/tc-i386.c (offset_in_range): Use addressT instead of
+	bfd_vma for none bfd assemblers.
+
 2000-04-17  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c (offset_in_range): Sign extend val so BFD64
