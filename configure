@@ -175,7 +175,7 @@ fi
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="getopt bfd binutils ld gas gnulib1 gcc clib"
+configdirs="getopt bfd binutils ld gas gcc gnulib clib"
 srctrigger=README.configure
 srcname="gnu development package"
 
@@ -553,7 +553,10 @@ exit 0
 
 #
 # $Log$
-# Revision 1.8  1991/04/17 01:34:44  rich
+# Revision 1.9  1991/04/24 16:50:54  rich
+# Three staging checkpoint.
+#
+# Revision 1.7  1991/04/17  01:34:47  rich
 # Added getopt for binutils, fixed problem with host dependancies in
 # configure.template.
 #

@@ -1,7 +1,7 @@
 #
 # Makefile for directory with subdirs to build.
 #
-# Last Mod Tue Apr 16 12:57:52 PDT 1991, by rich@sendai
+# Last Mod Thu Apr 18 17:41:48 PDT 1991, by rich@cygint.cygnus.com
 #
 
 # $Id$
@@ -12,22 +12,21 @@ destdir = /usr/local
 #CC = gcc -b$(target) # -B$(srcdir)/../gas/Host-$(host)/Target-$(target)/
 #CFLAGS = -g -nostdinc -nostdlib -I- -I/usr/local/lib/gcc/$(target)/1.92/include -I$(srcdir) -I$(srcdir)/../include -I$(OSINCLUDE)
 
-# These are roughly topologically sorted in order to make porting more
-# streamlined.
-
-SUBDIRS =
-NONSUBDIRS =
-SUBDIRS_INCLUDE = machine-dep
-
 RANLIB = ranlib
 AR = ar
 AR_FLAGS = cqv
 
+BOOTSTRAPPABLE = getopt bfd binutils ld gas gcc gnulib
+OTHERS = 
+
 #### host and target specific makefile fragments come in here.
 ###
 
-subdir_do: $(SUBDIRS) $(TARGETDIRS)
-	for i in $(SUBDIRS); \
+all:
+	$(MAKE) subdir_do DO=all "DODIRS=$(BOOTSTRAPPABLE) $(OTHERS)"
+
+subdir_do: $(DODIRS)
+	for i in $(DODIRS); \
 	  do \
 	    if (cd $(srcdir)/$$i`if [ -d $(srcdir)/$$i.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir); \
@@ -41,37 +40,63 @@ subdir_do: $(SUBDIRS) $(TARGETDIRS)
 	    fi ;\
 	  done
 
-all:
-	$(MAKE) subdir_do DO=all
-
-stage1:
-	$(MAKE) subdir_do DO=stage1
-
 bootstrap:
 	$(MAKE) all
 	$(MAKE) stage1
+	$(MAKE) pass "stagepass=stage1"
+	$(MAKE) stage2
+	$(MAKE) pass "stagepass=stage2"
+
+bootstrap2:
+	$(MAKE) pass "stagepass=stage1"
+	$(MAKE) stage2
+	$(MAKE) pass "stagepass=stage2"
+
+bootstrap3:
+	$(MAKE) pass "stagepass=stage2"
+
+pass:
+	$(MAKE) subdir_do DO=all "DODIRS=$(BOOTSTRAPPABLE)" \
+		"CC=$(srcdir)/../gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gcc -O \
+		-B$(srcdir)/../gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ \
+		-B$(srcdir)/../gas`if [ -d $(srcdir)/gas.$(target) ] ; \
+		then echo .$(target) ; fi`$(subdir)/$(stagepass)/" \
+		"AR=$(srcdir)/../binutils`if [ -d $(srcdir)/binutils.$(target) ] ; \
+		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ar" \
+		"RANLIB=$(srcdir)/../binutils`if [ -d $(srcdir)/binutils.$(target) ] ; \
+		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ranlib" \
+		"LOADLIBES=$(srcdir)/../gnulib`if [ -d $(srcdir)/binutils.$(target) ] ; \
+		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gnulib.a /lib/libc.a" \
+		"LDFLAGS=-nostdlib /lib/crt0.o \
+		-B$(srcdir)/../ld`if [ -d $(srcdir)/ld.$(target) ] ; \
+		then echo .$(target) ; fi`$(subdir)/$(stagepass)/"
+
+
+stage1:
+	$(MAKE) subdir_do DO=stage1 "DODIRS=$(BOOTSTRAPPABLE)"
+
+stage2:
+	$(MAKE) subdir_do DO=stage2 "DODIRS=$(BOOTSTRAPPABLE)"
+
+stage3:
+	$(MAKE) subdir_do DO=stage3 "DODIRS=$(BOOTSTRAPPABLE)"
+
+stage4:
+	$(MAKE) subdir_do DO=stage4 "DODIRS=$(BOOTSTRAPPABLE)"
+
+de-stage1:; $(MAKE) subdir_do DO=de-stage1 "DODIRS=$(BOOTSTRAPPABLE)"
+de-stage2:; $(MAKE) subdir_do DO=de-stage2 "DODIRS=$(BOOTSTRAPPABLE)"
+de-stage3:; $(MAKE) subdir_do DO=de-stage3 "DODIRS=$(BOOTSTRAPPABLE)"
+de-stage4:; $(MAKE) subdir_do DO=de-stage4 "DODIRS=$(BOOTSTRAPPABLE)"
 
 clean:
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
-	$(MAKE) subdir_do DO=clean
+	$(MAKE) subdir_do DO=clean "DODIRS=$(BOOTSTRAPPABLE) $(OTHERS)"
 
 install:
-	$(MAKE) subdir_do DO=install
-
-# When installing include files, be sure that machine-dependent
-# files override machine-independent files.
-# Might be better to check for collisions?  FIXME
-install_crt:
-	$(MAKE) SUBDIRS=machine-dep DO=install_crt
-
-install_gnulib:
-	$(MAKE) SUBDIRS=gnulib DO=install_gnulib
-
-install_include:
-	$(MAKE) SUBDIRS=$(SUBDIRS_INCLUDE) DO=install_include
-
-install_lib: libc.a
-	cp libc.a $(DESTDIR)/lib/libc.a
+	$(MAKE) subdir_do DO=install "DODIRS=$(BOOTSTRAPPABLE) $(OTHERS)"
 
 etags tags: TAGS
 
@@ -103,7 +128,10 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 
 #
 # $Log$
-# Revision 1.9  1991/04/17 01:34:36  rich
+# Revision 1.10  1991/04/24 16:50:53  rich
+# Three staging checkpoint.
+#
+# Revision 1.9  1991/04/17  01:34:36  rich
 # Added getopt for binutils, fixed problem with host dependancies in
 # configure.template.
 #

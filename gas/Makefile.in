@@ -126,7 +126,7 @@ HOST_LDFLAGS=$(LDFLAGS)
 HOST_CPPFLAGS=$(CPPFLAGS)
 
 # Choose the real default target.
-ALL=gas
+ALL=as
 
 # End of variables for you to override.
 
@@ -236,7 +236,7 @@ all: $(ALL)
 # Now figure out from those variables how to compile and link.
 
 # This is the variable actually used when we compile.
-ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CFLAGS)
+ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
 
 # Even if ALLOCA is set, don't use it if compiling with GCC.
 USE_ALLOCA= `if [ x"${CC}" = x"${OLDCC}" ] ; then echo ${ALLOCA}; else true; fi`
@@ -277,7 +277,7 @@ SUBDIR_INCLUDES = -I.. -I../$(srcdir) -I../$(srcdir)/config
 
 # Files to be copied away after each stage in building.
 STAGE_GCC=gcc
-STAGESTUFF = *.o gas 
+STAGESTUFF = *.o as 
 
 # The files that "belong" in CONFIG_H are deliberately omitted
 # because having them there would not be useful in actual practice.
@@ -288,14 +288,14 @@ STAGESTUFF = *.o gas
 # CONFIG_H = config.h tm.h
 CONFIG_H =
 
-gas: $(OBJS) $(LIBDEPS)
-	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gas $(OBJS) $(LIBS)
+as: $(OBJS) $(LIBDEPS)
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as $(OBJS) $(LIBS) $(LOADLIBES)
 
 objdump:
 
 all.internal: native
 # This is what is made with the host's compiler if making a cross assembler.
-native: config.status gas
+native: config.status as
 
 config.status:
 	@echo You must configure gas.  Look at the INSTALL file for details.
@@ -464,8 +464,8 @@ realclean: cleanconfig
 # Entry points `install', `includes' and `uninstall'.
 
 # Copy the files into directories where they will be run.
-install: gas
-	$(INSTALL_PROGRAM) gas $(libsubdir)/as
+install: as
+	$(INSTALL_PROGRAM) as $(libsubdir)/as
 
 # Create the installation directory.
 install-dir:
@@ -494,7 +494,7 @@ install-man: install-dir $(srcdir)/gcc.1 protoize.1 unprotoize.1
 # Cancel installation by deleting the installed files.
 uninstall:
 	-rm -rf $(libsubdir)
-	-rm -rf $(bindir)/gas
+	-rm -rf $(bindir)/as
 	-rm -rf $(mandir)/gas.$(manext)
 
 
@@ -503,48 +503,47 @@ uninstall:
 tags TAGS: force
 	etags $(REAL_SOURCES) $(REAL_HEADERS) README Makefile config/*.[hc]
 	
-bootstrap: gas force
+bootstrap: as force
 	$(MAKE) stage1
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= gas
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
 	$(MAKE) stage2
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= gas
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
 	for i in *.o; do cmp $$i stage2/$$i; done
 
 bootstrap2: force
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= gas
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
 	$(MAKE) stage2
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= gas
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
 	$(MAKE) stage-last
 
 bootstrap3: force
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= gas
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
 	$(MAKE) comparison
 
 # Copy the object files from a particular stage into a subdirectory.
 stage1: force
 	-mkdir stage1
 	-mv $(STAGESTUFF) stage1
-	-(cd stage1 ; ln -s gas as)
 
 stage2: force
 	-mkdir stage2
 	-mv $(STAGESTUFF) stage2
-	-(cd stage2 ; ln -s gas as)
-
 
 stage3: force
 	-mkdir stage3
-	-mv $(STAGESTUFF) $(STAGE_GCC) stage3
-	-rm -f stage3/gnulib
-	-cp gnulib stage3
-	-if $(RANLIB_TEST) ; then $(RANLIB) stage3/gnulib; else true; fi
+	-mv $(STAGESTUFF) stage3
 
-stage4: force
-	-mkdir stage4
-	-mv $(STAGESTUFF) $(STAGE_GCC) stage4
-	-rm -f stage4/gnulib
-	-cp gnulib stage4
-	-if $(RANLIB_TEST) ; then $(RANLIB) stage4/gnulib; else true; fi
+de-stage1: force
+	- (cd stage1 ; mv -f * ..)
+	- rmdir stage1
+
+de-stage2: force
+	- (cd stage2 ; mv -f * ..)
+	- rmdir stage2
+
+de-stage3: force
+	- (cd stage3 ; mv -f * ..)
+	- rmdir stage3
 
 stage-last:
 	for i in *.o; do cmp $$i stage2/$$i; done
@@ -585,11 +584,11 @@ risky-stage4: force
 .PHONY: risky-stage1 risky-stage2 risky-stage3 risky-stage4
 
 comparison: clean
-	$(MAKE) "CC=/usr/local/bin/gcc -Wall" gas
+	$(MAKE) "CC=/usr/local/bin/gcc -Wall" as
 	$(MAKE) stage1
-	- $(MAKE) "CC=/usr/local/bin/gcc -Wall -b$(target) -Bstage1/" gas -k
+	- $(MAKE) "CC=/usr/local/bin/gcc -Wall -b$(target) -Bstage1/" as -k
 	$(MAKE) stage2
-	- $(MAKE) "CC=/usr/local/bin/gcc -Wall -b$(target)" gas -k
+	- $(MAKE) "CC=/usr/local/bin/gcc -Wall -b$(target)" as -k
 	$(MAKE) stage-last
 
 force:

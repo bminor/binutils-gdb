@@ -34,40 +34,18 @@ OBJDUMP_PROG=objdump
 
 PROGS = $(SIZE_PROG) $(COPY_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG)
 
-#CC = gcc -Wall
-#CC=gcc
 BASEDIR = $(srcdir)/..
-# Let rich do this for now:
 LIBDIR  = $(srcdir)/../bfd$(subdir)
-
-#__dgux__#DEFINES=-DHOST_SYS=DGUX_SYS
-
-#__sun3__#DEFINES=-DHOST_SYS=SUN3_SYS
-#__sun3__#LDFLAGS= -Bstatic
-
-#__sun4__#DEFINES=-DHOST_SYS=SUN4_SYS
-#__sun4__#LDFLAGS= -Bstatic
-
-#__sun386i__#LDFLAGS	= -Bstatic
-
-#__rs6000__#DEFINES=-Daix
-#__rs6000__#ALLOCA = alloca.o
-
-#__i386v__#ALLOCA = alloca.o
-#__i386v__#DEFINES=-DUSG
-
 
 #### host and target dependant Makefile fragments come in here.
 ###
 
 INCDIR = $(BASEDIR)/include
 
-CFLAGS  = -g -I$(srcdir)/../include-cygnus -I$(INCDIR) $(DEFINES) $(CDEFINES)
-
-
-bindir=$(BASEDIR)/bin
+CFLAGS  = -g -I$(srcdir)/../include-cygnus -I$(INCDIR) $(HDEFINES) $(TDEFINES)
 
 DISASMS = m68k-pinsn.o i960-pinsn.o sparc-pinsn.o
+
 #
 ## Random definitions
 # Hopefully all these may be flushed once we get configuration down pat.
@@ -90,7 +68,7 @@ GNU_GETOPT_LONG = $(srcdir)/../getopt$(subdir)/libgetopt.a
 # Code shared by all the binutils.
 BULIBS = bucomm.o version.o filemode.o
 
-ADDL_LIBS = $(GNU_GETOPT_LONG) $(MALLOC)   $(BULIBS)
+ADDL_LIBS = $(GNU_GETOPT_LONG) $(MALLOC) $(BULIBS) $(BFD)
 
 BFD = $(LIBDIR)/libbfd.a
 #
@@ -103,19 +81,19 @@ all: $(ADDL_LIBS) $(PROGS)
 #	(cd $(LIBDIR); make)
 
 $(SIZE_PROG): $(ADDL_LIBS) size.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(LOADLIBES)
 
 $(COPY_PROG): $(ADDL_LIBS) copy.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(COPY_PROG) copy.o $(ADDL_LIBS) $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(COPY_PROG) copy.o $(ADDL_LIBS) $(LOADLIBES)
 
 $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(MALLOC) $(ADDL_LIBS) $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(LOADLIBES)
 
 $(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(DISASMS) $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DISASMS) $(ADDL_LIBS) $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DISASMS) $(ADDL_LIBS) $(LOADLIBES)
 
 $(AR_PROG): $(ADDL_LIBS) ar.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o $(MALLOC) $(ADDL_LIBS) $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o $(ADDL_LIBS) $(LOADLIBES)
 
 $(RANLIB_PROG): $(AR_PROG) 
 	-rm -f $(RANLIB_PROG)
@@ -125,12 +103,36 @@ $(STRIP_PROG): $(COPY_PROG)
 	-rm -f $(STRIP_PROG)
 	-ln $(COPY_PROG) $(STRIP_PROG)
 
+stage1: force
+	- mkdir stage1
+	- mv -f *.o $(PROGS) stage1
+
+stage2: force
+	- mkdir stage2
+	- mv -f *.o $(PROGS) stage2
+
+stage3: force
+	- mkdir stage3
+	- mv -f *.o $(PROGS) stage3
+
+de-stage1: force
+	- (cd stage1 ; mv -f * ..)
+	- rmdir stage1
+
+de-stage2: force
+	- (cd stage2 ; mv -f * ..)
+	- rmdir stage2
+
+de-stage3: force
+	- (cd stage3 ; mv -f * ..)
+	- rmdir stage3
+
 clean:
 	-rm -f *.o *~ \#* core $(PROGS) TAGS
 
 etags tags: TAGS
 
-TAGS: .force
+TAGS: force
 	etags $(INCDIR)/*.h $(BFDSRC)/*.[hc] *.[hc]
 
 realclean: clean
@@ -169,8 +171,7 @@ ver960.c: FORCE
 
 # Dummy target to force execution of dependent targets.
 #
-.force:
-FORCE:
+force:
 
 # Target to uncomment host-specific lines in this makefile.  Such lines must
 # have the following string beginning in column 1: #__<hostname>__#
