@@ -1,3 +1,17 @@
+2001-06-14  Michael Snyder  <msnyder@redhat.com>
+
+	* remote.c (show_remote_protocol_qSymbol_packet_cmd, 
+	set_remote_protocol_qSymbol_packet_cmd): New functions.
+	(init_all_packet_configs, show_remote_cmd): Add qSymbol packet.
+	(remote_check_symbols): New function.  Implement qSymbol packet, 
+	allowing target to request symbol lookup service from gdb.
+	(remote_open_1, remote_async_open_1): Call remote_check_symbols,
+	allowing symbol lookup from exec_bfd on connection to target.
+	(remote_new_objfile): New function.  Catch new objfile notifications
+	from shared library module, and call remote_check_symbols.
+	(_initialize_remote): Hook remote_new_objfile into the shared
+	library notification chain.  Add "set remote symbol-lookup" command.
+
 2001-06-14  Keith Seitz  <keiths@redhat.com>
 
 	* tracepoint.c (trace_command): We now have tracepoint

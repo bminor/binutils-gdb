@@ -188,9 +188,9 @@ static void record_currthread (int currthread);
 
 static int fromhex (int a);
 
-static int hex2bin (const char *hex, char *bin, int);
+static int hex2bin (const char *hex, char *bin, int count);
 
-static int bin2hex (const char *bin, char *hex, int);
+static int bin2hex (const char *bin, char *hex, int count);
 
 static int putpkt_binary (char *buf, int cnt);
 
@@ -668,6 +668,22 @@ packet_ok (const char *buf, struct packet_config *config)
 	}
       return PACKET_UNKNOWN;
     }
+}
+
+/* Should we try the 'qSymbol' (target symbol lookup service) request? */
+static struct packet_config remote_protocol_qSymbol;
+
+static void
+set_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty,
+				  struct cmd_list_element *c)
+{
+  update_packet_config (&remote_protocol_qSymbol);
+}
+
+static void
+show_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty)
+{
+  show_packet_config_cmd (&remote_protocol_qSymbol);
 }
 
 /* Should we try the 'e' (step over range) request? */
@@ -2070,11 +2086,50 @@ init_all_packet_configs (void)
   update_packet_config (&remote_protocol_e);
   update_packet_config (&remote_protocol_E);
   update_packet_config (&remote_protocol_P);
+  update_packet_config (&remote_protocol_qSymbol);
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
     update_packet_config (&remote_protocol_Z[i]);
   /* Force remote_write_bytes to check whether target supports binary
      downloading. */
   update_packet_config (&remote_protocol_binary_download);
+}
+
+/* Symbol look-up. */
+
+static void
+remote_check_symbols (struct objfile *objfile)
+{
+  char *msg, *reply, *tmp;
+  struct minimal_symbol *sym;
+  int end;
+
+  if (remote_protocol_qSymbol.support == PACKET_DISABLE)
+    return;
+
+  msg   = alloca (PBUFSIZ);
+  reply = alloca (PBUFSIZ);
+
+  /* Invite target to request symbol lookups. */
+
+  putpkt ("qSymbol::");
+  getpkt (reply, PBUFSIZ, 0);
+  packet_ok (reply, &remote_protocol_qSymbol);
+
+  while (strncmp (reply, "qSymbol:", 8) == 0)
+    {
+      tmp = &reply[8];
+      end = hex2bin (tmp, msg, strlen (tmp) / 2);
+      msg[end] = '\0';
+      sym = lookup_minimal_symbol (msg, NULL, NULL);
+      if (sym == NULL)
+	sprintf (msg, "qSymbol::%s", &reply[8]);
+      else
+	sprintf (msg, "qSymbol:%s:%s", 
+		 paddr_nz (SYMBOL_VALUE_ADDRESS (sym)),
+		 &reply[8]);
+      putpkt (msg);
+      getpkt (reply, PBUFSIZ, 0);
+    }
 }
 
 static void
@@ -2169,7 +2224,10 @@ serial device is attached to the remote system\n\
 
   /* Set up to detect and load shared libraries. */
   if (exec_bfd) 	/* No use without an exec file. */
-    SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
+    {
+      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
+      remote_check_symbols (symfile_objfile);
+    }
 #endif
 }
 
@@ -2279,7 +2337,10 @@ serial device is attached to the remote system\n\
 
   /* Set up to detect and load shared libraries. */
   if (exec_bfd) 	/* No use without an exec file. */
-    SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
+    {
+      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
+      remote_check_symbols (symfile_objfile);
+    }
 #endif
 }
 
@@ -5705,7 +5766,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 static void
 set_remote_cmd (char *args, int from_tty)
 {
-  
 }
 
 static void
@@ -5716,6 +5776,7 @@ show_remote_cmd (char *args, int from_tty)
   show_remote_protocol_e_packet_cmd (args, from_tty);
   show_remote_protocol_E_packet_cmd (args, from_tty);
   show_remote_protocol_P_packet_cmd (args, from_tty);
+  show_remote_protocol_qSymbol_packet_cmd (args, from_tty);
   show_remote_protocol_binary_download_cmd (args, from_tty);
 }
 
@@ -5727,6 +5788,23 @@ build_remote_gdbarch_data (void)
   /* Cisco stuff */
   tty_input = xmalloc (PBUFSIZ);
   remote_address_size = TARGET_ADDR_BIT;
+}
+
+/* Saved pointer to previous owner of the new_objfile event. */
+static void (*remote_new_objfile_chain) (struct objfile *);
+
+/* Function to be called whenever a new objfile (shlib) is detected. */
+static void
+remote_new_objfile (struct objfile *objfile)
+{
+  if (remote_desc != 0)		/* Have a remote connection */
+    {
+      remote_check_symbols (objfile);
+    }
+  /* Call predecessor on chain, if any. */
+  if (remote_new_objfile_chain != 0 &&
+      remote_desc == 0)
+    remote_new_objfile_chain (objfile);
 }
 
 void
@@ -5758,6 +5836,10 @@ _initialize_remote (void)
 
   init_remote_cisco_ops ();
   add_target (&remote_cisco_ops);
+
+  /* Hook into new objfile notification.  */
+  remote_new_objfile_chain = target_new_objfile_hook;
+  target_new_objfile_hook  = remote_new_objfile;
 
 #if 0
   init_remote_threadtests ();
@@ -5858,6 +5940,13 @@ in a memory packet.\n",
 
   add_info ("remote-process", remote_info_process,
 	    "Query the remote system for process info.");
+
+  add_packet_config_cmd (&remote_protocol_qSymbol,
+			 "qSymbol", "symbol-lookup",
+			 set_remote_protocol_qSymbol_packet_cmd,
+			 show_remote_protocol_qSymbol_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist,
+			 0);
 
   add_packet_config_cmd (&remote_protocol_e,
 			 "e", "step-over-range",
