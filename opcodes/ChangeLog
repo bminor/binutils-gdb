@@ -1,9 +1,12 @@
 Mon Nov 25 16:15:17 1996  J.T. Conklin  <jtc@cygnus.com>
 
-	* m68k-opc.c (m68k-opcodes): Fix move and movem instructions for
+	* m68k-opc.c (m68k_opcodes): Simplify table by using < and >
+ 	operand specifiers in *save, *restore and movem* instructions.
+
+	* m68k-opc.c (m68k_opcodes): Fix move and movem instructions for
  	the coldfire.
 
-	* m68k-opc.c (m68k-opcodes): The coldfire (mcf5200) can only use
+	* m68k-opc.c (m68k_opcodes): The coldfire (mcf5200) can only use
  	register operands for immediate arithmetic, not, neg, negx, and
 	set according to condition instructions.
 	
