@@ -589,13 +589,16 @@ operand (expressionP)
 	}
     case ',':
     case '\n':
+    eol:
       /* can't imagine any other kind of operand */
       expressionP->X_seg = SEG_ABSENT;
       input_line_pointer--;
       md_operand (expressionP);
       break;
-      /* Fall through */
+
     default:
+      if (is_end_of_line[c])
+	goto eol;
       if (is_name_beginner (c))	/* here if did not begin with a digit */
 	{
 	  /*

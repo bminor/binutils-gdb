@@ -1,5 +1,8 @@
 Tue Jan  5 08:42:16 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* expr.c (operand): If character other than comma or newline is a
+	logical end-of-line character, use the newline case.
+
 	* configure.in (per-target): Look for with_bfd_assembler option.
 	For now, only accept "no", until the merge is done.
 
