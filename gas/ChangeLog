@@ -1,3 +1,7 @@
+Tue Nov 22 14:37:58 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* Makefile.in (INSTALL_XFORM): Fix typo.
+
 Tue Nov 22 10:23:25 1994  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* config/tc-alpha.c (s_alpha_set): Ignore the .set (no)move and

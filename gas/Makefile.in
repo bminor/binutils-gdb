@@ -53,14 +53,14 @@ infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
-VERSION=cygnus-2.5
+VERSION=cygnus-2.5.3
 
 SHELL = /bin/sh
 
 INSTALL = $${srcroot}/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
-INSTALL_XFORM = $(INSTALL) -t='-e "$(program_transform_name)"'
+INSTALL_XFORM = $(INSTALL) -t='-e $(program_transform_name)'
 INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
 DISTSTUFF= make-gas.com
