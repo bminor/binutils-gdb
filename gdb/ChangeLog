@@ -67,6 +67,12 @@
 
         * MAINTAINERS: Update my entry.
 
+2001-11-01  Michael Snyder  <msnyder@redhat.com>
+
+	* symtab.c (operator_chars): Allow '*' and '[' to be quoted in
+	operator names, to avoid regexp expansion.
+	(search_symbols): Alloca buffer is too small, may get clobbered.
+
 2001-11-01  Fred Fish  <fnf@redhat.com>
 
 	* coff-solib.c (coff_solib_add): Add new readsyms arg.
