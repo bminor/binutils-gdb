@@ -21,19 +21,23 @@
 
 #include "targ-cpu.h"
 
+#if defined (BFD_HEADERS) || defined (BFD_ASSEMBLER)
 
+/* This internal_lineno crap is to stop namespace pollution from the
+   bfd internal coff headerfile. */
 
-#ifdef BFD_HEADERS
-#ifdef TC_A29K
 #include "bfd.h"
-#include "coff/a29k.h"
-
-/* This internal_lineno crap is to stop namespace pollution from the bfd internal
-   coff headerfile. */
-
 #define internal_lineno bfd_internal_lineno
 #include "coff/internal.h"
 #undef internal_lineno
+
+#ifdef BFD_ASSEMBLER
+#include "../bfd/libcoff.h"
+#endif
+
+#ifdef TC_A29K
+#include "coff/a29k.h"
+
 /*
   #undef RELOC
   #undef SYMENT
@@ -57,16 +61,22 @@ extern bfd *stdoutput;
 
 #endif /* TC_A29K */
 
+#ifdef TC_I960
+#include "coff/i960.h"
+#define TARGET_FORMAT "coff-i960-big"
+#endif
+
 #ifdef TC_I386
-#  include "bfd.h"
 #  include "coff/i386.h"
-#  define internal_lineno bfd_internal_lineno
-#  include "coff/internal.h"
-#  undef internal_lineno
 #  define TARGET_FORMAT "coff-i386"
 extern bfd *stdoutput;
 
 #endif /* TC_I386 */
+
+#ifdef TC_M68K
+#  include "coff/m68k.h"
+#  define TARGET_FORMAT "coff-m68k"
+#endif /* TC_M68K */
 
 #else /* not BFD_HEADERS */
 
@@ -85,7 +95,9 @@ extern bfd *stdoutput;
 
 #endif /* not BFD_HEADERS */
 
-/* Define some processor dependent values according to the processor we are on. */
+#ifndef BFD_ASSEMBLER
+/* Define some processor dependent values according to the processor
+   we are on. */
 #ifdef TC_M68K
 
 #define BYTE_ORDERING		F_AR32W	/* See filehdr.h for more info. */
@@ -140,12 +152,31 @@ extern const segT N_TYPE_seg[];
 #define AOUTHDRSZ		sizeof(AOUTHDR)
 #endif
 
+#endif /* not BFD_ASSEMBLER */
+
+
 /* SYMBOL TABLE */
 
 /* targets may also set this */
 #ifndef SYMBOLS_NEED_BACKPOINTERS
 #define SYMBOLS_NEED_BACKPOINTERS 1
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
+
+#ifdef BFD_ASSEMBLER
+
+#ifdef TC_I960
+#define I960_SYM_FIELDS		struct symbol *bal;
+#else
+#define I960_SYM_FIELDS
+#endif
+
+#define TARGET_SYMBOL_FIELDS	unsigned long sy_flags; I960_SYM_FIELDS
+
+#ifndef OBJ_COFF_MAX_AUXENTRIES
+#define OBJ_COFF_MAX_AUXENTRIES 1
+#endif
+
+#else
 
 /* Symbol table entry data type */
 
@@ -160,11 +191,19 @@ typedef struct
 #endif
     unsigned int ost_flags;	/* obj_coff internal use only flags */
   }
-
 obj_symbol_type;
+#endif /* ! BFD_ASSEMBLER */
+
+#ifdef BFD_ASSEMBLER
+#define SYM_AUXENT(S)	(&coffsymbol ((S)->bsym)->native[1].u.auxent)
+#else
+#define SYM_AUXENT(S)	(&(S)->sy_symbol.ost_auxent[0])
+#endif
 
 #define DO_NOT_STRIP	0
 #define DO_STRIP	1
+
+#ifndef BFD_ASSEMBLER
 
 /* Symbol table macros and constants */
 
@@ -196,7 +235,7 @@ obj_symbol_type;
    section == 0 and value > 0 (external bss symbol) */
 #define S_IS_DEFINED(s)         ((s)->sy_symbol.ost_entry.n_scnum > C_UNDEF_SECTION || \
 				 ((s)->sy_symbol.ost_entry.n_scnum == C_UNDEF_SECTION && \
-				  (s)->sy_symbol.ost_entry.n_value > 0))
+				  S_GET_VALUE(s) > 0))
 /* True if a debug special symbol entry */
 #define S_IS_DEBUG(s)		((s)->sy_symbol.ost_entry.n_scnum == C_DEBUG_SECTION)
 /* True if a symbol is local symbol name */
@@ -205,12 +244,14 @@ obj_symbol_type;
 				 (s)->sy_symbol.ost_entry.n_scnum == C_REGISTER_SECTION || \
 				 (S_LOCAL_NAME(s) && !flagseen['L']))
 /* True if a symbol is not defined in this file */
-#define S_IS_EXTERN(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 && (s)->sy_symbol.ost_entry.n_value == 0)
+#define S_IS_EXTERN(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 \
+				 && S_GET_VALUE (s) == 0)
 /*
  * True if a symbol can be multiply defined (bss symbols have this def
  * though it is bad practice)
  */
-#define S_IS_COMMON(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 && (s)->sy_symbol.ost_entry.n_value != 0)
+#define S_IS_COMMON(s)		((s)->sy_symbol.ost_entry.n_scnum == 0
+				 && S_GET_VALUE (s) != 0)
 /* True if a symbol name is in the string table, i.e. its length is > 8. */
 #define S_IS_STRING(s)		(strlen(S_GET_NAME(s)) > 8 ? 1 : 0)
 
@@ -221,8 +262,6 @@ obj_symbol_type;
 #define S_GET_OFFSET(s)         ((s)->sy_symbol.ost_entry.n_offset)
 /* The zeroes if symbol name is longer than 8 chars */
 #define S_GET_ZEROES(s)		((s)->sy_symbol.ost_entry.n_zeroes)
-/* The value of the symbol */
-#define S_GET_VALUE(s)		((unsigned) ((s)->sy_symbol.ost_entry.n_value))
 /* The numeric value of the segment */
 #define S_GET_SEGMENT(s)        (N_TYPE_seg[(s)->sy_symbol.ost_entry.n_scnum+4])
 /* The data type */
@@ -239,8 +278,6 @@ obj_symbol_type;
 #define S_SET_OFFSET(s,v)	((s)->sy_symbol.ost_entry.n_offset = (v))
 /* The zeroes if symbol name is longer than 8 chars */
 #define S_SET_ZEROES(s,v)		((s)->sy_symbol.ost_entry.n_zeroes = (v))
-/* Set the value of the symbol */
-#define S_SET_VALUE(s,v)	((s)->sy_symbol.ost_entry.n_value = (v))
 /* The numeric value of the segment */
 #define S_SET_SEGMENT(s,v)	((s)->sy_symbol.ost_entry.n_scnum = SEGMENT_TO_SYMBOL_TYPE(v))
 /* The data type */
@@ -254,49 +291,71 @@ obj_symbol_type;
 /* The symbol is external (does not mean undefined) */
 #define S_SET_EXTERNAL(s)       { S_SET_STORAGE_CLASS(s, C_EXT) ; SF_CLEAR_LOCAL(s); }
 
+#else /* BFD_ASSEMBLER */
+
+/* The data type */
+#define S_GET_DATA_TYPE(s)	(coffsymbol ((s)->bsym)->native->u.syment.n_type)
+/* The storage class */
+#define S_GET_STORAGE_CLASS(s)	(coffsymbol((s)->bsym)->native->u.syment.n_sclass)
+/* The number of auxiliary entries */
+#define S_GET_NUMBER_AUXILIARY(s)	(coffsymbol((s)->bsym)->native->u.syment.n_numaux)
+/* The data type */
+#define S_SET_DATA_TYPE(s,v)	(S_GET_DATA_TYPE (s) = (v))
+/* The storage class */
+#define S_SET_STORAGE_CLASS(s,v)	(S_GET_STORAGE_CLASS (s) = (v))
+/* The number of auxiliary entries */
+#define S_SET_NUMBER_AUXILIARY(s,v)	(S_GET_NUMBER_AUXILIARY (s) = (v))
+
+/* True if a symbol name is in the string table, i.e. its length is > 8. */
+#define S_IS_STRING(s)		(strlen(S_GET_NAME(s)) > 8 ? 1 : 0)
+
+
+#endif /* ! BFD_ASSEMBLER */
+
 /* Auxiliary entry macros. SA_ stands for symbol auxiliary */
 /* Omit the tv related fields */
 /* Accessors */
+
 #ifdef BFD_HEADERS
-#define SA_GET_SYM_TAGNDX(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_tagndx.l)
+#define SA_GET_SYM_TAGNDX(s)	(SYM_AUXENT (s)->x_sym.x_tagndx.l)
 #else
-#define SA_GET_SYM_TAGNDX(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_tagndx)
+#define SA_GET_SYM_TAGNDX(s)	(SYM_AUXENT (s)->x_sym.x_tagndx)
 #endif
-#define SA_GET_SYM_LNNO(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_lnsz.x_lnno)
-#define SA_GET_SYM_SIZE(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_lnsz.x_size)
-#define SA_GET_SYM_FSIZE(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_fsize)
-#define SA_GET_SYM_LNNOPTR(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_lnnoptr)
+#define SA_GET_SYM_LNNO(s)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_lnno)
+#define SA_GET_SYM_SIZE(s)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_size)
+#define SA_GET_SYM_FSIZE(s)	(SYM_AUXENT (s)->x_sym.x_misc.x_fsize)
+#define SA_GET_SYM_LNNOPTR(s)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_lnnoptr)
 #ifdef BFD_HEADERS
-#define SA_GET_SYM_ENDNDX(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_endndx.l)
+#define SA_GET_SYM_ENDNDX(s)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_endndx.l)
 #else
-#define SA_GET_SYM_ENDNDX(s)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_endndx)
+#define SA_GET_SYM_ENDNDX(s)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_endndx)
 #endif
-#define SA_GET_SYM_DIMEN(s,i)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen[(i)])
-#define SA_GET_FILE_FNAME(s)	((s)->sy_symbol.ost_auxent[0].x_file.x_fname)
-#define SA_GET_SCN_SCNLEN(s)	((s)->sy_symbol.ost_auxent[0].x_scn.x_scnlen)
-#define SA_GET_SCN_NRELOC(s)	((s)->sy_symbol.ost_auxent[0].x_scn.x_nreloc)
-#define SA_GET_SCN_NLINNO(s)	((s)->sy_symbol.ost_auxent[0].x_scn.x_nlinno)
+#define SA_GET_SYM_DIMEN(s,i)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_ary.x_dimen[(i)])
+#define SA_GET_FILE_FNAME(s)	(SYM_AUXENT (s)->x_file.x_fname)
+#define SA_GET_SCN_SCNLEN(s)	(SYM_AUXENT (s)->x_scn.x_scnlen)
+#define SA_GET_SCN_NRELOC(s)	(SYM_AUXENT (s)->x_scn.x_nreloc)
+#define SA_GET_SCN_NLINNO(s)	(SYM_AUXENT (s)->x_scn.x_nlinno)
 
 /* Modifiers */
+#ifndef BFD_ASSEMBLER
 #ifdef BFD_HEADERS
-#define SA_SET_SYM_TAGNDX(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_tagndx.l=(v))
+#define SA_SET_SYM_TAGNDX(s,v)	(SYM_AUXENT (s)->x_sym.x_tagndx.l=(v))
+#define SA_SET_SYM_ENDNDX(s,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_endndx.l=(v))
 #else
-#define SA_SET_SYM_TAGNDX(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_tagndx=(v))
+#define SA_SET_SYM_ENDNDX(s,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_endndx=(v))
+#define SA_SET_SYM_TAGNDX(s,v)	(SYM_AUXENT (s)->x_sym.x_tagndx=(v))
 #endif
-#define SA_SET_SYM_LNNO(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_lnsz.x_lnno=(v))
-#define SA_SET_SYM_SIZE(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_lnsz.x_size=(v))
-#define SA_SET_SYM_FSIZE(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_misc.x_fsize=(v))
-#define SA_SET_SYM_LNNOPTR(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_lnnoptr=(v))
-#ifdef BFD_HEADERS
-#define SA_SET_SYM_ENDNDX(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_endndx.l=(v))
-#else
-#define SA_SET_SYM_ENDNDX(s,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_endndx=(v))
 #endif
-#define SA_SET_SYM_DIMEN(s,i,v)	((s)->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen[(i)]=(v))
-#define SA_SET_FILE_FNAME(s,v)	strncpy((s)->sy_symbol.ost_auxent[0].x_file.x_fname,(v),FILNMLEN)
-#define SA_SET_SCN_SCNLEN(s,v)	((s)->sy_symbol.ost_auxent[0].x_scn.x_scnlen=(v))
-#define SA_SET_SCN_NRELOC(s,v)	((s)->sy_symbol.ost_auxent[0].x_scn.x_nreloc=(v))
-#define SA_SET_SCN_NLINNO(s,v)	((s)->sy_symbol.ost_auxent[0].x_scn.x_nlinno=(v))
+
+#define SA_SET_SYM_LNNO(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_lnno=(v))
+#define SA_SET_SYM_SIZE(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_size=(v))
+#define SA_SET_SYM_FSIZE(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_fsize=(v))
+#define SA_SET_SYM_LNNOPTR(s,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_lnnoptr=(v))
+#define SA_SET_SYM_DIMEN(s,i,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_ary.x_dimen[(i)]=(v))
+#define SA_SET_FILE_FNAME(s,v)	strncpy(SYM_AUXENT (s)->x_file.x_fname,(v),FILNMLEN)
+#define SA_SET_SCN_SCNLEN(s,v)	(SYM_AUXENT (s)->x_scn.x_scnlen=(v))
+#define SA_SET_SCN_NRELOC(s,v)	(SYM_AUXENT (s)->x_scn.x_nreloc=(v))
+#define SA_SET_SCN_NLINNO(s,v)	(SYM_AUXENT (s)->x_scn.x_nlinno=(v))
 
 /*
  * Internal use only definitions. SF_ stands for symbol flags.
@@ -332,50 +391,57 @@ obj_symbol_type;
 /* All other bits are unused. */
 
 /* Accessors */
+#ifdef BFD_ASSEMBLER
+#define SF_GET(s)		((s)->sy_flags)
+#define SF_GET_DEBUG(s)		((s)->bsym->flags & BSF_DEBUGGING)
+#define SF_SET_DEBUG(s)		((s)->bsym->flags |= BSF_DEBUGGING)
+#else
 #define SF_GET(s)		((s)->sy_symbol.ost_flags)
-#define SF_GET_NORMAL_FIELD(s)	((s)->sy_symbol.ost_flags & SF_NORMAL_MASK)
-#define SF_GET_DEBUG_FIELD(s)	((s)->sy_symbol.ost_flags & SF_DEBUG_MASK)
-#define SF_GET_FILE(s)		((s)->sy_symbol.ost_flags & SF_FILE)
-#define SF_GET_STATICS(s)	((s)->sy_symbol.ost_flags & SF_STATICS)
-#define SF_GET_DEFINED(s)	((s)->sy_symbol.ost_flags & SF_DEFINED)
-#define SF_GET_STRING(s)	((s)->sy_symbol.ost_flags & SF_STRING)
-#define SF_GET_LOCAL(s)		((s)->sy_symbol.ost_flags & SF_LOCAL)
-#define SF_GET_FUNCTION(s)      ((s)->sy_symbol.ost_flags & SF_FUNCTION)
-#define SF_GET_PROCESS(s)	((s)->sy_symbol.ost_flags & SF_PROCESS)
 #define SF_GET_DEBUG(s)		((s)->sy_symbol.ost_flags & SF_DEBUG)
-#define SF_GET_TAGGED(s)	((s)->sy_symbol.ost_flags & SF_TAGGED)
-#define SF_GET_TAG(s)		((s)->sy_symbol.ost_flags & SF_TAG)
-#define SF_GET_GET_SEGMENT(s)	((s)->sy_symbol.ost_flags & SF_GET_SEGMENT)
-#define SF_GET_I960(s)		((s)->sy_symbol.ost_flags & SF_I960_MASK)	/* used by i960 */
-#define SF_GET_BALNAME(s)	((s)->sy_symbol.ost_flags & SF_BALNAME)	/* used by i960 */
-#define SF_GET_CALLNAME(s)	((s)->sy_symbol.ost_flags & SF_CALLNAME)	/* used by i960 */
-#define SF_GET_IS_SYSPROC(s)	((s)->sy_symbol.ost_flags & SF_IS_SYSPROC)	/* used by i960 */
-#define SF_GET_SYSPROC(s)	((s)->sy_symbol.ost_flags & SF_SYSPROC)	/* used by i960 */
+#define SF_SET_DEBUG(s)		((s)->sy_symbol.ost_flags |= SF_DEBUG)
+#endif
+#define SF_GET_NORMAL_FIELD(s)	(SF_GET (s) & SF_NORMAL_MASK)
+#define SF_GET_DEBUG_FIELD(s)	(SF_GET (s) & SF_DEBUG_MASK)
+#define SF_GET_FILE(s)		(SF_GET (s) & SF_FILE)
+#define SF_GET_STATICS(s)	(SF_GET (s) & SF_STATICS)
+#define SF_GET_DEFINED(s)	(SF_GET (s) & SF_DEFINED)
+#define SF_GET_STRING(s)	(SF_GET (s) & SF_STRING)
+#define SF_GET_LOCAL(s)		(SF_GET (s) & SF_LOCAL)
+#define SF_GET_FUNCTION(s)      (SF_GET (s) & SF_FUNCTION)
+#define SF_GET_PROCESS(s)	(SF_GET (s) & SF_PROCESS)
+#define SF_GET_TAGGED(s)	(SF_GET (s) & SF_TAGGED)
+#define SF_GET_TAG(s)		(SF_GET (s) & SF_TAG)
+#define SF_GET_GET_SEGMENT(s)	(SF_GET (s) & SF_GET_SEGMENT)
+#define SF_GET_I960(s)		(SF_GET (s) & SF_I960_MASK)	/* used by i960 */
+#define SF_GET_BALNAME(s)	(SF_GET (s) & SF_BALNAME)	/* used by i960 */
+#define SF_GET_CALLNAME(s)	(SF_GET (s) & SF_CALLNAME)	/* used by i960 */
+#define SF_GET_IS_SYSPROC(s)	(SF_GET (s) & SF_IS_SYSPROC)	/* used by i960 */
+#define SF_GET_SYSPROC(s)	(SF_GET (s) & SF_SYSPROC)	/* used by i960 */
 
 /* Modifiers */
-#define SF_SET(s,v)		((s)->sy_symbol.ost_flags = (v))
-#define SF_SET_NORMAL_FIELD(s,v)((s)->sy_symbol.ost_flags |= ((v) & SF_NORMAL_MASK))
-#define SF_SET_DEBUG_FIELD(s,v)	((s)->sy_symbol.ost_flags |= ((v) & SF_DEBUG_MASK))
-#define SF_SET_FILE(s)		((s)->sy_symbol.ost_flags |= SF_FILE)
-#define SF_SET_STATICS(s)	((s)->sy_symbol.ost_flags |= SF_STATICS)
-#define SF_SET_DEFINED(s)	((s)->sy_symbol.ost_flags |= SF_DEFINED)
-#define SF_SET_STRING(s)	((s)->sy_symbol.ost_flags |= SF_STRING)
-#define SF_SET_LOCAL(s)		((s)->sy_symbol.ost_flags |= SF_LOCAL)
-#define SF_CLEAR_LOCAL(s)	((s)->sy_symbol.ost_flags &= ~SF_LOCAL)
-#define SF_SET_FUNCTION(s)      ((s)->sy_symbol.ost_flags |= SF_FUNCTION)
-#define SF_SET_PROCESS(s)	((s)->sy_symbol.ost_flags |= SF_PROCESS)
-#define SF_SET_DEBUG(s)		((s)->sy_symbol.ost_flags |= SF_DEBUG)
-#define SF_SET_TAGGED(s)	((s)->sy_symbol.ost_flags |= SF_TAGGED)
-#define SF_SET_TAG(s)		((s)->sy_symbol.ost_flags |= SF_TAG)
-#define SF_SET_GET_SEGMENT(s)	((s)->sy_symbol.ost_flags |= SF_GET_SEGMENT)
-#define SF_SET_I960(s,v)	((s)->sy_symbol.ost_flags |= ((v) & SF_I960_MASK))	/* used by i960 */
-#define SF_SET_BALNAME(s)	((s)->sy_symbol.ost_flags |= SF_BALNAME)	/* used by i960 */
-#define SF_SET_CALLNAME(s)	((s)->sy_symbol.ost_flags |= SF_CALLNAME)	/* used by i960 */
-#define SF_SET_IS_SYSPROC(s)	((s)->sy_symbol.ost_flags |= SF_IS_SYSPROC)	/* used by i960 */
-#define SF_SET_SYSPROC(s,v)	((s)->sy_symbol.ost_flags |= ((v) & SF_SYSPROC))	/* used by i960 */
+#define SF_SET(s,v)		(SF_GET (s) = (v))
+#define SF_SET_NORMAL_FIELD(s,v)(SF_GET (s) |= ((v) & SF_NORMAL_MASK))
+#define SF_SET_DEBUG_FIELD(s,v)	(SF_GET (s) |= ((v) & SF_DEBUG_MASK))
+#define SF_SET_FILE(s)		(SF_GET (s) |= SF_FILE)
+#define SF_SET_STATICS(s)	(SF_GET (s) |= SF_STATICS)
+#define SF_SET_DEFINED(s)	(SF_GET (s) |= SF_DEFINED)
+#define SF_SET_STRING(s)	(SF_GET (s) |= SF_STRING)
+#define SF_SET_LOCAL(s)		(SF_GET (s) |= SF_LOCAL)
+#define SF_CLEAR_LOCAL(s)	(SF_GET (s) &= ~SF_LOCAL)
+#define SF_SET_FUNCTION(s)      (SF_GET (s) |= SF_FUNCTION)
+#define SF_SET_PROCESS(s)	(SF_GET (s) |= SF_PROCESS)
+#define SF_SET_TAGGED(s)	(SF_GET (s) |= SF_TAGGED)
+#define SF_SET_TAG(s)		(SF_GET (s) |= SF_TAG)
+#define SF_SET_GET_SEGMENT(s)	(SF_GET (s) |= SF_GET_SEGMENT)
+#define SF_SET_I960(s,v)	(SF_GET (s) |= ((v) & SF_I960_MASK))	/* used by i960 */
+#define SF_SET_BALNAME(s)	(SF_GET (s) |= SF_BALNAME)	/* used by i960 */
+#define SF_SET_CALLNAME(s)	(SF_GET (s) |= SF_CALLNAME)	/* used by i960 */
+#define SF_SET_IS_SYSPROC(s)	(SF_GET (s) |= SF_IS_SYSPROC)	/* used by i960 */
+#define SF_SET_SYSPROC(s,v)	(SF_GET (s) |= ((v) & SF_SYSPROC))	/* used by i960 */
 
 /* File header macro and type definition */
 
+#ifndef BFD_ASSEMBLER
 /*
  * File position calculators. Beware to use them when all the
  * appropriate fields are set in the header.
@@ -477,7 +543,6 @@ obj_symbol_type;
 #define H_SET_LINENO_SIZE(h,v)          ((h)->lineno_size = (v))
 
 /* Segment flipping */
-#define segment_name(v)	(seg_name[(int) (v)])
 
 typedef struct
   {
@@ -497,10 +562,12 @@ typedef struct
   }
 
 object_headers;
+#endif /* ! BFD_ASSEMBLER */
 
 /* --------------  Line number handling ------- */
 extern int text_lineno_number;
 
+#ifndef BFD_ASSEMBLER
 /* line numbering stuff. */
 
 typedef struct internal_lineno
@@ -518,11 +585,9 @@ extern lineno *lineno_lastP;
 extern lineno *lineno_rootP;
 #define OBJ_EMIT_LINENO(a, b, c)	obj_emit_lineno((a),(b),(c))
 
-#if __STDC__ == 1
-void obj_emit_lineno (char **where, lineno * line, char *file_start);
-#else /* not __STDC__ */
-void obj_emit_lineno ();
-#endif /* not __STDC__ */
+#endif /* not BFD_ASSEMBLER */
+
+void obj_emit_lineno PARAMS ((char **where, lineno * line, char *file_start));
 
 /* stack stuff */
 typedef struct
@@ -536,58 +601,37 @@ typedef struct
 
 stack;
 
-#if __STDC__ == 1
-
-char *stack_pop (stack * st);
-char *stack_push (stack * st, char *element);
-char *stack_top (stack * st);
-stack *stack_init (unsigned long chunk_size, unsigned long element_size);
-void c_dot_file_symbol (char *filename);
-void obj_extra_stuff (object_headers * headers);
-void stack_delete (stack * st);
+char *stack_pop PARAMS ((stack * st));
+char *stack_push PARAMS ((stack * st, char *element));
+char *stack_top PARAMS ((stack * st));
+stack *stack_init PARAMS ((unsigned long chunk_size,
+			   unsigned long element_size));
+void c_dot_file_symbol PARAMS ((char *filename));
+void obj_extra_stuff PARAMS ((object_headers * headers));
+void stack_delete PARAMS ((stack * st));
 
 #ifndef tc_headers_hook
-void tc_headers_hook (object_headers * headers);
-#endif /* tc_headers_hook */
+void tc_headers_hook PARAMS ((object_headers * headers));
+#endif
 
 #ifndef tc_coff_symbol_emit_hook
-void tc_coff_symbol_emit_hook ();	/* really tc_coff_symbol_emit_hook(symbolS *symbolP) */
-#endif /* tc_coff_symbol_emit_hook */
+void tc_coff_symbol_emit_hook PARAMS ((/* symbolS * */));
+#endif
 
-void c_section_header (
+#define obj_check_file_symbols coff_check_file_symbols
+
+#ifndef BFD_ASEMBLER
+void c_section_header PARAMS ((
 #ifdef BFD_HEADERS
-			struct internal_scnhdr *header,
+			       struct internal_scnhdr *header,
 #else
-			SCNHDR * header,
+			       SCNHDR * header,
 #endif
-
-			char *name,
-			long core_address,
-			long size,
-			long data_ptr,
-			long reloc_ptr,
-			long lineno_ptr,
-			long reloc_number,
-			long lineno_number,
-			long alignment);
-
-#else /* not __STDC__ */
-
-char *stack_pop ();
-char *stack_push ();
-char *stack_top ();
-stack *stack_init ();
-void c_dot_file_symbol ();
-void c_section_header ();
-void obj_extra_stuff ();
-void stack_delete ();
-#ifndef tc_headers_hook
-void tc_headers_hook ();
+			       char *name, long core_address, long size,
+			       long data_ptr, long reloc_ptr, long lineno_ptr,
+			       long reloc_number, long lineno_number,
+			       long alignment));
 #endif
-void tc_coff_symbol_emit_hook ();
-
-#endif /* not __STDC__ */
-
 
 /* sanity check */
 
@@ -596,6 +640,7 @@ void tc_coff_symbol_emit_hook ();
 hey ! Where is the C_LEAFSTAT definition ? i960 - coff support is depending on it.
 #endif /* no C_LEAFSTAT */
 #endif /* TC_I960 */
+#ifndef BFD_ASSEMBLER
 #ifdef BFD_HEADERS
 extern struct internal_scnhdr data_section_header;
 extern struct internal_scnhdr text_section_header;
@@ -603,12 +648,6 @@ extern struct internal_scnhdr text_section_header;
 extern SCNHDR data_section_header;
 extern SCNHDR text_section_header;
 #endif
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
+#endif
 
 /* end of obj-coff.h */

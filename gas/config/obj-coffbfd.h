@@ -152,7 +152,7 @@ obj_symbol_type;
    section == 0 and value > 0 (external bss symbol) */
 #define S_IS_DEFINED(s)         ((s)->sy_symbol.ost_entry.n_scnum > C_UNDEF_SECTION || \
 				 ((s)->sy_symbol.ost_entry.n_scnum == C_UNDEF_SECTION && \
-				  (s)->sy_symbol.ost_entry.n_value > 0))
+				  S_GET_VALUE (s) > 0))
 /* True if a debug special symbol entry */
 #define S_IS_DEBUG(s)		((s)->sy_symbol.ost_entry.n_scnum == C_DEBUG_SECTION)
 /* True if a symbol is local symbol name */
@@ -161,12 +161,14 @@ obj_symbol_type;
 				 (s)->sy_symbol.ost_entry.n_scnum == C_REGISTER_SECTION || \
 				 (S_LOCAL_NAME(s) && !flagseen['L']))
 /* True if a symbol is not defined in this file */
-#define S_IS_EXTERN(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 && (s)->sy_symbol.ost_entry.n_value == 0)
+#define S_IS_EXTERN(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 \
+				 && S_GET_VALUE (s) == 0)
 /*
  * True if a symbol can be multiply defined (bss symbols have this def
  * though it is bad practice)
  */
-#define S_IS_COMMON(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 && (s)->sy_symbol.ost_entry.n_value != 0)
+#define S_IS_COMMON(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 \
+				 && S_GET_VALUE (s) != 0)
 /* True if a symbol name is in the string table, i.e. its length is > 8. */
 #define S_IS_STRING(s)		(strlen(S_GET_NAME(s)) > 8 ? 1 : 0)
 
@@ -177,8 +179,6 @@ obj_symbol_type;
 #define S_GET_OFFSET(s)         ((s)->sy_symbol.ost_entry.n_offset)
 /* The zeroes if symbol name is longer than 8 chars */
 #define S_GET_ZEROES(s)		((s)->sy_symbol.ost_entry.n_zeroes)
-/* The value of the symbol */
-#define S_GET_VALUE(s)		((unsigned) ((s)->sy_symbol.ost_entry.n_value))
 /* The numeric value of the segment */
 #define S_GET_SEGMENT(s)   s_get_segment(s)
 /* The data type */
@@ -195,8 +195,6 @@ obj_symbol_type;
 #define S_SET_OFFSET(s,v)	((s)->sy_symbol.ost_entry.n_offset = (v))
 /* The zeroes if symbol name is longer than 8 chars */
 #define S_SET_ZEROES(s,v)		((s)->sy_symbol.ost_entry.n_zeroes = (v))
-/* Set the value of the symbol */
-#define S_SET_VALUE(s,v)	((s)->sy_symbol.ost_entry.n_value = (v))
 /* The numeric value of the segment */
 #define S_SET_SEGMENT(s,v)	((s)->sy_symbol.ost_entry.n_scnum = SEGMENT_TO_SYMBOL_TYPE(v))
 /* The data type */

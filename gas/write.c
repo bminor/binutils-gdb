@@ -1231,6 +1231,11 @@ write_object_file ()
 #endif
 	      continue;
 	    }
+
+	  /* Set the value into the BFD symbol.  Up til now the value
+	     has only been kept in the gas symbolS struct.  */
+	  symp->bsym->value = S_GET_VALUE (symp);
+
 	  i++;
 	}
       n = i;
@@ -1255,6 +1260,10 @@ write_object_file ()
 
 
 #ifdef obj_frob_file
+  /* If obj_frob_file changes the symbol value at this point, it is
+     responsible for moving the changed value into symp->bsym->value
+     as well.  Hopefully all symbol value changing can be done in
+     {obj,tc}_frob_symbol.  */
   obj_frob_file ();
 #endif
 

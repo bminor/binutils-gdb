@@ -199,8 +199,6 @@ struct relocation_info
 #define S_IS_STABD(s)		(S_GET_NAME(s) == NULL)
 
 /* Accessors */
-/* The value of the symbol */
-#define S_GET_VALUE(s)		((s)->sy_symbol.n_value)
 /* The name of the symbol */
 #define S_GET_NAME(s)		((s)->sy_symbol.n_un.n_name)
 /* The pointer to the string table */
@@ -215,8 +213,6 @@ struct relocation_info
 #define S_GET_DESC(s)		((s)->sy_symbol.n_desc)
 
 /* Modifiers */
-/* Set the value of the symbol */
-#define S_SET_VALUE(s,v)	((s)->sy_symbol.n_value = (unsigned long) (v))
 /* Assume that a symbol cannot be simultaneously in more than on segment */
 /* set segment */
 #define S_SET_SEGMENT(s,seg)	((s)->sy_symbol.n_type &= ~N_TYPE,(s)->sy_symbol.n_type|=SEGMENT_TO_SYMBOL_TYPE(seg))

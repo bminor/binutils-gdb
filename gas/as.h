@@ -464,11 +464,9 @@ void subseg_new PARAMS ((segT seg, subsegT subseg));
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"
 
-/* these define types needed by the interfaces */
-#include "struc-symbol.h"
-
-#include "write.h"
 #include "expr.h"
+#include "struc-symbol.h"
+#include "write.h"
 #include "frags.h"
 #include "hash.h"
 #include "read.h"

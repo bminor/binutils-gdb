@@ -946,6 +946,28 @@ decode_local_label_name (s)
   return (symbol_decode);
 }				/* decode_local_label_name() */
 
+/* Get the value of a symbol.  */
+
+valueT
+S_GET_VALUE (s)
+     symbolS *s;
+{
+  if (s->sy_value.X_seg != absolute_section)
+    as_bad ("Attempt to get value of unresolved symbol");
+  return (valueT) s->sy_value.X_add_number;
+}
+
+/* Set the value of a symbol.  */
+
+void
+S_SET_VALUE (s, val)
+     symbolS *s;
+     valueT val;
+{
+  s->sy_value.X_seg = absolute_section;
+  s->sy_value.X_add_number = (offsetT) val;
+}
+
 #ifdef BFD_ASSEMBLER
 
 int
@@ -1016,13 +1038,6 @@ S_IS_STABD (s)
   return S_GET_NAME (s) == 0;
 }
 
-valueT
-S_GET_VALUE (s)
-     symbolS *s;
-{
-  return s->bsym->value;
-}
-
 CONST char *
 S_GET_NAME (s)
      symbolS *s;
@@ -1035,14 +1050,6 @@ S_GET_SEGMENT (s)
      symbolS *s;
 {
   return s->bsym->section;
-}
-
-void
-S_SET_VALUE (s, val)
-     symbolS *s;
-     valueT val;
-{
-  s->bsym->value = val;
 }
 
 void

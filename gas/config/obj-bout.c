@@ -183,7 +183,7 @@ obj_symbol_to_chars (where, symbolP)
 {
   md_number_to_chars ((char *) &(S_GET_OFFSET (symbolP)), S_GET_OFFSET (symbolP), sizeof (S_GET_OFFSET (symbolP)));
   md_number_to_chars ((char *) &(S_GET_DESC (symbolP)), S_GET_DESC (symbolP), sizeof (S_GET_DESC (symbolP)));
-  md_number_to_chars ((char *) &(S_GET_VALUE (symbolP)), S_GET_VALUE (symbolP), sizeof (S_GET_VALUE (symbolP)));
+  md_number_to_chars ((char *) &symbolP->sy_symbol.n_value, S_GET_VALUE (symbolP), sizeof (symbolP->sy_symbol.n_value));
 
   append (where, (char *) &symbolP->sy_symbol, sizeof (obj_symbol_type));
 }				/* obj_symbol_to_chars() */

@@ -21,6 +21,7 @@
 
 #include "obstack.h"
 
+#ifndef BFD_ASSEMBLER
 lineno *lineno_rootP;
 
 const short seg_N_TYPE[] =
@@ -59,6 +60,7 @@ const segT N_TYPE_seg[32] =
   SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF,
   SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF
 };
+#endif
 
 char *s_get_name PARAMS ((symbolS * s));
 static symbolS *tag_find_or_make PARAMS ((char *name));
@@ -72,7 +74,7 @@ static void obj_coff_def PARAMS ((int what));
 static void obj_coff_dim PARAMS ((void));
 static void obj_coff_endef PARAMS ((void));
 static void obj_coff_line PARAMS ((void));
-static void obj_coff_ln PARAMS ((void));
+static void obj_coff_ln PARAMS ((int));
 static void obj_coff_scl PARAMS ((void));
 static void obj_coff_size PARAMS ((void));
 static void obj_coff_stab PARAMS ((int what));
@@ -81,6 +83,11 @@ static void obj_coff_type PARAMS ((void));
 static void obj_coff_val PARAMS ((void));
 static void tag_init PARAMS ((void));
 static void tag_insert PARAMS ((char *name, symbolS * symbolP));
+
+#ifdef BFD_ASSEMBLER
+static void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
+static void SA_SET_SYM_TAGNDX PARAMS ((symbolS *, symbolS *));
+#endif
 
 int line_base;
 
@@ -95,6 +102,7 @@ const pseudo_typeS obj_pseudo_table[] =
   {"endef", obj_coff_endef, 0},
   {"line", obj_coff_line, 0},
   {"ln", obj_coff_ln, 0},
+  {"appline", obj_coff_ln, 1},
   {"scl", obj_coff_scl, 0},
   {"size", obj_coff_size, 0},
   {"tag", obj_coff_tag, 0},
@@ -116,25 +124,35 @@ const pseudo_typeS obj_pseudo_table[] =
   {"ident", s_ignore, 0},	/* we don't yet handle this. */
 
 
-/* stabs aka a.out aka b.out directives for debug symbols.
-	   Currently ignored silently.  Except for .line at which
-	   we guess from context. */
+  /* stabs aka a.out aka b.out directives for debug symbols.
+     Currently ignored silently.  Except for .line at which
+     we guess from context. */
   {"desc", s_ignore, 0},	/* def */
-/*	{ "line",	s_ignore,		0	}, *//* source code line number */
   {"stabd", obj_coff_stab, 'd'},/* stabs */
   {"stabn", obj_coff_stab, 'n'},/* stabs */
   {"stabs", obj_coff_stab, 's'},/* stabs */
 
-/* stabs-in-coff (?) debug pseudos (ignored) */
+  /* stabs-in-coff (?) debug pseudos (ignored) */
   {"optim", s_ignore, 0},	/* For sun386i cc (?) */
-/* other stuff */
+  /* other stuff */
   {"ABORT", s_abort, 0},
 
   {NULL}			/* end sentinel */
 };				/* obj_pseudo_table */
 
+#ifdef BFD_ASSEMBLER
+struct line_no {
+  struct line_no *next;
+  fragS *frag;
+  alent l;
+};
+#endif
+
+#define GET_FILENAME_STRING(X) \
+((char*)(&((X)->sy_symbol.ost_auxent->x_file.x_n.x_offset))[1])
 
 /* obj dependant output values */
+#ifndef BFD_ASSEMBLER
 #ifdef BFD_HEADERS
 static struct internal_scnhdr bss_section_header;
 struct internal_scnhdr data_section_header;
@@ -144,6 +162,53 @@ static SCNHDR bss_section_header;
 SCNHDR data_section_header;
 SCNHDR text_section_header;
 #endif
+#endif
+
+#ifdef BFD_ASSEMBLER
+
+/* @@ Ick.  */
+static segT
+fetch_coff_debug_section ()
+{
+  static segT debug_section;
+  if (!debug_section)
+    {
+      CONST asymbol *s;
+      s = bfd_make_debug_symbol (stdoutput, (char *) 0, 0);
+      assert (s != 0);
+      debug_section = s->section;
+    }
+  return debug_section;
+}
+
+static void
+SA_SET_SYM_ENDNDX (sym, val)
+     symbolS *sym;
+     symbolS *val;
+{
+  combined_entry_type *entry, *p;
+
+  entry = &coffsymbol (sym->bsym)->native[1];
+  p = coffsymbol (val->bsym)->native;
+  entry->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p = p;
+  entry->fix_end = 1;
+}
+
+static void
+SA_SET_SYM_TAGNDX (sym, val)
+     symbolS *sym;
+     symbolS *val;
+{
+  combined_entry_type *entry, *p;
+
+  entry = &coffsymbol (sym->bsym)->native[1];
+  p = coffsymbol (val->bsym)->native;
+  entry->u.auxent.x_sym.x_tagndx.p = p;
+  entry->fix_tag = 1;
+}
+
+#else /* ! BFD_ASSEMBLER */
+
 /* Relocation. */
 
 static int
@@ -205,6 +270,7 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
     {
       if (symbolP = fixP->fx_addsy)
 	{
+	  int rtype_ok = 0;
 #if defined(TC_M68K)
 	  ri_table[i].r_type = (fixP->fx_pcrel ?
 				(fixP->fx_size == 1 ? R_PCRBYTE :
@@ -213,7 +279,9 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
 				(fixP->fx_size == 1 ? R_RELBYTE :
 				 fixP->fx_size == 2 ? R_RELWORD :
 				 R_RELLONG));
-#elif defined(TC_I386)
+	  rtype_ok = 1;
+#endif
+#if defined(TC_I386)
 	  /* FIXME-SOON R_OFF8 & R_DIR16 are a vague guess, completly
 			   untested. */
 	  ri_table[i].r_type = (fixP->fx_pcrel ?
@@ -223,39 +291,43 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
 				(fixP->fx_size == 1 ? R_OFF8 :
 				 fixP->fx_size == 2 ? R_DIR16 :
 				 R_DIR32));
-#elif defined(TC_I960)
+	  rtype_ok = 1;
+#endif
+#if defined(TC_I960)
 	  ri_table[i].r_type = (fixP->fx_pcrel
 				? R_IPRMED
 				: R_RELLONG);
 	  callj_table[i] = fixP->fx_callj ? 1 : 0;
-#elif defined(TC_A29K)
+	  rtype_ok = 1;
+#endif
+#if defined(TC_A29K)
 	  ri_table[i].r_type = tc_coff_fix2rtype (fixP);
-
-#else
-#error		  you lose
-#endif /* TC_M68K || TC_I386 */
+	  rtype_ok = 1;
+#endif
+	  if (!rtype_ok)
+	    abort ();
 	  ri_table[i].r_vaddr = (fixP->fx_frag->fr_address
 				 + fixP->fx_where);
 	  /* If symbol associated to relocation entry is a bss symbol
-			   or undefined symbol just remember the index of the symbol.
-			   Otherwise store the index of the symbol describing the
-			   section the symbol belong to. This heuristic speeds up ld.
-			   */
+	     or undefined symbol just remember the index of the symbol.
+	     Otherwise store the index of the symbol describing the
+	     section the symbol belong to. This heuristic speeds up ld.
+	     */
 	  /* Local symbols can generate relocation information. In case
-			   of structure return for instance. But they have no symbol
-			   number because they won't be emitted in the final object.
-			   In the case where they are in the BSS section, this leads
-			   to an incorrect r_symndx.
-			   Under bsd the loader do not care if the symbol reference
-			   is incorrect. But the SYS V ld complains about this. To
-			   avoid this we associate the symbol to the associated
-			   section, *even* if it is the BSS section. */
+	     of structure return for instance. But they have no symbol
+	     number because they won't be emitted in the final object.
+	     In the case where they are in the BSS section, this leads
+	     to an incorrect r_symndx.
+	     Under bsd the loader do not care if the symbol reference
+	     is incorrect. But the SYS V ld complains about this. To
+	     avoid this we associate the symbol to the associated
+	     section, *even* if it is the BSS section. */
 	  /* If someone can tell me why the other symbols of the bss
-			   section are not associated with the .bss section entry,
-			   I'd be gratefull. I guess that it has to do with the special
-			   nature of the .bss section. Or maybe this is because the
-			   bss symbols are declared in the common section and can
-			   be resized later. Can it break code some where ? */
+	     section are not associated with the .bss section entry,
+	     I'd be gratefull. I guess that it has to do with the special
+	     nature of the .bss section. Or maybe this is because the
+	     bss symbols are declared in the common section and can
+	     be resized later. Can it break code some where ? */
 	  ri_table[i].r_symndx = (S_GET_SEGMENT (symbolP) == SEG_TEXT
 				  ? dot_text_symbol->sy_number
 				  : (S_GET_SEGMENT (symbolP) == SEG_DATA
@@ -270,10 +342,8 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
 	}			/* if there's a symbol */
     }				/* for each fixP */
 
-  /*
-	 * AIX ld prefer to have the reloc table with r_vaddr sorted.
-	 * But sorting it should not hurt any other ld.
-	 */
+  /* AIX ld prefer to have the reloc table with r_vaddr sorted.
+     But sorting it should not hurt any other ld.  */
   qsort (ri_table, count, sizeof (*ri_table), reloc_compare);
 
   for (i = 0; i < count; i++)
@@ -282,9 +352,9 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
       *where += bfd_coff_swap_reloc_out (stdoutput, &ri_table[i], *where);
 # ifdef TC_A29K
       /* The 29k has a special kludge for the high 16 bit reloc.
-		       Two relocations are emmited, R_IHIHALF, and R_IHCONST.
-		       The second one doesn't contain a symbol, but uses the
-		       value for offset */
+	 Two relocations are emmited, R_IHIHALF, and R_IHCONST.
+	 The second one doesn't contain a symbol, but uses the
+	 value for offset */
       if (ri_table[i].r_type == R_IHIHALF)
 	{
 	  /* now emit the second bit */
@@ -337,10 +407,9 @@ obj_header_append (where, headers)
   obj_coff_section_header_append (where, &text_section_header);
   obj_coff_section_header_append (where, &data_section_header);
   obj_coff_section_header_append (where, &bss_section_header);
-
 }
 
-#else
+#else /* ! BFD_HEADERS */
 
 void
 obj_header_append (where, headers)
@@ -405,12 +474,16 @@ obj_header_append (where, headers)
   return;
 }				/* obj_header_append() */
 
-#endif
+#endif /* ! BFD_HEADERS */
+
 void
 obj_symbol_to_chars (where, symbolP)
      char **where;
      symbolS *symbolP;
 {
+  /* Move the value into the COFF symbol itself.  */
+  symbolP->sy_symbol.ost_entry.n_value = S_GET_VALUE (symbolP);
+
 #ifdef BFD_HEADERS
   unsigned int numaux = symbolP->sy_symbol.ost_entry.n_numaux;
   unsigned int i;
@@ -454,7 +527,8 @@ obj_symbol_to_chars (where, symbolP)
   append (where, (char *) syment, sizeof (*syment));
 #endif /* CROSS_COMPILE */
 
-  /* Should do the following : if (.file entry) MD(..)... else if (static entry) MD(..) */
+  /* Should do the following:
+     if (.file entry) MD(..)... else if (static entry) MD(..) */
   if (numaux > OBJ_COFF_MAX_AUXENTRIES)
     {
       as_bad ("Internal error? too many auxents for symbol");
@@ -615,6 +689,8 @@ obj_emit_symbols (where, symbol_rootP)
     }
 }				/* obj_emit_symbols() */
 
+#endif /* ! BFD_ASSEMBLER */
+
 /* Merge a debug symbol containing debug information into a normal symbol. */
 
 void
@@ -626,35 +702,70 @@ c_symbol_merge (debug, normal)
   S_SET_STORAGE_CLASS (normal, S_GET_STORAGE_CLASS (debug));
 
   if (S_GET_NUMBER_AUXILIARY (debug) > S_GET_NUMBER_AUXILIARY (normal))
-    {
-      S_SET_NUMBER_AUXILIARY (normal, S_GET_NUMBER_AUXILIARY (debug));
-    }				/* take the most we have */
+    /* take the most we have */
+    S_SET_NUMBER_AUXILIARY (normal, S_GET_NUMBER_AUXILIARY (debug));
 
   if (S_GET_NUMBER_AUXILIARY (debug) > 0)
     {
-      memcpy ((char *) &normal->sy_symbol.ost_auxent[0], (char *) &debug->sy_symbol.ost_auxent[0], S_GET_NUMBER_AUXILIARY (debug) * AUXESZ);
-    }				/* Move all the auxiliary information */
+      /* Move all the auxiliary information.  */
+#ifdef BFD_ASSEMBLER
+      /* @@ How many fields do we want to preserve?  Would it make more
+	 sense to pick and choose those we want to copy?  Should look
+	 into this further....  [raeburn:19920512.2209EST]  */
+      alent *linenos;
+      linenos = coffsymbol (normal->bsym)->lineno;
+      memcpy ((char *) &coffsymbol (normal->bsym)->native,
+	      (char *) &coffsymbol (debug->bsym)->native,
+	      S_GET_NUMBER_AUXILIARY(debug) * AUXESZ);
+      coffsymbol (normal->bsym)->lineno = linenos;
+#else
+      memcpy ((char *) &normal->sy_symbol.ost_auxent[0],
+	      (char *) &debug->sy_symbol.ost_auxent[0],
+	      S_GET_NUMBER_AUXILIARY (debug) * AUXESZ);
+#endif
+    }
 
   /* Move the debug flags. */
   SF_SET_DEBUG_FIELD (normal, SF_GET_DEBUG_FIELD (debug));
 }				/* c_symbol_merge() */
 
-static symbolS *previous_file_symbol = NULL;
-
+static symbolS *previous_file_symbol;
 void
 c_dot_file_symbol (filename)
      char *filename;
 {
   symbolS *symbolP;
 
+#ifdef BFD_ASSEMBLER
+  symbolP = symbol_new (filename, &bfd_abs_section, 0,
+			&zero_address_frag);
+#else
   symbolP = symbol_new (".file",
 			SEG_DEBUG,
 			0,
 			&zero_address_frag);
+#endif
 
   S_SET_STORAGE_CLASS (symbolP, C_FILE);
   S_SET_NUMBER_AUXILIARY (symbolP, 1);
-  SA_SET_FILE_FNAME (symbolP, filename);
+
+#ifdef BFD_ASSEMBLER
+  symbolP->bsym->flags = BSF_DEBUGGING;
+#else
+  if (strlen(filename) > 14) 
+    {
+      /* This won't fit into a 14 char space, it will go into the string
+	 table.  */
+      symbolP->sy_symbol.ost_auxent->x_file.x_n.x_zeroes = 0;
+      (&(symbolP->sy_symbol.ost_auxent->x_file.x_n.x_offset))[0] = string_byte_count;
+      (&(symbolP->sy_symbol.ost_auxent->x_file.x_n.x_offset))[1] = (int)filename;
+    }
+  else 
+    {
+      SA_SET_FILE_FNAME (symbolP, filename);
+    }
+  SF_SET_DEBUG (symbolP);
+#endif
 
 #ifndef NO_LISTING
   {
@@ -666,7 +777,6 @@ c_dot_file_symbol (filename)
   }
 #endif
 
-  SF_SET_DEBUG (symbolP);
   S_SET_VALUE (symbolP, (long) previous_file_symbol);
 
   previous_file_symbol = symbolP;
@@ -683,8 +793,7 @@ c_dot_file_symbol (filename)
       symbol_insert (symbolP, symbol_rootP, &symbol_rootP, &symbol_lastP);
       symbol_rootP = symbolP;
     }				/* if not first on the list */
-
-}				/* c_dot_file_symbol() */
+}
 
 /*
  * Build a 'section static' symbol.
@@ -702,10 +811,10 @@ c_section_symbol (name, value, length, nreloc, nlnno)
 
   symbolP = symbol_new (name,
 			(name[1] == 't'
-			 ? SEG_TEXT
-			 : (name[1] == 'd'
-			    ? SEG_DATA
-			    : SEG_BSS)),
+			 ? text_section
+			 : name[1] == 'd'
+			 ? data_section
+			 : bss_section),
 			value,
 			&zero_address_frag);
 
@@ -767,26 +876,37 @@ c_section_header (header,
 
   header->s_flags = STYP_REG | (name[1] == 't'
 				? STYP_TEXT
-				: (name[1] == 'd'
-				   ? STYP_DATA
-				   : (name[1] == 'b'
-				      ? STYP_BSS
-				      : STYP_INFO)));
-  return;
-}				/* c_section_header() */
+				: name[1] == 'd'
+				? STYP_DATA
+				: name[1] == 'b'
+				? STYP_BSS
+				: STYP_INFO);
+}
 
 /* Line number handling */
 
-int function_lineoff = -1;	/* Offset in line#s where the last function
-				   started (the odd entry for line #0) */
-int text_lineno_number = 0;
-int our_lineno_number = 0;	/* we use this to build pointers from .bf's
-				   into the linetable.  It should match
-				   exactly the values that are later
-				   assigned in text_lineno_number by
-				   write.c. */
-lineno *lineno_lastP = (lineno *) 0;
+#ifdef BFD_ASSEMBLER
 
+/* Symbol of last function, which we should hang line#s off of.  */
+symbolS *function_lineoff;
+
+#else
+
+/* Offset in line#s where the last function started (the odd entry for
+   line #0). */
+int function_lineoff = -1;
+
+int text_lineno_number;
+
+/* We use this to build pointers from .bf's into the linetable.  It
+   should match exactly the values that are later assigned in
+   text_lineno_number by write.c. */
+int our_lineno_number;
+
+lineno *lineno_lastP;
+#endif
+
+#ifndef BFD_ASSEMBLER
 int
 c_line_new (paddr, line_number, frag)
      long paddr;
@@ -807,13 +927,17 @@ c_line_new (paddr, line_number, frag)
   lineno_lastP = new_line;
   return LINESZ * our_lineno_number++;
 }
+#endif
 
 void
 obj_emit_lineno (where, line, file_start)
      char **where;
+#ifndef BFD_ASSEMBLER /* sigh */
      lineno *line;
+#endif
      char *file_start;
 {
+#ifndef BFD_ASSEMBLER
 #ifdef BFD_HEADERS
   struct bfd_internal_lineno *line_entry;
 #else
@@ -823,16 +947,15 @@ obj_emit_lineno (where, line, file_start)
     {
       line_entry = &line->line;
 
-      /* FIXME-SOMEDAY Resolving the sy_number of function linno's used to be done in
-		   write_object_file() but their symbols need a fileptr to the lnno, so
-		   I moved this resolution check here.  xoxorich. */
+      /* FIXME-SOMEDAY Resolving the sy_number of function linno's used to be
+	 done in write_object_file() but their symbols need a fileptr to the
+	 lnno, so I moved this resolution check here.  xoxorich. */
 
       if (line_entry->l_lnno == 0)
 	{
 	  /* There is a good chance that the symbol pointed to
-			   is not the one that will be emitted and that the
-			   sy_number is not accurate. */
-	  /*			char *name; */
+	     is not the one that will be emitted and that the
+	     sy_number is not accurate. */
 	  symbolS *symbolP;
 
 	  symbolP = (symbolS *) line_entry->l_addr.l_symndx;
@@ -845,7 +968,7 @@ obj_emit_lineno (where, line, file_start)
       *where += bfd_coff_swap_lineno_out (stdoutput, line_entry, *where);
 #else
       /* No matter which member of the union we process, they are
-		   both long. */
+	 both long. */
 #ifdef CROSS_COMPILE
       md_number_to_chars (*where, line_entry->l_addr.l_paddr, sizeof (line_entry->l_addr.l_paddr));
       *where += sizeof (line_entry->l_addr.l_paddr);
@@ -865,9 +988,10 @@ obj_emit_lineno (where, line, file_start)
 #endif /* CROSS_COMPILE */
 #endif /* BFD_HEADERS */
     }				/* for each line number */
-
-  return;
-}				/* obj_emit_lineno() */
+#else /* BFD_ASSEMBLER */
+  abort ();
+#endif /* BFD_ASSEMBLER */
+}
 
 void
 obj_symbol_new_hook (symbolP)
@@ -875,35 +999,41 @@ obj_symbol_new_hook (symbolP)
 {
   char underscore = 0;		/* Symbol has leading _ */
 
+#ifdef BFD_ASSEMBLER
+  {
+    long sz = (OBJ_COFF_MAX_AUXENTRIES + 1) * sizeof (combined_entry_type);
+    char *s = (char *) bfd_alloc_by_size_t (stdoutput, sz);
+    memset (s, 0, sz);
+    coffsymbol (symbolP->bsym)->native = (combined_entry_type *) s;
+  }
+#else
   /* Effective symbol */
   /* Store the pointer in the offset. */
   S_SET_ZEROES (symbolP, 0L);
-  S_SET_DATA_TYPE (symbolP, T_NULL);
-  S_SET_STORAGE_CLASS (symbolP, 0);
-  S_SET_NUMBER_AUXILIARY (symbolP, 0);
   /* Additional information */
   symbolP->sy_symbol.ost_flags = 0;
   /* Auxiliary entries */
   memset ((char *) &symbolP->sy_symbol.ost_auxent[0], '\0', AUXESZ);
+#endif
+  S_SET_DATA_TYPE (symbolP, T_NULL);
+  S_SET_STORAGE_CLASS (symbolP, 0);
+  S_SET_NUMBER_AUXILIARY (symbolP, 0);
 
 #ifdef STRIP_UNDERSCORE
   /* Remove leading underscore at the beginning of the symbol.
-	 * This is to be compatible with the standard librairies.
-	 */
+     This is to be compatible with the standard librairies.  */
   if (*S_GET_NAME (symbolP) == '_')
     {
       underscore = 1;
       S_SET_NAME (symbolP, S_GET_NAME (symbolP) + 1);
-    }				/* strip underscore */
+    }
 #endif /* STRIP_UNDERSCORE */
 
   if (S_IS_STRING (symbolP))
     SF_SET_STRING (symbolP);
   if (!underscore && S_IS_LOCAL (symbolP))
     SF_SET_LOCAL (symbolP);
-
-  return;
-}				/* obj_symbol_new_hook() */
+}
 
 /* stack stuff */
 stack *
@@ -913,19 +1043,21 @@ stack_init (chunk_size, element_size)
 {
   stack *st;
 
-  if ((st = (stack *) malloc (sizeof (stack))) == (stack *) 0)
-    return (stack *) 0;
-  if ((st->data = malloc (chunk_size)) == (char *) 0)
+  st = (stack *) malloc (sizeof (stack));
+  if (!st)
+    return 0;
+  st->data = malloc (chunk_size);
+  if (!st->data)
     {
       free (st);
-      return (stack *) 0;
+      return 0;
     }
   st->pointer = 0;
   st->size = chunk_size;
   st->chunk_size = chunk_size;
   st->element_size = element_size;
   return st;
-}				/* stack_init() */
+}
 
 void
 stack_delete (st)
@@ -975,20 +1107,62 @@ stack_top (st)
  * Handle .ln directives.
  */
 
+#ifdef BFD_ASSEMBLER
+static symbolS *current_lineno_sym;
+static struct line_no *line_nos;
+
 static void
-obj_coff_ln ()
+add_lineno (frag, offset, num)
+     fragS *frag;
+     int offset;
+     int num;
+{
+  struct line_no *new_line = (struct line_no *) bfd_alloc_by_size_t (stdoutput,
+								     sizeof (struct line_no));
+  if (!current_lineno_sym)
+    {
+      abort ();
+    }
+  new_line->next = line_nos;
+  new_line->frag = frag;
+  new_line->l.line_number = num;
+  new_line->l.u.offset = offset;
+  line_nos = new_line;
+}
+
+static void
+add_linesym (sym)
+     symbolS *sym;
+{
+  if (line_nos)
+    {
+      add_lineno (0, 0, 0);
+      coffsymbol (current_lineno_sym->bsym)->lineno = (alent *) line_nos;
+      line_nos = 0;
+    }
+  current_lineno_sym = sym;
+}
+#endif
+
+static void
+obj_coff_ln (appline)
+     int appline;
 {
   int l;
-  if (def_symbol_in_progress != NULL)
+
+  if (! appline && def_symbol_in_progress != NULL)
     {
       as_warn (".ln pseudo-op inside .def/.endef: ignored.");
       demand_empty_rest_of_line ();
       return;
-    }				/* wrong context */
+    }
 
-  c_line_new (obstack_next_free (&frags) - frag_now->fr_literal,
-	      l = get_absolute_expression (),
-	      frag_now);
+  l = get_absolute_expression ();
+#ifdef BFD_ASSEMBLER
+  add_lineno (frag_now, frag_now_fix (), l);
+#else
+  c_line_new (frag_now_fix (), l, frag_now);
+#endif
 
 #ifndef NO_LISTING
   {
@@ -996,13 +1170,14 @@ obj_coff_ln ()
 
     if (listing)
       {
-	listing_source_line (l + line_base - 1);
+	if (! appline)
+	  l += line_base - 1;
+	listing_source_line (l);
       }
   }
 #endif
 
   demand_empty_rest_of_line ();
-  return;
 }				/* obj_coff_ln() */
 
 /*
@@ -1032,9 +1207,6 @@ obj_coff_def (what)
   char *symbol_name;		/* Name of the debug symbol */
   char *symbol_name_copy;	/* Temporary copy of the name */
   unsigned int symbol_name_length;
-  /*$char*	directiveP;$ *//* Name of the pseudo opcode */
-  /*$char directive[MAX_DIRECTIVE];$ *//* Backup of the directive */
-  /*$char end = 0;$ *//* If 1, stop parsing */
 
   if (def_symbol_in_progress != NULL)
     {
@@ -1045,38 +1217,38 @@ obj_coff_def (what)
 
   SKIP_WHITESPACES ();
 
-  def_symbol_in_progress = (symbolS *) obstack_alloc (&notes, sizeof (*def_symbol_in_progress));
-  memset (def_symbol_in_progress, '\0', sizeof (*def_symbol_in_progress));
-
   symbol_name = input_line_pointer;
+#ifdef STRIP_UNDERSCORE
+  if (symbol_name[0] == '_' && symbol_name[1] != 0)
+    symbol_name++;
+#endif /* STRIP_UNDERSCORE */
+
   name_end = get_symbol_end ();
   symbol_name_length = strlen (symbol_name);
   symbol_name_copy = xmalloc (symbol_name_length + 1);
   strcpy (symbol_name_copy, symbol_name);
 
   /* Initialize the new symbol */
-#ifdef STRIP_UNDERSCORE
-  S_SET_NAME (def_symbol_in_progress, (*symbol_name_copy == '_'
-				       ? symbol_name_copy + 1
-				       : symbol_name_copy));
-#else /* STRIP_UNDERSCORE */
+#ifdef BFD_ASSEMBLER
+  def_symbol_in_progress = symbol_make (symbol_name_copy);
+#else
+  def_symbol_in_progress = (symbolS *) obstack_alloc (&notes, sizeof (*def_symbol_in_progress));
+  memset (def_symbol_in_progress, '\0', sizeof (*def_symbol_in_progress));
+
   S_SET_NAME (def_symbol_in_progress, symbol_name_copy);
-#endif /* STRIP_UNDERSCORE */
-  /* free(symbol_name_copy); */
   def_symbol_in_progress->sy_name_offset = ~0;
   def_symbol_in_progress->sy_number = ~0;
+#endif
+
   def_symbol_in_progress->sy_frag = &zero_address_frag;
 
   if (S_IS_STRING (def_symbol_in_progress))
-    {
-      SF_SET_STRING (def_symbol_in_progress);
-    }				/* "long" name */
+    SF_SET_STRING (def_symbol_in_progress);
 
   *input_line_pointer = name_end;
 
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_def() */
+}
 
 unsigned int dim_index;
 static void
@@ -1103,7 +1275,11 @@ obj_coff_endef ()
     case C_FILE:
     case C_TPDEF:
       SF_SET_DEBUG (def_symbol_in_progress);
+#ifdef BFD_ASSEMBLER
+      S_SET_SEGMENT (def_symbol_in_progress, fetch_coff_debug_section ());
+#else
       S_SET_SEGMENT (def_symbol_in_progress, SEG_DEBUG);
+#endif
       break;
 
     case C_EFCN:
@@ -1113,20 +1289,33 @@ obj_coff_endef ()
       SF_SET_PROCESS (def_symbol_in_progress);	/* Will need processing before writing */
       /* intentional fallthrough */
     case C_FCN:
-      S_SET_SEGMENT (def_symbol_in_progress, SEG_TEXT);
+      {
+	CONST char *name;
+	S_SET_SEGMENT (def_symbol_in_progress, text_section);
 
-      if (def_symbol_in_progress->sy_symbol.ost_entry._n._n_nptr[1][1] == 'b'
-      && def_symbol_in_progress->sy_symbol.ost_entry._n._n_nptr[1][2] == 'f')
-	{
-	  if (function_lineoff < 0)
-	    {
-	      as_warn ("`.bf' symbol without preceding function");
-	    }
-	  SA_GET_SYM_LNNOPTR (def_symbol_in_progress) = function_lineoff;
-	  /* Will need relocating */
-	  SF_SET_PROCESS (def_symbol_in_progress);
-	  function_lineoff = -1;
-	}
+#ifdef BFD_ASSEMBLER
+	name = bfd_asymbol_name (def_symbol_in_progress->bsym);
+#else
+	name = def_symbol_in_progress->sy_symbol.ost_entry._n._n_nptr[1];
+#endif
+	if (name[1] == 'b' && name[2] == 'f')
+	  {
+	    if (function_lineoff < 0)
+	      as_warn ("`%s' symbol without preceding function", name);
+#ifdef BFD_ASSEMBLER
+	    abort ();
+#else
+	    SA_GET_SYM_LNNOPTR (def_symbol_in_progress) = function_lineoff;
+#endif
+	    /* Will need relocating */
+	    SF_SET_PROCESS (def_symbol_in_progress);
+#ifdef BFD_ASSEMBLER
+	    function_lineoff = 0;
+#else
+	    function_lineoff = -1;
+#endif
+	  }
+      }
       break;
 
 #ifdef C_AUTOARG
@@ -1142,7 +1331,7 @@ obj_coff_endef ()
     case C_FIELD:
     case C_EOS:
       SF_SET_DEBUG (def_symbol_in_progress);
-      S_SET_SEGMENT (def_symbol_in_progress, SEG_ABSOLUTE);
+      S_SET_SEGMENT (def_symbol_in_progress, absolute_section);
       break;
 
     case C_EXT:
@@ -1154,52 +1343,59 @@ obj_coff_endef ()
     case C_USTATIC:
     case C_EXTDEF:
     case C_ULABEL:
-      as_warn ("unexpected storage class %d", S_GET_STORAGE_CLASS (def_symbol_in_progress));
+      as_warn ("unexpected storage class %d",
+	       S_GET_STORAGE_CLASS (def_symbol_in_progress));
       break;
     }				/* switch on storage class */
 
-  /* Now that we have built a debug symbol, try to
-	   find if we should merge with an existing symbol
-	   or not.  If a symbol is C_EFCN or SEG_ABSOLUTE or
-	   untagged SEG_DEBUG it never merges. */
+  /* Now that we have built a debug symbol, try to find if we should
+     merge with an existing symbol or not.  If a symbol is C_EFCN or
+     SEG_ABSOLUTE or untagged SEG_DEBUG it never merges. */
 
-  /* Two cases for functions.  Either debug followed
-	   by definition or definition followed by debug.
-	   For definition first, we will merge the debug
-	   symbol into the definition.  For debug first, the
-	   lineno entry MUST point to the definition
-	   function or else it will point off into space
-	   when obj_crawl_symbol_chain() merges the debug
-	   symbol into the real symbol.  Therefor, let's
-	   presume the debug symbol is a real function
-	   reference. */
+  /* Two cases for functions.  Either debug followed by definition or
+     definition followed by debug.  For definition first, we will
+     merge the debug symbol into the definition.  For debug first, the
+     lineno entry MUST point to the definition function or else it
+     will point off into space when obj_crawl_symbol_chain() merges
+     the debug symbol into the real symbol.  Therefor, let's presume
+     the debug symbol is a real function reference. */
 
-  /* FIXME-SOON If for some reason the definition
-	   label/symbol is never seen, this will probably
-	   leave an undefined symbol at link time. */
+  /* FIXME-SOON If for some reason the definition label/symbol is
+     never seen, this will probably leave an undefined symbol at link
+     time. */
 
   if (S_GET_STORAGE_CLASS (def_symbol_in_progress) == C_EFCN
+#ifdef BFD_ASSEMBLER
+      || (!strcmp (bfd_get_section_name (stdoutput,
+					 S_GET_SEGMENT (def_symbol_in_progress)),
+		   "*DEBUG*")
+	  && !SF_GET_TAG (def_symbol_in_progress))
+#else
       || (S_GET_SEGMENT (def_symbol_in_progress) == SEG_DEBUG
 	  && !SF_GET_TAG (def_symbol_in_progress))
-      || S_GET_SEGMENT (def_symbol_in_progress) == SEG_ABSOLUTE
+#endif
+      || S_GET_SEGMENT (def_symbol_in_progress) == absolute_section
       || (symbolP = symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP)) == NULL)
     {
-
-      symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP, &symbol_lastP);
-
+#ifdef BFD_ASSEMBLER
+      if (def_symbol_in_progress != symbol_lastP)
+	symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP,
+		       &symbol_lastP);
+#else
+      symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP,
+		     &symbol_lastP);
+#endif
     }
   else
     {
-      /* This symbol already exists, merge the
-		   newly created symbol into the old one.
-		   This is not mandatory. The linker can
-		   handle duplicate symbols correctly. But I
-		   guess that it save a *lot* of space if
-		   the assembly file defines a lot of
-		   symbols. [loic] */
+      /* This symbol already exists, merge the newly created symbol
+	 into the old one.  This is not mandatory. The linker can
+	 handle duplicate symbols correctly. But I guess that it save
+	 a *lot* of space if the assembly file defines a lot of
+	 symbols. [loic] */
 
-      /* The debug entry (def_symbol_in_progress)
-		   is merged into the previous definition. */
+      /* The debug entry (def_symbol_in_progress) is merged into the
+	 previous definition. */
 
       c_symbol_merge (def_symbol_in_progress, symbolP);
       /* FIXME-SOON Should *def_symbol_in_progress be free'd? xoxorich. */
@@ -1208,33 +1404,40 @@ obj_coff_endef ()
       if (SF_GET_FUNCTION (def_symbol_in_progress)
 	  || SF_GET_TAG (def_symbol_in_progress))
 	{
-	  /* For functions, and tags, the symbol *must* be where the debug symbol
-			   appears.  Move the existing symbol to the current place. */
+	  /* For functions, and tags, the symbol *must* be where the
+	     debug symbol appears.  Move the existing symbol to the
+	     current place. */
 	  /* If it already is at the end of the symbol list, do nothing */
 	  if (def_symbol_in_progress != symbol_lastP)
 	    {
 	      symbol_remove (def_symbol_in_progress, &symbol_rootP, &symbol_lastP);
 	      symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP, &symbol_lastP);
-	    }			/* if not already in place */
-	}			/* if function */
-    }				/* normal or mergable */
+	    }
+	}
+    }
 
   if (SF_GET_TAG (def_symbol_in_progress)
       && symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP) == NULL)
     {
       tag_insert (S_GET_NAME (def_symbol_in_progress), def_symbol_in_progress);
-    }				/* If symbol is a {structure,union} tag, associate symbol to its name. */
+    }
 
   if (SF_GET_FUNCTION (def_symbol_in_progress))
     {
       know (sizeof (def_symbol_in_progress) <= sizeof (long));
-      function_lineoff = c_line_new ((long) def_symbol_in_progress, 0, &zero_address_frag);
+#ifdef BFD_ASSEMBLER
+      function_lineoff = def_symbol_in_progress;
+      add_linesym (def_symbol_in_progress);
+#else
+      function_lineoff = c_line_new ((long) def_symbol_in_progress, 0,
+				     &zero_address_frag);
+#endif
       SF_SET_PROCESS (def_symbol_in_progress);
 
       if (symbolP == NULL)
 	{
-	  /* That is, if this is the first
-			   time we've seen the function... */
+	  /* That is, if this is the first time we've seen the
+	     function... */
 	  symbol_table_insert (def_symbol_in_progress);
 	}			/* definition follows debug */
     }				/* Create the line number entry pointing to the function being defined */
@@ -1242,7 +1445,7 @@ obj_coff_endef ()
   def_symbol_in_progress = NULL;
   demand_empty_rest_of_line ();
   return;
-}				/* obj_coff_endef() */
+}
 
 static void
 obj_coff_dim ()
@@ -1291,7 +1494,7 @@ obj_coff_line ()
 
   if (def_symbol_in_progress == NULL)
     {
-      obj_coff_ln ();
+      obj_coff_ln (0);
       return;
     }				/* if it looks like a stabs style line */
 
@@ -1359,7 +1562,8 @@ obj_coff_tag ()
 
   /* Assume that the symbol referred to by .tag is always defined. */
   /* This was a bad assumption.  I've added find_or_make. xoxorich. */
-  SA_SET_SYM_TAGNDX (def_symbol_in_progress, (long) tag_find_or_make (symbol_name));
+  SA_SET_SYM_TAGNDX (def_symbol_in_progress,
+		     (long) tag_find_or_make (symbol_name));
   if (SA_GET_SYM_TAGNDX (def_symbol_in_progress) == 0L)
     {
       as_warn ("tag not found for .tag %s", symbol_name);
@@ -1369,7 +1573,6 @@ obj_coff_tag ()
   *input_line_pointer = name_end;
 
   demand_empty_rest_of_line ();
-  return;
 }				/* obj_coff_tag() */
 
 static void
@@ -1449,7 +1652,7 @@ tag_init ()
 
 static void
 tag_insert (name, symbolP)
-     char *name;
+     CONST char *name;
      symbolS *symbolP;
 {
   register char *error_string;
@@ -1470,10 +1673,8 @@ tag_find_or_make (name)
 
   if ((symbolP = tag_find (name)) == NULL)
     {
-      symbolP = symbol_new (name,
-			    SEG_UNKNOWN,
-			    0,
-			    &zero_address_frag);
+      symbolP = symbol_new (name, undefined_section,
+			    0, &zero_address_frag);
 
       tag_insert (S_GET_NAME (symbolP), symbolP);
       symbol_table_insert (symbolP);
@@ -1502,9 +1703,7 @@ obj_read_begin_hook ()
   know (SYMESZ == AUXESZ);
 #endif
   tag_init ();
-
-  return;
-}				/* obj_read_begin_hook() */
+}
 
 void
 obj_crawl_symbol_chain (headers)
@@ -1749,6 +1948,15 @@ obj_crawl_symbol_chain (headers)
 	}
       else if (S_GET_STORAGE_CLASS (symbolP) == C_FILE)
 	{
+	  if (symbolP->sy_symbol.ost_auxent->x_file.x_n.x_zeroes == 0)
+	  {
+	    symbolP->sy_symbol.ost_auxent->x_file.x_n.x_offset = string_byte_count;	    
+	    string_byte_count +=
+	     strlen(GET_FILENAME_STRING(symbolP)) + 1;
+
+
+	  }
+	    
 	  if (S_GET_VALUE (symbolP))
 	    {
 	      S_SET_VALUE ((symbolS *) S_GET_VALUE (symbolP), symbol_number);
@@ -1757,16 +1965,15 @@ obj_crawl_symbol_chain (headers)
 	}			/* if debug or tag or eos or file */
 
       /* We must put the external symbols apart. The loader
-       does not bomb if we do not. But the references in
-       the endndx field for a .bb symbol are not corrected
-       if an external symbol is removed between .bb and .be.
-       I.e in the following case :
-       [20] .bb endndx = 22
-       [21] foo external
-       [22] .be
-       ld will move the symbol 21 to the end of the list but
-       endndx will still be 22 instead of 21. */
-
+	 does not bomb if we do not. But the references in
+	 the endndx field for a .bb symbol are not corrected
+	 if an external symbol is removed between .bb and .be.
+	 I.e in the following case :
+	 [20] .bb endndx = 22
+	 [21] foo external
+	 [22] .be
+	 ld will move the symbol 21 to the end of the list but
+	 endndx will still be 22 instead of 21. */
 
       if (SF_GET_LOCAL (symbolP))
 	{
@@ -1777,11 +1984,14 @@ obj_crawl_symbol_chain (headers)
 	}
       else if (
 #ifdef TE_I386AIX
-	S_GET_STORAGE_CLASS (symbolP) == C_EXT && !SF_GET_FUNCTION (symbolP)
+	       S_GET_STORAGE_CLASS (symbolP) == C_EXT
+	       && !SF_GET_FUNCTION (symbolP)
 #else /* not TE_I386AIX */
-		!S_IS_DEFINED (symbolP) && !S_IS_DEBUG (symbolP) && !SF_GET_STATICS (symbolP)
+	       !S_IS_DEFINED (symbolP)
+	       && !S_IS_DEBUG (symbolP)
+	       && !SF_GET_STATICS (symbolP)
 #endif /* not TE_I386AIX */
-	)
+	       )
 	{
 	  /* if external, Remove from the list */
 	  symbolS *hold = symbol_previous (symbolP);
@@ -1831,27 +2041,27 @@ obj_crawl_symbol_chain (headers)
       symbol_number += 1 + S_GET_NUMBER_AUXILIARY (tmp);
     }				/* append the entire extern chain */
 
-  /* When a tag reference preceeds the tag definition,
-     the definition will not have a number at the time
-     we process the reference during the first
-     traversal.  Thus, a second traversal. */
+  /* When a tag reference preceeds the tag definition, the definition
+     will not have a number at the time we process the reference
+     during the first traversal.  Thus, a second traversal. */
 
   for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
     {
       if (SF_GET_TAGGED (symbolP))
 	{
 	  SA_SET_SYM_TAGNDX (symbolP, ((symbolS *) SA_GET_SYM_TAGNDX (symbolP))->sy_number);
-	}			/* If the symbol has a tagndx entry, resolve it */
-    }				/* second traversal */
+	}
+    }
 
   know (symbol_externP == NULL);
   know (symbol_extern_lastP == NULL);
 
-  /* FIXME-SOMEDAY I'm counting line no's here so we know what to put in the section
-     headers, and I'm resolving the addresses since I'm not sure how to
-     do it later. I am NOT resolving the linno's representing functions.
-     Their symbols need a fileptr pointing to this linno when emitted.
-     Thus, I resolve them on emit.  xoxorich. */
+  /* FIXME-SOMEDAY I'm counting line no's here so we know what to put
+     in the section headers, and I'm resolving the addresses since I'm
+     not sure how to do it later. I am NOT resolving the linno's
+     representing functions.  Their symbols need a fileptr pointing to
+     this linno when emitted.  Thus, I resolve them on emit.
+     xoxorich. */
 
   for (lineP = lineno_rootP; lineP; lineP = lineP->next)
     {
@@ -1869,7 +2079,7 @@ obj_crawl_symbol_chain (headers)
   H_SET_SYMBOL_TABLE_SIZE (headers, symbol_number);
 
   return;
-}				/* obj_crawl_symbol_chain() */
+}
 
 /*
  * Find strings by crawling along symbol table chain.
@@ -1891,14 +2101,23 @@ obj_emit_strings (where)
 
   for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
     {
+      if (S_GET_STORAGE_CLASS(symbolP) == C_FILE) 
+      {
+	/* May need special treatment for this auxent */
+	if (symbolP->sy_symbol.ost_auxent->x_file.x_n.x_zeroes == 0)
+	{
+	  char *p = GET_FILENAME_STRING(symbolP);
+	  append 
+	   (where,p, strlen(p)+1);
+	}
+      }
       if (SF_GET_STRING (symbolP))
 	{
-	  append (where, S_GET_NAME (symbolP), (unsigned long) (strlen (S_GET_NAME (symbolP)) + 1));
+	  append (where, S_GET_NAME (symbolP),
+		  (unsigned long) (strlen (S_GET_NAME (symbolP)) + 1));
 	}			/* if it has a string */
     }				/* walk the symbol chain */
-
-  return;
-}				/* obj_emit_strings() */
+}
 
 void
 obj_pre_write_hook (headers)
@@ -1908,9 +2127,8 @@ obj_pre_write_hook (headers)
   register int data_relocation_number = 0;
   register fixS *fixP;
 
-  /* FIXME-SOMEDAY this should be done at
-	   fixup_segment time but I'm going to wait until I
-	   do multiple segments.  xoxorich. */
+  /* FIXME-SOMEDAY this should be done at fixup_segment time but I'm
+     going to wait until I do multiple segments.  xoxorich. */
   /* Count the number of relocation entries for text and data */
   for (fixP = text_fix_root; fixP; fixP = fixP->fx_next)
     {
@@ -2056,9 +2274,7 @@ obj_pre_write_hook (headers)
 		    0,		/* No relocation information */
 		    0,		/* No line number information */
 		    section_alignment[(int) SEG_BSS]);
-
-  return;
-}				/* obj_pre_write_hook() */
+}
 
 /* This is a copy from aout.  All I do is neglect to actually build the symbol. */
 
@@ -2143,9 +2359,182 @@ obj_coff_stab (what)
     }				/* on error */
 }				/* obj_coff_stab() */
 
+#ifdef BFD_ASSEMBLER
+static
+unsigned long
+align (val, exp)
+{
+  int n = (1 << exp) - 1;
+  printf ("align (%x, %x)\n", val, exp);
+  val = (val + n) & ~n;
+  return val;
+}
+
+void
+coff_check_file_symbols (symp, punt)
+     symbolS *symp;
+     int *punt;
+{
+  static symbolS *last_functionP, *last_tagP;
+  static stack *block_stack;
+
+  if (!block_stack)
+    block_stack = stack_init (512, sizeof (symbolS*));
+
+#if 1
+  if (!S_IS_DEFINED (symp) && S_GET_STORAGE_CLASS (symp) != C_STAT)
+    S_SET_STORAGE_CLASS (symp, C_EXT);
+#endif
+
+  if (!SF_GET_DEBUG (symp))
+    {
+      symbolS *real;
+      if (!SF_GET_LOCAL (symp)
+	  && (real = symbol_find_base (S_GET_NAME (symp), DO_NOT_STRIP))
+	  && real != symp)
+	{
+	  c_symbol_merge (symp, real);
+	  *punt = 1;
+	}
+      if (!S_IS_DEFINED (symp) && !SF_GET_LOCAL (symp))
+	{
+	  assert (S_GET_VALUE (symp) == 0);
+	  S_SET_EXTERNAL (symp);
+	}
+      else if (S_GET_STORAGE_CLASS (symp) == C_NULL)
+	{
+	  if (S_GET_SEGMENT (symp) == text_section)
+	    S_SET_STORAGE_CLASS (symp, C_LABEL);
+	  else
+	    S_SET_STORAGE_CLASS (symp, C_STAT);
+	}
+      if (SF_GET_PROCESS (symp))
+	{
+	  if (S_GET_STORAGE_CLASS (symp) == C_BLOCK)
+	    {
+	      if (!strcmp (S_GET_NAME (symp), ".bb"))
+		stack_push (block_stack, (char *) &symp);
+	      else
+		{
+		  symbolS *begin;
+		  begin = *(symbolS **) stack_pop (block_stack);
+		  if (begin == 0)
+		    as_warn ("mismatched .eb");
+		  else
+		    SA_SET_SYM_ENDNDX (begin, begin);
+		}
+	    }
+	  if (last_functionP == 0 && SF_GET_FUNCTION (symp))
+	    {
+	      union internal_auxent *auxp;
+	      last_functionP = symp;
+	      if (S_GET_NUMBER_AUXILIARY (symp) < 1)
+		S_SET_NUMBER_AUXILIARY (symp, 1);
+	      auxp = &coffsymbol (symp->bsym)->native[1].u.auxent;
+	      memset (auxp->x_sym.x_fcnary.x_ary.x_dimen, 0,
+		      sizeof (auxp->x_sym.x_fcnary.x_ary.x_dimen));
+	    }
+	  if (S_GET_STORAGE_CLASS (symp) == C_EFCN)
+	    {
+	      if (last_functionP == 0)
+		as_fatal ("C_EFCN symbol out of scope");
+	      SA_SET_SYM_FSIZE (last_functionP,
+				(long) (S_GET_VALUE (symp)
+					- S_GET_VALUE (last_functionP)));
+	      SA_SET_SYM_ENDNDX (last_functionP, symp);
+	      last_functionP = 0;
+	    }
+	}
+      else if (SF_GET_TAG (symp))
+	last_tagP = symp;
+      else if (S_GET_STORAGE_CLASS (symp) == C_EOS)
+	SA_SET_SYM_ENDNDX (last_tagP, symp);
+      else if (S_GET_STORAGE_CLASS (symp) == C_FILE)
+	{
+	  if (S_GET_VALUE (symp))
+	    {
+	      S_SET_VALUE ((symbolS *) S_GET_VALUE (symp), 0xdeadbeef);
+	      S_SET_VALUE (symp, 0);
+	    }
+	}
+      if (SF_GET_LOCAL (symp))
+	*punt = 1;
+      /* more ... */
+    }
+  if (coffsymbol (symp->bsym)->lineno)
+    {
+      int i, n;
+      struct line_no *lptr;
+      alent *l;
+
+      lptr = (struct line_no *) coffsymbol (symp->bsym)->lineno;
+      for (i = 0; lptr; lptr = lptr->next)
+	i++;
+      n = i + 1;
+      lptr = (struct line_no *) coffsymbol (symp->bsym)->lineno;
+      l = (alent *) bfd_alloc_by_size_t (stdoutput, n * sizeof (alent));
+      coffsymbol (symp->bsym)->lineno = l;
+      for (i = n - 1; i > 0; i--)
+	{
+	  if (lptr->frag)
+	    lptr->l.u.offset += lptr->frag->fr_address;
+	  l[i] = lptr->l;
+	  lptr = lptr->next;
+	}
+    }
+}
+
+void 
+DEFUN_VOID(obj_coff_section)
+{
+  /* Strip out the section name */
+  char *section_name ;
+  char *section_name_end;
+  char c;
+
+  unsigned int len;
+  unsigned int exp;
+
+  section_name =  input_line_pointer;
+  c =   get_symbol_end();
+  section_name_end =  input_line_pointer;
+
+  len = section_name_end - section_name ;
+  input_line_pointer++;
+  SKIP_WHITESPACE();
+  if (c == ',')
+    exp = get_absolute_expression();
+  else if (*input_line_pointer == ',')
+    {
+      input_line_pointer++;
+      exp = get_absolute_expression();
+    }
+  else
+    {
+      exp = 0;
+    }
+
+  printf ("change_to_section(`%s',%d,%x)\n", section_name, len,exp);
+  *section_name_end = c;
+}
+
+void
+coff_frob_file ()
+{
+  if (symbol_rootP == NULL
+      || S_GET_STORAGE_CLASS (symbol_rootP) != C_FILE)
+    {
+      assert (previous_file_symbol == 0);
+      c_dot_file_symbol ("fake");
+    }
+  if (current_lineno_sym)
+    add_linesym ((symbolS *) 0);
+}
+#endif /* BFD_ASSEMBLER */
+
 #ifdef DEBUG
 /* for debugging */
-char *
+CONST char *
 s_get_name (s)
      symbolS *s;
 {
@@ -2159,6 +2548,14 @@ symbol_dump ()
 
   for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
     {
+#ifdef BFD_ASSEMBLER
+      printf("0x%lx: \"%s\" type = %ld, class = %d, segment = %d\n",
+	     (unsigned long) symbolP,
+	     S_GET_NAME(symbolP),
+	     (long) S_GET_DATA_TYPE(symbolP),
+	     S_GET_STORAGE_CLASS(symbolP),
+	     (int) S_GET_SEGMENT(symbolP));
+#else
       printf ("%3ld: 0x%lx \"%s\" type = %ld, class = %d, segment = %d\n",
 	      symbolP->sy_number,
 	      (unsigned long) symbolP,
@@ -2166,19 +2563,10 @@ symbol_dump ()
 	      (long) S_GET_DATA_TYPE (symbolP),
 	      S_GET_STORAGE_CLASS (symbolP),
 	      (int) S_GET_SEGMENT (symbolP));
-    }				/* traverse symbols */
-
-  return;
-}				/* symbol_dump() */
+#endif
+    }
+}
 
 #endif /* DEBUG */
-
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of obj-coff.c */

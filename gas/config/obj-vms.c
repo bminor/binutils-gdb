@@ -565,7 +565,8 @@ obj_crawl_symbol_chain (headers)
       symbolPP = &symbol_rootP;	/* -> last symbol chain link. */
       while ((symbolP = *symbolPP) != NULL)
 	{
-	  S_GET_VALUE (symbolP) += symbolP->sy_frag->fr_address;
+	  S_SET_VALUE (symbolP,
+		       S_GET_VALUE (symbolP) + symbolP->sy_frag->fr_address);
 
 	  /* OK, here is how we decide which symbols go out into the
 	     brave new symtab.  Symbols that do are:
@@ -4528,7 +4529,8 @@ VMS_Check_For_Main ()
 			       *	inserted.
 			       */
 			      if (S_GET_VALUE (symbolP) >= 2)
-				S_GET_VALUE (symbolP) += 6;
+				S_SET_VALUE (symbolP,
+					     S_GET_VALUE (symbolP) + 6);
 			    }
 			}
 		      /*
@@ -4542,7 +4544,7 @@ VMS_Check_For_Main ()
 		      S_SET_TYPE (symbolP, N_UNDF);
 		      S_GET_OTHER (symbolP) = 0;
 		      S_GET_DESC (symbolP) = 0;
-		      S_GET_VALUE (symbolP) = 0;
+		      S_SET_VALUE (symbolP, 0);
 		      symbolP->sy_name_offset = 0;
 		      symbolP->sy_number = 0;
 		      symbolP->sy_frag = New_Frag;

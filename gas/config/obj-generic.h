@@ -58,9 +58,6 @@ typedef void *object_headers;
 /* symbols have segments */
 #define S_GET_SEGMENT(s)	(SEG_UNKNOWN)
 #define S_SET_SEGMENT(s,v)	;
-/* symbols have a value */
-#define S_GET_VALUE(s)		(0)
-#define S_SET_VALUE(s,v)	;
 /* symbols may be external */
 #define S_IS_EXTERNAL(s)	(0)
 #define S_SET_EXTERNAL(s)	;

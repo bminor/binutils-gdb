@@ -641,6 +641,7 @@ DEFUN (symbol_to_chars, (abfd, where, symbolP),
 {
   unsigned int numaux = symbolP->sy_symbol.ost_entry.n_numaux;
   unsigned int i;
+  valueT val;
 
   /* Turn any symbols with register attributes into abs symbols */
   if (S_GET_SEGMENT (symbolP) == SEG_REGISTER)
@@ -649,9 +650,12 @@ DEFUN (symbol_to_chars, (abfd, where, symbolP),
     }
   /* At the same time, relocate all symbols to their output value */
 
-  S_SET_VALUE (symbolP,
-	       segment_info[S_GET_SEGMENT (symbolP)].scnhdr.s_paddr
-	       + S_GET_VALUE (symbolP));
+  val = (segment_info[S_GET_SEGMENT (symbolP)].scnhdr.s_paddr
+	 + S_GET_VALUE (symbolP));
+
+  S_SET_VALUE (symbolP, val);
+
+  symbolP->sy_symbol.ost_entry.n_value = val;
 
   where += bfd_coff_swap_sym_out (abfd, &symbolP->sy_symbol.ost_entry,
 				  where);

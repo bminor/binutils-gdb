@@ -217,7 +217,13 @@ DEFUN (do_relocs_for, (idx),
 	      if ((s->flags & BSF_UNDEFINED) == 0)
 		{
 		  to->section = s->section;
+
+		  /* We can refer directly to the value field here,
+		     rather than using S_GET_VALUE, because this is
+		     only called after do_symbols, which sets up the
+		     value field.  */
 		  to->addend += s->value;
+
 		  to->sym_ptr_ptr = 0;
 		  if (to->howto->pcrel_offset)
 		    {
@@ -276,7 +282,7 @@ DEFUN (do_symbols, (abfd),
 	{
 	  ptr->sy_symbol.sy.section =
 	    (asection *) (segment_info[ptr->sy_symbol.seg].user_stuff);
-	  ptr->sy_symbol.sy.value += ptr->sy_frag->fr_address;
+	  S_SET_VALUE (ptr, S_GET_VALUE (ptr) + ptr->sy_frag->fr_address);
 	  if (ptr->sy_symbol.sy.flags == 0)
 	    {
 	      ptr->sy_symbol.sy.flags = BSF_LOCAL;
@@ -298,6 +304,7 @@ DEFUN (do_symbols, (abfd),
 	      abort ();
 	    }
 	}
+      ptr->sy_symbol.sy.value = S_GET_VALUE (ptr);
       count++;
     }
   symbol_ptr_vec = (asymbol **) malloc ((count + 1) * sizeof (asymbol *));
@@ -337,14 +344,6 @@ DEFUN_VOID (bfd_as_write_hook)
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     do_relocs_for (i);
 
-}
-
-
-
-S_GET_VALUE (x)
-     symbolS *x;
-{
-  return x->sy_symbol.sy.value;
 }
 
 S_SET_SEGMENT (x, y)
@@ -397,13 +396,6 @@ S_SET_NAME (x, y)
      char *y;
 {
   x->sy_symbol.sy.name = y;
-}
-
-S_SET_VALUE (s, v)
-     symbolS *s;
-     long v;
-{
-  s->sy_symbol.sy.value = v;
 }
 
 S_GET_OTHER (x)

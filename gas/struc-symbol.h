@@ -46,6 +46,9 @@ struct symbol
   asymbol *bsym;
 #endif
 
+  /* The value of the symbol.  */
+  expressionS sy_value;
+
   struct symbol *sy_next;	/* forward chain, or NULL */
 #ifdef SYMBOLS_NEED_BACKPOINTERS
   struct symbol *sy_previous;	/* backward chain, or NULL */

@@ -1,3 +1,31 @@
+Wed Jul 14 15:09:32 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Changes to keep a full expression as the value of a symbol, not
+	just a longword:
+	* struc-symbol.h: New field sy_value.
+	* as.h: Include expr.h before struc-symbol.h.
+	* expr.h: Use struct symbol rather than symbolS.
+	* symbols.c (S_GET_VALUE, S_SET_VALUE): Rewrote to retrieve value
+	of sy_value field; compile unconditionally, not just if
+	BFD_ASSEMBLER.
+	* symbols.h: Compile S_{SG}ET_VALUE prototypes unconditionally.
+	* write.c (write_object_file): Set BFD symbol value to gas symbol
+	value.
+	* config/obj-aout.h, config/obj-bout.h, config/obj-coff.h,
+	config/obj-coffbfd.h, config/obj-generic.h, config/obj-vms.h
+	(S_GET_VALUE, S_SET_VALUE): Removed macro definitions.
+	* config/obj-ieee.c (S_GET_VALUE, S_SET_VALUE): Removed.
+	* config/obj-coff.h, obj-coffbfd.h: Rewrote several macros to use
+	S_GET_VALUE rather than ost_entry.n_value.
+	* config/obj-aout.c (obj_symbol_to_chars), config/obj-bout.c
+	(obj_symbol_to_chars), config/obj-coff.c (obj_symbol_to_chars),
+	config/obj-coffbfd.c (symbol_to_chars): Get value to write out
+	using S_GET_VALUE--don't assume it is already set.
+	* config/obj-ieee.c (do_symbols): Set BFD symbol value to gas
+	symbol value.
+	* config/obj-vms.c (various): Don't assign directly to
+	S_GET_VALUE; use S_SET_VALUE instead.
+
 Wed Jul 14 09:35:23 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* configure.in: Recognize h8300h.

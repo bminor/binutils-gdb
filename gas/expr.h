@@ -44,14 +44,12 @@
 
 typedef struct
 {
-  symbolS *X_add_symbol;	/* "foo", above */
-  symbolS *X_subtract_symbol;	/* "bar", above */
-  offsetT X_add_number;		/* 42, above -- must be signed */
+  struct symbol *X_add_symbol;		/* "foo", above */
+  struct symbol *X_subtract_symbol;	/* "bar", above */
+  offsetT X_add_number;			/* 42, above -- must be signed */
   /* What segment (expr type)? */
   segT X_seg;
-}
-
-expressionS;
+} expressionS;
 
 /* "result" should be type (expressionS *). */
 #define expression(result) expr(0,result)

@@ -57,6 +57,10 @@ void fb_label_instance_inc PARAMS ((long label));
 char *fb_label_name PARAMS ((long n, long augend));
 #endif /* LOCAL_LABELS_FB */
 
+/* Get and set the values of symbols.  These used to be macros.  */
+extern valueT S_GET_VALUE PARAMS ((symbolS *));
+extern void S_SET_VALUE PARAMS ((symbolS *, valueT));
+
 #ifdef BFD_ASSEMBLER
 extern int S_IS_EXTERNAL PARAMS ((symbolS *));
 extern int S_IS_COMMON PARAMS ((symbolS *));
@@ -65,10 +69,8 @@ extern int S_IS_DEBUG PARAMS ((symbolS *));
 extern int S_IS_LOCAL PARAMS ((symbolS *));
 extern int S_IS_EXTERN PARAMS ((symbolS *));
 extern int S_IS_STABD PARAMS ((symbolS *));
-extern valueT S_GET_VALUE PARAMS ((symbolS *));
 extern CONST char *S_GET_NAME PARAMS ((symbolS *));
 extern segT S_GET_SEGMENT PARAMS ((symbolS *));
-extern void S_SET_VALUE PARAMS ((symbolS *, valueT));
 extern void S_SET_SEGMENT PARAMS ((symbolS *, segT));
 extern void S_SET_EXTERNAL PARAMS ((symbolS *));
 extern void S_SET_NAME PARAMS ((symbolS *, char *));
