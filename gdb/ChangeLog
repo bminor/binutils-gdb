@@ -2,6 +2,12 @@ Fri Mar 13 15:51:11 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: pass MAKEINFO down on info.
 
+Fri Mar 13 12:56:36 1992  John Gilmore  (gnu at cygnus.com)
+
+	* mipsread.c (mipscoff_symfile_read):  Eliminate a lot of
+	useless code, including an lseek to an uninitialized variable.
+	Reported by Jim Williams <jimbo@wrs.com>.
+
 Thu Mar 12 11:56:46 1992  Per Bothner  (bothner@cygnus.com)
 
 	Merged in patches from metin@ibmpa.awdpa.ibm.com (Metin G.

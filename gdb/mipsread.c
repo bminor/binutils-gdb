@@ -287,22 +287,12 @@ mipscoff_symfile_read(sf, addr, mainline)
      CORE_ADDR addr;
      int mainline;
 {
-  struct coff_symfile_info *info = (struct coff_symfile_info *)sf->sym_private;
   bfd *abfd = sf->objfile->obfd;
-  char *name = bfd_get_filename (abfd);
   int desc;
-  register int val;
-  int symtab_offset;
-  int stringtab_offset;
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
    desc = fileno ((FILE *)(abfd->iostream));	/* Raw file descriptor */
 /* End of warning */
-
-  /* Position to read the symbol table.  */
-  val = lseek (desc, (long)symtab_offset, 0);
-  if (val < 0)
-    perror_with_name (name);
 
   init_minimal_symbol_collection ();
   make_cleanup (discard_minimal_symbols, 0);
@@ -393,8 +383,7 @@ read_the_mips_symtab(abfd, fsym, end_of_text_segp)
 	/* Header for executable/object file we read symbols from */
 	struct coff_exec filhdr;
 
-	/* We get here with DESC pointing to the symtab header. But we need
-	 * other info from the initial headers */
+	/* We need some info from the initial headers */
 	lseek(fsym, 0L, 0);
 	myread(fsym, (char *)&filhdr, sizeof filhdr);
 
@@ -455,11 +444,12 @@ fixup_symtab (hdr, data, f_ptr, abfd)
 	int f_ptr;
 	bfd *abfd;
 {
-	int             f_idx, s_idx;
+	int             f_idx, s_idx, i;
 	FDR            *fh;
 	SYMR	       *sh;
 	PDR	       *pr;
 	EXTR	       *esh;
+	struct rfd_ext *rbase;
 
 	/* This function depends on the external and internal forms
 	   of the MIPS symbol table taking identical space.  Check this
@@ -474,6 +464,8 @@ fixup_symtab (hdr, data, f_ptr, abfd)
 	static check_sym2[1 + sizeof (SYMR) - sizeof (struct sym_ext)] = {0};
 	static check_ext1[1 + sizeof (struct ext_ext) - sizeof (EXTR)] = {0};
 	static check_ext2[1 + sizeof (EXTR) - sizeof (struct ext_ext)] = {0};
+	static check_rfd1[1 + sizeof (struct rfd_ext) - sizeof (RFDT)] = {0};
+	static check_rfd2[1 + sizeof (RFDT) - sizeof (struct rfd_ext)] = {0};
 
 	/* Swap in the header record.  */
 	ecoff_swap_hdr_in (abfd, hdr, hdr);
@@ -501,6 +493,11 @@ fixup_symtab (hdr, data, f_ptr, abfd)
         FIX(cbExtOffset);
 #undef	FIX
 
+	/* Fix all the RFD's.  */
+	rbase = (struct rfd_ext *)(hdr->cbRfdOffset);
+	for (i = 0; i < hdr->crfd; i++) {
+	  ecoff_swap_rfd_in (abfd, rbase+i, (pRFDT) rbase+i);
+	}
 
 	/* Fix all string pointers inside the symtab, and
 	   the FDR records.  Also fix other miscellany.  */
@@ -1966,7 +1963,6 @@ parse_partial_symbols(end_of_text_seg, objfile)
 	    else {
 		register struct partial_symbol *psym;
 		for (cur_sdx = 0; cur_sdx < fh->csym; ) {
-		    register struct partial_symbol *p;
 		    char *name;
 		    int class;
 		    sh = cur_sdx + (SYMR *) fh->isymBase;
@@ -2028,7 +2024,9 @@ parse_partial_symbols(end_of_text_seg, objfile)
 		      case stEnd:			/* Ends of files */
 			goto skip;
 		      default:
-			complain (&unknown_sym_complaint, SYMBOL_NAME(p));
+			/* Both complaints are valid:  one gives symbol name,
+			   the other the offending symbol type.  */
+			complain (&unknown_sym_complaint, (char *)sh->iss);
 			complain (&unknown_st_complaint, sh->st);
 			cur_sdx++;
 			continue;
