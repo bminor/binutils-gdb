@@ -1,11 +1,11 @@
 Tue Jun  9 14:10:46 1998  Keith Seitz  <keiths@cygnus.com>
 
-	* symfile.c (symbol_file_add): Always call the
-	pre/post_add_symbol_hooks.
-
 	* gdbtk.c (gdb_get_vars_command): Return static variables and
 	variables stored in registers.
 
+	* main.c (main): Call pre/post_add_symbol_hook's when loading
+	executables and symbol files.
+	
 Fri Jun  5 00:16:22 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* gdbtk.c (gdbtk_init): Change all references to
