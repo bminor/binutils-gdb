@@ -911,6 +911,10 @@ simulator_command (args, from_tty)
     }
 
   sim_do_command (gdbsim_desc, args);
+
+  /* Invalidate the register cache, in case the simulator command does
+     something funny. */
+  registers_changed (); 
 }
 
 /* Define the target subroutine names */
