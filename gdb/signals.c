@@ -24,6 +24,7 @@
 #include "target.h"
 #include <signal.h>
 
+#ifndef GDBSERVER
 /* This table must match in order and size the signals in enum target_signal
    in target.h.  */
 /* *INDENT-OFF* */
@@ -230,13 +231,13 @@ target_signal_from_name (char *name)
 
   /* This ugly cast brought to you by the native VAX compiler.  */
   for (sig = TARGET_SIGNAL_HUP;
-       signals[sig].name != NULL;
-       sig = (enum target_signal) ((int) sig + 1))
+       signals[sig].name != NULL; sig = (enum target_signal) ((int) sig + 1))
     if (STREQ (name, signals[sig].name))
       return sig;
   return TARGET_SIGNAL_UNKNOWN;
 }
-
+#endif /* GDBSERVER */
+
 /* The following functions are to help certain targets deal
    with the signal/waitstatus stuff.  They could just as well be in
    a file called native-utils.c or unixwaitstatus-utils.c or whatever.  */
@@ -480,7 +481,8 @@ target_signal_from_host (int hostsig)
 	return (enum target_signal)
 	  (hostsig - 64 + (int) TARGET_SIGNAL_REALTIME_64);
       else
-	error ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
+	error
+	  ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
     }
 #endif
 
@@ -494,7 +496,8 @@ target_signal_from_host (int hostsig)
       else if (hostsig == 64)
 	return TARGET_SIGNAL_REALTIME_64;
       else
-	error ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
+	error
+	  ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
     }
 #endif
   return TARGET_SIGNAL_UNKNOWN;
@@ -506,8 +509,7 @@ target_signal_from_host (int hostsig)
    accordingly. */
 
 static int
-do_target_signal_to_host (enum target_signal oursig,
-			  int *oursig_ok)
+do_target_signal_to_host (enum target_signal oursig, int *oursig_ok)
 {
   *oursig_ok = 1;
   switch (oursig)
@@ -737,9 +739,8 @@ do_target_signal_to_host (enum target_signal oursig,
 	  && oursig <= TARGET_SIGNAL_REALTIME_63)
 	{
 	  /* This block of signals is continuous, and
-             TARGET_SIGNAL_REALTIME_33 is 33 by definition.  */
-	  int retsig =
-	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_33 + 33;
+	     TARGET_SIGNAL_REALTIME_33 is 33 by definition.  */
+	  int retsig = (int) oursig - (int) TARGET_SIGNAL_REALTIME_33 + 33;
 	  if (retsig >= REALTIME_LO && retsig < REALTIME_HI)
 	    return retsig;
 	}
@@ -747,7 +748,7 @@ do_target_signal_to_host (enum target_signal oursig,
       else if (oursig == TARGET_SIGNAL_REALTIME_32)
 	{
 	  /* TARGET_SIGNAL_REALTIME_32 isn't contiguous with
-             TARGET_SIGNAL_REALTIME_33.  It is 32 by definition.  */
+	     TARGET_SIGNAL_REALTIME_33.  It is 32 by definition.  */
 	  return 32;
 	}
 #endif
@@ -756,13 +757,12 @@ do_target_signal_to_host (enum target_signal oursig,
 	  && oursig <= TARGET_SIGNAL_REALTIME_127)
 	{
 	  /* This block of signals is continuous, and
-             TARGET_SIGNAL_REALTIME_64 is 64 by definition.  */
-	  int retsig =
-	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_64 + 64;
+	     TARGET_SIGNAL_REALTIME_64 is 64 by definition.  */
+	  int retsig = (int) oursig - (int) TARGET_SIGNAL_REALTIME_64 + 64;
 	  if (retsig >= REALTIME_LO && retsig < REALTIME_HI)
 	    return retsig;
 	}
-      
+
 #endif
 #endif
 
@@ -771,9 +771,8 @@ do_target_signal_to_host (enum target_signal oursig,
 	  && oursig <= TARGET_SIGNAL_REALTIME_63)
 	{
 	  /* This block of signals is continuous, and
-             TARGET_SIGNAL_REALTIME_33 is 33 by definition.  */
-	  int retsig =
-	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_33 + 33;
+	     TARGET_SIGNAL_REALTIME_33 is 33 by definition.  */
+	  int retsig = (int) oursig - (int) TARGET_SIGNAL_REALTIME_33 + 33;
 	  if (retsig >= SIGRTMIN && retsig <= SIGRTMAX)
 	    return retsig;
 	}
@@ -785,6 +784,7 @@ do_target_signal_to_host (enum target_signal oursig,
     }
 }
 
+#ifndef GDBSERVER
 int
 target_signal_to_host_p (enum target_signal oursig)
 {
@@ -792,6 +792,7 @@ target_signal_to_host_p (enum target_signal oursig)
   do_target_signal_to_host (oursig, &oursig_ok);
   return oursig_ok;
 }
+#endif /* GDBSERVER */
 
 int
 target_signal_to_host (enum target_signal oursig)
@@ -802,14 +803,21 @@ target_signal_to_host (enum target_signal oursig)
     {
       /* The user might be trying to do "signal SIGSAK" where this system
          doesn't have SIGSAK.  */
+#ifdef GDBSERVER
+      fprintf (stderr, "Target signal %d does not exist on this system.\n",
+	       oursig);
+#else
       warning ("Signal %s does not exist on this system.\n",
 	       target_signal_to_name (oursig));
+#endif
+
       return 0;
     }
   else
     return targ_signo;
 }
 
+#ifndef GDBSERVER
 /* In some circumstances we allow a command to specify a numeric
    signal.  The idea is to keep these circumstances limited so that
    users (and scripts) develop portable habits.  For comparison,
@@ -833,3 +841,4 @@ _initialize_signals (void)
   if (!STREQ (signals[TARGET_SIGNAL_LAST].string, "TARGET_SIGNAL_MAGIC"))
     internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
+#endif /* GDBSERVER */

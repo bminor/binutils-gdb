@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "server.h"
+#include "target.h"
 
 int cont_thread;
 int general_thread;
@@ -60,7 +61,6 @@ main (int argc, char *argv[])
     error ("Usage: gdbserver tty prog [args ...]");
 
   initialize_low ();
-
   /* Wait till we are at first instruction in program.  */
   signal = start_inferior (&argv[2], &status);
 
@@ -130,12 +130,14 @@ main (int argc, char *argv[])
 	      break;
 	    case 'C':
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
+	      sig = target_signal_to_host (sig);
 	      myresume (0, sig);
 	      signal = mywait (&status);
 	      prepare_resume_reply (own_buf, status, signal);
 	      break;
 	    case 'S':
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
+	      sig = target_signal_to_host (sig);
 	      myresume (1, sig);
 	      signal = mywait (&status);
 	      prepare_resume_reply (own_buf, status, signal);
@@ -210,8 +212,7 @@ main (int argc, char *argv[])
 	  putpkt (own_buf);
 
 	  if (status == 'W')
-	    fprintf (stderr,
-		     "\nChild exited with status %d\n", sig);
+	    fprintf (stderr, "\nChild exited with status %d\n", sig);
 	  if (status == 'X')
 	    fprintf (stderr, "\nChild terminated with signal = 0x%x\n", sig);
 	  if (status == 'W' || status == 'X')
@@ -250,7 +251,8 @@ main (int argc, char *argv[])
 	}
       else
 	{
-	  fprintf (stderr, "Remote side has terminated connection.  GDBserver will reopen the connection.\n");
+	  fprintf (stderr,
+		   "Remote side has terminated connection.  GDBserver will reopen the connection.\n");
 
 	  remote_close ();
 	}

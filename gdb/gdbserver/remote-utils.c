@@ -34,6 +34,7 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <target.h>
 
 int remote_debug = 0;
 struct ui_file *gdb_stdlog;
@@ -141,7 +142,8 @@ remote_open (char *name)
 
       /* Enable TCP keep alive process. */
       tmp = 1;
-      setsockopt (tmp_desc, SOL_SOCKET, SO_KEEPALIVE, (char *) &tmp, sizeof (tmp));
+      setsockopt (tmp_desc, SOL_SOCKET, SO_KEEPALIVE, (char *) &tmp,
+		  sizeof (tmp));
 
       /* Tell TCP not to delay small packets.  This greatly speeds up
          interactive response. */
@@ -278,7 +280,7 @@ input_interrupt (void)
     {
       int cc;
       char c;
-      
+
       cc = read (remote_desc, &c, 1);
 
       if (cc != 1 || c != '\003')
@@ -286,7 +288,7 @@ input_interrupt (void)
 	  fprintf (stderr, "input_interrupt, cc = %d c = %d\n", cc, c);
 	  return;
 	}
-      
+
       kill (inferior_pid, SIGINT);
     }
 }
@@ -463,10 +465,7 @@ prepare_resume_reply (char *buf, char status, unsigned char signo)
 
   *buf++ = status;
 
-  /* FIXME!  Should be converting this signal number (numbered
-     according to the signal numbering of the system we are running on)
-     to the signal numbers used by the gdb protocol (see enum target_signal
-     in gdb/target.h).  */
+  signo = target_signal_from_host (signo);
   nib = ((signo & 0xf0) >> 4);
   *buf++ = tohex (nib);
   nib = signo & 0x0f;
@@ -475,12 +474,11 @@ prepare_resume_reply (char *buf, char status, unsigned char signo)
   if (status == 'T')
     {
 #ifdef GDBSERVER_RESUME_REGS
-      static int gdbserver_resume_regs[] = GDBSERVER_RESUME_REGS ;
+      static int gdbserver_resume_regs[] = GDBSERVER_RESUME_REGS;
       int i;
-      for (i = 0; 
-           i < sizeof (gdbserver_resume_regs) 
-	        / sizeof (gdbserver_resume_regs[0]);
-	   i++)
+      for (i = 0;
+	   i < sizeof (gdbserver_resume_regs)
+	   / sizeof (gdbserver_resume_regs[0]); i++)
 	{
 	  int regnum = gdbserver_resume_regs[i];
 	  buf = outreg (regnum, buf);

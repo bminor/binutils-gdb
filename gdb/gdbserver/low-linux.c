@@ -49,8 +49,9 @@ char *registers = my_registers;
 
 extern int errno;
 
+#ifndef S390_GNULINUX_TARGET
 static void initialize_arch (void);
-
+#endif
 /* Start an inferior process and returns its pid.
    ALLARGS is a vector of program-name and args. */
 
@@ -113,13 +114,15 @@ mywait (char *status)
 
   if (WIFEXITED (w))
     {
-      fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
+      fprintf (stderr, "\nChild exited with retcode = %x \n",
+	       WEXITSTATUS (w));
       *status = 'W';
       return ((unsigned char) WEXITSTATUS (w));
     }
   else if (!WIFSTOPPED (w))
     {
-      fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
+      fprintf (stderr, "\nChild terminated with signal = %x \n",
+	       WTERMSIG (w));
       *status = 'X';
       return ((unsigned char) WTERMSIG (w));
     }
@@ -178,17 +181,17 @@ int i386_register_byte[MAX_NUM_REGS];
 /* i386_register_raw_size[i] is the number of bytes of storage in
    GDB's register array occupied by register i.  */
 int i386_register_raw_size[MAX_NUM_REGS] = {
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
+  4, 4, 4, 4,
+  4, 4, 4, 4,
+  4, 4, 4, 4,
+  4, 4, 4, 4,
   10, 10, 10, 10,
   10, 10, 10, 10,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
+  4, 4, 4, 4,
+  4, 4, 4, 4,
   16, 16, 16, 16,
   16, 16, 16, 16,
-   4
+  4
 };
 
 static void
@@ -212,8 +215,7 @@ initialize_arch (void)
 
 /* Mapping between the general-purpose registers in `struct user'
    format and GDB's register array layout.  */
-static int regmap[] = 
-{
+static int regmap[] = {
   EAX, ECX, EDX, EBX,
   UESP, EBP, ESI, EDI,
   EIP, EFL, CS, SS,
@@ -236,8 +238,7 @@ initialize_arch (void)
 }
 
 /* This table must line up with REGISTER_NAMES in tm-m68k.h */
-static int regmap[] =
-{
+static int regmap[] = {
 #ifdef PT_D0
   PT_D0, PT_D1, PT_D2, PT_D3, PT_D4, PT_D5, PT_D6, PT_D7,
   PT_A0, PT_A1, PT_A2, PT_A3, PT_A4, PT_A5, PT_A6, PT_USP,
@@ -268,258 +269,257 @@ m68k_linux_register_u_addr (int blockend, int regnum)
 
 #include <asm/ptrace_offsets.h>
 
-static int u_offsets[] =
-  {
-    /* general registers */
-    -1,		/* gr0 not available; i.e, it's always zero */
-    PT_R1,
-    PT_R2,
-    PT_R3,
-    PT_R4,
-    PT_R5,
-    PT_R6,
-    PT_R7,
-    PT_R8,
-    PT_R9,
-    PT_R10,
-    PT_R11,
-    PT_R12,
-    PT_R13,
-    PT_R14,
-    PT_R15,
-    PT_R16,
-    PT_R17,
-    PT_R18,
-    PT_R19,
-    PT_R20,
-    PT_R21,
-    PT_R22,
-    PT_R23,
-    PT_R24,
-    PT_R25,
-    PT_R26,
-    PT_R27,
-    PT_R28,
-    PT_R29,
-    PT_R30,
-    PT_R31,
-    /* gr32 through gr127 not directly available via the ptrace interface */
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    /* Floating point registers */
-    -1, -1,	/* f0 and f1 not available (f0 is +0.0 and f1 is +1.0) */
-    PT_F2,
-    PT_F3,
-    PT_F4,
-    PT_F5,
-    PT_F6,
-    PT_F7,
-    PT_F8,
-    PT_F9,
-    PT_F10,
-    PT_F11,
-    PT_F12,
-    PT_F13,
-    PT_F14,
-    PT_F15,
-    PT_F16,
-    PT_F17,
-    PT_F18,
-    PT_F19,
-    PT_F20,
-    PT_F21,
-    PT_F22,
-    PT_F23,
-    PT_F24,
-    PT_F25,
-    PT_F26,
-    PT_F27,
-    PT_F28,
-    PT_F29,
-    PT_F30,
-    PT_F31,
-    PT_F32,
-    PT_F33,
-    PT_F34,
-    PT_F35,
-    PT_F36,
-    PT_F37,
-    PT_F38,
-    PT_F39,
-    PT_F40,
-    PT_F41,
-    PT_F42,
-    PT_F43,
-    PT_F44,
-    PT_F45,
-    PT_F46,
-    PT_F47,
-    PT_F48,
-    PT_F49,
-    PT_F50,
-    PT_F51,
-    PT_F52,
-    PT_F53,
-    PT_F54,
-    PT_F55,
-    PT_F56,
-    PT_F57,
-    PT_F58,
-    PT_F59,
-    PT_F60,
-    PT_F61,
-    PT_F62,
-    PT_F63,
-    PT_F64,
-    PT_F65,
-    PT_F66,
-    PT_F67,
-    PT_F68,
-    PT_F69,
-    PT_F70,
-    PT_F71,
-    PT_F72,
-    PT_F73,
-    PT_F74,
-    PT_F75,
-    PT_F76,
-    PT_F77,
-    PT_F78,
-    PT_F79,
-    PT_F80,
-    PT_F81,
-    PT_F82,
-    PT_F83,
-    PT_F84,
-    PT_F85,
-    PT_F86,
-    PT_F87,
-    PT_F88,
-    PT_F89,
-    PT_F90,
-    PT_F91,
-    PT_F92,
-    PT_F93,
-    PT_F94,
-    PT_F95,
-    PT_F96,
-    PT_F97,
-    PT_F98,
-    PT_F99,
-    PT_F100,
-    PT_F101,
-    PT_F102,
-    PT_F103,
-    PT_F104,
-    PT_F105,
-    PT_F106,
-    PT_F107,
-    PT_F108,
-    PT_F109,
-    PT_F110,
-    PT_F111,
-    PT_F112,
-    PT_F113,
-    PT_F114,
-    PT_F115,
-    PT_F116,
-    PT_F117,
-    PT_F118,
-    PT_F119,
-    PT_F120,
-    PT_F121,
-    PT_F122,
-    PT_F123,
-    PT_F124,
-    PT_F125,
-    PT_F126,
-    PT_F127,
-    /* predicate registers - we don't fetch these individually */
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    /* branch registers */
-    PT_B0,
-    PT_B1,
-    PT_B2,
-    PT_B3,
-    PT_B4,
-    PT_B5,
-    PT_B6,
-    PT_B7,
-    /* virtual frame pointer and virtual return address pointer */
-    -1, -1,
-    /* other registers */
-    PT_PR,
-    PT_CR_IIP,	/* ip */
-    PT_CR_IPSR, /* psr */
-    PT_CFM,	/* cfm */
-    /* kernel registers not visible via ptrace interface (?) */
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    /* hole */
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    PT_AR_RSC,
-    PT_AR_BSP,
-    PT_AR_BSPSTORE,
-    PT_AR_RNAT,
-    -1,
-    -1,		/* Not available: FCR, IA32 floating control register */
-    -1, -1,
-    -1,		/* Not available: EFLAG */
-    -1,		/* Not available: CSD */
-    -1,		/* Not available: SSD */
-    -1,		/* Not available: CFLG */
-    -1,		/* Not available: FSR */
-    -1,		/* Not available: FIR */
-    -1,		/* Not available: FDR */
-    -1,
-    PT_AR_CCV,
-    -1, -1, -1,
-    PT_AR_UNAT,
-    -1, -1, -1,
-    PT_AR_FPSR,
-    -1, -1, -1,
-    -1,		/* Not available: ITC */
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    PT_AR_PFS,
-    PT_AR_LC,
-    -1,		/* Not available: EC, the Epilog Count register */
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1,
-    /* nat bits - not fetched directly; instead we obtain these bits from
-       either rnat or unat or from memory. */
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-  };
+static int u_offsets[] = {
+  /* general registers */
+  -1,				/* gr0 not available; i.e, it's always zero */
+  PT_R1,
+  PT_R2,
+  PT_R3,
+  PT_R4,
+  PT_R5,
+  PT_R6,
+  PT_R7,
+  PT_R8,
+  PT_R9,
+  PT_R10,
+  PT_R11,
+  PT_R12,
+  PT_R13,
+  PT_R14,
+  PT_R15,
+  PT_R16,
+  PT_R17,
+  PT_R18,
+  PT_R19,
+  PT_R20,
+  PT_R21,
+  PT_R22,
+  PT_R23,
+  PT_R24,
+  PT_R25,
+  PT_R26,
+  PT_R27,
+  PT_R28,
+  PT_R29,
+  PT_R30,
+  PT_R31,
+  /* gr32 through gr127 not directly available via the ptrace interface */
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  /* Floating point registers */
+  -1, -1,			/* f0 and f1 not available (f0 is +0.0 and f1 is +1.0) */
+  PT_F2,
+  PT_F3,
+  PT_F4,
+  PT_F5,
+  PT_F6,
+  PT_F7,
+  PT_F8,
+  PT_F9,
+  PT_F10,
+  PT_F11,
+  PT_F12,
+  PT_F13,
+  PT_F14,
+  PT_F15,
+  PT_F16,
+  PT_F17,
+  PT_F18,
+  PT_F19,
+  PT_F20,
+  PT_F21,
+  PT_F22,
+  PT_F23,
+  PT_F24,
+  PT_F25,
+  PT_F26,
+  PT_F27,
+  PT_F28,
+  PT_F29,
+  PT_F30,
+  PT_F31,
+  PT_F32,
+  PT_F33,
+  PT_F34,
+  PT_F35,
+  PT_F36,
+  PT_F37,
+  PT_F38,
+  PT_F39,
+  PT_F40,
+  PT_F41,
+  PT_F42,
+  PT_F43,
+  PT_F44,
+  PT_F45,
+  PT_F46,
+  PT_F47,
+  PT_F48,
+  PT_F49,
+  PT_F50,
+  PT_F51,
+  PT_F52,
+  PT_F53,
+  PT_F54,
+  PT_F55,
+  PT_F56,
+  PT_F57,
+  PT_F58,
+  PT_F59,
+  PT_F60,
+  PT_F61,
+  PT_F62,
+  PT_F63,
+  PT_F64,
+  PT_F65,
+  PT_F66,
+  PT_F67,
+  PT_F68,
+  PT_F69,
+  PT_F70,
+  PT_F71,
+  PT_F72,
+  PT_F73,
+  PT_F74,
+  PT_F75,
+  PT_F76,
+  PT_F77,
+  PT_F78,
+  PT_F79,
+  PT_F80,
+  PT_F81,
+  PT_F82,
+  PT_F83,
+  PT_F84,
+  PT_F85,
+  PT_F86,
+  PT_F87,
+  PT_F88,
+  PT_F89,
+  PT_F90,
+  PT_F91,
+  PT_F92,
+  PT_F93,
+  PT_F94,
+  PT_F95,
+  PT_F96,
+  PT_F97,
+  PT_F98,
+  PT_F99,
+  PT_F100,
+  PT_F101,
+  PT_F102,
+  PT_F103,
+  PT_F104,
+  PT_F105,
+  PT_F106,
+  PT_F107,
+  PT_F108,
+  PT_F109,
+  PT_F110,
+  PT_F111,
+  PT_F112,
+  PT_F113,
+  PT_F114,
+  PT_F115,
+  PT_F116,
+  PT_F117,
+  PT_F118,
+  PT_F119,
+  PT_F120,
+  PT_F121,
+  PT_F122,
+  PT_F123,
+  PT_F124,
+  PT_F125,
+  PT_F126,
+  PT_F127,
+  /* predicate registers - we don't fetch these individually */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  /* branch registers */
+  PT_B0,
+  PT_B1,
+  PT_B2,
+  PT_B3,
+  PT_B4,
+  PT_B5,
+  PT_B6,
+  PT_B7,
+  /* virtual frame pointer and virtual return address pointer */
+  -1, -1,
+  /* other registers */
+  PT_PR,
+  PT_CR_IIP,			/* ip */
+  PT_CR_IPSR,			/* psr */
+  PT_CFM,			/* cfm */
+  /* kernel registers not visible via ptrace interface (?) */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  /* hole */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  PT_AR_RSC,
+  PT_AR_BSP,
+  PT_AR_BSPSTORE,
+  PT_AR_RNAT,
+  -1,
+  -1,				/* Not available: FCR, IA32 floating control register */
+  -1, -1,
+  -1,				/* Not available: EFLAG */
+  -1,				/* Not available: CSD */
+  -1,				/* Not available: SSD */
+  -1,				/* Not available: CFLG */
+  -1,				/* Not available: FSR */
+  -1,				/* Not available: FIR */
+  -1,				/* Not available: FDR */
+  -1,
+  PT_AR_CCV,
+  -1, -1, -1,
+  PT_AR_UNAT,
+  -1, -1, -1,
+  PT_AR_FPSR,
+  -1, -1, -1,
+  -1,				/* Not available: ITC */
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  PT_AR_PFS,
+  PT_AR_LC,
+  -1,				/* Not available: EC, the Epilog Count register */
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1,
+  /* nat bits - not fetched directly; instead we obtain these bits from
+     either rnat or unat or from memory. */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+};
 
 int
 ia64_register_u_addr (int blockend, int regnum)
@@ -569,22 +569,31 @@ fetch_register (int regno)
 
   offset = U_REGS_OFFSET;
 
-  regaddr = register_addr (regno, offset);
-  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+#ifdef  S390_GNULINUX_TARGET	/* intel has CANNOT_FETCH_REGISTER defined but not linked */
+  if (CANNOT_FETCH_REGISTER (regno))
+    memset (&registers[REGISTER_BYTE (regno)], 0, REGISTER_RAW_SIZE (regno));
+  else
+#endif
     {
-      errno = 0;
-      *(PTRACE_XFER_TYPE *) &registers[REGISTER_BYTE (regno) + i] =
-	ptrace (PTRACE_PEEKUSER, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, 0);
-      regaddr += sizeof (PTRACE_XFER_TYPE);
-      if (errno != 0)
+      regaddr = register_addr (regno, offset);
+      for (i = 0; i < REGISTER_RAW_SIZE (regno);
+	   i += sizeof (PTRACE_XFER_TYPE))
 	{
-	  /* Warning, not error, in case we are attached; sometimes the
-	     kernel doesn't let us at the registers.  */
-	  char *err = strerror (errno);
-	  char *msg = alloca (strlen (err) + 128);
-	  sprintf (msg, "reading register %d: %s", regno, err);
-	  error (msg);
-	  goto error_exit;
+	  errno = 0;
+	  *(PTRACE_XFER_TYPE *) & registers[REGISTER_BYTE (regno) + i] =
+	    ptrace (PTRACE_PEEKUSER, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		    0);
+	  regaddr += sizeof (PTRACE_XFER_TYPE);
+	  if (errno != 0)
+	    {
+	      /* Warning, not error, in case we are attached; sometimes the
+	         kernel doesn't let us at the registers.  */
+	      char *err = strerror (errno);
+	      char *msg = alloca (strlen (err) + 128);
+	      sprintf (msg, "reading register %d: %s", regno, err);
+	      error (msg);
+	      goto error_exit;
+	    }
 	}
     }
 error_exit:;
@@ -596,7 +605,11 @@ void
 fetch_inferior_registers (int regno)
 {
   if (regno == -1 || regno == 0)
-    for (regno = 0; regno < NUM_REGS - NUM_FREGS; regno++)
+    for (regno = 0; regno < NUM_REGS
+#ifndef S390_GNULINUX_TARGET
+	 - NUM_FREGS
+#endif
+	 ; regno++)
       fetch_register (regno);
   else
     fetch_register (regno);
@@ -615,7 +628,7 @@ store_inferior_registers (int regno)
 
   if (regno >= 0)
     {
-#if 0
+#ifdef  S390_GNULINUX_TARGET	/* intel has CANNOT_STORE_REGISTER defined but not implemented */
       if (CANNOT_STORE_REGISTER (regno))
 	return;
 #endif
@@ -637,19 +650,20 @@ store_inferior_registers (int regno)
 	}
       else
 #endif
-	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
+	for (i = 0; i < REGISTER_RAW_SIZE (regno);
+	     i += sizeof (PTRACE_XFER_TYPE))
 	  {
 	    errno = 0;
 	    ptrace (PTRACE_POKEUSER, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		    *(int *) &registers[REGISTER_BYTE (regno) + i]);
+		    *(PTRACE_XFER_TYPE *) & registers[REGISTER_BYTE (regno) +
+						      i]);
 	    if (errno != 0)
 	      {
 		/* Warning, not error, in case we are attached; sometimes the
 		   kernel doesn't let us at the registers.  */
 		char *err = strerror (errno);
 		char *msg = alloca (strlen (err) + 128);
-		sprintf (msg, "writing register %d: %s",
-			 regno, err);
+		sprintf (msg, "writing register %d: %s", regno, err);
 		error (msg);
 		return;
 	      }
@@ -657,7 +671,11 @@ store_inferior_registers (int regno)
 	  }
     }
   else
-    for (regno = 0; regno < NUM_REGS - NUM_FREGS; regno++)
+    for (regno = 0; regno < NUM_REGS
+#ifndef S390_GNULINUX_TARGET
+	 - NUM_FREGS
+#endif
+	 ; regno++)
       store_inferior_registers (regno);
 }
 
@@ -677,11 +695,11 @@ read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
   /* Round starting address down to longword boundary.  */
   register CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
   /* Round ending address up; get number of longwords that makes.  */
-  register int count 
-    = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1) 
-      / sizeof (PTRACE_XFER_TYPE);
+  register int count
+    = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
+    / sizeof (PTRACE_XFER_TYPE);
   /* Allocate buffer of that many longwords.  */
-  register PTRACE_XFER_TYPE *buffer 
+  register PTRACE_XFER_TYPE *buffer
     = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
 
   /* Read all the longwords */
@@ -691,7 +709,8 @@ read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
     }
 
   /* Copy appropriate bytes out of the buffer.  */
-  memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)), len);
+  memcpy (myaddr,
+	  (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)), len);
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR
@@ -707,9 +726,12 @@ write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
   register CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
   /* Round ending address up; get number of longwords that makes.  */
   register int count
-  = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1) / sizeof (PTRACE_XFER_TYPE);
+    =
+    (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) -
+     1) / sizeof (PTRACE_XFER_TYPE);
   /* Allocate buffer of that many longwords.  */
-  register PTRACE_XFER_TYPE *buffer = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
+  register PTRACE_XFER_TYPE *buffer =
+    (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
   extern int errno;
 
   /* Fill start and end extra bytes of buffer with existing memory data.  */
@@ -725,7 +747,8 @@ write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
   /* Copy data to be written over corresponding part of buffer */
 
-  memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)), myaddr, len);
+  memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
+	  myaddr, len);
 
   /* Write the entire buffer.  */
 
@@ -743,5 +766,7 @@ write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 void
 initialize_low (void)
 {
+#ifndef S390_GNULINUX_TARGET
   initialize_arch ();
+#endif
 }

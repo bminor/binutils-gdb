@@ -162,5 +162,10 @@ xscale-*-*)		gdb_host=arm ;;
 vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix2*)		gdb_host=vaxult2 ;;
 vax-*-ultrix*)		gdb_host=vaxult ;;
-
+s390*-*-*)               gdb_host=s390 ;;
 esac
+
+
+
+
+
