@@ -953,7 +953,7 @@ earmpe.c: $(srcdir)/emulparams/armpe.sh \
 	${GENSCRIPTS} armpe "$(tdir_armpe)"
 earmsymbian.c: $(srcdir)/emulparams/armsymbian.sh \
   $(srcdir)/emulparams/armelf.sh $(srcdir)/emultempl/elf32.em \
-  $(srcdir)/emultempl/armelf.em $(srcdir)/scripttempl/elf.sc \
+  $(srcdir)/emultempl/armelf.em $(srcdir)/scripttempl/armbpabi.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} armsymbian "$(tdir_armelf)"
 eavr2.c: $(srcdir)/emulparams/avr2.sh \
