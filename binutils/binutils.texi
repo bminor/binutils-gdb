@@ -4,7 +4,7 @@
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-* Binutils: (binutils).		The GNU binary utilities "ar", "ld", "objcopy",
+* Binutils::                    The GNU binary utilities "ar", "ld", "objcopy",
 				"objdump", "nm", "size", "strip", and "ranlib".
 END-INFO-DIR-ENTRY
 @end format
