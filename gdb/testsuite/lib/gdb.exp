@@ -290,21 +290,20 @@ proc default_gdb_exit {} {
     global GDBFLAGS
     global verbose
 
-    verbose "Quitting $GDB $GDBFLAGS" 1
+    verbose "Quitting $GDB $GDBFLAGS"
 
     # This used to be 1 for unix-gdb.exp
     set timeout 5
 
     catch "send \"quit\n\"" result
     # If the process has gone away (e.g. gdb dumped core), deal with it.
-    if [string match "write\(spawn_id=\[0-9\]+\):" $result] then {
+    if [string match "write\[(\]+spawn_id=\[0-9)\]+:" $result] then {
 	catch "close"
 	# FIXME:  Shouldn't we call "wait" too?
 	return -1
     }
     # FIXME: What is this catch statement doing here?  Won't it prevent us
     # from getting errors that we'd rather see?
-    catch {
 	expect {
 	    eof { 
 		verbose "Got EOF from $GDB" 2
@@ -316,7 +315,6 @@ proc default_gdb_exit {} {
 		send "y\n"
 		verbose "Killing program being debugged" 2
 	    }
-	}
     }
 
     # Before this was here sometimes "uit" would get sent to the next GDB
@@ -394,7 +392,8 @@ oaded."
 # till the new dejagnu gets installed everywhere. I'd hate to break the
 # gdb tests suite.
 #
-if [string match "" [info proc exp_continue]] {
+global argv0
+if ![info exists argv0] then {
     proc exp_continue { } {
 	continue -expect
     }
