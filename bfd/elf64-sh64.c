@@ -2892,7 +2892,7 @@ sh64_elf64_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 {
   /* We want to do this for relocatable as well as final linking.  */
   if (ELF_ST_TYPE (sym->st_info) == STT_DATALABEL
-      && info->hash->creator->flavour == bfd_target_elf_flavour)
+      && is_elf_hash_table (info->hash))
     {
       struct elf_link_hash_entry *h;
 

@@ -843,7 +843,7 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
   if (! info->relocatable
       && (*namep)[0] == '_' && (*namep)[1] == 'S'
       && strcmp (*namep, "_SDA_BASE_") == 0
-      && info->hash->creator->flavour == bfd_target_elf_flavour)
+      && is_elf_hash_table (info->hash))
     {
       /* This is simpler than using _bfd_elf_create_linker_section
 	 (our needs are simpler than ppc's needs).  Also

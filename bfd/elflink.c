@@ -117,7 +117,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   struct bfd_link_hash_entry *bh;
   const struct elf_backend_data *bed;
 
-  if (! is_elf_hash_table (info))
+  if (! is_elf_hash_table (info->hash))
     return FALSE;
 
   if (elf_hash_table (info)->dynamic_sections_created)
@@ -144,8 +144,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
     }
 
-  if (! info->traditional_format
-      && info->hash->creator->flavour == bfd_target_elf_flavour)
+  if (! info->traditional_format)
     {
       s = bfd_make_section (abfd, ".eh_frame_hdr");
       if (s == NULL
@@ -424,7 +423,7 @@ bfd_elf_record_link_assignment (bfd *output_bfd ATTRIBUTE_UNUSED,
 {
   struct elf_link_hash_entry *h;
 
-  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+  if (!is_elf_hash_table (info->hash))
     return TRUE;
 
   h = elf_link_hash_lookup (elf_hash_table (info), name, TRUE, TRUE, FALSE);
@@ -494,7 +493,7 @@ elf_link_record_local_dynamic_symbol (struct bfd_link_info *info,
   Elf_External_Sym_Shndx eshndx;
   char esym[sizeof (Elf64_External_Sym)];
 
-  if (! is_elf_hash_table (info))
+  if (! is_elf_hash_table (info->hash))
     return 0;
 
   /* See if the entry exists already.  */
@@ -2206,7 +2205,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
      will force it local.  */
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0
       && eif->info->shared
-      && is_elf_hash_table (eif->info)
+      && is_elf_hash_table (eif->info->hash)
       && (eif->info->symbolic
 	  || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
@@ -2276,7 +2275,7 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
   bfd *dynobj;
   const struct elf_backend_data *bed;
 
-  if (! is_elf_hash_table (eif->info))
+  if (! is_elf_hash_table (eif->info->hash))
     return FALSE;
 
   if (h->root.type == bfd_link_hash_warning)

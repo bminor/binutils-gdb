@@ -400,8 +400,8 @@ struct elf_link_hash_table
 #define elf_hash_table(p) ((struct elf_link_hash_table *) ((p)->hash))
 
 /* Returns TRUE if the hash table is a struct elf_link_hash_table.  */
-#define is_elf_hash_table(p)					      	\
-  ((p)->hash->type == bfd_link_elf_hash_table)
+#define is_elf_hash_table(htab)					      	\
+  (((struct bfd_link_hash_table *) (htab))->type == bfd_link_elf_hash_table)
 
 /* Used by bfd_section_from_r_symndx to cache a small number of local
    symbol to section mappings.  */

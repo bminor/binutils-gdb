@@ -437,7 +437,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       /* You can't use -r against a dynamic object.  Also, there's no
 	 hope of using a dynamic object which does not exactly match
 	 the format of the output file.  */
-      if (info->relocatable || info->hash->creator != abfd->xvec)
+      if (info->relocatable
+	  || !is_elf_hash_table (hash_table)
+	  || hash_table->root.creator != abfd->xvec)
 	{
 	  bfd_set_error (bfd_error_invalid_operation);
 	  goto error_return;
@@ -475,7 +477,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		 fix is to keep track of what warnings we are supposed
 		 to emit, and then handle them all at the end of the
 		 link.  */
-	      if (dynamic && abfd->xvec == info->hash->creator)
+	      if (dynamic)
 		{
 		  struct elf_link_hash_entry *h;
 
@@ -531,15 +533,15 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 format.  FIXME: If there are no input BFD's of the same
 	 format as the output, we can't make a shared library.  */
       if (info->shared
-	  && is_elf_hash_table (info)
-	  && ! hash_table->dynamic_sections_created
-	  && abfd->xvec == info->hash->creator)
+	  && is_elf_hash_table (hash_table)
+	  && hash_table->root.creator == abfd->xvec
+	  && ! hash_table->dynamic_sections_created)
 	{
 	  if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
 	    goto error_return;
 	}
     }
-  else if (! is_elf_hash_table (info))
+  else if (!is_elf_hash_table (hash_table))
     goto error_return;
   else
     {
@@ -723,9 +725,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
       /* If this is the first dynamic object found in the link, create
 	 the special sections required for dynamic linking.  */
-      if (! hash_table->dynamic_sections_created)
-	if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
-	  goto error_return;
+      if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
+	goto error_return;
 
       if (add_needed)
 	{
@@ -968,7 +969,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       old_alignment = 0;
       old_bfd = NULL;
 
-      if (info->hash->creator->flavour == bfd_target_elf_flavour)
+      if (is_elf_hash_table (hash_table))
 	{
 	  Elf_Internal_Versym iver;
 	  unsigned int vernum = 0;
@@ -1131,7 +1132,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  && definition
 	  && (flags & BSF_WEAK) != 0
 	  && ELF_ST_TYPE (isym->st_info) != STT_FUNC
-	  && info->hash->creator->flavour == bfd_target_elf_flavour
+	  && is_elf_hash_table (hash_table)
 	  && h->weakdef == NULL)
 	{
 	  /* Keep a list of all weak defined non function symbols from
@@ -1167,7 +1168,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    h->root.u.c.p->alignment_power = old_alignment;
 	}
 
-      if (info->hash->creator->flavour == bfd_target_elf_flavour)
+      if (is_elf_hash_table (hash_table))
 	{
 	  int old_flags;
 	  bfd_boolean dynsym;
@@ -1380,9 +1381,6 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      bfd_size_type oldsize;
 	      bfd_size_type strindex;
 
-	      if (! is_elf_hash_table (info))
-		goto error_free_vers;
-
 	      /* The symbol from a DT_NEEDED object is referenced from
 		 the regular object to create a dynamic executable. We
 		 have to make sure there is a DT_NEEDED entry for it.  */
@@ -1446,7 +1444,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  shortname[amt] = '\0';
 
 	  hi = (struct elf_link_hash_entry *)
-	       bfd_link_hash_lookup (info->hash, shortname,
+	       bfd_link_hash_lookup (&hash_table->root, shortname,
 				     FALSE, FALSE, FALSE);
 	  if (hi != NULL
 	      && hi->root.type == h->root.type
@@ -1573,7 +1571,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      different format.  It probably can't be done.  */
   check_relocs = get_elf_backend_data (abfd)->check_relocs;
   if (! dynamic
-      && abfd->xvec == info->hash->creator
+      && is_elf_hash_table (hash_table)
+      && hash_table->root.creator == abfd->xvec
       && check_relocs != NULL)
     {
       asection *o;
@@ -1609,8 +1608,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      of the .stab/.stabstr sections.  */
   if (! dynamic
       && ! info->traditional_format
-      && info->hash->creator->flavour == bfd_target_elf_flavour
-      && is_elf_hash_table (info)
+      && is_elf_hash_table (hash_table)
       && (info->strip != strip_all && info->strip != strip_debugger))
     {
       asection *stabstr;
@@ -1643,8 +1641,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (! info->relocatable && ! dynamic
-      && is_elf_hash_table (info))
+  if (! info->relocatable
+      && ! dynamic
+      && is_elf_hash_table (hash_table))
     {
       asection *s;
 
@@ -1664,7 +1663,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  }
     }
 
-  if (is_elf_hash_table (info))
+  if (is_elf_hash_table (hash_table))
     {
       /* Add this bfd to the loaded list.  */
       struct elf_link_loaded_list *n;
@@ -1702,7 +1701,7 @@ elf_add_dynamic_entry (struct bfd_link_info *info, bfd_vma tag, bfd_vma val)
   bfd_size_type newsize;
   bfd_byte *newcontents;
 
-  if (! is_elf_hash_table (info))
+  if (! is_elf_hash_table (info->hash))
     return FALSE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1907,10 +1906,7 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 
   soname_indx = (bfd_size_type) -1;
 
-  if (info->hash->creator->flavour != bfd_target_elf_flavour)
-    return TRUE;
-
-  if (! is_elf_hash_table (info))
+  if (!is_elf_hash_table (info->hash))
     return TRUE;
 
   if (info->execstack)
@@ -3112,7 +3108,7 @@ elf_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   asection *reldyn = 0;
   bfd_size_type amt;
 
-  if (! is_elf_hash_table (info))
+  if (! is_elf_hash_table (info->hash))
     return FALSE;
 
   if (info->shared)
@@ -4188,7 +4184,7 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
   bfd *abfd;
   struct elf_link_loaded_list *loaded;
 
-  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+  if (!is_elf_hash_table (info->hash))
     return FALSE;
 
   switch (h->root.type)
@@ -5797,7 +5793,9 @@ elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
      struct elf_link_hash_entry *h, Elf_Internal_Sym *);
 
   if (!get_elf_backend_data (abfd)->can_gc_sections
-      || info->relocatable || info->emitrelocations
+      || info->relocatable
+      || info->emitrelocations
+      || !is_elf_hash_table (info->hash)
       || elf_hash_table (info)->dynamic_sections_created)
     return TRUE;
 
@@ -5972,6 +5970,9 @@ elf_gc_common_finalize_got_offsets (bfd *abfd,
   bfd *i;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_vma gotoff;
+
+  if (! is_elf_hash_table (info->hash))
+    return FALSE;
 
   /* The GOT offset is relative to the .got section, but the GOT header is
      put into the .got.plt section, if the backend uses it.  */
@@ -6179,8 +6180,7 @@ elf_bfd_discard_info (bfd *output_bfd, struct bfd_link_info *info)
   bfd_boolean ret = FALSE;
 
   if (info->traditional_format
-      || info->hash->creator->flavour != bfd_target_elf_flavour
-      || ! is_elf_hash_table (info))
+      || !is_elf_hash_table (info->hash))
     return FALSE;
 
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)

@@ -1,4 +1,4 @@
-/* Intel 860 specific support for 32-bit ELF
+/* Intel 960 specific support for 32-bit ELF
    Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -107,13 +107,8 @@ elf32_i960_info_to_howto_rel (abfd, cache_ptr, dst)
    relocatable output against an external symbol.  */
 
 bfd_reloc_status_type
-elf32_i960_relocate (abfd,
-		       reloc_entry,
-		       symbol,
-		       data,
-		       input_section,
-		       output_bfd,
-		       error_message)
+elf32_i960_relocate (abfd, reloc_entry, symbol, data, input_section,
+		     output_bfd, error_message)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;

@@ -1,3 +1,42 @@
+2003-12-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (is_elf_hash_table): Take hash tab rather than info arg.
+	* elf.c (_bfd_elf_merge_sections): Adjust to suit.
+	(_bfd_elf_link_just_syms): Likewise.
+	(bfd_elf_get_needed_list): Likewise.
+	(bfd_elf_get_runpath_list): Likewise.
+	(_bfd_elf_link_hash_copy_indirect): Remove unneeded parens.
+	* elf32-hppa.c (elf32_hppa_setup_section_lists): Don't check hash tab
+	creator flavour.
+	(elf32_hppa_set_gp): Look up output sections rather than using htab.
+	* elf32-i960.c: Comment fix.  Formatting.
+	* elf32-m32r.c (m32r_elf_add_symbol_hook): Use is_elf_hash_table
+	rather than testing creator flavour.
+	* elf32-sh64.c (sh64_elf_add_symbol_hook): Likewise.
+	* elf64-sh64.c (sh64_elf64_add_symbol_hook): Likewise.
+	* elflink.c (_bfd_elf_link_create_dynamic_sections): Adjust for
+	is_elf_hash_table change.  Remove redundant test.
+	(bfd_elf_record_link_assignment): Use is_elf_hash_table rather than
+	testing creator flavour.
+	(elf_link_record_local_dynamic_symbol): Adjust for is_elf_hash_table.
+	(_bfd_elf_fix_symbol_flags): Likewise.
+	(_bfd_elf_adjust_dynamic_symbol): Likewise.
+	* elflink.h (elf_link_add_object_symbols): Likewise.  Remove redundant
+	checks.  Use is_elf_hash_table rather than testing creator flavour.
+	Use hash_table throughout in place of info->hash.
+	(elf_add_dynamic_entry): Adjust for is_elf_hash_table change.
+	(NAME(bfd_elf,size_dynamic_sections)): Likewise.  Remove redundant
+	check.
+	(elf_bfd_final_link): Adjust for is_elf_hash_table change.
+	(elf_link_check_versioned_symbol): Use is_elf_hash_table rather than
+	testing creator flavour.
+	(elf_gc_sections): Add is_elf_hash_table check.
+	(elf_gc_common_finalize_got_offsets): Likewise.
+	(elf_bfd_discard_info): Adjust for is_elf_hash_table change.  Remove
+	redundant check.
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Use is_elf_hash_table
+	rather than testing creator flavour.
+
 2003-11-28  Christian Groessler  <chris@groessler.org>
 
 	* cpu-z8k.c: Convert to ISO C90.
@@ -23,7 +62,7 @@
 	of the note.
 
 2003-11-26  Daniel Jacobowitz  <drow@mvista.com>
-            Richard Sandiford  <rsandifo@redhat.com>
+	    Richard Sandiford  <rsandifo@redhat.com>
 
 	* elfxx-mips.c (mips_elf_set_global_got_offset): Don't set no_fn_stub.
 	(mips_elf_set_no_stub): New function.

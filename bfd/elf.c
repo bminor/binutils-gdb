@@ -894,7 +894,7 @@ merge_sections_remove_hook (bfd *abfd ATTRIBUTE_UNUSED,
 bfd_boolean
 _bfd_elf_merge_sections (bfd *abfd, struct bfd_link_info *info)
 {
-  if (!is_elf_hash_table (info))
+  if (!is_elf_hash_table (info->hash))
     return FALSE;
   if (elf_hash_table (info)->merge_info)
     _bfd_merge_sections (abfd, elf_hash_table (info)->merge_info,
@@ -907,7 +907,7 @@ _bfd_elf_link_just_syms (asection *sec, struct bfd_link_info *info)
 {
   sec->output_section = bfd_abs_section_ptr;
   sec->output_offset = sec->vma;
-  if (!is_elf_hash_table (info))
+  if (!is_elf_hash_table (info->hash))
     return;
 
   sec->sec_info_type = ELF_INFO_TYPE_JUST_SYMS;
@@ -1355,12 +1355,12 @@ _bfd_elf_link_hash_copy_indirect (const struct elf_backend_data *bed,
      symbol which just became indirect.  */
 
   dir->elf_link_hash_flags
-    |= (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
-				    | ELF_LINK_HASH_REF_REGULAR
-				    | ELF_LINK_HASH_REF_REGULAR_NONWEAK
-				    | ELF_LINK_NON_GOT_REF
-				    | ELF_LINK_HASH_NEEDS_PLT
-				    | ELF_LINK_POINTER_EQUALITY_NEEDED));
+    |= ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
+				   | ELF_LINK_HASH_REF_REGULAR
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				   | ELF_LINK_NON_GOT_REF
+				   | ELF_LINK_HASH_NEEDS_PLT
+				   | ELF_LINK_POINTER_EQUALITY_NEEDED);
 
   if (ind->root.type != bfd_link_hash_indirect)
     return;
@@ -1504,7 +1504,7 @@ struct bfd_link_needed_list *
 bfd_elf_get_needed_list (bfd *abfd ATTRIBUTE_UNUSED,
 			 struct bfd_link_info *info)
 {
-  if (! is_elf_hash_table (info))
+  if (! is_elf_hash_table (info->hash))
     return NULL;
   return elf_hash_table (info)->needed;
 }
@@ -1516,7 +1516,7 @@ struct bfd_link_needed_list *
 bfd_elf_get_runpath_list (bfd *abfd ATTRIBUTE_UNUSED,
 			  struct bfd_link_info *info)
 {
-  if (! is_elf_hash_table (info))
+  if (! is_elf_hash_table (info->hash))
     return NULL;
   return elf_hash_table (info)->runpath;
 }
