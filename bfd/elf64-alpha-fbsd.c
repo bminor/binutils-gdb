@@ -17,11 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#define TARGET_LITTLE_SYM		bfd_elf64_alpha_freebsd_vec
-#define TARGET_LITTLE_NAME		"elf64-alpha-freebsd"
-#define ELF_ARCH			bfd_arch_alpha
-#define ELF_MACHINE_CODE		EM_ALPHA
-#define ELF_MAXPAGESIZE			0x10000
+#define TARGET_LITTLE_SYM	bfd_elf64_alpha_freebsd_vec
+#define TARGET_LITTLE_NAME	"elf64-alpha-freebsd"
+#define ELF_ARCH		bfd_arch_alpha
+#define ELF_MACHINE_CODE	EM_ALPHA
+#define ELF_MAXPAGESIZE		0x10000
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -43,12 +43,11 @@ elf_alpha_post_process_headers (abfd, link_info)
 
   i_ehdrp = elf_elfheader (abfd);
 
+  /* Put an ABI label supported by FreeBSD >= 4.1.  */
+  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
 #ifdef OLD_FREEBSD_ABI_LABEL
   /* The ABI label supported by FreeBSD <= 4.0 is quite nonstandard.  */
   memcpy (&i_ehdrp->e_ident[EI_ABIVERSION], "FreeBSD", 8);
-#else
-  /* Put an ABI label supported by FreeBSD >= 4.1.  */
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
 #endif
 }
 

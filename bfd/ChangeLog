@@ -1,3 +1,9 @@
+2002-09-17  David O'Brien  <obrien@FreeBSD.org>
+
+	* elf32-i386-fbsd.c: Always label using the EI_OSABI method.
+	It is benign for FreeBSD < 4.1.  Minor reformatting.
+	* elf64-alpha-fbsd.c: Likewise.
+
 2002-09-17  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf_i386_relocate_section (R_386_TLS_TPOFF32): Negate addend.
