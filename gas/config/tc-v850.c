@@ -1,5 +1,5 @@
 /* tc-v850.c -- Assembler code for the NEC V850
-   Copyright (C) 1996, 1997 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -681,7 +681,8 @@ register_name (expressionP)
 
   c = get_symbol_end ();
 
-  reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name, FALSE);
+  reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT,
+				name, FALSE);
 
   * input_line_pointer = c;	/* put back the delimiting char */
   
@@ -743,7 +744,8 @@ system_register_name (expressionP, accept_numbers
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (system_registers, SYSREG_NAME_CNT, name, accept_numbers);
+  reg_number = reg_name_search (system_registers, SYSREG_NAME_CNT, name,
+				accept_numbers);
 
   * input_line_pointer = c;   /* put back the delimiting char */
   
@@ -772,7 +774,8 @@ system_register_name (expressionP, accept_numbers
       else if (accept_list_names)
 	{
 	  c = get_symbol_end ();
-	  reg_number = reg_name_search (system_list_registers, SYSREGLIST_NAME_CNT, name, FALSE);
+	  reg_number = reg_name_search (system_list_registers,
+					SYSREGLIST_NAME_CNT, name, FALSE);
 
 	  * input_line_pointer = c;   /* put back the delimiting char */
 	}
@@ -979,14 +982,16 @@ parse_register_list
 
   input_line_pointer ++;
 
-  /* Parse the register list until a terminator (closing curly brace or new-line) is found.  */
+  /* Parse the register list until a terminator (closing curly brace or
+     new-line) is found.  */
   for (;;)
     {
       if (register_name (& exp))
 	{
 	  int  i;
 	  
-	  /* Locate the given register in the list, and if it is there, insert the corresponding bit into the instruction.  */
+	  /* Locate the given register in the list, and if it is there,
+	     insert the corresponding bit into the instruction.  */
 	  for (i = 0; i < 32; i++)
 	    {
 	      if (regs[ i ] == exp.X_add_number)
@@ -1050,7 +1055,8 @@ parse_register_list
 	    {
 	      int  i;
 	  
-	      /* Locate the given register in the list, and if it is there, insert the corresponding bit into the instruction.  */
+	      /* Locate the given register in the list, and if it is there,
+		 insert the corresponding bit into the instruction.  */
 	      for (i = 0; i < 32; i++)
 		{
 		  if (regs[ i ] == j)
@@ -1231,7 +1237,8 @@ md_convert_frag (abfd, sec, fragP)
 	 target.  */
       md_number_to_chars (buffer + 2, 0x00000780, 4);
       fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode + 1);
+	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int) fragP->fr_opcode
+	       + 1);
       fragP->fr_var = 0;
       fragP->fr_fix += 6;
     }
@@ -1240,7 +1247,8 @@ md_convert_frag (abfd, sec, fragP)
     {
       md_number_to_chars (fragP->fr_fix + fragP->fr_literal, 0x00000780, 4);
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode + 1);
+	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int) fragP->fr_opcode
+	       + 1);
       fragP->fr_var = 0;
       fragP->fr_fix += 4;
     }
@@ -1562,7 +1570,8 @@ v850_insert_operand (insn, operand, val, file, line, str)
 	      char         buf[100];
 	      
 	      /* Restore min and mix to expected values for decimal ranges.  */
-	      if ((operand->flags & V850_OPERAND_SIGNED) && ! warn_signed_overflows)
+	      if ((operand->flags & V850_OPERAND_SIGNED)
+		  && ! warn_signed_overflows)
 		max = (1 << (operand->bits - 1)) - 1;
 
 	      if (! (operand->flags & V850_OPERAND_SIGNED)
@@ -1662,7 +1671,7 @@ md_assemble (str)
 
       input_line_pointer = str = start_of_operands;
 
-      for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
+      for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr ++)
 	{
 	  const struct v850_operand * operand;
 	  char *                      hold;
@@ -1694,7 +1703,8 @@ md_assemble (str)
 	  /* lo(), hi(), hi0(), etc... */
 	  if ((reloc = v850_reloc_prefix (operand)) != BFD_RELOC_UNUSED)
 	    {
-	      if (reloc == BFD_RELOC_64) /* This is a fake reloc, used to indicate an error condition.  */
+	      /* This is a fake reloc, used to indicate an error condition.  */
+	      if (reloc == BFD_RELOC_64) 
 		{
 		  match = 1;
 		  goto error;
@@ -1707,7 +1717,8 @@ md_assemble (str)
 		  switch (reloc)
 		    {
 		    case BFD_RELOC_V850_ZDA_16_16_OFFSET:
-		      /* To cope with "not1 7, zdaoff(0xfffff006)[r0]"  and the like.  */
+		      /* To cope with "not1 7, zdaoff(0xfffff006)[r0]"
+			 and the like.  */
 		      /* Fall through.  */
 		      
 		    case BFD_RELOC_LO16:
@@ -1757,7 +1768,8 @@ md_assemble (str)
 		    }
 
 		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
-					      (char *) NULL, 0, copy_of_instruction);
+					      (char *) NULL, 0,
+					      copy_of_instruction);
 		}
 	      else
 		{
@@ -1795,8 +1807,7 @@ md_assemble (str)
 		    {
 		      errmsg = "invalid register name";
 		    }
-
-		  if ((operand->flags & V850_NOT_R0)
+		  else if ((operand->flags & V850_NOT_R0)
 		      && ex.X_add_number == 0)
 		    {
 		      errmsg = "register r0 cannot be used here";
@@ -1805,9 +1816,6 @@ md_assemble (str)
 			 skipping over any following potential matches
 			 for this opcode.  */
 		      opcode += 3;
-
-		      if (* input_line_pointer == ']')
-			++ input_line_pointer;
 		    }
 		}
 	      else if ((operand->flags & V850_OPERAND_SRG) != 0) 
@@ -1839,8 +1847,9 @@ md_assemble (str)
 		  str = input_line_pointer;
 		  input_line_pointer = hold;
 	      
-		  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
-		    ++str;
+		  while (   *str == ' ' || *str == ',' || *str == '['
+			 || *str == ']')
+		    ++ str;
 		  continue;
 		}
 	      else if ((operand->flags & V850_OPERAND_CC) != 0) 
@@ -1855,7 +1864,8 @@ md_assemble (str)
 		{
 		  errmsg = parse_register_list (& insn, operand);
 		  
-		  /* The parse_register_list() function has already done everything, so fake a dummy expression.  */
+		  /* The parse_register_list() function has already done
+		     everything, so fake a dummy expression.  */
 		  ex.X_op         = O_constant;
 		  ex.X_add_number = 0;
 		}
@@ -1908,7 +1918,16 @@ md_assemble (str)
 		  expression (& ex);
 
 		  if (ex.X_op != O_constant)
-		    errmsg = "syntax error: register not expected";
+		    {
+		      /* If this register is actually occuring too early on
+			 the parsing of the instruction, (because another
+			 field is missing) then report this.  */
+		      if (opindex_ptr[1] != 0
+			  && (v850_operands [opindex_ptr [1]].flags & V850_OPERAND_REG))
+			errmsg = "syntax error: value is missing before the register name";
+		      else
+			errmsg = "syntax error: register not expected";
+		    }
 		}
 	      else if (system_register_name (& ex, false
 					     /* start-sanitize-v850e */
@@ -1930,14 +1949,15 @@ md_assemble (str)
 /* start-sanitize-v850e */
 		  /* Special case:
 		     If we are assembling a MOV instruction (or a CALLT.... :-)
-		     and the immediate value does not fit into the bits available
-		     then create a fake error so that the next MOV instruction
-		      will be selected.  This one has a 32 bit immediate field.  */
+		     and the immediate value does not fit into the bits
+		     available then create a fake error so that the next MOV
+		     instruction will be selected.  This one has a 32 bit
+		     immediate field.  */
 
 		  if (((insn & 0x07e0) == 0x0200)
 		      && ex.X_op == O_constant
 		      && (ex.X_add_number < (- (1 << (operand->bits - 1))) || ex.X_add_number > ((1 << operand->bits) - 1)))
-		    errmsg = "immediate constant is too large";
+		    errmsg = "immediate operand is too large";
 /* end-sanitize-v850e */
 		}
 
@@ -1961,12 +1981,14 @@ md_assemble (str)
 		      goto error;
 		    }
 		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
-					      (char *) NULL, 0, copy_of_instruction);
+					      (char *) NULL, 0,
+					      copy_of_instruction);
 		  break;
 
 		case O_constant:
 		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
-					      (char *) NULL, 0, copy_of_instruction);
+					      (char *) NULL, 0,
+					      copy_of_instruction);
 		  break;
 
 		default:
@@ -1995,13 +2017,24 @@ md_assemble (str)
       if (match == 0)
         {
 	  next_opcode = opcode + 1;
-	  if (next_opcode->name != NULL && strcmp (next_opcode->name, opcode->name) == 0)
+	  if (next_opcode->name != NULL
+	      && strcmp (next_opcode->name, opcode->name) == 0)
 	    {
 	      opcode = next_opcode;
+
+	      /* Skip versions that are not supported by the target
+		 processor.  */
+	      if ((opcode->processors & processor_mask) == 0)
+		goto error;
+	      
 	      continue;
 	    }
 	  
-	  as_bad (errmsg);
+	  as_bad ("%s: %s", copy_of_instruction, errmsg);
+	  
+	  if (* input_line_pointer == ']')
+	    ++ input_line_pointer;
+	  
 	  ignore_rest_of_line ();
 	  input_line_pointer = saved_input_line_pointer;
 	  return;
@@ -2088,7 +2121,8 @@ md_assemble (str)
       
       if (reloc != BFD_RELOC_UNUSED)
 	{
-	  reloc_howto_type * reloc_howto = bfd_reloc_type_lookup (stdoutput, reloc);
+	  reloc_howto_type * reloc_howto = bfd_reloc_type_lookup (stdoutput,
+								  reloc);
 	  int                size;
 	  int                address;
 	  fixS *             fixP;
@@ -2098,7 +2132,9 @@ md_assemble (str)
 	  
 	  size = bfd_get_reloc_size (reloc_howto);
 
-	  if (size != 2 && size != 4) /* XXX this will abort on an R_V850_8 reloc - is this reloc actually used ? */
+	  /* XXX This will abort on an R_V850_8 reloc -
+	     is this reloc actually used ? */
+	  if (size != 2 && size != 4) 
 	    abort();
 
 	  address = (f - frag_now->fr_literal) + insn_size - size;
@@ -2129,7 +2165,8 @@ md_assemble (str)
 		       f - frag_now->fr_literal, 4,
 		       & fixups[i].exp,
 		       1 /* FIXME: V850_OPERAND_RELATIVE ??? */,
-		       (bfd_reloc_code_real_type) (fixups[i].opindex + (int) BFD_RELOC_UNUSED)
+		       (bfd_reloc_code_real_type) (fixups[i].opindex
+						   + (int) BFD_RELOC_UNUSED)
 		       );
 	}
     }
@@ -2156,7 +2193,8 @@ tc_gen_reloc (seg, fixp)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-                    "reloc %d not supported by object file format", (int)fixp->fx_r_type);
+                    "reloc %d not supported by object file format",
+		    (int)fixp->fx_r_type);
 
       xfree (reloc);
       
