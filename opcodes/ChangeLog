@@ -1,3 +1,10 @@
+start-sanitize-sh3e
+Wed Aug 30 11:11:58 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* sh-opc.h: Add blank lines to improve readabililty of sh3e
+	instructions.
+
+end-sanitize-sh3e
 Wed Aug 30 11:09:38 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* sh-dis.c: Correct comment on first line of file.
