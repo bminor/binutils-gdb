@@ -57,7 +57,7 @@ static void print_insn_normal
 
 static int
 extract_normal (buf_ctrl, insn_value, attrs, start, length, shift, total_length, valuep)
-     void *buf_ctrl;
+     PTR buf_ctrl;
      cgen_insn_t insn_value;
      unsigned int attrs;
      int start, length, shift, total_length;
@@ -94,7 +94,7 @@ extract_normal (buf_ctrl, insn_value, attrs, start, length, shift, total_length,
 
 static void
 print_normal (dis_info, value, attrs, pc, length)
-     void *dis_info;
+     PTR dis_info;
      long value;
      unsigned int attrs;
      unsigned long pc; /* FIXME: should be bfd_vma */
@@ -121,7 +121,7 @@ print_normal (dis_info, value, attrs, pc, length)
 
 static void
 print_keyword (dis_info, keyword_table, value, attrs)
-     void *dis_info;
+     PTR dis_info;
      CGEN_KEYWORD *keyword_table;
      long value;
      CGEN_ATTR *attrs;
@@ -197,7 +197,7 @@ my_print_insn (pc, info, buf, buflen)
 CGEN_INLINE int
 m32r_cgen_extract_operand (opindex, buf_ctrl, insn_value, fields)
      int opindex;
-     void * buf_ctrl;
+     PTR buf_ctrl;
      cgen_insn_t insn_value;
      CGEN_FIELDS * fields;
 {
@@ -238,6 +238,26 @@ m32r_cgen_extract_operand (opindex, buf_ctrl, insn_value, fields)
     case M32R_OPERAND_UIMM16 :
       length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_uimm16);
       break;
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_IMM1 :
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 15, 1, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_imm1);
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCD :
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 2, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_accd);
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCS :
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 2, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_accs);
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACC :
+      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 1, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_acc);
+      break;
+/* end-sanitize-m32rx */
     case M32R_OPERAND_HI16 :
       length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), & fields->f_hi16);
       break;
@@ -327,6 +347,26 @@ m32r_cgen_print_operand (opindex, info, fields, attrs, pc, length)
     case M32R_OPERAND_UIMM16 :
       print_normal (info, fields->f_uimm16, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_IMM1 :
+      print_normal (info, fields->f_imm1, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCD :
+      print_keyword (info, & m32r_cgen_opval_h_accums, fields->f_accd, 0|(1<<CGEN_OPERAND_UNSIGNED));
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCS :
+      print_keyword (info, & m32r_cgen_opval_h_accums, fields->f_accs, 0|(1<<CGEN_OPERAND_UNSIGNED));
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACC :
+      print_keyword (info, & m32r_cgen_opval_h_accums, fields->f_acc, 0|(1<<CGEN_OPERAND_UNSIGNED));
+      break;
+/* end-sanitize-m32rx */
     case M32R_OPERAND_HI16 :
       print_normal (info, fields->f_hi16, 0|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
@@ -389,7 +429,7 @@ m32r_cgen_init_dis (mach, endian)
 static int
 extract_insn_normal (insn, buf_ctrl, insn_value, fields)
      const CGEN_INSN *insn;
-     void *buf_ctrl;
+     PTR buf_ctrl;
      cgen_insn_t insn_value;
      CGEN_FIELDS *fields;
 {
@@ -419,13 +459,13 @@ extract_insn_normal (insn, buf_ctrl, insn_value, fields)
 
 /* Default insn printer.
 
-   DIS_INFO is defined as `void *' so the disassembler needn't know anything
+   DIS_INFO is defined as `PTR' so the disassembler needn't know anything
    about disassemble_info.
 */
 
 static void
 print_insn_normal (dis_info, insn, fields, pc, length)
-     void *dis_info;
+     PTR dis_info;
      const CGEN_INSN *insn;
      CGEN_FIELDS *fields;
      bfd_vma pc;
@@ -473,7 +513,6 @@ print_insn (pc, info, buf, buflen)
      char *buf;
      int buflen;
 {
-  int i;
   unsigned long insn_value;
   const CGEN_INSN_LIST *insn_list;
 
@@ -499,7 +538,6 @@ print_insn (pc, info, buf, buflen)
   while (insn_list != NULL)
     {
       const CGEN_INSN *insn = insn_list->insn;
-      const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
       CGEN_FIELDS fields;
       int length;
 

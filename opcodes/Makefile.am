@@ -55,6 +55,7 @@ CFILES = \
 	sh-dis.c \
 	sparc-dis.c \
 	sparc-opc.c \
+	tic30-dis.c \
 	w65-dis.c \
 	z8k-dis.c \
 	z8kgen.c
@@ -99,6 +100,7 @@ ALL_MACHINES = \
 	sh-dis.lo \
 	sparc-dis.lo \
 	sparc-opc.lo \
+	tic30-dis.lo \
 	$(start-sanitize-tic80) \
 	tic80-dis.lo \
 	tic80-opc.lo \
@@ -158,7 +160,7 @@ CGENFILES = $(CGENDIR)/object.scm $(CGENDIR)/utils.scm \
 	$(CGENDIR)/ifield.scm $(CGENDIR)/iformat.scm \
 	$(CGENDIR)/operand.scm $(CGENDIR)/insn.scm \
 	$(CGENDIR)/opcodes.scm $(CGENDIR)/cgen-opc.scm \
-	cgen-asm.in cgen-dis.in
+	cgen-opc.in cgen-asm.in cgen-dis.in
 # The end marker is written this way to pass through automake unscathed.
 ENDSAN = end-sanitize-cygnus
 
@@ -243,7 +245,8 @@ alpha-dis.lo: alpha-dis.c $(INCDIR)/ansidecl.h sysdep.h \
 alpha-opc.lo: alpha-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/alpha.h \
   $(BFD_H)
 arm-dis.lo: arm-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h arm-opc.h
+  $(INCDIR)/ansidecl.h arm-opc.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/libiberty.h \
   $(BFD_H) $(INCDIR)/opcode/cgen.h
 cgen-dis.lo: cgen-dis.c sysdep.h config.h $(INCDIR)/libiberty.h \
@@ -301,6 +304,8 @@ sparc-dis.lo: sparc-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/opcode/sparc.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/libiberty.h
 sparc-opc.lo: sparc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/sparc.h
+tic30-dis.lo: tic30-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic30.h
 w65-dis.lo: w65-dis.c w65-opc.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/ansidecl.h
 z8k-dis.lo: z8k-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \

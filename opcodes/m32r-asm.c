@@ -304,26 +304,46 @@ m32r_cgen_parse_operand (opindex, strp, fields)
     case M32R_OPERAND_UIMM16 :
       errmsg = cgen_parse_unsigned_integer (strp, 11, 0, 65535, &fields->f_uimm16);
       break;
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_IMM1 :
+      errmsg = cgen_parse_unsigned_integer (strp, 12, 0, 1, &fields->f_imm1);
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCD :
+      errmsg = cgen_parse_keyword (strp, & m32r_cgen_opval_h_accums, & fields->f_accd);
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCS :
+      errmsg = cgen_parse_keyword (strp, & m32r_cgen_opval_h_accums, & fields->f_accs);
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACC :
+      errmsg = cgen_parse_keyword (strp, & m32r_cgen_opval_h_accums, & fields->f_acc);
+      break;
+/* end-sanitize-m32rx */
     case M32R_OPERAND_HI16 :
-      errmsg = parse_h_hi16 (strp, 12, 0, 65535, &fields->f_hi16);
+      errmsg = parse_h_hi16 (strp, 16, 0, 65535, &fields->f_hi16);
       break;
     case M32R_OPERAND_SLO16 :
-      errmsg = parse_h_slo16 (strp, 13, -32768, 32767, &fields->f_simm16);
+      errmsg = parse_h_slo16 (strp, 17, -32768, 32767, &fields->f_simm16);
       break;
     case M32R_OPERAND_ULO16 :
-      errmsg = parse_h_ulo16 (strp, 14, 0, 65535, &fields->f_uimm16);
+      errmsg = parse_h_ulo16 (strp, 18, 0, 65535, &fields->f_uimm16);
       break;
     case M32R_OPERAND_UIMM24 :
-      errmsg = cgen_parse_address (strp, 15, 0, NULL, & fields->f_uimm24);
+      errmsg = cgen_parse_address (strp, 19, 0, NULL, & fields->f_uimm24);
       break;
     case M32R_OPERAND_DISP8 :
-      errmsg = cgen_parse_address (strp, 16, 0, NULL, & fields->f_disp8);
+      errmsg = cgen_parse_address (strp, 20, 0, NULL, & fields->f_disp8);
       break;
     case M32R_OPERAND_DISP16 :
-      errmsg = cgen_parse_address (strp, 17, 0, NULL, & fields->f_disp16);
+      errmsg = cgen_parse_address (strp, 21, 0, NULL, & fields->f_disp16);
       break;
     case M32R_OPERAND_DISP24 :
-      errmsg = cgen_parse_address (strp, 18, 0, NULL, & fields->f_disp24);
+      errmsg = cgen_parse_address (strp, 22, 0, NULL, & fields->f_disp24);
       break;
 
     default :
@@ -390,6 +410,26 @@ m32r_cgen_insert_operand (opindex, fields, buffer)
     case M32R_OPERAND_UIMM16 :
       insert_normal (fields->f_uimm16, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
       break;
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_IMM1 :
+      insert_normal (fields->f_imm1, 0|(1<<CGEN_OPERAND_UNSIGNED), 15, 1, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCD :
+      insert_normal (fields->f_accd, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 2, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCS :
+      insert_normal (fields->f_accs, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 2, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACC :
+      insert_normal (fields->f_acc, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 1, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      break;
+/* end-sanitize-m32rx */
     case M32R_OPERAND_HI16 :
       insert_normal (fields->f_hi16, 0|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
       break;
@@ -470,6 +510,26 @@ m32r_cgen_validate_operand (opindex, fields)
     case M32R_OPERAND_UIMM16 :
       errmsg = cgen_validate_unsigned_integer (fields->f_uimm16, 0, 65535);
       break;
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_IMM1 :
+      errmsg = cgen_validate_unsigned_integer (fields->f_imm1, 0, 1);
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCD :
+      /* nothing to do */
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCS :
+      /* nothing to do */
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACC :
+      /* nothing to do */
+      break;
+/* end-sanitize-m32rx */
     case M32R_OPERAND_HI16 :
       errmsg = cgen_validate_unsigned_integer (fields->f_hi16, 0, 65535);
       break;

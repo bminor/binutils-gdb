@@ -1,0 +1,143 @@
+/* Generic opcode table support for targets using CGEN. -*- C -*-
+   CGEN: Cpu tools GENerator
+
+This file is used to generate @arch@-opc.c.
+
+Copyright (C) 1998 Free Software Foundation, Inc.
+
+This file is part of the GNU Binutils and GDB, the GNU debugger.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#include "sysdep.h"
+#include <stdio.h>
+#include "ansidecl.h"
+#include "libiberty.h"
+#include "bfd.h"
+#include "symcat.h"
+#include "@arch@-opc.h"
+
+/* Look up instruction INSN_VALUE and extract its fields.
+   If non-null INSN is the insn table entry.
+   Otherwise INSN_VALUE is examined to compute it.
+   LENGTH is the bit length of INSN_VALUE if known, otherwise 0.
+   The result a pointer to the insn table entry, or NULL if the instruction
+   wasn't recognized.  */
+
+const CGEN_INSN *
+@arch@_cgen_lookup_insn (insn, insn_value, length, fields)
+     const CGEN_INSN *insn;
+     cgen_insn_t insn_value;
+     int length;
+     CGEN_FIELDS *fields;
+{
+  char buf[4];
+
+  if (!insn)
+    {
+      const CGEN_INSN_LIST *insn_list;
+
+#ifdef CGEN_INT_INSN
+      switch (length)
+	{
+	case 8:
+	  buf[0] = insn_value;
+	  break;
+	case 16:
+	  if (cgen_current_endian == CGEN_ENDIAN_BIG)
+	    bfd_putb16 (insn_value, buf);
+	  else
+	    bfd_putl16 (insn_value, buf);
+	  break;
+	case 32:
+	  if (cgen_current_endian == CGEN_ENDIAN_BIG)
+	    bfd_putb32 (insn_value, buf);
+	  else
+	    bfd_putl32 (insn_value, buf);
+	  break;
+	default:
+	  abort ();
+	}
+#else
+      abort (); /* FIXME: unfinished */
+#endif
+
+      /* The instructions are stored in hash lists.
+	 Pick the first one and keep trying until we find the right one.  */
+
+      insn_list = CGEN_DIS_LOOKUP_INSN (buf, insn_value);
+      while (insn_list != NULL)
+	{
+	  insn = insn_list->insn;
+
+	  /* Basic bit mask must be correct.  */
+	  /* ??? May wish to allow target to defer this check until the extract
+	     handler.  */
+	  if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
+	    {
+	      length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
+	      if (length > 0)
+		return insn;
+	    }
+
+	  insn_list = CGEN_DIS_NEXT_INSN (insn_list);
+	}
+    }
+  else
+    {
+      length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
+      if (length > 0)
+	return insn;
+    }
+
+  return NULL;
+}
+
+/* Fill in the operand instances used by insn INSN_VALUE.
+   If non-null INS is the insn table entry.
+   Otherwise INSN_VALUE is examined to compute it.
+   LENGTH is the number of bits in INSN_VALUE if known, otherwise 0.
+   INDICES is a pointer to a buffer of MAX_OPERANDS ints to be filled in.
+   The result a pointer to the insn table entry, or NULL if the instruction
+   wasn't recognized.  */
+
+const CGEN_INSN *
+@arch@_cgen_get_insn_operands (insn, insn_value, length, indices)
+     const CGEN_INSN *insn;
+     cgen_insn_t insn_value;
+     int length;
+     int *indices;
+{
+  CGEN_FIELDS fields;
+  const CGEN_OPERAND_INSTANCE *opinst;
+  int i;
+
+  insn = @arch@_cgen_lookup_insn (insn, insn_value, length, &fields);
+  if (! insn)
+    return NULL;
+
+  for (i = 0, opinst = CGEN_INSN_OPERANDS (insn);
+       CGEN_OPERAND_INSTANCE_TYPE (opinst) != CGEN_OPERAND_INSTANCE_END;
+       ++i, ++opinst)
+    {
+      const CGEN_OPERAND *op = CGEN_OPERAND_INSTANCE_OPERAND (opinst);
+      if (op == NULL)
+	indices[i] = CGEN_OPERAND_INSTANCE_INDEX (opinst);
+      else
+	indices[i] = @arch@_cgen_get_operand (CGEN_OPERAND_INDEX (op), &fields);
+    }
+
+  return insn;
+}

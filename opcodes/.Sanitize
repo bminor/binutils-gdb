@@ -15,7 +15,7 @@
 
 Do-first:
 
-cygnus_files="cgen.sh cgen-asm.in cgen-dis.in"
+cygnus_files="cgen.sh cgen-asm.in cgen-dis.in cgen-opc.in"
 
 if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
 	keep_these_too="${cygnus_files} ${keep_these_too}"

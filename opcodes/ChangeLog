@@ -1,7 +1,23 @@
+Wed Feb 11 18:58:34 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-opc.in: New file.
+	* cgen.sh: Translate @ARCH@.  Cat cgen-opc.in into @arch@-opc.c.
+	* Makefile.am (CGENFILES): Add cgen-opc.in.
+	* Makefile.in: Regenerate.
+
+	* cgen-opc.c (cgen_set_cpu): Delete init of hw list `next' chain.
+	(cgen_hw_lookup): Make result const.
+
+	* cgen-dis.in (*): Use PTR instead of void *.
+	(print_insn): Delete unused vars `i', `syntax'.
+
+	* m32r-opc.h, m32r-opc.c, m32r-asm.c, m32r-dis.c: Regenerate.
+
 start-sanitize-sky
 Tue Feb 10 14:56:24 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-opc.c (*): pke,gpuif renamed to vif,gif.
+	(vif_opcodes): Update renamed insns.
 	* dvp-dis.c (*): Likewise.
 
 end-sanitize-sky

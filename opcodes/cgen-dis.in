@@ -57,7 +57,7 @@ static void print_insn_normal
 
 static int
 extract_normal (buf_ctrl, insn_value, attrs, start, length, shift, total_length, valuep)
-     void *buf_ctrl;
+     PTR buf_ctrl;
      cgen_insn_t insn_value;
      unsigned int attrs;
      int start, length, shift, total_length;
@@ -94,7 +94,7 @@ extract_normal (buf_ctrl, insn_value, attrs, start, length, shift, total_length,
 
 static void
 print_normal (dis_info, value, attrs, pc, length)
-     void *dis_info;
+     PTR dis_info;
      long value;
      unsigned int attrs;
      unsigned long pc; /* FIXME: should be bfd_vma */
@@ -121,7 +121,7 @@ print_normal (dis_info, value, attrs, pc, length)
 
 static void
 print_keyword (dis_info, keyword_table, value, attrs)
-     void *dis_info;
+     PTR dis_info;
      CGEN_KEYWORD *keyword_table;
      long value;
      CGEN_ATTR *attrs;
@@ -147,7 +147,7 @@ print_keyword (dis_info, keyword_table, value, attrs)
 static int
 extract_insn_normal (insn, buf_ctrl, insn_value, fields)
      const CGEN_INSN *insn;
-     void *buf_ctrl;
+     PTR buf_ctrl;
      cgen_insn_t insn_value;
      CGEN_FIELDS *fields;
 {
@@ -177,13 +177,13 @@ extract_insn_normal (insn, buf_ctrl, insn_value, fields)
 
 /* Default insn printer.
 
-   DIS_INFO is defined as `void *' so the disassembler needn't know anything
+   DIS_INFO is defined as `PTR' so the disassembler needn't know anything
    about disassemble_info.
 */
 
 static void
 print_insn_normal (dis_info, insn, fields, pc, length)
-     void *dis_info;
+     PTR dis_info;
      const CGEN_INSN *insn;
      CGEN_FIELDS *fields;
      bfd_vma pc;
@@ -215,7 +215,7 @@ print_insn_normal (dis_info, insn, fields, pc, length)
 }
 
 /* Default value for CGEN_PRINT_INSN.
-   Given BUFLEN bytes (target byte order) read into BUF, look up the
+   Given BUFLEN bits (target byte order) read into BUF, look up the
    insn in the instruction table and disassemble it.
 
    The result is the size of the insn in bytes.  */
@@ -231,7 +231,6 @@ print_insn (pc, info, buf, buflen)
      char *buf;
      int buflen;
 {
-  int i;
   unsigned long insn_value;
   const CGEN_INSN_LIST *insn_list;
 
@@ -257,7 +256,6 @@ print_insn (pc, info, buf, buflen)
   while (insn_list != NULL)
     {
       const CGEN_INSN *insn = insn_list->insn;
-      const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
       CGEN_FIELDS fields;
       int length;
 

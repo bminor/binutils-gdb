@@ -76,6 +76,12 @@ typedef enum cgen_operand_type {
  , M32R_OPERAND_SRC2, M32R_OPERAND_SCR, M32R_OPERAND_DCR, M32R_OPERAND_SIMM8
  , M32R_OPERAND_SIMM16, M32R_OPERAND_UIMM4, M32R_OPERAND_UIMM5, M32R_OPERAND_UIMM16
 /* start-sanitize-m32rx */
+ , M32R_OPERAND_IMM1
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_OPERAND_ACCD
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
  , M32R_OPERAND_ACCS
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
@@ -101,6 +107,16 @@ typedef enum mach_attr {
  , MACH_MAX
 } MACH_ATTR;
 
+/* Enum declaration for instructions which modify the link register as a side effect.  */
+typedef enum write_lr_attr {
+  WRITE_LR_NO, WRITE_LR_YES
+} WRITE_LR_ATTR;
+
+/* Enum declaration for instructions which modify their source register as a side effect.  */
+typedef enum write_src_attr {
+  WRITE_SRC_NO, WRITE_SRC_YES
+} WRITE_SRC_ATTR;
+
 /* start-sanitize-m32rx */
 /* Enum declaration for parallel execution pipeline selection.  */
 typedef enum pipe_attr {
@@ -111,8 +127,11 @@ typedef enum pipe_attr {
 /* Number of architecture variants.  */
 #define MAX_MACHS ((int) MACH_MAX)
 
-/* Number of operands.  */
+/* Number of operands types.  */
 #define MAX_OPERANDS ((int) M32R_OPERAND_MAX)
+
+/* Maximum number of operands referenced by any insn.  */
+#define MAX_OPERAND_INSTANCES 8
 
 /* Operand and instruction attribute indices.  */
 
@@ -132,8 +151,9 @@ typedef enum cgen_insn_attr {
 /* start-sanitize-m32rx */
  , CGEN_INSN_PIPE
 /* end-sanitize-m32rx */
- , CGEN_INSN_ALIAS, CGEN_INSN_COND_CTI, CGEN_INSN_FILL_SLOT, CGEN_INSN_PARALLEL
- , CGEN_INSN_RELAX, CGEN_INSN_RELAXABLE, CGEN_INSN_UNCOND_CTI
+ , CGEN_INSN_WRITE_LR, CGEN_INSN_WRITE_SRC, CGEN_INSN_ALIAS, CGEN_INSN_COND_CTI
+ , CGEN_INSN_FILL_SLOT, CGEN_INSN_PARALLEL, CGEN_INSN_RELAX, CGEN_INSN_RELAXABLE
+ , CGEN_INSN_UNCOND_CTI
 } CGEN_INSN_ATTR;
 
 /* Number of non-boolean elements in cgen_insn.  */
@@ -188,6 +208,9 @@ typedef enum cgen_insn_type {
 /* end-sanitize-m32rx */
  , M32R_INSN_DIV, M32R_INSN_DIVU, M32R_INSN_REM, M32R_INSN_REMU
 /* start-sanitize-m32rx */
+ , M32R_INSN_DIVH
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
  , M32R_INSN_JC
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
@@ -240,11 +263,23 @@ typedef enum cgen_insn_type {
  , M32R_INSN_MVTC, M32R_INSN_NEG, M32R_INSN_NOP, M32R_INSN_NOT
  , M32R_INSN_RAC
 /* start-sanitize-m32rx */
- , M32R_INSN_RAC_A
+ , M32R_INSN_RAC_D
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_INSN_RAC_DS
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_INSN_RAC_DSI
 /* end-sanitize-m32rx */
  , M32R_INSN_RACH
 /* start-sanitize-m32rx */
- , M32R_INSN_RACH_A
+ , M32R_INSN_RACH_D
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_INSN_RACH_DS
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_INSN_RACH_DSI
 /* end-sanitize-m32rx */
  , M32R_INSN_RTE, M32R_INSN_SETH, M32R_INSN_SETH_A, M32R_INSN_SLL
  , M32R_INSN_SLL3, M32R_INSN_SLL3_A, M32R_INSN_SLLI, M32R_INSN_SLLI_A
@@ -281,7 +316,7 @@ typedef enum cgen_insn_type {
  , M32R_INSN_MULWU1
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
- , M32R_INSN_MACHL1
+ , M32R_INSN_MACLH1
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
  , M32R_INSN_SC
@@ -301,7 +336,7 @@ typedef enum cgen_insn_type {
 #include "opcode/cgen.h"
 
 /* This struct records data prior to insertion or after extraction.  */
-typedef struct cgen_fields 
+struct cgen_fields 
 {
   long f_nil;
   long f_op1;
@@ -332,12 +367,43 @@ typedef struct cgen_fields
 /* start-sanitize-m32rx */
   long f_accs;
 /* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+  long f_accd;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+  long f_bits67;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+  long f_bit14;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+  long f_imm1;
+/* end-sanitize-m32rx */
   int length;
-} CGEN_FIELDS;
+};
 
 /* Attributes.  */
 extern const CGEN_ATTR_TABLE m32r_cgen_operand_attr_table[];
 extern const CGEN_ATTR_TABLE m32r_cgen_insn_attr_table[];
+
+/* Enum declaration for m32r hardware types.  */
+typedef enum hw_type {
+  HW_H_PC, HW_H_MEMORY, HW_H_SINT, HW_H_UINT
+ , HW_H_ADDR, HW_H_IADDR, HW_H_HI16, HW_H_SLO16
+ , HW_H_ULO16, HW_H_GR, HW_H_CR, HW_H_ACCUM
+/* start-sanitize-m32rx */
+ , HW_H_ACCUMS
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , HW_H_ABORT
+/* end-sanitize-m32rx */
+ , HW_H_COND, HW_H_SM, HW_H_BSM, HW_H_IE
+ , HW_H_BIE, HW_H_BCOND, HW_H_BPC, HW_MAX
+} HW_TYPE;
+
+#define MAX_HW ((int) HW_MAX)
+
+/* Hardware decls.  */
 
 extern CGEN_KEYWORD m32r_cgen_opval_h_gr;
 extern CGEN_KEYWORD m32r_cgen_opval_h_cr;
@@ -368,6 +434,7 @@ extern CGEN_KEYWORD m32r_cgen_opval_h_accums;
 (X (buffer) | \
  (X (buffer) == 0x40 || X (buffer) == 0xe0 || X (buffer) == 0x60 || X (buffer) == 0x50 ? 0 \
   : X (buffer) == 0x70 || X (buffer) == 0xf0 ? (((unsigned char *) (buffer))[0] & 0xf) \
+  : X (buffer) == 0x30 ? ((((unsigned char *) (buffer))[1] & 0x70) >> 4) \
   : ((((unsigned char *) (buffer))[1] & 0xf0) >> 4)))
 
 /* -- */
