@@ -247,6 +247,9 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_MOVL2, 0, 1, 16, false, 0, complain_overflow_bitfield, special, "32/24 relaxed move", false, 0x0000ffff, 0x0000ffff, false),
 
+  HOWTO (R_BCC_INV, 0, 0, 8, true, 0, complain_overflow_signed, special, "DISP8 inverted", false, 0x000000ff, 0x000000ff, true),
+
+  HOWTO (R_JMP_DEL, 0, 0, 8, true, 0, complain_overflow_signed, special, "Deleted jump", false, 0x000000ff, 0x000000ff, true),
 };
 
 
@@ -340,6 +343,12 @@ rtype2howto (internal, dst)
     case R_MOVL2:
       internal->howto = howto_table + 17;
       break;
+    case R_BCC_INV:
+      internal->howto = howto_table + 18;
+      break;
+    case R_JMP_DEL:
+      internal->howto = howto_table + 19;
+      break;
     default:
       abort ();
       break;
@@ -387,6 +396,33 @@ reloc_processing (relent, reloc, symbols, abfd, section)
   /*  relent->section = 0;*/
 }
 
+static boolean
+h8300_symbol_address_p (abfd, input_section, address)
+     bfd *abfd;
+     asection *input_section;
+     bfd_vma address;
+{
+  asymbol **s;
+
+  s = _bfd_generic_link_get_symbols (abfd);
+  BFD_ASSERT (s != (asymbol **) NULL);
+
+  /* Search all the symbols for one in INPUT_SECTION with
+     address ADDRESS.  */
+  while (*s) 
+    {
+      asymbol *p = *s;
+      if (p->section == input_section
+	  && (input_section->output_section->vma
+	      + input_section->output_offset
+	      + p->value) == address)
+	return true;
+      s++;
+    }    
+  return false;
+}
+
+
 /* If RELOC represents a relaxable instruction/reloc, change it into
    the relaxed reloc, notify the linker that symbol addresses
    have changed (bfd_perform_slip) and return how much the current
@@ -406,12 +442,17 @@ h8300_reloc16_estimate(abfd, input_section, reloc, shrink, link_info)
   bfd_vma value;  
   bfd_vma dot;
   bfd_vma gap;
+  static asection *last_input_section = NULL;
+  static arelent *last_reloc = NULL;
 
   /* The address of the thing to be relocated will have moved back by 
      the size of the shrink - but we don't change reloc->address here,
      since we need it to know where the relocation lives in the source
      uncooked section.  */
   bfd_vma address = reloc->address - shrink;
+
+  if (input_section != last_input_section)
+    last_reloc = NULL;
 
   /* Only examine the relocs which might be relaxable.  */
   switch (reloc->howto->type)
@@ -436,9 +477,45 @@ h8300_reloc16_estimate(abfd, input_section, reloc, shrink, link_info)
   
       /* If the distance is within -128..+128 inclusive, then we can relax
 	 this jump.  +128 is valid since the target will move two bytes
-	 this jump.  */
+	 closer if we do relax this branch.  */
       if ((int)gap >= -128 && (int)gap <= 128 )
 	{ 
+
+	  /* It's possible we may be able to eliminate this branch entirely;
+	     if the previous instruction is a branch around this instruction,
+	     and there's no label at this instruction, then we can reverse
+	     the condition on the previous branch and eliminate this jump.
+
+	       original:			new:
+		 bCC lab1			bCC' lab2
+		 jmp lab2
+		lab1:				lab1:
+	
+	     This saves 4 bytes instead of two, and should be relatively
+	     common.  */
+
+	  if (gap <= 126
+	      && last_reloc
+	      && last_reloc->howto->type == R_PCRBYTE)
+	    {
+	      bfd_vma last_value;
+	      last_value = bfd_coff_reloc16_get_value (last_reloc, link_info,
+						       input_section) + 1;
+
+	      if (last_value == dot + 2
+		  && last_reloc->address + 1 == reloc->address
+		  && ! h8300_symbol_address_p (abfd, input_section, dot - 2))
+		{
+		  reloc->howto = howto_table + 19;
+		  last_reloc->howto = howto_table + 18;
+		  last_reloc->sym_ptr_ptr = reloc->sym_ptr_ptr;
+		  last_reloc->addend = reloc->addend;
+		  shrink += 4;
+		  bfd_perform_slip (abfd, 4, input_section, address);
+		  break;
+		}
+	    }
+
 	  /* Change the reloc type.  */
 	  reloc->howto = reloc->howto + 1;	  
 
@@ -552,6 +629,8 @@ h8300_reloc16_estimate(abfd, input_section, reloc, shrink, link_info)
 	break;
     }
 
+  last_reloc = reloc;
+  last_input_section = input_section;
   return shrink;
 }
 
@@ -916,6 +995,42 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
       src_address += 4;
       break;
 
+    case R_BCC_INV:
+      /* Get the address of the target of this branch.  */
+      value = bfd_coff_reloc16_get_value(reloc, link_info, input_section);
+
+      dot = (link_order->offset 
+	     + dst_address 
+	     + link_order->u.indirect.section->output_section->vma) + 1;
+
+      gap = value - dot;
+
+      /* Sanity check.  */
+      if (gap < -128 || gap > 126)
+	{
+	  if (! ((*link_info->callbacks->reloc_overflow)
+		 (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		  reloc->howto->name, reloc->addend, input_section->owner,
+		  input_section, reloc->address)))
+	    abort ();
+	}
+
+      /* Everything looks OK.  Fix the condition in the instruction, apply
+	 the relocation, and update the src/dst address appropriately.  */
+
+      bfd_put_8 (abfd, bfd_get_8 (abfd, data + dst_address - 1) ^ 1,
+		 data + dst_address - 1);
+      bfd_put_8 (abfd, gap, data + dst_address);
+      dst_address++;
+      src_address++;
+
+      /* All done.  */
+      break;
+
+    case R_JMP_DEL:
+      src_address += 4;
+      break;
+
     /* An 8bit memory indirect instruction (jmp/jsr).
 
        There's several things that need to be done to handle
@@ -934,7 +1049,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	   address in the function vector table.  */
 	asymbol *symbol;
 	bfd_vma value;
-	char *name;
+	const char *name;
 	struct funcvec_hash_entry *h;
 	asection *vectors_sec = h8300_coff_hash_table (link_info)->vectors_sec;
 
@@ -1131,7 +1246,7 @@ h8300_bfd_link_add_symbols(abfd, info)
 	{
 	  arelent *reloc = relocs[i];
 	  asymbol *symbol = *(reloc->sym_ptr_ptr);
-	  char *name;
+	  const char *name;
 
 	  /* We've got an indirect reloc.  See if we need to add it
 	     to the function vector table.   At this point, we have
