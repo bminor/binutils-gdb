@@ -7079,15 +7079,36 @@ debug_info;
 
 static debug_info *   debug_information = NULL;
 static unsigned int   num_debug_info_entries = 0;
+static unsigned int   last_pointer_size = 0;
+static int            warned_about_missing_comp_units = FALSE;
 
 static unsigned int
-get_pointer_size_of_comp_unit (unsigned int comp_unit)
+get_pointer_size_of_comp_unit (unsigned int comp_unit,
+			       const char * section_name)
 {
-  if (num_debug_info_entries == 0
-      || comp_unit >= num_debug_info_entries)
-    return 0;
+  if (num_debug_info_entries == 0)
+    {
+      error (_("%s section needs a populated .debug_info section\n"),
+	     section_name);
+      return 0;
+    }
 
-  return debug_information [comp_unit].pointer_size;
+  if (comp_unit >= num_debug_info_entries)
+    {
+      if (!warned_about_missing_comp_units)
+	{
+	  warn (_("%s section has more comp units than .debug_info section\n"),
+		section_name);
+	  warn (_("assuming that the pointer size is %d, from the last comp unit in .debug_info\n\n"),
+		last_pointer_size);
+	  warned_about_missing_comp_units = TRUE;
+	}
+    }
+  else
+    last_pointer_size = debug_information [comp_unit].pointer_size;
+
+  return last_pointer_size;
+
 }
 
 /* Locate and scan the .debug_info section in the file and record the pointer
@@ -7106,6 +7127,12 @@ get_debug_info (FILE * file)
   unsigned long       length;
   unsigned int        num_units;
   unsigned int        unit;
+
+  /* Reset the last pointer size so that we can issue correct
+     error messages if we are displaying the contents of more
+     than one file.  */
+  last_pointer_size = 0;
+  warned_about_missing_comp_units = FALSE;
 
   /* If we already have the information there is nothing else to do.  */
   if (num_debug_info_entries > 0)
@@ -7275,12 +7302,8 @@ display_debug_lines (Elf_Internal_Shdr *section,
 
       /* Get the pointer size from the comp unit associated
 	 with this block of line number information.  */
-      pointer_size = get_pointer_size_of_comp_unit (comp_unit);
-      if (pointer_size == 0)
-	{
-	  error (_("Not enough comp units for .debug_line section\n"));
-	  return 0;
-	}
+      pointer_size = get_pointer_size_of_comp_unit (comp_unit,
+						    ".debug_lines");
       comp_unit ++;
 
       printf (_("  Length:                      %ld\n"), info.li_length);
@@ -8487,12 +8510,8 @@ display_debug_loc (Elf_Internal_Shdr *section,
 
       /* Get the pointer size from the comp unit associated
 	 with this block of location information.  */
-      pointer_size = get_pointer_size_of_comp_unit (comp_unit);
-      if (pointer_size == 0)
-	{
-	  error (_("Not enough comp units for .debug_loc section\n"));
-	  return 0;
-	}
+      pointer_size = get_pointer_size_of_comp_unit (comp_unit, ".debug_loc");
+
       comp_unit ++;
 
       while (1)

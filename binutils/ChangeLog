@@ -1,3 +1,19 @@
+2004-12-22  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (last_pointer_size, warned_about_missing_comp_units):
+	New variables associated with obtaining the pointer size for a
+	comp_unit.
+	(get_pointer_size_of_comp_unit): Add an extra parameter - the name
+	of the section requesting the pointer size.  Use this name in
+	error messages.  If there are not enough comp_units available
+	produce a warning message, but return the last known pointer size
+	so that section dumping can continue.
+	(get_debug_info): Reset the new variables.
+	(display_debug_lines): Add extra parameter to invocation of
+	get_pointer_size_of_comp_unit and remove error message when it
+	returns 0.
+	(display_debug_loc): Likewise.
+
 2004-12-15 Jan Beulich  <jbeulich@novell.com>
 
 	* doc/binutils.texi: Document --strip-unneeded-symbol and
