@@ -5877,10 +5877,9 @@ terminating `#' character and checksum.",
 	   &maintenancelist);
 
   add_show_from_set
-    (add_set_cmd ("remotebreak", no_class,
-		  var_boolean, (char *) &remote_break,
-		  "Set whether to send break if interrupted.\n",
-		  &setlist),
+    (add_set_boolean_cmd ("remotebreak", no_class, &remote_break,
+			  "Set whether to send break if interrupted.\n",
+			  &setlist),
      &showlist);
 
   /* Install commands for configuring memory read/write packets. */

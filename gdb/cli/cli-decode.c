@@ -291,6 +291,25 @@ add_set_auto_boolean_cmd (char *name,
   return c;
 }
 
+/* Add element named NAME to command list LIST (the list for set
+   or some sublist thereof).
+   CLASS is as in add_cmd.
+   VAR is address of the variable which will contain the value.
+   DOC is the documentation string.  */
+struct cmd_list_element *
+add_set_boolean_cmd (char *name,
+		     enum command_class class,
+		     int *var,
+		     char *doc,
+		     struct cmd_list_element **list)
+{
+  static const char *boolean_enums[] = { "on", "off", NULL };
+  struct cmd_list_element *c;
+  c = add_set_cmd (name, class, var_boolean, var, doc, list);
+  c->enums = boolean_enums;
+  return c;
+}
+
 /* Where SETCMD has already been added, add the corresponding show
    command to LIST and return a pointer to the added command (not 
    necessarily the head of LIST).  */

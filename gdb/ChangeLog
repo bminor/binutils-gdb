@@ -1,5 +1,13 @@
 2001-09-29  Andrew Cagney  <ac131313@redhat.com>
 
+	* cli/cli-decode.c (add_set_boolean_cmd): Define.
+	* cli/cli-decode.h (add_set_boolean_cmd): Declare.
+	* command.h (add_set_boolean_cmd): Ditto.
+	* remote.c (_initialize_remote): Use add_set_boolean_cmd for "set
+	remotebreak"
+
+2001-09-29  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (gdbarch_dump): Sort output.
 	* gdbarch.c: Regenerate.
 
