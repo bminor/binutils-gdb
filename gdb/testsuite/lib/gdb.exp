@@ -354,13 +354,13 @@ proc gdb_test { args } {
 	    gdb_start
 	    set result -1
 	}
-	-re "\[\r\n\]*$pattern\[\r\n\]+$gdb_prompt $" {
+	-re "\[\r\n\]*($pattern)\[\r\n\]+$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		pass "$message"
 	    }
 	    set result 0
 	}
-	-re "${question_string}$" {
+	-re "(${question_string})$" {
 	    send_gdb "$response_string\n";
 	    exp_continue;
 	}

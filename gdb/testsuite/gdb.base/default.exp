@@ -350,13 +350,13 @@ gdb_test "pwd" "Working directory .*" "pwd"
 
 #test run "r" abbreviation
 if [istarget "*-*-vxworks*"] then {
-    send_gdb "set args\n"
-    expect -re "$gdb_prompt $" {}
+    gdb_test "set args" "" "" 
+
     gdb_test "r" "Starting program: .*
 You must specify a function name to run, and arguments if any"\
 		"run \"r\" abbreviation"
-    send_gdb "set args main\n"
-    expect -re "$gdb_prompt $" {}
+    gdb_test "set args main" "" "" 
+
 } else {
     send_gdb "r\n"
     expect {
@@ -382,12 +382,12 @@ No program loaded.*$gdb_prompt $"\
 
 #test run
 if [istarget "*-*-vxworks*"] then {
-    send_gdb "set args\n"
-    expect -re "$gdb_prompt $" {}
+    gdb_test "set args" "" "" 
+
     gdb_test "run" "Starting program: .*
 You must specify a function name to run, and arguments if any"
-    send_gdb "set args main\n"
-    expect -re "$gdb_prompt $" {}
+    gdb_test "set args main" "" "" 
+
 } else {
     send_gdb "run\n"
     expect {
@@ -415,17 +415,8 @@ gdb_test "rbreak" "" "rbreak"
 #test return
 # The middle case accommodates the a29k, where doing the "ni" above causes
 # an initial stack to be created.
-send_gdb "return\n"
-expect {
-	-re "No selected frame..*$gdb_prompt $"\
-			{ pass "return" }
-	-re "Make .* return now.*y or n. $" {
-	    send_gdb "y\n"
-	    exp_continue
-	}
-	-re ".*$gdb_prompt $"	{ fail "return" }
-	timeout		{ fail "(timeout) return" }
-	}
+gdb_test "return" "No selected frame..*" "return"  "Make .* return now.*y or n. $" "y"
+
 
 #test reverse-search
 gdb_test "reverse-search" "No previous regular expression.*|There is no previous regular expression.*" "reverse-search"

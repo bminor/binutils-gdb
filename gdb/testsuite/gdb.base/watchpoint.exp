@@ -56,65 +56,41 @@ proc initialize {} {
     global decimal
     global srcfile
 
-    send_gdb "break marker1\n"
-    expect {
-	-re "Breakpoint 1 at $hex: file .*$srcfile, line $decimal.*$gdb_prompt $" {
-	    pass "set breakpoint at marker1"
-	}
-	-re ".*$gdb_prompt $" { fail "set breakpoint at marker1" ; return 0 }
-	timeout { fail "set breakpoint at marker1 (timeout)" ; return 0 }
+    if [gdb_test "break marker1" "Breakpoint 1 at $hex: file .*$srcfile, line $decimal.*" "set breakpoint at marker1" ] { 
+      return 0; 
     }
 
-    send_gdb "break marker2\n"
-    expect {
-	-re "Breakpoint 2 at $hex: file .*$srcfile, line $decimal.*$gdb_prompt $" {
-	    pass "set breakpoint at marker2"
-	}
-	-re ".*$gdb_prompt $" { fail "set breakpoint at marker2" ; return 0 }
-	timeout { fail "set breakpoint at marker2 (timeout)" ; return 0 }
+
+    if [gdb_test "break marker2" "Breakpoint 2 at $hex: file .*$srcfile, line $decimal.*" "set breakpoint at marker2" ] { 
+      return 0; 
     }
 
-    send_gdb "info break\n"
-    expect {
-	-re "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*\r\n$gdb_prompt $" { pass "info break in watchpoint.exp" }
-	-re ".*$gdb_prompt $" { fail "info break in watchpoint.exp" ; return 0 }
-	timeout { fail "info break in watchpoint.exp (timeout)" ; return 0 }
+
+    if [gdb_test "info break" "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*" "info break in watchpoint.exp" ] { 
+      return 0; 
     }
 
-    send_gdb "watch ival3\n"
-    expect {
-	-re ".*\[Ww\]atchpoint 3: ival3\r\n$gdb_prompt $" { 
-	    pass "set watchpoint on ival3"
-	}
-	-re ".*$gdb_prompt $" { fail "set watchpoint on ival3" ; return 0 }
-	timeout { fail "set watchpoint on ival3 (timeout)" ; return 0 }
+
+    if [gdb_test "watch ival3" ".*\[Ww\]atchpoint 3: ival3" "set watchpoint on ival3" ] { 
+      return 0; 
     }
+
 
     # "info watch" is the same as "info break"
 
-    send_gdb "info watch\n"
-    expect {
-	-re "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*\r\n3\[ \]*.*watchpoint.*ival3\r\n$gdb_prompt $" {
-	    pass "watchpoint found in watchpoint/breakpoint table"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "watchpoint found in watchpoint/breakpoint table" ; return 0
-	}
-	timeout {
-	   fail "watchpoint found in watchpoint/breakpoint table (timeout)" ; return 0
-	}
+    if [gdb_test "info watch" "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*\r\n3\[ \]*.*watchpoint.*ival3" "watchpoint found in watchpoint/breakpoint table" ] { 
+      return 0; 
     }
+
 
     # After installing the watchpoint, we disable it until we are ready
     # to use it.  This allows the test program to run at full speed until
     # we get to the first marker function.
 
-    send_gdb "disable 3\n"
-    expect {
-	-re "disable 3\[\r\n\]+$gdb_prompt $" { pass "disable watchpoint" }
-	-re ".*$gdb_prompt $" { fail "disable watchpoint" ; return 0 }
-	timeout { fail "disable watchpoint (timeout)" ; return 0 }
+    if [gdb_test "disable 3" "disable 3\[\r\n\]+" "disable watchpoint" ] { 
+      return 0; 
     }
+
 
     return 1
 }
@@ -131,20 +107,10 @@ proc test_simple_watchpoint {} {
 
     # Ensure that the watchpoint is disabled when we startup.
 
-    send_gdb "disable 3\n"
-    expect {
-	-re "^disable 3\[\r\n\]+$gdb_prompt $" {
-	    pass "disable watchpoint in test_simple_watchpoint"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "disable watchpoint in test_simple_watchpoint"
-	    return 0
-	}
-	timeout {
-	    fail "disable watchpoint in test_simple_watchpoint (timeout)"
-	    return 0
-	}
+    if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "disable watchpoint in test_simple_watchpoint" ] { 
+      return 0; 
     }
+
 
     # Run until we get to the first marker function.
 
@@ -166,12 +132,10 @@ proc test_simple_watchpoint {} {
 
     # After reaching the marker function, enable the watchpoint.
 
-    send_gdb "enable 3\n"
-    expect {
-	-re "^enable 3\[\r\n\]+$gdb_prompt $" { pass "enable watchpoint" }
-	-re ".*$gdb_prompt $" { fail "enable watchpoint" ; return }
-	timeout { fail "enable watchpoint (timeout)" ; return }
+    if [gdb_test "enable 3" "^enable 3\[\r\n\]+" "enable watchpoint" ] { 
+      return ; 
     }
+
 
     gdb_test "break func1" "Breakpoint.*at.*"
     gdb_test "set \$func1_breakpoint_number = \$bpnum" ""
@@ -223,12 +187,10 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
 
     # Disable the watchpoint so we run at full speed until we exit.
 
-    send_gdb "disable 3\n"
-    expect {
-	-re "^disable 3\[\r\n\]+$gdb_prompt $" { pass "watchpoint disabled" }
-	-re ".*$gdb_prompt $" { fail "watchpoint disabled" ; return }
-	timeout { fail "watchpoint disabled (timeout)" ; return }
+    if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "watchpoint disabled" ] { 
+      return ; 
     }
+
 
     # Run until process exits.
 
@@ -250,20 +212,10 @@ proc test_disabling_watchpoints {} {
 
     # Ensure that the watchpoint is disabled when we startup.
 
-    send_gdb "disable 3\n"
-    expect {
-	-re "^disable 3\[\r\n\]+$gdb_prompt $" {
-	    pass "disable watchpoint in test_disabling_watchpoints"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "disable watchpoint in test_disabling_watchpoints"
-	    return 0
-	}
-	timeout {
-	    fail "disable watchpoint in test_disabling_watchpoints (timeout)"
-	    return 0
-	}
+    if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "disable watchpoint in test_disabling_watchpoints" ] { 
+      return 0; 
     }
+
 
     # Run until we get to the first marker function.
 
@@ -285,12 +237,10 @@ proc test_disabling_watchpoints {} {
 
     # After reaching the marker function, enable the watchpoint.
 
-    send_gdb "enable 3\n"
-    expect {
-	-re "^enable 3\[\r\n\]+$gdb_prompt $" { pass "watchpoint enabled" }
-	-re ".*$gdb_prompt $" { fail "watchpoint enabled" ; return }
-	timeout { fail "watchpoint enabled (timeout)" ; return }
+    if [gdb_test "enable 3" "^enable 3\[\r\n\]+" "watchpoint enabled" ] { 
+      return ; 
     }
+
 
     # Continue until the first change, from -1 to 0
     # Don't check the old value, because on VxWorks the variable value
@@ -302,20 +252,10 @@ proc test_disabling_watchpoints {} {
     
     # Disable the watchpoint but leave breakpoints
 
-    send_gdb "disable 3\n"
-    expect {
-	-re "^disable 3\[\r\n\]+$gdb_prompt $" {
-	    pass "disable watchpoint #2 in test_disabling_watchpoints"
-	}
-	-re ".*$gdb_prompt $" {
-	    "disable watchpoint #2 in test_disabling_watchpoints"
-	    return 0
-	}
-	timeout {
-	    "disable watchpoint #2 in test_disabling_watchpoints (timeout)"
-	    return 0
-	}
+    if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "disable watchpoint #2 in test_disabling_watchpoints" ] { 
+      return 0; 
     }
+
 
     # Check watchpoint list, looking for the entry that confirms the
     # watchpoint is disabled.
@@ -382,6 +322,7 @@ proc test_stepping {} {
 	    -re "Run.*exit from.*marker1.* at" { }
 	    default { fail "finish from marker1" ; return }
 	}
+
 	expect {
 	    -re "marker1 \\(\\);.*$gdb_prompt $" {
 		send_gdb "step\n"
@@ -455,13 +396,10 @@ proc test_watchpoint_triggered_in_syscall {} {
 	# If we send_gdb "123\n" before gdb has switched the tty, then it goes
 	# to gdb, not the inferior, and we lose.  So that is why we have
 	# watchpoint.c prompt us, so we can wait for that prompt.
-	send_gdb "continue\n"
-	expect {
-	    -re "Continuing\\.\r\ntype stuff for buf now:" {
-		pass "continue to read"
-	    }
-	    default { fail "continue to read"; return }
+	if [gdb_test "continue" "Continuing\\.\r\ntype stuff for buf now:" "continue to read" ] { 
+	  return ; 
 	}
+
 	send_gdb "123\n"
 	expect {
 	    -re ".*\[Ww\]atchpoint.*buf\\\[0\\\].*Old value = 0.*New value = 49\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
@@ -552,7 +490,6 @@ proc test_complex_watchpoint {} {
 
 # Start with a fresh gdb.
 
-gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
