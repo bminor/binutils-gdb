@@ -73,13 +73,6 @@ extern char *nindy_ttyname;	/* Name of serial port to talk to nindy */
 extern void
 nindy_before_main_loop();		/* In remote-nindy.c */
 
-/* Address of end of stack space.
- *	This probably doesn't matter for nindy, because it's only used
- *	in manipulation of core files, which we don't support.
- */
-
-#define STACK_END_ADDR (0xfe000000)
-
 /* FRAME_CHAIN_VALID returns zero if the given frame is the outermost one
    and has no caller.
 

@@ -29,14 +29,6 @@ Here is an m-news.h file for gdb.  It supports the 68881 registers.
 
 #define HAVE_68881
 
-/* Use to compute STACK_END_ADDR.  */
-#define TARGET_UPAGES 2
-#define TARGET_NBPG 4096
-
-/* Address of end of stack space.  */
-
-#define STACK_END_ADDR (0x80000000 - TARGET_UPAGES * TARGET_NBPG)
-
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */

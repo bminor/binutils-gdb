@@ -22,10 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HAVE_68881
 
-/* Address of end of stack space.  */
-
-#define STACK_END_ADDR 0xfffe000
-
 /* Data segment starts at etext rounded up to DATAROUND in {N,Z}MAGIC files */
 
 #define DATAROUND	0x20000

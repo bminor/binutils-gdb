@@ -32,13 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define DECR_PC_AFTER_BREAK 0		/* No decrement required */
 
-/* Address of end of stack space.  Actually one byte past it.
-   This value is typically very OS dependent.
-   FIXME:  Check to see if SVR4 offers some machine independent way
-   of discovering this value and use it if so, and if we need it. */
-
-/* #define STACK_END_ADDR 0xc0800000 */
-
 /* Use the alternate method of determining valid frame chains. */
 
 #define FRAME_CHAIN_VALID_ALTERNATE

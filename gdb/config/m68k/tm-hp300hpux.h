@@ -24,8 +24,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define BPT_VECTOR 0x1
 
-/* Address of end of stack space.  */
-
-#define STACK_END_ADDR 0xFFF00000
-
 #include "m68k/tm-m68k.h"

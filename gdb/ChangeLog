@@ -1,4 +1,22 @@
+Fri Jul  2 13:39:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Remove unused STACK_END_ADDR in the following files (in other
+	files it is used for something): tm-mips.h, tm-sun2.h, tm-news.h,
+	tm-a29k, tm-i386v.h, tm-hppa.h, tm-nindy960.h, tm-amix.h,
+	tm-hp300hpux.h, tm-isi.h.
+
 Thu Jul  1 09:51:27 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* config/mips/nm-riscos.h: Define NBPG and UPAGES.
+	config/mips/xm-riscos.h: Include <sys/types.h>.
+
+	* ser-unix.c (hardwire_noflush_set_tty_state): Use an assignment,
+	not an initializer, to copy the structure.
+
+	* gdbtypes.h (struct type): Add field tag_name.
+	* gdbtypes.c (type_name_no_tag), c-typeprint.c (c_type_print_base):
+	Use it.
+	* {coff,dwarf,mips,stabs}read.c: Set it.
 
 	* xm-sysv4.h: Undefine HAVE_TERMIO.
 

@@ -59,12 +59,8 @@ CORE_ADDR skip_prologue ();
 
    This is the register stack; We call it "CONTROL" in GDB for consistency
    with Pyramid.  */
+/* I suspect this is obsolete, just like STACK_END_ADDR.  */
 #define CONTROL_END_ADDR 0x80200000
-
-/* Memory stack.  This is for the default register stack size, which is
-   only 0x800 bytes.  Perhaps we should let the user specify stack sizes
-   (and tell EBMON with the "ZS" command).  */
-#define STACK_END_ADDR 0x801ff800
 
 /* Stack grows downward.  */
 

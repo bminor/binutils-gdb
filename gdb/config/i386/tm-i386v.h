@@ -59,10 +59,6 @@ i386_skip_prologue PARAMS ((int));
 #define SAVED_PC_AFTER_CALL(frame) \
   (read_memory_integer (read_register (SP_REGNUM), 4))
 
-/* Address of end of stack space.  */
-
-#define STACK_END_ADDR 0x80000000
-
 /* Stack grows downward.  */
 
 #define INNER_THAN <

@@ -55,10 +55,6 @@ extern int mips_fpu;
 
 #define IN_SIGTRAMP(pc, name)	in_sigtramp(pc, name)
 
-/* Address of end of stack space.  */
-
-#define STACK_END_ADDR (0x7ffff000)
-
 /* Stack grows downward.  */
 
 #define INNER_THAN <
