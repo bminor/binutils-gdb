@@ -33,5 +33,5 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <malloc.h>
 
-#define SIGQUIT 5
-#define SIGTRAP 6
+#define SIGQUIT 3
+#define SIGTRAP 5
