@@ -878,8 +878,10 @@ Initialized static variables are represented by the @samp{S} and
 @c find the variables)
 @findex N_STSYM
 @findex N_LCSYM
-In a.out files, @code{N_STSYM} means the data segment, @code{N_FUN}
-means the text segment, and @code{N_LCSYM} means the bss segment.
+In a.out files, @code{N_STSYM} means the data section, @code{N_FUN}
+means the text section, and @code{N_LCSYM} means the bss section.  For
+those systems with a read-only data section separate from the text
+section (Solaris), @code{N_ROSYM} means the read-only data section.
 
 For example, the source lines:
 
@@ -901,16 +903,17 @@ yield the following stabs:
 @end example
 
 In XCOFF files, each symbol has a section number, so the stab type
-need not indicate the segment.
+need not indicate the section.
 
 In ECOFF files, the storage class is used to specify the section, so the
-stab type need not indicate the segment.
+stab type need not indicate the section.
 
-@c In ELF files, it apparently is a big mess.  See kludge in dbxread.c
-@c in GDB.  FIXME: Investigate where this kludge comes from.
-@c
-@c This is the place to mention N_ROSYM; I'd rather do so once I can
-@c coherently explain how this stuff works for stabs-in-ELF.
+In ELF files, for Solaris 2.1, symbol descriptor @samp{S} means that the
+address is absolute (ld relocates it) and symbol descriptor @samp{V}
+means that the address is relative to the start of the relevant section
+for that compilation unit.  I don't know what it does for @samp{S} stabs
+on Solaris 2.3 (in which ld no longer relocates stabs).  For more
+information on ld stab relocation, @xref{Stabs In ELF}.
 
 @node Parameters
 @section Parameters
@@ -2800,8 +2803,6 @@ BSS segment file-scope variable; see @ref{Statics}.
 @item 0x2a N_MAIN
 Name of main routine; see @ref{Main Program}.
 
-@c FIXME: discuss this in the Statics node where we talk about
-@c the fact that the n_type indicates the section.
 @item 0x2c N_ROSYM
 Variable in @code{.rodata} section; see @ref{Statics}.
 
@@ -3600,30 +3601,37 @@ section, and the @code{.stabstr} section has its ELF section
 header @code{sh_type} member set to @code{SHT_STRTAB} to mark it as a
 string table.
 
-It should not be necessary for the linker to process the @code{.stab}
-section in any special way, so (except for Solaris 2.2 and earlier, see
-below) none of the addresses in the @code{n_value} field of the stabs
-are relocated by the linker.  Instead they are relative to the source
-file (or some entity smaller than a source file, like a function).  To
-find the address of each section corresponding to a given source file,
-the (compiler? assembler?) puts out symbols giving the address of each
-section for a given source file.  Since these are ELF (not stab)
-symbols, the linker can relocate them correctly.  They are named
-@code{Bbss.bss} for the bss section, @code{Ddata.data} for the data
-section, and @code{Drodata.rodata} for the rodata section.  For the text
-section, there is no such symbol.  The linker provided with Solaris 2.2
-and earlier relocates stabs using relocation information from a
-@code{.rela.stabs} section, which means that the value of an
-@code{N_FUN} stab in an executable is the actual address.  For Solaris
-2.3 and later, the value of the @code{N_FUN} stab is zero and the
-address of the function can be obtained from the ELF (non-stab) symbols.
-Sun, in reference to bug 1142109, has verified that this is intentional.
+To keep linking fast, it is a bad idea to have the linker relocating
+stabs, so (except for Solaris 2.2 and earlier, see below) none of the
+addresses in the @code{n_value} field of the stabs are relocated by the
+linker.  Instead they are relative to the source file (or some entity
+smaller than a source file, like a function).  To find the address of
+each section corresponding to a given source file, the compiler puts out
+symbols giving the address of each section for a given source file.
+Since these are ELF (not stab) symbols, the linker can relocate them
+correctly.  They are named @code{Bbss.bss} for the bss section,
+@code{Ddata.data} for the data section, and @code{Drodata.rodata} for
+the rodata section.  For the text section, there is no such symbol.  GCC
+does not provide these symbols; it instead relies on the stabs getting
+relocated, which loses for Solaris 2.3 (see below).  Thus address which
+would normally be relative to @code{Bbss.bss}, etc., are absolute.  The
+linker provided with Solaris 2.2 and earlier relocates stabs using
+relocation information from a @code{.rela.stab} section, which means
+that the value of an @code{N_FUN} stab in an executable is the actual
+address.  I think this is pretty much just standard ELF relocations, as
+it would do for any section, rather than a special-purpose stabs hack.
+For Solaris 2.3 and later, the linker ignores relocations for the stabs
+section.  The value of a @code{N_FUN} stab is zero and the address of a
+function can be obtained from the ELF (non-stab) symbols.  Sun, in
+reference to bug 1142109, has verified that this is intentional.
 Because looking things up in the ELF symbols is slow and GDB currently
 only has code to do this for functions (which is enough for Solaris
 since read-only variables go in the @code{.rodata} section), it would
 probably be better to use a @code{Ttext.text} symbol for stabs-in-elf on
-non-Solaris machines, and make the address in the N_FUN relative to the
-@code{Ttext.text} symbol.
+non-Solaris machines, and make the address in the @code{N_FUN} relative
+to the @code{Ttext.text} symbol.  In addition to @code{N_FUN} symbols,
+whether the linker relocates stabs also affects some @code{N_ROSYM},
+@code{N_STSYM}, and @code{N_LCSYM} symbols; see @ref{Statics}.
 
 @node Symbol Types Index
 @unnumbered Symbol Types Index

@@ -1,3 +1,8 @@
+Wed Sep  8 09:11:52 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Stabs In ELF, Statics): More on relocating stabs
+	in ELF files.
+
 Tue Sep  7 13:45:02 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Stabs In ELF): Talk about N_FUN value.
