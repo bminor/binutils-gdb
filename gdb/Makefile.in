@@ -2105,7 +2105,7 @@ xcoffread.o: xcoffread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(INCLUDE_DIR)/aout/stab_gnu.h $(INCLUDE_DIR)/coff/internal.h \
 	$(INCLUDE_DIR)/coff/rs6000.h $(BFD_SRC)/libcoff.h buildsym.h \
 	complaints.h $(defs_h) $(gdbtypes_h) objfiles.h stabsread.h $(symfile_h) \
-	$(symtab_h) partial-stab.h $(gdb_string_h)
+	$(symtab_h) $(gdb_string_h)
 
 xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) xcoffsolib.h $(inferior_h) \
 	$(gdbcmd_h) $(symfile_h) $(frame_h) gdb_regex.h
