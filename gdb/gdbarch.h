@@ -2207,7 +2207,7 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
 #endif
 #endif
 
-/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into 
+/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into
    ADDR_BITS_REMOVE. */
 
 /* Default (function) for non- multi-arch platforms. */
@@ -2529,6 +2529,22 @@ extern void set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, gdba
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (COFF_MAKE_MSYMBOL_SPECIAL)
 #define COFF_MAKE_MSYMBOL_SPECIAL(val, msym) (gdbarch_coff_make_msymbol_special (current_gdbarch, val, msym))
+#endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (NAME_OF_MALLOC)
+#define NAME_OF_MALLOC ("malloc")
+#endif
+
+extern const char * gdbarch_name_of_malloc (struct gdbarch *gdbarch);
+extern void set_gdbarch_name_of_malloc (struct gdbarch *gdbarch, const char * name_of_malloc);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (NAME_OF_MALLOC)
+#error "Non multi-arch definition of NAME_OF_MALLOC"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (NAME_OF_MALLOC)
+#define NAME_OF_MALLOC (gdbarch_name_of_malloc (current_gdbarch))
 #endif
 #endif
 

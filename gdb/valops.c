@@ -138,7 +138,7 @@ struct value *
 value_allocate_space_in_inferior (int len)
 {
   struct value *blocklen;
-  struct value *val = find_function_in_inferior ("malloc");
+  struct value *val = find_function_in_inferior (NAME_OF_MALLOC);
 
   blocklen = value_from_longest (builtin_type_int, (LONGEST) len);
   val = call_function_by_hand (val, 1, &blocklen);

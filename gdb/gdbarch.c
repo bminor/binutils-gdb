@@ -267,6 +267,7 @@ struct gdbarch
   gdbarch_dwarf2_build_frame_info_ftype *dwarf2_build_frame_info;
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
+  const char * name_of_malloc;
 };
 
 
@@ -423,6 +424,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  "malloc",
   /* startup_gdbarch() */
 };
 
@@ -553,6 +555,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->construct_inferior_arguments = construct_inferior_arguments;
   current_gdbarch->elf_make_msymbol_special = default_elf_make_msymbol_special;
   current_gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
+  current_gdbarch->name_of_malloc = "malloc";
   /* gdbarch_alloc() */
 
   return current_gdbarch;
@@ -797,6 +800,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of dwarf2_build_frame_info, has predicate */
   /* Skip verify of elf_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
+  /* Skip verify of name_of_malloc, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -1484,6 +1488,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: MEMORY_REMOVE_BREAKPOINT = 0x%08lx\n",
                         (long) current_gdbarch->memory_remove_breakpoint
                         /*MEMORY_REMOVE_BREAKPOINT ()*/);
+#endif
+#ifdef NAME_OF_MALLOC
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NAME_OF_MALLOC # %s\n",
+                      XSTRING (NAME_OF_MALLOC));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NAME_OF_MALLOC = %ld\n",
+                      (long) NAME_OF_MALLOC);
 #endif
 #ifdef NPC_REGNUM
   fprintf_unfiltered (file,
@@ -4953,6 +4965,23 @@ set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch,
                                        gdbarch_coff_make_msymbol_special_ftype coff_make_msymbol_special)
 {
   gdbarch->coff_make_msymbol_special = coff_make_msymbol_special;
+}
+
+const char *
+gdbarch_name_of_malloc (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of name_of_malloc, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_name_of_malloc called\n");
+  return gdbarch->name_of_malloc;
+}
+
+void
+set_gdbarch_name_of_malloc (struct gdbarch *gdbarch,
+                            const char * name_of_malloc)
+{
+  gdbarch->name_of_malloc = name_of_malloc;
 }
 
 

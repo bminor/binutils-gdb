@@ -1,5 +1,14 @@
 2002-09-12  Joel Brobecker  <brobecker@gnat.com>
 
+	* gdbarch.sh (NAME_OF_MALLOC): New variable in the architecture
+	vector. Will be useful for Interix.  
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* valops.c (value_allocate_space_in_inferior): Replace hard-coded
+	name of the malloc function by NAME_OF_MALLOC.
+
+2002-09-12  Joel Brobecker  <brobecker@gnat.com>
+
 	* value.h (find_function_in_inferior): Add const keyword to
 	one of the parameters. Allows us to invoke this function with
 	a const char *.
