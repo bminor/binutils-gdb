@@ -3,8 +3,6 @@
 
 /* TODO:
 
-   * ld.h, ld.w st.h and st.w will need special insert/extract code.
-
    * All sld instructions will need special insert/extrat code. */
 
 /* Local insertion and extraction functions.  */
@@ -12,6 +10,9 @@ static unsigned long insert_d9 PARAMS ((unsigned long, long, const char **));
 static long extract_d9 PARAMS ((unsigned long, int *));
 static unsigned long insert_d22 PARAMS ((unsigned long, long, const char **));
 static long extract_d22 PARAMS ((unsigned long, int *));
+static unsigned long insert_d16_15 PARAMS ((unsigned long, long,
+					    const char **));
+static long extract_d16_15 PARAMS ((unsigned long, int *));
 
 /* regular opcode */
 #define OP(x)		((x & 0x3f) << 5)
@@ -61,11 +62,11 @@ const struct v850_operand v850_operands[] = {
   { 9, 0, insert_d9, extract_d9, V850_OPERAND_SIGNED },
 
 /* The DISP16 field in a format 6 insn. */
-#define D16	(D9+1)
-  { 16, 16, 0, 0, V850_OPERAND_SIGNED }, 
+#define D16_15	(D9+1)
+  { 16, 16, insert_d16_15, extract_d16_15, V850_OPERAND_SIGNED }, 
 
 /* The DISP22 field in a format 4 insn. */
-#define D22	(D16+1)
+#define D22	(D16_15+1)
   { 22, 0, insert_d22, extract_d22, V850_OPERAND_SIGNED },
 
 #define B3	(D22+1)
@@ -96,6 +97,10 @@ const struct v850_operand v850_operands[] = {
 #define SR2	(I16U+1)
   { 5, 11, 0, 0, V850_OPERAND_SRG },
 
+/* The DISP16 field in a format 8 insn. */
+#define D16	(SR2+1)
+  { 16, 16, 0, 0, V850_OPERAND_SIGNED }, 
+
 } ; 
 
 
@@ -123,9 +128,13 @@ const struct v850_operand v850_operands[] = {
 /* 3 operand instruction (Format VI) */
 #define IF6U	{I16U, R1, R2}
 
-/* 32-bit load/store instruction (Format VII) */
-#define IF7A	{D16, R1, R2}
-#define IF7B	{R2, D16, R1}
+/* 32-bit load/store half/word instruction (Format VII) */
+#define IF7A	{D16_15, R1, R2}
+#define IF7B	{R2, D16_15, R1}
+
+/* 32-bit load/store byte instruction (Format VII) */
+#define IF7C	{D16, R1, R2}
+#define IF7D	{R2, D16, R1}
 
 /* Bit manipulation function.  */
 
@@ -157,10 +166,10 @@ const struct v850_opcode v850_opcodes[] = {
 { "sst.h",	one(0x0480),		one(0x0780),	IF4D, 2 },
 { "sst.w",	one(0x0501),		one(0x0781),	IF4D, 2 },
 
-{ "ld.b",	two(0x0700,0x0000),	two (0x07e0,0x0000),	IF7A, 4 },
+{ "ld.b",	two(0x0700,0x0000),	two (0x07e0,0x0000),	IF7C, 4 },
 { "ld.h",	two(0x0720,0x0000),	two (0x07e0,0x0001),	IF7A, 4 },
 { "ld.w",	two(0x0720,0x0001),	two (0x07e0,0x0001),	IF7A, 4 },
-{ "st.b",	two(0x0740,0x0000),	two (0x07e0,0x0000),	IF7B, 4 },
+{ "st.b",	two(0x0740,0x0000),	two (0x07e0,0x0000),	IF7D, 4 },
 { "st.h",	two(0x0760,0x0000),	two (0x07e0,0x0001),	IF7B, 4 },
 { "st.w",	two(0x0760,0x0001),	two (0x07e0,0x0001),	IF7B, 4 },
 
@@ -295,7 +304,7 @@ insert_d22 (insn, value, errmsg)
      const char **errmsg;
 {
   if (value > 0xfffff || value <= -0x100000)
-    *errmsg = "value out of range";
+    *errmsg = "branch value out of range";
 
   if ((value % 2) != 0)
     *errmsg = "branch to odd offset";
@@ -311,4 +320,29 @@ extract_d22 (insn, invalid)
   int ret = ((insn & 0xfffe0000) >> 16) | ((insn & 0x3f) << 16);
 
   return ((ret << 10) >> 10);
+}
+
+static unsigned long
+insert_d16_15 (insn, value, errmsg)
+     unsigned long insn;
+     long value;
+     const char **errmsg;
+{
+  if (value > 0x7fff || value <= -0x8000)
+    *errmsg = "value out of range";
+
+  if ((value % 2) != 0)
+    *errmsg = "load/store at odd offset";
+
+  return (insn | ((value & 0xfffe) << 16));
+}
+
+static long
+extract_d16_15 (insn, invalid)
+     unsigned long insn;
+     int *invalid;
+{
+  int ret = ((insn & 0xfffe0000) >> 16);
+
+  return ((ret << 16) >> 16);
 }

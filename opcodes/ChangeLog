@@ -1,6 +1,13 @@
 start-sanitize-v850
 Sat Aug 31 01:27:26 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-opc.c (insert_d16_15, extract_d16_15): New functions.
+	(v850_operands): Change D16 to D16_15, use special insert/extract
+	routines.  New new D16 that uses the generic insert/extract code.
+	(IF7A, IF7B): Use D16_15.
+	(IF7C, IF7D): New.  Use D16.
+	(v850_opcodes): Use IF7C and IF7D for ld.b and st.b.
+
 	* v850-opc.c (insert_d9, insert_d22): Slightly improve error
 	message.  Issue an error if the branch offset is odd.
 
