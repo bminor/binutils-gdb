@@ -78,7 +78,10 @@ PE/PEI rearrangement (and code added): Donn Terry
    anybody wants to revive the code, you will have to figure out how
    to handle those issues.  */
 
-boolean in_reloc_p PARAMS((bfd *, reloc_howto_type *));
+static void add_data_entry
+  PARAMS ((bfd *, struct internal_extra_pe_aouthdr *, int, char *, bfd_vma));
+static boolean pe_print_pdata PARAMS ((bfd *, PTR));
+static boolean pe_print_reloc PARAMS ((bfd *, PTR));
 
 /**********************************************************************/
 
@@ -497,7 +500,10 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
 
 }
 
-static void add_data_entry (abfd, aout, idx, name, base)
+/* A support function for below.  */
+
+static void
+add_data_entry (abfd, aout, idx, name, base)
      bfd *abfd;
      struct internal_extra_pe_aouthdr *aout;
      int idx;
@@ -600,7 +606,12 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
 	  dsize += rounded;
 	if (sec->flags & SEC_CODE)
 	  tsize += rounded;
-	isize += SA(rounded);
+	/* The image size is the total VIRTUAL size (which is what is
+	   in the virt_size field).  Files have been seen (from MSVC
+	   5.0 link.exe) where the file size of the .data segment is
+	   quite small compared to the virtual size.  Without this
+	   fix, strip munges the file.  */
+	isize += SA (FA (pei_section_data (abfd, sec)->virt_size));
       }
 
     aouthdr_in->dsize = dsize;
@@ -611,13 +622,13 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
   extra->SizeOfHeaders = abfd->sections->filepos;
   bfd_h_put_16(abfd, aouthdr_in->magic, (bfd_byte *) aouthdr_out->standard.magic);
 
-#ifdef POWERPC_LE_PE
-  /* this little piece of magic sets the "linker version" field to 2.60 */
-  bfd_h_put_16(abfd, 2  + 60 * 256, (bfd_byte *) aouthdr_out->standard.vstamp);
-#else
-  /* this little piece of magic sets the "linker version" field to 2.55 */
-  bfd_h_put_16(abfd, 2  + 55 * 256, (bfd_byte *) aouthdr_out->standard.vstamp);
-#endif
+#define LINKER_VERSION 256 /* That is, 2.56 */
+
+  /* This piece of magic sets the "linker version" field to
+     LINKER_VERSION.  */
+  bfd_h_put_16 (abfd,
+		LINKER_VERSION / 100 + (LINKER_VERSION % 100) * 256,
+		(bfd_byte *) aouthdr_out->standard.vstamp);
 
   PUT_AOUTHDR_TSIZE (abfd, aouthdr_in->tsize, (bfd_byte *) aouthdr_out->standard.tsize);
   PUT_AOUTHDR_DSIZE (abfd, aouthdr_in->dsize, (bfd_byte *) aouthdr_out->standard.dsize);
@@ -855,11 +866,11 @@ _bfd_pei_swap_scnhdr_out (abfd, in, out)
 		     & 0xffffffff),
 		    (bfd_byte *) scnhdr_ext->s_vaddr);
 
-  /* NT wants the size data to be rounded up to the next NT_FILE_ALIGNMENT
-     value except for the BSS section, its s_size should be 0 */
+  /* NT wants the size data to be rounded up to the next
+     NT_FILE_ALIGNMENT, but zero if it has no content (as in .bss,
+     sometimes).  */
 
-
-  if (strcmp (scnhdr_int->s_name, _BSS) == 0) 
+  if ((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0)
     {
       ps = scnhdr_int->s_size;
       ss = 0;
@@ -874,6 +885,7 @@ _bfd_pei_swap_scnhdr_out (abfd, in, out)
 		   (bfd_byte *) scnhdr_ext->s_size);
 
 
+  /* s_paddr in PE is really the virtual size.  */
   PUT_SCNHDR_PADDR (abfd, ps, (bfd_byte *) scnhdr_ext->s_paddr);
 
   PUT_SCNHDR_SCNPTR (abfd, scnhdr_int->s_scnptr,
@@ -1002,7 +1014,7 @@ static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
 
 /**********************************************************************/
 static boolean
-pe_print_idata(abfd, vfile)
+pe_print_idata (abfd, vfile)
      bfd *abfd;
      PTR vfile;
 {
@@ -1019,7 +1031,6 @@ pe_print_idata(abfd, vfile)
   bfd_size_type dataoff;
   bfd_size_type secsize;
   bfd_size_type i;
-  bfd_size_type start, stop;
   int onaline = 20;
 
   pe_data_type *pe = pe_data (abfd);
@@ -1032,9 +1043,12 @@ pe_print_idata(abfd, vfile)
 
       if (datasize == 0)
 	return true;
+
+      fprintf (file, _("\nThe import table is the .idata section\n"));
     }
   else
     {
+      /* idata buried in some other section: e.g. KERNEL32.DLL.  */
       bfd_vma addr, size;
 
       addr = extra->DataDirectory[1].VirtualAddress;
@@ -1045,19 +1059,21 @@ pe_print_idata(abfd, vfile)
 
       for (section = abfd->sections; section != NULL; section = section->next)
 	{
-	  if (section->vma - extra->ImageBase <= addr
-	      && ((section->vma - extra->ImageBase
-		   + bfd_section_size (abfd, section))
-		  >= addr + size))
-	    break;
+	   if (addr >= section->vma
+	       && addr < section->vma + bfd_section_size(abfd,section))
+	         break;
 	}
       if (section == NULL)
-	return true;
+	{
+	   fprintf (file,
+		    _("\nThere is an import table, but the section containing it could not be found\n"));
+	   return true;
+	}
 
-      /* For some reason the import table size is not reliable.  The
-         import data will extend past the indicated size, and before
-         the indicated address.  */
-      dataoff = addr - (section->vma - extra->ImageBase);
+      fprintf (file, _("\nThere is an import table in %s at 0x%lx\n"),
+	       section->name, (unsigned long)addr);
+
+      dataoff = addr - section->vma;
       datasize = size;
     }
 
@@ -1123,11 +1139,9 @@ pe_print_idata(abfd, vfile)
   if (! bfd_get_section_contents (abfd, section, (PTR) data, 0, secsize))
     return false;
 
-  adj = (extra->ImageBase - section->vma) & 0xffffffff;
+  adj = - section->vma;
 
-  start = dataoff;
-  stop = dataoff + datasize;
-  for (i = start; i < stop; i += onaline)
+  for (i = 0; i < datasize; i += onaline)
     {
       bfd_vma hint_addr;
       bfd_vma time_stamp;
@@ -1142,30 +1156,29 @@ pe_print_idata(abfd, vfile)
 	       " %08lx\t",
 	       (unsigned long int) (i + section->vma + dataoff));
       
-      if (i+20 > stop)
+      if (i + 20 > datasize)
 	{
 	  /* check stuff */
 	  ;
 	}
-      
-      hint_addr = bfd_get_32(abfd, data+i);
-      time_stamp = bfd_get_32(abfd, data+i+4);
-      forward_chain = bfd_get_32(abfd, data+i+8);
-      dll_name = bfd_get_32(abfd, data+i+12);
-      first_thunk = bfd_get_32(abfd, data+i+16);
-      
-      fprintf(file, "%08lx %08lx %08lx %08lx %08lx\n",
-	      hint_addr,
-	      time_stamp,
-	      forward_chain,
-	      dll_name,
-	      first_thunk);
+
+      hint_addr = bfd_get_32 (abfd, data + i + dataoff);
+      time_stamp = bfd_get_32 (abfd, data + i + 4 + dataoff);
+      forward_chain = bfd_get_32 (abfd, data + i + 8 + dataoff);
+      dll_name = bfd_get_32 (abfd, data + i + 12 + dataoff);
+      first_thunk = bfd_get_32 (abfd, data + i + 16 + dataoff);
+
+      fprintf (file, "%08lx %08lx %08lx %08lx %08lx\n",
+	       hint_addr,
+	       time_stamp,
+	       forward_chain,
+	       dll_name,
+	       first_thunk);
 
       if (hint_addr == 0 && first_thunk == 0)
 	break;
 
-      /* the image base is present in the section->vma */
-      dll = (char *) data + dll_name + adj;
+      dll = (char *) data + dll_name - section->vma + dataoff;
       fprintf(file, _("\n\tDLL Name: %s\n"), dll);
 
       if (hint_addr != 0)
@@ -1174,7 +1187,7 @@ pe_print_idata(abfd, vfile)
 
 	  idx = hint_addr + adj;
 
-	  for (j = 0; j < stop; j += 4)
+	  for (j = 0; j < datasize; j += 4)
 	    {
 	      unsigned long member = bfd_get_32 (abfd, data + idx + j);
 
@@ -1213,7 +1226,7 @@ pe_print_idata(abfd, vfile)
 
 	  idx2 = first_thunk + adj;
 
-	  for (j=0;j<stop;j+=4)
+	  for (j = 0; j < datasize; j += 4)
 	    {
 	      int ordinal;
 	      char *member_name;
@@ -1306,9 +1319,11 @@ pe_print_edata (abfd, vfile)
     {
       datasize = bfd_section_size (abfd, section);
       dataoff = 0;
+      fprintf (file, _("\nThe export table is the .edata section\n"));
     }
   else
     {
+      /* edata is buried in some other section: e.g. NTDLL.DLL.  */
       bfd_vma addr, size;
 
       addr = extra->DataDirectory[0].VirtualAddress;
@@ -1319,17 +1334,22 @@ pe_print_edata (abfd, vfile)
 
       for (section = abfd->sections; section != NULL; section = section->next)
 	{
-	  if (section->vma - extra->ImageBase <= addr
-	      && ((section->vma - extra->ImageBase
-		   + bfd_section_size (abfd, section))
-		  >= addr + size))
-            break;
+	   if (addr >= section->vma
+	       && addr < section->vma + bfd_section_size (abfd, section))
+	     break;
 	}
       if (section == NULL)
-	return true;
+	{
+	   fprintf (file,
+		    _("\nThere is an export table, but the section containing it could not be found\n"));
+	   return true;
+	}
+
+      fprintf (file, _("\nThere is an export table in %s at 0x%lx\n"),
+	       section->name, (unsigned long) addr);
 
       datasize = size;
-      dataoff = addr - (section->vma - extra->ImageBase);
+      dataoff = addr - section->vma;
     }
 
   data = (bfd_byte *) bfd_malloc (datasize);
@@ -1353,7 +1373,7 @@ pe_print_edata (abfd, vfile)
   edt.npt_addr       = bfd_get_32(abfd, data+32);
   edt.ot_addr        = bfd_get_32(abfd, data+36);
 
-  adj = (extra->ImageBase - (section->vma + dataoff)) & 0xffffffff;
+  adj = - (section->vma + dataoff);
 
   /* Dump the EDT first first */
   fprintf(file,
@@ -1406,7 +1426,7 @@ pe_print_edata (abfd, vfile)
   fprintf (file, "\n");
 
   
-  /* The next table to find si the Export Address Table. It's basically
+  /* The next table to find is the Export Address Table. It's basically
      a list of pointers that either locate a function in this dll, or
      forward the call to another dll. Something like:
       typedef union
@@ -1424,8 +1444,8 @@ pe_print_edata (abfd, vfile)
     {
       bfd_vma eat_member = bfd_get_32 (abfd,
 				       data + edt.eat_addr + (i * 4) + adj);
-      bfd_vma eat_actual = (extra->ImageBase + eat_member) & 0xffffffff;
-      bfd_vma edata_start = bfd_get_section_vma (abfd,section) + dataoff;
+      bfd_vma eat_actual = eat_member;
+      bfd_vma edata_start = bfd_get_section_vma (abfd, section);
       bfd_vma edata_end = edata_start + datasize;
 
       if (eat_member == 0)
@@ -1435,17 +1455,18 @@ pe_print_edata (abfd, vfile)
 	{
 	  /* this rva is to a name (forwarding function) in our section */
 	  /* Should locate a function descriptor */
-	  fprintf(file,
-		  "\t[%4ld] +base[%4ld] %04lx %s -- %s\n",
-		  (long) i, (long) (i + edt.base), eat_member,
-		  "Forwarder RVA", data + eat_member + adj);
+	  fprintf (file,
+		   "\t[%4ld] +base[%4ld] %04lx %s -- %s\n",
+		   (long) i, (long) (i + edt.base), eat_member,
+		   _("Forwarder RVA"), data + eat_member + adj);
 	}
       else
 	{
 	  /* Should locate a function descriptor in the reldata section */
-	  fprintf(file,
-		  "\t[%4ld] +base[%4ld] %04lx %s\n",
-		  (long) i, (long) (i + edt.base), eat_member, "Export RVA");
+	  fprintf (file,
+		   "\t[%4ld] +base[%4ld] %04lx %s\n",
+		   (long) i, (long) (i + edt.base), eat_member,
+		   _("Export RVA"));
 	}
     }
 
@@ -1490,20 +1511,22 @@ pe_print_pdata (abfd, vfile)
   bfd_size_type start, stop;
   int onaline = 20;
 
-  if (section == 0)
-    return true;
+  if (section == NULL
+      || coff_section_data (abfd, section) == NULL
+      || pei_section_data (abfd, section) == NULL)
+     return true;
 
-  stop = bfd_section_size (abfd, section);
+  stop = pei_section_data (abfd, section)->virt_size;
   if ((stop % onaline) != 0)
     fprintf (file, _("Warning, .pdata section size (%ld) is not a multiple of %d\n"),
 	     (long)stop, onaline);
 
-  fprintf(file,
-	  _("\nThe Function Table (interpreted .pdata section contents)\n"));
-  fprintf(file,
-	  _(" vma:\t\tBegin    End      EH       EH       PrologEnd\n"));
-  fprintf(file,
-	  _("     \t\tAddress  Address  Handler  Data     Address\n"));
+  fprintf (file,
+	   _("\nThe Function Table (interpreted .pdata section contents)\n"));
+  fprintf (file,
+	   _(" vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"));
+  fprintf (file,
+	   _("     \t\tAddress  Address  Handler  Data     Address    Mask\n"));
 
   if (bfd_section_size (abfd, section) == 0)
     return true;
@@ -1527,10 +1550,11 @@ pe_print_pdata (abfd, vfile)
       bfd_vma eh_handler;
       bfd_vma eh_data;
       bfd_vma prolog_end_addr;
+      int em_data;
 
-      if (i+20 > stop)
+      if (i + 20 > stop)
 	break;
-      
+
       begin_addr = bfd_get_32(abfd, data+i);
       end_addr = bfd_get_32(abfd, data+i+4);
       eh_handler = bfd_get_32(abfd, data+i+8);
@@ -1548,12 +1572,17 @@ pe_print_pdata (abfd, vfile)
 	       " %08lx\t",
 	       (unsigned long int) (i + section->vma));
 
-      fprintf(file, "%08lx %08lx %08lx %08lx %08lx",
-	      begin_addr,
-	      end_addr,
-	      eh_handler,
-	      eh_data,
-	      prolog_end_addr);
+      em_data = ((eh_handler & 0x1) << 2) | (prolog_end_addr & 0x3);
+      eh_handler &= 0xfffffffc;
+      prolog_end_addr &= 0xfffffffc;
+
+      fprintf (file, "%08lx %08lx %08lx %08lx %08lx   %x",
+	       begin_addr,
+	       end_addr,
+	       eh_handler,
+	       eh_data,
+	       prolog_end_addr,
+	       em_data);
 
 #ifdef POWERPC_LE_PE
       if (eh_handler == 0 && eh_data != 0)
@@ -1590,14 +1619,16 @@ pe_print_pdata (abfd, vfile)
   return true;
 }
 
-static const char *tbl[6] =
+#define IMAGE_REL_BASED_HIGHADJ 4
+static const char * const tbl[] =
 {
 "ABSOLUTE",
 "HIGH",
 "LOW",
 "HIGHLOW",
 "HIGHADJ",
-"MIPS_JMPADDR"
+"MIPS_JMPADDR",
+"UNKNOWN",   /* MUST be last */
 };
 
 static boolean
@@ -1612,14 +1643,14 @@ pe_print_reloc (abfd, vfile)
   bfd_size_type i;
   bfd_size_type start, stop;
 
-  if (section == 0)
+  if (section == NULL)
     return true;
 
   if (bfd_section_size (abfd, section) == 0)
     return true;
 
-  fprintf(file,
-	  _("\n\nPE File Base Relocations (interpreted .reloc section contents)\n"));
+  fprintf (file,
+	   _("\n\nPE File Base Relocations (interpreted .reloc section contents)\n"));
 
   data = (bfd_byte *) bfd_malloc ((size_t) bfd_section_size (abfd, section));
   datasize = bfd_section_size (abfd, section);
@@ -1659,17 +1690,29 @@ pe_print_reloc (abfd, vfile)
 
       for (j = 0; j < number; ++j)
 	{
-	  unsigned short e = bfd_get_16(abfd, data + i + 8 + j*2);
-	  int t =   (e & 0xF000) >> 12;
+	  unsigned short e = bfd_get_16 (abfd, data + i + 8 + j * 2);
+	  unsigned int t = (e & 0xF000) >> 12;
 	  int off = e & 0x0FFF;
 
-	  if (t > 5) 
-	    abort();
+	  if (t >= sizeof (tbl) / sizeof (tbl[0]))
+	    t = (sizeof (tbl) / sizeof (tbl[0])) - 1;
 
-	  fprintf(file,
-		  _("\treloc %4d offset %4x [%4lx] %s\n"), 
-		  j, off, (long) (off + virtual_address), tbl[t]);
+	  fprintf (file,
+		   _("\treloc %4d offset %4x [%4lx] %s"),
+		   j, off, (long) (off + virtual_address), tbl[t]);
 
+	  /* HIGHADJ takes an argument, but there's no documentation
+	     on what it does, or what it means.  Inferred from
+	     DUMPBIN.  */
+	  if (t == IMAGE_REL_BASED_HIGHADJ)
+	    {
+	       fprintf (file, " (%4x)\n",
+			((unsigned int)
+			 bfd_get_16 (abfd, data + i + 8 + j * 2 + 2)));
+	       j++;
+	    }
+	  else
+	      fprintf (file, "\n");
 	}
       i += size;
     }
@@ -1709,6 +1752,8 @@ _bfd_pe_print_private_bfd_data_common (abfd, vfile)
   PF (0x8000, "big endian");
 #undef PF
 
+  /* ctime implies '\n'.  */
+  fprintf (file, "\nTime/Date\t\t%s", ctime (&pe->coff.timestamp));
   fprintf (file,"\nImageBase\t\t");
   fprintf_vma (file, i->ImageBase);
   fprintf (file,"\nSectionAlignment\t");
@@ -1770,6 +1815,13 @@ _bfd_pe_bfd_copy_private_bfd_data_common (ibfd, obfd)
   pe_data (obfd)->pe_opthdr = pe_data (ibfd)->pe_opthdr;
   pe_data (obfd)->dll = pe_data (ibfd)->dll;
 
+  /* for strip: if we removed .reloc, we'll make a real mess of things
+     if we don't remove this entry as well.  */
+  if (! pe_data (obfd)->has_reloc_section)
+    {
+      pe_data(obfd)->pe_opthdr.DataDirectory[5].VirtualAddress = 0;
+      pe_data(obfd)->pe_opthdr.DataDirectory[5].Size = 0;
+    }
   return true;
 }
 
@@ -1804,6 +1856,8 @@ _bfd_pe_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
 	}
       pei_section_data (obfd, osec)->virt_size =
 	pei_section_data (ibfd, isec)->virt_size;
+      pei_section_data (obfd, osec)->pe_flags =
+        pei_section_data (ibfd, isec)->pe_flags;
     }
 
   return true;

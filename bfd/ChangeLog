@@ -7,6 +7,21 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* peigen.c (add_data_entry): Declare.
+	(pei_swap_aouthdr_out): Get image size right.  Set linker version
+	more intuitively.
+	(pei_swap_scnhdr_out): Test for UNINIT section, not .bss.
+	(pe_print_idata): Code cleanup, print more info, get rid of (now)
+	extraneous ImageBase.
+	(pe_print_edata): Likewise.
+	(pe_print_pdata): Likewise.  Print exception entries.
+	(pe_print_reloc): Likewise.  Print MIPS_JMPADDR.
+	(tbl): Make const, add "UNKNOWN".
+	(_bfd_pe_print_private_bfd_data_common): Print timestamp.
+	(_bfd_pe_bfd_copy_private_bfd_data_common): Don't copy deleted
+	section data directory.
+	(_bfd_pe_bfd_copy_private_section_data): Copy pe_flags.
+
 	* libpei.h (_bfd_pe_bfd_get_symbol_info): Declare.
 	* peigen.c (_bfd_pe_bfd_get_symbol_info): New function.
 	* peicode.h (coff_get_symbol_info): Define.
