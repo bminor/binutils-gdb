@@ -542,8 +542,15 @@ core_create_function_syms (cbfd)
       if (class == 't')
 	symtab.limit->is_static = true;
 
+      /* Keep track of the minimum and maximum vma addresses used by all
+	 symbols.  When computing the max_vma, use the ending address of the
+	 section containing the symbol, if available.  */
       min_vma = MIN (symtab.limit->addr, min_vma);
-      max_vma = MAX (symtab.limit->addr, max_vma);
+      if (core_syms[i]->section)
+	max_vma = MAX (core_syms[i]->section->vma
+		       + core_syms[i]->section->_cooked_size - 1, max_vma);
+      else
+	max_vma = MAX (symtab.limit->addr, max_vma);
 
       /* If we see "main" without an initial '_', we assume names
 	 are *not* prefixed by '_'.  */
