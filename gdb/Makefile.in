@@ -1225,6 +1225,7 @@ ALLDEPFILES = a68v-nat.c \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c \
 	i387-tdep.c \
 	i386-linux-tdep.c i386-nat.c \
+	i386gnu-nat.c i386gnu-tdep.c \
 	i960-tdep.c \
 	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
 	infptrace.c inftarg.c irix4-nat.c irix5-nat.c \
@@ -1658,6 +1659,8 @@ hppab-nat.o: hppab-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(target_h) \
 
 hppah-nat.o: hppah-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(target_h) \
 	$(regcache_h)
+
+i386gnu-tdep.o: $(defs_h) $(i386_tdep_h)
 
 i386gnu-nat.o: gnu-nat.h
 

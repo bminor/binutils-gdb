@@ -1,3 +1,19 @@
+2002-08-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-gnu.h: Removed.
+	* config/i386/nm-i386gnu.h: New file.
+	(THREAD_STATE_FLAVOR, THREAD_STATE_SIZE,
+	THREAD_STATE_SET_TRACED, THREAD_STATE_CLEAR_STATE, ATTACH_DETACH):
+	Moved here from ...
+	* config/i386/tm-i386gnu.h: ... here.  Removed.
+	* config/i386/xm-i386gnu.h: Removed.
+	* config/i386/i386gnu.mh (XM_FILE): Set to xm-i386.h.
+	(NAT_FILE): Set to nm-i386gnu.h.
+	* config/i386/i386gnu.mt (TDEPFILES): Add i386gnu-tdep.o.
+	* i386-tdep.c: New file.
+	* Makefile.in (ALLDEPFILES): Add i386gnu-nat.c and i386gnu-tdep.c.
+	(i386gnu-tdep.o): Specify dependencies.
+
 2002-08-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386sco5.h: Include "i386/tm-i386v4.h" instead of
