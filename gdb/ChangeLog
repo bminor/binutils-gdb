@@ -1,3 +1,9 @@
+2001-12-05  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (s390_get_frame_info): Recognize argument register
+	spills that use the `stm' instruction.
+	(is_arg_reg): New function.
+
 2001-12-03 Keith Walker <keith.walker@arm.com>
 	* gdbserver/low-linux.c (arm_register_u_addr): added.
 	(initialize_arch): added for ARM target.

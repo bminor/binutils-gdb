@@ -180,6 +180,14 @@ s390_stab_reg_to_regnum (int regno)
 }
 
 
+/* Return true if REGIDX is the number of a register used to pass
+     arguments, false otherwise.  */
+static int
+is_arg_reg (int regidx)
+{
+  return 2 <= regidx && regidx <= 6;
+}
+
 
 /* s390_get_frame_info based on Hartmuts
    prologue definition in
@@ -405,7 +413,7 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
 	  continue;
 	}
 
-      /* Check for an fp-relative STG or ST.  This is probably
+      /* Check for an fp-relative STG, ST, or STM.  This is probably
           spilling an argument from a register out into a stack slot.
           This could be a user instruction, but if we haven't included
           any other suspicious instructions in the prologue, this
@@ -414,9 +422,14 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
           are more serious, though --- you don't see the proper values
           of the arguments.  */
       if ((save_link_state == 3 || save_link_state == 4)
-          && instr[0] == 0x50      /* st %rA, D(%rX,%rB) */
-          && (instr[1] & 0xf) == 0 /* %rX is zero, no index reg */
-          && ((instr[2] >> 4) & 0xf) == frame_pointer_regidx)
+          && ((instr[0] == 0x50      /* st %rA, D(%rX,%rB) */
+               && (instr[1] & 0xf) == 0 /* %rX is zero, no index reg */
+               && is_arg_reg ((instr[1] >> 4) & 0xf)
+               && ((instr[2] >> 4) & 0xf) == frame_pointer_regidx)
+              || (instr[0] == 0x90 /* stm %rA, %rB, D(%rC) */
+                  && is_arg_reg ((instr[1] >> 4) & 0xf)
+                  && is_arg_reg (instr[1] & 0xf)
+                  && ((instr[2] >> 4) & 0xf) == frame_pointer_regidx)))
         {
           valid_prologue = 1;
           continue;
