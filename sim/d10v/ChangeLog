@@ -1,3 +1,8 @@
+2001-08-01  John R. Moore  <jmoore@redhat.com>
+
+	* interp.c (sim_create_inferior): Removed a hack that stated
+	it was setting r0/r1 with argc/argv.
+
 2001-04-15  J.T. Conklin  <jtc@redback.com>
 
 	* Makefile.in (simops.o): Add simops.h to dependency list.

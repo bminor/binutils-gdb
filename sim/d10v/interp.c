@@ -1202,25 +1202,6 @@ sim_create_inferior (sd, abfd, argv, env)
   /* reset all state information */
   memset (&State.regs, 0, (int)&State.mem - (int)&State.regs);
 
-  if (argv)
-    {
-      /* a hack to set r0/r1 with argc/argv */
-      /* some high memory that won't be overwritten by the stack soon */
-      bfd_vma addr = 0x7C00;
-      int p = 20;
-      int i = 0;
-      while (argv[i])
- 	{
- 	  int size = strlen (argv[i]) + 1;
- 	  SW (addr + 2*i, addr + p); 
- 	  sim_write (sd, addr + 0, argv[i], size);
- 	  p += size;
- 	  i++;
- 	}
-      SET_GPR (0, addr);
-      SET_GPR (1, i);
-    }
-
   /* set PC */
   if (abfd != NULL)
     start_address = bfd_get_start_address (abfd);
