@@ -1,3 +1,8 @@
+2004-11-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (read_encoded_value): Set proper size for signed
+	encodings as well as unsigned encodings.
+
 2004-11-02  Andrew Cagney  <cagney@gnu.org>
 
 	* value.h (COERCE_VARYING_ARRAY): Delete.
