@@ -1,3 +1,9 @@
+Mon Nov 08 17:05:30 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	* Makefile.in: Change RUNTEST_FLAGS back to RUNTESTFLAGS
+		       Change RUNTEST = runtest to test for existance of
+			a runtest in the source tree first.
+
 Mon Nov  8 10:42:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in: Remove unused variable GCC.  Remove "#CC=cc" line

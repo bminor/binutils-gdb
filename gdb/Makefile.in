@@ -189,7 +189,10 @@ DIST=gdb
 LINT=/usr/5bin/lint
 LINTFLAGS= $(BFD_CFLAGS)
 
-RUNTEST=runtest
+RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
+		echo $${srcdir}/../dejagnu/runtest ; else echo runtest; \
+	   fi`
+
 RUNTESTFLAGS=
 
 # This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
