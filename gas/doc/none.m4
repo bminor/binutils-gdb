@@ -29,6 +29,7 @@ _define__(<_I960__>,<0>)
 _define__(<_M680X0__>,<0>)
 _define__(<_SPARC__>,<0>)
 _define__(<_VAX__>,<0>)
+_define__(<_Z8000__>,<0>)
 _define__(<_VXWORKS__>,<0>)
 
 Text:
