@@ -7,6 +7,8 @@
 start-sanitize-sky
 1998-12-11  Jeff Law (law@cygnus.com)
 
+        * txvu-tdep.c (set_vxtu_prompt): Rename set_prompt.
+
         * configure.in (with-sim-gpu2): Do not emit a -L argument without
         an associated pathname.  Link in the math library after the gpu2
         library.
