@@ -30,7 +30,7 @@
 #include <sys/procfs.h>
 #include <sys/neutrino.h>
 #include <sys/syspage.h>
-#include <dirent.h>
+#include <gdb_dirent.h>
 #include <sys/netmgr.h>
 
 #include "gdb_string.h"
@@ -97,7 +97,7 @@ static unsigned nto_procfs_node = ND_LOCAL_NODE;
    is required is because QNX node descriptors are transient so
    we have to re-acquire them every time.  */
 static unsigned
-nto_node()
+nto_node(void)
 {
   unsigned node;
 
@@ -140,7 +140,7 @@ procfs_open (char *arg, int from_tty)
 	  if (errno == ENOTSUP)
 	    printf_filtered ("QNX Net Manager not found.\n");
 	  printf_filtered ("Invalid QNX node %s: error %d (%s).\n", nodestr,
-			   errno, strerror (errno));
+			   errno, safe_strerror (errno));
 	  xfree (nodestr);
 	  nodestr = NULL;
 	  nto_procfs_node = ND_LOCAL_NODE;
@@ -153,7 +153,7 @@ procfs_open (char *arg, int from_tty)
 	    *endstr = 0;
 	}
     }
-  sprintf (nto_procfs_path, "%s%s", nodestr ? nodestr : "", "/proc");
+  snprintf (nto_procfs_path, PATH_MAX - 1, "%s%s", nodestr ? nodestr : "", "/proc");
   if (nodestr)
     xfree (nodestr);
 
@@ -161,7 +161,7 @@ procfs_open (char *arg, int from_tty)
   if (fd == -1)
     {
       printf_filtered ("Error opening %s : %d (%s)\n", nto_procfs_path, errno,
-		       strerror (errno));
+		       safe_strerror (errno));
       error ("Invalid procfs arg");
     }
 
@@ -169,7 +169,7 @@ procfs_open (char *arg, int from_tty)
   if (devctl (fd, DCMD_PROC_SYSINFO, sysinfo, sizeof buffer, 0) != EOK)
     {
       printf_filtered ("Error getting size: %d (%s)\n", errno,
-		       strerror (errno));
+		       safe_strerror (errno));
       close (fd);
       error ("Devctl failed.");
     }
@@ -180,7 +180,7 @@ procfs_open (char *arg, int from_tty)
       if (!sysinfo)
 	{
 	  printf_filtered ("Memory error: %d (%s)\n", errno,
-			   strerror (errno));
+			   safe_strerror (errno));
 	  close (fd);
 	  error ("alloca failed.");
 	}
@@ -189,7 +189,7 @@ procfs_open (char *arg, int from_tty)
 	  if (devctl (fd, DCMD_PROC_SYSINFO, sysinfo, total_size, 0) != EOK)
 	    {
 	      printf_filtered ("Error getting sysinfo: %d (%s)\n", errno,
-			       strerror (errno));
+			       safe_strerror (errno));
 	      close (fd);
 	      error ("Devctl failed.");
 	    }
@@ -270,8 +270,8 @@ procfs_pidlist (char *args, int from_tty)
   dp = opendir (nto_procfs_path);
   if (dp == NULL)
     {
-      printf ("failed to opendir \"%s\" - %d (%s)", nto_procfs_path, errno,
-	      strerror (errno));
+      fprintf_unfiltered (gdb_stderr, "failed to opendir \"%s\" - %d (%s)",
+	      nto_procfs_path, errno, safe_strerror (errno));
       return;
     }
 
@@ -289,7 +289,7 @@ procfs_pidlist (char *args, int from_tty)
 	      closedir (dp);
 	      return;
 	    }
-	  sprintf (buf, "%s/%s/as", nto_procfs_path, dirp->d_name);
+	  snprintf (buf, 511, "%s/%s/as", nto_procfs_path, dirp->d_name);
 	  pid = atoi (dirp->d_name);
 	}
       while (pid == 0);
@@ -298,8 +298,8 @@ procfs_pidlist (char *args, int from_tty)
       fd = open (buf, O_RDONLY);
       if (fd == -1)
 	{
-	  printf ("failed to open %s - %d (%s)\n", buf, errno,
-		  strerror (errno));
+	  fprintf_unfiltered (gdb_stderr, "failed to open %s - %d (%s)\n",
+		  buf, errno, safe_strerror (errno));
 	  closedir (dp);
 	  return;
 	}
@@ -307,8 +307,9 @@ procfs_pidlist (char *args, int from_tty)
       pidinfo = (procfs_info *) buf;
       if (devctl (fd, DCMD_PROC_INFO, pidinfo, sizeof (buf), 0) != EOK)
 	{
-	  printf ("devctl DCMD_PROC_INFO failed - %d (%s)\n", errno,
-		  strerror (errno));
+	  fprintf_unfiltered (gdb_stderr,
+		  "devctl DCMD_PROC_INFO failed - %d (%s)\n", errno,
+		  safe_strerror (errno));
 	  break;
 	}
       num_threads = pidinfo->num_threads;
@@ -544,13 +545,13 @@ do_attach (ptid_t ptid)
 {
   procfs_status status;
   struct sigevent event;
-  char path[100];
+  char path[PATH_MAX];
 
-  sprintf (path, "%s/%d/as", nto_procfs_path, PIDGET (ptid));
+  snprintf (path, PATH_MAX - 1, "%s/%d/as", nto_procfs_path, PIDGET (ptid));
   ctl_fd = open (path, O_RDWR);
   if (ctl_fd == -1)
     error ("Couldn't open proc file %s, error %d (%s)", path, errno,
-	   strerror (errno));
+	   safe_strerror (errno));
   if (devctl (ctl_fd, DCMD_PROC_STOP, &status, sizeof (status), 0) != EOK)
     error ("Couldn't stop process");
 
@@ -572,7 +573,7 @@ do_attach (ptid_t ptid)
 
 /* Ask the user what to do when an interrupt is received.  */
 static void
-interrupt_query ()
+interrupt_query (void)
 {
   target_terminal_ours ();
 
@@ -887,7 +888,7 @@ procfs_resume (ptid_t ptid, int step, enum target_signal signo)
 }
 
 static void
-procfs_mourn_inferior ()
+procfs_mourn_inferior (void)
 {
   if (!ptid_equal (inferior_ptid, null_ptid))
     {
@@ -1053,7 +1054,7 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env)
   sigprocmask (SIG_BLOCK, &set, NULL);
 
   if (pid == -1)
-    error ("Error spawning %s: %d (%s)", argv[0], errno, strerror (errno));
+    error ("Error spawning %s: %d (%s)", argv[0], errno, safe_strerror (errno));
 
   if (fds[0] != STDIN_FILENO)
     close (fds[0]);
@@ -1084,13 +1085,13 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env)
 }
 
 static void
-procfs_stop ()
+procfs_stop (void)
 {
   devctl (ctl_fd, DCMD_PROC_STOP, NULL, 0, 0);
 }
 
 static void
-procfs_kill_inferior ()
+procfs_kill_inferior (void)
 {
   target_mourn_inferior ();
 }
@@ -1098,7 +1099,7 @@ procfs_kill_inferior ()
 /* Store register REGNO, or all registers if REGNO == -1, from the contents
    of REGISTERS.  */
 static void
-procfs_prepare_to_store ()
+procfs_prepare_to_store (void)
 {
 }
 
@@ -1169,7 +1170,7 @@ procfs_store_registers (int regno)
 	  if (err != EOK)
 	    fprintf_unfiltered (gdb_stderr,
 				"Warning unable to write regset %d: %s\n",
-				regno, strerror (err));
+				regno, safe_strerror (err));
 	}
     }
   else
@@ -1193,7 +1194,7 @@ procfs_store_registers (int regno)
       if (err != EOK)
 	fprintf_unfiltered (gdb_stderr,
 			    "Warning unable to write regset %d: %s\n", regno,
-			    strerror (err));
+			    safe_strerror (err));
     }
 }
 
@@ -1242,19 +1243,19 @@ procfs_pid_to_str (ptid_t ptid)
   pid = ptid_get_pid (ptid);
   tid = ptid_get_tid (ptid);
 
-  n = sprintf (buf, "process %d", pid);
+  n = snprintf (buf, 1023, "process %d", pid);
 
 #if 0				/* NYI */
   tip = procfs_thread_info (pid, tid);
   if (tip != NULL)
-    sprintf (&buf[n], " (state = 0x%02x)", tip->state);
+    snprintf (&buf[n], 1023, " (state = 0x%02x)", tip->state);
 #endif
 
   return buf;
 }
 
 static void
-init_procfs_ops ()
+init_procfs_ops (void)
 {
   procfs_ops.to_shortname = "procfs";
   procfs_ops.to_longname = "QNX Neutrino procfs child process";
@@ -1307,7 +1308,7 @@ init_procfs_ops ()
 #define OSTYPE_NTO 1
 
 void
-_initialize_procfs ()
+_initialize_procfs (void)
 {
   sigset_t set;
 
