@@ -1,3 +1,13 @@
+Wed May  6 16:34:03 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* somsolib.c: Include gdb_stat.h.
+
+Mon May  4 16:24:22 1998  Mark Alexander  <marka@cygnus.com>
+
+	* defs.h (make_run_cleanup): Declare.
+	* solib.c (find_solib): Pass correct number of arguments to
+	make_run_cleanup.
+
 Sat May  2 09:35:07 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* ocd.h:  Add new flags, function codes, and processor types to support

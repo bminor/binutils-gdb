@@ -34,6 +34,7 @@ and by Cygnus Support.  */
 #include "objfiles.h"
 #include "inferior.h"
 #include "gdb-stabs.h"
+#include "gdb_stat.h"
 #include "gdbcmd.h"
 #include "language.h"
 
