@@ -1,5 +1,7 @@
 Fri May  1 12:58:34 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
+	* coffcode.h (coff_write_object_contents): use RELSZ to work out
+	size of output reloc struct.
 	* targets.c, Makefile.in: comment out tekhex for the moment.
 	* ieee.c: if some places where null pointers were used instead of &bfd_abs_section.
 	* configure.in: tandem target is st2000
