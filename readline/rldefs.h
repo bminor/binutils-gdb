@@ -35,13 +35,17 @@
 #  endif
 #endif
 
+
 #define NEW_TTY_DRIVER
 #define HAVE_BSD_SIGNALS
 /* #define USE_XON_XOFF */
 
-#ifdef __MSDOS__
+#if defined(__MSDOS__) || defined(_MSC_VER)
+#define NO_SYS_FILE
+#define SIGALRM 1234
 #undef NEW_TTY_DRIVER
 #undef HAVE_BSD_SIGNALS
+#define MINIMAL
 #endif
 
 #if defined (__linux__)
@@ -52,6 +56,16 @@
 /* CYGNUS LOCAL accept __hpux as well as hpux for HP compiler in ANSI mode.  */
 #if defined (USG) && !(defined (hpux) || defined (__hpux))
 #  undef HAVE_BSD_SIGNALS
+#endif
+
+#if defined (__WIN32__) && !defined(_MSC_VER)
+#undef NEW_TTY_DRIVER
+#define MINIMAL
+#undef HAVE_BSD_SIGNALS
+#define TERMIOS_TTY_DRIVER
+#undef HANDLE_SIGNALS
+#include <termios.h>
+/*#define HAVE_POSIX_SIGNALS*/
 #endif
 
 /* System V machines use termio. */
@@ -137,6 +151,12 @@
 #endif /* !1 */
 
 #if defined (USG) && defined (TIOCGWINSZ) && !defined (Linux)
+#  if defined (_AIX)
+	/* AIX 4.x seems to reference struct uio within a prototype
+	   in stream.h, but doesn't cause the uio include file to
+	   be included.  */
+#    include <sys/uio.h>
+#  endif
 #  include <sys/stream.h>
 #  if defined (HAVE_SYS_PTEM_H)
 #    include <sys/ptem.h>
@@ -151,6 +171,11 @@
 #if defined (S_IFDIR) && !defined (S_ISDIR)
 #define S_ISDIR(m) (((m)&S_IFMT) == S_IFDIR)
 #endif
+/* Posix macro to check file in statbuf for file-ness.
+   This requires that <sys/stat.h> be included before this test. */
+#if defined (S_IFREG) && !defined (S_ISREG)
+#define S_ISREG(m) (((m)&S_IFMT) == S_IFREG)
+#endif
 
 #if !defined (strchr) && !defined (__STDC__)
 extern char *strchr (), *strrchr ();
@@ -163,6 +188,11 @@ extern char *strchr (), *strrchr ();
 /* This definition is needed by readline.c, rltty.c, and signals.c. */
 /* If on, then readline handles signals in a way that doesn't screw. */
 #define HANDLE_SIGNALS
+
+#if defined(__WIN32__) || defined(__MSDOS__)
+#undef HANDLE_SIGNALS
+#endif
+
 
 #if !defined (emacs_mode)
 #  define no_mode -1
@@ -232,6 +262,17 @@ extern char *strchr (), *strrchr ();
 
 #endif /* HAVE_BSD_SIGNALS */
 #endif /* HAVE_POSIX_SIGNALS */
+
+#if !defined (strchr)
+extern char *strchr ();
+#endif
+#if !defined (strrchr)
+extern char *strrchr ();
+#endif
+#ifdef __STDC__
+#include <stddef.h>
+extern size_t strlen (const char *s);
+#endif  /* __STDC__ */
 
 /*  End of signal handling definitions.  */
 #endif /* !_RLDEFS_H */
