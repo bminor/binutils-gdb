@@ -3186,6 +3186,7 @@ hpread_read_enum_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
 	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (xsym);
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
+	  TYPE_FIELD_STATIC_KIND (type, n) = 0;
 	}
       if (syms == osyms)
 	break;
@@ -3347,6 +3348,7 @@ hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  TYPE_FIELD_TYPE (type, n) = SYMBOL_TYPE (xsym);
 	  TYPE_FIELD_ARTIFICIAL (type, n) = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
+	  TYPE_FIELD_STATIC_KIND (type, n) = 0;
 	}
     }
   /* Mark it as having been processed */
@@ -3520,6 +3522,7 @@ hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  TYPE_FIELD_TYPE (type, n) = SYMBOL_TYPE (xsym);
 	  TYPE_FIELD_ARTIFICIAL (type, n) = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
+	  TYPE_FIELD_STATIC_KIND (type, n) = 0;
 	}
     }
 
@@ -3704,6 +3707,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  list = new;
 
 	  FIELD_BITSIZE (list->field) = 0;
+	  FIELD_STATIC_KIND (list->field) = 0;
 
 	  /* The "classname" field is actually a DNTT pointer to the base class */
 	  baseclass = hpread_type_lookup (parentp->dinheritance.classname,
@@ -4101,6 +4105,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	      list->field.name = VT (objfile) + fn_fieldp->dsvar.name;
 	      FIELD_BITPOS (list->field) = 0;	/* FIXME is this always true? */
 	      FIELD_BITSIZE (list->field) = 0;	/* use length from type */
+	      FIELD_STATIC_KIND (list->field) = 0;
 	      memtype = hpread_type_lookup (fn_fieldp->dsvar.type, objfile);
 	      list->field.type = memtype;
 	      list->attributes = 0;
@@ -4120,6 +4125,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	      list->field.name = VT (objfile) + fn_fieldp->ddvar.name;
 	      FIELD_BITPOS (list->field) = 0;	/* FIXME is this always true? */
 	      FIELD_BITSIZE (list->field) = 0;	/* use length from type */
+	      FIELD_STATIC_KIND (list->field) = 0;
 	      memtype = hpread_type_lookup (fn_fieldp->ddvar.type, objfile);
 	      list->field.type = memtype;
 	      list->attributes = 0;
@@ -4168,6 +4174,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 
 
 	  /* A FIELD by itself (without a GENFIELD) can also be a static member */
+	  FIELD_STATIC_KIND (list->field) = 0;
 	  if (fieldp->dfield.staticmem)
 	    {
 	      FIELD_BITPOS (list->field) = -1;

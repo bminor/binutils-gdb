@@ -4189,6 +4189,7 @@ fill_in_ada_prototype (struct symbol *func)
       case LOC_REGPARM_ADDR:
 	TYPE_FIELD_BITPOS (ftype, nargs) = nargs;
 	TYPE_FIELD_BITSIZE (ftype, nargs) = 0;
+	TYPE_FIELD_STATIC_KIND (ftype, nargs) = 0;
 	TYPE_FIELD_TYPE (ftype, nargs) =
 	  lookup_pointer_type (check_typedef (SYMBOL_TYPE (sym)));
 	TYPE_FIELD_NAME (ftype, nargs) = SYMBOL_NAME (sym);
@@ -4202,6 +4203,7 @@ fill_in_ada_prototype (struct symbol *func)
       case LOC_BASEREG_ARG:
 	TYPE_FIELD_BITPOS (ftype, nargs) = nargs;
 	TYPE_FIELD_BITSIZE (ftype, nargs) = 0;
+	TYPE_FIELD_STATIC_KIND (ftype, nargs) = 0;
 	TYPE_FIELD_TYPE (ftype, nargs) = check_typedef (SYMBOL_TYPE (sym));
 	TYPE_FIELD_NAME (ftype, nargs) = SYMBOL_NAME (sym);
 	nargs += 1;
@@ -6046,6 +6048,7 @@ template_to_fixed_record_type (struct type *type, char *valaddr,
        * rediscover why we needed field_offset and fix it properly. */
       TYPE_FIELD_BITPOS (rtype, f) = off;
       TYPE_FIELD_BITSIZE (rtype, f) = 0;
+      TYPE_FIELD_STATIC_KIND (rtype, f) = 0;
 
       if (ada_is_variant_part (type, f))
 	{
@@ -6149,6 +6152,7 @@ template_to_static_fixed_type (struct type *templ_type)
     {
       TYPE_FIELD_BITPOS (type, f) = 0;
       TYPE_FIELD_BITSIZE (type, f) = 0;
+      TYPE_FIELD_STATIC_KIND (type, f) = 0;
 
       if (is_dynamic_field (templ_type, f))
 	{
@@ -6218,6 +6222,7 @@ to_record_with_fixed_variant_part (struct type *type, char *valaddr,
       TYPE_FIELD_TYPE (rtype, nfields - 1) = branch_type;
       TYPE_FIELD_NAME (rtype, nfields - 1) = "S";
       TYPE_FIELD_BITSIZE (rtype, nfields - 1) = 0;
+      TYPE_FIELD_STATIC_KIND (rtype, nfields - 1) = 0;
       TYPE_LENGTH (rtype) += TYPE_LENGTH (branch_type);
       -TYPE_LENGTH (TYPE_FIELD_TYPE (type, nfields - 1));
     }

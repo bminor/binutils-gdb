@@ -1,3 +1,24 @@
+2002-11-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbtypes.h (struct main_type): Move artificial flag out of
+	loc.  New member of ``struct field'' named static_kind.  Reduce
+	overloaded meaning of bitsize.
+	(FIELD_ARTIFICIAL, SET_FIELD_PHYSNAME, SET_FIELD_PHYSADDR)
+	(TYPE_FIELD_STATIC, TYPE_FIELD_STATIC_HAS_ADDR): Likewise.
+	(FIELD_STATIC_KIND, TYPE_FIELD_STATIC_KIND): New macros.
+
+	* ada-lang.c (fill_in_ada_prototype): Initialize static_kind for
+	new fields.
+	(template_to_fixed_record_type, template_to_static_fixed_type)
+	(to_record_with_fixed_variant_part): Likewise.
+	* coffread.c (coff_read_struct_type, coff_read_enum_type): Likewise.
+	* dwarf2read.c (dwarf2_add_field, read_enumeration): Likewise.
+	* dwarfread.c (struct_type, enum_type): Likewise.
+	* hpread.c (hpread_read_enum_type)
+	(hpread_read_function_type, hpread_read_doc_function_type)
+	(hpread_read_struct_type): Likewise.
+	* mdebugread.c (parse_symbol): Likewise.
+
 2002-11-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* breakpoint.h (deprecated_frame_in_dummy): Rename frame_in_dummy.

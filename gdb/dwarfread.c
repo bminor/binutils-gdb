@@ -1027,6 +1027,7 @@ struct_type (struct dieinfo *dip, char *thisdie, char *enddie,
 			  &objfile->type_obstack);
 	  FIELD_TYPE (list->field) = decode_die_type (&mbr);
 	  FIELD_BITPOS (list->field) = 8 * locval (&mbr);
+	  FIELD_STATIC_KIND (list->field) = 0;
 	  /* Handle bit fields. */
 	  FIELD_BITSIZE (list->field) = mbr.at_bit_size;
 	  if (BITS_BIG_ENDIAN)
@@ -1694,6 +1695,7 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
 	  list = new;
 	  FIELD_TYPE (list->field) = NULL;
 	  FIELD_BITSIZE (list->field) = 0;
+	  FIELD_STATIC_KIND (list->field) = 0;
 	  FIELD_BITPOS (list->field) =
 	    target_to_host (scan, TARGET_FT_LONG_SIZE (objfile), GET_SIGNED,
 			    objfile);

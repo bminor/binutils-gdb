@@ -1997,6 +1997,7 @@ coff_read_struct_type (int index, int length, int lastsym)
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux);
 	  FIELD_BITPOS (list->field) = 8 * ms->c_value;
 	  FIELD_BITSIZE (list->field) = 0;
+	  FIELD_STATIC_KIND (list->field) = 0;
 	  nfields++;
 	  break;
 
@@ -2015,6 +2016,7 @@ coff_read_struct_type (int index, int length, int lastsym)
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux);
 	  FIELD_BITPOS (list->field) = ms->c_value;
 	  FIELD_BITSIZE (list->field) = sub_aux.x_sym.x_misc.x_lnsz.x_size;
+	  FIELD_STATIC_KIND (list->field) = 0;
 	  nfields++;
 	  break;
 
@@ -2135,6 +2137,7 @@ coff_read_enum_type (int index, int length, int lastsym)
 	  if (SYMBOL_VALUE (xsym) < 0)
 	    unsigned_enum = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
+	  TYPE_FIELD_STATIC_KIND (type, n) = 0;
 	}
       if (syms == osyms)
 	break;

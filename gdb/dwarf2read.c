@@ -2149,6 +2149,8 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* Get type of field.  */
       fp->type = die_type (die, objfile, cu_header);
 
+      FIELD_STATIC_KIND (*fp) = 0;
+
       /* Get bit size of field (zero if none).  */
       attr = dwarf_attr (die, DW_AT_bit_size);
       if (attr)
@@ -2257,6 +2259,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	FIELD_BITPOS (*fp) = (decode_locdesc (DW_BLOCK (attr), objfile, cu_header)
 			      * bits_per_byte);
       FIELD_BITSIZE (*fp) = 0;
+      FIELD_STATIC_KIND (*fp) = 0;
       FIELD_TYPE (*fp) = die_type (die, objfile, cu_header);
       FIELD_NAME (*fp) = type_name_no_tag (fp->type);
       fip->nbaseclasses++;
@@ -2761,6 +2764,7 @@ read_enumeration (struct die_info *die, struct objfile *objfile,
 		  FIELD_TYPE (fields[num_fields]) = NULL;
 		  FIELD_BITPOS (fields[num_fields]) = SYMBOL_VALUE (sym);
 		  FIELD_BITSIZE (fields[num_fields]) = 0;
+		  FIELD_STATIC_KIND (fields[num_fields]) = 0;
 
 		  num_fields++;
 		}
