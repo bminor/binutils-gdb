@@ -69,7 +69,7 @@ proc gdb_load { arg } {
     expect {
 	-re "A program is being debugged already.  Kill it\? \(y or n\)" {
 	    send "y\n"
-	    exp_continue
+	    continue -expect
 	}
 	-re "Reading symbols from.*done..*$prompt $" { }
 	-re "$prompt $" { perror "GDB couldn't read file" }

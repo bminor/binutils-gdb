@@ -26,30 +26,15 @@ target_makefile_frag=config/mt-unix
 
 	# this section is for all targets
 case "${target}" in
-i386-*-aout)		target_abbrev=aout ; 
-				target_makefile_frag=config/mt-i386-aout ;;
-m68*-abug-aout)		target_abbrev=abug ; 
-				target_makefile_frag=config/mt-m68k-abug-aout ;;
-m68*-abug-coff)		target_abbrev=abug ; 
-				target_makefile_frag=config/mt-m68k-abug-coff ;;
-m68*-*-abug)		target_abbrev=abug ; 
-				target_makefile_frag=config/mt-m68k-abug-aout ;;
-m68k-*-coff)		target_abbrev=coff ; 
-				target_makefile_frag=config/mt-m68k-coff ;;
-m68k-*-aout)		target_abbrev=aout ; 
-				target_makefile_frag=config/mt-m68k-aout ;;
-i960-*-nindy)		target_abbrev=nind ; 
-				target_makefile_frag=config/mt-i960-nindy ;;
-m68k-*-vxworks)		target_abbrev=vx ; 
-				target_makefile_frag=config/mt-m68k-vx ;;
-i960-*-vxworks)		target_abbrev=vx ; 
-				target_makefile_frag=config/mt-i960-vx ;;
-a29k-*-udi)		target_abbrev=udi ; 
-				target_makefile_frag=config/mt-a29k-udi ;;
-a29k-isstip-*)		target_abbrev=itip ; 
-				target_makefile_frag=config/mt-a29k-isstip ;;
-mips-idt-ecoff*)	target_abbrev=mips ;
-				target_makefile_frag=config/mt-mips ;;
+       i386-*-aout)    target_makefile_frag=config/mt-i386-aout ;;
+       *-*-lynx)       target_makefile_frag=config/mt-lynx ;;
+       *-*-vxworks)    target_makefile_frag=config/mt-vxworks ;;
+       m68k-*-*)       target_makefile_frag=config/mt-m68k ;;
+       i960-*-nindy)   target_makefile_frag=config/mt-i960-nindy ;;
+       a29k-*-udi)     target_makefile_frag=config/mt-a29k-udi ;;
+       sparclite-*-*)  target_makefile_frag=config/mt-slite ;;
+       sparc-*-aout)   target_makefile_frag=config/mt-sparc-aout ;;
+       mips-*-ecoff)   target_makefile_frag=config/mt-mips-ecoff ;;
 esac
 
 case "${target}" in

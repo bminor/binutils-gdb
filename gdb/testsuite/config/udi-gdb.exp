@@ -24,13 +24,6 @@
 # NOTE: these test assume that there is a udi_soc file in th
 #
 
-# these need to be initialized only if site.exp doesn't set them
-set prompt "\(gdb\)"
-
-if ![info exists prompt] then {
-    set prompt "\(gdb\)"
-}
-
 load_lib gdb.exp
 load_lib udi.exp
 
@@ -96,47 +89,9 @@ proc gdb_load { arg } {
     gdb_target_udi
 }
 
-#
-# gdb_start -- start GDB running. This assumes that there the
-#              UDICONF enviroment variable is set.
-#
 proc gdb_start { } {
-    global GDB
-    global GDBFLAGS
-    global spawn_id
-    global prompt
-    global verbose
-
-    set GDB [which $GDB]
-    # start GDB
-    if [ llength $GDBFLAGS ] then {
-	spawn $GDB $GDBFLAGS
-    } else {
-	spawn $GDB
-    }
-    expect  {
-	-re "GDB.*$prompt $"   {
-	    verbose "$GDB initialized for cross mode\n"
-	}
-	-re "$prompt $" {
-	    perror "GDB never initialized."
-	    return -1
-	}
-	timeout {
-	    perror "(timeout) GDB never initialized."    
-	    return -1
-	}
-    }
-
-    # force the height to "unlimited", so no pagers get used
-    send "set height 0\n"
-    expect -re ".*$prompt $" {}
-    # force the width to "unlimited", so no wraparound occurs
-    send "set width 0\n"
-    expect -re ".*$prompt $" {}
-
+    default_gdb_start
     verbose "Setting up target, Please wait..."
-
     gdb_target_udi
 }
 

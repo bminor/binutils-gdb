@@ -1,4 +1,24 @@
-Wed May 18 17:04:03 1994  Bill Cox  (bill@rtl.cygnus.com)
+Thu May 19 12:51:00 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* Makefile.in, configure.in, config/mips-gdb.exp,
+          config/mt-a29k-udi, config/mt-i386-aout, config/mt-i960-nindy,
+          config/mt-sparc-aout, config/udi-gdb.exp, config/unix-gdb.exp,
+          config/unknown.exp, gdb.t00/default.exp, gdb.t00/help.exp,,
+	  gdb.t00/teststrategy.exp, gdb.t01/Makefile.in, gdb.t02/Makefile.in,
+	  gdb.t02/whatis.exp, gdb.t03/Makefile.in, gdb.t03/gdbme.c,
+	  gdb.t04/Makefile.in, gdb.t05/Makefile.in, gdb.t06/Makefile.in,
+	  gdb.t06/break.exp, gdb.t06/signals.c, gdb.t06/signals.exp,
+	  gdb.t08/Makefile.in, gdb.t08/opaque.exp, gdb.t09/Makefile.in,
+	  gdb.t10/Makefile.in, gdb.t11/Makefile.in, gdb.t12/Makefile.in,
+	  gdb.t13/Makefile.in, gdb.t15/Makefile.in, gdb.t15/funcargs.exp,
+	  gdb.t15/gdbme.c, gdb.t15/return.exp, gdb.t16/Makefile.in,
+	  gdb.t17/Makefile.in, gdb.t17/callfuncs.exp, gdb.t17/gdbme.c,
+	  gdb.t20/Makefile.in, gdb.t21/Makefile.in, gdb.t21/cplusfuncs.exp,
+	  gdb.t22/Makefile.in, gdb.t22/virtfunc.exp, gdb.t23/Makefile.in,
+	  gdb.t24/demangle.exp, lib/gdb.exp:  Check in Rob's testing
+	  changes from 94Q1.
+
+Wed May 18 17:04:03 1994  Bill Cox  (bill@rtl.cygnus.com),
 
 	* config/mt-lynx, config/mt-m68k, config/mt-mips-ecoff,
 	  config/mt-slite, config/mt-unix, config/mt-vxworks: Add
@@ -185,6 +205,13 @@ Wed Mar  2 10:08:01 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 	operator[] test with gdb_test because the old code didn't seem to
 	be getting the quoting right with the new dejagnu.
 
+Thu Feb 24 19:49:25 1994  Rob Savoye  (rob@poseidon.cygnus.com)
+
+	* lib/gdb.exp: Set GDB to a fresh gdb if there is one, else use
+	one from the path.
+	* Makefile.in: Use a fresh expect if there is one, use runtest
+	from the src tree if there is one.
+  
 Thu Feb 24 18:49:37 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* gdb.t06/break.exp (test_next_with_recursion): Remove xfail for
