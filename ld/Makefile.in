@@ -38,9 +38,11 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(prefix)/info
+infodir = $(datadir)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
+
+gcclibdir = $(libdir)/gcc/$(target_alias)
 
 SHELL = /bin/sh
 
@@ -199,6 +201,10 @@ ldgram.h ldgram.c: ldgram.y
 
 ldlex.c: ldlex.l
 	lex -t $(VPATH)/ldlex.l >ldlex.c 
+
+# Main needs to know the default emulation type, too.
+ldmain.o: ldmain.c
+	$(CC) $(CFLAGS) -DDEFAULT_EMULATION=$(EMUL) -c $<
 
 # These all start with ld__ so 'make clean' can find them.
 
@@ -453,7 +459,9 @@ objdump:objdump.c
 
 install: $(LD_PROG)
 	$(INSTALL_PROGRAM) ld.new $(bindir)/ld
-#	$(INSTALL_PROGRAM) ld.new $(gcclibdir)/ld
+	-if [ -d "$(gcclibdir)" ] ; then \
+		 $(INSTALL_PROGRAM) ld.new $(gcclibdir)/ld ; \
+	fi
 
 install-info: info
 	for i in ld.info* ; do \
