@@ -1,5 +1,9 @@
 2001-01-01  Philip Blundell  <philb@gnu.org>
 
+	* ld-undefined/weak-undef.exp: New test.
+	* ld-undefined/weak-undef.s, ld-undefined/weak-undef.t: Supporting
+	files for above.
+
 	* ld-elfvers/vers.exp: Run test on Linux/ARM.
 	* ld-elfvsb/elfvsb.exp: Likewise.
 	* ld-shared/shared.exp: Likewise.
