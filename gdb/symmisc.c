@@ -35,6 +35,7 @@
 #include "bcache.h"
 #include "block.h"
 #include "gdb_regex.h"
+#include "gdb_stat.h"
 #include "dictionary.h"
 
 #include "gdb_string.h"
@@ -930,6 +931,8 @@ maintenance_print_msymbols (char *args, int from_tty)
   char *symname = NULL;
   struct objfile *objfile;
 
+  struct stat sym_st, obj_st;
+
   dont_repeat ();
 
   if (args == NULL)
@@ -948,7 +951,10 @@ maintenance_print_msymbols (char *args, int from_tty)
       /* If a second arg is supplied, it is a source file name to match on */
       if (argv[1] != NULL)
 	{
-	  symname = argv[1];
+	  symname = xfullpath (argv[1]);
+	  make_cleanup (xfree, symname);
+	  if (symname && stat (symname, &sym_st))
+	    perror_with_name (symname);
 	}
     }
 
@@ -962,8 +968,9 @@ maintenance_print_msymbols (char *args, int from_tty)
 
   immediate_quit++;
   ALL_OBJFILES (objfile)
-    if (symname == NULL || strcmp (symname, objfile->name) == 0)
-    dump_msymbols (objfile, outfile);
+    if (symname == NULL
+	|| (!stat (objfile->name, &obj_st) && sym_st.st_ino == obj_st.st_ino))
+      dump_msymbols (objfile, outfile);
   immediate_quit--;
   fprintf_filtered (outfile, "\n\n");
   do_cleanups (cleanups);
