@@ -1,3 +1,9 @@
+2002-05-22  H.J. Lu <hjl@gnu.org>
+
+	* gas/mips/elf-rel.d: Updated for the subsegs_finish change in
+	write.c.
+	* gas/mips/elfel-rel.d: Likewise.
+
 Wed May 22 14:26:07 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* gas/sh/pcrel-coff.s: New file.
