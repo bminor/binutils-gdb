@@ -352,7 +352,8 @@ sim_open (kind, ptr, abfd, argv)
      char **argv;
 {
   sim_kind = kind;
-  myname = argv[0];
+  if (myname) free (myname);
+  myname = xstrdup (argv[0]);
   sim_callback = ptr;
 
   /* Decide upon the endian-ness of the processor.
@@ -410,7 +411,8 @@ sim_close (sd, quitting)
      SIM_DESC sd ATTRIBUTE_UNUSED;
      int quitting ATTRIBUTE_UNUSED;
 {
-  /* nothing to do */
+  if (myname) free (myname);
+  myname = NULL;
 }
 
 SIM_RC

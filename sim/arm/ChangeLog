@@ -1,3 +1,7 @@
+Wed Mar 22 15:24:21 2000  glen mccready  <gkm@pobox.com>
+
+	* wrapper.c (sim_open,sim_close): Copy into myname, free myname.
+
 2000-02-08  Nick Clifton  <nickc@cygnus.com>
 
 	* wrapper.c: Fix compile time warning messages.
