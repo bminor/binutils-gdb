@@ -1,3 +1,7 @@
+Thu May  7 07:47:14 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* cgen.c (cgen_asm_finish_insn): Fix typo.
+
 Thu May  7 02:19:14 1998  Doug Evans  <devans@charmed.cygnus.com>
 
 	* cgen.h: New file.

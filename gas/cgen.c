@@ -333,7 +333,7 @@ cgen_asm_finish_insn (insn, buf, length, relax_p, result)
      cgen_insn_t * buf;
      unsigned int length;
      int relax_p;
-     finished_insn * result;
+     finished_insnS * result;
 {
   int i;
   int relax_operand;
