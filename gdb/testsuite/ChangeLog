@@ -1,5 +1,11 @@
 2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.base/completion.exp: Tab-complete "complet" instead of
+	"compl".
+	* gdb.base/complex.exp, gdb.base/complex.c: New files.
+
+2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/constvars.exp: Remove most xfails for GCC 3.x.
 	* gdb.base/volatile.exp: Likewise.
 

@@ -677,7 +677,7 @@ gdb_test "cd ${fullsrcdir}" \
          "Working directory [string_to_regexp ${fullsrcdir}].*" \
          "cd to \${srcdir}"
 
-send_gdb "file ./gdb.base/compl\t"
+send_gdb "file ./gdb.base/complet\t"
 sleep 1
 gdb_expect  {
         -re "^file ./gdb.base/completion\\.exp $"\
@@ -688,17 +688,17 @@ gdb_expect  {
                       { send_gdb "n\n"
                         gdb_expect {
                                 -re "\r\nProgram not killed\\.\r\n$gdb_prompt $"\
-                                        { pass "complete 'file ./gdb.base/compl'"}
-                                -re ".*$gdb_prompt $" { fail "complete 'file ./gdb.base/compl'"}
-                                timeout           {fail "(timeout) complete 'file ./gdb.base/compl'"}
+                                        { pass "complete 'file ./gdb.base/complet'"}
+                                -re ".*$gdb_prompt $" { fail "complete 'file ./gdb.base/complet'"}
+                                timeout           {fail "(timeout) complete 'file ./gdb.base/complet'"}
                                }
                       }
-                      -re ".*$gdb_prompt $" { fail "complete 'file ./gdb.base/compl'"}
-                      timeout           {fail "(timeout) complete 'file ./gdb.base/compl'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'file ./gdb.base/complet'"}
+                      timeout           {fail "(timeout) complete 'file ./gdb.base/complet'"}
                      }
             }
-        -re ".*$gdb_prompt $"       { fail "complete 'file ./gdb.base/compl'" }
-        timeout         { fail "(timeout) complete 'file ./gdb.base/compl'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'file ./gdb.base/complet'" }
+        timeout         { fail "(timeout) complete 'file ./gdb.base/complet'" }
         }
 
 send_gdb "info func marke\t"
