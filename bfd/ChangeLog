@@ -1,3 +1,10 @@
+Mon Nov 21 12:37:25 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* srec.c (srec_get_reloc_upper_bound): Define.
+	(srec_canonicalize_reloc): Define.
+	(srec_bfd_reloc_type_lookup): Define.
+	(srec_vec, symbolsrec_vec): Use BFD_JUMP_TABLE_RELOCS (srec).
+
 Sat Nov 19 03:10:51 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* configure.host (i[345]86-*-solaris*):  Use solaris2 to
