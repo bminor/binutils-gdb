@@ -169,6 +169,11 @@ struct broken_word *broken_words;
 int new_broken_words;
 #endif
 
+/* The current offset into the absolute section.  We don't try to
+   build frags in the absolute section, since no data can be stored
+   there.  We just keep track of the current offset.  */
+addressT abs_section_offset;
+
 /* If this line had an MRI style label, it is stored in this variable.
    This is used by some of the MRI pseudo-ops.  */
 static symbolS *mri_line_label;
@@ -185,6 +190,8 @@ symbolS *mri_common_symbol;
 static int mri_pending_align;
 
 static void do_align PARAMS ((int, char *));
+static int hex_float PARAMS ((int, char *));
+static void do_org PARAMS ((segT, expressionS *, int));
 char *demand_copy_string PARAMS ((int *lenP));
 int is_it_end_of_statement PARAMS ((void));
 static segT get_segmented_expression PARAMS ((expressionS *expP));
@@ -238,10 +245,21 @@ static const pseudo_typeS potable[] =
   {"dc.s", float_cons, 'f'},
   {"dc.w", cons, 2},
   {"dc.x", float_cons, 'x'},
+  {"dcb", s_space, 2},
+  {"dcb.b", s_space, 1},
+  {"dcb.d", s_float_space, 'd'},
+  {"dcb.l", s_space, 4},
+  {"dcb.s", s_float_space, 'f'},
+  {"dcb.w", s_space, 2},
+  {"dcb.x", s_float_space, 'x'},
   {"ds", s_space, 2},
   {"ds.b", s_space, 1},
+  {"ds.d", s_space, 8},
   {"ds.l", s_space, 4},
+  {"ds.p", s_space, 12},
+  {"ds.s", s_space, 4},
   {"ds.w", s_space, 2},
+  {"ds.x", s_space, 12},
 #ifdef S_SET_DESC
   {"desc", s_desc, 0},
 #endif
@@ -250,7 +268,9 @@ static const pseudo_typeS potable[] =
 /* dsect */
   {"eject", listing_eject, 0},	/* Formfeed listing */
   {"else", s_else, 0},
+  {"elsec", s_else, 0},
   {"end", s_end, 0},
+  {"endc", s_endif, 0},
   {"endif", s_endif, 0},
 /* endef */
   {"equ", s_set, 0},
@@ -259,16 +279,24 @@ static const pseudo_typeS potable[] =
   {"extern", s_ignore, 0},	/* We treat all undef as ext */
   {"appfile", s_app_file, 1},
   {"appline", s_app_line, 0},
+  {"fail", s_fail, 0},
   {"file", s_app_file, 0},
   {"fill", s_fill, 0},
   {"float", float_cons, 'f'},
+  {"format", s_ignore, 0},
   {"global", s_globl, 0},
   {"globl", s_globl, 0},
   {"hword", cons, 2},
-  {"if", s_if, 0},
+  {"if", s_if, (int) O_ne},
   {"ifdef", s_ifdef, 0},
+  {"ifeq", s_if, (int) O_eq},
   {"ifeqs", s_ifeqs, 0},
+  {"ifge", s_if, (int) O_ge},
+  {"ifgt", s_if, (int) O_gt},
+  {"ifle", s_if, (int) O_le},
+  {"iflt", s_if, (int) O_lt},
   {"ifndef", s_ifdef, 1},
+  {"ifne", s_if, (int) O_ne},
   {"ifnes", s_ifeqs, 1},
   {"ifnotdef", s_ifdef, 1},
   {"include", s_include, 0},
@@ -276,10 +304,13 @@ static const pseudo_typeS potable[] =
   {"lcomm", s_lcomm, 0},
   {"lflags", listing_flags, 0},	/* Listing flags */
   {"list", listing_list, 1},	/* Turn listing on */
+  {"llen", listing_psize, 1},
   {"long", cons, 4},
   {"lsym", s_lsym, 0},
+  {"noformat", s_ignore, 0},
   {"nolist", listing_list, 0},	/* Turn listing off */
   {"octa", cons, 16},
+  {"offset", s_struct, 0},
   {"org", s_org, 0},
   {"p2align", s_align_ptwo, 0},
   {"psize", listing_psize, 0},	/* set paper size */
@@ -297,6 +328,7 @@ static const pseudo_typeS potable[] =
   {"stabn", s_stab, 'n'},
   {"stabs", s_stab, 's'},
   {"string", stringer, 1},
+  {"struct", s_struct, 0},
 /* tag */
   {"text", s_text, 0},
 
@@ -433,22 +465,28 @@ read_a_source_file (name)
 		      char *line_start = input_line_pointer;
 		      char c = get_symbol_end ();
 
-		      /* In MRI mode, the EQU pseudoop must be handled
-                         specially.  */
-		      if (flag_mri)
+		      if (! ignore_input ())
 			{
-			  if ((strncasecmp (input_line_pointer + 1, "EQU", 3)
-			       == 0)
-			      && (input_line_pointer[4] == ' '
-				  || input_line_pointer[4] == '\t'))
+			  /* In MRI mode, the EQU pseudoop must be
+			     handled specially.  */
+			  if (flag_mri)
 			    {
-			      input_line_pointer += 4;
-			      equals (line_start);
-			      continue;
+			      if (((strncasecmp (input_line_pointer + 1,
+						 "EQU", 3) == 0)
+				   || (strncasecmp (input_line_pointer + 1,
+						    "SET", 3) == 0))
+				  && (input_line_pointer[4] == ' '
+				      || input_line_pointer[4] == '\t'))
+				{
+				  input_line_pointer += 4;
+				  equals (line_start);
+				  continue;
+				}
 			    }
+
+			  mri_line_label = colon (line_start);
 			}
 
-		      mri_line_label = colon (line_start);
 		      *input_line_pointer = c;
 		      if (c == ':')
 			input_line_pointer++;
@@ -595,6 +633,10 @@ read_a_source_file (name)
 		       * after pseudo-operation.
 		       */
 		      (*pop->poc_handler) (pop->poc_val);
+
+		      /* If that was .end, just get out now.  */
+		      if (pop->poc_handler == s_end)
+			goto quit;
 		    }
 		  else
 		    {		/* machine instruction */
@@ -810,8 +852,9 @@ read_a_source_file (name)
 	    }
 	}
     }				/* while (more buffers to scan) */
-  input_scrub_close ();		/* Close the input file */
 
+ quit:
+  input_scrub_close ();		/* Close the input file */
 }
 
 void 
@@ -1173,6 +1216,39 @@ s_app_line (ignore)
   demand_empty_rest_of_line ();
 }
 
+/* Handle the .end pseudo-op.  Actually, the real work is done in
+   read_a_source_file.  */
+
+void
+s_end (ignore)
+     int ignore;
+{
+  if (flag_mri)
+    {
+      /* The MRI assembler permits the start symbol to follow .end,
+         but we don't support that.  */
+      SKIP_WHITESPACE ();
+      if (! is_end_of_line[(unsigned char) *input_line_pointer])
+	as_warn ("start address not supported");
+    }
+}
+
+/* Handle the MRI fail pseudo-op.  */
+
+void
+s_fail (ignore)
+     int ignore;
+{
+  offsetT temp;
+
+  temp = get_absolute_expression ();
+  if (temp >= 500)
+    as_warn (".fail %ld encountered", (long) temp);
+  else
+    as_bad (".fail %ld encountered", (long) temp);
+  demand_empty_rest_of_line ();
+}
+
 void 
 s_fill (ignore)
      int ignore;
@@ -1486,6 +1562,39 @@ s_lsym (ignore)
   demand_empty_rest_of_line ();
 }				/* s_lsym() */
 
+/* Handle changing the location counter.  */
+
+static void
+do_org (segment, exp, fill)
+     segT segment;
+     expressionS *exp;
+     int fill;
+{
+  if (segment != now_seg && segment != absolute_section)
+    as_bad ("invalid segment \"%s\"; segment \"%s\" assumed",
+	    segment_name (segment), segment_name (now_seg));
+
+  if (now_seg == absolute_section)
+    {
+      if (fill != 0)
+	as_warn ("ignoring fill value in absolute section");
+      if (exp->X_op != O_constant)
+	{
+	  as_bad ("only constant offsets supported in absolute section");
+	  exp->X_add_number = 0;
+	}
+      abs_section_offset = exp->X_add_number;
+    }
+  else
+    {
+      char *p;
+
+      p = frag_var (rs_org, 1, 1, (relax_substateT) 0, exp->X_add_symbol,
+		    exp->X_add_number, (char *) NULL);
+      *p = fill;
+    }
+}
+
 void 
 s_org (ignore)
      int ignore;
@@ -1493,7 +1602,7 @@ s_org (ignore)
   register segT segment;
   expressionS exp;
   register long temp_fill;
-  register char *p;
+
   /* Don't believe the documentation of BSD 4.2 AS.  There is no such
      thing as a sub-segment-relative origin.  Any absolute origin is
      given a warning, then assumed to be segment-relative.  Any
@@ -1514,15 +1623,10 @@ s_org (ignore)
     }
   else
     temp_fill = 0;
+
   if (!need_pass_2)
-    {
-      if (segment != now_seg && segment != absolute_section)
-	as_bad ("Invalid segment \"%s\". Segment \"%s\" assumed.",
-		segment_name (segment), segment_name (now_seg));
-      p = frag_var (rs_org, 1, 1, (relax_substateT) 0, exp.X_add_symbol,
-		    exp.X_add_number, (char *) 0);
-      *p = temp_fill;
-    }				/* if (ok to make frag) */
+    do_org (segment, &exp, temp_fill);
+
   demand_empty_rest_of_line ();
 }				/* s_org() */
 
@@ -1568,15 +1672,7 @@ s_set (ignore)
       segment = get_known_segmented_expression (&exp);
 
       if (!need_pass_2)
-	{
-	  if (segment != now_seg && segment != absolute_section)
-	    as_bad ("Invalid segment \"%s\". Segment \"%s\" assumed.",
-		    segment_name (segment),
-		    segment_name (now_seg));
-	  ptr = frag_var (rs_org, 1, 1, (relax_substateT) 0, exp.X_add_symbol,
-			  exp.X_add_number, (char *) 0);
-	  *ptr = 0;
-	}			/* if (ok to make frag) */
+	do_org (segment, &exp, 0);
 
       *end_name = delim;
       return;
@@ -1629,6 +1725,14 @@ s_space (mult)
 	  return;
 	}
 
+      /* If we are in the absolute section, just bump the offset.  */
+      if (now_seg == absolute_section)
+	{
+	  abs_section_offset += repeat;
+	  demand_empty_rest_of_line ();
+	  return;
+	}
+
       /* If we are secretly in an MRI common section, then creating
          space just increases the size of the common symbol.  */
       if (mri_common_symbol != NULL)
@@ -1645,6 +1749,11 @@ s_space (mult)
     }
   else
     {
+      if (now_seg == absolute_section)
+	{
+	  as_bad ("space allocation too complex in absolute section");
+	  subseg_set (text_section, 0);
+	}
       if (mri_common_symbol != NULL)
 	{
 	  as_bad ("space allocation too complex in common section");
@@ -1668,6 +1777,85 @@ s_space (mult)
     {
       *p = temp_fill;
     }
+  demand_empty_rest_of_line ();
+}
+
+/* This is like s_space, but the value is a floating point number with
+   the given precision.  This is for the MRI dcb.s pseudo-op and
+   friends.  */
+
+void
+s_float_space (float_type)
+     int float_type;
+{
+  offsetT count;
+  int flen;
+  char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT];
+
+  count = get_absolute_expression ();
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("missing value");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  ++input_line_pointer;
+
+  SKIP_WHITESPACE ();
+
+  /* Skip any 0{letter} that may be present.  Don't even check if the
+   * letter is legal.  */
+  if (input_line_pointer[0] == '0' && isalpha (input_line_pointer[1]))
+    input_line_pointer += 2;
+
+  /* Accept :xxxx, where the x's are hex digits, for a floating point
+     with the exact digits specified.  */
+  if (input_line_pointer[0] == ':')
+    {
+      flen = hex_float (float_type, temp);
+      if (flen < 0)
+	{
+	  ignore_rest_of_line ();
+	  return;
+	}
+    }
+  else
+    {
+      char *err;
+
+      err = md_atof (float_type, temp, &flen);
+      know (flen <= MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
+      know (flen > 0);
+      if (err)
+	{
+	  as_bad ("Bad floating literal: %s", err);
+	  ignore_rest_of_line ();
+	  return;
+	}
+    }
+
+  while (--count >= 0)
+    {
+      char *p;
+
+      p = frag_more (flen);
+      memcpy (p, temp, (unsigned int) flen);
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the .struct pseudo-op, as found in MIPS assemblers.  */
+
+void
+s_struct (ignore)
+     int ignore;
+{
+  abs_section_offset = get_absolute_expression ();
+  subseg_set (absolute_section, 0);
   demand_empty_rest_of_line ();
 }
 
@@ -1926,6 +2114,15 @@ emit_expr (exp, nbytes)
     return;
 
   op = exp->X_op;
+
+  /* Allow `.word 0' in the absolute section.  */
+  if (now_seg == absolute_section)
+    {
+      if (op != O_constant || exp->X_add_number != 0)
+	as_bad ("attempt to store value in absolute section");
+      abs_section_offset += nbytes;
+      return;
+    }
 
   /* Handle a negative bignum.  */
   if (op == O_uminus
@@ -2379,6 +2576,88 @@ parse_repeat_cons (exp, nbytes)
 
 #endif /* REPEAT_CONS_EXPRESSIONS */
 
+/* Parse a floating point number represented as a hex constant.  This
+   permits users to specify the exact bits they want in the floating
+   point number.  */
+
+static int
+hex_float (float_type, bytes)
+     int float_type;
+     char *bytes;
+{
+  int length;
+  int i;
+
+  switch (float_type)
+    {
+    case 'f':
+    case 'F':
+    case 's':
+    case 'S':
+      length = 4;
+      break;
+
+    case 'd':
+    case 'D':
+    case 'r':
+    case 'R':
+      length = 8;
+      break;
+
+    case 'x':
+    case 'X':
+      length = 12;
+      break;
+
+    case 'p':
+    case 'P':
+      length = 12;
+      break;
+
+    default:
+      as_bad ("Unknown floating type type '%c'", float_type);
+      return -1;
+    }
+
+  /* It would be nice if we could go through expression to parse the
+     hex constant, but if we get a bignum it's a pain to sort it into
+     the buffer correctly.  */
+  i = 0;
+  while (hex_p (*input_line_pointer) || *input_line_pointer == '_')
+    {
+      int d;
+
+      /* The MRI assembler accepts arbitrary underscores strewn about
+	 through the hex constant, so we ignore them as well. */
+      if (*input_line_pointer == '_')
+	{
+	  ++input_line_pointer;
+	  continue;
+	}
+
+      if (i >= length)
+	{
+	  as_warn ("Floating point constant too large");
+	  return -1;
+	}
+      d = hex_value (*input_line_pointer) << 4;
+      ++input_line_pointer;
+      while (*input_line_pointer == '_')
+	++input_line_pointer;
+      if (hex_p (*input_line_pointer))
+	{
+	  d += hex_value (*input_line_pointer);
+	  ++input_line_pointer;
+	}
+      bytes[i++] = d;
+    }
+
+  if (i < length)
+    memset (bytes + i, 0, length - i);
+
+  return length;
+}
+
 /*
  *			float_cons()
  *
@@ -2432,77 +2711,13 @@ float_cons (float_type)
          point with the exact digits specified.  */
       if (input_line_pointer[0] == ':')
 	{
-	  int i;
-
-	  switch (float_type)
+	  ++input_line_pointer;
+	  length = hex_float (float_type, temp);
+	  if (length < 0)
 	    {
-	    case 'f':
-	    case 'F':
-	    case 's':
-	    case 'S':
-	      length = 4;
-	      break;
-
-	    case 'd':
-	    case 'D':
-	    case 'r':
-	    case 'R':
-	      length = 8;
-	      break;
-
-	    case 'x':
-	    case 'X':
-	      length = 12;
-	      break;
-
-	    case 'p':
-	    case 'P':
-	      length = 12;
-	      break;
-
-	    default:
-	      as_bad ("Unknown floating type type '%c'", float_type);
 	      ignore_rest_of_line ();
 	      return;
 	    }
-
-	  /* It would be nice if we could go through expression to
-             parse the hex constant, but if we get a bignum it's a
-             pain to sort it into the buffer correctly.  */
-	  i = 0;
-	  ++input_line_pointer;
-	  while (hex_p (*input_line_pointer) || *input_line_pointer == '_')
-	    {
-	      int d;
-
-	      /* The MRI assembler accepts arbitrary underscores
-                 strewn about through the hex constant, so we ignore
-                 them as well. */
-	      if (*input_line_pointer == '_')
-		{
-		  ++input_line_pointer;
-		  continue;
-		}
-
-	      if (i >= length)
-		{
-		  as_warn ("Floating point constant too large");
-		  ignore_rest_of_line ();
-		  return;
-		}
-	      d = hex_value (*input_line_pointer) << 4;
-	      ++input_line_pointer;
-	      while (*input_line_pointer == '_')
-		++input_line_pointer;
-	      if (hex_p (*input_line_pointer))
-		{
-		  d += hex_value (*input_line_pointer);
-		  ++input_line_pointer;
-		}
-	      temp[i++] = d;
-	    }
-	  if (i < length)
-	    memset (temp + i, 0, length - i);
 	}
       else
 	{
@@ -2924,15 +3139,7 @@ equals (sym_name)
 
       segment = get_known_segmented_expression (&exp);
       if (!need_pass_2)
-	{
-	  if (segment != now_seg && segment != absolute_section)
-	    as_warn ("Illegal segment \"%s\". Segment \"%s\" assumed.",
-		     segment_name (segment),
-		     segment_name (now_seg));
-	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, exp.X_add_symbol,
-			exp.X_add_number, (char *) 0);
-	  *p = 0;
-	}			/* if (ok to make frag) */
+	do_org (segment, &exp, 0);
     }
   else
     {

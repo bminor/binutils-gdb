@@ -1,5 +1,63 @@
 Wed Aug  9 10:51:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* write.c (adjust_reloc_syms): Check that symbol is not NULL
+	before checking sy_mri_common.
+	(fixup_segment): Likewise.
+	* config/obj-coff.c (fixup_segment): Likewise.
+
+	* read.c (abs_section_offset): New global variable.
+	(potable): Add offset, struct.
+	(do_org): New static function; handle changing the origin in the
+	absolute section.
+	(s_org): Use do_org.
+	(s_set): Likewise.
+	(equals): Likewise.
+	(s_space): In absolute_section, just increase abs_section_offset.
+	(s_struct): New function.
+	(emit_expr): Handle absolute_section specially.
+	* read.h (abs_section_offset): Declare.
+	(s_struct): Declare.
+	* frags.c (frag_more): Warn if in absolute_section.
+	(frag_now_fix): In absolute_section, return abs_section_offset.
+	* subsegs.c (subseg_change): If switching to absolute_section,
+	just set now_seg and now_subseg.
+	(subseg_set_rest): Special handling when switching to or from
+	absolute_section.
+
+	* config/tc-m68k.c (m68k_float_copnum): New static variable.
+	(md_pseudo_table): Add fopt and mask2.
+	(m68k_ip): Use m68k_float_copnum, not COPNUM, when setting
+	coprocessor register to use.  In case 'I' when checking operands,
+	correct coprocessor register numbers.  In case 'I' when setting
+	operands, don't add 1.
+	(s_fopt): New static function.
+	* config/m68k-parse.h (COPNUM): Don't define.
+
+	* read.c (potable): Add ifeq, ifge, ifgt, ifle, iflt, ifne.
+	Change if to pass O_ne to s_if.
+	(read_a_source_file): Don't define an label without a colon if
+	ignore_input returns true.
+	* cond.c (s_if): Treat argument as an operatorT describing how to
+	compare the argument against zero.
+	(ignore_input): Don't require an initial dot in MRI mode, or if
+	NO_PSEUDO_DOT is defined.
+
+	* read.c (potable): Add dcb, dcb.b, dcb.d, dcb.l, dcb.s, dcb.w,
+	dcb.x, ds.d, ds.p, ds.s, ds.x, elsec, endc, fail, format, llen,
+	noformat.
+	(read_a_source_file): If pseudo-op handler is s_end, quit
+	immediately.
+	(s_end): New function.
+	(s_fail): New function.
+	(s_float_space): New function.
+	(hex_float): New static function.
+	(float_cons): Use hex_float.
+	* read.h (s_fail): Declare.
+	(s_float_space): Declare.
+	* cond.c (s_end): Remove.
+	* listing.c (listing_psize): Treat argument as indicating whether
+	a height is expected.
+
 	* read.c (mri_pending_align): New static variable.
 	(read_a_source_file): Handle mri_pending_align.
 	(cons): Set mri_pending_align if appropriate.

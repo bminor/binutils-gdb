@@ -60,6 +60,9 @@ extern const char line_separator_chars[];
 /* This flag whether to generate line info for asm file */
 extern int generate_asm_lineno;
 
+/* The offset in the absolute section.  */
+extern addressT abs_section_offset;
+
 /* This is used to support MRI common sections.  */
 extern symbolS *mri_common_symbol;
 
@@ -86,13 +89,14 @@ void s_align_ptwo PARAMS ((int));
 void s_app_file PARAMS ((int));
 void s_app_line PARAMS ((int));
 void s_comm PARAMS ((int));
-void s_mri_common PARAMS ((int));
 void s_data PARAMS ((int));
 void s_desc PARAMS ((int));
 void s_else PARAMS ((int arg));
 void s_end PARAMS ((int arg));
 void s_endif PARAMS ((int arg));
+void s_fail PARAMS ((int));
 void s_fill PARAMS ((int));
+void s_float_space PARAMS ((int mult));
 void s_globl PARAMS ((int arg));
 void s_if PARAMS ((int arg));
 void s_ifdef PARAMS ((int arg));
@@ -101,10 +105,12 @@ void s_ignore PARAMS ((int arg));
 void s_include PARAMS ((int arg));
 void s_lcomm PARAMS ((int needs_align));
 void s_lsym PARAMS ((int));
+void s_mri_common PARAMS ((int));
 void s_org PARAMS ((int));
 void s_set PARAMS ((int));
 void s_space PARAMS ((int mult));
 void s_stab PARAMS ((int what));
+void s_struct PARAMS ((int));
 void s_text PARAMS ((int));
 void stringer PARAMS ((int append_zero));
 void s_xstab PARAMS ((int what));
