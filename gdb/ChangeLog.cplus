@@ -1,3 +1,8 @@
+2003-12-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cp-names.y: Use precedence to resolve shift/reduce conflicts for
+	COLONCOLON.  Merge type1a, type1b, and type2 rules.
+
 2003-12-16  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cp-names.y (function_arglist): Call d_qualify.

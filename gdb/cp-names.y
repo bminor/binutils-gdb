@@ -199,7 +199,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %type <comp> unqualified_name scope_id ext_name colon_ext_name
 %type <comp> template template_arg basic_exp
 %type <comp> /* base_function typed_function */ colon_name
-%type <comp> builtin_type type2 type1a type1b function_arglist
+%type <comp> builtin_type function_arglist
 %type <comp> decl1b
 
 %type <nested> template_params function_args
@@ -233,6 +233,9 @@ static int parse_number (char *, int, int, YYSTYPE *);
 /* C++ */
 %token TRUEKEYWORD
 %token FALSEKEYWORD
+
+/* i.e., lower precedence than COLONCOLON.  */
+%nonassoc NAME
 
 %left ','
 %right '=' ASSIGN_MODIFY
@@ -327,6 +330,7 @@ operator	:	OPERATOR NEW
 			{ $$ = d_op_from_string ("->*"); }
 		|	OPERATOR '[' ']'
 			{ $$ = d_op_from_string ("[]"); }
+/* FIXME conversion operators are sorta important */
 /*
 		|	OPERATOR type
 			{ $$ = d_make_node (di, D_COMP_CAST, $2, NULL); }
@@ -351,9 +355,9 @@ colon_name	:	name
 
 /* D_COMP_QUAL_NAME */
 /* D_COMP_CTOR / D_COMP_DTOR ? */
-name		:	nested_name scope_id
+name		:	nested_name scope_id %prec NAME
 			{ $$ = $1.comp; d_right ($1.last) = $2; }
-		|	scope_id
+		|	scope_id %prec NAME
 		;
 
 colon_ext_name	:	ext_name
@@ -461,11 +465,9 @@ typed_function	:	type base_function
 /* FIXME actions all wrong */
 qualified	:	ext_name function_arglist
 		{}
-		|	type1a ext_name function_arglist
+		|	type ext_name function_arglist
 		{}
-		|	type2 ext_name function_arglist
-		{}
-		|	type1a COLONCOLON ext_name function_arglist
+		|	type COLONCOLON ext_name function_arglist
 		{}
 		|	decl1b function_arglist
 		{}
@@ -609,12 +611,7 @@ ptr_operator_seq:	ptr_operator
 			  *$1.last = $2.comp; }
 		;
 
-/* "type1" are the type productions which can legally be followed by a ::
-   token.  "type2" are the type productions which can not.  For instance,
-   int ::Foo::* and Bar Foo::* are both pointer-to-member types, but
-   Bar ::Foo::* is a ptr_operator, because :: is consumed greedily.  */
-
-type1a		:	builtin_type qualifiers_opt
+type		:	builtin_type qualifiers_opt
 			{ $$ = d_qualify ($1, $2, 0); }
 		|	qualifiers builtin_type qualifiers_opt
 			{ $$ = d_qualify ($2, $1 | $3, 0); }
@@ -623,10 +620,7 @@ type1a		:	builtin_type qualifiers_opt
 		|	qualifiers colon_name qualifiers
 			{ $$ = d_qualify ($2, $1 | $3, 0); }
 
-		|	type1a ptr_operator_1
-			{ $$ = $2.comp;
-			  *$2.last = $1; }
-		|	type2 ptr_operator_1
+		|	type ptr_operator_1
 			{ $$ = $2.comp;
 			  *$2.last = $1; }
 /*
@@ -644,7 +638,11 @@ type1a		:	builtin_type qualifiers_opt
 			  $$ = d_make_comp (di, D_COMP_ARRAY_TYPE, $1,
 					    d_make_comp (di, D_COMP_LITERAL, $3.type, i));
 			}
-		;
+		|	qualifiers colon_name
+			{ $$ = d_qualify ($2, $1, 0); }
+		|	name
+		|	type ptr_operator_2
+			{ $$ = d_make_comp (di, D_COMP_POINTER, $1, NULL); }
 
 		/* FIXME this comment is completely wrong; this is not allowing, it's rejecting */
 		/* This ext_name and the one below for
@@ -652,7 +650,7 @@ type1a		:	builtin_type qualifiers_opt
 		   "type" instead.  That causes a reduce/reduce
 		   conflict.  Allow a few invalid inputs to keep life
 		   simple.  */
-type1b		:	ext_name '(' ptr_operator_seq ')' '(' function_args ')'
+		|	ext_name '(' ptr_operator_seq ')' '(' function_args ')'
 			{ struct d_comp *funtype;
 			  funtype = d_make_comp (di, D_COMP_FUNCTION_TYPE, $1, $6.comp);
 			  $$ = $3.comp;
@@ -673,18 +671,6 @@ decl1b		:	ext_name '(' ptr_operator_seq ext_name '(' function_args ')' ')'
 			  $$ = $4.comp;
 			  *$4.last = funtype; }
 */
-		;
-
-type2		:	qualifiers colon_name
-			{ $$ = d_qualify ($2, $1, 0); }
-		|	name
-		|	type1a ptr_operator_2
-			{ $$ = d_make_comp (di, D_COMP_POINTER, $1, NULL); }
-		;
-
-type		:	type1a
-		|	type1b
-		|	type2
 		;
 
 basic_exp	:	exp
