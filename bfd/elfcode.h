@@ -4819,11 +4819,71 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
-      size_t dynsymcount;
       bfd_size_type strsize;
 
       *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
       BFD_ASSERT (*sinterpptr != NULL || info->shared);
+
+      if (soname != NULL)
+	{
+	  bfd_size_type indx;
+
+	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, soname,
+				     true, true);
+	  if (indx == (bfd_size_type) -1
+	      || ! elf_add_dynamic_entry (info, DT_SONAME, indx))
+	    return false;
+	}      
+
+      if (rpath != NULL)
+	{
+	  bfd_size_type indx;
+
+	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, rpath,
+				     true, true);
+	  if (indx == (bfd_size_type) -1
+	      || ! elf_add_dynamic_entry (info, DT_RPATH, indx))
+	    return false;
+	}
+
+      /* Find all symbols which were defined in a dynamic object and make
+	 the backend pick a reasonable value for them.  */
+      elf_link_hash_traverse (elf_hash_table (info),
+			      elf_adjust_dynamic_symbol,
+			      (PTR) info);
+
+      /* Add some entries to the .dynamic section.  We fill in some of the
+	 values later, in elf_bfd_final_link, but we must add the entries
+	 now so that we know the final size of the .dynamic section.  */
+      if (bfd_get_section_by_name (output_bfd, ".init") != NULL)
+	{
+	  if (! elf_add_dynamic_entry (info, DT_INIT, 0))
+	    return false;
+	}
+      if (bfd_get_section_by_name (output_bfd, ".fini") != NULL)
+	{
+	  if (! elf_add_dynamic_entry (info, DT_FINI, 0))
+	    return false;
+	}
+      strsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
+      if (! elf_add_dynamic_entry (info, DT_HASH, 0)
+	  || ! elf_add_dynamic_entry (info, DT_STRTAB, 0)
+	  || ! elf_add_dynamic_entry (info, DT_SYMTAB, 0)
+	  || ! elf_add_dynamic_entry (info, DT_STRSZ, strsize)
+	  || ! elf_add_dynamic_entry (info, DT_SYMENT,
+				      sizeof (Elf_External_Sym)))
+	return false;
+    }
+
+  /* The backend must work out the sizes of all the other dynamic
+     sections.  */
+  bed = get_elf_backend_data (output_bfd);
+  if (! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
+    return false;
+
+  if (elf_hash_table (info)->dynamic_sections_created)
+    {
+      size_t dynsymcount;
 
       /* Set the size of the .dynsym and .hash sections.  We counted
 	 the number of dynamic symbols in elf_link_add_object_symbols.
@@ -4875,69 +4935,10 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
 
       elf_hash_table (info)->bucketcount = bucketcount;
 
-      if (soname != NULL)
-	{
-	  bfd_size_type indx;
-
-	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, soname,
-				     true, true);
-	  if (indx == (bfd_size_type) -1
-	      || ! elf_add_dynamic_entry (info, DT_SONAME, indx))
-	    return false;
-	}      
-
-      if (rpath != NULL)
-	{
-	  bfd_size_type indx;
-
-	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, rpath,
-				     true, true);
-	  if (indx == (bfd_size_type) -1
-	      || ! elf_add_dynamic_entry (info, DT_RPATH, indx))
-	    return false;
-	}
-
       s = bfd_get_section_by_name (dynobj, ".dynstr");
       BFD_ASSERT (s != NULL);
       s->_raw_size = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
 
-      /* Find all symbols which were defined in a dynamic object and make
-	 the backend pick a reasonable value for them.  */
-      elf_link_hash_traverse (elf_hash_table (info),
-			      elf_adjust_dynamic_symbol,
-			      (PTR) info);
-
-      /* Add some entries to the .dynamic section.  We fill in some of the
-	 values later, in elf_bfd_final_link, but we must add the entries
-	 now so that we know the final size of the .dynamic section.  */
-      if (bfd_get_section_by_name (output_bfd, ".init") != NULL)
-	{
-	  if (! elf_add_dynamic_entry (info, DT_INIT, 0))
-	    return false;
-	}
-      if (bfd_get_section_by_name (output_bfd, ".fini") != NULL)
-	{
-	  if (! elf_add_dynamic_entry (info, DT_FINI, 0))
-	    return false;
-	}
-      strsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
-      if (! elf_add_dynamic_entry (info, DT_HASH, 0)
-	  || ! elf_add_dynamic_entry (info, DT_STRTAB, 0)
-	  || ! elf_add_dynamic_entry (info, DT_SYMTAB, 0)
-	  || ! elf_add_dynamic_entry (info, DT_STRSZ, strsize)
-	  || ! elf_add_dynamic_entry (info, DT_SYMENT,
-				      sizeof (Elf_External_Sym)))
-	return false;
-    }
-
-  /* The backend must work out the sizes of all the other dynamic
-     sections.  */
-  bed = get_elf_backend_data (output_bfd);
-  if (! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
-    return false;
-
-  if (elf_hash_table (info)->dynamic_sections_created)
-    {
       if (! elf_add_dynamic_entry (info, DT_NULL, 0))
 	return false;
     }

@@ -420,6 +420,10 @@ struct bfd_elf_section_data {
      rather than RELA, all the r_addend fields will be zero.  This
      pointer may be NULL.  It is used by the backend linker.  */
   Elf_Internal_Rela *relocs;
+  /* Used by the backend linker when generating a shared library to
+     record the dynamic symbol index for a section symbol
+     corresponding to this section.  */
+  long dynindx;
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)

@@ -36,6 +36,8 @@ static boolean elf32_sparc_check_relocs
 	   const Elf_Internal_Rela *));
 static boolean elf32_sparc_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+static boolean elf32_sparc_adjust_dynindx
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf32_sparc_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf32_sparc_relocate_section
@@ -617,9 +619,15 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
 	  return false;
 	}
 
-      /* Set the symbol to this location in the .plt.  */
-      h->root.u.def.section = s;
-      h->root.u.def.value = s->_raw_size;
+      /* If we are not generating a shared library, or if the symbol
+         is not defined, set the symbol to this location in the .plt.
+         This is required to make function pointers compare as equal
+         between the normal executable and the shared library.  */
+      if (! info->shared || h->root.type != bfd_link_hash_defined)
+	{
+	  h->root.u.def.section = s;
+	  h->root.u.def.value = s->_raw_size;
+	}
 
       h->plt_offset = s->_raw_size;
 
@@ -863,6 +871,44 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	}
     }
 
+  /* If we are generating a shared library, we generate a section
+     symbol for each output section.  These are local symbols, which
+     means that they must come first in the dynamic symbol table.
+     That means we must increment the dynamic symbol index of every
+     other dynamic symbol.  */
+  if (info->shared)
+    {
+      int c, i;
+
+      c = bfd_count_sections (output_bfd);
+      elf_link_hash_traverse (elf_hash_table (info),
+			      elf32_sparc_adjust_dynindx,
+			      (PTR) &c);
+      elf_hash_table (info)->dynsymcount += c;
+
+      for (i = 1, s = output_bfd->sections; s != NULL; s = s->next, i++)
+	{
+	  elf_section_data (s)->dynindx = i;
+	  /* These symbols will have no names, so we don't need to
+             fiddle with dynstr_index.  */
+	}
+    }
+
+  return true;
+}
+
+/* Increment the index of a dynamic symbol by a given amount.  Called
+   via elf_link_hash_traverse.  */
+
+static boolean
+elf32_sparc_adjust_dynindx (h, cparg)
+     struct elf_link_hash_entry *h;
+     PTR cparg;
+{
+  int *cp = (int *) cparg;
+
+  if (h->dynindx != -1)
+    h->dynindx += *cp;
   return true;
 }
 
@@ -1146,37 +1192,44 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  BFD_ASSERT (h->dynindx != -1);
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
-		  outrel.r_addend = 0;
+		  outrel.r_addend = rel->r_addend;
 		}
 	      else
 		{
-		  long indx;
-
-		  sym = local_syms + r_symndx;
-
-		  /* If this isn't a section symbol, we need to map it
-                     to something that is going to be put into the
-                     dynamic symbols.  The case will probably never
-                     arise.  */
-		  BFD_ASSERT (ELF_ST_TYPE (sym->st_info) == STT_SECTION);
-
-		  sec = local_sections[r_symndx];
-		  if (sec != NULL && bfd_is_abs_section (sec))
-		    indx = 0;
-		  else if (sec == NULL || sec->owner == NULL)
+		  if (r_type == R_SPARC_32)
 		    {
-		      bfd_set_error (bfd_error_bad_value);
-		      return false;
+		      outrel.r_info = ELF32_R_INFO (0, R_SPARC_RELATIVE);
+		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		  else
 		    {
-		      indx = sec->output_section->target_index;
-		      if (indx == 0)
-			abort ();
-		    }
+		      long indx;
 
-		  outrel.r_info = ELF32_R_INFO (indx, r_type);
-		  outrel.r_addend = sec->output_offset + sym->st_value;
+		      sym = local_syms + r_symndx;
+
+		      BFD_ASSERT (ELF_ST_TYPE (sym->st_info) == STT_SECTION);
+
+		      sec = local_sections[r_symndx];
+		      if (sec != NULL && bfd_is_abs_section (sec))
+			indx = 0;
+		      else if (sec == NULL || sec->owner == NULL)
+			{
+			  bfd_set_error (bfd_error_bad_value);
+			  return false;
+			}
+		      else
+			{
+			  asection *osec;
+
+			  osec = sec->output_section;
+			  indx = elf_section_data (osec)->dynindx;
+			  if (indx == 0)
+			    abort ();
+			}
+
+		      outrel.r_info = ELF32_R_INFO (indx, r_type);
+		      outrel.r_addend = relocation + rel->r_addend;
+		    }
 		}
 
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
@@ -1399,15 +1452,19 @@ elf32_sparc_finish_dynamic_sections (output_bfd, info)
 	      asection *s;
 
 	      s = bfd_get_section_by_name (output_bfd, name);
-	      BFD_ASSERT (s != NULL);
-	      if (! size)
-		dyn.d_un.d_ptr = s->vma;
+	      if (s == NULL)
+		dyn.d_un.d_val = 0;
 	      else
 		{
-		  if (s->_cooked_size != 0)
-		    dyn.d_un.d_val = s->_cooked_size;
+		  if (! size)
+		    dyn.d_un.d_ptr = s->vma;
 		  else
-		    dyn.d_un.d_val = s->_raw_size;
+		    {
+		      if (s->_cooked_size != 0)
+			dyn.d_un.d_val = s->_cooked_size;
+		      else
+			dyn.d_un.d_val = s->_raw_size;
+		    }
 		}
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	    }
@@ -1441,6 +1498,43 @@ elf32_sparc_finish_dynamic_sections (output_bfd, info)
     }
 
   elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
+
+  if (info->shared)
+    {
+      asection *sdynsym;
+      asection *s;
+      Elf_Internal_Sym sym;
+
+      /* Set up the section symbols for the output sections.  */
+
+      sdynsym = bfd_get_section_by_name (dynobj, ".dynsym");
+      BFD_ASSERT (sdynsym != NULL);
+
+      sym.st_size = 0;
+      sym.st_name = 0;
+      sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
+      sym.st_other = 0;
+
+      for (s = output_bfd->sections; s != NULL; s = s->next)
+	{
+	  int indx;
+
+	  sym.st_value = s->vma;
+
+	  indx = elf_section_data (s)->this_idx;
+	  BFD_ASSERT (indx > 0);
+	  sym.st_shndx = indx;
+
+	  bfd_elf32_swap_symbol_out (output_bfd, &sym,
+				     ((Elf32_External_Sym *) sdynsym->contents
+				      + elf_section_data (s)->dynindx));
+	}
+
+      /* Set the sh_info field of the output .dynsym section to the
+         index of the first global symbol.  */
+      elf_section_data (sdynsym->output_section)->this_hdr.sh_info =
+	bfd_count_sections (output_bfd) + 1;
+    }
 
   return true;
 }

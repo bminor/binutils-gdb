@@ -542,9 +542,9 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	  if (info->shared
 	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
-	      /* When creating a shared object, we must output a
-                 R_386_RELATIVE reloc for this location.  We create a
-                 reloc section in dynobj and make room for this reloc.  */
+	      /* When creating a shared object, we must copy these
+                 reloc types into the output file.  We create a reloc
+                 section in dynobj and make room for this reloc.  */
 	      if (sreloc == NULL)
 		{
 		  const char *name;
@@ -647,9 +647,15 @@ elf_i386_adjust_dynamic_symbol (info, h)
       if (s->_raw_size == 0)
 	s->_raw_size += PLT_ENTRY_SIZE;
 
-      /* Set the symbol to this location in the .plt.  */
-      h->root.u.def.section = s;
-      h->root.u.def.value = s->_raw_size;
+      /* If we are not generating a shared library, or if the symbol
+         is not defined, set the symbol to this location in the .plt.
+         This is required to make function pointers compare as equal
+         between the normal executable and the shared library.  */
+      if (! info->shared || h->root.type != bfd_link_hash_defined)
+	{
+	  h->root.u.def.section = s;
+	  h->root.u.def.value = s->_raw_size;
+	}
 
       h->plt_offset = s->_raw_size;
 

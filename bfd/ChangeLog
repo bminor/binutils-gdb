@@ -1,3 +1,27 @@
+Thu Oct 27 16:59:52 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* libelf.h (struct bfd_elf_section_data): Add field dynindx.
+	* elfcode.h (NAME(bfd_elf,size_dynamic_sections)): Don't finalize
+	the .dynsym, .dynstr or .hash sections until after the backend
+	size_dynamic_sections routine, so that it can add dynamic symbols
+	if it wants to.
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Don't define the
+	symbol to be in the .plt section when generating a shared library
+	if it is a defined symbol.
+	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Likewise.
+	(elf32_sparc_size_dynamic_sections): When generating a shared
+	library, allocate space for a dynamic symbol for each output
+	section, storing the index in the dynindx field of the ELF section
+	data.  Adjust the other dynindx fields to account for this.
+	(elf32_sparc_adjust_dynindx): New static function.
+	(elf32_sparc_relocate_section): When copying a reloc into a shared
+	library, use the original addend as appropriate.  Convert an
+	R_SPARC_32 reloc into an R_SPARC_RELATIVE reloc.  Use the dynamic
+	symbol index of the output section, not the normal symbol index.
+	(elf32_sparc_finish_dynamic_sections): Don't die if a section does
+	not exist when setting the value of the dynamic tags.  Write out
+	a dynamic symbol for each output section.
+
 Wed Oct 26 01:15:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* aoutx.h (aout_link_input_section): Don't bother to read or write
