@@ -1,3 +1,8 @@
+Wed Feb  5 11:11:06 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (mips16_ip): Accept floating point registers in
+	the operand of the exit instruction.
+
 Tue Feb  4 14:12:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* symbols.c (resolve_symbol_value): If we leave an equated symbol

@@ -7217,7 +7217,7 @@ mips16_ip (str, ip)
 		  mask = 7 << 3;
 		while (*s != '\0')
 		  {
-		    int reg1, reg2;
+		    int freg, reg1, reg2;
 
 		    while (*s == ' ' || *s == ',')
 		      ++s;
@@ -7227,6 +7227,13 @@ mips16_ip (str, ip)
 			break;
 		      }
 		    ++s;
+		    if (*s != 'f')
+		      freg = 0;
+		    else
+		      {
+			freg = 1;
+			++s;
+		      }
 		    reg1 = 0;
 		    while (isdigit (*s))
 		      {
@@ -7244,6 +7251,16 @@ mips16_ip (str, ip)
 			if (*s != '$')
 			  break;
 			++s;
+			if (freg)
+			  {
+			    if (*s == 'f')
+			      ++s;
+			    else
+			      {
+				as_bad ("invalid register list");
+				break;
+			      }
+			  }
 			reg2 = 0;
 			while (isdigit (*s))
 			  {
@@ -7252,15 +7269,32 @@ mips16_ip (str, ip)
 			    ++s;
 			  }
 		      }
-		    if (reg1 == 4 && reg2 >= 4 && reg2 <= 7 && c != 'L')
+		    if (freg && reg1 == 0 && reg2 == 0 && c == 'L')
+		      {
+			mask &= ~ (7 << 3);
+			mask |= 5 << 3;
+		      }
+		    else if (freg && reg1 == 0 && reg2 == 1 && c == 'L')
+		      {
+			mask &= ~ (7 << 3);
+			mask |= 6 << 3;
+		      }
+		    else if (reg1 == 4 && reg2 >= 4 && reg2 <= 7 && c != 'L')
 		      mask |= (reg2 - 3) << 3;
 		    else if (reg1 == 16 && reg2 >= 16 && reg2 <= 17)
 		      mask |= (reg2 - 15) << 1;
 		    else if (reg1 == 31 && reg2 == 31)
 		      mask |= 1;
 		    else
-		      as_bad ("invalid register list");
+		      {
+			as_bad ("invalid register list");
+			break;
+		      }
 		  }
+		/* The mask is filled in in the opcode table for the
+                   benefit of the disassembler.  We remove it before
+                   applying the actual mask.  */
+		ip->insn_opcode &= ~ ((7 << 3) << MIPS16OP_SH_IMM6);
 		ip->insn_opcode |= mask << MIPS16OP_SH_IMM6;
 	      }
 	    continue;
