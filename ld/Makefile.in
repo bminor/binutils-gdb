@@ -139,10 +139,10 @@ SED_REMOVE_CONSTRUCTORS= -e /CONSTRUCTORS/d
 BFDLIB=$(unsubdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(unsubdir)/../libiberty$(subdir)/libiberty.a
 
-OFILES= ldgram.o ldlex.o ldlang.o ldctor.o ldmain.o \
-	ldwarn.o ldwrite.o ldexp.o ldlnk960.o ldgld68k.o ldindr.o i386aout.o \
-	ldm88k.o ldglda29k.o news.o h8300hds.o ebmon29k.o \
-	ldgld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o ldvanilla.o ldfile.o
+OFILES= ldgram.o ldlex.o ldlang.o ldctor.o ldmain.o ldindr.o \
+	ldwarn.o ldwrite.o ldexp.o ldlnk960.o ld__gld68k.o ld__i386aout.o \
+	ld__m88k.o ld__glda29k.o ld__news.o h8300hds.o ld__ebmon29k.o \
+	ld__gld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o ldvanilla.o ldfile.o
 
 HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h \
 	ldsym.h ldctor.h ldlang.h ldexp.h \
@@ -151,10 +151,10 @@ HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h \
 MANSOURCES=ld.tex
 
 LDCSOURCES=ldlang.c ldctor.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c \
-	ldgld.c ldgld68k.c ldm88k.c ebmon29k.c \
+	ld__gld.c ld__gld68k.c ld__m88k.c ld__ebmon29k.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c ldvanilla.c
 
-GENERATED_SOURCES=ldgram.c ldlex.c ldgram.h 
+GENERATED_SOURCES=ldgram.c ldlex.c ldgram.h ld__*.c
 GENERATED_HEADERS=ldgram.h
 
 LDSOURCES=$(LDCSOURCES) ldgram.y ldlex.l ldgram.h
@@ -177,44 +177,46 @@ ldgram.h ldgram.c: ldgram.y
 ldlex.c: ldlex.l
 	lex -t $(VPATH)/ldlex.l >ldlex.c 
 
-ldgld.c: $(srcdir)/ldtemplate
+# These all start with ld__ so 'make clean' can find them.
+
+ld__gld.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldgld/g -e s/"<arch>"/m68k/g \
 	-e s/"<target>"//g -e s/"<TARGET>"//g <$(srcdir)/ldtemplate >$@
-news.c: $(srcdir)/ldtemplate
+ld__news.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/news/g -e s/"<arch>"/m68k/g \
 	-e s/"<target>"/news/g -e s/"<TARGET>"/NEWS/g <$(srcdir)/ldtemplate >$@
 
-i386aout.c: $(srcdir)/ldtemplate
+ld__i386aout.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/i386aout/g -e s/"<arch>"/i386/g \
 	-e s/"<target>"/i386aout/g -e s/"<TARGET>"/I386AOUT/g <$(srcdir)/ldtemplate >$@
  
 
-ebmon29k.c: $(srcdir)/ldtemplate
+ld__ebmon29k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ebmon29k/g -e s/"<arch>"/a29k/g \
 	-e s/"gld<target>"/ebmon29k/g -e s/"GLD<TARGET>"/EBMON29K/g \
 	-e s/"<ldtarget>.x"/ebmon.x/ <$(srcdir)/ldtemplate >$@
 
-ldgld68k.c: $(srcdir)/ldtemplate
+ld__gld68k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldgld68k/g -e s/"<arch>"/m68k/g \
 	-e s/"<target>"/68k/g -e s/"<TARGET>"/68K/g <$(srcdir)/ldtemplate >$@
-ldglda29k.c: $(srcdir)/ldtemplate
+ld__glda29k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldglda29k/g -e s/"<arch>"/a29k/g \
 	-e s/"<target>"/29k/g -e s/"<TARGET>"/29K/g <$(srcdir)/ldtemplate >$@
-ldm88k.c: $(srcdir)/ldtemplate
+ld__m88k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldm88k/g -e s/"<arch>"/m88k/g \
 	-e s/"<target>"/m88kbcs/g -e s/"<TARGET>"/M88KBCS/g <$(srcdir)/ldtemplate >$@
 
 # The .c files for these are generated from ldtemplete.
-ldgld.o: ./mkscript ldgld.x ldgld.xr ldgld.xu ldgld.xn ldgld.xN
-news.o: ./mkscript news.x news.xr news.xu news.xn news.xN
-i386aout.o: ./mkscript i386aout.x i386aout.xr i386aout.xu i386aout.xn i386aout.xN
-ebmon29k.o: ./mkscript ebmon29k.x ebmon29k.xr ebmon29k.xu \
+ld__gld.o: ./mkscript ldgld.x ldgld.xr ldgld.xu ldgld.xn ldgld.xN
+ld__news.o: ./mkscript news.x news.xr news.xu news.xn news.xN
+ld__i386aout.o: ./mkscript i386aout.x i386aout.xr i386aout.xu i386aout.xn i386aout.xN
+ld__ebmon29k.o: ./mkscript ebmon29k.x ebmon29k.xr ebmon29k.xu \
 	ebmon29k.xn ebmon29k.xN
-ldgld68k.o: ./mkscript ldgld68k.x ldgld68k.xr ldgld68k.xu \
+ld__gld68k.o: ./mkscript ldgld68k.x ldgld68k.xr ldgld68k.xu \
 	ldgld68k.xn ldgld68k.xN
-ldglda29k.o: ./mkscript ldglda29k.x ldglda29k.xr ldglda29k.xu \
+ld__glda29k.o: ./mkscript ldglda29k.x ldglda29k.xr ldglda29k.xu \
 	ldglda29k.xn ldglda29k.xN
-ldm88k.o: ./mkscript ldm88k.x ldm88k.xr ldm88k.xu ldm88k.xn ldm88k.xN
+ld__m88k.o: ./mkscript ldm88k.x ldm88k.xr ldm88k.xu ldm88k.xn ldm88k.xN
 
 # The .c files for these are (for now) specially written (not ldtemplete).
 ldgld960.o: ./mkscript ldgld960.x
@@ -373,7 +375,7 @@ de-stage3: force
 clean:
 	- rm -f TAGS $(OFILES) $(GENERATED_SOURCES) $(GENERATED_HEADERS)
 	- rm -f *.x *.x[runN] *.sc[runN]
-	- rm -f ld.?? ld.??? 
+	- rm -f ld.?? ld.???
 	- rm -f ld ld1 ld2 ld3 ld.new mkscript *.o y.output
 
 lintlog:$(SOURCES) Makefile
