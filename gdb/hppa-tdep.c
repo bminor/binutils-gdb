@@ -1285,9 +1285,9 @@ prologue_inst_adjust_sp (unsigned long inst)
   if ((inst & 0xffe00008) == 0x73c00008)
     return (inst & 0x1 ? -1 << 13 : 0) | (((inst >> 4) & 0x3ff) << 3);
 
-  /* addil high21,%r1; ldo low11,(%r1),%r30)
+  /* addil high21,%r30; ldo low11,(%r1),%r30)
      save high bits in save_high21 for later use.  */
-  if ((inst & 0xffe00000) == 0x28200000)
+  if ((inst & 0xffe00000) == 0x2bc00000)
     {
       save_high21 = hppa_extract_21 (inst);
       return 0;

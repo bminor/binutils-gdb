@@ -1,3 +1,8 @@
+2005-01-01  Joel Brobecker  <brobecker@gnat.com>
+
+        * hppa-tdep.c (prologue_inst_adjust_sp): Fix small confusion
+        in register number for addil instruction.
+
 2004-12-28  Jim Blandy  <jimb@redhat.com>
 
  	* remote.c (fetch_register_using_p): Recognize a register value
