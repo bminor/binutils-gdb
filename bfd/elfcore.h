@@ -32,7 +32,7 @@ elf_core_file_failing_signal (abfd)
   return elf_tdata (abfd)->core_signal;
 }
 
-boolean
+bfd_boolean
 elf_core_file_matches_executable_p (core_bfd, exec_bfd)
      bfd *core_bfd;
      bfd *exec_bfd;
@@ -44,7 +44,7 @@ elf_core_file_matches_executable_p (core_bfd, exec_bfd)
   if (core_bfd->xvec != exec_bfd->xvec)
     {
       bfd_set_error (bfd_error_system_call);
-      return false;
+      return FALSE;
     }
 
   /* See if the name in the corefile matches the executable name.  */
@@ -56,10 +56,10 @@ elf_core_file_matches_executable_p (core_bfd, exec_bfd)
       execname = execname ? execname + 1 : exec_bfd->filename;
 
       if (strcmp(execname, corename) != 0)
-	return false;
+	return FALSE;
     }
 
-  return true;
+  return TRUE;
 }
 
 /*  Core files are simply standard ELF formatted files that partition

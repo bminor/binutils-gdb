@@ -918,19 +918,20 @@ gdb_print_insn_sh (bfd_vma memaddr, disassemble_info *info)
   return print_insn_sh (memaddr, info);
 }
 
-/* Given a GDB frame, determine the address of the calling function's frame.
-   This will be used to create a new GDB frame struct, and then
-   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
+/* Given a GDB frame, determine the address of the calling function's
+   frame.  This will be used to create a new GDB frame struct, and
+   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
+   called for the new frame.
 
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
 static CORE_ADDR
 sh_frame_chain (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return frame->frame;	/* dummy frame same as caller's frame */
   if (frame->pc && !inside_entry_file (frame->pc))
-    return read_memory_integer (FRAME_FP (frame) + frame->extra_info->f_offset, 4);
+    return read_memory_integer (get_frame_base (frame) + frame->extra_info->f_offset, 4);
   else
     return 0;
 }
@@ -965,7 +966,7 @@ translate_insn_rn (int rn, int media_mode)
 static CORE_ADDR
 sh64_frame_chain (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return frame->frame;	/* dummy frame same as caller's frame */
   if (frame->pc && !inside_entry_file (frame->pc))
     {
@@ -975,7 +976,7 @@ sh64_frame_chain (struct frame_info *frame)
 	size = 4;
       else
 	size = REGISTER_RAW_SIZE (translate_insn_rn (FP_REGNUM, media_mode));
-      return read_memory_integer (FRAME_FP (frame) + frame->extra_info->f_offset, size);
+      return read_memory_integer (get_frame_base (frame) + frame->extra_info->f_offset, size);
     }
   else
     return 0;
@@ -990,7 +991,7 @@ static CORE_ADDR
 sh_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
-    if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       /* When the caller requests PR from the dummy frame, we return PC because
          that's where the previous routine appears to have done a call from. */
       return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
@@ -1012,7 +1013,7 @@ sh64_get_saved_pr (struct frame_info *fi, int pr_regnum)
   int media_mode = 0;
 
   for (; fi; fi = fi->next)
-    if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       /* When the caller requests PR from the dummy frame, we return PC because
          that's where the previous routine appears to have done a call from. */
       return deprecated_read_register_dummy (fi->pc, fi->frame, pr_regnum);
@@ -1725,7 +1726,7 @@ sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
@@ -1757,7 +1758,7 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
@@ -1814,7 +1815,7 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 
   while (frame && ((frame = frame->next) != NULL))
     {
-      if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
 	{
 	  if (lval)		/* found it in a CALL_DUMMY frame */
 	    *lval = not_lval;
@@ -1908,11 +1909,11 @@ sh_pop_frame (void)
   register CORE_ADDR fp;
   register int regnum;
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
-      fp = FRAME_FP (frame);
+      fp = get_frame_base (frame);
       FRAME_INIT_SAVED_REGS (frame);
 
       /* Copy regs from where they were saved in the frame */
@@ -1938,11 +1939,11 @@ sh64_pop_frame (void)
 
   int media_mode = pc_is_isa32 (frame->pc);
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
-      fp = FRAME_FP (frame);
+      fp = get_frame_base (frame);
       FRAME_INIT_SAVED_REGS (frame);
 
       /* Copy regs from where they were saved in the frame */
@@ -2937,7 +2938,7 @@ sh64_show_compact_regs (void)
 static void
 sh64_show_regs (void)
 {
-  if (pc_is_isa32 (selected_frame->pc))
+  if (pc_is_isa32 (deprecated_selected_frame->pc))
     sh64_show_media_regs ();
   else
     sh64_show_compact_regs ();
@@ -3919,7 +3920,7 @@ sh_do_fp_register (int regnum)
   raw_buffer = (char *) alloca (REGISTER_RAW_SIZE (FP0_REGNUM));
 
   /* Get the data in raw format.  */
-  if (!frame_register_read (selected_frame, regnum, raw_buffer))
+  if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
 
   /* Get the register as a number */ 
@@ -4001,7 +4002,7 @@ sh_do_register (int regnum)
   print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), gdb_stdout);
 
   /* Get the data in raw format.  */
-  if (!frame_register_read (selected_frame, regnum, raw_buffer))
+  if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     printf_filtered ("*value not available*\n");
       
   val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0, 0,
@@ -4112,7 +4113,7 @@ sh_compact_do_registers_info (int regnum, int fpregs)
 void
 sh64_do_registers_info (int regnum, int fpregs)
 {
-  if (pc_is_isa32 (selected_frame->pc))
+  if (pc_is_isa32 (deprecated_selected_frame->pc))
    sh_do_registers_info (regnum, fpregs);
   else
    sh_compact_do_registers_info (regnum, fpregs); 
@@ -4240,6 +4241,10 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      provided. */
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
+
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
 
   tdep->osabi = osabi;
 
@@ -4560,14 +4565,11 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1); /*???*/
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_words (gdbarch, sh_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (sh_call_dummy_words));
   set_gdbarch_call_dummy_p (gdbarch, 1);
@@ -4589,8 +4591,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, sh_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
   set_gdbarch_saved_pc_after_call (gdbarch, sh_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);

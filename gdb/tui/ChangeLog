@@ -1,3 +1,41 @@
+2002-12-08  Elena Zannoni  <ezannoni@redhat.com>
+
+       Import of readline 4.3.
+       Fix PR gdb/675
+       * tuiWin.c: Include readline/readline.h.
+       (tui_update_gdb_sizes): Use accessor function rl_get_screen_size.
+       (tuiResizeAll): Ditto.
+
+2002-12-06  Elena Zannoni  <ezannoni@redhat.com>
+
+	* tuiStack.c (tuiShowFrameInfo): Fix typo.
+
+2002-11-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* tui/tui-hooks.c: Update to use deprecated_selected_frame.
+	* tui/tui.c, tui/tuiDisassem.c, tui/tuiRegs.c: Ditto.
+	* tui/tuiSource.c, tui/tuiSourceWin.c, tui/tuiWin.c: Ditto.
+
+2002-11-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiStack.c (tuiShowFrameInfo): Use find_frame_sal instead of
+	find_pc_line.
+
+2002-11-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiStack.c (tuiShowFrameInfo): Use get_frame_type instead of
+	deprecated_frame_in_dummy.  Fix coding style.
+
+2002-11-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-hooks.c (tui_init_hook): Don't enable the TUI if a specific
+	interpreter is installed.
+
+2002-11-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiStack.c (tuiShowFrameInfo): Use get_frame_type instead of
+	signal_handler_caller.
+	
 2002-11-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* tuiStack.c (tuiShowFrameInfo): Replace frame_in_dummy with

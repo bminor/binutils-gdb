@@ -64,7 +64,8 @@ value_of_builtin_frame_reg (struct frame_info *frame)
   memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
   /* frame.base.  */
   if (frame != NULL)
-    ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf, frame->frame);
+    ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
+			get_frame_base (frame));
   buf += TYPE_LENGTH (builtin_type_void_data_ptr);
   /* frame.XXX.  */
   return val;
@@ -83,7 +84,8 @@ value_of_builtin_frame_fp_reg (struct frame_info *frame)
     if (frame == NULL)
       memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
     else
-      ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf, frame->frame);
+      ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
+			  get_frame_base (frame));
     return val;
   }
 }
@@ -101,7 +103,8 @@ value_of_builtin_frame_pc_reg (struct frame_info *frame)
     if (frame == NULL)
       memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
     else
-      ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf, frame->pc);
+      ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
+			  get_frame_pc (frame));
     return val;
   }
 }

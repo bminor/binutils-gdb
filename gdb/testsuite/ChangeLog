@@ -1,3 +1,132 @@
+2002-12-23  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.base/selftest.exp (do_steps_and_nexts): Allow initial brace
+	and current_directory initialization.
+
+2002-12-22  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.trace/tfind.exp: Pass '-O1' flag via the 'optimize' option,
+	rather than as part of the output file name.
+
+	* gdb.base/attach.exp: There's no need to copy the test program to
+	/tmp; that was only ever necessary on HP/UX, and this test is
+	entirely disabled there anyway.
+
+2002-12-21  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/psmang.exp: Doc fix.
+
+	* gdb.c++/psmang.exp, gdb.c++/psmang1.cc, gdb.c++/psmang2.cc: New
+	test.
+
+2002-12-20  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/annota2.exp: KFAIL annotate-quit.
+
+2002-12-18  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/annota2.exp: Add copyright year 2002.
+
+2002-12-17  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/try_catch.cc: Add marker comments.
+	* gdb.c++/try_catch.exp: Get line numbers from marker comments.
+	* gdb.c++/m-data.cc: Delete namespace __gnu_test.
+	* gdb.c++/m-static.cc: Ditto.
+	* gdb.c++/m-static1.cc: Ditto.
+	* gdb.c++/try_catch.cc: Ditto.
+
+2002-12-16  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* lib/mi-support.exp (mi_reinitialize_dir): Check mi level
+	to see whether we are using the new -environment-directory
+	command which resets via -r or the old version of the command
+	which may prompt the user.  Part of fix for gdb/741.
+
+2002-12-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.fortran/types.exp: Update obsolete comment.
+	* gdb.fortran/exprs.exp: Ditto.
+	* lib/gdb.exp: Delete obsolete code.
+	* gdb.chill/ChangeLog, gdb.chill/Makefile.in: Delete.
+	* gdb.chill/builtins.ch, gdb.chill/builtins.exp: Delete.
+	* gdb.chill/callch.ch, gdb.chill/callch.exp: Delete.
+	* gdb.chill/chexp.exp, gdb.chill/chillvars.ch: Delete.
+	* gdb.chill/chillvars.exp, gdb.chill/configure: Delete.
+	* gdb.chill/configure.in, gdb.chill/enum.ch: Delete.
+	* gdb.chill/enum.exp, gdb.chill/func1.ch: Delete.
+	* gdb.chill/gch1041.ch, gdb.chill/gch1041.exp: Delete.
+	* gdb.chill/gch1272.ch, gdb.chill/gch1272.exp: Delete.
+	* gdb.chill/gch1280.ch, gdb.chill/gch1280.exp: Delete.
+	* gdb.chill/gch922.ch, gdb.chill/gch922.exp: Delete.
+	* gdb.chill/gch981.ch, gdb.chill/gch981.exp: Delete.
+	* gdb.chill/misc.ch, gdb.chill/misc.exp: Delete.
+	* gdb.chill/powerset.ch, gdb.chill/powerset.exp: Delete.
+	* gdb.chill/pr-4975-grt.ch, gdb.chill/pr-4975.ch: Delete.
+	* gdb.chill/pr-4975.exp, gdb.chill/pr-5016.ch: Delete.
+	* gdb.chill/pr-5016.exp, gdb.chill/pr-5020.ch: Delete.
+	* gdb.chill/pr-5020.exp, gdb.chill/pr-5022.ch: Delete.
+	* gdb.chill/pr-5022.exp, gdb.chill/pr-5646-grt.ch: Delete.
+	* gdb.chill/pr-5646.ch, gdb.chill/pr-5646.exp: Delete.
+	* gdb.chill/pr-5984.ch, gdb.chill/pr-5984.exp: Delete.
+	* gdb.chill/pr-6292.ch, gdb.chill/pr-6292.exp: Delete.
+	* gdb.chill/pr-6632-grt.ch, gdb.chill/pr-6632.ch: Delete.
+	* gdb.chill/pr-6632.exp, gdb.chill/pr-8134.exp: Delete.
+	* gdb.chill/pr-8136.ch, gdb.chill/pr-8136.exp: Delete.
+	* gdb.chill/pr-8405.ch, gdb.chill/pr-8405.exp: Delete.
+	* gdb.chill/pr-8742.ch, gdb.chill/pr-8742.exp: Delete.
+	* gdb.chill/pr-8894-grt.ch, gdb.chill/pr-8894.ch: Delete.
+	* gdb.chill/pr-8894.exp, gdb.chill/pr-9095.ch: Delete.
+	* gdb.chill/pr-9095.exp, gdb.chill/pr-9946.ch: Delete.
+	* gdb.chill/pr-9946.exp, gdb.chill/result.ch: Delete.
+	* gdb.chill/result.exp, gdb.chill/string.ch: Delete.
+	* gdb.chill/string.exp, gdb.chill/tests1.ch: Delete.
+	* gdb.chill/tests1.exp, gdb.chill/tests2.ch: Delete.
+	* gdb.chill/tests2.exp, gdb.chill/tuples.ch: Delete.
+	* gdb.chill/tuples.exp, gdb.chill/xstruct-grt.ch: Delete.
+	* gdb.chill/xstruct.ch, gdb.chill/xstruct.exp: Delete.
+
+2002-12-11  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/m-data.exp: Add test for members that shadow global
+	variables: see PR gdb/804.
+	* gdb.c++/m-data.cc: Ditto.
+
+2002-12-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/foll-vfork.exp: Re-enable test on HP/UX.
+
+2002-12-06  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.base/store.c: Don't declare functions static.
+
+2002-12-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.base/store.exp, gdb.base/store.c: New files.
+
+2002-12-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/selftest.exp: Update for current gdb.
+
+2002-12-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/maint.exp: Only dump symbols from one source file
+	or objfile.
+
+2002-12-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/step-test.exp: Allow MIPS to return to the line of a
+	function call.
+
+2002-11-25  Jim Blandy  <jimb@redhat.com>
+
+	* lib/mi-support.exp (mi_delete_breakpoints): Change name of
+	function appearing in error message.
+
+2002-11-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/maint.exp (help maint dump-me): Update with typo fix.
+
 2002-12-20  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/namespace.exp: Delete tests that try to apply using

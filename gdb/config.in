@@ -80,6 +80,9 @@
 /* Define if your struct reg has r_gs.  */
 #undef HAVE_STRUCT_REG_R_GS
 
+/* Define if the pread64 function is available.  */
+#undef HAVE_PREAD64
+
 /* Define if <link.h> exists and defines struct link_map which has
    members with an ``l_'' prefix.  (For Solaris, SVR4, and
    SVR4-like systems.) */
@@ -516,4 +519,13 @@
 
 /* Define if <thread_db.h> has the TD_NOTALLOC error code. */
 #undef THREAD_DB_HAS_TD_NOTALLOC
+
+/* Define to be a string naming the default host character set. */
+#undef GDB_DEFAULT_HOST_CHARSET
+
+/* Define if you have the iconv() function. */
+#undef HAVE_ICONV
+
+/* Define as const if the declaration of iconv() needs const. */
+#undef ICONV_CONST
 

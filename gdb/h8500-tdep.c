@@ -106,9 +106,10 @@ h8500_addr_bits_remove (CORE_ADDR addr)
   return ((addr) & 0xffffff);
 }
 
-/* Given a GDB frame, determine the address of the calling function's frame.
-   This will be used to create a new GDB frame struct, and then
-   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
+/* Given a GDB frame, determine the address of the calling function's
+   frame.  This will be used to create a new GDB frame struct, and
+   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
+   called for the new frame.
 
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
@@ -117,7 +118,7 @@ CORE_ADDR
 h8500_frame_chain (struct frame_info *thisframe)
 {
   if (!inside_entry_file (thisframe->pc))
-    return (read_memory_integer (FRAME_FP (thisframe), PTR_SIZE));
+    return (read_memory_integer (get_frame_base (thisframe), PTR_SIZE));
   else
     return 0;
 }
@@ -154,7 +155,7 @@ NEXT_PROLOGUE_INSN (CORE_ADDR addr, CORE_ADDR lim, char *pword1)
 CORE_ADDR
 frame_saved_pc (struct frame_info *frame)
 {
-  return read_memory_integer (FRAME_FP (frame) + 2, PTR_SIZE);
+  return read_memory_integer (get_frame_base (frame) + 2, PTR_SIZE);
 }
 
 void
@@ -164,7 +165,7 @@ h8500_pop_frame (void)
   struct frame_saved_regs fsr;
   struct frame_info *frame = get_current_frame ();
 
-  get_frame_saved_regs (frame, &fsr);
+  deprecated_get_frame_saved_regs (frame, &fsr);
 
   for (regnum = 0; regnum < 8; regnum++)
     {
@@ -186,7 +187,7 @@ h8500_print_register_hook (int regno)
       unsigned char b[2];
       unsigned char l;
 
-      frame_register_read (selected_frame, regno, b);
+      frame_register_read (deprecated_selected_frame, regno, b);
       l = b[1];
       printf_unfiltered ("\t");
       printf_unfiltered ("I-%d - ", (l & 0x80) != 0);
@@ -328,7 +329,7 @@ h8500_print_registers_info (struct gdbarch *gdbarch,
 void
 h8500_do_registers_info (int regnum, int all)
 {
-  h8500_print_registers_info (current_gdbarch, gdb_stdout, selected_frame,
+  h8500_print_registers_info (current_gdbarch, gdb_stdout, deprecated_selected_frame,
 			      regnum, all);
 }
 
@@ -617,10 +618,10 @@ h8500_value_of_trapped_internalvar (struct internalvar *var)
       break;
     }
 
-  get_saved_register (regbuf, NULL, NULL, selected_frame, page_regnum, NULL);
+  get_saved_register (regbuf, NULL, NULL, deprecated_selected_frame, page_regnum, NULL);
   regval = regbuf[0] << 16;
 
-  get_saved_register (regbuf, NULL, NULL, selected_frame, regnum, NULL);
+  get_saved_register (regbuf, NULL, NULL, deprecated_selected_frame, regnum, NULL);
   regval |= regbuf[0] << 8 | regbuf[1];		/* XXX host/target byte order */
 
   xfree (var->value);		/* Free up old value */

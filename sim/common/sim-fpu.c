@@ -1754,33 +1754,7 @@ INLINE_SIM_FPU (int)
 sim_fpu_inv (sim_fpu *f,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return 0;
-    }
-  if (sim_fpu_is_infinity (r))
-    {
-      *f = sim_fpu_zero;
-      f->sign = r->sign;
-      return 0;
-    }
-  if (sim_fpu_is_zero (r))
-    {
-      f->class = sim_fpu_class_infinity;
-      f->sign = r->sign;
-      return sim_fpu_status_invalid_div0;
-    }
-  *f = *r;
-  f->normal_exp = - r->normal_exp;
-  return 0;
+  return sim_fpu_div (f, &sim_fpu_one, r);
 }
 
 

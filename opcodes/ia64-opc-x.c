@@ -34,6 +34,7 @@
 #define bWha(x)		(((ia64_insn) ((x) & 0x3)) << 33)
 #define bX3(x)		(((ia64_insn) ((x) & 0x7)) << 33)
 #define bX6(x)		(((ia64_insn) ((x) & 0x3f)) << 27)
+#define bY(x)		(((ia64_insn) ((x) & 0x1)) << 26)
 
 #define mBtype		bBtype (-1)
 #define mD		bD (-1)
@@ -43,9 +44,12 @@
 #define mWha		bWha (-1)
 #define mX3             bX3 (-1)
 #define mX6		bX6 (-1)
+#define mY		bY (-1)
 
 #define OpX3X6(a,b,c)		(bOp (a) | bX3 (b) | bX6(c)), \
 				(mOp | mX3 | mX6)
+#define OpX3X6Y(a,b,c,d)	(bOp (a) | bX3 (b) | bX6(c) | bY(d)), \
+				(mOp | mX3 | mX6 | mY)
 #define OpVc(a,b)		(bOp (a) | bVc (b)), (mOp | mVc)
 #define OpPaWhaD(a,b,c,d) \
 	(bOp (a) | bPa (b) | bWha (c) | bD (d)), (mOp | mPa | mWha | mD)
@@ -58,8 +62,9 @@
 
 struct ia64_opcode ia64_opcodes_x[] =
   {
-    {"break.x", X0, OpX3X6 (0, 0, 0x00), {IMMU62}, 0, 0, NULL},
-    {"nop.x",   X0, OpX3X6 (0, 0, 0x01), {IMMU62}, 0, 0, NULL},
+    {"break.x",	X0, OpX3X6 (0, 0, 0x00), {IMMU62}, 0, 0, NULL},
+    {"nop.x",	X0, OpX3X6Y (0, 0, 0x01, 0), {IMMU62}, 0, 0, NULL},
+    {"hint.x",	X0, OpX3X6Y (0, 0, 0x01, 1), {IMMU62}, 0, 0, NULL},
     {"movl",	X,  OpVc (6, 0), {R1, IMMU64}, 0, 0, NULL},
 #define BRL(a,b) \
       X0, OpBtypePaWhaDPr (0xC, 0, a, 0, b, 0), {TGT64}, PSEUDO, 0, NULL

@@ -28,7 +28,8 @@ BFD_H = bfd.h
 # need two copies of the executable, one to download and one for the
 # debugger).
 BFD32_LIBS = \
-	archive.lo archures.lo bfd.lo cache.lo coffgen.lo corefile.lo \
+	archive.lo archures.lo bfd.lo bfdio.lo bfdwin.lo \
+	cache.lo coffgen.lo corefile.lo \
 	format.lo init.lo libbfd.lo opncls.lo reloc.lo \
 	section.lo syms.lo targets.lo hash.lo linker.lo \
 	srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo \
@@ -37,7 +38,8 @@ BFD32_LIBS = \
 BFD64_LIBS = archive64.lo
 
 BFD32_LIBS_CFILES = \
-	archive.c archures.c bfd.c cache.c coffgen.c corefile.c \
+	archive.c archures.c bfd.c bfdio.c bfdwin.c \
+	cache.c coffgen.c corefile.c \
 	format.c init.c libbfd.c opncls.c reloc.c \
 	section.c syms.c targets.c hash.c linker.c \
 	srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c \
@@ -794,9 +796,11 @@ stmp-bfd-h: bfd-in3.h
 	touch stmp-bfd-h
 
 BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c section.c archures.c \
-	reloc.c syms.c bfd.c archive.c corefile.c targets.c format.c
+	reloc.c syms.c bfd.c bfdio.c bfdwin.c \
+	archive.c corefile.c targets.c format.c
 BFD64_H_FILES = archive64.c
-LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c cache.c reloc.c archures.c elf.c
+LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c bfdio.c bfdwin.c \
+	cache.c reloc.c archures.c elf.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 
 # Could really use a "copy-if-change"...
@@ -856,6 +860,8 @@ bfd.lo: bfd.c bfdver.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/coff/sym.h libcoff.h libecoff.h $(INCDIR)/coff/ecoff.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h
+bfdio.lo: bfdio.c $(INCDIR)/filenames.h
+bfdwin.lo: bfdwin.c $(INCDIR)/filenames.h
 cache.lo: cache.c $(INCDIR)/filenames.h
 coffgen.lo: coffgen.c $(INCDIR)/filenames.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h

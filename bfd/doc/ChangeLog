@@ -1,3 +1,15 @@
+2002-11-18  Klee Dienes  <kdienes@apple.com>
+
+	* Makefile.am (DOCFILES): Add bfdwin.texi, bfdio.texi.
+	(PROTOS): Add bfdio.p, bfdwin.p.
+	(SRCDOC): Add bfdio.c, bfdwin.c.
+	(SRCPROT): Add bfdio.c, bfdwin.c.
+	(SRCIPROT): Add bfdio.c, bfdwin.c.
+	(LIBBFD_H_DEP): Add bfdio.c, bfdwin.c.
+	(BFD_H_DEP): Add bfdio.c, bfdwin.c.
+	Add rules for bfdio.texi, bfdwin.text.
+	* bfd.texinfo: Include bfdio.texi.
+
 2002-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.

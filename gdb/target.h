@@ -112,8 +112,8 @@ enum target_waitkind
        inferior.  */
     TARGET_WAITKIND_SPURIOUS,
 
-    /* This is used for target async and extended-async
-       only. Remote_async_wait() returns this when there is an event
+    /* An event has occured, but we should wait again.
+       Remote_async_wait() returns this when there is an event
        on the inferior, but the rest of the world is not interested in
        it. The inferior has not stopped, but has just sent some output
        to the console, for instance. In this case, we want to go back
@@ -193,9 +193,7 @@ struct target_ops
     void (*to_close) (int);
     void (*to_attach) (char *, int);
     void (*to_post_attach) (int);
-    void (*to_require_attach) (char *, int);
     void (*to_detach) (char *, int);
-    void (*to_require_detach) (int, char *, int);
     void (*to_resume) (ptid_t, int, enum target_signal);
     ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
     void (*to_post_wait) (ptid_t, int);
@@ -272,21 +270,14 @@ struct target_ops
     void (*to_create_inferior) (char *, char *, char **);
     void (*to_post_startup_inferior) (ptid_t);
     void (*to_acknowledge_created_inferior) (int);
-    void (*to_clone_and_follow_inferior) (int, int *);
-    void (*to_post_follow_inferior_by_clone) (void);
     int (*to_insert_fork_catchpoint) (int);
     int (*to_remove_fork_catchpoint) (int);
     int (*to_insert_vfork_catchpoint) (int);
     int (*to_remove_vfork_catchpoint) (int);
-    int (*to_has_forked) (int, int *);
-    int (*to_has_vforked) (int, int *);
-    int (*to_can_follow_vfork_prior_to_exec) (void);
-    void (*to_post_follow_vfork) (int, int, int, int);
+    int (*to_follow_fork) (int);
     int (*to_insert_exec_catchpoint) (int);
     int (*to_remove_exec_catchpoint) (int);
-    int (*to_has_execd) (int, char **);
     int (*to_reported_exec_events_per_exec_call) (void);
-    int (*to_has_syscall_event) (int, enum target_waitkind *, int *);
     int (*to_has_exited) (int, int, int *);
     void (*to_mourn_inferior) (void);
     int (*to_can_run) (void);
@@ -304,8 +295,6 @@ struct target_ops
     struct exception_event_record *(*to_get_current_exception_event) (void);
     char *(*to_pid_to_exec_file) (int pid);
     enum strata to_stratum;
-    struct target_ops
-     *DONT_USE;			/* formerly to_next */
     int to_has_all_memory;
     int to_has_memory;
     int to_has_stack;
@@ -411,17 +400,6 @@ extern struct target_stack_item *target_stack;
 #define target_post_attach(pid) \
      (*current_target.to_post_attach) (pid)
 
-/* Attaches to a process on the target side, if not already attached.
-   (If already attached, takes no action.)
-
-   This operation can be used to follow the child process of a fork.
-   On some targets, such child processes of an original inferior process
-   are automatically under debugger control, and thus do not require an
-   actual attach operation.  */
-
-#define	target_require_attach(args, from_tty)	\
-     (*current_target.to_require_attach) (args, from_tty)
-
 /* Takes a program previously attached to and detaches it.
    The program may resume execution (some targets do, some don't) and will
    no longer stop on signals, etc.  We better not have left any breakpoints
@@ -430,21 +408,6 @@ extern struct target_stack_item *target_stack;
    says whether to be verbose or not.  */
 
 extern void target_detach (char *, int);
-
-/* Detaches from a process on the target side, if not already dettached.
-   (If already detached, takes no action.)
-
-   This operation can be used to follow the parent process of a fork.
-   On some targets, such child processes of an original inferior process
-   are automatically under debugger control, and thus do require an actual
-   detach operation.
-
-   PID is the process id of the child to detach from.
-   ARGS is arguments typed by the user (e.g. a signal to send the process).
-   FROM_TTY says whether to be verbose or not.  */
-
-#define target_require_detach(pid, args, from_tty)	\
-     (*current_target.to_require_detach) (pid, args, from_tty)
 
 /* Resume execution of the target process PTID.  STEP says whether to
    single-step or to run free; SIGGNAL is the signal to be given to
@@ -545,10 +508,6 @@ extern void child_post_startup_inferior (ptid_t);
 
 extern void child_acknowledge_created_inferior (int);
 
-extern void child_clone_and_follow_inferior (int, int *);
-
-extern void child_post_follow_inferior_by_clone (void);
-
 extern int child_insert_fork_catchpoint (int);
 
 extern int child_remove_fork_catchpoint (int);
@@ -557,29 +516,27 @@ extern int child_insert_vfork_catchpoint (int);
 
 extern int child_remove_vfork_catchpoint (int);
 
-extern int child_has_forked (int, int *);
-
-extern int child_has_vforked (int, int *);
-
 extern void child_acknowledge_created_inferior (int);
 
-extern int child_can_follow_vfork_prior_to_exec (void);
-
-extern void child_post_follow_vfork (int, int, int, int);
+extern int child_follow_fork (int);
 
 extern int child_insert_exec_catchpoint (int);
 
 extern int child_remove_exec_catchpoint (int);
 
-extern int child_has_execd (int, char **);
-
 extern int child_reported_exec_events_per_exec_call (void);
-
-extern int child_has_syscall_event (int, enum target_waitkind *, int *);
 
 extern int child_has_exited (int, int, int *);
 
 extern int child_thread_alive (ptid_t);
+
+/* From infrun.c.  */
+
+extern int inferior_has_forked (int pid, int *child_pid);
+
+extern int inferior_has_vforked (int pid, int *child_pid);
+
+extern int inferior_has_execd (int pid, char **execd_pathname);
 
 /* From exec.c */
 
@@ -702,33 +659,6 @@ extern void target_load (char *arg, int from_tty);
 #define target_acknowledge_created_inferior(pid) \
      (*current_target.to_acknowledge_created_inferior) (pid)
 
-/* An inferior process has been created via a fork() or similar
-   system call.  This function will clone the debugger, then ensure
-   that CHILD_PID is attached to by that debugger.
-
-   FOLLOWED_CHILD is set TRUE on return *for the clone debugger only*,
-   and FALSE otherwise.  (The original and clone debuggers can use this
-   to determine which they are, if need be.)
-
-   (This is not a terribly useful feature without a GUI to prevent
-   the two debuggers from competing for shell input.)  */
-
-#define target_clone_and_follow_inferior(child_pid,followed_child) \
-     (*current_target.to_clone_and_follow_inferior) (child_pid, followed_child)
-
-/* This operation is intended to be used as the last in a sequence of
-   steps taken when following both parent and child of a fork.  This
-   is used by a clone of the debugger, which will follow the child.
-
-   The original debugger has detached from this process, and the
-   clone has attached to it.
-
-   On some targets, this requires a bit of cleanup to make it work
-   correctly.  */
-
-#define target_post_follow_inferior_by_clone() \
-     (*current_target.to_post_follow_inferior_by_clone) ()
-
 /* On some targets, we can catch an inferior fork or vfork event when
    it occurs.  These functions insert/remove an already-created
    catchpoint for such events.  */
@@ -745,42 +675,16 @@ extern void target_load (char *arg, int from_tty);
 #define target_remove_vfork_catchpoint(pid) \
      (*current_target.to_remove_vfork_catchpoint) (pid)
 
-/* Returns TRUE if PID has invoked the fork() system call.  And,
-   also sets CHILD_PID to the process id of the other ("child")
-   inferior process that was created by that call.  */
+/* If the inferior forks or vforks, this function will be called at
+   the next resume in order to perform any bookkeeping and fiddling
+   necessary to continue debugging either the parent or child, as
+   requested, and releasing the other.  Information about the fork
+   or vfork event is available via get_last_target_status ().
+   This function returns 1 if the inferior should not be resumed
+   (i.e. there is another event pending).  */
 
-#define target_has_forked(pid,child_pid) \
-     (*current_target.to_has_forked) (pid,child_pid)
-
-/* Returns TRUE if PID has invoked the vfork() system call.  And, 
-   also sets CHILD_PID to the process id of the other ("child") 
-   inferior process that was created by that call.  */
-
-#define target_has_vforked(pid,child_pid) \
-     (*current_target.to_has_vforked) (pid,child_pid)
-
-/* Some platforms (such as pre-10.20 HP-UX) don't allow us to do
-   anything to a vforked child before it subsequently calls exec().
-   On such platforms, we say that the debugger cannot "follow" the
-   child until it has vforked.
-
-   This function should be defined to return 1 by those targets
-   which can allow the debugger to immediately follow a vforked
-   child, and 0 if they cannot.  */
-
-#define target_can_follow_vfork_prior_to_exec() \
-     (*current_target.to_can_follow_vfork_prior_to_exec) ()
-
-/* An inferior process has been created via a vfork() system call.
-   The debugger has followed the parent, the child, or both.  The
-   process of setting up for that follow may have required some
-   target-specific trickery to track the sequence of reported events.
-   If so, this function should be defined by those targets that
-   require the debugger to perform cleanup or initialization after
-   the vfork follow.  */
-
-#define target_post_follow_vfork(parent_pid,followed_parent,child_pid,followed_child) \
-     (*current_target.to_post_follow_vfork) (parent_pid,followed_parent,child_pid,followed_child)
+#define target_follow_fork(follow_child) \
+     (*current_target.to_follow_fork) (follow_child)
 
 /* On some targets, we can catch an inferior exec event when it
    occurs.  These functions insert/remove an already-created
@@ -792,26 +696,12 @@ extern void target_load (char *arg, int from_tty);
 #define target_remove_exec_catchpoint(pid) \
      (*current_target.to_remove_exec_catchpoint) (pid)
 
-/* Returns TRUE if PID has invoked a flavor of the exec() system call.
-   And, also sets EXECD_PATHNAME to the pathname of the executable
-   file that was passed to exec(), and is now being executed.  */
-
-#define target_has_execd(pid,execd_pathname) \
-     (*current_target.to_has_execd) (pid,execd_pathname)
-
 /* Returns the number of exec events that are reported when a process
    invokes a flavor of the exec() system call on this target, if exec
    events are being reported.  */
 
 #define target_reported_exec_events_per_exec_call() \
      (*current_target.to_reported_exec_events_per_exec_call) ()
-
-/* Returns TRUE if PID has reported a syscall event.  And, also sets
-   KIND to the appropriate TARGET_WAITKIND_, and sets SYSCALL_ID to
-   the unique integer ID of the syscall.  */
-
-#define target_has_syscall_event(pid,kind,syscall_id) \
-     (*current_target.to_has_syscall_event) (pid,kind,syscall_id)
 
 /* Returns TRUE if PID has exited.  And, also sets EXIT_STATUS to the
    exit code of PID, if any.  */
@@ -887,11 +777,6 @@ extern void target_load (char *arg, int from_tty);
 
 #define target_get_current_exception_event() \
      (*current_target.to_get_current_exception_event) ()
-
-/* Pointer to next target in the chain, e.g. a core file and an exec file.  */
-
-#define	target_next \
-     (current_target.to_next)
 
 /* Does the target include all of memory, or only part of it?  This
    determines whether we look up the target chain for other parts of
@@ -1241,13 +1126,7 @@ extern void noprocess (void);
 
 extern void find_default_attach (char *, int);
 
-extern void find_default_require_attach (char *, int);
-
-extern void find_default_require_detach (int, char *, int);
-
 extern void find_default_create_inferior (char *, char *, char **);
-
-extern void find_default_clone_and_follow_inferior (int, int *);
 
 extern struct target_ops *find_run_target (void);
 

@@ -685,7 +685,7 @@ mn10200_pop_frame (struct frame_info *frame)
 {
   int regnum;
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -703,7 +703,7 @@ mn10200_pop_frame (struct frame_info *frame)
 	  }
 
       /* Actually cut back the stack.  */
-      write_register (SP_REGNUM, FRAME_FP (frame));
+      write_register (SP_REGNUM, get_frame_base (frame));
 
       /* Don't we need to set the PC?!?  XXX FIXME.  */
     }

@@ -100,10 +100,6 @@ static unsigned long insert_nsi
   PARAMS ((unsigned long, long, int, const char **));
 static long extract_nsi
   PARAMS ((unsigned long, int, int *));
-static unsigned long insert_pmrn
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_pmrn
-  PARAMS ((unsigned long, int, int *));
 static unsigned long insert_ral
   PARAMS ((unsigned long, long, int, const char **));
 static unsigned long insert_ram
@@ -265,7 +261,6 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The CT field in an X form instruction.  */
 #define CT CRFS + 1
-#define RD CT
   { 5, 21, 0, 0, PPC_OPERAND_OPTIONAL },
 
   /* The D field in a D form instruction.  This is a displacement off
@@ -394,12 +389,8 @@ const struct powerpc_operand powerpc_operands[] =
   { 16, 0, insert_nsi, extract_nsi,
       PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
 
-  /* The PMRN field in an X form instruction.  */
-#define PMRN NSI + 1
-  { 16, 0, insert_pmrn, extract_pmrn, PPC_OPERAND_GPR },
-
   /* The RA field in an D, DS, X, XO, M, or MDS form instruction.  */
-#define RA PMRN + 1
+#define RA NSI + 1
 #define RA_MASK (0x1f << 16)
   { 5, 16, 0, 0, PPC_OPERAND_GPR },
 
@@ -461,6 +452,7 @@ const struct powerpc_operand powerpc_operands[] =
   /* The SPR field in an XFX form instruction.  This is flipped--the
      lower 5 bits are stored in the upper 5 and vice- versa.  */
 #define SPR SISIGNOPT + 1
+#define PMR SPR
 #define SPR_MASK (0x3ff << 11)
   { 10, 11, insert_spr, extract_spr, 0 },
 
@@ -889,7 +881,7 @@ insert_ev2 (insn, value, dialect, errmsg)
     *errmsg = _("offset not a multiple of 2");
   if ((value > 62) != 0 && errmsg != NULL)
     *errmsg = _("offset greater than 62");
-  return insn | ((value & 0xf8) << 8);
+  return insn | ((value & 0x3e) << 10);
 }
 
 static long
@@ -898,7 +890,7 @@ extract_ev2 (insn, dialect, invalid)
      int dialect ATTRIBUTE_UNUSED;
      int * invalid ATTRIBUTE_UNUSED;
 {
-  return (insn >> 8) & 0xf8;
+  return (insn >> 10) & 0x3e;
 }
 
 static unsigned long
@@ -912,7 +904,7 @@ insert_ev4 (insn, value, dialect, errmsg)
     *errmsg = _("offset not a multiple of 4");
   if ((value > 124) != 0 && errmsg != NULL)
     *errmsg = _("offset greater than 124");
-  return insn | ((value & 0xf8) << 8);
+  return insn | ((value & 0x7c) << 9);
 }
 
 static long
@@ -921,7 +913,7 @@ extract_ev4 (insn, dialect, invalid)
      int dialect ATTRIBUTE_UNUSED;
      int * invalid ATTRIBUTE_UNUSED;
 {
-  return (insn >> 8) & 0xf8;
+  return (insn >> 9) & 0x7c;
 }
 
 static unsigned long
@@ -1227,28 +1219,6 @@ extract_nsi (insn, dialect, invalid)
   if (invalid != (int *) NULL)
     *invalid = 1;
   return - (((insn & 0xffff) ^ 0x8000) - 0x8000);
-}
-
-/* The PMRN field in a X form instruction.
-   This has 5+5 bits switched around.  */
-
-static unsigned long
-insert_pmrn (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg ATTRIBUTE_UNUSED;
-{
-  return insn | ((value & 0x1f) << 16) | ((value & 0x3e) << 11);
-}
-
-static long
-extract_pmrn (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
-{
-  return ((insn >> 16) & 0x1f) | ((insn >> 11) & 0x3e);
 }
 
 /* The RA field in a D or X form instruction which is an updating
@@ -2087,43 +2057,43 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "vupklsh",   VX(4,  718), VX_MASK,	PPCVEC,		{ VD, VB } },
 { "vxor",      VX(4, 1220), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
 
-{ "evaddw",    VX(4, 512), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evaddiw",   VX(4, 514), VX_MASK,	PPCSPE,		{ RD, RB, UIMM } },
-{ "evsubfw",   VX(4, 516), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evsubw",    VX(4, 516), VX_MASK,	PPCSPE,		{ RD, RB, RA } },
-{ "evsubifw",  VX(4, 518), VX_MASK,	PPCSPE,		{ RD, UIMM, RB } },
-{ "evsubiw",   VX(4, 518), VX_MASK,	PPCSPE,		{ RD, RB, UIMM } },
-{ "evabs",     VX(4, 520), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evneg",     VX(4, 521), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evextsb",   VX(4, 522), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evextsh",   VX(4, 523), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evrndw",    VX(4, 524), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evcntlzw",  VX(4, 525), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evcntlsw",  VX(4, 526), VX_MASK,	PPCSPE,		{ RD, RA } },
+{ "evaddw",    VX(4, 512), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evaddiw",   VX(4, 514), VX_MASK,	PPCSPE,		{ RS, RB, UIMM } },
+{ "evsubfw",   VX(4, 516), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evsubw",    VX(4, 516), VX_MASK,	PPCSPE,		{ RS, RB, RA } },
+{ "evsubifw",  VX(4, 518), VX_MASK,	PPCSPE,		{ RS, UIMM, RB } },
+{ "evsubiw",   VX(4, 518), VX_MASK,	PPCSPE,		{ RS, RB, UIMM } },
+{ "evabs",     VX(4, 520), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evneg",     VX(4, 521), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evextsb",   VX(4, 522), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evextsh",   VX(4, 523), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evrndw",    VX(4, 524), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evcntlzw",  VX(4, 525), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evcntlsw",  VX(4, 526), VX_MASK,	PPCSPE,		{ RS, RA } },
 
-{ "brinc",     VX(4, 527), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "brinc",     VX(4, 527), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evand",     VX(4, 529), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evandc",    VX(4, 530), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evand",     VX(4, 529), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evandc",    VX(4, 530), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmr",      VX(4, 535), VX_MASK,	PPCSPE,		{ RS, RA, BBA } },
-{ "evor",      VX(4, 535), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evorc",     VX(4, 539), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evxor",     VX(4, 534), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "eveqv",     VX(4, 537), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evnand",    VX(4, 542), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evor",      VX(4, 535), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evorc",     VX(4, 539), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evxor",     VX(4, 534), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "eveqv",     VX(4, 537), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evnand",    VX(4, 542), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evnot",     VX(4, 536), VX_MASK,	PPCSPE,		{ RS, RA, BBA } },
-{ "evnor",     VX(4, 536), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evnor",     VX(4, 536), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evrlw",     VX(4, 552), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evrlwi",    VX(4, 554), VX_MASK,	PPCSPE,		{ RD, RA, EVUIMM } },
-{ "evslw",     VX(4, 548), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evslwi",    VX(4, 550), VX_MASK,	PPCSPE,		{ RD, RA, EVUIMM } },
-{ "evsrws",    VX(4, 545), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evsrwu",    VX(4, 544), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evsrwis",   VX(4, 547), VX_MASK,	PPCSPE,		{ RD, RA, EVUIMM } },
-{ "evsrwiu",   VX(4, 546), VX_MASK,	PPCSPE,		{ RD, RA, EVUIMM } },
-{ "evsplati",  VX(4, 553), VX_MASK,	PPCSPE,		{ RD, SIMM } },
-{ "evsplatfi", VX(4, 555), VX_MASK,	PPCSPE,		{ RD, SIMM } },
+{ "evrlw",     VX(4, 552), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evrlwi",    VX(4, 554), VX_MASK,	PPCSPE,		{ RS, RA, EVUIMM } },
+{ "evslw",     VX(4, 548), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evslwi",    VX(4, 550), VX_MASK,	PPCSPE,		{ RS, RA, EVUIMM } },
+{ "evsrws",    VX(4, 545), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evsrwu",    VX(4, 544), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evsrwis",   VX(4, 547), VX_MASK,	PPCSPE,		{ RS, RA, EVUIMM } },
+{ "evsrwiu",   VX(4, 546), VX_MASK,	PPCSPE,		{ RS, RA, EVUIMM } },
+{ "evsplati",  VX(4, 553), VX_MASK,	PPCSPE,		{ RS, SIMM } },
+{ "evsplatfi", VX(4, 555), VX_MASK,	PPCSPE,		{ RS, SIMM } },
 { "evmergehi", VX(4, 556), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmergelo", VX(4, 557), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmergehilo",VX(4,558), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
@@ -2134,7 +2104,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "evcmplts",  VX(4, 563), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
 { "evcmpltu",  VX(4, 562), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
 { "evcmpeq",   VX(4, 564), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
-{ "evsel",     EVSEL(4,79),EVSEL_MASK,	PPCSPE,		{ RD, RA, RB, CRFS } },
+{ "evsel",     EVSEL(4,79),EVSEL_MASK,	PPCSPE,		{ RS, RA, RB, CRFS } },
 
 { "evldd",     VX(4, 769), VX_MASK,	PPCSPE,		{ RS, EVUIMM_8, RA } },
 { "evlddx",    VX(4, 768), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
@@ -2174,222 +2144,166 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "evstwho",   VX(4, 821), VX_MASK,	PPCSPE,		{ RS, EVUIMM_4, RA } },
 { "evstwhox",  VX(4, 820), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evfsabs",   VX(4, 644), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evfsnabs",  VX(4, 645), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evfsneg",   VX(4, 646), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evfsadd",   VX(4, 640), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evfssub",   VX(4, 641), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evfsmul",   VX(4, 648), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evfsdiv",   VX(4, 649), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evfsabs",   VX(4, 644), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evfsnabs",  VX(4, 645), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evfsneg",   VX(4, 646), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evfsadd",   VX(4, 640), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evfssub",   VX(4, 641), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evfsmul",   VX(4, 648), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evfsdiv",   VX(4, 649), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evfscmpgt", VX(4, 652), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
 { "evfscmplt", VX(4, 653), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
 { "evfscmpeq", VX(4, 654), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
 { "evfststgt", VX(4, 668), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
 { "evfststlt", VX(4, 669), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
 { "evfststeq", VX(4, 670), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
-{ "evfscfui",  VX(4, 656), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evfsctuiz", VX(4, 664), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evfscfsi",  VX(4, 657), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evfscfuf",  VX(4, 658), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evfscfsf",  VX(4, 659), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evfsctui",  VX(4, 660), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evfsctsi",  VX(4, 661), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evfsctsiz", VX(4, 666), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evfsctuf",  VX(4, 662), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evfsctsf",  VX(4, 663), VX_MASK,	PPCSPE,		{ RD, RB } },
+{ "evfscfui",  VX(4, 656), VX_MASK,	PPCSPE,		{ RS, RB } },
+{ "evfsctuiz", VX(4, 664), VX_MASK,	PPCSPE,		{ RS, RB } },
+{ "evfscfsi",  VX(4, 657), VX_MASK,	PPCSPE,		{ RS, RB } },
+{ "evfscfuf",  VX(4, 658), VX_MASK,	PPCSPE,		{ RS, RB } },
+{ "evfscfsf",  VX(4, 659), VX_MASK,	PPCSPE,		{ RS, RB } },
+{ "evfsctui",  VX(4, 660), VX_MASK,	PPCSPE,		{ RS, RB } },
+{ "evfsctsi",  VX(4, 661), VX_MASK,	PPCSPE,		{ RS, RB } },
+{ "evfsctsiz", VX(4, 666), VX_MASK,	PPCSPE,		{ RS, RB } },
+{ "evfsctuf",  VX(4, 662), VX_MASK,	PPCSPE,		{ RS, RB } },
+{ "evfsctsf",  VX(4, 663), VX_MASK,	PPCSPE,		{ RS, RB } },
 
-{ "efsabs",   VX(4, 708), VX_MASK,	PPCEFS,		{ RD, RA } },
-{ "efsnabs",  VX(4, 709), VX_MASK,	PPCEFS,		{ RD, RA } },
-{ "efsneg",   VX(4, 710), VX_MASK,	PPCEFS,		{ RD, RA } },
-{ "efsadd",   VX(4, 704), VX_MASK,	PPCEFS,		{ RD, RA, RB } },
-{ "efssub",   VX(4, 705), VX_MASK,	PPCEFS,		{ RD, RA, RB } },
-{ "efsmul",   VX(4, 712), VX_MASK,	PPCEFS,		{ RD, RA, RB } },
-{ "efsdiv",   VX(4, 713), VX_MASK,	PPCEFS,		{ RD, RA, RB } },
+{ "efsabs",   VX(4, 708), VX_MASK,	PPCEFS,		{ RS, RA } },
+{ "efsnabs",  VX(4, 709), VX_MASK,	PPCEFS,		{ RS, RA } },
+{ "efsneg",   VX(4, 710), VX_MASK,	PPCEFS,		{ RS, RA } },
+{ "efsadd",   VX(4, 704), VX_MASK,	PPCEFS,		{ RS, RA, RB } },
+{ "efssub",   VX(4, 705), VX_MASK,	PPCEFS,		{ RS, RA, RB } },
+{ "efsmul",   VX(4, 712), VX_MASK,	PPCEFS,		{ RS, RA, RB } },
+{ "efsdiv",   VX(4, 713), VX_MASK,	PPCEFS,		{ RS, RA, RB } },
 { "efscmpgt", VX(4, 716), VX_MASK,	PPCEFS,		{ CRFD, RA, RB } },
 { "efscmplt", VX(4, 717), VX_MASK,	PPCEFS,		{ CRFD, RA, RB } },
 { "efscmpeq", VX(4, 718), VX_MASK,	PPCEFS,		{ CRFD, RA, RB } },
 { "efststgt", VX(4, 732), VX_MASK,	PPCEFS,		{ CRFD, RA, RB } },
 { "efststlt", VX(4, 733), VX_MASK,	PPCEFS,		{ CRFD, RA, RB } },
 { "efststeq", VX(4, 734), VX_MASK,	PPCEFS,		{ CRFD, RA, RB } },
-{ "efscfui",  VX(4, 720), VX_MASK,	PPCEFS,		{ RD, RB } },
-{ "efsctuiz", VX(4, 728), VX_MASK,	PPCEFS,		{ RD, RB } },
-{ "efscfsi",  VX(4, 721), VX_MASK,	PPCEFS,		{ RD, RB } },
-{ "efscfuf",  VX(4, 722), VX_MASK,	PPCEFS,		{ RD, RB } },
-{ "efscfsf",  VX(4, 723), VX_MASK,	PPCEFS,		{ RD, RB } },
-{ "efsctui",  VX(4, 724), VX_MASK,	PPCEFS,		{ RD, RB } },
-{ "efsctsi",  VX(4, 725), VX_MASK,	PPCEFS,		{ RD, RB } },
-{ "efsctsiz", VX(4, 730), VX_MASK,	PPCEFS,		{ RD, RB } },
-{ "efsctuf",  VX(4, 726), VX_MASK,	PPCEFS,		{ RD, RB } },
-{ "efsctsf",  VX(4, 727), VX_MASK,	PPCEFS,		{ RD, RB } },
+{ "efscfui",  VX(4, 720), VX_MASK,	PPCEFS,		{ RS, RB } },
+{ "efsctuiz", VX(4, 728), VX_MASK,	PPCEFS,		{ RS, RB } },
+{ "efscfsi",  VX(4, 721), VX_MASK,	PPCEFS,		{ RS, RB } },
+{ "efscfuf",  VX(4, 722), VX_MASK,	PPCEFS,		{ RS, RB } },
+{ "efscfsf",  VX(4, 723), VX_MASK,	PPCEFS,		{ RS, RB } },
+{ "efsctui",  VX(4, 724), VX_MASK,	PPCEFS,		{ RS, RB } },
+{ "efsctsi",  VX(4, 725), VX_MASK,	PPCEFS,		{ RS, RB } },
+{ "efsctsiz", VX(4, 730), VX_MASK,	PPCEFS,		{ RS, RB } },
+{ "efsctuf",  VX(4, 726), VX_MASK,	PPCEFS,		{ RS, RB } },
+{ "efsctsf",  VX(4, 727), VX_MASK,	PPCEFS,		{ RS, RB } },
 
-{ "evsabs",    VX(4, 708), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evsnabs",   VX(4, 709), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evsneg",    VX(4, 710), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evsadd",    VX(4, 704), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evssub",    VX(4, 705), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evsmul",    VX(4, 712), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evsdiv",    VX(4, 713), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evscmpgt",  VX(4, 716), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
-{ "evsgmplt",  VX(4, 717), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
-{ "evsgmpeq",  VX(4, 718), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
-{ "evststgt",  VX(4, 732), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
-{ "evststlt",  VX(4, 733), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
-{ "evststeq",  VX(4, 734), VX_MASK,	PPCSPE,		{ CRFD, RA, RB } },
-{ "evscfui",   VX(4, 720), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evscfsi",   VX(4, 721), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evscfuf",   VX(4, 722), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evscfsf",   VX(4, 723), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evsctui",   VX(4, 724), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evsctuiz",  VX(4, 728), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evsctsi",   VX(4, 725), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evsctsiz",  VX(4, 730), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evsctuf",   VX(4, 726), VX_MASK,	PPCSPE,		{ RD, RB } },
-{ "evsctsf",   VX(4, 727), VX_MASK,	PPCSPE,		{ RD, RB } },
+{ "evmhossf",  VX(4, 1031), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhossfa", VX(4, 1063), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhosmf",  VX(4, 1039), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhosmfa", VX(4, 1071), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhosmi",  VX(4, 1037), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhosmia", VX(4, 1069), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhoumi",  VX(4, 1036), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhoumia", VX(4, 1068), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhessf",  VX(4, 1027), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhessfa", VX(4, 1059), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhesmf",  VX(4, 1035), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhesmfa", VX(4, 1067), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhesmi",  VX(4, 1033), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhesmia", VX(4, 1065), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmheumi",  VX(4, 1032), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmheumia", VX(4, 1064), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmhossf",  VX(4, 1031), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhossfa", VX(4, 1063), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhosmf",  VX(4, 1039), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhosmfa", VX(4, 1071), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhosmi",  VX(4, 1037), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhosmia", VX(4, 1069), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhoumi",  VX(4, 1036), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhoumia", VX(4, 1068), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhessf",  VX(4, 1027), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhessfa", VX(4, 1059), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhesmf",  VX(4, 1035), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhesmfa", VX(4, 1067), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhesmi",  VX(4, 1033), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhesmia", VX(4, 1065), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmheumi",  VX(4, 1032), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmheumia", VX(4, 1064), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmhossfaaw",VX(4, 1287), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhossiaaw",VX(4, 1285), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhosmfaaw",VX(4, 1295), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhosmiaaw",VX(4, 1293), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhousiaaw",VX(4, 1284), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhoumiaaw",VX(4, 1292), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhessfaaw",VX(4, 1283), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhessiaaw",VX(4, 1281), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhesmfaaw",VX(4, 1291), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhesmiaaw",VX(4, 1289), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmheusiaaw",VX(4, 1280), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmheumiaaw",VX(4, 1288), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmhossfaaw",VX(4, 1287), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhossiaaw",VX(4, 1285), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhosmfaaw",VX(4, 1295), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhosmiaaw",VX(4, 1293), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhousiaaw",VX(4, 1284), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhoumiaaw",VX(4, 1292), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhessfaaw",VX(4, 1283), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhessiaaw",VX(4, 1281), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhesmfaaw",VX(4, 1291), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhesmiaaw",VX(4, 1289), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmheusiaaw",VX(4, 1280), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmheumiaaw",VX(4, 1288), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmhossfanw",VX(4, 1415), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhossianw",VX(4, 1413), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhosmfanw",VX(4, 1423), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhosmianw",VX(4, 1421), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhousianw",VX(4, 1412), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhoumianw",VX(4, 1420), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhessfanw",VX(4, 1411), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhessianw",VX(4, 1409), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhesmfanw",VX(4, 1419), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhesmianw",VX(4, 1417), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmheusianw",VX(4, 1408), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmheumianw",VX(4, 1416), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmhossfanw",VX(4, 1415), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhossianw",VX(4, 1413), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhosmfanw",VX(4, 1423), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhosmianw",VX(4, 1421), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhousianw",VX(4, 1412), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhoumianw",VX(4, 1420), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhessfanw",VX(4, 1411), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhessianw",VX(4, 1409), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhesmfanw",VX(4, 1419), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhesmianw",VX(4, 1417), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmheusianw",VX(4, 1408), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmheumianw",VX(4, 1416), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmhogsmfaa",VX(4, 1327), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhogsmiaa",VX(4, 1325), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhogumiaa",VX(4, 1324), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhegsmfaa",VX(4, 1323), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhegsmiaa",VX(4, 1321), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhegumiaa",VX(4, 1320), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmhogsmfaa",VX(4, 1327), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhogsmiaa",VX(4, 1325), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhogumiaa",VX(4, 1324), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhegsmfaa",VX(4, 1323), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhegsmiaa",VX(4, 1321), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhegumiaa",VX(4, 1320), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmhogsmfan",VX(4, 1455), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhogsmian",VX(4, 1453), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhogumian",VX(4, 1452), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhegsmfan",VX(4, 1451), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhegsmian",VX(4, 1449), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmhegumian",VX(4, 1448), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmhogsmfan",VX(4, 1455), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhogsmian",VX(4, 1453), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhogumian",VX(4, 1452), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhegsmfan",VX(4, 1451), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhegsmian",VX(4, 1449), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmhegumian",VX(4, 1448), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmwhssf",  VX(4, 1095), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwhssfa", VX(4, 1127), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwhsmf",  VX(4, 1103), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwhsmfa", VX(4, 1135), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwhsmi",  VX(4, 1101), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwhsmia", VX(4, 1133), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwhumi",  VX(4, 1100), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwhumia", VX(4, 1132), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmwhssf",  VX(4, 1095), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhssfa", VX(4, 1127), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhsmf",  VX(4, 1103), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhsmfa", VX(4, 1135), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhsmi",  VX(4, 1101), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhsmia", VX(4, 1133), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhumi",  VX(4, 1100), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhumia", VX(4, 1132), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmwlumi",  VX(4, 1096), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwlumia", VX(4, 1128), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmwlssf",  VX(4, 1091), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlssfa", VX(4, 1123), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlsmf",  VX(4, 1099), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlsmfa", VX(4, 1131), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlumi",  VX(4, 1096), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlumia", VX(4, 1128), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmwlssiaaw",VX(4, 1345), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwlsmiaaw",VX(4, 1353), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwlusiaaw",VX(4, 1344), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwlumiaaw",VX(4, 1352), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmwhssfaa",VX(4, 1351), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhssmaa",VX(4, 1349), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhsmfaa",VX(4, 1359), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhsmiaa",VX(4, 1357), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhusiaa",VX(4, 1348), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhumiaa",VX(4, 1356), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmwlssianw",VX(4, 1473), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwlsmianw",VX(4, 1481), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwlusianw",VX(4, 1472), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwlumianw",VX(4, 1480), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmwlssfaaw",VX(4, 1347), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlssiaaw",VX(4, 1345), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlsmfaaw",VX(4, 1355), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlsmiaaw",VX(4, 1353), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlusiaaw",VX(4, 1344), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlumiaaw",VX(4, 1352), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmwssf",   VX(4, 1107), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwssfa",  VX(4, 1139), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwsmf",   VX(4, 1115), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwsmfa",  VX(4, 1147), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwsmi",   VX(4, 1113), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwsmia",  VX(4, 1145), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwumi",   VX(4, 1112), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwumia",  VX(4, 1144), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmwhssfan",VX(4, 1479), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhssian",VX(4, 1477), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhsmfan",VX(4, 1487), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhsmian",VX(4, 1485), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhusian",VX(4, 1476), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhumian",VX(4, 1484), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmwssfaa", VX(4, 1363), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwsmfaa", VX(4, 1371), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwsmiaa", VX(4, 1369), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwumiaa", VX(4, 1368), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmwlssfanw",VX(4, 1475), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlssianw",VX(4, 1473), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlsmfanw",VX(4, 1483), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlsmianw",VX(4, 1481), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlusianw",VX(4, 1472), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwlumianw",VX(4, 1480), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmwssfan", VX(4, 1491), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwsmfan", VX(4, 1499), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwsmian", VX(4, 1497), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evmwumian", VX(4, 1496), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmwhgssfaa",VX(4, 1383), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhgsmfaa",VX(4, 1391), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhgsmiaa",VX(4, 1381), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhgumiaa",VX(4, 1380), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evaddssiaaw",VX(4, 1217), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evaddsmiaaw",VX(4, 1225), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evaddusiaaw",VX(4, 1216), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evaddumiaaw",VX(4, 1224), VX_MASK,	PPCSPE,		{ RS, RA } },
 
-{ "evmwhgssfan",VX(4, 1511), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhgsmfan",VX(4, 1519), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhgsmian",VX(4, 1509), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwhgumian",VX(4, 1508), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evsubfssiaaw",VX(4, 1219), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evsubfsmiaaw",VX(4, 1227), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evsubfusiaaw",VX(4, 1218), VX_MASK,	PPCSPE,		{ RS, RA } },
+{ "evsubfumiaaw",VX(4, 1226), VX_MASK,	PPCSPE,		{ RS, RA } },
 
-{ "evmwssf",   VX(4, 1107), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwssfa",  VX(4, 1139), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwsmf",   VX(4, 1115), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwsmfa",  VX(4, 1147), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwsmi",   VX(4, 1113), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwsmia",  VX(4, 1145), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwumi",   VX(4, 1112), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwumia",  VX(4, 1144), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evmra",    VX(4, 1220), VX_MASK,	PPCSPE,		{ RS, RA } },
 
-{ "evmwssfaa", VX(4, 1363), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwsmfaa", VX(4, 1371), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwsmiaa", VX(4, 1369), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwumiaa", VX(4, 1368), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-
-{ "evmwssfan", VX(4, 1491), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwsmfan", VX(4, 1499), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwsmian", VX(4, 1497), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evmwumian", VX(4, 1496), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-
-{ "evaddssiaaw",VX(4, 1217), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evaddsmiaaw",VX(4, 1225), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evaddusiaaw",VX(4, 1216), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evaddumiaaw",VX(4, 1224), VX_MASK,	PPCSPE,		{ RD, RA } },
-
-{ "evsubfssiaaw",VX(4, 1219), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evsubfsmiaaw",VX(4, 1227), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evsubfusiaaw",VX(4, 1218), VX_MASK,	PPCSPE,		{ RD, RA } },
-{ "evsubfumiaaw",VX(4, 1226), VX_MASK,	PPCSPE,		{ RD, RA } },
-
-{ "evmra",    VX(4, 1220), VX_MASK,	PPCSPE,		{ RD, RA } },
-
-{ "evdivws",  VX(4, 1222), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
-{ "evdivwu",  VX(4, 1223), VX_MASK,	PPCSPE,		{ RD, RA, RB } },
+{ "evdivws",  VX(4, 1222), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
+{ "evdivwu",  VX(4, 1223), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
 { "mulli",   OP(7),	OP_MASK,	PPCCOM,		{ RT, RA, SI } },
 { "muli",    OP(7),	OP_MASK,	PWRCOM,		{ RT, RA, SI } },
@@ -3627,7 +3541,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "divo",    XO(31,331,1,0), XO_MASK,	M601,		{ RT, RA, RB } },
 { "divo.",   XO(31,331,1,1), XO_MASK,	M601,		{ RT, RA, RB } },
 
-{ "mfpmr",   X(31,334),	X_MASK,		PPCPMR,		{ RT, PMRN }},
+{ "mfpmr",   X(31,334),	X_MASK,		PPCPMR,		{ RT, PMR }},
 
 { "mfmq",       XSPR(31,339,0),    XSPR_MASK, M601,	{ RT } },
 { "mfxer",      XSPR(31,339,1),    XSPR_MASK, COM,	{ RT } },
@@ -3672,6 +3586,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mfsprg5",    XSPR(31,339,261),  XSPR_MASK, PPC405,	{ RT } },
 { "mfsprg6",    XSPR(31,339,262),  XSPR_MASK, PPC405,	{ RT } },
 { "mfsprg7",    XSPR(31,339,263),  XSPR_MASK, PPC405,	{ RT } },
+{ "mftb",       XSPR(31,339,268),  XSPR_MASK, BOOKE,    { RT } },
 { "mftbl",      XSPR(31,339,268),  XSPR_MASK, BOOKE,    { RT } },
 { "mftbu",      XSPR(31,339,269),  XSPR_MASK, BOOKE,    { RT } },
 { "mfsprg",     XSPR(31,339,272),  XSPRG_MASK, PPC,	{ RT, SPRG } },
@@ -3715,6 +3630,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mfivor15",   XSPR(31,339,415),  XSPR_MASK, BOOKE,    { RT } },
 { "mfspefscr",  XSPR(31,339,512),  XSPR_MASK, PPCSPE,	{ RT } },
 { "mfbbear",    XSPR(31,339,513),  XSPR_MASK, PPCBRLK,  { RT } },
+{ "mfbbtar",    XSPR(31,339,514),  XSPR_MASK, PPCBRLK,  { RT } },
 { "mfibatu",    XSPR(31,339,528),  XSPRBAT_MASK, PPC,	{ RT, SPRBAT } },
 { "mfibatl",    XSPR(31,339,529),  XSPRBAT_MASK, PPC,	{ RT, SPRBAT } },
 { "mfdbatu",    XSPR(31,339,536),  XSPRBAT_MASK, PPC,	{ RT, SPRBAT } },
@@ -3835,7 +3751,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "mftbl",   XSPR(31,371,268), XSPR_MASK, CLASSIC,	{ RT } },
 { "mftbu",   XSPR(31,371,269), XSPR_MASK, CLASSIC,	{ RT } },
-{ "mftb",    X(31,371),	X_MASK,         BOOKE,		{ RT, TBR } },
 { "mftb",    X(31,371),	X_MASK,		CLASSIC,	{ RT, TBR } },
 
 { "lwaux",   X(31,373),	X_MASK,		PPC64,		{ RT, RAL, RB } },
@@ -4028,8 +3943,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mtivor13",  XSPR(31,467,413),  XSPR_MASK, BOOKE,     { RS } },
 { "mtivor14",  XSPR(31,467,414),  XSPR_MASK, BOOKE,     { RS } },
 { "mtivor15",  XSPR(31,467,415),  XSPR_MASK, BOOKE,     { RS } },
-{ "mtspefscr", XSPR(31,467,512),  XSPR_MASK, PPCSPE,	{ RT } },
+{ "mtspefscr",  XSPR(31,467,512),  XSPR_MASK, PPCSPE,   { RS } },
 { "mtbbear",   XSPR(31,467,513),  XSPR_MASK, PPCBRLK,   { RS } },
+{ "mtbbtar",   XSPR(31,467,514),  XSPR_MASK, PPCBRLK,  { RS } },
 { "mtibatu",   XSPR(31,467,528),  XSPRBAT_MASK, PPC,	{ SPRBAT, RS } },
 { "mtibatl",   XSPR(31,467,529),  XSPRBAT_MASK, PPC,	{ SPRBAT, RS } },
 { "mtdbatu",   XSPR(31,467,536),  XSPRBAT_MASK, PPC,	{ SPRBAT, RS } },
@@ -4103,7 +4019,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "dcread",  X(31,486),	X_MASK,		PPC403,		{ RT, RA, RB }},
 
-{ "mtpmr",   X(31,462),	X_MASK,		PPCPMR,		{ PMRN, RS }},
+{ "mtpmr",   X(31,462),	X_MASK,		PPCPMR,		{ PMR, RS }},
 
 { "icbtls",  X(31,486),	X_MASK,		PPCCHLK,	{ CT, RA, RB }},
 
@@ -4182,9 +4098,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "lwsync",  XSYNC(31,598,1), 0xffffffff, PPCONLY,	{ 0 } },
 { "ptesync", XSYNC(31,598,2), 0xffffffff, PPC64,	{ 0 } },
+{ "msync",   X(31,598), 0xffffffff,	BOOKE,		{ 0 } },
 { "sync",    X(31,598), XSYNC_MASK,	PPCCOM,		{ LS } },
 { "dcs",     X(31,598), 0xffffffff,	PWRCOM,		{ 0 } },
-{ "msync",   X(31,598), 0xf80007fe,	BOOKE,		{ 0 } },
 
 { "lfdx",    X(31,599), X_MASK,		COM,		{ FRT, RA, RB } },
 
@@ -4280,8 +4196,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "slbmfev", X(31,851), XRA_MASK,	PPC64,		{ RT, RB } },
 
+{ "mbar",    X(31,854),	X_MASK,		BOOKE,		{ MO } },
 { "eieio",   X(31,854),	0xffffffff,	PPC,		{ 0 } },
-{ "mbar",    X(31,854),	0xffffffff,	BOOKE,		{ MO } },
 
 { "tlbsx",   XRC(31,914,0), X_MASK, 	PPC403,		{ RT, RA, RB } },
 { "tlbsx.",  XRC(31,914,1), X_MASK, 	PPC403,		{ RT, RA, RB } },

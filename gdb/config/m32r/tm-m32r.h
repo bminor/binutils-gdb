@@ -109,8 +109,8 @@ struct value;
 extern void m32r_init_extra_frame_info (struct frame_info *fi);
 /* mvs_check  INIT_EXTRA_FRAME_INFO */
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) m32r_init_extra_frame_info (fi)
-/* mvs_no_check  INIT_FRAME_PC */
-#define INIT_FRAME_PC		/* Not necessary */
+/* mvs_no_check  DEPRECATED_INIT_FRAME_PC */
+#define DEPRECATED_INIT_FRAME_PC		init_frame_pc_noop
 
 extern void
 m32r_frame_find_saved_regs (struct frame_info *fi,
@@ -191,7 +191,7 @@ extern use_struct_convention_fn m32r_use_struct_convention;
 /* generic dummy frame stuff */
 
 #define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
-#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
+#define DEPRECATED_PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 
 
 /* target-specific dummy_frame stuff */
@@ -224,7 +224,7 @@ extern CORE_ADDR m32r_push_arguments (int nargs,
      deprecated_generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 
-#define USE_GENERIC_DUMMY_FRAMES 1
+#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_LENGTH            (0)
 #define CALL_DUMMY_START_OFFSET      (0)

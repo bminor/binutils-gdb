@@ -881,25 +881,24 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
   for the moment.
   For some reason the blockframe.c calls us with fi->next->fromleaf
   so this seems of little use to us. */
-void
+CORE_ADDR
 s390_init_frame_pc_first (int next_fromleaf, struct frame_info *fi)
 {
   CORE_ADDR sigcaller_pc;
-
-  fi->pc = 0;
+  CORE_ADDR pc = 0;
   if (next_fromleaf)
     {
-      fi->pc = ADDR_BITS_REMOVE (read_register (S390_RETADDR_REGNUM));
+      pc = ADDR_BITS_REMOVE (read_register (S390_RETADDR_REGNUM));
       /* fix signal handlers */
     }
-  else if (fi->next && fi->next->pc)
-    fi->pc = s390_frame_saved_pc_nofix (fi->next);
-  if (fi->pc && fi->next && fi->next->frame &&
-      s390_is_sigreturn (fi->pc, fi->next, NULL, &sigcaller_pc))
+  else if (get_next_frame (fi) && get_frame_pc (get_next_frame (fi)))
+    pc = s390_frame_saved_pc_nofix (get_next_frame (fi));
+  if (pc && get_next_frame (fi) && get_frame_base (get_next_frame (fi))
+      && s390_is_sigreturn (pc, get_next_frame (fi), NULL, &sigcaller_pc))
     {
-      fi->pc = sigcaller_pc;
+      pc = sigcaller_pc;
     }
-
+  return pc;
 }
 
 void
@@ -1001,8 +1000,8 @@ s390_frame_saved_pc (struct frame_info *fi)
 
 
 
-/* We want backtraces out of signal handlers so we don't
-   set thisframe->signal_handler_caller to 1 */
+/* We want backtraces out of signal handlers so we don't set
+   (get_frame_type (thisframe) == SIGTRAMP_FRAME) to 1 */
 
 CORE_ADDR
 s390_frame_chain (struct frame_info *thisframe)
@@ -1762,6 +1761,10 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Yes: create a new gdbarch for the specified machine type.  */
   gdbarch = gdbarch_alloc (&info, NULL);
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
   set_gdbarch_char_signed (gdbarch, 0);
 
@@ -1790,7 +1793,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, s390_breakpoint_from_pc);
   set_gdbarch_skip_prologue (gdbarch, s390_skip_prologue);
   set_gdbarch_init_extra_frame_info (gdbarch, s390_init_extra_frame_info);
-  set_gdbarch_init_frame_pc_first (gdbarch, s390_init_frame_pc_first);
+  set_gdbarch_deprecated_init_frame_pc_first (gdbarch, s390_init_frame_pc_first);
   set_gdbarch_read_fp (gdbarch, s390_read_fp);
   /* This function that tells us whether the function invocation represented
      by FI does not have a frame on the stack associated with it.  If it
@@ -1811,7 +1814,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, S390_NUM_REGS);
   set_gdbarch_cannot_fetch_register (gdbarch, s390_cannot_fetch_register);
   set_gdbarch_cannot_store_register (gdbarch, s390_cannot_fetch_register);
-  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
   set_gdbarch_use_struct_convention (gdbarch, s390_use_struct_convention);
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_register_name (gdbarch, s390_register_name);
@@ -1823,12 +1825,10 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Parameters for inferior function calls.  */
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_arguments (gdbarch, s390_push_arguments);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);

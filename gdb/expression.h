@@ -181,11 +181,11 @@ enum exp_opcode
        making three exp_elements.  */
     OP_FUNCALL,
 
-    /* OP_MSGCALL is followed by a string in the next exp_element and then an
+    /* OP_OBJC_MSGCALL is followed by a string in the next exp_element and then an
        integer.  The string is the selector string.  The integer is the number
        of arguments to the message call.  That many plus one values are used, 
        the first one being the object pointer.  This is an Objective C message */
-    OP_MSGCALL,
+    OP_OBJC_MSGCALL,
 
     /* This is EXACTLY like OP_FUNCALL but is semantically different.  
        In F77, array subscript expressions, substring expressions
@@ -283,12 +283,12 @@ enum exp_opcode
        It just comes in a tight (OP_THIS, OP_THIS) pair.  */
     OP_THIS,
 
-    /* Objective-C: OP_SELF is just a placeholder for the class instance
-       variable.  It just comes in a tight (OP_SELF, OP_SELF) pair.  */
-    OP_SELF,
+    /* Objective-C: OP_OBJC_SELF is just a placeholder for the class instance
+       variable.  It just comes in a tight (OP_OBJC_SELF, OP_OBJC_SELF) pair.  */
+    OP_OBJC_SELF,
 
     /* Objective C: "@selector" pseudo-operator */
-    OP_SELECTOR,
+    OP_OBJC_SELECTOR,
 
     /* OP_SCOPE surrounds a type name, a block, and a field name.  The
        type name and block are encoded as one element, but the field
@@ -321,7 +321,7 @@ enum exp_opcode
     OP_EXPRSTRING,
 
     /* An Objective C Foundation Class NSString constant */
-    OP_NSSTRING,
+    OP_OBJC_NSSTRING,
   };
 
 union exp_element

@@ -74,7 +74,6 @@ static gdbarch_push_arguments_ftype alpha_push_arguments;
 static gdbarch_push_dummy_frame_ftype alpha_push_dummy_frame;
 static gdbarch_pop_frame_ftype alpha_pop_frame;
 static gdbarch_fix_call_dummy_ftype alpha_fix_call_dummy;
-static gdbarch_init_frame_pc_first_ftype alpha_init_frame_pc_first;
 static gdbarch_init_extra_frame_info_ftype alpha_init_extra_frame_info;
 
 static gdbarch_get_longjmp_target_ftype alpha_get_longjmp_target;
@@ -378,7 +377,7 @@ alpha_find_saved_regs (struct frame_info *frame)
 #define SIGFRAME_REGSAVE_OFF	(4 * 8)
 #define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_REGSAVE_OFF + 32 * 8 + 8)
 #endif
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     {
       CORE_ADDR sigcontext_addr;
 
@@ -458,11 +457,12 @@ alpha_frame_init_saved_regs (struct frame_info *fi)
   fi->saved_regs[SP_REGNUM] = fi->frame;
 }
 
-static void
+static CORE_ADDR
 alpha_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
-  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) :
-	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
+  return (fromleaf ? SAVED_PC_AFTER_CALL (get_next_frame (prev)) 
+	  : get_next_frame (prev) ? FRAME_SAVED_PC (prev->next)
+	  : read_pc ());
 }
 
 static CORE_ADDR
@@ -472,7 +472,7 @@ read_next_frame_reg (struct frame_info *fi, int regno)
     {
       /* We have to get the saved sp from the sigcontext
          if it is a signal handler frame.  */
-      if (regno == SP_REGNUM && !fi->signal_handler_caller)
+      if (regno == SP_REGNUM && !(get_frame_type (fi) == SIGTRAMP_FRAME))
 	return fi->frame;
       else
 	{
@@ -491,7 +491,7 @@ alpha_frame_saved_pc (struct frame_info *frame)
   alpha_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
   /* We have to get the saved pc from the sigcontext
      if it is a signal handler frame.  */
-  int pcreg = frame->signal_handler_caller ? PC_REGNUM
+  int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME) ? PC_REGNUM
                                            : frame->extra_info->pc_reg;
 
   if (proc_desc && PROC_DESC_IS_DUMMY (proc_desc))
@@ -516,7 +516,7 @@ alpha_saved_pc_after_call (struct frame_info *frame)
   proc_desc = find_proc_desc (pc, frame->next);
   pcreg = proc_desc ? PROC_PC_REG (proc_desc) : ALPHA_RA_REGNUM;
 
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return alpha_frame_saved_pc (frame);
   else
     return read_register (pcreg);
@@ -823,7 +823,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame)
      So we have to find the proc_desc whose frame is closest to the current
      stack pointer.  */
 
-  if (PC_IN_CALL_DUMMY (pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
     {
       struct linked_proc_info *link;
       CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
@@ -957,7 +957,7 @@ alpha_frame_chain (struct frame_info *frame)
       && PROC_FRAME_OFFSET (proc_desc) == 0
   /* The previous frame from a sigtramp frame might be frameless
      and have frame size zero.  */
-      && !frame->signal_handler_caller)
+      && !(get_frame_type (frame) == SIGTRAMP_FRAME))
     return alpha_frame_past_sigtramp_frame (frame, saved_pc);
   else
     return read_next_frame_reg (frame, PROC_FRAME_REG (proc_desc))
@@ -1020,8 +1020,12 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 	  char *name;
 
 	  /* Do not set the saved registers for a sigtramp frame,
-	     alpha_find_saved_registers will do that for us.
-	     We can't use frame->signal_handler_caller, it is not yet set.  */
+	     alpha_find_saved_registers will do that for us.  We can't
+	     use (get_frame_type (frame) == SIGTRAMP_FRAME), it is not
+	     yet set.  */
+	  /* FIXME: cagney/2002-11-18: This problem will go away once
+             frame.c:get_prev_frame() is modified to set the frame's
+             type before calling functions like this.  */
 	  find_pc_partial_function (frame->pc, &name,
 				    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
 	  if (!PC_IN_SIGTRAMP (frame->pc, name))
@@ -1866,7 +1870,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					    alpha_extract_struct_value_address);
 
   /* Settings for calling functions in the inferior.  */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+  set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_push_arguments (gdbarch, alpha_push_arguments);
   set_gdbarch_pop_frame (gdbarch, alpha_pop_frame);
@@ -1885,17 +1889,16 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Alpha OSF/1 inhibits execution of code on the stack.  But there is
      no need for a dummy on the Alpha.  PUSH_ARGUMENTS takes care of all
      argument handling and bp_call_dummy takes care of stopping the dummy.  */
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, alpha_call_dummy_address);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_push_dummy_frame (gdbarch, alpha_push_dummy_frame);
   set_gdbarch_fix_call_dummy (gdbarch, alpha_fix_call_dummy);
-  set_gdbarch_init_frame_pc (gdbarch, init_frame_pc_noop);
-  set_gdbarch_init_frame_pc_first (gdbarch, alpha_init_frame_pc_first);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
+  set_gdbarch_deprecated_init_frame_pc_first (gdbarch, alpha_init_frame_pc_first);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);

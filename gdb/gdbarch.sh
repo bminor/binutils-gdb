@@ -115,19 +115,25 @@ EOF
 	    test "${fmt}" || fmt="%ld"
 	    test "${print}" || print="(long) ${macro}"
 
-	    case "${invalid_p}" in
-		0 ) valid_p=1 ;;
+	    case "${class}" in
+	    F | V | M )
+		case "${invalid_p}" in
 		"" )
-		    if [ -n "${predefault}" ]
+		    if test -n "${predefault}" -a "${predefault}" != "0"
 		    then
 			#invalid_p="gdbarch->${function} == ${predefault}"
-			valid_p="gdbarch->${function} != ${predefault}"
+			predicate="gdbarch->${function} != ${predefault}"
 		    else
-			#invalid_p="gdbarch->${function} == 0"
-			valid_p="gdbarch->${function} != 0"
+			# filled in later
+			predicate=""
 		    fi
 		    ;;
-		* ) valid_p="!(${invalid_p})"
+		* )
+		    echo "Predicate function ${function} with invalid_p." 1>&2
+		    kill $$
+		    exit 1
+		    ;;
+		esac
 	    esac
 
 	    # PREDEFAULT is a valid fallback definition of MEMBER when
@@ -488,22 +494,27 @@ F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc::0:0
 # behaviour here (and hence entrench it further) gdbarch simply
 # reqires that these methods be set up from the word go.  This also
 # avoids any potential problems with moving beyond multi-arch partial.
-v:1:USE_GENERIC_DUMMY_FRAMES:int:use_generic_dummy_frames::::0:-1
-v:1:CALL_DUMMY_LOCATION:int:call_dummy_location::::0:0
+v:1:DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
+v:1:CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
 f:2:CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void:::0:0::gdbarch->call_dummy_location == AT_ENTRY_POINT && gdbarch->call_dummy_address == 0
 v:2:CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset::::0:-1:::0x%08lx
 v:2:CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:call_dummy_breakpoint_offset::::0:-1::gdbarch->call_dummy_breakpoint_offset_p && gdbarch->call_dummy_breakpoint_offset == -1:0x%08lx::CALL_DUMMY_BREAKPOINT_OFFSET_P
 v:1:CALL_DUMMY_BREAKPOINT_OFFSET_P:int:call_dummy_breakpoint_offset_p::::0:-1
 v:2:CALL_DUMMY_LENGTH:int:call_dummy_length::::0:-1:::::CALL_DUMMY_LOCATION == BEFORE_TEXT_END || CALL_DUMMY_LOCATION == AFTER_TEXT_END
-f:1:PC_IN_CALL_DUMMY:int:pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::0:0
+# NOTE: cagney/2002-11-24: This function with predicate has a valid
+# (callable) initial value.  As a consequence, even when the predicate
+# is false, the corresponding function works.  This simplifies the
+# migration process - old code, calling DEPRECATED_PC_IN_CALL_DUMMY(),
+# doesn't need to be modified.
+F:1:DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::generic_pc_in_call_dummy:generic_pc_in_call_dummy
 v:1:CALL_DUMMY_P:int:call_dummy_p::::0:-1
 v:2:CALL_DUMMY_WORDS:LONGEST *:call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
 v:2:SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0:0x%08lx
 v:1:CALL_DUMMY_STACK_ADJUST_P:int:call_dummy_stack_adjust_p::::0:-1:::0x%08lx
 v:2:CALL_DUMMY_STACK_ADJUST:int:call_dummy_stack_adjust::::0:::gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0:0x%08lx::CALL_DUMMY_STACK_ADJUST_P
 f:2:FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p:::0
-f:2:INIT_FRAME_PC_FIRST:void:init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev:::init_frame_pc_noop::0
-f:2:INIT_FRAME_PC:void:init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev:::init_frame_pc_default::0
+F:2:DEPRECATED_INIT_FRAME_PC_FIRST:CORE_ADDR:deprecated_init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev
+F::DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
 v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::
@@ -566,8 +577,8 @@ f:2:FRAME_CHAIN:CORE_ADDR:frame_chain:struct frame_info *frame:frame::0:0
 # functions.
 f:2:FRAME_CHAIN_VALID:int:frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe:::generic_func_frame_chain_valid::0
 f:2:FRAME_SAVED_PC:CORE_ADDR:frame_saved_pc:struct frame_info *fi:fi::0:0
-f:2:FRAME_ARGS_ADDRESS:CORE_ADDR:frame_args_address:struct frame_info *fi:fi::0:0
-f:2:FRAME_LOCALS_ADDRESS:CORE_ADDR:frame_locals_address:struct frame_info *fi:fi::0:0
+f:2:FRAME_ARGS_ADDRESS:CORE_ADDR:frame_args_address:struct frame_info *fi:fi::0:get_frame_base::0
+f:2:FRAME_LOCALS_ADDRESS:CORE_ADDR:frame_locals_address:struct frame_info *fi:fi::0:get_frame_base::0
 f:2:SAVED_PC_AFTER_CALL:CORE_ADDR:saved_pc_after_call:struct frame_info *frame:frame::0:0
 f:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame::0:0
 #
@@ -578,9 +589,9 @@ F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc
 F:2:SAVE_DUMMY_FRAME_TOS:void:save_dummy_frame_tos:CORE_ADDR sp:sp::0:0
 v:2:PARM_BOUNDARY:int:parm_boundary
 #
-v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (gdbarch)
-v:2:TARGET_DOUBLE_FORMAT:const struct floatformat *:double_format::::::default_double_format (gdbarch)
-v:2:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat *:long_double_format::::::default_double_format (gdbarch)
+v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (gdbarch)::%s:(TARGET_FLOAT_FORMAT)->name
+v:2:TARGET_DOUBLE_FORMAT:const struct floatformat *:double_format::::::default_double_format (gdbarch)::%s:(TARGET_DOUBLE_FORMAT)->name
+v:2:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat *:long_double_format::::::default_double_format (gdbarch)::%s:(TARGET_LONG_DOUBLE_FORMAT)->name
 f:2:CONVERT_FROM_FUNC_PTR_ADDR:CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr:addr:::core_addr_identity::0
 # On some machines there are bits in addresses which are not really
 # part of the address, but are used by the kernel, the hardware, etc.
@@ -661,12 +672,12 @@ m::CONSTRUCT_INFERIOR_ARGUMENTS:char *:construct_inferior_arguments:int argc, ch
 F:2:DWARF2_BUILD_FRAME_INFO:void:dwarf2_build_frame_info:struct objfile *objfile:objfile:::0
 f:2:ELF_MAKE_MSYMBOL_SPECIAL:void:elf_make_msymbol_special:asymbol *sym, struct minimal_symbol *msym:sym, msym:::default_elf_make_msymbol_special::0
 f:2:COFF_MAKE_MSYMBOL_SPECIAL:void:coff_make_msymbol_special:int val, struct minimal_symbol *msym:val, msym:::default_coff_make_msymbol_special::0
-v::NAME_OF_MALLOC:const char *:name_of_malloc::::"malloc":"malloc"::0
+v::NAME_OF_MALLOC:const char *:name_of_malloc::::"malloc":"malloc"::0:%s:NAME_OF_MALLOC
 v::CANNOT_STEP_BREAKPOINT:int:cannot_step_breakpoint::::0:0::0
 v::HAVE_NONSTEPPABLE_WATCHPOINT:int:have_nonsteppable_watchpoint::::0:0::0
 F:2:ADDRESS_CLASS_TYPE_FLAGS:int:address_class_type_flags:int byte_size, int dwarf2_addr_class:byte_size, dwarf2_addr_class
-M:2:ADDRESS_CLASS_TYPE_FLAGS_TO_NAME:char *:address_class_type_flags_to_name:int type_flags:type_flags:
-M:2:ADDRESS_CLASS_NAME_TO_TYPE_FLAGS:int:address_class_name_to_type_flags:char *name, int *type_flags_ptr:name, type_flags_ptr
+M:2:ADDRESS_CLASS_TYPE_FLAGS_TO_NAME:const char *:address_class_type_flags_to_name:int type_flags:type_flags:
+M:2:ADDRESS_CLASS_NAME_TO_TYPE_FLAGS:int:address_class_name_to_type_flags:const char *name, int *type_flags_ptr:name, type_flags_ptr
 # Is a register in a group
 m:::int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup:::default_register_reggroup_p::0
 EOF
@@ -686,9 +697,6 @@ EOF
     do
 	eval echo \"\ \ \ \ ${r}=\${${r}}\"
     done
-#    #fallbackdefault=${fallbackdefault}
-#    #valid_p=${valid_p}
-#EOF
     if class_is_predicate_p && fallback_default_p
     then
 	echo "Error: predicate function ${macro} can not have a non- multi-arch default" 1>&2
@@ -1562,8 +1570,29 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: GDB_MULTI_ARCH = %d\\n",
                       GDB_MULTI_ARCH);
 EOF
-function_list | sort -t: +2 | while do_read
+function_list | sort -t: -k 3 | while do_read
 do
+    # First the predicate
+    if class_is_predicate_p
+    then
+	if class_is_multiarch_p
+	then
+	    printf "  if (GDB_MULTI_ARCH)\n"
+	    printf "    fprintf_unfiltered (file,\n"
+	    printf "                        \"gdbarch_dump: gdbarch_${function}_p() = %%d\\\\n\",\n"
+	    printf "                        gdbarch_${function}_p (current_gdbarch));\n"
+	else
+	    printf "#ifdef ${macro}_P\n"
+	    printf "  fprintf_unfiltered (file,\n"
+	    printf "                      \"gdbarch_dump: %%s # %%s\\\\n\",\n"
+	    printf "                      \"${macro}_P()\",\n"
+	    printf "                      XSTRING (${macro}_P ()));\n"
+	    printf "  fprintf_unfiltered (file,\n"
+	    printf "                      \"gdbarch_dump: ${macro}_P() = %%d\\\\n\",\n"
+	    printf "                      ${macro}_P ());\n"
+	    printf "#endif\n"
+	fi
+    fi
     # multiarch functions don't have macros.
     if class_is_multiarch_p
     then
@@ -1612,7 +1641,7 @@ do
     then
 	printf "  if (GDB_MULTI_ARCH)\n"
 	printf "    fprintf_unfiltered (file,\n"
-	printf "                        \"gdbarch_dump: ${macro} = 0x%%08lx\\\\n\",\n"
+	printf "                        \"gdbarch_dump: ${macro} = <0x%%08lx>\\\\n\",\n"
 	printf "                        (long) current_gdbarch->${function}\n"
 	printf "                        /*${macro} ()*/);\n"
     else
@@ -1650,11 +1679,11 @@ do
 	printf "gdbarch_${function}_p (struct gdbarch *gdbarch)\n"
 	printf "{\n"
         printf "  gdb_assert (gdbarch != NULL);\n"
-	if [ -n "${valid_p}" ]
+	if [ -n "${predicate}" ]
 	then
-	    printf "  return ${valid_p};\n"
+	    printf "  return ${predicate};\n"
 	else
-	    printf "#error \"gdbarch_${function}_p: not defined\"\n"
+	    printf "  return gdbarch->${function} != 0;\n"
 	fi
 	printf "}\n"
     fi
@@ -1673,6 +1702,11 @@ do
         printf "  if (gdbarch->${function} == 0)\n"
         printf "    internal_error (__FILE__, __LINE__,\n"
 	printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
+	if class_is_predicate_p && test -n "${predicate}"
+	then
+	    # Allow a call to a function with a predicate.
+	    printf "  /* Ignore predicate (${predicate}).  */\n"
+	fi
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
 	if [ "x${actual}" = "x-" -o "x${actual}" = "x" ]

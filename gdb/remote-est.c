@@ -30,6 +30,8 @@
 #include "serial.h"
 #include "regcache.h"
 
+#include "m68k-tdep.h"
+
 static void est_open (char *args, int from_tty);
 
 static void
@@ -55,12 +57,12 @@ est_supply_register (char *regname, int regnamelen, char *val, int vallen)
     case 'D':
       if (regname[1] < '0' || regname[1] > '7')
 	return;
-      regno = regname[1] - '0' + D0_REGNUM;
+      regno = regname[1] - '0' + M68K_D0_REGNUM;
       break;
     case 'A':
       if (regname[1] < '0' || regname[1] > '7')
 	return;
-      regno = regname[1] - '0' + A0_REGNUM;
+      regno = regname[1] - '0' + M68K_A0_REGNUM;
       break;
     default:
       return;

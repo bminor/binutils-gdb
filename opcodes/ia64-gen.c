@@ -1061,10 +1061,11 @@ in_iclass (struct ia64_opcode *idesc, struct iclass *ic,
                   && (idesc->name[len] == '\0' 
                       || idesc->name[len] == '.'));
 
-      /* All break and nop variations must match exactly.  */
+      /* All break, nop, and hint variations must match exactly.  */
       if (resolved &&
           (strcmp (ic->name, "break") == 0
-           || strcmp (ic->name, "nop") == 0))
+           || strcmp (ic->name, "nop") == 0
+	   || strcmp (ic->name, "hint") == 0))
         resolved = strcmp (ic->name, idesc->name) == 0;
 
       /* Assume restrictions in the FORMAT/FIELD negate resolution,
@@ -1257,6 +1258,22 @@ lookup_regindex (const char *name, int specifier)
         return 18;
       else if (strstr (name, "[RNAT]"))
         return 19;
+      else if (strstr (name, "[FCR]"))
+        return 21;
+      else if (strstr (name, "[EFLAG]"))
+        return 24;
+      else if (strstr (name, "[CSD]"))
+        return 25;
+      else if (strstr (name, "[SSD]"))
+        return 26;
+      else if (strstr (name, "[CFLG]"))
+        return 27;
+      else if (strstr (name, "[FSR]"))
+        return 28;
+      else if (strstr (name, "[FIR]"))
+        return 29;
+      else if (strstr (name, "[FDR]"))
+        return 30;
       else if (strstr (name, "[CCV]"))
         return 32;
       else if (strstr (name, "[ITC]"))

@@ -1,3 +1,33 @@
+2002-11-22  Andrew Cagney  <cagney@redhat.com>
+
+	* gen.c (name_cmp): Rename format_name_cmp.
+	(insn_list_insert): When a merge, compare the format name and
+	instruction name.  Add trace messages.
+
+2002-11-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* filter.c: Re-indent.
+	* filter.h, filter_host.h, gen-engine.c, gen-engine.h: Ditto.
+	* gen-icache.c, gen-icache.h, gen-idecode.c: Ditto.
+	* gen-idecode.h, gen-itable.c, gen-itable.h: Ditto.
+	* gen-model.c, gen-model.h, gen-semantics.c: Ditto.
+	* gen-semantics.h, gen-support.c, gen-support.h: Ditto.
+	* gen.c, gen.h, igen.c, igen.h, ld-cache.c, ld-cache.h: Ditto.
+	* ld-decode.c, ld-decode.h, ld-insn.c, ld-insn.h, lf.c: Ditto.
+	* lf.h, misc.c, misc.h, table.c, table.h: Ditto.
+	
+2002-11-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in: Update copyright.  IGEN contributed to the FSF.
+	* filter.c, filter.h, filter_host.c, filter_host.h: Ditto.
+	* gen-engine.c, gen-engine.h, gen-icache.c, gen-icache.h: Ditto.
+	* gen-idecode.c, gen-idecode.h, gen-itable.c: Ditto.
+	* gen-itable.h, gen-model.c, gen-model.h, gen-semantics.c: Ditto.
+	* gen-semantics.h, gen-support.c, gen-support.h, gen.c: Ditto.
+	* gen.h, igen.c, igen.h, ld-cache.c, ld-cache.h: Ditto.
+	* ld-decode.c, ld-decode.h, ld-insn.c, ld-insn.h, lf.c: Ditto.
+	* lf.h, misc.c, misc.h, table.c, table.h: Ditto.
+
 2002-11-06  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gen-engine.c (print_engine_issue_prefix_hook): Don't add the

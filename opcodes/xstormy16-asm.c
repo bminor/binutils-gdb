@@ -52,6 +52,8 @@ static const char * parse_mem8
   PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 static const char * parse_small_immediate
   PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_immediate16
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 
 /* The machine-independent code doesn't know how to disambiguate
      mov (foo),r3
@@ -73,7 +75,7 @@ parse_mem8 (cd, strp, opindex, valuep)
       if (s[1] == '-' && s[2] == '-')
 	return _("Bad register in preincrement");
 
-      while (isalnum (*++s))
+      while (ISALNUM (*++s))
 	;
       if (s[0] == '+' && s[1] == '+' && (s[2] == ')' || s[2] == ','))
 	return _("Bad register in postincrement");
@@ -109,6 +111,9 @@ parse_small_immediate (cd, strp, opindex, valuep)
   enum cgen_parse_operand_result result;
   const char *errmsg;
 
+  if (**strp == '@')
+    return _("No relocation for small immediate");
+
   errmsg = (* cd->parse_operand_fn)
     (cd, CGEN_PARSE_OPERAND_INTEGER, strp, opindex, BFD_RELOC_NONE,
      &result, &value);
@@ -121,6 +126,54 @@ parse_small_immediate (cd, strp, opindex, valuep)
 
   *valuep = value;
   return NULL;
+}
+
+/* Literal scan be either a normal literal, a @hi() or @lo relocation. */
+   
+static const char *
+parse_immediate16 (cd, strp, opindex, valuep)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     unsigned long *valuep;
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result;
+  bfd_reloc_code_real_type code = BFD_RELOC_NONE;
+  bfd_vma value;
+
+  if (strncmp (*strp, "@hi(", 4) == 0)
+    {
+      *strp += 4;
+      code = BFD_RELOC_HI16;
+    }
+  else
+  if (strncmp (*strp, "@lo(", 4) == 0)
+    {
+      *strp += 4;
+      code = BFD_RELOC_LO16;
+    }
+
+  if (code == BFD_RELOC_NONE)
+    errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+  else
+    {
+      errmsg = cgen_parse_address (cd, strp, opindex, code, &result, &value);
+      if ((errmsg == NULL) &&
+	  (result != CGEN_PARSE_OPERAND_RESULT_QUEUED))
+	errmsg = _("Operand is not a symbol");
+
+      *valuep = value;
+      if ((code == BFD_RELOC_HI16 || code == BFD_RELOC_LO16)
+	  && **strp == ')')        
+	*strp += 1;
+      else
+        {
+	  errmsg = _("Syntax error: No trailing ')'");
+	  return errmsg;
+	}
+    }
+  return errmsg;
 }
 /* -- */
 
@@ -187,7 +240,7 @@ xstormy16_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = cgen_parse_signed_integer (cd, strp, XSTORMY16_OPERAND_IMM12, &fields->f_imm12);
       break;
     case XSTORMY16_OPERAND_IMM16 :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, XSTORMY16_OPERAND_IMM16, &fields->f_imm16);
+      errmsg = parse_immediate16 (cd, strp, XSTORMY16_OPERAND_IMM16, &fields->f_imm16);
       break;
     case XSTORMY16_OPERAND_IMM2 :
       errmsg = cgen_parse_unsigned_integer (cd, strp, XSTORMY16_OPERAND_IMM2, &fields->f_imm2);

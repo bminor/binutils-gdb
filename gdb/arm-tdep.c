@@ -131,7 +131,10 @@ static void set_disassembly_flavor_sfunc(char *, int,
 					 struct cmd_list_element *);
 static void set_disassembly_flavor (void);
 
-static void convert_from_extended (void *ptr, void *dbl);
+static void convert_from_extended (const struct floatformat *, const void *,
+				   void *);
+static void convert_to_extended (const struct floatformat *, void *,
+				 const void *);
 
 /* Define other aspects of the stack frame.  We keep the offsets of
    all saved registers, 'cause we need 'em a lot!  We also keep the
@@ -215,7 +218,7 @@ arm_pc_is_thumb_dummy (CORE_ADDR memaddr)
      frame location (true if we have not pushed large data structures or
      gone too many levels deep) and that our 1024 is not enough to consider
      code regions as part of the stack (true for most practical purposes).  */
-  if (PC_IN_CALL_DUMMY (memaddr, sp, sp + 1024))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (memaddr, sp, sp + 1024))
     return caller_is_thumb;
   else
     return 0;
@@ -410,8 +413,7 @@ arm_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line sal;
 
   /* If we're in a dummy frame, don't even try to skip the prologue.  */
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
     return pc;
 
   /* See what the symbol table says.  */
@@ -536,9 +538,8 @@ thumb_scan_prologue (struct frame_info *fi)
   int i;
 
   /* Don't try to scan dummy frames.  */
-  if (USE_GENERIC_DUMMY_FRAMES
-      && fi != NULL
-      && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+  if (fi != NULL
+      && DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
     return;
 
   if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
@@ -992,8 +993,7 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
      function could be called directly.  */
   for (; fi; fi = fi->next)
     {
-      if (USE_GENERIC_DUMMY_FRAMES
-	  && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
 	{
 	  return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
 	}
@@ -1012,9 +1012,9 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
 }
 /* Function: frame_chain Given a GDB frame, determine the address of
    the calling function's frame.  This will be used to create a new
-   GDB frame struct, and then INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC
-   will be called for the new frame.  For ARM, we save the frame size
-   when we initialize the frame_info.  */
+   GDB frame struct, and then INIT_EXTRA_FRAME_INFO and
+   DEPRECATED_INIT_FRAME_PC will be called for the new frame.  For
+   ARM, we save the frame size when we initialize the frame_info.  */
 
 static CORE_ADDR
 arm_frame_chain (struct frame_info *fi)
@@ -1022,8 +1022,7 @@ arm_frame_chain (struct frame_info *fi)
   CORE_ADDR caller_pc;
   int framereg = fi->extra_info->framereg;
 
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
     /* A generic call dummy's frame is the same as caller's.  */
     return fi->frame;
 
@@ -1106,8 +1105,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      the sigtramp and call dummy cases.  */
   if (!fi->next)
     sp = read_sp();
-  else if (USE_GENERIC_DUMMY_FRAMES
-	   && PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
     /* For generic dummy frames, pull the value direct from the frame.
        Having an unwind function to do this would be nice.  */
     sp = deprecated_read_register_dummy (fi->next->pc, fi->next->frame,
@@ -1117,19 +1115,24 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	  + fi->next->extra_info->framesize);
 
   /* Determine whether or not we're in a sigtramp frame.
-     Unfortunately, it isn't sufficient to test
-     fi->signal_handler_caller because this value is sometimes set
-     after invoking INIT_EXTRA_FRAME_INFO.  So we test *both*
-     fi->signal_handler_caller and PC_IN_SIGTRAMP to determine if we
-     need to use the sigcontext addresses for the saved registers.
+     Unfortunately, it isn't sufficient to test (get_frame_type (fi)
+     == SIGTRAMP_FRAME) because this value is sometimes set after
+     invoking INIT_EXTRA_FRAME_INFO.  So we test *both*
+     (get_frame_type (fi) == SIGTRAMP_FRAME) and PC_IN_SIGTRAMP to
+     determine if we need to use the sigcontext addresses for the
+     saved registers.
 
      Note: If an ARM PC_IN_SIGTRAMP method ever needs to compare
      against the name of the function, the code below will have to be
      changed to first fetch the name of the function and then pass
      this name to PC_IN_SIGTRAMP.  */
 
+  /* FIXME: cagney/2002-11-18: This problem will go away once
+     frame.c:get_prev_frame() is modified to set the frame's type
+     before calling functions like this.  */
+
   if (SIGCONTEXT_REGISTER_ADDRESS_P () 
-      && (fi->signal_handler_caller || PC_IN_SIGTRAMP (fi->pc, (char *)0)))
+      && ((get_frame_type (fi) == SIGTRAMP_FRAME) || PC_IN_SIGTRAMP (fi->pc, (char *)0)))
     {
       for (reg = 0; reg < NUM_REGS; reg++)
 	fi->saved_regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, fi->pc, reg);
@@ -1143,33 +1146,6 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       fi->extra_info->frameoffset = 0;
 
     }
-  else if (!USE_GENERIC_DUMMY_FRAMES
-	   && PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
-    {
-      CORE_ADDR rp;
-      CORE_ADDR callers_sp;
-
-      /* Set rp point at the high end of the saved registers.  */
-      rp = fi->frame - REGISTER_SIZE;
-
-      /* Fill in addresses of saved registers.  */
-      fi->saved_regs[ARM_PS_REGNUM] = rp;
-      rp -= REGISTER_RAW_SIZE (ARM_PS_REGNUM);
-      for (reg = ARM_PC_REGNUM; reg >= 0; reg--)
-	{
-	  fi->saved_regs[reg] = rp;
-	  rp -= REGISTER_RAW_SIZE (reg);
-	}
-
-      callers_sp = read_memory_integer (fi->saved_regs[ARM_SP_REGNUM],
-                                        REGISTER_RAW_SIZE (ARM_SP_REGNUM));
-      if (arm_pc_is_thumb (fi->pc))
-	fi->extra_info->framereg = THUMB_FP_REGNUM;
-      else
-	fi->extra_info->framereg = ARM_FP_REGNUM;
-      fi->extra_info->framesize = callers_sp - sp;
-      fi->extra_info->frameoffset = fi->frame - sp;
-    }
   else
     {
       arm_scan_prologue (fi);
@@ -1177,8 +1153,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       if (!fi->next)
 	/* This is the innermost frame?  */
 	fi->frame = read_register (fi->extra_info->framereg);
-      else if (USE_GENERIC_DUMMY_FRAMES
-	       && PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
+      else if (DEPRECATED_PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
 	/* Next inner most frame is a dummy, just grab its frame.
            Dummy frames always have the same FP as their caller.  */
 	fi->frame = fi->next->frame;
@@ -1219,11 +1194,10 @@ static CORE_ADDR
 arm_frame_saved_pc (struct frame_info *fi)
 {
   /* If a dummy frame, pull the PC out of the frame's register buffer.  */
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
     return deprecated_read_register_dummy (fi->pc, fi->frame, ARM_PC_REGNUM);
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->extra_info->frameoffset,
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->extra_info->frameoffset,
 			fi->frame))
     {
       return read_memory_integer (fi->saved_regs[ARM_PC_REGNUM],
@@ -1549,8 +1523,7 @@ arm_pop_frame (void)
   CORE_ADDR old_SP = (frame->frame - frame->extra_info->frameoffset
 		      + frame->extra_info->framesize);
 
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       generic_pop_dummy_frame ();
       flush_cached_frames ();
@@ -1694,7 +1667,8 @@ arm_register_sim_regno (int regnum)
    little-endian systems.  */
 
 static void
-convert_from_extended (void *ptr, void *dbl)
+convert_from_extended (const struct floatformat *fmt, const void *ptr,
+		       void *dbl)
 {
   DOUBLEST d;
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
@@ -1702,14 +1676,14 @@ convert_from_extended (void *ptr, void *dbl)
   else
     floatformat_to_doublest (&floatformat_arm_ext_littlebyte_bigword,
 			     ptr, &d);
-  floatformat_from_doublest (TARGET_DOUBLE_FORMAT, &d, dbl);
+  floatformat_from_doublest (fmt, &d, dbl);
 }
 
 static void
-convert_to_extended (void *dbl, void *ptr)
+convert_to_extended (const struct floatformat *fmt, void *dbl, const void *ptr)
 {
   DOUBLEST d;
-  floatformat_to_doublest (TARGET_DOUBLE_FORMAT, ptr, &d);
+  floatformat_to_doublest (fmt, ptr, &d);
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     floatformat_from_doublest (&floatformat_arm_ext_big, &d, dbl);
   else
@@ -2247,9 +2221,11 @@ arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 
 static void
 arm_extract_return_value (struct type *type,
-			  char regbuf[REGISTER_BYTES],
-			  char *valbuf)
+			  struct regcache *regs,
+			  void *dst)
 {
+  bfd_byte *valbuf = dst;
+
   if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
       struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
@@ -2257,14 +2233,24 @@ arm_extract_return_value (struct type *type,
       switch (tdep->fp_model)
 	{
 	case ARM_FLOAT_FPA:
-	  convert_from_extended (&regbuf[REGISTER_BYTE (ARM_F0_REGNUM)],
-				 valbuf);
+	  {
+	    /* The value is in register F0 in internal format.  We need to
+	       extract the raw value and then convert it to the desired
+	       internal type.  */
+	    bfd_byte tmpbuf[FP_REGISTER_RAW_SIZE];
+
+	    regcache_cooked_read (regs, ARM_F0_REGNUM, tmpbuf);
+	    convert_from_extended (floatformat_from_type (type), tmpbuf,
+				   valbuf);
+	  }
 	  break;
 
 	case ARM_FLOAT_SOFT:
 	case ARM_FLOAT_SOFT_VFP:
-	  memcpy (valbuf, &regbuf[REGISTER_BYTE (ARM_A1_REGNUM)],
-		  TYPE_LENGTH (type));
+	  regcache_cooked_read (regs, ARM_A1_REGNUM, valbuf);
+	  if (TYPE_LENGTH (type) > 4)
+	    regcache_cooked_read (regs, ARM_A1_REGNUM + 1,
+				  valbuf + INT_REGISTER_RAW_SIZE);
 	  break;
 
 	default:
@@ -2274,9 +2260,50 @@ arm_extract_return_value (struct type *type,
 	  break;
 	}
     }
+  else if (TYPE_CODE (type) == TYPE_CODE_INT
+	   || TYPE_CODE (type) == TYPE_CODE_CHAR
+	   || TYPE_CODE (type) == TYPE_CODE_BOOL
+	   || TYPE_CODE (type) == TYPE_CODE_PTR
+	   || TYPE_CODE (type) == TYPE_CODE_REF
+	   || TYPE_CODE (type) == TYPE_CODE_ENUM)
+    {
+      /* If the the type is a plain integer, then the access is
+	 straight-forward.  Otherwise we have to play around a bit more.  */
+      int len = TYPE_LENGTH (type);
+      int regno = ARM_A1_REGNUM;
+      ULONGEST tmp;
+
+      while (len > 0)
+	{
+	  /* By using store_unsigned_integer we avoid having to do
+	     anything special for small big-endian values.  */
+	  regcache_cooked_read_unsigned (regs, regno++, &tmp);
+	  store_unsigned_integer (valbuf, 
+				  (len > INT_REGISTER_RAW_SIZE
+				   ? INT_REGISTER_RAW_SIZE : len),
+				  tmp);
+	  len -= INT_REGISTER_RAW_SIZE;
+	  valbuf += INT_REGISTER_RAW_SIZE;
+	}
+    }
   else
-    memcpy (valbuf, &regbuf[REGISTER_BYTE (ARM_A1_REGNUM)],
-	    TYPE_LENGTH (type));
+    {
+      /* For a structure or union the behaviour is as if the value had
+         been stored to word-aligned memory and then loaded into 
+         registers with 32-bit load instruction(s).  */
+      int len = TYPE_LENGTH (type);
+      int regno = ARM_A1_REGNUM;
+      bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+
+      while (len > 0)
+	{
+	  regcache_cooked_read (regs, regno++, tmpbuf);
+	  memcpy (valbuf, tmpbuf,
+		  len > INT_REGISTER_RAW_SIZE ? INT_REGISTER_RAW_SIZE : len);
+	  len -= INT_REGISTER_RAW_SIZE;
+	  valbuf += INT_REGISTER_RAW_SIZE;
+	}
+    }
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -2389,8 +2416,11 @@ arm_use_struct_convention (int gcc_p, struct type *type)
    TYPE, given in virtual format.  */
 
 static void
-arm_store_return_value (struct type *type, char *valbuf)
+arm_store_return_value (struct type *type, struct regcache *regs,
+			const void *src)
 {
+  const bfd_byte *valbuf = src;
+
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
@@ -2400,15 +2430,16 @@ arm_store_return_value (struct type *type, char *valbuf)
 	{
 	case ARM_FLOAT_FPA:
 
-	  convert_to_extended (valbuf, buf);
-	  deprecated_write_register_bytes (REGISTER_BYTE (ARM_F0_REGNUM), buf,
-					   FP_REGISTER_RAW_SIZE);
+	  convert_to_extended (floatformat_from_type (type), buf, valbuf);
+	  regcache_cooked_write (regs, ARM_F0_REGNUM, buf);
 	  break;
 
 	case ARM_FLOAT_SOFT:
 	case ARM_FLOAT_SOFT_VFP:
-	  deprecated_write_register_bytes (ARM_A1_REGNUM, valbuf,
-					   TYPE_LENGTH (type));
+	  regcache_cooked_write (regs, ARM_A1_REGNUM, valbuf);
+	  if (TYPE_LENGTH (type) > 4)
+	    regcache_cooked_write (regs, ARM_A1_REGNUM + 1, 
+				   valbuf + INT_REGISTER_RAW_SIZE);
 	  break;
 
 	default:
@@ -2418,9 +2449,57 @@ arm_store_return_value (struct type *type, char *valbuf)
 	  break;
 	}
     }
+  else if (TYPE_CODE (type) == TYPE_CODE_INT
+	   || TYPE_CODE (type) == TYPE_CODE_CHAR
+	   || TYPE_CODE (type) == TYPE_CODE_BOOL
+	   || TYPE_CODE (type) == TYPE_CODE_PTR
+	   || TYPE_CODE (type) == TYPE_CODE_REF
+	   || TYPE_CODE (type) == TYPE_CODE_ENUM)
+    {
+      if (TYPE_LENGTH (type) <= 4)
+	{
+	  /* Values of one word or less are zero/sign-extended and
+	     returned in r0.  */
+	  bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+	  LONGEST val = unpack_long (type, valbuf);
+
+	  store_signed_integer (tmpbuf, INT_REGISTER_RAW_SIZE, val);
+	  regcache_cooked_write (regs, ARM_A1_REGNUM, tmpbuf);
+	}
+      else
+	{
+	  /* Integral values greater than one word are stored in consecutive
+	     registers starting with r0.  This will always be a multiple of
+	     the regiser size.  */
+	  int len = TYPE_LENGTH (type);
+	  int regno = ARM_A1_REGNUM;
+
+	  while (len > 0)
+	    {
+	      regcache_cooked_write (regs, regno++, valbuf);
+	      len -= INT_REGISTER_RAW_SIZE;
+	      valbuf += INT_REGISTER_RAW_SIZE;
+	    }
+	}
+    }
   else
-    deprecated_write_register_bytes (ARM_A1_REGNUM, valbuf,
-				     TYPE_LENGTH (type));
+    {
+      /* For a structure or union the behaviour is as if the value had
+         been stored to word-aligned memory and then loaded into 
+         registers with 32-bit load instruction(s).  */
+      int len = TYPE_LENGTH (type);
+      int regno = ARM_A1_REGNUM;
+      bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+
+      while (len > 0)
+	{
+	  memcpy (tmpbuf, valbuf,
+		  len > INT_REGISTER_RAW_SIZE ? INT_REGISTER_RAW_SIZE : len);
+	  regcache_cooked_write (regs, regno++, tmpbuf);
+	  len -= INT_REGISTER_RAW_SIZE;
+	  valbuf += INT_REGISTER_RAW_SIZE;
+	}
+    }
 }
 
 /* Store the address of the place in which to copy the structure the
@@ -2778,6 +2857,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
   tdep->osabi = osabi;
 
   /* This is the way it has always defaulted.  */
@@ -2814,34 +2897,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;	/* Longjump support not enabled by default.  */
 
-#if OLD_STYLE_ARM_DUMMY_FRAMES
-  /* NOTE: cagney/2002-05-07: Enable the below to restore the old ARM
-     specific (non-generic) dummy frame code.  Might be useful if
-     there appears to be a problem with the generic dummy frame
-     mechanism that replaced it.  */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
-
-  /* Call dummy code.  */
-  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  /* We have to give this a value now, even though we will re-set it 
-     during each call to arm_fix_call_dummy.  */
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 8);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-
-  set_gdbarch_call_dummy_words (gdbarch, arm_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (arm_call_dummy_words));
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-
-  set_gdbarch_fix_call_dummy (gdbarch, arm_fix_call_dummy);
-
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
-#else
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
-
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
 
@@ -2854,13 +2909,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_length (gdbarch, 0);
 
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
 
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_push_return_address (gdbarch, arm_push_return_address);
-#endif
 
-  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, arm_push_arguments);
   set_gdbarch_coerce_float_to_double (gdbarch,
 				      standard_coerce_float_to_double);
@@ -2878,15 +2930,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, arm_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
-#if OLD_STYLE_ARM_DUMMY_FRAMES
-  /* NOTE: cagney/2002-05-07: Enable the below to restore the old ARM
-     specific (non-generic) dummy frame code.  Might be useful if
-     there appears to be a problem with the generic dummy frame
-     mechanism that replaced it.  */
-  set_gdbarch_push_dummy_frame (gdbarch, arm_push_dummy_frame);
-#else
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
-#endif
   set_gdbarch_pop_frame (gdbarch, arm_pop_frame);
 
   /* Address manipulation.  */
@@ -2934,8 +2978,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, arm_register_name);
 
   /* Returning results.  */
-  set_gdbarch_deprecated_extract_return_value (gdbarch, arm_extract_return_value);
-  set_gdbarch_deprecated_store_return_value (gdbarch, arm_store_return_value);
+  set_gdbarch_extract_return_value (gdbarch, arm_extract_return_value);
+  set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, arm_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
   set_gdbarch_extract_struct_value_address (gdbarch,
@@ -3066,11 +3110,11 @@ _initialize_arm_tdep (void)
 				  arm_elf_osabi_sniffer);
 
   /* Register some ABI variants for embedded systems.  */
-  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_ARM_EABI_V1,
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_EABI_V1,
                           arm_init_abi_eabi_v1);
-  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_ARM_EABI_V2,
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_EABI_V2,
                           arm_init_abi_eabi_v2);
-  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_ARM_APCS,
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_APCS,
                           arm_init_abi_apcs);
 
   tm_print_insn = gdb_print_insn_arm;

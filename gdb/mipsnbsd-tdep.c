@@ -359,7 +359,7 @@ mipsnbsd_init_abi (struct gdbarch_info info,
 void
 _initialize_mipsnbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_mips, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_NETBSD_ELF,
 			  mipsnbsd_init_abi);
 
   add_core_fns (&mipsnbsd_core_fns);

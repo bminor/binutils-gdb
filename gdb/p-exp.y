@@ -206,7 +206,7 @@ static int search_field;
 
 /* Object pascal */
 %token THIS
-%token <lval> TRUE FALSE
+%token <lval> TRUEKEYWORD FALSEKEYWORD
 
 %left ','
 %left ABOVE_COMMA
@@ -294,7 +294,7 @@ exp	:	exp '.' { search_field = 1; }
 			    { while (TYPE_CODE (current_type) == TYPE_CODE_PTR)
 				current_type = TYPE_TARGET_TYPE (current_type);
 			      current_type = lookup_struct_elt_type (
-				current_type, $4.ptr, false); };
+				current_type, $4.ptr, 0); };
 			 } ; 
 exp	:	exp '['
 			/* We need to save the current_type value */
@@ -343,7 +343,15 @@ arglist	:
 	;
 
 exp	:	type '(' exp ')' %prec UNARY
-			{ write_exp_elt_opcode (UNOP_CAST);
+			{ if (current_type)
+			    {
+			      /* Allow automatic dereference of classes.  */
+			      if ((TYPE_CODE (current_type) == TYPE_CODE_PTR)
+				  && (TYPE_CODE (TYPE_TARGET_TYPE (current_type)) == TYPE_CODE_CLASS)
+				  && (TYPE_CODE ($1) == TYPE_CODE_CLASS))
+				write_exp_elt_opcode (UNOP_IND);
+			    }
+			  write_exp_elt_opcode (UNOP_CAST);
 			  write_exp_elt_type ($1);
 			  write_exp_elt_opcode (UNOP_CAST); 
 			  current_type = $1; }
@@ -427,13 +435,13 @@ exp	:	exp ASSIGN exp
 			{ write_exp_elt_opcode (BINOP_ASSIGN); }
 	;
 
-exp	:	TRUE
+exp	:	TRUEKEYWORD
 			{ write_exp_elt_opcode (OP_BOOL);
 			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_BOOL); }
 	;
 
-exp	:	FALSE
+exp	:	FALSEKEYWORD
 			{ write_exp_elt_opcode (OP_BOOL);
 			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_BOOL); }
@@ -505,8 +513,28 @@ exp	:	STRING
 
 /* Object pascal  */
 exp	:	THIS
-			{ write_exp_elt_opcode (OP_THIS);
-			  write_exp_elt_opcode (OP_THIS); }
+			{ 
+			  struct value * this_val;
+			  struct type * this_type;
+			  write_exp_elt_opcode (OP_THIS);
+			  write_exp_elt_opcode (OP_THIS); 
+			  /* we need type of this */
+			  this_val = value_of_this (0); 
+			  if (this_val)
+			    this_type = this_val->type;
+			  else
+			    this_type = NULL;
+			  if (this_type)
+			    {
+			      if (TYPE_CODE (this_type) == TYPE_CODE_PTR)
+				{
+				  this_type = TYPE_TARGET_TYPE (this_type);
+				  write_exp_elt_opcode (UNOP_IND);
+				}
+			    }
+		
+			  current_type = this_type;
+			}
 	;
 
 /* end of object pascal.  */
@@ -651,7 +679,7 @@ variable:	name_not_typename
 			      if (this_type)
 				current_type = lookup_struct_elt_type (
 				  this_type,
-				  copy_name($1.stoken), false);
+				  copy_name ($1.stoken), 0);
 			      else
 				current_type = NULL; 
 			    }
@@ -695,7 +723,9 @@ type	:	ptype
 	;
 
 typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
-	:	TYPENAME
+	:	'^' typebase
+			{ $$ = lookup_pointer_type ($2); }
+	|	TYPENAME
 			{ $$ = $1.type; }
 	|	STRUCT name
 			{ $$ = lookup_struct (copy_name ($2),
@@ -1351,14 +1381,14 @@ yylex ()
       if (STREQ (uptokstart, "FALSE"))
 	{
           yylval.lval = 0;
-          return FALSE;
+          return FALSEKEYWORD;
         }
       break;
     case 4:
       if (STREQ (uptokstart, "TRUE"))
 	{
           yylval.lval = 1;
-  	  return TRUE;
+  	  return TRUEKEYWORD;
         }
       if (STREQ (uptokstart, "SELF"))
         {

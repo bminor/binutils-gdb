@@ -1,5 +1,5 @@
 /* Native support for HPPA-RISC machine running HPUX, for GDB.
-   Copyright 1991, 1992, 1994, 1996, 1998, 1999, 2000
+   Copyright 1991, 1992, 1994, 1996, 1998, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -48,25 +48,10 @@
    user space will crap out HPUX.  */
 #define NEED_TEXT_START_END 1
 
-/* This macro defines the register numbers (from REGISTER_NAMES) that
-   are effectively unavailable to the user through ptrace().  It allows
-   us to include the whole register set in REGISTER_NAMES (inorder to
-   better support remote debugging).  If it is used in
-   fetch/store_inferior_registers() gdb will not complain about I/O errors
-   on fetching these registers.  If all registers in REGISTER_NAMES
-   are available, then return false (0).  */
-
-#define CANNOT_STORE_REGISTER(regno)            \
-                   ((regno) == 0) ||     \
-                   ((regno) == PCSQ_HEAD_REGNUM) || \
-                   ((regno) >= PCSQ_TAIL_REGNUM && (regno) < IPSW_REGNUM) ||  \
-                   ((regno) > IPSW_REGNUM && (regno) < FP4_REGNUM)
-
 /* In hppah-nat.c: */
 #define FETCH_INFERIOR_REGISTERS
 #define CHILD_XFER_MEMORY
-#define CHILD_POST_FOLLOW_INFERIOR_BY_CLONE
-#define CHILD_POST_FOLLOW_VFORK
+#define CHILD_FOLLOW_FORK
 
 /* While this is for use by threaded programs, it doesn't appear
  * to hurt non-threaded ones.  This is used in infrun.c: */
@@ -81,22 +66,17 @@ extern int hppa_prepare_to_proceed (void);
 #define CHILD_REMOVE_FORK_CATCHPOINT
 #define CHILD_INSERT_VFORK_CATCHPOINT
 #define CHILD_REMOVE_VFORK_CATCHPOINT
-#define CHILD_HAS_FORKED
-#define CHILD_HAS_VFORKED
-#define CHILD_CAN_FOLLOW_VFORK_PRIOR_TO_EXEC
 #define CHILD_INSERT_EXEC_CATCHPOINT
 #define CHILD_REMOVE_EXEC_CATCHPOINT
-#define CHILD_HAS_EXECD
 #define CHILD_REPORTED_EXEC_EVENTS_PER_EXEC_CALL
-#define CHILD_HAS_SYSCALL_EVENT
 #define CHILD_POST_ATTACH
 #define CHILD_THREAD_ALIVE
 #define CHILD_PID_TO_STR
+#define CHILD_WAIT
+struct target_waitstatus;
+extern ptid_t child_wait (ptid_t, struct target_waitstatus *);
 
-#define REQUIRE_ATTACH(pid) hppa_require_attach(pid)
 extern int hppa_require_attach (int);
-
-#define REQUIRE_DETACH(pid,signal) hppa_require_detach(pid,signal)
 extern int hppa_require_detach (int, int);
 
 /* So we can cleanly use code in infptrace.c.  */

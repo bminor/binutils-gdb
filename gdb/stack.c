@@ -112,27 +112,6 @@ static void frame_info (char *, int);
 
 extern int addressprint;	/* Print addresses, or stay symbolic only? */
 
-/* The "selected" stack frame is used by default for local and arg access.
-   May be zero, for no selected frame.  */
-
-struct frame_info *selected_frame;
-
-/* Level of the selected frame:
-   0 for innermost, 1 for its caller, ...
-   or -1 for frame specified by address with no defined level.  */
-
-/* Level of the selected frame: 0 for innermost, 1 for its caller, ...
-   or -1 for NULL frame.  */
-
-int
-frame_relative_level (struct frame_info *fi)
-{
-  if (fi == NULL)
-    return -1;
-  else
-    return fi->level;
-}
-
 /* Zero means do things normally; we are interacting directly with the
    user.  One means print the full filename and linenumber when a
    frame is printed, and do so in a format emacs18/emacs19.22 can
@@ -335,27 +314,9 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
   int source_print;
   int location_print;
 
-#if 0
-  char buf[MAX_REGISTER_RAW_SIZE];
-  CORE_ADDR sp;
-
-  /* On the 68k, this spends too much time in m68k_find_saved_regs.  */
-
-  /* Get the value of SP_REGNUM relative to the frame.  */
-  get_saved_register (buf, (int *) NULL, (CORE_ADDR *) NULL,
-		    FRAME_INFO_ID (fi), SP_REGNUM, (enum lval_type *) NULL);
-  sp = extract_address (buf, REGISTER_RAW_SIZE (SP_REGNUM));
-
-  /* This is not a perfect test, because if a function alloca's some
-     memory, puts some code there, and then jumps into it, then the test
-     will succeed even though there is no call dummy.  Probably best is
-     to check for a bp_call_dummy breakpoint.  */
-  if (PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
-#else
-  if (deprecated_frame_in_dummy (fi))
-#endif
+  if (get_frame_type (fi) == DUMMY_FRAME)
     {
-      annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
+      annotate_frame_begin (level == -1 ? 0 : level, get_frame_pc (fi));
 
       /* Do this regardless of SOURCE because we don't have any source
          to list for this frame.  */
@@ -369,9 +330,9 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
       annotate_frame_end ();
       return;
     }
-  if (fi->signal_handler_caller)
+  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     {
-      annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
+      annotate_frame_begin (level == -1 ? 0 : level, get_frame_pc (fi));
 
       /* Do this regardless of SOURCE because we don't have any source
          to list for this frame.  */
@@ -387,16 +348,12 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     }
 
   /* If fi is not the innermost frame, that normally means that fi->pc
-     points to *after* the call instruction, and we want to get the line
-     containing the call, never the next line.  But if the next frame is
-     a signal_handler_caller or a dummy frame, then the next frame was
-     not entered as the result of a call, and we want to get the line
-     containing fi->pc.  */
-  sal =
-    find_pc_line (fi->pc,
-		  fi->next != NULL
-		  && !fi->next->signal_handler_caller
-		  && !deprecated_frame_in_dummy (fi->next));
+     points to *after* the call instruction, and we want to get the
+     line containing the call, never the next line.  But if the next
+     frame is a SIGTRAMP_FRAME or a DUMMY_FRAME, then the next frame
+     was not entered as the result of a call, and we want to get the
+     line containing fi->pc.  */
+  find_frame_sal (fi, &sal);
 
   location_print = (source == LOCATION 
 		    || source == LOC_AND_ADDRESS
@@ -414,11 +371,11 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     {
       struct symtab_and_line cursal;
       int done = 0;
-      int mid_statement = (source == SRC_LINE) && (fi->pc != sal.pc);
+      int mid_statement = (source == SRC_LINE) && (get_frame_pc (fi) != sal.pc);
 
       if (annotation_level)
 	done = identify_source_line (sal.symtab, sal.line, mid_statement,
-				     fi->pc);
+				     get_frame_pc (fi));
       if (!done)
 	{
 	  if (print_frame_info_listing_hook)
@@ -435,7 +392,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
 		 ability to decide for themselves if it is desired. */
 	      if (addressprint && mid_statement)
 		{
-		  ui_out_field_core_addr (uiout, "addr", fi->pc);
+		  ui_out_field_core_addr (uiout, "addr", get_frame_pc (fi));
 		  ui_out_text (uiout, "\t");
 		}
 
@@ -450,7 +407,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     }
 
   if (source != 0)
-    set_default_breakpoint (1, fi->pc, sal.symtab, sal.line);
+    set_default_breakpoint (1, get_frame_pc (fi), sal.symtab, sal.line);
 
   annotate_frame_end ();
 
@@ -549,7 +506,7 @@ print_frame (struct frame_info *fi,
 	}
     }
 
-  annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
+  annotate_frame_begin (level == -1 ? 0 : level, get_frame_pc (fi));
 
   list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
 
@@ -559,10 +516,12 @@ print_frame (struct frame_info *fi,
       ui_out_field_fmt_int (uiout, 2, ui_left, "level", level);
     }
   if (addressprint)
-    if (fi->pc != sal.pc || !sal.symtab || source == LOC_AND_ADDRESS)
+    if (get_frame_pc (fi) != sal.pc
+	|| !sal.symtab
+	|| source == LOC_AND_ADDRESS)
       {
 	annotate_frame_address ();
-	ui_out_field_core_addr (uiout, "addr", fi->pc);
+	ui_out_field_core_addr (uiout, "addr", get_frame_pc (fi));
 	annotate_frame_address_end ();
 	ui_out_text (uiout, " in ");
       }
@@ -607,7 +566,7 @@ print_frame (struct frame_info *fi,
 #ifdef PC_SOLIB
   if (!funname || (!sal.symtab || !sal.symtab->filename))
     {
-      char *lib = PC_SOLIB (fi->pc);
+      char *lib = PC_SOLIB (get_frame_pc (fi));
       if (lib)
 	{
 	  annotate_frame_where ();
@@ -699,9 +658,9 @@ parse_frame_specification (char *frame_exp)
   switch (numargs)
     {
     case 0:
-      if (selected_frame == NULL)
+      if (deprecated_selected_frame == NULL)
 	error ("No selected frame.");
-      return selected_frame;
+      return deprecated_selected_frame;
       /* NOTREACHED */
     case 1:
       {
@@ -733,13 +692,13 @@ parse_frame_specification (char *frame_exp)
 	   (s)he gets.  Still, give the highest one that matches.  */
 
 	for (fid = get_current_frame ();
-	     fid && fid->frame != args[0];
+	     fid && get_frame_base (fid) != args[0];
 	     fid = get_prev_frame (fid))
 	  ;
 
 	if (fid)
 	  while ((tfid = get_prev_frame (fid)) &&
-		 (tfid->frame == args[0]))
+		 (get_frame_base (tfid) == args[0]))
 	    fid = tfid;
 
 	/* We couldn't identify the frame as an existing frame, but
@@ -793,12 +752,11 @@ frame_info (char *addr_exp, int from_tty)
   if (fi == NULL)
     error ("Invalid frame specified.");
 
-  sal = find_pc_line (fi->pc,
-		      fi->next != NULL
-		      && !fi->next->signal_handler_caller
-		      && !deprecated_frame_in_dummy (fi->next));
+  find_frame_sal (fi, &sal);
   func = get_frame_function (fi);
-  s = find_pc_symtab (fi->pc);
+  /* FIXME: cagney/2002-11-28: Why bother?  Won't sal.symtab contain
+     the same value.  */
+  s = find_pc_symtab (get_frame_pc (fi));
   if (func)
     {
       /* I'd like to use SYMBOL_PRINT_NAME() here, to display
@@ -830,7 +788,7 @@ frame_info (char *addr_exp, int from_tty)
     }
   else
     {
-      register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
+      register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
       if (msymbol != NULL)
 	{
 	  funname = SYMBOL_NAME (msymbol);
@@ -839,21 +797,21 @@ frame_info (char *addr_exp, int from_tty)
     }
   calling_frame_info = get_prev_frame (fi);
 
-  if (!addr_exp && frame_relative_level (selected_frame) >= 0)
+  if (!addr_exp && frame_relative_level (deprecated_selected_frame) >= 0)
     {
       printf_filtered ("Stack level %d, frame at ",
-		       frame_relative_level (selected_frame));
-      print_address_numeric (fi->frame, 1, gdb_stdout);
+		       frame_relative_level (deprecated_selected_frame));
+      print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
       printf_filtered (":\n");
     }
   else
     {
       printf_filtered ("Stack frame at ");
-      print_address_numeric (fi->frame, 1, gdb_stdout);
+      print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
       printf_filtered (":\n");
     }
   printf_filtered (" %s = ", REGISTER_NAME (PC_REGNUM));
-  print_address_numeric (fi->pc, 1, gdb_stdout);
+  print_address_numeric (get_frame_pc (fi), 1, gdb_stdout);
 
   wrap_here ("   ");
   if (funname)
@@ -868,7 +826,7 @@ frame_info (char *addr_exp, int from_tty)
   puts_filtered ("; ");
   wrap_here ("    ");
   printf_filtered ("saved %s ", REGISTER_NAME (PC_REGNUM));
-  print_address_numeric (FRAME_SAVED_PC (fi), 1, gdb_stdout);
+  print_address_numeric (frame_pc_unwind (fi), 1, gdb_stdout);
   printf_filtered ("\n");
 
   {
@@ -881,20 +839,23 @@ frame_info (char *addr_exp, int from_tty)
   if (calling_frame_info)
     {
       printf_filtered (" called by frame at ");
-      print_address_numeric (calling_frame_info->frame, 1, gdb_stdout);
+      print_address_numeric (get_frame_base (calling_frame_info),
+			     1, gdb_stdout);
     }
-  if (fi->next && calling_frame_info)
+  if (get_next_frame (fi) && calling_frame_info)
     puts_filtered (",");
   wrap_here ("   ");
-  if (fi->next)
+  if (get_next_frame (fi))
     {
       printf_filtered (" caller of frame at ");
-      print_address_numeric (fi->next->frame, 1, gdb_stdout);
+      print_address_numeric (get_frame_base (get_next_frame (fi)), 1,
+			     gdb_stdout);
     }
-  if (fi->next || calling_frame_info)
+  if (get_next_frame (fi) || calling_frame_info)
     puts_filtered ("\n");
   if (s)
-    printf_filtered (" source language %s.\n", language_str (s->language));
+    printf_filtered (" source language %s.\n",
+		     language_str (s->language));
 
 #ifdef PRINT_EXTRA_FRAME_INFO
   PRINT_EXTRA_FRAME_INFO (fi);
@@ -941,7 +902,7 @@ frame_info (char *addr_exp, int from_tty)
       }
   }
 
-  if (fi->saved_regs == NULL)
+  if (get_frame_saved_regs (fi) == NULL)
     FRAME_INIT_SAVED_REGS (fi);
   /* Print as much information as possible on the location of all the
      registers.  */
@@ -1345,7 +1306,7 @@ print_frame_label_vars (register struct frame_info *fi, int this_level_only,
   register int values_printed = 0;
   int index, have_default = 0;
   char *blocks_printed;
-  CORE_ADDR pc = fi->pc;
+  CORE_ADDR pc = get_frame_pc (fi);
 
   if (block == 0)
     {
@@ -1408,9 +1369,9 @@ print_frame_label_vars (register struct frame_info *fi, int this_level_only,
 void
 locals_info (char *args, int from_tty)
 {
-  if (!selected_frame)
+  if (!deprecated_selected_frame)
     error ("No frame selected.");
-  print_frame_local_vars (selected_frame, 0, gdb_stdout);
+  print_frame_local_vars (deprecated_selected_frame, 0, gdb_stdout);
 }
 
 static void
@@ -1427,17 +1388,17 @@ catch_info (char *ignore, int from_tty)
          system to find the list of active handlers, etc. */
       fprintf_filtered (gdb_stdout, "Info catch not supported with this target/compiler combination.\n");
 #if 0
-      if (!selected_frame)
+      if (!deprecated_selected_frame)
 	error ("No frame selected.");
 #endif
     }
   else
     {
       /* Assume g++ compiled code -- old v 4.16 behaviour */
-      if (!selected_frame)
+      if (!deprecated_selected_frame)
 	error ("No frame selected.");
 
-      print_frame_label_vars (selected_frame, 0, gdb_stdout);
+      print_frame_label_vars (deprecated_selected_frame, 0, gdb_stdout);
     }
 }
 
@@ -1503,9 +1464,9 @@ print_frame_arg_vars (register struct frame_info *fi,
 void
 args_info (char *ignore, int from_tty)
 {
-  if (!selected_frame)
+  if (!deprecated_selected_frame)
     error ("No frame selected.");
-  print_frame_arg_vars (selected_frame, gdb_stdout);
+  print_frame_arg_vars (deprecated_selected_frame, gdb_stdout);
 }
 
 
@@ -1514,44 +1475,6 @@ args_plus_locals_info (char *ignore, int from_tty)
 {
   args_info (ignore, from_tty);
   locals_info (ignore, from_tty);
-}
-
-
-/* Select frame FI (or NULL - to invalidate the current frame).  */
-
-void
-select_frame (struct frame_info *fi)
-{
-  register struct symtab *s;
-
-  selected_frame = fi;
-  /* NOTE: cagney/2002-05-04: FI can be NULL.  This occures when the
-     frame is being invalidated.  */
-  if (selected_frame_level_changed_hook)
-    selected_frame_level_changed_hook (frame_relative_level (fi));
-
-  /* FIXME: kseitz/2002-08-28: It would be nice to call
-     selected_frame_level_changed_event right here, but due to limitations
-     in the current interfaces, we would end up flooding UIs with events
-     because select_frame is used extensively internally.
-
-     Once we have frame-parameterized frame (and frame-related) commands,
-     the event notification can be moved here, since this function will only
-     be called when the users selected frame is being changed. */
-
-  /* Ensure that symbols for this frame are read in.  Also, determine the
-     source language of this frame, and switch to it if desired.  */
-  if (fi)
-    {
-      s = find_pc_symtab (fi->pc);
-      if (s
-	  && s->language != current_language->la_language
-	  && s->language != language_unknown
-	  && language_mode == language_mode_auto)
-	{
-	  set_language (s->language);
-	}
-    }
 }
 
 
@@ -1580,9 +1503,24 @@ get_selected_block (CORE_ADDR *addr_in_block)
   if (!target_has_stack)
     return 0;
 
-  if (!selected_frame)
-    return get_current_block (addr_in_block);
-  return get_frame_block (selected_frame, addr_in_block);
+  /* NOTE: cagney/2002-11-28: Why go to all this effort to not create
+     a selected/current frame?  Perhaphs this function is called,
+     indirectly, by WFI in "infrun.c" where avoiding the creation of
+     an inner most frame is very important (it slows down single
+     step).  I suspect, though that this was true in the deep dark
+     past but is no longer the case.  A mindless look at all the
+     callers tends to support this theory.  I think we should be able
+     to assume that there is always a selcted frame.  */
+  /* gdb_assert (deprecated_selected_frame != NULL); So, do you feel
+     lucky? */
+  if (!deprecated_selected_frame)
+    {
+      CORE_ADDR pc = read_pc ();
+      if (addr_in_block != NULL)
+	*addr_in_block = pc;
+      return block_for_pc (pc);
+    }
+  return get_frame_block (deprecated_selected_frame, addr_in_block);
 }
 
 /* Find a frame a certain number of levels away from FRAME.
@@ -1643,7 +1581,7 @@ static void
 select_frame_command (char *level_exp, int from_tty)
 {
   struct frame_info *frame;
-  int level = frame_relative_level (selected_frame);
+  int level = frame_relative_level (deprecated_selected_frame);
 
   if (!target_has_stack)
     error ("No stack.");
@@ -1651,8 +1589,8 @@ select_frame_command (char *level_exp, int from_tty)
   frame = parse_frame_specification (level_exp);
 
   select_frame (frame);
-  if (level != frame_relative_level (selected_frame))
-    selected_frame_level_changed_event (frame_relative_level (selected_frame));
+  if (level != frame_relative_level (deprecated_selected_frame))
+    selected_frame_level_changed_event (frame_relative_level (deprecated_selected_frame));
 }
 
 /* The "frame" command.  With no arg, print selected frame briefly.
@@ -1663,8 +1601,8 @@ void
 frame_command (char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
-  show_and_print_stack_frame (selected_frame,
-			      frame_relative_level (selected_frame), 1);
+  show_and_print_stack_frame (deprecated_selected_frame,
+			      frame_relative_level (deprecated_selected_frame), 1);
 }
 
 /* The XDB Compatibility command to print the current frame. */
@@ -1672,10 +1610,10 @@ frame_command (char *level_exp, int from_tty)
 static void
 current_frame_command (char *level_exp, int from_tty)
 {
-  if (target_has_stack == 0 || selected_frame == 0)
+  if (target_has_stack == 0 || deprecated_selected_frame == 0)
     error ("No stack.");
-  print_only_stack_frame (selected_frame,
-			  frame_relative_level (selected_frame), 1);
+  print_only_stack_frame (deprecated_selected_frame,
+			  frame_relative_level (deprecated_selected_frame), 1);
 }
 
 /* Select the frame up one or COUNT stack levels
@@ -1691,14 +1629,14 @@ up_silently_base (char *count_exp)
     count = parse_and_eval_long (count_exp);
   count1 = count;
 
-  if (target_has_stack == 0 || selected_frame == 0)
+  if (target_has_stack == 0 || deprecated_selected_frame == 0)
     error ("No stack.");
 
-  fi = find_relative_frame (selected_frame, &count1);
+  fi = find_relative_frame (deprecated_selected_frame, &count1);
   if (count1 != 0 && count_exp == 0)
     error ("Initial frame selected; you cannot go up.");
   select_frame (fi);
-  selected_frame_level_changed_event (frame_relative_level (selected_frame));
+  selected_frame_level_changed_event (frame_relative_level (deprecated_selected_frame));
 }
 
 static void
@@ -1711,8 +1649,8 @@ static void
 up_command (char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
-  show_and_print_stack_frame (selected_frame,
-			      frame_relative_level (selected_frame), 1);
+  show_and_print_stack_frame (deprecated_selected_frame,
+			      frame_relative_level (deprecated_selected_frame), 1);
 }
 
 /* Select the frame down one or COUNT stack levels
@@ -1728,10 +1666,10 @@ down_silently_base (char *count_exp)
     count = -parse_and_eval_long (count_exp);
   count1 = count;
 
-  if (target_has_stack == 0 || selected_frame == 0)
+  if (target_has_stack == 0 || deprecated_selected_frame == 0)
     error ("No stack.");
 
-  frame = find_relative_frame (selected_frame, &count1);
+  frame = find_relative_frame (deprecated_selected_frame, &count1);
   if (count1 != 0 && count_exp == 0)
     {
 
@@ -1744,7 +1682,7 @@ down_silently_base (char *count_exp)
     }
 
   select_frame (frame);
-  selected_frame_level_changed_event (frame_relative_level (selected_frame));
+  selected_frame_level_changed_event (frame_relative_level (deprecated_selected_frame));
 }
 
 /* ARGSUSED */
@@ -1758,8 +1696,8 @@ static void
 down_command (char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
-  show_and_print_stack_frame (selected_frame,
-			      frame_relative_level (selected_frame), 1);
+  show_and_print_stack_frame (deprecated_selected_frame,
+			      frame_relative_level (deprecated_selected_frame), 1);
 }
 
 void
@@ -1771,11 +1709,11 @@ return_command (char *retval_exp, int from_tty)
   struct frame_info *frame;
   struct value *return_value = NULL;
 
-  if (selected_frame == NULL)
+  if (deprecated_selected_frame == NULL)
     error ("No selected frame.");
-  thisfun = get_frame_function (selected_frame);
-  selected_frame_addr = FRAME_FP (selected_frame);
-  selected_frame_pc = selected_frame->pc;
+  thisfun = get_frame_function (deprecated_selected_frame);
+  selected_frame_addr = get_frame_base (deprecated_selected_frame);
+  selected_frame_pc = get_frame_pc (deprecated_selected_frame);
 
   /* Compute the return value (if any -- possibly getting errors here).  */
 
@@ -1815,12 +1753,12 @@ return_command (char *retval_exp, int from_tty)
     }
 
   /* Do the real work.  Pop until the specified frame is current.  We
-     use this method because the selected_frame is not valid after
+     use this method because the deprecated_selected_frame is not valid after
      a POP_FRAME.  The pc comparison makes this work even if the
      selected frame shares its fp with another frame.  */
 
-  while (selected_frame_addr != (frame = get_current_frame ())->frame
-	 || selected_frame_pc != frame->pc)
+  while (selected_frame_addr != get_frame_base (frame = get_current_frame ())
+	 || selected_frame_pc != get_frame_pc (frame))
     POP_FRAME;
 
   /* Then pop that frame.  */
@@ -1836,7 +1774,7 @@ return_command (char *retval_exp, int from_tty)
   /* If we are at the end of a call dummy now, pop the dummy frame too.  */
 
   if (CALL_DUMMY_HAS_COMPLETED (read_pc(), read_sp (),
-				FRAME_FP (get_current_frame ())))
+				get_frame_base (get_current_frame ())))
     POP_FRAME;
 
   /* If interactive, print the frame that is now current.  */
@@ -1889,8 +1827,8 @@ func_command (char *arg, int from_tty)
   do
     {
       for (i = 0; (i < sals.nelts && !found); i++)
-	found = (fp->pc >= func_bounds[i].low &&
-		 fp->pc < func_bounds[i].high);
+	found = (get_frame_pc (fp) >= func_bounds[i].low &&
+		 get_frame_pc (fp) < func_bounds[i].high);
       if (!found)
 	{
 	  level = 1;
@@ -1904,7 +1842,7 @@ func_command (char *arg, int from_tty)
 
   if (!found)
     printf_filtered ("'%s' not within current stack frame.\n", arg);
-  else if (fp != selected_frame)
+  else if (fp != deprecated_selected_frame)
     select_and_print_frame (fp);
 }
 
@@ -1916,9 +1854,9 @@ get_frame_language (void)
   register struct symtab *s;
   enum language flang;		/* The language of the current frame */
 
-  if (selected_frame)
+  if (deprecated_selected_frame)
     {
-      s = find_pc_symtab (selected_frame->pc);
+      s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
       if (s)
 	flang = s->language;
       else

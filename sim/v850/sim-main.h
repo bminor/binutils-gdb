@@ -374,14 +374,14 @@ extern void divun ( unsigned int       N,
 		    unsigned long int  sfi,
 		    unsigned32 /*unsigned long int*/ *  quotient_ptr,
 		    unsigned32 /*unsigned long int*/ *  remainder_ptr,
-		    boolean *          overflow_ptr
+		    int *overflow_ptr
 		    );
 extern void divn ( unsigned int       N,
 		   unsigned long int  als,
 		   unsigned long int  sfi,
 		   signed32 /*signed long int*/ *  quotient_ptr,
 		   signed32 /*signed long int*/ *  remainder_ptr,
-		   boolean *          overflow_ptr
+		   int *overflow_ptr
 		   );
 extern int type1_regs[];
 extern int type2_regs[];

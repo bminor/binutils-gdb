@@ -40,12 +40,16 @@ struct netbsd_core_struct {
 
 /* forward declarations */
 
-static const bfd_target *netbsd_core_file_p PARAMS ((bfd *abfd));
-static char *netbsd_core_file_failing_command PARAMS ((bfd *abfd));
-static int netbsd_core_file_failing_signal PARAMS ((bfd *abfd));
-static boolean netbsd_core_file_matches_executable_p
+static const bfd_target *netbsd_core_file_p
+  PARAMS ((bfd *abfd));
+static char *netbsd_core_file_failing_command
+  PARAMS ((bfd *abfd));
+static int netbsd_core_file_failing_signal
+  PARAMS ((bfd *abfd));
+static bfd_boolean netbsd_core_file_matches_executable_p
   PARAMS ((bfd *core_bfd, bfd *exec_bfd));
-static void swap_abort PARAMS ((void));
+static void swap_abort
+  PARAMS ((void));
 
 /* Handle NetBSD-style core dump file.  */
 
@@ -185,12 +189,12 @@ netbsd_core_file_failing_signal (abfd)
 }
 
 /* ARGSUSED */
-static boolean
+static bfd_boolean
 netbsd_core_file_matches_executable_p  (core_bfd, exec_bfd)
      bfd *core_bfd ATTRIBUTE_UNUSED;
      bfd *exec_bfd ATTRIBUTE_UNUSED;
 {
-  return true;		/* FIXME, We have no way of telling at this point */
+  return TRUE;		/* FIXME, We have no way of telling at this point */
 }
 
 /* If somebody calls any byte-swapping routines, shoot them.  */

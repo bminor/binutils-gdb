@@ -1,3 +1,242 @@
+2002-12-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+
+2002-12-19  Nick Kelsey  <nickk@ubicom.com>
+
+	* cgen-asm.c (cgen_parse_keyword): Added underscore to symbol character
+	check to fix false keyword trigger with names such as <keyword>_foo.
+
+2002-12-19  Doug Evans  <dje@sebabeach.org>
+
+	* Makefile.am (CGEN_CPUS): New variable.
+	(run-cgen-all): New rule.
+	* Makefile.in: Regenerate.
+
+2002-12-18  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Remove one "ror" and two
+	"dror" entries, and reorder the remaining "dror" and "ror" entries.
+
+2002-12-16  DJ Delorie  <dj@delorie.com>
+
+	* xstormy16-asm.c (parse_immediate16): Add prototype.
+
+2002-12-16  Andrew MacLeod  <amacleod@redhat.com>
+
+	* xstormy16-asm.c: Regenerate.
+
+2002-12-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ns32k-dis.c (print_insn_ns32k): Constify "d", remove register
+	keyword.
+
+2002-12-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* h8500-opc.h (h8500_table): Add missing initializers to quiet
+	warnings.
+	* pj-dis.c (print_insn_pj): Adjust for pj_opc_info_t change.
+	* pj-opc.c (pj_opc_info): Add braces around union initializer.
+	* z8kgen.c: Include "libiberty.h".
+	(opt, args, toks): Fix initializer warnings.
+	(chewname): Make "name" a char **.  Return mnemonic trimmed of
+	operands.
+	(gas): Improve emitted "DO NOT EDIT" warning.  Format emitted
+	opcode_entry_type, and make "nicename" and "name" const.  Make
+	z8k_table const too.  Formatting.  Generate idx as gas needs it.
+	* z8k-opc.h: Regenerate.
+
+2002-12-08  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-dis.c (print_indexed_operand): Fix PC-relative address
+	for 9 and 16-bit PC-relative addressing mode.
+
+2002-12-05  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c: Delete evsabs, evsnabs, evsneg, evsadd, evssub,
+	evsmul, evsdiv, evscmpgt, evsgmplt, evststgt, evtstlt, evststeq,
+	evscfui, evscfsi, evscfuf, evscfsf, evsctui, evsctuiz, evsctsi,
+	evsctsiz, evsctuf, evsctsf, evmwhssfaa, evmwhssmaa, evmwhsmfaa,
+	evmwhsmiaa, evmwhusiaa, evmwhumiaa, evmwhssfan, evmwhssian,
+	evmwhsmfan, evmwhsmian, evmwhusian, evmwhumian, evmwhgssfaa,
+	evmwhgsmfaa, evmwhgsmiaa, evmwhgumiaa, evmwhgssfan, evmwhgsmfan,
+	evmwhgsmian, evmwhgumian.
+	(mftb): Add to opcode table.
+	(mtspefscr): Change RT to RS in opcode table.
+
+2002-12-05  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c: Move mbar and msync up.  Change mask for mbar and
+	msync.
+
+2002-12-04  David Mosberger  <davidm@hpl.hp.com>
+
+	* ia64-opc-d.c (ia64_opcodes_d): Add "hint" instruction.
+	* ia64-opc-b.c: Add "hint.b" instruction.
+	* ia64-opc-f.c: Add "hint.f" instruction.
+	* ia64-opc-i.c: Add "hint.i" instruction.
+	* ia64-opc-m.c: Add "hint.m", "fc.i", "ld16", "st16", and
+	"cmp8xchg16" instructions.
+	* ia64-opc-x.c: Add "hint.x" instruction.
+
+	* ia64-opc.h (AR_CSD): New macro.
+
+	* ia64-ic.tbl: Update according to SDM2.1.
+	* ia64-raw.tbl: Ditto.
+	* ia64-waw.tbl: Ditto.
+
+	* ia64-gen.c (in_iclass): Handle "hint" like "nop".
+	(lookup_regindex): Recognize AR[FCR], AR[EFLAG], AR[CSD],
+	AR[SSD], AR[CFLG], AR[FSR], AR[FIR], and AR[FDR].
+	* ia64-asmtab.c: Regenerate.
+	
+2002-11-25  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c: Remove evmwlssf, evmwlssfa, evmwlsmf, evmwlsmfa,
+	evmwlssfaaw, evmwlsmfaaw, evmwlssfanw, evmwlsfanw.
+
+2002-12-04  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c (PMRN): Remove.
+	(RA): Set to NB + 1.
+	(powerpc_opcodes): Change PMRN to SPR.
+	Change all RD to RS.
+	Change mftb to look like mftbl.
+	Move mftb before mftbl.
+	Add mfbbtar.
+	Add mtbbtar.
+	Change mfpmr to use PMR.
+	Change mtpmr to use PMR.
+	(RD): Remove.
+	(insert_ev2): Fix mask and shift.
+	(extract_ev2): Same.
+	(insert_ev4): Same.
+	(extract_ev4): Same.
+	(PMR): Define.
+	(extract_pmrn): Remove.
+	(insert_pmrn): Remove.
+
+2002-12-03  Richard Henderson  <rth@redhat.com>
+
+	* ia64-opc-m.c: Add ld8.mov.
+	* ia64-asmtab.c: Regenerate.
+
+2002-12-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* arm-dis.c (print_insn_arm): Constify "insn".  Formatting.
+	(print_insn_thumb): Likewise.
+	* h8500-dis.c (print_insn_h8500): Constify "opcode".
+	* mcore-dis.c (print_insn_mcore): Constify "op".  Formatting.
+	* ns32k-dis.c (print_insn_arg <case 'F'>): Use a union to avoid
+	type-punned pointer warnings.
+	<case 'L'>: Likewise.  Fix error message too.
+	* pdp11-dis.c (print_reg): Warning fix.
+	* sh-dis.c (print_movxy): Constify "op" param.
+	(print_insn_ddt): Constify sh_opcode_info vars.
+	(print_insn_ppi): Likewise.
+	(print_insn_sh): Likewise.
+	* tic30-dis.c (cnvt_tmsfloat_ieee): Use a union to avoid
+	type-punned pointer warnings.
+	* w65-dis.c (print_insn_w65): Constify "op".
+
+2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-dis.c (PC_REGNUM): Define.
+	(print_indexed_operand): Need an adjustment for some PC-relative
+	operand modes; print the final address of PC-relative modes.
+	(print_insn): Take into account movw/movb to adjust the PC-relative
+	operand addresses.
+
+2002-11-30  Alan Modra  <amodra@bigpond.net.au>
+
+	*arm-dis.c, cris-dis.c, h8300-dis.c, mips-dis.c, mmix-dis.c, sh-dis.c,
+	sh64-dis.c, v850-dis.c: Replace boolean with bfd_boolean, true with
+	TRUE, false with FALSE.  Simplify comparisons of bfd_boolean vars
+	with TRUE/FALSE.  Formatting.
+
+2002-11-25  DJ Delorie  <dj@redhat.com>
+
+	* xstormy16-opc.c: Regenerate.
+
+2002-11-25  Jim Wilson  <wilson@redhat.com>
+
+	* ia64-dis.c (print_insn_ia64): Correct handling of IA64_OPND_TGT64.
+
+2002-11-15  DJ Delorie  <dj@redhat.com>
+
+	* xstormy16-desc.c: Regenerate.
+	* xstormy16-opc.c: Regenerate.
+	* xstormy16-opc.h: Regenerate.
+	
+2002-11-18  Klee Dienes  <kdienes@apple.com>
+
+	* avr-dis.c: Include libiberty.h (for xmalloc).
+	(struct avr_opcodes_s): Remove 'bin_mask' field (it's
+	automatically computed in the init routine).
+	(AVR_INSN): No longer provide bin_mask field in initializer.
+	(avr_opcodes_s): Declare as const.
+	(print_insn_avr): Store the bin_mask field in a separate table
+	(allocated with xmalloc); iterate through it at the same time as
+	we iterate through the opcodes.
+
+2002-11-18  Klee Dienes  <kdienes@apple.com>
+
+	* h8300-dis.c: Include libiberty.h (for xmalloc).
+	(struct h8_instruction): New type, used to wrap h8_opcodes with a
+	length field (computed at run-time).
+	(h8_instructions): New variable.
+	(bfd_h8_disassemble_init): Allocate the storage for
+	h8_instructions.  Fill h8_instructions with pointers to the
+	appropriate opcode and the correct value for the length field.
+	(bfd_h8_disassemble): Iterate through h8_instructions instead of
+	h8_opcodes.
+
+2002-11-18  Klee Dienes  <kdienes@apple.com>
+
+	* arc-opc.c (arc_ext_opcodes): Define.
+	(arc_ext_operands): Define.
+	* i386-dis.c (Suffix3DNow): Declare as const.
+	* arm-opc.h (arm_opcodes): Declare as const.
+	(thumb_opcodes): Declare as const.
+	* h8500-opc.h (h8500_table): Declare as const.
+	(h8500_table): Use a NULL for the opcode in the terminator, so
+	that code testing (opcode->name) behaves correctly.
+	* mcore-opc.h (mcore_table): Declare as const.
+	* sh-opc.h (sh_table): Declare as const.
+	* w65-opc.h (optable): Declare as const.
+	* z8k-opc.h (z8k_table): Declare as const.
+
+2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* tic4x-dis.c: Added support for enhanced and special insn.
+	(c4x_print_op): Added insn class 'i' and 'j'
+	(c4x_hash_opcode_special): Add to support special insn
+	(c4x_hash_opcode): Update to support the new opcode-list
+	format. Add support for the new special insns.
+	(c4x_disassemble): New opcode-list support.
+
+2002-11-16  Klee Dienes  <kdienes@apple.com>
+
+	* m88k-dis.c: Include libiberty.h (for xmalloc).
+	(HASHTAB): New type, used to build instruction hash tables.
+	Contains a pointer to an INSTAB and a pointer to the next hash
+	chain entry.
+	(instructions): Move definition from m88k.h; remove initialization
+	of 'next' field.
+	(hashtable): Now an aray of pointer-to-HASHTAB, not INSTAB.
+	(printop): Mark pointer to OPSPEC as const.
+	(install): Remove; fold into init_disasm.
+	(m88kdis): Update to ihashtab_initialized to 1 after calling
+	init_disasm.  entry_ptr now iterates through HASHTABs, not
+	INSTABs.
+	(init_disasm): Iterate through the instructions and add to
+	hashtable[].
+
+2002-11-16  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* tic4x-dis.c: (c4x_print_op): Add support for the new argument
+	  format. Fix bug in 'N' register printer.
+
 2002-11-12  Segher Boessenkool  <segher@koffie.nl>
 
 	* ppc-dis.c (print_insn_powerpc): Correct condition register display.

@@ -98,7 +98,8 @@ struct hpread_symfile_info
     *NAMEP = ""; \
   else if (((unsigned)(SYM)->dsfile.name) >= VT_SIZE (OBJFILE)) \
     { \
-      complain (&string_table_offset_complaint, (char *) symnum); \
+      complaint (&symfile_complaints, "bad string table offset in symbol %d", \
+		 (char *) symnum); \
       *NAMEP = ""; \
     } \
   else \
@@ -127,57 +128,20 @@ struct symloc
 #define LDSYMLEN(p) (((struct symloc *)((p)->read_symtab_private))->ldsymlen)
 #define SYMLOC(p) ((struct symloc *)((p)->read_symtab_private))
 
-/* FIXME: Shouldn't this stuff be in a .h file somewhere?  */
 /* Complaints about the symbols we have encountered.  */
-extern struct deprecated_complaint string_table_offset_complaint;
-extern struct deprecated_complaint lbrac_unmatched_complaint;
-extern struct deprecated_complaint lbrac_mismatch_complaint;
-
-static struct deprecated_complaint hpread_unhandled_end_common_complaint =
+static void
+lbrac_unmatched_complaint (int arg1)
 {
-  "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON/DNTT_TYPE_END.\n", 0, 0
-};
+  complaint (&symfile_complaints, "unmatched N_LBRAC before symtab pos %d",
+	     arg1);
+}
 
-static struct deprecated_complaint hpread_unhandled_type_complaint =
+static void
+lbrac_mismatch_complaint (int arg1)
 {
-  "hpread_type_translate: unhandled type code.", 0, 0
-};
-
-static struct deprecated_complaint hpread_struct_complaint =
-{
-  "hpread_read_struct_type: expected SVAR type...", 0, 0
-};
-
-static struct deprecated_complaint hpread_array_complaint =
-{
-  "error in hpread_array_type.", 0, 0
-};
-
-static struct deprecated_complaint hpread_type_lookup_complaint =
-{
-  "error in hpread_type_lookup().", 0, 0
-};
-
-
-static struct deprecated_complaint hpread_unexpected_end_complaint =
-{
-  "internal error in hp-symtab-read.c: Unexpected DNTT_TYPE_END kind.", 0, 0
-};
-
-static struct deprecated_complaint hpread_tagdef_complaint =
-{
-  "error processing class tagdef", 0, 0
-};
-
-static struct deprecated_complaint hpread_unhandled_common_complaint =
-{
-  "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON.", 0, 0
-};
-
-static struct deprecated_complaint hpread_unhandled_blockdata_complaint =
-{
-  "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_BLOCKDATA.", 0, 0
-};
+  complaint (&symfile_complaints,
+	     "N_LBRAC/N_RBRAC symbol mismatch at symtab pos %d", arg1);
+}
 
 /* To generate dumping code, uncomment this define.  The dumping
    itself is controlled by routine-local statics called "dumping". */
@@ -219,6 +183,8 @@ static unsigned long hpread_get_scope_start (sltpointer, struct objfile *);
 static unsigned long hpread_get_line (sltpointer, struct objfile *);
 
 static CORE_ADDR hpread_get_location (sltpointer, struct objfile *);
+
+int hpread_has_name (enum dntt_entry_type kind);
 
 static void hpread_psymtab_to_symtab_1 (struct partial_symtab *);
 
@@ -596,11 +562,11 @@ pst_syms_struct;
 
 static pst_syms_struct *pst_syms_array = 0;
 
-static pst_syms_count = 0;
-static pst_syms_size = 0;
+static int pst_syms_count = 0;
+static int pst_syms_size = 0;
 
 /* used by the TELL_OBJFILE macro */
-static boolean told_objfile = 0;
+static int told_objfile = 0;
 
 /* Set up psymtab symbol index stuff */
 static void
@@ -4772,7 +4738,7 @@ hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 	  dn_bufp = hpread_get_lntt (dn_bufp->dtype.type.dnttp.index, objfile);
 	else
 	  {
-	    complain (&hpread_type_lookup_complaint);
+	    complaint (&symfile_complaints, "error in hpread_type_lookup().");
 	    return NULL;
 	  }
 
@@ -5266,7 +5232,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 
       /* Stack must be empty now.  */
       if (context_stack_depth != 0)
-	complain (&lbrac_unmatched_complaint, (char *) symnum);
+	lbrac_unmatched_complaint ((char *) symnum);
       new = push_context (0, valu);
 
       /* Built a type for the function. This includes processing
@@ -5384,7 +5350,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
       CURRENT_FUNCTION_VALUE (objfile) = valu;
       /* Stack must be empty now.  */
       if (context_stack_depth != 0)
-	complain (&lbrac_unmatched_complaint, (char *) symnum);
+	lbrac_unmatched_complaint ((char *) symnum);
       new = push_context (0, valu);
 
       /* Built a type for the function. This includes processing
@@ -5612,7 +5578,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	      new = pop_context ();
 	      desc = dn_bufp->dend.beginscope.dnttp.index;
 	      if (desc != new->depth)
-		complain (&lbrac_mismatch_complaint, (char *) symnum);
+		lbrac_mismatch_complaint ((char *) symnum);
 
 	      /* Make a block for the local symbols within.  */
 	      finish_block (new->name, &local_symbols, new->old_blocks,
@@ -5630,7 +5596,8 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 
 	case DNTT_TYPE_COMMON:
 	  /* End a FORTRAN common block. We don't currently handle these */
-	  complain (&hpread_unhandled_end_common_complaint);
+	  complaint (&symfile_complaints,
+		     "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON/DNTT_TYPE_END.\n");
 	  break;
 
 	case DNTT_TYPE_CLASS_SCOPE:
@@ -5647,7 +5614,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	  new = pop_context ();
 	  desc = dn_bufp->dend.beginscope.dnttp.index;
 	  if (desc != new->depth)
-	    complain (&lbrac_mismatch_complaint, (char *) symnum);
+	    lbrac_mismatch_complaint ((char *) symnum);
 	  /* Make a block for the local symbols within.  */
 	  finish_block (new->name, &local_symbols, new->old_blocks,
 			new->start_addr, valu, objfile);
@@ -5657,7 +5624,8 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	  break;
 
 	default:
-	  complain (&hpread_unexpected_end_complaint);
+	  complaint (&symfile_complaints,
+		     "internal error in hp-symtab-read.c: Unexpected DNTT_TYPE_END kind.");
 	  break;
 	}
       break;
@@ -5879,7 +5847,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	  dn_bufp = hpread_get_lntt (dn_bufp->dtag.type.dnttp.index, objfile);
 	else
 	  {
-	    complain (&hpread_tagdef_complaint);
+	    complaint (&symfile_complaints, "error processing class tagdef");
 	    return;
 	  }
 	if (dn_bufp->dblock.kind == DNTT_TYPE_CLASS ||
@@ -5987,7 +5955,8 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 
     case DNTT_TYPE_COMMON:
       /* FORTRAN common. Not yet handled. */
-      complain (&hpread_unhandled_common_complaint);
+      complaint (&symfile_complaints,
+		 "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON.");
       break;
 
       /* DNTT_TYPE_COBSTRUCT is not handled by GDB.  */
@@ -5999,7 +5968,8 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
       /* Not sure what this is - part of FORTRAN support maybe? 
        * Anyway, not yet handled.
        */
-      complain (&hpread_unhandled_blockdata_complaint);
+      complaint (&symfile_complaints,
+		 "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_BLOCKDATA.");
       break;
 
     case DNTT_TYPE_CLASS_SCOPE:

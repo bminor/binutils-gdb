@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 COFF files (DJGPP variant with a stub).
-   Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -93,7 +93,7 @@ create_go32_stub PARAMS ((bfd *));
 #define COFF_ADJUST_AUX_OUT_PRE adjust_aux_out_pre
 #define COFF_ADJUST_AUX_OUT_POST adjust_aux_out_post
 
-static boolean
+static bfd_boolean
   go32_stubbed_coff_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 
 #define coff_bfd_copy_private_bfd_data go32_stubbed_coff_bfd_copy_private_bfd_data
@@ -392,22 +392,22 @@ stub_end:
 /* If ibfd was a stubbed coff image, copy the stub from that bfd
    to the new obfd.  */
 
-static boolean
+static bfd_boolean
 go32_stubbed_coff_bfd_copy_private_bfd_data  (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
   /* Check if both are the same targets.  */
   if (ibfd->xvec != obfd->xvec)
-    return true;
+    return TRUE;
 
   /* Check if both have a valid stub.  */
   if (bfd_coff_go32stub (ibfd) == NULL
       || bfd_coff_go32stub (obfd) == NULL)
-    return true;
+    return TRUE;
 
   /* Now copy the stub.  */
   memcpy (bfd_coff_go32stub (obfd), bfd_coff_go32stub (ibfd), STUBSIZE);
 
-  return true;
+  return TRUE;
 }

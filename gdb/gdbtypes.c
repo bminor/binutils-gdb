@@ -416,7 +416,7 @@ address_space_name_to_int (char *space_identifier)
 /* Identify address space identifier by integer flag as defined in 
    gdbtypes.h -- return the string version of the adress space name. */
 
-extern char *
+const char *
 address_space_int_to_name (int space_flag)
 {
   struct gdbarch *gdbarch = current_gdbarch;
@@ -1341,8 +1341,11 @@ get_destructor_fn_field (struct type *t, int *method_indexp, int *field_indexp)
    This used to be coded as a macro, but I don't think it is called 
    often enough to merit such treatment.  */
 
-struct deprecated_complaint stub_noname_complaint =
-{"stub type has NULL name", 0, 0};
+static void
+stub_noname_complaint (void)
+{
+  complaint (&symfile_complaints, "stub type has NULL name");
+}
 
 struct type *
 check_typedef (struct type *type)
@@ -1369,7 +1372,7 @@ check_typedef (struct type *type)
 	     TYPE_TAG_NAME were separate).  */
 	  if (name == NULL)
 	    {
-	      complain (&stub_noname_complaint);
+	      stub_noname_complaint ();
 	      return type;
 	    }
 	  sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0,
@@ -1396,7 +1399,7 @@ check_typedef (struct type *type)
       struct type *newtype;
       if (name == NULL)
 	{
-	  complain (&stub_noname_complaint);
+	  stub_noname_complaint ();
 	  return type;
 	}
       newtype = lookup_transparent_type (name);
@@ -1414,7 +1417,7 @@ check_typedef (struct type *type)
       struct symbol *sym;
       if (name == NULL)
 	{
-	  complain (&stub_noname_complaint);
+	  stub_noname_complaint ();
 	  return type;
 	}
       sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, (struct symtab **) NULL);
@@ -1511,12 +1514,8 @@ add_mangled_type (struct extra *pextras, struct type *t)
 	  break;
 	default:
 	  {
-
-	    static struct deprecated_complaint msg =
-	    {"Bad int type code length x%x\n", 0, 0};
-
-	    complain (&msg, tlen);
-
+	    complaint (&symfile_complaints, "Bad int type code length x%x",
+		       tlen);
 	  }
 	}
       break;
@@ -1534,9 +1533,8 @@ add_mangled_type (struct extra *pextras, struct type *t)
 	  break;
 	default:
 	  {
-	    static struct deprecated_complaint msg =
-	    {"Bad float type code length x%x\n", 0, 0};
-	    complain (&msg, tlen);
+	    complaint (&symfile_complaints, "Bad float type code length x%x",
+		       tlen);
 	  }
 	}
       break;
@@ -1550,9 +1548,8 @@ add_mangled_type (struct extra *pextras, struct type *t)
       break;
     case TYPE_CODE_TYPEDEF:
       {
-	static struct deprecated_complaint msg =
-	{"Typedefs in overloaded functions not yet supported\n", 0, 0};
-	complain (&msg);
+	complaint (&symfile_complaints,
+	           "Typedefs in overloaded functions not yet supported");
       }
       /* followed by type bytes & name */
       break;
@@ -1590,9 +1587,7 @@ add_mangled_type (struct extra *pextras, struct type *t)
     case TYPE_CODE_ERROR:
     default:
       {
-	static struct deprecated_complaint msg =
-	{"Unknown type code x%x\n", 0, 0};
-	complain (&msg, tcode);
+	complaint (&symfile_complaints, "Unknown type code x%x", tcode);
       }
     }
   if (TYPE_TARGET_TYPE (t))

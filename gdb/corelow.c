@@ -38,6 +38,7 @@
 #include "gdbthread.h"
 #include "regcache.h"
 #include "symfile.h"
+#include <readline/readline.h>
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -62,7 +63,7 @@ static int solib_add_stub (PTR);
 
 static struct core_fns *sniff_core_bfd (bfd *);
 
-static boolean gdb_check_format (bfd *);
+static int gdb_check_format (bfd *);
 
 static void core_open (char *, int);
 
@@ -160,7 +161,7 @@ default_check_format (bfd *abfd)
 
 /* Attempt to recognize core file formats that BFD rejects. */
 
-static boolean 
+static int
 gdb_check_format (bfd *abfd)
 {
   struct core_fns *cf;
@@ -364,8 +365,8 @@ core_open (char *filename, int from_tty)
       /* Now, set up the frame cache, and print the top of stack.  */
       flush_cached_frames ();
       select_frame (get_current_frame ());
-      print_stack_frame (selected_frame,
-			 frame_relative_level (selected_frame), 1);
+      print_stack_frame (deprecated_selected_frame,
+			 frame_relative_level (deprecated_selected_frame), 1);
     }
   else
     {
@@ -509,16 +510,13 @@ init_core_ops (void)
   core_ops.to_open = core_open;
   core_ops.to_close = core_close;
   core_ops.to_attach = find_default_attach;
-  core_ops.to_require_attach = find_default_require_attach;
   core_ops.to_detach = core_detach;
-  core_ops.to_require_detach = find_default_require_detach;
   core_ops.to_fetch_registers = get_core_registers;
   core_ops.to_xfer_memory = xfer_memory;
   core_ops.to_files_info = core_files_info;
   core_ops.to_insert_breakpoint = ignore;
   core_ops.to_remove_breakpoint = ignore;
   core_ops.to_create_inferior = find_default_create_inferior;
-  core_ops.to_clone_and_follow_inferior = find_default_clone_and_follow_inferior;
   core_ops.to_thread_alive = core_file_thread_alive;
   core_ops.to_stratum = core_stratum;
   core_ops.to_has_memory = 1;

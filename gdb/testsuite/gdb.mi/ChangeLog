@@ -1,3 +1,9 @@
+2002-12-13  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-basics.exp: Change tests for -environment-directory.  Also add
+	tests for -environment-cd, -environment-pwd, and -environment-path.
+	Part of fix for PR gdb/741.
+
 2002-11-05  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb792.cc: New file to test patch for PR gdb/792.

@@ -1,5 +1,6 @@
 /* Functions specific to running gdb native on a SPARC running SunOS4.
-   Copyright 1989, 1992, 1993, 1994, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1989, 1992, 1993, 1994, 1996, 1997, 1998, 1999, 2000, 2001,
+   2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -58,6 +59,25 @@ fetch_inferior_registers (int regno)
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
   int i;
+  int fetch_pid;
+
+  /* NOTE: cagney/2002-12-03: This code assumes that the currently
+     selected light weight processes' registers can be written
+     directly into the selected thread's register cache.  This works
+     fine when given an 1:1 LWP:thread model (such as found on
+     GNU/Linux) but will, likely, have problems when used on an N:1
+     (userland threads) or N:M (userland multiple LWP) model.  In the
+     case of the latter two, the LWP's registers do not necessarily
+     belong to the selected thread (the LWP could be in the middle of
+     executing the thread switch code).
+
+     These functions should instead be paramaterized with an explicit
+     object (struct regcache, struct thread_info?) into which the LWPs
+     registers can be written.  */
+
+  fetch_pid = TIDGET (inferior_ptid);
+  if (fetch_pid == 0)
+    fetch_pid = PIDGET (inferior_ptid);
 
   /* We should never be called with deferred stores, because a prerequisite
      for writing regs is to have fetched them all (PREPARE_TO_STORE), sigh.  */
@@ -75,7 +95,7 @@ fetch_inferior_registers (int regno)
       || regno >= Y_REGNUM
       || (!deprecated_register_valid[SP_REGNUM] && regno < I7_REGNUM))
     {
-      if (0 != ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid),
+      if (0 != ptrace (PTRACE_GETREGS, fetch_pid,
 		       (PTRACE_ARG3_TYPE) & inferior_registers, 0))
 	perror ("ptrace_getregs");
 
@@ -108,7 +128,7 @@ fetch_inferior_registers (int regno)
       regno == FPS_REGNUM ||
       (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 31))
     {
-      if (0 != ptrace (PTRACE_GETFPREGS, PIDGET (inferior_ptid),
+      if (0 != ptrace (PTRACE_GETFPREGS, fetch_pid,
 		       (PTRACE_ARG3_TYPE) & inferior_fp_registers,
 		       0))
 	perror ("ptrace_getfpregs");
@@ -153,6 +173,13 @@ store_inferior_registers (int regno)
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
   int wanna_store = INT_REGS + STACK_REGS + FP_REGS;
+  int store_pid;
+
+  /* NOTE: cagney/2002-12-02: See comment in fetch_inferior_registers
+     about threaded assumptions.  */
+  store_pid = TIDGET (inferior_ptid);
+  if (store_pid == 0)
+    store_pid = PIDGET (inferior_ptid);
 
   /* First decide which pieces of machine-state we need to modify.  
      Default for regno == -1 case is all pieces.  */
@@ -236,7 +263,7 @@ store_inferior_registers (int regno)
       inferior_registers.r_y =
 	*(int *) &deprecated_registers[REGISTER_BYTE (Y_REGNUM)];
 
-      if (0 != ptrace (PTRACE_SETREGS, PIDGET (inferior_ptid),
+      if (0 != ptrace (PTRACE_SETREGS, store_pid,
 		       (PTRACE_ARG3_TYPE) & inferior_registers, 0))
 	perror ("ptrace_setregs");
     }
@@ -252,7 +279,7 @@ store_inferior_registers (int regno)
 	      &deprecated_registers[REGISTER_BYTE (FPS_REGNUM)],
 	      sizeof (FPU_FSR_TYPE));
       if (0 !=
-	  ptrace (PTRACE_SETFPREGS, PIDGET (inferior_ptid),
+	  ptrace (PTRACE_SETFPREGS, store_pid,
 		  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0))
 	perror ("ptrace_setfpregs");
     }

@@ -25,7 +25,8 @@
 
 #define C4X_DEBUG 0
 
-#define C4X_HASH_SIZE 11 /* 11 and above should give unique entries.  */
+#define C4X_HASH_SIZE   11   /* 11 (bits) and above should give unique entries.  */
+#define C4X_SPESOP_SIZE 8    /* Max 8. ops for special instructions */
 
 typedef enum
   {
@@ -50,35 +51,37 @@ static int c4x_version = 0;
 static int c4x_dp = 0;
 
 static int c4x_pc_offset
-    PARAMS ((unsigned int));
+  PARAMS ((unsigned int));
 static int c4x_print_char
-    PARAMS ((struct disassemble_info *, char));
+  PARAMS ((struct disassemble_info *, char));
 static int c4x_print_str
-    PARAMS ((struct disassemble_info *, char *));
+  PARAMS ((struct disassemble_info *, char *));
 static int c4x_print_register
-    PARAMS ((struct disassemble_info *, unsigned long));
+  PARAMS ((struct disassemble_info *, unsigned long));
 static int c4x_print_addr
-    PARAMS ((struct disassemble_info *, unsigned long));
+  PARAMS ((struct disassemble_info *, unsigned long));
 static int c4x_print_relative
-    PARAMS ((struct disassemble_info *, unsigned long, long, unsigned long));
+  PARAMS ((struct disassemble_info *, unsigned long, long, unsigned long));
 void c4x_print_ftoa
-    PARAMS ((unsigned int, FILE *, fprintf_ftype));
+  PARAMS ((unsigned int, FILE *, fprintf_ftype));
 static int c4x_print_direct
-    PARAMS ((struct disassemble_info *, unsigned long));
+  PARAMS ((struct disassemble_info *, unsigned long));
 static int c4x_print_immed
-    PARAMS ((struct disassemble_info *, immed_t, unsigned long));
+  PARAMS ((struct disassemble_info *, immed_t, unsigned long));
 static int c4x_print_cond
-    PARAMS ((struct disassemble_info *, unsigned int));
+  PARAMS ((struct disassemble_info *, unsigned int));
 static int c4x_print_indirect
-    PARAMS ((struct disassemble_info *, indirect_t, unsigned long));
+  PARAMS ((struct disassemble_info *, indirect_t, unsigned long));
 static int c4x_print_op
-    PARAMS ((struct disassemble_info *, unsigned long, c4x_inst_t *, unsigned long));
+  PARAMS ((struct disassemble_info *, unsigned long, c4x_inst_t *, unsigned long));
+static void c4x_hash_opcode_special
+  PARAMS ((c4x_inst_t **, const c4x_inst_t *));
 static void c4x_hash_opcode
-    PARAMS ((c4x_inst_t **, const c4x_inst_t *));
+  PARAMS ((c4x_inst_t **, c4x_inst_t **, const c4x_inst_t *, unsigned long));
 static int c4x_disassemble
-    PARAMS ((unsigned long, unsigned long, struct disassemble_info *));
+  PARAMS ((unsigned long, unsigned long, struct disassemble_info *));
 int print_insn_tic4x
-    PARAMS ((bfd_vma, struct disassemble_info *));
+  PARAMS ((bfd_vma, struct disassemble_info *));
 
 
 static int
@@ -479,6 +482,7 @@ c4x_print_op (info, instruction, p, pc)
 	  break;
 
 	case 'E': /* register 0--7 */
+        case 'e':
 	  if (! c4x_print_register (info, EXTRU (instruction, 7, 0)))
 	    return 0;
 	  break;
@@ -488,11 +492,28 @@ c4x_print_op (info, instruction, p, pc)
 			   EXTRU (instruction, 15, 0));
 	  break;
 
+        case 'i': /* Extended indirect 0--7 */
+          if ( EXTRU (instruction, 7, 5) == 7 )
+            {
+              if( !c4x_print_register (info, EXTRU (instruction, 4, 0)) )
+                return 0;
+              break;
+            }
+          /* Fallthrough */
+
 	case 'I': /* indirect (short) 0--7 */
 	  if (! c4x_print_indirect (info, INDIRECT_SHORT,
 				    EXTRU (instruction, 7, 0)))
 	    return 0;
 	  break;
+
+        case 'j': /* Extended indirect 8--15 */
+          if ( EXTRU (instruction, 15, 13) == 7 )
+            {
+              if( !c4x_print_register (info, EXTRU (instruction, 12, 8)) )
+                return 0;
+              break;
+            }
 
 	case 'J': /* indirect (short) 8--15 */
 	  if (! c4x_print_indirect (info, INDIRECT_SHORT,
@@ -501,6 +522,7 @@ c4x_print_op (info, instruction, p, pc)
 	  break;
 
 	case 'G': /* register 8--15 */
+        case 'g':
 	  if (! c4x_print_register (info, EXTRU (instruction, 15, 8)))
 	    return 0;
 	  break;
@@ -525,7 +547,7 @@ c4x_print_op (info, instruction, p, pc)
 	  break;
 
 	case 'N': /* register 23--23 */
-	  c4x_print_register (info, EXTRU (instruction, 22, 22) + REG_R0);
+	  c4x_print_register (info, EXTRU (instruction, 23, 23) + REG_R0);
 	  break;
 
 	case 'O': /* indirect (short C4x) 8--15 */
@@ -542,11 +564,13 @@ c4x_print_op (info, instruction, p, pc)
 	  break;
 
 	case 'Q': /* register 0--15 */
+        case 'q':
 	  if (! c4x_print_register (info, EXTRU (instruction, 15, 0)))
 	    return 0;
 	  break;
 
 	case 'R': /* register 16--20 */
+        case 'r':
 	  if (! c4x_print_register (info, EXTRU (instruction, 20, 16)))
 	    return 0;
 	  break;
@@ -625,9 +649,43 @@ c4x_print_op (info, instruction, p, pc)
 }
 
 static void
-c4x_hash_opcode (optable, inst)
-     c4x_inst_t **optable;
+c4x_hash_opcode_special (optable_special, inst)
+     c4x_inst_t **optable_special;
      const c4x_inst_t *inst;
+{
+  int i;
+
+  for( i=0; i<C4X_SPESOP_SIZE; i++ )
+    if( optable_special[i] != NULL
+        && optable_special[i]->opcode == inst->opcode )
+      {
+        /* Collision (we have it already) - overwrite */
+        optable_special[i] = (void *)inst;
+        return;
+      }
+
+  for( i=0; i<C4X_SPESOP_SIZE; i++ )
+    if( optable_special[i] == NULL )
+      {
+        /* Add the new opcode */
+        optable_special[i] = (void *)inst;
+        return;
+      }
+
+  /* This should never occur. This happens if the number of special
+     instructions exceeds C4X_SPESOP_SIZE. Please increase the variable
+     of this variable */
+#if C4X_DEBUG
+  printf("optable_special[] is full, please increase C4X_SPESOP_SIZE!\n");
+#endif
+}
+
+static void
+c4x_hash_opcode (optable, optable_special, inst, c4x_oplevel)
+     c4x_inst_t **optable;
+     c4x_inst_t **optable_special;
+     const c4x_inst_t *inst;
+     const unsigned long c4x_oplevel;
 {
   int j;
   int opcode = inst->opcode >> (32 - C4X_HASH_SIZE);
@@ -637,7 +695,8 @@ c4x_hash_opcode (optable, inst)
      have unique entries so there's no point having a linked list
      for each entry? */
   for (j = opcode; j < opmask; j++)
-    if ((j & opmask) == opcode)
+    if ( (j & opmask) == opcode
+         && inst->oplevel & c4x_oplevel )
       {
 #if C4X_DEBUG
 	/* We should only have collisions for synonyms like
@@ -646,7 +705,21 @@ c4x_hash_opcode (optable, inst)
 	  printf("Collision at index %d, %s and %s\n",
 		 j, optable[j]->name, inst->name);
 #endif
-	optable[j] = (void *)inst;
+        /* Catch those ops that collide with others already inside the
+           hash, and have a opmask greater than the one we use in the
+           hash. Store them in a special-list, that will handle full
+           32-bit INSN, not only the first 11-bit (or so). */
+        if ( optable[j] != NULL
+             && inst->opmask & ~(opmask << (32 - C4X_HASH_SIZE)) )
+          {
+            /* Add the instruction already on the list */
+            c4x_hash_opcode_special(optable_special, optable[j]);
+
+            /* Add the new instruction */
+            c4x_hash_opcode_special(optable_special, inst);
+          }
+
+        optable[j] = (void *)inst;
       }
 }
 
@@ -663,36 +736,63 @@ c4x_disassemble (pc, instruction, info)
      struct disassemble_info *info;
 {
   static c4x_inst_t **optable = NULL;
+  static c4x_inst_t **optable_special = NULL;
   c4x_inst_t *p;
   int i;
+  unsigned long c4x_oplevel;
   
   c4x_version = info->mach;
+
+  c4x_oplevel  = (IS_CPU_C4X (c4x_version)) ? OP_C4X : 0;
+  c4x_oplevel |= OP_C3X|OP_LPWR|OP_IDLE2|OP_ENH;
   
   if (optable == NULL)
     {
       optable = (c4x_inst_t **)
 	xcalloc (sizeof (c4x_inst_t *), (1 << C4X_HASH_SIZE));
+
+      optable_special = (c4x_inst_t **)
+        xcalloc (sizeof (c4x_inst_t *), C4X_SPESOP_SIZE );
+
       /* Install opcodes in reverse order so that preferred
 	 forms overwrite synonyms.  */
-      for (i = c3x_num_insts - 1; i >= 0; i--)
-	c4x_hash_opcode (optable, &c3x_insts[i]);
-      if (IS_CPU_C4X (c4x_version))
-	{
-	  for (i = c4x_num_insts - 1; i >= 0; i--)
-	    c4x_hash_opcode (optable, &c4x_insts[i]);
-	}
+      for (i = c4x_num_insts - 1; i >= 0; i--)
+        c4x_hash_opcode (optable, optable_special, &c4x_insts[i], c4x_oplevel);
+
+      /* We now need to remove the insn that are special from the
+         "normal" optable, to make the disasm search this extra list
+         for them.
+      */
+      for (i=0; i<C4X_SPESOP_SIZE; i++)
+        if ( optable_special[i] != NULL )
+          optable[optable_special[i]->opcode >> (32 - C4X_HASH_SIZE)] = NULL;
     }
   
   /* See if we can pick up any loading of the DP register...  */
   if ((instruction >> 16) == 0x5070 || (instruction >> 16) == 0x1f70)
     c4x_dp = EXTRU (instruction, 15, 0);
-  
+
   p = optable[instruction >> (32 - C4X_HASH_SIZE)];
-  if (p != NULL && ((instruction & p->opmask) == p->opcode)
-      && c4x_print_op (NULL, instruction, p, pc))
-    c4x_print_op (info, instruction, p, pc);
+  if ( p != NULL )
+    {
+      if ( ((instruction & p->opmask) == p->opcode)
+           && c4x_print_op (NULL, instruction, p, pc) )
+        c4x_print_op (info, instruction, p, pc);
+      else
+        (*info->fprintf_func) (info->stream, "%08x", instruction);
+    }
   else
-    (*info->fprintf_func) (info->stream, "%08x", instruction);
+    {
+      for (i = 0; i<C4X_SPESOP_SIZE; i++)
+        if (optable_special[i] != NULL
+            && optable_special[i]->opcode == instruction )
+          {
+            (*info->fprintf_func)(info->stream, "%s", optable_special[i]->name);
+            break;
+          }
+      if (i==C4X_SPESOP_SIZE)
+        (*info->fprintf_func) (info->stream, "%08x", instruction);
+    }
 
   /* Return size of insn in words.  */
   return 1;	

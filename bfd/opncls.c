@@ -75,13 +75,13 @@ _bfd_new_bfd ()
   nbfd->format = bfd_unknown;
   nbfd->my_archive = (bfd *) NULL;
   nbfd->origin = 0;
-  nbfd->opened_once = false;
-  nbfd->output_has_begun = false;
+  nbfd->opened_once = FALSE;
+  nbfd->output_has_begun = FALSE;
   nbfd->section_count = 0;
   nbfd->usrdata = (PTR) NULL;
-  nbfd->cacheable = false;
+  nbfd->cacheable = FALSE;
   nbfd->flags = BFD_NO_FLAGS;
-  nbfd->mtime_set = false;
+  nbfd->mtime_set = FALSE;
 
   return nbfd;
 }
@@ -275,7 +275,7 @@ bfd_fdopenr (filename, target, fd)
       _bfd_delete_bfd (nbfd);
       return NULL;
     }
-  nbfd->opened_once = true;
+  nbfd->opened_once = TRUE;
 
   return nbfd;
 }
@@ -388,7 +388,7 @@ FUNCTION
 	bfd_close
 
 SYNOPSIS
-	boolean bfd_close(bfd *abfd);
+	bfd_boolean bfd_close (bfd *abfd);
 
 DESCRIPTION
 
@@ -403,24 +403,24 @@ DESCRIPTION
 	if it was passed in to BFD by <<bfd_fdopenr>>).
 
 RETURNS
-	<<true>> is returned if all is ok, otherwise <<false>>.
+	<<TRUE>> is returned if all is ok, otherwise <<FALSE>>.
 */
 
 
-boolean
+bfd_boolean
 bfd_close (abfd)
      bfd *abfd;
 {
-  boolean ret;
+  bfd_boolean ret;
 
   if (bfd_write_p (abfd))
     {
       if (! BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)))
-	return false;
+	return FALSE;
     }
 
   if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
-    return false;
+    return FALSE;
 
   ret = bfd_cache_close (abfd);
 
@@ -453,7 +453,7 @@ FUNCTION
 	bfd_close_all_done
 
 SYNOPSIS
-	boolean bfd_close_all_done(bfd *);
+	bfd_boolean bfd_close_all_done (bfd *);
 
 DESCRIPTION
 	Close a BFD.  Differs from <<bfd_close>> since it does not
@@ -467,14 +467,14 @@ DESCRIPTION
 	All memory attached to the BFD is released.
 
 RETURNS
-	<<true>> is returned if all is ok, otherwise <<false>>.
+	<<TRUE>> is returned if all is ok, otherwise <<FALSE>>.
 */
 
-boolean
+bfd_boolean
 bfd_close_all_done (abfd)
      bfd *abfd;
 {
-  boolean ret;
+  bfd_boolean ret;
 
   ret = bfd_cache_close (abfd);
 
@@ -539,7 +539,7 @@ FUNCTION
 	bfd_make_writable
 
 SYNOPSIS
-	boolean bfd_make_writable(bfd *abfd);
+	bfd_boolean bfd_make_writable (bfd *abfd);
 
 DESCRIPTION
 	Takes a BFD as created by <<bfd_create>> and converts it
@@ -548,10 +548,10 @@ DESCRIPTION
 	you will call <<bfd_make_readable>> on this bfd later.
 
 RETURNS
-	<<true>> is returned if all is ok, otherwise <<false>>.
+	<<TRUE>> is returned if all is ok, otherwise <<FALSE>>.
 */
 
-boolean
+bfd_boolean
 bfd_make_writable(abfd)
      bfd *abfd;
 {
@@ -560,7 +560,7 @@ bfd_make_writable(abfd)
   if (abfd->direction != no_direction)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return false;
+      return FALSE;
     }
 
   bim = ((struct bfd_in_memory *)
@@ -574,7 +574,7 @@ bfd_make_writable(abfd)
   abfd->direction = write_direction;
   abfd->where = 0;
 
-  return true;
+  return TRUE;
 }
 
 /*
@@ -582,7 +582,7 @@ FUNCTION
 	bfd_make_readable
 
 SYNOPSIS
-	boolean bfd_make_readable(bfd *abfd);
+	bfd_boolean bfd_make_readable (bfd *abfd);
 
 DESCRIPTION
 	Takes a BFD as created by <<bfd_create>> and
@@ -592,23 +592,23 @@ DESCRIPTION
 	direction.
 
 RETURNS
-	<<true>> is returned if all is ok, otherwise <<false>>.  */
+	<<TRUE>> is returned if all is ok, otherwise <<FALSE>>.  */
 
-boolean
+bfd_boolean
 bfd_make_readable(abfd)
      bfd *abfd;
 {
   if (abfd->direction != write_direction || !(abfd->flags & BFD_IN_MEMORY))
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return false;
+      return FALSE;
     }
 
   if (! BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)))
-    return false;
+    return FALSE;
 
   if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
-    return false;
+    return FALSE;
 
 
   abfd->arch_info = &bfd_default_arch_struct;
@@ -617,15 +617,15 @@ bfd_make_readable(abfd)
   abfd->format = bfd_unknown;
   abfd->my_archive = (bfd *) NULL;
   abfd->origin = 0;
-  abfd->opened_once = false;
-  abfd->output_has_begun = false;
+  abfd->opened_once = FALSE;
+  abfd->output_has_begun = FALSE;
   abfd->section_count = 0;
   abfd->usrdata = (PTR) NULL;
-  abfd->cacheable = false;
+  abfd->cacheable = FALSE;
   abfd->flags = BFD_IN_MEMORY;
-  abfd->mtime_set = false;
+  abfd->mtime_set = FALSE;
 
-  abfd->target_defaulted = true;
+  abfd->target_defaulted = TRUE;
   abfd->direction = read_direction;
   abfd->sections = 0;
   abfd->symcount = 0;
@@ -635,7 +635,7 @@ bfd_make_readable(abfd)
   bfd_section_list_clear (abfd);
   bfd_check_format (abfd, bfd_object);
 
-  return true;
+  return TRUE;
 }
 
 /*

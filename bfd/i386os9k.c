@@ -27,14 +27,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libaout.h"		/* BFD a.out internal data structures */
 #include "os9k.h"
 
-static const bfd_target * os9k_callback PARAMS ((bfd *));
-static const bfd_target * os9k_object_p PARAMS ((bfd *));
-static int                os9k_sizeof_headers PARAMS ((bfd *, boolean));
-boolean                   os9k_swap_exec_header_in PARAMS ((bfd *, mh_com *, struct internal_exec *));
+static const bfd_target * os9k_callback
+  PARAMS ((bfd *));
+static const bfd_target * os9k_object_p
+  PARAMS ((bfd *));
+static int os9k_sizeof_headers
+  PARAMS ((bfd *, bfd_boolean));
+bfd_boolean os9k_swap_exec_header_in
+  PARAMS ((bfd *, mh_com *, struct internal_exec *));
 
 /* Swaps the information in an executable header taken from a raw byte
    stream memory image, into the internal exec_header structure.  */
-boolean
+bfd_boolean
 os9k_swap_exec_header_in (abfd, raw_bytes, execp)
      bfd *abfd;
      mh_com *raw_bytes;
@@ -59,7 +63,7 @@ os9k_swap_exec_header_in (abfd, raw_bytes, execp)
 	  != sizeof (dmemstart))
       || (bfd_bread (&dmemsize, (bfd_size_type) sizeof (dmemsize), abfd)
 	  != sizeof (dmemsize)))
-    return false;
+    return FALSE;
 
   execp->a_tload = 0;
   execp->a_dload = H_GET_32 (abfd, (unsigned char *) &dmemstart);
@@ -70,7 +74,7 @@ os9k_swap_exec_header_in (abfd, raw_bytes, execp)
   execp->a_trsize = 0;
   execp->a_drsize = 0;
 
-  return true;
+  return TRUE;
 }
 
 #if 0
@@ -193,7 +197,7 @@ struct bout_data_struct
   struct internal_exec e;
 };
 
-static boolean
+static bfd_boolean
 os9k_mkobject (abfd)
      bfd *abfd;
 {
@@ -202,7 +206,7 @@ os9k_mkobject (abfd)
 
   rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, amt);
   if (rawptr == NULL)
-    return false;
+    return FALSE;
 
   abfd->tdata.bout_data = rawptr;
   exec_hdr (abfd) = &rawptr->e;
@@ -211,17 +215,17 @@ os9k_mkobject (abfd)
   obj_datasec (abfd) = (asection *) NULL;
   obj_bsssec (abfd) = (asection *) NULL;
 
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 os9k_write_object_contents (abfd)
      bfd *abfd;
 {
   struct external_exec swapped_hdr;
 
   if (! aout_32_make_sections (abfd))
-    return false;
+    return FALSE;
 
   exec_hdr (abfd)->a_info = BMAGIC;
 
@@ -247,35 +251,35 @@ os9k_write_object_contents (abfd)
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
       || bfd_bwrite ((PTR) & swapped_hdr, (bfd_size_type) EXEC_BYTES_SIZE,
 		    abfd) != EXEC_BYTES_SIZE)
-    return false;
+    return FALSE;
 
   /* Now write out reloc info, followed by syms and strings.  */
   if (bfd_get_symcount (abfd) != 0)
     {
       if (bfd_seek (abfd, (file_ptr) (N_SYMOFF (*exec_hdr (abfd))), SEEK_SET)
 	  != 0)
-	return false;
+	return FALSE;
 
       if (!aout_32_write_syms (abfd))
-	return false;
+	return FALSE;
 
       if (bfd_seek (abfd, (file_ptr) (N_TROFF (*exec_hdr (abfd))), SEEK_SET)
 	  != 0)
-	return false;
+	return FALSE;
 
       if (!b_out_squirt_out_relocs (abfd, obj_textsec (abfd)))
-	return false;
+	return FALSE;
       if (bfd_seek (abfd, (file_ptr) (N_DROFF (*exec_hdr (abfd))), SEEK_SET)
 	  != 0)
-	return false;
+	return FALSE;
 
       if (!b_out_squirt_out_relocs (abfd, obj_datasec (abfd)))
-	return false;
+	return FALSE;
     }
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 os9k_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
@@ -287,7 +291,7 @@ os9k_set_section_contents (abfd, section, location, offset, count)
   if (! abfd->output_has_begun)
     {				/* set by bfd.c handler */
       if (! aout_32_make_sections (abfd))
-	return false;
+	return FALSE;
 
       obj_textsec (abfd)->filepos = sizeof (struct internal_exec);
       obj_datasec (abfd)->filepos = obj_textsec (abfd)->filepos
@@ -296,19 +300,19 @@ os9k_set_section_contents (abfd, section, location, offset, count)
     }
   /* Regardless, once we know what we're doing, we might as well get going.  */
   if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0)
-    return false;
+    return FALSE;
 
   if (count != 0)
     return bfd_bwrite ((PTR) location, (bfd_size_type) count, abfd) == count;
 
-  return true;
+  return TRUE;
 }
 #endif	/* 0 */
 
 static int
 os9k_sizeof_headers (ignore_abfd, ignore)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
-     boolean ignore ATTRIBUTE_UNUSED;
+     bfd_boolean ignore ATTRIBUTE_UNUSED;
 {
   return sizeof (struct internal_exec);
 }

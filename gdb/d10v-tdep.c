@@ -114,7 +114,7 @@ d10v_frame_chain_valid (CORE_ADDR chain, struct frame_info *frame)
 {
   if (chain != 0 && frame != NULL)
     {
-      if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
 	return 1;	/* Path back from a call dummy must be valid. */
       return ((frame)->pc > IMEM_START
 	      && !inside_main_func (frame->pc));
@@ -512,7 +512,7 @@ d10v_extract_struct_value_address (char *regbuf)
 static CORE_ADDR
 d10v_frame_saved_pc (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return d10v_make_iaddr (deprecated_read_register_dummy (frame->pc, 
 							    frame->frame, 
 							    PC_REGNUM));
@@ -547,7 +547,7 @@ do_d10v_pop_frame (struct frame_info *fi)
   int regnum;
   char raw_buffer[8];
 
-  fp = FRAME_FP (fi);
+  fp = get_frame_base (fi);
   /* fill out fsr with the address of where each */
   /* register was stored in the frame */
   d10v_frame_init_saved_regs (fi);
@@ -677,10 +677,10 @@ d10v_skip_prologue (CORE_ADDR pc)
   return pc;
 }
 
-/* Given a GDB frame, determine the address of the calling function's frame.
-   This will be used to create a new GDB frame struct, and then
-   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
- */
+/* Given a GDB frame, determine the address of the calling function's
+   frame.  This will be used to create a new GDB frame struct, and
+   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
+   called for the new frame.  */
 
 static CORE_ADDR
 d10v_frame_chain (struct frame_info *fi)
@@ -688,7 +688,7 @@ d10v_frame_chain (struct frame_info *fi)
   CORE_ADDR addr;
 
   /* A generic call dummy's frame is the same as caller's.  */
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return fi->frame;
 
   d10v_frame_init_saved_regs (fi);
@@ -699,7 +699,7 @@ d10v_frame_chain (struct frame_info *fi)
     {
       /* This is meant to halt the backtrace at "_start".
 	 Make sure we don't halt it at a generic dummy frame. */
-      if (!PC_IN_CALL_DUMMY (fi->extra_info->return_pc, 0, 0))
+      if (!DEPRECATED_PC_IN_CALL_DUMMY (fi->extra_info->return_pc, 0, 0))
 	return (CORE_ADDR) 0;
     }
 
@@ -911,13 +911,13 @@ d10v_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   /* If fi->pc is zero, but this is not the outermost frame, 
      then let's snatch the return_pc from the callee, so that
-     PC_IN_CALL_DUMMY will work.  */
+     DEPRECATED_PC_IN_CALL_DUMMY will work.  */
   if (fi->pc == 0 && fi->level != 0 && fi->next != NULL)
     fi->pc = d10v_frame_saved_pc (fi->next);
 
   /* The call dummy doesn't save any registers on the stack, so we can
      return now.  */
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       return;
     }
@@ -1518,6 +1518,10 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_d10v_ts2:
@@ -1592,19 +1596,15 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		      "d10v_gdbarch_init: bad byte order for float format");
     }
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_words (gdbarch, d10v_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (d10v_call_dummy_words));
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_deprecated_extract_return_value (gdbarch, d10v_extract_return_value);
@@ -1635,8 +1635,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, d10v_frame_chain);
   set_gdbarch_frame_chain_valid (gdbarch, d10v_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, d10v_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
+
   set_gdbarch_saved_pc_after_call (gdbarch, d10v_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_stack_align (gdbarch, d10v_stack_align);

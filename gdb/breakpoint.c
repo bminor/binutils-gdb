@@ -49,6 +49,7 @@
 #include "ui-out.h"
 #include "cli/cli-script.h"
 #include "dictionary.h"
+#include "gdb_assert.h"
 
 #include "gdb-events.h"
 
@@ -953,8 +954,8 @@ insert_breakpoints (void)
 
 	/* Save the current frame and level so we can restore it after
 	   evaluating the watchpoint expression on its own frame.  */
-	saved_frame = selected_frame;
-	saved_level = frame_relative_level (selected_frame);
+	saved_frame = deprecated_selected_frame;
+	saved_level = frame_relative_level (deprecated_selected_frame);
 
 	/* Determine if the watchpoint is within scope.  */
 	if (b->exp_valid_block == NULL)
@@ -1050,8 +1051,8 @@ insert_breakpoints (void)
 	  }
 
 	/* Restore the frame and level.  */
-	if ((saved_frame != selected_frame) ||
-	    (saved_level != frame_relative_level (selected_frame)))
+	if ((saved_frame != deprecated_selected_frame) ||
+	    (saved_level != frame_relative_level (deprecated_selected_frame)))
 	  select_frame (saved_frame);
 
 	if (val)
@@ -1684,9 +1685,9 @@ breakpoint_inserted_here_p (CORE_ADDR pc)
 }
 
 /* Return nonzero if FRAME is a dummy frame.  We can't use
-   PC_IN_CALL_DUMMY because figuring out the saved SP would take too
-   much time, at least using get_saved_register on the 68k.  This
-   means that for this function to work right a port must use the
+   DEPRECATED_PC_IN_CALL_DUMMY because figuring out the saved SP would
+   take too much time, at least using get_saved_register on the 68k.
+   This means that for this function to work right a port must use the
    bp_call_dummy breakpoint.  */
 
 int
@@ -1697,19 +1698,21 @@ deprecated_frame_in_dummy (struct frame_info *frame)
   if (!CALL_DUMMY_P)
     return 0;
 
-  if (USE_GENERIC_DUMMY_FRAMES)
-    return generic_pc_in_call_dummy (frame->pc, frame->frame, frame->frame);
+  /* This function is used by two files: get_frame_type(), after first
+     checking that !DEPRECATED_USE_GENERIC_DUMMY_FRAMES; and
+     sparc-tdep.c, which doesn't yet use generic dummy frames anyway.  */
+  gdb_assert (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
 
   ALL_BREAKPOINTS (b)
   {
     if (b->type == bp_call_dummy
-	&& b->frame == frame->frame
+	&& frame_id_eq (b->frame_id, get_frame_id (frame))
     /* We need to check the PC as well as the frame on the sparc,
        for signals.exp in the testsuite.  */
-	&& (frame->pc
+	&& (get_frame_pc (frame)
 	    >= (b->address
-	      - SIZEOF_CALL_DUMMY_WORDS / sizeof (LONGEST) * REGISTER_SIZE))
-	&& frame->pc <= b->address)
+		- SIZEOF_CALL_DUMMY_WORDS / sizeof (LONGEST) * REGISTER_SIZE))
+	&& get_frame_pc (frame) <= b->address)
       return 1;
   }
   return 0;
@@ -2572,17 +2575,17 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
       continue;
 
     if ((b->type == bp_catch_fork)
-	&& !target_has_forked (PIDGET (inferior_ptid),
-	                       &b->forked_inferior_pid))
+	&& !inferior_has_forked (PIDGET (inferior_ptid),
+				 &b->forked_inferior_pid))
       continue;
 
     if ((b->type == bp_catch_vfork)
-	&& !target_has_vforked (PIDGET (inferior_ptid),
-	                        &b->forked_inferior_pid))
+	&& !inferior_has_vforked (PIDGET (inferior_ptid),
+				  &b->forked_inferior_pid))
       continue;
 
     if ((b->type == bp_catch_exec)
-	&& !target_has_execd (PIDGET (inferior_ptid), &b->exec_pathname))
+	&& !inferior_has_execd (PIDGET (inferior_ptid), &b->exec_pathname))
       continue;
 
     if (ep_is_exception_catchpoint (b) &&
@@ -2726,8 +2729,8 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 	real_breakpoint = 1;
       }
 
-    if (b->frame &&
-       b->frame != (get_current_frame ())->frame)
+    if (frame_id_p (b->frame_id)
+	&& !frame_id_eq (b->frame_id, get_frame_id (get_current_frame ())))
       bs->stop = 0;
     else
       {
@@ -3416,11 +3419,13 @@ print_one_breakpoint (struct breakpoint *b,
   
   ui_out_text (uiout, "\n");
   
-  if (b->frame)
+  if (frame_id_p (b->frame_id))
     {
       annotate_field (6);
       ui_out_text (uiout, "\tstop only in stack frame at ");
-      ui_out_field_core_addr (uiout, "frame", b->frame);
+      /* FIXME: cagney/2002-12-01: Shouldn't be poeking around inside
+         the frame ID.  */
+      ui_out_field_core_addr (uiout, "frame", b->frame_id.base);
       ui_out_text (uiout, "\n");
     }
   
@@ -3841,7 +3846,7 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
   b->silent = 0;
   b->ignore_count = 0;
   b->commands = NULL;
-  b->frame = 0;
+  b->frame_id = null_frame_id;
   b->dll_pathname = NULL;
   b->triggered_dll_pathname = NULL;
   b->forked_inferior_pid = 0;
@@ -4009,14 +4014,12 @@ struct breakpoint *
 create_thread_event_breakpoint (CORE_ADDR address)
 {
   struct breakpoint *b;
-  char addr_string[80];		/* Surely an addr can't be longer than that. */
 
   b = create_internal_breakpoint (address, bp_thread_event);
   
   b->enable_state = bp_enabled;
   /* addr_string has to be used or breakpoint_re_set will delete me.  */
-  sprintf (addr_string, "*0x%s", paddr (b->address));
-  b->addr_string = xstrdup (addr_string);
+  xasprintf (&b->addr_string, "*0x%s", paddr (b->address));
 
   return b;
 }
@@ -4309,7 +4312,7 @@ hw_watchpoint_used_count (enum bptype type, int *other_type_used)
    that gets deleted automatically... */
 
 void
-set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_info *frame)
+set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_id frame_id)
 {
   register struct breakpoint *b;
 
@@ -4318,10 +4321,7 @@ set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_info *frame)
     {
       b->address = pc;
       b->enable_state = bp_enabled;
-      if (frame != NULL)
-	b->frame = frame->frame;
-      else
-	b->frame = 0;
+      b->frame_id = frame_id;
       check_duplicates (b);
       return;
     }
@@ -4373,14 +4373,14 @@ enable_watchpoints_after_interactive_call_stop (void)
    Restrict it to frame FRAME if FRAME is nonzero.  */
 
 struct breakpoint *
-set_momentary_breakpoint (struct symtab_and_line sal, struct frame_info *frame,
+set_momentary_breakpoint (struct symtab_and_line sal, struct frame_id frame_id,
 			  enum bptype type)
 {
   register struct breakpoint *b;
   b = set_raw_breakpoint (sal, type);
   b->enable_state = bp_enabled;
   b->disposition = disp_donttouch;
-  b->frame = (frame ? frame->frame : 0);
+  b->frame_id = frame_id;
 
   /* If we're debugging a multi-threaded program, then we
      want momentary breakpoints to be active in only a 
@@ -4572,7 +4572,12 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	b->number = breakpoint_count;
 	b->cond = cond[i];
 	b->thread = thread;
-	b->addr_string = addr_string[i];
+	if (addr_string[i])
+	  b->addr_string = addr_string[i];
+	else
+	  /* addr_string has to be used or breakpoint_re_set will delete
+	     me.  */
+	  xasprintf (&b->addr_string, "*0x%s", paddr (b->address));
 	b->cond_string = cond_string[i];
 	b->ignore_count = ignore_count;
 	b->enable_state = bp_enabled;
@@ -4962,9 +4967,9 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
 
       if (default_breakpoint_valid)
 	{
-	  if (selected_frame)
+	  if (deprecated_selected_frame)
 	    {
-	      selected_pc = selected_frame->pc;
+	      selected_pc = get_frame_pc (deprecated_selected_frame);
 	      if (arg)
 		if_arg = 1;
 	    }
@@ -4993,7 +4998,7 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
 
       frame = parse_frame_specification (level_arg);
       if (frame)
-	selected_pc = frame->pc;
+	selected_pc = get_frame_pc (frame);
       else
 	selected_pc = 0;
     }
@@ -5040,10 +5045,11 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
     {
       if (default_breakpoint_valid)
 	{
-	  if (selected_frame)
+	  if (deprecated_selected_frame)
 	    {
 	      addr_string = (char *) xmalloc (15);
-	      sprintf (addr_string, "*0x%s", paddr_nz (selected_frame->pc));
+	      sprintf (addr_string, "*0x%s",
+		       paddr_nz (get_frame_pc (deprecated_selected_frame)));
 	      if (arg)
 		if_arg = 1;
 	    }
@@ -5399,7 +5405,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   if (frame)
     {
       prev_frame = get_prev_frame (frame);
-      get_frame_id (frame, &b->watchpoint_frame);
+      b->watchpoint_frame = get_frame_id (frame);
     }
   else
     {
@@ -5423,7 +5429,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 	  scope_breakpoint->disposition = disp_del;
 
 	  /* Only break in the proper frame (help with recursion).  */
-	  scope_breakpoint->frame = prev_frame->frame;
+	  scope_breakpoint->frame_id = get_frame_id (prev_frame);
 
 	  /* Set the address at which we will stop.  */
 	  scope_breakpoint->address = get_frame_pc (prev_frame);
@@ -5582,7 +5588,7 @@ until_break_command (char *arg, int from_tty)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
-  struct frame_info *prev_frame = get_prev_frame (selected_frame);
+  struct frame_info *prev_frame = get_prev_frame (deprecated_selected_frame);
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
   struct continuation_arg *arg1;
@@ -5611,7 +5617,9 @@ until_break_command (char *arg, int from_tty)
 
   resolve_sal_pc (&sal);
 
-  breakpoint = set_momentary_breakpoint (sal, selected_frame, bp_until);
+  breakpoint = 
+    set_momentary_breakpoint (sal,get_frame_id (deprecated_selected_frame),
+			      bp_until);
 
   if (!event_loop_p || !target_can_async_p ())
     old_chain = make_cleanup_delete_breakpoint (breakpoint);
@@ -5643,9 +5651,10 @@ until_break_command (char *arg, int from_tty)
 
   if (prev_frame)
     {
-      sal = find_pc_line (prev_frame->pc, 0);
-      sal.pc = prev_frame->pc;
-      breakpoint = set_momentary_breakpoint (sal, prev_frame, bp_until);
+      sal = find_pc_line (get_frame_pc (prev_frame), 0);
+      sal.pc = get_frame_pc (prev_frame);
+      breakpoint = set_momentary_breakpoint (sal, get_frame_id (prev_frame),
+					     bp_until);
       if (!event_loop_p || !target_can_async_p ())
 	make_cleanup_delete_breakpoint (breakpoint);
       else
@@ -5769,10 +5778,10 @@ get_catch_sals (int this_level_only)
 
   /* Not sure whether an error message is always the correct response,
      but it's better than a core dump.  */
-  if (selected_frame == NULL)
+  if (deprecated_selected_frame == NULL)
     error ("No selected frame.");
-  block = get_frame_block (selected_frame, 0);
-  pc = selected_frame->pc;
+  block = get_frame_block (deprecated_selected_frame, 0);
+  pc = get_frame_pc (deprecated_selected_frame);
 
   sals.nelts = 0;
   sals.sals = NULL;
@@ -7367,8 +7376,8 @@ is valid is not currently in scope.\n", bpt->number);
 	      return;
 	    }
 
-	  save_selected_frame = selected_frame;
-	  save_selected_frame_level = frame_relative_level (selected_frame);
+	  save_selected_frame = deprecated_selected_frame;
+	  save_selected_frame_level = frame_relative_level (deprecated_selected_frame);
 	  select_frame (fr);
 	}
 

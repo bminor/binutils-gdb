@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -409,6 +409,8 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
+
+CGEN_CPUS = fr30 frv ip2k m32r openrisc xstormy16
 @CGEN_MAINT_TRUE@IP2K_DEPS = @CGEN_MAINT_TRUE@stamp-ip2k
 @CGEN_MAINT_FALSE@IP2K_DEPS = 
 @CGEN_MAINT_TRUE@M32R_DEPS = @CGEN_MAINT_TRUE@stamp-m32r
@@ -449,7 +451,7 @@ acinclude.m4 aclocal.m4 config.in configure configure.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = libopcodes.a.c $(libopcodes_la_SOURCES)
 OBJECTS = libopcodes.a.$(OBJEXT) $(libopcodes_la_OBJECTS)
@@ -598,7 +600,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" != "." || dot_seen=yes; \
+	  test "$$subdir" = "." && dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -860,6 +862,14 @@ run-cgen:
 	  "$(options)" $(extrafiles)
 	touch stamp-${prefix}
 .PHONY: run-cgen
+
+# Maintainer utility rule to regenerate all cgen files.
+run-cgen-all:
+	for c in $(CGEN_CPUS) ; \
+	do \
+		$(MAKE) stamp-$$c || exit 1 ; \
+	done
+.PHONY: run-cgen-all
 
 # For now, require developers to configure with --enable-cgen-maint.
 $(srcdir)/ip2k-desc.h $(srcdir)/ip2k-desc.c $(srcdir)/ip2k-opc.h $(srcdir)/ip2k-opc.c $(srcdir)/ip2k-ibld.c $(srcdir)/ip2k-asm.c $(srcdir)/ip2k-dis.c: $(IP2K_DEPS)

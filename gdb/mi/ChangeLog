@@ -1,3 +1,22 @@
+2002-12-13  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-cmds.c (-environment-directory) Change to use mi_cmd_env_dir,
+	(-environment-cd): Change to use mi_cmd_env_cd,.
+	(-environment-pwd): Change to use mi_cmd_env_pwd.
+	(-environment-path): Change to use mi_cmd_env_path.
+	* mi-cmds.h (mi_cmd_env_cd, mi_cmd_env_dir): New prototypes.
+	(mi_cmd_env_path, mi_cmd_env_pwd): Ditto.
+	* mi-cmd-env.c: New file.  Part of fix for PR gdb/741.
+	* gdbmi.texinfo (environment-cd): Update output and example.
+	(environment-pwd): Ditto.
+	(environment-dir): Update output, description, and examples.
+	(environment-path): Ditto.
+
+2002-11-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi/mi-cmd-stack.c, mi/mi-main.c: Update to use
+	deprecated_selected_frame.
+
 2002-11-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-main.c (mi_cmd_data_write_register_values): Use

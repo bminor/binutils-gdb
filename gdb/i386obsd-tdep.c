@@ -117,6 +117,6 @@ _initialize_i386obsd_tdep (void)
      expected.  */
 #define GDB_OSABI_OPENBSD_AOUT GDB_OSABI_NETBSD_AOUT
 
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_OPENBSD_AOUT,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_OPENBSD_AOUT,
 			  i386obsd_init_abi);
 }

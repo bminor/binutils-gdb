@@ -191,7 +191,7 @@ addr_and_unwind_t;
 /* When adding fields, be sure to clear them in _initialize_som_solib. */
 static struct
   {
-    boolean is_valid;
+    int is_valid;
     addr_and_unwind_t hook;
     addr_and_unwind_t hook_stub;
     addr_and_unwind_t load;

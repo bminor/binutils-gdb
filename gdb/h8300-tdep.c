@@ -482,9 +482,10 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
     }
 }
 
-/* Given a GDB frame, determine the address of the calling function's frame.
-   This will be used to create a new GDB frame struct, and then
-   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
+/* Given a GDB frame, determine the address of the calling function's
+   frame.  This will be used to create a new GDB frame struct, and
+   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
+   called for the new frame.
 
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
@@ -492,7 +493,7 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
 static CORE_ADDR
 h8300_frame_chain (struct frame_info *thisframe)
 {
-  if (PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
     {				/* initialize the from_pc now */
       thisframe->extra_info->from_pc =
 	deprecated_read_register_dummy (thisframe->pc, thisframe->frame,
@@ -510,7 +511,7 @@ h8300_frame_chain (struct frame_info *thisframe)
 static CORE_ADDR
 h8300_frame_saved_pc (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return deprecated_read_register_dummy (frame->pc, frame->frame,
 					   E_PC_REGNUM);
   else
@@ -540,7 +541,7 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static CORE_ADDR
 h8300_frame_locals_address (struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
   return fi->extra_info->locals_pointer;
 }
@@ -551,7 +552,7 @@ h8300_frame_locals_address (struct frame_info *fi)
 static CORE_ADDR
 h8300_frame_args_address (struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
   return fi->extra_info->args_pointer;
 }
@@ -746,7 +747,7 @@ h8300_pop_frame (void)
   unsigned regno;
   struct frame_info *frame = get_current_frame ();
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       generic_pop_dummy_frame ();
     }
@@ -904,7 +905,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
       int C, Z, N, V;
       unsigned char b[h8300h_reg_size];
       unsigned char l;
-      frame_register_read (selected_frame, regno, b);
+      frame_register_read (deprecated_selected_frame, regno, b);
       l = b[REGISTER_VIRTUAL_SIZE (E_CCR_REGNUM) - 1];
       fprintf_filtered (file, "\t");
       fprintf_filtered (file, "I-%d ", (l & 0x80) != 0);
@@ -945,7 +946,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
       /* EXR register */
       unsigned char b[h8300h_reg_size];
       unsigned char l;
-      frame_register_read (selected_frame, regno, b);
+      frame_register_read (deprecated_selected_frame, regno, b);
       l = b[REGISTER_VIRTUAL_SIZE (E_EXR_REGNUM) - 1];
       fprintf_filtered (file, "\t");
       fprintf_filtered (file, "T-%d - - - ", (l & 0x80) != 0);
@@ -1079,6 +1080,10 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdbarch = gdbarch_alloc (&info, 0);
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
   /*
    * Basic register fields and methods.
    */
@@ -1106,7 +1111,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_init_extra_frame_info (gdbarch, h8300_init_extra_frame_info);
   set_gdbarch_frame_init_saved_regs (gdbarch, h8300_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, h8300_frame_chain);
-  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
   set_gdbarch_saved_pc_after_call (gdbarch, h8300_saved_pc_after_call);
   set_gdbarch_frame_saved_pc (gdbarch, h8300_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, h8300_skip_prologue);
@@ -1138,7 +1142,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Call Dummies
    * 
    * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, h8300_push_return_address);
   set_gdbarch_deprecated_extract_return_value (gdbarch, h8300_extract_return_value);
@@ -1148,13 +1151,11 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_return_value (gdbarch, h8300_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, h8300_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, h8300_use_struct_convention);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);

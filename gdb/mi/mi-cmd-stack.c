@@ -144,7 +144,7 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
   if (argc != 1)
     error ("mi_cmd_stack_list_locals: Usage: PRINT_VALUES");
 
-  list_args_or_locals (1, atoi (argv[0]), selected_frame);
+  list_args_or_locals (1, atoi (argv[0]), deprecated_selected_frame);
   return MI_CMD_DONE;
 }
 

@@ -176,15 +176,6 @@ x86_64_register_virtual_type (int regno)
   return *x86_64_register_info_table[regno].type;
 }
 
-/* FIXME: cagney/2002-11-11: Once the i386 and x86-64 targets are
-   merged, this function can go away.  */
-int
-i386_fp_regnum_p (int regnum)
-{
-  return (regnum < NUM_REGS
-	  && (FP0_REGNUM && FP0_REGNUM <= (regnum) && (regnum) < FPC_REGNUM));
-}
-
 /* x86_64_register_convertible is true if register N's virtual format is
    different from its raw format.  Note that this definition assumes
    that the host supports IEEE 32-bit floats, since it doesn't say
@@ -922,7 +913,7 @@ x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
   return breakpoint;
 }
 
-static void
+void
 x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -1026,6 +1017,8 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* FIXME: kettenis/20021026: This one is GNU/Linux-specific too.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_in_sigtramp);
 
+  set_gdbarch_num_pseudo_regs (gdbarch, 0);
+
   /* Build call frame information (CFI) from DWARF2 frame debug info.  */
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
 
@@ -1033,7 +1026,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_init_extra_frame_info (gdbarch, cfi_init_extra_frame_info);
 
   /* Frame PC initialization is handled by using CFI.  */
-  set_gdbarch_init_frame_pc (gdbarch, x86_64_init_frame_pc);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, x86_64_init_frame_pc);
 
   /* Cons up virtual frame pointer for trace.  */
   set_gdbarch_virtual_frame_pointer (gdbarch, cfi_virtual_frame_pointer);
@@ -1044,86 +1037,9 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
 }
 
-static struct gdbarch *
-x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
-{
-  struct gdbarch_tdep *tdep;
-  struct gdbarch *gdbarch;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
-
-  /* Try to determine the OS ABI of the object we're loading.  */
-  if (info.abfd != NULL)
-    osabi = gdbarch_lookup_osabi (info.abfd);
-
-  /* Find a candidate among extant architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      /* Make sure the OS ABI selection matches.  */
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->osabi == osabi)
-        return arches->gdbarch;
-    }
-
-  /* Allocate space for the new architecture.  */
-  tdep = XMALLOC (struct gdbarch_tdep);
-  gdbarch = gdbarch_alloc (&info, tdep);
-
-  tdep->osabi = osabi;
-
-  /* FIXME: kettenis/20021025: The following calls are going to
-     disappear when we integrate the x86_64 target into the i386
-     target.  */
-
-  set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
-
-  set_gdbarch_max_register_raw_size (gdbarch, 16);
-  set_gdbarch_max_register_virtual_size (gdbarch, 16);
-
-  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-
-  set_gdbarch_breakpoint_from_pc (gdbarch, x86_64_breakpoint_from_pc);
-  set_gdbarch_decr_pc_after_break (gdbarch, 1);
-  set_gdbarch_function_start_offset (gdbarch, 0);
-
-  set_gdbarch_frame_args_skip (gdbarch, 8);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
-
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_words (gdbarch, NULL);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
-
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
-
-  /* FIXME: kettenis/20021025: These already are the default.  */
-
-  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 0);
-
-  x86_64_init_abi (info, gdbarch);
-
-  return gdbarch;
-}
-
 void
 _initialize_x86_64_tdep (void)
 {
-  register_gdbarch_init (bfd_arch_i386, x86_64_gdbarch_init);
-
   /* Initialize the table saying where each register starts in the
      register file.  */
   {
@@ -1135,19 +1051,5 @@ _initialize_x86_64_tdep (void)
 	x86_64_register_byte_table[i] = offset;
 	offset += x86_64_register_info_table[i].size;
       }
-  }
-
-  tm_print_insn = gdb_print_insn_x86_64;
-  tm_print_insn_info.mach = bfd_mach_x86_64;
-
-  /* Add the variable that controls the disassembly flavour.  */
-  {
-    struct cmd_list_element *new_cmd;
-
-    new_cmd = add_set_enum_cmd ("disassembly-flavour", no_class,
-				valid_flavours, &disassembly_flavour, "\
-Set the disassembly flavour, the valid values are \"att\" and \"intel\", \
-and the default value is \"att\".", &setlist);
-    add_show_from_set (new_cmd, &showlist);
   }
 }

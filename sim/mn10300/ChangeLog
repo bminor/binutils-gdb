@@ -1,3 +1,8 @@
+2002-11-28  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-main.h: Only include "idecode.h" once.
+	* Makefile.in (SIM_EXTRA_DEPS): Define.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

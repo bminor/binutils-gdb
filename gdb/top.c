@@ -1952,7 +1952,7 @@ init_main (void)
   write_history_p = 0;
 
   /* Setup important stuff for command line editing.  */
-  rl_completion_entry_function = (int (*)()) readline_line_completion_function;
+  rl_completion_entry_function = readline_line_completion_function;
   rl_completer_word_break_characters =
 				 get_gdb_completer_word_break_characters ();
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();

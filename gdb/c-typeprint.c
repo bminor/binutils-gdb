@@ -302,7 +302,7 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
 		       int need_pre_space, int need_post_space)
 {
   int did_print_modifier = 0;
-  char *address_space_id;
+  const char *address_space_id;
 
   /* We don't print `const' qualifiers for references --- since all
      operators affect the thing referenced, not the reference itself,

@@ -638,9 +638,10 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
   return addr;
 }
 
-/* Given a GDB frame, determine the address of the calling function's frame.
-   This will be used to create a new GDB frame struct, and then
-   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame. */
+/* Given a GDB frame, determine the address of the calling function's
+   frame.  This will be used to create a new GDB frame struct, and
+   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
+   called for the new frame. */
 
 CORE_ADDR
 mcore_frame_chain (struct frame_info * fi)
@@ -756,7 +757,7 @@ mcore_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi != NULL; fi = fi->next)
     {
-      if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
 	return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
       else if (fi->saved_regs[regnum] != 0)
 	return read_memory_integer (fi->saved_regs[regnum],
@@ -772,7 +773,7 @@ CORE_ADDR
 mcore_frame_saved_pc (struct frame_info * fi)
 {
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
   else
     return mcore_find_callers_reg (fi, PR_REGNUM);
@@ -789,7 +790,7 @@ mcore_pop_frame (void)
   int rn;
   struct frame_info *fi = get_current_frame ();
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -810,7 +811,7 @@ mcore_pop_frame (void)
 	}
 
       /* Actually cut back the stack. */
-      write_register (SP_REGNUM, FRAME_FP (fi));
+      write_register (SP_REGNUM, get_frame_base (fi));
     }
 
   /* Finally, throw away any cached frame information. */
@@ -1047,7 +1048,7 @@ mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   fi->extra_info->status = 0;
   fi->extra_info->framesize = 0;
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
@@ -1084,6 +1085,10 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdbarch = gdbarch_alloc (&info, 0);
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
   /* Registers: */
 
   /* All registers are 32 bits */
@@ -1100,22 +1105,18 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 0);
   set_gdbarch_fp_regnum (gdbarch, 0);
-  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
 
   /* Call Dummies:  */
 
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
   set_gdbarch_function_start_offset (gdbarch, 0);

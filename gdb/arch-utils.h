@@ -109,10 +109,6 @@ extern CORE_ADDR core_addr_identity (CORE_ADDR addr);
 
 extern int no_op_reg_to_regnum (int reg);
 
-/* Default frame_args_address and frame_locals_address.  */
-
-extern CORE_ADDR default_frame_address (struct frame_info *);
-
 /* Default prepare_to_procced. */
 
 extern int default_prepare_to_proceed (int select_it);
@@ -121,9 +117,9 @@ extern int generic_prepare_to_proceed (int select_it);
 
 /* Versions of init_frame_pc().  Do nothing; do the default. */
 
-void init_frame_pc_noop (int fromleaf, struct frame_info *prev);
+extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 
-void init_frame_pc_default (int fromleaf, struct frame_info *prev);
+extern CORE_ADDR init_frame_pc_default (int fromleaf, struct frame_info *prev);
 
 /* Do nothing version of elf_make_msymbol_special. */
 

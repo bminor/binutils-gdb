@@ -572,9 +572,15 @@ extern int source_full_path_of (char *, char **);
 
 extern void mod_path (char *, char **);
 
+extern void add_path (char *, char **, int);
+
 extern void directory_command (char *, int);
 
+extern char *source_path;
+
 extern void init_source_path (void);
+
+extern void init_last_source_visited (void);
 
 extern char *symtab_to_filename (struct symtab *);
 
@@ -613,10 +619,6 @@ enum lval_type
   };
 
 struct frame_info;
-
-/* From readline (but not in any readline .h files).  */
-
-extern char *tilde_expand (char *);
 
 /* Control types for commands */
 

@@ -38,6 +38,7 @@
 #include "value.h"
 #include "gdb_assert.h"
 #include "reggroups.h"
+#include "dummy-frame.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -472,17 +473,16 @@ i386_get_frame_setup (CORE_ADDR pc)
    frame -- that is, the frame which was in progress when the signal
    trampoline was entered.  GDB mostly treats this frame pointer value
    as a magic cookie.  We detect the case of a signal trampoline by
-   looking at the SIGNAL_HANDLER_CALLER field, which is set based on
-   PC_IN_SIGTRAMP.
+   testing for get_frame_type() == SIGTRAMP_FRAME, which is set based
+   on PC_IN_SIGTRAMP.
 
    When a signal trampoline is invoked from a frameless function, we
    essentially have two frameless functions in a row.  In this case,
    we use the same magic cookie for three frames in a row.  We detect
-   this case by seeing whether the next frame has
-   SIGNAL_HANDLER_CALLER set, and, if it does, checking whether the
-   current frame is actually frameless.  In this case, we need to get
-   the PC by looking at the SP register value stored in the signal
-   context.
+   this case by seeing whether the next frame is a SIGTRAMP_FRAME,
+   and, if it does, checking whether the current frame is actually
+   frameless.  In this case, we need to get the PC by looking at the
+   SP register value stored in the signal context.
 
    This should work in most cases except in horrible situations where
    a signal occurs just as we enter a function but before the frame
@@ -498,7 +498,7 @@ i386_get_frame_setup (CORE_ADDR pc)
 int
 i386_frameless_signal_p (struct frame_info *frame)
 {
-  return (frame->next && frame->next->signal_handler_caller
+  return (frame->next && get_frame_type (frame->next) == SIGTRAMP_FRAME
 	  && (frameless_look_for_prologue (frame)
 	      || frame->pc == get_pc_function_start (frame->pc)));
 }
@@ -510,10 +510,10 @@ i386_frameless_signal_p (struct frame_info *frame)
 static CORE_ADDR
 i386_frame_chain (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+  if (pc_in_dummy_frame (frame->pc))
     return frame->frame;
 
-  if (frame->signal_handler_caller
+  if (get_frame_type (frame) == SIGTRAMP_FRAME
       || i386_frameless_signal_p (frame))
     return frame->frame;
 
@@ -530,7 +530,7 @@ i386_frame_chain (struct frame_info *frame)
 static int
 i386_frameless_function_invocation (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if (get_frame_type (frame) == SIGTRAMP_FRAME)
     return 0;
 
   return frameless_look_for_prologue (frame);
@@ -567,7 +567,7 @@ i386_sigtramp_saved_sp (struct frame_info *frame)
 static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+  if (pc_in_dummy_frame (frame->pc))
     {
       ULONGEST pc;
 
@@ -575,7 +575,7 @@ i386_frame_saved_pc (struct frame_info *frame)
       return pc;
     }
 
-  if (frame->signal_handler_caller)
+  if (get_frame_type (frame) == SIGTRAMP_FRAME)
     return i386_sigtramp_saved_pc (frame);
 
   if (i386_frameless_signal_p (frame))
@@ -592,7 +592,7 @@ i386_frame_saved_pc (struct frame_info *frame)
 static CORE_ADDR
 i386_saved_pc_after_call (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if (get_frame_type (frame) == SIGTRAMP_FRAME)
     return i386_sigtramp_saved_pc (frame);
 
   return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
@@ -861,7 +861,7 @@ i386_do_pop_frame (struct frame_info *frame)
   int regnum;
   char regbuf[I386_MAX_REGISTER_SIZE];
 
-  fp = FRAME_FP (frame);
+  fp = get_frame_base (frame);
   i386_frame_init_saved_regs (frame);
 
   for (regnum = 0; regnum < NUM_REGS; regnum++)
@@ -1520,6 +1520,10 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
   tdep->osabi = osabi;
 
   /* The i386 default settings don't include the SSE registers.
@@ -1578,10 +1582,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-
   /* Call dummy code.  */
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
@@ -1597,10 +1598,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convert_to_virtual (gdbarch,
 					   i386_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
-
-  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
-
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
 
   /* "An argument's size is increased, if necessary, to make it a
      multiple of [32-bit] words.  This may require tail padding,
@@ -1639,8 +1636,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, i386_frame_chain);
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, i386_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
   set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
@@ -1720,11 +1715,11 @@ are \"default\", \"pcc\" and \"reg\", and the default value is \"default\".",
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_nlm_flavour,
 				  i386_nlm_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_SVR4,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_SVR4,
 			  i386_svr4_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_GO32,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_GO32,
 			  i386_go32_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETWARE,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETWARE,
 			  i386_nw_init_abi);
 
   /* Initialize the i386 specific register groups.  */

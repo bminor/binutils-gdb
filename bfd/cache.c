@@ -42,8 +42,8 @@ SECTION
 
 static void insert PARAMS ((bfd *));
 static void snip PARAMS ((bfd *));
-static boolean close_one PARAMS ((void));
-static boolean bfd_cache_delete PARAMS ((bfd *));
+static bfd_boolean close_one PARAMS ((void));
+static bfd_boolean bfd_cache_delete PARAMS ((bfd *));
 
 /*
 INTERNAL_FUNCTION
@@ -133,7 +133,7 @@ snip (abfd)
 /* We need to open a new file, and the cache is full.  Find the least
    recently used cacheable BFD and close it.  */
 
-static boolean
+static bfd_boolean
 close_one ()
 {
   register bfd *kill;
@@ -157,7 +157,7 @@ close_one ()
   if (kill == NULL)
     {
       /* There are no open cacheable BFD's.  */
-      return true;
+      return TRUE;
     }
 
   kill->where = ftell ((FILE *) kill->iostream);
@@ -167,17 +167,17 @@ close_one ()
 
 /* Close a BFD and remove it from the cache.  */
 
-static boolean
+static bfd_boolean
 bfd_cache_delete (abfd)
      bfd *abfd;
 {
-  boolean ret;
+  bfd_boolean ret;
 
   if (fclose ((FILE *) abfd->iostream) == 0)
-    ret = true;
+    ret = TRUE;
   else
     {
-      ret = false;
+      ret = FALSE;
       bfd_set_error (bfd_error_system_call);
     }
 
@@ -194,13 +194,13 @@ INTERNAL_FUNCTION
 	bfd_cache_init
 
 SYNOPSIS
-	boolean bfd_cache_init (bfd *abfd);
+	bfd_boolean bfd_cache_init (bfd *abfd);
 
 DESCRIPTION
 	Add a newly opened BFD to the cache.
 */
 
-boolean
+bfd_boolean
 bfd_cache_init (abfd)
      bfd *abfd;
 {
@@ -208,11 +208,11 @@ bfd_cache_init (abfd)
   if (open_files >= BFD_CACHE_MAX_OPEN)
     {
       if (! close_one ())
-	return false;
+	return FALSE;
     }
   insert (abfd);
   ++open_files;
-  return true;
+  return TRUE;
 }
 
 /*
@@ -220,24 +220,24 @@ INTERNAL_FUNCTION
 	bfd_cache_close
 
 SYNOPSIS
-	boolean bfd_cache_close (bfd *abfd);
+	bfd_boolean bfd_cache_close (bfd *abfd);
 
 DESCRIPTION
 	Remove the BFD @var{abfd} from the cache. If the attached file is open,
 	then close it too.
 
 RETURNS
-	<<false>> is returned if closing the file fails, <<true>> is
+	<<FALSE>> is returned if closing the file fails, <<TRUE>> is
 	returned if all is well.
 */
 
-boolean
+bfd_boolean
 bfd_cache_close (abfd)
      bfd *abfd;
 {
   if (abfd->iostream == NULL
       || (abfd->flags & BFD_IN_MEMORY) != 0)
-    return true;
+    return TRUE;
 
   return bfd_cache_delete (abfd);
 }
@@ -261,7 +261,7 @@ FILE *
 bfd_open_file (abfd)
      bfd *abfd;
 {
-  abfd->cacheable = true;	/* Allow it to be closed later.  */
+  abfd->cacheable = TRUE;	/* Allow it to be closed later.  */
 
   if (open_files >= BFD_CACHE_MAX_OPEN)
     {
@@ -312,7 +312,7 @@ bfd_open_file (abfd)
 	    unlink (abfd->filename);
 #endif
 	  abfd->iostream = (PTR) fopen (abfd->filename, FOPEN_WUB);
-	  abfd->opened_once = true;
+	  abfd->opened_once = TRUE;
 	}
       break;
     }

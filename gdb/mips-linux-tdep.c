@@ -23,6 +23,8 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "solib-svr4.h"
+#include "osabi.h"
+#include "gdb_string.h"
 
 /* Copied from <asm/elf.h>.  */
 #define ELF_NGREG       45
@@ -60,7 +62,10 @@ typedef elf_fpreg_t elf_fpregset_t[ELF_NFPREG];
    which we extract the pc (MIPS_LINUX_JB_PC) that we will land at.  The pc
    is copied into PC.  This routine returns 1 on success.  */
 
-int
+#define MIPS_LINUX_JB_ELEMENT_SIZE 4
+#define MIPS_LINUX_JB_PC 0
+
+static int
 mips_linux_get_longjmp_target (CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
@@ -309,7 +314,7 @@ static struct core_fns regset_core_fns =
    This makes it possible to access GNU/Linux MIPS shared libraries from a
    GDB that was built on a different host platform (for cross debugging).  */
 
-struct link_map_offsets *
+static struct link_map_offsets *
 mips_linux_svr4_fetch_link_map_offsets (void)
 { 
   static struct link_map_offsets lmo;
@@ -342,8 +347,18 @@ mips_linux_svr4_fetch_link_map_offsets (void)
   return lmp;
 }
 
+static void
+mips_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  set_gdbarch_get_longjmp_target (gdbarch, mips_linux_get_longjmp_target);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, mips_linux_svr4_fetch_link_map_offsets);
+}
+
 void
 _initialize_mips_linux_tdep (void)
 {
+  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_LINUX,
+			  mips_linux_init_abi);
   add_core_fns (&regset_core_fns);
 }

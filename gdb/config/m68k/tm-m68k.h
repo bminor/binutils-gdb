@@ -22,12 +22,3 @@
 #include "regcache.h"
 
 #define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
-
-/* Generic 68000 stuff, to be included by other tm-*.h files.  */
-
-/* D0_REGNM and A0_REGNUM must be defined here because they are
-   used by the monitor.  */
-
-#define D0_REGNUM 0
-#define A0_REGNUM 8
-

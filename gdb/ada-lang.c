@@ -3542,7 +3542,7 @@ add_symbols_from_enclosing_procs (const char *name, namespace_enum namespace,
 	-(long) TYPE_LENGTH (SYMBOL_TYPE (static_link));
     }
 
-  frame = selected_frame;
+  frame = deprecated_selected_frame;
   while (frame != NULL && ndefns == 0)
     {
       struct block *block;
@@ -4973,17 +4973,7 @@ find_printable_frame (struct frame_info *fi, int level)
 
   for (; fi != NULL; level += 1, fi = get_prev_frame (fi))
     {
-      /* If fi is not the innermost frame, that normally means that fi->pc
-         points to *after* the call instruction, and we want to get the line
-         containing the call, never the next line.  But if the next frame is
-         a signal_handler_caller or a dummy frame, then the next frame was
-         not entered as the result of a call, and we want to get the line
-         containing fi->pc.  */
-      sal =
-	find_pc_line (fi->pc,
-		      fi->next != NULL
-		      && !fi->next->signal_handler_caller
-		      && !deprecated_frame_in_dummy (fi->next));
+      find_frame_sal (fi, &sal);
       if (sal.symtab && !is_ada_runtime_file (sal.symtab->filename))
 	{
 #if defined(__alpha__) && defined(__osf__) && !defined(VXWORKS_TARGET)
@@ -4994,7 +4984,7 @@ find_printable_frame (struct frame_info *fi, int level)
 	      STREQ (sal.symtab->objfile->name, "/usr/shlib/libpthread.so"))
 	    continue;
 #endif
-	  selected_frame = fi;
+	  deprecated_selected_frame = fi;
 	  break;
 	}
     }

@@ -299,8 +299,8 @@ _initialize_i386nbsd_tdep (void)
   add_core_fns (&i386nbsd_core_fns);
   add_core_fns (&i386nbsd_elfcore_fns);
 
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETBSD_AOUT,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETBSD_AOUT,
 			  i386nbsd_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETBSD_ELF,
 			  i386nbsdelf_init_abi);
 }

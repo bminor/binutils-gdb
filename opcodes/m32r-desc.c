@@ -32,6 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "m32r-opc.h"
 #include "opintl.h"
 #include "libiberty.h"
+#include "xregex.h"
 
 /* Attributes.  */
 
@@ -319,109 +320,112 @@ const CGEN_OPERAND m32r_cgen_operand_table[] =
 {
 /* pc: program counter */
   { "pc", M32R_OPERAND_PC, HW_H_PC, 0, 0,
-    { 0, &(m32r_cgen_ifld_table[0]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[0] } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* sr: source register */
   { "sr", M32R_OPERAND_SR, HW_H_GR, 12, 4,
-    { 0, &(m32r_cgen_ifld_table[6]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[6] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* dr: destination register */
   { "dr", M32R_OPERAND_DR, HW_H_GR, 4, 4,
-    { 0, &(m32r_cgen_ifld_table[5]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[5] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* src1: source register 1 */
   { "src1", M32R_OPERAND_SRC1, HW_H_GR, 4, 4,
-    { 0, &(m32r_cgen_ifld_table[5]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[5] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* src2: source register 2 */
   { "src2", M32R_OPERAND_SRC2, HW_H_GR, 12, 4,
-    { 0, &(m32r_cgen_ifld_table[6]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[6] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* scr: source control register */
   { "scr", M32R_OPERAND_SCR, HW_H_CR, 12, 4,
-    { 0, &(m32r_cgen_ifld_table[6]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[6] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* dcr: destination control register */
   { "dcr", M32R_OPERAND_DCR, HW_H_CR, 4, 4,
-    { 0, &(m32r_cgen_ifld_table[5]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[5] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* simm8: 8 bit signed immediate */
   { "simm8", M32R_OPERAND_SIMM8, HW_H_SINT, 8, 8,
-    { 0, &(m32r_cgen_ifld_table[7]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[7] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* simm16: 16 bit signed immediate */
   { "simm16", M32R_OPERAND_SIMM16, HW_H_SINT, 16, 16,
-    { 0, &(m32r_cgen_ifld_table[8]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[8] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* uimm4: 4 bit trap number */
   { "uimm4", M32R_OPERAND_UIMM4, HW_H_UINT, 12, 4,
-    { 0, &(m32r_cgen_ifld_table[10]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[10] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* uimm5: 5 bit shift count */
   { "uimm5", M32R_OPERAND_UIMM5, HW_H_UINT, 11, 5,
-    { 0, &(m32r_cgen_ifld_table[11]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[11] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* uimm16: 16 bit unsigned immediate */
   { "uimm16", M32R_OPERAND_UIMM16, HW_H_UINT, 16, 16,
-    { 0, &(m32r_cgen_ifld_table[12]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[12] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_BASE) } }  },
 /* imm1: 1 bit immediate */
   { "imm1", M32R_OPERAND_IMM1, HW_H_UINT, 15, 1,
-    { 0, &(m32r_cgen_ifld_table[25]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[25] } }, 
     { 0|A(HASH_PREFIX), { (1<<MACH_M32RX) } }  },
 /* accd: accumulator destination register */
   { "accd", M32R_OPERAND_ACCD, HW_H_ACCUMS, 4, 2,
-    { 0, &(m32r_cgen_ifld_table[22]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[22] } }, 
     { 0, { (1<<MACH_M32RX) } }  },
 /* accs: accumulator source register */
   { "accs", M32R_OPERAND_ACCS, HW_H_ACCUMS, 12, 2,
-    { 0, &(m32r_cgen_ifld_table[21]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[21] } }, 
     { 0, { (1<<MACH_M32RX) } }  },
 /* acc: accumulator reg (d) */
   { "acc", M32R_OPERAND_ACC, HW_H_ACCUMS, 8, 1,
-    { 0, &(m32r_cgen_ifld_table[20]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[20] } }, 
     { 0, { (1<<MACH_M32RX) } }  },
 /* hash: # prefix */
   { "hash", M32R_OPERAND_HASH, HW_H_SINT, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* hi16: high 16 bit immediate, sign optional */
   { "hi16", M32R_OPERAND_HI16, HW_H_HI16, 16, 16,
-    { 0, &(m32r_cgen_ifld_table[14]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[14] } }, 
     { 0|A(SIGN_OPT), { (1<<MACH_BASE) } }  },
 /* slo16: 16 bit signed immediate, for low() */
   { "slo16", M32R_OPERAND_SLO16, HW_H_SLO16, 16, 16,
-    { 0, &(m32r_cgen_ifld_table[8]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[8] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* ulo16: 16 bit unsigned immediate, for low() */
   { "ulo16", M32R_OPERAND_ULO16, HW_H_ULO16, 16, 16,
-    { 0, &(m32r_cgen_ifld_table[12]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[12] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* uimm24: 24 bit address */
   { "uimm24", M32R_OPERAND_UIMM24, HW_H_ADDR, 8, 24,
-    { 0, &(m32r_cgen_ifld_table[13]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[13] } }, 
     { 0|A(HASH_PREFIX)|A(RELOC)|A(ABS_ADDR), { (1<<MACH_BASE) } }  },
 /* disp8: 8 bit displacement */
   { "disp8", M32R_OPERAND_DISP8, HW_H_IADDR, 8, 8,
-    { 0, &(m32r_cgen_ifld_table[15]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[15] } }, 
     { 0|A(RELAX)|A(RELOC)|A(PCREL_ADDR), { (1<<MACH_BASE) } }  },
 /* disp16: 16 bit displacement */
   { "disp16", M32R_OPERAND_DISP16, HW_H_IADDR, 16, 16,
-    { 0, &(m32r_cgen_ifld_table[16]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[16] } }, 
     { 0|A(RELOC)|A(PCREL_ADDR), { (1<<MACH_BASE) } }  },
 /* disp24: 24 bit displacement */
   { "disp24", M32R_OPERAND_DISP24, HW_H_IADDR, 8, 24,
-    { 0, &(m32r_cgen_ifld_table[17]) }, 
+    { 0, { (const PTR) &m32r_cgen_ifld_table[17] } }, 
     { 0|A(RELAX)|A(RELOC)|A(PCREL_ADDR), { (1<<MACH_BASE) } }  },
 /* condbit: condition bit */
   { "condbit", M32R_OPERAND_CONDBIT, HW_H_COND, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* accum: accumulator */
   { "accum", M32R_OPERAND_ACCUM, HW_H_ACCUM, 0, 0,
-    { 0, 0 }, 
+    { 0, { (const PTR) 0 } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
-  { 0, 0, 0, 0, 0, {0, {0}} }
+/* sentinel */
+  { 0, 0, 0, 0, 0,
+    { 0, { (const PTR) 0 } },
+    { 0, { 0 } } }
 };
 
 #undef A
@@ -1442,7 +1446,7 @@ m32r_cgen_cpu_close (cd)
      CGEN_CPU_DESC cd;
 {
   unsigned int i;
-  CGEN_INSN *insns;
+  const CGEN_INSN *insns;
 
   if (cd->macro_insn_table.init_entries)
     {
@@ -1450,7 +1454,7 @@ m32r_cgen_cpu_close (cd)
       for (i = 0; i < cd->macro_insn_table.num_init_entries; ++i, ++insns)
 	{
 	  if (CGEN_INSN_RX ((insns)))
-	    regfree(CGEN_INSN_RX (insns));
+	    regfree (CGEN_INSN_RX (insns));
 	}
     }
 
@@ -1460,7 +1464,7 @@ m32r_cgen_cpu_close (cd)
       for (i = 0; i < cd->insn_table.num_init_entries; ++i, ++insns)
 	{
 	  if (CGEN_INSN_RX (insns))
-	    regfree(CGEN_INSN_RX (insns));
+	    regfree (CGEN_INSN_RX (insns));
 	}
     }
 

@@ -40,6 +40,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "osabi.h"
+#include "mips-tdep.h"
 
 #include "opcode/mips.h"
 #include "elf/mips.h"
@@ -58,19 +59,6 @@ enum
   MIPS_FPU_DOUBLE_REGSIZE = 8
 };
 
-/* All the possible MIPS ABIs. */
-
-enum mips_abi
-  {
-    MIPS_ABI_UNKNOWN = 0,
-    MIPS_ABI_N32,
-    MIPS_ABI_O32,
-    MIPS_ABI_N64,
-    MIPS_ABI_O64,
-    MIPS_ABI_EABI32,
-    MIPS_ABI_EABI64,
-    MIPS_ABI_LAST
-  };
 
 static const char *mips_abi_string;
 
@@ -162,6 +150,13 @@ struct gdbarch_tdep
 static const char *mips_saved_regsize_string = size_auto;
 
 #define MIPS_SAVED_REGSIZE (mips_saved_regsize())
+
+/* Return the MIPS ABI associated with GDBARCH.  */
+enum mips_abi
+mips_abi (struct gdbarch *gdbarch)
+{
+  return gdbarch_tdep (gdbarch)->mips_abi;
+}
 
 static unsigned int
 mips_saved_regsize (void)
@@ -1424,7 +1419,7 @@ mips_find_saved_regs (struct frame_info *fci)
 /* FIXME!  Is this correct?? */
 #define SIGFRAME_REG_SIZE	MIPS_REGSIZE
 #endif
-  if (fci->signal_handler_caller)
+  if ((get_frame_type (fci) == SIGTRAMP_FRAME))
     {
       for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
@@ -1457,7 +1452,7 @@ mips_find_saved_regs (struct frame_info *fci)
 				   a signal, we assume that all registers have been saved.
 				   This assumes that all register saves in a function happen before
 				   the first function call.  */
-       (fci->next == NULL || fci->next->signal_handler_caller)
+       (fci->next == NULL || (get_frame_type (fci->next) == SIGTRAMP_FRAME))
 
   /* In a dummy frame we know exactly where things are saved.  */
        && !PROC_DESC_IS_DUMMY (proc_desc)
@@ -1683,7 +1678,7 @@ mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
     target_remove_breakpoint (next_pc, break_mem);
 }
 
-static void
+static CORE_ADDR
 mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
   CORE_ADDR pc, tmp;
@@ -1691,7 +1686,7 @@ mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
   pc = ((fromleaf) ? SAVED_PC_AFTER_CALL (prev->next) :
 	prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
   tmp = SKIP_TRAMPOLINE_CODE (pc);
-  prev->pc = tmp ? tmp : pc;
+  return tmp ? tmp : pc;
 }
 
 
@@ -1702,11 +1697,10 @@ mips_frame_saved_pc (struct frame_info *frame)
   mips_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
   /* We have to get the saved pc from the sigcontext
      if it is a signal handler frame.  */
-  int pcreg = frame->signal_handler_caller ? PC_REGNUM
+  int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME) ? PC_REGNUM
   : (proc_desc ? PROC_PC_REG (proc_desc) : RA_REGNUM);
 
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0))
     {
       LONGEST tmp;
       frame_unwind_signed_register (frame, PC_REGNUM, &tmp);
@@ -1721,7 +1715,13 @@ mips_frame_saved_pc (struct frame_info *frame)
 }
 
 static struct mips_extra_func_info temp_proc_desc;
-static CORE_ADDR temp_saved_regs[NUM_REGS];
+
+/* This hack will go away once the get_prev_frame() code has been
+   modified to set the frame's type first.  That is BEFORE init extra
+   frame info et.al.  is called.  This is because it will become
+   possible to skip the init extra info call for sigtramp and dummy
+   frames.  */
+static CORE_ADDR *temp_saved_regs;
 
 /* Set a register's saved stack address in temp_saved_regs.  If an address
    has already been set for this register, do nothing; this way we will
@@ -2033,6 +2033,7 @@ mips32_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0;	/* Value of $r30. Used by gcc for frame-pointer */
 restart:
+  temp_saved_regs = xrealloc (temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
   memset (temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_FRAME_OFFSET (&temp_proc_desc) = 0;
   PROC_FRAME_ADJUST (&temp_proc_desc) = 0;	/* offset of FP from SP */
@@ -2141,7 +2142,8 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   if (start_pc == 0)
     return NULL;
   memset (&temp_proc_desc, '\0', sizeof (temp_proc_desc));
-  memset (&temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
+  temp_saved_regs = xrealloc (temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
+  memset (temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
   PROC_FRAME_REG (&temp_proc_desc) = SP_REGNUM;
   PROC_PC_REG (&temp_proc_desc) = RA_REGNUM;
@@ -2189,7 +2191,7 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
   struct obj_section *sec;
   struct mips_objfile_private *priv;
 
-  if (PC_IN_CALL_DUMMY (pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
     return NULL;
 
   find_pc_partial_function (pc, NULL, &startaddr, NULL);
@@ -2429,8 +2431,7 @@ mips_frame_chain (struct frame_info *frame)
   if ((tmp = SKIP_TRAMPOLINE_CODE (saved_pc)) != 0)
     saved_pc = tmp;
 
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (saved_pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (saved_pc, 0, 0))
     {
       /* A dummy frame, uses SP not FP.  Get the old SP value.  If all
          is well, frame->frame the bottom of the current frame will
@@ -2452,11 +2453,10 @@ mips_frame_chain (struct frame_info *frame)
       && PROC_FRAME_OFFSET (proc_desc) == 0
       /* The previous frame from a sigtramp frame might be frameless
 	 and have frame size zero.  */
-      && !frame->signal_handler_caller
+      && !(get_frame_type (frame) == SIGTRAMP_FRAME)
       /* For a generic dummy frame, let get_frame_pointer() unwind a
          register value saved as part of the dummy frame call.  */
-      && !(USE_GENERIC_DUMMY_FRAMES
-	   && PC_IN_CALL_DUMMY (frame->pc, 0, 0)))
+      && !(DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0)))
     return 0;
   else
     return get_frame_pointer (frame, proc_desc);
@@ -2486,8 +2486,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
       if (fci->pc == PROC_LOW_ADDR (proc_desc)
 	  && !PROC_DESC_IS_DUMMY (proc_desc))
 	fci->frame = read_next_frame_reg (fci->next, SP_REGNUM);
-      else if (USE_GENERIC_DUMMY_FRAMES
-	       && PC_IN_CALL_DUMMY (fci->pc, 0, 0))
+      else if (DEPRECATED_PC_IN_CALL_DUMMY (fci->pc, 0, 0))
 	/* Do not ``fix'' fci->frame.  It will have the value of the
            generic dummy frame's top-of-stack (since the draft
            fci->frame is obtained by returning the unwound stack
@@ -2503,8 +2502,12 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 	  char *name;
 
 	  /* Do not set the saved registers for a sigtramp frame,
-	     mips_find_saved_registers will do that for us.
-	     We can't use fci->signal_handler_caller, it is not yet set.  */
+	     mips_find_saved_registers will do that for us.  We can't
+	     use (get_frame_type (fci) == SIGTRAMP_FRAME), it is not
+	     yet set.  */
+	  /* FIXME: cagney/2002-11-18: This problem will go away once
+             frame.c:get_prev_frame() is modified to set the frame's
+             type before calling functions like this.  */
 	  find_pc_partial_function (fci->pc, &name,
 				    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
 	  if (!PC_IN_SIGTRAMP (fci->pc, name))
@@ -3810,11 +3813,10 @@ mips_pop_frame (void)
 {
   register int regnum;
   struct frame_info *frame = get_current_frame ();
-  CORE_ADDR new_sp = FRAME_FP (frame);
+  CORE_ADDR new_sp = get_frame_base (frame);
   mips_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
 
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0))
     {
       generic_pop_dummy_frame ();
       flush_cached_frames ();
@@ -3943,7 +3945,7 @@ mips_read_fp_register_single (int regno, char *rare_buffer)
   int raw_size = REGISTER_RAW_SIZE (regno);
   char *raw_buffer = alloca (raw_size);
 
-  if (!frame_register_read (selected_frame, regno, raw_buffer))
+  if (!frame_register_read (deprecated_selected_frame, regno, raw_buffer))
     error ("can't read register %d (%s)", regno, REGISTER_NAME (regno));
   if (raw_size == 8)
     {
@@ -3977,7 +3979,7 @@ mips_read_fp_register_double (int regno, char *rare_buffer)
     {
       /* We have a 64-bit value for this register, and we should use
 	 all 64 bits.  */
-      if (!frame_register_read (selected_frame, regno, rare_buffer))
+      if (!frame_register_read (deprecated_selected_frame, regno, rare_buffer))
 	error ("can't read register %d (%s)", regno, REGISTER_NAME (regno));
     }
   else
@@ -4008,7 +4010,7 @@ mips_print_register (int regnum, int all)
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
 
   /* Get the data in raw format.  */
-  if (!frame_register_read (selected_frame, regnum, raw_buffer))
+  if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     {
       printf_filtered ("%s: [Invalid]", REGISTER_NAME (regnum));
       return;
@@ -4188,7 +4190,7 @@ do_gp_register_row (int regnum)
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
 	break;			/* end row: reached FP register */
       /* OK: get the data in raw format.  */
-      if (!frame_register_read (selected_frame, regnum, raw_buffer))
+      if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
 	error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
       /* pad small registers */
       for (byte = 0; byte < (MIPS_REGSIZE - REGISTER_VIRTUAL_SIZE (regnum)); byte++)
@@ -5764,6 +5766,11 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_elf_make_msymbol_special (gdbarch, 
 					mips_elf_make_msymbol_special);
 
+  if (osabi == GDB_OSABI_IRIX)
+    set_gdbarch_num_regs (gdbarch, 71);
+  else
+    set_gdbarch_num_regs (gdbarch, 90);
+
   switch (mips_abi)
     {
     case MIPS_ABI_O32:
@@ -5971,9 +5978,9 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_addr_bits_remove (gdbarch, mips_addr_bits_remove);
 
   /* There's a mess in stack frame creation.  See comments in
-     blockframe.c near reference to INIT_FRAME_PC_FIRST.  */
-  set_gdbarch_init_frame_pc_first (gdbarch, mips_init_frame_pc_first);
-  set_gdbarch_init_frame_pc (gdbarch, init_frame_pc_noop);
+     blockframe.c near reference to DEPRECATED_INIT_FRAME_PC_FIRST.  */
+  set_gdbarch_deprecated_init_frame_pc_first (gdbarch, mips_init_frame_pc_first);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
 
   /* Map debug register numbers onto internal register numbers.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, mips_stab_reg_to_regnum);
@@ -5987,38 +5994,20 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-#if OLD_STYLE_MIPS_DUMMY_FRAMES
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
-#else
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-#endif
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
-#if OLD_STYLE_MIPS_DUMMY_FRAMES
-  set_gdbarch_push_dummy_frame (gdbarch, mips_push_dummy_frame);
-#else
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
-#endif
   set_gdbarch_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, mips_fix_call_dummy);
-#if OLD_STYLE_MIPS_DUMMY_FRAMES
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
-#else
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
-#endif
   set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
-#if OLD_STYLE_MIPS_DUMMY_FRAMES
-#else
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-#endif
   set_gdbarch_register_convertible (gdbarch, mips_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch, 
 					   mips_register_convert_to_virtual);
@@ -6032,8 +6021,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     generic_frameless_function_invocation_not);
   set_gdbarch_frame_saved_pc (gdbarch, mips_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
@@ -6211,12 +6198,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: GDB_TARGET_IS_MIPS64 = %d\n",
 		      GDB_TARGET_IS_MIPS64);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: GDB_TARGET_MASK_DISAS_PC # %s\n",
-		      XSTRING (GDB_TARGET_MASK_DISAS_PC (PC)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: GDB_TARGET_UNMASK_DISAS_PC # %s\n",
-		      XSTRING (GDB_TARGET_UNMASK_DISAS_PC (PC)));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: GEN_REG_SAVE_MASK = %d\n",
 		      GEN_REG_SAVE_MASK);

@@ -662,7 +662,7 @@ value_assign (struct value *toval, struct value *fromval)
 	/* Since modifying a register can trash the frame chain, we
            save the old frame and then restore the new frame
            afterwards.  */
-	get_frame_id (selected_frame, &old_frame);
+	old_frame = get_frame_id (deprecated_selected_frame);
 
 	/* Figure out which frame this is in currently.  */
 	if (VALUE_LVAL (toval) == lval_register)
@@ -673,7 +673,7 @@ value_assign (struct value *toval, struct value *fromval)
 	else
 	  {
 	    for (frame = get_current_frame ();
-		 frame && FRAME_FP (frame) != VALUE_FRAME (toval);
+		 frame && get_frame_base (frame) != VALUE_FRAME (toval);
 		 frame = get_prev_frame (frame))
 	      ;
 	    value_reg = VALUE_FRAME_REGNUM (toval);
@@ -1475,7 +1475,7 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   if (CALL_DUMMY_LOCATION == ON_STACK)
     {
       write_memory (start_sp, (char *) dummy1, sizeof_dummy1);
-      if (USE_GENERIC_DUMMY_FRAMES)
+      if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
 	generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
     }
 
@@ -1493,7 +1493,7 @@ hand_function_call (struct value *function, int nargs, struct value **args)
       sp = old_sp;
       real_pc = text_end - sizeof_dummy1;
       write_memory (real_pc, (char *) dummy1, sizeof_dummy1);
-      if (USE_GENERIC_DUMMY_FRAMES)
+      if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
 	generic_save_call_dummy_addr (real_pc, real_pc + sizeof_dummy1);
     }
 
@@ -1506,14 +1506,14 @@ hand_function_call (struct value *function, int nargs, struct value **args)
       errcode = target_write_memory (real_pc, (char *) dummy1, sizeof_dummy1);
       if (errcode != 0)
 	error ("Cannot write text segment -- call_function failed");
-      if (USE_GENERIC_DUMMY_FRAMES)
+      if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
 	generic_save_call_dummy_addr (real_pc, real_pc + sizeof_dummy1);
     }
 
   if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
     {
       real_pc = funaddr;
-      if (USE_GENERIC_DUMMY_FRAMES)
+      if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
 	/* NOTE: cagney/2002-04-13: The entry point is going to be
            modified with a single breakpoint.  */
 	generic_save_call_dummy_addr (CALL_DUMMY_ADDRESS (),
@@ -3384,7 +3384,7 @@ value_of_local (const char *name, int complain)
   int i;
   struct value * ret;
 
-  if (selected_frame == 0)
+  if (deprecated_selected_frame == 0)
     {
       if (complain)
 	error ("no frame selected");
@@ -3392,7 +3392,7 @@ value_of_local (const char *name, int complain)
 	return 0;
     }
 
-  func = get_frame_function (selected_frame);
+  func = get_frame_function (deprecated_selected_frame);
   if (!func)
     {
       if (complain)
@@ -3421,7 +3421,7 @@ value_of_local (const char *name, int complain)
 	return NULL;
     }
 
-  ret = read_var_value (sym, selected_frame);
+  ret = read_var_value (sym, deprecated_selected_frame);
   if (ret == 0 && complain)
     error ("`%s' argument unreadable", name);
   return ret;
@@ -3448,7 +3448,7 @@ struct value *
 value_slice (struct value *array, int lowbound, int length)
 {
   struct type *slice_range_type, *slice_type, *range_type;
-  LONGEST lowerbound, upperbound, offset;
+  LONGEST lowerbound, upperbound;
   struct value *slice;
   struct type *array_type;
   array_type = check_typedef (VALUE_TYPE (array));
@@ -3499,7 +3499,7 @@ value_slice (struct value *array, int lowbound, int length)
   else
     {
       struct type *element_type = TYPE_TARGET_TYPE (array_type);
-      offset
+      LONGEST offset
 	= (lowbound - lowerbound) * TYPE_LENGTH (check_typedef (element_type));
       slice_type = create_array_type ((struct type *) NULL, element_type,
 				      slice_range_type);

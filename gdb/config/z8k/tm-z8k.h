@@ -20,6 +20,11 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+/* NOTE: cagney/2002-11-24: This is a guess.  */
+#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 0
+#define CALL_DUMMY_LOCATION ON_STACK
+#define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
+
 #undef TARGET_INT_BIT
 #undef TARGET_LONG_BIT
 #undef TARGET_SHORT_BIT
@@ -103,9 +108,8 @@ extern int z8k_saved_pc_after_call (struct frame_info *frame);
 #define REGISTER_VIRTUAL_TYPE(N) \
  (REGISTER_VIRTUAL_SIZE(N) == 2? builtin_type_unsigned_int : builtin_type_long)
 
-/*#define INIT_FRAME_PC(x,y) init_frame_pc(x,y) */
-/* Initializer for an array of names of registers.
-   Entries beyond the first NUM_REGS are ignored.  */
+#define DEPRECATED_INIT_FRAME_PC(x,y) (init_frame_pc_noop (x, y))
+#define INIT_FRAME_PC_FIRST(x,y) (init_frame_pc_noop (x, y))
 
 #define REGISTER_NAMES  \
  {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", \

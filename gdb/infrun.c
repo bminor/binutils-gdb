@@ -66,12 +66,7 @@ static int restore_selected_frame (void *);
 
 static void build_infrun (void);
 
-static void follow_inferior_fork (int parent_pid, int child_pid,
-				  int has_forked, int has_vforked);
-
-static void follow_fork (int parent_pid, int child_pid);
-
-static void follow_vfork (int parent_pid, int child_pid);
+static int follow_fork ();
 
 static void set_schedlock_func (char *args, int from_tty,
 				struct cmd_list_element *c);
@@ -360,43 +355,19 @@ static struct
   struct
   {
     int parent_pid;
-    int saw_parent_fork;
     int child_pid;
-    int saw_child_fork;
-    int saw_child_exec;
   }
   fork_event;
   char *execd_pathname;
 }
 pending_follow;
 
-/* Some platforms don't allow us to do anything meaningful with a
-   vforked child until it has exec'd.  Vforked processes on such
-   platforms can only be followed after they've exec'd.
-
-   When this is set to 0, a vfork can be immediately followed,
-   and an exec can be followed merely as an exec.  When this is
-   set to 1, a vfork event has been seen, but cannot be followed
-   until the exec is seen.
-
-   (In the latter case, inferior_ptid is still the parent of the
-   vfork, and pending_follow.fork_event.child_pid is the child.  The
-   appropriate process is followed, according to the setting of
-   follow-fork-mode.) */
-static int follow_vfork_when_exec;
-
 static const char follow_fork_mode_ask[] = "ask";
-static const char follow_fork_mode_both[] = "both";
 static const char follow_fork_mode_child[] = "child";
 static const char follow_fork_mode_parent[] = "parent";
 
 static const char *follow_fork_mode_kind_names[] = {
   follow_fork_mode_ask,
-  /* ??rehrauer: The "both" option is broken, by what may be a 10.20
-     kernel problem.  It's also not terribly useful without a GUI to
-     help the user drive two debuggers.  So for now, I'm disabling the
-     "both" option. */
-  /* follow_fork_mode_both, */
   follow_fork_mode_child,
   follow_fork_mode_parent,
   NULL
@@ -405,15 +376,11 @@ static const char *follow_fork_mode_kind_names[] = {
 static const char *follow_fork_mode_string = follow_fork_mode_parent;
 
 
-static void
-follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
-		      int has_vforked)
+static int
+follow_fork ()
 {
-  int followed_parent = 0;
-  int followed_child = 0;
-
-  /* Which process did the user want us to follow? */
   const char *follow_mode = follow_fork_mode_string;
+  int follow_child = (follow_mode == follow_fork_mode_child);
 
   /* Or, did the user not know, and want us to ask? */
   if (follow_fork_mode_string == follow_fork_mode_ask)
@@ -423,175 +390,33 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
       /* follow_mode = follow_fork_mode_...; */
     }
 
-  /* If we're to be following the parent, then detach from child_pid.
-     We're already following the parent, so need do nothing explicit
-     for it. */
-  if (follow_mode == follow_fork_mode_parent)
-    {
-      followed_parent = 1;
-
-      /* We're already attached to the parent, by default. */
-
-      /* Before detaching from the child, remove all breakpoints from
-         it.  (This won't actually modify the breakpoint list, but will
-         physically remove the breakpoints from the child.) */
-      if (!has_vforked || !follow_vfork_when_exec)
-	{
-	  detach_breakpoints (child_pid);
-#ifdef SOLIB_REMOVE_INFERIOR_HOOK
-	  SOLIB_REMOVE_INFERIOR_HOOK (child_pid);
-#endif
-	}
-
-      /* Detach from the child. */
-      dont_repeat ();
-
-      target_require_detach (child_pid, "", 1);
-    }
-
-  /* If we're to be following the child, then attach to it, detach
-     from inferior_ptid, and set inferior_ptid to child_pid. */
-  else if (follow_mode == follow_fork_mode_child)
-    {
-      char child_pid_spelling[100];	/* Arbitrary length. */
-
-      followed_child = 1;
-
-      /* Before detaching from the parent, detach all breakpoints from
-         the child.  But only if we're forking, or if we follow vforks
-         as soon as they happen.  (If we're following vforks only when
-         the child has exec'd, then it's very wrong to try to write
-         back the "shadow contents" of inserted breakpoints now -- they
-         belong to the child's pre-exec'd a.out.) */
-      if (!has_vforked || !follow_vfork_when_exec)
-	{
-	  detach_breakpoints (child_pid);
-	}
-
-      /* Before detaching from the parent, remove all breakpoints from it. */
-      remove_breakpoints ();
-
-      /* Also reset the solib inferior hook from the parent. */
-#ifdef SOLIB_REMOVE_INFERIOR_HOOK
-      SOLIB_REMOVE_INFERIOR_HOOK (PIDGET (inferior_ptid));
-#endif
-
-      /* Detach from the parent. */
-      dont_repeat ();
-      target_detach (NULL, 1);
-
-      /* Attach to the child. */
-      inferior_ptid = pid_to_ptid (child_pid);
-      sprintf (child_pid_spelling, "%d", child_pid);
-      dont_repeat ();
-
-      target_require_attach (child_pid_spelling, 1);
-
-      /* Was there a step_resume breakpoint?  (There was if the user
-         did a "next" at the fork() call.)  If so, explicitly reset its
-         thread number.
-
-         step_resumes are a form of bp that are made to be per-thread.
-         Since we created the step_resume bp when the parent process
-         was being debugged, and now are switching to the child process,
-         from the breakpoint package's viewpoint, that's a switch of
-         "threads".  We must update the bp's notion of which thread
-         it is for, or it'll be ignored when it triggers... */
-      if (step_resume_breakpoint && (!has_vforked || !follow_vfork_when_exec))
-	breakpoint_re_set_thread (step_resume_breakpoint);
-
-      /* Reinsert all breakpoints in the child.  (The user may've set
-         breakpoints after catching the fork, in which case those
-         actually didn't get set in the child, but only in the parent.) */
-      if (!has_vforked || !follow_vfork_when_exec)
-	{
-	  breakpoint_re_set ();
-	  insert_breakpoints ();
-	}
-    }
-
-  /* If we're to be following both parent and child, then fork ourselves,
-     and attach the debugger clone to the child. */
-  else if (follow_mode == follow_fork_mode_both)
-    {
-      char pid_suffix[100];	/* Arbitrary length. */
-
-      /* Clone ourselves to follow the child.  This is the end of our
-         involvement with child_pid; our clone will take it from here... */
-      dont_repeat ();
-      target_clone_and_follow_inferior (child_pid, &followed_child);
-      followed_parent = !followed_child;
-
-      /* We continue to follow the parent.  To help distinguish the two
-         debuggers, though, both we and our clone will reset our prompts. */
-      sprintf (pid_suffix, "[%d] ", PIDGET (inferior_ptid));
-      set_prompt (strcat (get_prompt (), pid_suffix));
-    }
-
-  /* The parent and child of a vfork share the same address space.
-     Also, on some targets the order in which vfork and exec events
-     are received for parent in child requires some delicate handling
-     of the events.
-
-     For instance, on ptrace-based HPUX we receive the child's vfork
-     event first, at which time the parent has been suspended by the
-     OS and is essentially untouchable until the child's exit or second
-     exec event arrives.  At that time, the parent's vfork event is
-     delivered to us, and that's when we see and decide how to follow
-     the vfork.  But to get to that point, we must continue the child
-     until it execs or exits.  To do that smoothly, all breakpoints
-     must be removed from the child, in case there are any set between
-     the vfork() and exec() calls.  But removing them from the child
-     also removes them from the parent, due to the shared-address-space
-     nature of a vfork'd parent and child.  On HPUX, therefore, we must
-     take care to restore the bp's to the parent before we continue it.
-     Else, it's likely that we may not stop in the expected place.  (The
-     worst scenario is when the user tries to step over a vfork() call;
-     the step-resume bp must be restored for the step to properly stop
-     in the parent after the call completes!)
-
-     Sequence of events, as reported to gdb from HPUX:
-
-     Parent        Child           Action for gdb to take
-     -------------------------------------------------------
-     1                VFORK               Continue child
-     2                EXEC
-     3                EXEC or EXIT
-     4  VFORK */
-  if (has_vforked)
-    {
-      target_post_follow_vfork (parent_pid,
-				followed_parent, child_pid, followed_child);
-    }
-
-  pending_follow.fork_event.saw_parent_fork = 0;
-  pending_follow.fork_event.saw_child_fork = 0;
+  return target_follow_fork (follow_child);
 }
 
-static void
-follow_fork (int parent_pid, int child_pid)
+void
+follow_inferior_reset_breakpoints (void)
 {
-  follow_inferior_fork (parent_pid, child_pid, 1, 0);
-}
+  /* Was there a step_resume breakpoint?  (There was if the user
+     did a "next" at the fork() call.)  If so, explicitly reset its
+     thread number.
 
+     step_resumes are a form of bp that are made to be per-thread.
+     Since we created the step_resume bp when the parent process
+     was being debugged, and now are switching to the child process,
+     from the breakpoint package's viewpoint, that's a switch of
+     "threads".  We must update the bp's notion of which thread
+     it is for, or it'll be ignored when it triggers.  */
 
-/* Forward declaration. */
-static void follow_exec (int, char *);
+  if (step_resume_breakpoint)
+    breakpoint_re_set_thread (step_resume_breakpoint);
 
-static void
-follow_vfork (int parent_pid, int child_pid)
-{
-  follow_inferior_fork (parent_pid, child_pid, 0, 1);
+  /* Reinsert all breakpoints in the child.  The user may have set
+     breakpoints after catching the fork, in which case those
+     were never set in the child, but only in the parent.  This makes
+     sure the inserted breakpoints match the breakpoint list.  */
 
-  /* Did we follow the child?  Had it exec'd before we saw the parent vfork? */
-  if (pending_follow.fork_event.saw_child_exec
-      && (PIDGET (inferior_ptid) == child_pid))
-    {
-      pending_follow.fork_event.saw_child_exec = 0;
-      pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-      follow_exec (PIDGET (inferior_ptid), pending_follow.execd_pathname);
-      xfree (pending_follow.execd_pathname);
-    }
+  breakpoint_re_set ();
+  insert_breakpoints ();
 }
 
 /* EXECD_PATHNAME is assumed to be non-NULL. */
@@ -604,23 +429,6 @@ follow_exec (int pid, char *execd_pathname)
 
   if (!may_follow_exec)
     return;
-
-  /* Did this exec() follow a vfork()?  If so, we must follow the
-     vfork now too.  Do it before following the exec. */
-  if (follow_vfork_when_exec &&
-      (pending_follow.kind == TARGET_WAITKIND_VFORKED))
-    {
-      pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-      follow_vfork (PIDGET (inferior_ptid),
-		    pending_follow.fork_event.child_pid);
-      follow_vfork_when_exec = 0;
-      saved_pid = PIDGET (inferior_ptid);
-
-      /* Did we follow the parent?  If so, we're done.  If we followed
-         the child then we must also follow its exec(). */
-      if (PIDGET (inferior_ptid) == pending_follow.fork_event.parent_pid)
-	return;
-    }
 
   /* This is an exec event that we actually wish to pay attention to.
      Refresh our symbol table to the newly exec'd program, remove any
@@ -797,38 +605,19 @@ resume (int step, enum target_signal sig)
 #endif
 
   /* If there were any forks/vforks/execs that were caught and are
-     now to be followed, then do so. */
+     now to be followed, then do so.  */
   switch (pending_follow.kind)
     {
-    case (TARGET_WAITKIND_FORKED):
+    case TARGET_WAITKIND_FORKED:
+    case TARGET_WAITKIND_VFORKED:
       pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-      follow_fork (PIDGET (inferior_ptid),
-		   pending_follow.fork_event.child_pid);
+      if (follow_fork ())
+	should_resume = 0;
       break;
 
-    case (TARGET_WAITKIND_VFORKED):
-      {
-	int saw_child_exec = pending_follow.fork_event.saw_child_exec;
-
-	pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-	follow_vfork (PIDGET (inferior_ptid),
-		      pending_follow.fork_event.child_pid);
-
-	/* Did we follow the child, but not yet see the child's exec event?
-	   If so, then it actually ought to be waiting for us; we respond to
-	   parent vfork events.  We don't actually want to resume the child
-	   in this situation; we want to just get its exec event. */
-	if (!saw_child_exec &&
-	    (PIDGET (inferior_ptid) == pending_follow.fork_event.child_pid))
-	  should_resume = 0;
-      }
-      break;
-
-    case (TARGET_WAITKIND_EXECD):
-      /* If we saw a vfork event but couldn't follow it until we saw
-         an exec, then now might be the time! */
-      pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
+    case TARGET_WAITKIND_EXECD:
       /* follow_exec is called as soon as the exec event is seen. */
+      pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
       break;
 
     default:
@@ -887,7 +676,7 @@ clear_proceed_status (void)
   trap_expected = 0;
   step_range_start = 0;
   step_range_end = 0;
-  step_frame_address = 0;
+  step_frame_id = null_frame_id;
   step_over_calls = STEP_OVER_UNDEBUGGABLE;
   stop_after_trap = 0;
   stop_soon_quietly = 0;
@@ -1075,9 +864,6 @@ init_wait_for_inferior (void)
 
   /* The first resume is not following a fork/vfork/exec. */
   pending_follow.kind = TARGET_WAITKIND_SPURIOUS;	/* I.e., none. */
-  pending_follow.fork_event.saw_parent_fork = 0;
-  pending_follow.fork_event.saw_child_fork = 0;
-  pending_follow.fork_event.saw_child_exec = 0;
 
   /* See wait_for_inferior's handling of SYSCALL_ENTRY/RETURN events. */
   number_of_threads_in_syscalls = 0;
@@ -1356,7 +1142,7 @@ context_switch (struct execution_control_state *ecs)
 			 prev_func_start, prev_func_name,
 			 trap_expected, step_resume_breakpoint,
 			 through_sigtramp_breakpoint, step_range_start,
-			 step_range_end, step_frame_address,
+			 step_range_end, &step_frame_id,
 			 ecs->handling_longjmp, ecs->another_trap,
 			 ecs->stepping_through_solib_after_catch,
 			 ecs->stepping_through_solib_catchpoints,
@@ -1368,7 +1154,7 @@ context_switch (struct execution_control_state *ecs)
 			 &prev_func_start, &prev_func_name,
 			 &trap_expected, &step_resume_breakpoint,
 			 &through_sigtramp_breakpoint, &step_range_start,
-			 &step_range_end, &step_frame_address,
+			 &step_range_end, &step_frame_id,
 			 &ecs->handling_longjmp, &ecs->another_trap,
 			 &ecs->stepping_through_solib_after_catch,
 			 &ecs->stepping_through_solib_catchpoints,
@@ -1540,108 +1326,40 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* The following are the only cases in which we keep going;
          the above cases end in a continue or goto. */
     case TARGET_WAITKIND_FORKED:
-      stop_signal = TARGET_SIGNAL_TRAP;
-      pending_follow.kind = ecs->ws.kind;
-
-      /* Ignore fork events reported for the parent; we're only
-         interested in reacting to forks of the child.  Note that
-         we expect the child's fork event to be available if we
-         waited for it now. */
-      if (ptid_equal (inferior_ptid, ecs->ptid))
-	{
-	  pending_follow.fork_event.saw_parent_fork = 1;
-	  pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
-	  pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
-	  prepare_to_wait (ecs);
-	  return;
-	}
-      else
-	{
-	  pending_follow.fork_event.saw_child_fork = 1;
-	  pending_follow.fork_event.child_pid = PIDGET (ecs->ptid);
-	  pending_follow.fork_event.parent_pid = ecs->ws.value.related_pid;
-	}
-
-      stop_pc = read_pc_pid (ecs->ptid);
-      ecs->saved_inferior_ptid = inferior_ptid;
-      inferior_ptid = ecs->ptid;
-      /* The second argument of bpstat_stop_status is meant to help
-         distinguish between a breakpoint trap and a singlestep trap.
-         This is only important on targets where DECR_PC_AFTER_BREAK
-         is non-zero.  The prev_pc test is meant to distinguish between
-         singlestepping a trap instruction, and singlestepping thru a
-         jump to the instruction following a trap instruction. */
-
-      stop_bpstat = bpstat_stop_status (&stop_pc,
-					currently_stepping (ecs) &&
-					prev_pc !=
-					stop_pc - DECR_PC_AFTER_BREAK);
-      ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
-      inferior_ptid = ecs->saved_inferior_ptid;
-      goto process_event_stop_test;
-
-      /* If this a platform which doesn't allow a debugger to touch a
-         vfork'd inferior until after it exec's, then we'd best keep
-         our fingers entirely off the inferior, other than continuing
-         it.  This has the unfortunate side-effect that catchpoints
-         of vforks will be ignored.  But since the platform doesn't
-         allow the inferior be touched at vfork time, there's really
-         little choice. */
     case TARGET_WAITKIND_VFORKED:
       stop_signal = TARGET_SIGNAL_TRAP;
       pending_follow.kind = ecs->ws.kind;
 
-      /* Is this a vfork of the parent?  If so, then give any
-         vfork catchpoints a chance to trigger now.  (It's
-         dangerous to do so if the child canot be touched until
-         it execs, and the child has not yet exec'd.  We probably
-         should warn the user to that effect when the catchpoint
-         triggers...) */
-      if (ptid_equal (ecs->ptid, inferior_ptid))
-	{
-	  pending_follow.fork_event.saw_parent_fork = 1;
-	  pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
-	  pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
-	}
-
-      /* If we've seen the child's vfork event but cannot really touch
-         the child until it execs, then we must continue the child now.
-         Else, give any vfork catchpoints a chance to trigger now. */
-      else
-	{
-	  pending_follow.fork_event.saw_child_fork = 1;
-	  pending_follow.fork_event.child_pid = PIDGET (ecs->ptid);
-	  pending_follow.fork_event.parent_pid = ecs->ws.value.related_pid;
-	  target_post_startup_inferior (pid_to_ptid
-					(pending_follow.fork_event.
-					 child_pid));
-	  follow_vfork_when_exec = !target_can_follow_vfork_prior_to_exec ();
-	  if (follow_vfork_when_exec)
-	    {
-	      target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
-	      prepare_to_wait (ecs);
-	      return;
-	    }
-	}
+      pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
+      pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
 
       stop_pc = read_pc ();
-      /* The second argument of bpstat_stop_status is meant to help
-         distinguish between a breakpoint trap and a singlestep trap.
-         This is only important on targets where DECR_PC_AFTER_BREAK
-         is non-zero.  The prev_pc test is meant to distinguish between
-         singlestepping a trap instruction, and singlestepping thru a
-         jump to the instruction following a trap instruction. */
 
-      stop_bpstat = bpstat_stop_status (&stop_pc,
-					currently_stepping (ecs) &&
-					prev_pc !=
-					stop_pc - DECR_PC_AFTER_BREAK);
+      /* Assume that catchpoints are not really software breakpoints.  If
+	 some future target implements them using software breakpoints then
+	 that target is responsible for fudging DECR_PC_AFTER_BREAK.  Thus
+	 we pass 1 for the NOT_A_SW_BREAKPOINT argument, so that
+	 bpstat_stop_status will not decrement the PC.  */
+
+      stop_bpstat = bpstat_stop_status (&stop_pc, 1);
+
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
+
+      /* If no catchpoint triggered for this, then keep going.  */
+      if (ecs->random_signal)
+	{
+	  stop_signal = TARGET_SIGNAL_0;
+	  keep_going (ecs);
+	  return;
+	}
       goto process_event_stop_test;
 
     case TARGET_WAITKIND_EXECD:
       stop_signal = TARGET_SIGNAL_TRAP;
 
+      /* NOTE drow/2002-12-05: This code should be pushed down into the
+	 target_wait function.  Until then following vfork on HP/UX 10.20
+	 is probably broken by this.  Of course, it's broken anyway.  */
       /* Is this a target which reports multiple exec events per actual
          call to exec()?  (HP-UX using ptrace does, for example.)  If so,
          ignore all but the last one.  Just resume the exec'r, and wait
@@ -1663,36 +1381,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	savestring (ecs->ws.value.execd_pathname,
 		    strlen (ecs->ws.value.execd_pathname));
 
-      /* Did inferior_ptid exec, or did a (possibly not-yet-followed)
-         child of a vfork exec?
-
-         ??rehrauer: This is unabashedly an HP-UX specific thing.  On
-         HP-UX, events associated with a vforking inferior come in
-         threes: a vfork event for the child (always first), followed
-         a vfork event for the parent and an exec event for the child.
-         The latter two can come in either order.
-
-         If we get the parent vfork event first, life's good: We follow
-         either the parent or child, and then the child's exec event is
-         a "don't care".
-
-         But if we get the child's exec event first, then we delay
-         responding to it until we handle the parent's vfork.  Because,
-         otherwise we can't satisfy a "catch vfork". */
-      if (pending_follow.kind == TARGET_WAITKIND_VFORKED)
-	{
-	  pending_follow.fork_event.saw_child_exec = 1;
-
-	  /* On some targets, the child must be resumed before
-	     the parent vfork event is delivered.  A single-step
-	     suffices. */
-	  if (RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK ())
-	    target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
-	  /* We expect the parent vfork event to be available now. */
-	  prepare_to_wait (ecs);
-	  return;
-	}
-
       /* This causes the eventpoints and symbol table to be reset.  Must
          do this now, before trying to determine whether to stop. */
       follow_exec (PIDGET (inferior_ptid), pending_follow.execd_pathname);
@@ -1701,19 +1389,25 @@ handle_inferior_event (struct execution_control_state *ecs)
       stop_pc = read_pc_pid (ecs->ptid);
       ecs->saved_inferior_ptid = inferior_ptid;
       inferior_ptid = ecs->ptid;
-      /* The second argument of bpstat_stop_status is meant to help
-         distinguish between a breakpoint trap and a singlestep trap.
-         This is only important on targets where DECR_PC_AFTER_BREAK
-         is non-zero.  The prev_pc test is meant to distinguish between
-         singlestepping a trap instruction, and singlestepping thru a
-         jump to the instruction following a trap instruction. */
 
-      stop_bpstat = bpstat_stop_status (&stop_pc,
-					currently_stepping (ecs) &&
-					prev_pc !=
-					stop_pc - DECR_PC_AFTER_BREAK);
+      /* Assume that catchpoints are not really software breakpoints.  If
+	 some future target implements them using software breakpoints then
+	 that target is responsible for fudging DECR_PC_AFTER_BREAK.  Thus
+	 we pass 1 for the NOT_A_SW_BREAKPOINT argument, so that
+	 bpstat_stop_status will not decrement the PC.  */
+
+      stop_bpstat = bpstat_stop_status (&stop_pc, 1);
+
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       inferior_ptid = ecs->saved_inferior_ptid;
+
+      /* If no catchpoint triggered for this, then keep going.  */
+      if (ecs->random_signal)
+	{
+	  stop_signal = TARGET_SIGNAL_0;
+	  keep_going (ecs);
+	  return;
+	}
       goto process_event_stop_test;
 
       /* These syscall events are returned on HP-UX, as part of its
@@ -1775,13 +1469,15 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       /* We had an event in the inferior, but we are not interested
          in handling it at this level. The lower layers have already
-         done what needs to be done, if anything. This case can
-         occur only when the target is async or extended-async. One
-         of the circumstamces for this to happen is when the
-         inferior produces output for the console. The inferior has
-         not stopped, and we are ignoring the event. */
+         done what needs to be done, if anything.
+	 
+	 One of the possible circumstances for this is when the
+	 inferior produces output for the console. The inferior has
+	 not stopped, and we are ignoring the event.  Another possible
+	 circumstance is any event which the lower level knows will be
+	 reported multiple times without an intervening resume.  */
     case TARGET_WAITKIND_IGNORE:
-      ecs->wait_some_more = 1;
+      prepare_to_wait (ecs);
       return;
     }
 
@@ -2124,8 +1820,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  = !(bpstat_explains_signal (stop_bpstat)
 	      || trap_expected
 	      || (!CALL_DUMMY_BREAKPOINT_OFFSET_P
-		  && PC_IN_CALL_DUMMY (stop_pc, read_sp (),
-				       FRAME_FP (get_current_frame ())))
+		  && DEPRECATED_PC_IN_CALL_DUMMY (stop_pc, read_sp (),
+				       get_frame_base (get_current_frame ())))
 	      || (step_range_end && step_resume_breakpoint == NULL));
 
       else
@@ -2135,8 +1831,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 				    news) give another signal besides SIGTRAP, so
 				    check here as well as above.  */
 				 || (!CALL_DUMMY_BREAKPOINT_OFFSET_P
-				     && PC_IN_CALL_DUMMY (stop_pc, read_sp (),
-							  FRAME_FP
+				     && DEPRECATED_PC_IN_CALL_DUMMY (stop_pc, read_sp (),
+							  get_frame_base
 							  (get_current_frame
 							   ()))));
 	  if (!ecs->random_signal)
@@ -2150,54 +1846,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   else
     ecs->random_signal = 1;
-  /* If a fork, vfork or exec event was seen, then there are two
-     possible responses we can make:
 
-     1. If a catchpoint triggers for the event (ecs->random_signal == 0),
-     then we must stop now and issue a prompt.  We will resume
-     the inferior when the user tells us to.
-     2. If no catchpoint triggers for the event (ecs->random_signal == 1),
-     then we must resume the inferior now and keep checking.
-
-     In either case, we must take appropriate steps to "follow" the
-     the fork/vfork/exec when the inferior is resumed.  For example,
-     if follow-fork-mode is "child", then we must detach from the
-     parent inferior and follow the new child inferior.
-
-     In either case, setting pending_follow causes the next resume()
-     to take the appropriate following action. */
 process_event_stop_test:
-  if (ecs->ws.kind == TARGET_WAITKIND_FORKED)
-    {
-      if (ecs->random_signal)	/* I.e., no catchpoint triggered for this. */
-	{
-	  trap_expected = 1;
-	  stop_signal = TARGET_SIGNAL_0;
-	  keep_going (ecs);
-	  return;
-	}
-    }
-  else if (ecs->ws.kind == TARGET_WAITKIND_VFORKED)
-    {
-      if (ecs->random_signal)	/* I.e., no catchpoint triggered for this. */
-	{
-	  stop_signal = TARGET_SIGNAL_0;
-	  keep_going (ecs);
-	  return;
-	}
-    }
-  else if (ecs->ws.kind == TARGET_WAITKIND_EXECD)
-    {
-      pending_follow.kind = ecs->ws.kind;
-      if (ecs->random_signal)	/* I.e., no catchpoint triggered for this. */
-	{
-	  trap_expected = 1;
-	  stop_signal = TARGET_SIGNAL_0;
-	  keep_going (ecs);
-	  return;
-	}
-    }
-
   /* For the program's own signals, act according to
      the signal handling tables.  */
 
@@ -2315,7 +1965,7 @@ process_event_stop_test:
 	  set_longjmp_resume_breakpoint (jmp_buf_pc, get_current_frame ());
 	else
 #endif /* 0 */
-	  set_longjmp_resume_breakpoint (jmp_buf_pc, NULL);
+	  set_longjmp_resume_breakpoint (jmp_buf_pc, null_frame_id);
 	ecs->handling_longjmp = 1;	/* FIXME */
 	keep_going (ecs);
 	return;
@@ -2327,8 +1977,8 @@ process_event_stop_test:
 #if 0
 	/* FIXME - Need to implement nested temporary breakpoints */
 	if (step_over_calls
-	    && (INNER_THAN (FRAME_FP (get_current_frame ()),
-			    step_frame_address)))
+	    && (frame_id_inner (get_frame_id (get_current_frame ()),
+				step_frame_id)))
 	  {
 	    ecs->another_trap = 1;
 	    keep_going (ecs);
@@ -2538,7 +2188,7 @@ process_event_stop_test:
          case she'd better know what she's doing.  */
 
       if (CALL_DUMMY_HAS_COMPLETED (stop_pc, read_sp (),
-				    FRAME_FP (get_current_frame ()))
+				    get_frame_base (get_current_frame ()))
 	  && !step_range_end)
 	{
 	  stop_print_frame = 0;
@@ -2608,7 +2258,7 @@ process_event_stop_test:
 
 	  check_for_old_step_resume_breakpoint ();
 	  step_resume_breakpoint =
-	    set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
+	    set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
 	  if (breakpoints_inserted)
 	    insert_breakpoints ();
 	}
@@ -2639,9 +2289,9 @@ process_event_stop_test:
 
 
       {
-	CORE_ADDR current_frame = FRAME_FP (get_current_frame ());
+	struct frame_id current_frame = get_frame_id (get_current_frame ());
 
-	if (INNER_THAN (current_frame, step_frame_address))
+	if (frame_id_inner (current_frame, step_frame_id))
 	  {
 	    /* We have just taken a signal; go until we are back to
 	       the point where we took it and one more.  */
@@ -2661,11 +2311,10 @@ process_event_stop_test:
 	    sr_sal.line = 0;
 	    sr_sal.pc = prev_pc;
 	    /* We could probably be setting the frame to
-	       step_frame_address; I don't think anyone thought to
-	       try it.  */
+	       step_frame_id; I don't think anyone thought to try it.  */
 	    check_for_old_step_resume_breakpoint ();
 	    step_resume_breakpoint =
-	      set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
+	      set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
 	    if (breakpoints_inserted)
 	      insert_breakpoints ();
 	  }
@@ -2736,17 +2385,17 @@ process_event_stop_test:
 	  /* We're doing a "next".  */
 
 	  if (PC_IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
-	      && INNER_THAN (step_frame_address, read_sp ()))
+	      && frame_id_inner (step_frame_id,
+				 frame_id_build (read_sp (), 0)))
 	    /* We stepped out of a signal handler, and into its
 	       calling trampoline.  This is misdetected as a
 	       subroutine call, but stepping over the signal
-	       trampoline isn't such a bad idea.  In order to do
-	       that, we have to ignore the value in
-	       step_frame_address, since that doesn't represent the
-	       frame that'll reach when we return from the signal
-	       trampoline.  Otherwise we'll probably continue to the
-	       end of the program.  */
-	    step_frame_address = 0;
+	       trampoline isn't such a bad idea.  In order to do that,
+	       we have to ignore the value in step_frame_id, since
+	       that doesn't represent the frame that'll reach when we
+	       return from the signal trampoline.  Otherwise we'll
+	       probably continue to the end of the program.  */
+	    step_frame_id = null_frame_id;
 
 	  step_over_function (ecs);
 	  keep_going (ecs);
@@ -2774,7 +2423,7 @@ process_event_stop_test:
 	      xxx.section = find_pc_overlay (xxx.pc);
 	      check_for_old_step_resume_breakpoint ();
 	      step_resume_breakpoint =
-		set_momentary_breakpoint (xxx, NULL, bp_step_resume);
+		set_momentary_breakpoint (xxx, null_frame_id, bp_step_resume);
 	      insert_breakpoints ();
 	      keep_going (ecs);
 	      return;
@@ -2852,7 +2501,7 @@ process_event_stop_test:
 	     is where the new fp value is established.  */
 	  check_for_old_step_resume_breakpoint ();
 	  step_resume_breakpoint =
-	    set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
+	    set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
 	  if (breakpoints_inserted)
 	    insert_breakpoints ();
 
@@ -2910,17 +2559,17 @@ process_event_stop_test:
     }
   step_range_start = ecs->sal.pc;
   step_range_end = ecs->sal.end;
-  step_frame_address = FRAME_FP (get_current_frame ());
+  step_frame_id = get_frame_id (get_current_frame ());
   ecs->current_line = ecs->sal.line;
   ecs->current_symtab = ecs->sal.symtab;
 
-  /* In the case where we just stepped out of a function into the middle
-     of a line of the caller, continue stepping, but step_frame_address
-     must be modified to current frame */
+  /* In the case where we just stepped out of a function into the
+     middle of a line of the caller, continue stepping, but
+     step_frame_id must be modified to current frame */
   {
-    CORE_ADDR current_frame = FRAME_FP (get_current_frame ());
-    if (!(INNER_THAN (current_frame, step_frame_address)))
-      step_frame_address = current_frame;
+    struct frame_id current_frame = get_frame_id (get_current_frame ());
+    if (!(frame_id_inner (current_frame, step_frame_id)))
+      step_frame_id = current_frame;
   }
 
   keep_going (ecs);
@@ -2966,7 +2615,7 @@ check_sigtramp2 (struct execution_control_state *ecs)
       /* We perhaps could set the frame if we kept track of what the
          frame corresponding to prev_pc was.  But we don't, so don't.  */
       through_sigtramp_breakpoint =
-	set_momentary_breakpoint (sr_sal, NULL, bp_through_sigtramp);
+	set_momentary_breakpoint (sr_sal, null_frame_id, bp_through_sigtramp);
       if (breakpoints_inserted)
 	insert_breakpoints ();
 
@@ -3024,7 +2673,7 @@ step_into_function (struct execution_control_state *ecs)
          established.  */
       check_for_old_step_resume_breakpoint ();
       step_resume_breakpoint =
-	set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
+	set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
       if (breakpoints_inserted)
 	insert_breakpoints ();
 
@@ -3043,7 +2692,7 @@ step_into_function (struct execution_control_state *ecs)
    of the call.
 
    To do this, we set the step_resume bp's frame to our current
-   caller's frame (step_frame_address, which is set by the "next" or
+   caller's frame (step_frame_id, which is set by the "next" or
    "until" command, before execution begins).  */
 
 static void
@@ -3057,10 +2706,12 @@ step_over_function (struct execution_control_state *ecs)
 
   check_for_old_step_resume_breakpoint ();
   step_resume_breakpoint =
-    set_momentary_breakpoint (sr_sal, get_current_frame (), bp_step_resume);
+    set_momentary_breakpoint (sr_sal, get_frame_id (get_current_frame ()),
+			      bp_step_resume);
 
-  if (step_frame_address && !IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
-    step_resume_breakpoint->frame = step_frame_address;
+  if (frame_id_p (step_frame_id)
+      && !IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
+    step_resume_breakpoint->frame_id = step_frame_id;
 
   if (breakpoints_inserted)
     insert_breakpoints ();
@@ -3071,30 +2722,6 @@ stop_stepping (struct execution_control_state *ecs)
 {
   if (target_has_execution)
     {
-      /* Are we stopping for a vfork event?  We only stop when we see
-         the child's event.  However, we may not yet have seen the
-         parent's event.  And, inferior_ptid is still set to the
-         parent's pid, until we resume again and follow either the
-         parent or child.
-
-         To ensure that we can really touch inferior_ptid (aka, the
-         parent process) -- which calls to functions like read_pc
-         implicitly do -- wait on the parent if necessary. */
-      if ((pending_follow.kind == TARGET_WAITKIND_VFORKED)
-	  && !pending_follow.fork_event.saw_parent_fork)
-	{
-	  ptid_t parent_ptid;
-
-	  do
-	    {
-	      if (target_wait_hook)
-		parent_ptid = target_wait_hook (pid_to_ptid (-1), &(ecs->ws));
-	      else
-		parent_ptid = target_wait (pid_to_ptid (-1), &(ecs->ws));
-	    }
-	  while (!ptid_equal (parent_ptid, inferior_ptid));
-	}
-
       /* Assuming the inferior still exists, set these up for next
          time, just like we did above if we didn't break out of the
          loop.  */
@@ -3114,16 +2741,6 @@ stop_stepping (struct execution_control_state *ecs)
 static void
 keep_going (struct execution_control_state *ecs)
 {
-  /* ??rehrauer: ttrace on HP-UX theoretically allows one to debug a
-     vforked child between its creation and subsequent exit or call to
-     exec().  However, I had big problems in this rather creaky exec
-     engine, getting that to work.  The fundamental problem is that
-     I'm trying to debug two processes via an engine that only
-     understands a single process with possibly multiple threads.
-
-     Hence, this spot is known to have problems when
-     target_can_follow_vfork_prior_to_exec returns 1. */
-
   /* Save the pc before execution, to compare with pc after stop.  */
   prev_pc = read_pc ();		/* Might have been DECR_AFTER_BREAK */
   prev_func_start = ecs->stop_func_start;	/* Ok, since if DECR_PC_AFTER
@@ -3363,8 +2980,12 @@ normal_stop (void)
   /* Make sure that the current_frame's pc is correct.  This
      is a correction for setting up the frame info before doing
      DECR_PC_AFTER_BREAK */
-  if (target_has_execution && get_current_frame ())
-    (get_current_frame ())->pc = read_pc ();
+  if (target_has_execution)
+    /* FIXME: cagney/2002-12-06: Has the PC changed?  Thanks to
+       DECR_PC_AFTER_BREAK, the program counter can change.  Ask the
+       frame code to check for this and sort out any resultant mess.
+       DECR_PC_AFTER_BREAK needs to just go away.  */
+    deprecated_update_frame_pc_hack (get_current_frame (), read_pc ());
 
   if (target_has_execution && breakpoints_inserted)
     {
@@ -3424,7 +3045,7 @@ normal_stop (void)
          bpstat_print() contains the logic deciding in detail
          what to print, based on the event(s) that just occurred. */
 
-      if (stop_print_frame && selected_frame)
+      if (stop_print_frame && deprecated_selected_frame)
 	{
 	  int bpstat_ret;
 	  int source_flag;
@@ -3434,8 +3055,12 @@ normal_stop (void)
 	  switch (bpstat_ret)
 	    {
 	    case PRINT_UNKNOWN:
+	      /* FIXME: cagney/2002-12-01: Given that a frame ID does
+		 (or should) carry around the function and does (or
+		 should) use that when doing a frame comparison.  */
 	      if (stop_step
-		  && step_frame_address == FRAME_FP (get_current_frame ())
+		  && frame_id_eq (step_frame_id,
+				  get_frame_id (get_current_frame ()))
 		  && step_start_function == find_pc_function (stop_pc))
 		source_flag = SRC_LINE;	/* finished step, just print source line */
 	      else
@@ -3468,7 +3093,7 @@ normal_stop (void)
 	     LOCATION: Print only location
 	     SRC_AND_LOC: Print location and source line */
 	  if (do_frame_printing)
-	    show_and_print_stack_frame (selected_frame, -1, source_flag);
+	    show_and_print_stack_frame (deprecated_selected_frame, -1, source_flag);
 
 	  /* Display the auto-display expressions.  */
 	  do_displays ();
@@ -3873,7 +3498,7 @@ struct inferior_status
   int trap_expected;
   CORE_ADDR step_range_start;
   CORE_ADDR step_range_end;
-  CORE_ADDR step_frame_address;
+  struct frame_id step_frame_id;
   enum step_over_calls_kind step_over_calls;
   CORE_ADDR step_resume_break_address;
   int stop_after_trap;
@@ -3920,7 +3545,7 @@ save_inferior_status (int restore_stack_info)
   inf_status->trap_expected = trap_expected;
   inf_status->step_range_start = step_range_start;
   inf_status->step_range_end = step_range_end;
-  inf_status->step_frame_address = step_frame_address;
+  inf_status->step_frame_id = step_frame_id;
   inf_status->step_over_calls = step_over_calls;
   inf_status->stop_after_trap = stop_after_trap;
   inf_status->stop_soon_quietly = stop_soon_quietly;
@@ -3938,7 +3563,7 @@ save_inferior_status (int restore_stack_info)
 
   inf_status->registers = regcache_dup (current_regcache);
 
-  get_frame_id (selected_frame, &inf_status->selected_frame_id);
+  inf_status->selected_frame_id = get_frame_id (deprecated_selected_frame);
   return inf_status;
 }
 
@@ -3950,8 +3575,8 @@ restore_selected_frame (void *args)
 
   frame = frame_find_by_id (*fid);
 
-  /* If inf_status->selected_frame_address is NULL, there was no
-     previously selected frame.  */
+  /* If inf_status->selected_frame_id is NULL, there was no previously
+     selected frame.  */
   if (frame == NULL)
     {
       warning ("Unable to restore previously selected frame.\n");
@@ -3974,7 +3599,7 @@ restore_inferior_status (struct inferior_status *inf_status)
   trap_expected = inf_status->trap_expected;
   step_range_start = inf_status->step_range_start;
   step_range_end = inf_status->step_range_end;
-  step_frame_address = inf_status->step_frame_address;
+  step_frame_id = inf_status->step_frame_id;
   step_over_calls = inf_status->step_over_calls;
   stop_after_trap = inf_status->stop_after_trap;
   stop_soon_quietly = inf_status->stop_soon_quietly;
@@ -4039,6 +3664,60 @@ discard_inferior_status (struct inferior_status *inf_status)
   regcache_xfree (inf_status->registers);
   regcache_xfree (inf_status->stop_registers);
   xfree (inf_status);
+}
+
+int
+inferior_has_forked (int pid, int *child_pid)
+{
+  struct target_waitstatus last;
+  ptid_t last_ptid;
+
+  get_last_target_status (&last_ptid, &last);
+
+  if (last.kind != TARGET_WAITKIND_FORKED)
+    return 0;
+
+  if (ptid_get_pid (last_ptid) != pid)
+    return 0;
+
+  *child_pid = last.value.related_pid;
+  return 1;
+}
+
+int
+inferior_has_vforked (int pid, int *child_pid)
+{
+  struct target_waitstatus last;
+  ptid_t last_ptid;
+
+  get_last_target_status (&last_ptid, &last);
+
+  if (last.kind != TARGET_WAITKIND_VFORKED)
+    return 0;
+
+  if (ptid_get_pid (last_ptid) != pid)
+    return 0;
+
+  *child_pid = last.value.related_pid;
+  return 1;
+}
+
+int
+inferior_has_execd (int pid, char **execd_pathname)
+{
+  struct target_waitstatus last;
+  ptid_t last_ptid;
+
+  get_last_target_status (&last_ptid, &last);
+
+  if (last.kind != TARGET_WAITKIND_EXECD)
+    return 0;
+
+  if (ptid_get_pid (last_ptid) != pid)
+    return 0;
+
+  *execd_pathname = xstrdup (last.value.execd_pathname);
+  return 1;
 }
 
 /* Oft used ptids */

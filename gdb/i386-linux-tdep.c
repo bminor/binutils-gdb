@@ -482,6 +482,6 @@ extern void _initialize_i386_linux_tdep (void);
 void
 _initialize_i386_linux_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_LINUX,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_LINUX,
 			  i386_linux_init_abi);
 }

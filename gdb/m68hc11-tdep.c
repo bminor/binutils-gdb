@@ -434,11 +434,11 @@ m68hc11_pop_frame (void)
   register CORE_ADDR fp, sp;
   register int regnum;
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
-      fp = FRAME_FP (frame);
+      fp = get_frame_base (frame);
       FRAME_INIT_SAVED_REGS (frame);
 
       /* Copy regs from where they were saved in the frame.  */
@@ -802,17 +802,17 @@ m68hc11_skip_prologue (CORE_ADDR pc)
   return pc;
 }
 
-/* Given a GDB frame, determine the address of the calling function's frame.
-   This will be used to create a new GDB frame struct, and then
-   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
-*/
+/* Given a GDB frame, determine the address of the calling function's
+   frame.  This will be used to create a new GDB frame struct, and
+   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
+   called for the new frame.  */
 
 static CORE_ADDR
 m68hc11_frame_chain (struct frame_info *frame)
 {
   CORE_ADDR addr;
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return frame->frame;	/* dummy frame same as caller's frame */
 
   if (frame->extra_info->return_pc == 0
@@ -1177,33 +1177,6 @@ m68hc11_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
   return sp;
 }
 
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-static int
-m68hc11_register_byte (int reg_nr)
-{
-  return (reg_nr * M68HC11_REG_SIZE);
-}
-
-static int
-m68hc11_register_raw_size (int reg_nr)
-{
-  switch (reg_nr)
-    {
-    case HARD_PAGE_REGNUM:
-    case HARD_A_REGNUM:
-    case HARD_B_REGNUM:
-    case HARD_CCR_REGNUM:
-      return 1;
-
-    case M68HC12_HARD_PC_REGNUM:
-      return 4;
-
-    default:
-      return M68HC11_REG_SIZE;
-    }
-}
-
 /* Test whether the ELF symbol corresponds to a function using rtc or
    rti to return.  */
    
@@ -1263,6 +1236,10 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
   switch (info.bfd_arch_info->arch)
     {
     case bfd_arch_m68hc11:
@@ -1311,9 +1288,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_max_register_raw_size (gdbarch, 2);
   set_gdbarch_max_register_virtual_size (gdbarch, 2);
-  set_gdbarch_register_raw_size (gdbarch, m68hc11_register_raw_size);
-  set_gdbarch_register_virtual_size (gdbarch, m68hc11_register_raw_size);
-  set_gdbarch_register_byte (gdbarch, m68hc11_register_byte);
   set_gdbarch_frame_init_saved_regs (gdbarch, m68hc11_frame_init_saved_regs);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
@@ -1332,14 +1306,11 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pseudo_register_read (gdbarch, m68hc11_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, m68hc11_pseudo_register_write);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, m68hc11_call_dummy_address);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1); /*???*/
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_words (gdbarch, m68hc11_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch,
                                        sizeof (m68hc11_call_dummy_words));

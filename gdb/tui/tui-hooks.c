@@ -147,7 +147,7 @@ tui_registers_changed_hook (void)
 {
   struct frame_info *fi;
 
-  fi = selected_frame;
+  fi = deprecated_selected_frame;
   if (fi && tui_refreshing_registers == 0)
     {
       tui_refreshing_registers = 1;
@@ -163,7 +163,7 @@ tui_register_changed_hook (int regno)
 {
   struct frame_info *fi;
 
-  fi = selected_frame;
+  fi = deprecated_selected_frame;
   if (fi && tui_refreshing_registers == 0)
     {
       tui_refreshing_registers = 1;
@@ -245,7 +245,7 @@ tui_selected_frame_level_changed_hook (int level)
 {
   struct frame_info *fi;
 
-  fi = selected_frame;
+  fi = deprecated_selected_frame;
   /* Ensure that symbols for this frame are read in.  Also, determine the
      source language of this frame, and switch to it if desired.  */
   if (fi)
@@ -279,7 +279,7 @@ tui_print_frame_info_listing_hook (struct symtab *s, int line,
                                    int stopline, int noerror)
 {
   select_source_symtab (s);
-  tuiShowFrameInfo (selected_frame);
+  tuiShowFrameInfo (deprecated_selected_frame);
 }
 
 /* Called when the target process died or is detached.
@@ -419,6 +419,10 @@ tui_event_loop (void)
 static void
 tui_init_hook (char *argv0)
 {
+  /* Don't enable the TUI if a specific interpreter is installed.  */
+  if (interpreter_p)
+    return;
+
   /* Install exit handler to leave the screen in a good shape.  */
   atexit (tui_exit);
 

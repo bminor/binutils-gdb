@@ -170,11 +170,11 @@ static void elf_swap_shdr_out
 
 #define section_from_elf_index bfd_section_from_elf_index
 
-static boolean elf_slurp_reloc_table_from_section
+static bfd_boolean elf_slurp_reloc_table_from_section
   PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, bfd_size_type,
-	   arelent *, asymbol **, boolean));
+	   arelent *, asymbol **, bfd_boolean));
 
-static boolean elf_file_p PARAMS ((Elf_External_Ehdr *));
+static bfd_boolean elf_file_p PARAMS ((Elf_External_Ehdr *));
 
 #ifdef DEBUG
 static void elf_debug_section PARAMS ((int, Elf_Internal_Shdr *));
@@ -421,44 +421,49 @@ elf_swap_phdr_out (abfd, src, dst)
 }
 
 /* Translate an ELF reloc from external format to internal format.  */
-INLINE void
-elf_swap_reloc_in (abfd, src, dst)
+void
+elf_swap_reloc_in (abfd, s, dst)
      bfd *abfd;
-     const Elf_External_Rel *src;
-     Elf_Internal_Rel *dst;
-{
-  dst->r_offset = H_GET_WORD (abfd, src->r_offset);
-  dst->r_info = H_GET_WORD (abfd, src->r_info);
-}
-
-INLINE void
-elf_swap_reloca_in (abfd, src, dst)
-     bfd *abfd;
-     const Elf_External_Rela *src;
+     const bfd_byte *s;
      Elf_Internal_Rela *dst;
 {
+  const Elf_External_Rel *src = (const Elf_External_Rel *) s;
+  dst->r_offset = H_GET_WORD (abfd, src->r_offset);
+  dst->r_info = H_GET_WORD (abfd, src->r_info);
+  dst->r_addend = 0;
+}
+
+void
+elf_swap_reloca_in (abfd, s, dst)
+     bfd *abfd;
+     const bfd_byte *s;
+     Elf_Internal_Rela *dst;
+{
+  const Elf_External_Rela *src = (const Elf_External_Rela *) s;
   dst->r_offset = H_GET_WORD (abfd, src->r_offset);
   dst->r_info = H_GET_WORD (abfd, src->r_info);
   dst->r_addend = H_GET_SIGNED_WORD (abfd, src->r_addend);
 }
 
 /* Translate an ELF reloc from internal format to external format.  */
-INLINE void
-elf_swap_reloc_out (abfd, src, dst)
+void
+elf_swap_reloc_out (abfd, src, d)
      bfd *abfd;
-     const Elf_Internal_Rel *src;
-     Elf_External_Rel *dst;
+     const Elf_Internal_Rela *src;
+     bfd_byte *d;
 {
+  Elf_External_Rel *dst = (Elf_External_Rel *) d;
   H_PUT_WORD (abfd, src->r_offset, dst->r_offset);
   H_PUT_WORD (abfd, src->r_info, dst->r_info);
 }
 
-INLINE void
-elf_swap_reloca_out (abfd, src, dst)
+void
+elf_swap_reloca_out (abfd, src, d)
      bfd *abfd;
      const Elf_Internal_Rela *src;
-     Elf_External_Rela *dst;
+     bfd_byte *d;
 {
+  Elf_External_Rela *dst = (Elf_External_Rela *) d;
   H_PUT_WORD (abfd, src->r_offset, dst->r_offset);
   H_PUT_WORD (abfd, src->r_info, dst->r_info);
   H_PUT_SIGNED_WORD (abfd, src->r_addend, dst->r_addend);
@@ -495,7 +500,7 @@ elf_swap_dyn_out (abfd, src, p)
    First we validate the file by reading in the ELF header and checking
    the magic number.  */
 
-static INLINE boolean
+static INLINE bfd_boolean
 elf_file_p (x_ehdrp)
      Elf_External_Ehdr *x_ehdrp;
 {
@@ -856,14 +861,15 @@ elf_write_relocs (abfd, sec, data)
      asection *sec;
      PTR data;
 {
-  boolean *failedp = (boolean *) data;
+  bfd_boolean *failedp = (bfd_boolean *) data;
   Elf_Internal_Shdr *rela_hdr;
-  Elf_External_Rela *outbound_relocas;
-  Elf_External_Rel *outbound_relocs;
+  bfd_vma addr_offset;
+  void (*swap_out) PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
+  size_t extsize;
+  bfd_byte *dst_rela;
   unsigned int idx;
-  int use_rela_p;
-  asymbol *last_sym = 0;
-  int last_sym_idx = 0;
+  asymbol *last_sym;
+  int last_sym_idx;
 
   /* If we have already failed, don't do anything.  */
   if (*failedp)
@@ -885,128 +891,75 @@ elf_write_relocs (abfd, sec, data)
   rela_hdr->contents = (PTR) bfd_alloc (abfd, rela_hdr->sh_size);
   if (rela_hdr->contents == NULL)
     {
-      *failedp = true;
+      *failedp = TRUE;
       return;
     }
 
   /* Figure out whether the relocations are RELA or REL relocations.  */
   if (rela_hdr->sh_type == SHT_RELA)
-    use_rela_p = true;
+    {
+      swap_out = elf_swap_reloca_out;
+      extsize = sizeof (Elf_External_Rela);
+    }
   else if (rela_hdr->sh_type == SHT_REL)
-    use_rela_p = false;
+    {
+      swap_out = elf_swap_reloc_out;
+      extsize = sizeof (Elf_External_Rel);
+    }
   else
     /* Every relocation section should be either an SHT_RELA or an
        SHT_REL section.  */
     abort ();
 
+  /* The address of an ELF reloc is section relative for an object
+     file, and absolute for an executable file or shared library.
+     The address of a BFD reloc is always section relative.  */
+  addr_offset = 0;
+  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
+    addr_offset = sec->vma;
+
   /* orelocation has the data, reloc_count has the count...  */
-  if (use_rela_p)
+  last_sym = 0;
+  last_sym_idx = 0;
+  dst_rela = rela_hdr->contents;
+
+  for (idx = 0; idx < sec->reloc_count; idx++, dst_rela += extsize)
     {
-      outbound_relocas = (Elf_External_Rela *) rela_hdr->contents;
+      Elf_Internal_Rela src_rela;
+      arelent *ptr;
+      asymbol *sym;
+      int n;
 
-      for (idx = 0; idx < sec->reloc_count; idx++)
+      ptr = sec->orelocation[idx];
+      sym = *ptr->sym_ptr_ptr;
+      if (sym == last_sym)
+	n = last_sym_idx;
+      else if (bfd_is_abs_section (sym->section) && sym->value == 0)
+	n = STN_UNDEF;
+      else
 	{
-	  Elf_Internal_Rela dst_rela;
-	  Elf_External_Rela *src_rela;
-	  arelent *ptr;
-	  asymbol *sym;
-	  int n;
-
-	  ptr = sec->orelocation[idx];
-	  src_rela = outbound_relocas + idx;
-
-	  /* The address of an ELF reloc is section relative for an object
-	     file, and absolute for an executable file or shared library.
-	     The address of a BFD reloc is always section relative.  */
-	  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
-	    dst_rela.r_offset = ptr->address;
-	  else
-	    dst_rela.r_offset = ptr->address + sec->vma;
-
-	  sym = *ptr->sym_ptr_ptr;
-	  if (sym == last_sym)
-	    n = last_sym_idx;
-	  else if (bfd_is_abs_section (sym->section) && sym->value == 0)
-	    n = STN_UNDEF;
-	  else
+	  last_sym = sym;
+	  n = _bfd_elf_symbol_from_bfd_symbol (abfd, &sym);
+	  if (n < 0)
 	    {
-	      last_sym = sym;
-	      n = _bfd_elf_symbol_from_bfd_symbol (abfd, &sym);
-	      if (n < 0)
-		{
-		  *failedp = true;
-		  return;
-		}
-	      last_sym_idx = n;
-	    }
-
-	  if ((*ptr->sym_ptr_ptr)->the_bfd != NULL
-	      && (*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
-	      && ! _bfd_elf_validate_reloc (abfd, ptr))
-	    {
-	      *failedp = true;
+	      *failedp = TRUE;
 	      return;
 	    }
-
-	  dst_rela.r_info = ELF_R_INFO (n, ptr->howto->type);
-
-	  dst_rela.r_addend = ptr->addend;
-	  elf_swap_reloca_out (abfd, &dst_rela, src_rela);
+	  last_sym_idx = n;
 	}
-    }
-  else
-    /* REL relocations */
-    {
-      outbound_relocs = (Elf_External_Rel *) rela_hdr->contents;
 
-      for (idx = 0; idx < sec->reloc_count; idx++)
+      if ((*ptr->sym_ptr_ptr)->the_bfd != NULL
+	  && (*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
+	  && ! _bfd_elf_validate_reloc (abfd, ptr))
 	{
-	  Elf_Internal_Rel dst_rel;
-	  Elf_External_Rel *src_rel;
-	  arelent *ptr;
-	  int n;
-	  asymbol *sym;
-
-	  ptr = sec->orelocation[idx];
-	  sym = *ptr->sym_ptr_ptr;
-	  src_rel = outbound_relocs + idx;
-
-	  /* The address of an ELF reloc is section relative for an object
-	     file, and absolute for an executable file or shared library.
-	     The address of a BFD reloc is always section relative.  */
-	  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
-	    dst_rel.r_offset = ptr->address;
-	  else
-	    dst_rel.r_offset = ptr->address + sec->vma;
-
-	  if (sym == last_sym)
-	    n = last_sym_idx;
-	  else if (bfd_is_abs_section (sym->section) && sym->value == 0)
-	    n = STN_UNDEF;
-	  else
-	    {
-	      last_sym = sym;
-	      n = _bfd_elf_symbol_from_bfd_symbol (abfd, &sym);
-	      if (n < 0)
-		{
-		  *failedp = true;
-		  return;
-		}
-	      last_sym_idx = n;
-	    }
-
-	  if ((*ptr->sym_ptr_ptr)->the_bfd != NULL
-	      && (*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
-	      && ! _bfd_elf_validate_reloc (abfd, ptr))
-	    {
-	      *failedp = true;
-	      return;
-	    }
-
-	  dst_rel.r_info = ELF_R_INFO (n, ptr->howto->type);
-
-	  elf_swap_reloc_out (abfd, &dst_rel, src_rel);
+	  *failedp = TRUE;
+	  return;
 	}
+
+      src_rela.r_offset = ptr->address + addr_offset;
+      src_rela.r_info = ELF_R_INFO (n, ptr->howto->type);
+      src_rela.r_addend = ptr->addend;
+      (*swap_out) (abfd, &src_rela, dst_rela);
     }
 }
 
@@ -1032,7 +985,7 @@ elf_write_out_phdrs (abfd, phdr, count)
 
 /* Write out the section headers and the ELF file header.  */
 
-boolean
+bfd_boolean
 elf_write_shdrs_and_ehdr (abfd)
      bfd *abfd;
 {
@@ -1055,7 +1008,7 @@ elf_write_shdrs_and_ehdr (abfd)
   amt = sizeof (x_ehdr);
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
       || bfd_bwrite ((PTR) & x_ehdr, amt, abfd) != amt)
-    return false;
+    return FALSE;
 
   /* Some fields in the first section header handle overflow of ehdr
      fields.  */
@@ -1069,7 +1022,7 @@ elf_write_shdrs_and_ehdr (abfd)
   amt *= sizeof (*x_shdrp);
   x_shdrp = (Elf_External_Shdr *) bfd_alloc (abfd, amt);
   if (!x_shdrp)
-    return false;
+    return FALSE;
 
   for (count = 0; count < i_ehdrp->e_shnum; i_shdrp++, count++)
     {
@@ -1077,24 +1030,24 @@ elf_write_shdrs_and_ehdr (abfd)
       elf_debug_section (count, *i_shdrp);
 #endif
       elf_swap_shdr_out (abfd, *i_shdrp, x_shdrp + count);
-      
+
       if (count == SHN_LORESERVE - 1)
 	i_shdrp += SHN_HIRESERVE + 1 - SHN_LORESERVE;
     }
   if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0
       || bfd_bwrite ((PTR) x_shdrp, amt, abfd) != amt)
-    return false;
+    return FALSE;
 
   /* need to dump the string table too...  */
 
-  return true;
+  return TRUE;
 }
 
 long
 elf_slurp_symbol_table (abfd, symptrs, dynamic)
      bfd *abfd;
      asymbol **symptrs;		/* Buffer for generated bfd symbols */
-     boolean dynamic;
+     bfd_boolean dynamic;
 {
   Elf_Internal_Shdr *hdr;
   Elf_Internal_Shdr *verhdr;
@@ -1328,7 +1281,7 @@ error_return:
 /* Read  relocations for ASECT from REL_HDR.  There are RELOC_COUNT of
    them.  */
 
-static boolean
+static bfd_boolean
 elf_slurp_reloc_table_from_section (abfd, asect, rel_hdr, reloc_count,
 				    relents, symbols, dynamic)
      bfd *abfd;
@@ -1337,7 +1290,7 @@ elf_slurp_reloc_table_from_section (abfd, asect, rel_hdr, reloc_count,
      bfd_size_type reloc_count;
      arelent *relents;
      asymbol **symbols;
-     boolean dynamic;
+     bfd_boolean dynamic;
 {
   struct elf_backend_data * const ebd = get_elf_backend_data (abfd);
   PTR allocated = NULL;
@@ -1372,17 +1325,11 @@ elf_slurp_reloc_table_from_section (abfd, asect, rel_hdr, reloc_count,
        i++, relent++, native_relocs += entsize)
     {
       Elf_Internal_Rela rela;
-      Elf_Internal_Rel rel;
 
       if (entsize == sizeof (Elf_External_Rela))
-	elf_swap_reloca_in (abfd, (Elf_External_Rela *) native_relocs, &rela);
+	elf_swap_reloca_in (abfd, native_relocs, &rela);
       else
-	{
-	  elf_swap_reloc_in (abfd, (Elf_External_Rel *) native_relocs, &rel);
-	  rela.r_offset = rel.r_offset;
-	  rela.r_info = rel.r_info;
-	  rela.r_addend = 0;
-	}
+	elf_swap_reloc_in (abfd, native_relocs, &rela);
 
       /* The address of an ELF reloc is section relative for an object
 	 file, and absolute for an executable file or shared library.
@@ -1421,28 +1368,28 @@ elf_slurp_reloc_table_from_section (abfd, asect, rel_hdr, reloc_count,
       if (entsize == sizeof (Elf_External_Rela))
 	(*ebd->elf_info_to_howto) (abfd, relent, &rela);
       else
-	(*ebd->elf_info_to_howto_rel) (abfd, relent, &rel);
+	(*ebd->elf_info_to_howto_rel) (abfd, relent, &rela);
     }
 
   if (allocated != NULL)
     free (allocated);
 
-  return true;
+  return TRUE;
 
  error_return:
   if (allocated != NULL)
     free (allocated);
-  return false;
+  return FALSE;
 }
 
 /* Read in and swap the external relocs.  */
 
-boolean
+bfd_boolean
 elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
      bfd *abfd;
      asection *asect;
      asymbol **symbols;
-     boolean dynamic;
+     bfd_boolean dynamic;
 {
   struct bfd_elf_section_data * const d = elf_section_data (asect);
   Elf_Internal_Shdr *rel_hdr;
@@ -1453,13 +1400,13 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
   bfd_size_type amt;
 
   if (asect->relocation != NULL)
-    return true;
+    return TRUE;
 
   if (! dynamic)
     {
       if ((asect->flags & SEC_RELOC) == 0
 	  || asect->reloc_count == 0)
-	return true;
+	return TRUE;
 
       rel_hdr = &d->rel_hdr;
       reloc_count = NUM_SHDR_ENTRIES (rel_hdr);
@@ -1478,7 +1425,7 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
 	 dynamic symbol table, and in that case bfd_section_from_shdr
 	 in elf.c does not update the RELOC_COUNT.  */
       if (asect->_raw_size == 0)
-	return true;
+	return TRUE;
 
       rel_hdr = &d->this_hdr;
       reloc_count = NUM_SHDR_ENTRIES (rel_hdr);
@@ -1489,23 +1436,23 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
   amt = (reloc_count + reloc_count2) * sizeof (arelent);
   relents = (arelent *) bfd_alloc (abfd, amt);
   if (relents == NULL)
-    return false;
+    return FALSE;
 
   if (!elf_slurp_reloc_table_from_section (abfd, asect,
 					   rel_hdr, reloc_count,
 					   relents,
 					   symbols, dynamic))
-    return false;
+    return FALSE;
 
   if (rel_hdr2
       && !elf_slurp_reloc_table_from_section (abfd, asect,
 					      rel_hdr2, reloc_count2,
 					      relents + reloc_count,
 					      symbols, dynamic))
-    return false;
+    return FALSE;
 
   asect->relocation = relents;
-  return true;
+  return TRUE;
 }
 
 #ifdef DEBUG
@@ -1649,8 +1596,8 @@ const struct elf_size_info NAME(_bfd_elf,size_info) = {
   elf_slurp_symbol_table,
   elf_swap_dyn_in,
   elf_swap_dyn_out,
-  NULL,
-  NULL,
-  NULL,
-  NULL
+  elf_swap_reloc_in,
+  elf_swap_reloc_out,
+  elf_swap_reloca_in,
+  elf_swap_reloca_out
 };

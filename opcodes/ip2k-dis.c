@@ -4,7 +4,8 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 - the resultant file is machine generated, cgen-dis.in isn't
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -31,6 +32,7 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "dis-asm.h"
 #include "bfd.h"
 #include "symcat.h"
+#include "libiberty.h"
 #include "ip2k-desc.h"
 #include "ip2k-opc.h"
 #include "opintl.h"
@@ -59,14 +61,27 @@ static int read_insn
 
 /* -- dis.c */
 
+#define PRINT_FUNC_DECL(name) \
+static void name PARAMS ((CGEN_CPU_DESC, PTR, long, unsigned int, bfd_vma, int))
+
+PRINT_FUNC_DECL (print_fr);
+PRINT_FUNC_DECL (print_dollarhex);
+PRINT_FUNC_DECL (print_dollarhex8);
+PRINT_FUNC_DECL (print_dollarhex16);
+PRINT_FUNC_DECL (print_dollarhex_addr16h);
+PRINT_FUNC_DECL (print_dollarhex_addr16l);
+PRINT_FUNC_DECL (print_dollarhex_p);
+PRINT_FUNC_DECL (print_dollarhex_cj);
+PRINT_FUNC_DECL (print_decimal);
+
 static void
 print_fr (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
   const CGEN_KEYWORD_ENTRY *ke;
@@ -75,33 +90,33 @@ print_fr (cd, dis_info, value, attrs, pc, length)
   long offsetvalue;
 
   if ( value == 0 ) /* This is (IP) */
-  {
+    {
       (*info->fprintf_func) (info->stream, "%s", "(IP)");
       return;
-  }
+    }
 
   offsettest = value >> 7;
   offsetvalue = value & 0x7F;
 
   /* Check to see if first two bits are 10 -> (DP) */
   if ( offsettest == 2 )
-  {
+    {
       if ( offsetvalue == 0 )
-         (*info->fprintf_func) (info->stream, "%s","(DP)");
+	(*info->fprintf_func) (info->stream, "%s","(DP)");
       else
-         (*info->fprintf_func) (info->stream, "$%x%s",offsetvalue, "(DP)");
+	(*info->fprintf_func) (info->stream, "$%x%s",offsetvalue, "(DP)");
       return;
-  }
+    }
 
   /* Check to see if first two bits are 11 -> (SP) */
   if ( offsettest == 3 )
-  {
+    {
       if ( offsetvalue == 0 )
-         (*info->fprintf_func) (info->stream, "%s", "(SP)");
+	(*info->fprintf_func) (info->stream, "%s", "(SP)");
       else
-         (*info->fprintf_func) (info->stream, "$%x%s", offsetvalue,"(SP)");
+	(*info->fprintf_func) (info->stream, "$%x%s", offsetvalue,"(SP)");
       return;
-  }
+    }
 
   /* Attempt to print as a register keyword. */
   ke = cgen_keyword_lookup_value (& ip2k_cgen_opval_register_names, value);
@@ -117,12 +132,12 @@ print_fr (cd, dis_info, value, attrs, pc, length)
 
 static void
 print_dollarhex (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
@@ -131,12 +146,12 @@ print_dollarhex (cd, dis_info, value, attrs, pc, length)
 
 static void
 print_dollarhex8 (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
@@ -145,12 +160,12 @@ print_dollarhex8 (cd, dis_info, value, attrs, pc, length)
 
 static void
 print_dollarhex16 (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
@@ -159,12 +174,12 @@ print_dollarhex16 (cd, dis_info, value, attrs, pc, length)
 
 static void
 print_dollarhex_addr16h (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
@@ -177,12 +192,12 @@ print_dollarhex_addr16h (cd, dis_info, value, attrs, pc, length)
 
 static void
 print_dollarhex_addr16l (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
@@ -191,12 +206,12 @@ print_dollarhex_addr16l (cd, dis_info, value, attrs, pc, length)
 
 static void
 print_dollarhex_p (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
@@ -207,12 +222,12 @@ print_dollarhex_p (cd, dis_info, value, attrs, pc, length)
 
 static void
 print_dollarhex_cj (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
@@ -223,12 +238,12 @@ print_dollarhex_cj (cd, dis_info, value, attrs, pc, length)
 
 static void
 print_decimal (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 

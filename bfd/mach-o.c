@@ -70,38 +70,71 @@
 #define bfd_mach_o_bfd_merge_sections bfd_generic_merge_sections
 #define bfd_mach_o_bfd_discard_group bfd_generic_discard_group
 
-static boolean  bfd_mach_o_bfd_copy_private_symbol_data  PARAMS ((bfd *, asymbol *, bfd *, asymbol *));
-static boolean  bfd_mach_o_bfd_copy_private_section_data PARAMS ((bfd *, asection *, bfd *, asection *));
-static boolean  bfd_mach_o_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
-static long     bfd_mach_o_count_symbols             PARAMS ((bfd *));
-static long     bfd_mach_o_get_symtab_upper_bound    PARAMS ((bfd *));
-static long     bfd_mach_o_get_symtab                PARAMS ((bfd *, asymbol **));
-static void     bfd_mach_o_get_symbol_info           PARAMS ((bfd *, asymbol *, symbol_info *));
-static void     bfd_mach_o_print_symbol              PARAMS ((bfd *, PTR, asymbol *, bfd_print_symbol_type));
-static void     bfd_mach_o_convert_architecture      PARAMS ((bfd_mach_o_cpu_type, bfd_mach_o_cpu_subtype, enum bfd_architecture *, unsigned long *));
-static boolean  bfd_mach_o_write_contents            PARAMS ((bfd *));
-static int      bfd_mach_o_sizeof_headers            PARAMS ((bfd *, boolean));
-static asymbol *   bfd_mach_o_make_empty_symbol      PARAMS ((bfd *));
-static int      bfd_mach_o_write_header              PARAMS ((bfd *, bfd_mach_o_header *));
-static int      bfd_mach_o_read_header               PARAMS ((bfd *, bfd_mach_o_header *));
-static asection *  bfd_mach_o_make_bfd_section       PARAMS ((bfd *, bfd_mach_o_section *));
-static int      bfd_mach_o_scan_read_section         PARAMS ((bfd *, bfd_mach_o_section *, bfd_vma));
-static int      bfd_mach_o_scan_write_section        PARAMS ((bfd *, bfd_mach_o_section *, bfd_vma));
-static int      bfd_mach_o_scan_write_symtab_symbols PARAMS ((bfd *, bfd_mach_o_load_command *));
-static int      bfd_mach_o_scan_write_thread         PARAMS ((bfd *, bfd_mach_o_load_command *));
-static int      bfd_mach_o_scan_read_dylinker        PARAMS ((bfd *, bfd_mach_o_load_command *));
-static int      bfd_mach_o_scan_read_dylib           PARAMS ((bfd *, bfd_mach_o_load_command *));
-static int      bfd_mach_o_scan_read_prebound_dylib  PARAMS ((bfd *, bfd_mach_o_load_command *));
-static int      bfd_mach_o_scan_read_thread          PARAMS ((bfd *, bfd_mach_o_load_command *));
-static int      bfd_mach_o_scan_write_symtab         PARAMS ((bfd *, bfd_mach_o_load_command *));
-static int      bfd_mach_o_scan_read_dysymtab        PARAMS ((bfd *, bfd_mach_o_load_command *));
-static int      bfd_mach_o_scan_read_symtab          PARAMS ((bfd *, bfd_mach_o_load_command *));
-static int      bfd_mach_o_scan_read_segment         PARAMS ((bfd *, bfd_mach_o_load_command *));
-static int      bfd_mach_o_scan_write_segment        PARAMS ((bfd *, bfd_mach_o_load_command *));
-static int      bfd_mach_o_scan_read_command         PARAMS ((bfd *, bfd_mach_o_load_command *));
-static void     bfd_mach_o_flatten_sections          PARAMS ((bfd *));
-static const char * bfd_mach_o_i386_flavour_string   PARAMS ((unsigned int));
-static const char * bfd_mach_o_ppc_flavour_string    PARAMS ((unsigned int));
+static bfd_boolean bfd_mach_o_bfd_copy_private_symbol_data
+  PARAMS ((bfd *, asymbol *, bfd *, asymbol *));
+static bfd_boolean bfd_mach_o_bfd_copy_private_section_data
+  PARAMS ((bfd *, asection *, bfd *, asection *));
+static bfd_boolean bfd_mach_o_bfd_copy_private_bfd_data
+  PARAMS ((bfd *, bfd *));
+static long bfd_mach_o_count_symbols
+  PARAMS ((bfd *));
+static long bfd_mach_o_get_symtab_upper_bound
+  PARAMS ((bfd *));
+static long bfd_mach_o_get_symtab
+  PARAMS ((bfd *, asymbol **));
+static void bfd_mach_o_get_symbol_info
+  PARAMS ((bfd *, asymbol *, symbol_info *));
+static void bfd_mach_o_print_symbol
+  PARAMS ((bfd *, PTR, asymbol *, bfd_print_symbol_type));
+static void bfd_mach_o_convert_architecture
+  PARAMS ((bfd_mach_o_cpu_type, bfd_mach_o_cpu_subtype,
+	   enum bfd_architecture *, unsigned long *));
+static bfd_boolean bfd_mach_o_write_contents
+  PARAMS ((bfd *));
+static int bfd_mach_o_sizeof_headers
+  PARAMS ((bfd *, bfd_boolean));
+static asymbol * bfd_mach_o_make_empty_symbol
+  PARAMS ((bfd *));
+static int bfd_mach_o_write_header
+  PARAMS ((bfd *, bfd_mach_o_header *));
+static int bfd_mach_o_read_header
+  PARAMS ((bfd *, bfd_mach_o_header *));
+static asection * bfd_mach_o_make_bfd_section
+  PARAMS ((bfd *, bfd_mach_o_section *));
+static int bfd_mach_o_scan_read_section
+  PARAMS ((bfd *, bfd_mach_o_section *, bfd_vma));
+static int bfd_mach_o_scan_write_section
+  PARAMS ((bfd *, bfd_mach_o_section *, bfd_vma));
+static int bfd_mach_o_scan_write_symtab_symbols
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static int bfd_mach_o_scan_write_thread
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static int bfd_mach_o_scan_read_dylinker
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static int bfd_mach_o_scan_read_dylib
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static int bfd_mach_o_scan_read_prebound_dylib
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static int bfd_mach_o_scan_read_thread
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static int bfd_mach_o_scan_write_symtab
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static int bfd_mach_o_scan_read_dysymtab
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static int bfd_mach_o_scan_read_symtab
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static int bfd_mach_o_scan_read_segment
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static int bfd_mach_o_scan_write_segment
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static int bfd_mach_o_scan_read_command
+  PARAMS ((bfd *, bfd_mach_o_load_command *));
+static void bfd_mach_o_flatten_sections
+  PARAMS ((bfd *));
+static const char * bfd_mach_o_i386_flavour_string
+  PARAMS ((unsigned int));
+static const char * bfd_mach_o_ppc_flavour_string
+  PARAMS ((unsigned int));
 
 /* The flags field of a section structure is separated into two parts a section
    type and section attributes.  The section types are mutually exclusive (it
@@ -129,7 +162,7 @@ static const char * bfd_mach_o_ppc_flavour_string    PARAMS ((unsigned int));
 #define N_SECT 0xe
 #define N_INDR 0xa
 
-boolean
+bfd_boolean
 bfd_mach_o_valid (abfd)
      bfd *abfd;
 {
@@ -149,33 +182,33 @@ bfd_mach_o_valid (abfd)
 /* Copy any private info we understand from the input symbol
    to the output symbol.  */
 
-static boolean
+static bfd_boolean
 bfd_mach_o_bfd_copy_private_symbol_data (ibfd, isymbol, obfd, osymbol)
      bfd *ibfd ATTRIBUTE_UNUSED;
      asymbol *isymbol ATTRIBUTE_UNUSED;
      bfd *obfd ATTRIBUTE_UNUSED;
      asymbol *osymbol ATTRIBUTE_UNUSED;
 {
-  return true;
+  return TRUE;
 }
 
 /* Copy any private info we understand from the input section
    to the output section.  */
 
-static boolean
+static bfd_boolean
 bfd_mach_o_bfd_copy_private_section_data (ibfd, isection, obfd, osection)
      bfd *ibfd ATTRIBUTE_UNUSED;
      asection *isection ATTRIBUTE_UNUSED;
      bfd *obfd ATTRIBUTE_UNUSED;
      asection *osection ATTRIBUTE_UNUSED;
 {
-  return true;
+  return TRUE;
 }
 
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
-static boolean
+static bfd_boolean
 bfd_mach_o_bfd_copy_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
@@ -185,7 +218,7 @@ bfd_mach_o_bfd_copy_private_bfd_data (ibfd, obfd)
 
   obfd->tdata.mach_o_data = ibfd->tdata.mach_o_data;
   obfd->tdata.mach_o_data->ibfd = ibfd;
-  return true;
+  return TRUE;
 }
 
 static long
@@ -325,7 +358,7 @@ bfd_mach_o_convert_architecture (mtype, msubtype, type, subtype)
     }
 }
 
-static boolean
+static bfd_boolean
 bfd_mach_o_write_contents (abfd)
      bfd *abfd;
 {
@@ -362,11 +395,11 @@ bfd_mach_o_write_contents (abfd)
 
 	    bfd_seek (abfd, curoff, SEEK_SET);
 	    if (bfd_bread ((PTR) buf, thisread, abfd) != thisread)
-	      return false;
+	      return FALSE;
 
 	    bfd_seek (abfd, curoff, SEEK_SET);
 	    if (bfd_bwrite ((PTR) buf, thisread, abfd) != thisread)
-	      return false;
+	      return FALSE;
 
 	    nbytes -= thisread;
 	    curoff += thisread;
@@ -377,7 +410,7 @@ bfd_mach_o_write_contents (abfd)
 
   /* Now write header information.  */
   if (bfd_mach_o_write_header (abfd, &mdata->header) != 0)
-    return false;
+    return FALSE;
 
   for (i = 0; i < mdata->header.ncmds; i++)
     {
@@ -392,24 +425,24 @@ bfd_mach_o_write_contents (abfd)
 
       bfd_seek (abfd, cur->offset, SEEK_SET);
       if (bfd_bwrite ((PTR) buf, 8, abfd) != 8)
-	return false;
+	return FALSE;
 
       switch (cur->type)
 	{
 	case BFD_MACH_O_LC_SEGMENT:
 	  if (bfd_mach_o_scan_write_segment (abfd, cur) != 0)
-	    return false;
+	    return FALSE;
 	  break;
 	case BFD_MACH_O_LC_SYMTAB:
 	  if (bfd_mach_o_scan_write_symtab (abfd, cur) != 0)
-	    return false;
+	    return FALSE;
 	  break;
 	case BFD_MACH_O_LC_SYMSEG:
 	  break;
 	case BFD_MACH_O_LC_THREAD:
 	case BFD_MACH_O_LC_UNIXTHREAD:
 	  if (bfd_mach_o_scan_write_thread (abfd, cur) != 0)
-	    return false;
+	    return FALSE;
 	  break;
 	case BFD_MACH_O_LC_LOADFVMLIB:
 	case BFD_MACH_O_LC_IDFVMLIB:
@@ -430,17 +463,17 @@ bfd_mach_o_write_contents (abfd)
 	  fprintf (stderr,
 		   "unable to write unknown load command 0x%lx\n",
 		   (long) cur->type);
-	  return false;
+	  return FALSE;
 	}
     }
 
-  return true;
+  return TRUE;
 }
 
 static int
 bfd_mach_o_sizeof_headers (a, b)
      bfd *a ATTRIBUTE_UNUSED;
-     boolean b ATTRIBUTE_UNUSED;
+     bfd_boolean b ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -1682,7 +1715,7 @@ bfd_mach_o_scan (abfd, header, mdata)
   return 0;
 }
 
-boolean
+bfd_boolean
 bfd_mach_o_mkobject (abfd)
      bfd *abfd;
 {
@@ -1691,7 +1724,7 @@ bfd_mach_o_mkobject (abfd)
   mdata = ((bfd_mach_o_data_struct *)
 	   bfd_alloc (abfd, sizeof (bfd_mach_o_data_struct)));
   if (mdata == NULL)
-    return false;
+    return FALSE;
   abfd->tdata.mach_o_data = mdata;
 
   mdata->header.magic = 0;
@@ -1709,7 +1742,7 @@ bfd_mach_o_mkobject (abfd)
   mdata->sections = NULL;
   mdata->ibfd = NULL;
 
-  return true;
+  return TRUE;
 }
 
 const bfd_target *
@@ -2149,12 +2182,12 @@ bfd_mach_o_core_file_failing_signal (abfd)
   return 0;
 }
 
-boolean
+bfd_boolean
 bfd_mach_o_core_file_matches_executable_p (core_bfd, exec_bfd)
      bfd *core_bfd ATTRIBUTE_UNUSED;
      bfd *exec_bfd ATTRIBUTE_UNUSED;
 {
-  return true;
+  return TRUE;
 }
 
 #define TARGET_NAME mach_o_be_vec

@@ -4,50 +4,45 @@
 #include <stdexcept>
 #include <string>
 
-namespace __gnu_test
+enum region { oriental, egyptian, greek, etruscan, roman };
+
+// Test one.
+class gnu_obj_1
 {
-  enum 	region { oriental, egyptian, greek, etruscan, roman };
+public:
+  typedef region antiquities;
+  const bool 		test;
+  const int 		key1;
+  long       		key2;
 
-  // Test one.
-  class gnu_obj_1
-  {
-  public:
-    typedef region antiquities;
-    const bool 		test;
-    const int 		key1;
-    long       		key2;
+  antiquities 	value;
 
-    antiquities 	value;
+  gnu_obj_1(antiquities a, long l): test(true), key1(5), key2(l), value(a) {}
+};
 
-    gnu_obj_1(antiquities a, long l): test(true), key1(5), key2(l), value(a) {}
-  };
+// Test two.
+template<typename T>
+class gnu_obj_2: public virtual gnu_obj_1
+{
+public:
+  antiquities	value_derived;
+  
+  gnu_obj_2(antiquities b): gnu_obj_1(oriental, 7), value_derived(b) { }
+}; 
 
-  // Test two.
-  template<typename T>
-    class gnu_obj_2: public virtual gnu_obj_1
-    {
-    public:
-      antiquities	value_derived;
+// Test three.
+template<typename T>
+class gnu_obj_3
+{
+public:
+  typedef region antiquities;
+  gnu_obj_2<int>   	data;
       
-      gnu_obj_2(antiquities b): gnu_obj_1(oriental, 7), value_derived(b) { }
-    }; 
-
-  // Test three.
-  template<typename T>
-    class gnu_obj_3
-    {
-    public:
-      typedef region antiquities;
-      gnu_obj_2<int>   	data;
-      
-      gnu_obj_3(antiquities b): data(etruscan) { }
-    }; 
-} 
+  gnu_obj_3(antiquities b): data(etruscan) { }
+}; 
 
 int main()
 {
-  using namespace __gnu_test;
-
   bool test = true;
   const int i = 5;
   int j = i;
@@ -58,12 +53,12 @@ int main()
   try
     {
       ++j;
-      throw gnu_obj_1(egyptian, 4589);      
+      throw gnu_obj_1(egyptian, 4589);	// marker 1-throw
     }
   catch (gnu_obj_1& obj)
     {
       ++j;
-      if (obj.value != egyptian)
+      if (obj.value != egyptian)	// marker 1-catch
 	test &= false;
       if (obj.key2 != 4589)
 	test &= false;     
@@ -77,19 +72,19 @@ int main()
   // 2
   try
     {
-      ++j;
+      ++j;				// marker 2-start
       try
 	{
-	  ++j;
+	  ++j;				// marker 2-next
 	  try
 	    {
 	      ++j;
-	      throw gnu_obj_1(egyptian, 4589); 
+	      throw gnu_obj_1(egyptian, 4589); // marker 2-throw
 	    }
 	  catch (gnu_obj_1& obj)
 	    {
 	      ++j;
-	      if (obj.value != egyptian)
+	      if (obj.value != egyptian) // marker 2-catch
 		test &= false;
 	      if (obj.key2 != 4589)
 		test &= false;     
@@ -115,11 +110,11 @@ int main()
   try
     {
       if (j < 100)
-	throw invalid_argument("gdb.1");
+	throw invalid_argument("gdb.1"); // marker 3-throw
     }
   catch (exception& obj)
     {
-      if (obj.what() != "gdb.1")
+      if (obj.what() != "gdb.1")	// marker 3-catch
 	test &= false;
     }
   return 0;

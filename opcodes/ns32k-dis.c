@@ -1,5 +1,5 @@
 /* Print National Semiconductor 32000 instructions.
-   Copyright 1986, 1988, 1991, 1992, 1994, 1998, 2001
+   Copyright 1986, 1988, 1991, 1992, 1994, 1998, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of opcodes library.
@@ -405,8 +405,8 @@ print_insn_ns32k (memaddr, info)
      bfd_vma memaddr;
      disassemble_info *info;
 {
-  register unsigned int i;
-  register char *d;
+  unsigned int i;
+  const char *d;
   unsigned short first_word;
   int ioffset;		/* bits into instruction */
   int aoffset;		/* bits into arguments */
@@ -556,10 +556,13 @@ print_insn_arg (d, ioffset, aoffsetp, buffer, addr, result, index_offset)
      char *result;
      int index_offset;
 {
-  int addr_mode;
-  float Fvalue;
-  double Lvalue;
+  union {
+    float f;
+    double d;
+    int i[2];
+  } value;
   int Ivalue;
+  int addr_mode;
   int disp1, disp2;
   int index;
   int size;
@@ -647,23 +650,23 @@ print_insn_arg (d, ioffset, aoffsetp, buffer, addr, result, index_offset)
 	      sprintf (result, "$%d", Ivalue);
 	      break;
 	    case 'F':
-	      bit_copy (buffer, *aoffsetp, 32, (char *) &Fvalue);
-	      flip_bytes ((char *) & Fvalue, 4);
+	      bit_copy (buffer, *aoffsetp, 32, (char *) &value.f);
+	      flip_bytes ((char *) &value.f, 4);
 	      *aoffsetp += 32;
-	      if (INVALID_FLOAT (&Fvalue, 4))
-		sprintf (result, "<<invalid float 0x%.8x>>", *(int *) &Fvalue);
+	      if (INVALID_FLOAT (&value.f, 4))
+		sprintf (result, "<<invalid float 0x%.8x>>", value.i[0]);
 	      else /* assume host has ieee float */
-		sprintf (result, "$%g", Fvalue);
+		sprintf (result, "$%g", value.f);
 	      break;
 	    case 'L':
-	      bit_copy (buffer, *aoffsetp, 64, (char *) &Lvalue);
-	      flip_bytes ((char *) & Lvalue, 8);
+	      bit_copy (buffer, *aoffsetp, 64, (char *) &value.d);
+	      flip_bytes ((char *) &value.d, 8);
 	      *aoffsetp += 64;
-	      if (INVALID_FLOAT (&Lvalue, 8))
-		sprintf (result, "<<invalid long 0x%.8x%.8x>>",
-			 *(((int *) &Lvalue) + 1), *(int *) &Lvalue);
+	      if (INVALID_FLOAT (&value.d, 8))
+		sprintf (result, "<<invalid double 0x%.8x%.8x>>",
+			 value.i[1], value.i[0]);
 	      else /* assume host has ieee float */
-		sprintf (result, "$%g", Lvalue);
+		sprintf (result, "$%g", value.d);
 	      break;
 	    }
 	  break;

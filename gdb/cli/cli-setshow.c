@@ -18,6 +18,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include <readline/tilde.h>
 #include "value.h"
 #include <ctype.h>
 #include "gdb_string.h"

@@ -50,7 +50,7 @@ int
 file_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
   return ((chain) != 0
-	  && !inside_entry_file (FRAME_SAVED_PC (thisframe)));
+	  && !inside_entry_file (frame_pc_unwind (thisframe)));
 }
 
 /* Use the alternate method of avoiding running up off the end of the
@@ -61,8 +61,8 @@ int
 func_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
   return ((chain) != 0
-	  && !inside_main_func ((thisframe)->pc)
-	  && !inside_entry_func ((thisframe)->pc));
+	  && !inside_main_func (get_frame_pc (thisframe))
+	  && !inside_entry_func (get_frame_pc (thisframe)));
 }
 
 /* A very simple method of determining a valid frame */
@@ -93,7 +93,7 @@ inside_entry_file (CORE_ADDR addr)
       /* Do not stop backtracing if the pc is in the call dummy
          at the entry point.  */
       /* FIXME: Won't always work with zeros for the last two arguments */
-      if (PC_IN_CALL_DUMMY (addr, 0, 0))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (addr, 0, 0))
 	return 0;
     }
   return (addr >= symfile_objfile->ei.entry_file_lowpc &&
@@ -158,7 +158,7 @@ inside_entry_func (CORE_ADDR pc)
       /* Do not stop backtracing if the pc is in the call dummy
          at the entry point.  */
       /* FIXME: Won't always work with zeros for the last two arguments */
-      if (PC_IN_CALL_DUMMY (pc, 0, 0))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
 	return 0;
     }
   return (symfile_objfile->ei.entry_func_lowpc <= pc &&
@@ -174,7 +174,7 @@ frameless_look_for_prologue (struct frame_info *frame)
 {
   CORE_ADDR func_start, after_prologue;
 
-  func_start = get_pc_function_start (frame->pc);
+  func_start = get_pc_function_start (get_frame_pc (frame));
   if (func_start)
     {
       func_start += FUNCTION_START_OFFSET;
@@ -182,7 +182,7 @@ frameless_look_for_prologue (struct frame_info *frame)
          prologue, not how long it is.  */
       return PROLOGUE_FRAMELESS_P (func_start);
     }
-  else if (frame->pc == 0)
+  else if (get_frame_pc (frame) == 0)
     /* A frame with a zero PC is usually created by dereferencing a
        NULL function pointer, normally causing an immediate core dump
        of the inferior. Mark function as frameless, as the inferior
@@ -203,7 +203,7 @@ frameless_look_for_prologue (struct frame_info *frame)
 CORE_ADDR
 frame_address_in_block (struct frame_info *frame)
 {
-  CORE_ADDR pc = frame->pc;
+  CORE_ADDR pc = get_frame_pc (frame);
 
   /* If we are not in the innermost frame, and we are not interrupted
      by a signal, frame->pc points to the instruction following the
@@ -211,7 +211,11 @@ frame_address_in_block (struct frame_info *frame)
      instruction. Unfortunately, this is not straightforward to do, so
      we just use the address minus one, which is a good enough
      approximation.  */
-  if (frame->next != 0 && frame->next->signal_handler_caller == 0)
+  /* FIXME: cagney/2002-11-10: Should this instead test for
+     NORMAL_FRAME?  A dummy frame (in fact all the abnormal frames)
+     save the PC value in the block.  */
+  if (get_next_frame (frame) != 0
+      && get_frame_type (get_next_frame (frame)) != SIGTRAMP_FRAME)
     --pc;
 
   return pc;
@@ -237,17 +241,6 @@ struct block *
 get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
   const CORE_ADDR pc = frame_address_in_block (frame);
-
-  if (addr_in_block)
-    *addr_in_block = pc;
-
-  return block_for_pc (pc);
-}
-
-struct block *
-get_current_block (CORE_ADDR *addr_in_block)
-{
-  CORE_ADDR pc = read_pc ();
 
   if (addr_in_block)
     *addr_in_block = pc;
@@ -640,56 +633,6 @@ block_innermost_frame (const struct block *block)
     }
 }
 
-/* Return the full FRAME which corresponds to the given CORE_ADDR
-   or NULL if no FRAME on the chain corresponds to CORE_ADDR.  */
-
-struct frame_info *
-find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
-{
-  struct frame_info *frame = NULL;
-
-  if (frame_addr == (CORE_ADDR) 0)
-    return NULL;
-
-  while (1)
-    {
-      frame = get_prev_frame (frame);
-      if (frame == NULL)
-	return NULL;
-      if (FRAME_FP (frame) == frame_addr)
-	return frame;
-    }
-}
-
-#ifdef SIGCONTEXT_PC_OFFSET
-/* Get saved user PC for sigtramp from sigcontext for BSD style sigtramp.  */
-
-CORE_ADDR
-sigtramp_saved_pc (struct frame_info *frame)
-{
-  CORE_ADDR sigcontext_addr;
-  char *buf;
-  int ptrbytes = TYPE_LENGTH (builtin_type_void_func_ptr);
-  int sigcontext_offs = (2 * TARGET_INT_BIT) / TARGET_CHAR_BIT;
-
-  buf = alloca (ptrbytes);
-  /* Get sigcontext address, it is the third parameter on the stack.  */
-  if (frame->next)
-    sigcontext_addr = read_memory_typed_address
-      (FRAME_ARGS_ADDRESS (frame->next) + FRAME_ARGS_SKIP + sigcontext_offs,
-       builtin_type_void_data_ptr);
-  else
-    sigcontext_addr = read_memory_typed_address
-      (read_register (SP_REGNUM) + sigcontext_offs, builtin_type_void_data_ptr);
-
-  /* Don't cause a memory_error when accessing sigcontext in case the stack
-     layout has changed or the stack is corrupt.  */
-  target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
-  return extract_typed_address (buf, builtin_type_void_func_ptr);
-}
-#endif /* SIGCONTEXT_PC_OFFSET */
-
-
 /* Are we in a call dummy?  The code below which allows DECR_PC_AFTER_BREAK
    below is for infrun.c, which may give the macro a pc without that
    subtracted out.  */
@@ -697,16 +640,16 @@ sigtramp_saved_pc (struct frame_info *frame)
 extern CORE_ADDR text_end;
 
 int
-pc_in_call_dummy_before_text_end (CORE_ADDR pc, CORE_ADDR sp,
-				  CORE_ADDR frame_address)
+deprecated_pc_in_call_dummy_before_text_end (CORE_ADDR pc, CORE_ADDR sp,
+					     CORE_ADDR frame_address)
 {
   return ((pc) >= text_end - CALL_DUMMY_LENGTH
 	  && (pc) <= text_end + DECR_PC_AFTER_BREAK);
 }
 
 int
-pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
-				 CORE_ADDR frame_address)
+deprecated_pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
+					    CORE_ADDR frame_address)
 {
   return ((pc) >= text_end
 	  && (pc) <= text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK);
@@ -723,7 +666,7 @@ pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
    have that meaning, but the 29k doesn't use ON_STACK.  This could be
    fixed by generalizing this scheme, perhaps by passing in a frame
    and adding a few fields, at least on machines which need them for
-   PC_IN_CALL_DUMMY.
+   DEPRECATED_PC_IN_CALL_DUMMY.
 
    Something simpler, like checking for the stack segment, doesn't work,
    since various programs (threads implementations, gcc nested function
@@ -731,7 +674,8 @@ pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
    allocate other kinds of code on the stack.  */
 
 int
-pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address)
+deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp,
+				      CORE_ADDR frame_address)
 {
   return (INNER_THAN ((sp), (pc))
 	  && (frame_address != 0)
@@ -739,8 +683,8 @@ pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address)
 }
 
 int
-pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
-				 CORE_ADDR frame_address)
+deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
+					    CORE_ADDR frame_address)
 {
   return ((pc) >= CALL_DUMMY_ADDRESS ()
 	  && (pc) <= (CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK));
@@ -754,24 +698,26 @@ pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
 int
 generic_file_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (FRAME_SAVED_PC (fi), fp, fp))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame_pc_unwind (fi), fp, fp))
     return 1;			/* don't prune CALL_DUMMY frames */
   else				/* fall back to default algorithm (see frame.h) */
     return (fp != 0
-	    && (INNER_THAN (fi->frame, fp) || fi->frame == fp)
-	    && !inside_entry_file (FRAME_SAVED_PC (fi)));
+	    && (INNER_THAN (get_frame_base (fi), fp)
+		|| get_frame_base (fi) == fp)
+	    && !inside_entry_file (frame_pc_unwind (fi)));
 }
 
 int
 generic_func_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
-  if (USE_GENERIC_DUMMY_FRAMES
-      && PC_IN_CALL_DUMMY ((fi)->pc, 0, 0))
+  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
+      && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
     return 1;			/* don't prune CALL_DUMMY frames */
   else				/* fall back to default algorithm (see frame.h) */
     return (fp != 0
-	    && (INNER_THAN (fi->frame, fp) || fi->frame == fp)
-	    && !inside_main_func ((fi)->pc)
-	    && !inside_entry_func ((fi)->pc));
+	    && (INNER_THAN (get_frame_base (fi), fp)
+		|| get_frame_base (fi) == fp)
+	    && !inside_main_func (get_frame_pc (fi))
+	    && !inside_entry_func (get_frame_pc (fi)));
 }
 

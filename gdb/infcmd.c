@@ -183,7 +183,7 @@ CORE_ADDR step_range_end;	/* Exclusive */
    This is how we know when we step into a subroutine call,
    and how to set the frame for the breakpoint used to step out.  */
 
-CORE_ADDR step_frame_address;
+struct frame_id step_frame_id;
 
 /* Our notion of the current stack pointer.  */
 
@@ -279,7 +279,7 @@ construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
 
       /* We over-compute the size.  It shouldn't matter.  */
       for (i = 0; i < argc; ++i)
-	length += 2 * strlen (argv[i]) + 1;
+	length += 2 * strlen (argv[i]) + 1 + 2 * (argv[i][0] == '\0');
 
       result = (char *) xmalloc (length);
       out = result;
@@ -289,11 +289,20 @@ construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
 	  if (i > 0)
 	    *out++ = ' ';
 
-	  for (cp = argv[i]; *cp; ++cp)
+	  /* Need to handle empty arguments specially.  */
+	  if (argv[i][0] == '\0')
 	    {
-	      if (strchr (special, *cp) != NULL)
-		*out++ = '\\';
-	      *out++ = *cp;
+	      *out++ = '\'';
+	      *out++ = '\'';
+	    }
+	  else
+	    {
+	      for (cp = argv[i]; *cp; ++cp)
+		{
+		  if (strchr (special, *cp) != NULL)
+		    *out++ = '\\';
+		  *out++ = *cp;
+		}
 	    }
 	}
       *out = '\0';
@@ -619,7 +628,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 	  frame = get_current_frame ();
 	  if (!frame)		/* Avoid coredump here.  Why tho? */
 	    error ("No current frame");
-	  step_frame_address = FRAME_FP (frame);
+	  step_frame_id = get_frame_id (frame);
 	  step_sp = read_sp ();
 
 	  if (!single_inst)
@@ -734,7 +743,7 @@ step_once (int skip_subroutines, int single_inst, int count)
       frame = get_current_frame ();
       if (!frame)		/* Avoid coredump here.  Why tho? */
 	error ("No current frame");
-      step_frame_address = FRAME_FP (frame);
+      step_frame_id = get_frame_id (frame);
       step_sp = read_sp ();
 
       if (!single_inst)
@@ -993,27 +1002,28 @@ run_stack_dummy (CORE_ADDR addr, struct regcache *buffer)
 	}
       else
 	{
+	  /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need
+	     to put a breakpoint instruction.  If not, the call dummy
+	     already has the breakpoint instruction in it.
+
+	     ADDR IS THE ADDRESS of the call dummy plus the
+	     CALL_DUMMY_START_OFFSET, so we need to subtract the
+	     CALL_DUMMY_START_OFFSET.  */
 	  sal.pc = addr - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
 	}
       sal.section = find_pc_overlay (sal.pc);
 
-      /* Set up a FRAME for the dummy frame so we can pass it to
-         set_momentary_breakpoint.  We need to give the breakpoint a
-         frame in case there is only one copy of the dummy (e.g.
-         CALL_DUMMY_LOCATION == AFTER_TEXT_END).  */
-      flush_cached_frames ();
-      set_current_frame (create_new_frame (read_fp (), sal.pc));
-
-      /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need to put
-         a breakpoint instruction.  If not, the call dummy already has the
-         breakpoint instruction in it.
-
-         addr is the address of the call dummy plus the CALL_DUMMY_START_OFFSET,
-         so we need to subtract the CALL_DUMMY_START_OFFSET.  */
-      bpt = set_momentary_breakpoint (sal,
-				      get_current_frame (),
-				      bp_call_dummy);
-      bpt->disposition = disp_del;
+      {
+	/* Set up a frame ID for the dummy frame so we can pass it to
+	   set_momentary_breakpoint.  We need to give the breakpoint a
+	   frame ID so that the breakpoint code can correctly
+	   re-identify the dummy breakpoint.  */
+	struct frame_id frame = frame_id_build (read_fp (), sal.pc);
+	/* Create a momentary breakpoint at the return address of the
+           inferior.  That way it breaks when it returns.  */
+	bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
+	bpt->disposition = disp_del;
+      }
 
       /* If all error()s out of proceed ended up calling normal_stop (and
          perhaps they should; it already does in the special case of error
@@ -1097,7 +1107,7 @@ until_next_command (int from_tty)
     }
 
   step_over_calls = STEP_OVER_ALL;
-  step_frame_address = FRAME_FP (frame);
+  step_frame_id = get_frame_id (frame);
   step_sp = read_sp ();
 
   step_multi = 0;		/* Only one call to proceed */
@@ -1264,19 +1274,19 @@ finish_command (char *arg, int from_tty)
     error ("The \"finish\" command does not take any arguments.");
   if (!target_has_execution)
     error ("The program is not running.");
-  if (selected_frame == NULL)
+  if (deprecated_selected_frame == NULL)
     error ("No selected frame.");
 
-  frame = get_prev_frame (selected_frame);
+  frame = get_prev_frame (deprecated_selected_frame);
   if (frame == 0)
     error ("\"finish\" not meaningful in the outermost frame.");
 
   clear_proceed_status ();
 
-  sal = find_pc_line (frame->pc, 0);
-  sal.pc = frame->pc;
+  sal = find_pc_line (get_frame_pc (frame), 0);
+  sal.pc = get_frame_pc (frame);
 
-  breakpoint = set_momentary_breakpoint (sal, frame, bp_finish);
+  breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame), bp_finish);
 
   if (!event_loop_p || !target_can_async_p ())
     old_chain = make_cleanup_delete_breakpoint (breakpoint);
@@ -1285,15 +1295,15 @@ finish_command (char *arg, int from_tty)
 
   /* Find the function we will return from.  */
 
-  function = find_pc_function (selected_frame->pc);
+  function = find_pc_function (get_frame_pc (deprecated_selected_frame));
 
   /* Print info on the selected frame, including level number
      but not source.  */
   if (from_tty)
     {
       printf_filtered ("Run till exit from ");
-      print_stack_frame (selected_frame,
-			 frame_relative_level (selected_frame), 0);
+      print_stack_frame (deprecated_selected_frame,
+			 frame_relative_level (deprecated_selected_frame), 0);
     }
 
   /* If running asynchronously and the target support asynchronous
@@ -1681,13 +1691,13 @@ registers_info (char *addr_exp, int fpregs)
 
   if (!target_has_registers)
     error ("The program has no registers now.");
-  if (selected_frame == NULL)
+  if (deprecated_selected_frame == NULL)
     error ("No selected frame.");
 
   if (!addr_exp)
     {
       gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
-				    selected_frame, -1, fpregs);
+				    deprecated_selected_frame, -1, fpregs);
       return;
     }
 
@@ -1724,7 +1734,7 @@ registers_info (char *addr_exp, int fpregs)
 	if (regnum >= 0)
 	  {
 	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
-					  selected_frame, regnum, fpregs);
+					  deprecated_selected_frame, regnum, fpregs);
 	    continue;
 	  }
       }
@@ -1738,7 +1748,7 @@ registers_info (char *addr_exp, int fpregs)
 	    && regnum < NUM_REGS + NUM_PSEUDO_REGS)
 	  {
 	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
-					  selected_frame, regnum, fpregs);
+					  deprecated_selected_frame, regnum, fpregs);
 	    continue;
 	  }
       }
@@ -1764,7 +1774,7 @@ registers_info (char *addr_exp, int fpregs)
 		if (gdbarch_register_reggroup_p (current_gdbarch, regnum,
 						 (*group)))
 		  gdbarch_print_registers_info (current_gdbarch,
-						gdb_stdout, selected_frame,
+						gdb_stdout, deprecated_selected_frame,
 						regnum, fpregs);
 	      }
 	    continue;
@@ -1794,7 +1804,7 @@ print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
 {
   if (!target_has_registers)
     error ("The program has no registers now.");
-  if (selected_frame == NULL)
+  if (deprecated_selected_frame == NULL)
     error ("No selected frame.");
 
   if (gdbarch_print_vector_info_p (gdbarch))
@@ -1820,7 +1830,7 @@ print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
 static void
 vector_info (char *args, int from_tty)
 {
-  print_vector_info (current_gdbarch, gdb_stdout, selected_frame, args);
+  print_vector_info (current_gdbarch, gdb_stdout, deprecated_selected_frame, args);
 }
 
 
@@ -1961,7 +1971,7 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 {
   if (!target_has_registers)
     error ("The program has no registers now.");
-  if (selected_frame == NULL)
+  if (deprecated_selected_frame == NULL)
     error ("No selected frame.");
 
   if (gdbarch_print_float_info_p (gdbarch))
@@ -1995,7 +2005,7 @@ No floating-point info available for this processor.\n");
 static void
 float_info (char *args, int from_tty)
 {
-  print_float_info (current_gdbarch, gdb_stdout, selected_frame, args);
+  print_float_info (current_gdbarch, gdb_stdout, deprecated_selected_frame, args);
 }
 
 /* ARGSUSED */

@@ -52,7 +52,7 @@ static int print_insn_mips16
 static int is_newabi
   PARAMS ((Elf_Internal_Ehdr *));
 static void print_mips16_insn_arg
-  PARAMS ((int, const struct mips_opcode *, int, boolean, int, bfd_vma,
+  PARAMS ((int, const struct mips_opcode *, int, bfd_boolean, int, bfd_vma,
 	   struct disassemble_info *));
 
 /* FIXME: These should be shared with gdb somehow.  */
@@ -312,7 +312,7 @@ print_insn_arg (d, l, pc, info)
 	      if ((vsel & 1) == 0)
 		break;
 	    (*info->fprintf_func) (info->stream, "$v%d[%d]",
-				   (l >> OP_SH_FT) & OP_MASK_FT, 
+				   (l >> OP_SH_FT) & OP_MASK_FT,
 				   vsel >> 1);
 	  }
 	else if ((vsel & 0x08) == 0)
@@ -498,7 +498,7 @@ print_insn_mips (memaddr, word, info)
 {
   register const struct mips_opcode *op;
   int target_processor, mips_isa;
-  static boolean init = 0;
+  static bfd_boolean init = 0;
   static const struct mips_opcode *mips_hash[OP_MASK_OP + 1];
 
   /* Build a hash table to shorten the search time.  */
@@ -687,7 +687,7 @@ print_insn_mips16 (memaddr, info)
   bfd_byte buffer[2];
   int length;
   int insn;
-  boolean use_extend;
+  bfd_boolean use_extend;
   int extend = 0;
   const struct mips_opcode *op, *opend;
 
@@ -715,10 +715,10 @@ print_insn_mips16 (memaddr, info)
     insn = bfd_getl16 (buffer);
 
   /* Handle the extend opcode specially.  */
-  use_extend = false;
+  use_extend = FALSE;
   if ((insn & 0xf800) == 0xf000)
     {
-      use_extend = true;
+      use_extend = TRUE;
       extend = insn & 0x7ff;
 
       memaddr += 2;
@@ -768,7 +768,7 @@ print_insn_mips16 (memaddr, info)
 		  return length - 2;
 		}
 
-	      use_extend = false;
+	      use_extend = FALSE;
 
 	      memaddr += 2;
 
@@ -776,7 +776,7 @@ print_insn_mips16 (memaddr, info)
 						  info);
 	      if (status == 0)
 		{
-		  use_extend = true;
+		  use_extend = TRUE;
 		  if (info->endian == BFD_ENDIAN_BIG)
 		    extend = bfd_getb16 (buffer);
 		  else
@@ -839,7 +839,7 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
      char type;
      const struct mips_opcode *op;
      int l;
-     boolean use_extend;
+     bfd_boolean use_extend;
      int extend;
      bfd_vma memaddr;
      struct disassemble_info *info;

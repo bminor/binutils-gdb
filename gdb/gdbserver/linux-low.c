@@ -894,8 +894,6 @@ register_addr (int regnum)
     error ("Invalid register number %d.", regnum);
 
   addr = the_low_target.regmap[regnum];
-  if (addr == -1)
-    addr = 0;
 
   return addr;
 }

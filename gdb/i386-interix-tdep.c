@@ -117,12 +117,6 @@ i386_interix_skip_trampoline_code (CORE_ADDR pc)
   return i386_pe_skip_trampoline_code (pc, 0);
 }
 
-static void
-i386_interix_init_frame_pc (int fromleaf, struct frame_info *prev)
-{
-  /* Nothing to do on Interix.  */
-}
-
 static int
 i386_interix_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
@@ -131,16 +125,16 @@ i386_interix_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
      be a signal handler caller).  If we're dealing with a signal
      handler caller, this will return valid, which is fine.  If not,
      it'll make the correct test.  */
-  return (thisframe->signal_handler_caller
+  return ((get_frame_type (thisframe) == SIGTRAMP_FRAME)
           || (chain != 0
               && !inside_entry_file (read_memory_integer
                                      (thisframe->frame + 4, 4))));
 }
 
-/* We want to find the previous frame, which on Interix is tricky when signals
-   are involved; set frame->frame appropriately, and also get the pc
-   and tweak signal_handler_caller; this replaces a boatload of nested
-   macros, as well.  */
+/* We want to find the previous frame, which on Interix is tricky when
+   signals are involved; set frame->frame appropriately, and also get
+   the pc and tweak tye frame's type; this replaces a boatload of
+   nested macros, as well.  */
 static void
 i386_interix_back_one_frame (int fromleaf, struct frame_info *frame)
 {
@@ -169,7 +163,7 @@ i386_interix_back_one_frame (int fromleaf, struct frame_info *frame)
              NullApi or something else?  */
           ra = SAVED_PC_AFTER_CALL (frame);
           if (ra >= null_start && ra < null_end)
-            frame->signal_handler_caller = 1;
+	    deprecated_set_frame_type (frame, SIGTRAMP_FRAME);
           /* There might also be an indirect call to the mini-frame,
              putting one more return address on the stack.  (XP only,
              I think?)  This can't (reasonably) return the address of the 
@@ -177,12 +171,12 @@ i386_interix_back_one_frame (int fromleaf, struct frame_info *frame)
              is safe.  */
           ra = read_memory_unsigned_integer (read_register (SP_REGNUM) + 4, 4);
           if (ra >= null_start && ra < null_end)
-            frame->signal_handler_caller = 1;
+	    deprecated_set_frame_type (frame, SIGTRAMP_FRAME);
         }
       return;
     }
 
-  if (!frame->next->signal_handler_caller)
+  if (!(get_frame_type (frame->next) == SIGTRAMP_FRAME))
     {
       frame->pc = read_memory_integer (frame->next->frame + 4, 4);
       return;
@@ -316,7 +310,7 @@ i386_interix_frame_saved_pc (struct frame_info *fi)
   /* Assume that we've already unwound enough to have the caller's address
      if we're dealing with a signal handler caller (And if that fails,
      return 0).  */
-  if (fi->signal_handler_caller)
+  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     return fi->next ? fi->next->pc : 0;
   else
     return read_memory_integer (fi->frame + 4, 4);
@@ -337,7 +331,7 @@ i386_interix_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_trampoline_code (gdbarch,
                                     i386_interix_skip_trampoline_code);
   set_gdbarch_init_extra_frame_info (gdbarch, i386_interix_back_one_frame);
-  set_gdbarch_init_frame_pc (gdbarch, i386_interix_init_frame_pc);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_frame_chain_valid (gdbarch, i386_interix_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, i386_interix_frame_saved_pc);
   set_gdbarch_name_of_malloc (gdbarch, "_malloc");
@@ -360,6 +354,6 @@ _initialize_i386_interix_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
                                   i386_interix_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_INTERIX,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_INTERIX,
                           i386_interix_init_abi);
 }

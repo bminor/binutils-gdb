@@ -314,13 +314,13 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       /* Compute ->frame as if not flat.  If it is flat, we'll change
          it later.  */
       if (fi->next->next != NULL
-	  && (fi->next->next->signal_handler_caller
+	  && ((get_frame_type (fi->next->next) == SIGTRAMP_FRAME)
 	      || deprecated_frame_in_dummy (fi->next->next))
 	  && frameless_look_for_prologue (fi->next))
 	{
 	  /* A frameless function interrupted by a signal did not change
 	     the frame pointer, fix up frame pointer accordingly.  */
-	  fi->frame = FRAME_FP (fi->next);
+	  fi->frame = get_frame_base (fi->next);
 	  fi->extra_info->bottom = fi->next->extra_info->bottom;
 	}
       else
@@ -451,7 +451,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
   CORE_ADDR addr;
 
   buf = alloca (MAX_REGISTER_RAW_SIZE);
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     {
       /* This is the signal trampoline frame.
          Get the saved PC from the sigcontext structure.  */
@@ -487,7 +487,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
     }
   else if (frame->extra_info->in_prologue ||
 	   (frame->next != NULL &&
-	    (frame->next->signal_handler_caller ||
+	    ((get_frame_type (frame->next) == SIGTRAMP_FRAME) ||
 	     deprecated_frame_in_dummy (frame->next)) &&
 	    frameless_look_for_prologue (frame)))
     {
@@ -816,10 +816,10 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
       /* error ("No selected frame."); */
       if (!target_has_registers)
 	error ("The program has no registers now.");
-      if (selected_frame == NULL)
+      if (deprecated_selected_frame == NULL)
 	error ("No selected frame.");
       /* Try to use selected frame */
-      frame = get_prev_frame (selected_frame);
+      frame = get_prev_frame (deprecated_selected_frame);
       if (frame == 0)
 	error ("Cmd not meaningful in the outermost frame.");
     }
@@ -848,7 +848,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 
       if (frame1->pc >= (frame1->extra_info->bottom ? 
 			 frame1->extra_info->bottom : read_sp ())
-	  && frame1->pc <= FRAME_FP (frame1))
+	  && frame1->pc <= get_frame_base (frame1))
 	{
 	  /* Dummy frame.  All but the window regs are in there somewhere.
 	     The window registers are saved on the stack, just like in a
@@ -1112,7 +1112,7 @@ static void
 sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 {
   register int regnum;
-  CORE_ADDR frame_addr = FRAME_FP (fi);
+  CORE_ADDR frame_addr = get_frame_base (fi);
 
   if (!fi)
     internal_error (__FILE__, __LINE__,
@@ -1122,7 +1122,7 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 
   if (fi->pc >= (fi->extra_info->bottom ? 
 		 fi->extra_info->bottom : read_sp ())
-      && fi->pc <= FRAME_FP (fi))
+      && fi->pc <= get_frame_base (fi))
     {
       /* Dummy frame.  All but the window regs are in there somewhere. */
       for (regnum = G1_REGNUM; regnum < G1_REGNUM + 7; regnum++)
@@ -1205,16 +1205,17 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
     }
   /* Otherwise, whatever we would get from ptrace(GETREGS) is accurate */
   /* FIXME -- should this adjust for the sparc64 offset? */
-  saved_regs_addr[SP_REGNUM] = FRAME_FP (fi);
+  saved_regs_addr[SP_REGNUM] = get_frame_base (fi);
 }
 
 /* Discard from the stack the innermost frame, restoring all saved registers.
 
-   Note that the values stored in fsr by get_frame_saved_regs are *in
-   the context of the called frame*.  What this means is that the i
-   regs of fsr must be restored into the o regs of the (calling) frame that
-   we pop into.  We don't care about the output regs of the calling frame,
-   since unless it's a dummy frame, it won't have any output regs in it.
+   Note that the values stored in fsr by
+   deprecated_get_frame_saved_regs are *in the context of the called
+   frame*.  What this means is that the i regs of fsr must be restored
+   into the o regs of the (calling) frame that we pop into.  We don't
+   care about the output regs of the calling frame, since unless it's
+   a dummy frame, it won't have any output regs in it.
 
    We never have to bother with %l (local) regs, since the called routine's
    locals get tossed, and the calling routine's locals are already saved
@@ -1871,8 +1872,8 @@ sparc_print_register_hook (int regno)
     {
       char value[16];
 
-      if (frame_register_read (selected_frame, regno, value)
-	  && frame_register_read (selected_frame, regno + 1, value + 4))
+      if (frame_register_read (deprecated_selected_frame, regno, value)
+	  && frame_register_read (deprecated_selected_frame, regno + 1, value + 4))
 	{
 	  printf_unfiltered ("\t");
 	  print_floating (value, builtin_type_double, gdb_stdout);
@@ -1880,8 +1881,8 @@ sparc_print_register_hook (int regno)
 #if 0				/* FIXME: gdb doesn't handle long doubles */
       if ((regno & 3) == 0)
 	{
-	  if (frame_register_read (selected_frame, regno + 2, value + 8)
-	      && frame_register_read (selected_frame, regno + 3, value + 12))
+	  if (frame_register_read (deprecated_selected_frame, regno + 2, value + 8)
+	      && frame_register_read (deprecated_selected_frame, regno + 3, value + 12))
 	    {
 	      printf_unfiltered ("\t");
 	      print_floating (value, builtin_type_long_double, gdb_stdout);
@@ -1900,8 +1901,8 @@ sparc_print_register_hook (int regno)
     {
       char value[16];
 
-      if (frame_register_read (selected_frame, regno, value)
-	  && frame_register_read (selected_frame, regno + 1, value + 8))
+      if (frame_register_read (deprecated_selected_frame, regno, value)
+	  && frame_register_read (deprecated_selected_frame, regno + 1, value + 8))
 	{
 	  printf_unfiltered ("\t");
 	  print_floating (value, builtin_type_long_double, gdb_stdout);
@@ -2150,7 +2151,7 @@ sparc_print_registers_info (struct gdbarch *gdbarch,
 void
 sparc_do_registers_info (int regnum, int all)
 {
-  sparc_print_registers_info (current_gdbarch, gdb_stdout, selected_frame,
+  sparc_print_registers_info (current_gdbarch, gdb_stdout, deprecated_selected_frame,
 			      regnum, all);
 }
 
@@ -2166,8 +2167,8 @@ sparclet_print_registers_info (struct gdbarch *gdbarch,
 void
 sparclet_do_registers_info (int regnum, int all)
 {
-  sparclet_print_registers_info (current_gdbarch, gdb_stdout, selected_frame,
-				 regnum, all);
+  sparclet_print_registers_info (current_gdbarch, gdb_stdout,
+				 deprecated_selected_frame, regnum, all);
 }
 
 
@@ -3149,10 +3150,8 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_fp_regnum (gdbarch, SPARC_FP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, SPARC_FP0_REGNUM);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
   set_gdbarch_frame_chain (gdbarch, sparc_frame_chain);
   set_gdbarch_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_saved_pc (gdbarch, sparc_frame_saved_pc);
   set_gdbarch_frameless_function_invocation (gdbarch, 
@@ -3181,7 +3180,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_skip_prologue (gdbarch, sparc_skip_prologue);
   set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM);
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+  set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
 
   /*
@@ -3199,7 +3198,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* 32-bit machine types: */
 
 #ifdef SPARC32_CALL_DUMMY_ON_STACK
-      set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
+      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
       set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0x30);
       set_gdbarch_call_dummy_length (gdbarch, 0x38);
@@ -3250,11 +3249,10 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_32);
 #else
-      set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
       set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
       set_gdbarch_call_dummy_length (gdbarch, 0);
-      set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
 #endif
       set_gdbarch_call_dummy_stack_adjust (gdbarch, 68);
@@ -3298,7 +3296,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     default:	/* Any new machine type is likely to be 64-bit.  */
 
 #ifdef SPARC64_CALL_DUMMY_ON_STACK
-      set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
+      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
       set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 8 * 4);
       set_gdbarch_call_dummy_length (gdbarch, 192);
@@ -3306,11 +3304,10 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_start_offset (gdbarch, 148);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_64);
 #else
-      set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
       set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
       set_gdbarch_call_dummy_length (gdbarch, 0);
-      set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
       set_gdbarch_call_dummy_start_offset (gdbarch, 0);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
 #endif

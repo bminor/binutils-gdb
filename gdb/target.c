@@ -44,8 +44,6 @@ static void cleanup_target (struct target_ops *);
 
 static void maybe_kill_then_create_inferior (char *, char *, char **);
 
-static void default_clone_and_follow_inferior (int, int *);
-
 static void maybe_kill_then_attach (char *, int);
 
 static void kill_or_be_killed (int);
@@ -348,12 +346,6 @@ maybe_kill_then_create_inferior (char *exec, char *args, char **env)
   target_create_inferior (exec, args, env);
 }
 
-static void
-default_clone_and_follow_inferior (int child_pid, int *followed_child)
-{
-  target_clone_and_follow_inferior (child_pid, followed_child);
-}
-
 /* Clean up a target struct so it no longer has any zero pointers in it.
    We default entries, at least to stubs that print error messages.  */
 
@@ -376,13 +368,8 @@ cleanup_target (struct target_ops *t)
   de_fault (to_post_attach, 
 	    (void (*) (int)) 
 	    target_ignore);
-  de_fault (to_require_attach, 
-	    maybe_kill_then_attach);
   de_fault (to_detach, 
 	    (void (*) (char *, int)) 
-	    target_ignore);
-  de_fault (to_require_detach, 
-	    (void (*) (int, char *, int)) 
 	    target_ignore);
   de_fault (to_resume, 
 	    (void (*) (ptid_t, int, enum target_signal)) 
@@ -469,11 +456,6 @@ cleanup_target (struct target_ops *t)
   de_fault (to_acknowledge_created_inferior, 
 	    (void (*) (int)) 
 	    target_ignore);
-  de_fault (to_clone_and_follow_inferior, 
-	    default_clone_and_follow_inferior);
-  de_fault (to_post_follow_inferior_by_clone, 
-	    (void (*) (void)) 
-	    target_ignore);
   de_fault (to_insert_fork_catchpoint, 
 	    (int (*) (int)) 
 	    tcomplain);
@@ -486,17 +468,8 @@ cleanup_target (struct target_ops *t)
   de_fault (to_remove_vfork_catchpoint, 
 	    (int (*) (int)) 
 	    tcomplain);
-  de_fault (to_has_forked, 
-	    (int (*) (int, int *)) 
-	    return_zero);
-  de_fault (to_has_vforked, 
-	    (int (*) (int, int *)) 
-	    return_zero);
-  de_fault (to_can_follow_vfork_prior_to_exec, 
-	    (int (*) (void)) 
-	    return_zero);
-  de_fault (to_post_follow_vfork, 
-	    (void (*) (int, int, int, int)) 
+  de_fault (to_follow_fork,
+	    (int (*) (int)) 
 	    target_ignore);
   de_fault (to_insert_exec_catchpoint, 
 	    (int (*) (int)) 
@@ -504,15 +477,9 @@ cleanup_target (struct target_ops *t)
   de_fault (to_remove_exec_catchpoint, 
 	    (int (*) (int)) 
 	    tcomplain);
-  de_fault (to_has_execd, 
-	    (int (*) (int, char **)) 
-	    return_zero);
   de_fault (to_reported_exec_events_per_exec_call, 
 	    (int (*) (void)) 
 	    return_one);
-  de_fault (to_has_syscall_event, 
-	    (int (*) (int, enum target_waitkind *, int *)) 
-	    return_zero);
   de_fault (to_has_exited, 
 	    (int (*) (int, int, int *)) 
 	    return_zero);
@@ -588,9 +555,7 @@ update_current_target (void)
       INHERIT (to_close, t);
       INHERIT (to_attach, t);
       INHERIT (to_post_attach, t);
-      INHERIT (to_require_attach, t);
       INHERIT (to_detach, t);
-      INHERIT (to_require_detach, t);
       INHERIT (to_resume, t);
       INHERIT (to_wait, t);
       INHERIT (to_post_wait, t);
@@ -621,21 +586,14 @@ update_current_target (void)
       INHERIT (to_create_inferior, t);
       INHERIT (to_post_startup_inferior, t);
       INHERIT (to_acknowledge_created_inferior, t);
-      INHERIT (to_clone_and_follow_inferior, t);
-      INHERIT (to_post_follow_inferior_by_clone, t);
       INHERIT (to_insert_fork_catchpoint, t);
       INHERIT (to_remove_fork_catchpoint, t);
       INHERIT (to_insert_vfork_catchpoint, t);
       INHERIT (to_remove_vfork_catchpoint, t);
-      INHERIT (to_has_forked, t);
-      INHERIT (to_has_vforked, t);
-      INHERIT (to_can_follow_vfork_prior_to_exec, t);
-      INHERIT (to_post_follow_vfork, t);
+      INHERIT (to_follow_fork, t);
       INHERIT (to_insert_exec_catchpoint, t);
       INHERIT (to_remove_exec_catchpoint, t);
-      INHERIT (to_has_execd, t);
       INHERIT (to_reported_exec_events_per_exec_call, t);
-      INHERIT (to_has_syscall_event, t);
       INHERIT (to_has_exited, t);
       INHERIT (to_mourn_inferior, t);
       INHERIT (to_can_run, t);
@@ -651,7 +609,6 @@ update_current_target (void)
       INHERIT (to_get_current_exception_event, t);
       INHERIT (to_pid_to_exec_file, t);
       INHERIT (to_stratum, t);
-      INHERIT (DONT_USE, t);
       INHERIT (to_has_all_memory, t);
       INHERIT (to_has_memory, t);
       INHERIT (to_has_stack, t);
@@ -1245,42 +1202,12 @@ find_default_attach (char *args, int from_tty)
 }
 
 void
-find_default_require_attach (char *args, int from_tty)
-{
-  struct target_ops *t;
-
-  t = find_default_run_target ("require_attach");
-  (t->to_require_attach) (args, from_tty);
-  return;
-}
-
-void
-find_default_require_detach (int pid, char *args, int from_tty)
-{
-  struct target_ops *t;
-
-  t = find_default_run_target ("require_detach");
-  (t->to_require_detach) (pid, args, from_tty);
-  return;
-}
-
-void
 find_default_create_inferior (char *exec_file, char *allargs, char **env)
 {
   struct target_ops *t;
 
   t = find_default_run_target ("run");
   (t->to_create_inferior) (exec_file, allargs, env);
-  return;
-}
-
-void
-find_default_clone_and_follow_inferior (int child_pid, int *followed_child)
-{
-  struct target_ops *t;
-
-  t = find_default_run_target ("run");
-  (t->to_clone_and_follow_inferior) (child_pid, followed_child);
   return;
 }
 
@@ -1581,10 +1508,7 @@ init_dummy_target (void)
   dummy_target.to_longname = "None";
   dummy_target.to_doc = "";
   dummy_target.to_attach = find_default_attach;
-  dummy_target.to_require_attach = find_default_require_attach;
-  dummy_target.to_require_detach = find_default_require_detach;
   dummy_target.to_create_inferior = find_default_create_inferior;
-  dummy_target.to_clone_and_follow_inferior = find_default_clone_and_follow_inferior;
   dummy_target.to_pid_to_str = normal_pid_to_str;
   dummy_target.to_stratum = dummy_stratum;
   dummy_target.to_find_memory_regions = dummy_find_memory_regions;
@@ -1629,29 +1553,11 @@ debug_to_post_attach (int pid)
 }
 
 static void
-debug_to_require_attach (char *args, int from_tty)
-{
-  debug_target.to_require_attach (args, from_tty);
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_require_attach (%s, %d)\n", args, from_tty);
-}
-
-static void
 debug_to_detach (char *args, int from_tty)
 {
   debug_target.to_detach (args, from_tty);
 
   fprintf_unfiltered (gdb_stdlog, "target_detach (%s, %d)\n", args, from_tty);
-}
-
-static void
-debug_to_require_detach (int pid, char *args, int from_tty)
-{
-  debug_target.to_require_detach (pid, args, from_tty);
-
-  fprintf_unfiltered (gdb_stdlog,
-	       "target_require_detach (%d, %s, %d)\n", pid, args, from_tty);
 }
 
 static void
@@ -2058,24 +1964,6 @@ debug_to_acknowledge_created_inferior (int pid)
 		      pid);
 }
 
-static void
-debug_to_clone_and_follow_inferior (int child_pid, int *followed_child)
-{
-  debug_target.to_clone_and_follow_inferior (child_pid, followed_child);
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_clone_and_follow_inferior (%d, %d)\n",
-		      child_pid, *followed_child);
-}
-
-static void
-debug_to_post_follow_inferior_by_clone (void)
-{
-  debug_target.to_post_follow_inferior_by_clone ();
-
-  fprintf_unfiltered (gdb_stdlog, "target_post_follow_inferior_by_clone ()\n");
-}
-
 static int
 debug_to_insert_fork_catchpoint (int pid)
 {
@@ -2129,53 +2017,14 @@ debug_to_remove_vfork_catchpoint (int pid)
 }
 
 static int
-debug_to_has_forked (int pid, int *child_pid)
+debug_to_follow_fork (int follow_child)
 {
-  int has_forked;
+  int retval =  debug_target.to_follow_fork (follow_child);
 
-  has_forked = debug_target.to_has_forked (pid, child_pid);
+  fprintf_unfiltered (gdb_stdlog, "target_follow_fork (%d) = %d\n",
+		      follow_child, retval);
 
-  fprintf_unfiltered (gdb_stdlog, "target_has_forked (%d, %d) = %d\n",
-		      pid, *child_pid, has_forked);
-
-  return has_forked;
-}
-
-static int
-debug_to_has_vforked (int pid, int *child_pid)
-{
-  int has_vforked;
-
-  has_vforked = debug_target.to_has_vforked (pid, child_pid);
-
-  fprintf_unfiltered (gdb_stdlog, "target_has_vforked (%d, %d) = %d\n",
-		      pid, *child_pid, has_vforked);
-
-  return has_vforked;
-}
-
-static int
-debug_to_can_follow_vfork_prior_to_exec (void)
-{
-  int can_immediately_follow_vfork;
-
-  can_immediately_follow_vfork = debug_target.to_can_follow_vfork_prior_to_exec ();
-
-  fprintf_unfiltered (gdb_stdlog, "target_can_follow_vfork_prior_to_exec () = %d\n",
-		      can_immediately_follow_vfork);
-
-  return can_immediately_follow_vfork;
-}
-
-static void
-debug_to_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
-			    int followed_child)
-{
-  debug_target.to_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child);
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_post_follow_vfork (%d, %d, %d, %d)\n",
-		    parent_pid, followed_parent, child_pid, followed_child);
+  return retval;
 }
 
 static int
@@ -2205,20 +2054,6 @@ debug_to_remove_exec_catchpoint (int pid)
 }
 
 static int
-debug_to_has_execd (int pid, char **execd_pathname)
-{
-  int has_execd;
-
-  has_execd = debug_target.to_has_execd (pid, execd_pathname);
-
-  fprintf_unfiltered (gdb_stdlog, "target_has_execd (%d, %s) = %d\n",
-		      pid, (*execd_pathname ? *execd_pathname : "<NULL>"),
-		      has_execd);
-
-  return has_execd;
-}
-
-static int
 debug_to_reported_exec_events_per_exec_call (void)
 {
   int reported_exec_events;
@@ -2230,36 +2065,6 @@ debug_to_reported_exec_events_per_exec_call (void)
 		      reported_exec_events);
 
   return reported_exec_events;
-}
-
-static int
-debug_to_has_syscall_event (int pid, enum target_waitkind *kind,
-			    int *syscall_id)
-{
-  int has_syscall_event;
-  char *kind_spelling = "??";
-
-  has_syscall_event = debug_target.to_has_syscall_event (pid, kind, syscall_id);
-  if (has_syscall_event)
-    {
-      switch (*kind)
-	{
-	case TARGET_WAITKIND_SYSCALL_ENTRY:
-	  kind_spelling = "SYSCALL_ENTRY";
-	  break;
-	case TARGET_WAITKIND_SYSCALL_RETURN:
-	  kind_spelling = "SYSCALL_RETURN";
-	  break;
-	default:
-	  break;
-	}
-    }
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_has_syscall_event (%d, %s, %d) = %d\n",
-		      pid, kind_spelling, *syscall_id, has_syscall_event);
-
-  return has_syscall_event;
 }
 
 static int
@@ -2395,9 +2200,7 @@ setup_target_debug (void)
   current_target.to_close = debug_to_close;
   current_target.to_attach = debug_to_attach;
   current_target.to_post_attach = debug_to_post_attach;
-  current_target.to_require_attach = debug_to_require_attach;
   current_target.to_detach = debug_to_detach;
-  current_target.to_require_detach = debug_to_require_detach;
   current_target.to_resume = debug_to_resume;
   current_target.to_wait = debug_to_wait;
   current_target.to_post_wait = debug_to_post_wait;
@@ -2428,21 +2231,14 @@ setup_target_debug (void)
   current_target.to_create_inferior = debug_to_create_inferior;
   current_target.to_post_startup_inferior = debug_to_post_startup_inferior;
   current_target.to_acknowledge_created_inferior = debug_to_acknowledge_created_inferior;
-  current_target.to_clone_and_follow_inferior = debug_to_clone_and_follow_inferior;
-  current_target.to_post_follow_inferior_by_clone = debug_to_post_follow_inferior_by_clone;
   current_target.to_insert_fork_catchpoint = debug_to_insert_fork_catchpoint;
   current_target.to_remove_fork_catchpoint = debug_to_remove_fork_catchpoint;
   current_target.to_insert_vfork_catchpoint = debug_to_insert_vfork_catchpoint;
   current_target.to_remove_vfork_catchpoint = debug_to_remove_vfork_catchpoint;
-  current_target.to_has_forked = debug_to_has_forked;
-  current_target.to_has_vforked = debug_to_has_vforked;
-  current_target.to_can_follow_vfork_prior_to_exec = debug_to_can_follow_vfork_prior_to_exec;
-  current_target.to_post_follow_vfork = debug_to_post_follow_vfork;
+  current_target.to_follow_fork = debug_to_follow_fork;
   current_target.to_insert_exec_catchpoint = debug_to_insert_exec_catchpoint;
   current_target.to_remove_exec_catchpoint = debug_to_remove_exec_catchpoint;
-  current_target.to_has_execd = debug_to_has_execd;
   current_target.to_reported_exec_events_per_exec_call = debug_to_reported_exec_events_per_exec_call;
-  current_target.to_has_syscall_event = debug_to_has_syscall_event;
   current_target.to_has_exited = debug_to_has_exited;
   current_target.to_mourn_inferior = debug_to_mourn_inferior;
   current_target.to_can_run = debug_to_can_run;

@@ -1,18 +1,18 @@
 /* Hitachi SH64-specific support for 32-bit ELF
-   Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc. 
-      
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+
    This file is part of BFD, the Binary File Descriptor library.
-  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-                      
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-    
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
@@ -26,7 +26,7 @@
 #include "elf/sh.h"
 #include "../opcodes/sh64-opc.h"
 
-static boolean sh64_address_in_cranges
+static bfd_boolean sh64_address_in_cranges
   PARAMS ((asection *cranges, bfd_vma, sh64_elf_crange *));
 
 /* Ordering functions of a crange, for the qsort and bsearch calls and for
@@ -100,7 +100,7 @@ _bfd_sh64_crange_bsearch_cmpl (p1, p2)
    section.  Return FALSE if not found, and TRUE if found, and the region
    filled into RANGEP if non-NULL.  */
 
-static boolean
+static bfd_boolean
 sh64_address_in_cranges (cranges, addr, rangep)
      asection *cranges;
      bfd_vma addr;
@@ -113,11 +113,11 @@ sh64_address_in_cranges (cranges, addr, rangep)
   /* If the size is not a multiple of the cranges entry size, then
      something is badly wrong.  */
   if ((cranges_size % SH64_CRANGE_SIZE) != 0)
-    return false;
+    return FALSE;
 
   /* If this section has relocations, then we can't do anything sane.  */
   if (bfd_get_section_flags (cranges->owner, cranges) & SEC_RELOC)
-    return false;
+    return FALSE;
 
   /* Has some kind soul (or previous call) left processed, sorted contents
      for us?  */
@@ -130,7 +130,7 @@ sh64_address_in_cranges (cranges, addr, rangep)
 	= bfd_malloc (cranges->_cooked_size != 0
 		      ? cranges->_cooked_size : cranges->_raw_size);
       if (cranges_contents == NULL)
-	return false;
+	return FALSE;
 
       if (! bfd_get_section_contents (cranges->owner, cranges,
 				      cranges_contents, (file_ptr) 0,
@@ -183,16 +183,16 @@ sh64_address_in_cranges (cranges, addr, rangep)
       rangep->cr_size = cr_size;
       rangep->cr_type = cr_type;
 
-      return true;
+      return TRUE;
     }
 
   /* There is a .cranges section, but it does not have a descriptor
      matching this address.  */
-  return false;
+  return FALSE;
 
 error_return:
   free (cranges_contents);
-  return false;
+  return FALSE;
 }
 
 /* Determine what ADDR points to in SEC, and fill in a range descriptor in
@@ -215,7 +215,7 @@ sh64_get_contents_type (sec, addr, rangep)
       rangep->cr_type = CRT_NONE;
     }
   else
-    return false;
+    return FALSE;
 
   /* If none of the pertinent bits are set, then it's a SHcompact (or at
      least not SHmedia).  */
@@ -254,7 +254,7 @@ sh64_get_contents_type (sec, addr, rangep)
 
 /* This is a simpler exported interface for the benefit of gdb et al.  */
 
-boolean
+bfd_boolean
 sh64_address_is_shmedia (sec, addr)
      asection *sec;
      bfd_vma addr;

@@ -219,7 +219,7 @@ ppcnbsd_init_abi (struct gdbarch_info info,
 void
 _initialize_ppcnbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_powerpc, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_powerpc, 0, GDB_OSABI_NETBSD_ELF,
 			  ppcnbsd_init_abi);
 
   add_core_fns (&ppcnbsd_core_fns);

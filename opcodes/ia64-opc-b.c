@@ -189,7 +189,7 @@ struct ia64_opcode ia64_opcodes_b[] =
 #undef BR
 #undef BRP
 #undef BRT
-    
+
     {"cover",		B0, OpX6 (0, 0x02), {0, }, NO_PRED | LAST | MOD_RRBS, 0, NULL},
     {"clrrrb",		B0, OpX6 (0, 0x04), {0, }, NO_PRED | LAST | MOD_RRBS, 0, NULL},
     {"clrrrb.pr",	B0, OpX6 (0, 0x05), {0, }, NO_PRED | LAST | MOD_RRBS, 0, NULL},
@@ -238,6 +238,7 @@ struct ia64_opcode ia64_opcodes_b[] =
 #undef BRP
 
     {"nop.b",		B0, OpX6 (2, 0x00), {IMMU21}, EMPTY},
+    {"hint.b",		B0, OpX6 (2, 0x01), {IMMU21}, EMPTY},
 
 #define BR(a,b) \
       B0, OpBtypePaWhaDPr (4, 0, a, 0, b, 0), {TGT25c}, PSEUDO, 0, NULL

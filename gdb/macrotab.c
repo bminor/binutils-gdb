@@ -445,12 +445,9 @@ macro_include (struct macro_source_file *source,
          should tolerate bad debug info.  So:
 
          First, squawk.  */
-      static struct deprecated_complaint bogus_inclusion_line = {
-        "both `%s' and `%s' allegedly #included at %s:%d", 0, 0
-      };
-
-      complain (&bogus_inclusion_line, 
-                included, (*link)->filename, source->filename, line);
+      complaint (&symfile_complaints,
+		 "both `%s' and `%s' allegedly #included at %s:%d", included,
+		 (*link)->filename, source->filename, line);
 
       /* Now, choose a new, unoccupied line number for this
          #inclusion, after the alleged #inclusion line.  */
@@ -707,15 +704,10 @@ check_for_redefinition (struct macro_source_file *source, int line,
 
       if (! same)
         {
-          static struct deprecated_complaint macro_redefined = {
-            "macro `%s' redefined at %s:%d; original definition at %s:%d",
-            0, 0
-          };
-          complain (&macro_redefined,
-                    name,
-                    source->filename, line,
-                    found_key->start_file->filename,
-                    found_key->start_line);
+	  complaint (&symfile_complaints,
+		     "macro `%s' redefined at %s:%d; original definition at %s:%d",
+		     name, source->filename, line,
+		     found_key->start_file->filename, found_key->start_line);
         }
 
       return found_key;
@@ -801,12 +793,10 @@ macro_undef (struct macro_source_file *source, int line,
 
       if (key->end_file)
         {
-          static struct deprecated_complaint double_undef = {
-            "macro '%s' is #undefined twice, at %s:%d and %s:%d",
-            0, 0
-          };
-          complain (&double_undef, name, source->filename, line,
-                    key->end_file->filename, key->end_line);
+	  complaint (&symfile_complaints,
+		     "macro '%s' is #undefined twice, at %s:%d and %s:%d", name,
+		     source->filename, line, key->end_file->filename,
+		     key->end_line);
         }
 
       /* Whatever the case, wipe out the old ending point, and 
@@ -820,11 +810,9 @@ macro_undef (struct macro_source_file *source, int line,
          has no macro definition in scope is ignored.  So we should
          ignore it too.  */
 #if 0
-      static struct deprecated_complaint no_macro_to_undefine = {
-        "no definition for macro `%s' in scope to #undef at %s:%d",
-        0, 0
-      };
-      complain (&no_macro_to_undefine, name, source->filename, line);
+      complaint (&symfile_complaints,
+		 "no definition for macro `%s' in scope to #undef at %s:%d",
+		 name, source->filename, line);
 #endif
     }
 }

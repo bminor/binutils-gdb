@@ -688,11 +688,13 @@ struct section_offsets
     ? (internal_error (__FILE__, __LINE__, "Section index is uninitialized"), -1) \
     : secoff->offsets[whichone])
 
-/* The maximum possible size of a section_offsets table.  */
-
-#define SIZEOF_SECTION_OFFSETS \
+/* The size of a section_offsets table for N sections.  */
+#define SIZEOF_N_SECTION_OFFSETS(n) \
   (sizeof (struct section_offsets) \
-   + sizeof (((struct section_offsets *) 0)->offsets) * (SECT_OFF_MAX-1))
+   + sizeof (((struct section_offsets *) 0)->offsets) * ((n)-1))
+
+/* The maximum possible size of a section_offsets table.  */
+#define SIZEOF_SECTION_OFFSETS (SIZEOF_N_SECTION_OFFSETS (SECT_OFF_MAX))
 
 /* Each source file or header is represented by a struct symtab. 
    These objects are chained through the `next' field.  */

@@ -1746,13 +1746,19 @@ cfi_frame_chain (struct frame_info *fi)
 }
 
 /* Sets the pc of the frame.  */
-void
+CORE_ADDR
 cfi_init_frame_pc (int fromleaf, struct frame_info *fi)
 {
-  if (fi->next)
-    get_reg ((char *) &(fi->pc), UNWIND_CONTEXT (fi->next), PC_REGNUM);
+  if (get_next_frame (fi))
+    {
+      CORE_ADDR pc;
+      /* FIXME: cagney/2002-12-04: This is straight wrong.  It's
+         assuming that the PC is CORE_ADDR (a host quantity) in size.  */
+      get_reg ((void *)&pc, UNWIND_CONTEXT (get_next_frame (fi)), PC_REGNUM);
+      return pc;
+    }
   else
-    fi->pc = read_pc ();
+    return read_pc ();
 }
 
 /* Initialize unwind context informations of the frame.  */

@@ -62,7 +62,7 @@ print_insn_pj (addr, info)
       unsigned char byte_2;
       if ((status = info->read_memory_func (addr + 1, &byte_2, 1, info)))
 	goto fail;
-      fprintf_fn (stream, "%s\t", pj_opc_info[opcode + byte_2].name);
+      fprintf_fn (stream, "%s\t", pj_opc_info[opcode + byte_2].u.name);
       return 2;
     }
   else
@@ -72,12 +72,12 @@ print_insn_pj (addr, info)
       const pj_opc_info_t *op = &pj_opc_info[opcode];
       int a;
       addr++;
-      fprintf_fn (stream, "%s", op->name);
+      fprintf_fn (stream, "%s", op->u.name);
 
       /* The tableswitch instruction is followed by the default
 	 address, low value, high value and the destinations.  */
 
-      if (strcmp (op->name, "tableswitch") == 0)
+      if (strcmp (op->u.name, "tableswitch") == 0)
 	{
 	  int lowval;
 	  int highval;
@@ -116,7 +116,7 @@ print_insn_pj (addr, info)
 	 address, element count and pairs of values and
 	 addresses.  */
 
-      if (strcmp (op->name, "lookupswitch") == 0)
+      if (strcmp (op->u.name, "lookupswitch") == 0)
 	{
 	  int count;
 	  int val;

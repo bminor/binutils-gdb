@@ -20,23 +20,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* FIXME: cagney/2002-02-28: The GDB coding standard indicates that
-   "defs.h" should be included first.  Unfortunatly some systems
-   (currently Debian GNU/Linux) include the <stdbool.h> via <curses.h>
-   and they clash with "bfd.h"'s definiton of true/false.  The correct
-   fix is to remove true/false from "bfd.h", however, until that
-   happens, hack around it by including "config.h" and <curses.h>
-   first.  */
-
-#include "config.h"
-
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#ifdef HAVE_TERM_H
-#include <term.h>
-#endif
-
 #include "defs.h"
 #include "gdb_assert.h"
 #include <ctype.h>
@@ -67,6 +50,13 @@
 #include "inferior.h" /* for signed_pointer_to_address */
 
 #include <sys/param.h>		/* For MAXPATHLEN */
+
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#ifdef HAVE_TERM_H
+#include <term.h>
+#endif
 
 #include <readline/readline.h>
 

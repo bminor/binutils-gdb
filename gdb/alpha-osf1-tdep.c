@@ -73,5 +73,6 @@ alpha_osf1_init_abi (struct gdbarch_info info,
 void
 _initialize_alpha_osf1_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_alpha, GDB_OSABI_OSF1, alpha_osf1_init_abi);
+  gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_OSF1,
+			  alpha_osf1_init_abi);
 }

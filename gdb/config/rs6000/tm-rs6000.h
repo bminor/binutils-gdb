@@ -78,10 +78,15 @@ extern void aix_process_linenos (void);
 
 /* Define other aspects of the stack frame.  */
 
-#define INIT_FRAME_PC_FIRST(fromleaf, prev) \
-  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
-	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
-#define INIT_FRAME_PC(fromleaf, prev)	/* nothing */
+#define DEPRECATED_INIT_FRAME_PC_FIRST(fromleaf, prev) \
+  (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
+	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ())
+/* NOTE: cagney/2002-12-08: Add local declaration of
+   init_frame_pc_noop() because it isn't possible to include
+   "arch-utils.h" here.  Not too bad as this entire file is going away
+   anyway.  */
+extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
+#define DEPRECATED_INIT_FRAME_PC(fromleaf, prev) (init_frame_pc_noop (fromleaf, prev))
 
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define IBM6000_TARGET

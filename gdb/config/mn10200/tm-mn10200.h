@@ -107,7 +107,8 @@ struct value;
 
 extern void mn10200_init_extra_frame_info (struct frame_info *);
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) mn10200_init_extra_frame_info (fi)
-#define INIT_FRAME_PC(x,y)
+#define DEPRECATED_INIT_FRAME_PC(x,y) (init_frame_pc_noop (x, y))
+#define INIT_FRAME_PC_FIRST(x,y) (init_frame_pc_noop (x, y))
 
 extern void mn10200_frame_find_saved_regs (struct frame_info *,
 					   struct frame_saved_regs *);
@@ -184,7 +185,7 @@ extern CORE_ADDR mn10200_skip_prologue (CORE_ADDR);
 extern void mn10200_pop_frame (struct frame_info *);
 #define POP_FRAME mn10200_pop_frame (get_current_frame ())
 
-#define USE_GENERIC_DUMMY_FRAMES 1
+#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_START_OFFSET      (0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
@@ -202,18 +203,13 @@ extern CORE_ADDR mn10200_push_arguments (int, struct value **, CORE_ADDR,
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (mn10200_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 
-#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
+#define DEPRECATED_PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
 
 #define REG_STRUCT_HAS_ADDR(gcc_p,TYPE) \
   	(TYPE_LENGTH (TYPE) > 8)
 
 extern use_struct_convention_fn mn10200_use_struct_convention;
 #define USE_STRUCT_CONVENTION(GCC_P, TYPE) mn10200_use_struct_convention (GCC_P, TYPE)
-
-/* Override the default get_saved_register function with
-   one that takes account of generic CALL_DUMMY frames.  */
-#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-      generic_unwind_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Define this for Wingdb */
 #define TARGET_MN10200

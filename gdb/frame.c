@@ -33,23 +33,64 @@
 #include "dummy-frame.h"
 #include "gdbcore.h"
 #include "annotate.h"
+#include "language.h"
 
-/* Return a frame uniq ID that can be used to, later re-find the
+/* Return a frame uniq ID that can be used to, later, re-find the
    frame.  */
 
-void
-get_frame_id (struct frame_info *fi, struct frame_id *id)
+struct frame_id
+get_frame_id (struct frame_info *fi)
 {
   if (fi == NULL)
     {
-      id->base = 0;
-      id->pc = 0;
+      return null_frame_id;
     }
   else
     {
-      id->base = FRAME_FP (fi);
-      id->pc = fi->pc;
+      struct frame_id id;
+      id.base = fi->frame;
+      id.pc = fi->pc;
+      return id;
     }
+}
+
+const struct frame_id null_frame_id; /* All zeros.  */
+
+struct frame_id
+frame_id_build (CORE_ADDR base, CORE_ADDR func_or_pc)
+{
+  struct frame_id id;
+  id.base = base;
+  id.pc = func_or_pc;
+  return id;
+}
+
+int
+frame_id_p (struct frame_id l)
+{
+  /* The .func can be NULL but the .base cannot.  */
+  return (l.base != 0);
+}
+
+int
+frame_id_eq (struct frame_id l, struct frame_id r)
+{
+  /* If .base is different, the frames are different.  */
+  if (l.base != r.base)
+    return 0;
+  /* Add a test to check that the frame ID's are for the same function
+     here.  */
+  return 1;
+}
+
+int
+frame_id_inner (struct frame_id l, struct frame_id r)
+{
+  /* Only return non-zero when strictly inner than.  Note that, per
+     comment in "frame.h", there is some fuzz here.  Frameless
+     functions are not strictly inner than (same .base but different
+     .func).  */
+  return INNER_THAN (l.base, r.base);
 }
 
 struct frame_info *
@@ -59,30 +100,51 @@ frame_find_by_id (struct frame_id id)
 
   /* ZERO denotes the null frame, let the caller decide what to do
      about it.  Should it instead return get_current_frame()?  */
-  if (id.base == 0 && id.pc == 0)
+  if (!frame_id_p (id))
     return NULL;
 
   for (frame = get_current_frame ();
        frame != NULL;
        frame = get_prev_frame (frame))
     {
-      if (INNER_THAN (FRAME_FP (frame), id.base))
-	/* ``inner/current < frame < id.base''.  Keep looking along
-           the frame chain.  */
-	continue;
-      if (INNER_THAN (id.base, FRAME_FP (frame)))
-	/* ``inner/current < id.base < frame''.  Oops, gone past it.
-           Just give up.  */
+      struct frame_id this = get_frame_id (frame);
+      if (frame_id_eq (id, this))
+	/* An exact match.  */
+	return frame;
+      if (frame_id_inner (id, this))
+	/* Gone to far.  */
 	return NULL;
-      /* FIXME: cagney/2002-04-21: This isn't sufficient.  It should
-	 use id.pc to check that the two frames belong to the same
-	 function.  Otherwise we'll do things like match dummy frames
-	 or mis-match frameless functions.  However, until someone
-	 notices, stick with the existing behavour.  */
-      return frame;
+      /* Either, we're not yet gone far enough out along the frame
+         chain (inner(this,id), or we're comparing frameless functions
+         (same .base, different .func, no test available).  Struggle
+         on until we've definitly gone to far.  */
     }
   return NULL;
 }
+
+CORE_ADDR
+frame_pc_unwind (struct frame_info *frame)
+{
+  if (!frame->pc_unwind_cache_p)
+    {
+      frame->pc_unwind_cache = frame->pc_unwind (frame, &frame->unwind_cache);
+      frame->pc_unwind_cache_p = 1;
+    }
+  return frame->pc_unwind_cache;
+}
+
+struct frame_id
+frame_id_unwind (struct frame_info *frame)
+{
+  if (!frame->id_unwind_cache_p)
+    {
+      frame->id_unwind_cache =
+	frame->id_unwind (frame, &frame->unwind_cache);
+      frame->id_unwind_cache_p = 1;
+    }
+  return frame->id_unwind_cache;
+}
+
 
 void
 frame_register_unwind (struct frame_info *frame, int regnum,
@@ -124,7 +186,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
     }
 
   /* Ask this frame to unwind its register.  */
-  frame->register_unwind (frame, &frame->register_unwind_cache, regnum,
+  frame->register_unwind (frame, &frame->unwind_cache, regnum,
 			  optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
@@ -250,7 +312,7 @@ frame_read_signed_register (struct frame_info *frame, int regnum,
   frame_unwind_signed_register (get_next_frame (frame), regnum, val);
 }
 
-void
+static void
 generic_unwind_get_saved_register (char *raw_buffer,
 				   int *optimizedp,
 				   CORE_ADDR *addrp,
@@ -399,14 +461,20 @@ frame_obstack_alloc (unsigned long size)
   return obstack_alloc (&frame_cache_obstack, size);
 }
 
-void
+CORE_ADDR *
 frame_saved_regs_zalloc (struct frame_info *fi)
 {
   fi->saved_regs = (CORE_ADDR *)
     frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
   memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
+  return fi->saved_regs;
 }
 
+CORE_ADDR *
+get_frame_saved_regs (struct frame_info *fi)
+{
+  return fi->saved_regs;
+}
 
 /* Return the innermost (currently executing) stack frame.  */
 
@@ -423,10 +491,63 @@ get_current_frame (void)
   return current_frame;
 }
 
-void
-set_current_frame (struct frame_info *frame)
+/* The "selected" stack frame is used by default for local and arg
+   access.  May be zero, for no selected frame.  */
+
+struct frame_info *deprecated_selected_frame;
+
+/* Return the selected frame.  Always non-null (unless there isn't an
+   inferior sufficient for creating a frame) in which case an error is
+   thrown.  */
+
+struct frame_info *
+get_selected_frame (void)
 {
-  current_frame = frame;
+  if (deprecated_selected_frame == NULL)
+    /* Hey!  Don't trust this.  It should really be re-finding the
+       last selected frame of the currently selected thread.  This,
+       though, is better than nothing.  */
+    select_frame (get_current_frame ());
+  /* There is always a frame.  */
+  gdb_assert (deprecated_selected_frame != NULL);
+  return deprecated_selected_frame;
+}
+
+/* Select frame FI (or NULL - to invalidate the current frame).  */
+
+void
+select_frame (struct frame_info *fi)
+{
+  register struct symtab *s;
+
+  deprecated_selected_frame = fi;
+  /* NOTE: cagney/2002-05-04: FI can be NULL.  This occures when the
+     frame is being invalidated.  */
+  if (selected_frame_level_changed_hook)
+    selected_frame_level_changed_hook (frame_relative_level (fi));
+
+  /* FIXME: kseitz/2002-08-28: It would be nice to call
+     selected_frame_level_changed_event right here, but due to limitations
+     in the current interfaces, we would end up flooding UIs with events
+     because select_frame is used extensively internally.
+
+     Once we have frame-parameterized frame (and frame-related) commands,
+     the event notification can be moved here, since this function will only
+     be called when the users selected frame is being changed. */
+
+  /* Ensure that symbols for this frame are read in.  Also, determine the
+     source language of this frame, and switch to it if desired.  */
+  if (fi)
+    {
+      s = find_pc_symtab (fi->pc);
+      if (s
+	  && s->language != current_language->la_language
+	  && s->language != language_unknown
+	  && language_mode == language_mode_auto)
+	{
+	  set_language (s->language);
+	}
+    }
 }
 
 /* Return the register saved in the simplistic ``saved_regs'' cache.
@@ -445,8 +566,8 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
   /* If we're using generic dummy frames, we'd better not be in a call
      dummy.  (generic_call_dummy_register_unwind ought to have been called
      instead.)  */
-  gdb_assert (!(USE_GENERIC_DUMMY_FRAMES
-                && PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame)));
+  gdb_assert (!(DEPRECATED_USE_GENERIC_DUMMY_FRAMES
+		&& (get_frame_type (frame) == DUMMY_FRAME)));
 
   /* Load the saved_regs register cache.  */
   if (frame->saved_regs == NULL)
@@ -524,6 +645,74 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
     }
 }
 
+static CORE_ADDR
+frame_saved_regs_pc_unwind (struct frame_info *frame, void **cache)
+{
+  return FRAME_SAVED_PC (frame);
+}
+	
+static struct frame_id
+frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache)
+{
+  int fromleaf;
+  struct frame_id id;
+
+  if (next_frame->next == NULL)
+    /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
+       the frame chain, not just the inner most frame!  The generic,
+       per-architecture, frame code should handle this and the below
+       should simply be removed.  */
+    fromleaf = FRAMELESS_FUNCTION_INVOCATION (next_frame);
+  else
+    fromleaf = 0;
+
+  if (fromleaf)
+    /* A frameless inner-most frame.  The `FP' (which isn't an
+       architecture frame-pointer register!) of the caller is the same
+       as the callee.  */
+    /* FIXME: 2002-11-09: There isn't any reason to special case this
+       edge condition.  Instead the per-architecture code should hande
+       it locally.  */
+    id.base = get_frame_base (next_frame);
+  else
+    {
+      /* Two macros defined in tm.h specify the machine-dependent
+         actions to be performed here.
+
+         First, get the frame's chain-pointer.
+
+         If that is zero, the frame is the outermost frame or a leaf
+         called by the outermost frame.  This means that if start
+         calls main without a frame, we'll return 0 (which is fine
+         anyway).
+
+         Nope; there's a problem.  This also returns when the current
+         routine is a leaf of main.  This is unacceptable.  We move
+         this to after the ffi test; I'd rather have backtraces from
+         start go curfluy than have an abort called from main not show
+         main.  */
+      id.base = FRAME_CHAIN (next_frame);
+
+      /* FIXME: cagney/2002-06-08: There should be two tests here.
+         The first would check for a valid frame chain based on a user
+         selectable policy.  The default being ``stop at main'' (as
+         implemented by generic_func_frame_chain_valid()).  Other
+         policies would be available - stop at NULL, ....  The second
+         test, if provided by the target architecture, would check for
+         more exotic cases - most target architectures wouldn't bother
+         with this second case.  */
+      if (!FRAME_CHAIN_VALID (id.base, next_frame))
+	return null_frame_id;
+    }
+  if (id.base == 0)
+    return null_frame_id;
+
+  /* FIXME: cagney/2002-06-08: This should probably return the frame's
+     function and not the PC (a.k.a. resume address).  */
+  id.pc = frame_pc_unwind (next_frame);
+  return id;
+}
+	
 /* Function: get_saved_register
    Find register number REGNUM relative to FRAME and put its (raw,
    target format) contents in *RAW_BUFFER.  
@@ -571,7 +760,7 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 
   while (frame && ((frame = frame->next) != NULL))
     {
-      if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+      if (get_frame_type (frame) == DUMMY_FRAME)
 	{
 	  if (lval)		/* found it in a CALL_DUMMY frame */
 	    *lval = not_lval;
@@ -627,18 +816,34 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 
 static void
 set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
-		  frame_register_unwind_ftype **unwind)
+		  frame_register_unwind_ftype **unwind_register,
+		  frame_pc_unwind_ftype **unwind_pc,
+		  frame_id_unwind_ftype **unwind_id)
 {
-  if (!USE_GENERIC_DUMMY_FRAMES)
-    /* Still need to set this to something.  The ``info frame'' code
-       calls this function to find out where the saved registers are.
-       Hopefully this is robust enough to stop any core dumps and
-       return vaguely correct values..  */
-    *unwind = frame_saved_regs_register_unwind;
-  else if (PC_IN_CALL_DUMMY (pc, fp, fp))
-    *unwind = dummy_frame_register_unwind;
+  if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
+    {
+      /* Still need to set this to something.  The ``info frame'' code
+	 calls this function to find out where the saved registers are.
+	 Hopefully this is robust enough to stop any core dumps and
+	 return vaguely correct values..  */
+      *unwind_register = frame_saved_regs_register_unwind;
+      *unwind_pc = frame_saved_regs_pc_unwind;
+      *unwind_id = frame_saved_regs_id_unwind;
+    }
+  else if (DEPRECATED_PC_IN_CALL_DUMMY_P ()
+	   ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
+	   : pc_in_dummy_frame (pc))
+    {
+      *unwind_register = dummy_frame_register_unwind;
+      *unwind_pc = dummy_frame_pc_unwind;
+      *unwind_id = dummy_frame_id_unwind;
+    }
   else
-    *unwind = frame_saved_regs_register_unwind;
+    {
+      *unwind_register = frame_saved_regs_register_unwind;
+      *unwind_pc = frame_saved_regs_pc_unwind;
+      *unwind_id = frame_saved_regs_id_unwind;
+    }
 }
 
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
@@ -648,7 +853,7 @@ struct frame_info *
 create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 {
   struct frame_info *fi;
-  char *name;
+  enum frame_type type;
 
   fi = (struct frame_info *)
     obstack_alloc (&frame_cache_obstack,
@@ -659,14 +864,37 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   fi->frame = addr;
   fi->pc = pc;
-  find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  fi->signal_handler_caller = PC_IN_SIGTRAMP (fi->pc, name);
+  /* NOTE: cagney/2002-11-18: The code segments, found in
+     create_new_frame and get_prev_frame(), that initializes the
+     frames type is subtly different.  The latter only updates ->type
+     when it encounters a SIGTRAMP_FRAME or DUMMY_FRAME.  This stops
+     get_prev_frame() overriding the frame's type when the INIT code
+     has previously set it.  This is really somewhat bogus.  The
+     initialization, as seen in create_new_frame(), should occur
+     before the INIT function has been called.  */
+  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
+      && (DEPRECATED_PC_IN_CALL_DUMMY_P ()
+	  ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
+	  : pc_in_dummy_frame (pc)))
+    /* NOTE: cagney/2002-11-11: Does this even occure?  */
+    type = DUMMY_FRAME;
+  else
+    {
+      char *name;
+      find_pc_partial_function (pc, &name, NULL, NULL);
+      if (PC_IN_SIGTRAMP (fi->pc, name))
+	type = SIGTRAMP_FRAME;
+      else
+	type = NORMAL_FRAME;
+    }
+  fi->type = type;
 
   if (INIT_EXTRA_FRAME_INFO_P ())
     INIT_EXTRA_FRAME_INFO (0, fi);
 
   /* Select/initialize an unwind function.  */
-  set_unwind_by_pc (fi->pc, fi->frame, &fi->register_unwind);
+  set_unwind_by_pc (fi->pc, fi->frame, &fi->register_unwind,
+		    &fi->pc_unwind, &fi->id_unwind);
 
   return fi;
 }
@@ -718,7 +946,6 @@ get_prev_frame (struct frame_info *next_frame)
   CORE_ADDR address = 0;
   struct frame_info *prev;
   int fromleaf;
-  char *name;
 
   /* Return the inner-most frame, when the caller passes in NULL.  */
   /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
@@ -772,7 +999,7 @@ get_prev_frame (struct frame_info *next_frame)
     /* FIXME: 2002-11-09: There isn't any reason to special case this
        edge condition.  Instead the per-architecture code should hande
        it locally.  */
-    address = FRAME_FP (next_frame);
+    address = get_frame_base (next_frame);
   else
     {
       /* Two macros defined in tm.h specify the machine-dependent
@@ -817,26 +1044,32 @@ get_prev_frame (struct frame_info *next_frame)
   prev->next = next_frame;
   prev->frame = address;
   prev->level = next_frame->level + 1;
+  /* FIXME: cagney/2002-11-18: Should be setting the frame's type
+     here, before anything else, and not last.  Various INIT functions
+     are full of work-arounds for the frames type not being set
+     correctly from the word go.  Ulgh!  */
+  prev->type = NORMAL_FRAME;
 
   /* This change should not be needed, FIXME!  We should determine
-     whether any targets *need* INIT_FRAME_PC to happen after
-     INIT_EXTRA_FRAME_INFO and come up with a simple way to express
-     what goes on here.
+     whether any targets *need* DEPRECATED_INIT_FRAME_PC to happen
+     after INIT_EXTRA_FRAME_INFO and come up with a simple way to
+     express what goes on here.
 
      INIT_EXTRA_FRAME_INFO is called from two places: create_new_frame
      (where the PC is already set up) and here (where it isn't).
-     INIT_FRAME_PC is only called from here, always after
+     DEPRECATED_INIT_FRAME_PC is only called from here, always after
      INIT_EXTRA_FRAME_INFO.
 
      The catch is the MIPS, where INIT_EXTRA_FRAME_INFO requires the
      PC value (which hasn't been set yet).  Some other machines appear
      to require INIT_EXTRA_FRAME_INFO before they can do
-     INIT_FRAME_PC.  Phoo.
+     DEPRECATED_INIT_FRAME_PC.  Phoo.
 
-     We shouldn't need INIT_FRAME_PC_FIRST to add more complication to
-     an already overcomplicated part of GDB.  gnu@cygnus.com, 15Sep92.
+     We shouldn't need DEPRECATED_INIT_FRAME_PC_FIRST to add more
+     complication to an already overcomplicated part of GDB.
+     gnu@cygnus.com, 15Sep92.
 
-     Assuming that some machines need INIT_FRAME_PC after
+     Assuming that some machines need DEPRECATED_INIT_FRAME_PC after
      INIT_EXTRA_FRAME_INFO, one possible scheme:
 
      SETUP_INNERMOST_FRAME(): Default version is just create_new_frame
@@ -848,17 +1081,17 @@ get_prev_frame (struct frame_info *next_frame)
      SETUP_ARBITRARY_FRAME would have to do that.
 
      INIT_PREV_FRAME(fromleaf, prev) Replace INIT_EXTRA_FRAME_INFO and
-     INIT_FRAME_PC.  This should also return a flag saying whether to
-     keep the new frame, or whether to discard it, because on some
-     machines (e.g.  mips) it is really awkward to have
+     DEPRECATED_INIT_FRAME_PC.  This should also return a flag saying
+     whether to keep the new frame, or whether to discard it, because
+     on some machines (e.g.  mips) it is really awkward to have
      FRAME_CHAIN_VALID called *before* INIT_EXTRA_FRAME_INFO (there is
      no good way to get information deduced in FRAME_CHAIN_VALID into
      the extra fields of the new frame).  std_frame_pc(fromleaf, prev)
 
      This is the default setting for INIT_PREV_FRAME.  It just does
-     what the default INIT_FRAME_PC does.  Some machines will call it
-     from INIT_PREV_FRAME (either at the beginning, the end, or in the
-     middle).  Some machines won't use it.
+     what the default DEPRECATED_INIT_FRAME_PC does.  Some machines
+     will call it from INIT_PREV_FRAME (either at the beginning, the
+     end, or in the middle).  Some machines won't use it.
 
      kingdon@cygnus.com, 13Apr93, 31Jan94, 14Dec94.  */
 
@@ -887,7 +1120,8 @@ get_prev_frame (struct frame_info *next_frame)
      FRAME_SAVED_PC() is being superseed by frame_pc_unwind() and that
      function does have somewhere to cache that PC value.  */
 
-  INIT_FRAME_PC_FIRST (fromleaf, prev);
+  if (DEPRECATED_INIT_FRAME_PC_FIRST_P ())
+    prev->pc = (DEPRECATED_INIT_FRAME_PC_FIRST (fromleaf, prev));
 
   if (INIT_EXTRA_FRAME_INFO_P ())
     INIT_EXTRA_FRAME_INFO (fromleaf, prev);
@@ -895,7 +1129,8 @@ get_prev_frame (struct frame_info *next_frame)
   /* This entry is in the frame queue now, which is good since
      FRAME_SAVED_PC may use that queue to figure out its value (see
      tm-sparc.h).  We want the pc saved in the inferior frame. */
-  INIT_FRAME_PC (fromleaf, prev);
+  if (DEPRECATED_INIT_FRAME_PC_P ())
+    prev->pc = DEPRECATED_INIT_FRAME_PC (fromleaf, prev);
 
   /* If ->frame and ->pc are unchanged, we are in the process of
      getting ourselves into an infinite backtrace.  Some architectures
@@ -913,12 +1148,41 @@ get_prev_frame (struct frame_info *next_frame)
      (and probably other architectural information).  The PC lets you
      check things like the debug info at that point (dwarf2cfi?) and
      use that to decide how the frame should be unwound.  */
-  set_unwind_by_pc (prev->pc, prev->frame, &prev->register_unwind);
+  set_unwind_by_pc (prev->pc, prev->frame, &prev->register_unwind,
+		    &prev->pc_unwind, &prev->id_unwind);
 
-  find_pc_partial_function (prev->pc, &name,
-			    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  if (PC_IN_SIGTRAMP (prev->pc, name))
-    prev->signal_handler_caller = 1;
+  /* NOTE: cagney/2002-11-18: The code segments, found in
+     create_new_frame and get_prev_frame(), that initializes the
+     frames type is subtly different.  The latter only updates ->type
+     when it encounters a SIGTRAMP_FRAME or DUMMY_FRAME.  This stops
+     get_prev_frame() overriding the frame's type when the INIT code
+     has previously set it.  This is really somewhat bogus.  The
+     initialization, as seen in create_new_frame(), should occur
+     before the INIT function has been called.  */
+  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
+      && (DEPRECATED_PC_IN_CALL_DUMMY_P ()
+	  ? DEPRECATED_PC_IN_CALL_DUMMY (prev->pc, 0, 0)
+	  : pc_in_dummy_frame (prev->pc)))
+    prev->type = DUMMY_FRAME;
+  else
+    {
+      /* FIXME: cagney/2002-11-10: This should be moved to before the
+	 INIT code above so that the INIT code knows what the frame's
+	 type is (in fact, for a [generic] dummy-frame, the type can
+	 be set and then the entire initialization can be skipped.
+	 Unforunatly, its the INIT code that sets the PC (Hmm, catch
+	 22).  */
+      char *name;
+      find_pc_partial_function (prev->pc, &name, NULL, NULL);
+      if (PC_IN_SIGTRAMP (prev->pc, name))
+	prev->type = SIGTRAMP_FRAME;
+      /* FIXME: cagney/2002-11-11: Leave prev->type alone.  Some
+         architectures are forcing the frame's type in INIT so we
+         don't want to override it here.  Remember, NORMAL_FRAME == 0,
+         so it all works (just :-/).  Once this initialization is
+         moved to the start of this function, all this nastness will
+         go away.  */
+    }
 
   return prev;
 }
@@ -929,14 +1193,75 @@ get_frame_pc (struct frame_info *frame)
   return frame->pc;
 }
 
+static int
+pc_notcurrent (struct frame_info *frame)
+{
+  /* If FRAME is not the innermost frame, that normally means that
+     FRAME->pc points at the return instruction (which is *after* the
+     call instruction), and we want to get the line containing the
+     call (because the call is where the user thinks the program is).
+     However, if the next frame is either a SIGTRAMP_FRAME or a
+     DUMMY_FRAME, then the next frame will contain a saved interrupt
+     PC and such a PC indicates the current (rather than next)
+     instruction/line, consequently, for such cases, want to get the
+     line containing fi->pc.  */
+  struct frame_info *next = get_next_frame (frame);
+  int notcurrent = (next != NULL && get_frame_type (next) == NORMAL_FRAME);
+  return notcurrent;
+}
+
+void
+find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
+{
+  (*sal) = find_pc_line (frame->pc, pc_notcurrent (frame));
+}
+
+/* Per "frame.h", return the ``address'' of the frame.  Code should
+   really be using get_frame_id().  */
+CORE_ADDR
+get_frame_base (struct frame_info *fi)
+{
+  return fi->frame;
+}
+
+/* Level of the selected frame: 0 for innermost, 1 for its caller, ...
+   or -1 for a NULL frame.  */
+
+int
+frame_relative_level (struct frame_info *fi)
+{
+  if (fi == NULL)
+    return -1;
+  else
+    return fi->level;
+}
+
+enum frame_type
+get_frame_type (struct frame_info *frame)
+{
+  /* Some targets still don't use [generic] dummy frames.  Catch them
+     here.  */
+  if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES
+      && deprecated_frame_in_dummy (frame))
+    return DUMMY_FRAME;
+  return frame->type;
+}
+
+void
+deprecated_set_frame_type (struct frame_info *frame, enum frame_type type)
+{
+  /* Arrrg!  See comment in "frame.h".  */
+  frame->type = type;
+}
+
 #ifdef FRAME_FIND_SAVED_REGS
 /* XXX - deprecated.  This is a compatibility function for targets
    that do not yet implement FRAME_INIT_SAVED_REGS.  */
 /* Find the addresses in which registers are saved in FRAME.  */
 
 void
-get_frame_saved_regs (struct frame_info *frame,
-		      struct frame_saved_regs *saved_regs_addr)
+deprecated_get_frame_saved_regs (struct frame_info *frame,
+				 struct frame_saved_regs *saved_regs_addr)
 {
   if (frame->saved_regs == NULL)
     {
@@ -956,6 +1281,34 @@ get_frame_saved_regs (struct frame_info *frame,
     }
 }
 #endif
+
+struct frame_extra_info *
+get_frame_extra_info (struct frame_info *fi)
+{
+  return fi->extra_info;
+}
+
+struct frame_extra_info *
+frame_extra_info_zalloc (struct frame_info *fi, long size)
+{
+  fi->extra_info = frame_obstack_alloc (size);
+  memset (fi->extra_info, 0, size);
+  return fi->extra_info;
+}
+
+void
+deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
+{
+  /* See comment in "frame.h".  */
+  frame->pc = pc;
+}
+
+void
+deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
+{
+  /* See comment in "frame.h".  */
+  frame->frame = base;
+}
 
 void
 _initialize_frame (void)

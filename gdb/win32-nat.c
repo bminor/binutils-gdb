@@ -473,7 +473,7 @@ psapi_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
 					   dll_name_ret,
 					   MAX_PATH);
       if (len == 0)
-	error ("Error getting dll name: %u\n", GetLastError ());
+	error ("Error getting dll name: %u\n", (unsigned) GetLastError ());
 
       if ((DWORD) (mi.lpBaseOfDll) == BaseAddress)
 	return 1;
@@ -502,6 +502,7 @@ struct so_stuff
 {
   struct so_stuff *next;
   DWORD load_addr;
+  DWORD end_addr;
   int loaded;
   struct objfile *objfile;
   char name[1];
@@ -578,6 +579,7 @@ register_loaded_dll (const char *name, DWORD load_addr)
   char *p;
   WIN32_FIND_DATA w32_fd;
   HANDLE h = FindFirstFile(name, &w32_fd);
+  MEMORY_BASIC_INFORMATION m;
   size_t len;
 
   if (h == INVALID_HANDLE_VALUE)
@@ -601,6 +603,12 @@ register_loaded_dll (const char *name, DWORD load_addr)
   so = (struct so_stuff *) xmalloc (sizeof (struct so_stuff) + strlen (ppath) + 8 + 1);
   so->loaded = 0;
   so->load_addr = load_addr;
+  if (!VirtualQueryEx (current_process_handle, (void *) load_addr, &m,
+		       sizeof (m)))
+    so->end_addr = (DWORD) m.AllocationBase + m.RegionSize;
+  else
+    so->end_addr = load_addr + 0x2000;	/* completely arbitrary */
+
   so->next = NULL;
   so->objfile = NULL;
   strcpy (so->name, ppath);
@@ -708,6 +716,16 @@ handle_unload_dll (void *dummy)
   return 0;
 }
 
+char *
+solib_address (CORE_ADDR address)
+{
+  struct so_stuff *so;
+  for (so = &solib_start; so->next != NULL; so = so->next)
+    if (address >= so->load_addr && address <= so->end_addr)
+      return so->name;
+  return NULL;
+}
+
 /* Return name of last loaded DLL. */
 char *
 child_solib_loaded_library_pathname (int pid)
@@ -749,7 +767,7 @@ solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
   memset (&section_addrs, 0, sizeof (section_addrs));
   section_addrs.other[0].name = ".text";
   section_addrs.other[0].addr = load_addr;
-  return safe_symbol_file_add (name, from_tty, NULL, 0, OBJF_SHARED);
+  return safe_symbol_file_add (name, from_tty, &section_addrs, 0, OBJF_SHARED);
 }
 
 /* Load DLL symbol info. */
@@ -1198,6 +1216,7 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
       retval = main_thread_id;
+      re_enable_breakpoints_in_shlibs ();
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
@@ -1305,6 +1324,7 @@ do_initial_child_stuff (DWORD pid)
   memset (&current_event, 0, sizeof (current_event));
   push_target (&child_ops);
   child_init_thread_list ();
+  disable_breakpoints_in_shlibs (1);
   child_clear_solibs ();
   clear_proceed_status ();
   init_wait_for_inferior ();
@@ -1366,6 +1386,7 @@ child_attach (char *args, int from_tty)
 
   pid = strtoul (args, 0, 0);
   ok = DebugActiveProcess (pid);
+  saw_create = 0;
 
   if (!ok)
     error ("Can't attach to process.");
@@ -1618,7 +1639,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
     }
 
   if (!ret)
-    error ("Error creating process %s, (error %d)\n", exec_file, GetLastError ());
+    error ("Error creating process %s, (error %d)\n", exec_file, (unsigned) GetLastError ());
 
   CloseHandle (pi.hThread);
   CloseHandle (pi.hProcess);

@@ -35,6 +35,12 @@
 
 extern CORE_ADDR text_end;
 
+extern int hpux_has_forked (int pid, int *childpid);
+extern int hpux_has_vforked (int pid, int *childpid);
+extern int hpux_has_execd (int pid, char **execd_pathname);
+extern int hpux_has_syscall_event (int pid, enum target_waitkind *kind,
+				   int *syscall_id);
+
 static void fetch_register (int);
 
 void
@@ -378,60 +384,131 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   return len;
 }
 
+char *saved_child_execd_pathname = NULL;
+int saved_vfork_pid;
+enum {
+  STATE_NONE,
+  STATE_GOT_CHILD,
+  STATE_GOT_EXEC,
+  STATE_GOT_PARENT,
+  STATE_FAKE_EXEC
+} saved_vfork_state = STATE_NONE;
 
-void
-child_post_follow_inferior_by_clone (void)
+int
+child_follow_fork (int follow_child)
 {
-  int status;
+  ptid_t last_ptid;
+  struct target_waitstatus last_status;
+  int has_vforked;
+  int parent_pid, child_pid;
 
-  /* This function is used when following both the parent and child
-     of a fork.  In this case, the debugger clones itself.  The original
-     debugger follows the parent, the clone follows the child.  The
-     original detaches from the child, delivering a SIGSTOP to it to
-     keep it from running away until the clone can attach itself.
+  get_last_target_status (&last_ptid, &last_status);
+  has_vforked = (last_status.kind == TARGET_WAITKIND_VFORKED);
+  parent_pid = ptid_get_pid (last_ptid);
+  child_pid = last_status.value.related_pid;
 
-     At this point, the clone has attached to the child.  Because of
-     the SIGSTOP, we must now deliver a SIGCONT to the child, or it
-     won't behave properly. */
-  status = kill (PIDGET (inferior_ptid), SIGCONT);
-}
+  /* At this point, if we are vforking, breakpoints were already
+     detached from the child in child_wait; and the child has already
+     called execve().  If we are forking, both the parent and child
+     have breakpoints inserted.  */
 
-
-void
-child_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
-			 int followed_child)
-{
-  /* Are we a debugger that followed the parent of a vfork?  If so,
-     then recall that the child's vfork event was delivered to us
-     first.  And, that the parent was suspended by the OS until the
-     child's exec or exit events were received.
-
-     Upon receiving that child vfork, then, we were forced to remove
-     all breakpoints in the child and continue it so that it could
-     reach the exec or exit point.
-
-     But also recall that the parent and child of a vfork share the
-     same address space.  Thus, removing bp's in the child also
-     removed them from the parent.
-
-     Now that the child has safely exec'd or exited, we must restore
-     the parent's breakpoints before we continue it.  Else, we may
-     cause it run past expected stopping points. */
-  if (followed_parent)
+  if (! follow_child)
     {
-      reattach_breakpoints (parent_pid);
+      if (! has_vforked)
+	{
+	  detach_breakpoints (child_pid);
+#ifdef SOLIB_REMOVE_INFERIOR_HOOK
+	  SOLIB_REMOVE_INFERIOR_HOOK (child_pid);
+#endif
+	}
+
+      /* Detach from the child. */
+      printf_unfiltered ("Detaching after fork from %s\n",
+			 target_pid_to_str (pid_to_ptid (child_pid)));
+      hppa_require_detach (child_pid, 0);
+
+      /* The parent and child of a vfork share the same address space.
+	 Also, on some targets the order in which vfork and exec events
+	 are received for parent in child requires some delicate handling
+	 of the events.
+
+	 For instance, on ptrace-based HPUX we receive the child's vfork
+	 event first, at which time the parent has been suspended by the
+	 OS and is essentially untouchable until the child's exit or second
+	 exec event arrives.  At that time, the parent's vfork event is
+	 delivered to us, and that's when we see and decide how to follow
+	 the vfork.  But to get to that point, we must continue the child
+	 until it execs or exits.  To do that smoothly, all breakpoints
+	 must be removed from the child, in case there are any set between
+	 the vfork() and exec() calls.  But removing them from the child
+	 also removes them from the parent, due to the shared-address-space
+	 nature of a vfork'd parent and child.  On HPUX, therefore, we must
+	 take care to restore the bp's to the parent before we continue it.
+	 Else, it's likely that we may not stop in the expected place.  (The
+	 worst scenario is when the user tries to step over a vfork() call;
+	 the step-resume bp must be restored for the step to properly stop
+	 in the parent after the call completes!)
+
+	 Sequence of events, as reported to gdb from HPUX:
+
+	 Parent        Child           Action for gdb to take
+	 -------------------------------------------------------
+	 1                VFORK               Continue child
+	 2                EXEC
+	 3                EXEC or EXIT
+	 4  VFORK
+
+	 Now that the child has safely exec'd or exited, we must restore
+	 the parent's breakpoints before we continue it.  Else, we may
+	 cause it run past expected stopping points.  */
+
+      if (has_vforked)
+	reattach_breakpoints (parent_pid);
+    }
+  else
+    {
+      /* Needed to keep the breakpoint lists in sync.  */
+      if (! has_vforked)
+	detach_breakpoints (child_pid);
+
+      /* Before detaching from the parent, remove all breakpoints from it. */
+      remove_breakpoints ();
+
+      /* Also reset the solib inferior hook from the parent. */
+#ifdef SOLIB_REMOVE_INFERIOR_HOOK
+      SOLIB_REMOVE_INFERIOR_HOOK (PIDGET (inferior_ptid));
+#endif
+
+      /* Detach from the parent. */
+      target_detach (NULL, 1);
+
+      /* Attach to the child. */
+      printf_unfiltered ("Attaching after fork to %s\n",
+			 target_pid_to_str (pid_to_ptid (child_pid)));
+      hppa_require_attach (child_pid);
+      inferior_ptid = pid_to_ptid (child_pid);
+
+      /* If we vforked, then we've also execed by now.  The exec will be
+	 reported momentarily.  follow_exec () will handle breakpoints, so
+	 we don't have to..  */
+      if (!has_vforked)
+	follow_inferior_reset_breakpoints ();
     }
 
-  /* Are we a debugger that followed the child of a vfork?  If so,
-     then recall that we don't actually acquire control of the child
-     until after it has exec'd or exited.  */
-  if (followed_child)
+  if (has_vforked)
     {
-      /* If the child has exited, then there's nothing for us to do.
-         In the case of an exec event, we'll let that be handled by
-         the normal mechanism that notices and handles exec events, in
-         resume(). */
+      /* If we followed the parent, don't try to follow the child's exec.  */
+      if (saved_vfork_state != STATE_GOT_PARENT
+	  && saved_vfork_state != STATE_FAKE_EXEC)
+	fprintf_unfiltered (gdb_stdout,
+			    "hppa: post follow vfork: confused state\n");
+
+      if (! follow_child || saved_vfork_state == STATE_GOT_PARENT)
+	saved_vfork_state = STATE_NONE;
+      else
+	return 1;
     }
+  return 0;
 }
 
 /* Format a process id, given PID.  Be sure to terminate
@@ -467,6 +544,221 @@ hppa_tid_to_str (ptid_t ptid)
   sprintf (buf, "system thread %d%c", tid, '\0');
 
   return buf;
+}
+
+/*## */
+/* Enable HACK for ttrace work.  In
+ * infttrace.c/require_notification_of_events,
+ * this is set to 0 so that the loop in child_wait
+ * won't loop.
+ */
+int not_same_real_pid = 1;
+/*## */
+
+/* Wait for child to do something.  Return pid of child, or -1 in case
+   of error; store status through argument pointer OURSTATUS.  */
+
+ptid_t
+child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+{
+  int save_errno;
+  int status;
+  char *execd_pathname = NULL;
+  int exit_status;
+  int related_pid;
+  int syscall_id;
+  enum target_waitkind kind;
+  int pid;
+
+  if (saved_vfork_state == STATE_FAKE_EXEC)
+    {
+      saved_vfork_state = STATE_NONE;
+      ourstatus->kind = TARGET_WAITKIND_EXECD;
+      ourstatus->value.execd_pathname = saved_child_execd_pathname;
+      return inferior_ptid;
+    }
+
+  do
+    {
+      set_sigint_trap ();	/* Causes SIGINT to be passed on to the
+				   attached process. */
+      set_sigio_trap ();
+
+      pid = ptrace_wait (inferior_ptid, &status);
+
+      save_errno = errno;
+
+      clear_sigio_trap ();
+
+      clear_sigint_trap ();
+
+      if (pid == -1)
+	{
+	  if (save_errno == EINTR)
+	    continue;
+
+	  fprintf_unfiltered (gdb_stderr, "Child process unexpectedly missing: %s.\n",
+			      safe_strerror (save_errno));
+
+	  /* Claim it exited with unknown signal.  */
+	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+	  ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
+	  return pid_to_ptid (-1);
+	}
+
+      /* Did it exit?
+       */
+      if (target_has_exited (pid, status, &exit_status))
+	{
+	  /* ??rehrauer: For now, ignore this. */
+	  continue;
+	}
+
+      if (!target_thread_alive (pid_to_ptid (pid)))
+	{
+	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  return pid_to_ptid (pid);
+	}
+
+      if (hpux_has_forked (pid, &related_pid))
+	{
+	  /* Ignore the parent's fork event.  */
+	  if (pid == PIDGET (inferior_ptid))
+	    {
+	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	      return inferior_ptid;
+	    }
+
+	  /* If this is the child's fork event, report that the
+	     process has forked.  */
+	  if (related_pid == PIDGET (inferior_ptid))
+	    {
+	      ourstatus->kind = TARGET_WAITKIND_FORKED;
+	      ourstatus->value.related_pid = pid;
+	      return inferior_ptid;
+	    }
+	}
+
+      if (hpux_has_vforked (pid, &related_pid))
+	{
+	  if (pid == PIDGET (inferior_ptid))
+	    {
+	      if (saved_vfork_state == STATE_GOT_CHILD)
+		saved_vfork_state = STATE_GOT_PARENT;
+	      else if (saved_vfork_state == STATE_GOT_EXEC)
+		saved_vfork_state = STATE_FAKE_EXEC;
+	      else
+		fprintf_unfiltered (gdb_stdout,
+				    "hppah: parent vfork: confused\n");
+	    }
+	  else if (related_pid == PIDGET (inferior_ptid))
+	    {
+	      if (saved_vfork_state == STATE_NONE)
+		saved_vfork_state = STATE_GOT_CHILD;
+	      else
+		fprintf_unfiltered (gdb_stdout,
+				    "hppah: child vfork: confused\n");
+	    }
+	  else
+	    fprintf_unfiltered (gdb_stdout,
+				"hppah: unknown vfork: confused\n");
+
+	  if (saved_vfork_state == STATE_GOT_CHILD)
+	    {
+	      child_post_startup_inferior (pid_to_ptid (pid));
+	      detach_breakpoints (pid);
+#ifdef SOLIB_REMOVE_INFERIOR_HOOK
+	      SOLIB_REMOVE_INFERIOR_HOOK (pid);
+#endif
+	      child_resume (pid_to_ptid (pid), 0, TARGET_SIGNAL_0);
+	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	      return pid_to_ptid (related_pid);
+	    }
+	  else if (saved_vfork_state == STATE_FAKE_EXEC)
+	    {
+	      ourstatus->kind = TARGET_WAITKIND_VFORKED;
+	      ourstatus->value.related_pid = related_pid;
+	      return pid_to_ptid (pid);
+	    }
+	  else
+	    {
+	      /* We saw the parent's vfork, but we haven't seen the exec yet.
+		 Wait for it, for simplicity's sake.  It should be pending.  */
+	      saved_vfork_pid = related_pid;
+	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	      return pid_to_ptid (pid);
+	    }
+	}
+
+      if (hpux_has_execd (pid, &execd_pathname))
+	{
+	  /* On HP-UX, events associated with a vforking inferior come in
+	     threes: a vfork event for the child (always first), followed
+	     a vfork event for the parent and an exec event for the child.
+	     The latter two can come in either order.  Make sure we get
+	     both.  */
+	  if (saved_vfork_state != STATE_NONE)
+	    {
+	      if (saved_vfork_state == STATE_GOT_CHILD)
+		{
+		  saved_vfork_state = STATE_GOT_EXEC;
+		  /* On HP/UX with ptrace, the child must be resumed before
+		     the parent vfork event is delivered.  A single-step
+		     suffices.  */
+		  if (RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK ())
+		    target_resume (pid_to_ptid (pid), 1, TARGET_SIGNAL_0);
+		  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+		}
+	      else if (saved_vfork_state == STATE_GOT_PARENT)
+		{
+		  saved_vfork_state = STATE_FAKE_EXEC;
+		  ourstatus->kind = TARGET_WAITKIND_VFORKED;
+		  ourstatus->value.related_pid = saved_vfork_pid;
+		}
+	      else
+		fprintf_unfiltered (gdb_stdout,
+				    "hppa: exec: unexpected state\n");
+
+	      saved_child_execd_pathname = execd_pathname;
+
+	      return inferior_ptid;
+	    }
+	  
+	  /* Are we ignoring initial exec events?  (This is likely because
+	     we're in the process of starting up the inferior, and another
+	     (older) mechanism handles those.)  If so, we'll report this
+	     as a regular stop, not an exec.
+	   */
+	  if (inferior_ignoring_startup_exec_events)
+	    {
+	      inferior_ignoring_startup_exec_events--;
+	    }
+	  else
+	    {
+	      ourstatus->kind = TARGET_WAITKIND_EXECD;
+	      ourstatus->value.execd_pathname = execd_pathname;
+	      return pid_to_ptid (pid);
+	    }
+	}
+
+      /* All we must do with these is communicate their occurrence
+         to wait_for_inferior...
+       */
+      if (hpux_has_syscall_event (pid, &kind, &syscall_id))
+	{
+	  ourstatus->kind = kind;
+	  ourstatus->value.syscall_id = syscall_id;
+	  return pid_to_ptid (pid);
+	}
+
+      /*##  } while (pid != PIDGET (inferior_ptid)); ## *//* Some other child died or stopped */
+/* hack for thread testing */
+    }
+  while ((pid != PIDGET (inferior_ptid)) && not_same_real_pid);
+/*## */
+
+  store_waitstatus (ourstatus, status);
+  return pid_to_ptid (pid);
 }
 
 #if !defined (GDB_NATIVE_HPUX_11)
@@ -890,7 +1182,7 @@ child_remove_vfork_catchpoint (int pid)
 }
 
 int
-child_has_forked (int pid, int *childpid)
+hpux_has_forked (int pid, int *childpid)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
@@ -921,7 +1213,7 @@ child_has_forked (int pid, int *childpid)
 }
 
 int
-child_has_vforked (int pid, int *childpid)
+hpux_has_vforked (int pid, int *childpid)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
@@ -950,13 +1242,6 @@ child_has_vforked (int pid, int *childpid)
 
   return 0;
 #endif
-}
-
-int
-child_can_follow_vfork_prior_to_exec (void)
-{
-  /* ptrace doesn't allow this. */
-  return 0;
 }
 
 int
@@ -990,7 +1275,7 @@ child_remove_exec_catchpoint (int pid)
 }
 
 int
-child_has_execd (int pid, char **execd_pathname)
+hpux_has_execd (int pid, char **execd_pathname)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
@@ -1029,7 +1314,7 @@ child_reported_exec_events_per_exec_call (void)
 }
 
 int
-child_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
+hpux_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
 {
   /* This request is only available on HPUX 10.30 and later, via
      the ttrace interface.  */

@@ -328,9 +328,9 @@ read_sigcontext_register (struct frame_info *frame, int regnum)
   if (frame == NULL)
     internal_error (__FILE__, __LINE__,
 		    "read_sigcontext_register: NULL frame");
-  if (!frame->signal_handler_caller)
+  if (!(get_frame_type (frame) == SIGTRAMP_FRAME))
     internal_error (__FILE__, __LINE__,
-		    "read_sigcontext_register: frame not a signal_handler_caller");
+		    "read_sigcontext_register: frame not a signal trampoline");
   if (SIGCONTEXT_REGISTER_ADDRESS == 0)
     internal_error (__FILE__, __LINE__,
 		    "read_sigcontext_register: SIGCONTEXT_REGISTER_ADDRESS is 0");
@@ -703,9 +703,9 @@ rse_address_add(CORE_ADDR addr, int nslots)
 CORE_ADDR
 ia64_frame_chain (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return read_sigcontext_register (frame, sp_regnum);
-  else if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return frame->frame;
   else
     {
@@ -720,9 +720,9 @@ ia64_frame_chain (struct frame_info *frame)
 CORE_ADDR
 ia64_frame_saved_pc (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return read_sigcontext_register (frame, pc_regnum);
-  else if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return deprecated_read_register_dummy (frame->pc, frame->frame, pc_regnum);
   else
     {
@@ -730,7 +730,7 @@ ia64_frame_saved_pc (struct frame_info *frame)
 
       if (frame->saved_regs[IA64_VRAP_REGNUM])
 	return read_memory_integer (frame->saved_regs[IA64_VRAP_REGNUM], 8);
-      else if (frame->next && frame->next->signal_handler_caller)
+      else if (frame->next && (get_frame_type (frame->next) == SIGTRAMP_FRAME))
 	return read_sigcontext_register (frame->next, IA64_BR0_REGNUM);
       else	/* either frameless, or not far enough along in the prologue... */
 	return ia64_saved_pc_after_call (frame);
@@ -1163,7 +1163,7 @@ ia64_frame_init_saved_regs (struct frame_info *frame)
   if (frame->saved_regs)
     return;
 
-  if (frame->signal_handler_caller && SIGCONTEXT_REGISTER_ADDRESS)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME) && SIGCONTEXT_REGISTER_ADDRESS)
     {
       int regno;
 
@@ -1233,7 +1233,7 @@ ia64_get_saved_register (char *raw_buffer,
   if (lval != NULL)
     *lval = not_lval;
 
-  is_dummy_frame = PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame);
+  is_dummy_frame = DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame);
 
   if (regnum == SP_REGNUM && frame->next)
     {
@@ -1481,7 +1481,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   CORE_ADDR bsp, cfm;
   int next_frame_is_call_dummy = ((frame->next != NULL)
-    && PC_IN_CALL_DUMMY (frame->next->pc, frame->next->frame,
+    && DEPRECATED_PC_IN_CALL_DUMMY (frame->next->pc, frame->next->frame,
                                           frame->next->frame));
 
   frame->extra_info = (struct frame_extra_info *)
@@ -1493,7 +1493,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
       cfm = read_register (IA64_CFM_REGNUM);
 
     }
-  else if (frame->next->signal_handler_caller)
+  else if ((get_frame_type (frame->next) == SIGTRAMP_FRAME))
     {
       bsp = read_sigcontext_register (frame->next, IA64_BSP_REGNUM);
       cfm = read_sigcontext_register (frame->next, IA64_CFM_REGNUM);
@@ -1515,10 +1515,10 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 
       if (frn->saved_regs[IA64_CFM_REGNUM] != 0)
 	cfm = read_memory_integer (frn->saved_regs[IA64_CFM_REGNUM], 8);
-      else if (frn->next && frn->next->signal_handler_caller)
+      else if (frn->next && (get_frame_type (frn->next) == SIGTRAMP_FRAME))
 	cfm = read_sigcontext_register (frn->next, IA64_PFS_REGNUM);
       else if (frn->next
-               && PC_IN_CALL_DUMMY (frn->next->pc, frn->next->frame,
+               && DEPRECATED_PC_IN_CALL_DUMMY (frn->next->pc, frn->next->frame,
 	                                           frn->next->frame))
 	cfm = deprecated_read_register_dummy (frn->next->pc, frn->next->frame,
 					      IA64_PFS_REGNUM);
@@ -1531,7 +1531,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
   frame->extra_info->sof = cfm & 0x7f;
   frame->extra_info->sol = (cfm >> 7) & 0x7f;
   if (frame->next == 0 
-      || frame->next->signal_handler_caller 
+      || (get_frame_type (frame->next) == SIGTRAMP_FRAME) 
       || next_frame_is_call_dummy)
     frame->extra_info->bsp = rse_address_add (bsp, -frame->extra_info->sof);
   else
@@ -2120,6 +2120,9 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->os_ident = os_ident;
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
 
   /* Set the method of obtaining the sigcontext addresses at which
      registers are saved.  The method of checking to see if
@@ -2204,7 +2207,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, ia64_write_pc);
 
   /* Settings for calling functions in the inferior.  */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_push_arguments (gdbarch, ia64_push_arguments);
   set_gdbarch_push_return_address (gdbarch, ia64_push_return_address);
@@ -2231,11 +2233,9 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
 
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);

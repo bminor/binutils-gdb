@@ -37,10 +37,13 @@ struct dummy_frame
 {
   struct dummy_frame *next;
 
+  /* These values belong to the caller (the previous frame, the frame
+     that this unwinds back to).  */
   CORE_ADDR pc;
   CORE_ADDR fp;
   CORE_ADDR sp;
   CORE_ADDR top;
+  struct frame_id id;
   struct regcache *regcache;
 
   /* Address range of the call dummy code.  Look for PC in the range
@@ -54,7 +57,7 @@ static struct dummy_frame *dummy_frame_stack = NULL;
 /* Function: find_dummy_frame(pc, fp, sp)
 
    Search the stack of dummy frames for one matching the given PC and
-   FP/SP.  Unlike PC_IN_CALL_DUMMY, this function doesn't need to
+   FP/SP.  Unlike pc_in_dummy_frame(), this function doesn't need to
    adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
    to call this function after the PC has been adjusted.  */
 
@@ -104,7 +107,7 @@ struct dummy_frame *
 cached_find_dummy_frame (struct frame_info *frame, void **cache)
 {
   if ((*cache) == NULL)
-    (*cache) = find_dummy_frame (frame->pc, frame->frame);
+    (*cache) = find_dummy_frame (get_frame_pc (frame), get_frame_base (frame));
   return (*cache);
 }
 
@@ -136,6 +139,24 @@ deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 
 int
 generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
+{
+  return pc_in_dummy_frame (pc);
+}
+
+/* Return non-zero if the PC falls in a dummy frame.
+
+   The code below which allows DECR_PC_AFTER_BREAK is for infrun.c,
+   which may give the function a PC without that subtracted out.
+
+   FIXME: cagney/2002-11-23: This is silly.  Surely "infrun.c" can
+   figure out what the real PC (as in the resume address) is BEFORE
+   calling this function (Oh, and I'm not even sure that this function
+   is called with an decremented PC, the call to pc_in_call_dummy() in
+   that file is conditional on !CALL_DUMMY_BREAKPOINT_OFFSET_P yet
+   generic dummy targets set CALL_DUMMY_BREAKPOINT_OFFSET. True?).  */
+
+int
+pc_in_dummy_frame (CORE_ADDR pc)
 {
   struct dummy_frame *dummyframe;
   for (dummyframe = dummy_frame_stack;
@@ -187,7 +208,7 @@ void
 generic_push_dummy_frame (void)
 {
   struct dummy_frame *dummy_frame;
-  CORE_ADDR fp = (get_current_frame ())->frame;
+  CORE_ADDR fp = get_frame_base (get_current_frame ());
 
   /* check to see if there are stale dummy frames, 
      perhaps left over from when a longjump took us out of a 
@@ -212,6 +233,7 @@ generic_push_dummy_frame (void)
   dummy_frame->sp = read_sp ();
   dummy_frame->top = 0;
   dummy_frame->fp = fp;
+  dummy_frame->id = get_frame_id (get_current_frame ());
   regcache_cpy (dummy_frame->regcache, current_regcache);
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
@@ -239,8 +261,9 @@ void
 generic_pop_current_frame (void (*popper) (struct frame_info * frame))
 {
   struct frame_info *frame = get_current_frame ();
-
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (get_frame_type (frame) == DUMMY_FRAME)
+    /* NOTE: cagney/2002-22-23: Does this ever occure?  Surely a dummy
+       frame will have already been poped by the "infrun.c" code.  */
     generic_pop_dummy_frame ();
   else
     (*popper) (frame);
@@ -306,5 +329,32 @@ dummy_frame_register_unwind (struct frame_info *frame, void **cache,
          register cache.  */
       regcache_cooked_read (dummy->regcache, regnum, bufferp);
     }
+}
+
+CORE_ADDR
+dummy_frame_pc_unwind (struct frame_info *frame,
+		       void **cache)
+{
+  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
+  /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
+     that the frame doesn't unwind.  Should this function instead
+     return a has-no-caller indication?  */
+  if (dummy == NULL)
+    return 0;
+  return dummy->pc;
+}
+
+
+struct frame_id
+dummy_frame_id_unwind (struct frame_info *frame,
+		       void **cache)
+{
+  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
+  /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
+     that the frame doesn't unwind.  Should this function instead
+     return a has-no-caller indication?  */
+  if (dummy == NULL)
+    return null_frame_id;
+  return dummy->id;
 }
 

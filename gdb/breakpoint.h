@@ -237,7 +237,7 @@ struct breakpoint
     struct command_line *commands;
     /* Stack depth (address of frame).  If nonzero, break only if fp
        equals this.  */
-    CORE_ADDR frame;
+    struct frame_id frame_id;
     /* Conditional.  Break only if this expression's value is nonzero.  */
     struct expression *cond;
 
@@ -521,9 +521,6 @@ enum breakpoint_here
 
 /* Prototypes for breakpoint-related functions.  */
 
-/* Forward declarations for prototypes */
-struct frame_info;
-
 extern enum breakpoint_here breakpoint_here_p (CORE_ADDR);
 
 extern int breakpoint_inserted_here_p (CORE_ADDR);
@@ -532,11 +529,7 @@ extern int breakpoint_inserted_here_p (CORE_ADDR);
    implements a functional superset of this function.  The only reason
    it hasn't been removed is because some architectures still don't
    use the new framework.  Once they have been fixed, this can go.  */
-/* FIXME: cagney/2002-11-10: There should be a function (hmm,
-   something like, enum { NORMAL_FRAME, DUMMY_FRAME, SIGTRAMP_FRAME }
-   get_frame_type() ...) that the caller can use to determine the
-   frame's type.  This could replace this function, PC_IN_CALL_DUMMY,
-   and fi->signal_handler_caller.  */
+struct frame_info;
 extern int deprecated_frame_in_dummy (struct frame_info *);
 
 extern int breakpoint_thread_match (CORE_ADDR, ptid_t);
@@ -550,7 +543,7 @@ extern void breakpoint_re_set_thread (struct breakpoint *);
 extern int ep_is_exception_catchpoint (struct breakpoint *);
 
 extern struct breakpoint *set_momentary_breakpoint
-  (struct symtab_and_line, struct frame_info *, enum bptype);
+  (struct symtab_and_line, struct frame_id, enum bptype);
 
 extern void set_ignore_count (int, int, int);
 
@@ -624,7 +617,7 @@ extern void disable_longjmp_breakpoint (void);
 extern void enable_overlay_breakpoints (void);
 extern void disable_overlay_breakpoints (void);
 
-extern void set_longjmp_resume_breakpoint (CORE_ADDR, struct frame_info *);
+extern void set_longjmp_resume_breakpoint (CORE_ADDR, struct frame_id);
 /* These functions respectively disable or reenable all currently
    enabled watchpoints.  When disabled, the watchpoints are marked
    call_disabled.  When reenabled, they are marked enabled.

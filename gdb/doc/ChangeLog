@@ -1,3 +1,42 @@
+2002-12-20  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* agentexpr.texi: Fix typos.
+	* annotate.texi: Likewise.
+	* fdl.texi: Likewise.
+
+2002-12-10  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Algorithms): Replace INIT_FRAME_PC with
+	DEPRECATED_INIT_FRAME_PC.
+
+2002-12-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	PC_IN_CALL_DUMMY.
+
+2002-11-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Host Definition): Delete documentation on
+	USE_GENERIC_DUMMY_FRAMES.
+
+2002-11-26  Elena Zannoni  <ezannoni@redhat.com>
+
+        Fix PR gdb/723 and PR gdb/245.
+	* Makefile.in (install-info): Run the install-info command as part
+	of the post install steps only.
+	(uninstall-info): New target.
+	(uninstall): New target.
+
+2002-11-22  Elena Zannoni  <ezannoni@redhat.com>
+
+	* Makefile.in (install): Make install do some real work.
+
+2002-11-19  Andrew Cagney  <ac131313@redhat.com>
+
+	Fix POSIX problem reported by Paul Eggert.
+	* Makefile.in (GDBvn.texi): Use `sed q' instead of `head -1'.
+	Fix PR gdb/527.
+
 2002-10-26  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete

@@ -561,138 +561,63 @@ struct field_info
 
 /* Various complaints about symbol reading that don't abort the process */
 
-static struct deprecated_complaint dwarf2_const_ignored =
+static void
+dwarf2_non_const_array_bound_ignored_complaint (const char *arg1)
 {
-  "type qualifier 'const' ignored", 0, 0
-};
-static struct deprecated_complaint dwarf2_volatile_ignored =
+  complaint (&symfile_complaints, "non-constant array bounds form '%s' ignored",
+	     arg1);
+}
+
+static void
+dwarf2_statement_list_fits_in_line_number_section_complaint (void)
 {
-  "type qualifier 'volatile' ignored", 0, 0
-};
-static struct deprecated_complaint dwarf2_non_const_array_bound_ignored =
+  complaint (&symfile_complaints,
+	     "statement list doesn't fit in .debug_line section");
+}
+
+static void
+dwarf2_complex_location_expr_complaint (void)
 {
-  "non-constant array bounds form '%s' ignored", 0, 0
-};
-static struct deprecated_complaint dwarf2_missing_line_number_section =
+  complaint (&symfile_complaints, "location expression too complex");
+}
+
+static void
+dwarf2_unsupported_at_frame_base_complaint (const char *arg1)
 {
-  "missing .debug_line section", 0, 0
-};
-static struct deprecated_complaint dwarf2_statement_list_fits_in_line_number_section =
+  complaint (&symfile_complaints,
+	     "unsupported DW_AT_frame_base for function '%s'", arg1);
+}
+
+static void
+dwarf2_const_value_length_mismatch_complaint (const char *arg1, int arg2,
+					      int arg3)
 {
-  "statement list doesn't fit in .debug_line section", 0, 0
-};
-static struct deprecated_complaint dwarf2_mangled_line_number_section =
+  complaint (&symfile_complaints,
+	     "const value length mismatch for '%s', got %d, expected %d", arg1,
+	     arg2, arg3);
+}
+
+static void
+dwarf2_macros_too_long_complaint (void)
 {
-  "mangled .debug_line section", 0, 0
-};
-static struct deprecated_complaint dwarf2_unsupported_die_ref_attr =
+  complaint (&symfile_complaints,
+	     "macro info runs off end of `.debug_macinfo' section");
+}
+
+static void
+dwarf2_macro_malformed_definition_complaint (const char *arg1)
 {
-  "unsupported die ref attribute form: '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_unsupported_stack_op =
+  complaint (&symfile_complaints,
+	     "macro debug info contains a malformed macro definition:\n`%s'",
+	     arg1);
+}
+
+static void
+dwarf2_invalid_attrib_class_complaint (const char *arg1, const char *arg2)
 {
-  "unsupported stack op: '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_complex_location_expr =
-{
-  "location expression too complex", 0, 0
-};
-static struct deprecated_complaint dwarf2_unsupported_tag =
-{
-  "unsupported tag: '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_unsupported_at_encoding =
-{
-  "unsupported DW_AT_encoding: '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_unsupported_at_frame_base =
-{
-  "unsupported DW_AT_frame_base for function '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_unexpected_tag =
-{
-  "unexepected tag in read_type_die: '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_missing_at_frame_base =
-{
-  "DW_AT_frame_base missing for DW_OP_fbreg", 0, 0
-};
-static struct deprecated_complaint dwarf2_bad_static_member_name =
-{
-  "unrecognized static data member name '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_unsupported_accessibility =
-{
-  "unsupported accessibility %d", 0, 0
-};
-static struct deprecated_complaint dwarf2_bad_member_name_complaint =
-{
-  "cannot extract member name from '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_missing_member_fn_type_complaint =
-{
-  "member function type missing for '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_vtbl_not_found_complaint =
-{
-  "virtual function table pointer not found when defining class '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_absolute_sibling_complaint =
-{
-  "ignoring absolute DW_AT_sibling", 0, 0
-};
-static struct deprecated_complaint dwarf2_const_value_length_mismatch =
-{
-  "const value length mismatch for '%s', got %d, expected %d", 0, 0
-};
-static struct deprecated_complaint dwarf2_unsupported_const_value_attr =
-{
-  "unsupported const value attribute form: '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_misplaced_line_number =
-{
-  "misplaced first line number at 0x%lx for '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_line_header_too_long =
-{
-  "line number info header doesn't fit in `.debug_line' section", 0, 0
-};
-static struct deprecated_complaint dwarf2_missing_macinfo_section =
-{
-  "missing .debug_macinfo section", 0, 0
-};
-static struct deprecated_complaint dwarf2_macros_too_long =
-{
-  "macro info runs off end of `.debug_macinfo' section", 0, 0
-};
-static struct deprecated_complaint dwarf2_macros_not_terminated =
-{
-  "no terminating 0-type entry for macros in `.debug_macinfo' section", 0, 0
-};
-static struct deprecated_complaint dwarf2_macro_outside_file =
-{
-  "debug info gives macro %s outside of any file: %s", 0, 0
-};
-static struct deprecated_complaint dwarf2_macro_unmatched_end_file =
-{
-  "macro debug info has an unmatched `close_file' directive", 0, 0
-};
-static struct deprecated_complaint dwarf2_macro_malformed_definition =
-{
-  "macro debug info contains a malformed macro definition:\n`%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_macro_spaces_in_definition =
-{
-  "macro definition contains spaces in formal argument list:\n`%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_invalid_attrib_class =
-{
-  "invalid attribute class or form for '%s' in '%s'", 0, 0
-};
-static struct deprecated_complaint dwarf2_invalid_pointer_size = 
-{
-  "invalid pointer size %d", 0, 0
-};
+  complaint (&symfile_complaints,
+	     "invalid attribute class or form for '%s' in '%s'", arg1, arg2);
+}
 
 /* local function prototypes */
 
@@ -2131,17 +2056,17 @@ read_func_scope (struct die_info *die, struct objfile *objfile,
         }
       else if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
         {
-          complain (&dwarf2_complex_location_expr);
+	  dwarf2_complex_location_expr_complaint ();
           addr = 0;
         }
       else
         {
-          complain (&dwarf2_invalid_attrib_class, "DW_AT_frame_base", name);
+	  dwarf2_invalid_attrib_class_complaint ("DW_AT_frame_base", name);
           addr = 0;
         }
     
       if (isderef)
-	complain (&dwarf2_unsupported_at_frame_base, name);
+	dwarf2_unsupported_at_frame_base_complaint (name);
       else if (isreg)
 	frame_base_reg = addr;
       else if (offreg)
@@ -2150,7 +2075,7 @@ read_func_scope (struct die_info *die, struct objfile *objfile,
 	  frame_base_offset = addr;
 	}
       else
-	complain (&dwarf2_unsupported_at_frame_base, name);
+	dwarf2_unsupported_at_frame_base_complaint (name);
     }
 
   new = push_context (0, lowpc);
@@ -2302,8 +2227,11 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
     new_field->virtuality = DW_UNSND (attr);
 
   fp = &new_field->field;
-  if (die->tag == DW_TAG_member)
+
+  if (die->tag == DW_TAG_member && ! die_is_declaration (die))
     {
+      /* Data member other than a C++ static data member.  */
+      
       /* Get type of field.  */
       fp->type = die_type (die, objfile, cu_header);
 
@@ -2388,8 +2316,15 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	  fip->non_public_fields = 1;
 	}
     }
-  else if (die->tag == DW_TAG_variable)
+  else if (die->tag == DW_TAG_member || die->tag == DW_TAG_variable)
     {
+      /* C++ static member.  */
+
+      /* NOTE: carlton/2002-11-05: It should be a DW_TAG_member that
+	 is a declaration, but all versions of G++ as of this writing
+	 (so through at least 3.2.1) incorrectly generate
+	 DW_TAG_variable tags.  */
+      
       char *physname;
 
       /* C++ static member.
@@ -2490,8 +2425,8 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 	default:
 	  /* Unknown accessibility.  Complain and treat it as public.  */
 	  {
-	    complain (&dwarf2_unsupported_accessibility,
-		      fip->fields->accessibility);
+	    complaint (&symfile_complaints, "unsupported accessibility %d",
+		       fip->fields->accessibility);
 	  }
 	  break;
 	}
@@ -2598,7 +2533,8 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 	fnp->voffset = VOFFSET_STATIC;
     }
   else
-    complain (&dwarf2_missing_member_fn_type_complaint, physname);
+    complaint (&symfile_complaints, "member function type missing for '%s'",
+	       physname);
 
   /* Get fcontext from DW_AT_containing_type if present.  */
   if (dwarf_attr (die, DW_AT_containing_type) != NULL)
@@ -2638,12 +2574,12 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
         }
       else if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
         {
-          complain (&dwarf2_complex_location_expr);
+	  dwarf2_complex_location_expr_complaint ();
         }
       else
         {
-          complain (&dwarf2_invalid_attrib_class, "DW_AT_vtable_elem_location",
-                    fieldname);
+	  dwarf2_invalid_attrib_class_complaint ("DW_AT_vtable_elem_location",
+						 fieldname);
         }
    }
 }
@@ -2777,13 +2713,14 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 
       while (child_die && child_die->tag)
 	{
-	  if (child_die->tag == DW_TAG_member)
+	  if (child_die->tag == DW_TAG_member
+	      || child_die->tag == DW_TAG_variable)
 	    {
-	      dwarf2_add_field (&fi, child_die, objfile, cu_header);
-	    }
-	  else if (child_die->tag == DW_TAG_variable)
-	    {
-	      /* C++ static member.  */
+	      /* NOTE: carlton/2002-11-05: A C++ static data member
+		 should be a DW_TAG_member that is a declaration, but
+		 all versions of G++ as of this writing (so through at
+		 least 3.2.1) incorrectly generate DW_TAG_variable
+		 tags for them instead.  */
 	      dwarf2_add_field (&fi, child_die, objfile, cu_header);
 	    }
 	  else if (child_die->tag == DW_TAG_subprogram)
@@ -2843,8 +2780,10 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 
 		  /* Complain if virtual function table field not found.  */
 		  if (i < TYPE_N_BASECLASSES (t))
-		    complain (&dwarf2_vtbl_not_found_complaint,
-			  TYPE_TAG_NAME (type) ? TYPE_TAG_NAME (type) : "");
+		    complaint (&symfile_complaints,
+			       "virtual function table pointer not found when defining class '%s'",
+			       TYPE_TAG_NAME (type) ? TYPE_TAG_NAME (type) :
+			       "");
 		}
 	      else
 		{
@@ -3045,8 +2984,8 @@ read_array_type (struct die_info *die, struct objfile *objfile,
 		}
 	      else
 		{
-		  complain (&dwarf2_non_const_array_bound_ignored,
-			    dwarf_form_name (attr->form));
+		  dwarf2_non_const_array_bound_ignored_complaint
+		    (dwarf_form_name (attr->form));
 #ifdef FORTRAN_HACK
 		  die->type = lookup_pointer_type (element_type);
 		  return;
@@ -3081,8 +3020,8 @@ read_array_type (struct die_info *die, struct objfile *objfile,
 		}
 	      else
 		{
-		  complain (&dwarf2_non_const_array_bound_ignored,
-			    dwarf_form_name (attr->form));
+		  dwarf2_non_const_array_bound_ignored_complaint
+		    (dwarf_form_name (attr->form));
 #ifdef FORTRAN_HACK
 		  die->type = lookup_pointer_type (element_type);
 		  return;
@@ -3149,12 +3088,12 @@ read_common_block (struct die_info *die, struct objfile *objfile,
         }
       else if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
         {
-          complain (&dwarf2_complex_location_expr);
+	  dwarf2_complex_location_expr_complaint ();
         }
       else
         {
-          complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
-                    "common block member");
+	  dwarf2_invalid_attrib_class_complaint ("DW_AT_location",
+						 "common block member");
         }
     }
   if (die->has_children)
@@ -3279,7 +3218,7 @@ read_tag_pointer_type (struct die_info *die, struct objfile *objfile,
 	}
       else if (TYPE_LENGTH (type) != byte_size)
 	{
-	  complain (&dwarf2_invalid_pointer_size, byte_size);
+	  complaint (&symfile_complaints, "invalid pointer size %d", byte_size);
 	}
       else {
 	/* Should we also complain about unhandled address classes?  */
@@ -3578,8 +3517,8 @@ read_base_type (struct die_info *die, struct objfile *objfile)
 	  type_flags |= TYPE_FLAG_UNSIGNED;
 	  break;
 	default:
-	  complain (&dwarf2_unsupported_at_encoding,
-		    dwarf_type_encoding_name (encoding));
+	  complaint (&symfile_complaints, "unsupported DW_AT_encoding: '%s'",
+		     dwarf_type_encoding_name (encoding));
 	  break;
 	}
       type = init_type (code, size, type_flags, DW_STRING (attr), objfile);
@@ -3895,12 +3834,12 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
             }
           else if (attr.form == DW_FORM_data4 || attr.form == DW_FORM_data8)
             {
-              complain (&dwarf2_complex_location_expr);
+	      dwarf2_complex_location_expr_complaint ();
             }
           else
             {
-              complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
-                        "partial symbol information");
+	      dwarf2_invalid_attrib_class_complaint ("DW_AT_location",
+						     "partial symbol information");
             }
 	  break;
 	case DW_AT_language:
@@ -3924,7 +3863,7 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
 	  /* Ignore absolute siblings, they might point outside of
 	     the current compile unit.  */
 	  if (attr.form == DW_FORM_ref_addr)
-	    complain (&dwarf2_absolute_sibling_complaint);
+	    complaint (&symfile_complaints, "ignoring absolute DW_AT_sibling");
 	  else
 	    part_die->sibling =
 	      dwarf_info_buffer + dwarf2_get_ref_die_offset (&attr);
@@ -4636,7 +4575,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
 
   if (dwarf_line_buffer == NULL)
     {
-      complain (&dwarf2_missing_line_number_section);
+      complaint (&symfile_complaints, "missing .debug_line section");
       return 0;
     }
 
@@ -4644,7 +4583,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
      could be 12 bytes long, but we're just going to fudge that.  */
   if (offset + 4 >= dwarf_line_size)
     {
-      complain (&dwarf2_statement_list_fits_in_line_number_section);
+      dwarf2_statement_list_fits_in_line_number_section_complaint ();
       return 0;
     }
 
@@ -4660,7 +4599,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
   line_ptr += bytes_read;
   if (line_ptr + lh->total_length > dwarf_line_buffer + dwarf_line_size)
     {
-      complain (&dwarf2_statement_list_fits_in_line_number_section);
+      dwarf2_statement_list_fits_in_line_number_section_complaint ();
       return 0;
     }
   lh->statement_program_end = line_ptr + lh->total_length;
@@ -4715,7 +4654,8 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
   lh->statement_program_start = line_ptr; 
 
   if (line_ptr > dwarf_line_buffer + dwarf_line_size)
-    complain (&dwarf2_line_header_too_long);
+    complaint (&symfile_complaints,
+	       "line number info header doesn't fit in `.debug_line' section");
 
   discard_cleanups (back_to);
   return lh;
@@ -4760,8 +4700,9 @@ check_cu_functions (CORE_ADDR address)
   if (fn->seen_line)
     return address;
   if (address != fn->lowpc)
-    complain (&dwarf2_misplaced_line_number,
-	      (unsigned long) address, fn->name);
+    complaint (&symfile_complaints,
+	       "misplaced first line number at 0x%lx for '%s'",
+	       (unsigned long) address, fn->name);
   fn->seen_line = 1;
   return fn->lowpc;
 }
@@ -4864,7 +4805,8 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
                   }
 		  break;
 		default:
-		  complain (&dwarf2_mangled_line_number_section);
+		  complaint (&symfile_complaints,
+			     "mangled .debug_line section");
 		  return;
 		}
 	      break;
@@ -5088,12 +5030,12 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
                   else if (attr->form == DW_FORM_data4
                            || attr->form == DW_FORM_data8)
                     {
-                      complain (&dwarf2_complex_location_expr);
+		      dwarf2_complex_location_expr_complaint ();
                     }
                   else
                     {
-                      complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
-                                "external variable");
+		      dwarf2_invalid_attrib_class_complaint ("DW_AT_location",
+							     "external variable");
                     }
 		  add_symbol_to_list (sym, &global_symbols);
                   if (is_thread_local)
@@ -5134,12 +5076,12 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
                   else if (attr->form == DW_FORM_data4
                            || attr->form == DW_FORM_data8)
                     {
-                      complain (&dwarf2_complex_location_expr);
+		      dwarf2_complex_location_expr_complaint ();
                     }
                   else
                     {
-                      complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
-                                "external variable");
+		      dwarf2_invalid_attrib_class_complaint ("DW_AT_location",
+							     "external variable");
                       addr = 0;
                     }
 		  add_symbol_to_list (sym, list_in_scope);
@@ -5211,7 +5153,7 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		  if (isderef)
 		    {
 		      if (basereg != frame_base_reg)
-			complain (&dwarf2_complex_location_expr);
+			dwarf2_complex_location_expr_complaint ();
 		      SYMBOL_CLASS (sym) = LOC_REF_ARG;
 		    }
 		  else
@@ -5347,7 +5289,8 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	     trash data, but since we must specifically ignore things
 	     we don't recognize, there is nothing else we should do at
 	     this point. */
-	  complain (&dwarf2_unsupported_tag, dwarf_tag_name (die->tag));
+	  complaint (&symfile_complaints, "unsupported tag: '%s'",
+		     dwarf_tag_name (die->tag));
 	  break;
 	}
     }
@@ -5367,8 +5310,10 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
     {
     case DW_FORM_addr:
       if (TYPE_LENGTH (SYMBOL_TYPE (sym)) != cu_header->addr_size)
-	complain (&dwarf2_const_value_length_mismatch, SYMBOL_NAME (sym),
-		  cu_header->addr_size, TYPE_LENGTH (SYMBOL_TYPE (sym)));
+	dwarf2_const_value_length_mismatch_complaint (SYMBOL_NAME (sym),
+						      cu_header->addr_size,
+						      TYPE_LENGTH (SYMBOL_TYPE
+								   (sym)));
       SYMBOL_VALUE_BYTES (sym) = (char *)
 	obstack_alloc (&objfile->symbol_obstack, cu_header->addr_size);
       store_address (SYMBOL_VALUE_BYTES (sym), cu_header->addr_size,
@@ -5381,8 +5326,10 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
     case DW_FORM_block:
       blk = DW_BLOCK (attr);
       if (TYPE_LENGTH (SYMBOL_TYPE (sym)) != blk->size)
-	complain (&dwarf2_const_value_length_mismatch, SYMBOL_NAME (sym),
-		  blk->size, TYPE_LENGTH (SYMBOL_TYPE (sym)));
+	dwarf2_const_value_length_mismatch_complaint (SYMBOL_NAME (sym),
+						      blk->size,
+						      TYPE_LENGTH (SYMBOL_TYPE
+								   (sym)));
       SYMBOL_VALUE_BYTES (sym) = (char *)
 	obstack_alloc (&objfile->symbol_obstack, blk->size);
       memcpy (SYMBOL_VALUE_BYTES (sym), blk->data, blk->size);
@@ -5418,8 +5365,9 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
       break;
 
     default:
-      complain (&dwarf2_unsupported_const_value_attr,
-		dwarf_form_name (attr->form));
+      complaint (&symfile_complaints,
+		 "unsupported const value attribute form: '%s'",
+		 dwarf_form_name (attr->form));
       SYMBOL_VALUE (sym) = 0;
       SYMBOL_CLASS (sym) = LOC_CONST;
       break;
@@ -5602,7 +5550,8 @@ read_type_die (struct die_info *die, struct objfile *objfile,
       read_base_type (die, objfile);
       break;
     default:
-      complain (&dwarf2_unexpected_tag, dwarf_tag_name (die->tag));
+      complaint (&symfile_complaints, "unexepected tag in read_type_die: '%s'",
+		 dwarf_tag_name (die->tag));
       break;
     }
 }
@@ -6730,7 +6679,9 @@ dwarf2_get_ref_die_offset (struct attribute *attr)
       result = cu_header_offset + DW_UNSND (attr);
       break;
     default:
-      complain (&dwarf2_unsupported_die_ref_attr, dwarf_form_name (attr->form));
+      complaint (&symfile_complaints,
+		 "unsupported die ref attribute form: '%s'",
+		 dwarf_form_name (attr->form));
     }
   return result;
 }
@@ -6966,7 +6917,8 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 	    }
 	  else
 	    {
-	      complain (&dwarf2_missing_at_frame_base);
+	      complaint (&symfile_complaints,
+			 "DW_AT_frame_base missing for DW_OP_fbreg");
 	      islocal = 1;
 	    }
 	  break;
@@ -7043,7 +6995,7 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 	  /* If we're not the last op, then we definitely can't encode
 	     this using GDB's address_class enum.  */
 	  if (i < size)
-	    complain (&dwarf2_complex_location_expr);
+	    dwarf2_complex_location_expr_complaint ();
 	  break;
 
         case DW_OP_GNU_push_tls_address:
@@ -7053,11 +7005,12 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 	  /* Nothing should follow this operator, so the top of stack would
 	     be returned.  */
 	  if (i < size)
-	    complain (&dwarf2_complex_location_expr);
+	    dwarf2_complex_location_expr_complaint ();
           break;
 
 	default:
-	  complain (&dwarf2_unsupported_stack_op, dwarf_stack_op_name (op));
+	  complaint (&symfile_complaints, "unsupported stack op: '%s'",
+		     dwarf_stack_op_name (op));
 	  return (stack[stacki]);
 	}
     }
@@ -7190,7 +7143,9 @@ consume_improper_spaces (const char *p, const char *body)
 {
   if (*p == ' ')
     {
-      complain (&dwarf2_macro_spaces_in_definition, body);
+      complaint (&symfile_complaints,
+		 "macro definition contains spaces in formal argument list:\n`%s'",
+		 body);
 
       while (*p == ' ')
         p++;
@@ -7248,7 +7203,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
         replacement = body + name_len + 1;
       else
         {
-          complain (&dwarf2_macro_malformed_definition, body);
+	  dwarf2_macro_malformed_definition_complaint (body);
           replacement = body + name_len;
         }
       
@@ -7278,8 +7233,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
             p++;
 
           if (! *p || p == arg_start)
-            complain (&dwarf2_macro_malformed_definition,
-                      body);
+	    dwarf2_macro_malformed_definition_complaint (body);
           else
             {
               /* Make sure argv has room for the new argument.  */
@@ -7315,18 +7269,18 @@ parse_macro_definition (struct macro_source_file *file, int line,
           else if (*p == '\0')
             {
               /* Complain, but do define it.  */
-              complain (&dwarf2_macro_malformed_definition, body);
+	      dwarf2_macro_malformed_definition_complaint (body);
               macro_define_function (file, line, name,
                                      argc, (const char **) argv, 
                                      p);
             }
           else
             /* Just complain.  */
-            complain (&dwarf2_macro_malformed_definition, body);
+	    dwarf2_macro_malformed_definition_complaint (body);
         }
       else
         /* Just complain.  */
-        complain (&dwarf2_macro_malformed_definition, body);
+	dwarf2_macro_malformed_definition_complaint (body);
 
       xfree (name);
       {
@@ -7338,7 +7292,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
       xfree (argv);
     }
   else
-    complain (&dwarf2_macro_malformed_definition, body);
+    dwarf2_macro_malformed_definition_complaint (body);
 }
 
 
@@ -7353,7 +7307,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 
   if (dwarf_macinfo_buffer == NULL)
     {
-      complain (&dwarf2_missing_macinfo_section);
+      complaint (&symfile_complaints, "missing .debug_macinfo section");
       return;
     }
 
@@ -7367,7 +7321,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
       /* Do we at least have room for a macinfo type byte?  */
       if (mac_ptr >= mac_end)
         {
-          complain (&dwarf2_macros_too_long);
+	  dwarf2_macros_too_long_complaint ();
           return;
         }
 
@@ -7394,11 +7348,12 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
             mac_ptr += bytes_read;
 
             if (! current_file)
-              complain (&dwarf2_macro_outside_file,
-                        macinfo_type == DW_MACINFO_define ? "definition" :
-                        macinfo_type == DW_MACINFO_undef ? "undefinition" :
-                        "something-or-other",
-                        body);
+	      complaint (&symfile_complaints,
+			 "debug info gives macro %s outside of any file: %s",
+			 macinfo_type ==
+			 DW_MACINFO_define ? "definition" : macinfo_type ==
+			 DW_MACINFO_undef ? "undefinition" :
+			 "something-or-other", body);
             else
               {
                 if (macinfo_type == DW_MACINFO_define)
@@ -7427,7 +7382,8 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 
         case DW_MACINFO_end_file:
           if (! current_file)
-            complain (&dwarf2_macro_unmatched_end_file);
+	    complaint (&symfile_complaints,
+		       "macro debug info has an unmatched `close_file' directive");
           else
             {
               current_file = current_file->included_by;
@@ -7443,7 +7399,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
                   /* Do we at least have room for a macinfo type byte?  */
                   if (mac_ptr >= mac_end)
                     {
-                      complain (&dwarf2_macros_too_long);
+		      dwarf2_macros_too_long_complaint ();
                       return;
                     }
 
@@ -7451,7 +7407,8 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
                      a look-ahead.  */
                   next_type = read_1_byte (abfd, mac_ptr);
                   if (next_type != 0)
-                    complain (&dwarf2_macros_not_terminated);
+		    complaint (&symfile_complaints,
+			       "no terminating 0-type entry for macros in `.debug_macinfo' section");
 
                   return;
                 }

@@ -75,6 +75,6 @@ _initialize_i386_sol2_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,
 				  i386_sol2_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_SOLARIS,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_SOLARIS,
 			  i386_sol2_init_abi);
 }

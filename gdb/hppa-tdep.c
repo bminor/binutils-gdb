@@ -31,6 +31,7 @@
 #include "regcache.h"
 #include "completer.h"
 #include "language.h"
+#include "osabi.h"
 
 /* For argument passing to the inferior */
 #include "symtab.h"
@@ -891,7 +892,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
 
 #ifdef FRAME_SAVED_PC_IN_SIGTRAMP
   /* Deal with signal handler caller frames too.  */
-  if (frame->signal_handler_caller)
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     {
       CORE_ADDR rp;
       FRAME_SAVED_PC_IN_SIGTRAMP (frame, &rp);
@@ -910,12 +911,12 @@ hppa_frame_saved_pc (struct frame_info *frame)
          register area to get the return pointer (the values
          in the registers may not correspond to anything useful).  */
       if (frame->next
-	  && (frame->next->signal_handler_caller
+	  && ((get_frame_type (frame->next) == SIGTRAMP_FRAME)
 	      || pc_in_interrupt_handler (frame->next->pc)))
 	{
 	  struct frame_saved_regs saved_regs;
 
-	  get_frame_saved_regs (frame->next, &saved_regs);
+	  deprecated_get_frame_saved_regs (frame->next, &saved_regs);
 	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
 				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
@@ -950,12 +951,12 @@ hppa_frame_saved_pc (struct frame_info *frame)
          information out of the saved register info.  */
       if (rp_offset == 0
 	  && frame->next
-	  && (frame->next->signal_handler_caller
+	  && ((get_frame_type (frame->next) == SIGTRAMP_FRAME)
 	      || pc_in_interrupt_handler (frame->next->pc)))
 	{
 	  struct frame_saved_regs saved_regs;
 
-	  get_frame_saved_regs (frame->next, &saved_regs);
+	  deprecated_get_frame_saved_regs (frame->next, &saved_regs);
 	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
 				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
@@ -1079,9 +1080,10 @@ init_extra_frame_info (int fromleaf, struct frame_info *frame)
     frame->frame = read_register (SP_REGNUM) - framesize;
 }
 
-/* Given a GDB frame, determine the address of the calling function's frame.
-   This will be used to create a new GDB frame struct, and then
-   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
+/* Given a GDB frame, determine the address of the calling function's
+   frame.  This will be used to create a new GDB frame struct, and
+   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
+   called for the new frame.
 
    This may involve searching through prologues for several functions
    at boundaries where GCC calls HP C code, or where code which has
@@ -1144,7 +1146,7 @@ frame_chain (struct frame_info *frame)
     frame_base = read_memory_integer (frame->frame + SP_REGNUM * 4,
 				      TARGET_PTR_BIT / 8);
 #ifdef FRAME_BASE_BEFORE_SIGTRAMP
-  else if (frame->signal_handler_caller)
+  else if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     {
       FRAME_BASE_BEFORE_SIGTRAMP (frame, &frame_base);
     }
@@ -1215,7 +1217,7 @@ frame_chain (struct frame_info *frame)
 	}
 
       if (u->Save_SP
-	  || tmp_frame->signal_handler_caller
+	  || (get_frame_type (tmp_frame) == SIGTRAMP_FRAME)
 	  || pc_in_interrupt_handler (tmp_frame->pc))
 	break;
 
@@ -1226,7 +1228,7 @@ frame_chain (struct frame_info *frame)
 	  /* The unwind entry claims that r3 is saved here.  However,
 	     in optimized code, GCC often doesn't actually save r3.
 	     We'll discover this if we look at the prologue.  */
-	  get_frame_saved_regs (tmp_frame, &saved_regs);
+	  deprecated_get_frame_saved_regs (tmp_frame, &saved_regs);
 	  saved_regs_frame = tmp_frame;
 
 	  /* If we have an address for r3, that's good.  */
@@ -1240,7 +1242,7 @@ frame_chain (struct frame_info *frame)
       /* We may have walked down the chain into a function with a frame
          pointer.  */
       if (u->Save_SP
-	  && !tmp_frame->signal_handler_caller
+	  && !(get_frame_type (tmp_frame) == SIGTRAMP_FRAME)
 	  && !pc_in_interrupt_handler (tmp_frame->pc))
 	{
 	  return read_memory_integer (tmp_frame->frame, TARGET_PTR_BIT / 8);
@@ -1275,7 +1277,7 @@ frame_chain (struct frame_info *frame)
 	     system call has a variable sized stack frame.  */
 
 	  if (tmp_frame != saved_regs_frame)
-	    get_frame_saved_regs (tmp_frame, &saved_regs);
+	    deprecated_get_frame_saved_regs (tmp_frame, &saved_regs);
 
 	  /* Abominable hack.  */
 	  if (current_target.to_has_execution == 0
@@ -1310,7 +1312,7 @@ frame_chain (struct frame_info *frame)
 	tmp_frame = tmp_frame->next;
 
       if (tmp_frame != saved_regs_frame)
-	get_frame_saved_regs (tmp_frame, &saved_regs);
+	deprecated_get_frame_saved_regs (tmp_frame, &saved_regs);
 
       /* Abominable hack.  See above.  */
       if (current_target.to_has_execution == 0
@@ -1388,7 +1390,7 @@ hppa_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
      and doesn't "call" an interrupt routine or signal handler caller,
      then its not valid.  */
   if (u->Save_SP || u->Total_frame_size || u->stub_unwind.stub_type != 0
-      || (thisframe->next && thisframe->next->signal_handler_caller)
+      || (thisframe->next && (get_frame_type (thisframe->next) == SIGTRAMP_FRAME))
       || (next_u && next_u->HP_UX_interrupt_marker))
     return 1;
 
@@ -1532,8 +1534,8 @@ hppa_pop_frame (void)
   struct frame_saved_regs fsr;
   double freg_buffer;
 
-  fp = FRAME_FP (frame);
-  get_frame_saved_regs (frame, &fsr);
+  fp = get_frame_base (frame);
+  deprecated_get_frame_saved_regs (frame, &fsr);
 
 #ifndef NO_PC_SPACE_QUEUE_RESTORE
   if (fsr.regs[IPSW_REGNUM])	/* Restoring a call dummy frame */
@@ -1602,7 +1604,7 @@ hppa_pop_frame (void)
          for "return_command" will print the frame we returned to.  */
       sal = find_pc_line (target_pc, 0);
       sal.pc = target_pc;
-      breakpoint = set_momentary_breakpoint (sal, NULL, bp_finish);
+      breakpoint = set_momentary_breakpoint (sal, null_frame_id, bp_finish);
       breakpoint->silent = 1;
 
       /* So we can clean things up.  */
@@ -2510,7 +2512,7 @@ pa_do_registers_info (int regnum, int fpregs)
   /* Make a copy of gdb's save area (may cause actual
      reads from the target). */
   for (i = 0; i < NUM_REGS; i++)
-    frame_register_read (selected_frame, i, raw_regs + REGISTER_BYTE (i));
+    frame_register_read (deprecated_selected_frame, i, raw_regs + REGISTER_BYTE (i));
 
   if (regnum == -1)
     pa_print_registers (raw_regs, regnum, fpregs);
@@ -2554,7 +2556,7 @@ pa_do_strcat_registers_info (int regnum, int fpregs, struct ui_file *stream,
   /* Make a copy of gdb's save area (may cause actual
      reads from the target). */
   for (i = 0; i < NUM_REGS; i++)
-    frame_register_read (selected_frame, i, raw_regs + REGISTER_BYTE (i));
+    frame_register_read (deprecated_selected_frame, i, raw_regs + REGISTER_BYTE (i));
 
   if (regnum == -1)
     pa_strcat_registers (raw_regs, regnum, fpregs, stream);
@@ -2806,7 +2808,7 @@ pa_print_fp_reg (int i)
   char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
 
   /* Get 32bits of data.  */
-  frame_register_read (selected_frame, i, raw_buffer);
+  frame_register_read (deprecated_selected_frame, i, raw_buffer);
 
   /* Put it in the buffer.  No conversions are ever necessary.  */
   memcpy (virtual_buffer, raw_buffer, REGISTER_RAW_SIZE (i));
@@ -2824,7 +2826,7 @@ pa_print_fp_reg (int i)
   if ((i % 2) == 0)
     {
       /* Get the data in raw format for the 2nd half.  */
-      frame_register_read (selected_frame, i + 1, raw_buffer);
+      frame_register_read (deprecated_selected_frame, i + 1, raw_buffer);
 
       /* Copy it into the appropriate part of the virtual buffer.  */
       memcpy (virtual_buffer + REGISTER_RAW_SIZE (i), raw_buffer,
@@ -2852,7 +2854,7 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
   print_spaces_filtered (8 - strlen (REGISTER_NAME (i)), stream);
 
   /* Get 32bits of data.  */
-  frame_register_read (selected_frame, i, raw_buffer);
+  frame_register_read (deprecated_selected_frame, i, raw_buffer);
 
   /* Put it in the buffer.  No conversions are ever necessary.  */
   memcpy (virtual_buffer, raw_buffer, REGISTER_RAW_SIZE (i));
@@ -2863,7 +2865,7 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
       char raw_buf[MAX_REGISTER_RAW_SIZE];
 
       /* Get the data in raw format for the 2nd half.  */
-      frame_register_read (selected_frame, i + 1, raw_buf);
+      frame_register_read (deprecated_selected_frame, i + 1, raw_buf);
 
       /* Copy it into the appropriate part of the virtual buffer.  */
       memcpy (virtual_buffer + REGISTER_RAW_SIZE (i), raw_buf, REGISTER_RAW_SIZE (i));
@@ -3887,7 +3889,7 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 
 #ifdef FRAME_FIND_SAVED_REGS_IN_SIGTRAMP
   /* Handle signal handler callers.  */
-  if (frame_info->signal_handler_caller)
+  if ((get_frame_type (frame_info) == SIGTRAMP_FRAME))
     {
       FRAME_FIND_SAVED_REGS_IN_SIGTRAMP (frame_info, frame_saved_regs);
       return;
@@ -4892,6 +4894,20 @@ static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
+  
+  /* Try to determine the ABI of the object we are loading.  */
+
+  if (info.abfd != NULL)
+    {
+      osabi = gdbarch_lookup_osabi (info.abfd);
+      if (osabi == GDB_OSABI_UNKNOWN)
+	{
+	  /* If it's a SOM file, assume it's HP/UX SOM.  */
+	  if (bfd_get_flavour (info.abfd) == bfd_target_som_flavour)
+	    osabi = GDB_OSABI_HPUX_SOM;
+	}
+    }
 
   /* find a candidate among the list of pre-declared architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -4900,6 +4916,9 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* If none found, then allocate and initialize one.  */
   gdbarch = gdbarch_alloc (&info, NULL);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch, osabi);
 
   return gdbarch;
 }

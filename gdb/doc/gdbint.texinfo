@@ -253,9 +253,9 @@ your frames are nonstandard.)
 
 @cindex frame chain
 Given a @value{GDBN} frame, define @code{FRAME_CHAIN} to determine the
-address of the calling function's frame.  This will be used to create
-a new @value{GDBN} frame struct, and then @code{INIT_EXTRA_FRAME_INFO}
-and @code{INIT_FRAME_PC} will be called for the new frame.
+address of the calling function's frame.  This will be used to create a
+new @value{GDBN} frame struct, and then @code{INIT_EXTRA_FRAME_INFO} and
+@code{DEPRECATED_INIT_FRAME_PC} will be called for the new frame.
 
 @section Breakpoint Handling
 
@@ -2245,11 +2245,6 @@ of functions to indicate that they never return.  The default is already
 set correctly if compiling with GCC.  This will almost never need to be
 defined.
 
-@item USE_GENERIC_DUMMY_FRAMES
-@cindex generic dummy frames
-Define this to 1 if the target is using the generic inferior function
-call code.  See @code{blockframe.c} for more information.
-
 @item USE_MMALLOC
 @findex mmalloc
 @value{GDBN} will use the @code{mmalloc} library for memory allocation
@@ -3458,8 +3453,8 @@ If additional information about the frame is required this should be
 stored in @code{frame->extra_info}.  Space for @code{frame->extra_info}
 is allocated using @code{frame_obstack_alloc}.
 
-@item INIT_FRAME_PC (@var{fromleaf}, @var{prev})
-@findex INIT_FRAME_PC
+@item DEPRECATED_INIT_FRAME_PC (@var{fromleaf}, @var{prev})
+@findex DEPRECATED_INIT_FRAME_PC
 This is a C statement that sets the pc of the frame pointed to by
 @var{prev}.  [By default...]
 
@@ -3679,10 +3674,6 @@ them.
 @item PCC_SOL_BROKEN
 @findex PCC_SOL_BROKEN
 (Used only in the Convex target.)
-
-@item PC_IN_CALL_DUMMY
-@findex PC_IN_CALL_DUMMY
-See @file{inferior.h}.
 
 @item PC_IN_SIGTRAMP (@var{pc}, @var{name})
 @findex PC_IN_SIGTRAMP

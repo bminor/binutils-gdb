@@ -1,5 +1,5 @@
 /* BFD back-end for i386 a.out binaries.
-   Copyright 1990, 1991, 1992, 1994, 1996, 1997, 2001
+   Copyright 1990, 1991, 1992, 1994, 1996, 1997, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -54,12 +54,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "aout/aout64.h"
 #include "libaout.h"
 
-static boolean i386aout_write_object_contents PARAMS ((bfd *));
-static boolean MY (set_sizes) PARAMS ((bfd *));
+static bfd_boolean i386aout_write_object_contents PARAMS ((bfd *));
+static bfd_boolean MY (set_sizes) PARAMS ((bfd *));
 
 /* Set the machine type correctly.  */
 
-static boolean
+static bfd_boolean
 i386aout_write_object_contents (abfd)
      bfd *abfd;
 {
@@ -72,7 +72,7 @@ i386aout_write_object_contents (abfd)
 
   WRITE_HEADERS (abfd, execp);
 
-  return true;
+  return TRUE;
 }
 
 #define MY_write_object_contents i386aout_write_object_contents

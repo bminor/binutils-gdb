@@ -28,6 +28,8 @@
 #include "language.h"
 #include "parser-defs.h"
 #include "frame.h"		/* For frame_map_regnum_to_name.  */
+#include "target.h"
+#include "gdb_string.h"
 
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -177,6 +179,51 @@ print_subexp (register struct expression *exp, register int *pos,
 	+= 3 + BYTES_TO_EXP_ELEM ((nargs + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT);
       fprintf_unfiltered (stream, "B'<unimplemented>'");
       return;
+
+    case OP_OBJC_NSSTRING:	/* Objective-C Foundation Class NSString constant.  */
+      nargs = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
+      fputs_filtered ("@\"", stream);
+      LA_PRINT_STRING (stream, &exp->elts[pc + 2].string, nargs, 1, 0);
+      fputs_filtered ("\"", stream);
+      return;
+
+    case OP_OBJC_MSGCALL:
+      {			/* Objective C message (method) call.  */
+	char *selector;
+	(*pos) += 3;
+	nargs = longest_to_int (exp->elts[pc + 2].longconst);
+	fprintf_unfiltered (stream, "[");
+	print_subexp (exp, pos, stream, PREC_SUFFIX);
+	if (0 == target_read_string (exp->elts[pc + 1].longconst,
+				     &selector, 1024, NULL))
+	  {
+	    error ("bad selector");
+	    return;
+	  }
+	if (nargs)
+	  {
+	    char *s, *nextS;
+	    s = alloca (strlen (selector) + 1);
+	    strcpy (s, selector);
+	    for (tem = 0; tem < nargs; tem++)
+	      {
+		nextS = strchr (s, ':');
+		*nextS = '\0';
+		fprintf_unfiltered (stream, " %s: ", s);
+		s = nextS + 1;
+		print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
+	      }
+	  }
+	else
+	  {
+	    fprintf_unfiltered (stream, " %s", selector);
+	  }
+	fprintf_unfiltered (stream, "]");
+	/* "selector" was malloc'd by target_read_string. Free it.  */
+	free (selector);
+	return;
+      }
 
     case OP_ARRAY:
       (*pos) += 3;
@@ -390,6 +437,13 @@ print_subexp (register struct expression *exp, register int *pos,
     case OP_THIS:
       ++(*pos);
       fputs_filtered ("this", stream);
+      return;
+
+      /* Objective-C ops */
+
+    case OP_OBJC_SELF:
+      ++(*pos);
+      fputs_filtered ("self", stream);	/* The ObjC equivalent of "this".  */
       return;
 
       /* Modula-2 ops */
@@ -685,6 +739,8 @@ op_name (int opcode)
       return "STRUCTOP_PTR";
     case OP_THIS:
       return "OP_THIS";
+    case OP_OBJC_SELF:
+      return "OP_OBJC_SELF";
     case OP_SCOPE:
       return "OP_SCOPE";
     case OP_TYPE:

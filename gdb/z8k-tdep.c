@@ -166,12 +166,6 @@ z8k_frame_chain (struct frame_info *thisframe)
   return 0;
 }
 
-void
-init_frame_pc (void)
-{
-  internal_error (__FILE__, __LINE__, "failed internal consistency check");
-}
-
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
    This includes special registers such as pc and fp saved in special
@@ -249,7 +243,7 @@ frame_find_saved_regs (struct frame_info *fip, struct frame_saved_regs *fsrp)
   pc = skip_adjust (get_pc_function_start (fip->pc), &locals);
 
   {
-    adr = FRAME_FP (fip) - locals;
+    adr = get_frame_base (fip) - locals;
     for (i = 0; i < 8; i++)
       {
 	int word = read_memory_short (pc);
@@ -327,8 +321,8 @@ z8k_print_register_hook (int regno)
     {
       unsigned char l[4];
 
-      frame_register_read (selected_frame, regno, l + 0);
-      frame_register_read (selected_frame, regno + 1, l + 2);
+      frame_register_read (deprecated_selected_frame, regno, l + 0);
+      frame_register_read (deprecated_selected_frame, regno + 1, l + 2);
       printf_unfiltered ("\t");
       printf_unfiltered ("0x%02x%02x%02x%02x", l[0], l[1], l[2], l[3]);
     }
@@ -337,10 +331,10 @@ z8k_print_register_hook (int regno)
     {
       unsigned char l[8];
 
-      frame_register_read (selected_frame, regno, l + 0);
-      frame_register_read (selected_frame, regno + 1, l + 2);
-      frame_register_read (selected_frame, regno + 2, l + 4);
-      frame_register_read (selected_frame, regno + 3, l + 6);
+      frame_register_read (deprecated_selected_frame, regno, l + 0);
+      frame_register_read (deprecated_selected_frame, regno + 1, l + 2);
+      frame_register_read (deprecated_selected_frame, regno + 2, l + 4);
+      frame_register_read (deprecated_selected_frame, regno + 3, l + 6);
 
       printf_unfiltered ("\t");
       printf_unfiltered ("0x%02x%02x%02x%02x%02x%02x%02x%02x",
@@ -351,7 +345,7 @@ z8k_print_register_hook (int regno)
       unsigned short rval;
       int i;
 
-      frame_register_read (selected_frame, regno, (char *) (&rval));
+      frame_register_read (deprecated_selected_frame, regno, (char *) (&rval));
 
       printf_unfiltered ("\n");
       for (i = 0; i < 10; i += 2)
@@ -469,8 +463,8 @@ z8k_print_registers_info (struct gdbarch *gdbarch,
 void
 z8k_do_registers_info (int regnum, int all)
 {
-  z8k_print_registers_info (current_gdbarch, gdb_stdout, selected_frame,
-			    regnum, all);
+  z8k_print_registers_info (current_gdbarch, gdb_stdout,
+			    deprecated_selected_frame, regnum, all);
 }
 
 void

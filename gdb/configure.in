@@ -532,12 +532,12 @@ aix*)
   ;;
 esac
 
-dnl See if thread_db library is around for Solaris thread debugging.  Note that
-dnl we must explicitly test for version 1 of the library because version 0
-dnl (present on Solaris 2.4 or earlier) doesn't have the same API.
 
-dnl Note that we only want this if we are both native (host == target), and
-dnl not doing a canadian cross build (build == host).
+dnl For certain native configurations, we need to check whether thread
+dnl support can be built in or not.
+dnl
+dnl Note that we only want this if we are both native (host == target),
+dnl and not doing a canadian cross build (build == host).
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
    case ${host_os} in
@@ -557,6 +557,10 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
       fi
       ;;
    solaris*)
+      # See if thread_db library is around for Solaris thread debugging.
+      # Note that we must explicitly test for version 1 of the library
+      # because version 0 (present on Solaris 2.4 or earlier) doesn't have
+      # the same API.
       AC_MSG_CHECKING(for Solaris thread debugging library)
       if test -f /usr/lib/libthread_db.so.1 ; then
          AC_MSG_RESULT(yes)
@@ -596,6 +600,22 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
          AC_MSG_RESULT(no)
       fi
       ;;
+   aix*)
+      AC_MSG_CHECKING(for AiX thread debugging library)
+      AC_CACHE_VAL(gdb_cv_have_aix_thread_debug,
+                   [AC_TRY_COMPILE([#include <sys/pthdebug.h>],
+                                   [#ifndef PTHDB_VERSION_3
+                                    #error
+                                    #endif],
+                                   gdb_cv_have_aix_thread_debug=yes,
+                                   gdb_cv_have_aix_thread_debug=no)])
+      AC_MSG_RESULT($gdb_cv_have_aix_thread_debug)
+      if test $gdb_cv_have_aix_thread_debug = yes; then
+         CONFIG_SRCS="${CONFIG_SRCS} aix-thread.c"
+         CONFIG_LIB_OBS="${CONFIG_LIB_OBS} aix-thread.o"
+         CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -lpthdebug"
+      fi
+      ;;
    esac
    AC_SUBST(CONFIG_LDFLAGS)
 fi
@@ -615,6 +635,23 @@ fi
 if test "x$gdb_cv_thread_db_h_has_td_notalloc" = "xyes"; then
   AC_DEFINE(THREAD_DB_HAS_TD_NOTALLOC, 1,
             [Define if <thread_db.h> has the TD_NOTALLOC error code.])
+fi
+
+dnl linux-proc.c wants to use pread64, which may require special CFLAGS
+dnl -D_BSD_SOURCE is normally assumed but we have to specify it because of
+dnl -D_XOPEN_SOURCE=500.
+if test $host = $target; then
+  case $target in
+    *-linux*)
+      save_CFLAGS=$CFLAGS
+      CFLAGS="$CFLAGS -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_LARGEFILE64_SOURCE"
+      AC_TRY_LINK([#include <unistd.h>],
+		  [pread64 (0, NULL, 0, 0);],
+		  [ENABLE_CFLAGS="$ENABLE_CFLAGS -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_LARGEFILE64_SOURCE"
+		   AC_DEFINE(HAVE_PREAD64)], [])
+      CFLAGS=$save_CFLAGS
+      ;;
+  esac
 fi
 
 dnl The CLI cannot be disabled yet, but may be in the future  
@@ -1025,7 +1062,6 @@ if test "${enable_gdbtk}" = "yes"; then
 	   CY_AC_PATH_TKH
 	   CY_AC_PATH_ITCLH
 	   CY_AC_PATH_ITKH
-	   CY_AC_PATH_TIXH
 
 
 	   # now look for Tk library stuff
@@ -1061,14 +1097,6 @@ if test "${enable_gdbtk}" = "yes"; then
 	     ITK_DEPS="${ITK_LIB_FULL_PATH}"
            fi
 
-	   # now look for Tix library stuff
-	   CY_AC_PATH_TIXCONFIG
-           if test -z "${no_tix}"; then
-             CY_AC_LOAD_TIXCONFIG
-	     TIXLIB="${TIX_BUILD_LIB_SPEC}"
-	     TIX_DEPS="${TIX_BUILD_LOCATION}/${TIX_LIB_FILE}"
-           fi
-
            ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
 	   # Tcl/Tk 8.1 require -fwritable strings.  I don't
            # know whether 8.2 will or not, but I bet it will.
@@ -1081,7 +1109,7 @@ if test "${enable_gdbtk}" = "yes"; then
            fi
 
 	   # Include some libraries that Tcl and Tk want.
-	   TCL_LIBS='$(LIBGUI) $(ITCL) $(ITK) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	   TCL_LIBS='$(LIBGUI) $(ITCL) $(ITK) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
 	   # Yes, the ordering seems wrong here.  But it isn't.
 	   # TK_LIBS is the list of libraries that need to be linked
 	   # after Tcl/Tk.  Note that this isn't put into LIBS.  If it
@@ -1119,8 +1147,6 @@ AC_SUBST(ITCLLIB)
 AC_SUBST(ITCL_DEPS)
 AC_SUBST(ITKLIB)
 AC_SUBST(ITK_DEPS)
-AC_SUBST(TIXLIB)
-AC_SUBST(TIX_DEPS)
 AC_SUBST(GDBTKLIBS)
 AC_SUBST(GDBTK_CFLAGS)
 AC_SUBST(GDBTK_SRC_DIR)

@@ -21,9 +21,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define HPUX_SNAP1
-#define HPUX_SNAP2
-
 /* The solib hooks are not really designed to have a list of hook
    and handler routines.  So until we clean up those interfaces you
    either get SOM shared libraries or HP's unusual PA64 ELF shared
@@ -39,7 +36,7 @@
 /* Actually, for a PA running HPUX the kernel calls the signal handler
    without an intermediate trampoline.  Luckily the kernel always sets
    the return pointer for the signal handler to point to _sigreturn.  */
-#define IN_SIGTRAMP(pc, name) (name && STREQ ("_sigreturn", name))
+#define PC_IN_SIGTRAMP(pc, name) (name && STREQ ("_sigreturn", name))
 
 /* For HPUX:
 

@@ -42,7 +42,6 @@
 /* These are generated files.  */
 #include "itable.h"
 #include "idecode.h"
-#include "idecode.h"
 
 typedef instruction_address sim_cia;
 static const sim_cia null_cia = {0}; /* Dummy */

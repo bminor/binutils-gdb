@@ -34,6 +34,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbtypes.h"
+#include "gdb_assert.h"
 #include "complaints.h"
 #include "gdb_string.h"
 #include "expression.h"		/* For "enum exp_opcode" used by... */
@@ -89,23 +90,6 @@ static struct using_direct_node *copy_usings_to_obstack (struct
 #define	INITIAL_LINE_VECTOR_LENGTH	1000
 
 
-/* Complaints about the symbols we have encountered.  */
-
-struct deprecated_complaint block_end_complaint =
-{"block end address less than block start address in %s (patched it)", 0, 0};
-
-struct deprecated_complaint anon_block_end_complaint =
-{"block end address 0x%lx less than block start address 0x%lx (patched it)", 0, 0};
-
-struct deprecated_complaint innerblock_complaint =
-{"inner block not inside outer block in %s", 0, 0};
-
-struct deprecated_complaint innerblock_anon_complaint =
-{"inner block (0x%lx-0x%lx) not inside outer block (0x%lx-0x%lx)", 0, 0};
-
-struct deprecated_complaint blockvector_complaint =
-{"block at %s out of order", 0, 0};
-
 /* maintain the lists of symbols and blocks */
 
 /* Add a pending list to free_pendings. */
@@ -508,11 +492,15 @@ finish_block (struct symbol *symbol, struct pending **listhead,
     {
       if (symbol)
 	{
-	  complain (&block_end_complaint, SYMBOL_PRINT_NAME (symbol));
+	  complaint (&symfile_complaints,
+		     "block end address less than block start address in %s (patched it)",
+		     SYMBOL_PRINT_NAME (symbol));
 	}
       else
 	{
-	  complain (&anon_block_end_complaint, BLOCK_END (block), BLOCK_START (block));
+	  complaint (&symfile_complaints,
+		     "block end address 0x%s less than block start address 0x%s (patched it)",
+		     paddr_nz (BLOCK_END (block)), paddr_nz (BLOCK_START (block)));
 	}
       /* Better than nothing */
       BLOCK_END (block) = BLOCK_START (block);
@@ -538,14 +526,18 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	    {
 	      if (symbol)
 		{
-		  complain (&innerblock_complaint,
-			    SYMBOL_PRINT_NAME (symbol));
+		  complaint (&symfile_complaints,
+			     "inner block not inside outer block in %s",
+			     SYMBOL_PRINT_NAME (symbol));
 		}
 	      else
 		{
-		  complain (&innerblock_anon_complaint, BLOCK_START (pblock->block),
-			    BLOCK_END (pblock->block), BLOCK_START (block),
-			    BLOCK_END (block));
+		  complaint (&symfile_complaints,
+			     "inner block (0x%s-0x%s) not inside outer block (0x%s-0x%s)",
+			     paddr_nz (BLOCK_START (pblock->block)),
+			     paddr_nz (BLOCK_END (pblock->block)),
+			     paddr_nz (BLOCK_START (block)),
+			     paddr_nz (BLOCK_END (block)));
 		}
 	      if (BLOCK_START (pblock->block) < BLOCK_START (block))
 		BLOCK_START (pblock->block) = BLOCK_START (block);
@@ -650,8 +642,8 @@ make_blockvector (struct objfile *objfile)
 	      CORE_ADDR start
 		= BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i));
 
-	      complain (&blockvector_complaint,
-			local_hex_string ((LONGEST) start));
+	      complaint (&symfile_complaints, "block at %s out of order",
+			 local_hex_string ((LONGEST) start));
 	    }
 	}
     }
@@ -972,9 +964,8 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	     same.  FIXME: Find out why it is happening.  This is not
 	     believed to happen in most cases (even for coffread.c);
 	     it used to be an abort().  */
-	  static struct deprecated_complaint msg =
-	  {"Context stack not empty in end_symtab", 0, 0};
-	  complain (&msg);
+	  complaint (&symfile_complaints,
+	             "Context stack not empty in end_symtab");
 	  context_stack_depth = 0;
 	}
     }
@@ -1237,6 +1228,17 @@ push_context (int desc, CORE_ADDR valu)
 
   return new;
 }
+
+/* Pop a context block.  Returns the address of the context block just
+   popped. */
+
+struct context_stack *
+pop_context (void)
+{
+  gdb_assert (context_stack_depth > 0);
+  return (&context_stack[--context_stack_depth]);
+}
+
 
 
 /* Compute a small integer hash code for the given name. */

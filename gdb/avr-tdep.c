@@ -750,7 +750,7 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   avr_scan_prologue (fi);
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
@@ -833,7 +833,7 @@ avr_pop_frame (void)
   CORE_ADDR saddr;
   struct frame_info *frame = get_current_frame ();
 
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       generic_pop_dummy_frame ();
     }
@@ -866,7 +866,7 @@ avr_pop_frame (void)
 static CORE_ADDR
 avr_frame_saved_pc (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return deprecated_read_register_dummy (frame->pc, frame->frame,
 					   AVR_PC_REGNUM);
   else
@@ -1020,9 +1020,10 @@ avr_frame_address (struct frame_info *fi)
   return avr_make_saddr (fi->frame);
 }
 
-/* Given a GDB frame, determine the address of the calling function's frame.
-   This will be used to create a new GDB frame struct, and then
-   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
+/* Given a GDB frame, determine the address of the calling function's
+   frame.  This will be used to create a new GDB frame struct, and
+   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
+   called for the new frame.
 
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
@@ -1030,7 +1031,7 @@ avr_frame_address (struct frame_info *fi)
 static CORE_ADDR
 avr_frame_chain (struct frame_info *frame)
 {
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       /* initialize the return_pc now */
       frame->extra_info->return_pc
@@ -1166,6 +1167,10 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
   /* If we ever need to differentiate the device types, do it here. */
   switch (info.bfd_arch_info->mach)
     {
@@ -1215,18 +1220,13 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_register_virtual_type (gdbarch, avr_register_virtual_type);
 
-  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
-
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, avr_call_dummy_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, avr_call_dummy_words);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);

@@ -396,6 +396,27 @@ static struct vlist **varobj_table;
 
 /* Creates a varobj (not its children) */
 
+/* Return the full FRAME which corresponds to the given CORE_ADDR
+   or NULL if no FRAME on the chain corresponds to CORE_ADDR.  */
+
+static struct frame_info *
+find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
+{
+  struct frame_info *frame = NULL;
+
+  if (frame_addr == (CORE_ADDR) 0)
+    return NULL;
+
+  while (1)
+    {
+      frame = get_prev_frame (frame);
+      if (frame == NULL)
+	return NULL;
+      if (get_frame_base (frame) == frame_addr)
+	return frame;
+    }
+}
+
 struct varobj *
 varobj_create (char *objname,
 	       char *expression, CORE_ADDR frame, enum varobj_type type)
@@ -420,8 +441,14 @@ varobj_create (char *objname,
 
       /* Allow creator to specify context of variable */
       if ((type == USE_CURRENT_FRAME) || (type == USE_SELECTED_FRAME))
-	fi = selected_frame;
+	fi = deprecated_selected_frame;
       else
+	/* FIXME: cagney/2002-11-23: This code should be doing a
+	   lookup using the frame ID and not just the frame's
+	   ``address''.  This, of course, means an interface change.
+	   However, with out that interface change ISAs, such as the
+	   ia64 with its two stacks, won't work.  Similar goes for the
+	   case where there is a frameless function.  */
 	fi = find_frame_addr_in_frame_chain (frame);
 
       /* frame = -2 means always use selected frame */
@@ -460,8 +487,8 @@ varobj_create (char *objname,
          Since select_frame is so benign, just call it for all cases. */
       if (fi != NULL)
 	{
-	  get_frame_id (fi, &var->root->frame);
-	  old_fi = selected_frame;
+	  var->root->frame = get_frame_id (fi);
+	  old_fi = deprecated_selected_frame;
 	  select_frame (fi);
 	}
 
@@ -871,7 +898,7 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
 
   /* Save the selected stack frame, since we will need to change it
      in order to evaluate expressions. */
-  get_frame_id (selected_frame, &old_fid);
+  old_fid = get_frame_id (deprecated_selected_frame);
 
   /* Update the root variable. value_of_root can return NULL
      if the variable is no longer around, i.e. we stepped out of
@@ -1317,8 +1344,7 @@ new_root_variable (void)
   var->root->lang = NULL;
   var->root->exp = NULL;
   var->root->valid_block = NULL;
-  var->root->frame.base = 0;
-  var->root->frame.pc = 0;
+  var->root->frame = null_frame_id;
   var->root->use_selected_frame = 0;
   var->root->rootvar = NULL;
 

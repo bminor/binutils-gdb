@@ -42,6 +42,7 @@
 #include "filenames.h"		/* for DOSish file names */
 
 #include "solist.h"
+#include <readline/readline.h>
 
 /* external data declarations */
 

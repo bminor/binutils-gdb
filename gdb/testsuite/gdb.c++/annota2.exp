@@ -1,4 +1,4 @@
-#   Copyright 1999, 2000, 2001
+#   Copyright 1999, 2000, 2001, 2002
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -214,6 +214,7 @@ send_gdb "\003"
 gdb_expect {
     -re "\r\n\032\032error-begin\r\nQuit\r\n\r\n\032\032quit\r\n$gdb_prompt$" \
 	    { pass "annotate-quit" }
+    -re "$gdb_prompt$" { kfail "gdb/544" "annotate-quit" }
     -re ".*$gdb_prompt$" { fail "annotate-quit" }
     timeout { fail "annotate-quit (timeout)" }
 }

@@ -629,9 +629,7 @@ e7000_start_remote (void *dummy)
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  set_current_frame (create_new_frame (read_fp (), stop_pc));
-  select_frame (get_current_frame ());
-  print_stack_frame (selected_frame, -1, 1);
+  print_stack_frame (get_selected_frame (), -1, 1);
 
   return 1;
 }

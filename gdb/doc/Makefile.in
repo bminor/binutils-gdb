@@ -134,7 +134,7 @@ STABS_DOC_FILES = \
 #### Host, target, and site specific Makefile fragments come in here.
 ###
 
-all install:
+all:
 
 info: $(INFO_DEPS)
 dvi: gdb.dvi gdbint.dvi stabs.dvi refcard.dvi
@@ -156,6 +156,7 @@ install-info: $(INFO_DEPS)
 	    else : ; fi; \
 	  done; \
 	done
+	$(POST_INSTALL)
 	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
 	  list='$(INFO_DEPS)'; \
 	  for file in $$list; do \
@@ -163,6 +164,22 @@ install-info: $(INFO_DEPS)
 	    install-info --info-dir=$(infodir) $(infodir)/$$file || :;\
 	  done; \
 	else : ; fi
+
+uninstall-info:
+	$(PRE_UNINSTALL)
+	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
+	  ii=yes; \
+	else ii=; fi; \
+	list='$(INFO_DEPS)'; \
+	for file in $$list; do \
+	  test -z "$$ii" \
+	    || install-info --info-dir=$(DESTDIR)$(infodir) --remove $$file; \
+	done
+	$(NORMAL_UNINSTALL)
+	list='$(INFO_DEPS)'; \
+	for file in $$list; do \
+	  (cd $(DESTDIR)$(infodir) && rm -f $$file $$file-[0-9] $$file-[0-9][0-9]); \
+	done
 
 install-html: html
 	for i in *.html ; do \
@@ -218,7 +235,7 @@ refcard.ps : refcard.dvi
 
 # File to record current GDB version number (copied from main dir version.in)
 GDBvn.texi : ${gdbdir}/version.in
-	echo "@set GDBVN `head -1 $(srcdir)/../version.in`" > ./GDBvn.new
+	echo "@set GDBVN `sed q $(srcdir)/../version.in`" > ./GDBvn.new
 	mv GDBvn.new GDBvn.texi
 
 # Updated atomically
@@ -432,3 +449,6 @@ distclean: clean
 maintainer-clean realclean: distclean
 	rm -f GDBvn.texi *.info* *.dvi *.ps *.html *.pdf
 
+install: install-info
+
+uninstall: uninstall-info

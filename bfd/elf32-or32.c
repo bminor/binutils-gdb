@@ -1,5 +1,5 @@
 /* OR32-specific support for 32-bit ELF
-   Copyright (C) 2002 Free Software Foundation, Inc.
+   Copyright 2002 Free Software Foundation, Inc.
    Contributed by Ivan Guzvinec  <ivang@opencores.org>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -25,16 +25,26 @@
 #include "elf/or32.h"
 #include "libiberty.h"
 
-static reloc_howto_type *     bfd_elf32_bfd_reloc_type_lookup  PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void                   or32_info_to_howto_rel           PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
-static boolean                or32_elf_object_p                PARAMS ((bfd *));
-static void                   or32_elf_final_write_processing  PARAMS ((bfd *, boolean));
-static bfd_reloc_status_type  or32_elf_32_reloc                PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static bfd_reloc_status_type  or32_elf_16_reloc                PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static bfd_reloc_status_type  or32_elf_8_reloc                 PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static bfd_reloc_status_type  or32_elf_const_reloc             PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static bfd_reloc_status_type  or32_elf_consth_reloc            PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static bfd_reloc_status_type  or32_elf_jumptarg_reloc          PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+static void or32_info_to_howto_rel
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+static bfd_boolean or32_elf_object_p
+  PARAMS ((bfd *));
+static void or32_elf_final_write_processing
+  PARAMS ((bfd *, bfd_boolean));
+static bfd_reloc_status_type or32_elf_32_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type or32_elf_16_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type or32_elf_8_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type or32_elf_const_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type or32_elf_consth_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type or32_elf_jumptarg_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
 /* Try to minimize the amount of space occupied by relocation tables
    on the ROM (not that the ROM won't be swamped by other ELF overhead).  */
@@ -47,135 +57,135 @@ static reloc_howto_type elf_or32_howto_table[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_OR32_NONE",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A standard 32 bit relocation.  */
   HOWTO (R_OR32_32,		/* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 or32_elf_32_reloc, 	/* special_function */
 	 "R_OR32_32",		/* name */
-	 false,	                /* partial_inplace */
+	 FALSE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,   		/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* A standard 16 bit relocation.  */
   HOWTO (R_OR32_16,		/* type */
 	 0,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 or32_elf_16_reloc, 	/* special_function */
 	 "R_OR32_16",		/* name */
-	 false,	                /* partial_inplace */
+	 FALSE,	                /* partial_inplace */
 	 0x0000ffff,	        /* src_mask */
 	 0x0000ffff,   		/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* A standard 8 bit relocation.  */
   HOWTO (R_OR32_8,		/* type */
 	 0,	                /* rightshift */
 	 0,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 8,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 or32_elf_8_reloc, 	/* special_function */
 	 "R_OR32_8",		/* name */
-	 false,	                /* partial_inplace */
+	 FALSE,	                /* partial_inplace */
 	 0x000000ff,	        /* src_mask */
 	 0x000000ff,   		/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* A standard low 16 bit relocation.  */
   HOWTO (R_OR32_CONST,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 or32_elf_const_reloc,	/* special_function */
 	 "R_OR32_CONST",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A standard high 16 bit relocation.  */
   HOWTO (R_OR32_CONSTH,		/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 or32_elf_consth_reloc,	/* special_function */
 	 "R_OR32_CONSTH",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff0000,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A standard branch relocation.  */
   HOWTO (R_OR32_JUMPTARG,	/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 28,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 or32_elf_jumptarg_reloc,/* special_function */
 	 "R_OR32_JUMPTARG",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x03ffffff,		/* dst_mask */
-	 true), 		/* pcrel_offset */
+	 TRUE), 		/* pcrel_offset */
 
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_OR32_GNU_VTINHERIT, /* type */
          0,                     /* rightshift */
          2,                     /* size (0 = byte, 1 = short, 2 = long) */
          0,                     /* bitsize */
-         false,                 /* pc_relative */
+         FALSE,                 /* pc_relative */
          0,                     /* bitpos */
          complain_overflow_dont, /* complain_on_overflow */
          NULL,                  /* special_function */
          "R_OR32_GNU_VTINHERIT", /* name */
-         false,                 /* partial_inplace */
+         FALSE,                 /* partial_inplace */
          0,                     /* src_mask */
          0,                     /* dst_mask */
-         false),                /* pcrel_offset */
+         FALSE),                /* pcrel_offset */
 
   /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_OR32_GNU_VTENTRY,     /* type */
          0,                     /* rightshift */
          2,                     /* size (0 = byte, 1 = short, 2 = long) */
          0,                     /* bitsize */
-         false,                 /* pc_relative */
+         FALSE,                 /* pc_relative */
          0,                     /* bitpos */
          complain_overflow_dont, /* complain_on_overflow */
          _bfd_elf_rel_vtable_reloc_fn,  /* special_function */
          "R_OR32_GNU_VTENTRY",   /* name */
-         false,                 /* partial_inplace */
+         FALSE,                 /* partial_inplace */
          0,                     /* src_mask */
          0,                     /* dst_mask */
-         false),                /* pcrel_offset */
+         FALSE),                /* pcrel_offset */
 };
 
 /* Map BFD reloc types to OR32 ELF reloc types.  */
@@ -221,7 +231,7 @@ static void
 or32_info_to_howto_rel (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf32_Internal_Rel *dst;
+     Elf_Internal_Rela *dst;
 {
   unsigned int r_type;
 
@@ -232,12 +242,12 @@ or32_info_to_howto_rel (abfd, cache_ptr, dst)
 
 /* Set the right machine number for an OR32 ELF file.  */
 
-static boolean
+static bfd_boolean
 or32_elf_object_p (abfd)
      bfd *abfd;
 {
   (void) bfd_default_set_arch_mach (abfd, bfd_arch_or32, 0);
-  return true;
+  return TRUE;
 }
 
 /* The final processing done just before writing out an OR32 ELF object file.
@@ -246,7 +256,7 @@ or32_elf_object_p (abfd)
 static void
 or32_elf_final_write_processing (abfd, linker)
      bfd *abfd;
-     boolean linker ATTRIBUTE_UNUSED;
+     bfd_boolean linker ATTRIBUTE_UNUSED;
 {
   int mach;
   unsigned long val;

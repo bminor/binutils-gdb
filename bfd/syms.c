@@ -346,14 +346,14 @@ FUNCTION
 	bfd_is_local_label
 
 SYNOPSIS
-        boolean bfd_is_local_label(bfd *abfd, asymbol *sym);
+        bfd_boolean bfd_is_local_label(bfd *abfd, asymbol *sym);
 
 DESCRIPTION
-	Return true if the given symbol @var{sym} in the BFD @var{abfd} is
-	a compiler generated local label, else return false.
+	Return TRUE if the given symbol @var{sym} in the BFD @var{abfd} is
+	a compiler generated local label, else return FALSE.
 */
 
-boolean
+bfd_boolean
 bfd_is_local_label (abfd, sym)
      bfd *abfd;
      asymbol *sym;
@@ -362,9 +362,9 @@ bfd_is_local_label (abfd, sym)
      starts with '.' is local.  This would accidentally catch section names
      if we didn't reject them here.  */
   if ((sym->flags & (BSF_GLOBAL | BSF_WEAK | BSF_SECTION_SYM)) != 0)
-    return false;
+    return FALSE;
   if (sym->name == NULL)
-    return false;
+    return FALSE;
   return bfd_is_local_label_name (abfd, sym->name);
 }
 
@@ -373,12 +373,12 @@ FUNCTION
 	bfd_is_local_label_name
 
 SYNOPSIS
-        boolean bfd_is_local_label_name(bfd *abfd, const char *name);
+        bfd_boolean bfd_is_local_label_name (bfd *abfd, const char *name);
 
 DESCRIPTION
-	Return true if a symbol with the name @var{name} in the BFD
+	Return TRUE if a symbol with the name @var{name} in the BFD
 	@var{abfd} is a compiler generated local label, else return
-	false.  This just checks whether the name has the form of a
+	FALSE.  This just checks whether the name has the form of a
 	local label.
 
 .#define bfd_is_local_label_name(abfd, name) \
@@ -408,7 +408,7 @@ FUNCTION
 	bfd_set_symtab
 
 SYNOPSIS
-	boolean bfd_set_symtab (bfd *abfd, asymbol **location, unsigned int count);
+	bfd_boolean bfd_set_symtab (bfd *abfd, asymbol **location, unsigned int count);
 
 DESCRIPTION
 	Arrange that when the output BFD @var{abfd} is closed,
@@ -416,7 +416,7 @@ DESCRIPTION
 	will be written.
 */
 
-boolean
+bfd_boolean
 bfd_set_symtab (abfd, location, symcount)
      bfd *abfd;
      asymbol **location;
@@ -425,12 +425,12 @@ bfd_set_symtab (abfd, location, symcount)
   if ((abfd->format != bfd_object) || (bfd_read_p (abfd)))
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return false;
+      return FALSE;
     }
 
   bfd_get_outsymbols (abfd) = location;
   bfd_get_symcount (abfd) = symcount;
-  return true;
+  return TRUE;
 }
 
 /*
@@ -706,14 +706,14 @@ DESCRIPTION
 	Returns zero otherwise.
 
 SYNOPSIS
-	boolean bfd_is_undefined_symclass (int symclass);
+	bfd_boolean bfd_is_undefined_symclass (int symclass);
 */
 
-boolean
+bfd_boolean
 bfd_is_undefined_symclass (symclass)
      int symclass;
 {
-  return (boolean) (symclass == 'U' || symclass == 'w' || symclass == 'v');
+  return symclass == 'U' || symclass == 'w' || symclass == 'v';
 }
 
 /*
@@ -749,12 +749,12 @@ FUNCTION
 	bfd_copy_private_symbol_data
 
 SYNOPSIS
-	boolean bfd_copy_private_symbol_data(bfd *ibfd, asymbol *isym, bfd *obfd, asymbol *osym);
+	bfd_boolean bfd_copy_private_symbol_data(bfd *ibfd, asymbol *isym, bfd *obfd, asymbol *osym);
 
 DESCRIPTION
 	Copy private symbol information from @var{isym} in the BFD
 	@var{ibfd} to the symbol @var{osym} in the BFD @var{obfd}.
-	Return <<true>> on success, <<false>> on error.  Possible error
+	Return <<TRUE>> on success, <<FALSE>> on error.  Possible error
 	returns are:
 
 	o <<bfd_error_no_memory>> -
@@ -773,7 +773,7 @@ DESCRIPTION
 long
 _bfd_generic_read_minisymbols (abfd, dynamic, minisymsp, sizep)
      bfd *abfd;
-     boolean dynamic;
+     bfd_boolean dynamic;
      PTR *minisymsp;
      unsigned int *sizep;
 {
@@ -820,7 +820,7 @@ _bfd_generic_read_minisymbols (abfd, dynamic, minisymsp, sizep)
 asymbol *
 _bfd_generic_minisymbol_to_symbol (abfd, dynamic, minisym, sym)
      bfd *abfd ATTRIBUTE_UNUSED;
-     boolean dynamic ATTRIBUTE_UNUSED;
+     bfd_boolean dynamic ATTRIBUTE_UNUSED;
      const PTR minisym;
      asymbol *sym ATTRIBUTE_UNUSED;
 {
@@ -830,7 +830,7 @@ _bfd_generic_minisymbol_to_symbol (abfd, dynamic, minisym, sym)
 /* Look through stabs debugging information in .stab and .stabstr
    sections to find the source file and line closest to a desired
    location.  This is used by COFF and ELF targets.  It sets *pfound
-   to true if it finds some information.  The *pinfo field is used to
+   to TRUE if it finds some information.  The *pinfo field is used to
    pass cached information in and out of this routine; this first time
    the routine is called for a BFD, *pinfo should be NULL.  The value
    placed in *pinfo should be saved with the BFD, and passed back each
@@ -902,14 +902,14 @@ struct stab_find_info
   char *filename;
 };
 
-boolean
+bfd_boolean
 _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 				     pfilename, pfnname, pline, pinfo)
      bfd *abfd;
      asymbol **symbols;
      asection *section;
      bfd_vma offset;
-     boolean *pfound;
+     bfd_boolean *pfound;
      const char **pfilename;
      const char **pfnname;
      unsigned int *pline;
@@ -924,9 +924,9 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
   char *file_name;
   char *directory_name;
   int saw_fun;
-  boolean saw_line, saw_func;
+  bfd_boolean saw_line, saw_func;
 
-  *pfound = false;
+  *pfound = FALSE;
   *pfilename = bfd_get_filename (abfd);
   *pfnname = NULL;
   *pline = 0;
@@ -957,7 +957,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
       if (info->stabsec == NULL || info->strsec == NULL)
 	{
 	  /* No stabs debugging information.  */
-	  return true;
+	  return TRUE;
 	}
 
       stabsize = info->stabsec->_raw_size;
@@ -974,7 +974,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 
       info = (struct stab_find_info *) bfd_zalloc (abfd, amt);
       if (info == NULL)
-	return false;
+	return FALSE;
 
       /* FIXME: When using the linker --split-by-file or
 	 --split-by-reloc options, it is possible for the .stab and
@@ -988,7 +988,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	  /* No stabs debugging information.  Set *pinfo so that we
              can return quickly in the info != NULL case above.  */
 	  *pinfo = (PTR) info;
-	  return true;
+	  return TRUE;
 	}
 
       stabsize = info->stabsec->_raw_size;
@@ -997,13 +997,13 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
       info->stabs = (bfd_byte *) bfd_alloc (abfd, stabsize);
       info->strs = (bfd_byte *) bfd_alloc (abfd, strsize);
       if (info->stabs == NULL || info->strs == NULL)
-	return false;
+	return FALSE;
 
       if (! bfd_get_section_contents (abfd, info->stabsec, info->stabs,
 				      (bfd_vma) 0, stabsize)
 	  || ! bfd_get_section_contents (abfd, info->strsec, info->strs,
 					 (bfd_vma) 0, strsize))
-	return false;
+	return FALSE;
 
       /* If this is a relocateable object file, we have to relocate
 	 the entries in .stab.  This should always be simple 32 bit
@@ -1011,17 +1011,17 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	 this should be no big deal.  */
       reloc_size = bfd_get_reloc_upper_bound (abfd, info->stabsec);
       if (reloc_size < 0)
-	return false;
+	return FALSE;
       reloc_vector = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);
       if (reloc_vector == NULL && reloc_size != 0)
-	return false;
+	return FALSE;
       reloc_count = bfd_canonicalize_reloc (abfd, info->stabsec, reloc_vector,
 					    symbols);
       if (reloc_count < 0)
 	{
 	  if (reloc_vector != NULL)
 	    free (reloc_vector);
-	  return false;
+	  return FALSE;
 	}
       if (reloc_count > 0)
 	{
@@ -1046,7 +1046,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 		  bfd_set_error (bfd_error_invalid_operation);
 		  if (reloc_vector != NULL)
 		    free (reloc_vector);
-		  return false;
+		  return FALSE;
 		}
 
 	      val = bfd_get_32 (abfd, info->stabs + r->address);
@@ -1100,14 +1100,14 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	++info->indextablesize;
 
       if (info->indextablesize == 0)
-	return true;
+	return TRUE;
       ++info->indextablesize;
 
       amt = info->indextablesize;
       amt *= sizeof (struct indexentry);
       info->indextable = (struct indexentry *) bfd_alloc (abfd, amt);
       if (info->indextable == NULL)
-	return false;
+	return FALSE;
 
       file_name = NULL;
       directory_name = NULL;
@@ -1272,7 +1272,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	}
 
       if (indexentry == NULL)
-	return true;
+	return TRUE;
 
       stab = indexentry->stab + STABSIZE;
       file_name = indexentry->file_name;
@@ -1281,14 +1281,14 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
   directory_name = indexentry->directory_name;
   str = indexentry->str;
 
-  saw_line = false;
-  saw_func = false;
+  saw_line = FALSE;
+  saw_func = FALSE;
   for (; stab < (indexentry+1)->stab; stab += STABSIZE)
     {
-      boolean done;
+      bfd_boolean done;
       bfd_vma val;
 
-      done = false;
+      done = FALSE;
 
       switch (stab[TYPEOFF])
 	{
@@ -1324,15 +1324,15 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 #endif
 	    }
 	  if (val > offset)
-	    done = true;
-	  saw_line = true;
+	    done = TRUE;
+	  saw_line = TRUE;
 	  break;
 
 	case N_FUN:
 	case N_SO:
 	  if (saw_func || saw_line)
-	    done = true;
-	  saw_func = true;
+	    done = TRUE;
+	  saw_func = TRUE;
 	  break;
 	}
 
@@ -1340,7 +1340,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	break;
     }
 
-  *pfound = true;
+  *pfound = TRUE;
 
   if (file_name == NULL || IS_ABSOLUTE_PATH (file_name)
       || directory_name == NULL)
@@ -1361,7 +1361,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	  len = strlen (file_name) + 1;
 	  info->filename = (char *) bfd_malloc ((bfd_size_type) dirlen + len);
 	  if (info->filename == NULL)
-	    return false;
+	    return FALSE;
 	  memcpy (info->filename, directory_name, dirlen);
 	  memcpy (info->filename + dirlen, file_name, len);
 	}
@@ -1384,5 +1384,5 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
       *pfnname = indexentry->function_name;
     }
 
-  return true;
+  return TRUE;
 }

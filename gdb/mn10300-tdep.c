@@ -738,7 +738,7 @@ mn10300_pop_frame_regular (struct frame_info *frame)
       }
 
   /* Actually cut back the stack.  */
-  write_register (SP_REGNUM, FRAME_FP (frame));
+  write_register (SP_REGNUM, get_frame_base (frame));
 
   /* Don't we need to set the PC?!?  XXX FIXME.  */
 }
@@ -1012,7 +1012,7 @@ mn10300_print_register (const char *name, int regnum, int reg_width)
     printf_filtered ("%s: ", name);
 
   /* Get the data */
-  if (!frame_register_read (selected_frame, regnum, raw_buffer))
+  if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     {
       printf_filtered ("[invalid]");
       return;
@@ -1162,13 +1162,12 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Stack unwinding.  */
-  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_saved_pc_after_call (gdbarch, mn10300_saved_pc_after_call);
   set_gdbarch_init_extra_frame_info (gdbarch, mn10300_init_extra_frame_info);
-  set_gdbarch_init_frame_pc (gdbarch, init_frame_pc_noop);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_frame_init_saved_regs (gdbarch, mn10300_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, mn10300_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, mn10300_frame_saved_pc);
@@ -1180,8 +1179,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pop_frame (gdbarch, mn10300_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, mn10300_skip_prologue);
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   /* That's right, we're using the stack pointer as our frame pointer.  */
   set_gdbarch_read_fp (gdbarch, generic_target_read_sp);
@@ -1191,7 +1188,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_words (gdbarch, mn10300_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 
@@ -1199,8 +1195,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
+  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_arguments (gdbarch, mn10300_push_arguments);
   set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);

@@ -523,9 +523,9 @@ _initialize_sparnbsd_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_sparc, bfd_target_aout_flavour,
 				  sparcnbsd_aout_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_sparc, GDB_OSABI_NETBSD_AOUT,
+  gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_AOUT,
 			  sparcnbsd_init_abi_aout);
-  gdbarch_register_osabi (bfd_arch_sparc, GDB_OSABI_NETBSD_ELF,
+  gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_ELF,
 			  sparcnbsd_init_abi_elf);
 
   add_core_fns (&sparcnbsd_core_fns);

@@ -26,11 +26,13 @@
 #include <sys/reg.h>
 #endif
 
-#define arm_num_regs 16
+#define arm_num_regs 26
 
 static int arm_regmap[] = {
   0, 4, 8, 12, 16, 20, 24, 28,
   32, 36, 40, 44, 48, 52, 56, 60,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  64
 };
 
 static int

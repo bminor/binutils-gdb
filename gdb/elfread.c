@@ -52,20 +52,6 @@ struct elfinfo
     asection *mdebugsect;	/* Section pointer for .mdebug section */
   };
 
-/* Various things we might complain about... */
-
-struct deprecated_complaint section_info_complaint =
-{"elf/stab section information %s without a preceding file symbol", 0, 0};
-
-struct deprecated_complaint section_info_dup_complaint =
-{"duplicated elf/stab section information for %s", 0, 0};
-
-struct deprecated_complaint stab_info_mismatch_complaint =
-{"elf/stab section information missing for %s", 0, 0};
-
-struct deprecated_complaint stab_info_questionable_complaint =
-{"elf/stab section information questionable for %s", 0, 0};
-
 static void free_elfinfo (void *);
 
 /* We are called once per section from elf_symfile_read.  We
@@ -415,8 +401,9 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 				      sizeof (*sectinfo));
 			      if (filesym == NULL)
 				{
-				  complain (&section_info_complaint,
-					    sym->name);
+				  complaint (&symfile_complaints,
+					     "elf/stab section information %s without a preceding file symbol",
+					     sym->name);
 				}
 			      else
 				{
@@ -428,8 +415,9 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 			    { 
 			      if (sectinfo->sections[index] != 0)
 				{
-				  complain (&section_info_dup_complaint,
-					    sectinfo->filename);
+				  complaint (&symfile_complaints,
+					     "duplicated elf/stab section information for %s",
+					     sectinfo->filename);
 				}
 			    }
 			  else
@@ -740,7 +728,8 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
 
   if (maybe == 0 && questionable != 0)
     {
-      complain (&stab_info_questionable_complaint, filename);
+      complaint (&symfile_complaints,
+		 "elf/stab section information questionable for %s", filename);
       maybe = questionable;
     }
 
@@ -757,7 +746,8 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
 
   /* We were unable to find any offsets for this file.  Complain.  */
   if (dbx->stab_section_info)	/* If there *is* any info, */
-    complain (&stab_info_mismatch_complaint, filename);
+    complaint (&symfile_complaints,
+	       "elf/stab section information missing for %s", filename);
 }
 
 /* Register that we are able to handle ELF object file formats.  */

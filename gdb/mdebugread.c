@@ -144,96 +144,43 @@ struct symloc
 #define SC_IS_UNDEF(sc) ((sc) == scUndefined || (sc) == scSUndefined)
 
 /* Various complaints about symbol reading that don't abort the process */
+static void
+index_complaint (const char *arg1)
+{
+  complaint (&symfile_complaints, "bad aux index at symbol %s", arg1);
+}
 
-static struct deprecated_complaint bad_file_number_complaint =
-{"bad file number %d", 0, 0};
+static void
+unknown_ext_complaint (const char *arg1)
+{
+  complaint (&symfile_complaints, "unknown external symbol %s", arg1);
+}
 
-static struct deprecated_complaint index_complaint =
-{"bad aux index at symbol %s", 0, 0};
+static void
+basic_type_complaint (int arg1, const char *arg2)
+{
+  complaint (&symfile_complaints, "cannot map ECOFF basic type 0x%x for %s",
+	     arg1, arg2);
+}
 
-static struct deprecated_complaint aux_index_complaint =
-{"bad proc end in aux found from symbol %s", 0, 0};
+static void
+bad_tag_guess_complaint (const char *arg1)
+{
+  complaint (&symfile_complaints, "guessed tag type of %s incorrectly", arg1);
+}
 
-static struct deprecated_complaint block_index_complaint =
-{"bad aux index at block symbol %s", 0, 0};
+static void
+bad_rfd_entry_complaint (const char *arg1, int arg2, int arg3)
+{
+  complaint (&symfile_complaints, "bad rfd entry for %s: file %d, index %d",
+	     arg1, arg2, arg3);
+}
 
-static struct deprecated_complaint unknown_ext_complaint =
-{"unknown external symbol %s", 0, 0};
-
-static struct deprecated_complaint unknown_sym_complaint =
-{"unknown local symbol %s", 0, 0};
-
-static struct deprecated_complaint unknown_st_complaint =
-{"with type %d", 0, 0};
-
-static struct deprecated_complaint block_overflow_complaint =
-{"block containing %s overfilled", 0, 0};
-
-static struct deprecated_complaint basic_type_complaint =
-{"cannot map ECOFF basic type 0x%x for %s", 0, 0};
-
-static struct deprecated_complaint unknown_type_qual_complaint =
-{"unknown type qualifier 0x%x", 0, 0};
-
-static struct deprecated_complaint array_index_type_complaint =
-{"illegal array index type for %s, assuming int", 0, 0};
-
-static struct deprecated_complaint bad_tag_guess_complaint =
-{"guessed tag type of %s incorrectly", 0, 0};
-
-static struct deprecated_complaint block_member_complaint =
-{"declaration block contains unhandled symbol type %d", 0, 0};
-
-static struct deprecated_complaint stEnd_complaint =
-{"stEnd with storage class %d not handled", 0, 0};
-
-static struct deprecated_complaint unknown_mdebug_symtype_complaint =
-{"unknown symbol type 0x%x", 0, 0};
-
-static struct deprecated_complaint stab_unknown_complaint =
-{"unknown stabs symbol %s", 0, 0};
-
-static struct deprecated_complaint pdr_for_nonsymbol_complaint =
-{"PDR for %s, but no symbol", 0, 0};
-
-static struct deprecated_complaint pdr_static_symbol_complaint =
-{"can't handle PDR for static proc at 0x%lx", 0, 0};
-
-static struct deprecated_complaint bad_setjmp_pdr_complaint =
-{"fixing bad setjmp PDR from libc", 0, 0};
-
-static struct deprecated_complaint bad_fbitfield_complaint =
-{"can't handle TIR fBitfield for %s", 0, 0};
-
-static struct deprecated_complaint bad_continued_complaint =
-{"illegal TIR continued for %s", 0, 0};
-
-static struct deprecated_complaint bad_rfd_entry_complaint =
-{"bad rfd entry for %s: file %d, index %d", 0, 0};
-
-static struct deprecated_complaint unexpected_type_code_complaint =
-{"unexpected type code for %s", 0, 0};
-
-static struct deprecated_complaint unable_to_cross_ref_complaint =
-{"unable to cross ref btTypedef for %s", 0, 0};
-
-static struct deprecated_complaint bad_indirect_xref_complaint =
-{"unable to cross ref btIndirect for %s", 0, 0};
-
-static struct deprecated_complaint illegal_forward_tq0_complaint =
-{"illegal tq0 in forward typedef for %s", 0, 0};
-
-static struct deprecated_complaint illegal_forward_bt_complaint =
-{"illegal bt %d in forward typedef for %s", 0, 0};
-
-static struct deprecated_complaint bad_linetable_guess_complaint =
-{"guessed size of linetable for %s incorrectly", 0, 0};
-
-static struct deprecated_complaint bad_ext_ifd_complaint =
-{"bad ifd for external symbol: %d (max %d)", 0, 0};
-
-static struct deprecated_complaint bad_ext_iss_complaint =
-{"bad iss for external symbol: %ld (max %ld)", 0, 0};
+static void
+unexpected_type_code_complaint (const char *arg1)
+{
+  complaint (&symfile_complaints, "unexpected type code for %s", arg1);
+}
 
 /* Macros and extra defs */
 
@@ -986,7 +933,9 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		break;
 
 	      default:
-		complain (&block_member_complaint, tsym.st);
+		complaint (&symfile_complaints,
+			   "declaration block contains unhandled symbol type %d",
+			   tsym.st);
 	      }
 	  }
       end_of_fields:;
@@ -1272,7 +1221,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  ;
 	}
       else
-	complain (&stEnd_complaint, sh->sc);
+	complaint (&symfile_complaints,
+		   "stEnd with storage class %d not handled", sh->sc);
 
       pop_parse_stack ();	/* restore previous lexical context */
       break;
@@ -1384,7 +1334,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
     case stConstant:
       break;			/* constant */
     default:
-      complain (&unknown_mdebug_symtype_complaint, sh->st);
+      complaint (&symfile_complaints, "unknown symbol type 0x%x", sh->st);
       break;
     }
 
@@ -1453,7 +1403,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
   /* Handle corrupt aux indices.  */
   if (aux_index >= (debug_info->fdr + fd)->caux)
     {
-      complain (&index_complaint, sym_name);
+      index_complaint (sym_name);
       return mdebug_type_int;
     }
   ax += aux_index;
@@ -1462,7 +1412,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
   (*debug_swap->swap_tir_in) (bigend, &ax->a_ti, t);
   if (t->bt >= (sizeof (map_bt) / sizeof (*map_bt)))
     {
-      complain (&basic_type_complaint, t->bt, sym_name);
+      basic_type_complaint (t->bt, sym_name);
       return mdebug_type_int;
     }
   if (map_bt[t->bt])
@@ -1501,7 +1451,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  type_code = TYPE_CODE_ERROR;
 	  break;
 	default:
-	  complain (&basic_type_complaint, t->bt, sym_name);
+	  basic_type_complaint (t->bt, sym_name);
 	  return mdebug_type_int;
 	}
     }
@@ -1527,7 +1477,8 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  else if (t->bt == btEnum)
 	    ;
 	  else
-	    complain (&bad_fbitfield_complaint, sym_name);
+	    complaint (&symfile_complaints, "can't handle TIR fBitfield for %s",
+		       sym_name);
 	}
       else
 	*bs = width;
@@ -1555,7 +1506,8 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 
       if (rf == -1)
 	{
-	  complain (&bad_indirect_xref_complaint, sym_name);
+	  complaint (&symfile_complaints,
+		     "unable to cross ref btIndirect for %s", sym_name);
 	  return mdebug_type_int;
 	}
       xref_fh = get_rfd (fd, rf);
@@ -1595,7 +1547,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  && TYPE_CODE (tp) != TYPE_CODE_UNION
 	  && TYPE_CODE (tp) != TYPE_CODE_ENUM)
 	{
-	  complain (&unexpected_type_code_complaint, sym_name);
+	  unexpected_type_code_complaint (sym_name);
 	}
       else
 	{
@@ -1609,7 +1561,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	      || (TYPE_CODE (tp) != TYPE_CODE_ENUM
 		  && type_code == TYPE_CODE_ENUM))
 	    {
-	      complain (&bad_tag_guess_complaint, sym_name);
+	      bad_tag_guess_complaint (sym_name);
 	    }
 
 	  if (TYPE_CODE (tp) != type_code)
@@ -1646,7 +1598,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
          are corrupted.  */
       if (TYPE_CODE (tp) != TYPE_CODE_RANGE)
 	{
-	  complain (&unexpected_type_code_complaint, sym_name);
+	  unexpected_type_code_complaint (sym_name);
 	}
       else
 	{
@@ -1654,7 +1606,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	     exception is if we guessed wrong re struct/union/enum. */
 	  if (TYPE_CODE (tp) != type_code)
 	    {
-	      complain (&bad_tag_guess_complaint, sym_name);
+	      bad_tag_guess_complaint (sym_name);
 	      TYPE_CODE (tp) = type_code;
 	    }
 	  if (TYPE_NAME (tp) == NULL || !STREQ (TYPE_NAME (tp), name))
@@ -1670,7 +1622,8 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
       ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
       if (tp == (struct type *) NULL)
 	{
-	  complain (&unable_to_cross_ref_complaint, sym_name);
+	  complaint (&symfile_complaints,
+		     "unable to cross ref btTypedef for %s", sym_name);
 	  tp = mdebug_type_int;
 	}
     }
@@ -1720,7 +1673,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 
   /* Complain for illegal continuations due to corrupt aux entries.  */
   if (t->continued)
-    complain (&bad_continued_complaint, sym_name);
+    complaint (&symfile_complaints, "illegal TIR continued for %s", sym_name);
 
   return tp;
 }
@@ -1782,7 +1735,8 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
          else due to corrupt aux entries.  */
       if (TYPE_CODE (indx) != TYPE_CODE_INT)
 	{
-	  complain (&array_index_type_complaint, sym_name);
+	  complaint (&symfile_complaints,
+		     "illegal array index type for %s, assuming int", sym_name);
 	  indx = mdebug_type_int;
 	}
 
@@ -1832,7 +1786,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
       return 0;
 
     default:
-      complain (&unknown_type_qual_complaint, tq);
+      complaint (&symfile_complaints, "unknown type qualifier 0x%x", tq);
       return 0;
     }
 }
@@ -1867,7 +1821,9 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 	{
 	  /* Static procedure at address pr->adr.  Sigh. */
 	  /* FIXME-32x64.  assuming pr->adr fits in long.  */
-	  complain (&pdr_static_symbol_complaint, (unsigned long) pr->adr);
+	  complaint (&symfile_complaints,
+		     "can't handle PDR for static proc at 0x%lx",
+		     (unsigned long) pr->adr);
 	  return;
 	}
       else
@@ -1927,7 +1883,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
     }
   else
     {
-      complain (&pdr_for_nonsymbol_complaint, sh_name);
+      complaint (&symfile_complaints, "PDR for %s, but no symbol", sh_name);
 #if 1
       return;
 #else
@@ -1975,7 +1931,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
          to make backtrace through setjmp work.  */
       if (e->pdr.pcreg == 0 && STREQ (sh_name, "setjmp"))
 	{
-	  complain (&bad_setjmp_pdr_complaint, 0);
+	  complaint (&symfile_complaints, "fixing bad setjmp PDR from libc");
 	  e->pdr.pcreg = RA_REGNUM;
 	  e->pdr.regmask = 0x80000000;
 	  e->pdr.regoffset = -4;
@@ -2172,7 +2128,9 @@ parse_lines (FDR *fh, PDR *pr, struct linetable *lt, int maxlines,
 	     with corrupt binaries.  */
 	  if (lt->nitems >= maxlines)
 	    {
-	      complain (&bad_linetable_guess_complaint, fdr_name (fh));
+	      complaint (&symfile_complaints,
+			 "guessed size of linetable for %s incorrectly",
+			 fdr_name (fh));
 	      break;
 	    }
 	  k = add_line (lt, lineno, l, k);
@@ -2181,6 +2139,14 @@ parse_lines (FDR *fh, PDR *pr, struct linetable *lt, int maxlines,
     }
 }
 
+static void
+function_outside_compilation_unit_complaint (const char *arg1)
+{
+  complaint (&symfile_complaints,
+	     "function `%s' appears to be defined outside of all compilation units",
+	     arg1);
+}
+
 /* Master parsing procedure for first-pass reading of file symbols
    into a partial_symtab.  */
 
@@ -2357,13 +2323,16 @@ parse_partial_symbols (struct objfile *objfile)
          external symbols.  */
       if (ext_in->ifd < -1 || ext_in->ifd >= hdr->ifdMax)
 	{
-	  complain (&bad_ext_ifd_complaint, ext_in->ifd, hdr->ifdMax);
+	  complaint (&symfile_complaints,
+		     "bad ifd for external symbol: %d (max %ld)", ext_in->ifd,
+		     hdr->ifdMax);
 	  continue;
 	}
       if (ext_in->asym.iss < 0 || ext_in->asym.iss >= hdr->issExtMax)
 	{
-	  complain (&bad_ext_iss_complaint, ext_in->asym.iss,
-		    hdr->issExtMax);
+	  complaint (&symfile_complaints,
+		     "bad iss for external symbol: %ld (max %ld)",
+		     ext_in->asym.iss, hdr->issExtMax);
 	  continue;
 	}
 
@@ -2489,7 +2458,7 @@ parse_partial_symbols (struct objfile *objfile)
 	  /* Fall through.  */
 	default:
 	  ms_type = mst_unknown;
-	  complain (&unknown_ext_complaint, name);
+	  unknown_ext_complaint (name);
 	}
       if (!ECOFF_IN_ELF (cur_bfd))
 	prim_record_minimal_symbol (name, svalue, ms_type, objfile);
@@ -2721,9 +2690,6 @@ parse_partial_symbols (struct objfile *objfile)
 
 		switch (type_code)
 		  {
-		    static struct deprecated_complaint function_outside_compilation_unit = {
-		      "function `%s' appears to be defined outside of all compilation units", 0, 0
-		    };
 		    char *p;
 		    /*
 		     * Standard, external, non-debugger, symbols
@@ -3126,7 +3092,7 @@ parse_partial_symbols (struct objfile *objfile)
 			    char *name = xmalloc (name_len + 1);
 			    memcpy (name, namestring, name_len);
 			    name[name_len] = '\0';
-			    complain (&function_outside_compilation_unit, name);
+			    function_outside_compilation_unit_complaint (name);
 			    xfree (name);
 			  }
 			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
@@ -3147,7 +3113,7 @@ parse_partial_symbols (struct objfile *objfile)
 			    char *name = xmalloc (name_len + 1);
 			    memcpy (name, namestring, name_len);
 			    name[name_len] = '\0';
-			    complain (&function_outside_compilation_unit, name);
+			    function_outside_compilation_unit_complaint (name);
 			    xfree (name);
 			  }
 			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
@@ -3198,7 +3164,8 @@ parse_partial_symbols (struct objfile *objfile)
 			   time searching to the end of every string looking for
 			   a backslash.  */
 
-			complain (&unknown_symchar_complaint, p[1]);
+			complaint (&symfile_complaints,
+				   "unknown symbol descriptor `%c'", p[1]);
 
 			/* Ignore it; perhaps it is an extension that we don't
 			   know about.  */
@@ -3259,8 +3226,8 @@ parse_partial_symbols (struct objfile *objfile)
 		  default:
 		    /* If we haven't found it yet, ignore it.  It's probably some
 		       new type we don't know about yet.  */
-		    complain (&unknown_symtype_complaint,
-			      local_hex_string (type_code)); /*CUR_SYMBOL_TYPE*/
+		    complaint (&symfile_complaints, "unknown symbol type %s",
+			       local_hex_string (type_code)); /*CUR_SYMBOL_TYPE*/
 		    continue;
 		  }
 		if (stabstring
@@ -3365,7 +3332,7 @@ parse_partial_symbols (struct objfile *objfile)
 		    {
 		      /* Should not happen, but does when cross-compiling
 		         with the MIPS compiler.  FIXME -- pull later.  */
-		      complain (&index_complaint, name);
+		      index_complaint (name);
 		      new_sdx = cur_sdx + 1;	/* Don't skip at all */
 		    }
 		  else
@@ -3378,7 +3345,9 @@ parse_partial_symbols (struct objfile *objfile)
 		  if (new_sdx <= cur_sdx)
 		    {
 		      /* This should not happen either... FIXME.  */
-		      complain (&aux_index_complaint, name);
+		      complaint (&symfile_complaints,
+				 "bad proc end in aux found from symbol %s",
+				 name);
 		      new_sdx = cur_sdx + 1;	/* Don't skip backward */
 		    }
 
@@ -3457,7 +3426,8 @@ parse_partial_symbols (struct objfile *objfile)
 		  if (new_sdx <= cur_sdx)
 		    {
 		      /* This happens with the Ultrix kernel. */
-		      complain (&block_index_complaint, name);
+		      complaint (&symfile_complaints,
+				 "bad aux index at block symbol %s", name);
 		      new_sdx = cur_sdx + 1;	/* Don't skip backward */
 		    }
 		  cur_sdx = new_sdx;
@@ -3477,8 +3447,9 @@ parse_partial_symbols (struct objfile *objfile)
 		default:
 		  /* Both complaints are valid:  one gives symbol name,
 		     the other the offending symbol type.  */
-		  complain (&unknown_sym_complaint, name);
-		  complain (&unknown_st_complaint, sh.st);
+		  complaint (&symfile_complaints, "unknown local symbol %s",
+			     name);
+		  complaint (&symfile_complaints, "with type %d", sh.st);
 		  cur_sdx++;
 		  continue;
 		}
@@ -3547,8 +3518,7 @@ parse_partial_symbols (struct objfile *objfile)
 		  class = LOC_LABEL;
 		  break;
 		default:
-		  complain (&unknown_ext_complaint,
-			    debug_info->ssext + psh->iss);
+		  unknown_ext_complaint (debug_info->ssext + psh->iss);
 		  /* Fall through, pretend it's global.  */
 		case stGlobal:
 		  /* Global common symbols are resolved by the runtime loader,
@@ -3645,7 +3615,7 @@ parse_partial_symbols (struct objfile *objfile)
 			  &rh);
 	  if (rh < 0 || rh >= hdr->ifdMax)
 	    {
-	      complain (&bad_file_number_complaint, rh);
+	      complaint (&symfile_complaints, "bad file number %ld", rh);
 	      continue;
 	    }
 
@@ -3952,7 +3922,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 	    /* These are generated by gcc-2.x, do not complain */
 	    ;
 	  else
-	    complain (&stab_unknown_complaint, name);
+	    complaint (&symfile_complaints, "unknown stabs symbol %s", name);
 	}
 
       if (! last_symtab_ended)
@@ -4249,8 +4219,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp, enum type_code type_cod
     {
       /* File indirect entry is corrupt.  */
       *pname = "<illegal>";
-      complain (&bad_rfd_entry_complaint,
-		sym_name, xref_fd, rn->index);
+      bad_rfd_entry_complaint (sym_name, xref_fd, rn->index);
       return result;
     }
 
@@ -4274,8 +4243,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp, enum type_code type_cod
     {
       /* File indirect entry is corrupt.  */
       *pname = "<illegal>";
-      complain (&bad_rfd_entry_complaint,
-		sym_name, xref_fd, rn->index);
+      bad_rfd_entry_complaint (sym_name, xref_fd, rn->index);
       return result;
     }
 
@@ -4311,7 +4279,8 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp, enum type_code type_cod
 					+ fh->iauxBase + sh.index)->a_ti,
 				      &tir);
 	  if (tir.tq0 != tqNil)
-	    complain (&illegal_forward_tq0_complaint, sym_name);
+	    complaint (&symfile_complaints,
+		       "illegal tq0 in forward typedef for %s", sym_name);
 	  switch (tir.bt)
 	    {
 	    case btVoid:
@@ -4348,7 +4317,9 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp, enum type_code type_cod
 	      break;
 
 	    default:
-	      complain (&illegal_forward_bt_complaint, tir.bt, sym_name);
+	      complaint (&symfile_complaints,
+			 "illegal bt %d in forward typedef for %s", tir.bt,
+			 sym_name);
 	      *tpp = init_type (type_code, 0, 0, (char *) NULL,
 				current_objfile);
 	      break;

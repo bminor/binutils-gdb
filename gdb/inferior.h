@@ -32,6 +32,9 @@ struct regcache;
 /* For enum target_signal.  */
 #include "target.h"
 
+/* For struct frame_id.  */
+#include "frame.h"
+
 /* Structure in which to save the status of the inferior.  Create/Save
    through "save_inferior_status", restore through
    "restore_inferior_status".
@@ -234,14 +237,6 @@ extern void terminal_init_inferior_with_pgrp (int pgrp);
 
 extern int attach (int);
 
-#if !defined(REQUIRE_ATTACH)
-#define REQUIRE_ATTACH attach
-#endif
-
-#if !defined(REQUIRE_DETACH)
-#define REQUIRE_DETACH(pid,siggnal) detach (siggnal)
-#endif
-
 extern void detach (int);
 
 /* PTRACE method of waiting for inferior process.  */
@@ -269,8 +264,6 @@ extern void fork_inferior (char *, char *, char **,
 			   void (*)(void),
 			   void (*)(int), void (*)(void), char *);
 
-
-extern void clone_and_follow_inferior (int, int *);
 
 extern void startup_inferior (int);
 
@@ -302,6 +295,8 @@ extern int signal_pass_update (int, int);
 
 extern void get_last_target_status(ptid_t *ptid,
                                    struct target_waitstatus *status);
+
+extern void follow_inferior_reset_breakpoints (void);
 
 /* From infcmd.c */
 
@@ -371,7 +366,7 @@ extern CORE_ADDR step_range_end;	/* Exclusive */
    This is how we know when we step into a subroutine call,
    and how to set the frame for the breakpoint used to step out.  */
 
-extern CORE_ADDR step_frame_address;
+extern struct frame_id step_frame_id;
 
 /* Our notion of the current stack pointer.  */
 
@@ -424,14 +419,6 @@ extern int attach_flag;
 #define BEFORE_TEXT_END 2
 #define AFTER_TEXT_END 3
 #define AT_ENTRY_POINT 4
-
-#if !defined (USE_GENERIC_DUMMY_FRAMES)
-#define USE_GENERIC_DUMMY_FRAMES 0
-#endif
-
-#if !defined (CALL_DUMMY_LOCATION)
-#define CALL_DUMMY_LOCATION ON_STACK
-#endif /* No CALL_DUMMY_LOCATION.  */
 
 #if !defined (CALL_DUMMY_ADDRESS)
 #define CALL_DUMMY_ADDRESS() (internal_error (__FILE__, __LINE__, "CALL_DUMMY_ADDRESS"), 0)
@@ -488,37 +475,41 @@ extern int attach_flag;
 
 /* Are we in a call dummy? */
 
-extern int pc_in_call_dummy_before_text_end (CORE_ADDR pc, CORE_ADDR sp,
-					     CORE_ADDR frame_address);
-#if !GDB_MULTI_ARCH
-#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == BEFORE_TEXT_END
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_before_text_end (pc, sp, frame_address)
-#endif /* Before text_end.  */
-#endif
+/* NOTE: cagney/2002-11-24: Targets need to both switch to generic
+   dummy frames, and use generic_pc_in_call_dummy().  The generic
+   version should be able to handle all cases since that code works by
+   saving the address of the dummy's breakpoint (where ever it is).  */
 
-extern int pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
-					    CORE_ADDR frame_address);
-#if !GDB_MULTI_ARCH
-#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AFTER_TEXT_END
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_after_text_end (pc, sp, frame_address)
-#endif
-#endif
+extern int deprecated_pc_in_call_dummy_before_text_end (CORE_ADDR pc,
+							CORE_ADDR sp,
+							CORE_ADDR frame_address);
 
-extern int pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp,
-				      CORE_ADDR frame_address);
-#if !GDB_MULTI_ARCH
-#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == ON_STACK
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_on_stack (pc, sp, frame_address)
-#endif
-#endif
+/* NOTE: cagney/2002-11-24: Targets need to both switch to generic
+   dummy frames, and use generic_pc_in_call_dummy().  The generic
+   version should be able to handle all cases since that code works by
+   saving the address of the dummy's breakpoint (where ever it is).  */
 
-extern int pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
-					    CORE_ADDR frame_address);
-#if !GDB_MULTI_ARCH
-#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AT_ENTRY_POINT
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
-#endif
-#endif
+extern int deprecated_pc_in_call_dummy_after_text_end (CORE_ADDR pc,
+						       CORE_ADDR sp,
+						       CORE_ADDR frame_address);
+
+/* NOTE: cagney/2002-11-24: Targets need to both switch to generic
+   dummy frames, and use generic_pc_in_call_dummy().  The generic
+   version should be able to handle all cases since that code works by
+   saving the address of the dummy's breakpoint (where ever it is).  */
+
+extern int deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc,
+						 CORE_ADDR sp,
+						 CORE_ADDR frame_address);
+
+/* NOTE: cagney/2002-11-24: Targets need to both switch to generic
+   dummy frames, and use generic_pc_in_call_dummy().  The generic
+   version should be able to handle all cases since that code works by
+   saving the address of the dummy's breakpoint (where ever it is).  */
+
+extern int deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc,
+						       CORE_ADDR sp,
+						       CORE_ADDR frame_address);
 
 /* It's often not enough for our clients to know whether the PC is merely
    somewhere within the call dummy.  They may need to know whether the
@@ -539,7 +530,7 @@ extern int pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
  */
 #if !defined(CALL_DUMMY_HAS_COMPLETED)
 #define CALL_DUMMY_HAS_COMPLETED(pc, sp, frame_address) \
-  PC_IN_CALL_DUMMY((pc), (sp), (frame_address))
+  DEPRECATED_PC_IN_CALL_DUMMY((pc), (sp), (frame_address))
 #endif
 
 /* If STARTUP_WITH_SHELL is set, GDB's "run"

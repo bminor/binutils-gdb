@@ -1,6 +1,6 @@
 /* BFD back-end for Motorola 88000 COFF "Binary Compatability Standard" files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1998, 1999, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
-static boolean m88k_is_local_label_name PARAMS ((bfd *, const char *));
+static bfd_boolean m88k_is_local_label_name PARAMS ((bfd *, const char *));
 static bfd_reloc_status_type m88k_special_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static void rtype2howto PARAMS ((arelent *, struct internal_reloc *));
@@ -44,7 +44,7 @@ static void reloc_processing
 
 #define coff_bfd_is_local_label_name m88k_is_local_label_name
 
-static boolean
+static bfd_boolean
 m88k_is_local_label_name (abfd, name)
      bfd *abfd ATTRIBUTE_UNUSED;
      const char *name;
@@ -152,85 +152,85 @@ static reloc_howto_type howto_table[] =
 	 02,				/* rightshift */
 	 1,				/* size (0 = byte, 1 = short, 2 = long) */
 	 16,				/* bitsize */
-	 true,				/* pc_relative */
+	 TRUE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_signed,	/* complain_on_overflow */
 	 m88k_special_reloc,		/* special_function */
 	 "PCR16L",			/* name */
-	 false,				/* partial_inplace */
+	 FALSE,				/* partial_inplace */
 	 0x0000ffff,			/* src_mask */
 	 0x0000ffff,			/* dst_mask */
-	 true),				/* pcrel_offset */
+	 TRUE),				/* pcrel_offset */
 
   HOWTO (R_PCR26L,			/* type */
 	 02,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 26,				/* bitsize */
-	 true,				/* pc_relative */
+	 TRUE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_signed,	/* complain_on_overflow */
 	 m88k_special_reloc,		/* special_function */
 	 "PCR26L",			/* name */
-	 false,				/* partial_inplace */
+	 FALSE,				/* partial_inplace */
 	 0x03ffffff,			/* src_mask */
 	 0x03ffffff,			/* dst_mask */
-	 true),				/* pcrel_offset */
+	 TRUE),				/* pcrel_offset */
 
   HOWTO (R_VRT16,			/* type */
 	 00,				/* rightshift */
 	 1,				/* size (0 = byte, 1 = short, 2 = long) */
 	 16,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 m88k_special_reloc,		/* special_function */
 	 "VRT16",			/* name */
-	 false,				/* partial_inplace */
+	 FALSE,				/* partial_inplace */
 	 0x0000ffff,			/* src_mask */
 	 0x0000ffff,			/* dst_mask */
-	 true),				/* pcrel_offset */
+	 TRUE),				/* pcrel_offset */
 
   HOWTO (R_HVRT16,			/* type */
 	 16,				/* rightshift */
 	 1,				/* size (0 = byte, 1 = short, 2 = long) */
 	 16,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 m88k_special_reloc,		/* special_function */
 	 "HVRT16",			/* name */
-	 false,				/* partial_inplace */
+	 FALSE,				/* partial_inplace */
 	 0x0000ffff,			/* src_mask */
 	 0x0000ffff,			/* dst_mask */
-	 true),				/* pcrel_offset */
+	 TRUE),				/* pcrel_offset */
 
   HOWTO (R_LVRT16,			/* type */
 	 00,				/* rightshift */
 	 1,				/* size (0 = byte, 1 = short, 2 = long) */
 	 16,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 m88k_special_reloc,		/* special_function */
 	 "LVRT16",			/* name */
-	 false,				/* partial_inplace */
+	 FALSE,				/* partial_inplace */
 	 0x0000ffff,			/* src_mask */
 	 0x0000ffff,			/* dst_mask */
-	 true),				/* pcrel_offset */
+	 TRUE),				/* pcrel_offset */
 
   HOWTO (R_VRT32,			/* type */
 	 00,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 32,				/* bitsize */
-	 false,				/* pc_relative */
+	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 m88k_special_reloc,		/* special_function */
 	 "VRT32",			/* name */
-	 false,				/* partial_inplace */
+	 FALSE,				/* partial_inplace */
 	 0xffffffff,			/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 true),				/* pcrel_offset */
+	 TRUE),				/* pcrel_offset */
 };
 
 /* Code to turn an external r_type into a pointer to an entry in the

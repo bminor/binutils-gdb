@@ -4,8 +4,8 @@
    in the Stratus FTX/Golf Object File Format (SED-1762) dated
    February 1994.
 
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
+   2002 Free Software Foundation, Inc.
 
    Written by:
 
@@ -42,15 +42,15 @@ int elf32_hppa_setup_section_lists
 void elf32_hppa_next_input_section
   PARAMS ((struct bfd_link_info *, asection *));
 
-boolean elf32_hppa_size_stubs
-  PARAMS ((bfd *, bfd *, struct bfd_link_info *, boolean, bfd_signed_vma,
+bfd_boolean elf32_hppa_size_stubs
+  PARAMS ((bfd *, bfd *, struct bfd_link_info *, bfd_boolean, bfd_signed_vma,
 	   asection * (*) PARAMS ((const char *, asection *)),
 	   void (*) PARAMS ((void))));
 
-boolean elf32_hppa_set_gp
+bfd_boolean elf32_hppa_set_gp
   PARAMS ((bfd *, struct bfd_link_info *));
 
-boolean elf32_hppa_build_stubs
+bfd_boolean elf32_hppa_build_stubs
   PARAMS ((struct bfd_link_info *));
 
 elf_hppa_reloc_type elf32_hppa_reloc_final_type

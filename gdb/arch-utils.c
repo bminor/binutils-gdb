@@ -313,13 +313,6 @@ no_op_reg_to_regnum (int reg)
   return reg;
 }
 
-/* For use by frame_args_address and frame_locals_address.  */
-CORE_ADDR
-default_frame_address (struct frame_info *fi)
-{
-  return fi->frame;
-}
-
 /* Default prepare_to_procced().  */
 int
 default_prepare_to_proceed (int select_it)
@@ -380,21 +373,22 @@ generic_prepare_to_proceed (int select_it)
   
 }
 
-void
+CORE_ADDR
 init_frame_pc_noop (int fromleaf, struct frame_info *prev)
 {
-  return;
+  /* Do nothing, implies return the same PC value.  */
+  return get_frame_pc (prev);
 }
 
-void
+CORE_ADDR
 init_frame_pc_default (int fromleaf, struct frame_info *prev)
 {
   if (fromleaf)
-    prev->pc = SAVED_PC_AFTER_CALL (prev->next);
-  else if (prev->next != NULL)
-    prev->pc = FRAME_SAVED_PC (prev->next);
+    return SAVED_PC_AFTER_CALL (get_next_frame (prev));
+  else if (get_next_frame (prev) != NULL)
+    return FRAME_SAVED_PC (get_next_frame (prev));
   else
-    prev->pc = read_pc ();
+    return read_pc ();
 }
 
 void

@@ -674,7 +674,9 @@ _bfd_vms_slurp_gsd (abfd, objtype)
 
 	    /* save symbol in vms_symbol_table  */
 
-	    entry = (vms_symbol_entry *) bfd_hash_lookup (PRIV(vms_symbol_table), symbol->name, true, false);
+	    entry = (vms_symbol_entry *) bfd_hash_lookup (PRIV(vms_symbol_table),
+							  symbol->name,
+							  TRUE, FALSE);
 	    if (entry == (vms_symbol_entry *)NULL)
 	      {
 		bfd_set_error (bfd_error_no_memory);

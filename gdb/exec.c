@@ -36,6 +36,7 @@
 #endif
 
 #include <fcntl.h>
+#include <readline/readline.h>
 #include "gdb_string.h"
 
 #include "gdbcore.h"
@@ -481,10 +482,10 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	     struct mem_attrib *attrib,
 	     struct target_ops *target)
 {
-  boolean res;
+  int res;
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
-  boolean (*xfer_fn) (bfd *, sec_ptr, PTR, file_ptr, bfd_size_type);
+  int (*xfer_fn) (bfd *, sec_ptr, PTR, file_ptr, bfd_size_type);
   asection *section = NULL;
 
   if (len <= 0)
@@ -544,6 +545,7 @@ void
 print_section_info (struct target_ops *t, bfd *abfd)
 {
   struct section_table *p;
+  char *fmt = TARGET_ADDR_BIT <= 32 ? "08l" : "016l";
 
   printf_filtered ("\t`%s', ", bfd_get_filename (abfd));
   wrap_here ("        ");
@@ -556,12 +558,11 @@ print_section_info (struct target_ops *t, bfd *abfd)
     }
   for (p = t->to_sections; p < t->to_sections_end; p++)
     {
-      /* FIXME-32x64 need a print_address_numeric with field width */
-      printf_filtered ("\t%s", local_hex_string_custom ((unsigned long) p->addr, "08l"));
-      printf_filtered (" - %s", local_hex_string_custom ((unsigned long) p->endaddr, "08l"));
+      printf_filtered ("\t%s", local_hex_string_custom (p->addr, fmt));
+      printf_filtered (" - %s", local_hex_string_custom (p->endaddr, fmt));
       if (info_verbose)
 	printf_filtered (" @ %s",
-			 local_hex_string_custom ((unsigned long) p->the_bfd_section->filepos, "08l"));
+			 local_hex_string_custom (p->the_bfd_section->filepos, "08l"));
       printf_filtered (" is %s", bfd_section_name (p->bfd, p->the_bfd_section));
       if (p->bfd != abfd)
 	{
@@ -714,14 +715,11 @@ Specify the filename of the executable file.";
   exec_ops.to_open = exec_open;
   exec_ops.to_close = exec_close;
   exec_ops.to_attach = find_default_attach;
-  exec_ops.to_require_attach = find_default_require_attach;
-  exec_ops.to_require_detach = find_default_require_detach;
   exec_ops.to_xfer_memory = xfer_memory;
   exec_ops.to_files_info = exec_files_info;
   exec_ops.to_insert_breakpoint = ignore;
   exec_ops.to_remove_breakpoint = ignore;
   exec_ops.to_create_inferior = find_default_create_inferior;
-  exec_ops.to_clone_and_follow_inferior = find_default_clone_and_follow_inferior;
   exec_ops.to_stratum = file_stratum;
   exec_ops.to_has_memory = 1;
   exec_ops.to_make_corefile_notes = exec_make_note_section;

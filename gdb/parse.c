@@ -830,7 +830,7 @@ length_of_subexp (register struct expression *expr, register int endpos)
       args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
       break;
 
-    case OP_MSGCALL:		/* Objective C message (method) call */
+    case OP_OBJC_MSGCALL:	/* Objective C message (method) call */
       oplen = 4;
       args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
       break;
@@ -866,8 +866,8 @@ length_of_subexp (register struct expression *expr, register int endpos)
       /* fall through */
     case OP_M2_STRING:
     case OP_STRING:
-    case OP_NSSTRING:		/* Objective C Foundation Class NSString constant */
-    case OP_SELECTOR:		/* Objective C "@selector" pseudo-op */
+    case OP_OBJC_NSSTRING:	/* Objective C Foundation Class NSString constant */
+    case OP_OBJC_SELECTOR:	/* Objective C "@selector" pseudo-op */
     case OP_NAME:
     case OP_EXPRSTRING:
       oplen = longest_to_int (expr->elts[endpos - 2].longconst);
@@ -906,7 +906,7 @@ length_of_subexp (register struct expression *expr, register int endpos)
 
       /* C++ */
     case OP_THIS:
-    case OP_SELF:
+    case OP_OBJC_SELF:
       oplen = 2;
       break;
 
@@ -975,7 +975,7 @@ prefixify_subexp (register struct expression *inexpr,
       args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);
       break;
 
-    case OP_MSGCALL:		/* Objective C message (method) call */
+    case OP_OBJC_MSGCALL:	/* Objective C message (method) call */
       oplen = 4;
       args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);
       break;
@@ -1010,8 +1010,8 @@ prefixify_subexp (register struct expression *inexpr,
       /* fall through */
     case OP_M2_STRING:
     case OP_STRING:
-    case OP_NSSTRING:		/* Objective C Foundation Class NSString constant */
-    case OP_SELECTOR:		/* Objective C "@selector" pseudo-op */
+    case OP_OBJC_NSSTRING:	/* Objective C Foundation Class NSString constant */
+    case OP_OBJC_SELECTOR:	/* Objective C "@selector" pseudo-op */
     case OP_NAME:
     case OP_EXPRSTRING:
       oplen = longest_to_int (inexpr->elts[inend - 2].longconst);
@@ -1050,7 +1050,7 @@ prefixify_subexp (register struct expression *inexpr,
 
       /* C++ */
     case OP_THIS:
-    case OP_SELF:
+    case OP_OBJC_SELF:
       oplen = 2;
       break;
 

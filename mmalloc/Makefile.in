@@ -64,6 +64,9 @@ MAKEINFO=makeinfo
 
 SET_TEXINPUTS = TEXINPUTS=${TEXIDIR}:.:$(srcdir):$(READLINE_DIR):$$TEXINPUTS
 
+# Files which should be generated via 'info' and installed by 'install-info'
+INFO_DEPS = mmalloc.info
+
 # The TeX formatter
 TEX = tex
 
@@ -96,7 +99,7 @@ STAGESTUFF =	$(TARGETLIB) *.o
 
 all:		$(TARGETLIB)
 
-info: mmalloc.info
+info: $(INFO_DEPS)
 dvi: mmalloc.dvi
 clean-info:
 installcheck:
@@ -110,13 +113,40 @@ mmalloc.dvi: mmalloc.texi
 	rm -f mmalloc.?? mmalloc.??s mmalloc.log mmalloc.aux mmalloc.toc
 
 install-info: info
-	$(SHELL) $(srcdir)/../mkinstalldirs $(infodir)
-	if test ! -f mmalloc.info ; then cd $(srcdir); fi; \
-	$(INSTALL_DATA) mmalloc.info $(infodir)/mmalloc.info
+	@list='$(INFO_DEPS)'; \
+	for file in $$list; do \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  for ifile in `cd $$d && echo $$file $$file-[0-9] $$file-[0-9][0-9]`; do \
+	    if test -f $$d/$$ifile; then \
+	      echo " $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile"; \
+	      $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile; \
+	    else : ; fi; \
+	  done; \
+	done
+	$(POST_INSTALL)
 	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
-	  echo " install-info --info-dir=$(infodir) $(infodir)/mmalloc.info";\
-	  install-info --info-dir=$(infodir) $(infodir)/mmalloc.info || :;\
+	  list='$(INFO_DEPS)'; \
+	  for file in $$list; do \
+	    echo " install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file";\
+	    install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file || :;\
+	  done; \
 	else : ; fi
+
+uninstall-info:
+	$(PRE_UNINSTALL)
+	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
+	  ii=yes; \
+	else ii=; fi; \
+	list='$(INFO_DEPS)'; \
+	for file in $$list; do \
+	  test -z "$$ii" \
+	    || install-info --info-dir=$(DESTDIR)$(infodir) --remove $$file; \
+	done
+	$(NORMAL_UNINSTALL)
+	list='$(INFO_DEPS)'; \
+	for file in $$list; do \
+	  (cd $(DESTDIR)$(infodir) && rm -f $$file $$file-[0-9] $$file-[0-9][0-9]); \
+	done
 
 check: test1.c
 #	$(CC) -g $(srcdir)/test1.c libmmalloc.a
@@ -125,10 +155,12 @@ check: test1.c
 # for gdb, perhaps).
 #	./a.out
 
-install:	all
+install:	all install-info
 		$(INSTALL_DATA) $(TARGETLIB) $(libdir)/$(TARGETLIB)n
 		$(RANLIB) $(libdir)/$(TARGETLIB)n
 		mv -f $(libdir)/$(TARGETLIB)n $(libdir)/$(TARGETLIB)
+
+uninstall:	uninstall-info
 
 $(TARGETLIB):	$(TARGETOBJS)
 		$(RM) -rf $@

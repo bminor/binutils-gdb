@@ -456,6 +456,17 @@ static struct core_fns linux_elf_core_fns = {
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 #endif
 
+/* SSE register?  */
+/* FIXME: cagney/2002-11-15: Once the i386 and x86-64 are integrated,
+   this will go.  */
+
+int
+i386_sse_regnum_p (int regnum)
+{
+  return (regnum < NUM_REGS
+	  && (XMM0_REGNUM <= (regnum) && (regnum) < MXCSR_REGNUM));
+}
+
 /* Return the address of register REGNUM.  BLOCKEND is the value of
    u.u_ar0, which should point to the registers.  */
 CORE_ADDR

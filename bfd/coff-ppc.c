@@ -54,7 +54,7 @@ Boston, MA 02111-1307, USA.  */
 
 /* This file is compiled more than once, but we only compile the
    final_link routine once.  */
-extern boolean ppc_bfd_coff_final_link
+extern bfd_boolean ppc_bfd_coff_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 extern void dump_toc PARAMS ((PTR));
 
@@ -128,14 +128,14 @@ struct ppc_coff_link_hash_table
 static struct bfd_hash_entry *ppc_coff_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *,
 	   const char *));
-static boolean ppc_coff_link_hash_table_init
+static bfd_boolean ppc_coff_link_hash_table_init
   PARAMS ((struct ppc_coff_link_hash_table *, bfd *,
 	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
 				       struct bfd_hash_table *,
 				       const char *)));
 static struct bfd_link_hash_table *ppc_coff_link_hash_table_create
   PARAMS ((bfd *));
-static boolean coff_ppc_relocate_section
+static bfd_boolean coff_ppc_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
 static reloc_howto_type *coff_ppc_rtype_to_howto
@@ -184,7 +184,7 @@ ppc_coff_link_hash_newfunc (entry, table, string)
 
 /* Initialize a PE linker hash table.  */
 
-static boolean
+static bfd_boolean
 ppc_coff_link_hash_table_init (table, abfd, newfunc)
      struct ppc_coff_link_hash_table *table;
      bfd *abfd;
@@ -385,7 +385,7 @@ static bfd_reloc_status_type ppc_imglue_reloc PARAMS ((bfd *abfd,
 						       bfd *output_bfd,
 						       char **error));
 
-static boolean in_reloc_p PARAMS((bfd *abfd, reloc_howto_type *howto));
+static bfd_boolean in_reloc_p PARAMS((bfd *abfd, reloc_howto_type *howto));
 
 /* FIXME: It'll take a while to get through all of these. I only need a few to
    get us started, so those I'll make sure work. Those marked FIXME are either
@@ -433,15 +433,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                 /* rightshift */
 	 0,	                 /* size (0 = byte, 1 = short, 2 = long) */
 	 0,	                 /* bitsize */
-	 false,	                 /* pc_relative */
+	 FALSE,	                 /* pc_relative */
 	 0,	                 /* bitpos */
 	 complain_overflow_dont, /* dont complain_on_overflow */
 	 0,		         /* special_function */
 	 "ABSOLUTE",             /* name */
-	 false,	                 /* partial_inplace */
+	 FALSE,	                 /* partial_inplace */
 	 0x00,	 	         /* src_mask */
 	 0x00,        		 /* dst_mask */
-	 false),                 /* pcrel_offset */
+	 FALSE),                 /* pcrel_offset */
 
   /* IMAGE_REL_PPC_ADDR64 0x0001  64-bit address */
   /* Unused: */
@@ -449,15 +449,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	0,	                 /* rightshift */
 	3,	                 /* size (0 = byte, 1 = short, 2 = long) */
 	64,	                 /* bitsize */
-	false,	                 /* pc_relative */
+	FALSE,	                 /* pc_relative */
 	0,	                 /* bitpos */
 	complain_overflow_bitfield, 	 /* complain_on_overflow */
 	0,		         /* special_function */
 	"ADDR64",               /* name */
-	true,	                 /* partial_inplace */
+	TRUE,	                 /* partial_inplace */
 	MINUS_ONE,	 	 /* src_mask */
 	MINUS_ONE,        	 /* dst_mask */
-	false),                 /* pcrel_offset */
+	FALSE),                 /* pcrel_offset */
 
   /* IMAGE_REL_PPC_ADDR32 0x0002  32-bit address */
   /* Used: */
@@ -465,15 +465,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "ADDR32",              /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,            /* src_mask */
 	 0xffffffff,            /* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* IMAGE_REL_PPC_ADDR24 0x0003  26-bit address, shifted left 2 (branch absolute) */
   /* the LI field is in bit 6 through bit 29 is 24 bits, + 2 for the shift */
@@ -484,15 +484,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 26,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "ADDR24",              /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0x07fffffc,	        /* src_mask */
 	 0x07fffffc,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* IMAGE_REL_PPC_ADDR16 0x0004  16-bit address */
   /* Used: */
@@ -500,15 +500,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "ADDR16",              /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* IMAGE_REL_PPC_ADDR14 0x0005 */
   /*  16-bit address, shifted left 2 (load doubleword) */
@@ -518,15 +518,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 1,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "ADDR16",              /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* IMAGE_REL_PPC_REL24 0x0006 */
   /*   26-bit PC-relative offset, shifted left 2 (branch relative) */
@@ -535,15 +535,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 26,	                /* bitsize */
-	 true,	                /* pc_relative */
+	 TRUE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "REL24",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0x3fffffc,	        /* src_mask */
 	 0x3fffffc,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* IMAGE_REL_PPC_REL14 0x0007 */
   /*   16-bit PC-relative offset, shifted left 2 (br cond relative) */
@@ -554,15 +554,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 1,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "ADDR16",              /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 true),                 /* pcrel_offset */
+	 TRUE),                 /* pcrel_offset */
 
   /* IMAGE_REL_PPC_TOCREL16 0x0008 */
   /*   16-bit offset from TOC base */
@@ -571,15 +571,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 ppc_toc16_reloc,       /* special_function */
 	 "TOCREL16",            /* name */
-	 false,	                /* partial_inplace */
+	 FALSE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* IMAGE_REL_PPC_TOCREL14 0x0009 */
   /*   16-bit offset from TOC base, shifted left 2 (load doubleword) */
@@ -588,15 +588,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 1,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "TOCREL14",            /* name */
-	 false,	                /* partial_inplace */
+	 FALSE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* IMAGE_REL_PPC_ADDR32NB 0x000A */
   /*   32-bit addr w/ image base */
@@ -605,15 +605,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,                     /* special_function */
 	 "ADDR32NB",            /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
-	 false),                 /* pcrel_offset */
+	 FALSE),                 /* pcrel_offset */
 
   /* IMAGE_REL_PPC_SECREL 0x000B */
   /*   va of containing section (as in an image sectionhdr) */
@@ -622,15 +622,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc_secrel_reloc,      /* special_function */
 	 "SECREL",              /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
-	 true),                 /* pcrel_offset */
+	 TRUE),                 /* pcrel_offset */
 
   /* IMAGE_REL_PPC_SECTION 0x000C */
   /*   sectionheader number */
@@ -639,15 +639,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc_section_reloc,     /* special_function */
 	 "SECTION",             /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
-	 true),                 /* pcrel_offset */
+	 TRUE),                 /* pcrel_offset */
 
   /* IMAGE_REL_PPC_IFGLUE 0x000D */
   /*   substitute TOC restore instruction iff symbol is glue code */
@@ -656,15 +656,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "IFGLUE",              /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* IMAGE_REL_PPC_IMGLUE 0x000E */
   /*   symbol is glue code; virtual address is TOC restore instruction */
@@ -673,15 +673,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 32,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 ppc_imglue_reloc,      /* special_function */
 	 "IMGLUE",              /* name */
-	 false,	                /* partial_inplace */
+	 FALSE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
-	 false),                 /* pcrel_offset */
+	 FALSE),                 /* pcrel_offset */
 
   /* IMAGE_REL_PPC_SECREL16 0x000F */
   /*   va of containing section (limited to 16 bits) */
@@ -690,15 +690,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */
 	 "SECREL16",            /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 true),                 /* pcrel_offset */
+	 TRUE),                 /* pcrel_offset */
 
   /* IMAGE_REL_PPC_REFHI             0x0010 */
   /* Unused: */
@@ -706,15 +706,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc_refhi_reloc,	/* special_function */
 	 "REFHI",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
-	 false),                 /* pcrel_offset */
+	 FALSE),                 /* pcrel_offset */
 
   /* IMAGE_REL_PPC_REFLO             0x0011 */
   /* Unused: */
@@ -722,15 +722,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc_refhi_reloc,	/* special_function */
 	 "REFLO",               /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* IMAGE_REL_PPC_PAIR              0x0012 */
   /* Unused: */
@@ -738,15 +738,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc_pair_reloc,        /* special_function */
 	 "PAIR",                /* name */
-	 true,	                /* partial_inplace */
+	 TRUE,	                /* partial_inplace */
 	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
   /* IMAGE_REL_PPC_TOCREL16_DEFN 0x0013 */
   /*   16-bit offset from TOC base, without causing a definition */
@@ -755,15 +755,15 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 FALSE,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 0,                     /* special_function */
 	 "TOCREL16, TOCDEFN",   /* name */
-	 false,	                /* partial_inplace */
+	 FALSE,	                /* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
-	 false),                /* pcrel_offset */
+	 FALSE),                /* pcrel_offset */
 
 };
 
@@ -884,13 +884,13 @@ record_toc (toc_section, our_toc_offset, cat, name)
 
 #ifdef COFF_IMAGE_WITH_PE
 
-static boolean ppc_record_toc_entry
+static bfd_boolean ppc_record_toc_entry
   PARAMS ((bfd *, struct bfd_link_info *, asection *, int, enum toc_type));
 static void ppc_mark_symbol_as_glue
   PARAMS ((bfd *, int, struct internal_reloc *));
 
 /* record a toc offset against a symbol */
-static boolean
+static bfd_boolean
 ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
      bfd *abfd;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
@@ -922,7 +922,7 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 	  amt = (bfd_size_type) obj_raw_syment_count (abfd) * sizeof (int);
 	  local_syms = (int *) bfd_zalloc (abfd, amt);
 	  if (local_syms == 0)
-	    return false;
+	    return FALSE;
 	  obj_coff_local_toc_table (abfd) = local_syms;
 	  for (i = 0; i < obj_raw_syment_count (abfd); ++i)
 	    {
@@ -940,7 +940,7 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 	    {
 	      (*_bfd_error_handler) (_("TOC overflow"));
 	      bfd_set_error (bfd_error_file_too_big);
-	      return false;
+	      return FALSE;
 	    }
 	}
     }
@@ -960,12 +960,12 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 	    {
 	      (*_bfd_error_handler) (_("TOC overflow"));
 	      bfd_set_error (bfd_error_file_too_big);
-	      return false;
+	      return FALSE;
 	    }
 	}
     }
 
-  return true;
+  return TRUE;
 }
 
 /* record a toc offset against a symbol */
@@ -989,10 +989,10 @@ ppc_mark_symbol_as_glue(abfd, sym, rel)
 
 #endif /* COFF_IMAGE_WITH_PE */
 
-/* Return true if this relocation should
+/* Return TRUE if this relocation should
    appear in the output .reloc section.  */
 
-static boolean in_reloc_p(abfd, howto)
+static bfd_boolean in_reloc_p(abfd, howto)
      bfd * abfd ATTRIBUTE_UNUSED;
      reloc_howto_type *howto;
 {
@@ -1030,7 +1030,7 @@ pe_ppc_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 {
   /* the consth relocation comes in two parts, we have to remember
      the state between calls, in these variables */
-  static boolean part1_consth_active = false;
+  static bfd_boolean part1_consth_active = FALSE;
   static unsigned long part1_consth_value;
 
   unsigned long sym_value;
@@ -1052,7 +1052,7 @@ pe_ppc_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       /* Keep the state machine happy in case we're called again */
       if (r_type == IMAGE_REL_PPC_REFHI)
 	{
-	  part1_consth_active = true;
+	  part1_consth_active = TRUE;
 	  part1_consth_value  = 0;
 	}
       return(bfd_reloc_undefined);
@@ -1060,7 +1060,7 @@ pe_ppc_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 
   if ((part1_consth_active) && (r_type != IMAGE_REL_PPC_PAIR))
     {
-      part1_consth_active = false;
+      part1_consth_active = FALSE;
       *error_message = (char *) _("Missing PAIR");
       return(bfd_reloc_dangerous);
     }
@@ -1074,7 +1074,7 @@ pe_ppc_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 
 /* The reloc processing routine for the optimized COFF linker.  */
 
-static boolean
+static bfd_boolean
 coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 			   contents, relocs, syms, sections)
      bfd *output_bfd;
@@ -1088,7 +1088,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 {
   struct internal_reloc *rel;
   struct internal_reloc *relend;
-  boolean hihalf;
+  bfd_boolean hihalf;
   bfd_vma hihalf_val;
   asection *toc_section = 0;
   bfd_vma relocation;
@@ -1098,9 +1098,9 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
      thing.  The caller will take care of adjusting the reloc
      addresses and symbol indices.  */
   if (info->relocateable)
-    return true;
+    return TRUE;
 
-  hihalf = false;
+  hihalf = FALSE;
   hihalf_val = 0;
 
   rel = relocs;
@@ -1182,8 +1182,8 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.root.string, input_bfd, input_section,
-		      rel->r_vaddr - input_section->vma, true)))
-		return false;
+		      rel->r_vaddr - input_section->vma, TRUE)))
+		return FALSE;
 	    }
 	}
 
@@ -1197,7 +1197,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    (_("%s: unsupported relocation type 0x%02x"),
 	     bfd_archive_filename (input_bfd), r_type);
 	  bfd_set_error (bfd_error_bad_value);
-	  return false;
+	  return FALSE;
 	case IMAGE_REL_PPC_TOCREL16:
 	  {
 	    bfd_signed_vma our_toc_offset;
@@ -1224,7 +1224,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	     *  the 1 bit to tell us if we've written this particular toc
 	     *  entry out.
 	     */
-	    fixit = false;
+	    fixit = FALSE;
 	    if (h == 0)
 	      { /* it is a file local symbol */
 		int *local_toc_table;
@@ -1254,7 +1254,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 			       toc_section->contents + our_toc_offset);
 
 		    MARK_AS_WRITTEN(local_toc_table[symndx]);
-		    fixit = true;
+		    fixit = TRUE;
 		  }
 	      }
 	    else
@@ -1291,7 +1291,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 			   bfd_archive_filename (input_bfd), name,
 			   (unsigned long) our_toc_offset);
 			bfd_set_error (bfd_error_bad_value);
-			return false;
+			return FALSE;
 		      }
 
 		    record_toc (toc_section, our_toc_offset, pub,
@@ -1317,7 +1317,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		    MARK_AS_WRITTEN(h->toc_offset);
 		    /* The tricky part is that this is the address that */
 		    /* needs a .reloc entry for it */
-		    fixit = true;
+		    fixit = TRUE;
 		  }
 	      }
 
@@ -1348,7 +1348,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		   bfd_archive_filename (input_bfd),
 		   (unsigned long) toc_section->_raw_size);
 		bfd_set_error (bfd_error_bad_value);
-		return false;
+		return FALSE;
 	      }
 
 	    /* Now we know the relocation for this toc reference */
@@ -1423,7 +1423,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	      (_("%s: Out of order IMGLUE reloc for %s"),
 	       bfd_archive_filename (input_bfd), my_name);
 	    bfd_set_error (bfd_error_bad_value);
-	    return false;
+	    return FALSE;
 	  }
 
 	case IMAGE_REL_PPC_ADDR32NB:
@@ -1438,7 +1438,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		struct coff_link_hash_entry *myh;
 		myh = coff_link_hash_lookup (coff_hash_table (info),
 					     "__idata5_magic__",
-					     false, false, true);
+					     FALSE, FALSE, TRUE);
 		first_thunk_address = myh->root.u.def.value +
 		  sec->output_section->vma +
 		    sec->output_offset -
@@ -1447,12 +1447,12 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		idata5offset = myh->root.u.def.value;
 		myh = coff_link_hash_lookup (coff_hash_table (info),
 					     "__idata6_magic__",
-					     false, false, true);
+					     FALSE, FALSE, TRUE);
 
 		thunk_size = myh->root.u.def.value - idata5offset;
 		myh = coff_link_hash_lookup (coff_hash_table (info),
 					     "__idata4_magic__",
-					     false, false, true);
+					     FALSE, FALSE, TRUE);
 		import_table_size = myh->root.u.def.value;
 	      }
 
@@ -1479,7 +1479,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		    myh = coff_link_hash_lookup (coff_hash_table (info),
 						 target,
-						 false, false, true);
+						 FALSE, FALSE, TRUE);
 		    if (myh == 0)
 		      {
 			/* Missing magic cookies. Something is very wrong.  */
@@ -1493,7 +1493,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 			int idata5offset;
 			myh = coff_link_hash_lookup (coff_hash_table (info),
 						     "__idata5_magic__",
-						     false, false, true);
+						     FALSE, FALSE, TRUE);
 			first_thunk_address = myh->root.u.def.value +
 			  sec->output_section->vma +
 			    sec->output_offset -
@@ -1502,12 +1502,12 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 			idata5offset = myh->root.u.def.value;
 			myh = coff_link_hash_lookup (coff_hash_table (info),
 						     "__idata6_magic__",
-						     false, false, true);
+						     FALSE, FALSE, TRUE);
 
 			thunk_size = myh->root.u.def.value - idata5offset;
 			myh = coff_link_hash_lookup (coff_hash_table (info),
 						     "__idata4_magic__",
-						     false, false, true);
+						     FALSE, FALSE, TRUE);
 			import_table_size = myh->root.u.def.value;
 		      }
 		  }
@@ -1596,14 +1596,14 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		    (bfd_vma) 0, input_bfd,
 		    input_section, rel->r_vaddr - input_section->vma)))
 	      {
-		return false;
+		return FALSE;
 	      }
 	  }
 	}
 
     }
 
-  return true;
+  return TRUE;
 }
 
 #ifdef COFF_IMAGE_WITH_PE
@@ -1677,7 +1677,7 @@ dump_toc (vfile)
   fprintf (file, "\n");
 }
 
-boolean
+bfd_boolean
 ppc_allocate_toc_section (info)
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
@@ -1687,7 +1687,7 @@ ppc_allocate_toc_section (info)
   static char test_char = '1';
 
   if ( global_toc_size == 0 ) /* FIXME: does this get me in trouble? */
-    return true;
+    return TRUE;
 
   if (bfd_of_toc_owner == 0)
     {
@@ -1709,10 +1709,10 @@ ppc_allocate_toc_section (info)
   s->_raw_size = s->_cooked_size = global_toc_size;
   s->contents = foo;
 
-  return true;
+  return TRUE;
 }
 
-boolean
+bfd_boolean
 ppc_process_before_allocation (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -1730,7 +1730,7 @@ ppc_process_before_allocation (abfd, info)
 
   if (sec == 0)
     {
-      return true;
+      return TRUE;
     }
 
   for (; sec != 0; sec = sec->next)
@@ -1749,7 +1749,7 @@ ppc_process_before_allocation (abfd, info)
       {
 	unsigned short r_type  = EXTRACT_TYPE (rel->r_type);
 	unsigned short r_flags = EXTRACT_FLAGS(rel->r_type);
-	boolean ok = true;
+	bfd_boolean ok = TRUE;
 
 	DUMP_RELOC2(ppc_coff_howto_table[r_type].name, rel);
 
@@ -1762,7 +1762,7 @@ ppc_process_before_allocation (abfd, info)
 	      ok = ppc_record_toc_entry(abfd, info, sec,
 					rel->r_symndx, default_toc);
 	    if (!ok)
-	      return false;
+	      return FALSE;
 	    break;
 	  case IMAGE_REL_PPC_IMGLUE:
 	    ppc_mark_symbol_as_glue(abfd, rel->r_symndx, rel);
@@ -1773,7 +1773,7 @@ ppc_process_before_allocation (abfd, info)
       }
   }
 
-  return true;
+  return TRUE;
 }
 
 #endif
@@ -2278,17 +2278,17 @@ ppc_coff_swap_sym_in_hook (abfd, ext1, in1)
 
 #ifndef COFF_IMAGE_WITH_PE
 
-static boolean ppc_do_last PARAMS ((bfd *));
+static bfd_boolean ppc_do_last PARAMS ((bfd *));
 static bfd *ppc_get_last PARAMS ((void));
 
-static boolean
+static bfd_boolean
 ppc_do_last (abfd)
      bfd *abfd;
 {
   if (abfd == bfd_of_toc_owner)
-    return true;
+    return TRUE;
   else
-    return false;
+    return FALSE;
 }
 
 static bfd *
@@ -2311,14 +2311,14 @@ ppc_get_last()
 
 /* Do the final link step.  */
 
-boolean
+bfd_boolean
 ppc_bfd_coff_final_link (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
   bfd_size_type symesz;
   struct coff_final_link_info finfo;
-  boolean debug_merge_allocated;
+  bfd_boolean debug_merge_allocated;
   asection *o;
   struct bfd_link_order *p;
   bfd_size_type max_sym_count;
@@ -2351,7 +2351,7 @@ ppc_bfd_coff_final_link (abfd, info)
   finfo.contents = NULL;
   finfo.external_relocs = NULL;
   finfo.internal_relocs = NULL;
-  debug_merge_allocated = false;
+  debug_merge_allocated = FALSE;
 
   coff_data (abfd)->link_info = info;
 
@@ -2361,13 +2361,13 @@ ppc_bfd_coff_final_link (abfd, info)
 
   if (! coff_debug_merge_hash_table_init (&finfo.debug_merge))
     goto error_return;
-  debug_merge_allocated = true;
+  debug_merge_allocated = TRUE;
 
   /* Compute the file positions for all the sections.  */
   if (! abfd->output_has_begun)
     {
       if (! bfd_coff_compute_section_file_positions (abfd))
-	return false;
+	return FALSE;
     }
 
   /* Count the line numbers and relocation entries required for the
@@ -2395,7 +2395,7 @@ ppc_bfd_coff_final_link (abfd, info)
 		 link.  This will normally be every section.  We need
 		 to do this so that we can identify any sections which
 		 the linker has decided to not include.  */
-	      sec->linker_mark = true;
+	      sec->linker_mark = TRUE;
 
 	      if (info->strip == strip_none
 		  || info->strip == strip_some)
@@ -2509,7 +2509,7 @@ ppc_bfd_coff_final_link (abfd, info)
     {
       bfd_size_type sz;
 
-      sub->output_has_begun = false;
+      sub->output_has_begun = FALSE;
       sz = obj_raw_syment_count (sub);
       if (sz > max_sym_count)
 	max_sym_count = sz;
@@ -2575,7 +2575,7 @@ ppc_bfd_coff_final_link (abfd, info)
 		{
 		  if (! _bfd_coff_link_input_bfd (&finfo, sub))
 		    goto error_return;
-		  sub->output_has_begun = true;
+		  sub->output_has_begun = TRUE;
 		}
 	    }
 	  else if (p->type == bfd_section_reloc_link_order
@@ -2600,14 +2600,14 @@ ppc_bfd_coff_final_link (abfd, info)
 	if (! _bfd_coff_link_input_bfd (&finfo, last_one))
 	  goto error_return;
       }
-    last_one->output_has_begun = true;
+    last_one->output_has_begun = TRUE;
   }
 #endif
 
   /* Free up the buffers used by _bfd_coff_link_input_bfd.  */
 
   coff_debug_merge_hash_table_free (&finfo.debug_merge);
-  debug_merge_allocated = false;
+  debug_merge_allocated = FALSE;
 
   if (finfo.internal_syms != NULL)
     {
@@ -2659,11 +2659,11 @@ ppc_bfd_coff_final_link (abfd, info)
       pos = obj_sym_filepos (abfd) + finfo.last_file_index * symesz;
       if (bfd_seek (abfd, pos, SEEK_SET) != 0
 	  || bfd_bwrite (finfo.outsyms, symesz, abfd) != symesz)
-	return false;
+	return FALSE;
     }
 
   /* Write out the global symbols.  */
-  finfo.failed = false;
+  finfo.failed = FALSE;
   coff_link_hash_traverse (coff_hash_table (info), _bfd_coff_write_global_sym,
 			   (PTR) &finfo);
   if (finfo.failed)
@@ -2740,7 +2740,7 @@ ppc_bfd_coff_final_link (abfd, info)
   if (coff_hash_table (info)->stab_info != NULL)
     {
       if (! _bfd_write_stab_strings (abfd, &coff_hash_table (info)->stab_info))
-	return false;
+	return FALSE;
     }
 
   /* Write out the string table.  */
@@ -2750,7 +2750,7 @@ ppc_bfd_coff_final_link (abfd, info)
 
       pos = obj_sym_filepos (abfd) + obj_raw_syment_count (abfd) * symesz;
       if (bfd_seek (abfd, pos, SEEK_SET) != 0)
-	return false;
+	return FALSE;
 
 #if STRING_SIZE_SIZE == 4
       H_PUT_32 (abfd,
@@ -2762,10 +2762,10 @@ ppc_bfd_coff_final_link (abfd, info)
 
       if (bfd_bwrite (strbuf, (bfd_size_type) STRING_SIZE_SIZE, abfd)
 	  != STRING_SIZE_SIZE)
-	return false;
+	return FALSE;
 
       if (! _bfd_stringtab_emit (abfd, finfo.strtab))
-	return false;
+	return FALSE;
     }
 
   _bfd_stringtab_free (finfo.strtab);
@@ -2774,7 +2774,7 @@ ppc_bfd_coff_final_link (abfd, info)
      not try to write out the symbols.  */
   bfd_get_symcount (abfd) = 0;
 
-  return true;
+  return TRUE;
 
  error_return:
   if (debug_merge_allocated)
@@ -2812,7 +2812,7 @@ ppc_bfd_coff_final_link (abfd, info)
     free (finfo.internal_relocs);
   if (external_relocs != NULL)
     free (external_relocs);
-  return false;
+  return FALSE;
 }
 #endif
 

@@ -262,6 +262,9 @@ do_captured_list_thread_ids (struct ui_out *uiout,
   struct thread_info *tp;
   int num = 0;
 
+  prune_threads ();
+  target_find_new_threads ();
+
   ui_out_tuple_begin (uiout, "thread-ids");
 
   for (tp = thread_list; tp; tp = tp->next)
@@ -296,7 +299,7 @@ load_infrun_state (ptid_t ptid,
 		   struct breakpoint **through_sigtramp_breakpoint,
 		   CORE_ADDR *step_range_start, 
 		   CORE_ADDR *step_range_end,
-		   CORE_ADDR *step_frame_address, 
+		   struct frame_id *step_frame_id, 
 		   int *handling_longjmp,
 		   int *another_trap, 
 		   int *stepping_through_solib_after_catch,
@@ -322,7 +325,7 @@ load_infrun_state (ptid_t ptid,
   *through_sigtramp_breakpoint = tp->through_sigtramp_breakpoint;
   *step_range_start = tp->step_range_start;
   *step_range_end = tp->step_range_end;
-  *step_frame_address = tp->step_frame_address;
+  *step_frame_id = tp->step_frame_id;
   *handling_longjmp = tp->handling_longjmp;
   *another_trap = tp->another_trap;
   *stepping_through_solib_after_catch = tp->stepping_through_solib_after_catch;
@@ -345,7 +348,7 @@ save_infrun_state (ptid_t ptid,
 		   struct breakpoint *through_sigtramp_breakpoint,
 		   CORE_ADDR step_range_start, 
 		   CORE_ADDR step_range_end,
-		   CORE_ADDR step_frame_address, 
+		   const struct frame_id *step_frame_id, 
 		   int handling_longjmp,
 		   int another_trap, 
 		   int stepping_through_solib_after_catch,
@@ -371,7 +374,7 @@ save_infrun_state (ptid_t ptid,
   tp->through_sigtramp_breakpoint = through_sigtramp_breakpoint;
   tp->step_range_start = step_range_start;
   tp->step_range_end = step_range_end;
-  tp->step_frame_address = step_frame_address;
+  tp->step_frame_id = (*step_frame_id);
   tp->handling_longjmp = handling_longjmp;
   tp->another_trap = another_trap;
   tp->stepping_through_solib_after_catch = stepping_through_solib_after_catch;
@@ -422,12 +425,12 @@ info_threads_command (char *arg, int from_tty)
   struct thread_info *tp;
   ptid_t current_ptid;
   struct frame_info *cur_frame;
-  int saved_frame_level = frame_relative_level (selected_frame);
+  int saved_frame_level = frame_relative_level (deprecated_selected_frame);
   int counter;
   char *extra_info;
 
   /* Avoid coredumps which would happen if we tried to access a NULL
-     selected_frame.  */
+     deprecated_selected_frame.  */
   if (!target_has_stack)
     error ("No stack.");
 
@@ -453,8 +456,8 @@ info_threads_command (char *arg, int from_tty)
       puts_filtered ("  ");
 
       switch_to_thread (tp->ptid);
-      if (selected_frame)
-	print_only_stack_frame (selected_frame, -1, 0);
+      if (deprecated_selected_frame)
+	print_only_stack_frame (deprecated_selected_frame, -1, 0);
       else
 	printf_filtered ("[No stack.]\n");
     }
@@ -468,12 +471,12 @@ info_threads_command (char *arg, int from_tty)
    * of the stack (leaf frame).
    */
   counter = saved_frame_level;
-  cur_frame = find_relative_frame (selected_frame, &counter);
+  cur_frame = find_relative_frame (deprecated_selected_frame, &counter);
   if (counter != 0)
     {
       /* Ooops, can't restore, tell user where we are. */
       warning ("Couldn't restore frame in current thread, at frame 0");
-      print_stack_frame (selected_frame, -1, 0);
+      print_stack_frame (deprecated_selected_frame, -1, 0);
     }
   else
     {
@@ -714,7 +717,8 @@ do_captured_thread_select (struct ui_out *uiout,
 #endif
   ui_out_text (uiout, ")]");
 
-  print_stack_frame (selected_frame, frame_relative_level (selected_frame), 1);
+  print_stack_frame (deprecated_selected_frame,
+		     frame_relative_level (deprecated_selected_frame), 1);
   return GDB_RC_OK;
 }
 

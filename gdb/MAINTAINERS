@@ -84,7 +84,7 @@ maintainer works with the native maintainer when resolving API issues.
 	h8300		--target=h8300hms ,-Werror
 			Maintenance only
 
-	h8500		--target=h8500hms -Werror
+	h8500		(--target=h8500hms broken)
 			Maintenance only
 			Not multi-arch, work in progress
 
@@ -279,9 +279,7 @@ breakpoints		Michael Snyder		msnyder@redhat.com
 			Jim Blandy		jimb@redhat.com
 language support	(Blanket Write Privs Maintainers)
   C++			Daniel Jacobowitz	dan@debian.org
-  Java support (devolved)
-			Per Bothner		per@bothner.com
-			Anthony Green 		green@redhat.com
+  Java support		(Global Maintainers)
   Pascal support	Pierre Muller		muller@sources.redhat.com
   Scheme support	Jim Blandy		jimb@redhat.com
 
@@ -300,6 +298,7 @@ testsuite		Fernando Nasser		fnasser@redhat.com
   lib                   Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
   c++ (gdb.c++)		Michael Chastain	mec@shout.net
+			David Carlton		carlton@math.stanford.edu
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
                         Andrew Cagney           cagney@redhat.com
   stabs (gdb.stabs)     Elena Zannoni           ezannoni@redhat.com
@@ -450,6 +449,8 @@ David Taylor (d10v, sparc, utils, defs,
   expression evaluator, language support)	taylor at candd dot org
 J.T. Conklin (dcache, NetBSD, remote)		jtc at redback dot com
 Frank Ch. Eigler (sim)				fche at redhat dot com
+Per Bothner (Java)				per at bothner dot com
+Anthony Green (Java)				green at redhat dot com
 
 
 

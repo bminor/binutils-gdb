@@ -45,7 +45,7 @@ struct ui_out_hdr
    is always available.  Stack/nested level 0 is reserved for the
    top-level result. */
 
-enum { MAX_UI_OUT_LEVELS = 5 };
+enum { MAX_UI_OUT_LEVELS = 6 };
 
 struct ui_out_level
   {

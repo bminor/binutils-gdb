@@ -22,6 +22,11 @@
 
 #include "regcache.h"
 
+/* NOTE: cagney/2002-11-24: This is a guess.  */
+#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 0
+#define CALL_DUMMY_LOCATION ON_STACK
+#define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
+
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
 #define GDB_TARGET_IS_H8500

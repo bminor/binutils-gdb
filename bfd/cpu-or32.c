@@ -32,8 +32,8 @@ const bfd_arch_info_type bfd_or32_arch =
     "or32",
     "or32",
     4,
-    true,         /* The one and only.  */
-    bfd_default_compatible, 
+    TRUE,         /* The one and only.  */
+    bfd_default_compatible,
     bfd_default_scan ,
     0,
   };

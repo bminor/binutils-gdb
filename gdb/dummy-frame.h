@@ -54,6 +54,43 @@ extern void dummy_frame_register_unwind (struct frame_info *frame,
 					 int *realnump,
 					 void *valuep);
 
+/* Assuming that FRAME is a dummy, return the resume address for the
+   previous frame.  */
+
+extern CORE_ADDR dummy_frame_pc_unwind (struct frame_info *frame,
+					void **unwind_cache);
+
+/* Assuming that FRAME is a dummy, return the ID of the calling frame
+   (the frame that the dummy has the saved state of).  */
+
+extern struct frame_id dummy_frame_id_unwind (struct frame_info *frame,
+					      void **unwind_cache);
+
+/* Does the PC fall in a dummy frame?
+
+   This function is used by "frame.c" when creating a new `struct
+   frame_info'.
+
+   Note that there is also very similar code in breakpoint.c (where
+   the bpstat stop reason is computed).  It is looking for a PC
+   falling on a dummy_frame breakpoint.  Perhaphs this, and that code
+   should be combined?
+
+   Architecture dependant code, that has access to a frame, should not
+   use this function.  Instead (get_frame_type() == DUMMY_FRAME)
+   should be used.
+
+   Hmm, but what about threads?  When the dummy-frame code tries to
+   relocate a dummy frame's saved registers it definitly needs to
+   differentiate between threads (otherwize it will do things like
+   clean-up the wrong threads frames).  However, when just trying to
+   identify a dummy-frame that shouldn't matter.  The wost that can
+   happen is that a thread is marked as sitting in a dummy frame when,
+   in reality, its corrupted its stack, to the point that a PC is
+   pointing into a dummy frame.  */
+
+extern int pc_in_dummy_frame (CORE_ADDR pc);
+
 /* Return the regcache that belongs to the dummy-frame identifed by PC
    and FP, or NULL if no such frame exists.  */
 /* FIXME: cagney/2002-11-08: The function only exists because of

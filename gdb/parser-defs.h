@@ -79,6 +79,14 @@ struct symtoken
     int is_a_field_of_this;
   };
 
+struct objc_class_str
+  {
+    struct stoken stoken;
+    struct type *type;
+    int class;
+  };
+
+
 /* For parsing of complicated types.
    An array should be preceded in the list by the size of the array.  */
 enum type_pieces

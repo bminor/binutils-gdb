@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -4148,7 +4148,7 @@ m32r_init_cpu (SIM_CPU *cpu)
   CPU_PC_FETCH (cpu) = m32rbf_h_pc_get;
   CPU_PC_STORE (cpu) = m32rbf_h_pc_set;
   CPU_GET_IDATA (cpu) = m32rbf_get_idata;
-  CPU_MAX_INSNS (cpu) = M32RBF_INSN_UNLOCK + 1;
+  CPU_MAX_INSNS (cpu) = M32RBF_INSN__MAX;
   CPU_INSN_NAME (cpu) = cgen_insn_name;
   CPU_FULL_ENGINE_FN (cpu) = m32rbf_engine_run_full;
 #if WITH_FAST

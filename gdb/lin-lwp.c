@@ -34,7 +34,7 @@
 #include "gdbcmd.h"
 
 static int debug_lin_lwp;
-extern const char *strsignal (int sig);
+extern char *strsignal (int sig);
 
 /* On GNU/Linux there are no real LWP's.  The closest thing to LWP's
    are processes sharing the same VM space.  A multi-threaded process
@@ -1343,32 +1343,6 @@ lin_lwp_mourn_inferior (void)
   child_ops.to_mourn_inferior ();
 }
 
-static void
-lin_lwp_fetch_registers (int regno)
-{
-  struct cleanup *old_chain = save_inferior_ptid ();
-
-  if (is_lwp (inferior_ptid))
-    inferior_ptid = pid_to_ptid (GET_LWP (inferior_ptid));
-
-  fetch_inferior_registers (regno);
-
-  do_cleanups (old_chain);
-}
-
-static void
-lin_lwp_store_registers (int regno)
-{
-  struct cleanup *old_chain = save_inferior_ptid ();
-
-  if (is_lwp (inferior_ptid))
-    inferior_ptid = pid_to_ptid (GET_LWP (inferior_ptid));
-
-  store_inferior_registers (regno);
-
-  do_cleanups (old_chain);
-}
-
 static int
 lin_lwp_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 		     struct mem_attrib *attrib,
@@ -1380,7 +1354,9 @@ lin_lwp_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   if (is_lwp (inferior_ptid))
     inferior_ptid = pid_to_ptid (GET_LWP (inferior_ptid));
 
-  xfer = child_xfer_memory (memaddr, myaddr, len, write, attrib, target);
+  xfer = linux_proc_xfer_memory (memaddr, myaddr, len, write, attrib, target);
+  if (xfer == 0)
+    xfer = child_xfer_memory (memaddr, myaddr, len, write, attrib, target);
 
   do_cleanups (old_chain);
   return xfer;
@@ -1426,8 +1402,10 @@ init_lin_lwp_ops (void)
   lin_lwp_ops.to_detach = lin_lwp_detach;
   lin_lwp_ops.to_resume = lin_lwp_resume;
   lin_lwp_ops.to_wait = lin_lwp_wait;
-  lin_lwp_ops.to_fetch_registers = lin_lwp_fetch_registers;
-  lin_lwp_ops.to_store_registers = lin_lwp_store_registers;
+  /* fetch_inferior_registers and store_inferior_registers will
+     honor the LWP id, so we can use them directly.  */
+  lin_lwp_ops.to_fetch_registers = fetch_inferior_registers;
+  lin_lwp_ops.to_store_registers = store_inferior_registers;
   lin_lwp_ops.to_xfer_memory = lin_lwp_xfer_memory;
   lin_lwp_ops.to_kill = lin_lwp_kill;
   lin_lwp_ops.to_create_inferior = lin_lwp_create_inferior;

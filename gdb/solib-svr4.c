@@ -446,15 +446,16 @@ elf_locate_base (void)
 	  else if (dyn_tag == DT_MIPS_RLD_MAP)
 	    {
 	      char *pbuf;
+	      int pbuf_size = TARGET_PTR_BIT / HOST_CHAR_BIT;
 
-	      pbuf = alloca (TARGET_PTR_BIT / HOST_CHAR_BIT);
+	      pbuf = alloca (pbuf_size);
 	      /* DT_MIPS_RLD_MAP contains a pointer to the address
 		 of the dynamic link structure.  */
 	      dyn_ptr = bfd_h_get_32 (exec_bfd, 
 				      (bfd_byte *) x_dynp->d_un.d_ptr);
-	      if (target_read_memory (dyn_ptr, pbuf, sizeof (pbuf)))
+	      if (target_read_memory (dyn_ptr, pbuf, pbuf_size))
 		return 0;
-	      return extract_unsigned_integer (pbuf, sizeof (pbuf));
+	      return extract_unsigned_integer (pbuf, pbuf_size);
 	    }
 	}
     }
@@ -476,6 +477,20 @@ elf_locate_base (void)
 	      dyn_ptr = bfd_h_get_64 (exec_bfd, 
 				      (bfd_byte *) x_dynp->d_un.d_ptr);
 	      return dyn_ptr;
+	    }
+	  else if (dyn_tag == DT_MIPS_RLD_MAP)
+	    {
+	      char *pbuf;
+	      int pbuf_size = TARGET_PTR_BIT / HOST_CHAR_BIT;
+
+	      pbuf = alloca (pbuf_size);
+	      /* DT_MIPS_RLD_MAP contains a pointer to the address
+		 of the dynamic link structure.  */
+	      dyn_ptr = bfd_h_get_64 (exec_bfd, 
+				      (bfd_byte *) x_dynp->d_un.d_ptr);
+	      if (target_read_memory (dyn_ptr, pbuf, pbuf_size))
+		return 0;
+	      return extract_unsigned_integer (pbuf, pbuf_size);
 	    }
 	}
     }

@@ -1,5 +1,5 @@
 /* mmix-dis.c -- Disassemble MMIX instructions.
-   Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Hans-Peter Nilsson (hp@bitrange.com)
 
 This file is part of GDB and the GNU binutils.
@@ -66,13 +66,15 @@ struct mmix_dis_info
    char basic_reg_name[256][sizeof ("$255")];
  };
 
-static boolean initialize_mmix_dis_info PARAMS ((struct disassemble_info *));
-static const struct mmix_opcode *get_opcode PARAMS ((unsigned long));
+static bfd_boolean initialize_mmix_dis_info
+  PARAMS ((struct disassemble_info *));
+static const struct mmix_opcode *get_opcode
+  PARAMS ((unsigned long));
 
 
 /* Initialize a target-specific array in INFO.  */
 
-static boolean
+static bfd_boolean
 initialize_mmix_dis_info (info)
      struct disassemble_info *info;
 {
@@ -80,7 +82,7 @@ initialize_mmix_dis_info (info)
   int i;
 
   if (minfop == NULL)
-    return false;
+    return FALSE;
 
   memset (minfop, 0, sizeof (*minfop));
 
@@ -107,7 +109,7 @@ initialize_mmix_dis_info (info)
 	  if (syms == NULL)
 	    { FATAL_DEBUG;
 	      free (minfop);
-	      return false;
+	      return FALSE;
 	    }
 	  nsyms = bfd_canonicalize_symtab (abfd, syms);
 
@@ -137,7 +139,7 @@ initialize_mmix_dis_info (info)
     minfop->spec_reg_name[mmix_spec_regs[i].number] = mmix_spec_regs[i].name;
 
   info->private_data = (PTR) minfop;
-  return true;
+  return TRUE;
 }
 
 /* A table indexed by the first byte is constructed as we disassemble each

@@ -212,7 +212,7 @@ proc mi_delete_breakpoints {} {
 	 -re ".*102-break-delete\r\n102\\\^done\r\n$mi_gdb_prompt$" {
             # This happens if there were no breakpoints
 	 }
-	 timeout { perror "Delete all breakpoints in delete_breakpoints (timeout)" ; return }
+	 timeout { perror "Delete all breakpoints in mi_delete_breakpoints (timeout)" ; return }
     }
 
 # The correct output is not "No breakpoints or watchpoints." but an
@@ -234,6 +234,7 @@ proc mi_delete_breakpoints {} {
 
 proc mi_gdb_reinitialize_dir { subdir } {
     global mi_gdb_prompt
+    global MIFLAGS
 
     global suppress_flag
     if { $suppress_flag } {
@@ -244,8 +245,9 @@ proc mi_gdb_reinitialize_dir { subdir } {
 	return "";
     }
 
-    send_gdb "104-environment-directory\n"
-    gdb_expect 60 {
+    if { $MIFLAGS == "-i=mi1" } {
+      send_gdb "104-environment-directory\n"
+      gdb_expect 60 {
 	-re ".*Reinitialize source path to empty.*y or n. " {
             warning "Got confirmation prompt for dir reinitialization."
 	    send_gdb "y\n"
@@ -256,6 +258,14 @@ proc mi_gdb_reinitialize_dir { subdir } {
 	}
 	-re "$mi_gdb_prompt$" {}
         timeout {error "Dir reinitialization failed (timeout)"}
+      }
+    } else {
+      send_gdb "104-environment-directory -r\n"
+      gdb_expect 60 {
+	-re "104\\\^done,source-path=.*\r\n$mi_gdb_prompt$" {}
+	-re "$mi_gdb_prompt$" {}
+        timeout {error "Dir reinitialization failed (timeout)"}
+      }
     }
 
     send_gdb "105-environment-directory $subdir\n"
@@ -263,7 +273,7 @@ proc mi_gdb_reinitialize_dir { subdir } {
 	-re "Source directories searched.*$mi_gdb_prompt$" {
 	    verbose "Dir set to $subdir"
 	}
-	-re "105\\\^done\r\n$mi_gdb_prompt$" {
+	-re "105\\\^done.*\r\n$mi_gdb_prompt$" {
             # FIXME: We return just the prompt for now.
 	    verbose "Dir set to $subdir"
 	    # perror "Dir \"$subdir\" failed."

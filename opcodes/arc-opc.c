@@ -66,6 +66,9 @@ enum operand {OP_NONE,OP_REG,OP_SHIMM,OP_LIMM};
 
 enum operand ls_operand[OPERANDS];
 
+struct arc_opcode *arc_ext_opcodes;
+struct arc_ext_operand_value *arc_ext_operands;
+
 #define LS_VALUE  0
 #define LS_DEST   0
 #define LS_BASE   1

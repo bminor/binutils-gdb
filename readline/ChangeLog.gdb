@@ -1,3 +1,42 @@
+2002-12-16  Christopher Faylor  <cgf@redhat.com>
+
+	* configure.in: Remove --enable-shared option.  It shouldn't be used
+	for gdb.
+	* configure: Regenerate.
+
+2002-12-16  Christopher Faylor  <cgf@redhat.com>
+
+	* config/cygwin.cache: Prime mbstate_t.
+
+2002-12-06  Elena Zannoni  <ezannoni@redhat.com>
+
+        Import of readline 4.3:
+
+        * compat.c, mbutil.c, misc.c, rlmbutil.h, rltypedefs.h,
+        text.c, doc/history.0, doc/history.3, support/wcwidth.c,
+        examples/readlinebuf.h, examples/rlcat.c: New files.
+
+        * CHANGELOG, CHANGES, INSTALL,  MANIFEST, Makefile.in, README,
+        aclocal.m4, ansi_stdlib.h, bind.c, callback.c, chardefs.h,
+        complete.c, config.h.in, configure, configure.in, display.c,
+        emacs_keymap.c, funmap.c, histexpand.c, histfile.c, histlib.h,
+        history.c, history.h, histsearch.c, input.c, isearch.c,
+        keymaps.c, keymaps.h, kill.c, macro.c, nls.c, parens.c,
+        posixdir.h, readline.c, readline.h, rlconf.h, rldefs.h,
+        rlprivate.h, rlshell.h, rlstdc.h, rltty.c, savestring.c,
+        search.c, shell.c, signals.c, terminal.c, tilde.c, tilde.h,
+        undo.c, util.c, vi_keymap.c, vi_mode.c, xmalloc.c, xmalloc.h,
+        doc/Makefile.in, doc/hist.texinfo, doc/hstech.texinfo,
+        doc/hsuser.texinfo, doc/manvers.texinfo, doc/readline.3,
+        doc/rlman.texinfo, doc/rltech.texinfo, doc/rluser.texinfo
+        doc/rluserman.texinfo, doc/texi2dvi, doc/texi2html,
+        shlib/Makefile.in, support/install.sh, support/mkdirs,
+        support/mkdist, support/shlib-install, support/shobj-conf,
+        examples/Inputrc, examples/Makefile.in, examples/fileman.c,
+        examples/histexamp.c, examples/manexamp.c, examples/rl.c,
+        examples/rlfe.c, examples/rltest.c, examples/rlversion.c:
+        Modified files.
+
 2002-08-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* support/config.guess: Import version 2002-08-23.

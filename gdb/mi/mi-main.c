@@ -183,8 +183,8 @@ mi_cmd_exec_return (char *args, int from_tty)
 
   /* Because we have called return_command with from_tty = 0, we need
      to print the frame here. */
-  show_and_print_stack_frame (selected_frame,
-			      frame_relative_level (selected_frame),
+  show_and_print_stack_frame (deprecated_selected_frame,
+			      frame_relative_level (deprecated_selected_frame),
 			      LOC_AND_ADDRESS);
 
   return MI_CMD_DONE;
@@ -397,7 +397,7 @@ register_changed_p (int regnum)
 {
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
 
-  if (! frame_register_read (selected_frame, regnum, raw_buffer))
+  if (! frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     return -1;
 
   if (memcmp (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
@@ -518,7 +518,8 @@ get_register (int regnum, int format)
   if (format == 'N')
     format = 0;
 
-  get_saved_register (raw_buffer, &optim, (CORE_ADDR *) NULL, selected_frame,
+  get_saved_register (raw_buffer, &optim, (CORE_ADDR *) NULL,
+		      deprecated_selected_frame,
 		      regnum, (enum lval_type *) NULL);
   if (optim)
     {

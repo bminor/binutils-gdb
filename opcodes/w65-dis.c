@@ -1,5 +1,5 @@
 /* Disassemble WDC 65816 instructions.
-   Copyright 1995, 1998, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1995, 1998, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ print_insn_w65 (memaddr, info)
 {
   int status = 0;
   unsigned char insn[4];
-  register struct opinfo *op;
+  const struct opinfo *op;
   int i;
   int X = 0;
   int M = 0;

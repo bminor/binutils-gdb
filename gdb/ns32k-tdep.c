@@ -314,11 +314,36 @@ ns32k_frame_chain (struct frame_info *frame)
   return (read_memory_integer (frame->frame, 4));
 }
 
+
+static CORE_ADDR
+ns32k_sigtramp_saved_pc (struct frame_info *frame)
+{
+  CORE_ADDR sigcontext_addr;
+  char *buf;
+  int ptrbytes = TYPE_LENGTH (builtin_type_void_func_ptr);
+  int sigcontext_offs = (2 * TARGET_INT_BIT) / TARGET_CHAR_BIT;
+
+  buf = alloca (ptrbytes);
+  /* Get sigcontext address, it is the third parameter on the stack.  */
+  if (frame->next)
+    sigcontext_addr = read_memory_typed_address
+      (FRAME_ARGS_ADDRESS (frame->next) + FRAME_ARGS_SKIP + sigcontext_offs,
+       builtin_type_void_data_ptr);
+  else
+    sigcontext_addr = read_memory_typed_address
+      (read_register (SP_REGNUM) + sigcontext_offs, builtin_type_void_data_ptr);
+
+  /* Don't cause a memory_error when accessing sigcontext in case the stack
+     layout has changed or the stack is corrupt.  */
+  target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
+  return extract_typed_address (buf, builtin_type_void_func_ptr);
+}
+
 static CORE_ADDR
 ns32k_frame_saved_pc (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
-    return (sigtramp_saved_pc (frame)); /* XXXJRT */
+  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
+    return (ns32k_sigtramp_saved_pc (frame)); /* XXXJRT */
 
   return (read_memory_integer (frame->frame + 4, 4));
 }
@@ -535,6 +560,10 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
   tdep->osabi = osabi;
 
   /* Register info */
@@ -590,8 +619,8 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fix_call_dummy (gdbarch, ns32k_fix_call_dummy);
   set_gdbarch_call_dummy_start_offset (gdbarch, 3);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 0);
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
+  set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
+  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
 
   /* Breakpoint info */

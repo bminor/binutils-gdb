@@ -333,7 +333,7 @@ xstormy16_pop_frame (void)
   if (fi == NULL)
     return;			/* paranoia */
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       generic_pop_dummy_frame ();
     }
@@ -466,7 +466,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   if (fi)
     {
       /* In a call dummy, don't touch the frame. */
-      if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
 	return start_addr;
 
       /* Grab the frame-relative values of SP and FP, needed below. 
@@ -756,7 +756,7 @@ xstormy16_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR saved_pc;
 
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       saved_pc = deprecated_read_register_dummy (fi->pc, fi->frame,
 						 E_PC_REGNUM);
@@ -817,7 +817,7 @@ xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static CORE_ADDR
 xstormy16_frame_chain (struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* Call dummy's frame is the same as caller's.  */
       return fi->frame;
@@ -1023,6 +1023,10 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdbarch = gdbarch_alloc (&info, 0);
 
+  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
+     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+
   /*
    * Basic register fields and methods.
    */
@@ -1055,8 +1059,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_saved_pc (gdbarch, xstormy16_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, xstormy16_skip_prologue);
   set_gdbarch_frame_chain_valid (gdbarch, xstormy16_frame_chain_valid);
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
 
   set_gdbarch_in_function_epilogue_p (gdbarch,
 				      xstormy16_in_function_epilogue_p);
@@ -1084,7 +1086,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Call Dummies
    * 
    * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, xstormy16_push_return_address);
   set_gdbarch_deprecated_extract_return_value (gdbarch, xstormy16_extract_return_value);
@@ -1095,13 +1096,11 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, xstormy16_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch,
 				     xstormy16_use_struct_convention);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);

@@ -8,3 +8,7 @@ LOADLIBES = -ldl -rdynamic
 
 MMALLOC = 
 MMALLOC_CFLAGS = -DNO_MMALLOC 
+
+# doublest.c currently assumes some properties of FP arithmetic
+# on the host which require this.
+MH_CFLAGS = -mieee
