@@ -1,3 +1,18 @@
+Mon Aug  2 16:35:31 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* Makefile.in (VERSION): bumped to 4.9.4.
+
+	* remote-monitor.c: updated copyright.
+	  (bug_ops, monitor_desc): now static.
+	  (monitor_desc): in several places, check and/or set to NULL.
+
+	* remote-hms.c (hms_files_info): Add the appropriate items where
+	  missing in the printf call.
+
+	* remote-bug.c: new file for m88k bug support.
+
+	* config/m88k/m88k.mt (TDEPFILES): added remote-bug.o.
+
 Mon Aug  2 14:22:09 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* h8300-tdep.c:  Use new variable h8300hmode.
