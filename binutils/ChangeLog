@@ -1,3 +1,14 @@
+2005-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (group_count): Don't initialize it.
+	(process_section_groups): Reurn 1 if we won't do unwind nor
+	section groups. Set group_count to 0 before counting group
+	sections and return 1 if there are no group sections. Reread
+	SHT_SYMTAB/SHT_STRTAB sections only when needed. Don't skip
+	section 0.
+	(process_object): Only set do_unwind to 0 if
+	process_section_groups return 0.
+
 2005-02-10  Ian Lance Taylor  <ian@airs.com>
 
 	* MAINTAINERS: Update my e-mail address.

@@ -185,7 +185,7 @@ struct group
 };
 
 struct group *section_groups;
-size_t group_count = 0;
+size_t group_count;
 
 struct group **section_headers_groups;
 
@@ -3956,11 +3956,18 @@ process_section_groups (FILE *file)
   Elf_Internal_Shdr *section;
   unsigned int i;
   struct group *group;
+  Elf_Internal_Shdr *symtab_sec, *strtab_sec;
+  Elf_Internal_Sym *symtab;
+  char *strtab;
+
+  /* Don't process section groups unless needed.  */
+  if (!do_unwind && !do_section_groups)
+    return 1;
 
   if (elf_header.e_shnum == 0)
     {
       if (do_section_groups)
-	printf (_("\nThere are no section groups in this file.\n"));
+	printf (_("\nThere are no sections in this file.\n"));
 
       return 1;
     }
@@ -3981,11 +3988,20 @@ process_section_groups (FILE *file)
     }
 
   /* Scan the sections for the group section.  */
+  group_count = 0;
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
        i++, section++)
     if (section->sh_type == SHT_GROUP)
       group_count++;
+
+  if (group_count == 0)
+    {
+      if (do_section_groups)
+	printf (_("\nThere are no section groups in this file.\n"));
+
+      return 1;
+    }
 
   section_groups = calloc (group_count, sizeof (struct group));
 
@@ -3995,6 +4011,10 @@ process_section_groups (FILE *file)
       return 0;
     }
 
+  symtab_sec = NULL;
+  strtab_sec = NULL;
+  symtab = NULL;
+  strtab = NULL;
   for (i = 0, section = section_headers, group = section_groups;
        i < elf_header.e_shnum;
        i++, section++)
@@ -4002,20 +4022,26 @@ process_section_groups (FILE *file)
       if (section->sh_type == SHT_GROUP)
 	{
 	  char *name = SECTION_NAME (section);
-	  char *group_name, *strtab, *start, *indices;
+	  char *group_name, *start, *indices;
 	  unsigned int entry, j, size;
+	  Elf_Internal_Shdr *sec;
 	  Elf_Internal_Sym *sym;
-	  Elf_Internal_Shdr *symtab_sec, *strtab_sec, *sec;
-	  Elf_Internal_Sym *symtab;
 
 	  /* Get the symbol table.  */
-	  symtab_sec = SECTION_HEADER (section->sh_link);
-	  if (symtab_sec->sh_type != SHT_SYMTAB)
+	  sec = SECTION_HEADER (section->sh_link);
+	  if (sec->sh_type != SHT_SYMTAB)
 	    {
 	      error (_("Bad sh_link in group section `%s'\n"), name);
 	      continue;
 	    }
-	  symtab = GET_ELF_SYMBOLS (file, symtab_sec);
+
+	  if (symtab_sec != sec)
+	    {
+	      symtab_sec = sec;
+	      if (symtab)
+		free (symtab);
+	      symtab = GET_ELF_SYMBOLS (file, symtab_sec);
+	    }
 
 	  sym = symtab + section->sh_info;
 
@@ -4034,11 +4060,16 @@ process_section_groups (FILE *file)
 	  else
 	    {
 	      /* Get the string table.  */
-	      strtab_sec = SECTION_HEADER (symtab_sec->sh_link);
-	      strtab = get_data (NULL, file, strtab_sec->sh_offset,
-				 strtab_sec->sh_size,
-				 _("string table"));
-
+	      sec = SECTION_HEADER (symtab_sec->sh_link);
+	      if (strtab_sec != sec)
+		{
+		  strtab_sec = sec;
+		  if (strtab)
+		    free (strtab);
+		  strtab = get_data (NULL, file, strtab_sec->sh_offset,
+				     strtab_sec->sh_size,
+				     _("string table"));
+		}
 	      group_name = strtab + sym->st_name;
 	    }
 
@@ -4070,9 +4101,26 @@ process_section_groups (FILE *file)
 	      if (section_headers_groups [SECTION_HEADER_INDEX (entry)]
 		  != NULL)
 		{
-		  error (_("section [%5u] already in group section [%5u]\n"),
-			 entry, section_headers_groups [SECTION_HEADER_INDEX (entry)]->group_index);
-		  continue;
+		  if (entry)
+		    {
+		      error (_("section [%5u] already in group section [%5u]\n"),
+			     entry,
+			     section_headers_groups [SECTION_HEADER_INDEX (entry)]->group_index);
+		      continue;
+		    }
+		  else
+		    {
+		      /* Intel C/C++ compiler may put section 0 in a
+			 section group. We just warn it the first time
+			 and ignore it afterwards.  */
+		      static int warned = 0;
+		      if (!warned)
+			{
+			  error (_("section 0 in group section [%5u]\n"),
+				 section_headers_groups [SECTION_HEADER_INDEX (entry)]->group_index);
+			  warned++;
+			}
+		    }
 		}
 
 	      section_headers_groups [SECTION_HEADER_INDEX (entry)]
@@ -4091,10 +4139,6 @@ process_section_groups (FILE *file)
 	      group->root = g;
 	    }
 
-	  if (symtab)
-	    free (symtab);
-	  if (strtab)
-	    free (strtab);
 	  if (start)
 	    free (start);
 
@@ -4102,6 +4146,10 @@ process_section_groups (FILE *file)
 	}
     }
 
+  if (symtab)
+    free (symtab);
+  if (strtab)
+    free (strtab);
   return 1;
 }
 
@@ -11660,15 +11708,20 @@ process_object (char *file_name, FILE *file)
   if (! process_file_header ())
     return 1;
 
-  if (! process_section_headers (file)
-      || ! process_section_groups (file))
+  if (! process_section_headers (file))
     {
-      /* Without loaded section headers and section groups we
-	 cannot process lots of things.  */
+      /* Without loaded section headers we cannot process lots of
+	 things.  */
       do_unwind = do_version = do_dump = do_arch = 0;
 
       if (! do_using_dynamic)
 	do_syms = do_reloc = 0;
+    }
+
+  if (! process_section_groups (file))
+    {
+      /* Without loaded section groups we cannot process unwind.  */
+      do_unwind = 0;
     }
 
   if (process_program_headers (file))
