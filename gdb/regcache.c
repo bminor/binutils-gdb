@@ -277,8 +277,11 @@ max_register_size (struct gdbarch *gdbarch)
 struct regcache
 {
   struct regcache_descr *descr;
-  char *raw_registers;
-  char *raw_register_valid_p;
+  /* The register buffers.  A read-only register cache can hold the
+     full [0 .. NUM_REGS + NUM_PSEUDO_REGS) while a read/write
+     register cache can only hold [0 .. NUM_REGS).  */
+  char *registers;
+  char *register_valid_p;
   /* If a value isn't in the cache should the corresponding target be
      queried for a value.  */
   int passthrough_p;
@@ -293,9 +296,9 @@ regcache_xmalloc (struct gdbarch *gdbarch)
   descr = regcache_descr (gdbarch);
   regcache = XMALLOC (struct regcache);
   regcache->descr = descr;
-  regcache->raw_registers
+  regcache->registers
     = XCALLOC (descr->sizeof_raw_registers, char);
-  regcache->raw_register_valid_p
+  regcache->register_valid_p
     = XCALLOC (descr->sizeof_raw_register_valid_p, char);
   regcache->passthrough_p = 0;
   return regcache;
@@ -306,8 +309,8 @@ regcache_xfree (struct regcache *regcache)
 {
   if (regcache == NULL)
     return;
-  xfree (regcache->raw_registers);
-  xfree (regcache->raw_register_valid_p);
+  xfree (regcache->registers);
+  xfree (regcache->register_valid_p);
   xfree (regcache);
 }
 
@@ -321,6 +324,14 @@ struct cleanup *
 make_cleanup_regcache_xfree (struct regcache *regcache)
 {
   return make_cleanup (do_regcache_xfree, regcache);
+}
+
+/* Return  a pointer to register REGNUM's buffer cache.  */
+
+static char *
+register_buffer (struct regcache *regcache, int regnum)
+{
+  return regcache->registers + regcache->descr->register_offset[regnum];
 }
 
 void
@@ -338,7 +349,7 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
     {
       /* ULGH!!!!  Old way.  Use REGISTER bytes and let code below
 	 untangle fetch.  */
-      read_register_bytes (0, dst->raw_registers, REGISTER_BYTES);
+      read_register_bytes (0, dst->registers, REGISTER_BYTES);
       return;
     }
   /* FIXME: cagney/2002-05-17: To say this bit is bad is being polite.
@@ -348,7 +359,7 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
     {
       /* ULGH!!!!  Old way.  Use REGISTER bytes and let code below
 	 untangle fetch.  */
-      write_register_bytes (0, src->raw_registers, REGISTER_BYTES);
+      write_register_bytes (0, src->registers, REGISTER_BYTES);
       return;
     }
   buf = alloca (src->descr->max_register_size);
@@ -370,9 +381,8 @@ regcache_cpy_no_passthrough (struct regcache *dst, struct regcache *src)
      move of data into the current_regcache().  Doing this would be
      silly - it would mean that valid_p would be completly invalid.  */
   gdb_assert (dst != current_regcache);
-  memcpy (dst->raw_registers, src->raw_registers,
-	  dst->descr->sizeof_raw_registers);
-  memcpy (dst->raw_register_valid_p, src->raw_register_valid_p,
+  memcpy (dst->registers, src->registers, dst->descr->sizeof_raw_registers);
+  memcpy (dst->register_valid_p, src->register_valid_p,
 	  dst->descr->sizeof_raw_register_valid_p);
 }
 
@@ -401,19 +411,19 @@ regcache_valid_p (struct regcache *regcache, int regnum)
 {
   gdb_assert (regcache != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
-  return regcache->raw_register_valid_p[regnum];
+  return regcache->register_valid_p[regnum];
 }
 
 char *
 deprecated_grub_regcache_for_registers (struct regcache *regcache)
 {
-  return regcache->raw_registers;
+  return regcache->registers;
 }
 
 char *
 deprecated_grub_regcache_for_register_valid (struct regcache *regcache)
 {
-  return regcache->raw_register_valid_p;
+  return regcache->register_valid_p;
 }
 
 /* Global structure containing the current regcache.  */
@@ -471,16 +481,7 @@ set_register_cached (int regnum, int state)
 {
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < current_regcache->descr->nr_raw_registers);
-  current_regcache->raw_register_valid_p[regnum] = state;
-}
-
-/* If REGNUM >= 0, return a pointer to register REGNUM's cache buffer area,
-   else return a pointer to the start of the cache buffer.  */
-
-static char *
-register_buffer (struct regcache *regcache, int regnum)
-{
-  return regcache->raw_registers + regcache->descr->register_offset[regnum];
+  current_regcache->register_valid_p[regnum] = state;
 }
 
 /* Return whether register REGNUM is a real register.  */
@@ -686,8 +687,7 @@ regcache_raw_read (struct regcache *regcache, int regnum, void *buf)
 	target_fetch_registers (regnum);
     }
   /* Copy the value directly into the register cache.  */
-  memcpy (buf, (regcache->raw_registers
-		+ regcache->descr->register_offset[regnum]),
+  memcpy (buf, register_buffer (regcache, regnum),
 	  regcache->descr->sizeof_register[regnum]);
 }
 
@@ -856,10 +856,9 @@ regcache_raw_write (struct regcache *regcache, int regnum, const void *buf)
      value in cache.  */
   if (!regcache->passthrough_p)
     {
-      memcpy ((regcache->raw_registers
-	       + regcache->descr->register_offset[regnum]), buf,
+      memcpy (register_buffer (regcache, regnum), buf,
 	      regcache->descr->sizeof_register[regnum]);
-      regcache->raw_register_valid_p[regnum] = 1;
+      regcache->register_valid_p[regnum] = 1;
       return;
     }
 
@@ -881,7 +880,7 @@ regcache_raw_write (struct regcache *regcache, int regnum, const void *buf)
   target_prepare_to_store ();
   memcpy (register_buffer (regcache, regnum), buf,
 	  regcache->descr->sizeof_register[regnum]);
-  regcache->raw_register_valid_p[regnum] = 1;
+  regcache->register_valid_p[regnum] = 1;
   target_store_registers (regnum);
 }
 

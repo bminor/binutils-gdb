@@ -1,3 +1,22 @@
+2002-11-13  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (register_buffer): Move to near start of file, update
+	description.
+	(regcache_raw_read): Use.
+	(regcache_raw_write): Use.
+	(struct regcache): Rename raw_registers to registers and
+	raw_register_valid_p to register_valid_p.
+	(regcache_xmalloc): Update.
+	(regcache_xfree): Update.
+	(register_buffer): Update.
+	(regcache_cpy): Update.
+	(regcache_cpy_no_passthrough): Update.
+	(regcache_valid_p): Update.
+	(deprecated_grub_regcache_for_registers): Update.
+	(deprecated_grub_regcache_for_register_valid): Update.
+	(set_register_cached): Update.
+	(regcache_raw_write): Update.
+
 2002-11-13  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-exp.y (name_not_typename): Use copy_name to
