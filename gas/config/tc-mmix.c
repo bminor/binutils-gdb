@@ -542,6 +542,11 @@ get_putget_operands (insn, operands, exp)
 
   input_line_pointer = p;
 
+  /* Initialize both possible operands to error state, in case we never
+     get further.  */
+  exp[0].X_op = O_illegal;
+  exp[1].X_op = O_illegal;
+
   if (insn->operands == mmix_operands_get)
     {
       expp_reg = &exp[0];
@@ -572,10 +577,6 @@ get_putget_operands (insn, operands, exp)
     {
       expp_sreg = &exp[0];
       expp_reg = &exp[1];
-
-      /* Initialize to error state in case we'll never call expression on
-         this operand.  */
-      expp_reg->X_op = O_illegal;
 
       sregp = p;
       c = get_symbol_end ();

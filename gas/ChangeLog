@@ -1,5 +1,8 @@
 2002-11-10  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	* config/tc-mmix.c (get_putget_operands): Mark both possible
+	operands as invalid at beginning.
+
 	* config/tc-mmix.c (md_convert_frag) <case STATE_GREG_DEF>:
 	Initialize target of fixup to zero.
 
