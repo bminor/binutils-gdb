@@ -1,3 +1,8 @@
+2004-03-19  Andrew Cagney  <cagney@redhat.com>
+
+	* PROBLEMS: Delete note that ARM does not use frame code, problem
+	fixed.
+
 2004-03-18  Andrew Cagney  <cagney@redhat.com>
 
 	* stack.c (return_command): Delete code wrapped in #ifdef
