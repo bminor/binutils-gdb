@@ -1,5 +1,11 @@
 Fri May  1 12:58:34 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
+	* targets.c, Makefile.in: comment out tekhex for the moment.
+	* ieee.c: if some places where null pointers were used instead of &bfd_abs_section.
+	* configure.in: tandem target is st2000
+	* coff-m68k.c: rename static howto_table to global
+	m68kcoff_howto_table.
+	* bout.c: remove unnecessary abort
 	* coff-a29k.c: various changes to the way relocations work to cope
 	with the "new order" and latent bugs.
 	* coffcode.h: lint

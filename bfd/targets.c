@@ -140,6 +140,7 @@ of a file.
 .    bfd_target_elf_flavour,
 .    bfd_target_ieee_flavour,
 .    bfd_target_oasys_flavour,
+.    bfd_target_tekhex_flavour,
 .    bfd_target_srec_flavour} flavour;
 
 The order of bytes within the data area of a file.
@@ -268,7 +269,7 @@ Symbols and reloctions
 .  SDEF (void, _bfd_debug_info_end, (bfd *));
 .  SDEF (void, _bfd_debug_info_accumulate, (bfd *, struct sec  *));
 .  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet_struct *));
-.  SDEF (boolean,_bfd_relax_section,(bfd *, struct sec *, struct symbol_cache_entry **, struct bfd_seclet_struct *));
+.  SDEF (boolean,_bfd_relax_section,(bfd *, struct sec *, struct symbol_cache_entry **));
 Special entry points for gdb to swap in coff symbol table parts
 
 .  SDEF(void, _bfd_coff_swap_aux_in,(
@@ -354,6 +355,7 @@ extern bfd_target ecoff_big_vec;
 extern bfd_target sunos_big_vec;
 extern bfd_target demo_64_vec;
 extern bfd_target srec_vec;
+extern bfd_target tekhex_vec;
 extern bfd_target b_out_vec_little_host;
 extern bfd_target b_out_vec_big_host;
 extern bfd_target icoff_little_vec;
@@ -408,6 +410,7 @@ bfd_target *target_vector[] = {
 	&h8300coff_vec,
 	&m88kbcs_vec,
 	&srec_vec,
+/*	&tekhex_vec,*/
 	&icoff_little_vec,
 	&icoff_big_vec,
 	&elf_little_vec,
@@ -496,7 +499,7 @@ DESCRIPTION
 	modify the names 
 
 SYNOPSIS
-	CONST char **bfd_target_list();
+	CONST char **bfd_target_list(void);
 
 */
 
