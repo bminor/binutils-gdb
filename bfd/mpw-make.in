@@ -124,7 +124,7 @@ ALL_MACHINES = \Option-d
 	"{o}"cpu-z8k.c.o
 
 # The .c.o files needed by all of the 32 bit vectors that are configured into
-# target_vector in targets.c if configured with --with-targets=all.
+# target_vector in targets.c if configured with --enable-targets=all.
 BFD32_BACKENDS = \Option-d
 	"{o}"aout-adobe.c.o \Option-d
 	"{o}"aout32.c.o \Option-d
@@ -180,8 +180,8 @@ BFD32_BACKENDS = \Option-d
 	"{o}"sunos.c.o
 
 # The .c.o files needed by all of the 64 bit vectors that are configured into
-# target_vector in targets.c if configured with --with-targets=all
-# and --with-64-bit-bfd.
+# target_vector in targets.c if configured with --enable-targets=all
+# and --enable-64-bit-bfd.
 BFD64_BACKENDS = \Option-d
 	"{o}"aout64.c.o \Option-d
 	"{o}"coff-alpha.c.o \Option-d

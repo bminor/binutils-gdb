@@ -1,3 +1,7 @@
+Thu Jun 23 12:52:22 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* configure.in: Change --with-targets to --enable-targets.
+
 Wed Jun 22 13:42:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* lexsup.c (parse_args): Add support for new options -( -) with

@@ -1,3 +1,9 @@
+Thu Jun 23 12:53:41 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* configure.in: Change --with-targets to --enable-targets and
+	--with-64-bit-bfd to --enable-64-bit-bfd.
+	* Makefile.in, mpw-make.in, targets.c: Change comments.
+
 Wed Jun 22 17:59:59 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config.bfd (powerpc-*-elf*): New target, just like

@@ -1,4 +1,10 @@
+Thu Jun 23 12:52:46 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* configure.in: Change --with-targets to --enable-targets.
+
 Tue Jun 21 12:53:21 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* Makefile.in (sysinfo): Does not depend upon $(ADDL_LIBS).
 
 	* nlmconv.c (powerpc_build_stubs): Don't generate the PowerPC
 	NetWare custom header; no longer needed.
