@@ -33,6 +33,7 @@ decstation.h
 dgux.h
 delta68.h
 delta88.h
+delta88v4.h
 dose.h
 dpx2.h
 go32.h

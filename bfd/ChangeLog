@@ -1,3 +1,8 @@
+Thu Sep  2 00:59:55 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hosts/delta88v4.h: New for SVR4.
+	* configure.hosts: Use it.
+
 Wed Sep  1 14:23:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* libaout.h, netbsd386.c: Change M_I386 to M_386_NETBSD.  M_I386

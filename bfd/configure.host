@@ -25,6 +25,7 @@ hppa*-hp-bsd*)		my_host=hppabsd ;;
 hppa*-hp-osf*)		my_host=hppaosf ;;
 
 i[34]86-*-bsd*)		my_host=i386bsd ;;
+i[34]86-*-netbsd)	my_host=i386bsd ;;
 i[34]86-*-lynx*)	my_host=i386lynx ;;
 i[34]86-ncr*-sysv4*)	my_host=ncr3000 ;;
 i[34]86-*-go32*)		my_host=go32 ;;
@@ -62,9 +63,10 @@ m68*-motorola-sysv*)	my_host=delta68 ;;
 m68*-sony-*)		my_host=news ;;
 m68*-sun-*)		my_host=sun3 ;;
 
-m88k-motorola-*)	my_host=delta88 ;;
-m88k-harris-*)		my_host=harris ;;
-m88k-*-dgux*)		my_host=dgux ;;
+m88*-*-sysv4*)		my_host=delta88v4 ;;
+m88*-motorola-sysv*)	my_host=delta88 ;;
+m88*-harris-*)		my_host=harris ;;
+m88*-*-dgux*)		my_host=dgux ;;
 
 # Apparently the same config file as for 386 works.
 ns32k-*-mach*)		my_host=i386mach3 ;;
