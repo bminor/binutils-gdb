@@ -1,7 +1,26 @@
+Mon Jun 16 19:06:41 1997  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* mh-ppcpic: New file.
+	* mt-ppcpic: New file.
+
+Thu Mar 27 15:52:40 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* mh-cygwin32: override CXXFLAGS, setting to -O2 only
+	(no debug)
+
+Tue Mar 25 18:16:43 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* mh-cygwin32: override LIBGCC2_DEBUG_CFLAGS so debug info
+	isn't included in cygwin32-hosted libgcc2.a by default
+
 start-sanitize-r5900
 Mon Feb 24 22:37:52 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* mt-r5900 (LDFLAGS_FOR_TARGET): changed to idt.
+
+Fri Feb  7 16:39:29 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mt-r5900: added, 5900 specific flags.
 
 end-sanitize-r5900        
 Wed Jan  8 19:56:43 1997  Geoffrey Noer  <noer@cygnus.com>
