@@ -1,3 +1,8 @@
+Wed Jun 15 12:32:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (mips_ip): Permit non constant expressions in
+	'u' case: lets lui %hi(foo) work correctly.
+
 Mon Jun 13 12:08:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-aout.c (obj_aout_frob_symbol): Warn about an attempt

@@ -4647,9 +4647,9 @@ mips_ip (str, ip)
 
 	    case 'u':		/* upper 16 bits */
 	      c = my_getSmallExpression (&imm_expr, s);
-	      if (imm_expr.X_op != O_constant
-		  || imm_expr.X_add_number < 0
-		  || imm_expr.X_add_number >= 0x10000)
+	      if (imm_expr.X_op == O_constant
+		  && (imm_expr.X_add_number < 0
+		      || imm_expr.X_add_number >= 0x10000))
 		as_bad ("lui expression not in range 0..65535");
 	      imm_reloc = BFD_RELOC_LO16;
 	      if (c)
