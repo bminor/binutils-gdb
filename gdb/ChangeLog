@@ -1,3 +1,11 @@
+2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
+
+	* signals/signals.c (REALTIME_LO, REALTIME_HI): Define if
+	not already defined.  Use __SIGRTMIN if available.
+	(target_signal_from_host): Remove SIGRTMIN block.
+	(do_target_signal_to_host): Remove SIGRTMIN block; check that
+	the signal is within the realtime range.
+
 2003-03-25  Adam Fedor  <fedor@gnu.org>
 
 	* Makefile.in (infrun.o): Add $(language_h)
