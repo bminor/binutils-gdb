@@ -1,3 +1,9 @@
+2005-01-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.ac: Provide prerequisite headers when checking
+	<link.h>, <sys/proc.h> and <sys/user.h>.
+	* configure: Regenerate.
+
 2005-01-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/powerpc/obsd.mt (DEPRECATED_TM_FILE): Set to

@@ -356,9 +356,16 @@ fi
 AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_STDC
-AC_CHECK_HEADERS(link.h)
-AC_CHECK_HEADERS(machine/reg.h)
 AC_CHECK_HEADERS(nlist.h)
+AC_CHECK_HEADERS(link.h, [], [],
+[#if HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#if HAVE_NLIST_H
+# include <nlist.h>
+#endif
+])
+AC_CHECK_HEADERS(machine/reg.h)
 AC_CHECK_HEADERS(poll.h sys/poll.h)
 AC_CHECK_HEADERS(proc_service.h thread_db.h gnu/libc-version.h)
 AC_CHECK_HEADERS(stddef.h)
@@ -370,14 +377,22 @@ AC_CHECK_HEADERS(sys/file.h)
 AC_CHECK_HEADERS(sys/filio.h)
 AC_CHECK_HEADERS(sys/ioctl.h)
 AC_CHECK_HEADERS(sys/param.h)
-AC_CHECK_HEADERS(sys/proc.h)
+AC_CHECK_HEADERS(sys/proc.h, [], [],
+[#if HAVE_SYS_PARAM_H
+# include <sys/param.h>
+#endif
+])
 AC_CHECK_HEADERS(sys/procfs.h)
 AC_CHECK_HEADERS(sys/ptrace.h ptrace.h)
 AC_CHECK_HEADERS(sys/reg.h sys/debugreg.h)
 AC_CHECK_HEADERS(sys/select.h)
 AC_CHECK_HEADERS(sys/syscall.h)
 AC_CHECK_HEADERS(sys/types.h)
-AC_CHECK_HEADERS(sys/user.h)
+AC_CHECK_HEADERS(sys/user.h, [], [],
+[#if HAVE_SYS_PARAM_H
+# include <sys/param.h>
+#endif
+])
 AC_CHECK_HEADERS(sys/wait.h wait.h)
 AC_CHECK_HEADERS(termios.h termio.h sgtty.h)
 AC_CHECK_HEADERS(unistd.h)
