@@ -1,3 +1,10 @@
+Tue Dec  2 10:26:16 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c (TARGET_UNDERSCORE): Revert back to '_'
+	(USER_LABEL_PREFIX): Revert back to '_'
+
+	* config.bfd (targ_cpu): Add support for Thumb target.
+
 Mon Dec  1 20:24:18 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* coff-sh.c (sh_coff_howtos): Add R_SH_SWITCH8 entry.

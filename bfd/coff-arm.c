@@ -152,8 +152,8 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   return bfd_reloc_continue;
 }
 
-/* #define TARGET_UNDERSCORE '_' */
-#define TARGET_UNDERSCORE '\0'
+#define TARGET_UNDERSCORE '_'
+/* #define TARGET_UNDERSCORE '\0' */
 
 #ifndef PCRELOFFSET
 #define PCRELOFFSET true
@@ -1977,7 +1977,8 @@ coff_arm_bfd_copy_private_bfd_data (src, dest)
 /* Note:  the definitions here of LOCAL_LABEL_PREFIX and USER_LABEL_PREIFX
  *must* match the definitions on gcc/config/arm/semi.h.  */
 #define LOCAL_LABEL_PREFIX "."
-#define USER_LABEL_PREFIX ""
+#define USER_LABEL_PREFIX "_"
+/* #define USER_LABEL_PREFIX "" */
 
 static boolean
 coff_arm_is_local_label_name (abfd, name)
