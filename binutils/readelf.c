@@ -231,6 +231,7 @@ static void               free_abbrevs                PARAMS ((void));
 static void               add_abbrev                  PARAMS ((unsigned long, unsigned long, int));
 static void               add_abbrev_attr             PARAMS ((unsigned long, unsigned long));
 static unsigned char *    read_and_display_attr       PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long, unsigned long));
+static unsigned char *    read_and_display_attr_value PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long, unsigned long));
 static unsigned char *    display_block               PARAMS ((unsigned char *, unsigned long));
 static void               decode_location_expression  PARAMS ((unsigned char *, unsigned int, unsigned long));
 static void		  request_dump                PARAMS ((unsigned int, int));
@@ -6933,7 +6934,7 @@ decode_location_expression (data, pointer_size, length)
 
 
 static unsigned char *
-read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
+read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
      unsigned long   attribute;
      unsigned long   form;
      unsigned char * data;
@@ -6943,8 +6944,6 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
   unsigned long   uvalue = 0;
   unsigned char * block_start = NULL;
   int             bytes_read;
-
-  printf ("     %-18s:", get_AT_name (attribute));
 
   switch (form)
     {
@@ -6990,6 +6989,13 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
       uvalue = read_leb128 (data, & bytes_read, 0);
       data += bytes_read;
       break;
+
+    case DW_FORM_indirect:
+      form = read_leb128 (data, & bytes_read, 0);
+      data += bytes_read;
+      printf (" %s", get_FORM_name (form));
+      return read_and_display_attr_value (attribute, form, data, cu_offset,
+                                          pointer_size);
     }
 
   switch (form)
@@ -7065,7 +7071,7 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
       break;
 
     case DW_FORM_indirect:
-      warn (_("Unable to handle FORM: %d"), form);
+      /* handled above */
       break;
 
     default:
@@ -7224,6 +7230,20 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
       break;
     }
 
+  return data;
+}
+
+static unsigned char *
+read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
+     unsigned long   attribute;
+     unsigned long   form;
+     unsigned char * data;
+     unsigned long   cu_offset;
+     unsigned long   pointer_size;
+{
+  printf ("     %-18s:", get_AT_name (attribute));
+  data = read_and_display_attr_value (attribute, form, data, cu_offset,
+                                      pointer_size);
   printf ("\n");
   return data;
 }
