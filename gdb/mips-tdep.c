@@ -206,12 +206,6 @@ is_mips16_addr (CORE_ADDR addr)
 }
 
 static CORE_ADDR
-make_mips16_addr (CORE_ADDR addr)
-{
-  return ((addr) | 1);
-}
-
-static CORE_ADDR
 unmake_mips16_addr (CORE_ADDR addr)
 {
   return ((addr) & ~1);
@@ -4842,34 +4836,13 @@ static int
 gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  mips_extra_func_info_t proc_desc;
 
-  /* Search for the function containing this address.  Set the low bit
-     of the address when searching, in case we were given an even address
-     that is the start of a 16-bit function.  If we didn't do this,
-     the search would fail because the symbol table says the function
-     starts at an odd address, i.e. 1 byte past the given address.  */
-  memaddr = ADDR_BITS_REMOVE (memaddr);
-  proc_desc = non_heuristic_proc_desc (make_mips16_addr (memaddr), NULL);
-
-  /* Make an attempt to determine if this is a 16-bit function.  If
-     the procedure descriptor exists and the address therein is odd,
-     it's definitely a 16-bit function.  Otherwise, we have to just
-     guess that if the address passed in is odd, it's 16-bits.  */
   /* FIXME: cagney/2003-06-26: Is this even necessary?  The
      disassembler needs to be able to locally determine the ISA, and
      not rely on GDB.  Otherwize the stand-alone 'objdump -d' will not
      work.  */
-  if (proc_desc)
-    {
-      if (mips_pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
-	info->mach = bfd_mach_mips16;
-    }
-  else
-    {
-      if (mips_pc_is_mips16 (memaddr))
-	info->mach = bfd_mach_mips16;
-    }
+  if (mips_pc_is_mips16 (memaddr))
+    info->mach = bfd_mach_mips16;
 
   /* Round down the instruction address to the appropriate boundary.  */
   memaddr &= (info->mach == bfd_mach_mips16 ? ~1 : ~3);
