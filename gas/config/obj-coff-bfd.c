@@ -156,10 +156,10 @@ const pseudo_typeS obj_pseudo_table[] = {
 	{ "type",	obj_coff_type,		0	},
 	{ "val",	obj_coff_val,		0	},
         { "section",    obj_coff_section,       0       },
-        { "text",    obj_coff_text,       0       },
-        { "data",    obj_coff_data,       0       },
-
-	{ "ident",      s_ignore,		0 }, /* we don't yet handle this. */
+        { "text",       obj_coff_text,          0       },
+        { "data",       obj_coff_data,          0       },
+	/* we don't yet handle this. */
+	{ "ident",      s_ignore,		0       },
 	{ "ABORT",      s_abort,		0 },
 	{ "lcomm",	obj_coff_lcomm,	0},
 	{ NULL}	/* end sentinel */
@@ -419,74 +419,75 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 		  unsigned long *file_cursor)
 {
 
-  unsigned int i;
-  unsigned int paddr = 0;
+    unsigned int i;
+    unsigned int paddr = 0;
   
-  for (i = SEG_E0; i < SEG_UNKNOWN; i++) {  
-      unsigned int offset = 0;
+    for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
+    {  
+	unsigned int offset = 0;
 
-
-      struct internal_scnhdr *s = &( segment_info[i].scnhdr);
+	struct internal_scnhdr *s = &( segment_info[i].scnhdr);
 	  
-      if (s->s_name[0]) {
-	  fragS *frag = segment_info[i].frchainP->frch_root;
-	  char *buffer =  malloc(s->s_size);
-	  s->s_scnptr = *file_cursor;
-	  s->s_paddr =  paddr;
-	  s->s_vaddr =  paddr;
+	if (s->s_name[0]) 
+	{
+	    fragS *frag = segment_info[i].frchainP->frch_root;
+	    char *buffer =  malloc(s->s_size);
+	    s->s_scnptr = *file_cursor;
+	    s->s_paddr =  paddr;
+	    s->s_vaddr =  paddr;
 
-	  s->s_flags = STYP_REG;
-	  if (strcmp(s->s_name,".text")==0)
-	   s->s_flags |= STYP_TEXT;
-	  else if (strcmp(s->s_name,".data")==0)
-	   s->s_flags |= STYP_DATA;
-	  else if (strcmp(s->s_name,".bss")==0)
-	   s->s_flags |= STYP_BSS | STYP_NOLOAD;
+	    s->s_flags = STYP_REG;
+	    if (strcmp(s->s_name,".text")==0)
+	     s->s_flags |= STYP_TEXT;
+	    else if (strcmp(s->s_name,".data")==0)
+	     s->s_flags |= STYP_DATA;
+	    else if (strcmp(s->s_name,".bss")==0)
+	     s->s_flags |= STYP_BSS | STYP_NOLOAD;
 
-	  while (frag) {
-	      unsigned int fill_size;
-	      switch (frag->fr_type) {
+	    while (frag) {
+		    unsigned int fill_size;
+		    switch (frag->fr_type) {
 
-		case rs_fill:
-		case rs_align:
-		case rs_org:
-		  if(frag->fr_fix) 
-		  {
-		    memcpy(buffer + frag->fr_address,
-			   frag->fr_literal,
-			   frag->fr_fix);
-		    offset += frag->fr_fix;
-		  }
+			  case rs_fill:
+			  case rs_align:
+			  case rs_org:
+			    if(frag->fr_fix) 
+			    {
+				memcpy(buffer + frag->fr_address,
+				       frag->fr_literal,
+				       frag->fr_fix);
+				offset += frag->fr_fix;
+			    }
 
-		  fill_size = frag->fr_var;
-		  if (fill_size)	
-		  {
-		      unsigned int count ;
-		      unsigned int off = frag->fr_fix;
-		      for (count = frag->fr_offset; count;  count--) 
-		      {
-			  memcpy(buffer +  frag->fr_address  + off,
-				 frag->fr_literal + frag->fr_fix,
-				 fill_size);
-			  off += fill_size;
-			  offset += fill_size;
+			    fill_size = frag->fr_var;
+			    if (fill_size)	
+			    {
+				unsigned int count ;
+				unsigned int off = frag->fr_fix;
+				for (count = frag->fr_offset; count;  count--) 
+				{
+				    memcpy(buffer +  frag->fr_address  + off,
+					   frag->fr_literal + frag->fr_fix,
+					   fill_size);
+				    off += fill_size;
+				    offset += fill_size;
 		      
-		      }
+				}
 
-		  }
-		  break;
-		default:	
-		  abort();
+			    }
+			    break;
+			  default:	
+			    abort();
+			}
+		    frag = frag->fr_next;
 		}
-	      frag = frag->fr_next;
-	  }
 	  
 
-	  bfd_write(buffer, s->s_size,1,abfd);
-	  free(buffer);
+	    bfd_write(buffer, s->s_size,1,abfd);
+	    free(buffer);
 	  
-	  *file_cursor += s->s_size;
-	  paddr += s->s_size;
+	    *file_cursor += s->s_size;
+	    paddr += s->s_size;
 	}      
     }
 
@@ -703,22 +704,23 @@ static void obj_coff_ln() {
 				      *input_line_pointer == '\t') \
                                          input_line_pointer++;
 
-static void obj_coff_def(what)
-int what;
+static void 
+DEFUN(obj_coff_def,(what),
+      int what)
 {
-    char name_end; /* Char after the end of name */
-    char *symbol_name; /* Name of the debug symbol */
-    char *symbol_name_copy; /* Temporary copy of the name */
+    char name_end;		/* Char after the end of name */
+    char *symbol_name;		/* Name of the debug symbol */
+    char *symbol_name_copy;	/* Temporary copy of the name */
     unsigned int symbol_name_length;
     /*$char*	directiveP;$ */		/* Name of the pseudo opcode */
     /*$char directive[MAX_DIRECTIVE];$ */ /* Backup of the directive */
     /*$char end = 0;$ */ /* If 1, stop parsing */
 
     if (def_symbol_in_progress != NULL) {
-	as_warn(".def pseudo-op used inside of .def/.endef: ignored.");
-	demand_empty_rest_of_line();
-	return;
-    } /* if not inside .def/.endef */
+	    as_warn(".def pseudo-op used inside of .def/.endef: ignored.");
+	    demand_empty_rest_of_line();
+	    return;
+	}			/* if not inside .def/.endef */
 
     SKIP_WHITESPACES();
 
@@ -736,123 +738,125 @@ int what;
     S_SET_NAME(def_symbol_in_progress, (*symbol_name_copy == '_'
 					? symbol_name_copy + 1
 					: symbol_name_copy));
-#else /* STRIP_UNDERSCORE */
+#else				/* STRIP_UNDERSCORE */
     S_SET_NAME(def_symbol_in_progress, symbol_name_copy);
-#endif /* STRIP_UNDERSCORE */
+#endif				/* STRIP_UNDERSCORE */
     /* free(symbol_name_copy); */
     def_symbol_in_progress->sy_name_offset = ~0;
     def_symbol_in_progress->sy_number = ~0;
     def_symbol_in_progress->sy_frag = &zero_address_frag;
 
     if (S_IS_STRING(def_symbol_in_progress)) {
-	SF_SET_STRING(def_symbol_in_progress);
-    } /* "long" name */
+	    SF_SET_STRING(def_symbol_in_progress);
+	}			/* "long" name */
 
     *input_line_pointer = name_end;
 
     demand_empty_rest_of_line();
     return;
-} /* obj_coff_def() */
+}				/* obj_coff_def() */
 
 unsigned int dim_index;
-static void obj_coff_endef() {
-	symbolS *symbolP = 0;
-/* DIM BUG FIX sac@cygnus.com */
-	dim_index =0;
-	if (def_symbol_in_progress == NULL) {
-		as_warn(".endef pseudo-op used outside of .def/.endef: ignored.");
-		demand_empty_rest_of_line();
-		return;
-	} /* if not inside .def/.endef */
+static void 
+DEFUN_VOID(obj_coff_endef) 
+{
+    symbolS *symbolP = 0;
+    /* DIM BUG FIX sac@cygnus.com */
+    dim_index =0;
+    if (def_symbol_in_progress == NULL) {
+	    as_warn(".endef pseudo-op used outside of .def/.endef: ignored.");
+	    demand_empty_rest_of_line();
+	    return;
+	}			/* if not inside .def/.endef */
 
-	/* Set the section number according to storage class. */
-	switch (S_GET_STORAGE_CLASS(def_symbol_in_progress)) {
-	case C_STRTAG:
-	case C_ENTAG:
-	case C_UNTAG:
-		SF_SET_TAG(def_symbol_in_progress);
-		/* intentional fallthrough */
-	case C_FILE:
-	case C_TPDEF:
-		SF_SET_DEBUG(def_symbol_in_progress);
-		S_SET_SEGMENT(def_symbol_in_progress, SEG_DEBUG);
-		break;
+    /* Set the section number according to storage class. */
+    switch (S_GET_STORAGE_CLASS(def_symbol_in_progress)) {
+	  case C_STRTAG:
+	  case C_ENTAG:
+	  case C_UNTAG:
+	    SF_SET_TAG(def_symbol_in_progress);
+	    /* intentional fallthrough */
+	  case C_FILE:
+	  case C_TPDEF:
+	    SF_SET_DEBUG(def_symbol_in_progress);
+	    S_SET_SEGMENT(def_symbol_in_progress, SEG_DEBUG);
+	    break;
 
-	case C_EFCN:
-		SF_SET_LOCAL(def_symbol_in_progress);   /* Do not emit this symbol. */
-		/* intentional fallthrough */
-	case C_BLOCK:
-		SF_SET_PROCESS(def_symbol_in_progress); /* Will need processing before writing */
-		/* intentional fallthrough */
-	case C_FCN:
-		S_SET_SEGMENT(def_symbol_in_progress, SEG_E0);
+	  case C_EFCN:
+	    SF_SET_LOCAL(def_symbol_in_progress); /* Do not emit this symbol. */
+	    /* intentional fallthrough */
+	  case C_BLOCK:
+	    SF_SET_PROCESS(def_symbol_in_progress); /* Will need processing before writing */
+	    /* intentional fallthrough */
+	  case C_FCN:
+	    S_SET_SEGMENT(def_symbol_in_progress, SEG_E0);
 
-		if (def_symbol_in_progress->sy_symbol.ost_entry.n_name[1] == 'b') { /* .bf */
-			if (function_lineoff < 0) {
-				fprintf(stderr, "`.bf' symbol without preceding function\n");
-			} /* missing function symbol */
-			SA_GET_SYM_LNNOPTR(def_symbol_in_progress) = function_lineoff;
-			SF_SET_PROCESS(def_symbol_in_progress);	/* Will need relocating */
-			function_lineoff = -1;
+	    if (def_symbol_in_progress->sy_symbol.ost_entry.n_name[1] == 'b') { /* .bf */
+		    if (function_lineoff < 0) {
+			    fprintf(stderr, "`.bf' symbol without preceding function\n");
+			}	/* missing function symbol */
+		    SA_GET_SYM_LNNOPTR(def_symbol_in_progress) = function_lineoff;
+		    SF_SET_PROCESS(def_symbol_in_progress); /* Will need relocating */
+		    function_lineoff = -1;
 		}
-		break;
+	    break;
 
 #ifdef C_AUTOARG
-	case C_AUTOARG:
-#endif /* C_AUTOARG */
-	case C_AUTO:
-	case C_REG:
-	case C_MOS:
-	case C_MOE:
-	case C_MOU:
-	case C_ARG:
-	case C_REGPARM:
-	case C_FIELD:
-	case C_EOS:
-		SF_SET_DEBUG(def_symbol_in_progress);
-		S_SET_SEGMENT(def_symbol_in_progress, SEG_ABSOLUTE);
-		break;
+	  case C_AUTOARG:
+#endif				/* C_AUTOARG */
+	  case C_AUTO:
+	  case C_REG:
+	  case C_MOS:
+	  case C_MOE:
+	  case C_MOU:
+	  case C_ARG:
+	  case C_REGPARM:
+	  case C_FIELD:
+	  case C_EOS:
+	    SF_SET_DEBUG(def_symbol_in_progress);
+	    S_SET_SEGMENT(def_symbol_in_progress, SEG_ABSOLUTE);
+	    break;
 
-	case C_EXT:
-	case C_STAT:
-	case C_LABEL:	
-	/* Valid but set somewhere else (s_comm, s_lcomm, colon) */
-		break;
+	  case C_EXT:
+	  case C_STAT:
+	  case C_LABEL:	
+	    /* Valid but set somewhere else (s_comm, s_lcomm, colon) */
+	    break;
 
-	case C_USTATIC:
-	case C_EXTDEF:
-	case C_ULABEL:
-		as_warn("unexpected storage class %d", S_GET_STORAGE_CLASS(def_symbol_in_progress));
-		break;
-	} /* switch on storage class */
+	  case C_USTATIC:
+	  case C_EXTDEF:
+	  case C_ULABEL:
+	    as_warn("unexpected storage class %d", S_GET_STORAGE_CLASS(def_symbol_in_progress));
+	    break;
+	}			/* switch on storage class */
 
-	/* Now that we have built a debug symbol, try to
-	   find if we should merge with an existing symbol
-	   or not.  If a symbol is C_EFCN or SEG_ABSOLUTE or
-	   untagged SEG_DEBUG it never merges. */
+    /* Now that we have built a debug symbol, try to
+       find if we should merge with an existing symbol
+       or not.  If a symbol is C_EFCN or SEG_ABSOLUTE or
+       untagged SEG_DEBUG it never merges. */
 
-	/* Two cases for functions.  Either debug followed
-	   by definition or definition followed by debug.
-	   For definition first, we will merge the debug
-	   symbol into the definition.  For debug first, the
-	   lineno entry MUST point to the definition
-	   function or else it will point off into space
-	   when crawl_symbols() merges the debug
-	   symbol into the real symbol.  Therefor, let's
-	   presume the debug symbol is a real function
-	   reference. */
+    /* Two cases for functions.  Either debug followed
+       by definition or definition followed by debug.
+       For definition first, we will merge the debug
+       symbol into the definition.  For debug first, the
+       lineno entry MUST point to the definition
+       function or else it will point off into space
+       when crawl_symbols() merges the debug
+       symbol into the real symbol.  Therefor, let's
+       presume the debug symbol is a real function
+       reference. */
 
-	/* FIXME-SOON If for some reason the definition
-	   label/symbol is never seen, this will probably
-	   leave an undefined symbol at link time. */
+    /* FIXME-SOON If for some reason the definition
+       label/symbol is never seen, this will probably
+       leave an undefined symbol at link time. */
 
-	if (S_GET_STORAGE_CLASS(def_symbol_in_progress) == C_EFCN
-	    || (S_GET_SEGMENT(def_symbol_in_progress) == SEG_DEBUG
-		&& !SF_GET_TAG(def_symbol_in_progress))
-	    || S_GET_SEGMENT(def_symbol_in_progress) == SEG_ABSOLUTE
-	    || (symbolP = symbol_find_base(S_GET_NAME(def_symbol_in_progress), DO_NOT_STRIP)) == NULL) {
+    if (S_GET_STORAGE_CLASS(def_symbol_in_progress) == C_EFCN
+	|| (S_GET_SEGMENT(def_symbol_in_progress) == SEG_DEBUG
+	    && !SF_GET_TAG(def_symbol_in_progress))
+	|| S_GET_SEGMENT(def_symbol_in_progress) == SEG_ABSOLUTE
+	|| (symbolP = symbol_find_base(S_GET_NAME(def_symbol_in_progress), DO_NOT_STRIP)) == NULL) {
 
-		symbol_append(def_symbol_in_progress, symbol_lastP, &symbol_rootP, &symbol_lastP);
+	    symbol_append(def_symbol_in_progress, symbol_lastP, &symbol_rootP, &symbol_lastP);
 
 	} else {
 		/* This symbol already exists, merge the
@@ -878,72 +882,76 @@ static void obj_coff_endef() {
 			if (def_symbol_in_progress != symbol_lastP) {
 				symbol_remove(def_symbol_in_progress, &symbol_rootP, &symbol_lastP);
 				symbol_append(def_symbol_in_progress, symbol_lastP, &symbol_rootP, &symbol_lastP);
-			} /* if not already in place */
-		} /* if function */
-	} /* normal or mergable */
+			    }	/* if not already in place */
+		    }		/* if function */
+	    }			/* normal or mergable */
 
-	if (SF_GET_TAG(def_symbol_in_progress)
-	    && symbol_find_base(S_GET_NAME(def_symbol_in_progress), DO_NOT_STRIP) == NULL) {
-		tag_insert(S_GET_NAME(def_symbol_in_progress), def_symbol_in_progress);
-	} /* If symbol is a {structure,union} tag, associate symbol to its name. */
+    if (SF_GET_TAG(def_symbol_in_progress)
+	&& symbol_find_base(S_GET_NAME(def_symbol_in_progress), DO_NOT_STRIP) == NULL) {
+	    tag_insert(S_GET_NAME(def_symbol_in_progress), def_symbol_in_progress);
+	}			/* If symbol is a {structure,union} tag, associate symbol to its name. */
 
-	if (SF_GET_FUNCTION(def_symbol_in_progress)) {
-		know(sizeof(def_symbol_in_progress) <= sizeof(long));
-		function_lineoff 
-		 = c_line_new((long)
-			      def_symbol_in_progress,0, 0, &zero_address_frag);
+    if (SF_GET_FUNCTION(def_symbol_in_progress)) {
+	    know(sizeof(def_symbol_in_progress) <= sizeof(long));
+	    function_lineoff 
+	     = c_line_new((long)
+			  def_symbol_in_progress,0, 0, &zero_address_frag);
 
 
 
-		SF_SET_PROCESS(def_symbol_in_progress);
+	    SF_SET_PROCESS(def_symbol_in_progress);
 
-		if (symbolP == NULL) {
-			/* That is, if this is the first
-			   time we've seen the function... */
-			symbol_table_insert(def_symbol_in_progress);
-		    }		/* definition follows debug */
-	    }			/* Create the line number entry pointing to the function being defined */
+	    if (symbolP == NULL) {
+		    /* That is, if this is the first
+		       time we've seen the function... */
+		    symbol_table_insert(def_symbol_in_progress);
+		}		/* definition follows debug */
+	}			/* Create the line number entry pointing to the function being defined */
 
-	def_symbol_in_progress = NULL;
-	demand_empty_rest_of_line();
-	return;
-} /* obj_coff_endef() */
+    def_symbol_in_progress = NULL;
+    demand_empty_rest_of_line();
+    return;
+}				/* obj_coff_endef() */
 
-static void obj_coff_dim() 
+static void 
+DEFUN_VOID(obj_coff_dim) 
 {
     register int dim_index;
 
-    if (def_symbol_in_progress == NULL) {
+    if (def_symbol_in_progress == NULL) 
+    {
 	as_warn(".dim pseudo-op used outside of .def/.endef: ignored.");
 	demand_empty_rest_of_line();
 	return;
-    } /* if not inside .def/.endef */
+    }				/* if not inside .def/.endef */
 
     S_SET_NUMBER_AUXILIARY(def_symbol_in_progress, 1);
 
-    for (dim_index = 0; dim_index < DIMNUM; dim_index++) {
+    for (dim_index = 0; dim_index < DIMNUM; dim_index++) 
+    {
 	SKIP_WHITESPACES();
 	SA_SET_SYM_DIMEN(def_symbol_in_progress, dim_index, get_absolute_expression());
 
-	switch (*input_line_pointer) {
+	switch (*input_line_pointer) 
+	{
 
-	   case ',':
+	  case ',':
 	    input_line_pointer++;
 	    break;
 
-	   default:
+	  default:
 	    as_warn("badly formed .dim directive ignored");
 	    /* intentional fallthrough */
-	   case '\n':
-	   case ';':
+	  case '\n':
+	  case ';':
 	    dim_index = DIMNUM;
 	    break;
-	} /* switch on following character */
-    } /* for each dimension */
+	}			/* switch on following character */
+    }				/* for each dimension */
 
     demand_empty_rest_of_line();
     return;
-} /* obj_coff_dim() */
+}				/* obj_coff_dim() */
 
 static void obj_coff_line() {
 	if (def_symbol_in_progress == NULL) {
@@ -1269,10 +1277,12 @@ static unsigned int DEFUN_VOID(yank_symbols)
 	  /* next pointer remains valid */
 	  symbol_remove(symbolP, &symbol_rootP, &symbol_lastP);
 
-	} else if (!S_IS_DEFINED(symbolP)
-		   && !S_IS_DEBUG(symbolP) 
-		   && !SF_GET_STATICS(symbolP)) {
-	    /* S_GET_STORAGE_CLASS(symbolP) == C_EXT && !SF_GET_FUNCTION(symbolP)) { */
+	}
+      else if (!S_IS_DEFINED(symbolP)
+	       && !S_IS_DEBUG(symbolP) 
+	       && !SF_GET_STATICS(symbolP) &&
+	       S_GET_STORAGE_CLASS(symbolP) == C_EXT)
+      { /* C_EXT && !SF_GET_FUNCTION(symbolP))  */
 	    /* if external, Remove from the list */
 	    symbolS *hold = symbol_previous(symbolP);
 
@@ -1348,81 +1358,85 @@ static unsigned int DEFUN_VOID(tie_tags)
   
 }
 
-static void DEFUN(crawl_symbols,(headers, abfd),
-	   struct    internal_filehdr *headers AND
-	   bfd *abfd)
+static void 
+DEFUN(crawl_symbols,(headers, abfd),
+      struct    internal_filehdr *headers AND
+      bfd *abfd)
 {
 
-    unsigned int i;	
-    unsigned int ptr = 0;
+  unsigned int i;	
+  unsigned int ptr = 0;
 
 
-    symbolS *symbolP;
+  symbolS *symbolP;
 
-    /* Initialize the stack used to keep track of the matching .bb .be */
+  /* Initialize the stack used to keep track of the matching .bb .be */
 
-    block_stack = stack_init(512, sizeof(symbolS*));
-    /* JF deal with forward references first... */
-    for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next(symbolP)) {
+  block_stack = stack_init(512, sizeof(symbolS*));
+  /* JF deal with forward references first... */
+  for (symbolP = symbol_rootP;
+       symbolP;
+       symbolP = symbol_next(symbolP)) 
+  {
 
-	    if (symbolP->sy_forward) {
-		    S_SET_VALUE(symbolP, (S_GET_VALUE(symbolP)
-					  + S_GET_VALUE(symbolP->sy_forward)
-					  + symbolP->sy_forward->sy_frag->fr_address));
+    if (symbolP->sy_forward) {
+	S_SET_VALUE(symbolP, (S_GET_VALUE(symbolP)
+			      + S_GET_VALUE(symbolP->sy_forward)
+			      + symbolP->sy_forward->sy_frag->fr_address));
 
-		    if (SF_GET_GET_SEGMENT(symbolP)) {
-			    S_SET_SEGMENT(symbolP, S_GET_SEGMENT(symbolP->sy_forward));
-			}	/* forward segment also */
+	if (SF_GET_GET_SEGMENT(symbolP)) {
+	    S_SET_SEGMENT(symbolP, S_GET_SEGMENT(symbolP->sy_forward));
+	  }			/* forward segment also */
 
-		    symbolP->sy_forward=0;
-		}		/* if it has a forward reference */
-	}			/* walk the symbol chain */
-
-
-    /* The symbol list should be ordered according to the following sequence
-     * order :
-     * . .file symbol
-     * . debug entries for functions
-     * . fake symbols for the sections, including.text .data and .bss
-     * . defined symbols
-     * . undefined symbols
-     * But this is not mandatory. The only important point is to put the
-     * undefined symbols at the end of the list.
-     */
-
-    if (symbol_rootP == NULL
-	|| S_GET_STORAGE_CLASS(symbol_rootP) != C_FILE) {
-	    c_dot_file_symbol("fake");
-	}
-    /* Is there a .file symbol ? If not insert one at the beginning. */
-
-    /*
-     * Build up static symbols for the sections, they are filled in later
-     */
+	symbolP->sy_forward=0;
+      }				/* if it has a forward reference */
+  }				/* walk the symbol chain */
 
 
-    for (i = SEG_E0; i < SEG_E9; i++) 
-    {
-	if (segment_info[i].scnhdr.s_name[0])
-	{
-	    segment_info[i].dot = 
-	     c_section_symbol(segment_info[i].scnhdr.s_name,
-			      i-SEG_E0+1);
-	    
-	}
+  /* The symbol list should be ordered according to the following sequence
+   * order :
+   * . .file symbol
+   * . debug entries for functions
+   * . fake symbols for the sections, including.text .data and .bss
+   * . defined symbols
+   * . undefined symbols
+   * But this is not mandatory. The only important point is to put the
+   * undefined symbols at the end of the list.
+   */
+
+  if (symbol_rootP == NULL
+      || S_GET_STORAGE_CLASS(symbol_rootP) != C_FILE) {
+      c_dot_file_symbol("fake");
     }
+  /* Is there a .file symbol ? If not insert one at the beginning. */
+
+  /*
+   * Build up static symbols for the sections, they are filled in later
+   */
 
 
-    /* Take all the externals out and put them into another chain */
-    headers->f_nsyms =   yank_symbols();
-    /* Take the externals and glue them onto the end.*/
-    headers->f_nsyms +=  glue_symbols();
+  for (i = SEG_E0; i < SEG_E9; i++) 
+  {
+    if (segment_info[i].scnhdr.s_name[0])
+    {
+      segment_info[i].dot = 
+       c_section_symbol(segment_info[i].scnhdr.s_name,
+			i-SEG_E0+1);
+	    
+    }
+  }
 
-    headers->f_nsyms =   tie_tags();
-    know(symbol_externP == NULL);
-    know(symbol_extern_lastP  == NULL);
 
-    return;
+  /* Take all the externals out and put them into another chain */
+  headers->f_nsyms =   yank_symbols();
+  /* Take the externals and glue them onto the end.*/
+  headers->f_nsyms +=  glue_symbols();
+
+  headers->f_nsyms =   tie_tags();
+  know(symbol_externP == NULL);
+  know(symbol_extern_lastP  == NULL);
+
+  return;
 }
 
 /*
@@ -1505,14 +1519,7 @@ DEFUN(do_linenos_for,(abfd, file_cursor),
   }
 }
 
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
-/* end of obj-coff.c */
 /* Now we run through the list of frag chains in a segment and
    make all the subsegment frags appear at the end of the
    list, as if the seg 0 was extra long */
@@ -2101,6 +2108,7 @@ segT		this_segment_type)
 
 }				/* fixup_segment() */
 #endif
+
 
 
 
