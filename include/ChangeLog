@@ -1,3 +1,14 @@
+Mon Aug 12 17:03:18 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* ansidecl.h:  Change WIN32 to _WIN32.
+
+Fri Jul 26 13:58:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dis-asm.h: Add flavour field.
+	(print_insn_alpha): Declare.
+	(print_insn_alpha_osf, print_insn_alpha_vms): Don't declare.
+	(INIT_DISASSEMBLE_INFO): Initialize flavour field.
+
 Tue Jul 23 17:37:58 1996  Fred Fish  <fnf@cygnus.com>
 
 	* libiberty.h (PRIVATE_XMALLOC): Enclose xmalloc/xrealloc
