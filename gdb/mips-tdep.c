@@ -3209,7 +3209,7 @@ mips_extract_return_value (struct type *valtype,
 {
   struct return_value_word lo;
   struct return_value_word hi;
-  return_value_location (valtype, &lo, &hi);
+  return_value_location (valtype, &hi, &lo);
 
   memcpy (valbuf + lo.buf_offset,
 	  regbuf + REGISTER_BYTE (lo.reg) + lo.reg_offset,
@@ -3230,7 +3230,7 @@ mips_store_return_value (struct type *valtype, char *valbuf)
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   struct return_value_word lo;
   struct return_value_word hi;
-  return_value_location (valtype, &lo, &hi);
+  return_value_location (valtype, &hi, &lo);
 
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
