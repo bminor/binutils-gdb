@@ -1206,6 +1206,7 @@ CODE_FRAGMENT
 .  {* Basic absolute relocations *}
 .  BFD_RELOC_64,
 .  BFD_RELOC_32,
+.  BFD_RELOC_26,
 .  BFD_RELOC_16,
 .  BFD_RELOC_14,
 .  BFD_RELOC_8,
