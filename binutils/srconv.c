@@ -241,11 +241,9 @@ writeBARRAY (data, ptr, idx, size, file)
     {
       writeINT (data.data[i], ptr, idx, 1, file);
     }
-
-
-
-
 }
+
+
 static void
 writeCHARS (string, ptr, idx, size, file)
      char *string;
@@ -271,7 +269,7 @@ writeCHARS (string, ptr, idx, size, file)
       ptr[i++] = size;
     }
 
-
+  /* BUG WAITING TO HAPPEN */
   memcpy (ptr + i, string, size);
   i += size;
   *idx = i * 8;
@@ -294,8 +292,14 @@ static char *rname_h8300[] =
 static void
 wr_tr ()
 {
-  struct IT_tr t;
-  sysroff_swap_tr_out (file, &t);
+  /* The TR block is not normal - it doesn't have any contents. */
+
+  static char b[] = {
+    0xff,			/* IT */
+    0x03,			/* RL */
+    0xfd,			/* CS */
+  };
+  fwrite (b, 1, sizeof (b), file);
 }
 
 static void
@@ -392,7 +396,7 @@ wr_hd (p)
     case bfd_arch_sh:
       hd.au = 8;
       hd.si = 32;
-      hd.afl = 2;
+      hd.afl = 4;
       hd.spcsz = 0;
       hd.segsz = 0;
       hd.segsh = 0;
@@ -997,8 +1001,8 @@ walk_tree_symbol (sfile, section, symbol, nest)
     {
       dsy.type = STYPE_ENUM;
       dsy.assign = 0;
-      dsy.vallen = 4;
-      dsy.value = symbol->where->offset;
+      dsy.evallen = 4;
+      dsy.evalue = symbol->where->offset;
     }
 
   if (symbol->type->type == coff_structdef_type
@@ -1551,15 +1555,47 @@ wr_debug (p)
       n++;
     }
 }
+
 static void
 wr_cs ()
 {
   /* It seems that the CS struct is not normal - the size is wrong
      heres one I prepared earlier.. */
-  static char b[] =
-  {0x80, 0x21, 0x00, 0x80, 0x00, 0x80, 0x00, 0x80, 0x00, 0x80, 0x80, 0x80,
-   0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x00, 0x80, 0x00,
-   0x80, 0x80, 0x80, 0x80, 0x80, 0x00, 0x00, 0x00, 0xde};
+  static char b[] = {
+    0x80,			/* IT */
+    0x21,			/* RL */
+    0x00,			/* number of chars in variable length part */
+    0x80,			/* hd */ 
+    0x00,			/* hs */ 
+    0x80,			/* un */ 
+    0x00,			/* us */ 
+    0x80,			/* sc */ 
+    0x00,			/* ss */ 
+    0x80,			/* er */ 
+    0x80,			/* ed */ 
+    0x80,			/* sh */ 
+    0x80,			/* ob */ 
+    0x80,			/* rl */ 
+    0x80,			/* du */
+    0x80,			/* dps */
+    0x80,			/* dsy */
+    0x80,			/* dty */
+    0x80,			/* dln */
+    0x80,			/* dso */
+    0x80,			/* dus */
+    0x00,			/* dss */
+    0x80,			/* dbt */
+    0x00,			/* dpp */
+    0x80,			/* dfp */
+    0x80,			/* den */
+    0x80,			/* dds */
+    0x80,			/* dar */
+    0x80,			/* dpt */
+    0x00,			/* dul */
+    0x00,			/* dse */
+    0x00,			/* dot */
+    0xDE			/* CS */
+  };
   fwrite (b, 1, sizeof (b), file);
 }
 
@@ -1686,6 +1722,8 @@ int scount = 0;
 return scount;
 }
 
+
+/* Write out the ER records for a unit. */
 static void
 wr_er (ptr, sfile, first)
      struct coff_ofile *ptr;
@@ -1706,12 +1744,12 @@ wr_er (ptr, sfile, first)
 	      er.name = sym->name;
 	      sysroff_swap_er_out (file, &er);
 	      sym->er_number = idx++;
-
 	    }
 	}
     }
 }
 
+/* Write out the ED records for a unit. */
 static void
 wr_ed (ptr, sfile, first)
      struct coff_ofile *ptr;
@@ -1768,9 +1806,9 @@ wr_unit_info (ptr)
       wr_un (ptr, sfile, first, 0);
       nsecs = wr_sc (ptr, sfile);
       p2 = ftell (file);
-      fseek (file, p1, 0);
+      fseek (file, p1, SEEK_SET);
       wr_un (ptr, sfile, first, nsecs);
-      fseek (file, p2, 0);      
+      fseek (file, p2, SEEK_SET); 
       wr_er (ptr, sfile, first);
       wr_ed (ptr, sfile, first);
       first = 0;
@@ -1966,7 +2004,7 @@ main (ac, av)
       exit (1);
     }
 
-  file = fopen (output_file, "wb");
+  file = fopen (output_file, FOPEN_WB);
 
   if (!file)
     {
