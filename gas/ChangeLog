@@ -1,3 +1,11 @@
+2003-11-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (parse_cpu): New function, broken out from..
+	(md_parse_option): ..here.
+	(ppc_setup_opcodes): New function, broken out from..
+	(md_begin): ..here.
+	(ppc_machine): Implement .machine pseudo op.
+
 2003-11-20  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* depend.c: Convert to ISO-C.
