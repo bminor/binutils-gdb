@@ -135,6 +135,8 @@ tc-sparc.c
 tc-sparc.h
 tc-tahoe.c
 tc-tahoe.h
+tc-tic30.c
+tc-tic30.h
 tc-v850.c
 tc-v850.h
 tc-vax.c

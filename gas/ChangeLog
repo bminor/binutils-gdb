@@ -1,3 +1,22 @@
+Mon Feb  2 18:38:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sparc.c: Only include elf/sparc.h if OBJ_ELF.
+
+Mon Feb  2 18:30:34 1998  Steve Haworth  <steve@pm.cse.rmit.EDU.AU>
+
+	Add tms320c30 support:
+	* config/tc-tic30.h: New file.
+	* config/tc-tic30.c: New file.
+	* config/obj-coff.h: If TC_TIC30, include coff/tic30.h and define
+	TARGET_FORMAT as "coff-tic30".
+	* configure.in (tic30-*-*aout*, tic30-*-*coff*): New targets.
+	* Makefile.am: Rebuild dependencies.
+	(CPU_TYPES): Add tic30.
+	(CPU_OBJ_VALID): tic30-aout is valid.
+	(TARGET_CPU_CFILES): Add config/tc-tic30.c.
+	(TARGET_CPU_HFILES): Add config/tc-tic30.h.
+	* configure, Makefile.in: Rebuild.
+
 Mon Feb  2 10:20:37 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (md_assemble): Improvements to error messages

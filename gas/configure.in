@@ -286,6 +286,8 @@ changequote([,])dnl
       sparc-*-netbsd*)      fmt=aout em=nbsd bfd_gas=yes ;;
       sparc-*-openbsd*)     fmt=aout em=nbsd bfd_gas=yes ;;
 
+      tic30-*-*aout*)	    fmt=aout bfd_gas=yes ;;
+      tic30-*-*coff*)       fmt=coff bfd_gas=yes ;;
 # start-sanitize-tic80
       tic80-*-*)	    fmt=coff ;;
 # end-sanitize-tic80
@@ -344,7 +346,7 @@ changequote([,])dnl
 
     # do we need the opcodes library?
     case ${cpu_type} in
-      vax | i386)
+      vax | i386 | tic30)
 	;;
       *)
 	need_opcodes=yes

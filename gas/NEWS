@@ -1,5 +1,16 @@
 -*- text -*-
 
+Changes in 2.9:
+
+Texas Instruction c30 (tms320c30) support added.
+
+Added --gstabs option to generates stabs debugging information.
+
+The -a option takes a new suboption, m (e.g., -alm) to expand macros in a
+listing.
+
+Added -MD option to print dependencies.
+
 Changes in 2.8:
 
 BeOS support added.
@@ -21,6 +32,9 @@ The ELF assembler has a new pseudo-op, .symver, used for symbol versioning.
 
 The -a option takes a new suboption, c (e.g., -alc), to skip false conditionals
 in listings.
+
+Added new pseudo-op, .equiv; it's like .equ, except that it is an error if the
+symbol is already defined.
 
 Changes in 2.7:
 
