@@ -1140,13 +1140,21 @@ gdb_find_file_command (clientData, interp, objc, objv)
  *
  * This lists all the files in the current executible.
  *
+ * Note that this currently pulls in all sorts of filenames
+ * that aren't really part of the executable.  It would be
+ * best if we could check each file to see if it actually
+ * contains executable lines of code, but we can't do that
+ * with psymtabs.
+ *
  * Arguments:
  *    ?pathname? - If provided, only files which match pathname
- *        (up to strlen(pathname)) are included.
+ *        (up to strlen(pathname)) are included. THIS DOES NOT
+ *        CURRENTLY WORK BECAUSE PARTIAL_SYMTABS DON'T SUPPLY
+ *        THE FULL PATHNAME!!!
+ *
  * Tcl Result:
  *    A list of all matching files.
  */
-
 static int
 gdb_listfiles (clientData, interp, objc, objv)
   ClientData clientData;
@@ -1180,15 +1188,14 @@ gdb_listfiles (clientData, interp, objc, objv)
            files_size = files_size * 2;
            files = (char **) xrealloc (files, sizeof (char *) * files_size);
         }
-      if (len == 0)
+      if (psymtab->filename)
 	{
-	  if (psymtab->filename)
-	    files[numfiles++] = basename(psymtab->filename);
+	  if (!len || !strncmp(pathname, psymtab->filename,len)
+	      || !strcmp(psymtab->filename, basename(psymtab->filename)))
+	    {
+	      files[numfiles++] = basename(psymtab->filename);
+	    }
 	}
-      else if (!strcmp(psymtab->filename,basename(psymtab->filename))
-	       || !strncmp(pathname,psymtab->filename,len))
-	if (psymtab->filename)
-	  files[numfiles++] = basename(psymtab->filename);
     }
 
   ALL_SYMTABS (objfile, symtab)
@@ -1198,15 +1205,14 @@ gdb_listfiles (clientData, interp, objc, objv)
            files_size = files_size * 2;
            files = (char **) xrealloc (files, sizeof (char *) * files_size);
         }
-      if (len == 0)
+      if (symtab->filename && symtab->linetable && symtab->linetable->nitems)
 	{
-	  if (symtab->filename)
-	    files[numfiles++] = basename(symtab->filename);
+	  if (!len || !strncmp(pathname, symtab->filename,len)
+	      || !strcmp(symtab->filename, basename(symtab->filename)))
+	    {
+	      files[numfiles++] = basename(symtab->filename);
+	    }
 	}
-      else if (!strcmp(symtab->filename,basename(symtab->filename))
-	       || !strncmp(pathname,symtab->filename,len))
-	if (symtab->filename)
-	  files[numfiles++] = basename(symtab->filename);
     }
 
   qsort (files, numfiles, sizeof(char *), comp_files);
