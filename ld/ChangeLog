@@ -1,3 +1,9 @@
+1999-11-22  Nick Clifton  <nickc@cygnus.com>
+
+	* ldlang.c (lang_check_section_addresses): Fix test to determine
+	if a section should be tested.
+	(IGNORE_SECTION): New macro.
+
 Wed Nov  3 23:31:19 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_open_dynamic_archive):

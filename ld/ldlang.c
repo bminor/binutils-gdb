@@ -2608,6 +2608,10 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
   return dot;
 }
 
+#define IGNORE_SECTION(bfd, s) \
+  (((bfd_get_section_flags (bfd, s) & (SEC_ALLOC | SEC_LOAD)) == 0) \
+   || bfd_section_size (bfd, s) == 0)
+
 /* Check to see if any allocated sections overlap with other allocated
    sections.  This can happen when the linker script specifically specifies
    the output section addresses of the two sections.  */
@@ -2618,49 +2622,48 @@ lang_check_section_addresses ()
 
   /* Scan all sections in the output list.  */
   for (s = output_bfd->sections; s != NULL; s = s->next)
-    /* Ignore sections which are not loaded or which have no contents.  */
-    if ((bfd_get_section_flags (output_bfd, s) & (SEC_ALLOC | SEC_LOAD))
-	&& bfd_section_size (output_bfd, s) != 0)
-      {
-	asection * os;
+    {
+      asection * os;
+      
+      /* Ignore sections which are not loaded or which have no contents.  */
+      if (IGNORE_SECTION (output_bfd, s))
+	continue;
+      
+      /* Once we reach section 's' stop our seach.  This prevents two
+	 warning messages from being produced, one for 'section A overlaps
+	 section B' and one for 'section B overlaps section A'.  */
+      for (os = output_bfd->sections; os != s; os = os->next)
+	{
+	  bfd_vma s_start;
+	  bfd_vma s_end;
+	  bfd_vma os_start;
+	  bfd_vma os_end;
+	  
+	  /* Only consider loadable sections with real contents.  */
+	  if (IGNORE_SECTION (output_bfd, os))
+	    continue;
 
-	/* Once we reach section 's' stop our seach.  This prevents two
-	   warning messages from being produced, one for 'section A overlaps
-	   section B' and one for 'section B overlaps section A'.  */
-	for (os = output_bfd->sections; os != s; os = os->next)
-	  {
-	    bfd_vma s_start;
-	    bfd_vma s_end;
-	    bfd_vma os_start;
-	    bfd_vma os_end;
-
-	    /* Only consider loadable sections with real contents.  */
-	    if (((bfd_get_section_flags (output_bfd, os)
-		  & (SEC_ALLOC | SEC_LOAD)) == 0)
-		|| bfd_section_size (output_bfd, os) == 0)
-	      continue;
-
-	    /* We must check the sections' LMA addresses not their
-	       VMA addresses because overlay sections can have
-	       overlapping VMAs but they must have distinct LMAs.  */
-	    s_start  = bfd_section_lma (output_bfd, s);
-	    os_start = bfd_section_lma (output_bfd, os);
-	    s_end    = s_start  + bfd_section_size (output_bfd, s) - 1;
-	    os_end   = os_start + bfd_section_size (output_bfd, os) - 1;
-
-	    /* Look for an overlap.  */
-	    if ((s_end < os_start) || (s_start > os_end))
-	      continue;
-	    
-	    einfo (
+	  /* We must check the sections' LMA addresses not their
+	     VMA addresses because overlay sections can have
+	     overlapping VMAs but they must have distinct LMAs.  */
+	  s_start  = bfd_section_lma (output_bfd, s);
+	  os_start = bfd_section_lma (output_bfd, os);
+	  s_end    = s_start  + bfd_section_size (output_bfd, s) - 1;
+	  os_end   = os_start + bfd_section_size (output_bfd, os) - 1;
+	  
+	  /* Look for an overlap.  */
+	  if ((s_end < os_start) || (s_start > os_end))
+	    continue;
+	  
+	  einfo (
 _("%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"),
-		   s->name, s_start, s_end, os->name, os_start, os_end);
-
-	    /* Once we have found one overlap for this section,
-	       stop looking for others.  */
-	    break;
-	  }
-      }
+		 s->name, s_start, s_end, os->name, os_start, os_end);
+	  
+	  /* Once we have found one overlap for this section,
+	     stop looking for others.  */
+	  break;
+	}
+    }
 }
 
 /* This variable indicates whether bfd_relax_section should be called
