@@ -17,10 +17,14 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include "i386/xm-i386v.h"
+#define HOST_BYTE_ORDER LITTLE_ENDIAN
 
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
-#undef KERNEL_U_ADDR
 #define KERNEL_U_ADDR 0x0
 #define PSIGNAL_IN_SIGNAL_H
+
+#define NEED_POSIX_SETPGID
+
+/* Need R_OK etc, but USG isn't defined.  */
+#include <unistd.h>

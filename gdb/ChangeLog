@@ -1,3 +1,11 @@
+Mon Nov 15 11:38:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/i386/linux.mh: Remove XM_CLIBS, TERMLIB, SYSV_DEFINE, and
+	REGEX.
+	* config/i386/xm-linux.h: Don't include xm-i386v.h.  Define
+	HOST_BYTE_ORDER ourselves.  Define HAVE_TERMIOS not HAVE_TERMIO.
+	Define NEED_POSIX_SETPGID.  Include unistd.h.
+
 Mon Nov 15 12:29:10 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* symtab.c(gdb_mangle_name): fix the problem with constructor
