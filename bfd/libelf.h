@@ -178,9 +178,6 @@ struct elf_backend_data
      approach will need to be changed.  */
   int use_rela_p;
 
-  /* Whether this backend is 64 bits or not.  FIXME: Who cares?  */
-  int elf_64_p;
-
   /* The architecture for this backend.  */
   enum bfd_architecture arch;
 

@@ -1,6 +1,10 @@
 Sat Jul  1 00:11:08 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* elfxx-target.h: New file.
+
+	* libelf.h (struct elf_backend_data): Remove elf_64_p field.
+	* elfxx-target.h (elfNN_bed): Don't set it.
+
 	* elf32-target.h, elf64-target.h: Deleted.
 	* Makefile.in (elf32-target.h, elf64-target.h): Build them from
 	elfxx-target.h.

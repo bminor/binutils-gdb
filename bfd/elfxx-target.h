@@ -186,11 +186,6 @@ static CONST struct elf_backend_data elfNN_bed =
 #else
   1,				/* use_rela_p */
 #endif
-#if NN == 64
-  1,				/* elf_64_p */
-#else
-  0,				/* elf_64_p */
-#endif
   ELF_ARCH,			/* arch */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
