@@ -1,3 +1,10 @@
+Wed Jan  4 23:53:49 1995  Ian Lance Taylor  <ian@tweedledumb.cygnus.com>
+
+	* Makefile.in: Use /x/x/ instead of /brokensed/brokensed/, to
+	reduce command line length.
+	(AS_FOR_TARGET): Check for as.new, not Makefile.
+	(NM_FOR_TARGET): Check for nm.new, not Makefile.
+
 Wed Jan  4 13:02:39 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* config.guess:  Merge from FSF.

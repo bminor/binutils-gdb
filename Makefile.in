@@ -150,7 +150,7 @@ CC_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
+      t='$(program_transform_name)'; echo gcc | sed -e 's/x/x/' $$t; \
     fi; \
   fi`
 
@@ -162,7 +162,7 @@ CHILL_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
+      t='$(program_transform_name)'; echo gcc | sed -e 's/x/x/' $$t; \
     fi; \
   fi`
 
@@ -179,18 +179,18 @@ CXX_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CXX); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
+      t='$(program_transform_name)'; echo gcc | sed -e 's/x/x/' $$t; \
     fi; \
   fi`
 
 AS_FOR_TARGET = ` \
-  if [ -f $$r/gas/Makefile ] ; then \
+  if [ -f $$r/gas/as.new ] ; then \
     echo $$r/gas/as.new ; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(AS); \
     else \
-       t='$(program_transform_name)'; echo as | sed -e 's/brokensed/brokensed/' $$t ; \
+       t='$(program_transform_name)'; echo as | sed -e 's/x/x/' $$t ; \
     fi; \
   fi`
 
@@ -201,7 +201,7 @@ AR_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(AR); \
     else \
-       t='$(program_transform_name)'; echo ar | sed -e 's/brokensed/brokensed/' $$t ; \
+       t='$(program_transform_name)'; echo ar | sed -e 's/x/x/' $$t ; \
     fi; \
   fi`
 
@@ -212,21 +212,20 @@ RANLIB_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(RANLIB); \
     else \
-       t='$(program_transform_name)'; echo ranlib | sed -e 's/brokensed/brokensed/' $$t ; \
+       t='$(program_transform_name)'; echo ranlib | sed -e 's/x/x/' $$t ; \
     fi; \
   fi`
 
 NM_FOR_TARGET = ` \
-  if [ -f $$r/binutils/Makefile ] ; then \
+  if [ -f $$r/binutils/nm.new ] ; then \
     echo $$r/binutils/nm.new ; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(NM); \
     else \
-       t='$(program_transform_name)'; echo nm | sed -e 's/brokensed/brokensed/' $$t ; \
+       t='$(program_transform_name)'; echo nm | sed -e 's/x/x/' $$t ; \
     fi; \
   fi`
-
 
 #### host and target specific makefile fragments come in here.
 ###
@@ -362,7 +361,6 @@ ALL_MODULES = \
 	all-make \
 	all-mmalloc \
 	all-opcodes \
-	all-pagas \
 	all-patch \
 	all-prms \
 	all-rcs \
@@ -419,7 +417,6 @@ CROSS_CHECK_MODULES = \
 	check-make \
 	check-mmcheckoc \
 	check-opcodes \
-	check-pagas \
 	check-patch \
 	check-prms \
 	check-rcs \
@@ -471,7 +468,6 @@ INSTALL_MODULES = \
 	install-make \
 	install-mmalloc \
 	install-opcodes \
-	install-pagas \
 	install-patch \
 	install-prms \
 	install-rcs \
@@ -926,7 +922,7 @@ all-flex: all-libiberty all-byacc
 all-gas: all-libiberty all-opcodes all-bfd
 all-gash: all-tcl
 all-gawk:
-all-gcc: all-libiberty all-byacc all-binutils all-gas all-pagas
+all-gcc: all-libiberty all-byacc all-binutils all-gas
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-glob all-byacc all-sim all-gcc all-ld
 all-glob:
 all-gprof: all-libiberty all-bfd
@@ -937,16 +933,14 @@ all-hello: all-libiberty
 all-indent:
 all-ispell: all-emacs19
 all-ld: all-libiberty all-bfd all-byacc all-flex
-all-libg++: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib \
-	all-libio all-librx
-all-libio: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib 
+all-libg++: all-gas all-ld all-gcc all-xiberty all-newlib all-libio all-librx
+all-libio: all-gas all-ld all-gcc all-xiberty all-newlib 
 all-libiberty:
-all-libstdc++: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib \
-	all-libio
+all-libstdc++: all-gas all-ld all-gcc all-xiberty all-newlib all-libio
 all-m4: all-libiberty
 all-make: all-libiberty
 all-mmalloc:
-all-newlib: all-binutils all-gas all-pagas all-gcc
+all-newlib: all-binutils all-gas all-gcc
 all-opcodes: all-bfd
 all-patch:
 all-prms: all-libiberty
@@ -1149,7 +1143,7 @@ gas+binutils.tar.gz: $(DIST_SUPPORT) $(GASB_SUPPORT_DIRS) gas
 		SUPPORT_FILES="$(GASB_SUPPORT_DIRS) makeall.bat configure.bat"
 
 .PHONY: libg++.tar.gz
-LIBGXX_SUPPORT_DIRS=include libio librx libiberty xiberty
+LIBGXX_SUPPORT_DIRS=include libstdc++ libio librx libiberty xiberty
 libg++.tar.gz: $(DIST_SUPPORT) libg++
 	$(MAKE) -f Makefile.in taz TOOL=libg++ \
 		SUPPORT_FILES="$(LIBGXX_SUPPORT_DIRS)"
