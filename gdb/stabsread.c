@@ -3137,7 +3137,7 @@ read_enum_type (pp, type, objfile)
      that in something like "enum {FOO, LAST_THING=FOO}" we print
      FOO, not LAST_THING.  */
 
-  for (syms = *symlist, n = nsyms - 1; ; syms = syms->next)
+  for (syms = *symlist, n = nsyms - 1; syms; syms = syms->next)
     {
       int last = syms == osyms ? o_nsyms : 0;
       int j = syms->nsyms;
