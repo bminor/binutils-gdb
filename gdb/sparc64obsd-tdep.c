@@ -105,7 +105,7 @@ sparc64obsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 	continue;
 
       return 1;
-  }
+    }
 
   return 0;
 }

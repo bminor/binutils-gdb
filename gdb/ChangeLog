@@ -1,5 +1,8 @@
 2004-07-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64obsd-tdep.c (sparc64obsd_pc_in_sigtramp): Fix
+	indentation.
+
 	* mips-nat.c: Remove file.
 	* Makefile.in (ALLDEPFILES): Remove mips-nat.c
 	(mips-nat.o): Remove dependency.
