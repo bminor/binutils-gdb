@@ -1,5 +1,7 @@
 Thu Jul  1 09:51:27 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* xm-sysv4.h: Undefine HAVE_TERMIO.
+
 	* config/mips/nm-riscos.h: Remove unmatched #endif.
 	Define FETCH_INFERIOR_REGISTERS.
 	* config/mips/riscos.mh: Don't include coredep.o; mips-nat.o is enough.
@@ -593,7 +595,7 @@ Tue Jun  8 17:54:09 1993  Rob Savoye  (rob@rtl.cygnus.com)
 
 	* serial.c (serial_close): If scb is NULL, don't try to close
 	it. 
-o	* configure.in: Add support for rom68k and bug boot monitors.
+	* configure.in: Add support for rom68k and bug boot monitors.
 
 Tue Jun  8 17:39:12 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 

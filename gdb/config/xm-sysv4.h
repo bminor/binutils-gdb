@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* SVR4 has termios facilities. */
 
+#undef HAVE_TERMIO
 #define HAVE_TERMIOS
 
 /* SVR4 has mmap facilities */
