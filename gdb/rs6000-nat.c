@@ -73,9 +73,6 @@ static void
 exec_one_dummy_insn PARAMS ((void));
 
 extern void
-add_text_to_loadinfo PARAMS ((CORE_ADDR textaddr, CORE_ADDR dataaddr));
-
-extern void
 fixup_breakpoints PARAMS ((CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta));
 
 /* Conversion from gdb-to-system special purpose register numbers.. */
@@ -248,7 +245,7 @@ exec_one_dummy_insn ()
 #define	DUMMY_INSN_ADDR	(TEXT_SEGMENT_BASE)+0x200
 
   char shadow_contents[BREAKPOINT_MAX];	/* Stash old bkpt addr contents */
-  unsigned int status, pid;
+  int status, pid;
   CORE_ADDR prev_pc;
 
   /* We plant one dummy breakpoint into DUMMY_INSN_ADDR address. We assume that
@@ -623,24 +620,11 @@ xcoff_relocate_symtab (pid)
 
   errno = 0;
   ptrace (PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
-	  MAX_LOAD_SEGS * sizeof(*ldi), ldi);
+	  MAX_LOAD_SEGS * sizeof(*ldi), (int *) ldi);
   if (errno)
     perror_with_name ("ptrace ldinfo");
 
   vmap_ldinfo (ldi);
-
-  do {
-    /* We are allowed to assume CORE_ADDR == pointer.  This code is
-       native only.  */
-    add_text_to_loadinfo ((CORE_ADDR) ldi->ldinfo_textorg,
-			  (CORE_ADDR) ldi->ldinfo_dataorg);
-  } while (ldi->ldinfo_next
-	   && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
-
-#if 0
-  /* Now that we've jumbled things around, re-sort them.  */
-  sort_minimal_symbols ();
-#endif
 
   /* relocate the exec and core sections as well. */
   vmap_exec ();
@@ -780,9 +764,6 @@ xcoff_relocate_core (target)
 	}
 
       vmap_symtab (vp);
-
-      add_text_to_loadinfo ((CORE_ADDR)ldip->ldinfo_textorg,
-			    (CORE_ADDR)ldip->ldinfo_dataorg);
     } while (ldip->ldinfo_next != 0);
   vmap_exec ();
   breakpoint_re_set ();
@@ -794,7 +775,30 @@ kernel_u_size ()
 {
   return (sizeof (struct user));
 }
+
+/* Under AIX, we have to pass the correct TOC pointer to a function
+   when calling functions in the inferior.
+   We try to find the relative toc offset of the objfile containing PC
+   and add the current load address of the data segment from the vmap.  */
 
+static CORE_ADDR
+find_toc_address (pc)
+     CORE_ADDR pc;
+{
+  struct vmap *vp;
+
+  for (vp = vmap; vp; vp = vp->nxt)
+    {
+      if (pc >= vp->tstart && pc < vp->tend)
+	{
+	  /* vp->objfile is only NULL for the exec file.  */
+	  return vp->dstart + get_toc_offset (vp->objfile == NULL
+					      ? symfile_objfile
+					      : vp->objfile);
+	}
+    }
+  error ("Unable to find TOC entry for pc 0x%x\n", pc);
+}
 
 /* Register that we are able to handle rs6000 core file formats. */
 
@@ -808,6 +812,10 @@ static struct core_fns rs6000_core_fns =
 void
 _initialize_core_rs6000 ()
 {
+  /* Initialize hook in rs6000-tdep.c for determining the TOC address when
+     calling functions in the inferior.  */
+  find_toc_address_hook = &find_toc_address;
+
   /* For native configurations, where this module is included, inform
      the xcoffsolib module where it can find the function for symbol table
      relocation at runtime. */

@@ -44,9 +44,13 @@ static struct sstep_breaks {
   char data[4];
 } stepBreaks[2];
 
-/* Static function prototypes */
+/* Hook for determining the TOC address when calling functions in the
+   inferior under AIX. The initialization code in rs6000-nat.c sets
+   this hook to point to find_toc_address.  */
 
-static CORE_ADDR find_toc_address PARAMS ((CORE_ADDR pc));
+CORE_ADDR (*find_toc_address_hook) PARAMS ((CORE_ADDR)) = NULL;
+
+/* Static function prototypes */
 
 static CORE_ADDR branch_dest PARAMS ((int opcode, int instr, CORE_ADDR pc,
 				      CORE_ADDR safety));
@@ -651,19 +655,22 @@ rs6000_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
 
   int ii;
   CORE_ADDR target_addr;
-  CORE_ADDR tocvalue;
+
+  if (find_toc_address_hook != NULL)
+    {
+      CORE_ADDR tocvalue;
+
+      tocvalue = (*find_toc_address_hook) (fun);
+      ii  = *(int*)((char*)dummyname + TOC_ADDR_OFFSET);
+      ii = (ii & 0xffff0000) | (tocvalue >> 16);
+      *(int*)((char*)dummyname + TOC_ADDR_OFFSET) = ii;
+
+      ii  = *(int*)((char*)dummyname + TOC_ADDR_OFFSET+4);
+      ii = (ii & 0xffff0000) | (tocvalue & 0x0000ffff);
+      *(int*)((char*)dummyname + TOC_ADDR_OFFSET+4) = ii;
+    }
 
   target_addr = fun;
-  tocvalue = find_toc_address (target_addr);
-
-  ii  = *(int*)((char*)dummyname + TOC_ADDR_OFFSET);
-  ii = (ii & 0xffff0000) | (tocvalue >> 16);
-  *(int*)((char*)dummyname + TOC_ADDR_OFFSET) = ii;
-
-  ii  = *(int*)((char*)dummyname + TOC_ADDR_OFFSET+4);
-  ii = (ii & 0xffff0000) | (tocvalue & 0x0000ffff);
-  *(int*)((char*)dummyname + TOC_ADDR_OFFSET+4) = ii;
-
   ii  = *(int*)((char*)dummyname + TARGET_ADDR_OFFSET);
   ii = (ii & 0xffff0000) | (target_addr >> 16);
   *(int*)((char*)dummyname + TARGET_ADDR_OFFSET) = ii;
@@ -1163,107 +1170,6 @@ rs6000_frame_chain (thisframe)
   return fp;
 }
 
-/* Keep an array of load segment information and their TOC table addresses.
-   This info will be useful when calling a shared library function by hand. */
-   
-struct loadinfo {
-  CORE_ADDR textorg, dataorg;
-  unsigned long toc_offset;
-};
-
-#define	LOADINFOLEN	10
-
-static	struct loadinfo *loadinfo = NULL;
-static	int	loadinfolen = 0;
-static	int	loadinfotocindex = 0;
-static	int	loadinfotextindex = 0;
-
-
-void
-xcoff_init_loadinfo ()
-{
-  loadinfotocindex = 0;
-  loadinfotextindex = 0;
-
-  if (loadinfolen == 0) {
-    loadinfo = (struct loadinfo *)
-               xmalloc (sizeof (struct loadinfo) * LOADINFOLEN);
-    loadinfolen = LOADINFOLEN;
-  }
-}
-
-
-/* FIXME -- this is never called!  */
-#if 0
-void
-free_loadinfo ()
-{
-  if (loadinfo)
-    free (loadinfo);
-  loadinfo = NULL;
-  loadinfolen = 0;
-  loadinfotocindex = 0;
-  loadinfotextindex = 0;
-}
-#endif
-
-/* this is called from xcoffread.c */
-
-void
-xcoff_add_toc_to_loadinfo (tocoff)
-     unsigned long tocoff;
-{
-  while (loadinfotocindex >= loadinfolen) {
-    loadinfolen += LOADINFOLEN;
-    loadinfo = (struct loadinfo *)
-               xrealloc (loadinfo, sizeof(struct loadinfo) * loadinfolen);
-  }
-  loadinfo [loadinfotocindex++].toc_offset = tocoff;
-}
-
-void
-add_text_to_loadinfo (textaddr, dataaddr)
-     CORE_ADDR textaddr;
-     CORE_ADDR dataaddr;
-{
-  while (loadinfotextindex >= loadinfolen) {
-    loadinfolen += LOADINFOLEN;
-    loadinfo = (struct loadinfo *)
-               xrealloc (loadinfo, sizeof(struct loadinfo) * loadinfolen);
-  }
-  loadinfo [loadinfotextindex].textorg = textaddr;
-  loadinfo [loadinfotextindex].dataorg = dataaddr;
-  ++loadinfotextindex;
-}
-
-
-/* Note that this assumes that the "textorg" and "dataorg" elements of
-   a member of this array are correlated with the "toc_offset" element
-   of the same member.  This is taken care of because the loops which
-   assign the former (in xcoff_relocate_symtab or xcoff_relocate_core)
-   and the latter (in scan_xcoff_symtab, via vmap_symtab, in
-   vmap_ldinfo or xcoff_relocate_core) traverse the same objfiles in
-   the same order.  */
-
-static CORE_ADDR
-find_toc_address (pc)
-     CORE_ADDR pc;
-{
-  int ii, toc_entry;
-  CORE_ADDR tocbase = 0;
-
-  toc_entry = -1;
-  for (ii=0; ii < loadinfotextindex; ++ii)
-    if (pc > loadinfo[ii].textorg && loadinfo[ii].textorg > tocbase) {
-      toc_entry = ii;
-      tocbase = loadinfo[ii].textorg;
-    }
-
-  if (toc_entry == -1)
-    error ("Unable to find TOC entry for pc 0x%x\n", pc);
-  return loadinfo[toc_entry].dataorg + loadinfo[toc_entry].toc_offset;
-}
-
 /* Return nonzero if ADDR (a function pointer) is in the data space and
    is therefore a special function pointer.  */
 
@@ -1296,22 +1202,6 @@ gdb_print_insn_powerpc (memaddr, info)
 void
 _initialize_rs6000_tdep ()
 {
-#ifndef ELF_OBJECT_FORMAT
-  {
-    extern void (*xcoff_add_toc_to_loadinfo_hook) PARAMS ((unsigned long));
-    extern void (*xcoff_init_loadinfo_hook) PARAMS ((void));
-
-    /* Initialize hook in xcoffread for recording the toc offset value
-       of a symbol table into the ldinfo structure, for native rs6000
-       config. */
-    xcoff_add_toc_to_loadinfo_hook = &xcoff_add_toc_to_loadinfo;
-
-    /* Initialize hook in xcoffread for calling xcoff_init_loadinfo in
-       a native rs6000 config. */
-    xcoff_init_loadinfo_hook = &xcoff_init_loadinfo;
-  }
-#endif /* ELF_OBJECT_FORMAT */
-
   /* FIXME, this should not be decided via ifdef. */
 #ifdef GDB_TARGET_POWERPC
   tm_print_insn = gdb_print_insn_powerpc;

@@ -88,17 +88,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This is output from LD.  */
 #define N_SETV	0x1C		/* Pointer to set vector in data area.  */
-
-/* Hook for recording the toc offset value of a symbol table into
-   the ldinfo structure. */
-
-void (*xcoff_add_toc_to_loadinfo_hook) PARAMS ((unsigned long)) = NULL;
-
-/* Hook for recording how to call xcoff_init_loadinfo for a native
-   rs6000 config only. */
-
-void (*xcoff_init_loadinfo_hook) PARAMS ((void)) = NULL;
-
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
@@ -185,6 +174,9 @@ struct coff_symfile_info {
 
   /* Number of symbols in symtbl.  */
   int symtbl_num_syms;
+
+  /* Offset in data section to TOC anchor.  */
+  CORE_ADDR toc_offset;
 };
 
 static struct complaint storclass_complaint =
@@ -2628,12 +2620,22 @@ scan_xcoff_symtab (section_offsets, objfile)
 			 dependencies_used, textlow_not_set);
     }
 
-  /* Record the toc offset value of this symbol table into ldinfo structure.
+  /* Record the toc offset value of this symbol table into objfile structure.
      If no XMC_TC0 is found, toc_offset should be zero. Another place to obtain
      this information would be file auxiliary header. */
 
-  if (xcoff_add_toc_to_loadinfo_hook != NULL)
-    (*xcoff_add_toc_to_loadinfo_hook) ((unsigned long) toc_offset);
+  ((struct coff_symfile_info *) objfile->sym_private)->toc_offset = toc_offset;
+}
+
+/* Return the toc offset value for a given objfile.  */
+
+CORE_ADDR
+get_toc_offset (objfile)
+     struct objfile *objfile;
+{
+  if (objfile)
+    return ((struct coff_symfile_info *) objfile->sym_private)->toc_offset;
+  return 0;
 }
 
 /* Scan and build partial symbols for a symbol file.
@@ -2661,10 +2663,6 @@ xcoff_initial_scan (objfile, section_offsets, mainline)
   struct coff_symfile_info *info;
   char *name;
   unsigned int size;
-
-  /* Initialize load info structure. */
-  if (mainline && xcoff_init_loadinfo_hook != NULL)
-    (*xcoff_init_loadinfo_hook) ();
 
   info = (struct coff_symfile_info *) objfile -> sym_private;
   symfile_bfd = abfd = objfile->obfd;

@@ -53,9 +53,6 @@ struct vmap_and_bfd {
 
 extern struct vmap *vmap;
 
-extern void
-add_text_to_loadinfo PARAMS ((CORE_ADDR textaddr, CORE_ADDR dataaddr));
-
 /* Hook for symbol table relocation at runtime. */
 
 extern void (*xcoff_relocate_symtab_hook) PARAMS ((unsigned int));

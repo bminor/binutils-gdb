@@ -1,3 +1,49 @@
+Fri Aug 15 13:59:37 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* infrun.c (wait_for_inferior):  Add the symbols for any
+	newly loaded objects upon a TARGET_WAITKIND_LOADED event.
+
+	Rewrite code which determines the TOC address for calling functions
+	in the inferior under AIX.
+	* rs6000-nat.c (find_toc_address):  New function to determine
+	the required TOC address from a function address.
+	(_initialize_core_rs6000):  Set up find_toc_address_hook to point
+	to find_toc_address.
+	(xcoff_relocate_symtab, xcoff_relocate_core):  Remove
+	add_text_to_loadinfo calls.
+	(exec_one_dummy_insn):  Change pid and status to int to get rid of
+	compiler warnings.
+	(xcoff_relocate_symtab):  Cast ldi to `int *' when passing it to
+	ptrace to get rid of compiler warnings.
+	* rs6000-tdep.c:  Add definition for find_toc_address_hook.
+	(rs6000_fix_call_dummy):  If find_toc_address_hook is non zero,
+	patch TOC address load code in the call dummy with the value
+	returned from find_toc_address_hook.
+	(struct loadinfo, loadinfo, loadinfolen,
+	loadinfotextindex, xcoff_init_loadinfo, free_loadinfo,
+	xcoff_add_toc_to_loadinfo, add_text_to_loadinfo, find_toc_address):
+	Remove.
+	(_initialize_rs6000_tdep):  Remove initialization of
+	coff_add_toc_to_loadinfo_hook and xcoff_init_loadinfo_hook.
+	* xcoffread.c (coff_add_toc_to_loadinfo_hook,
+	xcoff_init_loadinfo_hook):  Remove.
+	(struct coff_symfile_info):  Add toc_offset field.
+	(scan_xcoff_symtab):  Record toc_offset value in toc_offset field
+	instead of calling xcoff_add_toc_to_loadinfo_hook.
+	(get_toc_offset):  New function to return the value of the
+	toc_offset field for an object file.
+	(xcoff_initial_scan):  Remove call of xcoff_init_loadinfo_hook.
+	* xcoffsolib.h (add_text_to_loadinfo):  Remove declaration.
+	* config/rs6000/tm-rs6000.h:  Add declarations for
+	find_toc_address_hook and get_toc_offset.
+
+Wed Aug 13 19:31:28 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-sds.c: New file, interface to SDS-compatible monitors.
+	* Makefile.in (remote-sds.o): Add build rule.
+	* config/powerpc/ppc-eabi.mt, config/powerpc/ppc-sim.mt
+ 	(TDEPFILES): Add remote-sds.o.
+
 Tue Aug 12 14:37:18 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* ocd.c (ocd_wait): loop until we're in BDM mode instead of
