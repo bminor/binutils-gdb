@@ -1,3 +1,9 @@
+2005-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* ldlex.l (YY_NO_UNPUT): Define so that the yy_unput function is
+	not declared.  It is not used and its presence causes a compile
+	time warning.
+	
 2005-02-11  Zack Weinberg  <zack@codesourcery.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_stat_needed):
