@@ -209,9 +209,11 @@ skip_prologue (pc, fdata)
   CORE_ADDR orig_pc = pc;
   char buf[4];
   unsigned long op;
+  long offset = 0;
   int lr_reg = 0;
   int cr_reg = 0;
   int reg;
+  int framep = 0;
   static struct rs6000_framedata zero_frame;
 
   *fdata = zero_frame;
@@ -243,7 +245,7 @@ skip_prologue (pc, fdata)
 	reg = GET_SRC_REG (op);
 	if (fdata->saved_fpr == -1 || fdata->saved_fpr > reg) {
 	  fdata->saved_fpr = reg;
-	  fdata->fpr_offset = SIGNED_SHORT (op);
+	  fdata->fpr_offset = SIGNED_SHORT (op) + offset;
 	}
 	continue;
 
@@ -254,7 +256,7 @@ skip_prologue (pc, fdata)
 	reg = GET_SRC_REG (op);
 	if (fdata->saved_gpr == -1 || fdata->saved_gpr > reg) {
 	  fdata->saved_gpr = reg;
-	  fdata->gpr_offset = SIGNED_SHORT (op);
+	  fdata->gpr_offset = SIGNED_SHORT (op) + offset;
 	}
 	continue;
 
@@ -267,14 +269,26 @@ skip_prologue (pc, fdata)
 	continue;
 
       } else if ((op & 0xffff0000) == lr_reg) {		/* st Rx,NUM(r1) where Rx == lr */
-	fdata->lr_offset = SIGNED_SHORT (op);
+	fdata->lr_offset = SIGNED_SHORT (op) + offset;
 	fdata->nosavedpc = 0;
 	lr_reg = 0;
 	continue;
 
       } else if ((op & 0xffff0000) == cr_reg) {		/* st Rx,NUM(r1) where Rx == cr */
-	fdata->cr_offset = SIGNED_SHORT (op);
+	fdata->cr_offset = SIGNED_SHORT (op) + offset;
 	cr_reg = 0;
+	continue;
+
+      } else if (op == 0x48000005) {			/* bl .+4 used in -mrelocatable */
+	continue;
+
+      } else if (((op & 0xffff0000) == 0x801e0000 ||	/* lwz 0,NUM(r30), used in V.4 -mrelocatable */
+		  op == 0x7fc0f214) &&			/* add r30,r0,r30, used in V.4 -mrelocatable */
+		 lr_reg == 0x901e0000) {
+	continue;
+
+      } else if ((op & 0xffff0000) == 0x3fc00000 ||	/* addis 30,0,foo@ha, used in V.4 -mminimal-toc */
+		 (op & 0xffff0000) == 0x3bde0000) {	/* addi 30,30,foo@l */
 	continue;
 
       } else if ((op & 0xfc000000) == 0x48000000) {	/* bl foo, to save fprs??? */
@@ -290,67 +304,43 @@ skip_prologue (pc, fdata)
 
 	continue;
 
+      /* update stack pointer */
       } else if ((op & 0xffff0000) == 0x94210000) {	/* stu r1,NUM(r1) */
-	fdata->offset = - SIGNED_SHORT (op);
-	pc += 4;
-	op = read_memory_integer (pc, 4);
-	break;
+	fdata->offset = SIGNED_SHORT (op);
+	offset = fdata->offset;
+	continue;
 
       } else if (op == 0x7c21016e) {			/* stwux 1,1,0 */
-	pc += 4;					/* offset set above  */
-	op = read_memory_integer (pc, 4);
-	break;
+	offset = fdata->offset;
+	continue;
+
+      /* Load up minimal toc pointer */
+      } else if ((op >> 22) == 0x20f) {			/* l r31,... or l r30,... */
+	continue;
+
+      /* store parameters in stack */
+      } else if ((op & 0xfc1f0000) == 0x90010000 ||	/* st rx,NUM(r1) */
+		 (op & 0xfc1f0000) == 0xd8010000 ||	/* stfd Rx,NUM(r1) */
+		 (op & 0xfc1f0000) == 0xfc010000) {	/* frsp, fp?,NUM(r1) */
+	continue;
+
+      /* store parameters in stack via frame pointer */
+      } else if (framep &&
+		 (op & 0xfc1f0000) == 0x901f0000 ||	/* st rx,NUM(r1) */
+		 (op & 0xfc1f0000) == 0xd81f0000 ||	/* stfd Rx,NUM(r1) */
+		 (op & 0xfc1f0000) == 0xfc1f0000) {	/* frsp, fp?,NUM(r1) */
+	continue;
+
+      /* Set up frame pointer */
+      } else if (op == 0x603f0000			/* oril r31, r1, 0x0 */
+		 || op == 0x7c3f0b78) {			/* mr r31, r1 */
+	framep = 1;
+	continue;
 
       } else {
 	break;
       }
     }
-
-  /* Skip -mreloctable (V.4/eabi) load up the toc case */
-  if (op == 0x48000005 &&					/* bl .+4 */
-      read_memory_integer (pc+4, 4) == 0x7fc802a6 &&		/* mflr r30 */
-      (read_memory_integer (pc+8, 4) & 0xffff) == 0x801e0000 &&	/* lwz 0,NUM(r30) */
-      read_memory_integer (pc+12, 4) == 0x7fc0f214) {		/* add r30,r0,r30 */
-    pc += 16;
-    op = read_memory_integer (pc, 4);
-
-  /* And -mminimal-toc code on V.4 */
-  } else if ((op & 0xffff0000) == 0x3fc00000 &&			/* addis 30,0,foo@ha */
-								/* addi 30,30,foo@l */
-	     ((read_memory_integer (pc+4, 4) & 0xffff0000) == 0x3bde0000)) {
-    pc += 8;
-    op = read_memory_integer (pc, 8);
-  }
-
-  while ((op >> 22) == 0x20f) {				/* l r31, ... or */
-    pc += 4;						/* l r30, ...    */
-    op = read_memory_integer (pc, 4);
-  }
-
-  /* store parameters into stack */
-  while(
-	(op & 0xfc1f0000) == 0x90010000 ||		/* st rx,NUM(r1) */
-	(op & 0xfc1f0000) == 0xd8010000 ||		/* stfd Rx,NUM(r1) */
-	(op & 0xfc1f0000) == 0xfc010000) {		/* frsp, fp?,NUM(r1) */
-    pc += 4;
-    op = read_memory_integer (pc, 4);
-  }
-
-  /* Set up frame pointer */
-  if (op == 0x603f0000					/* oril r31, r1, 0x0 */
-      || op == 0x7c3f0b78) {				/* mr r31, r1 */
-    pc += 4;						/* this happens if r31 is used as */
-    op = read_memory_integer (pc, 4);			/* frame ptr. (gcc does that)	  */
-
-    /* store parameters into frame */
-    while (
-	   (op & 0xfc1f0000) == 0x901f0000 ||		/* st rx,NUM(r1) */
-	   (op & 0xfc1f0000) == 0xd81f0000 ||		/* stfd Rx,NUM(r1) */
-	   (op & 0xfc1f0000) == 0xfc1f0000) {		/* frsp, fp?,NUM(r1) */
-      pc += 4;
-      op = read_memory_integer (pc, 4);
-    }
-  }
 
 #if 0
 /* I have problems with skipping over __main() that I need to address
@@ -380,6 +370,7 @@ skip_prologue (pc, fdata)
 #endif /* 0 */
  
   fdata->frameless = (pc == orig_pc);
+  fdata->offset = - fdata->offset;
   return pc;
 }
 
@@ -944,11 +935,15 @@ frame_saved_pc (fi)
     return 0;
 
   (void) skip_prologue (func_start, &fdata);
-  if (fdata.lr_offset == 0)
-    return read_register (LR_REGNUM);
 
   if (fi->signal_handler_caller)
     return read_memory_integer (fi->frame + SIG_FRAME_PC_OFFSET, 4);
+
+  if (fdata.lr_offset == 0 && fi->next != NULL)
+    return read_memory_integer (rs6000_frame_chain (fi) + DEFAULT_LR_SAVE, 4);
+
+  if (fdata.lr_offset == 0)
+    return read_register (LR_REGNUM);
 
   return read_memory_integer (rs6000_frame_chain (fi) + fdata.lr_offset, 4);
 }
