@@ -1,5 +1,7 @@
 Thu Jun 11 08:56:46 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* write.c (adjust_reloc_syms): Add more checks for NULL pointers. 
+
 	* config/tc-v850.c (v850_comm): Set SEC_COMMON bit on special
 	common sections.
 
