@@ -1,3 +1,9 @@
+2003-02-26  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-engine.h (sim_engine_abort): Add noreturn attribute.
+	(sim_engine_vabort): Ditto.
+	(sim_engine_halt, sim_engine_restart): Ditto.
+
 2003-02-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* Make-common.in (SIM_NEW_COMMON_OBJS): Remove sim-break.o
