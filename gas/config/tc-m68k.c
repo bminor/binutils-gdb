@@ -3664,6 +3664,21 @@ md_assemble (str)
     }
 
   /* There's some frag hacking */
+  {
+    /* Calculate the max frag size.  */
+    int wid;
+
+    wid = 2 * the_ins.fragb[0].fragoff;
+    for (n = 1; n < the_ins.nfrag; n++)
+      wid += 2 * (the_ins.numo - the_ins.fragb[n - 1].fragoff);
+    /* frag_var part.  */
+    wid += 10;
+    /* Make sure the whole insn fits in one chunk, in particular that
+       the var part is attached, as we access one byte before the
+       variable frag for byte branches.  */
+    frag_grow (wid);
+  }
+
   for (n = 0, fromP = &the_ins.opcode[0]; n < the_ins.nfrag; n++)
     {
       int wid;

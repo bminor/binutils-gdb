@@ -1,3 +1,8 @@
+2001-05-27  Alan Modra  <amodra@one.net.au>
+
+	* config/tc-m68k.c (md_assemble): Ensure variable part of frag is
+	allocated in the same chunk as the fixed part.
+
 2001-05-26  Alan Modra  <amodra@one.net.au>
 
 	* write.c (relax_segment <rs_space>): Calculate growth using
