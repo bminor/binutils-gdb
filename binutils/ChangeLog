@@ -1,4 +1,4 @@
-2001-11-23  Jakub Jelinek  <jakub@redhat.com>
+2001-01-23  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (process_version_sections): Check if VERDEF or VERNEED
 	sections are present before using them.  Remove code duplication.
