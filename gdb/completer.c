@@ -678,15 +678,24 @@ line_completion_function (char *text, int matches, char *line_buffer, int point)
 
   return (output);
 }
-/* Skip over a possibly quoted word (as defined by the quote characters
-   and word break characters the completer uses).  Returns pointer to the
-   location after the "word". */
+
+/* Skip over the possibly quoted word STR (as defined by the quote
+   characters QUOTECHARS and the the word break characters
+   BREAKCHARS).  Returns pointer to the location after the "word".  If
+   either QUOTECHARS or BREAKCHARS is NULL, use the same values used
+   by the completer.  */
 
 char *
-skip_quoted (char *str)
+skip_quoted_chars (char *str, char *quotechars, char *breakchars)
 {
   char quote_char = '\0';
   char *scan;
+
+  if (quotechars == NULL)
+    quotechars = gdb_completer_quote_characters;
+
+  if (breakchars == NULL)
+    breakchars = gdb_completer_word_break_characters;
 
   for (scan = str; *scan != '\0'; scan++)
     {
@@ -700,16 +709,26 @@ skip_quoted (char *str)
 	      break;
 	    }
 	}
-      else if (strchr (gdb_completer_quote_characters, *scan))
+      else if (strchr (quotechars, *scan))
 	{
 	  /* Found start of a quoted string. */
 	  quote_char = *scan;
 	}
-      else if (strchr (gdb_completer_word_break_characters, *scan))
+      else if (strchr (breakchars, *scan))
 	{
 	  break;
 	}
     }
+
   return (scan);
 }
 
+/* Skip over the possibly quoted word STR (as defined by the quote
+   characters and word break characters used by the completer).
+   Returns pointer to the location after the "word". */
+
+char *
+skip_quoted (char *str)
+{
+  return skip_quoted_chars (str, NULL, NULL);
+}

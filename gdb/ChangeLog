@@ -1,3 +1,14 @@
+2002-11-19  Klee Dienes  <kdienes@apple.com>
+            Adam Fedor  <fedor@gnu.org>
+
+	* completer.c (skip_quoted_chars): Renamed from skip_chars.  Add
+	the ability to explicitly specify the quote characters and word
+	break characters; if NULL is specified for either, use the old
+	behavior of using the characters used by the completer.
+	(skip_chars): New function.  Convenience wrapper around
+	skip_quoted_chars to provide the original skip_chars behavior.
+	* completer.h (skip_quoted_chars): Add prototype.
+
 2002-11-19  Andrew Cagney  <ac131313@redhat.com>
 
 	Problems reported by Paul Eggert.

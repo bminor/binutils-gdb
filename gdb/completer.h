@@ -39,6 +39,8 @@ extern char *get_gdb_completer_quote_characters (void);
 
 /* Exported to linespec.c */
 
-extern char *skip_quoted (char *str);
+extern char *skip_quoted_chars (char *, char *, char *);
+
+extern char *skip_quoted (char *);
 
 #endif /* defined (COMPLETER_H) */
