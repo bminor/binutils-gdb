@@ -2754,7 +2754,7 @@ ppc_section_letter (letter, ptr_msg)
     return SHF_EXCLUDE;
 
   *ptr_msg = _("Bad .section directive: want a,e,w,x,M,S,G,T in string");
-  return 0;
+  return -1;
 }
 
 int

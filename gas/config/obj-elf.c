@@ -845,10 +845,7 @@ obj_elf_parse_section_letters (str, len)
 	      attr |= md_attr;
 	    else
 #endif
-	      {
-		as_warn ("%s", bad_msg);
-		attr = -1;
-	      }
+	      as_fatal ("%s", bad_msg);
 	  }
 	  break;
 	}

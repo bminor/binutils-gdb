@@ -5635,7 +5635,7 @@ alpha_elf_section_letter (letter, ptr_msg)
     return SHF_ALPHA_GPREL;
 
   *ptr_msg = _("Bad .section directive: want a,s,w,x,M,S,G,T in string");
-  return 0;
+  return -1;
 }
 
 /* Map SHF_ALPHA_GPREL to SEC_SMALL_DATA.  */

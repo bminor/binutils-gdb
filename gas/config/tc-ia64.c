@@ -968,9 +968,11 @@ ia64_elf_section_letter (letter, ptr_msg)
 {
   if (letter == 's')
     return SHF_IA_64_SHORT;
+  else if (letter == 'o')
+    return SHF_LINK_ORDER;
 
-  *ptr_msg = _("Bad .section directive: want a,s,w,x,M,S,G,T in string");
-  return 0;
+  *ptr_msg = _("Bad .section directive: want a,o,s,w,x,M,S,G,T in string");
+  return -1;
 }
 
 /* Map SHF_IA_64_SHORT to SEC_SMALL_DATA.  */
@@ -1002,6 +1004,9 @@ ia64_elf_section_type (str, len)
     return SHT_IA_64_UNWIND;
 
   if (STREQ (ELF_STRING_ia64_unwind_once))
+    return SHT_IA_64_UNWIND;
+
+  if (STREQ ("unwind"))
     return SHT_IA_64_UNWIND;
 
   if (STREQ ("init_array"))

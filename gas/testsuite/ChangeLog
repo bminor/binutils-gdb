@@ -1,3 +1,11 @@
+2003-05-03  H.J. Lu <hjl@gnu.org>
+
+	* gas/ia64/ia64.exp: Add unwind.
+
+	* gas/ia64/unwind.s: New. Test the new section attribute 'o'
+	and the new section type "unwind".
+	* gas/ia64/unwind.d: Likewise.
+
 2003-05-02  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/mips.exp (mips_arch_init): Reimplement in
