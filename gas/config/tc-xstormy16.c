@@ -1,5 +1,5 @@
 /* tc-xstormy16.c -- Assembler for the Sanyo XSTORMY16.
-   Copyright (C) 2000, 2001 Free Software Foundation.
+   Copyright (C) 2000, 2001, 2002 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -400,6 +400,11 @@ xstormy16_fix_adjustable (fixP)
   if (S_IS_WEAK (fixP->fx_addsy))
     return 0;
   
+  /* We need the symbol name for the VTABLE entries.  */
+  if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 0;
+
   return ! xstormy16_force_relocation (fixP);
 }
 
@@ -513,7 +518,7 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
 	}
 
       if (fixP->fx_done)
-	return 1;
+	return;
 
       /* The operand isn't fully resolved.  Determine a BFD reloc value
 	 based on the operand information and leave it to
@@ -530,7 +535,7 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("unresolved expression that must be resolved"));
 	  fixP->fx_done = 1;
-	  return 1;
+	  return;
 	}
     }
   else if (fixP->fx_done)
@@ -578,8 +583,6 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
      See the comment describing fx_addnumber in write.h.
      This field is misnamed (or misused :-).  */
   fixP->fx_addnumber = value;
-
-  return 1;
 }
 
 

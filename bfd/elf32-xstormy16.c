@@ -1,5 +1,5 @@
 /* XSTORMY16-specific support for 32-bit ELF.
-   Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/xstormy16.h"
+#include "libiberty.h"
 
 /* Forward declarations.  */
 static reloc_howto_type * xstormy16_reloc_type_lookup
@@ -245,26 +246,27 @@ static reloc_howto_type xstormy16_elf_howto_table2 [] =
 
 /* Map BFD reloc types to XSTORMY16 ELF reloc types.  */
 
-struct xstormy16_reloc_map
+typedef struct xstormy16_reloc_map
 {
-  bfd_reloc_code_real_type bfd_reloc_val;
-  unsigned int xstormy16_reloc_val;
-};
+  bfd_reloc_code_real_type  bfd_reloc_val;
+  unsigned int              xstormy16_reloc_val;
+  reloc_howto_type *        table;
+} reloc_map;
 
-static const struct xstormy16_reloc_map xstormy16_reloc_map [] =
+static const reloc_map xstormy16_reloc_map [] =
 {
-  { BFD_RELOC_NONE,                 R_XSTORMY16_NONE },
-  { BFD_RELOC_32,                   R_XSTORMY16_32 },
-  { BFD_RELOC_16,                   R_XSTORMY16_16 },
-  { BFD_RELOC_8,                    R_XSTORMY16_8 },
-  { BFD_RELOC_32_PCREL,             R_XSTORMY16_PC32 },
-  { BFD_RELOC_16_PCREL,             R_XSTORMY16_PC16 },
-  { BFD_RELOC_8_PCREL,              R_XSTORMY16_PC8 },
-  { BFD_RELOC_XSTORMY16_REL_12,      R_XSTORMY16_REL_12 },
-  { BFD_RELOC_XSTORMY16_24,	    R_XSTORMY16_24 },
-  { BFD_RELOC_XSTORMY16_FPTR16,	    R_XSTORMY16_FPTR16 },
-  { BFD_RELOC_VTABLE_INHERIT,       R_XSTORMY16_GNU_VTINHERIT },
-  { BFD_RELOC_VTABLE_ENTRY,         R_XSTORMY16_GNU_VTENTRY },
+  { BFD_RELOC_NONE,                 R_XSTORMY16_NONE,          xstormy16_elf_howto_table },
+  { BFD_RELOC_32,                   R_XSTORMY16_32,            xstormy16_elf_howto_table },
+  { BFD_RELOC_16,                   R_XSTORMY16_16,            xstormy16_elf_howto_table },
+  { BFD_RELOC_8,                    R_XSTORMY16_8,             xstormy16_elf_howto_table },
+  { BFD_RELOC_32_PCREL,             R_XSTORMY16_PC32,          xstormy16_elf_howto_table },
+  { BFD_RELOC_16_PCREL,             R_XSTORMY16_PC16,          xstormy16_elf_howto_table },
+  { BFD_RELOC_8_PCREL,              R_XSTORMY16_PC8,           xstormy16_elf_howto_table },
+  { BFD_RELOC_XSTORMY16_REL_12,     R_XSTORMY16_REL_12,        xstormy16_elf_howto_table },
+  { BFD_RELOC_XSTORMY16_24,	    R_XSTORMY16_24,            xstormy16_elf_howto_table },
+  { BFD_RELOC_XSTORMY16_FPTR16,	    R_XSTORMY16_FPTR16,        xstormy16_elf_howto_table },
+  { BFD_RELOC_VTABLE_INHERIT,       R_XSTORMY16_GNU_VTINHERIT, xstormy16_elf_howto_table2 },
+  { BFD_RELOC_VTABLE_ENTRY,         R_XSTORMY16_GNU_VTENTRY,   xstormy16_elf_howto_table2 },
 };
 
 static reloc_howto_type *
@@ -274,10 +276,16 @@ xstormy16_reloc_type_lookup (abfd, code)
 {
   unsigned int i;
 
-  for (i = sizeof (xstormy16_reloc_map) / sizeof (xstormy16_reloc_map[0]);
-       --i;)
-    if (xstormy16_reloc_map [i].bfd_reloc_val == code)
-      return & xstormy16_elf_howto_table [xstormy16_reloc_map[i].xstormy16_reloc_val];
+  for (i = ARRAY_SIZE (xstormy16_reloc_map); --i;)
+    {
+      const reloc_map * entry;
+
+      entry = xstormy16_reloc_map + i;
+
+      if (entry->bfd_reloc_val == code)
+	return entry->table + (entry->xstormy16_reloc_val
+			       - entry->table[0].type);
+    }
   
   return NULL;
 }

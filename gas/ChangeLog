@@ -1,3 +1,9 @@
+2002-01-15  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-xstormy16.c: (xstormy16_fix_adjustable): Do not fix
+	vtinherit relocs.
+	(xstormy16_md_apply_fix3): Do not return a value.
+
 2002-01-14  Richard Earnshaw  <rearnsha@arm.com>
 
 	* tc-arm.c (md_longopts): On targets that aren't bi-endian, support
