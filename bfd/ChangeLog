@@ -1,3 +1,8 @@
+Fri Jun  4 03:10:49 1999  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* elf32-sh.c (sh_elf_relax_delete_bytes): Fix setting of
+	start / stop for recalculating of r_addend of R_SH_SWITCH*.
+
 Fri Jun  4 02:53:13 1999  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* elf32-sh.c (sh_elf_relax_delete_bytes): Handle R_SH_SWITCH32

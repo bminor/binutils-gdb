@@ -1161,13 +1161,15 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	case R_SH_SWITCH32:
 	  /* These relocs types represent
 	       .word L2-L1
-	     The r_offset field holds the difference between the reloc
+	     The r_addend field holds the difference between the reloc
 	     address and L1.  That is the start of the reloc, and
 	     adding in the contents gives us the top.  We must adjust
-	     both the r_offset field and the section contents.  */
+	     both the r_offset field and the section contents.
+	     N.B. in gas / coff bfd, the elf bfd r_addend is called r_offset,
+	     and the elf bfd r_offset is called r_vaddr.  */
 
-	  start = irel->r_offset;
-	  stop = (bfd_vma) ((bfd_signed_vma) start - (long) irel->r_addend);
+	  stop = irel->r_offset;
+	  start = (bfd_vma) ((bfd_signed_vma) stop - (long) irel->r_addend);
 
 	  if (start > addr
 	      && start < toaddr
@@ -1177,8 +1179,6 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 		   && stop < toaddr
 		   && (start <= addr || start >= toaddr))
 	    irel->r_addend -= count;
-
-	  start = stop;
 
 	  if (ELF32_R_TYPE (irel->r_info) == (int) R_SH_SWITCH16)
 	    voff = bfd_get_signed_16 (abfd, contents + nraddr);
