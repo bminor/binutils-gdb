@@ -2057,7 +2057,10 @@ serial device is attached to the remote system\n\
 
   unpush_target (target);
 
-  remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
+  if (!remote_dcache)
+    remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
+  else
+    dcache_flush (remote_dcache);
 
   remote_desc = SERIAL_OPEN (name);
   if (!remote_desc)
@@ -5034,7 +5037,10 @@ device is attached to the remote system (e.g. host:port).");
 
   unpush_target (&remote_cisco_ops);
 
-  remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
+  if (!remote_dcache)
+    remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
+  else
+    dcache_flush (remote_dcache);
 
   remote_desc = SERIAL_OPEN (name);
   if (!remote_desc)

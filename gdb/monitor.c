@@ -838,10 +838,17 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   monitor_printf (current_monitor->line_term);
 
-  if (current_monitor->flags & MO_HAS_BLOCKWRITES)
-    remote_dcache = dcache_init (monitor_read_memory, monitor_write_memory_block);
+  if (!remote_dcache)
+    {
+      if (current_monitor->flags & MO_HAS_BLOCKWRITES)
+	remote_dcache = dcache_init (monitor_read_memory, 
+				     monitor_write_memory_block);
+      else
+	remote_dcache = dcache_init (monitor_read_memory, monitor_write_memory);
+    }
   else
-    remote_dcache = dcache_init (monitor_read_memory, monitor_write_memory);
+    dcache_flush (remote_dcache);
+
   start_remote ();
 }
 

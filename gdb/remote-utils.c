@@ -154,13 +154,18 @@ gr_generic_checkin (void)
 void
 gr_open (char *args, int from_tty, struct gr_settings *gr)
 {
+  DCACHE *dcache;
+
   target_preopen (from_tty);
   sr_scan_args (gr->ops->to_shortname, args);
   unpush_target (gr->ops);
 
   gr_settings = gr;
 
-  gr_set_dcache (dcache_init (gr->readfunc, gr->writefunc));
+  if ((dcache = gr_get_dcache()) == NULL)
+    gr_set_dcache (dcache_init (gr->readfunc, gr->writefunc));
+  else
+    dcache_flush (dcache);
 
   if (sr_get_desc () != NULL)
     gr_close (0);

@@ -157,7 +157,7 @@ static struct dcache_block *dcache_hit (DCACHE * dcache, CORE_ADDR addr);
 
 static int dcache_write_line (DCACHE * dcache, struct dcache_block *db);
 
-static struct dcache_block *dcache_alloc (DCACHE * dcache);
+static struct dcache_block *dcache_alloc (DCACHE * dcache, CORE_ADDR addr);
 
 static int dcache_writeback (DCACHE * dcache);
 
@@ -267,15 +267,10 @@ dcache_write_line (DCACHE *dcache, register struct dcache_block *db)
 
 
 /* Get a free cache block, put or keep it on the valid list,
-   and return its address.  The caller should store into the block
-   the address and data that it describes, then remque it from the
-   free list and insert it into the valid list.  This procedure
-   prevents errors from creeping in if a memory retrieval is
-   interrupted (which used to put garbage blocks in the valid
-   list...).  */
+   and return its address.  */
 
 static struct dcache_block *
-dcache_alloc (DCACHE *dcache)
+dcache_alloc (DCACHE *dcache, CORE_ADDR addr)
 {
   register struct dcache_block *db;
 
@@ -296,6 +291,11 @@ dcache_alloc (DCACHE *dcache)
 
       dcache_write_line (dcache, db);
     }
+
+  db->addr = MASK(addr);
+  db->refs = 0;
+  db->anydirty = 0;
+  memset (db->state, ENTRY_BAD, sizeof (db->data));
 
   /* append this line to end of valid list */
   if (!dcache->valid_head)
@@ -327,9 +327,9 @@ dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
 	  dcache_write_line (dcache, db);
 	}
       else
-	db = dcache_alloc (dcache);
+	db = dcache_alloc (dcache, addr);
+
       immediate_quit++;
-      db->addr = MASK (addr);
       while (done < LINE_SIZE)
 	{
 	  int try =
@@ -379,9 +379,7 @@ dcache_poke_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
 
   if (!db)
     {
-      db = dcache_alloc (dcache);
-      db->addr = MASK (addr);
-      memset (db->state, ENTRY_BAD, sizeof (db->data));
+      db = dcache_alloc (dcache, addr);
     }
 
   db->data[XFORM (addr)] = *ptr;

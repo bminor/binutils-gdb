@@ -1,3 +1,18 @@
+2000-08-10  J.T. Conklin  <jtc@redback.com>
+
+	* monitor.c (monitor_open): If a dcache has already been created,
+	invalidate it rather than creating another.
+	* ocd.c (ocd_open): Likewise.
+	* remote-nindy.c (nindy_open): Likewise.
+	* remote-sds.c (sds_open): Likewise.
+	* remote-utils.c (gr_open): Likewise.
+	* remote.c (remote_open_1, remote_cisco_open): Likewise.
+
+	* dcache.c (dcache_alloc): Changed to take address of line as an
+ 	argument, and to invalidate cache line before returning.
+	(dcache_peek_byte): Updated.
+	(dcache_poke_byte): Updated.
+
 2000-08-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	From Greg McGary <greg@mcgary.org>:

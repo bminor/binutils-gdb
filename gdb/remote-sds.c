@@ -203,7 +203,10 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   unpush_target (&sds_ops);
 
-  sds_dcache = dcache_init (sds_read_bytes, sds_write_bytes);
+  if (!sds_dcache)
+    sds_dcache = dcache_init (sds_read_bytes, sds_write_bytes);
+  else
+    dcache_flush (sds_dcache);
 
   sds_desc = SERIAL_OPEN (name);
   if (!sds_desc)

@@ -292,7 +292,10 @@ device the OCD device is attached to (e.g. /dev/ttya).");
 
   unpush_target (current_ops);
 
-  ocd_dcache = dcache_init (ocd_read_bytes, ocd_write_bytes);
+  if (!ocd_dcache)
+    ocd_dcache = dcache_init (ocd_read_bytes, ocd_write_bytes);
+  else
+    dcache_flush (ocd_dcache);
 
   if (strncmp (name, "wiggler", 7) == 0)
     {

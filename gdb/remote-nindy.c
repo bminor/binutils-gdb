@@ -187,7 +187,11 @@ nindy_open (char *name,		/* "/dev/ttyXX", "ttyXX", or "XX": tty to be opened */
   nindy_close (0);
 
   have_regs = regs_changed = 0;
-  nindy_dcache = dcache_init (ninMemGet, ninMemPut);
+
+  if (!nindy_dcache)
+    nindy_dcache = dcache_init (ninMemGet, ninMemPut);
+  else
+    dcache_flush (nindy_dcache);
 
   /* Allow user to interrupt the following -- we could hang if there's
      no NINDY at the other end of the remote tty.  */
