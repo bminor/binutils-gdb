@@ -235,7 +235,6 @@ GNU/Linux m68k		Andreas Schwab		schwab@suse.de
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 			David O'Brien		obrien@freebsd.org
 hurd native		Mark Kettenis		kettenis@gnu.org
-NetBSD native & host	J.T. Conklin		jtc@redback.com
 SCO/Unixware		Robert Lipe		rjl@sco.com
 GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host (devolved)
@@ -292,7 +291,6 @@ shared libs (devolved)	Jim Blandy		jimb@redhat.com
   xcoffsolib		Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 
 remote.c		Andrew Cagney		cagney@redhat.com
-			J.T. Conklin		jtc@redback.com
 include/remote-sim.h, remote-sim.c
 			Andrew Cagney		cagney@redhat.com
 sds protocol		Fernando Nasser		fnasser@redhat.com
@@ -311,7 +309,6 @@ testsuite		Fernando Nasser		fnasser@redhat.com
   hp tests (gdb.hp)	(vacant)
   Java tests (gdb.java)	Anthony Green 		green@redhat.com
 Kernel Object Display	Fernando Nasser		fnasser@redhat.com
-dcache.c		J.T. Conklin		jtc@redback.com
 
 
 UI: External (user) interfaces.
@@ -406,6 +403,8 @@ Daniel Berlin (C++ support)			dan at cgsoftware dot com
 Nick Duffek (powerpc, SCO, Sol/x86)		nick at duffek dot com
 David Taylor (d10v, sparc, utils, defs,
   expression evaluator, language support)	taylor at candd dot org
+J.T. Conklin (dcache, NetBSD, remote)		jtc at redback dot com
+
 
 
 Folks that have been caught up in a paper trail:
