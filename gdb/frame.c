@@ -299,6 +299,8 @@ generic_unwind_get_saved_register (char *raw_buffer,
   if (!target_has_registers)
     error ("No registers.");
 
+  gdb_assert (FRAME_INIT_SAVED_REGS_P ());
+
   /* Keep things simple, ensure that all the pointers (except valuep)
      are non NULL.  */
   if (optimizedp == NULL)

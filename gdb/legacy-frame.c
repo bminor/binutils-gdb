@@ -61,6 +61,10 @@ legacy_frame_register_unwind (struct frame_info *frame,
   gdb_assert (!(DEPRECATED_USE_GENERIC_DUMMY_FRAMES
 		&& (get_frame_type (frame) == DUMMY_FRAME)));
 
+   /* Only (older) architectures that implement the
+      FRAME_INIT_SAVED_REGS method should be using this function.  */
+   gdb_assert (FRAME_INIT_SAVED_REGS_P ());
+ 
   /* Load the saved_regs register cache.  */
   if (get_frame_saved_regs (frame) == NULL)
     FRAME_INIT_SAVED_REGS (frame);
