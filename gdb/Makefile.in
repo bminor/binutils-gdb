@@ -1730,7 +1730,7 @@ hpread.o: hpread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(hp_symtab_h) \
 	$(complaints_h) $(gdb_stabs_h) $(gdbtypes_h) $(demangle_h) \
 	$(gdb_string_h)
 hpux-thread.o: hpux-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
-	$(inferior_h) $(regcache_h) $(gdbcore_h)
+	$(inferior_h) $(regcache_h) $(gdb_stat_h) $(gdbcore_h)
 i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(gregset_h) \
 	$(i387_tdep_h) $(i386_tdep_h) $(i386_linux_tdep_h)
@@ -2126,8 +2126,8 @@ sh3-rom.o: sh3-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 shnbsd-nat.o: shnbsd-nat.c $(defs_h) $(inferior_h) $(shnbsd_tdep_h)
 shnbsd-tdep.o: shnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) $(value_h) \
 	$(solib_svr4_h) $(nbsd_tdep_h) $(sh_tdep_h) $(shnbsd_tdep_h) $(osabi_h)
-sol-thread.o: sol-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
-	$(inferior_h) $(gdbcmd_h) $(gdbcore_h) $(regcache_h) $(symfile_h) \
+sol-thread.o: sol-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
+	$(gdb_stat_h) $(gdbcmd_h) $(gdbcore_h) $(regcache_h) $(symfile_h) \
 	$(gregset_h)
 solib-aix5.o: solib-aix5.c $(defs_h) $(gdb_string_h) $(elf_external_h) \
 	$(symtab_h) $(bfd_h) $(symfile_h) $(objfiles_h) $(gdbcore_h) \

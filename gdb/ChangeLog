@@ -1,3 +1,9 @@
+2003-02-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* sol-thread.c, hpux-thread.c: Include "gdb_stat.h" instead of
+	<sys/stat.h>.
+	* Makefile.in (sol-thread.o, hpux-thread.o): Update dependencies.
+	
 2003-02-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (symm-nat.o): Update dependencies.
