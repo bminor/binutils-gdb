@@ -587,7 +587,7 @@ som_solib_create_inferior_hook()
 	    {
 	      struct unwind_table_entry *u;
 	      /* It must be a shared library trampoline.  */
-	      if (SYMBOL_TYPE (msymbol) != mst_solib_trampoline)
+	      if (MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
 		continue;
 
 	      /* It must also be an export stub.  */

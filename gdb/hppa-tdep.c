@@ -1609,7 +1609,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 		{
 		  struct unwind_table_entry *u;
 		  /* It must be a shared library trampoline.  */
-		  if (SYMBOL_TYPE (stub_symbol) != mst_solib_trampoline)
+		  if (MSYMBOL_TYPE (stub_symbol) != mst_solib_trampoline)
 		    continue;
 
 		  /* It must also be an import stub.  */

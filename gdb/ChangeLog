@@ -1,5 +1,10 @@
 Wed Aug 14 02:03:42 1996  Fred Fish  <fnf@rtl.cygnus.com>
 
+	From Blair MacIntyre <bm@cs.columbia.edu>:
+	* hppa-tdep.c (hppa_fix_call_dummy): Use MSYMBOL_TYPE rather
+	than SYMBOL_TYPE on msymbols.
+	* somsolib.c (som_solib_create_inferior_hook): Ditto.
+
 	* Makefile.in (init.c):  Generate with prototypes.
 
 	* config/pa/tm-hppa.h (frame_saved_pc): Add prototype.
