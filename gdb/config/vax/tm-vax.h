@@ -17,26 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* There is one known bug with VAX support that I don't know how to
-   fix:  if you do a backtrace from a signal handler, you get something
-   like:
-#0  0xbc in kill (592, 3)
-#1  0x7f in hand (...) (...)
-#2  0x7fffec7e in ?? (2, 0, 2147478112, 94)
-                  ^^ GDB doesn't know about sigtramp
-#3  0x7fffec70 in ?? (592, 2)
-    ^^^^^^^^^^ wrong address
-#4  0xae in main (...) (...)
-
-when the correct backtrace (as given by adb) is:
-_kill(250,3) from _hand+21
-_hand(2,0,7fffea60,5e) from 7fffec7e
-sigtramp(2,0,7fffea60,5e) from _kill+4
-_kill(250,2) from _main+2e
-_main(1,7fffeac4,7fffeacc) from start+3d
-
-If anyone knows enough about VAX BSD to fix this, please send the
-fix to bug-gdb@prep.ai.mit.edu.  */
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
@@ -76,14 +56,15 @@ fix to bug-gdb@prep.ai.mit.edu.  */
 
 #define SAVED_PC_AFTER_CALL(frame) FRAME_SAVED_PC(frame)
 
-#define TARGET_UPAGES 10
+#define TARGET_UPAGES 14
 #define TARGET_NBPG 512
 #define STACK_END_ADDR (0x80000000 - (TARGET_UPAGES * TARGET_NBPG))
 
 /* On the VAX, sigtramp is in the u area.  Can't check the exact
    addresses because for cross-debugging we don't have VAX include
    files around.  This should be close enough.  */
-#define IN_SIGTRAMP(pc, name) ((pc) >= STACK_END_ADDR && (pc < 0x80000000))
+#define SIGTRAMP_START	STACK_END_ADDR
+#define SIGTRAMP_END	0x80000000
 
 /* Stack grows downward.  */
 
@@ -231,9 +212,16 @@ fix to bug-gdb@prep.ai.mit.edu.  */
 /* On the vax, all functions have frames.  */
 #define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS)  {(FRAMELESS) = 0;}
 
-/* Saved Pc.  */
+/* Saved Pc.  Get it from sigcontext if within sigtramp.  */
 
-#define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 16, 4))
+/* Offset to saved PC in sigcontext, from <sys/signal.h>.  */
+#define SIGCONTEXT_PC_OFFSET 12
+
+#define FRAME_SAVED_PC(FRAME) \
+  (((FRAME)->signal_handler_caller \
+    ? sigtramp_saved_pc (FRAME) \
+    : read_memory_integer ((FRAME)->frame + 16, 4)) \
+   )
 
 /* Cannot find the AP register value directly from the FP value.  Must
    find it saved in the frame called by this one, or in the AP
