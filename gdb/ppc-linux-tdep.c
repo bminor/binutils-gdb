@@ -936,13 +936,11 @@ ppc64_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 					CORE_ADDR addr,
 					struct target_ops *targ)
 {
-  struct obj_section *s;
-
-  s = find_pc_section (addr);
+  struct section_table *s = target_section_by_addr (targ, addr);
 
   /* Check if ADDR points to a function descriptor.  */
   if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)
-    return read_memory_unsigned_integer (addr, 8);
+    return get_target_memory_unsigned (targ, addr, 8);
 
   return addr;
 }

@@ -1,5 +1,14 @@
 2003-10-24  Andrew Cagney  <cagney@redhat.com>
 
+	* target.c: Include "gdbcore.h".
+	(get_target_memory, get_target_memory_unsigned): New functions.
+	* target.h (get_target_memory, get_target_memory_unsigned): Declare.
+	* ppc-linux-tdep.c (ppc64_linux_convert_from_func_ptr_addr):
+	Use get_target_memory_unsigned.
+	* Makefile.in (target.o): Update dependencies.
+
+2003-10-24  Andrew Cagney  <cagney@redhat.com>
+
 	* osabi.c (gdbarch_init_osabi): Fix typos, and "fortunatly"[sic].
 	* PROBLEMS, arch-utils.c, cli-out.c, command.h: Ditto.
 	* complaints.c, cris-tdep.c, disasm.c, dwarf2-frame.c: Ditto.

@@ -248,6 +248,18 @@ extern LONGEST target_write (struct target_ops *ops,
 			     enum target_object object,
 			     const char *annex, const void *buf,
 			     ULONGEST offset, LONGEST len);
+
+/* Wrappers to target read/write that perform memory transfers.  They
+   throw an error if the memory transfer fails.
+
+   NOTE: cagney/2003-10-23: The naming schema is lifted from
+   "frame.h".  The parameter order is lifted from get_frame_memory,
+   which in turn lifted it from read_memory.  */
+
+extern void get_target_memory (struct target_ops *ops, CORE_ADDR addr,
+			       void *buf, LONGEST len);
+extern ULONGEST get_target_memory_unsigned (struct target_ops *ops,
+					    CORE_ADDR addr, int len);
 
 
 /* If certain kinds of activity happen, target_wait should perform

@@ -37,6 +37,7 @@
 #include <signal.h>
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "gdbcore.h"
 
 static void target_info (char *, int);
 
@@ -1212,6 +1213,28 @@ target_write (struct target_ops *ops,
       QUIT;
     }
   return len;
+}
+
+/* Memory transfer methods.  */
+
+void
+get_target_memory (struct target_ops *ops, CORE_ADDR addr, void *buf,
+		   LONGEST len)
+{
+  if (target_read (ops, TARGET_OBJECT_MEMORY, NULL, buf, addr, len)
+      != len)
+    memory_error (EIO, addr);
+}
+
+ULONGEST
+get_target_memory_unsigned (struct target_ops *ops,
+			    CORE_ADDR addr, int len)
+{
+  char buf[sizeof (ULONGEST)];
+
+  gdb_assert (len <= sizeof (buf));
+  get_target_memory (ops, addr, buf, len);
+  return extract_unsigned_integer (buf, len);
 }
 
 static void
