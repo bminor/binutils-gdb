@@ -1,5 +1,46 @@
 2001-03-22  Hans-Peter Nilsson  <hp@axis.com>
 
+	* elf32-cris.c: Shlib and PIC support.  PCREL tweaks.
+	(elf_cris_discard_copies, elf_cris_adjust_gotplt_to_got,
+	elf_cris_try_fold_plt_to_got, elf_cris_link_hash_newfunc,
+	elf_cris_link_hash_table_create, elf_cris_adjust_dynamic_symbol,
+	elf_cris_size_dynamic_sections, elf_cris_finish_dynamic_symbol,
+	elf_cris_finish_dynamic_sections,elf_cris_hide_symbol): New
+	functions.
+	(cris_elf_howto_table) <R_CRIS_8_PCREL, R_CRIS_16_PCREL,
+	R_CRIS_32_PCREL>: Correct comments.  Set pcrel_offset to false.
+	<R_CRIS_COPY, R_CRIS_GLOB_DAT, R_CRIS_JUMP_SLOT, R_CRIS_RELATIVE,
+	R_CRIS_16_GOT, R_CRIS_32_GOT, R_CRIS_16_GOTPLT, R_CRIS_32_GOTPLT,
+	R_CRIS_32_GOTREL, R_CRIS_32_PLT_GOTREL, R_CRIS_32_PLT_PCREL>:
+	New HOWTO members for new relocs.
+	(cris_reloc_map): Map new relocs.
+	(ELF_DYNAMIC_INTERPRETER): Define.
+	(PLT_ENTRY_SIZE): Define.
+	(elf_cris_plt0_entry, elf_cris_plt_entry, elf_cris_pic_plt0_entry,
+	elf_cris_pic_plt_entry): New, PLT templates.
+	(struct elf_cris_pcrel_relocs_copied, struct
+	elf_cris_link_hash_entry, struct elf_cris_link_hash_table): New.
+	(elf_cris_link_hash_traverse, elf_cris_hash_table): Define.
+	(cris_final_link_relocate): Check that 16-bit GOT relocs have
+	positive values.  Adjust PCREL relocs to be relative to location
+	after relocation.
+	(cris_elf_relocate_section): Handle relocations to dynamic
+	objects.  Handle new relocations.  Call error handler when seeing
+	non-PIC relocation for read-only sections while generating shared
+	object.
+	(cris_elf_check_relocs): Set reference counts for GOT and PLT
+	entries.
+	(bfd_elf32_bfd_link_hash_table_create,
+	elf_backend_adjust_dynamic_symbol,
+	elf_backend_size_dynamic_sections,
+	elf_backend_finish_dynamic_symbol,
+	elf_backend_finish_dynamic_sections,
+	elf_backend_create_dynamic_sections, bfd_elf32_bfd_final_link,
+	elf_backend_hide_symbol, elf_backend_want_got_plt,
+	elf_backend_plt_readonly, elf_backend_want_plt_sym,
+	elf_backend_got_header_size, elf_backend_plt_header_size):
+	Define.
+
 	* reloc.c: (BFD_RELOC_CRIS_COPY, BFD_RELOC_CRIS_GLOB_DAT,
 	BFD_RELOC_CRIS_JUMP_SLOT, BFD_RELOC_CRIS_RELATIVE,
 	BFD_RELOC_CRIS_32_GOT, BFD_RELOC_CRIS_16_GOT,
