@@ -1,3 +1,12 @@
+Thu Sep 21 16:30:56 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* subsegs.c (subseg_set): Permit SEG_ABSOLUTE in know expression.
+	* expr.c (expr): Account for new operatorT values in know
+	expression.
+
+	* write.c (fixup_segment): Clear fixp->fx_subsy if the relocation
+	is fully resolved.
+
 Thu Sep 21 14:11:49 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* config/tc-ppc.c (ppc_flags): New variable to hold the flag bits

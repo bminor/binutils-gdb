@@ -34,6 +34,7 @@
 static void floating_constant PARAMS ((expressionS * expressionP));
 static void integer_constant PARAMS ((int radix, expressionS * expressionP));
 static void mri_char_constant PARAMS ((expressionS *));
+static void current_location PARAMS ((expressionS *));
 static void clean_up_expression PARAMS ((expressionS * expressionP));
 
 extern const char EXP_CHARS[], FLT_CHARS[];
@@ -491,6 +492,31 @@ mri_char_constant (expressionP)
   ++input_line_pointer;
 }
 
+/* Return an expression representing the current location.  This
+   handles the magic symbol `.'.  */
+
+static void
+current_location (expressionp)
+     expressionS *expressionp;
+{
+  if (now_seg == absolute_section)
+    {
+      expressionp->X_op = O_constant;
+      expressionp->X_add_number = abs_section_offset;
+    }
+  else
+    {
+      symbolS *symbolp;
+
+      symbolp = symbol_new (FAKE_LABEL_NAME, now_seg,
+			    (valueT) frag_now_fix (),
+			    frag_now);
+      expressionp->X_op = O_symbol;
+      expressionp->X_add_symbol = symbolp;
+      expressionp->X_add_number = 0;
+    }
+}
+
 /*
  * Summary of operand().
  *
@@ -810,23 +836,17 @@ operand (expressionP)
 	  integer_constant (16, expressionP);
 	  break;
 	}
-      /* Fall through.  */
+
+      if (is_part_of_name (*input_line_pointer))
+	goto isname;
+
+      current_location (expressionP);
+      break;
+
     case '.':
       if (!is_part_of_name (*input_line_pointer))
 	{
-	  const char *fake;
-
-	  /* JF: '.' is pseudo symbol with value of current location
-	     in current segment.  */
-	  fake = FAKE_LABEL_NAME;
-	  symbolP = symbol_new (fake,
-				now_seg,
-				(valueT) frag_now_fix (),
-				frag_now);
-
-	  expressionP->X_op = O_symbol;
-	  expressionP->X_add_symbol = symbolP;
-	  expressionP->X_add_number = 0;
+	  current_location (expressionP);
 	  break;
 	}
       else if ((strncasecmp (input_line_pointer, "startof.", 8) == 0
@@ -906,6 +926,13 @@ operand (expressionP)
 
       ++input_line_pointer;
       integer_constant (16, expressionP);
+      break;
+
+    case '*':
+      if (! flag_mri || is_part_of_name (*input_line_pointer))
+	goto de_fault;
+
+      current_location (expressionP);
       break;
 
     default:
@@ -1272,7 +1299,7 @@ expr (rank, resultP)
       op_right = operator ();
 
       know (op_right == O_illegal || op_rank[(int) op_right] <= op_rank[(int) op_left]);
-      know ((int) op_left >= (int) O_multiply && (int) op_left <= (int) O_subtract);
+      know ((int) op_left >= (int) O_multiply && (int) op_left <= (int) O_gt);
 
       /* input_line_pointer->after right-hand quantity. */
       /* left-hand quantity in resultP */
