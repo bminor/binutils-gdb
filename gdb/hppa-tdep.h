@@ -39,6 +39,7 @@ enum hppa_regnum
   HPPA_RP_REGNUM = 2,		/* return pointer */
   HPPA_FP_REGNUM = 3,		/* The ABI's frame pointer, when used */
   HPPA_SP_REGNUM = 30,		/* Stack pointer.  */
+  HPPA_R31_REGNUM = 31,
   HPPA_SAR_REGNUM = 32,		/* Shift Amount Register */
   HPPA_IPSW_REGNUM = 41,	/* Interrupt Processor Status Word */
   HPPA_PCOQ_HEAD_REGNUM = 33,	/* instruction offset queue head */

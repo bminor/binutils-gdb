@@ -1,5 +1,7 @@
 2004-05-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-tdep.h (hppa_regnum): Add HPPA_R31_REGNUM.
+
 	* i386-tdep.c (i386_supply_gregset): Adjust comment.
 	(i386_collect_gregset): New function.
 	(i386_supply_fpregset): Adjust comment.
