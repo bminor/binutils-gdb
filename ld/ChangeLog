@@ -1,3 +1,9 @@
+2005-01-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_try_needed): Formatting.
+	(gld${EMULATION_NAME}_after_open): Ignore needed libs if they were
+	only needed by an as-needed lib that didn't get linked.
+
 2005-01-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.texinfo (Output Section Keywords <CONSTRUCTORS>): Correct

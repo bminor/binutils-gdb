@@ -13,7 +13,7 @@ cat >e${EMULATION_NAME}.c <<EOF
 
 /* ${ELFSIZE} bit ELF emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    ELF support by Ian Lance Taylor <ian@cygnus.com>
 
@@ -398,9 +398,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
   /* Tell the ELF linker that we don't want the output file to have a
      DT_NEEDED entry for this file at all if the entry is from a file
      with DYN_NO_ADD_NEEDED.  */
-  if (needed->by
-      && (bfd_elf_get_dyn_lib_class (needed->by)
-	  & DYN_NO_ADD_NEEDED) != 0)
+  if (needed->by != NULL
+      && (bfd_elf_get_dyn_lib_class (needed->by) & DYN_NO_ADD_NEEDED) != 0)
     class |= DYN_NO_NEEDED | DYN_NO_ADD_NEEDED;
 
   bfd_elf_set_dyn_lib_class (abfd, class);
@@ -785,9 +784,17 @@ gld${EMULATION_NAME}_after_open (void)
       struct dt_needed n, nn;
       int force;
 
+      /* If the lib that needs this one was --as-needed and wasn't
+	 found to be needed, then this lib isn't needed either.  */
+      if (l->by != NULL
+	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0)
+	continue;
+
       /* If we've already seen this file, skip it.  */
       for (ll = needed; ll != l; ll = ll->next)
-	if (strcmp (ll->name, l->name) == 0)
+	if ((ll->by == NULL
+	     || (bfd_elf_get_dyn_lib_class (ll->by) & DYN_AS_NEEDED) == 0)
+	    && strcmp (ll->name, l->name) == 0)
 	  break;
       if (ll != l)
 	continue;

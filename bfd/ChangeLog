@@ -1,3 +1,16 @@
+2005-01-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_link_add_object_symbols): Don't create link dynamic
+	sections immediately when linking shared libs.  Instead, wait until
+	we know a lib is needed.
+	(_bfd_elf_link_create_dynstrtab): Extract from..
+	(_bfd_elf_link_create_dynamic_sections_): ..here.
+	(elf_add_dt_needed_tag): Call _bfd_elf_link_create_dynstrtab and
+	_bfd_elf_link_create_dynamic_sections.  Add abfd param.  Allow
+	for non-existent .dynamic.
+	(elf_link_output_extsym): Don't complain about undefined symbols
+	in as-needed dynamic libs that aren't actually linked.
+
 2005-01-24  Andrew Cagney  <cagney@gnu.org>
 
 	* configure: Regenerate, ../gettext.m4 was updated.

@@ -1,5 +1,5 @@
 /* ELF linking support for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -103,6 +103,25 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Create a strtab to hold the dynamic symbol names.  */
+static bfd_boolean
+_bfd_elf_link_create_dynstrtab (bfd *abfd, struct bfd_link_info *info)
+{
+  struct elf_link_hash_table *hash_table;
+
+  hash_table = elf_hash_table (info);
+  if (hash_table->dynobj == NULL)
+    hash_table->dynobj = abfd;
+
+  if (hash_table->dynstr == NULL)
+    {
+      hash_table->dynstr = _bfd_elf_strtab_init ();
+      if (hash_table->dynstr == NULL)
+	return FALSE;
+    }
+  return TRUE;
+}
+
 /* Create some sections which will be filled in with dynamic linking
    information.  ABFD is an input file which requires dynamic sections
    to be created.  The dynamic sections take up virtual memory space
@@ -125,12 +144,10 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (elf_hash_table (info)->dynamic_sections_created)
     return TRUE;
 
-  /* Make sure that all dynamic sections use the same input BFD.  */
-  if (elf_hash_table (info)->dynobj == NULL)
-    elf_hash_table (info)->dynobj = abfd;
-  else
-    abfd = elf_hash_table (info)->dynobj;
+  if (!_bfd_elf_link_create_dynstrtab (abfd, info))
+    return FALSE;
 
+  abfd = elf_hash_table (info)->dynobj;
   bed = get_elf_backend_data (abfd);
 
   flags = bed->dynamic_sec_flags;
@@ -185,14 +202,6 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (s == NULL
       || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY))
     return FALSE;
-
-  /* Create a strtab to hold the dynamic symbol names.  */
-  if (elf_hash_table (info)->dynstr == NULL)
-    {
-      elf_hash_table (info)->dynstr = _bfd_elf_strtab_init ();
-      if (elf_hash_table (info)->dynstr == NULL)
-	return FALSE;
-    }
 
   s = bfd_make_section (abfd, ".dynamic");
   if (s == NULL
@@ -2746,13 +2755,17 @@ _bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
    1 if a DT_NEEDED tag already exists, and 0 on success.  */
 
 static int
-elf_add_dt_needed_tag (struct bfd_link_info *info,
+elf_add_dt_needed_tag (bfd *abfd,
+		       struct bfd_link_info *info,
 		       const char *soname,
 		       bfd_boolean do_it)
 {
   struct elf_link_hash_table *hash_table;
   bfd_size_type oldsize;
   bfd_size_type strindex;
+
+  if (!_bfd_elf_link_create_dynstrtab (abfd, info))
+    return -1;
 
   hash_table = elf_hash_table (info);
   oldsize = _bfd_elf_strtab_size (hash_table->dynstr);
@@ -2768,26 +2781,28 @@ elf_add_dt_needed_tag (struct bfd_link_info *info,
 
       bed = get_elf_backend_data (hash_table->dynobj);
       sdyn = bfd_get_section_by_name (hash_table->dynobj, ".dynamic");
-      BFD_ASSERT (sdyn != NULL);
+      if (sdyn != NULL)
+	for (extdyn = sdyn->contents;
+	     extdyn < sdyn->contents + sdyn->size;
+	     extdyn += bed->s->sizeof_dyn)
+	  {
+	    Elf_Internal_Dyn dyn;
 
-      for (extdyn = sdyn->contents;
-	   extdyn < sdyn->contents + sdyn->size;
-	   extdyn += bed->s->sizeof_dyn)
-	{
-	  Elf_Internal_Dyn dyn;
-
-	  bed->s->swap_dyn_in (hash_table->dynobj, extdyn, &dyn);
-	  if (dyn.d_tag == DT_NEEDED
-	      && dyn.d_un.d_val == strindex)
-	    {
-	      _bfd_elf_strtab_delref (hash_table->dynstr, strindex);
-	      return 1;
-	    }
-	}
+	    bed->s->swap_dyn_in (hash_table->dynobj, extdyn, &dyn);
+	    if (dyn.d_tag == DT_NEEDED
+		&& dyn.d_un.d_val == strindex)
+	      {
+		_bfd_elf_strtab_delref (hash_table->dynstr, strindex);
+		return 1;
+	      }
+	  }
     }
 
   if (do_it)
     {
+      if (!_bfd_elf_link_create_dynamic_sections (hash_table->dynobj, info))
+	return -1;
+
       if (!_bfd_elf_add_dynamic_entry (info, DT_NEEDED, strindex))
 	return -1;
     }
@@ -3282,11 +3297,6 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 file.  */
       bfd_section_list_clear (abfd);
 
-      /* If this is the first dynamic object found in the link, create
-	 the special sections required for dynamic linking.  */
-      if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
-	goto error_return;
-
       /* Find the name to use in a DT_NEEDED entry that refers to this
 	 object.  If the object has a DT_SONAME entry, we use it.
 	 Otherwise, if the generic linker stuck something in
@@ -3303,7 +3313,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 will need to know it.  */
       elf_dt_name (abfd) = soname;
 
-      ret = elf_add_dt_needed_tag (info, soname, add_needed);
+      ret = elf_add_dt_needed_tag (abfd, info, soname, add_needed);
       if (ret < 0)
 	goto error_return;
 
@@ -3953,7 +3963,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      elf_dyn_lib_class (abfd) &= ~DYN_AS_NEEDED;
 
 	      add_needed = TRUE;
-	      ret = elf_add_dt_needed_tag (info, soname, add_needed);
+	      ret = elf_add_dt_needed_tag (abfd, info, soname, add_needed);
 	      if (ret < 0)
 		goto error_free_vers;
 
@@ -6160,6 +6170,7 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
   if (h->root.type == bfd_link_hash_undefined
       && h->ref_dynamic
       && !h->ref_regular
+      && (elf_dyn_lib_class (h->root.u.undef.abfd) & DYN_AS_NEEDED) == 0
       && ! elf_link_check_versioned_symbol (finfo->info, bed, h)
       && finfo->info->unresolved_syms_in_shared_libs != RM_IGNORE)
     {
