@@ -1,4 +1,4 @@
-/*
+*
  * Copyright (c) 1983 Regents of the University of California.
  * All rights reserved.
  *
@@ -82,7 +82,7 @@ findcall( parentp , p_lowpc , p_highpc )
 	    printf( "[findcall]\t0x%x:callf" , instructp - textspace );
 	  }
 #	    endif DEBUG
-	  length += 4;	/* constant length in a SPARC */
+	  length = 4;	/* constant length in a SPARC */
 	  /*
 	   *	regular pc relative addressing
 	   *	check that this is the address of 
