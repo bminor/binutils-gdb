@@ -1,5 +1,10 @@
 2001-11-09  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdb.base/restore.exp: Include $expected value in restored test
+	message.
+
+2001-11-09  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdb.asm/asm-source.exp: Supress file, instead of skip, when not
 	implemented.
 
