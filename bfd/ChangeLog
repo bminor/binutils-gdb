@@ -1,5 +1,8 @@
 2003-03-07  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_relocate_section): Don't look for a nop after
+	a tls_get_addr call.
+
 	* elf32-ppc.c (ELIMINATE_COPY_RELOCS): Define as one.
 	(ppc_elf_adjust_dynamic_symbol): For weak symbols, copy
 	ELF_LINK_NON_GOT_REF from weakdef.

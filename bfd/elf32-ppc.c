@@ -4524,7 +4524,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  enum elf_ppc_reloc_type r_type2;
 		  unsigned long r_symndx2;
 		  struct elf_link_hash_entry *h2;
-		  bfd_vma insn1, insn2, insn3;
+		  bfd_vma insn1, insn2;
 		  bfd_vma offset;
 
 		  /* The next instruction should be a call to
@@ -4551,8 +4551,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  offset = rel[1].r_offset;
 		  insn1 = bfd_get_32 (output_bfd,
 				      contents + rel->r_offset - 2);
-		  insn3 = bfd_get_32 (output_bfd,
-				      contents + offset + 4);
 		  if ((tls_mask & tls_gd) != 0)
 		    {
 		      /* IE */
@@ -4582,16 +4580,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 						    R_PPC_TPREL16_LO);
 		      rel[1].r_offset += 2;
 		    }
-		  if (insn3 == NOP
-		      || insn3 == CROR_151515 || insn3 == CROR_313131)
-		    {
-		      insn3 = insn2;
-		      insn2 = NOP;
-		      rel[1].r_offset += 4;
-		    }
 		  bfd_put_32 (output_bfd, insn1, contents + rel->r_offset - 2);
 		  bfd_put_32 (output_bfd, insn2, contents + offset);
-		  bfd_put_32 (output_bfd, insn3, contents + offset + 4);
 		  if (tls_gd == 0)
 		    {
 		      /* We changed the symbol on an LD reloc.  Start over
