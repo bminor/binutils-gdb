@@ -1,3 +1,10 @@
+2003-10-04  Christian Groessler  <chris@groessler.org>
+
+	* tc-z8k.c (newfix): Tell fix_new_exp about pc relativeness.
+	(md_apply_fix3): Fix R_JR, R_DISP7, and R_CALLR cases.
+	(md_pcrel_from): This function now gets called. Supply return
+	value.
+
 2003-10-04  Nick Clifton  <nickc@redhat.com>
 
 	* as.c: Convert to ISO C90.

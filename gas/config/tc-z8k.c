@@ -985,15 +985,24 @@ newfix (ptr, type, size, operand)
      int size;   /* nibbles.  */
      expressionS *operand;
 {
+  int is_pcrel = 0;
+
   if (operand->X_add_symbol
       || operand->X_op_symbol
       || operand->X_add_number)
     {
+      switch(type)
+        {
+        case R_JR:
+        case R_DISP7:
+        case R_CALLR:
+          is_pcrel = 1;
+        }
       fix_new_exp (frag_now,
 		   ptr,
 		   size / 2,
 		   operand,
-		   0,
+		   is_pcrel,
 		   type);
     }
 }
@@ -1455,6 +1464,9 @@ md_section_align (seg, size)
 	  & (-1 << section_alignment[(int) seg]));
 }
 
+/* Attempt to simplify or eliminate a fixup. To indicate that a fixup
+   has been eliminated, set fix->fx_done. If fix->fx_addsy is non-NULL,
+   we will have to generate a reloc entry.  */
 void
 md_apply_fix3 (fixP, valP, segment)
      fixS * fixP;
@@ -1471,34 +1483,62 @@ md_apply_fix3 (fixP, valP, segment)
       break;
 
     case R_JR:
-      val = val - fixP->fx_frag->fr_address + fixP->fx_where - fixP->fx_size;
+      if (fixP->fx_addsy)
+        {
+          fixP->fx_no_overflow = 1;
+          fixP->fx_done = 0;
+        }
+      else
+        {
       if (val & 1)
         as_bad (_("cannot branch to odd address"));
       val /= 2;
       if (val > 127 || val < -128)
-        as_bad (_("relative jump out of range"));
+            as_warn (_("relative jump out of range"));
       *buf++ = val;
       fixP->fx_no_overflow = 1;
+          fixP->fx_done = 1;
+        }
       break;
 
     case R_DISP7:
-      val = val - fixP->fx_frag->fr_address + fixP->fx_where - fixP->fx_size;
+      if (fixP->fx_addsy)
+        {
+          fixP->fx_no_overflow = 1;
+          fixP->fx_done = 0;
+        }
+      else
+        {
       if (val & 1)
         as_bad (_("cannot branch to odd address"));
       val /= 2;
-      if (val > 0 || val < -128)
+          if (val > 0 || val < -127)
         as_bad (_("relative jump out of range"));
-      *buf = (*buf & 0x80) | (val & 0x7f);
+          *buf = (*buf & 0x80) | (-val & 0x7f);
       fixP->fx_no_overflow = 1;
+          fixP->fx_done = 1;
+        }
       break;
 
     case R_CALLR:
-      if (val > 8191 || val < -8192)
+      if (fixP->fx_addsy)
+        {
+          fixP->fx_no_overflow = 1;
+          fixP->fx_done = 0;
+        }
+      else
+        {
+          if (val & 1)
+            as_bad (_("cannot branch to odd address"));
+          if (val > 4096 || val < -4095)
         as_bad (_("relative call out of range"));
-      val = -val;
+          val = -val / 2;
       *buf = (*buf & 0xf0) | ((val >> 8) & 0xf);
       buf++;
       *buf++ = val & 0xff;
+          fixP->fx_no_overflow = 1;
+          fixP->fx_done = 1;
+        }
       break;
 
     case R_IMM8:
@@ -1568,11 +1608,13 @@ md_number_to_chars (ptr, use, nbytes)
   number_to_chars_bigendian (ptr, use, nbytes);
 }
 
+/* On the Z8000, a PC-relative offset is relative to the address of the
+   instruction plus its size.  */
 long
 md_pcrel_from (fixP)
-     fixS *fixP ATTRIBUTE_UNUSED;
+     fixS *fixP;
 {
-  abort ();
+  return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
 void
