@@ -56,9 +56,9 @@ void serial_raw PARAMS ((int fd, struct ttystate *oldstate));
 void serial_normal PARAMS ((void));
 
 /* Read one char from the serial device with <TO>-second timeout.
-   Return char, and set ok if ok.  */
+   Returns char if ok, else EOF, -2 for timeout, -3 for anything else  */
 
-int serial_timedreadchar PARAMS ((int to, int *ok));
+int serial_readchar PARAMS ((int to));
 
 /* Set the baudrate to the decimal value supplied, and return 1, or fail and
    return 0.  */

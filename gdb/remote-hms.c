@@ -251,11 +251,10 @@ int check_open()
 static int
 readchar ()
 {
-  int ok;
   int buf;
-  buf = serial_timedreadchar(timeout, &ok);
+  buf = serial_readchar(timeout);
 
-  if (!ok)
+  if (buf < 0)
    error ("Timeout reading from remote system.");
 
   if (!quiet)
@@ -267,10 +266,9 @@ readchar ()
 static int
 readchar_nofail ()
 {
-  int ok;
   int buf;
-  buf = serial_timedreadchar(timeout, &ok);
-  if (!ok) buf = 0;
+  buf = serial_readchar(timeout);
+  if (buf < 0) buf = 0;
   if (!quiet)
    printf("%c",buf);
   
@@ -544,8 +542,8 @@ is_baudrate_right()
   
   while (1) 
   {
-    serial_timedreadchar(timeout, &ok);
-    if (!ok) break;
+    ok = serial_readchar(timeout);
+    if (ok < 0) break;
   }
 
   hms_write("r",1);

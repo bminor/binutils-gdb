@@ -294,20 +294,14 @@ serial_open (name)
 }
 
 int
-serial_timedreadchar (to, ok)
+serial_readchar (to)
       int to;
-      int *ok;
 {
   char buf;
   if (dosasync_read(fd, &buf, 1, to))  
-  {
-    *ok = 1;
-  }
+    return buf;
   else
-  {
-    *ok = 0;
-  }
-  return buf;
+    return -2; /* Timeout, I guess */
 }
 
 int
