@@ -1,3 +1,9 @@
+2003-10-23  Peter Barada  <pbarada@mail.wm.sps.mot.com>
+
+	* gas/m68k/mcf-mov3q.s: New file: Test some ColdFire instructions.
+	* gas/m68k/mcf-mov3q.s: New file: Expected disassembly.
+	* gas/m68k/all.exp: Run new test.
+
 2003-10-22  Andreas Schwab  <schwab@suse.de>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
