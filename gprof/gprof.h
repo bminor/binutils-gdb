@@ -55,6 +55,12 @@
 # include <locale.h>
 #endif
 
+#ifdef ENABLE_NLS
+/* Undefine BFD's `_' macro - it uses dgetext() and we want to use gettext().  */
+#undef  _
+#define _(String) gettext (String)
+#endif
+
 #include "bin-bugs.h"
 
 /*

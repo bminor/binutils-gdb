@@ -1,3 +1,8 @@
+2000-05-31  Nick Clifton  <nickc@cygnus.com>
+
+	* gprof.h (_): Revert previous delta.  We want to use gettext,
+	not dgettext in the _ macro.
+
 2000-05-29  Alan Modra  <alan@linuxcare.com.au>
 
 	* gprof.h (_): Use BFD version.
