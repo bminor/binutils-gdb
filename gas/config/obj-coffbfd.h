@@ -518,4 +518,10 @@ extern SCNHDR text_section_header;
 #endif
 #endif
 
+/* Forward the segment of a forwarded symbol.  */
+#define obj_frob_forward_symbol(symp) \
+  (SF_GET_GET_SEGMENT (symp) \
+   ? (S_SET_SEGMENT (symp, S_GET_SEGMENT (symp->sy_value.X_add_symbol)), 0) \
+   : 0)
+
 /* end of obj-coffbfd.h */

@@ -118,7 +118,6 @@ symbol_new (name, segment, value, frag)
   symbol_clear_list_pointers(symbolP);
 
   symbolP->sy_frag = frag;
-  symbolP->sy_forward = NULL;
 #ifndef BFD_ASSEMBLER
   symbolP->sy_number = ~0;
   symbolP->sy_name_offset = ~0;
@@ -566,6 +565,53 @@ verify_symbol_chain_2 (sym)
   verify_symbol_chain (p, n);
 }
 
+/* Resolve the value of a symbol.  This is called during the final
+   pass over the symbol table to resolve any symbols with complex
+   values.  */
+
+void
+resolve_symbol_value (symp)
+     symbolS *symp;
+{
+  if (symp->sy_resolved)
+    return;
+
+  if (symp->sy_resolving)
+    {
+      as_bad ("Symbol definition loop encountered at %s",
+	      S_GET_NAME (symp));
+      S_SET_VALUE (symp, (valueT) 0);
+    }
+  else
+    {
+      symp->sy_resolving = 1;
+
+      if (symp->sy_value.X_seg == absolute_section)
+	S_SET_VALUE (symp, S_GET_VALUE (symp) + symp->sy_frag->fr_address);
+      else if (symp->sy_value.X_seg == undefined_section)
+	{
+	  resolve_symbol_value (symp->sy_value.X_add_symbol);
+
+#ifdef obj_frob_forward_symbol
+	  /* Some object formats need to forward the segment.  */
+	  obj_frob_forward_symbol (symp);
+#endif
+
+	  S_SET_VALUE (symp,
+		       (symp->sy_value.X_add_number
+			+ symp->sy_frag->fr_address
+			+ S_GET_VALUE (symp->sy_value.X_add_symbol)));
+	}
+      else
+	{
+	  /* More cases need to be added here.  */
+	  abort ();
+	}
+    }
+
+  symp->sy_resolved = 1;
+}
+
 #ifdef LOCAL_LABELS_DOLLAR
 
 /* Dollar labels look like a number followed by a dollar sign.  Eg, "42$".
@@ -953,7 +999,7 @@ S_GET_VALUE (s)
      symbolS *s;
 {
   if (s->sy_value.X_seg != absolute_section)
-    as_bad ("Attempt to get value of unresolved symbol");
+    as_bad ("Attempt to get value of unresolved symbol %s", S_GET_NAME (s));
   return (valueT) s->sy_value.X_add_number;
 }
 

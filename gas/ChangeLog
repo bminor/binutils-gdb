@@ -1,5 +1,37 @@
 Wed Jul 14 15:09:32 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* Removed sy_forward and replaced it with an undefined expression
+	as the value of a symbol.
+	* struc-symbol.h (struct symbol): Removed sy_forward field.  Added
+	sy_resolved and sy_resolving single bit fields.
+	* symbols.c (symbol_new): Don't initialize sy_forward field.
+	(resolve_symbol_value): New function to adjust symbol value by
+	fragment address, using recursion to resolve forward symbols.
+	* symbols.h: Added prototype for new function.
+	* read.c (pseudo_set): Set symbolP->sy_value to an undefined
+	expression rather than setting symbolP->sy_forward.
+	* write.c (write_object_file): Use resolve_symbol_value on
+	symbols, keeping the common case (the old behaviour) inline.
+	* config/obj-aout.c (obj_aout_frob_symbol): Removed sy_forward
+	handling (subsumed by write.c change).
+	* config/obj-coff.c, config/obj-coffbfd.c (obj_coff_val): Set
+	sy_value rather than sy_forward.
+	* config/obj-coffbfd.c (obj_coff_endef, yank_symbols): Check
+	expression segment rather than sy_forward.
+	(yank_symbols): Use resolve_symbol_value.
+	(crawl_symbols): Removed extra pass over symbols.
+	* config/obj-aout.c, config/obj-bout.c, config/obj-coff.c,
+	config/obj-vms.c (obj_crawl_symbol_chain): Removed extra pass over
+	symbols which handled sy_forward; use resolve_symbol_value
+	instead.
+	* config/obj-coff.h, config/obj-coffbfd.h (obj_frob_forward_symbol):
+	Define.
+	* config/obj-elf.c (obj_elf_stab_generic): Check expression
+	segment rather than sy_forward.
+	* config/obj-vms.c (VMS_Check_For_Main): Don't initialize
+	sy_forward; do initialize sy_resolved and sy_resolving.
+	* config/tc-hppa.h (STAB_FIXUP): Use sy_value, not sy_forward.
+
 	* Changes to keep a full expression as the value of a symbol, not
 	just a longword:
 	* struc-symbol.h: New field sy_value.

@@ -1499,13 +1499,19 @@ pseudo_set (symbolP)
     }
   else if (segment == pass1_section)
     {
-      symbolP->sy_forward = exp.X_add_symbol;
+      symbolP->sy_value.X_add_symbol = exp.X_add_symbol;
+      symbolP->sy_value.X_subtract_symbol = NULL;
+      symbolP->sy_value.X_add_number = 0;
+      symbolP->sy_value.X_seg = undefined_section;
       as_bad ("Unknown expression");
       know (need_pass_2 == 1);
     }
   else if (segment == undefined_section)
     {
-      symbolP->sy_forward = exp.X_add_symbol;
+      symbolP->sy_value.X_add_symbol = exp.X_add_symbol;
+      symbolP->sy_value.X_subtract_symbol = NULL;
+      symbolP->sy_value.X_add_number = 0;
+      symbolP->sy_value.X_seg = undefined_section;
     }
   else
     {

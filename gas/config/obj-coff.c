@@ -1620,11 +1620,15 @@ obj_coff_val ()
 	}
       else if (strcmp (S_GET_NAME (def_symbol_in_progress), symbol_name))
 	{
-	  def_symbol_in_progress->sy_forward = symbol_find_or_make (symbol_name);
+	  def_symbol_in_progress->sy_value.X_add_symbol =
+	    symbol_find_or_make (symbol_name);
+	  def_symbol_in_progress->sy_value.X_subtract_symbol = NULL;
+	  def_symbol_in_progress->sy_value.X_add_number = 0;
+	  def_symbol_in_progress->sy_value.X_seg = undefined_section;
 
-	  /* If the segment is undefined when the forward
-			   reference is solved, then copy the segment id
-			   from the forward symbol. */
+	  /* If the segment is undefined when the forward reference is
+	     resolved, then copy the segment id from the forward
+	     symbol.  */
 	  SF_SET_GET_SEGMENT (def_symbol_in_progress);
 	}
       /* Otherwise, it is the name of a non debug symbol and its value will be calculated later. */
@@ -1719,32 +1723,6 @@ obj_crawl_symbol_chain (headers)
 
   /* Initialize the stack used to keep track of the matching .bb .be */
   stack *block_stack = stack_init (512, sizeof (symbolS *));
-
-  /* JF deal with forward references first... */
-  for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
-    {
-
-      if (symbolP->sy_forward)
-	{
-	  S_SET_VALUE (symbolP, (S_GET_VALUE (symbolP)
-				 + S_GET_VALUE (symbolP->sy_forward)
-			       + symbolP->sy_forward->sy_frag->fr_address));
-
-	  if (
-#ifndef TE_I386AIX
-	       SF_GET_GET_SEGMENT (symbolP)
-#else
-	       SF_GET_GET_SEGMENT (symbolP)
-	       && S_GET_SEGMENT (symbolP) == SEG_UNKNOWN
-#endif /* TE_I386AIX */
-	    )
-	    {
-	      S_SET_SEGMENT (symbolP, S_GET_SEGMENT (symbolP->sy_forward));
-	    }			/* forward segment also */
-
-	  symbolP->sy_forward = 0;
-	}			/* if it has a forward reference */
-    }				/* walk the symbol chain */
 
   tc_crawl_symbol_chain (headers);
 
@@ -1864,7 +1842,7 @@ obj_crawl_symbol_chain (headers)
 	      S_SET_SEGMENT (symbolP, SEG_TEXT);
 	    }			/* push data into text */
 
-	  S_SET_VALUE (symbolP, S_GET_VALUE (symbolP) + symbolP->sy_frag->fr_address);
+	  resolve_symbol_value (symbolP);
 
 	  if (!S_IS_DEFINED (symbolP) && !SF_GET_LOCAL (symbolP))
 	    {

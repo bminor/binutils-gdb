@@ -486,7 +486,7 @@ obj_elf_stab_generic (what, secname)
       subseg_new ((char *) saved_seg->name, subseg);
 
       if ((what == 's' || what == 'n')
-	  && symbolP->sy_forward == NULL)
+	  && symbolP->sy_value.X_seg == absolute_section)
 	{
 	  /* symbol is not needed in the regular symbol table */
 	  symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);

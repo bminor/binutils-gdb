@@ -990,7 +990,7 @@ DEFUN_VOID (obj_coff_endef)
       || (S_GET_SEGMENT (def_symbol_in_progress) == SEG_DEBUG
 	  && !SF_GET_TAG (def_symbol_in_progress))
       || S_GET_SEGMENT (def_symbol_in_progress) == SEG_ABSOLUTE
-      || def_symbol_in_progress->sy_forward != NULL
+      || def_symbol_in_progress->sy_value.X_seg != absolute_section
       || (symbolP = symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP)) == NULL
       || (SF_GET_TAG (def_symbol_in_progress) != SF_GET_TAG (symbolP)))
     {
@@ -1238,11 +1238,15 @@ obj_coff_val ()
 	}
       else if (strcmp (S_GET_NAME (def_symbol_in_progress), symbol_name))
 	{
-	  def_symbol_in_progress->sy_forward = symbol_find_or_make (symbol_name);
+	  def_symbol_in_progress->sy_value.X_add_symbol =
+	    symbol_find_or_make (symbol_name);
+	  def_symbol_in_progress->sy_value.X_subtract_symbol = NULL;
+	  def_symbol_in_progress->sy_value.X_add_number = 0;
+	  def_symbol_in_progress->sy_value.X_seg = undefined_section;
 
-	  /* If the segment is undefined when the forward
-			   reference is solved, then copy the segment id
-			   from the forward symbol. */
+	  /* If the segment is undefined when the forward reference is
+	     resolved, then copy the segment id from the forward
+	     symbol.  */
 	  SF_SET_GET_SEGMENT (def_symbol_in_progress);
 
 	  /* FIXME: gcc can generate address expressions
@@ -1369,7 +1373,7 @@ DEFUN_VOID (yank_symbols)
 	  /* L* and C_EFCN symbols never merge. */
 	  if (!SF_GET_LOCAL (symbolP)
 	      && S_GET_STORAGE_CLASS (symbolP) != C_LABEL
-	      && symbolP->sy_forward == NULL
+	      && symbolP->sy_value.X_seg == absolute_section
 	      && (real_symbolP = symbol_find_base (S_GET_NAME (symbolP), DO_NOT_STRIP))
 	      && real_symbolP != symbolP)
 	    {
@@ -1396,8 +1400,7 @@ DEFUN_VOID (yank_symbols)
 	      S_SET_SEGMENT (symbolP, SEG_E0);
 	    }			/* push data into text */
 
-	  S_SET_VALUE (symbolP,
-		       S_GET_VALUE (symbolP) + symbolP->sy_frag->fr_address);
+	  resolve_symbol_value (symbolP);
 
 	  if (!S_IS_DEFINED (symbolP) && !SF_GET_LOCAL (symbolP))
 	    {
@@ -1612,16 +1615,6 @@ DEFUN (crawl_symbols, (h, abfd),
   /* Initialize the stack used to keep track of the matching .bb .be */
 
   block_stack = stack_init (512, sizeof (symbolS *));
-  /* JF deal with forward references first... */
-  for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
-    if (symbolP->sy_forward)
-      {
-	S_SET_VALUE (symbolP, (S_GET_VALUE (symbolP)
-			       + S_GET_VALUE (symbolP->sy_forward)
-			       + symbolP->sy_forward->sy_frag->fr_address));
-	if (SF_GET_GET_SEGMENT (symbolP))
-	  S_SET_SEGMENT (symbolP, S_GET_SEGMENT (symbolP->sy_forward));
-      }
 
   /* The symbol list should be ordered according to the following sequence
    * order :

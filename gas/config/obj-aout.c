@@ -110,17 +110,6 @@ obj_aout_frob_symbol (sym, punt)
   asection *sec;
   int desc, type, other;
 
-  /* Is this part format-dependent?  */
-  if (sym->sy_forward)
-    {
-      S_SET_VALUE (sym,
-		   S_GET_VALUE (sym)
-		   + S_GET_VALUE (sym->sy_forward)
-		   + sym->sy_forward->sy_frag->fr_address
-		   );
-      sym->sy_forward = 0;
-    }
-
   flags = sym->bsym->flags;
   desc = S_GET_DESC (sym);
   type = S_GET_TYPE (sym);
@@ -450,19 +439,6 @@ obj_crawl_symbol_chain (headers)
   symbolS **symbolPP;
   int symbol_number = 0;
 
-  /* JF deal with forward references first... */
-  for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
-    {
-      if (symbolP->sy_forward)
-	{
-	  S_SET_VALUE (symbolP, S_GET_VALUE (symbolP)
-		       + S_GET_VALUE (symbolP->sy_forward)
-		       + symbolP->sy_forward->sy_frag->fr_address);
-
-	  symbolP->sy_forward = 0;
-	}			/* if it has a forward reference */
-    }				/* walk the symbol chain */
-
   tc_crawl_symbol_chain (headers);
 
   symbolPP = &symbol_rootP;	/*->last symbol chain link. */
@@ -473,7 +449,7 @@ obj_crawl_symbol_chain (headers)
 	  S_SET_SEGMENT (symbolP, SEG_TEXT);
 	}			/* if pusing data into text */
 
-      S_SET_VALUE (symbolP, S_GET_VALUE (symbolP) + symbolP->sy_frag->fr_address);
+      resolve_symbol_value (symbolP);
 
       /* OK, here is how we decide which symbols go out into the brave
 	 new symtab.  Symbols that do are:

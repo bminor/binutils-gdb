@@ -1172,18 +1172,30 @@ write_object_file ()
 	{
 	  int keep = 0;
 
-	  S_SET_VALUE (symp, S_GET_VALUE (symp) + symp->sy_frag->fr_address);
+	  if (! symp->sy_resolved)
+	    {
+	      if (symp->sy_value.X_seg == absolute_section)
+		{
+		  /* This is the normal case; skip the call.  */
+		  S_SET_VALUE (symp,
+			       (S_GET_VALUE (symp)
+				+ symp->sy_frag->fr_address));
+		  symp->sy_resolved = 1;
+		}
+	      else
+		resolve_symbol_value (symp);
+	    }
+
 	  /* So far, common symbols have been treated like undefined symbols.
 	     Put them in the common section now.  */
 	  if (S_IS_DEFINED (symp) == 0
 	      && S_GET_VALUE (symp) != 0)
 	    S_SET_SEGMENT (symp, &bfd_com_section);
 #if 0
-	  printf ("symbol `%s'\n\t@%x: value=%d flags=%x forward=%x seg=%s\n",
+	  printf ("symbol `%s'\n\t@%x: value=%d flags=%x seg=%s\n",
 		  S_GET_NAME (symp), symp,
 		  S_GET_VALUE (symp),
 		  symp->bsym->flags,
-		  symp->sy_forward,
 		  segment_name (symp->bsym->section));
 #endif
 	  {
