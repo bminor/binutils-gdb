@@ -1,5 +1,5 @@
 /* GDB interface to ARM RDI library.
-   Copyright 1997 Free Software Foundation, Inc.
+   Copyright 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
-
 
 #include "defs.h"
 #include "gdb_string.h"
@@ -93,7 +92,9 @@ static char *rdi_error_message PARAMS ((int err));
 
 static enum target_signal rdi_error_signal PARAMS ((int err));
 
-extern struct target_ops arm_rdi_ops;	/* Forward decl */
+/* Global variables.  */
+
+struct target_ops arm_rdi_ops;
 
 static struct Dbg_ConfigBlock gdb_config;
 
@@ -125,7 +126,7 @@ arm_rdi_start_remote (dummy)
    these to forward output from the target system and so forth.  */
 
 void
-voiddummy()
+voiddummy ()
 {
   printf("void dummy\n");
 }
@@ -256,28 +257,6 @@ device is attached to the remote system (e.g. /dev/ttya).");
       printf_filtered ("RDI_info: %s\n", rdi_error_message (rslt));
     }
 
-  /*
-  ** There's no point asking if the target's an ICEBreaker, unless
-  ** you're going to do something with the answer. All it does is provoke
-  ** an error message on non-ICE targets
-  rslt = angel_RDI_info (RDIInfo_Icebreaker, & arg1, & arg2);
-  if (rslt)
-    {
-      printf_filtered ("RDI_info: %s\n", rdi_error_message (rslt));
-    }
-    */
-
-  /*
-  ** There's no point asking if the target can accept a configuration download,
-  ** unless you're going to do something with the answer. All it does is
-  ** provoke an error message on non-ICE targets
-  rslt = angel_RDI_info (RDIInfo_DownLoad, & arg1, & arg2);
-  if (rslt)
-    {
-      printf_filtered ("RDI_info: %s\n", rdi_error_message (rslt));
-    }
-    */
-
   rslt = angel_RDI_info (RDIInfo_GetLoadSize, &arg1, &arg2);
   if (rslt)
     {
@@ -363,22 +342,22 @@ arm_rdi_create_inferior (exec_file, args, env)
   inferior_pid = 42;
   insert_breakpoints ();  /* Needed to get correct instruction in cache */
 
-  if ( env != NULL)
+  if (env != NULL)
     {
       while (*env)
 	{
-	  if (strncmp(*env, "MEMSIZE=", sizeof("MEMSIZE=")-1)==0)
+	  if (strncmp (*env, "MEMSIZE=", sizeof ("MEMSIZE=") - 1) == 0)
 	    {
 	      unsigned long top_of_memory;
 	      char *end_of_num;
 
 	      /* Set up memory limit */
-	      top_of_memory = strtoul(*env + sizeof("MEMSIZE=")-1,
-				      &end_of_num, 0);
+	      top_of_memory = strtoul (*env + sizeof ("MEMSIZE=") - 1,
+				       &end_of_num, 0);
 	      printf_filtered ("Setting top-of-memory to 0x%x\n",
 			       top_of_memory);
 	  
-	      rslt=angel_RDI_info (RDIInfo_SetTopMem, &top_of_memory, &arg2);
+	      rslt = angel_RDI_info (RDIInfo_SetTopMem, &top_of_memory, &arg2);
 	      if (rslt)
 		{
 		  printf_filtered ("RDI_info: %s\n", rdi_error_message (rslt));
@@ -507,11 +486,11 @@ arm_rdi_wait (pid, status)
      int pid;
      struct target_waitstatus *status;
 {
-  status->kind = execute_status == RDIError_NoError ?
-    TARGET_WAITKIND_EXITED : TARGET_WAITKIND_STOPPED;
+  status->kind = (execute_status == RDIError_NoError ?
+    TARGET_WAITKIND_EXITED : TARGET_WAITKIND_STOPPED);
 
   /* convert stopped code from target into right signal */
-  status->value.sig = rdi_error_signal ( execute_status );
+  status->value.sig = rdi_error_signal (execute_status);
 
   return inferior_pid;
 }
@@ -933,57 +912,42 @@ rdi_error_signal (err)
 
 /* Define the target operations structure.  */
 
-struct target_ops arm_rdi_ops ;
-
-static void init_rdi_ops(void)
+static void
+init_rdi_ops ()
 {
-  arm_rdi_ops.to_shortname =   "rdi";	
-  arm_rdi_ops.to_longname =   "ARM RDI";
-  arm_rdi_ops.to_doc =   "Use a remote ARM-based computer; via the RDI library.\n\
+  arm_rdi_ops.to_shortname = "rdi";	
+  arm_rdi_ops.to_longname = "ARM RDI";
+  arm_rdi_ops.to_doc = "Use a remote ARM-based computer; via the RDI library.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya)." ; 
-  arm_rdi_ops.to_open =   arm_rdi_open;		
-  arm_rdi_ops.to_close =   arm_rdi_close;	
-  arm_rdi_ops.to_attach =   NULL;		
-  arm_rdi_ops.to_detach =   arm_rdi_detach;	
-  arm_rdi_ops.to_resume =   arm_rdi_resume;	
-  arm_rdi_ops.to_wait  =   arm_rdi_wait;	
-  arm_rdi_ops.to_fetch_registers  =   arm_rdi_fetch_registers;
-  arm_rdi_ops.to_store_registers  =   arm_rdi_store_registers;
-  arm_rdi_ops.to_prepare_to_store =   arm_rdi_prepare_to_store;
-  arm_rdi_ops.to_xfer_memory  =   arm_rdi_xfer_memory;
-  arm_rdi_ops.to_files_info  =   arm_rdi_files_info;
-  arm_rdi_ops.to_insert_breakpoint =   arm_rdi_insert_breakpoint;
-  arm_rdi_ops.to_remove_breakpoint =   arm_rdi_remove_breakpoint;	
-  arm_rdi_ops.to_terminal_init  =   NULL;		
-  arm_rdi_ops.to_terminal_inferior =   NULL;		
-  arm_rdi_ops.to_terminal_ours_for_output =   NULL;	
-  arm_rdi_ops.to_terminal_ours  =   NULL;		
-  arm_rdi_ops.to_terminal_info  =   NULL;		
-  arm_rdi_ops.to_kill  =   arm_rdi_kill;		
-  arm_rdi_ops.to_load  =   generic_load;		
-  arm_rdi_ops.to_lookup_symbol =   NULL;			
-  arm_rdi_ops.to_create_inferior =   arm_rdi_create_inferior;
-  arm_rdi_ops.to_mourn_inferior =   arm_rdi_mourn_inferior;
-  arm_rdi_ops.to_can_run  =   0;		
-  arm_rdi_ops.to_notice_signals =   0;		
-  arm_rdi_ops.to_thread_alive  =   0;		
-  arm_rdi_ops.to_stop  =   0;			
-  arm_rdi_ops.to_stratum =   process_stratum;
-  arm_rdi_ops.DONT_USE =   NULL;	
-  arm_rdi_ops.to_has_all_memory =   1;	
-  arm_rdi_ops.to_has_memory =   1;	
-  arm_rdi_ops.to_has_stack =   1;	
-  arm_rdi_ops.to_has_registers =   1;	
-  arm_rdi_ops.to_has_execution =   1;	
-  arm_rdi_ops.to_sections =   NULL;	
-  arm_rdi_ops.to_sections_end =   NULL;	
-  arm_rdi_ops.to_magic =   OPS_MAGIC ;	
+  arm_rdi_ops.to_open = arm_rdi_open;		
+  arm_rdi_ops.to_close = arm_rdi_close;	
+  arm_rdi_ops.to_detach = arm_rdi_detach;	
+  arm_rdi_ops.to_resume = arm_rdi_resume;	
+  arm_rdi_ops.to_wait = arm_rdi_wait;	
+  arm_rdi_ops.to_fetch_registers = arm_rdi_fetch_registers;
+  arm_rdi_ops.to_store_registers = arm_rdi_store_registers;
+  arm_rdi_ops.to_prepare_to_store = arm_rdi_prepare_to_store;
+  arm_rdi_ops.to_xfer_memory = arm_rdi_xfer_memory;
+  arm_rdi_ops.to_files_info = arm_rdi_files_info;
+  arm_rdi_ops.to_insert_breakpoint = arm_rdi_insert_breakpoint;
+  arm_rdi_ops.to_remove_breakpoint = arm_rdi_remove_breakpoint;	
+  arm_rdi_ops.to_kill = arm_rdi_kill;		
+  arm_rdi_ops.to_load = generic_load;		
+  arm_rdi_ops.to_create_inferior = arm_rdi_create_inferior;
+  arm_rdi_ops.to_mourn_inferior = arm_rdi_mourn_inferior;
+  arm_rdi_ops.to_stratum = process_stratum;
+  arm_rdi_ops.to_has_all_memory = 1;	
+  arm_rdi_ops.to_has_memory = 1;	
+  arm_rdi_ops.to_has_stack = 1;	
+  arm_rdi_ops.to_has_registers = 1;	
+  arm_rdi_ops.to_has_execution = 1;	
+  arm_rdi_ops.to_magic = OPS_MAGIC;	
 }
 
 void
 _initialize_remote_rdi ()
 {
-  init_rdi_ops() ;
+  init_rdi_ops () ;
   add_target (&arm_rdi_ops);
 }
 

@@ -1,3 +1,8 @@
+Thu Sep 24 15:44:34 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-rdi.c: Fix formatting, remove some commented-out code.
+	(init_rdi_ops): Omit needless initializations.
+
 Wed Sep 23 18:21:03 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (remote_address_masked): New function - mask address
