@@ -3191,9 +3191,10 @@ VAX options:\n\
 #ifdef OBJ_VMS
   fprintf (stream, "\
 -+			hash names longer than 31 characters\n\
--1			?\n\
+-1			don't do const thing\n\
 -H			show new symbol after hash truncation\n\
--h			do not hash mixed-case names\n\
+-h NUM			don't hash mixed-case names, and adjust case:\n\
+			0 = upper, 2 = lower, 3 = preserve case\n\
 -vVERSION		compiler version is VERSION\n");
 #endif
 }
