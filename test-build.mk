@@ -48,7 +48,7 @@ release_root := $(ROOTING)/$(RELEASE_TAG)
 
 TIME := time
 GCC := gcc -O
-GNU_MAKE := /usr/latest/bin/make -f test-build.mk
+GNU_MAKE := /usr/latest/bin/make
 override MAKE := make
 override MAKEFLAGS :=
 override MFLAGS :=
@@ -80,9 +80,8 @@ $(host)-stamp-in-place: $(TREE)-stamp-co
 	PATH=/bin:/usr/bin:/usr/ucb ; \
 		export PATH ; \
 		SHELL=/bin/sh ; export SHELL ; \
-		$(TIME) $(GNU_MAKE) $(host)-stamp-in-place-installed host=$(host) $(FLAGS_TO_PASS)
+		$(TIME) $(GNU_MAKE) -f test-build.mk $(host)-stamp-in-place-installed host=$(host) $(FLAGS_TO_PASS)
 	touch $@
-	mv $(INPLACEDIR) $(STAGE1DIR)
 
 $(host)-stamp-in-place-installed: $(host)-stamp-in-place-checked
 	(cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(MF) install host=$(host))
@@ -123,7 +122,7 @@ $(host)-stamp-stage1:
 	PATH=`pwd`/$(HOLESDIR) ; \
 		export PATH ; \
 		SHELL=sh ; export SHELL ; \
-		$(TIME) $(GNU_MAKE) $(host)-stamp-stage1-installed host=$(host) $(FLAGS_TO_PASS)
+		$(TIME) $(GNU_MAKE) -f test-build.mk $(host)-stamp-stage1-installed host=$(host) $(FLAGS_TO_PASS)
 	touch $@
 	mv $(WORKING_DIR) $(STAGE1DIR)
 
@@ -161,7 +160,7 @@ $(host)-stamp-stage2:
 	PATH=$(release_root)/H-$(host)/bin:`pwd`/$(HOLESDIR) ; \
 		export PATH ; \
 		SHELL=sh ; export SHELL ; \
-		$(TIME) $(MAKE) -w $(STAGE2DIR) host=$(host) $(FLAGS_TO_PASS)
+		$(TIME) $(MAKE) -f test-build.mk -w $(STAGE2DIR) host=$(host) $(FLAGS_TO_PASS)
 	touch $@
 
 $(STAGE2DIR): $(host)-stamp-stage2-installed
