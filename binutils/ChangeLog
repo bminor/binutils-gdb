@@ -1,3 +1,15 @@
+Wed Jun  3 12:09:40 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* bucomm.h: New exported funtion from bucomm.c: non_fatal().
+	* bucomm.c (non_fatal): New exported function.  Just like fatal()
+	except that it returns rather than calling xexit().
+
+	(bfd_check_format_matches): Call fatal() rather than bfd_fatal().
+	
+	(check_matching_formats): Fix C formating.
+	
+	(parse_vma): Call fatal().
+
 Mon Jun  1 18:26:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Yuli Barcohen <yuli.barcohen@telrad.co.il>:
