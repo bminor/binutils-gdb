@@ -1,3 +1,7 @@
+2001-02-26  H.J. Lu  <hjl@gnu.org>
+
+	* gas/ia64/opc-a-err.l: Change "Operand [3|4]" to "Operand [34]".
+
 2001-02-23  H.J. Lu  <hjl@gnu.org>
 
 	* gas/ia64/opc-a-err.l: Fix "cmp4.lt.or".
