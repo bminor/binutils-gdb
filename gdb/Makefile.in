@@ -1324,7 +1324,7 @@ ALLDEPFILES = \
 	avr-tdep.c \
 	coff-solib.c \
 	core-regset.c core-aout.c corelow.c \
-	dcache.c delta68-nat.c dpx2-nat.c exec.c fork-child.c \
+	dcache.c dpx2-nat.c exec.c fork-child.c \
 	glibc-tdep.c \
 	go32-nat.c h8300-tdep.c \
 	hppa-tdep.c hppa-hpux-tdep.c \
@@ -1698,7 +1698,6 @@ dbxread.o: dbxread.c $(defs_h) $(gdb_string_h) $(gdb_obstack_h) \
 	$(cp_abi_h) $(gdb_assert_h) $(aout_aout64_h) $(aout_stab_gnu_h)
 dcache.o: dcache.c $(defs_h) $(dcache_h) $(gdbcmd_h) $(gdb_string_h) \
 	$(gdbcore_h) $(target_h)
-delta68-nat.o: delta68-nat.c $(defs_h)
 demangle.o: demangle.c $(defs_h) $(command_h) $(gdbcmd_h) $(demangle_h) \
 	$(gdb_string_h)
 dictionary.o: dictionary.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \

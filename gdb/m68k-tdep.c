@@ -327,62 +327,6 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct type *type,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-int
-delta68_in_sigtramp (CORE_ADDR pc, char *name)
-{
-  if (name != NULL)
-    return strcmp (name, "_sigcode") == 0;
-  else
-    return 0;
-}
-
-CORE_ADDR
-delta68_frame_args_address (struct frame_info *frame_info)
-{
-  /* we assume here that the only frameless functions are the system calls
-     or other functions who do not put anything on the stack. */
-  if (get_frame_type (frame_info) == SIGTRAMP_FRAME)
-    return get_frame_base (frame_info) + 12;
-  else if (legacy_frameless_look_for_prologue (frame_info))
-    {
-      /* Check for an interrupted system call */
-      if (get_next_frame (frame_info) && (get_frame_type (get_next_frame (frame_info)) == SIGTRAMP_FRAME))
-	return get_frame_base (get_next_frame (frame_info)) + 16;
-      else
-	return get_frame_base (frame_info) + 4;
-    }
-  else
-    return get_frame_base (frame_info);
-}
-
-CORE_ADDR
-delta68_frame_saved_pc (struct frame_info *frame_info)
-{
-  return read_memory_unsigned_integer (delta68_frame_args_address (frame_info)
-				       + 4, 4);
-}
-
-int
-delta68_frame_num_args (struct frame_info *fi)
-{
-  int val;
-  CORE_ADDR pc = DEPRECATED_FRAME_SAVED_PC (fi);
-  int insn = read_memory_unsigned_integer (pc, 2);
-  val = 0;
-  if (insn == 0047757 || insn == 0157374)	/* lea W(sp),sp or addaw #W,sp */
-    val = read_memory_integer (pc + 2, 2);
-  else if ((insn & 0170777) == 0050217	/* addql #N, sp */
-	   || (insn & 0170777) == 0050117)	/* addqw */
-    {
-      val = (insn >> 9) & 7;
-      if (val == 0)
-	val = 8;
-    }
-  else if (insn == 0157774)	/* addal #WW, sp */
-    val = read_memory_integer (pc + 2, 4);
-  val >>= 2;
-  return val;
-}
 
 static CORE_ADDR
 m68k_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,

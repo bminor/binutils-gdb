@@ -1,5 +1,11 @@
 2004-05-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* delta68-nat.c: Remove file.
+	* m68k-tdep.c (delta68_in_sigtramp, delta68_frame_args_address)
+	(delta68_frame_saved_pc, delta68_frame_num_args): Remove functions.
+	* Makefile.in (ALLDEPFILES): Remove delta68-nat.c.
+	(delta68-nat.o): Remove dependency.
+
 	* m68k-tdep.c (m68k_frameless_function_invocation): Remove
 	function.
 	(m68k_gdbarch_init): Don't set
