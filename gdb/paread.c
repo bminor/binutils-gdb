@@ -47,15 +47,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 static void
 pa_symfile_init PARAMS ((struct objfile *));
 
-static int
-compare_unwind_entries PARAMS ((struct unwind_table_entry *,   
-				struct unwind_table_entry *));
-
 static void
 pa_new_init PARAMS ((struct objfile *));
-
-static void
-read_unwind_info PARAMS ((struct objfile *));
 
 static void
 pa_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
@@ -300,173 +293,6 @@ pa_symtab_read (abfd, addr, objfile)
   install_minimal_symbols (objfile);
 }
 
-/* Compare the start address for two unwind entries returning 1 if 
-   the first address is larger than the second, -1 if the second is
-   larger than the first, and zero if they are equal.  */
-
-static int
-compare_unwind_entries (a, b)
-     struct unwind_table_entry *a;
-     struct unwind_table_entry *b;
-{
-  if (a->region_start > b->region_start)
-    return 1;
-  else if (a->region_start < b->region_start)
-    return -1;
-  else
-    return 0;
-}
-
-/* Read in the backtrace information stored in the `$UNWIND_START$' section of
-   the object file.  This info is used mainly by find_unwind_entry() to find
-   out the stack frame size and frame pointer used by procedures.  We put
-   everything on the psymbol obstack in the objfile so that it automatically
-   gets freed when the objfile is destroyed.  */
-
-static void
-read_unwind_info (objfile)
-     struct objfile *objfile;
-{
-  asection *unwind_sec, *stub_unwind_sec;
-  unsigned unwind_size, stub_unwind_size, total_size;
-  unsigned index, unwind_entries, stub_entries, total_entries;
-  struct obj_unwind_info *ui;
-
-  ui = obstack_alloc (&objfile->psymbol_obstack,
-		      sizeof (struct obj_unwind_info));
-
-  ui->table = NULL;
-  ui->cache = NULL;
-  ui->last = -1;
-
-  /* Get hooks to both unwind sections.  */
-  unwind_sec = bfd_get_section_by_name (objfile->obfd, "$UNWIND_START$");
-  stub_unwind_sec = bfd_get_section_by_name (objfile->obfd, "$UNWIND_END$");
-
-  /* Get sizes and unwind counts for both sections.  */
-  if (unwind_sec)
-    {
-      unwind_size = bfd_section_size (objfile->obfd, unwind_sec);
-      unwind_entries = unwind_size / UNWIND_ENTRY_SIZE;
-    }
-  else
-    {
-      unwind_size = 0;
-      unwind_entries = 0;
-    }
-
-  if (stub_unwind_sec)
-    {
-      stub_unwind_size = bfd_section_size (objfile->obfd, stub_unwind_sec);
-      stub_entries = stub_unwind_size / STUB_UNWIND_ENTRY_SIZE;
-    }
-  else
-    {
-      stub_unwind_size = 0;
-      stub_entries = 0;
-    }
-
-  /* Compute total number of stubs.  */
-  total_entries = unwind_entries + stub_entries;
-  total_size = total_entries * sizeof (struct unwind_table_entry);
-
-  /* Allocate memory for the unwind table.  */
-  ui->table = obstack_alloc (&objfile->psymbol_obstack, total_size);
-  ui->last = total_entries - 1;
-
-  /* We will read the unwind entries into temporary memory, then
-     fill in the actual unwind table.  */
-  if (unwind_size > 0)
-    {
-      unsigned long tmp;
-      unsigned i;
-      char *buf = alloca (unwind_size);
-
-      bfd_get_section_contents (objfile->obfd, unwind_sec, buf, 0, unwind_size);
-
-      /* Now internalize the information being careful to handle host/target
-	 endian issues.  */
-      for (i = 0; i < unwind_entries; i++)
-	{
-	  ui->table[i].region_start = bfd_get_32 (objfile->obfd,
-						  (bfd_byte *)buf);
-	  buf += 4;
-	  ui->table[i].region_end = bfd_get_32 (objfile->obfd, (bfd_byte *)buf);
-	  buf += 4;
-	  tmp = bfd_get_32 (objfile->obfd, (bfd_byte *)buf);
-	  buf += 4;
-	  ui->table[i].Cannot_unwind = (tmp >> 31) & 0x1;;
-	  ui->table[i].Millicode = (tmp >> 30) & 0x1;
-	  ui->table[i].Millicode_save_sr0 = (tmp >> 29) & 0x1;
-	  ui->table[i].Region_description = (tmp >> 27) & 0x3;
-	  ui->table[i].reserved1 = (tmp >> 26) & 0x1;
-	  ui->table[i].Entry_SR = (tmp >> 25) & 0x1;
-	  ui->table[i].Entry_FR = (tmp >> 21) & 0xf;
-	  ui->table[i].Entry_GR = (tmp >> 16) & 0x1f;
-	  ui->table[i].Args_stored = (tmp >> 15) & 0x1;
-	  ui->table[i].Variable_Frame = (tmp >> 14) & 0x1;
-	  ui->table[i].Separate_Package_Body = (tmp >> 13) & 0x1;
-	  ui->table[i].Frame_Extension_Millicode = (tmp >> 12 ) & 0x1;
-	  ui->table[i].Stack_Overflow_Check = (tmp >> 11) & 0x1;
-	  ui->table[i].Two_Instruction_SP_Increment = (tmp >> 10) & 0x1;
-	  ui->table[i].Ada_Region = (tmp >> 9) & 0x1;
-	  ui->table[i].reserved2 = (tmp >> 5) & 0xf;
-	  ui->table[i].Save_SP = (tmp >> 4) & 0x1;
-	  ui->table[i].Save_RP = (tmp >> 3) & 0x1;
-	  ui->table[i].Save_MRP_in_frame = (tmp >> 2) & 0x1;
-	  ui->table[i].extn_ptr_defined = (tmp >> 1) & 0x1;
-	  ui->table[i].Cleanup_defined = tmp & 0x1;
-	  tmp = bfd_get_32 (objfile->obfd, (bfd_byte *)buf);
-	  buf += 4;
-	  ui->table[i].MPE_XL_interrupt_marker = (tmp >> 31) & 0x1;
-	  ui->table[i].HP_UX_interrupt_marker = (tmp >> 30) & 0x1;
-	  ui->table[i].Large_frame = (tmp >> 29) & 0x1;
-	  ui->table[i].reserved4 = (tmp >> 27) & 0x3;
-	  ui->table[i].Total_frame_size = tmp & 0x7ffffff;
-	}
-      
-    }
-     
-  if (stub_unwind_size > 0)
-    {
-      unsigned int i;
-      char *buf = alloca (stub_unwind_size);
-
-      /* Read in the stub unwind entries.  */
-      bfd_get_section_contents (objfile->obfd, stub_unwind_sec, buf,
-				0, stub_unwind_size);
-
-      /* Now convert them into regular unwind entries.  */
-      index = unwind_entries;
-      for (i = 0; i < stub_entries; i++, index++)
-	{
-	  /* Clear out the next unwind entry.  */
-	  memset (&ui->table[index], 0, sizeof (struct unwind_table_entry));
-
-	  /* Convert offset & size into region_start and region_end.  
-	     Stuff away the stub type into "reserved" fields.  */
-	  ui->table[index].region_start = bfd_get_32 (objfile->obfd,
-						      (bfd_byte *) buf);
-	  buf += 4;
-	  ui->table[index].stub_type = bfd_get_8 (objfile->obfd,
-						  (bfd_byte *) buf);
-	  buf += 2;
-	  ui->table[index].region_end
-	    = ui->table[index].region_start + 4 * 
-	      (bfd_get_16 (objfile->obfd, (bfd_byte *) buf) - 1);
-	  buf += 2;
-	}
-
-    }
-
-  /* Unwind table needs to be kept sorted.  */
-  qsort (ui->table, total_entries, sizeof (struct unwind_table_entry),
-	 compare_unwind_entries);
-
-  /* Keep a pointer to the unwind information.  */
-  objfile->obj_private = (PTR) ui;
-}
-
 /* Scan and build partial symbols for a symbol file.
    We have been initialized by a call to pa_symfile_init, which 
    currently does nothing.
@@ -522,8 +348,6 @@ pa_symfile_read (objfile, section_offsets, mainline)
      special PA sections.  */
 
   pastab_build_psymtabs (objfile, section_offsets, mainline);
-
-  read_unwind_info(objfile);
 
   do_cleanups (back_to);
 }

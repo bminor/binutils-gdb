@@ -1,3 +1,15 @@
+Sat Apr 16 22:20:51 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* paread.c (compare_unwind_entries): Delete function.  It's been
+	moved into hppa-tdep.c.
+	(read_unwind_info): Likewise.
+	(pa_symfile_read): No longer call read_unwind_info.  The unwind
+	tables will be read in as they are needed.
+
+	* hppa-tdep.c (compare_unwind_entries): New function.
+	(read_unwind_info, internalize_unwinds): Likewise.
+	(find_unwind_entry): Read in unwind information on demand.
+
 Fri Apr 15 11:53:46 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* source.c (DIRNAME_SEPARATOR): New macro, replaces all references
