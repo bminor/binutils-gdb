@@ -1,6 +1,5 @@
 	.section	.rdata
 	.align	0
-.LC0:
 	.ascii	"some data\000"
 
 	.text
@@ -76,4 +75,4 @@ misc:
 
 	.align
 .L2:
-	.word	.LC0
+	.word	.rdata

@@ -1,3 +1,14 @@
+1999-11-01  Nick Clifton  <nickc@cygnus.com>
+
+	Remove reloc generating references to local labels in test code.
+	Some ARM targets (eg PE) generate a reloc based on the label,
+	whilst others (eg ELF) generate a reloc based on the section
+	symbol.  This meant that the disassembled outputs would differ.
+	
+	* gas/arm/inst.s: Change test of BLPL instruction.
+	* gas/arm/inst.d: Change expected decode of BLPL instruction.
+	* gas/arm/arm7t.s: Remove use of .LC0 label in .word directive.
+
 1999-10-21  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/arm/arm7t.d: Update to match latest objdump output.

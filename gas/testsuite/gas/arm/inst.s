@@ -184,6 +184,6 @@ bar:
 	swihs	0x33
 
 	bl	_wombat
-	blpl	bar
+	blpl	hohum
 	b	_wibble
 	ble	testerfunc
