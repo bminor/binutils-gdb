@@ -1,3 +1,7 @@
+Fri Dec 15 16:44:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* disassemble.c (disassembler): Use new bfd_big_endian macro.
+
 Tue Dec 12 12:22:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (distclean): Remove stamp-h.  From Ronald
