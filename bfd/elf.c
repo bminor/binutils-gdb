@@ -576,6 +576,7 @@ bfd_section_from_shdr (abfd, shindex)
     case SHT_DYNAMIC:	/* Dynamic linking information.  */
     case SHT_NOBITS:	/* .bss section.  */
     case SHT_HASH:	/* .hash section.  */
+    case SHT_NOTE:	/* .note section.  */
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
     case SHT_SYMTAB:		/* A symbol table */
@@ -750,9 +751,6 @@ bfd_section_from_shdr (abfd, shindex)
 	abfd->flags |= HAS_RELOC;
 	return true;
       }
-      break;
-
-    case SHT_NOTE:
       break;
 
     case SHT_SHLIB:
@@ -1746,6 +1744,12 @@ assign_file_positions_for_segments (abfd)
 	return false;
     }
 
+  if (bed->elf_backend_modify_segment_map)
+    {
+      if (! (*bed->elf_backend_modify_segment_map) (abfd))
+	return false;
+    }
+
   count = 0;
   for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
     ++count;
@@ -1756,11 +1760,6 @@ assign_file_positions_for_segments (abfd)
 
   if (count == 0)
     return true;
-
-  /* Let the backend count up any program headers it might need.  */
-  if (bed->elf_backend_create_program_headers)
-    count = ((*bed->elf_backend_create_program_headers)
-	     (abfd, (Elf_Internal_Phdr *) NULL, count));
 
   /* If we already counted the number of program segments, make sure
      that we allocated enough space.  This happens when SIZEOF_HEADERS
@@ -1978,11 +1977,6 @@ assign_file_positions_for_segments (abfd)
 	}
     }
 
-  /* Let the backend set up any program headers it might need.  */
-  if (bed->elf_backend_create_program_headers)
-    count = ((*bed->elf_backend_create_program_headers)
-	     (abfd, phdrs, count));
-
   /* Clear out any program headers we allocated but did not use.  */
   for (; count < alloc; count++, p++)
     {
@@ -2057,9 +2051,15 @@ get_program_header_size (abfd)
     }
 
   /* Let the backend count up any program headers it might need.  */
-  if (bed->elf_backend_create_program_headers)
-    segs = ((*bed->elf_backend_create_program_headers)
-	    (abfd, (Elf_Internal_Phdr *) NULL, segs));
+  if (bed->elf_backend_additional_program_headers)
+    {
+      int a;
+
+      a = (*bed->elf_backend_additional_program_headers) (abfd);
+      if (a == -1)
+	abort ();
+      segs += a;
+    }
 
   elf_tdata (abfd)->program_header_size = segs * bed->s->sizeof_phdr;
   return elf_tdata (abfd)->program_header_size;

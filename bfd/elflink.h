@@ -629,7 +629,7 @@ elf_link_add_object_symbols (abfd, info)
 	definition = true;
 
       size_change_ok = false;
-      type_change_ok = false;
+      type_change_ok = get_elf_backend_data (abfd)->type_change_ok;
       if (info->hash->creator->flavour == bfd_target_elf_flavour)
 	{
 	  /* We need to look up the symbol now in order to get some of
@@ -648,15 +648,16 @@ elf_link_add_object_symbols (abfd, info)
 
 	  /* It's OK to change the type if it used to be a weak
              definition.  */
-	  type_change_ok = (h->root.type == bfd_link_hash_defweak
-			    || h->root.type == bfd_link_hash_undefweak);
+	  if (h->root.type == bfd_link_hash_defweak
+	      || h->root.type == bfd_link_hash_undefweak)
+	    type_change_ok = true;
 
 	  /* It's OK to change the size if it used to be a weak
 	     definition, or if it used to be undefined, or if we will
-	     be overriding an old definition.
-	     */
-	  size_change_ok = (type_change_ok
-			    || h->root.type == bfd_link_hash_undefined);
+	     be overriding an old definition.  */
+	  if (type_change_ok
+	      || h->root.type == bfd_link_hash_undefined)
+	    size_change_ok = true;
 
 	  /* If we are looking at a dynamic object, and this is a
 	     definition, we need to see if it has already been defined
@@ -2401,12 +2402,15 @@ elf_link_output_extsym (h, data)
      linker will complain that the symbol is undefined when the
      program is run.  We don't have to worry about symbols that are
      referenced by regular files, because we will already have issued
-     warnings for them.  */
+     warnings for them.  FIXME: _rld_new_interface is apparently
+     supposed to be undefined on Irix 5.3.  This should be handled in
+     a better way.  */
   if (! finfo->info->relocateable
       && ! finfo->info->shared
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
+      && strcmp (h->root.root.string, "_rld_new_interface") != 0)
     {
       if (! ((*finfo->info->callbacks->undefined_symbol)
 	     (finfo->info, h->root.root.string, h->root.u.undef.abfd,
@@ -2987,6 +2991,7 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
   reloc_howto_type *howto;
   long indx;
   bfd_vma offset;
+  bfd_vma addend;
   struct elf_link_hash_entry **rel_hash_ptr;
   Elf_Internal_Shdr *rel_hdr;
 
@@ -2997,50 +3002,7 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
       return false;
     }
 
-  /* If this is an inplace reloc, we must write the addend into the
-     object file.  */
-  if (howto->partial_inplace
-      && link_order->u.reloc.p->addend != 0)
-    {
-      bfd_size_type size;
-      bfd_reloc_status_type rstat;
-      bfd_byte *buf;
-      boolean ok;
-
-      size = bfd_get_reloc_size (howto);
-      buf = (bfd_byte *) bfd_zmalloc (size);
-      if (buf == (bfd_byte *) NULL)
-	return false;
-      rstat = _bfd_relocate_contents (howto, output_bfd,
-				      link_order->u.reloc.p->addend, buf);
-      switch (rstat)
-	{
-	case bfd_reloc_ok:
-	  break;
-	default:
-	case bfd_reloc_outofrange:
-	  abort ();
-	case bfd_reloc_overflow:
-	  if (! ((*info->callbacks->reloc_overflow)
-		 (info,
-		  (link_order->type == bfd_section_reloc_link_order
-		   ? bfd_section_name (output_bfd,
-				       link_order->u.reloc.p->u.section)
-		   : link_order->u.reloc.p->u.name),
-		  howto->name, link_order->u.reloc.p->addend,
-		  (bfd *) NULL, (asection *) NULL, (bfd_vma) 0)))
-	    {
-	      free (buf);
-	      return false;
-	    }
-	  break;
-	}
-      ok = bfd_set_section_contents (output_bfd, output_section, (PTR) buf,
-				     (file_ptr) link_order->offset, size);
-      free (buf);
-      if (! ok)
-	return false;
-    }
+  addend = link_order->u.reloc.p->addend;
 
   /* Figure out the symbol index.  */
   rel_hash_ptr = (elf_section_data (output_section)->rel_hashes
@@ -3055,10 +3017,26 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
     {
       struct elf_link_hash_entry *h;
 
+      /* Treat a reloc against a defined symbol as though it were
+         actually against the section.  */
       h = elf_link_hash_lookup (elf_hash_table (info),
 				link_order->u.reloc.p->u.name,
 				false, false, true);
-      if (h != NULL)
+      if (h != NULL
+	  && (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak))
+	{
+	  asection *section;
+
+	  section = h->root.u.def.section;
+	  indx = section->output_section->target_index;
+	  *rel_hash_ptr = NULL;
+	  /* It seems that we ought to add the symbol value to the
+             addend here, but in practice it has already been added
+             because it was passed to constructor_callback.  */
+	  addend += section->output_section->vma + section->output_offset;
+	}
+      else if (h != NULL)
 	{
 	  /* Setting the index to -2 tells elf_link_output_extsym that
 	     this symbol is used by a reloc.  */
@@ -3074,6 +3052,49 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
 	    return false;
 	  indx = 0;
 	}
+    }
+
+  /* If this is an inplace reloc, we must write the addend into the
+     object file.  */
+  if (howto->partial_inplace && addend != 0)
+    {
+      bfd_size_type size;
+      bfd_reloc_status_type rstat;
+      bfd_byte *buf;
+      boolean ok;
+
+      size = bfd_get_reloc_size (howto);
+      buf = (bfd_byte *) bfd_zmalloc (size);
+      if (buf == (bfd_byte *) NULL)
+	return false;
+      rstat = _bfd_relocate_contents (howto, output_bfd, addend, buf);
+      switch (rstat)
+	{
+	case bfd_reloc_ok:
+	  break;
+	default:
+	case bfd_reloc_outofrange:
+	  abort ();
+	case bfd_reloc_overflow:
+	  if (! ((*info->callbacks->reloc_overflow)
+		 (info,
+		  (link_order->type == bfd_section_reloc_link_order
+		   ? bfd_section_name (output_bfd,
+				       link_order->u.reloc.p->u.section)
+		   : link_order->u.reloc.p->u.name),
+		  howto->name, addend, (bfd *) NULL, (asection *) NULL,
+		  (bfd_vma) 0)))
+	    {
+	      free (buf);
+	      return false;
+	    }
+	  break;
+	}
+      ok = bfd_set_section_contents (output_bfd, output_section, (PTR) buf,
+				     (file_ptr) link_order->offset, size);
+      free (buf);
+      if (! ok)
+	return false;
     }
 
   /* The address of a reloc is relative to the section in a
@@ -3103,7 +3124,7 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
 
       irela.r_offset = offset;
       irela.r_info = ELF_R_INFO (indx, howto->type);
-      irela.r_addend = link_order->u.reloc.p->addend;
+      irela.r_addend = addend;
       erela = ((Elf_External_Rela *) rel_hdr->contents
 	       + output_section->reloc_count);
       elf_swap_reloca_out (output_bfd, &irela, erela);

@@ -212,6 +212,12 @@ struct elf_backend_data
      section.  */
   boolean collect;
 
+  /* This is true if the linker should ignore changes to the type of a
+     symbol.  This is true for MIPS ELF because some Irix 5 objects
+     record undefined functions as STT_OBJECT although the definitions
+     are STT_FUNC.  */
+  boolean type_change_ok;
+
   /* A function to translate an ELF RELA relocation to a BFD arelent
      structure.  */
   void (*elf_info_to_howto) PARAMS ((bfd *, arelent *,
@@ -412,13 +418,14 @@ struct elf_backend_data
   void (*elf_backend_final_write_processing)
     PARAMS ((bfd *, boolean linker));
 
-  /* A function to create any special program headers required by the
-     backend.  PHDRS are the program headers, and PHDR_COUNT is the
-     number of them.  If PHDRS is NULL, this just counts headers
-     without creating them.  This returns an updated value for
-     PHDR_COUNT.  */
-  int (*elf_backend_create_program_headers)
-    PARAMS ((bfd *, Elf_Internal_Phdr *phdrs, int phdr_count));
+  /* This function is called by get_program_header_size.  It should
+     return the number of additional program segments which this BFD
+     will need.  It should return -1 on error.  */
+  int (*elf_backend_additional_program_headers) PARAMS ((bfd *));
+
+  /* This function is called to modify an existing segment map in a
+     backend specific fashion.  */
+  boolean (*elf_backend_modify_segment_map) PARAMS ((bfd *));
 
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */

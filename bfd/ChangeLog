@@ -1,5 +1,31 @@
 Thu Jan 11 11:23:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-mips.c: Extensive changes for a start at dynamic linking
+	support, from Kazumoto Kojima <kkojima@info.kanagawa-u.ac.jp>.
+
+	* elf-bfd.h (struct elf_backend_data): Add type_change_ok field.
+	(struct elf_backend_data): Remove
+	elf_backend_create_program_headers field.  Add
+	elf_backend_additional_program_headers and
+	elf_backend_modify_segment_map fields.
+	* elfxx-target.h (elf_backend_type_change_ok): Define if not
+	defined.
+	(elf_backend_additional_program_headers): Likewise.
+	(elf_backend_modify_segment_map): Likewise.
+	(elf_backend_create_program_headers): Don't define.
+	(elfNN_bed): Change to account for field changes.
+	* elf.c (assign_file_positions_for_segments): Call new
+	modify_segment_map backend function.  Don't call old
+	create_program_headers backend function.
+	(get_program_header_size): Call additional_program_headers rather
+	than create_program_headers.
+	* elflink.h (elf_link_add_object_symbols): Initialize
+	type_change_ok from new backend field.
+	(elf_link_output_extsym): Don't warn if _rld_new_interface is
+	defined.
+	(elf_reloc_link_order): Treat a reloc against a defined symbol as
+	a reloc against the appropriate section.
+
 	* elf-bfd.h (struct bfd_elf_section_data): Add tdata field.
 	(struct elf_obj_tdata): Rename ppc_flags_init field to flags_init.
 	(elf_flags_init): Rename from elf_ppc_flags_init.

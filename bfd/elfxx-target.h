@@ -156,6 +156,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_collect
 #define elf_backend_collect false
 #endif
+#ifndef elf_backend_type_change_ok
+#define elf_backend_type_change_ok false
+#endif
 
 #ifndef elf_backend_sym_is_global
 #define elf_backend_sym_is_global	0
@@ -214,8 +217,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_final_write_processing
 #define elf_backend_final_write_processing	0
 #endif
-#ifndef elf_backend_create_program_headers
-#define elf_backend_create_program_headers	0
+#ifndef elf_backend_additional_program_headers
+#define elf_backend_additional_program_headers	0
+#endif
+#ifndef elf_backend_modify_segment_map
+#define elf_backend_modify_segment_map	0
 #endif
 #ifndef elf_backend_ecoff_debug_swap
 #define elf_backend_ecoff_debug_swap	0
@@ -242,6 +248,7 @@ static CONST struct elf_backend_data elfNN_bed =
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
   elf_backend_collect,
+  elf_backend_type_change_ok,
   elf_info_to_howto,
   elf_info_to_howto_rel,
   elf_backend_sym_is_global,
@@ -263,7 +270,8 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_finish_dynamic_sections,
   elf_backend_begin_write_processing,
   elf_backend_final_write_processing,
-  elf_backend_create_program_headers,
+  elf_backend_additional_program_headers,
+  elf_backend_modify_segment_map,
   elf_backend_ecoff_debug_swap,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
@@ -283,11 +291,11 @@ const bfd_target TARGET_BIG_SYM =
   /* flavour: general indication about file */
   bfd_target_elf_flavour,
 
-  /* byteorder_big_p: data is big endian */
-  true,
+  /* byteorder: data is big endian */
+  BFD_ENDIAN_BIG,
 
-  /* header_byteorder_big_p: header is also big endian */
-  true,
+  /* header_byteorder: header is also big endian */
+  BFD_ENDIAN_BIG,
 
   /* object_flags: mask of all file flags */
   (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS |
@@ -367,11 +375,11 @@ const bfd_target TARGET_LITTLE_SYM =
   /* flavour: general indication about file */
   bfd_target_elf_flavour,
 
-  /* byteorder_big_p: data is big endian */
-  false,		/* Nope -- this one's little endian */
+  /* byteorder: data is little endian */
+  BFD_ENDIAN_LITTLE,
 
-  /* header_byteorder_big_p: header is also big endian */
-  false,		/* Nope -- this one's little endian */
+  /* header_byteorder: header is also little endian */
+  BFD_ENDIAN_LITTLE,
 
   /* object_flags: mask of all file flags */
   (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS |
