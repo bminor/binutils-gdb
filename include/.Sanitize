@@ -16,15 +16,15 @@
 Do-first:
 
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="mpw"
+	keep_these_too="${keep_these_too} mpw"
 else
-	lose_these_too="mpw"
+	lose_these_too="${lose_these_too} mpw"
 fi
 
 if ( echo $* | grep keep\-hpread > /dev/null ) ; then
-	keep_these_too="hpux-symtab.h ChangeLog.hpread"
+	keep_these_too="${keep_these_too} hpux-symtab.h ChangeLog.hpread"
 else
-	lose_these_too="hpux-symtab.h ChangeLog.hpread"
+	lose_these_too="${lose_these_too} hpux-symtab.h ChangeLog.hpread"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
