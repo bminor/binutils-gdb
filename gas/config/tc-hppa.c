@@ -1,5 +1,5 @@
 /* tc-hppa.c -- Assemble for the PA
-   Copyright (C) 1989 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1996 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -2704,7 +2704,7 @@ tc_gen_reloc (section, fixp)
 	  relocs[0]->howto = bfd_reloc_type_lookup (stdoutput, *codes[0]);
 	  relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[0]->addend = 0;
-	  relocs[0]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+	  relocs[1]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
 	  relocs[1]->howto = bfd_reloc_type_lookup (stdoutput, *codes[1]);
 	  relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[1]->addend = 0;
@@ -2750,6 +2750,8 @@ tc_gen_reloc (section, fixp)
 	case R_RSEL:
 	case R_BEGIN_BRTAB:
 	case R_END_BRTAB:
+	case R_N0SEL:
+	case R_N1SEL:
 	  /* There is no symbol or addend associated with these fixups.  */
 	  relocs[i]->sym_ptr_ptr = &dummy_symbol->bsym;
 	  relocs[i]->addend = 0;
