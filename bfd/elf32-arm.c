@@ -3428,6 +3428,10 @@ elf32_arm_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   elf_elfheader (obfd)->e_flags = in_flags;
   elf_flags_init (obfd) = TRUE;
 
+  /* Also copy the EI_OSABI field.  */
+  elf_elfheader (obfd)->e_ident[EI_OSABI] =
+    elf_elfheader (ibfd)->e_ident[EI_OSABI];
+
   return TRUE;
 }
 
@@ -5352,7 +5356,10 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
 
   i_ehdrp = elf_elfheader (abfd);
 
-  i_ehdrp->e_ident[EI_OSABI]      = ARM_ELF_OS_ABI_VERSION;
+  if (EF_ARM_EABI_VERSION (i_ehdrp->e_flags) == EF_ARM_EABI_UNKNOWN)
+    i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_ARM;
+  else
+    i_ehdrp->e_ident[EI_OSABI] = 0;
   i_ehdrp->e_ident[EI_ABIVERSION] = ARM_ELF_ABI_VERSION;
 
   if (link_info)

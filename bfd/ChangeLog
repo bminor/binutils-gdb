@@ -1,5 +1,11 @@
 2004-12-01  Paul Brook  <paul@codesourcery.com>
 
+	* elf32-arm.c (elf32_arm_copy_private_bfd_data): Set EI_OSABI.
+	(elf32_arm_post_process_headers): Set EI_OSABI depending on ABI
+	version.
+
+2004-12-01  Paul Brook  <paul@codesourcery.com>
+
 	* elflink.c (elf_link_add_object_symbols): Make symbols from discarded
 	sections undefined.
 
