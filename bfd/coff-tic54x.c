@@ -76,6 +76,56 @@ tic54x_getl_signed_32 (addr)
   return COERCE32 (v);
 }
 
+#define coff_get_section_load_page bfd_ticoff_get_section_load_page
+#define coff_set_section_load_page bfd_ticoff_set_section_load_page
+
+void 
+bfd_ticoff_set_section_load_page (sect, page)
+  asection *sect;
+  int page;
+{
+  sect->lma = (sect->lma & ADDR_MASK) | PG_TO_FLAG(page);
+}
+
+
+int
+bfd_ticoff_get_section_load_page (sect)
+  asection *sect;
+{
+  int page;
+
+  /* Provide meaningful defaults for predefined sections. */
+  if (sect == &bfd_com_section)
+    page = PG_DATA;
+
+  else if (sect == &bfd_und_section
+      || sect == &bfd_abs_section
+      || sect == &bfd_ind_section)
+    page = PG_PROG;
+
+  else
+    page = FLAG_TO_PG (sect->lma);
+
+  return page;
+}
+
+/* Set the architecture appropriately.  Allow unkown architectures
+   (e.g. binary). */ 
+static boolean
+tic54x_set_arch_mach (abfd, arch, machine)
+     bfd *abfd;
+     enum bfd_architecture arch;
+     unsigned long machine;
+{
+  if (arch == bfd_arch_unknown)
+    arch = bfd_arch_tic54x;
+
+  else if (arch != bfd_arch_tic54x)
+    return false;
+
+  return bfd_default_set_arch_mach (abfd, arch, machine);
+}
+
 static bfd_reloc_status_type
 tic54x_relocation (abfd, reloc_entry, symbol, data, input_section, 
                    output_bfd, error_message)
@@ -295,6 +345,18 @@ ticoff_bfd_is_local_label_name (abfd, name)
 #define BADMAG(x) COFF2_BADMAG(x)
 #include "coffcode.h"
 
+static boolean
+tic54x_set_section_contents (abfd, section, location, offset, bytes_to_do)
+     bfd *abfd;
+     sec_ptr section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type bytes_to_do;
+{
+  return coff_set_section_contents (abfd, section, location, 
+                                    offset, bytes_to_do);
+}
+
 static void
 tic54x_reloc_processing (relent, reloc, symbols, abfd, section)
      arelent *relent;
@@ -420,7 +482,7 @@ const bfd_target tic54x_coff0_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
@@ -446,7 +508,7 @@ const bfd_target tic54x_coff0_vec =
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
   BFD_JUMP_TABLE_SYMBOLS (coff),
   BFD_JUMP_TABLE_RELOCS (coff),
-  BFD_JUMP_TABLE_WRITE (coff),
+  BFD_JUMP_TABLE_WRITE (tic54x),
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
   NULL,
@@ -464,7 +526,7 @@ const bfd_target tic54x_coff0_beh_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
@@ -490,7 +552,7 @@ const bfd_target tic54x_coff0_beh_vec =
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
   BFD_JUMP_TABLE_SYMBOLS (coff),
   BFD_JUMP_TABLE_RELOCS (coff),
-  BFD_JUMP_TABLE_WRITE (coff),
+  BFD_JUMP_TABLE_WRITE (tic54x),
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
@@ -509,7 +571,7 @@ const bfd_target tic54x_coff1_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
@@ -535,7 +597,7 @@ const bfd_target tic54x_coff1_vec =
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
   BFD_JUMP_TABLE_SYMBOLS (coff),
   BFD_JUMP_TABLE_RELOCS (coff),
-  BFD_JUMP_TABLE_WRITE (coff),
+  BFD_JUMP_TABLE_WRITE (tic54x),
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
@@ -554,7 +616,7 @@ const bfd_target tic54x_coff1_beh_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
@@ -580,7 +642,7 @@ const bfd_target tic54x_coff1_beh_vec =
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
   BFD_JUMP_TABLE_SYMBOLS (coff),
   BFD_JUMP_TABLE_RELOCS (coff),
-  BFD_JUMP_TABLE_WRITE (coff),
+  BFD_JUMP_TABLE_WRITE (tic54x),
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
@@ -599,7 +661,7 @@ const bfd_target tic54x_coff2_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
@@ -625,7 +687,7 @@ const bfd_target tic54x_coff2_vec =
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
   BFD_JUMP_TABLE_SYMBOLS (coff),
   BFD_JUMP_TABLE_RELOCS (coff),
-  BFD_JUMP_TABLE_WRITE (coff),
+  BFD_JUMP_TABLE_WRITE (tic54x),
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
@@ -644,7 +706,7 @@ const bfd_target tic54x_coff2_beh_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
@@ -670,7 +732,7 @@ const bfd_target tic54x_coff2_beh_vec =
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
   BFD_JUMP_TABLE_SYMBOLS (coff),
   BFD_JUMP_TABLE_RELOCS (coff),
-  BFD_JUMP_TABLE_WRITE (coff),
+  BFD_JUMP_TABLE_WRITE (tic54x),
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 

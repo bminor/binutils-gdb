@@ -748,6 +748,13 @@ extern boolean bfd_elf32_arm_process_before_allocation
 extern boolean bfd_elf32_arm_get_bfd_for_interworking
   PARAMS ((bfd *, struct bfd_link_info *));
 
+/* TI COFF load page support. */
+extern void bfd_ticoff_set_section_load_page
+  PARAMS ((struct sec *, int));
+
+extern int bfd_ticoff_get_section_load_page
+  PARAMS ((struct sec *));
+
 /* And more from the source.  */
 void 
 bfd_init PARAMS ((void));

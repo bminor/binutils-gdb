@@ -1531,6 +1531,10 @@ coff_set_alignment_hook (abfd, section, scnhdr)
   i = COFF_DECODE_ALIGNMENT(hdr->s_flags);
 #endif
   section->alignment_power = i;
+
+#ifdef coff_set_section_load_page
+  coff_set_section_load_page (section, hdr->s_page);
+#endif
 }
 
 #else /* ! COFF_ALIGN_IN_SECTION_HEADER */
@@ -3249,6 +3253,9 @@ coff_write_object_contents (abfd)
       section.s_vaddr = current->vma;
       section.s_paddr = current->lma;
       section.s_size =  current->_raw_size;
+#ifdef coff_get_section_load_page
+      section.s_page = coff_get_section_load_page (current); 
+#endif
 
 #ifdef COFF_WITH_PE
       section.s_paddr = 0;

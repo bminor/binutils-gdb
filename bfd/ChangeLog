@@ -1,3 +1,13 @@
+2000-04-17  Timothy Wall  <twall@cygnus.com>
+
+	* bfd-in2.h: Add prototypes for tic54x load page access.
+	* bfd-in.h: Regenerate.
+	* coff-tic54x.c: Add load page functions; allow bfd_arch_unknown
+	in customized _set_arch_mach function.
+	* coffcode.h (coff_set_alignment_hook): Set section load page if
+	the appropriate macro is defined. 
+	(write_object_contents): Read section load page.
+	
 2000-04-13  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-hppa.h: Update copyright date.
