@@ -41,7 +41,9 @@ man9dir = $(mandir)/man9
 infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
-scriptdir = $(datadir)/ld
+# We can't put the scripts in $(datadir) because the SEARCH_DIR
+# directives need to be different for native and cross linkers.
+scriptdir = $(tooldir)/lib/ld
 
 gcclibdir = $(libdir)/gcc/$(target_alias)
 
@@ -76,7 +78,7 @@ LIB_PATH =
 
 BASEDIR	= ../..
 INCLUDE	= $(srcdir)/../include
-INCLUDES = -I. -I$(srcdir) -I../include -I$(srcdir)/../bfd -I../bfd -I$(INCLUDE) 
+INCLUDES = -I. -I$(srcdir) -I$(srcdir)/../bfd -I../bfd -I$(INCLUDE) 
 
 # What version of the manual to build
 DOCVER = gen
@@ -166,7 +168,12 @@ all: $(LD_PROG)
 
 info: ld.info
 
-ldgram.h ldgram.c: ldgram.y
+# This somewhat odd makefile construction prevents a parallel gnu make
+# from spinning off two bison processes concurrently.  This is
+# important because yacc uses static file names and multiple instances
+# will collide.
+ldgram.h ldgram.c: ldgram-files
+ldgram-files: ldgram.y
 	$(BISON) $(BISONFLAGS) -d $(srcdir)/ldgram.y
 	mv -f y.tab.c ldgram.c
 	mv -f y.tab.h ldgram.h

@@ -1,4 +1,18 @@
+Wed Jun 30 15:45:55 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* Makefile.in (ldgram.[hc]): rewrite this rule in such a way that
+	  gnu make can run in parallel without colliding on yacc's static
+	  file names.
+
+Tue Jun 29 12:20:36 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldmain.c (subfile_wanted_p): Don't dump core if there are no
+	symbols.
+
 Mon Jun 28 12:22:11 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* genscripts.sh (LIB_PATH): Only add /usr/local/lib if it's
+	different from libdir.
 
 	* Makefile.in (scriptdir): Base on tooldir, not datadir.
 
