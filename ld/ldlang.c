@@ -170,7 +170,6 @@ DEFUN(lang_for_each_statement_worker,(func,  s),
 	case lang_target_statement_enum:
 	case lang_input_section_enum:
 	case lang_input_statement_enum:
-	case lang_fill_statement_enum:
 	case lang_assignment_statement_enum:
 	case lang_padding_statement_enum:
 	case lang_address_statement_enum:
@@ -237,6 +236,7 @@ DEFUN(new_afile, (name, file_type, target),
       CONST lang_input_file_enum_type file_type AND
       CONST char *CONST target)
 {
+
   lang_input_statement_type *p = new_stat(lang_input_statement, 
 					  stat_ptr);
   lang_has_input_file = true;
@@ -815,7 +815,6 @@ DEFUN_VOID(lang_place_undefineds)
 {
   ldlang_undef_chain_list_type *ptr = ldlang_undef_chain_list_head;
   while (ptr != (ldlang_undef_chain_list_type*)NULL) {
-    ldsym_type *sy = ldsym_get(ptr->name);
     asymbol *def;
     asymbol **def_ptr = (asymbol **)ldmalloc((bfd_size_type)(sizeof(asymbol **)));
     def = (asymbol *)bfd_make_empty_symbol(script_file->the_bfd);
@@ -1201,7 +1200,6 @@ DEFUN(print_statement,(s, os),
 	   case lang_address_statement_enum:
 	    fprintf(config.map_file, "address\n");
 	    break;
-	    break;
 	   case lang_object_symbols_statement_enum:
 	    fprintf(config.map_file, "object symbols\n");
 	    break;
@@ -1509,6 +1507,8 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill,
       case lang_input_statement_enum:
 	break;
       case lang_fill_statement_enum:
+	s->fill_statement.output_section =output_section_statement->bfd_section;
+
 	fill = s->fill_statement.fill;
 	break;
       case lang_assignment_statement_enum:
@@ -1740,11 +1740,9 @@ static void
 DEFUN_VOID(lang_check)
 {
   lang_statement_union_type *file;
-
   bfd * input_bfd;
-  unsigned long input_machine;
-  enum bfd_architecture input_architecture;
-
+unsigned long input_machine;
+enum bfd_architecture input_architecture;
   CONST  bfd_arch_info_type *compatible;
 
   for (file = file_chain.head;
@@ -1945,35 +1943,35 @@ DEFUN(lang_set_flags,(ptr, flags),
       int  *ptr AND
       CONST char *flags)
 {
-  boolean state = true;
-*ptr= 0;
+boolean state = false;
+  *ptr= 0;
   while (*flags)
-      {
-	if (*flags == '!') {
-	  state = false;
-	  flags++;
-	}
-	else state = true;
-	switch (*flags) {
-	case 'R':
-/*	  ptr->flag_read = state; */
-	  break;
-	case 'W':
-/*	  ptr->flag_write = state; */
-	  break;
-	case 'X':
-/*	  ptr->flag_executable= state;*/
-	  break;
-	case 'L':
-	case 'I':
-/*	  ptr->flag_loadable= state;*/
-	  break;
-	default:
-	  einfo("%P%F illegal syntax in flags\n");
-	  break;
-	}
-	flags++;
-      }
+  {
+    if (*flags == '!') {
+      state = false;
+      flags++;
+    }
+    else state = true;
+    switch (*flags) {
+     case 'R':
+      /*	  ptr->flag_read = state; */
+      break;
+     case 'W':
+      /*	  ptr->flag_write = state; */
+      break;
+     case 'X':
+      /*	  ptr->flag_executable= state;*/
+      break;
+     case 'L':
+     case 'I':
+      /*	  ptr->flag_loadable= state;*/
+      break;
+     default:
+      einfo("%P%F illegal syntax in flags\n");
+      break;
+    }
+    flags++;
+  }
 }
 
 

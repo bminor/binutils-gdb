@@ -40,7 +40,7 @@ extern int yyparse();
 
 char *buystring();
 
-int lineno = 1;
+unsigned int lineno = 1;
 int old;
 
 #undef YY_INPUT
@@ -168,7 +168,7 @@ WHITE		[ \t\n]+
 			       	}
 
 <MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
-  				yylval.integer = strtol(yytext+1, 0,16);	
+  				yylval.integer = strtoul(yytext+1, 0,16);	
 				return INT;
 			}
 
@@ -189,11 +189,11 @@ WHITE		[ \t\n]+
 				    default:
 				     base = 10;
 				   }
-				   yylval.integer = strtol(yytext+1, 0, base);	
+				   yylval.integer = strtoul(yytext+1, 0, base);	
 				   return INT;
 				 }
 <DEFSYMEXP,MRI,BOTH,EXPRESSION>"$"?"0x"?([0-9A-Fa-f])+(M|K|m|k)? {
-				  yylval.integer = strtol(yytext,0,hex_mode);
+				  yylval.integer = strtoul(yytext,0,hex_mode);
 				  if (yytext[yyleng-1]=='M'
 					|| yytext[yyleng-1] == 'm') {
 				      yylval.integer *= 1024*1024;
