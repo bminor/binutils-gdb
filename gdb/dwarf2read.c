@@ -4185,7 +4185,10 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		     the variable is referenced.  */
 		  if (SYMBOL_VALUE_ADDRESS (sym))
 		    {
-		      SYMBOL_VALUE_ADDRESS (sym) += baseaddr;
+		      fixup_symbol_section (sym, objfile);
+		      SYMBOL_VALUE_ADDRESS (sym) +=
+			ANOFFSET (objfile->section_offsets,
+			          SYMBOL_SECTION (sym));
 		      SYMBOL_CLASS (sym) = LOC_STATIC;
 		    }
 		  else
@@ -4215,8 +4218,11 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		    }
 		  else
 		    {
+		      fixup_symbol_section (sym, objfile);
+		      SYMBOL_VALUE_ADDRESS (sym) =
+		        addr + ANOFFSET (objfile->section_offsets,
+			                 SYMBOL_SECTION (sym));
 		      SYMBOL_CLASS (sym) = LOC_STATIC;
-		      SYMBOL_VALUE_ADDRESS (sym) = addr + baseaddr;
 		    }
 		}
 	    }
