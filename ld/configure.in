@@ -41,6 +41,7 @@ do
 case "${targ}" in
 
   sparc-sun-sunos4*) 	ld_target=sun4 ;;
+  sparclite*-*-coff)	ld_target=coff-sparc ;;
   sparclite*-fujitsu-*) ld_target=sun4 ;;
   sparc*-*-aout)	ld_target=sun4 ;;
   sparc*-*-coff)	ld_target=coff-sparc ;;

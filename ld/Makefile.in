@@ -342,17 +342,14 @@ em_delta68.c: $(srcdir)/emulparams/delta68.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} delta68
 em_m68klynx.c: $(srcdir)/emulparams/m68klynx.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m68kcoff.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m68klynx.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68klynx
 em_i386coff.c: $(srcdir)/emulparams/i386coff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386coff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386coff
 em_i386lynx.c: $(srcdir)/emulparams/i386lynx.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386coff.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386lynx.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386lynx
-em_sparclynx.c: $(srcdir)/emulparams/sparclynx.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} sparclynx
 em_mipslit.c:  $(srcdir)/emulparams/mipslit.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipslit
@@ -383,6 +380,9 @@ em_alpha.c: $(srcdir)/emulparams/alpha.sh \
 em_coff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} coff_sparc
+em_sparclynx.c: $(srcdir)/emulparams/sparclynx.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparclynx.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} sparclynx
 em_elf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc

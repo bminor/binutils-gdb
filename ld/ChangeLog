@@ -1,3 +1,15 @@
+Tue Apr 26 17:20:03 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* Makefile.in (em_m68klynx.c, em_i386lynx.c, em_sparclynx.c): Use
+	Lynx-specific script templates.
+	* configure.in (sparclite*-*-coff): Use coff-sparc.
+	* emulparams/i386lynx.sh (SCRIPT_NAME): Set to i386lynx.
+	* emulparams/sparclynx.sh (SCRIPT_NAME): Set to sparclynx.
+	(ENTRY): Set to __main.
+	* scripttempl/i386lynx.sc: New file, script for I386 Lynx.
+	* scripttempl/m68klynx.sc: Add insertion of ctor/dtor sections.
+	* scripttempl/sparclynx.sc: New file, script for uSparc Lynx.
+
 Tue Apr 26 12:41:03 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* scripttempl/mips.sc: Force _gp and .lit8 to be aligned to a 16
