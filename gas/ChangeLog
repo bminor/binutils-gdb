@@ -1,3 +1,10 @@
+Tue Mar 18 23:30:14 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (potable): Add "equiv".
+	(s_set): Handle .equiv based on argument.
+	* doc/as.texinfo (Equiv): New node to document .equiv.
+	(Err): New node to document .err.
+
 Tue Mar 18 15:50:13 1997  H.J. Lu  <hjl@lucon.org>
 
 	* Many files: Add function prototypes.
