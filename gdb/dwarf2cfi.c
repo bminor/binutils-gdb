@@ -30,6 +30,7 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "dwarf2cfi.h"
+#include "gdb_assert.h"
 
 /* Common Information Entry - holds information that is shared among many
    Frame Descriptors.  */
@@ -844,24 +845,20 @@ frame_state_for (struct context *context, struct frame_state *fs)
 
   fs->pc = fde->initial_location;
 
-  if (fde->cie_ptr)
-    {
-      cie = fde->cie_ptr;
+  gdb_assert (fde->cie_ptr != NULL);
 
-      fs->code_align = cie->code_align;
-      fs->data_align = cie->data_align;
-      fs->retaddr_column = cie->ra;
-      fs->addr_encoding = cie->addr_encoding;
-      fs->objfile = cie->objfile;
-
-      execute_cfa_program (cie->objfile, cie->data,
-			   cie->data + cie->data_length, context, fs);
-      execute_cfa_program (cie->objfile, fde->data,
-			   fde->data + fde->data_length, context, fs);
-    }
-  else
-    internal_error (__FILE__, __LINE__,
-		    "%s(): Internal error: fde->cie_ptr==NULL !", __func__);
+  cie = fde->cie_ptr;
+  
+  fs->code_align = cie->code_align;
+  fs->data_align = cie->data_align;
+  fs->retaddr_column = cie->ra;
+  fs->addr_encoding = cie->addr_encoding;
+  fs->objfile = cie->objfile;
+  
+  execute_cfa_program (cie->objfile, cie->data,
+		       cie->data + cie->data_length, context, fs);
+  execute_cfa_program (cie->objfile, fde->data,
+		       fde->data + fde->data_length, context, fs);
 }
 
 static void
@@ -1349,9 +1346,9 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 	    context->reg[i].how = REG_CTX_SAVED_ADDR;
 	    context->reg[i].loc.addr =
 	      orig_context->reg[fs->regs.reg[i].loc.reg].loc.addr;
+	    break;
 	  default:
-	    internal_error (__FILE__, __LINE__,
-			    "%s: unknown register rule", __func__);
+	    internal_error (__FILE__, __LINE__, "bad switch");
 	  }
 	break;
       case REG_SAVED_EXP:
@@ -1368,8 +1365,7 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 	}
 	break;
       default:
-	internal_error (__FILE__, __LINE__,
-			"%s: unknown register rule", __func__);
+	internal_error (__FILE__, __LINE__, "bad switch");
       }
   get_reg ((char *) &context->ra, context, fs->retaddr_column);
   unwind_tmp_obstack_free ();

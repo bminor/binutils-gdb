@@ -1,3 +1,11 @@
+2002-07-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* dwarf2cfi.c: Include "gdb_assert.h".
+	(frame_state_for): Use gdb_assert to check that fde->cie_ptr is
+	non-NULL.
+	(update_context): Do not use __func__.  Add missing ``break''.
+	(update_context): Do not use __func__.
+
 2002-07-15  Elena Zannoni  <ezannoni@redhat.com>
 
         * rs6000-tdep.c (rs6000_gdbarch_init): Remove variable print_insn
