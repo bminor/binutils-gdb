@@ -1647,29 +1647,11 @@ get_machine_flags (e_flags, e_machine)
 	  if (e_flags & EF_MIPS_ABI2)
 	    strcat (buf, ", abi2");
 
+	  if (e_flags & EF_MIPS_OPTIONS_FIRST)
+	    strcat (buf, ", odk first");
+
 	  if (e_flags & EF_MIPS_32BITMODE)
 	    strcat (buf, ", 32bitmode");
-
-	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_1)
-	    strcat (buf, ", mips1");
-
-	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_2)
-	    strcat (buf, ", mips2");
-
-	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_3)
-	    strcat (buf, ", mips3");
-
-	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_4)
-	    strcat (buf, ", mips4");
-
-	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_5)
-	    strcat (buf, ", mips5");
-
-	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32)
-	    strcat (buf, ", mips32");
-
-	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_64)
-	    strcat (buf, ", mips64");
 
 	  switch ((e_flags & EF_MIPS_MACH))
 	    {
@@ -1679,8 +1661,47 @@ get_machine_flags (e_flags, e_machine)
 	    case E_MIPS_MACH_4650: strcat (buf, ", 4650"); break;
 	    case E_MIPS_MACH_4111: strcat (buf, ", 4111"); break;
 	    case E_MIPS_MACH_SB1:  strcat (buf, ", sb1");  break;
-	    default: strcat (buf, " UNKNOWN"); break;
+	    case 0:
+	    /* We simply ignore the field in this case to avoid confusion:
+	       MIPS ELF does not specify EF_MIPS_MACH, it is a GNU
+	       extension.  */
+	      break;
+	    default: strcat (buf, ", unknown CPU"); break;
 	    }
+
+	  switch ((e_flags & EF_MIPS_ABI))
+	    {
+	    case E_MIPS_ABI_O32: strcat (buf, ", o32"); break;
+	    case E_MIPS_ABI_O64: strcat (buf, ", o64"); break;
+	    case E_MIPS_ABI_EABI32: strcat (buf, ", eabi32"); break;
+	    case E_MIPS_ABI_EABI64: strcat (buf, ", eabi64"); break;
+	    case 0:
+	    /* We simply ignore the field in this case to avoid confusion:
+	       MIPS ELF does not specify EF_MIPS_ABI, it is a GNU extension.
+	       This means it is likely to be an o32 file, but not for
+	       sure.  */
+	      break;
+	    default: strcat (buf, ", unknown ABI"); break;
+	    }
+
+	  if (e_flags & EF_MIPS_ARCH_ASE_MDMX)
+	    strcat (buf, ", mdmx");
+
+	  if (e_flags & EF_MIPS_ARCH_ASE_M16)
+	    strcat (buf, ", mips16");
+
+	  switch ((e_flags & EF_MIPS_ARCH))
+	    {
+	    case E_MIPS_ARCH_1: strcat (buf, ", mips1"); break;
+	    case E_MIPS_ARCH_2: strcat (buf, ", mips2"); break;
+	    case E_MIPS_ARCH_3: strcat (buf, ", mips3"); break;
+	    case E_MIPS_ARCH_4: strcat (buf, ", mips4"); break;
+	    case E_MIPS_ARCH_5: strcat (buf, ", mips5"); break;
+	    case E_MIPS_ARCH_32: strcat (buf, ", mips32"); break;
+	    case E_MIPS_ARCH_64: strcat (buf, ", mips64"); break;
+	    default: strcat (buf, ", unknown ISA"); break;
+	    }
+
 	  break;
 
 	case EM_SPARCV9:
