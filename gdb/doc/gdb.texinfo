@@ -3078,16 +3078,22 @@ End of assembler dump.
 The usual way to examine data in your program is with the @code{print}
 command (abbreviated @code{p}), or its synonym @code{inspect}.  It
 evaluates and prints the value of an expression of the language your
-program is written in (@pxref{Languages}).  You type
+program is written in (@pxref{Languages}).  
 
-@example
-print @var{exp}
-@end example
-
-@noindent
-where @var{exp} is an expression (in the source language), and
+@table @code
+@item print @var{exp}
+@itemx print /@var{f} @var{exp}
+@var{exp} is an expression (in the source language).  By default
 the value of @var{exp} is printed in a format appropriate to its data
-type.
+type; you can choose a different format by specifying @samp{/@var{f}},
+where @var{f} is a letter specifying the format; @pxref{Output formats}.
+
+@item print
+@itemx print /@var{f}
+If you omit @var{exp}, _GDBN__ displays the last value again (from the
+@dfn{value history}; @pxref{Value History}).  This allows you to
+conveniently inspect the same value in an alternative format.
+@end table
 
 A more low-level way of examining data is with the @code{x} command.
 It examines data in memory at a specified address and prints it in a
@@ -5192,6 +5198,7 @@ the name of a type, or for C code it may have the form
 @samp{enum @var{enum-tag}}.@refill
 
 @item ptype @var{exp}
+@itemx ptype
 Print a description of the type of expression @var{exp}.  @code{ptype}
 differs from @code{whatis} by printing a detailed description, instead of just
 the name of the type.  For example, if your program declares a variable
@@ -5210,6 +5217,9 @@ type = struct complex @{
     double imag;
 @}
 @end example
+@noindent
+As with @code{whatis}, using @code{ptype} without an argument refers to
+the type of @code{$}, the last value in the value history.
 
 @item info types @var{regexp}
 @itemx info types
@@ -5280,17 +5290,17 @@ which match the regular-expression @var{regexp}.
 @kindex printsyms
 @cindex partial symbol dump
 Write a dump of debugging symbol data into the file @var{filename}.
-These commands are useful for debugging the _GDBN__ symbol-reading code.
-Only symbols with debugging data are included.  If you use
-@code{printsyms}, _GDBN__ includes all the symbols for which it has
-already collected full details: that is, @var{filename} reflects symbols
-for only those files whose symbols _GDBN__ has read.  You can find out
-which files these are using the command @code{info sources}.  On the
-other hand, if you use @code{printpsyms}, the dump also shows
-information about symbols that _GDBN__ only knows partially---that is,
-symbols defined in files that _GDBN__ has skimmed, but not yet read
-completely.  The description of @code{symbol-file} describes how _GDBN__
-reads symbols; both commands are described under @ref{Files}.
+These commands are used to debug the _GDBN__ symbol-reading code.  Only
+symbols with debugging data are included.  If you use @code{printsyms},
+_GDBN__ includes all the symbols for which it has already collected full
+details: that is, @var{filename} reflects symbols for only those files
+whose symbols _GDBN__ has read.  You can use the command @code{info
+sources} to find out which files these are.  If you use
+@code{printpsyms}, the dump also shows information about symbols that
+_GDBN__ only knows partially---that is, symbols defined in files that
+_GDBN__ has skimmed, but not yet read completely.  The description of
+@code{symbol-file} describes how _GDBN__ reads symbols; both commands
+are described under @ref{Files}.
 
 @end table
 
@@ -5570,16 +5580,18 @@ directories to search, just as the shell does when looking for a program
 to run.  You can change the value of this variable, for both _GDBN__ and
 your program, using the @code{path} command.
 
+@item file
 @code{file} with no argument makes _GDBN__ discard any information it
 has on both executable file and the symbol table.
 
-@item exec-file @var{filename}
+@item exec-file @r{[} @var{filename} @r{]}
 @kindex exec-file
 Specify that the program to be run (but not the symbol table) is found
 in @var{filename}.  _GDBN__ will search the environment variable @code{PATH}
-if necessary to locate the program.
+if necessary to locate the program.  Omitting @var{filename} means to
+discard information on the executable file.
 
-@item symbol-file @var{filename}
+@item symbol-file @r{[} @var{filename} @r{]}
 @kindex symbol-file
 Read symbol table information from file @var{filename}.  @code{PATH} is
 searched when necessary.  Use the @code{file} command to get both symbol
@@ -5620,8 +5632,7 @@ other compilers that adhere to the local conventions.  Best results are
 usually obtained from GNU compilers; for example, using @code{_GCC__}
 you can generate debugging information for optimized code.
 
-@item core-file @var{filename}
-@itemx core @var{filename}
+@item core-file @r{[} @var{filename} @r{]}
 @kindex core
 @kindex core-file
 Specify the whereabouts of a core dump file to be used as the ``contents
@@ -6466,8 +6477,7 @@ space.  This is useful for outputting a string with spaces at the
 beginning or the end, since leading and trailing spaces are otherwise
 trimmed from all arguments.  Thus, to print @samp{@ and foo =@ }, use the
 command @samp{echo \@ and foo = \@ }.
-@c FIXME: verify hard copy actually issues enspaces for '@ '!  Will this
-@c        confuse texinfo?
+@c FIXME? '@ ' works in tex and info, but confuses texi2roff[-2].
 
 A backslash at the end of @var{text} can be used, as in C, to continue
 the command onto subsequent lines.  For example,
