@@ -30,27 +30,6 @@ FILE *bfd_open_file();
 /* fdopen is a loser -- we should use stdio exclusively.  Unfortunately
    if we do that we can't use fcntl.  */
 
-/** Locking 
-
-   Locking is loosely controlled by the preprocessor variable
-   BFD_LOCKS.  I say loosely because Unix barely understands locking
-   -- at least in BSD it doesn't affect programs which don't
-   explicitly use it!  That is to say it's practically useless, though
-   if everyone uses this library you'll be OK.
-
-   From among the many and varied lock facilities available, (none of
-   which, of course, knows about any other) we use the fcntl locks,
-   because they're Posix.
-
-   The reason that @code{bfd_openr} and @code{bfd_fdopenr} exist, yet
-   only @code{bfd_openw} exists is because of locking.  When we do
-   output, we lock the filename file for output, then open a temporary
-   file which does not actually get its correct filename until closing
-   time.  This is safest, but requires the asymmetry in read and write
-   entry points.
-
-   Perhaps, since unix has so many different kinds of locking anyway,
-   we should use the emacs lock scheme?... */
 
 #define obstack_chunk_alloc malloc
 #define obstack_chunk_free free
@@ -65,7 +44,7 @@ bfd *new_bfd()
   if (!nbfd)
     return 0;
 
-  obstack_begin((PTR)&nbfd->memory, 128);
+  obstack_begin(&nbfd->memory, 128);
   
   nbfd->direction = no_direction;
   nbfd->iostream = NULL;
@@ -170,19 +149,15 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
   bfd *nbfd;
   bfd_target *target_vec;
   int fdflags;
-#ifdef BFD_LOCKS
-  struct flock lock, *lockp = &lock;
-#endif
 
   bfd_error = system_call_error;
   
+#ifdef NO_FCNTL
+  fdflags = O_RDWR;			/* Assume full access */
+#else
   fdflags = fcntl (fd, F_GETFL, NULL);
-  if (fdflags == -1) return NULL;
-
-#ifdef BFD_LOCKS
-  lockp->l_type = F_RDLCK;
-  if (fcntl (fd, F_SETLKW, lockp) == -1) return NULL;
 #endif
+  if (fdflags == -1) return NULL;
 
   nbfd = new_bfd();
 
@@ -197,9 +172,6 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
     return NULL;
   }
 
-#ifdef BFD_LOCKS
-  nbfd->lock = (struct flock *) (nbfd + 1);
-#endif
   /* if the fd were open for read only, this still would not hurt: */
   nbfd->iostream = (char *) fdopen (fd, "r+"); 
   if (nbfd->iostream == NULL) {
@@ -221,10 +193,6 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
   default: abort ();
   }
 				   
-#ifdef BFD_LOCKS
-  memcpy (nbfd->lock, lockp, sizeof (struct flock))
-#endif
-
   bfd_cache_init (nbfd);
 
   return nbfd;

@@ -29,6 +29,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "oasys.h"
 #include "liboasys.h"
 
+/* XXX - FIXME.  offsetof belongs in the system-specific files in
+   ../include/sys. */
 /* Define offsetof for those systems which lack it */
 
 #ifndef offsetof
@@ -347,11 +349,9 @@ static boolean
 DEFUN(oasys_mkobject,(abfd),
       bfd *abfd)
 {
-  oasys_data_type *oasys;
 
   set_tdata (abfd,
     (oasys_data_type*)bfd_alloc(abfd, sizeof(oasys_data_type)));
-  oasys = oasys_data(abfd);
   return true;
 }
 
@@ -757,8 +757,8 @@ DEFUN(oasys_get_section_contents,(abfd, section, location, offset, count),
 
 
 unsigned int
-DEFUN(oasys_canonicalize_reloc,(abfd, section, relptr, symbols),
-      bfd *abfd AND
+DEFUN(oasys_canonicalize_reloc,(ignore_abfd, section, relptr, symbols),
+      bfd *ignore_abfd AND
       sec_ptr section AND
       arelent **relptr AND
       asymbol **symbols)

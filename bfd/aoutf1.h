@@ -20,7 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <ansidecl.h>
 #include <sysdep.h>
-struct external_exec;
 #include <a.out.sun4.h>
 #include "bfd.h"
 #include "libaout.h"           
@@ -308,7 +307,6 @@ DEFUN(swapcore_sun3,(abfd, ext, intcore),
       char *ext AND
       struct internal_sunos_core *intcore)
 {
-  struct external_exec exec_bytes;
   struct external_sun3_core *extcore = (struct external_sun3_core *)ext;
   
   intcore->c_magic = bfd_h_get_32 (abfd, (unsigned char *)&extcore->c_magic);
@@ -332,7 +330,7 @@ DEFUN(swapcore_sun3,(abfd, ext, intcore),
 }
 
 
-/* byte-swap in the Sun-3 core structure */
+/* byte-swap in the Sparc core structure */
 static void
 DEFUN(swapcore_sparc,(abfd, ext, intcore),
       bfd *abfd AND
@@ -360,9 +358,8 @@ DEFUN(swapcore_sparc,(abfd, ext, intcore),
 	intcore->c_len - sizeof (extcore->c_ucode) + (unsigned char *)extcore);
   /* Supposedly the user stack grows downward from the bottom of kernel memory.
      Presuming that this remains true, this definition will work. */
-#define USRSTACK (-(128*1024*1024))
-  intcore->c_stacktop = USRSTACK;	/* By experimentation */
-#undef USRSTACK
+#define SPARC_USRSTACK (-(128*1024*1024))
+  intcore->c_stacktop = SPARC_USRSTACK;	/* By experimentation */
 }
 
 /* need this cast because ptr is really void * */
@@ -390,7 +387,6 @@ DEFUN(sunos4_core_file_p,(abfd),
   int core_mag;
   struct internal_sunos_core *core;
   char *extcore;
-  char *rawptr;
   struct mergem {
     struct suncoredata suncoredata;
     struct internal_sunos_core internal_sunos_core;
@@ -457,7 +453,7 @@ DEFUN(sunos4_core_file_p,(abfd),
   if (core_stacksec (abfd) == NULL) {
   loser:
     bfd_error = no_memory;
-    bfd_release (abfd, rawptr);
+    bfd_release (abfd, (char *)mergem);
     return 0;
   }
   core_datasec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
@@ -543,7 +539,8 @@ DEFUN(sunos4_core_file_matches_executable_p, (core_bfd, exec_bfd),
     return false;
   }
 
-  return (bcmp ((char *)&core_hdr (core_bfd), (char*) &exec_hdr (exec_bfd),
+  return (bcmp ((char *)&core_hdr (core_bfd)->c_aouthdr, 
+		(char *) exec_hdr (exec_bfd),
 		sizeof (struct internal_exec)) == 0) ? true : false;
 }
 

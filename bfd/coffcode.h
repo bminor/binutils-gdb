@@ -363,21 +363,8 @@ DEFUN(styp_to_sec_flags, (styp_flags),
     return(sec_flags);
 }
 
-static int
-DEFUN(get_index,(symbol),
-      asymbol        *symbol)
-{
-    return (int) symbol->value;
-}
-
-static void
-DEFUN(set_index,(symbol, idx),
-      asymbol        *symbol AND
-      unsigned int    idx)
-{
-    symbol->value = idx;
-}
-
+#define	get_index(symbol)	((int) (symbol)->value)
+#define	set_index(symbol, idx)	((symbol)->value = (idx))
 
 /*  **********************************************************************
 Here are all the routines for swapping the structures seen in the
@@ -462,7 +449,11 @@ DEFUN(coff_swap_sym_in,(abfd, ext1, in1),
     in->_n._n_n._n_offset = bfd_h_get_32(abfd, (bfd_byte *) ext->e.e.e_offset);
   }
   else {
+#if SYMNMLEN != E_SYMNMLEN
+   -> Error, we need to cope with truncating or extending SYMNMLEN!;
+#else
     memcpy(in->_n._n_name, ext->e.e_name, SYMNMLEN);
+#endif
   }
   in->n_value = bfd_h_get_32(abfd, (bfd_byte *) ext->e_value);
   in->n_scnum = bfd_h_get_16(abfd, (bfd_byte *) ext->e_scnum);
@@ -487,7 +478,11 @@ DEFUN(coff_swap_sym_out,(abfd,in,  ext),
     bfd_h_put_32(abfd, in->_n._n_n._n_offset, (bfd_byte *)  ext->e.e.e_offset);
   }
   else {
+#if SYMNMLEN != E_SYMNMLEN
+   -> Error, we need to cope with truncating or extending SYMNMLEN!;
+#else
     memcpy(ext->e.e_name, in->_n._n_name, SYMNMLEN);
+#endif
   }
   bfd_h_put_32(abfd,  in->n_value , (bfd_byte *) ext->e_value);
   bfd_h_put_16(abfd,  in->n_scnum , (bfd_byte *) ext->e_scnum);
@@ -506,10 +501,10 @@ DEFUN(coff_swap_sym_out,(abfd,in,  ext),
 static void
 DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
       bfd            *abfd AND
-      PTR ext1 AND
+      PTR 	      ext1 AND
       int             type AND
       int             class AND
-      PTR in1)
+      PTR 	      in1)
 {
   AUXENT    *ext = (AUXENT *)ext1;
   union internal_auxent  *in = (union internal_auxent *)in1;
@@ -519,8 +514,11 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
       in->x_file.x_n.x_zeroes = 0;
       in->x_file.x_n.x_offset  = bfd_h_get_32(abfd, (bfd_byte *) ext->x_file.x_n.x_offset);
     } else {
-      memcpy (in->x_file.x_fname, ext->x_file.x_fname,
-	      sizeof (in->x_file.x_fname));
+#if FILNMLEN != E_FILNMLEN
+   -> Error, we need to cope with truncating or extending FILNMLEN!;
+#else
+      memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
+#endif
     }
 
     break;
@@ -542,10 +540,14 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
 #endif
 
     if (ISARY(type) || class == C_BLOCK) {
+#if DIMNUM != E_DIMNUM
+   -> Error, we need to cope with truncating or extending DIMNUM!;
+#else
       in->x_sym.x_fcnary.x_ary.x_dimen[0] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
       in->x_sym.x_fcnary.x_ary.x_dimen[1] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
       in->x_sym.x_fcnary.x_ary.x_dimen[2] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
       in->x_sym.x_fcnary.x_ary.x_dimen[3] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
+#endif
     }
       in->x_sym.x_fcnary.x_fcn.x_lnnoptr = GET_FCN_LNNOPTR(abfd, ext);
       in->x_sym.x_fcnary.x_fcn.x_endndx.l = GET_FCN_ENDNDX(abfd, ext);
@@ -575,8 +577,11 @@ DEFUN(coff_swap_aux_out,(abfd, in, type, class, ext),
       PUTWORD(abfd, in->x_file.x_n.x_offset, (bfd_byte *) ext->x_file.x_n.x_offset);
     }
     else {
-      memcpy ( ext->x_file.x_fname,in->x_file.x_fname,
-	      sizeof (in->x_file.x_fname));
+#if FILNMLEN != E_FILNMLEN
+   -> Error, we need to cope with truncating or extending FILNMLEN!;
+#else
+      memcpy (ext->x_file.x_fname, in->x_file.x_fname, FILNMLEN);
+#endif
     }    
     break;
   case C_STAT:
@@ -605,11 +610,14 @@ DEFUN(coff_swap_aux_out,(abfd, in, type, class, ext),
     else {
 
       if (ISARY(type) || class == C_BLOCK) {
+#if DIMNUM != E_DIMNUM
+   -> Error, we need to cope with truncating or extending DIMNUM!;
+#else
 	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[0], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
 	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[1], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
 	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[2], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
 	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[3], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
-
+#endif
       }
 	PUT_LNSZ_LNNO(abfd, in->x_sym.x_misc.x_lnsz.x_lnno, ext);
 	PUT_LNSZ_SIZE(abfd, in->x_sym.x_misc.x_lnsz.x_size, ext);
@@ -754,35 +762,6 @@ DEFUN(swap_scnhdr_out,(abfd, scnhdr_int, scnhdr_ext),
 #endif
 }
 
-
-/* **********************************************************************/
-/* Return a pointer to a malloc'd copy of 'name'.  'name' may not be
- \0-terminated, but will not exceed 'maxlen' characters.  The copy *will*
- be \0-terminated.
- */
-static char *
-DEFUN(copy_name,(abfd, name, maxlen),
-      bfd *abfd AND
-      char *name AND
-      int maxlen)
-{
-  int  len;
-  char *newname;
- 
-  for (len = 0; len < maxlen; ++len) {
-    if (name[len] == '\0') {
-      break;
-    }
-  }
- 
-  if ((newname = (PTR) bfd_alloc(abfd, len+1)) == NULL) {
-    bfd_error = no_memory;
-    return (NULL);
-  }
-  strncpy(newname, name, len);
-  newname[len] = '\0';
-  return newname;
-}
 
 /*
    initialize a section structure with information peculiar to this
@@ -1011,7 +990,18 @@ DEFUN(coff_real_object_p,(abfd, nscns, internal_f, internal_a),
   
   coff->sym_filepos = internal_f->f_symptr;
   
-  
+  /* These members communicate important constants about the symbol table
+     to GDB's symbol-reading code.  These `constants' unfortunately vary
+     from coff implementation to implementation...  */
+#ifndef NO_COFF_SYMBOLS
+  coff->local_n_btmask = N_BTMASK;
+  coff->local_n_btshft = N_BTSHFT;
+  coff->local_n_tmask  = N_TMASK;
+  coff->local_n_tshift = N_TSHIFT;
+  coff->local_symesz   = SYMESZ;
+  coff->local_auxesz   = AUXESZ;
+  coff->local_linesz   = LINESZ;
+#endif
   
   coff->symbols = (coff_symbol_type *) NULL;
   bfd_get_start_address(abfd) = internal_f->f_opthdr ? internal_a->entry : 0;
@@ -1123,8 +1113,8 @@ Takes a bfd and a symbol, returns a pointer to the coff specific area
 of the symbol if there is one.
 */
 static coff_symbol_type *
-DEFUN(coff_symbol_from,(abfd, symbol),
-      bfd            *abfd AND
+DEFUN(coff_symbol_from,(ignore_abfd, symbol),
+      bfd            *ignore_abfd AND
       asymbol        *symbol)
 {
   if (symbol->the_bfd->xvec->flavour != bfd_target_coff_flavour_enum) 
@@ -1433,8 +1423,8 @@ DEFUN(coff_mangle_symbols,(bfd_ptr),
 #endif
 static int string_size; 
 static void
-DEFUN(coff_fix_symbol_name,(abfd, symbol, native),
-  bfd *abfd AND
+DEFUN(coff_fix_symbol_name,(ignore_abfd, symbol, native),
+  bfd *ignore_abfd AND
   asymbol *symbol AND
   combined_entry_type *native)
 {
@@ -1443,10 +1433,8 @@ DEFUN(coff_fix_symbol_name,(abfd, symbol, native),
   char *  name = ( char *)(symbol->name);
 
   if (name == (char *) NULL) {
-    /*
-      coff symbols always have names, so we'll make one up
-      */
- symbol->name = "strange";
+    /* coff symbols always have names, so we'll make one up */
+    symbol->name = "strange";
     name = (char *)symbol->name;
   }
   name_length = strlen(name);
@@ -1668,7 +1656,8 @@ DEFUN(coff_write_symbols,(abfd),
   if (string_size != 0) 
    {
      unsigned int    size = string_size + 4;
-     char buffer[4];
+     bfd_byte buffer[4];
+
      bfd_h_put_32(abfd, size, buffer);
      bfd_write((PTR) buffer, 1, sizeof(buffer), abfd);
      for (p = abfd->outsymbols, i = 0; i < limit; i++, p++) 
@@ -1698,7 +1687,6 @@ DEFUN(coff_write_symbols,(abfd),
       
   }
 }
-#endif /* NO_COFF_SYMBOLS */
 
 /*doc*
 @subsubsection Writing Relocations
@@ -1743,6 +1731,7 @@ DEFUN(coff_write_relocs,(abfd),
     }
   }
 }
+#endif /* NO_COFF_SYMBOLS */
 
 #ifndef NO_COFF_LINENOS
 
@@ -2298,8 +2287,8 @@ pointers to syments.
 
 
 static void
-DEFUN(coff_pointerize_aux,(abfd, table_base, type, class, auxent),
-bfd *abfd AND
+DEFUN(coff_pointerize_aux,(ignore_abfd, table_base, type, class, auxent),
+bfd *ignore_abfd AND
 combined_entry_type *table_base AND
 int type AND
 int class AND
@@ -2422,6 +2411,34 @@ bfd *abfd)
   return string_table;
 }
 
+/* Return a pointer to a malloc'd copy of 'name'.  'name' may not be
+ \0-terminated, but will not exceed 'maxlen' characters.  The copy *will*
+ be \0-terminated.  */
+static char *
+DEFUN(copy_name,(abfd, name, maxlen),
+      bfd *abfd AND
+      char *name AND
+      int maxlen)
+{
+  int  len;
+  char *newname;
+ 
+  for (len = 0; len < maxlen; ++len) {
+    if (name[len] == '\0') {
+      break;
+    }
+  }
+ 
+  if ((newname = (PTR) bfd_alloc(abfd, len+1)) == NULL) {
+    bfd_error = no_memory;
+    return (NULL);
+  }
+  strncpy(newname, name, len);
+  newname[len] = '\0';
+  return newname;
+}
+
+
 /*
 read a symbol table into freshly mallocated memory, swap it, and knit the
 symbol names into a normalized form. By normalized here I mean that all
@@ -2483,7 +2500,7 @@ bfd            *abfd)
       (internal_ptr+1)->fix_tag = 0;
       (internal_ptr+1)->fix_end = 0;
 
-      coff_swap_aux_in(abfd, (AUXENT *)(raw_src +1), internal_ptr->u.syment.n_type,
+      coff_swap_aux_in(abfd, (char *)(raw_src +1), internal_ptr->u.syment.n_type,
 		       internal_ptr->u.syment.n_sclass, & 	(internal_ptr+1)->u.auxent);
 
       coff_pointerize_aux(abfd, 
@@ -3087,14 +3104,14 @@ location.
 static          boolean
 DEFUN(coff_find_nearest_line,(abfd,
 			      section,
-			      symbols,
+			      ignore_symbols,
 			      offset,
 			      filename_ptr,
 			      functionname_ptr,
 			      line_ptr),
       bfd            *abfd AND
       asection       *section AND
-      asymbol       **symbols AND
+      asymbol       **ignore_symbols AND
       bfd_vma         offset AND
       CONST char      **filename_ptr AND
       CONST char       **functionname_ptr AND
@@ -3107,7 +3124,7 @@ DEFUN(coff_find_nearest_line,(abfd,
   static alent   *cache_l;
     
   unsigned int    i = 0;
-  struct icofdata *cof = obj_icof(abfd);
+  coff_data_type *cof = coff_data(abfd);
   /* Run through the raw syments if available */
   combined_entry_type *p;
   alent          *l;
@@ -3122,7 +3139,7 @@ DEFUN(coff_find_nearest_line,(abfd,
   if (abfd->xvec->flavour != bfd_target_coff_flavour_enum)
     return false;
     
-  if (cof == (struct icofdata *)NULL)
+  if (cof == NULL)
     return false;
 
   p = cof->raw_syments;

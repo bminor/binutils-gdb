@@ -112,7 +112,6 @@ selected.
 #include <sysdep.h>
 #include <ansidecl.h>
 
-struct external_exec;
 #include "libaout.h"
 #include "libbfd.h"
 #include "aout64.h"
@@ -194,6 +193,10 @@ DEFUN(disp64,(abfd, reloc_entry, symbol_in, data, input_section),
   return bfd_reloc_ok;
 }
 
+
+/* High 22 bits of high half of a 64-bit value, in the low bits of the
+   target address.  If we only have 32-bit values, this is always zeroes.  */
+
 static bfd_reloc_status_enum_type
 DEFUN(hhi22,(abfd, reloc_entry, symbol_in, data, input_section),
       bfd *abfd AND
@@ -204,13 +207,20 @@ DEFUN(hhi22,(abfd, reloc_entry, symbol_in, data, input_section),
 {
   bfd_vma sym_value = get_symbol_value(symbol_in, input_section);
 
-  bfd_vma value =   bfd_get_32(abfd, (bfd_byte *)data + reloc_entry->address);
+  bfd_vma value = bfd_get_32(abfd, (bfd_byte *)data + reloc_entry->address);
 
-  value = (value & ~0x3fffff) | ( ((sym_value + reloc_entry->addend) >> 32+10) & 0x3fffff);
+  value &= ~0x3fffff;
+  value |=  0x3fffff & (((sym_value + reloc_entry->addend) >> 31) >> 11);
+  /* C does not define what happens if we shift it by >32 bits on a 32-bit
+     machine, but a shift of 31 and then 11 is well defined to give zero. */
 
   bfd_put_32(abfd, value, (bfd_byte *)data+reloc_entry->address);
   return bfd_reloc_ok;
 }
+
+
+/* Low 10 bits of high half of a 64-bit value, in the low bits of the
+   target address.  If we only have 32-bit values, this is always zeroes.  */
 
 static bfd_reloc_status_enum_type
 DEFUN(hlo10,(abfd, reloc_entry, symbol_in, data, input_section),
@@ -222,9 +232,12 @@ DEFUN(hlo10,(abfd, reloc_entry, symbol_in, data, input_section),
 {
   bfd_vma sym_value = get_symbol_value(symbol_in, input_section);
 
-  bfd_vma value =   bfd_get_32(abfd, (bfd_byte *)data + reloc_entry->address);
+  bfd_vma value = bfd_get_32(abfd, (bfd_byte *)data + reloc_entry->address);
 
-  value = (value & ~0x3ff) | (((sym_value + reloc_entry->addend) >> 32) & 0x3ff);
+  value &= ~0x3ff;
+  value |=  0x3ff & (((sym_value + reloc_entry->addend) >> 31) >> 1);
+  /* C does not define what happens if we shift it by >32 bits on a 32-bit
+     machine, but a shift of 31 and then 1 is well defined to give zero. */
 
   bfd_put_32(abfd, value, (bfd_byte *)data+reloc_entry->address);
   return bfd_reloc_ok;
@@ -234,6 +247,7 @@ static bfd_reloc_status_enum_type
 r64() 
 {
   abort();
+  return bfd_reloc_notsupported;
 }
 
 /* end-sanitize-v9 */
@@ -1244,6 +1258,7 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
       }
       else {
 	BFD_ASSERT(0);
+	r_index = N_ABS | N_EXT;
       }
     }
     
@@ -1328,6 +1343,7 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
     }
     else {
       BFD_ASSERT(0);
+      r_index = N_ABS | N_EXT;
     }
   }
 
@@ -1698,7 +1714,8 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
 
   switch (how) {
   case bfd_print_symbol_name_enum:
-    fprintf(file,"%s", symbol->name);
+    if (symbol->name)
+      fprintf(file,"%s", symbol->name);
     break;
   case bfd_print_symbol_type_enum:
     fprintf(file,"%4x %2x %2x",(unsigned)(aout_symbol(symbol)->desc & 0xffff),
@@ -1712,12 +1729,14 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
 
       bfd_print_symbol_vandf((PTR)file,symbol);
 
-      fprintf(file," %-5s %04x %02x %02x %s",
+      fprintf(file," %-5s %04x %02x %02x",
 	      section_name,
 	      (unsigned)(aout_symbol(symbol)->desc & 0xffff),
 	      (unsigned)(aout_symbol(symbol)->other & 0xff),
 	      (unsigned)(aout_symbol(symbol)->type  & 0xff),
 	      symbol->name);
+      if (symbol->name)
+        fprintf(file," %s", symbol->name);
     }
     break;
   }
@@ -1806,9 +1825,9 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
 }
 
 int 
-DEFUN(NAME(aout,sizeof_headers),(ignore_abfd, execable),
+DEFUN(NAME(aout,sizeof_headers),(ignore_abfd, ignore),
       bfd *ignore_abfd AND
-      boolean execable)
+      boolean ignore)
 {
   return EXEC_BYTES_SIZE;
 }

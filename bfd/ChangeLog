@@ -1,3 +1,8 @@
+Thu Sep 26 15:27:29 1991  John Gilmore  (gnu at cygnus.com)
+
+	* aoutf1.h, aoutx.h, bout.c, coffcode.h, host-aout.c, oasys.c,
+	opncls.c:  Lint (saber actually).
+
 Thu Sep 26 11:24:24 1991  Per Bothner  (bothner at cygnus.com)
 
 	* libaout.h (WRITE_HEADERS): Set header's a_text field always.
