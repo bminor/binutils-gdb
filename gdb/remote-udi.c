@@ -125,22 +125,6 @@ typedef	struct 	bkpt_entry_str
 static bkpt_entry_t	bkpt_table[BKPT_TABLE_SIZE];
 extern	char	dfe_errmsg[];		/* error string */
 
-/* Called when SIGALRM signal sent due to alarm() timeout.  */
-#ifndef HAVE_TERMIO
-
-volatile int n_alarms;
-
-static void
-udi_timer ()
-{
-#if 0
-  if (kiodebug)
-    printf ("udi_timer called\n");
-#endif
-  n_alarms++;
-}
-#endif	/* HAVE_TERMIO */
-
 /* malloc'd name of the program on the remote system.  */
 static char *prog_name = NULL;
 
@@ -250,19 +234,6 @@ udi_open (name, from_tty)
     error("UDIConnect() failed: %s\n", dfe_errmsg);
 
   push_target (&udi_ops);
-
-#ifndef HAVE_TERMIO
-#ifndef NO_SIGINTERRUPT
-  /* Cause SIGALRM's to make reads fail with EINTR instead of resuming
-     the read.  */
-  if (siginterrupt (SIGALRM, 1) != 0)
-    error ("udi_open: siginterrupt() %s", safe_strerror(errno));
-#endif
-
-  /* Set up read timeout timer.  */
-  if ((void (*)) signal (SIGALRM, udi_timer) == (void (*)) -1)
-    error ("udi_open: signal() %s", safe_strerror(errno));
-#endif
 
 #if defined (LOG_FILE)
   log_file = fopen (LOG_FILE, "w");
