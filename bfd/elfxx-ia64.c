@@ -4900,7 +4900,6 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_want_plt_sym	0
 #define elf_backend_plt_alignment	5
 #define elf_backend_got_header_size	0
-#define elf_backend_plt_header_size	PLT_HEADER_SIZE
 #define elf_backend_want_got_plt	1
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	1

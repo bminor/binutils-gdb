@@ -2772,7 +2772,6 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_plt_readonly	0
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size     0
-#define elf_backend_plt_header_size     0
 #define elf_backend_type_change_ok	TRUE
 #define elf_backend_get_symbol_type	elf64_hppa_elf_get_symbol_type
 #define elf_backend_reloc_type_class	elf64_hppa_reloc_type_class

@@ -2792,7 +2792,6 @@ elf64_x86_64_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *inf
 #define elf_backend_plt_readonly	    1
 #define elf_backend_want_plt_sym	    0
 #define elf_backend_got_header_size	    (GOT_ENTRY_SIZE*3)
-#define elf_backend_plt_header_size	    PLT_ENTRY_SIZE
 #define elf_backend_rela_normal		    1
 
 #define elf_info_to_howto		    elf64_x86_64_info_to_howto

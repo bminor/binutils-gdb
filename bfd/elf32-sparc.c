@@ -3478,7 +3478,6 @@ elf32_sparc_reloc_type_class (rela)
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
 #define elf_backend_got_header_size 4
-#define elf_backend_plt_header_size (4*PLT_ENTRY_SIZE)
 #define elf_backend_rela_normal 1
 
 #include "elf32-target.h"

@@ -4209,7 +4209,6 @@ static struct bfd_elf_special_section const sh64_elf64_special_sections[]=
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	24
-#define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 
 #include "elf64-target.h"
 

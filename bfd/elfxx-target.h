@@ -343,9 +343,6 @@
 #ifndef elf_backend_got_header_size
 #define elf_backend_got_header_size	0
 #endif
-#ifndef elf_backend_plt_header_size
-#define elf_backend_plt_header_size	0
-#endif
 #ifndef elf_backend_post_process_headers
 #define elf_backend_post_process_headers	NULL
 #endif
@@ -507,7 +504,6 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_special_sections,
   elf_backend_got_symbol_offset,
   elf_backend_got_header_size,
-  elf_backend_plt_header_size,
   elf_backend_collect,
   elf_backend_type_change_ok,
   elf_backend_may_use_rel_p,

@@ -3240,7 +3240,6 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
-#define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 
 /* Support RELA for objdump of prelink objects.  */
 #define elf_info_to_howto		      elf_i386_info_to_howto_rel

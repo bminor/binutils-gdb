@@ -4148,7 +4148,6 @@ elf32_arm_final_write_processing (abfd, linker)
 #endif
 
 #define elf_backend_got_header_size	12
-#define elf_backend_plt_header_size	PLT_HEADER_SIZE
 
 #include "elf32-target.h"
 

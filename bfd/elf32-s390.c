@@ -3463,7 +3463,6 @@ elf_s390_grok_prstatus (abfd, note)
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
-#define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 #define elf_backend_rela_normal		1
 
 #define elf_info_to_howto		      elf_s390_info_to_howto

@@ -894,10 +894,9 @@ struct elf_backend_data
      .got section */
   bfd_vma got_symbol_offset;
 
-  /* The size in bytes of the headers for the GOT and PLT.  This includes
-     the so-called reserved entries on some systems.  */
+  /* The size in bytes of the header for the GOT.  This includes the
+     so-called reserved entries on some systems.  */
   bfd_vma got_header_size;
-  bfd_vma plt_header_size;
 
   /* This is TRUE if the linker should act like collect and gather
      global constructors and destructors by name.  This is TRUE for

@@ -1,3 +1,28 @@
+2003-11-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf-bfd.h (struct elf_backend_data): Remove plt_header_size.
+	* elf-m10300.c (elf_backend_plt_header_size): Don't define.
+	* elf32-arm.h (elf_backend_plt_header_size): Don't define.
+	* elf32-cris.c (elf_backend_plt_header_size): Don't define.
+	* elf32-i386.c (elf_backend_plt_header_size): Don't define.
+	* elf32-mips.c (elf_backend_plt_header_size): Don't define.
+	* elf32-ppc.c (elf_backend_plt_header_size): Don't define.
+	* elf32-s390.c (elf_backend_plt_header_size): Don't define.
+	* elf32-sh.c (elf_backend_plt_header_size): Don't define.
+	* elf32-sparc.c (elf_backend_plt_header_size): Don't define.
+	* elf64-alpha.c (elf_backend_plt_header_size): Don't define.
+	* elf64-hppa.c (elf_backend_plt_header_size): Don't define.
+	* elf64-mips.c (elf_backend_plt_header_size): Don't define.
+	* elf64-ppc.c (elf_backend_plt_header_size): Don't define.
+	* elf64-s390.c (elf_backend_plt_header_size): Don't define.
+	* elf64-sh64.c (elf_backend_plt_header_size): Don't define.
+	* elf64-sparc.c (elf_backend_plt_header_size): Don't define.
+	* elf64-x86-64.c (elf_backend_plt_header_size): Don't define.
+	* elfn32-mips.c (elf_backend_plt_header_size): Don't define.
+	* elfxx-ia64.c (elf_backend_plt_header_size): Don't define.
+	* elfxx-target.h (elf_backend_plt_header_size): Don't define
+	or include in target initializer.
+
 2003-11-03  Andrew Cagney  <cagney@redhat.com>
 
 	* section.c (bfd_set_section_contents): Make the "location" buffer

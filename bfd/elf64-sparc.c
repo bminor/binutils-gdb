@@ -3236,6 +3236,5 @@ const struct elf_size_info sparc64_elf_size_info =
 #define elf_backend_plt_alignment 8
 
 #define elf_backend_got_header_size 8
-#define elf_backend_plt_header_size PLT_HEADER_SIZE
 
 #include "elf64-target.h"

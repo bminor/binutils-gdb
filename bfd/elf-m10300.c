@@ -4874,6 +4874,5 @@ _bfd_mn10300_elf_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
-#define elf_backend_plt_header_size	PLT0_ENTRY_SIZE
 
 #include "elf32-target.h"

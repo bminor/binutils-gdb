@@ -5600,7 +5600,6 @@ static const struct elf_size_info alpha_elf_size_info =
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
 #define elf_backend_got_header_size 0
-#define elf_backend_plt_header_size PLT_HEADER_SIZE
 
 #include "elf64-target.h"
 

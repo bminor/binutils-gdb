@@ -6224,7 +6224,6 @@ static struct bfd_elf_special_section const ppc_elf_special_sections[]=
 #define elf_backend_can_gc_sections	1
 #define elf_backend_can_refcount	1
 #define elf_backend_got_header_size	12
-#define elf_backend_plt_header_size	PLT_INITIAL_ENTRY_SIZE
 #define elf_backend_rela_normal		1
 
 #define bfd_elf32_mkobject			ppc_elf_mkobject
