@@ -1,3 +1,16 @@
+Thu Jun 23 15:31:28 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* elfcode.h (elf_object_p): Don't set DYNAMIC just because there
+	is an SHT_DYNAMIC section.
+
+	* cf-i386lynx.c (i386coff_vec): Don't include DYNAMIC in
+	object_flags.
+	* coff-sparc.c (sparccoff_vec): Likewise.
+	* hppabsd-core.c (hppabsd_core_vec): Likewise.
+
+	* aoutx.h (NAME(aout,some_aout_object_p)): Don't set SEC_RELOC
+	just because DYNAMIC is set.
+
 Thu Jun 23 12:53:41 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* configure.in: Change --with-targets to --enable-targets and

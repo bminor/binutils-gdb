@@ -962,11 +962,6 @@ elf_object_p (abfd)
 	goto got_no_match;
       elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
       elf_elfsections (abfd)[shindex] = i_shdrp + shindex;
-
-      /* If this is a .dynamic section, mark the object file as being
-	 dynamically linked.  */
-      if (i_shdrp[shindex].sh_type == SHT_DYNAMIC)
-	abfd->flags |= DYNAMIC;
     }
   if (i_ehdrp->e_shstrndx)
     {
@@ -2888,24 +2883,12 @@ elf_get_dynamic_symtab_upper_bound (abfd)
   return symtab_size;
 }
 
-/*
-	This function return the number of bytes required to store the
-	relocation information associated with section <<sect>>
-	attached to bfd <<abfd>>
-
-*/
 long
 elf_get_reloc_upper_bound (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
 {
-  if (asect->flags & SEC_RELOC)
-    {
-      /* either rel or rela */
-      return elf_section_data (asect)->rel_hdr.sh_size;
-    }
-  else
-    return 0;
+  return (asect->reloc_count + 1) * sizeof (arelent *);
 }
 
 static boolean
