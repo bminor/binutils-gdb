@@ -472,7 +472,7 @@ file.  @code{C_BINCL} and @code{C_EINCL} do not nest.
 
 @findex N_SLINE
 An @code{N_SLINE} symbol represents the start of a source line.  The
-desc field contains the line number and the value field
+desc field contains the line number and the value
 contains the code address for the start of that source line.  On most
 machines the address is absolute; for Sun's stabs-in-ELF, it is relative
 to the function in which the @code{N_SLINE} symbol occurs.
@@ -515,7 +515,7 @@ one has complained).
 
 A function is represented by an @samp{F} symbol descriptor for a global
 (extern) function, and @samp{f} for a static (local) function.  The
-value field is the address of the start of the function (absolute
+value is the address of the start of the function (absolute
 for @code{a.out}; relative to the start of the file for Sun's
 stabs-in-ELF).  The type information of the stab represents the return
 type of the function; thus @samp{foo:f5} means that foo is a function
@@ -816,7 +816,7 @@ produce an external symbol.
 @c According to an old version of this manual, AIX uses C_RPSYM instead
 @c of C_RSYM.  I am skeptical; this should be verified.
 Register variables have their own stab type, @code{N_RSYM}, and their
-own symbol descriptor, @samp{r}.  The stab's value field contains the
+own symbol descriptor, @samp{r}.  The stab's value is the
 number of the register where the variable data will be stored.
 @c .stabs "name:type",N_RSYM,0,RegSize,RegNumber (Sun doc)
 
@@ -984,7 +984,7 @@ know that it is an argument.
 Because that approach is kind of ugly, some compilers use symbol
 descriptor @samp{P} or @samp{R} to indicate an argument which is in a
 register.  Symbol type @code{C_RPSYM} is used with @samp{R} and
-@code{N_RSYM} is used with @samp{P}.  The symbol's value field is
+@code{N_RSYM} is used with @samp{P}.  The symbol's value is
 the register number.  @samp{P} and @samp{R} mean the same thing; the
 difference is that @samp{P} is a GNU invention and @samp{R} is an IBM
 (XCOFF) invention.  As of version 4.9, GDB should handle either one.
@@ -2000,9 +2000,9 @@ The variable is represented by two symbol table entries in the object
 file (see below).  The first one originated as a stab.  The second one
 is an external symbol.  The upper case @samp{D} signifies that the
 @code{n_type} field of the symbol table contains 7, @code{N_DATA} with
-local linkage.  The value field is empty for the stab entry.  For
-the linker symbol, it contains the relocatable address corresponding to
-the variable.
+local linkage.  The stab's value is zero since the value is not used for
+@code{N_GSYM} stabs.  The value of the linker symbol is the relocatable
+address corresponding to the variable.
 
 @example
 00000000 - 00 0000  GSYM g_foo:G2
