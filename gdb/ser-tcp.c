@@ -57,6 +57,7 @@ tcp_open(scb, name)
   struct sockaddr_in sockaddr;
   int tmp;
   char hostname[100];
+  struct protoent *protoent;
 
   port_str = strchr (name, ':');
 
@@ -98,8 +99,13 @@ tcp_open(scb, name)
       return -1;
     }
 
+  protoent = getprotobyname ("tcp");
+  if (!protoent)
+    return -1;
+
   tmp = 1;
-  if (setsockopt (scb->fd, 6, TCP_NODELAY, (char *)&tmp, sizeof(tmp)))
+  if (setsockopt (scb->fd, protoent->p_proto, TCP_NODELAY,
+		  (char *)&tmp, sizeof(tmp)))
     return -1;
 
   signal(SIGPIPE, SIG_IGN);	/* If we don't do this, then GDB simply exits
