@@ -412,9 +412,17 @@ static offsetT mips_cpreturn_offset = -1;
 static int mips_cpreturn_register = -1;
 static int mips_gp_register = GP;
 
+/* Whether mips_cprestore_offset has been set in the current function
+   (or whether it has already been warned about, if not).  */
+static int mips_cprestore_valid = 0;
+
 /* This is the register which holds the stack frame, as set by the
    .frame pseudo-op.  This is needed to implement .cprestore.  */
 static int mips_frame_reg = SP;
+
+/* Whether mips_frame_reg has been set in the current function
+   (or whether it has already been warned about, if not).  */
+static int mips_frame_reg_valid = 0;
 
 /* To output NOP instructions correctly, we need to keep information
    about the previous two instructions.  */
@@ -5110,6 +5118,18 @@ macro (ip)
 		as_warn (_("No .cprestore pseudo-op used in PIC code"));
 	      else
 		{
+		  if (! mips_frame_reg_valid)
+		    {
+		      as_warn (_("No .frame pseudo-op used in PIC code"));
+		      /* Quiet this warning.  */
+		      mips_frame_reg_valid = 1;
+		    }
+		  if (! mips_cprestore_valid)
+		    {
+		      as_warn (_("No .cprestore pseudo-op used in PIC code"));
+		      /* Quiet this warning.  */
+		      mips_cprestore_valid = 1;
+		    }
 		  expr1.X_add_number = mips_cprestore_offset;
 		  macro_build ((char *) NULL, &icnt, &expr1,
 			       HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)",
@@ -5211,6 +5231,18 @@ macro (ip)
 		as_warn (_("No .cprestore pseudo-op used in PIC code"));
 	      else
 		{
+		  if (! mips_frame_reg_valid)
+		    {
+		      as_warn (_("No .frame pseudo-op used in PIC code"));
+		      /* Quiet this warning.  */
+		      mips_frame_reg_valid = 1;
+		    }
+		  if (! mips_cprestore_valid)
+		    {
+		      as_warn (_("No .cprestore pseudo-op used in PIC code"));
+		      /* Quiet this warning.  */
+		      mips_cprestore_valid = 1;
+		    }
 		  if (mips_opts.noreorder)
 		    macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			     "nop", "");
@@ -11472,6 +11504,7 @@ s_cprestore (ignore)
     }
 
   mips_cprestore_offset = get_absolute_expression ();
+  mips_cprestore_valid = 1;
 
   ex.X_op = O_constant;
   ex.X_add_symbol = NULL;
@@ -11738,7 +11771,11 @@ tc_get_register (frame)
       input_line_pointer += 2;
     }
   if (frame)
-    mips_frame_reg = reg != 0 ? reg : SP;
+    {
+      mips_frame_reg = reg != 0 ? reg : SP;
+      mips_frame_reg_valid = 1;
+      mips_cprestore_valid = 0;
+    }
   return reg;
 }
 
@@ -12806,6 +12843,10 @@ s_mips_end (x)
   symbolS *p;
   int maybe_text;
 
+  /* Following functions need their own .frame and .cprestore directives.  */
+  mips_frame_reg_valid = 0;
+  mips_cprestore_valid = 0;
+
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
       p = get_symbol ();
@@ -12923,6 +12964,10 @@ s_mips_ent (aent)
 
   if (!aent)
     {
+      /* This function needs its own .frame and .cprestore directives.  */
+      mips_frame_reg_valid = 0;
+      mips_cprestore_valid = 0;
+
       cur_proc_ptr = &cur_proc;
       memset (cur_proc_ptr, '\0', sizeof (procS));
 

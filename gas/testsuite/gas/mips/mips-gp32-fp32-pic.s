@@ -12,6 +12,7 @@ unshared:
 	.text
 	.ent	func
 func:
+	.frame $sp,0,$31
 	.set noreorder
 	.cpload $25		# 0000 lui	gp,hi(_gp_disp)
 				# 0004 addiu	gp,gp,lo(_gp_disp)

@@ -1,3 +1,15 @@
+2002-01-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* tc-mips.c (mips_cprestore_valid): New flag.
+	(mips_frame_reg_valid): New flag.
+	(macro) [M_JAL_2]: Check both flags.
+	[M_JAL_A]: Likewise.
+	(s_cprestore): Set mips_cprestore_valid.
+	(tc_get_register): If setting mips_frame_reg, set
+	mips_frame_reg_valid and clear mips_cprestore_valid.
+	(s_mips_ent): Clear both flags.
+	(s_mips_end): Clear both flags.
+
 2002-01-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.c (write_object_file): Make use of bfd_section_list_remove.
