@@ -2760,8 +2760,9 @@ assign_section_numbers (abfd)
 		  elf_section_data (s)->this_hdr.sh_link = d->this_idx;
 
 		  /* This is a .stab section.  */
-		  elf_section_data (s)->this_hdr.sh_entsize =
-		    4 + 2 * bfd_get_arch_size (abfd) / 8;
+		  if (elf_section_data (s)->this_hdr.sh_entsize == 0)
+		    elf_section_data (s)->this_hdr.sh_entsize
+		      = 4 + 2 * bfd_get_arch_size (abfd) / 8;
 		}
 	    }
 	  break;

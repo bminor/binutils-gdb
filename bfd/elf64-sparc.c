@@ -72,6 +72,9 @@ static void sparc64_elf_symbol_processing
 static boolean sparc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 
+static boolean sparc64_elf_fake_sections
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
+
 static const char *sparc64_elf_print_symbol_all
   PARAMS ((bfd *, PTR, asymbol *));
 static boolean sparc64_elf_relax_section
@@ -2995,6 +2998,27 @@ sparc64_elf_merge_private_bfd_data (ibfd, obfd)
     }
   return true;
 }
+
+/* MARCO: Set the correct entry size for the .stab section.  */
+
+static boolean
+sparc64_elf_fake_sections (abfd, hdr, sec)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     Elf32_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
+     asection *sec;
+{
+  const char *name;
+
+  name = bfd_get_section_name (abfd, sec);
+
+  if (strcmp (name, ".stab") == 0)
+    {
+      /* Even in the 64bit case the stab entries are only 12 bytes long.  */
+      elf_section_data (sec)->this_hdr.sh_entsize = 12;
+    }
+  
+  return true;
+}
 
 /* Print a STT_REGISTER symbol to file FILE.  */
 
@@ -3132,6 +3156,8 @@ const struct elf_size_info sparc64_elf_size_info =
   sparc64_elf_output_arch_syms
 #define bfd_elf64_bfd_merge_private_bfd_data \
   sparc64_elf_merge_private_bfd_data
+#define elf_backend_fake_sections \
+  sparc64_elf_fake_sections
 
 #define elf_backend_size_info \
   sparc64_elf_size_info
