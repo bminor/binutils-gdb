@@ -72,6 +72,7 @@ cache.c
 cf-i386lynx.c
 cf-m68klynx.c
 cf-sparclynx.c
+cisco-core.c
 coff-a29k.c
 coff-alpha.c
 coff-apollo.c
