@@ -358,12 +358,19 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "lduh",	F3(3, 0x02, 1), F3(~3, ~0x02, ~1),		"[i+1],d", 0, v6 },
 { "lduh",	F3(3, 0x02, 1), F3(~3, ~0x02, ~1)|RS1_G0,	"[i],d", 0, v6 },
 { "lduh",	F3(3, 0x02, 1), F3(~3, ~0x02, ~1)|SIMM13(~0),	"[1],d", 0, v6 }, /* lduh [rs1+0],d */
+
 { "ldx",	F3(3, 0x0b, 0), F3(~3, ~0x0b, ~0)|ASI(~0),	"[1+2],d", 0, v9 },
 { "ldx",	F3(3, 0x0b, 0), F3(~3, ~0x0b, ~0)|ASI_RS2(~0),	"[1],d", 0, v9 }, /* ldx [rs1+%g0],d */
 { "ldx",	F3(3, 0x0b, 1), F3(~3, ~0x0b, ~1),		"[1+i],d", 0, v9 },
 { "ldx",	F3(3, 0x0b, 1), F3(~3, ~0x0b, ~1),		"[i+1],d", 0, v9 },
 { "ldx",	F3(3, 0x0b, 1), F3(~3, ~0x0b, ~1)|RS1_G0,	"[i],d", 0, v9 },
 { "ldx",	F3(3, 0x0b, 1), F3(~3, ~0x0b, ~1)|SIMM13(~0),	"[1],d", 0, v9 }, /* ldx [rs1+0],d */
+{ "ldx",	F3(3, 0x29, 0), F3(~3, ~0x29, ~0),		"[1+2],F", 0, v9 },
+{ "ldx",	F3(3, 0x29, 0), F3(~3, ~0x29, ~0)|RS2_G0,	"[1],F", 0, v9 }, /* ld [rs1+%g0],d */
+{ "ldx",	F3(3, 0x29, 1), F3(~3, ~0x29, ~1),		"[1+i],F", 0, v9 },
+{ "ldx",	F3(3, 0x29, 1), F3(~3, ~0x29, ~1),		"[i+1],F", 0, v9 },
+{ "ldx",	F3(3, 0x29, 1), F3(~3, ~0x29, ~1)|RS1_G0,	"[i],F", 0, v9 },
+{ "ldx",	F3(3, 0x29, 1), F3(~3, ~0x29, ~1)|SIMM13(~0),	"[1],F", 0, v9 }, /* ld [rs1+0],d */
 
 { "ldda",	F3(3, 0x13, 0), F3(~3, ~0x13, ~0),		"[1+2]A,d", 0, v6 },
 { "ldda",	F3(3, 0x13, 0), F3(~3, ~0x13, ~0)|RS2_G0,	"[1]A,d", 0, v6 }, /* ldda [rs1+%g0],d */
@@ -408,11 +415,12 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "st",	F3(3, 0x35, 1), F3(~3, ~0x35, ~1),			"C,[i+1]", 0, v6 },
 { "st",	F3(3, 0x35, 1), F3(~3, ~0x35, ~1)|RS1_G0,		"C,[i]", 0, v6 },
 { "st",	F3(3, 0x35, 1), F3(~3, ~0x35, ~1)|SIMM13(~0),		"C,[1]", 0, v6 }, /* st d,[rs1+0] */
+
 { "st",	F3(3, 0x25, 0), F3(~3, ~0x25, ~0)|RD_G0|ASI(~0),	"F,[1+2]", 0, v6 },
 { "st",	F3(3, 0x25, 0), F3(~3, ~0x25, ~0)|RD_G0|ASI_RS2(~0),	"F,[1]", 0, v6 }, /* st d,[rs1+%g0] */
 { "st",	F3(3, 0x25, 1), F3(~3, ~0x25, ~1)|RD_G0,		"F,[1+i]", 0, v6 },
 { "st",	F3(3, 0x25, 1), F3(~3, ~0x25, ~1)|RD_G0,		"F,[i+1]", 0, v6 },
-{ "st",	F3(3, 0x25, 1), F3(~3, ~0x25, ~1)|RD_G0|RS1_G0,	"F,[i]", 0, v6 },
+{ "st",	F3(3, 0x25, 1), F3(~3, ~0x25, ~1)|RD_G0|RS1_G0,		"F,[i]", 0, v6 },
 { "st",	F3(3, 0x25, 1), F3(~3, ~0x25, ~1)|SIMM13(~0),		"F,[1]", 0, v6 }, /* st d,[rs1+0] */
 
  /* FIXME-v9: combine st, stw, stuw, stsw, in macros. */
@@ -615,12 +623,18 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "stuha",	F3(3, 0x16, 0), F3(~3, ~0x16, ~0),		"d,[1+2]A", F_ALIAS, v9 },
 { "stuha",	F3(3, 0x16, 0), F3(~3, ~0x16, ~0)|RS2(~0),	"d,[1]A", F_ALIAS, v9 }, /* stha d,[rs1+%g0] */
 
-{ "stx",	F3(3, 0x0e, 0), F3(~3, ~0x0e, ~0)|ASI(~0),	"d,[1+2]", 0, v9 },
-{ "stx",	F3(3, 0x0e, 0), F3(~3, ~0x0e, ~0)|ASI_RS2(~0),	"d,[1]", 0, v9 }, /* stx d,[rs1+%g0] */
-{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1),		"d,[1+i]", 0, v9 },
-{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1),		"d,[i+1]", 0, v9 },
-{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1)|RS1_G0,	"d,[i]", 0, v9 },
-{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1)|SIMM13(~0),	"d,[1]", 0, v9 }, /* stx d,[rs1+0] */
+{ "stx",	F3(3, 0x0e, 0), F3(~3, ~0x0e, ~0)|ASI(~0),		"d,[1+2]", 0, v9 },
+{ "stx",	F3(3, 0x0e, 0), F3(~3, ~0x0e, ~0)|ASI_RS2(~0),		"d,[1]", 0, v9 }, /* stx d,[rs1+%g0] */
+{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1),			"d,[1+i]", 0, v9 },
+{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1),			"d,[i+1]", 0, v9 },
+{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1)|RS1_G0,		"d,[i]", 0, v9 },
+{ "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1)|SIMM13(~0),		"d,[1]", 0, v9 }, /* stx d,[rs1+0] */
+{ "stx",	F3(3, 0x2d, 0), F3(~3, ~0x25, ~0)|RD_G0|ASI(~0),	"F,[1+2]", F_ALIAS, v9 },
+{ "stx",	F3(3, 0x2d, 0), F3(~3, ~0x25, ~0)|RD_G0|ASI_RS2(~0),	"F,[1]", F_ALIAS, v9 }, /* st d,[rs1+%g0] */
+{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x25, ~1)|RD_G0,		"F,[1+i]", F_ALIAS, v9 },
+{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x25, ~1)|RD_G0,		"F,[i+1]", F_ALIAS, v9 },
+{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x25, ~1)|RD_G0|RS1_G0,		"F,[i]", F_ALIAS, v9 },
+{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x25, ~1)|SIMM13(~0),		"F,[1]", F_ALIAS, v9 }, /* st d,[rs1+0] */
 
 { "stxa",	F3(3, 0x1e, 0), F3(~3, ~0x1e, ~0),		"d,[1+2]A", 0, v9 },
 { "stxa",	F3(3, 0x1e, 0), F3(~3, ~0x1e, ~0)|RS2(~0),	"d,[1]A", 0, v9 }, /* stha d,[rs1+%g0] */
@@ -739,6 +753,8 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "wr", F3(2, 0x30, 1)|RD(0), F3(~2, ~0x30, ~1)|RD(~0),		"1,i,y", 0, v9 },
 { "wr", F3(2, 0x30, 0)|RD(1), F3(~2, ~0x30, ~0)|RD(~1)|ASI(~0), "1,2,E", 0, v9 },
 { "wr", F3(2, 0x30, 1)|RD(1), F3(~2, ~0x30, ~1)|RD(~1),		"1,i,E", 0, v9 },
+{ "wr", F3(2, 0x30, 0)|RD(3), F3(~2, ~0x30, ~0)|RD(~3)|ASI(~0), "1,2,W", 0, v9 },
+{ "wr", F3(2, 0x30, 1)|RD(3), F3(~2, ~0x30, ~1)|RD(~3),		"1,i,W", 0, v9 },
 { "wr", F3(2, 0x30, 0)|RD(4), F3(~2, ~0x30, ~0)|RD(~4)|ASI(~0), "1,2,p", 0, v9 },
 { "wr", F3(2, 0x30, 1)|RD(4), F3(~2, ~0x30, ~1)|RD(~4),		"1,i,p", 0, v9 },
 { "wr", F3(2, 0x30, 0)|RD(5), F3(~2, ~0x30, ~0)|RD(~5)|ASI(~0), "1,2,w", 0, v9 },
@@ -860,8 +876,6 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "addxcc",	F3(2, 0x18, 1), F3(~2, ~0x18, ~1),		"1,i,d", 0, v6 },
 { "addxcc",	F3(2, 0x18, 1), F3(~2, ~0x18, ~1),		"i,1,d", 0, v6 },
 
-{ "mulx",	F3(2, 0x09, 0), F3(~2, ~0x09, ~0)|ASI(~0),	"1,2,d", 0, v9 },
-{ "mulx",	F3(2, 0x09, 1), F3(~2, ~0x09, ~1),		"1,i,d", 0, v9 },
 { "smul",	F3(2, 0x0b, 0), F3(~2, ~0x0b, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "smul",	F3(2, 0x0b, 1), F3(~2, ~0x0b, ~1),		"1,i,d", 0, v8 },
 { "smul",	F3(2, 0x0b, 1), F3(~2, ~0x0b, ~1),		"i,1,d", 0, v8 },
@@ -874,25 +888,27 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "umulcc",	F3(2, 0x1a, 0), F3(~2, ~0x1a, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "umulcc",	F3(2, 0x1a, 1), F3(~2, ~0x1a, ~1),		"1,i,d", 0, v8 },
 { "umulcc",	F3(2, 0x1a, 1), F3(~2, ~0x1a, ~1),		"i,1,d", 0, v8 },
-{ "umulxcc",	F3(2, 0x19, 0), F3(~2, ~0x19, ~0)|ASI(~0),	"1,2,d", 0, v9 },
-{ "umulxcc",	F3(2, 0x19, 1), F3(~2, ~0x19, ~1),		"1,i,d", 0, v9 },
-
 { "sdiv",	F3(2, 0x0f, 0), F3(~2, ~0x0f, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "sdiv",	F3(2, 0x0f, 1), F3(~2, ~0x0f, ~1),		"1,i,d", 0, v8 },
 { "sdiv",	F3(2, 0x0f, 1), F3(~2, ~0x0f, ~1),		"i,1,d", 0, v8 },
 { "sdivcc",	F3(2, 0x1f, 0), F3(~2, ~0x1f, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "sdivcc",	F3(2, 0x1f, 1), F3(~2, ~0x1f, ~1),		"1,i,d", 0, v8 },
 { "sdivcc",	F3(2, 0x1f, 1), F3(~2, ~0x1f, ~1),		"i,1,d", 0, v8 },
-{ "sdivx",	F3(2, 0x0d, 0), F3(~2, ~0x0d, ~0)|ASI(~0),	"1,2,d", 0, v9 },
-{ "sdivx",	F3(2, 0x0d, 1), F3(~2, ~0x0d, ~1),		"1,i,d", 0, v9 },
 { "udiv",	F3(2, 0x0e, 0), F3(~2, ~0x0e, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "udiv",	F3(2, 0x0e, 1), F3(~2, ~0x0e, ~1),		"1,i,d", 0, v8 },
 { "udiv",	F3(2, 0x0e, 1), F3(~2, ~0x0e, ~1),		"i,1,d", 0, v8 },
 { "udivcc",	F3(2, 0x1e, 0), F3(~2, ~0x1e, ~0)|ASI(~0),	"1,2,d", 0, v8 },
 { "udivcc",	F3(2, 0x1e, 1), F3(~2, ~0x1e, ~1),		"1,i,d", 0, v8 },
 { "udivcc",	F3(2, 0x1e, 1), F3(~2, ~0x1e, ~1),		"i,1,d", 0, v8 },
-{ "udivx",	F3(2, 0x1d, 0), F3(~2, ~0x1d, ~0)|ASI(~0),	"1,2,d", 0, v9 },
-{ "udivx",	F3(2, 0x1d, 1), F3(~2, ~0x1d, ~1),		"1,i,d", 0, v9 },
+
+{ "mulx",	F3(2, 0x09, 0), F3(~2, ~0x09, ~0)|ASI(~0),	"1,2,d", 0, v9 },
+{ "mulx",	F3(2, 0x09, 1), F3(~2, ~0x09, ~1),		"1,i,d", 0, v9 },
+{ "umulxcc",	F3(2, 0x19, 0), F3(~2, ~0x19, ~0)|ASI(~0),	"1,2,d", 0, v9 },
+{ "umulxcc",	F3(2, 0x19, 1), F3(~2, ~0x19, ~1),		"1,i,d", 0, v9 },
+{ "sdivx",	F3(2, 0x1d, 0), F3(~2, ~0x1d, ~0)|ASI(~0),	"1,2,d", 0, v9 },
+{ "sdivx",	F3(2, 0x1d, 1), F3(~2, ~0x1d, ~1),		"1,i,d", 0, v9 },
+{ "udivx",	F3(2, 0x0d, 0), F3(~2, ~0x0d, ~0)|ASI(~0),	"1,2,d", 0, v9 },
+{ "udivx",	F3(2, 0x0d, 1), F3(~2, ~0x0d, ~1),		"1,i,d", 0, v9 },
 
 { "call",	F1(0x1), F1(~0x1), "L", F_DELAYED, v6 },
 { "call",	F1(0x1), F1(~0x1), "L,#", F_DELAYED, v6 },
@@ -942,7 +958,7 @@ static const struct sparc_opcode sparc_opcodes[] = {
 /* Define both branches and traps based on condition mask */
 #define cond(bop, top, mask, flags) \
   br(bop,  F2(0, 2)|(mask), F2(~0, ~2)|((~mask)&COND(~0)), F_DELAYED|(flags)), \
-  brx(bop, F2(0, 5)|(mask), F2(~0, ~5)|((~mask)&COND(~0)), F_DELAYED|(flags)), /* v9 */ \
+  brx(bop, F2(0, 1)|(mask), F2(~0, ~1)|((~mask)&COND(~0)), F_DELAYED|(flags)), /* v9 */ \
   tr(top,  F3(2, 0x3a, 0)|(mask), F3(~2, ~0x3a, 0)|((~mask)&COND(~0)), (flags))
 
 /* Define all the conditions, all the branches, all the traps.  */
@@ -1584,7 +1600,7 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 
 #define condfc(fop, cop, mask) \
   brfc(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask))), \
-  brfcx(fop, F2(0, 1)|COND(mask), F2(~0, ~1)|COND(~(mask))), /* v9 */ \
+  brfcx(fop, F2(0, 5)|COND(mask), F2(~0, ~5)|COND(~(mask))), /* v9 */ \
   brfc(cop, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask))) \
 
 condfc("fb",	"cb",	 0x8),
@@ -1728,8 +1744,7 @@ condfc("fbule",	"cb013", 0xe),
 { "fnegq",	F3F(2, 0x34, 0x007), F3F(~2, ~0x34, ~0x007)|RS1_G0, "f,g", 0, v6 },
 { "fnegs",	F3F(2, 0x34, 0x005), F3F(~2, ~0x34, ~0x005)|RS1_G0, "f,g", 0, v6 },
 
-
-{ "pop",	F3(2, 0x2d, 0), F3(~2, ~0x2d, ~0)|ASI_RS2(~0),	"1,d", 0, v9 },
+{ "popc",	F3(2, 0x2d, 0), F3(~2, ~0x2d, ~0)|(0x3fff<<5),	"2,d", 0, v9 },
 
 { "faddd",	F3F(2, 0x34, 0x042), F3F(~2, ~0x34, ~0x042), "e,f,g", 0, v6 },
 { "faddq",	F3F(2, 0x34, 0x043), F3F(~2, ~0x34, ~0x043), "e,f,g", 0, v8 },
@@ -1778,8 +1793,10 @@ condfc("fbule",	"cb013", 0xe),
 { "cpop1",	F3(2, 0x36, 0), F3(~2, ~0x36, ~1), "[1+2],d", 0, v6 },
 { "cpop2",	F3(2, 0x37, 0), F3(~2, ~0x37, ~1), "[1+2],d", 0, v6 },
     
-{ "casx",	F3(3, 0x0c, 0), F3(~3, ~0x0c, ~0), "[1],2,d", 0, v9 },
-{ "casx",	F3(3, 0x1c, 0), F3(~3, ~0x1c, ~0), "[1]A,2,d", 0, v9 },
+{ "casx",	F3(3, 0x0c, 0)|IMMED, F3(~3, ~0x0c, ~0), "[1],2,d", 0, v9 },
+{ "casxa",	F3(3, 0x1c, 0)|IMMED, F3(~3, ~0x1c, ~0), "[1]A,2,d", 0, v9 },
+{ "cas",	F3(3, 0x0c, 0), IMMED|F3(~3, ~0x0c, ~0), "[1],2,d", 0, v9 },
+{ "casa",	F3(3, 0x1c, 0), IMMED|F3(~3, ~0x1c, ~0), "[1]A,2,d", 0, v9 },
 
 { "fmaddd",	F3(2, 0x35, 0)|OPF_LOW(0xa), F3(~2, ~0x35, ~0)|OPF_LOW(~0xa), "e,f,j,g", 0, v9 },
 { "fmaddq",	F3(2, 0x35, 0)|OPF_LOW(0xb), F3(~2, ~0x35, ~0)|OPF_LOW(~0xb), "e,f,j,g", 0, v9 },
