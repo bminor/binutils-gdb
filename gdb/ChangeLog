@@ -1,3 +1,8 @@
+Sun Feb 18 09:27:10 1996  Stu Grossman  (grossman@cygnus.com)
+
+	* config/sparc/tm-sparc.h:  Define PS_FLAG_CARRY.  Define
+	RETURN_VALUE_ON_STACK to return long doubles on the stack.
+
 Sat Feb 17 16:33:11 1996  Fred Fish  <fnf@cyngus.com>
 
 	* Makefile.in (ch-exp.o): Add dependencies.

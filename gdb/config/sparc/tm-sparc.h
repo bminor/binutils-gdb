@@ -177,6 +177,7 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
 #define	FP0_REGNUM 32		/* Floating point register 0 */
 #define	Y_REGNUM 64		/* Temp register for multiplication, etc.  */
 #define	PS_REGNUM 65		/* Contains processor status */
+#define PS_FLAG_CARRY 0x100000	/* Carry bit in PS */
 #define	WIM_REGNUM 66		/* Window Invalid Mask (not really supported) */
 #define	TBR_REGNUM 67		/* Trap Base Register (not really supported) */
 #define	PC_REGNUM 68		/* Contains program counter */
@@ -588,6 +589,11 @@ arguments.  */
     store_unsigned_integer (dummyname + 176, 4, TYPE_LENGTH (type) & 0x1fff); \
 }
 
+/* The Sparc returns long doubles on the stack.  */
+
+#define RETURN_VALUE_ON_STACK(TYPE) \
+  (TYPE_CODE(TYPE) == TYPE_CODE_FLT \
+   && TYPE_LENGTH(TYPE) > 8)
 
 /* Sparc has no reliable single step ptrace call */
 
