@@ -16,6 +16,8 @@ SECTIONS
 	{
 	    ${RELOCATING+ *(.init);}
 	    *(.text)
+	    ${CONSTRUCTING+ ___CTOR_LIST__ = .; LONG (-1); *(.ctor); LONG (0); }
+            ${CONSTRUCTING+ ___DTOR_LIST__ = .; LONG (-1); *(.dtor); LONG (0); }
 	    ${RELOCATING+ *(.fini);}
 	    ${RELOCATING+ etext  =  .};
 	  }

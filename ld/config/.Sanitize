@@ -127,7 +127,7 @@ sun4sol2.mt
 vax.mt
 vsta.mt
 vxworks68.mt
-z8ksim.mt
+z8k-coff.mt
 
 Things-to-lose:
 
