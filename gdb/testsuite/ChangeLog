@@ -1,3 +1,8 @@
+Thurs Jul 9 11:08:31 1998  Dawn Perchik  <dawn@cygnus.com>
+
+	* gdb.base/commands.exp: Break up infrun_breakpoint_command_test 
+	into two parts to get around a synchronization problem in expect.
+
 start-sanitize-gdbtk
 Sun Jun 28 22:34:34 1998  Martin M. Hunt  <hunt@cygnus.com>
 
