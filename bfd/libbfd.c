@@ -115,7 +115,7 @@ _bfd_dummy_target (ignore_abfd)
 #ifndef zalloc
 char *
 zalloc (size)
-     size_t size;
+     bfd_size_type size;
 {
   char *ptr = (char *) malloc (size);
 
