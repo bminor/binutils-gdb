@@ -1,3 +1,22 @@
+2004-05-21  Jim Blandy  <jimb@redhat.com>
+
+	Allocate regset structures in the gdbarch's obstack, not using
+	xmalloc.
+	* regset.c (regset_alloc): Renamed from regset_xmalloc.
+	Add 'arch' argument.  Allocate the regset on arch's obstack, not
+	using xmalloc.
+	* regset.h (regset_alloc): Update declaration.
+	* am64-tdep.c (amd64_regset_from_core_section): Update call; pass
+	gdbarch argument.
+	* amd64obsd-tdep.c (amd64obsd_regset_from_core_section): Same.
+	* i386-tdep.c (i386_regset_from_core_section): Same.
+	* i386nbsd-tdep.c (i386nbsd_aout_regset_from_core_section): Same.
+	* i386obsd-tdep.c (i386obsd_aout_regset_from_core_section): Same.
+	* sparc64fbsd-tdep.c (sparc64fbsd_init_abi): Same.
+	* sparc64nbsd-tdep.c (sparc64nbsd_init_abi): Same.
+	* sparc64obsd-tdep.c (sparc64obsd_init_abi): Same.
+	* sparcnbsd-tdep.c (sparc32nbsd_init_abi): Same.
+
 2004-05-21  Joel Brobecker  <brobecker@gnat.com>
 
 	* config/djgpp/fnchange.lst: Undo previous change, was useless.

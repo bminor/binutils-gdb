@@ -141,8 +141,8 @@ i386obsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
       && sect_size >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE)
     {
       if (tdep->gregset == NULL)
-        tdep->gregset
-          = regset_xmalloc (tdep, i386obsd_aout_supply_regset, NULL);
+        tdep->gregset = regset_alloc (gdbarch, tdep,
+                                      i386obsd_aout_supply_regset, NULL);
       return tdep->gregset;
     }
 

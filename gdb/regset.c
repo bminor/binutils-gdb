@@ -25,11 +25,13 @@
 
 
 struct regset *
-regset_xmalloc (const void *descr,
-                supply_regset_ftype *supply_regset,
-                collect_regset_ftype *collect_regset)
+regset_alloc (struct gdbarch *arch,
+              const void *descr,
+              supply_regset_ftype *supply_regset,
+              collect_regset_ftype *collect_regset)
 {
-  struct regset *r = (struct regset *) xmalloc (sizeof (*r));
+  struct regset *r
+    = (struct regset *) gdbarch_obstack_zalloc (arch, sizeof (*r));
 
   r->descr = descr;
   r->supply_regset = supply_regset;

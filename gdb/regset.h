@@ -51,10 +51,11 @@ struct regset
    function is COLLECT_REGSET.  If the regset has no collect function,
    pass NULL for COLLECT_REGSET.
 
-   The object returned is allocated using xmalloc.  */
-extern struct regset *regset_xmalloc (const void *descr,
-                                      supply_regset_ftype *supply_regset,
-                                      collect_regset_ftype *collect_regset);
+   The object returned is allocated on ARCH's obstack.  */
+extern struct regset *regset_alloc (struct gdbarch *arch,
+                                    const void *descr,
+                                    supply_regset_ftype *supply_regset,
+                                    collect_regset_ftype *collect_regset);
 
 
 #endif /* regset.h */

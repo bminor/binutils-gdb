@@ -274,11 +274,12 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
 
-  tdep->gregset
-    = regset_xmalloc (&sparc32nbsd_gregset, sparc32nbsd_supply_gregset, NULL);
+  tdep->gregset = regset_alloc (gdbarch, &sparc32nbsd_gregset,
+                                sparc32nbsd_supply_gregset, NULL);
   tdep->sizeof_gregset = 20 * 4;
 
-  tdep->fpregset = regset_xmalloc (NULL, sparc32nbsd_supply_fpregset, NULL);
+  tdep->fpregset = regset_alloc (gdbarch, NULL,
+                                 sparc32nbsd_supply_fpregset, NULL);
   tdep->sizeof_fpregset = 33 * 4;
 
   frame_unwind_append_sniffer (gdbarch, sparc32nbsd_sigtramp_frame_sniffer);
