@@ -255,6 +255,9 @@ binary_set_section_contents (abfd, sec, data, offset, size)
      file_ptr offset;
      bfd_size_type size;
 {
+  if (size == 0)
+    return true;
+
   if (! abfd->output_has_begun)
     {
       boolean found_low;
@@ -270,6 +273,7 @@ binary_set_section_contents (abfd, sec, data, offset, size)
 	if (((s->flags
 	      & (SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC | SEC_NEVER_LOAD))
 	     == (SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC))
+	    && (s->_raw_size > 0)
 	    && (! found_low || s->lma < low))
 	  {
 	    low = s->lma;
@@ -284,7 +288,8 @@ binary_set_section_contents (abfd, sec, data, offset, size)
 	     occupy file space.  */
 	  if ((s->flags
 	       & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_NEVER_LOAD))
-	      != (SEC_HAS_CONTENTS | SEC_ALLOC))
+	      != (SEC_HAS_CONTENTS | SEC_ALLOC)
+	      || (s->_raw_size == 0))
 	    continue;
 
 	  /* If attempting to generate a binary file from a bfd with

@@ -1,3 +1,8 @@
+2000-12-08  Mark Salter  <msalter@redhat.com>
+
+	* binary.c (binary_set_section_contents): Ignore sections
+	with zero size.
+
 2000-12-12  Kazu Hirata  <kazu@hxi.com>
 
 	* m68klinux.c: Fix formatting.
