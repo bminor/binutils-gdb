@@ -143,6 +143,7 @@ struct elfNN_ia64_link_hash_table
   asection *got_sec;		/* the linkage table section (or NULL) */
   asection *rel_got_sec;	/* dynamic relocation section for same */
   asection *fptr_sec;		/* function descriptor table (or NULL) */
+  asection *rel_fptr_sec;	/* dynamic relocation section for same */
   asection *plt_sec;		/* the primary plt section (or NULL) */
   asection *pltoff_sec;		/* private descriptors for plt (or NULL) */
   asection *rel_pltoff_sec;	/* dynamic relocation section for same */
@@ -1652,7 +1653,7 @@ elfNN_ia64_dynamic_symbol_p (h, info)
       || h->root.type == bfd_link_hash_defweak)
     return TRUE;
 
-  if ((info->shared && (!info->symbolic || info->allow_shlib_undefined))
+  if ((!info->executable && (!info->symbolic || info->allow_shlib_undefined))
       || ((h->elf_link_hash_flags
 	   & (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))
 	  == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))
@@ -2063,7 +2064,7 @@ get_got (abfd, info, ia64_info)
 static asection *
 get_fptr (abfd, info, ia64_info)
      bfd *abfd;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info;
      struct elfNN_ia64_link_hash_table *ia64_info;
 {
   asection *fptr;
@@ -2083,7 +2084,7 @@ get_fptr (abfd, info, ia64_info)
 				      | SEC_LOAD
 				      | SEC_HAS_CONTENTS
 				      | SEC_IN_MEMORY
-				      | SEC_READONLY
+				      | (info->pie ? 0 : SEC_READONLY)
 				      | SEC_LINKER_CREATED))
 	  || !bfd_set_section_alignment (abfd, fptr, 4))
 	{
@@ -2092,6 +2093,26 @@ get_fptr (abfd, info, ia64_info)
 	}
 
       ia64_info->fptr_sec = fptr;
+
+      if (info->pie)
+	{
+	  asection *fptr_rel;
+	  fptr_rel = bfd_make_section(abfd, ".rela.opd");
+	  if (fptr_rel == NULL
+	      || !bfd_set_section_flags (abfd, fptr_rel,
+					 (SEC_ALLOC | SEC_LOAD
+					  | SEC_HAS_CONTENTS
+					  | SEC_IN_MEMORY
+					  | SEC_LINKER_CREATED
+					  | SEC_READONLY))
+	      || !bfd_set_section_alignment (abfd, fptr_rel, 3))
+	    {
+	      BFD_ASSERT (0);
+	      return NULL;
+	    }
+
+	  ia64_info->rel_fptr_sec = fptr_rel;
+	}
     }
 
   return fptr;
@@ -2278,7 +2299,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	 have yet been processed.  Do something with what we know, as
 	 this may help reduce memory usage and processing time later.  */
       maybe_dynamic = FALSE;
-      if (h && ((info->shared
+      if (h && ((!info->executable
 		      && (!info->symbolic || info->allow_shlib_undefined))
 		|| ! (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		|| h->root.type == bfd_link_hash_defweak
@@ -2638,7 +2659,7 @@ allocate_fptr (dyn_i, data)
 	       || h->root.type == bfd_link_hash_warning)
 	  h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-      if ((x->info->shared
+      if ((!x->info->executable
 	   && (!h
 	       || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	       || h->root.type != bfd_link_hash_undefweak))
@@ -2788,10 +2809,11 @@ allocate_dynrel_entries (dyn_i, data)
       switch (rent->type)
 	{
 	case R_IA64_FPTR64LSB:
-	  /* Allocate one iff !want_fptr, which by this point will
-	     be true only if we're actually allocating one statically
-	     in the main executable.  */
-	  if (dyn_i->want_fptr)
+	  /* Allocate one iff !want_fptr and not PIE, which by this point
+	     will be true only if we're actually allocating one statically
+	     in the main executable.  Position independent executables
+	     need a relative reloc.  */
+	  if (dyn_i->want_fptr && !x->info->pie)
 	    continue;
 	  break;
 	case R_IA64_PCREL64LSB:
@@ -2828,13 +2850,24 @@ allocate_dynrel_entries (dyn_i, data)
       || (dyn_i->want_ltoff_fptr
 	  && dyn_i->h
 	  && dyn_i->h->dynindx != -1))
-    ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
+    {
+      if (!dyn_i->want_ltoff_fptr
+	  || !x->info->pie
+	  || dyn_i->h == NULL
+	  || dyn_i->h->root.type != bfd_link_hash_undefweak)
+	ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
+    }
   if ((dynamic_symbol || shared) && dyn_i->want_tprel)
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
   if (dynamic_symbol && dyn_i->want_dtpmod)
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
   if (dynamic_symbol && dyn_i->want_dtprel)
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
+  if (ia64_info->rel_fptr_sec && dyn_i->want_fptr)
+    {
+      if (dyn_i->h == NULL || dyn_i->h->root.type != bfd_link_hash_undefweak)
+	ia64_info->rel_fptr_sec->_raw_size += sizeof (ElfNN_External_Rela);
+    }
 
   if (!resolved_zero && dyn_i->want_pltoff)
     {
@@ -3444,14 +3477,18 @@ set_got_entry (abfd, info, dyn_i, dynindx, addend, value, dyn_r_type)
       bfd_put_64 (abfd, value, got_sec->contents + got_offset);
 
       /* Install a dynamic relocation if needed.  */
-      if ((info->shared
-	   && (!dyn_i->h
-	       || ELF_ST_VISIBILITY (dyn_i->h->other) == STV_DEFAULT
-	       || dyn_i->h->root.type != bfd_link_hash_undefweak)
-	   && dyn_r_type != R_IA64_DTPREL64LSB)
-          || elfNN_ia64_dynamic_symbol_p (dyn_i->h, info)
-	  || elfNN_ia64_aix_vec (abfd->xvec)
-	  || (dynindx != -1 && dyn_r_type == R_IA64_FPTR64LSB))
+      if (((info->shared
+	    && (!dyn_i->h
+		|| ELF_ST_VISIBILITY (dyn_i->h->other) == STV_DEFAULT
+		|| dyn_i->h->root.type != bfd_link_hash_undefweak)
+	    && dyn_r_type != R_IA64_DTPREL64LSB)
+           || elfNN_ia64_dynamic_symbol_p (dyn_i->h, info)
+	   || elfNN_ia64_aix_vec (abfd->xvec)
+	   || (dynindx != -1 && dyn_r_type == R_IA64_FPTR64LSB))
+	  && (!dyn_i->want_ltoff_fptr
+	      || !info->pie
+	      || !dyn_i->h
+	      || dyn_i->h->root.type != bfd_link_hash_undefweak))
 	{
 	  if (dynindx == -1
 	      && dyn_r_type != R_IA64_TPREL64LSB
@@ -3530,6 +3567,24 @@ set_fptr_entry (abfd, info, dyn_i, value)
       bfd_put_64 (abfd, value, fptr_sec->contents + dyn_i->fptr_offset);
       bfd_put_64 (abfd, _bfd_get_gp_value (abfd),
 		  fptr_sec->contents + dyn_i->fptr_offset + 8);
+      if (ia64_info->rel_fptr_sec)
+	{
+	  Elf_Internal_Rela outrel;
+	  bfd_byte *loc;
+
+	  if (bfd_little_endian (abfd))
+	    outrel.r_info = ELFNN_R_INFO (0, R_IA64_IPLTLSB);
+	  else
+	    outrel.r_info = ELFNN_R_INFO (0, R_IA64_IPLTMSB);
+	  outrel.r_addend = value;
+	  outrel.r_offset = (fptr_sec->output_section->vma
+			     + fptr_sec->output_offset
+			     + dyn_i->fptr_offset);
+	  loc = ia64_info->rel_fptr_sec->contents;
+	  loc += ia64_info->rel_fptr_sec->reloc_count++
+		 * sizeof (ElfNN_External_Rela);
+	  bfd_elfNN_swap_reloca_out (abfd, &outrel, loc);
+	}
     }
 
   /* Return the descriptor's address.  */
@@ -3986,7 +4041,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    undef_weak_ref = TRUE;
-	  else if (info->shared
+	  else if (! info->executable
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    ;
@@ -4146,14 +4201,36 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (!undef_weak_ref)
 		value = set_fptr_entry (output_bfd, info, dyn_i, value);
 	    }
-	  else
+	  if (!dyn_i->want_fptr || info->pie)
 	    {
 	      long dynindx;
+	      unsigned int dyn_r_type = r_type;
+	      bfd_vma addend = rel->r_addend;
 
 	      /* Otherwise, we expect the dynamic linker to create
 		 the entry.  */
 
-	      if (h)
+	      if (dyn_i->want_fptr)
+		{
+		  if (r_type == R_IA64_FPTR64I)
+		    {
+		      /* We can't represent this without a dynamic symbol.
+			 Adjust the relocation to be against an output
+			 section symbol, which are always present in the
+			 dynamic symbol table.  */
+		      /* ??? People shouldn't be doing non-pic code in
+			 shared libraries.  Hork.  */
+		      (*_bfd_error_handler)
+			(_("%s: linking non-pic code in a position independent executable"),
+			 bfd_archive_filename (input_bfd));
+		      ret_val = FALSE;
+		      continue;
+		    }
+		  dynindx = 0;
+		  addend = value;
+		  dyn_r_type = r_type + R_IA64_REL64LSB - R_IA64_FPTR64LSB;
+		}
+	      else if (h)
 		{
 		  if (h->dynindx != -1)
 		    dynindx = h->dynindx;
@@ -4161,17 +4238,18 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		    dynindx = (_bfd_elf_link_lookup_local_dynindx
 			       (info, h->root.u.def.section->owner,
 				global_sym_index (h)));
+		  value = 0;
 		}
 	      else
 		{
 		  dynindx = (_bfd_elf_link_lookup_local_dynindx
 			     (info, input_bfd, (long) r_symndx));
+		  value = 0;
 		}
 
 	      elfNN_ia64_install_dyn_reloc (output_bfd, info, input_section,
-					    srel, rel->r_offset, r_type,
-					    dynindx, rel->r_addend);
-	      value = 0;
+					    srel, rel->r_offset, dyn_r_type,
+					    dynindx, addend);
 	    }
 
 	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);

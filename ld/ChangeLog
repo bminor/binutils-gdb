@@ -1,3 +1,11 @@
+2003-07-02  Jakub Jelinek  <jakub@redhat.com>
+
+	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Don't include
+	.opd if -pie.
+	(OTHER_READWRITE_SECTIONS): Include .opd if -pie.
+	* scripttempl/elf.sc: Use SHLIB_DATA_ADDR instead of DATA_ADDR
+	if -pie.
+
 2003-06-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.h: Convert to C90, remove unnecessary prototypes and casts.

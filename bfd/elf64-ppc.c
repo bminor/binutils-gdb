@@ -7195,7 +7195,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    ;
-	  else if (info->shared
+	  else if (!info->executable
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    ;

@@ -22,7 +22,12 @@ OTHER_GOT_SECTIONS="
   .IA_64.pltoff ${RELOCATING-0} : { *(.IA_64.pltoff) }"
 OTHER_PLT_RELOC_SECTIONS="
   .rela.IA_64.pltoff ${RELOCATING-0} : { *(.rela.IA_64.pltoff) }"
-OTHER_READONLY_SECTIONS="
-  .opd          ${RELOCATING-0} : { *(.opd) }
+OTHER_READONLY_SECTIONS=
+OTHER_READWRITE_SECTIONS=
+test -z "$CREATE_PIE" && OTHER_READONLY_SECTIONS="
+  .opd          ${RELOCATING-0} : { *(.opd) }"
+test -n "$CREATE_PIE" && OTHER_READWRITE_SECTIONS="
+  .opd          ${RELOCATING-0} : { *(.opd) }"
+OTHER_READONLY_SECTIONS="${OTHER_READONLY_SECTIONS}
   .IA_64.unwind_info ${RELOCATING-0} : { *(.IA_64.unwind_info${RELOCATING+* .gnu.linkonce.ia64unwi.*}) }
   .IA_64.unwind ${RELOCATING-0} : { *(.IA_64.unwind${RELOCATING+* .gnu.linkonce.ia64unw.*}) }"
