@@ -29,18 +29,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bucomm.h"
 #include "aout/ar.h"
 #include "../bfd/libbfd.h"
+#include "arsup.h"
 #include <stdio.h>
+#ifdef	USG
+#include <time.h>
+#else
 #include <sys/time.h>
+#endif
 #include <errno.h>
 #define BUFSIZE 8192
-/* PROTO (void, open_inarch, (char *archive_filename)); */
-#ifdef __STDC__
-static void     open_inarch(char *archive_filename);
-#else
-static void     open_inarch();
-#endif				/* __STDC__ */
 
-PROTO(void, map_over_members, (void (*function) (), char **files, int count));
+void EXFUN(open_inarch,(char *archive_filename));
+
+
 PROTO(void, print_contents, (bfd * member));
 PROTO(void, extract_file, (bfd * abfd));
 PROTO(void, delete_members, (char **files_to_delete));
@@ -56,6 +57,7 @@ char           *program_name = NULL;
 bfd             bogus_archive;
 bfd            *inarch;		/* The input arch we're manipulating */
 
+int mri_mode;
 /* This flag distinguishes between ar and ranlib:
    1 means this is 'ranlib'; 0 means this is 'ar'.
    -1 means if we should use argv[0] to decide. */
@@ -113,6 +115,52 @@ enum pos {
 	}
 #endif
 
+int interactive = 0;
+void
+DEFUN_VOID(mri_emul)
+{
+  interactive = isatty(fileno(stdin)) ;
+  yyparse();
+}
+
+/*
+   If count is 0, then function is called once on each entry. if nonzero,
+   count is the length of the files chain; function is called on each entry
+   whose name matches one in files
+*/
+void
+DEFUN(map_over_members,(function, files, count),
+      void            (*function) () AND
+      char          **files AND
+      int             count)
+{
+  bfd            *head;
+
+  if (count == 0) {
+    for (head = inarch->next; head; head = head->next)
+     function(head);
+    return;
+  }
+  /*
+    This may appear to be a baroque way of accomplishing what we want.
+    however we have to iterate over the filenames in order to notice where
+    a filename is requested but does not exist in the archive.  Ditto
+    mapping over each file each time -- we want to hack multiple
+    references.
+    */
+
+  for (; count > 0; files++, count--) {
+    boolean         found = false;
+    for (head = inarch->next; head; head = head->next)
+     if ((head->filename != NULL) &&
+	 (!strcmp(*files, head->filename))) {
+       found = true;
+       function(head);
+     }
+    if (!found)
+     fprintf(stderr, "No entry %s in archive.\n", *files);
+  }
+}
 
 
 boolean operation_alters_arch = false;
@@ -126,196 +174,207 @@ main(argc, argv)
     int             argc;
     char          **argv;
 {
-    char           *arg_ptr;
-    char            c;
-    enum {
-	none = 0, delete, replace, print_table,
-	print_files, extract, move, quick_append
-    }               operation = none;
-    int             arg_index;
-    char          **files;
-    char           *inarch_filename;
-    char           *temp;
+  char           *arg_ptr;
+  char            c;
+  enum {
+    none = 0, delete, replace, print_table,
+    print_files, extract, move, quick_append
+  }               operation = none;
+  int             arg_index;
+  char          **files;
+  char           *inarch_filename;
+  char           *temp;
 
-    bfd_init();
-
+  bfd_init();
+verbose = 1;
 #ifdef GNU960
-    check_v960( argc, argv );
-    default_target = bfd_make_targ_name(BFD_COFF_FORMAT,HOST_BYTE_ORDER_BIG_P);
+  check_v960( argc, argv );
+  default_target = bfd_make_targ_name(BFD_COFF_FORMAT,HOST_BYTE_ORDER_BIG_P);
 #endif
 
-    program_name = argv[0];
+  program_name = argv[0];
 
-    temp = strrchr(program_name, '/');
-    if (temp == (char *) NULL)
-	temp = program_name;	/* shouldn't happen, but... */
-    else
-	++temp;
-    if (is_ranlib > 0 || (is_ranlib < 0 && strcmp(temp, "ranlib") == 0)) {
-	if (argc < 2)
-	    bfd_fatal("Too few command arguments.");
-	ranlib_only(argv[1]);
+  temp = strrchr(program_name, '/');
+  if (temp == (char *) NULL)
+   temp = program_name;		/* shouldn't happen, but... */
+  else
+   ++temp;
+  if (is_ranlib > 0 || (is_ranlib < 0 && strcmp(temp, "ranlib") == 0)) {
+    if (argc < 2)
+     bfd_fatal("Too few command arguments.");
+    ranlib_only(argv[1]);
+  }
+
+  if (argc == 2 && strcmp(argv[1],"-M") == 0) {
+    mri_emul();
+    exit(0);
+  }
+  if (argc < 3)
+   bfd_fatal("Too few command arguments.");
+
+  arg_ptr = argv[1];
+
+  if (*arg_ptr == '-')
+   ++arg_ptr;			/* compatibility */
+
+  while (c = *arg_ptr++) {
+    switch (c) {
+     case 'd':
+     case 'm':
+     case 'p':
+     case 'q':
+     case 'r':
+     case 't':
+     case 'x':
+      if (operation != none)
+       fatal("two different operation switches specified");
+      switch (c) {
+       case 'd':
+	operation = delete;
+	operation_alters_arch = true;
+	break;
+       case 'm':
+	operation = move;
+	operation_alters_arch = true;
+	break;
+       case 'p':
+	operation = print_files;
+	break;
+       case 'q':
+	operation = quick_append;
+	operation_alters_arch = true;
+	break;
+       case 'r':
+	operation = replace;
+	operation_alters_arch = true;
+	break;
+       case 't':
+	operation = print_table;
+	break;
+       case 'x':
+	operation = extract;
+	break;
+      }
+     case 'l':
+      break;
+     case 'c':
+      silent_create = 1;
+      break;
+     case 'o':
+      preserve_dates = 1;
+      break;
+     case 's':
+      write_armap = true;
+      break;
+     case 'u':
+      newer_only = 1;
+      break;
+     case 'v':
+      verbose = 1;
+      break;
+     case 'a':
+      postype = pos_after;
+      break;
+     case 'b':
+      postype = pos_before;
+      break;
+     case 'i':
+      postype = pos_before;
+      break;
+     case 'M':
+
+      mri_mode = 1;
+      break;
+     default:
+      fatal("invalid option %c", c);
     }
+  }
 
-
-    if (argc < 3)
-	bfd_fatal("Too few command arguments.");
-
-    arg_ptr = argv[1];
-
-    if (*arg_ptr == '-')
-	++arg_ptr;		/* compatibility */
-
-    while (c = *arg_ptr++) {
-	switch (c) {
-	case 'd':
-	case 'm':
-	case 'p':
-	case 'q':
-	case 'r':
-	case 't':
-	case 'x':
-	    if (operation != none)
-		fatal("two different operation switches specified");
-	    switch (c) {
-	    case 'd':
-		operation = delete;
-		operation_alters_arch = true;
-		break;
-	    case 'm':
-		operation = move;
-		operation_alters_arch = true;
-		break;
-	    case 'p':
-		operation = print_files;
-		break;
-	    case 'q':
-		operation = quick_append;
-		operation_alters_arch = true;
-		break;
-	    case 'r':
-		operation = replace;
-		operation_alters_arch = true;
-		break;
-	    case 't':
-		operation = print_table;
-		break;
-	    case 'x':
-		operation = extract;
-		break;
-	    }
-	case 'l':
-	    break;
-	case 'c':
-	    silent_create = 1;
-	    break;
-	case 'o':
-	    preserve_dates = 1;
-	    break;
-	case 's':
-	    write_armap = true;
-	    break;
-	case 'u':
-	    newer_only = 1;
-	    break;
-	case 'v':
-	    verbose = 1;
-	    break;
-	case 'a':
-	    postype = pos_after;
-	    break;
-	case 'b':
-	    postype = pos_before;
-	    break;
-	case 'i':
-	    postype = pos_before;
-	    break;
-	default:
-	    fatal("invalid option %c", c);
-	}
-    }
-
+  if (mri_mode) {
+    mri_emul();
+  }
+  else {
     if ((operation == none || operation == print_table) 
 	&& write_armap == true)
-	ranlib_only(argv[2]);
+     ranlib_only(argv[2]);
 
     if (operation == none)
-	fatal("no operation specified");
+     fatal("no operation specified");
 
     if (newer_only && operation != replace)
-	fatal("'u' only meaningful with 'r' option.");
+     fatal("'u' only meaningful with 'r' option.");
 
     arg_index = 2;
 
     if (postype != pos_default)
-	posname = argv[arg_index++];
+     posname = argv[arg_index++];
 
     inarch_filename = argv[arg_index++];
 
     if (arg_index < argc) {
-	files = argv + arg_index;
-	while (arg_index < argc)
-	    if (!strcmp(argv[arg_index++], "__.SYMDEF")) {
-		ignore_symdef = 1;
-		break;
-	    }
+      files = argv + arg_index;
+      while (arg_index < argc)
+       if (!strcmp(argv[arg_index++], "__.SYMDEF")) {
+	 ignore_symdef = 1;
+	 break;
+       }
     }
     else
-	files = NULL;
+     files = NULL;
 
     if (operation == quick_append) {
-	if (files != NULL)
-	    do_quick_append(inarch_filename, files);
-	exit(0);
+      if (files != NULL)
+       do_quick_append(inarch_filename, files);
+      exit(0);
     }
 
 
     open_inarch(inarch_filename);
     /*
-       If we have no archive, and we've been asked to replace then create one
-    */
+      If we have no archive, and we've been asked to replace then create one
+      */
 #if 0
     if (operation == replace && inarch == &bogus_archive) {
-	silent_create = 1;
-	do_quick_append(inarch_filename, 0);
-	open_inarch(inarch_filename);
+      silent_create = 1;
+      do_quick_append(inarch_filename, 0);
+      open_inarch(inarch_filename);
     }
 #endif
     switch (operation) {
 
-    case print_table:
-	map_over_members(print_descr, files, argc - 3);
-	break;
+     case print_table:
+      map_over_members(print_descr, files, argc - 3);
+      break;
 
-    case print_files:
-	map_over_members(print_contents, files, argc - 3);
-	break;
+     case print_files:
+      map_over_members(print_contents, files, argc - 3);
+      break;
 
-    case extract:
-	map_over_members(extract_file, files, argc - 3);
-	break;
+     case extract:
+      map_over_members(extract_file, files, argc - 3);
+      break;
 
-    case delete:
-	if (files != NULL)
-	    delete_members(files);
-	break;
+     case delete:
+      if (files != NULL)
+       delete_members(files);
+      break;
 
-    case move:
-	if (files != NULL)
-	    move_members(files);
-	break;
+     case move:
+      if (files != NULL)
+       move_members(files);
+      break;
 
-    case replace:
-	if (files != NULL || write_armap)
-	    replace_members(files);
-	break;
+     case replace:
+      if (files != NULL || write_armap)
+       replace_members(files);
+      break;
 
-	/* Shouldn't happen! */
-    default:
-	fprintf(stderr, "Sorry; this option not implemented.\n");
+      /* Shouldn't happen! */
+     default:
+      fprintf(stderr, "Sorry; this option not implemented.\n");
     }
-
-    return (0);
+  }
+  return (0);
 }				/* main() */
 
 static
@@ -332,7 +391,7 @@ char *file;
     return filename;
 }
 
-static void
+ void
 open_inarch(archive_filename)
     char           *archive_filename;
 {
@@ -346,7 +405,8 @@ open_inarch(archive_filename)
 	if (!operation_alters_arch) {
 	  fprintf (stderr, "%s: %s not found.\n", program_name,
 		   archive_filename);
-	  exit (1);
+	  maybequit();
+	  return ;
 	}	
 	if (!silent_create)
 	    fprintf(stderr,
@@ -390,47 +450,6 @@ open_inarch(archive_filename)
 
 
 
-/*
-   If count is 0, then function is called once on each entry. if nonzero,
-   count is the length of the files chain; function is called on each entry
-   whose name matches one in files
-*/
-void
-map_over_members(function, files, count)
-    void            (*function) ();
-    char          **files;
-    int             count;
-{
-    bfd            *head;
-
-
-
-
-    if (count == 0) {
-	for (head = inarch->next; head; head = head->next)
-	    function(head);
-	return;
-    }
-    /*
-       This may appear to be a baroque way of accomplishing what we want.
-       however we have to iterate over the filenames in order to notice where
-       a filename is requested but does not exist in the archive.  Ditto
-       mapping over each file each time -- we want to hack multiple
-       references.
-    */
-
-    for (; count > 0; files++, count--) {
-	boolean         found = false;
-	for (head = inarch->next; head; head = head->next)
-	    if ((head->filename != NULL) &&
-		(!strcmp(*files, head->filename))) {
-		found = true;
-		function(head);
-	    }
-	if (!found)
-	    fprintf(stderr, "No entry %s in archive.\n", *files);
-    }
-}
 
 
 void
@@ -502,7 +521,7 @@ extract_file(abfd)
     ostream = 0;
     if (size == 0) {
       /* Seems like an abstraction violation, eh?  Well it's OK! */
-      ostream = fopen(abfd->filename, "wb");
+      ostream = fopen(abfd->filename, FOPEN_WB);
       if (!ostream) {
 	perror(abfd->filename);
 	exit(1);
@@ -520,7 +539,7 @@ extract_file(abfd)
 	/* See comment above; this saves disk arm motion */
 	if (!ostream) {
 	    /* Seems like an abstraction violation, eh?  Well it's OK! */
-	    ostream = fopen(abfd->filename, "wb");
+	    ostream = fopen(abfd->filename, FOPEN_WB);
 	    if (!ostream) {
 		perror(abfd->filename);
 		exit(1);
@@ -580,7 +599,7 @@ do_quick_append(archive_filename, files_to_append)
     }
 
 
-    ofile = fopen(archive_filename, "a+b");
+    ofile = fopen(archive_filename, FOPEN_AUB);
     if (ofile == NULL) {
 	perror(program_name);
 	exit(1);
@@ -621,7 +640,7 @@ do_quick_append(archive_filename, files_to_append)
 
 	BFD_SEND(temp, _bfd_truncate_arname, (temp, *files_to_append, (char *) hdr));
 
-	ifile = fopen(*files_to_append, "rb");
+	ifile = fopen(*files_to_append, FOPEN_RB);
 	if (ifile == NULL)
 	    bfd_perror(program_name);
 
@@ -940,5 +959,8 @@ void
 print_descr(abfd)
     bfd            *abfd;
 {
-    print_arelt_descr(abfd, verbose);
+    print_arelt_descr(stdout,abfd, verbose);
 }
+
+
+

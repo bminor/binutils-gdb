@@ -36,6 +36,10 @@ alloca.c
 am29k-pinsn.c
 ar.1
 ar.c
+arlex.l
+arsup.c
+arsup.h
+arparse.y
 binutils.texi
 bucomm.c
 bucomm.h
