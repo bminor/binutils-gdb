@@ -1,3 +1,8 @@
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.in: Use ns32k-*-netbsd* instead of ns32k-pc532-netbsd*.
+	* configure: Regenerate.
+
 2002-05-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (OBJS): Depend on ansidecl.h and fopen-same.h.

@@ -383,7 +383,7 @@ alpha*-*-netware*)	targ_emul=alpha ;;
 alpha*-*-netbsd*)	targ_emul=elf64alpha_nbsd ;;
 z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)	targ_emul=pc532macha ;;
-ns32k-pc532-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
+ns32k-*-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
 openrisc-*-*)		targ_emul=elf32openrisc ;;
 or32-*-coff)		targ_emul=or32 ;;
 or32-*-elf)		targ_emul=or32elf ;;

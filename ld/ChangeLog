@@ -1,3 +1,7 @@
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.tgt: Use ns32k-*-netbsd* instead of ns32k-pc532-netbsd*.
+
 2002-05-25  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* ldemul.c: Fix formatting.
