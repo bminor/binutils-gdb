@@ -1,4 +1,15 @@
+Mon Apr 20 18:16:36 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: explicitly pass CFLAGS on recursion. no longer pass
+	  MINUS_G (this can be done with CFLAGS).  Default CFLAGS to -g.
+
+Fri Apr 17 18:27:51 1992  Per Bothner  (bothner@cygnus.com)
+
+	* configure: mkdir ${subdir} as needed.
+
 Wed Apr 15 17:27:34 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: no longer pass against on recursion.
 
 	* Makefile.in: added .NOEXPORT: so that stray makefile_frag
 	  definitions are not inherited.

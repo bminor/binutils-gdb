@@ -479,6 +479,10 @@ for subdir in . ${subdirs} ; do
 	Makefile=${subdir}/Makefile
     fi
 
+    if [ ! -d ${subdir} ] ; then
+	mkdir ${subdir}
+    fi
+
     case "${removing}" in
     "")
 	if [ -n "${verbose}" -o -z "${silent}" ] ; then
@@ -622,7 +626,7 @@ EOF
 	# Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
 	case "${host_alias}" in
 	"${target_alias}")
-		tooldir="\$(libdir)"
+		tooldir='$(libdir)'
 		echo "ALL=all.internal" >> ${Makefile}
 		;;
 	*)
