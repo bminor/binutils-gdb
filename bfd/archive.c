@@ -436,12 +436,12 @@ _bfd_generic_read_ar_hdr_mag (abfd, mag)
 	 spaces, so only look for ' ' if we don't find '/'.  */
 
       char *e;
-      e = memchr (hdr.ar_name, '\0', ar_maxnamelen (abfd));
+      e = (char *) memchr (hdr.ar_name, '\0', ar_maxnamelen (abfd));
       if (e == NULL)
 	{
-	  e = memchr (hdr.ar_name, '/', ar_maxnamelen (abfd));
+	  e = (char *) memchr (hdr.ar_name, '/', ar_maxnamelen (abfd));
 	  if (e == NULL)
-	    e = memchr (hdr.ar_name, ' ', ar_maxnamelen (abfd));
+	    e = (char *) memchr (hdr.ar_name, ' ', ar_maxnamelen (abfd));
 	}
 
       if (e != NULL)
@@ -2082,7 +2082,7 @@ _bfd_archive_bsd_update_armap_timestamp (arch)
   bfd_flush (arch);
   if (bfd_stat (arch, &archstat) == -1)
     {
-      perror (_("Reading archive file mod timestamp"));
+      bfd_perror (_("Reading archive file mod timestamp"));
 
       /* Can't read mod time for some reason.  */
       return true;
@@ -2108,8 +2108,7 @@ _bfd_archive_bsd_update_armap_timestamp (arch)
       || (bfd_bwrite (hdr.ar_date, (bfd_size_type) sizeof (hdr.ar_date), arch)
 	  != sizeof (hdr.ar_date)))
     {
-      /* FIXME: bfd can't call perror.  */
-      perror (_("Writing updated armap timestamp"));
+      bfd_perror (_("Writing updated armap timestamp"));
 
       /* Some error while writing.  */
       return true;

@@ -1,8 +1,482 @@
+2002-11-03  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-v850.c (v850_elf_relax_delete_bytes): Correct parameters
+	for bfd_elf32_swap_symbol_out.
+
+2002-10-31  David O'Brien  <obrien@FreeBSD.org>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't mix
+	signed and unsigned in comparison.
+
+2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
+
+	* coffcode.h: Remove extraneous '\'.
+
+2002-10-28  H.J. Lu <hjl@gnu.org>
+
+	* Makefile.am (targets.lo): Depend on Makefile instead of
+	config.status.
+	(archures.lo): Likewise.
+	* Makefile.in: Regenerated.
+
+2002-10-25  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config.bfd (mips*el-*-netbsd*, mips*-*-netbsd*): Add
+	bfd_elf64_bigmips_vec and bfd_elf64_littlemips_vec to
+	targ_selvecs.
+
+2002-10-25  Jim Wilson  <wilson@redhat.com>
+
+	* elf64-sh64.c (sh_elf64_relocate_section): Call
+	_bfd_elf_rela_local_sym.  Handle relocs against STT_SECTION symbol
+	of SHF_MERGE section.
+
+2002-10-25  Hans-Peter Nilsson  <hp@axis.com>
+
+	* simple.c: Correct placement of ATTRIBUTE_UNUSED.
+
+2002-10-24  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* aoutx.h (NAME(aout,swap_ext_reloc_in)): Cast bytes->r_index to
+	unsigned int.  Cast RELOC_BASE10, RELOC_BASE13 and RELOC_BASE22 to
+	unsigned int.
+	(NAME(aout,final_link)): Cast enum used in assignment.
+	(aout_link_write_symbols): Cast enums in comparisons, int values to
+	boolean, enums in assignments to int.
+	(aout_link_input_section_std): Cast rel->r_index to unsigned int.
+	(aout_link_input_section_ext): Likewise.  Cast enums used in comparisons
+	with unsigned ints.
+	(aout_link_reloc_link_order): Cast enum to int in assignment.
+	* archive.c (_bfd_generic_read_ar_hdr_mag): Cast result of memchr
+	calls to char *.
+	* bfd-in.h (bfd_set_section_vma): Cast enum true to unsigned int in
+	assignment.
+	* bfd-in2.h (bfd_set_section_vma): Likewise.
+	* bfd.c (bfd_record_phdr): Cast enums in assignments.
+	* binary.c (bfd_alloc): Cast enum to long.
+	* coffgen.c (_bfd_coff_is_local_label_name): Cast return to boolean.
+	* dwarf2.c (read_abbrevs): Add casts to enum types.
+	(read_attribute_value): Likewise.
+	(arange_add): Cast result of bfd_zalloc call.
+	(comp_unit_contains_address): Return true and false.
+	(comp_unit_find_nearest_line): Cast return to boolean.
+	* format.c (bfd_check_format_matches, bfd_set_format): Likewise.
+	* gen-aout.c: define macro '_' if not defined.
+	* libbfd.c (bfd_realloc): Cast malloc and realloc to PTR.
+	(bfd_bwrite): Cast bfd_realloc to bfd_byte *.
+	(bfd_write_bigendian_4byte_int): Cast return to boolean.
+	(bfd_seek): Cast bfd_realloc to bfd_byte *.
+	(bfd_generic_is_local_label_name): Cast return to boolean.
+	* libcoff.h (_bfd_coff_adjust_symndx): Remove extraneous '\'.
+	* linker.c (_bfd_link_hash_newfunc): Cast bfd_hash_allocate result to
+	struct bfd_hash_entry *.
+	(_bfd_generic_link_hash_newfunc): likewise.
+	(_bfd_generic_final_link): Cast enum to unsigned int.
+	* merge.c (sec_merge_emit): Cast return to boolean.
+	(merge_strings): Add casts to const unsigned char *.
+	* reloc.c (bfd_get_reloc_code_name): Cast enums in comparison to int.
+	(bfd_generic_get_relocated_section_content): Cast enum to unsigned int.
+	* section.c (bfd_section_hash_newfunc): Cast bfd_hash_allocate result to
+	struct bfd_hash_entry *.
+	(bfd_set_section_content): Add cast to PTR in comparison.
+	* simple.c (simple_dummy_warning, simple_dummy_undefined_symbol,
+	simple_dummy_reloc_overflow, simple_dummy_reloc_dangerous,
+	simple_dummy_unattached_reloc,
+	bfd_simple_get_relocated_section_contents): Add K&R declarations and
+	function definitions.
+	* srec.c (S3Forced): Initialize to false.
+	(srec_get_symtab): Cast return value from bfd_alloc to asymbol *.
+	* stabs.c (_bfd_link_section_stabs): Cast enum to int in comparisons.
+	(_bfd_discard_section_stabs): Likewise.  Also cast return to boolean.
+	* syms.c (bfd_is_undefined_symclass): Cast return to boolean.
+	(_bfd_stab_section_find_nearest_line): Cast enum to bfd_byte in
+	comparisons.
+
+2002-10-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_check_relocs): Only put maybe_dynamic
+	relocs into shared lib non-allocated reloc sections.
+
+2002-10-23  Nathan Tallent  <eraxxon@alumni.rice.edu>
+
+	* dwarf2.c (add_line_info): Ensure that the line_info_table is
+	sorted even when given an out-of-order line sequence.
+	(lookup_address_in_line_info_table): When an exact VMA match is
+	not found, return line information with the closest VMA.
+
+2002-10-23 Ross Alexander <ross.alexander@uk.neceur.com>
+
+	* elf64-hppa.c: Force DT_FLAGS to always be set.  Required by
+	HPUX 11.00 patch PHSS_26559.
+
+2002-10-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_modify_segment_map): Don't move
+	the options section into a separate section unless IRIX 6
+	compatibility is enabled.
+
+2002-10-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elflink.h (struct elf_link_sort_rela): Turn rel and rela
+	into arrays.
+	(elf_link_sort_cmp1, elf_link_sort_cmp2): Adjust.
+	(elf_link_sort_relocs): Likewise.  Take int_rels_per_ext_rel
+	into account.
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Compose
+	R_MIPS_REL32 with R_MIPS64 if ABI_64_P.
+
+2002-10-21  Graeme Peterson  <gp@qnx.com>
+
+	* targets.c (_bfd_target_vector): Add missing qnx vectors.
+
+2002-10-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* targets.c (bfd_target_list): Don't return the default target twice.
+
+2002-10-21  Elias Athanasopoulos  <eathan@otenet.gr>
+
+	* archive.c (_bfd_archive_bsd_update_armap_timestamp): Replace
+	perror with bfd_perror.
+
+2002-10-19  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_link_add_object_symbols): Correctly handle
+	DT_RPATH and DT_RUNPATH.
+
+2002-10-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* elf.c (elfcore_grok_note): Fix recognition on NT_PRXFPREG notes.
+
+2002-10-17  Denis Chertykov  <denisc@overta.ru>
+
+	* elf32-ip2k.c (ELF_MACHINE_ALT1): Define alternate machine code
+	for ip2k port.
+
+2002-10-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfxx-target.h (USE_REL): Don't define as 1.
+	* elf32-arm.h (USE_REL): Provide a default define of 0.
+	Use #if rather than #ifdef when testing USE_REL.
+	* elf32-m32r.c: Likewise.
+
+	* elf32-arc.c (USE_REL): Define as 1.
+	* elf32-d10v.c (USE_REL): Likewise.
+	* elf32-m32r.c (USE_REL): Likewise.
+	* elf32-m68hc11.c (USE_REL): Likewise.
+	* elf32-m68hc12.c (USE_REL): Likewise.
+	* elf32-or32.c (USE_REL): Likewise.
+	* elfarm-nabi.c (USE_REL): Likewise.
+
+2002-10-16  Jakub Jelinek  <jakub@redhat.com>
+
+	* config.bfd (s390-*-linux*): Add targ64_selvecs.
+	(s390x-*-linux*): Add targ_selvecs.
+
+2002-10-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (BFD32_BACKENDS): Remove elfarmqnx-nabi.lo,
+	elf32-i386-fbsd.lo, elf32-i386qnx.lo, elf32-ppcqnx.lo,
+	elf32-sh-lin.lo, elf32-sh64-lin.lo, elf32-sh-nbsd.lo,
+	elf32-sh64-nbsd.lo, elf32-shqnx.lo.  Add elf32-qnx.lo.
+	(BFD32_BACKENDS_CFILES): Likewise for corresponding C files.
+	(BFD64_BACKENDS): Remove elf64-sh64-lin.lo, elf64-sh64-nbsd.lo.
+	(BFD64_BACKENDS_CFILES): Likewise for corresponding C files.
+	(SOURCE_HFILES): Add elf32-qnx.h.
+	(BUILD_HFILES): Add bfdver.h.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* configure.in Update bfd vector dependencies.
+	* configure: Regenerate.
+	* elf32-i386-fbsd.c: Delete.  Move code to elf32-i386.c.
+	* elf32-i386qnx.c: Likewise.
+	* elf32-ppcqnx.c: Delete.  Move code to elf32-ppc.c.
+	* elf32-sh-nbsd.c: Delete.  Move code to elf32-sh.c.
+	* elf32-sh-lin.c: Likewise.
+	* elf32-shqnx.c: Likewise.
+	* elf32-sh64-lin.c: Delete.  Move code to elf32-sh64.c.
+	* elf32-sh64-nbsd.c: Likewise.
+	* elf64-sh64-lin.c: Delete.  Move code to elf64-sh64.c.
+	* elf64-sh64-nbsd.c: Likewise.
+	* elfarmqnx-nabi.c: Delete.  Move code to elfarm-nabi.c.
+	* elf32-arm.h (ELF_MAXPAGESIZE): Always define.
+	* elf32-i386.c: Remove ELF_ARCH and ELF32_I386_C_INCLUDED tests.
+	* elf32-ppc.c: Remove ELF32_PPC_C_INCLUDED tests.
+	* elf32-qnx.h (elf_backend_set_nonloadable_filepos): Always define.
+	(elf_backend_is_contained_by_filepos): Likewise.
+	(elf_backend_copy_private_bfd_data_p): Likewise.
+	Globalize and move functions to..
+	* elf32-qnx.c: ..here.  New file.
+	* elf32-sh.c: Remove ELF_ARCH and ELF32_SH_C_INCLUDED tests.  Don't
+	emit target vectors when INCLUDE_SHMEDIA.
+	* elf32-sh64.c: Remove ELF_ARCH test.  Move TARGET_* etc. defines to
+	end of file.
+	* elf64-sh64.c: Remove ELF_ARCH test.
+	* elfarm-nabi.c: Remove ELFARM_NABI_C_INCLUDED test.
+	* po/BLD-POTFILES.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2002-10-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_link_add_object_symbols): Error out on dynamic objects
+	loaded with --just-symbols.
+
+	* elf32-i386qnx.c (TARGET_LITTLE_NAME): Define.
+	* elf32-ppcqnx.c (TARGET_LITTLE_NAME, TARGET_BIG_NAME): Define.
+	* elf32-shqnx.c (TARGET_LITTLE_NAME, TARGET_BIG_NAME): Define.
+	* elfarmqnx-nabi.c (TARGET_LITTLE_NAME, TARGET_BIG_NAME): Define.
+
+2002-10-15  Richard Henderson  <rth@redhat.com>
+
+	* Makefile.am (BFD64_BACKENDS): Remove elf64-alpha-fbsd.
+	(BFD64_BACKENDS_CFILES): Likewise.
+	* configure.in (bfd_elf64_alpha_freebsd_vec): Use elf64-alpha.
+	* elf64-alpha-fbsd.c: Remove file, move code ...
+	* elf64-alpha.c: ... here.
+	* Makefile.in, configure: Rebuild.
+
+2002-10-14  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section) [BRSGP]: Increment
+	VALUE, not ADDEND.
+
+2002-10-14  Stephen Clarke <stephen.clarke@superh.com>
+
+	* elf32-sh.c (elf_sh_link_hash_entry): Replace
+	datalabel_got_offset with union of datalabel_got
+	offset and refcount.
+	(sh_elf_link_hash_newfunc): Initialize datalabel_got.refcount.
+	(allocate_dynrelocs): Delete unnecessary code for
+	STT_DATALABEL type.  Create entry in got for
+	datalabel version of symbol if datalabel_got.refcount > 0.
+	(sh_elf_relocate_section): Use datalabel_got union.
+	(sh_elf_gc_sweep_hook): Pull common code to initialize
+	h and eh out of switch statement.  Declare seen_stt_datalabel.
+	Initialize it.  Decrement datalabel_got.refcount for
+	got relocs when seen_stt_datalabel is true.
+	Decrement local_got_refcounts entry for datalabel got relocs
+	of local symbols.
+	(sh_elf_copy_indirect_symbol): Copy datalabel_got field over.
+	(sh_elf_check_relocs): Declare seen_stt_datalabel.
+	Initialize it.  When seen_stt_datalabel is true, increment
+	datalabel_got refcount rather than got.refcount.
+	(sh_elf_finish_dynamic_symbol): Create relocs to
+	initialize got entry for datalabel version of symbol.
+
+2002-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	(BFD_H_FILES): Remove version.h.
+	* bfd-in.h (BFD_VERSION, BFD_VERSION_DATE, BFD_VERSION_STRING): Move..
+	* version.h: ..to here.
+	* configure.in (bfd_version_date): Remove.
+	(AC_OUTPUT): Make bfdver.h from version.h.
+	* bfd.c: #include "bfdver.h".
+	* vms-hdr.c: Likewise.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2002-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* archures.c (bfd_mach_i386_i386, bfd_mach_i386_i8086,
+	bfd_mach_i386_i386_intel_syntax, bfd_mach_x86_64,
+	bfd_mach_x86_64_intel_syntax bfd_mach_ppc, bfd_mach_ppc64,
+	bfd_mach_rs6k, bfd_mach_d10v, bfd_mach_sh, bfd_mach_v850,
+	bfd_mach_arc_5, bfd_mach_arc_6, bfd_mach_arc_7, bfd_mach_arc_8,
+	bfd_mach_m32r, bfd_mach_frv, bfd_mach_frvsimple,
+	bfd_mach_ia64_elf64, bfd_mach_ia64_elf32,
+	bfd_mach_ip2022, bfd_mach_ip2022ext,
+	bfd_mach_s390_31, bfd_mach_s390_64, bfd_mach_xstormy16): Renumber.
+	* bfd-in2.h: Regenerate.
+
+2002-10-14  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config.bfd (sh*eb-*-linux*, sh*-*-linux*): Add the alternative
+	endian vector to targ_selvecs.
+
+2002-10-13  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Take
+	save_addend argument.  Don't apply the 32-bit mask to a
+	GPREL32 value if it's to be used in another relocation.  Don't
+	use forced-check computation of local_p to decide whether to
+	add gp0 to GPREL16 value.  Don't use only the lowest 16 bits
+	of the addend of a non-in-place GPREL16 relocation.
+	(_bfd_mips_elf_relocate_section): Pass use_saved_addend_p to
+	mips_elf_calculate_relocation().
+
+2002-10-12  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* elf32-m68hc11.c (m68hc11_elf_relax_section): Don't treat relocs
+	with symbols in other sections if we relaxed something;  the sections
+	output offsets must be re-computed before.
+
+2002-10-12  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* elf32-m68hc11.c (m68hc11_elf_relax_section): Update symbols
+	handling to use Elf_Internal_Sym.
+	(m68hc11_elf_relax_delete_bytes): Likewise.
+
+2002-10-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_optimized_tls_reloc, sh_elf_mkobject,
+	sh_elf_object_p, dtpoff_base): New functions.
+	(sh_elf_howto_table): Add TLS relocs.
+	(sh_reloc_map): Likewise.
+	(sh_elf_info_to_howto): Support TLS relocs.
+	(elf_sh_link_hash_entry): Add tls_type and tls_tpoff32.
+	(sh_elf_hash_entry, sh_elf_tdata, sh_elf_local_got_tls_type):
+	New macros.
+	(sh_elf_obj_tdata): New.
+	(elf_sh_link_hash_table): Add tls_ldm_got.
+	(sh_elf_link_hash_table_create): Clear refcount of tls_ldm_got.
+	(allocate_dynrelocs): Support TLS relocs.
+	(sh_elf_size_dynamic_sections): Likewise.
+	(sh_elf_relocate_section): Support TLS relocs.  Don't try to find
+	.rela.got section when found already.  Return false after printing
+	error about unresolvable relocation.
+	(sh_elf_gc_sweep_hook): Support TLS relocs.
+	(sh_elf_check_relocs): Likewise.
+	(sh_elf_finish_dynamic_symbol): Likewise.
+	(bfd_elf32_mkobject, elf_backend_object_p): Define for TLS case.
+	* reloc.c: Add SH TLS relocs.
+	* bfd-in2.h, libbfd.h: Regenerate.
+
+2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in: Regenerated.
+
+2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.am: Run dep-am.
+	(BFD_H_DEP): Add simple.c and linker.c.
+	(BFD32_LIBS): Add simple.lo.
+	(BFD32_LIBS_CFILES): Add simple.c.
+	* Makefile.in: Regenerated.
+	* bfd-in2.h: Regenerated.
+	* simple.c: New file.
+
+2002-10-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-arm.c (record_arm_to_thumb_glue): Avoid type-punned pointers.
+	(record_thumb_to_arm_glue): Likewise.
+	* ecoff.c (ecoff_link_add_externals): Likewise.
+	* elf32-arm.h (record_arm_to_thumb_glue): Likewise.
+	(record_thumb_to_arm_glue): Likewise.
+	* elf32-m32r.c (m32r_elf_add_symbol_hook): Likewise.
+	* elf32-sh.c (sh_elf_create_dynamic_sections): Likewise.
+	* elf32-sh64.c (sh64_elf_add_symbol_hook): Likewise.
+	* elf64-alpha.c (elf64_alpha_create_dynamic_sections): Likewise.
+	* elf64-ppc.c (func_desc_adjust): Likewise.
+	* elf64-sh64.c (sh64_elf64_add_symbol_hook): Likewise.
+	(sh64_elf64_create_dynamic_sections): Likewise.
+	* elflink.c (_bfd_elf_create_got_section): Likewise.
+	(_bfd_elf_create_dynamic_sections): Likewise.
+	(_bfd_elf_create_linker_section): Likewise.
+	* elflink.h (elf_add_default_symbol): Likewise.
+	(elf_link_create_dynamic_sections): Likewise.
+	(NAME(bfd_elf,size_dynamic_sections)): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_aix_add_symbol_hook): Likewise.
+	* elfxx-mips.c (mips_elf_create_got_section): Likewise.
+	(_bfd_mips_elf_add_symbol_hook): Likewise.
+	(_bfd_mips_elf_create_dynamic_sections): Likewise.
+	* linker.c (generic_link_add_symbol_list): Likewise.
+	* xcofflink.c (xcoff_link_add_symbols): Likewise.
+
+	* elfxx-ia64.c (oor_brl, oor_ip): Conditionally define.
+
+	* elf64-ppc.c (edit_opd): Only zero opd syms when function is
+	completely removed.  Correct local sym adjustment.
+
+2002-10-10  Stephen Clarke <stephen.clarke@superh.com>
+
+	* elf32-sh.c (elf_sh_pic_plt_entry_be, elf_sh_pic_plt_entry_le):
+	Correct mistake in calculation of address of .got.
+	* elf64-sh64.c (elf_sh64_pic_plt_entry_be,
+	elf_sh64_pic_plt_entry_le): Likewise.
+
+2002-10-09  Richard Shann <richard.shann@superh.com>
+	    Stephen Clarke <stephen.clarke@superh.com>
+
+	* Makefile.am: Add entries for elf32-sh64-lin.c and
+	elf64-sh64-lin.c. Regenerate.
+	* Makefile.in: Regenerate.
+	* config.bfd:  Change sh64eb-*-linux* and sh64-*-linux*
+	to use sh64 vectors rather than sh vectors.
+	* configure.in: Add bfd_elf32_sh64lin_vec, bfd_elf32_sh64blin_vec,
+	bfd_elf64_sh64lin_vec, bfd_elf64_sh64blin_vec.
+	* configure: Regenerate.
+	* elf32-sh64-lin.c: New file.
+	* elf64-sh64-lin.c: New file.
+	* targets.c: Add bfd_elf32_sh64lin_vec, bfd_elf32_sh64blin_vec,
+	bfd_elf64_sh64lin_vec, bfd_elf64_sh64blin_vec.
+
+2002-10-08  H.J. Lu <hjl@gnu.org>
+
+	* elf32-i386.c (elf_i386_relocate_section): Re-arrange the
+	IE->LE transition for R_386_TLS_IE.
+
+2002-10-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (edit_opd): Correct test for discarded sections.
+
+2002-10-07  Mark Elbrecht  <snowball3@softhome.net>
+
+	* cofflink.c (mark_relocs): Don't mark relocations in excluded
+	sections.
+
+2002-10-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_link_input_bfd): Remove BFD_VERSION_DATE dependent
+	code.
+
+	* elf64-ppc.c (ppc64_elf_build_stubs): Increment .glink indx.
+
+2002-10-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* opncls.c: Formatting.
+	(_bfd_new_bfd): Use a smaller section hash table.
+
+2002-10-05  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Set the type
+	of the other two relocations packed with a REL32 to NONE.
+
+2002-10-02  Stephen Clarke <stephen.clarke@superh.com>
+
+	* elf32-sh.c (elf_sh_link_hash_entry): Add gotplt_refcount.
+	(sh_elf_link_hash_newfunc): Initialize it.
+	(allocate_dynrelocs): Transfer gotplt refs from plt.refcount
+	to got.refcount for symbols that are forced local or when
+	we have direct got refs.
+	(sh_elf_gc_sweep_hook): Adjust gotplt_refcount.  Use it
+	to correctly adjust got.refcount and plt.refcount.
+	(sh_elf_copy_indirect_symbol): Copy gotplt_refcount across.
+	(sh_elf_check_relocs): Increment gotplt_refcount.
+
+2002-10-01  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Fix
+	movl foo@indntpoff, %eax IE->LE transition.
+
+2002-10-01  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Change TLSGD
+	sequence and its transitions.
+
+2002-10-01  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Resolve R_386_TLS_LDO_32
+	to st_value + addend in non-code sections.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Resolve
+	R_X86_64_DTPOFF32 to st_value + addend in non-code sections.
+
 2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
-            Ken Raeburn  <raeburn@cygnus.com>
-            Aldy Hernandez  <aldyh@redhat.com>
-            Eric Christopher  <echristo@redhat.com>
-            Richard Sandiford  <rsandifo@redhat.com>
+	    Ken Raeburn  <raeburn@cygnus.com>
+	    Aldy Hernandez  <aldyh@redhat.com>
+	    Eric Christopher  <echristo@redhat.com>
+	    Richard Sandiford  <rsandifo@redhat.com>
 
 	* archures.c (bfd_mach_mips4120, bfd_mach_mips5400): New.
 	(bfd_mach_mips5500): New.
@@ -204,7 +678,7 @@
 	* elfcode.h (elf_slurp_reloc_table_from_section): Check
 	for overflow.
 
-2002-09-17  Stan Cox <scox@redhat.com>	
+2002-09-17  Stan Cox <scox@redhat.com>
 
 	* elf64-mips.c (mips_elf64_be_swap_reloca_out): Handle type2 and type3.
 	(mips_elf64_final_gp): Don't make up gp value.
@@ -286,7 +760,7 @@
 2002-09-10  Michael Snyder  <msnyder@redhat.com>
 
 	* irix-core.c (do_sections, do_sections64): New functions.
-	(irix_core_core_file_p): Call new functions do_sections, 
+	(irix_core_core_file_p): Call new functions do_sections,
 	do_sections64, depending on corefile (32-bit or 64-bit).
 
 2002-09-09  Richard Henderson  <rth@redhat.com>
@@ -296,8 +770,8 @@
 
 2002-09-04  Kevin Buettner  <kevinb@redhat.com>
 
- 	* config.bfd (mips*-*-irix6*): Add new ABI vectors.  Make n32 default
- 	vector.
+	* config.bfd (mips*-*-irix6*): Add new ABI vectors.  Make n32 default
+	vector.
 
 2002-09-02  Nick Clifton  <nickc@redhat.com>
 
@@ -308,7 +782,7 @@
 	(v850_elf_relax_section): Replace caching of external symbols
 	with caching of internal symbols obtained from calling
 	bfd_elf_get_elf_syms().
-        Fixup problems with freeing cached allocated memory blocks.
+	Fixup problems with freeing cached allocated memory blocks.
 
 2002-09-02  Alan Modra  <amodra@bigpond.net.au>
 
@@ -477,7 +951,7 @@
 	* elf32-sh.c (sh_elf_finish_dynamic_sections): Set LSB of DT_INIT
 	value if .init is an SHmedia function.  Similarly for DT_FINI.
 	* elf64-sh64.c (sh64_elf64_finish_dynamic_sections): Likewise.
-	
+
 2002-08-23  Stephen Clarke <stephen.clarke@superh.com>
 
 	* elf32-sh.c (sh_elf_size_dynamic_sections): Zero initialize
@@ -487,7 +961,7 @@
 2002-08-22  Kaz Kojima <kkojima@rr.iij4u.or.jp>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Use a simple
-	byte read when reading the return address register column. 
+	byte read when reading the return address register column.
 
 2002-08-22  Nick Clifton  <nickc@redhat.com>
 
@@ -553,9 +1027,9 @@
 	argument declaration.
 
 2002-08-19  Elena Zannoni <ezannoni@redhat.com>
- 
-        * archures.c (bfd_mach_ppc_e500): Added.
-        * bfd-in2.h: Rebuilt.
+
+	* archures.c (bfd_mach_ppc_e500): Added.
+	* bfd-in2.h: Rebuilt.
 	* cpu-powerpc.c (bfd_powerpc_archs): Added e500.
 
 2002-08-19  Alan Modra  <amodra@bigpond.net.au>
@@ -565,7 +1039,7 @@
 2002-08-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* elf.c (bfd_elf_get_elf_syms): Change type of `esym' to
- 	`bfd_byte'.
+	`bfd_byte'.
 
 2002-08-17  Stan Cox  <scox@redhat.com>
 
@@ -577,7 +1051,7 @@
 	* bfd/elf32-sh.c (sh_elf_gc_mark_hook): For sh64, skip indirect
 	symbols when looking for section referred to by a relocation.
 	* bfd/elf64-sh.c (sh_elf64_gc_mark_hook): Likewise.
-	
+
 2002-08-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i370.c: Move reloc enum to include/elf/i370.h.
@@ -666,7 +1140,7 @@
 
 2002-08-09  Graeme Peterson  <gp@qnx.com>
 
-	* Makefile.am: Add entries for elf32-ppcqnx.c, and add 
+	* Makefile.am: Add entries for elf32-ppcqnx.c, and add
 	elf32-qnx.h dependency to elfarmqnx-nabi.c and elf32-i386qnx.c.
 	* Makefile.in: Regenerate.
 	* config.bfd: Add support for powerpc{le}-*-nto targets.
