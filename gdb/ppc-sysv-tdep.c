@@ -29,21 +29,6 @@
 
 #include "ppc-tdep.h"
 
-/* Ensure that X is aligned to an S byte boundary (assuming that S is
-   a power of 2) rounding up/down where necessary.  */
-
-static ULONGEST
-align_up (ULONGEST x, int s)
-{
-  return (x + s - 1) & -s;
-}
-
-static ULONGEST
-align_down (ULONGEST x, int s)
-{
-  return (x & -s);
-}
-
 /* Pass the arguments in either registers, or in the stack. Using the
    ppc sysv ABI, the first eight words of the argument list (that might
    be less than eight parameters if some parameters occupy more than one

@@ -1,3 +1,22 @@
+2003-09-19  Andrew Cagney  <cagney@redhat.com>
+
+	* utils.c (align_up, align_down): New functions.
+	* defs.h (align_up, align_down): Declare.
+	* ppc-sysv-tdep.c (align_up, align_down): Delete functions.
+	* s390-tdep.c: Replace "round_up" and "round_down" with "align_up"
+	and "align_down".
+	(round_up, round_down): Delete functions.
+	* mips-tdep.c: Replace ROUND_UP and ROUND_DOWN with "align_up" and
+	"align_down".
+	(ROUND_DOWN, ROUND_UP): Delete macros.
+	(mips_dump_tdep): Do not print "ROUND_UP" or "ROUND_DOWN".
+	* h8300-tdep.c: Replace "round_up" and "round_down" with
+	"align_up" and "align_down".
+	(round_up, round_down): Delete macros.
+	* frv-tdep.c: Replace ROUND_UP and ROUND_DOWN with "align_up" and
+	"align_down".
+	(ROUND_UP, ROUND_DOWN): Delete macros.
+
 2003-09-18  J. Brobecker  <brobecker@gnat.com>
 
 	* hppa-hpux-tdep.c (_initialize_hppa_hpux_tdep): Remove a

@@ -2822,18 +2822,12 @@ mips_type_needs_double_align (struct type *type)
   return 0;
 }
 
-/* Macros to round N up or down to the next A boundary; 
-   A must be a power of two.  */
-
-#define ROUND_DOWN(n,a) ((n) & ~((a)-1))
-#define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
-
 /* Adjust the address downward (direction of stack growth) so that it
    is correctly aligned for a new stack frame.  */
 static CORE_ADDR
 mips_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
-  return ROUND_DOWN (addr, 16);
+  return align_down (addr, 16);
 }
 
 static CORE_ADDR
@@ -2862,21 +2856,21 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      aligned.  For n32 and n64, stack frames need to be 128-bit
      aligned, so we round to this widest known alignment.  */
 
-  sp = ROUND_DOWN (sp, 16);
-  struct_addr = ROUND_DOWN (struct_addr, 16);
+  sp = align_down (sp, 16);
+  struct_addr = align_down (struct_addr, 16);
 
   /* Now make space on the stack for the args.  We allocate more
      than necessary for EABI, because the first few arguments are
      passed in registers, but that's OK.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
+    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
 		     MIPS_STACK_ARGSIZE);
-  sp -= ROUND_UP (len, 16);
+  sp -= align_up (len, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_eabi_push_dummy_call: sp=0x%s allocated %d\n",
-			paddr_nz (sp), ROUND_UP (len, 16));
+			"mips_eabi_push_dummy_call: sp=0x%s allocated %ld\n",
+			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
@@ -3083,7 +3077,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	         only needs to be adjusted when it has been used.  */
 
 	      if (stack_used_p)
-		stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
+		stack_offset += align_up (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
       if (mips_debug)
@@ -3124,19 +3118,19 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      aligned.  For n32 and n64, stack frames need to be 128-bit
      aligned, so we round to this widest known alignment.  */
 
-  sp = ROUND_DOWN (sp, 16);
-  struct_addr = ROUND_DOWN (struct_addr, 16);
+  sp = align_down (sp, 16);
+  struct_addr = align_down (struct_addr, 16);
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
+    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
 		     MIPS_STACK_ARGSIZE);
-  sp -= ROUND_UP (len, 16);
+  sp -= align_up (len, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_n32n64_push_dummy_call: sp=0x%s allocated %d\n",
-			paddr_nz (sp), ROUND_UP (len, 16));
+			"mips_n32n64_push_dummy_call: sp=0x%s allocated %ld\n",
+			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
@@ -3314,7 +3308,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	         adjusted when it has been used.  */
 
 	      if (stack_used_p)
-		stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
+		stack_offset += align_up (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
       if (mips_debug)
@@ -3355,19 +3349,19 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      aligned.  For n32 and n64, stack frames need to be 128-bit
      aligned, so we round to this widest known alignment.  */
 
-  sp = ROUND_DOWN (sp, 16);
-  struct_addr = ROUND_DOWN (struct_addr, 16);
+  sp = align_down (sp, 16);
+  struct_addr = align_down (struct_addr, 16);
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
+    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
 		     MIPS_STACK_ARGSIZE);
-  sp -= ROUND_UP (len, 16);
+  sp -= align_up (len, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_o32_push_dummy_call: sp=0x%s allocated %d\n",
-			paddr_nz (sp), ROUND_UP (len, 16));
+			"mips_o32_push_dummy_call: sp=0x%s allocated %ld\n",
+			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
@@ -3478,7 +3472,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	      argreg += FP_REGISTER_DOUBLE ? 1 : 2;
 	    }
 	  /* Reserve space for the FP register.  */
-	  stack_offset += ROUND_UP (len, MIPS_STACK_ARGSIZE);
+	  stack_offset += align_up (len, MIPS_STACK_ARGSIZE);
 	}
       else
 	{
@@ -3622,7 +3616,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		 refered to as their "home".  Consequently, space is
 		 always allocated.  */
 
-	      stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
+	      stack_offset += align_up (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
       if (mips_debug)
@@ -3663,19 +3657,19 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      aligned.  For n32 and n64, stack frames need to be 128-bit
      aligned, so we round to this widest known alignment.  */
 
-  sp = ROUND_DOWN (sp, 16);
-  struct_addr = ROUND_DOWN (struct_addr, 16);
+  sp = align_down (sp, 16);
+  struct_addr = align_down (struct_addr, 16);
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
+    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
 		     MIPS_STACK_ARGSIZE);
-  sp -= ROUND_UP (len, 16);
+  sp -= align_up (len, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_o64_push_dummy_call: sp=0x%s allocated %d\n",
-			paddr_nz (sp), ROUND_UP (len, 16));
+			"mips_o64_push_dummy_call: sp=0x%s allocated %ld\n",
+			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
@@ -3786,7 +3780,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	      argreg += FP_REGISTER_DOUBLE ? 1 : 2;
 	    }
 	  /* Reserve space for the FP register.  */
-	  stack_offset += ROUND_UP (len, MIPS_STACK_ARGSIZE);
+	  stack_offset += align_up (len, MIPS_STACK_ARGSIZE);
 	}
       else
 	{
@@ -3930,7 +3924,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		 refered to as their "home".  Consequently, space is
 		 always allocated.  */
 
-	      stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
+	      stack_offset += align_up (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
       if (mips_debug)
@@ -6399,10 +6393,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: RA_REGNUM = %d\n",
 		      RA_REGNUM);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: ROUND_DOWN = function?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: ROUND_UP = function?\n");
 #ifdef SAVED_BYTES
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SAVED_BYTES = %d\n",

@@ -2206,28 +2206,6 @@ extend_simple_arg (struct value *arg)
 }
 
 
-/* Round ADDR up to the next N-byte boundary.  N must be a power of
-   two.  */
-static CORE_ADDR
-round_up (CORE_ADDR addr, int n)
-{
-  /* Check that N is really a power of two.  */
-  gdb_assert (n && (n & (n-1)) == 0);
-  return ((addr + n - 1) & -n);
-}
-
-
-/* Round ADDR down to the next N-byte boundary.  N must be a power of
-   two.  */
-static CORE_ADDR
-round_down (CORE_ADDR addr, int n)
-{
-  /* Check that N is really a power of two.  */
-  gdb_assert (n && (n & (n-1)) == 0);
-  return (addr & -n);
-}
-
-
 /* Return the alignment required by TYPE.  */
 static int
 alignment_of (struct type *type)
@@ -2304,7 +2282,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
           && pass_by_copy_ref (type))
         {
           sp -= length;
-          sp = round_down (sp, alignment_of (type));
+          sp = align_down (sp, alignment_of (type));
           write_memory (sp, VALUE_CONTENTS (arg), length);
           copy_addr[i] = sp;
           num_copies++;
@@ -2323,7 +2301,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
         struct type *type = VALUE_TYPE (arg);
         int length = TYPE_LENGTH (type);
         
-        sp = round_down (sp, alignment_of (type));
+        sp = align_down (sp, alignment_of (type));
 
         /* SIMPLE_ARG values get extended to DEPRECATED_REGISTER_SIZE bytes. 
            Assume every argument is.  */
@@ -2333,12 +2311,12 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   }
 
   /* Include space for any reference-to-copy pointers.  */
-  sp = round_down (sp, pointer_size);
+  sp = align_down (sp, pointer_size);
   sp -= num_copies * pointer_size;
     
   /* After all that, make sure it's still aligned on an eight-byte
      boundary.  */
-  sp = round_down (sp, 8);
+  sp = align_down (sp, 8);
 
   /* Finally, place the actual parameters, working from SP towards
      higher addresses.  The code above is supposed to reserve enough
@@ -2403,7 +2381,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
               {
                 /* Simple args are always extended to 
                    DEPRECATED_REGISTER_SIZE bytes.  */
-                starg = round_up (starg, DEPRECATED_REGISTER_SIZE);
+                starg = align_up (starg, DEPRECATED_REGISTER_SIZE);
 
                 /* Do we need to pass a pointer to our copy of this
                    argument?  */
@@ -2420,10 +2398,10 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
             else
               {
                 /* You'd think we should say:
-                   starg = round_up (starg, alignment_of (type));
+                   starg = align_up (starg, alignment_of (type));
                    Unfortunately, GCC seems to simply align the stack on
                    a four/eight-byte boundary, even when passing doubles. */
-                starg = round_up (starg, S390_STACK_PARAMETER_ALIGNMENT);
+                starg = align_up (starg, S390_STACK_PARAMETER_ALIGNMENT);
                 write_memory (starg, VALUE_CONTENTS (arg), length);
                 starg += length;
               }

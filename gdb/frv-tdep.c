@@ -760,14 +760,11 @@ frv_frameless_function_invocation (struct frame_info *frame)
   return frameless_look_for_prologue (frame);
 }
 
-#define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
-#define ROUND_DOWN(n,a) ((n) & ~((a)-1))
-
 static CORE_ADDR
 frv_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
   /* Require dword alignment.  */
-  return ROUND_DOWN (sp, 8);
+  return align_down (sp, 8);
 }
 
 static CORE_ADDR
@@ -795,14 +792,14 @@ frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 
   stack_space = 0;
   for (argnum = 0; argnum < nargs; ++argnum)
-    stack_space += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 4);
+    stack_space += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 4);
 
   stack_space -= (6 * 4);
   if (stack_space > 0)
     sp -= stack_space;
 
   /* Make sure stack is dword aligned. */
-  sp = ROUND_DOWN (sp, 8);
+  sp = align_down (sp, 8);
 
   stack_offset = 0;
 
@@ -852,7 +849,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		     argnum, *((int *)val), stack_offset, (int) (sp + stack_offset));
 #endif
 	      write_memory (sp + stack_offset, val, partial_len);
-	      stack_offset += ROUND_UP(partial_len, 4);
+	      stack_offset += align_up (partial_len, 4);
 	    }
 	  len -= partial_len;
 	  val += partial_len;

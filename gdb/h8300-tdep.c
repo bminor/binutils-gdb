@@ -559,12 +559,6 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     }
 }
 
-/* Round N up or down to the nearest multiple of UNIT.
-   Evaluate N only once, UNIT several times.
-   UNIT must be a power of two.  */
-#define round_up(n, unit)   (((n) + (unit) - 1) & -(unit))
-#define round_down(n, unit) ((n) & -(unit))
-
 /* Function: push_dummy_call
    Setup the function arguments for calling a function in the inferior.
    In this discussion, a `word' is 16 bits on the H8/300s, and 32 bits
@@ -641,12 +635,12 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   int argument;
 
   /* First, make sure the stack is properly aligned.  */
-  sp = round_down (sp, wordsize);
+  sp = align_down (sp, wordsize);
 
   /* Now make sure there's space on the stack for the arguments.  We
      may over-allocate a little here, but that won't hurt anything.  */
   for (argument = 0; argument < nargs; argument++)
-    stack_alloc += round_up (TYPE_LENGTH (VALUE_TYPE (args[argument])),
+    stack_alloc += align_up (TYPE_LENGTH (VALUE_TYPE (args[argument])),
                              wordsize);
   sp -= stack_alloc;
 
@@ -665,7 +659,7 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
       char *contents = (char *) VALUE_CONTENTS (args[argument]);
 
       /* Pad the argument appropriately.  */
-      int padded_len = round_up (len, wordsize);
+      int padded_len = align_up (len, wordsize);
       char *padded = alloca (padded_len);
 
       memset (padded, 0, padded_len);
