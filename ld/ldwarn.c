@@ -87,7 +87,7 @@ produce_warnings (lgs, it)
   ptr  = lgs->srefs_chain;
   while (ptr != (asymbol **)NULL) {
     asymbol *ref = *ptr;
-    info("%B: %s\n", bfd_asymbol_bfd(ref), fetch_warning(it));
+    info_msg ("%B: %s\n", bfd_asymbol_bfd(ref), fetch_warning(it));
     ptr = (asymbol **)(ref->udata);
   }
 }

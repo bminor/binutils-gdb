@@ -211,7 +211,7 @@ process_keepsyms (table, size)
   ks_file = fopen (keepsyms_file, "r");
   if (!ks_file)
     {
-      info ("%X%P: cannot open keep-symbols file `%s'\n", keepsyms_file);
+      info_msg ("%X%P: cannot open keep-symbols file `%s'\n", keepsyms_file);
       goto egress;
     }
   errno = 0;
@@ -239,7 +239,7 @@ process_keepsyms (table, size)
 	  if (!feof (ks_file))
 	    /* error occurred */
 	    {
-	      info ("%X%P: error reading keep-symbols file `%s': %E\n",
+	      info_msg ("%X%P: error reading keep-symbols file `%s': %E\n",
 		    keepsyms_file);
 	      out = end;
 	      goto egress;
@@ -247,7 +247,7 @@ process_keepsyms (table, size)
 	  if (obstack_next_free (&obstack) != obstack_base (&obstack) + 1)
 	    /* eof in middle of symbol */
 	    {
-	      info ("%X%P: eof reached mid-line while reading keep-symbols file `%s'\n",
+	      info_msg ("%X%P: eof reached mid-line while reading keep-symbols file `%s'\n",
 		    keepsyms_file);
 	      out = end;
 	      goto egress;
@@ -268,7 +268,7 @@ process_keepsyms (table, size)
 	    found = 1;
 	  }
       if (!found)
-	info ("%P: symbol `%s' (requested to be kept) not found\n", ptr);
+	info_msg ("%P: symbol `%s' (requested to be kept) not found\n", ptr);
     }
   /* It'd be slightly faster to move this pass above the previous one,
      but that'd mean any symbols preserved in this pass would generate
@@ -304,7 +304,7 @@ list_file_locals (entry)
 	  /* If this is a definition,
 	   update it if necessary by this file's start address.  */
 	  if (p->flags & BSF_LOCAL)
-	    info ("  %V %s\n", p->value, p->name);
+	    info_msg ("  %V %s\n", p->value, p->name);
 	}
     }
 }
@@ -621,7 +621,7 @@ ldsym_write ()
   if (keepsyms_file != 0
       && strip_symbols != STRIP_SOME)
     {
-      info ("%P: `-retain-symbols-file' overrides `-s' and `-S'\n");
+      info_msg ("%P: `-retain-symbols-file' overrides `-s' and `-S'\n");
       strip_symbols = STRIP_SOME;
     }
   if (strip_symbols != STRIP_ALL)
