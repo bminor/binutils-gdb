@@ -4419,9 +4419,15 @@ md_apply_fix (fixP, valp)
 	  && fixP->fx_pcrel
 	  && !arg_reloc_stub_needed (symbol_arg_reloc_info (fixP->fx_addsy),
 				     hppa_fixP->fx_arg_reloc)
-	  && ((*valp - 8 + 8192) < 16384
-	      || (fmt == 17 && (*valp - 8 + 262144) < 524288)
-	      || (fmt == 22 && (*valp - 8 + 8388608) < 16777216))
+#ifdef OBJ_ELF
+	  && (*valp - 8 + 8192 < 16384
+	      || (fmt == 17 && *valp - 8 + 262144 < 524288)
+	      || (fmt == 22 && *valp - 8 + 8388608 < 16777216))
+#endif
+#ifdef OBJ_SOM
+	  && (*valp - 8 + 262144 < 524288
+	      || (fmt == 22 && *valp - 8 + 8388608 < 16777216))
+#endif
 	  && !S_IS_EXTERNAL (fixP->fx_addsy)
 	  && !S_IS_WEAK (fixP->fx_addsy)
 	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
@@ -8449,7 +8455,10 @@ hppa_force_relocation (fixp)
 		  - md_pcrel_from (fixp) - 8);
       if (distance + 8388608 >= 16777216
 	  || (hppa_fixp->fx_r_format == 17 && distance + 262144 >= 524288)
-	  || (hppa_fixp->fx_r_format == 12 && distance + 8192 >= 16384))
+#ifdef OBJ_ELF
+	  || (hppa_fixp->fx_r_format == 12 && distance + 8192 >= 16384)
+#endif
+	  )
 	return 1;
     }
 

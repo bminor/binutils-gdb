@@ -1,5 +1,11 @@
 2000-09-28  Alan Modra  <alan@linuxcare.com.au>
 
+	* config/tc-hppa.c (hppa_force_relocation): If OBJ_SOM, don't
+	force relocs for 12 bit branches.
+	(md_apply_fix): Similarly, adjust logic here.
+
+2000-09-28  Alan Modra  <alan@linuxcare.com.au>
+
 	* config/tc-hppa.c (md_apply_fix): Add fmt assertion.  Don't
 	adjust for external and weak syms as we will use a reloc.  Allow
 	for +8 offset when calculating limits of branches.
