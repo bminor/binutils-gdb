@@ -42,7 +42,6 @@ aix386-core.c
 aout-adobe.c
 aout-encap.c
 aout-ns32k.c
-aout-ns32k.h
 aout-target.h
 aout0.c
 aout32.c
