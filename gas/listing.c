@@ -92,7 +92,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 */
 
 #include "as.h"
+<<<<<<< listing.c
+#include <ansidecl.h>
+=======
 
+>>>>>>> 1.13
 #include <obstack.h>
 #include "input-file.h"
 #include "targ-cpu.h"
@@ -977,7 +981,7 @@ void DEFUN_VOID(listing_eject)
 {
   s_ignore();  
 }
-void DEFUN(listing_psize)
+void DEFUN_VOID(listing_psize)
 {
   s_ignore();
 }
