@@ -1,3 +1,9 @@
+start-sanitize-v850
+Wed Oct 30 16:46:58 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-opc.c (v850_opcodes): Add relaxing "jbr".
+
+end-sanitize-v850
 Tue Oct 29 16:30:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-dis.c (_print_insn_mips): Don't print a trailing tab if
