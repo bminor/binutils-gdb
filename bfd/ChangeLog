@@ -1,3 +1,14 @@
+Wed Mar 25 15:45:55 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* coffcode.h (coff_mkobject_hook): Set private falgs even for a PE
+	build.
+
+	* peicode.h: Call arm-coff private data functions after handling
+	pe private data.
+
+	* coff-arm.c: Turn statics into globals so that they can be shared
+	both pe and pei backends.
+
 Wed Mar 25 15:19:38 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutf1.h (sunos_set_arch_mach): Use bfd_mach_m68* rather than

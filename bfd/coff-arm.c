@@ -725,11 +725,28 @@ arm_reloc_type_lookup(abfd,code)
 #define ARM 1			/* Customize coffcode.h */
 
 /* The set of global variables that mark the total size of each kind
-   of glue required. */
-static long int global_thumb_glue_size = 0;
-static long int global_arm_glue_size = 0;
+   of glue required, plus a BFD to hang the glue sections onto.
+   Note:  These variable should not be made static, since in a *-pe
+   build there are two versions of this file compiled, one for pe
+   objects and one for pei objects, and they want to share these
+   variables.  */
+#if defined COFF_IMAGE_WITH_PE
+extern long int global_thumb_glue_size;
+#else
+long int global_thumb_glue_size = 0;
+#endif
 
-static bfd * bfd_of_glue_owner = NULL;
+#if defined COFF_IMAGE_WITH_PE
+extern long int global_arm_glue_size;
+#else
+long int global_arm_glue_size = 0;
+#endif
+
+#if defined COFF_IMAGE_WITH_PE 
+extern bfd * bfd_of_glue_owner;
+#else
+bfd * bfd_of_glue_owner = NULL;
+#endif
 
 /* some typedefs for holding instructions */
 typedef unsigned long int insn32;
@@ -1105,7 +1122,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				("  first occurrence: %s: arm call to thumb",
 				 bfd_get_filename (input_bfd));
 			    }
-			  
+
 			  --my_offset;
 			  myh->root.u.def.value = my_offset;
 
@@ -1182,6 +1199,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				("  first occurrence: %s: thumb call to arm",
 				 bfd_get_filename (input_bfd));
 			    }
+			  
 			  -- my_offset;
 			  myh->root.u.def.value = my_offset;
 
@@ -1658,6 +1676,8 @@ arm_process_before_allocation (abfd, info)
 
   _bfd_coff_get_external_symbols (abfd);
 
+  BFD_ASSERT (bfd_of_glue_owner != NULL);
+  
   /* Rummage around all the relocs and map the glue vectors.  */
   sec = abfd->sections;
 
@@ -1788,9 +1808,10 @@ coff_arm_bfd_merge_private_bfd_data (ibfd, obfd)
   /* If the two formats are different we cannot merge anything.
      This is not an error, since it is permissable to change the
      input and output formats.  */
-  if (ibfd->xvec != obfd->xvec)
+  if (   ibfd->xvec->flavour != bfd_target_coff_flavour
+      || obfd->xvec->flavour != bfd_target_coff_flavour)
     return true;
-  
+
   /* Verify that the APCS is the same for the two BFDs */
   if (APCS_SET (ibfd))
     {
@@ -1841,7 +1862,7 @@ coff_arm_bfd_merge_private_bfd_data (ibfd, obfd)
 	  bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
 	}
     }
-  
+
   /* Check the interworking support.  */
   if (INTERWORK_SET (ibfd))
     {
@@ -1871,7 +1892,7 @@ coff_arm_bfd_merge_private_bfd_data (ibfd, obfd)
 
 /* Display the flags field.  */
 
-static boolean
+boolean
 coff_arm_bfd_print_private_bfd_data (abfd, ptr)
      bfd *   abfd;
      PTR     ptr;
@@ -1890,8 +1911,10 @@ coff_arm_bfd_print_private_bfd_data (abfd, ptr)
 	     );
   
   if (INTERWORK_SET (abfd))
-    fprintf (file, ": [interworking %ssupported]",
+    fprintf (file, " [interworking %ssupported]",
 	     INTERWORK_FLAG (abfd) ? "" : "not " );
+  else
+    fprintf (file, " [interworking flag not initialised]");
   
   fputc ('\n', file);
   
@@ -1942,13 +1965,13 @@ coff_arm_bfd_set_private_flags (abfd, flags)
 /* Copy the important parts of the target specific data
    from one instance of a BFD to another.  */
 
-static boolean
+boolean
 coff_arm_bfd_copy_private_bfd_data (src, dest)
      bfd *  src;
      bfd *  dest;
 {
   BFD_ASSERT (src != NULL && dest != NULL);
-
+ 
   if (src == dest)
     return true;
 
@@ -1991,14 +2014,13 @@ coff_arm_bfd_copy_private_bfd_data (src, dest)
 
   return true;
 }
-#endif /* COFF_IMAGE_WITH_PE or not COFF_WITH_PE */
 
 /* Note:  the definitions here of LOCAL_LABEL_PREFIX and USER_LABEL_PREIFX
  *must* match the definitions on gcc/config/arm/semi.h.  */
 #define LOCAL_LABEL_PREFIX "."
 #define USER_LABEL_PREFIX "_"
 
-static boolean
+boolean
 coff_arm_is_local_label_name (abfd, name)
      bfd *        abfd;
      const char * name;
@@ -2030,6 +2052,7 @@ coff_arm_is_local_label_name (abfd, name)
     default:  return false;     /* Cannot make our minds up - default to false so that it will not be stripped by accident.  */ 
     }
 }
+#endif /* COFF_IMAGE_WITH_PE or not COFF_WITH_PE */
 
 #define coff_bfd_is_local_label_name 		coff_arm_is_local_label_name
 #define coff_adjust_symndx			coff_arm_adjust_symndx
@@ -2045,6 +2068,7 @@ extern boolean coff_arm_final_link_postscript ();
 extern boolean coff_arm_bfd_set_private_flags ();
 extern boolean coff_arm_bfd_merge_private_bfd_data ();
 extern boolean coff_arm_link_output_has_begun ();
+extern boolean coff_arm_is_local_label_name ();
 
 #if defined COFF_IMAGE_WITH_PE || ! defined COFF_WITH_PE
 /* This piece of machinery exists only to guarantee that the bfd that holds

@@ -1327,7 +1327,7 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
     }
 #endif
 
-#if defined  ARM && ! defined COFF_WITH_PE
+#if defined ARM 
   /* Set the flags field from the COFF header read in */
   if (! coff_arm_bfd_set_private_flags (abfd, internal_f->f_flags))
     coff->flags = 0;
@@ -3461,7 +3461,7 @@ coff_slurp_symbol_table (abfd)
 #endif
 
 	    case C_EXT:
-#if defined ARM || defined COFF_WITH_PE
+#if defined ARM
             case C_THUMBEXT:
             case C_THUMBEXTFUNC:
 #endif
@@ -3497,7 +3497,7 @@ coff_slurp_symbol_table (abfd)
 
 		  dst->symbol.flags = BSF_EXPORT | BSF_GLOBAL;
 
-#if defined (COFF_WITH_PE) || defined (COFF_IMAGE_WITH_PE)
+#if defined COFF_WITH_PE
 		  /* PE sets the symbol to a value relative to the
                      start of the section.  */
 		  dst->symbol.value = src->u.syment.n_value;
@@ -3534,7 +3534,7 @@ coff_slurp_symbol_table (abfd)
 #ifdef I960
 	    case C_LEAFSTAT:	/* static leaf procedure        */
 #endif
-#if defined ARM || defined COFF_WITH_PE
+#if defined ARM 
             case C_THUMBSTAT:   /* Thumb static                  */
             case C_THUMBLABEL:  /* Thumb label                   */
             case C_THUMBSTATFUNC:/* Thumb static function        */
@@ -3549,7 +3549,7 @@ coff_slurp_symbol_table (abfd)
 		 section, if there is one.  */
 	      if (dst->symbol.section)
 		{
-#if defined (COFF_WITH_PE) || defined (COFF_IMAGE_WITH_PE)
+#if defined COFF_WITH_PE
 		  /* PE sets the symbol to a value relative to the
                      start of the section.  */
 		  dst->symbol.value = src->u.syment.n_value;
@@ -3659,7 +3659,7 @@ coff_slurp_symbol_table (abfd)
 	    case C_FCN:		/* ".bf" or ".ef"		 */
 	    case C_EFCN:	/* physical end of function	 */
 	      dst->symbol.flags = BSF_LOCAL;
-#if defined (COFF_WITH_PE) || defined (COFF_IMAGE_WITH_PE)
+#if defined COFF_WITH_PE
 	      /* PE sets the symbol to a value relative to the start
 		 of the section.  */
 	      dst->symbol.value = src->u.syment.n_value;
