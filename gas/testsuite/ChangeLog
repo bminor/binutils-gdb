@@ -1,5 +1,11 @@
 2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
 
+	* gas/mips/macro-warn-[1234].[sdl]: New tests.
+	* gas/mips/macro-warn-[12]-n32.[dl]: New tests.
+	* gas/mips/mips.exp: Run them.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
 	* gas/mips/elf-rel19.[sd]: New test.
 	* gas/mips/mips.exp: Run it.
 

@@ -735,4 +735,13 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "ldstla-n64"
 	run_dump_test "ldstla-n64-shared"
     }
+
+    run_dump_test "macro-warn-1"
+    run_dump_test "macro-warn-2"
+    run_dump_test "macro-warn-3"
+    run_dump_test "macro-warn-4"
+    if $has_newabi {
+	run_dump_test "macro-warn-1-n32"
+	run_dump_test "macro-warn-2-n32"
+    }
 }
