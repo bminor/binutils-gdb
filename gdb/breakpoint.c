@@ -6145,30 +6145,6 @@ handle_gnu_4_16_catch_command (char *arg, int tempflag, int from_tty)
   xfree (sals.sals);
 }
 
-#if 0
-/* This creates a temporary internal breakpoint
-   just to placate infrun */
-static struct breakpoint *
-create_temp_exception_breakpoint (CORE_ADDR pc)
-{
-  struct symtab_and_line sal;
-  struct breakpoint *b;
-
-  INIT_SAL (&sal);
-  sal.pc = pc;
-  sal.symtab = NULL;
-  sal.line = 0;
-
-  b = set_raw_breakpoint (sal, bp_breakpoint);
-
-  b->disposition = disp_del;
-  b->enable_state = bp_enabled;
-  b->silent = 1;
-  b->number = internal_breakpoint_number--;
-  return b;
-}
-#endif
-
 static void
 catch_command_1 (char *arg, int tempflag, int from_tty)
 {

@@ -1,5 +1,6 @@
 2002-02-01  Michael Snyder  <msnyder@redhat.com>
 
+	* breakpoint.c (create_temp_exception_breakpoint): Delete.
 	* hppa-tdep.c: Deprecate xbreak, txbreak and bx commands.
 
 2002-02-01  Daniel Jacobowitz  <drow@mvista.com>
