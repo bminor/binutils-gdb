@@ -72,7 +72,6 @@ Mon Jan 27 11:54:44 1997  Doug Evans  <dje@seba.cygnus.com>
 
 	* m32r.h (enum reloc_type): Add R_M32R_HI16_[SU]LO,R_M32R_LO16.
 
-start-sanitize-v850 
 Fri Jan  3 11:32:51 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* v850.h (V850_OTHER_{TDA_BYTE,ERROR}): New bits for the st_other
@@ -86,7 +85,6 @@ Thu Jan  2 19:30:23 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* v850.h: New file, provide V850 specific definitions. 
 
-end-sanitize-v850
 Tue Dec 31 14:44:32 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* common.h (DT_AUXILIARY): Define.
@@ -124,12 +122,10 @@ Fri Aug 30 17:06:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* common.h (EM_SH): Define.
 
-start-sanitize-v850
 Tue Aug 20 14:47:54 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 
 	* common.h (EM_CYGNUS_V850): Define.
 
-end-sanitize-v850
 Mon Aug 19 10:59:10 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* common.h (EM_CYGNUS_M32R): Define.
