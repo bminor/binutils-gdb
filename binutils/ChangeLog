@@ -1,3 +1,10 @@
+2002-07-31  Nick Clifton  <nickc@redhat.com>
+
+	* addr2line.c (process_file): Rename parameter 'filename' to
+	'file_name' in order to avoid shadowing global symbol of the
+	same name.
+	(main): Likewise.
+
 2002-07-30  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (OPTION_DEBUG_DUMP): Define.

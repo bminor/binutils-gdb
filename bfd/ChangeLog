@@ -1,3 +1,12 @@
+2002-07-31  Nick Clifton  <nickc@redhat.com>
+
+	* bfd.c (bfd_alt_mach_code): Rename parameter 'index' to
+	'alternative' in order to avoid shadowing global symbol of the
+	same name.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
 2002-07-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* Makefile.am: Add n32 ABI support.

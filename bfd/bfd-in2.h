@@ -1,7 +1,6 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
-   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c", 
-   "section.c", "archures.c", "reloc.c", "syms.c", "bfd.c", "archive.c", 
-   "corefile.c", "targets.c" and "format.c".
+   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c" and 
+   "section.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* Main header file for the bfd library -- portable access to object files.
@@ -3663,7 +3662,7 @@ extern bfd_byte *bfd_get_relocated_section_contents
                  boolean, asymbol **));
 
 boolean
-bfd_alt_mach_code PARAMS ((bfd *abfd, int index));
+bfd_alt_mach_code PARAMS ((bfd *abfd, int alternative));
 
 /* Extracted from archive.c.  */
 symindex
