@@ -1,3 +1,10 @@
+2003-08-02  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/annota3.exp: New file.
+	* gdb.base/annota3.c: New file.
+	* gdb.c++/annota3.exp: New file.
+	* gdb.c++/annota3.cc: New file.
+
 2003-07-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/print-threads.exp (test_all_threads): Loosen KFAIL
