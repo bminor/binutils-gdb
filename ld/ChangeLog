@@ -1,3 +1,7 @@
+2002-05-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in: Correct spelling of AC_PREREQ.
+
 2002-05-21  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* pe-dll.c (autofilter_liblist): Add more system libs excluded by
@@ -2756,7 +2760,7 @@ Mon Mar 18 17:38:39 CET 2002  Jan Hubicka  <jh@suse.cz>
 	* scripttempl/i386go32.sc: Use PROVIDE with _etext, _edata, _end.
 	Set DWARF2 sections to a VMA of zero.
 
-2000-12-01      Joel Sherrill <joel@OARcorp.com>
+2000-12-01  Joel Sherrill  <joel@OARcorp.com>
 
 	* configure.tgt (arm-*-rtems*, a29k-*rtems*, h8300-*-rtems*):
 	New targets.
@@ -4174,7 +4178,7 @@ Mon Mar 18 17:38:39 CET 2002  Jan Hubicka  <jh@suse.cz>
 	(lang_one_common) Record size changes in octets.
 	(lang_abs_symbol_at_end_of) Section end symbol's value is
 	recorded in target bytes.
-	* ld.texinfo:   Updated description of BYTE, SHORT, LONG, etc.
+	* ld.texinfo: Updated description of BYTE, SHORT, LONG, etc.
 	to be clear about behavior when an octet is smaller than one byte.
 
 2000-01-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
