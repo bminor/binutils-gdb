@@ -1,4 +1,19 @@
 start-sanitize-tic80
+Tue Jul  8 12:23:55 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h (TIC80_TARGET_ID): Add define.
+	* internal.h (struct internal_filehdr): Add f_target_id field.
+
+end-sanitize-tic80
+Tue Jun  3 16:44:18 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* internal.h: Add storage classes for Thumb symbols
+
+start-sanitize-tic80
+Mon May 26 14:07:55 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* tic80.h (R_PPL16B): Correct value.
+
 Sat May  3 08:24:59 1997  Fred Fish  <fnf@cygnus.com>
 
 	* internal.h (C_UEXT, C_STATLAB, C_EXTLAB, C_SYSTEM):

@@ -53,6 +53,7 @@ struct internal_filehdr
   long f_nsyms;			/* number of symtab entries	*/
   unsigned short f_opthdr;	/* sizeof(optional hdr)		*/
   unsigned short f_flags;	/* flags			*/
+  unsigned short f_target_id;	/* (TIc80 specific)		*/
 };
 
 
@@ -215,6 +216,14 @@ struct internal_aouthdr
 #define C_ALIAS	 	105	/* duplicate tag		*/
 #define C_HIDDEN	106	/* ext symbol in dmert public lib */
 
+/* start-sanitize-tic80 */
+/* New storage classes for TIc80 */
+#define C_UEXT		19	/* Tentative external definition */
+#define C_STATLAB	20	/* Static load time label */
+#define C_EXTLAB	21	/* External load time label */
+#define C_SYSTEM	23	/* System Wide variable */
+/* end-sanitize-tic80 */
+
 /* New storage classes for WINDOWS_NT   */
 #define C_SECTION       104     /* section name */
 #define C_NT_WEAK	105	/* weak external */
@@ -258,6 +267,11 @@ struct internal_aouthdr
 #define C_BSTAT         (0x8f)
 #define C_ESTAT         (0x90)
 
+/* Storage classes for Thumb symbols */
+#define C_THUMBEXT      (128 + C_EXT)
+#define C_THUMBSTAT     (128 + C_STAT)
+#define C_THUMBLABEL    (128 + C_LABEL)
+
 /********************** SECTION HEADER **********************/
 
 #define SCNNMLEN (8)
@@ -267,7 +281,7 @@ struct internal_scnhdr
   char s_name[SCNNMLEN];	/* section name			*/
 
   /* Physical address, aliased s_nlib.
-     In the pe/pei format, this field is the virtual section size
+     In the pei format, this field is the virtual section size
      (the size of the section after being loaded int memory),
      NOT the physical address.  */
   bfd_vma s_paddr;
@@ -587,10 +601,7 @@ struct internal_reloc
 #define R_VRT32  133
 #define R_RELLONG	(0x11)	/* Direct 32-bit relocation */
 #define R_IPRSHORT	(0x18)
-#define R_IPRMED 	(0x19)	/* 24-bit ip-relative relocation */
 #define R_IPRLONG	(0x1a)
-#define R_OPTCALL	(0x1b)	/* 32-bit optimizable call (leafproc/sysproc) */
-#define R_OPTCALLX	(0x1c)	/* 64-bit optimizable call (leafproc/sysproc) */
 #define R_GETSEG	(0x1d)
 #define R_GETPA		(0x1e)
 #define R_TAGWORD	(0x1f)
