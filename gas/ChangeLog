@@ -1,3 +1,8 @@
+2001-03-17  Alan Modra  <alan@linuxcare.com.au>
+
+	* read.c (do_org): Handle complex expressions.
+	* cgen.c (gas_cgen_finish_insn): Likewise.
+
 2001-03-15  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (md): New member keep_pending_output.

@@ -398,6 +398,9 @@ gas_cgen_finish_insn (insn, buf, length, relax_p, result)
     {
       int max_len;
       fragS *old_frag;
+      expressionS *exp;
+      symbolS *sym;
+      offsetT off;
 
 #ifdef TC_CGEN_MAX_RELAX
       max_len = TC_CGEN_MAX_RELAX (insn, byte_len);
@@ -414,14 +417,24 @@ gas_cgen_finish_insn (insn, buf, length, relax_p, result)
       /* Create a relaxable fragment for this instruction.  */
       old_frag = frag_now;
 
+      exp = &fixups[relax_operand].exp;
+      sym = exp->X_add_symbol;
+      off = exp->X_add_number;
+      if (exp->X_op != O_constant && exp->X_op != O_symbol)
+	{
+	  /* Handle complex expressions.  */
+	  sym = make_expr_symbol (exp);
+	  off = 0;
+	}
+
       frag_var (rs_machine_dependent,
 		max_len - byte_len /* max chars */,
 		0 /* variable part already allocated */,
 		/* FIXME: When we machine generate the relax table,
 		   machine generate a macro to compute subtype.  */
 		1 /* subtype */,
-		fixups[relax_operand].exp.X_add_symbol,
-		fixups[relax_operand].exp.X_add_number,
+		sym,
+		off,
 		f);
 
       /* Record the operand number with the fragment so md_convert_frag
