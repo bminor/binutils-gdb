@@ -1,3 +1,16 @@
+Wed Jul 21 17:32:02 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* configure.in (case ${host}):  Map *-*-sysv4* to gas_host=sysv.
+	* configure.in (case ${generic_target}):  Add i[34]86-*-sysv4*
+	case to set obj_format=elf.  Must go before i386-*-sysv* case that
+	sets obj_format=coffbsd.  Add *-*-sysv4* to *-*-elf and
+	*-*-solaris case, and move to before *-sysv* case that wants to
+	set obj_format to coff.
+	* config/tc-i386.c (i386_operand): Change all 'exp.X_op' to
+	'exp->X_op'.
+	* config/tc-i386.c (md_apply_fix):  Fix valp to be 'valueT *' for
+	BFD_ASSEMBLER case.
+
 Wed Jul 21 12:47:51 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-aout.c: Include aout/aout64.h.
