@@ -677,7 +677,7 @@ keep_going:
   if (opcode->format == 4)
     size = 5;
 
-  if (opcode->format == 5)
+  if (opcode->format == 5 || opcode->format == 10)
     size = 7;
 
   if (opcode->format == 8)
@@ -686,16 +686,12 @@ keep_going:
   if (opcode->format == 9)
     size = 6;
 
-  if (opcode->format == 10)
-    size = 8;
-
- 
   /* Write out the instruction.  */
 
   f = frag_more (size);
+  number_to_chars_bigendian (f, insn, size > 4 ? 4 : size);
   if (size > 4)
-    size = 4;
-  md_number_to_chars (f, insn, size);
+    number_to_chars_bigendian (f + 4, 0, size - 4);
 }
 
 

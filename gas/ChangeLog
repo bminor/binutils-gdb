@@ -1,6 +1,11 @@
+Thu Oct 10 12:05:45 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (md_assemble): Format D5 instructions
+	are 7 bytes long.  Write out instructions in big-endian format.
+
 Tue Oct  8 14:56:15 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* config/tc-mn10300.h (md_assemble): Tweak further so
+	* config/tc-mn10300.c (md_assemble): Tweak further so
 	that all instructions are parsed correctly.
 
 Tue Oct  8 13:02:21 1996  Ian Lance Taylor  <ian@cygnus.com>
