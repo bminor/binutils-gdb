@@ -1,5 +1,0 @@
-# OBSOLETE # Host: Hewlett-Packard PA-RISC machine, running BSD
-# OBSOLETE XM_FILE= xm-hppab.h
-# OBSOLETE NAT_FILE= nm-hppao.h
-# OBSOLETE NATDEPFILES= fork-child.o m3-nat.o hppam3-nat.o somread.o hpread.o somsolib.o
-# OBSOLETE NAT_CLIBS= -lmachid -lnetname -lmach

@@ -1,5 +1,27 @@
 2003-10-06  Andrew Cagney  <cagney@redhat.com>
 
+	* config/nm-m3.h, config/h8500/h8500.mt: Delete obsolete files.
+	* config/h8500/tm-h8500.h, config/i386/nm-ptx4.h: Ditto.
+	* config/i386/nm-symmetry.h, config/i386/ptx.mh: Ditto.
+	* config/i386/ptx.mt, config/i386/ptx4.mh: Ditto.
+	* config/i386/ptx4.mt, config/i386/symmetry.mh: Ditto.
+	* config/i386/symmetry.mt, config/i386/tm-ptx.h: Ditto.
+	* config/i386/tm-ptx4.h, config/i386/tm-symmetry.h: Ditto.
+	* config/i386/xm-ptx.h, config/i386/xm-ptx4.h: Ditto.
+	* config/i386/xm-symmetry.h, config/mips/mipsm3.mh: Ditto.
+	* config/mips/mipsm3.mt, config/mips/tm-mipsm3.h: Ditto.
+	* config/mips/xm-mipsm3.h, config/mn10200/mn10200.mt: Ditto.
+	* config/mn10200/tm-mn10200.h, config/pa/hppabsd.mh: Ditto.
+	* config/pa/hppabsd.mt, config/pa/hppaosf.mh: Ditto.
+	* config/pa/hppaosf.mt, config/pa/hppapro.mt: Ditto.
+	* config/pa/nm-hppab.h, config/pa/nm-hppao.h: Ditto.
+	* config/pa/tm-hppab.h, config/pa/tm-hppao.h: Ditto.
+	* config/pa/tm-pro.h, config/pa/xm-hppab.h: Ditto.
+	* config/pa/xm-pa.h, config/sparc/sparclet.mt: Ditto.
+	* config/sparc/sparclite.mt, config/sparc/tm-sparclet.h: Ditto.
+	* config/sparc/tm-sparclite.h, config/z8k/tm-z8k.h: Ditto.
+	* config/z8k/z8k.mt: Ditto.
+
 	* NEWS: Mention that z8k-zilog-none, z8ksim, mn10200-*-*,
 	h8500hms, hppa*-*-bsd*, hppa*-*-osf*, hppa*-*-pro*,
 	mips*-*-mach3*, i[3456]86-sequent-sysv4*, i[3456]86-sequent-sysv*,
