@@ -30,6 +30,10 @@
 #include <errno.h>
 #include <setjmp.h>
 
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
 #ifndef ATTR_NORETURN
 #if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
 #define ATTR_NORETURN __attribute__ ((noreturn))

@@ -1,14 +1,19 @@
 2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
 
-	* linux-low.h: Remove obsolete prototypes.
+	* gdbserver/server.h: Include <string.h> if HAVE_STRING_H.
+	* ChangeLog: Correct paths in last ChangeLog entry.
+
+2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbserver/linux-low.h: Remove obsolete prototypes.
 	(struct linux_target_ops): New.
 	(extern the_low_target): New.
-	* linux-low.c (num_regs, regmap): Remove declarations.
+	* gdbserver/linux-low.c (num_regs, regmap): Remove declarations.
 	(register_addr): Use the_low_target explicitly.
 	(fetch_register): Likewise.
 	(usr_fetch_inferior_registers): Likewise.
 	(usr_store_inferior_registers): Likewise.
-	* linux-arm-low.c (num_regs): Remove.
+	* gdbserver/linux-arm-low.c (num_regs): Remove.
 	(arm_num_regs): Define.
 	(arm_regmap): Renamed from regmap, made static.
 	(arm_cannot_fetch_register): Renamed from cannot_fetch_register,
@@ -16,7 +21,7 @@
 	(arm_cannot_store_register): Renamed from cannot_store_register,
 	made static.
 	(the_low_target): New.
-	* linux-i386-low.c (num_regs): Remove.
+	* gdbserver/linux-i386-low.c (num_regs): Remove.
 	(i386_num_regs): Define.
 	(i386_regmap): Renamed from regmap, made static.
 	(i386_cannot_fetch_register): Renamed from cannot_fetch_register,
@@ -24,7 +29,7 @@
 	(i386_cannot_store_register): Renamed from cannot_store_register,
 	made static.
 	(the_low_target): New.
-	* linux-ia64-low.c (num_regs): Remove.
+	* gdbserver/linux-ia64-low.c (num_regs): Remove.
 	(ia64_num_regs): Define.
 	(ia64_regmap): Renamed from regmap, made static.
 	(ia64_cannot_fetch_register): Renamed from cannot_fetch_register,
@@ -32,7 +37,7 @@
 	(ia64_cannot_store_register): Renamed from cannot_store_register,
 	made static.
 	(the_low_target): New.
-	* linux-m68k-low.c (num_regs): Remove.
+	* gdbserver/linux-m68k-low.c (num_regs): Remove.
 	(m68k_num_regs): Define.
 	(m68k_regmap): Renamed from regmap, made static.
 	(m68k_cannot_fetch_register): Renamed from cannot_fetch_register,
@@ -40,7 +45,7 @@
 	(m68k_cannot_store_register): Renamed from cannot_store_register,
 	made static.
 	(the_low_target): New.
-	* linux-mips-low.c (num_regs): Remove.
+	* gdbserver/linux-mips-low.c (num_regs): Remove.
 	(mips_num_regs): Define.
 	(mips_regmap): Renamed from regmap, made static.
 	(mips_cannot_fetch_register): Renamed from cannot_fetch_register,
@@ -48,7 +53,7 @@
 	(mips_cannot_store_register): Renamed from cannot_store_register,
 	made static.
 	(the_low_target): New.
-	* linux-ppc-low.c (num_regs): Remove.
+	* gdbserver/linux-ppc-low.c (num_regs): Remove.
 	(ppc_num_regs): Define.
 	(ppc_regmap): Renamed from regmap, made static.
 	(ppc_cannot_fetch_register): Renamed from cannot_fetch_register,
@@ -56,7 +61,7 @@
 	(ppc_cannot_store_register): Renamed from cannot_store_register,
 	made static.
 	(the_low_target): New.
-	* linux-s390-low.c (num_regs): Remove.
+	* gdbserver/linux-s390-low.c (num_regs): Remove.
 	(s390_num_regs): Define.
 	(s390_regmap): Renamed from regmap, made static.
 	(s390_cannot_fetch_register): Renamed from cannot_fetch_register,
@@ -64,7 +69,7 @@
 	(s390_cannot_store_register): Renamed from cannot_store_register,
 	made static.
 	(the_low_target): New.
-	* linux-sh-low.c (num_regs): Remove.
+	* gdbserver/linux-sh-low.c (num_regs): Remove.
 	(sh_num_regs): Define.
 	(sh_regmap): Renamed from regmap, made static.
 	(sh_cannot_fetch_register): Renamed from cannot_fetch_register,
@@ -72,7 +77,7 @@
 	(sh_cannot_store_register): Renamed from cannot_store_register,
 	made static.
 	(the_low_target): New.
-	* linux-x86-64-low.c (x86_64_regmap): Renamed from regmap.
+	* gdbserver/linux-x86-64-low.c (x86_64_regmap): Renamed from regmap.
 	(the_low_target): New.
 
 2002-04-09  Andrew Cagney  <ac131313@redhat.com>
