@@ -53,7 +53,7 @@ VERSION=2.1.4
 
 SHELL = /bin/sh
 
-INSTALL = $(srcdir)/../install.sh -c
+INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 INSTALL_XFORM = $(INSTALL) -t=$(program_transform_name)

@@ -1,3 +1,23 @@
+Tue Jun 15 17:03:25 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: remove parentdir support; use INSTALL_XFORM
+
+Wed Jun  9 11:26:07 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/tc-i386.c (md_pseudo_table): .align uses a power of two
+	for any a.out target, not just Linux and 386BSD.
+	* config/tc-i386.h (DOT_LABEL_PREFIX): Do not define for any a.out
+	target.
+
+Fri Jun  4 15:59:31 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* config/h8300.c: Support for H8/300-H opcodes.
+
+	* config/obj-coffbfd.c (w_strings): String table length is 4
+	bytes, no matter what the host int size is.
+
+	* configure.in (alpha-*-osf*): New.
+
 Fri Jun  4 07:51:18 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in (mips-*-ecoffl*): New target; use ecoff and
