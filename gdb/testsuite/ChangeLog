@@ -1,3 +1,7 @@
+Sat Apr  1 07:23:22 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* lib/gdb.exp: If nosignals is not set, set it to 0.
+
 Fri Mar 31 16:13:48 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* config/slite-gdb.exp: Responds to load symbol table prompt.
