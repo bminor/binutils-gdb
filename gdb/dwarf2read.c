@@ -820,7 +820,9 @@ static void dwarf2_add_member_fn (struct field_info *,
 static void dwarf2_attach_fn_fields_to_type (struct field_info *,
 					     struct type *, struct dwarf2_cu *);
 
-static void read_structure_scope (struct die_info *, struct dwarf2_cu *);
+static void read_structure_type (struct die_info *, struct dwarf2_cu *);
+
+static void process_structure_scope (struct die_info *, struct dwarf2_cu *);
 
 static void read_common_block (struct die_info *, struct dwarf2_cu *);
 
@@ -829,7 +831,9 @@ static void read_namespace (struct die_info *die, struct dwarf2_cu *);
 static const char *namespace_name (struct die_info *die,
 				   int *is_anonymous, struct dwarf2_cu *);
 
-static void read_enumeration (struct die_info *, struct dwarf2_cu *);
+static void read_enumeration_type (struct die_info *, struct dwarf2_cu *);
+
+static void process_enumeration_scope (struct die_info *, struct dwarf2_cu *);
 
 static struct type *dwarf_base_type (int, int, struct dwarf2_cu *);
 
@@ -1695,7 +1699,7 @@ add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
 	 what template types look like, because the demangler
 	 frequently doesn't give the same name as the debug info.  We
 	 could fix this by only using the demangled name to get the
-	 prefix (but see comment in read_structure_scope).  */
+	 prefix (but see comment in read_structure_type).  */
 
       /* FIXME: carlton/2004-01-23: If NAMESPACE equals "", we have
 	 the appropriate debug information, so it would be nice to be
@@ -2105,11 +2109,17 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_class_type:
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
-      read_structure_scope (die, cu);
+      read_structure_type (die, cu);
+      process_structure_scope (die, cu);
       break;
     case DW_TAG_enumeration_type:
-      read_enumeration (die, cu);
+      read_enumeration_type (die, cu);
+      process_enumeration_scope (die, cu);
       break;
+
+    /* FIXME drow/2004-03-14: These initialize die->type, but do not create
+       a symbol or process any children.  Therefore it doesn't do anything
+       that won't be done on-demand by read_type_die.  */
     case DW_TAG_subroutine_type:
       read_subroutine_type (die, cu);
       break;
@@ -2128,21 +2138,19 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_string_type:
       read_tag_string_type (die, cu);
       break;
+    /* END FIXME */
+
     case DW_TAG_base_type:
       read_base_type (die, cu);
-      if (dwarf2_attr (die, DW_AT_name, cu))
-	{
-	  /* Add a typedef symbol for the base type definition.  */
-	  new_symbol (die, die->type, cu);
-	}
+      /* Add a typedef symbol for the type definition, if it has a
+	 DW_AT_name.  */
+      new_symbol (die, die->type, cu);
       break;
     case DW_TAG_subrange_type:
       read_subrange_type (die, cu);
-      if (dwarf2_attr (die, DW_AT_name, cu))
-       {
-         /* Add a typedef symbol for the base type definition.  */
-         new_symbol (die, die->type, cu);
-       }
+      /* Add a typedef symbol for the type definition, if it has a
+         DW_AT_name.  */
+      new_symbol (die, die->type, cu);
       break;
     case DW_TAG_common_block:
       read_common_block (die, cu);
@@ -3154,7 +3162,7 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
    suppresses creating a symbol table entry itself).  */
 
 static void
-read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
+read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   struct type *type;
@@ -3166,6 +3174,9 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
      name to include enclosing namespace/class information, if
      any.  */
   int need_to_update_name = 0;
+
+  if (die->type)
+    return;
 
   type = alloc_type (objfile);
 
@@ -3266,7 +3277,7 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  else if (child_die->tag == DW_TAG_subprogram)
 	    {
 	      /* C++ member function. */
-	      process_die (child_die, cu);
+	      read_type_die (child_die, cu);
 	      dwarf2_add_member_fn (&fi, child_die, type, cu);
 	      if (need_to_update_name)
 		{
@@ -3308,10 +3319,6 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    {
 	      /* C++ base class field.  */
 	      dwarf2_add_field (&fi, child_die, cu);
-	    }
-	  else
-	    {
-	      process_die (child_die, cu);
 	    }
 	  child_die = sibling_die (child_die);
 	}
@@ -3369,8 +3376,6 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	}
 
-      new_symbol (die, type, cu);
-
       do_cleanups (back_to);
     }
   else
@@ -3384,26 +3389,53 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
     do_cleanups (back_to);
 }
 
-/* Given a pointer to a die which begins an enumeration, process all
-   the dies that define the members of the enumeration.
-
-   This will be much nicer in draft 6 of the DWARF spec when our
-   members will be dies instead squished into the DW_AT_element_list
-   attribute.
-
-   NOTE: We reverse the order of the element list.  */
-
 static void
-read_enumeration (struct die_info *die, struct dwarf2_cu *cu)
+process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct die_info *child_die;
+  const char *previous_prefix = processing_current_prefix;
+
+  if (TYPE_TAG_NAME (die->type) != NULL)
+    processing_current_prefix = TYPE_TAG_NAME (die->type);
+
+  if (die->child != NULL && ! die_is_declaration (die, cu))
+    {
+      struct die_info *child_die;
+
+      child_die = die->child;
+
+      while (child_die && child_die->tag)
+	{
+	  if (child_die->tag == DW_TAG_member
+	      || child_die->tag == DW_TAG_variable
+	      || child_die->tag == DW_TAG_inheritance)
+	    {
+	      /* Do nothing.  */
+	    }
+	  else
+	    process_die (child_die, cu);
+
+	  child_die = sibling_die (child_die);
+	}
+
+      new_symbol (die, die->type, cu);
+    }
+
+  processing_current_prefix = previous_prefix;
+}
+
+/* Given a DW_AT_enumeration_type die, set its type.  We do not
+   complete the type's fields yet, or create any symbols.  */
+
+static void
+read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct objfile *objfile = cu->objfile;
   struct type *type;
-  struct field *fields;
   struct attribute *attr;
-  struct symbol *sym;
-  int num_fields;
-  int unsigned_enum = 1;
+
+  if (die->type)
+    return;
 
   type = alloc_type (objfile);
 
@@ -3439,6 +3471,26 @@ read_enumeration (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_LENGTH (type) = 0;
     }
 
+  die->type = type;
+}
+
+/* Given a pointer to a die which begins an enumeration, process all
+   the dies that define the members of the enumeration, and create the
+   symbol for the enumeration type.
+
+   NOTE: We reverse the order of the element list.  */
+
+static void
+process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct objfile *objfile = cu->objfile;
+  struct die_info *child_die;
+  struct field *fields;
+  struct attribute *attr;
+  struct symbol *sym;
+  int num_fields;
+  int unsigned_enum = 1;
+
   num_fields = 0;
   fields = NULL;
   if (die->child != NULL)
@@ -3455,7 +3507,7 @@ read_enumeration (struct die_info *die, struct dwarf2_cu *cu)
 	      attr = dwarf2_attr (child_die, DW_AT_name, cu);
 	      if (attr)
 		{
-		  sym = new_symbol (child_die, type, cu);
+		  sym = new_symbol (child_die, die->type, cu);
 		  if (SYMBOL_VALUE (sym) < 0)
 		    unsigned_enum = 0;
 
@@ -3482,18 +3534,18 @@ read_enumeration (struct die_info *die, struct dwarf2_cu *cu)
 
       if (num_fields)
 	{
-	  TYPE_NFIELDS (type) = num_fields;
-	  TYPE_FIELDS (type) = (struct field *)
-	    TYPE_ALLOC (type, sizeof (struct field) * num_fields);
-	  memcpy (TYPE_FIELDS (type), fields,
+	  TYPE_NFIELDS (die->type) = num_fields;
+	  TYPE_FIELDS (die->type) = (struct field *)
+	    TYPE_ALLOC (die->type, sizeof (struct field) * num_fields);
+	  memcpy (TYPE_FIELDS (die->type), fields,
 		  sizeof (struct field) * num_fields);
 	  xfree (fields);
 	}
       if (unsigned_enum)
-	TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
+	TYPE_FLAGS (die->type) |= TYPE_FLAG_UNSIGNED;
     }
-  die->type = type;
-  new_symbol (die, type, cu);
+
+  new_symbol (die, die->type, cu);
 }
 
 /* Extract all information from a DW_TAG_array_type DIE and put it in
@@ -5844,7 +5896,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
 	  /* Make sure that the symbol includes appropriate enclosing
 	     classes/namespaces in its name.  These are calculated in
-	     read_structure_scope, and the correct name is saved in
+	     read_structure_type, and the correct name is saved in
 	     the type.  */
 
 	  if (cu->language == language_cplus)
@@ -6187,10 +6239,10 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_class_type:
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
-      read_structure_scope (die, cu);
+      read_structure_type (die, cu);
       break;
     case DW_TAG_enumeration_type:
-      read_enumeration (die, cu);
+      read_enumeration_type (die, cu);
       break;
     case DW_TAG_subprogram:
     case DW_TAG_subroutine_type:
