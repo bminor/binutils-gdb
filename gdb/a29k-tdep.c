@@ -914,7 +914,7 @@ setup_arbitrary_frame (int argc, CORE_ADDR *argv)
 int
 gdb_print_insn_a29k (bfd_vma memaddr, disassemble_info *info)
 {
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     return print_insn_big_a29k (memaddr, info);
   else
     return print_insn_little_a29k (memaddr, info);

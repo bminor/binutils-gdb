@@ -1475,7 +1475,7 @@ arm_register_type (int regnum)
 {
   if (regnum >= F0_REGNUM && regnum < F0_REGNUM + NUM_FREGS)
     {
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	return builtin_type_arm_ext_big;
       else
 	return builtin_type_arm_ext_littlebyte_bigword;
@@ -1493,7 +1493,7 @@ static void
 convert_from_extended (void *ptr, void *dbl)
 {
   DOUBLEST d;
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     floatformat_to_doublest (&floatformat_arm_ext_big, ptr, &d);
   else
     floatformat_to_doublest (&floatformat_arm_ext_littlebyte_bigword,
@@ -1506,7 +1506,7 @@ convert_to_extended (void *dbl, void *ptr)
 {
   DOUBLEST d;
   floatformat_to_doublest (TARGET_DOUBLE_FORMAT, ptr, &d);
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     floatformat_from_doublest (&floatformat_arm_ext_big, &d, dbl);
   else
     floatformat_from_doublest (&floatformat_arm_ext_littlebyte_bigword,
@@ -1951,7 +1951,7 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
   else
     info->symbols = NULL;
 
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     return print_insn_big_arm (memaddr, info);
   else
     return print_insn_little_arm (memaddr, info);
@@ -1970,7 +1970,7 @@ arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   if (arm_pc_is_thumb (*pcptr) || arm_pc_is_thumb_dummy (*pcptr))
     {
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	{
 	  static char thumb_breakpoint[] = THUMB_BE_BREAKPOINT;
 	  *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
@@ -1987,7 +1987,7 @@ arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
     }
   else
     {
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	{
 	  static char arm_breakpoint[] = ARM_BE_BREAKPOINT;
 	  *lenptr = sizeof (arm_breakpoint);

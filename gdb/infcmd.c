@@ -1651,7 +1651,7 @@ do_registers_info (int regnum, int fpregs)
 	  printf_filtered ("\t(raw 0x");
 	  for (j = 0; j < REGISTER_RAW_SIZE (i); j++)
 	    {
-	      register int idx = TARGET_BYTE_ORDER == BIG_ENDIAN ? j
+	      register int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
 	      : REGISTER_RAW_SIZE (i) - 1 - j;
 	      printf_filtered ("%02x", (unsigned char) raw_buffer[idx]);
 	    }

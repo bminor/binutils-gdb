@@ -428,7 +428,7 @@ sh_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static int
 gdb_print_insn_sh (bfd_vma memaddr, disassemble_info *info)
 {
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     return print_insn_sh (memaddr, info);
   else
     return print_insn_shl (memaddr, info);
@@ -1001,7 +1001,7 @@ sh_extract_return_value (struct type *type, char *regbuf, char *valbuf)
   
   if (len <= 4)
     {
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	offset = REGISTER_BYTE (return_register) + 4 - len;
       else
 	offset = REGISTER_BYTE (return_register);
@@ -1009,7 +1009,7 @@ sh_extract_return_value (struct type *type, char *regbuf, char *valbuf)
     }
   else if (len <= 8)
     {
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	offset = REGISTER_BYTE (return_register) + 8 - len;
       else
 	offset = REGISTER_BYTE (return_register);
@@ -1046,7 +1046,7 @@ sh3e_sh4_extract_return_value (struct type *type, char *regbuf, char *valbuf)
     }
   else if (len <= 4)
     {
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	offset = REGISTER_BYTE (return_register) + 4 - len;
       else
 	offset = REGISTER_BYTE (return_register);
@@ -1054,7 +1054,7 @@ sh3e_sh4_extract_return_value (struct type *type, char *regbuf, char *valbuf)
     }
   else if (len <= 8)
     {
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	offset = REGISTER_BYTE (return_register) + 8 - len;
       else
 	offset = REGISTER_BYTE (return_register);
@@ -1705,7 +1705,7 @@ sh_do_fp_register (int regnum)
   printf_filtered ("\t(raw 0x");
   for (j = 0; j < REGISTER_RAW_SIZE (regnum); j++)
     {
-      register int idx = TARGET_BYTE_ORDER == BIG_ENDIAN ? j
+      register int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
 	: REGISTER_RAW_SIZE (regnum) - 1 - j;
       printf_filtered ("%02x", (unsigned char) raw_buffer[idx]);
     }

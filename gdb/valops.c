@@ -1056,7 +1056,7 @@ value_push (register CORE_ADDR sp, struct value *arg)
 		     & ~(PARM_BOUNDARY / TARGET_CHAR_BIT - 1));
 
   /* Are we going to put it at the high or low end of the container?  */
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     offset = container_len - len;
   else
     offset = 0;

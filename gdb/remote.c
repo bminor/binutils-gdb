@@ -4681,7 +4681,7 @@ remote_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 
   if (val == 0)
     {
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	val = target_write_memory (addr, (char *) big_break_insn,
 				   sizeof big_break_insn);
       else

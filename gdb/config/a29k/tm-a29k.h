@@ -31,7 +31,7 @@
    la tm-m68k.h).  */
 
 /* Byte order is configurable, but this machine runs big-endian.  */
-#define TARGET_BYTE_ORDER BIG_ENDIAN
+#define TARGET_BYTE_ORDER BFD_ENDIAN_BIG
 
 /* Floating point uses IEEE representations.  */
 #define IEEE_FLOAT (1)
@@ -74,7 +74,7 @@ CORE_ADDR a29k_skip_prologue ();
    We let the command line (or previously included files) override this
    setting.  */
 #ifndef BREAKPOINT
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
+#if TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 #define BREAKPOINT {0x72, 0x50, 0x01, 0x01}
 #else /* Target is little-endian.  */
 #define BREAKPOINT {0x01, 0x01, 0x50, 0x72}
@@ -647,7 +647,7 @@ extern void pop_frame ();
    word in target byte order; bits 0-7 and 16-23 of *WORDP are replaced with
    bits 0-7 and 8-15 of DATA (which is in host byte order).  */
 
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
+#if TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 #define STUFF_I16(WORDP, DATA) \
   { \
     *((char *)(WORDP) + 3) = ((DATA) & 0xff);\

@@ -1152,7 +1152,7 @@ print_insn (CORE_ADDR memaddr, struct ui_file *stream)
     internal_error (__FILE__, __LINE__,
 		    "print_insn: no disassembler");
 
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     tm_print_insn_info.endian = BFD_ENDIAN_BIG;
   else
     tm_print_insn_info.endian = BFD_ENDIAN_LITTLE;

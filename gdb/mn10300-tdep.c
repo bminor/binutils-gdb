@@ -1018,7 +1018,7 @@ mn10300_print_register (const char *name, int regnum, int reg_width)
   else
     {
       int byte;
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	{
 	  for (byte = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
 	       byte < REGISTER_RAW_SIZE (regnum);

@@ -1,3 +1,8 @@
+2002-01-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	BIG_ENDIAN with BFD_ENDIAN_BIG.
+
 2002-01-03  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Replace

@@ -3486,7 +3486,7 @@ current sources.)
 @item TARGET_BYTE_ORDER_DEFAULT
 @findex TARGET_BYTE_ORDER_DEFAULT
 The ordering of bytes in the target.  This must be either
-@code{BIG_ENDIAN} or @code{BFD_ENDIAN_LITTLE}.  This macro replaces
+@code{BFD_ENDIAN_BIG} or @code{BFD_ENDIAN_LITTLE}.  This macro replaces
 @code{TARGET_BYTE_ORDER} which is deprecated.
 
 @item TARGET_BYTE_ORDER_SELECTABLE_P

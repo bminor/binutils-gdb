@@ -1268,7 +1268,7 @@ print_insn (CORE_ADDR memaddr, struct ui_file *stream)
     internal_error (__FILE__, __LINE__,
 		    "print_insn: no disassembler");
 
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     tm_print_insn_info.endian = BFD_ENDIAN_BIG;
   else
     tm_print_insn_info.endian = BFD_ENDIAN_LITTLE;
@@ -1523,7 +1523,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   switch (info.byte_order)
     {
-    case BIG_ENDIAN:
+    case BFD_ENDIAN_BIG:
       set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_big);
       set_gdbarch_double_format (gdbarch, &floatformat_ieee_single_big);
       set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);

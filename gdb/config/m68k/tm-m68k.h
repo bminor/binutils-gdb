@@ -26,7 +26,7 @@
 #define IEEE_FLOAT (1)
 
 /* Define the bit, byte, and word ordering of the machine.  */
-#define TARGET_BYTE_ORDER BIG_ENDIAN
+#define TARGET_BYTE_ORDER BFD_ENDIAN_BIG
 
 #define TARGET_LONG_DOUBLE_FORMAT &floatformat_m68881_ext
 

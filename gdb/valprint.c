@@ -618,7 +618,7 @@ print_binary_chars (struct ui_file *stream, unsigned char *valaddr,
   /* FIXME: We should be not printing leading zeroes in most cases.  */
 
   fprintf_filtered (stream, local_binary_format_prefix ());
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       for (p = valaddr;
 	   p < valaddr + len;
@@ -705,7 +705,7 @@ print_octal_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
   carry = 0;
 
   fprintf_filtered (stream, local_octal_format_prefix ());
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       for (p = valaddr;
 	   p < valaddr + len;
@@ -819,11 +819,11 @@ print_decimal_chars (struct ui_file *stream, unsigned char *valaddr,
 #define CARRY_LEFT( x ) ((x) % TEN)
 #define SHIFT( x )      ((x) << 4)
 #define START_P \
-        ((TARGET_BYTE_ORDER == BIG_ENDIAN) ? valaddr : valaddr + len - 1)
+        ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) ? valaddr : valaddr + len - 1)
 #define NOT_END_P \
-        ((TARGET_BYTE_ORDER == BIG_ENDIAN) ? (p < valaddr + len) : (p >= valaddr))
+        ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) ? (p < valaddr + len) : (p >= valaddr))
 #define NEXT_P \
-        ((TARGET_BYTE_ORDER == BIG_ENDIAN) ? p++ : p-- )
+        ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) ? p++ : p-- )
 #define LOW_NIBBLE(  x ) ( (x) & 0x00F)
 #define HIGH_NIBBLE( x ) (((x) & 0x0F0) >> 4)
 
@@ -956,7 +956,7 @@ print_hex_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
   /* FIXME: We should be not printing leading zeroes in most cases.  */
 
   fprintf_filtered (stream, local_hex_format_prefix ());
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       for (p = valaddr;
 	   p < valaddr + len;

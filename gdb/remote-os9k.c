@@ -258,7 +258,7 @@ get_hex_regs (int n, int regno)
       for (j = 0; j < 4; j++)
 	{
 	  get_hex_byte (&b);
-	  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	    val = (val << 8) + b;
 	  else
 	    val = val + (b << (j * 8));
@@ -558,7 +558,7 @@ rombug_fetch_registers (void)
 	  for (j = 0; j < 2; j++)
 	    {
 	      get_hex_byte (&b);
-	      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 		val = (val << 8) + b;
 	      else
 		val = val + (b << (j * 8));
@@ -622,7 +622,7 @@ rombug_fetch_register (int regno)
 	  for (j = 0; j < 2; j++)
 	    {
 	      get_hex_byte (&b);
-	      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 		val = (val << 8) + b;
 	      else
 		val = val + (b << (j * 8));

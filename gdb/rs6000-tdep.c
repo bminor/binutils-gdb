@@ -283,7 +283,7 @@ rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
   static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
   static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
   *bp_size = 4;
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     return big_breakpoint;
   else
     return little_breakpoint;
@@ -300,7 +300,7 @@ rs6000_software_single_step (enum target_signal signal,
 
   static char le_breakp[] = LITTLE_BREAKPOINT;
   static char be_breakp[] = BIG_BREAKPOINT;
-  char *breakp = TARGET_BYTE_ORDER == BIG_ENDIAN ? be_breakp : le_breakp;
+  char *breakp = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? be_breakp : le_breakp;
   int ii, insn;
   CORE_ADDR loc;
   CORE_ADDR breaks[2];
@@ -964,7 +964,7 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	}
       else
 	{			/* Argument can fit in one register. No problem. */
-	  int adj = TARGET_BYTE_ORDER == BIG_ENDIAN ? reg_size - len : 0;
+	  int adj = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? reg_size - len : 0;
 	  memset (&registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
 	  memcpy ((char *)&registers[REGISTER_BYTE (ii + 3)] + adj, 
 	          VALUE_CONTENTS (arg), len);
@@ -1111,7 +1111,7 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
   else
     {
       /* return value is copied starting from r3. */
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 	  && TYPE_LENGTH (valtype) < REGISTER_RAW_SIZE (3))
 	offset = REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
 
@@ -2470,7 +2470,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Select instruction printer. */
   tm_print_insn = arch == power ? print_insn_rs6000 :
-    info.byte_order == BIG_ENDIAN ? print_insn_big_powerpc :
+    info.byte_order == BFD_ENDIAN_BIG ? print_insn_big_powerpc :
       print_insn_little_powerpc;
 
   /* Choose variant. */

@@ -47,7 +47,7 @@ memory_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
      breakpoint.  On some machines, breakpoints are handled by the
      target environment and we don't have to worry about them here.  */
 #ifdef BIG_BREAKPOINT
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       static unsigned char big_break_insn[] = BIG_BREAKPOINT;
       *lenptr = sizeof (big_break_insn);
@@ -55,7 +55,7 @@ memory_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
     }
 #endif
 #ifdef LITTLE_BREAKPOINT
-  if (TARGET_BYTE_ORDER != BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER != BFD_ENDIAN_BIG)
     {
       static unsigned char little_break_insn[] = LITTLE_BREAKPOINT;
       *lenptr = sizeof (little_break_insn);

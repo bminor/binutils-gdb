@@ -4117,7 +4117,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* Ok.  */
       break;
 
-    case BIG_ENDIAN:
+    case BFD_ENDIAN_BIG:
       internal_error (__FILE__, __LINE__, "cris_gdbarch_init: big endian byte order in info");
       break;
     

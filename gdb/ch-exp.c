@@ -1883,15 +1883,15 @@ match_bitstring_literal (void)
       else
 	{
 	  /* Extract bits from digit, packing them into the bitstring byte. */
-	  int k = TARGET_BYTE_ORDER == BIG_ENDIAN ? bits_per_char - 1 : 0;
-	  for (; TARGET_BYTE_ORDER == BIG_ENDIAN ? k >= 0 : k < bits_per_char;
-	       TARGET_BYTE_ORDER == BIG_ENDIAN ? k-- : k++)
+	  int k = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? bits_per_char - 1 : 0;
+	  for (; TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? k >= 0 : k < bits_per_char;
+	       TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? k-- : k++)
 	    {
 	      bitcount++;
 	      if (digit & (1 << k))
 		{
 		  tempbuf[tempbufindex] |=
-		    (TARGET_BYTE_ORDER == BIG_ENDIAN)
+		    (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 		    ? (1 << (HOST_CHAR_BIT - 1 - bitoffset))
 		    : (1 << bitoffset);
 		}

@@ -365,7 +365,7 @@ function_list ()
   cat <<EOF
 i:2:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info::::&bfd_default_arch_struct::::%s:TARGET_ARCHITECTURE->printable_name:TARGET_ARCHITECTURE != NULL
 #
-i:2:TARGET_BYTE_ORDER:int:byte_order::::BIG_ENDIAN
+i:2:TARGET_BYTE_ORDER:int:byte_order::::BFD_ENDIAN_BIG
 # Number of bits in a char or unsigned char for the target machine.
 # Just like CHAR_BIT in <limits.h> but describes the target machine.
 # v::TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
@@ -2063,7 +2063,7 @@ gdbarch_update_p (struct gdbarch_info info)
   /* From the INFO struct. */
   if (info.byte_order == BFD_ENDIAN_UNKNOWN
       && info.abfd != NULL)
-    info.byte_order = (bfd_big_endian (info.abfd) ? BIG_ENDIAN
+    info.byte_order = (bfd_big_endian (info.abfd) ? BFD_ENDIAN_BIG
 		       : bfd_little_endian (info.abfd) ? BFD_ENDIAN_LITTLE
 		       : BFD_ENDIAN_UNKNOWN);
   /* From the current target. */
@@ -2083,7 +2083,7 @@ gdbarch_update_p (struct gdbarch_info info)
       fprintf_unfiltered (gdb_stdlog,
 			  "gdbarch_update: info.byte_order %d (%s)\n",
 			  info.byte_order,
-			  (info.byte_order == BIG_ENDIAN ? "big"
+			  (info.byte_order == BFD_ENDIAN_BIG ? "big"
 			   : info.byte_order == BFD_ENDIAN_LITTLE ? "little"
 			   : "default"));
       fprintf_unfiltered (gdb_stdlog,

@@ -1225,15 +1225,11 @@ extern void *alloca ();
 #endif /* Not GNU C */
 #endif /* alloca not defined */
 
-/* Get a definition of BIG_ENDIAN and BFD_ENDIAN_LITTLE.  */
+/* Get a definition of BFD_ENDIAN_BIG and BFD_ENDIAN_LITTLE.  */
 /* FIXME: cagney/2001-10-31: GDB should just use BFD's definitions.  */
 
 #ifdef HAVE_ENDIAN_H
 #include <endian.h>
-#endif
-
-#if !defined (BIG_ENDIAN)
-#define BIG_ENDIAN 4321
 #endif
 
 /* Dynamic target-system-dependent parameters for GDB. */
@@ -1269,7 +1265,7 @@ extern void *alloca ();
    from byte/word byte order.  */
 
 #if !defined (BITS_BIG_ENDIAN)
-#define BITS_BIG_ENDIAN (TARGET_BYTE_ORDER == BIG_ENDIAN)
+#define BITS_BIG_ENDIAN (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 #endif
 
 /* In findvar.c.  */

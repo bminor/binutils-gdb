@@ -62,7 +62,7 @@ legacy_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
      breakpoint.  On some machines, breakpoints are handled by the
      target environment and we don't have to worry about them here.  */
 #ifdef BIG_BREAKPOINT
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       static unsigned char big_break_insn[] = BIG_BREAKPOINT;
       *lenptr = sizeof (big_break_insn);
@@ -70,7 +70,7 @@ legacy_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
     }
 #endif
 #ifdef LITTLE_BREAKPOINT
-  if (TARGET_BYTE_ORDER != BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER != BFD_ENDIAN_BIG)
     {
       static unsigned char little_break_insn[] = LITTLE_BREAKPOINT;
       *lenptr = sizeof (little_break_insn);
@@ -194,7 +194,7 @@ default_float_format (struct gdbarch *gdbarch)
 #endif
   switch (byte_order)
     {
-    case BIG_ENDIAN:
+    case BFD_ENDIAN_BIG:
       return &floatformat_ieee_single_big;
     case BFD_ENDIAN_LITTLE:
       return &floatformat_ieee_single_little;
@@ -215,7 +215,7 @@ default_double_format (struct gdbarch *gdbarch)
 #endif
   switch (byte_order)
     {
-    case BIG_ENDIAN:
+    case BFD_ENDIAN_BIG:
       return &floatformat_ieee_double_big;
     case BFD_ENDIAN_LITTLE:
       return &floatformat_ieee_double_little;
@@ -401,9 +401,9 @@ generic_register_virtual_size (int regnum)
 
 #ifdef TARGET_BYTE_ORDER_SELECTABLE
 /* compat - Catch old targets that expect a selectable byte-order to
-   default to BIG_ENDIAN */
+   default to BFD_ENDIAN_BIG */
 #ifndef TARGET_BYTE_ORDER_DEFAULT
-#define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN
+#define TARGET_BYTE_ORDER_DEFAULT BFD_ENDIAN_BIG
 #endif
 #endif
 #if !TARGET_BYTE_ORDER_SELECTABLE_P
@@ -417,7 +417,7 @@ generic_register_virtual_size (int regnum)
 #endif
 #endif
 #ifndef TARGET_BYTE_ORDER_DEFAULT
-#define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN /* arbitrary */
+#define TARGET_BYTE_ORDER_DEFAULT BFD_ENDIAN_BIG /* arbitrary */
 #endif
 /* ``target_byte_order'' is only used when non- multi-arch.
    Multi-arch targets obtain the current byte order using
@@ -444,10 +444,10 @@ show_endian (char *args, int from_tty)
 {
   if (TARGET_BYTE_ORDER_AUTO)
     printf_unfiltered ("The target endianness is set automatically (currently %s endian)\n",
-		       (TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little"));
+		       (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "big" : "little"));
   else
     printf_unfiltered ("The target is assumed to be %s endian\n",
-		       (TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little"));
+		       (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "big" : "little"));
 }
 
 static void
@@ -486,7 +486,7 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 	{
 	  struct gdbarch_info info;
 	  gdbarch_info_init (&info);
-	  info.byte_order = BIG_ENDIAN;
+	  info.byte_order = BFD_ENDIAN_BIG;
 	  if (! gdbarch_update_p (info))
 	    {
 	      printf_unfiltered ("Big endian target not supported by GDB\n");
@@ -494,7 +494,7 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 	}
       else
 	{
-	  target_byte_order = BIG_ENDIAN;
+	  target_byte_order = BFD_ENDIAN_BIG;
 	}
     }
   else
@@ -516,24 +516,24 @@ set_endian_from_file (bfd *abfd)
       int want;
       
       if (bfd_big_endian (abfd))
-	want = BIG_ENDIAN;
+	want = BFD_ENDIAN_BIG;
       else
 	want = BFD_ENDIAN_LITTLE;
       if (TARGET_BYTE_ORDER_AUTO)
 	target_byte_order = want;
       else if (TARGET_BYTE_ORDER != want)
 	warning ("%s endian file does not match %s endian target.",
-		 want == BIG_ENDIAN ? "big" : "little",
-		 TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
+		 want == BFD_ENDIAN_BIG ? "big" : "little",
+		 TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "big" : "little");
     }
   else
     {
       if (bfd_big_endian (abfd)
-	  ? TARGET_BYTE_ORDER != BIG_ENDIAN
-	  : TARGET_BYTE_ORDER == BIG_ENDIAN)
+	  ? TARGET_BYTE_ORDER != BFD_ENDIAN_BIG
+	  : TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	warning ("%s endian file does not match %s endian target.",
 		 bfd_big_endian (abfd) ? "big" : "little",
-		 TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
+		 TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "big" : "little");
     }
 }
 
@@ -769,7 +769,7 @@ initialize_current_architecture (void)
       switch (default_bfd_vec->byteorder)
 	{
 	case BFD_ENDIAN_BIG:
-	  info.byte_order = BIG_ENDIAN;
+	  info.byte_order = BFD_ENDIAN_BIG;
 	  break;
 	case BFD_ENDIAN_LITTLE:
 	  info.byte_order = BFD_ENDIAN_LITTLE;
@@ -791,7 +791,7 @@ initialize_current_architecture (void)
   if (info.byte_order == BFD_ENDIAN_UNKNOWN)
     {
       /* Wire it to big-endian!!! */
-      info.byte_order = BIG_ENDIAN;
+      info.byte_order = BFD_ENDIAN_BIG;
     }
 
   if (GDB_MULTI_ARCH)

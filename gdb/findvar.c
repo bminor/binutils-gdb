@@ -66,7 +66,7 @@ That operation is not available on integers of more than %d bytes.",
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       p = startaddr;
       /* Do the sign extension once at the start.  */
@@ -101,7 +101,7 @@ That operation is not available on integers of more than %d bytes.",
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
   retval = 0;
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       for (p = startaddr; p < endaddr; ++p)
 	retval = (retval << 8) | *p;
@@ -126,7 +126,7 @@ extract_long_unsigned_integer (void *addr, int orig_len, LONGEST *pval)
   int len;
 
   len = orig_len;
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       for (p = (char *) addr;
 	   len > (int) sizeof (LONGEST) && p < (char *) addr + orig_len;
@@ -210,7 +210,7 @@ store_signed_integer (void *addr, int len, LONGEST val)
 
   /* Start at the least significant end of the integer, and work towards
      the most significant.  */
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       for (p = endaddr - 1; p >= startaddr; --p)
 	{
@@ -237,7 +237,7 @@ store_unsigned_integer (void *addr, int len, ULONGEST val)
 
   /* Start at the least significant end of the integer, and work towards
      the most significant.  */
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       for (p = endaddr - 1; p >= startaddr; --p)
 	{
@@ -824,7 +824,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
     {
       /* Raw and virtual formats are the same for this register.  */
 
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN && len < REGISTER_RAW_SIZE (regnum))
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG && len < REGISTER_RAW_SIZE (regnum))
 	{
 	  /* Big-endian, and we want less than full size.  */
 	  VALUE_OFFSET (v) = REGISTER_RAW_SIZE (regnum) - len;

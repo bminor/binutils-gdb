@@ -446,7 +446,7 @@ void
 mips_register_convert_to_virtual (int n, struct type *virtual_type,
 				  char *raw_buf, char *virt_buf)
 {
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     memcpy (virt_buf,
 	    raw_buf + (REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
 	    TYPE_LENGTH (virtual_type));
@@ -461,7 +461,7 @@ mips_register_convert_to_raw (struct type *virtual_type, int n,
 			      char *virt_buf, char *raw_buf)
 {
   memset (raw_buf, 0, REGISTER_RAW_SIZE (n));
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     memcpy (raw_buf + (REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
 	    virt_buf,
 	    TYPE_LENGTH (virtual_type));
@@ -2284,7 +2284,7 @@ mips_push_arguments (int nargs,
 	{
 	  if (!FP_REGISTER_DOUBLE && len == 8)
 	    {
-	      int low_offset = TARGET_BYTE_ORDER == BIG_ENDIAN ? 4 : 0;
+	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	      unsigned long regval;
 
 	      /* Write the low word of the double to the even register(s).  */
@@ -2385,7 +2385,7 @@ mips_push_arguments (int nargs,
 		  int longword_offset = 0;
 		  CORE_ADDR addr;
 		  stack_used_p = 1;
-		  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 		    {
 		      if (MIPS_STACK_ARGSIZE == 8 &&
 			  (typecode == TYPE_CODE_INT ||
@@ -2457,7 +2457,7 @@ mips_push_arguments (int nargs,
 
 		  if (!MIPS_EABI
 		      && MIPS_SAVED_REGSIZE < 8
-		      && TARGET_BYTE_ORDER == BIG_ENDIAN
+		      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 		      && partial_len < MIPS_SAVED_REGSIZE
 		      && (typecode == TYPE_CODE_STRUCT ||
 			  typecode == TYPE_CODE_UNION))
@@ -2522,7 +2522,7 @@ mips_push_register (CORE_ADDR * sp, int regno)
   if (MIPS_SAVED_REGSIZE < REGISTER_RAW_SIZE (regno))
     {
       regsize = MIPS_SAVED_REGSIZE;
-      offset = (TARGET_BYTE_ORDER == BIG_ENDIAN
+      offset = (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 		? REGISTER_RAW_SIZE (regno) - MIPS_SAVED_REGSIZE
 		: 0);
     }
@@ -2719,7 +2719,7 @@ mips_print_register (int regnum, int all)
   if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
     if (FP_REGISTER_DOUBLE)
       {				/* show 8-byte floats as float AND double: */
-	int offset = 4 * (TARGET_BYTE_ORDER == BIG_ENDIAN);
+	int offset = 4 * (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG);
 
 	printf_filtered (" (float) ");
 	val_print (builtin_type_float, raw_buffer + offset, 0, 0,
@@ -2736,7 +2736,7 @@ mips_print_register (int regnum, int all)
     {
       int offset;
 
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
         offset = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
       else
 	offset = 0;
@@ -2756,8 +2756,8 @@ do_fp_register_row (int regnum)
   char *raw_buffer[2];
   char *dbl_buffer;
   /* use HI and LO to control the order of combining two flt regs */
-  int HI = (TARGET_BYTE_ORDER == BIG_ENDIAN);
-  int LO = (TARGET_BYTE_ORDER != BIG_ENDIAN);
+  int HI = (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG);
+  int LO = (TARGET_BYTE_ORDER != BFD_ENDIAN_BIG);
   double doub, flt1, flt2;	/* doubles extracted from raw hex data */
   int inv1, inv2, inv3;
 
@@ -2806,7 +2806,7 @@ do_fp_register_row (int regnum)
     }
   else
     {				/* eight byte registers: print each one as float AND as double. */
-      int offset = 4 * (TARGET_BYTE_ORDER == BIG_ENDIAN);
+      int offset = 4 * (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG);
 
       memcpy (dbl_buffer, raw_buffer[HI], 2 * REGISTER_RAW_SIZE (FP0_REGNUM));
       flt1 = unpack_double (builtin_type_float,
@@ -2875,7 +2875,7 @@ do_gp_register_row (int regnum)
       for (byte = 0; byte < (MIPS_REGSIZE - REGISTER_VIRTUAL_SIZE (regnum)); byte++)
 	printf_filtered ("  ");
       /* Now print the register value in hex, endian order. */
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	for (byte = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
 	     byte < REGISTER_RAW_SIZE (regnum);
 	     byte++)
@@ -3218,9 +3218,9 @@ return_value_location (struct type *valtype,
 	{
 	  /* We need to break a 64bit float in two 32 bit halves and
 	     spread them across a floating-point register pair. */
-	  lo->buf_offset = TARGET_BYTE_ORDER == BIG_ENDIAN ? 4 : 0;
-	  hi->buf_offset = TARGET_BYTE_ORDER == BIG_ENDIAN ? 0 : 4;
-	  lo->reg_offset = ((TARGET_BYTE_ORDER == BIG_ENDIAN
+	  lo->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
+	  hi->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 0 : 4;
+	  lo->reg_offset = ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 			     && REGISTER_RAW_SIZE (FP0_REGNUM) == 8)
 			    ? 4 : 0);
 	  hi->reg_offset = lo->reg_offset;
@@ -3233,7 +3233,7 @@ return_value_location (struct type *valtype,
 	{
 	  /* The floating point value fits in a single floating-point
 	     register. */
-	  lo->reg_offset = ((TARGET_BYTE_ORDER == BIG_ENDIAN
+	  lo->reg_offset = ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 			     && REGISTER_RAW_SIZE (FP0_REGNUM) == 8
 			     && len == 4)
 			    ? 4 : 0);
@@ -3252,7 +3252,7 @@ return_value_location (struct type *valtype,
       int regnum = 2;
       lo->reg = regnum + 0;
       hi->reg = regnum + 1;
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 	  && len < MIPS_SAVED_REGSIZE)
 	{
 	  /* "un-left-justify" the value in the low register */
@@ -3261,7 +3261,7 @@ return_value_location (struct type *valtype,
 	  hi->reg_offset = 0;
 	  hi->len = 0;
 	}
-      else if (TARGET_BYTE_ORDER == BIG_ENDIAN
+      else if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 	       && len > MIPS_SAVED_REGSIZE	/* odd-size structs */
 	       && len < MIPS_SAVED_REGSIZE * 2
 	       && (TYPE_CODE (valtype) == TYPE_CODE_STRUCT ||
@@ -3289,7 +3289,7 @@ return_value_location (struct type *valtype,
 	      hi->len = 0;
 	    }
 	}
-      if (TARGET_BYTE_ORDER == BIG_ENDIAN
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 	  && REGISTER_RAW_SIZE (regnum) == 8
 	  && MIPS_SAVED_REGSIZE == 4)
 	{
@@ -3563,7 +3563,7 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
   memaddr &= (info->mach == bfd_mach_mips16 ? ~1 : ~3);
 
   /* Call the appropriate disassembler based on the target endian-ness.  */
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     return print_insn_big_mips (memaddr, info);
   else
     return print_insn_little_mips (memaddr, info);
@@ -3592,7 +3592,7 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
 unsigned char *
 mips_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 {
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       if (pc_is_mips16 (*pcptr))
 	{

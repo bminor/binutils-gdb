@@ -1701,7 +1701,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &local_symbols);
 
-      if (TARGET_BYTE_ORDER != BIG_ENDIAN)
+      if (TARGET_BYTE_ORDER != BFD_ENDIAN_BIG)
 	{
 	  /* On little-endian machines, this crud is never necessary,
 	     and, if the extra bytes contain garbage, is harmful.  */

@@ -242,7 +242,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
     }
 
   di.mach = TARGET_PRINT_INSN_INFO->mach;
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     di.endian = BFD_ENDIAN_BIG;
   else
     di.endian = BFD_ENDIAN_LITTLE;

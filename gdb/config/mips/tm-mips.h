@@ -225,7 +225,7 @@ void mips_register_convert_to_raw (struct type *virtual_type, int reg_nr,
    between memory and register formats.  */
 
 #define REGISTER_CONVERT_TO_TYPE(n, type, buffer)			\
-  do {if (TARGET_BYTE_ORDER == BIG_ENDIAN				\
+  do {if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG				\
 	  && REGISTER_RAW_SIZE (n) == 4					\
 	  && (n) >= FP0_REGNUM && (n) < FP0_REGNUM + 32			\
 	  && TYPE_CODE(type) == TYPE_CODE_FLT				\
@@ -236,7 +236,7 @@ void mips_register_convert_to_raw (struct type *virtual_type, int reg_nr,
 	memcpy (((char *)(buffer)), __temp, 4); }} while (0)
 
 #define REGISTER_CONVERT_FROM_TYPE(n, type, buffer)			\
-  do {if (TARGET_BYTE_ORDER == BIG_ENDIAN				\
+  do {if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG				\
 	  && REGISTER_RAW_SIZE (n) == 4					\
 	  && (n) >= FP0_REGNUM && (n) < FP0_REGNUM + 32			\
 	  && TYPE_CODE(type) == TYPE_CODE_FLT				\

@@ -2431,7 +2431,7 @@ disassemble_command (char *arg, int from_tty)
 static int
 print_insn (CORE_ADDR memaddr, struct ui_file *stream)
 {
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     TARGET_PRINT_INSN_INFO->endian = BFD_ENDIAN_BIG;
   else
     TARGET_PRINT_INSN_INFO->endian = BFD_ENDIAN_LITTLE;

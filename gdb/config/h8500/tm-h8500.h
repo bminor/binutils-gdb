@@ -29,7 +29,7 @@
 
 /* Define the bit, byte, and word ordering of the machine.  */
 
-#define TARGET_BYTE_ORDER BIG_ENDIAN
+#define TARGET_BYTE_ORDER BFD_ENDIAN_BIG
 
 /* Define the sizes of integers and pointers.  */
 

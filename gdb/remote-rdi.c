@@ -243,7 +243,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
   if (rslt != adp_ok)
     error ("Could not open device \"%s\"", name);
 
-  gdb_config.bytesex = 2 | (TARGET_BYTE_ORDER == BIG_ENDIAN ? 1 : 0);
+  gdb_config.bytesex = 2 | (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 1 : 0);
   gdb_config.fpe = 1;
   gdb_config.rditype = 2;
   gdb_config.heartbeat_on = 1;

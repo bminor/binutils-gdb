@@ -95,7 +95,7 @@
    from the msp in the memory stack. If msp is set higher than the dummy code,
    an ESF may clobber this code. */
 
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
+#if TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 #define NOP_INSTR  0x70400101
 #else /* Target is little endian */
 #define NOP_INSTR  0x01014070

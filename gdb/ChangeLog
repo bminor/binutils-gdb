@@ -1,3 +1,22 @@
+2002-01-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* defs.h (BIG_ENDIAN): Delete macro definition.
+	* a29k-tdep.c, arch-utils.c, arm-tdep.c, ax-gdb.c, ch-exp.c,
+	coffread.c, cris-tdep.c, d10v-tdep.c, d30v-tdep.c, defs.h,
+	findvar.c, infcmd.c, mem-break.c, mips-tdep.c, mn10300-tdep.c,
+	printcmd.c, remote-os9k.c, remote-rdi.c, remote-rdp.c,
+	remote-sim.c, remote.c, rs6000-tdep.c, sh-tdep.c, sparcl-tdep.c,
+	stabsread.c, valops.c, valprint.c, config/a29k/tm-a29k.h,
+	config/a29k/tm-vx29k.h, config/arm/tm-arm.h,
+	config/d30v/tm-d30v.h, config/fr30/tm-fr30.h,
+	config/h8300/tm-h8300.h, config/h8500/tm-h8500.h,
+	config/m32r/tm-m32r.h, config/m68k/tm-m68k.h,
+	config/m88k/tm-m88k.h, config/mips/tm-mips.h, config/pa/tm-hppa.h,
+	config/sparc/tm-sparc.h, config/z8k/tm-z8k.h, mi/mi-cmd-disas.c,
+	mi/mi-main.c: Replace BIG_ENDIAN with BFD_ENDIAN_BIG.
+	* gdbarch.sh: Replace BIG_ENDIAN with BFD_ENDIAN_BIG.
+	* gdbarch.c: Re-generate.
+
 2002-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* thread-db.c (thread_db_new_objfile): Do not enable thread_db

@@ -52,7 +52,7 @@
 
 #define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
-#define TARGET_BYTE_ORDER BIG_ENDIAN
+#define TARGET_BYTE_ORDER BFD_ENDIAN_BIG
 
 #define R0_REGNUM  0
 #define R1_REGNUM  1

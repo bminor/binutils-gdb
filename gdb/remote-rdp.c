@@ -353,7 +353,7 @@ rdp_init (int cold, int tty)
 		    sync = 1;
 		    break;
 		  case RDP_RES_VALUE_BIG_ENDIAN:
-		    target_byte_order = BIG_ENDIAN;
+		    target_byte_order = BFD_ENDIAN_BIG;
 		    sync = 1;
 		    break;
 		  default:

@@ -622,7 +622,7 @@ download (char *target_name, char *args, int from_tty,
 					    sizeof (marker));
 		  if (strncmp (marker.signature, "DaTa", 4) == 0)
 		    {
-		      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+		      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 			section_address = bfd_getb32 (marker.sdata);
 		      else
 			section_address = bfd_getl32 (marker.sdata);

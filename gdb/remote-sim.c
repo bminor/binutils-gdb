@@ -477,7 +477,7 @@ gdbsim_open (char *args, int from_tty)
     {
       switch (TARGET_BYTE_ORDER)
 	{
-	case BIG_ENDIAN:
+	case BFD_ENDIAN_BIG:
 	  strcat (arg_buf, " -E big");
 	  break;
 	case BFD_ENDIAN_LITTLE:

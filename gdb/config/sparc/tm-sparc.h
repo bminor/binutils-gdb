@@ -159,7 +159,7 @@ extern int sparc_intreg_size (void);
   "y", "psr", "wim", "tbr", "pc", "npc", "fpsr", "cpsr" 	\
 }
 
-#define TARGET_BYTE_ORDER BIG_ENDIAN
+#define TARGET_BYTE_ORDER BFD_ENDIAN_BIG
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
