@@ -1,3 +1,14 @@
+Wed Mar 16 16:43:33 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* netbsd386.c (N_SET_FLAGS): Don't nuke the machine id field.
+	From sukes@glue.umd.edu (Tasuki Hirata).
+
+Wed Mar 16 07:55:54 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* aoutf1.h (4 places): Use a simple #if on ARCH_SIZE, rather than
+	all that convoluted stuff with NAME, CAT3, etc.  The convoluted
+	stuff broke for SunOS4 /bin/cc (due to DEFUN elimination, I guess).
+
 Wed Mar 16 00:02:05 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_prep_for_fixups): Detect section symbols based
