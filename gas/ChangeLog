@@ -1,3 +1,9 @@
+2001-02-02  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tc-m68hc11.c (relaxable_symbol): Relax externally visible symbols
+	because there is no support for shared libraries and these symbols
+	can't be overridden (unless they are weak).
+
 2001-02-01  Momchil Velikov  <velco@fadata.bg>
 
 	* dwarf2dbg.c (out_debug_abbrev): Terminate the abbreviations

@@ -2543,14 +2543,15 @@ md_convert_frag (abfd, sec, fragP)
     }
 }
 
-/* On an ELF system, we can't relax an externally visible symbol,
-   as well as a weak symbol.  The weak symbol can be overriden
-   at final link time by a non weak symbol.  */
+/* On an ELF system, we can't relax a weak symbol.  The weak symbol
+   can be overridden at final link time by a non weak symbol.  We can
+   relax externally visible symbol because there is no shared library
+   and such symbol can't be overridden (unless they are weak).  */
 static int
 relaxable_symbol (symbol)
      symbolS *symbol;
 {
-  return ! S_IS_EXTERNAL (symbol) && ! S_IS_WEAK (symbol);
+  return ! S_IS_WEAK (symbol);
 }
 
 /* Force truly undefined symbols to their maximum size, and generally set up
