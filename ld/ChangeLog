@@ -1,3 +1,11 @@
+2002-09-17  Stan Cox  <scox@redhat.com>
+
+	* emulparams/elf32bmipn32-defs.sh: New file.
+	* emulparams/elf32bmipn32.sh: Use elf32bmipn32-defs.sh.
+	* emulparams/elf32btsmipn32.sh: Likewise.
+	* emulparams/elf64bmip.sh: Likewise.
+	* emulparams/elf64btsmip.sh: Likewise.
+
 2002-09-16  Bruno Haible  <bruno@clisp.org>
 
 	* emulparams/elf_i386_fbsd.sh: Set OUTPUT_FORMAT to

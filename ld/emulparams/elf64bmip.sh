@@ -1,8 +1,10 @@
-. ${srcdir}/emulparams/elf32bmipn32.sh
+. ${srcdir}/emulparams/elf32bmipn32-defs.sh
 OUTPUT_FORMAT="elf64-bigmips"
 BIG_OUTPUT_FORMAT="elf64-bigmips"
 LITTLE_OUTPUT_FORMAT="elf64-littlemips"
 ELFSIZE=64
+GENERATE_SHLIB_SCRIPT=yes
+LIB_PATH=/usr/lib64
 
 # IRIX6 defines these symbols.  0x40 is the size of the ELF header.
 EXECUTABLE_SYMBOLS="
