@@ -186,5 +186,15 @@ else
 fi
 AC_SUBST(TESTBFDLIB)
 
+target_vendor=${target_vendor=$host_vendor}
+case "$target_vendor" in
+  hp) EXTRA_SHLIB_EXTENSION=".sl" ;;
+  *)  EXTRA_SHLIB_EXTENSION= ;;
+esac
+if test x${EXTRA_SHLIB_EXTENSION} != x ; then
+  AC_DEFINE_UNQUOTED(EXTRA_SHLIB_EXTENSION, "$EXTRA_SHLIB_EXTENSION",
+   [Additional extension a shared object might have.])
+fi
+
 AC_OUTPUT(Makefile po/Makefile.in:po/Make-in,
 [sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile])

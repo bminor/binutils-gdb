@@ -1,3 +1,8 @@
+Wed Nov  3 23:31:19 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_open_dynamic_archive):
+	Clean up code to use EXTRA_SHLIB_EXTENSION.
+
 1999-11-03  Nick Clifton  <nickc@cygnus.com>
 
 	* emulparams/elf32mcore.sh (OUTPUT_FORMAT): Change to little endian.
@@ -120,6 +125,15 @@ Wed Sep 15 02:47:43 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): allow for 
 	terminating null.
+
+1999-09-14  Ulrich Drepper  <drepper@cygnus.com>
+
+	* configure.in: Define EXTRA_SHLIB_EXTENSION to ".sl" for HP target.
+	* config.in: Add EXTRA_SHLIB_EXTENSION.
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_open_dynamic_archive):
+	Search for second shared lib extension only if EXTRA_SHLIB_EXTENSION
+	is defined.
 
 1999-09-14  Nick Clifton  <nickc@cygnus.com>
 
