@@ -1,4 +1,38 @@
+Mon May 17 15:00:33 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* hppa.c (assemble_3, dis_assemble_3, assemble_12,
+	dis_assemble_12, assemble_17, dis_assemble_17, assemble_21,
+	dis_assemble_21, sign_ext, ones, sign_unext, low_sign_ext,
+	low_sign_unext, round_down, round, round_up, L, R, LS, RS, LD, RD,
+	LR, RR, hppa_field_adjust): New functions.
+
+Mon May 17 10:04:16 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_set_symbol_info): Added support for indirect
+	stabs symbols, including new indirect_ptr_ptr argument.
+	(ecoff_slurp_symbol_table): Pass new argument in calls to
+	ecoff_set_symbol_info.
+
+Fri May 14 00:05:06 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* configure.in: For m68k sysv systems, use m68k-coff.
+
+	* config/hppa-elf.mt (TDEFINES): Don't define DEFAULT_VECTOR here.
+	(TDEFAULTS): Define it here.  Use the new name.
+
+	* elf32-hppa.c (elf_hppa_backend_data): Delete; rely on default
+	values instead.
+
+	* reloc.c (bfd_reloc_code_real_type): Add some HPPA reloc types.
+
+	* aix386-core.c (NO_GETS): Fix PROTO invocation to have correct
+	number of arguments.
+	(aix386_core_file_p): Initialize core_size to correct value.
+
 Wed May 12 14:39:59 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (CC_FOR_BUILD): New variable, set to $(CC).
+	(FLAGS_TO_PASS): Pass down CC_FOR_BUILD.
 
 	* bout.c (aout32_slurp_extended_name_table): Define to be
 	_bfd_slurp_extended_name_table rather than bfd_true.
@@ -14,6 +48,11 @@ Wed May 12 14:39:59 1993  Ian Lance Taylor  (ian@cygnus.com)
 Tue May 11 00:33:31 1993  John Gilmore  (gnu@cygnus.com)
 
 	* coff-m88k.c (m88kbcs_vec):  Symbols have underbars.
+
+Mon May 10 05:55:45 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* hosts/miniframe.h: New file.
+	* configure.host: Use it.
 
 Sun May  9 16:36:59 1993  Fred Fish  (fnf@cygnus.com)
 

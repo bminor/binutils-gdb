@@ -23,6 +23,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 
+/* @@FIXME This is not a reasonable set of conditions to permit
+   cross-compilation, obviously.  It also isn't enough to support hppa-elf
+   targets either.  Can we eliminate the HPUX or BSD dependencies, or
+   at least get the conditionals more localized?  */
 #if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
 
 #include "libbfd.h"
@@ -627,6 +631,343 @@ hppa_core_file_matches_executable_p  (core_bfd, exec_bfd)
 {
   return true;          /* FIXME, We have no way of telling at this point */
 }
+
+/* Miscellaneous Support Functions -- Control Structures and Functions
+   for the PA.  */
+
+unsigned int assemble_3(x)
+     unsigned int x;
+{
+  return ( ( (x & 1 ) << 2 ) | ( ( x & 6 ) >> 1 ) ) & 7; 
+}
+
+void dis_assemble_3(x,r)
+     unsigned int x;
+     unsigned int *r;
+{
+  *r = ( ( (x & 4 ) >> 2 ) | ( ( x & 3 ) << 1 ) ) & 7;
+}
+
+unsigned int assemble_12(x,y)
+     unsigned int x,y;
+{
+  return ( ( ( y & 1 ) << 11 ) | ( ( x & 1 ) << 10 ) | ( ( x & 0x7fe ) >> 1) ) & 0xfff;
+}
+
+void dis_assemble_12(as12,x,y)
+     unsigned int as12;
+     unsigned int *x,*y;
+{
+  *y = ( as12 & 0x800 ) >> 11;
+  *x = ( ( as12 & 0x3ff ) << 1 ) | ( ( as12 & 0x400 ) >> 10 );
+}
+
+unsigned long assemble_17(x,y,z)
+     unsigned int x,y,z;
+{
+  unsigned long temp;
+
+  temp = ( ( z &    1 ) << 16 ) |
+	 ( ( x & 0x1f ) << 11 ) |
+	 ( ( y &    1 ) << 10 ) |
+ 	 ( ( y & 0x7fe ) >> 1);
+  return temp & 0x1ffff;
+}
+
+void dis_assemble_17(as17,x,y,z)
+     unsigned int as17;
+     unsigned int *x,*y,*z;
+{
+
+  *z =     ( as17 & 0x10000 ) >> 16;
+  *x =     ( as17 & 0x0f800 ) >> 11;
+  *y = ( ( ( as17 & 0x00400 ) >> 10 ) | ( ( as17 & 0x3ff ) << 1 ) ) & 0x7ff;
+}
+
+unsigned long assemble_21(x)
+     unsigned int x;
+{
+  unsigned long temp;
+
+  temp = ( ( x &        1 ) << 20 ) |
+	 ( ( x &    0xffe ) <<  8 ) |
+	 ( ( x &   0xc000 ) >>  7 ) |
+	 ( ( x & 0x1f0000 ) >> 14 ) |
+	 ( ( x & 0x003000 ) >> 12 );
+  return temp & 0x1fffff;
+}
+
+void dis_assemble_21(as21,x)
+     unsigned int as21,*x;
+{
+  unsigned long temp;
+
+
+  temp  = ( as21 & 0x100000 ) >> 20;
+  temp |= ( as21 & 0x0ffe00 ) >> 8;
+  temp |= ( as21 & 0x000180 ) << 7;
+  temp |= ( as21 & 0x00007c ) << 14;
+  temp |= ( as21 & 0x000003 ) << 12;
+  *x = temp;
+}
+
+unsigned long sign_ext(x,len)
+     unsigned int x,len;
+{
+  unsigned int sign;
+  unsigned int result;
+  unsigned int len_ones;
+  int i;
+
+  i = 0;
+  len_ones = 0;
+  while ( i < len ) {
+    len_ones = (len_ones << 1) | 1;
+    i++;
+  }
+
+  sign = (x >> (len-1)) & 1;
+
+  if ( sign )
+    result = ( ~0 ^ len_ones ) | ( len_ones & x );
+  else
+    result = len_ones & x;
+
+  return result;
+}
+
+static unsigned int ones(n)
+     int n;
+{
+  unsigned int len_ones;
+  int i;
+
+  i = 0;
+  len_ones = 0;
+  while ( i < n ) {
+    len_ones = (len_ones << 1) | 1;
+    i++;
+  }
+
+  return len_ones;
+}
+
+void sign_unext(x,len,result)
+     unsigned int x,len;
+     unsigned int *result;
+{
+  unsigned int len_ones;
+
+  len_ones = ones(len);
+
+  *result = x & len_ones;
+}
+
+unsigned long low_sign_ext(x,len)
+     unsigned int x,len;
+{
+  unsigned int temp1,temp2;
+  unsigned int len_ones;
+
+  len_ones = ones(len);
+
+  temp1 = ( x & 1 ) << (len-1);
+  temp2 = ( ( x & 0xfffffffe ) & len_ones ) >> 1;
+  return sign_ext( (temp1 | temp2),len);
+}
+
+void low_sign_unext(x,len,result)
+     unsigned int x,len;
+     unsigned int *result;
+{
+  unsigned int temp;
+  unsigned int sign;
+  unsigned int rest;
+  unsigned int one_bit_at_len;
+  unsigned int len_ones;
+
+  len_ones = ones(len);
+  one_bit_at_len = 1 << (len-1);
+
+  sign_unext(x,len,&temp);
+  sign = temp & one_bit_at_len;
+  sign >>= (len-1);
+
+  rest = temp & ( len_ones ^ one_bit_at_len );
+  rest <<= 1;
+
+  *result = rest | sign;
+}
+
+/* These work when 'y' is a power of two only. */
+
+long
+round_down(x,y)
+long x,y;
+{
+	return x & ~(y-1);
+}
+
+long
+round(x,y)
+long x,y;
+{
+	return (x + y/2) & ~(y-1);
+}
+
+long
+round_up(x,y)
+long x,y;
+{
+	return x - (x | ~(y-1));
+}
+
+/*	L(Symbol, Addend):	*/
+/*		round_down (Symbol + Addend, 2048)	*/
+
+long
+L(Symbol, Addend)
+{
+	return (round_down(Symbol + Addend, 2048)) >> 11;
+}
+
+/*	R(Symbol, Addend):	*/
+/*		Symbol + Addend - round_down (Symbol + Addend, 2048)	*/
+
+long
+R(Symbol, Addend)
+{
+	return Symbol + Addend - round_down (Symbol + Addend, 2048);
+}
+
+/*	LS(Symbol, Addend):	*/
+/*		round (Symbol + Addend, 2048)	*/
+
+long
+LS(Symbol, Addend)
+{
+	return round (Symbol + Addend, 2048);
+}
+
+/*	RS(Symbol, Addend):	*/
+/*		Symbol + Addend - round (Symbol + Addend, 2048)	*/
+
+long
+RS(Symbol, Addend)
+{
+	return Symbol + Addend - round (Symbol + Addend, 2048);
+}
+
+/*	LD(Symbol, Addend):	*/
+/*		round_up (Symbol + Addend, 2048)	*/
+
+long
+LD(Symbol, Addend)
+{
+	return (round_up (Symbol + Addend, 2048)) >> 11;
+}
+
+/*	RD(Symbol, Addend):	*/
+/*		Symbol + Addend - round_up (Symbol + Addend, 2048)	*/
+
+long
+RD(Symbol, Addend)
+{
+	return Symbol + Addend - round_up (Symbol + Addend, 2048);
+}
+
+/*	LR(Symbol, Addend):	*/
+/*		round_down (Symbol, 2048) + round (Addend, 8192)	*/
+
+long
+LR(Symbol, Addend)
+{
+	return (round_down (Symbol, 2048) + round (Addend, 8192)) >> 11;
+}
+
+/*	RR(Symbol, Addend):	*/
+/*		Symbol - round_down (Symbol, 2048) +	*/
+/*			Addend - round (Addend, 8192)	*/
+
+long
+RR(Symbol, Addend)
+{
+	return Symbol
+		- round_down (Symbol, 2048)
+			+ Addend - round (Addend, 8192);
+}
+
+unsigned long
+DEFUN(hppa_field_adjust, (value,constant_value,r_field),
+      unsigned long value AND
+      unsigned long constant_value AND
+      unsigned short r_field)
+{
+	unsigned long init_value = value;
+	value += constant_value;
+	switch (r_field) {
+	case e_fsel:        /* F  : no change                      */
+		break;
+
+	case e_lssel:       /* LS : if (bit 21) then add 0x800
+		                    arithmetic shift right 11 bits */
+		if ( value & 0x00000400 )
+			value += 0x800;
+		value = (value & 0xfffff800) >> 11;
+		BFD_ASSERT(value == LS(init_value,constant_value));
+		break;
+
+	case e_rssel:       /* RS : Sign extend from bit 21        */
+		if ( value & 0x00000400 )
+			value |= 0xfffff800;
+		else
+			value &= 0x7ff;
+		BFD_ASSERT(value == RS(init_value,constant_value));
+		break;
+
+	case e_lsel:        /* L  : Arithmetic shift right 11 bits */
+		value = (value & 0xfffff800) >> 11;
+		BFD_ASSERT(value == L(init_value,constant_value));
+		break;
+
+	case e_rsel:        /* R  : Set bits 0-20 to zero          */
+		value = value & 0x7ff;
+		BFD_ASSERT(value == R(init_value,constant_value));
+		break;
+
+	case e_ldsel:       /* LD : Add 0x800, arithmetic shift
+		                    right 11 bits                  */
+		value += 0x800;
+		value = (value & 0xfffff800) >> 11;    
+		BFD_ASSERT(value == LD(init_value,constant_value));
+		break;
+
+	case e_rdsel:       /* RD : Set bits 0-20 to one           */
+		value |= 0xfffff800;
+		BFD_ASSERT(value == RD(init_value,constant_value));
+		break;
+
+	case e_lrsel:       /* LR : L with "rounded" constant      */
+		value = value + ((constant_value + 0x1000) & 0xffffe000);
+		value = (value & 0xfffff800) >> 11;
+		BFD_ASSERT(value == LR(init_value,constant_value));
+		break;
+
+	case e_rrsel:       /* RR : R with "rounded" constant      */
+		value = value + ((constant_value + 0x1000) & 0xffffe000);
+		value = (value & 0x7ff) + constant_value - ((constant_value + 0x1000) & 0xffffe000);
+		BFD_ASSERT(value == RR(init_value,constant_value));
+		break;
+
+	default:
+		fprintf(stderr,"Unrecognized field_selector 0x%02x\n", r_field);
+		break;
+  }
+  return value;
+	
+}
+
+/* End of miscellaneous support functions. */
 #endif /* HOST_HPPAHPUX */
 
 #ifdef HOST_HPPABSD
