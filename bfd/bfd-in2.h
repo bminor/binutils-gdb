@@ -1212,13 +1212,13 @@ enum bfd_architecture
 #define bfd_mach_z8002		2
   bfd_arch_h8500,      /* Hitachi H8/500 */
   bfd_arch_sh,         /* Hitachi SH */
-  /* start-sanitize-tic80 */
-  bfd_arch_tic80,	/* TI TMS320C80 (MVP) */
-  /* end-sanitize-tic80 */
   bfd_arch_alpha,      /* Dec Alpha */
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
   bfd_arch_w65,        /* WDC 65816 */
+  /* start-sanitize-tic80 */
+  bfd_arch_tic80,      /* TI TMS320c80 (MVP) */
+  /* end-sanitize-tic80 */
   /* start-sanitize-v850 */
   bfd_arch_v850,       /* NEC V850 */
   /* end-sanitize-v850 */

@@ -1,4 +1,11 @@
 start-sanitize-tic80
+Mon Dec 30 16:12:58 1996  Fred Fish  <fnf@cygnus.com>
+
+	* archures.c (enum bfd_architecture): Add bfd_arch_tic80
+	for TI TMS320c80 (MVP).
+	(bfd_archures_list): Add bfd_tic80_arch.
+	* bfd-in2.h: Regenerate by running "make headers".
+
 Sun Dec 29 16:18:52 1996  Fred Fish  <fnf@cygnus.com>
 
 	* cpu-tic80.c (bfd_tic80_arch): Add struct.
@@ -13,7 +20,7 @@ Mon Dec 30 11:54:56 1996  Ian Lance Taylor  <ian@cygnus.com>
 	is configured with --with-mmap.
 
 start-sanitize-tic80
-Sun Dec 29 10:48:57 1996  Fred Fish  <fnf@toadfish.ninemoons.com>
+Sun Dec 29 10:48:57 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (BFD32_BACKENDS): Add coff-tic80.o
 	(ALL_MACHINES): Add cpu-tic80.o
