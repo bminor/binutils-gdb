@@ -101,18 +101,20 @@ gdb_test "handle SIGSEGV" "SIGSEGV.*Yes.*Yes.*Yes.*Segmentation fault"
 # through the SEGV works.
 
 proc test_segv { name tag bt_from_segv bt_from_keeper } {
-    gdb_test continue "Breakpoint.* bowler.*" "${name} starts with the bowler"
-    gdb_test "set test = $tag"
-    gdb_test continue "Program received signal SIGSEGV.*" "${name} got SEGV"
-    gdb_test backtrace $bt_from_segv "backtrace segv for ${name}"
-    gdb_test continue "Breakpoint.* keeper.*" "${name} through to keeper"
-    gdb_test backtrace $bt_from_keeper "backtrace keeper for ${name}"
+    gdb_test continue "Breakpoint.* bowler.*" "${name}; start with the bowler"
+    # NB: Don't use $tag in the testname - changes across systems.
+    gdb_test "set test = $tag" "" "${name}; select the pointer type"
+    gdb_test continue "Program received signal SIGSEGV.*" \
+	"${name}; take the SIGSEGV"
+    gdb_test backtrace $bt_from_segv "${name}; backtrace from SIGSEGV"
+    gdb_test continue "Breakpoint.* keeper.*" "${name}; continue to the keeper"
+    gdb_test backtrace $bt_from_keeper "${name}; backtrace from keeper through SIGSEGV"
 }
 
-test_segv data-read data_read \
+test_segv "data read" data_read \
     {#0 .* bowler .*#1  .* main .*} \
     {#0 .* keeper .*#1  .* handler .*#2 .* bowler .*#3  .* main .*}
-test_segv data-write data_write \
+test_segv "data write" data_write \
     {#0 .* bowler .*#1  .* main .*} \
     {#0 .* keeper .*#1  .* handler .*#2 .* bowler .*#3  .* main .*}
 test_segv code $function_pointer \
