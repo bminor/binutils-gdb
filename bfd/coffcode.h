@@ -1084,6 +1084,22 @@ machine = 0;
     machine = 88100;
     break;
 #endif
+#ifdef Z8KMAGIC
+   case Z8KMAGIC:
+    arch = bfd_arch_z8k;
+    switch (internal_f->f_flags & F_MACHMASK) 
+{
+     case F_Z8001:
+      machine = bfd_mach_z8001;
+      break;
+     case F_Z8002:
+      machine = bfd_mach_z8002;
+      break;
+     default:
+      goto fail;
+    }
+    break;
+#endif
 #ifdef I960
 #ifdef I960ROMAGIC
   case I960ROMAGIC:
@@ -1121,6 +1137,13 @@ machine = 0;
   case U802TOCMAGIC:
     arch = bfd_arch_rs6000;
     machine = 6000;
+    break;
+#endif
+
+#ifdef WE32KMAGIC
+  case WE32KMAGIC:
+    arch = bfd_arch_we32k;
+    machine = 0;
     break;
 #endif
 
@@ -1359,7 +1382,8 @@ DEFUN(coff_renumber_symbols,(bfd_ptr),
     int i;
 
     newsyms = (asymbol **) bfd_alloc_by_size_t (bfd_ptr,
-						sizeof (asymbol *) * symbol_count);
+						sizeof (asymbol *)
+						* (symbol_count + 1));
     bfd_ptr->outsymbols = newsyms;
     for (i = 0; i < symbol_count; i++)
       if (symbol_ptr_ptr[i]->section != &bfd_und_section)
@@ -1367,6 +1391,7 @@ DEFUN(coff_renumber_symbols,(bfd_ptr),
     for (i = 0; i < symbol_count; i++)
       if (symbol_ptr_ptr[i]->section == &bfd_und_section)
 	*newsyms++ = symbol_ptr_ptr[i];
+    *newsyms = (asymbol *) NULL;
     symbol_ptr_ptr = bfd_ptr->outsymbols;
   }
 
@@ -1797,7 +1822,10 @@ DEFUN(coff_write_relocs,(abfd),
 	 to fold the addend into the section contents.  */
 
       if (q->addend != 0)
-	abort ();
+#ifdef R_IHCONST
+	if (q->howto->type != R_IHCONST)
+#endif
+	  abort ();
 #endif
 
       n.r_vaddr = q->address + s->vma;
@@ -2040,7 +2068,22 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
       unsigned short *flagsp)
 {
   switch (bfd_get_arch(abfd)) {
-
+#ifdef Z8KMAGIC
+   case bfd_arch_z8k:
+    *magicp = Z8KMAGIC;
+    switch (bfd_get_mach(abfd)) 
+    {
+     case bfd_mach_z8001:
+      *flagsp = F_Z8001;
+      break;
+     case bfd_mach_z8002:
+      *flagsp = F_Z8002;
+      break;
+     default:
+      return false;
+    }
+    return true;
+#endif
 #ifdef I960ROMAGIC
 
     case bfd_arch_i960:
@@ -2089,11 +2132,13 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
   case bfd_arch_i386:
     *magicp = I386MAGIC;
     return true;
+    break;
 #endif
 #ifdef MC68MAGIC
   case bfd_arch_m68k:
     *magicp = MC68MAGIC;
     return true;
+    break;
 #endif
 
 #ifdef MC88MAGIC
@@ -2118,9 +2163,17 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
       break;
 #endif
 
+#ifdef WE32KMAGIC
+  case bfd_arch_we32k:
+    *magicp = WE32KMAGIC;
+    return true;
+    break;
+#endif
+
 #ifdef U802TOCMAGIC
   case bfd_arch_rs6000:
     *magicp = U802TOCMAGIC;
+    return true;
     break;
 #endif
 
@@ -2604,10 +2657,10 @@ DEFUN(coff_write_object_contents,(abfd),
   internal_a.magic = PAGEMAGICBCS;
 #endif				/* M88 */
 
-#if M68 || I386 || MIPS
+#if M68 || I386 || MIPS || WE32K
 #define __A_MAGIC_SET__
   /* Never was anything here for the 68k */
-#endif				/* M88 */
+#endif				/* M68 || I386 || MIPS || WE32K */
 
 #if RS6000COFF_C
 #define __A_MAGIC_SET__

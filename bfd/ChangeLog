@@ -1,3 +1,10 @@
+Fri Sep 11 15:37:06 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coffcode.h (coff_renumber_symbols): set the last renumbered
+	symbol pointer to NULL, as expected by coff_write_linenumbers.
+	(coff_write_relocs): apparently a non-zero addend is OK for reloc
+	type R_IHCONST used on the 29k.
+
 Thu Sep 10 13:28:24 1992  John Gilmore  (gnu@cygnus.com)
 
 	* opncls.c (bfd_fdopenr):  Determine whether to fdopen for
