@@ -1,3 +1,15 @@
+2000-01-03  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-dis.c (streq): New macro.
+	(strneq): New macro.
+	(force_thumb): ew local variable.
+	(parse_disassembler_option): New function: Parse a single, ARM
+	specific disassembler command line switch.
+	(parse_disassembler_option): Call parse_disassembler_option to
+	parse individual command line switches.
+	(print_insn_big_arm): Check force_thumb.
+	(print_insn_little_arm): Check force_thumb.
+
 1999-12-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386-dis.c (grps[]): Correct GRP5 FF/3 from "call" to "lcall".

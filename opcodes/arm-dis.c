@@ -1,5 +1,5 @@
 /* Instruction printing code for the ARM
-   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc. 
+   Copyright (C) 1994, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc. 
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
    Modification by James G. Smith (jsmith@cygnus.co.uk)
 
@@ -32,6 +32,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf/internal.h"
 #include "elf/arm.h"
 
+#ifndef streq
+#define streq(a,b) (strcmp ((a), (b)) == 0)
+#endif
+#ifndef strneq
+#define strneq(a,b,n) (strncmp ((a), (b), (n)) == 0)
+#endif
+
 static char * arm_conditional[] =
 {"eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc",
  "hi", "ls", "ge", "lt", "gt", "le", "", "nv"};
@@ -51,15 +58,22 @@ static char * arm_regnames_apcs[] =
 /* Choose which register name set to use.  */
 static char ** arm_regnames = arm_regnames_standard;
 
+static boolean force_thumb = false;
+
 static char * arm_fp_const[] =
 {"0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "0.5", "10.0"};
 
 static char * arm_shift[] = 
 {"lsl", "lsr", "asr", "ror"};
-
-static int print_insn_arm
-  PARAMS ((bfd_vma, struct disassemble_info *, long));
-
+
+/* Forward declarations.  */
+static void arm_decode_shift PARAMS ((long, fprintf_ftype, void *));
+static int  print_insn_arm   PARAMS ((bfd_vma, struct disassemble_info *, long));
+static int  print_insn_thumb PARAMS ((bfd_vma, struct disassemble_info *, long));
+static void parse_disassembler_option PARAMS ((char *));
+static void parse_disassembler_options PARAMS ((char *));
+
+/* Functions. */
 static void
 arm_decode_shift (given, func, stream)
      long given;
@@ -792,32 +806,63 @@ arm_toggle_regnames ()
 }
 
 static void
-parse_disassembler_options (options)
-     char * options;
+parse_disassembler_option (option)
+     char * option;
 {
-  if (options == NULL)
+  if (option == NULL)
     return;
       
-  if (strncmp (options, "reg-names-", 10) == 0)
+  if (strneq (option, "reg-names-", 10))
     {
-      options += 10;
+      option += 10;
       
-      if (strcmp (options, "std") == 0)
+      if (streq (option, "std"))
 	arm_regnames = arm_regnames_standard;
-      else if (strcmp (options, "apcs") == 0)
+      else if (streq (option, "apcs"))
 	arm_regnames = arm_regnames_apcs;
-      else if (strcmp (options, "raw") == 0)
+      else if (streq (option, "raw"))
 	arm_regnames = arm_regnames_raw;
       else
-	fprintf (stderr, "Unrecognised register name set: %s\n", options);
+	fprintf (stderr, "Unrecognised register name set: %s\n", option);
     }
+  else if (streq (option, "force-thumb"))
+    force_thumb = 1;
+  else if (streq (option, "no-force-thumb"))
+    force_thumb = 0;
   else
-    fprintf (stderr, "Unrecognised disassembler option: %s\n", options);
+    fprintf (stderr, "Unrecognised disassembler option: %s\n", option);
   
   return;
 }
 
-/* NOTE: There are no checks in these routines that the relevant number of data bytes exist */
+static void
+parse_disassembler_options (options)
+     char * options;
+{
+  char * space;
+  
+  if (options == NULL)
+    return;
+
+  do
+    {
+      space = strchr (options, ' ');
+
+      if (space)
+	{
+	  * space = '\0';
+	  parse_disassembler_option (options);
+	  * space = ' ';
+	  options = space + 1;
+	}
+      else
+	parse_disassembler_option (options);
+    }
+  while (space);
+}
+
+/* NOTE: There are no checks in these routines that the relevant number of
+   data bytes exist.  */
 
 int
 print_insn_big_arm (pc, info)
@@ -839,8 +884,9 @@ print_insn_big_arm (pc, info)
       info->disassembler_options = NULL;
     }
   
-  is_thumb = false;
-  if (info->symbols != NULL)
+  is_thumb = force_thumb;
+  
+  if (!is_thumb && info->symbols != NULL)
     {
       if (bfd_asymbol_flavour (*info->symbols) == bfd_target_coff_flavour)
 	{
@@ -919,10 +965,10 @@ print_insn_little_arm (pc, info)
       /* To avoid repeated parsing of this option, we remove it here.  */
       info->disassembler_options = NULL;
     }
+
+  is_thumb = force_thumb;
   
-  is_thumb = false;
-  
-  if (info->symbols != NULL)
+  if (!is_thumb && info->symbols != NULL)
     {
       if (bfd_asymbol_flavour (*info->symbols) == bfd_target_coff_flavour)
 	{
@@ -952,9 +998,10 @@ print_insn_little_arm (pc, info)
       status = info->read_memory_func (pc, (bfd_byte *) b, 2, info);
       b[3] = b[2] = 0;
     }
+  
   if (status != 0)
     {
-      (*info->memory_error_func) (status, pc, info);
+      info->memory_error_func (status, pc, info);
       return -1;
     }
 
