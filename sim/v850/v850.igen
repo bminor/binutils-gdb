@@ -332,7 +332,48 @@ rrrrr,111111,RRRRR + wwwww,01011000000:XI:::div
 rrrrr!0,000010,RRRRR!0:I:::divh
 "divh r<reg1>, r<reg2>"
 {
-  COMPAT_1 (OP_40 ());
+  unsigned32 ov, s, z;
+  signed long int op0, op1, result;
+
+  trace_input ("divh", OP_REG_REG, 0);
+
+  PC = cia;
+  OP[0] = instruction_0 & 0x1f;
+  OP[1] = (instruction_0 >> 11) & 0x1f;
+
+  /* Compute the result.  */
+  op0 = EXTEND16 (State.regs[OP[0]]);
+  op1 = State.regs[OP[1]];
+  
+  if (op0 == 0xffffffff && op1 == 0x80000000)
+    {
+      result = 0x80000000;
+      ov = 1;
+    }
+  else if (op0 != 0)
+    {
+      result = op1 / op0;
+      ov = 0;
+    }
+  else
+    {
+      result = 0x0;
+      ov = 1;
+    }
+  
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0) | (ov ? PSW_OV : 0));
+
+  trace_output (OP_REG_REG);
+
+  PC += 2;
+  nia = PC;
 }
 
 rrrrr,111111,RRRRR + wwwww,01010000000:XI:::divh

@@ -771,50 +771,6 @@ OP_6E0 ()
   return 4;
 }
 
-/* divh reg1, reg2 */
-int
-OP_40 ()
-{
-  unsigned int op0, op1, result, ov, s, z;
-  int temp;
-
-  trace_input ("divh", OP_REG_REG, 0);
-
-  /* Compute the result.  */
-  temp = EXTEND16 (State.regs[ OP[0] ]);
-  op0 = temp;
-  op1 = State.regs[OP[1]];
-  
-  if (op0 == 0xffffffff && op1 == 0x80000000)
-    {
-      result = 0x80000000;
-      ov = 1;
-    }
-  else if (op0 != 0)
-    {
-      result = op1 / op0;
-      ov = 0;
-    }
-  else
-    {
-      result = 0x0;
-      ov = 1;
-    }
-  
-  /* Compute the condition codes.  */
-  z = (result == 0);
-  s = (result & 0x80000000);
-  
-  /* Store the result and condition codes.  */
-  State.regs[OP[1]] = result;
-  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
-	  | (ov ? PSW_OV : 0));
-  trace_output (OP_REG_REG);
-
-  return 2;
-}
-
 /* cmp reg, reg */
 int
 OP_1E0 ()
