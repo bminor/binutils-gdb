@@ -1,3 +1,9 @@
+2002-05-01  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/completion.exp: Handle completions of "./Make" for
+	more than one completion possibility, as is the case when we
+	build and test in the source tree.
+
 2002-04-29  Anthony Green  <green@redhat.com>
 
 	* gdb.java/jmisc1.exp: New file.

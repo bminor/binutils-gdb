@@ -1,4 +1,4 @@
-# Copyright 1998, 1999 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -631,12 +631,18 @@ gdb_expect  {
 #
 # So, we avoid long lines.  We `cd' to ${objdir} first, and then do
 # the completion relative to the current directory.
+#
+# Note that if we are building in the source tree, then there will be
+# more than one completion for ./Make, so we need to handle that also.
+# A better long term solution might be to create a temporary directory,
+# populate it with a set of known names, and use that directory to
+# test completions.
 
 gdb_test "cd ${objdir}" "Working directory ${objdir}.*" "cd to \${objdir}"
 send_gdb "file ./Make\t"
 sleep 1
 gdb_expect  {
-        -re "file ./Makefile.*$"\
+        -re "^file ./Make(\\\x07|)file.*$"\
             { send_gdb "\n"
               gdb_expect {
                       -re "\r\nA program is being debugged already\\.  Kill it\\? \\(y or n\\) $"\
