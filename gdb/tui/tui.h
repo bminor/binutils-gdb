@@ -21,18 +21,9 @@
 
 #ifndef TUI_H
 #define TUI_H
-#if defined (HAVE_NCURSES_H)
-#include <ncurses.h>
-#elif defined (HAVE_CURSES_H)
-#include <curses.h>
-#endif
 
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
-
+#include <string.h>
 #include "ansidecl.h"
 
 #if defined(reg)
@@ -96,23 +87,6 @@ TuiWinType, *TuiWinTypePtr;
 	 int x, y;
        }
 TuiPoint, *TuiPointPtr;
-
-/* Generic window information */
-     typedef struct _TuiGenWinInfo
-       {
-	 WINDOW *handle;	/* window handle */
-	 TuiWinType type;	/* type of window */
-	 int width;		/* window width */
-	 int height;		/* window height */
-	 TuiPoint origin;	/* origin of window */
-	 OpaquePtr content;	/* content of window */
-	 int contentSize;	/* Size of content (# of elements) */
-	 int contentInUse;	/* Can it be used, or is it already used? */
-	 int viewportHeight;	/* viewport height */
-	 int lastVisibleLine;	/* index of last visible line */
-	 int isVisible;		/* whether the window is visible or not */
-       }
-TuiGenWinInfo, *TuiGenWinInfoPtr;
 
 /* GENERAL TUI FUNCTIONS */
 /* tui.c */

@@ -22,6 +22,29 @@
 #ifndef TUI_DATA_H
 #define TUI_DATA_H
 
+#if defined (HAVE_NCURSES_H)
+#include <ncurses.h>
+#elif defined (HAVE_CURSES_H)
+#include <curses.h>
+#endif
+
+/* Generic window information */
+     typedef struct _TuiGenWinInfo
+       {
+	 WINDOW *handle;	/* window handle */
+	 TuiWinType type;	/* type of window */
+	 int width;		/* window width */
+	 int height;		/* window height */
+	 TuiPoint origin;	/* origin of window */
+	 OpaquePtr content;	/* content of window */
+	 int contentSize;	/* Size of content (# of elements) */
+	 int contentInUse;	/* Can it be used, or is it already used? */
+	 int viewportHeight;	/* viewport height */
+	 int lastVisibleLine;	/* index of last visible line */
+	 int isVisible;		/* whether the window is visible or not */
+       }
+TuiGenWinInfo, *TuiGenWinInfoPtr;
+
 /* Constant definitions */
 #define DEFAULT_TAB_LEN                8
 #define NO_SRC_STRING                  "[ No Source Available ]"
@@ -314,9 +337,9 @@ extern int winElementHeight (TuiGenWinInfoPtr, TuiWinElementPtr);
 extern TuiLayoutType currentLayout (void);
 extern void setCurrentLayoutTo (TuiLayoutType);
 extern int termHeight (void);
-extern void setTermHeight (int);
+extern void setTermHeightTo (int);
 extern int termWidth (void);
-extern void setTermWidth (int);
+extern void setTermWidthTo (int);
 extern int historyLimit (void);
 extern void setHistoryLimit (int);
 extern void setGenWinOrigin (TuiGenWinInfoPtr, int, int);
@@ -343,6 +366,5 @@ extern void tuiSetWinResizedTo (int);
 
 extern TuiWinInfoPtr tuiNextWin (TuiWinInfoPtr);
 extern TuiWinInfoPtr tuiPrevWin (TuiWinInfoPtr);
-
 
 #endif /* TUI_DATA_H */
