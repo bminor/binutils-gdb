@@ -134,10 +134,10 @@ check:  site.exp
 
 force:
 
-clean:
+clean mostlyclean:
 	-rm -f *~ core *.o a.out xgdb *.x a.out b.out
 
-distclean: clean
+distclean realclean: clean
 	-rm -f *~ core
 	-rm -f Makefile config.status
 	-rm -fr *.log summary detail

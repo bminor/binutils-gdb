@@ -19,7 +19,7 @@
 
 # The targets for external use include:
 # all, doc, proto, install, uninstall, includes, TAGS,
-# clean, cleanconfig, realclean, stage1, stage2, stage3, stage4.
+# clean, mostlyclean, distclean, realclean, stage1, stage2, stage3, stage4.
 
 # Variables that exist for you to override.
 # See below for how to change them for certain systems.
@@ -430,17 +430,17 @@ $(srcdir)/as.info: $(srcdir)/doc/as.texinfo
 clean-here:
 	-rm -f $(STAGESTUFF) core
 
-clean: clean-here
-	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) clean
+clean mostlyclean: clean-here
+	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@
 	@if [ -d testsuite ] ; then \
-	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) clean ; \
+	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) $@ ; \
 	else true; fi
 
 # Like clean but also delete the links made to configure gas.
-distclean: clean-here
-	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) distclean
+distclean realclean: clean-here
+	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@
 	@if [ -d testsuite ] ; then \
-	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) distclean ; \
+	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) $@ ; \
 	else true; fi
 	-rm -f config.status Makefile host.h targ-env.h targ-cpu.h \
 		targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
@@ -534,7 +534,8 @@ de-stage3: force
 	- rmdir stage3
 
 #In GNU Make, ignore whether `stage*' exists.
-.PHONY: stage1 stage2 stage3 stage4 clean realclean TAGS bootstrap
+.PHONY: stage1 stage2 stage3 stage4 clean mostlyclean realclean distclean
+.PHONY: TAGS bootstrap
 
 force:
 
