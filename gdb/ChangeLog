@@ -1,5 +1,19 @@
 2001-11-04  Mark Kettenis  <kettenis@gnu.org>
 
+	Add support for "orig_eax" pseudo register on Linux/x86.
+	* i386-linux-tdep.c: Include "inferior.h".
+	(i386_linux_register_name, i386_linux_register_byte,
+	i386_linux_register_raw_size): New functions.
+	(i386_linux_write_pc): New function.
+	* config/i386/tm-linux.h (I386_LINUX_ORIG_EAX_REGNUM): New define.
+	(NUM_REGS, MAX_NUM_REGS, REGISTER_BYTES, REGISTER_NAME,
+	REGISTER_BYTE, REGISTER_RAW_SIZE): Define to deal with additional
+	register.
+	(i386_linux_register_name, i386_linux_register_byte,
+	i386_linux_register_raw_size): New prototypes.
+	(TARGET_WRITE_PC): New define.
+	(i386_linux_write_pc): New prototype.
+
 	* i386-tdep.c (i386_register_offset): Renamed from
 	i386_register_byte.  Made static.
 	(i386_register_size): Renamed from i386_register_raw_size.  Made

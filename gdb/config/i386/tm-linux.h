@@ -31,6 +31,35 @@
 #include "i386/tm-i386.h"
 #include "tm-linux.h"
 
+/* Register number for the "orig_eax" pseudo-register.  If this
+   pseudo-register contains a value >= 0 it is interpreted as the
+   system call number that the kernel is supposed to restart.  */
+#define I386_LINUX_ORIG_EAX_REGNUM 41
+
+/* Adjust a few macros to deal with this extra register.  */
+
+#undef NUM_REGS
+#define NUM_REGS (NUM_GREGS + NUM_FREGS + NUM_SSE_REGS + 1)
+
+#undef MAX_NUM_REGS
+#define MAX_NUM_REGS (16 + 16 + 9 + 1)
+
+#undef REGISTER_BYTES
+#define REGISTER_BYTES \
+  (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS + SIZEOF_SSE_REGS + 4)
+
+#undef REGISTER_NAME
+#define REGISTER_NAME(reg) i386_linux_register_name ((reg))
+extern char *i386_linux_register_name (int reg);
+
+#undef REGISTER_BYTE
+#define REGISTER_BYTE(reg) i386_linux_register_byte ((reg))
+extern int i386_linux_register_byte (int reg);
+
+#undef REGISTER_RAW_SIZE
+#define REGISTER_RAW_SIZE(reg) i386_linux_register_raw_size ((reg))
+extern int i386_linux_register_raw_size (int reg);
+
 /* Linux/ELF uses stabs-in-ELF with the DWARF register numbering
    scheme by default, so we must redefine STAB_REG_TO_REGNUM.  This
    messes up the floating-point registers for a.out, but there is not
@@ -64,6 +93,9 @@ extern CORE_ADDR i386_linux_frame_saved_pc (struct frame_info *frame);
 #undef SAVED_PC_AFTER_CALL
 #define SAVED_PC_AFTER_CALL(frame) i386_linux_saved_pc_after_call (frame)
 extern CORE_ADDR i386_linux_saved_pc_after_call (struct frame_info *);
+
+#define TARGET_WRITE_PC(pc, ptid) i386_linux_write_pc (pc, ptid)
+extern void i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid);
 
 /* When we call a function in a shared library, and the PLT sends us
    into the dynamic linker to find the function's real address, we

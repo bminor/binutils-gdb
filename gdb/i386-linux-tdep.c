@@ -23,6 +23,7 @@
 #include "frame.h"
 #include "value.h"
 #include "regcache.h"
+#include "inferior.h"
 
 /* For i386_linux_skip_solib_resolver.  */
 #include "symtab.h"
@@ -31,6 +32,38 @@
 
 #include "solib-svr4.h"		/* For struct link_map_offsets.  */
 
+/* Return the name of register REG.  */
+
+char *
+i386_linux_register_name (int reg)
+{
+  /* Deal with the extra "orig_eax" pseudo register.  */
+  if (reg == I386_LINUX_ORIG_EAX_REGNUM)
+    return "orig_eax";
+
+  return i386_register_name (reg);
+}
+
+int
+i386_linux_register_byte (int reg)
+{
+  /* Deal with the extra "orig_eax" pseudo register.  */
+  if (reg == I386_LINUX_ORIG_EAX_REGNUM)
+    return (i386_register_byte (I386_LINUX_ORIG_EAX_REGNUM - 1)
+	    + i386_register_raw_size (I386_LINUX_ORIG_EAX_REGNUM - 1));
+
+  return i386_register_byte (reg);
+}
+
+int
+i386_linux_register_raw_size (int reg)
+{
+  /* Deal with the extra "orig_eax" pseudo register.  */
+  if (reg == I386_LINUX_ORIG_EAX_REGNUM)
+    return 4;
+
+  return i386_register_raw_size (reg);
+}
 
 /* Recognizing signal handler frames.  */
 
@@ -342,9 +375,33 @@ i386_linux_saved_pc_after_call (struct frame_info *frame)
 
   return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
 }
-
 
+/* Set the program counter for process PTID to PC.  */
+
+void
+i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
+{
+  write_register_pid (PC_REGNUM, pc, ptid);
+
+  /* We must be careful with modifying the program counter.  If we
+     just interrupted a system call, the kernel might try to restart
+     it when we resume the inferior.  On restarting the system call,
+     the kernel will try backing up the program counter even though it
+     no longer points at the system call.  This typically results in a
+     SIGSEGV or SIGILL.  We can prevent this by writing `-1' in the
+     "orig_eax" pseudo-register.
+
+     Note that "orig_eax" is saved when setting up a dummy call frame.
+     This means that it is properly restored when that frame is
+     popped, and that the interrupted system call will be restarted
+     when we resume the inferior on return from a function call from
+     within GDB.  In all other cases the system call will not be
+     restarted.  */
+  write_register_pid (I386_LINUX_ORIG_EAX_REGNUM, -1, ptid);
+}
+
 /* Calling functions in shared libraries.  */
+
 /* Find the minimal symbol named NAME, and return both the minsym
    struct and its objfile.  This probably ought to be in minsym.c, but
    everything there is trying to deal with things like C++ and
