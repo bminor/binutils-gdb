@@ -73,6 +73,13 @@ legacy_store_return_value (struct type *type, struct regcache *regcache,
 
 
 int
+always_use_struct_convention (int gcc_p, struct type *value_type)
+{
+  return 1;
+}
+
+
+int
 legacy_register_sim_regno (int regnum)
 {
   /* Only makes sense to supply raw registers.  */

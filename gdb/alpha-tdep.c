@@ -1600,13 +1600,6 @@ alpha_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
    matter.  */
 LONGEST alpha_call_dummy_words[] = { 0 };
 
-static int
-alpha_use_struct_convention (int gcc_p, struct type *type)
-{
-  /* Structures are returned by ref in extra arg0.  */
-  return 1;
-}
-
 static void
 alpha_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
@@ -1842,7 +1835,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, alpha_frame_init_saved_regs);
 
-  set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
+  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, alpha_extract_return_value);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, alpha_store_struct_return);

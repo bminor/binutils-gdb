@@ -1023,12 +1023,6 @@ h8300_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
   write_register (0, addr);
 }
 
-static int
-h8300_use_struct_convention (int gcc_p, struct type *type)
-{
-  return 1;
-}
-
 static CORE_ADDR
 h8300_extract_struct_value_address (char *regbuf)
 {
@@ -1155,7 +1149,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_struct_return (gdbarch, h8300_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, h8300_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, h8300_extract_struct_value_address);
-  set_gdbarch_use_struct_convention (gdbarch, h8300_use_struct_convention);
+  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, h8300_breakpoint_from_pc);
