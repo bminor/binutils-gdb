@@ -557,37 +557,6 @@ frame_saved_pc (frame)
 }
 
 
-#if TARGET_BYTE_ORDER != HOST_BYTE_ORDER
-you lose
-#else /* Host and target byte order the same.  */
-#define SINGLE_EXP_BITS  8
-#define DOUBLE_EXP_BITS 11
-int
-IEEE_isNAN(fp, len)
-     int *fp, len;
-     /* fp points to a single precision OR double precision
-      * floating point value; len is the number of bytes, either 4 or 8.
-      * Returns 1 iff fp points to a valid IEEE floating point number.
-      * Returns 0 if fp points to a denormalized number or a NaN
-      */
-{
-  int exponent;
-  if (len == 4)
-    {
-      exponent = *fp;
-      exponent = exponent << 1 >> (32 - SINGLE_EXP_BITS - 1);
-      return ((exponent == -1) || (! exponent && *fp));
-    }
-  else if (len == 8)
-    {
-      exponent = *(fp+1);
-      exponent = exponent << 1 >> (32 - DOUBLE_EXP_BITS - 1);
-      return ((exponent == -1) || (! exponent && *fp * *(fp+1)));
-    }
-  else return 1;
-}
-#endif /* Host and target byte order the same.  */
-
 static int
 pushed_size (prev_words, v)
      int prev_words;

@@ -96,10 +96,9 @@ extern CORE_ADDR skip_prologue ();
 
 #define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 2) == 0xF800)
 
-/* Return 1 if P points to an invalid floating point value.
-   LEN is the length in bytes.  */
+/* This is taken care of in print_floating [IEEE_FLOAT].  */
 
-#define INVALID_FLOAT(p, len) IEEE_isNAN(p,len)
+#define INVALID_FLOAT(p,len) 0
 
 /* Say how long (ordinary) registers are.  */
 
