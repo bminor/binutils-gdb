@@ -2275,11 +2275,11 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	r = RT - 1;
 	i = 32;
 	nr = (n + 3) / 4;
-	if (((RT + n >= 32)
-	     ? ((RA >= RT || RA < (RT + n) % 32)
-	        || (RB >= RT || RB < (RT + n) % 32))
-	     : ((RA >= RT && RA < RT + n)
-	        || (RB >= RT && RB < RT + n)))
+	if (((RT + nr >= 32)
+	     ? ((RA >= RT || RA < (RT + nr) % 32)
+	        || (RB >= RT || RB < (RT + nr) % 32))
+	     : ((RA >= RT && RA < RT + nr)
+	        || (RB >= RT && RB < RT + nr)))
 	    || (RT == RA || RT == RB))
 	  program_interrupt(processor, cia,
 	                  illegal_instruction_program_interrupt);
@@ -2288,7 +2288,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	while (n > 0) {
 	  if (i == 32) {
 	    r = (r + 1) % 32;
-	    GPR(i) = 0;
+	    GPR(r) = 0;
 	  }
 	  GPR(r) |= INSERTED(MEM(unsigned, EA, 1), i, i+7);
 	  i = i + 8;
@@ -4582,7 +4582,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	FPSCR_SET(BFA, 0); /* FPSCR_END fixes up FEX/VX */
 	FPSCR_END(0);
 
-0.64,6.BF,9./,11./,16.U,20./,21.134,31.Rc:X:f::Move To FPSCR Field Immediate
+0.63,6.BF,9./,11./,16.U,20./,21.134,31.Rc:X:f::Move To FPSCR Field Immediate
 	FPSCR_BEGIN;
 	FPSCR_SET(BF, U);
 	FPSCR_END(Rc);
