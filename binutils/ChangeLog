@@ -1,3 +1,12 @@
+1999-08-05  Donn Terry  <donn@interix.com>
+
+	* Makefile.am (YACC): If bison is not in the source tree, use
+	@YACC@ rather than bison -y.
+	(LEX): If flex is not in the source tree, use @LEX@ rather than
+	flex.
+	* configure.in: Build dlltool for i[3-6]86-*-interix.
+	* Makefile.in, configure: Rebuild.
+
 1999-07-21  Ian Lance Taylor  <ian@zembu.com>
 
 	From Mark Elbrecht:

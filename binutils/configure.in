@@ -179,12 +179,12 @@ changequote([,])dnl
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
-	 ;;
+	  ;;
 	thumb-*pe*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
-	 ;;
+	  ;;
 changequote(,)dnl
 	i[3-6]86-*pe* | i[3-6]86-*-cygwin* | i[3-6]86-*-mingw32*)
 changequote([,])dnl
@@ -192,21 +192,25 @@ changequote([,])dnl
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	  BUILD_DLLWRAP='$(DLLWRAP_PROG)$(EXEEXT)'
-	 ;;
+	  ;;
+	i[3-6]86-*-interix)
+	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
+	  ;;
 	powerpc*-*-*pe* | powerpc*-*-cygwin*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_PPC"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
-	 ;;
+	  ;;
 	mcore-*pe)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MCORE"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
-	 ;;
+	  ;;
 	mcore-*elf)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MCORE_ELF"
-	 ;;
+	  ;;
 	esac
     fi
 done
