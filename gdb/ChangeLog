@@ -1,3 +1,8 @@
+Sun Jun 18 00:27:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_push_arguments): For MIPS_EABI, squeeze a
+ 	strut containing a floating-point into an FP register.
+
 Sat Jun 17 16:00:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-mips.c: Include <ctype.h>

@@ -2143,7 +2143,14 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
          don't use float registers for arguments.  This duplication of
          arguments in general registers can't hurt non-MIPS16 functions
          because those registers are normally skipped.  */
-      if (typecode == TYPE_CODE_FLT
+      /* MIPS_EABI squeeses a struct that contains a single floating
+         point value into an FP register instead of pusing it onto the
+         stack. */
+      if ((typecode == TYPE_CODE_FLT
+	   || (MIPS_EABI
+	       && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
+	       && TYPE_NFIELDS (arg_type) == 1
+	       && TYPE_CODE (TYPE_FIELD_TYPE (arg_type, 0)) == TYPE_CODE_FLT))
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM
 	  && MIPS_FPU_TYPE != MIPS_FPU_NONE)
 	{
