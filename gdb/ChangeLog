@@ -1,3 +1,9 @@
+2002-08-23  Joel Brobecker  <brobecker@gnat.com>
+
+	* infrun.c (handle_inferior_event): Move a comment outside of a
+	function call, in order to avoid indent reformatting this part
+	of the code in an unreadable way.
+
 2002-08-23  Grace Sainsbury  <graces@redhat.com>
 
 	* infrun.c (normal_stop, proceed): Remove call to print_sys_errmsg

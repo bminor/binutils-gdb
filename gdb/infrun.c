@@ -2103,18 +2103,18 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     This is only important on targets where DECR_PC_AFTER_BREAK
 	     is non-zero.  The prev_pc test is meant to distinguish between
 	     singlestepping a trap instruction, and singlestepping thru a
-	     jump to the instruction following a trap instruction. */
+	     jump to the instruction following a trap instruction.
 
+             Therefore, pass TRUE if our reason for stopping is
+             something other than hitting a breakpoint.  We do this by
+             checking that either: we detected earlier a software single
+             step trap or, 1) stepping is going on and 2) we didn't hit
+             a breakpoint in a signal handler without an intervening stop
+             in sigtramp, which is detected by a new stack pointer value
+             below any usual function calling stack adjustments.  */
 	  stop_bpstat =
             bpstat_stop_status
               (&stop_pc,
-               /* Pass TRUE if our reason for stopping is something other
-                  than hitting a breakpoint.  We do this by checking that
-                  either we detected earlier a software single step trap or
-                  1) stepping is going on and 2) we didn't hit a breakpoint
-                  in a signal handler without an intervening stop in
-                  sigtramp, which is detected by a new stack pointer value
-                  below any usual function calling stack adjustments.  */
                sw_single_step_trap_p
                || (currently_stepping (ecs)
                    && prev_pc != stop_pc - DECR_PC_AFTER_BREAK
