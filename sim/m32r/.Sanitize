@@ -24,7 +24,28 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog
+Makefile.in
 README
+TODO
+arch-defs.h
+config.in
+configure
+configure.in
+decode.c
+decode.h
+extract.c
+m32r-sim.h
+m32r.c
+mainloop.in
+mem-ops.h
+model.c
+sem-ops.h
+sem-switch.c
+semantics.c
+sim-if.c
+sim-main.h
+tconfig.in
 
 Things-to-lose:
 
