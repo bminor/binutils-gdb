@@ -29,8 +29,9 @@ Fri Oct 24 22:36:20 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	* mips.h: Added to comments a quick-ref list of all assigned
 	operand type characters.
+	(OP_{MASK,SH}_PERFREG): New macros.
 start-sanitize-vr5400
-	(OP_{MASK,SH}_{PERFREG,VECBYTE,VECALIGN}): New macros for VR5400
+	(OP_{MASK,SH}_{VECBYTE,VECALIGN}): New macros for VR5400
 	support.
 end-sanitize-vr5400
 
