@@ -1,0 +1,10 @@
+Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
+
+	* binutils/testsuite: Initial creation of binutils/testsuite.
+	Migrated dejagnu testcases and support files for testing nm to
+	binutils/testsuite from deja-gnu.  These files were moved "as is"
+	with no modifications.  This migration is part of a major overhaul
+	of dejagnu.  The modifications to these testcases, etc., which
+	will allow them to work with the new version of dejagnu will be
+	made in a future update.
+
