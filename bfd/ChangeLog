@@ -1,5 +1,8 @@
 Thu Apr 16 11:43:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* targets.c (bfd_target_vector) [SELECT_VECS not defined]: Add
+	bfd_elf32_powerpcle_vec.
+
 	* elf.c (copy_private_bfd_data): If all the p_paddr fields in the
 	program segments are zero, don't set p_paddr_valid.
 
