@@ -669,12 +669,12 @@ ${progname}" ${arguments}  "
 
 				if [ -d ${srcdir}/${configdir} ] ; then
 					case "${srcdir}" in
-					".")
+					".") ;;
+					*)
 						if [ ! -d ./${configdir} ] ; then
 							mkdir ./${configdir}
 						fi
 						;;
-					*) ;;
 					esac
 
 					POPDIR=${PWD}
