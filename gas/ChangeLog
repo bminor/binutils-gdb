@@ -1,4 +1,25 @@
+Thu Jan 12 17:56:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (VMS_OTHER_OBJS): Add ../libiberty/hex.o.
+	(OBJS): Delete hex-value.o.
+	(REAL_SOURCES): Delete hex-value.c.
+	(hex-value.o): Delete dependencies.
+	* hex-value.c: Deleted.
+	* as.c (main): Call hex_init.
+	* expr.c, config/tc-mips.c: Include libiberty.h.  Replace
+	hex_value array references with hex_* macros.
+
 Wed Jan 11 17:51:38 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-h8300.h (COFF_FLAGS): Don't define.
+	* config/tc-h8500.h (COFF_FLAGS), config/tc-sh.h (COFF_FLAGS),
+	config/tc-z8k.h (COFF_FLAGS): Ditto.
+start-sanitize-rce
+	* config/tc-rce.h (COFF_FLAGS): Ditto.
+end-sanitize-rce
+
+	* config/obj-coff.c (KEEP_RELOC_INFO): Make sure it's always
+	defined.
 
 	* config/tc-m68k.c (m68k_ip, cases AOFF and AINDEX): Don't
 	generate 68020 addressing modes for a 68000 processor.

@@ -6598,8 +6598,6 @@ md_obj_end ()
     as_warn ("missing `.end' at end of assembly");
 }
 
-extern char hex_value[];
-
 static long
 get_number ()
 {
@@ -6621,7 +6619,7 @@ get_number ()
 	  while (isxdigit (*input_line_pointer))
 	    {
 	      val <<= 4;
-	      val |= hex_value[(int) *input_line_pointer++];
+	      val |= hex_value (*input_line_pointer++);
 	    }
 	  return negative ? -val : val;
 	}

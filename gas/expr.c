@@ -28,13 +28,12 @@
 #include <string.h>
 
 #include "as.h"
-
+#include "libiberty.h"
 #include "obstack.h"
 
 static void floating_constant PARAMS ((expressionS * expressionP));
 static void integer_constant PARAMS ((int radix, expressionS * expressionP));
 static void clean_up_expression PARAMS ((expressionS * expressionP));
-static symbolS *make_expr_symbol PARAMS ((expressionS * expressionP));
 
 extern const char EXP_CHARS[], FLT_CHARS[];
 
@@ -42,7 +41,7 @@ extern const char EXP_CHARS[], FLT_CHARS[];
    build expressions up out of other expressions.  The symbol is put
    into the fake section expr_section.  */
 
-static symbolS *
+symbolS *
 make_expr_symbol (expressionP)
      expressionS *expressionP;
 {
@@ -61,11 +60,11 @@ make_expr_symbol (expressionP)
      expr_section is convenient for the old a.out code, for which
      S_GET_SEGMENT does not always retrieve the value put in by
      S_SET_SEGMENT.  */
-  symbolP = symbol_new (fake,
-			(expressionP->X_op == O_constant
-			 ? absolute_section
-			 : expr_section),
-			0, &zero_address_frag);
+  symbolP = symbol_create (fake,
+			   (expressionP->X_op == O_constant
+			    ? absolute_section
+			    : expr_section),
+			   0, &zero_address_frag);
   symbolP->sy_value = *expressionP;
 
   if (expressionP->X_op == O_constant)
@@ -140,7 +139,6 @@ integer_constant (radix, expressionP)
   symbolS *symbolP;	/* points to symbol */
 
   int small;			/* true if fits in 32 bits. */
-  extern const char hex_value[]; /* in hex_value.c */
 
   /* May be bignum, or may fit in 32 bits. */
   /* Most numbers fit into 32 bits, and we want this case to be fast.
@@ -188,7 +186,7 @@ integer_constant (radix, expressionP)
   start = input_line_pointer;
   c = *input_line_pointer++;
   for (number = 0;
-       (digit = hex_value[(unsigned char) c]) < maxdig;
+       (digit = hex_value (c)) < maxdig;
        c = *input_line_pointer++)
     {
       number = number * radix + digit;
@@ -211,7 +209,7 @@ integer_constant (radix, expressionP)
       input_line_pointer = start;	/*->1st digit. */
       c = *input_line_pointer++;
       for (;
-	   (carry = hex_value[(unsigned char) c]) < maxdig;
+	   (carry = hex_value (c)) < maxdig;
 	   c = *input_line_pointer++)
 	{
 	  for (pointer = generic_bignum;
@@ -776,8 +774,8 @@ clean_up_expression (expressionP)
 	      && (S_GET_VALUE (expressionP->X_op_symbol)
 		  == S_GET_VALUE (expressionP->X_add_symbol))))
 	{
-	  bfd_vma diff = (S_GET_VALUE (expressionP->X_add_symbol)
-			  - S_GET_VALUE (expressionP->X_op_symbol));
+	  addressT diff = (S_GET_VALUE (expressionP->X_add_symbol)
+			   - S_GET_VALUE (expressionP->X_op_symbol));
 
 	  expressionP->X_op = O_constant;
 	  expressionP->X_add_symbol = NULL;
