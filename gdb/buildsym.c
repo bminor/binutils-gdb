@@ -716,18 +716,6 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
      file_symbols is still good).  */
   cleanup_undefined_types ();
 
-  if (file_stabs) {
-    patch_block_stabs (file_symbols, file_stabs);
-    free (file_stabs);
-    file_stabs = 0;
-  }
-
-  if (global_stabs) {
-    patch_block_stabs (global_symbols, global_stabs);
-    free (global_stabs);
-    global_stabs = 0;
-  }
-
   if (pending_blocks == 0
    && file_symbols == 0
    && global_symbols == 0) {
