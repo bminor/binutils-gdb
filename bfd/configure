@@ -2708,7 +2708,7 @@ else
 fi
 
 
-ALL_LINGUAS="fr tr ja es sv da zh_CN"
+ALL_LINGUAS="fr tr ja es sv da zh_CN ro"
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
 echo "configure:2714: checking how to run the C preprocessor" >&5
 # On Suns, sometimes $CPP names a directory.
