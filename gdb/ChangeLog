@@ -1,3 +1,8 @@
+Mon Jun 12 12:17:20 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+ 	* mips-tdep.c: Include "symcat.h".
+ 	(mips_dump_tdep): Print all known but not yet multi-arched values.
+
 Fri Jun  9 15:06:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh (struct gdbarch): Add member dump_tdep.
