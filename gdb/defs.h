@@ -893,9 +893,6 @@ extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (pri
 
 extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
 
-/* Output arbitrary error message.  */
-extern void error_output_message (char *pre_print, char *msg);
-
 extern NORETURN void vfatal (const char *fmt, va_list ap) ATTR_NORETURN;
 
 extern NORETURN void fatal (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);

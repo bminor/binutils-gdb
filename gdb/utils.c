@@ -641,20 +641,6 @@ fatal (const char *string, ...)
   va_end (args);
 }
 
-/* Output an error message including any pre-print text to gdb_stderr.  */
-void
-error_output_message (char *pre_print, char *msg)
-{
-  target_terminal_ours ();
-  wrap_here ("");		/* Force out any buffered output */
-  gdb_flush (gdb_stdout);
-  annotate_error_begin ();
-  if (pre_print)
-    fputs_filtered (pre_print, gdb_stderr);
-  fputs_filtered (msg, gdb_stderr);
-  fprintf_filtered (gdb_stderr, "\n");
-}
-
 NORETURN void
 error_stream (struct ui_file *stream)
 {
