@@ -1,4 +1,4 @@
-2000-11-07  Dave Brolley  <brolley@redhat.com>
+2000-11-07  Matthew Green  <mrg@redhat.com>
 
 	* cgen-dis.in (print_insn): All insns which can fit into insn_value
 	must be loaded there in their entirety.
