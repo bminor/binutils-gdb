@@ -1,3 +1,11 @@
+2005-03-04  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arm.exp: Fix test for running the "undefined" to catch
+	more non-ELF cases.
+	* gas/arm/pic.d: Fix for vxworks target.
+	* gas/arm/basic.d: Likewise.
+	* gas/arm/unwind.d: Likewise.
+
 2005-03-04  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/ldstla-{n32.s, n32.d, n32-shared.d}: Delete.
@@ -104,7 +112,6 @@
 	section.
 	* gas/arm/pic.d: Likewise.
 
->>>>>>> 1.791
 2005-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/m68k/mcf-emac.d: Allow for 64-bit addresses.
