@@ -1,7 +1,7 @@
 /* IBM RS/6000 "XCOFF" file definitions for BFD.
    Copyright (C) 1990, 1991 Free Software Foundation, Inc.
    Written by Mimi Phûông-Thåo Võ and John Gilmore.
-   Contributed by IBM Corporation and Cygnus Support.
+   Contributed by IBM Corporation and Cygnus Support.  */
 
 /********************** FILE HEADER **********************/
 

@@ -1,3 +1,32 @@
+Thu Nov 21 11:53:03 1991  John Gilmore  (gnu at cygnus.com)
+
+	* aout64.h (N_TXTADDR, N_TXTOFF, N_TXTSIZE):  New definitions
+	that should handle all uses.  LOGICAL_ versions deleted.
+	Eliminate N_HEADER_IN_TEXT, using a_entry to determine which
+	kind of zmagic a.out file we are looking at.
+	* coff-rs6000.h:  Typo.
+
+Tue Nov 19 18:43:37 1991  Per Bothner  (bothner at cygnus.com)
+
+	(Note:  This is a revised entry, as was aout64.h.)
+	* aout64.h:  Some cleanups of N_TXTADDR and N_TXTOFF:
+	Will now work for both old- and new-style ZMAGIC files,
+	depending on N_HEADER_IN_TEXT macro.
+	Add LOGICAL_TXTADDR, LOICAL_TXTOFF and LOGICAL_TXTSIZE
+	that don't count the exec header as part
+	of the text segment, to be consistent with bfd.
+	* a.out.sun4.h:  Simplified/fixed for previous change.
+
+Mon Nov 18 00:02:06 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dwarf.h:  Update to DWARF draft 5 version from gcc2.
+
+Thu Nov 14 19:44:59 1991  Per Bothner  (bothner at cygnus.com)
+
+	* stab.def:  Added defs for extended GNU symbol types,
+	such as N_SETT.  These are normally ifdef'd out (because
+	of conflicts with a.out.gnu.h), but are used by bfb_stab_name().
+
 Thu Nov 14 19:17:03 1991  Fred Fish  (fnf at cygnus.com)
 
 	* elf-common.h:  Add defines to support ELF symbol table code.

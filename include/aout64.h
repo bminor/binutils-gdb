@@ -19,60 +19,14 @@ struct external_exec
 
 #define	EXEC_BYTES_SIZE	(4 + BYTES_IN_WORD * 7)
 
-/* By default, segment size is constant.  But on some machines, it can
-   be a function of the a.out header (e.g. machine type).  */
-#ifndef	N_SEGSIZE
-#define	N_SEGSIZE(x)	SEGMENT_SIZE
-#endif
-
-#define _N_HDROFF(x)	(N_SEGSIZE(x) - EXEC_BYTES_SIZE)
-
-/* If the exec header is mapped in as part of a shared text segemnt.
-   Only relevant for ZMAGIC files. */
-
-#ifndef N_HEADER_IN_TEXT
-#define N_HEADER_IN_TEXT(x) 1
-#endif
-
-/* Virtual memory address of the text section. When demand paged, it's
-   set up a bit to make nothing at 0, when an object file it's 0.
-   There's a special hack case when the entry point is < TEXT_START_ADDR
-   for executables, then the real start is 0 
-
-   Note that this differs from Sun's definition:  They consider
-   the text segment to start at 0x2000; we view it as starting at 0x2000.
-   I.e., we never consider the exec header to be part of the text segment.
-*/
-
-#ifndef N_TXTADDR
-#define N_TXTADDR(x) \
-    (N_MAGIC(x)!=ZMAGIC? 0 : TEXT_START_ADDR)
-#endif
-
-/* Offset in an a.out of the start of the text section. */
-
-#define N_TXTOFF(x)   ( N_MAGIC(x) != ZMAGIC ? EXEC_BYTES_SIZE \
-		       : N_HEADER_IN_TEXT(x) ? 0 : PAGE_SIZE)
-
-/* These are the same as N_TXTADDR and N_TXTOFF,
-   but never consider the exec header to be includes in the text. */
-
-#define LOGICAL_TXTADDR(x) \
-    (N_MAGIC(x)!=ZMAGIC? 0 \
-     : N_HEADER_IN_TEXT(x) ? TEXT_START_ADDR+EXEC_BYTES_SIZE \
-     : TEXT_START_ADDR)
-#define LOGICAL_TXTOFF(x)   ( N_MAGIC(x) != ZMAGIC ? EXEC_BYTES_SIZE \
-		       : N_HEADER_IN_TEXT(x) ? EXEC_BYTES_SIZE : PAGE_SIZE)
-#define LOGICAL_TXTSIZE(x) \
-    ((x).a_text \
-     - (N_HEADER_IN_TEXT(x) && N_MAGIC(x)==ZMAGIC ? EXEC_BYTES_SIZE : 0))
+/* Magic numbers for a.out files */
 
 #if ARCH_SIZE==64
 #define OMAGIC 0x1001		/* Code indicating object file  */
 #define ZMAGIC 0x1002		/* Code indicating demand-paged executable.  */
 #define NMAGIC 0x1003		/* Code indicating pure executable.  */
 #else
-#define OMAGIC 0407		/* Code indicating object file or impure executable.  */
+#define OMAGIC 0407		/* ...object file or impure executable.  */
 #define NMAGIC 0410		/* Code indicating pure executable.  */
 #define ZMAGIC 0413		/* Code indicating demand-paged executable.  */
 #endif
@@ -81,22 +35,97 @@ struct external_exec
 			&& N_MAGIC(x) != NMAGIC		\
   			&& N_MAGIC(x) != ZMAGIC)
 
+/* By default, segment size is constant.  But some machines override this
+   to be a function of the a.out header (e.g. machine type).  */
+#ifndef	N_SEGSIZE
+#define	N_SEGSIZE(x)	SEGMENT_SIZE
+#endif
+
+/* Virtual memory address of the text section.
+   This is getting very complicated.  A good reason to discard a.out format
+   for something that specifies these fields explicitly.  But til then...
 
+   * OMAGIC and NMAGIC files:
+       (object files: text for "relocatable addr 0" right after the header)
+       start at 0, offset is EXEC_BYTES_SIZE, size as stated.
+   * The text address, offset, and size of ZMAGIC files depend
+     on the entry point of the file:
+     * entry point below TEXT_START_ADDR:
+       (hack for SunOS shared libraries)
+       start at 0, offset is 0, size as stated.
+     * entry point is EXEC_BYTES_SIZE or further into a page:
+       (no padding is needed; text can start after exec header.  Sun
+       considers the text segment of such files to include the exec header;
+       for BFD's purposes, we don't, which makes more work for us.)
+       start at TEXT_START_ADDR + EXEC_BYTES_SIZE, offset is EXEC_BYTES_SIZE,
+       size as stated minus EXEC_BYTES_SIZE.
+     * entry point is less than EXEC_BYTES_SIZE into a page (e.g. page aligned):
+       (padding is needed so that text can start at a page boundary)
+       start at TEXT_START_ADDR, offset PAGE_SIZE, size as stated.  */
+
+#ifndef N_TXTADDR
+#define N_TXTADDR(x) \
+    ( (N_MAGIC(x) != ZMAGIC)? \
+        0:					/* object file or NMAGIC */\
+        ((x).a_entry < TEXT_START_ADDR)? \
+	    0:					/* shared lib */\
+	( (((x).a_entry & (PAGE_SIZE-1)) >= EXEC_BYTES_SIZE) ?	\
+	    TEXT_START_ADDR + EXEC_BYTES_SIZE:	/* no padding */\
+	    TEXT_START_ADDR			/* a page of padding */\
+        )	\
+    )
+#endif
+
+/* Offset in an a.out of the start of the text section. */
+
+#define N_TXTOFF(x)	\
+    ( (N_MAGIC(x) != ZMAGIC)? \
+            EXEC_BYTES_SIZE:			/* object file or NMAGIC */\
+        ((x).a_entry < TEXT_START_ADDR)? \
+	    0:					/* shared lib */\
+	( (((x).a_entry & (PAGE_SIZE-1)) >= EXEC_BYTES_SIZE) ?	\
+	    EXEC_BYTES_SIZE:			/* no padding */\
+	    PAGE_SIZE				/* a page of padding */\
+        )	\
+    )
+
+/* Size of the text section.  It's always as stated, except that we
+   offset it to `undo' the adjustment to N_TXTADDR and N_TXTOFF
+   for NMAGIC/ZMAGIC files that nominally include the exec header
+   as part of the first page of text.  (BFD doesn't consider the
+   exec header to be part of the text segment.)  */
+
+#define	N_TXTSIZE(x) \
+    ( (N_MAGIC(x) != ZMAGIC)? \
+            (x).a_text:				/* object file or NMAGIC */\
+        ((x).a_entry < TEXT_START_ADDR)? \
+	    (x).a_text:				/* shared lib */\
+	( (((x).a_entry & (PAGE_SIZE-1)) >= EXEC_BYTES_SIZE) ?	\
+	    (x).a_text - EXEC_BYTES_SIZE:	/* no padding */\
+	    (x).a_text				/* a page of padding */\
+        )	\
+    )
+
+/* The address of the data segment in virtual memory.
+   It is the text segment address, plus text segment size, rounded
+   up to a N_SEGSIZE boundary for pure or pageable files. */
 
 #define N_DATADDR(x) \
-    (N_MAGIC(x)==OMAGIC? (N_TXTADDR(x)+(x).a_text) \
-     :  (N_SEGSIZE(x) + ((N_TXTADDR(x)+(x).a_text-1) & ~(N_SEGSIZE(x)-1))))
+    (N_MAGIC(x)==OMAGIC? (N_TXTADDR(x)+N_TXTSIZE(x)) \
+     :  (N_SEGSIZE(x) + ((N_TXTADDR(x)+N_TXTSIZE(x)-1) & ~(N_SEGSIZE(x)-1))))
 
-#define N_BSSADDR(x) (N_DATADDR(x) + (x).a_data)
+/* The address of the BSS segment -- immediately after the data segment.  */
 
+#define N_BSSADDR(x)	(N_DATADDR(x) + (x).a_data)
 
-#define N_DATOFF(x)	( N_TXTOFF(x) + (x).a_text )
+/* Offsets of the various portions of the file after the text segment.  */
+
+#define N_DATOFF(x)	( N_TXTOFF(x) + N_TXTSIZE(x) )
 #define N_TRELOFF(x)	( N_DATOFF(x) + (x).a_data )
 #define N_DRELOFF(x)	( N_TRELOFF(x) + (x).a_trsize )
 #define N_SYMOFF(x)	( N_DRELOFF(x) + (x).a_drsize )
 #define N_STROFF(x)	( N_SYMOFF(x) + (x).a_syms )
-
-
+
 /* Symbols */
 struct external_nlist {
   bfd_byte e_strx[BYTES_IN_WORD];	/* index into string table of name */
