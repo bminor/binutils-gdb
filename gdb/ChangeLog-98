@@ -5377,12 +5377,10 @@ Wed Jun 10 15:39:14 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 	* gdbtypes.c (check_stub_method):  Cosmetic.  Use more descriptive
 	names for parameters.
 
-start-sanitize-java
 	* jv-exp.y:  Parser now accepts primitive types.
 	* (parse_number):  Use correct ifdef for scanf long double support.
 	* jv-lang.c (java_array_type):  Initial cut at array support.
 
-end-sanitize-java
 	* language.c language.h (set_language):  Now returns previous language.
 
 	* symtab.c (find_methods):  Make static.  Cosmetic changes, including
@@ -5393,10 +5391,8 @@ end-sanitize-java
 	goobldegook that check_stub_method does.
 	* (gdb_mangle_name):  Use more descriptive names for parameters.  Fix
 	comment.
-start-sanitize-java
 	* (lookup_partial_symbol lookup_block_symbol):  Check for java to
 	ensure we can find mangled names.
-end-sanitize-java
 	* (decode_line_1):  Move local variable defs into the block they are
 	used in.  (Improves code readability.)
 
@@ -5804,10 +5800,8 @@ Wed May 13 14:42:21 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* defs.h: Check HAVE_ALLOCA_H rather than sparc.  Add _AIX pragma
 	alloca.
 	* configure: Rebuild.
-start-sanitize-java
 	* Makefile.in (jv-lang.o, jv-typeprint.o, jv-valprint.o): New
 	targets.
-end-sanitize-java
 
 Wed May 13 11:19:08 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
@@ -6061,12 +6055,10 @@ Thu Apr 23 16:37:20 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
         * README:  Minor changes for 4.17 release.
 
-start-sanitize-java	
 Thu Apr 23 15:44:39 1998  Per Bothner  <bothner@cygnus.com>
 
 	* symfile.c (deduce_language_from_filename):  .class implies java.
 
-end-sanitize-java	
 Thu Apr 23 12:52:21 1998  Philippe De Muyter  <phdm@macqel.be>
 
         * configure.in (strerror): Check if function must be declared.
@@ -6837,9 +6829,7 @@ Mon Feb 24 11:24:57 1998  Richard Henderson  <rth@cygnus.com>
         * Makefile.in (BISON): Don't even pretend to use yacc.
         (c-exp.tab.o): Use bison -o to use a unique intermediate file.
         (f-exp.tab.o, m2-exp.tab.o): Likewise.
-start-sanitize-java	
         (jv-exp.tab.o): Likewise.
-end-sanitize-java	
 
 Tue Feb 24 03:32:59 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

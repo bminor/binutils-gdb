@@ -136,13 +136,11 @@ All configurations can now understand and use the DWARF 2 debugging
 format.  The choice is automatic, if the symbol file contains DWARF 2
 information.
 
-start-sanitize-java
 * Java frontend
 
 GDB now includes basic Java language support.  This support is
 only useful with Java compilers that produce native machine code.
 
-end-sanitize-java
 * solib-absolute-prefix and solib-search-path
 
 For SunOS and SVR4 shared libraries, you may now set the prefix for

@@ -371,12 +371,10 @@ Mon Nov 17 15:35:06 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.in (remote-sim.o): Depend on $(INCLUDE_DIR)/callback.h.
 
-start-sanitize-java	
 Fri Nov 14 13:04:34 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* jv-exp.y (copy_exp, insert_exp): Avoid ANSI prototypes.
 
-end-sanitize-java	
 Thu Nov 13 09:47:35 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v-tdep.c (d30v_print_flags): Function to print the d30v flags
@@ -412,14 +410,12 @@ Tue Nov  4 16:52:50 1997  Geoffrey Noer  <noer@cygnus.com>
 	to allocate memory for environ space, gdb cannot use memory
 	checks -- set -DNO_MMCHECK
 
-start-sanitize-java	
 Tue Nov  4 13:50:59 1997  Jim Blandy  <jimb@sendai.cygnus.com>
 
 	* jv-exp.y (ArrayAccess): Implement Name [ Expression ]; check the
  	code to see why this is not trivial.
 	(copy_exp, insert_exp): New functions.
 	
-end-sanitize-java	
 Fri Oct 24 17:24:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Handle the case
@@ -537,7 +533,6 @@ Sat Oct  4 18:45:44 1997  Mark Alexander  <marka@cygnus.com>
 	* remote-mips.c (mips-initialize): Work around flakiness in
 	some versions of PMON after loading a program.
 
-start-sanitize-java	
 Fri Oct  3 15:49:18 1997  Per Bothner  <bothner@cygnus.com>
 
 	* c-lang.h, cp-valprint.c (static_field_print):  Make non-static.
@@ -557,7 +552,6 @@ Fri Oct  3 15:49:18 1997  Per Bothner  <bothner@cygnus.com>
 	(java_print_value_fields):  New function.
 	(java_val_print):  Better printing of TYPE_CODE_CHAR, TYPE_CODE_STRUCT.
 
-end-sanitize-java	
 Fri Oct  3 09:52:26 1997  Mark Alexander  <marka@cygnus.com>
 
 	* config/mips/tm-mips.h (MAKE_MSYMBOL_SPECIAL): Force MIPS16
@@ -691,7 +685,6 @@ Fri Sep 19 18:51:26 1997  Felix Lee  <flee@cygnus.com>
 	* config/i386/windows.mh (XDEPFILES): need to list some files
  	explicitly, for odd reasons.
 
-start-sanitize-java	
 Tue Sep 16 20:00:05 1997  Per Bothner  <bothner@cygnus.com>
 
 	* jv-exp.y (push_fieldnames):  New, to handle EXP.FIELD1....FIELDN.
@@ -714,7 +707,6 @@ Tue Sep 16 20:00:05 1997  Per Bothner  <bothner@cygnus.com>
 	ascending, not descending order.  Hack to avoid virtual baseclass
 	botch for Java interfaces.
 
-end-sanitize-java	
 Tue Sep 16 19:56:23 1997  Per Bothner  <bothner@cygnus.com>
 
 	* util.c (run_cleanup_chain, make_run_cleanup, do_run_cleanups):
@@ -1244,7 +1236,6 @@ Tue Aug  5 13:37:14 1997  Per Bothner  <bothner@cygnus.com>
 	* coffread.c, hpread.c, stabsread.c:  Remove bugus TYPE_FIELD_VALUE.
 	* value.h, values.c (value_static_field):  New function.
 	* cp-valprint.c, valops.c:  Modify to use value_static_field.
-start-sanitize-java	
 
 	* jv-lang.c (get_java_utf8_name):  Re-write so it works with
 	implied (missing) data field, as defined by cc1java.
@@ -1255,7 +1246,6 @@ start-sanitize-java
 	java_type_print_base):  New functions, for better Java output.
 	* jv-valprint.c:  Start to support Java-specific output.
 
-end-sanitize-java	
 Sun Aug  3 08:18:09 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* c-valprint.c (c_val_print):  Use extract_address to retrieve
@@ -1277,7 +1267,6 @@ Fri Aug  1 15:21:44 1997  Ian Lance Taylor  <ian@cygnus.com>
 	(gdb): Use $(WIN32LDAPP).
 	* configure: Rebuild.
 
-start-sanitize-java	
 Thu Jul 31 15:40:19 1997  Per Bothner  <bothner@cygnus.com>
 
 	* symtab.h (SYMBOL_INIT_LANGUAGE_SPECIFIC, SYMBOL_INIT_DEMANGLED_NAME,
@@ -1295,7 +1284,6 @@ Wed Jul 30 14:04:18 1997  Per Bothner  <bothner@cygnus.com>
 	(java_language_defn):  Replace c_print_type by java_print_type.
 	* Makefile.in:  Update accordingly.
 
-end-sanitize-java	
 Tue Jul 29 10:12:44 1997  Felix Lee  <flee@cygnus.com>
 
 	* Makefile.in (init.c): except some mswin files do need to be
@@ -1556,7 +1544,6 @@ Fri Jun 13 10:28:09 1997  Fred Fish  <fnf@cygnus.com>
 	cases by just ignoring them.
 	(command.h): Include.
 
-start-sanitize-java
 	* java-exp.y (parse_number): Remove unused variable "unsigned_p".
 	* java-lang.c (gdbcore.h): Include for prototypes.
 	(type_from_class): Remove unused variable "ftype".
@@ -1565,7 +1552,6 @@ start-sanitize-java
 	enumerations.
 	* java-valprint.c (c-lang.h): Include for prototypes.
 
-end-sanitize-java
 	* symfile.c (simple_read_overlay_region_table): #if away
 	unused function.
 	(simple_free_overlay_region_table): Ditto.
@@ -1596,15 +1582,11 @@ end-sanitize-java
 
 	* c-exp.y (parse_number): Cast args to float* or double* as
 	appropriate for conversion format.
-start-sanitize-java
 	* java-exp.y (parse_number): Ditto.
-end-sanitize-java
 
 	* Makefile.in (c-exp.tab.c): Remove #line lines that refer
 	to nonexistant y.tab.c file.
-start-sanitize-java
 	(java-exp.tab.c): Ditto.
-end-sanitize-java
 	(f-exp.tab.c): Ditto.
 	(m2-exp.tab.c): Ditto.
 
@@ -1832,9 +1814,7 @@ Mon Apr 28 17:27:40 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* c-exp.y: make parse_number reject "123DEADBEEF".
 	(fix by Bob Manson).
-start-sanitize-java
 	* java-exp.y: Ditto.
-end-sanitize-java
 	* top.c: change "to enable to enable" to "to enable" in a couple
 	of help strings.
 
@@ -1923,13 +1903,11 @@ Mon Apr 21 09:49:25 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* remote-pa.c:  Remove.  It's broken and no longer necessary.
 
-start-sanitize-java
 	Sat Apr 19 11:56:10 1997  Per Bothner  <bothner@deneb.cygnus.com>
 
 	* java-exp.y:  Combine TRUE and FALSE into BOOLEAN_LITERAL.
 	(Avoids name clash with broken AIX header files.)
 
-end-sanitize-java
 Sat Apr 19 01:49:37 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* serial.c (serial_log_command):  Fix fputs_unfiltered calls.
@@ -2022,12 +2000,10 @@ Fri Apr 18 16:52:41 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 Thu Apr 17 14:30:04 1997  Per Bothner  <bothner@deneb.cygnus.com>
 
 	* objfiles.c (allocate_objfile):  Allow NULL bfd argument.
-start-sanitize-java
 	* defs.h (enum language):  Add language_java.
 	* java-exp.y, java-lang.c, java-lang.h, java-valprint.c:  New files.
 	* Makefile.in:  Update for new files.
 	* symfile.c (deduce_language_from_filename):  Recognize .java.
-end-sanitize-java
 
 Thu Apr 17 02:20:23 1997  Doug Evans  <dje@canuck.cygnus.com>
 

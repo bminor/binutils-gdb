@@ -71,20 +71,6 @@ else
 	fi
 fi
 
-java_files="jv-exp.y jv-lang.c jv-lang.h jv-typeprint.c jv-valprint.c"
-
-if ( echo $* | grep keep\-java > /dev/null ) ; then
-	keep_these_too="${java_files} ${keep_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${java_files}
-	fi
-else
-	lose_these_too="${java_files} ${lose_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Deleting ${java_files}
-	fi
-fi
-
 vr4xxx_files="nec4102rom.c"
 
 if ( echo $* | grep keep\-vr4xxx > /dev/null ) ; then
@@ -819,33 +805,6 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-tclpro/,/end-\sanitize\-tclpro/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-if ( echo $* | grep keep\-java > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-java $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping java stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-java $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"java\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-java/,/end-\sanitize\-java/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
