@@ -1,3 +1,13 @@
+Tue May 20 10:22:50 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim_calls.c (sim_open): Add callback argument.
+	(sim_set_callbacks): Delete SIM_DESC argument.
+
+Tue Apr 22 22:36:57 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* sim_callbacks.h (error): Make declaration match gdb's.
+	* main.c (error): Ditto.
+
 Fri Apr 18 17:03:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim_calls.c (sim_stop_reason): Simplify.  Was running implies

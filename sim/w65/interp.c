@@ -322,8 +322,9 @@ sim_kill ()
 }
 
 void
-sim_open (kind,argv)
+sim_open (kind,cb,argv)
      SIM_OPEN_KIND kind;
+     host_callback *cb;
      char **argv;
 {
 }

@@ -162,19 +162,22 @@ int sim_stop PARAMS ((SIM_DESC sd));
 void sim_do_command PARAMS ((SIM_DESC sd, char *cmd));
 
 
-/* Provide simulator with a standard host_callback_struct.
-   If SD is NULL, the command is to be interpreted as refering to
-   the global state, however the simulator defines that.
+/* NOTE: sim_set_callbacks () is depreciated.
 
-   This function is depreciated. Callbacks are set as part of
-   sim_open. */
+   Provide simulator with a default (global) host_callback_struct. */
 
-void sim_set_callbacks PARAMS ((SIM_DESC sd, struct host_callback_struct *));
+void sim_set_callbacks PARAMS ((struct host_callback_struct *));
 
 
-/* NOTE: sim_size() and sim_trace() are going away */
+/* NOTE: sim_size() is depreciated.
 
-void sim_size PARAMS ((SIM_DESC sd, int i));
+   sim_size() does not take a SIM_DESC argument as this function is
+   used before sim_open() has been called. */
+
+void sim_size PARAMS ((int i));
+
+
+/* NOTE: sim_trace() is depreciated. */
 
 int sim_trace PARAMS ((SIM_DESC sd));
 

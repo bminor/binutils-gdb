@@ -110,14 +110,6 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *callback, char **argv
 }
 
 
-/* NOTE: sim_size is going away */
-void
-sim_size (SIM_DESC sd, int i)
-{
-  sim_io_error (sd, "unexpected call to sim_size()");
-}
-
-
 void
 sim_close (SIM_DESC sd, int quitting)
 {

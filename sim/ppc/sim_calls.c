@@ -57,8 +57,10 @@ static const char *register_names[] = REGISTER_NAMES;
 static unsigned_word entry_point;
 
 SIM_DESC
-sim_open (SIM_OPEN_KIND kind, char **argv)
+sim_open (SIM_OPEN_KIND kind, host_callback *callback, char **argv)
 {
+  callbacks = callback;
+
   /* Note: The simulation is not created by sim_open() because
      complete information is not yet available */
   /* trace the call */
@@ -215,48 +217,31 @@ sim_create_inferior (SIM_DESC sd, char **argv, char **envp)
 }
 
 
-static volatile int sim_should_run;
-
 void
 sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
   psim_status status = psim_get_status(simulator);
 
-  switch (CURRENT_ENVIRONMENT) {
-
-  case USER_ENVIRONMENT:
-  case VIRTUAL_ENVIRONMENT:
-    switch (status.reason) {
-    case was_continuing:
-      *reason = sim_stopped;
+  switch (status.reason) {
+  case was_continuing:
+    *reason = sim_stopped;
+    if (status.signal == 0)
       *sigrc = SIGTRAP;
-      if (sim_should_run) {
-	error("sim_stop_reason() unknown reason for halt\n");
-      }
-      break;
-    case was_trap:
-      *reason = sim_stopped;
-      *sigrc = SIGTRAP;
-      break;
-    case was_exited:
-      *reason = sim_exited;
-      *sigrc = 0;
-      break;
-    case was_signalled:
-      *reason = sim_signalled;
+    else
       *sigrc = status.signal;
-      break;
-    }
     break;
-
-  case OPERATING_ENVIRONMENT:
+  case was_trap:
     *reason = sim_stopped;
     *sigrc = SIGTRAP;
     break;
-
-  default:
-    error("sim_stop_reason() - unknown environment\n");
-  
+  case was_exited:
+    *reason = sim_exited;
+    *sigrc = status.signal;
+    break;
+  case was_signalled:
+    *reason = sim_signalled;
+    *sigrc = status.signal;
+    break;
   }
 
   TRACE(trace_gdb, ("sim_stop_reason(reason=0x%lx(%ld), sigrc=0x%lx(%ld))\n",
@@ -266,10 +251,12 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 
 
 /* Run (or resume) the program.  */
-static RETSIGTYPE
-sim_ctrl_c(int sig)
+
+int
+sim_stop (SIM_DESC sd)
 {
-  sim_should_run = 0;
+  psim_stop (simulator);
+  return 1;
 }
 
 void
@@ -280,19 +267,11 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
   if (step)
     {
-      psim_step(simulator);
-      /* sim_stop_reason has a sanity check for stopping while
-	 was_continuing.  We don't want that here so reset sim_should_run.  */
-      sim_should_run = 0;
+      psim_step (simulator);
     }
   else
     {
-      RETSIGTYPE (*prev) ();
-
-      prev = signal(SIGINT, sim_ctrl_c);
-      sim_should_run = 1;
-      psim_run_until_stop(simulator, &sim_should_run);
-      signal(SIGINT, prev);
+      psim_run (simulator);
     }
 }
 
@@ -406,7 +385,7 @@ sim_io_flush_stdoutput(void)
 }
 
 void
-sim_set_callbacks (SIM_DESC sd, host_callback *callback)
+sim_set_callbacks (host_callback *callback)
 {
   callbacks = callback;
   TRACE(trace_gdb, ("sim_set_callbacks called\n"));
