@@ -1,5 +1,8 @@
 Thu Dec  8 17:48:25 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* Makefile.in (NM_FOR_TARGET): Use ../binutils/nm.new, not just
+	plain nm.
+
 	* configure.in (ns32k-pc532-mach*): Select correct emulation.
 	(mips-sony-bsd*): Use ecoff.
 	(mips-*-gnu*): New target, using aout format, from Roland McGrath.
