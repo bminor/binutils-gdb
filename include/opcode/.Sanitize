@@ -51,6 +51,7 @@ Things-to-keep:
 ChangeLog
 a29k.h
 alpha.h
+arc.h
 arm.h
 cgen.h
 convex.h
