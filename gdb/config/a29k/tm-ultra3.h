@@ -18,8 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* This file includes tm-29k.h, but predefines REGISTER_NAMES and
-   related macros.  The file supports a 29k running our flavor of
+/* This file includes tm-a29k.h, but predefines REGISTER_NAMES and
+   related macros.  The file supports a a29k running our flavor of
    Unix on our Ultra3 PE Boards.  */
 
 /* Byte order is configurable, but this machine runs big-endian.  */
@@ -183,9 +183,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 #endif /* !KERNEL_DEBUGGING */
 
-#include "a29k/tm-29k.h"
+#include "a29k/tm-a29k.h"
 
-/**** The following are definitions that override those in tm-29k.h ****/
+/**** The following are definitions that override those in tm-a29k.h ****/
 
 /* This sequence of words is the instructions
    mtsrim cr, 15

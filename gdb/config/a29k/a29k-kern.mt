@@ -5,6 +5,6 @@
 # As compared to ordinary remote 29K debugging, this changes the register
 # numbering a bit, to hold kernel regs, and adds support for looking at
 # the upage.
-TDEPFILES= exec.o am29k-pinsn.o am29k-tdep.o remote-mm.o remote-adapt.o
+TDEPFILES= exec.o a29k-pinsn.o a29k-tdep.o remote-mm.o remote-adapt.o
 TM_FILE= tm-ultra3.h
 MT_CFLAGS = -DKERNEL_DEBUGGING -DNO_HIF_SUPPORT

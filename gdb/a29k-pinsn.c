@@ -115,7 +115,7 @@ find_bytes (insn, insn0, insn8, insn16, insn24)
 }
 
 /* Print one instruction from MEMADDR on STREAM.
-   Return the size of the instruction (always 4 on am29k).  */
+   Return the size of the instruction (always 4 on a29k).  */
 int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;

@@ -1,4 +1,4 @@
-/* Host definitions for GDB running on a 29k NYU Ultracomputer
+/* Host definitions for GDB running on an a29k NYU Ultracomputer
    Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
    Contributed by David Wood (wood@lab.ultra.nyu.edu).
 
@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Here at NYU we have what we call an ULTRA3 PE board.  So
    ifdefs for ULTRA3 are my doing.  At this point in time,
-   I don't know of any other Unixi running on the 29k.  */
+   I don't know of any other Unixi running on the a29k.  */
 
 #define HOST_BYTE_ORDER BIG_ENDIAN
 

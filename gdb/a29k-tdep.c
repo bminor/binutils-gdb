@@ -359,7 +359,7 @@ examine_tag(p, is_trans, argcount, msize, mfp_used)
 /* Initialize the frame.  In addition to setting "extra" frame info,
    we also set ->frame because we use it in a nonstandard way, and ->pc
    because we need to know it to get the other stuff.  See the diagram
-   of stacks and the frame cache in tm-29k.h for more detail.  */
+   of stacks and the frame cache in tm-a29k.h for more detail.  */
 static void
 init_frame_info (innermost_frame, fci)
      int innermost_frame;

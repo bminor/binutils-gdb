@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* This is like remote.c but is for an esoteric situation--
-   having a 29k board in a PC hooked up to a unix machine with
+   having a a29k board in a PC hooked up to a unix machine with
    a serial line, and running ctty com1 on the PC, through which
    the unix machine can run ebmon.  Not to mention that the PC
    has PC/NFS, so it can access the same executables that gdb can,
@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	 TM_FILE_OVERRIDE
 #include "defs.h"
 #include <string.h>
-#include "a29k/tm-29k.h"
+#include "a29k/tm-a29k.h"
 
 #include "inferior.h"
 #include "wait.h"

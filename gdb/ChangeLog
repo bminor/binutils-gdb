@@ -1,3 +1,21 @@
+Mon Mar 29 15:03:25 1993  Fred Fish  (fnf@cygnus.com)
+
+	* config/a29k/tm-a29k.h:  Renamed from config/a29k/tm-29k.h.
+	* a29k-pinsn.c:  Renamed from am29k-pinsn.c.
+	* a29k-tdep.c:  Renamed from am29k-tdep.c.
+	* remote-eb.c, config/a29k/tm-ultra3.h:  Include renamed tm-a29k.h.
+	* remote-monitor.c, remote-st2000.c, config/a29k/{nm-ultra3.h,
+	tm-a29k.h, xm-ultra3.h}, config/romp/rtbsd.mh, doc/gdbinv-s.texi,
+	testsuite/gdb.t15/funcargs.exp, testsuite/gdb.t17/callfuncs.exp:
+	Map '29k' to 'a29k'.
+	* config/a29k/{a29k-kern.mt, a29k-udi.mt, a29k.mt, ultra3.mt}
+	(TDEPFILES):  Use renamed a29k-pinsn.o and a29k-tdep.o.
+	* config/a29k/{a29k-udi.mt, a29k.mt} (TM_FILE):  Use renamed
+	tm-a29k.h.
+	* config/a29k/a29k-udi.mt (MT_CFLAGS):  Remove TARGET_AM29K
+	define that does not appear anywhere else in the gdb source tree.
+	* doc/gdbinit.texinfo:  Document renaming of tm-29k.h to tm-a29k.h.
+
 Mon Mar 29 13:55:29 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* xcoffread.c (sort_syms, compare_symbols): Remove.
@@ -5,11 +23,6 @@ Mon Mar 29 13:55:29 1993  Jim Kingdon  (kingdon@cygnus.com)
 	not our own sort_syms (it is identical).
 
 	* xcoffread.c: Nuke NAMES_HAVE_DOT define (not used).
-
-Fri Mar 26 11:29:30 1993  Jim Kingdon  (kingdon@cygnus.com)
-
-	* breakpoint.{c,h}: Add exp_string to struct breakpoint and use
-	it in breakpoint_re_set.
 
 Sun Mar 28 11:24:37 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -33,6 +46,8 @@ Fri Mar 26 15:25:05 1993  John Gilmore  (gnu@cygnus.com)
 
 Fri Mar 26 11:29:30 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* breakpoint.{c,h}: Add exp_string to struct breakpoint and use
+	it in breakpoint_re_set.
 	* breakpoint.c (watch_command, enable_breakpoint): Fetch lazy values.
 
 	* rs6000-tdep.c (single_step): Misc cleanups (CORE_ADDR not int,

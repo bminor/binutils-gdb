@@ -451,19 +451,19 @@ a break is detected.
 @cindex UDI
 @cindex AMD29K via UDI
 @value{GDBN} supports AMD's UDI (``Universal Debugger Interface'')
-protocol for debugging the 29k processor family.  To use this
+protocol for debugging the a29k processor family.  To use this
 configuration with AMD targets running the MiniMON monitor, you need the
 program @code{MONTIP}, available from AMD at no charge.  You can also
-use @value{GDBN} with the UDI conformant 29k simulator program
+use @value{GDBN} with the UDI conformant a29k simulator program
 @code{ISSTIP}, also available from AMD.
 
 @table @code
 @item target udi @var{keyword}
 @kindex udi
-Select the UDI interface to a remote 29K board or simulator, where
+Select the UDI interface to a remote a29k board or simulator, where
 @var{keyword} is an entry in the AMD configuration file @file{udi_soc}.
 This file contains keyword entries which specify parameters used to
-connect to 29k targets.  If the @file{udi_soc} file is not in your
+connect to a29k targets.  If the @file{udi_soc} file is not in your
 working directory, you must set the environment variable @samp{UDICONF}
 to its pathname.
 @end table

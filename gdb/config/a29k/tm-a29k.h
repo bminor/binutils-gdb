@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    accessed through EBMON software running on the PC, which we
    use as we'd use a remote stub (see remote-eb.c).
 
-   If gdb is ported to other 29k machines/systems, the
+   If gdb is ported to other a29k machines/systems, the
    machine/system-specific parts should be removed from this file (a
    la tm-68k.h).  */
 
@@ -93,7 +93,7 @@ CORE_ADDR skip_prologue ();
 #define DECR_PC_AFTER_BREAK 0
 
 /* Nonzero if instruction at PC is a return instruction.
-   On the 29k, this is a "jmpi l0" instruction.  */
+   On the a29k, this is a "jmpi l0" instruction.  */
 
 #define ABOUT_TO_RETURN(pc) \
   ((read_memory_integer (pc, 4) & 0xff0000ff) == 0xc0000080)
@@ -291,13 +291,13 @@ CORE_ADDR skip_prologue ();
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
-/* On the 29k the LRP points to the part of the structure beyond the first
+/* On the a29k the LRP points to the part of the structure beyond the first
    16 words.  */
 #define STORE_STRUCT_RETURN(ADDR, SP) \
   write_register (LRP_REGNUM, (ADDR) + 16 * 4);
 
 /* Should call_function allocate stack space for a struct return?  */
-/* On the 29k objects over 16 words require the caller to allocate space.  */
+/* On the a29k objects over 16 words require the caller to allocate space.  */
 #define USE_STRUCT_CONVENTION(gcc_p, type) (TYPE_LENGTH (type) > 16 * 4)
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -333,7 +333,7 @@ CORE_ADDR skip_prologue ();
 			  TYPE_LENGTH (TYPE));				  \
   }
 
-/* The am29k user's guide documents well what the stacks look like.
+/* The a29k user's guide documents well what the stacks look like.
    But what isn't so clear there is how this interracts with the
    symbols, or with GDB.
    In the following saved_msp, saved memory stack pointer (which functions
@@ -355,7 +355,7 @@ CORE_ADDR skip_prologue ();
    before trying to print arguments or anything.
 
    The following diagram attempts to depict what is going on in memory
-   (see also the _am29k user's guide_) and also how that interacts with
+   (see also the _a29k user's guide_) and also how that interacts with
    GDB frames.  We arbitrarily pick fci->frame to point the same place
    as the register stack pointer; since we set it ourself in
    INIT_EXTRA_FRAME_INFO, and access it only through the FRAME_*
@@ -364,7 +364,7 @@ CORE_ADDR skip_prologue ();
    (1) as a "magic cookie" which uniquely identifies frames (even over
    calls to the inferior), (2) (in PC_IN_CALL_DUMMY [ON_STACK])
    as the value of SP_REGNUM before the dummy frame was pushed.  These
-   two meanings would be incompatible for the 29k if we defined
+   two meanings would be incompatible for the a29k if we defined
    CALL_DUMMY_LOCATION == ON_STACK (but we don't, so don't worry about it).
    Also note that "lr1" below, while called a frame pointer
    in the user's guide, has only one function:  To determine whether
@@ -463,7 +463,7 @@ void init_frame_pc ();
    However, if FRAME_CHAIN_VALID returns zero,
    it means the given frame is the outermost one and has no caller.  */
 
-/* On the 29k, the nominal address of a frame is the address on the
+/* On the a29k, the nominal address of a frame is the address on the
    register stack of the return address (the one next to the incoming
    arguments, not down at the bottom so nominal address == stack pointer).
 
@@ -472,7 +472,7 @@ void init_frame_pc ();
    However, that doesn't work for us, so when creating the innermost
    frame we set ->frame ourselves in INIT_EXTRA_FRAME_INFO.  */
 
-/* These are mostly dummies for the 29k because INIT_FRAME_PC
+/* These are mostly dummies for the a29k because INIT_FRAME_PC
    sets prev->frame instead.  */
 #define FRAME_CHAIN(thisframe) ((thisframe)->frame + (thisframe)->rsize)
 
@@ -524,7 +524,7 @@ extern CORE_ADDR frame_locals_address ();
 #define FRAME_ARGS_SKIP 0
 
 /* Provide our own get_saved_register.  HAVE_REGISTER_WINDOWS is insufficient
-   because registers get renumbered on the 29k without getting saved.  */
+   because registers get renumbered on the a29k without getting saved.  */
 
 #define GET_SAVED_REGISTER
 
@@ -572,7 +572,7 @@ extern CORE_ADDR frame_locals_address ();
       the msp, it won't end up larger than mfp_dummy (it is needed in the
       case where margs and struct_ret do not add up to at least 16 words).
    struct ret:  This area is allocated by GDB if the return value is more
-      than 16 words.  struct ret_16 is not used on the 29k.
+      than 16 words.  struct ret_16 is not used on the a29k.
    margs:  Pushed by GDB.  The call dummy copies the first 16 words to
       args_out_dummy.
    retaddr_sproc:  Contains the PC at the time we call the function.
@@ -671,7 +671,7 @@ extern void pop_frame ();
    into a call sequence of the above form stored at DUMMYNAME.  */
 
 /* Currently this stuffs in the address of the function that we are calling.
-   Since different 29k systems use different breakpoint instructions, it
+   Since different a29k systems use different breakpoint instructions, it
    also stuffs BREAKPOINT in the right place (to avoid having to
    duplicate CALL_DUMMY in each tm-*.h file).  */
 
@@ -682,7 +682,7 @@ extern void pop_frame ();
   /* FIXME  memcpy ((char *)(dummyname) + BREAKPT_INSN, break_insn, 4); */ \
   }
 
-/* 29k architecture has separate data & instruction memories -- wired to
+/* a29k architecture has separate data & instruction memories -- wired to
    different pins on the chip -- and can't execute the data memory.
    Also, there should be space after text_end;
    we won't get a SIGSEGV or scribble on data space.  */

@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    as mentioned in the following comment (left in for comic relief):
 
   "This is like remote.c but is for an esoteric situation--
-   having a 29k board in a PC hooked up to a unix machine with
+   having an a29k board in a PC hooked up to a unix machine with
    a serial line, and running ctty com1 on the PC, through which
    the unix machine can run ebmon.  Not to mention that the PC
    has PC/NFS, so it can access the same executables that gdb can,

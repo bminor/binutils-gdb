@@ -5,6 +5,6 @@
 # Adapt (remote-adapt.c),
 # or a MiniMon debugger (remote-mm.c).
 # Or run native on an Ultracomputer.
-TDEPFILES= exec.o am29k-pinsn.o am29k-tdep.o remote-eb.o remote-mm.o remote-adapt.o 
-TM_FILE= tm-29k.h
+TDEPFILES= exec.o a29k-pinsn.o a29k-tdep.o remote-eb.o remote-mm.o remote-adapt.o 
+TM_FILE= tm-a29k.h
 MT_CFLAGS = -DNO_HIF_SUPPORT
