@@ -1,3 +1,11 @@
+Fri Mar 11 22:25:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-ppc.c (md_pcrel_from): Return 0 for undefined ELF
+	symbols.
+	(ppc_is_toc_sym): Change .toc to .got.
+	(md_apply_fix): Change handling of ELF relocs.
+	(tc_gen_reloc): Likewise.
+
 Fri Mar 11 17:42:20 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/obj-vms.c (Close_VMS_Object_File): Add comment pointing
