@@ -1,3 +1,8 @@
+Sun Oct 29 12:18:16 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.stabs/ecoff.sed: Remove comment lines except for first one.
+	IRIX 4.0 /bin/sed chokes on them, though they work fine elsewhere.
+
 Tue Oct 24 11:12:12 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.disasm/hppa.exp: Test lci and syncdma instructions.
