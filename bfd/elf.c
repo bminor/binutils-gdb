@@ -2022,6 +2022,7 @@ bfd_section_from_elf_index (bfd *abfd, unsigned int index)
 static struct bfd_elf_special_section const special_sections[] =
 {
   { ".bss",            4, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { ".gnu.linkonce.b",15, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
   { ".comment",        8,  0, SHT_PROGBITS, 0 },
   { ".data",           5, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { ".data1",          6,  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
