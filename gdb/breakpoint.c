@@ -5179,7 +5179,7 @@ catch_command_1 (arg, tempflag, from_tty)
       /* catch_throw_command_1 (arg1_start, tempflag, from_tty); */
       /* return; */
       /* Now, this is not allowed */ 
-      error ("Catch requires an event name");
+      error ("Catch requires an event name.");
 
     }
   arg1_end = ep_find_event_name_end (arg1_start);

@@ -355,7 +355,7 @@ tcomplain ()
 void
 noprocess ()
 {
-  error ("You can't do that without a process to debug");
+  error ("You can't do that without a process to debug.");
 }
 
 /* ARGSUSED */
