@@ -1,6 +1,6 @@
 2004-09-28  Nick Clifton  <nickc@redhat.com>
 
-	* nm.c: Reoder functions to eliminate most of the static function
+	* nm.c: Reorder functions to eliminate most of the static function
 	prototypes.
 
 2004-09-22  Alan Modra  <amodra@bigpond.net.au>
