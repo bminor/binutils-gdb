@@ -1,5 +1,8 @@
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* cofflink.c (coff_link_add_symbols): Don't warn about symbol type
+	changes when the base type is unknown.
+
 	* coffgen.c (coff_print_symbol): Fix printing of aux record for
 	function symbols.
 

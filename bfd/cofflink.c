@@ -295,12 +295,9 @@ coff_link_add_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-#if 0
-  /* These aren't needed yet.  */
   unsigned int n_tmask = coff_data (abfd)->local_n_tmask;
   unsigned int n_btshft = coff_data (abfd)->local_n_btshft;
   unsigned int n_btmask = coff_data (abfd)->local_n_btmask;
-#endif
   boolean keep_syms;
   boolean default_copy;
   bfd_size_type symcount;
@@ -452,25 +449,44 @@ coff_link_add_symbols (abfd, info)
 
 	  if (info->hash->creator->flavour == bfd_get_flavour (abfd))
 	    {
-	      if (((*sym_hash)->class == C_NULL
-		   && (*sym_hash)->type == T_NULL)
-		  || sym.n_scnum != 0
-		  || (sym.n_value != 0
-		      && (*sym_hash)->root.type != bfd_link_hash_defined
-		      && (*sym_hash)->root.type != bfd_link_hash_defweak))
-		{
-		  (*sym_hash)->class = sym.n_sclass;
-		  if (sym.n_type != T_NULL)
-		    {
-		      if ((*sym_hash)->type != T_NULL
-			  && (*sym_hash)->type != sym.n_type)
-			(*_bfd_error_handler)
-			  (_("Warning: type of symbol `%s' changed from %d to %d in %s"),
-			   name, (*sym_hash)->type, sym.n_type,
-			   bfd_get_filename (abfd));
-		      (*sym_hash)->type = sym.n_type;
-		    }
-		  (*sym_hash)->auxbfd = abfd;
+	      /* If we don't have any symbol information currently in
+                 the hash table, or if we are looking at a symbol
+                 definition, then update the symbol class and type in
+                 the hash table.  */
+  	      if (((*sym_hash)->class == C_NULL
+  		   && (*sym_hash)->type == T_NULL)
+  		  || sym.n_scnum != 0
+  		  || (sym.n_value != 0
+  		      && (*sym_hash)->root.type != bfd_link_hash_defined
+  		      && (*sym_hash)->root.type != bfd_link_hash_defweak))
+  		{
+  		  (*sym_hash)->class = sym.n_sclass;
+  		  if (sym.n_type != T_NULL)
+  		    {
+  		      /* We want to warn if the type changed, but not
+  			 if it changed from an unspecified type.
+  			 Testing the whole type byte may work, but the
+  			 change from (e.g.) a function of unspecified
+  			 type to function of known type also wants to
+  			 skip the warning.  */
+  		      if ((*sym_hash)->type != T_NULL
+  			  && (*sym_hash)->type != sym.n_type
+  		          && !(DTYPE ((*sym_hash)->type) == DTYPE (sym.n_type)
+  		               && (BTYPE ((*sym_hash)->type) == T_NULL
+  		                   || BTYPE (sym.n_type) == T_NULL)))
+  			(*_bfd_error_handler)
+  			  (_("Warning: type of symbol `%s' changed from %d to %d in %s"),
+  			   name, (*sym_hash)->type, sym.n_type,
+  			   bfd_get_filename (abfd));
+
+  		      /* We don't want to change from a meaningful
+  			 base type to a null one, but if we know
+  			 nothing, take what little we might now know.  */
+  		      if (BTYPE (sym.n_type) != T_NULL
+  			  || (*sym_hash)->type == T_NULL)
+			(*sym_hash)->type = sym.n_type;
+  		    }
+  		  (*sym_hash)->auxbfd = abfd;
 		  if (sym.n_numaux != 0)
 		    {
 		      union internal_auxent *alloc;
