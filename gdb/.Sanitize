@@ -515,7 +515,7 @@ else
 	done
 fi
 
-d10v_files="configure.tgt ChangeLog"
+d10v_files="configure.tgt ChangeLog valops.c"
 
 if ( echo $* | grep keep\-d10v > /dev/null ) ; then
 	for i in $d10v_files ; do
