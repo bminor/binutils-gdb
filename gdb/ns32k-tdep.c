@@ -1,4 +1,4 @@
-/* Print NS 32000 instructions for GDB, the GNU debugger.
+/* Target dependent code for the NS32000, for GDB.
    Copyright 1986, 1988, 1991, 1992, 1994, 1995, 1998, 1999, 2000, 2001,
    2002 Free Software Foundation, Inc.
 
@@ -21,14 +21,22 @@
 
 #include "defs.h"
 #include "frame.h"
+#include "gdbtypes.h"
 #include "gdbcore.h"
+#include "inferior.h"
+#include "regcache.h"
+#include "target.h"
+
+#include "arch-utils.h"
+
+#include "ns32k-tdep.h"
 
 static int sign_extend (int value, int bits);
 static CORE_ADDR ns32k_get_enter_addr (CORE_ADDR);
 static int ns32k_localcount (CORE_ADDR enter_pc);
 static void flip_bytes (void *, int);
 
-char *
+static char *
 ns32k_register_name_32082 (int regno)
 {
   static char *register_names[] =
@@ -47,7 +55,7 @@ ns32k_register_name_32082 (int regno)
   return (register_names[regno]);
 }
 
-char *
+static char *
 ns32k_register_name_32382 (int regno)
 {
   static char *register_names[] =
@@ -67,16 +75,16 @@ ns32k_register_name_32382 (int regno)
   return (register_names[regno]);
 }
 
-int
+static int
 ns32k_register_byte_32082 (int regno)
 {
-  if (regno >= LP0_REGNUM)
-    return (LP0_REGNUM * 4) + ((regno - LP0_REGNUM) * 8);
+  if (regno >= NS32K_LP0_REGNUM)
+    return (NS32K_LP0_REGNUM * 4) + ((regno - NS32K_LP0_REGNUM) * 8);
 
   return (regno * 4);
 }
 
-int
+static int
 ns32k_register_byte_32382 (int regno)
 {
   /* This is a bit yuk.  The even numbered double precision floating
@@ -85,27 +93,27 @@ ns32k_register_byte_32382 (int regno)
      registers are at the end.  Doing it this way is compatible for both
      32081 and 32381 equipped machines.  */
 
-  return ((regno < LP0_REGNUM ? regno
-           : (regno - LP0_REGNUM) & 1 ? regno - 1
-           : (regno - LP0_REGNUM + FP0_REGNUM)) * 4);
+  return ((regno < NS32K_LP0_REGNUM ? regno
+           : (regno - NS32K_LP0_REGNUM) & 1 ? regno - 1
+           : (regno - NS32K_LP0_REGNUM + FP0_REGNUM)) * 4);
 }
 
-int
+static int
 ns32k_register_raw_size (int regno)
 {
   /* All registers are 4 bytes, except for the doubled floating
      registers.  */
 
-  return ((regno >= LP0_REGNUM) ? 8 : 4);
+  return ((regno >= NS32K_LP0_REGNUM) ? 8 : 4);
 }
 
-int
+static int
 ns32k_register_virtual_size (int regno)
 {
-  return ((regno >= LP0_REGNUM) ? 8 : 4);
+  return ((regno >= NS32K_LP0_REGNUM) ? 8 : 4);
 }
 
-struct type *
+static struct type *
 ns32k_register_virtual_type (int regno)
 {
   if (regno < FP0_REGNUM)
@@ -114,7 +122,7 @@ ns32k_register_virtual_type (int regno)
   if (regno < FP0_REGNUM + 8)
     return (builtin_type_float);
 
-  if (regno < LP0_REGNUM)
+  if (regno < NS32K_LP0_REGNUM)
     return (builtin_type_int); 
 
   return (builtin_type_double);
@@ -125,7 +133,7 @@ ns32k_register_virtual_type (int regno)
    the new frame is not set up until the new function executes some
    instructions.  */
 
-CORE_ADDR
+static CORE_ADDR
 ns32k_saved_pc_after_call (struct frame_info *frame)
 {
   return (read_memory_integer (read_register (SP_REGNUM), 4));
@@ -134,7 +142,7 @@ ns32k_saved_pc_after_call (struct frame_info *frame)
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-CORE_ADDR
+static CORE_ADDR
 umax_skip_prologue (CORE_ADDR pc)
 {
   register unsigned char op = read_memory_integer (pc, 1);
@@ -151,7 +159,7 @@ umax_skip_prologue (CORE_ADDR pc)
   return pc;
 }
 
-const unsigned char *
+static const unsigned char *
 ns32k_breakpoint_from_pc (CORE_ADDR *pcp, int *lenp)
 {
   static const unsigned char breakpoint_insn[] = { 0xf2 };
@@ -166,7 +174,7 @@ ns32k_breakpoint_from_pc (CORE_ADDR *pcp, int *lenp)
    so this will often not work properly.  If the arg names
    are known, it's likely most of them will be printed. */
 
-int
+static int
 umax_frame_num_args (struct frame_info *fi)
 {
   int numargs;
@@ -292,7 +300,7 @@ ns32k_get_enter_addr (CORE_ADDR pc)
   return enter_addr;		/* pc is between enter and exit */
 }
 
-CORE_ADDR
+static CORE_ADDR
 ns32k_frame_chain (struct frame_info *frame)
 {
   /* In the case of the NS32000 series, the frame's nominal address is the
@@ -305,7 +313,7 @@ ns32k_frame_chain (struct frame_info *frame)
   return (read_memory_integer (frame->frame, 4));
 }
 
-CORE_ADDR
+static CORE_ADDR
 ns32k_frame_saved_pc (struct frame_info *frame)
 {
   if (frame->signal_handler_caller)
@@ -314,7 +322,7 @@ ns32k_frame_saved_pc (struct frame_info *frame)
   return (read_memory_integer (frame->frame + 4, 4));
 }
 
-CORE_ADDR
+static CORE_ADDR
 ns32k_frame_args_address (struct frame_info *frame)
 {
   if (ns32k_get_enter_addr (frame->pc) > 1)
@@ -323,10 +331,55 @@ ns32k_frame_args_address (struct frame_info *frame)
   return (read_register (SP_REGNUM) - 4);
 }
 
-CORE_ADDR
+static CORE_ADDR
 ns32k_frame_locals_address (struct frame_info *frame)
 {
   return (frame->frame);
+}
+
+static void
+ns32k_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
+                          struct frame_info *frame, int regnum,
+			  enum lval_type *lval)
+{
+  CORE_ADDR addr;
+
+  if (!target_has_registers)
+    error ("No registers.");
+
+  /* Normal systems don't optimize out things with register numbers.  */
+  if (optimized != NULL)
+    *optimized = 0;
+  addr = find_saved_register (frame, regnum);
+  if (addr != 0)
+    {
+      if (lval != NULL)
+	*lval = lval_memory;
+      if (regnum == SP_REGNUM)
+	{
+	  if (raw_buffer != NULL)
+	    {
+	      /* Put it back in target format.  */
+	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
+			     (LONGEST) addr);
+	    }
+	  if (addrp != NULL)
+	    *addrp = 0;
+	  return;
+	}
+      if (raw_buffer != NULL)
+	target_read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
+    }
+  else
+    {
+      if (lval != NULL)
+	*lval = lval_register;
+      addr = REGISTER_BYTE (regnum);
+      if (raw_buffer != NULL)
+	read_register_gen (regnum, raw_buffer);
+    }
+  if (addrp != NULL)
+    *addrp = addr;
 }
 
 /* Code to initialize the addresses of the saved registers of frame described
@@ -334,7 +387,7 @@ ns32k_frame_locals_address (struct frame_info *frame)
    special ways in the stack frame.  sp is even more special: the address we
    return for it IS the sp for the next frame.  */
 
-void
+static void
 ns32k_frame_init_saved_regs (struct frame_info *frame)
 {
   int regmask, regnum;
@@ -371,7 +424,7 @@ ns32k_frame_init_saved_regs (struct frame_info *frame)
     }
 }
 
-void
+static void
 ns32k_push_dummy_frame (void)
 {
   CORE_ADDR sp = read_register (SP_REGNUM);
@@ -387,7 +440,7 @@ ns32k_push_dummy_frame (void)
   write_register (SP_REGNUM, sp);
 }
 
-void
+static void
 ns32k_pop_frame (void)
 {
   struct frame_info *frame = get_current_frame ();
@@ -417,19 +470,19 @@ ns32k_pop_frame (void)
 
    It is 16 bytes long.  */
 
-LONGEST ns32k_call_dummy_words[] =
+static LONGEST ns32k_call_dummy_words[] =
 {
   0x7f00ff82,
   0x0201c0ae,
   0x01a57f03,
   0xf2040302
 };
-int sizeof_ns32k_call_dummy_words = sizeof (ns32k_call_dummy_words);
+static int sizeof_ns32k_call_dummy_words = sizeof (ns32k_call_dummy_words);
 
 #define NS32K_CALL_DUMMY_ADDR         5
 #define NS32K_CALL_DUMMY_NARGS        11
 
-void
+static void
 ns32k_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
                       struct value **args, struct type *type, int gcc_p)
 {
@@ -444,13 +497,13 @@ ns32k_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
   store_unsigned_integer (dummy + NS32K_CALL_DUMMY_NARGS, 4, flipped);
 }
 
-void
+static void
 ns32k_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   /* On this machine, this is a no-op (Encore Umax didn't use GCC).  */
 }
 
-void
+static void
 ns32k_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 {
   memcpy (valbuf,
@@ -458,21 +511,163 @@ ns32k_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 				  FP0_REGNUM : 0), TYPE_LENGTH (valtype));
 }
 
-void
+static void
 ns32k_store_return_value (struct type *valtype, char *valbuf)
 {
   write_register_bytes (TYPE_CODE (valtype) == TYPE_CODE_FLT ?
 			FP0_REGNUM : 0, valbuf, TYPE_LENGTH (valtype));
 }
 
-CORE_ADDR
+static CORE_ADDR
 ns32k_extract_struct_value_address (char *regbuf)
 {
   return (extract_address (regbuf + REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
 }
 
 void
+ns32k_gdbarch_init_32082 (struct gdbarch *gdbarch)
+{
+  set_gdbarch_num_regs (gdbarch, NS32K_NUM_REGS_32082);
+
+  set_gdbarch_register_name (gdbarch, ns32k_register_name_32082);
+  set_gdbarch_register_bytes (gdbarch, NS32K_REGISTER_BYTES_32082);
+  set_gdbarch_register_byte (gdbarch, ns32k_register_byte_32082);
+}
+
+void
+ns32k_gdbarch_init_32382 (struct gdbarch *gdbarch)
+{
+  set_gdbarch_num_regs (gdbarch, NS32K_NUM_REGS_32382);
+
+  set_gdbarch_register_name (gdbarch, ns32k_register_name_32382);
+  set_gdbarch_register_bytes (gdbarch, NS32K_REGISTER_BYTES_32382);
+  set_gdbarch_register_byte (gdbarch, ns32k_register_byte_32382);
+}
+
+/* Initialize the current architecture based on INFO.  If possible, re-use an
+   architecture from ARCHES, which is a list of architectures already created
+   during this debugging session.
+
+   Called e.g. at program startup, when reading a core file, and when reading
+   a binary file.  */
+
+static struct gdbarch *
+ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+{
+  struct gdbarch_tdep *tdep;
+  struct gdbarch *gdbarch;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
+
+  /* Try to determine the OS ABI of the object we are loading.  */
+  if (info.abfd != NULL)
+    {
+      osabi = gdbarch_lookup_osabi (info.abfd);
+    }
+
+  /* Find a candidate among extant architectures.  */
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* Make sure the OS ABI selection matches.  */
+      tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->osabi == osabi)
+	return arches->gdbarch;
+    }
+
+  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  gdbarch = gdbarch_alloc (&info, tdep);
+
+  tdep->osabi = osabi;
+
+  /* Register info */
+  ns32k_gdbarch_init_32082 (gdbarch);
+  set_gdbarch_num_regs (gdbarch, NS32K_SP_REGNUM);
+  set_gdbarch_num_regs (gdbarch, NS32K_FP_REGNUM);
+  set_gdbarch_num_regs (gdbarch, NS32K_PC_REGNUM);
+  set_gdbarch_num_regs (gdbarch, NS32K_PS_REGNUM);
+
+  set_gdbarch_register_size (gdbarch, NS32K_REGISTER_SIZE);
+  set_gdbarch_register_raw_size (gdbarch, ns32k_register_raw_size);
+  set_gdbarch_max_register_raw_size (gdbarch, NS32K_MAX_REGISTER_RAW_SIZE);
+  set_gdbarch_register_virtual_size (gdbarch, ns32k_register_virtual_size);
+  set_gdbarch_max_register_virtual_size (gdbarch,
+                                         NS32K_MAX_REGISTER_VIRTUAL_SIZE);
+  set_gdbarch_register_virtual_type (gdbarch, ns32k_register_virtual_type);
+
+  /* Frame and stack info */
+  set_gdbarch_skip_prologue (gdbarch, umax_skip_prologue);
+  set_gdbarch_saved_pc_after_call (gdbarch, ns32k_saved_pc_after_call);
+
+  set_gdbarch_frame_num_args (gdbarch, umax_frame_num_args);
+  set_gdbarch_frameless_function_invocation (gdbarch,
+                                   generic_frameless_function_invocation_not);
+  
+  set_gdbarch_frame_chain (gdbarch, ns32k_frame_chain);
+  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
+  set_gdbarch_frame_saved_pc (gdbarch, ns32k_frame_saved_pc);
+
+  set_gdbarch_frame_args_address (gdbarch, ns32k_frame_args_address);
+  set_gdbarch_frame_locals_address (gdbarch, ns32k_frame_locals_address);
+
+  set_gdbarch_frame_init_saved_regs (gdbarch, ns32k_frame_init_saved_regs);
+
+  set_gdbarch_frame_args_skip (gdbarch, 8);
+
+  set_gdbarch_get_saved_register (gdbarch, ns32k_get_saved_register);
+
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+
+  /* Return value info */
+  set_gdbarch_store_struct_return (gdbarch, ns32k_store_struct_return);
+  set_gdbarch_extract_return_value (gdbarch, ns32k_extract_return_value);
+  set_gdbarch_store_return_value (gdbarch, ns32k_store_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch,
+                                            ns32k_extract_struct_value_address);
+
+  /* Call dummy info */
+  set_gdbarch_push_dummy_frame (gdbarch, ns32k_push_dummy_frame);
+  set_gdbarch_pop_frame (gdbarch, ns32k_pop_frame);
+  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_words (gdbarch, ns32k_call_dummy_words);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof_ns32k_call_dummy_words);
+  set_gdbarch_fix_call_dummy (gdbarch, ns32k_fix_call_dummy);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 3);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 0);
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+
+  /* Breakpoint info */
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
+  set_gdbarch_breakpoint_from_pc (gdbarch, ns32k_breakpoint_from_pc);
+
+  /* Misc info */
+  set_gdbarch_function_start_offset (gdbarch, 0);
+
+  /* Hook in OS ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch, osabi);
+
+  return (gdbarch);
+}
+
+static void
+ns32k_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep == NULL)
+    return;
+
+  fprintf_unfiltered (file, "ns32k_dump_tdep: OS ABI = %s\n",
+		      gdbarch_osabi_name (tdep->osabi));
+}
+
+void
 _initialize_ns32k_tdep (void)
 {
+  gdbarch_register (bfd_arch_ns32k, ns32k_gdbarch_init, ns32k_dump_tdep);
+
   tm_print_insn = print_insn_ns32k;
 }

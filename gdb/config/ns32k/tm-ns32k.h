@@ -1,5 +1,5 @@
-/* Macro definitions for ns32k running under NetBSD.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+/* Definitions to make GDB run on an encore under umax 4.2
+   Copyright 1987, 1989, 1991, 1993, 1994, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -19,19 +19,21 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef TM_NBSD_H
-#define TM_NBSD_H
+#ifndef TM_NS32K_H
+#define TM_NS32K_H
 
-/* Override number of expected traps from sysv. */
-#define START_INFERIOR_TRAPS_EXPECTED 2
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
-/* Most definitions from umax could be used. */
+/* Need to get function ends by adding this to epilogue address from .bf
+   record, not using x_fsize field.  */
+#define FUNCTION_EPILOGUE_SIZE 4
 
-#include "ns32k/tm-ns32k.h"
+/* Address of end of stack space.  */
 
-/* Saved Pc.  Get it from sigcontext if within sigtramp.  */
+#ifndef STACK_END_ADDR
+#define STACK_END_ADDR (0xfffff000)
+#endif
 
-/* Offset to saved PC in sigcontext, from <machine/signal.h>.  */
-#define SIGCONTEXT_PC_OFFSET 20
+#define NUM_GENERAL_REGS	8
 
-#endif /* TM_NBSD_H */
+#endif /* TM_NS32K_H */

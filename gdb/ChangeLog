@@ -1,5 +1,24 @@
 2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* ns32k-tdep.c: include gdbtypes.h, inferior.h, regcache.h,
+	target.s, arch-utils.h, ns32k-tdep.h.  Make many functions
+	static.  Rename some register numbers to put them in ns32k-tdep
+	private namespace.
+	(ns32k_get_saved_register, ns32k_gdbarch_init_32082,
+	ns32k_gdbarch_init_32382, ns32k_gdbarch_init, ns32k_dump_tdep): New
+	functions.
+	(_initialize_ns32k_tdep): Use gdbarch_register.
+	* ns32k-tdep.h: New file.
+	* ns32knbsd-tdep.c: New file.
+	* config/ns32k/nbsdaout.mt (TDEPFILES): Add ns32knbsd-tdep.o.
+	* config/ns32k/tm-nbsd.h: Include "ns32k/tm-ns32k.h".
+	(IN_SOLIB_CALL_TRAMPOLINE, REGISTER_NAME, NUM_REGS,
+	REGISTER_BYTES, REGISTER_BYTE): Remove.
+	* config/ns32k/tm-ns32k.h: New file.
+	* config/ns32k/tm-umax.h: Remove.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* ns32k-tdep.c (ns32k_saved_pc_after_call,
 	ns32k_store_struct_return, ns32k_extract_return_value,
 	ns32k_store_return_value, ns32k_extract_struct_value_address): New
