@@ -1,3 +1,9 @@
+Fri Apr 25 00:10:18 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/mn10300/tm-mn10300.h (EXTRACT_STRUCT_VALUE_ADDRESS): The
+	structure value address is found in $a0 now.
+	* config/mn10200/tm-mn10200.h (EXTRACT_STRUCT_VALUE_ADDRESS): Likewise.
+
 Thu Apr 24 13:31:10 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/mn10300/tm-mn10300.h (STORE_RETURN_VALUE): Pointers are

@@ -140,8 +140,8 @@ extern CORE_ADDR mn10200_frame_saved_pc   PARAMS ((struct frame_info *));
   }
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  extract_address (REGBUF + REGISTER_BYTE (0), \
-		   REGISTER_RAW_SIZE (0))
+  extract_address (REGBUF + REGISTER_BYTE (4), \
+		   REGISTER_RAW_SIZE (4))
 
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
   { \
