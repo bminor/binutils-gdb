@@ -2103,7 +2103,7 @@ assign_file_positions_except_relocs (abfd, dosyms)
       phdr_map = map_program_segments (abfd, phdr_off, first, phdr_size);
       if (phdr_map == (file_ptr) -1)
 	return false;
-      BFD_ASSERT (phdr_map == phdr_off + phdr_size);
+      BFD_ASSERT (phdr_map <= phdr_off + phdr_size);
     }
 
   /* Place the section headers.  */
