@@ -1,5 +1,16 @@
 2005-02-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (struct ppc_link_hash_entry): Add "fake".
+	(link_hash_newfunc): Clear all locals using memset.
+	(make_fdh): Remove flags param.  Always create fake func desc
+	weak.  Link the descriptor with the code entry sym.
+	(ppc64_elf_archive_symbol_lookup): Don't return fake syms.
+	(add_symbol_adjust): Adjust make_fdh call.
+	(func_desc_adjust): Likewise.  Twiddle any pre-existing fake
+	descriptor to strong undefined if code entry is strong.
+
+2005-02-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (bfd_elf_record_link_assignment): Do "provide" symbol
 	lookup here.  Set to new before calling bfd_link_repair_undef_list.
 	(elf_smash_syms): Check that u.undef.weak isn't the not_needed bfd.

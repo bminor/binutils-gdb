@@ -3208,6 +3208,7 @@ struct ppc_link_hash_entry
   /* Flag function code and descriptor symbols.  */
   unsigned int is_func:1;
   unsigned int is_func_descriptor:1;
+  unsigned int fake:1;
 
   /* Whether global opd/toc sym has been adjusted or not.
      After ppc64_elf_edit_opd/ppc64_elf_edit_toc has run, this flag
@@ -3430,14 +3431,9 @@ link_hash_newfunc (struct bfd_hash_entry *entry,
     {
       struct ppc_link_hash_entry *eh = (struct ppc_link_hash_entry *) entry;
 
-      eh->stub_cache = NULL;
-      eh->dyn_relocs = NULL;
-      eh->oh = NULL;
-      eh->is_func = 0;
-      eh->is_func_descriptor = 0;
-      eh->adjust_done = 0;
-      eh->was_undefined = 0;
-      eh->tls_mask = 0;
+      memset (&eh->stub_cache, 0,
+	      (sizeof (struct ppc_link_hash_entry)
+	       - offsetof (struct ppc_link_hash_entry, stub_cache)));
     }
 
   return entry;
@@ -3941,8 +3937,7 @@ get_fdh (struct ppc_link_hash_entry *fh, struct ppc_link_hash_table *htab)
 
 static struct ppc_link_hash_entry *
 make_fdh (struct bfd_link_info *info,
-	  struct ppc_link_hash_entry *fh,
-	  flagword flags)
+	  struct ppc_link_hash_entry *fh)
 {
   bfd *abfd;
   asymbol *newsym;
@@ -3954,7 +3949,7 @@ make_fdh (struct bfd_link_info *info,
   newsym->name = fh->elf.root.root.string + 1;
   newsym->section = bfd_und_section_ptr;
   newsym->value = 0;
-  newsym->flags = flags;
+  newsym->flags = BSF_WEAK;
 
   bh = NULL;
   if (!_bfd_generic_link_add_one_symbol (info, abfd, newsym->name,
@@ -3965,6 +3960,11 @@ make_fdh (struct bfd_link_info *info,
 
   fdh = (struct ppc_link_hash_entry *) bh;
   fdh->elf.non_elf = 0;
+  fdh->fake = 1;
+  fdh->is_func_descriptor = 1;
+  fdh->oh = fh;
+  fh->is_func = 1;
+  fh->oh = fdh;
   return fdh;
 }
 
@@ -4002,7 +4002,9 @@ ppc64_elf_add_symbol_hook (bfd *ibfd ATTRIBUTE_UNUSED,
 }
 
 /* This function makes an old ABI object reference to ".bar" cause the
-   inclusion of a new ABI object archive that defines "bar".  */
+   inclusion of a new ABI object archive that defines "bar".
+   NAME is a symbol defined in an archive.  Return a symbol in the hash
+   table that might be satisfied by the archive symbols.  */
 
 static struct elf_link_hash_entry *
 ppc64_elf_archive_symbol_lookup (bfd *abfd,
@@ -4014,7 +4016,11 @@ ppc64_elf_archive_symbol_lookup (bfd *abfd,
   size_t len;
 
   h = _bfd_elf_archive_symbol_lookup (abfd, info, name);
-  if (h != NULL)
+  if (h != NULL
+      /* Don't return this sym if it is a fake function descriptor
+	 created by add_symbol_adjust.  */
+      && !(h->root.type == bfd_link_hash_undefweak
+	   && ((struct ppc_link_hash_entry *) h)->fake))
     return h;
 
   if (name[0] == '.')
@@ -4075,7 +4081,7 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
       /* Make an undefweak function descriptor sym, which is enough to
 	 pull in an --as-needed shared lib, but won't cause link
 	 errors.  Archives are handled elsewhere.  */
-      fdh = make_fdh (data->info, eh, BSF_WEAK);
+      fdh = make_fdh (data->info, eh);
       if (fdh == NULL)
 	data->ok = FALSE;
       else
@@ -5414,12 +5420,21 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
       && (fh->elf.root.type == bfd_link_hash_undefined
 	  || fh->elf.root.type == bfd_link_hash_undefweak))
     {
-      flagword flags = 0;
-      if (fh->elf.root.type == bfd_link_hash_undefweak)
-	flags = BSF_WEAK;
-      fdh = make_fdh (info, fh, flags);
+      fdh = make_fdh (info, fh);
       if (fdh == NULL)
 	return FALSE;
+    }
+
+  /* Fake function descriptors are made undefweak.  If the function
+     code symbol is strong undefined, make the fake sym the same.  */
+
+  if (fdh != NULL
+      && fdh->fake
+      && fdh->elf.root.type == bfd_link_hash_undefweak
+      && fh->elf.root.type == bfd_link_hash_undefined)
+    {
+      fdh->elf.root.type = bfd_link_hash_undefined;
+      bfd_link_add_undef (&htab->elf.root, &fdh->elf.root);
     }
 
   if (fdh != NULL
