@@ -27,11 +27,13 @@ CONTRIBUTORS
 COPYING
 ChangeLog
 ChangeLog.1
+Makefile.am
 Makefile.in
 NEWS
 README
 README-vms
 acconfig.h
+acinclude.m4
 aclocal.m4
 app.c
 as.c
@@ -42,8 +44,8 @@ bignum.h
 bit_fix.h
 cgen.c
 cond.c
-conf.in
 config
+config.in
 config-gas.com
 configure
 configure.bat
@@ -94,6 +96,7 @@ read.h
 sb.c
 sb.h
 stabs.c
+stamp-h.in
 struc-symbol.h
 subsegs.c
 subsegs.h

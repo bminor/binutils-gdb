@@ -1,3 +1,9 @@
+/* Name of package.  */
+#undef PACKAGE
+
+/* Version of package.  */
+#undef VERSION
+
 /* Should gas use high-level BFD interfaces?  */
 #undef BFD_ASSEMBLER
 
@@ -59,3 +65,6 @@
 #undef I386COFF
 #undef M68KCOFF
 #undef M88KCOFF
+
+/* Using cgen code?  */
+#undef USING_CGEN

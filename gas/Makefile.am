@@ -1,78 +1,4 @@
-# Makefile.in generated automatically by automake 1.2 from Makefile.am
-
-# Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
-# This Makefile.in is free software; the Free Software Foundation
-# gives unlimited permission to copy, distribute and modify it.
-
-
-SHELL = /bin/sh
-
-srcdir = @srcdir@
-top_srcdir = @top_srcdir@
-VPATH = @srcdir@
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-
-bindir = @bindir@
-sbindir = @sbindir@
-libexecdir = @libexecdir@
-datadir = @datadir@
-sysconfdir = @sysconfdir@
-sharedstatedir = @sharedstatedir@
-localstatedir = @localstatedir@
-libdir = @libdir@
-infodir = @infodir@
-mandir = @mandir@
-includedir = @includedir@
-oldincludedir = /usr/include
-
-pkgdatadir = $(datadir)/@PACKAGE@
-pkglibdir = $(libdir)/@PACKAGE@
-pkgincludedir = $(includedir)/@PACKAGE@
-
-top_builddir = .
-
-ACLOCAL = @ACLOCAL@
-AUTOCONF = @AUTOCONF@
-AUTOMAKE = @AUTOMAKE@
-AUTOHEADER = @AUTOHEADER@
-
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
-INSTALL_SCRIPT = @INSTALL_SCRIPT@
-transform = @program_transform_name@
-
-NORMAL_INSTALL = true
-PRE_INSTALL = true
-POST_INSTALL = true
-NORMAL_UNINSTALL = true
-PRE_UNINSTALL = true
-POST_UNINSTALL = true
-build_alias = @build_alias@
-build_triplet = @build@
-host_alias = @host_alias@
-host_triplet = @host@
-target_alias = @target_alias@
-target_triplet = @target@
-ALL_OBJ_DEPS = @ALL_OBJ_DEPS@
-BFDLIB = @BFDLIB@
-CC = @CC@
-EXEEXT = @EXEEXT@
-LD = @LD@
-LIBTOOL = @LIBTOOL@
-LN_S = @LN_S@
-MAINT = @MAINT@
-MAKEINFO = @MAKEINFO@
-OPCODES_LIB = @OPCODES_LIB@
-PACKAGE = @PACKAGE@
-RANLIB = @RANLIB@
-VERSION = @VERSION@
-atof = @atof@
-extra_objects = @extra_objects@
-obj_format = @obj_format@
-target_cpu_type = @target_cpu_type@
-te_file = @te_file@
+## Process this file with automake to generate Makefile.in
 
 AUTOMAKE_OPTIONS = dejagnu
 
@@ -404,6 +330,12 @@ OBJS = \
 noinst_PROGRAMS = as-new gasp-new
 noinst_SCRIPTS = .gdbinit
 
+make-gas.com: stamp-mk.com
+stamp-mk.com: vmsconf.sh Makefile
+	sh $(srcdir)/vmsconf.sh $(OBJS) > new-make.com
+	$(SHELL) $(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
+	touch stamp-mk.com
+
 # Now figure out from those variables how to compile and link.
 
 BASEDIR = $(srcdir)/..
@@ -425,11 +357,19 @@ GASLIBS = @OPCODES_LIB@ @BFDLIB@ ../libiberty/libiberty.a
 # Files to be copied away after each stage in building.
 STAGESTUFF = *.o $(bin_PROGRAMS)
 
+$(OBJS): @ALL_OBJ_DEPS@
+
 as_new_SOURCES = $(GAS_CFILES)
 as_new_LDADD = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
 	$(extra_objects) $(GASLIBS)
 as_new_DEPENDENCIES = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
 	$(extra_objects) $(GASLIBS)
+
+# Stuff that every object file depends upon.  If anything is removed
+# from this list, remove it from dep-in.sed as well.
+$(OBJS): config.h as.h $(TARG_ENV_H) $(OBJ_FORMAT_H) $(TARG_CPU_H) flonum.h \
+	expr.h struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h \
+	obj.h listing.h bignum.h bit_fix.h $(INCDIR)/libiberty.h
 
 gasp_new_SOURCES = gasp.c macro.c sb.c hash.c
 gasp_new_LDADD = ../libiberty/libiberty.a
@@ -443,15 +383,117 @@ RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
 	   fi`
 RUNTESTFLAGS=
 
+check-DEJAGNU: site.exp
+	if [ -d testsuite ]; then \
+	  true; \
+	else \
+	  mkdir testsuite; \
+	fi
+	rm -f testsuite/site.exp
+	cp site.exp testsuite/site.exp
+	rootme=`pwd`; export rootme; \
+	srcdir=`cd ${srcdir}; pwd` ; export srcdir ; \
+	cd testsuite; \
+	EXPECT=${EXPECT} ; export EXPECT ; \
+	if [ -f $(top_builddir)/../expect/expect ]; then \
+	  TCL_LIBRARY=`cd $(top_srcdir)/../tcl/library && pwd`; \
+	  export TCL_LIBRARY; \
+	fi; \
+	runtest=$(RUNTEST); \
+	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
+	  $$runtest --tool $(DEJATOOL) --srcdir $${srcdir}/testsuite \
+		$(RUNTESTFLAGS); \
+	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
+	fi
+
+# The implicit .c.o rule doesn't work for these, perhaps because of
+# the variables, or perhaps because the sources are not on vpath.
+$(TARG_CPU_O): $(TARG_CPU_C) $(TARG_CPU_DEP_@target_cpu_type@)
+	$(COMPILE) -c $(TARG_CPU_C)
+$(ATOF_TARG_O): $(ATOF_TARG_C)
+	$(COMPILE) -c $(ATOF_TARG_C)
+
+# ecoff.c only has full dependencies when ECOFF_DEBUGGING is defined,
+# so the automatic dependency stuff doesn't work.
+ecoff.o : ecoff.c ecoff.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h \
+	$(INCDIR)/coff/ecoff.h $(INCDIR)/coff/symconst.h \
+	$(INCDIR)/aout/stab_gnu.h
+
+# We need all these explicit rules for the multi stuff.  Because of
+# these rules, we don't need one for OBJ_FORMAT_O.
+
+obj-aout.o : $(srcdir)/config/obj-aout.c
+	$(COMPILE) -c $(srcdir)/config/obj-aout.c
+obj-bout.o : $(srcdir)/config/obj-bout.c
+	$(COMPILE) -c $(srcdir)/config/obj-bout.c
+obj-coff.o: $(srcdir)/config/obj-coff.c
+	$(COMPILE) -c $(srcdir)/config/obj-coff.c
+obj-ecoff.o : $(srcdir)/config/obj-ecoff.c
+	$(COMPILE) -c $(srcdir)/config/obj-ecoff.c
+obj-elf.o : $(srcdir)/config/obj-elf.c
+	$(COMPILE) -c $(srcdir)/config/obj-elf.c
+obj-evax.o : $(srcdir)/config/obj-evax.c
+	$(COMPILE) -c $(srcdir)/config/obj-evax.c
+obj-hp300.o : $(srcdir)/config/obj-hp300.c
+	$(COMPILE) -c $(srcdir)/config/obj-hp300.c
+obj-ieee.o : $(srcdir)/config/obj-ieee.c
+	$(COMPILE) -c $(srcdir)/config/obj-ieee.c
+obj-multi.o : $(srcdir)/config/obj-multi.c
+	$(COMPILE) -c $(srcdir)/config/obj-multi.c
+obj-som.o : $(srcdir)/config/obj-som.c
+	$(COMPILE) -c $(srcdir)/config/obj-som.c
+obj-vms.o : $(srcdir)/config/obj-vms.c
+	$(COMPILE) -c $(srcdir)/config/obj-vms.c
+
+e-mipself.o : $(srcdir)/config/e-mipself.c
+	$(COMPILE) -c $(srcdir)/config/e-mipself.c
+e-mipsecoff.o : $(srcdir)/config/e-mipsecoff.c
+	$(COMPILE) -c $(srcdir)/config/e-mipsecoff.c
+e-i386coff.o: $(srcdir)/config/e-i386coff.c
+	$(COMPILE) -c $(srcdir)/config/e-i386coff.c
+e-i386elf.o: $(srcdir)/config/e-i386elf.c
+	$(COMPILE) -c $(srcdir)/config/e-i386elf.c
+
 # The m68k operand parser.
 
 EXTRA_as_new_SOURCES = m68k-parse.y
+
+m68k-parse.c: $(srcdir)/config/m68k-parse.y
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/config/m68k-parse.y y.tab.c m68k-parse.c --
+m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
+
+# Don't let the .y.h rule clobber m68k-parse.h.
+m68k-parse.h: ; @true
+
+# The instruction table specification lexical analyzer and parser.
+
+itbl-lex.c: $(srcdir)/itbl-lex.l
+itbl-lex.o: itbl-lex.c itbl-parse.h
+
+itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h
+
+itbl-ops.o: $(srcdir)/itbl-ops.c $(srcdir)/itbl-ops.h itbl-parse.h
+
+itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/itbl-parse.y y.tab.c itbl-parse.c y.tab.h itbl-parse.h -- -d
 
 # stand-alone itbl assembler & disassembler
 
 EXTRA_PROGRAMS = itbl-test
 itbl_test_SOURCES = itbl-parse.y itbl-lex.l
 itbl_test_LDADD = itbl-test-ops.o itbl-test.o $(GASLIBS) @LEXLIB@
+
+itbl-test-ops.o: $(srcdir)/itbl-ops.c $(srcdir)/itbl-ops.h itbl-parse.h
+	$(COMPILE) -o itbl-test-ops.o -DSTAND_ALONE -c $(srcdir)/itbl-ops.c
+
+itbl-test.o: $(srcdir)/testsuite/gas/all/itbl-test.c $(srcdir)/itbl-ops.h
+	$(COMPILE) -c -DSTAND_ALONE $(srcdir)/testsuite/gas/all/itbl-test.c
+
+# CGEN interface.
+
+cgen.o: cgen.c cgen-opc.h subsegs.h \
+	$(INCDIR)/obstack.h $(INCDIR)/opcode/cgen.h \
+	$(srcdir)/../opcodes/$(TARG_CPU)-opc.h
 
 # Remake the info files.
 
@@ -461,7 +503,97 @@ MOSTLYCLEANFILES = $(STAGESTUFF) core stamp-mk.com \
 
 CLEANFILES = dep.sed .tcdep .objdep .dep2 .dep1 .depa .dep .depdir
 
+.PHONY: install-exec-local install-data-local
+
+install-exec-local: $(noinst_PROGRAMS)
+	$(mkinstalldirs) $(bindir) $(tooldir)/bin
+	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`; \
+	  else :; fi; \
+	done
+	rm -f $(tooldir)/bin/as$(EXEEXT)
+	n=`echo as | sed '$(transform)'`; \
+	ln $(bindir)/$$n$(EXEEXT) $(tooldir)/bin/as$(EXEEXT) >/dev/null 2>/dev/null \
+	  || $(INSTALL_PROGRAM) as-new$(EXEEXT) $(tooldir)/bin/as$(EXEEXT)
+
+# These exist for maintenance purposes.
+
+.PHONY: bootstrap bootstrap2 bootstrap3 stage1 stage2 stage3 comparison
+
+bootstrap: as-new
+	$(MAKE) stage1
+	rm -f stage && ln -s stage1 stage
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
+	$(MAKE) stage2
+	rm -f stage && ln -s stage2 stage
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
+	$(MAKE) comparison against=stage2
+
+bootstrap2:
+	rm -f stage && ln -s stage1 stage
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
+	$(MAKE) stage2
+	rm -f stage && ln -s stage2 stage
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
+	$(MAKE) comparison against=stage2
+
+bootstrap3:
+	rm -f stage && ln -s stage2 stage
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
+	$(MAKE) comparison against=stage2
+
+# Copy the object files from a particular stage into a subdirectory.
+stage1:
+	-mkdir stage1
+	-mv $(STAGESTUFF) stage1
+	if [ -f stage1/as-new$(EXEEXT) -a ! -f stage1/as$(EXEEXT) ] ; then (cd stage1 ; ln -s as-new$(EXEEXT) as$(EXEEXT)) ; fi
+
+stage2:
+	-mkdir stage2
+	-mv $(STAGESTUFF) stage2
+	if [ -f stage2/as-new$(EXEEXT) -a ! -f stage2/as$(EXEEXT) ] ; then (cd stage2 ; ln -s as-new$(EXEEXT) as$(EXEEXT)) ; fi
+
+stage3:
+	-mkdir stage3
+	-mv $(STAGESTUFF) stage3
+	if [ -f stage3/as-new$(EXEEXT) -a ! -f stage3/as$(EXEEXT) ] ; then (cd stage3 ; ln -s as-new as$(EXEEXT)) ; fi
+
 against=stage2
+
+# This rule is derived from corresponding code in the Makefile.in for gcc.
+# The "tail +16c" is to bypass headers which may include timestamps or
+# temporary assembly file names.
+comparison:
+	x=0 ; \
+	for file in *.o ; do \
+	  tail +16c ./$$file > tmp-foo1; \
+	  if tail +16c ${against}/$$file > tmp-foo2 2>/dev/null ; then \
+	    if cmp tmp-foo1 tmp-foo2 ; then \
+	      true ; \
+	    else \
+	      echo $$file differs ; \
+	      x=1 ; \
+	    fi ; \
+	  else true; fi ; \
+	done ; \
+	exit $$x
+	-rm -f tmp-foo*
+
+.PHONY: de-stage1 de-stage2 de-stage3
+
+de-stage1:
+	- (cd stage1 ; rm -f as$(EXEEXT) ; mv -f * ..)
+	- rmdir stage1
+
+de-stage2:
+	- (cd stage2 ; rm -f as$(EXEEXT) ; mv -f * ..)
+	- rmdir stage2
+
+de-stage3:
+	- (cd stage3 ; rm -f as$(EXEEXT) ; mv -f * ..)
+	- rmdir stage3
 
 # Automatic dependency computation.  This is a real pain, because the
 # dependencies change based on target_cpu_type and obj_format.  We
@@ -470,8 +602,229 @@ against=stage2
 DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	$(TARGET_CPU_HFILES) $(OBJ_FORMAT_CFILES) $(OBJ_FORMAT_HFILES)
 
+.dep: dep.sed $(DEP_FILE_DEPS) .tcdep .objdep .dep2
+	rm -f .dep1
+	$(MAKE) DEP=$(DEP) .dep1
+	rm -rf .depdir
+	sed -f dep.sed < .dep1 > .depa
+	sed -f dep.sed < .tcdep >> .depa
+	sed -f dep.sed < .objdep >> .depa
+	sed -f dep.sed < .dep2 >> .depa
+	echo '$$(OBJS): $$(DEP_@target''_cpu_type@_@obj''_format@)' >> .depa
+	echo '$$(TARG_CPU_O): $$(TCDEP_@target''_cpu_type@_@obj''_format@)' >> .depa
+	echo '$$(OBJ_FORMAT_O): $$(OBJDEP_@target''_cpu_type@_@obj''_format@)' >> .depa
+	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> .depa
+	$(SHELL) $(srcdir)/../move-if-change .depa .dep
+
+# This rule needs a mkdep that runs "gcc -MM".
+# FIXME: This only works correctly if $(srcdir) is an absolute path.
+.dep1: $(CFILES) $(MULTI_CFILES)
+	if [ -d .depdir ]; then true; else mkdir .depdir; fi
+	cd .depdir; \
+	echo '' > targ-cpu.h; \
+	echo '' > obj-format.h; \
+	echo '' > targ-env.h; \
+	echo '' > itbl-cpu.h; \
+	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
+	$(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) $?
+	mv -f .depdir/.dep .dep1
+
+# Work out the special dependencies for the tc-*.c files.
+.tcdep: $(TARGET_CPU_CFILES)
+	rm -f .tcdepa
+	if [ -d .depdir ]; then true; else mkdir .depdir; fi
+	cd .depdir; \
+	for c in $(CPU_TYPES); do \
+	  for o in $(OBJ_FORMATS); do \
+	    $(CPU_OBJ_VALID) \
+	    if [ x$${valid} = xyes ]; then \
+	      echo '#include "tc-'"$${c}"'.h"' > targ-cpu.h; \
+	      echo '#include "obj-'"$${o}"'.h"' > obj-format.h; \
+	      echo '#include "te-generic.h"' > targ-env.h; \
+	      echo '' > itbl-cpu.h; \
+	      echo '#include "opcodes/'"$${c}"'-opc.h"' > cgen-opc.h; \
+	      rm -f dummy.c; \
+	      cp $(srcdir)/config/tc-$${c}.c dummy.c; \
+	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
+	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) dummy.c; \
+	      sed -e "s/dummy.o: dummy.c/TCDEP_$${c}_$${o} =/" \
+		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
+		  -e '/IF YOU PUT ANYTHING/,$$d' \
+		  -e '/^$$/d' < .dep >> ../.tcdepa; \
+	      rm -f dummy.c; \
+	    else true; fi; \
+	  done; \
+	done
+	echo 'TCDEP_hppa_som = $(srcdir)/config/tc-hppa.h subsegs.h \' >> .tcdepa
+	echo '  $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h \' >> .tcdepa
+	echo '  $(INCDIR)/opcode/hppa.h $(BFDDIR)/som.h' >> .tcdepa
+	# We don't try to handle all multi cases.
+	for c in $(CPU_TYPES); do \
+	  $(CPU_MULTI_VALID) \
+	  if [ x$${valid} = xyes ]; then \
+	    o=ecoff; \
+	    $(CPU_OBJ_VALID) \
+	    echo 'TCDEP_'"$${c}"'_multi = \' >> .tcdepa; \
+	    echo '$$(TCDEP_'"$${c}"'_coff) \' >> .tcdepa; \
+	    if [ x$${valid} = xyes ]; then \
+	      echo '$$(TCDEP_'"$${c}"'_ecoff) \' >> .tcdepa; \
+	    else true; fi; \
+	    echo '$$(TCDEP_'"$${c}"'_elf)' >> .tcdepa; \
+	  else true; fi; \
+	done
+	mv -f .tcdepa .tcdep
+
+# Work out the special dependencies for the obj-*.c files.
+.objdep: $(OBJ_FORMAT_CFILES)
+	rm -f .objdepa
+	if [ -d .depdir ]; then true; else mkdir .depdir; fi
+	cd .depdir; \
+	for c in $(CPU_TYPES); do \
+	  for o in $(OBJ_FORMATS); do \
+	    $(CPU_OBJ_VALID) \
+	    if [ x$${valid} = xyes ]; then \
+	      echo '#include "tc-'"$${c}"'.h"' > targ-cpu.h; \
+	      echo '#include "obj-'"$${o}"'.h"' > obj-format.h; \
+	      echo '#include "te-generic.h"' > targ-env.h; \
+	      echo '' > itbl-cpu.h; \
+	      rm -f dummy.c; \
+	      cp $(srcdir)/config/obj-$${o}.c dummy.c; \
+	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
+	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) dummy.c; \
+	      sed -e "s/dummy.o: dummy.c/OBJDEP_$${c}_$${o} =/" \
+		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
+		  -e '/IF YOU PUT ANYTHING/,$$d' \
+		  -e '/^$$/d' < .dep >> ../.objdepa; \
+	      rm -f dummy.c; \
+	    else true; fi; \
+	  done; \
+	done
+	echo 'OBJDEP_hppa_som = $(srcdir)/config/obj-som.h subsegs.h \' >> .objdepa
+	echo '  $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h \' >> .objdepa
+	echo '  $(BFDDIR)/som.h  $(INCDIR)/aout/stab_gnu.h \' >> .objdepa
+	echo '  $(INCDIR)/aout/stab.def' >> .objdepa
+	# We don't try to handle all multi cases.
+	for c in $(CPU_TYPES); do \
+	  $(CPU_MULTI_VALID) \
+	  if [ x$${valid} = xyes ]; then \
+	    o=ecoff; \
+	    $(CPU_OBJ_VALID) \
+	    echo 'OBJDEP_'"$${c}"'_multi = \' >> .objdepa; \
+	    echo '$$(OBJDEP_'"$${c}"'_coff) \' >> .objdepa; \
+	    if [ x$${valid} = xyes ]; then \
+	      echo '$$(OBJDEP_'"$${c}"'_ecoff) \' >> .objdepa; \
+	    else true; fi; \
+	    echo '$$(OBJDEP_'"$${c}"'_elf)' >> .objdepa; \
+	  else true; fi; \
+	done
+	mv -f .objdepa .objdep
+
+# Work out the dependencies for each CPU/OBJ combination.
+# Note that SOM is a special case, because it only works native.
+# FIXME: This only works correctly if $(srcdir) is an absolute path.
+.dep2: $(TARGET_CPU_HFILES) $(OBJ_FORMAT_HFILES)
+	rm -f .dep2a
+	if [ -d .depdir ]; then true; else mkdir .depdir; fi
+	cd .depdir; \
+	for c in $(CPU_TYPES); do \
+	  for o in $(OBJ_FORMATS); do \
+	    $(CPU_OBJ_VALID) \
+	    if [ x$${valid} = xyes ]; then \
+	      echo '#include "tc-'"$${c}"'.h"' > targ-cpu.h; \
+	      echo '#include "obj-'"$${o}"'.h"' > dummy.c; \
+	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
+	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) dummy.c; \
+	      sed -e "s/dummy.o: dummy.c/DEP_$${c}_$${o} =/" \
+		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
+		  -e '/IF YOU PUT ANYTHING/,$$d' \
+		  -e '/^$$/d' < .dep >> ../.dep2a; \
+	    else true; fi; \
+	  done; \
+	done
+	echo 'DEP_hppa_som = $(srcdir)/../bfd/som.h' >> .dep2a
+	# We don't try to handle all multi cases.
+	for c in $(CPU_TYPES); do \
+	  $(CPU_MULTI_VALID) \
+	  if [ x$${valid} = xyes ]; then \
+	    o=ecoff; \
+	    $(CPU_OBJ_VALID) \
+	    echo 'DEP_'"$${c}"'_multi = \' >> .dep2a; \
+	    echo '$$(DEP_'"$${c}"'_coff) \' >> .dep2a; \
+	    if [ x$${valid} = xyes ]; then \
+	      echo '$$(DEP_'"$${c}"'_ecoff) \' >> .dep2a; \
+	    else true; fi; \
+	    echo '$$(DEP_'"$${c}"'_elf)' >> .dep2a; \
+	  else true; fi; \
+	done
+	mv -f .dep2a .dep2
+
+dep.sed: dep-in.sed config.status
+	sed <$(srcdir)/dep-in.sed >dep.sed \
+		-e 's!@INCDIR@!$(INCDIR)!' \
+		-e 's!@BFDDIR@!$(BFDDIR)!' \
+		-e 's!@SRCDIR@!$(srcdir)!'
+
+dep: .dep
+	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
+	cat .dep >> tmp-Makefile
+	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile Makefile
+
+dep-in: .dep
+	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
+	cat .dep >> tmp-Makefile.in
+	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
+
+dep-am: .dep
+	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.am > tmp-Makefile.am
+	cat .dep >> tmp-Makefile.am
+	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.am $(srcdir)/Makefile.am
+
+.PHONY: dep dep-in
+
 # start-sanitize-arc
 TCDEP_arc_elf = $(INCDIR)/opcode/arc.h
+# end-sanitize-arc
+
+# DO NOT DELETE THIS LINE -- mkdep uses it.
+# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
+
+app.o: app.c
+as.o: as.c subsegs.h $(INCDIR)/obstack.h output-file.h \
+  sb.h macro.h
+atof-generic.o: atof-generic.c
+bignum-copy.o: bignum-copy.c
+cond.o: cond.c macro.h sb.h $(INCDIR)/obstack.h
+depend.o: depend.c
+ecoff.o: ecoff.c
+expr.o: expr.c $(INCDIR)/obstack.h
+flonum-copy.o: flonum-copy.c
+flonum-konst.o: flonum-konst.c
+flonum-mult.o: flonum-mult.c
+frags.o: frags.c subsegs.h $(INCDIR)/obstack.h
+hash.o: hash.c
+input-file.o: input-file.c input-file.h
+input-scrub.o: input-scrub.c input-file.h sb.h
+listing.o: listing.c input-file.h subsegs.h
+literal.o: literal.c subsegs.h $(INCDIR)/obstack.h
+macro.o: macro.c sb.h macro.h
+messages.o: messages.c
+output-file.o: output-file.c output-file.h
+read.o: read.c subsegs.h $(INCDIR)/obstack.h sb.h macro.h \
+  ecoff.h
+sb.o: sb.c sb.h
+stabs.o: stabs.c $(INCDIR)/obstack.h subsegs.h ecoff.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
+subsegs.o: subsegs.c subsegs.h $(INCDIR)/obstack.h
+symbols.o: symbols.c $(INCDIR)/obstack.h subsegs.h
+write.o: write.c subsegs.h $(INCDIR)/obstack.h output-file.h
+gasp.o: gasp.c sb.h macro.h
+itbl-ops.o: itbl-ops.c itbl-ops.h
+e-i386coff.o: $(srcdir)/config/e-i386coff.c emul.h \
+  emul-target.h
+e-i386elf.o: $(srcdir)/config/e-i386elf.c emul.h emul-target.h
+e-mipsecoff.o: $(srcdir)/config/e-mipsecoff.c emul.h \
+  emul-target.h
+e-mipself.o: $(srcdir)/config/e-mipself.c emul.h emul-target.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 TCDEP_a29k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-a29k.h \
@@ -1095,799 +1448,7 @@ DEP_hppa_som = $(BFDDIR)/som.h
 DEP_i386_multi = $(DEP_i386_coff) $(DEP_i386_elf)
 DEP_mips_multi = $(DEP_mips_coff) $(DEP_mips_ecoff) \
   $(DEP_mips_elf)
-ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
-CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =  .gdbinit
-noinst_PROGRAMS =  as-new$(EXEEXT) gasp-new$(EXEEXT)
-PROGRAMS =  $(noinst_PROGRAMS)
-
-
-DEFS = @DEFS@ -I. -I$(srcdir) -I.
-CPPFLAGS = @CPPFLAGS@
-LDFLAGS = @LDFLAGS@
-LIBS = @LIBS@
-itbl_test_OBJECTS =  itbl-parse.o itbl-lex.o
-itbl_test_DEPENDENCIES =  itbl-test-ops.o itbl-test.o \
-../libiberty/libiberty.a
-itbl_test_LDFLAGS = 
-as_new_OBJECTS =  app.o as.o atof-generic.o bignum-copy.o cond.o \
-depend.o ecoff.o expr.o flonum-copy.o flonum-konst.o flonum-mult.o \
-frags.o hash.o input-file.o input-scrub.o listing.o literal.o macro.o \
-messages.o output-file.o read.o sb.o stabs.o subsegs.o symbols.o \
-write.o
-as_new_LDFLAGS = 
-gasp_new_OBJECTS =  gasp.o macro.o sb.o hash.o
-gasp_new_DEPENDENCIES =  ../libiberty/libiberty.a
-gasp_new_LDFLAGS = 
-SCRIPTS =  $(noinst_SCRIPTS)
-
-LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
-LEXLIB = @LEXLIB@
-YLWRAP = $(top_srcdir)/../ylwrap
-CFLAGS = @CFLAGS@
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -o $@
-DIST_COMMON =  README COPYING ChangeLog Makefile.am Makefile.in NEWS \
-acconfig.h acinclude.m4 aclocal.m4 config.in configure configure.in \
-gdbinit.in itbl-lex.c itbl-parse.c m68k-parse.c stamp-h.in
-
-
-DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
-
-TAR = tar
-GZIP = --best
-SOURCES = $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES) $(gasp_new_SOURCES)
-OBJECTS = $(itbl_test_OBJECTS) $(as_new_OBJECTS) $(gasp_new_OBJECTS)
-
-default: all
-
-.SUFFIXES:
-.SUFFIXES: .c .h .l .lo .o .y
-$(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
-
-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
-	cd $(top_builddir) \
-	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
-
-$(ACLOCAL_M4): @MAINT@ configure.in  acinclude.m4
-	cd $(srcdir) && $(ACLOCAL)
-
-config.status: $(srcdir)/configure
-	$(SHELL) ./config.status --recheck
-$(srcdir)/configure: @MAINT@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
-	cd $(srcdir) && $(AUTOCONF)
-
-config.h: stamp-h
-stamp-h: $(srcdir)/config.in $(top_builddir)/config.status
-	cd $(top_builddir) \
-	  && CONFIG_FILES= CONFIG_HEADERS=config.h:config.in \
-	     $(SHELL) ./config.status
-	@echo timestamp > stamp-h
-$(srcdir)/config.in: @MAINT@$(srcdir)/stamp-h.in
-$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) acconfig.h
-	cd $(top_srcdir) && $(AUTOHEADER)
-	@echo timestamp > $(srcdir)/stamp-h.in
-
-mostlyclean-hdr:
-
-clean-hdr:
-
-distclean-hdr:
-	rm -f config.h
-
-maintainer-clean-hdr:
-.gdbinit: $(top_builddir)/config.status gdbinit.in
-	cd $(top_builddir) && CONFIG_FILES=$@:gdbinit.in CONFIG_HEADERS= ./config.status
-
-mostlyclean-noinstPROGRAMS:
-
-clean-noinstPROGRAMS:
-	test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
-
-distclean-noinstPROGRAMS:
-
-maintainer-clean-noinstPROGRAMS:
-
-.c.o:
-	$(COMPILE) -c $<
-
-mostlyclean-compile:
-	rm -f *.o core
-
-clean-compile:
-
-distclean-compile:
-	rm -f *.tab.c
-
-maintainer-clean-compile:
-
-.c.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-mostlyclean-libtool:
-	rm -f *.lo
-
-clean-libtool:
-	rm -rf .libs
-
-distclean-libtool:
-
-maintainer-clean-libtool:
-
-itbl-test$(EXEEXT): $(itbl_test_OBJECTS) $(itbl_test_DEPENDENCIES)
-	@rm -f itbl-test$(EXEEXT)
-	$(LINK) $(itbl_test_LDFLAGS) $(itbl_test_OBJECTS) $(itbl_test_LDADD) $(LIBS)
-
-as-new$(EXEEXT): $(as_new_OBJECTS) $(as_new_DEPENDENCIES)
-	@rm -f as-new$(EXEEXT)
-	$(LINK) $(as_new_LDFLAGS) $(as_new_OBJECTS) $(as_new_LDADD) $(LIBS)
-
-gasp-new$(EXEEXT): $(gasp_new_OBJECTS) $(gasp_new_DEPENDENCIES)
-	@rm -f gasp-new$(EXEEXT)
-	$(LINK) $(gasp_new_LDFLAGS) $(gasp_new_OBJECTS) $(gasp_new_LDADD) $(LIBS)
-.y.c:
-	$(SHELL) $(YLWRAP) "$(YACC)" $< y.tab.c $*.c y.tab.h $*.h -- $(YFLAGS)
-.y.h:
-	$(SHELL) $(YLWRAP) "$(YACC)" $< y.tab.c $*.c y.tab.h $*.h -- $(YFLAGS)
-.l.c:
-	$(LEX) $(LFLAGS) $< && mv $(LEX_OUTPUT_ROOT).c $@
-
-# This directory's subdirectories are mostly independent; you can cd
-# into them and run `make' without going through this Makefile.
-# To change the values of `make' variables: instead of editing Makefiles,
-# (1) if the variable is set in `config.status', edit `config.status'
-#     (which will cause the Makefiles to be regenerated when you run `make');
-# (2) otherwise, pass the desired values on the `make' command line.
-
-@SET_MAKE@
-
-all-recursive install-data-recursive install-exec-recursive \
-installdirs-recursive install-recursive uninstall-recursive install-info-recursive \
-check-recursive installcheck-recursive info-recursive dvi-recursive:
-	@set fnord $(MAKEFLAGS); amf=$$2; \
-	for subdir in $(SUBDIRS); do \
-	  target=`echo $@ | sed s/-recursive//`; \
-	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $$target) \
-	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
-	done && test -z "$$fail"
-
-mostlyclean-recursive clean-recursive distclean-recursive \
-maintainer-clean-recursive:
-	@set fnord $(MAKEFLAGS); amf=$$2; \
-	rev=''; for subdir in $(SUBDIRS); do rev="$$rev $$subdir"; done; \
-	for subdir in $$rev; do \
-	  target=`echo $@ | sed s/-recursive//`; \
-	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $$target) \
-	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
-	done && test -z "$$fail"
-tags-recursive:
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  (cd $$subdir && $(MAKE) tags); \
-	done
-
-tags: TAGS
-
-ID: $(HEADERS) $(SOURCES)
-	here=`pwd` && cd $(srcdir) && mkid -f$$here/ID $(SOURCES) $(HEADERS)
-
-TAGS: tags-recursive $(HEADERS) $(SOURCES) config.in $(TAGS_DEPENDENCIES)
-	tags=; \
-	here=`pwd`; \
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  test -f $$subdir/TAGS && tags="$$tags -i $$here/$$subdir/TAGS"; \
-	done; \
-	test -z "$(ETAGS_ARGS)config.in$(SOURCES)$(HEADERS)$$tags" \
-	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags config.in $(SOURCES) $(HEADERS) -o $$here/TAGS)
-
-mostlyclean-tags:
-
-clean-tags:
-
-distclean-tags:
-	rm -f TAGS ID
-
-maintainer-clean-tags:
-
-distdir = $(PACKAGE)-$(VERSION)
-top_distdir = $(distdir)
-
-# This target untars the dist file and tries a VPATH configuration.  Then
-# it guarantees that the distribution is self-contained by making another
-# tarfile.
-distcheck: dist
-	rm -rf $(distdir)
-	GZIP=$(GZIP) $(TAR) zxf $(distdir).tar.gz
-	mkdir $(distdir)/=build
-	mkdir $(distdir)/=inst
-	dc_install_base=`cd $(distdir)/=inst && pwd`; \
-	cd $(distdir)/=build \
-	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
-	  && $(MAKE) \
-	  && $(MAKE) dvi \
-	  && $(MAKE) check \
-	  && $(MAKE) install \
-	  && $(MAKE) installcheck \
-	  && $(MAKE) dist
-	rm -rf $(distdir)
-	@echo "========================"; \
-	echo "$(distdir).tar.gz is ready for distribution"; \
-	echo "========================"
-dist: distdir
-	-chmod -R a+r $(distdir)
-	GZIP=$(GZIP) $(TAR) chozf $(distdir).tar.gz $(distdir)
-	rm -rf $(distdir)
-dist-all: distdir
-	-chmod -R a+r $(distdir)
-	GZIP=$(GZIP) $(TAR) chozf $(distdir).tar.gz $(distdir)
-	rm -rf $(distdir)
-distdir: $(DISTFILES)
-	rm -rf $(distdir)
-	mkdir $(distdir)
-	-chmod 777 $(distdir)
-	@for file in $(DISTFILES); do \
-	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
-	  test -f $(distdir)/$$file \
-	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	  || cp -p $$d/$$file $(distdir)/$$file; \
-	done
-	for subdir in $(SUBDIRS); do		\
-	  test -d $(distdir)/$$subdir		\
-	  || mkdir $(distdir)/$$subdir		\
-	  || exit 1;				\
-	  chmod 777 $(distdir)/$$subdir;	\
-	  (cd $$subdir && $(MAKE) top_distdir=../$(top_distdir) distdir=../$(distdir)/$$subdir distdir) \
-	    || exit 1; \
-	done
-
-DEJATOOL = $(PACKAGE)
-site.exp: Makefile
-	@echo 'Making a new site.exp file...'
-	-@rm -f site.bak
-	@echo '## these variables are automatically generated by make ##' > $@-t
-	@echo '# Do not edit here.  If you wish to override these values' >> $@-t
-	@echo '# edit the last section' >> $@-t
-	@echo 'set tool $(DEJATOOL)' >> $@-t
-	@echo 'set srcdir $(srcdir)' >> $@-t
-	@echo 'set objdir' `pwd` >> $@-t
-	@echo 'set host_alias $(host_alias)' >> $@-t
-	@echo 'set host_triplet $(host_triplet)' >> $@-t
-	@echo 'set target_alias $(target_alias)' >> $@-t
-	@echo 'set target_triplet $(target_triplet)' >> $@-t
-	@echo 'set build_alias $(build_alias)' >> $@-t
-	@echo 'set build_triplet $(build_triplet)' >> $@-t
-	@echo '## All variables above are generated by configure. Do Not Edit ##' >> $@-t
-	-@sed '1,/^## All variables above are.*##/ d' site.bak >> $@-t
-	-@mv site.exp site.bak
-	@mv $@-t site.exp
-info: info-recursive
-dvi: dvi-recursive
-check: all-am
-	$(MAKE) check-recursive check-DEJAGNU
-installcheck: installcheck-recursive
-install-info: install-info-recursive
-all-recursive-am: config.h
-	$(MAKE) all-recursive
-
-all-am: Makefile $(PROGRAMS) $(SCRIPTS) config.h
-
-install-exec-am: install-exec-local
-
-install-exec: install-exec-recursive install-exec-am
-	@$(NORMAL_INSTALL)
-
-install-data: install-data-recursive
-	@$(NORMAL_INSTALL)
-
-install: install-recursive install-exec-am
-	@:
-
-uninstall: uninstall-recursive
-
-all: all-recursive-am all-am
-
-install-strip:
-	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
-installdirs: installdirs-recursive
-
-
-mostlyclean-generic:
-	test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
-
-clean-generic:
-	test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
-
-distclean-generic:
-	rm -f Makefile $(DISTCLEANFILES)
-	rm -f config.cache config.log stamp-h stamp-h[0-9]*
-	test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
-
-maintainer-clean-generic:
-	test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-	test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
-mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
-		mostlyclean-compile mostlyclean-libtool \
-		mostlyclean-tags mostlyclean-generic
-
-clean-am:  clean-hdr clean-noinstPROGRAMS clean-compile clean-libtool \
-		clean-tags clean-generic mostlyclean-am
-
-distclean-am:  distclean-hdr distclean-noinstPROGRAMS distclean-compile \
-		distclean-libtool distclean-tags distclean-generic \
-		clean-am
-
-maintainer-clean-am:  maintainer-clean-hdr \
-		maintainer-clean-noinstPROGRAMS \
-		maintainer-clean-compile maintainer-clean-libtool \
-		maintainer-clean-tags maintainer-clean-generic \
-		distclean-am
-
-mostlyclean:  mostlyclean-recursive mostlyclean-am
-
-clean:  clean-recursive clean-am
-
-distclean:  distclean-recursive distclean-am
-	rm -f config.status
-	rm -f libtool
-
-maintainer-clean:  maintainer-clean-recursive maintainer-clean-am
-	@echo "This command is intended for maintainers to use;"
-	@echo "it deletes files that may require special tools to rebuild."
-	rm -f config.status
-
-.PHONY: default mostlyclean-hdr distclean-hdr clean-hdr \
-maintainer-clean-hdr mostlyclean-noinstPROGRAMS \
-distclean-noinstPROGRAMS clean-noinstPROGRAMS \
-maintainer-clean-noinstPROGRAMS mostlyclean-compile distclean-compile \
-clean-compile maintainer-clean-compile mostlyclean-libtool \
-distclean-libtool clean-libtool maintainer-clean-libtool \
-install-data-recursive uninstall-data-recursive install-exec-recursive \
-uninstall-exec-recursive installdirs-recursive uninstalldirs-recursive \
-all-recursive check-recursive installcheck-recursive info-recursive \
-dvi-recursive mostlyclean-recursive distclean-recursive clean-recursive \
-maintainer-clean-recursive tags tags-recursive mostlyclean-tags \
-distclean-tags clean-tags maintainer-clean-tags distdir check-DEJAGNU \
-info dvi installcheck install-info all-recursive-am all-am \
-install-exec-am install-exec install-data install uninstall all \
-installdirs mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
-
-
-make-gas.com: stamp-mk.com
-stamp-mk.com: vmsconf.sh Makefile
-	sh $(srcdir)/vmsconf.sh $(OBJS) > new-make.com
-	$(SHELL) $(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
-	touch stamp-mk.com
-
-$(OBJS): @ALL_OBJ_DEPS@
-
-# Stuff that every object file depends upon.  If anything is removed
-# from this list, remove it from dep-in.sed as well.
-$(OBJS): config.h as.h $(TARG_ENV_H) $(OBJ_FORMAT_H) $(TARG_CPU_H) flonum.h \
-	expr.h struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h \
-	obj.h listing.h bignum.h bit_fix.h $(INCDIR)/libiberty.h
-
-check-DEJAGNU: site.exp
-	if [ -d testsuite ]; then \
-	  true; \
-	else \
-	  mkdir testsuite; \
-	fi
-	rm -f testsuite/site.exp
-	cp site.exp testsuite/site.exp
-	rootme=`pwd`; export rootme; \
-	srcdir=`cd ${srcdir}; pwd` ; export srcdir ; \
-	cd testsuite; \
-	EXPECT=${EXPECT} ; export EXPECT ; \
-	if [ -f $(top_builddir)/../expect/expect ]; then \
-	  TCL_LIBRARY=`cd $(top_srcdir)/../tcl/library && pwd`; \
-	  export TCL_LIBRARY; \
-	fi; \
-	runtest=$(RUNTEST); \
-	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
-	  $$runtest --tool $(DEJATOOL) --srcdir $${srcdir}/testsuite \
-		$(RUNTESTFLAGS); \
-	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
-	fi
-
-# The implicit .c.o rule doesn't work for these, perhaps because of
-# the variables, or perhaps because the sources are not on vpath.
-$(TARG_CPU_O): $(TARG_CPU_C) $(TARG_CPU_DEP_@target_cpu_type@)
-	$(COMPILE) -c $(TARG_CPU_C)
-$(ATOF_TARG_O): $(ATOF_TARG_C)
-	$(COMPILE) -c $(ATOF_TARG_C)
-
-# ecoff.c only has full dependencies when ECOFF_DEBUGGING is defined,
-# so the automatic dependency stuff doesn't work.
-ecoff.o : ecoff.c ecoff.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h \
-	$(INCDIR)/coff/ecoff.h $(INCDIR)/coff/symconst.h \
-	$(INCDIR)/aout/stab_gnu.h
-
-# We need all these explicit rules for the multi stuff.  Because of
-# these rules, we don't need one for OBJ_FORMAT_O.
-
-obj-aout.o : $(srcdir)/config/obj-aout.c
-	$(COMPILE) -c $(srcdir)/config/obj-aout.c
-obj-bout.o : $(srcdir)/config/obj-bout.c
-	$(COMPILE) -c $(srcdir)/config/obj-bout.c
-obj-coff.o: $(srcdir)/config/obj-coff.c
-	$(COMPILE) -c $(srcdir)/config/obj-coff.c
-obj-ecoff.o : $(srcdir)/config/obj-ecoff.c
-	$(COMPILE) -c $(srcdir)/config/obj-ecoff.c
-obj-elf.o : $(srcdir)/config/obj-elf.c
-	$(COMPILE) -c $(srcdir)/config/obj-elf.c
-obj-evax.o : $(srcdir)/config/obj-evax.c
-	$(COMPILE) -c $(srcdir)/config/obj-evax.c
-obj-hp300.o : $(srcdir)/config/obj-hp300.c
-	$(COMPILE) -c $(srcdir)/config/obj-hp300.c
-obj-ieee.o : $(srcdir)/config/obj-ieee.c
-	$(COMPILE) -c $(srcdir)/config/obj-ieee.c
-obj-multi.o : $(srcdir)/config/obj-multi.c
-	$(COMPILE) -c $(srcdir)/config/obj-multi.c
-obj-som.o : $(srcdir)/config/obj-som.c
-	$(COMPILE) -c $(srcdir)/config/obj-som.c
-obj-vms.o : $(srcdir)/config/obj-vms.c
-	$(COMPILE) -c $(srcdir)/config/obj-vms.c
-
-e-mipself.o : $(srcdir)/config/e-mipself.c
-	$(COMPILE) -c $(srcdir)/config/e-mipself.c
-e-mipsecoff.o : $(srcdir)/config/e-mipsecoff.c
-	$(COMPILE) -c $(srcdir)/config/e-mipsecoff.c
-e-i386coff.o: $(srcdir)/config/e-i386coff.c
-	$(COMPILE) -c $(srcdir)/config/e-i386coff.c
-e-i386elf.o: $(srcdir)/config/e-i386elf.c
-	$(COMPILE) -c $(srcdir)/config/e-i386elf.c
-
-m68k-parse.c: $(srcdir)/config/m68k-parse.y
-	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/config/m68k-parse.y y.tab.c m68k-parse.c --
-m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
-
-# Don't let the .y.h rule clobber m68k-parse.h.
-m68k-parse.h: ; @true
-
-# The instruction table specification lexical analyzer and parser.
-
-itbl-lex.c: $(srcdir)/itbl-lex.l
-itbl-lex.o: itbl-lex.c itbl-parse.h
-
-itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h
-
-itbl-ops.o: $(srcdir)/itbl-ops.c $(srcdir)/itbl-ops.h itbl-parse.h
-
-itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
-	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/itbl-parse.y y.tab.c itbl-parse.c y.tab.h itbl-parse.h -- -d
-
-itbl-test-ops.o: $(srcdir)/itbl-ops.c $(srcdir)/itbl-ops.h itbl-parse.h
-	$(COMPILE) -o itbl-test-ops.o -DSTAND_ALONE -c $(srcdir)/itbl-ops.c
-
-itbl-test.o: $(srcdir)/testsuite/gas/all/itbl-test.c $(srcdir)/itbl-ops.h
-	$(COMPILE) -c -DSTAND_ALONE $(srcdir)/testsuite/gas/all/itbl-test.c
-
-# CGEN interface.
-
-cgen.o: cgen.c cgen-opc.h subsegs.h \
-	$(INCDIR)/obstack.h $(INCDIR)/opcode/cgen.h \
-	$(srcdir)/../opcodes/$(TARG_CPU)-opc.h
-
-.PHONY: install-exec-local install-data-local
-
-install-exec-local: $(noinst_PROGRAMS)
-	$(mkinstalldirs) $(bindir) $(tooldir)/bin
-	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`; \
-	  else :; fi; \
-	done
-	rm -f $(tooldir)/bin/as$(EXEEXT)
-	n=`echo as | sed '$(transform)'`; \
-	ln $(bindir)/$$n$(EXEEXT) $(tooldir)/bin/as$(EXEEXT) >/dev/null 2>/dev/null \
-	  || $(INSTALL_PROGRAM) as-new$(EXEEXT) $(tooldir)/bin/as$(EXEEXT)
-
-# These exist for maintenance purposes.
-
-.PHONY: bootstrap bootstrap2 bootstrap3 stage1 stage2 stage3 comparison
-
-bootstrap: as-new
-	$(MAKE) stage1
-	rm -f stage && ln -s stage1 stage
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
-	$(MAKE) stage2
-	rm -f stage && ln -s stage2 stage
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
-	$(MAKE) comparison against=stage2
-
-bootstrap2:
-	rm -f stage && ln -s stage1 stage
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
-	$(MAKE) stage2
-	rm -f stage && ln -s stage2 stage
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
-	$(MAKE) comparison against=stage2
-
-bootstrap3:
-	rm -f stage && ln -s stage2 stage
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(bin_PROGRAMS)
-	$(MAKE) comparison against=stage2
-
-# Copy the object files from a particular stage into a subdirectory.
-stage1:
-	-mkdir stage1
-	-mv $(STAGESTUFF) stage1
-	if [ -f stage1/as-new$(EXEEXT) -a ! -f stage1/as$(EXEEXT) ] ; then (cd stage1 ; ln -s as-new$(EXEEXT) as$(EXEEXT)) ; fi
-
-stage2:
-	-mkdir stage2
-	-mv $(STAGESTUFF) stage2
-	if [ -f stage2/as-new$(EXEEXT) -a ! -f stage2/as$(EXEEXT) ] ; then (cd stage2 ; ln -s as-new$(EXEEXT) as$(EXEEXT)) ; fi
-
-stage3:
-	-mkdir stage3
-	-mv $(STAGESTUFF) stage3
-	if [ -f stage3/as-new$(EXEEXT) -a ! -f stage3/as$(EXEEXT) ] ; then (cd stage3 ; ln -s as-new as$(EXEEXT)) ; fi
-
-# This rule is derived from corresponding code in the Makefile.in for gcc.
-# The "tail +16c" is to bypass headers which may include timestamps or
-# temporary assembly file names.
-comparison:
-	x=0 ; \
-	for file in *.o ; do \
-	  tail +16c ./$$file > tmp-foo1; \
-	  if tail +16c ${against}/$$file > tmp-foo2 2>/dev/null ; then \
-	    if cmp tmp-foo1 tmp-foo2 ; then \
-	      true ; \
-	    else \
-	      echo $$file differs ; \
-	      x=1 ; \
-	    fi ; \
-	  else true; fi ; \
-	done ; \
-	exit $$x
-	-rm -f tmp-foo*
-
-.PHONY: de-stage1 de-stage2 de-stage3
-
-de-stage1:
-	- (cd stage1 ; rm -f as$(EXEEXT) ; mv -f * ..)
-	- rmdir stage1
-
-de-stage2:
-	- (cd stage2 ; rm -f as$(EXEEXT) ; mv -f * ..)
-	- rmdir stage2
-
-de-stage3:
-	- (cd stage3 ; rm -f as$(EXEEXT) ; mv -f * ..)
-	- rmdir stage3
-
-.dep: dep.sed $(DEP_FILE_DEPS) .tcdep .objdep .dep2
-	rm -f .dep1
-	$(MAKE) DEP=$(DEP) .dep1
-	rm -rf .depdir
-	sed -f dep.sed < .dep1 > .depa
-	sed -f dep.sed < .tcdep >> .depa
-	sed -f dep.sed < .objdep >> .depa
-	sed -f dep.sed < .dep2 >> .depa
-	echo '$$(OBJS): $$(DEP_@target''_cpu_type@_@obj''_format@)' >> .depa
-	echo '$$(TARG_CPU_O): $$(TCDEP_@target''_cpu_type@_@obj''_format@)' >> .depa
-	echo '$$(OBJ_FORMAT_O): $$(OBJDEP_@target''_cpu_type@_@obj''_format@)' >> .depa
-	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> .depa
-	$(SHELL) $(srcdir)/../move-if-change .depa .dep
-
-# This rule needs a mkdep that runs "gcc -MM".
-# FIXME: This only works correctly if $(srcdir) is an absolute path.
-.dep1: $(CFILES) $(MULTI_CFILES)
-	if [ -d .depdir ]; then true; else mkdir .depdir; fi
-	cd .depdir; \
-	echo '' > targ-cpu.h; \
-	echo '' > obj-format.h; \
-	echo '' > targ-env.h; \
-	echo '' > itbl-cpu.h; \
-	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
-	$(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) $?
-	mv -f .depdir/.dep .dep1
-
-# Work out the special dependencies for the tc-*.c files.
-.tcdep: $(TARGET_CPU_CFILES)
-	rm -f .tcdepa
-	if [ -d .depdir ]; then true; else mkdir .depdir; fi
-	cd .depdir; \
-	for c in $(CPU_TYPES); do \
-	  for o in $(OBJ_FORMATS); do \
-	    $(CPU_OBJ_VALID) \
-	    if [ x$${valid} = xyes ]; then \
-	      echo '#include "tc-'"$${c}"'.h"' > targ-cpu.h; \
-	      echo '#include "obj-'"$${o}"'.h"' > obj-format.h; \
-	      echo '#include "te-generic.h"' > targ-env.h; \
-	      echo '' > itbl-cpu.h; \
-	      echo '#include "opcodes/'"$${c}"'-opc.h"' > cgen-opc.h; \
-	      rm -f dummy.c; \
-	      cp $(srcdir)/config/tc-$${c}.c dummy.c; \
-	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
-	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) dummy.c; \
-	      sed -e "s/dummy.o: dummy.c/TCDEP_$${c}_$${o} =/" \
-		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
-		  -e '/IF YOU PUT ANYTHING/,$$d' \
-		  -e '/^$$/d' < .dep >> ../.tcdepa; \
-	      rm -f dummy.c; \
-	    else true; fi; \
-	  done; \
-	done
-	echo 'TCDEP_hppa_som = $(srcdir)/config/tc-hppa.h subsegs.h \' >> .tcdepa
-	echo '  $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h \' >> .tcdepa
-	echo '  $(INCDIR)/opcode/hppa.h $(BFDDIR)/som.h' >> .tcdepa
-	# We don't try to handle all multi cases.
-	for c in $(CPU_TYPES); do \
-	  $(CPU_MULTI_VALID) \
-	  if [ x$${valid} = xyes ]; then \
-	    o=ecoff; \
-	    $(CPU_OBJ_VALID) \
-	    echo 'TCDEP_'"$${c}"'_multi = \' >> .tcdepa; \
-	    echo '$$(TCDEP_'"$${c}"'_coff) \' >> .tcdepa; \
-	    if [ x$${valid} = xyes ]; then \
-	      echo '$$(TCDEP_'"$${c}"'_ecoff) \' >> .tcdepa; \
-	    else true; fi; \
-	    echo '$$(TCDEP_'"$${c}"'_elf)' >> .tcdepa; \
-	  else true; fi; \
-	done
-	mv -f .tcdepa .tcdep
-
-# Work out the special dependencies for the obj-*.c files.
-.objdep: $(OBJ_FORMAT_CFILES)
-	rm -f .objdepa
-	if [ -d .depdir ]; then true; else mkdir .depdir; fi
-	cd .depdir; \
-	for c in $(CPU_TYPES); do \
-	  for o in $(OBJ_FORMATS); do \
-	    $(CPU_OBJ_VALID) \
-	    if [ x$${valid} = xyes ]; then \
-	      echo '#include "tc-'"$${c}"'.h"' > targ-cpu.h; \
-	      echo '#include "obj-'"$${o}"'.h"' > obj-format.h; \
-	      echo '#include "te-generic.h"' > targ-env.h; \
-	      echo '' > itbl-cpu.h; \
-	      rm -f dummy.c; \
-	      cp $(srcdir)/config/obj-$${o}.c dummy.c; \
-	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
-	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) dummy.c; \
-	      sed -e "s/dummy.o: dummy.c/OBJDEP_$${c}_$${o} =/" \
-		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
-		  -e '/IF YOU PUT ANYTHING/,$$d' \
-		  -e '/^$$/d' < .dep >> ../.objdepa; \
-	      rm -f dummy.c; \
-	    else true; fi; \
-	  done; \
-	done
-	echo 'OBJDEP_hppa_som = $(srcdir)/config/obj-som.h subsegs.h \' >> .objdepa
-	echo '  $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h \' >> .objdepa
-	echo '  $(BFDDIR)/som.h  $(INCDIR)/aout/stab_gnu.h \' >> .objdepa
-	echo '  $(INCDIR)/aout/stab.def' >> .objdepa
-	# We don't try to handle all multi cases.
-	for c in $(CPU_TYPES); do \
-	  $(CPU_MULTI_VALID) \
-	  if [ x$${valid} = xyes ]; then \
-	    o=ecoff; \
-	    $(CPU_OBJ_VALID) \
-	    echo 'OBJDEP_'"$${c}"'_multi = \' >> .objdepa; \
-	    echo '$$(OBJDEP_'"$${c}"'_coff) \' >> .objdepa; \
-	    if [ x$${valid} = xyes ]; then \
-	      echo '$$(OBJDEP_'"$${c}"'_ecoff) \' >> .objdepa; \
-	    else true; fi; \
-	    echo '$$(OBJDEP_'"$${c}"'_elf)' >> .objdepa; \
-	  else true; fi; \
-	done
-	mv -f .objdepa .objdep
-
-# Work out the dependencies for each CPU/OBJ combination.
-# Note that SOM is a special case, because it only works native.
-# FIXME: This only works correctly if $(srcdir) is an absolute path.
-.dep2: $(TARGET_CPU_HFILES) $(OBJ_FORMAT_HFILES)
-	rm -f .dep2a
-	if [ -d .depdir ]; then true; else mkdir .depdir; fi
-	cd .depdir; \
-	for c in $(CPU_TYPES); do \
-	  for o in $(OBJ_FORMATS); do \
-	    $(CPU_OBJ_VALID) \
-	    if [ x$${valid} = xyes ]; then \
-	      echo '#include "tc-'"$${c}"'.h"' > targ-cpu.h; \
-	      echo '#include "obj-'"$${o}"'.h"' > dummy.c; \
-	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
-	      $(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(INCLUDES) dummy.c; \
-	      sed -e "s/dummy.o: dummy.c/DEP_$${c}_$${o} =/" \
-		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
-		  -e '/IF YOU PUT ANYTHING/,$$d' \
-		  -e '/^$$/d' < .dep >> ../.dep2a; \
-	    else true; fi; \
-	  done; \
-	done
-	echo 'DEP_hppa_som = $(srcdir)/../bfd/som.h' >> .dep2a
-	# We don't try to handle all multi cases.
-	for c in $(CPU_TYPES); do \
-	  $(CPU_MULTI_VALID) \
-	  if [ x$${valid} = xyes ]; then \
-	    o=ecoff; \
-	    $(CPU_OBJ_VALID) \
-	    echo 'DEP_'"$${c}"'_multi = \' >> .dep2a; \
-	    echo '$$(DEP_'"$${c}"'_coff) \' >> .dep2a; \
-	    if [ x$${valid} = xyes ]; then \
-	      echo '$$(DEP_'"$${c}"'_ecoff) \' >> .dep2a; \
-	    else true; fi; \
-	    echo '$$(DEP_'"$${c}"'_elf)' >> .dep2a; \
-	  else true; fi; \
-	done
-	mv -f .dep2a .dep2
-
-dep.sed: dep-in.sed config.status
-	sed <$(srcdir)/dep-in.sed >dep.sed \
-		-e 's!@INCDIR@!$(INCDIR)!' \
-		-e 's!@BFDDIR@!$(BFDDIR)!' \
-		-e 's!@SRCDIR@!$(srcdir)!'
-
-dep: .dep
-	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
-	cat .dep >> tmp-Makefile
-	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile Makefile
-
-dep-in: .dep
-	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
-	cat .dep >> tmp-Makefile.in
-	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
-
-dep-am: .dep
-	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.am > tmp-Makefile.am
-	cat .dep >> tmp-Makefile.am
-	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.am $(srcdir)/Makefile.am
-
-.PHONY: dep dep-in
-# end-sanitize-arc
-
-# DO NOT DELETE THIS LINE -- mkdep uses it.
-# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
-
-app.o: app.c
-as.o: as.c subsegs.h $(INCDIR)/obstack.h output-file.h \
-  sb.h macro.h
-atof-generic.o: atof-generic.c
-bignum-copy.o: bignum-copy.c
-cond.o: cond.c macro.h sb.h $(INCDIR)/obstack.h
-depend.o: depend.c
-ecoff.o: ecoff.c
-expr.o: expr.c $(INCDIR)/obstack.h
-flonum-copy.o: flonum-copy.c
-flonum-konst.o: flonum-konst.c
-flonum-mult.o: flonum-mult.c
-frags.o: frags.c subsegs.h $(INCDIR)/obstack.h
-gasp.o: gasp.c sb.h macro.h
-hash.o: hash.c
-input-file.o: input-file.c input-file.h
-input-scrub.o: input-scrub.c input-file.h sb.h
-itbl-ops.o: itbl-ops.c itbl-ops.h
-listing.o: listing.c input-file.h subsegs.h
-literal.o: literal.c subsegs.h $(INCDIR)/obstack.h
-macro.o: macro.c sb.h macro.h
-messages.o: messages.c
-output-file.o: output-file.c output-file.h
-read.o: read.c subsegs.h $(INCDIR)/obstack.h sb.h macro.h \
-  ecoff.h
-sb.o: sb.c sb.h
-stabs.o: stabs.c $(INCDIR)/obstack.h subsegs.h ecoff.h \
-  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
-subsegs.o: subsegs.c subsegs.h $(INCDIR)/obstack.h
-symbols.o: symbols.c $(INCDIR)/obstack.h subsegs.h
-write.o: write.c subsegs.h $(INCDIR)/obstack.h output-file.h
-e-i386coff.o: $(srcdir)/config/e-i386coff.c emul.h \
-  emul-target.h
-e-i386elf.o: $(srcdir)/config/e-i386elf.c emul.h emul-target.h
-e-mipsecoff.o: $(srcdir)/config/e-mipsecoff.c emul.h \
-  emul-target.h
-e-mipself.o: $(srcdir)/config/e-mipself.c emul.h emul-target.h
 $(OBJS): $(DEP_@target_cpu_type@_@obj_format@)
 $(TARG_CPU_O): $(TCDEP_@target_cpu_type@_@obj_format@)
 $(OBJ_FORMAT_O): $(OBJDEP_@target_cpu_type@_@obj_format@)
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
-
-# Tell versions [3.59,3.63) of GNU make to not export all variables.
-# Otherwise a system limit (for SysV at least) may be exceeded.
-.NOEXPORT:

@@ -1,4 +1,4 @@
-/* conf.in.  Generated automatically from configure.in by autoheader.  */
+/* config.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define if using alloca.c.  */
 #undef C_ALLOCA
@@ -24,6 +24,15 @@
  STACK_DIRECTION = 0 => direction of growth unknown
  */
 #undef STACK_DIRECTION
+
+/* Define if lex declares yytext as a char * by default, not a char[].  */
+#undef YYTEXT_POINTER
+
+/* Name of package.  */
+#undef PACKAGE
+
+/* Version of package.  */
+#undef VERSION
 
 /* Should gas use high-level BFD interfaces?  */
 #undef BFD_ASSEMBLER
@@ -65,9 +74,6 @@
 #undef SPARC_V9
 #undef SPARC_ARCH64
 
-/* Defined if using CGEN.  */
-#undef USING_CGEN
-
 /* Needed only for some configurations that can produce multiple output
    formats.  */
 #undef DEFAULT_EMULATION
@@ -89,6 +95,9 @@
 #undef I386COFF
 #undef M68KCOFF
 #undef M88KCOFF
+
+/* Using cgen code?  */
+#undef USING_CGEN
 
 /* Define if you have the remove function.  */
 #undef HAVE_REMOVE

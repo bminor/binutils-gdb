@@ -1,5 +1,23 @@
 Tue Aug  5 12:32:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am: New file, based on old Makefile.in.
+	* acinclude.m4: New file, from old aclocal.m4.
+	* configure.in: Call AM_INIT_AUTOMAKE and AM_PROG_LIBTOOL.  Remove
+	shared library handling; now handled by libtool.  Replace
+	AC_CONFIG_HEADER with AM_CONFIG_HEADER.  Call AC_PROG_YACC,
+	AC_PROG_LEX, and AC_DECL_YYTEXT.  Call AM_MAINTAINER_MODE,
+	AM_CYGWIN32, and AM_EXEEXT.  Don't call CY_CYGWIN32 or CY_EXEEXT.
+	* config.in: New file, created by autoheader.
+	* conf.in: Remove.
+	* acconfig.h: Mention PACKAGE, VERSION, and USING_CGEN.
+	* stamp-h.in: New file.
+	* as.c (print_version_id): Change GAS_VERSION to VERSION.
+	(parse_args): Likewise.
+	* config/obj-vms.c: (Write_VMS_MHD_Records): Likewise.
+	* Makefile.in: Now built with automake.
+	* aclocal.m4: Now built with aclocal.
+	* configure: Rebuild.
+
 	* cond.c (s_else): If not listing false conditionals, turn listing
 	off in the false branch of the else.
 

@@ -3166,7 +3166,7 @@ Write_VMS_MHD_Records ()
       cp = "GNU AS  V";
       while (*cp)
 	PUT_CHAR (*cp++);
-      cp = GAS_VERSION;
+      cp = VERSION;
     }
   while (*cp >= ' ')
     PUT_CHAR (*cp++);

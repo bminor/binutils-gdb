@@ -4,9 +4,16 @@ dnl And be careful when changing it!  If you must add tests with square
 dnl brackets, be sure changequote invocations surround it.
 dnl
 dnl
-AC_PREREQ(2.5)dnl v2.5 needed for --bindir et al
-AC_INIT(as.h)dnl
-dnl
+dnl v2.5 needed for --bindir et al
+AC_PREREQ(2.5)
+AC_INIT(as.h)
+
+AC_CANONICAL_SYSTEM
+
+AM_INIT_AUTOMAKE(gas, 2.8.2)
+
+AM_PROG_LIBTOOL
+
 user_bfd_gas=
 AC_ARG_ENABLE(bfd-assembler,
 [  --enable-bfd-assembler  use BFD back end for writing object files],
@@ -23,17 +30,6 @@ AC_ARG_ENABLE(targets,
   no)	    enable_targets= ;;
   *)	    enable_targets=$enableval ;;
 esac])dnl
-AC_ARG_ENABLE(shared,
-[  --enable-shared         build shared BFD library],
-[case "${enableval}" in
-  yes) shared=true shared_bfd=true shared_opcodes=true ;;
-  no)  shared=false ;;
-  *bfd*opcodes*) shared=true shared_bfd=true shared_opcodes=true ;;
-  *opcodes*bfd*) shared=true shared_bfd=true shared_opcodes=true ;;
-  *bfd*) shared=true shared_bfd=true ;;
-  *opcodes*) shared=true shared_opcodes=true ;;
-  *) shared=false ;;
-esac])dnl
 AC_ARG_ENABLE(commonbfdlib,
 [  --enable-commonbfdlib   build shared BFD/opcodes/libiberty library],
 [case "${enableval}" in
@@ -42,13 +38,8 @@ AC_ARG_ENABLE(commonbfdlib,
   *)   AC_MSG_ERROR([bad value ${enableval} for BFD commonbfdlib option]) ;;
 esac])dnl
 
-# Generate a header file -- gets more post-processing by Makefile later.
-AC_CONFIG_HEADER(conf)
-
-dnl For recursion to work right, this must be an absolute pathname.
-AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
-AC_CANONICAL_SYSTEM
-AC_ARG_PROGRAM
+# Generate a header file
+AM_CONFIG_HEADER(config.h:config.in)
 
 te_file=generic
 
@@ -613,74 +604,18 @@ esac
 # do we need the opcodes library?
 case "${need_opcodes}" in
 yes)
-  OPCODES_DEP=../opcodes/libopcodes.a
-  OPCODES_LIB='-L../opcodes -lopcodes'
-
-  # We need to handle some special cases for shared libraries.
-  case "${host}" in
-  *-*-sunos*)
-    # On SunOS, we must link against the name we are going to install,
-    # not -lbfd, since SunOS does not support SONAME.
-    if test "${shared_opcodes}" = "true"; then
-      OPCODES_LIB='-L../opcodes -l`echo opcodes | sed '"'"'$(program_transform_name)'"'"'`'
-    fi
-    ;;
-  alpha*-*-osf*)
-    # On Alpha OSF/1, the native linker searches all the -L
-    # directories for any LIB.so files, and only then searches for any
-    # LIB.a files.  That means that if there is an installed
-    # libbfd.so, but this build is not done with --enable-shared, the
-    # link will wind up being against the install libbfd.so rather
-    # than the newly built libbfd.  To avoid this, we must explicitly
-    # link against libbfd.a when --enable-shared is not used.
-    if test "${shared_opcodes}" != "true"; then
-      OPCODES_LIB='../opcodes/libopcodes.a'
-    fi
-    ;;
-  esac
+  OPCODES_LIB=../opcodes/libopcodes.la
   ;;
 esac
 
 case "${need_bfd}" in
 yes)
-  BFDDEP=../bfd/libbfd.a
-  BFDLIB='-L../bfd -lbfd'
+  BFDLIB=../bfd/libbfd.la
   ALL_OBJ_DEPS="$ALL_OBJ_DEPS ../bfd/bfd.h"
-
-  # We need to handle some special cases for shared libraries
-  case "${host}" in
-  *-*-sunos*)
-    # On SunOS, we must link against the name we are going to install,
-    # not -lbfd, since SunOS does not support SONAME.
-    if test "${shared_bfd}" = "true"; then
-      BFDLIB='-L../bfd -l`echo bfd | sed '"'"'$(program_transform_name)'"'"'`'
-    fi
-    ;;
-  alpha*-*-osf*)
-    # On Alpha OSF/1, the native linker searches all the -L
-    # directories for any LIB.so files, and only then searches for any
-    # LIB.a files.  That means that if there is an installed
-    # libbfd.so, but this build is not done with --enable-shared, the
-    # link will wind up being against the install libbfd.so rather
-    # than the newly built libbfd.  To avoid this, we must explicitly
-    # link against libbfd.a when --enable-shared is not used.
-    if test "${shared_bfd}" != "true"; then
-      BFDLIB='../bfd/libbfd.a'
-    fi
-    ;;
-  esac
-
-  if test "${commonbfdlib}" = "true"; then
-    # when a shared libbfd is built with --enable-commonbfdlib,
-    # all of libopcodes is available in libbfd.so
-    OPCODES_LIB=
-  fi
   ;;
 esac
 
-AC_SUBST(BFDDEP)
 AC_SUBST(BFDLIB)
-AC_SUBST(OPCODES_DEP)
 AC_SUBST(OPCODES_LIB)
 
 AC_SUBST(ALL_OBJ_DEPS)
@@ -694,6 +629,14 @@ AC_DEFINE_UNQUOTED(TARGET_OS,		"${target_os}")
 AC_PROG_CC
 AC_PROG_INSTALL
 
+AC_PROG_YACC
+AC_PROG_LEX
+AC_DECL_YYTEXT
+
+AM_MAINTAINER_MODE
+AM_CYGWIN32
+AM_EXEEXT
+
 AC_CHECK_HEADERS(string.h stdlib.h memory.h strings.h unistd.h stdarg.h varargs.h errno.h sys/types.h)
 
 # Put this here so that autoconf's "cross-compiling" message doesn't confuse
@@ -706,10 +649,6 @@ else
   AC_DEFINE(CROSS_COMPILE)
 fi
 AC_MSG_RESULT($cross_gas)
-
-# Look for win32 specific settings.
-CY_CYGWIN32
-CY_EXEEXT
 
 dnl ansidecl.h will deal with const
 dnl AC_CONST
@@ -760,58 +699,6 @@ GAS_CHECK_DECL_NEEDED(errno, f, int f, [
 #include <errno.h>
 #endif
 ])
-
-HLDFLAGS=
-HLDENV=
-RPATH_ENVVAR=LD_LIBRARY_PATH
-# If we have shared libraries, try to set rpath reasonably.
-if test "${shared}" = "true"; then
-  case "${host}" in
-  *-*-hpux*)
-    HLDFLAGS='-Wl,+s,+b,$(libdir)'
-    RPATH_ENVVAR=SHLIB_PATH
-    ;;
-  *-*-irix5* | *-*-irix6*)
-    HLDFLAGS='-Wl,-rpath,$(libdir)'
-    ;;
-  *-*-linux*aout*)
-    ;;
-  *-*-linux*)
-    HLDFLAGS='-Wl,-rpath,$(libdir)'
-    ;;
-  *-*-solaris*)
-    HLDFLAGS='-R $(libdir)'
-    ;;
-  *-*-sysv4*)
-    HLDENV='if test -z "$${LD_RUN_PATH}"; then LD_RUN_PATH=$(libdir); else LD_RUN_PATH=$${LD_RUN_PATH}:$(libdir); fi; export LD_RUN_PATH;'
-    ;;
-  esac
-fi
-
-# On SunOS, if the linker supports the -rpath option, use it to
-# prevent ../bfd and ../opcodes from being included in the run time
-# search path.
-case "${host}" in
-  *-*-sunos*)
-    echo 'main () { }' > conftest.c
-    ${CC} -o conftest -Wl,-rpath= conftest.c >/dev/null 2>conftest.t
-    if grep 'unrecognized' conftest.t >/dev/null 2>&1; then
-      :
-    elif grep 'No such file' conftest.t >/dev/null 2>&1; then
-      :
-    elif grep 'do not mix' conftest.t >/dev/null 2>&1; then
-      :
-    elif test "${shared}" = "true"; then
-      HLDFLAGS='-Wl,-rpath=$(libdir)'
-    else
-      HLDFLAGS='-Wl,-rpath='
-    fi
-    rm -f conftest.t conftest.c conftest
-    ;;
-esac
-AC_SUBST(HLDFLAGS)
-AC_SUBST(HLDENV)
-AC_SUBST(RPATH_ENVVAR)
 
 dnl This must come last.
 
