@@ -1,3 +1,8 @@
+2000-04-24  Nick Clifton  <nickc@cygnus.com>
+
+	* fr30-desc.c (fr30_cgen_cpu_open): Initialise signed_overflow
+	field. 
+
 2000-04-22  Timothy Wall  <twall@cygnus.com>
 
 	* ia64-gen.c (general): Add an ordered table of primary
