@@ -42,6 +42,8 @@ pr-5646-grt.ch
 pr-5646.exp
 result.ch
 result.exp
+tuples.ch
+tuples.exp
 
 Things-to-lose:
 

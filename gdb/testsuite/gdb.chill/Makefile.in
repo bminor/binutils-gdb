@@ -102,7 +102,7 @@ GDBFLAGS = -nx
 
 #### host, target, and site specific Makefile frags come in here.
 
-EXECUTABLES = chillvars.exe result.exe \
+EXECUTABLES = chillvars.exe result.exe tuples.exe \
   pr-4975.exe pr-5016.exe pr-5020.exe pr-5022.exe pr-5646.exe pr-5984.exe
 
 all:	$(EXECUTABLES)
@@ -118,7 +118,7 @@ pr-5646.o: pr-5646-grt.o
 	$(CHILL_FOR_TARGET) $(CHILLFLAGS) $(LDFLAGS) -o $*.exe $*.o $(CHILL_LIB) $(LIBS)
 
 .ch.o:
-	$(CHILL_FOR_TARGET) $(CHILLFLAGS) -fspecial_UC -c $<
+	$(CHILL_FOR_TARGET) $(CHILLFLAGS) -c $<
 
 # Do 'make chillvars.check' to run just the chillvars.{ch,exp} test.
 

@@ -1,3 +1,7 @@
+Wed Feb  1 13:09:48 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* tuples.ch, tuples.exp, Makefile.in:  New test case.
+
 Mon Nov 28 18:39:08 1994  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* pr-5984.ch, pr-5984.exp, Makefile.in:  New test case.
