@@ -1,5 +1,8 @@
 Tue May 28 11:42:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-sh.c (sh_relax_delete_bytes): Insert nop instructions, not
+	zeroes, in alignment holes.
+
 	* configure: Rebuild with autoconf 2.10.
 
 	* aoutx.h (NAME(aout,find_nearest_line)): Make room for the
