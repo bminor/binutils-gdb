@@ -1,3 +1,8 @@
+2002-12-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/step-test.exp: Allow MIPS to return to the line of a
+	function call.
+
 2002-11-25  Jim Blandy  <jimb@redhat.com>
 
 	* lib/mi-support.exp (mi_delete_breakpoints): Change name of

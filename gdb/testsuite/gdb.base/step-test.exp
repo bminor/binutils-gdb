@@ -78,7 +78,8 @@ gdb_test "step" ".*${decimal}.*myglob.*"   "step into"
 # On PA64, we end up at a different instruction than PA32.
 # On IA-64, we also end up on callee instead of on the next line due
 # to the restoration of the global pointer (which is a caller-save).
-if { [istarget "hppa2.0w-hp-hpux*"] || [istarget "ia64-*-*"]} {
+# Similarly on MIPS PIC targets.
+if { [istarget "hppa2.0w-hp-hpux*"] || [istarget "ia64-*-*"] || [istarget "mips*-*-*"]} {
     send_gdb "finish\n"
     gdb_expect {
         -re ".*${decimal}.*a.*5.*= a.*3.*$gdb_prompt $" { pass "step out 1" }
@@ -176,8 +177,11 @@ gdb_expect {
     # On PA64, we end up at a different instruction than PA32.
     # On IA-64, we end up on callee instead of on the following line due
     # to the restoration of the global pointer.
-    if { [istarget "hppa2.0w-hp-hpux*"] || [istarget "ia64-*-*"] } {
+    # Similarly on MIPS PIC targets.
+    if { [istarget "hppa2.0w-hp-hpux*"] || [istarget "ia64-*-*"] || [istarget "mips*-*-*"] } {
         pass "stepi: finish call 2"
+	test_i "stepi: past call" "stepi" \
+	  ".*${decimal}.*callee.*STEPI"  ".*${decimal}.*callee.*NEXTI"
     } else {
 	fail "stepi: finish call 2"
         return
