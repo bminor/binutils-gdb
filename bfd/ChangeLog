@@ -1,3 +1,8 @@
+2000-04-03  H.J. Lu  <hjl@gnu.org>
+
+	* cache.c (bfd_open_file): Unlink the output file only if
+	it has none zero size.
+
 2000-03-31  Thomas de Lellis  <tdel@wrs.com>
 
 	* srec.c : Set CHUNK size to 16 bytes to prevent download failures
