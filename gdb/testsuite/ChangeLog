@@ -1,3 +1,7 @@
+2004-06-26  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.hp/gdb.base-hp/reg.exp: Update copyright notice.
+
 2004-06-25  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/attach.exp (do_attach_tests): Don't forget to kill second
