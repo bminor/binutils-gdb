@@ -46,6 +46,7 @@ configuration is fully multi-arch.
 ARM NetBSD					arm*-*-netbsd*
 x86 OpenBSD					i[3456]86-*-openbsd*
 AMD x86-64 running GNU/Linux			x86_64-*-linux-*
+Sparc64 running FreeBSD				sparc64-*-freebsd*
 
 * New targets
 
