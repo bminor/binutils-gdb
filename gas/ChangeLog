@@ -1,3 +1,14 @@
+Tue Oct 12 17:26:15 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c: If OBJ_ELF, include elf/mips.h.
+	(mips_regmask_frag): New static variable, if OBJ_ELF.
+	(md_begin): If OBJ_ELF, create .reginfo section and set
+	mips_regmask_frag to a frag.
+	(mips_elf_final_processing): New function, if OBJ_ELF.  Set
+	mips_regmask_frag to register mask information.
+	* config/tc-mips.h (elf_tc_final_processing): New macro, defined
+	if OBJ_ELF.
+
 Tue Oct 12 03:33:26 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* messages.c (as_fatal): Use myname when printing messages.

@@ -42,6 +42,12 @@
 
 #include "opcode/mips.h"
 
+#ifdef OBJ_ELF
+#include "elf/mips.h"
+
+static char *mips_regmask_frag;
+#endif
+
 #define AT  1
 #define GP  28
 #define RA  31
@@ -388,6 +394,28 @@ md_begin ()
 #ifdef GPOPT
   bfd_set_gp_size (stdoutput, g_switch_value);
 #endif
+
+#ifdef OBJ_ELF
+  /* Create a .reginfo section for register masks.  */
+  {
+    segT seg;
+    subsegT subseg;
+    segT regsec;
+
+    seg = now_seg;
+    subseg = now_subseg;
+    regsec = subseg_new (".reginfo", (subsegT) 0);
+
+    /* I don't know why this section should be loaded, but the ABI
+       says that SHF_ALLOC should be set.  */
+    bfd_set_section_flags (stdoutput, regsec,
+			   SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA);
+
+    mips_regmask_frag = frag_more (sizeof (Elf32_External_RegInfo));
+
+    subseg_set (seg, subseg);
+  }
+#endif /* OBJ_ELF */
 
 #ifndef OBJ_ECOFF
   md_obj_begin ();
@@ -4440,6 +4468,29 @@ mips_define_label (sym)
 {
   insn_label = sym;
 }
+
+#ifdef OBJ_ELF
+
+/* Write out the .reginfo section for a MIPS ELF file.  */
+
+void
+mips_elf_final_processing ()
+{
+  Elf32_RegInfo s;
+
+  s.ri_gprmask = mips_gprmask;
+  s.ri_cprmask[0] = mips_cprmask[0];
+  s.ri_cprmask[1] = mips_cprmask[1];
+  s.ri_cprmask[2] = mips_cprmask[2];
+  s.ri_cprmask[3] = mips_cprmask[3];
+  /* The gp_value field is set by the MIPS ELF backend.  */
+
+  bfd_mips_elf32_swap_reginfo_out (stdoutput, &s,
+				   ((Elf32_External_RegInfo *)
+				    mips_regmask_frag));
+}
+
+#endif /* OBJ_ELF */
 
 #ifndef OBJ_ECOFF
 
