@@ -1,5 +1,5 @@
 /* Machine independent support for Solaris 2 core files for GDB.
-   Copyright 1994, 2000 Free Software Foundation, Inc.
+   Copyright 1994, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -42,6 +42,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "gdb_string.h"
+#include "regcache.h"
 
 #include "inferior.h"
 #include "target.h"

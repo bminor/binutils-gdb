@@ -30,6 +30,7 @@
 #include <sys/ptrace.h>
 #include "gdbcore.h"
 #include "gdb_wait.h"
+#include "regcache.h"
 #include <signal.h>
 
 extern CORE_ADDR text_end;

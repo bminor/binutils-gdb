@@ -1,6 +1,6 @@
 /* Remote debugging interface for PPCbug (PowerPC) Rom monitor
    for GDB, the GNU debugger.
-   Copyright 1995 Free Software Foundation, Inc.
+   Copyright 1995, 2001 Free Software Foundation, Inc.
 
    Written by Stu Grossman of Cygnus Support
 
@@ -26,6 +26,7 @@
 #include "target.h"
 #include "monitor.h"
 #include "serial.h"
+#include "regcache.h"
 
 static void
 ppcbug_supply_register (char *regname, int regnamelen, char *val, int vallen)

@@ -55,6 +55,7 @@
 #include <sys/param.h>
 #include "wince-stub.h"
 #include <time.h>
+#include "regcache.h"
 
 /* The ui's event loop. */
 extern int (*ui_loop_hook) (int signo);

@@ -25,6 +25,7 @@
 #include "serial.h"
 #include "srec.h"
 #include "arch-utils.h"
+#include "regcache.h"
 
 static serial_t parallel;
 static int parallel_in_use;

@@ -108,8 +108,6 @@ extern void validate_files (void);
 
 extern CORE_ADDR register_addr (int regno, CORE_ADDR blockend);
 
-extern void registers_fetched (void);
-
 #if !defined (KERNEL_U_ADDR)
 extern CORE_ADDR kernel_u_addr;
 #define KERNEL_U_ADDR kernel_u_addr

@@ -1,5 +1,6 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
-   Copyright 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 97, 1998, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +31,7 @@
 #include "objfiles.h"
 #include "gdb_string.h"
 #include "linespec.h"
+#include "regcache.h"
 
 /* FIXME: Some of this code should perhaps be merged with mips-tdep.c.  */
 

@@ -1,5 +1,6 @@
 /* Intel 387 floating point stuff.
-   Copyright (C) 1988, 89, 91, 98, 99, 2000 Free Software Foundation, Inc.
+   Copyright 1988, 89, 91, 98, 99, 2000, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +26,7 @@
 #include "value.h"
 #include "gdbcore.h"
 #include "floatformat.h"
+#include "regcache.h"
 
 
 /* FIXME: Eliminate the next two functions when we have the time to

@@ -1,5 +1,5 @@
 /* Native-dependent code for LynxOS.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #include <sys/ptrace.h>
 #include <sys/wait.h>

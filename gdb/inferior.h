@@ -111,16 +111,6 @@ extern int inferior_ignoring_leading_exec_events;
 
 extern struct environ *inferior_environ;
 
-/* Character array containing an image of the inferior programs'
-   registers. */
-
-extern char *registers;
-
-/* Character array containing the current state of each register
-   (unavailable<0, valid=0, invalid>0). */
-
-extern signed char *register_valid;
-
 extern void clear_proceed_status (void);
 
 extern void proceed (CORE_ADDR, enum target_signal, int);

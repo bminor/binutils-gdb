@@ -46,6 +46,7 @@
 #include "gdbcmd.h"
 #include "bfd.h"
 #include "gdbcore.h"		/* For download function */
+#include "regcache.h"
 
 /* access the register store directly, without going through
    the normal handler functions. This avoids an extra data copy.  */

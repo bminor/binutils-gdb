@@ -465,40 +465,6 @@ extern void release_value (value_ptr val);
 
 extern int record_latest_value (value_ptr val);
 
-extern void registers_changed (void);
-
-extern void read_register_bytes (int regbyte, char *myaddr, int len);
-
-extern void write_register_bytes (int regbyte, char *myaddr, int len);
-
-extern void read_register_gen (int regnum, char *myaddr);
-
-extern void write_register_gen (int regnum, char *myaddr);
-
-/* Rename to read_unsigned_register()? */
-extern ULONGEST read_register (int regnum);
-
-extern LONGEST read_signed_register (int regnum);
-
-/* Rename to read_unsigned_register_pid()? */
-extern ULONGEST read_register_pid (int regnum, int pid);
-
-extern LONGEST read_signed_register_pid (int regnum, int pid);
-
-extern void write_register (int regnum, LONGEST val);
-
-extern void write_register_pid (int regnum, CORE_ADDR val, int pid);
-
-extern void supply_register (int regnum, char *val);
-
-extern int register_cached (int regnum);
-
-extern void set_register_cached (int regnum, int state);
-
-extern void register_changed (int regnum);
-
-extern char *register_buffer (int regnum);
-
 extern void
 modify_field (char *addr, LONGEST fieldval, int bitpos, int bitsize);
 

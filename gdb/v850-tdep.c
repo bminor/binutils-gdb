@@ -29,6 +29,7 @@
 #include "gdbcore.h"
 #include "symfile.h"
 #include "arch-utils.h"
+#include "regcache.h"
 
 
 static char *v850_generic_reg_names[] = REGISTER_NAMES;

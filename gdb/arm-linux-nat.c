@@ -1,5 +1,5 @@
 /* GNU/Linux on ARM native support.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "gdb_string.h"
+#include "regcache.h"
 
 #include <sys/user.h>
 #include <sys/ptrace.h>

@@ -1,5 +1,5 @@
 /* Target-dependent code for the Mitsubishi m32r for GDB, the GNU debugger.
-   Copyright 1996, Free Software Foundation, Inc.
+   Copyright 1996, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "gdb_string.h"
 #include "gdbcore.h"
 #include "symfile.h"
+#include "regcache.h"
 
 /* Function: m32r_use_struct_convention
    Return nonzero if call_function should allocate stack space for a

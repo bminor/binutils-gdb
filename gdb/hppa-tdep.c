@@ -1,5 +1,6 @@
 /* Target-dependent code for the HP PA architecture, for GDB.
-   Copyright 1986, 1987, 1989-1996, 1999-2000 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989-1996, 1999-2000, 2001 Free Software
+   Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -26,6 +27,7 @@
 #include "bfd.h"
 #include "inferior.h"
 #include "value.h"
+#include "regcache.h"
 
 /* For argument passing to the inferior */
 #include "symtab.h"

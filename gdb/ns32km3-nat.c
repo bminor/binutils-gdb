@@ -1,5 +1,5 @@
 /* Low level interface to ns532 running mach 3.0.
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright 1992, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "inferior.h"
+#include "regcache.h"
 
 #include <stdio.h>
 

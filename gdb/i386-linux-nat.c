@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #include <sys/ptrace.h>
 #include <sys/user.h>

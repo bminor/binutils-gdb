@@ -1,5 +1,6 @@
 /* Low level DECstation interface to ptrace, for GDB when running native.
-   Copyright 1988, 1989, 1991, 1992, 1995 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1995, 2001 Free Software
+   Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 
@@ -23,6 +24,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "gdbcore.h"
+#include "regcache.h"
 #include <sys/ptrace.h>
 #include <sys/types.h>
 #include <sys/param.h>

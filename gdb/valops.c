@@ -1,6 +1,6 @@
 /* Perform non-arithmetic operations on values, for GDB.
-   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998
-   Free Software Foundation, Inc.
+   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998, 2001 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +30,7 @@
 #include "demangle.h"
 #include "language.h"
 #include "gdbcmd.h"
+#include "regcache.h"
 
 #include <errno.h>
 #include "gdb_string.h"

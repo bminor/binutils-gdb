@@ -1,5 +1,6 @@
 /* Functions specific to running gdb native on a SPARC running SunOS4.
-   Copyright 1989, 1992, 1993, 1994, 1996 Free Software Foundation, Inc.
+   Copyright 1989, 1992, 1993, 1994, 1996, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +23,8 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "sparc-nat.c"
+#include "regcache.h"
 
 #include <signal.h>
 #include <sys/ptrace.h>

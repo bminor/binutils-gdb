@@ -1,6 +1,6 @@
 /* Remote debugging interface for Densan DVE-R3900 ROM monitor for
    GDB, the GNU debugger.
-   Copyright 1997 Free Software Foundation, Inc.
+   Copyright 1997, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "command.h"
 #include "gdb_string.h"
 #include <time.h>
+#include "regcache.h"
 
 /* Type of function passed to bfd_map_over_sections.  */
 

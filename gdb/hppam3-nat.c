@@ -1,5 +1,5 @@
 /* Low level interface to HP800 running mach 4.0.
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright 1995, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "floatformat.h"
+#include "regcache.h"
 
 #include <stdio.h>
 

@@ -1,5 +1,6 @@
 /* Native-dependent code for ptx 4.0
-   Copyright 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 2001 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -21,6 +22,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "gdbcore.h"
+#include "regcache.h"
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
 #include <sys/param.h>

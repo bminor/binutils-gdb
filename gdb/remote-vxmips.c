@@ -31,6 +31,7 @@
 #include "command.h"
 #include "symtab.h"
 #include "symfile.h"		/* for struct complaint */
+#include "regcache.h"
 
 #include "gdb_string.h"
 #include <errno.h>

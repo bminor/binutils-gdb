@@ -23,6 +23,7 @@
 #include "breakpoint.h"
 #include "target.h"
 #include "serial.h"
+#include "regcache.h"
 #include <sys/types.h>
 
 #if (!defined(__GO32__) && !defined(_WIN32)) || defined(__CYGWIN32__)

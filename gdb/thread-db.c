@@ -1,5 +1,5 @@
 /* libthread_db assisted debugging support, generic parts.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +31,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "target.h"
+#include "regcache.h"
 
 #ifndef LIBTHREAD_DB_SO
 #define LIBTHREAD_DB_SO "libthread_db.so.1"

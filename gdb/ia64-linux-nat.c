@@ -1,5 +1,5 @@
 /* Functions specific to running gdb native on IA-64 running Linux.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #include <signal.h>
 #include <sys/ptrace.h>

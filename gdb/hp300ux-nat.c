@@ -1,5 +1,6 @@
 /* HP/UX native interface for HP 300's, for GDB when running under Unix.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +22,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
+#include "regcache.h"
 
 /* Defining this means some system include files define some extra stuff.  */
 #define WOPR

@@ -1,5 +1,6 @@
 /* Functions specific to running gdb native on an ns32k running NetBSD
-   Copyright 1989, 1992, 1993, 1994, 1996 Free Software Foundation, Inc.
+   Copyright 1989, 1992, 1993, 1994, 1996, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +29,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #define RF(dst, src) \
 	memcpy(&registers[REGISTER_BYTE(dst)], &src, sizeof(src))

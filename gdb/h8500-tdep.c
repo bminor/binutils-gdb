@@ -1,5 +1,5 @@
 /* Target-dependent code for Hitachi H8/500, for GDB.
-   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,6 +32,7 @@
 #include "value.h"
 #include "dis-asm.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #define UNSIGNED_SHORT(X) ((X) & 0xffff)
 

@@ -30,6 +30,7 @@
 #include "gdbcmd.h"
 #include "command.h"
 #include "arch-utils.h"
+#include "regcache.h"
 
 static long i386_get_frame_setup (CORE_ADDR);
 

@@ -109,6 +109,7 @@
 #include "remote-utils.h"
 #include "gdbcore.h"
 #include "serial.h"
+#include "regcache.h"
 
 /* Prototypes for local functions */
 

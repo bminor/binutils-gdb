@@ -1,5 +1,5 @@
 /* Multi-threaded debugging support for Linux (LWP layer).
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,6 +29,7 @@
 #include "gdbthread.h"
 #include "inferior.h"
 #include "target.h"
+#include "regcache.h"
 
 #define DEBUG 1
 

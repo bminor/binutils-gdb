@@ -1,5 +1,5 @@
 /* Target-vector operations for controlling Mac applications, for GDB.
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright 1995, 2001 Free Software Foundation, Inc.
    Written by Stan Shebs.  Contributed by Cygnus Support.
 
    This file is part of GDB.
@@ -36,6 +36,7 @@
 #include "gdb_string.h"
 #include "gdbthread.h"
 #include "gdbcmd.h"
+#include "regcache.h"
 
 #include <Processes.h>
 

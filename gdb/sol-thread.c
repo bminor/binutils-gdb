@@ -1,5 +1,6 @@
 /* Low level interface for debugging Solaris threads for GDB, the GNU debugger.
-   Copyright 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 2000, 2001 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -58,6 +59,7 @@
 #include <dlfcn.h>
 #include "gdbcmd.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 extern struct target_ops sol_thread_ops;	/* Forward declaration */
 extern struct target_ops sol_core_ops;	/* Forward declaration */

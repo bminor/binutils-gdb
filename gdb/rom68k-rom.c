@@ -1,5 +1,6 @@
 /* Remote target glue for the ROM68K ROM monitor.
-   Copyright 1988, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1988, 1991, 1992, 1993, 1994, 1995, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +24,7 @@
 #include "target.h"
 #include "monitor.h"
 #include "serial.h"
+#include "regcache.h"
 
 static void rom68k_open (char *args, int from_tty);
 

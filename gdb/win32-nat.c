@@ -1,5 +1,6 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001 Free Software
+   Foundation, Inc.
    Contributed by Cygnus Solutions, A Red Hat Company.
 
    This file is part of GDB.
@@ -17,8 +18,7 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.
- */
+   Boston, MA 02111-1307, USA.  */
 
 /* by Steve Chamberlain, sac@cygnus.com */
 
@@ -31,6 +31,7 @@
 #include "gdbcore.h"
 #include "command.h"
 #include "completer.h"
+#include "regcache.h"
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>

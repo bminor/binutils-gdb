@@ -35,6 +35,7 @@
 #include "serial.h"
 #include "ocd.h"
 #include "ppc-tdep.h"
+#include "regcache.h"
 
 static void bdm_ppc_open (char *name, int from_tty);
 

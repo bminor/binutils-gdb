@@ -108,6 +108,7 @@
 #include "gdbcore.h"
 #include "command.h"
 #include "floatformat.h"
+#include "regcache.h"
 
 #include <sys/file.h>
 #include <ctype.h>

@@ -30,6 +30,7 @@
 #include "target.h"
 #include "remote-utils.h"
 #include "gdb_string.h"
+#include "regcache.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

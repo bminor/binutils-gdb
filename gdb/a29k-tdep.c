@@ -27,6 +27,7 @@
 #include "symtab.h"
 #include "inferior.h"
 #include "gdbcmd.h"
+#include "regcache.h"
 
 /* If all these bits in an instruction word are zero, it is a "tag word"
    which precedes a function entry point and gives stack traceback info.

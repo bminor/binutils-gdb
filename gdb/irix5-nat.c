@@ -1,6 +1,6 @@
 /* Native support for the SGI Iris running IRIX version 5, for GDB.
-   Copyright 1988, 89, 90, 91, 92, 93, 94, 95, 96, 98, 1999
-   Free Software Foundation, Inc.
+   Copyright 1988, 89, 90, 91, 92, 93, 94, 95, 96, 98, 1999, 2001 Free
+   Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
    Implemented for Irix 4.x by Garrett A. Wollman.
@@ -27,6 +27,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "target.h"
+#include "regcache.h"
 
 #include "gdb_string.h"
 #include <sys/time.h>

@@ -30,6 +30,7 @@
 #include "gdb_string.h"
 #include "floatformat.h"
 #include "symfile.h"		/* for overlay functions */
+#include "regcache.h"
 
 /* This is used to indicate that we don't know the format of the floating point
    number.  Typically, this is useful for native ports, where the actual format

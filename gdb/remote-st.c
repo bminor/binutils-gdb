@@ -41,6 +41,7 @@
 #include "gdb_string.h"
 #include <sys/types.h>
 #include "serial.h"
+#include "regcache.h"
 
 extern struct target_ops st2000_ops;	/* Forward declaration */
 

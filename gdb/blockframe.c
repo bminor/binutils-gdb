@@ -1,7 +1,7 @@
 /* Get info from stack frames;
    convert between frames, blocks, functions and pc values.
-   Copyright 1986, 87, 88, 89, 91, 94, 95, 96, 97, 1998
-   Free Software Foundation, Inc.
+   Copyright 1986, 87, 88, 89, 91, 94, 95, 96, 97, 1998, 2001 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +31,7 @@
 #include "target.h"		/* for target_has_stack */
 #include "inferior.h"		/* for read_pc */
 #include "annotate.h"
+#include "regcache.h"
 
 /* Prototypes for exported functions. */
 

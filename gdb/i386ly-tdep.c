@@ -1,5 +1,5 @@
 /* Target-dependent code for Intel 386 running LynxOS.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 /* Return the PC of the caller from the call frame.  Assumes the subr prologue
    has already been executed, and the frame pointer setup.  If this is the

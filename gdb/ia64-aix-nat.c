@@ -22,6 +22,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "regcache.h"
 #include <sys/procfs.h>
 
 #include "symtab.h"

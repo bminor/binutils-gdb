@@ -27,6 +27,7 @@
 #include "inferior.h"
 #include "symtab.h"
 #include "target.h"
+#include "regcache.h"
 
 /* FIXME: What is the _INKERNEL define for?  */
 #define _INKERNEL

@@ -1,5 +1,6 @@
 /* Low level Alpha interface, for GDB when running native.
-   Copyright 1993, 1995, 1996, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1996, 1998, 2001 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -22,6 +23,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "target.h"
+#include "regcache.h"
 #include <sys/ptrace.h>
 #ifdef __linux__
 #include <asm/reg.h>

@@ -1,5 +1,6 @@
 /* Low level interface to i386 running the GNU Hurd.
-   Copyright (C) 1992, 1995, 1996, 2000 Free Software Foundation, Inc.
+   Copyright 1992, 1995, 1996, 2000, 2001 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -21,6 +22,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "floatformat.h"
+#include "regcache.h"
 
 #include "gdb_assert.h"
 #include <stdio.h>

@@ -35,6 +35,7 @@
 #include "target.h"
 #include "gdbcore.h"
 #include "gdbthread.h"
+#include "regcache.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0

@@ -28,6 +28,7 @@
 
 #include "defs.h"
 #include "gdb_string.h"
+#include "regcache.h"
 
 #include "inferior.h"
 #include "bfd.h"

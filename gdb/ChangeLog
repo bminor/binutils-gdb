@@ -1,3 +1,175 @@
+Tue Feb 27 23:56:23 2001  Andrew Cagney  <ac131313@redhat.com>
+
+	From Steven Johnson:
+	* regcache.h: New file.
+	
+	* value.h (read_register_bytes, read_register_gen)
+	(write_register_gen, write_register_bytes)
+	(read_register, read_register_pid)
+	(read_signed_register, read_signed_register_pid)
+	(write_register, write_register_pid)
+	(register_cached, set_register_cached)
+	(register_changed, register_buffer)
+	(registers_changed, supply_register): Move declaration from here.
+	* regcache.h: To here.
+	* gdbcore.h (registers_fetched): Ditto.
+	* inferior.h (registers, registers_valid): Ditto.
+
+	* regcache.c (generic_target_read_pc, read_pc_pid, read_pc,
+	generic_target_write_pc, write_pc_pid, write_pc,
+	generic_target_read_sp, read_sp, generic_target_write_sp,
+	write_sp, generic_target_read_fp, read_fp,
+	generic_target_write_fp, write_fp): Add note that these functions
+	will be moved from this file.
+	
+	* a29k-tdep.c: Include "regcache.h".
+	* a68v-nat.c: Ditto.
+	* abug-rom.c: Ditto.
+	* alpha-nat.c: Ditto.
+	* alpha-tdep.c: Ditto.
+	* alphabsd-nat.c: Ditto.
+	* arc-tdep.c: Ditto.
+	* arm-linux-nat.c: Ditto.
+	* arm-linux-tdep.c: Ditto.
+	* arm-tdep.c: Ditto.
+	* blockframe.c: Ditto.
+	* core-aout.c: Ditto.
+	* core-sol2.c: Ditto.
+	* corelow.c: Ditto.
+	* cpu32bug-rom.c: Ditto.
+	* cxux-nat.c: Ditto.
+	* d10v-tdep.c: Ditto.
+	* d30v-tdep.c: Ditto.
+	* dbug-rom.c: Ditto.
+	* dink32-rom.c: Ditto.
+	* dve3900-rom.c: Ditto.
+	* findvar.c: Ditto.
+	* fr30-tdep.c: Ditto.
+	* frame.c: Ditto.
+	* go32-nat.c: Ditto.
+	* h8300-tdep.c: Ditto.
+	* h8500-tdep.c: Ditto.
+	* hp300ux-nat.c: Ditto.
+	* hppa-tdep.c: Ditto.
+	* hppab-nat.c: Ditto.
+	* hppah-nat.c: Ditto.
+	* hppam3-nat.c: Ditto.
+	* hpux-thread.c: Ditto.
+	* i386-linux-nat.c: Ditto.
+	* i386-linux-tdep.c: Ditto.
+	* i386-tdep.c: Ditto.
+	* i386aix-nat.c: Ditto.
+	* i386b-nat.c: Ditto.
+	* i386bsd-nat.c: Ditto.
+	* i386gnu-nat.c: Ditto.
+	* i386ly-tdep.c: Ditto.
+	* i386m3-nat.c: Ditto.
+	* i386mach-nat.c: Ditto.
+	* i386nbsd-nat.c: Ditto.
+	* i386v4-nat.c: Ditto.
+	* i387-nat.c: Ditto.
+	* i387-tdep.c: Ditto.
+	* i960-tdep.c: Ditto.
+	* ia64-aix-nat.c: Ditto.
+	* ia64-linux-nat.c: Ditto.
+	* ia64-tdep.c: Ditto.
+	* infptrace.c: Ditto.
+	* infrun.c: Ditto.
+	* irix4-nat.c: Ditto.
+	* irix5-nat.c: Ditto.
+	* lin-lwp.c: Ditto.
+	* lin-thread.c: Ditto.
+	* lynx-nat.c: Ditto.
+	* m3-nat.c: Ditto.
+	* m32r-rom.c: Ditto.
+	* m32r-tdep.c: Ditto.
+	* m68hc11-tdep.c: Ditto.
+	* m68k-tdep.c: Ditto.
+	* m68klinux-nat.c: Ditto.
+	* m68knbsd-nat.c: Ditto.
+	* m68knbsd-tdep.c: Ditto.
+	* m88k-nat.c: Ditto.
+	* m88k-tdep.c: Ditto.
+	* mac-nat.c: Ditto.
+	* mcore-rom.c: Ditto.
+	* mcore-tdep.c: Ditto.
+	* mi/mi-main.c: Ditto.
+	* mips-nat.c: Ditto.
+	* mips-tdep.c: Ditto.
+	* mipsm3-nat.c: Ditto.
+	* mipsv4-nat.c: Ditto.
+	* mn10200-tdep.c: Ditto.
+	* mn10300-tdep.c: Ditto.
+	* monitor.c: Ditto.
+	* ns32km3-nat.c: Ditto.
+	* ns32knbsd-nat.c: Ditto.
+	* ocd.c: Ditto.
+	* pa64solib.c: Ditto.
+	* ppc-bdm.c: Ditto.
+	* ppc-linux-nat.c: Ditto.
+	* ppc-linux-tdep.c: Ditto.
+	* ppcbug-rom.c: Ditto.
+	* ppcnbsd-nat.c: Ditto.
+	* ptx4-nat.c: Ditto.
+	* regcache.c: Ditto.
+	* remote-adapt.c: Ditto.
+	* remote-array.c: Ditto.
+	* remote-bug.c: Ditto.
+	* remote-e7000.c: Ditto.
+	* remote-eb.c: Ditto.
+	* remote-es.c: Ditto.
+	* remote-est.c: Ditto.
+	* remote-hms.c: Ditto.
+	* remote-mips.c: Ditto.
+	* remote-mm.c: Ditto.
+	* remote-nindy.c: Ditto.
+	* remote-os9k.c: Ditto.
+	* remote-rdi.c: Ditto.
+	* remote-rdp.c: Ditto.
+	* remote-sds.c: Ditto.
+	* remote-sim.c: Ditto.
+	* remote-st.c: Ditto.
+	* remote-udi.c: Ditto.
+	* remote-utils.c: Ditto.
+	* remote-vx.c: Ditto.
+	* remote-vx29k.c: Ditto.
+	* remote-vx68.c: Ditto.
+	* remote-vx960.c: Ditto.
+	* remote-vxmips.c: Ditto.
+	* remote-vxsparc.c: Ditto.
+	* remote.c: Ditto.
+	* rom68k-rom.c: Ditto.
+	* rs6000-nat.c: Ditto.
+	* rs6000-tdep.c: Ditto.
+	* sh-tdep.c: Ditto.
+	* sh3-rom.c: Ditto.
+	* sol-thread.c: Ditto.
+	* solib-svr4.c: Ditto.
+	* somsolib.c: Ditto.
+	* sparc-nat.c: Ditto.
+	* sparc-tdep.c: Ditto.
+	* sparcl-tdep.c: Ditto.
+	* sparclet-rom.c: Ditto.
+	* sun3-nat.c: Ditto.
+	* sun386-nat.c: Ditto.
+	* symm-nat.c: Ditto.
+	* target.c: Ditto.
+	* thread-db.c: Ditto.
+	* thread.c: Ditto.
+	* tic80-tdep.c: Ditto.
+	* tracepoint.c: Ditto.
+	* ultra3-nat.c: Ditto.
+	* umax-xdep.c: Ditto.
+	* uw-thread.c: Ditto.
+	* v850-tdep.c: Ditto.
+	* v850ice.c: Ditto.
+	* valops.c: Ditto.
+	* w65-tdep.c: Ditto.
+	* w89k-rom.c: Ditto.
+	* win32-nat.c: Ditto.
+	* wince.c: Ditto.
+	* z8k-tdep.c: Ditto.
+
 2001-02-28  Matt Hiller  <hiller@redhat.com>	
 	
 	* MAINTAINERS: Add Matt Hiller to Write After Approval list.

@@ -51,6 +51,7 @@
 #include "inferior.h"
 #include "gdb_regex.h"
 #include "srec.h"
+#include "regcache.h"
 
 static char *dev_name;
 static struct target_ops *targ_ops;

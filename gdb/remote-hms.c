@@ -1,5 +1,5 @@
 /* Remote debugging interface for Hitachi HMS Monitor Version 1.0
-   Copyright 1995,1999 Free Software Foundation, Inc.
+   Copyright 1995, 1999, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Steve Chamberlain
    (sac@cygnus.com).
 
@@ -25,6 +25,7 @@
 #include "target.h"
 #include "monitor.h"
 #include "serial.h"
+#include "regcache.h"
 
 static void hms_open (char *args, int from_tty);
 static void

@@ -26,6 +26,7 @@
 #include "value.h"
 #include "gdb_string.h"
 #include "inferior.h"
+#include "regcache.h"
 
 
 #define P_LINKL_FP	0x480e

@@ -1,5 +1,5 @@
 /* Remote target glue for the SPARC Sparclet ROM monitor.
-   Copyright 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +27,7 @@
 #include "srec.h"
 #include "symtab.h"
 #include "symfile.h"		/* for generic_load */
+#include "regcache.h"
 #include <time.h>
 
 extern void report_transfer_performance (unsigned long, time_t, time_t);

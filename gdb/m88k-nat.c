@@ -1,5 +1,6 @@
 /* Native-dependent Motorola 88xxx support for GDB, the GNU Debugger.
-   Copyright 1988, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1990, 1991, 1992, 2001 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -21,6 +22,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
+#include "regcache.h"
 
 #include <sys/types.h>
 #include <sys/param.h>

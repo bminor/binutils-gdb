@@ -29,6 +29,7 @@
 #include "gdb_string.h"
 #include "gdbcore.h"
 #include "symfile.h"
+#include "regcache.h"
 
 extern void _initialize_mn10300_tdep (void);
 static CORE_ADDR mn10300_analyze_prologue (struct frame_info *fi,

@@ -33,6 +33,7 @@
 #include "gdb_wait.h"
 #include "dcache.h"
 #include <signal.h>
+#include "regcache.h"
 
 extern int errno;
 

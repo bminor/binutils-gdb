@@ -1,5 +1,6 @@
 /* PPC linux native support.
-   Copyright (C) 1988, 1989, 1991, 1992, 1994, 1996 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +22,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #include <sys/types.h>
 #include <sys/param.h>

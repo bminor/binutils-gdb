@@ -1,5 +1,5 @@
 /* Target-dependent code for Linux running on i386's, for GDB.
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #include "gdbcore.h"
 #include "frame.h"
 #include "value.h"
+#include "regcache.h"
 
 /* For i386_linux_skip_solib_resolver.  */
 #include "symtab.h"

@@ -1,5 +1,5 @@
 /* Native support for MIPS running SVR4, for GDB.
-   Copyright 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "target.h"
+#include "regcache.h"
 
 #include <sys/time.h>
 #include <sys/procfs.h>

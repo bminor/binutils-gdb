@@ -1,5 +1,5 @@
 /* Target-dependent code for Motorola 68HC11 & 68HC12
-   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Stephane Carrez, stcarrez@worldnet.fr
 
 This file is part of GDB.
@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "arch-utils.h"
+#include "regcache.h"
 
 #include "target.h"
 #include "opcode/m68hc11.h"

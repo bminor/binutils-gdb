@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "gdbtypes.h"
+#include "regcache.h"
 
 int
 m68knbsd_use_struct_convention (int gcc_p, struct type *type)

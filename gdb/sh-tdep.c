@@ -38,6 +38,7 @@
 #include "gdb_string.h"
 #include "arch-utils.h"
 #include "floatformat.h"
+#include "regcache.h"
 
 #include "solib-svr4.h"
 

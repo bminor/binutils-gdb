@@ -1,7 +1,7 @@
 /* Low level interface for debugging UnixWare user-mode threads for
    GDB, the GNU debugger.
 
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Nick Duffek <nsd@cygnus.com>.
 
    This file is part of GDB.
@@ -101,6 +101,7 @@
 #include "gdbthread.h"
 #include "target.h"
 #include "inferior.h"
+#include "regcache.h"
 #include <fcntl.h>
 
 /* <thread.h> includes <sys/priocntl.h>, which requires boolean_t from

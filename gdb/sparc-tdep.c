@@ -30,6 +30,7 @@
 #include "value.h"
 #include "bfd.h"
 #include "gdb_string.h"
+#include "regcache.h"
 
 #ifdef	USE_PROC_FS
 #include <sys/procfs.h>

@@ -31,6 +31,7 @@
 #include "gdbthread.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "regcache.h"
 
 #include <ctype.h>
 #include <sys/types.h>

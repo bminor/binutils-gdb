@@ -1,5 +1,6 @@
 /* Native-dependent code for PowerPC's running NetBSD, for GDB.
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +28,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "ppc-tdep.h"
+#include "regcache.h"
 
 #define RF(dst, src) \
         memcpy(&registers[REGISTER_BYTE(dst)], &src, sizeof(src))

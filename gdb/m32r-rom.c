@@ -37,6 +37,7 @@
 #include "objfiles.h"		/* for ALL_OBJFILES etc. */
 #include "inferior.h"		/* for write_pc() */
 #include <ctype.h>
+#include "regcache.h"
 
 extern void report_transfer_performance (unsigned long, time_t, time_t);
 

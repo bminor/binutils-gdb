@@ -25,6 +25,7 @@
 #include "target.h"
 #include "gdbarch.h"
 #include "gdbcmd.h"
+#include "regcache.h"
 
 /*
  * DATA STRUCTURE
@@ -553,6 +554,14 @@ supply_register (int regnum, char *val)
 
 /* read_pc, write_pc, read_sp, write_sp, read_fp, write_fp, etc.
    Special handling for registers PC, SP, and FP.  */
+
+/* NOTE: cagney/2001-02-18: The functions generic_target_read_pc(),
+   read_pc_pid(), read_pc(), generic_target_write_pc(),
+   write_pc_pid(), write_pc(), generic_target_read_sp(), read_sp(),
+   generic_target_write_sp(), write_sp(), generic_target_read_fp(),
+   read_fp(), generic_target_write_fp(), write_fp will eventually be
+   moved out of the reg-cache into either frame.[hc] or to the
+   multi-arch framework.  The are not part of the raw register cache.  */
 
 /* This routine is getting awfully cluttered with #if's.  It's probably
    time to turn this into READ_PC and define it in the tm.h file.

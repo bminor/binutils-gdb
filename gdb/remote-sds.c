@@ -36,6 +36,7 @@
 #include "gdb-stabs.h"
 #include "gdbthread.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #ifdef USG
 #include <sys/types.h>

@@ -1,6 +1,6 @@
 /* Remote debugging interface to Motorola picobug monitor for gdb,
    the GNU debugger.
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,7 @@
 #include "target.h"
 #include "monitor.h"
 #include "gdb_string.h"
+#include "regcache.h"
 
 /* Functions used only in this file. */
 

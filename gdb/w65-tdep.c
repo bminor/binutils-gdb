@@ -1,5 +1,5 @@
 /* Target-machine dependent code for WDC-65816, for GDB.
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright 1995, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +31,7 @@
 #include "gdbtypes.h"
 #include "dis-asm.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 /* Return the saved PC from this frame. */
 

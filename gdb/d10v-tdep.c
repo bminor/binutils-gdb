@@ -35,6 +35,7 @@
 #include "objfiles.h"
 #include "language.h"
 #include "arch-utils.h"
+#include "regcache.h"
 
 #include "floatformat.h"
 #include "sim-d10v.h"

@@ -1,5 +1,6 @@
 /* Host-dependent code for Sun-3 for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +22,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #include <sys/ptrace.h>
 #define KERNEL			/* To get floating point reg definitions */

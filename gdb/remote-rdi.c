@@ -33,6 +33,7 @@
 #include "gdbcore.h"
 #include "breakpoint.h"
 #include "completer.h"
+#include "regcache.h"
 
 #ifdef USG
 #include <sys/types.h>

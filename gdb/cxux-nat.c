@@ -1,5 +1,6 @@
 /* Native support for Motorola 88k running Harris CX/UX.
-   Copyright 1988, 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1988, 1990, 1991, 1992, 1993, 1994, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,6 +34,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "symtab.h"
+#include "regcache.h"
 
 #ifndef USER			/* added to support BCS ptrace_user */
 #define USER ptrace_user

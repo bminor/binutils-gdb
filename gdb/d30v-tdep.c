@@ -33,6 +33,7 @@
 #include "dis-asm.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "regcache.h"
 
 #include "language.h" /* For local_hex_string() */
 

@@ -1,5 +1,5 @@
 /* GNU/Linux on ARM target support.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +25,7 @@
 #include "floatformat.h"
 #include "gdbcore.h"
 #include "frame.h"
+#include "regcache.h"
 
 /* For arm_linux_skip_solib_resolver.  */
 #include "symtab.h"

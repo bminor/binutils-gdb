@@ -1,5 +1,6 @@
 /* Native dependent code for Mach 386's for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +23,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #include <sys/param.h>
 #include <sys/dir.h>

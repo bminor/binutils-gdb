@@ -24,6 +24,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdb_string.h"
+#include "regcache.h"
 
 #include "gdb_wait.h"
 

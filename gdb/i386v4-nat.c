@@ -1,5 +1,6 @@
 /* Native-dependent code for SVR4 Unix running on i386's, for GDB.
-   Copyright 1988, 1989, 1991, 1992, 1996, 1998 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1996, 1998, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +22,7 @@
 #include "defs.h"
 #include "value.h"
 #include "inferior.h"
+#include "regcache.h"
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>

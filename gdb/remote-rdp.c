@@ -47,6 +47,7 @@
 #include "remote-utils.h"
 #include "gdb_string.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #ifdef HAVE_TIME_H
 #include <time.h>

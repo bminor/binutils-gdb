@@ -1,6 +1,6 @@
 /* Generic support for remote debugging interfaces.
 
-   Copyright 1993, 1994, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1998, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -50,6 +50,7 @@
 #include "gdbcore.h"		/* for exec_bfd */
 #include "inferior.h"		/* for generic_mourn_inferior */
 #include "remote-utils.h"
+#include "regcache.h"
 
 
 void _initialize_sr_support (void);

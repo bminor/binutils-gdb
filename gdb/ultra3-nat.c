@@ -1,5 +1,6 @@
 /* Native-dependent code for GDB, for NYU Ultra3 running Sym1 OS.
-   Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 2001 Free Software Foundation,
+   Inc.
    Contributed by David Wood (wood@nyu.edu) at New York University.
 
    This file is part of GDB.
@@ -25,6 +26,7 @@
 #include "inferior.h"
 #include "symtab.h"
 #include "value.h"
+#include "regcache.h"
 
 #include <sys/types.h>
 #include <sys/param.h>

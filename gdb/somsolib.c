@@ -39,6 +39,7 @@
 #include "gdbcmd.h"
 #include "assert.h"
 #include "language.h"
+#include "regcache.h"
 
 #include <fcntl.h>
 

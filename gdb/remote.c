@@ -35,6 +35,7 @@
 #include "gdb-stabs.h"
 #include "gdbthread.h"
 #include "remote.h"
+#include "regcache.h"
 
 #include <ctype.h>
 #include <sys/time.h>

@@ -1,5 +1,6 @@
 /* Intel 386 native support.
-   Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 2001 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -23,6 +24,7 @@
 #include "inferior.h"
 #include "language.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #ifdef USG
 #include <sys/types.h>

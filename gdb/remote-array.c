@@ -37,6 +37,7 @@
 #include "remote-utils.h"
 #include "inferior.h"
 #include "version.h"
+#include "regcache.h"
 
 extern int baud_rate;
 

@@ -1,5 +1,6 @@
 /* Target-machine dependent code for Motorola 88000 series, for GDB.
-   Copyright 1988, 1990, 1991, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1988, 1990, 1991, 1994, 1995, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,6 +27,7 @@
 #include "symtab.h"
 #include "setjmp.h"
 #include "value.h"
+#include "regcache.h"
 
 /* Size of an instruction */
 #define	BYTES_PER_88K_INSN	4

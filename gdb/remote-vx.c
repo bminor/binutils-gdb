@@ -32,6 +32,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
+#include "regcache.h"
 
 #include "gdb_string.h"
 #include <errno.h>

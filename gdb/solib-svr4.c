@@ -21,6 +21,7 @@
 
 #define _SYSCALL32	/* for Sparc64 cross Sparc32 */
 #include "defs.h"
+#include "regcache.h"
 
 
 #include <sys/types.h>

@@ -1,5 +1,5 @@
 /* Target-dependent code for the TI TMS320C80 (MVP) for GDB, the GNU debugger.
-   Copyright 1996, Free Software Foundation, Inc.
+   Copyright 1996, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "gdb_string.h"
 #include "gdbcore.h"
 #include "symfile.h"
+#include "regcache.h"
 
 /* Function: frame_find_saved_regs
    Return the frame_saved_regs structure for the frame.

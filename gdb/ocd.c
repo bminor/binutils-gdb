@@ -34,6 +34,7 @@
 #include <signal.h>
 #include "serial.h"
 #include "ocd.h"
+#include "regcache.h"
 
 /* Prototypes for local functions */
 

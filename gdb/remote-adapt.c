@@ -43,6 +43,7 @@
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 /* This processor is getting rusty but I am trying to keep it
    up to date at least with data structure changes.

@@ -24,6 +24,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "gdb_string.h"
+#include "regcache.h"
 #include <ctype.h>
 #include <fcntl.h>
 #include <setjmp.h>

@@ -1,5 +1,5 @@
 /* Target-machine dependent code for Zilog Z8000, for GDB.
-   Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +31,7 @@
 #include "gdbtypes.h"
 #include "dis-asm.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #include "value.h" /* For read_register() */
 

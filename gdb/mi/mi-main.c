@@ -1,5 +1,5 @@
 /* MI Command Set.
-   Copyright (C) 2000, Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -37,6 +37,7 @@
 #include "event-top.h"
 #include "gdbcore.h"		/* for write_memory() */
 #include "value.h"		/* for write_register_bytes() */
+#include "regcache.h"
 #include <ctype.h>
 #include <sys/time.h>
 

@@ -1,5 +1,5 @@
 /* Tracing functionality for remote targets in custom GDB protocol
-   Copyright 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,6 +33,7 @@
 #include "remote.h"
 #include "linespec.h"
 #include "completer.h"
+#include "regcache.h"
 
 #include "ax.h"
 #include "ax-gdb.h"

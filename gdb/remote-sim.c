@@ -36,6 +36,7 @@
 #include "remote-sim.h"
 #include "remote-utils.h"
 #include "command.h"
+#include "regcache.h"
 
 /* Prototypes */
 

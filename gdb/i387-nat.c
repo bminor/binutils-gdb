@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "value.h"
+#include "regcache.h"
 
 #include "i387-nat.h"
 

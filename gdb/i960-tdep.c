@@ -1,5 +1,6 @@
 /* Target-machine dependent code for the Intel 960
-   Copyright 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 2001 Free Software
+   Foundation, Inc.
    Contributed by Intel Corporation.
    examine_prologue and other parts contributed by Wind River Systems.
 
@@ -28,6 +29,7 @@
 #include "target.h"
 #include "gdbcore.h"
 #include "inferior.h"
+#include "regcache.h"
 
 static CORE_ADDR next_insn (CORE_ADDR memaddr,
 			    unsigned int *pword1, unsigned int *pword2);

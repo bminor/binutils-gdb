@@ -1,5 +1,5 @@
 /* Target-dependent code for the Fujitsu FR30.
-   Copyright 1999, Free Software Foundation, Inc.
+   Copyright 1999, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "gdb_string.h"
 #include "gdbcore.h"
 #include "symfile.h"
+#include "regcache.h"
 
 /* An expression that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  */

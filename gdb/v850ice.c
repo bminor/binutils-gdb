@@ -1,5 +1,5 @@
 /* ICE interface for the NEC V850 for GDB, the GNU debugger.
-   Copyright 1996, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +30,7 @@
 #include "gdbcore.h"
 #include "value.h"
 #include "command.h"
+#include "regcache.h"
 
 #include <tcl.h>
 #include <windows.h>

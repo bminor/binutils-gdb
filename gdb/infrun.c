@@ -35,6 +35,7 @@
 #include "top.h"
 #include <signal.h>
 #include "inf-loop.h"
+#include "regcache.h"
 
 /* Prototypes for local functions */
 

@@ -37,6 +37,7 @@
 #include "gdbtypes.h"
 #include "target.h"
 #include "arch-utils.h"
+#include "regcache.h"
 
 #include "opcode/mips.h"
 #include "elf/mips.h"

@@ -26,6 +26,7 @@
 #include "floatformat.h"
 #include "symtab.h"
 #include "gdbcmd.h"
+#include "regcache.h"
 
 /* Local functions */
 

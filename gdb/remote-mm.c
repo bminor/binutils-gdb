@@ -41,6 +41,7 @@
 #include "terminal.h"
 #include "minimon.h"
 #include "target.h"
+#include "regcache.h"
 
 /* Offset of member MEMBER in a struct of type TYPE.  */
 #define offsetof(TYPE, MEMBER) ((int) &((TYPE *)0)->MEMBER)

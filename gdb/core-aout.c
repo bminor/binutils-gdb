@@ -1,5 +1,5 @@
 /* Extract registers from a "standard" core file, for GDB.
-   Copyright (C) 1988-1998  Free Software Foundation, Inc.
+   Copyright 1988-1998, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,6 +38,7 @@
 #include "gdbcore.h"
 #include "value.h"		/* For supply_register.  */
 #include "inferior.h"		/* For ARCH_NUM_REGS. */
+#include "regcache.h"
 
 /* These are needed on various systems to expand REGISTER_U_ADDR.  */
 #ifndef USG

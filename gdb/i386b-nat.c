@@ -1,5 +1,6 @@
 /* Native-dependent code for BSD Unix running on i386's, for GDB.
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +28,7 @@
 #include <machine/frame.h>
 #include "inferior.h"
 #include "gdbcore.h" /* for registers_fetched() */
+#include "regcache.h"
 
 void
 fetch_inferior_registers (int regno)

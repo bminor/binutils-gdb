@@ -1,6 +1,6 @@
 /* Common target dependent code for GDB on ARM systems.
-   Copyright 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1997, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,6 +29,7 @@
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
 #include "dis-asm.h"		/* For register flavors. */
 #include <ctype.h>		/* for isupper () */
+#include "regcache.h"
 
 /* Each OS has a different mechanism for accessing the various
    registers stored in the sigcontext structure.

@@ -50,6 +50,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
+#include "regcache.h"
 
 struct cmd_list_element *showlist;
 extern struct target_ops rombug_ops;	/* Forward declaration */

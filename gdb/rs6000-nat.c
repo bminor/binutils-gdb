@@ -30,6 +30,7 @@
 #include "libbfd.h"		/* For bfd_cache_lookup (FIXME) */
 #include "bfd.h"
 #include "gdb-stabs.h"
+#include "regcache.h"
 
 #include <sys/ptrace.h>
 #include <sys/reg.h>

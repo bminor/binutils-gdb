@@ -57,6 +57,7 @@
 #include "gdb_wait.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 #if 0
 #include <servers/machid_lib.h>

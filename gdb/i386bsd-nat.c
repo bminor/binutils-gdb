@@ -1,5 +1,5 @@
 /* Native-dependent code for modern i386 BSD's.
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "inferior.h"
+#include "regcache.h"
 
 #include <sys/types.h>
 #include <sys/ptrace.h>

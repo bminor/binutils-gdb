@@ -24,6 +24,7 @@
 #include "target.h"
 #include "value.h"
 #include "inferior.h"	/* for inferior_pid */
+#include "regcache.h"
 
 /* FIND_SAVED_REGISTER ()
 

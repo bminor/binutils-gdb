@@ -1,5 +1,5 @@
 /* Target-machine dependent code for Hitachi H8/300, for GDB.
-   Copyright (C) 1988, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1988, 1990, 1991, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,6 +33,7 @@
 #include "gdbcore.h"
 #include "gdb_string.h"
 #include "value.h"
+#include "regcache.h"
 
 extern int h8300hmode, h8300smode;
 

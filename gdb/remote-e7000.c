@@ -45,6 +45,7 @@
 #include "serial.h"
 #include "remote-utils.h"
 #include "symfile.h"
+#include "regcache.h"
 #include <time.h>
 #include <ctype.h>
 

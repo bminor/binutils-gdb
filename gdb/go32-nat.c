@@ -29,6 +29,7 @@
 #include "floatformat.h"
 #include "buildsym.h"
 #include "i387-nat.h"
+#include "regcache.h"
 
 #include <stdio.h>		/* required for __DJGPP_MINOR__ */
 #include <stdlib.h>
