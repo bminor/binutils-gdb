@@ -481,15 +481,12 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
   obj_datasec (abfd)->_raw_size = execp->a_data;
   obj_bsssec (abfd)->_raw_size = execp->a_bss;
 
-  /* If this object is dynamically linked, we assume that both
-     sections have relocs.  This does no real harm, even though it may
-     not be true.  */
   obj_textsec (abfd)->flags =
-    (execp->a_trsize != 0 || (abfd->flags & DYNAMIC) != 0
+    (execp->a_trsize != 0
      ? (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS | SEC_RELOC)
      : (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS));
   obj_datasec (abfd)->flags =
-    (execp->a_drsize != 0 || (abfd->flags & DYNAMIC) != 0
+    (execp->a_drsize != 0
      ? (SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS | SEC_RELOC)
      : (SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS));
   obj_bsssec (abfd)->flags = SEC_ALLOC;
@@ -553,6 +550,19 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
 
   result = (*callback_to_real_object_p)(abfd);
 
+#ifdef MACH
+  /* Stat the file to decide whether or not it's executable.
+     Many Mach programs use text at very unconventional addresses,
+     including the emulator, so the standard heuristic is incorrect.  */
+  {
+    struct stat st;
+
+    stat (abfd->filename, &st);
+    /* Are any exec 'x' bits on? */
+    if (st.st_mode & 0111)
+      abfd->flags |= EXEC_P;
+  }
+#else /* ! MACH */
   /* Now that the segment addresses have been worked out, take a better
      guess at whether the file is executable.  If the entry point
      is within the text segment, assume it is.  (This makes files
@@ -564,6 +574,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
   if ((execp->a_entry >= obj_textsec(abfd)->vma) &&
       (execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size))
     abfd->flags |= EXEC_P;
+#endif /* MACH */
   if (result)
     {
 #if 0 /* These should be set correctly anyways.  */

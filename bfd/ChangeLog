@@ -1,3 +1,26 @@
+Tue Jul  5 13:26:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	Mach 3 support.
+	* config.bfd (m88*-*-mach3*, mips*-dec-mach3*, mips*-*-mach3*):
+	New targets.
+	* configure.host (i[34]86-*-mach3*, ns32k-*-mach3*): Recognize
+	"mach3" instead of "mach".
+	(m88*-*-mach3*, mips*-dec-mach3*, mips*-*-mach3*): New hosts.
+	* targets.c (m88kmach3_vec): New target vector.
+	(bfd_target_vector): Add i386mach3_vec and m88kmach3_vec, but
+	inside #if 0.
+	* aoutx.h (some_aout_object_p) [MACH]: Recognize executables by
+	checking for execute permission, instead of looking at entry
+	point.
+	* i386mach3.c: Update, define MACH, N_TXTOFF, N_TXTADDR,
+	N_SHARED_LIB, don't include aout/*.h files, etc.
+	* m88kmach3.c: New file, m88k Mach 3 target.
+	* config/m88k-mach3.mt,	config/mips-mach3.mt: New files, target
+	makefile fragments.
+	* config/i386mach3.mh, config/m88kmach3.mh, config/mipsmach3.mh:
+	New files, host	makefile fragments.
+	* hosts/m88kmach3.h, hosts/mipsmach3.h: New files, host definitions.
+
 Tue Jul  5 13:56:52 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* elfcode.h (swap_out_syms): Get alignment of common symbol from
