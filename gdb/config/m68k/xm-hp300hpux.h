@@ -71,12 +71,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
   0, 0, 0, 0, 0, 0, 0, 0, \
   SIGILL }
 
-/* On hpux, autoconf 2.4 (and possibly others) does not properly detect that
-   mmap is available.  Until this is fixed, we have to explicitly force 
-   HAVE_MMAP.  -fnf */
-
-#define HAVE_MMAP 1
-
 #ifndef HPUX_ASM
 
 /* Start running with a stack stretching from BEG to END.
