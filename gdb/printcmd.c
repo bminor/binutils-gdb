@@ -382,6 +382,51 @@ print_scalar_formatted (valaddr, type, format, size, stream)
     case 0:
       abort ();
 
+    case 't':
+      /* Binary; 't' stands for "two".  */
+      {
+        char bits[8*(sizeof val_long) + 1];
+	char *cp = bits;
+	int width;
+
+        if (!size)
+	  width = 8*(sizeof val_long);
+        else
+          switch (size)
+	    {
+	    case 'b':
+	      width = 8;
+	      break;
+	    case 'h':
+	      width = 16;
+	      break;
+	    case 'w':
+	      width = 32;
+	      break;
+	    case 'g':
+	      width = 64;
+	      break;
+	    default:
+	      error ("Undefined output size \"%c\".", size);
+	    }
+
+        bits[width] = '\0';
+        while (width-- > 0)
+          {
+            bits[width] = (val_long & 1) ? '1' : '0';
+            val_long >>= 1;
+          }
+	if (!size)
+	  {
+	    while (*cp && *cp == '0')
+	      cp++;
+	    if (*cp == '\0')
+	      cp--;
+	  }
+        fprintf_filtered (stream, cp);
+      }
+      break;
+
     default:
       error ("Undefined output format \"%c\".", format);
     }
