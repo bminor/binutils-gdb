@@ -1,5 +1,15 @@
 Mon Jun  5 02:15:20 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
+	Linker support for m68k-elf from Andreas Schwab
+	<schwab@issan.informatik.uni-dortmund.de>:
+	* elfcode.h (elf_link_add_object_symbols): Check for NULL when
+	looping through the symbol hashes.
+	(elf_bfd_final_link): When looking for _init and _fini don't use
+	the symbol if it is imported from another object.
+	* elf32-m68k.c: Relocation type changed from REL to RELA.  Regular
+	and dynamic linking support functions added, similar to other elf
+	targets.
+
 	* config.bfd (i[345]86-*-gnu*): Use ELF configuration.
 
 Fri Jun  2 18:54:59 1995  Steve Chamberlain  <sac@slash.cygnus.com>
