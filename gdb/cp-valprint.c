@@ -1,6 +1,6 @@
 /* Support for printing C++ values for GDB, the GNU debugger.
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   2000
+   2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -48,7 +48,7 @@ static struct obstack dont_print_statmem_obstack;
 
 extern void _initialize_cp_valprint (void);
 
-static void cp_print_static_field (struct type *, value_ptr,
+static void cp_print_static_field (struct type *, struct value *,
 				   struct ui_file *, int, int,
 				   enum val_prettyprint);
 
@@ -57,7 +57,7 @@ static void cp_print_value (struct type *, struct type *, char *, int,
 			    enum val_prettyprint, struct type **);
 
 static void cp_print_hpacc_virtual_table_entries (struct type *, int *,
-						  value_ptr,
+						  struct value *,
 						  struct ui_file *, int,
 						  int,
 						  enum val_prettyprint);
@@ -348,7 +348,7 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
 
 	  if (!TYPE_FIELD_STATIC (type, i) && TYPE_FIELD_PACKED (type, i))
 	    {
-	      value_ptr v;
+	      struct value *v;
 
 	      /* Bitfields require special handling, especially due to byte
 	         order problems.  */
@@ -374,7 +374,7 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
 		}
 	      else if (TYPE_FIELD_STATIC (type, i))
 		{
-		  value_ptr v = value_static_field (type, i);
+		  struct value *v = value_static_field (type, i);
 		  if (v == NULL)
 		    fputs_filtered ("<optimized out>", stream);
 		  else
@@ -413,7 +413,7 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
 		 hpacc_vtbl_ptr_name, 
 		 5))
     {
-      value_ptr v;
+      struct value *v;
       /* First get the virtual table pointer and print it out */
 
 #if 0
@@ -627,7 +627,7 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
 
 static void
 cp_print_static_field (struct type *type,
-		       value_ptr val,
+		       struct value *val,
 		       struct ui_file *stream,
 		       int format,
 		       int recurse,
@@ -745,7 +745,7 @@ cp_print_class_member (char *valaddr, struct type *domain,
 
 static void
 cp_print_hpacc_virtual_table_entries (struct type *type, int *vfuncs,
-				      value_ptr v, struct ui_file *stream,
+				      struct value *v, struct ui_file *stream,
 				      int format, int recurse,
 				      enum val_prettyprint pretty)
 {
@@ -774,7 +774,7 @@ cp_print_hpacc_virtual_table_entries (struct type *type, int *vfuncs,
 		    - 1);
 
 	  /* Get the address of the vfunction entry */
-	  value_ptr vf = value_copy (v);
+	  struct value *vf = value_copy (v);
 	  if (VALUE_LAZY (vf))
 	    (void) value_fetch_lazy (vf);
 	  /* adjust by offset */

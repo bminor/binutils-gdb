@@ -308,7 +308,7 @@ tryagain:
       scm_lreadr (skipping);
       if (!skipping)
 	{
-	  value_ptr val = scm_evaluate_string (str.ptr, lexptr - str.ptr);
+	  struct value *val = scm_evaluate_string (str.ptr, lexptr - str.ptr);
 	  if (!is_scmvalue_type (VALUE_TYPE (val)))
 	    error ("quoted scm form yields non-SCM value");
 	  svalue = extract_signed_integer (VALUE_CONTENTS (val),

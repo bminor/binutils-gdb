@@ -1,5 +1,6 @@
 /* Scheme/Guile language support routines for GDB, the GNU debugger.
-   Copyright 1995, 1996, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -386,7 +387,7 @@ scm_val_print (struct type *type, char *valaddr, int embedded_offset,
 }
 
 int
-scm_value_print (value_ptr val, struct ui_file *stream, int format,
+scm_value_print (struct value *val, struct ui_file *stream, int format,
 		 enum val_prettyprint pretty)
 {
   return (val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,

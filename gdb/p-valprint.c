@@ -1,5 +1,5 @@
 /* Support for printing Pascal values for GDB, the GNU debugger.
-   Copyright 2000
+   Copyright 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -217,7 +217,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 		}
 	      if (vt_address && vtblprint)
 		{
-		  value_ptr vt_val;
+		  struct value *vt_val;
 		  struct symbol *wsym = (struct symbol *) NULL;
 		  struct type *wtype;
 		  struct symtab *s;
@@ -282,7 +282,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	{
 	  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
 	    {
-	      value_ptr deref_val =
+	      struct value *deref_val =
 	      value_at
 	      (TYPE_TARGET_TYPE (type),
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
@@ -531,7 +531,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 }
 
 int
-pascal_value_print (value_ptr val, struct ui_file *stream, int format,
+pascal_value_print (struct value *val, struct ui_file *stream, int format,
 		    enum val_prettyprint pretty)
 {
   struct type *type = VALUE_TYPE (val);
@@ -579,9 +579,9 @@ static int pascal_static_field_print;	/* Controls printing of static fields. */
 static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;
 
-static void
-  pascal_object_print_static_field (struct type *, value_ptr, struct ui_file *, int, int,
-				    enum val_prettyprint);
+static void pascal_object_print_static_field (struct type *, struct value *,
+					      struct ui_file *, int, int,
+					      enum val_prettyprint);
 
 static void
   pascal_object_print_value (struct type *, char *, CORE_ADDR, struct ui_file *,
@@ -834,7 +834,7 @@ pascal_object_print_value_fields (struct type *type, char *valaddr,
 
 	  if (!TYPE_FIELD_STATIC (type, i) && TYPE_FIELD_PACKED (type, i))
 	    {
-	      value_ptr v;
+	      struct value *v;
 
 	      /* Bitfields require special handling, especially due to byte
 	         order problems.  */
@@ -859,8 +859,8 @@ pascal_object_print_value_fields (struct type *type, char *valaddr,
 		}
 	      else if (TYPE_FIELD_STATIC (type, i))
 		{
-		  /* value_ptr v = value_static_field (type, i); v4.17 specific */
-		  value_ptr v;
+		  /* struct value *v = value_static_field (type, i); v4.17 specific */
+		  struct value *v;
 		  v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
@@ -1011,7 +1011,7 @@ pascal_object_print_value (struct type *type, char *valaddr, CORE_ADDR address,
    have the same meanings as in c_val_print.  */
 
 static void
-pascal_object_print_static_field (struct type *type, value_ptr val,
+pascal_object_print_static_field (struct type *type, struct value *val,
 				  struct ui_file *stream, int format,
 				  int recurse, enum val_prettyprint pretty)
 {

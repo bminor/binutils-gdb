@@ -1,6 +1,6 @@
 /* Support for printing Chill values for GDB, the GNU debugger.
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 2000
+   1998, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -445,7 +445,7 @@ chill_val_print (struct type *type, char *valaddr, int embedded_offset,
 	{
 	  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
 	    {
-	      value_ptr deref_val =
+	      struct value *deref_val =
 	      value_at
 	      (TYPE_TARGET_TYPE (type),
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
@@ -537,7 +537,7 @@ chill_print_value_fields (struct type *type, char *valaddr,
 	  fputs_filtered (": ", stream);
 	  if (TYPE_FIELD_PACKED (type, i))
 	    {
-	      value_ptr v;
+	      struct value *v;
 
 	      /* Bitfields require special handling, especially due to byte
 	         order problems.  */
@@ -564,7 +564,7 @@ chill_print_value_fields (struct type *type, char *valaddr,
 }
 
 int
-chill_value_print (value_ptr val, struct ui_file *stream, int format,
+chill_value_print (struct value *val, struct ui_file *stream, int format,
 		   enum val_prettyprint pretty)
 {
   struct type *type = VALUE_TYPE (val);

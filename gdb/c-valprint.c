@@ -1,6 +1,6 @@
 /* Support for printing C values for GDB, the GNU debugger.
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000
+   1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -209,7 +209,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 		}
 	      if (vt_address && vtblprint)
 		{
-		  value_ptr vt_val;
+		  struct value *vt_val;
 		  struct symbol *wsym = (struct symbol *) NULL;
 		  struct type *wtype;
 		  struct symtab *s;
@@ -274,7 +274,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 	{
 	  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
 	    {
-	      value_ptr deref_val =
+	      struct value *deref_val =
 	      value_at
 	      (TYPE_TARGET_TYPE (type),
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
@@ -467,7 +467,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 }
 
 int
-c_value_print (value_ptr val, struct ui_file *stream, int format,
+c_value_print (struct value *val, struct ui_file *stream, int format,
 	       enum val_prettyprint pretty)
 {
   struct type *type = VALUE_TYPE (val);
@@ -500,7 +500,7 @@ c_value_print (value_ptr val, struct ui_file *stream, int format,
 	      /* Copy value, change to pointer, so we don't get an
 	       * error about a non-pointer type in value_rtti_target_type
 	       */
-	      value_ptr temparg;
+	      struct value *temparg;
 	      temparg=value_copy(val);
 	      VALUE_TYPE (temparg) = lookup_pointer_type(TYPE_TARGET_TYPE(type));
 	      val=temparg;
