@@ -472,12 +472,6 @@ get_current_frame (void)
   return current_frame;
 }
 
-void
-set_current_frame (struct frame_info *frame)
-{
-  current_frame = frame;
-}
-
 /* The "selected" stack frame is used by default for local and arg
    access.  May be zero, for no selected frame.  */
 

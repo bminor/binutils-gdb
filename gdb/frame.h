@@ -625,23 +625,9 @@ extern void return_command (char *, int);
 extern struct frame_info *deprecated_selected_frame;
 
 
-/* NOTE: cagney/2002-11-28:
+/* Create a frame using the specified BASE and PC.  */
 
-   These functions are used to explicitly create and set the inner
-   most (current) frame vis:
-
-   set_current_frame (create_new_frame (read_fp(), stop_pc)));
-
-   Such code should be removed.  Instead that task can be left to
-   get_current_frame() which will update things on-demand.
-
-   The only vague exception is found in "infcmd.c" (and a few
-   architectures specific files) as part of the code implementing the
-   command ``(gdb) frame FRAME PC''.  There, the frame should be
-   created/selected in a single shot.  */
-
-extern void set_current_frame (struct frame_info *);
-extern struct frame_info *create_new_frame (CORE_ADDR, CORE_ADDR);
+extern struct frame_info *create_new_frame (CORE_ADDR base, CORE_ADDR pc);
 
 
 /* Create/access the frame's `extra info'.  The extra info is used by

@@ -1001,30 +1001,28 @@ run_stack_dummy (CORE_ADDR addr, struct regcache *buffer)
 	}
       else
 	{
+	  /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need
+	     to put a breakpoint instruction.  If not, the call dummy
+	     already has the breakpoint instruction in it.
+
+	     ADDR IS THE ADDRESS of the call dummy plus the
+	     CALL_DUMMY_START_OFFSET, so we need to subtract the
+	     CALL_DUMMY_START_OFFSET.  */
 	  sal.pc = addr - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
 	}
       sal.section = find_pc_overlay (sal.pc);
 
-      /* Set up a FRAME for the dummy frame so we can pass it to
-         set_momentary_breakpoint.  We need to give the breakpoint a
-         frame in case there is only one copy of the dummy (e.g.
-         CALL_DUMMY_LOCATION == AFTER_TEXT_END).  */
-      flush_cached_frames ();
-      set_current_frame (create_new_frame (read_fp (), sal.pc));
-
-      /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need to put
-         a breakpoint instruction.  If not, the call dummy already has the
-         breakpoint instruction in it.
-
-         addr is the address of the call dummy plus the CALL_DUMMY_START_OFFSET,
-         so we need to subtract the CALL_DUMMY_START_OFFSET.  */
-      /* FIXME: cagney/2002-12-01: Rather than pass in curent frame,
-         why not just create, and then pass in a frame ID.  This would
-         make it possible to eliminate set_current_frame().  */
-      bpt = set_momentary_breakpoint (sal,
-				      get_frame_id (get_current_frame ()),
-				      bp_call_dummy);
-      bpt->disposition = disp_del;
+      {
+	/* Set up a frame ID for the dummy frame so we can pass it to
+	   set_momentary_breakpoint.  We need to give the breakpoint a
+	   frame ID so that the breakpoint code can correctly
+	   re-identify the dummy breakpoint.  */
+	struct frame_id frame = frame_id_build (read_fp (), sal.pc);
+	/* Create a momentary breakpoint at the return address of the
+           inferior.  That way it breaks when it returns.  */
+	bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
+	bpt->disposition = disp_del;
+      }
 
       /* If all error()s out of proceed ended up calling normal_stop (and
          perhaps they should; it already does in the special case of error
