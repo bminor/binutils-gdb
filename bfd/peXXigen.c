@@ -674,7 +674,9 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
 	   5.0 link.exe) where the file size of the .data segment is
 	   quite small compared to the virtual size.  Without this
 	   fix, strip munges the file.  */
-	isize += SA (FA (pei_section_data (abfd, sec)->virt_size));
+	if (coff_section_data (abfd, sec) != NULL
+	    && pei_section_data (abfd, sec) != NULL)
+	  isize += SA (FA (pei_section_data (abfd, sec)->virt_size));
       }
 
     aouthdr_in->dsize = dsize;
