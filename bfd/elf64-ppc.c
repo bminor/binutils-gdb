@@ -8786,8 +8786,7 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 		      sym_value = 0;
 		      /* Recognise an old ABI func code entry sym, and
 			 use the func descriptor sym instead.  */
-		      if (hash->elf.root.type == bfd_link_hash_undefweak
-			  && hash->elf.root.root.string[0] == '.'
+		      if (hash->elf.root.root.string[0] == '.'
 			  && (fdh = get_fdh (hash, htab)) != NULL)
 			{
 			  if (fdh->elf.root.type == bfd_link_hash_defined

@@ -1,3 +1,8 @@
+2005-03-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): Override defined dot-sym
+	entry points with the func descriptor as well as undefweak.
+
 2005-02-28  Ross Ridge  <rridge@csclub.uwaterloo.ca>
 
 	* peicode.h (pe_ILF_build_a_bfd): Do not assume that an @ will be
