@@ -10862,22 +10862,19 @@ fi
 
 
 frags=
-host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
-if test ! -f ${host_makefile_frag}; then
-    # When building a native debuger the .mh file containing things
-    # like NATDEPFILES is needed.  Cross debuggers don't need .mh
-    # since it no longer contains anything useful.
-    if test "${target}" = "${host}"; then
-	{ echo "configure: error: "*** Gdb does not support native target ${host}"" 1>&2; exit 1; }
-    else
-	host_makefile_frag=/dev/null
-    fi
+if test "${target}" = "${host}"; then
+  host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
+  if test ! -f ${host_makefile_frag}; then
+    { echo "configure: error: "*** Gdb does not support native target ${host}"" 1>&2; exit 1; }
+  fi
+  frags="$frags $host_makefile_frag"
+else
+  host_makefile_frag=/dev/null
 fi
-frags="$frags $host_makefile_frag"
 
 target_makefile_frag=${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt
 if test ! -f ${target_makefile_frag}; then
-{ echo "configure: error: "*** Gdb does not support target ${target}"" 1>&2; exit 1; }
+  { echo "configure: error: "*** Gdb does not support target ${target}"" 1>&2; exit 1; }
 fi
 frags="$frags $target_makefile_frag"
 
@@ -10927,7 +10924,7 @@ fi
 # We only build gdbserver automatically if host and target are the same.
 if test "x$target" = "x$host"; then
   echo $ac_n "checking whether gdbserver is supported on this host""... $ac_c" 1>&6
-echo "configure:10931: checking whether gdbserver is supported on this host" >&5
+echo "configure:10928: checking whether gdbserver is supported on this host" >&5
   if test "x$build_gdbserver" = xyes; then
     configdirs="$configdirs gdbserver"
     echo "$ac_t""yes" 1>&6
@@ -11000,12 +10997,12 @@ fi
 
 
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:11004: checking for Cygwin environment" >&5
+echo "configure:11001: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'ac_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 11009 "configure"
+#line 11006 "configure"
 #include "confdefs.h"
 
 int main() {
@@ -11016,7 +11013,7 @@ int main() {
 return __CYGWIN__;
 ; return 0; }
 EOF
-if { (eval echo configure:11020: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:11017: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_cygwin=yes
 else
@@ -11033,19 +11030,19 @@ echo "$ac_t""$ac_cv_cygwin" 1>&6
 CYGWIN=
 test "$ac_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for mingw32 environment""... $ac_c" 1>&6
-echo "configure:11037: checking for mingw32 environment" >&5
+echo "configure:11034: checking for mingw32 environment" >&5
 if eval "test \"`echo '$''{'ac_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 11042 "configure"
+#line 11039 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:11049: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:11046: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_mingw32=yes
 else
@@ -11064,7 +11061,7 @@ test "$ac_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:11068: checking for executable suffix" >&5
+echo "configure:11065: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'ac_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -11074,7 +11071,7 @@ else
   rm -f conftest*
   echo 'int main () { return 0; }' > conftest.$ac_ext
   ac_cv_exeext=
-  if { (eval echo configure:11078: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  if { (eval echo configure:11075: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
       *.c | *.C | *.o | *.obj | *.ilk | *.pdb) ;;
@@ -11116,7 +11113,7 @@ fi
 
 
   echo $ac_n "checking for iconv""... $ac_c" 1>&6
-echo "configure:11120: checking for iconv" >&5
+echo "configure:11117: checking for iconv" >&5
 if eval "test \"`echo '$''{'am_cv_func_iconv'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -11124,7 +11121,7 @@ else
     am_cv_func_iconv="no, consider installing GNU libiconv"
     am_cv_lib_iconv=no
     cat > conftest.$ac_ext <<EOF
-#line 11128 "configure"
+#line 11125 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 #include <iconv.h>
@@ -11134,7 +11131,7 @@ iconv_t cd = iconv_open("","");
        iconv_close(cd);
 ; return 0; }
 EOF
-if { (eval echo configure:11138: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:11135: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   am_cv_func_iconv=yes
 else
@@ -11146,7 +11143,7 @@ rm -f conftest*
       am_save_LIBS="$LIBS"
       LIBS="$LIBS -liconv"
       cat > conftest.$ac_ext <<EOF
-#line 11150 "configure"
+#line 11147 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 #include <iconv.h>
@@ -11156,7 +11153,7 @@ iconv_t cd = iconv_open("","");
          iconv_close(cd);
 ; return 0; }
 EOF
-if { (eval echo configure:11160: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:11157: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   am_cv_lib_iconv=yes
         am_cv_func_iconv=yes
@@ -11177,13 +11174,13 @@ echo "$ac_t""$am_cv_func_iconv" 1>&6
 EOF
 
     echo $ac_n "checking for iconv declaration""... $ac_c" 1>&6
-echo "configure:11181: checking for iconv declaration" >&5
+echo "configure:11178: checking for iconv declaration" >&5
     if eval "test \"`echo '$''{'am_cv_proto_iconv'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   
       cat > conftest.$ac_ext <<EOF
-#line 11187 "configure"
+#line 11184 "configure"
 #include "confdefs.h"
 
 #include <stdlib.h>
@@ -11202,7 +11199,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:11206: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:11203: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   am_cv_proto_iconv_arg1=""
 else

@@ -1422,22 +1422,19 @@ fi
 AC_SUBST(target_subdir)
 
 frags=
-host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
-if test ! -f ${host_makefile_frag}; then
-    # When building a native debuger the .mh file containing things
-    # like NATDEPFILES is needed.  Cross debuggers don't need .mh
-    # since it no longer contains anything useful.
-    if test "${target}" = "${host}"; then
-	AC_MSG_ERROR("*** Gdb does not support native target ${host}")
-    else
-	host_makefile_frag=/dev/null
-    fi
+if test "${target}" = "${host}"; then
+  host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
+  if test ! -f ${host_makefile_frag}; then
+    AC_MSG_ERROR("*** Gdb does not support native target ${host}")
+  fi
+  frags="$frags $host_makefile_frag"
+else
+  host_makefile_frag=/dev/null
 fi
-frags="$frags $host_makefile_frag"
 
 target_makefile_frag=${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt
 if test ! -f ${target_makefile_frag}; then
-AC_MSG_ERROR("*** Gdb does not support target ${target}")
+  AC_MSG_ERROR("*** Gdb does not support target ${target}")
 fi
 frags="$frags $target_makefile_frag"
 
