@@ -1,3 +1,18 @@
+Thu Apr  8 10:28:00 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* trad-core.c (trad_unix_core_file_failing_signal): Use new macro
+	TRAD_UNIX_CORE_FILE_FAILING_SIGNAL to allow host files to specify
+	the core file failing signal.
+	* hosts/decstation.h (TRAD_UNIX_CORE_FILE_FAILING_SIGNAL): Define
+	to supply the core file failing signal.
+
+Thu Apr  8 09:17:35 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coffcode.h (styp_to_sec_flags): Only set SEC_SHARED_LIBRARY for
+	a STYP_NOLOAD | STYP_BSS section if BSS_NOLOAD_IS_SHARED_LIBRARY
+	is defined.  On many COFF targets STYP_BSS is always STYP_NOLOAD.
+	* coff-i386.h (BSS_NOLOAD_IS_SHARED_LIBRARY): Define.
+
 Wed Apr  7 11:33:06 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coff-mips.c (PAGESIZE): Correct value.
