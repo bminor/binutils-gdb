@@ -1,13 +1,3 @@
-Fri May 13 11:15:12 1994  Bill Cox  (bill@rtl.cygnus.com)
-
-	* Makefile.in (stmp-bfd.h): Copy Ian's version of this from
-	  progressive/bfd/Makefile.in.
-
-Fri May 13 10:43:51 1994  Bill Cox  (bill@rtl.cygnus.com)
-
-	* Makefile.in (stmp-bfd.h): Add an 'if' to mask a harmless
-	  grep error.  Already in progressive/bfd/Makefile.in.
-
 Fri May 13 10:51:21 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/mipsbelf.mt (SELECT_VECS): Add ecoff_big_vec and
