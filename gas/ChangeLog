@@ -1,4 +1,17 @@
+Thu Mar 13 11:20:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-elf.c (obj_elf_data): Call md_flush_pending_output
+	and md_elf_section_change_hook if they are defined.
+	(obj_elf_text, obj_elf_previous): Likewise.
+
 Wed Mar 12 11:40:20 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-multi.h (struct elf_obj_sy): Define if
+	OBJ_MAYBE_ELF.
+	(OBJ_SYMFIELD_TYPE): Define as struct elf_obj_sy if
+	OBJ_MAYBE_ELF.
+	* config/obj-elf.h (struct elf_obj_sy): Don't define if
+	OBJ_SYMFIELD_TYPE is defined.
 
 	* doc/as.texinfo (bss): Improve description of .bss section.  In
 	ELF or COFF, you are permitted to switch into the section.

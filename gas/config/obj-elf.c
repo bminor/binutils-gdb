@@ -806,9 +806,17 @@ static void
 obj_elf_data (i)
      int i;
 {
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   previous_section = now_seg;
   previous_subsection = now_subseg;
   s_data (i);
+
+#ifdef md_elf_section_change_hook
+  md_elf_section_change_hook ();
+#endif
 }
 
 /* Change to the .text section.  */
@@ -817,9 +825,17 @@ static void
 obj_elf_text (i)
      int i;
 {
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   previous_section = now_seg;
   previous_subsection = now_subseg;
   s_text (i);
+
+#ifdef md_elf_section_change_hook
+  md_elf_section_change_hook ();
+#endif
 }
 
 void
@@ -831,8 +847,17 @@ obj_elf_previous (ignore)
       as_bad (".previous without corresponding .section; ignored");
       return;
     }
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   subseg_set (previous_section, previous_subsection);
   previous_section = 0;
+
+#ifdef md_elf_section_change_hook
+  md_elf_section_change_hook ();
+#endif
 }
 
 static void
@@ -865,6 +890,15 @@ obj_elf_symver (ignore)
   sym = symbol_find_or_make (name);
 
   *input_line_pointer = c;
+
+  if (sym->sy_obj.versioned_name != NULL)
+    {
+      as_bad ("multiple .symver directives for symbol `%s'",
+	      S_GET_NAME (sym));
+      ignore_rest_of_line ();
+      return;
+    }
+
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
@@ -886,6 +920,14 @@ obj_elf_symver (ignore)
   sym->sy_obj.versioned_name = xstrdup (name);
 
   *input_line_pointer = c;
+
+  if (strchr (sym->sy_obj.versioned_name, ELF_VER_CHR) == NULL)
+    {
+      as_bad ("missing version name in `%s' for symbol `%s'",
+	      sym->sy_obj.versioned_name, S_GET_NAME (sym));
+      ignore_rest_of_line ();
+      return;
+    }
 
   demand_empty_rest_of_line ();
 }
@@ -1255,7 +1297,22 @@ elf_frob_symbol (symp, puntp)
 	 approach.  */
 
       if (! S_IS_DEFINED (symp))
-	S_SET_NAME (symp, symp->sy_obj.versioned_name);
+	{
+	  char *p;
+
+	  /* Verify that the name isn't using the @@ syntax--this is
+             reserved for definitions of the default version to link
+             against.  */
+	  p = strchr (symp->sy_obj.versioned_name, ELF_VER_CHR);
+	  know (p != NULL);
+	  if (p[1] == ELF_VER_CHR)
+	    {
+	      as_bad ("invalid attempt to declare external version name as default in symbol `%s'",
+		      symp->sy_obj.versioned_name);
+	      *puntp = true;
+	    }
+	  S_SET_NAME (symp, symp->sy_obj.versioned_name);
+	}
       else
 	{
 	  symbolS *symp2;
