@@ -27,12 +27,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "ansidecl.h"
 
-/* An address in the program being debugged.  Host byte order.  */
-#ifndef CORE_ADDR_TYPE
-typedef unsigned int CORE_ADDR;
-#else
-typedef CORE_ADDR_TYPE CORE_ADDR;
-#endif
+/* For BFD64 and bfd_vma.  */
+#include "bfd.h"
+
+/* An address in the program being debugged.  Host byte order.  Rather
+   than duplicate all the logic in BFD which figures out what type
+   this is (long, long long, etc.) and whether it needs to be 64
+   bits (the host/target interactions are subtle), we just use
+   bfd_vma.  */
+
+typedef bfd_vma CORE_ADDR;
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -508,6 +512,14 @@ enum val_prettyprint
 #define	LONG_MAX ((long)(ULONG_MAX >> 1))	/* 0x7FFFFFFF for 32-bits */
 #endif
 
+#ifdef BFD64
+
+/* This is to make sure that LONGEST is at least as big as CORE_ADDR.  */
+
+#define LONGEST BFD_HOST_64_TYPE
+
+#else /* No BFD64 */
+
 /* Default to support for "long long" if the host compiler being used is gcc.
    Config files must define CC_HAS_LONG_LONG to use other host compilers
    that are capable of supporting "long long", and to cause gdb to use that
@@ -538,19 +550,14 @@ enum val_prettyprint
 #  endif
 #endif
 
+#endif /* No BFD64 */
+
 /* Convert a LONGEST to an int.  This is used in contexts (e.g. number of
    arguments to a function, number in a value history, register number, etc.)
    where the value must not be larger than can fit in an int.  */
 
-#ifndef longest_to_int
-#  ifdef CC_HAS_LONG_LONG
-#    define longest_to_int(x) (((x) > INT_MAX || (x) < INT_MIN) \
-			       ? (error ("Value out of range."),0) : (int) (x))
-#  else
-     /* Assume sizeof (int) == sizeof (long).  */
-#    define longest_to_int(x) ((int) (x))
-#  endif
-#endif
+#define longest_to_int(x) (((x) > INT_MAX || (x) < INT_MIN) \
+			   ? (error ("Value out of range."),0) : (int) (x))
 
 /* Assorted functions we can declare, now that const and volatile are 
    defined.  */
@@ -767,17 +774,21 @@ strerror PARAMS ((int));				/* 4.11.6.2 */
 #ifndef alloca
 # ifdef __GNUC__
 #  define alloca __builtin_alloca
-# else
+# else /* Not GNU C */
 #  ifdef sparc
 #   include <alloca.h>		/* NOTE:  Doesn't declare alloca() */
 #  endif
-#  ifdef __STDC__
-   extern void *alloca (size_t);
-#  else /* __STDC__ */
+
+/* We need to be careful not to declare this in a way which conflicts with
+   bison.  Bison never declares it as char *, but under various circumstances
+   (like __hpux) we need to use void *.  */
+#  if defined (__STDC__) || defined (__hpux)
+   extern void *alloca ();
+#  else /* Don't use void *.  */
    extern char *alloca ();
-#  endif
-# endif
-#endif
+#  endif /* Don't use void *.  */
+# endif /* Not GNU C */
+#endif /* alloca not defined */
 
 /* TARGET_BYTE_ORDER and HOST_BYTE_ORDER must be defined to one of these.  */
 
