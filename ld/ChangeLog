@@ -1,5 +1,9 @@
 Fri Sep  8 16:32:43 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldemul.h (ldemul_set_symbols): Declare.
+	(ldemul_parse_args): Declare.
+	* ldemul.c (ldemul_parse_args): Fix indentation.
+
 	* configure.in: Call AC_HEADER_DIRENT.
 	* configure, config.in: Rebuild.
 	* emultempl/sunos.em: Use autoconf recommend mechanism to define
