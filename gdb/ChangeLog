@@ -1,5 +1,7 @@
 Tue Sep 20 11:34:27 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* TODO: Reword item regarding NO_STD_REGS.
+
 	* coffread.c (record_minimal_symbol, coff_read_enum_type,
 	coff_read_struct_type): Allocate on symbol_obstack, not directly
 	via malloc/savestring.

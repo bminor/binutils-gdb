@@ -380,9 +380,9 @@ enum mask
 If try to modify value in file with "set write off" should give
 appropriate error not "cannot access memory at address 0x65e0".
 
-What the hell is no_std_regs in tm-z8k.h???
-This fixes the case where a target defines no standard reg names,
-and the parsing of $pc gets confused when it should be an invalid expr.
+Why do we allow a target to omit standard register names (NO_STD_REGS
+in tm-z8k.h)?  I thought the standard register names were supposed to
+be just that, standard.
 
 Make DEBUG_EXPRESSIONS a maintenance command, dependent on
 MAINTENANCE_COMMANDS.
