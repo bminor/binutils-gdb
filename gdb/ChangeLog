@@ -1,5 +1,13 @@
 Fri Apr 19 09:36:50 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* main.c: New HAVE_SIGSETMASK #ifdefs.
+
+	* coffread.c (read_coff_symtab): Check for "LF%" with all the
+	other L*% things.
+
+	* coffread.c (SDB_TYPE): New macro.
+	various: Use it instead of checking against T_NULL.
+
 	* Makefile.dist (cplus-dem.o): Hack in an #include "param.h"
 	before we compile it.
 	defs.h: Protect against multiple inclusion.

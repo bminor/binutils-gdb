@@ -195,6 +195,15 @@ char *baud_rate;
 #define STOP_SIGNAL SIGTSTP
 #endif
 #endif
+
+/* Some System V have job control but not sigsetmask(). */
+#if !defined (HAVE_SIGSETMASK)
+#define HAVE_SIGSETMASK !defined (USG)
+#endif
+
+#if !HAVE_SIGSETMASK
+#define sigsetmask(n)
+#endif
 
 /* This is how `error' returns to command level.  */
 
