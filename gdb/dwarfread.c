@@ -1503,10 +1503,8 @@ read_tag_pointer_type (dip)
       TYPE_POINTER_TYPE (type) = utype;
 
       /* We assume the machine has only one representation for pointers!  */
-      /* FIXME:  This confuses host<->target data representations, and is a
-	 poor assumption besides. */
-      
-      TYPE_LENGTH (utype) = sizeof (char *);
+      /* FIXME:  Possably a poor assumption  */
+      TYPE_LENGTH (utype) = TARGET_PTR_BIT / TARGET_CHAR_BIT ;
       TYPE_CODE (utype) = TYPE_CODE_PTR;
     }
 }
