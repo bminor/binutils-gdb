@@ -1,3 +1,12 @@
+Sat Sep 30 16:13:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* scm-lang.c:  Moved Scheme value printing code to ...
+	* scm-valprint.c:  ... this new file.
+	Also major improvements in support for printing SCM values.
+	* scm-lang.h:  New file.
+	* scm-tags.h:  New file.
+	* Makefile.in:  Note new scm-valprint.{c,o}.
+
 Sat Sep 30 09:35:02 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in: X_INCDIR and X_LIBDIR added.

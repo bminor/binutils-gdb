@@ -23,14 +23,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "expression.h"
 #include "parser-defs.h"
 #include "language.h"
-#include "c-lang.h"
 #include "value.h"
+#include "c-lang.h"
+#include "scm-lang.h"
+#include "scm-tags.h"
 
 extern struct type ** const (c_builtin_types[]);
 extern value_ptr value_allocate_space_in_inferior PARAMS ((int));
 extern value_ptr find_function_in_inferior PARAMS ((char*));
 
 static void scm_lreadr ();
+
+struct type *SCM_TYPE = NULL;
 
 static void
 scm_read_token (c, weird)
@@ -276,7 +280,7 @@ scm_parse ()
   return 0;
 }
 
-static void
+void
 scm_printchar (c, stream)
      int c;
      GDB_FILE *stream;
@@ -295,159 +299,33 @@ scm_printstr (stream, string, length, force_ellipses)
 }
 
 int
-is_object_type (type)
+is_scmvalue_type (type)
      struct type *type;
 {
-  /* FIXME - this should test for the SCM type, but we can't do that ! */
-  return TYPE_CODE (type) == TYPE_CODE_INT
-    && TYPE_NAME (type)
-#if 1
-    && strcmp (TYPE_NAME (type), "SCM") == 0;
-#else
-    && TYPE_LENGTH (type) == TYPE_LENGTH (builtin_type_long)
-    && strcmp (TYPE_NAME (type), "long int") == 0;
-#endif
-}
-
-/* Prints the SCM value VALUE by invoking the inferior, if appropraite.
-   Returns >= 0 on succes;  retunr -1 if the inferior cannot/should not
-   print VALUE. */
-
-int
-scm_inferior_print (value, stream, format, deref_ref, recurse, pretty)
-     LONGEST value;
-     GDB_FILE *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
-{
-  return -1;
-}
-
-#define SCM_ITAG8_DATA(X)	((X)>>8)
-#define SCM_ICHR(x)	((unsigned char)SCM_ITAG8_DATA(x))
-#define SCM_ICHRP(x)    (SCM_ITAG8(x) == scm_tc8_char)
-#define scm_tc8_char 0xf4
-#define SCM_IFLAGP(n)            ((0x87 & (int)(n))==4)
-#define SCM_ISYMNUM(n)           ((int)((n)>>9))
-#define SCM_ISYMCHARS(n)         (scm_isymnames[SCM_ISYMNUM(n)])
-#define SCM_ILOCP(n)             ((0xff & (int)(n))==0xfc)
-#define SCM_ITAG8(X)             ((int)(X) & 0xff)
-
-/* {Names of immediate symbols}
- * This table must agree with the declarations in scm.h: {Immediate Symbols}.*/
-
-static char *scm_isymnames[] =
-{
-  /* This table must agree with the declarations */
-  "#@and",
-  "#@begin",
-  "#@case",
-  "#@cond",
-  "#@do",
-  "#@if",
-  "#@lambda",
-  "#@let",
-  "#@let*",
-  "#@letrec",
-  "#@or",
-  "#@quote",
-  "#@set!",
-  "#@define",
-#if 0
-  "#@literal-variable-ref",
-  "#@literal-variable-set!",
-#endif
-  "#@apply",
-  "#@call-with-current-continuation",
-
- /* user visible ISYMS */
- /* other keywords */
- /* Flags */
-
-  "#f",
-  "#t",
-  "#<undefined>",
-  "#<eof>",
-  "()",
-  "#<unspecified>"
-};
-
-int
-scm_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
-	     pretty)
-     struct type *type;
-     char *valaddr;
-     CORE_ADDR address;
-     GDB_FILE *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
-{
-  if (is_object_type (type))
+  if (TYPE_CODE (type) == TYPE_CODE_INT
+      && TYPE_NAME (type) && strcmp (TYPE_NAME (type), "SCM") == 0)
     {
-      LONGEST svalue = unpack_long (type, valaddr);
-      if (scm_inferior_print (svalue, stream, format,
-			      deref_ref, recurse, pretty) >= 0)
-	{
-	}
-      else
-	{
-	  switch (7 & svalue)
-	    {
-	    case 2:
-	    case 6:
-	      print_longest (stream, format ? format : 'd', 1, svalue >> 2);
-	      break;
-	    case 4:
-	      if (SCM_ICHRP (svalue))
-		{
-		  svalue = SCM_ICHR (svalue);
-		  scm_printchar (svalue, stream);
-		  break;
-		}
-	      else if (SCM_IFLAGP (svalue)
-	       && (SCM_ISYMNUM (svalue)
-		   < (sizeof scm_isymnames / sizeof (char *))))
-		{
-		  fputs_filtered (SCM_ISYMCHARS (svalue), stream);
-		  break;
-		}
-	      else if (SCM_ILOCP (svalue))
-		{
-#if 0
-		  fputs_filtered ("#@", stream);
-		  scm_intprint ((long) IFRAME (exp), 10, port);
-		  scm_putc (ICDRP (exp) ? '-' : '+', port);
-		  scm_intprint ((long) IDIST (exp), 10, port);
-		  break;
-#endif
-		}
-	    default:
-	      fprintf_filtered (stream, "#<%lX>", svalue);
-	    }
-	}
-      gdb_flush (stream);
-      return (0);
+      SCM_TYPE = type;
+      return 1;
     }
-  else
-    {
-      return c_val_print (type, valaddr, address, stream, format,
-			  deref_ref, recurse, pretty);
-    }
+  return 0;
 }
 
-int
-scm_value_print (val, stream, format, pretty)
-     value_ptr val;
-     GDB_FILE *stream;
-     int format;
-     enum val_prettyprint pretty;
+/* Get the INDEX'th SCM value, assuming SVALUE is the address
+   of the 0'th one.  */
+
+LONGEST
+scm_get_field (svalue, index)
+     LONGEST svalue;
+     int index;
 {
-  return (val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
-		     VALUE_ADDRESS (val), stream, format, 1, 0, pretty));
+  value_ptr val;
+  char buffer[20];
+  if (SCM_TYPE == NULL)
+    error ("internal error - no SCM type");
+  read_memory (SCM2PTR (svalue) + index * TYPE_LENGTH (SCM_TYPE),
+	       buffer, TYPE_LENGTH (SCM_TYPE));
+  return unpack_long (SCM_TYPE, buffer);
 }
 
 static value_ptr
