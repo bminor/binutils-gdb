@@ -818,7 +818,9 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 		       (looking_for & SIZE) == L_16U)
 		{
 		  cst[opnum] = (data[len / 2] << 8) + data[len / 2 + 1];
-		  if ((looking_for & SIZE) != L_16U)
+		  /* Immediates are always unsigned.  */
+		  if ((looking_for & SIZE) != L_16U &&
+		      (looking_for & MODE) != IMM)
 		    cst[opnum] = (short) cst[opnum];	/* Sign extend.  */
 		}
 	      else if (looking_for & ABSJMP)
