@@ -63,6 +63,11 @@ proc initialize {} {
     global srcfile
     global wp_set
 
+    # Disable hardware watchpoints if necessary.
+    if [target_info exists gdb,no_hardware_watchpoints] {
+	gdb_test "set can-use-hw-watchpoints 0" "" ""
+    }
+
     if [gdb_test "break marker1" "Breakpoint 1 at $hex: file .*$srcfile, line $decimal.*" "set breakpoint at marker1" ] { 
       return 0; 
     }
@@ -460,9 +465,9 @@ proc test_stepping {} {
 proc test_watchpoint_triggered_in_syscall {} {
     global gdb_prompt
 
-    if [target_info exists gdb,noinferiorio] {
-	verbose "Skipping test_watchpoint_triggered_in_syscall due to noinferiorio"
-	return
+    # These tests won't work without printf support.
+    if [gdb_skip_stdio_test "watchpoints triggered in syscall"] {
+	return;
     }
     # Run until we get to the first marker function.
     set x 0

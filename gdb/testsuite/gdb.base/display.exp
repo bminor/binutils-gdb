@@ -70,13 +70,18 @@ if ![runto_main] then {
     continue
 }
 
-gdb_test "b 14" ".*Breakpoint 2.*" "break do_loops"
-gdb_test "c"          ".*Breakpoint 2, do_loops.*" "get to do_loops"
+# Disable hardware watchpoints if necessary.
+if [target_info exists gdb,no_hardware_watchpoints] {
+    gdb_test "set can-use-hw-watchpoints 0" "" ""
+}
+
+gdb_test "break 14" ".*Breakpoint 2.*"           "break  do_loops"
+gdb_test "cont"     ".*Breakpoint 2, do_loops.*" "get to do_loops"
 
 # Create stopping points.
 #
-gdb_test "wat sum"    ".*\[Ww\]atchpoint 3: sum.*" "set watch"
-gdb_test "b 19"       ".*Breakpoint 4.*" "break 19"
+gdb_test "watch sum"    ".*\[Ww\]atchpoint 3: sum.*" "set watch"
+gdb_test "break 19"     ".*Breakpoint 4.*" "break 19"
 
 # Create displays for those points
 #
@@ -89,8 +94,8 @@ gdb_test "disp/s &sum" ".*5: x/s &sum  $hex.*sum.:.*" "display/s &sum"
 
 # Hit the displays
 #
-gdb_test "c" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f sum = 1.40129846e.45\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0\r\n\[1-9\]*: i = 0.*" "first disp"
-gdb_test "c" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f sum = 2.80259693e.45\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0.*\[1-9\]*: i = 0.*" "second disp"
+gdb_test "cont" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f sum = 1.40129846e.45\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0\r\n\[1-9\]*: i = 0.*" "first disp"
+gdb_test "cont" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f sum = 2.80259693e.45\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0.*\[1-9\]*: i = 0.*" "second disp"
 
 gdb_test "enab  disp 6" ".*No display number 6..*" "catch err"
 gdb_test "disab disp 1" ".*" "disab disp 1"
@@ -98,9 +103,9 @@ gdb_test "disab disp 2" ".*" "disab disp 2"
 gdb_test "enab disp 1"  ".*" "re-enab"
 gdb_test "enab disp 1"  ".*" "re-enab of enab"
 gdb_test "undisp 5"     ".*" "undisp"
-gdb_test "i disp"       ".*Auto-display expressions now in effect.*y  /f sum.*y  /1bi &k.*n  /x j.*y  i.*" "info disp"
+gdb_test "info disp"    ".*Auto-display expressions now in effect.*y  /f sum.*y  /1bi &k.*n  /x j.*y  i.*" "info disp"
 
-gdb_test "c" ".*\[Ww\]atch.*4.20389539e-45.*.*i = 0.*" "next hit"
+gdb_test "cont" ".*\[Ww\]atch.*4.20389539e-45.*.*i = 0.*" "next hit"
 
 send_gdb "undisp\n"
 gdb_expect {
@@ -126,7 +131,7 @@ gdb_expect {
 }
 
 gdb_test "disab 3" ".*.*" "disab 3"
-gdb_test "c" ".*Breakpoint 4.*" "watch off"
+gdb_test "cont" ".*Breakpoint 4.*" "watch off"
 
 # Now the printf tests
 #
@@ -153,9 +158,9 @@ gdb_expect {
     }
 }
 
-gdb_test "s" ".*do_vars.*.*27.*"
-gdb_test "tb 37" ".*Breakpoint 5 a.*"
-gdb_test "c" ".*do_vars.*37.*37.*"
+gdb_test "step"      ".*do_vars.*.*27.*"
+gdb_test "tbreak 37" ".*Breakpoint 5 a.*"
+gdb_test "cont"      ".*do_vars.*37.*37.*"
 
 # Beat on printf a bit
 #
@@ -168,10 +173,10 @@ gdb_test "printf \"\"" ".*" "re-set term"
 gdb_test "printf \"\\w\"" ".*Unrecognized escape character.*"
 gdb_test "printf \"%d\" j" ".*Invalid argument syntax.*"
 
-# play with "p", too
+# play with "print", too
 #
-gdb_test "p/r j" ".*Undefined output format.*"
-gdb_test "p j" ".*" "debug test output"
+gdb_test "print/r j" ".*Undefined output format.*"
+gdb_test "print j"   ".*" "debug test output"
 
 # x/0 j doesn't produce any output and terminates PA64 process when testing
 if [istarget "hppa2.0w-hp-hpux11*"] {
@@ -183,15 +188,15 @@ if [istarget "hppa*-hp-hpux*"] {
     # on HP-UX you could access the first page without getting an error
     gdb_test "x/rx j" ".*(Cannot access|Error accessing) memory.*|.*0xa:\[ \t\]*\[0-9\]+.*"
 }
-gdb_test "p/0 j" ".*Item count other than 1 is meaningless.*" "p/0 j"
-gdb_test "p/s sum" ".*Format letter.*is meaningless.*" " no s"
-gdb_test "p/i sum" ".*Format letter.*is meaningless.*.*" "no i"
-gdb_test "p/a &sum" ".*= $hex.*<sum>.*"
+gdb_test "print/0 j" ".*Item count other than 1 is meaningless.*" "print/0 j"
+gdb_test "print/s sum" ".*Format letter.*is meaningless.*" " no s"
+gdb_test "print/i sum" ".*Format letter.*is meaningless.*.*" "no i"
+gdb_test "print/a &sum" ".*= $hex.*<sum>.*"
 # If the constant below is larger than the length of main, then
 # this test will (incorrectly) fail.  So use a small number.
-gdb_test "p/a main+4" ".*= $hex.*<.*>.*"
-gdb_test "p/a \$pc" ".*= $hex.*<do_vars+.*>.*"
-gdb_test "p/a &&j" ".*A .* error in expression.*"
+gdb_test "print/a main+4" ".*= $hex.*<.*>.*"
+gdb_test "print/a \$pc" ".*= $hex.*<do_vars+.*>.*"
+gdb_test "print/a &&j" ".*A .* error in expression.*"
 
 # Done!
 #

@@ -1,3 +1,20 @@
+2000-11-03  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/a2-run.exp: Use gdb_skip_stdio_test.
+	* gdb.base/corefile.exp: Expect the message "Program is being
+	debugged already" when we send the "corefile" command, since
+	the preceeding gdb_load may have connected gdb to a remote target.
+	* gdb.base/display.exp: Disable hardware watchpoints if new
+	board info variable "no_hardware_watchpoints" is true.
+	Replace single-letter commands with more readable ones.
+	* gdb.base/recurse.exp (recurse_tests): Disable hardware watchpoints
+	if new board info variable "no_hardware_watchpoints" is true.
+	* gdb.base/restore.exp (restore_tests): Call gdb_skip_stdio_tests
+	to see if stdio (printf) testing is possible.
+	* gdb.base/watchpoint.exp: Disable hardware watchpoints if new
+	board info variable "no_hardware_watchpoints" is true.  Use new
+	proc "gdb_skip_stdio_tests" to see if printf tests are possible.
+
 2000-11-13  Fernando Nasser  <fnasser@redhat.com>
 
 	From Orjan Friberg  <orjanf@axis.com>:

@@ -42,6 +42,11 @@ gdb_load ${binfile}
 
 proc recurse_tests {} {
 
+    # Disable hardware watchpoints if necessary.
+    if [target_info exists gdb,no_hardware_watchpoints] {
+	gdb_test "set can-use-hw-watchpoints 0" "" ""
+    }
+
     if [runto recurse] then {
 	# First we need to step over the assignment of b, so it has a known
 	# value.
