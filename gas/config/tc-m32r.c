@@ -1,4 +1,4 @@
-/* tc-m32r.c -- Assembler for the Mitsubishi M32R/X.
+/* tc-m32r.c -- Assembler for the Mitsubishi M32R.
    Copyright (C) 1996, 1997, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
