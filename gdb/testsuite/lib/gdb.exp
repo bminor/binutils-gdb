@@ -1265,6 +1265,7 @@ proc gdb_expect_list {test sentinel list} {
     set ok 1
     if { $suppress_flag } {
 	set ok 0
+	unresolved "${test}"
     }
     while { ${index} < [llength ${list}] } {
 	set pattern [lindex ${list} ${index}]
@@ -1273,41 +1274,42 @@ proc gdb_expect_list {test sentinel list} {
 	    if { ${ok} } {
 		gdb_expect {
 		    -re "${pattern}${sentinel}" {
-			pass "${test}, pattern ${index} + sentinel"
+			# pass "${test}, pattern ${index} + sentinel"
 		    }
 		    -re "${sentinel}" {
-			fail "${test}, pattern ${index} + sentinel"
+			fail "${test} (pattern ${index} + sentinel)"
 			set ok 0
 		    }
 		    timeout {
-			fail "${test}, pattern ${index} + sentinel (timeout)"
+			fail "${test} (pattern ${index} + sentinel) (timeout)"
 			set ok 0
 		    }
 		}
 	    } else {
-		unresolved "${test}, pattern ${index} + sentinel"
+		# unresolved "${test}, pattern ${index} + sentinel"
 	    }
 	} else {
 	    if { ${ok} } {
 		gdb_expect {
 		    -re "${pattern}" {
-			pass "${test}, pattern ${index}"
+			# pass "${test}, pattern ${index}"
 		    }
 		    -re "${sentinel}" {
-			fail "${test}, pattern ${index}"
+			fail "${test} (pattern ${index})"
 			set ok 0
 		    }
 		    timeout {
-			fail "${test}, pattern ${index} (timeout)"
+			fail "${test} (pattern ${index}) (timeout)"
 			set ok 0
 		    }
 		}
 	    } else {
-		unresolved "${test}, pattern ${index}"
+		# unresolved "${test}, pattern ${index}"
 	    }
 	}
     }
     if { ${ok} } {
+	pass "${test}"
 	return 0
     } else {
 	return 1
