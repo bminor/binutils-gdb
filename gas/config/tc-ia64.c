@@ -6496,9 +6496,12 @@ emit_one_bundle ()
   if (manual_bundling)
     {
       if (md.num_slots_in_use > 0)
-	as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-		      "`%s' does not fit into %s template",
-		      idesc->name, ia64_templ_desc[template].name);
+	{
+	  as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
+			"`%s' does not fit into %s template",
+			idesc->name, ia64_templ_desc[template].name);
+	  --md.num_slots_in_use;
+	}
       else
 	as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
 		      "Missing '}' at end of file");

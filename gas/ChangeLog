@@ -1,3 +1,10 @@
+2004-10-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 474
+	* config/tc-ia64.c (emit_one_bundle): Decrement md.num_slots_in_use
+	after reporting template error during manual bundling. Reported
+	by Michael Dupont, michaelx.dupont@intel.com.
+
 2004-10-25  Daniel Jacobowitz  <dan@debian.org>
 
 	* Makefile.am: Run dep-am.
