@@ -1,5 +1,9 @@
 2004-09-03  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.c (find_proc_desc, heuristic_proc_desc): Delete
+	"cur_frame" parameter.
+	(after_prologue, mips_mdebug_frame_cache, mips_insn16_frame_cache): 
+
 	* config/vax/nm-obsd.h: Delete file.
 	* config/vax/obsd.mh (NAT_FILE): Set to config/nm-bsd.h.
 	* config/vax/nm-nbsd.h: Delete file.

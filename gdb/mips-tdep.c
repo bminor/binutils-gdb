@@ -421,7 +421,7 @@ mips_stack_argsize (struct gdbarch *gdbarch)
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
 static mips_extra_func_info_t heuristic_proc_desc (CORE_ADDR, CORE_ADDR,
-						   struct frame_info *, int);
+						   struct frame_info *);
 static mips_extra_func_info_t non_heuristic_proc_desc (CORE_ADDR pc,
 						       CORE_ADDR *addrptr);
 
@@ -432,8 +432,7 @@ static CORE_ADDR read_next_frame_reg (struct frame_info *, int);
 static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
 
 static mips_extra_func_info_t find_proc_desc (CORE_ADDR pc,
-					      struct frame_info *next_frame,
-					      int cur_frame);
+					      struct frame_info *next_frame);
 
 static CORE_ADDR after_prologue (CORE_ADDR pc,
 				 mips_extra_func_info_t proc_desc);
@@ -890,13 +889,13 @@ after_prologue (CORE_ADDR pc, mips_extra_func_info_t proc_desc)
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
 
-  /* Pass cur_frame == 0 to find_proc_desc.  We should not attempt
+  /* Pass a NULL next_frame to find_proc_desc.  We should not attempt
      to read the stack pointer from the current machine state, because
      the current machine state has nothing to do with the information
      we need from the proc_desc; and the process may or may not exist
      right now.  */
   if (!proc_desc)
-    proc_desc = find_proc_desc (pc, NULL, 0);
+    proc_desc = find_proc_desc (pc, NULL);
 
   if (proc_desc)
     {
@@ -1545,7 +1544,7 @@ mips_mdebug_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   /* Get the mdebug proc descriptor.  */
-  proc_desc = find_proc_desc (frame_pc_unwind (next_frame), next_frame, 1);
+  proc_desc = find_proc_desc (frame_pc_unwind (next_frame), next_frame);
   if (proc_desc == NULL)
     /* I'm not sure how/whether this can happen.  Normally when we
        can't find a proc_desc, we "synthesize" one using
@@ -1821,7 +1820,7 @@ mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   /* Get the mdebug proc descriptor.  */
-  proc_desc = find_proc_desc (frame_pc_unwind (next_frame), next_frame, 1);
+  proc_desc = find_proc_desc (frame_pc_unwind (next_frame), next_frame);
   if (proc_desc == NULL)
     /* I'm not sure how/whether this can happen.  Normally when we
        can't find a proc_desc, we "synthesize" one using
@@ -2082,7 +2081,7 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
     if (start_addr == 0)
       start_addr = heuristic_proc_start (pc);
 
-    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, 1);
+    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame);
   }
   
   if (proc_desc == NULL)
@@ -2866,11 +2865,13 @@ restart:
 
 static mips_extra_func_info_t
 heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-		     struct frame_info *next_frame, int cur_frame)
+		     struct frame_info *next_frame)
 {
   CORE_ADDR sp;
 
-  if (cur_frame)
+  /* Can be called when there's no process, and hence when there's no
+     NEXT_FRAME.  */
+  if (next_frame != NULL)
     sp = read_next_frame_reg (next_frame, NUM_REGS + MIPS_SP_REGNUM);
   else
     sp = 0;
@@ -3109,7 +3110,7 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
 
 
 static mips_extra_func_info_t
-find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
+find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame)
 {
   mips_extra_func_info_t proc_desc;
   CORE_ADDR startaddr = 0;
@@ -3140,7 +3141,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
 	    {
 	      mips_extra_func_info_t found_heuristic =
 		heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
-				     pc, next_frame, cur_frame);
+				     pc, next_frame);
 	      if (found_heuristic)
 		proc_desc = found_heuristic;
 	    }
@@ -3151,7 +3152,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
       if (startaddr == 0)
 	startaddr = heuristic_proc_start (pc);
 
-      proc_desc = heuristic_proc_desc (startaddr, pc, next_frame, cur_frame);
+      proc_desc = heuristic_proc_desc (startaddr, pc, next_frame);
     }
   return proc_desc;
 }
