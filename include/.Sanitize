@@ -17,7 +17,6 @@
 
 Do-first:
 
-recover="aout64.h sparc-opcode.h"
 echo Sanitizing `pwd`...
 
 # All files listed between the "Things-to-keep:" line and the
@@ -79,24 +78,22 @@ wait.h
 
 Do-last:
 
-if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping v9 in sparc-opcode.h.
-else
-	echo Sanitizing v9 in sparc-opcode.h.
-	rm -f new
-	grep -v v9 sparc-opcode.h > new
-	rm sparc-opcode.h
-	mv new sparc-opcode.h
-fi
+v9dirty="sparc-opcode.h aout64.h"
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping v9 in aout64.h.
+	echo Keeping v9 in ${v9dirty}
 else
-	echo Sanitizing v9 in aout64.h.
-	rm -f new
-	grep -v v9 aout64.h > new
-	rm aout64.h
-	mv new aout64.h
+	for i in ${v9dirty} ; do
+		echo Sanitizing v9 in $i
+		rm -f new
+		grep -v v9 $i > new
+		if [ -n "${safe}" ] ; then
+			mv $i .Recover
+		else
+			rm sparc-opcode.h
+		fi
+		mv new $i
+	done
 fi
 
 echo Done in `pwd`.
@@ -104,7 +101,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.11  1991/09/02 21:21:47  rich
+# Revision 1.12  1991/09/04 02:51:18  rich
+# Adding "recover"'ability.
+#
+# Revision 1.11  1991/09/02  21:21:47  rich
 # Recover the editted files.
 #
 # Revision 1.10  1991/08/29  00:34:45  gnu
