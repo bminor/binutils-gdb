@@ -52,11 +52,16 @@
    Note that symbols that begin with '$' are local symbols
    on mips targets, so we can't begin it with '$'.  */
 #define VU_LABEL_PREFIX "_$"
+/* Prefix for symbols at start of vu overlays, in r5900 space.  */
+#define VUOVERLAY_START_PREFIX "__start_"
 
 static long parse_float PARAMS ((char **, const char **));
 static symbolS * create_label PARAMS ((const char *, const char *));
 static symbolS * create_colon_label PARAMS ((int, const char *, const char *));
 static char * unique_name PARAMS ((const char *));
+static char * vuoverlay_section_name PARAMS ((offsetT));
+static void create_vuoverlay_section PARAMS ((const char *, offsetT,
+					      symbolS *, symbolS *));
 static symbolS * compute_mpgloc PARAMS ((symbolS *, symbolS *, symbolS *));
 static int compute_nloop PARAMS ((gif_type, int, int));
 static void check_nloop PARAMS ((gif_type, int, int, int,
@@ -152,8 +157,27 @@ static symbolS *vif_data_start;
 /* Label at end of insn's data.  */
 static symbolS *vif_data_end;
 
-/* Special symbol $.mpgloc.  The value is in bytes.  */
+/* Special symbol $.mpgloc.  The value is in bytes.
+   This value is kept absolute, for simplicity.  */
 static symbolS *mpgloc_sym;
+
+/* Handle of the current .vuoverlay.foo section.  */
+static segT vuoverlay_section;
+
+/* The .overlay section is a table mapping lma's to vma's.  */
+static segT vuoverlay_table_section;
+
+/* Table to map vu space labels to their overlay sections.
+   Labels in vu space are first put in the ABS section to simplify
+   PC relative branch calculations (s1 - s2 isn't supported if they're
+   in different sections).  Before the file is written out the labels
+   are moved to their overlay section.  */
+typedef struct ovlysym {
+  struct ovlysym *next;
+  segT sec;
+  symbolS *sym;
+} ovlysymS;
+static ovlysymS *ovlysym_table;
 
 /* GIF insn support.  */
 /* Type of insn.  */
@@ -287,8 +311,17 @@ md_begin ()
   /* Disable automatic mpg insertion.  */
   vu_count = -1;
 
-  /* Create special symbols.  */
+  /* Initialize $.mpgloc.  */
   mpgloc_sym = expr_build_uconstant (0);
+
+  /* Create the vu overlay table section.  */
+  {
+    /* Must preserve the current seg/subseg.  It is the initial one.  */
+    segT orig_seg = now_seg;
+    subsegT orig_subseg = now_subseg;
+    vuoverlay_table_section = subseg_new (VUOVERLAY_TABLE_SECTION_NAME, 0);
+    subseg_set (orig_seg, orig_subseg);
+  }
 
   /* Set the type of the output file to r5900.  */
   bfd_set_arch_mach (stdoutput, bfd_arch_mips, 5900);
@@ -628,21 +661,25 @@ assemble_vif (str)
 
 	  /* Put a symbol at the start of data.  The relaxation code uses
 	     this to figure out how many bytes to insert.  $.mpgloc
-	     calculations also use it.  */
-	  vif_data_start = create_colon_label (STO_DVP_VU, LOCAL_LABEL_PREFIX,
-					       unique_name ("mpg"));
-	  insn_frag->fr_symbol = vif_data_start;
-
-	  /* Get the value of mpgloc.  If it wasn't '*'
-	     then update $.mpgloc.  */
+	     calculations use it.  The disassembler uses it.  The overlay
+	     tracking table uses it.  */
 	  {
 	    int mpgloc = vif_get_mpgloc ();
+	    offsetT addr = mpgloc * 8;
+	    const char * section_name = vuoverlay_section_name (addr);
+	    vif_data_start = create_colon_label (STO_DVP_VU,
+						 VUOVERLAY_START_PREFIX,
+						 section_name);
+	    insn_frag->fr_symbol = vif_data_start;
+
+	    /* Get the value of mpgloc.  If it wasn't '*'
+	       then update $.mpgloc.  */
+	    /* FIXME: Need to handle `*' case as well.  */
 	    if (mpgloc != -1)
 	      {
-		mpgloc_sym->sy_value.X_op = O_constant;
 		/* The value is recorded in bytes.  */
-		mpgloc_sym->sy_value.X_add_number = mpgloc * 8;
-		mpgloc_sym->sy_value.X_unsigned = 1;
+		create_vuoverlay_section (section_name, addr,
+					  vif_data_start, vif_data_end);
 	      }
 	  }
 	}
@@ -1150,16 +1187,9 @@ assemble_one_insn (cpu, opcode, operand_table, init_fixup_count, fixup_offset,
 	      if (!(operand->flags & DVP_OPERAND_SUFFIX))
 		as_fatal ("internal error: bad opcode table, missing suffix flag");
 
-	      /* If we're at a space in the input string, we want to skip the
-		 remaining suffixes.  There may be some fake ones though, so
-		 just go on to try the next one.  */
-	      if (*str == ' ')
-		{
-		  ++syn;
-		  continue;
-		}
-
-	      /* Parse the suffix.  */
+	      /* Parse the suffix.  If we're at a space in the input string
+		 there are no more suffixes.  Suffix parse routines must be
+		 prepared to deal with this.  */
 	      errmsg = NULL;
 	      suf_value = (*operand->parse) (opcode, operand, mods, &str,
 					     &errmsg);
@@ -1495,15 +1525,46 @@ dvp_frob_label (sym)
       /* Check for recursive invocation creating the _$name.  */
       && strncmp (name, VU_LABEL_PREFIX, sizeof (VU_LABEL_PREFIX) - 1) != 0)
     {
-      /* Move this symbol to vu space.  */
+      /* Move this symbol to the vu overlay.  */
       symbolS * cur_mpgloc = compute_mpgloc (mpgloc_sym, vif_data_start,
 					     expr_build_dot ());
+#if 0 /* Don't do this now, leave in ABS and then move to overlay
+	 section before file is written.  */
+      S_SET_SEGMENT (sym, vuoverlay_section);
+#else
+      /* Record the overlay section this symbol is in.  */
+      {
+	ovlysymS *p = (ovlysymS *) xmalloc (sizeof (ovlysymS));
+	p->next = ovlysym_table;
+	p->sec = vuoverlay_section;
+	p->sym = sym;
+	ovlysym_table = p;
+      }
       S_SET_SEGMENT (sym, expr_section);
+#endif
       sym->sy_value = cur_mpgloc->sy_value;
       sym->sy_frag = &zero_address_frag;
 
       /* Create the _$ symbol in normal space.  */
       create_colon_label (STO_DVP_VU, VU_LABEL_PREFIX, name);
+    }
+}
+
+/* Move vu space symbols into their overlay sections.
+   Called via tc_frob_file.  */
+
+void
+dvp_frob_file ()
+{
+  ovlysymS *p;
+
+  for (p = ovlysym_table; p; p = p->next)
+    {
+      /* See the comment near tc_frob_file in write.c.
+	 We are responsible for updating sym->bsym->value.  */
+      S_SET_SEGMENT (p->sym, p->sec);
+      /* Adjust for the section's vma.  */
+      p->sym->bsym->value -= bfd_get_section_vma (stdoutput, p->sec);
     }
 }
 
@@ -1885,8 +1946,10 @@ md_apply_fix3 (fixP, valueP, seg)
 	  return 1;
 	}
     }
-  else
+  else if (fixP->fx_done)
     {
+      /* We're finished with this fixup.  Install it because
+	 bfd_install_relocation won't be called to do it.  */
       switch (fixP->fx_r_type)
 	{
 	case BFD_RELOC_8:
@@ -1902,7 +1965,13 @@ md_apply_fix3 (fixP, valueP, seg)
 	  as_fatal ("internal error: unexpected fixup");
 	}
     }
+  else
+    {
+      /* bfd_install_relocation will be called to finish things up.  */
+    }
 
+  /* Tuck `value' away for use by tc_gen_reloc.
+     See the comment describing fx_addnumber in write.h.  */
   fixP->fx_addnumber = value;
 
   return 1;
@@ -2168,6 +2237,99 @@ unique_name (prefix)
   asprintf (&result, "%s%d", prefix, counter);
   ++counter;
   return result;
+}
+
+/* VU support.  */
+
+/* Return the name of the overlay section.
+   It must be unique among all overlays in the executable.  */
+
+static char *
+vuoverlay_section_name (addr)
+     offsetT addr;
+{
+  char *section_name;
+  char *file;
+  unsigned int lineno;
+  unsigned int fileno;
+  /* One mpg may actually result in several, counter keeps track of this.  */
+  static int counter;
+
+  as_where (&file, &lineno);
+  for (fileno = 0; *file; ++file)
+    fileno = (fileno << 1) + *file;
+  asprintf (&section_name, "%s0x%x.%u.%u.%d", VUOVERLAY_SECTION_PREFIX,
+	    (int) addr, fileno, lineno, counter);
+  ++counter;
+  return section_name;
+}
+
+/* Create a shadow section for VU code that starts at ADDR in vu space.
+   START_LABEL and END_LABEL, if non-NULL, are symbols marking the start and
+   end of the section.  If NULL, no overlay tracking information is output.  */
+
+static void
+create_vuoverlay_section (section_name, addr, start_label, end_label)
+     const char *section_name;
+     offsetT addr;
+     symbolS *start_label, *end_label;
+{
+  /* Must preserve the current seg/subseg.  */
+  segT orig_seg = now_seg;
+  subsegT orig_subseg = now_subseg;
+
+  /* Create and get handle of .vuoverlay section.  All vu symbols go here.
+     The section name must be unique in the entire executable.
+     We achieve this by encoding the source file name and file number.  Ick.
+     ??? A cleaner way would be if mpg took a new argument that named the
+     overlay.  */
+  vuoverlay_section = subseg_new (section_name, 0);
+  bfd_set_section_flags (stdoutput, vuoverlay_section, 0);
+  /* There's no point in setting the section vma as we can't get the linker
+     to preserve it.  But what the heck ...  It might be useful to the
+     objdump user.  */
+  bfd_set_section_vma (stdoutput, vuoverlay_section, addr);
+  /* The size of the section won't be known until we see the .endmpg,
+     but we can compute it from the start and end labels.  */
+  /* FIXME: This causes the section to occupy space in the file.  */
+  if (start_label)
+    frag_var (rs_space, 1, 1, (relax_substateT) 0,
+	      expr_build_binary (O_subtract, end_label, start_label),
+	      (offsetT) 0, (char *) 0);
+#if 0
+  /* Create a symbol marking the start of the section.  */
+  begin_label = create_colon_label (STO_DVP_VU, "__start_", section_name);
+#endif
+
+  /* Initialize $.mpgloc.  */
+  mpgloc_sym = expr_build_uconstant (addr);
+
+#if 0 /* $.mpgloc is kept in the ABS section.  */
+  S_SET_SEGMENT (mpgloc_sym, vuoverlay_section);
+#endif
+
+  /* Add an entry to the vu overlay table.  */
+  if (start_label)
+    {
+      /* FIXME: should be a service routine to do these.  */
+      expressionS exp;
+
+      subseg_set (vuoverlay_table_section, 0);
+
+      /* The section's lma.  */
+      exp.X_op = O_symbol;
+      exp.X_add_symbol = start_label;
+      exp.X_add_number = 0;
+      emit_expr (&exp, 8);
+
+      /* The section's vma.  */
+      exp.X_op = O_constant;
+      exp.X_add_number = addr;
+      emit_expr (&exp, 8);
+    }
+
+  /* Restore the original seg/subseg.  */
+  subseg_set (orig_seg, orig_subseg);
 }
 
 /* Compute a value for $.mpgloc given a symbol at the start of a chunk
@@ -2971,8 +3133,12 @@ s_state (state)
 	 in use versions of these.  Also need to worry about which section
 	 the .vu is issued in.  On the other hand, ".vu" isn't intended
 	 to be supported everywhere.  */
-      mpgloc_sym = expr_build_uconstant (0);
       vif_data_start = expr_build_dot ();
+#if 0
+      create_vuoverlay_section (vuoverlay_section_name (0), 0, NULL, NULL);
+#else
+      mpgloc_sym = expr_build_uconstant (0);
+#endif
     }
 
   set_asm_state (state);

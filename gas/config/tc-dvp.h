@@ -45,28 +45,54 @@
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-#define md_convert_frag(b,s,f)		{as_fatal ("dvp convert_frag\n");}
-#define md_estimate_size_before_relax(f,s) \
-			(as_fatal("estimate_size_before_relax called"),1)
+/* Handle mpg/direct alignment requirements with relaxation.  */
+extern long dvp_relax_frag PARAMS ((fragS *, long));
+#define md_relax_frag(fragP,stretch) dvp_relax_frag ((fragP), (stretch))
 
 #define MD_APPLY_FIX3
 
+/* Ensure insns at labels have their mach type properly recorded.  */
+int force_mach_label PARAMS ((void));
+#define TC_START_LABEL(ch, ptr)	(ch == ':' && force_mach_label ())
+
 #define TC_HANDLES_FX_DONE
+
+/* Record user specified val, for cases where we can't compute the actual
+   value until the end of assembly.  */
+#define TC_FIX_TYPE \
+struct { \
+  int type; /* gif_type, or vif type */ \
+  int nregs; /* for gif insns only */ \
+  short wl; short cl; /* for unpack only */ \
+  int user_value; \
+}
+/* Code to initialize it.  */
+#define TC_INIT_FIX_DATA(fixP) \
+do { memset (&fixP->tc_fix_data, 0, sizeof (fixP->tc_fix_data)); } while (0)
 
 /* Called after parsing a file.  */
 extern void dvp_parse_done PARAMS ((void));
 #define md_after_pass_hook() dvp_after_pass_hook ()
 
+/* Called for each label.  */
 extern void dvp_frob_label PARAMS ((struct symbol *));
 #define tc_frob_label(sym) dvp_frob_label (sym)
+
+/* Called just before writing the file out.  */
+extern void dvp_frob_file PARAMS ((void));
+#define tc_frob_file() dvp_frob_file ()
 
 /* Default section names. */
 #define TEXT_SECTION_NAME	".vutext"
 #define DATA_SECTION_NAME	".vudata"
 #define BSS_SECTION_NAME	".vubss"
 
+/* Other special section names.  */
+#define VUOVERLAY_SECTION_PREFIX	".vuoverlay."
+#define VUOVERLAY_TABLE_SECTION_NAME	".vuoverlay_table"
+
 #define ELF_TC_SPECIAL_SECTIONS \
   { ".vubss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE		}, \
   { ".vudata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		}, \
-  { ".vutext",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
-
+  { ".vutext",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	}, \
+  { ".vuoverlay_table", SHT_NOBITS, SHF_ALLOC + SHF_WRITE	},

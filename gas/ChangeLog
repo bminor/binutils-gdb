@@ -1,3 +1,22 @@
+start-sanitize-sky
+Thu May 28 16:23:08 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.h (ELF_TC_SPECIAL_SECTIONS): Add .vuoverlay_table.
+	(dvp_frob_file): Declare.
+	(tc_frob_file): Define.
+	(VUOVERLAY_SECTION_PREFIX,VUOVERLAY_TABLE_SECTION_NAME): New macros.
+	* config/tc-dvp.c (VUOVERLAY_START_PREFIX): New macro.
+	(vuoverlay_section_name,create_vuoverlay_section): New functions.
+	(vuoverlay_section,vuoverlay_table_section): New static globals.
+	(ovlysym_table): New static global.
+	(md_begin): Create .vuoverlay_table section.
+	(assemble_vif): Call create_vuoverlay_section for each mpg.
+	(dvp_frob_label): Record vu labels in ovlysym_table for later
+	movement from absolute section to their overlay section.
+	(dvp_frob_file): New function.
+	(md_apply_fix3): For 8/16/32/64 bit relocs, only process if fx_done.
+
+end-sanitize-sky
 Wed May 27 11:16:25 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (s_org): Call md_flush_pending_output if it is defined.
