@@ -1,3 +1,7 @@
+Fri Oct 17 17:26:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h (ALU32_END): Use ALU32_RESULT.
+
 Mon Sep 29 12:49:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* insns (get_fp_reg, set_fp_reg): Update to use changed sim_fpu

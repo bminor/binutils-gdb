@@ -1,3 +1,12 @@
+Thu Oct 16 11:38:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-alu.h (ALU16_BEGIN, ALU32_BEGIN, ALU64_BEGIN): Drop opening
+ 	brace from macro.
+	(ALU8_BEGIN, ALU8_SET, ALU8_ADD, ALU8_SUB, ALU8_NEGATE): Define.
+	(ALU16_ADD, ALU16_SUB, ALU16_NEGATE): Simplify arrithmetic.
+	(ALU32_ADD, ALU32_SUB, ALU32_NEGATE): Simplify arrithmetic.
+	(ALU64_ADD, ALU64_SUB, ALU64_NEGATE): Simplify arrithmetic.
+
 Wed Oct 15 09:24:19 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-core.h (struct _sim_core_mapping): Change free_buffer to

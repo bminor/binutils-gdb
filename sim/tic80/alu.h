@@ -27,8 +27,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define ALU32_END(TARG) \
 { \
-  (TARG) = (unsigned32)alu_carry_val; /* FIXME */ \
-}}
+  (TARG) = ALU32_RESULT; /* FIXME */ \
+}
 
 #define ALU_END(TARG) ALU32_END(TARG)
 
