@@ -1,3 +1,11 @@
+Wed Apr 30 10:22:29 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* tconfig.in (SIM_PRE_LOAD): Delete, no longer used.
+
+Thu Apr 24 00:39:51 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Fri Apr 18 14:30:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* compile.c (sim_resume): Use poll_quit callback.
