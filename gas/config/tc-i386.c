@@ -938,8 +938,8 @@ reloc (size, pcrel, other)
  * some cases we force the original symbol to be used.
  */
 int
-tc_i386_fix_adjustable(fixP)
-     fixS * fixP;
+tc_i386_fix_adjustable (fixP)
+     fixS *fixP;
 {
 #if defined (OBJ_ELF) || defined (TE_PE)
   /* Prevent all adjustments to global symbols, or else dynamic
@@ -3908,8 +3908,34 @@ md_apply_fix3 (fixP, valp, seg)
 	 address offset for a PC relative symbol.  */
       if (S_GET_SEGMENT (fixP->fx_addsy) != seg)
 	value += md_pcrel_from (fixP);
+      else if (S_IS_EXTERNAL (fixP->fx_addsy)
+	       || S_IS_WEAK (fixP->fx_addsy))
+	{
+	  /* We are generating an external relocation for this defined
+             symbol.  We add the address, because
+             bfd_install_relocation will subtract it.  VALUE already
+             holds the symbol value, because fixup_segment added it
+             in.  We subtract it out, and then we subtract it out
+             again because bfd_install_relocation will add it in
+             again.  */
+	  value += md_pcrel_from (fixP);
+	  value -= 2 * S_GET_VALUE (fixP->fx_addsy);
+	}
 #endif
     }
+#ifdef TE_PE
+  else if (fixP->fx_addsy != NULL
+	   && S_IS_DEFINED (fixP->fx_addsy)
+	   && (S_IS_EXTERNAL (fixP->fx_addsy)
+	       || S_IS_WEAK (fixP->fx_addsy)))
+    {
+      /* We are generating an external relocation for this defined
+         symbol.  VALUE already holds the symbol value, and
+         bfd_install_relocation will add it in again.  We don't want
+         either addition.  */
+      value -= 2 * S_GET_VALUE (fixP->fx_addsy);
+    }
+#endif
 
   /* Fix a few things - the dynamic linker expects certain values here,
      and we must not dissappoint it. */

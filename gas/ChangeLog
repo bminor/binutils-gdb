@@ -1,3 +1,8 @@
+1999-09-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-i386.c (md_apply_fix3): Add horrible adjustments to
+	the value if TE_PE and a global defined symbol.
+
 1999-09-11  Ian Lance Taylor  <ian@zembu.com>
 
 	* write.c (dump_section_relocs): Call print_symbol_value_1 to
