@@ -1,3 +1,7 @@
+Mon Aug  2 14:22:09 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* h8300-tdep.c:  Use new variable h8300hmode.
+
 Mon Aug  2 12:06:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* valops.c (typecmp): If we are passing a non-reference to a function

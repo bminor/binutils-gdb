@@ -27,6 +27,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 #include "symtab.h"
 #include <dis-asm.h>
+#include "gdbcmd.h"
+#include "gdbtypes.h"
+
 #undef NUM_REGS
 #define NUM_REGS 11
 
@@ -101,7 +104,7 @@ print_insn (memaddr, stream)
 {
   disassemble_info info;
   GDB_INIT_DISASSEMBLE_INFO(info, stream);
-  if (HMODE)
+  if (h8300hmode)
     return print_insn_h8300h (memaddr, &info);
   else
     return print_insn_h8300 (memaddr, &info);
@@ -219,7 +222,7 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
   int size, offset;
   /* Number of things pushed onto stack, starts at 2/4, 'cause the
      PC is already there */
-  unsigned int reg_save_depth = HMODE ? 4 : 2;
+  unsigned int reg_save_depth = h8300hmode ? 4 : 2;
 
   unsigned int auto_depth = 0;	/* Number of bytes of autos */
 
@@ -234,7 +237,7 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
     {
       after_prolog_fp = read_register (SP_REGNUM);
     }
-  if (ip == 0 || ip & (HMODE ? ~0xffff : ~0xffff))
+  if (ip == 0 || ip & (h8300hmode ? ~0xffff : ~0xffff))
     return 0;
 
   next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
@@ -390,6 +393,48 @@ h8300_pop_frame ()
     }
 }
 
+
+struct cmd_list_element *setmemorylist;
+
+static void
+h8300_command(args, from_tty)
+{
+  extern int h8300hmode;
+  h8300hmode = 0;
+}
+
+static void
+h8300h_command(args, from_tty)
+{
+  extern int h8300hmode;
+  h8300hmode = 1;
+}
+
+static void 
+set_machine (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  printf ("\"set machine\" must be followed by h8300 or h8300h.\n");
+  help_list (setmemorylist, "set memory ", -1, stdout);
+}
+
+void
+_initialize_h8300m ()
+{
+  add_prefix_cmd ("machine", no_class, set_machine,
+		  "set the machine type", &setmemorylist, "set machine ", 0,
+		  &setlist);
+
+  add_cmd ("h8300", class_support, h8300_command,
+	   "Set machine to be H8/300.", &setmemorylist);
+
+  add_cmd ("h8300h", class_support, h8300h_command,
+	   "Set machine to be H8/300H.", &setmemorylist);
+}
+
+
+
 void
 print_register_hook (regno)
 {
@@ -436,3 +481,4 @@ print_register_hook (regno)
 	printf ("<= ");
     }
 }
+
