@@ -2877,10 +2877,8 @@ macro_build_lui (place, counter, ep, regnum)
   if (high_expr.X_op == O_constant)
     {
       /* we can compute the instruction now without a relocation entry */
-      if (high_expr.X_add_number & 0x8000)
-	high_expr.X_add_number += 0x10000;
-      high_expr.X_add_number =
-	((unsigned long) high_expr.X_add_number >> 16) & 0xffff;
+      high_expr.X_add_number = ((high_expr.X_add_number + 0x8000)
+				>> 16) & 0xffff;
       r = BFD_RELOC_UNUSED;
     }
   else
@@ -4982,7 +4980,7 @@ macro (ip)
 	     With a constant we always use the latter case.  */
 	  if (breg == 0)
 	    {
-	      if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
+	      if ((valueT) offset_expr.X_add_number > MAX_GPREL_OFFSET
 		  || nopic_need_relax (offset_expr.X_add_symbol, 1))
 		p = NULL;
 	      else
@@ -5007,7 +5005,7 @@ macro (ip)
 	    }
 	  else
 	    {
-	      if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
+	      if ((valueT) offset_expr.X_add_number > MAX_GPREL_OFFSET
 		  || nopic_need_relax (offset_expr.X_add_symbol, 1))
 		p = NULL;
 	      else
@@ -5502,7 +5500,7 @@ macro (ip)
 	     If there is a base register, we add it to $at after the
 	     lui instruction.  If there is a constant, we always use
 	     the last case.  */
-	  if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
+	  if ((valueT) offset_expr.X_add_number > MAX_GPREL_OFFSET
 	      || nopic_need_relax (offset_expr.X_add_symbol, 1))
 	    {
 	      p = NULL;
@@ -7806,7 +7804,7 @@ mips_ip (str, ip)
 	    case 'u':		/* upper 16 bits */
 	      c = my_getSmallExpression (&imm_expr, s);
 	      imm_reloc = BFD_RELOC_LO16;
-	      if (c)
+	      if (c != S_EX_NONE)
 		{
 		  if (c != S_EX_LO)
 		    {
@@ -8677,13 +8675,14 @@ my_getSmallExpression (ep, str)
   else if (str[0] == '%'
 	   && tolower(str[1]) == 'g'
 	   && tolower(str[2]) == 'p'
-	   && tolower(str[3]) == 'r'
-	   && tolower(str[4]) == 'e'
-	   && tolower(str[5]) == 'l'
-	   && str[6] == '(')
+	   && tolower(str[3]) == '_'
+	   && tolower(str[4]) == 'r'
+	   && tolower(str[5]) == 'e'
+	   && tolower(str[6]) == 'l'
+	   && str[7] == '(')
     {
       c = S_EX_GPREL;
-      str += sizeof ("%gprel(") - 2;
+      str += sizeof ("%gp_rel(") - 2;
     }
   else if (str[0] == '%'
 	   && tolower(str[1]) == 'n'
@@ -9723,9 +9722,7 @@ md_apply_fix (fixP, valueP)
 	  value += (fixP->fx_next->fx_frag->fr_address
 		    + fixP->fx_next->fx_where);
 	}
-      if (value & 0x8000)
-	value += 0x10000;
-      value >>= 16;
+      value = ((value + 0x8000) >> 16) & 0xffff;
       buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
       if (target_big_endian)
 	buf += 2;

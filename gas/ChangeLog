@@ -1,3 +1,13 @@
+2001-08-26  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* tc_mips.h (MAX_GPREL_OFFSET): Change it to the maximum allowed
+	value, not the word beyond maximum.
+	* tc_mips.c (macro_build_lui): Code cleanup.
+	(macro): Reflect change to MAX_GPREL_OFFSET.
+	(mips_ip): Check explicitly against S_EX_NONE.
+	(my_get_SmallExpression): parse for %gp_rel, not %gprel.
+	(md_apply_fix): Code cleanup.
+
 2001-08-24  Andreas Jaeger  <aj@suse.de>
 
 	* config/tc-ppc.h: Fix prototype declaration.

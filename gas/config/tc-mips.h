@@ -47,7 +47,7 @@ struct expressionS;
 
 /* Maximum symbol offset that can be encoded in a BFD_RELOC_MIPS_GPREL
    relocation: */
-#define MAX_GPREL_OFFSET (0x7FF4)
+#define MAX_GPREL_OFFSET (0x7FF0)
 
 #define md_relax_frag(segment, fragp, stretch) mips_relax_frag(fragp, stretch)
 extern int mips_relax_frag PARAMS ((struct frag *, long));
