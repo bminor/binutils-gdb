@@ -1,3 +1,8 @@
+2004-12-28  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* emultempl/pe.em (set_pe_subsystem): Change second arg to
+	lang_add_entry to FALSE.
+
 2004-12-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 600

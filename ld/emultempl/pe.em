@@ -467,7 +467,7 @@ set_pe_subsystem (void)
       entry = alc_entry;
     }
 
-  lang_add_entry (entry, TRUE);
+  lang_add_entry (entry, FALSE);
 
   return;
 }
