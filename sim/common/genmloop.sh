@@ -142,6 +142,10 @@ ${SHELL} $file support
 cat <<EOF
 
 static volatile int keep_running;
+/* FIXME: Should each cpu have its own copy?  */
+static volatile enum sim_stop pending_reason;
+static volatile int pending_sigrc;
+
 /* Want to measure simulator speed even in fast mode.  */
 static unsigned long insn_count;
 static SIM_ELAPSED_TIME start_time;
@@ -151,10 +155,17 @@ static void engine_resume (SIM_DESC, int, int);
 static void engine_resume_full (SIM_DESC);
 ${scache+static void engine_resume_fast (SIM_DESC);}
 
+/* Stop the simulation for REASON/SIGRC.
+   CPU is the cpu being stopped [at address PC].
+   If CPU is NULL, all cpu's are stopping for the same reason.  */
+
 int
-@cpu@_engine_stop (SIM_DESC sd)
+@cpu@_engine_stop (SIM_DESC sd, SIM_CPU *cpu, PCADDR pc,
+		   enum sim_stop reason, int sigrc)
 {
   keep_running = 0;
+  pending_reason = reason;
+  pending_sigrc = sigrc;
   return 1;
 }
 
@@ -186,52 +197,56 @@ engine_resume (SIM_DESC sd, int step, int siggnal)
   insn_count = 0;
 
   engine->jmpbuf = &buf;
+  sim_engine_set_run_state (sd, sim_running, 0);
+  pending_reason = sim_running;
+  pending_sigrc = 0;
+
+  /* ??? Restart support to be added in time.  */
+
   if (setjmp (buf))
     {
       /* Account for the last insn executed.  */
       ++insn_count;
-
-      engine->jmpbuf = NULL;
       TRACE_INSN_FINI ((sim_cpu *) cpu, 1);
-      PROFILE_EXEC_TIME (CPU_PROFILE_DATA (cpu))
-	+= sim_elapsed_time_since (start_time);
-      PROFILE_TOTAL_INSN_COUNT (CPU_PROFILE_DATA (cpu))
-	+= insn_count;
-
-      return;
     }
-
-  /* ??? Restart support to be added in time.  */
-
-  /* The computed goto switch can be used, and while the number of blocks
-     may swamp the relatively few that this function contains, when running
-     with the scache we put the actual semantic code in their own
-     functions.  */
+  else
+    {
+      /* The computed goto switch can be used, and while the number of blocks
+	 may swamp the relatively few that this function contains, when running
+	 with the scache we put the actual semantic code in their own
+	 functions.  */
 
 EOF
 
 if [ x$fast = xyes ] ; then
 	cat <<EOF
-  if (step
-      || !RUN_FAST_P (current_cpu))
-    engine_resume_full (sd);
-  else
-    engine_resume_fast (sd);
+      if (step
+          || !RUN_FAST_P (current_cpu))
+	engine_resume_full (sd);
+      else
+	engine_resume_fast (sd);
 EOF
 else
 	cat <<EOF
-  engine_resume_full (sd);
+      engine_resume_full (sd);
 EOF
 fi
 
 cat <<EOF
 
-  /* If the loop exits, either we single-stepped or engine_stop was called.
-     In either case we need to call engine_halt: to properly exit this
-     function we must go through the setjmp executed above.  */
-  if (step)
-    sim_engine_halt (sd, current_cpu, NULL, NULL_CIA, sim_stopped, SIM_SIGTRAP);
-  sim_engine_halt (sd, current_cpu, NULL, NULL_CIA, sim_stopped, SIM_SIGINT);
+      /* If the loop exits, either we single-stepped or @cpu@_engine_stop
+	 was called.  */
+      if (step)
+	sim_engine_set_run_state (sd, sim_stopped, SIM_SIGTRAP);
+      else
+	sim_engine_set_run_state (sd, pending_reason, pending_sigrc);
+    }
+
+  engine->jmpbuf = NULL;
+  PROFILE_EXEC_TIME (CPU_PROFILE_DATA (cpu))
+    += sim_elapsed_time_since (start_time);
+  PROFILE_TOTAL_INSN_COUNT (CPU_PROFILE_DATA (cpu))
+    += insn_count;
 }
 
 EOF

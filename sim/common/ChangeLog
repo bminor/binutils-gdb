@@ -1,3 +1,11 @@
+Sat May 16 12:44:52 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim-engine.c (sim_engine_set_run_state): New function.
+	* sim-engine.h (sim_engine_set_run_state): Declare.
+	* genmloop.sh (pending_reason,pending_sigrc): New static locals.
+	(@cpu@_engine_stop): New args reason,sigrc.  All callers updated.
+	(engine_resume): Reorganize.  Allow synchronous exit from main loop.
+
 Fri May 15 16:06:05 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-trace.c (trace_insn_init): New arg first_p. 
