@@ -35,7 +35,7 @@ gdb_test "set height 400" "" "test set height"
 
 # use a larger expect input buffer for long help outputs.
 # test help add-symbol-file
-gdb_test "help add-symbol-file" "Usage: add-symbol-file FILE ADDR \\\[-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> \.\.\.\\\]\[\r\n\]+Load the symbols from FILE, assuming FILE has been dynamically loaded\.\[\r\n\]+ADDR is the starting address of the file's text\.\[\r\n\]+The optional arguments are section-name section-address pairs and\[\r\n\]+should be specified if the data and bss segments are not contiguous\[\r\n\]+with the text\. SECT is a section name to be loaded at SECT_ADDR\." "help add-symbol-file"
+gdb_test "help add-symbol-file" "Usage: add-symbol-file FILE ADDR \\\[-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> \.\.\.\\\]\[\r\n\]+Load the symbols from FILE, assuming FILE has been dynamically loaded\.\[\r\n\]+ADDR is the starting address of the file's text\.\[\r\n\]+The optional arguments are section-name section-address pairs and\[\r\n\]+should be specified if the data and bss segments are not contiguous\[\r\n\]+with the text\.  SECT is a section name to be loaded at SECT_ADDR\." "help add-symbol-file"
 # test help aliases
 gdb_test "help aliases" "Aliases of other commands\.\[\r\n\]+List of commands\:.*\[\r\n\]+Type \"help\" followed by command name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help aliases"
 gdb_test "help attach" "Attach to a process or file outside of GDB\.\[\r\n\]+This command attaches to another target, of the same type as your last\[\r\n\]+\"target\" command \\(\"info files\" will show your target stack\\)\.\[\r\n\]+The command may take as argument a process id or a device file\.\[\r\n\]+For a process id, you must have permission to send the process a signal,\[\r\n\]+and it must have the same effective uid as the debugger\.\[\r\n\]+When using \"attach\" with a process id, the debugger finds the\[\r\n\]+program running in the process, looking first in the current working\[\r\n\]+directory, or \\(if not found there\\) using the source file search path\[\r\n\]+\\(see the \"directory\" command\\)\.  You can also use the \"file\" command\[\r\n\]+to specify the program, and to load its symbol table\." "help attach"
@@ -70,7 +70,7 @@ gdb_test "help clear" "Clear breakpoint at specified line or function\.\[\r\n\]+
 # test help commands
 gdb_test "help commands" "Set commands to be executed when a breakpoint is hit\.\[\r\n\]+Give breakpoint number as argument after \"commands\"\.\[\r\n\]+With no argument, the targeted breakpoint is the last one set\.\[\r\n\]+The commands themselves follow starting on the next line\.\[\r\n\]+Type a line containing \"end\" to indicate the end of them\.\[\r\n\]+Give \"silent\" as the first line to make the breakpoint silent;\[\r\n\]+then no output is printed when it is hit, except what the commands print\." "help commands"
 # test help condition
-gdb_test "help condition" "Specify breakpoint number N to break only if COND is true\.\[\r\n\]+Usage is `condition N COND', where N is an integer and COND is an\[\r\n\]+expression to be evaluated whenever breakpoint N is reached.  " "help condition"
+gdb_test "help condition" "Specify breakpoint number N to break only if COND is true\.\[\r\n\]+Usage is `condition N COND', where N is an integer and COND is an\[\r\n\]+expression to be evaluated whenever breakpoint N is reached." "help condition"
 # test help core-file
 gdb_test "help core-file" "Use FILE as core dump for examining memory and registers\.\[\r\n\]+No arg means have no core file\.  This command has been superseded by the\[\r\n\]+`target core' and `detach' commands\." "help core-file"
 # test help delete "d" abbreviation
@@ -317,11 +317,11 @@ gdb_test "help set annotate" "Set annotation_level\.\[\r\n\]+0 == normal;     1 
 # test help set args
 gdb_test "help set args" "Set argument list to give program being debugged when it is started\.\[\r\n\]+Follow this command with any number of args, to be passed to the program\."
 # test help set check "c" abbreviation
-gdb_test "help set c" "Set the status of the type/range checker\[\r\n\]+List of set check subcommands:\[\r\n\]+set check range -- Set range checking\[\r\n\]+set check type -- Set type checking\[\r\n\]+Type \"help set check\" followed by set check subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help set check \"c\" abbreviation"
+gdb_test "help set c" "Set the status of the type/range checker.\[\r\n\]+List of set check subcommands:\[\r\n\]+set check range -- Set range checking\[\r\n\]+set check type -- Set type checking\[\r\n\]+Type \"help set check\" followed by set check subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help set check \"c\" abbreviation"
 # test help set check "ch" abbreviation
-gdb_test "help set ch" "Set the status of the type/range checker\[\r\n\]+List of set check subcommands:\[\r\n\]+set check range -- Set range checking\[\r\n\]+set check type -- Set type checking\[\r\n\]+Type \"help set check\" followed by set check subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help set check \"ch\" abbreviation"
+gdb_test "help set ch" "Set the status of the type/range checker.\[\r\n\]+List of set check subcommands:\[\r\n\]+set check range -- Set range checking\[\r\n\]+set check type -- Set type checking\[\r\n\]+Type \"help set check\" followed by set check subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help set check \"ch\" abbreviation"
 # test help set check
-gdb_test "help set check" "Set the status of the type/range checker\[\r\n\]+List of set check subcommands:\[\r\n\]+set check range -- Set range checking\[\r\n\]+set check type -- Set type checking\[\r\n\]+Type \"help set check\" followed by set check subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help set check"
+gdb_test "help set check" "Set the status of the type/range checker.\[\r\n\]+List of set check subcommands:\[\r\n\]+set check range -- Set range checking\[\r\n\]+set check type -- Set type checking\[\r\n\]+Type \"help set check\" followed by set check subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help set check"
 # test help set check range
 gdb_test "help set check range" "Set range checking\.  \\(on/warn/off/auto\\)" "help set check range"
 # test help set check type
@@ -343,7 +343,7 @@ gdb_test "help set history filename" "Set the filename in which to record the co
 # test help set history save
 gdb_test "help set history save" "Set saving of the history record on exit\.\[\r\n\]+Use \"on\" to enable the saving, and \"off\" to disable it\.\[\r\n\]+Without an argument, saving is enabled\." "help set history save"
 # test help set history size
-gdb_test "help set history size" "Set the size of the command history, \[\r\n\]+ie\. the number of previous commands to keep a record of\." "help set history size"
+gdb_test "help set history size" "Set the size of the command history,\[\r\n\]+ie\. the number of previous commands to keep a record of\." "help set history size"
 # test help set history
 gdb_test "help set history" "Generic command for setting command history parameters\.\[\r\n\]+List of set history subcommands:\[\r\n\]+set history expansion -- Set history expansion on command input\[\r\n\]+set history filename -- Set the filename in which to record the command history\[\r\n\]+set history save -- Set saving of the history record on exit\[\r\n\]+set history size -- Set the size of the command history\[\r\n\]+Type \"help set history\" followed by set history subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help set history"
 # test help set language
@@ -400,15 +400,15 @@ gdb_test "help set write" "Set writing into executable and core files\." "help s
 # Also, if the system is slow, it may time out because the output is large.
 gdb_test "help set" "Evaluate expression EXP and assign result to variable VAR, using assignment\[\r\n\]+syntax appropriate for the current language \\(VAR = EXP or VAR := EXP for\[\r\n\]+example\\)\.  VAR may be a debugger \"convenience\" variable \\(names starting\[\r\n\]+with \\\$\\), a register \\(a few standard names starting with \\\$\\), or an actual\[\r\n\]+variable in the program being debugged\.  EXP is any valid expression.*\[\r\n\]+set listsize -- Set number of source lines gdb will list by default.*\[\r\n\]+Type \"help set\" followed by set subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous..*\[\r\n\]+" "help set"
 # test help shell
-gdb_test "help shell" "Execute the rest of the line as a shell command\.  \[\r\n\]+With no arguments, run an inferior shell\." "help shell"
+gdb_test "help shell" "Execute the rest of the line as a shell command\.\[\r\n\]+With no arguments, run an inferior shell\." "help shell"
 #test help show annotate
 gdb_test "help show annotate" "Show annotation_level\.\[\r\n\]+0 == normal;     1 == fullname \\(for use when running under emacs\\)\[\r\n\]+2 == output annotated suitably for use by programs that control GDB\." "help show annotate"
 # test help show args
 gdb_test "help show args" "Show argument list to give program being debugged when it is started\.\[\r\n\]+Follow this command with any number of args, to be passed to the program\."
 # test help show check "c" abbreviation
-gdb_test "help show c" "Show the status of the type/range checker\[\r\n\]+List of show check subcommands:\[\r\n\]+show check range -- Show range checking\[\r\n\]+show check type -- Show type checking\[\r\n\]+Type \"help show check\" followed by show check subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help show check \"c\" abbreviation"
+gdb_test "help show c" "Show the status of the type/range checker.\[\r\n\]+List of show check subcommands:\[\r\n\]+show check range -- Show range checking\[\r\n\]+show check type -- Show type checking\[\r\n\]+Type \"help show check\" followed by show check subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help show check \"c\" abbreviation"
 # test help show check
-gdb_test "help show check" "Show the status of the type/range checker\[\r\n\]+List of show check subcommands:\[\r\n\]+show check range -- Show range checking\[\r\n\]+show check type -- Show type checking\[\r\n\]+Type \"help show check\" followed by show check subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help show check"
+gdb_test "help show check" "Show the status of the type/range checker.\[\r\n\]+List of show check subcommands:\[\r\n\]+show check range -- Show range checking\[\r\n\]+show check type -- Show type checking\[\r\n\]+Type \"help show check\" followed by show check subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help show check"
 # test help show check range
 gdb_test "help show check range" "Show range checking\.  \\(on/warn/off/auto\\)" "help show check range"
 # test help show check type
@@ -432,7 +432,7 @@ gdb_test "help show height" "Show number of lines gdb thinks are in a page\." "h
 # test help show history expansion
 gdb_test "help show history expansion" "Show history expansion on command input\.\[\r\n\]+Without an argument, history expansion is enabled\." "help show history expansion"
 # test help show history filename
-gdb_test "help show history filename" "Show the filename in which to record the command history\[\r\n\]+ \\(the list of previous commands of which a record is kept\\)\." "help show history filename"
+gdb_test "help show history filename" "Show the filename in which to record the command history\[\r\n\]+\\(the list of previous commands of which a record is kept\\)\." "help show history filename"
 # test help show history save
 gdb_test "help show history save" "Show saving of the history record on exit\.\[\r\n\]+Use \"on\" to enable the saving, and \"off\" to disable it\.\[\r\n\]+Without an argument, saving is enabled\." "help show history save"
 # test help show history size
@@ -543,7 +543,7 @@ gdb_test "help undisplay" "Cancel some expressions to be displayed when program 
 # test help unset environment
 gdb_test "help unset environment" "Cancel environment variable VAR for the program\.\[\r\n\]+This does not affect the program until the next \"run\" command\." "help unset environment"
 # test help unset
-gdb_test "help unset" "Complement to certain \"set\" commands\[\r\n\]+List of unset subcommands:\[\r\n\]+unset environment -- Cancel environment variable VAR for the program\[\r\n\]+Type \"help unset\" followed by unset subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help unset"
+gdb_test "help unset" "Complement to certain \"set\" commands.\[\r\n\]+List of unset subcommands:\[\r\n\]+unset environment -- Cancel environment variable VAR for the program\[\r\n\]+Type \"help unset\" followed by unset subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help unset"
 # test help up
 gdb_test "help up" "Select and print stack frame that called this one\.\[\r\n\]+An argument says how many frames up to go\." "help up"
 # test help up-silently

@@ -1,3 +1,8 @@
+2002-03-27  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/help.exp: Modify expect strings to reflect 
+	clean-ups in help messages.
+
 2002-03-26  Fred Fish  <fnf@redhat.com>
 
 	* gdb.base/step-test.exp: Accept stopping in memcpy/bcopy when we
