@@ -1,3 +1,11 @@
+Sat Jan 24 23:44:43 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* breakpoint.c (enable_breakpoint): Preserve breakpoint
+	disposition when enabling a breakpoint.
+
+	* symtab.c (find_pc_sect_line): If no symbol information
+	is found, return correct pc anyway.
+
 Fri Jan 23 17:26:22 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.host (i[3456]86-*-osf1mk*, mips-*-mach3*,
