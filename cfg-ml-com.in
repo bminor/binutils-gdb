@@ -253,42 +253,6 @@ powerpc-*-eabiaix*)
 	  done
 	fi
 	;;
-powerpc*-*-eabisim*)	# don't bother with aix{,desc}/mrelocatable configurations
-	multidirs="little-endian big-endian aix aixdesc mrelocatable little-endian/mrelocatable big-endian/mrelocatable"
-	if [ x$enable_biendian = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *endian* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_aix = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *aix* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_relocatable = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *relocatable* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	;;
 powerpc-*-eabi* | powerpc-*-elf* | powerpc-*-sysv4*)
 	multidirs="soft-float relocatable little-endian call-aix little-endian/call-aix relocatable/little-endian relocatable/call-aix relocatable/little-endian/call-aix soft-float/relocatable soft-float/little-endian soft-float/call-aix soft-float/little-endian/call-aix soft-float/relocatable/little-endian soft-float/relocatable/call-aix soft-float/relocatable/little-endian/call-aix"
 	if [ x$enable_biendian = xno ]
