@@ -1,3 +1,8 @@
+Fri Jan 21 19:13:12 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* dis-asm.h (print_insn_big_powerpc, print_insn_little_powerpc,
+	print_insn_rs6000): Declare.
+
 Thu Jan  6 14:15:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bfdlink.h (struct bfd_link_callbacks): Add bitsize argument to
