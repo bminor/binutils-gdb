@@ -1,3 +1,9 @@
+Mon Feb 21 11:17:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh: Include <gdb_wait.h> instead of <wait.h>.
+	* gdbarch.c: Already updated by Wed Feb 9 18:59:16 2000 Andrew
+ 	Cagney <cagney@b1.cygnus.com>.
+
 Mon Feb 21 11:03:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Update: IA-64 - Kevin Buettner; ARM - Fernando
