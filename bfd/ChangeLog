@@ -40,6 +40,7 @@ Wed Oct 23 00:53:16 1996  Jeffrey A Law  (law@cygnus.com)
 	* elf32-v850.c (elf32_v850_howto_table): Fix typo in
 	R_V850_SDA_OFFSET entry.
 
+end-sanitize-v850
 Wed Oct 23 00:20:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (bfd_xcoff_import_symbol): Don't allocate ldsym.
