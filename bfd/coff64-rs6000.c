@@ -1730,6 +1730,22 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
+
+  /* Modifiable branch absolute.  */
+  HOWTO (R_RBA,			/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_RBA_16",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
 };
 
 void
@@ -1750,6 +1766,8 @@ xcoff64_rtype2howto (relent, internal)
 	relent->howto = &xcoff64_howto_table[0x1d];
       else if (R_RBR == internal->r_type) 
 	relent->howto = &xcoff64_howto_table[0x1e];
+      else if (R_RBA == internal->r_type) 
+	relent->howto = &xcoff64_howto_table[0x1f];
     }
   /* Special case 32 bit */
   else if (31 == (internal->r_size & 0x3f))

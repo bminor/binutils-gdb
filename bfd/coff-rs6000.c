@@ -948,6 +948,21 @@ reloc_howto_type xcoff_howto_table[] =
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
+  /* Modifiable branch relative.  */
+  HOWTO (R_RBA,	                /* type */
+	 0,	                /* rightshift */
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 16,	                /* bitsize */
+	 false,	                /* pc_relative */
+	 0,	                /* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 0,		        /* special_function */
+	 "R_RBA_16",            /* name */
+	 true,	                /* partial_inplace */
+	 0xffff,	        /* src_mask */
+	 0xffff,        	/* dst_mask */
+	 false),                /* pcrel_offset */
+
 };
 
 void
@@ -968,6 +983,8 @@ xcoff_rtype2howto (relent, internal)
 	relent->howto = &xcoff_howto_table[0x1c];
       else if (R_RBR == internal->r_type) 
 	relent->howto = &xcoff_howto_table[0x1d];
+      else if (R_RBA == internal->r_type) 
+	relent->howto = &xcoff_howto_table[0x1e];
     }
   
   /* The r_size field of an XCOFF reloc encodes the bitsize of the

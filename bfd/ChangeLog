@@ -1,3 +1,8 @@
+2002-05-30  Tom Rix  <trix@redhat.com>
+
+	* coff-rs6000.c (xcoff_rtype2howto): Handle 16 bit R_RBA.
+	* coff64-rs6000.c (xcoff64_rtype2howto): Same.
+
 2002-05-30  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (ALPHA_ELF_LINK_HASH_LU_TLSGD,
