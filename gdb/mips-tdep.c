@@ -30,8 +30,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "gdbtypes.h"
 
+#if 0
 #include "opcode/mips.h"
+#endif
 
 #define VM_MIN_ADDRESS (unsigned)0x400000
 
@@ -706,8 +709,14 @@ mips_push_dummy_frame()
   for (ireg = 32; --ireg >= 0; )
     if (PROC_REG_MASK(proc_desc) & (1 << ireg))
       {
-	store_unsigned_integer (buffer, REGISTER_RAW_SIZE (ireg),
-				read_register (ireg));
+	read_register_gen (ireg, buffer);
+
+	/* Need to fix the save_address decrement below, and also make sure
+	   that we don't run into problems with the size of the dummy frame
+	   or any of the offsets within it.  */
+	if (REGISTER_RAW_SIZE (ireg) > 4)
+	  error ("Cannot call functions on mips64");
+
 	write_memory (save_address, buffer, REGISTER_RAW_SIZE (ireg));
 	save_address -= 4;
       }
@@ -716,26 +725,28 @@ mips_push_dummy_frame()
   for (ireg = 32; --ireg >= 0; )
     if (PROC_FREG_MASK(proc_desc) & (1 << ireg))
       {
-	store_unsigned_integer (buffer, 4, read_register (ireg + FP0_REGNUM));
-	write_memory (save_address, buffer, 4);
+	read_register_gen (ireg + FP0_REGNUM, buffer);
+
+	if (REGISTER_RAW_SIZE (ireg + FP0_REGNUM) > 4)
+	  error ("Cannot call functions on mips64");
+
+	write_memory (save_address, buffer,
+		      REGISTER_RAW_SIZE (ireg + FP0_REGNUM));
 	save_address -= 4;
       }
   write_register (PUSH_FP_REGNUM, sp);
   PROC_FRAME_REG(proc_desc) = PUSH_FP_REGNUM;
   PROC_FRAME_OFFSET(proc_desc) = 0;
-  store_unsigned_integer (buffer, REGISTER_RAW_SIZE (PC_REGNUM),
-			  read_register (PC_REGNUM));
+  read_register_gen (PC_REGNUM, buffer);
   write_memory (sp - 4, buffer, REGISTER_RAW_SIZE (PC_REGNUM));
-  store_unsigned_integer (buffer, REGISTER_RAW_SIZE (HI_REGNUM),
-			  read_register (HI_REGNUM));
+  read_register_gen (HI_REGNUM, buffer);
   write_memory (sp - 8, buffer, REGISTER_RAW_SIZE (HI_REGNUM));
-  store_unsigned_integer (buffer, REGISTER_RAW_SIZE (LO_REGNUM),
-			  read_register (LO_REGNUM));
+  read_register_gen (LO_REGNUM, buffer);
   write_memory (sp - 12, buffer, REGISTER_RAW_SIZE (LO_REGNUM));
-  store_unsigned_integer
-    (buffer,
-     REGISTER_RAW_SIZE (FCRCS_REGNUM),
-     mips_fpu ? read_register (FCRCS_REGNUM) : 0);
+  if (mips_fpu)
+    read_register_gen (FCRCS_REGNUM, buffer);
+  else
+    memset (buffer, 0, REGISTER_RAW_SIZE (FCRCS_REGNUM));
   write_memory (sp - 16, buffer, REGISTER_RAW_SIZE (FCRCS_REGNUM));
   sp -= 4 * (GEN_REG_SAVE_COUNT
 	     + (mips_fpu ? FLOAT_REG_SAVE_COUNT : 0)
@@ -810,6 +821,13 @@ mips_print_register (regnum, all)
      int regnum, all;
 {
   unsigned char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  struct type *our_type =
+    init_type (TYPE_CODE_INT,
+	       /* We will fill in the length for each register.  */
+	       0,
+	       TYPE_FLAG_UNSIGNED,
+	       NULL,
+	       NULL);
 
   /* Get the data in raw format.  */
   if (read_relative_register_raw_bytes (regnum, raw_buffer))
@@ -853,19 +871,11 @@ mips_print_register (regnum, all)
   /* Else print as integer in hex.  */
   else
     {
-      long val;
-
-      val = extract_signed_integer (raw_buffer,
-				    REGISTER_RAW_SIZE (regnum));
-
-      if (val == 0)
-	printf_filtered ("0");
-      else if (all)
-	/* FIXME: We should be printing this in a fixed field width, so that
-	   registers line up.  */
-	printf_filtered (local_hex_format(), val);
-      else
-	printf_filtered ("%s=%ld", local_hex_string(val), val);
+      print_scalar_formatted (raw_buffer,
+			      REGISTER_VIRTUAL_TYPE (regnum),
+			      'x',
+			      0,
+			      gdb_stdout);
     }
 }
 

@@ -1,5 +1,17 @@
 Thu Feb 24 08:30:33 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* mips-tdep.c (mips_print_register): Print integers using
+	print_scalar_formatted rather than duplicating all the
+	CC_HAS_LONG_LONG and so on.
+	(mips_push_dummy_frame): Use read_register_gen rather than using
+	read_register and then putting it back in target format with
+	store_unsigned_integer.  If registers are more than 4 bytes, give
+	an error rather than have some registers overwrite other
+	registers.
+	#if 0 unused include of opcode/mips.h.
+
+	* symfile.h: Don't declare arguments for coff_getfilename.
+
 	* defs.h: Revert Kung change regarding FORCE_LONG_LONG.
 
 Thu Feb 24 08:06:52 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
