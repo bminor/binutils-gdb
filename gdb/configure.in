@@ -812,12 +812,12 @@ fi
 # start-sanitize-gdbtk
 AC_PROG_LN_S
 # Make it possible to use the GUI without doing a full install
-if test "${enable_gdbtk}" = "yes" -a ! -d gdbtcl ; then
-  if test "$LN_S" = "ln -s" -a ! -f gdbtcl ; then
-  echo linking $srcdir/gdbtcl to gdbtcl
-  $LN_S $srcdir/gdbtcl gdbtcl
+if test "${enable_gdbtk}" = "yes" -a ! -d gdbtcl2 ; then
+  if test "$LN_S" = "ln -s" -a ! -f gdbtcl2 ; then
+  echo linking $srcdir/gdbtcl2 to gdbtcl2
+  $LN_S $srcdir/gdbtcl2 gdbtcl2
   else
-  echo Warning: Unable to link $srcdir/gdbtcl to gdbtcl.  You will need to do a
+  echo Warning: Unable to link $srcdir/gdbtcl2 to gdbtcl2.  You will need to do a
   echo "         " make install before you are able to run the GUI.
   fi
 fi
