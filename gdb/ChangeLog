@@ -1,3 +1,7 @@
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* config/pa/tm-hppah.h: Update copyright years.
+
 2004-01-08  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_n32n64_reg_struct_has_addr): Delete function.
