@@ -1,5 +1,11 @@
 2004-04-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* vaxnbsd-tdep.c: New file.
+	* Makefile.in (vaxnbsd-tdep.o): New dependency.
+	* configure.tgt: Add vax-*-netbsd* and vax-*-openbsd*.
+	* config/vax/nbsd.mt: New file.
+	* config/vax/tm-nbsd.h: New file.
+
 	* Makefile.in (vaxbsd-nat.o): New dependency.
 
 	* vax-tdep.h (vax_regnum): Add VAX_R0_REGNUM and VAX_R1_REGNUM.

@@ -185,6 +185,8 @@ sparc64-*-*)		gdb_target=sparc64 ;;
 
 xstormy16-*-*)          gdb_target=xstormy16 ;;
 
+vax-*-netbsd*)		gdb_target=nbsd ;;
+vax-*-openbsd*)		gdb_target=nbsd ;;
 vax-*-*)		gdb_target=vax ;;
 
 v850*-*-*)		gdb_target=v850
