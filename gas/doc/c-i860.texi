@@ -104,6 +104,8 @@ Change the temporary register used when expanding pseudo operations. The
 default register is @code{r31}.
 @end table
 
+The @code{.dual}, @code{.enddual}, and @code{.atmp} directives are available only in the Intel syntax mode.
+
 @node Opcodes for i860
 @section i860 Opcodes
 

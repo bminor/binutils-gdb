@@ -1,5 +1,10 @@
 2003-08-05  Jason Eckhardt  <jle@rice.edu>
 
+        * doc/c-i860.texi: Mention that .dual, .enddual, and .atmp
+	directives are only available in Intel syntax mode.
+
+2003-08-05  Jason Eckhardt  <jle@rice.edu>
+
         * config/tc-i860.c (s_dual): Accept .dual directive only in
         the Intel syntax mode.
         (s_enddual): Likewise for .enddual.
