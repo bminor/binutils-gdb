@@ -1435,8 +1435,8 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
                           _("cannot branch to odd address"));
           val /= 2;
           if (val > 127 || val < -128)
-            as_warn_where (fixP->fx_file, fixP->fx_line,
-                           _("relative jump out of range"));
+            as_bad_where (fixP->fx_file, fixP->fx_line,
+                          _("relative jump out of range"));
           *buf++ = val;
           fixP->fx_no_overflow = 1;
           fixP->fx_done = 1;
