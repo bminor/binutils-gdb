@@ -1,3 +1,7 @@
+Fri Mar  3 12:27:28 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* utils.c [_AIX]: Include stddef.h instead of #defining size_t.
+
 Fri Mar  3 12:33:24 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* rs6000-tdep.c (skip_prologue): Skip multiple stores of the saved

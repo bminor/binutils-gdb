@@ -1,5 +1,5 @@
 /* General utility routines for GDB, the GNU debugger.
-   Copyright 1986, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1992, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#if !defined(__GO32__)
+#if !defined(__GO32__) && !defined(WIN32)
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <pwd.h>
@@ -284,8 +284,12 @@ error (va_alist)
   va_list args;
   char *string;
 
-  error_begin ();
   va_start (args);
+
+  if (error_hook)
+    error_hook (args);		/* Never returns */
+
+  error_begin ();
   string = va_arg (args, char *);
   vfprintf_filtered (gdb_stderr, string, args);
   fprintf_filtered (gdb_stderr, "\n");
@@ -474,7 +478,7 @@ quit ()
 }
 
 
-#ifdef __GO32__
+#if defined(__GO32__)||defined(WIN32)
 
 /* In the absence of signals, poll keyboard for a quit.
    Called from #define QUIT pollquit() in xm-go32.h. */
@@ -503,7 +507,7 @@ pollquit()
 
 
 #endif
-#ifdef __GO32__
+#if defined(__GO32__)||defined(WIN32)
 void notice_quit()
 {
   if (kbhit ())
@@ -554,19 +558,31 @@ request_quit (signo)
 
 #if defined (NO_MMALLOC)
 
+/* Make a substitute size_t for non-ANSI compilers. */
+
+#ifdef _AIX
+#include <stddef.h>
+#else /* Not AIX */
+#ifndef __STDC__
+#ifndef size_t
+#define size_t unsigned int
+#endif
+#endif
+#endif /* Not AIX */
+
 PTR
 mmalloc (md, size)
      PTR md;
-     long size;
+     size_t size;
 {
-  return (malloc (size));
+  return malloc (size);
 }
 
 PTR
 mrealloc (md, ptr, size)
      PTR md;
      PTR ptr;
-     long size;
+     size_t size;
 {
   if (ptr == 0)		/* Guard against old realloc's */
     return malloc (size);
@@ -823,6 +839,12 @@ query (va_alist)
   register int answer;
   register int ans2;
   int retval;
+
+  if (query_hook)
+    {
+      va_start (args);
+      return query_hook (args);
+    }
 
   /* Automatically answer "yes" if input is not from a terminal.  */
   if (!input_from_terminal_p ())
@@ -1226,6 +1248,12 @@ void
 gdb_flush (stream)
      FILE *stream;
 {
+  if (flush_hook)
+    {
+      flush_hook (stream);
+      return;
+    }
+
   fflush (stream);
 }
 
@@ -1252,7 +1280,7 @@ fputs_maybe_filtered (linebuffer, stream, filter)
 
   if (linebuffer == 0)
     return;
-  
+
   /* Don't do any filtering if it is disabled.  */
   if (stream != gdb_stdout
    || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX))
@@ -1703,7 +1731,7 @@ strcmp_iw (string1, string2)
 
 
 void
-_initialize_utils ()
+initialize_utils ()
 {
   struct cmd_list_element *c;
 
@@ -1722,7 +1750,7 @@ _initialize_utils ()
   
   /* These defaults will be used if we are unable to get the correct
      values from termcap.  */
-#if defined(__GO32__)
+#if defined(__GO32__) || defined(WIN32)
   lines_per_page = ScreenRows();
   chars_per_line = ScreenCols();
 #else  
