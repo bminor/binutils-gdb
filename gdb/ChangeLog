@@ -1,3 +1,11 @@
+Thu May 19 09:56:20 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* target.c, target.h: New variables target_activity_function and
+	target_activity_fd.
+	* inflow.c, inferior.h: New functions set_sigio_trap and
+	clear_sigio_trap.
+	* inftarg.c (child_wait), procfs.c (wait_fd): Call them.
+
 Wed May 18 13:01:55 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 	* remote-sim.h (sim_verbose): Delete.

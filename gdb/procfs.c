@@ -573,6 +573,7 @@ wait_fd ()
   if (attach_flag)
     set_sigint_trap ();	/* Causes SIGINT to be passed on to the
 			   attached process. */
+  set_sigio_trap ();
 
 #ifndef LOSING_POLL
   num_fds = poll (poll_list, num_poll_list, -1);
@@ -592,6 +593,7 @@ wait_fd ()
   
   if (attach_flag)
     clear_sigint_trap();
+  clear_sigio_trap ();
 
 #ifndef LOSING_POLL
 
