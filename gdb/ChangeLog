@@ -1,5 +1,7 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
+	* objc-lang.h (c_val_print, c_value_print): Delete declarations.
+
 	* cp-valprint.c (cp_print_class_method)
 	(cp_print_class_member): Make buffer a const bfd_byte.
 	* c-lang.h (cp_print_class_member, cp_print_class_method): Ditto.

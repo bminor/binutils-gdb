@@ -1,6 +1,6 @@
 /* Objective-C language support definitions for GDB, the GNU debugger.
 
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 2005 Free Software Foundation, Inc.
 
    Contributed by Apple Computer, Inc.
 
@@ -30,13 +30,6 @@ struct block;
 extern int objc_parse (void);		/* Defined in c-exp.y */
 
 extern void objc_error (char *);	/* Defined in c-exp.y */
-
-extern int c_val_print (struct type *, char *, int, 
-			CORE_ADDR, struct ui_file *, int,
-			int, int, enum val_prettyprint);
-
-extern int c_value_print (struct value *, struct ui_file *, 
-			  int, enum val_prettyprint);
 
 extern CORE_ADDR lookup_objc_class     (char *classname);
 extern CORE_ADDR lookup_child_selector (char *methodname);
