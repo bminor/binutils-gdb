@@ -2897,25 +2897,6 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
       r_type = ELF32_R_TYPE (rel->r_info);
 
       /* Many of the relocs are only used for relaxing, and are
@@ -2948,9 +2929,28 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
+
+	  if (info->relocateable)
+	    {
+	      /* This is a relocateable link.  We don't have to change
+		 anything, unless the reloc is against a section symbol,
+		 in which case we have to adjust according to where the
+		 section symbol winds up in the output section.  */
+	      sym = local_syms + r_symndx;
+	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+		goto final_link_relocate;
+
+	      continue;
+	    }
 	}
       else
 	{
+	  /* Section symbol are never (?) placed in the hash table, so
+	     we can just ignore hash relocations when creating a
+	     relocateable object file.  */
+	  if (info->relocateable)
+	    continue;
+
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)

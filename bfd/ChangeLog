@@ -1,3 +1,9 @@
+2000-09-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-sh.c (sh_elf_relocate_section): Use
+	_bfd_final_link_relocate to apply the relocation against a section
+	symbol, when doing relocatable links.
+
 2000-09-18  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-hppa.c (elf32_hppa_stub_hash_entry): Rename input_section
