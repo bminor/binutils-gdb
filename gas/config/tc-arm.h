@@ -167,6 +167,7 @@ struct fix;
 # define DWARF2_LINE_MIN_INSN_LENGTH 	2
 # define obj_frob_symbol(sym, punt)	armelf_frob_symbol ((sym), & (punt))
 # define md_elf_section_change_hook()	arm_elf_change_section ()
+# define md_elf_section_type(str, len)	arm_elf_section_type (str, len)
 # define GLOBAL_OFFSET_TABLE_NAME	"_GLOBAL_OFFSET_TABLE_"
 # define LOCAL_LABEL_PREFIX 		'.'
 # define TC_SEGMENT_INFO_TYPE 		enum mstate
@@ -209,3 +210,5 @@ extern void cons_fix_new_arm (fragS *, int, int, expressionS *);
 extern void arm_init_frag (struct frag *);
 extern void arm_handle_align (struct frag *);
 extern bfd_boolean arm_fix_adjustable (struct fix *);
+extern int arm_elf_section_type (const char *, size_t);
+

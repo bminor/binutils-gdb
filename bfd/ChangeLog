@@ -1,3 +1,10 @@
+2004-10-01  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.h (elf32_arm_fake_sections,
+	is_arm_elf_unwind_section_name, elf32_arm_section_from_shdr): New
+	functions.
+	(elf_backend_fake_sections, elf_backend_section_from_shdr): Define.
+
 2004-10-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct eh_cie_fde): Add need_relative and

@@ -2404,6 +2404,19 @@ get_ia64_section_type_name (unsigned int sh_type)
 }
 
 static const char *
+get_arm_section_type_name (unsigned int sh_type)
+{
+  switch (sh_type)
+    {
+    case SHT_ARM_EXIDX:
+      return "ARM_EXIDX";
+    default:
+      break;
+    }
+  return NULL;
+}
+
+static const char *
 get_section_type_name (unsigned int sh_type)
 {
   static char buff[32];
@@ -2452,6 +2465,9 @@ get_section_type_name (unsigned int sh_type)
 	      break;
 	    case EM_IA_64:
 	      result = get_ia64_section_type_name (sh_type);
+	      break;
+	    case EM_ARM:
+	      result = get_arm_section_type_name (sh_type);
 	      break;
 	    default:
 	      result = NULL;

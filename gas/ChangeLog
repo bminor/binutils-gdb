@@ -1,3 +1,10 @@
+2004-10-01  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (arm_elf_section_type): New function.
+	(arm_elf_change_section): Set section link for exidx sections.
+	* config/tc-arm.h (arm_elf_section_type): Add prototype.
+	(md_elf_section_type): Define.
+
 2004-10-01  Bill Farmer  <Bill@the-farmers.freeserve.co.uk>
 
 	* config/tc-pdp11.c (md_apply_fix3): Change to sign of the SOB

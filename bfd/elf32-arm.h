@@ -4235,9 +4235,6 @@ elf32_arm_reloc_type_class (const Elf_Internal_Rela *rela)
     }
 }
 
-static bfd_boolean elf32_arm_section_flags           (flagword *, const Elf_Internal_Shdr *);
-static void        elf32_arm_final_write_processing  (bfd *, bfd_boolean);
-
 /* Set the right machine number for an Arm ELF file.  */
 
 static bfd_boolean
@@ -4255,6 +4252,65 @@ elf32_arm_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED
   bfd_arm_update_notes (abfd, ARM_NOTE_SECTION);
 }
 
+/* Return TRUE if this is an unwinding table entry.  */
+
+static bfd_boolean
+is_arm_elf_unwind_section_name (bfd * abfd ATTRIBUTE_UNUSED, const char * name)
+{
+  size_t len1, len2;
+
+  len1 = sizeof (ELF_STRING_ARM_unwind) - 1;
+  len2 = sizeof (ELF_STRING_ARM_unwind_once) - 1;
+  return (strncmp (name, ELF_STRING_ARM_unwind, len1) == 0
+	  || strncmp (name, ELF_STRING_ARM_unwind_once, len2) == 0);
+}
+
+
+/* Set the type and flags for an ARM section.  We do this by
+   the section name, which is a hack, but ought to work.  */
+
+static bfd_boolean
+elf32_arm_fake_sections (bfd * abfd, Elf_Internal_Shdr * hdr, asection * sec)
+{
+  const char * name;
+
+  name = bfd_get_section_name (abfd, sec);
+
+  if (is_arm_elf_unwind_section_name (abfd, name))
+    {
+      hdr->sh_type = SHT_ARM_EXIDX;
+      hdr->sh_flags |= SHF_LINK_ORDER;
+    }
+  return TRUE;
+}
+
+/* Handle an ARM specific section when reading an object file.
+   This is called when elf.c finds a section with an unknown type.  */
+
+static bfd_boolean
+elf32_arm_section_from_shdr (bfd *abfd,
+			     Elf_Internal_Shdr * hdr,
+			     const char *name)
+{
+  /* There ought to be a place to keep ELF backend specific flags, but
+     at the moment there isn't one.  We just keep track of the
+     sections by their name, instead.  Fortunately, the ABI gives
+     names for all the ARM specific sections, so we will probably get
+     away with this.  */
+  switch (hdr->sh_type)
+    {
+    case SHT_ARM_EXIDX:
+      break;
+
+    default:
+      return FALSE;
+    }
+
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+    return FALSE;
+
+  return TRUE;
+}
 
 /* Called for each symbol.  Builds a section map based on mapping symbols.
    Does not alter any of the symbols.  */
@@ -4426,6 +4482,8 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
 #define elf_backend_reloc_type_class		elf32_arm_reloc_type_class
 #define elf_backend_object_p			elf32_arm_object_p
 #define elf_backend_section_flags		elf32_arm_section_flags
+#define elf_backend_fake_sections  		elf32_arm_fake_sections
+#define elf_backend_section_from_shdr  		elf32_arm_section_from_shdr
 #define elf_backend_final_write_processing      elf32_arm_final_write_processing
 #define elf_backend_copy_indirect_symbol        elf32_arm_copy_indirect_symbol
 

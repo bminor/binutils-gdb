@@ -1338,6 +1338,11 @@ arm_elf_change_section (void)
 {
   flagword flags;
 
+  /* Link an unlinked unwind index table section to the .text section.  */
+  if (elf_section_type (now_seg) == SHT_ARM_EXIDX
+      && elf_linked_to_section (now_seg) == NULL)
+    elf_linked_to_section (now_seg) = text_section;
+
   if (!SEG_NORMAL (now_seg))
     return;
 
@@ -1348,6 +1353,15 @@ arm_elf_change_section (void)
     return;
 
   mapstate = seg_info (now_seg)->tc_segment_info_data;
+}
+
+int
+arm_elf_section_type (const char * str, size_t len)
+{
+  if (len == 5 && strncmp (str, "exidx", 5) == 0)
+    return SHT_ARM_EXIDX;
+
+  return -1;
 }
 #else
 #define mapping_state(a)

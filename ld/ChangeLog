@@ -1,3 +1,7 @@
+2004-10-01  Paul Brook  <paul@codesourcery.com>
+
+	* emulparams/armelf.sh: Add unwinding table sections.
+
 2004-09-30  Filip Navara  <navaraf@reactos.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_set_symbols): Generate
