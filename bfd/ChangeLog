@@ -1,3 +1,10 @@
+1999-01-27  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-fr30.c (fr30_elf_howto_table): Fix name of R_FR30_48
+	relocation. 
+	(fr30_final_link_relocate): Use computed value as result of
+	relocation. 
+
 1999-01-26  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* binary.c (binary_set_section_contents): Emit warning for

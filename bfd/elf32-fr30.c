@@ -65,7 +65,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FR30_8",		/* name */
 	 true,			/* partial_inplace */
-	 0x0ff0,		/* src_mask */
+	 0x0000,		/* src_mask */
 	 0x0ff0,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -80,7 +80,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 fr30_elf_i20_reloc,	/* special_function */
 	 "R_FR30_20",		/* name */
 	 true,			/* partial_inplace */
-	 0x00f0ffff,		/* src_mask */
+	 0x00000000,		/* src_mask */
 	 0x00f0ffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -95,7 +95,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FR30_32",		/* name */
 	 true,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
+	 0x00000000,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -108,9 +108,9 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 fr30_elf_i32_reloc,	/* special_function */
-	 "R_FR30_32",		/* name */
+	 "R_FR30_48",		/* name */
 	 true,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
+	 0x00000000,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -125,7 +125,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FR30_6_IN_4",	/* name */
 	 true,			/* partial_inplace */
-	 0x00f0,		/* src_mask */
+	 0x0000,		/* src_mask */
 	 0x00f0,		/* dst_mask */
 	 false),		/* pcrel_offset */
   
@@ -140,7 +140,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 bfd_elf_generic_reloc,/* special_function */
 	 "R_FR30_8_IN_8",	/* name */
 	 true,			/* partial_inplace */
-	 0x0ff0,		/* src_mask */
+	 0x0000,		/* src_mask */
 	 0x0ff0,		/* dst_mask */
 	 false),		/* pcrel_offset */
   
@@ -155,7 +155,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 bfd_elf_generic_reloc,/* special_function */
 	 "R_FR30_9_IN_8",	/* name */
 	 true,			/* partial_inplace */
-	 0x0ff0,		/* src_mask */
+	 0x0000,		/* src_mask */
 	 0x0ff0,		/* dst_mask */
 	 false),		/* pcrel_offset */
   
@@ -170,7 +170,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 bfd_elf_generic_reloc,/* special_function */
 	 "R_FR30_10_IN_8",	/* name */
 	 true,			/* partial_inplace */
-	 0x0ff0,		/* src_mask */
+	 0x0000,		/* src_mask */
 	 0x0ff0,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -185,7 +185,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_FR30_9_PCREL",	/* name */
 	 false,			/* partial_inplace */
-	 0x00ff,		/* src_mask */
+	 0x0000,		/* src_mask */
 	 0x00ff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -200,7 +200,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_FR30_12_PCREL",	/* name */
 	 false,			/* partial_inplace */
-	 0x07ff,		/* src_mask */
+	 0x0000,		/* src_mask */
 	 0x07ff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 };
@@ -372,7 +372,7 @@ fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
       
       x = bfd_get_32 (input_bfd, contents);
       x = (x & 0xff0f0000) | (relocation & 0x0000ffff) | ((relocation & 0x000f0000) << 4);
-      bfd_put_32 (input_bfd, relocation, contents);
+      bfd_put_32 (input_bfd, x, contents);
       break;
       
     case R_FR30_48:
