@@ -45,6 +45,8 @@
 #include "dwarf2loc.h"
 #include "cp-support.h"
 #include "hashtab.h"
+#include "command.h"
+#include "gdbcmd.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -166,6 +168,18 @@ struct dwarf2_per_objfile
   char *macinfo_buffer;
   char *ranges_buffer;
   char *loc_buffer;
+
+  /* A list of all the compilation units.  This will be set if and
+     only if we have encountered a compilation unit with inter-CU
+     references.  */
+  struct dwarf2_per_cu_data **all_comp_units;
+
+  /* The number of compilation units in ALL_COMP_UNITS.  */
+  int n_comp_units;
+
+  /* A chain of compilation units that are currently read in, so that
+     they can be freed later.  */
+  struct dwarf2_per_cu_data *read_in_chain;
 };
 
 static struct dwarf2_per_objfile *dwarf2_per_objfile;
@@ -299,11 +313,46 @@ struct dwarf2_cu
      unit, including partial DIEs.  */
   struct obstack comp_unit_obstack;
 
+  /* When multiple dwarf2_cu structures are living in memory, this field
+     chains them all together, so that they can be released efficiently.
+     We will probably also want a generation counter so that most-recently-used
+     compilation units are cached...  */
+  struct dwarf2_per_cu_data *read_in_chain;
+
+  /* Backchain to our per_cu entry if the tree has been built.  */
+  struct dwarf2_per_cu_data *per_cu;
+
+  /* How many compilation units ago was this CU last referenced?  */
+  int last_used;
+
+  /* Mark used when releasing cached dies.  */
+  unsigned int mark : 1;
+
+  /* This flag will be set if this compilation unit might include
+     inter-compilation-unit references.  */
+  unsigned int has_form_ref_addr : 1;
+
   /* This flag will be set if this compilation unit includes any
      DW_TAG_namespace DIEs.  If we know that there are explicit
      DIEs for namespaces, we don't need to try to infer them
      from mangled names.  */
   unsigned int has_namespace_info : 1;
+};
+
+struct dwarf2_per_cu_data
+{
+  /* The start offset and length of this compilation unit.  2**31-1
+     bytes should suffice to store the length of any compilation unit
+     - if it doesn't, GDB will fall over anyway.  */
+  unsigned long offset;
+  unsigned long length : 31;
+
+  /* Flag indicating this compilation unit will be read in before
+     any of the current compilation units are processed.  */
+  unsigned long queued : 1;
+
+  /* Set iff currently read in.  */
+  struct dwarf2_cu *cu;
 };
 
 /* The line number information for a compilation unit (found in the
@@ -584,6 +633,13 @@ struct field_info
     /* Number of entries in the fnfieldlists array.  */
     int nfnfields;
   };
+
+/* Loaded secondary compilation units are kept in memory until they
+   have not been referenced for the processing of this many
+   compilation units.  Set this to zero to disable caching.  Cache
+   sizes of up to at least twenty will improve startup time for
+   typical inter-CU-reference binaries, at an obvious memory cost.  */
+static int dwarf2_max_cache_age = 5;
 
 /* Various complaints about symbol reading that don't abort the process */
 
@@ -965,6 +1021,26 @@ static hashval_t partial_die_hash (const void *item);
 
 static int partial_die_eq (const void *item_lhs, const void *item_rhs);
 
+static struct dwarf2_per_cu_data *dwarf2_find_containing_comp_unit
+  (unsigned long offset, struct objfile *objfile);
+
+static struct dwarf2_per_cu_data *dwarf2_find_comp_unit
+  (unsigned long offset, struct objfile *objfile);
+
+static void free_one_comp_unit (void *);
+
+static void free_cached_comp_units (void *);
+
+static void age_cached_comp_units (void);
+
+static void free_one_cached_comp_unit (void *);
+
+static void create_all_comp_units (struct objfile *);
+
+static void dwarf2_mark (struct dwarf2_cu *);
+
+static void dwarf2_clear_marks (struct dwarf2_per_cu_data *);
+
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
 
@@ -1291,9 +1367,14 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   char *beg_of_comp_unit;
   struct partial_die_info comp_unit_die;
   struct partial_symtab *pst;
+  struct cleanup *back_to;
   CORE_ADDR lowpc, highpc, baseaddr;
 
   info_ptr = dwarf2_per_objfile->info_buffer;
+
+  /* Any cached compilation units will be linked by the per-objfile
+     read_in_chain.  Make sure to free them when we're done.  */
+  back_to = make_cleanup (free_cached_comp_units, NULL);
 
   /* Since the objects we're extracting from .debug_info vary in
      length, only the individual functions to extract them (like
@@ -1335,11 +1416,12 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       cu.list_in_scope = &file_symbols;
 
-      cu.partial_dies = NULL;
-
       /* Read the abbrevs for this compilation unit into a table */
       dwarf2_read_abbrevs (abfd, &cu);
       make_cleanup (dwarf2_free_abbrev_table, &cu);
+
+      if (cu.has_form_ref_addr && dwarf2_per_objfile->all_comp_units == NULL)
+	create_all_comp_units (objfile);
 
       /* Read the compilation unit die */
       abbrev = peek_die_abbrev (info_ptr, &bytes_read, &cu);
@@ -1356,8 +1438,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 				  objfile->global_psymbols.next,
 				  objfile->static_psymbols.next);
 
-	  if (comp_unit_die.dirname)
-        pst->dirname = xstrdup (comp_unit_die.dirname);
+      if (comp_unit_die.dirname)
+	pst->dirname = xstrdup (comp_unit_die.dirname);
 
       pst->read_symtab_private = (char *)
 	obstack_alloc (&objfile->objfile_obstack, sizeof (struct dwarf2_pinfo));
@@ -1366,6 +1448,32 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       /* Store the function that reads in the rest of the symbol table */
       pst->read_symtab = dwarf2_psymtab_to_symtab;
+
+      if (dwarf2_per_objfile->all_comp_units != NULL)
+	{
+	  struct dwarf2_per_cu_data *per_cu;
+
+	  per_cu = dwarf2_find_comp_unit (cu.header.offset, objfile);
+
+	  /* If this compilation unit was already read in, free the
+	     cached copy in order to read it in again.  This is
+	     necessary because we skipped some symbols when we first
+	     read in the compilation unit (see load_partial_dies).
+	     This problem could be avoided, but the benefit is
+	     unclear.  */
+	  if (per_cu->cu != NULL)
+	    free_one_cached_comp_unit (per_cu->cu);
+
+	  cu.per_cu = per_cu;
+
+	  /* Note that this is a pointer to our stack frame, being
+	     added to a global data structure.  It will be cleaned up
+	     in free_stack_comp_unit when we finish with this
+	     compilation unit.  */
+	  per_cu->cu = &cu;
+	}
+      else
+	cu.per_cu = NULL;
 
       /* Check if comp unit has_children.
          If so, read the rest of the partial symbols from this comp unit.
@@ -1420,6 +1528,122 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       do_cleanups (back_to_inner);
     }
+  do_cleanups (back_to);
+}
+
+/* Load the DIEs for a secondary CU into memory.  */
+
+static void
+load_comp_unit (struct dwarf2_per_cu_data *this_cu, struct objfile *objfile)
+{
+  bfd *abfd = objfile->obfd;
+  char *info_ptr, *beg_of_comp_unit;
+  struct partial_die_info comp_unit_die;
+  struct dwarf2_cu *cu;
+  struct abbrev_info *abbrev;
+  unsigned int bytes_read;
+  struct cleanup *back_to;
+
+  info_ptr = dwarf2_per_objfile->info_buffer + this_cu->offset;
+  beg_of_comp_unit = info_ptr;
+
+  cu = xmalloc (sizeof (struct dwarf2_cu));
+  memset (cu, 0, sizeof (struct dwarf2_cu));
+
+  obstack_init (&cu->comp_unit_obstack);
+
+  cu->objfile = objfile;
+  info_ptr = partial_read_comp_unit_head (&cu->header, info_ptr, abfd);
+
+  /* Complete the cu_header.  */
+  cu->header.offset = beg_of_comp_unit - dwarf2_per_objfile->info_buffer;
+  cu->header.first_die_ptr = info_ptr;
+  cu->header.cu_head_ptr = beg_of_comp_unit;
+
+  /* Read the abbrevs for this compilation unit into a table.  */
+  dwarf2_read_abbrevs (abfd, cu);
+  back_to = make_cleanup (dwarf2_free_abbrev_table, cu);
+
+  /* Read the compilation unit die.  */
+  abbrev = peek_die_abbrev (info_ptr, &bytes_read, cu);
+  info_ptr = read_partial_die (&comp_unit_die, abbrev, bytes_read,
+			       abfd, info_ptr, cu);
+
+  /* Set the language we're debugging.  */
+  set_cu_language (comp_unit_die.language, cu);
+
+  /* Link this compilation unit into the compilation unit tree.  */
+  this_cu->cu = cu;
+  cu->per_cu = this_cu;
+
+  /* Check if comp unit has_children.
+     If so, read the rest of the partial symbols from this comp unit.
+     If not, there's no more debug_info for this comp unit. */
+  if (comp_unit_die.has_children)
+    load_partial_dies (abfd, info_ptr, 0, cu);
+
+  do_cleanups (back_to);
+}
+
+/* Create a list of all compilation units in OBJFILE.  We do this only
+   if an inter-comp-unit reference is found; presumably if there is one,
+   there will be many, and one will occur early in the .debug_info section.
+   So there's no point in building this list incrementally.  */
+
+static void
+create_all_comp_units (struct objfile *objfile)
+{
+  int n_allocated;
+  int n_comp_units;
+  struct dwarf2_per_cu_data **all_comp_units;
+  char *info_ptr = dwarf2_per_objfile->info_buffer;
+
+  n_comp_units = 0;
+  n_allocated = 10;
+  all_comp_units = xmalloc (n_allocated
+			    * sizeof (struct dwarf2_per_cu_data *));
+  
+  while (info_ptr < dwarf2_per_objfile->info_buffer + dwarf2_per_objfile->info_size)
+    {
+      struct comp_unit_head cu_header;
+      char *beg_of_comp_unit;
+      struct dwarf2_per_cu_data *this_cu;
+      unsigned long offset;
+      int bytes_read;
+
+      offset = info_ptr - dwarf2_per_objfile->info_buffer;
+
+      /* Read just enough information to find out where the next
+	 compilation unit is.  */
+      cu_header.length = read_initial_length (objfile->obfd, info_ptr,
+					      &cu_header, &bytes_read);
+
+      /* Save the compilation unit for later lookup.  */
+      this_cu = obstack_alloc (&objfile->objfile_obstack,
+			       sizeof (struct dwarf2_per_cu_data));
+      memset (this_cu, 0, sizeof (*this_cu));
+      this_cu->offset = offset;
+      this_cu->length = cu_header.length + cu_header.initial_length_size;
+
+      if (n_comp_units == n_allocated)
+	{
+	  n_allocated *= 2;
+	  all_comp_units = xrealloc (all_comp_units,
+				     n_allocated
+				     * sizeof (struct dwarf2_per_cu_data *));
+	}
+      all_comp_units[n_comp_units++] = this_cu;
+
+      info_ptr = info_ptr + this_cu->length;
+    }
+
+  dwarf2_per_objfile->all_comp_units
+    = obstack_alloc (&objfile->objfile_obstack,
+		     n_comp_units * sizeof (struct dwarf2_per_cu_data *));
+  memcpy (dwarf2_per_objfile->all_comp_units, all_comp_units,
+	  n_comp_units * sizeof (struct dwarf2_per_cu_data *));
+  xfree (all_comp_units);
+  dwarf2_per_objfile->n_comp_units = n_comp_units;
 }
 
 /* Process all loaded DIEs for compilation unit CU, starting at FIRST_DIE.
@@ -2144,6 +2368,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   /* We're in the global namespace.  */
   processing_current_prefix = "";
 
+  memset (&cu, 0, sizeof (struct dwarf2_cu));
   obstack_init (&cu.comp_unit_obstack);
   back_to = make_cleanup (free_stack_comp_unit, &cu);
 
@@ -4614,6 +4839,17 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
 		= xrealloc (cur_attrs, (allocated_attrs
 					* sizeof (struct attr_abbrev)));
 	    }
+
+	  /* Record whether this compilation unit might have
+	     inter-compilation-unit references.  If we don't know what form
+	     this attribute will have, then it might potentially be a
+	     DW_FORM_ref_addr, so we conservatively expect inter-CU
+	     references.  */
+
+	  if (abbrev_form == DW_FORM_ref_addr
+	      || abbrev_form == DW_FORM_indirect)
+	    cu->has_form_ref_addr = 1;
+
 	  cur_attrs[cur_abbrev->num_attrs].name = abbrev_name;
 	  cur_attrs[cur_abbrev->num_attrs++].form = abbrev_form;
 	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
@@ -5066,8 +5302,25 @@ find_partial_die (unsigned long offset, struct dwarf2_cu *cu,
       return find_partial_die_in_comp_unit (offset, cu);
     }
 
-  internal_error (__FILE__, __LINE__,
-		  "unsupported inter-compilation-unit reference");
+  per_cu = dwarf2_find_containing_comp_unit (offset, cu->objfile);
+
+  /* If this offset isn't pointing into a known compilation unit,
+     the debug information is probably corrupted.  */
+  if (per_cu == NULL)
+    error ("Dwarf Error: could not find partial DIE containing "
+	   "offset 0x%lx [in module %s]",
+	   (long) offset, bfd_get_filename (cu->objfile->obfd));
+
+  if (per_cu->cu == NULL)
+    {
+      load_comp_unit (per_cu, cu->objfile);
+      per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
+      dwarf2_per_objfile->read_in_chain = per_cu;
+    }
+
+  per_cu->cu->last_used = 0;
+  *target_cu = per_cu->cu;
+  return find_partial_die_in_comp_unit (offset, per_cu->cu);
 }
 
 /* Adjust PART_DIE before generating a symbol for it.  This function
@@ -8812,9 +9065,81 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
     }
 }
 
+/* Locate the compilation unit from CU's objfile which contains the
+   DIE at OFFSET.  Returns NULL on failure.  */
+
+static struct dwarf2_per_cu_data *
+dwarf2_find_containing_comp_unit (unsigned long offset,
+				  struct objfile *objfile)
+{
+  struct dwarf2_per_cu_data *this_cu;
+  int low, high;
+
+  if (dwarf2_per_objfile->all_comp_units == NULL)
+    error ("Dwarf Error: offset 0x%lx points outside this "
+	   "compilation unit [in module %s]",
+	   offset, bfd_get_filename (objfile->obfd));
+
+  low = 0;
+  high = dwarf2_per_objfile->n_comp_units - 1;
+  while (high > low)
+    {
+      int mid = low + (high - low) / 2;
+      if (dwarf2_per_objfile->all_comp_units[mid]->offset >= offset)
+	high = mid;
+      else
+	low = mid + 1;
+    }
+  gdb_assert (low == high);
+  if (dwarf2_per_objfile->all_comp_units[low]->offset > offset)
+    {
+      gdb_assert (low > 0);
+      gdb_assert (dwarf2_per_objfile->all_comp_units[low-1]->offset <= offset);
+      return dwarf2_per_objfile->all_comp_units[low-1];
+    }
+  else
+    {
+      this_cu = dwarf2_per_objfile->all_comp_units[low];
+      if (low == dwarf2_per_objfile->n_comp_units - 1
+	  && offset >= this_cu->offset + this_cu->length)
+	error ("invalid dwarf2 offset %ld", offset);
+      gdb_assert (offset < this_cu->offset + this_cu->length);
+      return this_cu;
+    }
+}
+
+static struct dwarf2_per_cu_data *
+dwarf2_find_comp_unit (unsigned long offset, struct objfile *objfile)
+{
+  struct dwarf2_per_cu_data *this_cu;
+  this_cu = dwarf2_find_containing_comp_unit (offset, objfile);
+  if (this_cu->offset != offset)
+    error ("no compilation unit with offset %ld\n", offset);
+  return this_cu;
+}
+
+/* Release one cached compilation unit, CU.  We unlink it from the tree
+   of compilation units, but we don't remove it from the read_in_chain;
+   the caller is responsible for that.  */
+
+static void
+free_one_comp_unit (void *data)
+{
+  struct dwarf2_cu *cu = data;
+
+  if (cu->per_cu != NULL)
+    cu->per_cu->cu = NULL;
+  cu->per_cu = NULL;
+
+  obstack_free (&cu->comp_unit_obstack, NULL);
+
+  xfree (cu);
+}
+
 /* This cleanup function is passed the address of a dwarf2_cu on the stack
-   when we're finished with it.  We can't free the pointer itself, but
-   release any associated storage.
+   when we're finished with it.  We can't free the pointer itself, but be
+   sure to unlink it from the cache.  Also release any associated storage
+   and perform cache maintenance.
 
    Only used during partial symbol parsing.  */
 
@@ -8825,6 +9150,127 @@ free_stack_comp_unit (void *data)
 
   obstack_free (&cu->comp_unit_obstack, NULL);
   cu->partial_dies = NULL;
+
+  if (cu->per_cu != NULL)
+    {
+      /* This compilation unit is on the stack in our caller, so we
+	 should not xfree it.  Just unlink it.  */
+      cu->per_cu->cu = NULL;
+      cu->per_cu = NULL;
+
+      /* If we had a per-cu pointer, then we may have other compilation
+	 units loaded, so age them now.  */
+      age_cached_comp_units ();
+    }
+}
+
+/* Free all cached compilation units.  */
+
+static void
+free_cached_comp_units (void *data)
+{
+  struct dwarf2_per_cu_data *per_cu, **last_chain;
+
+  per_cu = dwarf2_per_objfile->read_in_chain;
+  last_chain = &dwarf2_per_objfile->read_in_chain;
+  while (per_cu != NULL)
+    {
+      struct dwarf2_per_cu_data *next_cu;
+
+      next_cu = per_cu->cu->read_in_chain;
+
+      free_one_comp_unit (per_cu->cu);
+      *last_chain = next_cu;
+
+      per_cu = next_cu;
+    }
+}
+
+/* Increase the age counter on each cached compilation unit, and free
+   any that are too old.  */
+
+static void
+age_cached_comp_units (void)
+{
+  struct dwarf2_per_cu_data *per_cu, **last_chain;
+
+  dwarf2_clear_marks (dwarf2_per_objfile->read_in_chain);
+  per_cu = dwarf2_per_objfile->read_in_chain;
+  while (per_cu != NULL)
+    {
+      per_cu->cu->last_used ++;
+      if (per_cu->cu->last_used <= dwarf2_max_cache_age)
+	dwarf2_mark (per_cu->cu);
+      per_cu = per_cu->cu->read_in_chain;
+    }
+
+  per_cu = dwarf2_per_objfile->read_in_chain;
+  last_chain = &dwarf2_per_objfile->read_in_chain;
+  while (per_cu != NULL)
+    {
+      struct dwarf2_per_cu_data *next_cu;
+
+      next_cu = per_cu->cu->read_in_chain;
+
+      if (!per_cu->cu->mark)
+	{
+	  free_one_comp_unit (per_cu->cu);
+	  *last_chain = next_cu;
+	}
+      else
+	last_chain = &per_cu->cu->read_in_chain;
+
+      per_cu = next_cu;
+    }
+}
+
+/* Remove a single compilation unit from the cache.  */
+
+static void
+free_one_cached_comp_unit (void *target_cu)
+{
+  struct dwarf2_per_cu_data *per_cu, **last_chain;
+
+  per_cu = dwarf2_per_objfile->read_in_chain;
+  last_chain = &dwarf2_per_objfile->read_in_chain;
+  while (per_cu != NULL)
+    {
+      struct dwarf2_per_cu_data *next_cu;
+
+      next_cu = per_cu->cu->read_in_chain;
+
+      if (per_cu->cu == target_cu)
+	{
+	  free_one_comp_unit (per_cu->cu);
+	  *last_chain = next_cu;
+	  break;
+	}
+      else
+	last_chain = &per_cu->cu->read_in_chain;
+
+      per_cu = next_cu;
+    }
+}
+
+/* Set the mark field in CU and in every other compilation unit in the
+   cache that we must keep because we are keeping CU.  */
+
+static void
+dwarf2_mark (struct dwarf2_cu *cu)
+{
+  if (cu->mark)
+    return;
+  cu->mark = 1;
+}
+
+static void
+dwarf2_clear_marks (struct dwarf2_per_cu_data *per_cu)
+{
+  while (per_cu)
+    {
+      per_cu->cu->mark = 0;
+      per_cu = per_cu->cu->read_in_chain;
+    }
 }
 
 /* Allocation function for the libiberty hash table which uses an
@@ -8870,10 +9316,53 @@ partial_die_eq (const void *item_lhs, const void *item_rhs)
   return part_die_lhs->offset == part_die_rhs->offset;
 }
 
+static struct cmd_list_element *set_dwarf2_cmdlist;
+static struct cmd_list_element *show_dwarf2_cmdlist;
+
+static void
+set_dwarf2_cmd (char *args, int from_tty)
+{
+  help_list (set_dwarf2_cmdlist, "maintenance set dwarf2 ", -1, gdb_stdout);
+}
+
+static void
+show_dwarf2_cmd (char *args, int from_tty)
+{ 
+  cmd_show_list (show_dwarf2_cmdlist, from_tty, "");
+}
+
 void _initialize_dwarf2_read (void);
 
 void
 _initialize_dwarf2_read (void)
 {
   dwarf2_objfile_data_key = register_objfile_data ();
+
+  add_prefix_cmd ("dwarf2", class_maintenance, set_dwarf2_cmd,
+		  "Set DWARF 2 specific variables.\n"
+		  "Configure DWARF 2 variables such as the cache size",
+                  &set_dwarf2_cmdlist, "maintenance set dwarf2 ",
+                  0/*allow-unknown*/, &maintenance_set_cmdlist);
+
+  add_prefix_cmd ("dwarf2", class_maintenance, show_dwarf2_cmd,
+		  "Show DWARF 2 specific variables\n"
+		  "Show DWARF 2 variables such as the cache size",
+                  &show_dwarf2_cmdlist, "maintenance show dwarf2 ",
+                  0/*allow-unknown*/, &maintenance_show_cmdlist);
+
+  add_setshow_zinteger_cmd ("max-cache-age", class_obscure,
+			    &dwarf2_max_cache_age,
+			    "Set the upper bound on the age of cached "
+			    "dwarf2 compilation units.",
+			    "Show the upper bound on the age of cached "
+			    "dwarf2 compilation units.",
+			    "A higher limit means that cached "
+			    "compilation units will be stored\n"
+			    "in memory longer, and more total memory will "
+			    "be used.  Zero disables\n"
+			    "caching, which can slow down startup.",
+			    "The upper bound on the age of cached "
+			    "dwarf2 compilation units is %d.",
+			    NULL, NULL, &set_dwarf2_cmdlist,
+			    &show_dwarf2_cmdlist);
 }

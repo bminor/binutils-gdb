@@ -1,3 +1,35 @@
+2004-09-20  Daniel Jacobowitz  <dan@debian.org>
+
+	* Makefile.in (dwarf2read.o): Update dependencies.
+	* dwarf2read.c: Include "command.h" and "gdbcmd.h".
+	(struct dwarf2_per_objfile): Add all_comp_units, n_comp_units,
+	and read_in_chain.
+	(struct dwarf2_cu): Add read_in_chain, per_cu, last_used,
+	mark, and has_form_ref_addr.
+	(struct dwarf2_per_cu_data): New.
+	(dwarf2_max_cache_age): New.
+	(dwarf2_build_psymtabs_hard): Free cached compilation units
+	after loading.  Create and manage the list of compilation units.
+	Remove unnecessary NULL initialization.  Fix indentation.
+	(psymtab_to_symtab_1): Initialize all of CU.
+	(dwarf2_read_abbrevs): Set has_form_ref_addr.
+	(find_partial_die): Use dwarf2_find_containing_comp_unit
+	and load_comp_unit.
+	(free_stack_comp_unit): Update comments.  Clear the per-cu
+	pointer.  Handle aging.
+	(dwarf2_find_containing_comp_unit, free_cached_comp_units)
+	(age_cached_comp_units, free_one_cached_comp_unit)
+	(dwarf2_mark, dwarf2_clear_marks, create_all_comp_units)
+	(load_comp_unit, dwarf2_find_comp_unit, free_one_comp_unit)
+	(set_dwarf2_cmdlist, show_dwarf2_cmdlist, set_dwarf2_cmd)
+	(show_dwarf2_cmd): New.
+	(_initialize_dwarf2_read): Provide "maint set dwarf2 max-cache-age"
+	and "maint show dwarf2 max-cache-age".
+	* gdbcmd.h (maintenance_set_cmdlist, maintenance_show_cmdlist): New
+	externs.
+	* maint.c (maintenance_set_cmdlist, maintenance_show_cmdlist): Make
+	global.
+
 2004-09-20  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* dwarf2read.c (typename_concat): Change prototype to accept obstack
