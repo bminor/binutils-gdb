@@ -1,3 +1,8 @@
+2004-05-27  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* Makefile.am (bfdver.h): Use explicit filename, not $< .
+	* Makefile.in: Regenerate.
+
 2004-05-27  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf-m10300.c (elf32_mn10300_finish_hash_table_entry): Avoid
