@@ -293,7 +293,7 @@ pascal_create_fundamental_type (struct objfile *objfile, int typeid)
 			0, "void", objfile);
       break;
     case FT_CHAR:
-      type = init_type (TYPE_CODE_INT,
+      type = init_type (TYPE_CODE_CHAR,
 			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 			0, "char", objfile);
       break;

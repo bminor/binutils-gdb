@@ -1,5 +1,10 @@
 2002-05-02  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* p-lang.c (pascal_create_fundamental_type): Use TYPE_CODE_CHAR
+	for fondamental pascal 'char' type.
+
+2002-05-02  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* p-lang.h (is_pascal_string_type): Declaration changed,
 	new sixth argument of type char ** added.
 	* p-lang.c (is_pascal_string_type): Implementation 
