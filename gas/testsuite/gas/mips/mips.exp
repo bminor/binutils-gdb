@@ -57,7 +57,11 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "blt"
     run_dump_test "bltu"
 
-    if !$ilocks { run_dump_test "div" } else { run_dump_test "div-ilocks" }
+    if $ilocks {
+	run_dump_test "div-ilocks"
+    } else {
+	run_dump_test "div"
+    }
     run_dump_test "dli"
     if $elf {
 	run_dump_test "elf-jal"
@@ -89,9 +93,9 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "lb-xgot-ilocks"
     }
     if $ecoff { run_dump_test "lb-empic" }
-    if !$aout { 
-        if !$gpr_ilocks { 
-            run_dump_test "ld" 
+    if !$aout {
+        if !$gpr_ilocks {
+            run_dump_test "ld"
         } else { 
             if !$addr32 {
                 run_dump_test "ld-ilocks"
@@ -112,7 +116,11 @@ if { [istarget mips*-*-*] } then {
     # 2000-03-12 00:00 UTC.
     if $ecoff { run_dump_test "lif-empic" }
     run_dump_test "mips4"
-    if !$ilocks { run_dump_test "mul" } else { run_dump_test "mul-ilocks" }
+    if $ilocks {
+	run_dump_test "mul-ilocks"
+    } else {
+	run_dump_test "mul"
+    }
     run_dump_test "rol"
     if !$aout { run_dump_test "sb" }
     run_dump_test "trunc"
@@ -164,13 +172,13 @@ if { [istarget mips*-*-*] } then {
 	# containing 4650-specific instructions with -m4650 and -mcpu=4650,
 	# and verify that they're the same.  Specifically, we're checking
 	# that the EF_MIPS_MACH field is set, and that the 4650 'mul'
-	# instruction does get used.  In previous versions of GAS, 
+	# instruction does get used.  In previous versions of GAS,
 	# only -mcpu=4650 would set the EF_MIPS_MACH field; -m4650 wouldn't.
 	run_dump_test "elf_e_flags1"
 	run_dump_test "elf_e_flags2"
 	run_dump_test "elf_e_flags3"
 	run_dump_test "elf_e_flags4"
-    
+
  	run_dump_test "mips-gp32-fp32-pic"
  	run_dump_test "mips-gp32-fp64-pic"
  	run_dump_test "mips-gp64-fp32-pic"
@@ -197,9 +205,9 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "empic3_e"
 	run_dump_test "empic3_g1"
 	run_dump_test "empic3_g2"
-	if { !$no_mips16 } { 
-	    run_dump_test "${tmips}mips${el}16-e" 
-	    run_dump_test "${tmips}mips${el}16-f" 
+	if { !$no_mips16 } {
+	    run_dump_test "${tmips}mips${el}16-e"
+	    run_dump_test "${tmips}mips${el}16-f"
 	}
     }
 }

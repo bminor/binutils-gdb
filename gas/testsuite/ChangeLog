@@ -1,3 +1,9 @@
+2002-04-04  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/mips/mips.exp: Remove spurious whaitespace.
+	Open out one-line if-then-else test clauses so that other clauses
+	can be inserted in the future.
+
 2002-03-19  Bo Thorsen  <bo@suse.de>
 
 	* gas/i386/x86-64-opcode.d: More test cases for x86-64 opcodes.
