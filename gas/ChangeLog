@@ -1,3 +1,10 @@
+2002-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in: bfd_gas=yes for all i386 targets.  Formatting.
+	Remove "bfd_gas=yes" from target table when covered later.
+	Consolidate some entries.
+	* configure: Regenerate
+
 2002-08-09  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-i386.c (output_insn): Save frag_now and frag_now_fix ()
