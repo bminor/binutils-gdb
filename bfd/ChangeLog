@@ -1,5 +1,13 @@
 Mon Oct 25 16:05:23 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	Fix up warnings from gcc -Wall:
+	* coffgen.c (coff_print_symbol): Use %lx and cast n_value to
+	unsigned long.  Use %ld for tagndx.  Use %lx for offset + vma and
+	cast it to unsigned long.
+	* ecoff.c (ecoff_emit_aggregate): Use %ld.	
+	(ecoff_print_symbol): Use %ld, and cast indx and sym_base to long.
+	* coffcode.h (dummy_reloc16_estimate): Specify return type.
+
 	* libbfd.c (bfd_write): If not everything is written out, set
 	bfd_error to system_call_error.  If the return value is
 	non-negative, set errno to ENOSPC (if ENOSPC is defined).

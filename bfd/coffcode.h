@@ -437,9 +437,11 @@ DEFUN(styp_to_sec_flags, (abfd, hdr),
   }
   else if (styp_flags & STYP_INFO) 
     {
-      /* Assume that any informational section is primarily for debugging
-	 and therefore a prime candidate for stripping. */
-      sec_flags |= SEC_DEBUGGING;
+      /* This should be marked as SEC_DEBUGGING, but that can't be
+	 done until we make sure that strip can still work.  strip
+	 will probably have to preserve the same number of sections to
+	 ensure that the section vma matches the section file
+	 position.  */
     }
   else
   {
@@ -1261,10 +1263,6 @@ DEFUN(coff_compute_section_file_positions,(abfd),
    sofar += AOUTSZ;
 
   sofar += abfd->section_count * SCNHSZ;
-#ifdef USE_DISCARDED_SECTIONS_COUNT
-  /* Count any sections that were removed, so overall size doesn't change. */
-  sofar += discarded_sections_count * SCNHSZ;
-#endif
   for (current = abfd->sections;
        current != (asection *)NULL;
        current = current->next) {
@@ -2288,14 +2286,14 @@ bfd *abfd;
 #ifndef coff_reloc16_estimate
 #define coff_reloc16_estimate dummy_reloc16_estimate
 
-static dummy_reloc16_estimate(input_section, symbols, reloc, shrink)
+static int
+dummy_reloc16_estimate(input_section, symbols, reloc, shrink)
      asection *input_section;
      asymbol **symbols;
      arelent *reloc;
-     int shrink;
+     unsigned int shrink;
 {
-  abort();
-  
+  abort ();
 }
 
 #endif
