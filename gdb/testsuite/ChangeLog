@@ -1,3 +1,9 @@
+2001-06-04  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.threads/pthreads.exp (check_control_c): Return 0 for success,
+	non-zero if control_c fails.  Terminate the test on failure, 
+	rather than wait for 12 more tests to time out.
+
 2001-06-06  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/exprs.exp ("sizeof (long long) > sizeof (long) (true)"):

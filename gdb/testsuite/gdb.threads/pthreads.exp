@@ -259,6 +259,7 @@ proc check_control_c {} {
 	}
 	timeout {
 	    fail "$description (timeout)"
+	    return 1;
 	}
     }
     gdb_test "bt" ""
@@ -267,6 +268,7 @@ proc check_control_c {} {
     if [all_threads_running] then {
 	pass "All threads running after continuing from ^C stop"
     }
+    return 0;
 }
 
 proc check_backtraces {} {
@@ -337,7 +339,10 @@ setup_xfail "alpha-*-osf*"
 if [runto_main] then {
     clear_xfail "alpha-*-osf*"
     if [test_startup] then {
-	check_control_c
+	if [check_control_c] then {
+	    warning "Could not stop child with ^C; skipping rest of tests.\n"
+	    return;
+	}
 	check_backtraces
     }
 }
