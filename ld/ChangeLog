@@ -1,3 +1,13 @@
+2003-03-25  Stan Cox   <scox@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+	    
+	Contribute support for Intel's iWMMXt chip - an	ARM variant:
+
+	* emulparams/armelf.sh (OTHER_READONLY_SECTIONS): Define.
+	* emulparams/armelf_linux.sh (OTHER_READONLY_SECTIONS): Define.
+	* scripttempl/armcoff.sc (.data): Ensure 8 byte alignment.
+	(.bss): Likewise.
+
 2003-03-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ldmain.h (ld_canon_sysroot, ld_canon_sysroot_len): Declare.

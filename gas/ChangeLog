@@ -1,3 +1,29 @@
+2003-03-25  Stan Cox   <scox@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+	    
+	Contribute support for Intel's iWMMXt chip - an	ARM variant:
+
+	* config/tc-arm.c: (ARM_CEXT_IWMMXT, ARM_ARCH_IWMMXT, WR_PREFIX,
+	WC_PREFIX, REG_TYPE_IWMMXT): New constants.
+	(enum wreg_type, enum iwmmxt_insn_type): New types.
+	(wr_register, wc_register, wcg_register): New macros.
+	(iwmmxt_table): New variable.
+	(wreg_required_here, do_iwmmxt_byte_addr, do_iwmmxt_tandc,
+	do_iwmmxt_tbcst, do_iwmmxt_textrc, do_iwmmxt_textrm,
+	do_iwmmxt_tinsr, do_iwmmxt_tmcr, do_iwmmxt_tmcrr, do_iwmmxt_tmia,
+	do_iwmmxt_tmovmsk, do_iwmmxt_tmrc, do_iwmmxt_tmrrc,
+	do_iwmmxt_torc, do_iwmmxt_waligni, do_iwmmxt_wmov,
+	do_iwmmxt_word_addr, do_iwmmxt_wrwr, do_iwmmxt_wrwrwcg,
+	do_iwmmxt_wrwrwr, do_iwmmxt_wshufh, do_iwmmxt_wzero,
+	cp_byte_address_offset, cp_byte_address_required_here,
+	check_iwmmxt_insn): New	functions.
+	(asm_opcode_insns): Add iWMMXt instructions.	
+	(md_begin): Set the mach value for iWMMXt targets.  Create a note
+	section to identify iwmmxt binaries.
+	(md_apply_fix3): Handle BFD_RELOC_ARM_CP_OFF_IMM_S2.
+	* doc/c-arm.texi: Document the support for the iWMMXt.
+	* NEWS: Mention new support.
+
 2003-03-24  Daniel Néri  <dne@mayonnaise.net>
 
 	* doc/as.texinfo: Rename the all occurances of C54X to TIC54X.

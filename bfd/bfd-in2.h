@@ -1691,6 +1691,7 @@ enum bfd_architecture
 #define bfd_mach_arm_5TE       9
 #define bfd_mach_arm_XScale    10
 #define bfd_mach_arm_ep9312    11
+#define bfd_mach_arm_iWMMXt    12
   bfd_arch_ns32k,     /* National Semiconductors ns32000 */
   bfd_arch_w65,       /* WDC 65816 */
   bfd_arch_tic30,     /* Texas Instruments TMS320C30 */
@@ -2563,6 +2564,7 @@ field in the instruction.  */
   BFD_RELOC_ARM_SWI,
   BFD_RELOC_ARM_MULTI,
   BFD_RELOC_ARM_CP_OFF_IMM,
+  BFD_RELOC_ARM_CP_OFF_IMM_S2,
   BFD_RELOC_ARM_ADR_IMM,
   BFD_RELOC_ARM_LDR_IMM,
   BFD_RELOC_ARM_LITERAL,

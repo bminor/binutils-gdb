@@ -1,24 +1,24 @@
 /* Instruction printing code for the ARM
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
    Modification by James G. Smith (jsmith@cygnus.co.uk)
 
-This file is part of libopcodes.
+   This file is part of libopcodes.
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 2 of the License, or (at your option)
-any later version.
+   This program is free software; you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free
+   Software Foundation; either version 2 of the License, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-more details.
+   This program is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+   more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sysdep.h"
 #include "dis-asm.h"
@@ -70,7 +70,21 @@ static arm_regname regnames[] =
   { "atpcs", "Select register names used in the ATPCS",
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "v4", "v5", "v6", "v7",  "v8",  "IP",  "SP",  "LR",  "PC" }},
   { "special-atpcs", "Select special register names used in the ATPCS",
-    { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "WR", "v5", "SB", "SL",  "FP",  "IP",  "SP",  "LR",  "PC" }}
+    { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "WR", "v5", "SB", "SL",  "FP",  "IP",  "SP",  "LR",  "PC" }},
+  { "iwmmxt_regnames", "Select register names used on the Intel(r) Wireless MMX(tm) technology coprocessor",
+    { "wr0", "wr1", "wr2", "wr3", "wr4", "wr5", "wr6", "wr7", "wr8", "wr9", "wr10", "wr11", "wr12", "wr13", "wr14", "wr15"}},
+  { "iwmmxt_Cregnames", "Select control register names used on the Intel(r) Wireless MMX(tm) technology coprocessor",
+    {"wcid", "wcon", "wcssf", "wcasf", "reserved", "reserved", "reserved", "reserved", "wcgr0", "wcgr1", "wcgr2", "wcgr3", "reserved", "reserved", "reserved", "reserved"}}
+};
+
+static char * iwmmxt_wwnames[] =
+{"b", "h", "w", "d"};
+
+static char * iwmmxt_wwssnames[] =
+{"b", "bus", "b", "bss",
+ "h", "hus", "h", "hss",
+ "w", "wus", "w", "wss",
+ "d", "dus", "d", "dss"
 };
 
 /* Default to GCC register name set.  */
@@ -98,11 +112,15 @@ static void parse_disassembler_options
   PARAMS ((char *));
 static int  print_insn
   PARAMS ((bfd_vma, struct disassemble_info *, bfd_boolean));
-int get_arm_regname_num_options (void);
-int set_arm_regname_option (int option);
-int get_arm_regnames (int option, const char **setname,
-		      const char **setdescription,
-		      const char ***register_names);
+static int set_iwmmxt_regnames
+  PARAMS ((void));
+
+int get_arm_regname_num_options
+  PARAMS ((void));
+int set_arm_regname_option
+  PARAMS ((int));
+int get_arm_regnames
+  PARAMS ((int, const char **, const char **, const char ***));
 
 /* Functions.  */
 int
@@ -167,6 +185,24 @@ arm_decode_shift (given, func, stream)
     }
 }
 
+static int
+set_iwmmxt_regnames ()
+{
+  const char * setname;
+  const char * setdesc;
+  const char ** regnames;
+  int iwmmxt_regnames = 0;
+  int num_regnames = get_arm_regname_num_options ();
+
+  get_arm_regnames (iwmmxt_regnames, &setname,
+		    &setdesc, &regnames);
+  while ((strcmp ("iwmmxt_regnames", setname))
+	 && (iwmmxt_regnames < num_regnames))
+    get_arm_regnames (++iwmmxt_regnames, &setname, &setdesc, &regnames);
+
+  return iwmmxt_regnames;
+}
+			  
 /* Print one instruction from PC on INFO->STREAM.
    Return the size of the instruction (always 4 on ARM). */
 
@@ -179,9 +215,15 @@ print_insn_arm (pc, info, given)
   const struct arm_opcode *insn;
   void *stream = info->stream;
   fprintf_ftype func   = info->fprintf_func;
+  static int iwmmxt_regnames = 0;
 
   for (insn = arm_opcodes; insn->assembler; insn++)
     {
+      if (insn->value == FIRST_IWMMXT_INSN
+	  && info->mach != bfd_mach_arm_XScale
+	  && info->mach != bfd_mach_arm_iWMMXt)
+	insn = insn + IWMMXT_INSN_COUNT;
+
       if ((given & insn->mask) == insn->value)
 	{
 	  char * c;
@@ -629,6 +671,63 @@ print_insn_arm (pc, info, given)
 				    func (stream, "f%d", reg);
 				}
 				break;
+
+			      case 'w':
+				{
+				  long reg;
+
+				  if (bitstart != bitend)
+				    {
+				      reg = given >> bitstart;
+				      reg &= (2 << (bitend - bitstart)) - 1;
+				      if (bitend - bitstart == 1)
+					func (stream, "%s", iwmmxt_wwnames[reg]);
+				      else
+					func (stream, "%s", iwmmxt_wwssnames[reg]);
+				    }
+				  else
+				    {
+				      reg = (((given >> 8)  & 0x1) |
+					     ((given >> 22) & 0x1));
+				      func (stream, "%s", iwmmxt_wwnames[reg]);
+				    }
+				}
+				break;
+
+			      case 'g':
+				{
+				  long reg;
+				  int current_regnames;
+
+				  if (! iwmmxt_regnames)
+				    iwmmxt_regnames = set_iwmmxt_regnames ();
+				  current_regnames = set_arm_regname_option
+				    (iwmmxt_regnames);
+
+				  reg = given >> bitstart;
+				  reg &= (2 << (bitend - bitstart)) - 1;
+				  func (stream, "%s", arm_regnames[reg]);
+				  set_arm_regname_option (current_regnames);
+				}
+				break;
+
+			      case 'G':
+				{
+				  long reg;
+				  int current_regnames;
+
+				  if (! iwmmxt_regnames)
+				    iwmmxt_regnames = set_iwmmxt_regnames ();
+				  current_regnames = set_arm_regname_option
+				    (iwmmxt_regnames + 1);
+
+				  reg = given >> bitstart;
+				  reg &= (2 << (bitend - bitstart)) - 1;
+				  func (stream, "%s", arm_regnames[reg]);
+				  set_arm_regname_option (current_regnames);
+				}
+				break;
+
 			      default:
 				abort ();
 			      }
@@ -732,6 +831,54 @@ print_insn_arm (pc, info, given)
 			  default:
 			    abort ();
 			  }
+			break;
+
+		      case 'L':
+			switch (given & 0x00400100)
+			  {
+			  case 0x00000000: func (stream, "b"); break;
+			  case 0x00400000: func (stream, "h"); break;
+			  case 0x00000100: func (stream, "w"); break;
+			  case 0x00400100: func (stream, "d"); break;
+			  default:
+			    break;
+			  }
+			break;
+
+		      case 'Z':
+			{
+			  int value;
+			  /* given (20, 23) | given (0, 3) */
+			  value = ((given >> 16) & 0xf0) | (given & 0xf);
+			  func (stream, "%d", value);
+			}
+			break;
+
+		      case 'l':
+			/* This is like the 'A' operator, except that if
+			   the width field "M" is zero, then the offset is
+			   *not* multiplied by four.  */
+			{
+			  int offset = given & 0xff;
+			  int multiplier = (given & 0x00000100) ? 4 : 1;
+
+			  func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
+
+			  if (offset)
+			    {
+			      if ((given & 0x01000000) != 0)
+				func (stream, ", %s#%d]%s",
+				      ((given & 0x00800000) == 0 ? "-" : ""),
+				      offset * multiplier,
+				      ((given & 0x00200000) != 0 ? "!" : ""));
+			      else
+				func (stream, "], %s#%d",
+				      ((given & 0x00800000) == 0 ? "-" : ""),
+				      offset * multiplier);
+			    }
+			  else
+			    func (stream, "]");
+			}
 			break;
 
 		      default:

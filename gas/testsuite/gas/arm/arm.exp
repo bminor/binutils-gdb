@@ -44,7 +44,7 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     gas_test "immed.s" "" $stdoptlist "immediate expressions"
 
-    gas_test "float.s" "" $stdoptlist "Core floating point instructions"
+    gas_test "float.s" "-mcpu=arm7tdmi" $stdoptlist "Core floating point instructions"
 
     run_dump_test "fpa-monadic"
 
@@ -79,3 +79,6 @@ if [istarget arm-*-pe] {
     #run_dump_test "be-fpconst"
 }
 
+if [istarget xscale-*] {
+    run_dump_test "iwmmxt"
+}

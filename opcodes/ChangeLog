@@ -1,3 +1,14 @@
+2003-03-25  Stan Cox   <scox@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+	    
+	Contribute support for Intel's iWMMXt chip - an	ARM variant:
+
+	* arm-dis.c (regnames): Add iWMMXt register names.
+	(set_iwmmxt_regnames): New function.
+	(print_insn_arm): Handle iWMMXt formatters.
+	* arm-opc.h: Document iWMMXt formatters.
+	(arm_opcod): Add iWMMXt instructions.
+
 2003-03-22  Doug Evans  <dje@sebabeach.org>
 
 	* i386-dis.c (dis386): Recognize icebp (0xf1).

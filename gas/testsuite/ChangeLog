@@ -1,3 +1,14 @@
+2003-03-25  Stan Cox   <scox@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+	    
+	Contribute support for Intel's iWMMXt chip - an	ARM variant:
+
+	* gas/arm/arm.exp: Run iwmmxt test.
+	* gas/arm/iwmmxt.s: New test source file.
+	* gas/arm/iwmmxt.d: New test expected results file.
+	* gas/elf/elf.exp: Fix section2 test to cope with note section.
+	* gas/eld/section2.e-miwxxmt: New test expected results file.
+
 2003-03-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/mips/branch-misc-2.s: Add branch to symbol in another

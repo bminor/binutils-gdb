@@ -1899,6 +1899,27 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	     currently the XScale.  */
         case F_ARM_5:  machine = bfd_mach_arm_XScale;  break;
 	}
+
+      {
+	asection * arm_arch_section;
+  
+	arm_arch_section = bfd_get_section_by_name (abfd, ".note");
+
+	if (arm_arch_section)
+	  {
+	    bfd_byte buffer [4];
+
+	    if (! bfd_get_section_contents (abfd, arm_arch_section, buffer,
+					    (file_ptr) 0, sizeof buffer))
+	      (*_bfd_error_handler)
+		(_("%s: warning: unable to retrieve .note section from %s"),
+		 bfd_get_filename (abfd));
+	      
+	    /* We have to extract the value this way to allow for a
+	       host whose endian-ness is different from the target.  */
+	    machine = bfd_get_32 (abfd, buffer);
+	  }
+      }
       break;
 #endif
 #ifdef MC68MAGIC

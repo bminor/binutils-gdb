@@ -91,6 +91,7 @@ recognized:
 @code{arm1020e}, 
 @code{ep9312} (ARM920 with Cirrus Maverick coprocessor),
 @code{i80200} (Intel XScale processor)
+@code{iwmmxt} (Intel(r) XScale processor with Wireless MMX(tm) technology coprocessor)
 and
 @code{xscale}.  
 The special name @code{all} may be used to allow the
@@ -102,6 +103,7 @@ co-processor instruction space.  For example, @code{-mcpu=arm920+maverick}
 is equivalent to specifying @code{-mcpu=ep9312}.  The following extensions
 are currently supported: 
 @code{+maverick}
+@code{+iwmmxt}
 and
 @code{+xscale}.
 
@@ -126,6 +128,7 @@ names are recognized:
 @code{armv5txm},
 @code{armv5te},
 @code{armv5texp}
+@code{iwmmxt}
 and
 @code{xscale}.
 If both @code{-mcpu} and

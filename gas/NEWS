@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Support for Intel's iWMMXt processor (an ARM variant) added.
+
 * An assembler test generator has been contributed and an example file that
   uses it (gas/testsuite/gas/all/test-gen.c and test-exmaple.c).
   

@@ -59,6 +59,7 @@
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00800000	/* Allow MIA etc.          */
 #define ARM_CEXT_MAVERICK 0x00400000	/* Use Cirrus/DSP coprocessor.  */
+#define ARM_CEXT_IWMMXT   0x00200000    /* Intel(r) Wireless MMX(tm) technology coprocessor.   */
 
 /* Architectures are the sum of the base and extensions.  The ARM ARM (rev E)
    defines the following: ARMv3, ARMv3M, ARMv4xM, ARMv4, ARMv4TxM, ARMv4T,
@@ -84,6 +85,7 @@
 
 /* Processors with specific extensions in the co-processor space.  */
 #define ARM_ARCH_XSCALE	(ARM_ARCH_V5TE	| ARM_CEXT_XSCALE)
+#define ARM_ARCH_IWMMXT	(ARM_ARCH_V5TE	| ARM_CEXT_XSCALE | ARM_CEXT_IWMMXT)
 
 /* Some useful combinations:  */
 #define ARM_ANY		0x0000ffff	/* Any basic core.  */
@@ -499,6 +501,35 @@ static const struct asm_psr psrs[] =
   {"SPSR_cxsf",	FALSE, PSR_c | PSR_x | PSR_s | PSR_f},
 };
 
+enum wreg_type
+  {
+    IWMMXT_REG_WR = 0,
+    IWMMXT_REG_WC = 1,
+    IWMMXT_REG_WR_OR_WC = 2,
+    IWMMXT_REG_WCG
+  };
+
+enum iwmmxt_insn_type
+{
+  check_rd,
+  check_wr,
+  check_wrwr,
+  check_wrwrwr,
+  check_wrwrwcg,
+  check_tbcst,
+  check_tmovmsk,
+  check_tmia,
+  check_tmcrr,
+  check_tmrrc,
+  check_tmcr,
+  check_tmrc,
+  check_tinsr,
+  check_textrc,
+  check_waligni,
+  check_textrm,
+  check_wshufh
+};
+
 enum vfp_dp_reg_pos
 {
   VFP_REG_Dd, VFP_REG_Dm, VFP_REG_Dn
@@ -543,6 +574,10 @@ struct reg_entry
 #define REG_LR  14
 #define REG_PC	15
 
+#define wr_register(reg)  ((reg ^ WR_PREFIX) >= 0 && (reg ^ WR_PREFIX) <= 15)
+#define wc_register(reg)  ((reg ^ WC_PREFIX) >= 0 && (reg ^ WC_PREFIX) <= 15)
+#define wcg_register(reg) ((reg ^ WC_PREFIX) >= 8 && (reg ^ WC_PREFIX) <= 11)
+
 /* These are the standard names.  Users can add aliases with .req.  */
 /* Integer Register Numbers.  */
 static const struct reg_entry rn_table[] =
@@ -559,6 +594,40 @@ static const struct reg_entry rn_table[] =
 						 {"wr",  7},
 	       {"sb",  9},      {"sl",  10},     {"fp",  11},
   {"ip",  12}, {"sp",  REG_SP}, {"lr",  REG_LR}, {"pc",  REG_PC},
+  {NULL, 0}
+};
+
+#define WR_PREFIX 0x200
+#define WC_PREFIX 0x400
+
+static const struct reg_entry iwmmxt_table[] =
+{
+  /* Intel(r) Wireless MMX(tm) technology register names.  */
+  {  "wr0", 0x0 | WR_PREFIX},   {"wr1", 0x1 | WR_PREFIX},
+  {  "wr2", 0x2 | WR_PREFIX},   {"wr3", 0x3 | WR_PREFIX},
+  {  "wr4", 0x4 | WR_PREFIX},   {"wr5", 0x5 | WR_PREFIX},
+  {  "wr6", 0x6 | WR_PREFIX},   {"wr7", 0x7 | WR_PREFIX},
+  {  "wr8", 0x8 | WR_PREFIX},   {"wr9", 0x9 | WR_PREFIX},
+  { "wr10", 0xa | WR_PREFIX},  {"wr11", 0xb | WR_PREFIX},
+  { "wr12", 0xc | WR_PREFIX},  {"wr13", 0xd | WR_PREFIX},
+  { "wr14", 0xe | WR_PREFIX},  {"wr15", 0xf | WR_PREFIX},
+  { "wcid", 0x0 | WC_PREFIX},  {"wcon", 0x1 | WC_PREFIX},
+  {"wcssf", 0x2 | WC_PREFIX}, {"wcasf", 0x3 | WC_PREFIX},
+  {"wcgr0", 0x8 | WC_PREFIX}, {"wcgr1", 0x9 | WC_PREFIX},
+  {"wcgr2", 0xa | WC_PREFIX}, {"wcgr3", 0xb | WC_PREFIX},
+
+  {  "wR0", 0x0 | WR_PREFIX},   {"wR1", 0x1 | WR_PREFIX},
+  {  "wR2", 0x2 | WR_PREFIX},   {"wR3", 0x3 | WR_PREFIX},
+  {  "wR4", 0x4 | WR_PREFIX},   {"wR5", 0x5 | WR_PREFIX},
+  {  "wR6", 0x6 | WR_PREFIX},   {"wR7", 0x7 | WR_PREFIX},
+  {  "wR8", 0x8 | WR_PREFIX},   {"wR9", 0x9 | WR_PREFIX},
+  { "wR10", 0xa | WR_PREFIX},  {"wR11", 0xb | WR_PREFIX},
+  { "wR12", 0xc | WR_PREFIX},  {"wR13", 0xd | WR_PREFIX},
+  { "wR14", 0xe | WR_PREFIX},  {"wR15", 0xf | WR_PREFIX},
+  { "wCID", 0x0 | WC_PREFIX},  {"wCon", 0x1 | WC_PREFIX},
+  {"wCSSF", 0x2 | WC_PREFIX}, {"wCASF", 0x3 | WC_PREFIX},
+  {"wCGR0", 0x8 | WC_PREFIX}, {"wCGR1", 0x9 | WC_PREFIX},
+  {"wCGR2", 0xa | WC_PREFIX}, {"wCGR3", 0xb | WC_PREFIX},
   {NULL, 0}
 };
 
@@ -690,6 +759,7 @@ struct reg_map all_reg_maps[] =
   {mav_mvdx_table,  15, NULL, N_("Maverick MVFX register expected")},
   {mav_mvax_table,   3, NULL, N_("Maverick MVAX register expected")},
   {mav_dspsc_table,  0, NULL, N_("Maverick DSPSC register expected")},
+  {iwmmxt_table,    23, NULL, N_("Intel(r) Wireless MMX(tm) technology register expected")},
 };
 
 /* Enumeration matching entries in table above.  */
@@ -708,8 +778,9 @@ enum arm_reg_type
   REG_TYPE_MVDX = 9,
   REG_TYPE_MVAX = 10,
   REG_TYPE_DSPSC = 11,
+  REG_TYPE_IWMMXT = 12,
 
-  REG_TYPE_MAX = 12
+  REG_TYPE_MAX = 13
 };
 
 /* Functions called by parser.  */
@@ -938,6 +1009,31 @@ static symbolS * find_real_start PARAMS ((symbolS *));
 static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
 #endif
 
+static int wreg_required_here   PARAMS ((char **, int, enum wreg_type));
+static void do_iwmmxt_byte_addr PARAMS ((char *));
+static void do_iwmmxt_tandc     PARAMS ((char *));
+static void do_iwmmxt_tbcst     PARAMS ((char *));
+static void do_iwmmxt_textrc    PARAMS ((char *));
+static void do_iwmmxt_textrm    PARAMS ((char *));
+static void do_iwmmxt_tinsr     PARAMS ((char *));
+static void do_iwmmxt_tmcr      PARAMS ((char *));
+static void do_iwmmxt_tmcrr     PARAMS ((char *));
+static void do_iwmmxt_tmia      PARAMS ((char *));
+static void do_iwmmxt_tmovmsk   PARAMS ((char *));
+static void do_iwmmxt_tmrc      PARAMS ((char *));
+static void do_iwmmxt_tmrrc     PARAMS ((char *));
+static void do_iwmmxt_torc      PARAMS ((char *));
+static void do_iwmmxt_waligni   PARAMS ((char *));
+static void do_iwmmxt_wmov      PARAMS ((char *));
+static void do_iwmmxt_word_addr PARAMS ((char *));
+static void do_iwmmxt_wrwr      PARAMS ((char *));
+static void do_iwmmxt_wrwrwcg   PARAMS ((char *));
+static void do_iwmmxt_wrwrwr    PARAMS ((char *));
+static void do_iwmmxt_wshufh    PARAMS ((char *));
+static void do_iwmmxt_wzero     PARAMS ((char *));
+static int cp_byte_address_offset         PARAMS ((char **));
+static int cp_byte_address_required_here  PARAMS ((char **));
+
 /* ARM instructions take 4bytes in the object file, Thumb instructions
    take 2:  */
 #define INSN_SIZE       4
@@ -981,6 +1077,170 @@ struct asm_opcode
 
 static const struct asm_opcode insns[] =
 {
+  /* Intel(r) Wireless MMX(tm) technology instructions.  */
+  {"tandcb",     0xee130130, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tandc},
+  {"tandch",     0xee530130, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tandc},
+  {"tandcw",     0xee930130, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tandc},
+  {"tbcstb",     0xee400010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tbcst},
+  {"tbcsth",     0xee400050, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tbcst},
+  {"tbcstw",     0xee400090, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tbcst},
+  {"textrcb",    0xee130170, 7, ARM_CEXT_IWMMXT, do_iwmmxt_textrc},
+  {"textrch",    0xee530170, 7, ARM_CEXT_IWMMXT, do_iwmmxt_textrc},
+  {"textrcw",    0xee930170, 7, ARM_CEXT_IWMMXT, do_iwmmxt_textrc},
+  {"textrmub",   0xee100070, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"textrmuh",   0xee500070, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"textrmuw",   0xee900070, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"textrmsb",   0xee100078, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"textrmsh",   0xee500078, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"textrmsw",   0xee900078, 8, ARM_CEXT_IWMMXT, do_iwmmxt_textrm},
+  {"tinsrb",     0xee600010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tinsr},
+  {"tinsrh",     0xee600050, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tinsr},
+  {"tinsrw",     0xee600090, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tinsr},
+  {"tmcr",       0xee000110, 4, ARM_CEXT_IWMMXT, do_iwmmxt_tmcr},
+  {"tmcrr",      0xec400000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_tmcrr},
+  {"tmia",       0xee200010, 4, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmiaph",     0xee280010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmiabb",     0xee2c0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmiabt",     0xee2d0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmiatb",     0xee2e0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmiatt",     0xee2f0010, 6, ARM_CEXT_IWMMXT, do_iwmmxt_tmia},
+  {"tmovmskb",   0xee100030, 8, ARM_CEXT_IWMMXT, do_iwmmxt_tmovmsk},
+  {"tmovmskh",   0xee500030, 8, ARM_CEXT_IWMMXT, do_iwmmxt_tmovmsk},
+  {"tmovmskw",   0xee900030, 8, ARM_CEXT_IWMMXT, do_iwmmxt_tmovmsk},
+  {"tmrc",       0xee100110, 4, ARM_CEXT_IWMMXT, do_iwmmxt_tmrc},
+  {"tmrrc",      0xec500000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_tmrrc},
+  {"torcb",      0xee130150, 5, ARM_CEXT_IWMMXT, do_iwmmxt_torc},
+  {"torch",      0xee530150, 5, ARM_CEXT_IWMMXT, do_iwmmxt_torc},
+  {"torcw",      0xee930150, 5, ARM_CEXT_IWMMXT, do_iwmmxt_torc},
+  {"waccb",      0xee0001c0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wacch",      0xee4001c0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"waccw",      0xee8001c0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"waddbss",    0xee300180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddb",      0xee000180, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddbus",    0xee100180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddhss",    0xee700180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddh",      0xee400180, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddhus",    0xee500180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddwss",    0xeeb00180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddw",      0xee800180, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waddwus",    0xee900180, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"waligni",    0xee000020, 7, ARM_CEXT_IWMMXT, do_iwmmxt_waligni},
+  {"walignr0",   0xee800020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"walignr1",   0xee900020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"walignr2",   0xeea00020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"walignr3",   0xeeb00020, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wand",       0xee200000, 4, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wandn",      0xee300000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wavg2b",     0xee800000, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wavg2br",    0xee900000, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wavg2h",     0xeec00000, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wavg2hr",    0xeed00000, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpeqb",    0xee000060, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpeqh",    0xee400060, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpeqw",    0xee800060, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtub",   0xee100060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtuh",   0xee500060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtuw",   0xee900060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtsb",   0xee300060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtsh",   0xee700060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wcmpgtsw",   0xeeb00060, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wldrb",      0xec100000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
+  {"wldrh",      0xec100100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
+  {"wldrw",      0xec100200, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
+  {"wldrd",      0xec100300, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
+  {"wmacs",      0xee600100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmacsz",     0xee700100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmacu",      0xee400100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmacuz",     0xee500100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmadds",     0xeea00100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaddu",     0xee800100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxsb",     0xee200160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxsh",     0xee600160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxsw",     0xeea00160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxub",     0xee000160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxuh",     0xee400160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmaxuw",     0xee800160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminsb",     0xee300160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminsh",     0xee700160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminsw",     0xeeb00160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminub",     0xee100160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminuh",     0xee500160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wminuw",     0xee900160, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmov",       0xee000000, 4, ARM_CEXT_IWMMXT, do_iwmmxt_wmov},
+  {"wmulsm",     0xee300100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmulsl",     0xee200100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmulum",     0xee100100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wmulul",     0xee000100, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wor",        0xee000000, 3, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackhss",   0xee700080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackhus",   0xee500080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackwss",   0xeeb00080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackwus",   0xee900080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackdss",   0xeef00080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wpackdus",   0xeed00080, 8, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wrorh",      0xee700040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wrorhg",     0xee700148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wrorw",      0xeeb00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wrorwg",     0xeeb00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wrord",      0xeef00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wrordg",     0xeef00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsadb",      0xee000120, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsadbz",     0xee100120, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsadh",      0xee400120, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsadhz",     0xee500120, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wshufh",     0xee0001e0, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wshufh},
+  {"wsllh",      0xee500040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsllhg",     0xee500148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsllw",      0xee900040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsllwg",     0xee900148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wslld",      0xeed00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wslldg",     0xeed00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsrah",      0xee400040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsrahg",     0xee400148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsraw",      0xee800040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsrawg",     0xee800148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsrad",      0xeec00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsradg",     0xeec00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsrlh",      0xee600040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsrlhg",     0xee600148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsrlw",      0xeea00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsrlwg",     0xeea00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wsrld",      0xeee00040, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsrldg",     0xeee00148, 6, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwcg},
+  {"wstrb",      0xec000000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
+  {"wstrh",      0xec000100, 5, ARM_CEXT_IWMMXT, do_iwmmxt_byte_addr},
+  {"wstrw",      0xec000200, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
+  {"wstrd",      0xec000300, 5, ARM_CEXT_IWMMXT, do_iwmmxt_word_addr},
+  {"wsubbss",    0xee3001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubb",      0xee0001a0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubbus",    0xee1001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubhss",    0xee7001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubh",      0xee4001a0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubhus",    0xee5001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubwss",    0xeeb001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubw",      0xee8001a0, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wsubwus",    0xee9001a0, 7, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckehub", 0xee0000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckehuh", 0xee4000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckehuw", 0xee8000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckehsb", 0xee2000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckehsh", 0xee6000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckehsw", 0xeea000c0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckihb",  0xee1000c0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckihh",  0xee5000c0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckihw",  0xee9000c0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckelub", 0xee0000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckeluh", 0xee4000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckeluw", 0xee8000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckelsb", 0xee2000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckelsh", 0xee6000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckelsw", 0xeea000e0, 10, ARM_CEXT_IWMMXT, do_iwmmxt_wrwr},
+  {"wunpckilb",  0xee1000e0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckilh",  0xee5000e0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wunpckilw",  0xee9000e0, 9, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wxor",       0xee100000, 4, ARM_CEXT_IWMMXT, do_iwmmxt_wrwrwr},
+  {"wzero",      0xee300000, 5, ARM_CEXT_IWMMXT, do_iwmmxt_wzero},
+
   /* Core ARM Instructions.  */
   {"and",        0xe0000000, 3,  ARM_EXT_V1,       do_arit},
   {"ands",       0xe0100000, 3,  ARM_EXT_V1,       do_arit},
@@ -2739,6 +2999,57 @@ reg_required_here (str, shift)
   return FAIL;
 }
 
+/* A Intel(r) Wireless MMX(tm) technology register
+   must be given at this point.
+   Shift is the place to put it in inst.instruction.
+   Restores input start point on err.
+   Returns the reg#, or FAIL.  */
+
+static int
+wreg_required_here (str, shift, reg_type)
+     char ** str;
+     int     shift;
+     enum wreg_type reg_type;
+{
+  static char buff [128];
+  int    reg;
+  char * start = *str;
+
+  if ((reg = arm_reg_parse (str, all_reg_maps[REG_TYPE_IWMMXT].htab)) != FAIL)
+    {
+      if (wr_register (reg)
+	  && (reg_type == IWMMXT_REG_WR || reg_type == IWMMXT_REG_WR_OR_WC))
+        {
+          if (shift >= 0)
+            inst.instruction |= (reg ^ WR_PREFIX) << shift;
+          return reg;
+        }
+      else if (wc_register (reg)
+	       && (reg_type == IWMMXT_REG_WC || reg_type == IWMMXT_REG_WR_OR_WC))
+        {
+          if (shift >= 0)
+            inst.instruction |= (reg ^ WC_PREFIX) << shift;
+          return reg;
+        }
+      else if ((wcg_register (reg) && reg_type == IWMMXT_REG_WCG))
+        {
+          if (shift >= 0)
+            inst.instruction |= ((reg ^ WC_PREFIX) - 8) << shift;
+          return reg;
+        }
+    }
+
+  /* Restore the start point, we may have got a reg of the wrong class.  */
+  *str = start;
+
+  /* In the few cases where we might be able to accept
+     something else this error can be overridden.  */
+  sprintf (buff, _("Intel(r) Wireless MMX(tm) technology register expected, not '%.100s'"), start);
+  inst.error = buff;
+
+  return FAIL;
+}
+
 static const struct asm_psr *
 arm_psr_parse (ccp)
      register char ** ccp;
@@ -3065,6 +3376,144 @@ cp_address_required_here (str, wb_ok)
 	return FAIL;
 
       inst.reloc.type = BFD_RELOC_ARM_CP_OFF_IMM;
+      inst.reloc.exp.X_add_number -= 8;  /* PC rel adjust.  */
+      inst.reloc.pc_rel = 1;
+      inst.instruction |= (REG_PC << 16);
+      pre_inc = PRE_INDEX;
+    }
+
+  inst.instruction |= write_back | pre_inc;
+  *str = p;
+  return SUCCESS;
+}
+
+static int
+cp_byte_address_offset (str)
+     char ** str;
+{
+  int offset;
+
+  skip_whitespace (* str);
+
+  if (! is_immediate_prefix (**str))
+    {
+      inst.error = _("immediate expression expected");
+      return FAIL;
+    }
+
+  (*str)++;
+  
+  if (my_get_expression (& inst.reloc.exp, str))
+    return FAIL;
+  
+  if (inst.reloc.exp.X_op == O_constant)
+    {
+      offset = inst.reloc.exp.X_add_number;
+      
+      if (offset > 255 || offset < -255)
+        {
+          inst.error = _("offset too large");
+          return FAIL;
+        }
+
+      if (offset >= 0)
+        inst.instruction |= INDEX_UP;
+      else
+        offset = -offset;
+
+      inst.instruction |= offset;
+    }
+  else
+    inst.reloc.type = BFD_RELOC_ARM_CP_OFF_IMM_S2;
+
+  return SUCCESS;
+}
+
+static int
+cp_byte_address_required_here (str)
+     char ** str;
+{
+  char * p = * str;
+  int    pre_inc = 0;
+  int    write_back = 0;
+
+  if (*p == '[')
+    {
+      int reg;
+
+      p++;
+      skip_whitespace (p);
+
+      if ((reg = reg_required_here (& p, 16)) == FAIL)
+        return FAIL;
+
+      skip_whitespace (p);
+
+      if (*p == ']')
+        {
+          p++;
+          
+          if (skip_past_comma (& p) == SUCCESS)
+            {
+              /* [Rn], #expr */
+              write_back = WRITE_BACK;
+              
+              if (reg == REG_PC)
+                {
+                  inst.error = _("pc may not be used in post-increment");
+                  return FAIL;
+                }
+
+              if (cp_byte_address_offset (& p) == FAIL)
+                return FAIL;
+            }
+          else
+            pre_inc = PRE_INDEX | INDEX_UP;
+        }
+      else
+        {
+          /* '['Rn, #expr']'[!] */
+
+          if (skip_past_comma (& p) == FAIL)
+            {
+              inst.error = _("pre-indexed expression expected");
+              return FAIL;
+            }
+
+          pre_inc = PRE_INDEX;
+          
+          if (cp_byte_address_offset (& p) == FAIL)
+            return FAIL;
+
+          skip_whitespace (p);
+
+          if (*p++ != ']')
+            {
+              inst.error = _("missing ]");
+              return FAIL;
+            }
+
+          skip_whitespace (p);
+
+          if (*p == '!')
+            {
+              if (reg == REG_PC)
+                {
+                  inst.error = _("pc may not be used with write-back");
+                  return FAIL;
+                }
+
+              p++;
+              write_back = WRITE_BACK;
+            }
+        }
+    }
+  else
+    {
+      if (my_get_expression (&inst.reloc.exp, &p))
+        return FAIL;
+
+      inst.reloc.type = BFD_RELOC_ARM_CP_OFF_IMM_S2;
       inst.reloc.exp.X_add_number -= 8;  /* PC rel adjust.  */
       inst.reloc.pc_rel = 1;
       inst.instruction |= (REG_PC << 16);
@@ -4139,6 +4588,449 @@ do_bkpt (str)
   inst.instruction |= number & 0xf;
 
   end_of_line (str);
+}
+
+static unsigned long check_iwmmxt_insn PARAMS ((char *, enum iwmmxt_insn_type, int));
+
+/* Parse INSN_TYPE insn STR having a possible IMMEDIATE_SIZE immediate.  */
+
+static unsigned long
+check_iwmmxt_insn (str, insn_type, immediate_size)
+     char * str;
+     enum iwmmxt_insn_type insn_type;
+     int immediate_size;
+{
+  int reg = 0;
+  const char *  inst_error;
+  expressionS expr;
+  unsigned long number;
+
+  inst_error = inst.error;
+  if (!inst.error)
+    inst.error = BAD_ARGS;
+  skip_whitespace (str);
+
+  switch (insn_type)
+    {
+    case check_rd:
+      if ((reg = reg_required_here (&str, 12)) == FAIL)
+	return FAIL;
+      break;
+      
+    case check_wr:
+       if ((wreg_required_here (&str, 0, IWMMXT_REG_WR)) == FAIL)
+	 return FAIL;
+       break;
+       
+    case check_wrwr:
+      if ((wreg_required_here (&str, 12, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 16, IWMMXT_REG_WR) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_wrwrwr:
+      if ((wreg_required_here (&str, 12, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 16, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 0, IWMMXT_REG_WR) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_wrwrwcg:
+      if ((wreg_required_here (&str, 12, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 16, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 0, IWMMXT_REG_WCG) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_tbcst:
+      if ((wreg_required_here (&str, 16, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || reg_required_here (&str, 12) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_tmovmsk:
+      if ((reg_required_here (&str, 12) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 16, IWMMXT_REG_WR) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_tmia:
+      if ((wreg_required_here (&str, 5, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || reg_required_here (&str, 0) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || reg_required_here (&str, 12) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_tmcrr:
+      if ((wreg_required_here (&str, 0, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || reg_required_here (&str, 12) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || reg_required_here (&str, 16) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_tmrrc:
+      if ((reg_required_here (&str, 12) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || reg_required_here (&str, 16) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 0, IWMMXT_REG_WR) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_tmcr:
+      if ((wreg_required_here (&str, 16, IWMMXT_REG_WC) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || reg_required_here (&str, 12) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_tmrc:
+      if ((reg_required_here (&str, 12) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 16, IWMMXT_REG_WC) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_tinsr:
+      if ((wreg_required_here (&str, 16, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || reg_required_here (&str, 12) == FAIL
+	   || skip_past_comma (&str) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_textrc:
+      if ((reg_required_here (&str, 12) == FAIL
+	   || skip_past_comma (&str) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_waligni:
+      if ((wreg_required_here (&str, 12, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 16, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 0, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_textrm:
+      if ((reg_required_here (&str, 12) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 16, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL))
+	return FAIL;
+      break;
+      
+    case check_wshufh:
+      if ((wreg_required_here (&str, 12, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL
+	   || wreg_required_here (&str, 16, IWMMXT_REG_WR) == FAIL
+	   || skip_past_comma (&str) == FAIL))
+	return FAIL;
+      break;
+    }
+  
+  if (immediate_size == 0)
+    {
+      end_of_line (str);
+      inst.error = inst_error;
+      return reg;
+    }
+  else
+    {
+      skip_whitespace (str);      
+  
+      /* Allow optional leading '#'. */
+      if (is_immediate_prefix (* str))
+        str++;
+
+      memset (& expr, '\0', sizeof (expr));
+  
+      if (my_get_expression (& expr, & str) || (expr.X_op != O_constant))
+        {
+          inst.error = _("bad or missing expression");
+          return FAIL;
+        }
+  
+      number = expr.X_add_number;
+  
+      if (number != (number & immediate_size))
+        {
+          inst.error = _("immediate value out of range");
+          return FAIL;
+        }
+      end_of_line (str);
+      inst.error = inst_error;
+      return number;
+    }
+}
+
+static void
+do_iwmmxt_byte_addr (str)
+     char * str;
+{
+  int op = (inst.instruction & 0x300) >> 8;
+  int reg;
+
+  inst.instruction &= ~0x300;
+  inst.instruction |= (op & 1) << 22 | (op & 2) << 7;  
+
+  skip_whitespace (str);
+
+  if ((reg = wreg_required_here (&str, 12, IWMMXT_REG_WR_OR_WC)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || cp_byte_address_required_here (&str) == FAIL)
+    {
+      if (! inst.error)
+        inst.error = BAD_ARGS;
+    }
+  else
+    end_of_line (str);
+
+  if (wc_register (reg))
+    {
+      inst.instruction |=  0xf0000100;
+      inst.instruction &= ~0x00400000;
+    }
+}
+
+static void
+do_iwmmxt_tandc (str)
+     char * str;
+{
+  int reg;
+
+  reg = check_iwmmxt_insn (str, check_rd, 0);
+
+  if (reg != REG_PC && !inst.error)
+    inst.error = _("only r15 allowed here");
+  return;
+}
+
+static void
+do_iwmmxt_tbcst (str)
+     char * str;
+{
+  check_iwmmxt_insn (str, check_tbcst, 0);
+
+  return;
+}
+
+static void
+do_iwmmxt_textrc (str)
+     char * str;
+{
+  unsigned long number;
+
+  if ((number = check_iwmmxt_insn (str, check_textrc, 7)) == (unsigned long) FAIL)
+    return;
+
+  inst.instruction |= number & 0x7;
+  return;
+}
+
+static void
+do_iwmmxt_textrm (str)
+     char * str;
+{
+  unsigned long number;
+
+  if ((number = check_iwmmxt_insn (str, check_textrm, 7)) == (unsigned long) FAIL)
+    return;
+
+  inst.instruction |= number & 0x7;
+}
+
+static void
+do_iwmmxt_tinsr (str)
+     char * str;
+{
+  unsigned long number;
+
+  if ((number = check_iwmmxt_insn (str, check_tinsr, 7)) == (unsigned long) FAIL)
+    return;
+
+  inst.instruction |= number & 0x7;
+  return;
+}
+
+static void
+do_iwmmxt_tmcr (str)
+     char * str;
+{
+  check_iwmmxt_insn (str, check_tmcr, 0);
+
+  return;
+}
+
+static void
+do_iwmmxt_tmcrr (str)
+     char * str;
+{
+  check_iwmmxt_insn (str, check_tmcrr, 0);
+
+  return;
+}
+
+static void
+do_iwmmxt_tmia (str)
+     char * str;
+{
+  check_iwmmxt_insn (str, check_tmia, 0);
+
+  return;
+}
+
+static void
+do_iwmmxt_tmovmsk (str)
+     char * str;
+{
+  check_iwmmxt_insn (str, check_tmovmsk, 0);
+
+  return;
+}
+
+static void
+do_iwmmxt_tmrc (str)
+     char * str;
+{
+  check_iwmmxt_insn (str, check_tmrc, 0);
+
+  return;
+}
+
+static void
+do_iwmmxt_tmrrc (str)
+     char * str;
+{
+  check_iwmmxt_insn (str, check_tmrrc, 0);
+
+  return;
+}
+
+static void
+do_iwmmxt_torc (str)
+     char * str;
+{
+  check_iwmmxt_insn (str, check_rd, 0);
+  return;
+}
+
+static void
+do_iwmmxt_waligni (str)
+     char * str;
+{
+  unsigned long number;
+
+  if ((number = check_iwmmxt_insn (str, check_waligni, 7)) == (unsigned long) FAIL)
+    return;
+
+  inst.instruction |= ((number & 0x7) << 20);
+  return;
+}
+
+static void
+do_iwmmxt_wmov (str)
+     char * str;
+{
+  if (check_iwmmxt_insn (str, check_wrwr, 0) == (unsigned long) FAIL)
+    return;
+  
+  inst.instruction |= ((inst.instruction >> 16) & 0xf);
+  return;
+}
+
+static void
+do_iwmmxt_word_addr (str)
+     char * str;
+{
+  int op = (inst.instruction & 0x300) >> 8;
+  int reg;
+
+  inst.instruction &= ~0x300;
+  inst.instruction |= (op & 1) << 22 | (op & 2) << 7;  
+
+  skip_whitespace (str);
+
+  if ((reg = wreg_required_here (&str, 12, IWMMXT_REG_WR_OR_WC)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || cp_address_required_here (& str, CP_WB_OK) == FAIL)
+    {
+      if (! inst.error)
+        inst.error = BAD_ARGS;
+    }
+  else
+    end_of_line (str);
+
+  if (wc_register (reg))
+    {
+      inst.instruction |=  0xf0000100;
+      inst.instruction &= ~0x00400000;
+    }
+}
+
+static void
+do_iwmmxt_wrwr (str)
+     char * str;
+{
+  check_iwmmxt_insn (str, check_wrwr, 0);
+  
+  return;
+}
+
+static void
+do_iwmmxt_wrwrwcg (str)
+     char * str;
+{
+  check_iwmmxt_insn (str, check_wrwrwcg, 0);
+
+  return;
+}
+
+static void
+do_iwmmxt_wrwrwr (str)
+     char * str;
+{
+  check_iwmmxt_insn (str, check_wrwrwr, 0);
+
+  return;
+}
+
+static void
+do_iwmmxt_wshufh (str)
+     char * str;
+{
+  unsigned long number;
+
+  if ((number = check_iwmmxt_insn (str, check_wshufh, 0xff)) == (unsigned long) FAIL)
+    return;
+
+  inst.instruction |= ((number & 0xf0) << 16) | (number & 0xf);
+  return;
+}
+
+static void
+do_iwmmxt_wzero (str)
+     char * str;
+{
+  if (check_iwmmxt_insn (str, check_wr, 0) == (unsigned long) FAIL)
+    return;
+
+  inst.instruction |= ((inst.instruction & 0xf) << 12) | ((inst.instruction & 0xf) << 16);
+  return;
 }
 
 /* Xscale multiply-accumulate (argument parse)
@@ -9329,7 +10221,9 @@ md_begin ()
     }
 
   /* Catch special cases.  */
-  if (cpu_variant & ARM_CEXT_XSCALE)
+  if (cpu_variant & ARM_CEXT_IWMMXT)
+    mach = bfd_mach_arm_iWMMXt;
+  else if (cpu_variant & ARM_CEXT_XSCALE)
     mach = bfd_mach_arm_XScale;
   else if (cpu_variant & ARM_CEXT_MAVERICK)
     mach = bfd_mach_arm_ep9312;
@@ -9351,6 +10245,33 @@ md_begin ()
     }
   else if (cpu_variant & ARM_EXT_V3M)
     mach = bfd_mach_arm_3M;
+
+#if defined (OBJ_ELF) || defined (OBJ_COFF)
+  {
+    expressionS exp;
+    segT current_seg = now_seg;
+    subsegT current_subseg = now_subseg;
+    asection * arm_arch;
+    
+    arm_arch = bfd_make_section_old_way (stdoutput, ARM_NOTE_SECTION);
+
+#ifdef OBJ_COFF
+    bfd_set_section_flags (stdoutput, arm_arch,
+			   SEC_DATA | SEC_ALLOC | SEC_LOAD | SEC_LINK_ONCE \
+			   | SEC_HAS_CONTENTS);
+#endif
+    arm_arch->output_section = arm_arch;
+    subseg_set (arm_arch, 0);
+    exp.X_op = O_constant;
+    exp.X_add_number = mach;
+    exp.X_add_symbol = NULL;
+    exp.X_op_symbol = NULL;
+
+    emit_expr (&exp, 4);
+
+    subseg_set (current_seg, current_subseg);
+  }
+#endif
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach);
 }
@@ -10064,6 +10985,18 @@ md_apply_fix3 (fixP, valP, seg)
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
+    case BFD_RELOC_ARM_CP_OFF_IMM_S2:
+      sign = value >= 0;
+      if (value < -255 || value > 255)
+        as_bad_where (fixP->fx_file, fixP->fx_line,
+                      _("Illegal value for co-processor offset"));
+      if (value < 0)
+        value = -value;
+      newval = md_chars_to_number (buf, INSN_SIZE) & 0xff7fff00;
+      newval |= value | (sign ?  INDEX_UP : 0);
+      md_number_to_chars (buf, newval , INSN_SIZE);
+      break;
+
     case BFD_RELOC_ARM_THUMB_OFFSET:
       newval = md_chars_to_number (buf, THUMB_SIZE);
       /* Exactly what ranges, and where the offset is inserted depends
@@ -10722,6 +11655,7 @@ struct arm_option_table arm_opts[] =
   {"mstrongarm1110", NULL, &legacy_cpu, ARM_ARCH_V4,
    N_("use -mcpu=strongarm1110")},
   {"mxscale",	 NULL, &legacy_cpu, ARM_ARCH_XSCALE, N_("use -mcpu=xscale")},
+  {"miwmmxt",	 NULL, &legacy_cpu, ARM_ARCH_IWMMXT, N_("use -mcpu=iwmmxt")},
   {"mall",	 NULL, &legacy_cpu, ARM_ANY,      N_("use -mcpu=all")},
 
   /* Architecture variants -- don't add any more to this list either.  */
@@ -10826,6 +11760,7 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"arm1020e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
   /* ??? XSCALE is really an architecture.  */
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
+  {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP_V2},
   {"i80200",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
   /* Maverick */
   {"ep9312",		ARM_ARCH_V4T | ARM_CEXT_MAVERICK, FPU_NONE},
@@ -10875,6 +11810,7 @@ static struct arm_arch_extension_table arm_extensions[] =
 {
   {"maverick",		ARM_CEXT_MAVERICK},
   {"xscale",		ARM_CEXT_XSCALE},
+  {"iwmmxt",		ARM_CEXT_IWMMXT},
   {NULL,		0}
 };
 

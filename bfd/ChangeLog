@@ -1,3 +1,26 @@
+2003-03-25  Stan Cox   <scox@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+	    
+	Contribute support for Intel's iWMMXt chip - an	ARM variant:
+
+	* archures.c: Add bfd_mach_arm_iWMMXt.
+	* reloc.c: Add BFD_RELOC_ARM_CP_OFF_IMM_S2.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* coff-arm.c (coff_arm_merge_private_bfd_data): Allow iWMMXt
+	object files to be linked with XScale ones.
+	(coff_arm_final_link_postscript): Update note section.
+	* coffcode.h (coff_set_arch_mach_hook): Handle note section.
+	* coffgen.c (coff_real_object_p): Call bfd_coff_set_arch_mach_hook
+	after identifying a coff binary.
+	* cpu-arm.c (processors): Add iWMMXt.
+	(arch_inf): Likewise.
+	* elf32-arm.h (arm_object_p): Handle note section.
+	(elf32_arm_merge_private_bfd_data):  Allow iWMMXt object files to
+	be linked with XScale ones.
+	(elf32_arm_section_flags): New function: Set flags on note section.
+	(elf32_arm_final_write_processing): Handle note section.
+
 2003-03-21  DJ Delorie  <dj@redhat.com>
 
 	* elf32-xstormy16.c (elf32_xstormy16_relocate_section): Call
