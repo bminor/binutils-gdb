@@ -1,5 +1,10 @@
 2003-12-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc_stabs_unglobalize_name): New function.
+	* config/sparc/tm-sol2.h (SOFUN_ADDRESS_MAYBE_MISSING): Define.
+	(sparc_stabs_unglobalize_name): New prototype.
+	(STATIC_TRANSFORM_NAME, IS_STATIC_TRANSFORM_NAME): New defines.
+
 	* sparc64-sol2-tdep.c: Include "frame.h", "frame-unwind.h",
 	"trad-frame.h" and "gdb_assert.h".
 	(BIAS): Define if not already defined.

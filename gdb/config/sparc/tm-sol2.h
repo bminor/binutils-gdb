@@ -23,4 +23,18 @@
 
 #define GDB_MULTI_ARCH GDB_MULTI_ARCH_TM
 
+/* The Sun compilers (Sun ONE Studio, Forte Developer, Sun WorkShop,
+   SunPRO) compiler puts out 0 instead of the address in N_SO stabs.
+   Starting with SunPRO 3.0, the compiler does this for N_FUN stabs
+   too.  */
+#define SOFUN_ADDRESS_MAYBE_MISSING
+
+/* The Sun compilers also do "globalization"; see the comment in
+   sparc-tdep.c for more information.  */
+extern char *sparc_stabs_unglobalize_name (char *name);
+#define STATIC_TRANSFORM_NAME(name) \
+  sparc_stabs_unglobalize_name (name)
+#define IS_STATIC_TRANSFORM_NAME(name) \
+  ((name) != sparc_stabs_unglobalize_name (name))
+
 #endif /* tm-sol2.h */
