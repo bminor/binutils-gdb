@@ -169,7 +169,7 @@ proc test_ptype_functions {} {
     send "ptype main\n"
     expect {
 	-re "type = int \[)(\]+\r\n$prompt $" {}
-	timeout { fail "$binfile ($bfdformat) function main" ; return }
+	timeout { fail "(timeout) $binfile ($bfdformat) function main" ; return }
     }
 
     # set up a list of lists of command and patterns

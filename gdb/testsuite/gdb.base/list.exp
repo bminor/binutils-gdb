@@ -319,8 +319,11 @@ proc test_listsize {} {
 	    -re "1\[ \t\]+#include \"list0.h\".*\r\n42\[ \t\]+\}\r\n$prompt $" {
 		pass "list line 1 with listsize 100"
 	    }
-	    timeout {
+	    -re ".*$prompt $" {
 		fail "list line 1 with listsize 100"
+	    }
+	    timeout {
+		fail "list line 1 with listsize 100 (timeout)"
 	    }
 	}
 	
@@ -329,8 +332,11 @@ proc test_listsize {} {
 	    -re "1\[ \t\]+#include \"list0.h\".*\r\n42\[ \t\]+\}\r\n$prompt $" {
 		pass "list line 10 with listsize 100"
 	    }
-	    timeout {
+	    -re ".*$prompt $" {
 		fail "list line 10 with listsize 100"
+	    }
+	    timeout {
+		fail "list line 10 with listsize 100 (timeout)"
 	    }
 	}
     }
@@ -404,7 +410,7 @@ proc test_listsize {} {
 		    fail "listsize of -1 (unlimited) suppresses output"
 		}
 		timeout {
-		    fail "list line 1 with unlimited listsize"
+		    fail "list line 1 with unlimited listsize (timeout)"
 		}
 	    }
 	}
@@ -476,7 +482,7 @@ proc test_list_filename_and_number {} {
 	    incr testcnt 
 	}
 	-re ".*$prompt $" { fail "list list0.c:1" ; return }
-	timeout { fail "list list0.c:1" ; return }
+	timeout { fail "list list0.c:1 (timeout)" ; return }
     }
     send "list list0.c:10\n"
     expect {
@@ -484,7 +490,7 @@ proc test_list_filename_and_number {} {
 	    incr testcnt 
 	}
 	-re ".*$prompt $" { fail "list list.c:10" ; return }
-	timeout { fail "list list.c:10" ; return }
+	timeout { fail "list list.c:10 (timeout)" ; return }
     }
     send "list list1.c:1\n"
     expect {
@@ -492,7 +498,7 @@ proc test_list_filename_and_number {} {
 	    incr testcnt 
 	}
 	-re ".*$prompt $" { fail "list list1.c:1" ; return }
-	timeout { fail "list list1.c:1" ; return }
+	timeout { fail "list list1.c:1 (timeout)" ; return }
     }
     send "list list1.c:12\n"
     expect {
@@ -500,7 +506,7 @@ proc test_list_filename_and_number {} {
 	    incr testcnt 
 	}
 	-re ".*$prompt $" { fail "list list1.c:12" ; return }
-	timeout { fail "list list1.c:12" ; return }
+	timeout { fail "list list1.c:12 (timeout)" ; return }
     }
     pass "list filename:number ($testcnt tests)"
 }
@@ -526,7 +532,7 @@ proc test_list_function {} {
 	    pass "list function in source file 1"
 	}
 	-re ".*$prompt $" { fail "list main" ; return }
-	timeout { fail "list main" ; return }
+	timeout { fail "list main (timeout)" ; return }
     }
 
     # Ultrix gdb takes the second case below; it's also correct.
@@ -543,7 +549,7 @@ proc test_list_function {} {
 	    pass "list function in source file 2"
 	}
 	-re ".*$prompt $" { fail "list bar" ; return }
-	timeout { fail "list bar" ; return }
+	timeout { fail "list bar (timeout)" ; return }
     }
 
     # Test "list function" for C include file
@@ -578,7 +584,7 @@ proc test_list_forward {} {
     expect {
 	-re "5\[ \t\]+int x;.*14\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$prompt $" { incr testcnt }
 	-re ".*$prompt $" { fail "list list0.c:10" ; return }
-	timeout { fail "list list0.c:10" ; return }
+	timeout { fail "list list0.c:10 (timeout)" ; return }
     }
 
     send "list\n"
@@ -614,7 +620,7 @@ proc test_list_backwards {} {
     expect {
 	-re "28\[ \t\]+foo \[(\]+.*\[)\]+;.*37\[ \t\]+\r\n$prompt $" { incr testcnt }
 	-re ".*$prompt $" { fail "list list0.c:33" ; return }
-	timeout { fail "list list0.c:33" ; return }
+	timeout { fail "list list0.c:33 (timeout)" ; return }
     }
 
     send "list -\n"
@@ -654,7 +660,7 @@ proc test_list_range {} {
 	    pass "list range; filename:line1,filename:line2"
 	}
 	-re ".*$prompt $" { fail "list list0.c:2,list0.c:5" }
-	timeout { fail "list list0.c:2,list0.c:5" }
+	timeout { fail "list list0.c:2,list0.c:5 (timeout)" }
     }
 
     send "list 2,5\n"
@@ -663,7 +669,7 @@ proc test_list_range {} {
 	    pass "list range; line1,line2"
 	}
 	-re ".*$prompt $" { fail "list 2,5" }
-	timeout { fail "list 2,5" }
+	timeout { fail "list 2,5 (timeout)" }
     }
 
     #send "list -1,6\n"
@@ -672,7 +678,7 @@ proc test_list_range {} {
 	    #pass "list range; lower bound negative"
 	#}
 	#-re ".*$prompt $" { fail "list -1,6" }
-	#timeout { fail "list -1,6" }
+	#timeout { fail "list -1,6 (timeout)" }
     #}
 
     #send "list -100,-40\n"
@@ -681,7 +687,7 @@ proc test_list_range {} {
 	    #pass "list range; both bounds negative"
 	#}
 	#-re ".*$prompt $" { fail "-100,-40" }
-	#timeout { fail "-100,-40" }
+	#timeout { fail "-100,-40 (timeout)" }
     #}
 
     send "list 30,43\n"
@@ -690,7 +696,7 @@ proc test_list_range {} {
 	    pass "list range; upper bound past EOF"
 	}
 	-re ".*$prompt $" { fail "list 30,43" }
-	timeout { fail "list 30,43" }
+	timeout { fail "list 30,43 (timeout)" }
     }
 
     send "list 43,100\n"
@@ -699,7 +705,7 @@ proc test_list_range {} {
 	    pass "list range; both bounds past EOF"
 	}
 	-re ".*$prompt $" { fail "43,100" }
-	timeout { fail "43,100" }
+	timeout { fail "43,100 (timeout)" }
     }
 
     send "list list0.c:2,list1.c:17\n"
@@ -708,7 +714,7 @@ proc test_list_range {} {
 	    pass "list range, must be same files"
 	}
 	-re ".*$prompt $" { fail "list0.c:2,list1.c:17" }
-	timeout { fail "list0.c:2,list1.c:17" }
+	timeout { fail "list0.c:2,list1.c:17 (timeout)" }
     }
 }
 
@@ -880,6 +886,7 @@ proc test_list_filename_and_function {} {
 }
 
 proc test_forward_search {} {
+	global timeout
 
 	gdb_test "set listsize 4" ""
 	# On SunOS4, this gives us lines 19-22.  On AIX, it gives us
@@ -892,15 +899,15 @@ proc test_forward_search {} {
 
 	gdb_test "search 6789" "24\[ \t\]+oof .6789.;"
 
-	# We could look at the result of this, but dejagnu seems to
-	# fail, perhaps because expect's buffers are too small.
-	# In any case, we just want GDB to not crash if the line
-	# being searched is extremely long.
+	# Test that GDB won't crash if the line being searched is extremely long.
 
-	set timeout 30
+	set oldtimeout $timeout
+	set timeout [expr "$timeout + 60"]
 	verbose "Timeout is now $timeout seconds" 2
-	match_max 6000
+	match_max 10000
 	gdb_test "search 1234" ".*1234.*" "search extremely long line (> 5000 chars)"
+	set timeout $oldtimeout
+	verbose "Timeout is now $timeout seconds" 2
 }
 
 # Start with a fresh gdb.
