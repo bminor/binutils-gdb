@@ -1,3 +1,8 @@
+2000-04-17  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c (offset_in_range): Sign extend val so BFD64
+	doesn't give spurious errors.
+
 2000-04-14  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
         * as.h (SEEK_SET): Define if undefined.
