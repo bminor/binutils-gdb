@@ -30,7 +30,7 @@ typedef enum
   lang_input_file_is_file_enum
 } lang_input_file_enum_type;
 
-typedef unsigned short fill_type;
+typedef unsigned int fill_type;
 typedef struct statement_list
 {
   union lang_statement_union *head;
@@ -275,13 +275,10 @@ typedef union lang_statement_union
 
 extern bfd_size_type largest_section;
 extern lang_output_section_statement_type *abs_output_section;
-extern lang_input_statement_type *script_file;
 extern boolean lang_has_input_file;
-extern boolean relaxing;
 extern etree_type *base;
 extern lang_statement_list_type *stat_ptr;
 extern boolean delete_output_file_on_failure;
-extern lang_output_section_statement_type *create_object_symbols;
 
 extern void lang_init PARAMS ((void));
 extern struct memory_region_struct *lang_memory_region_lookup
@@ -296,10 +293,8 @@ extern void lang_enter_output_section_statement
 	   bfd_vma block_value,
 	   etree_type *align,
 	   etree_type *subalign,
-	   etree_type *base));
+	   etree_type *));
 extern void lang_final PARAMS ((void));
-extern struct symbol_cache_entry *create_symbol
-  PARAMS ((const char *, unsigned int, struct sec *));
 extern void lang_process PARAMS ((void));
 extern void lang_section_start PARAMS ((const char *, union etree_union *));
 extern void lang_add_entry PARAMS ((const char *));
@@ -374,7 +369,8 @@ extern void ldlang_add_undef PARAMS ((const char *const name));
 extern void lang_add_output_format PARAMS ((const char *, int from_script));
 extern void lang_list_init PARAMS ((lang_statement_list_type*));
 extern void lang_add_data PARAMS ((int type, union etree_union *));
-extern void lang_for_each_statement PARAMS ((void (*func)()));
+extern void lang_for_each_statement
+  PARAMS ((void (*func) (lang_statement_union_type *)));
 extern PTR stat_alloc PARAMS ((size_t size));
 
 #endif

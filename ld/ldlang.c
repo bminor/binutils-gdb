@@ -145,7 +145,6 @@ static int topower PARAMS ((int));
 static void reset_memory_regions PARAMS ((void));
 
 /* EXPORTS */
-boolean relaxing;
 lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_statement_list_type file_chain =
@@ -1769,15 +1768,32 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	lang_input_section_type *is;
 	asection *i;
 
-	relaxing = true;
-
 	is = &(*prev)->input_section;
 	i = is->section;
 
+	/* FIXME: The interface to bfd_relax_section should be changed
+	   to not require the generic symbols to be read.  Changing
+	   this would require changing both b_out_relax_section and
+	   bfd_coff_relax16_section.  */
+	if (is->ifile->asymbols == (asymbol **) NULL)
+	  {
+	    unsigned int symsize;
+
+	    symsize = get_symtab_upper_bound (i->owner);
+	    is->ifile->asymbols = (asymbol **) ldmalloc (symsize);
+	    is->ifile->symbol_count =
+	      bfd_canonicalize_symtab (i->owner, is->ifile->asymbols);
+
+	    /* The generic linker code in BFD requires that these
+	       symbols be stored in the outsymbols and symcount
+	       fields.  When the bfd_relax_section is interface is
+	       fixed this should also be fixed.  */
+	    i->owner->outsymbols = is->ifile->asymbols;
+	    i->owner->symcount = is->ifile->symbol_count;
+	  }
+
 	if (bfd_relax_section (i->owner, i, &link_info, is->ifile->asymbols))
 	  had_relax = true;
-
-	relaxing = false;
       }
       else  {
 	(*prev)->input_section.section->_cooked_size = 

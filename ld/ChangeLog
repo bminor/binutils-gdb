@@ -1,3 +1,10 @@
+Mon Jan 24 12:56:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (relaxing): Removed global variable.
+	(lang_size_sections): If the canonical symbols have not already
+	been read in, read them in before relaxing.
+	* ldlang.h (relaxing): Removed declaration.
+
 Fri Jan 21 00:44:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldlang.c (new_afile): Initialize loaded field to false.
