@@ -3,6 +3,14 @@
 
 *** Changes since GDB 5.1:
 
+* New command "generate-core-file" (or "gcore").
+
+This new gdb command allows the user to drop a core file of the
+child process state at any time.  So far it's been implemented 
+only for Linux and Solaris, but should be relatively easily 
+ported to other hosts.  Argument is core file name (defaults 
+to core.<pid>).
+
 * New command line option
 
 GDB now accepts --pid or -p followed by a process id.  
