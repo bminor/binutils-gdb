@@ -640,7 +640,8 @@ extern const bfd_target ihex_vec;
 
 /* All of the xvecs for core files.  */
 extern const bfd_target aix386_core_vec;
-extern const bfd_target cisco_core_vec;
+extern const bfd_target cisco_core_big_vec;
+extern const bfd_target cisco_core_little_vec;
 extern const bfd_target hpux_core_vec;
 extern const bfd_target hppabsd_core_vec;
 extern const bfd_target irix_core_vec;
@@ -726,7 +727,7 @@ const bfd_target * const bfd_target_vector[] = {
 #if 0
 	&bfd_elf64_sparc_vec,
 #endif
-	/* We don't include cisco_core_vec.  Although it has a magic number,
+	/* We don't include cisco_core_*_vec.  Although it has a magic number,
 	   the magic number isn't at the beginning of the file, and thus
 	   might spuriously match other kinds of files.  */
 #ifdef BFD64

@@ -5427,7 +5427,8 @@ do
 				target64=true ;;
     bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.lo elf64.lo $elf"
 				target64=true ;;
-    cisco_core_vec)		tb="$tb cisco-core.lo" ;;
+    cisco_core_big_vec)		tb="$tb cisco-core.lo" ;;
+    cisco_core_little_vec)	tb="$tb cisco-core.lo" ;;
     demo_64_vec)		tb="$tb demo64.lo aout64.lo"
 				target64=true ;;
     ecoff_big_vec)		tb="$tb coff-mips.lo ecoff.lo ecofflink.lo" ;;

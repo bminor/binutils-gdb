@@ -1,3 +1,31 @@
+1999-09-28  Fred Fish  <fnf@cygnus.com>
+
+	* targets.c (cisco_core_vec): Replaced with two new vecs ...
+	(cisco_core_big_vec): Add new bigendian vec.
+	(cisco_core_little_vec): Add new little endian vec.
+
+	* cisco-core.c (CRASH_INFO): Fixed offset replaced with ...
+	(crash_info_locs): Add array of possible offsets.
+	(MASK_ADDR): Mask to apply to crash info offset.
+	(crashinfo_external): Add textbase, database, bssbase and
+	turn into a typedef.
+	(cisco_core_file_validate): Renamed from cisco_core_file_p.
+	Many small changes to account for additional hardware versions.
+	Pick a reasonable size for ".reg" section.  Add a ".crash"
+	section to allow access to crashinfo_external struct.
+	(cisco_core_file_p): New version of this function that
+	iterates over crash_info_locs, calling cisco_core_file_validate.
+	(cisco_core_vec): Old big endian only vec replaced with ...
+	(cisco_core_big_vec): Add big endian version.
+	(cisco_core_little_vec): Add little endian version.
+
+	* configure.in (cisco_core_vec): Split to two new vectors ...
+	(cisco_core_big_vec): New target vector.
+	(cisco_core_little_vec): New target vector.
+	* configure: Regenerate.
+	* config.bfd (targ): For m68*-*-aout* targ, change cisco_core_vec
+	to cisco_core_big_vec in targ_selvecs.
+
 1999-09-28  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* elf32-mips.c (mips_elf_relocate_hi16): Unused, delete.
