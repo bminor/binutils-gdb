@@ -1,5 +1,9 @@
 2004-08-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (elf_section_complain_discarded): Ignore .fixup.
+
+2004-08-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* bfd.c (_bfd_default_error_handler): Account for doubled '%' in
 	free space available.
 

@@ -6337,6 +6337,9 @@ elf_section_complain_discarded (asection *sec)
   if (strcmp (".PARISC.unwind", sec->name) == 0)
     return FALSE;
 
+  if (strcmp (".fixup", sec->name) == 0)
+    return FALSE;
+
   return TRUE;
 }
 
