@@ -1,3 +1,7 @@
+2005-03-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	* hash.c (strtab_hash_newfunc): Fix typo in allocated size.
+
 2005-03-22  Bob Wilson  <bob.wilson@acm.org>
 
 	* xtensa-isa.c (xtensa_opcode_lookup, xtensa_state_lookup,

@@ -555,7 +555,7 @@ strtab_hash_newfunc (struct bfd_hash_entry *entry,
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
   if (ret == NULL)
-    ret = bfd_hash_allocate (table, sizeof (* entry));
+    ret = bfd_hash_allocate (table, sizeof (* ret));
   if (ret == NULL)
     return NULL;
 
