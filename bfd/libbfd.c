@@ -1260,7 +1260,7 @@ bfd_log2 (x)
 {
   unsigned int result = 0;
 
-  while ((((bfd_vma) 1) << result) < x)
+  while ((x = (x >> 1)) != 0)
     ++result;
   return result;
 }

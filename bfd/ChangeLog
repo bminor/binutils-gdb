@@ -1,3 +1,8 @@
+1999-09-12  Donn Terry  <donn@interix.com>
+
+	* libbfd.c (bfd_log2): Rewrite to avoid infinite loop if most
+	significant bit is set.
+
 1999-09-11  Ian Lance Taylor  <ian@zembu.com>
 
 	* coff-ppc.c (COFF_SECTION_ALIGNMENT_ENTRIES): Define.
