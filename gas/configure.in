@@ -64,10 +64,11 @@ case "${host}" in
 
   vax-*-vms*)			gas_host=vms		;;
   vax-*-bsd*)			gas_host=vax		;;
+  vax-*-ultrix*)		gas_host=vax		;;
 
   *-*-sysv4* | *-*-unixware)	gas_host=sysv		;;
 
-  *-*-ansi | *-*-ultrix | *-*-hpux | *-*-sysv*)
+  *-*-ansi | *-*-hpux | *-*-sysv)
 				gas_host=${host_os}	;;
 
 esac
@@ -201,6 +202,8 @@ case ${generic_target} in
 			obj_format=elf ;;
   sparc64-*-aout*)	obj_format=aout bfd_gas=yes ;; # v9
 
+  vax-*-bsd* | vax-*-ultrix*)
+			obj_format=aout ;;
   vax-*-vms)		obj_format=vms ;;
 
   z8k-*-coff | z8k-*-sim)
