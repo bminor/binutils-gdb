@@ -1,3 +1,9 @@
+Thu Mar 23 15:07:08 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.c (bpstat_do_actions): For each element in the bpstat
+	chain, do all the commands regardless of whether they run the
+	inferior.
+
 Wed Mar 22 19:17:06 1995  Doug Evans  <dje@cygnus.com>
 
 	* mem-break.c (LITTLE_BREAKPOINT, BIG_BREAKPOINT): Define as
