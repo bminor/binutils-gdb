@@ -117,8 +117,10 @@ WIN32LIBADD = @WIN32LIBADD@
 all_backends = @all_backends@
 bfd_backends = @bfd_backends@
 bfd_default_target_size = @bfd_default_target_size@
+bfd_file_ptr = @bfd_file_ptr@
 bfd_libs = @bfd_libs@
 bfd_machines = @bfd_machines@
+bfd_ufile_ptr = @bfd_ufile_ptr@
 bfd_version = @bfd_version@
 bfd_version_string = @bfd_version_string@
 bfdincludedir = @bfdincludedir@
@@ -255,7 +257,7 @@ DIST_COMMON =  ChangeLog Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:
