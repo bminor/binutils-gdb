@@ -1,3 +1,11 @@
+2002-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	(CPU_OBJ_VALID): sh64 coff is invalid.
+	* as.c: #include "bfdver.h".
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+
 2002-10-14  Momchil Velikov  <velco@fadata.bg>
 
 	* config/tc-v850.c (CHECK_): Remove token pasting operator.

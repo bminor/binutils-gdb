@@ -119,7 +119,7 @@ CPU_OBJ_VALID = \
 	  esac ;; \
 	coff) valid=yes; \
 	  case $$c in \
-	  cris | i860 | mmix) \
+	  cris | i860 | mmix | sh64) \
 	    valid= ;; \
 	  esac ;; \
 	ecoff) \
@@ -2337,7 +2337,7 @@ BMKDEP = #DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING ABOVE.
 #MKDEP    DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING BELOW.
 app.o: app.c $(INCDIR)/symcat.h
 as.o: as.c $(INCDIR)/symcat.h subsegs.h $(INCDIR)/obstack.h \
-  output-file.h sb.h macro.h dwarf2dbg.h
+  output-file.h sb.h macro.h dwarf2dbg.h ../bfd/bfdver.h
 atof-generic.o: atof-generic.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h
 bignum-copy.o: bignum-copy.c $(INCDIR)/symcat.h
 cond.o: cond.c $(INCDIR)/symcat.h macro.h sb.h $(INCDIR)/obstack.h

@@ -43,6 +43,10 @@
 #include "macro.h"
 #include "dwarf2dbg.h"
 
+#ifdef BFD_ASSEMBLER
+#include "bfdver.h"
+#endif
+
 #ifdef HAVE_ITBL_CPU
 #include "itbl-ops.h"
 #else
