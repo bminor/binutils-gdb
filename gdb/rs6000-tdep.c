@@ -192,6 +192,14 @@ ppc_floating_point_unit_p (struct gdbarch *gdbarch)
           && tdep->ppc_fpscr_regnum >= 0);
 }
 
+
+/* Check that TABLE[GDB_REGNO] is not already initialized, and then
+   set it to SIM_REGNO.
+
+   This is a helper function for init_sim_regno_table, constructing
+   the table mapping GDB register numbers to sim register numbers; we
+   initialize every element in that table to -1 before we start
+   filling it in.  */
 static void
 set_sim_regno (int *table, int gdb_regno, int sim_regno)
 {
@@ -201,6 +209,10 @@ set_sim_regno (int *table, int gdb_regno, int sim_regno)
   table[gdb_regno] = sim_regno;
 }
 
+
+/* Initialize ARCH->tdep->sim_regno, the table mapping GDB register
+   numbers to simulator register numbers, based on the values placed
+   in the ARCH->tdep->ppc_foo_regnum members.  */
 static void
 init_sim_regno_table (struct gdbarch *arch)
 {
@@ -281,6 +293,9 @@ init_sim_regno_table (struct gdbarch *arch)
   tdep->sim_regno = sim_regno;
 }
 
+
+/* Given a GDB register number REG, return the corresponding SIM
+   register number.  */
 static int
 rs6000_register_sim_regno (int reg)
 {

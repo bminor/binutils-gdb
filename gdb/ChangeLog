@@ -1,3 +1,8 @@
+2004-08-09  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (set_sim_regno, init_sim_regno_table,
+	rs6000_register_sim_regno): Doc fixes.
+
 2004-08-08  Joel Brobecker  <brobecker@gnat.com>
 
 	* mips-tdep.c: Include "floatformat.h".
