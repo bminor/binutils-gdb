@@ -187,7 +187,7 @@ acinclude.m4 aclocal.m4 configure configure.in gconfig.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(gprof_SOURCES)
 OBJECTS = $(gprof_OBJECTS)

@@ -68,8 +68,8 @@
 
 2000-07-05  Kenneth Block  <krblock@computer.org>
 
-        * gprof/gprof.c: Add optional style to demangle switch
-        * gprof/gprof.texi: Document optional style to demangle switch.
+        * gprof.c: Add optional style to demangle switch
+        * gprof.texi: Document optional style to demangle switch.
 
 2000-06-05  DJ Delorie  <dj@redhat.com>
 
@@ -1305,7 +1305,7 @@ Tue Jan 31 16:18:18 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	   -S: annotate source file
 	   -t: set table length (with -S)
 
-	* Makefile (OBJS): added basic_blocks.o call_graph.o gmon_io.o
+	* Makefile.am (OBJS): added basic_blocks.o call_graph.o gmon_io.o
 	source.o time_hist.o
 
 	Fri Jul	 1 15:23:50 1994  David Mosberger-Tang	(davidm@piston.cs.arizona.edu)
@@ -1456,7 +1456,7 @@ Mon Apr 26 12:37:46 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 Tue Apr 13 16:14:03 1993  Per Bothner  (bothner@cygnus.com)
 
-	* M Makefile.in:  Add -g to CFLAGS.
+	* Makefile.in:  Add -g to CFLAGS.
 	Ads LDFLAGS and use in place of CFLAGS where appropriate.
 	* configure.in:  Make a sysdep.hlink in the same way other
 	bfd-based directories do.
@@ -1578,4 +1578,3 @@ Thu Jun  4 11:34:02 1992  Mark Eichin  (eichin at cygnus.com)
 	help in debugging the problem (with -DDEBUG)
 	* gprof.c: symbol values are now real values, don't add the vma
 	anymore. (done for solaris; should verify this on other platforms)
-	* ChangeLog: created.

@@ -1,6 +1,6 @@
 /* call_graph.c  -  Create call graphs.
 
-   Copyright (C) 2000  Free Software Foundation, Inc.
+   Copyright 2000 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
