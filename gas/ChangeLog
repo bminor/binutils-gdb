@@ -1,5 +1,8 @@
 Fri Mar 18 20:09:16 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* config/ic960coff.mt (TDEFINES): Fixed typo (MANY_SECTIONS, not
+	MANY_SEGMENTS).
+
 	* configure.in: Eliminated all targets using obj-coff but not
 	defining BFD_ASSEMBLER; I think all such targets that are
 	supported will be matched by real CPU-OS combinations earlier in
