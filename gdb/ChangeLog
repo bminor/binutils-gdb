@@ -1,3 +1,8 @@
+Thu Dec  5 21:53:21 1991  John Gilmore  (gnu at cygnus.com)
+
+	* symtab.c (decode_line_1):  If SKIP_PROLOGUE leaves us in
+	mid-line, be more careful about possibly advancing to the next line.
+
 Thu Dec  5 18:59:51 1991  Michael Tiemann  (tiemann at cygnus.com)
 
 	* cplus-dem.c (cplus_demangle): Call `string_need' when

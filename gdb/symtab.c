@@ -2114,7 +2114,16 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	  /* Convex: no need to suppress code on first line, if any */
 	  val.pc = pc;
 #else
-	  val.pc = (val.end && val.pc != pc) ? val.end : pc;
+	  /* If SKIP_PROLOGUE left us in mid-line, and the next line is still
+	     part of the same function:
+		advance to next line, 
+	        recalculate its line number (might not be N+1).  */
+	  if (val.pc != pc && val.end &&
+	      find_pc_misc_function (pc) == find_pc_misc_function (val.end)) {
+	    pc = val.end;	/* First pc of next line */
+	    val = find_pc_line (pc, 0);
+	  }
+	  val.pc = pc;
 #endif
 	  values.sals = (struct symtab_and_line *)xmalloc (sizeof (struct symtab_and_line));
 	  values.sals[0] = val;

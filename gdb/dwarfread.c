@@ -1,4 +1,3 @@
-
 /* DWARF debugging format support for GDB.
    Copyright (C) 1991 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support, portions based on dbxread.c,
