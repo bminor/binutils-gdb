@@ -2012,7 +2012,7 @@ lang_reasonable_defaults ()
 
   default_common_section = lang_output_section_statement_lookup (".bss");
 
-  if (placed_commons == false)
+  if (!placed_commons)
     {
       lang_wild_statement_type *new =
       new_stat (lang_wild_statement,
@@ -2768,7 +2768,7 @@ size_input_section (this_ptr, output_section_statement, fill, dot)
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
 
-  if (is->ifile->just_syms_flag == false)
+  if (!is->ifile->just_syms_flag)
     {
       unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
 						    ldfile_output_machine);
@@ -3023,11 +3023,10 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 				       abs_output_section,
 				       lang_allocating_phase_enum,
 				       dot, &dot);
-		    if (r.valid_p == false)
-		      {
-			einfo (_("%F%S: non constant address expression for section %s\n"),
-			       os->name);
-		      }
+		    if (!r.valid_p)
+		      einfo (_("%F%S: non constant address expression for section %s\n"),
+			     os->name);
+
 		    dot = r.value + r.section->bfd_section->vma;
 		  }
 
@@ -3394,7 +3393,7 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 				   abs_output_section,
 				   lang_final_phase_enum, dot, &dot);
 	    s->data_statement.value = value.value;
-	    if (value.valid_p == false)
+	    if (!value.valid_p)
 	      einfo (_("%F%P: invalid data statement\n"));
 	  }
 	  {
@@ -3431,7 +3430,7 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 				   abs_output_section,
 				   lang_final_phase_enum, dot, &dot);
 	    s->reloc_statement.addend_value = value.value;
-	    if (value.valid_p == false)
+	    if (!value.valid_p)
 	      einfo (_("%F%P: invalid reloc statement\n"));
 	  }
 	  dot += bfd_get_reloc_size (s->reloc_statement.howto) / opb;
@@ -4014,7 +4013,7 @@ lang_add_output (name, from_script)
      int from_script;
 {
   /* Make -o on command line override OUTPUT in script.  */
-  if (had_output_filename == false || !from_script)
+  if (!had_output_filename || !from_script)
     {
       output_filename = name;
       had_output_filename = true;

@@ -1,3 +1,17 @@
+2002-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (load_symbols): Revert last change.
+
+2002-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (load_symbols): Don't call bfd_link_add_symbols when
+	just_syms_flag.
+	(lang_reasonable_defaults): Don't compare against false.
+	(size_input_section): Likewise.
+	(lang_size_sections_1): Likewise.
+	(lang_do_assignments): Likewise.
+	(lang_add_output): Likewise.
+
 2002-10-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* pe-dll.c (make_import_fixup_mark): Avoid type-punned pointer.
