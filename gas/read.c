@@ -1821,6 +1821,11 @@ s_lcomm (needs_align)
 	{
 	  bss_seg = subseg_new (".sbss", 1);
 	  seg_info (bss_seg)->bss = 1;
+#ifdef BFD_ASSEMBLER
+	  if (! bfd_set_section_flags (stdoutput, bss_seg, SEC_ALLOC))
+	    as_warn ("error setting flags for \".sbss\": %s",
+		     bfd_errmsg (bfd_get_error ()));
+#endif
 	}
     }
 #endif

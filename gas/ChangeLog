@@ -1,3 +1,16 @@
+Thu May 30 19:00:19 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (s_lcomm): Set section flags for .sbss section.
+
+	* config/tc-mips.c (mips_64): New static variable.
+	(mips_target_format): If mips_64, return elf64 targets rather than
+	elf32 ones.
+	(md_longopts): Add "32" and "64".
+	(md_parse_option): Handle -32 and -64.
+	(md_show_usage): Mention -32 and -64.
+	(cons_fix_new_mips): If mips_64, don't convert an 8 byte reloc to
+	a 4 byte one.
+
 Thu May 30 10:36:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (comment_chars): Make '!' a comment character
