@@ -1,5 +1,17 @@
 1998-11-23  DJ Delorie  <dj@cygnus.com>
 
+	* pe-dll.c (make_head): name object files sequentially to ensure
+	they link in the right order.
+	(make_tail): same here
+	(pe_process_import_defs): use sequential names for bfds to ensure
+	proper link order.
+	(pe_implied_import_dll): new function; handles linking directly
+	against DLLs by simulating IMPORTS directives.  * emultempl/pe.em
+	(gld_i386pe_before_parse): hack bfd to not recognize .dll files
+	via bfd_pe_dll_not_recognized_hack
+
+1998-11-23  DJ Delorie  <dj@cygnus.com>
+
 	* emultempl/pe.em (gld_i386pe_parse_args): Conditionalize call to
 	pe_dll_add_excludes
 

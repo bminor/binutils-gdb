@@ -1023,14 +1023,20 @@ save_relocs (asection *sec)
  * hname:
  */
 
-bfd *
+static bfd *
 make_head (parent)
      bfd *parent;
 {
   asection *id2, *id5, *id4;
   unsigned char *d2, *d5, *d4;
+  char *oname;
+  bfd *abfd;
 
-  bfd *abfd = bfd_create ("dh.o", parent);
+  oname = (char *) xmalloc (20);
+  sprintf (oname, "d%06d.o", tmp_seq);
+  tmp_seq++;
+
+  abfd = bfd_create (oname, parent);
   bfd_find_target ("pe-i386", abfd);
   bfd_make_writable (abfd);
 
@@ -1086,15 +1092,21 @@ make_head (parent)
  *	.asciz		"my.dll"
  */
 
-bfd *
+static bfd *
 make_tail (parent)
      bfd *parent;
 {
   asection *id4, *id5, *id7;
   unsigned char *d4, *d5, *d7;
   int len;
+  char *oname;
+  bfd *abfd;
 
-  bfd *abfd = bfd_create ("dt.o", parent);
+  oname = (char *) xmalloc (20);
+  sprintf (oname, "d%06d.o", tmp_seq);
+  tmp_seq++;
+
+  abfd = bfd_create (oname, parent);
   bfd_find_target ("pe-i386", abfd);
   bfd_make_writable (abfd);
 
@@ -1159,12 +1171,12 @@ make_tail (parent)
  *	.asciz		"function" xlate? (add underscore, kill at)
  */
 
-unsigned char jmp_ix86_bytes[] = {
+static unsigned char jmp_ix86_bytes[] = {
   0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90
 };
 
 
-bfd *
+static bfd *
 make_one (exp, parent)
      def_file_export *exp;
      bfd *parent;
@@ -1176,8 +1188,9 @@ make_one (exp, parent)
   bfd *abfd;
 
   oname = (char *) xmalloc (20);
-  sprintf (oname, "ds%d.o", tmp_seq);
+  sprintf (oname, "d%06d.o", tmp_seq);
   tmp_seq++;
+
   abfd = bfd_create (oname, parent);
   bfd_find_target ("pe-i386", abfd);
   bfd_make_writable (abfd);
@@ -1411,28 +1424,177 @@ pe_process_import_defs (output_bfd, link_info)
 	    free (name);
 	    if (blhe && blhe->type == bfd_link_hash_undefined)
 	      {
+		bfd *one;
 		/* we do */
 		if (!do_this_dll)
 		  {
-		    add_bfd_to_link (make_head (output_bfd), "imp-head", link_info);
+		    bfd *ar_head = make_head (output_bfd);
+		    add_bfd_to_link (ar_head, ar_head->filename, link_info);
 		    do_this_dll = 1;
 		  }
 		exp.internal_name = pe_def_file->imports[i].internal_name;
 		exp.name = pe_def_file->imports[i].name;
 		exp.ordinal = pe_def_file->imports[i].ordinal;
-		exp.hint = 0;
+		exp.hint = exp.ordinal;
 		exp.flag_private = 0;
 		exp.flag_constant = 0;
 		exp.flag_data = 0;
 		exp.flag_noname = exp.name ? 0 : 1;
-		add_bfd_to_link (make_one (&exp, output_bfd), "imp-sym", link_info);
+		one = make_one (&exp, output_bfd);
+		add_bfd_to_link (one, one->filename, link_info);
 	      }
 	  }
       if (do_this_dll)
-	add_bfd_to_link (make_tail (output_bfd), "imp-tail", link_info);
+	{
+	  bfd *ar_tail = make_tail (output_bfd);
+	  add_bfd_to_link (ar_tail, ar_tail->filename, link_info);
+	}
 
       free (dll_symname);
     }
+}
+
+/************************************************************************
+
+ We were handed a *.DLL file.  Parse it and turn it into a set of
+ IMPORTS directives in the def file.  Return true if the file was
+ handled, false if not.
+
+ ************************************************************************/
+
+static unsigned int
+pe_get16 (abfd, where)
+     bfd *abfd;
+     int where;
+{
+  unsigned char b[2];
+  bfd_seek (abfd, where, SEEK_SET);
+  bfd_read (b, 1, 2, abfd);
+  return b[0] + (b[1]<<8);
+}
+
+static unsigned int
+pe_get32 (abfd, where)
+     bfd *abfd;
+     int where;
+{
+  unsigned char b[4];
+  bfd_seek (abfd, where, SEEK_SET);
+  bfd_read (b, 1, 4, abfd);
+  return b[0] + (b[1]<<8) + (b[2]<<16) + (b[3]<<24);
+}
+
+static unsigned int
+pe_as16 (ptr)
+     void *ptr;
+{
+  unsigned char *b = ptr;
+  return b[0] + (b[1]<<8);
+}
+
+static unsigned int
+pe_as32 (ptr)
+     void *ptr;
+{
+  unsigned char *b = ptr;
+  return b[0] + (b[1]<<8) + (b[2]<<16) + (b[3]<<24);
+}
+
+extern int bfd_pe_dll_not_recognized_hack;
+
+boolean
+pe_implied_import_dll (filename)
+     char *filename;
+{
+  bfd *dll;
+  unsigned long pe_header_offset, opthdr_ofs, num_entries, i;
+  unsigned long export_rva, export_size, nsections, secptr, expptr;
+  unsigned char *expdata, *erva;
+  unsigned long name_rvas, ordinals, nexp, ordbase;
+  char *dll_name;
+
+  /* No, I can't use bfd here.  kernel32.dll puts its export table in
+     the middle of the .rdata section. */
+
+  bfd_pe_dll_not_recognized_hack = 0;
+  dll = bfd_openr (filename, "pei-i386");
+  if (!dll)
+    {
+      einfo ("%Xopen %s: %s\n", filename, bfd_errmsg (bfd_get_error ()));
+      bfd_pe_dll_not_recognized_hack = 1;
+      return false;
+    }
+  /* PEI dlls seem to be bfd_objects */
+  if (!bfd_check_format (dll, bfd_object))
+    {
+      einfo ("%X%s: this doesn't appear to be a DLL\n", filename);
+      bfd_pe_dll_not_recognized_hack = 1;
+      return false;
+    }
+  bfd_pe_dll_not_recognized_hack = 1;
+  printf("dj: importing dll %s at %x\n", filename, dll->where);
+
+  dll_name = filename;
+  for (i=0; filename[i]; i++)
+    if (filename[i] == '/' || filename[i] == '\\' || filename[i] == ':')
+      dll_name = filename + i + 1;
+
+  pe_header_offset = pe_get32 (dll, 0x3c);
+  opthdr_ofs = pe_header_offset + 4 + 20;
+  num_entries = pe_get32 (dll, opthdr_ofs + 92);
+  if (num_entries < 1) /* no exports */
+    return false;
+  export_rva = pe_get32 (dll, opthdr_ofs + 96);
+  export_size = pe_get32 (dll, opthdr_ofs + 100);
+  nsections = pe_get16 (dll, pe_header_offset + 4 + 2);
+  secptr = (pe_header_offset + 4 + 20 +
+	    pe_get16 (dll, pe_header_offset + 4 + 16));
+  expptr = 0;
+  printf("export: rva=%08x size=%08x secptr=%08x\n",
+	 export_rva, export_size, secptr);
+  for (i=0; i<nsections; i++)
+    {
+      char sname[8];
+      unsigned long secptr1 = secptr + 40 * i;
+      unsigned long vaddr = pe_get32 (dll, secptr1 + 12);
+      unsigned long vsize = pe_get32 (dll, secptr1 + 16);
+      unsigned long fptr = pe_get32 (dll, secptr1 + 20);
+      bfd_seek(dll, secptr1, SEEK_SET);
+      bfd_read(sname, 1, 8, dll);
+      printf("sec: %.8s addr=%08x size=%08x fptr=%08x\n",
+	     sname, vaddr, vsize, fptr);
+      if (vaddr <= export_rva && vaddr+vsize > export_rva)
+	{
+	  expptr = fptr + (export_rva - vaddr);
+	  if (export_rva + export_size > vaddr + vsize)
+	    export_size = vsize - (export_rva - vaddr);
+	  break;
+	}
+    }
+  printf("expptr=%08x size=%08x\n", expptr, export_size);
+
+  expdata = (unsigned char *) xmalloc (export_size);
+  bfd_seek (dll, expptr, SEEK_SET);
+  bfd_read (expdata, 1, export_size, dll);
+  erva = expdata - export_rva;
+
+  if (pe_def_file == 0)
+    pe_def_file = def_file_empty();
+
+  nexp = pe_as32 (expdata+24);
+  name_rvas = pe_as32 (expdata+32);
+  ordinals = pe_as32 (expdata+36);
+  ordbase = pe_as32 (expdata+16);
+  printf("%d exports ob=%d\n", nexp, ordbase);
+  for (i=0; i<nexp; i++)
+    {
+      unsigned long name_rva = pe_as32 (erva+name_rvas+i*4);
+      def_file_import *imp;
+      imp = def_file_add_import (pe_def_file, erva+name_rva, dll_name,
+				 i, 0);
+    }
+
+  return true;
 }
 
 /************************************************************************
