@@ -1,3 +1,8 @@
+Sat Mar 29 13:57:20 1997  Fred Fish  <fnf@cygnus.com>
+
+	* COPYING: Install new version of file from FSF.
+	* copying.c (show_copying_command): Update FSF address.
+
 Fri Mar 28 18:33:41 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (distclean): Remove .gdbinit.
