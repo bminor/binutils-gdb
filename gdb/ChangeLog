@@ -1,5 +1,45 @@
 2004-01-23  David Carlton  <carlton@kealia.com>
 
+	Partial workaround for PR c++/1511:
+	* cp-namespace.c: Include frame.h.
+	(cp_lookup_transparent_type): New
+	(cp_lookup_transparent_type_loop): New.
+	* cp-support.h: Declare cp_lookup_transparent_type.
+	* symtab.c (basic_lookup_transparent_type): Renamed from
+	lookup_transparent_type.
+	(lookup_transparent_type): Replace old body by a call to
+	current_language->la_lookup_transparent_type.
+	* symtab.h: Update copyright.  Declare
+	basic_lookup_transparent_type.
+	* language.h: Update copyright.
+	(struct language_defn): Add la_lookup_transparent_type.
+	* language.c: Update copyright.
+	(unknown_language_defn): Add basic_lookup_transparent_type.
+	(auto_language_defn): Add basic_lookup_transparent_type.
+	(local_language_defn): Add basic_lookup_transparent_type.
+	* ada-lang.c: Update copyright.
+	(ada_language_defn): Add basic_lookup_transparent_type.
+	* c-lang.c: Update copyright.
+	(c_language_defn): Add basic_lookup_transparent_type.
+	(cplus_language_defn): Add basic_lookup_transparent_type.
+	(asm_language_defn): Add basic_lookup_transparent_type.
+	(minimal_language_defn): Add basic_lookup_transparent_type.
+	* f-lang.c: Update copyright.
+	(f_language_defn): Add basic_lookup_transparent_type.
+	* jv-lang.c: Update copyright.
+	(java_language_defn): Add basic_lookup_transparent_type.
+	* m2-lang.c: Update copyright.
+	(m2_language_defn): Add basic_lookup_transparent_type.
+	* objc-lang.c: Update copyright.
+	(objc_language_defn): Add basic_lookup_transparent_type.
+	* p-lang.c: Update copyright.
+	(p_language_defn): Add basic_lookup_transparent_type.
+	* scm-lang.c: Update copyright.
+	(scm_language_defn): Add basic_lookup_transparent_type.
+	* Makefile.in (cp-namespace.o): Depend on frame.h.
+
+2004-01-23  David Carlton  <carlton@kealia.com>
+
 	Patch for PR c++/1520:
 	* dwarf2read.c (read_func_scope): Set processing_current_prefix
 	properly if we have a specification die.

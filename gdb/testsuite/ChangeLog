@@ -1,3 +1,10 @@
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/rtti.exp: Don't include full path in ${srcfile}.  Add
+	test for cp_lookup_transparent_type.
+	* gdb.cp/rtti1.cc: Update copyright.  Add n2::func and refer_to;
+	call them.
+
 2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.mi/mi-var-child.exp: Update copyright year.  Move new test
