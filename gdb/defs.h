@@ -1010,6 +1010,7 @@ enum gdb_osabi
   GDB_OSABI_ARM_EABI_V1,
   GDB_OSABI_ARM_EABI_V2,
   GDB_OSABI_ARM_APCS,
+  GDB_OSABI_QNXNTO,
 
   GDB_OSABI_INVALID		/* keep this last */
 };
