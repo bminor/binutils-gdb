@@ -215,9 +215,9 @@ refcard.dvi : refcard.tex $(REFEDITS)
 refcard.ps : refcard.dvi
 	$(DVIPS) -t landscape -o $@ $?
 
-# File to record current GDB version number (copied from main dir Makefile.in)
-GDBvn.texi : ${gdbdir}/Makefile.in
-	echo "@set GDBVN `sed <$(srcdir)/../Makefile.in -n 's/^VERSION *= *//p'`" > ./GDBvn.new
+# File to record current GDB version number (copied from main dir version.in)
+GDBvn.texi : ${gdbdir}/version.in
+	echo "@set GDBVN `head -1 $(srcdir)/../version.in`" > ./GDBvn.new
 	mv GDBvn.new GDBvn.texi
 
 # Updated atomically

@@ -1,3 +1,7 @@
+2001-05-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (GDBvn.texi): Set GDBVN from ../version.in.
+
 2001-05-10  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdbint.texinfo (Clean Design and Portable Implementation):
