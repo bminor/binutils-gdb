@@ -85,12 +85,14 @@ static void obj_elf_symver PARAMS ((int));
 static void obj_elf_subsection PARAMS ((int));
 static void obj_elf_popsection PARAMS ((int));
 static void obj_elf_tls_common PARAMS ((int));
+static void obj_elf_lcomm (int);
 
 static const pseudo_typeS elf_pseudo_table[] =
 {
   {"comm", obj_elf_common, 0},
   {"common", obj_elf_common, 1},
   {"ident", obj_elf_ident, 0},
+  {"lcomm", obj_elf_lcomm, 0},
   {"local", obj_elf_local, 0},
   {"previous", obj_elf_previous, 0},
   {"section", obj_elf_section, 0},
@@ -382,6 +384,15 @@ obj_elf_tls_common (ignore)
 }
 
 static void
+obj_elf_lcomm (int ignore ATTRIBUTE_UNUSED)
+{
+  symbolS *symbolP = s_comm_internal (0, s_lcomm_internal);
+
+  if (symbolP)
+    symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
+}
+
+static void
 obj_elf_local (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
@@ -640,7 +651,7 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
 
       /* Prevent SEC_HAS_CONTENTS from being inadvertently set.  */
       if (type == SHT_NOBITS)
-        seg_info (sec)->bss = 1;
+	seg_info (sec)->bss = 1;
 
       if (linkonce)
 	flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
@@ -654,7 +665,7 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
       if (secsym != NULL)
 	symbol_set_bfdsym (secsym, sec->symbol);
       else
-        symbol_table_insert (section_symbol (sec));
+	symbol_table_insert (section_symbol (sec));
     }
   else if (attr != 0)
     {
@@ -1738,9 +1749,9 @@ elf_frob_symbol (symp, puntp)
 
       /* This symbol was given a new name with the .symver directive.
 
-         If this is an external reference, just rename the symbol to
-         include the version string.  This will make the relocs be
-         against the correct versioned symbol.
+	 If this is an external reference, just rename the symbol to
+	 include the version string.  This will make the relocs be
+	 against the correct versioned symbol.
 
 	 If this is a definition, add an alias.  FIXME: Using an alias
 	 will permit the debugging information to refer to the right
@@ -1750,8 +1761,8 @@ elf_frob_symbol (symp, puntp)
       if (! S_IS_DEFINED (symp))
 	{
 	  /* Verify that the name isn't using the @@ syntax--this is
-             reserved for definitions of the default version to link
-             against.  */
+	     reserved for definitions of the default version to link
+	     against.  */
 	  if (p[1] == ELF_VER_CHR)
 	    {
 	      as_bad (_("invalid attempt to declare external version name as default in symbol `%s'"),
@@ -2080,9 +2091,9 @@ elf_frob_file_after_relocs ()
       sec->_raw_size = bfd_ecoff_debug_size (stdoutput, &debug, debug_swap);
 
       /* Pass BUF to bfd_set_section_contents because this will
-         eventually become a call to fwrite, and ISO C prohibits
-         passing a NULL pointer to a stdio function even if the
-         pointer will not be used.  */
+	 eventually become a call to fwrite, and ISO C prohibits
+	 passing a NULL pointer to a stdio function even if the
+	 pointer will not be used.  */
       if (! bfd_set_section_contents (stdoutput, sec, (PTR) buf,
 				      (file_ptr) 0, (bfd_size_type) 0))
 	as_fatal (_("can't start writing .mdebug section: %s"),
@@ -2121,7 +2132,7 @@ elf_frob_file_after_relocs ()
    int_32 version = (major ver # << 16)  | version of tools ;
    int_32 source  = (tool_id << 16 ) | 1 ;
    int_32 info    = 0 ;    These are set by the SCO tools, but we
-                           don't know enough about the source
+			   don't know enough about the source
 			   environment to set them.  SCO ld currently
 			   ignores them, and recommends we set them
 			   to zero.  */

@@ -2022,7 +2022,7 @@ parse_align (int align_bytes)
    (alignment as a power of 2), or 2 if this was a ".bss" directive
    with alignment in bytes.  */
 
-static symbolS *
+symbolS *
 s_lcomm_internal (int needs_align, symbolS *symbolP, addressT size)
 {
   addressT align = 0;

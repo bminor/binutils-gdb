@@ -1,5 +1,12 @@
 2003-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* read.c (s_lcomm_internal): Make global.
+	* read.h (s_lcomm_internal): Declare.
+	* config/obj-elf.c (elf_pseudo_table): Handle lcomm.
+	(obj_elf_lcomm): New function.
+
+2003-12-13  Alan Modra  <amodra@bigpond.net.au>
+
 	* read.c: Remove unneeded prototypes.
 	(s_comm): Split out code to..
 	(s_comm_internal): ..here.  Tidy error returns.  Rearrange so that
