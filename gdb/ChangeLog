@@ -1,5 +1,11 @@
 Fri Apr 22 16:43:54 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* infrun.c (wait_for_inferior): Move call to flush_cached_frames
+	to after call to target_wait.  This means that flush_cached_frames
+	can call target_terminal_ours if it wants to.
+	* infrun.c (wait_for_inferior) [HAVE_NONSTEPPABLE_WATCHPOINT]: Add
+	comment about why the code is dubious.
+
 	* stabsread.c (read_type): Call read_type, not nonexistent
 	os9k_read_type.
 
