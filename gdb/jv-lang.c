@@ -1,5 +1,7 @@
 /* Java language support routines for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999, 2000, 2003, 2004 Free Software Foundation, Inc.
+
+   Copyright 1997, 1998, 1999, 2000, 2003, 2004, 2005 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -439,7 +441,7 @@ java_link_class_type (struct type *type, struct value *clas)
       else
 	{			/* Re-use field value for next field. */
 	  VALUE_ADDRESS (field) += TYPE_LENGTH (value_type (field));
-	  VALUE_LAZY (field) = 1;
+	  set_value_lazy (field, 1);
 	}
       temp = field;
       temp = value_struct_elt (&temp, NULL, "name", NULL, "structure");
@@ -509,7 +511,7 @@ java_link_class_type (struct type *type, struct value *clas)
       else
 	{			/* Re-use method value for next method. */
 	  VALUE_ADDRESS (method) += TYPE_LENGTH (value_type (method));
-	  VALUE_LAZY (method) = 1;
+	  set_value_lazy (method, 1);
 	}
 
       /* Get method name. */

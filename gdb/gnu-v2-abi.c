@@ -166,7 +166,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 
       if (!value_lazy (arg1))
 	{
-	  VALUE_LAZY (arg1) = 1;
+	  set_value_lazy (arg1, 1);
 	  value_fetch_lazy (arg1);
 	}
 

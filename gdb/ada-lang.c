@@ -420,7 +420,7 @@ value_from_contents_and_address (struct type *type,
 {
   struct value *v = allocate_value (type);
   if (valaddr == NULL)
-    VALUE_LAZY (v) = 1;
+    set_value_lazy (v, 1);
   else
     memcpy (value_contents_raw (v), valaddr, TYPE_LENGTH (type));
   VALUE_ADDRESS (v) = address;
@@ -453,7 +453,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
       VALUE_ADDRESS (result) = VALUE_ADDRESS (val) + value_offset (val);
       if (value_lazy (val)
           || TYPE_LENGTH (type) > TYPE_LENGTH (value_type (val)))
-        VALUE_LAZY (result) = 1;
+        set_value_lazy (result, 1);
       else
         memcpy (value_contents_raw (result), value_contents (val),
                 TYPE_LENGTH (type));

@@ -478,7 +478,7 @@ value_at_lazy (struct type *type, CORE_ADDR addr)
 
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = addr;
-  VALUE_LAZY (val) = 1;
+  set_value_lazy (val, 1);
 
   return val;
 }
@@ -506,7 +506,7 @@ value_fetch_lazy (struct value *val)
   if (length)
     read_memory (addr, value_contents_all_raw (val), length);
 
-  VALUE_LAZY (val) = 0;
+  set_value_lazy (val, 0);
   return 0;
 }
 
@@ -1311,7 +1311,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	      VALUE_FRAME_ID (v2) = VALUE_FRAME_ID (arg1);
 	      v2->offset = value_offset (arg1) + boffset;
 	      if (value_lazy (arg1))
-		VALUE_LAZY (v2) = 1;
+		set_value_lazy (v2, 1);
 	      else
 		memcpy (value_contents_raw (v2),
 			value_contents_raw (arg1) + boffset,
@@ -2762,7 +2762,7 @@ value_slice (struct value *array, int lowbound, int length)
       TYPE_CODE (slice_type) = TYPE_CODE (array_type);
       slice = allocate_value (slice_type);
       if (value_lazy (array))
-	VALUE_LAZY (slice) = 1;
+	set_value_lazy (slice, 1);
       else
 	memcpy (value_contents_writeable (slice),
 		value_contents (array) + offset,

@@ -585,7 +585,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
     }
 
   VALUE_ADDRESS (v) = addr;
-  VALUE_LAZY (v) = 1;
+  set_value_lazy (v, 1);
   return v;
 }
 

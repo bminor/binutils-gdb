@@ -180,7 +180,7 @@ extern int value_offset (struct value *);
 
 extern struct type *value_enclosing_type (struct value *);
 extern int value_lazy (struct value *);
-#define VALUE_LAZY(val) (val)->lazy
+extern void set_value_lazy (struct value *value, int val);
 
 /* value_contents() and value_contents_raw() both return the address
    of the gdb buffer used to hold a copy of the contents of the lval.

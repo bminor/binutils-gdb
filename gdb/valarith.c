@@ -269,7 +269,7 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
 
   v = allocate_value (elt_type);
   if (value_lazy (array))
-    VALUE_LAZY (v) = 1;
+    set_value_lazy (v, 1);
   else
     memcpy (value_contents_writeable (v),
 	    value_contents (array) + elt_offs, elt_size);
