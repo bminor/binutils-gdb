@@ -639,6 +639,7 @@ F:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame
 F:2:STACK_ALIGN:CORE_ADDR:stack_align:CORE_ADDR sp:sp::0:0
 M:::CORE_ADDR:frame_align:CORE_ADDR address:address
 F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type::0:0
+v::FRAME_RED_ZONE_SIZE:int:frame_red_zone_size
 v:2:PARM_BOUNDARY:int:parm_boundary
 #
 v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (gdbarch)::%s:(TARGET_FLOAT_FORMAT)->name

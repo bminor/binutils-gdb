@@ -253,6 +253,7 @@ struct gdbarch
   gdbarch_stack_align_ftype *stack_align;
   gdbarch_frame_align_ftype *frame_align;
   gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
+  int frame_red_zone_size;
   int parm_boundary;
   const struct floatformat * float_format;
   const struct floatformat * double_format;
@@ -420,6 +421,7 @@ struct gdbarch startup_gdbarch =
   0,  /* stack_align */
   0,  /* frame_align */
   0,  /* reg_struct_has_addr */
+  0,  /* frame_red_zone_size */
   0,  /* parm_boundary */
   0,  /* float_format */
   0,  /* double_format */
@@ -1841,6 +1843,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: FRAME_NUM_ARGS = <0x%08lx>\n",
                         (long) current_gdbarch->frame_num_args
                         /*FRAME_NUM_ARGS ()*/);
+#endif
+#ifdef FRAME_RED_ZONE_SIZE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FRAME_RED_ZONE_SIZE # %s\n",
+                      XSTRING (FRAME_RED_ZONE_SIZE));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FRAME_RED_ZONE_SIZE = %d\n",
+                      FRAME_RED_ZONE_SIZE);
 #endif
 #ifdef FUNCTION_START_OFFSET
   fprintf_unfiltered (file,
@@ -5249,6 +5259,22 @@ set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch,
                                  gdbarch_reg_struct_has_addr_ftype reg_struct_has_addr)
 {
   gdbarch->reg_struct_has_addr = reg_struct_has_addr;
+}
+
+int
+gdbarch_frame_red_zone_size (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_red_zone_size called\n");
+  return gdbarch->frame_red_zone_size;
+}
+
+void
+set_gdbarch_frame_red_zone_size (struct gdbarch *gdbarch,
+                                 int frame_red_zone_size)
+{
+  gdbarch->frame_red_zone_size = frame_red_zone_size;
 }
 
 int

@@ -440,6 +440,18 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     CORE_ADDR old_sp = read_sp ();
     if (gdbarch_frame_align_p (current_gdbarch))
       {
+	sp = gdbarch_frame_align (current_gdbarch, old_sp);
+	/* NOTE: cagney/2003-08-13: Skip the "red zone".  For some
+	   ABIs, a function can use memory beyond the inner most stack
+	   address.  AMD64 called that region the "red zone".  Skip at
+	   least the "red zone" size before allocating any space on
+	   the stack.  */
+	if (INNER_THAN (1, 2))
+	  sp -= gdbarch_frame_red_zone_size (current_gdbarch);
+	else
+	  sp += gdbarch_frame_red_zone_size (current_gdbarch);
+	/* Still aligned?  */
+	gdb_assert (sp == gdbarch_frame_align (current_gdbarch, sp));
 	/* NOTE: cagney/2002-09-18:
 	   
 	   On a RISC architecture, a void parameterless generic dummy
@@ -460,7 +472,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	   stack.  That way, two dummy frames can never be identical.
 	   It does burn a few bytes of stack but that is a small price
 	   to pay :-).  */
-	sp = gdbarch_frame_align (current_gdbarch, old_sp);
 	if (sp == old_sp)
 	  {
 	    if (INNER_THAN (1, 2))
@@ -476,12 +487,16 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     else
       /* FIXME: cagney/2002-09-18: Hey, you loose!
 
-	 Who knows how badly aligned the SP is!  Further, per comment
-	 above, if the generic dummy frame ends up empty (because
-	 nothing is pushed) GDB won't be able to correctly perform
-	 back traces.  If a target is having trouble with backtraces,
-	 first thing to do is add FRAME_ALIGN() to the architecture
-	 vector. If that fails, try unwind_dummy_id().  */
+	 Who knows how badly aligned the SP is!
+
+	 If the generic dummy frame ends up empty (because nothing is
+	 pushed) GDB won't be able to correctly perform back traces.
+	 If a target is having trouble with backtraces, first thing to
+	 do is add FRAME_ALIGN() to the architecture vector. If that
+	 fails, try unwind_dummy_id().
+
+         If the ABI specifies a "Red Zone" (see the doco) the code
+         below will quietly trash it.  */
       sp = old_sp;
   }
 

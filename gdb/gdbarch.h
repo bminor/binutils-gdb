@@ -2546,6 +2546,15 @@ extern void set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_re
 #define REG_STRUCT_HAS_ADDR(gcc_p, type) (gdbarch_reg_struct_has_addr (current_gdbarch, gcc_p, type))
 #endif
 
+extern int gdbarch_frame_red_zone_size (struct gdbarch *gdbarch);
+extern void set_gdbarch_frame_red_zone_size (struct gdbarch *gdbarch, int frame_red_zone_size);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_RED_ZONE_SIZE)
+#error "Non multi-arch definition of FRAME_RED_ZONE_SIZE"
+#endif
+#if !defined (FRAME_RED_ZONE_SIZE)
+#define FRAME_RED_ZONE_SIZE (gdbarch_frame_red_zone_size (current_gdbarch))
+#endif
+
 extern int gdbarch_parm_boundary (struct gdbarch *gdbarch);
 extern void set_gdbarch_parm_boundary (struct gdbarch *gdbarch, int parm_boundary);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PARM_BOUNDARY)

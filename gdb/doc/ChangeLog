@@ -1,3 +1,8 @@
+2003-08-18  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	"frame_red_zone_size".
+
 2003-08-09  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.texinfo (Backtrace): Replace "set/show backtrace-below-main"

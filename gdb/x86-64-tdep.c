@@ -614,13 +614,6 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
   int *stack_values;
   stack_values = alloca (nargs * sizeof (int));
 
-  /* Before storing anything to the stack we must skip
-     the "Red zone" (see the "Function calling sequence" section
-     of AMD64 ABI).
-     It could have already been skipped in the function's
-     prologue, but we don't care and will easily skip it once again.  */
-  sp -= 128;
-
   for (i = 0; i < nargs; i++)
     {
       enum x86_64_reg_class class[MAX_CLASSES];
@@ -1202,6 +1195,14 @@ x86_64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
   return frame_id_build (fp + 16, frame_pc_unwind (next_frame));
 }
 
+/* 16 byte align the SP per frame requirements.  */
+
+static CORE_ADDR
+x86_64_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
+{
+  return sp & -(CORE_ADDR)16;
+}
+
 void
 x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1245,6 +1246,8 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Call dummy code.  */
   set_gdbarch_push_dummy_call (gdbarch, x86_64_push_dummy_call);
+  set_gdbarch_frame_align (gdbarch, x86_64_frame_align);
+  set_gdbarch_frame_red_zone_size (gdbarch, 128);
 
   set_gdbarch_convert_register_p (gdbarch, x86_64_convert_register_p);
   set_gdbarch_register_to_value (gdbarch, i387_register_to_value);
