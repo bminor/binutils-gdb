@@ -43,7 +43,7 @@
    the register sets used by `ptrace'.  The corresponding types are
    `elf_gregset_t' for the general-purpose registers (with
    `elf_greg_t' the type of a single GP register) and `elf_fpregset_t'
-   for the floating-point registers.
+   for the floating-point registers.  */
 
 /* Mapping between the general-purpose registers in `struct user'
    format and GDB's register array layout.  */
