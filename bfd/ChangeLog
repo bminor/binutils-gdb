@@ -1,3 +1,7 @@
+2001-01-17  Bo Thorsen  <bo@suse.de>
+
+	* targets.c: Alphabetize list of xvecs.
+
 2001-01-14  Alan Modra  <alan@linuxcare.com.au>
 
 	* config.bfd: Add linux target variant for elfxx-hppa.
