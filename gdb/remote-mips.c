@@ -281,18 +281,19 @@ static int mips_debug = 0;
 /* Handle used to access serial I/O stream.  */
 static serial_t mips_desc;
 
-/* Read a character from the remote, aborting on error.  Returns -2 on
-   timeout (since that's what serial_readchar returns).  FIXME: If we
-   see the string "<IDT>" from the board, then we are debugging on the
-   main console port, and we have somehow dropped out of remote
-   debugging mode.  In this case, we automatically go back in to
-   remote debugging mode.  This is a hack, put in because I can't find
-   any way for a program running on the remote board to terminate
-   without also ending remote debugging mode.  I assume users won't
-   have any trouble with this; for one thing, the IDT documentation
-   generally assumes that the remote debugging port is not the console
-   port.  This is, however, very convenient for DejaGnu when you only
-   have one connected serial port.  */
+/* Read a character from the remote, aborting on error.  Returns
+   SERIAL_TIMEOUT on timeout (since that's what SERIAL_READCHAR
+   returns).  FIXME: If we see the string "<IDT>" from the board, then
+   we are debugging on the main console port, and we have somehow
+   dropped out of remote debugging mode.  In this case, we
+   automatically go back in to remote debugging mode.  This is a hack,
+   put in because I can't find any way for a program running on the
+   remote board to terminate without also ending remote debugging
+   mode.  I assume users won't have any trouble with this; for one
+   thing, the IDT documentation generally assumes that the remote
+   debugging port is not the console port.  This is, however, very
+   convenient for DejaGnu when you only have one connected serial
+   port.  */
 
 static int
 mips_readchar (timeout)
@@ -368,7 +369,7 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
       while (ch != SYN)
 	{
 	  ch = mips_readchar (timeout);
-	  if (ch == -2)
+	  if (ch == SERIAL_TIMEOUT)
 	    return -1;
 	  if (ch != SYN)
 	    {
@@ -392,7 +393,7 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
       for (i = 1; i < HDR_LENGTH; i++)
 	{
 	  ch = mips_readchar (timeout);
-	  if (ch == -2)
+	  if (ch == SERIAL_TIMEOUT)
 	    return -1;
 
 	  /* Make sure this is a header byte.  */
@@ -428,7 +429,7 @@ mips_receive_trailer (trlr, pgarbage, pch, timeout)
     {
       ch = mips_readchar (timeout);
       *pch = ch;
-      if (ch == -2)
+      if (ch == SERIAL_TIMEOUT)
 	return -1;
       if (! TRLR_CHECK (ch))
 	return -2;
@@ -517,7 +518,8 @@ mips_send_packet (s, get_ack)
 	  printf_filtered ("Writing \"%s\"\n", packet + 1);
 	}
 
-      if (SERIAL_WRITE (mips_desc, packet, HDR_LENGTH + len + TRLR_LENGTH))
+      if (SERIAL_WRITE (mips_desc, packet,
+			HDR_LENGTH + len + TRLR_LENGTH) != 0)
 	error ("write to target failed: %s", safe_strerror (errno));
 
       garbage = 0;
@@ -653,7 +655,7 @@ mips_receive_packet (buff)
 	      ch = SYN;
 	      break;
 	    }
-	  if (rch == -2)
+	  if (rch == SERIAL_TIMEOUT)
 	    error ("Timed out waiting for remote packet");
 	  buff[i] = rch;
 	}
@@ -704,7 +706,7 @@ mips_receive_packet (buff)
 			   ack + 1);
 	}
 
-      if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH))
+      if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
 	error ("write to target failed: %s", safe_strerror (errno));
     }
 
@@ -735,7 +737,7 @@ mips_receive_packet (buff)
 		       ack + 1);
     }
 
-  if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH))
+  if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
     error ("write to target failed: %s", safe_strerror (errno));
 
   return len;
@@ -847,7 +849,7 @@ mips_initialize ()
      it means.  The packet seems to be triggered by a carriage return
      character, although perhaps any character would do.  */
   cr = '\r';
-  SERIAL_WRITE (mip_desc, &cr, 1);
+  SERIAL_WRITE (mips_desc, &cr, 1);
 
   hold_wait = mips_receive_wait;
   mips_receive_wait = 3;
@@ -899,8 +901,7 @@ device is attached to the target board (e.g., /dev/ttya).");
     unpush_target (&mips_ops);
 
   mips_desc = SERIAL_OPEN (name);
-
-  if (!mips_desc)
+  if (mips_desc == (serial_t) NULL)
     perror_with_name (name);
 
   SERIAL_RAW (mips_desc);
