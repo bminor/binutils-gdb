@@ -1,3 +1,7 @@
+2000-12-22  H.J. Lu  <hjl@gnu.org>
+
+	* dwarf2dbg.c (dwarf2_finish): Remove #if BFD_ASSEMBLER.
+
 Wed Dec 20 14:21:22 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 	* tc-i386.h (i386_target_format): Define even for ELFs.

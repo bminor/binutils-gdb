@@ -1197,18 +1197,11 @@ dwarf2_finish ()
     return;
 
   /* Calculate the size of an address for the target machine.  */
-#ifdef BFD_ASSEMBLER
   sizeof_address = bfd_arch_bits_per_address (stdoutput) / 8;
-#else
-  /* FIXME.  */
-  sizeof_address = 4;
-#endif
 
   /* Create and switch to the line number section.  */
   line_seg = subseg_new (".debug_line", 0);
-#ifdef BFD_ASSEMBLER
   bfd_set_section_flags (stdoutput, line_seg, SEC_READONLY);
-#endif
 
   /* For each subsection, chain the debug entries together.  */
   for (s = all_segs; s; s = s->next)
@@ -1237,11 +1230,9 @@ dwarf2_finish ()
       abbrev_seg = subseg_new (".debug_abbrev", 0);
       aranges_seg = subseg_new (".debug_aranges", 0);
 
-#ifdef BFD_ASSEMBLER
       bfd_set_section_flags (stdoutput, info_seg, SEC_READONLY);
       bfd_set_section_flags (stdoutput, abbrev_seg, SEC_READONLY);
       bfd_set_section_flags (stdoutput, aranges_seg, SEC_READONLY);
-#endif
 
       record_alignment (aranges_seg, ffs (2 * sizeof_address) - 1);
 
