@@ -24,7 +24,6 @@
    Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <setjmp.h>
@@ -61,6 +60,7 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "gdbthread.h"
+#include "gdb_assert.h"
 
 #include "gnu-nat.h"
 
@@ -262,7 +262,7 @@ proc_update_sc (struct proc *proc)
   if (proc->sc == 0 && proc->state_changed)
     /* Since PROC may start running, we must write back any state changes. */
     {
-      assert (proc_is_thread (proc));
+      gdb_assert (proc_is_thread (proc));
       proc_debug (proc, "storing back changed thread state");
       err = thread_set_state (proc->port, THREAD_STATE_FLAVOR,
 			 (thread_state_t) &proc->state, THREAD_STATE_SIZE);
@@ -318,7 +318,7 @@ proc_update_sc (struct proc *proc)
 void
 proc_abort (struct proc *proc, int force)
 {
-  assert (proc_is_thread (proc));
+  gdb_assert (proc_is_thread (proc));
 
   if (!proc->aborted)
     {
@@ -1157,7 +1157,7 @@ inf_suspend (struct inf *inf)
 void
 inf_set_step_thread (struct inf *inf, struct proc *thread)
 {
-  assert (!thread || proc_is_thread (thread));
+  gdb_assert (!thread || proc_is_thread (thread));
 
   if (thread)
     inf_debug (inf, "setting step thread: %d/%d", inf->pid, thread->tid);
@@ -1429,7 +1429,7 @@ gnu_wait (int tid, struct target_waitstatus *status)
   extern int notify_server (mach_msg_header_t *, mach_msg_header_t *);
   extern int process_reply_server (mach_msg_header_t *, mach_msg_header_t *);
 
-  assert (inf->task);
+  gdb_assert (inf->task);
 
   if (!inf->threads && !inf->pending_execs)
     /* No threads!  Assume that maybe some outside agency is frobbing our
@@ -1669,7 +1669,7 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
 	      inf_debug (waiting_inf, "Handler is task exception port <%d>",
 			 inf->task->saved_exc_port);
 	      inf->wait.exc.handler = inf->task->saved_exc_port;
-	      assert (inf->task->exc_port == port);
+	      gdb_assert (inf->task->exc_port == port);
 	    }
 	  if (inf->wait.exc.handler != MACH_PORT_NULL)
 	    /* Add a reference to the exception handler. */
@@ -2195,7 +2195,7 @@ gnu_detach (char *args, int from_tty)
 static void
 gnu_terminal_init_inferior (void)
 {
-  assert (current_inferior);
+  gdb_assert (current_inferior);
   terminal_init_inferior_with_pgrp (current_inferior->pid);
 }
 

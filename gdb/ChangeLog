@@ -1,3 +1,13 @@
+2001-03-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* gnu-nat.c: Include "gdb_assert.h" instead of <assert.h>.
+	(proc_update_sc): Use gdb_assert instead of assert.
+	(proc_abort): Ditto.
+	(inf_set_step_thread): Ditto.
+	(gnu_wait): Ditto.
+	(S_exception_raise_request): Ditto.
+	(gnu_terminal_init_inferior): Ditto.
+
 2001-03-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* Makefile.in (solib-svr4.o): Depend on solib-svr4.c, not solib.c.
