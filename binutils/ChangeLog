@@ -1,3 +1,8 @@
+Thu Jun  3 14:05:57 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (underscore.c): Hack the backquoted command so it
+	doesn't cause Solaris make to bomb.
+
 Thu Jun  3 10:40:19 1993  Jeffrey Osier  (jeffrey@cygnus.com)
 
 	* Makefile.in:  added c++filt and objcopy to MANPAGES variable
