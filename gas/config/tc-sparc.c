@@ -89,6 +89,9 @@ const pseudo_typeS md_pseudo_table[] =
 /* start-sanitize-v9 */
 #ifndef NO_V9
   {"xword", s_xword, 0},
+#ifdef OBJ_ELF
+  {"uaxword", cons, 8},
+#endif
 #endif
 /* end-sanitize-v9 */
 #ifdef OBJ_ELF
@@ -1956,10 +1959,10 @@ md_apply_fix (fixP, value)
     {
 
     case BFD_RELOC_32:
-      buf[0] = 0;		/* val >> 24; */
-      buf[1] = 0;		/* val >> 16; */
-      buf[2] = 0;		/* val >> 8; */
-      buf[3] = 0;		/* val; */
+      buf[0] = val >> 24;
+      buf[1] = val >> 16;
+      buf[2] = val >> 8;
+      buf[3] = val;
       break;
 
     case BFD_RELOC_32_PCREL_S2:
@@ -1973,14 +1976,14 @@ md_apply_fix (fixP, value)
       /* start-sanitize-v9 */
 #ifndef NO_V9
     case BFD_RELOC_64:
-      buf[0] = 0;
-      buf[1] = 0;
-      buf[2] = 0;
-      buf[3] = 0;
-      buf[4] = 0;
-      buf[5] = 0;
-      buf[6] = 0;
-      buf[7] = 0;
+      buf[0] = val >> 56;
+      buf[1] = val >> 48;
+      buf[2] = val >> 40;
+      buf[3] = val >> 32;
+      buf[4] = val >> 24;
+      buf[5] = val >> 16;
+      buf[6] = val >> 8;
+      buf[7] = val;
       break;
 
     case BFD_RELOC_SPARC_11:
