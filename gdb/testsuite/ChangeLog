@@ -1,3 +1,7 @@
+2003-06-12  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/fileio.exp: Run only on remote targets.
+
 2003-06-10  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/fileio.c: New file, testing File-I/O.
