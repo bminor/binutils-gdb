@@ -960,6 +960,12 @@ default value it zero.
 You may define this macro to the lexical type of the @kbd{$} character.  The
 default value is @code{LEX_NAME | LEX_BEGIN_NAME}.
 
+@item NUMBERS_WITH_SUFFIX
+@cindex NUMBERS_WITH_SUFFIX
+When this macro is defined to be non-zero, the parser allows the radix of a
+constant to be indicated with a suffix.  Valid suffixes are binary (B), 
+octal (Q), and hexadecimal (H).  Case is not significant.
+
 @item SINGLE_QUOTE_STRINGS
 @cindex SINGLE_QUOTE_STRINGS
 If you define this macro, GAS will treat single quotes as string delimiters.

@@ -327,7 +327,7 @@ integer_constant (radix, expressionP)
 #define valuesize 32
 #endif
 
-  if (flag_m68k_mri && radix == 0)
+  if ((NUMBERS_WITH_SUFFIX || flag_m68k_mri) && radix == 0)
     {
       int flt = 0;
 
@@ -541,7 +541,9 @@ integer_constant (radix, expressionP)
 	}
     }
 
-  if (flag_m68k_mri && suffix != NULL && input_line_pointer - 1 == suffix)
+  if ((NUMBERS_WITH_SUFFIX || flag_m68k_mri) 
+      && suffix != NULL 
+      && input_line_pointer - 1 == suffix)
     c = *input_line_pointer++;
 
   if (small)
@@ -810,13 +812,15 @@ operand (expressionP)
     case '9':
       input_line_pointer--;
 
-      integer_constant (flag_m68k_mri ? 0 : 10, expressionP);
+      integer_constant ((NUMBERS_WITH_SUFFIX || flag_m68k_mri) 
+                        ? 0 : 10,
+                        expressionP);
       break;
 
     case '0':
       /* non-decimal radix */
 
-      if (flag_m68k_mri)
+      if (NUMBERS_WITH_SUFFIX || flag_m68k_mri)
 	{
 	  char *s;
 
@@ -829,8 +833,26 @@ operand (expressionP)
 	      integer_constant (0, expressionP);
 	      break;
 	    }
-	}
-
+          if (NUMBERS_WITH_SUFFIX)
+            {
+              /* Check for a binary constant.  */
+              for (s = input_line_pointer; *s == '0' || *s == '1'; s++)
+                ;
+              if (toupper (*s) == 'B')
+                {
+                  integer_constant (0, expressionP);
+                  break;
+                }
+              /* Check for an octal constant.  */
+              for (s = input_line_pointer; *s >= '0' && *s <= '7'; s++)
+                ;
+              if (toupper (*s) == 'Q')
+                {
+                  integer_constant (0, expressionP);
+                  break;
+                }
+            }
+        }
       c = *input_line_pointer;
       switch (c)
 	{
@@ -840,7 +862,7 @@ operand (expressionP)
 	case 'Q':
 	case '8':
 	case '9':
-	  if (flag_m68k_mri)
+	  if (NUMBERS_WITH_SUFFIX || flag_m68k_mri)
 	    {
 	      integer_constant (0, expressionP);
 	      break;
@@ -873,7 +895,7 @@ operand (expressionP)
 	  break;
 
 	case 'b':
-	  if (LOCAL_LABELS_FB && ! flag_m68k_mri)
+	  if (LOCAL_LABELS_FB && ! flag_m68k_mri && ! NUMBERS_WITH_SUFFIX)
 	    {
 	      /* This code used to check for '+' and '-' here, and, in
 		 some conditions, fall through to call

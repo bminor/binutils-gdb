@@ -1,5 +1,12 @@
 2000-02-08  Timothy Wall  <twall@redhat.com>
 
+	* doc/internals.texi: Document NUMBERS_WITH_SUFFIX macro.
+	* as.h: Provide a default NUMBERS_WITH_SUFFIX definition (zero).
+	* expr.c: Handle numbers with suffixes if NUMBERS_WITH_SUFFIX is
+	non-zero. 
+	
+2000-02-08  Timothy Wall  <twall@redhat.com>
+
 	* read.c: Added elseif to directives table.
 	* read.h: Added prototype for s_elseif.
 	* doc/as.texinfo: Added description for elseif.

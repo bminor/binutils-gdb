@@ -629,6 +629,10 @@ void eh_frame_convert_frag PARAMS ((fragS *));
 #endif
 #include "listing.h"
 
+#ifndef NUMBERS_WITH_SUFFIX
+#define NUMBERS_WITH_SUFFIX 0
+#endif
+
 #ifndef LOCAL_LABELS_DOLLAR
 #define LOCAL_LABELS_DOLLAR 0
 #endif
