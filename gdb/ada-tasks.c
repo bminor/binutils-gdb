@@ -164,7 +164,7 @@ static int add_task_entry (p_task_id, index)
   struct task_entry *pt;
 
   highest_task_num++;
-  new_task_entry = malloc (sizeof (struct task_entry));
+  new_task_entry = xmalloc (sizeof (struct task_entry));
   new_task_entry->task_num = highest_task_num;
   new_task_entry->task_id = p_task_id;
   new_task_entry->known_tasks_index = index;
@@ -236,7 +236,7 @@ void init_task_list ()
     {
       old_pt = pt;
       pt = pt->next_task;
-      free (old_pt);
+      xfree (old_pt);
     };
   task_list = NULL;
   highest_task_num = 0;

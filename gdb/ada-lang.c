@@ -2891,7 +2891,7 @@ replace_operator_with_call (expp, pc, nargs, oplen, sym, block)
   newexp->elts[pc + 5].symbol = sym;
 
   *expp = newexp;
-  free (exp);
+  xfree (exp);
 }  
 
 /* Type-class predicates */
@@ -4363,7 +4363,7 @@ fill_in_ada_prototype (func)
   if (nargs == 0)
     {
       static struct field dummy_field = {0, 0, 0, 0};
-      free (TYPE_FIELDS (ftype));
+      xfree (TYPE_FIELDS (ftype));
       TYPE_FIELDS (ftype) = &dummy_field;
     }
   else
@@ -4373,7 +4373,7 @@ fill_in_ada_prototype (func)
       memcpy ((char*) fields, 
 	      (char*) TYPE_FIELDS (ftype), 
 	      nargs * sizeof (struct field));
-      free (TYPE_FIELDS (ftype));
+      xfree (TYPE_FIELDS (ftype));
       TYPE_FIELDS (ftype) = fields;
     }
 }
@@ -4586,7 +4586,7 @@ ada_finish_decode_line_1 (spec, file_table, funfirstline, canonical)
   selected.sals = (struct symtab_and_line*) 
     xmalloc (sizeof (struct symtab_and_line) * selected.nelts);
   memset (selected.sals, 0, selected.nelts * sizeof (selected.sals[i]));
-  make_cleanup (free, selected.sals);
+  make_cleanup (xfree, selected.sals);
 
   i = 0;
   while (i < selected.nelts)
@@ -5065,14 +5065,14 @@ all_sals_for_line (filename, line_num, canonical)
       if (canonical != NULL) 
 	{
 	  *canonical = (char**) xmalloc (result.nelts * sizeof (char**));
-	  make_cleanup (free, *canonical);
+	  make_cleanup (xfree, *canonical);
 	  for (k = 0; k < result.nelts; k += 1) 
 	    {
 	      (*canonical)[k] = 
 		extended_canonical_line_spec (result.sals[k], func_names[k]);
 	      if ((*canonical)[k] == NULL)
 		error ("Could not locate one or more breakpoints.");
-	      make_cleanup (free, (*canonical)[k]);
+	      make_cleanup (xfree, (*canonical)[k]);
 	    }
 	}
     }
@@ -5328,7 +5328,7 @@ char* ada_breakpoint_rewrite (char* arg, int* break_on_exceptionp)
       arg = (char*) xmalloc (sizeof ("__gnat_raise_nodefer_with_msg if "
 				     "long_integer(e) = long_integer(&)")
 			     + toklen + 1);
-      make_cleanup (free, arg);
+      make_cleanup (xfree, arg);
       if (toklen == 0)
 	strcpy (arg, "__gnat_raise_nodefer_with_msg");
       else if (STREQN (tok, "unhandled", toklen))
@@ -5354,7 +5354,7 @@ char* ada_breakpoint_rewrite (char* arg, int* break_on_exceptionp)
       arg = (char*) 
 	xmalloc (sizeof ("system__assertions__raise_assert_failure")
 		 + strlen (tok) + 1);
-      make_cleanup (free, arg);
+      make_cleanup (xfree, arg);
       sprintf (arg, "system__assertions__raise_assert_failure%s", tok);
     }
   */

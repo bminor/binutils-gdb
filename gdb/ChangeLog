@@ -1,3 +1,13 @@
+2002-07-13  Aidan Skinner <aidan@velvet.net>
+
+	* ada-tasks.c (add_task_entry): replace calls to
+	malloc() with xmalloc
+	* ada-tasks.c (init_task_list): replace calls to free with xfree()
+	
+	* ada-lang.c (replace_operator_with_call, fill_in_ada_prototype,
+	ada_finish_decode_line_1, all_sals_for_line
+	ada_breakpoint_rewrite): replace calls to free() with xfree()
+		
 2002-07-12  Kevin Buettner  <kevinb@redhat.com>
 
 	From Nicholas Duffek (with minor changes by Martin Hunt, 
@@ -3965,7 +3975,7 @@ Fri May 17 14:26:19 2002  J"orn Rennecke <joern.rennecke@superh.com>
 2002-04-24  Pierre Muller  <ics.u-strasbg.fr>
 
 	* hpread.c (hpread_psymtab_to_symtab_1,
-	hpread_psymtab_to_symtab): Replace fprintf (stderr,...)
+	hpread_psymtab_to_symtab): Replace fprintf tab_to_s...)
 	with fprintf_unfiltered (gdb_stderr,...).
 
 2002-04-24  Pierre Muller  <ics.u-strasbg.fr>
