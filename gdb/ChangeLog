@@ -1,5 +1,7 @@
 Fri Oct 23 04:47:17 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* Makefile.in (VERSION):  4.7.1 post release!
+
 	* config/hppahpux.mh (NATDEPFILES):  Add hppah-nat.o.
 
 Fri Oct 23 00:48:08 1992  John Gilmore  (gnu@cygnus.com)

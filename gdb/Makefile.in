@@ -1,4 +1,4 @@
-#Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+#Copyright 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -166,7 +166,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${NAT_CDEPS} \
 ADD_FILES = ${REGEX} ${ALLOCA}  ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 
-VERSION = 4.7
+VERSION = 4.7.1
 DIST=gdb
 
 LINT=/usr/5bin/lint
