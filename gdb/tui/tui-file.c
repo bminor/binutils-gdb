@@ -21,11 +21,11 @@
 #include "defs.h"
 #include "ui-file.h"
 #include "tui/tui-file.h"
-#include "tui/tuiIO.h"
+#include "tui/tui-io.h"
 
 #include "tui.h"
 
-#include <string.h>
+#include "gdb_string.h"
 
 /* A ``struct ui_file'' that is compatible with all the legacy
    code. */
