@@ -984,7 +984,9 @@ static void
 DEFUN(print_input_statement,(statm),
       lang_input_statement_type *statm)
 {
-  printf("LOAD %s\n",statm->filename);
+  if (statm->filename != (char *)NULL) {
+    printf("LOAD %s\n",statm->filename);
+  }
 }
 
 static void 

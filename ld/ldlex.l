@@ -388,7 +388,7 @@ WHITE		[ \t]+
 }
 
 [0-9]+[KM]? {
-  if (hex_mode == true) {
+  if (hex_mode == true || ldgram_in_defsym == true) {
     yylval.integer = number(yytext, 16);
   }
   else {

@@ -256,6 +256,9 @@ bfd_vma *dotp;
 	  FAIL();
 	}
     }
+    else {
+      result.valid = false;
+    }
   }
   return result;
 }

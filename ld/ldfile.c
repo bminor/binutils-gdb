@@ -37,7 +37,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* EXPORT */
 char *ldfile_input_filename;
-CONST char * ldfile_output_machine_name;
+CONST char * ldfile_output_machine_name ="";
 unsigned long ldfile_output_machine;
 enum bfd_architecture ldfile_output_architecture;
 boolean had_script;

@@ -276,11 +276,10 @@ command_line_option:
 			{
 			ldgram_in_defsym = true;
 			ldgram_in_expression = true;	
-			hex_mode = true;
+
 			}
 			 assignment
 			{
-			hex_mode = false;
 			ldgram_in_defsym = false;
 			ldgram_in_expression = false;
 			}	
