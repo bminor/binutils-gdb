@@ -1044,7 +1044,7 @@ match_simple_name_string ()
 {
   char *tokptr = lexptr;
 
-  if (isalpha (*tokptr))
+  if (isalpha (*tokptr) || *tokptr == '_')
     {
       char *result;
       do {

@@ -1,5 +1,8 @@
 Thu Mar  3 12:41:16 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* ch-exp.y (match_simple_name_string): Accept '_' as well as an
+	alphabetic character as the start of a name.
+
 	* sparclite/Makefile.in (all install): Build and install aload.
 
 	* configure.in: Accept i[34]86-*-*sysv32 because that is what
