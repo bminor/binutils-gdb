@@ -1,3 +1,12 @@
+2002-05-30  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (sparc-tdep.o): Add osabi.h to dependency list.
+	* sparc-tdep.c: Include osabi.h.
+	(gdbarch_tdep): Add osabi member.
+	(_initialize_sparc_tdep): Use gdbarch_register.
+	(sparc_gdbarch_init): Use generic OS ABI framework.
+	(sparc_dump_tdep): New function.
+
 2002-05-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* corefile.c (do_captured_read_memory_integer): Return non-zero
