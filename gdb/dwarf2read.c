@@ -3331,32 +3331,34 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   const char *previous_prefix = processing_current_prefix;
+  struct die_info *child_die = die->child;
 
   if (TYPE_TAG_NAME (die->type) != NULL)
     processing_current_prefix = TYPE_TAG_NAME (die->type);
 
-  if (die->child != NULL && ! die_is_declaration (die, cu))
+  /* NOTE: carlton/2004-03-16: GCC 3.4 (or at least one of its
+     snapshots) has been known to create a die giving a declaration
+     for a class that has, as a child, a die giving a definition for a
+     nested class.  So we have to process our children even if the
+     current die is a declaration.  Normally, of course, a declaration
+     won't have any children at all.  */
+
+  while (child_die != NULL && child_die->tag)
     {
-      struct die_info *child_die;
-
-      child_die = die->child;
-
-      while (child_die && child_die->tag)
+      if (child_die->tag == DW_TAG_member
+	  || child_die->tag == DW_TAG_variable
+	  || child_die->tag == DW_TAG_inheritance)
 	{
-	  if (child_die->tag == DW_TAG_member
-	      || child_die->tag == DW_TAG_variable
-	      || child_die->tag == DW_TAG_inheritance)
-	    {
-	      /* Do nothing.  */
-	    }
-	  else
-	    process_die (child_die, cu);
-
-	  child_die = sibling_die (child_die);
+	  /* Do nothing.  */
 	}
+      else
+	process_die (child_die, cu);
 
-      new_symbol (die, die->type, cu);
+      child_die = sibling_die (child_die);
     }
+
+  if (die->child != NULL && ! die_is_declaration (die, cu))
+    new_symbol (die, die->type, cu);
 
   processing_current_prefix = previous_prefix;
 }
