@@ -1,0 +1,73 @@
+# Sanitize.in for devo.
+# $Id$
+#
+
+# Each directory to survive it's way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this 
+
+Do-first:
+
+# All files listed between the "Things-to-keep:" line and the
+# "Files-to-sed:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+ChangeLog
+a29k.h
+arm.h
+h8300.h
+i386.h
+i860.h
+i960.h
+m68k.h
+m88k.h
+mips.h
+np1.h
+ns32k.h
+pn.h
+pyr.h
+sparc.h
+tahoe.h
+vax.h
+
+Do-last:
+
+v9dirty="sparc.h"
+
+if ( echo $* | grep keep\-v9 > /dev/null ) ; then
+	echo Keeping v9 in ${v9dirty}
+else
+	for i in ${v9dirty} ; do
+		echo Sanitizing v9 in $i
+		rm -f new
+		grep -v v9 $i > new
+		if [ -n "${safe}" ] ; then
+			mv $i .Recover
+		else
+			rm $i
+		fi
+		mv new $i
+	done
+fi
+
+echo Done in `pwd`.
+
+#
+#
+#
+#
+
+# End of file.
