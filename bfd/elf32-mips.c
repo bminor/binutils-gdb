@@ -1820,6 +1820,7 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 {
   flagword old_flags;
   flagword new_flags;
+  boolean ok;
 
   /* Check if we have the same endianess */
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
@@ -1843,65 +1844,87 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
   elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_NOREORDER;
   old_flags = elf_elfheader (obfd)->e_flags;
 
-  if (!elf_flags_init (obfd))	/* First call, no flags set */
+  if (! elf_flags_init (obfd))
     {
       elf_flags_init (obfd) = true;
       elf_elfheader (obfd)->e_flags = new_flags;
+
       if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
 	  && bfd_get_arch_info (obfd)->the_default)
-	bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
+	{
+	  if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
+				   bfd_get_mach (ibfd)))
+	    return false;
+	}
+
+      return true;
     }
-  else if (((new_flags ^ old_flags) & ~EF_MIPS_NOREORDER)
-	   == 0)			/* Compatible flags are ok */
-    ;
-  else					/* Incompatible flags */
+
+  /* Check flag compatibility.  */
+
+  new_flags &= ~EF_MIPS_NOREORDER;
+  old_flags &= ~EF_MIPS_NOREORDER;
+
+  if (new_flags == old_flags)
+    return true;
+
+  ok = true;
+
+  if ((new_flags & EF_MIPS_PIC) != (old_flags & EF_MIPS_PIC))
     {
-      /* Warn about -fPIC mismatch */
-      if ((new_flags & EF_MIPS_PIC) != (old_flags & EF_MIPS_PIC))
+      new_flags &= ~EF_MIPS_PIC;
+      old_flags &= ~EF_MIPS_PIC;
+      (*_bfd_error_handler)
+	("%s: linking PIC files with non-PIC files",
+	 bfd_get_filename (ibfd));
+      ok = false;
+    }
+
+  if ((new_flags & EF_MIPS_CPIC) != (old_flags & EF_MIPS_CPIC))
+    {
+      new_flags &= ~EF_MIPS_CPIC;
+      old_flags &= ~EF_MIPS_CPIC;
+      (*_bfd_error_handler)
+	("%s: linking abicalls files with non-abicalls files",
+	 bfd_get_filename (ibfd));
+      ok = false;
+    }
+
+  /* Don't warn about mixing -mips1 and -mips2 code, or mixing -mips3
+     and -mips4 code.  They will normally use the same data sizes and
+     calling conventions.  */
+  if ((new_flags & EF_MIPS_ARCH) != (old_flags & EF_MIPS_ARCH))
+    {
+      int new_isa, old_isa;
+
+      new_isa = elf_mips_isa (new_flags);
+      old_isa = elf_mips_isa (old_flags);
+      if ((new_isa == 1 || new_isa == 2)
+	  ? (old_isa != 1 && old_isa != 2)
+	  : (old_isa == 1 || old_isa == 2))
 	{
-	  new_flags &= ~EF_MIPS_PIC;
-	  old_flags &= ~EF_MIPS_PIC;
 	  (*_bfd_error_handler)
-	    ("%s: needs all files compiled with -fPIC",
-	     bfd_get_filename (ibfd));
+	    ("%s: ISA mismatch (-mips%d) with previous modules (-mips%d)",
+	     bfd_get_filename (ibfd), new_isa, old_isa);
+	  ok = false;
 	}
 
-      if ((new_flags & EF_MIPS_CPIC) != (old_flags & EF_MIPS_CPIC))
-	{
-	  new_flags &= ~EF_MIPS_CPIC;
-	  old_flags &= ~EF_MIPS_CPIC;
-	  (*_bfd_error_handler)
-	    ("%s: needs all files compiled with -mabicalls",
-	     bfd_get_filename (ibfd));
-	}
+      new_flags &= ~ EF_MIPS_ARCH;
+      old_flags &= ~ EF_MIPS_ARCH;
+    }
 
-      /* Don't warn about mixing -mips1 and -mips2 code, or mixing
-         -mips3 and -mips4 code.  They will normally use the same data
-         sizes and calling conventions.  */
-      if ((new_flags & EF_MIPS_ARCH) != (old_flags & EF_MIPS_ARCH))
-	{
-	  int new_isa, old_isa;
+  /* Warn about any other mismatches */
+  if (new_flags != old_flags)
+    {
+      (*_bfd_error_handler)
+	("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)",
+	 bfd_get_filename (ibfd), (unsigned long) new_flags,
+	 (unsigned long) old_flags);
+      ok = false;
+    }
 
-	  new_isa = elf_mips_isa (new_flags);
-	  old_isa = elf_mips_isa (old_flags);
-	  if ((new_isa == 1 || new_isa == 2)
-	      ? (old_isa != 1 && old_isa != 2)
-	      : (old_isa == 1 || old_isa == 2))
-	    (*_bfd_error_handler)
-	      ("%s: ISA mismatch (-mips%d) with previous modules (-mips%d)",
-	       bfd_get_filename (ibfd), new_isa, old_isa);
-
-	  new_flags &= ~ EF_MIPS_ARCH;
-	  old_flags &= ~ EF_MIPS_ARCH;
-	}
-
-      /* Warn about any other mismatches */
-      if (new_flags != old_flags)
-	(*_bfd_error_handler)
-	  ("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)",
-	   bfd_get_filename (ibfd), (unsigned long) new_flags,
-	   (unsigned long) old_flags);
-
+  if (! ok)
+    {
       bfd_set_error (bfd_error_bad_value);
       return false;
     }
