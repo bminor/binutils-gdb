@@ -97,6 +97,8 @@ struct sparc_opcode {
 #define	F_UNBR		4	/* Unconditional branch */
 #define	F_CONDBR	8	/* Conditional branch */
 #define	F_JSR		16	/* Subroutine call */
+#define F_FLOAT		32	/* Floating point instruction (not a branch) */
+#define F_FBR		64	/* Floating point branch */
 /* FIXME: Add F_ANACHRONISTIC flag for v9.  */
 
 /*
