@@ -74,10 +74,14 @@ struct simops
 enum _ins_type
 {
   INS_UNKNOWN,			/* unknown instruction */
-  INS_LONG,			/* long instruction (both containers) */
   INS_COND_TRUE,		/* # times EXExxx executed other instruction */
   INS_COND_FALSE,		/* # times EXExxx did not execute other instruction */
+  INS_COND_JUMP,		/* # times JUMP skipped other instruction */
   INS_CYCLES,			/* # cycles */
+  INS_LONG,			/* long instruction (both containers, ie FM == 11) */
+  INS_LEFTRIGHT,		/* # times instruction encoded as L -> R (ie, FM == 01) */
+  INS_RIGHTLEFT,		/* # times instruction encoded as L <- R (ie, FM == 10) */
+  INS_PARALLEL,			/* # times instruction encoded as L || R (ie, RM == 00) */
 
   INS_LEFT,			/* normal left instructions */
   INS_LEFT_PARALLEL,		/* left side of || */
@@ -113,11 +117,11 @@ struct _state
   uint8 F1;
   uint8 C;
   uint8 exe;
+  int   exception;
+  /* everything below this line is not reset by sim_create_inferior() */
   uint8 *imem;
   uint8 *dmem;
-  uint32 mem_min;
-  uint32 mem_max;
-  int   exception;
+  uint8 *umem[128];
   enum _ins_type ins_type;
 } State;
 
@@ -169,7 +173,9 @@ extern struct simops Simops[];
 
 #define INC_ADDR(x,i)	x = ((State.MD && x == MOD_E) ? MOD_S : (x)+(i))
 
-#define	RB(x)	(*((uint8 *)((x)+State.imem)))
+extern uint8 *dmem_addr PARAMS ((uint32));
+
+#define	RB(x)	(*(dmem_addr(x)))
 #define SB(addr,data)	( RB(addr) = (data & 0xff))
 
 #if defined(__GNUC__) && defined(__OPTIMIZE__) && !defined(NO_ENDIAN_INLINE)
@@ -186,11 +192,18 @@ extern void write_longword PARAMS ((uint8 *addr, uint32 data));
 extern void write_longlong PARAMS ((uint8 *addr, int64 data));
 #endif
 
-#define SW(addr,data)		write_word((long)(addr)+State.imem,data)
-#define RW(x)			get_word((long)(x)+State.imem)
-#define SLW(addr,data)  	write_longword((long)(addr)+State.imem,data)
-#define RLW(x)			get_longword((long)(x)+State.imem)
+#define SW(addr,data)		write_word(dmem_addr(addr),data)
+#define RW(x)			get_word(dmem_addr(x))
+#define SLW(addr,data)  	write_longword(dmem_addr(addr),data)
+#define RLW(x)			get_longword(dmem_addr(x))
 #define READ_16(x)		get_word(x)
 #define WRITE_16(addr,data)	write_word(addr,data)
 #define READ_64(x)		get_longlong(x)
 #define WRITE_64(addr,data)	write_longlong(addr,data)
+
+#define IMAP0			RW(0xff00)
+#define IMAP1			RW(0xff02)
+#define DMAP			RW(0xff04)
+#define SET_IMAP0(x)		SW(0xff00,x)
+#define SET_IMAP1(x)		SW(0xff02,x)
+#define SET_DMAP(x)		SW(0xff04,x)

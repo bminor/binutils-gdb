@@ -6,7 +6,8 @@
 #include "d10v_sim.h"
 
 #define IMEM_SIZE 18	/* D10V instruction memory size is 18 bits */
-#define DMEM_SIZE 16	/* Data memory */
+#define DMEM_SIZE 16	/* Data memory is 64K (but only 32K internal RAM) */
+#define UMEM_SIZE 17	/* each unified memory region is 17 bits */
 
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 
@@ -133,16 +134,30 @@ do_2_short (ins1, ins2, leftright)
 {
   struct hash_entry *h;
   reg_t orig_pc = PC;
+  enum _ins_type first, second;
 
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
     (*d10v_callback->printf_filtered) (d10v_callback, "do_2_short 0x%x (%s) -> 0x%x\n",
 				       ins1, (leftright) ? "left" : "right", ins2);
 #endif
-  /*  printf ("do_2_short %x -> %x\n",ins1,ins2); */
+
+  if (leftright == LEFT_FIRST)
+    {
+      first = INS_LEFT;
+      second = INS_RIGHT;
+      ins_type_counters[ (int)INS_LEFTRIGHT ]++;
+    }
+  else
+    {
+      first = INS_RIGHT;
+      second = INS_LEFT;
+      ins_type_counters[ (int)INS_RIGHTLEFT ]++;
+    }
+
   h = lookup_hash (ins1, 0);
   get_operands (h->ops, ins1);
-  State.ins_type = (leftright == LEFT_FIRST) ? INS_LEFT : INS_RIGHT;
+  State.ins_type = first;
   ins_type_counters[ (int)State.ins_type ]++;
   (h->ops->func)();
 
@@ -151,10 +166,13 @@ do_2_short (ins1, ins2, leftright)
     {
       h = lookup_hash (ins2, 0);
       get_operands (h->ops, ins2);
-      State.ins_type = (leftright == LEFT_FIRST) ? INS_RIGHT : INS_LEFT;
+      State.ins_type = second;
       ins_type_counters[ (int)State.ins_type ]++;
+      ins_type_counters[ (int)INS_CYCLES ]++;
       (h->ops->func)();
     }
+  else if (orig_pc != PC && !State.exception)
+    ins_type_counters[ (int)INS_COND_JUMP ]++;
 }
 
 static void
@@ -166,6 +184,7 @@ do_parallel (ins1, ins2)
   if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
     (*d10v_callback->printf_filtered) (d10v_callback, "do_parallel 0x%x || 0x%x\n", ins1, ins2);
 #endif
+  ins_type_counters[ (int)INS_PARALLEL ]++;
   h1 = lookup_hash (ins1, 0);
   h2 = lookup_hash (ins2, 0);
 
@@ -247,22 +266,39 @@ sim_size (power)
      int power;
 
 {
+  int i;
+
   if (State.imem)
     {
+      for (i=0;i<128;i++)
+	{
+	  if (State.umem[i])
+	    {
+	      free (State.umem[i]);
+	      State.umem[i] = NULL;
+	    }
+	}
       free (State.imem);
       free (State.dmem);
     }
 
   State.imem = (uint8 *)calloc(1,1<<IMEM_SIZE);
   State.dmem = (uint8 *)calloc(1,1<<DMEM_SIZE);
-  if (!State.imem || !State.dmem )
+  for (i=1;i<127;i++)
+    State.umem[i] = NULL;
+  State.umem[0] = (uint8 *)calloc(1,1<<UMEM_SIZE);
+  State.umem[1] = (uint8 *)calloc(1,1<<UMEM_SIZE);
+  State.umem[2] = (uint8 *)calloc(1,1<<UMEM_SIZE);
+  State.umem[127] = (uint8 *)calloc(1,1<<UMEM_SIZE);
+  if (!State.imem || !State.dmem || !State.umem[0] || !State.umem[1] || !State.umem[2] || !State.umem[127] )
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "Memory allocation failed.\n");
       exit(1);
     }
-
-  State.mem_min = 1<<IMEM_SIZE;
-  State.mem_max = 0;
+  
+  SET_IMAP0(0x1000);
+  SET_IMAP1(0x1000);
+  SET_DMAP(0);
 
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_MEMSIZE) != 0)
@@ -285,29 +321,116 @@ init_system ()
     sim_size(1);
 }
 
+static int
+xfer_mem (addr, buffer, size, write)
+     SIM_ADDR addr;
+     unsigned char *buffer;
+     int size;
+     int write;
+{
+  if (!State.imem)
+    init_system ();
+
+#ifdef DEBUG
+  if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
+    {
+      if (write)
+	(*d10v_callback->printf_filtered) (d10v_callback, "sim_write %d bytes to 0x%x\n", size, addr);
+      else
+	(*d10v_callback->printf_filtered) (d10v_callback, "sim_read %d bytes from 0x%x\n", size, addr);
+    }
+#endif
+
+  /* to access data, we use the following mapping */
+  /* 0x01000000 - 0x0103ffff : instruction memory */
+  /* 0x02000000 - 0x0200ffff : data memory        */
+  /* 0x03000000 - 0x03ffffff : unified memory     */
+
+  if ( (addr & 0x03000000) == 0x03000000)
+    {
+      /* UNIFIED MEMORY */
+      int segment;
+      addr &= ~0x03000000;
+      segment = addr >> UMEM_SIZE;
+      addr &= 0x1ffff;
+      if (!State.umem[segment])
+	State.umem[segment] = (uint8 *)calloc(1,1<<UMEM_SIZE);
+      if (!State.umem[segment])
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback, "Memory allocation failed.\n");
+	  exit(1);
+	}
+#ifdef DEBUG
+      (*d10v_callback->printf_filtered) (d10v_callback,"Allocated %s bytes unified memory to region %d\n",
+		add_commas (buffer, sizeof (buffer), (1UL<<IMEM_SIZE)), segment);
+#endif
+      /* FIXME:  need to check size and read/write multiple segments if necessary */
+      if (write)
+	memcpy (State.umem[segment]+addr, buffer, size); 
+      else
+	memcpy (buffer, State.umem[segment]+addr, size); 
+    }
+  else if ( (addr & 0x03000000) == 0x02000000)
+    {
+      /* DATA MEMORY */
+      addr &= ~0x02000000;
+      if (size > (1<<(DMEM_SIZE-1)))
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: data section is only %d bytes.\n",1<<(DMEM_SIZE-1));
+	  exit(1);
+	}
+      if (write)
+	memcpy (State.dmem+addr, buffer, size); 
+      else
+	memcpy (buffer, State.dmem+addr, size); 
+    }
+  else if ( (addr & 0x03000000) == 0x01000000)
+    {
+      /* INSTRUCTION MEMORY */
+      addr &= ~0x01000000;
+      if (size > (1<<IMEM_SIZE))
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: inst section is only %d bytes.\n",1<<IMEM_SIZE);
+	  exit(1);
+	}
+      if (write)
+	memcpy (State.imem+addr, buffer, size); 
+      else
+	memcpy (buffer, State.imem+addr, size); 
+    }
+  else if (write)
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: address 0x%x is not in valid range\n",addr);
+      (*d10v_callback->printf_filtered) (d10v_callback, "Instruction addresses start at 0x01000000\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "Data addresses start at 0x02000000\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "Unified addresses start at 0x03000000\n");
+      exit(1);
+    }
+  else
+    return 0;
+
+  return size;
+}
+
+
 int
 sim_write (addr, buffer, size)
      SIM_ADDR addr;
      unsigned char *buffer;
      int size;
 {
-  init_system ();
-
-#ifdef DEBUG
-  if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
-    (*d10v_callback->printf_filtered) (d10v_callback, "sim_write %d bytes to 0x%x, min = 0x%x, max = 0x%x\n",
-				       size, addr, State.mem_min, State.mem_max);
-#endif
-
-  if (State.mem_min > addr)
-    State.mem_min = addr;
-
-  if (State.mem_max < addr+size-1)
-    State.mem_max = addr+size-1;
-
-  memcpy (State.imem+addr, buffer, size);
-  return size;
+  return xfer_mem( addr, buffer, size, 1);
 }
+
+int
+sim_read (addr, buffer, size)
+     SIM_ADDR addr;
+     unsigned char *buffer;
+     int size;
+{
+  return xfer_mem( addr, buffer, size, 0);
+}
+
 
 void
 sim_open (args)
@@ -326,7 +449,7 @@ sim_open (args)
 #endif
 	(*d10v_callback->printf_filtered) (d10v_callback, "ERROR: unsupported option(s): %s\n",args);
     }
-
+  
   /* put all the opcodes in the hash table */
   if (!init_p++)
     {
@@ -372,6 +495,70 @@ sim_set_profile_size (n)
   (*d10v_callback->printf_filtered) (d10v_callback, "sim_set_profile_size %d\n",n);
 }
 
+
+uint8 *
+dmem_addr( addr )
+     uint32 addr;
+{
+  int seg;
+
+  addr &= 0xffff;
+
+  if (addr > 0xbfff)
+    {
+      if ( (addr & 0xfff0) != 0xff00)
+	(*d10v_callback->printf_filtered) (d10v_callback, "Data address %x is in I/O space.\n",addr);
+      return State.dmem + addr;
+    }
+  
+  if (addr > 0x7fff)
+    {
+      if (DMAP & 0x1000)
+	{
+	  /* instruction memory */
+	  return (DMAP & 0xf) * 0x4000 + State.imem;
+	}
+      /* unified memory */
+      /* this is ugly because we allocate unified memory in 128K segments and */
+      /* dmap addresses 16k segments */
+      seg = (DMAP & 0x3ff) >> 2;
+      if (State.umem[seg] == NULL)
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR:  unified memory region %d unmapped\n", seg);
+	  exit(1);
+	}
+      return State.umem[seg] + (DMAP & 3) * 0x4000;
+    }
+
+  return State.dmem + addr;
+}
+
+
+static uint8 *
+pc_addr()
+{
+  uint32 pc = ((uint32)PC) << 2;
+  uint16 imap;
+
+  if (pc & 0x20000)
+    imap = IMAP1;
+  else
+    imap = IMAP0;
+  
+  if (imap & 0x1000)
+    return State.imem + pc;
+
+  if (State.umem[imap & 0xff] == NULL)
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR:  unified memory region %d unmapped\n", imap & 0xff);
+      State.exception = SIGILL;
+      return 0;
+    }
+
+  return State.umem[imap & 0xff] + pc;
+}
+
+
 void
 sim_resume (step, siggnal)
      int step, siggnal;
@@ -384,54 +571,44 @@ sim_resume (step, siggnal)
   State.exception = 0;
   do
     {
-      uint32 byte_pc = ((uint32)PC) << 2;
-      if ((byte_pc < State.mem_min) || (byte_pc > State.mem_max))
+      inst = get_longword( pc_addr() ); 
+      oldpc = PC;
+      ins_type_counters[ (int)INS_CYCLES ]++;
+      switch (inst & 0xC0000000)
 	{
-	  (*d10v_callback->printf_filtered) (d10v_callback,
-					     "PC (0x%lx) out of range, oldpc = 0x%lx, min = 0x%lx, max = 0x%lx\n",
-					     (long)byte_pc, (long)oldpc, (long)State.mem_min, (long)State.mem_max);
-	  State.exception = SIGILL;
+	case 0xC0000000:
+	  /* long instruction */
+	  do_long (inst & 0x3FFFFFFF);
+	  break;
+	case 0x80000000:
+	  /* R -> L */
+	  do_2_short ( inst & 0x7FFF, (inst & 0x3FFF8000) >> 15, 0);
+	  break;
+	case 0x40000000:
+	  /* L -> R */
+	  do_2_short ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF, 1);
+	  break;
+	case 0:
+	  do_parallel ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF);
+	  break;
 	}
-      else
+      
+      if (State.RP && PC == RPT_E)
 	{
-	  inst = RLW (byte_pc); 
-	  oldpc = PC;
-	  ins_type_counters[ (int)INS_CYCLES ]++;
-	  switch (inst & 0xC0000000)
-	    {
-	    case 0xC0000000:
-	      /* long instruction */
-	      do_long (inst & 0x3FFFFFFF);
-	      break;
-	    case 0x80000000:
-	      /* R -> L */
-	      do_2_short ( inst & 0x7FFF, (inst & 0x3FFF8000) >> 15, 0);
-	      break;
-	    case 0x40000000:
-	      /* L -> R */
-	      do_2_short ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF, 1);
-	      break;
-	    case 0:
-	      do_parallel ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF);
-	      break;
-	    }
-     
-	  if (State.RP && PC == RPT_E)
-	    {
-	      RPT_C -= 1;
-	      if (RPT_C == 0)
-		State.RP = 0;
-	      else
-		PC = RPT_S;
-	    }
-
-	  /* FIXME */
-	  if (PC == oldpc)
-	    PC++;
+	  RPT_C -= 1;
+	  if (RPT_C == 0)
+	    State.RP = 0;
+	  else
+	    PC = RPT_S;
 	}
+      
+      /* FIXME */
+      if (PC == oldpc)
+	PC++;
+      
     } 
   while ( !State.exception && !step);
-
+  
   if (step && !State.exception)
     State.exception = SIGTRAP;
 }
@@ -469,8 +646,12 @@ sim_info (verbose)
 
   unsigned long unknown		= ins_type_counters[ (int)INS_UNKNOWN ];
   unsigned long ins_long	= ins_type_counters[ (int)INS_LONG ];
+  unsigned long parallel	= ins_type_counters[ (int)INS_PARALLEL ];
+  unsigned long leftright	= ins_type_counters[ (int)INS_LEFTRIGHT ];
+  unsigned long rightleft	= ins_type_counters[ (int)INS_RIGHTLEFT ];
   unsigned long cond_true	= ins_type_counters[ (int)INS_COND_TRUE ];
   unsigned long cond_false	= ins_type_counters[ (int)INS_COND_FALSE ];
+  unsigned long cond_jump	= ins_type_counters[ (int)INS_COND_JUMP ];
   unsigned long cycles		= ins_type_counters[ (int)INS_CYCLES ];
   unsigned long total		= (unknown + left_total + right_total + ins_long);
 
@@ -482,7 +663,7 @@ sim_info (verbose)
   int normal_size		= strlen (add_commas (buf1, sizeof (buf1), (left > right) ? left : right));
 
   (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*s left  instructions, %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
+				     "executed %*s left  instruction(s), %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
 				     size, add_commas (buf1, sizeof (buf1), left_total),
 				     normal_size, add_commas (buf2, sizeof (buf2), left),
 				     parallel_size, add_commas (buf3, sizeof (buf3), left_parallel),
@@ -490,32 +671,55 @@ sim_info (verbose)
 				     nop_size, add_commas (buf5, sizeof (buf5), left_nops));
 
   (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*s right instructions, %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
+				     "executed %*s right instruction(s), %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
 				     size, add_commas (buf1, sizeof (buf1), right_total),
 				     normal_size, add_commas (buf2, sizeof (buf2), right),
 				     parallel_size, add_commas (buf3, sizeof (buf3), right_parallel),
 				     cond_size, add_commas (buf4, sizeof (buf4), right_cond),
 				     nop_size, add_commas (buf5, sizeof (buf5), right_nops));
 
-  (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*s long instructions\n",
-				     size, add_commas (buf1, sizeof (buf1), ins_long));
+  if (ins_long)
+    (*d10v_callback->printf_filtered) (d10v_callback,
+				       "executed %*s long instruction(s)\n",
+				       size, add_commas (buf1, sizeof (buf1), ins_long));
+
+  if (parallel)
+    (*d10v_callback->printf_filtered) (d10v_callback,
+				       "executed %*s parallel instruction(s)\n",
+				       size, add_commas (buf1, sizeof (buf1), parallel));
+
+  if (leftright)
+    (*d10v_callback->printf_filtered) (d10v_callback,
+				       "executed %*s instruction(s) encoded L->R\n",
+				       size, add_commas (buf1, sizeof (buf1), leftright));
+
+  if (rightleft)
+    (*d10v_callback->printf_filtered) (d10v_callback,
+				       "executed %*s instruction(s) encoded R->L\n",
+				       size, add_commas (buf1, sizeof (buf1), rightleft));
 
   if (unknown)
     (*d10v_callback->printf_filtered) (d10v_callback,
-				       "executed %*s unknown instructions\n",
+				       "executed %*s unknown instruction(s)\n",
 				       size, add_commas (buf1, sizeof (buf1), unknown));
 
-  (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*s instructions conditionally\n",
-				     size, add_commas (buf1, sizeof (buf1), cond_true));
+  if (cond_true)
+    (*d10v_callback->printf_filtered) (d10v_callback,
+				       "executed %*s instruction(s) due to EXExxx condition being true\n",
+				       size, add_commas (buf1, sizeof (buf1), cond_true));
+
+  if (cond_false)
+    (*d10v_callback->printf_filtered) (d10v_callback,
+				       "skipped  %*s instruction(s) due to EXExxx condition being false\n",
+				       size, add_commas (buf1, sizeof (buf1), cond_false));
+
+  if (cond_jump)
+    (*d10v_callback->printf_filtered) (d10v_callback,
+				       "skipped  %*s instruction(s) due to conditional branch succeeding\n",
+				       size, add_commas (buf1, sizeof (buf1), cond_jump));
 
   (*d10v_callback->printf_filtered) (d10v_callback,
-				     "skipped  %*s instructions due to conditional failure\n",
-				     size, add_commas (buf1, sizeof (buf1), cond_false));
-
-  (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*s cycles\n",
+				     "executed %*s cycle(s)\n",
 				     size, add_commas (buf1, sizeof (buf1), cycles));
 
   (*d10v_callback->printf_filtered) (d10v_callback,
@@ -529,26 +733,23 @@ sim_create_inferior (start_address, argv, env)
      char **argv;
      char **env;
 {
-  uint8 *imem, *dmem;
-  uint32 mem_min, mem_max;
 #ifdef DEBUG
   if (d10v_debug)
     (*d10v_callback->printf_filtered) (d10v_callback, "sim_create_inferior:  PC=0x%x\n", start_address);
 #endif
-  /* save memory pointers */
-  imem = State.imem;
-  dmem = State.dmem;
-  mem_min = State.mem_min;
-  mem_max = State.mem_max;
+
   /* reset all state information */
-  memset (&State, 0, sizeof(State));
-  /* restore memory pointers */
-  State.imem = imem;
-  State.dmem = dmem;
-  State.mem_min = mem_min;
-  State.mem_max = mem_max;
+  memset (&State.regs, 0, (int)&State.imem - (int)&State.regs[0]);
+
   /* set PC */
   PC = start_address >> 2;
+
+  /* cpu resets imap0 to 0 and imap1 to 0x7f, but D10V-EVA board */
+  /* resets imap0 and imap1 to 0x1000. */
+
+  SET_IMAP0(0x1000);
+  SET_IMAP1(0x1000);
+  SET_DMAP(0);
 }
 
 
@@ -597,16 +798,19 @@ sim_fetch_register (rn, memory)
      int rn;
      unsigned char *memory;
 {
-  if (rn > 31)
-    {
-      WRITE_64 (memory, State.a[rn-32]);
-      /* (*d10v_callback->printf_filtered) (d10v_callback, "sim_fetch_register %d 0x%llx\n",rn,State.a[rn-32]); */
-    }
+  if (!State.imem)
+    init_system();
+
+  if (rn > 34)
+    WRITE_64 (memory, State.a[rn-32]);
+  else if (rn == 32)
+    WRITE_16 (memory, IMAP0);
+  else if (rn == 33)
+    WRITE_16 (memory, IMAP1);
+  else if (rn == 34)
+    WRITE_16 (memory, DMAP);
   else
-    {
-      WRITE_16 (memory, State.regs[rn]);
-      /* (*d10v_callback->printf_filtered) (d10v_callback, "sim_fetch_register %d 0x%x\n",rn,State.regs[rn]); */
-    }
+    WRITE_16 (memory, State.regs[rn]);
 }
  
 void
@@ -614,31 +818,21 @@ sim_store_register (rn, memory)
      int rn;
      unsigned char *memory;
 {
-  if (rn > 31)
-    {
-      State.a[rn-32] =  READ_64 (memory) & MASK40;
-      /* (*d10v_callback->printf_filtered) (d10v_callback, "store: a%d=0x%llx\n",rn-32,State.a[rn-32]); */
-    }
+  if (!State.imem)
+    init_system();
+
+  if (rn > 34)
+    State.a[rn-32] =  READ_64 (memory) & MASK40;
+  else if (rn == 34)
+    SET_DMAP( READ_16(memory) );
+  else if (rn == 33)
+    SET_IMAP1( READ_16(memory) );
+  else if (rn == 32)
+    SET_IMAP0( READ_16(memory) );
   else
-    {
-      State.regs[rn]= READ_16 (memory);
-      /* (*d10v_callback->printf_filtered) (d10v_callback, "store: r%d=0x%x\n",rn,State.regs[rn]); */
-    }
+    State.regs[rn]= READ_16 (memory);
 }
 
-int
-sim_read (addr, buffer, size)
-     SIM_ADDR addr;
-     unsigned char *buffer;
-     int size;
-{
-  int i;
-  for (i = 0; i < size; i++)
-    {
-      buffer[i] = State.imem[addr + i];
-    }
-  return size;
-} 
 
 void
 sim_do_command (cmd)

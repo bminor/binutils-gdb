@@ -1,3 +1,54 @@
+Tue Oct 29 12:13:52 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* interp.c (sim_size): Now allocates unified memory for imap segments
+	0,1,2, and 127. Initializes imap0 and imap1 to 0x1000.  Initializes dmap to 0.
+	(sim_write): Just call xfer_mem().
+	(sim_read): Just call xfer_mem().
+	(xfer_mem): New function. Does appropriate memory mapping and copies bytes.
+	(dmem_addr): New function. Reads dmap register and translates data
+ 	addresses to local addresses.
+	(pc_addr): New function. Reads imap register and computes local address
+	corresponding to contents of the PC.
+	(sim_resume): Change to use pc_addr().
+	(sim_create_inferior): Change reinitialization code. Also reinitializes
+	imap[01] and dmap.
+	(sim_fetch_register): Add fake registers 32,33,34 for imap0, imap1, and dmap.
+	(sim_store_register): Add fake registers 32,33,34 for imap0, imap1, and dmap.
+
+	* simops.c (MEMPTR): Redefine to use dmem_addr().
+	(OP_5F00): Replace references to STate.imem with dmem_addr().
+	
+	* d10v-sim.h (State): Remove mem_min and mem_max. Add umem[128].
+	(RB,SW,RW,SLW,RLW): Redefine to use dmem_addr().
+	(IMAP0,IMAP1,DMAP,SET_IMAP,SET_IMAP1,SET_DMAP): Define.
+	
+Tue Oct 22 15:22:33 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* d10v_sim.h (_ins_type): Reorganize, so that we can provide
+	better statistics, like not counting NOPS as parallel
+	instructions, and printing total cycles.
+	(ins_type_counters): Make unsigned long.
+	(left_nops,right_nops): Fold into ins_type_counters.
+
+	* simops.c (trace_input_func): Print new instruction types.
+	Handle OP_R2R3 as input types.
+	(OP_{38000000,7000}): Correctly sign extend bytes.
+	(OP_5E00): Don't count NOPs as parallel instructions.
+	(OP_460B): Remove unused variable.
+	(OP_5F00): Ditto.
+
+	* interp.c (ins_type_counters): Make unsigned long.
+	(left_nops,right_nops): Delete.
+	(most functions): Add prototypes.
+	(INLINE): If GCC and optimize define as __inline__.
+	({,lookup_}hash,get_operands): Declare as INLINE.
+	(do_parallel): Count conditional operations.
+	(add_commas): New function, to add commas every 3 digits.
+	(sim_size): Call add_commas to print numbers.
+	(sim_{open,resume}): Delete unused variables.
+	(sim_info): Provide better statistics.
+	(sim_read): Add int return type.
+
 Mon Oct 21 16:16:26 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* interp.c (sim_resume): Change the way single-stepping and exceptions

@@ -9,6 +9,8 @@
 #include "sys/syscall.h"
 #include "bfd.h"
 
+extern char *strrchr ();
+
 enum op_types {
   OP_VOID,
   OP_REG,
@@ -111,6 +113,10 @@ trace_input_func (name, in1, in2, in3)
     case INS_RIGHT:		type = " R"; break;
     case INS_LEFT_PARALLEL:	type = "*L"; break;
     case INS_RIGHT_PARALLEL:	type = "*R"; break;
+    case INS_LEFT_COND_TEST:	type = "?L"; break;
+    case INS_RIGHT_COND_TEST:	type = "?R"; break;
+    case INS_LEFT_COND_EXE:	type = "&L"; break;
+    case INS_RIGHT_COND_EXE:	type = "&R"; break;
     case INS_LONG:		type = " B"; break;
     }
 
@@ -165,7 +171,7 @@ trace_input_func (name, in1, in2, in3)
 		}
 	      else if (filename)
 		{
-		  char *q = (char *) strrchr (filename, '/');
+		  char *q = strrchr (filename, '/');
 		  sprintf (p, "%s ", (q) ? q+1 : filename);
 		  p += strlen (p);
 		}
@@ -196,6 +202,7 @@ trace_input_func (name, in1, in2, in3)
 	case OP_R2:
 	case OP_R3:
 	case OP_R4:
+	case OP_R2R3:
 	  break;
 
 	case OP_REG:
@@ -405,6 +412,14 @@ trace_input_func (name, in1, in2, in3)
 	    case OP_R4:
 	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)State.regs[4]);
+	      break;
+
+	    case OP_R2R3:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)State.regs[2]);
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+						 (uint16)State.regs[3]);
+	      i++;
 	      break;
 	    }
 	}
@@ -1261,8 +1276,7 @@ void
 OP_38000000 ()
 {
   trace_input ("ldb", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
-  State.regs[OP[0]] = RB (OP[1] + State.regs[OP[2]]);
-  SEXT8 (State.regs[OP[0]]);
+  State.regs[OP[0]] = SEXT8 (RB (OP[1] + State.regs[OP[2]]));
   trace_output (OP_REG);
 }
 
@@ -1271,8 +1285,7 @@ void
 OP_7000 ()
 {
   trace_input ("ldb", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
-  State.regs[OP[0]] = RB (State.regs[OP[1]]);
-  SEXT8 (State.regs[OP[0]]);
+  State.regs[OP[0]] = SEXT8 (RB (State.regs[OP[1]]));
   trace_output (OP_REG);
 }
 
@@ -1830,12 +1843,40 @@ void
 OP_5E00 ()
 {
   trace_input ("nop", OP_VOID, OP_VOID, OP_VOID);
-  trace_output (OP_VOID);
 
-  if (State.ins_type == INS_LEFT || State.ins_type == INS_LEFT_PARALLEL)
-    left_nops++;
-  else
-    right_nops++;
+  ins_type_counters[ (int)State.ins_type ]--;	/* don't count nops as normal instructions */
+  switch (State.ins_type)
+    {
+    default:
+      ins_type_counters[ (int)INS_UNKNOWN ]++;
+      break;
+
+    case INS_LEFT_PARALLEL:
+      /* Don't count a parallel op that includes a NOP as a true parallel op */
+      ins_type_counters[ (int)INS_RIGHT_PARALLEL ]--;
+      ins_type_counters[ (int)INS_RIGHT ]++;
+      ins_type_counters[ (int)INS_LEFT_NOPS ]++;
+      break;
+
+    case INS_LEFT:
+    case INS_LEFT_COND_EXE:
+      ins_type_counters[ (int)INS_LEFT_NOPS ]++;
+      break;
+
+    case INS_RIGHT_PARALLEL:
+      /* Don't count a parallel op that includes a NOP as a true parallel op */
+      ins_type_counters[ (int)INS_LEFT_PARALLEL ]--;
+      ins_type_counters[ (int)INS_LEFT ]++;
+      ins_type_counters[ (int)INS_RIGHT_NOPS ]++;
+      break;
+
+    case INS_RIGHT:
+    case INS_RIGHT_COND_EXE:
+      ins_type_counters[ (int)INS_RIGHT_NOPS ]++;
+      break;
+    }
+
+  trace_output (OP_VOID);
 }
 
 /* not */
@@ -2129,8 +2170,6 @@ OP_3201 ()
 void
 OP_460B ()
 {
-  uint16 tmp;
-
   trace_input ("slx", OP_REG, OP_FLAG, OP_VOID);
   State.regs[OP[0]] = (State.regs[OP[0]] << 1) | State.F0;
   trace_output (OP_REG);
@@ -2606,7 +2645,6 @@ OP_5F00 ()
     case 0:
       /* Trap 0 is used for simulating low-level I/O */
       {
-	int save_errno = errno;	
 	errno = 0;
 
 /* Registers passed to trap 0 */
@@ -2626,7 +2664,7 @@ OP_5F00 ()
 
 /* Turn a pointer in a register into a pointer into real memory. */
 
-#define MEMPTR(x) ((char *)((x) + State.imem))
+#define MEMPTR(x) ((char *)(dmem_addr(x)))
 
 	switch (FUNC)
 	  {
@@ -2942,7 +2980,7 @@ OP_5F00 ()
     case 1:
       /* Trap 1 prints a string */
       {
-	char *fstr = State.regs[2] + State.imem;
+	char *fstr = dmem_addr(State.regs[2]);
 	fputs (fstr, stdout);
 	break;
       }
@@ -2950,7 +2988,7 @@ OP_5F00 ()
     case 2:
       /* Trap 2 calls printf */
       {
-	char *fstr = State.regs[2] + State.imem;
+	char *fstr = dmem_addr(State.regs[2]);
 	(*d10v_callback->printf_filtered) (d10v_callback, fstr,
 					   (int16)State.regs[3],
 					   (int16)State.regs[4],
