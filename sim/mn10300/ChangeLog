@@ -1,5 +1,11 @@
 start-sanitize-am33
+Thu Jul 23 10:05:28 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Autoincrement loads/store fixes.
+
 Tue Jul 21 09:48:14 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Add mov_lCC DSP instructions.
 
 	* am33.igen: Add most am33 DSP instructions.
 
