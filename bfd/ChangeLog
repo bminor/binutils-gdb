@@ -1,3 +1,11 @@
+Fri Aug 14 19:22:18 1992  Per Bothner  (bothner@cygnus.com)
+
+	* aout-target.h:  Make _bfd_slurp_extended_name_table be
+	the default.  Given that we *write* the suckers (for long
+	archive member names), we really ought to be able to read them!
+	* trad-core.c:  Don't include <machine/reg.h>.  It doesn't
+	seem to be needed, and many machines don't have it.
+
 Thu Aug 13 09:53:39 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coff-m68k.c (vector): read and write archives in coff format.

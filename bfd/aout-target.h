@@ -1,4 +1,4 @@
-/* Define a target vector for a variant of a.out.
+/* Define a target vector and some small routines for a variant of a.out.
    Copyright (C) 1990-1991 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,6 +16,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#include "aout/aout64.h"
+#include "aout/stab_gnu.h"
+#include "aout/ar.h"
+/*#include "libaout.h"*/
 
 /* Set parameters about this a.out file that are machine-dependent.
    This routine is called from some_aout_object_p just before it returns.  */
@@ -45,8 +50,7 @@ DEFUN(MY(callback),(abfd),
   obj_sym_filepos (abfd) = N_SYMOFF (*execp);
   obj_str_filepos (abfd) = N_STROFF (*execp);
   
-  /* Determine the architecture and machine type of the object file.
-   */
+  /* Determine the architecture and machine type of the object file.  */
 #ifdef SET_ARCH_MACH
   SET_ARCH_MACH(abfd, *execp);
 #else
@@ -145,7 +149,14 @@ DEFUN(MY(write_object_contents),(abfd),
   struct external_exec exec_bytes;
   struct internal_exec *execp = exec_hdr (abfd);
 
+#if CHOOSE_RELOC_SIZE
+  CHOOSE_RELOC_SIZE(abfd);
+#else
+  obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
+#endif
+
   WRITE_HEADERS(abfd, execp);
+
   return true;
 }
 #define MY_write_object_contents MY(write_object_contents)
@@ -162,7 +173,7 @@ DEFUN(MY(write_object_contents),(abfd),
 #define	MY_slurp_armap			bfd_slurp_bsd_armap
 #endif
 #ifndef	MY_slurp_extended_name_table
-#define	MY_slurp_extended_name_table	bfd_true
+#define	MY_slurp_extended_name_table	_bfd_slurp_extended_name_table
 #endif
 #ifndef	MY_write_armap
 #define	MY_write_armap		bsd_write_armap
@@ -274,19 +285,33 @@ DEFUN(MY(write_object_contents),(abfd),
 #ifndef MY_bfd_debug_info_accumulat
 #define MY_bfd_debug_info_accumulat NAME(aout,bfd_debug_info_accumulat)
 #endif
+#ifndef MY_reloc_howto_type_lookup
+#define MY_reloc_howto_type_lookup 0
+#endif
+#ifndef MY_make_debug_symbol
+#define MY_make_debug_symbol 0
+#endif
+#ifndef MY_backend_data
+#define MY_backend_data (PTR) 0
+#endif
 
 bfd_target MY(vec) =
 {
   TARGETNAME,		/* name */
   bfd_target_aout_flavour,
-  true,				/* target byte order */
-  true,				/* target headers byte order */
+#ifdef TARGET_IS_BIG_ENDIAN_P
+  true,				/* target byte order (big) */
+  true,				/* target headers byte order (big) */
+#else
+  false,			/* target byte order (little) */
+  false,			/* target headers byte order (little) */
+#endif
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   ' ',				/* ar_pad_char */
-  16,				/* ar_max_namelen */
+  15,				/* ar_max_namelen */
   1,				/* minimum alignment */
 #ifdef TARGET_IS_BIG_ENDIAN_P
   _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
@@ -328,5 +353,10 @@ bfd_target MY(vec) =
   MY_bfd_debug_info_start,
   MY_bfd_debug_info_end,
   MY_bfd_debug_info_accumulate,
-  bfd_generic_get_relocated_section_contents
+  bfd_generic_get_relocated_section_contents,
+  bfd_generic_relax_section,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* COFF stuff?! */
+  MY_reloc_howto_type_lookup,
+  MY_make_debug_symbol,
+  (PTR) MY_backend_data,
 };
