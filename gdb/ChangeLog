@@ -1,3 +1,25 @@
+2000-04-20  Christopher Faylor  <cgf@cygnus.com>
+
+	* win32-nat.c (thread_rec): Be more defensive about suspending already
+	suspended threads.
+	(safe_symbol_file_add_stub): New function.
+	(safe_symbole_file_add_cleanup): New function.
+	(safe_symbol_file_add): New function.
+	(handle_load_dll): Use wrapper to add DLL symbol information to avoid
+	bogus errors from non-stabs DLLs.
+	(handle_exception): Add work around for detection of first exception
+	breakpoint which does not seem to occur on W2K.  Detect more "signals"
+	that can be effectively passed to the debuggee.  Reorganize to eliminate
+	continue_status global.
+	(child_continue): Reorganize to eliminate continue_status global.
+	(child_wait): Ditto.
+	(child_resume): Ditto.
+	(get_child_debug_event): Ditto.  Recognize when an a breakpoint
+	exception should be ignored.  Change method for signalling when an
+	important event has occured to the caller.
+	(child_create_inferior): Use new method for noticing when
+	get_child_debug_event has found something interesting.
+
 Fri Apr  7 13:44:38 2000  glen mccready  <gkm@pobox.com>
 
         * rs6000-nat.c (xcoff_relocate_symtab): Grow buffer if ptrace()

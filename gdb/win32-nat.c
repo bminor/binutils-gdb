@@ -79,6 +79,9 @@ static void child_stop PARAMS ((void));
 static int win32_child_thread_alive PARAMS ((int));
 void child_kill_inferior PARAMS ((void));
 
+static int last_sig = 0;	/* Set if a signal was received from the
+				   debugged process */
+
 /* Thread information structure used to track information that is
    not available in gdb's thread structure. */
 typedef struct thread_info_struct
@@ -94,9 +97,6 @@ typedef struct thread_info_struct
 
 static thread_info thread_head = {NULL};
 
-/* The saved state for a continue after breaking back to gdb. */
-static DWORD continue_status;
-
 /* The process and thread handles for the above context. */
 
 static DEBUG_EVENT current_event;	/* The current debug event from
@@ -104,6 +104,8 @@ static DEBUG_EVENT current_event;	/* The current debug event from
 static HANDLE current_process_handle;	/* Currently executing process */
 static thread_info *current_thread;	/* Info on currently selected thread */
 static DWORD main_thread_id;	/* Thread ID of the main thread */
+static int ignore_first_first_chance = 0; /* True if we should ignore the
+					     first first chance exception that we get. */
 
 /* Counts of things. */
 static int exception_count = 0;
@@ -201,7 +203,7 @@ thread_rec (DWORD id, int get_context)
       {
 	if (!th->suspend_count && get_context)
 	  {
-	    if (get_context > 0)
+	    if (get_context > 0 && id != current_event.dwThreadId)
 	      th->suspend_count = SuspendThread (th->h) + 1;
 	    else if (get_context < 0)
 	      th->suspend_count = -1;
@@ -418,6 +420,55 @@ failed:
   return 0;
 }
 
+struct safe_symbol_file_add_args
+{
+  char *name;
+  int from_tty;
+  struct section_addr_info *addrs;
+  int mainline;
+  int flags;
+  struct objfile *ret;
+};
+
+static int
+safe_symbol_file_add_stub (void *argv)
+{
+#define p ((struct safe_symbol_file_add_args *)argv)
+  p->ret = symbol_file_add (p->name, p->from_tty, p->addrs, p->mainline, p->flags);
+  return !!p->ret;
+#undef p
+}
+
+static void
+safe_symbol_file_add_cleanup (void *gdb_stderrv)
+{
+  ui_file_delete (gdb_stderr);
+  gdb_stderr = (struct ui_file *)gdb_stderrv;
+}
+
+static struct objfile *
+safe_symbol_file_add (char *name, int from_tty,
+		      struct section_addr_info *addrs,
+		      int mainline, int flags)
+
+{
+  struct safe_symbol_file_add_args p;
+  struct cleanup *cleanup;
+
+  cleanup = make_cleanup (safe_symbol_file_add_cleanup, gdb_stderr);
+
+  gdb_stderr = ui_file_new ();
+  p.name = name;
+  p.from_tty = from_tty;
+  p.addrs = addrs;
+  p.mainline = mainline;
+  p.flags = flags;
+  catch_errors (safe_symbol_file_add_stub, &p, "", RETURN_MASK_ERROR);
+
+  do_cleanups (cleanup);
+  return p.ret;
+}
+
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */
 
@@ -505,14 +556,11 @@ handle_load_dll (PTR dummy)
 
   /* The symbols in a dll are offset by 0x1000, which is the
      the offset from 0 of the first byte in an image - because
-     of the file header and the section alignment.
+     of the file header and the section alignment. */
 
-     FIXME: Is this the real reason that we need the 0x1000 ? */
-
-  printf_unfiltered ("%x:%s", event->lpBaseOfDll, dll_name);
   section_addrs.text_addr = (int) event->lpBaseOfDll + 0x1000;
-  symbol_file_add (dll_name, 0, &section_addrs, 0, OBJF_SHARED);
-  printf_unfiltered ("\n");
+  safe_symbol_file_add (dll_name, 0, &section_addrs, 0, OBJF_SHARED);
+  printf_unfiltered ("%x:%s\n", event->lpBaseOfDll, dll_name);
 
   return 1;
 }
@@ -556,11 +604,16 @@ handle_exception (struct target_waitstatus *ourstatus)
   int i;
   int done = 0;
   thread_info *th;
+  int fc = ignore_first_first_chance;
 
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
 
+  ignore_first_first_chance = 0;
+
   /* Record the context of the current thread */
   th = thread_rec (current_event.dwThreadId, -1);
+
+  last_sig = 0;
 
   switch (current_event.u.Exception.ExceptionRecord.ExceptionCode)
     {
@@ -568,7 +621,7 @@ handle_exception (struct target_waitstatus *ourstatus)
       DEBUG_EXCEPT (("gdb: Target exception ACCESS_VIOLATION at 0x%08x\n",
 	       current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_SEGV;
-      continue_status = DBG_EXCEPTION_NOT_HANDLED;
+      last_sig = SIGSEGV;
       break;
     case STATUS_FLOAT_UNDERFLOW:
     case STATUS_FLOAT_DIVIDE_BY_ZERO:
@@ -577,15 +630,19 @@ handle_exception (struct target_waitstatus *ourstatus)
       DEBUG_EXCEPT (("gdb: Target exception STACK_OVERFLOW at 0x%08x\n",
 	       current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_FPE;
-      continue_status = DBG_EXCEPTION_NOT_HANDLED;
       break;
     case STATUS_STACK_OVERFLOW:
       DEBUG_EXCEPT (("gdb: Target exception STACK_OVERFLOW at 0x%08x\n",
 	       current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_SEGV;
-      continue_status = DBG_EXCEPTION_NOT_HANDLED;
       break;
     case EXCEPTION_BREAKPOINT:
+      if (fc && current_event.u.Exception.dwFirstChance &&
+	  ((DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress & 0xc0000000))
+	{
+	  last_sig = -1;
+	  return 0;
+	}
       DEBUG_EXCEPT (("gdb: Target exception BREAKPOINT at 0x%08x\n",
 	       current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_TRAP;
@@ -594,7 +651,7 @@ handle_exception (struct target_waitstatus *ourstatus)
       DEBUG_EXCEPT (("gdb: Target exception CONTROL_C at 0x%08x\n",
 	       current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_INT;
-      continue_status = DBG_EXCEPTION_NOT_HANDLED;
+      last_sig = SIGINT;	/* FIXME - should check pass state */
       break;
     case EXCEPTION_SINGLE_STEP:
       DEBUG_EXCEPT (("gdb: Target exception SINGLE_STEP at 0x%08x\n",
@@ -605,21 +662,13 @@ handle_exception (struct target_waitstatus *ourstatus)
       DEBUG_EXCEPT (("gdb: Target exception SINGLE_ILL at 0x%08x\n",
 	       current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_ILL;
+      last_sig = SIGILL;
       break;
     default:
-      /* This may be a structured exception handling exception.  In
-         that case, we want to let the program try to handle it, and
-         only break if we see the exception a second time.
-      if (current_event.u.Exception.dwFirstChance)
-
-	return 0;
-*/
-
       printf_unfiltered ("gdb: unknown target exception 0x%08x at 0x%08x\n",
 		    current_event.u.Exception.ExceptionRecord.ExceptionCode,
 		current_event.u.Exception.ExceptionRecord.ExceptionAddress);
       ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
-      continue_status = DBG_EXCEPTION_NOT_HANDLED;
       break;
     }
   exception_count++;
@@ -629,7 +678,7 @@ handle_exception (struct target_waitstatus *ourstatus)
 /* Resume all artificially suspended threads if we are continuing
    execution */
 static BOOL
-child_continue (int id)
+child_continue (DWORD continue_status, int id)
 {
   int i;
   thread_info *th;
@@ -653,16 +702,22 @@ child_continue (int id)
   return res;
 }
 
+/* Get the next event from the child.  Return 1 if the event requires
+   handling by WFI (or whatever).
+ */
 static int
 get_child_debug_event (int pid, struct target_waitstatus *ourstatus,
-		       DWORD *event_code, int *retval)
+		       DWORD target_event_code, int *retval)
 {
+  int breakout = 0;
   BOOL debug_event;
-  int breakout = 1;
+  DWORD continue_status, event_code;
+  thread_info *th = NULL;
+  static thread_info dummy_thread_info;
 
-  if (!(debug_event = WaitForDebugEvent (&current_event, 20)))
+  if (!(debug_event = WaitForDebugEvent (&current_event, 1000)))
     {
-      breakout = *retval = *event_code = 0;
+      *retval = 0;
       goto out;
     }
 
@@ -670,91 +725,95 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus,
   continue_status = DBG_CONTINUE;
   *retval = 0;
 
-  switch (*event_code = current_event.dwDebugEventCode)
+  event_code = current_event.dwDebugEventCode;
+  breakout = event_code == target_event_code;
+
+  switch (event_code)
     {
     case CREATE_THREAD_DEBUG_EVENT:
       DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%x code=%s)\n",
-		    (unsigned) current_event.dwProcessId,
-		    (unsigned) current_event.dwThreadId,
-		    "CREATE_THREAD_DEBUG_EVENT"));
+		     (unsigned) current_event.dwProcessId,
+		     (unsigned) current_event.dwThreadId,
+		     "CREATE_THREAD_DEBUG_EVENT"));
       /* Record the existence of this thread */
-      child_add_thread (current_event.dwThreadId,
-			current_event.u.CreateThread.hThread);
+      th = child_add_thread (current_event.dwThreadId,
+			     current_event.u.CreateThread.hThread);
       if (info_verbose)
 	printf_unfiltered ("[New %s]\n",
-		      target_pid_to_str (current_event.dwThreadId));
+			   target_pid_to_str (current_event.dwThreadId));
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
       DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-		    (unsigned) current_event.dwProcessId,
-		    (unsigned) current_event.dwThreadId,
-		    "EXIT_THREAD_DEBUG_EVENT"));
+		     (unsigned) current_event.dwProcessId,
+		     (unsigned) current_event.dwThreadId,
+		     "EXIT_THREAD_DEBUG_EVENT"));
       child_delete_thread (current_event.dwThreadId);
+      th = &dummy_thread_info;
       break;
 
     case CREATE_PROCESS_DEBUG_EVENT:
       DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-		    (unsigned) current_event.dwProcessId,
-		    (unsigned) current_event.dwThreadId,
-		    "CREATE_PROCESS_DEBUG_EVENT"));
+		     (unsigned) current_event.dwProcessId,
+		     (unsigned) current_event.dwThreadId,
+		     "CREATE_PROCESS_DEBUG_EVENT"));
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
 
       main_thread_id = inferior_pid = current_event.dwThreadId;
       /* Add the main thread */
-      current_thread = child_add_thread (inferior_pid,
-			 current_event.u.CreateProcessInfo.hThread);
+      th = child_add_thread (inferior_pid,
+			     current_event.u.CreateProcessInfo.hThread);
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
       DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-		    (unsigned) current_event.dwProcessId,
-		    (unsigned) current_event.dwThreadId,
-		    "EXIT_PROCESS_DEBUG_EVENT"));
+		     (unsigned) current_event.dwProcessId,
+		     (unsigned) current_event.dwThreadId,
+		     "EXIT_PROCESS_DEBUG_EVENT"));
       ourstatus->kind = TARGET_WAITKIND_EXITED;
       ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
       CloseHandle (current_process_handle);
       *retval = current_event.dwProcessId;
-      goto out;
+      breakout = 1;
+      break;
 
     case LOAD_DLL_DEBUG_EVENT:
       DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-		    (unsigned) current_event.dwProcessId,
-		    (unsigned) current_event.dwThreadId,
-		    "LOAD_DLL_DEBUG_EVENT"));
-      catch_errors (handle_load_dll, NULL, "", RETURN_MASK_ALL);
+		     (unsigned) current_event.dwProcessId,
+		     (unsigned) current_event.dwThreadId,
+		     "LOAD_DLL_DEBUG_EVENT"));
+      catch_errors (handle_load_dll, NULL, (char *) "", RETURN_MASK_ALL);
       registers_changed ();	/* mark all regs invalid */
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
       DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-		    (unsigned) current_event.dwProcessId,
-		    (unsigned) current_event.dwThreadId,
-		    "UNLOAD_DLL_DEBUG_EVENT"));
-      break;		/* FIXME: don't know what to do here */
+		     (unsigned) current_event.dwProcessId,
+		     (unsigned) current_event.dwThreadId,
+		     "UNLOAD_DLL_DEBUG_EVENT"));
+      break;			/* FIXME: don't know what to do here */
 
     case EXCEPTION_DEBUG_EVENT:
       DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-		    (unsigned) current_event.dwProcessId,
-		    (unsigned) current_event.dwThreadId,
-		    "EXCEPTION_DEBUG_EVENT"));
-      if (handle_exception (ourstatus))	/* sets continue_status */
+		     (unsigned) current_event.dwProcessId,
+		     (unsigned) current_event.dwThreadId,
+		     "EXCEPTION_DEBUG_EVENT"));
+      if (handle_exception (ourstatus))
+	*retval = current_event.dwThreadId;
+      else
 	{
-	  *retval = current_event.dwThreadId;
-	  goto out;
+	  if (last_sig >= 0)
+	    continue_status = DBG_EXCEPTION_NOT_HANDLED;
+	  breakout = 0;
 	}
       break;
 
-    case OUTPUT_DEBUG_STRING_EVENT:
+    case OUTPUT_DEBUG_STRING_EVENT:	/* message from the kernel */
       DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-		    (unsigned) current_event.dwProcessId,
-		    (unsigned) current_event.dwThreadId,
-		    "OUTPUT_DEBUG_STRING_EVENT"));
-      if (handle_output_debug_string (ourstatus))
-	{
-	  *retval = main_thread_id;
-	  goto out;
-	}
+		     (unsigned) current_event.dwProcessId,
+		     (unsigned) current_event.dwThreadId,
+		     "OUTPUT_DEBUG_STRING_EVENT"));
+      handle_output_debug_string ( ourstatus);
       break;
     default:
       printf_unfiltered ("gdb: kernel event for pid=%d tid=%d\n",
@@ -765,14 +824,14 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus,
       break;
     }
 
-  breakout = 0;
-  CHECK (child_continue (-1));
-  continue_status = 0;
+  if (breakout)
+    current_thread = th ?: thread_rec (current_event.dwThreadId, TRUE);
+  else
+    CHECK (child_continue (continue_status, -1));
 
 out:
   return breakout;
 }
-
 
 /* Wait for interesting events to occur in the target process. */
 static int
@@ -788,22 +847,18 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
      isn't necessarily what you think it is. */
 
   while (1)
-    {
-      if (continue_status != 0)
-	CHECK (child_continue (-1));
-      if (get_child_debug_event (pid, ourstatus, &event_code, &retval))
-	return retval;
-      else
-	{
-	  int detach = 0;
+    if (get_child_debug_event (pid, ourstatus, EXCEPTION_DEBUG_EVENT, &retval))
+      return retval;
+    else
+      {
+	int detach = 0;
 
-	  if (ui_loop_hook != NULL)
-	    detach = ui_loop_hook (0);
+	if (ui_loop_hook != NULL)
+	  detach = ui_loop_hook (0);
 
-	  if (detach)
-	    child_kill_inferior ();
-	}
-    }
+	if (detach)
+	  child_kill_inferior ();
+      }
 }
 
 /* Attach to process PID, then initialize for debugging it.  */
@@ -1031,22 +1086,21 @@ child_create_inferior (exec_file, allargs, env)
   target_terminal_init ();
   target_terminal_inferior ();
 
+  ignore_first_first_chance = 1;
+
   /* Run until process and threads are loaded */
-  do
-    get_child_debug_event (inferior_pid, &dummy, &event_code, &ret);
-  while (event_code != EXCEPTION_DEBUG_EVENT);
+  while (!get_child_debug_event (inferior_pid, &dummy,
+				 CREATE_PROCESS_DEBUG_EVENT, &ret))
+    continue;
 
-  SymSetOptions (SYMOPT_DEFERRED_LOADS);
-  SymInitialize (current_process_handle, NULL, TRUE);
-
+  /* child_continue (DBG_CONTINUE, -1);*/
   proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
 }
 
 static void
 child_mourn_inferior ()
 {
-  continue_status = DBG_CONTINUE;
-  (void) child_continue (-1);
+  (void) child_continue (DBG_CONTINUE, -1);
   unpush_target (&child_ops);
   generic_mourn_inferior ();
 }
@@ -1092,8 +1146,7 @@ child_kill_inferior (void)
 
   for (;;)
     {
-      continue_status = DBG_CONTINUE;
-      if (!child_continue (-1))
+      if (!child_continue (DBG_CONTINUE, -1))
 	break;
       if (!WaitForDebugEvent (&current_event, INFINITE))
 	break;
@@ -1111,8 +1164,11 @@ child_kill_inferior (void)
 void
 child_resume (int pid, int step, enum target_signal sig)
 {
-  int i;
   thread_info *th;
+  DWORD continue_status = last_sig > 0 && last_sig < NSIG ?
+			  DBG_EXCEPTION_NOT_HANDLED : DBG_CONTINUE;
+
+  last_sig = 0;
 
   DEBUG_EXEC (("gdb: child_resume (pid=%d, step=%d, sig=%d);\n",
 	       pid, step, sig));
@@ -1137,7 +1193,7 @@ child_resume (int pid, int step, enum target_signal sig)
   /* Allow continuing with the same signal that interrupted us.
      Otherwise complain. */
 
-  child_continue (pid);
+  child_continue (continue_status, pid);
 }
 
 static void
@@ -1209,7 +1265,6 @@ init_child_ops (void)
 void
 _initialize_inftarg ()
 {
-  struct cmd_list_element *c;
   init_child_ops ();
 
   add_show_from_set
