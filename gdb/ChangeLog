@@ -1,3 +1,7 @@
+Wed Jan 27 16:50:25 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* hp-psymtab-read.c: reformatted using indent.
+
 Wed Jan 27 13:20:25 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* hp-psymtab-read.c: reformatted comments, updated copyright.
