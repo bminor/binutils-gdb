@@ -370,6 +370,51 @@ disassemble (memaddr, info, insn, extension, size)
 	      else if ((operand->flags & MN10300_OPERAND_MEMADDR) != 0)
 		(*info->print_address_func) (value, info);
 
+	      else if ((operand->flags & MN10300_OPERAND_REG_LIST) != 0)
+		{
+		  int comma = 0;
+
+		  (*info->fprintf_func) (info->stream, "[");
+		  if (value & 0x80)
+		    {
+		      (*info->fprintf_func) (info->stream, "d2");
+		      comma = 1;
+		    }
+
+		  if (value & 0x40)
+		    {
+		      if (comma)
+			(*info->fprintf_func) (info->stream, ",");
+		      (*info->fprintf_func) (info->stream, "d3");
+		      comma = 1;
+		    }
+
+		  if (value & 0x20)
+		    {
+		      if (comma)
+			(*info->fprintf_func) (info->stream, ",");
+		      (*info->fprintf_func) (info->stream, "a2");
+		      comma = 1;
+		    }
+
+		  if (value & 0x10)
+		    {
+		      if (comma)
+			(*info->fprintf_func) (info->stream, ",");
+		      (*info->fprintf_func) (info->stream, "a3");
+		      comma = 1;
+		    }
+
+		  if (value & 0x08)
+		    {
+		      if (comma)
+			(*info->fprintf_func) (info->stream, ",");
+		      (*info->fprintf_func) (info->stream, "other");
+		      comma = 1;
+		    }
+		  (*info->fprintf_func) (info->stream, "]");
+		}
+
 	      else 
 		(*info->fprintf_func) (info->stream, "%d", value);
 	    }

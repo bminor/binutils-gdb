@@ -1,5 +1,7 @@
 Wed Nov 20 10:37:13 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300-dis.c (disassemble): Handle register lists.
+
 	* mn10300-opc.c: Fix handling of register list operand for
 	"call", "ret", and "rets" instructions.
 
