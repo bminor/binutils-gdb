@@ -1,3 +1,8 @@
+2003-02-03  Michael Chastain  <mec@shout.net>
+
+	* config/djgpp/fnchange.lst: Add gdb/testsuite/gdb.c++/pr-1023.cc,
+	gdb/testsuite/gdb.c++/pr-1023.exp.
+
 2003-02-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* values.c: Delete code conditional on IS_TRAPPED_INTERNALVAR.
