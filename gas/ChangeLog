@@ -1,3 +1,8 @@
+Sat Jan 21 19:02:23 1995  Ian Lance Taylor  <ian@tweedledumb.cygnus.com>
+
+	* hash.c (hash_ask): If we find the slot after wrapping around,
+	break out of the loop.  Fixes bug in Jan 18 change.
+
 Fri Jan 20 17:07:31 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* hash.c (hash_code): Undo last change.
