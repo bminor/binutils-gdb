@@ -1,10 +1,11 @@
 # Host: Motorola 88k running SVR3
-XDEPFILES= 
+
 XM_FILE= xm-delta88.h
+XDEPFILES= 
+
 NAT_FILE= nm-m88k.h
 NATDEPFILES= exec.o infptrace.o inftarg.o fork-child.o m88k-nat.o \
 	corelow.o coredep.o
+
 REGEX=regex.o
 REGEX1=regex.o
-# Have to use /bin/nm because a bfd nm won't do the right thing
-MUNCH_DEFINE=MUNCH_NM=/bin/nm
