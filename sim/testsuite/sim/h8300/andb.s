@@ -238,8 +238,7 @@ and_b_imm8_rdpredec:
 	fail
 .L5:
 
-
-.endif
+.endif				; h8sx
 
 and_b_reg8_reg8:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -452,6 +451,7 @@ and_b_reg8_rdpredec:
 	beq	.L10
 	fail
 .L10:
+.endif				; h8sx
 
 andc_imm8_ccr:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -484,8 +484,44 @@ andc_imm8_ccr:
 	test_gr_a5a5 5
 	test_gr_a5a5 6
 	test_gr_a5a5 7
+
+.if (sim_cpu == h8300s || sim_cpu == h8sx)	; Earlier versions, no exr
+andc_imm8_exr:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+
+	ldc	#0xff, exr
+	stc	exr, r0l
+	test_h_gr8 0x87, r0l
+
+	;;  andc #xx:8,exr
+	set_ccr_zero
+	andc	#0x7f, exr
+	test_cc_clear
+	stc	exr, r0l
+	test_h_gr8 0x7, r0l
+
+	andc	#0x3, exr
+	stc	exr, r0l
+	test_h_gr8 0x3, r0l
+
+	andc	#0x1, exr
+	stc	exr, r0l
+	test_h_gr8 0x1, r0l
+
+	andc	#0x0, exr
+	stc	exr, r0l
+	test_h_gr8 0x0, r0l
+
+	test_h_gr32  0xa5a5a500 er0
+	test_gr_a5a5 1
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+.endif				; not h8300 or h8300h
 	
-.endif
 	pass
 
 	exit 0

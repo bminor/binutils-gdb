@@ -43,18 +43,28 @@ brabc_ind_disp8:
 	test_h_gr32 0xa5a5a5a5 er6
 	test_h_gr32 0xa5a5a5a5 er7
 
+brabc_abs8_disp16:
+	set_grs_a5a5
+	mov.b	#0xa5, @0x20:32
+	set_ccr_zero
+	;; bra/bc xx:3, @aa:8, disp16
+	bra/bc	#1, @0x20:8, .Lpass3:16
+	fail
+.Lpass3:
+	bra/bc	#2, @0x20:8, Lfail:16
+
+	test_cc_clear
+	test_grs_a5a5
+
 brabc_abs16_disp16:
 	set_grs_a5a5
 	set_ccr_zero
 	;; bra/bc xx:3, @aa:16, disp16
-	bra/bc	#1, @byte_src:16, .Lpass3:16
+	bra/bc	#1, @byte_src:16, .Lpass5:16
 	fail
-.Lpass3:
-	bra/bc	#2, @byte_src:16, .Lfail2:16
-	bra	.Lpass4
-.Lfail2:
-	fail
-.Lpass4:	
+.Lpass5:
+	bra/bc	#2, @byte_src:16, Lfail:16
+
 	test_cc_clear
 	test_grs_a5a5
 
@@ -63,18 +73,18 @@ brabs_ind_disp8:
 	mov	#byte_src, er1
 	set_ccr_zero
 	;; bra/bs xx:3, @erd, disp8
-	bra/bs	#2, @er1, .Lpass5:8
+	bra/bs	#2, @er1, .Lpass7:8
 ;;; 	.word	0x7c10
 ;;; 	.word	0x4a10
 	fail
-.Lpass5:
+.Lpass7:
 	bra/bs	#1, @er1, .Lfail3:8
 ;;; 	.word	0x7c10
 ;;; 	.word	0x4902
-	bra	.Lpass6
+	bra	.Lpass8
 .Lfail3:
 	fail
-.Lpass6:
+.Lpass8:
 	test_cc_clear
 	test_h_gr32 0xa5a5a5a5 er0
 	test_h_gr32 byte_src   er1
@@ -89,14 +99,11 @@ brabs_abs32_disp16:
 	set_grs_a5a5
 	set_ccr_zero
 	;; bra/bs xx:3, @aa:32, disp16
-	bra/bs	#2, @byte_src:32, .Lpass7:16
+	bra/bs	#2, @byte_src:32, .Lpass9:16
 	fail
-.Lpass7:
-	bra/bs	#1, @byte_src:32, .Lfail4:16
-	bra	.Lpass8
-.Lfail4:
-	fail
-.Lpass8:
+.Lpass9:
+	bra/bs	#1, @byte_src:32, Lfail:16
+
 	test_cc_clear
 	test_grs_a5a5
 
@@ -105,3 +112,5 @@ brabs_abs32_disp16:
 	pass
 
 	exit 0
+
+Lfail:	fail

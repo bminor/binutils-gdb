@@ -24,6 +24,9 @@
 	# or.b reg8, @+erd	;         0 1 7     9 9 rd 4 rs
 	# or.b reg8, @-erd	;         0 1 7     9 b rd 4 rs
 	#
+	# orc  #xx:8, ccr
+	# orc  #xx:8, exr
+	
 
 	# Coming soon:
 	# ...
@@ -455,6 +458,8 @@ or_b_reg8_rdpredec:
 	fail
 .L10:
 
+.endif
+
 orc_imm8_ccr:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
@@ -486,8 +491,42 @@ orc_imm8_ccr:
 	test_gr_a5a5 6
 	test_gr_a5a5 7
 	
-.endif
+.if (sim_cpu == h8300s || sim_cpu == h8sx)	; Earlier versions, no exr
+orc_imm8_exr:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
 
+	ldc	#0, exr
+	stc	exr, r0l
+	test_h_gr8 0, r0l
+	
+	;;  orc #xx:8,exr
+
+	orc	#0x1, exr
+	stc	exr,r0l
+	test_h_gr8 1, r0l
+
+	orc	#0x2, exr
+	stc	exr,r0l
+	test_h_gr8 3, r0l
+
+	orc	#0x4, exr
+	stc	exr,r0l
+	test_h_gr8 7, r0l
+
+	orc	#0x80, exr
+	stc	exr,r0l
+	test_h_gr8 0x87, r0l
+
+	test_h_gr32  0xa5a5a587 er0
+	test_gr_a5a5 1		; Make sure other general regs not disturbed
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+.endif				; not h8300 or h8300h
+	
 	pass
 
 	exit 0
