@@ -13114,6 +13114,20 @@ without asking when used in a command file.  Many @value{GDBN} commands that
 normally print messages to say what they are doing omit the messages
 when called from command files.
 
+@value{GDBN} also accepts command input from standard input.  In this
+mode, normal output goes to standard output and error output goes to
+standard error.  Errors in a command file supplied on standard input do
+not terminate execution of the command file --- execution continues with
+the next command.
+
+@example
+gdb < cmds > log 2>&1
+@end example
+
+(The syntax above will vary depending on the shell used.) This example
+will execute commands from the file @file{cmds}. All output and errors
+would be directed to @file{log}.
+
 @node Output
 @section Commands for controlled output
 

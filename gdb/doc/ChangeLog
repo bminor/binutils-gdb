@@ -1,3 +1,8 @@
+2001-10-30  Don Howard  <dhoward@redhat.com>
+
+	* gdb.texinfo: (Command Files) Added documentation for the behavior of gdb with
+	input redirected from a file.
+
 2001-10-28  Fred Fish  <fnf@redhat.com>
 
 	* gdb.texinfo (auto-solib-add): Change docs to match
