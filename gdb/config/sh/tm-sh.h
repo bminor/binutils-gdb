@@ -72,11 +72,8 @@ extern CORE_ADDR sh_skip_prologue ();
 
 #define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
 
-/* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places; REGISTER_RAW_SIZE is the
-   real way to know how big a register is.  */
-
-#define REGISTER_SIZE 4
+/* Say how long registers are.  */
+#define REGISTER_TYPE  long
 
 /* Say how much memory is needed to store a copy of the register set */
 #define REGISTER_BYTES    (NUM_REGS*4) 
@@ -222,3 +219,5 @@ typedef unsigned short INSN_WORD;
 
 
 #define NOP   {0x20, 0x0b}
+
+#define REGISTER_SIZE 4

@@ -19,6 +19,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define IEEE_FLOAT 1
 
+#undef TARGET_INT_BIT
+#undef TARGET_LONG_BIT
+#undef TARGET_SHORT_BIT
+#undef TARGET_PTR_BIT
+
 #define TARGET_SHORT_BIT 16
 #define TARGET_INT_BIT 16
 #define TARGET_LONG_BIT 32
@@ -69,11 +74,9 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 #define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
 
-/* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places; REGISTER_RAW_SIZE is the
-   real way to know how big a register is.  */
+/* Say how long registers are.  */
 
-#define REGISTER_SIZE 4
+#define REGISTER_TYPE unsigned int
 
 #define NUM_REGS 	23   /* 16 registers + 1 ccr + 1 pc + 3 debug
 				regs + fake fp + fake sp*/
@@ -283,3 +286,6 @@ int sim_z8001_mode;
 
 #define INIT_EXTRA_SYMTAB_INFO \
   z8k_set_pointer_size(objfile->obfd->arch_info->bits_per_address);
+
+#define REGISTER_SIZE 4
+
