@@ -13,7 +13,7 @@
  
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "armdefs.h"
 #include "armos.h"
@@ -51,6 +51,8 @@ NoCoPro4W (ARMul_State * state ATTRIBUTE_UNUSED,
 /* The XScale Co-processors.  */
 
 /* Coprocessor 15:  System Control.  */
+static void     write_cp14_reg (unsigned, ARMword);
+static ARMword  read_cp14_reg  (unsigned);
 
 /* There are two sets of registers for copro 15.
    One set is available when opcode_2 is 0 and
@@ -83,7 +85,7 @@ XScale_cp15_init (ARMul_State * state ATTRIBUTE_UNUSED)
 
   /* Initialise the ARM Control Register.  */
   XScale_cp15_opcode_2_is_0_Regs[1] = 0x00000078;
-  
+
 }
 
 /* Check an access to a register.  */
@@ -102,7 +104,7 @@ check_cp15_access (ARMul_State * state,
   /* Opcode_1should be zero.  */
   if (opcode_1 != 0)
     return ARMul_CANT;
-  
+
   /* Different register have different access requirements.  */
   switch (reg)
     {
@@ -149,7 +151,7 @@ check_cp15_access (ARMul_State * state,
 	case 0: if ((CRm < 5) || (CRm > 7)) return ARMul_CANT; break;
 	}
       break;
-      
+
     case 8:
       /* Permissable combinations:
 	   Opcode_2  CRm
@@ -205,14 +207,18 @@ check_cp15_access (ARMul_State * state,
       /* Should never happen.  */
       return ARMul_CANT;
     }
-  
+
   return ARMul_DONE;
 }
 
 /* Store a value into one of coprocessor 15's registers.  */
 
-void
-write_cp15_reg (ARMul_State * state, unsigned reg, unsigned opcode_2, unsigned CRm, ARMword value)
+static void
+write_cp15_reg (ARMul_State * state,
+		unsigned reg,
+		unsigned opcode_2,
+		unsigned CRm,
+		ARMword  value)
 {
   if (opcode_2)
     {
@@ -226,11 +232,11 @@ write_cp15_reg (ARMul_State * state, unsigned reg, unsigned opcode_2, unsigned C
 	  /* Only BITS (5, 4) and BITS (1, 0) can be written.  */
 	  value &= 0x33;
 	  break;
-	  
+
 	default:
 	  return;
 	}
-      
+
       XScale_cp15_opcode_2_is_not_0_Regs [reg] = value;
     }
   else
@@ -261,11 +267,11 @@ write_cp15_reg (ARMul_State * state, unsigned reg, unsigned opcode_2, unsigned C
 	  /* Only BITS (31, 14) can be written.  */
 	  value &= 0xffffc000;
 	  break;
-	  
+
 	case 3: /* Domain Access Control.  */
 	  /* All bits writable.  */
 	  break;
-	  
+
 	case 5: /* Fault Status Register.  */
 	  /* BITS (10, 9) and BITS (7, 0) can be written.  */
 	  value &= 0x000006ff;
@@ -319,18 +325,18 @@ write_cp15_reg (ARMul_State * state, unsigned reg, unsigned opcode_2, unsigned C
 	  /* Access is only valid if CRm == 1.  */
 	  if (CRm != 1)
 	    return;
-	  
+
 	  /* Only BITS (13, 0) may be written.  */
 	  value &= 0x00003fff;
 	  break;
-	  
+
 	default:
 	  return;
 	}
 
       XScale_cp15_opcode_2_is_0_Regs [reg] = value;
     }
-  
+
   return;
 }
 
@@ -356,7 +362,7 @@ read_cp15_reg (unsigned reg, unsigned opcode_2, unsigned CRm)
 	      break;
 	    }
 	}
-      
+
       return XScale_cp15_opcode_2_is_0_Regs [reg];
     }
   else
@@ -372,7 +378,7 @@ XScale_cp15_LDC (ARMul_State * state, unsigned type, ARMword instr, ARMword data
   unsigned result;
   
   result = check_cp15_access (state, reg, 0, 0, 0);
-  
+
   if (result == ARMul_DONE && type == ARMul_DATA)
     write_cp15_reg (state, reg, 0, 0, data);
 
@@ -384,80 +390,79 @@ XScale_cp15_STC (ARMul_State * state, unsigned type, ARMword instr, ARMword * da
 {
   unsigned reg = BITS (12, 15);
   unsigned result;
-  
+
   result = check_cp15_access (state, reg, 0, 0, 0);
-  
+
   if (result == ARMul_DONE && type == ARMul_DATA)
     * data = read_cp15_reg (reg, 0, 0);
-  
+
   return result;
 }
 
 static unsigned
 XScale_cp15_MRC (ARMul_State * state,
-	      unsigned      type ATTRIBUTE_UNUSED,
-	      ARMword       instr,
-	      ARMword *     value)
+		 unsigned      type ATTRIBUTE_UNUSED,
+		 ARMword       instr,
+		 ARMword *     value)
 {
   unsigned opcode_2 = BITS (5, 7);
   unsigned CRm = BITS (0, 3);
   unsigned reg = BITS (16, 19);
   unsigned result;
-  
+
   result = check_cp15_access (state, reg, CRm, BITS (21, 23), opcode_2);
-  
+
   if (result == ARMul_DONE)
     * value = read_cp15_reg (reg, opcode_2, CRm);
-  
+
   return result;
 }
 
 static unsigned
 XScale_cp15_MCR (ARMul_State * state,
-	      unsigned      type ATTRIBUTE_UNUSED,
-	      ARMword       instr,
-	      ARMword       value)
+		 unsigned      type ATTRIBUTE_UNUSED,
+		 ARMword       instr,
+		 ARMword       value)
 {
   unsigned opcode_2 = BITS (5, 7);
   unsigned CRm = BITS (0, 3);
   unsigned reg = BITS (16, 19);
   unsigned result;
-  
+
   result = check_cp15_access (state, reg, CRm, BITS (21, 23), opcode_2);
-  
+
   if (result == ARMul_DONE)
     write_cp15_reg (state, reg, opcode_2, CRm, value);
-  
+
   return result;
 }
 
 static unsigned
 XScale_cp15_read_reg (ARMul_State * state ATTRIBUTE_UNUSED,
-		   unsigned      reg,
-		   ARMword *     value)
+		      unsigned      reg,
+		      ARMword *     value)
 {
   /* FIXME: Not sure what to do about the alternative register set
      here.  For now default to just accessing CRm == 0 registers.  */
   * value = read_cp15_reg (reg, 0, 0);
-  
+
   return TRUE;
 }
 
 static unsigned
 XScale_cp15_write_reg (ARMul_State * state ATTRIBUTE_UNUSED,
-		    unsigned      reg,
-		    ARMword       value)
+		       unsigned      reg,
+		       ARMword       value)
 {
   /* FIXME: Not sure what to do about the alternative register set
      here.  For now default to just accessing CRm == 0 registers.  */
   write_cp15_reg (state, reg, 0, 0, value);
-  
+
   return TRUE;
 }
 
-/***************************************************************************\
-*        Check for special XScale memory access features                    *
-\***************************************************************************/
+/* Check for special XScale memory access features.  */
+
 void
 XScale_check_memacc (ARMul_State * state, ARMword * address, int store)
 {
@@ -515,11 +520,10 @@ XScale_check_memacc (ARMul_State * state, ARMword * address, int store)
     }
 }
 
-/***************************************************************************\
-*        Check set 
-\***************************************************************************/
+/* Check set.  */
+
 void
-XScale_set_fsr_far(ARMul_State * state, ARMword fsr, ARMword far)
+XScale_set_fsr_far (ARMul_State * state, ARMword fsr, ARMword far)
 {
   if (!state->is_XScale || (read_cp14_reg (10) & (1UL << 31)) == 0)
     return;
@@ -529,6 +533,7 @@ XScale_set_fsr_far(ARMul_State * state, ARMword fsr, ARMword far)
 }
 
 /* Set the XScale debug `method of entry' if it is enabled.  */
+
 int
 XScale_debug_moe (ARMul_State * state, int moe)
 {
@@ -589,12 +594,12 @@ check_cp13_access (ARMul_State * state,
   /* The opcodes should be zero.  */
   if ((opcode_1 != 0) || (opcode_2 != 0))
     return ARMul_CANT;
-  
-  /* Do not allow access to these register if bit 13 of coprocessor
-     15's register 15 is zero.  */
-  if ((XScale_cp15_opcode_2_is_0_Regs[15] & (1 << 13)) == 0)
+
+  /* Do not allow access to these register if bit
+     13 of coprocessor 15's register 15 is zero.  */
+  if (! CP_ACCESS_ALLOWED (state, 13))
     return ARMul_CANT;
-  
+
   /* Registers 0, 4 and 8 are defined when CRm == 0.
      Registers 0, 4, 5, 6, 7, 8 are defined when CRm == 1.
      For all other CRm values undefined behaviour results.  */
@@ -626,21 +631,21 @@ write_cp13_reg (unsigned reg, unsigned CRm, ARMword value)
 	  /* Only BITS (3:0) can be written.  */
 	  value &= 0xf;
 	  break;
-	  
+
 	case 4: /* INTSRC */
 	  /* No bits may be written.  */
 	  return;
-	  
+
 	case 8: /* INTSTR */
 	  /* Only BITS (1:0) can be written.  */
 	  value &= 0x3;
 	  break;
-	  
+
 	default:
 	  /* Should not happen.  Ignore any writes to unimplemented registers.  */
 	  return;
 	}
-      
+
       XScale_cp13_CR0_Regs [reg] = value;
       break;
 
@@ -653,7 +658,7 @@ write_cp13_reg (unsigned reg, unsigned CRm, ARMword value)
 	  value &= 0x7000000f;
 	  value |= XScale_cp13_CR1_Regs[0] & (1UL << 31);
 	  break;
-	  
+
 	case 4: /* ELOG0 */
 	case 5: /* ELOG1 */
 	case 6: /* ECAR0 */
@@ -665,12 +670,12 @@ write_cp13_reg (unsigned reg, unsigned CRm, ARMword value)
 	  /* Only BITS (7:0) can be written.  */
 	  value &= 0xff;
 	  break;
-	  
+
 	default:
 	  /* Should not happen.  Ignore any writes to unimplemented registers.  */
 	  return;
 	}
-      
+
       XScale_cp13_CR1_Regs [reg] = value;
       break;
 
@@ -678,7 +683,7 @@ write_cp13_reg (unsigned reg, unsigned CRm, ARMword value)
       /* Should not happen.  */
       break;
     }
-  
+
   return;
 }
 
@@ -700,9 +705,9 @@ XScale_cp13_LDC (ARMul_State * state, unsigned type, ARMword instr, ARMword data
 {
   unsigned reg = BITS (12, 15);
   unsigned result;
-  
+
   result = check_cp13_access (state, reg, 0, 0, 0);
-  
+
   if (result == ARMul_DONE && type == ARMul_DATA)
     write_cp13_reg (reg, 0, data);
 
@@ -714,78 +719,72 @@ XScale_cp13_STC (ARMul_State * state, unsigned type, ARMword instr, ARMword * da
 {
   unsigned reg = BITS (12, 15);
   unsigned result;
-  
+
   result = check_cp13_access (state, reg, 0, 0, 0);
-  
+
   if (result == ARMul_DONE && type == ARMul_DATA)
     * data = read_cp13_reg (reg, 0);
-  
+
   return result;
 }
 
 static unsigned
 XScale_cp13_MRC (ARMul_State * state,
-	      unsigned      type ATTRIBUTE_UNUSED,
-	      ARMword       instr,
-	      ARMword *     value)
+		 unsigned      type ATTRIBUTE_UNUSED,
+		 ARMword       instr,
+		 ARMword *     value)
 {
   unsigned CRm = BITS (0, 3);
   unsigned reg = BITS (16, 19);
   unsigned result;
-  
+
   result = check_cp13_access (state, reg, CRm, BITS (21, 23), BITS (5, 7));
-  
+
   if (result == ARMul_DONE)
     * value = read_cp13_reg (reg, CRm);
-  
+
   return result;
 }
 
 static unsigned
 XScale_cp13_MCR (ARMul_State * state,
-	      unsigned      type ATTRIBUTE_UNUSED,
-	      ARMword       instr,
-	      ARMword       value)
+		 unsigned      type ATTRIBUTE_UNUSED,
+		 ARMword       instr,
+		 ARMword       value)
 {
   unsigned CRm = BITS (0, 3);
   unsigned reg = BITS (16, 19);
   unsigned result;
-  
+
   result = check_cp13_access (state, reg, CRm, BITS (21, 23), BITS (5, 7));
-  
+
   if (result == ARMul_DONE)
     write_cp13_reg (reg, CRm, value);
-  
+
   return result;
 }
 
 static unsigned
-XScale_cp13_read_reg
-(
- ARMul_State * state ATTRIBUTE_UNUSED,
- unsigned      reg,
- ARMword *     value
-)
+XScale_cp13_read_reg (ARMul_State * state ATTRIBUTE_UNUSED,
+		      unsigned      reg,
+		      ARMword *     value)
 {
   /* FIXME: Not sure what to do about the alternative register set
      here.  For now default to just accessing CRm == 0 registers.  */
   * value = read_cp13_reg (reg, 0);
-  
+
   return TRUE;
 }
 
 static unsigned
-XScale_cp13_write_reg
-(
- ARMul_State * state ATTRIBUTE_UNUSED,
- unsigned      reg,
- ARMword       value
-)
+XScale_cp13_write_reg (ARMul_State * state ATTRIBUTE_UNUSED,
+		       unsigned      reg,
+		       ARMword       value)
 {
   /* FIXME: Not sure what to do about the alternative register set
      here.  For now default to just accessing CRm == 0 registers.  */
   write_cp13_reg (reg, 0, value);
-  
+
   return TRUE;
 }
 
@@ -823,7 +822,7 @@ check_cp14_access (ARMul_State * state,
   /* OPcodes should be zero.  */
   if (opcode1 != 0 || opcode2 != 0)
     return ARMul_CANT;
-  
+
   /* Accessing registers 4 or 5 has unpredicatable results.  */
   if (reg >= 4 && reg <= 5)
     return ARMul_CANT;
@@ -833,7 +832,7 @@ check_cp14_access (ARMul_State * state,
 
 /* Store a value into one of coprocessor 14's registers.  */
 
-void
+static void
 write_cp14_reg (unsigned reg, ARMword value)
 {
   switch (reg)
@@ -853,7 +852,7 @@ write_cp14_reg (unsigned reg, ARMword value)
 	 can bypass the normal checks though, so it could happen.  */
       value = 0;
       break;
-      
+
     case 6: /* CCLKCFG */
       /* Only BITS (3:0) can be written.  */
       value &= 0xf;
@@ -864,7 +863,7 @@ write_cp14_reg (unsigned reg, ARMword value)
 	 have the side effect of putting the processor to sleep.  Thus in
 	 order for the register to be read again, it would have to go into
 	 ACTIVE mode, which means that any read will see these bits as zero.
-	 
+
 	 Rather than trying to implement complex reset-to-zero-upon-read logic
 	 we just override the write value with zero.  */
       value = 0;
@@ -880,12 +879,12 @@ write_cp14_reg (unsigned reg, ARMword value)
       /* No writes are permitted.  */
       value = 0;
       break;
-      
+
     case 14: /* TXRXCTRL */
       /* Only BITS (31:30) can be written.  */
       value &= 0xc0000000;
       break;
-      
+
     default:
       /* All bits can be written.  */
       break;
@@ -908,9 +907,9 @@ XScale_cp14_LDC (ARMul_State * state, unsigned type, ARMword instr, ARMword data
 {
   unsigned reg = BITS (12, 15);
   unsigned result;
-  
+
   result = check_cp14_access (state, reg, 0, 0, 0);
-  
+
   if (result == ARMul_DONE && type == ARMul_DATA)
     write_cp14_reg (reg, data);
 
@@ -922,12 +921,12 @@ XScale_cp14_STC (ARMul_State * state, unsigned type, ARMword instr, ARMword * da
 {
   unsigned reg = BITS (12, 15);
   unsigned result;
-  
+
   result = check_cp14_access (state, reg, 0, 0, 0);
-  
+
   if (result == ARMul_DONE && type == ARMul_DATA)
     * data = read_cp14_reg (reg);
-  
+
   return result;
 }
 
@@ -942,12 +941,12 @@ XScale_cp14_MRC
 {
   unsigned reg = BITS (16, 19);
   unsigned result;
-  
+
   result = check_cp14_access (state, reg, BITS (0, 3), BITS (21, 23), BITS (5, 7));
-  
+
   if (result == ARMul_DONE)
     * value = read_cp14_reg (reg);
-  
+
   return result;
 }
 
@@ -962,12 +961,12 @@ XScale_cp14_MCR
 {
   unsigned reg = BITS (16, 19);
   unsigned result;
-  
+
   result = check_cp14_access (state, reg, BITS (0, 3), BITS (21, 23), BITS (5, 7));
-  
+
   if (result == ARMul_DONE)
     write_cp14_reg (reg, value);
-  
+
   return result;
 }
 
@@ -980,7 +979,7 @@ XScale_cp14_read_reg
 )
 {
   * value = read_cp14_reg (reg);
-  
+
   return TRUE;
 }
 
@@ -993,7 +992,7 @@ XScale_cp14_write_reg
 )
 {
   write_cp14_reg (reg, value);
-  
+
   return TRUE;
 }
 
@@ -1052,7 +1051,7 @@ MMUMCR (ARMul_State * state,
       d = state->data32Sig;
       l = state->lateabtSig;
       b = state->bigendSig;
-      
+
       state->prog32Sig  = value >> 4 & 1;
       state->data32Sig  = value >> 5 & 1;
       state->lateabtSig = value >> 6 & 1;
@@ -1094,12 +1093,12 @@ MMUWrite (ARMul_State * state, unsigned reg, ARMword value)
       d = state->data32Sig;
       l = state->lateabtSig;
       b = state->bigendSig;
-      
+
       state->prog32Sig  = value >> 4 & 1;
       state->data32Sig  = value >> 5 & 1;
       state->lateabtSig = value >> 6 & 1;
       state->bigendSig  = value >> 7 & 1;
-      
+
       if (   p != state->prog32Sig
 	  || d != state->data32Sig
 	  || l != state->lateabtSig
@@ -1144,7 +1143,7 @@ ValLDC (ARMul_State * state ATTRIBUTE_UNUSED,
 	if (words++ != 4)
 	  return ARMul_INC;
     }
-  
+
   return ARMul_DONE;
 }
 
@@ -1204,12 +1203,12 @@ ValCDP (ARMul_State * state, unsigned type, ARMword instr)
   if (type == ARMul_FIRST)
     {
       ARMword howlong;
-      
+
       howlong = ValReg[BITS (0, 3)];
-      
+
       /* First cycle of a busy wait.  */
       finish = ARMul_Time (state) + howlong;
-      
+
       return howlong == 0 ? ARMul_DONE : ARMul_BUSY;
     }
   else if (type == ARMul_BUSY)
@@ -1219,7 +1218,7 @@ ValCDP (ARMul_State * state, unsigned type, ARMword instr)
       else
 	return ARMul_BUSY;
     }
-  
+
   return ARMul_CANT;
 }
 
@@ -1265,42 +1264,40 @@ IntCDP (ARMul_State * state, unsigned type, ARMword instr)
 	    return ARMul_BUSY;
 	}
       return ARMul_DONE;
-      
+
     case 1:
       if (howlong == 0)
 	ARMul_Abort (state, ARMul_FIQV);
       else
 	ARMul_ScheduleEvent (state, howlong, DoAFIQ);
       return ARMul_DONE;
-      
+
     case 2:
       if (howlong == 0)
 	ARMul_Abort (state, ARMul_IRQV);
       else
 	ARMul_ScheduleEvent (state, howlong, DoAIRQ);
       return ARMul_DONE;
-      
+
     case 3:
       state->NfiqSig = HIGH;
       state->Exception--;
       return ARMul_DONE;
-      
+
     case 4:
       state->NirqSig = HIGH;
       state->Exception--;
       return ARMul_DONE;
-      
+
     case 5:
       ValReg[BITS (0, 3)] = ARMul_Time (state);
       return ARMul_DONE;
     }
-  
+
   return ARMul_CANT;
 }
 
-/***************************************************************************\
-*         Install co-processor instruction handlers in this routine         *
-\***************************************************************************/
+/* Install co-processor instruction handlers in this routine.  */
 
 unsigned
 ARMul_CoProInit (ARMul_State * state)
@@ -1332,12 +1329,12 @@ ARMul_CoProInit (ARMul_State * state)
 		     XScale_cp13_LDC, XScale_cp13_STC, XScale_cp13_MRC,
 		     XScale_cp13_MCR, NULL, XScale_cp13_read_reg,
 		     XScale_cp13_write_reg);
-  
+
   ARMul_CoProAttach (state, 14, XScale_cp14_init, NULL,
 		     XScale_cp14_LDC, XScale_cp14_STC, XScale_cp14_MRC,
 		     XScale_cp14_MCR, NULL, XScale_cp14_read_reg,
 		     XScale_cp14_write_reg);
-  
+
   ARMul_CoProAttach (state, 15, XScale_cp15_init, NULL,
 		     NULL, NULL, XScale_cp15_MRC, XScale_cp15_MCR,
 		     NULL, XScale_cp15_read_reg, XScale_cp15_write_reg);
@@ -1352,9 +1349,7 @@ ARMul_CoProInit (ARMul_State * state)
   return TRUE;
 }
 
-/***************************************************************************\
-*         Install co-processor finalisation routines in this routine        *
-\***************************************************************************/
+/* Install co-processor finalisation routines in this routine.  */
 
 void
 ARMul_CoProExit (ARMul_State * state)
@@ -1369,9 +1364,7 @@ ARMul_CoProExit (ARMul_State * state)
     ARMul_CoProDetach (state, i);
 }
 
-/***************************************************************************\
-*              Routines to hook Co-processors into ARMulator                 *
-\***************************************************************************/
+/* Routines to hook Co-processors into ARMulator.  */
 
 void
 ARMul_CoProAttach (ARMul_State *    state,

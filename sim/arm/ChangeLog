@@ -1,3 +1,22 @@
+2001-10-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* armemu.h (CP_ACCESS_ALLOWED): New macro.
+	Fix formatting.
+	* armcopro.c (read_cp14_reg): Make static.
+	(write_cp14_reg): Make static.
+	(check_cp13_access): Use CP_ACCESS_ALLOWED macro.
+	Fix formatting.
+	* armsupp.c (ARMul_LDC): Check CP_ACCESS_ALLOWED.
+	(ARMul_STC): Check CP_ACCESS_ALLOWED.
+	(ARMul_MCR): Check CP_ACCESS_ALLOWED.
+	(ARMul_MRC): Check CP_ACCESS_ALLOWED.
+	(ARMul_CDP): Check CP_ACCESS_ALLOWED.
+	Fix formatting.
+	* armemu.c (MCRR): Check CP_ACCESS_ALLOWED.  Test Rd and Rn not
+	equal to 15.
+	(MRRC): Check CP_ACCESS_ALLOWED.  Test Rd and Rn not equal to 15.
+	Fix formatting.
+
 2001-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* armemu.c (ARMul_Emulate32): Fix handling of XScale LDRD and STRD
