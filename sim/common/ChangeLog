@@ -1,3 +1,15 @@
+Tue Oct 14 19:20:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-n-core.h (sim_core_read_aligned_N,
+ 	sim_core_write_aligned_N): Make xaddr param type address_word not
+ 	unsigned_word.
+
+Fri Oct  3 09:49:18 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-fpu.h, sim-fpu.c: Rewrite.  Change sim_fpu object to an
+ 	unpacked floating point struct.  Pass sim_fpu object by reference.
+	Add preliminary support for rounding modes.
+	
 Fri Oct  3 09:28:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

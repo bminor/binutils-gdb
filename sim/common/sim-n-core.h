@@ -43,16 +43,18 @@ INLINE_SIM_CORE(unsigned_N)
 sim_core_read_aligned_N(sim_cpu *cpu,
 			sim_cia cia,
 			sim_core_maps map,
-			unsigned_word xaddr)
+			address_word xaddr)
 {
   sim_cpu_core *cpu_core = CPU_CORE (cpu);
   sim_core_common *core = &cpu_core->common;
   unsigned_N val;
   sim_core_mapping *mapping;
   address_word addr;
+#if WITH_XOR_ENDIAN != 0
   if (WITH_XOR_ENDIAN)
     addr = xaddr ^ cpu_core->xor[(sizeof(unsigned_N) - 1) % WITH_XOR_ENDIAN];
   else
+#endif
     addr = xaddr;
   mapping = sim_core_find_mapping (core, map,
 				   addr,
@@ -74,6 +76,7 @@ sim_core_read_aligned_N(sim_cpu *cpu,
   else
 #endif
     val = T2H_N (*(unsigned_N*) sim_core_translate (mapping, addr));
+  PROFILE_COUNT_CORE (cpu, addr, sizeof (unsigned_N), map);
   if (TRACE_P (cpu, TRACE_CORE_IDX))
     if (sizeof (unsigned_N) > 4)
       trace_printf (CPU_STATE (cpu), cpu,
@@ -130,6 +133,7 @@ sim_core_read_unaligned_N(sim_cpu *cpu,
 			     sizeof (unsigned_N), addr,
 			     read_transfer, sim_core_unaligned_signal);
 	  val = T2H_N(val);
+	  PROFILE_COUNT_CORE (cpu, addr, sizeof (unsigned_N), map);
 	  return val;
 	}
       case FORCED_ALIGNMENT:
@@ -155,16 +159,18 @@ INLINE_SIM_CORE(void)
 sim_core_write_aligned_N(sim_cpu *cpu,
 			 sim_cia cia,
 			 sim_core_maps map,
-			 unsigned_word xaddr,
+			 address_word xaddr,
 			 unsigned_N val)
 {
   sim_cpu_core *cpu_core = CPU_CORE (cpu);
   sim_core_common *core = &cpu_core->common;
   sim_core_mapping *mapping;
   address_word addr;
+#if WITH_XOR_ENDIAN != 0
   if (WITH_XOR_ENDIAN)
     addr = xaddr ^ cpu_core->xor[(sizeof(unsigned_N) - 1) % WITH_XOR_ENDIAN];
   else
+#endif
     addr = xaddr;
   mapping = sim_core_find_mapping(core, map,
 				  addr,
@@ -187,6 +193,7 @@ sim_core_write_aligned_N(sim_cpu *cpu,
   else
 #endif
     *(unsigned_N*) sim_core_translate (mapping, addr) = H2T_N (val);
+  PROFILE_COUNT_CORE (cpu, addr, sizeof (unsigned_N), map);
   if (TRACE_P (cpu, TRACE_CORE_IDX))
     if (sizeof (unsigned_N) > 4)
       trace_printf (CPU_STATE (cpu), cpu,
@@ -242,6 +249,7 @@ sim_core_write_unaligned_N(sim_cpu *cpu,
 	    SIM_CORE_SIGNAL (CPU_STATE (cpu), cpu, cia, map,
 			     sizeof (unsigned_N), addr,
 			     write_transfer, sim_core_unaligned_signal);
+	  PROFILE_COUNT_CORE (cpu, addr, sizeof (unsigned_N), map);
 	  break;
 	}
       case FORCED_ALIGNMENT:
