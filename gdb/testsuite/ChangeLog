@@ -1,5 +1,7 @@
 Thu Jan 30 16:49:25 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* config/slite.exp: Miscellaneous fixes.
+
 	* lib/gdb.exp: Fix runto.
 
 	* gdb.base/signals.exp: Check for a gdb,nosignals feature of

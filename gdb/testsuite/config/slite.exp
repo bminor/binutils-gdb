@@ -141,23 +141,26 @@ proc gdb_load { arg } {
     }
 
     if [target_info exists gdb_serial] {
-	send_gdb "target remote [target_info gdb_serial]\n"
-	set timeout 60
-	verbose "Timeout is now $timeout seconds" 2
-	expect {
-	    -i $gdb_spawn_id -re ".*Kill it?.*y or n.*" {
-		send_gdb "y\n";
-		exp_continue
-	    }
-	    -i $gdb_spawn_id -re ".*$prompt $"	{
-		verbose "Set remote target to [target_info serial]" 2
-	    }
-	    -i $gdb_spawn_id timeout { 
-		perror "Couldn't set remote target."
-		set timeout 10
-		verbose "Timeout is now $timeout seconds" 2
-		return -1
-	    }
+	set serial [target_info gdb_serial];
+    } else {
+	set serial [target_info serial];
+    }
+    send_gdb "target remote $serial\n"
+    set timeout 60
+    verbose "Timeout is now $timeout seconds" 2
+    expect {
+	-i $gdb_spawn_id -re ".*Kill it?.*y or n.*" {
+	    send_gdb "y\n";
+	    exp_continue
+	}
+	-i $gdb_spawn_id -re ".*$prompt $"	{
+	    verbose "Set remote target to [target_info serial]" 2
+	}
+	-i $gdb_spawn_id timeout {
+	    perror "Couldn't set remote target."
+	    set timeout 10
+	    verbose "Timeout is now $timeout seconds" 2
+	    return -1
 	}
     }
 
