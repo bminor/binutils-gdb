@@ -1,3 +1,27 @@
+1999-01-30  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdb.base/maint.exp: Use 'set height 0' to disable page
+	prompting, not 'set height 400'.
+
+	Fix a bunch of timeouts.
+	* gdb.base/maint.exp ("maint print objfiles"): Break this up into
+	four separate tests, so expect doesn't take forever to match a ton
+	of text against a regexp with lots of .* forms.
+	("maint print psymbols", "maint print symbols"): Make some of
+	these greps more selective, so that expect doesn't try to wade
+	through huge piles of output and time out.
+
+	* gdb.base/maint.exp ("maint print msymbols"): Fix pattern.
+
+	* gdb.base/maint.exp ("maint info breakpoints"): Split into two
+ 	tests: one which doesn't expect shlib events to be reported, and
+ 	another which does, but is XFAIL for all platforms other than
+ 	HP/UX.
+
+	* gdb.base/break.exp: Teach the test suite that the `catch
+	fork', `catch vfork', and `catch exec' commands produce error
+	messages on platforms that don't provide these features.
+
 Mon Jan 25 18:35:56 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.hp/gen-so-thresh.c, so-thresh.sh, so-thresh.exp,
