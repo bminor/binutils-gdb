@@ -3,11 +3,34 @@
 # and then Sanitize.
 
 ===================================================================
-*** config/ncr3000.mh.orig	Mon Jun 15 12:25:13 1992
---- config/ncr3000.mh	Mon Aug 24 19:22:31 1992
+*** 1.4	1992/06/10 02:05:16
+--- config/amix.mh	1992/07/21 20:18:16
+***************
+*** 22,24 ****
+--- 22,38 ----
+  
+  # SVR4 puts the BSD compatible install in /usr/ucb.
+  INSTALL = /usr/ucb/install -c
++ 
++ # These are the libs that are needed for the Energize version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ ENERGIZE_LIB = energize/libconn.a
++ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
++ 
++ # These are the libs that are needed for the Energize version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ ENERGIZE_LIB = energize/libconn.a
++ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
+===================================================================
+*** 1.4	1992/06/15 19:25:13
+--- config/ncr3000.mh	1992/09/15 01:51:32
 ***************
 *** 38,40 ****
---- 38,46 ----
+--- 38,59 ----
   # The /usr/ucb/install program is incompatible (complains about unknown
   # group staff).  Use good old cp...
   INSTALL = cp
@@ -15,10 +38,39 @@
 + # These are the libs that are needed for the Energize version of gdb on
 + # SVR4.  Note that we MUST include the standard C library before libucb.a,
 + # otherwise we get lots of broken stuff we don't want.
-+ XM_CLIBS = -L/usr/lib -lm -lnet -lresolv -lform -lsocket -lc \
-+ 	/usr/ucblib/libucb.a -lnsl
-*** Makefile.in.orig	Tue Aug 18 14:59:22 1992
---- Makefile.in	Mon Aug 24 19:24:01 1992
++ XM_CLIBS = -L/usr/lib -lm -lnet -lresolv -lform -lsocket -lnsl -lc
++ 
++ # These are the libs that are needed for the Energize version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ ENERGIZE_LIB = energize/libconn.a
++ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
++ 
++ # These are the libs that are needed for the Energize version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ ENERGIZE_LIB = energize/libconn.a
++ ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
+===================================================================
+*** 2.70	1992/09/03 16:25:59
+--- .Sanitize	1992/09/15 05:19:46
+***************
+*** 73,78 ****
+--- 73,81 ----
+  doc
+  dwarfread.c
+  elfread.c
++ energize
++ energize.c
++ energize.h
+  environ.c
+  environ.h
+  eval.c
+===================================================================
+*** 1.181	1992/09/08 22:33:31
+--- Makefile.in	1992/09/15 05:21:40
 ***************
 *** 123,128 ****
 --- 123,135 ----
@@ -36,44 +88,44 @@
   # -I. for config files.
   # -I${srcdir} possibly for regex.h also.
 ***************
-*** 155,166 ****
+*** 159,170 ****
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
   # TERMCAP comes after readline, since readline depends on it.
-  CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
+  CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
 ! 	${XM_CLIBS} ${TM_CLIBS}
-  CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
+  CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
   	${RL_LIB} ${MMALLOC_LIB}
   
   ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
   
-  VERSION = 4.6.3
+  VERSION = 4.6.6
   DIST=gdb
---- 162,174 ----
+--- 166,178 ----
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
   # TERMCAP comes after readline, since readline depends on it.
-  CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
+  CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
 ! 	${ENERGIZE_LIB}	${XM_CLIBS} ${TM_CLIBS}
-  CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
+  CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
   	${RL_LIB} ${MMALLOC_LIB}
   
   ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} \
 ! 	   ${ENERGIZE_LIB}
   
-  VERSION = 4.6.3
+  VERSION = 4.6.6
   DIST=gdb
 ***************
-*** 203,209 ****
-  	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
+*** 201,207 ****
+  	 mem-break.c target.c inftarg.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
 ! 	 minsyms.c mipsread.c maint.c
   
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
---- 211,217 ----
-  	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
+--- 209,215 ----
+  	 mem-break.c target.c inftarg.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
 ! 	 minsyms.c mipsread.c maint.c energize.c
@@ -81,24 +133,24 @@
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
 ***************
-*** 289,295 ****
+*** 287,293 ****
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
-      copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
+      copying.o $(DEPFILES) mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
 !     buildsym.o objfiles.o minsyms.o maint.o demangle.o \
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
       stabsread.o
   
---- 297,303 ----
+--- 295,301 ----
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
-      copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
+      copying.o $(DEPFILES) mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
 !     buildsym.o objfiles.o minsyms.o maint.o demangle.o energize.o \
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
       stabsread.o
   
 ***************
-*** 303,309 ****
+*** 301,307 ****
   
   NTSSTART = kdb-start.o
   
@@ -106,7 +158,7 @@
   
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
---- 311,317 ----
+--- 309,315 ----
   
   NTSSTART = kdb-start.o
   
@@ -137,18 +189,9 @@
   
   # This is useful when debugging GDB, because some Unix's don't let you run GDB
   # on itself without copying the executable.  So "make gdb1" will make
-***************
-*** 652,658 ****
-  	     -e '/extern.*free/d' \
-  	  < y.tab.c > m2-exp.tab.c
-  	-rm y.tab.c
-- 
-  
-  main.o:	${srcdir}/main.c
-  	${CC} -c ${INTERNAL_CFLAGS} -I${READLINE_DIR} $<
---- 674,679 ----
-*** breakpoint.c.orig	Sun Aug 23 11:09:10 1992
---- breakpoint.c	Mon Aug 24 19:22:26 1992
+===================================================================
+*** 1.46	1992/09/15 06:27:18
+--- breakpoint.c	1992/09/15 06:33:37
 ***************
 *** 273,278 ****
 --- 273,279 ----
@@ -198,8 +241,8 @@
         }
     error ("No breakpoint number %d.", bnum);
 ***************
-*** 922,927 ****
---- 925,931 ----
+*** 923,928 ****
+--- 926,932 ----
   	    {
   	      b->ignore_count--;
   	      this_bp_stop = 0;
@@ -208,8 +251,8 @@
   	  else
   	    {
 ***************
-*** 1373,1378 ****
---- 1377,1384 ----
+*** 1375,1380 ****
+--- 1379,1386 ----
   mention (b)
        struct breakpoint *b;
   {
@@ -219,8 +262,8 @@
       {
       case bp_watchpoint:
 ***************
-*** 2120,2125 ****
---- 2126,2133 ----
+*** 2125,2130 ****
+--- 2131,2138 ----
     register struct breakpoint *b;
     register bpstat bs;
   
@@ -230,8 +273,8 @@
         target_remove_breakpoint(bpt->address, bpt->shadow_contents);
   
 ***************
-*** 2296,2301 ****
---- 2304,2310 ----
+*** 2303,2308 ****
+--- 2311,2317 ----
       if (b->number == bptnum)
         {
   	b->ignore_count = count;
@@ -240,7 +283,7 @@
   	  return;
   	else if (count == 0)
 ***************
-*** 2320,2326 ****
+*** 2327,2333 ****
     struct breakpoint *b;
   
     ALL_BREAKPOINTS (b)
@@ -248,7 +291,7 @@
   }
   
   /* Command to set ignore-count of breakpoint N to COUNT.  */
---- 2329,2338 ----
+--- 2336,2345 ----
     struct breakpoint *b;
   
     ALL_BREAKPOINTS (b)
@@ -260,19 +303,19 @@
   
   /* Command to set ignore-count of breakpoint N to COUNT.  */
 ***************
-*** 2387,2392 ****
---- 2399,2406 ----
+*** 2394,2399 ****
+--- 2406,2413 ----
   {
     bpt->enable = enabled;
   
 +   energize_enable_breakpoint(bpt);
 + 
     if (xgdb_verbose && bpt->type == bp_breakpoint)
-      printf ("breakpoint #%d enabled\n", bpt->number);
+      printf_filtered ("breakpoint #%d enabled\n", bpt->number);
   
 ***************
-*** 2434,2439 ****
---- 2448,2455 ----
+*** 2441,2446 ****
+--- 2455,2462 ----
   disable_breakpoint (bpt)
        struct breakpoint *bpt;
   {
@@ -281,8 +324,20 @@
     bpt->enable = disabled;
   
     if (xgdb_verbose && bpt->type == bp_breakpoint)
-*** command.c.orig	Fri Jul 10 10:22:30 1992
---- command.c	Mon Aug 24 19:22:26 1992
+===================================================================
+*** 1.18	1992/07/10 17:22:30
+--- command.c	1992/07/23 01:42:36
+***************
+*** 1093,1098 ****
+--- 1093,1100 ----
+    else
+      error ("gdb internal error: bad cmd_type in do_setshow_command");
+    (*c->function.sfunc) (NULL, from_tty, c);
++   if (energize)
++     print_prompt();
+  }
+  
+  /* Show all the settings in a list of show commands.  */
 ***************
 *** 1148,1154 ****
       }
@@ -292,7 +347,7 @@
         ;
     else
       error ("Fork failed");
---- 1148,1154 ----
+--- 1150,1156 ----
       }
   
     if (pid != -1)
@@ -300,8 +355,9 @@
         ;
     else
       error ("Fork failed");
-*** configure.in.orig	Tue Aug 18 11:35:50 1992
---- configure.in	Mon Aug 24 19:22:26 1992
+===================================================================
+*** 1.63	1992/09/03 16:26:02
+--- configure.in	1992/09/15 05:19:56
 ***************
 *** 1,4 ****
 ! configdirs="doc"
@@ -313,19 +369,41 @@
   srcname="GDB"
   srctrigger=main.c
   target_dependent=true
-*** defs.h.orig	Mon Jul 20 21:14:28 1992
---- defs.h	Mon Aug 24 19:22:27 1992
+===================================================================
+*** 1.46	1992/09/15 06:26:58
+--- defs.h	1992/09/15 06:29:55
 ***************
-*** 808,811 ****
---- 808,813 ----
+*** 811,814 ****
+--- 811,816 ----
   #define MAINTENANCE_CMDS 1
   #endif
   
 + #include "energize.h"
 + 
   #endif /* !defined (DEFS_H) */
-*** inflow.c.orig	Wed Jul 22 21:41:45 1992
---- inflow.c	Mon Aug 24 19:22:27 1992
+===================================================================
+*** 2.5	1992/09/03 16:26:03
+--- demangle.c	1992/09/15 05:19:59
+***************
+*** 37,43 ****
+     the appropriate target configuration file. */
+  
+  #ifndef DEFAULT_DEMANGLING_STYLE
+! # define DEFAULT_DEMANGLING_STYLE AUTO_DEMANGLING_STYLE_STRING
+  #endif
+  
+  /* String name for the current demangling style.  Set by the "set demangling"
+--- 37,43 ----
+     the appropriate target configuration file. */
+  
+  #ifndef DEFAULT_DEMANGLING_STYLE
+! # define DEFAULT_DEMANGLING_STYLE LUCID_DEMANGLING_STYLE_STRING
+  #endif
+  
+  /* String name for the current demangling style.  Set by the "set demangling"
+===================================================================
+*** 1.28	1992/07/23 04:41:45
+--- inflow.c	1992/08/27 22:43:15
 ***************
 *** 89,95 ****
   static short pgrp_inferior;
@@ -343,8 +421,9 @@
   static int pgrp_ours;
   # endif /* not def SHORT_PGRP */
   #else /* not def TIOCGPGRP */
-*** infrun.c.orig	Mon Aug 24 12:00:30 1992
---- infrun.c	Mon Aug 24 19:22:28 1992
+===================================================================
+*** 1.54	1992/09/02 09:22:09
+--- infrun.c	1992/09/15 05:20:09
 ***************
 *** 633,638 ****
 --- 633,639 ----
@@ -365,27 +444,33 @@
     push_target (&child_ops);
   
     mark_breakpoints_out ();
-*** inftarg.c.orig	Sun Mar 29 15:21:27 1992
---- inftarg.c	Mon Aug 24 19:22:28 1992
+===================================================================
+*** 1.11	1992/03/29 23:21:27
+--- inftarg.c	1992/09/15 06:37:01
 ***************
-*** 58,64 ****
-  #ifdef USE_PROC_FS
-      pid = proc_wait (status);
-  #else
+*** 55,65 ****
+    int pid;
+  
+    do {
+! #ifdef USE_PROC_FS
+!     pid = proc_wait (status);
+! #else
 !     pid = wait (status);
-  #endif
+! #endif
       if (pid == -1)		/* No more children to wait for */
         {
---- 58,64 ----
-  #ifdef USE_PROC_FS
-      pid = proc_wait (status);
-  #else
+  	fprintf (stderr, "Child process unexpectedly missing.\n");
+--- 55,61 ----
+    int pid;
+  
+    do {
 !     pid = energize_wait (status);
-  #endif
       if (pid == -1)		/* No more children to wait for */
         {
-*** main.c.orig	Fri Jul 10 10:22:33 1992
---- main.c	Mon Aug 24 19:22:29 1992
+  	fprintf (stderr, "Child process unexpectedly missing.\n");
+===================================================================
+*** 1.52	1992/09/15 06:27:10
+--- main.c	1992/09/15 06:30:03
 ***************
 *** 426,431 ****
 --- 426,432 ----
@@ -419,16 +504,17 @@
   	    symarg = optarg;
   	    break;
 ***************
-*** 736,741 ****
---- 741,748 ----
-    free ((PTR)dirarg);
-    do_cleanups (ALL_CLEANUPS);
+*** 664,669 ****
+--- 669,677 ----
   
+    /* Run the init function of each source file */
+  
++   /* Must call this first to setup tty */
 +   energize_initialize (energize_id, execarg);
 + 
-    if (execarg != NULL
-        && symarg != NULL
-        && strcmp (execarg, symarg) == 0)
+    initialize_cmd_lists ();	/* This needs to be done first */
+    initialize_all_files ();
+    initialize_main ();		/* But that omits this file!  Do it now */
 ***************
 *** 850,856 ****
         if (!setjmp (to_top_level))
@@ -438,7 +524,7 @@
             quit_command ((char *)0, instream == stdin);
   	}
       }
---- 857,866 ----
+--- 858,867 ----
         if (!setjmp (to_top_level))
   	{
   	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
@@ -458,7 +544,7 @@
      }
   
     /* Tell the user if the language has changed (except first time).  */
---- 922,928 ----
+--- 923,929 ----
         else if (c->function.cfunc == NO_FUNCTION)
   	error ("That is not a command, just a help topic.");
         else
@@ -475,7 +561,7 @@
         if (p == NULL)
   	/* Treat end of file like "end".  */
   	break;
---- 1574,1580 ----
+--- 1575,1581 ----
     while (1)
       {
         dont_repeat ();
@@ -483,25 +569,9 @@
         if (p == NULL)
   	/* Treat end of file like "end".  */
   	break;
-***************
-*** 1868,1874 ****
-  void
-  print_prompt ()
-  {
-!   printf ("%s", prompt);
-    fflush (stdout);
-  }
-  
---- 1878,1884 ----
-  void
-  print_prompt ()
-  {
-!   printf_filtered ("%s", prompt);
-    fflush (stdout);
-  }
-  
-*** printcmd.c.orig	Sun Jul  5 17:22:52 1992
---- printcmd.c	Mon Aug 24 19:22:29 1992
+===================================================================
+*** 1.32	1992/09/15 06:27:00
+--- printcmd.c	1992/09/15 06:30:06
 ***************
 *** 778,783 ****
 --- 778,792 ----
@@ -518,7 +588,7 @@
 + 	}
 + 
         if (inspect)
-  	printf ("\031(gdb-makebuffer \"%s\"  %d '(\"", exp, histindex);
+  	printf_filtered ("\031(gdb-makebuffer \"%s\"  %d '(\"", exp, histindex);
         else
 ***************
 *** 784,789 ****
@@ -529,10 +599,10 @@
 +       energize_end_variable_annotation();
         printf_filtered ("\n");
         if (inspect)
-  	printf("\") )\030");
+  	printf_filtered("\") )\030");
 ***************
-*** 1653,1663 ****
---- 1663,1681 ----
+*** 1652,1662 ****
+--- 1662,1680 ----
   	 standard indentation here is 4 spaces, and val_print indents
   	 2 for each recurse.  */
         val = read_var_value (sym, FRAME_INFO_ID (fi));
@@ -552,8 +622,9 @@
         first = 0;
       }
   
-*** stack.c.orig	Fri Jul  3 20:21:45 1992
---- stack.c	Mon Aug 24 19:22:30 1992
+===================================================================
+*** 1.34	1992/09/11 09:11:04
+--- stack.c	1992/09/15 05:20:25
 ***************
 *** 159,165 ****
         if (addressprint)
@@ -633,8 +704,9 @@
       }
     wrap_here ("   ");
     if (sal.symtab)
-*** symfile.c.orig	Sun Aug 23 11:09:17 1992
---- symfile.c	Mon Aug 24 19:22:30 1992
+===================================================================
+*** 1.57	1992/09/15 06:27:08
+--- symfile.c	1992/09/15 06:30:09
 ***************
 *** 611,616 ****
 --- 611,618 ----
@@ -646,108 +718,9 @@
     return (objfile);
   }
   
-*** utils.c.orig	Sun Aug 23 11:09:21 1992
---- utils.c	Mon Aug 24 19:22:31 1992
-***************
-*** 694,700 ****
-    register int ans2;
-  
-    /* Automatically answer "yes" if input is not from a terminal.  */
-!   if (!input_from_terminal_p ())
-      return 1;
-  
-    while (1)
---- 694,700 ----
-    register int ans2;
-  
-    /* Automatically answer "yes" if input is not from a terminal.  */
-!   if (!input_from_terminal_p () && !energize)
-      return 1;
-  
-    while (1)
-***************
-*** 703,723 ****
-        fflush (stdout);
-        va_start (args);
-        ctlstr = va_arg (args, char *);
-        vfprintf_filtered (stdout, ctlstr, args);
--       va_end (args);
-        printf_filtered ("(y or n) ");
-!       fflush (stdout);
-!       answer = fgetc (stdin);
-!       clearerr (stdin);		/* in case of C-d */
-!       if (answer == EOF)	/* C-d */
-!         return 1;
-!       if (answer != '\n')	/* Eat rest of input line, to EOF or newline */
-! 	do 
-! 	  {
-! 	    ans2 = fgetc (stdin);
-! 	    clearerr (stdin);
-! 	  }
-!         while (ans2 != EOF && ans2 != '\n');
-        if (answer >= 'a')
-  	answer -= 040;
-        if (answer == 'Y')
---- 703,734 ----
-        fflush (stdout);
-        va_start (args);
-        ctlstr = va_arg (args, char *);
-+       energize_query (ctlstr, args);
-        vfprintf_filtered (stdout, ctlstr, args);
-        printf_filtered ("(y or n) ");
-!       if (energize)
-! 	{
-! 	  char *buf;
-! 
-! 	  buf = energize_command_line_input(0, 0);
-! 	  answer = buf ? *buf : 'Y';
-! 	  energize_acknowledge_query(buf);
-! 	}
-!       else
-! 	{
-! 	  fflush (stdout);
-! 	  answer = fgetc (stdin);
-! 	  clearerr (stdin);		/* in case of C-d */
-! 	  if (answer == EOF)	/* C-d */
-! 	    return 1;
-! 	  if (answer != '\n')	/* Eat rest of input line, to EOF or newline */
-! 	    do 
-! 	      {
-! 		ans2 = fgetc (stdin);
-! 		clearerr (stdin);
-! 	      }
-! 	  while (ans2 != EOF && ans2 != '\n');
-! 	}
-        if (answer >= 'a')
-  	answer -= 040;
-        if (answer == 'Y')
-***************
-*** 725,730 ****
---- 736,742 ----
-        if (answer == 'N')
-  	return 0;
-        printf_filtered ("Please answer y or n.\n");
-+       va_end (args);
-      }
-  }
-  
-***************
-*** 991,996 ****
---- 1003,1014 ----
-    if (linebuffer == 0)
-      return;
-    
-+   if (energize)
-+     {
-+       energize_fputs(linebuffer);
-+       return;
-+     }
-+ 
-    /* Don't do any filtering if it is disabled.  */
-    if (stream != stdout
-     || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX))
-*** valprint.c.orig	Sat Aug  8 23:14:57 1992
---- valprint.c	Mon Aug 24 19:22:31 1992
+===================================================================
+*** 1.54	1992/09/15 06:27:03
+--- valprint.c	1992/09/15 06:30:13
 ***************
 *** 488,493 ****
 --- 488,494 ----
@@ -818,22 +791,3 @@
   		}
   	      if (i < len)
   		fprintf_filtered (stream, "...");
-*** demangle.c.orig	Wed Jul 15 12:33:17 1992
---- demangle.c	Mon Aug 24 19:22:32 1992
-***************
-*** 37,43 ****
-     the appropriate target configuration file. */
-  
-  #ifndef DEFAULT_DEMANGLING_STYLE
-! # define DEFAULT_DEMANGLING_STYLE AUTO_DEMANGLING_STYLE_STRING
-  #endif
-  
-  /* The current demangling style in affect.  Global so that the demangler
---- 37,43 ----
-     the appropriate target configuration file. */
-  
-  #ifndef DEFAULT_DEMANGLING_STYLE
-! # define DEFAULT_DEMANGLING_STYLE LUCID_DEMANGLING_STYLE_STRING
-  #endif
-  
-  /* The current demangling style in affect.  Global so that the demangler
