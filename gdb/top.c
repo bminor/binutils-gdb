@@ -2763,6 +2763,17 @@ quit_command (args, from_tty)
      char *args;
      int from_tty;
 {
+  int exit_code = 0;
+
+  /* An optional expression may be used to cause gdb to terminate with the 
+     value of that expression. */
+  if (args)
+    {
+      value_ptr val = parse_and_eval (args);
+
+      exit_code = (int) value_as_long (val);
+    }
+
   if (inferior_pid != 0 && target_has_execution)
     {
       if (attach_flag)
@@ -2787,7 +2798,7 @@ quit_command (args, from_tty)
   if (write_history_p && history_filename)
     write_history (history_filename);
 
-  exit (0);
+  exit (exit_code);
 }
 
 /* Returns whether GDB is running on a terminal and whether the user

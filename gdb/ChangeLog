@@ -1,3 +1,11 @@
+Wed Jul 19 18:19:28 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Richard Earnshaw (rearnsha@armltd.co.uk):
+	* infrun.c (wait_for_inferior): Set the convenience variable
+	$_exitcode to the termination code of the inferior.
+	* top.c (quit_command): Accept optional expression to use
+	as parameter to exit().
+
 Wed Jul 19 13:15:32 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* remote.c (remote_wait): When getting registers, check endianess and
@@ -7,17 +15,17 @@ Tue Jul 18 00:41:31 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdbserver/low-hppabsd.c: New file.
 	* gdbserver/Makefile.in (SFILES): Add low-hppabsd.c.
-	* config/hppabsd.mh (XDEPFILES): Add ser-tcp.o
-	(GDBSERVER_DEPFILES): Add low-hppabsd.o
-	* config/hppaosf.mh: LIkewise.
+	* config/pa/hppabsd.mh (XDEPFILES): Add ser-tcp.o.
+	(GDBSERVER_DEPFILES): Add low-hppabsd.o.
+	* config/pa/hppaosf.mh: Likewise.
 
 Mon Jul 17 21:35:18 1995  Fred Fish  <fnf@cygnus.com>
 
-	* dache.c (struct dcache_block):  Change data member from unsigned char
-	to char, since everything passed in and out of dcache is char or casted
-	to appropriate type anyway.
-	(dcache_alloc):  Move assignment of db out of test and combine separate
-	tests into if-else.
+	* dache.c (struct dcache_block): Change data member from unsigned
+	char to char, since everything passed in and out of dcache is char
+	or casted to appropriate type anyway.
+	(dcache_alloc):  Move assignment of db out of test and combine
+	separate tests into if-else.
 	(dcache_peek_byte):  Change ptr from unsigned char* to char*.
 	(dcache_peek_byte):  Remove now unnecessary cast in read_memory call.
 	(dcache_peek):  Change cast of incoming data arg.
@@ -25,16 +33,17 @@ Mon Jul 17 21:35:18 1995  Fred Fish  <fnf@cygnus.com>
 	(dcache_info):  Mask data passed to printf_filtered to lsbyte only.
 	(dcache_info):  Change printf_filtered arg from "% 2x" to " %2x".
 	* target.c (debug_to_thread_alive): Change return type to int and
-	return zero, for type compatibility with other *_thread_alive funcs.
+	return zero, for type compatibility with other *_thread_alive
+	funcs.
 	(cleanup_target): Change cast of ignore function to match type of the
 	to_thread_alive member.
 	* defs.h (error_hook): Add ATTR_NORETURN.
-	* defs.h (NORETURN, ATTR_NORETURN):  Switch from volatile to
+	* defs.h (NORETURN, ATTR_NORETURN): Switch from volatile to
 	__attribute__ method with gcc 2.7, to avoid gcc 2.6.3 bug.
-	* remote.c (remote_wait):  Cast first arg to strtol, strchr, and strncmp
-	to "const char *" from "unsigned char *".
-	(remote_wait):  Cast arg to putpkt and strcpy from "unsigned char *" to
-	"char *".
+	* remote.c (remote_wait): Cast first arg to strtol, strchr, and
+	strncmp to "const char *" from "unsigned char *".
+	(remote_wait):  Cast arg to putpkt and strcpy from "unsigned char *"
+	to "char *".
 	(remote_wait):  Change printf format for long arg from "%d" to "%ld".
 	(getpkt):  Remove unused variable "bp".
 	(remote_fetch_word, remote_store_word):  Ifdef out apparently unused
@@ -49,9 +58,10 @@ Mon Jul 17 21:35:18 1995  Fred Fish  <fnf@cygnus.com>
 	unused variable "state" in #ifdef that matches one in which it is
 	referenced.
 	* eval.c (evaluate_subexp_standard):  Remove unused variable "var".
-	* eval.c (evaluate_subexp_standard):  Remove unused variable "tmp_symbol".
-	* valarith.c (value_subscript):  Remove unused variable "lowerbound",
-	which is redeclared in a nested scope prior to use.
+	* eval.c (evaluate_subexp_standard):  Remove unused variable
+	"tmp_symbol".
+	* valarith.c (value_subscript):  Remove unused variable
+	"lowerbound", which is redeclared in a nested scope prior to use.
 	* printcmd.c (print_frame_nameless_args):  Use "%ld" to print long
 	arg, not "%d".
 	* {mem-break.c, remote-pa.c, remote.c, saber.suppress}:
@@ -67,16 +77,17 @@ Mon Jul 17 21:35:18 1995  Fred Fish  <fnf@cygnus.com>
 	(chill_val_print):  Remove unused local var "high_bound" that
 	is redeclared in a nested scope prior to use.
 	(chill_var_print):  Use "%ld" to print long arg, not "%d".
-	* regex.c (re_compile_fastmap, re_match_2):  Add remaining enum types
-	and default to switches for completeness.
+	* regex.c (re_compile_fastmap, re_match_2):  Add remaining enum
+	types and default to switches for completeness.
 	* minsyms.c (lookup_minimal_symbol_text): Delete unused variable
 	"trampoline_symbol".
-	(prim_record_minimal_symbol_and_info):  Return NULL rather than trash.
+	(prim_record_minimal_symbol_and_info):  Return NULL rather than
+	trash.
 	* elfread.c (elf_symtab_read):  Don't dereference NULL returns from
 	record_minimal_symbol_and_info.
 	* f-lang.c (saved_function_list_end):  Ifdef out unused variable
 	that may be used someday.
-	* f-valprint.c (f_val_print):  Remove unused local variable "straddr".
+	* f-valprint.c (f_val_print):  Remove unused local "straddr".
 	
 Mon Jul 17 13:08:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
