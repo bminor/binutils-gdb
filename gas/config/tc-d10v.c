@@ -673,10 +673,10 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   if ( (opcode1->format & LONG_OPCODE) || (opcode2->format & LONG_OPCODE))
     as_fatal ("Long instructions may not be combined.");
 
-  if(opcode1->exec_type & BRANCH_LINK && opcode2->exec_type != PARONLY)
+  if(opcode1->exec_type & BRANCH_LINK && exec_type == 0)
     {
-      /* subroutines must be called from 32-bit boundaries */
-      /* so the return address will be correct */
+      /* Instructions paired with a subroutine call are executed before the
+	 subroutine, so don't do these pairings unless explicitly requested.  */
       write_1_short (opcode1, insn1, fx->next);
       return (1);
     }

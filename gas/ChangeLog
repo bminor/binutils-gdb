@@ -3,6 +3,11 @@ Thu Oct  9 01:44:36 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
 	* tc-d10v.h (TC_START_LABEL): Don't define.
 	(tc_frob_label): Define.
 
+Thu Oct  9 00:07:23 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
+
+	* config/tc-d10v.c (write_2_short): Fix bug that wouldn't allow
+	to pair a branch and link with anything but an exe instruction.
+
 Wed Oct  8 16:28:53 1997  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-alpha.c (load_expression): Disable the sym+const .got
