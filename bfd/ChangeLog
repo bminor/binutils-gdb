@@ -1,3 +1,8 @@
+2004-12-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Don't report an
+	overflow for calls to undefined weak symbols.
+
 2004-12-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfcode.h (elf_slurp_symbol_table): Use bfd_elf_sym_name so that

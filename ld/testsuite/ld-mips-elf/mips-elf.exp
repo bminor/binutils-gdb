@@ -81,6 +81,7 @@ if {$has_newabi && $linux_gnu} {
 }
 
 run_dump_test "jaloverflow"
+run_dump_test "jaloverflow-2"
 if {$has_newabi} {
     run_dump_test "jalbal"
 }

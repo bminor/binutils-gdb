@@ -3352,7 +3352,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       else
 	{
 	  value = (_bfd_mips_elf_sign_extend (addend, 28) + symbol) >> 2;
-	  overflowed_p = (value >> 26) != ((p + 4) >> 28);
+	  if (h->root.root.type != bfd_link_hash_undefweak)
+	    overflowed_p = (value >> 26) != ((p + 4) >> 28);
 	}
       value &= howto->dst_mask;
       break;

@@ -1,3 +1,8 @@
+2004-12-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-mips-elf/jal-overflow-2.[sd]: New test.
+	* ld-mips-elf/mips-elf.exp: Run it.
+
 2004-12-13  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-mips-elf/mips-elf.exp: Only run jalbal if n32 is supported.
