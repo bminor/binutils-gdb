@@ -213,52 +213,17 @@ compare_symbols (const void *s1p, const void *s2p)
   return (strcmp (SYMBOL_PRINT_NAME (*s1), SYMBOL_PRINT_NAME (*s2)));
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   compare_psymbols -- compare two partial symbols by name
-
-   DESCRIPTION
-
-   Given pointers to pointers to two partial symbol table entries,
-   compare them by name and return -N, 0, or +N (ala strcmp).
-   Typically used by sorting routines like qsort().
-
-   NOTES
-
-   Does direct compare of first two characters before punting
-   and passing to strcmp for longer compares.  Note that the
-   original version had a bug whereby two null strings or two
-   identically named one character strings would return the
-   comparison of memory following the null byte.
-
- */
+/* This compares two partial symbols by names, using strcmp_iw_ordered
+   for the comparison.  */
 
 static int
 compare_psymbols (const void *s1p, const void *s2p)
 {
-  register struct partial_symbol **s1, **s2;
-  register char *st1, *st2;
+  struct partial_symbol *const *s1 = s1p;
+  struct partial_symbol *const *s2 = s2p;
 
-  s1 = (struct partial_symbol **) s1p;
-  s2 = (struct partial_symbol **) s2p;
-  st1 = SYMBOL_PRINT_NAME (*s1);
-  st2 = SYMBOL_PRINT_NAME (*s2);
-
-
-  if ((st1[0] - st2[0]) || !st1[0])
-    {
-      return (st1[0] - st2[0]);
-    }
-  else if ((st1[1] - st2[1]) || !st1[1])
-    {
-      return (st1[1] - st2[1]);
-    }
-  else
-    {
-      return (strcmp (st1, st2));
-    }
+  return strcmp_iw_ordered (SYMBOL_PRINT_NAME (*s1),
+			    SYMBOL_PRINT_NAME (*s2));
 }
 
 void

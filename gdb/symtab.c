@@ -1374,9 +1374,10 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
       do_linear_search = 0;
 
       /* Binary search.  This search is guaranteed to end with center
-         pointing at the earliest partial symbol with the correct
-         name.  At that point *all* partial symbols with that name
-         will be checked against the correct namespace. */
+         pointing at the earliest partial symbol whose name might be
+         correct.  At that point *all* partial symbols with an
+         appropriate name will be checked against the correct
+         namespace.  */
 
       bottom = start;
       top = start + length - 1;
@@ -1391,7 +1392,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (strcmp (SYMBOL_PRINT_NAME (*center), name) >= 0)
+	  if (strcmp_iw_ordered (SYMBOL_PRINT_NAME (*center), name) >= 0)
 	    {
 	      top = center;
 	    }

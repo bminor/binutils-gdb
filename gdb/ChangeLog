@@ -1,3 +1,11 @@
+2003-02-24  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_partial_symbol): Use strcmp_iw_ordered to
+	do the comparison, not strcmp.
+	* symfile.c (compare_psymbols): Ditto.
+	* defs.h: Declare strcmp_iw_ordered.
+	* utils.c (strcmp_iw_ordered): New function.
+
 2003-02-24  Jim Blandy  <jimb@redhat.com>
 
 	* MAINTAINERS (GNU/Linux/x86, linespec, breakpoints, Scheme
