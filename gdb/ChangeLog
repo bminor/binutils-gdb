@@ -1,4 +1,8 @@
-Wed Jul  8 00:11:02 1992  Stu Grossman  (grossman at cygnus.com)
+Wed Jul  8 17:23:07 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (VERSION):  Update to 4.5.8.
+
+ Wed Jul  8 00:11:02 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* dbxread.c (dbx_symfile_init):  Init stab_section_info to NULL to
 	prevent crashes when examining cross-targets.
