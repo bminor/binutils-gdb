@@ -1,5 +1,9 @@
 -*- text -*-
 
+Changes in 2.11:
+
+Support for IA-64.
+
 Changes in 2.10:
 
 Support for ATMEL AVR.
