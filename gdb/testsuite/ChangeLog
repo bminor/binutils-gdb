@@ -1,3 +1,14 @@
+Wed Mar  5 00:00:43 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* lib/gdb.exp(gdb_run_cmd): Add check for gdb_init_command
+	target feature.
+
+	* config/monitor.exp(gdb_load): Check for a failure when loading,
+ 	and reboot the board if necessary.
+
+	* gdb.base/setvar.exp(test_set): Handle multiple prints within
+	a set of tests. Remove print.* from the patterns being checked.
+
 Mon Mar  3 11:57:43 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* gdb.base/a1-selftest.exp: Use send_gdb consistently. Don't

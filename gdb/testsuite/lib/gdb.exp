@@ -125,7 +125,6 @@ proc gdb_unload {} {
 
 proc delete_breakpoints {} {
     global gdb_prompt
-    global gdb_spawn_id
 
     send_gdb "delete breakpoints\n"
     gdb_expect {
@@ -159,9 +158,17 @@ proc delete_breakpoints {} {
 #
 proc gdb_run_cmd {args} {
     global gdb_prompt
-    global gdb_spawn_id
 
-    set spawn_id $gdb_spawn_id
+    if [target_info exists gdb_init_command] {
+	send_gdb "[target_info gdb_init_command]\n";
+	gdb_expect {
+	    -re ".*$gdb_prompt $" { }
+	    default {
+		perror "gdb_init_command for target failed";
+		return;
+	    }
+	}
+    }
 
     if [target_info exists use_gdb_stub] {
 	if [target_info exists gdb,start_symbol] {
@@ -210,16 +217,13 @@ proc gdb_run_cmd {args} {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-re "Starting program: \[^\n\]*" {}
+	-re "Starting program: \[^\r\n\]*" {}
     }
 }
 
 proc gdb_breakpoint { function } {
     global gdb_prompt
     global decimal
-    global gdb_spawn_id
-
-    set spawn_id $gdb_spawn_id
 
     send_gdb "break $function\n"
     # The first two regexps are what we get with -g, the third is without -g.
@@ -242,9 +246,6 @@ proc gdb_breakpoint { function } {
 proc runto { function } {
     global gdb_prompt
     global decimal
-    global gdb_spawn_id
-
-    set spawn_id $gdb_spawn_id
 
     delete_breakpoints
 
@@ -323,7 +324,6 @@ proc gdb_test { args } {
     global GDB
     global expect_out
     upvar timeout timeout
-    global gdb_spawn_id;
 
     if [llength $args]>2 then {
 	set message [lindex $args 2]
@@ -349,7 +349,11 @@ proc gdb_test { args } {
     set result -1
     if ![string match $command ""] {
 	if { [send_gdb "$command\n"] != "" } {
-	    perror "Couldn't send $command to GDB.";
+	    global suppress_flag;
+
+	    if { ! $suppress_flag } {
+		perror "Couldn't send $command to GDB.";
+	    }
 	    fail "$message";
 	    return $result;
 	}
@@ -547,8 +551,6 @@ proc gdb_test_exact { args } {
 
 proc gdb_reinitialize_dir { subdir } {
     global gdb_prompt
-    global gdb_spawn_id
-    set spawn_id $gdb_spawn_id
 
     if [is_remote host] {
 	return "";
@@ -587,7 +589,9 @@ proc default_gdb_exit {} {
     global GDB
     global GDBFLAGS
     global verbose
-    global gdb_spawn_id
+    global gdb_spawn_id;
+
+    gdb_stop_suppressing_tests;
 
     if ![info exists gdb_spawn_id] {
 	return;
@@ -606,16 +610,8 @@ proc default_gdb_exit {} {
 		send_gdb "y\n";
 		exp_continue;
 	    }
-	     timeout { }
+	    timeout { }
 	}
-    } else {
-	# We used to try to send_gdb "quit" to GDB, and wait for it to die.
-	# Dealing with all the cases and errors got pretty hairy.  Just close it, 
-	# that is simpler.
-	catch "close "
-
-	# Omitting this probably would cause strange timing-dependent failures.
-	catch "wait "
     }
 
     remote_close host;
@@ -633,8 +629,6 @@ proc gdb_file_cmd { arg } {
     global GDB
     global gdb_prompt
     upvar timeout timeout
-    global gdb_spawn_id
-    set spawn_id $gdb_spawn_id
 
     if [is_remote host] {
 	set arg [remote_download host $arg];
@@ -707,49 +701,52 @@ proc default_gdb_start { } {
     global GDBFLAGS
     global gdb_prompt
     global timeout
-    global gdb_spawn_id
-    global spawn_id
+    global gdb_spawn_id;
+
+    gdb_stop_suppressing_tests;
+
     verbose "Spawning $GDB -nw $GDBFLAGS"
 
     if [info exists gdb_spawn_id] {
+	foo;
 	return 0;
     }
 
     set oldtimeout $timeout
     set timeout [expr "$timeout + 180"]
     if [is_remote host] {
-	set shell_id [remote_spawn host "$GDB -nw $GDBFLAGS --command gdbinit"]
+	set res [remote_spawn host "$GDB -nw $GDBFLAGS --command gdbinit"];
     } else {
 	if { [which $GDB] == 0 } then {
 	    perror "$GDB does not exist."
 	    exit 1
 	}
 
-	set shell_id [remote_spawn host "$GDB -nw $GDBFLAGS"]
+	set res [remote_spawn host "$GDB -nw $GDBFLAGS"];
     }
-    verbose $shell_id
+    if { $res < 0 || $res == "" } {
+	bar
+    }
     set timeout 10
-    expect {
-	-i $shell_id -re ".*\[\r\n\]$gdb_prompt $" {
+    gdb_expect {
+	-re ".*\[\r\n\]$gdb_prompt $" {
 	    verbose "GDB initialized."
 	}
-	-i $shell_id -re "$gdb_prompt $"	{
+	-re "$gdb_prompt $"	{
 	    perror "GDB never initialized."
 	    set timeout $oldtimeout
 	    verbose "Timeout restored to $timeout seconds" 2
 	    return -1
 	}
-	-i $shell_id timeout		{
+	timeout	{
+
 	    perror "(timeout) GDB never initialized after $timeout seconds."
-	    set timeout $oldtimeout
-	    verbose "Timeout restored to $timeout seconds" 2
 	    return -1
 	}
     }
     set timeout $oldtimeout
     verbose "Timeout restored to $timeout seconds" 2
-    set gdb_spawn_id $shell_id
-    set spawn_id $gdb_spawn_id
+    set gdb_spawn_id -1;
     # force the height to "unlimited", so no pagers get used
 
     send_gdb "set height 0\n"
@@ -841,95 +838,18 @@ proc gdb_compile {source dest type options} {
 }
 
 proc send_gdb { string } {
+    global suppress_flag;
+    if { $suppress_flag } {
+	return "suppressed";
+    }
     return [remote_send host "$string"];
 }
 
 #
-# Basically the same as TCL expect, but with a big difference: it will
-# call the eof/timeout/default section if there is an error in the
-# expect call.
-# Also adds a -i $gdb_spawn_id to each expect statement.
 #
 
 proc gdb_expect { args } {
-    global gdb_spawn_id;
-    global errorInfo errorCode;
-
-    if { [llength $args] == 1 } {
-	set args "[lindex $args 0]";
-    }
-
-    set res {}
-    set got_re 0;
-    set need_append 1;
-    
-    set orig "$args";
-
-    set error_sect "";
-    set save_next 0;
-
-    for { set i 0; } { $i < [llength $args] } { incr i ; }  {
-	if { $need_append } {
-	    append res "\n-i $gdb_spawn_id ";
-	    set need_append 0;
-	}
-
-	set x "[lrange $args $i $i]";
-	regsub "^\n*\[ 	\]*" "$x" "" x;
-
-	if { $x == "-i" || $x == "-timeout" || $x == "-ex" } {
-	    append res "$x ";
-	    set next [expr ${i}+1];
-	    append res "[lrange $args $next $next]";
-	    incr i;
-	    continue;
-	}
-	if { $x == "-n" || $x == "-notransfer" || $x == "-nocase" || $x == "-indices" } {
-	    append res "${x} ";
-	    continue;
-	}
-	if { $x == "-re" } {
-	    append res "${x} ";
-	    set next [expr ${i}+1];
-	    set y [lrange $args $next $next];
-	    append res "${y} ";
-	    set got_re 1;
-	    incr i;
-	    continue;
-	}
-	if { $got_re } {
-	    set need_append 1;
-	    append res "$x ";
-	    set got_re 0;
-	    if { $save_next } {
-		set save_next 0;
-		set error_sect [lindex $args $i];
-	    }
-	} else {
-	    if { ${x} == "eof" } {
-		set save_next 1;
-	    } elseif { ${x} == "default" || ${x} == "timeout" } {
-		if { $error_sect == "" } {
-		    set save_next 1;
-		}
-	    }
-	    append res "${x} ";
-	    set got_re 1;
-	}
-    }
-
-    set body "expect [list $res]";
-
-    set code [catch {uplevel $body} string];
-
-    if {$code == 1} {
-	if { $error_sect != "" } {
-	    set code [catch {uplevel $error_sect} string];
-	} else {
-	    perror "uh, gdb_expect statement without a default case?!";
-	    return;
-	}
-    }
+    set code [catch {uplevel remote_expect host $args} string];
 
     if {$code == 1} {
 	return -code error -errorinfo $errorInfo -errorcode $errorCode $string
@@ -940,6 +860,26 @@ proc gdb_expect { args } {
     } elseif {$code > 4} {
 	return -code $code $string
     }
+}
+
+#
+# Set suppress_flag, which will cause all subsequent calls to send_gdb and
+# gdb_expect to fail immediately (until the next call to 
+# gdb_stop_suppressing_tests).
+#
+proc gdb_suppress_tests { } {
+    global suppress_flag;
+
+    incr suppress_flag;
+}
+
+#
+# Clear suppress_flag.
+#
+proc gdb_stop_suppressing_tests { } {
+    global suppress_flag;
+
+    set suppress_flag 0;
 }
 
 proc gdb_start { } {
@@ -965,6 +905,12 @@ proc gdb_continue { function } {
 }
 
 proc gdb_init { args } {
+    gdb_stop_suppressing_tests;
+
+    # Uh, this is lame. Really, really, really lame. But there's this *one*
+    # testcase that will fail in random places if we don't increase this.
+    match_max -d 20000
+
     if { [llength $args] > 0 } {
 	global pf_prefix
 
