@@ -146,7 +146,7 @@ stamp-lib: libopcodes.la
 
 libopcodes.a: stamp-lib ; @true
 
-POTFILES = $(BFD_H) $(HFILES) $(CFILES)
+POTFILES = $(HFILES) $(CFILES)
 po/POTFILES.in: @MAINT@ Makefile
 	for file in $(POTFILES); do echo $$file; done | sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
