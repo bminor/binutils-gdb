@@ -1,3 +1,8 @@
+2002-04-11  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* binutils-all/ar.exp (long_filenames): Use 'file delete' instead
+	of 'exec rm -f'.
+
 2002-04-10  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* binutils-all/ar.exp (long_filenames): Delete the abc... files

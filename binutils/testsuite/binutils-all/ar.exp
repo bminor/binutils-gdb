@@ -163,7 +163,7 @@ proc long_filenames { } {
     }
     close $f
 
-    exec rm -f $file1 $file2
+    file delete $file1 $file2
     pass $testname
 }
 
