@@ -4,6 +4,11 @@ forward-include "{srcdir}"config:m68k:xm-mpw.h xm.h
 
 forward-include "{srcdir}"config:m68k:xm-m68k.h 'm68k/xm-m68k.h'
 
+# Make a copy of this file and give it a different name, so it
+# won't be confused with GDB's serial.h.
+
+Duplicate -y "{MPW}"Interfaces:CIncludes:Serial.h MacSerial.h
+
 Echo "/* dummy */" >termio.h
 
 Set xdepfiles   " "

@@ -23,7 +23,9 @@
 
 #include <Types.h>
 #include <Devices.h>
-#include <Serial.h>
+/* This is the regular Mac Serial.h, but copied to a different name
+   so as not to get confused with the GDB serial.h above.  */
+#include "MacSerial.h"
 
 /* This is unused for now.  We just return a placeholder. */
 
