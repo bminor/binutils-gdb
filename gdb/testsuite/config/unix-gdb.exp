@@ -174,7 +174,7 @@ proc gdb_start {} {
 	    exit 1
 	}
     } else {
-	IF {[WHICH $GDB] != 0} then {
+	if {[which $GDB] != 0} then {
 	spawn $GDB
 	} else {
 	    error "$GDB does not exist."
