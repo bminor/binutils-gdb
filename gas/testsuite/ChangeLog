@@ -1,3 +1,13 @@
+Tue Jun 18 12:39:49 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* gas/h8300/cbranchh.s: Switch into h8300h mode.
+
+Mon Jun 10 14:14:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/all/cofftag.s, gas/all/cofftag.d: New test for COFF enum tag
+	with the same name as a global variable.
+	* gas/all/gas.exp: Run cofftag test for any COFF target.
+
 Thu Jun  6 12:30:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/m68k/all.exp: Pass -m68020 when assembling the disperr.s
