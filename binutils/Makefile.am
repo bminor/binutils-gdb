@@ -114,6 +114,7 @@ CC_FOR_TARGET = ` \
 
 check-DEJAGNU: site.exp
 	srcdir=`cd $(srcdir) && pwd`; export srcdir; \
+	r=`pwd`; export r; \
 	EXPECT=$(EXPECT); export EXPECT; \
 	if [ -f $(top_builddir)/../expect/expect ]; then \
 	  TCL_LIBRARY=`cd $(top_srcdir)/../tcl/library && pwd`; \
@@ -253,7 +254,7 @@ windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@
 .dep1: $(CFILES) $(GENERATED_CFILES)
 	rm -f .dep2
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
-	$(DEP) -f .dep2 $(ALL_CFLAGS) $?
+	$(DEP) -f .dep2 $(INCLUDES) $?
 	$(SHELL) $(srcdir)/../move-if-change .dep2 .dep1
 
 dep.sed: dep-in.sed config.status

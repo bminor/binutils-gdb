@@ -1,5 +1,11 @@
 Tue Aug  5 00:01:41 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am (check-DEJAGNU): Export r.
+	(.dep1): Use $(INCLUDES) rather than $(ALL_CFLAGS).
+	* Makefile.in: Rebuild.
+
+	* nlmheader.y: Use VERSIONK rather than VERSION.
+
 	* Makefile.am (STRIP_PROG): Change from strip.new to strip-new.
 	(NM_PROG): Change from nm.new to nm-new.
 	(TOOL_PROGS, install-exec-local): Adjust accordingly.
