@@ -225,6 +225,7 @@ void write_object_file()
 		if (text_fix_root) {
 			for (tmp = text_fix_root; tmp->fx_next; tmp = tmp->fx_next) ;;
 			tmp->fx_next=data_fix_root;
+			text_fix_tail = data_fix_tail;
 		} else
 		    text_fix_root=data_fix_root;
 		data_fix_root=NULL;
@@ -255,7 +256,16 @@ void write_object_file()
 		H_SET_DATA_SIZE(&headers, data_last_frag->fr_address);
 		data_last_frag->fr_address = H_GET_DATA_SIZE(&headers);
 		slide = H_GET_TEXT_SIZE(&headers); /* & in file of the data segment. */
-		
+#ifdef OBJ_BOUT
+#define RoundUp(N,S) (((N)+(S)-1)&-(S))
+		/* For b.out: If the data section has a strict alignment
+		   requirement, its load address in the .o file will be
+		   rounded up from the size of the text section.  These
+		   two values are *not* the same!  Similarly for the bss
+		   section....  */
+		slide = RoundUp (slide, 1 << section_alignment[SEG_DATA]);
+#endif
+
 		for (fragP = data_frag_root; fragP; fragP = fragP->fr_next) {
 			fragP->fr_address += slide;
 		} /* for each data frag */
@@ -266,9 +276,22 @@ void write_object_file()
 		H_SET_DATA_SIZE(&headers,0);
 		data_siz = 0;
 	}
-	
+
+#ifdef OBJ_BOUT
+	/* See above comments on b.out data section address.  */
+	{
+	  long bss_vma;
+	  if (data_last_frag == 0)
+	    bss_vma = H_GET_TEXT_SIZE (&headers);
+	  else
+	    bss_vma = data_last_frag->fr_address;
+	  bss_vma = RoundUp (bss_vma, 1 << section_alignment[SEG_BSS]);
+	  bss_address_frag.fr_address = bss_vma;
+	}
+#else
 	bss_address_frag.fr_address = (H_GET_TEXT_SIZE(&headers) + 
 				       H_GET_DATA_SIZE(&headers));
+#endif
 	
 	H_SET_BSS_SIZE(&headers,local_bss_counter);
 	
@@ -362,8 +385,18 @@ void write_object_file()
 			BAD_CASE( fragP->fr_type );
 			break;
 		} /* switch (fr_type) */
-		
-		know((fragP->fr_next == NULL) || ((fragP->fr_next->fr_address - fragP->fr_address) == (fragP->fr_fix + (fragP->fr_offset * fragP->fr_var))));
+
+		if (!((fragP->fr_next == NULL)
+#ifdef OBJ_BOUT
+		      || (fragP->fr_next == data_frag_root)
+#endif
+		      || ((fragP->fr_next->fr_address - fragP->fr_address)
+			  == (fragP->fr_fix + (fragP->fr_offset * fragP->fr_var)))))
+		  {
+		    fprintf (stderr, "assertion failed: file `%s', line %d\n",
+			     __FILE__, __LINE__ - 4);
+		    exit (1);
+		  }
 	} /* for each frag. */
 	
 #ifndef WORKING_DOT_WORD
@@ -714,7 +747,7 @@ segT		segment; /* SEG_DATA or SEG_TEXT */
 						offset=  lie->add->sy_frag->fr_address+ S_GET_VALUE(lie->add) + lie->addnum -
 						    (lie->sub->sy_frag->fr_address+ S_GET_VALUE(lie->sub));
 						if (offset<=-32768 || offset>=32767) {
-							if (flagseen['k'])
+							if (flagseen['K'])
 							    as_warn(".word %s-%s+%ld didn't fit",
 								    S_GET_NAME(lie->add),
 								    S_GET_NAME(lie->sub),
