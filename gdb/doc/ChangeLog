@@ -1,3 +1,7 @@
+2004-03-28  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.texinfo (TUI Commands): Document tui reg commands.
+
 2004-03-26  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.texinfo (TUI): Delete reference to --enable-tui.  Mention
