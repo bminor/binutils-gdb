@@ -598,7 +598,7 @@ mips_expect_timeout (const char *string, int timeout)
 int
 mips_expect (const char *string)
 {
-  return mips_expect_timeout (string, 2);
+  return mips_expect_timeout (string, remote_timeout);
 }
 
 /* Read the required number of characters into the given buffer (which
@@ -612,7 +612,7 @@ mips_getstring (char *string, int n)
   immediate_quit++;
   while (n > 0)
     {
-      c = SERIAL_READCHAR (mips_desc, 2);
+      c = SERIAL_READCHAR (mips_desc, remote_timeout);
 
       if (c == SERIAL_TIMEOUT)
 	{
@@ -928,7 +928,7 @@ mips_send_packet (const char *s, int get_ack)
 		{
 		  int rch;
 
-		  rch = mips_readchar (2);
+		  rch = mips_readchar (remote_timeout);
 		  if (rch == SYN)
 		    {
 		      ch = SYN;
@@ -940,7 +940,8 @@ mips_send_packet (const char *s, int get_ack)
 		}
 
 	      if (i == len)
-		(void) mips_receive_trailer (trlr, &garbage, &ch, 2);
+		(void) mips_receive_trailer (trlr, &garbage, &ch,
+					     remote_timeout);
 
 	      /* We don't bother checking the checksum, or providing an
 	         ACK to the packet. */
@@ -2308,7 +2309,7 @@ pmon_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 
       mips_expect ("Bpt ");
 
-      if (!mips_getstring (tbuff, 2))
+      if (!mips_getstring (tbuff, remote_timeout))
 	return 1;
       tbuff[2] = '\0';		/* terminate the string */
       if (sscanf (tbuff, "%d", &bpnum) != 1)
@@ -2776,7 +2777,7 @@ send_srec (char *srec, int len, CORE_ADDR addr)
 
       SERIAL_WRITE (mips_desc, srec, len);
 
-      ch = mips_readchar (2);
+      ch = mips_readchar (remote_timeout);
 
       switch (ch)
 	{
@@ -3133,7 +3134,8 @@ pmon_check_ack (char *mesg)
 
   if (!tftp_in_use)
     {
-      c = SERIAL_READCHAR (udp_in_use ? udp_desc : mips_desc, 2);
+      c = SERIAL_READCHAR (udp_in_use ? udp_desc : mips_desc,
+			   remote_timeout);
       if ((c == SERIAL_TIMEOUT) || (c != 0x06))
 	{
 	  fprintf_unfiltered (gdb_stderr,
@@ -3181,6 +3183,26 @@ mips_expect_download (char *string)
 }
 
 static void
+pmon_check_entry_address (char *entry_address, int final)
+{
+  char hexnumber[9];		/* includes '\0' space */
+  mips_expect_timeout (entry_address, tftp_in_use ? 15 : remote_timeout);
+  sprintf (hexnumber, "%x", final);
+  mips_expect (hexnumber);
+  mips_expect ("\r\n");
+}
+
+static int
+pmon_check_total (int bintotal)
+{
+  char hexnumber[9];		/* includes '\0' space */
+  mips_expect ("\r\ntotal = 0x");
+  sprintf (hexnumber, "%x", bintotal);
+  mips_expect (hexnumber);
+  return mips_expect_download (" bytes\r\n");
+}
+
+static void
 pmon_end_download (int final, int bintotal)
 {
   char hexnumber[9];		/* includes '\0' space */
@@ -3220,24 +3242,21 @@ pmon_end_download (int final, int bintotal)
   /* Wait for the stuff that PMON prints after the load has completed.
      The timeout value for use in the tftp case (15 seconds) was picked
      arbitrarily but might be too small for really large downloads. FIXME. */
-  if (mips_monitor == MON_LSI)
+  switch (mips_monitor)
     {
+    case MON_LSI:
       pmon_check_ack ("termination");
-      mips_expect_timeout ("Entry address is ", tftp_in_use ? 15 : 2);
+      pmon_check_entry_address ("Entry address is ", final);
+      if (!pmon_check_total (bintotal))
+	return;
+      break;
+    default:
+      pmon_check_entry_address ("Entry Address  = ", final);
+      pmon_check_ack ("termination");
+      if (!pmon_check_total (bintotal))
+	return;
+      break;
     }
-  else
-    mips_expect_timeout ("Entry Address  = ", tftp_in_use ? 15 : 2);
-
-  sprintf (hexnumber, "%x", final);
-  mips_expect (hexnumber);
-  mips_expect ("\r\n");
-  if (mips_monitor != MON_LSI)
-    pmon_check_ack ("termination");
-  mips_expect ("\r\ntotal = 0x");
-  sprintf (hexnumber, "%x", bintotal);
-  mips_expect (hexnumber);
-  if (!mips_expect_download (" bytes\r\n"))
-    return;
 
   if (tftp_in_use)
     remove (tftp_localname);	/* Remove temporary file */

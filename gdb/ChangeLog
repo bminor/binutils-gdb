@@ -1,3 +1,15 @@
+Wed Sep 13 03:08:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-mips.c (mips_expect, mips_getstring, mips_send_packet,
+ 	mips_send_packet, pmon_insert_breakpoint, send_srec,
+ 	pmon_check_ack, pmon_check_entry_address,
+ 	_initialize_remote_mips): Replace the magic two seconds with
+ 	``remote_timeout''.
+	(pmon_check_entry_address, pmon_check_total): New functions.  Use
+ 	``remote_timeout'' instead of magic two seconds.
+	(pmon_end_download): Rewrite.  Use pmon_check_entry_address and
+ 	pmon_check_total.
+
 2000-09-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* MAINTAINERS: Added myself.
