@@ -1,3 +1,9 @@
+Wed Jul  5 00:59:22 1995  Fred Fish  (fnf@cygnus.com)
+
+	* as.c (main):  Only use sbrk when HAVE_SBRK defined.
+	* configure.in:  Add test for sbrk.
+	* configure:  Regenerate using autoconf 2.4.
+
 Mon Jul  3 15:58:16 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.h (MAX_RELOC_EXPANSION): Bump to 6.

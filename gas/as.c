@@ -324,9 +324,12 @@ parse_args (pargc, pargv)
 	  exit (EXIT_SUCCESS);
 
 	case OPTION_EMULATION:
-	  /* Already handled; ignore it this time, except error checking.  */
+#ifdef USE_EMULATIONS
 	  if (strcmp (optarg, this_emulation->name))
 	    as_fatal ("multiple emulation names specified");
+#else
+	  as_fatal ("emulations not handled in this configuration");
+#endif
 	  break;
 
 	case OPTION_DUMPCONFIG:
@@ -537,13 +540,17 @@ main (argc, argv)
   if (flag_print_statistics)
     {
       extern char **environ;
+#ifdef HAVE_SBRK
       char *lim = (char *) sbrk (0);
+#endif
       long run_time = get_run_time () - start_time;
 
       fprintf (stderr, "%s: total time in assembly: %ld.%06ld\n",
 	       myname, run_time / 1000000, run_time % 1000000);
+#ifdef HAVE_SBRK
       fprintf (stderr, "%s: data size %ld\n",
 	       myname, (long) (lim - (char *) &environ));
+#endif
     }
 
   /* Use exit instead of return, because under VMS environments they

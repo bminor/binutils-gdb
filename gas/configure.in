@@ -533,6 +533,9 @@ AC_C_INLINE
 # VMS doesn't have unlink.
 AC_CHECK_FUNCS(unlink remove, break)
 
+# Some systems don't have sbrk().
+AC_CHECK_FUNCS(sbrk)
+
 # Some non-ANSI preprocessors botch requoting inside strings.  That's bad
 # enough, but on some of those systems, the assert macro relies on requoting
 # working properly!
