@@ -7,6 +7,22 @@
 
 This command runs the program until the begining of the main procedure.
 
+* New BSD Kernel Data Access Library (libkvm) interface
+
+Using ``target kvm'' it is now possible to debug kernel core dumps and
+live kernel memory images on various FreeBSD, NetBSD and OpenBSD
+platforms.  Currently supported (native-only) configurations are:
+
+FreeBSD/amd64			x86_64-*-freebsd*
+FreeBSD/i386			i?86-*-freebsd*
+NetBSD/i386			i?86-*-netbsd*
+NetBSD/m68k			m68*-*-netbsd*
+NetBSD/sparc			sparc-*-netbsd*
+OpenBSD/amd64			x86_64-*-openbsd*
+OpenBSD/i386			i?86-*-openbsd*
+OpenBSD/m68k			m68*-openbsd*
+OpenBSD/sparc			sparc-*-openbsd*
+
 * Signal trampoline code overhauled
 
 Many generic problems with GDB's signal handling code have been fixed.
