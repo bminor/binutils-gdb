@@ -1,3 +1,9 @@
+2003-04-06  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (Options): Add a reminder of the target specific
+	nature to the description of the i386 PE specific options, for
+	readers who have not read all the way through the manual.
+
 2003-04-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* configure.tgt: Fixed bug in list of targ_extra_emuls.
