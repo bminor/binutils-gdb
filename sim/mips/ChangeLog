@@ -1,3 +1,8 @@
+Fri Dec 27 22:48:51 1996  Mark Alexander  <marka@cygnus.com>
+
+	* gencode.c (build_instruction): Work around MSVC++ code gen bug
+	that messes up arithmetic shifts.
+
 Fri Dec 20 11:04:05 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* support.h:  Use _WIN32 instead of __WIN32__.  Also add defs for

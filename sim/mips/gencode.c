@@ -1680,6 +1680,11 @@ build_instruction (doisa, features, mips16, insn)
 	exit(9);
       }
 
+      /* Work around an MSC code generation bug by precomputing a value
+       * with the sign bit set.  */
+      if (insn->flags & ARITHMETIC)
+       printf("   %s highbit = (%s)1 << %d;\n", ltype, ltype, bits - 1);
+
       /* If register specified shift, then extract the relevant shift amount: */
       if (insn->flags & REG)
        printf("   op1 &= 0x%02X;\n",(bits - 1));
@@ -1701,7 +1706,7 @@ build_instruction (doisa, features, mips16, insn)
 	 since that would cause an undefined shift of the number of
 	 bits in the type.  */
       if (insn->flags & ARITHMETIC)
-       printf("   GPR[destreg] |= (op1 != 0 && (op2 & ((%s)1 << %d)) ? ((((%s)1 << op1) - 1) << (%d - op1)) : 0);\n",ltype,(bits - 1),ltype,bits);
+       printf("   GPR[destreg] |= (op1 != 0 && (op2 & highbit) ? ((((%s)1 << op1) - 1) << (%d - op1)) : 0);\n",ltype,bits);
 
       /* Ensure WORD values are sign-extended into 64bit registers */
       if ((bits == 32) && (gprlen == 64))
