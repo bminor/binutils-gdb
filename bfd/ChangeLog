@@ -1,3 +1,9 @@
+Tue Jun  8 20:28:02 1993  Mark Eichin  (eichin at tweedledumber)
+
+	* elfcode.h (elf_slurp_symbol_table): subtract section vma from
+	symbol value, since bfd symbols are section relative, but ELF
+	symbols aren't. 
+
 Tue Jun  8 12:08:27 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* cpu-i960.c, cpu-h8300.c (compatible): Make static.
