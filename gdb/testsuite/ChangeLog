@@ -1,3 +1,7 @@
+2003-11-15  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.trace/configure: Remove.
+
 2003-11-13  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.base/break.c: Add comments to aid finding line numbers for
