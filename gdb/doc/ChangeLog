@@ -1,3 +1,30 @@
+2002-08-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (GDBINT_TEX_TMPS): Define.
+	(gdbint.dvi, gdbint.pdf): Use
+	(GDB_TEX_TMPS): Define.
+	(gdb.dvi, gdb.pdf): Use.
+	(STABS_TEX_TMPS): Define.
+	(stabs.dvi, stabs.pdf): Use.
+	(GDB_DOC_SOURCE_INCLUDES): New macros.
+	(GDB_DOC_BUILD_INCLUDES, GDB_DOC_FILES): New macros.
+	(GDBINT_DOC_FILES_INCLUDES): New macros.
+	(GDBINT_DOC_BUILD_INCLUDES): New macros.
+	(GDBINT_DOC_FILES, STABS_DOC_SOURCE_INCLUDES): New macros.
+	(STABS_DOC_BUILD_INCLUDES, STABS_DOC_FILES): New macros.
+	(SFILES_DOC, SFILES_INCLUDED, SFILES_LOCAL): Delete macros.
+	(links2roff): Replace SFILES_INCLUDED with
+	GDB_DOC_SOURCE_INCLUDES.
+	(gdb.dvi, gdb_toc.html, gdb.pdf, gdb.info): Update dependencies.
+	(gdb.me, gdb.mm, gdb.ms): Update dependencies.
+	(gdbint.dvi, gdbint_toc.html, gdbint.pdf, gdbint.info): Update
+	dependencies.
+	(stabs.info, stabs_toc.html, stabs.pdf, stabs.dvi): Update
+	dependencies.
+	(gdbmi.texinfo): Delete rule.
+	(inc-hist.texinfo): Delete rule.
+	(rluser.texinfo): Delete rule.
+
 2002-08-23  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Update
