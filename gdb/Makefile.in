@@ -1,4 +1,4 @@
-#Copyright 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+#Copyright 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -404,8 +404,8 @@ rapp: $(RAPP_OBS)
 # Support for building Makefile out of configured pieces, automatically
 # generated dependencies, etc.  alldeps.mak is a file that contains
 # "make" variable definitions for all ALLDEPFILES, ALLDEPFILES_MAINDIR,
-# ALLDEPFILES_SUBDIR, ALLPARAM, and ALLCONFIG, all cadged from the current
-# contents of the config subdirectory.
+# ALLDEPFILES_SUBDIR, ALLDEPFILES_SUBSUBDIR, ALLPARAM, and ALLCONFIG,
+# all cadged from the current contents of the config subdirectory.
 
 alldeps.mak: ${srcdir}/config
 	rm -f alldeps.mak alldeps.tmp allparam.tmp allconfig.tmp
@@ -435,15 +435,20 @@ alldeps.mak: ${srcdir}/config
 	    >alldeps2.tmp
 	echo '# Start of "alldeps.mak" definitions' \
 	    >>alldeps.mak;
-	echo 'ALLDEPFILES = $$(ALLDEPFILES_MAINDIR) $$(ALLDEPFILES_SUBDIR)' \
+	echo 'ALLDEPFILES = $$(ALLDEPFILES_MAINDIR) $$(ALLDEPFILES_SUBDIR) $$(ALLDEP_FILES_SUBSUBDIR)' \
 	    >>alldeps.mak;
 	grep -v / alldeps2.tmp | \
 	  awk 'BEGIN {printf "ALLDEPFILES_MAINDIR="} \
 	    NR == 0 {printf $$0;} \
 	    NR != 0 {printf "\\\n" $$0} \
 	    END {printf "\n\n"}' >>alldeps.mak;
-	grep / alldeps2.tmp | \
+	grep / alldeps2.tmp | grep -v '/.*/' | \
 	  awk 'BEGIN {printf "ALLDEPFILES_SUBDIR="} \
+	    NR == 0 {printf $$0;} \
+	    NR != 0 {printf "\\\n" $$0} \
+	    END {printf "\n\n"}' >>alldeps.mak;
+	grep '/.*/' alldeps2.tmp | \
+	  awk 'BEGIN {printf "ALLDEPFILES_SUBSUBDIR="} \
 	    NR == 0 {printf $$0;} \
 	    NR != 0 {printf "\\\n" $$0} \
 	    END {printf "\n\n"}' >>alldeps.mak;
@@ -611,7 +616,7 @@ make-proto-gdb-1: ${TARFILES} ${TARDIRS} gdb.info
 	  for i in $(SFILES_SUBDIR) $(NONSRC_SUBDIR) $(ALLDEPFILES_SUBDIR); \
 	    do ln -s ../../$$i ../$$i ; done
 	cd proto-gdb.dir/config ; \
-	  for i in $(SFILES_SUBSUBDIR); \
+	  for i in $(SFILES_SUBSUBDIR) $(ALLDEPFILES_SUBSUBDIR); \
 	    do ln -s ../../../$$i ../$$i ; done
 	chmod og=u `find . -print`
 
