@@ -17,11 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifndef LANGUAGE_C
-#define LANGUAGE_C
-#endif
-#include <sym.h>
-#include <symconst.h>
+#include "coff/sym.h"			/* Needed for PDR below. */
+#include "coff/symconst.h"
 
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 

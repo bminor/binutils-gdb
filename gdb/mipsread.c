@@ -62,6 +62,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 
 #include "coff/mips.h"
+#include "coff/sym.h"
+#include "coff/symconst.h"
+
 #include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
@@ -206,10 +209,10 @@ static void
 read_mips_symtab PARAMS ((struct objfile *, int));
 
 static void
-read_the_mips_symtab PARAMS ((bfd *, int, CORE_ADDR));
+read_the_mips_symtab PARAMS ((bfd *, int, CORE_ADDR *));
 
 static int
-upgrade_type PARAMS ((struct type **, int, union aux_ent *, int));
+upgrade_type PARAMS ((struct type **, int, union aux_ext *, int));
 
 static void
 parse_partial_symbols PARAMS ((int, struct objfile *));
@@ -361,7 +364,7 @@ mipscoff_symfile_finish (objfile)
 
 static PTR
 xzalloc(size)
-     int size;
+     unsigned int size;
 {
 	PTR p = xmalloc(size);
 
@@ -826,6 +829,7 @@ add_pending(fh, sh, t)
 
 static void
 free_pending(f_idx)
+	int f_idx;
 {
 	register struct mips_pending *p, *q;
 
@@ -900,14 +904,14 @@ parse_symbol(sh, ax, bigend)
 		class = LOC_STATIC;
 		b = BLOCKVECTOR_BLOCK(BLOCKVECTOR(top_stack->cur_st),
 				      GLOBAL_BLOCK);
-		s = new_symbol(sh->iss);
+		s = new_symbol((char *)sh->iss);
 		SYMBOL_VALUE_ADDRESS(s) = (CORE_ADDR)sh->value;
 		goto data;
 
 	    case stStatic:	/* static data, goes into current block. */
 		class = LOC_STATIC;
 		b = top_stack->cur_block;
-		s = new_symbol(sh->iss);
+		s = new_symbol((char *)sh->iss);
 		SYMBOL_VALUE_ADDRESS(s) = (CORE_ADDR)sh->value;
 		goto data;
 
@@ -919,7 +923,7 @@ parse_symbol(sh, ax, bigend)
 		} else
 			class = LOC_LOCAL;
 		b = top_stack->cur_block;
-		s = new_symbol(sh->iss);
+		s = new_symbol((char *)sh->iss);
 		SYMBOL_VALUE(s) = sh->value;
 
 data:		/* Common code for symbols describing data */
@@ -965,7 +969,7 @@ data:		/* Common code for symbols describing data */
 		break;
 
 	    case stLabel:	/* label, goes into current block */
-		s = new_symbol(sh->iss);
+		s = new_symbol((char *)sh->iss);
 		SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;	/* so that it can be used */
 		SYMBOL_CLASS(s) = LOC_LABEL;		/* but not misused */
 		SYMBOL_VALUE_ADDRESS(s) = (CORE_ADDR)sh->value;
@@ -975,7 +979,7 @@ data:		/* Common code for symbols describing data */
 
 	    case stProc:	/* Procedure, usually goes into global block */
 	    case stStaticProc:	/* Static procedure, goes into current block */
-		s = new_symbol(sh->iss);
+		s = new_symbol((char *)sh->iss);
 		SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;
 		SYMBOL_CLASS(s) = LOC_BLOCK;
 		/* Type of the return value */
@@ -1060,7 +1064,7 @@ data:		/* Common code for symbols describing data */
 		    long max_value = 0;
 		    struct field *f;
 
-		    s = new_symbol(sh->iss);
+		    s = new_symbol((char *)sh->iss);
 		    SYMBOL_NAMESPACE(s) = STRUCT_NAMESPACE;
 		    SYMBOL_CLASS(s) = LOC_TYPEDEF;
 		    SYMBOL_VALUE(s) = 0;
@@ -1253,7 +1257,7 @@ data:		/* Common code for symbols describing data */
 		break;
 
 	    case stTypedef:	/* type definition */
-		s = new_symbol(sh->iss);
+		s = new_symbol((char *)sh->iss);
 		SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;
 		SYMBOL_CLASS(s) = LOC_TYPEDEF;
 		SYMBOL_BLOCK_VALUE(s) = top_stack->cur_block;
@@ -1577,6 +1581,7 @@ upgrade_type(tpp, tq, ax, bigend)
 static void
 parse_procedure(pr, bound)
 	PDR *pr;
+	int bound;
 {
 	struct symbol *s, *i;
 	SYMR *sh = (SYMR*)pr->isym;

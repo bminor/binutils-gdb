@@ -165,7 +165,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
 ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.4.7
+VERSION = 4.4.85
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -273,7 +273,7 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     copying.o $(DEPFILES) signame.o cplus-dem.o mem-break.o target.o \
     inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
     buildsym.o objfiles.o minsyms.o \
-    dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o # mipsread.o
+    dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 
