@@ -24,6 +24,7 @@
 
 struct gdbarch;
 struct regcache;
+struct regset;
 struct trad_frame_saved_reg;
 
 /* Register offsets for the general-purpose register set.  */
@@ -50,6 +51,12 @@ struct gdbarch_tdep
      definitions.  */
   int pc_regnum;
   int npc_regnum;
+
+  /* Register sets.  */
+  struct regset *gregset;
+  size_t sizeof_gregset;
+  struct regset *fpregset;
+  size_t sizeof_fpregset;
 
   /* Offset of saved PC in jmp_buf.  */
   int jb_pc_offset;

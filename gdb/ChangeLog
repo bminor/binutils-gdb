@@ -1,3 +1,14 @@
+2004-01-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.h (struct regset): Provide opaque declaration.
+	(struct gdbarch_tdep): Add gregset, sizeof_gregset,
+	fpregset and sizeof_fpregset members.
+	* sparc-tdep.c (struct regset): Provide opaque declaration.
+	(sparc_regset_from_core_section): New function.
+	(sparc32_gdbarch_init): Initialize TDEP->gregset,
+	TDEP->sizeof_gregset, TDEP->fpregset and TDEP->sizeof_fpregset.
+	Set regset_from_core_section when appropriate.
+
 2004-01-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.c (amd64_non_pod_p): New function.
