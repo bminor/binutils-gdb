@@ -61,7 +61,7 @@ proc test_ptype_of_templates {} {
 	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;((${ws}T5<int> & operator=\\(T5<int> const ?&\\);)|(${ws}T5\\(int\\);)|(${ws}T5\\((T5<int> const|const T5<int>) ?&\\);)|(${ws}~T5\\((void|)\\);)|(${ws}static void \\* operator new\\(unsigned( int| long)?\\);)|(${ws}static void operator delete\\(void ?\\*\\);)|(${ws}int value\\((void|)\\);))*${ws}\}\r\n$gdb_prompt $" {
 	    pass "ptype T5<int> (obsolescent gcc or gdb)"
 	}
-	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}void T5\\(int\\);${ws}void T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\(int\\);${ws}static void \\* operator new\\(unsigned( long|)\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}void T5\\(int\\);${ws}void T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\(int\\);${ws}static void \\* operator new\\(unsigned( int| long|)\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
 	    # This also triggers gdb/1113...
 	    kfail "gdb/1111" "ptype T5<int>"
 	}
@@ -87,7 +87,7 @@ proc test_ptype_of_templates {} {
 	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;((${ws}T5<int> & operator=\\(T5<int> const ?&\\);)|(${ws}T5\\(int\\);)|(${ws}T5\\(T5<int> const ?&\\);)|(${ws}~T5\\((void|)\\);)|(${ws}static void \\* operator new\\(unsigned( int| long)?\\);)|(${ws}static void operator delete\\(void ?\\*\\);)|(${ws}int value\\((void|)\\);))*${ws}\}\r\n$gdb_prompt $" {
 	    pass "ptype t5i (obsolescent gcc or gdb)"
 	}
-	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}void T5\\(int\\);${ws}void T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\(int\\);${ws}static void \\* operator new\\(unsigned( long|)\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}void T5\\(int\\);${ws}void T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\(int\\);${ws}static void \\* operator new\\(unsigned( int| long|)\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
 	    # This also triggers gdb/1113...
 	    kfail "gdb/1111" "ptype T5<int>"
 	}

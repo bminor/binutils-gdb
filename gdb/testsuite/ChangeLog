@@ -1,3 +1,8 @@
+2003-11-25  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/templates.exp (test_ptype_of_templates): Accept output
+	of new demangler.
+
 2003-11-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.arch/i386-unwind.exp: Use gdb_run_cmd and gdb_expect instead
