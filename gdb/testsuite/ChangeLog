@@ -1,3 +1,7 @@
+2005-02-03  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.base/interp.exp: New test.
+
 2005-01-24  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb.base/sigrepeat.exp, gdb.base/sigrepeat.c: New test.
