@@ -1,3 +1,9 @@
+Wed Nov 17 18:47:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mipsread.c: Change use of ECOFF information to correspond to
+	changes in bfd/libecoff.h.
+	(mipscoff_symfile_offsets): Made static.
+
 Wed Nov 17 09:43:31 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* valops.c (typecmp): improve prototype matching when calling
