@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on a Pyramidax under OSx 4.0 (4.2bsd).
-   Copyright (C) 1988, 1989 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1992  Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -94,12 +94,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 #define FETCH_INFERIOR_REGISTERS
-
-/* Compensate for lack of `vprintf' function.  */
-#define MISSING_VPRINTF
-
-
-/* Interface definitions for kernel debugger KDB.  */
-
-/* I have *no idea* how to debug OSx kernels, so this
-   is flushed, possible forever. */

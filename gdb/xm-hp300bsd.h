@@ -1,5 +1,5 @@
 /* Parameters for hosting on a Hewlett-Packard 9000/300, running bsd.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992  Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -60,9 +60,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   else									\
     addr = (int) &((struct user *)0)->u_pcb.pcb_fpregs.fpf_fpiar;	\
 }
-
-/* Compensate for lack of `vprintf' function.  */
-#define MISSING_VPRINTF
 
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT

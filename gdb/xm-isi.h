@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on an ISI Optimum V (3.05) under 4.3bsd.
-   Copyright (C) 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -38,9 +38,6 @@ extern int rloc[];  	/* Defined in isi-dep.c */
         else if (regno < 29) addr = (int) &((struct user *)0)->u_68881_regs \
             + 8 * 12 + (regno - 26) * 4;                        \
 }
-
-/* Compensate for lack of `vprintf' function.  */
-#define MISSING_VPRINTF
 
 /* Interface definitions for kernel debugger KDB.  */
 

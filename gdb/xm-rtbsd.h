@@ -1,5 +1,5 @@
 /* Definitions to host GDB on an IBM RT/PC running BSD Unix. 
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992  Free Software Foundation, Inc.
    Contributed by David Wood @ New York University (wood@lab.ultra.nyu.edu).
 
 This file is part of GDB.
@@ -26,9 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* This OS has the wait structure */
 #define HAVE_WAIT_STRUCT
-
-/* This unix does not have a libc with vprintf */
-#define MISSING_VPRINTF
 
 #ifdef HOSTING_ONLY
 /*

@@ -22,8 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Get rid of any system-imposed stack limit if possible.  */
 #define SET_STACK_LIMIT_HUGE
 
-#define MISSING_VPRINTF
-
 /* Address of U in kernel space */
 #define	KERNEL_U_ADDR		0x3fc000
 

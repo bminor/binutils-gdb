@@ -1,5 +1,5 @@
 /* Parameters for execution on a Sony/NEWS, for GDB, the GNU debugger.
-   Copyright (C) 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -43,9 +43,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	/*fp0-fp7:*/19,22,25,28,31,34,37,40, /*fpc:*/16,17,18 }; \
 	addr = blockend + 4 * offsets[regno]; \
 }
-
-/* Compensate for lack of `vprintf' function.  */
-#define MISSING_VPRINTF
 
 /* NewsOS 3 apparently dies on large alloca's -- roland@ai.mit.edu.  */
 #define	BROKEN_LARGE_ALLOCA

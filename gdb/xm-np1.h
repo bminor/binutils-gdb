@@ -1,5 +1,5 @@
 /* Parameters for execution on a Gould NP1, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -41,8 +41,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Don't try to write the frame pointer.  */
 #define CANNOT_STORE_REGISTER(regno) ((regno) == FP_REGNUM)
-
-#define MISSING_VPRINTF
 
 /*
  * No KDB support, Yet! */

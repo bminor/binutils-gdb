@@ -1,3 +1,9 @@
+Mon Jan 27 13:43:26 1992  John Gilmore  (gnu at cygnus.com)
+
+	* xm-convex.h, xm-hp300bsd.h, xm-isi.h, xm-merlin.h, xm-news.h,
+	xm-np1.h, xm-pn.h, xm-pyr.h, xm-rtbsd.h, xm-symmetry.h, xm-umax.h:
+	Remove MISSING_VPRINTF declaration, and superfluous "kgdb" defines.
+
 Mon Jan 27 13:00:55 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (OPCODES):  Remove OPCODES defs and refs.  There is

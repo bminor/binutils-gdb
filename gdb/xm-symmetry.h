@@ -1,6 +1,6 @@
 /* Definitions to make GDB run on a Sequent Symmetry under dynix 3.0,
    with Weitek 1167 and i387 support.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992  Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -137,10 +137,6 @@ switch (regno) { \
 	 ((int) &foo.u_fpasave.fpa_regs[(regno)-18] - (int)&foo); \
   } \
 }
-
-/* Compensate for lack of `vprintf' function.  */
-
-#define MISSING_VPRINTF
 
 /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 

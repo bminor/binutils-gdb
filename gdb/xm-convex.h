@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on Convex Unix (4bsd)
-   Copyright (C) 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1989, 1991, 1992  Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -32,14 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    turkeys SIGTSTP.  I think.  */
 
 #define STOP_SIGNAL SIGCONT
-
-/* Use csh to do argument expansion so we get ~ and such.  */
-
-/* Doesn't work.  */
-/* #define SHELL_FILE "/bin/csh" */
-
-/* Compensate for lack of `vprintf' function.  */
-#define MISSING_VPRINTF
 
 /* Hook to call after creating inferior process.  */
 

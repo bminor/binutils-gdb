@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on an encore under umax 4.2
-   Copyright (C) 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -59,6 +59,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	abort ();							\
   }									\
 }
-
-/* Compensate for lack of `vprintf' function.  */
-#define MISSING_VPRINTF
