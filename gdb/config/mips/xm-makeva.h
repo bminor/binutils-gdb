@@ -16,20 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Mips hosts need aligned va_list arguments.  */
-
-#define MAKEVA_ARG(list, argaddr, argsize) \
-  { \
-    int rounded_argsize; \
-    if (argsize > 8) \
-      /* Currently this never happens; printf_command only uses argsize */ \
-      /* of sizeof (int), sizeof (double), or sizeof (long long).  */ \
-      error ("MAKEVA_ARG not fully written for mips"); \
-    if (argsize <= 4) \
-      rounded_argsize = 4; \
-    else if (argsize <= 8) \
-      rounded_argsize = 8; \
-    list->argindex = (list->argindex + rounded_argsize - 1) & -rounded_argsize; \
-    memcpy (&list->aligner.arg_bytes[list->argindex], argaddr, argsize); \
-    list->argindex += argsize; \
-  }
+/* "makeva" is obsolete.  This file can probably go away (unless someone
+   can think of some other host thing which is common to various mips
+   machines).  */

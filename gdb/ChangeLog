@@ -1,3 +1,17 @@
+Wed Oct 13 11:47:23 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* printcmd.c (printf_command): Instead of using makeva* and
+	calling vprintf, just make the appropriate calls to printf.
+	* printcmd.c, config/pa/xm-pa.h, config/mips/xm-makeva.h,
+	config/alpha/xm-alpha.h, config/m88k/xm-m88k.h: Remove all
+	traces of makeva*.  My apologies to everyone (including me!)
+	who spent so much time getting it to work on various machines,
+	but look at the bright side, at least you won't have to do it
+	again in the future.
+
+	* printcmd.c (printf_command): Make a cleanup for val_args (fixes
+	a memory leak).
+
 Tue Oct 12 22:54:41 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/mips/xm-mips.h: Remove comment about HAVE_SGTTY vs. usleep.
