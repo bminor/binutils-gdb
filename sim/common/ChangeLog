@@ -1,3 +1,7 @@
+2002-11-27  Richard Sandiford  <rsandifo@redhat.com>
+
+	* sim-fpu.c (sim_fpu_inv): Use sim_fpu_div.
+
 2002-11-22  Andrew Cagney  <ac131313@redhat.com>
 
 	* dv-core.c: Update copyright.  sim/common contributed to the FSF.
