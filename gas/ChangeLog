@@ -1,3 +1,13 @@
+2000-08-01  Nick Clifton  <nickc@redhat.com>
+
+	* doc/c-m68k.texi (section M680x0 Options): Turn into a table
+	index by command line option.
+	
+2000-08-01  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* doc/c-m68k.texi (@cindex @samp{--pcrel}): Rewrite option description.
+	(@node M68K-Branch): Rewrite to match the reality.
+
 2000-07-31  Jason Eckhardt  <jle@cygnus.com>
 
 	* doc/c-i860.texi: New file.
