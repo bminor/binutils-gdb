@@ -1,5 +1,8 @@
 2003-07-22  Alexandre Oliva  <aoliva@redhat.com>
 
+	* config/tc-h8300.c (get_specific): No PCREL8 encoding for bsr/bc
+	or bsr/bs.
+
 	* config/tc-h8300.c (md_assemble): Make sure characters after
 	slash and dot are lower-case.
 

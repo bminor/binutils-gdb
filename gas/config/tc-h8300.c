@@ -1197,9 +1197,11 @@ get_specific (instruction, operands, size)
 		}
 	      else if (op_mode == PCREL && op_mode == x_mode)
 		{
-		  /* movsd only comes in PCREL16 flavour:
+		  /* movsd, bsr/bc and bsr/bs only come in PCREL16 flavour:
 		     If x_size is L_8, promote it.  */
-		  if (OP_KIND (this_try->opcode->how) == O_MOVSD)
+		  if (OP_KIND (this_try->opcode->how) == O_MOVSD
+		      || OP_KIND (this_try->opcode->how) == O_BSRBC
+		      || OP_KIND (this_try->opcode->how) == O_BSRBS)
 		    if (x_size == L_8)
 		      x_size = L_16;
 
