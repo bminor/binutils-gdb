@@ -59,7 +59,7 @@ struct exception
 {
   enum return_reason reason;
   enum errors error;
-  char *message;
+  const char *message;
 };
 
 /* A pre-defined non-exception.  */

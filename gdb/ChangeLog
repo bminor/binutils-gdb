@@ -1,5 +1,9 @@
 2005-01-13  Andrew Cagney  <cagney@gnu.org>
 
+	* exceptions.h (struct exception): Make message const.
+	* mi/mi-main.c (mi_execute_command): Pass result.message directly
+	to fputstr_unfiltered.
+
 	* defs.h (error_last_message, error_init): Delete declaration.
 	* utils.c (fatal, vfatal): Call throw_vfatal.
 	(error, verror): Call throw_verror;

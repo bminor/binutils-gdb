@@ -1166,13 +1166,11 @@ mi_execute_command (char *cmd, int from_tty)
 	}
       if (result.reason < 0)
 	{
-	  char *msg = result.message;
-	  struct cleanup *cleanup = make_cleanup (xfree, msg);
 	  /* The command execution failed and error() was called
 	     somewhere */
 	  fputs_unfiltered (command->token, raw_stdout);
 	  fputs_unfiltered ("^error,msg=\"", raw_stdout);
-	  fputstr_unfiltered (msg, '"', raw_stdout);
+	  fputstr_unfiltered (result.message, '"', raw_stdout);
 	  fputs_unfiltered ("\"\n", raw_stdout);
 	}
       mi_parse_free (command);
