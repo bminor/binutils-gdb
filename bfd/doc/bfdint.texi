@@ -3,9 +3,11 @@
 
 @settitle BFD Internals
 @iftex
+@titlepage
 @title{BFD Internals}
 @author{Ian Lance Taylor}
 @author{Cygnus Solutions}
+@page
 @end iftex
 
 @node Top
