@@ -1,5 +1,8 @@
 Wed Sep 28 08:59:14 1994  Jim Kingdon  (kingdon@cygnus.com)
 
+	* xcoffread.c (read_xcoff_symtab, case C_FILE):
+	Set main_aux before using it.
+
 	* xcoffexec.c (exec_close): If quitting, don't call clear_symtab_users.
 
 	* xcoffread.c (read_xcoff_symtab): Process XTY_LD symbols we were

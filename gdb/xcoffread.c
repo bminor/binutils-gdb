@@ -1459,7 +1459,11 @@ read_xcoff_symtab (objfile, nsyms)
 	 the symbol is ".file" and an auxent exists, otherwise use the symbol
 	 itself.  Simple enough.  */
       if (!strcmp (cs->c_name, ".file") && cs->c_naux > 0)
-	filestring = coff_getfilename (&main_aux);
+	{
+	  bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
+				0, cs->c_naux, &main_aux);
+	  filestring = coff_getfilename (&main_aux);
+	}
       else
 	filestring = cs->c_name;
 
