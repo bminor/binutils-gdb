@@ -1,7 +1,7 @@
 #
 #   This file is part of the program psim.
 #
-#   Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
+#   Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -48,13 +48,14 @@ man9dir = $(mandir)/man9
 infodir = @infodir@
 includedir = @includedir@
 
+# This can be referenced by the gettext configuration code.
+top_builddir = ..
+
 SHELL = /bin/sh
 
-INSTALL = $(srcroot)/install-sh -c
+INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
-INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
-INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
 AR = @AR@
 AR_FLAGS = rc
@@ -149,6 +150,9 @@ INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES)
 
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
 BFD_LIB		= ../../bfd/libbfd.a
+
+INTLLIBS = @INTLLIBS@
+INTLDEPS = @INTLDEPS@
 
 TARGETLIB	= libsim.a
 
@@ -316,8 +320,8 @@ PACKAGE_SRC = @sim_pk_src@
 PACKAGE_OBJ = @sim_pk_obj@
 
 
-psim: $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBS)
-	$(CC) $(CFLAGS) $(SIM_CFLAGS) $(LDFLAGS) -o psim main.o $(TARGETLIB) $(BFD_LIB) $(LIBIBERTY_LIB) $(LIBS)
+psim: $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBS) $(INTLDEPS)
+	$(CC) $(CFLAGS) $(SIM_CFLAGS) $(LDFLAGS) -o psim main.o $(TARGETLIB) $(BFD_LIB) $(INTLLIBS) $(LIBIBERTY_LIB) $(LIBS)
 
 run: psim
 	rm -f run
@@ -647,6 +651,9 @@ stamp-h: config.in config.status
 config.status: configure
 	$(SHELL) ./config.status --recheck
 
-install:
-	$(INSTALL_XFORM) run $(bindir)/run
+install: installdirs
+	n=`echo run | sed '$(program_transform_name)'`; \
+	$(INSTALL_PROGRAM) run $(bindir)/$$n
 
+installdirs:
+	$(SHELL) $(srcdir)/../../mkinstalldirs $(bindir)
