@@ -1,3 +1,9 @@
+Thu Jul  4 12:00:37 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* VERSION: Set to 2.7.1.
+
+	* Released binutils 2.7.
+
 Wed Jul  3 14:59:47 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386aout.c: Include "aout/aout64.h".
