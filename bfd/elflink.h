@@ -313,12 +313,10 @@ elf_link_add_archive_symbols (abfd, info)
     return true;
   amt = c;
   amt *= sizeof (boolean);
-  defined = (boolean *) bfd_malloc (amt);
-  included = (boolean *) bfd_malloc (amt);
+  defined = (boolean *) bfd_zmalloc (amt);
+  included = (boolean *) bfd_zmalloc (amt);
   if (defined == (boolean *) NULL || included == (boolean *) NULL)
     goto error_return;
-  memset (defined, 0, (size_t) amt);
-  memset (included, 0, (size_t) amt);
 
   symdefs = bfd_ardata (abfd)->symdefs;
 
@@ -3665,10 +3663,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       BFD_ASSERT (s != NULL);
       hash_entry_size = elf_section_data (s)->this_hdr.sh_entsize;
       s->_raw_size = ((2 + bucketcount + dynsymcount) * hash_entry_size);
-      s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
+      s->contents = (bfd_byte *) bfd_zalloc (output_bfd, s->_raw_size);
       if (s->contents == NULL)
 	return false;
-      memset (s->contents, 0, (size_t) s->_raw_size);
 
       bfd_put (8 * hash_entry_size, output_bfd, (bfd_vma) bucketcount,
 	       s->contents);
@@ -5809,6 +5806,15 @@ elf_bfd_final_link (abfd, info)
 		goto error_return;
 	    }
 	}
+    }
+
+  if (info->relocateable)
+    {
+      boolean failed = false;
+
+      bfd_map_over_sections (abfd, bfd_elf_set_group_contents, &failed);
+      if (failed)
+	goto error_return;
     }
 
   /* If we have optimized stabs strings, output them.  */

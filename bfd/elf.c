@@ -54,7 +54,6 @@ static const char *group_signature PARAMS ((bfd *, Elf_Internal_Shdr *));
 static boolean setup_group PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 static void merge_sections_remove_hook PARAMS ((bfd *, asection *));
 static void elf_fake_sections PARAMS ((bfd *, asection *, PTR));
-static void set_group_contents PARAMS ((bfd *, asection *, PTR));
 static boolean assign_section_numbers PARAMS ((bfd *));
 static INLINE int sym_is_global PARAMS ((bfd *, asymbol *));
 static boolean elf_map_symbols PARAMS ((bfd *));
@@ -2358,7 +2357,7 @@ elf_fake_sections (abfd, asect, failedptrarg)
       if ((asect->flags & SEC_STRINGS) != 0)
 	this_hdr->sh_flags |= SHF_STRINGS;
     }
-  if (elf_group_name (asect) != NULL)
+  if ((asect->flags & SEC_GROUP) == 0 && elf_group_name (asect) != NULL)
     this_hdr->sh_flags |= SHF_GROUP;
   if ((asect->flags & SEC_THREAD_LOCAL) != 0)
     this_hdr->sh_flags |= SHF_TLS;
@@ -2382,11 +2381,11 @@ elf_fake_sections (abfd, asect, failedptrarg)
 
 /* Fill in the contents of a SHT_GROUP section.  */
 
-static void
-set_group_contents (abfd, sec, failedptrarg)
+void
+bfd_elf_set_group_contents (abfd, sec, failedptrarg)
      bfd *abfd;
      asection *sec;
-     PTR failedptrarg ATTRIBUTE_UNUSED;
+     PTR failedptrarg;
 {
   boolean *failedptr = (boolean *) failedptrarg;
   unsigned long symindx;
@@ -2399,16 +2398,22 @@ set_group_contents (abfd, sec, failedptrarg)
       || *failedptr)
     return;
 
-  /* If called from the assembler, swap_out_syms will have set up
-     elf_section_syms;  If called for "ld -r", the symbols won't yet
-     be mapped, so emulate elf_bfd_final_link.  */
-  if (elf_section_syms (abfd) != NULL)
-    symindx = elf_section_syms (abfd)[sec->index]->udata.i;
-  else
-    symindx = elf_section_data (sec)->this_idx;
+  symindx = 0;
+  if (elf_group_id (sec) != NULL)
+    symindx = elf_group_id (sec)->udata.i;
+
+  if (symindx == 0)
+    {
+      /* If called from the assembler, swap_out_syms will have set up
+	 elf_section_syms;  If called for "ld -r", use target_index.  */
+      if (elf_section_syms (abfd) != NULL)
+	symindx = elf_section_syms (abfd)[sec->index]->udata.i;
+      else
+	symindx = sec->target_index;
+    }
   elf_section_data (sec)->this_hdr.sh_info = symindx;
 
-  /* Nor will the contents be allocated for "ld -r" or objcopy.  */
+  /* The contents won't be allocated for "ld -r" or objcopy.  */
   gas = true;
   if (sec->contents == NULL)
     {
@@ -2959,9 +2964,9 @@ _bfd_elf_compute_section_file_positions (abfd, link_info)
 	return false;
     }
 
-  if (link_info == NULL || link_info->relocateable)
+  if (link_info == NULL)
     {
-      bfd_map_over_sections (abfd, set_group_contents, &failed);
+      bfd_map_over_sections (abfd, bfd_elf_set_group_contents, &failed);
       if (failed)
 	return false;
     }
@@ -5144,10 +5149,9 @@ swap_out_syms (abfd, sttp, relocatable_p)
   if (symtab_shndx_hdr->sh_name != 0)
     {
       amt = (bfd_size_type) (1 + symcount) * sizeof (Elf_External_Sym_Shndx);
-      outbound_shndx = bfd_alloc (abfd, amt);
+      outbound_shndx = bfd_zalloc (abfd, amt);
       if (outbound_shndx == NULL)
 	return false;
-      memset (outbound_shndx, 0, (unsigned long) amt);
       symtab_shndx_hdr->contents = outbound_shndx;
       symtab_shndx_hdr->sh_type = SHT_SYMTAB_SHNDX;
       symtab_shndx_hdr->sh_size = amt;

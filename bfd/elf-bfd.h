@@ -916,8 +916,13 @@ struct bfd_elf_section_data
   /* Type of that information.  */
   enum elf_link_info_type sec_info_type;
 
-  /* Group name, if this section is part of a group.  */
-  const char *group_name;
+  union {
+    /* Group name, if this section is a member of a group.  */
+    const char *name;
+
+    /* Group signature sym, if this is the SHT_GROUP section.  */
+    struct symbol_cache_entry *id;
+  } group;
 
   /* A linked list of sections in the group.  Circular when used by
      the linker.  */
@@ -934,7 +939,8 @@ struct bfd_elf_section_data
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
-#define elf_group_name(sec)    (elf_section_data(sec)->group_name)
+#define elf_group_name(sec)    (elf_section_data(sec)->group.name)
+#define elf_group_id(sec)      (elf_section_data(sec)->group.id)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
 #define elf_linkonce_p(sec)    (elf_section_data(sec)->linkonce_p)
 
@@ -1265,6 +1271,8 @@ extern boolean _bfd_elf_merge_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf_discard_group
   PARAMS ((bfd *, struct sec *));
+extern void bfd_elf_set_group_contents
+  PARAMS ((bfd *, asection *, PTR));
 extern void _bfd_elf_link_just_syms
   PARAMS ((asection *, struct bfd_link_info *));
 extern boolean _bfd_elf_copy_private_symbol_data

@@ -1,5 +1,23 @@
 2002-06-07  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct bfd_elf_section_data <group_name>): Replace with
+	"group" union.
+	(elf_group_name): Update.
+	(elf_group_id): Define.
+	(bfd_elf_set_group_contents): Declare.
+	* elf.c (elf_fake_sections): Qualify use of elf_group_name.
+	(set_group_contents): Rename to bfd_elf_set_group_contents.  Remove
+	ATTRIBUTE_UNUSED from failedptrarg.  If elf_group_id is set, use
+	that sym for the signature.
+	(_bfd_elf_compute_section_file_positions): Don't call
+	set_group_contents for "ld -r" case.
+	(swap_out_syms): Use bfd_zalloc.
+	* elflink.h (elf_link_add_archive_symbols): Likewise.
+	(NAME(bfd_elf,size_dynamic_sections)): Likewise.
+	(elf_bfd_final_link): Call bfd_elf_set_group_contents.
+
+2002-06-07  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc64_elf_relocate_section): Allow unresolved
 	relocs in opd for non-shared too.
 
