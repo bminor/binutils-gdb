@@ -2745,6 +2745,12 @@ ppc_bfd_coff_final_link (abfd, info)
 
 	      sec = p->u.indirect.section;
 
+	      /* Mark all sections which are to be included in the
+		 link.  This will normally be every section.  We need
+		 to do this so that we can identify any sections which
+		 the linker has decided to not include.  */
+	      sec->flags |= SEC_LINKER_MARK;
+
 	      if (info->strip == strip_none
 		  || info->strip == strip_some)
 		o->lineno_count += sec->lineno_count;
@@ -2920,7 +2926,7 @@ ppc_bfd_coff_final_link (abfd, info)
 	      if (! sub->output_has_begun)
 #endif
 		{
-		  if (! coff_link_input_bfd (&finfo, sub))
+		  if (! _bfd_coff_link_input_bfd (&finfo, sub))
 		    goto error_return;
 		  sub->output_has_begun = true;
 		}
@@ -2928,7 +2934,7 @@ ppc_bfd_coff_final_link (abfd, info)
 	  else if (p->type == bfd_section_reloc_link_order
 		   || p->type == bfd_symbol_reloc_link_order)
 	    {
-	      if (! coff_reloc_link_order (abfd, &finfo, o, p))
+	      if (! _bfd_coff_reloc_link_order (abfd, &finfo, o, p))
 		goto error_return;
 	    }
 	  else
@@ -2945,14 +2951,14 @@ ppc_bfd_coff_final_link (abfd, info)
     bfd* last_one = ppc_get_last();
     if (last_one)
       {
-	if (! coff_link_input_bfd (&finfo, last_one))
+	if (! _bfd_coff_link_input_bfd (&finfo, last_one))
 	  goto error_return;
       }
     last_one->output_has_begun = true;
   }
 #endif
 
-  /* Free up the buffers used by coff_link_input_bfd.  */
+  /* Free up the buffers used by _bfd_coff_link_input_bfd.  */
 
   coff_debug_merge_hash_table_free (&finfo.debug_merge);
   debug_merge_allocated = false;
@@ -3012,12 +3018,12 @@ ppc_bfd_coff_final_link (abfd, info)
 
   /* Write out the global symbols.  */
   finfo.failed = false;
-  coff_link_hash_traverse (coff_hash_table (info), coff_write_global_sym,
+  coff_link_hash_traverse (coff_hash_table (info), _bfd_coff_write_global_sym,
 			   (PTR) &finfo);
   if (finfo.failed)
     goto error_return;
 
-  /* The outsyms buffer is used by coff_write_global_sym.  */
+  /* The outsyms buffer is used by _bfd_coff_write_global_sym.  */
   if (finfo.outsyms != NULL)
     {
       free (finfo.outsyms);

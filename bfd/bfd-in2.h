@@ -333,6 +333,10 @@ typedef struct _symbol_info
   short stab_desc;             /* Stab desc.  */
   CONST char *stab_name;       /* String for stab type.  */
 } symbol_info;
+
+/* Get the name of a stabs type code.  */
+
+extern const char *bfd_get_stab_name PARAMS ((int));
 
 /* Hash table routines.  There is no way to free up a hash table.  */
 
@@ -613,7 +617,9 @@ extern boolean bfd_sunos_size_dynamic_sections
 
 /* Linux shared library support routines for the linker.  */
 
-extern boolean bfd_linux_size_dynamic_sections
+extern boolean bfd_i386linux_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_m68klinux_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
 /* mmap hacks */
@@ -884,6 +890,10 @@ typedef struct sec
 	   based on the address specified in the associated symbol
 	   table.  */
 #define SEC_SORT_ENTRIES 0x80000
+
+	 /* A mark flag used by some of the linker backends.  This
+	   should not be set by application code.  */
+#define SEC_LINKER_MARK 0x100000
 
 	 /*  End of section flags.  */
 

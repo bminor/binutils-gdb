@@ -3217,6 +3217,12 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 
 	      sec = p->u.indirect.section;
 
+	      /* Mark all sections which are to be included in the
+		 link.  This will normally be every section.  We need
+		 to do this so that we can identify any sections which
+		 the linker has decided to not include.  */
+	      sec->flags |= SEC_LINKER_MARK;
+
 	      if (info->strip == strip_none
 		  || info->strip == strip_some)
 		o->lineno_count += sec->lineno_count;
@@ -4570,6 +4576,12 @@ xcoff_link_input_bfd (finfo, input_bfd)
   for (o = input_bfd->sections; o != NULL; o = o->next)
     {
       bfd_byte *contents;
+
+      if ((o->flags & SEC_LINKER_MARK) == 0)
+	{
+	  /* This section was omitted from the link.  */
+	  continue;
+	}
 
       if ((o->flags & SEC_HAS_CONTENTS) == 0
 	  || o->_raw_size == 0

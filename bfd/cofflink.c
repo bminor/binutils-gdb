@@ -485,12 +485,17 @@ _bfd_coff_final_link (abfd, info)
       o->lineno_count = 0;
       for (p = o->link_order_head; p != NULL; p = p->next)
 	{
-
 	  if (p->type == bfd_indirect_link_order)
 	    {
 	      asection *sec;
 
 	      sec = p->u.indirect.section;
+
+	      /* Mark all sections which are to be included in the
+		 link.  This will normally be every section.  We need
+		 to do this so that we can identify any sections which
+		 the linker has decided to not include.  */
+	      sec->flags |= SEC_LINKER_MARK;
 
 	      if (info->strip == strip_none
 		  || info->strip == strip_some)
@@ -1079,11 +1084,11 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
   output_index = syment_base;
   outsym = finfo->outsyms;
 
-  if (coff_data(output_bfd)->pe)
-      {
-	if (!process_embedded_commands (output_bfd, finfo->info, input_bfd))
-	  return false;
-      }
+  if (coff_data (output_bfd)->pe)
+    {
+      if (! process_embedded_commands (output_bfd, finfo->info, input_bfd))
+	return false;
+    }
 
   while (esym < esym_end)
     {
@@ -1196,9 +1201,9 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 
 	  /* Ignore fake names invented by compiler; treat them all as
              the same name.  */
-	  if (*name == '~' || *name == '.'
+	  if (*name == '~' || *name == '.' || *name == '$'
 	      || (*name == bfd_get_symbol_leading_char (input_bfd)
-		  && (name[1] == '~' || name[1] == '.')))
+		  && (name[1] == '~' || name[1] == '.' || name[1] == '$')))
 	    name = "";
 
 	  mh = coff_debug_merge_hash_lookup (&finfo->debug_merge, name,
@@ -1551,7 +1556,9 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
                              the index of the next symbol we are going
                              to include.  I don't know if this is
                              entirely right.  */
-			  while (finfo->sym_indices[indx] < 0
+			  while ((finfo->sym_indices[indx] < 0
+				  || ((bfd_size_type) finfo->sym_indices[indx]
+				      < syment_base))
 				 && indx < obj_raw_syment_count (input_bfd))
 			    ++indx;
 			  if (indx >= obj_raw_syment_count (input_bfd))
@@ -1742,6 +1749,12 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
   for (o = input_bfd->sections; o != NULL; o = o->next)
     {
       bfd_byte *contents;
+
+      if ((o->flags & SEC_LINKER_MARK) == 0)
+	{
+	  /* This section was omitted from the link.  */
+	  continue;
+	}
 
       if ((o->flags & SEC_HAS_CONTENTS) == 0)
 	{
@@ -2126,9 +2139,10 @@ _bfd_coff_reloc_link_order (output_bfd, finfo, output_section, link_order)
     {
       struct coff_link_hash_entry *h;
 
-      h = coff_link_hash_lookup (coff_hash_table (finfo->info),
-				 link_order->u.reloc.p->u.name,
-				 false, false, true);
+      h = ((struct coff_link_hash_entry *)
+	   bfd_wrapped_link_hash_lookup (output_bfd, finfo->info,
+					 link_order->u.reloc.p->u.name,
+					 false, false, true));
       if (h != NULL)
 	{
 	  if (h->indx >= 0)

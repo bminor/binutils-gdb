@@ -3681,6 +3681,19 @@ NAME(aout,final_link) (abfd, info, callback)
   for (sub = info->input_bfds; sub != (bfd *) NULL; sub = sub->link_next)
     sub->output_has_begun = false;
 
+  /* Mark all sections which are to be included in the link.  This
+     will normally be every section.  We need to do this so that we
+     can identify any sections which the linker has decided to not
+     include.  */
+  for (o = abfd->sections; o != NULL; o = o->next)
+    {
+      for (p = o->link_order_head; p != NULL; p = p->next)
+	{
+	  if (p->type == bfd_indirect_link_order)
+	    p->u.indirect.section->flags |= SEC_LINKER_MARK;
+	}
+    }
+
   have_link_order_relocs = false;
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     {
@@ -3836,16 +3849,25 @@ aout_link_input_bfd (finfo, input_bfd)
     return false;
 
   /* Relocate and write out the sections.  These functions use the
-     symbol map created by aout_link_write_symbols.  */
-  if (! aout_link_input_section (finfo, input_bfd,
-				 obj_textsec (input_bfd),
-				 &finfo->treloff,
-				 exec_hdr (input_bfd)->a_trsize)
-      || ! aout_link_input_section (finfo, input_bfd,
-				    obj_datasec (input_bfd),
-				    &finfo->dreloff,
-				    exec_hdr (input_bfd)->a_drsize))
-    return false;
+     symbol map created by aout_link_write_symbols.  SEC_LINKER_MARK
+     will be set if these sections are to be included in the link,
+     which will normally be the case.  */
+  if ((obj_textsec (input_bfd)->flags & SEC_LINKER_MARK) != 0)
+    {
+      if (! aout_link_input_section (finfo, input_bfd,
+				     obj_textsec (input_bfd),
+				     &finfo->treloff,
+				     exec_hdr (input_bfd)->a_trsize))
+	return false;
+    }
+  if ((obj_datasec (input_bfd)->flags & SEC_LINKER_MARK) != 0)
+    {
+      if (! aout_link_input_section (finfo, input_bfd,
+				     obj_datasec (input_bfd),
+				     &finfo->dreloff,
+				     exec_hdr (input_bfd)->a_drsize))
+	return false;
+    }
 
   /* If we are not keeping memory, we don't need the symbols any
      longer.  We still need them if we are keeping memory, because the
@@ -3971,6 +3993,11 @@ aout_link_write_symbols (finfo, input_bfd)
 	     in the hash table, provided we first check that it is an
 	     external symbol. */
 	  h = *sym_hash;
+
+	  /* Use the name from the hash table, in case the symbol was
+             wrapped.  */
+	  if (h != NULL)
+	    name = h->root.root.string;
 
 	  /* If this is an indirect or warning symbol, then change
 	     hresolve to the base symbol.  We also change *sym_hash so
@@ -4862,16 +4889,19 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	    {
 	      const char *name;
 
-	      name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
+	      if (h != NULL)
+		name = h->root.root.string;
+	      else
+		name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
 	      if (! ((*finfo->info->callbacks->undefined_symbol)
 		     (finfo->info, name, input_bfd, input_section, r_addr)))
 		return false;
 	    }
 
 	  r = MY_final_link_relocate (howto,
-					input_bfd, input_section,
-					contents, r_addr, relocation,
-					(bfd_vma) 0);
+				      input_bfd, input_section,
+				      contents, r_addr, relocation,
+				      (bfd_vma) 0);
 	}
 
       if (r != bfd_reloc_ok)
@@ -5246,16 +5276,19 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 	    {
 	      const char *name;
 
-	      name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
+	      if (h != NULL)
+		name = h->root.root.string;
+	      else
+		name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
 	      if (! ((*finfo->info->callbacks->undefined_symbol)
 		     (finfo->info, name, input_bfd, input_section, r_addr)))
 		return false;
 	    }
 
 	  r = MY_final_link_relocate (howto_table_ext + r_type,
-					input_bfd, input_section,
-					contents, r_addr, relocation,
-					r_addend);
+				      input_bfd, input_section,
+				      contents, r_addr, relocation,
+				      r_addend);
 	  if (r != bfd_reloc_ok)
 	    {
 	      switch (r)
@@ -5330,8 +5363,9 @@ aout_link_reloc_link_order (finfo, o, p)
 
       BFD_ASSERT (p->type == bfd_symbol_reloc_link_order);
       r_extern = 1;
-      h = aout_link_hash_lookup (aout_hash_table (finfo->info),
-				 pr->u.name, false, false, true);
+      h = ((struct aout_link_hash_entry *)
+	   bfd_wrapped_link_hash_lookup (finfo->output_bfd, finfo->info,
+					 pr->u.name, false, false, true));
       if (h != (struct aout_link_hash_entry *) NULL
 	  && h->indx >= 0)
 	r_index = h->indx;

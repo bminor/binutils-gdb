@@ -1,5 +1,22 @@
 Wed Mar 27 10:43:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* section.c (SEC_LINKER_MARK): Define.
+	* bfd-in2.h: Rebuild.
+	* aoutx.h (NAME(aout,final_link)): Mark sections included in the
+	link.
+	(aout_link_input_bfd): Don't link unmarked sections.
+	* cofflink.c (_bfd_coff_final_link): Mark sections included in the
+	link.
+	(_bfd_coff_link_input_bfd): Don't link unmarked sections.
+	* coff-ppc.c (ppc_bfd_coff_final_link): Mark sections included in
+	the link.
+	* elflink.h (elf_bfd_final_link): Mark sections included in the
+	link.
+	(elf_link_input_bfd): Don't link unmarked sections.
+	* xcofflink.c (_bfd_xcoff_bfd_final_link): Mark sections included
+	in the link.
+	(xcoff_link_input_bfd): Don't link unmarked sections.
+
 	* coffswap.h (coff_swap_scnhdr_out): Include section name in
 	overflow error messages.
 

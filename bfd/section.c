@@ -1,5 +1,5 @@
 /* Object file "section" support for the BFD library.
-   Copyright (C) 1990, 1991, 1992, 1993, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -268,6 +268,10 @@ CODE_FRAGMENT
 .	   based on the address specified in the associated symbol
 .	   table.  *}
 .#define SEC_SORT_ENTRIES 0x80000
+.
+.	{* A mark flag used by some of the linker backends.  This
+.	   should not be set by application code.  *}
+.#define SEC_LINKER_MARK 0x100000
 .
 .	{*  End of section flags.  *}
 .
