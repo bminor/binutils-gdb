@@ -2168,7 +2168,7 @@ find_opcode_match (first_opcode, tok, pntok, pcpumatch)
 	 && !strcmp (opcode->name, first_opcode->name));
 
   if (*pcpumatch)
-      *pcpumatch = got_cpu_match;
+    *pcpumatch = got_cpu_match;
 
   return NULL;
 }
@@ -2501,42 +2501,43 @@ emit_insn (insn)
 	  size = 4;
 	  pcrel = ((operand->flags & AXP_OPERAND_RELATIVE) != 0);
 	}
-      else switch (fixup->reloc)
-	{
+      else
+	switch (fixup->reloc)
+	  {
 #ifdef OBJ_ELF
-	  /* These relocation types are only used internally.  */
-	case BFD_RELOC_ALPHA_GPDISP_HI16:
-	case BFD_RELOC_ALPHA_GPDISP_LO16:
-	  size = 2;
-	  pcrel = 0;
-	  break;
+	    /* These relocation types are only used internally.  */
+	  case BFD_RELOC_ALPHA_GPDISP_HI16:
+	  case BFD_RELOC_ALPHA_GPDISP_LO16:
+	    size = 2;
+	    pcrel = 0;
+	    break;
 #endif
 #ifdef RELOC_OP_P
-	  /* and these also are internal only relocations */
-	case BFD_RELOC_ALPHA_USER_LITERAL:
-	case BFD_RELOC_ALPHA_USER_LITUSE_BASE:
-	case BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF:
-	case BFD_RELOC_ALPHA_USER_LITUSE_JSR:
-	case BFD_RELOC_ALPHA_USER_GPDISP:
-	case BFD_RELOC_ALPHA_USER_GPRELHIGH:
-	case BFD_RELOC_ALPHA_USER_GPRELLOW:
-	  size = 2;
-	  pcrel = 0;
-	  break;
+	    /* and these also are internal only relocations */
+	  case BFD_RELOC_ALPHA_USER_LITERAL:
+	  case BFD_RELOC_ALPHA_USER_LITUSE_BASE:
+	  case BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF:
+	  case BFD_RELOC_ALPHA_USER_LITUSE_JSR:
+	  case BFD_RELOC_ALPHA_USER_GPDISP:
+	  case BFD_RELOC_ALPHA_USER_GPRELHIGH:
+	  case BFD_RELOC_ALPHA_USER_GPRELLOW:
+	    size = 2;
+	    pcrel = 0;
+	    break;
 #endif
 
-	default:
-	  {
-	    reloc_howto_type *reloc_howto
-	      = bfd_reloc_type_lookup (stdoutput, fixup->reloc);
-	    assert (reloc_howto);
+	  default:
+	    {
+	      reloc_howto_type *reloc_howto
+		= bfd_reloc_type_lookup (stdoutput, fixup->reloc);
+	      assert (reloc_howto);
 
-	    size = bfd_get_reloc_size (reloc_howto);
-	    pcrel = reloc_howto->pc_relative;
+	      size = bfd_get_reloc_size (reloc_howto);
+	      pcrel = reloc_howto->pc_relative;
+	    }
+	    assert (size >= 1 && size <= 4);
+	    break;
 	  }
-	  assert (size >= 1 && size <= 4);
-	  break;
-	}
 
       fixP = fix_new_exp (frag_now, f - frag_now->fr_literal, size,
 			  &fixup->exp, pcrel, fixup->reloc);
@@ -2660,7 +2661,7 @@ assemble_tokens_to_insn (opname, tok, ntok, insn)
 	as_bad (_("inappropriate arguments for opcode `%s'"), opname);
       else
 	as_bad (_("opcode `%s' not supported for target %s"), opname,
-	        alpha_target_name);
+		alpha_target_name);
     }
   else
     as_bad (_("unknown opcode `%s'"), opname);
@@ -2854,7 +2855,7 @@ add_to_link_pool (basesym, sym, addend)
 	  {
 	    if (range_signed_16 (offset))
 	      {
-	        return offset;
+		return offset;
 	      }
 	  }
       }
@@ -3850,7 +3851,7 @@ emit_sextX (tok, ntok, vlgsize)
       expressionS newtok[3];
 
 #ifdef RELOC_OP_P
-  if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
+      if (ntok && USER_RELOC_P (tok[ntok-1].X_op))
 	{
 	  const expressionS *reloc_exp = &tok[ntok-1];
 	  const struct alpha_reloc_op_tag *r
@@ -3960,7 +3961,7 @@ emit_division (tok, ntok, symname)
 	{
 	  set_tok_reg (newtok[0], xr);
 	  set_tok_reg (newtok[1], AXP_REG_R16);
-          assemble_tokens ("mov", newtok, 2, 1);
+	  assemble_tokens ("mov", newtok, 2, 1);
 	}
 
       if (yr != AXP_REG_R16 && yr != AXP_REG_R17)
@@ -4072,7 +4073,7 @@ emit_division (tok, ntok, symname)
 	{
 	  set_tok_reg (newtok[0], xr);
 	  set_tok_reg (newtok[1], AXP_REG_T10);
-          assemble_tokens ("mov", newtok, 2, 1);
+	  assemble_tokens ("mov", newtok, 2, 1);
 	}
 
       if (yr != AXP_REG_T10 && yr != AXP_REG_T11)
@@ -4534,9 +4535,9 @@ s_alpha_mask (fp)
   if (ECOFF_DEBUGGING)
     {
       if (fp)
-        ecoff_directive_fmask (0);
+	ecoff_directive_fmask (0);
       else
-        ecoff_directive_mask (0);
+	ecoff_directive_mask (0);
     }
   else
     discard_rest_of_line ();
@@ -4570,20 +4571,20 @@ s_alpha_prologue (ignore)
 
   switch (arg)
     {
-      case 0: /* No PV required.  */
-	S_SET_OTHER (sym, STO_ALPHA_NOPV
-			  | (S_GET_OTHER (sym) & ~STO_ALPHA_STD_GPLOAD));
-	break;
-      case 1: /* Std GP load.  */
-	S_SET_OTHER (sym, STO_ALPHA_STD_GPLOAD
-			  | (S_GET_OTHER (sym) & ~STO_ALPHA_STD_GPLOAD));
-	break;
-      case 2: /* Non-std use of PV.  */
-	break;
+    case 0: /* No PV required.  */
+      S_SET_OTHER (sym, STO_ALPHA_NOPV
+		   | (S_GET_OTHER (sym) & ~STO_ALPHA_STD_GPLOAD));
+      break;
+    case 1: /* Std GP load.  */
+      S_SET_OTHER (sym, STO_ALPHA_STD_GPLOAD
+		   | (S_GET_OTHER (sym) & ~STO_ALPHA_STD_GPLOAD));
+      break;
+    case 2: /* Non-std use of PV.  */
+      break;
 
-      default:
-	as_bad (_("Invalid argument %d to .prologue."), arg);
-	break;
+    default:
+      as_bad (_("Invalid argument %d to .prologue."), arg);
+      break;
     }
 }
 
@@ -4869,25 +4870,25 @@ s_alpha_pdesc (ignore)
   seginfo->literal_pool_size += 16;
 
   *p = alpha_evax_proc.pdsckind
-       | ((alpha_evax_proc.framereg == 29) ? PDSC_S_M_BASE_REG_IS_FP : 0);
+    | ((alpha_evax_proc.framereg == 29) ? PDSC_S_M_BASE_REG_IS_FP : 0);
   *(p+1) = PDSC_S_M_NATIVE
-	   | PDSC_S_M_NO_JACKET;
+    | PDSC_S_M_NO_JACKET;
 
   switch (alpha_evax_proc.pdsckind)
     {
-      case PDSC_S_K_KIND_NULL:
-	*(p+2) = 0;
-	*(p+3) = 0;
-	break;
-      case PDSC_S_K_KIND_FP_REGISTER:
-	*(p+2) = alpha_evax_proc.fp_save;
-	*(p+3) = alpha_evax_proc.ra_save;
-	break;
-      case PDSC_S_K_KIND_FP_STACK:
-	md_number_to_chars (p+2, (valueT) alpha_evax_proc.rsa_offset, 2);
-	break;
-      default:		/* impossible */
-	break;
+    case PDSC_S_K_KIND_NULL:
+      *(p+2) = 0;
+      *(p+3) = 0;
+      break;
+    case PDSC_S_K_KIND_FP_REGISTER:
+      *(p+2) = alpha_evax_proc.fp_save;
+      *(p+3) = alpha_evax_proc.ra_save;
+      break;
+    case PDSC_S_K_KIND_FP_STACK:
+      md_number_to_chars (p+2, (valueT) alpha_evax_proc.rsa_offset, 2);
+      break;
+    default:		/* impossible */
+      break;
     }
 
   *(p+4) = 0;
@@ -5440,7 +5441,7 @@ s_alpha_arch (ignored)
   for (p = cpu_types; p->name; ++p)
     if (strcmp (name, p->name) == 0)
       {
-        alpha_target_name = p->name, alpha_target = p->flags;
+	alpha_target_name = p->name, alpha_target = p->flags;
 	goto found;
       }
   as_warn ("Unknown CPU identifier `%s'", name);
@@ -5457,26 +5458,26 @@ found:
 
 static void
 alpha_print_token (f, exp)
-    FILE *f;
-    const expressionS *exp;
+     FILE *f;
+     const expressionS *exp;
 {
   switch (exp->X_op)
     {
-      case O_cpregister:
-	putc (',', f);
-	/* FALLTHRU */
-      case O_pregister:
-	putc ('(', f);
-	{
-	  expressionS nexp = *exp;
-	  nexp.X_op = O_register;
-	  print_expr (f, &nexp);
-	}
-	putc (')', f);
-	break;
-      default:
-	print_expr (f, exp);
-	break;
+    case O_cpregister:
+      putc (',', f);
+      /* FALLTHRU */
+    case O_pregister:
+      putc ('(', f);
+      {
+	expressionS nexp = *exp;
+	nexp.X_op = O_register;
+	print_expr (f, &nexp);
+      }
+      putc (')', f);
+      break;
+    default:
+      print_expr (f, exp);
+      break;
     }
   return;
 }
@@ -5712,8 +5713,8 @@ alpha_handle_align (fragp)
 {
   static char const unop[4] = { 0x00, 0x00, 0xe0, 0x2f };
   static char const nopunop[8] = {
-	0x1f, 0x04, 0xff, 0x47,
-	0x00, 0x00, 0xe0, 0x2f
+    0x1f, 0x04, 0xff, 0x47,
+    0x00, 0x00, 0xe0, 0x2f
   };
 
   int bytes, fix;
