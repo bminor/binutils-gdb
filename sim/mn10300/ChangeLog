@@ -1,3 +1,13 @@
+Sun May 18 16:46:31 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* interp.c (load_mem_big): Remove function.  It's now a macro
+	defined elsewhere.
+	(compare_simops): New function.
+	(sim_open): Sort the Simops table before inserting entries
+	into the hash table.
+	* mn10300_sim.h: Remove unused #defines.
+	(load_mem_big): Define.
+
 Fri May 16 16:36:17 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* interp.c (load_mem): If we get a load from an out of range

@@ -234,32 +234,6 @@ put_word (addr, data)
   a[3] = (data >> 24) & 0xff;
 }
 
-
-uint32
-load_mem_big (addr, len)
-     SIM_ADDR addr;
-     int len;
-{
-  uint8 *p = addr + State.mem;
-
-  if (addr > max_mem)
-    abort ();
-
-  switch (len)
-    {
-    case 1:
-      return p[0];
-    case 2:
-      return p[0] << 8 | p[1];
-    case 3:
-      return p[0] << 16 | p[1] << 8 | p[2];
-    case 4:
-      return p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3];
-    default:
-      abort ();
-    }
-}
-
 uint32
 load_mem (addr, len)
      SIM_ADDR addr;
@@ -357,6 +331,22 @@ sim_write (sd, addr, buffer, size)
   return size;
 }
 
+/* Compare two opcode table entries for qsort.  */
+static int
+compare_simops (arg1, arg2)
+     const PTR arg1;
+     const PTR arg2;
+{
+  unsigned long code1 = ((struct simops *)arg1)->opcode;
+  unsigned long code2 = ((struct simops *)arg2)->opcode;
+
+  if (code1 < code2)
+    return -1;
+  if (code2 < code1)
+    return 1;
+  return 0;
+}
+
 SIM_DESC
 sim_open (kind,argv)
      SIM_OPEN_KIND kind;
@@ -365,6 +355,14 @@ sim_open (kind,argv)
   struct simops *s;
   struct hash_entry *h;
   char **p;
+  int i;
+
+  /* Sort the opcode array from smallest opcode to largest.
+     This will generally improve simulator performance as the smaller
+     opcodes are generally preferred to the larger opcodes.  */
+  for (i = 0, s = Simops; s->func; s++, i++)
+    ;
+  qsort (Simops, i, sizeof (Simops[0]), compare_simops);
 
   sim_kind = kind;
   myname = argv[0];
