@@ -269,7 +269,7 @@ i387_fill_fxsave (char *fxsave, int regnum)
 	      {
 		/* Converting back is much easier.  */
 
-		unsigned char val = 0;
+		unsigned short val = 0;
 		unsigned short ftag;
 		int fpreg;
 
@@ -280,7 +280,7 @@ i387_fill_fxsave (char *fxsave, int regnum)
 		    int tag = (ftag >> (fpreg * 2)) & 3;
 
 		    if (tag != 3)
-		      val |= (1 << (fpreg * 2));
+		      val |= (1 << fpreg);
 		  }
 
 		memcpy (FXSAVE_ADDR (fxsave, i), &val, 2);
