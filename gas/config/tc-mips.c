@@ -258,6 +258,7 @@ static int mips_fp32 = 0;
    require nops to be inserted.  */
 
 #define hilo_interlocks (mips_arch == CPU_R4010                       \
+                         || mips_arch == CPU_SB1                      \
                          )
 
 /* Whether the processor uses hardware interlocks to protect reads
@@ -270,6 +271,7 @@ static int mips_fp32 = 0;
    (co-processor) interlocks.  */
 /* Itbl support may require additional care here.  */
 #define cop_interlocks (mips_arch == CPU_R4300                        \
+                        || mips_arch == CPU_SB1                       \
 			)
 
 /* Is this a mfhi or mflo instruction?  */
