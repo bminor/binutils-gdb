@@ -41,7 +41,9 @@ Boston, MA 02111-1307, USA.  */
    it out. */
 
 static size_t pagesize;
+#if NEED_DECLARATION_GETPAGESIZE
 extern int getpagesize PARAMS ((void));
+#endif
 
 #define PAGE_ALIGN(addr) (caddr_t) (((long)(addr) + pagesize - 1) & \
 				    ~(pagesize - 1))

@@ -1423,6 +1423,53 @@ EOF
 
 fi
 
+echo $ac_n "checking whether getpagesize must be declared""... $ac_c" 1>&6
+echo "configure:1428: checking whether getpagesize must be declared" >&5
+if eval "test \"`echo '$''{'bfd_cv_decl_needed_getpagesize'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1433 "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+int main() {
+char *(*pfn) = (char *(*)) getpagesize
+; return 0; }
+EOF
+if { (eval echo configure:1454: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  bfd_cv_decl_needed_getpagesize=no
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  bfd_cv_decl_needed_getpagesize=yes
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$bfd_cv_decl_needed_getpagesize" 1>&6
+if test $bfd_cv_decl_needed_getpagesize = yes; then
+  cat >> confdefs.h <<\EOF
+#define NEED_DECLARATION_GETPAGESIZE 1
+EOF
+
+fi
+
 
 trap '' 1 2 15
 cat > confcache <<\EOF

@@ -30,5 +30,6 @@ AC_FUNC_MMAP
 AC_CHECK_HEADERS(limits.h stddef.h unistd.h)
 
 BFD_NEED_DECLARATION(sbrk)
+BFD_NEED_DECLARATION(getpagesize)
 
 AC_OUTPUT(Makefile)
