@@ -24,6 +24,7 @@
 #include "arch-utils.h"
 #include "command.h"
 #include "dummy-frame.h"
+#include "dwarf2-frame.h"
 #include "doublest.h"
 #include "floatformat.h"
 #include "frame.h"
@@ -1713,6 +1714,10 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Add the i386 register groups.  */
   i386_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
+
+  /* Hook in the DWARF CFI frame unwinder.  */
+  frame_unwind_append_predicate (gdbarch, dwarf2_frame_p);
+  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
 
   frame_base_set_default (gdbarch, &i386_frame_base);
 

@@ -1,5 +1,9 @@
 2003-05-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c: Include "dwarf2-frame.h".
+	(i386_gdbarch_init): Hook in the DWARF CFI frame unwinder.
+	* Makefile.in (i386-tdep.o): Update dependencies.
+
 	* dwarf2-frame.c, dwarf2-frame.h: New files.
 	* Makefile.in (SFILES): Add dwarf2-frame.c.
 	(dwarf2_frame_h): Define.

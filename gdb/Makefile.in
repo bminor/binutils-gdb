@@ -1798,11 +1798,11 @@ i386-sol2-tdep.o: i386-sol2-tdep.c $(defs_h) $(value_h) $(i386_tdep_h) \
 	$(osabi_h)
 i386-stub.o: i386-stub.c
 i386-tdep.o: i386-tdep.c $(defs_h) $(arch_utils_h) $(command_h) \
-	$(dummy_frame_h) $(doublest_h) $(floatformat_h) $(frame_h) \
-	$(frame_base_h) $(frame_unwind_h) $(inferior_h) $(gdbcmd_h) \
-	$(gdbcore_h) $(objfiles_h) $(osabi_h) $(regcache_h) $(reggroups_h) \
-	$(symfile_h) $(symtab_h) $(target_h) $(value_h) $(gdb_assert_h) \
-	$(gdb_string_h) $(i386_tdep_h) $(i387_tdep_h)
+	$(dummy_frame_h) $(dwarf2_frame_h) $(doublest_h) $(floatformat_h) \
+	$(frame_h) $(frame_base_h) $(frame_unwind_h) $(inferior_h) \
+	$(gdbcmd_h) $(gdbcore_h) $(objfiles_h) $(osabi_h) $(regcache_h) \
+	$(reggroups_h) $(symfile_h) $(symtab_h) $(target_h) $(value_h) \
+	$(gdb_assert_h) $(gdb_string_h) $(i386_tdep_h) $(i387_tdep_h)
 i386b-nat.o: i386b-nat.c $(defs_h)
 i386bsd-nat.o: i386bsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gdb_assert_h) $(gregset_h) $(i386_tdep_h) $(i387_tdep_h) \
