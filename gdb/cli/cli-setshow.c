@@ -266,11 +266,6 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
       if (c->pre_show_hook)
 	(c->pre_show_hook) (c);
 
-      /* Print doc minus "show" at start.  */
-      print_doc_line (gdb_stdout, c->doc + 5);
-
-      ui_out_text (uiout, " is ");
-      ui_out_wrap_hint (uiout, "    ");
       quote = 0;
       switch (c->var_type)
 	{
@@ -333,12 +328,30 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	default:
 	  error ("gdb internal error: bad var_type in do_setshow_command");
 	}
-      if (quote)
-	ui_out_text (uiout, "\"");
-      ui_out_field_stream (uiout, "value", stb);
-      if (quote)
-	ui_out_text (uiout, "\"");
-      ui_out_text (uiout, ".\n");
+
+
+      /* FIXME: cagney/2005-02-10: Need to split this in half: code to
+	 convert the value into a string (esentially the above); and
+	 code to print the value out.  For the latter there should be
+	 MI and CLI specific versions.  */
+
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_stream (uiout, "value", stb);
+      else
+	{
+	  /* Print doc minus "show" at start.  */
+	  print_doc_line (gdb_stdout, c->doc + 5);
+
+	  ui_out_text (uiout, " is ");
+	  ui_out_wrap_hint (uiout, "    ");
+	  if (quote)
+	    ui_out_text (uiout, "\"");
+	  ui_out_field_stream (uiout, "value", stb);
+	  if (quote)
+	    ui_out_text (uiout, "\"");
+	  ui_out_text (uiout, ".\n");
+	  do_cleanups (old_chain);
+	}
       do_cleanups (old_chain);
     }
   else

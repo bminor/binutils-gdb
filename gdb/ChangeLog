@@ -1,3 +1,9 @@
+2005-02-10  Andrew Cagney  <cagney@gnu.org>
+
+	* cli/cli-setshow.c (do_setshow_command): Move code printing the
+	value to the end of the function.  Handle MI and non-MI output
+	differently.
+
 2005-02-09  Andrew Cagney  <cagney@gnu.org>
 
 	* cli/cli-decode.c (add_setshow_enum_cmd): Drop set_result and
