@@ -1,3 +1,12 @@
+2003-04-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* disasm.c (dump_insns):  Move variables inside loop, or they will
+        be freed more than once, causing wild memory corruptions.
+	(gdb_disassembly): Look for the substring "-thread",
+        instead of "-threads" in the target name, to make sure to find
+        the 'multi-thread' target.  Also, make sure we do the right thing 
+        with the "core" target.
+
 2003-04-07  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-tdep.c (mips_print_fp_register): New function, created from
