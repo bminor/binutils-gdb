@@ -1,3 +1,7 @@
+2001-10-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* README, NEWS: Update for 5.1.
+
 2001-10-24  Daniel Jacobowitz  <drow@mvista.com>
 
 	* arm-linux-nat.c (fill_gregset): Do not check register_valid[].
