@@ -21,12 +21,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
-#define REGISTER_BYTES (NUM_REGS * 4)
-
 #define REGISTER_SIZE 4
 #define MAX_REGISTER_RAW_SIZE 4
-
 #define NUM_REGS 14
+
+#define REGISTER_BYTES (NUM_REGS * REGISTER_SIZE)
 
 #define REGISTER_NAMES \
 { "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3", \
@@ -68,6 +67,10 @@ struct value;
 #endif
 
 #define EXTRA_FRAME_INFO struct frame_saved_regs fsr;
+
+extern void mn10300_init_extra_frame_info PARAMS ((struct frame_info *fi));
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fi) mn10300_init_extra_frame_info (fi)
+#define INIT_FRAME_PC		/* Not necessary */
 
 extern void mn10300_frame_find_saved_regs PARAMS ((struct frame_info *fi, struct frame_saved_regs *regaddr));
 #define FRAME_FIND_SAVED_REGS(fi, regaddr) regaddr = fi->fsr

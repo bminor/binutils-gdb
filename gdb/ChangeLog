@@ -1,3 +1,12 @@
+Tue Jan 21 17:03:26 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* mn10300-tdep.c: wrote/fixed implementations of
+	mn10300_frame_chain, mn10300_init_extra_frame_info,
+	mn10300_frame_saved_pc
+	* config/mn10300/tm-mn10300.h: redefine INIT_EXTRA_FRAME_INFO
+	and INIT_FRAME_PC macros
+	Backtracing starting to work correctly.
+
 Tue Jan 21 17:01:20 1997  Stu Grossman  (grossman@lisa.cygnus.com)
 
 	* configure.in configure:  Check if host has libm.  Make sure we
