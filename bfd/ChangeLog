@@ -1,5 +1,17 @@
 2005-03-30  Julian Brown  <julian@codesourcery.com>
 
+	* bfd-in.h (bfd_is_arm_mapping_symbol_name): Rename from
+	bfd_elf32_is_arm_mapping_symbol_name.
+	* bfd-in2.h: Regenerate.
+	* cpu-arm.c (bfd_is_arm_mapping_symbol_name): Rename from
+	bfd_elf32_is_arm_mapping_symbol_name.
+	* elf32-arm.c (elf32_arm_is_target_special_symbol): Rename
+	bfd_elf32_is_arm_mapping_symbol_name to bfd_is_arm_mapping_symbol_name.
+	(arm_elf_find_function): Likewise.
+	(elf32_arm_output_symbol_hook): Likewise.
+
+2005-03-30  Julian Brown  <julian@codesourcery.com>
+
 	* bfd-in.h (bfd_elf32_is_arm_mapping_symbol_name): Add prototype.
 	* bfd-in2.h: Regenerate.
 	* elf32-arm.c (elf32_arm_is_target_special_symbol): Rename call to

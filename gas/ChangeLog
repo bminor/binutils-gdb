@@ -1,5 +1,10 @@
 2005-03-30  Julian Brown  <julian@codesourcery.com>
 
+	* config/tc-arm.c (arm_adjust_symtab): Rename
+	bfd_elf32_is_arm_mapping_symbol_name to bfd_is_arm_mapping_symbol_name.
+
+2005-03-30  Julian Brown  <julian@codesourcery.com>
+
 	* config/tc-arm.c (mapping_state): Change documentation in function
 	comment to cross-reference spec instead. Change type of mapping symbols
 	to BSF_NO_TYPE.

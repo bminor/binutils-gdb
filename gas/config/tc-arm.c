@@ -13669,7 +13669,7 @@ arm_adjust_symtab (void)
 	  elf_sym = elf_symbol (symbol_get_bfdsym (sym));
 	  bind = ELF_ST_BIND (elf_sym->internal_elf_sym.st_info);
 
-	  if (! bfd_elf32_is_arm_mapping_symbol_name (elf_sym->symbol.name))
+	  if (! bfd_is_arm_mapping_symbol_name (elf_sym->symbol.name))
 	    { 
 	      /* If it's a .thumb_func, declare it as so,
 		 otherwise tag label as .code 16.  */

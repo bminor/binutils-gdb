@@ -402,7 +402,7 @@ bfd_arm_get_mach_from_notes (bfd *abfd, const char *note_section)
 }
 
 bfd_boolean
-bfd_elf32_is_arm_mapping_symbol_name (const char * name)
+bfd_is_arm_mapping_symbol_name (const char * name)
 {
   return (name != NULL)
     && (name[0] == '$')
