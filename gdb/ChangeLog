@@ -1,3 +1,7 @@
+Fri Sep 25 18:48:20 1992  John Gilmore  (gnu@cygnus.com)
+
+	* infrun.c, inftarg.c, inferior.h:  Comment and lint cleanups.
+
 Fri Sep 25 15:13:44 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* tm-sparc.h, dbxread.c (read_ofile_symtab):  Install Jim Wilson's

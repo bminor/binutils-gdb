@@ -1,6 +1,4 @@
-/* Target independent code for starting (run) and stoping an inferior
-   process.
-
+/* Target-struct-independent code to start (run) and stop an inferior process.
    Copyright 1986, 1987, 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -145,8 +143,6 @@ insert_step_breakpoint PARAMS ((void));
 
 static void
 resume_cleanups PARAMS ((int));
-
-extern struct target_ops child_ops;	/* In inftarg.c */
 
 /* Sigtramp is a routine that the kernel calls (which then calls the
    signal handler).  On most machines it is a library routine that

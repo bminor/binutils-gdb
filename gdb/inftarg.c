@@ -1,5 +1,4 @@
-/* This file inplements the host independent child process statum.
-
+/* Target-vector operations for controlling Unix child processes, for GDB.
    Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
@@ -60,6 +59,9 @@ child_create_inferior PARAMS ((char *, char *, char **));
 
 static void
 child_mourn_inferior PARAMS ((void));
+
+static int
+child_can_run PARAMS ((void));
 
 extern char **environ;
 
@@ -154,16 +156,14 @@ child_attach (args, from_tty)
 #endif  /* ATTACH_DETACH */
 }
 
-/*
- * child_detach()
- * takes a program previously attached to and detaches it.
- * The program resumes execution and will no longer stop
- * on signals, etc.  We better not have left any breakpoints
- * in the program or it'll die when it hits one.  For this
- * to work, it may be necessary for the process to have been
- * previously attached.  It *might* work if the program was
- * started via the normal ptrace (PTRACE_TRACEME).
- */
+
+/* Take a program previously attached to and detaches it.
+   The program resumes execution and will no longer stop
+   on signals, etc.  We'd better not have left any breakpoints
+   in the program or it'll die when it hits one.  For this
+   to work, it may be necessary for the process to have been
+   previously attached.  It *might* work if the program was
+   started via the normal ptrace (PTRACE_TRACEME).  */
 
 static void
 child_detach (args, from_tty)
@@ -459,7 +459,7 @@ child_can_run ()
 {
   return(1);
 }
-
+
 struct target_ops child_ops = {
   "child",			/* to_shortname */
   "Unix child process",		/* to_longname */

@@ -122,6 +122,8 @@ close_exec_file PARAMS ((void));
 extern void
 reopen_exec_file PARAMS ((void));
 
+/* The `resume' routine should only be called in special circumstances.
+   Normally, use `proceed', which handles a lot of bookkeeping.  */
 extern void
 resume PARAMS ((int, int));
 
