@@ -2672,4 +2672,8 @@ destroy .t
 pack .c.m
 bind .c.m <Leave> {destroy .c}
 
+if [file exists ~/.gdbtkinit] {
+	source ~/.gdbtkinit
+}
+
 update

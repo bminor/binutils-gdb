@@ -1,3 +1,8 @@
+Mon Jan 23 17:21:09 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl:  Take .gdbtkinit if it exists.  Makes gdbtk match the
+	doc!
+
 Mon Jan 23 13:11:46 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	Add support for Chill bitstring literals (e.h. H'FF00').
