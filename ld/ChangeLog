@@ -1,3 +1,12 @@
+2001-06-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/hppa64linux.sh: New file.
+	* configure.tgt: hppa*64*-*-linux* uses hppa64linux.sh
+	* Makefile.am (ALL_64_EMULATIONS): Add ehppa64linux.o
+	(ehppa64linux.c): Add rule to make it.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2001-06-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld.texinfo (Options, -r): Mention restrictions when using
