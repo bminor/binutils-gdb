@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "top.h"
 
 /* readline include files */
-#include "readline.h"
+#include "readline/readline.h"
 #include "history.h"
 
 /* readline defines this.  */

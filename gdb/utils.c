@@ -1,5 +1,5 @@
 /* General utility routines for GDB, the GNU debugger.
-   Copyright 1986, 89, 90, 91, 92, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1986, 89, 90, 91, 92, 95, 96, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,15 +18,22 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#ifdef ANSI_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <ctype.h>
 #include "gdb_string.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#ifdef HAVE_TERM_H
+#include <term.h>
+#endif
+
+/* SunOS's curses.h has a '#define reg register' in it.  Thank you Sun. */
+#ifdef reg
+#undef reg
 #endif
 
 #include "signals.h"
@@ -39,7 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 #include "annotate.h"
 
-#include "readline.h"
+#include "readline/readline.h"
 
 /* readline defines this.  */
 #undef savestring
@@ -358,10 +365,15 @@ warning (va_alist)
   va_start (args);
   string = va_arg (args, char *);
 #endif
-  warning_begin ();
-  vfprintf_unfiltered (gdb_stderr, string, args);
-  fprintf_unfiltered (gdb_stderr, "\n");
-  va_end (args);
+  if (warning_hook)
+    (*warning_hook) (string, args);
+  else
+  {
+    warning_begin ();
+    vfprintf_unfiltered (gdb_stderr, string, args);
+    fprintf_unfiltered (gdb_stderr, "\n");
+    va_end (args);
+  }
 }
 
 /* Start the printing of an error message.  Way to use this is to call
@@ -552,7 +564,7 @@ perror_with_name (string)
   bfd_set_error (bfd_error_no_error);
   errno = 0;
 
-  error ("%s.", combined);
+  error ("%s.", combined); 
 }
 
 /* Print the system error message for ERRCODE, and also mention STRING
@@ -1598,6 +1610,18 @@ fputc_unfiltered (c, stream)
   return c;
 }
 
+int
+fputc_filtered (c, stream)
+     int c;
+     FILE * stream;
+{
+  char buf[2];
+
+  buf[0] = c;
+  buf[1] = 0;
+  fputs_filtered (buf, stream);
+  return c;
+}
 
 /* puts_debug is like fputs_unfiltered, except it prints special
    characters in printable fashion.  */
@@ -1612,16 +1636,16 @@ puts_debug (prefix, string, suffix)
 
   /* Print prefix and suffix after each line.  */
   static int new_line = 1;
-  static int carriage_return = 0;
+  static int return_p = 0;
   static char *prev_prefix = "";
   static char *prev_suffix = "";
 
   if (*string == '\n')
-    carriage_return = 0;
+    return_p = 0;
 
   /* If the prefix is changing, print the previous suffix, a new line,
      and the new prefix.  */
-  if ((carriage_return || (strcmp(prev_prefix, prefix) != 0)) && !new_line)
+  if ((return_p || (strcmp(prev_prefix, prefix) != 0)) && !new_line)
     {
       fputs_unfiltered (prev_suffix, gdb_stderr);
       fputs_unfiltered ("\n", gdb_stderr);
@@ -1648,7 +1672,7 @@ puts_debug (prefix, string, suffix)
 	    fputc_unfiltered (ch, gdb_stderr);
 
 	  else
-	    fprintf_unfiltered (gdb_stderr, "\\%03o", ch);
+	    fprintf_unfiltered (gdb_stderr, "\\x%02x", ch & 0xff);
 	  break;
 
 	case '\\': fputs_unfiltered ("\\\\",  gdb_stderr);	break;
@@ -1661,7 +1685,7 @@ puts_debug (prefix, string, suffix)
 	case '\v': fputs_unfiltered ("\\v",   gdb_stderr);	break;
         }
 
-      carriage_return = ch == '\r';
+      return_p = ch == '\r';
     }
 
   /* Print suffix if we printed a newline.  */
@@ -1989,9 +2013,11 @@ fprintf_symbol_filtered (stream, name, lang, arg_mode)
 	    case language_cplus:
 	      demangled = cplus_demangle (name, arg_mode);
 	      break;
+				/* start-sanitize-java */
 	    case language_java:
 	      demangled = cplus_demangle (name, arg_mode | DMGL_JAVA);
 	      break;
+				/* end-sanitize-java */
 	    case language_chill:
 	      demangled = chill_demangle (name);
 	      break;
@@ -2115,7 +2141,7 @@ initialize_utils ()
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
 
   /* If there is a better way to determine the window size, use it. */
-  SIGWINCH_HANDLER ();
+  SIGWINCH_HANDLER (SIGWINCH);
 #endif
 #endif
   /* If the output is not a terminal, don't paginate it.  */
@@ -2259,7 +2285,7 @@ floatformat_to_doublest (fmt, from, to)
       
       if (newfrom == NULL)
 	{
-	  newfrom = xmalloc (fmt -> totalsize);
+	  newfrom = (unsigned char *) xmalloc (fmt -> totalsize);
 	}
       swapout = newfrom;
       swapin = ufrom;
