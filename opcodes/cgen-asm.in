@@ -127,13 +127,22 @@ parse_insn_normal (cd, insn, strp, fields)
 	      ++ syn;
 	      ++ str;
 	    }
-	  else
+	  else if (*str)
 	    {
 	      /* Syntax char didn't match.  Can't be this insn.  */
 	      static char msg [80];
 	      /* xgettext:c-format */
 	      sprintf (msg, _("syntax error (expected char `%c', found `%c')"),
 		       *syn, *str);
+	      return msg;
+	    }
+	  else
+	    {
+	      /* Ran out of input.  */
+	      static char msg [80];
+	      /* xgettext:c-format */
+	      sprintf (msg, _("syntax error (expected char `%c', found end of instruction)"),
+		       *syn);
 	      return msg;
 	    }
 	  continue;

@@ -1,3 +1,8 @@
+2000-12-28  Frank Ch. Eigler  <fche@redhat.com>
+
+	* cgen-asm.in (parse_insn_normal): Print better error message for
+	instructions with missing operands.
+
 2000-12-21  Santeri Paavolainen <santtu@ssh.com>
 
 	* cgen-opc.c: Include alloca.h if HAVE_ALLOCA_H is defined.
