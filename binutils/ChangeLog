@@ -15,10 +15,10 @@
 
 2002-01-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
-	* objcopy.c (copy_usage): Use "switches" instead of "options".
-        (strip_usage): Use "switches" instead of "options".
-	* doc/binutils.texi (dlltool):  Refer to "switches" instead of
-        "options".
+	* objcopy.c (copy_usage): Use "options" instead of "switches".
+        (strip_usage): Use "options" instead of "switches".
+	* doc/binutils.texi (dlltool):  Refer to "options" instead of
+        "switches".
 
 2002-01-14  Richard Earnshaw  <rearnsha@arm.com>
 
