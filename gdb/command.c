@@ -237,6 +237,31 @@ add_set_cmd (name, class, var_type, var, doc, list)
   return c;
 }
 
+/* Add element named NAME to command list LIST (the list for set
+   or some sublist thereof).
+   CLASS is as in add_cmd.
+   ENUMLIST is a list of strings which may follow NAME.
+   VAR is address of the variable which will contain the matching string
+     (from ENUMLIST).
+   DOC is the documentation string.  */
+
+struct cmd_list_element *
+add_set_enum_cmd (name, class, enumlist, var, doc, list)
+     char *name;
+     enum command_class class;
+     char *enumlist[];
+     char *var;
+     char *doc;
+     struct cmd_list_element **list;
+{
+  struct cmd_list_element *c
+    = add_set_cmd (name, class, var_enum, var, doc, list);
+
+  c->enums = enumlist;
+
+  return c;
+}
+
 /* Where SETCMD has already been added, add the corresponding show
    command to LIST and return a pointer to it.  */
 struct cmd_list_element *
@@ -992,6 +1017,78 @@ complete_on_cmdlist (list, text, word)
   return matchlist;
 }
 
+/* Helper function for SYMBOL_COMPLETION_FUNCTION.  */
+
+/* Return a vector of char pointers which point to the different
+   possible completions in CMD of TEXT.  
+
+   WORD points in the same buffer as TEXT, and completions should be
+   returned relative to this position.  For example, suppose TEXT is "foo"
+   and we want to complete to "foobar".  If WORD is "oo", return
+   "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
+
+char **
+complete_on_enum (enumlist, text, word)
+     char **enumlist;
+     char *text;
+     char *word;
+{
+  char **matchlist;
+  int sizeof_matchlist;
+  int matches;
+  int textlen = strlen (text);
+  int i;
+  char *name;
+
+  sizeof_matchlist = 10;
+  matchlist = (char **) xmalloc (sizeof_matchlist * sizeof (char *));
+  matches = 0;
+
+  for (i = 0; name = enumlist[i]; i++)
+    if (strncmp (name, text, textlen) == 0)
+      {
+	if (matches == sizeof_matchlist)
+	  {
+	    sizeof_matchlist *= 2;
+	    matchlist = (char **) xrealloc ((char *)matchlist,
+					    (sizeof_matchlist
+					     * sizeof (char *)));
+	  }
+
+	matchlist[matches] = (char *) 
+	  xmalloc (strlen (word) + strlen (name) + 1);
+	if (word == text)
+	  strcpy (matchlist[matches], name);
+	else if (word > text)
+	  {
+	    /* Return some portion of name.  */
+	    strcpy (matchlist[matches], name + (word - text));
+	  }
+	else
+	  {
+	    /* Return some of text plus name.  */
+	    strncpy (matchlist[matches], word, text - word);
+	    matchlist[matches][text - word] = '\0';
+	    strcat (matchlist[matches], name);
+	  }
+	++matches;
+      }
+
+  if (matches == 0)
+    {
+      free ((PTR)matchlist);
+      matchlist = 0;
+    }
+  else
+    {
+      matchlist = (char **) xrealloc ((char *)matchlist, ((matches + 1)
+						* sizeof (char *)));
+      matchlist[matches] = (char *) 0;
+    }
+
+  return matchlist;
+}
+
 static int
 parse_binary_operation (arg)
      char *arg;
@@ -1123,6 +1220,38 @@ do_setshow_command (arg, from_tty, c)
 	    error_no_arg ("integer to set it to.");
 	  *(int *) c->var = parse_and_eval_address (arg);
 	  break;
+	case var_enum:
+	  {
+	    int i;
+	    int len;
+	    int nmatches;
+	    char *match;
+	    char *p;
+
+	    p = strchr (arg, ' ');
+
+	    if (p)
+	      len = p - arg;
+	    else
+	      len = strlen (arg);
+
+	    nmatches = 0;
+	    for (i = 0; c->enums[i]; i++)
+	      if (strncmp (arg, c->enums[i], len) == 0)
+		{
+		  match = c->enums[i];
+		  nmatches++;
+		}
+
+	    if (nmatches <= 0)
+	      error ("Undefined item: \"%s\".", arg);
+
+	    if (nmatches > 1)
+	      error ("Ambiguous item \"%s\".", arg);
+
+	    *(char **)c->var = match;
+	  }
+	  break;
 	default:
 	  error ("gdb internal error: bad var_type in do_setshow_command");
 	}
@@ -1147,6 +1276,7 @@ do_setshow_command (arg, from_tty, c)
 	break;
       case var_string_noescape:
       case var_filename:
+      case var_enum:
 	fputs_filtered ("\"", gdb_stdout);
 	fputs_filtered (*(char **) c->var, gdb_stdout);
 	fputs_filtered ("\"", gdb_stdout);
