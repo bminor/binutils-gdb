@@ -4320,7 +4320,7 @@ deprecated_mips_set_processor_regs_hack (void)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   CORE_ADDR prid;
 
-  prid = read_register (PRID_REGNUM);
+  prid = read_register (MIPS_PRID_REGNUM);
 
   if ((prid & ~0xf) == 0x700)
     tdep->mips_processor_reg_names = mips_r3041_reg_names;
@@ -5292,8 +5292,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: mips_abi_regsize() = %d\n",
 		      mips_abi_regsize (current_gdbarch));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: PRID_REGNUM = %d\n", PRID_REGNUM);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: PROC_FRAME_ADJUST = function?\n");
   fprintf_unfiltered (file,

@@ -86,6 +86,7 @@ enum
   MIPS_EMBED_FP0_REGNUM = 38,
   MIPS_UNUSED_REGNUM = 73,	/* Never used, FIXME */
   MIPS_FIRST_EMBED_REGNUM = 74,	/* First CP0 register for embedded use.  */
+  MIPS_PRID_REGNUM = 89,	/* Processor ID.  */
   MIPS_LAST_EMBED_REGNUM = 89	/* Last one.  */
 };
 

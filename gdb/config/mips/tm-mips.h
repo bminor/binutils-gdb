@@ -44,7 +44,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
 
 #define RA_REGNUM 31		/* Contains return address value */
-#define	PRID_REGNUM 89		/* Processor ID */
 
 /* Special symbol found in blocks associated with routines.  We can hang
    mips_extra_func_info_t's off of this.  */
