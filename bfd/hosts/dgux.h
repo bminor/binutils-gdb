@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <sys/dg_c_generics.h>
 #include <unistd.h>
 #include <stdlib.h>
