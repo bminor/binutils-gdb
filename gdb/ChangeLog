@@ -1,4 +1,7 @@
 2002-04-15  Andrew Cagney  <ac131313@redhat.com>
+ 
+	* bcache.c: Include <stddef.h> and <stdlib.h> after "defs.h".
+	Update copyright.
 
 	* hpread.c (hpread_getlntt): Add declaration.
 	Also fix PR gdb/391.
