@@ -1,3 +1,7 @@
+2003-12-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* tc.h (md_pcrel_from): Don't declare if defined as a macro.
+
 2003-12-03  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
 
 	* config/tc-m32r.h : Add support for new machine m32r2.

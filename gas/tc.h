@@ -1,6 +1,6 @@
 /* tc.h - target cpu dependent
 
-   Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 2000
+   Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 2000, 2001, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -51,7 +51,9 @@ int md_estimate_size_before_relax (fragS * fragP, segT segment);
 #endif
 int md_parse_option (int c, char *arg);
 void md_show_usage (FILE *);
+#ifndef md_pcrel_from
 long md_pcrel_from (fixS * fixP);
+#endif
 short tc_coff_fix2rtype (fixS * fixP);
 void md_assemble (char *str);
 void md_begin (void);
