@@ -1,3 +1,8 @@
+2001-03-19  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* vax-dis.c (print_insn_vax): Only fetch two bytes if the info buffer
+	has more than one byte left to read.
+
 2001-03-16  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* s390-opc.c: Add new opcodes.  Smooth out formatting.

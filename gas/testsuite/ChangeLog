@@ -1,3 +1,7 @@
+2001-03-19  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* gas/vax/quad.exp: Correct expected result.
+
 2001-03-19  Andreas Schwab  <schwab@suse.de>
 
 	* gas/m68k/pcrel.s: Force alignment to 8 byte boundary to get
