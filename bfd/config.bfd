@@ -420,6 +420,7 @@ case "${targ}" in
   i[3456]86-*-linux-gnu*)
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs="i386linux_vec bfd_efi_app_ia32_vec"
+    targ64_selvecs=bfd_elf64_x86_64_vec
     ;;
 #ifdef BFD64
   x86_64-*-freebsd*)

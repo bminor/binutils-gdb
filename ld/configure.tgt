@@ -144,6 +144,9 @@ i[3456]86-*-linux*aout*)	targ_emul=i386linux
 i[3456]86-*-linux*oldld)	targ_emul=i386linux; targ_extra_emuls=elf_i386 ;;
 i[3456]86-*-linux-gnu*)	targ_emul=elf_i386
 			targ_extra_emuls=i386linux
+			if test x${want64} = xtrue; then
+			  targ_extra_emuls="$targ_extra_emuls elf_x86_64"
+			fi
 			tdir_i386linux=${targ_alias}aout
 			;;
 x86_64-*-linux-gnu*)	targ_emul=elf_x86_64

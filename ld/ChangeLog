@@ -1,5 +1,10 @@
 2002-07-31  H.J. Lu <hjl@gnu.org>
 
+	* configure.tgt: Enable x86-64 emulation for Linux/i386 if
+	64bit BFD is selected.
+
+2002-07-31  H.J. Lu <hjl@gnu.org>
+
 	* configure.tgt: Enable 64bit emulations for 32bit Linux/mips
 	if 64bit BFD is selected.
 
