@@ -260,17 +260,6 @@ dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
   print_address (addr, info->stream);
 }
 
-/* Same as target_write_memory, but report an error if can't write.  */
-void
-write_memory (CORE_ADDR memaddr, char *myaddr, int len)
-{
-  int status;
-
-  status = target_write_memory (memaddr, myaddr, len);
-  if (status != 0)
-    memory_error (status, memaddr);
-}
-
 /* Read an integer from debugged memory, given address and number of bytes.  */
 
 LONGEST
@@ -317,6 +306,36 @@ read_memory_string (CORE_ADDR memaddr, char *buffer, int max_len)
 	break;
     }
 }
+
+/* Same as target_write_memory, but report an error if can't write.  */
+void
+write_memory (CORE_ADDR memaddr, char *myaddr, int len)
+{
+  int status;
+
+  status = target_write_memory (memaddr, myaddr, len);
+  if (status != 0)
+    memory_error (status, memaddr);
+}
+
+/* Store VALUE at ADDR in the inferior as a LEN-byte unsigned integer.  */
+void
+write_memory_unsigned_integer (CORE_ADDR addr, int len, ULONGEST value)
+{
+  char *buf = alloca (len);
+  store_unsigned_integer (buf, len, value);
+  write_memory (addr, buf, len);
+}
+
+/* Store VALUE at ADDR in the inferior as a LEN-byte signed integer.  */
+void
+write_memory_signed_integer (CORE_ADDR addr, int len, LONGEST value)
+{
+  char *buf = alloca (len);
+  store_signed_integer (buf, len, value);
+  write_memory (addr, buf, len);
+}
+
 
 
 #if 0

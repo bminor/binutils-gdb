@@ -72,6 +72,14 @@ extern void read_memory_string (CORE_ADDR, char *, int);
 
 extern void write_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
+/* Store VALUE at ADDR in the inferior as a LEN-byte unsigned integer.  */
+extern void write_memory_unsigned_integer (CORE_ADDR addr, int len,
+                                           ULONGEST value);
+
+/* Store VALUE at ADDR in the inferior as a LEN-byte unsigned integer.  */
+extern void write_memory_signed_integer (CORE_ADDR addr, int len,
+                                         LONGEST value);
+
 extern void generic_search (int len, char *data, char *mask,
 			    CORE_ADDR startaddr, int increment,
 			    CORE_ADDR lorange, CORE_ADDR hirange,

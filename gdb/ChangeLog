@@ -1,3 +1,11 @@
+2001-11-12  Jim Blandy  <jimb@redhat.com>
+
+	* corefile.c (write_memory_unsigned_integer,
+	write_memory_signed_integer): New functions.
+        (write_memory): Move to be with other write_memory_* functions.
+	* gdbcore.h (write_memory_unsigned_integer,
+	write_memory_signed_integer): New declarations.
+
 2001-11-11  Geoffrey Keating  <geoffk@redhat.com>
 
 	* dwarf2read.c (dwarf_decode_lines): Properly deal with
