@@ -120,6 +120,8 @@ extern const struct mn10300_operand mn10300_operands[];
 #define MN10300_OPERAND_XRREG 0x200000
 
 #define MN10300_OPERAND_PLUS 0x400000
+
+#define MN10300_OPERAND_24BIT 0x800000
 /* end-sanitize-am33 */
 
 /* Opcode Formats.  */
@@ -136,6 +138,9 @@ extern const struct mn10300_operand mn10300_operands[];
 /* start-sanitize-am33 */
 #define FMT_D6 11
 #define FMT_D7 12
+#define FMT_D8 13
+#define FMT_D9 14
+#define FMT_D10 15
 /* start-sanitize-am33 */
 
 #endif /* MN10300_H */

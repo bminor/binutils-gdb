@@ -1,3 +1,14 @@
+start-sanitize-am33
+Mon Jun 22 13:28:59 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h (FMT_D10): Define.
+
+Fri Jun 19 16:44:44 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h (MN10300_OPERAND_24BIT): Define.
+	(FMT_D8, FMT_D9): Likewise.
+
+end-sanitize-am33
 Fri Jun 19 16:09:09 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386.h: Use FP, not sl_Suf, for fxsave and fxrstor.
