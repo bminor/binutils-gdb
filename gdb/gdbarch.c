@@ -147,7 +147,7 @@ struct gdbarch
   int char_signed;
   gdbarch_read_pc_ftype *read_pc;
   gdbarch_write_pc_ftype *write_pc;
-  gdbarch_read_fp_ftype *read_fp;
+  gdbarch_deprecated_target_read_fp_ftype *deprecated_target_read_fp;
   gdbarch_read_sp_ftype *read_sp;
   gdbarch_deprecated_dummy_write_sp_ftype *deprecated_dummy_write_sp;
   gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer;
@@ -156,7 +156,7 @@ struct gdbarch
   int num_regs;
   int num_pseudo_regs;
   int sp_regnum;
-  int fp_regnum;
+  int deprecated_fp_regnum;
   int pc_regnum;
   int ps_regnum;
   int fp0_regnum;
@@ -499,12 +499,11 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->char_signed = -1;
   current_gdbarch->read_pc = generic_target_read_pc;
   current_gdbarch->write_pc = generic_target_write_pc;
-  current_gdbarch->read_fp = generic_target_read_fp;
   current_gdbarch->read_sp = generic_target_read_sp;
   current_gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
   current_gdbarch->num_regs = -1;
   current_gdbarch->sp_regnum = -1;
-  current_gdbarch->fp_regnum = -1;
+  current_gdbarch->deprecated_fp_regnum = -1;
   current_gdbarch->pc_regnum = -1;
   current_gdbarch->ps_regnum = -1;
   current_gdbarch->fp0_regnum = -1;
@@ -622,7 +621,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     gdbarch->char_signed = 1;
   /* Skip verify of read_pc, invalid_p == 0 */
   /* Skip verify of write_pc, invalid_p == 0 */
-  /* Skip verify of read_fp, invalid_p == 0 */
+  /* Skip verify of deprecated_target_read_fp, has predicate */
   /* Skip verify of read_sp, invalid_p == 0 */
   /* Skip verify of deprecated_dummy_write_sp, has predicate */
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
@@ -633,7 +632,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     fprintf_unfiltered (log, "\n\tnum_regs");
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
   /* Skip verify of sp_regnum, invalid_p == 0 */
-  /* Skip verify of fp_regnum, invalid_p == 0 */
+  /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
   /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
   /* Skip verify of fp0_regnum, invalid_p == 0 */
@@ -1145,6 +1144,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED = %d\n",
                       DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED);
 #endif
+#ifdef DEPRECATED_FP_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_FP_REGNUM # %s\n",
+                      XSTRING (DEPRECATED_FP_REGNUM));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_FP_REGNUM = %d\n",
+                      DEPRECATED_FP_REGNUM);
+#endif
 #ifdef DEPRECATED_FRAME_CHAIN_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1511,6 +1518,26 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->deprecated_store_struct_return
                         /*DEPRECATED_STORE_STRUCT_RETURN ()*/);
 #endif
+#ifdef DEPRECATED_TARGET_READ_FP_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_TARGET_READ_FP_P()",
+                      XSTRING (DEPRECATED_TARGET_READ_FP_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_TARGET_READ_FP_P() = %d\n",
+                      DEPRECATED_TARGET_READ_FP_P ());
+#endif
+#ifdef DEPRECATED_TARGET_READ_FP
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_TARGET_READ_FP()",
+                      XSTRING (DEPRECATED_TARGET_READ_FP ()));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_TARGET_READ_FP = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_target_read_fp
+                        /*DEPRECATED_TARGET_READ_FP ()*/);
+#endif
 #ifdef DEPRECATED_USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_USE_GENERIC_DUMMY_FRAMES # %s\n",
@@ -1653,14 +1680,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: FP0_REGNUM = %d\n",
                       FP0_REGNUM);
-#endif
-#ifdef FP_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FP_REGNUM # %s\n",
-                      XSTRING (FP_REGNUM));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FP_REGNUM = %d\n",
-                      FP_REGNUM);
 #endif
 #ifdef FRAMELESS_FUNCTION_INVOCATION
   fprintf_unfiltered (file,
@@ -2501,17 +2520,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: TARGET_PTR_BIT = %d\n",
                       TARGET_PTR_BIT);
 #endif
-#ifdef TARGET_READ_FP
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "TARGET_READ_FP()",
-                      XSTRING (TARGET_READ_FP ()));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: TARGET_READ_FP = <0x%08lx>\n",
-                        (long) current_gdbarch->read_fp
-                        /*TARGET_READ_FP ()*/);
-#endif
 #ifdef TARGET_READ_PC
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2880,23 +2888,30 @@ set_gdbarch_write_pc (struct gdbarch *gdbarch,
   gdbarch->write_pc = write_pc;
 }
 
-CORE_ADDR
-gdbarch_read_fp (struct gdbarch *gdbarch)
+int
+gdbarch_deprecated_target_read_fp_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->read_fp == 0)
+  return gdbarch->deprecated_target_read_fp != 0;
+}
+
+CORE_ADDR
+gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_target_read_fp == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_read_fp invalid");
+                    "gdbarch: gdbarch_deprecated_target_read_fp invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_read_fp called\n");
-  return gdbarch->read_fp ();
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_target_read_fp called\n");
+  return gdbarch->deprecated_target_read_fp ();
 }
 
 void
-set_gdbarch_read_fp (struct gdbarch *gdbarch,
-                     gdbarch_read_fp_ftype read_fp)
+set_gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch,
+                                       gdbarch_deprecated_target_read_fp_ftype deprecated_target_read_fp)
 {
-  gdbarch->read_fp = read_fp;
+  gdbarch->deprecated_target_read_fp = deprecated_target_read_fp;
 }
 
 CORE_ADDR
@@ -3069,20 +3084,20 @@ set_gdbarch_sp_regnum (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_fp_regnum (struct gdbarch *gdbarch)
+gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of fp_regnum, invalid_p == 0 */
+  /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_fp_regnum called\n");
-  return gdbarch->fp_regnum;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_fp_regnum called\n");
+  return gdbarch->deprecated_fp_regnum;
 }
 
 void
-set_gdbarch_fp_regnum (struct gdbarch *gdbarch,
-                       int fp_regnum)
+set_gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch,
+                                  int deprecated_fp_regnum)
 {
-  gdbarch->fp_regnum = fp_regnum;
+  gdbarch->deprecated_fp_regnum = deprecated_fp_regnum;
 }
 
 int

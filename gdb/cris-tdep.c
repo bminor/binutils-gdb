@@ -53,7 +53,7 @@ enum cris_num_regs
 };
 
 /* Register numbers of various important registers.
-   FP_REGNUM   Contains address of executing stack frame.
+   DEPRECATED_FP_REGNUM   Contains address of executing stack frame.
    STR_REGNUM  Contains the address of structure return values.
    RET_REGNUM  Contains the return value when shorter than or equal to 32 bits
    ARG1_REGNUM Contains the first parameter to a function.
@@ -65,8 +65,8 @@ enum cris_num_regs
    SRP_REGNUM  Subroutine return pointer register.
    BRP_REGNUM  Breakpoint return pointer register.  */
 
-/* FP_REGNUM = 8, SP_REGNUM = 14, and PC_REGNUM = 15 have been incorporated
-   into the multi-arch framework.  */
+/* DEPRECATED_FP_REGNUM = 8, SP_REGNUM = 14, and PC_REGNUM = 15 have
+   been incorporated into the multi-arch framework.  */
 
 enum cris_regnums
 {
@@ -529,7 +529,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
                 }
               get_frame_extra_info (fi)->leaf_function = 0;
             }
-          else if (regno == FP_REGNUM)
+          else if (regno == DEPRECATED_FP_REGNUM)
             {
               have_fp = 1;
             }
@@ -616,7 +616,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
               break;
             }
         }
-      else if (cris_get_operand2 (insn) == FP_REGNUM 
+      else if (cris_get_operand2 (insn) == DEPRECATED_FP_REGNUM 
                /* The size is a fixed-size.  */
                && ((insn & 0x0F00) >> 8) == 0x0001 
                /* A negative offset.  */
@@ -640,7 +640,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
               break;
             }
         }
-      else if (cris_get_operand2 (insn) == FP_REGNUM 
+      else if (cris_get_operand2 (insn) == DEPRECATED_FP_REGNUM 
                /* The size is a fixed-size.  */
                && ((insn & 0x0F00) >> 8) == 0x0001 
                /* A positive offset.  */
@@ -681,7 +681,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 
   if (have_fp)
     {
-      get_frame_saved_regs (fi)[FP_REGNUM] = get_frame_base (fi);
+      get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM] = get_frame_base (fi);
       
       /* Calculate the addresses.  */
       for (regno = regsave; regno >= 0; regno--)
@@ -1536,7 +1536,7 @@ cris_pop_frame (void)
                                                      
       /* Restore general registers R0 - R7.  They were pushed on the stack 
          after SP was saved.  */
-      for (regno = 0; regno < FP_REGNUM; regno++)
+      for (regno = 0; regno < DEPRECATED_FP_REGNUM; regno++)
         {
           if (get_frame_saved_regs (fi)[regno])
             {
@@ -1545,12 +1545,12 @@ cris_pop_frame (void)
             }
         }
      
-      if (get_frame_saved_regs (fi)[FP_REGNUM])
+      if (get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM])
         {
           /* Pop the frame pointer (R8).  It was pushed before SP 
              was saved.  */
-          write_register (FP_REGNUM, 
-                          read_memory_integer (get_frame_saved_regs (fi)[FP_REGNUM], 4));
+          write_register (DEPRECATED_FP_REGNUM, 
+                          read_memory_integer (get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM], 4));
           stack_offset += 4;
 
           /* Not a leaf function.  */
@@ -1561,7 +1561,7 @@ cris_pop_frame (void)
             }
       
           /* Restore the SP and adjust for R8 and (possibly) SRP.  */
-          write_register (SP_REGNUM, get_frame_saved_regs (fi)[FP_REGNUM] + stack_offset);
+          write_register (SP_REGNUM, get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM] + stack_offset);
         } 
       else
         {
@@ -4182,7 +4182,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* There are 32 registers (some of which may not be implemented).  */
   set_gdbarch_num_regs (gdbarch, 32);
   set_gdbarch_sp_regnum (gdbarch, 14);
-  set_gdbarch_fp_regnum (gdbarch, 8);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, 8);
   set_gdbarch_pc_regnum (gdbarch, 15);
 
   set_gdbarch_register_name (gdbarch, cris_register_name);

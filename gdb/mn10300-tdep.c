@@ -1157,7 +1157,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_do_registers_info (gdbarch, mn10300_do_registers_info);
   set_gdbarch_sp_regnum (gdbarch, 8);
   set_gdbarch_pc_regnum (gdbarch, 9);
-  set_gdbarch_fp_regnum (gdbarch, 31);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, 31);
   set_gdbarch_virtual_frame_pointer (gdbarch, mn10300_virtual_frame_pointer);
 
   /* Breakpoints.  */
@@ -1183,7 +1183,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   /* That's right, we're using the stack pointer as our frame pointer.  */
-  set_gdbarch_read_fp (gdbarch, generic_target_read_sp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, generic_target_read_sp);
 
   /* Calling functions in the inferior from GDB.  */
   set_gdbarch_call_dummy_words (gdbarch, mn10300_call_dummy_words);

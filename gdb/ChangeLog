@@ -1,5 +1,135 @@
 2003-04-28  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_TARGET_READ_FP): Replace TARGET_READ_FP.
+	(DEPRECATED_FP_REGNUM): Replace FP_REGNUM.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* infcall.c (call_function_by_hand): Use DEPRECATED_FP_REGNUM,
+	DEPRECATED_TARGET_READ_FP, or "sp" to create the dummy frame ID.
+	* inferior.h (deprecated_read_fp): Rename read_fp.
+	(generic_target_read_fp): Delete declaration.
+	* regcache.c (generic_target_read_fp): Delete function.
+	(deprecated_read_fp): Replace read_fp, use
+	DEPRECATED_TARGET_READ_FP or DEPRECATED_FP_REGNUM.
+	* d10v-tdep.c (d10v_read_fp): Delete function.
+	(d10v_gdbarch_init): Do not set deprecated_read_fp.
+
+	* sparc-tdep.c (sparc_gdbarch_init): Do not set
+	deprecated_target_read_fp to generic_target_read_fp.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Set
+	deprecated_fp_regnum.
+	* x86-64-tdep.c (x86_64_init_abi): Ditto.
+	* vax-tdep.c (vax_gdbarch_init): Ditto.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* sparc-tdep.c (sparc_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* m68k-tdep.c (m68k_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* i386-tdep.c (i386_gdbarch_init): Ditto.
+	* hppa-tdep.c (hppa_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+	* arm-tdep.c (arm_gdbarch_init): Ditto.
+	* alpha-tdep.c (alpha_gdbarch_init): Ditto.
+
+	* x86-64-tdep.c (x86_64_init_abi): Set deprecated_target_read_fp.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* sparc-tdep.c (sparc_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* hppa-tdep.c (hppa_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+	* arm-tdep.c (arm_gdbarch_init): Ditto.
+
+	* vax-tdep.c (vax_frame_init_saved_regs): Replace FP_REGNUM with
+	DEPRECATED_FP_REGNUM.
+	(vax_push_dummy_frame, vax_pop_frame): Ditto.
+	* std-regs.c (value_of_builtin_frame_fp_reg): Ditto.
+	* sparc-tdep.c (sparc_init_extra_frame_info): Ditto.
+	(sparc_push_dummy_frame, sparc64_read_fp): Ditto.
+	(sparc32_register_virtual_type): Ditto.
+	* sh-tdep.c (sh64_frame_chain): Ditto.
+	(sh64_get_saved_register, sh64_pop_frame): Ditto.
+	(sh_nofp_frame_init_saved_regs): Ditto.
+	(sh64_nofp_frame_init_saved_regs): Ditto.
+	(sh_fp_frame_init_saved_regs): Ditto.
+	* remote-mips.c (mips_wait, mips_fetch_registers): Ditto.
+	* remote-e7000.c (fetch_regs_from_dump): Ditto.
+	* procfs.c (procfs_fetch_registers): Ditto.
+	(procfs_store_registers): Ditto.
+	* ns32knbsd-nat.c (fetch_inferior_registers): Ditto.
+	(store_inferior_registers, fetch_core_registers): Ditto.
+	(fetch_kcore_registers, clear_regs): Ditto.
+	* ns32k-tdep.c (ns32k_frame_init_saved_regs): Ditto.
+	(ns32k_push_dummy_frame, ns32k_pop_frame): Ditto.
+	* nlm/i386.h (DEPRECATED_FP_REGNUM): Ditto.
+	* nlm/i386.c (do_status): Ditto.
+	* mipsv4-nat.c (supply_gregset): Ditto.
+	* mips-tdep.c: Ditto for comments.
+	* mips-nat.c (fetch_inferior_registers): Ditto.
+	(store_inferior_registers, fetch_core_registers): Ditto.
+	* m68k-tdep.c (m68k_push_dummy_frame): Ditto.
+	(m68k_pop_frame, m68k_frame_init_saved_regs): Ditto.
+	* i386-tdep.c (i386_frame_init_saved_regs): Ditto.
+	(i386_do_pop_frame, i386_register_type): Ditto.
+	* hppa-tdep.c (hppa_frame_chain): Ditto.
+	(hppa_push_dummy_frame, find_dummy_frame_regs): Ditto.
+	(hppa_pop_frame, hppa_read_fp): Ditto.
+	(skip_prologue_hard_way, hppa_frame_find_saved_regs): Ditto.
+	* cris-tdep.c (cris_examine, cris_pop_frame): Ditto.
+	* config/vax/nm-vax.h (REGISTER_U_ADDR): Ditto.
+	* config/sparc/tm-sparc.h (DEPRECATED_FP_REGNUM): Ditto.
+	* config/sparc/tm-sp64.h (DEPRECATED_FP_REGNUM): Ditto.
+	* config/s390/tm-s390.h (DEPRECATED_FP_REGNUM): Ditto.
+	* config/pa/tm-hppa64.h (DEPRECATED_FP_REGNUM): Ditto.
+	* config/ia64/tm-ia64.h (DEPRECATED_FP_REGNUM): Ditto.
+	* blockframe.c: Ditto for comments.
+	* arch-utils.h: Ditto for comments.
+	* arch-utils.c (legacy_virtual_frame_pointer): Ditto.
+	* alphanbsd-tdep.c (fetch_core_registers): Ditto.
+	* alphabsd-nat.c (fetch_inferior_registers): Ditto.
+	* alpha-tdep.h: Ditto for comments.
+	* alpha-tdep.c (alpha_cannot_fetch_register): Ditto.
+	(alpha_cannot_store_register): Ditto.
+	(alpha_push_dummy_frame): Ditto.
+	* alpha-nat.c (supply_gregset): Ditto.
+
+	* config/sparc/tm-sp64.h (DEPRECATED_TARGET_READ_FP): Update.
+	* config/pa/tm-hppa64.h (DEPRECATED_TARGET_READ_FP): Update.
+	* config/sparc/tm-sparc.h: Update comment.
+
+	* hppa-tdep.c (hppa_init_extra_frame_info): Use
+	deprecated_read_fp instead of TARGET_READ_FP.
+	(hppa_init_extra_frame_info, hppa_frame_chain): Ditto.
+	(hppa_push_dummy_frame, hppa_read_fp): Ditto.
+	* sparc-tdep.c (sparc_init_extra_frame_info): Use
+	deprecated_read_fp instead of read_fp.
+	* s390-tdep.c (s390_push_arguments): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* frame.h: Ditto in comments.
+	* frame.c (legacy_get_prev_frame): Ditto.
+	* dummy-frame.c (dummy_frame_this_id): Ditto.
+	* arm-tdep.c (arm_init_extra_frame_info): Ditto.
+
+2003-04-28  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (deprecated_tm_print_insn): Rename tm_print_insn.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* xstormy16-tdep.c (_initialize_xstormy16_tdep): Update.

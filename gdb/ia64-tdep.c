@@ -678,8 +678,8 @@ rse_address_add(CORE_ADDR addr, int nslots)
    computationally expensive.  So, instead of making life difficult
    (and slow), we pick a more convenient representation of the frame
    chain, knowing that we'll have to make some small adjustments in
-   other places.  (E.g, note that read_fp() is actually read_sp() in
-   ia64_gdbarch_init() below.)
+   other places.  (E.g, note that deprecated_read_fp() is actually
+   read_sp() in ia64_gdbarch_init() below.)
 
    Okay, so what is the frame chain exactly?  It'll be the SP value
    at the time that the function in question was entered.
@@ -2168,7 +2168,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_num_regs (gdbarch, ia64_num_regs);
   set_gdbarch_sp_regnum (gdbarch, sp_regnum);
-  set_gdbarch_fp_regnum (gdbarch, fp_regnum);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, fp_regnum);
   set_gdbarch_pc_regnum (gdbarch, pc_regnum);
   set_gdbarch_fp0_regnum (gdbarch, IA64_FR0_REGNUM);
 
@@ -2223,12 +2223,12 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_address (gdbarch, ia64_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, ia64_frame_locals_address);
 
-  /* We won't necessarily have a frame pointer and even if we do,
-     it winds up being extraordinarly messy when attempting to find
-     the frame chain.  So for the purposes of creating frames (which
-     is all read_fp() is used for), simply use the stack pointer value
-     instead.  */
-  set_gdbarch_read_fp (gdbarch, generic_target_read_sp);
+  /* We won't necessarily have a frame pointer and even if we do, it
+     winds up being extraordinarly messy when attempting to find the
+     frame chain.  So for the purposes of creating frames (which is
+     all deprecated_read_fp() is used for), simply use the stack
+     pointer value instead.  */
+  set_gdbarch_deprecated_target_read_fp (gdbarch, generic_target_read_sp);
 
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

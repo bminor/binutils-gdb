@@ -623,9 +623,9 @@ if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
    
    Note: kevinb/2002-08-01: The definition below should faithfully
    reproduce the behavior of each of the REGISTER_VIRTUAL_TYPE
-   definitions found in config/mips/tm-*.h.  I'm concerned about
-   the ``FCRCS_REGNUM <= reg && reg <= LAST_EMBED_REGNUM'' clause
-   though.  In some cases FP_REGNUM is in this range, and I doubt
+   definitions found in config/mips/tm-*.h.  I'm concerned about the
+   ``FCRCS_REGNUM <= reg && reg <= LAST_EMBED_REGNUM'' clause though.
+   In some cases DEPRECATED_FP_REGNUM is in this range, and I doubt
    that this code is correct for the 64-bit case.  */
 
 static struct type *
@@ -5880,7 +5880,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_name (gdbarch, mips_register_name);
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_read_fp (gdbarch, mips_read_sp); /* Draft FRAME base.  */
+  set_gdbarch_deprecated_target_read_fp (gdbarch, mips_read_sp); /* Draft FRAME base.  */
   set_gdbarch_read_sp (gdbarch, mips_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 

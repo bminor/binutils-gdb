@@ -1658,7 +1658,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
      frame.  This will help us get backtraces from within functions
      called from GDB.  */
   write_memory_unsigned_integer (sp, (TARGET_PTR_BIT / TARGET_CHAR_BIT),
-                                 read_fp ());
+                                 deprecated_read_fp ());
 
   return sp;
 }
@@ -1841,7 +1841,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_prologue (gdbarch, s390_skip_prologue);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, s390_init_extra_frame_info);
   set_gdbarch_deprecated_init_frame_pc_first (gdbarch, s390_init_frame_pc_first);
-  set_gdbarch_read_fp (gdbarch, s390_read_fp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, s390_read_fp);
   /* This function that tells us whether the function invocation represented
      by FI does not have a frame on the stack associated with it.  If it
      does not, FRAMELESS is set to 1, else 0.  */
@@ -1856,7 +1856,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_byte (gdbarch, s390_register_byte);
   set_gdbarch_pc_regnum (gdbarch, S390_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, S390_SP_REGNUM);
-  set_gdbarch_fp_regnum (gdbarch, S390_FP_REGNUM);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, S390_FP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, S390_FP0_REGNUM);
   set_gdbarch_num_regs (gdbarch, S390_NUM_REGS);
   set_gdbarch_cannot_fetch_register (gdbarch, s390_cannot_fetch_register);

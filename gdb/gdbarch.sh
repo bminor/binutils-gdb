@@ -428,7 +428,9 @@ v:2:TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::::
 #
 f:2:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc::0
 f:2:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
-f:2:TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:generic_target_read_fp::0
+# This is simply not needed.  See value_of_builtin_frame_fp_reg and
+# call_function_by_hand.
+F::DEPRECATED_TARGET_READ_FP:CORE_ADDR:deprecated_target_read_fp:void
 f:2:TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
 # The dummy call frame SP should be set by push_dummy_call.
 F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
@@ -451,7 +453,9 @@ v:2:NUM_PSEUDO_REGS:int:num_pseudo_regs::::0:0::0:::
 # a real register or a pseudo (computed) register or not be defined at
 # all (-1).
 v:2:SP_REGNUM:int:sp_regnum::::-1:-1::0
-v:2:FP_REGNUM:int:fp_regnum::::-1:-1::0
+# This is simply not needed.  See value_of_builtin_frame_fp_reg and
+# call_function_by_hand.
+v:2:DEPRECATED_FP_REGNUM:int:deprecated_fp_regnum::::-1:-1::0
 v:2:PC_REGNUM:int:pc_regnum::::-1:-1::0
 v:2:PS_REGNUM:int:ps_regnum::::-1:-1::0
 v:2:FP0_REGNUM:int:fp0_regnum::::0:-1::0

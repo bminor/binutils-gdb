@@ -212,7 +212,7 @@ supply_gregset (gdb_gregset_t *gregsetp)
 
   /* Fill inaccessible registers with zero.  */
   supply_register (ALPHA_ZERO_REGNUM, zerobuf);
-  supply_register (FP_REGNUM, zerobuf);
+  supply_register (DEPRECATED_FP_REGNUM, zerobuf);
 }
 
 void

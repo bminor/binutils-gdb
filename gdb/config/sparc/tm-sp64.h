@@ -269,7 +269,7 @@ extern CORE_ADDR sparc64_read_fp ();
 extern void sparc64_write_sp (CORE_ADDR);
 
 #define TARGET_READ_SP() (sparc64_read_sp ())
-#define TARGET_READ_FP() (sparc64_read_fp ())
+#define DEPRECATED_TARGET_READ_FP() (sparc64_read_fp ())
 #define DEPRECATED_DUMMY_WRITE_SP(X) (sparc64_write_sp (X))
 
 #undef DEPRECATED_EXTRACT_RETURN_VALUE
@@ -297,7 +297,7 @@ extern void sp64_extract_return_value (struct type *, char[], char *, int);
 #define	L0_REGNUM 16		/* First local reg that's saved on stack frame
 				   rather than in machine registers */
 #define	I0_REGNUM 24		/* %i0 */
-#define	FP_REGNUM 30		/* Contains address of executing stack frame */
+#define	DEPRECATED_FP_REGNUM 30		/* Contains address of executing stack frame */
 #define	I7_REGNUM 31		/* Last local reg saved on stack frame */
 #define	FP0_REGNUM 32		/* Floating point register 0 */
 #endif

@@ -119,7 +119,7 @@ extern CORE_ADDR hppa_stack_align (CORE_ADDR sp);
 #endif
 
 #if !GDB_MULTI_ARCH
-#define FP_REGNUM 3		/* Contains address of executing stack */
+#define DEPRECATED_FP_REGNUM 3		/* Contains address of executing stack */
 				/* frame */
 #endif
 #if !GDB_MULTI_ARCH
@@ -342,7 +342,7 @@ extern void hppa_target_write_pc (CORE_ADDR, ptid_t);
 #endif
 
 #if !GDB_MULTI_ARCH
-#define TARGET_READ_FP() hppa_target_read_fp ()
+#define DEPRECATED_TARGET_READ_FP() hppa_target_read_fp ()
 extern CORE_ADDR hppa_target_read_fp (void);
 #endif
 

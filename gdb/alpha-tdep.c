@@ -293,13 +293,13 @@ alpha_register_name (int regno)
 static int
 alpha_cannot_fetch_register (int regno)
 {
-  return (regno == FP_REGNUM || regno == ALPHA_ZERO_REGNUM);
+  return (regno == DEPRECATED_FP_REGNUM || regno == ALPHA_ZERO_REGNUM);
 }
 
 static int
 alpha_cannot_store_register (int regno)
 {
-  return (regno == FP_REGNUM || regno == ALPHA_ZERO_REGNUM);
+  return (regno == DEPRECATED_FP_REGNUM || regno == ALPHA_ZERO_REGNUM);
 }
 
 static int
@@ -1269,7 +1269,7 @@ alpha_push_dummy_frame (void)
      be read as zero and will help us to catch any errors in the dummy frame
      retrieval code.  */
   PROC_DUMMY_FRAME (proc_desc) = sp;
-  PROC_FRAME_REG (proc_desc) = FP_REGNUM;
+  PROC_FRAME_REG (proc_desc) = DEPRECATED_FP_REGNUM;
   PROC_FRAME_OFFSET (proc_desc) = 0;
   sp += PROC_REG_OFFSET (proc_desc);
   write_register (SP_REGNUM, sp);
@@ -1806,7 +1806,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Register info */
   set_gdbarch_num_regs (gdbarch, ALPHA_NUM_REGS);
   set_gdbarch_sp_regnum (gdbarch, ALPHA_SP_REGNUM);
-  set_gdbarch_fp_regnum (gdbarch, ALPHA_FP_REGNUM);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, ALPHA_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ALPHA_PC_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, ALPHA_FP0_REGNUM);
 

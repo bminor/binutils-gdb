@@ -1118,7 +1118,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	  else if (fromleaf)
 	    /* If we were called by a frameless fn.  then our frame is
 	       still in the frame pointer register on the board...  */
-	    deprecated_update_frame_base_hack (fi, read_fp ());
+	    deprecated_update_frame_base_hack (fi, deprecated_read_fp ());
 	}
 
       /* Calculate actual addresses of saved registers using offsets
@@ -2938,7 +2938,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Frame handling.  */
   set_gdbarch_deprecated_frame_chain_valid (gdbarch, arm_frame_chain_valid);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, arm_init_extra_frame_info);
-  set_gdbarch_read_fp (gdbarch, arm_read_fp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, arm_read_fp);
   set_gdbarch_deprecated_frame_chain (gdbarch, arm_frame_chain);
   set_gdbarch_frameless_function_invocation
     (gdbarch, arm_frameless_function_invocation);
@@ -2972,7 +2972,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Information about registers, etc.  */
   set_gdbarch_print_float_info (gdbarch, arm_print_float_info);
-  set_gdbarch_fp_regnum (gdbarch, ARM_FP_REGNUM);	/* ??? */
+  set_gdbarch_deprecated_fp_regnum (gdbarch, ARM_FP_REGNUM);	/* ??? */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
   set_gdbarch_register_byte (gdbarch, arm_register_byte);

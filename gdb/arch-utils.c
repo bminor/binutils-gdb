@@ -410,7 +410,8 @@ cannot_register_not (int regnum)
 }
 
 /* Legacy version of target_virtual_frame_pointer().  Assumes that
-   there is an FP_REGNUM and that it is the same, cooked or raw.  */
+   there is an DEPRECATED_FP_REGNUM and that it is the same, cooked or
+   raw.  */
 
 void
 legacy_virtual_frame_pointer (CORE_ADDR pc,
@@ -422,8 +423,8 @@ legacy_virtual_frame_pointer (CORE_ADDR pc,
      register and an offset can determine this.  I think it should
      instead generate a byte code expression as that would work better
      with things like Dwarf2's CFI.  */
-  if (FP_REGNUM >= 0 && FP_REGNUM < NUM_REGS)
-    *frame_regnum = FP_REGNUM;
+  if (DEPRECATED_FP_REGNUM >= 0 && DEPRECATED_FP_REGNUM < NUM_REGS)
+    *frame_regnum = DEPRECATED_FP_REGNUM;
   else if (SP_REGNUM >= 0 && SP_REGNUM < NUM_REGS)
     *frame_regnum = SP_REGNUM;
   else

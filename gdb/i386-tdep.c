@@ -669,7 +669,7 @@ i386_frame_init_saved_regs (struct frame_info *fip)
     }
 
   get_frame_saved_regs (fip)[PC_REGNUM] = get_frame_base (fip) + 4;
-  get_frame_saved_regs (fip)[FP_REGNUM] = get_frame_base (fip);
+  get_frame_saved_regs (fip)[DEPRECATED_FP_REGNUM] = get_frame_base (fip);
 }
 
 /* Return PC of first real instruction.  */
@@ -808,7 +808,7 @@ i386_do_pop_frame (struct frame_info *frame)
 	  deprecated_write_register_gen (regnum, regbuf);
 	}
     }
-  write_register (FP_REGNUM, read_memory_integer (fp, 4));
+  write_register (DEPRECATED_FP_REGNUM, read_memory_integer (fp, 4));
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
   write_register (SP_REGNUM, fp + 8);
   flush_cached_frames ();
@@ -1057,7 +1057,7 @@ i386_use_struct_convention (int gcc_p, struct type *type)
 static struct type *
 i386_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
+  if (regnum == PC_REGNUM || regnum == DEPRECATED_FP_REGNUM || regnum == SP_REGNUM)
     return lookup_pointer_type (builtin_type_void);
 
   if (i386_fp_regnum_p (regnum))
@@ -1469,7 +1469,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
 
   set_gdbarch_sp_regnum (gdbarch, 4); /* %esp */
-  set_gdbarch_fp_regnum (gdbarch, 5); /* %ebp */
+  set_gdbarch_deprecated_fp_regnum (gdbarch, 5); /* %ebp */
   set_gdbarch_pc_regnum (gdbarch, 8); /* %eip */
   set_gdbarch_ps_regnum (gdbarch, 9); /* %eflags */
   set_gdbarch_fp0_regnum (gdbarch, 16);	/* %st(0) */

@@ -445,8 +445,8 @@ m68k_push_dummy_frame (void)
   char raw_buffer[12];
 
   sp = push_word (sp, read_register (PC_REGNUM));
-  sp = push_word (sp, read_register (FP_REGNUM));
-  write_register (FP_REGNUM, sp);
+  sp = push_word (sp, read_register (DEPRECATED_FP_REGNUM));
+  write_register (DEPRECATED_FP_REGNUM, sp);
 
   /* Always save the floating-point registers, whether they exist on
      this target or not.  */
@@ -456,7 +456,7 @@ m68k_push_dummy_frame (void)
       sp = push_bytes (sp, raw_buffer, 12);
     }
 
-  for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)
+  for (regnum = DEPRECATED_FP_REGNUM - 1; regnum >= 0; regnum--)
     {
       sp = push_word (sp, read_register (regnum));
     }
@@ -486,7 +486,7 @@ m68k_pop_frame (void)
 					   12);
 	}
     }
-  for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)
+  for (regnum = DEPRECATED_FP_REGNUM - 1; regnum >= 0; regnum--)
     {
       if (get_frame_saved_regs (frame)[regnum])
 	{
@@ -499,7 +499,7 @@ m68k_pop_frame (void)
       write_register (PS_REGNUM,
 		      read_memory_integer (get_frame_saved_regs (frame)[PS_REGNUM], 4));
     }
-  write_register (FP_REGNUM, read_memory_integer (fp, 4));
+  write_register (DEPRECATED_FP_REGNUM, read_memory_integer (fp, 4));
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
   write_register (SP_REGNUM, fp + 8);
   flush_cached_frames ();
@@ -589,7 +589,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 
   /* First possible address for a pc in a call dummy for this frame.  */
   CORE_ADDR possible_call_dummy_start =
-    get_frame_base (frame_info) - 28 - FP_REGNUM * 4 - 4 - 8 * 12;
+    get_frame_base (frame_info) - 28 - DEPRECATED_FP_REGNUM * 4 - 4 - 8 * 12;
 
   int nextinsn;
 
@@ -743,7 +743,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
     }
 lose:;
   get_frame_saved_regs (frame_info)[SP_REGNUM] = get_frame_base (frame_info) + 8;
-  get_frame_saved_regs (frame_info)[FP_REGNUM] = get_frame_base (frame_info);
+  get_frame_saved_regs (frame_info)[DEPRECATED_FP_REGNUM] = get_frame_base (frame_info);
   get_frame_saved_regs (frame_info)[PC_REGNUM] = get_frame_base (frame_info) + 4;
 #ifdef SIG_SP_FP_OFFSET
   /* Adjust saved SP_REGNUM for fake _sigtramp frames.  */
@@ -1031,7 +1031,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes_ok (gdbarch, m68k_register_bytes_ok);
   set_gdbarch_register_bytes (gdbarch, (16 * 4 + 8 + 8 * 12 + 3 * 4));
   set_gdbarch_sp_regnum (gdbarch, M68K_SP_REGNUM);
-  set_gdbarch_fp_regnum (gdbarch, M68K_FP_REGNUM);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, M68K_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, M68K_PC_REGNUM);
   set_gdbarch_ps_regnum (gdbarch, M68K_PS_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, M68K_FP0_REGNUM);

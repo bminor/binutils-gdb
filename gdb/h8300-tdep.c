@@ -1101,7 +1101,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, E_NUM_REGS);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
   set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
-  set_gdbarch_fp_regnum (gdbarch, E_FP_REGNUM);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, E_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_register_name (gdbarch, h8300_register_name);
   set_gdbarch_register_size (gdbarch, BINWORD);

@@ -182,7 +182,7 @@ extern int sparc_intreg_size (void);
 
 #define	SP_REGNUM 14		/* Contains address of top of stack, \
 				   which is also the bottom of the frame.  */
-#define	FP_REGNUM 30		/* Contains address of executing stack frame */
+#define	DEPRECATED_FP_REGNUM 30		/* Contains address of executing stack frame */
 
 #define	FP0_REGNUM 32		/* Floating point register 0 */
 
@@ -201,8 +201,9 @@ extern int sparc_intreg_size (void);
    remove the ins and locals from `registers', make sure that
    frame_register() can get them from the stack (even in the innermost
    frame), and make this the way to access them.  For the frame
-   pointer we would do that via TARGET_READ_FP.  On the other hand,
-   that is likely to be confusing or worse for flat frames.  */
+   pointer we would do that via DEPRECATED_TARGET_READ_FP.  On the
+   other hand, that is likely to be confusing or worse for flat
+   frames.  */
 
 #define REGISTER_BYTES (32*4+32*4+8*4)
 

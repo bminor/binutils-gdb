@@ -80,7 +80,7 @@ int s390_register_byte (int reg_nr);
 #define PC_REGNUM S390_PC_REGNUM
 #define NUM_REGS  S390_NUM_REGS
 #define NUM_FREGS S390_NUM_FPRS
-#define FP_REGNUM S390_FP_REGNUM
+#define DEPRECATED_FP_REGNUM S390_FP_REGNUM
 #define SP_REGNUM S390_SP_REGNUM
 /* Obviously ptrace for user program tracing cannot be allowed
   mess with control registers (except per registers for hardware watchpoints),

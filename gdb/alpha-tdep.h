@@ -40,12 +40,12 @@
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 #define ALPHA_MAX_REGISTER_VIRTUAL_SIZE 8
 
-/* Register numbers of various important registers.
-   Note that most of these values are "real" register numbers,
-   and correspond to the general registers of the machine,
-   and FP_REGNUM is a "phony" register number which is too large
-   to be an actual register number as far as the user is concerned
-   but serves to get the desired value when passed to read_register.  */
+/* Register numbers of various important registers.  Note that most of
+   these values are "real" register numbers, and correspond to the
+   general registers of the machine, and DEPRECATED_FP_REGNUM is a
+   "phony" register number which is too large to be an actual register
+   number as far as the user is concerned but serves to get the
+   desired value when passed to read_register.  */
 
 #define ALPHA_V0_REGNUM	     0  /* Function integer return value */
 #define ALPHA_T7_REGNUM	     8  /* Return address register for OSF/1 __add* */

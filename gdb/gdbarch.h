@@ -345,20 +345,43 @@ extern void set_gdbarch_write_pc (struct gdbarch *gdbarch, gdbarch_write_pc_ftyp
 #endif
 #endif
 
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_FP)
-#define TARGET_READ_FP() (generic_target_read_fp ())
+/* This is simply not needed.  See value_of_builtin_frame_fp_reg and
+   call_function_by_hand. */
+
+#if defined (DEPRECATED_TARGET_READ_FP)
+/* Legacy for systems yet to multi-arch DEPRECATED_TARGET_READ_FP */
+#if !defined (DEPRECATED_TARGET_READ_FP_P)
+#define DEPRECATED_TARGET_READ_FP_P() (1)
+#endif
 #endif
 
-typedef CORE_ADDR (gdbarch_read_fp_ftype) (void);
-extern CORE_ADDR gdbarch_read_fp (struct gdbarch *gdbarch);
-extern void set_gdbarch_read_fp (struct gdbarch *gdbarch, gdbarch_read_fp_ftype *read_fp);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_READ_FP)
-#error "Non multi-arch definition of TARGET_READ_FP"
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_TARGET_READ_FP_P)
+#define DEPRECATED_TARGET_READ_FP_P() (0)
+#endif
+
+extern int gdbarch_deprecated_target_read_fp_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_TARGET_READ_FP_P)
+#error "Non multi-arch definition of DEPRECATED_TARGET_READ_FP"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_TARGET_READ_FP_P)
+#define DEPRECATED_TARGET_READ_FP_P() (gdbarch_deprecated_target_read_fp_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_TARGET_READ_FP)
+#define DEPRECATED_TARGET_READ_FP() (internal_error (__FILE__, __LINE__, "DEPRECATED_TARGET_READ_FP"), 0)
+#endif
+
+typedef CORE_ADDR (gdbarch_deprecated_target_read_fp_ftype) (void);
+extern CORE_ADDR gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch, gdbarch_deprecated_target_read_fp_ftype *deprecated_target_read_fp);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_TARGET_READ_FP)
+#error "Non multi-arch definition of DEPRECATED_TARGET_READ_FP"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_FP)
-#define TARGET_READ_FP() (gdbarch_read_fp (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_TARGET_READ_FP)
+#define DEPRECATED_TARGET_READ_FP() (gdbarch_deprecated_target_read_fp (current_gdbarch))
 #endif
 #endif
 
@@ -503,19 +526,22 @@ extern void set_gdbarch_sp_regnum (struct gdbarch *gdbarch, int sp_regnum);
 #endif
 #endif
 
+/* This is simply not needed.  See value_of_builtin_frame_fp_reg and
+   call_function_by_hand. */
+
 /* Default (value) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (FP_REGNUM)
-#define FP_REGNUM (-1)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FP_REGNUM)
+#define DEPRECATED_FP_REGNUM (-1)
 #endif
 
-extern int gdbarch_fp_regnum (struct gdbarch *gdbarch);
-extern void set_gdbarch_fp_regnum (struct gdbarch *gdbarch, int fp_regnum);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FP_REGNUM)
-#error "Non multi-arch definition of FP_REGNUM"
+extern int gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch, int deprecated_fp_regnum);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FP_REGNUM)
+#error "Non multi-arch definition of DEPRECATED_FP_REGNUM"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FP_REGNUM)
-#define FP_REGNUM (gdbarch_fp_regnum (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FP_REGNUM)
+#define DEPRECATED_FP_REGNUM (gdbarch_deprecated_fp_regnum (current_gdbarch))
 #endif
 #endif
 

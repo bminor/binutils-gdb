@@ -1145,14 +1145,14 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_read_pc (gdbarch, avr_read_pc);
   set_gdbarch_write_pc (gdbarch, avr_write_pc);
-  set_gdbarch_read_fp (gdbarch, avr_read_fp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, avr_read_fp);
   set_gdbarch_read_sp (gdbarch, avr_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, avr_write_sp);
 
   set_gdbarch_num_regs (gdbarch, AVR_NUM_REGS);
 
   set_gdbarch_sp_regnum (gdbarch, AVR_SP_REGNUM);
-  set_gdbarch_fp_regnum (gdbarch, AVR_FP_REGNUM);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, AVR_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, AVR_PC_REGNUM);
 
   set_gdbarch_register_name (gdbarch, avr_register_name);

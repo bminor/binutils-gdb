@@ -737,9 +737,19 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     sal.section = find_pc_overlay (sal.pc);
     /* Set up a frame ID for the dummy frame so we can pass it to
        set_momentary_breakpoint.  We need to give the breakpoint a
-       frame ID so that the breakpoint code can correctly
-       re-identify the dummy breakpoint.  */
-    frame = frame_id_build (read_fp (), sal.pc);
+       frame ID so that the breakpoint code can correctly re-identify
+       the dummy breakpoint.  */
+    /* The assumption here is that push_dummy_call() returned the
+       stack part of the frame ID.  Unfortunatly, many older
+       architectures were, via a convoluted mess, relying on the
+       poorly defined and greatly overloaded DEPRECATED_TARGET_READ_FP
+       or DEPRECATED_FP_REGNUM to supply the value.  */
+    if (DEPRECATED_TARGET_READ_FP_P ())
+      frame = frame_id_build (DEPRECATED_TARGET_READ_FP (), sal.pc);
+    else if (DEPRECATED_FP_REGNUM >= 0)
+      frame = frame_id_build (read_register (DEPRECATED_FP_REGNUM), sal.pc);
+    else
+      frame = frame_id_build (sp, sal.pc);
     bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
     bpt->disposition = disp_del;
   }

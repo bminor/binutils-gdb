@@ -74,20 +74,25 @@ value_of_builtin_frame_reg (struct frame_info *frame)
 static struct value *
 value_of_builtin_frame_fp_reg (struct frame_info *frame)
 {
-#ifdef FP_REGNUM
-  if (FP_REGNUM >= 0)
-    return value_of_register (FP_REGNUM, frame);
-#endif
-  {
-    struct value *val = allocate_value (builtin_type_void_data_ptr);
-    char *buf = VALUE_CONTENTS_RAW (val);
-    if (frame == NULL)
-      memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
-    else
-      ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
-			  get_frame_base (frame));
-    return val;
-  }
+  if (DEPRECATED_FP_REGNUM >= 0)
+    /* NOTE: cagney/2003-04-24: Since the mere presence of "fp" in the
+       register name table overrides this built-in $fp register, there
+       is no real reason for this DEPRECATED_FP_REGNUM trickery here.
+       An architecture wanting to implement "$fp" as alias for a raw
+       register can do so by adding "fp" to register name table (mind
+       you, doing this is probably a dangerous thing).  */
+    return value_of_register (DEPRECATED_FP_REGNUM, frame);
+  else
+    {
+      struct value *val = allocate_value (builtin_type_void_data_ptr);
+      char *buf = VALUE_CONTENTS_RAW (val);
+      if (frame == NULL)
+	memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
+      else
+	ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
+			    get_frame_base (frame));
+      return val;
+    }
 }
 
 static struct value *

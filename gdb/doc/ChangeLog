@@ -1,5 +1,11 @@
 2003-04-28  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	read_fp, TARGET_READ_FP and FP_REGNUM, with deprecated_read_fp,
+	DEPRECATED_TARGET_READ_FP and DEPRECATED_REGNUM.
+
+2003-04-28  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbint.texinfo (Target Architecture Definition): Rename
 	"tm_print_insn" to "deprecated_tm_print_insn".
 

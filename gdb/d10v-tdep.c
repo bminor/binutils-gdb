@@ -102,8 +102,6 @@ extern void _initialize_d10v_tdep (void);
 
 static CORE_ADDR d10v_read_sp (void);
 
-static CORE_ADDR d10v_read_fp (void);
-
 static void d10v_eva_prepare_to_trace (void);
 
 static void d10v_eva_get_trace_data (void);
@@ -918,12 +916,6 @@ d10v_read_sp (void)
   return (d10v_make_daddr (read_register (D10V_SP_REGNUM)));
 }
 
-static CORE_ADDR
-d10v_read_fp (void)
-{
-  return (d10v_make_daddr (read_register (D10V_FP_REGNUM)));
-}
-
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The below implements a FILO (stack) to do this. */
 
@@ -1584,7 +1576,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_read_pc (gdbarch, d10v_read_pc);
   set_gdbarch_write_pc (gdbarch, d10v_write_pc);
-  set_gdbarch_read_fp (gdbarch, d10v_read_fp);
   set_gdbarch_read_sp (gdbarch, d10v_read_sp);
 
   set_gdbarch_num_regs (gdbarch, d10v_num_regs);

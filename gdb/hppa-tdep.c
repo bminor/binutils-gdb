@@ -1085,7 +1085,7 @@ hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame)
          frame.  (we always want frame->frame to point at the lowest address
          in the frame).  */
       if (framesize == -1)
-	deprecated_update_frame_base_hack (frame, TARGET_READ_FP ());
+	deprecated_update_frame_base_hack (frame, deprecated_read_fp ());
       else
 	deprecated_update_frame_base_hack (frame, get_frame_base (frame) - framesize);
       return;
@@ -1106,7 +1106,7 @@ hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame)
      sorts, and its base is the high address in its parent's frame.  */
   framesize = find_proc_framesize (get_frame_pc (frame));
   if (framesize == -1)
-    deprecated_update_frame_base_hack (frame, TARGET_READ_FP ());
+    deprecated_update_frame_base_hack (frame, deprecated_read_fp ());
   else
     deprecated_update_frame_base_hack (frame, read_register (SP_REGNUM) - framesize);
 }
@@ -1264,7 +1264,7 @@ hppa_frame_chain (struct frame_info *frame)
 	  saved_regs_frame = tmp_frame;
 
 	  /* If we have an address for r3, that's good.  */
-	  if (saved_regs[FP_REGNUM])
+	  if (saved_regs[DEPRECATED_FP_REGNUM])
 	    break;
 	}
     }
@@ -1326,7 +1326,7 @@ hppa_frame_chain (struct frame_info *frame)
 	      u = find_unwind_entry (DEPRECATED_FRAME_SAVED_PC (frame));
 	      if (!u)
 		{
-		  return read_memory_integer (saved_regs[FP_REGNUM],
+		  return read_memory_integer (saved_regs[DEPRECATED_FP_REGNUM],
 					      TARGET_PTR_BIT / 8);
 		}
 	      else
@@ -1335,7 +1335,7 @@ hppa_frame_chain (struct frame_info *frame)
 		}
 	    }
 
-	  return read_memory_integer (saved_regs[FP_REGNUM],
+	  return read_memory_integer (saved_regs[DEPRECATED_FP_REGNUM],
 				      TARGET_PTR_BIT / 8);
 	}
     }
@@ -1364,7 +1364,7 @@ hppa_frame_chain (struct frame_info *frame)
 	  u = find_unwind_entry (DEPRECATED_FRAME_SAVED_PC (frame));
 	  if (!u)
 	    {
-	      return read_memory_integer (saved_regs[FP_REGNUM],
+	      return read_memory_integer (saved_regs[DEPRECATED_FP_REGNUM],
 					  TARGET_PTR_BIT / 8);
 	    }
 	  else
@@ -1375,7 +1375,7 @@ hppa_frame_chain (struct frame_info *frame)
 
       /* The value in %r3 was never saved into the stack (thus %r3 still
          holds the value of the previous frame pointer).  */
-      return TARGET_READ_FP ();
+      return deprecated_read_fp ();
     }
 }
 
@@ -1472,15 +1472,15 @@ hppa_push_dummy_frame (void)
   else
     write_memory (sp - 20, (char *) &int_buffer, REGISTER_SIZE);
 
-  int_buffer = TARGET_READ_FP ();
+  int_buffer = deprecated_read_fp ();
   write_memory (sp, (char *) &int_buffer, REGISTER_SIZE);
 
-  write_register (FP_REGNUM, sp);
+  write_register (DEPRECATED_FP_REGNUM, sp);
 
   sp += 2 * REGISTER_SIZE;
 
   for (regnum = 1; regnum < 32; regnum++)
-    if (regnum != RP_REGNUM && regnum != FP_REGNUM)
+    if (regnum != RP_REGNUM && regnum != DEPRECATED_FP_REGNUM)
       sp = push_word (sp, read_register (regnum));
 
   /* This is not necessary for the 64bit ABI.  In fact it is dangerous.  */
@@ -1515,13 +1515,13 @@ find_dummy_frame_regs (struct frame_info *frame,
   else
     frame_saved_regs[RP_REGNUM] = (fp - 20) & ~0x3;
 
-  frame_saved_regs[FP_REGNUM] = fp;
+  frame_saved_regs[DEPRECATED_FP_REGNUM] = fp;
 
   frame_saved_regs[1] = fp + (2 * REGISTER_SIZE);
 
   for (fp += 3 * REGISTER_SIZE, i = 3; i < 32; i++)
     {
-      if (i != FP_REGNUM)
+      if (i != DEPRECATED_FP_REGNUM)
 	{
 	  frame_saved_regs[i] = fp;
 	  fp += REGISTER_SIZE;
@@ -1598,7 +1598,7 @@ hppa_pop_frame (void)
       write_pc (npc);
     }
 
-  write_register (FP_REGNUM, read_memory_integer (fp, REGISTER_SIZE));
+  write_register (DEPRECATED_FP_REGNUM, read_memory_integer (fp, REGISTER_SIZE));
 
   if (fsr[IPSW_REGNUM])	/* call dummy */
     write_register (SP_REGNUM, fp - 48);
@@ -2442,8 +2442,8 @@ hppa_read_fp (int pid)
     }
 
   /* This is the only site that may directly read_register () the FP
-     register.  All others must use TARGET_READ_FP (). */
-  return read_register (FP_REGNUM);
+     register.  All others must use deprecated_read_fp (). */
+  return read_register (DEPRECATED_FP_REGNUM);
 }
 
 CORE_ADDR
@@ -3590,7 +3590,7 @@ restart:
   for (i = 3; i < u->Entry_GR + 3; i++)
     {
       /* Frame pointer gets saved into a special location.  */
-      if (u->Save_SP && i == FP_REGNUM)
+      if (u->Save_SP && i == DEPRECATED_FP_REGNUM)
 	continue;
 
       save_gr |= (1 << i);
@@ -3941,7 +3941,7 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
   for (i = 3; i < u->Entry_GR + 3; i++)
     {
       /* Frame pointer gets saved into a special location.  */
-      if (u->Save_SP && i == FP_REGNUM)
+      if (u->Save_SP && i == DEPRECATED_FP_REGNUM)
 	continue;
 
       save_gr |= (1 << i);
@@ -4003,14 +4003,14 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
       if (   (inst & 0xffffc000) == 0x6fc10000  /* stw,ma r1,N(sr0,sp) */
           || (inst & 0xffffc00c) == 0x73c10008) /* std,ma r1,N(sr0,sp) */
 	{
-	  frame_saved_regs[FP_REGNUM] = get_frame_base (frame_info);
+	  frame_saved_regs[DEPRECATED_FP_REGNUM] = get_frame_base (frame_info);
 	  save_sp = 0;
 	}
 
       /* Account for general and floating-point register saves.  */
       reg = inst_saves_gr (inst);
       if (reg >= 3 && reg <= 18
-	  && (!u->Save_SP || reg != FP_REGNUM))
+	  && (!u->Save_SP || reg != DEPRECATED_FP_REGNUM))
 	{
 	  save_gr &= ~(1 << reg);
 
@@ -4991,7 +4991,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_num_regs (gdbarch, hppa_num_regs);
-  set_gdbarch_fp_regnum (gdbarch, 3);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, 3);
   set_gdbarch_sp_regnum (gdbarch, 30);
   set_gdbarch_fp0_regnum (gdbarch, 64);
   set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
@@ -5030,7 +5030,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_read_pc (gdbarch, hppa_target_read_pc);
   set_gdbarch_write_pc (gdbarch, hppa_target_write_pc);
-  set_gdbarch_read_fp (gdbarch, hppa_target_read_fp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, hppa_target_read_fp);
 
   return gdbarch;
 }

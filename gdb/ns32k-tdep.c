@@ -395,7 +395,7 @@ ns32k_frame_init_saved_regs (struct frame_info *frame)
 
       get_frame_saved_regs (frame)[SP_REGNUM] = get_frame_base (frame) + 4;
       get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 4;
-      get_frame_saved_regs (frame)[FP_REGNUM] = read_memory_integer (get_frame_base (frame), 4);
+      get_frame_saved_regs (frame)[DEPRECATED_FP_REGNUM] = read_memory_integer (get_frame_base (frame), 4);
     }
   else if (enter_addr == 1)
     {
@@ -412,8 +412,8 @@ ns32k_push_dummy_frame (void)
   int regnum;
 
   sp = push_word (sp, read_register (PC_REGNUM));
-  sp = push_word (sp, read_register (FP_REGNUM));
-  write_register (FP_REGNUM, sp);
+  sp = push_word (sp, read_register (DEPRECATED_FP_REGNUM));
+  write_register (DEPRECATED_FP_REGNUM, sp);
 
   for (regnum = 0; regnum < 8; regnum++)
     sp = push_word (sp, read_register (regnum));
@@ -436,7 +436,7 @@ ns32k_pop_frame (void)
       write_register (regnum,
 		      read_memory_integer (get_frame_saved_regs (frame)[regnum], 4));
 
-  write_register (FP_REGNUM, read_memory_integer (fp, 4));
+  write_register (DEPRECATED_FP_REGNUM, read_memory_integer (fp, 4));
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
   write_register (SP_REGNUM, fp + 8);
   flush_cached_frames ();
