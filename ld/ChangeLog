@@ -4,6 +4,7 @@
 	(earmelfb.c, earmelfb_linux.c): New rules.
 	* Makefile.in: Regenerated.
 	* emulparams/armelfb.sh, emulparams/armelfb_linux.sh: New files.
+	* configure.tgt: Add armeb-elf and arm*b-*-linux-gnu.
 
 2003-05-09  Nick Clifton  <nickc@redhat.com>
 	
