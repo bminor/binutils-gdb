@@ -1,3 +1,18 @@
+Fri Dec  6 23:23:14 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: remove spaces following hyphens, bsd make can't
+	  cope. added clean-info.  added standards.text support.  Don't
+	  know how to make info anymore.
+
+	* configure.in: commontargets is no longer a recognized hook, so
+	  remove it.  new subdir called doc.
+
+Thu Dec  5 22:46:10 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: idestdir and ddestdir go away.  Added copyrights
+	  and shift gpl to v2.  Added ChangeLog if it didn't exist. docdir
+	  and mandir now keyed off datadir by default.
+
 Fri Nov 22 09:02:32 1991  John Gilmore  (gnu at cygnus.com)
 
 	* sysdep-obsd.h:  Rename from sysdep-newsos.h.

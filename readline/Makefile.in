@@ -1,20 +1,61 @@
-#								   #
-# Makefile for readline and history libraries.			   #
-#								   #
+#
+# Makefile
+#   Copyright (C) 1990, 1991 Cygnus Support
+#
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+#
+
+#
+# Makefile for readline and history libraries.
+#
 
 srcdir = .
-ddestdir = /usr/local
-idestdir = /usr/local
-INSTALL_PROG = install -c
-INSTALL_FILE = $(INSTALL_PROG)
 
-#### host and target dependent Makefile fragments come in here.
-##
+prefix = /usr/local
 
-# Destination installation directory.  The libraries are copied to DESTDIR
-# when you do a `make install', and the header files to INCDIR/readline/*.h.
-DESTDIR = $(ddestdir)/lib
-INCDIR = $(ddestdir)/include
+bindir = $(prefix)/bin
+datadir = $(prefix)/lib
+libdir = $(prefix)/lib
+mandir = $(datadir)/man
+man1dir = $(mandir)/man1
+man2dir = $(mandir)/man2
+man3dir = $(mandir)/man3
+man4dir = $(mandir)/man4
+man5dir = $(mandir)/man5
+man6dir = $(mandir)/man6
+man7dir = $(mandir)/man7
+man8dir = $(mandir)/man8
+man9dir = $(mandir)/man9
+infodir = $(prefix)/info
+includedir = $(prefix)/include
+docdir = $(datadir)/doc
+
+SHELL = /bin/sh
+
+INSTALL = install -c
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL)
+
+AR = ar
+AR_FLAGS = qv
+BISON = bison
+MAKEINFO = makeinfo
+RANLIB = ranlib
+
+#### Host, target, and site specific Makefile fragments come in here.
+###
 
 # Define TYPES as -DVOID_SIGHANDLER if your operating system uses
 # a return type of "void" for signal handlers.
@@ -33,13 +74,10 @@ READLINE_DEFINES = $(TYPES) -DVI_MODE
 MINUS_G=-g
 DEBUG_FLAGS = $(MINUS_G)
 LDFLAGS = $(DEBUG_FLAGS) 
-CFLAGS = $(DEBUG_FLAGS) $(USG) -I. $(LOCAL_INCLUDES) $(CPPFLAGS) $(READLINE_DEFINES)
+CFLAGS = $(H_CFLAGS) $(DEBUG_FLAGS) $(USG) -I. $(LOCAL_INCLUDES) $(CPPFLAGS) $(READLINE_DEFINES)
 
 # A good alternative is gcc -traditional.
 #CC = gcc -traditional
-RANLIB = /bin/ranlib
-AR = ar
-AR_FLAGS = clq
 RM = rm
 CP = cp
 
@@ -64,7 +102,13 @@ STAGESTUFF = *.o
 
 all: libreadline.a
 
-all-info: history.info readline.info
+info:
+	echo FIXME
+	echo FIXME
+	echo FIXME
+
+clean-info: force
+	-rm -f *.info*
 
 history.info: history.texi
 	$(MAKEINFO) -o history.info $(srcdir)/history.texi
@@ -99,15 +143,17 @@ readline.tar:	$(THINGS_TO_TAR)
 readline.tar.Z:	readline.tar
 		compress -f readline.tar
 
-install:	includes
-		$(INSTALL_PROG) libreadline.a $(DESTDIR)/libreadline.an
-		-mv $(DESTDIR)/libreadline.an $(DESTDIR)/libreadline.a
-		$(RANLIB) $(DESTDIR)/libreadline.a
+install:
+		$(INSTALL_DATA) libreadline.a $(libdir)/libreadline.a
+		$(RANLIB) $(libdir)/libreadline.a
+		[ -d $(includedir)/readline ] || mkdir $(includedir)/readline
+		$(INSTALL_DATA) readline.h $(includedir)/readline/readline.h
+		$(INSTALL_DATA) keymaps.h $(includedir)/readline/keymaps.h
+		$(INSTALL_DATA) chardefs.h $(includedir)/readline/chardefs.h
 
-install-info: all-info
+install-info: info
 		for i in *.info* ; do \
-			echo Installing $$i... ; \
-			cp $$i $(idestdir)/info/$$i ; \
+			$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 		done
 
 includes:
@@ -120,7 +166,7 @@ includes:
 		$(INSTALL_FILE) $(srcdir)/chardefs.h $(INCDIR)/readline/
 clean:
 		rm -f $(STAGESTUFF) *.a *.log *.cp *.tp *.vr *.fn
-		rm -f *.aux *.pg *.toc *.info*
+		rm -f *.aux *.pg *.toc
 
 $(DESTDIR)/libreadline.a: libreadline.a
 
@@ -143,16 +189,16 @@ comparison: force
 	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
 
 de-stage1: force
-	- (cd stage1 ; mv -f * ..)
-	- rmdir stage1
+	-(cd stage1 ; mv -f * ..)
+	-rmdir stage1
 
 de-stage2: force
-	- (cd stage2 ; mv -f * ..)
-	- rmdir stage2
+	-(cd stage2 ; mv -f * ..)
+	-rmdir stage2
 
 de-stage3: force
-	- (cd stage3 ; mv -f * ..)
-	- rmdir stage3
+	-(cd stage3 ; mv -f * ..)
+	-rmdir stage3
 
 force:
 
