@@ -1,4 +1,11 @@
 start-sanitize-d10v
+Thu Jul 25 12:08:09 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-opc.c: Changes to support signed and unsigned numbers.
+	All instructions with the same name that have long and short forms
+	now end in ".l" or ".s".  Divs added.
+	* d10v-dis.c: Changes to support signed and unsigned numbers.
+
 Tue Jul 23 11:02:53 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-dis.c: Change all functions to use info->print_address_func.

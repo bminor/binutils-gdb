@@ -155,7 +155,19 @@ print_operand (oper, insn, op, memaddr, info)
 	    (*info->print_address_func) (memaddr + num, info); 
 	}
       else
-	(*info->fprintf_func) (info->stream, "0x%x",num);
+	{
+	  if (oper->flags & OPERAND_SIGNED)
+	    {
+	      int max = (1 << (oper->bits - 1));
+	      if (num & max)
+		{
+		  num = -num;
+		  num &= (max-1);
+		  (*info->fprintf_func) (info->stream, "-");
+		}
+	    }
+	  (*info->fprintf_func) (info->stream, "0x%x",num);
+	}
     }
 }
 
