@@ -219,7 +219,6 @@ sim_open (kind, cb, abfd, argv)
      struct _bfd *abfd;
      char **argv;
 {
-  char *buf;
   SIM_DESC sd = sim_state_alloc (kind, cb);
 #if 0
   struct simops *s;
@@ -239,14 +238,11 @@ sim_open (kind, cb, abfd, argv)
     return 0;
 
   /* Allocate core managed memory */
+
   /* "Mirror" the ROM addresses below 1MB. */
-  asprintf (&buf, "memory region 0,0x100000,0x%lx", V850_ROM_SIZE);
-  sim_do_command (sd, buf);
-  free (buf);
+  sim_do_commandf (sd, "memory region 0,0x100000,0x%lx", V850_ROM_SIZE);
   /* Chunk of ram adjacent to rom */
-  asprintf (&buf, "memory region 0x100000,0x%lx", V850_LOW_END - 0x100000);
-  sim_do_command (sd, buf);
-  free (buf);
+  sim_do_commandf (sd, "memory region 0x100000,0x%lx", V850_LOW_END-0x100000);
   /* peripheral I/O region - mirror 1K across 4k (0x1000) */
   sim_do_command (sd, "memory region 0xfff000,0x1000,1024");
   /* similarly if in the internal RAM region */
@@ -394,7 +390,7 @@ sim_info (sd, verbose)
      SIM_DESC sd;
      int verbose;
 {
-  /* do nothing */
+  profile_print (sd, STATE_VERBOSE_P (sd), NULL, NULL);
 }
 
 SIM_RC

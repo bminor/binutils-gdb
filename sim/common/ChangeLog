@@ -1,3 +1,48 @@
+Thu Sep 11 10:08:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-profile.c (profile_print_speed): Call
+ 	sim_events_elapsed_time instead of PROFILE_EXEC_TIME for moment.
+
+	* sim-events.c (sim_events_elapsed_time): New function return nr
+ 	host MS consumed by the simulator.
+	(sim_watch_valid): Use.
+
+	* sim-module.c (modules): Install sim_events very very early.
+
+	* sim-profile.c (profile_print): Call profile_print_pc.
+	(print_bar):
+	(profile_pc_init): New function, set up processor for PC
+ 	profiling.
+	(profile_print_pc): New function, print a PC profile.
+	(profile_pc_event): New function, sample PC.
+
+	* sim-profile.h (PROFILE_PC_COUNT, PROFILE_PC_START,
+ 	PROFILE_PC_END, PROFILE_PC_SHIFT, PROFILE_PC_SAMPLE_SIZE): Add to
+ 	profile struct.
+
+	* sim-options.c (sim_print_help): Pacify GCC.
+
+	* sim-n-core.h (sim_core_read_aligned_N,
+ 	sim_core_write_aligned_N): Add un-conditional profile call.
+	(sim_core_read_unaligned_N, sim_core_write_unaligned_N): Add
+ 	profile call when aligned read/write isn't used.
+
+	* sim-base.h: Include sim-profile, sim-model after sim-core &
+ 	sim-events allow sim-core to define useful values.
+
+	* sim-profile.c (OPTION_PROFILE_CORE): Define.
+	(profile_option_handler, profile_options): Add support for
+ 	--profile-core option.
+	(print_bar): Include when core profiling.
+	(profile_print_core): New function, print core profile.
+
+	* sim-config.c (print_sim_config): Print profile status.
+
+	* sim-profile.h (PROFILE_NEXT_IDX, PROFILE_core,
+ 	WITH_PROFILE_PC_P): Define.
+	(PROFILE_CORE_COUNT): Count each core-map/size separatly.
+	(PROFILE_COUNT_CORE): Define.
+
 Thu Sep 11 08:44:52 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-watch.c (handle_watchpoint): Pass a char** index into the

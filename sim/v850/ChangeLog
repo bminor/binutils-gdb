@@ -1,5 +1,16 @@
 Thu Sep 11 08:40:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* interp.c (sim_open): Use sim_do_commandf instead of asprintf.
+
+	* sim-main.h (INSN_NAME): 
+
+	* Makefile.in (INCLUDE): Add SIM_EXTRA_DEPS.
+	(SIM_EXTRA_DEPS): Add itable.h
+	(tmp-gencode): Does not depend on simops.h
+
+	* sim-main.h (itable.h): Include.
+	(MAX_INSNS, INSN_NAME): Define.
+
 	* interp.c: Compute inttype from the interrupt_names index that
  	was passed in.
 

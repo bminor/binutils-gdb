@@ -343,6 +343,15 @@ sim_events_time (SIM_DESC sd)
 }
 
 
+INLINE_SIM_EVENTS\
+(unsigned long)
+sim_events_elapsed_time (SIM_DESC sd)
+{
+  return (sim_elapsed_time_since (STATE_EVENTS (sd)->resume_wallclock)
+	  + STATE_EVENTS (sd)->elapsed_wallclock);
+}
+
+
 STATIC_INLINE_SIM_EVENTS\
 (void)
 update_time_from_event (SIM_DESC sd)
@@ -865,9 +874,7 @@ sim_watch_valid (SIM_DESC sd,
 
     case watch_clock: /* wallclock */
       {
-	unsigned long elapsed_time =
-	  (sim_elapsed_time_since (STATE_EVENTS (sd)->resume_wallclock)
-	   + STATE_EVENTS (sd)->elapsed_wallclock);
+	unsigned long elapsed_time = sim_events_elapsed_time (sd);
 	return (elapsed_time >= to_do->wallclock);
       }
 

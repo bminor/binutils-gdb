@@ -1,3 +1,4 @@
+#define WITH_CORE
 #define WITH_MODULO_MEMORY 1
 #define WITH_WATCHPOINTS 1
 #define WITH_TARGET_WORD_MSB 31
@@ -6,9 +7,16 @@
 
 typedef address_word sim_cia;
 
+
 /* This simulator doesn't cache state */
 #define SIM_ENGINE_HALT_HOOK(sd,last_cpu,cia) while (0)
 #define SIM_ENGINE_RESTART_HOOK(sd,last_cpu,cia) while (0)
+
+/* Get the number of instructions.  FIXME: must be a more elegant way
+   of doing this.  */
+#include "itable.h"
+#define MAX_INSNS (nr_itable_entries)
+#define INSN_NAME(i) itable[(i)].name
 
 #include "sim-base.h"
 

@@ -45,7 +45,7 @@ SIM_RUN_OBJS = nrun.o
 
 # List of extra dependencies.
 # Generally this consists of simulator specific files included by sim-main.h.
-SIM_EXTRA_DEPS = v850_sim.h sim-main.h simops.h
+SIM_EXTRA_DEPS = v850_sim.h sim-main.h simops.h itable.h
 
 # List of flags to always pass to $(CC)
 SIM_WARNINGS=@sim_warnings@
@@ -59,18 +59,18 @@ SIM_EXTRA_CFLAGS = \
 	$(SIM_HOSTENDIAN)
 SIM_EXTRA_CLEAN = clean-extra
 
-INCLUDE = simops.h v850_sim.h sim-main.h $(srcdir)/../../include/callback.h
+INCLUDE = $(sim_main_headers) $(SIM_EXTRA_DEPS)
 
 ## COMMON_POST_CONFIG_FRAG
 
 simops.h table.c: tmp-gencode
-tmp-gencode: gencode simops.h
+tmp-gencode: gencode
 	./gencode >tmp-table.c
 	mv tmp-table.c table.c
 	./gencode -h >tmp-simops.h
 	mv tmp-simops.h simops.h
 	touch tmp-gencode
-gencode.o: gencode.c $(INCLUDE)
+gencode.o: gencode.c
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gencode.c
 v850-opc.o: $(srcdir)/../../opcodes/v850-opc.c
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $<
@@ -151,5 +151,5 @@ clean-extra: clean-igen
 	rm -f table.c simops.h gencode
 
 #interp.o: interp.c table.c $(INCLUDE)
-simops.o: simops.c simops.h
+simops.o: simops.c $(INCLUDE)
 #table.o: table.c
