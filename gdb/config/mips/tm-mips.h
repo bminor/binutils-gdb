@@ -345,8 +345,9 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
    into a call sequence of the above form stored at DUMMYNAME.  */
 
 #if TARGET_BYTE_ORDER == BIG_ENDIAN && ! defined (GDB_TARGET_IS_MIPS64)
-/* For big endian mips machines the loading of FP values depends on whether
-   they are single or double precision. */
+/* For big endian mips machines we need to switch the order of the
+   words with a floating-point value (it was already coerced to a double
+   by mips_push_arguments).  */
 #define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs, args, rettype, gcc_p) \
   do {									\
     ((int*)(dummyname))[11] |= ((unsigned long)(fun)) >> 16;		\
@@ -356,14 +357,16 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
       ((int *) (dummyname))[5] = 0; ((int *) (dummyname))[6] = 0;	\
     } else {								\
       if (nargs > 0 &&							\
-	  TYPE_CODE(VALUE_TYPE(args[0])) == TYPE_CODE_FLT &&		\
-	  TYPE_LENGTH(VALUE_TYPE(args[0])) == 8) {			\
+	  TYPE_CODE(VALUE_TYPE(args[0])) == TYPE_CODE_FLT) {		\
+	if (TYPE_LENGTH(VALUE_TYPE(args[0])) > 8)			\
+	  error ("Can't pass floating point value of more than 8 bytes to a function"); \
 	((int *) (dummyname))[3] = MK_OP(OP_LDFPR,SP_REGNUM,12,4);	\
 	((int *) (dummyname))[4] = MK_OP(OP_LDFPR,SP_REGNUM,13,0);	\
       }									\
       if (nargs > 1 &&							\
-	  TYPE_CODE(VALUE_TYPE(args[1])) == TYPE_CODE_FLT &&		\
-	  TYPE_LENGTH(VALUE_TYPE(args[1])) == 8) {			\
+	  TYPE_CODE(VALUE_TYPE(args[1])) == TYPE_CODE_FLT) {		\
+	if (TYPE_LENGTH(VALUE_TYPE(args[1])) > 8)			\
+	  error ("Can't pass floating point value of more than 8 bytes to a function"); \
 	((int *) (dummyname))[5] = MK_OP(OP_LDFPR,SP_REGNUM,14,12);	\
 	((int *) (dummyname))[6] = MK_OP(OP_LDFPR,SP_REGNUM,15,8);	\
       }									\
