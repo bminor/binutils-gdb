@@ -2037,7 +2037,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      code->op3.literal = 0;
 
 	      if (OP_KIND (code->src.type) == OP_INDEXB)
-		code->dst.type = X (OP_REG, SB);
+		{
+		  code->dst.type = X (OP_REG, SB);
+		  code->dst.reg = code->op3.reg + 8;
+		}
 	      else
 		code->dst.type = X (OP_REG, SW);
 	    }
@@ -3886,13 +3889,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      fetch (sd, &code->dst, &rd))
 	    goto end;
 
-	  /* FIXME: is this the right place to be doing sign extend?  */
-	  if (OP_KIND (code->src.type) == OP_IMM &&
-	      (ea & 8) != 0)
-	    ea |= 0xfff0;
-	  else
-	    ea = SEXTSHORT (ea);
-
+	  ea = SEXTSHORT (ea);
 	  res = SEXTSHORT (ea * SEXTSHORT (rd));
 
 	  n  = res & 0x8000;
@@ -3907,11 +3904,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      fetch (sd, &code->dst, &rd))
 	    goto end;
 
-	  /* FIXME: is this the right place to be doing sign extend?  */
-	  if (OP_KIND (code->src.type) == OP_IMM &&
-	      (ea & 8) != 0)
-	    ea |= 0xfffffff0;
-
 	  res = ea * rd;
 
 	  n  = res & 0x80000000;
@@ -3924,11 +3916,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  if (fetch (sd, &code->src, &ea) ||
 	      fetch (sd, &code->dst, &rd))
 	    goto end;
-
-	  /* FIXME: is this the right place to be doing sign extend?  */
-	  if (OP_KIND (code->src.type) == OP_IMM &&
-	      (ea & 8) != 0)
-	    ea |= 0xfffffff0;
 
 	  /* Compute upper 32 bits of the 64-bit result.  */
 	  res = (((long long) ea) * ((long long) rd)) >> 32;
@@ -3985,13 +3972,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      fetch (sd, &code->dst, &rd))
 	    goto end;
 
-	  /* FIXME: is this the right place to be doing sign extend?  */
-	  if (OP_KIND (code->src.type) == OP_IMM &&
-	      (ea & 8) != 0)
-	    ea |= 0xfffffff0;
-	  else
-	    ea = SEXTCHAR (ea);
-
+	  ea = SEXTCHAR (ea);
 	  res = ea * SEXTCHAR (rd);
 
 	  n  = res & 0x8000;
@@ -4006,13 +3987,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      fetch (sd, &code->dst, &rd))
 	    goto end;
 
-	  /* FIXME: is this the right place to be doing sign extend?  */
-	  if (OP_KIND (code->src.type) == OP_IMM &&
-	      (ea & 8) != 0)
-	    ea |= 0xfff0;
-	  else
-	    ea = SEXTSHORT (ea);
-
+	  ea = SEXTSHORT (ea);
 	  res = ea * SEXTSHORT (rd & 0xffff);
 
 	  n  = res & 0x80000000;
@@ -4103,11 +4078,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      fetch (sd, &code->dst, &rd))
 	    goto end;
 
-	  /* FIXME: is this the right place to be doing sign extend?  */
-	  if (OP_KIND (code->src.type) == OP_IMM &&
-	      (ea & 8) != 0)
-	    ea |= 0xfffffff0;
-
 	  if (ea)
 	    {
 	      res = SEXTSHORT (rd) / SEXTSHORT (ea);
@@ -4128,11 +4098,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  if (fetch (sd, &code->src, &ea) ||
 	      fetch (sd, &code->dst, &rd))
 	    goto end;
-
-	  /* FIXME: is this the right place to be doing sign extend?  */
-	  if (OP_KIND (code->src.type) == OP_IMM &&
-	      (ea & 8) != 0)
-	    ea |= 0xfffffff0;
 
 	  if (ea)
 	    {
@@ -4205,13 +4170,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    goto end;
 
 	  rd = SEXTSHORT (rd);
-
-	  /* FIXME: is this the right place to be doing sign extend?  */
-	  if (OP_KIND (code->src.type) == OP_IMM &&
-	      (ea & 8) != 0)
-	    ea |= 0xfffffff0;
-	  else
-	    ea = SEXTCHAR (ea);
+	  ea = SEXTCHAR (ea);
 
 	  if (ea)
 	    {
@@ -4236,12 +4195,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      fetch (sd, &code->dst, &rd))
 	    goto end;
 
-	  /* FIXME: is this the right place to be doing sign extend?  */
-	  if (OP_KIND (code->src.type) == OP_IMM &&
-	      (ea & 8) != 0)
-	    ea |= 0xfffffff0;
-	  else
-	    ea = SEXTSHORT (ea);
+	  ea = SEXTSHORT (ea);
 
 	  if (ea)
 	    {

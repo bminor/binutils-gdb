@@ -1,5 +1,12 @@
 2004-06-28  Alexandre Oliva  <aoliva@redhat.com>
 
+	2003-07-23  Richard Sandiford  <rsandifo@redhat.com>
+	* compile.c (sim_resume): Make sure that dst.reg refers to the
+	right register byte in mova/sz.l @(dd,RnL),ERn.
+	2003-07-21  Richard Sandiford  <rsandifo@redhat.com>
+	* compile.c (sim_resume): Zero-extend immediate to muls, mulsu,
+	mulxs, divs and divxs.
+
 	* compile.c (sim_load): Update sd->memory_size.
 
 2004-06-10  Michael Snyder  <msnyder@redhat.com>

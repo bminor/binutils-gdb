@@ -1,3 +1,10 @@
+2004-06-28  Alexandre Oliva  <aoliva@redhat.com>
+
+	2003-07-22  Michael Snyder  <msnyder@redhat.com>
+	* mul.s: Don't try to use negative immediate (it's always
+	unsigned).
+	* div.s: Ditto.
+
 2004-06-24  Alexandre Oliva  <aoliva@redhat.com>
 
 	2004-06-17  Alexandre Oliva  <aoliva@redhat.com>
