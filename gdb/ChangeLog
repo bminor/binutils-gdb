@@ -1,3 +1,8 @@
+Fri Jan 12 18:29:46 2001  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* infcmd.c (print_return_value): Restore space lost by switch to
+ 	UIOUT. ``$NN='' should be ``$NN =''.
+	
 2001-01-08  Nicholas Duffek  <nsd@redhat.com>
 
 	* regcache.c (set_register_cached, register_buffer,

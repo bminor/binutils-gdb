@@ -1,3 +1,7 @@
+Fri Jan 12 18:29:01 2001  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/callfuncs.exp: Add space after ``Value returned is''.
+
 2000-12-21  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
 	* gdb.base/finish.exp: Accept '1' instead of \001 from char_func.

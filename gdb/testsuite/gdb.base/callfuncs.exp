@@ -334,7 +334,7 @@ if ![gdb_test "bt 2" \
 # make sure we are back at main and still have the same register contents.
 gdb_test "print add(4,5)" "The program being debugged stopped while.*" ""
 gdb_test "finish" \
-	 "Value returned is.* = 9" \
+	 "Value returned is .* = 9" \
 	 "finish from call dummy breakpoint returns correct value"
 if ![gdb_test "bt 2" \
 	      "#0  main.*" \
