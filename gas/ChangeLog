@@ -1,3 +1,7 @@
+Mon Apr 21 15:33:19 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/c-mips.texi: Document .set autoextend.
+
 Sat Apr 19 23:09:25 1997  Niklas Hallqvist  <niklas@petra.appli.se>
 
 	* configure.in (i386-*-openbsd*, m68k-*-openbsd*,
