@@ -67,12 +67,7 @@ case "${target}" in
 # end-sanitize-v850
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
-  sparc*-*-*)		case "${host}" in	# don't build for non Unix systems
-			  *-*-go32)	sim_target=none ;;
-			  *-*-winnt)	sim_target=none ;;
-			  *-*-cygwin32)	sim_target=none ;;
-  			  *)
-				# The SPARC simulator can only be compiled
+  sparc*-*-*)			# The SPARC simulator can only be compiled
 				# by gcc.
 				if test "${GCC}" = "yes"; then
 				  sim_target=erc32
@@ -80,7 +75,6 @@ case "${target}" in
 				  sim_target=none
 				fi
 				;;
-  			esac ;;
   *)			sim_target=none ;;
 esac
 
