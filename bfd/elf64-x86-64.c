@@ -37,29 +37,41 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static reloc_howto_type x86_64_elf_howto_table[] =
 {
   HOWTO(R_X86_64_NONE, 0, 0, 0, false, 0, complain_overflow_dont,
-	bfd_elf_generic_reloc, "R_X86_64_NONE",	false, 0x00000000, 0x00000000, false),
+	bfd_elf_generic_reloc, "R_X86_64_NONE",	false, 0x00000000, 0x00000000,
+	false),
   HOWTO(R_X86_64_64, 0, 4, 64, false, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_64", false, MINUS_ONE, MINUS_ONE, false),
+	bfd_elf_generic_reloc, "R_X86_64_64", false, MINUS_ONE, MINUS_ONE,
+	false),
   HOWTO(R_X86_64_PC32, 0, 4, 32, true, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_PC32", false, 0xffffffff, 0xffffffff, true),
+	bfd_elf_generic_reloc, "R_X86_64_PC32", false, 0xffffffff, 0xffffffff,
+	true),
   HOWTO(R_X86_64_GOT32, 0, 4, 32, false, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_GOT32", false, 0xffffffff, 0xffffffff, false),
+	bfd_elf_generic_reloc, "R_X86_64_GOT32", false, 0xffffffff, 0xffffffff,
+	false),
   HOWTO(R_X86_64_PLT32, 0, 4, 32, true, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_PLT32", false, 0xffffffff, 0xffffffff, true),
+	bfd_elf_generic_reloc, "R_X86_64_PLT32", false, 0xffffffff, 0xffffffff,
+	true),
   HOWTO(R_X86_64_COPY, 0, 4, 32, false, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_COPY", false, 0xffffffff, 0xffffffff, false),
+	bfd_elf_generic_reloc, "R_X86_64_COPY", false, 0xffffffff, 0xffffffff,
+	false),
   HOWTO(R_X86_64_GLOB_DAT, 0, 4, 64, false, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_GLOB_DAT", false, MINUS_ONE, MINUS_ONE, false),
+	bfd_elf_generic_reloc, "R_X86_64_GLOB_DAT", false, MINUS_ONE,
+	MINUS_ONE, false),
   HOWTO(R_X86_64_JUMP_SLOT, 0, 4, 64, false, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_JUMP_SLOT", false, MINUS_ONE, MINUS_ONE, false),
+	bfd_elf_generic_reloc, "R_X86_64_JUMP_SLOT", false, MINUS_ONE,
+	MINUS_ONE, false),
   HOWTO(R_X86_64_RELATIVE, 0, 4, 64, false, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_RELATIVE", false, MINUS_ONE, MINUS_ONE, false),
+	bfd_elf_generic_reloc, "R_X86_64_RELATIVE", false, MINUS_ONE,
+	MINUS_ONE, false),
   HOWTO(R_X86_64_GOTPCREL, 0, 4, 32, true,0 , complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_GOTPCREL", false, 0xffffffff, 0xffffffff, true),
+	bfd_elf_generic_reloc, "R_X86_64_GOTPCREL", false, 0xffffffff,
+	0xffffffff, true),
   HOWTO(R_X86_64_32, 0, 4, 32, false, 0, complain_overflow_unsigned,
-	bfd_elf_generic_reloc, "R_X86_64_32", false, 0xffffffff, 0xffffffff, false),
+	bfd_elf_generic_reloc, "R_X86_64_32", false, 0xffffffff, 0xffffffff,
+	false),
   HOWTO(R_X86_64_32S, 0, 4, 32, false, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_32S", false, 0xffffffff, 0xffffffff, false),
+	bfd_elf_generic_reloc, "R_X86_64_32S", false, 0xffffffff, 0xffffffff,
+	false),
   HOWTO(R_X86_64_16, 0, 1, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_16", false, 0xffff, 0xffff, false),
   HOWTO(R_X86_64_PC16,0, 1, 16, true, 0, complain_overflow_bitfield,
@@ -67,7 +79,16 @@ static reloc_howto_type x86_64_elf_howto_table[] =
   HOWTO(R_X86_64_8, 0, 0, 8, false, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_8", false, 0xff, 0xff, false),
   HOWTO(R_X86_64_PC8, 0, 0, 8, true, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_PC8", false, 0xff, 0xff, true)
+	bfd_elf_generic_reloc, "R_X86_64_PC8", false, 0xff, 0xff, true),
+
+/* GNU extension to record C++ vtable hierarchy.  */
+  HOWTO (R_X86_64_GNU_VTINHERIT, 0, 4, 0, false, 0, complain_overflow_dont,
+	 NULL, "R_X86_64_GNU_VTINHERIT", false, 0, 0, false),
+
+/* GNU extension to record C++ vtable member usage.  */
+  HOWTO (R_X86_64_GNU_VTENTRY, 0, 4, 0, false, 0, complain_overflow_dont,
+	 _bfd_elf_rel_vtable_reloc_fn, "R_X86_64_GNU_VTENTRY", false, 0, 0,
+	 false)
 };
 
 /* Map BFD relocs to the x86_64 elf relocs.  */
@@ -95,6 +116,8 @@ static CONST struct elf_reloc_map x86_64_reloc_map[] =
   { BFD_RELOC_16_PCREL,		R_X86_64_PC16, },
   { BFD_RELOC_8,		R_X86_64_8, },
   { BFD_RELOC_8_PCREL,		R_X86_64_PC8, },
+  { BFD_RELOC_VTABLE_INHERIT,	R_X86_64_GNU_VTINHERIT, },
+  { BFD_RELOC_VTABLE_ENTRY,	R_X86_64_GNU_VTENTRY, },
 };
 
 static reloc_howto_type *elf64_x86_64_reloc_type_lookup
@@ -145,11 +168,20 @@ elf64_x86_64_info_to_howto (abfd, cache_ptr, dst)
      arelent *cache_ptr;
      Elf64_Internal_Rela *dst;
 {
-  unsigned r_type;
+  unsigned r_type, i;
 
   r_type = ELF64_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_X86_64_max);
-  cache_ptr->howto = &x86_64_elf_howto_table[r_type];
+  if (r_type < (unsigned int) R_X86_64_GNU_VTINHERIT)
+    {
+      BFD_ASSERT (r_type <= (unsigned int) R_X86_64_PC8);
+      i = r_type;
+    }
+  else
+    {
+      BFD_ASSERT (r_type < (unsigned int) R_X86_64_max);
+      i = r_type - ((unsigned int) R_X86_64_GNU_VTINHERIT - R_X86_64_PC8 - 1);
+    }
+  cache_ptr->howto = &x86_64_elf_howto_table[i];
   BFD_ASSERT (r_type == cache_ptr->howto->type);
 }
 
@@ -540,8 +572,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 		 that this function is only called if we are using an
 		 elf64_x86_64 linker hash table, which means that h is
 		 really a pointer to an elf64_x86_64_link_hash_entry.  */
-	      if (h != NULL
-		  && ELF64_R_TYPE (rel->r_info) == R_X86_64_PC32)
+	      if (h != NULL && ELF64_R_TYPE (rel->r_info) == R_X86_64_PC32)
 		{
 		  struct elf64_x86_64_link_hash_entry *eh;
 		  struct elf64_x86_64_pcrel_relocs_copied *p;
@@ -568,6 +599,20 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 		}
 	    }
 	  break;
+
+	  /* This relocation describes the C++ object vtable hierarchy.
+	     Reconstruct it for later use during GC.  */
+	case R_X86_64_GNU_VTINHERIT:
+	  if (!_bfd_elf64_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	    return false;
+	  break;
+
+	  /* This relocation describes which C++ vtable entries are actually
+	     used.  Record for later use during GC.  */
+	case R_X86_64_GNU_VTENTRY:
+	  if (!_bfd_elf64_gc_record_vtentry (abfd, sec, h, rel->r_offset))
+	    return false;
+	  break;
 	}
     }
 
@@ -587,17 +632,25 @@ elf64_x86_64_gc_mark_hook (abfd, info, rel, h, sym)
 {
   if (h != NULL)
     {
-      switch (h->root.type)
+      switch (ELF64_R_TYPE (rel->r_info))
 	{
-	case bfd_link_hash_defined:
-	case bfd_link_hash_defweak:
-	  return h->root.u.def.section;
-
-	case bfd_link_hash_common:
-	  return h->root.u.c.p->section;
+	case R_X86_64_GNU_VTINHERIT:
+	case R_X86_64_GNU_VTENTRY:
+	  break;
 
 	default:
-	  break;
+	  switch (h->root.type)
+	    {
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
+	    }
 	}
     }
   else
@@ -1096,7 +1149,7 @@ elf64_x86_64_discard_copies (h, inf)
 
 static boolean
 elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
-			     contents, relocs, local_syms, local_sections)
+			       contents, relocs, local_syms, local_sections)
      bfd *output_bfd;
      struct bfd_link_info *info;
      bfd *input_bfd;
@@ -1143,6 +1196,9 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
       unsigned int indx;
 
       r_type = ELF64_R_TYPE (rela->r_info);
+      if (r_type == (int) R_X86_64_GNU_VTINHERIT
+	  || r_type == (int) R_X86_64_GNU_VTENTRY)
+	continue;
 
       if ((indx = (unsigned) r_type) >= R_X86_64_max)
 	{
@@ -1654,7 +1710,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* Get the offset into the .got table of the entry that
 	 corresponds to this function.	Each .got entry is GOT_ENTRY_SIZE
-	 bytes. The first three are reserved.  */
+	 bytes. The first three are reserved for the dynamic linker.  */
       got_offset = (plt_index + 3) * GOT_ENTRY_SIZE;
 
       /* Fill in the entry in the procedure linkage table.  */
