@@ -66,7 +66,8 @@ proc gas_start { prog as_opts } {
 proc gas_finish { } {
     global spawn_id
 
-# Don't need to do anything?
+    close
+    # Might also need a wait here one day.
 }
 
 proc want_no_output { testname } {
@@ -196,7 +197,8 @@ proc objdump_start_no_subdir { prog opts } {
 proc objdump_finish { } {
     global spawn_id
 
-# Don't need to do anything?
+    close
+    # Might also need a wait here one day.
 }
 
 expect_after {
