@@ -127,6 +127,42 @@ struct cleanup
   PTR arg;
 };
 
+
+/* The ability to declare that a function never returns is useful, but
+   not really required to compile GDB successfully, so the NORETURN and
+   ATTR_NORETURN macros normally expand into nothing.  */
+
+/* If compiling with older versions of GCC, a function may be declared
+   "volatile" to indicate that it does not return.  */
+
+#ifndef NORETURN
+# if defined(__GNUC__) \
+     && (__GNUC__ == 1 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5))
+#  define NORETURN volatile
+# else
+#  define NORETURN /* nothing */
+# endif
+#endif
+
+/* GCC 2.5 and later versions define a function attribute "noreturn",
+   which is the preferred way to declare that a function never returns.  */
+
+#ifndef ATTR_NORETURN
+# if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 5
+#  define ATTR_NORETURN __attribute__ ((noreturn))
+# else
+#  define ATTR_NORETURN /* nothing */
+# endif
+#endif
+
+#ifndef ATTR_FORMAT
+# if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 4
+#  define ATTR_FORMAT(type, x, y) __attribute__ ((format(type, x, y)))
+# else
+#  define ATTR_FORMAT(type, x, y) /* nothing */
+# endif
+#endif
+
 /* Needed for various prototypes */
 
 #ifdef __STDC__
@@ -187,7 +223,8 @@ extern void null_cleanup PARAMS ((char **));
 
 extern int myread PARAMS ((int, char *, int));
 
-extern int query PARAMS((char *, ...));
+extern int query PARAMS((char *, ...))
+     ATTR_FORMAT(printf, 1, 2);
 
 /* Annotation stuff.  */
 
@@ -219,25 +256,35 @@ extern void puts_filtered PARAMS ((char *));
 
 extern void puts_unfiltered PARAMS ((char *));
 
-extern void vprintf_filtered ();
+extern void vprintf_filtered PARAMS ((char *, ...))
+     ATTR_FORMAT(printf, 1, 0);
 
-extern void vfprintf_filtered ();
+extern void vfprintf_filtered PARAMS ((FILE *, char *, ...))
+     ATTR_FORMAT(printf, 2, 0);
 
-extern void fprintf_filtered PARAMS ((FILE *, char *, ...));
+extern void fprintf_filtered PARAMS ((FILE *, char *, ...))
+     ATTR_FORMAT(printf, 2, 3);
 
-extern void fprintfi_filtered PARAMS ((int, FILE *, char *, ...));
+extern void fprintfi_filtered PARAMS ((int, FILE *, char *, ...))
+     ATTR_FORMAT(printf, 3, 4);
 
-extern void printf_filtered PARAMS ((char *, ...));
+extern void printf_filtered PARAMS ((char *, ...))
+     ATTR_FORMAT(printf, 1, 2);
 
-extern void printfi_filtered PARAMS ((int, char *, ...));
+extern void printfi_filtered PARAMS ((int, char *, ...))
+     ATTR_FORMAT(printf, 2, 3);
 
-extern void vprintf_unfiltered ();
+extern void vprintf_unfiltered PARAMS ((char *, ...))
+     ATTR_FORMAT(printf, 1, 0);
 
-extern void vfprintf_unfiltered ();
+extern void vfprintf_unfiltered PARAMS ((FILE *, char *, ...))
+     ATTR_FORMAT(printf, 2, 0);
 
-extern void fprintf_unfiltered PARAMS ((FILE *, char *, ...));
+extern void fprintf_unfiltered PARAMS ((FILE *, char *, ...))
+     ATTR_FORMAT(printf, 2, 3);
 
-extern void printf_unfiltered PARAMS ((char *, ...));
+extern void printf_unfiltered PARAMS ((char *, ...))
+     ATTR_FORMAT(printf, 1, 2);
 
 extern void print_spaces PARAMS ((int, GDB_FILE *));
 
@@ -419,33 +466,6 @@ enum val_prettyprint
 #endif /* STDC */
 #endif /* volatile */
 
-/* The ability to declare that a function never returns is useful, but
-   not really required to compile GDB successfully, so the NORETURN and
-   ATTR_NORETURN macros normally expand into nothing.  */
-
-/* If compiling with older versions of GCC, a function may be declared
-   "volatile" to indicate that it does not return.  */
-
-#ifndef NORETURN
-# if defined(__GNUC__) \
-     && (__GNUC__ == 1 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5))
-#  define NORETURN volatile
-# else
-#  define NORETURN /* nothing */
-# endif
-#endif
-
-/* GCC 2.5 and later versions define a function attribute "noreturn",
-   which is the preferred way to declare that a function never returns.  */
-
-#ifndef ATTR_NORETURN
-# if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 5
-#  define ATTR_NORETURN __attribute__ ((noreturn))
-# else
-#  define ATTR_NORETURN /* nothing */
-# endif
-#endif
-
 /* Defaults for system-wide constants (if not defined by xm.h, we fake it).  */
 
 #if !defined (UINT_MAX)
@@ -579,7 +599,8 @@ catch_errors PARAMS ((int (*) (char *), void *, char *, return_mask));
 
 extern void warning_begin PARAMS ((void));
 
-extern void warning PARAMS ((char *, ...));
+extern void warning PARAMS ((char *, ...))
+     ATTR_FORMAT(printf, 1, 2);
 
 /* Global functions from other, non-gdb GNU thingies.
    Libiberty thingies are no longer declared here.  We include libiberty.h
