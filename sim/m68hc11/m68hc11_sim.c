@@ -1,5 +1,5 @@
 /* m6811_cpu.c -- 68HC11&68HC12 CPU Emulation
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -643,8 +643,6 @@ cpu_move16 (sim_cpu *cpu, uint8 code)
 int
 cpu_initialize (SIM_DESC sd, sim_cpu *cpu)
 {
-  int result;
-  
   sim_add_option_table (sd, 0, cpu_options);
 
   memset (&cpu->cpu_regs, 0, sizeof(cpu->cpu_regs));
@@ -662,10 +660,10 @@ cpu_initialize (SIM_DESC sd, sim_cpu *cpu)
   cpu->cpu_use_local_config = 0;
   cpu->cpu_config        = M6811_NOSEC | M6811_NOCOP | M6811_ROMON |
     M6811_EEON;
-  result = interrupts_initialize (cpu);
+  interrupts_initialize (sd, cpu);
 
   cpu->cpu_is_initialized = 1;
-  return result;
+  return 0;
 }
 
 
@@ -701,6 +699,9 @@ cpu_reset (sim_cpu *cpu)
   cpu->cpu_absolute_cycle = 0;
   cpu->cpu_current_cycle  = 0;
   cpu->cpu_is_initialized = 0;
+
+  /* Reset interrupts.  */
+  interrupts_reset (&cpu->cpu_interrupts);
 
   /* Reinitialize the CPU operating mode.  */
   cpu->ios[M6811_HPRIO] = cpu->cpu_mode;
