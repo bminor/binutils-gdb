@@ -5849,18 +5849,24 @@ elf32_arm_symbian_link_hash_table_create (bfd *abfd)
   return ret;
 }     
 
-/* In a BPABI executable, the dynamic linking sections do not go in
-   the loadable read-only segment.  The post-linker may wish to refer
-   to these sections, but they are not part of the final program
-   image.  */
 static struct bfd_elf_special_section const 
   elf32_arm_symbian_special_sections[]=
 {
+  /* In a BPABI executable, the dynamic linking sections do not go in
+     the loadable read-only segment.  The post-linker may wish to
+     refer to these sections, but they are not part of the final
+     program image.  */
   { ".dynamic",        8,  0, SHT_DYNAMIC,  0 },
   { ".dynstr",         7,  0, SHT_STRTAB,   0 },
   { ".dynsym",         7,  0, SHT_DYNSYM,   0 },
   { ".got",            4,  0, SHT_PROGBITS, 0 },
   { ".hash",           5,  0, SHT_HASH,     0 },
+  /* These sections do not need to be writable as the SymbianOS
+     postlinker will arrange things so that no dynamic relocation is
+     required.  */
+  { ".init_array",    11,  0, SHT_INIT_ARRAY, SHF_ALLOC },
+  { ".fini_array",    11,  0, SHT_FINI_ARRAY, SHF_ALLOC },
+  { ".preinit_array", 14,  0, SHT_PREINIT_ARRAY, SHF_ALLOC },
   { NULL,              0,  0, 0,            0 }
 };
 

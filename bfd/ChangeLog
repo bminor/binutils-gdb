@@ -1,3 +1,8 @@
+2005-01-31  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_symbian_special_sections): Do not set
+	SHF_WRITE for .init_array, .fini_array, and .preinit_array.
+	
 2005-01-31  Nick Clifton  <nickc@redhat.com>
 
 	* confg.bfd: Make targets scheduled for obsoletion (m68k-lynxos,
