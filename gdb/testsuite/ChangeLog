@@ -36,6 +36,9 @@
 
 2001-11-07  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.c++/templates.exp (test_template_breakpoints): 
+	If we get an overload menu, but it does not match what 
+	we expect, we still need to issue the "cancel" command.
 	* gdb.c++/templates.exp: Replace "void \\*" with "void ?\\*",
 	making the whitespace optional.  Argument for "new" may be
 	"unsigned" as well as "unsigned int/long".
