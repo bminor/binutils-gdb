@@ -98,7 +98,7 @@ struct tic80_operand
 
      If it is NULL, compute
          op = ((i) >> o->shift) & ((1 << o->bits) - 1);
-	 if ((o->flags & PPC_OPERAND_SIGNED) != 0
+	 if ((o->flags & TIC80_OPERAND_SIGNED) != 0
 	     && (op & (1 << (o->bits - 1))) != 0)
 	   op -= 1 << o->bits;
      (i is the instruction, o is a pointer to this structure, and op
@@ -123,71 +123,138 @@ struct tic80_operand
 
 extern const struct tic80_operand tic80_operands[];
 
-/* Values defined for the flags field of a struct tic80_operand.  */
+
+/* Values defined for the flags field of a struct tic80_operand.
+
+   Note that flags for all predefined symbols, such as the general purpose
+   registers (ex: r10), control registers (ex: FPST), condition codes (ex:
+   eq0.b), bit numbers (ex: gt.b), etc are large enough that they can be
+   or'd into an int where the lower bits contain the actual numeric value
+   that correponds to this predefined symbol.  This way a single int can
+   contain both the value of the symbol and it's type.
+ */
+
+/* This operand must be an even register number.  Floating point numbers
+   for example are stored in even/odd register pairs. */
+
+#define TIC80_OPERAND_EVEN	(1 << 0)
+
+/* This operand must be an odd register number and must be one greater than
+   the register number of the previous operand.  I.E. the second register in
+   an even/odd register pair. */
+
+#define TIC80_OPERAND_ODD	(1 << 1)
 
 /* This operand takes signed values.  */
-#define TIC80_OPERAND_SIGNED (01)
 
-/* The next operand should be wrapped in parentheses rather than separated
-   from this one by a comma.  This is used for various instructions, like
-   the load and store instructions, which want their operands to look like
-   "displacement(reg)" */
-#define TIC80_OPERAND_PARENS (02)
+#define TIC80_OPERAND_SIGNED	(1 << 2)
 
-/* This operand is a bit number and may use symbolic names such as "eq.b",
-   "or.f", etc. */
-#define TIC80_OPERAND_BITNUM (04)
+/* This operand may be either a predefined constant name or a numeric value.
+   An example would be a condition code like "eq0.b" which has the numeric
+   value 0x2. */
 
-/* This operand names a register.  The disassembler uses this to print
-   register names with a leading 'r'.  */
-#define TIC80_OPERAND_GPR (010)
+#define TIC80_OPERAND_NUM	(1 << 3)
 
-/* This operand names a floating point accumulator register.  The disassembler
-   prints these with a leading 'a'.  */
-#define TIC80_OPERAND_FPA (020)
+/* This operand should be wrapped in parentheses rather than separated
+   from the previous one by a comma.  This is used for various
+   instructions, like the load and store instructions, which want
+   their operands to look like "displacement(reg)" */
+
+#define TIC80_OPERAND_PARENS	(1 << 4)
 
 /* This operand is a PC relative branch offset.  The disassembler prints
    these symbolically if possible.  Note that the offsets are taken as word
    offsets. */
-#define TIC80_OPERAND_PCREL (040)
+
+#define TIC80_OPERAND_PCREL	(1 << 5)
 
 /* This flag is a hint to the disassembler for using hex as the prefered
    printing format, even for small positive or negative immediate values.
    Normally values in the range -999 to 999 are printed as signed decimal
    values and other values are printed in hex. */
-#define TIC80_OPERAND_BITFIELD (0100)
 
-/* This operand is a condition code, which may be given symbolically as
-   "eq0.b", "ne0.w", etc. */
-#define TIC80_OPERAND_CC (0200)
-
-/* This operand is a control register number, or may also be given
-   symbolically as "EIP", "EPC", etc. */
-#define TIC80_OPERAND_CR (0400)
+#define TIC80_OPERAND_BITFIELD	(1 << 6)
 
 /* This operand may have a ":m" modifier specified by bit 17 in a short
    immediate form instruction. */
-#define TIC80_OPERAND_M_SI (01000)
+
+#define TIC80_OPERAND_M_SI	(1 << 7)
 
 /* This operand may have a ":m" modifier specified by bit 15 in a long
    immediate or register form instruction. */
-#define TIC80_OPERAND_M_LI (02000)
+
+#define TIC80_OPERAND_M_LI	(1 << 8)
 
 /* This operand may have a ":s" modifier specified in bit 11 in a long
    immediate or register form instruction. */
-#define TIC80_OPERAND_SCALED (04000)
+
+#define TIC80_OPERAND_SCALED	(1 << 9)
 
 /* This operand is a floating point value */
-#define TIC80_OPERAND_FLOAT (010000)
+
+#define TIC80_OPERAND_FLOAT	(1 << 10)
 
 /* This operand is an byte offset from a base relocation. The lower
  two bits of the final relocated address are ignored when the value is
  written to the program counter. */
-#define TIC80_OPERAND_BASEREL (020000)
 
+#define TIC80_OPERAND_BASEREL	(1 << 11)
+
+/* This operand is one of the 32 general purpose registers.
+   The disassembler prints these with a leading 'r'. */
+
+#define TIC80_OPERAND_GPR	(1 << 27)
+
+/* This operand is a floating point accumulator register.
+   The disassembler prints these with a leading 'a'. */
+
+#define TIC80_OPERAND_FPA	( 1 << 28)
+
+/* This operand is a control register number, either numeric or
+   symbolic (like "EIF", "EPC", etc).
+   The disassembler prints these symbolically. */
+
+#define TIC80_OPERAND_CR	(1 << 29)
+
+/* This operand is a condition code, either numeric or
+   symbolic (like "eq0.b", "ne0.w", etc).
+   The disassembler prints these symbolically. */
+
+#define TIC80_OPERAND_CC	(1 << 30)
+
+/* This operand is a bit number, either numeric or
+   symbolic (like "eq.b", "or.f", etc).
+   The disassembler prints these symbolically. */
+
+#define TIC80_OPERAND_BITNUM	(1 << 31)
+
+/* This mask is used to strip operand bits from an int that contains
+   both operand bits and a numeric value in the lsbs. */
+
+#define TIC80_OPERAND_MASK	(OPERAND_GPR | OPERAND_FPA | OPERAND_CR | OPERAND_CC | OPERAND_BITNUM)
+
+
 /* Flag bits for the struct tic80_opcode flags field. */
 
 #define TIC80_VECTOR		01	/* Is a vector instruction */
 #define TIC80_NO_R0_DEST	02	/* Register r0 cannot be a destination register */
+
+
+/* The opcodes library contains a table that allows translation from predefined
+   symbol names to numeric values, and vice versa. */
+
+/* Structure to hold information about predefined symbols.  */
+
+struct predefined_symbol
+{
+  char *name;		/* name to recognize */
+  int value;
+};
+
+extern const struct predefined_symbol tic80_predefined_symbols[];	/* Translation array */
+extern const int tic80_num_predefined_symbols;				/* How many members in the array */
+
+const char *tic80_value_to_symbol PARAMS ((int val, int class));	/* Translate value to symbolic name */
+int tic80_symbol_to_value PARAMS ((char *name));			/* Translate symbolic name to value */
 
 #endif /* TIC80_H */

@@ -1,3 +1,18 @@
+start-sanitize-tic80
+Thu Jan 30 13:46:18 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h: Change all the OPERAND defines to use the form (1 << X)
+	rather than a constant that is 2**X.  Reorder them to put bits for
+	operands that have symbolic names in the upper bits, so they can
+	be packed into an int where the lower bits contain the value that
+	corresponds to that symbolic name.
+	(predefined_symbo): Add struct.
+	(tic80_predefined_symbols): Declare array of translations.
+	(tic80_num_predefined_symbols): Declare size of that array.
+	(tic80_value_to_symbol): Declare function.
+	(tic80_symbol_to_value): Declare function.
+
+end-sanitize-tic80
 Wed Jan 29 09:37:25 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200.h (MN10200_OPERAND_RELAX): Define.
