@@ -1,3 +1,18 @@
+Tue Nov 30 13:45:15 1993  david d `zoo' zuhn  (zoo@andros.cygnus.com)
+
+	* configure.in (notsupp): ensure that a space is always at the end
+	  of the configdirs list, since the grep checks for an explicit space
+
+Tue Nov 16 15:04:27 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in (target i386-sysv4.2): don't build ld, since static
+	  versions of many libraries are not available.
+
+Tue Nov 16 14:28:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.guess: Recognize Apollos (using environment variables).
+	* configure.in: Don't configure ld, binutils, or gprof for Apollo.
+
 Thu Nov 11 12:03:50 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.guess: Recognize Sony news mips running newsos.

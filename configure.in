@@ -164,6 +164,9 @@ fi
 noconfigdirs=""
 
 case "${host}" in
+  i[34]86-*-netbsd*)
+    noconfigdirs="tk fileutils"
+    ;;
   i[34]86-*-go32)
     noconfigdirs="tcl expect deja-gnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
     ;;
@@ -260,7 +263,7 @@ esac
 
 notsupp=""
 for dir in . $noconfigdirs ; do
-  if [ $dir != . ] && echo ${configdirs} | grep "${dir} " >/dev/null 2>&1 ; then
+  if [ $dir != . ] && echo "# ${configdirs} #" | grep "${dir} " >/dev/null 2>&1 ; then
     configdirs=`echo $configdirs | sed -e "s/${dir} / /"`
     if [ -r $srcdir/$dir/configure ] || [ -r $srcdir/$dir/configure.in ]; then
       notsupp="$notsupp $dir"
