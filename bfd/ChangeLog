@@ -1,3 +1,7 @@
+2003-01-21  Fabio Alemagna  <falemagn@aros.org>
+
+	* config.bfd: Handle i[3456]86-*-aros*.
+
 2003-01-21  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-ppc.c (struct ppc_elf_dyn_relocs): Define.

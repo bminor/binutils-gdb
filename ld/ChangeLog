@@ -1,3 +1,7 @@
+2003-01-21  Fabio Alemagna  <falemagn@aros.org>
+
+	* configure.tgt: Handle i[3456]86-*-aros*
+
 2003-01-19  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* Makefile.am: Added etic3xcoff.o and etic4xcoff_onchip.o

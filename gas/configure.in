@@ -486,6 +486,7 @@ changequote([,])dnl
       *-*-xray | *-*-hms)		fmt=coff ;;
       *-*-sim)				fmt=coff ;;
       *-*-elf | *-*-sysv4* | *-*-solaris*) fmt=elf dev=yes ;;
+      *-*-aros*)				fmt=elf em=linux bfd_gas=yes ;;
       *-*-vxworks)			fmt=aout ;;
       *-*-netware)			fmt=elf ;;
     esac

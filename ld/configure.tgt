@@ -135,6 +135,7 @@ i[3456]86-*-coff)	targ_emul=i386coff ;;
 i[3456]86-*-rtemscoff*) targ_emul=i386coff ;;
 i[3456]86-*-rtemself*)  targ_emul=elf_i386 ;;
 i[3456]86-*-rtems*)     targ_emul=elf_i386 ;;
+i[3456]86-*-aros*)      targ_emul=elf_i386 ;;
 i[3456]86-*-bsd)	targ_emul=i386bsd ;;
 i[3456]86-*-bsd386)	targ_emul=i386bsd ;;
 i[3456]86-*-bsdi*)	targ_emul=i386bsd ;;

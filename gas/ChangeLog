@@ -1,3 +1,8 @@
+2003-01-21  Fabio Alemagna  <falemagn@aros.org>
+
+	* configure.in: Handle *-*-aros*.
+	* configure:	Regenerated from configure.in.
+
 2003-01-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (elf_suffix_type): Add suffix enums for gotoff,
