@@ -1663,7 +1663,7 @@ dbxread.o: dbxread.c $(defs_h) $(gdb_string_h) $(gdb_obstack_h) \
 	$(gdb_stat_h) $(symtab_h) $(breakpoint_h) $(target_h) $(gdbcore_h) \
 	$(libaout_h) $(symfile_h) $(objfiles_h) $(buildsym_h) $(stabsread_h) \
 	$(gdb_stabs_h) $(demangle_h) $(language_h) $(complaints_h) \
-	$(cp_abi_h) $(aout_aout64_h) $(aout_stab_gnu_h)
+	$(cp_abi_h) $(aout_aout64_h) $(aout_stab_gnu_h) $(gdb_assert_h)
 dcache.o: dcache.c $(defs_h) $(dcache_h) $(gdbcmd_h) $(gdb_string_h) \
 	$(gdbcore_h) $(target_h)
 delta68-nat.o: delta68-nat.c $(defs_h)
