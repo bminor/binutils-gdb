@@ -1,5 +1,10 @@
 Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
 
+	* Makefile.in: Add elfread.c and dwarfread.c to SFILES_MAINDIR.
+	Add elfread.o and dwarfread.o to OBS.
+
+	* symfile.h: Add "elf" to list of supported formats in comment.
+
 	* c-exp.y, defs.h, symtab.h, valprint.c:  Add three new builtin
 	types to gdb, builtin_type_long_double, builtin_type_complex, and
 	builtin_type_double_complex.  Add and use new TARGET_SHORT_BIT,
