@@ -262,6 +262,7 @@ SYNOPSIS
             struct internal_exec *execp);
 */
 	 
+#ifndef NAME_swap_exec_header_in
 void
 DEFUN(NAME(aout,swap_exec_header_in),(abfd, raw_bytes, execp),
       bfd *abfd AND
@@ -285,6 +286,8 @@ DEFUN(NAME(aout,swap_exec_header_in),(abfd, raw_bytes, execp),
   execp->a_trsize = GET_WORD (abfd, bytes->e_trsize);
   execp->a_drsize = GET_WORD (abfd, bytes->e_drsize);
 }
+#define NAME_swap_exec_header_in NAME(aout,swap_exec_header_in)
+#endif
 
 /*
 FUNCTION
@@ -1052,15 +1055,19 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd, statep),
 	      {
 	      case N_SETA:
 		into_section = &bfd_abs_section;
+		cache_ptr->type = N_ABS;
 		break;
 	      case N_SETT:
 		into_section = (asection *) obj_textsec (abfd);
+		cache_ptr->type = N_TEXT;
 		break;
 	      case N_SETD:
 		into_section = (asection *) obj_datasec (abfd);
+		cache_ptr->type = N_DATA;
 		break;
 	      case N_SETB:
 		into_section = (asection *) obj_bsssec (abfd);
+		cache_ptr->type = N_BSS;
 		break;
 	      default:
 		abort ();
@@ -1091,8 +1098,11 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd, statep),
 	    reloc->relent.address = section->_raw_size;
 	    section->_raw_size += sizeof (int *);
 
-	    reloc->relent.howto = howto_table_ext + CTOR_TABLE_RELOC_IDX;
-	    cache_ptr->symbol.flags |= BSF_DEBUGGING | BSF_CONSTRUCTOR;
+	    reloc->relent.howto
+	      = (obj_reloc_entry_size(abfd) == RELOC_EXT_SIZE
+		 ? howto_table_ext : howto_table_std)
+		+ CTOR_TABLE_RELOC_IDX;
+	    cache_ptr->symbol.flags |= BSF_CONSTRUCTOR;
 	  }
 	  break;
 	default:
@@ -1275,7 +1285,18 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
     sym_pointer->e_type[0] |= N_EXT;
   }
   if (cache_ptr->flags & BSF_DEBUGGING) {
-    sym_pointer->e_type [0]= ((aout_symbol_type *)cache_ptr)->type;
+    sym_pointer->e_type[0] = ((aout_symbol_type *)cache_ptr)->type;
+  }
+  if (cache_ptr->flags & BSF_CONSTRUCTOR) {
+    int type = ((aout_symbol_type *)cache_ptr)->type;
+    switch (type)
+      {
+      case N_ABS:	type = N_SETA; break;
+      case N_TEXT:	type = N_SETT; break;
+      case N_DATA:	type = N_SETD; break;
+      case N_BSS:	type = N_SETB; break;
+      }
+    sym_pointer->e_type[0] = type;
   }
 
   PUT_WORD(abfd, value, sym_pointer->e_value);
@@ -2105,7 +2126,7 @@ DEFUN(NAME(aout,swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
   int r_baserel, r_jmptable, r_relative;
   struct aoutdata  *su = &(abfd->tdata.aout_data->a);
 
-  cache_ptr->address = (int32_type)(bfd_h_get_32 (abfd, bytes->r_address));
+  cache_ptr->address = bfd_h_get_32 (abfd, bytes->r_address);
 
   /* now the fun stuff */
   if (abfd->xvec->header_byteorder_big_p != false) {
@@ -2354,6 +2375,31 @@ DEFUN(NAME(aout,get_lineno),(ignore_abfd, ignore_symbol),
 return (alent *)NULL;
 }
 
+void 
+DEFUN(NAME(aout,get_symbol_info),(ignore_abfd, symbol, ret),
+      bfd *ignore_abfd AND
+      asymbol *symbol AND
+      symbol_info *ret)
+{
+  bfd_symbol_info (symbol, ret);
+
+  if (ret->type == '?')
+    {
+      int type_code = aout_symbol(symbol)->type & 0xff;
+      CONST char *stab_name = aout_stab_name(type_code);
+      static char buf[10];
+
+      if (stab_name == NULL)
+	{
+	  sprintf(buf, "(%d)", type_code);
+	  stab_name = buf;
+	}
+      ret->type = '-';
+      ret->stab_other = (unsigned)(aout_symbol(symbol)->other & 0xff);
+      ret->stab_desc = (unsigned)(aout_symbol(symbol)->desc & 0xffff);
+      ret->stab_name = stab_name;
+    }
+}
 
 void 
 DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
@@ -2386,35 +2432,6 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
 	      (unsigned)(aout_symbol(symbol)->desc & 0xffff),
 	      (unsigned)(aout_symbol(symbol)->other & 0xff),
 	      (unsigned)(aout_symbol(symbol)->type  & 0xff));
-      if (symbol->name)
-        fprintf(file," %s", symbol->name);
-    }
-    break;
-  case bfd_print_symbol_nm:
-    {
-      int section_code = bfd_decode_symclass  (symbol);
-
-      if (section_code == 'U')
-	fprintf(file, "        ");
-      else
-	fprintf_vma(file, symbol->value+symbol->section->vma);
-      if (section_code == '?')
-	{
-	  int type_code = aout_symbol(symbol)->type  & 0xff;
-	  CONST char *stab_name = aout_stab_name(type_code);
-	  char buf[10];
-	  if (stab_name == NULL)
-	    {
-	      sprintf(buf, "(%d)", type_code);
-	      stab_name = buf;
-	    }
-	  fprintf(file," - %02x %04x %5s",
-		  (unsigned)(aout_symbol(symbol)->other & 0xff),
-		  (unsigned)(aout_symbol(symbol)->desc & 0xffff),
-		  stab_name);
-        }
-      else
-	fprintf(file," %c", section_code);
       if (symbol->name)
         fprintf(file," %s", symbol->name);
     }

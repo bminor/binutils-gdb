@@ -1,3 +1,16 @@
+Fri Jun 18 03:12:12 1993  John Gilmore  (gnu@cygnus.com)
+
+	Eliminate "int8_type", "int16_type", "int32_type", and their
+	variants from the BFD universe.  Leave the 64-bit types for now,
+	since they are in flux.
+
+	* aoutx.h, hp300hpux.c:  Eliminate needless (int32_type) casts.
+	* libaout.h (GET_SWORD):  Convert (int32_type) to (int).
+	* ieee.c:  Convert uint8e_type => unsigned char.
+	* oasys.c:  Extensive changes to eliminate obsolete types.
+	These depend on changes in ../include/oasys.h as well.
+	* hosts/*.h:  Remove declarations of all these types.
+
 Mon Jun 14 14:02:41 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* hosts/delta88.h: #if 0 out some declarations which conflict with
