@@ -46,8 +46,8 @@ const char *m68k_comment_chars = "|";
    .line and .file directives will appear in the pre-processed output */
 /* Note that input_file.c hand checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
-   #NO_APP at the beginning of its output. */
-/* Also note that comments like this one will always work. */
+   #NO_APP at the beginning of its output.  */
+/* Also note that comments like this one will always work.  */
 const char line_comment_chars[] = "#*";
 
 const char line_separator_chars[] = ";";
@@ -68,7 +68,7 @@ const int md_reloc_size = 8;	/* Size of relocation record */
 
 /* Are we trying to generate PIC code?  If so, absolute references
    ought to be made into linkage table references or pc-relative
-   references.  Not implemented.  For ELF there are other means 
+   references.  Not implemented.  For ELF there are other means
    to denote pic relocations.  */
 int flag_want_pic;
 
@@ -195,7 +195,7 @@ static const enum m68k_register m68060_control_regs[] = {
   0
 };
 static const enum m68k_register mcf_control_regs[] = {
-  CACR, TC, ITT0, ITT1, DTT0, DTT1, VBR, ROMBAR, 
+  CACR, TC, ITT0, ITT1, DTT0, DTT1, VBR, ROMBAR,
   RAMBAR0, RAMBAR1, MBAR,
   0
 };
@@ -437,7 +437,7 @@ static const int n_archs = sizeof (archs) / sizeof (archs[0]);
    on the 68000.  The 68000 doesn't support long branches with branchs */
 
 /* This table desribes how you change sizes for the various types of variable
-   size expressions.  This version only supports two kinds. */
+   size expressions.  This version only supports two kinds.  */
 
 /* Note that calls to frag_var need to specify the maximum expansion
    needed; this is currently 10 bytes for DBCC.  */
@@ -562,7 +562,6 @@ const pseudo_typeS md_pseudo_table[] =
 
   {0, 0, 0}
 };
-
 
 /* The mote pseudo ops are put into the opcode table, since they
    don't start with a . they look like opcodes to gas.
@@ -794,7 +793,7 @@ int
 tc_m68k_fix_adjustable (fixP)
      fixS *fixP;
 {
-  /* Prevent all adjustments to global symbols. */
+  /* Prevent all adjustments to global symbols.  */
   if (S_IS_EXTERNAL (fixP->fx_addsy)
       || S_IS_WEAK (fixP->fx_addsy))
     return 0;
@@ -955,7 +954,7 @@ tc_gen_reloc (section, fixp)
 #define relaxable_symbol(symbol) 1
 
 #endif
- 
+
 /* Handle of the OPCODE hash table.  NULL means any use before
    m68k_ip_begin() will crash.  */
 static struct hash_control *op_hash;
@@ -984,7 +983,7 @@ m68k_ip (instring)
     instring++;			/* skip leading whitespace */
 
   /* Scan up to end of operation-code, which MUST end in end-of-string
-     or exactly 1 space. */
+     or exactly 1 space.  */
   pdot = 0;
   for (p = instring; *p != '\0'; p++)
     {
@@ -1093,7 +1092,7 @@ m68k_ip (instring)
   for (losing = 0;;)
     {
       /* If we didn't get the right number of ops, or we have no
-	 common model with this pattern then reject this pattern. */
+	 common model with this pattern then reject this pattern.  */
 
       ok_arch |= opcode->m_arch;
       if (opsfound != opcode->m_opnum
@@ -1756,7 +1755,7 @@ m68k_ip (instring)
 			  && opP->reg != BC))
 		    {
 		      losing++;
-		    }		/* not a cache specifier. */
+		    }		/* not a cache specifier.  */
 		  break;
 
 		case '_':
@@ -1769,7 +1768,7 @@ m68k_ip (instring)
 		    losing++;
 		  /* FIXME: kludge instead of fixing parser:
                      upper/lower registers are *not* CONTROL
-                     registers, but ordinary ones. */
+                     registers, but ordinary ones.  */
 		  if ((opP->reg >= DATA0L && opP->reg <= DATA7L)
 		      || (opP->reg >= DATA0U && opP->reg <= DATA7U))
 		    opP->mode = DREG;
@@ -1789,7 +1788,7 @@ m68k_ip (instring)
       if (!losing)
 	{
 	  break;
-	}			/* got it. */
+	}			/* got it.  */
 
       opcode = opcode->m_next;
 
@@ -2145,9 +2144,9 @@ m68k_ip (instring)
 			  && m68k_index_width_default == SIZE_LONG))
 		    nextword |= 0x800;
 
-		  if ((opP->index.scale != 1 
+		  if ((opP->index.scale != 1
 		       && cpu_of_arch (current_architecture) < m68020)
-		      || (opP->index.scale == 8 
+		      || (opP->index.scale == 8
 			  && arch_coldfire_p (current_architecture)))
 		    {
 		      opP->error =
@@ -2823,7 +2822,7 @@ m68k_ip (instring)
 	  install_operand (s[1], tmpreg);
 	  break;
 #ifndef NO_68851
-	  /* JF: These are out of order, I fear. */
+	  /* JF: These are out of order, I fear.  */
 	case 'f':
 	  switch (opP->reg)
 	    {
@@ -2961,7 +2960,7 @@ m68k_ip (instring)
     }
 
   /* By the time whe get here (FINALLY) the_ins contains the complete
-     instruction, ready to be emitted. . . */
+     instruction, ready to be emitted. . .  */
 }
 
 static int
@@ -3427,7 +3426,7 @@ static const struct init_entry init_table[] =
   { "za6", ZADDR6 },
   { "za7", ZADDR7 },
 
-  /* Upper and lower data and address registers, used by macw and msacw. */
+  /* Upper and lower data and address registers, used by macw and msacw.  */
   { "d0l", DATA0L },
   { "d1l", DATA1L },
   { "d2l", DATA2L },
@@ -3725,7 +3724,7 @@ md_begin ()
 	{
 	  ins = &m68k_opcodes[i];
 	  /* We *could* ignore insns that don't match our arch here
-	     but just leaving them out of the hash. */
+	     but just leaving them out of the hash.  */
 	  slak->m_operands = ins->args;
 	  slak->m_opnum = strlen (slak->m_operands) / 2;
 	  slak->m_arch = ins->arch;
@@ -4284,7 +4283,7 @@ md_convert_frag_1 (fragP)
 
   /* Address in gas core of the place to store the displacement.  */
   /* This convinces the native rs6000 compiler to generate the code we
-     want. */
+     want.  */
   register char *buffer_address = fragP->fr_literal;
   buffer_address += fragP->fr_fix;
   /* end ibm compiler workaround */
@@ -4322,7 +4321,7 @@ md_convert_frag_1 (fragP)
 	{
 	  if (flag_keep_pcrel)
 	    as_bad (_("long branch not supported"));
-	  
+
 	  if (fragP->fr_opcode[0] == 0x61)
 	    /* BSR */
 	    {
@@ -4354,7 +4353,7 @@ md_convert_frag_1 (fragP)
 	    {
 	      /* This should never happen, because if it's a conditional
 	         branch and we are on a 68000, BCC68000 should have been
-	         picked instead of ABRANCH. */
+	         picked instead of ABRANCH.  */
 	      abort ();
 	    }
 	}
@@ -4369,13 +4368,13 @@ md_convert_frag_1 (fragP)
       /* change bcc into b!cc/jmp absl long */
       if (flag_keep_pcrel)
 	as_bad (_("long branch not supported"));
-      
+
       fragP->fr_opcode[0] ^= 0x01;	/* invert bcc */
       fragP->fr_opcode[1] = 0x6;/* branch offset = 6 */
 
       /* JF: these used to be fr_opcode[2,3], but they may be in a
 	   different frag, in which case refering to them is a no-no.
-	   Only fr_opcode[0,1] are guaranteed to work. */
+	   Only fr_opcode[0,1] are guaranteed to work.  */
       *buffer_address++ = 0x4e;	/* put in jmp long (0x4ef9) */
       *buffer_address++ = (char) 0xf9;
       fragP->fr_fix += 2;	/* account for jmp instruction */
@@ -4586,7 +4585,7 @@ md_estimate_size_before_relax (fragP, segment)
 	      {
 		/* This should never happen, because if it's a conditional
 		   branch and we are on a 68000, BCC68000 should have been
-		   picked instead of ABRANCH. */
+		   picked instead of ABRANCH.  */
 		abort ();
 	      }
 	  }
@@ -4699,10 +4698,10 @@ md_estimate_size_before_relax (fragP, segment)
 	else
 	  {
 	    /* Change dbcc into dbcc/bral.  */
-	    /* JF: these used to be fr_opcode[2-4], which is wrong. */
+	    /* JF: these used to be fr_opcode[2-4], which is wrong.  */
 	    buffer_address[0] = 0x00;	/* branch offset = 4 */
 	    buffer_address[1] = 0x04;
-	    buffer_address[2] = 0x60;	/* put in bra pc + ... */
+	    buffer_address[2] = 0x60;	/* put in bra pc + ...  */
 	    /* JF: these were fr_opcode[5-7] */
 	    buffer_address[3] = 0x06;	/* Plus 6 */
 	    if (HAVE_LONG_BRANCH (current_architecture))
@@ -4808,7 +4807,7 @@ md_estimate_size_before_relax (fragP, segment)
    bit 7 as pcrel, bits 6 & 5 as length, bit 4 as pcrel, and the lower
    nibble as nuthin. (on Sun 3 at least) */
 /* Translate the internal relocation information into target-specific
-   format. */
+   format.  */
 #ifdef comment
 void
 md_ri_to_chars (the_bytes, ri)
@@ -5090,7 +5089,7 @@ s_even (ignore)
 
   temp = 1;			/* JF should be 2? */
   temp_fill = get_absolute_expression ();
-  if (!need_pass_2)		/* Never make frag if expect extra pass. */
+  if (!need_pass_2)		/* Never make frag if expect extra pass.  */
     frag_align (temp, (int) temp_fill, 0);
   demand_empty_rest_of_line ();
   record_alignment (now_seg, temp);
@@ -5953,7 +5952,7 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
       cc = reverse_mri_condition (cc);
       truelab = falselab;
     }
-      
+
   if (leftstart != NULL)
     {
       buf = (char *) xmalloc (20
@@ -5975,7 +5974,7 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
       mri_assemble (buf);
       free (buf);
     }
-      
+
   buf = (char *) xmalloc (20 + strlen (truelab));
   s = buf;
   *s++ = 'b';
@@ -7127,7 +7126,7 @@ md_section_align (segment, size)
 /* Exactly what point is a PC-relative offset relative TO?
    On the 68k, it is relative to the address of the first extension
    word.  The difference between the addresses of the offset and the
-   first extension word is stored in fx_pcrel_adjust. */
+   first extension word is stored in fx_pcrel_adjust.  */
 long
 md_pcrel_from (fixP)
      fixS *fixP;

@@ -18,7 +18,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 /* This assembler implements a very hacked version of an elf-like thing
  * that gcc emits (when gcc is suitably hacked).  To make it behave more
@@ -75,7 +75,6 @@ const char EXP_CHARS[] = "eE";
    as in 0d1.0.  */
 const char FLT_CHARS[] = "dD";
 
-
 void
 md_show_usage (stream)
      FILE *stream;
@@ -115,7 +114,6 @@ static void i370_elf_rdata PARAMS ((int));
 static void i370_elf_lcomm PARAMS ((int));
 static void i370_elf_validate_fix PARAMS ((fixS *, segT));
 #endif
-
 
 
 /* The target specific pseudo-ops which we support.  */
@@ -186,14 +184,12 @@ struct pd_reg
    1. r<reg_num> which has the value <reg_num>.
    2. r.<reg_num> which has the value <reg_num>.
 
-
    Each floating point register has predefined names of the form:
    1. f<reg_num> which has the value <reg_num>.
    2. f.<reg_num> which has the value <reg_num>.
 
    There are only four floating point registers, and these are
    commonly labelled 0,2,4 and 6.  Thus, there is no f1, f3, etc.
-
 
    There are individual registers as well:
    rbase or r.base has the value  3  (base register)
@@ -205,7 +201,7 @@ struct pd_reg
    dsa or r.dsa    has the value 13  (stack pointer)
    lr              has the value 14  (link reg)
 
-   The table is sorted. Suitable for searching by a binary search. */
+   The table is sorted. Suitable for searching by a binary search.  */
 
 static const struct pd_reg pre_defined_registers[] =
 {
@@ -221,7 +217,6 @@ static const struct pd_reg pre_defined_registers[] =
   { "f2", 2 },
   { "f4", 4 },
   { "f6", 6 },
-
 
   { "dsa",13 },    /* stack pointer */
   { "lr", 14 },    /* Link Register */
@@ -533,7 +528,7 @@ md_parse_option (c, arg)
 
 /* Set i370_cpu if it is not already set.
    Currently defaults to the reasonable superset;
-   but can be made more fine grained if desred. */
+   but can be made more fine grained if desred.  */
 
 static void
 i370_set_cpu ()
@@ -541,7 +536,7 @@ i370_set_cpu ()
   const char *default_os  = TARGET_OS;
   const char *default_cpu = TARGET_CPU;
 
-  /* override with the superset for the moment. */
+  /* override with the superset for the moment.  */
   i370_cpu = I370_OPCODE_ESA390_SUPERSET;
   if (i370_cpu == 0)
     {
@@ -581,7 +576,7 @@ md_begin ()
   i370_set_cpu ();
 
 #ifdef OBJ_ELF
-  /* Set the ELF flags if desired. */
+  /* Set the ELF flags if desired.  */
   if (i370_flags)
     bfd_set_private_flags (stdoutput, i370_flags);
 #endif
@@ -751,8 +746,8 @@ i370_elf_suffix (str_p, exp_p)
   return BFD_RELOC_UNUSED;
 }
 
-/* Like normal .long/.short/.word, except support @got, etc. */
-/* clobbers input_line_pointer, checks end-of-line. */
+/* Like normal .long/.short/.word, except support @got, etc.  */
+/* clobbers input_line_pointer, checks end-of-line.  */
 static void
 i370_elf_cons (nbytes)
      register int nbytes;        /* 1=.byte, 2=.word, 4=.long */
@@ -792,7 +787,7 @@ i370_elf_cons (nbytes)
     }
   while (*input_line_pointer++ == ',');
 
-  input_line_pointer--;        	/* Put terminator back into stream. */
+  input_line_pointer--;        	/* Put terminator back into stream.  */
   demand_empty_rest_of_line ();
 }
 
@@ -1273,11 +1268,10 @@ i370_elf_validate_fix (fixp, seg)
 }
 #endif /* OBJ_ELF */
 
-
 
 #define LITERAL_POOL_SUPPORT
 #ifdef LITERAL_POOL_SUPPORT
-/* Provide support for literal pools within the text section. */
+/* Provide support for literal pools within the text section.  */
 /* Loosely based on similar code from tc-arm.c  */
 /*
  * We will use four symbols to locate four parts of the literal pool.
@@ -1528,7 +1522,7 @@ i370_addr_offset (expressionS *exx)
   expression (exx);
 
   /* OK, now we have to subtract the "using" location  */
-  /* normally branches appear in the text section only... */
+  /* normally branches appear in the text section only...  */
   if (0 == strncmp (now_seg->name, ".text", 5) || 0 > i370_using_other_regno)
     {
       i370_make_relative (exx, &i370_using_text_baseaddr);
@@ -1755,7 +1749,6 @@ i370_ltorg (ignore)
   else as_bad ("bad alignment of %d bytes in literal pool", biggest_literal_size);
   if (0 == biggest_align) biggest_align = 1;
 
-
   /* Align pool for short, word, double word accesses */
   frag_align (biggest_align, 0, 0);
   record_alignment (now_seg, biggest_align);
@@ -1763,7 +1756,7 @@ i370_ltorg (ignore)
   /* Note that the gas listing will print only the first five
    * entries in the pool .... wonder how to make it print more ...
    */
-  /* output largest literals first, then the smaller ones. */
+  /* output largest literals first, then the smaller ones.  */
   for (litsize=8; litsize; litsize /=2)
     {
       symbolS *current_poolP = NULL;
@@ -1841,13 +1834,13 @@ i370_using (ignore)
   char *star;
 
   /* if "*" appears in a using, it means "."  */
-  /* replace it with "." so that expr doesn't get confused. */
+  /* replace it with "." so that expr doesn't get confused.  */
   star = strchr (input_line_pointer, '*');
   if (star)
     *star = '.';
 
   /* the first arg to using will usually be ".", but it can
-   * be a more complex exprsssion too ... */
+   * be a more complex exprsssion too ...  */
   expression (&baseaddr);
   if (star)
     *star = '*';
@@ -2171,7 +2164,7 @@ md_assemble (str)
       hold = input_line_pointer;
       input_line_pointer = str;
 
-      /* register names are only allowed where there are registers ... */
+      /* register names are only allowed where there are registers ...  */
       if ((operand->flags & I370_OPERAND_GPR) != 0)
         {
           /* quickie hack to get past things like (,r13) */
@@ -2189,7 +2182,7 @@ md_assemble (str)
 
       /* check for a address constant expression */
       /* We will put PSW-relative addresses in the text section,
-       * and adress literals in the .data (or other) section. */
+       * and adress literals in the .data (or other) section.  */
       else if (i370_addr_cons (&ex))
 	use_other=1;
       else if (i370_addr_offset (&ex))
@@ -2224,7 +2217,7 @@ md_assemble (str)
           /* Allow @HA, @L, @H on constants.
            * Well actually, no we don't; there really don't make sense
            * (at least not to me) for the i370.  However, this code is
-           * left here for any dubious future expansion reasons ... */
+           * left here for any dubious future expansion reasons ...  */
           char *orig_str = str;
 
           if ((reloc = i370_elf_suffix (&str, &ex)) != BFD_RELOC_UNUSED)
@@ -2620,7 +2613,7 @@ md_atof (type, litp, sizep)
     }
 
   /* 360/370/390 have two float formats: an old, funky 360 single-precision
-   * format, and the ieee format.  Support only the ieee format. */
+   * format, and the ieee format.  Support only the ieee format.  */
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
     input_line_pointer = t;
@@ -2704,7 +2697,6 @@ md_pcrel_from_section (fixp, sec)
 {
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
-
 
 /* Apply a fixup to the object code.  This is called for all the
    fixups we generated by the call to fix_new_exp, above.  In the call
@@ -2797,7 +2789,7 @@ md_apply_fix3 (fixp, valuep, seg)
 #endif
       /* Fetch the instruction, insert the fully resolved operand
          value, and stuff the instruction back again.
-         fisxp->fx_size is the length of the instruction. */
+         fisxp->fx_size is the length of the instruction.  */
       where = fixp->fx_frag->fr_literal + fixp->fx_where;
       insn.i[0] = bfd_getb32 ((unsigned char *) where);
       if (6 <= fixp->fx_size)
@@ -2824,7 +2816,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	 relocs.  In fact, we support *zero* operand relocations ...
 	 Why?  Because we are not expecting the compiler to generate
 	 any operands that need relocation.  Due to the 12-bit naturew of
-	 i370 addressing, this would be unusual. */
+	 i370 addressing, this would be unusual.  */
 #if 0
       if ((operand->flags & I370_OPERAND_RELATIVE) != 0
           && operand->bits == 12

@@ -1,3 +1,9 @@
+2000-09-11  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-i370.c: Fix formatting.
+	* config/tc-i960.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+
 2000-09-09  Philip Blundell  <philb@gnu.org>
 
 	* configure.in (arm*-*-uclinux*): New target.
