@@ -1,3 +1,10 @@
+2000-06-05  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.h (elf_fix_symbol_flags): Follow the link for the
+	indirect symbol for the ELF_LINK_NON_ELF bit.
+	(elf_link_output_extsym): Don't output the indirect symbol even
+	if the ELF_LINK_NON_ELF bit is set.
+
 2000-06-01  J.T. Conklin  <jtc@redback.com>
 
 	* config.bfd (i[3456]86-*-netbsdelf*): New target.

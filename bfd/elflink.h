@@ -3289,6 +3289,9 @@ elf_fix_symbol_flags (h, eif)
      an ELF dynamic object.  */
   if ((h->elf_link_hash_flags & ELF_LINK_NON_ELF) != 0)
     {
+      while (h->root.type == bfd_link_hash_indirect)
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
       if (h->root.type != bfd_link_hash_defined
 	  && h->root.type != bfd_link_hash_defweak)
 	h->elf_link_hash_flags |= (ELF_LINK_HASH_REF_REGULAR
@@ -5030,10 +5033,8 @@ elf_link_output_extsym (h, data)
          symbol foo@@GNU_1.2 is the default, which should be used when
          foo is used with no version, then we add an indirect symbol
          foo which points to foo@@GNU_1.2.  We ignore these symbols,
-         since the indirected symbol is already in the hash table.  If
-         the indirect symbol is non-ELF, fall through and output it.  */
-      if ((h->elf_link_hash_flags & ELF_LINK_NON_ELF) == 0)
-	return true;
+         since the indirected symbol is already in the hash table.  */
+      return true;
 
       /* Fall through.  */
     case bfd_link_hash_warning:
