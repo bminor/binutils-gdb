@@ -425,15 +425,13 @@ md_convert_frag (abfd, sec, fragP)
   subseg_change (sec, 0);
   if (fragP->fr_subtype == 0)
     {
+      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
+	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode);
       fragP->fr_var = 0;
       fragP->fr_fix += 2;
-      fix_new (fragP, 0, 2, fragP->fr_symbol,
-	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode);
     }
   else if (fragP->fr_subtype == 1)
     {
-      fragP->fr_var = 0;
-      fragP->fr_fix += 6;
       /* Reverse the condition of the first branch.  */
       fragP->fr_literal[0] &= 0xf7;
       /* Mask off all the displacement bits.  */
@@ -446,8 +444,10 @@ md_convert_frag (abfd, sec, fragP)
       /* Now create the unconditional branch + fixup to the final
 	 target.  */
       md_number_to_chars (&fragP->fr_literal[2], 0x00000780, 4);
-      fix_new (fragP, 2, 4, fragP->fr_symbol,
+      fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
 	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode + 1);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 6;
     }
   else
     abort ();
