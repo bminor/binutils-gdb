@@ -531,6 +531,13 @@ case "${target}" in
     ;;    
 esac
 
+targets that need a second pass
+case "${target}" in
+  *-gm-magic*)
+    noconfigdirs="$noconfigdirs libgloss"
+    ;;
+esac
+
 # If we are building a Canadian Cross, discard tools that can not be built
 # using a cross compiler.  FIXME: These tools should be fixed.
 if [ "${build}" != "${host}" ]; then
