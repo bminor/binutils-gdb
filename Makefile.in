@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Tue Nov 12 22:24:08 PST 1991, by rich@cygnus.com
+# Last Mod Wed Nov 13 01:00:48 PST 1991, by rich@cygnus.com
 #
 # $Id$
 
@@ -34,6 +34,10 @@ AR_FLAGS = cq
 BISON = `if [ -d $(unsubdir)/../bison ] ; \
 	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L \`pwd\`/$(unsubdir)/../bison$(subdir)/ ; \
 	else echo yacc ; fi`
+
+MAKEINFO = `if [ -d $(unsubdir)/../texinfo/C ] ; \
+	then echo \`pwd\`/$(unsubdir)/../texinfo/C$(subdir)/makeinfo ; \
+	else echo echo ; fi`
 
 #\`(cd $(srcdir)/bison ; \\`pwd\\`)\`
 SUBDIRS = libiberty readline bfd gdb binutils ld gas gcc gnulib clib
@@ -66,7 +70,9 @@ subdir_do: force
 			if (cd $(unsubdir)/$$i$(subdir); \
 				$(MAKE) \
 					"against=$(against)" \
-					"BISON=$(BISON)" $(DO)) ; then true ; \
+					"BISON=$(BISON)" \
+					"MAKEINFO=$(MAKEINFO)" \
+					$(DO)) ; then true ; \
 				else exit 1 ; fi ; \
 		else if [ -d $(unsubdir)/$$i ] ; then \
 			if (cd $(unsubdir)/$$i$(subdir); \
@@ -78,7 +84,9 @@ subdir_do: force
 					"RANLIB=$(RANLIB)" \
 					"LOADLIBES=$(LOADLIBES)" \
 					"LDFLAGS=$(LDFLAGS)" \
-					"BISON=$(BISON)" $(DO)) ; then true ; \
+					"BISON=$(BISON)" \
+					"MAKEINFO=$(MAKEINFO)" \
+					$(DO)) ; then true ; \
 			else exit 1 ; fi ; \
 		else true ; fi ; \
 	fi ; \
