@@ -1,5 +1,12 @@
 2002-07-15  Kevin Buettner  <kevinb@redhat.com>
 
+	* aix-thread.c (PD_ERROR, CALL_BASE): Delete.
+	(ops_resume, ops_wait, fetch_regs_lib, store_regs_lib)
+	(ops_xfer_memory, ops_kill): Don't use PD_ERROR or CALL_BASE
+	macros.
+
+2002-07-15  Kevin Buettner  <kevinb@redhat.com>
+
 	* aix-thread.c (ptrace_check): Eliminate goto.
 	(sync_threadlists): Eliminate gotos.  Also, fix array overrun
 	problem.

@@ -81,12 +81,6 @@ static int debug_aix_thread;
 /* Build and lwp ptid.  */
 #define BUILD_LWP(LWP, PID) MERGEPID (PID, LWP)
 
-/* Call error() with a message indicating that libpthdebug FUNC failed with
-   STATUS. */
-
-#define PD_ERROR(func, status) \
-  error ("aix-thread: %s returned %s", func, pd_status2str (status))
-
 /* pthdb_user_t value that we pass to pthdb functions.  0 causes
    PTHDB_BAD_USER errors, so use 1. */
 
@@ -96,17 +90,6 @@ static int debug_aix_thread;
 
 #define PDC_SUCCESS	PTHDB_SUCCESS
 #define PDC_FAILURE	PTHDB_CALLBACK
-
-/* Convert composite process/thread inferior_ptid to a process id, evaluate
-   base_ops function CALL, and then restore inferior_ptid. */
-
-#define CALL_BASE(call)					\
-  do {							\
-    struct cleanup *cleanup = save_inferior_ptid ();	\
-    inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid)); \
-    call;						\
-    do_cleanups (cleanup);				\
-  } while (0)
 
 /* Private data attached to each element in GDB's thread list. */
 
@@ -934,7 +917,12 @@ ops_resume (ptid_t ptid, int step, enum target_signal sig)
   pthdb_tid_t tid[2];
 
   if (!PD_TID (ptid))
-    CALL_BASE (base_ops.to_resume (ptid, step, sig));
+    {
+      struct cleanup *cleanup = save_inferior_ptid ();
+      inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
+      base_ops.to_resume (ptid, step, sig);
+      do_cleanups (cleanup);
+    }
   else
     {
       thread = find_thread_pid (ptid);
@@ -960,8 +948,14 @@ ops_resume (ptid_t ptid, int step, enum target_signal sig)
 static ptid_t
 ops_wait (ptid_t ptid, struct target_waitstatus *status)
 {
+  struct cleanup *cleanup = save_inferior_ptid ();
+
   pid_to_prc (&ptid);
-  CALL_BASE (ptid = base_ops.to_wait (ptid, status));
+
+  inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
+  ptid = base_ops.to_wait (ptid, status);
+  do_cleanups (cleanup);
+
   if (PIDGET (ptid) == -1)
     return pid_to_ptid (-1);
 
@@ -1051,7 +1045,8 @@ fetch_regs_lib (pthdb_pthread_t pdtid)
     fprintf_unfiltered (gdb_stdlog, "fetch_regs_lib %lx\n", (long)pdtid);
   status = pthdb_pthread_context (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
-    PD_ERROR ("fetch_registers: pthdb_pthread_context", status);
+    error ("aix-thread: fetch_registers: pthdb_pthread_context returned %s",
+           pd_status2str (status));
 
   /* General-purpose registers. */
 
@@ -1209,7 +1204,8 @@ store_regs_lib (pthdb_pthread_t pdtid)
   /* Retrieve the thread's current context for its non-register values. */
   status = pthdb_pthread_context (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
-    PD_ERROR ("store_registers: pthdb_pthread_context", status);
+    error ("aix-thread: store_registers: pthdb_pthread_context returned %s",
+           pd_status2str (status));
 
   /* General-purpose registers. */
 
@@ -1227,7 +1223,8 @@ store_regs_lib (pthdb_pthread_t pdtid)
 
   status = pthdb_pthread_setcontext (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
-    PD_ERROR ("store_registers: pthdb_pthread_setcontext", status);
+    error ("aix-thread: store_registers: pthdb_pthread_setcontext returned %s",
+           pd_status2str (status));
 }
 
 /* Store register REGNO if != -1 or all registers otherwise into kernel
@@ -1340,9 +1337,12 @@ ops_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 		 struct target_ops *target)
 {
   int n;
+  struct cleanup *cleanup = save_inferior_ptid ();
 
-  CALL_BASE (n = base_ops.to_xfer_memory (memaddr, myaddr, len, write,
-					  attrib, &base_ops));
+  inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
+  n = base_ops.to_xfer_memory (memaddr, myaddr, len, write, attrib, &base_ops);
+  do_cleanups (cleanup);
+
   return n;
 }
 
@@ -1351,7 +1351,11 @@ ops_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 static void
 ops_kill (void)
 {
-  CALL_BASE (base_ops.to_kill ());
+  struct cleanup *cleanup = save_inferior_ptid ();
+
+  inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
+  base_ops.to_kill ();
+  do_cleanups (cleanup);
 }
 
 /* Clean up after the inferior exits. */
