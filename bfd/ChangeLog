@@ -1,3 +1,8 @@
+Wed Apr  1 13:36:58 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* elf32-m68k.c (elf_m68k_relocate_section, case R_68K_PLT*O): Fix
+	assertion.
+
 Tue Mar 31 00:12:12 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-m10300.c (mn10300_elf_relax_section): Correctly handle
