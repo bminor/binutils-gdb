@@ -941,7 +941,7 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
 		   "%s: compiled with -mrelocatable and linked with modules compiled normally\n",
 		   bfd_get_filename (ibfd));
 	}
-      else if ((new_flags & EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB) == 0
+      else if ((new_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0
 	       && (old_flags & EF_PPC_RELOCATABLE) != 0)
 	{
 	  fprintf (stderr,
