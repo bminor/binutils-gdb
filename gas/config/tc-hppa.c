@@ -1114,6 +1114,20 @@ static struct default_space_dict pa_def_spaces[] =
       } \
   }
 
+/* Simple alignment checking for FIELD againt ALIGN (a power of two).
+   IGNORE is used to suppress the error message.  */
+
+#define CHECK_ALIGN(FIELD, ALIGN, IGNORE) \
+  { \
+    if ((FIELD) & ((ALIGN) - 1)) \
+      { \
+	if (! IGNORE) \
+          as_bad (_("Field not properly aligned [%d] (%d)."), (ALIGN), \
+		  (int) (FIELD));\
+        break; \
+      } \
+  }
+
 #define is_DP_relative(exp)			\
   ((exp).X_op == O_subtract			\
    && strcmp (S_GET_NAME ((exp).X_op_symbol), "$global$") == 0)
@@ -3080,6 +3094,86 @@ pa_ip (str)
 		  continue;
 		}
 
+	    /* Handle a 16 bit immediate at 31 (PA 2.0 wide mode only).  */
+	    case 'l':
+	      the_insn.field_selector = pa_chk_field_selector (&s);
+	      get_expression (s);
+	      s = expr_end;
+	      if (the_insn.exp.X_op == O_constant)
+		{
+		  unsigned int result;
+		  num = evaluate_absolute (&the_insn);
+		  CHECK_FIELD (num, 32767, -32768, 0);
+		  dis_assemble_16 (num, &result, 1);
+		  INSERT_FIELD_AND_CONTINUE (opcode, result, 0);
+		}
+	      else
+		{
+		  /* ??? Is this valid for wide mode?  */
+		  if (is_DP_relative (the_insn.exp))
+		    the_insn.reloc = R_HPPA_GOTOFF;
+		  else if (is_PC_relative (the_insn.exp))
+		    the_insn.reloc = R_HPPA_PCREL_CALL;
+		  else
+		    the_insn.reloc = R_HPPA;
+		  the_insn.format = 14;
+		  continue;
+		}
+
+	    /* Handle a word-aligned 16-bit imm. at 31 (PA2.0 wide).  */
+	    case 'y':
+	      the_insn.field_selector = pa_chk_field_selector (&s);
+	      get_expression (s);
+	      s = expr_end;
+	      if (the_insn.exp.X_op == O_constant)
+		{
+		  unsigned int result;
+		  num = evaluate_absolute (&the_insn);
+		  CHECK_FIELD (num, 32767, -32768, 0);
+		  CHECK_ALIGN (num, 4, 0);
+		  dis_assemble_16 (num, &result, 1);
+		  INSERT_FIELD_AND_CONTINUE (opcode, result, 0);
+		}
+	      else
+		{
+		  /* ??? Is this valid for wide mode?  */
+		  if (is_DP_relative (the_insn.exp))
+		    the_insn.reloc = R_HPPA_GOTOFF;
+		  else if (is_PC_relative (the_insn.exp))
+		    the_insn.reloc = R_HPPA_PCREL_CALL;
+		  else
+		    the_insn.reloc = R_HPPA;
+		  the_insn.format = 14;
+		  continue;
+		}
+
+	    /* Handle a dword-aligned 16-bit imm. at 31 (PA2.0 wide).  */
+	    case '&':
+	      the_insn.field_selector = pa_chk_field_selector (&s);
+	      get_expression (s);
+	      s = expr_end;
+	      if (the_insn.exp.X_op == O_constant)
+		{
+		  unsigned int result;
+		  num = evaluate_absolute (&the_insn);
+		  CHECK_FIELD (num, 32767, -32768, 0);
+		  CHECK_ALIGN (num, 8, 0);
+		  dis_assemble_16 (num, &result, 1);
+		  INSERT_FIELD_AND_CONTINUE (opcode, result, 0);
+		}
+	      else
+		{
+		  /* ??? Is this valid for wide mode?  */
+		  if (is_DP_relative (the_insn.exp))
+		    the_insn.reloc = R_HPPA_GOTOFF;
+		  else if (is_PC_relative (the_insn.exp))
+		    the_insn.reloc = R_HPPA_PCREL_CALL;
+		  else
+		    the_insn.reloc = R_HPPA;
+		  the_insn.format = 14;
+		  continue;
+		}
+
 	    /* Handle a 12 bit branch displacement.  */
 	    case 'w':
 	      the_insn.field_selector = pa_chk_field_selector (&s);
@@ -3806,6 +3900,7 @@ pa_ip (str)
 		  }
 
 		/* Handle L/R register halves like 'x'.  */
+		case 'E':
 		case 'e':
 		  {
 		    struct pa_11_fp_reg_struct result;
@@ -3821,6 +3916,16 @@ pa_ip (str)
 		      }
 		    continue;
 		  }
+
+		/* Float target register (PA 2.0 wide).  */
+		case 'x':
+		  /* This should be more strict.  Small steps.  */
+		  if (strict && *s != '%')
+		    break;
+		  num = pa_parse_number (&s, 0);
+		  CHECK_FIELD (num, 31, 0, 0);
+		  INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
+
 		default:
 		  abort ();
 		}
@@ -4303,12 +4408,30 @@ md_apply_fix (fixP, valp)
 	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
 	  && !(fixP->fx_subsy
 	       && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
-
+	      
 	new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
 #undef arg_reloc_stub_needed
-
+	
       switch (fmt)
 	{
+	case 10:
+	  CHECK_FIELD (new_val, 8191, -8192, 0);
+
+	  /* Mask off 11 bits to be changed.  */
+	  bfd_put_32 (stdoutput,
+		      bfd_get_32 (stdoutput, buf) & 0xffffc00e,
+		      buf);
+	  result = ((new_val & 0x1fff) >> 2) | ((new_val & 0x2000) >> 13);
+	  break;
+	case -11:
+	  CHECK_FIELD (new_val, 8191, -8192, 0);
+
+	  /* Mask off 14 bits to be changed.  */
+	  bfd_put_32 (stdoutput,
+		      bfd_get_32 (stdoutput, buf) & 0xffffc006,
+		      buf);
+	  result = ((new_val & 0x1fff) >> 1) | ((new_val & 0x2000) >> 15);
+	  break;
 	/* Handle all opcodes with the 'j' operand type.  */
 	case 14:
 	  CHECK_FIELD (new_val, 8191, -8192, 0);

@@ -1,3 +1,11 @@
+Fri Apr 21 14:29:43 2000  Jeffrey A Law  (law@cygnus.com)
+			  Jason Eckhardt  <jle@cygnus.com>
+
+        * config/tc-hppa.c (md_apply_fix): Handle new PA2.0 formats.
+
+	* config/tc-hppa.c (CHECK_ALIGN): New macro.
+	Added handling of new operand types l,y,&,fe,fE,fx.
+
 Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 			  David Mosberger  <davidm@hpl.hp.com>
 			  Timothy Wall <twall@cygnus.com>
@@ -385,6 +393,8 @@ Sat Mar 11 00:01:39 2000  Hans-Peter Nilsson  <hp@axis.se>
 	* doc/Makefile.am (CPU_DOCS): Add c-m32r.texi.
 	* doc/Makefile.in: Regenerate.
 	* doc/c-m32r.texi (M32R-Opts): Document new command line switch.
+
+
 
 2000-03-02  Michael Meissner  <meissner@redhat.com>
 
