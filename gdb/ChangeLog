@@ -1,5 +1,8 @@
 2004-09-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386fbsd-nat.c (_initialize_i386fbsd_nat): Group target related
+	code together.
+
 	* config/i386/nm-fbsd64.h: Remove file.
 	* config/i386/fbsd64.mh (NAT_FILE): Set to config/nm-nbsd.h.
 

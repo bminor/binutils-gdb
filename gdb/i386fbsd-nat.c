@@ -131,6 +131,9 @@ _initialize_i386fbsd_nat (void)
   t->to_make_corefile_notes = fbsd_make_corefile_notes;
   add_target (t);
 
+  /* Support debugging kernel virtual memory images.  */
+  bsd_kvm_add_target (i386fbsd_supply_pcb);
+
   /* FreeBSD provides a kern.ps_strings sysctl that we can use to
      locate the sigtramp.  That way we can still recognize a sigtramp
      if its location is changed in a new kernel.  Of course this is
@@ -153,7 +156,4 @@ _initialize_i386fbsd_nat (void)
       }
   }
 #endif
-
-  /* Support debugging kernel virtual memory images.  */
-  bsd_kvm_add_target (i386fbsd_supply_pcb);
 }
