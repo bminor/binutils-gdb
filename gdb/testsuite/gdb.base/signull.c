@@ -19,6 +19,7 @@
 
 #include <signal.h>
 #include <setjmp.h>
+#include <stdlib.h>
 
 enum tests {
   code_entry_point, code_descriptor, data_pointer
@@ -38,7 +39,7 @@ jmp_buf env;
 extern void
 keeper (int sig)
 {
-  longjmp (env, 0);
+  siglongjmp (env, 0);
 }
 
 extern long
@@ -59,10 +60,15 @@ int
 main ()
 {
   static volatile int i;
-  signal (SIGSEGV, keeper);
+
+  struct sigaction act;
+  memset (&act, 0, sizeof act);
+  act.sa_handler = keeper;
+  sigaction (SIGSEGV, &act, NULL);
+
   for (i = 0; i < 10; i++)
     {
-      setjmp (env);
+      sigsetjmp (env, 1);
       bowler ();
     }
 }
