@@ -28,7 +28,7 @@ configure.in
 sparc-opc.c
 z8k-dis.c
 z8k-opc.h
-
+z8kgen.c
 
 Do-last:
 
