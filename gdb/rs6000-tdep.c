@@ -313,8 +313,8 @@ skip_prologue (pc, fdata)
   char buf[4];
   unsigned long op;
   long offset = 0;
-  int lr_reg = 0;
-  int cr_reg = 0;
+  int lr_reg = -1;
+  int cr_reg = -1;
   int reg;
   int framep = 0;
   int minimal_toc_loaded = 0;
@@ -391,7 +391,7 @@ skip_prologue (pc, fdata)
 	  continue;
 
 	}
-      else if ((op & 0xffff0000) == lr_reg)
+      else if (lr_reg != -1 && (op & 0xffff0000) == lr_reg)
 	{			/* st Rx,NUM(r1) 
 				   where Rx == lr */
 	  fdata->lr_offset = SIGNED_SHORT (op) + offset;
@@ -400,7 +400,7 @@ skip_prologue (pc, fdata)
 	  continue;
 
 	}
-      else if ((op & 0xffff0000) == cr_reg)
+      else if (cr_reg != -1 && (op & 0xffff0000) == cr_reg)
 	{			/* st Rx,NUM(r1) 
 				   where Rx == cr */
 	  fdata->cr_offset = SIGNED_SHORT (op) + offset;

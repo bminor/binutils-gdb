@@ -522,6 +522,14 @@ ppc_sysv_abi_push_arguments (nargs, args, sp, struct_return, struct_addr)
   structoffset = argoffset + argstkspace;
   freg = 1;
   greg = 3;
+  /* Fill in r3 with the return structure, if any */
+  if (struct_return)
+    {
+      char val_buf[4];
+      store_address (val_buf, 4, struct_addr);
+      memcpy (&registers[REGISTER_BYTE (greg)], val_buf, 4);
+      greg++;
+    }
   /* Now fill in the registers and stack... */
   for (argno = 0; argno < nargs; argno++)
     {
@@ -605,4 +613,30 @@ ppc_sysv_abi_push_arguments (nargs, args, sp, struct_return, struct_addr)
 
   target_store_registers (-1);
   return sp;
+}
+
+/* This version of ppc_linux_memory_remove_breakpoints handles the
+   case of self modifying code */
+int
+ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+{
+  unsigned char *bp;
+  int val;
+  int bplen;
+  char old_contents[BREAKPOINT_MAX];
+
+  /* Determine appropriate breakpoint contents and size for this address.  */
+  bp = BREAKPOINT_FROM_PC (&addr, &bplen);
+  if (bp == NULL)
+    error ("Software breakpoints not implemented for this target.");
+
+  val = target_read_memory (addr, old_contents, bplen);
+
+  /* If our breakpoint is no longer at the address, this means that the
+     program modified the code on us, so it is wrong to put back the
+     old value */
+  if (val == 0 && memcmp (bp, old_contents, bplen) == 0)
+    val = target_write_memory (addr, contents_cache, bplen);
+
+  return val;
 }

@@ -93,6 +93,13 @@ CORE_ADDR ppc_sysv_abi_push_arguments PARAMS ((int, struct value **, CORE_ADDR, 
 #define PROLOGUE_FIRSTLINE_OVERLAP
 #endif
 
+/* Needed to handled the self-modifying code situation due to the dynamic
+   linker. */
+int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
+#undef MEMORY_REMOVE_BREAKPOINT
+#define MEMORY_REMOVE_BREAKPOINT(addr, contents_cache) \
+  ppc_linux_memory_remove_breakpoint(addr, contents_cache)
+
 /* N_FUN symbols in shared libaries have 0 for their values and need
    to be relocated. */
 #define SOFUN_ADDRESS_MAYBE_MISSING

@@ -1,3 +1,17 @@
+2000-02-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* ppc-linux-tdep.c (ppc_sysv_abi_push_arguments): Put address
+	of return structure in r3 if necessary.
+	(ppc_linux_memory_remove_breakpoints): New function.
+	* rs6000-tdep.c (skip_prologue): Make sure that the cases
+	for storing either cr or lr to the stack only handle those
+	cases.  (I.e, don't let these cases match 0x00000000 which is
+	found found in the shared library trampoline prior to the
+	loading of the shared library.)
+	* config/powerpc/tm-linux.h (ppc_linux_memory_remove_breakpoint):
+	Declare.
+	(MEMORY_REMOVE_BREAKPOINT): Define.
+
 Wed Feb 23 23:27:48 2000  Andrew Cagney  <cagney@behemoth.cygnus.com>
 
 	* hppah-nat.c: Include "gdb_wait.h" instead of <wait.h>.
