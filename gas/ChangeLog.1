@@ -387,14 +387,12 @@ Wed Sep  6 21:13:06 1995  Ian Lance Taylor  <ian@cygnus.com>
 	first unquoted space.
 	(equals): Likewise.
 
-start-sanitize-sh3e
 Wed Sep  6 15:03:53 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* config/tc-sh.c (get_operands): Read third arg if it exists.
 	Otherwise, clear it.
 	(get_specific, case F_FR0): Add.
 
-end-sanitize-sh3e
 Wed Sep  6 15:03:53 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* config/tc-sh.c (get_specific): Delete arg_to_test.
@@ -1136,13 +1134,11 @@ Mon Aug  7 17:18:10 1995  Ian Lance Taylor  <ian@cygnus.com>
 	(TARG_CPU_DEP_m68k): Depend upon $(srcdir)/config/m68k-parse.h.
 	(m68k-parse.c, m68k-parse.o): New targets.
 
-start-sanitize-sh3e
 Mon Aug  7 02:54:20 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-sh.c (parse_reg): Handle new FP registers.
 	(get_specific): Handle new operand types.
 
-end-sanitize-sh3e
 Fri Aug  4 12:29:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* expr.c (op_encoding): Make non-const.  Don't set '"' to

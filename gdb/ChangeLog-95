@@ -1037,7 +1037,6 @@ Tue Oct 17 08:04:26 1995  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* NEWS: Fix typo.
 
-start-sanitize-sh3e
 Mon Oct 16 18:24:03 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* config/sh/tm-sh.h (REGISTER_VIRTUAL_TYPE): Return builtin_type_float
@@ -1047,7 +1046,6 @@ Mon Oct 16 18:24:03 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 	(NUM_REGS, NUM_REALREGS): Increase from 23 to 41.
 	(FPUL_REGNUM, FP0_REGNUM): New macros.
 
-end-sanitize-sh3e
 Mon Oct 16 11:27:06 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* remote-mips.c:  Add support for speedy (about 10x faster)

@@ -205,12 +205,10 @@ Fri Sep  8 01:07:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* mips-opc.c: Change unaligned loads and stores with "t,A"
 	operands to use "t,A(b)".
 
-start-sanitize-sh3e
 Thu Sep  7 19:02:46 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* sh-dis.c (print_insn_shx): Add F_FR0 support.
 
-end-sanitize-sh3e
 Thu Sep  7 19:02:46 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* sh-dis.c (print_insn_shx): Change loop over op->arg[n] to iterate
@@ -225,13 +223,11 @@ Wed Sep  6 21:21:33 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* configure.in: Substitute HDEFINES.
 	* configure: Rebuild.
 
-start-sanitize-sh3e
 Wed Sep  6 15:08:09 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* sh-opc.h (sh_arg_type): Add F_FR0.
 	(sh_table, case fmac): Add F_FR0 as first argument.
 	
-end-sanitize-sh3e
 Wed Sep  6 15:08:09 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* sh-opc.h (sh_opcode_info): Increase arg array size to 4.
@@ -272,12 +268,10 @@ Mon Sep  4 14:28:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 	Use them rather than looking through target Makefile fragments.
 	* configure: Rebuild.
 
-start-sanitize-sh3e
 Thu Aug 31 12:35:32 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* sh-opc.h (ftrc): Change FPUL_N to FPUL_M.
 
-end-sanitize-sh3e
 Wed Aug 30 13:52:28 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (sparc_opcodes): Delete duplicate wr %y insn.
@@ -290,13 +284,11 @@ Wed Aug 30 13:52:28 1995  Doug Evans  <dje@canuck.cygnus.com>
 	(sparc_{encode,decode}_prefetch): New functions.
 	* sparc-dis.c (print_insn): Handle '*' arg (prefetch function).
 
-start-sanitize-sh3e
 Wed Aug 30 11:11:58 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* sh-opc.h: Add blank lines to improve readabililty of sh3e
 	instructions.
 
-end-sanitize-sh3e
 Wed Aug 30 11:09:38 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* sh-dis.c: Correct comment on first line of file.
@@ -323,12 +315,10 @@ Mon Aug 21 17:33:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 	and likewise for the size variants.  Add dbhs as an alias for
 	dbcc.
 
-start-sanitize-sh3e
 Fri Aug 11 13:40:24 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* sh-opc.h (FP sts instructions): Update to match reality.
 
-end-sanitize-sh3e
 Mon Aug  7 16:12:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-dis.c: (fpcr_names): Add % before all register names.
@@ -346,7 +336,6 @@ Mon Aug  7 16:12:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* m68k-opc.c (m68k_opcode_aliases): Add jsrl and jsrs as aliases
 	for jsr.
 
-start-sanitize-sh3e
 Mon Aug  7 02:21:40 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* sh-dis.c (print_insn_shx): Handle new operand types F_REG_N,
@@ -354,7 +343,6 @@ Mon Aug  7 02:21:40 1995  Jeff Law  (law@snake.cs.utah.edu)
 	* sh-opc.h (sh_arg_type): Add new operand types.
 	(sh_table): Add new opcodes from SH3E Floating Point ISA.
 
-end-sanitize-sh3e
 Sat Aug  5 16:50:14 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (distclean): Remove generated file config.h.
