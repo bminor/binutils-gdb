@@ -1,3 +1,7 @@
+Tue Dec 31 16:00:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.sub, config.guess: Merge with latest FSF sources.
+
 start-sanitize-tic80
 Fri Dec 27 23:04:33 1996  Fred Fish  <fnf@cygnus.com>
 
