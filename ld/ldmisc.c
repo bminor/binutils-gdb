@@ -506,3 +506,14 @@ ld_abort (file, line, fn)
   einfo (_("%P%F: please report this bug\n"));
   xexit (1);
 }
+
+bfd_boolean
+error_handler VPARAMS ((int id ATTRIBUTE_UNUSED, const char *fmt, ...))
+{
+  VA_OPEN (arg, fmt);
+  VA_FIXEDARG (arg, const char *, fmt);
+
+  vfinfo (stderr, fmt, arg);
+  VA_CLOSE (arg);
+  return TRUE;
+}

@@ -22,6 +22,7 @@
 #ifndef LDMISC_H
 #define LDMISC_H
 
+extern bfd_boolean error_handler PARAMS ((int, const char *, ...));
 extern void einfo PARAMS ((const char *, ...));
 extern void minfo PARAMS ((const char *, ...));
 extern void info_msg PARAMS ((const char *, ...));
