@@ -1,7 +1,24 @@
+Mon Jul 28 14:04:39 1997  Felix Lee  <flee@cygnus.com>
+
+	* Makefile.in (init.c): don't try to scan mswin for _initialize
+ 	funcs.  (generates misleading error message because files have
+ 	.cpp suffix, not .c suffix)
+
+Mon Jul 28 13:27:21 1997  Felix Lee  <flee@cygnus.com>
+
+	* ser-e7kpc.c: <w32sut.h> -> "mswin/w32sut.h"
+
 Mon Jul 28 02:54:31 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* xcoffread.c (coff_getfilename):  Do not strip directory component
 	of filename.
+
+Fri Jul 25 15:16:15 1997  Felix Lee  <flee@cygnus.com>
+
+	* mon960-rom.c: removed unused #includes; no ioctl.h in Windows.
+	* nindy-share/ttyflush.c: find sleep() for _MSC_VER.
+	* remote-array.c: #include <ctype.h> for isascii().
+	* utils.c (notice_quit,pollquit): cleanup.  _WIN32 -> _MSC_VER.
 
 Fri Jul 25 16:48:18 1997  Jeffrey A Law  (law@cygnus.com)
 

@@ -607,80 +607,38 @@ quit ()
 }
 
 
-#if defined(__GO32__) || defined (_WIN32)
+#if defined(__GO32__)
 
-#ifndef _MSC_VER
 /* In the absence of signals, poll keyboard for a quit.
    Called from #define QUIT pollquit() in xm-go32.h. */
 
 void
-pollquit()
+notice_quit()
 {
   if (kbhit ())
-    {
-      int k = getkey ();
-      if (k == 1) {
+    switch (getkey ())
+      {
+      case 1:
 	quit_flag = 1;
-	quit();
+	break;
+      case 2:
+	immediate_quit = 2;
+	break;
+      default:
+	/* We just ignore it */
+	/* FIXME!! Don't think this actually works! */
+	fprintf_unfiltered (gdb_stderr, "CTRL-A to quit, CTRL-B to quit harder\n");
+	break;
       }
-      else if (k == 2) {
-	immediate_quit = 1;
-	quit ();
-      }
-      else 
-	{
-	  /* We just ignore it */
-	  /* FIXME!! Don't think this actually works! */
-	  fprintf_unfiltered (gdb_stderr, "CTRL-A to quit, CTRL-B to quit harder\n");
-	}
-    }
 }
-#else /* !_MSC_VER */
 
-/* This above code is not valid for wingdb unless
- * getkey and kbhit were to be rewritten.
+#elif defined(_MSC_VER) /* should test for wingdb instead? */
+
+/*
  * Windows translates all keyboard and mouse events 
  * into a message which is appended to the message 
  * queue for the process.
  */
-void
-pollquit()
-{
-  int k = win32pollquit();
-  if (k == 1)
-  {
-    quit_flag = 1;
-    quit ();
-  }
-  else if (k == 2)
-  {
-    immediate_quit = 1;
-    quit ();
-  }
-}
-#endif /* !_MSC_VER */
-
-
-#ifndef _MSC_VER
-void notice_quit()
-{
-  if (kbhit ())
-    {
-      int k = getkey ();
-      if (k == 1) {
-	quit_flag = 1;
-      }
-      else if (k == 2)
-	{
-	  immediate_quit = 1;
-	}
-      else 
-	{
-	  fprintf_unfiltered (gdb_stderr, "CTRL-A to quit, CTRL-B to quit harder\n");
-	}
-    }
-}
-#else /* !_MSC_VER */
 
 void notice_quit()
 {
@@ -690,14 +648,23 @@ void notice_quit()
   else if (k == 2)
     immediate_quit = 1;
 }
-#endif /* !_MSC_VER */
 
-#else
+#else /* !defined(__GO32__) && !defined(_MSC_VER) */
+
 void notice_quit()
 {
   /* Done by signals */
 }
-#endif /* defined(__GO32__) || defined(_WIN32) */
+
+#endif /* !defined(__GO32__) && !defined(_MSC_VER) */
+
+void
+pollquit()
+{
+  notice_quit ();
+  if (quit_flag || immediate_quit)
+    quit ();
+}
 
 /* Control C comes here */
 

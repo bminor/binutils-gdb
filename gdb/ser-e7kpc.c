@@ -29,7 +29,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #define W32SUT_32
-#include <w32sut.h>
+#include "mswin/w32sut.h"
 #endif
 
 #ifdef __GO32__

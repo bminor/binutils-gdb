@@ -28,18 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symtab.h"
 #include "symfile.h" /* for generic_load */
 
-#if !defined (HAVE_TERMIOS) && !defined (HAVE_TERMIO) && !defined (HAVE_SGTTY)
-#define HAVE_SGTTY
-#endif
-
-#ifdef HAVE_SGTTY
-#include <sys/ioctl.h>
-#endif
-
-#include <sys/types.h>	/* Needed by file.h on Sys V */
-#include <sys/file.h>
-#include <signal.h>
-#include <sys/stat.h>
 
 #define USE_GENERIC_LOAD
 

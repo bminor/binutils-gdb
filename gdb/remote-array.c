@@ -33,6 +33,7 @@
 #else
 #include <varargs.h>
 #endif
+#include <ctype.h>
 #include <signal.h>
 #include <sys/types.h>
 #include "gdb_string.h"
