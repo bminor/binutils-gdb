@@ -4780,6 +4780,7 @@ Table}.
 * Auxiliary Vector::            Auxiliary data provided by operating system
 * Memory Region Attributes::    Memory region attributes
 * Dump/Restore Files::          Copy between memory and a file
+* Core File Generation::        Cause a program dump its core
 * Character Sets::              Debugging programs that use a different
                                 character set than GDB does
 @end menu
@@ -6174,6 +6175,36 @@ file offset @var{start} and file offset @var{end} will be restored.
 These offsets are relative to the addresses in the file, before
 the @var{bias} argument is applied.
 
+@end table
+
+@node Core File Generation
+@section How to Produce a Core File from Your Program
+@cindex dump core from inferior
+
+A @dfn{core file} or @dfn{core dump} is a file that records the memory
+image of a running process and its process status (register values
+etc.).  Its primary use is post-mortem debugging of a program that
+crashed while it ran outside a debugger.  A program that crashes
+automatically produces a core file, unless this feature is disabled by
+the user.  @xref{Files}, for information on invoking @value{GDBN} in
+the post-mortem debugging mode.
+
+Occasionally, you may wish to produce a core file of the program you
+are debugging in order to preserve a snapshot of its state.
+@value{GDBN} has a special command for that.
+
+@table @code
+@kindex gcore
+@kindex generate-core-file
+@item generate-core-file [@var{file}]
+@itemx gcore [@var{file}]
+Produce a core dump of the inferior process.  The optional argument
+@var{file} specifies the file name where to put the core dump.  If not
+specified, the file name defaults to @file{core.@var{pid}}, where
+@var{pid} is the inferior process ID.
+
+Note that this command is implemented only for some systems (as of
+this writing, @sc{gnu}/Linux, FreeBSD, Solaris, Unixware, and S390).
 @end table
 
 @node Character Sets

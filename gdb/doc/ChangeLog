@@ -9,6 +9,7 @@
 	is first used, and add an index entry for the term.
 	(Calling): Expand and elaborate text.  Add "print".  Add the
 	description of problems with weak aliases.
+	(Core File Generation): New section.
 
 2004-10-12  Andrew Cagney  <cagney@gnu.org>
 
