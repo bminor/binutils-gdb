@@ -193,20 +193,22 @@ dump_section_header (abfd, section, ignored)
 {
   char *comma = "";
 
-#define PF(x,y) \
-  if (section->flags & x) {  printf("%s%s",comma,y); comma = ", "; }
-
-
-  printf ("SECTION %d [%s]\t: size %08x",
-	  section->index,
-	  section->name,
-	  (unsigned) bfd_get_section_size_before_reloc (section));
-  printf (" vma ");
-  printf_vma (section->vma);
-  printf (" lma ");
+  printf ("%3d %-14s%08lx  ", section->index,
+	  bfd_get_section_name (abfd, section),
+	  (unsigned long) bfd_section_size (abfd, section));
+  printf_vma (bfd_get_section_vma (abfd, section));
+  printf ("  ");
   printf_vma (section->lma);
-  printf (" align 2**%u%s ",
-	  section->alignment_power, (wide_output) ? "" : "\n");
+  printf ("  %08lx  2**%u", section->filepos,
+	  bfd_get_section_alignment (abfd, section));
+  if (! wide_output)
+    printf ("\n                ");
+  printf ("  ");
+
+#define PF(x, y) \
+  if (section->flags & x) { printf ("%s%s", comma, y); comma = ", "; }
+
+  PF (SEC_HAS_CONTENTS, "CONTENTS");
   PF (SEC_ALLOC, "ALLOC");
   PF (SEC_CONSTRUCTOR, "CONSTRUCTOR");
   PF (SEC_CONSTRUCTOR_TEXT, "CONSTRUCTOR TEXT");
@@ -233,6 +235,12 @@ static void
 dump_headers (abfd)
      bfd *abfd;
 {
+  printf ("Sections:\n");
+#ifndef BFD64
+  printf ("Idx Name          Size      VMA       LMA       File off  Algn\n");
+#else
+  printf ("Idx Name          Size      VMA               LMA               File off  Algn\n");
+#endif
   bfd_map_over_sections (abfd, dump_section_header, (PTR) NULL);
 }
 
