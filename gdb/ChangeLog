@@ -1,3 +1,8 @@
+2003-08-08  Elena Zannoni  <ezannoni@redhat.com>
+
+	* symtab.c (lookup_symbol_aux): Make sure that is_a_field_of_this
+	contains something meaningful at all times.
+
 2003-08-07  Andrew Cagney  <cagney@redhat.com>
 
 	* interps.h (INTERP_MI2, INTERP_MI3): Define.
