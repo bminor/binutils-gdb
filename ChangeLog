@@ -1,5 +1,7 @@
 Mon Nov 30 14:54:34 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
+	* configure.in: use mh-sun for all *-sun-* hosts
+
 	* config/mh-solaris: rework standard X location to use
 	$OPENWINHOME, if defined.
 	
