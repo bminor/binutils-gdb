@@ -70,6 +70,9 @@ static void set_cpu_arch PARAMS ((int));
 #ifdef BFD_ASSEMBLER
 static bfd_reloc_code_real_type reloc
   PARAMS ((int, int, int, bfd_reloc_code_real_type));
+#define RELOC_ENUM enum bfd_reloc_code_real
+#else
+#define RELOC_ENUM int
 #endif
 
 #ifndef DEFAULT_ARCH
@@ -117,11 +120,7 @@ struct _i386_insn
 #define Operand_PCrel 1
 
     /* Relocation type for operand */
-#ifdef BFD_ASSEMBLER
-    enum bfd_reloc_code_real reloc[MAX_OPERANDS];
-#else
-    int reloc[MAX_OPERANDS];
-#endif
+    RELOC_ENUM reloc[MAX_OPERANDS];
 
     /* BASE_REG, INDEX_REG, and LOG2_SCALE_FACTOR are used to encode
        the base index byte below.  */
@@ -241,6 +240,7 @@ enum flag_code {
 	CODE_32BIT,
 	CODE_16BIT,
 	CODE_64BIT };
+#define NUM_FLAG_CODE ((int) CODE_64BIT + 1)
 
 static enum flag_code flag_code;
 static int use_rela_relocations = 0;
@@ -1546,11 +1546,7 @@ md_assemble (line)
       {
 	union i386_op temp_op;
 	unsigned int temp_type;
-#ifdef BFD_ASSEMBLER
-	enum bfd_reloc_code_real temp_reloc;
-#else
-	int temp_reloc;
-#endif
+	RELOC_ENUM temp_reloc;
 	int xchg1 = 0;
 	int xchg2 = 0;
 
@@ -3068,11 +3064,7 @@ md_assemble (line)
 			   Need a 32-bit fixup (don't support 8bit
 			   non-absolute imms).  Try to support other
 			   sizes ...  */
-#ifdef BFD_ASSEMBLER
-			enum bfd_reloc_code_real reloc_type;
-#else
-			int reloc_type;
-#endif
+			RELOC_ENUM reloc_type;
 			int size = 4;
 			int sign = 0;
 
@@ -3127,6 +3119,130 @@ md_assemble (line)
   }
 }
 
+#ifndef LEX_AT
+static char *lex_got PARAMS ((RELOC_ENUM *, int *));
+
+/* Parse operands of the form
+   <symbol>@GOTOFF+<nnn>
+   and similar .plt or .got references.
+
+   If we find one, set up the correct relocation in RELOC and copy the
+   input string, minus the `@GOTOFF' into a malloc'd buffer for
+   parsing by the calling routine.  Return this buffer, and if ADJUST
+   is non-null set it to the length of the string we removed from the
+   input line.  Otherwise return NULL.  */
+static char *
+lex_got (reloc, adjust)
+     RELOC_ENUM *reloc;
+     int *adjust;
+{
+  static const char * const mode_name[NUM_FLAG_CODE] = { "32", "16", "64" };
+  static const struct {
+    const char *str;
+    const RELOC_ENUM rel[NUM_FLAG_CODE];
+  } gotrel[] = {
+    { "PLT",      { BFD_RELOC_386_PLT32,  0, BFD_RELOC_X86_64_PLT32    } },
+    { "GOTOFF",   { BFD_RELOC_386_GOTOFF, 0, 0                         } },
+    { "GOTPCREL", { 0,                    0, BFD_RELOC_X86_64_GOTPCREL } },
+    { "GOT",      { BFD_RELOC_386_GOT32,  0, BFD_RELOC_X86_64_GOT32    } }
+  };
+  char *cp;
+  unsigned int j;
+
+  for (cp = input_line_pointer; *cp != '@'; cp++)
+    if (is_end_of_line[(unsigned char) *cp])
+      return NULL;
+
+  for (j = 0; j < sizeof (gotrel) / sizeof (gotrel[0]); j++)
+    {
+      int len;
+
+      len = strlen (gotrel[j].str);
+      if (strncmp (cp + 1, gotrel[j].str, len) == 0)
+	{
+	  if (gotrel[j].rel[(unsigned int) flag_code] != 0)
+	    {
+	      int first;
+	      char *tmpbuf;
+
+	      *reloc = gotrel[j].rel[(unsigned int) flag_code];
+
+	      if (GOT_symbol == NULL)
+		GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
+
+	      /* Replace the relocation token with ' ', so that
+		 errors like foo@GOTOFF1 will be detected.  */
+	      first = cp - input_line_pointer;
+	      tmpbuf = xmalloc (strlen (input_line_pointer));
+	      memcpy (tmpbuf, input_line_pointer, first);
+	      tmpbuf[first] = ' ';
+	      strcpy (tmpbuf + first + 1, cp + 1 + len);
+	      if (adjust)
+		*adjust = len;
+	      return tmpbuf;
+	    }
+
+	  as_bad (_("@%s reloc is not supported in %s bit mode"),
+		  gotrel[j].str, mode_name[(unsigned int) flag_code]);
+	  return NULL;
+	}
+    }
+
+  /* Might be a symbol version string.  Don't as_bad here.  */
+  return NULL;
+}
+
+/* x86_cons_fix_new is called via the expression parsing code when a
+   reloc is needed.  We use this hook to get the correct .got reloc.  */
+static RELOC_ENUM got_reloc = NO_RELOC;
+
+void
+x86_cons_fix_new (frag, off, len, exp)
+     fragS *frag;
+     unsigned int off;
+     unsigned int len;
+     expressionS *exp;
+{
+  RELOC_ENUM r = reloc (len, 0, 0, got_reloc);
+  got_reloc = NO_RELOC;
+  fix_new_exp (frag, off, len, exp, 0, r);
+}
+
+void
+x86_cons (exp, size)
+     expressionS *exp;
+     int size;
+{
+  if (size == 4)
+    {
+      /* Handle @GOTOFF and the like in an expression.  */
+      char *save;
+      char *gotfree_input_line;
+      int adjust;
+
+      save = input_line_pointer;
+      gotfree_input_line = lex_got (&got_reloc, &adjust);
+      if (gotfree_input_line)
+	input_line_pointer = gotfree_input_line;
+
+      expression (exp);
+
+      if (gotfree_input_line)
+	{
+	  /* expression () has merrily parsed up to the end of line,
+	     or a comma - in the wrong buffer.  Transfer how far
+	     input_line_pointer has moved to the right buffer.  */
+	  input_line_pointer = (save
+				+ (input_line_pointer - gotfree_input_line)
+				+ adjust);
+	  free (gotfree_input_line);
+	}
+    }
+  else
+    expression (exp);
+}
+#endif
+
 static int i386_immediate PARAMS ((char *));
 
 static int
@@ -3134,6 +3250,9 @@ i386_immediate (imm_start)
      char *imm_start;
 {
   char *save_input_line_pointer;
+#ifndef LEX_AT
+  char *gotfree_input_line;
+#endif
   segT exp_seg = 0;
   expressionS *exp;
 
@@ -3153,80 +3272,22 @@ i386_immediate (imm_start)
   input_line_pointer = imm_start;
 
 #ifndef LEX_AT
-  {
-    /* We can have operands of the form
-         <symbol>@GOTOFF+<nnn>
-       Take the easy way out here and copy everything
-       into a temporary buffer...  */
-    register char *cp;
-
-    cp = strchr (input_line_pointer, '@');
-    if (cp != NULL)
-      {
-	char *tmpbuf;
-	int len = 0;
-	int first;
-
-	/* GOT relocations are not supported in 16 bit mode.  */
-	if (flag_code == CODE_16BIT)
-	  as_bad (_("GOT relocations not supported in 16 bit mode"));
-
-	if (GOT_symbol == NULL)
-	  GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
-
-	if (strncmp (cp + 1, "PLT", 3) == 0)
-	  {
-	    if (flag_code == CODE_64BIT)
-	      i.reloc[this_operand] = BFD_RELOC_X86_64_PLT32;
-	    else
-	      i.reloc[this_operand] = BFD_RELOC_386_PLT32;
-	    len = 3;
-	  }
-	else if (strncmp (cp + 1, "GOTOFF", 6) == 0)
-	  {
-	    if (flag_code == CODE_64BIT)
-	      as_bad ("GOTOFF relocations are unsupported in 64bit mode.");
-	    i.reloc[this_operand] = BFD_RELOC_386_GOTOFF;
-	    len = 6;
-	  }
-	else if (strncmp (cp + 1, "GOTPCREL", 8) == 0)
-	  {
-	    if (flag_code == CODE_64BIT)
-	      i.reloc[this_operand] = BFD_RELOC_X86_64_GOTPCREL;
-	    else
-	      as_bad ("GOTPCREL relocations are supported only in 64bit mode.");
-	    len = 8;
-	  }
-	else if (strncmp (cp + 1, "GOT", 3) == 0)
-	  {
-	    if (flag_code == CODE_64BIT)
-	      i.reloc[this_operand] = BFD_RELOC_X86_64_GOT32;
-	    else
-	      i.reloc[this_operand] = BFD_RELOC_386_GOT32;
-	    len = 3;
-	  }
-	else
-	  as_bad (_("bad reloc specifier in expression"));
-
-	/* Replace the relocation token with ' ', so that errors like
-	   foo@GOTOFF1 will be detected.  */
-	first = cp - input_line_pointer;
-	tmpbuf = (char *) alloca (strlen (input_line_pointer));
-	memcpy (tmpbuf, input_line_pointer, first);
-	tmpbuf[first] = ' ';
-	strcpy (tmpbuf + first + 1, cp + 1 + len);
-	input_line_pointer = tmpbuf;
-      }
-  }
+  gotfree_input_line = lex_got (&i.reloc[this_operand], NULL);
+  if (gotfree_input_line)
+    input_line_pointer = gotfree_input_line;
 #endif
 
   exp_seg = expression (exp);
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer)
-    as_bad (_("ignoring junk `%s' after expression"), input_line_pointer);
+    as_bad (_("junk `%s' after expression"), input_line_pointer);
 
   input_line_pointer = save_input_line_pointer;
+#ifndef LEX_AT
+  if (gotfree_input_line)
+    free (gotfree_input_line);
+#endif
 
   if (exp->X_op == O_absent || exp->X_op == O_big)
     {
@@ -3331,6 +3392,9 @@ i386_displacement (disp_start, disp_end)
   register expressionS *exp;
   segT exp_seg = 0;
   char *save_input_line_pointer;
+#ifndef LEX_AT
+  char *gotfree_input_line;
+#endif
   int bigdisp = Disp32;
 
   if ((flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0))
@@ -3391,70 +3455,9 @@ i386_displacement (disp_start, disp_end)
     }
 #endif
 #ifndef LEX_AT
-  {
-    /* We can have operands of the form
-         <symbol>@GOTOFF+<nnn>
-       Take the easy way out here and copy everything
-       into a temporary buffer...  */
-    register char *cp;
-
-    cp = strchr (input_line_pointer, '@');
-    if (cp != NULL)
-      {
-	char *tmpbuf;
-	int len = 0;
-	int first;
-
-	/* GOT relocations are not supported in 16 bit mode.  */
-	if (flag_code == CODE_16BIT)
-	  as_bad (_("GOT relocations not supported in 16 bit mode"));
-
-	if (GOT_symbol == NULL)
-	  GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
-
-	if (strncmp (cp + 1, "PLT", 3) == 0)
-	  {
-	    if (flag_code == CODE_64BIT)
-	      i.reloc[this_operand] = BFD_RELOC_X86_64_PLT32;
-	    else
-	      i.reloc[this_operand] = BFD_RELOC_386_PLT32;
-	    len = 3;
-	  }
-	else if (strncmp (cp + 1, "GOTOFF", 6) == 0)
-	  {
-	    if (flag_code == CODE_64BIT)
-	      as_bad ("GOTOFF relocation is not supported in 64bit mode.");
-	    i.reloc[this_operand] = BFD_RELOC_386_GOTOFF;
-	    len = 6;
-	  }
-	else if (strncmp (cp + 1, "GOTPCREL", 8) == 0)
-	  {
-	    if (flag_code != CODE_64BIT)
-	      as_bad ("GOTPCREL relocation is supported only in 64bit mode.");
-	    i.reloc[this_operand] = BFD_RELOC_X86_64_GOTPCREL;
-	    len = 8;
-	  }
-	else if (strncmp (cp + 1, "GOT", 3) == 0)
-	  {
-	    if (flag_code == CODE_64BIT)
-	      i.reloc[this_operand] = BFD_RELOC_X86_64_GOT32;
-	    else
-	      i.reloc[this_operand] = BFD_RELOC_386_GOT32;
-	    len = 3;
-	  }
-	else
-	  as_bad (_("bad reloc specifier in expression"));
-
-	/* Replace the relocation token with ' ', so that errors like
-	   foo@GOTOFF1 will be detected.  */
-	first = cp - input_line_pointer;
-	tmpbuf = (char *) alloca (strlen (input_line_pointer));
-	memcpy (tmpbuf, input_line_pointer, first);
-	tmpbuf[first] = ' ';
-	strcpy (tmpbuf + first + 1, cp + 1 + len);
-	input_line_pointer = tmpbuf;
-      }
-  }
+  gotfree_input_line = lex_got (&i.reloc[this_operand], NULL);
+  if (gotfree_input_line)
+    input_line_pointer = gotfree_input_line;
 #endif
 
   exp_seg = expression (exp);
@@ -3481,13 +3484,16 @@ i386_displacement (disp_start, disp_end)
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer)
-    as_bad (_("ignoring junk `%s' after expression"),
-	    input_line_pointer);
+    as_bad (_("junk `%s' after expression"), input_line_pointer);
 #if GCC_ASM_O_HACK
   RESTORE_END_STRING (disp_end + 1);
 #endif
   RESTORE_END_STRING (disp_end);
   input_line_pointer = save_input_line_pointer;
+#ifndef LEX_AT
+  if (gotfree_input_line)
+    free (gotfree_input_line);
+#endif
 
   if (exp->X_op == O_absent || exp->X_op == O_big)
     {
@@ -3927,11 +3933,7 @@ md_estimate_size_before_relax (fragP, segment)
       /* Symbol is undefined in this segment, or we need to keep a
 	 reloc so that weak symbols can be overridden.  */
       int size = (fragP->fr_subtype & CODE16) ? 2 : 4;
-#ifdef BFD_ASSEMBLER
-      enum bfd_reloc_code_real reloc_type;
-#else
-      int reloc_type;
-#endif
+      RELOC_ENUM reloc_type;
       unsigned char *opcode;
       int old_fr_fix;
 

@@ -155,6 +155,15 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 
 #endif /* ! BFD_ASSEMBLER */
 
+#ifndef LEX_AT
+#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) x86_cons (EXP, NBYTES)
+extern void x86_cons PARAMS ((expressionS *, int));
+
+#define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) x86_cons_fix_new(FRAG, OFF, LEN, EXP)
+extern void x86_cons_fix_new
+  PARAMS ((fragS *, unsigned int, unsigned int, expressionS *));
+#endif
+
 #define TC_FORCE_RELOCATION(fixp) tc_i386_force_relocation(fixp)
 extern int tc_i386_force_relocation PARAMS ((struct fix *));
 
