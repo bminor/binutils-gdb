@@ -1,3 +1,8 @@
+Tue Sep  9 20:52:21 1997  Felix Lee  <flee@cygnus.com>
+
+	* interp.c (sim_resume): poll_quit() at least once per call;
+ 	otherwise gdb can loop sim_resume() uninterruptably.
+
 Thu Sep  4 17:21:23 1997  Doug Evans  <dje@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
