@@ -2075,11 +2075,10 @@ Regular stepping:
 @end example
 
 Asynchronous command.  Resumes the inferior which executes one machine
-instruction.  The output, once stop, will vary depend on whether we have
-@c Someone who knows this should figure out what 'once stop' is supposed
-@c to be.  'once stop is reached'?  - BTY
-stopped in the middle of a source line or not.  In the former case, the
-address at which the program stopped will be printed as well.
+instruction.  The output, once GDB has stopped, will vary depending on
+whether we have stopped in the middle of a source line or not.  In the
+former case, the address at which the program stopped will be printed as
+well.
 
 @subsubheading GDB Command
 
