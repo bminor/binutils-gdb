@@ -1,3 +1,8 @@
+2004-09-14  Hideki IWAMOTO  <h-iwamoto@kit.hi-ho.ne.jp>
+
+	* config/tc-mmix.c [!LLONG_MIN]: Correct #elsif to #elif.
+	[!LLONG_MAX]: Ditto.
+
 2004-09-13  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c: Rename RELABS to TARGET1.

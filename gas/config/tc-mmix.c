@@ -1,5 +1,5 @@
 /* tc-mmix.c -- Assembler for Don Knuth's MMIX.
-   Copyright (C) 2001, 2002, 2003 Free Software Foundation.
+   Copyright (C) 2001, 2002, 2003, 2004 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -305,14 +305,14 @@ struct obstack mmix_sym_obstack;
    long long is 64 bits on the host).  */
 #ifdef LLONG_MIN
 #define PUSHJSTUB_MIN LLONG_MIN
-#elsif defined (LONG_LONG_MIN)
+#elif defined (LONG_LONG_MIN)
 #define PUSHJSTUB_MIN LONG_LONG_MIN
 #else
 #define PUSHJSTUB_MIN LONG_MIN
 #endif
 #ifdef LLONG_MAX
 #define PUSHJSTUB_MAX LLONG_MAX
-#elsif defined (LONG_LONG_MAX)
+#elif defined (LONG_LONG_MAX)
 #define PUSHJSTUB_MAX LONG_LONG_MAX
 #else
 #define PUSHJSTUB_MAX LONG_MAX
