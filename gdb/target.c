@@ -837,15 +837,10 @@ target_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
   return target_xfer_memory (memaddr, myaddr, len, 1);
 }
 
-/* Move memory to or from the targets.  Iterate until all of it has
-   been moved, if necessary.  The top target gets priority; anything
-   it doesn't want, is offered to the next one down, etc.  Note the
-   business with curlen:  if an early target says "no, but I have a
-   boundary overlapping this xfer" then we shorten what we offer to
-   the subsequent targets so the early guy will get a chance at the
-   tail before the subsequent ones do. 
+/* Move memory to or from the targets.  The top target gets priority;
+   if it cannot handle it, it is offered to the next one down, etc.
 
-   Result is 0 or errno value.  */
+   Result is -1 on error, or the number of bytes transfered.  */
 
 int
 do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
@@ -863,17 +858,12 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
      0.  */
   errno = 0;
 
-  /* The quick case is that the top target does it all.  */
+  /* The quick case is that the top target can handle the transfer.  */
   res = current_target.to_xfer_memory
     (memaddr, myaddr, len, write, &current_target);
-  if (res == len)
-    return len;
 
-  if (res > 0)
-    goto bump;
-  /* If res <= 0 then we call it again in the loop.  Ah well.  */
-
-  while (len > 0)
+  /* If res <= 0 then we call it again in the loop.  Ah well. */
+  if (res <= 0)
     {
       for (item = target_stack; item; item = item->next)
 	{
@@ -889,18 +879,17 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 	}
 
       if (res <= 0)
-	{
-	    return -1;
-	}
-    bump:
-      done    += res;
-      memaddr += res;
-      myaddr  += res;
-      len     -= res;
+	return -1;
     }
-  
-  return done;
+
+  return res;
 }
+
+
+/* Perform a memory transfer.  Iterate until the entire region has
+   been transfered.
+
+   Result is 0 or errno value.  */
 
 static int
 target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
@@ -937,17 +926,15 @@ target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 }
 
 
-/* Perform a partial memory transfer.  */
+/* Perform a partial memory transfer.
+
+   Result is -1 on error, or the number of bytes transfered.  */
 
 static int
 target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
 			    int write_p, int *err)
 {
   int res;
-  int err_res;
-  int len_res;
-  struct target_ops *t;
-  struct target_stack_item *item;
 
   /* Zero length requests are ok and require no work.  */
   if (len == 0)
@@ -968,7 +955,7 @@ target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
     }
 
   *err = 0;
-  return 0;
+  return res;
 }
 
 int

@@ -1,3 +1,16 @@
+2000-11-10  J.T. Conklin  <jtc@redback.com>
+
+	* target.c (do_xfer_memory): Only perform a single memory transfer
+ 	instead of iterating to tranfer the entire region.  Higher layers
+ 	are expected to call this function multiple times for partial
+ 	transfers.
+	(target_xfer_memory_partial): Remove unused local variables.
+
+2000-11-10  Nick Duffek  <nsd@redhat.com>
+
+	* target.c (target_xfer_memory_partial): Return bytes transferred
+	instead of 0.
+
 2000-11-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* values.c (value_being_returned, using_struct_return): Protoize.
