@@ -24,10 +24,8 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
-Makefile.in
 binutils-all
 config
-configure.in
 lib
 
 Things-to-lose:

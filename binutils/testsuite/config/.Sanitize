@@ -25,16 +25,6 @@ Do-first:
 Things-to-keep:
 
 default.exp
-unix.exp
-mt-a29k-udi
-mt-i386-aout
-mt-i960-nindy
-mt-lynx
-mt-m68k
-mt-mips-ecoff
-mt-slite
-mt-sparc-aout
-mt-vxworks
 
 Things-to-lose:
 

@@ -23,9 +23,7 @@ Do-first:
 
 Things-to-keep:
 
-Makefile.in
-bintest.c
-configure.in
+bintest.s
 nm.exp
 objdump.exp
 size.exp
