@@ -1,5 +1,9 @@
 Thu Sep 19 15:34:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* interp.c (CHECKHILO): Don't set HIACCESS, LOACCESS, or HLPC.
+	It's OK to have a mult follow a mult.  What's not OK is to have a
+	mult follow an mfhi.
+
 	* gencode.c (process_instructions): Correct handling of nor
 	instruction.  Correct shift count for 32 bit shift instructions.
 	Correct sign extension for arithmetic shifts to not shift the

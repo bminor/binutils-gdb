@@ -361,10 +361,6 @@ static ut_reg HLPC = 0;
 #define CHECKHILO(s)    {\
                           if ((HIACCESS != 0) || (LOACCESS != 0))\
                             sim_warning("%s over-writing HI and LO registers values (PC = 0x%08X%08X HLPC = 0x%08X%08X)\n",(s),(unsigned int)(PC>>32),(unsigned int)(PC&0xFFFFFFFF),(unsigned int)(HLPC>>32),(unsigned int)(HLPC&0xFFFFFFFF));\
-                          /* Set the access counts, since we are about\
-                             to update the HI and LO registers: */\
-                          HIACCESS = LOACCESS = 3; /* 3rd instruction will be safe */\
-                          HLPC = PC;\
                         }
 
 /* NOTE: We keep the following status flags as bit values (1 for true,
