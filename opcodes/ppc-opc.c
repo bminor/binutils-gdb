@@ -1004,8 +1004,13 @@ insert_fxm (unsigned long insn,
 
   /* If only one bit of the FXM field is set, we can use the new form
      of the instruction, which is faster.  Unlike the Power4 branch hint
-     encoding, this is not backward compatible.  */
-  else if ((dialect & PPC_OPCODE_POWER4) != 0 && (value & -value) == value)
+     encoding, this is not backward compatible.  Do not generate the
+     new form unless -mpower4 has been given, or -many and the two
+     operand form of mfcr was used.  */
+  else if ((value & -value) == value
+	   && ((dialect & PPC_OPCODE_POWER4) != 0
+	       || ((dialect & PPC_OPCODE_ANY) != 0
+		   && (insn & (0x3ff << 1)) == 19 << 1)))
     insn |= 1 << 20;
 
   /* Any other value on mfcr is an error.  */
