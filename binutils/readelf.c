@@ -1025,8 +1025,22 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	}
       else
 	{
+	  /* The #ifdef BFD64 below is to prevent a compile time warning.
+	     We know that if we do not have a 64 bit data type that we
+	     will never execute this code anyway.  */
+#ifdef BFD64
 	  if (elf_header.e_machine == EM_MIPS)
 	    {
+	      /* In little-endian objects, r_info isn't really a 64-bit
+		 little-endian value: it has a 32-bit little-endian
+		 symbol index followed by four individual byte fields.
+		 Reorder INFO accordingly.  */
+	      if (elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
+		info = (((info & 0xffffffff) << 32)
+			| ((info >> 56) & 0xff)
+			| ((info >> 40) & 0xff00)
+			| ((info >> 24) & 0xff0000)
+			| ((info >> 8) & 0xff000000));
 	      type  = ELF64_MIPS_R_TYPE (info);
 	      type2 = ELF64_MIPS_R_TYPE2 (info);
 	      type3 = ELF64_MIPS_R_TYPE3 (info);
@@ -1035,10 +1049,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	    type = ELF64_R_TYPE_ID (info);
 	  else
 	    type = ELF64_R_TYPE (info);
-	  /* The #ifdef BFD64 below is to prevent a compile time warning.
-	     We know that if we do not have a 64 bit data type that we
-	     will never execute this code anyway.  */
-#ifdef BFD64
+
 	  symtab_index = ELF64_R_SYM  (info);
 #endif
 	}

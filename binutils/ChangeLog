@@ -1,3 +1,8 @@
+2003-01-28  Richard Sandiford  <rsandifo@redhat.com>
+
+	* readelf.c (dump_relocations): Reorder the r_info field for
+	little-endian mips elf64.  Move #ifdef BFD64 to cover the new code.
+
 2003-01-21  Daniel Berlin  <dan@dberlin.org>
 
 	* readelf.c (display_debug_loc): Skip address base changes.
