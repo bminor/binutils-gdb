@@ -200,6 +200,8 @@ extern int one_stepped;		/* From machine dependent code */
 extern void single_step ();	/* Same. */
 #endif /* NO_SINGLE_STEP */
 
+extern void write_pc_pid PARAMS ((CORE_ADDR, int));
+
 
 /* Things to clean up if we QUIT out of resume ().  */
 /* ARGSUSED */
@@ -457,7 +459,10 @@ wait_for_inferior ()
   CORE_ADDR stop_func_start;
   CORE_ADDR stop_func_end;
   char *stop_func_name;
-  CORE_ADDR prologue_pc = 0, tmp;
+#if 0
+  CORE_ADDR prologue_pc = 0;
+#endif
+  CORE_ADDR tmp;
   struct symtab_and_line sal;
   int remove_breakpoints_on_following_step = 0;
   int current_line;
@@ -498,9 +503,12 @@ wait_for_inferior ()
       else
 	pid = target_wait (-1, &w);
 
-#ifdef HAVE_NONSTEPPABLE_WATCHPOINT
+    /* Gross.
+
+       We goto this label from elsewhere in wait_for_inferior when we want
+       to continue the main loop without calling "wait" and trashing the
+       waitstatus contained in W.  */
     have_waited:
-#endif
 
       flush_cached_frames ();
 
@@ -712,8 +720,20 @@ wait_for_inferior ()
 
       if (INSTRUCTION_NULLIFIED)
 	{
-	  resume (1, 0);
-	  continue;
+	  struct target_waitstatus tmpstatus;
+
+	  target_resume (pid, 1, TARGET_SIGNAL_0);
+
+	  /* We may have received a signal that we want to pass to
+	     the inferior; therefore, we must not clobber the waitstatus
+	     in W.  So we call wait ourselves, then continue the loop
+	     at the "have_waited" label.  */
+	  if (target_wait_hook)
+	    target_wait_hook (pid, &tmpstatus);
+	  else
+	    target_wait (pid, &tmpstatus);
+
+	  goto have_waited;
 	}
 
 #ifdef HAVE_STEPPABLE_WATCHPOINT

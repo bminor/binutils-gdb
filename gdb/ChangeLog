@@ -1,3 +1,14 @@
+Wed Apr 24 00:32:55 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* infrun.c (wait_for_inferior): Move "have_waited" label
+	outside of #ifdef conditionals.  Don't trash the wait status
+	if we get a signal and the current instruction is nullified.
+
+Mon Apr 22 20:17:01 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (VERSION): Bump version number to 4.16.1
+	* NEWS: Update for 4.16 release.
+
 Mon Apr 22 16:32:29 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* monitor.h: Clean up comment formatting.
