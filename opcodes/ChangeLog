@@ -1,3 +1,20 @@
+Thu Dec 28 13:29:19 1995  John Hassey  <hassey@rtp.dg.com>
+
+	* i386-dis.c: Added Pentium Pro instructions.
+
+Tue Dec 19 22:56:35 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc-opc.c (fsqrt{,.}): Duplicate for PowerPC in addition to
+	being for Power2.
+
+Fri Dec 15 14:14:15 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* sh-opc.h (sh_nibble_type): Added REG_B.
+	(sh_arg_type): Added A_REG_B.
+	(sh_table): Added pref and bank reg versions of ldc, ldc.l, stc
+ 	and stc.l opcodes.
+	* sh-dis.c (print_insn_shx): Added cases for REG_B and A_REG_B.
+
 Fri Dec 15 16:44:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* disassemble.c (disassembler): Use new bfd_big_endian macro.
