@@ -753,11 +753,11 @@ gld_${EMULATION_NAME}_after_open ()
 		else /* sentinel */
 		  seq = 'c';
 
-		new_name = xmalloc (strlen (is->the_bfd->filename) + 2);
+		new_name = xmalloc (strlen (is->the_bfd->filename) + 3);
 		sprintf (new_name, "%s.%c", is->the_bfd->filename, seq);
 		is->the_bfd->filename = new_name;
 
-		new_name = xmalloc (strlen(is->filename) + 2);
+		new_name = xmalloc (strlen(is->filename) + 3);
 		sprintf (new_name, "%s.%c", is->filename, seq);
 		is->filename = new_name;
 	      }
