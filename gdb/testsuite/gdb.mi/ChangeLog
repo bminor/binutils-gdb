@@ -1,3 +1,7 @@
+2002-08-21  Keith Seitz  <keiths@redhat.com>
+
+	* mi-cli.exp: Use "target_changed" instead of "register-update".
+
 2002-07-25  Keith Seitz  <keiths@redhat.com>
 
 	* mi-cli.exp: Fix typo in result for "-interpreter-exec console list"

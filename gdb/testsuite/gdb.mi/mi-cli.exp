@@ -132,7 +132,7 @@ mi_gdb_test "-interpreter-exec console \"help set args\"" \
   "-interpreter-exec console \"help set args\""
 
 mi_gdb_test "-interpreter-exec console \"set \$pc=0x0\"" \
-  {.*=register-update,number="[0-9]+".*\^done} \
+  {.*=target-changed.*\^done} \
   "-interpreter-exec console \"set \$pc=0x0\""
 
 #mi_gdb_test "-interpreter-exec console \"\"" \
