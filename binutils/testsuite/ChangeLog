@@ -1,3 +1,9 @@
+1998-07-22  Vladimir N. Makarov  <vmakarov@cygnus.com>
+
+	* binutils-all/objcopy.exp: Polish output about fail for objcopy
+	(simple copy), strip with/without saving a symbol for object file
+	and executable.
+
 Wed Jul  1 16:27:40 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* binutils-all/objcopy.exp: ARM simple objcopy now passes.
