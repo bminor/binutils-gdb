@@ -1800,12 +1800,15 @@ decode_type (cs, c_type, aux)
      struct, union, and enum types.  EPI a29k coff
      fakes us out by producing aux entries with a nonzero
      x_tagndx for definitions of structs, unions, and enums, so we
-     have to check the c_sclass field.  */
+     have to check the c_sclass field.  SCO 3.2v4 cc gets confused
+     with pointers to pointers to defined structs, and generates
+     negative x_tagndx fields.  */
   if (cs->c_naux > 0 && aux->x_sym.x_tagndx.l != 0)
     {
-      if  (cs->c_sclass != C_STRTAG
-	&& cs->c_sclass != C_UNTAG
-	&& cs->c_sclass != C_ENTAG)
+      if (cs->c_sclass != C_STRTAG
+	  && cs->c_sclass != C_UNTAG
+	  && cs->c_sclass != C_ENTAG
+	  && aux->x_sym.x_tagndx.l >= 0)
 	{
 	  type = coff_alloc_type (aux->x_sym.x_tagndx.l);
 	  return type;

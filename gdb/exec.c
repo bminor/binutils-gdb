@@ -180,7 +180,7 @@ exec_file_command (args, from_tty)
 	(*exec_file_display_hook) (filename);
     }
   else if (from_tty)
-    printf_filtered ("No exec file now.\n");
+    printf ("No exec file now.\n");
 }
 
 /* Set both the exec file and the symbol file, in one command.  
@@ -329,7 +329,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
 	wanna_xfer = coredata;
       }
 #endif				/* REG_STACK_SEGMENT */
-#endif FIXME
+#endif /* FIXME */
 
 void
 print_section_info (t, abfd)
@@ -408,7 +408,7 @@ struct target_ops exec_ops = {
 	"Use an executable file as a target.\n\
 Specify the filename of the executable file.",
 	exec_file_command, exec_close, /* open, close */
-	child_attach, 0, 0, 0, /* attach, detach, resume, wait, */
+	find_default_attach, 0, 0, 0, /* attach, detach, resume, wait, */
 	0, 0, /* fetch_registers, store_registers, */
 	0, /* prepare_to_store, */
 	xfer_memory, exec_files_info,
@@ -416,8 +416,10 @@ Specify the filename of the executable file.",
 	0, 0, 0, 0, 0, /* terminal stuff */
 	0, 0, /* kill, load */
 	0, /* lookup sym */
-	child_create_inferior,
+	find_default_create_inferior,
 	0, /* mourn_inferior */
+	0, /* can_run */
+	0, /* notice_signals */
 	file_stratum, 0, /* next */
 	0, 1, 0, 0, 0,	/* all mem, mem, stack, regs, exec */
 	0, 0,			/* section pointers */

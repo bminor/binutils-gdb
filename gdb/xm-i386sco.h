@@ -17,6 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* In 3.2v4 <sys/user.h> requires on <sys/dir.h>.  */
+#include <sys/types.h>
+#include <sys/dir.h>
+
 #include "xm-i386v.h"
 
 /* Apparently there is inconsistency among various System V's about what

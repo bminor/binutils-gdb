@@ -1,3 +1,14 @@
+Tue Dec 15 10:05:56 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coffread.c (decode_type): catch negative tagndx fields generated
+	by SCO 3.2v4 cc.
+	* exec.c: comment out string following #endif.
+	* configure.in (i[34]86-*-sco3.2v4*): use host i386sco4.	
+	* xm-i386sco.h: include <sys/types.h> and <sys/dir.h>, required by
+	<sys/user.h>.
+	* config/i386sco4.mh: new file; like i386sco.mh, but don't require
+	gcc, and define const to empty to avoid SCO 3.2v4 cc bug.
+
 Tue Dec 15 04:14:24 1992  Fred Fish  (fnf@cygnus.com)
 
 	* complaints.c:  New file, code moved from utils.c.
