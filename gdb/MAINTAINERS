@@ -66,6 +66,7 @@ GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
 hurd native		Mark Kettenis		kettenis@gnu.org
 macos host & native	Stan Shebs		shebs@apple.com
 hpux, hp pa native	Jeff Law		law@cygnus.com
+NetBSD			J.T. Conklin		jtc@redback.com
 SCO/Unixware		Nick Duffek		nsd@cygnus.com
 			Robert Lipe		rjl@sco.com
 GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
