@@ -1,3 +1,11 @@
+1999-07-13  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (mips_elf_calculate_relocation): Handle R_MIPS16_26.
+	(mips_elf_relocate_section): Adjust calling sequence for 
+	mips_elf_perform_relocation.
+	(mips_elf_perform_relocation): Take additional argument.  Handle
+	R_MIPS16_26.  Use bfd_put for convenience.
+
 1999-07-13  Richard Henderson  <rth@cygnus.com>
 
 	* elf.c (assign_file_positions_for_segments): Thinko last change.

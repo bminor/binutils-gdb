@@ -170,7 +170,8 @@ static bfd_reloc_status_type mips_elf_calculate_relocation
 static bfd_vma mips_elf_obtain_contents
   PARAMS ((reloc_howto_type *, const Elf_Internal_Rela *, bfd *, bfd_byte *));
 static void mips_elf_perform_relocation
-  PARAMS ((reloc_howto_type *, const Elf_Internal_Rela *, bfd_vma,
+  PARAMS ((struct bfd_link_info *, reloc_howto_type *, 
+	   const Elf_Internal_Rela *, bfd_vma,
 	   bfd *, bfd_byte *));
 static boolean mips_elf_assign_gp PARAMS ((bfd *, bfd_vma *));
 static boolean mips_elf_sort_hash_table_f 
@@ -5883,6 +5884,12 @@ mips_elf_calculate_relocation (abfd,
       value &= howto->dst_mask;
       break;
 
+    case R_MIPS16_26:
+      /* The calculation for R_MIPS_26 is just the same as for an
+	 R_MIPS_26.  It's only the storage of the relocated field into
+	 the output file that's different.  That's handle in
+	 mips_elf_perform_relocation.  So, we just fall through to the
+	 R_MIPS_26 case here.  */
     case R_MIPS_26:
       if (local_p)
 	value = (((addend << 2) | (p & 0xf0000000)) + symbol) >> 2;
@@ -5922,7 +5929,7 @@ mips_elf_calculate_relocation (abfd,
 
 	     Here $t9 holds the address of the function being called,
 	     as required by the MIPS ELF ABI.  The R_MIPS_LO16
-	     relocation can easily overlfow in this situation, but the
+	     relocation can easily overflow in this situation, but the
 	     R_MIPS_HI16 relocation will handle the overflow.
 	     Therefore, we consider this a bug in the MIPS ABI, and do
 	     not check for overflow here.  */
@@ -6037,7 +6044,6 @@ mips_elf_calculate_relocation (abfd,
       /* We don't do anything with these at present.  */
       return bfd_reloc_continue;
 
-    case R_MIPS16_26:
     case R_MIPS16_GPREL:
       /* These relocations, used for MIPS16, are not clearly
 	 documented anywhere.  What do they do?  */
@@ -6107,7 +6113,9 @@ mips_elf_obtain_contents (howto, relocation, input_bfd, contents)
    Returns false if anything goes wrong.  */
 
 static void
-mips_elf_perform_relocation (howto, relocation, value, input_bfd, contents)
+mips_elf_perform_relocation (info, howto, relocation, value,
+			     input_bfd, contents)
+     struct bfd_link_info *info;
      reloc_howto_type *howto;
      const Elf_Internal_Rela *relocation;
      bfd_vma value;
@@ -6115,7 +6123,10 @@ mips_elf_perform_relocation (howto, relocation, value, input_bfd, contents)
      bfd_byte *contents;
 {
   bfd_vma x;
-  bfd_byte *location = contents + relocation->r_offset;
+  bfd_byte *location;
+
+  /* Figure out where the relocation is occurring.  */
+  location = contents + relocation->r_offset;
 
   /* Obtain the current value.  */
   x = mips_elf_obtain_contents (howto, relocation, input_bfd, contents);
@@ -6123,40 +6134,94 @@ mips_elf_perform_relocation (howto, relocation, value, input_bfd, contents)
   /* Clear the field we are setting.  */
   x &= ~howto->dst_mask;
 
+  /* If this is the R_MIPS16_26 relocation, we must store the
+     value in a funny way.  */
+  if (ELF32_R_TYPE (relocation->r_info) == R_MIPS16_26)
+    {
+      /* R_MIPS16_26 is used for the mips16 jal and jalx instructions.
+	 Most mips16 instructions are 16 bits, but these instructions
+	 are 32 bits.
+
+	 The format of these instructions is:
+
+	 +--------------+--------------------------------+
+	 !     JALX     ! X!   Imm 20:16  !   Imm 25:21  !
+	 +--------------+--------------------------------+
+	 !	  	  Immediate  15:0		    !
+	 +-----------------------------------------------+
+	 
+	 JALX is the 5-bit value 00011.  X is 0 for jal, 1 for jalx.
+	 Note that the immediate value in the first word is swapped.
+
+	 When producing a relocateable object file, R_MIPS16_26 is
+	 handled mostly like R_MIPS_26.  In particular, the addend is
+	 stored as a straight 26-bit value in a 32-bit instruction.
+	 (gas makes life simpler for itself by never adjusting a
+	 R_MIPS16_26 reloc to be against a section, so the addend is
+	 always zero).  However, the 32 bit instruction is stored as 2
+	 16-bit values, rather than a single 32-bit value.  In a
+	 big-endian file, the result is the same; in a little-endian
+	 file, the two 16-bit halves of the 32 bit value are swapped.
+	 This is so that a disassembler can recognize the jal
+	 instruction.
+
+	 When doing a final link, R_MIPS16_26 is treated as a 32 bit
+	 instruction stored as two 16-bit values.  The addend A is the
+	 contents of the targ26 field.  The calculation is the same as
+	 R_MIPS_26.  When storing the calculated value, reorder the
+	 immediate value as shown above, and don't forget to store the
+	 value as two 16-bit values.
+
+	 To put it in MIPS ABI terms, the relocation field is T-targ26-16,
+	 defined as
+	 
+	 big-endian:
+	 +--------+----------------------+
+	 |        |                      |
+	 |        |    targ26-16         |
+	 |31    26|25                   0|
+	 +--------+----------------------+
+	 
+	 little-endian:
+	 +----------+------+-------------+
+	 |          |      |             |
+	 |  sub1    |      |     sub2    |
+	 |0        9|10  15|16         31|
+	 +----------+--------------------+
+	 where targ26-16 is sub1 followed by sub2 (i.e., the addend field A is
+	 ((sub1 << 16) | sub2)).
+	 
+	 When producing a relocateable object file, the calculation is
+	 (((A < 2) | (P & 0xf0000000) + S) >> 2)
+	 When producing a fully linked file, the calculation is
+	 let R = (((A < 2) | (P & 0xf0000000) + S) >> 2)
+	 ((R & 0x1f0000) << 5) | ((R & 0x3e00000) >> 5) | (R & 0xffff)  */
+
+      if (!info->relocateable)
+	/* Shuffle the bits according to the formula above.  */
+	value = (((value & 0x1f0000) << 5) 
+		 | ((value & 0x3e00000) >> 5) 
+		 | (value & 0xffff));
+      
+      /* Perform the relocation.  */
+      x |= (value & howto->dst_mask);
+
+      /* Swap the high- and low-order 16 bits on little-endian
+         systems.  */
+      if (bfd_little_endian (input_bfd))
+	x = (((x & 0xffff) << 16)
+	     | (((x & 0xffff0000) >> 16) & 0xffff));
+
+      /* Store the value.  */
+      bfd_put_32 (input_bfd, x, location);
+      return;
+    }
+
   /* Set the field.  */
   x |= (value & howto->dst_mask);
 
   /* Put the value into the output.  */
-  switch (bfd_get_reloc_size (howto))
-    {
-    case 0:
-      x = 0;
-      break;
-
-    case 1:
-      bfd_put_8 (input_bfd, x, location);
-      break;
-
-    case 2:
-      bfd_put_16 (input_bfd, x, location);
-      break;
-
-    case 4:
-      bfd_put_32 (input_bfd, x, location);
-      break;
-
-    case 8:
-#ifdef BFD64
-      bfd_put_64 (input_bfd, x, location);
-#else
-      abort ();
-#endif
-      break;
-
-    default:
-      abort ();
-      break;
-    }
+  bfd_put (8 * bfd_get_reloc_size (howto), input_bfd, x, location);
 }
 
 /* Relocate a MIPS ELF section.  */
@@ -6376,7 +6441,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
 
       /* Actually perform the relocation.  */
-      mips_elf_perform_relocation (howto, rel, value, input_bfd, 
+      mips_elf_perform_relocation (info, howto, rel, value, input_bfd, 
 				   contents);
     }
 
