@@ -23,6 +23,11 @@ if {[istarget "*-*-elf*"] || [istarget "*-*-linux*"]} then {
       return
     }
 
+    # not yet supported by i960
+    if {[istarget "i960-*-*"]} {
+      return
+    }
+
     run_dump_test "inherit0" 
     run_list_test "inherit1" "-al"
 

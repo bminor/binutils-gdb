@@ -1,3 +1,7 @@
+1999-05-28  Ian Lance Taylor  <ian@zembu.com>
+
+	* gas/vtable/vtable.exp: Don't run test for i960 yet.
+
 1999-05-17  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/mcore/allinsn.d: Updated to match latest objdump output.
