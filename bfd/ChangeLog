@@ -1,3 +1,9 @@
+2005-03-16  Fred Fish  <fnf@specifixinc.com>
+
+	PR binutils/790
+	* dwarf2.c (read_indirect_string): Fix apparent typo, check
+	dwarf_str_buffer allocation, not dwarf_abbrev_buffer.
+
 2005-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (elf_mark_used_section): New.

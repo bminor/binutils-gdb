@@ -301,7 +301,7 @@ read_indirect_string (struct comp_unit* unit,
       sz = msec->rawsize ? msec->rawsize : msec->size;
       stash->dwarf_str_size = sz;
       stash->dwarf_str_buffer = bfd_alloc (abfd, sz);
-      if (! stash->dwarf_abbrev_buffer)
+      if (! stash->dwarf_str_buffer)
 	return NULL;
 
       if (! bfd_get_section_contents (abfd, msec, stash->dwarf_str_buffer,
