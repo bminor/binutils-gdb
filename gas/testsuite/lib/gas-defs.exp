@@ -59,7 +59,7 @@ proc gas_start { prog as_opts } {
 	spawn -noecho -nottyinit $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog
     } foo
     if ![regexp {^[0-9]+} $foo] then {
- perror "Can't run $subdir/$prog: $foo"
+	perror "Can't run $subdir/$prog: $foo"
     }
 }
 
@@ -189,7 +189,7 @@ proc objdump_start_no_subdir { prog opts } {
 	spawn -noecho -nottyinit $srcdir/lib/run $OBJDUMP $opts $prog
     } foo
     if ![regexp {^[0-9]+} $foo] then {
- perror "Can't run $prog: $foo"
+	perror "Can't run $prog: $foo"
     }
 }
 
