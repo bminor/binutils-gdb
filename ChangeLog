@@ -1,6 +1,6 @@
 Thu Mar 19 16:49:36 1992  Stu Grossman  (grossman at cygnus.com)
 
-	* Makefile.in (all.cross):  Add .stmp-bfd.
+	* Makefile.in (all.cross):  Add .stmp-bfd .stmp-readline.
 
 Wed Mar 18 15:29:33 1992  Mike Stump  (mrs@cygnus.com)
 

@@ -117,7 +117,7 @@ all.normal: .stmp-libiberty .stmp-mmalloc .stmp-texinfo .stmp-bison .stmp-byacc 
 	.stmp-grep .stmp-patch .stmp-emacs .stmp-ispell .stmp-fileutils \
 	.stmp-newlib
 all.cross: .stmp-libiberty .stmp-mmalloc .stmp-gas .stmp-bison .stmp-ld \
-	.stmp-bfd .stmp-libgcc .stmp-gdb
+	.stmp-bfd .stmp-libgcc .stmp-readline .stmp-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 clean: clean-stamps clean-libiberty clean-mmalloc clean-texinfo clean-bfd \
