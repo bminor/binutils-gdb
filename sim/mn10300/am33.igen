@@ -1012,7 +1012,7 @@
 }
 
 // 1111 1001 0110 1010 Rm Rn; mov (Rm+),Rn
-8.0xf9+8.0x6a+4.RN2,4.RM0:D1y:::mov
+8.0xf9+8.0x6a+4.RN2,4.RM0!RN2:D1y:::mov
 "mov"
 *am33
 {
@@ -1026,7 +1026,7 @@
 }
 
 // 1111 1001 0111 1010 Rm Rn; mov Rm,(Rn+)
-8.0xf9+8.0x7a+4.RM2,4.RN0:D1z:::mov
+8.0xf9+8.0x7a+4.RM2,4.RN0!RM2:D1z:::mov
 "mov"
 *am33
 {
@@ -1112,7 +1112,7 @@
 }
 
 // 1111 1001 1110 1010 Rm Rn; movhu (Rm+),Rn
-8.0xf9+8.0xea+4.RN2,4.RM0:D1y:::movhu
+8.0xf9+8.0xea+4.RN2,4.RM0!RN2:D1y:::movhu
 "movhu"
 *am33
 {
@@ -1126,7 +1126,7 @@
 }
 
 // 1111 1001 1111 1010 Rm Rn; movhu Rm,(Rn+)
-8.0xf9+8.0xfa+4.RM2,4.RN0:D1z:::movhu
+8.0xf9+8.0xfa+4.RM2,4.RN0!RM2:D1z:::movhu
 "movhu"
 *am33
 {
@@ -1972,7 +1972,7 @@
 }
 
 // 1111 1011 0110 1010 Rn Rm IMM8; mov (d8,Rm+),Rn
-8.0xfb+8.0x6a+4.RN2,4.RM0+8.IMM8:D2y:::mov
+8.0xfb+8.0x6a+4.RN2,4.RM0!RN2+8.IMM8:D2y:::mov
 "mov"
 *am33
 {
@@ -1986,7 +1986,7 @@
 }
 
 // 1111 1011 0111 1010 Rn Rm IMM8; mov Rm,(d8,Rn+)
-8.0xfb+8.0x7a+4.RM2,4.RN0+8.IMM8:D2z:::mov
+8.0xfb+8.0x7a+4.RM2,4.RN0!RM2+8.IMM8:D2z:::mov
 "mov"
 {
   int srcreg, dstreg;
@@ -2066,7 +2066,7 @@
 }
 
 // 1111 1011 1110 1010 Rn Rm IMM8; movhu (d8,Rm+),Rn
-8.0xfb+8.0xea+4.RN2,4.RM0+8.IMM8:D2y:::movhu
+8.0xfb+8.0xea+4.RN2,4.RM0!RN2+8.IMM8:D2y:::movhu
 "movhu"
 *am33
 {
@@ -2080,7 +2080,7 @@
 }
 
 // 1111 1011 1111 1010 Rn Rm IMM8; movhu Rm,(d8,Rn+)
-8.0xfb+8.0xfa+4.RM2,4.RN0+8.IMM8:D2z:::movhu
+8.0xfb+8.0xfa+4.RM2,4.RN0!RM2+8.IMM8:D2z:::movhu
 "movhu"
 {
   int srcreg, dstreg;
@@ -2602,7 +2602,7 @@
 }
 
 // 1111 1011 1010 1101 Rm Rn Rd1 Rd2; mul Rm,Rn,Rd1,Rd2
-8.0xfb+8.0xad+4.RM2,4.RN0+4.RD0,4.RD2:D2c:::mul
+8.0xfb+8.0xad+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::mul
 "mul"
 *am33
 {
@@ -2629,7 +2629,7 @@
 }
 
 // 1111 1011 1011 1101 Rm Rn Rd1 Rd2; mulu Rm,Rn,Rd1,Rd2
-8.0xfb+8.0xbd+4.RM2,4.RN0+4.RD0,4.RD2:D2c:::mulu
+8.0xfb+8.0xbd+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::mulu
 "mulu"
 *am33
 {
@@ -2812,7 +2812,7 @@
 }
 
 // 1111 1011 0000 1111 Rm Rn Rd1 Rd2; mac Rm,Rn,Rd1,Rd2
-8.0xfb+8.0x0f+4.RM2,4.RN0+4.RD0,4.RD2:D2c:::mac
+8.0xfb+8.0x0f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::mac
 "mac"
 *am33
 {
@@ -2848,7 +2848,7 @@
 }
 
 // 1111 1011 0001 1111 Rm Rn Rd1 Rd2; macu Rm,Rn,Rd1,Rd2
-8.0xfb+8.0x1f+4.RM2,4.RN0+4.RD0,4.RD2:D2c:::macu
+8.0xfb+8.0x1f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::macu
 "macu"
 *am33
 {
@@ -2939,26 +2939,28 @@
     }
 }
 
-// 1111 1011 0100 1111 Rm Rn Rd1; mach Rm,Rn,Rd1
-8.0xfb+8.0x4f+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::mach
+// 1111 1011 0100 1111 Rm Rn Rd1; mach Rm,Rn,Rd1,Rd2
+8.0xfb+8.0x4f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::mach
 "mach"
 *am33
 {
-  int srcreg1, srcreg2, dstreg;
-  long temp, sum;
+  int srcreg1, srcreg2, dstreg1, dstreg2;
+  long long temp, sum;
   int v;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM2);
   srcreg2 = translate_rreg (SD_, RN0);
-  dstreg = translate_rreg (SD_, RD0);
+  dstreg1 = translate_rreg (SD_, RD0);
+  dstreg2 = translate_rreg (SD_, RD0);
 
   temp = ((signed32)(State.regs[srcreg2] & 0xffff)
           * (signed32)(State.regs[srcreg1] & 0xffff));
-  sum = State.regs[dstreg] + temp;
-  v = ((State.regs[dstreg] & 0x80000000) == (temp & 0x80000000)
+  State.regs[dstreg2] += (temp & 0xffffffff);
+  sum = State.regs[dstreg1] + ((temp >> 32) & 0xffffffff);
+  v = ((State.regs[dstreg1] & 0x80000000) == (temp & 0x80000000)
         && (temp & 0x80000000) != (sum & 0x80000000));
-  State.regs[dstreg] = sum;
+  State.regs[dstreg1] = sum;
   if (v)
     {
       State.regs[REG_MCVF] = 1;
@@ -2967,26 +2969,28 @@
     }
 }
 
-// 1111 1011 0101 1111 Rm Rn Rd1; machu Rm,Rn,Rd1
-8.0xfb+8.0x5f+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::machu
+// 1111 1011 0101 1111 Rm Rn Rd1; machu Rm,Rn,Rd1,Rd2
+8.0xfb+8.0x5f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::machu
 "machu"
 *am33
 {
-  int srcreg1, srcreg2, dstreg;
-  long temp, sum;
+  int srcreg1, srcreg2, dstreg1, dstreg2;
+  long long temp, sum;
   int v;
 
   PC = cia;
   srcreg1 = translate_rreg (SD_, RM2);
   srcreg2 = translate_rreg (SD_, RN0);
-  dstreg = translate_rreg (SD_, RD0);
+  dstreg1 = translate_rreg (SD_, RD0);
+  dstreg2 = translate_rreg (SD_, RD0);
 
   temp = ((unsigned32)(State.regs[srcreg2] & 0xffff)
           * (unsigned32)(State.regs[srcreg1] & 0xffff));
-  sum = State.regs[dstreg] + temp;
-  v = ((State.regs[dstreg] & 0x80000000) == (temp & 0x80000000)
+  State.regs[dstreg2] += (temp & 0xffffffff);
+  sum = State.regs[dstreg1] + ((temp >> 32) & 0xffffffff);
+  v = ((State.regs[dstreg1] & 0x80000000) == (temp & 0x80000000)
         && (temp & 0x80000000) != (sum & 0x80000000));
-  State.regs[dstreg] = sum;
+  State.regs[dstreg1] = sum;
   if (v)
     {
       State.regs[REG_MCVF] = 1;
@@ -3056,7 +3060,7 @@
 }
 
 // 1111 1011 1000 1111 Rm Rn Rd1 Rd2; dmulh Rm,Rn,Rd1,Rd2
-8.0xfb+8.0x8f+4.RM2,4.RN0+4.RD0,4.RD2:D2c:::dmulh
+8.0xfb+8.0x8f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::dmulh
 "dmulh"
 *am33
 {
@@ -3078,7 +3082,7 @@
 }
 
 // 1111 1011 1001 1111 Rm Rn Rd1 Rd2; dmulhu Rm,Rn,Rd1,Rd2
-8.0xfb+8.0x9f+4.RM2,4.RN0+4.RD0,4.RD2:D2c:::dmulhu
+8.0xfb+8.0x9f+4.RM2,4.RN0+4.RD0,4.RD2!RD0:D2c:::dmulhu
 "dmulhu"
 *am33
 {
@@ -3549,7 +3553,7 @@
 }
 
 // 1111 1101 0110 1010 Rn Rm IMM24; mov (d24,Rm+),Rn
-8.0xfd+8.0x6a+4.RN2,4.RM0+8.IMM24A+8.IMM24B+8.IMM24C:D4y:::mov
+8.0xfd+8.0x6a+4.RN2,4.RM0!RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4y:::mov
 "mov"
 *am33
 {
@@ -3563,7 +3567,7 @@
 }
 
 // 1111 1101 0111 1010 Rm Rn IMM24; mov Rm,(d24,Rn+)
-8.0xfd+8.0x7a+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::mov
+8.0xfd+8.0x7a+4.RM2,4.RN0!RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::mov
 "mov"
 *am33
 {
@@ -3659,7 +3663,7 @@
 }
 
 // 1111 1101 1110 1010 Rn Rm IMM24; movhu (d24,Rm+),Rn
-8.0xfd+8.0xea+4.RN2,4.RM0+8.IMM24A+8.IMM24B+8.IMM24C:D4y:::movhu
+8.0xfd+8.0xea+4.RN2,4.RM0!RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4y:::movhu
 "movhu"
 *am33
 {
@@ -3673,7 +3677,7 @@
 }
 
 // 1111 1101 1111 1010 Rm Rn IMM24; movhu Rm,(d24,Rn+)
-8.0xfd+8.0xfa+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::movhu
+8.0xfd+8.0xfa+4.RM2,4.RN0!RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::movhu
 "movhu"
 *am33
 {
@@ -4306,7 +4310,7 @@
 }
 
 // 1111 1110 0110 1010 Rn Rm IMM32; mov (d32,Rm+),Rn
-8.0xfe+8.0x6a+4.RN2,4.RM0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5y:::mov
+8.0xfe+8.0x6a+4.RN2,4.RM0!RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5y:::mov
 "mov"
 *am33
 {
@@ -4320,7 +4324,7 @@
 }
 
 // 1111 1110 0111 1010 Rm Rn IMM32; mov Rm,(d32,Rn+)
-8.0xfe+8.0x7a+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5z:::mov
+8.0xfe+8.0x7a+4.RM2,4.RN0!RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5z:::mov
 "mov"
 *am33
 {
@@ -4414,7 +4418,7 @@
 
 
 // 1111 1110 1110 1010 Rn Rm IMM32; movhu (d32,Rm+),Rn
-8.0xfe+8.0xea+4.RN2,4.RM0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5y:::movhu
+8.0xfe+8.0xea+4.RN2,4.RM0!RN2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5y:::movhu
 "movhu"
 *am33
 {
@@ -4428,7 +4432,7 @@
 }
 
 // 1111 1110 1111 1010 Rm Rn IMM32; movhu Rm,(d32,Rn+)
-8.0xfe+8.0xfa+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5f:::movhu
+8.0xfe+8.0xfa+4.RM2,4.RN0!RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5f:::movhu
 "movhu"
 *am33
 {
