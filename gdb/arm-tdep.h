@@ -116,11 +116,29 @@ enum arm_abi
   ARM_ABI_INVALID	/* Keep this last.  */
 };
 
+/* Type of floating-point code in use by inferior.  There are really 3 models
+   that are traditionally supported (plus the endianness issue), but gcc can
+   only generate 2 of those.  The third is APCS_FLOAT, where arguments to
+   functions are passed in floating-point registers.  
+
+   In addition to the traditional models, VFP adds two more.  */
+
+enum arm_float_model
+{
+  ARM_FLOAT_SOFT,
+  ARM_FLOAT_FPA,
+  ARM_FLOAT_SOFT_VFP,
+  ARM_FLOAT_VFP
+};
+
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
   enum arm_abi arm_abi;		/* OS/ABI of inferior.  */
   const char *abi_name;		/* Name of the above.  */
+
+  enum arm_float_model fp_model; /* Floating point calling conventions.  */
+
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
 				   will appear.  */
 

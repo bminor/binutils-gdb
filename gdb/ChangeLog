@@ -1,3 +1,17 @@
+2002-02-19  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.h (enum arm_float_model): New enum.
+	(struct gdbarch_tdep): Add fp_model.
+	* arm-tdep.c (arm_gdbarch_init): Set fp_model in tdep.  Defer setting
+	up floating-point conversions until we know the floating-point model
+	in use by the inferior.  Don't complain about being unable to
+	determine the ABI of the inferior when we don't have one.
+	(arm_extract_return_value): Support different floating-point models.
+	(arm_store_return_value): Likewise.
+	* armnbsd-tdep.c (arm_netbsd_aout_init_abi): Set fp_model in tdep to 
+	ARM_FLOAT_SOFT.
+	(arm_netbsd_elf_init_abi): Set fp_model to ARM_FLOAT_SOFT_VFP.
+
 2002-02-19  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* i386-tdep.c (i386_gdbarch_init): Eliminate incorrect use

@@ -2139,7 +2139,29 @@ arm_extract_return_value (struct type *type,
 			  char *valbuf)
 {
   if (TYPE_CODE_FLT == TYPE_CODE (type))
-    convert_from_extended (&regbuf[REGISTER_BYTE (ARM_F0_REGNUM)], valbuf);
+    {
+      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+      switch (tdep->fp_model)
+	{
+	case ARM_FLOAT_FPA:
+	  convert_from_extended (&regbuf[REGISTER_BYTE (ARM_F0_REGNUM)],
+				 valbuf);
+	  break;
+
+	case ARM_FLOAT_SOFT:
+	case ARM_FLOAT_SOFT_VFP:
+	  memcpy (valbuf, &regbuf[REGISTER_BYTE (ARM_A1_REGNUM)],
+		  TYPE_LENGTH (type));
+	  break;
+
+	default:
+	  internal_error
+	    (__FILE__, __LINE__,
+	     "arm_extract_return_value: Floating point model not supported");
+	  break;
+	}
+    }
   else
     memcpy (valbuf, &regbuf[REGISTER_BYTE (ARM_A1_REGNUM)],
 	    TYPE_LENGTH (type));
@@ -2256,15 +2278,32 @@ arm_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
+      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
       char buf[MAX_REGISTER_RAW_SIZE];
 
-      convert_to_extended (valbuf, buf);
-      /* XXX Is this correct for soft-float?  */
-      write_register_bytes (REGISTER_BYTE (ARM_F0_REGNUM), buf,
-			    MAX_REGISTER_RAW_SIZE);
+      switch (tdep->fp_model)
+	{
+	case ARM_FLOAT_FPA:
+
+	  convert_to_extended (valbuf, buf);
+	  write_register_bytes (REGISTER_BYTE (ARM_F0_REGNUM), buf,
+				MAX_REGISTER_RAW_SIZE);
+	  break;
+
+	case ARM_FLOAT_SOFT:
+	case ARM_FLOAT_SOFT_VFP:
+	  write_register_bytes (ARM_A1_REGNUM, valbuf, TYPE_LENGTH (type));
+	  break;
+
+	default:
+	  internal_error
+	    (__FILE__, __LINE__,
+	     "arm_store_return_value: Floating point model not supported");
+	  break;
+	}
     }
   else
-    write_register_bytes (0, valbuf, TYPE_LENGTH (type));
+    write_register_bytes (ARM_A1_REGNUM, valbuf, TYPE_LENGTH (type));
 }
 
 /* Store the address of the place in which to copy the structure the
@@ -2762,7 +2801,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->abi_name = "<invalid>";
     }
 
-  /* Breakpoints and floating point sizes and format.  */
+  /* This is the way it has always defaulted.  */
+  tdep->fp_model = ARM_FLOAT_FPA;
+
+  /* Breakpoints.  */
   switch (info.byte_order)
     {
     case BFD_ENDIAN_BIG:
@@ -2771,10 +2813,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->thumb_breakpoint = arm_default_thumb_be_breakpoint;
       tdep->thumb_breakpoint_size = sizeof (arm_default_thumb_be_breakpoint);
 
-      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_big);
-      set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_big);
-      set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
-      
       break;
 
     case BFD_ENDIAN_LITTLE:
@@ -2782,12 +2820,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->arm_breakpoint_size = sizeof (arm_default_arm_le_breakpoint);
       tdep->thumb_breakpoint = arm_default_thumb_le_breakpoint;
       tdep->thumb_breakpoint_size = sizeof (arm_default_thumb_le_breakpoint);
-
-      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
-      set_gdbarch_double_format (gdbarch,
-				 &floatformat_ieee_double_littlebyte_bigword);
-      set_gdbarch_long_double_format (gdbarch,
-				 &floatformat_ieee_double_littlebyte_bigword);
 
       break;
 
@@ -2905,9 +2937,12 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in the ABI-specific overrides, if they have been registered.  */
   if (arm_abi == ARM_ABI_UNKNOWN)
     {
-      fprintf_filtered
-	(gdb_stderr, "GDB doesn't recognize the ABI of the inferior.  "
-	 "Attempting to continue with the default ARM settings");
+      /* Don't complain about not knowing the ABI variant if we don't 
+	 have an inferior.  */
+      if (info.abfd)
+	fprintf_filtered
+	  (gdb_stderr, "GDB doesn't recognize the ABI of the inferior.  "
+	   "Attempting to continue with the default ARM settings");
     }
   else
     {
@@ -2938,6 +2973,39 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (tdep->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, arm_get_longjmp_target);
+
+  /* Floating point sizes and format.  */
+  switch (info.byte_order)
+    {
+    case BFD_ENDIAN_BIG:
+      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_big);
+      set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_big);
+      set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
+      
+      break;
+
+    case BFD_ENDIAN_LITTLE:
+      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
+      if (tdep->fp_model == ARM_FLOAT_VFP
+	  || tdep->fp_model == ARM_FLOAT_SOFT_VFP)
+	{
+	  set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_little);
+	  set_gdbarch_long_double_format (gdbarch,
+					  &floatformat_ieee_double_little);
+	}
+      else
+	{
+	  set_gdbarch_double_format
+	    (gdbarch, &floatformat_ieee_double_littlebyte_bigword);
+	  set_gdbarch_long_double_format
+	    (gdbarch, &floatformat_ieee_double_littlebyte_bigword);
+	}
+      break;
+
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "arm_gdbarch_init: bad byte order for float format");
+    }
 
   /* We can't use SIZEOF_FRAME_SAVED_REGS here, since that still
      references the old architecture vector, not the one we are
