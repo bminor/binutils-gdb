@@ -2951,18 +2951,18 @@ cop_lq (SIM_DESC sd,
     {
     case 2:
       {
-	unsigned_16 xyzw;
+	int i;
 
 	while(vu0_busy())
 	  vu0_issue(sd);
 	
-	memcpy(& xyzw, & memword, sizeof(xyzw));
-	xyzw = H2T_16(xyzw);
 	/* one word at a time, argh! */
-	write_vu_vec_reg(&(vu0_device.regs), coproc_reg, 0, A4_16(& xyzw, 3));
-	write_vu_vec_reg(&(vu0_device.regs), coproc_reg, 1, A4_16(& xyzw, 2));
-	write_vu_vec_reg(&(vu0_device.regs), coproc_reg, 2, A4_16(& xyzw, 1));
-	write_vu_vec_reg(&(vu0_device.regs), coproc_reg, 3, A4_16(& xyzw, 0));
+	for(i=0; i<4; i++)
+	  {
+	    unsigned_4 value;
+	    value = H2T_4(*A4_16(& memword, 3-i));
+	    write_vu_vec_reg(&(vu0_device.regs), coproc_reg, i, & value);
+	  }
       }
     break;
     
@@ -3053,16 +3053,18 @@ cop_sq (SIM_DESC sd,
     case 2:
       {
 	unsigned_16 xyzw;
+	int i;
 
 	while(vu0_busy())
 	  vu0_issue(sd);
 	
 	/* one word at a time, argh! */
-	read_vu_vec_reg(&(vu0_device.regs), coproc_reg, 0, A4_16(& xyzw, 3));
-	read_vu_vec_reg(&(vu0_device.regs), coproc_reg, 1, A4_16(& xyzw, 2));
-	read_vu_vec_reg(&(vu0_device.regs), coproc_reg, 2, A4_16(& xyzw, 1));
-	read_vu_vec_reg(&(vu0_device.regs), coproc_reg, 3, A4_16(& xyzw, 0));
-	xyzw = T2H_16(xyzw);
+	for(i=0; i<4; i++)
+	  {
+	    unsigned_4 value;
+	    read_vu_vec_reg(&(vu0_device.regs), coproc_reg, i, & value);
+	    *A4_16(& xyzw, 3-i) = T2H_4(value);
+	  }
 	return xyzw;
       }
     break;

@@ -1,4 +1,11 @@
 start-sanitize-sky
+Fri Apr 17 14:50:39 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* r5900.igen (COP_[LS]Q): Transfer COP2 quadwords.
+	* interp.c (cop_[ls]q): Fixes corresponding to above.
+	
+end-sanitize-sky
+start-sanitize-sky
 Thu Apr 16 15:24:14 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* interp.c (decode_coproc): Adapt COP2 micro interlock to
