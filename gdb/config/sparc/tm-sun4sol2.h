@@ -20,6 +20,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sparc/tm-sparc.h"
 #include "tm-sysv4.h"
 
+#undef IN_SOLIB_TRAMPOLINE
+#define IN_SOLIB_TRAMPOLINE(pc, name)	in_solib_trampoline((pc), (name))
+
 /* The values of N_SLINE, N_LBRAC, N_RBRAC symbols in .stab sections are
    relative to the current function, rather than being absolute or
    relative to the current N_SO.  */

@@ -1,3 +1,15 @@
+Tue Mar 30 15:46:14 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	Teach sparc solaris to next over shared library functions.
+	* solib.[hc] (find_pc_section_from_so_list): new function and
+	  prototype.
+	* sparc-tdep.c (in_solib_trampoline): new function.
+	* symfile.[hc] (find_pc_section): new function and prototypes.
+	* target.[hc] (find_pc_section_from_targets): new function and
+	  prototypes.
+	* config/sparc/tm-sun4sol2.h (IN_SOLIB_TRAMPOLINE): redefine to
+	  in_solib_trampoline.
+
 Tue Mar 30 08:06:24 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* infrun.c (wait_for_inferior): Revise comment.

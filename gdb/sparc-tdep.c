@@ -1,5 +1,5 @@
 /* Target-dependent code for the SPARC for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,11 +23,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 #include "target.h"
 #include "ieee-float.h"
+#include "symfile.h" /* for find_pc_section */
 
 #ifdef	USE_PROC_FS
 #include <sys/procfs.h>
-#else
-#include <sys/ptrace.h>
 #endif
 
 #include "gdbcore.h"
@@ -191,15 +190,21 @@ frame_saved_pc (frame)
  * difficulty. 
  */
 FRAME
-setup_arbitrary_frame (frame, stack)
-     FRAME_ADDR frame, stack;
+setup_arbitrary_frame (argc, argv)
+     int argc;
+     FRAME_ADDR *argv;
 {
-  FRAME fid = create_new_frame (frame, 0);
+  FRAME fid;
+
+  if (argc != 2)
+    error ("Sparc frame specifications require two arguments: fp and sp");
+
+  fid = create_new_frame (argv[0], 0);
 
   if (!fid)
     fatal ("internal: create_new_frame returned invalid frame id");
   
-  fid->bottom = stack;
+  fid->bottom = argv[1];
   fid->pc = FRAME_SAVED_PC (fid);
   return fid;
 }
@@ -228,7 +233,7 @@ setup_arbitrary_frame (frame, stack)
  * original contents of g1.  A * indicates that the actual value of
  * the instruction is modified below.
  */
-static int save_insn_opcodes[] = {
+static unsigned int save_insn_opcodes[] = {
   0x03000000, 0x82007ee0, 0x9de38001, 0x03000000,
   0x82007ee0, 0x91d02001, 0x01000000 };
 
@@ -279,7 +284,8 @@ do_save_insn (size)
  	t %g0,1
  	sethi %hi(0),%g0	*/
 
-static int restore_insn_opcodes[] = { 0x81e80000, 0x91d02001, 0x01000000 };
+static unsigned int restore_insn_opcodes[] = {
+  0x81e80000, 0x91d02001, 0x01000000 };
 
 static void
 do_restore_insn ()
@@ -831,3 +837,27 @@ get_longjmp_target(pc)
   return 1;
 }
 #endif /* GET_LONGJMP_TARGET */
+
+/* So far used only for sparc solaris.  In sparc solaris, we recognize
+   a trampoline by it's section name.  That is, if the pc is in a
+   section named ".plt" then we are in a trampline.
+
+   Section and offset tracking belongs in objfiles.  FIXME. */
+
+int
+in_solib_trampoline(pc, name)
+     CORE_ADDR pc;
+     char *name;
+{
+  struct section_table *s;
+  int retval = 0;
+  
+  s = find_pc_section(pc);
+  
+  retval = (s != NULL
+	    && s->sec_ptr != NULL
+	    && s->sec_ptr->name != NULL
+	    && STREQ (s->sec_ptr->name, ".plt"));
+  return(retval);
+}
+

@@ -55,3 +55,5 @@ solib_create_inferior_hook PARAMS((void));	/* solib.c */
 extern int
 solib_address PARAMS ((CORE_ADDR));		/* solib.c */
 
+struct section_table *
+find_pc_section_from_so_list PARAMS ((CORE_ADDR pc)); /* solib.c */

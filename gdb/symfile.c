@@ -1,5 +1,5 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -41,6 +41,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
+
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 /* Global variables owned by this file */
 
@@ -375,21 +379,6 @@ syms_from_objfile (objfile, addr, mainline, verbo)
   struct section_offsets *section_offsets;
   asection *lowest_sect;
 
-  /* There is a distinction between having no symbol table
-     (we refuse to read the file, leaving the old set of symbols around)
-     and having no debugging symbols in your symbol table (we read
-     the file and end up with a mostly empty symbol table).
-
-     FIXME:  This strategy works correctly when the debugging symbols are
-     intermixed with "normal" symbols.  However, when the debugging symbols
-     are separate, such as with ELF/DWARF, it is perfectly plausible for
-     the symbol table to be missing but still have all the DWARF info
-     intact.  Thus in general it is wrong to assume that having no symbol
-     table implies no debugging information. */
-
-  if (!(bfd_get_file_flags (objfile -> obfd) & HAS_SYMS))
-    return;
-
   init_entry_point_info (objfile);
   find_sym_fns (objfile);
 
@@ -440,48 +429,19 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 	addr -= bfd_section_vma (objfile->obfd, lowest_sect);
     }
 
-  {
-  /* Debugging check inserted for testing elimination of NAMES_HAVE_UNDERSCORE.
-     Complain if the dynamic setting of NAMES_HAVE_UNDERSCORE from BFD
-     doesn't match the static setting from the GDB config files, but only
-     if we are using the first BFD target (the default target selected by
-     the same configuration that decided whether NAMES_HAVE_UNDERSCORE is
-     defined or not).  For other targets (such as when the user sets GNUTARGET
-     or we are reading a "foreign" object file), it is likely that the value
-     of bfd_get_symbol_leading_char has no relation to the value of
-     NAMES_HAVE_UNDERSCORE for the target for which this gdb was built.
-     Hack alert: the only way to currently do this with bfd is to ask it to
-     produce a list of known target names and compare the first one in the
-     list with the one for the bfd we are using.
-     FIXME:  Remove this check after a round of testing.  
-						-- gnu@cygnus.com, 16dec92 */
-    CONST char **targets = bfd_target_list ();
-    if (targets != NULL && *targets != NULL)
-      {
-	if (bfd_get_symbol_leading_char (objfile->obfd) !=
-#ifdef NAMES_HAVE_UNDERSCORE
-	    '_'
-#else
-	    0
-#endif
-	    && STREQ (bfd_get_target (objfile->obfd), *targets))
-	  {
-	    fprintf (stderr, "GDB internal error!  NAMES_HAVE_UNDERSCORE set wrong for %s BFD:\n%s\n",
-		     bfd_get_target (objfile->obfd),
-		     bfd_get_filename (objfile->obfd));
-	  }
-	free (targets);
-      }
-    /* End of debugging check.  FIXME.  */
-  }
-
   /* Initialize symbol reading routines for this objfile, allow complaints to
      appear for this new file, and record how verbose to be, then do the
      initial symbol reading for this file. */
 
   (*objfile -> sf -> sym_init) (objfile);
   clear_complaints (1, verbo);
+
+  /* If objfile->sf->sym_offsets doesn't set this, we don't care
+     (currently).  */
+  objfile->num_sections = 0;  /* krp-FIXME: why zero? */
   section_offsets = (*objfile -> sf -> sym_offsets) (objfile, addr);
+  objfile->section_offsets = section_offsets;
+
   (*objfile -> sf -> sym_read) (objfile, section_offsets, mainline);
 
   /* Don't allow char * to have a typename (else would get caddr_t.)  */
@@ -550,26 +510,10 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
   struct partial_symtab *psymtab;
   bfd *abfd;
 
-  /* Open a bfd for the file and then check to see if the file has a
-     symbol table.  There is a distinction between having no symbol table
-     (we refuse to read the file, leaving the old set of symbols around)
-     and having no debugging symbols in the symbol table (we read the file
-     and end up with a mostly empty symbol table, but with lots of stuff in
-     the minimal symbol table).  We need to make the decision about whether
-     to continue with the file before allocating and building a objfile.
-
-     FIXME:  This strategy works correctly when the debugging symbols are
-     intermixed with "normal" symbols.  However, when the debugging symbols
-     are separate, such as with ELF/DWARF, it is perfectly plausible for
-     the symbol table to be missing but still have all the DWARF info
-     intact.  Thus in general it is wrong to assume that having no symbol
-     table implies no debugging information. */
+  /* Open a bfd for the file, and give user a chance to burp if we'd be
+     interactively wiping out any existing symbols.  */
 
   abfd = symfile_bfd_open (name);
-  if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
-    {
-      error ("%s has no symbol-table", name);
-    }
 
   if ((have_full_symbols () || have_partial_symbols ())
       && mainline
@@ -771,7 +715,7 @@ symfile_bfd_open (name)
   name = tilde_expand (name);	/* Returns 1st new malloc'd copy */
 
   /* Look down path for it, allocate 2nd new malloc'd copy.  */
-  desc = openp (getenv ("PATH"), 1, name, O_RDONLY, 0, &absolute_name);
+  desc = openp (getenv ("PATH"), 1, name, O_RDONLY | O_BINARY, 0, &absolute_name);
   if (desc < 0)
     {
       make_cleanup (free, name);
@@ -986,18 +930,21 @@ enum language
 deduce_language_from_filename (filename)
      char *filename;
 {
-  char *c = strrchr (filename, '.');
+  char *c;
   
-  if (!c) ; /* Get default. */
+  if (0 == filename) 
+    ; /* Get default */
+  else if (0 == (c = strrchr (filename, '.')))
+    ; /* Get default. */
   else if(STREQ(c,".mod"))
-     return language_m2;
+    return language_m2;
   else if(STREQ(c,".c"))
-     return language_c;
+    return language_c;
   else if(STREQ(c,".cc") || STREQ(c,".C"))
-     return language_cplus;
+    return language_cplus;
   /* start-sanitize-chill */
   else if(STREQ(c,".ch") || STREQ(c,".c186") || STREQ(c,".c286"))
-     return language_chill;
+    return language_chill;
   /* end-sanitize-chill */
 
   return language_unknown;		/* default */
@@ -1383,6 +1330,21 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
 }
 
 #endif /* !INLINE_ADD_PSYMBOL */
+
+/* Returns a section whose range includes PC or NULL if none found. */
+
+struct section_table *
+find_pc_section(pc)
+     CORE_ADDR pc;
+{
+  struct section_table *s;
+
+  s = find_pc_section_from_targets(pc);
+  if (s == NULL)
+    s = find_pc_section_from_so_list(pc);
+
+  return(s);
+}
 
 
 void
