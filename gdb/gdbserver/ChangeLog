@@ -1,3 +1,10 @@
+2004-10-21  Joel Brobecker  <brobecker@gnat.com>
+
+	* linux-x86-64-low.c (ARCH_SET_GS): Add definition if missing.
+	(ARCH_SET_FS): Likewise.
+	(ARCH_GET_FS): Likewise.
+	(ARCH_GET_GS): Likewise.
+
 2004-10-16  Daniel Jacobowitz  <dan@debian.org>
 
 	* linux-i386-low.c (ps_get_thread_area): New.
