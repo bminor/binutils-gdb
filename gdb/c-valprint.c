@@ -1,5 +1,5 @@
 /* Support for printing C values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -465,6 +465,7 @@ c_value_print (val, stream, format, pretty)
 	  fprintf_filtered (stream, ") ");
 	}
     }
-  return (val_print (type, VALUE_CONTENTS (val),
-		     VALUE_ADDRESS (val), stream, format, 1, 0, pretty));
+  return val_print (type, VALUE_CONTENTS (val),
+		    VALUE_ADDRESS (val) + VALUE_OFFSET (val),
+		    stream, format, 1, 0, pretty);
 }

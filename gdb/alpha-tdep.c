@@ -1,5 +1,5 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
-   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -489,7 +489,15 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 	word = extract_unsigned_integer (buf, 4);
 
 	if ((word & 0xffff0000) == 0x23de0000)		/* lda $sp,n($sp) */
-	  frame_size += (-word) & 0xffff;
+	  {
+	    if (word & 0x8000)
+	      frame_size += (-word) & 0xffff;
+	    else
+	      /* Exit loop if a positive stack adjustment is found, which
+		 usually means that the stack cleanup code in the function
+		 epilogue is reached.  */
+	      break;
+	  }
 	else if ((word & 0xfc1f0000) == 0xb41e0000	/* stq reg,n($sp) */
 		 && (word & 0xffff0000) != 0xb7fe0000)	/* reg != $zero */
 	  {
@@ -728,7 +736,13 @@ find_proc_desc (pc, next_frame)
       if (offset >= 0)
 	return push_sigtramp_desc (pc - offset);
 
-      if (startaddr == 0)
+      /* If heuristic_fence_post is non-zero, determine the procedure
+	 start address by examining the instructions.
+	 This allows us to find the start address of static functions which
+	 have no symbolic information, as startaddr would have been set to
+	 the preceding global function start address by the
+	 find_pc_partial_function call above.  */
+      if (startaddr == 0 || heuristic_fence_post != 0)
 	startaddr = heuristic_proc_start (pc);
 
       proc_desc =

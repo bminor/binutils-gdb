@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "annotate.h"
 #include "gdb_string.h"
 #include "c-lang.h"
+#include "target.h"
 
 int vtblprint;			/* Controls printing of vtbl's */
 int objectprint;		/* Controls looking up an object's derived type
@@ -410,6 +411,7 @@ cp_print_value (type, valaddr, address, stream, format, recurse, pretty,
       int boffset;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
       char *basename = TYPE_NAME (baseclass);
+      char *base_valaddr;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -438,10 +440,25 @@ cp_print_value (type, valaddr, address, stream, format, recurse, pretty,
 	 baseclass name.  */
       fputs_filtered (basename ? basename : "", stream);
       fputs_filtered ("> = ", stream);
+
+      /* The virtual base class pointer might have been clobbered by the
+	 user program. Make sure that it still points to a valid memory
+	 location.  */
+
+      if (boffset != -1 && (boffset < 0 || boffset >= TYPE_LENGTH (type)))
+	{
+	  base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
+	  if (target_read_memory (address + boffset, base_valaddr,
+				  TYPE_LENGTH (baseclass)) != 0)
+	    boffset = -1;
+	}
+      else
+	base_valaddr = valaddr + boffset;
+
       if (boffset == -1)
 	fprintf_filtered (stream, "<invalid address>");
       else
-	cp_print_value_fields (baseclass, valaddr + boffset, address + boffset,
+	cp_print_value_fields (baseclass, base_valaddr, address + boffset,
 			       stream, format, recurse, pretty,
 			       (struct type **) obstack_base (&dont_print_vb_obstack),
 			       0);

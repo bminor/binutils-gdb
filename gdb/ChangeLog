@@ -1,3 +1,29 @@
+Sat Nov  9 01:05:10 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* alpha-tdep.c (heuristic_proc_desc):  Stop examining the prologue
+	if we encounter a positive stack adjustment. 
+	(find_proc_desc):  If heuristic_fence_post is non-zero, use
+	heuristic_proc_start to determine the start of a function before
+	calling heuristic_proc_desc.
+
+	* coffread.c (coff_symtab_read):  Change minimal symbol types
+	for C_LABEL symbols from mst_* to mst_file_*.
+
+	* config/m68k/sun3os4.mh (MMALLOC_CFLAGS): Define MMCHECK_FORCE to 1.
+
+	* configure.in:  Handle error message from sun3 native ld when
+	configuring HLDFLAGS.
+	* configure:  Regenerated with autoconf.
+
+	* c-valprint.c (c_value_print):  Adjust value address by VALUE_OFFSET.
+	* cp-valprint.c (cp_print_value):  Prevent gdb crashes by making sure
+	that the virtual base pointer from an user object still points to
+	accessible memory.
+
+	* dbxread.c (dbx_symfile_init):  Initialize sym_stab_info to
+	clear the recently added header_files fields.
+	(dbx_symfile_finish):  Free hfiles[i].vector to avoid storage leak.
+
 Fri Nov  8 14:30:23 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config/tm-sh.h: Added a missing comma in middle of REGISTER_NAMES list.

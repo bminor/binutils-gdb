@@ -2688,6 +2688,8 @@ case "${host}" in
       :
     elif grep 'do not mix' conftest.t >/dev/null 2>&1; then
       :
+    elif grep 'some text already loaded' conftest.t >/dev/null 2>&1; then
+      :
     elif test "${shared}" = "true"; then
       HLDFLAGS='-Wl,-rpath=$(libdir)'
     else
