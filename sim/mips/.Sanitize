@@ -24,13 +24,6 @@ else
         lose_these_too="${r5900_files} ${lose_these_too}"
 fi
 
-vr4320_files="vr4320.igen"
-if ( echo $* | grep keep\-vr4320 > /dev/null ) ; then
-        keep_these_too="${vr4320_files} ${keep_these_too}"
-else
-        lose_these_too="${vr4320_files} ${lose_these_too}"
-fi
-
 tx3904_files="dv-tx3904cpu.c dv-tx3904irc.c dv-tx3904tmr.c"
 if ( echo $* | grep keep\-tx3904 > /dev/null ) ; then
         keep_these_too="${tx3904_files} ${keep_these_too}"
@@ -53,7 +46,7 @@ else
         lose_these_too="${sky_files} ${lose_these_too}"
 fi
 
-vr5400_files="vr5400.igen mdmx.igen"
+vr5400_files="mdmx.igen"
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
         keep_these_too="${vr5400_files} ${keep_these_too}"
 else
@@ -70,7 +63,6 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
-README.Cygnus
 acconfig.h
 config.in
 configure
@@ -90,6 +82,7 @@ vr.igen
 
 Things-to-lose:
 
+README.Cygnus
 
 Do-last:
 
@@ -213,7 +206,7 @@ else
 fi
 
 
-vr5400_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc vr5400.igen mdmx.igen vr.igen"
+vr5400_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc mdmx.igen vr.igen"
 
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
 	for i in $vr5400_files ; do
@@ -242,7 +235,7 @@ else
 	done
 fi
 
-vr4320_files="ChangeLog Makefile.in configure configure.in mips.igen vr.igen vr4320.igen"
+vr4320_files="ChangeLog Makefile.in configure configure.in mips.igen vr.igen"
 
 if ( echo $* | grep keep\-vr4320 > /dev/null ) ; then
 	for i in $vr4320_files ; do

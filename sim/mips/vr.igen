@@ -337,6 +337,7 @@
 // start-sanitze-vr5400
 *vr5400:
 // end-sanitze-vr5400
+// start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
