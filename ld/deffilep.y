@@ -1020,7 +1020,7 @@ def_lex ()
 #endif
 	}
 
-      while (c != EOF && (ISALNUM (c) || strchr ("$:-_?/@", c)))
+      while (c != EOF && (ISALNUM (c) || strchr ("$:-_?/@.", c)))
 	{
 	  put_buf (c);
 	  c = def_getc ();
