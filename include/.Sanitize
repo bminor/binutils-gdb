@@ -46,6 +46,9 @@ bfd.h
 bout.h
 convx-opcode.h
 ecoff.h
+elf-common.h
+elf-external.h
+elf-internal.h
 gdbm.h
 getopt.h
 i386-opcode.h
@@ -102,7 +105,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.14  1991/09/26 22:46:53  steve
+# Revision 1.15  1991/10/03 22:24:27  gnu
+# Add elf-*.h files.
+#
+# Revision 1.14  1991/09/26  22:46:53  steve
 # Newly created
 #
 # Revision 1.13  1991/09/13  05:17:53  gnu
