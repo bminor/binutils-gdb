@@ -1043,7 +1043,7 @@ run_stack_dummy (CORE_ADDR addr, struct regcache **buffer)
     return 2;
 
   /* On normal return, the stack dummy has been popped already.  */
-  *buffer = regcache_dup (stop_registers);
+  *buffer = regcache_dup_no_passthrough (stop_registers);
   return 0;
 }
 

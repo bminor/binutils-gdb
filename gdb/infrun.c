@@ -3961,9 +3961,9 @@ save_inferior_status (int restore_stack_info)
   inf_status->restore_stack_info = restore_stack_info;
   inf_status->proceed_to_finish = proceed_to_finish;
 
-  inf_status->stop_registers = regcache_dup (stop_registers);
-  inf_status->registers = regcache_xmalloc (current_gdbarch);
-  regcache_save (inf_status->registers);
+  inf_status->stop_registers = regcache_dup_no_passthrough (stop_registers);
+
+  inf_status->registers = regcache_dup (current_regcache);
 
   record_selected_frame (&(inf_status->selected_frame_address),
 			 &(inf_status->selected_level));
@@ -4027,7 +4027,7 @@ restore_inferior_status (struct inferior_status *inf_status)
   breakpoint_proceeded = inf_status->breakpoint_proceeded;
   proceed_to_finish = inf_status->proceed_to_finish;
 
-  /* FIXME: Is the restore of stop_registers always needed?  */
+  /* FIXME: Is the restore of stop_registers always needed. */
   regcache_xfree (stop_registers);
   stop_registers = inf_status->stop_registers;
 

@@ -59,12 +59,19 @@ extern signed char *register_valid;
 
 /* Save/restore the register cache using the regbuf.  The operation is
    write through - it is strictly for code that needs to restore the
-   target's registers to a previous state.  */
+   target's registers to a previous state.
+
+   ``no passthrough'' versions do not go through to the target.  They
+   only save values already in the cache.  */
 
 extern void regcache_save (struct regcache *regcache);
 extern void regcache_restore (struct regcache *regcache);
-extern void regcache_restore_no_writethrough (struct regcache *regcache);
 extern struct regcache *regcache_dup (struct regcache *regcache);
+extern void regcache_save_no_passthrough (struct regcache *regcache);
+extern void regcache_restore_no_passthrough (struct regcache *regcache);
+extern struct regcache *regcache_dup_no_passthrough (struct regcache *regcache);
+extern void regcache_move (struct regcache *dest, struct regcache *src);
+extern void regcache_move_no_passthrough (struct regcache *dest, struct regcache *src);
 
 extern char *grub_around_regcache_for_registers (struct regcache *);
 extern char *grub_around_regcache_for_register_valid (struct regcache *);

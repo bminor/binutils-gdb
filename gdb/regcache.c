@@ -182,16 +182,65 @@ regcache_xmalloc_with_cleanup (struct gdbarch *gdbarch)
   return regcache;
 }
 
+void
+regcache_move (struct regcache *dst, struct regcache *src)
+{
+  int i;
+  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  gdb_assert (src != NULL && dst != NULL);
+  gdb_assert (src->descr->gdbarch == dst->descr->gdbarch);
+  /* FIXME: cagney/2002-05-17: To say this bit is bad is being polite.
+     It keeps the existing code working where things rely on going
+     through the register cache.  */
+  if (src == current_regcache
+      && !gdbarch_register_read_p (src->descr->gdbarch))
+    {
+      /* ULGH!!!!  Old way.  Use REGISTER bytes and let code below
+	 untangle fetch.  */
+      read_register_bytes (0, dst->registers, REGISTER_BYTES);
+      return;
+    }
+  for (i = 0; i < current_regcache->descr->nr_registers; i++)
+    {
+      /* Should we worry about the valid bit here?  */
+      regcache_read (src, i, buf);
+      regcache_write (dst, i, buf);
+    }
+}
+
+void
+regcache_move_no_passthrough (struct regcache *dst, struct regcache *src)
+{
+  int i;
+  gdb_assert (src != NULL && dst != NULL);
+  gdb_assert (src->descr->gdbarch == dst->descr->gdbarch);
+  /* NOTE: cagney/2002-05-17: Don't let the caller do a no-passthrough
+     move of data into the current_regcache().  Doing this would be
+     silly - it would mean that valid_p would be completly invalid.  */
+  gdb_assert (dst != current_regcache);
+  memcpy (dst->registers, src->registers,
+	  dst->descr->sizeof_registers);
+  memcpy (dst->register_valid_p, src->register_valid_p,
+	  dst->descr->sizeof_register_valid_p);
+}
+
 struct regcache *
-regcache_dup (struct regcache *regcache)
+regcache_dup (struct regcache *src)
 {
   struct regcache *newbuf;
   gdb_assert (current_regcache != NULL);
-  newbuf = regcache_xmalloc (regcache->descr->gdbarch);
-  memcpy (newbuf->registers, regcache->registers,
-	  regcache->descr->sizeof_registers);
-  memcpy (newbuf->register_valid_p, regcache->register_valid_p,
-	  regcache->descr->sizeof_register_valid_p);
+  newbuf = regcache_xmalloc (src->descr->gdbarch);
+  regcache_move (newbuf, src);
+  return newbuf;
+}
+
+struct regcache *
+regcache_dup_no_passthrough (struct regcache *src)
+{
+  struct regcache *newbuf;
+  gdb_assert (current_regcache != NULL);
+  newbuf = regcache_xmalloc (src->descr->gdbarch);
+  regcache_move_no_passthrough (newbuf, src);
   return newbuf;
 }
 
@@ -982,36 +1031,38 @@ build_regcache (void)
 void
 regcache_save (struct regcache *regcache)
 {
+  int i;
+  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
   gdb_assert (current_regcache != NULL && regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
-  memcpy (grub_around_regcache_for_registers (regcache),
-	  grub_around_regcache_for_registers (current_regcache),
-	  regcache->descr->sizeof_registers);
-  memcpy (grub_around_regcache_for_register_valid (regcache),
-	  grub_around_regcache_for_register_valid (current_regcache),
-	  regcache->descr->sizeof_register_valid_p);
+  regcache_move (regcache, current_regcache);
+}
+
+void
+regcache_save_no_passthrough (struct regcache *regcache)
+{
+  gdb_assert (current_regcache != NULL && regcache != NULL);
+  gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
+  regcache_move_no_passthrough (regcache, current_regcache);
 }
 
 void
 regcache_restore (struct regcache *regcache)
 {
-  char *regcache_registers;
+  int i;
+  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
   gdb_assert (current_regcache != NULL && regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
-  regcache_registers = grub_around_regcache_for_registers (regcache);
-  /* NOTE: cagney, this should be regcache->sizeof_registers but,
-     again, things are screwed as it might copy pseudo registers.  */
-  write_register_bytes (0, regcache_registers, REGISTER_BYTES);
+  regcache_move (current_regcache, regcache);
 }
 
 void
-regcache_restore_no_writethrough (struct regcache *regcache)
+regcache_restore_no_passthrough (struct regcache *regcache)
 {
   char *regcache_registers;
   gdb_assert (current_regcache != NULL && regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
-  regcache_registers = grub_around_regcache_for_registers (regcache);
-  memcpy (registers, regcache_registers, REGISTER_BYTES);
+  regcache_move_no_passthrough (current_regcache, regcache);
 }
 
 void

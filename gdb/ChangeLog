@@ -1,5 +1,31 @@
-2002-05-16  Andrew Cagney  <ac131313@redhat.com>
+2002-05-17  Andrew Cagney  <ac131313@redhat.com>
 
+*** FIXME: the regcache_desc should contain max_register_size.
+
+	* regcache.c (regcache_move): New function.
+	(regcache_save): Rewrite, handle pre and post
+	gdbarch_register_read_p with regcache_move.
+	(regcache_dup): Ditto
+	(regcache_dup_no_passthrough): Ditto ditto.
+	(regcache_save_no_passthrough): Ditto ditto.
+	(regcache_restore): Ditto ditto.
+	(regcache_restore_no_passthrough): Ditto ditto.
+	* regcache.h: Upate
+
+	* infrun.c (save_inferior_status): Use regcache_dup_no_passthrough
+	instead of regcache_dup.  Use regcache dup instead of
+	regcache_xmalloc, regcache_save.  Revert white space change.
+
+	* infcmd.c (run_stack_dummy): Use regcache_dup_no_passthrough not
+	regcache_dup.
+
+	* blockframe.c (generic_push_dummy_frame): Re-order regcache_save
+	call to so that the patch is better.
+
+	* regcache.c (regcache_save_no_passthrough): New function.
+	(regcache_dup_no_passthrough): Ditto.
+	(regcache_restore_no_passthrough): Rename to
+	regcache_restore_no_writethrough.
 
 	* blockframe.c, regbuf.c, rs6000-tdep.c: Include "regcache.h".
 

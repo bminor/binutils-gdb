@@ -1170,12 +1170,12 @@ generic_push_dummy_frame (void)
 
   dummy_frame = xmalloc (sizeof (struct dummy_frame));
   dummy_frame->regcache = regcache_xmalloc (current_gdbarch);
-  regcache_save (dummy_frame->regcache);
 
   dummy_frame->pc = read_pc ();
   dummy_frame->sp = read_sp ();
   dummy_frame->top = dummy_frame->sp;
   dummy_frame->fp = fp;
+  regcache_save (dummy_frame->regcache);
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
 }
