@@ -163,6 +163,9 @@ value_at_lazy (type, addr)
    data from the user's process, and clears the lazy flag to indicate
    that the data in the buffer is valid.
 
+   If the value is zero-length, we avoid calling read_memory, which would
+   abort.  We mark the value as fetched anyway -- all 0 bytes of it.
+
    This function returns a value because it is used in the VALUE_CONTENTS
    macro as part of an expression, where a void would not work.  The
    value is ignored.  */
@@ -173,8 +176,9 @@ value_fetch_lazy (val)
 {
   CORE_ADDR addr = VALUE_ADDRESS (val) + VALUE_OFFSET (val);
 
-  read_memory (addr, VALUE_CONTENTS_RAW (val), 
-	       TYPE_LENGTH (VALUE_TYPE (val)));
+  if (TYPE_LENGTH (VALUE_TYPE (val)))
+    read_memory (addr, VALUE_CONTENTS_RAW (val), 
+	         TYPE_LENGTH (VALUE_TYPE (val)));
   VALUE_LAZY (val) = 0;
   return 0;
 }
