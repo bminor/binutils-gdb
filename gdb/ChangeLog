@@ -9,14 +9,15 @@ Mon Sep  4 16:21:31 2000  Andrew Cagney  <cagney@amy.cygnus.com>
 	* config/i386/nm-linux.h: Include <signal.h>.
 
 2000-09-04 Pierre Muller <muller@ics.u-strasbg.fr>
-	* c-typeprint.c (c_typedef_print): remove (replaced by typedef_print in
-	typeprint.c).
+
+	* c-typeprint.c (c_typedef_print): remove (replaced by 
+	typedef_print in typeprint.c).
 	* typeprint.c (typedef_print): new function. (old c_typedef_print
 	function with pascal language support added).
 	* value.h (c_printdef_print): removed.
 	(typedef_print): declare.
-	* symtab.c (print_symbol_info): call to c_typedef_print replaced by
-	call to typedef_print.
+	* symtab.c (print_symbol_info): call to c_typedef_print replaced
+	by call to typedef_print.
 
 2000-09-03  Mark Kettenis  <kettenis@gnu.org>
 
