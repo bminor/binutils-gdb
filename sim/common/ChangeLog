@@ -1,3 +1,7 @@
+2003-06-23  Michael Snyder  <msnyder@redhat.com>
+
+	* sim-reg.c: Fix cut-and-paste bug in comment.
+
 2003-06-22  Andrew Cagney  <cagney@redhat.com>
 
 	From matthew green <mrg@redhat.com>:
