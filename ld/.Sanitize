@@ -108,6 +108,7 @@ st2000.sc-sh
 st2000.sh
 sa29200.sc-sh
 sa29200.sh
+scripts
 sun3.sh
 sun4.sh
 vanilla.em
@@ -121,7 +122,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.41  1992/08/31 01:14:44  bothner
+# Revision 1.42  1992/09/01 22:14:49  bothner
+# Add scripts.
+#
+# Revision 1.41  1992/08/31  01:14:44  bothner
 # 	* cplus-dem.c:  Removed.  Use the version in libiberty now.
 # 	* ldmisc.c:  Use new libiberty version of cplus_demangle().
 #
