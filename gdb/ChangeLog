@@ -1,5 +1,11 @@
 2004-04-06  Andrew Cagney  <cagney@redhat.com>
 
+	* hppah-nat.c (hpux_has_forked, hpux_has_vforked)
+	(hpux_has_execd, hpux_has_syscall_event): Include "infttrace.h",
+	move extern declarations from here ...
+	* infttrace.h: ... to here.
+	* Makefile.in (hppah-nat.o): Update dependencies.
+
 	* hppa-tdep.c (hppa_breakpoint_from_pc): Make static.
 	(hppa_gdbarch_init): Set gdbarch_breakpoint_from_pc
 	* config/pa/tm-hppa.h (BREAKPOINT_FROM_PC, BREAKPOINT32): 

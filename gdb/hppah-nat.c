@@ -32,13 +32,9 @@
 #include "gdb_wait.h"
 #include "regcache.h"
 #include "gdb_string.h"
+#include "infttrace.h"
 #include <signal.h>
 
-extern int hpux_has_forked (int pid, int *childpid);
-extern int hpux_has_vforked (int pid, int *childpid);
-extern int hpux_has_execd (int pid, char **execd_pathname);
-extern int hpux_has_syscall_event (int pid, enum target_waitkind *kind,
-				   int *syscall_id);
 
 static CORE_ADDR text_end;
 

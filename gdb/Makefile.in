@@ -1816,7 +1816,7 @@ h8300-tdep.o: h8300-tdep.c $(defs_h) $(value_h) $(inferior_h) $(symfile_h) \
 hpacc-abi.o: hpacc-abi.c $(defs_h) $(value_h) $(gdb_regex_h) $(gdb_string_h) \
 	$(gdbtypes_h) $(gdbcore_h) $(cp_abi_h)
 hppah-nat.o: hppah-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
-	$(gdb_wait_h) $(regcache_h) $(gdb_string_h)
+	$(gdb_wait_h) $(regcache_h) $(gdb_string_h) $(infttrace_h)
 hppa-hpux-tdep.o: hppa-hpux-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
 	$(osabi_h) $(gdb_string_h) $(frame_h)
 hppa-tdep.o: hppa-tdep.c $(defs_h) $(frame_h) $(bfd_h) $(inferior_h) \
