@@ -1,3 +1,7 @@
+2002-07-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* valops.c (find_overload_match): Free oload_syms.
+
 2002-07-09  Joel Brobecker  <brobecker@gnat.com>
 
 	Define HAVE_SYS_PROC_H if sys/proc.h exists

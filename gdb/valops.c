@@ -2707,6 +2707,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   register int jj;
   register int ix;
   int static_offset;
+  struct cleanup *cleanups = NULL;
 
   char *obj_type_name = NULL;
   char *func_name = NULL;
@@ -2748,6 +2749,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
         }
 
       oload_syms = make_symbol_overload_list (fsym);
+      cleanups = make_cleanup (xfree, oload_syms);
       while (oload_syms[++i])
 	num_fns++;
       if (!num_fns)
@@ -2904,6 +2906,9 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	}
       *objp = temp;
     }
+  if (cleanups != NULL)
+    do_cleanups (cleanups);
+
   return oload_incompatible ? 100 : (oload_non_standard ? 10 : 0);
 }
 
