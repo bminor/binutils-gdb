@@ -1,5 +1,14 @@
 2005-01-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* acconfig.h (HAVE_STRUCT_REG_R_FS, HAVE_STRUCT_R_GS): Remove
+	undefs.
+	* configure.ac: Use AC_CHECK_MEMBERS to check whether `struct
+	thread' has a td_pcb member and whether `struct reg' has r_fs and
+	r_gs members.
+	* configure, config.in: Regenerate.
+
+2005-01-21  Mark Kettenis  <kettenis@gnu.org>
+
 	* configure.ac: Remove ia64-*-aix* junk.
 	* configure: Regenerate.
 

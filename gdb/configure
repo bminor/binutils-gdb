@@ -16746,10 +16746,10 @@ _ACEOF
 
 fi
 
-# See if <sys/proc.h> defines `struct thread' with a td_pcb member.
-echo "$as_me:$LINENO: checking for td_pcb in struct thread" >&5
-echo $ECHO_N "checking for td_pcb in struct thread... $ECHO_C" >&6
-if test "${gdb_cv_struct_thread_td_pcb+set}" = set; then
+# Check if <sys/proc.h> defines `struct thread' with a td_pcb member.
+echo "$as_me:$LINENO: checking for struct thread.td_pcb" >&5
+echo $ECHO_N "checking for struct thread.td_pcb... $ECHO_C" >&6
+if test "${ac_cv_member_struct_thread_td_pcb+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -16760,10 +16760,14 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 #include <sys/param.h>
 #include <sys/proc.h>
+
+
 int
 main ()
 {
-struct thread td; td.td_pcb;
+static struct thread ac_aggr;
+if (ac_aggr.td_pcb)
+return 0;
   ;
   return 0;
 }
@@ -16790,24 +16794,75 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  gdb_cv_struct_thread_td_pcb=yes
+  ac_cv_member_struct_thread_td_pcb=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-gdb_cv_struct_thread_td_pcb=no
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <sys/param.h>
+#include <sys/proc.h>
+
+
+int
+main ()
+{
+static struct thread ac_aggr;
+if (sizeof ac_aggr.td_pcb)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_member_struct_thread_td_pcb=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_member_struct_thread_td_pcb=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
-echo "$as_me:$LINENO: result: $gdb_cv_struct_thread_td_pcb" >&5
-echo "${ECHO_T}$gdb_cv_struct_thread_td_pcb" >&6
-if test $gdb_cv_struct_thread_td_pcb = yes; then
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_member_struct_thread_td_pcb" >&5
+echo "${ECHO_T}$ac_cv_member_struct_thread_td_pcb" >&6
+if test $ac_cv_member_struct_thread_td_pcb = yes; then
 
-cat >>confdefs.h <<\_ACEOF
+cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_THREAD_TD_PCB 1
 _ACEOF
 
+
 fi
+
 
 # See if <sys/lwp.h> defines `struct lwp`.
 echo "$as_me:$LINENO: checking for struct lwp" >&5
@@ -16937,9 +16992,9 @@ fi
 
 # See if <machine/reg.h> supports the %fs and %gs i386 segment registers.
 # Older i386 BSD's don't have the r_fs and r_gs members of `struct reg'.
-echo "$as_me:$LINENO: checking for r_fs in struct reg" >&5
-echo $ECHO_N "checking for r_fs in struct reg... $ECHO_C" >&6
-if test "${gdb_cv_struct_reg_r_fs+set}" = set; then
+echo "$as_me:$LINENO: checking for struct reg.r_fs" >&5
+echo $ECHO_N "checking for struct reg.r_fs... $ECHO_C" >&6
+if test "${ac_cv_member_struct_reg_r_fs+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -16949,10 +17004,13 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 #include <machine/reg.h>
+
 int
 main ()
 {
-struct reg r; r.r_fs;
+static struct reg ac_aggr;
+if (ac_aggr.r_fs)
+return 0;
   ;
   return 0;
 }
@@ -16979,26 +17037,75 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  gdb_cv_struct_reg_r_fs=yes
+  ac_cv_member_struct_reg_r_fs=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-gdb_cv_struct_reg_r_fs=no
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <machine/reg.h>
+
+int
+main ()
+{
+static struct reg ac_aggr;
+if (sizeof ac_aggr.r_fs)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_member_struct_reg_r_fs=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_member_struct_reg_r_fs=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
-echo "$as_me:$LINENO: result: $gdb_cv_struct_reg_r_fs" >&5
-echo "${ECHO_T}$gdb_cv_struct_reg_r_fs" >&6
-if test $gdb_cv_struct_reg_r_fs = yes; then
-  cat >>confdefs.h <<\_ACEOF
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_member_struct_reg_r_fs" >&5
+echo "${ECHO_T}$ac_cv_member_struct_reg_r_fs" >&6
+if test $ac_cv_member_struct_reg_r_fs = yes; then
+
+cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_REG_R_FS 1
 _ACEOF
 
+
 fi
-echo "$as_me:$LINENO: checking for r_gs in struct reg" >&5
-echo $ECHO_N "checking for r_gs in struct reg... $ECHO_C" >&6
-if test "${gdb_cv_struct_reg_r_gs+set}" = set; then
+echo "$as_me:$LINENO: checking for struct reg.r_gs" >&5
+echo $ECHO_N "checking for struct reg.r_gs... $ECHO_C" >&6
+if test "${ac_cv_member_struct_reg_r_gs+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -17008,10 +17115,13 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 #include <machine/reg.h>
+
 int
 main ()
 {
-struct reg r; r.r_gs;
+static struct reg ac_aggr;
+if (ac_aggr.r_gs)
+return 0;
   ;
   return 0;
 }
@@ -17038,23 +17148,73 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  gdb_cv_struct_reg_r_gs=yes
+  ac_cv_member_struct_reg_r_gs=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-gdb_cv_struct_reg_r_gs=no
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <machine/reg.h>
+
+int
+main ()
+{
+static struct reg ac_aggr;
+if (sizeof ac_aggr.r_gs)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_member_struct_reg_r_gs=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_member_struct_reg_r_gs=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
-echo "$as_me:$LINENO: result: $gdb_cv_struct_reg_r_gs" >&5
-echo "${ECHO_T}$gdb_cv_struct_reg_r_gs" >&6
-if test $gdb_cv_struct_reg_r_gs = yes; then
-  cat >>confdefs.h <<\_ACEOF
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_member_struct_reg_r_gs" >&5
+echo "${ECHO_T}$ac_cv_member_struct_reg_r_gs" >&6
+if test $ac_cv_member_struct_reg_r_gs = yes; then
+
+cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_REG_R_GS 1
 _ACEOF
 
+
 fi
+
 
 # See if <sys/ptrace.h> provides the PTRACE_GETREGS request.
 echo "$as_me:$LINENO: checking for PTRACE_GETREGS" >&5

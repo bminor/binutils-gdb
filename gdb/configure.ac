@@ -589,15 +589,11 @@ if test "$gdb_with_regex" = yes; then
     [Define to 1 if the regex included in libiberty should be used.])
 fi
 
-# See if <sys/proc.h> defines `struct thread' with a td_pcb member.
-AC_CACHE_CHECK([for td_pcb in struct thread], gdb_cv_struct_thread_td_pcb,
-[AC_TRY_COMPILE([#include <sys/param.h>
-#include <sys/proc.h>], [struct thread td; td.td_pcb;],
-gdb_cv_struct_thread_td_pcb=yes, gdb_cv_struct_thread_td_pcb=no)])
-if test $gdb_cv_struct_thread_td_pcb = yes; then
-  AC_DEFINE(HAVE_STRUCT_THREAD_TD_PCB, 1,
-            [Define to 1 if your system has td_pcb in struct thread.])
-fi
+# Check if <sys/proc.h> defines `struct thread' with a td_pcb member.
+AC_CHECK_MEMBERS([struct thread.td_pcb], [], [],
+[#include <sys/param.h>
+#include <sys/proc.h>
+])
 
 # See if <sys/lwp.h> defines `struct lwp`.
 AC_CACHE_CHECK([for struct lwp], gdb_cv_struct_lwp,
@@ -621,18 +617,8 @@ fi
 
 # See if <machine/reg.h> supports the %fs and %gs i386 segment registers.
 # Older i386 BSD's don't have the r_fs and r_gs members of `struct reg'.
-AC_CACHE_CHECK([for r_fs in struct reg], gdb_cv_struct_reg_r_fs,
-[AC_TRY_COMPILE([#include <machine/reg.h>], [struct reg r; r.r_fs;],
-gdb_cv_struct_reg_r_fs=yes, gdb_cv_struct_reg_r_fs=no)])
-if test $gdb_cv_struct_reg_r_fs = yes; then
-  AC_DEFINE(HAVE_STRUCT_REG_R_FS)
-fi
-AC_CACHE_CHECK([for r_gs in struct reg], gdb_cv_struct_reg_r_gs,
-[AC_TRY_COMPILE([#include <machine/reg.h>], [struct reg r; r.r_gs;],
-gdb_cv_struct_reg_r_gs=yes, gdb_cv_struct_reg_r_gs=no)])
-if test $gdb_cv_struct_reg_r_gs = yes; then
-  AC_DEFINE(HAVE_STRUCT_REG_R_GS)
-fi
+AC_CHECK_MEMBERS([struct reg.r_fs, struct reg.r_gs], [], [],
+                 [#include <machine/reg.h>])
 
 # See if <sys/ptrace.h> provides the PTRACE_GETREGS request.
 AC_MSG_CHECKING(for PTRACE_GETREGS)
