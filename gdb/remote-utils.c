@@ -573,9 +573,9 @@ gr_multi_scan (list, passthrough)
 	  if (passthrough)
 	    {
 	      for (p = swallowed; p < swallowed_p; ++p)
-		putc_unfiltered (*p, gdb_stdout);
+		fputc_unfiltered (*p, gdb_stdout);
 
-	      putc_unfiltered (ch, gdb_stdout);
+	      fputc_unfiltered (ch, gdb_stdout);
 	    }
 
 	  swallowed_p = swallowed;
