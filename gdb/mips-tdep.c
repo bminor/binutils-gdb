@@ -1226,7 +1226,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   int float_argreg;
   int argnum;
   int len = 0;
-  int stack_offset;
+  int stack_offset = 0;
 
   /* Macros to round N up or down to the next A boundary; A must be
      a power of two. */
@@ -1254,11 +1254,6 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   if (struct_return)
       write_register (argreg++, struct_addr);
 
-  /* The offset onto the stack at which we will start copying parameters
-     (after the registers are used up) begins at 16 in the old ABI.
-     This leaves room for the "home" area for register parameters.  */
-  stack_offset = MIPS_EABI ? 0 : MIPS_REGSIZE * 4;
-
   /* Now load as many as possible of the first arguments into
      registers, and push the rest onto the stack.  Loop thru args
      from first to last.  */
@@ -1273,7 +1268,8 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 
       /* The EABI passes structures that do not fit in a register by
 	 reference. In all other cases, pass the structure by value.  */
-      if (typecode == TYPE_CODE_STRUCT && MIPS_EABI && len > MIPS_REGSIZE)
+      if (MIPS_EABI && len > MIPS_REGSIZE &&
+	  (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
 	  store_address (valbuf, MIPS_REGSIZE, VALUE_ADDRESS (arg));
 	  typecode = TYPE_CODE_PTR;
@@ -1341,10 +1337,40 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	  /* Copy the argument to general registers or the stack in
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
+	  /* Note: structs whose size is not a multiple of MIPS_REGSIZE
+	     are treated specially: Irix cc passes them in registers
+	     where gcc sometimes puts them on the stack.  For maximum
+	     compatibility, we will put them in both places.  */
+
+	  int odd_sized_struct = ((len > MIPS_REGSIZE) && 
+				  (len % MIPS_REGSIZE != 0));
 	  while (len > 0)
 	    {
 	      int partial_len = len < MIPS_REGSIZE ? len : MIPS_REGSIZE;
 
+	      if (argreg > MIPS_LAST_ARG_REGNUM || odd_sized_struct)
+		{
+		  /* Write this portion of the argument to the stack.  */
+		  int longword_offset;
+
+		  longword_offset = 0;
+		  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+		    if (MIPS_REGSIZE == 8 &&
+			(typecode == TYPE_CODE_INT ||
+			 typecode == TYPE_CODE_PTR ||
+			 typecode == TYPE_CODE_FLT) && len <= 4)
+		      longword_offset = 4;
+		    else if ((typecode == TYPE_CODE_STRUCT ||
+			      typecode == TYPE_CODE_UNION) &&
+			     TYPE_LENGTH (arg_type) < MIPS_REGSIZE)
+		      longword_offset = MIPS_REGSIZE - len;
+
+		  write_memory (sp + stack_offset + longword_offset, 
+				val, partial_len);
+		}
+
+	      /* Note!!! This is NOT an else clause.
+		 Odd sized structs may go thru BOTH paths.  */
 	      if (argreg <= MIPS_LAST_ARG_REGNUM)
 		{
 		  CORE_ADDR regval = extract_address (val, partial_len);
@@ -1375,30 +1401,21 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 		  if (!MIPS_EABI)
 		    float_argreg = MIPS_LAST_FP_ARG_REGNUM + 1;
 		}
-	      else
-		{
-		  /* Write this portion of the argument to the stack.  */
-		  int longword_offset;
-
-		  partial_len = len;
-		  longword_offset = 0;
-		  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-		    if (MIPS_REGSIZE == 8 &&
-			(typecode == TYPE_CODE_INT ||
-			 typecode == TYPE_CODE_PTR ||
-			 typecode == TYPE_CODE_FLT) && len <= 4)
-		      longword_offset = 4;
-		    else if ((typecode == TYPE_CODE_STRUCT ||
-			      typecode == TYPE_CODE_UNION) &&
-			     len < MIPS_REGSIZE)
-		      longword_offset = MIPS_REGSIZE - len;
-		  write_memory (sp + stack_offset + longword_offset, 
-				val, partial_len);
-		  stack_offset += ROUND_UP (partial_len, MIPS_REGSIZE);
-		}
     
 	      len -= partial_len;
 	      val += partial_len;
+
+	      /* The offset onto the stack at which we will start
+		 copying parameters (after the registers are used up) 
+		 begins at (4 * MIPS_REGSIZE) in the old ABI.  This 
+		 leaves room for the "home" area for register parameters.
+
+		 In the new EABI, the 8 register parameters do not 
+		 have "home" stack space reserved for them, so the
+		 stack offset does not get incremented until after
+		 we have used up the 8 parameter registers.  */
+	      if (!(MIPS_EABI && argnum < 8))
+		stack_offset += ROUND_UP (partial_len, MIPS_REGSIZE);
 	    }
 	}
     }
@@ -1568,7 +1585,7 @@ mips_print_register (regnum, all)
       return;
     }
 
-  /* If an even floating pointer register, also print as double. */
+  /* If an even floating point register, also print as double. */
   if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM+MIPS_NUMREGS
       && !((regnum-FP0_REGNUM) & 1))
     {
