@@ -1,7 +1,7 @@
 Fri Feb  2 13:40:50 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* win32-nat.c (mappings): Add ppc registers.
-	(child_resume): Turn of step for ppc.
+	(child_resume): Turn off step for ppc.
 
 Thu Feb  1 10:29:31 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
