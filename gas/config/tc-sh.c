@@ -2975,7 +2975,9 @@ md_apply_fix3 (fixP, valP, seg)
       /* Make the jump instruction point to the address of the operand.  At
 	 runtime we merely add the offset to the actual PLT entry.  */
       * valP = 0xfffffffc;
-      val = fixP->fx_addnumber - S_GET_VALUE (fixP->fx_subsy);
+      val = fixP->fx_addnumber;
+      if (fixP->fx_subsy)
+	val -= S_GET_VALUE (fixP->fx_subsy);
       md_number_to_chars (buf, val, 4);
       break;
 

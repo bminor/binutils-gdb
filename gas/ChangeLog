@@ -1,3 +1,8 @@
+2002-02-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sh.c (md_apply_fix3) <BFD_RELOC_32_PLT_PCREL>: Don't
+	assume fixP->fx_subsy is non-NULL.
+
 2002-02-04  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.c (parse_at): Set arg type of @(expr,pc) to
