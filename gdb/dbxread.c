@@ -894,6 +894,9 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
 	  sym_value = sym->value;
 
 	  sec = bfd_get_section (sym);
+
+	  /* BFD symbols are section relative.  */
+	  sym_value += sec->vma;
 	  if (bfd_get_section_flags (abfd, sec) & SEC_CODE)
 	    {
 	      sym_value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
@@ -915,9 +918,18 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
 	  if (sym->flags & BSF_GLOBAL)
 	    type |= N_EXT;
 
-	  record_minimal_symbol (bfd_asymbol_name (sym), sym_value,
+	  record_minimal_symbol ((char *) bfd_asymbol_name (sym), sym_value,
 				 type, objfile);
 	}
+    }
+
+  /* FIXME: Reading the dynamic relocs currently causes a bfd_assertion
+     for sun3 executables. Do not read dynamic relocs till BFD is prepared
+     to handle them.  */
+  if (bfd_get_arch (abfd) != bfd_arch_sparc)
+    {
+      do_cleanups (back_to);
+      return;
     }
 
   /* Symbols from shared libraries have a dynamic relocation entry

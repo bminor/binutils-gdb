@@ -1,3 +1,9 @@
+Mon Apr 18 13:18:56 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dbxread.c (read_dbx_dynamic_symtab):  Relocate BFD symbols by
+	section vma. Do not read dynamic relocs for sun3 executables to
+	avoid BFD assertion message.
+
 Mon Apr 18 10:08:07 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* nm-hppab.h (KERNEL_U_ADDR): Define.
