@@ -1,5 +1,20 @@
 # .Sanitize for devo.
 
+########################
+# YO!  READ ME!!!!!!!!!
+# If you're about to add a file or directory which isn't checked out as part
+# of every module in devo (e.g., if "cvs co gas+utils" won't get it, or if
+# "cvs co gcc" won't get it), then don't, Don't, DON'T add it to the regular
+# things-to-keep or things-to-lose sections.  Instead, add it to the setting
+# of keep_these_too or lose_these_too before those variables are rescanned
+# to check for the existence of the items listed in them.
+#
+# Otherwise, somebody will check out some package that doesn't include your
+# new file, and will get warnings from Sanitize when everything is really
+# okay.  You don't want to get people in the habit of ignoring complaints from
+# Sanitize, do you?  No, I didn't think so.
+########################
+
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
@@ -21,7 +36,11 @@ keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 	groff include install.sh ispell ld libg++ libgcc libgloss libiberty
 	libio librx libstdc++ m4 make mmalloc move-if-change newlib opcodes
 	pagas patch prms rcs readline sed send-pr shellutils sim tcl textutils
-	tk texinfo tgas utils uudecode wdiff xiberty"
+	tk texinfo tgas utils uudecode wdiff xiberty
+	configure.bat makeall.bat
+	mpw-README mpw-configure mpw-config.in mpw-build.in"
+
+lose_these_too="${lose_these_too} testsuite"
 
 cygnus_files="release release-info build-all.mk test-build.mk COPYING.NEWLIB"
 
@@ -46,8 +65,6 @@ else
 fi
 
 # This is for newlib net releases.
-# We don't check for duplicates of COPYING.NEWLIB appearing because it's not
-# intended that keep-cygnus and keep-newlib be used together.
 newlib_files="COPYING.NEWLIB"
 
 if ( echo $* | grep keep\-newlib > /dev/null) ; then
@@ -60,7 +77,7 @@ fi
 # of this directory, and complaining about directories or files we didn't
 # check out just gets obnoxious.
 
-list="${keep_these_too}"
+list="`(for i in ${keep_these_too}; do echo $i ; done) | sort -u`"
 keep_these_too=
 
 for file in $list ; do
@@ -69,7 +86,7 @@ for file in $list ; do
 	fi
 done
 
-list="${lose_these_too}"
+list="`(for i in ${lose_these_too}; do echo $i ; done) | sort -u` "
 lose_these_too=
 
 for file in $list ; do
@@ -97,16 +114,8 @@ config.sub
 configure
 configure.in
 etc
-# These will only show up if they checked out gas-extra-stuff.
-configure.bat
-makeall.bat
-mpw-README
-mpw-configure
-mpw-config.in
-mpw-build.in
 
 Things-to-lose:
-testsuite
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
