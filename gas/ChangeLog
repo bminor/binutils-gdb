@@ -1,3 +1,74 @@
+Tue Aug  1 17:35:26 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (init_table): Add "control", "status", "iaddr",
+	"sfcr", and "dfcr" as synonyms for existing entries.
+	(md_begin): In MRI mode, force flag_reg_prefix_optional to 1.
+	(md_parse_option): Removed unused locals i and arch.  Change type
+	of arch (another one) to unsigned long.
+	(tc_coff_sizemachdep): Add return after abort to avoid warning.
+
+	Initial support for MRI style labels and expressions.
+	* as.h (flag_mri): Declare/define.
+	* as.c (show_usage): Mention -M and its synonym --mri.
+	(parse_args): Add 'M' to std_shortopts.  Add "mri" to
+	std_longopts.  Set flag_mri if -M is seen.
+	(main): Call parse_args before input_scrub_begin.  Call
+	expr_begin.
+	* app.c (do_scrub_begin): Don't set lex for '"' or '\'' in MRI
+	mode.  Do set lex for ';', '*', and '!' in MRI mode.
+	(do_scrub_next_char): Remove MRI ifdef in LEX_IS_WHITESPACE case.
+	In MRI mode, keep spaces between labels and colons.  Remove MRI
+	ifndef around LEX_IS_ONECHAR_QUOTE case.  In MRI mode, don't use
+	'!' or '*' as comment characters even if they are in
+	comment_chars.
+	* read.h (lex_type): No longer const.
+	* read.c: Include libiberty.h.
+	(lex_type): No longer const.
+	(read_begin): In MRI mode, set lex_type of '?' to 3.
+	(potable): Add dc, dc.b, dc.d, dc.l, dc.s, dc.w, dc.x, ds, ds.b,
+	ds.l, ds.w, and xdef.
+	(read_a_source_file): Change LABELS_WITHOUT_COLON ifdef to check
+	for MRI mode at runtime rather than compile time.  Handle the EQU
+	pseudo-op in MRI mode.  Remove bogus MRI ifdef around done_pseudo.
+	Change NO_PSEUDO_DOT ifdef to also take effect for MRI mode at
+	runtime.
+	(cons): In MRI mode, always call parse_mri_cons rather than
+	TC_PARSE_CONS_EXPRESSION.
+	(parse_mri_cons): Always compile, not just when MRI is defined.
+	Call TC_PARSE_CONS_EXPRESSION, not expression, when the input is
+	not a string constant.  Handle A and E modifiers.
+	(float_cons): Accept :xxxx, where the x's are hex digits.
+	* expr.h (operatorT): Add O_eq, O_ne, O_lt, O_le, O_ge, O_gt.
+	(expr_begin): Declare.
+	* expr.c (integer_constant): In MRI mode, if the base was not
+	specified, look for a suffix on the number to set the base.
+	(mri_char_constant): New static function.
+	(operand): Remove MRI ifdef.  In MRI mode, do various things: Pass
+	0 as the base when calling integer_constant if there was no
+	prefix.  Check for a hex constant suffix if when a leading '0' is
+	seen.  Don't accept 0x or 0b as a prefix.  Check for E'chars' and
+	A'chars'.  Handle MRI character constants.  Treat '"' as the
+	unary bitwise not operator.  Treat $ as the program counter, or as
+	the prefix for a hex constant.  Treat % as the prefix for a binary
+	constant and @ as the prefix for an octal constant.  Treat : as
+	the prefix for a hex constant.
+	(op_encoding): Set '"' to O_bit_not, '<' to O_lt, and '>' to O_gt.
+	(op_rank): No longer const.  Change rank values.
+	(expr_begin): New function.
+	(operator): New static function.
+	(expr): Use operator.  Don't bother to mention the operator in
+	warnings.  Remove bogus #if 0 code.  Handle new operatorT values.
+	* atof-generic.c (atof_generic): In MRI mode, accept underscores
+	around the exponent in floating point numbers.
+	* symbols.h (symbols_case_sensitive): Declare.
+	* symbols.c (symbols_case_sensitive): New global variable.
+	(symbol_create): Check symbols_case_sensitive.
+	(symbol_find_base): Likewise.
+	(resolve_symbol_value): Handle new operatorT values.
+	(print_expr_1): Likewise.
+	(S_IS_LOCAL): In MRI mode, names beginning with two '?' characters
+	are local.
+
 Tue Aug  1 11:35:18 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* tc-sh.c (md_convert_frag): Make some error messages more

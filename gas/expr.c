@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*
  * This is really a branch office of as-read.c. I split it out to clearly
@@ -33,6 +33,7 @@
 
 static void floating_constant PARAMS ((expressionS * expressionP));
 static void integer_constant PARAMS ((int radix, expressionS * expressionP));
+static void mri_char_constant PARAMS ((expressionS *));
 static void clean_up_expression PARAMS ((expressionS * expressionP));
 
 extern const char EXP_CHARS[], FLT_CHARS[];
@@ -129,8 +130,8 @@ integer_constant (radix, expressionP)
      expressionS *expressionP;
 {
   char *start;		/* start of number. */
+  char *suffix = NULL;
   char c;
-
   valueT number;	/* offset or (absolute) value */
   short int digit;	/* value of next digit in current radix */
   short int maxdig = 0;/* highest permitted digit value. */
@@ -163,6 +164,50 @@ integer_constant (radix, expressionP)
 #else /* includes non-bfd case, mostly */
 #define valuesize 32
 #endif
+
+  if (flag_mri && radix == 0)
+    {
+      int flt = 0;
+
+      /* In MRI mode, the number may have a suffix indicating the
+         radix.  For that matter, it might actually be a floating
+         point constant.  */
+      for (suffix = input_line_pointer; isalnum (*suffix); suffix++)
+	{
+	  if (*suffix == 'e' || *suffix == 'E')
+	    flt = 1;
+	}
+
+      if (suffix == input_line_pointer)
+	{
+	  radix = 10;
+	  suffix = NULL;
+	}
+      else
+	{
+	  c = *--suffix;
+	  if (islower (c))
+	    c = toupper (c);
+	  if (c == 'B')
+	    radix = 2;
+	  else if (c == 'D')
+	    radix = 10;
+	  else if (c == 'O' || c == 'Q')
+	    radix = 8;
+	  else if (c == 'H')
+	    radix = 16;
+	  else if (suffix[1] == '.' || c == 'E' || flt)
+	    {
+	      floating_constant (expressionP);
+	      return;
+	    }
+	  else
+	    {
+	      radix = 10;
+	      suffix = NULL;
+	    }
+	}
+    }
 
   switch (radix)
     {
@@ -247,6 +292,10 @@ integer_constant (radix, expressionP)
 	  number = leader - generic_bignum + 1;	/* number of littlenums in the bignum. */
 	}
     }
+
+  if (flag_mri && suffix != NULL && input_line_pointer - 1 == suffix)
+    c = *input_line_pointer++;
+
   if (small)
     {
       /*
@@ -256,112 +305,93 @@ integer_constant (radix, expressionP)
        * than checking for strict canonical form. syntax sux!
        */
 
-      switch (c)
+      if (LOCAL_LABELS_FB && c == 'b')
 	{
+	  /*
+	   * backward ref to local label.
+	   * because it is backward, expect it to be defined.
+	   */
+	  /* Construct a local label.  */
+	  name = fb_label_name ((int) number, 0);
 
-#ifdef LOCAL_LABELS_FB
-	case 'b':
-	  {
-	    /*
-	     * backward ref to local label.
-	     * because it is backward, expect it to be defined.
-	     */
-	    /* Construct a local label.  */
-	    name = fb_label_name ((int) number, 0);
+	  /* seen before, or symbol is defined: ok */
+	  symbolP = symbol_find (name);
+	  if ((symbolP != NULL) && (S_IS_DEFINED (symbolP)))
+	    {
+	      /* local labels are never absolute. don't waste time
+		 checking absoluteness. */
+	      know (SEG_NORMAL (S_GET_SEGMENT (symbolP)));
 
-	    /* seen before, or symbol is defined: ok */
-	    symbolP = symbol_find (name);
-	    if ((symbolP != NULL) && (S_IS_DEFINED (symbolP)))
-	      {
-		/* local labels are never absolute. don't waste time
-		   checking absoluteness. */
-		know (SEG_NORMAL (S_GET_SEGMENT (symbolP)));
+	      expressionP->X_op = O_symbol;
+	      expressionP->X_add_symbol = symbolP;
+	    }
+	  else
+	    {
+	      /* either not seen or not defined. */
+	      /* @@ Should print out the original string instead of
+		 the parsed number.  */
+	      as_bad ("backw. ref to unknown label \"%d:\", 0 assumed.",
+		      (int) number);
+	      expressionP->X_op = O_constant;
+	    }
 
-		expressionP->X_op = O_symbol;
-		expressionP->X_add_symbol = symbolP;
-	      }
-	    else
-	      {
-		/* either not seen or not defined. */
-		/* @@ Should print out the original string instead of
-		   the parsed number.  */
-		as_bad ("backw. ref to unknown label \"%d:\", 0 assumed.",
-			(int) number);
-		expressionP->X_op = O_constant;
-	      }
-
-	    expressionP->X_add_number = 0;
-	    break;
-	  }			/* case 'b' */
-
-	case 'f':
-	  {
-	    /*
-	     * forward reference. expect symbol to be undefined or
-	     * unknown. undefined: seen it before. unknown: never seen
-	     * it before.
-	     * construct a local label name, then an undefined symbol.
-	     * don't create a xseg frag for it: caller may do that.
-	     * just return it as never seen before.
-	     */
-	    name = fb_label_name ((int) number, 1);
-	    symbolP = symbol_find_or_make (name);
-	    /* we have no need to check symbol properties. */
+	  expressionP->X_add_number = 0;
+	}			/* case 'b' */
+      else if (LOCAL_LABELS_FB && c == 'f')
+	{
+	  /*
+	   * forward reference. expect symbol to be undefined or
+	   * unknown. undefined: seen it before. unknown: never seen
+	   * it before.
+	   * construct a local label name, then an undefined symbol.
+	   * don't create a xseg frag for it: caller may do that.
+	   * just return it as never seen before.
+	   */
+	  name = fb_label_name ((int) number, 1);
+	  symbolP = symbol_find_or_make (name);
+	  /* we have no need to check symbol properties. */
 #ifndef many_segments
-	    /* since "know" puts its arg into a "string", we
-	       can't have newlines in the argument.  */
-	    know (S_GET_SEGMENT (symbolP) == undefined_section || S_GET_SEGMENT (symbolP) == text_section || S_GET_SEGMENT (symbolP) == data_section);
+	  /* since "know" puts its arg into a "string", we
+	     can't have newlines in the argument.  */
+	  know (S_GET_SEGMENT (symbolP) == undefined_section || S_GET_SEGMENT (symbolP) == text_section || S_GET_SEGMENT (symbolP) == data_section);
 #endif
-	    expressionP->X_op = O_symbol;
-	    expressionP->X_add_symbol = symbolP;
-	    expressionP->X_add_number = 0;
+	  expressionP->X_op = O_symbol;
+	  expressionP->X_add_symbol = symbolP;
+	  expressionP->X_add_number = 0;
+	}			/* case 'f' */
+      else if (LOCAL_LABELS_DOLLAR && c == '$')
+	{
+	  /* If the dollar label is *currently* defined, then this is just
+	     another reference to it.  If it is not *currently* defined,
+	     then this is a fresh instantiation of that number, so create
+	     it.  */
 
-	    break;
-	  }			/* case 'f' */
+	  if (dollar_label_defined ((long) number))
+	    {
+	      name = dollar_label_name ((long) number, 0);
+	      symbolP = symbol_find (name);
+	      know (symbolP != NULL);
+	    }
+	  else
+	    {
+	      name = dollar_label_name ((long) number, 1);
+	      symbolP = symbol_find_or_make (name);
+	    }
 
-#endif /* LOCAL_LABELS_FB */
-
-#ifdef LOCAL_LABELS_DOLLAR
-
-	case '$':
-	  {
-
-	    /* If the dollar label is *currently* defined, then this is just
-	       another reference to it.  If it is not *currently* defined,
-	       then this is a fresh instantiation of that number, so create
-	       it.  */
-
-	    if (dollar_label_defined ((long) number))
-	      {
-		name = dollar_label_name ((long) number, 0);
-		symbolP = symbol_find (name);
-		know (symbolP != NULL);
-	      }
-	    else
-	      {
-		name = dollar_label_name ((long) number, 1);
-		symbolP = symbol_find_or_make (name);
-	      }
-
-	    expressionP->X_op = O_symbol;
-	    expressionP->X_add_symbol = symbolP;
-	    expressionP->X_add_number = 0;
-
-	    break;
-	  }			/* case '$' */
-
-#endif /* LOCAL_LABELS_DOLLAR */
-
-	default:
-	  {
-	    expressionP->X_op = O_constant;
-	    expressionP->X_add_number = number;
-	    input_line_pointer--;	/* restore following character. */
-	    break;
-	  }			/* really just a number */
-
-	}			/* switch on char following the number */
-
+	  expressionP->X_op = O_symbol;
+	  expressionP->X_add_symbol = symbolP;
+	  expressionP->X_add_number = 0;
+	}			/* case '$' */
+      else
+	{
+	  expressionP->X_op = O_constant;
+#ifdef TARGET_WORD_SIZE
+	  /* Sign extend NUMBER.  */
+	  number |= (-(number >> (TARGET_WORD_SIZE - 1))) << (TARGET_WORD_SIZE - 1);
+#endif
+	  expressionP->X_add_number = number;
+	  input_line_pointer--;	/* restore following character. */
+	}			/* really just a number */
     }
   else
     {
@@ -372,6 +402,94 @@ integer_constant (radix, expressionP)
     }
 }
 
+/* Parse an MRI multi character constant.  */
+
+static void
+mri_char_constant (expressionP)
+     expressionS *expressionP;
+{
+  int i;
+
+  if (*input_line_pointer == '\''
+      && input_line_pointer[1] != '\'')
+    {
+      expressionP->X_op = O_constant;
+      expressionP->X_add_number = 0;
+      return;
+    }
+
+  /* In order to get the correct byte ordering, we must build the
+     number in reverse.  */
+  for (i = SIZE_OF_LARGE_NUMBER - 1; i >= 0; i--)
+    {
+      int j;
+
+      generic_bignum[i] = 0;
+      for (j = 0; j < CHARS_PER_LITTLENUM; j++)
+	{
+	  if (*input_line_pointer == '\'')
+	    {
+	      if (input_line_pointer[1] != '\'')
+		break;
+	      ++input_line_pointer;
+	    }
+	  generic_bignum[i] <<= 8;
+	  generic_bignum[i] += *input_line_pointer;
+	  ++input_line_pointer;
+	}
+
+      if (i < SIZE_OF_LARGE_NUMBER - 1)
+	{
+	  /* If there is more than one littlenum, left justify the
+             last one to make it match the earlier ones.  If there is
+             only one, we can just use the value directly.  */
+	  for (; j < CHARS_PER_LITTLENUM; j++)
+	    generic_bignum[i] <<= 8;
+	}
+
+      if (*input_line_pointer == '\''
+	  && input_line_pointer[1] != '\'')
+	break;
+    }
+
+  if (i < 0)
+    {
+      as_bad ("Character constant too large");
+      i = 0;
+    }
+
+  if (i > 0)
+    {
+      int c;
+      int j;
+
+      c = SIZE_OF_LARGE_NUMBER - i;
+      for (j = 0; j < c; j++)
+	generic_bignum[j] = generic_bignum[i + j];
+      i = c;
+    }
+
+  know (LITTLENUM_NUMBER_OF_BITS == 16);
+  if (i > 2)
+    {
+      expressionP->X_op = O_big;
+      expressionP->X_add_number = i;
+    }
+  else
+    {
+      expressionP->X_op = O_constant;
+      if (i < 2)
+	expressionP->X_add_number = generic_bignum[0] & LITTLENUM_MASK;
+      else
+	expressionP->X_add_number =
+	  (((generic_bignum[1] & LITTLENUM_MASK)
+	    << LITTLENUM_NUMBER_OF_BITS)
+	   | (generic_bignum[0] & LITTLENUM_MASK));
+    }
+
+  /* Skip the final closing quote.  */
+  ++input_line_pointer;
+}
 
 /*
  * Summary of operand().
@@ -408,17 +526,6 @@ operand (expressionP)
 
   switch (c)
     {
-#ifdef MRI
-    case '%':
-      integer_constant (2, expressionP);
-      break;
-    case '@':
-      integer_constant (8, expressionP);
-      break;
-    case '$':
-      integer_constant (16, expressionP);
-      break;
-#endif
     case '1':
     case '2':
     case '3':
@@ -430,17 +537,32 @@ operand (expressionP)
     case '9':
       input_line_pointer--;
 
-      integer_constant (10, expressionP);
+      integer_constant (flag_mri ? 0 : 10, expressionP);
       break;
 
     case '0':
       /* non-decimal radix */
 
+      if (flag_mri)
+	{
+	  char *s;
+
+	  /* Check for a hex constant.  */
+	  for (s = input_line_pointer; hex_p (*s); s++)
+	    ;
+	  if (*s == 'h' || *s == 'H')
+	    {
+	      --input_line_pointer;
+	      integer_constant (0, expressionP);
+	      break;
+	    }
+	}
+
       c = *input_line_pointer;
       switch (c)
 	{
-
 	default:
+	default_case:
 	  if (c && strchr (FLT_CHARS, c))
 	    {
 	      input_line_pointer++;
@@ -458,47 +580,53 @@ operand (expressionP)
 
 	case 'x':
 	case 'X':
+	  if (flag_mri)
+	    goto default_case;
 	  input_line_pointer++;
 	  integer_constant (16, expressionP);
 	  break;
 
 	case 'b':
-#ifdef LOCAL_LABELS_FB
-	  switch (input_line_pointer[1])
+	  if (LOCAL_LABELS_FB)
 	    {
-	    case '+':
-	    case '-':
-	      /* If unambiguously a difference expression, treat it as
-		 one by indicating a label; otherwise, it's always a
-		 binary number.  */
-	      {
-		char *cp = input_line_pointer + 1;
-		while (strchr ("0123456789", *++cp))
-		  ;
-		if (*cp == 'b' || *cp == 'f')
+	      switch (input_line_pointer[1])
+		{
+		case '+':
+		case '-':
+		  /* If unambiguously a difference expression, treat
+		     it as one by indicating a label; otherwise, it's
+		     always a binary number.  */
+		  {
+		    char *cp = input_line_pointer + 1;
+		    while (strchr ("0123456789", *++cp))
+		      ;
+		    if (*cp == 'b' || *cp == 'f')
+		      goto is_0b_label;
+		  }
+		  goto is_0b_binary;
+		case '0':    case '1':
+		  /* Some of our code elsewhere does permit digits
+		     greater than the expected base; for consistency,
+		     do the same here.  */
+		case '2':    case '3':    case '4':    case '5':
+		case '6':    case '7':    case '8':    case '9':
+		  goto is_0b_binary;
+		case 0:
 		  goto is_0b_label;
-	      }
-	      goto is_0b_binary;
-	    case '0':    case '1':
-	      /* Some of our code elsewhere does permit digits greater
-		 than the expected base; for consistency, do the same
-		 here.  */
-	    case '2':    case '3':    case '4':    case '5':
-	    case '6':    case '7':    case '8':    case '9':
-	      goto is_0b_binary;
-	    case 0:
-	      goto is_0b_label;
-	    default:
-	      goto is_0b_label;
+		default:
+		  goto is_0b_label;
+		}
+	    is_0b_label:
+	      input_line_pointer--;
+	      integer_constant (10, expressionP);
+	      break;
+	    is_0b_binary:
+	      ;
 	    }
-	is_0b_label:
-	  input_line_pointer--;
-	  integer_constant (10, expressionP);
-	  break;
-	is_0b_binary:
-#endif
 	case 'B':
 	  input_line_pointer++;
+	  if (flag_mri)
+	    goto default_case;
 	  integer_constant (2, expressionP);
 	  break;
 
@@ -510,47 +638,49 @@ operand (expressionP)
 	case '5':
 	case '6':
 	case '7':
-	  integer_constant (8, expressionP);
+	  integer_constant (flag_mri ? 0 : 8, expressionP);
 	  break;
 
 	case 'f':
-#ifdef LOCAL_LABELS_FB
-	  /* If it says "0f" and it could possibly be a floating point
-	     number, make it one.  Otherwise, make it a local label,
-	     and try to deal with parsing the rest later.  */
-	  if (!input_line_pointer[1]
-	      || (is_end_of_line[0xff & input_line_pointer[1]]))
-	    goto is_0f_label;
-	  {
-	    char *cp = input_line_pointer + 1;
-	    int r = atof_generic (&cp, ".", EXP_CHARS,
-				  &generic_floating_point_number);
-	    switch (r)
+	  if (LOCAL_LABELS_FB)
+	    {
+	      /* If it says "0f" and it could possibly be a floating point
+		 number, make it one.  Otherwise, make it a local label,
+		 and try to deal with parsing the rest later.  */
+	      if (!input_line_pointer[1]
+		  || (is_end_of_line[0xff & input_line_pointer[1]]))
+		goto is_0f_label;
 	      {
-	      case 0:
-	      case ERROR_EXPONENT_OVERFLOW:
-		if (*cp == 'f' || *cp == 'b')
-		  /* looks like a difference expression */
-		  goto is_0f_label;
-		else
-		  goto is_0f_float;
-	      default:
-		as_fatal ("expr.c(operand): bad atof_generic return val %d",
-			  r);
+		char *cp = input_line_pointer + 1;
+		int r = atof_generic (&cp, ".", EXP_CHARS,
+				      &generic_floating_point_number);
+		switch (r)
+		  {
+		  case 0:
+		  case ERROR_EXPONENT_OVERFLOW:
+		    if (*cp == 'f' || *cp == 'b')
+		      /* looks like a difference expression */
+		      goto is_0f_label;
+		    else
+		      goto is_0f_float;
+		  default:
+		    as_fatal ("expr.c(operand): bad atof_generic return val %d",
+			      r);
+		  }
 	      }
-	  }
 
-	  /* Okay, now we've sorted it out.  We resume at one of these
-	     two labels, depending on what we've decided we're probably
-	     looking at.  */
-	is_0f_label:
-	  input_line_pointer--;
-	  integer_constant (10, expressionP);
-	  break;
+	      /* Okay, now we've sorted it out.  We resume at one of these
+		 two labels, depending on what we've decided we're probably
+		 looking at.  */
+	    is_0f_label:
+	      input_line_pointer--;
+	      integer_constant (10, expressionP);
+	      break;
 
-	is_0f_float:
-	  /* fall through */
-#endif
+	    is_0f_float:
+	      /* fall through */
+	      ;
+	    }
 
 	case 'd':
 	case 'D':
@@ -565,11 +695,14 @@ operand (expressionP)
 	  expressionP->X_add_number = -(isupper (c) ? tolower (c) : c);
 	  break;
 
-#ifdef LOCAL_LABELS_DOLLAR
 	case '$':
-	  integer_constant (10, expressionP);
-	  break;
-#endif
+	  if (LOCAL_LABELS_DOLLAR)
+	    {
+	      integer_constant (10, expressionP);
+	      break;
+	    }
+	  else
+	    goto default_case;
 	}
 
       break;
@@ -579,8 +712,8 @@ operand (expressionP)
       /* didn't begin with digit & not a name */
       segment = expression (expressionP);
       /* Expression() will pass trailing whitespace */
-      if (c == '(' && *input_line_pointer++ != ')' ||
-	  c == '[' && *input_line_pointer++ != ']') 
+      if ((c == '(' && *input_line_pointer++ != ')')
+	  || (c == '[' && *input_line_pointer++ != ']'))
 	{
 	  as_bad ("Missing ')' assumed");
 	  input_line_pointer--;
@@ -588,18 +721,40 @@ operand (expressionP)
       /* here with input_line_pointer->char after "(...)" */
       return segment;
 
+    case 'E':
+      if (! flag_mri || *input_line_pointer != '\'')
+	goto de_fault;
+      as_bad ("EBCDIC constants are not supported");
+      /* Fall through.  */
+    case 'A':
+      if (! flag_mri || *input_line_pointer != '\'')
+	goto de_fault;
+      ++input_line_pointer;
+      /* Fall through.  */
     case '\'':
-      /* Warning: to conform to other people's assemblers NO ESCAPEMENT is
-	 permitted for a single quote. The next character, parity errors and
-	 all, is taken as the value of the operand. VERY KINKY.  */
-      expressionP->X_op = O_constant;
-      expressionP->X_add_number = *input_line_pointer++;
+      if (! flag_mri)
+	{
+	  /* Warning: to conform to other people's assemblers NO
+	     ESCAPEMENT is permitted for a single quote. The next
+	     character, parity errors and all, is taken as the value
+	     of the operand. VERY KINKY.  */
+	  expressionP->X_op = O_constant;
+	  expressionP->X_add_number = *input_line_pointer++;
+	  break;
+	}
+
+      mri_char_constant (expressionP);
       break;
 
     case '+':
       (void) operand (expressionP);
       break;
 
+    case '"':
+      /* Double quote is the logical not operator in MRI mode.  */
+      if (! flag_mri)
+	goto de_fault;
+      /* Fall through.  */
     case '~':
     case '-':
       {
@@ -633,10 +788,22 @@ operand (expressionP)
       }
       break;
 
-    case '.':
-#ifdef DOLLAR_DOT
     case '$':
+      /* $ is the program counter when in MRI mode, or when DOLLAR_DOT
+         is defined.  */
+#ifndef DOLLAR_DOT
+      if (! flag_mri)
+	goto de_fault;
 #endif
+      if (flag_mri && hex_p (*input_line_pointer))
+	{
+	  /* In MRI mode, $ is also used as the prefix for a
+             hexadecimal constant.  */
+	  integer_constant (16, expressionP);
+	  break;
+	}
+      /* Fall through.  */
+    case '.':
       if (!is_part_of_name (*input_line_pointer))
 	{
 	  const char *fake;
@@ -665,10 +832,33 @@ operand (expressionP)
       /* can't imagine any other kind of operand */
       expressionP->X_op = O_absent;
       input_line_pointer--;
-      md_operand (expressionP);
+      break;
+
+    case '%':
+      if (! flag_mri)
+	goto de_fault;
+      integer_constant (2, expressionP);
+      break;
+
+    case '@':
+      if (! flag_mri)
+	goto de_fault;
+      integer_constant (8, expressionP);
+      break;
+
+    case ':':
+      if (! flag_mri)
+	goto de_fault;
+
+      /* In MRI mode, this is a floating point constant represented
+         using hexadecimal digits.  */
+
+      ++input_line_pointer;
+      integer_constant (16, expressionP);
       break;
 
     default:
+    de_fault:
       if (is_end_of_line[(unsigned char) c])
 	goto eol;
       if (is_name_beginner (c))	/* here if did not begin with a digit */
@@ -705,10 +895,22 @@ operand (expressionP)
 	}
       else
 	{
-	  as_bad ("Bad expression");
-	  expressionP->X_op = O_constant;
-	  expressionP->X_add_number = 0;
+	  /* Let the target try to parse it.  Success is indicated by changing
+	     the X_op field to something other than O_absent and pointing
+	     input_line_pointer passed the expression.  If it can't parse the
+	     expression, X_op and input_line_pointer should be unchanged.  */
+	  expressionP->X_op = O_absent;
+	  --input_line_pointer;
+	  md_operand (expressionP);
+	  if (expressionP->X_op == O_absent)
+	    {
+	      ++input_line_pointer;
+	      as_bad ("Bad expression");
+	      expressionP->X_op = O_constant;
+	      expressionP->X_add_number = 0;
+	    }
 	}
+      break;
     }
 
   /*
@@ -820,10 +1022,10 @@ static const operatorT op_encoding[256] =
   __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
 
-  __, O_bit_or_not, __, __, __, O_modulus, O_bit_and, __,
+  __, O_bit_or_not, O_bit_not, __, __, O_modulus, O_bit_and, __,
   __, __, O_multiply, O_add, __, O_subtract, __, O_divide,
   __, __, __, __, __, __, __, __,
-  __, __, __, __, O_left_shift, __, O_right_shift, __,
+  __, __, __, __, O_lt, __, O_gt, __,
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
@@ -847,12 +1049,14 @@ static const operatorT op_encoding[256] =
 /*
  *	Rank	Examples
  *	0	operand, (expression)
- *	1	+ -
- *	2	& ^ ! |
- *	3	* / % << >>
- *	4	unary - unary ~
+ *	1	= <> < <= >= >
+ *	2	+ -
+ *	3	used for * / % in MRI mode
+ *	4	& ^ ! |
+ *	5	* / % << >>
+ *	6	unary - unary ~
  */
-static const operator_rankT op_rank[] =
+static operator_rankT op_rank[] =
 {
   0,	/* O_illegal */
   0,	/* O_absent */
@@ -860,21 +1064,109 @@ static const operator_rankT op_rank[] =
   0,	/* O_symbol */
   0,	/* O_register */
   0,	/* O_bit */
-  4,	/* O_uminus */
-  4,	/* O_bit_now */
-  3,	/* O_multiply */
-  3,	/* O_divide */
-  3,	/* O_modulus */
-  3,	/* O_left_shift */
-  3,	/* O_right_shift */
-  2,	/* O_bit_inclusive_or */
-  2,	/* O_bit_or_not */
-  2,	/* O_bit_exclusive_or */
-  2,	/* O_bit_and */
-  1,	/* O_add */
-  1,	/* O_subtract */
+  6,	/* O_uminus */
+  6,	/* O_bit_not */
+  5,	/* O_multiply */
+  5,	/* O_divide */
+  5,	/* O_modulus */
+  5,	/* O_left_shift */
+  5,	/* O_right_shift */
+  4,	/* O_bit_inclusive_or */
+  4,	/* O_bit_or_not */
+  4,	/* O_bit_exclusive_or */
+  4,	/* O_bit_and */
+  2,	/* O_add */
+  2,	/* O_subtract */
+  1,	/* O_eq */
+  1,	/* O_ne */
+  1,	/* O_lt */
+  1,	/* O_le */
+  1,	/* O_ge */
+  1	/* O_gt */
 };
+
+/* Initialize the expression parser.  */
+
+void
+expr_begin ()
+{
+  /* In MRI mode, multiplication and division have lower precedence
+     than the bit wise operators.  */
+  if (flag_mri)
+    {
+      op_rank[O_multiply] = 3;
+      op_rank[O_divide] = 3;
+      op_rank[O_modulus] = 3;
+    }
+}
 
+/* Return the encoding for the operator at INPUT_LINE_POINTER.
+   Advance INPUT_LINE_POINTER to the last character in the operator
+   (i.e., don't change it for a single character operator).  */
+
+static inline operatorT
+operator ()
+{
+  int c;
+  operatorT ret;
+
+  c = *input_line_pointer;
+
+  switch (c)
+    {
+    default:
+      return op_encoding[c];
+
+    case '<':
+      switch (input_line_pointer[1])
+	{
+	default:
+	  return op_encoding[c];
+	case '<':
+	  ret = O_left_shift;
+	  break;
+	case '>':
+	  ret = O_ne;
+	  break;
+	case '=':
+	  ret = O_le;
+	  break;
+	}
+      ++input_line_pointer;
+      return ret;
+
+    case '>':
+      switch (input_line_pointer[1])
+	{
+	default:
+	  return op_encoding[c];
+	case '>':
+	  ret = O_right_shift;
+	  break;
+	case '=':
+	  ret = O_ge;
+	  break;
+	}
+      ++input_line_pointer;
+      return ret;
+
+    case '!':
+      /* We accept !! as equivalent to ^ for MRI compatibility.  */
+      if (input_line_pointer[1] != '!')
+	{
+	  if (flag_mri)
+	    return O_bit_inclusive_or;
+	  return op_encoding[c];
+	}
+      ++input_line_pointer;
+      return O_bit_exclusive_or;
+    }
+
+  /*NOTREACHED*/
+}	
+
+/* Parse an expression.  */
+
 segT
 expr (rank, resultP)
      operator_rankT rank;	/* Larger # is higher rank. */
@@ -883,9 +1175,7 @@ expr (rank, resultP)
   segT retval;
   expressionS right;
   operatorT op_left;
-  char c_left;		/* 1st operator character. */
   operatorT op_right;
-  char c_right;
 
   know (rank >= 0);
 
@@ -893,16 +1183,12 @@ expr (rank, resultP)
 
   know (*input_line_pointer != ' ');	/* Operand() gobbles spaces. */
 
-  c_left = *input_line_pointer;	/* Potential operator character. */
-  op_left = op_encoding[(unsigned char) c_left];
+  op_left = operator ();
   while (op_left != O_illegal && op_rank[(int) op_left] > rank)
     {
       segT rightseg;
 
       input_line_pointer++;	/*->after 1st character of operator. */
-      /* Operators "<<" and ">>" have 2 characters. */
-      if (*input_line_pointer == c_left && (c_left == '<' || c_left == '>'))
-	++input_line_pointer;
 
       rightseg = expr (op_rank[(int) op_left], &right);
       if (right.X_op == O_absent)
@@ -931,10 +1217,7 @@ expr (rank, resultP)
 	       )
 	as_bad ("operation combines symbols in different segments");
 
-      c_right = *input_line_pointer;
-      op_right = op_encoding[(unsigned char) c_right];
-      if (*input_line_pointer == c_right && (c_right == '<' || c_right == '>'))
-	++input_line_pointer;
+      op_right = operator ();
 
       know (op_right == O_illegal || op_rank[(int) op_right] <= op_rank[(int) op_left]);
       know ((int) op_left >= (int) O_multiply && (int) op_left <= (int) O_subtract);
@@ -946,8 +1229,8 @@ expr (rank, resultP)
 
       if (resultP->X_op == O_big)
 	{
-	  as_warn ("left operand of %c is a %s; integer 0 assumed",
-		   c_left, resultP->X_add_number > 0 ? "bignum" : "float");
+	  as_warn ("left operand is a %s; integer 0 assumed",
+		   resultP->X_add_number > 0 ? "bignum" : "float");
 	  resultP->X_op = O_constant;
 	  resultP->X_add_number = 0;
 	  resultP->X_add_symbol = NULL;
@@ -955,8 +1238,8 @@ expr (rank, resultP)
 	}
       if (right.X_op == O_big)
 	{
-	  as_warn ("right operand of %c is a %s; integer 0 assumed",
-		   c_left, right.X_add_number > 0 ? "bignum" : "float");
+	  as_warn ("right operand is a %s; integer 0 assumed",
+		   right.X_add_number > 0 ? "bignum" : "float");
 	  right.X_op = O_constant;
 	  right.X_add_number = 0;
 	  right.X_add_symbol = NULL;
@@ -964,22 +1247,7 @@ expr (rank, resultP)
 	}
 
       /* Optimize common cases.  */
-#if 0
-      if (op_left == O_add && resultP->X_got_symbol)
-	{
-	  /* XXX - kludge here to accomodate "_GLOBAL_OFFSET_TABLE + (x - y)"
-	   * expressions: this only works for this special case, the
-	   * _GLOBAL_OFFSET_TABLE thing *must* be the left operand, the whole
-	   * expression is given the segment of right expression (always a DIFFERENCE,
-	   * which should get resolved by fixup_segment())
-	   */
-	  resultP->X_op = right.X_op;
-	  resultP->X_add_symbol = right.X_add_symbol;
-	  resultP->X_op_symbol = right.X_op_symbol;
-	}
-      else
-#endif
-	if (op_left == O_add && right.X_op == O_constant)
+      if (op_left == O_add && right.X_op == O_constant)
 	{
 	  /* X + constant.  */
 	  resultP->X_add_number += right.X_add_number;
@@ -1024,6 +1292,7 @@ expr (rank, resultP)
 	    }
 	  switch (op_left)
 	    {
+	    default:			abort ();
 	    case O_multiply:		resultP->X_add_number *= v; break;
 	    case O_divide:		resultP->X_add_number /= v; break;
 	    case O_modulus:		resultP->X_add_number %= v; break;
@@ -1035,7 +1304,30 @@ expr (rank, resultP)
 	    case O_bit_and:		resultP->X_add_number &= v; break;
 	    case O_add:			resultP->X_add_number += v; break;
 	    case O_subtract:		resultP->X_add_number -= v; break;
-	    default:			abort ();
+	    case O_eq:
+	      resultP->X_add_number =
+		resultP->X_add_number == v ? ~ (offsetT) 0 : 0;
+	      break;
+	    case O_ne:
+	      resultP->X_add_number =
+		resultP->X_add_number != v ? ~ (offsetT) 0 : 0;
+	      break;
+	    case O_lt:
+	      resultP->X_add_number =
+		resultP->X_add_number <  v ? ~ (offsetT) 0 : 0;
+	      break;
+	    case O_le:
+	      resultP->X_add_number =
+		resultP->X_add_number <= v ? ~ (offsetT) 0 : 0;
+	      break;
+	    case O_ge:
+	      resultP->X_add_number =
+		resultP->X_add_number >= v ? ~ (offsetT) 0 : 0;
+	      break;
+	    case O_gt:
+	      resultP->X_add_number =
+		resultP->X_add_number >  v ? ~ (offsetT) 0 : 0;
+	      break;
 	    }
 	}
       else if (resultP->X_op == O_symbol
