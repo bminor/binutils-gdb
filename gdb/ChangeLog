@@ -1,5 +1,9 @@
 2001-05-21  Jim Blandy  <jimb@redhat.com>
 
+	* values.c (value_primitive_field): If we're extracting a base
+	class, then the type of the result should be the base class being
+	extracted, not the type of which it is a base class.
+
 	* value.h (struct value): Doc fix, and rearrange members to place
 	them near their explanations.
 

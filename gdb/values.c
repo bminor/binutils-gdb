@@ -856,7 +856,7 @@ value_primitive_field (register value_ptr arg1, int offset,
          entire object's contents for later references to virtual
          bases, etc.  */
       v = allocate_value (VALUE_ENCLOSING_TYPE (arg1));
-      VALUE_TYPE (v) = arg_type;
+      VALUE_TYPE (v) = type;
       if (VALUE_LAZY (arg1))
 	VALUE_LAZY (v) = 1;
       else
