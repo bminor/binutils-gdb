@@ -1,3 +1,9 @@
+2003-02-06  Raoul Gough  <RaoulGough@yahoo.co.uk>
+
+	* win32-nat.c (get_relocated_section_addrs): New function.  Find
+	section load addresses for symbol handling in relocated DLLs.
+	(solib_symbols_add): Open a bfd and call get_relocated_section_addrs.
+
 2003-02-05  Fred Fish  <fnf@intrinsity.com>
 
 	* remote-e7000.c (e7000_drain_command): Fix precedence problem with

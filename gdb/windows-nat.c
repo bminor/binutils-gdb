@@ -749,12 +749,67 @@ child_clear_solibs (void)
   solib_end = &solib_start;
   max_dll_name_len = sizeof ("DLL Name") - 1;
 }
+
+/* Get the loaded address of all sections, given that .text was loaded
+   at text_load. Assumes that all sections are subject to the same
+   relocation offset. Returns NULL if problems occur or if the
+   sections were not relocated. */
 
+static struct section_addr_info *
+get_relocated_section_addrs (bfd *abfd, CORE_ADDR text_load)
+{
+  struct section_addr_info *result = NULL;
+  int section_count = bfd_count_sections (abfd);
+  asection *text_section = bfd_get_section_by_name (abfd, ".text");
+  CORE_ADDR text_vma;
+
+  if (!text_section)
+    {
+      /* Couldn't get the .text section. Weird. */
+    }
+
+  else if (text_load == (text_vma = bfd_get_section_vma (abfd, text_section)))
+    {
+      /* DLL wasn't relocated. */
+    }
+
+  else
+    {
+      /* Figure out all sections' loaded addresses. The offset here is
+	 such that taking a bfd_get_section_vma() result and adding
+	 offset will give the real load address of the section. */
+
+      CORE_ADDR offset = text_load - text_vma;
+
+      struct section_table *table_start = NULL;
+      struct section_table *table_end = NULL;
+      struct section_table *iter = NULL;
+
+      build_section_table (abfd, &table_start, &table_end);
+
+      for (iter = table_start; iter < table_end; ++iter)
+	{
+	  /* Relocated addresses. */
+	  iter->addr += offset;
+	  iter->endaddr += offset;
+	}
+
+      result = build_section_addr_info_from_section_table (table_start,
+							   table_end);
+
+      xfree (table_start);
+    }
+
+  return result;
+}
+
 /* Add DLL symbol information. */
 static struct objfile *
 solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
 {
-  struct section_addr_info section_addrs;
+  struct section_addr_info *section_addrs_ptr = NULL;
+  static struct objfile *result = NULL;
+  bfd *abfd = NULL;
 
   /* The symbols in a dll are offset by 0x1000, which is the
      the offset from 0 of the first byte in an image - because
@@ -763,10 +818,46 @@ solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
   if (!name || !name[0])
     return NULL;
 
-  memset (&section_addrs, 0, sizeof (section_addrs));
-  section_addrs.other[0].name = ".text";
-  section_addrs.other[0].addr = load_addr;
-  return safe_symbol_file_add (name, from_tty, &section_addrs, 0, OBJF_SHARED);
+  abfd = bfd_openr (name, "pei-i386");
+
+  if (!abfd)
+    {
+      /* pei failed - try pe */
+      abfd = bfd_openr (name, "pe-i386");
+    }
+
+  if (abfd)
+    {
+      if (bfd_check_format (abfd, bfd_object))
+	{
+	  section_addrs_ptr = get_relocated_section_addrs (abfd, load_addr);
+	}
+
+      bfd_close (abfd);
+    }
+
+  if (section_addrs_ptr)
+    {
+      result = safe_symbol_file_add (name, from_tty, section_addrs_ptr,
+				     0, OBJF_SHARED);
+
+      free_section_addr_info (section_addrs_ptr);
+    }
+
+  else
+    {
+      /* Fallback on handling just the .text section. */
+      struct section_addr_info section_addrs;
+
+      memset (&section_addrs, 0, sizeof (section_addrs));
+      section_addrs.other[0].name = ".text";
+      section_addrs.other[0].addr = load_addr;
+
+      result = safe_symbol_file_add (name, from_tty, &section_addrs,
+				     0, OBJF_SHARED);
+    }
+
+  return result;
 }
 
 /* Load DLL symbol info. */
