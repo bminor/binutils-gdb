@@ -1,5 +1,9 @@
 2003-06-27  Elena Zannoni  <ezannoni@redhat.com>
 
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Add linux-nat.o.
+
+2003-06-27  Elena Zannoni  <ezannoni@redhat.com>
+
         * symfile.c (syms_from_objfile): Move variables to inner block.
         Move the checks for the non-mainline case a bit earlier to avoid
         doing some useless computations.
