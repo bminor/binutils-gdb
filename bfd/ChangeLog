@@ -1,3 +1,49 @@
+Wed Dec  2 15:03:59 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	The following changes were made by David Taylor
+ 	<taylor@texas.cygnus.com>, Edith Epstein
+ 	<eepstein@sophia.cygnus.com>, Jim Blandy
+ 	<jimb@zwingli.cygnus.com>, and Elena Zannoni
+ 	<ezannoni@kwikemart.cygnus.com> as part of the project to merge in
+ 	changes originally made by HP; HP did not create ChangeLog
+ 	entries.
+
+	* aclocal.m4, configure, Makefile.in: Rebuilt using latest
+ 	automake macro library.
+	
+	* hpux-core.c (hpux_core_core_file_p): this function now
+ 	understands HPUX 10.30 thread info. Yes, the thread stacks can be
+ 	found in the corefile! Also, in hpux_core_core_file_p, if we
+ 	encounter a section with an unknown type, don't punt.  Instead,
+ 	just skip it.  Also, count the number of sections of known type
+ 	that we encounter.  If we encounter at least one good one, then
+ 	we'll declare that the file is a core file.  If we encounter any
+ 	unknown ones but some known ones, then we'll issue a warning (but
+ 	still declare it to be a core file). Also, correctly decide when a
+ 	file is not a core.
+	(PROC_INFO_HAS_THREAD_ID): define if CORE_ANON_SHMEM defined.
+	(CORE_ANON_SHMEM): define if not defined.
+	(hpux_core_struct): add members lwpid and user_tid.
+	(core_kernel_thread_id, core_user_thread_id): new macros.
+	(make_bfd_asection): use bfd_alloc to allocate room for a copy of
+ 	the name before storing it in the bfd.
+	(hpux_core_core_file_p): handle threads.
+
+	* libhppa.h (GET_FIELD): protect against redefinition.
+	(HPPA_WIDE): define.
+	(GET_FIELD): define.
+	(GET_BIT): define.
+	(MASK): define.
+	(CATENATE): define.
+	(ELEVEN): define.
+	(sign_extend): redefine.
+	(assemble_6): define.
+	(assemble_12): rewrite.
+	(assemble_16): define.
+	(assemble_16a): define.
+	(assemble_17): rewrite.
+	(assemble_22): define.
+
 1998-12-07  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-fr30.c (fr30_final_link_relocate): Using signed
