@@ -110,6 +110,7 @@ struct external_scnhdr {
 #define _TEXT	".text"
 #define _DATA	".data"
 #define _BSS	".bss"
+#define _COMMENT ".comment"
 
 /*
  * s_flags "type"
