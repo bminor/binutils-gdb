@@ -1,7 +1,7 @@
 # Sed commands that finish translating the GDB Unix Makefile to MPW syntax.
 
-/^host_alias =/d
-/^target_alias =/d
+/^host_alias =/s/^/#/
+/^target_alias =/s/^/#/
 
 /^host_makefile_frag@$/d
 /^target_makefile_frag@$/d
@@ -39,6 +39,8 @@
 /@ENABLE_OBS@/s/@ENABLE_OBS@//g
 
 /@ENABLE_CLIBS@/s/@ENABLE_CLIBS@//g
+
+/@LIBS@/s/@LIBS@//g
 
 /INCLUDE_DIR/s/"{s}"{INCLUDE_DIR}/{INCLUDE_DIR}/g
 /INCLUDE_DIR/s/{INCLUDE_DIR}:/{INCLUDE_DIR}/g
@@ -146,7 +148,9 @@ install-only \\Option-f \
 # Don't do any recursive subdir stuff.
 / subdir_do/s/{MAKE}/null-command/
 
+# Edit out actions that only confuse MPW Make.
 /^config.status \\Option-f/,/^$/d
+/^Makefile \\Option-f/,/^$/d
 
 # Add an action to build SIOWgdb.
 $a\

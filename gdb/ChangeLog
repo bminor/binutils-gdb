@@ -1,3 +1,9 @@
+Thu Feb 15 15:25:34 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Edit out makefile rebuild rule.
+	(host_alias, target_alias): Comment out instead of deleting.
+	(@LIBS@): Edit out references.
+
 Tue Feb 13 22:56:46 1996  Fred Fish  <fnf@cygnus.com>
 
 	* symfile.c (add_psymbol_to_list, add_psymbol_addr_to_list):
