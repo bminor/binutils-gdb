@@ -70,4 +70,7 @@ if ![set_lang_chill] then {
     send "next\n" ; expect -re "$prompt $"
     # check too many array elements
     gdb_test {set var v_x := [1,2,3,4,5]} {Too many array elements}
+    gdb_test {set var $i := m_x[(3): 22, 25]} {Too many array elements}
+    send "set var \$i := m_x\[\(2\): 22, 25\]\n" ; expect -re "$prompt $"
+    gdb_test {print $i} { = \[\(1\): 0, \(2\): 22, \(3\): 25\]}
 }
