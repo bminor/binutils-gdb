@@ -419,16 +419,17 @@ bfd_target *target_vector[] = {
 	&aout_mips_little_vec,
 	&b_out_vec_big_host,
 	&b_out_vec_little_host,
-#if 0				/* No one seems to use this.  */
+
+	/* This, and other vectors, may not be used in any *.mt configuration.
+	   But that does not mean they are unnecessary.  If configured
+	   --with-targets=all, objdump or gdb should be able to examine
+	   the file even if we don't recognize the machine type.  */
 	&bfd_elf32_big_generic_vec,
-#endif
 	&bfd_elf32_bigmips_vec,
 	&bfd_elf32_hppa_vec,
 	&bfd_elf32_i386_vec,
 	&bfd_elf32_i860_vec,
-#if 0				/* No one seems to use this.  */
 	&bfd_elf32_little_generic_vec,
-#endif
 	&bfd_elf32_littlemips_vec,
 	&bfd_elf32_m68k_vec,
 	&bfd_elf32_m88k_vec,
@@ -453,6 +454,8 @@ bfd_target *target_vector[] = {
 	&h8300coff_vec,
 	&h8500coff_vec,
 #if 0
+	/* Since a.out files lack decent magic numbers, no way to recognize
+	   which kind of a.out file it is.  */
 	&host_aout_vec,
 #endif
 #if 0				/* Clashes with sunos_big_vec magic no.  */
@@ -467,6 +470,8 @@ bfd_target *target_vector[] = {
 	&netbsd386_vec,
 	&i386coff_vec,
 #if 0
+	/* Since a.out files lack decent magic numbers, no way to recognize
+	   which kind of a.out file it is.  */
 	&i386linux_vec,
 #endif
 	&i386lynx_aout_vec,
@@ -480,13 +485,9 @@ bfd_target *target_vector[] = {
 	&m68klynx_coff_vec,
 	&m88kbcs_vec,
 	&newsos3_vec,
-#if 0				/* No one seems to use this.  */
 	&nlm32_big_generic_vec,
-#endif
 	&nlm32_i386_vec,
-#if 0				/* No one seems to use this.  */
 	&nlm32_little_generic_vec,
-#endif
 #ifdef BFD64
 	&nlm64_big_generic_vec,
 	&nlm64_little_generic_vec,
@@ -524,9 +525,6 @@ bfd_target *target_vector[] = {
 #endif
 #ifdef OSF_CORE
 	&osf_core_vec,
-#endif
-#ifdef	SCO_CORE
-	&sco_core_vec,
 #endif
 #ifdef	TRAD_CORE
 	&trad_core_vec,

@@ -1,3 +1,10 @@
+Tue Oct 26 16:21:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* targets.c (target_vector): Remove SCO_CORE.  On Sep 11 1993,
+	we started using trad-core.c for SCO instead.
+
+	* targets.c (target_vector): Re-enable generic ELF and NLM targets.
+
 Tue Oct 26 16:53:12 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (assign_file_position_for_section): Align sh_offset to
