@@ -862,10 +862,10 @@ resolve_symbol_value (symp, finalize)
       struct local_symbol *locsym = (struct local_symbol *) symp;
 
       if (local_symbol_resolved_p (locsym))
-	return locsym->lsy_offset;
+	return locsym->lsy_offset / OCTETS_PER_BYTE;
 
       final_val = (local_symbol_get_frag (locsym)->fr_address
-		   + locsym->lsy_offset);
+		   + locsym->lsy_offset) / OCTETS_PER_BYTE;
 
       if (finalize)
 	{
@@ -921,7 +921,7 @@ resolve_symbol_value (symp, finalize)
 	  /* Fall through.  */
 
 	case O_constant:
-	  final_val += symp->sy_frag->fr_address;
+	  final_val += symp->sy_frag->fr_address / OCTETS_PER_BYTE;
 	  if (final_seg == expr_section)
 	    final_seg = absolute_section;
 	  resolved = 1;

@@ -1,3 +1,35 @@
+2000-02-03  Timothy Wall  <twall@cygnus.com>
+	
+	* as.h: Define OCTETS_PER_BYTE and OCTETS_PER_BYTE_POWER
+	default	values.
+	* frags.c (frag_new): Calculate fr_fix in octets
+	(frag_now_fix) Return offset as target address offset (bytes).
+	(frag_now_fix_octets) New - Return offset in octets (8-bit
+	quantities). 
+	* frags.h: Added prototype for frag_now_fix_octets().
+	Distinguish between octets and bytes in field descriptions.
+	* listing.c (calc_hex): Account for octets vs bytes when
+	printing addresses/offsets.
+	(print_lines) Ditto.  Also, if LISTING_WORD_SIZE is not 1, and
+	target is little-endian, print the octets in a word in big-endian
+	order so that the display looks like a proper hexadecimal number,
+	instead of having the octets reversed.
+	* read.c (do_align): When recording alignment, alignment power
+	should be in terms of target bytes (minimum addressible unit)
+	instead of octets.
+	(do_org) Convert ORG target address (byte) argument into an
+	octet offset when generating a variable fragment.
+	* symbols.c (resolve_symbol_value): Symbol final value
+	converted to a target address offset (bytes) from its octet offset.
+	* config/obj-coff.c (coff_frob_symbol): Symbol target address
+	offset (bytes) is adjusted by the frag offset (octets) converted
+	to bytes.
+	(coff_frob_section) Section alignment power is in terms of bytes;
+	convert it to an octet alignment power when calculating size (and
+	size mask) in octets.  Don't modify the section size in order to
+	"align" it for TI COFF, since that format has a different method
+	for storing alignment information.
+	
 2000-02-01  Timothy Wall  <twall@cygnus.com>
 
 	* stabs.c (generate_asm_file): Escape backslashes in stabs file

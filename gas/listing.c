@@ -596,7 +596,7 @@ calc_hex (list)
   unsigned int address = ~ (unsigned int) 0;
   fragS *frag;
   fragS *frag_ptr;
-  unsigned int byte_in_frag;
+  unsigned int octet_in_frag;
 
   /* Find first frag which says it belongs to this line */
   frag = list->frag;
@@ -611,33 +611,33 @@ calc_hex (list)
   while (frag_ptr != (fragS *) NULL && frag_ptr->line == first)
     {
       /* Print as many bytes from the fixed part as is sensible */
-      byte_in_frag = 0;
-      while ((offsetT) byte_in_frag < frag_ptr->fr_fix
+      octet_in_frag = 0;
+      while ((offsetT) octet_in_frag < frag_ptr->fr_fix
 	     && data_buffer_size < MAX_BYTES - 3)
 	{
 	  if (address == ~ (unsigned int) 0)
 	    {
-	      address = frag_ptr->fr_address;
+	      address = frag_ptr->fr_address / OCTETS_PER_BYTE;
 	    }
 
 	  sprintf (data_buffer + data_buffer_size,
 		   "%02X",
-		   (frag_ptr->fr_literal[byte_in_frag]) & 0xff);
+		   (frag_ptr->fr_literal[octet_in_frag]) & 0xff);
 	  data_buffer_size += 2;
-	  byte_in_frag++;
+	  octet_in_frag++;
 	}
       {
-	unsigned int var_rep_max = byte_in_frag;
-	unsigned int var_rep_idx = byte_in_frag;
+	unsigned int var_rep_max = octet_in_frag;
+	unsigned int var_rep_idx = octet_in_frag;
 
 	/* Print as many bytes from the variable part as is sensible */
-	while (((offsetT) byte_in_frag
-		< frag_ptr->fr_fix + frag_ptr->fr_var * frag_ptr->fr_offset)
+	while (((offsetT) octet_in_frag
+		< (frag_ptr->fr_fix + frag_ptr->fr_var * frag_ptr->fr_offset))
 	       && data_buffer_size < MAX_BYTES - 3)
 	  {
 	    if (address == ~ (unsigned int) 0)
 	      {
-		address = frag_ptr->fr_address;
+		address = frag_ptr->fr_address / OCTETS_PER_BYTE;
 	      }
 	    sprintf (data_buffer + data_buffer_size,
 		     "%02X",
@@ -649,7 +649,7 @@ calc_hex (list)
 	    data_buffer_size += 2;
 
 	    var_rep_idx++;
-	    byte_in_frag++;
+	    octet_in_frag++;
 
 	    if ((offsetT) var_rep_idx >= frag_ptr->fr_fix + frag_ptr->fr_var)
 	      var_rep_idx = var_rep_max;
@@ -677,8 +677,10 @@ print_lines (list, lineno, string, address)
   unsigned int idx;
   unsigned int nchars;
   unsigned int lines;
-  unsigned int byte_in_word = 0;
+  unsigned int octet_in_word = 0;
   char *src = data_buffer;
+  int end = strlen(src);
+  int cur;
 
   /* Print the stuff on the first line */
   listing_page (list);
@@ -707,18 +709,27 @@ print_lines (list, lineno, string, address)
 
   /* And the data to go along with it */
   idx = 0;
-  
-  while (*src && idx < nchars)
+  cur = 0;
+  while (src[cur] && idx < nchars)
     {
-      fprintf (list_file, "%c%c", src[0], src[1]);
-      src += 2;
-      byte_in_word++;
+      int offset;
+#if TARGET_BYTES_BIG_ENDIAN != 0
+      offset = cur;
+      fprintf (list_file, "%c%c", src[offset], src[offset+1]);
+#else
+      offset = (cur & ~(LISTING_WORD_SIZE * 2 - 1)) 
+        + (LISTING_WORD_SIZE - octet_in_word - 1) * 2;
+      if (offset < end)
+        fprintf (list_file, "%c%c", src[offset], src[offset+1]);
+#endif
+      cur += 2;
+      octet_in_word++;
       
-      if (byte_in_word == LISTING_WORD_SIZE)
+      if (octet_in_word == LISTING_WORD_SIZE)
 	{
 	  fprintf (list_file, " ");
 	  idx++;
-	  byte_in_word = 0;
+	  octet_in_word = 0;
 	}
       
       idx += 2;
@@ -740,7 +751,7 @@ print_lines (list, lineno, string, address)
   
   for (lines = 0;
        lines < (unsigned int) listing_lhs_cont_lines
-	 && *src;
+	 && src[cur];
        lines ++)
     {
       nchars = ((LISTING_WORD_SIZE * 2) + 1)
@@ -750,18 +761,27 @@ print_lines (list, lineno, string, address)
       /* Print any more lines of data, but more compactly */
       fprintf (list_file, "% 4d      ", lineno);
       
-      while (*src && idx < nchars)
+      while (src[cur] && idx < nchars)
 	{
-	  fprintf (list_file, "%c%c", src[0], src[1]);
-	  src += 2;
+          int offset;
+#if TARGET_BYTES_BIG_ENDIAN != 0
+          offset = cur;
+          fprintf (list_file, "%c%c", src[offset], src[offset+1]);
+#else
+          offset = (cur & ~(LISTING_WORD_SIZE * 2 - 1))
+            + (LISTING_WORD_SIZE - octet_in_word - 1) * 2;
+          if (offset < end)
+            fprintf (list_file, "%c%c", src[offset], src[offset+1]);
+#endif
+	  cur += 2;
 	  idx += 2;
-	  byte_in_word++;
+	  octet_in_word++;
 	  
-	  if (byte_in_word == LISTING_WORD_SIZE)
+	  if (octet_in_word == LISTING_WORD_SIZE)
 	    {
 	      fprintf (list_file, " ");
 	      idx++;
-	      byte_in_word = 0;
+	      octet_in_word = 0;
 	    }
 	}
       

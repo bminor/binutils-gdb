@@ -44,14 +44,14 @@ struct obstack;
 
 struct frag
 {
-  /* Object file address. */
+  /* Object file address (as an octet offset). */
   addressT fr_address;
   /* Chain forward; ascending address order.  Rooted in frch_root. */
   struct frag *fr_next;
 
-  /* (Fixed) number of chars we know we have.  May be 0. */
+  /* (Fixed) number of octets we know we have.  May be 0. */
   offsetT fr_fix;
-  /* (Variable) number of chars after above.  May be 0. */
+  /* (Variable) number of octets after above.  May be 0. */
   offsetT fr_var;
   /* For variable-length tail. */
   symbolS *fr_symbol;
@@ -101,6 +101,7 @@ struct frag
    instead, use frag_now_fix ().  */
 COMMON fragS *frag_now;
 extern addressT frag_now_fix PARAMS ((void));
+extern addressT frag_now_fix_octets PARAMS ((void));
 
 /* For foreign-segment symbol fixups. */
 COMMON fragS zero_address_frag;

@@ -643,6 +643,16 @@ void eh_frame_convert_frag PARAMS ((fragS *));
 #define BSS_SECTION_NAME	".bss"
 #endif
 
+#ifndef OCTETS_PER_BYTE_POWER
+#define OCTETS_PER_BYTE_POWER 0
+#endif
+#ifndef OCTETS_PER_BYTE
+#define OCTETS_PER_BYTE (1<<OCTETS_PER_BYTE_POWER)
+#endif
+#if OCTETS_PER_BYTE != (1<<OCTETS_PER_BYTE_POWER)
+ #error "Octets per byte conflicts with its power-of-two definition!"
+#endif
+
 #endif /* GAS */
 
 /* end of as.h */

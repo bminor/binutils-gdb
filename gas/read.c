@@ -1194,7 +1194,7 @@ do_align (n, fill, len, max)
  just_record_alignment:
 #endif
 
-  record_alignment (now_seg, n);
+  record_alignment (now_seg, n - OCTETS_PER_BYTE_POWER);
 }
 
 /* Handle the .align pseudo-op.  A positive ARG is a default alignment
@@ -2369,7 +2369,7 @@ do_org (segment, exp, fill)
       char *p;
 
       p = frag_var (rs_org, 1, 1, (relax_substateT) 0, exp->X_add_symbol,
-		    exp->X_add_number, (char *) NULL);
+		    exp->X_add_number * OCTETS_PER_BYTE, (char *) NULL);
       *p = fill;
     }
 }

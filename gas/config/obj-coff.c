@@ -1269,7 +1269,7 @@ coff_frob_symbol (symp, punt)
       for (; i > 0; i--)
 	{
 	  if (lptr->frag)
-	    lptr->l.u.offset += lptr->frag->fr_address;
+	    lptr->l.u.offset += lptr->frag->fr_address / OCTETS_PER_BYTE;
 	  l[i] = lptr->l;
 	  lptr = lptr->next;
 	}
@@ -1453,25 +1453,32 @@ coff_frob_section (sec)
   char *p;
   fragS *fragp;
   bfd_vma size, n_entries, mask;
+  bfd_vma align_power = (bfd_vma)sec->alignment_power + OCTETS_PER_BYTE_POWER;
 
   /* The COFF back end in BFD requires that all section sizes be
-     rounded up to multiples of the corresponding section alignments.
-     Seems kinda silly to me, but that's the way it is.  */
+     rounded up to multiples of the corresponding section alignments,
+     supposedly because standard COFF has no other way of encoding alignment
+     for sections.  If your COFF flavor has a different way of encoding
+     section alignment, then skip this step, as TICOFF does. */
   size = bfd_get_section_size_before_reloc (sec);
-  mask = ((bfd_vma) 1 << (bfd_vma) sec->alignment_power) - 1;
+  mask = ((bfd_vma) 1 << align_power) - 1;
+#if !defined(TICOFF)
   if (size & mask)
     {
       size = (size + mask) & ~mask;
       bfd_set_section_size (stdoutput, sec, size);
     }
+#endif
 
   /* If the section size is non-zero, the section symbol needs an aux
      entry associated with it, indicating the size.  We don't know
      all the values yet; coff_frob_symbol will fill them in later.  */
+#ifndef TICOFF
   if (size != 0
       || sec == text_section
       || sec == data_section
       || sec == bss_section)
+#endif
     {
       symbolS *secsym = section_symbol (sec);
 
