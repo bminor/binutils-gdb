@@ -16,7 +16,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the gprof profiler of the GNU system.
 
-Copyright (C) 1988, 1992, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1988, 92, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -53,11 +53,8 @@ can use it to determine which parts of a program are taking most of the
 execution time.  We assume that you know how to write, compile, and
 execute programs.  @sc{gnu} @code{gprof} was written by Jay Fenlason.
 
-This manual was edited January 1993 by Jeffrey Osier
-and updated September 1997 by Brent Baccala.
-
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, 1992, 1997, 1998 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, 92, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -88,8 +85,6 @@ This manual describes the @sc{gnu} profiler, @code{gprof}, and how you
 can use it to determine which parts of a program are taking most of the
 execution time.  We assume that you know how to write, compile, and
 execute programs.  @sc{gnu} @code{gprof} was written by Jay Fenlason.
-
-This manual was updated August 1997 by Brent Baccala.
 
 @menu
 * Introduction::        What profiling means, and why it is useful.
@@ -303,7 +298,7 @@ The order of these options does not matter.
 * Output Options::      Controlling @code{gprof}'s output style
 * Analysis Options::    Controlling how @code{gprof} analyses its data
 * Miscellaneous Options::
-* Depricated Options::  Options you no longer need to use, but which
+* Deprecated Options::  Options you no longer need to use, but which
                             have been retained for compatibility
 * Symspecs::            Specifying functions to include or exclude
 @end menu
@@ -344,7 +339,7 @@ The @samp{-C} option causes @code{gprof} to
 print a tally of functions and the number of times each was called.
 If @var{symspec} is specified, print tally only for matching symbols.
 
-If the profile data file contains basic-block count records, specifing
+If the profile data file contains basic-block count records, specifying
 the @samp{-l} option, along with @samp{-C}, will cause basic-block
 execution counts to be tallied and displayed.
 
@@ -358,7 +353,7 @@ call graph, and basic-block count records is displayed.
 @itemx --directory-path=@var{dirs}
 The @samp{-I} option specifies a list of search directories in
 which to find source files.  Environment variable @var{GPROF_PATH}
-can also be used to convery this information.
+can also be used to convey this information.
 Used mostly for annotated source output.
 
 @item -J[@var{symspec}]
@@ -407,10 +402,15 @@ but excludes matching symbols.
 @item -y
 @itemx --separate-files
 This option affects annotated source output only.
-Normally, gprof prints annotated source files
+Normally, @code{gprof} prints annotated source files
 to standard-output.  If this option is specified,
-annotated source for a file named @file{path/filename}
-is generated in the file @file{filename-ann}.
+annotated source for a file named @file{path/@var{filename}}
+is generated in the file @file{@var{filename}-ann}.  If the underlying
+filesystem would truncate @file{@var{filename}-ann} so that it
+overwrites the original @file{@var{filename}}, @code{gprof} generates
+annotated source in the file @file{@var{filename}.ann} instead (if the
+original file name has an extension, that extension is @emph{replaced}
+with @file{.ann}).
 
 @item -Z[@var{symspec}]
 @itemx --no-exec-counts[=@var{symspec}]
@@ -456,7 +456,8 @@ c-decl.o:00000000 T print_lang_type
 @end group
 @end smallexample
 
-GNU @code{nm} @samp{--extern-only} @samp{--defined-only} @samp{-v} @samp{--print-file-name} can be used to create @var{map_file}.
+To create a @var{map_file} with @sc{gnu} @code{nm}, type a command like
+@kbd{nm --extern-only --defined-only -v --print-file-name program-name}.
 
 @item -T
 @itemx --traditional
@@ -565,7 +566,7 @@ that had no time spent in them.  This is useful in conjunction with the
 
 @end table
 
-@node Miscellaneous Options,Depricated Options,Analysis Options,Invoking
+@node Miscellaneous Options,Deprecated Options,Analysis Options,Invoking
 @section Miscellaneous Options
 
 @table @code
@@ -601,8 +602,8 @@ number, and then exit.
 
 @end table
 
-@node Depricated Options,Symspecs,Miscellaneous Options,Invoking
-@section Depricated Options
+@node Deprecated Options,Symspecs,Miscellaneous Options,Invoking
+@section Deprecated Options
 
 @table @code
 
@@ -653,7 +654,7 @@ gprof -e boring -f foo -f bar myprogram > gprof.output
 lists in the call graph all functions that were reached from either
 @code{foo} or @code{bar} and were not reachable from @code{boring}.
 
-@node Symspecs,,Depricated Options,Invoking
+@node Symspecs,,Deprecated Options,Invoking
 @section Symspecs
 
 Many of the output options allow functions to be included or excluded
@@ -672,7 +673,7 @@ Here are some sample symspecs:
 @table @samp
 @item main.c
 Selects everything in file @file{main.c}---the
-dot in the string tells gprof to interpret
+dot in the string tells @code{gprof} to interpret
 the string as a filename, rather than as
 a function name.  To select a file whose
 name does not contain a dot, a trailing colon
@@ -691,11 +692,13 @@ Sometimes, function names contain dots.  In such cases, it is necessary
 to add a leading colon to the name.  For example, @samp{:.mul} selects
 function @samp{.mul}.
 
-In some object file formats, symbols have a leading underscore.  gprof
-will normally not print these underscores.  However, you must use the
-underscore when you name a symbol in a symspec.  You can use the
-@code{nm} program to see whether symbols have underscores for the object
-file format you are using.
+In some object file formats, symbols have a leading underscore.
+@code{gprof} will normally not print these underscores.  When you name a
+symbol in a symspec, you should type it exactly as @code{gprof} prints
+it in its output.  For example, if the compiler produces a symbol
+@samp{_main} from your @code{main} function, @code{gprof} still prints
+it as @samp{main} in its output, so you should use @samp{main} in
+symspecs.
 
 @item main.c:main
 Selects function @samp{main} in file @file{main.c}.
@@ -769,7 +772,7 @@ Each sample counts as 0.01 seconds.
 The functions are sorted by first by decreasing run-time spent in them,
 then by decreasing number of calls, then alphabetically by name.  The
 functions @samp{mcount} and @samp{profil} are part of the profiling
-aparatus and appear in every flat profile; their time gives a measure of
+apparatus and appear in every flat profile; their time gives a measure of
 the amount of overhead due to profiling.
 
 Just before the column headers, a statement appears indicating
@@ -781,10 +784,10 @@ suggesting a 100 Hz sampling rate.
 The program's total execution time was 0.06
 seconds, as indicated by the @samp{cumulative seconds} field.  Since
 each sample counted for 0.01 seconds, this means only six samples
-were taken during the run.  Two of the samples occured while the
+were taken during the run.  Two of the samples occurred while the
 program was in the @samp{open} function, as indicated by the
 @samp{self seconds} field.  Each of the other four samples
-occured one each in @samp{offtime}, @samp{memccpy}, @samp{write},
+occurred one each in @samp{offtime}, @samp{memccpy}, @samp{write},
 and @samp{mcount}.
 Since only six samples were taken, none of these values can
 be regarded as particularly reliable.
@@ -1019,7 +1022,7 @@ of the amount of time spent within calls to @code{report} from @code{main}.
 
 @item called
 Two numbers: the number of times @code{report} was called from @code{main},
-followed by the total number of nonrecursive calls to @code{report} from
+followed by the total number of non-recursive calls to @code{report} from
 all its callers.
 
 @item name and index number
@@ -1078,7 +1081,7 @@ of the total time spent in calls to @code{report} from @code{main}.
 
 @item called
 Two numbers, the number of calls to @code{report} from @code{main}
-followed by the total number of nonrecursive calls to @code{report}.
+followed by the total number of non-recursive calls to @code{report}.
 This ratio is used to determine how much of @code{report}'s @code{self}
 and @code{children} time gets credited to @code{main}.
 @xref{Assumptions}.
@@ -1211,7 +1214,7 @@ The @code{calls} field in the primary line for the cycle has two numbers:
 first, the number of times functions in the cycle were called by functions
 outside the cycle; second, the number of times they were called by
 functions in the cycle (including times when a function in the cycle calls
-itself).  This is a generalization of the usual split into nonrecursive and
+itself).  This is a generalization of the usual split into non-recursive and
 recursive calls.
 
 The @code{calls} field of a subroutine-line for a cycle member in the
@@ -1275,7 +1278,7 @@ index % time    self  children    called     name
 Now let's look at some of @code{gprof}'s output from the same program run,
 this time with line-by-line profiling enabled.  Note that @code{ct_init}'s
 four histogram hits are broken down into four lines of source code - one hit
-occured on each of lines 349, 351, 382 and 385.  In the call graph,
+occurred on each of lines 349, 351, 382 and 385.  In the call graph,
 note how
 @code{ct_init}'s 13327 calls to @code{init_block} are broken down
 into one call from line 396, 3071 calls from line 384, 3730 calls
@@ -1328,7 +1331,7 @@ number of times it was called.  You may also need to specify the
 Compiling with @samp{gcc @dots{} -g -pg -a} augments your program
 with basic-block counting code, in addition to function counting code.
 This enables @code{gprof} to determine how many times each line
-of code was exeucted.
+of code was executed.
 For example, consider the following function, taken from gzip,
 with line numbers added:
 
@@ -1364,7 +1367,7 @@ the fifth basic-block.  The compiler may also generate additional
 basic-blocks to handle various special cases.
 
 A program augmented for basic-block counting can be analyzed with
-@code{gprof -l -A}.  I also suggest use of the @samp{-x} option,
+@samp{gprof -l -A}.  I also suggest use of the @samp{-x} option,
 which ensures that each line of code is labeled at least once.
 Here is @code{updcrc}'s
 annotated source listing for a sample @code{gzip} run:
@@ -1526,7 +1529,7 @@ but not necessarily those that consumed the most time.
 
 @item How do I find which lines in my program called a particular function?
 
-Use @code{gprof -l} and lookup the function in the call graph.
+Use @samp{gprof -l} and lookup the function in the call graph.
 The callers will be broken down by function and line number.
 
 @item How do I analyze a program that runs for less than a second?
@@ -1582,7 +1585,7 @@ in the form @samp{from/to}, instead of @samp{from to}.
 @item
 In the annotated source listing,
 if there are multiple basic blocks on the same line,
-@sc{gnu} @code{gprof} prints all of their counts, seperated by commas.
+@sc{gnu} @code{gprof} prints all of their counts, separated by commas.
 
 @ignore - it does this now
 @item
@@ -1601,7 +1604,7 @@ tables without skipping the blurbs.
 @chapter Details of Profiling
 
 @menu
-* Implementation::      How a program collets profiling information
+* Implementation::      How a program collects profiling information
 * File Format::         Format of @samp{gmon.out} files
 * Internals::           @code{gprof}'s internal operation
 * Debugging::           Using @code{gprof}'s @samp{-d} option
@@ -1624,14 +1627,14 @@ is responsible for recording in an in-memory call graph table
 both its parent routine (the child) and its parent's parent.  This is
 typically done by examining the stack frame to find both
 the address of the child, and the return address in the original parent.
-Since this is a very machine-dependant operation, @code{mcount}
+Since this is a very machine-dependent operation, @code{mcount}
 itself is typically a short assembly-language stub routine
 that extracts the required
 information, and then calls @code{__mcount_internal}
 (a normal C function) with two arguments - @code{frompc} and @code{selfpc}.
 @code{__mcount_internal} is responsible for maintaining
 the in-memory call graph, which records @code{frompc}, @code{selfpc},
-and the number of times each of these call arcs was transversed.
+and the number of times each of these call arcs was traversed.
 
 GCC Version 2 provides a magical function (@code{__builtin_return_address}),
 which allows a generic @code{mcount} function to extract the
@@ -1724,7 +1727,7 @@ load due to other users won't directly affect the output you get.
 
 The old BSD-derived file format used for profile data does not contain a
 magic cookie that allows to check whether a data file really is a
-gprof file.  Furthermore, it does not provide a version number, thus
+@code{gprof} file.  Furthermore, it does not provide a version number, thus
 rendering changes to the file format almost impossible.  @sc{gnu} @code{gprof}
 uses a new file format that provides these features.  For backward
 compatibility, @sc{gnu} @code{gprof} continues to support the old BSD-derived
@@ -1827,7 +1830,7 @@ Next, the BFD library is called to open the object file,
 verify that it is an object file,
 and read its symbol table (@code{core.c:core_init}),
 using @code{bfd_canonicalize_symtab} after mallocing
-an appropiate sized array of asymbols.  At this point,
+an appropriately sized array of symbols.  At this point,
 function mappings are read (if the @samp{--file-ordering} option
 has been specified), and the core text space is read into
 memory (if the @samp{-c} option was given).
@@ -1845,7 +1848,7 @@ In either case, two passes are made through the symbol
 table - one to count the size of the symbol table required,
 and the other to actually read the symbols.  In between the
 two passes, a single array of type @code{Sym} is created of
-the appropiate length.
+the appropriate length.
 Finally, @code{symtab.c:symtab_finalize}
 is called to sort the symbol table and remove duplicate entries
 (entries with the same memory address).
@@ -1931,7 +1934,7 @@ cause each of two adjacent lines to be credited with half
 a hit, for example.
 
 If call graph data is present, @code{cg_arcs.c:cg_assemble} is called.
-First, if @samp{-c} was specified, a machine-dependant
+First, if @samp{-c} was specified, a machine-dependent
 routine (@code{find_call}) scans through each symbol's machine code,
 looking for subroutine call instructions, and adding them
 to the call graph with a zero call count.
@@ -1945,14 +1948,14 @@ Cycles are also detected at this point, all members
 of which are assigned the same topological number.
 Two passes are now made through this sorted array of symbol pointers.
 The first pass, from end to beginning (parents to children),
-computes the fraction of child time to propogate to each parent
+computes the fraction of child time to propagate to each parent
 and a print flag.
 The print flag reflects symspec handling of INCL_GRAPH/EXCL_GRAPH,
 with a parent's include or exclude (print or no print) property
 being propagated to its children, unless they themselves explicitly appear
 in INCL_GRAPH or EXCL_GRAPH.
 A second pass, from beginning to end (children to parents) actually
-propogates the timings along the call graph, subject
+propagates the timings along the call graph, subject
 to a check against INCL_TIME/EXCL_TIME.
 With the print flag, fractions, and timings now stored in the symbol
 structures, the topological sort array is now discarded, and a

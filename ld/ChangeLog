@@ -1,3 +1,8 @@
+2000-05-26  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* ldmain.c: Include filenames.h.
+	(set_scripts_dir): Support backslashes in program name.
+
 2000-05-22  Igor Shevlyakov  <igor@windriver.com>
 
 	* ldmain.c (main): When deciding if ".text" section should be

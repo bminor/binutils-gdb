@@ -1,3 +1,42 @@
+2000-05-26  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* ar.c: Include filenames.h.
+	(normalize) [HAVE_DOS_BASED_FILE_SYSTEM]: Support backslashes
+	and drive letters in file names.
+	(main): Support backslashes and drive letters in argv[0].  Drop
+	the .exe suffix, if any, in argv[0] if is_ranlib is negative.  Use
+	FILENAME_CMP instead of strcmp to compare file names.
+	(open_inarch) [__GO32__]: Don't ifdef errno != ENOENT test for
+	DJGPP v2.
+	(do_quick_append) [__GO32__]: Ditto.
+	(get_pos_bfd, delete_members, move_members, replace_members):
+	Compare file names with FILENAME_CMP.
+
+	* bucomm.c: Include filenames.h.
+	(make_tempname) [HAVE_DOS_BASED_FILE_SYSTEM]: Support mixed
+	forward/backward slashes and drive letters in file names.
+
+	* ieee.c (ieee_start_compilation_unit, ieee_add_bb11): Support
+	mixed forward/backward slashes and drive letters in file names.
+
+	* strings.c (O_BINARY, setmode, SET_BINARY): Define.
+	(main) [SET_BINARY]: Use SET_BINARY to switch stdin into binary
+	mode.
+
+	* objcopy.c: Include filenames.h.
+	(main) [HAVE_DOS_BASED_FILE_SYSTEM]: Drop the .exe suffix
+	before comparing to "strip".
+	Use FILENAME_CMP to compare file names.
+
+	* arsup.c: Include filenames.h.
+	(map_over_list, ar_delete, ar_replace, ar_extract): Use
+	FILENAME_CMP to compare file names.
+	(ar_open): Prepend "tmp-" instead of appending "-tmp", to create
+	the temporary file name.
+
+	* configure.in: Check for setmode.
+	* configure: Regenerate.
+
 2000-05-24  Alan Modra  <alan@linuxcare.com.au>
 
 	* objdump.c (display_target_list): Close the bfd.

@@ -1,5 +1,24 @@
 2000-05-26  Alan Modra  <alan@linuxcare.com.au>
 
+	* sysdep.h (gettext, dgettext, dcgettext, textdomain,
+	bindtextdomain): Replace defines with those from intl/libgettext.h
+	to quieten gcc warnings.
+
+2000-05-26  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* aoutx.h (find_nearest_line): Use IS_ABSOLUTE_PATH.
+
+	* archive.c (normalize, bfd_bsd_truncate_arname,
+	bfd_gnu_truncate_arname) [HAVE_DOS_BASED_FILE_SYSTEM]: Support
+	file names with backslashes.
+
+	* cache.c (bfd_open_file) [__MSDOS__]: Don't unlink the file
+	before opening it.
+
+	* sysdep.h: Include filenames.h.
+
+2000-05-26  Alan Modra  <alan@linuxcare.com.au>
+
 	* opncls.c (bfd_close_all_done): Mask file perms with 0777 not 0x777.
 
 2000-05-26  Jakub Jelinek  <jakub@redhat.com>

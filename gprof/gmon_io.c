@@ -72,6 +72,9 @@ DEFUN (gmon_out_read, (filename), const char *filename)
   if (strcmp (filename, "-") == 0)
     {
       ifp = stdin;
+#ifdef SET_BINARY
+      SET_BINARY (fileno (stdin));
+#endif
     }
   else
     {

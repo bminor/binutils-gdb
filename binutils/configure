@@ -4325,7 +4325,7 @@ EOF
 
 fi
 
-for ac_func in sbrk utimes
+for ac_func in sbrk utimes setmode
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:4332: checking for $ac_func" >&5

@@ -201,7 +201,10 @@ DEFUN (match, (pattern, sym), Sym * pattern AND Sym * sym)
 {
   return (pattern->file ? pattern->file == sym->file : TRUE)
     && (pattern->line_num ? pattern->line_num == sym->line_num : TRUE)
-    && (pattern->name ? strcmp (pattern->name, sym->name) == 0 : TRUE);
+    && (pattern->name
+	? strcmp (pattern->name,
+		  sym->name+(discard_underscores && sym->name[0] == '_')) == 0
+	: TRUE);
 }
 
 
