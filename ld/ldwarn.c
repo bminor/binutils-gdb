@@ -45,8 +45,8 @@ static warning_list_type *warning_list;
 
 
 void 
-DEFUN(add_warning,(sym),
-      asymbol *sym)
+add_warning (sym)
+     asymbol *sym;
 {
   CONST    char *name = ((asymbol *)(sym->value))->name;
   warning_list_type *new;
@@ -64,8 +64,8 @@ DEFUN(add_warning,(sym),
 /* run through the list we kept, and find the warning associated with
    this symbol */
 CONST char *
-DEFUN(fetch_warning,(sym),
-asymbol *sym)
+fetch_warning (sym)
+     asymbol *sym;
 {
   warning_list_type *ptr = warning_list;
   while (ptr != (warning_list_type *)NULL) {
@@ -79,9 +79,9 @@ asymbol *sym)
 
 
 void 
-DEFUN(produce_warnings,(lgs,it),
-      ldsym_type *lgs AND
-      asymbol *it)
+produce_warnings (lgs, it)
+     ldsym_type *lgs;
+     asymbol *it;
 {
   asymbol **ptr;
   ptr  = lgs->srefs_chain;

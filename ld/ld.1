@@ -18,7 +18,7 @@ ld \- the GNU linker
 .RB "[\|" \-o "
 .I output\c
 \&\|] \c
-.I objfiles\c
+.I objfile\c
 \&.\|.\|.
 .br
 .RB "[\|" \-A\c
@@ -50,6 +50,9 @@ ld \- the GNU linker
 .I input-format\c
 \&\|] 
 .RB "[\|" \-g "\|]" 
+.RB "[\|" \-G\c
+.I size\c
+\&\|]
 .RB "[\|" \-i "\|]"
 .RB "[\|" \-l\c
 .I ar\c
@@ -57,7 +60,10 @@ ld \- the GNU linker
 .RB "[\|" \-L\c
 .I searchdir\c
 \&\|] 
-.RB "[\|" \-M | \-m "\|]"  
+.RB "[\|" \-M "\|]" 
+.RB "[\|" \-m\c
+.I emulation\c
+\&\|] 
 .RB "[\|" \-n | \-N "\|]" 
 .RB "[\|" \-noinhibit-exec "\|]" 
 .RB "[\|" "\-R\ "\c
@@ -83,6 +89,7 @@ ld \- the GNU linker
 .RB "[\|" "\-u\ "\c
 .I sym\c
 \&]
+.RB "[\|" \-V "\|]"
 .RB "[\|" \-v "\|]"
 .RB "[\|" \-X "\|]" 
 .RB "[\|" \-x "\|]" 
@@ -203,11 +210,11 @@ The exceptions\(em\&which may meaningfully be used more than once\(em\&are
 \&.
 
 The list of object files to be linked together, shown as \c
-.I objfiles\c
+.I objfile\c
 \&,
 may follow, precede, or be mixed in with command-line options; save that
 an \c
-.I objfiles\c
+.I objfile\c
 \& argument may not be placed between an option flag and
 its argument.
 
@@ -228,12 +235,6 @@ issues the message `\|\c
 Option arguments must either follow the option letter without intervening
 whitespace, or be given as separate arguments immediately following the
 option that requires them.
-
-.TP
-.IR "objfiles" .\|.\|.
-The object files \c
-.I objfiles\c
-\& to be linked.
 
 .TP
 .BI "-A" "architecture"\c
@@ -454,6 +455,13 @@ Synonym for \c
 Accepted, but ignored; provided for compatibility with other tools.
 
 .TP
+.BI "\-G " "size"\c
+Set the maximum size of objects to be optimized using the GP register
+to
+.I size
+under MIPS ECOFF.  Ignored for other object file formats.
+
+.TP
 .B \-i
 Perform an incremental link (same as option \c
 .B \-r\c
@@ -502,13 +510,21 @@ command.
 
 .TP
 .B \-M 
-.TP
-.B \-m
 Print (to the standard output file) a link map\(em\&diagnostic information
 about where symbols are mapped by \c
 .B ld\c
 \&, and information on global
 common storage allocation.
+
+.TP
+.BI "\-m " "emulation"\c
+Emulate the
+.I emulation
+linker.  You can list the available emulations with the
+.I \-V
+option.  This option overrides the compiled-in default, which is the
+system for which you configured
+.BR ld .
 
 .TP
 .B \-N 
@@ -704,10 +720,18 @@ turn serve as input to \c
 \&.
 
 .TP
+.B \-V
+Display the version number for \c
+.B ld
+and list the supported emulations.
+Print which input files can and can not be opened.
+
+.TP
 .B \-v
 Display the version number for \c
 .B ld\c
 \&.
+Print which input files can and can not be opened.
 
 .TP
 .B \-X 
@@ -735,14 +759,11 @@ not just those beginning with `\|\c
 
 .SH ENVIRONMENT
 \c
+You can change the behavior of
 .B ld\c
-\& always consults two environment variables: \c
+\& with the environment variable \c
 .B GNUTARGET\c
-\&
-and \c
-.B LDEMULATION\c
-\&.  Depending on the setting of the latter, other
-environment variables may be used as well.
+\&.
 
 \c
 .B GNUTARGET\c
@@ -769,247 +790,6 @@ of ensuring that the magic number used to flag object-file formats is
 unique.  However, the configuration procedure for BFD on each system
 places the conventional format for that system first in the search-list,
 so ambiguities are resolved in favor of convention.
-
-\c
-.B LDEMULATION\c
-\& controls some aspects of \c
-.B ld\c
-\&'s dominant
-personality.  Although \c
-.B ld\c
-\& is flexible enough to permit its use
-in many contexts regardless of configuration, you can use this variable
-to make it act more like one or another older linker by default.
-
-In particular, the value of \c
-.B LDEMULATION\c
-\& controls what default
-linker script is used (thereby controlling the default input and output
-formats; ; what default paths are searched for
-archive libraries; and in some cases whether additional linker script
-commands are available.
-
-Here is the current set of emulations available:
-
-.TP
-.B LDEMULATION=gld
-Emulate the older GNU linker.  When this emulation is selected, the
-default library search paths are
-.sp
-.br
-/lib
-.br
-/usr/lib
-.br
-/usr/local/lib/lib
-.br
-.sp
-
-The default output format is set to \c
-.B a.out-generic-big\c
-\&, and the
-default machine is the system's configured BFD default.
-
-.TP
-.B LDEMULATION=gld68k
-A variant of the \c
-.B gld\c
-\& emulation; only differs in specifically
-setting the default BFD machine as \c
-.B m68k\c
-\&.
-
-.TP
-.B LDEMULATION=gld960
-Emulate the Intel port of the older \c
-.B gld\c
-\& for the i960
-architectures.  The default library search paths are taken from two
-other environment variables, \c
-.B G960LIB\c
-\& and \c
-.B G960BASE\c
-\&.  The
-default architecture is \c
-.B i960\c
-\&.  The default output format is set
-to \c
-.B b.out.big\c
-\&, and in fact the default output file name (if
-\c
-.B \-o\c
-\& is not specified) is \c
-.B b.out\c
-\&, to reflect this variant
-format, for this emulation.
-
-This emulation can behave slightly differently depending on the setting
-of the \c
-.B ld\c
-\& compile-time switch \c
-.B GNU960\c
-\&.  If \c
-.B ld\c
-\& is
-compiled with \c
-.B GNU960\c
-\& defined, then an additional environment
-variable\(em\&\c
-.B GNUTARGET\c
-\&\(em\&is available; its value, if available,
-specifies some other default output format than \c
-.B b.out.big\c
-\&.
-
-.TP
-.B LDEMULATION=gldm88kbcs
-Sets the output format to \c
-.B m88kbcs\c
-\& and the architecture to
-\c
-.B m88k\c
-\&.  Default library search paths are
-.sp
-.br
-/lib
-.br
-/usr/lib
-.br
-/usr/local/lib
-.br
-.sp
-
-.TP
-.B LDEMULATION=lnk960
-Emulate the Intel linker \c
-.B lnk960\c
-\&.  The default output format is
-\c
-.B coff-Intel-big\c
-\&.  With this emulation, \c
-.B ld\c
-\&
-supports the additional script commands \c
-.B HLL\c
-\& and \c
-.B SYSLIB\c
-\& for
-specification of library archives.  This is the only emulation with
-extensive support for the \c
-.B \-A\c
-\& (architecture) command-line option.
-By default, the architecture \c
-.B CORE\c
-\& is assumed, but you can choose
-additional features from the i960 architecture family by using one of
-the following with \c
-.B \-A\c
-\& (or by using the \c
-.B OUTPUT_ARCH\c
-\& command
-from a script):
-.sp
-.br
-CORE
-.br
-KB
-.br
-SB
-.br
-MC
-.br
-XA
-.br
-CA
-.br
-KA
-.br
-SA
-.br
-.sp
-
-The default libraries are chosen with some attention to the architecture
-selected; the core library `\|\c
-.B cg\c
-\|' is always included, but the library
-\c
-.B fpg\c
-\& is also used if you've specified any of the architectures
-\c
-.B KA\c
-\&, \c
-.B SA\c
-\&, or \c
-.B CA\c
-\&.
-
-Like \c
-.B gld960\c
-\&, this emulation uses additional environment variables
-to set the default library search paths.  Also like \c
-.B gld960\c
-\&, the
-behavior of this emulation is slightly different depending on whether
-\c
-.B ld\c
-\& itself was compiled with \c
-.B GNU960\c
-\& defined.
-
-If your \c
-.B ld\c
-\& was compiled with \c
-.B GNU960\c
-\& defined, the default
-paths are taken from all three of \c
-.B G960LIB\c
-\&, \c
-.B G960BASE\c
-\&, and
-\c
-.B I960BASE\c
-\&.  For the first two, paths you supply are automatically
-suffixed with `\|\c
-.B /lib/libcoff\c
-\|'; for the last, your path is
-automatically suffixed with `\|\c
-.B /lib\c
-\|'.
-
-If your \c
-.B ld\c
-\& was \c
-.I not\c
-\& compiled with \c
-.B GNU960\c
-\& defined,
-the default paths are taken from \c
-.B I960BASE\c
-\&, and \c
-.B G960BASE\c
-\& is
-only consulted if \c
-.B I960BASE\c
-\& is undefined.  In this case
-\c
-.B G960LIB\c
-\& is not used at all.
-
-.TP
-.B LDEMULATION=vanilla
-This is the least specific setting for \c
-.B ld\c
-\&.  You can set
-\c
-.B LDEMULATION=vanilla\c
-\& to disable emulation of other linkers.  This
-setting makes \c
-.B ld\c
-\& take the default machine from the BFD
-configuration on your system; \c
-.B a.out-generic-big\c
-\& is the default
-target.  No other defaults are specified.
 
 .PP
 

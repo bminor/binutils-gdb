@@ -1,3 +1,44 @@
+Wed Jun 16 11:45:32 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldfile.c (ldfile_open_command): Don't try .ld extension.
+	It wasn't documented (or likely used) and wastes time.
+	(try_open): If EXTEN is empty, don't try it.
+
+	* ldctor.c, lderror.c, ldexp.c, ldfile.c, ldindr.c, ldlang.c,
+	ldlex.l, ldmain.c, ldmisc.c, ldsym.c, ldver.c, ldwarn.c,
+	ldwrite.c, lexsup.c, mri.c, relax.c: Replace DEFUN macro calls
+	with normal function declarations.
+
+	* Move *.em to emultempl/*.em.  Move *.sh to emulparams/*.sh.
+	Move *.sc-sh to scripttempl/*.sc.
+	* {emultempl,emulparams,scripttempl}/README: New files.
+	* sh.em, st2000.em, z8ksim.em, h8300hms.em, h8500hms.em: Files
+	removed, replaced with generic.em.
+	* h8300.sh, h8500.sh, h8300.sc, h8500.sc: Renamed from
+	 h8[35]00hms.s[ch].  Change their contents to omit the "hms".
+
+	* *.em (*_get_script): Return script name instead of script contents.
+	* ldlang.c (lang_process): Change caller.
+
+	* ldlex.l, ldgram.y: Recognize -m option.
+	Check for input files after *all* options in grammar.
+	* ldmain.c (main): Check for -m options.  Add default directory
+	for -m.
+
+	* mkscript.c: File removed.
+	* genscripts.sh: Take two more parameters, tooldirlib and libdir,
+	to add to the default LIB_PATH.
+	Look for input files in the new subdirectories.
+	Create the scripts in emulations subdirectory and don't filter
+	them through mkscript.
+	* configure.in: Make the emulations subdirectory.
+
+	* Makefile.in: Account for all of the above changes.
+	Remove unused .SUFFIXES.  Get libgcc.a path with gcc
+	-print-libgcc-file-name instead of $(libdir)/libgcc.a.
+	Put CFLAGS last in the compilation rules.
+	Add -I../bfd to INCLUDES so sysdep.h is found.
+
 Tue Jun 15 23:04:46 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (INCLUDES): Look in ../include, not ../bfd.
@@ -5,6 +46,12 @@ Tue Jun 15 23:04:46 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	* aout.sc-sh: Add SHLIB_PATH like STACKZERO.  Make STACKZERO
 	dependent on RELOCATING, not RELOCATION.
 	* hp3hpux.sh (SHLIB_PATH): Define it.
+
+Mon Jun 14 19:06:15 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldfile.c (try_open): If opening without the extension fails,
+	try with the extension even if -v or -V was given.
+	had_script is imported (from ldgram.y), not exported.
 
 Mon Jun 14 16:26:10 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
 
@@ -362,6 +409,7 @@ Wed Dec  9 08:38:05 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	(lang_ini_script_file): initialize more parts of the command line
 	bfd.
 	* ldlex.l: fix DEFINED start states.
+
 Mon Dec  7 08:43:41 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	 -y support
 	* ld.texinfo: new doc.

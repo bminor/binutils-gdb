@@ -39,8 +39,8 @@ Tie together all the interseting blocks
 #include "ldgram.h"
 #include "relax.h"
 static void
-DEFUN (build_it, (statement),
-       lang_statement_union_type * statement)
+build_it (statement)
+     lang_statement_union_type * statement;
 {
   switch (statement->header.type)
     {
@@ -179,10 +179,10 @@ DEFUN (build_it, (statement),
 
 
 void
-DEFUN (write_relax, (output_bfd, data, relocateable),
-       bfd * output_bfd AND
-       PTR data AND
-       boolean relocateable)
+write_relax (output_bfd, data, relocateable)
+     bfd * output_bfd;
+     PTR data;
+     boolean relocateable;
 {
   /* Tie up all the statements to generate an output bfd structure which
    bfd can mull over */
@@ -203,8 +203,8 @@ DEFUN (write_relax, (output_bfd, data, relocateable),
    symbols in it, and shift around the data too.
  */
 boolean
-DEFUN (relax_section, (this_ptr),
-       lang_statement_union_type ** this_ptr)
+relax_section (this_ptr)
+     lang_statement_union_type ** this_ptr;
 {
   extern lang_input_statement_type *script_file;
   lang_input_section_type *is = &((*this_ptr)->input_section);

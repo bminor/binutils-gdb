@@ -1,0 +1,53 @@
+# .Sanitize for devo/ld/config
+
+# Each directory to survive its way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this directory.
+
+Do-first:
+
+
+# All files listed between the "Things-to-keep:" line and the
+# "Do-last:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+README
+a29k.sc
+aout.sc
+ebmon29k.sc
+h8300.sc
+h8500.sc
+hppaosf.sc
+i386coff.sc
+i960.sc
+m68kcoff.sc
+m88kbcs.sc
+mips.sc
+mipsbsd.sc
+sa29200.sc
+sh.sc
+st2000.sc
+vanilla.sc
+z8ksim.sc
+
+Things-to-lose:
+
+# The lines between the "Do-last:" line and the end of the file
+# are executed as a /bin/sh shell script after everything else is
+# done.
+
+Do-last:
+

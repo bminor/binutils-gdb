@@ -48,9 +48,9 @@
 
 
 static asymbol **
-DEFUN(move_it,(a_list, b_list),
-asymbol **a_list AND
-asymbol **b_list)
+move_it (a_list, b_list)
+     asymbol **a_list;
+     asymbol **b_list;
 {
   asymbol **head = a_list;
   asymbol **cursor = head;
@@ -71,15 +71,15 @@ asymbol **b_list)
 
 #if 0
 void 
-DEFUN(copy_over,(ldsym, bfdsym),
-   ldsym_type *ldsym AND
-   asymbol **bfdsym)
+copy_over (ldsym, bfdsym)
+     ldsym_type *ldsym;
+     asymbol **bfdsym;
 {
   while (list && *list)
-  {
-    refize(Q_enter_global_ref(list, name);
-    list = (asymbol **)((*list)->udata);
-  }
+    {
+      refize(Q_enter_global_ref(list, name));
+      list = (asymbol **)((*list)->udata);
+    }
 }
 #endif
 
@@ -87,8 +87,8 @@ DEFUN(copy_over,(ldsym, bfdsym),
    refs to the symbol are patched to know the alias - but we still
    have to fix all the old ones */
 void 
-DEFUN(add_indirect,(ptr),
-asymbol **ptr)
+add_indirect (ptr)
+     asymbol **ptr;
 {
   asymbol **p;
   ldsym_type *lgs = ldsym_get((*ptr)->name);

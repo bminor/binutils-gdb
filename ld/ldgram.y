@@ -43,6 +43,7 @@ extern unsigned int lineno;
 extern boolean trace_files;
 extern boolean write_map;
 extern boolean option_longmap;
+extern int g_switch_value;
 boolean hex_mode;
 static int typebits;
 strip_symbols_type strip_symbols=STRIP_NONE;
@@ -90,7 +91,7 @@ static int error_index;
   char *name;
   int token;
   union etree_union *etree;
-struct sec *section;
+  struct sec *section;
   struct lang_output_section_statement_struct *output_section_statement;
   union  lang_statement_union **statement_ptr;
   int lineno;
@@ -138,11 +139,11 @@ struct sec *section;
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
 %token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_sort_common
-%token OPTION_EB OPTION_EL
+%token OPTION_EB OPTION_EL OPTION_G OPTION_Gval
 %token OPTION_format  OPTION_F OPTION_u OPTION_Bstatic OPTION_N
 %token <integer> SIZEOF NEXT ADDR 
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
-%token OPTION_v OPTION_V OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT  NOFLOAT 
+%token OPTION_v OPTION_V OPTION_m OPTION_memul OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT  NOFLOAT 
 %token OPTION_Map
 %token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_R OPTION_relax
 %token <name> OPTION_l OPTION_L OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
@@ -196,6 +197,14 @@ command_line_option:
 		{
 		write_map = true;
 		config.map_filename = $2;
+		}
+	|	OPTION_m NAME
+		{
+		  /* Ignore.  */
+		}
+	|	OPTION_memul
+		{
+		  /* Ignore.  */
 		}
 	|	OPTION_M 
 		{
@@ -303,9 +312,6 @@ command_line_option:
 		{
 		/* Ignore */
 		}
-        | 	NAME
-		{ lang_add_input_file($1,lang_input_file_is_file_enum,
-				 (char *)NULL); }
 	|	OPTION_c filename 
 			{ ldfile_open_command_file($2); } mri_script_file  END {  ldlex_command();}
 
@@ -348,9 +354,19 @@ command_line_option:
 		     ``produce a little-endian object file''.  It could
 		     be used to select an output format.  */
 		}
+	|	OPTION_G NAME
+		{
+		  g_switch_value = atoi ($2);
+		}
+	|	OPTION_Gval
+		{
+		  g_switch_value = yylval.integer;
+		}
 	| '-' NAME
-		 { info("%P%F Unrecognized option -%s\n", $2);  }
-
+		 { einfo("%P%F illegal option -- %s\n", $2);  }
+        | 	NAME
+		{ lang_add_input_file($1,lang_input_file_is_file_enum,
+				 (char *)NULL); }
 	| '{' script_file '}'  
 	;
 
@@ -573,6 +589,11 @@ statement_list:
   	|  	statement
 	;
   
+statement_list_opt:
+		/* empty */
+	|	statement_list
+	;
+
 length:
 		LONG
 			{ $$ = $1; }
@@ -801,7 +822,7 @@ section:	NAME 		{ ldlex_expression(); }
 			{
 			lang_enter_output_section_statement($1,$3,typebits,0,0,0,$4);
 			}
-		statement_list 	
+		statement_list_opt 	
  		'}' {ldlex_expression();} fill_opt memspec_opt
 		{
 		  ldlex_popstate();

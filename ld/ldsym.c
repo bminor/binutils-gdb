@@ -95,8 +95,8 @@ static
 #endif
 
 int
-DEFUN (hash_string, (key),
-       CONST char *key)
+hash_string (key)
+     CONST char *key;
 {
   register CONST char *cp;
   register int k;
@@ -116,9 +116,9 @@ static
   __inline
 #endif
   ldsym_type *
-DEFUN (search, (key, hashval),
-       CONST char *key AND
-       int hashval)
+search (key, hashval)
+     CONST char *key;
+     int hashval;
 {
   ldsym_type *bp;
   for (bp = global_symbol_hash_table[hashval]; bp; bp = bp->link)
@@ -138,8 +138,8 @@ DEFUN (search, (key, hashval),
 /* Get the symbol table entry for the global symbol named KEY.
    Create one if there is none.  */
 ldsym_type *
-DEFUN (ldsym_get, (key),
-       CONST char *key)
+ldsym_get (key)
+     CONST char *key;
 {
   register int hashval;
   register ldsym_type *bp;
@@ -180,8 +180,8 @@ DEFUN (ldsym_get, (key),
 /* Like `ldsym_get' but return 0 if the symbol is not already known.  */
 
 ldsym_type *
-DEFUN (ldsym_get_soft, (key),
-       CONST char *key)
+ldsym_get_soft (key)
+     CONST char *key;
 {
   register int hashval;
   /* Determine which bucket.  */
@@ -313,8 +313,8 @@ list_file_locals (entry)
 
 
 static void
-DEFUN (print_file_stuff, (f),
-       lang_input_statement_type * f)
+print_file_stuff (f)
+     lang_input_statement_type * f;
 {
   fprintf (config.map_file, "  %s\n", f->filename);
   if (f->just_syms_flag)
@@ -659,8 +659,8 @@ return true if the supplied symbol name is not in the
 linker symbol table
 */
 boolean
-DEFUN (ldsym_undefined, (sym),
-       CONST char *sym)
+ldsym_undefined (sym)
+     CONST char *sym;
 {
   ldsym_type *from_table = ldsym_get_soft (sym);
   if (from_table != (ldsym_type *) NULL)
@@ -672,7 +672,7 @@ DEFUN (ldsym_undefined, (sym),
 }
 
 void
-DEFUN_VOID (ldsym_init)
+ldsym_init ()
 {
   obstack_begin (&global_sym_obstack, 20000);
 }

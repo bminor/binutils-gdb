@@ -14,9 +14,9 @@ extern bfd_error_vector_type bfd_error_vector;
 /* BFD has failed to link something, give a better error message */
 
 static void
-DEFUN(ld_undefined_symbol,(relent, seclet),
-      CONST arelent *relent AND
-      CONST bfd_seclet_type *seclet)
+ld_undefined_symbol (relent, seclet)
+     CONST arelent *relent;
+     CONST bfd_seclet_type *seclet;
 {
   asymbol *s = *(relent->sym_ptr_ptr);
   static asymbol *error_symbol;
@@ -60,9 +60,9 @@ DEFUN(ld_undefined_symbol,(relent, seclet),
   }
 }
 static void
-DEFUN(ld_reloc_truncated,(relent, seclet),
-      CONST arelent *relent AND
-      bfd_seclet_type *seclet)
+ld_reloc_truncated (relent, seclet)
+     CONST arelent *relent;
+     bfd_seclet_type *seclet;
 {
   asymbol *s = *(relent->sym_ptr_ptr);
   asection *section = seclet->u.indirect.section;
@@ -75,7 +75,7 @@ DEFUN(ld_reloc_truncated,(relent, seclet),
   
 
 void
-DEFUN_VOID(init_bfd_error_vector)
+init_bfd_error_vector ()
 {
   bfd_error_vector.undefined_symbol = ld_undefined_symbol;  
   bfd_error_vector.reloc_value_truncated = ld_reloc_truncated;

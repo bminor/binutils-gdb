@@ -119,6 +119,8 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <COMMAND>"-d"			{ return OPTION_d; }
 <COMMAND>"-v"			{ return OPTION_v; }
 <COMMAND>"-V"			{ return OPTION_V; }
+<COMMAND>"-m"			{ return OPTION_m; }
+<COMMAND>"-m"{FILENAME}		{ return OPTION_memul; }
 <COMMAND>"-M"			{ return OPTION_M; }
 <COMMAND>"-Map"	             	{ return OPTION_Map;}
 <COMMAND>"-t"			{ return OPTION_t; }
@@ -184,12 +186,19 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 
 <COMMAND>"-retain-symbols-file"	{ return OPTION_RETAIN_SYMBOLS_FILE; }
 
-<COMMAND>"-EB"          		{
-				 return OPTION_EB;
-			       }
-<COMMAND>"-EL"         		{
-				 return OPTION_EL;
-			       }
+<COMMAND>"-EB"          	{
+					return OPTION_EB;
+				}
+<COMMAND>"-EL"        		{
+					return OPTION_EL;
+				}
+<COMMAND>"-G"			{
+					return OPTION_G;
+				}
+<COMMAND>"-G"([0-9])+		{
+					yylval.integer = atoi (yytext + 2);
+					return OPTION_Gval;
+				}
 <MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
   				yylval.integer = strtoul(yytext+1, 0,16);
 				return INT;
@@ -400,9 +409,9 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 %%
 
 void
-DEFUN(lex_push_file,(file,name),
-     FILE *file AND
-     char *name)
+lex_push_file (file, name)
+     FILE *file;
+     char *name;
 {
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH) 
   {
@@ -419,9 +428,9 @@ DEFUN(lex_push_file,(file,name),
 }
 
 YY_BUFFER_STATE 
-DEFUN(yy_create_string_buffer,(string,  size),
-      CONST char *string AND
-      int size )
+yy_create_string_buffer (string,  size)
+     CONST char *string;
+     int size;
 {
   YY_BUFFER_STATE b;
 
@@ -457,8 +466,8 @@ DEFUN(yy_create_string_buffer,(string,  size),
 
 
 void
-DEFUN(lex_redirect,( string),
-    CONST  char *string)
+lex_redirect (string)
+     CONST  char *string;
 {
   YY_BUFFER_STATE tmp;
 
@@ -482,7 +491,7 @@ int state_stack[20];
 int *state_stack_p = state_stack;
 
 void
-DEFUN_VOID(ldlex_script)
+ldlex_script ()
 {
   *(state_stack_p)++ = yy_start;
 
@@ -491,41 +500,41 @@ DEFUN_VOID(ldlex_script)
 
 
 void
-DEFUN_VOID(ldlex_mri_script)
+ldlex_mri_script ()
 {
   *(state_stack_p)++ = yy_start;
   BEGIN(MRI);
 }
 
 void
-DEFUN_VOID(ldlex_defsym)
+ldlex_defsym ()
 {
   *(state_stack_p)++ = yy_start;
   BEGIN(DEFSYMEXP);
 }
 	   
 void
-DEFUN_VOID(ldlex_expression)
+ldlex_expression ()
 {
   *(state_stack_p)++ = yy_start;
   BEGIN(EXPRESSION);
 
 }
 void
-DEFUN_VOID(ldlex_both)
+ldlex_both ()
 {
   *(state_stack_p)++ = yy_start;
   BEGIN(BOTH);
 }
 void
-DEFUN_VOID(ldlex_command)
+ldlex_command ()
 {
   *(state_stack_p)++ = yy_start;
   BEGIN(COMMAND);
 }
 
 void
-DEFUN_VOID(ldlex_popstate)
+ldlex_popstate ()
 {
   yy_start = *(--state_stack_p);
 }

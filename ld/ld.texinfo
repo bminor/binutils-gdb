@@ -9,7 +9,7 @@
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-* Ld: (ld).			The GNU linker.
+* Ld::                          The GNU linker.
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
@@ -163,17 +163,17 @@ line:
 
 @c FIXME!  -relax only avail h8/300, i960.  Conditionals screwed in examples.
 @smallexample
-ld [-o @var{output} ] @var{objfile@dots{}}
+ld [-o @var{output} ] @var{objfile}@dots{}
   [ -A@var{architecture} ]  [ -b @var{input-format} ]  [ -Bstatic ]  
   [ -c @var{MRI-commandfile} ]  [ -d | -dc | -dp ]  
   [ -defsym @var{symbol}=@var{expression} ]
   [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
-  [ -format @var{input-format} ]  [ -g ]  [ -i ]
-  [ -l@var{ar} ]  [ -L@var{searchdir} ]  [ -M | -m ]  
-  [ -n | -N ]  [ -noinhibit-exec ]  [ -R @var{filename} ]
+  [ -format @var{input-format} ]  [ -g ]  [ -G @var{size} ]  [ -i ]
+  [ -l@var{ar} ]  [ -L@var{searchdir} ]  [ -M ]  [ -m @var{emulation} ]
+  [ -N | -n ]  [ -noinhibit-exec ]  [ -R @var{filename} ]
   [ -relax ]  [ -r | -Ur ]  [ -S ]  [ -s ]  [ -T @var{commandfile} ]  
   [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]  [ -Tbss @var{bssorg} ]
-  [ -t ]  [ -u @var{sym}]  [-v]  [ -X ]  [ -x ]  [ -y@var{symbol} ]
+  [ -t ]  [ -u @var{sym}]  [-V]  [-v]  [ -X ]  [ -x ]  [ -y@var{symbol} ]
   [ @{ @var{script} @} ] 
 @end smallexample
 
@@ -210,7 +210,7 @@ The exceptions---which may meaningfully be used more than once---are
 @end ifset
 
 @cindex object files
-The list of object files to be linked together, shown as @var{objfile@dots{}},
+The list of object files to be linked together, shown as @var{objfile}@dots{},
 may follow, precede, or be mixed in with command-line options, except that
 an @var{objfile} argument may not be placed between an option and
 its argument.
@@ -226,7 +226,7 @@ whitespace, or be given as separate arguments immediately following the
 option that requires them.
 
 @table @code
-@item @var{objfile@dots{}}
+@item @var{objfile}@dots{}
 The object files to be linked.
 
 @ifset I960
@@ -286,6 +286,8 @@ files written in an alternate, restricted command language, described in
 @ref{MRI,,MRI Compatible Script Files}.  Introduce MRI script files with
 the option @samp{-c}; use the @samp{-T} option to run linker
 scripts written in the general-purpose @code{ld} scripting language.
+If @var{MRI-cmdfile} does not exist, @code{ld} looks for it in the directories
+specified by any @samp{-L} options.
 
 @cindex common allocation
 @kindex -d
@@ -346,11 +348,17 @@ Synonym for @samp{-b @var{input-format}}.
 @item -g
 Ignored.  Provided for compatibility with other tools.
 
+@kindex -G
+@cindex object size
+@item -G@var{value}
+@itemx -G @var{value}
+Set the maximum size of objects to be optimized using the GP register to
+@var{size} under MIPS ECOFF.  Ignored for other object file formats.
+
 @kindex -i
 @cindex incremental link
 @item -i
 Perform an incremental link (same as option @samp{-r}).
-
 
 @cindex archive files, from cmd line
 @kindex -l@var{ar}
@@ -364,7 +372,8 @@ specified.
 @kindex -L@var{dir}
 @item -L@var{searchdir} 
 Add path @var{searchdir} to the list of paths that @code{ld} will search
-for archive libraries.  You may use this option any number of times.
+for archive libraries and @code{ld} control scripts.  You may use this
+option any number of times.
 
 @ifset UsesEnvVars
 The default set of paths searched (without being specified with
@@ -378,11 +387,17 @@ The paths can also be specified in a link script with the
 @cindex link map
 @kindex -M
 @item -M 
-@kindex -m
-@itemx -m
 Print (to the standard output) a link map---diagnostic information
 about where symbols are mapped by @code{ld}, and information on global
 common storage allocation.
+
+@cindex emulation
+@kindex -m @var{emulation}
+@item -m@var{emulation}
+@itemx -m @var{emulation}
+Emulate the @var{emulation} linker.  You can list the available
+emulations with the @samp{-V} option.  The
+default is the system for which you configured @code{ld}.
 
 @kindex -N
 @cindex read/write from cmd line
@@ -499,6 +514,8 @@ Read link commands from the file
 default link format (rather than adding to it); @var{commandfile} must
 specify everything necessary to describe the target format.
 @xref{Commands}.
+If @var{commandfile} does not exist, @code{ld} looks for it in the directories
+specified by any @samp{-L} options.
 
 You may also include a script of link commands directly in the command
 line by bracketing it between @samp{@{} and @samp{@}}.
@@ -527,10 +544,17 @@ For anything other than C++ programs, this option is equivalent to
 turn serve as input to @code{ld}.  When linking C++ programs, @samp{-Ur}
 @emph{will} resolve references to constructors, unlike @samp{-r}.
 
+@item -V
+@kindex -V
+@cindex version
+Display the version number for @code{ld} and list the supported emulations.
+Print which input files can and can not be opened.
+
 @item -v
 @kindex -v
 @cindex version
 Display the version number for @code{ld}.
+Print which input files can and can not be opened.
 
 @item -X 
 @kindex -X
@@ -1316,7 +1340,7 @@ file have not yet been defined.
 @kindex [ @var{sections} ]
 This is an alternate notation to specify named sections from all
 unallocated input files; its effect is exactly the same as that of
-@samp{* (@var{section@dots{}})}
+@samp{* (@var{section}@dots{})}
 
 @item @var{filename}@code{( COMMON )}
 @itemx ( COMMON )
@@ -2194,7 +2218,7 @@ COFF (the @samp{coff-m68k} variant in BFD), if @var{output-format} is
 @samp{COFF}
 @end enumerate
 
-@item LIST @var{@dots{}}
+@item LIST @var{anything}@dots{}
 @cindex @code{LIST} (MRI)
 Print (to the standard output file) a link map, as produced by the
 @code{ld} command-line option @samp{-M}.
