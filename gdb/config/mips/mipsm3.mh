@@ -8,4 +8,4 @@ NAT_FILE= ../nm-m3.h
 
 # Don't use the mmalloc library in Mach 3.
 MMALLOC = 
-MMALLOC_DISABLE = -DNO_MMALLOC
+MMALLOC_CFLAGS = -DNO_MMALLOC

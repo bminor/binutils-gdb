@@ -535,21 +535,21 @@ to do a "fork and exec" to start up a child process.
 This is the low level interface to inferior processes for systems
 using the Unix @code{ptrace} call in a vanilla way.
 
-@item coredep.c::fetch_core_registers()
+@item core-aout.c::fetch_core_registers()
 Support for reading registers out of a core file.  This routine calls
 @code{register_addr()}, see below.
 Now that BFD is used to read core files, virtually all machines should
-use @code{coredep.c}, and should just provide @code{fetch_core_registers} in
+use @code{core-aout.c}, and should just provide @code{fetch_core_registers} in
 @code{@var{xxx}-nat.c} (or @code{REGISTER_U_ADDR} in @code{nm-@var{xxx}.h}).
 
-@item coredep.c::register_addr()
+@item core-aout.c::register_addr()
 If your @code{nm-@var{xxx}.h} file defines the macro
 @code{REGISTER_U_ADDR(addr, blockend, regno)}, it should be defined to
 set @code{addr} to the offset within the @samp{user}
 struct of GDB register number @code{regno}.  @code{blockend} is the
 offset within the ``upage'' of @code{u.u_ar0}.
 If @code{REGISTER_U_ADDR} is defined,
-@file{coredep.c} will define the @code{register_addr()} function and use
+@file{core-aout.c} will define the @code{register_addr()} function and use
 the macro in it.  If you do not define @code{REGISTER_U_ADDR}, but you
 are using the standard @code{fetch_core_registers()}, you will need to
 define your own version of @code{register_addr()}, put it into your
@@ -579,7 +579,7 @@ around in.
 
 Then back in GDB, you need a matching routine called
 @code{fetch_core_registers()}.  If you can use the generic one, it's in
-@file{coredep.c}; if not, it's in your @file{@var{xxx}-nat.c} file.
+@file{core-aout.c}; if not, it's in your @file{@var{xxx}-nat.c} file.
 It will be passed a char pointer to the entire ``registers'' segment,
 its length, and a zero; or a char pointer to the entire ``regs2''
 segment, its length, and a 2.  The routine should suck out the supplied
@@ -814,13 +814,13 @@ distribution!
 From the top level directory (containing @file{gdb}, @file{bfd},
 @file{libiberty}, and so on):
 @example
-make -f Makefile.in gdb.tar.Z
+make -f Makefile.in gdb.tar.gz
 @end example
 
 This will properly configure, clean, rebuild any files that are
 distributed pre-built (e.g. @file{c-exp.tab.c} or @file{refcard.ps}),
 and will then make a tarfile.  (If the top level directory has already
-beenn configured, you can just do @code{make gdb.tar.Z} instead.)
+been configured, you can just do @code{make gdb.tar.gz} instead.)
 
 This procedure requires:
 @itemize @bullet
@@ -1505,9 +1505,6 @@ dbxread.c
 @item GDBINIT_FILENAME
 The default name of GDB's initialization file (normally @file{.gdbinit}).
 
-@item KERNELDEBUG
-tm-hppa.h
-
 @item MEM_FNS_DECLARED
 Your host config file defines this if it includes 
 declarations of @code{memcpy} and @code{memset}.  Define this
@@ -1515,11 +1512,16 @@ to avoid conflicts between the native include
 files and the declarations in @file{defs.h}.
 
 @item NO_SYS_FILE
-dbxread.c
-@item PYRAMID_CONTROL_FRAME_DEBUGGING
-pyr-xdep.c
+Define this if your system does not have a @code{<sys/file.h>}.
+
+@item SIGWINCH_HANDLER
+If your host defines @code{SIGWINCH}, you can define this to
+be the name of a function to be called if @code{SIGWINCH} is received.
+
 @item SIGWINCH_HANDLER_BODY
-utils.c
+Define this to expand into code that will define the function
+named by the expansion of @code{SIGWINCH_HANDLER}.
+
 @item ADDITIONAL_OPTIONS
 main.c
 @item ADDITIONAL_OPTION_CASES
@@ -1528,100 +1530,43 @@ main.c
 main.c
 @item ADDITIONAL_OPTION_HELP
 main.c
+
 @item AIX_BUGGY_PTRACE_CONTINUE
 infptrace.c
+
 @item ALIGN_STACK_ON_STARTUP
-main.c
-@item ALTOS
-altos-xdep.c
-@item ALTOS_AS
-xm-altos.h
-@item ASCII_COFF
-remote-adapt.c
-@item BCS
-tm-delta88.h
-@item BEFORE_MAIN_LOOP_HOOK
-main.c
-@item BELIEVE_PCC_PROMOTION
-coffread.c
-@item BELIEVE_PCC_PROMOTION_TYPE
-stabsread.c
-@item BLOCK_ADDRESS_ABSOLUTE
-dbxread.c
+Define this if your system is of a sort that will crash in @code{tgetent}
+if the stack happens not to be longword-aligned when @code{main} is
+called.  This is a rare situation, but is known to occur on several
+different types of systems.
 
-@item BROKEN_LARGE_ALLOCA
-Avoid large @code{alloca}'s.  For example, on sun's, Large alloca's fail
-because the attempt to increase the stack limit in main() fails because
-shared libraries are allocated just below the initial stack limit.  The
-SunOS kernel will not allow the stack to grow into the area occupied by
-the shared libraries.
-
-@item CALL_DUMMY
-valops.c
-@item CALL_DUMMY_LOCATION
-inferior.h
-@item CALL_DUMMY_STACK_ADJUST
-valops.c
 @item CFRONT_PRODUCER
 dwarfread.c
-@item CHILD_PREPARE_TO_STORE
-inftarg.c
-@item CLEAR_DEFERRED_STORES
-inflow.c
-@item CLEAR_SOLIB
-objfiles.c
-@item COFF_ENCAPSULATE
-hppabsd-tdep.c
-@item COFF_FORMAT
-symm-tdep.c
-@item CORE_NEEDS_RELOCATION
-stack.c
-@item CPLUS_MARKER
-cplus-dem.c
-@item C_GLBLREG
-coffread.c
-@item DBXREAD_ONLY
-partial-stab.h
 @item DBX_PARM_SYMBOL_CLASS
 stabsread.c
-@item DEBUG_INFO
-partial-stab.h
-@item DEBUG_PTRACE
-hppabsd-xdep.c
-@item DECR_PC_AFTER_BREAK
-breakpoint.c
 
 @item DEFAULT_PROMPT
 The default value of the prompt string (normally @code{"(gdb) "}).
 
-@item DELTA88
-m88k-xdep.c
 @item DEV_TTY
 symmisc.c
-@item DGUX
-m88k-xdep.c
-@item DISABLE_UNSETTABLE_BREAK
-breakpoint.c
-@item DONT_USE_REMOTE
-remote.c
-@item DO_DEFERRED_STORES
-infrun.c
 @item DO_REGISTERS_INFO
 infcmd.c
-@item EXTRACT_RETURN_VALUE
-tm-m68k.h
-@item EXTRACT_STRUCT_VALUE_ADDRESS
-values.c
+
+@item FCLOSE_PROVIDED
+Define this if the system declares @code{fclose} in the headers included in
+@code{defs.h}.  This isn't needed unless your compiler is unusually anal.
+
+@sc{ANSI} definition.
+
 @item FILES_INFO_HOOK
 target.c
 @item FLOAT_INFO
 infcmd.c
+
 @item FOPEN_RB
-defs.h
-@item FUNCTION_EPILOGUE_SIZE
-coffread.c
-@item F_OK
-xm-ultra3.h
+Define this if binary files are opened the same way as text files.
+
 @item GCC2_COMPILED_FLAG_SYMBOL
 dbxread.c
 @item GCC_COMPILED_FLAG_SYMBOL
@@ -1630,35 +1575,29 @@ dbxread.c
 symtab.c
 @item GCC_PRODUCER
 dwarfread.c
-@item GET_SAVED_REGISTER
-findvar.c
+
+@item GETENV_PROVIDED
+Define this if the system declares @code{getenv} in its headers included in
+@code{defs.h}. This isn't needed unless your compiler is unusually anal.
+
 @item GPLUS_PRODUCER
 dwarfread.c
-@item HANDLE_RBRAC
-partial-stab.h
 
 @item HAVE_MMAP
 In some cases, use the system call @code{mmap} for reading symbol
 tables.  For some machines this allows for sharing and quick updates.
 
-@item HAVE_REGISTER_WINDOWS
-findvar.c
 @item HAVE_SIGSETMASK
-main.c
+Define this if the host system has job control, but does not
+define @code{sigsetmask()}.
+Currently, this is only true of the RS/6000.
+
 @item HAVE_TERMIO
 inflow.c
-@item HEADER_SEEK_FD
-arm-tdep.c
-@item HOSTING_ONLY
-xm-rtbsd.h
+
 @item HOST_BYTE_ORDER
-findvar.c
-@item HP_OS_BUG
-infrun.c
-@item IEEE_FLOAT
-valprint.c
-@item IGNORE_SYMBOL
-dbxread.c
+The ordering of bytes in the host.
+This must be defined to be either @code{BIG_ENDIAN} or @code{LITTLE_ENDIAN}.
 
 @item INT_MAX
 @item INT_MIN
@@ -1667,18 +1606,9 @@ dbxread.c
 @item ULONG_MAX
 Values for host-side constants.
 
-@item IN_GDB
-i960-pinsn.c
-@item IN_SIGTRAMP
-infrun.c
-@item IN_SOLIB_TRAMPOLINE
-infrun.c
-
 @item ISATTY
 Substitute for isatty, if not available.
 
-@item IS_TRAPPED_INTERNALVAR
-values.c
 @item KERNEL_DEBUGGING
 tm-ultra3.h
 
@@ -1701,8 +1631,6 @@ directory.
 
 @item LCC_PRODUCER
 dwarfread.c
-@item LOG_FILE
-remote-adapt.c
 
 @item LONGEST
 This is the longest integer type available on the host.
@@ -1726,11 +1654,6 @@ coffread.c
 This macro is used as the argument to lseek (or, most commonly, bfd_seek).
 FIXME, should be replaced by SEEK_SET instead, which is the POSIX equivalent.
 
-@item MACHKERNELDEBUG
-hppabsd-tdep.c
-@item MAINTENANCE
-dwarfread.c
-
 @item MAINTENANCE_CMDS
 If the value of this is 1, then a number of optional maintenance commands
 are compiled in.
@@ -1739,25 +1662,15 @@ are compiled in.
 Define this if the system's prototype for @code{malloc} differs from the
 @sc{ANSI} definition.
 
-@item MIPSEL
-mips-tdep.c
-
 @item MMAP_BASE_ADDRESS
 When using HAVE_MMAP, the first mapping should go at this address.
 
 @item MMAP_INCREMENT
 when using HAVE_MMAP, this is the increment between mappings.
 
-@item MONO
-ser-go32.c
-@item MOTOROLA
-xm-altos.h
-@item NBPG
-altos-xdep.c
 @item NEED_POSIX_SETPGID
-infrun.c
-@item NEED_TEXT_START_END
-exec.c
+Define this to use the POSIX version of @code{setpgid} to determine
+whether job control is available.
 
 @item NORETURN
 If defined, this should be one or more tokens, such as @code{volatile},
@@ -1792,14 +1705,24 @@ Therefore, this define is usually set on the command line by overriding
 @code{MMALLOC_DISABLE} in @file{config/*/*.mh}, rather than by defining
 it in @file{xm-*.h}.
 
-@item NO_MMALLOC_CHECK
+@item NO_MMCHECK
 Define this if you are using @code{mmalloc}, but don't want the overhead
-of checking the heap with @code{mmcheck}.
+of checking the heap with @code{mmcheck}.  Note that on some systems,
+the C runtime makes calls to malloc prior to calling @code{main}, and if
+@code{free} is ever called with these pointers after calling @code{mmcheck}
+to enable checking, a memory corruption abort is certain to occur.  These
+systems can still use mmalloc, but must define NO_MMCHECK.
+
+@item MMCHECK_FORCE
+Define this to 1 if the C runtime allocates memory prior to @code{mmcheck}
+being called, but that memory is never freed so we don't have to worry
+about it triggering a memory corruption abort.  The default is 0, which
+means that @code{mmcheck} will only install the heap checking functions
+if there has not yet been any memory allocation calls, and if it fails
+to install the functions, gdb will issue a warning.
 
 @item NO_SIGINTERRUPT
 remote-adapt.c
-@item NS32K_SVC_IMMED_OPERANDS
-ns32k-opcode.h
 @item NUMERIC_REG_NAMES
 mips-tdep.c
 @item N_SETV
@@ -1812,26 +1735,18 @@ breakpoint.c
 exec.c
 @item O_RDONLY
 xm-ultra3.h
-@item PC
-convx-opcode.h
 @item PCC_SOL_BROKEN
 dbxread.c
-@item PC_IN_CALL_DUMMY
-inferior.h
 @item PC_LOAD_SEGMENT
 stack.c
 @item PRINT_RANDOM_SIGNAL
 infcmd.c
 @item PRINT_REGISTER_HOOK
 infcmd.c
-@item PRINT_TYPELESS_INTEGER
-valprint.c
 @item PROCESS_LINENUMBER_HOOK
 buildsym.c
 @item PROLOGUE_FIRSTLINE_OVERLAP
 infrun.c
-@item PSIGNAL_IN_SIGNAL_H
-defs.h
 @item PUSH_ARGUMENTS
 valops.c
 @item PYRAMID_CONTROL_FRAME_DEBUGGING
@@ -1842,8 +1757,6 @@ pyr-xdep.c
 pyr-xdep.c
 @item REGISTER_BYTES
 remote.c
-@item REGISTER_NAMES
-tm-a29k.h
 @item REG_STACK_SEGMENT
 exec.c
 @item REG_STRUCT_HAS_ADDR
@@ -1859,14 +1772,6 @@ state.c
 @item SEM
 coffread.c
 
-@item SET_STACK_LIMIT_HUGE
-When defined, stack limits will be raised to their maximum.  Use this
-if your host supports @code{setrlimit} and you have trouble with
-@code{stringtab} in @file{dbxread.c}.
-
-Also used in @file{fork-child.c} to return stack limits before child
-processes are forked.
-
 @item SHELL_COMMAND_CONCAT
 infrun.c
 @item SHELL_FILE
@@ -1877,8 +1782,6 @@ breakpoint.c
 infrun.c
 @item STACK_ALIGN
 valops.c
-@item START_INFERIOR_TRAPS_EXPECTED
-infrun.c
 @item STOP_SIGNAL
 main.c
 @item SUN4_COMPILER_FEATURE
@@ -1926,9 +1829,35 @@ Define this to override the defaults of @code{__volatile__} or @code{/**/}.
 
 @end table
 
+Platform-specific host conditionals.
+
+@table @code
+
+@item ALTOS
+altos-xdep.c
+@item ALTOS_AS
+xm-altos.h
+@item MOTOROLA
+xm-altos.h
+@item NBPG
+altos-xdep.c
+
+@item BCS
+tm-delta88.h
+
+@item DELTA88
+m88k-xdep.c
+@item DGUX
+m88k-xdep.c
+
+@item F_OK
+xm-ultra3.h
+
+@end table
+
 Regex conditionals.
 
-@table
+@table @code
 
 @item C_ALLOCA
 regex.c
@@ -1971,14 +1900,8 @@ Used in @samp{call_function_by_hand} to remove an artificial stack frame.
 
 @item BLOCK_ADDRESS_FUNCTION_RELATIVE
 dbxread.c
-@item KERNELDEBUG
-tm-hppa.h
-@item NO_SYS_FILE
-dbxread.c
 @item PYRAMID_CONTROL_FRAME_DEBUGGING
 pyr-xdep.c
-@item SIGWINCH_HANDLER_BODY
-utils.c
 @item ADDITIONAL_OPTIONS
 main.c
 @item ADDITIONAL_OPTION_CASES
@@ -2003,10 +1926,17 @@ main.c
 altos-xdep.c
 @item ALTOS_AS
 xm-altos.h
-@item ASCII_COFF
-remote-adapt.c
 @item BCS
 tm-delta88.h
+
+@item BEFORE_MAIN_LOOP_HOOK
+Define this to expand into any code that you want to execute before
+the main loop starts.  Although this is not, strictly speaking,
+a target conditional, that is how it is currently being used.
+Note that if a configuration were to define it one way for a host
+and a different way for the target, GDB will probably not compile,
+let alone run correctly.
+
 @item BELIEVE_PCC_PROMOTION
 coffread.c
 @item BELIEVE_PCC_PROMOTION_TYPE
@@ -2022,6 +1952,7 @@ A value of 1 means that the bits are numbered in a big-endian order,
 dbxread.c
 @item BREAKPOINT
 tm-m68k.h
+
 @item CALL_DUMMY
 valops.c
 @item CALL_DUMMY_LOCATION
@@ -2043,44 +1974,43 @@ GDB will assume that all registers may be written.
 
 @item CFRONT_PRODUCER
 dwarfread.c
-@item CHILD_PREPARE_TO_STORE
-inftarg.c
+
+@item DO_DEFERRED_STORES
 @item CLEAR_DEFERRED_STORES
-inflow.c
-@item CLEAR_SOLIB
-objfiles.c
-@item COFF_ENCAPSULATE
-hppabsd-tdep.c
-@item COFF_FORMAT
-symm-tdep.c
-@item CORE_NEEDS_RELOCATION
-stack.c
+Define this to execute any deferred stores of registers into the inferior,
+and to cancel any deferred stores.
+
+Currently only implemented correctly for native Sparc configurations?
+
 @item CPLUS_MARKER
-cplus-dem.c
-@item C_GLBLREG
-coffread.c
-@item DBXREAD_ONLY
-partial-stab.h
+Define this to expand into the character that G++ uses to
+distinguish compiler-generated identifiers from programmer-specified
+identifiers.  By default, this expands into @code{'$'}.
+Most System V targets should define this to @code{'.'}.
+
 @item DBX_PARM_SYMBOL_CLASS
 stabsread.c
-@item DEBUG_INFO
-partial-stab.h
-@item DEBUG_PTRACE
-hppabsd-xdep.c
+
 @item DECR_PC_AFTER_BREAK
-breakpoint.c
+Define this to be the amount by which to decrement the PC after
+the program encounters a breakpoint.
+This is often the number of bytes in BREAKPOINT, though not always.
+For most targets this value will be 0.
+
+@item DECR_PC_AFTER_HW_BREAK
+Similarly, for hardware breakpoints.
+
 @item DELTA88
 m88k-xdep.c
 @item DEV_TTY
 symmisc.c
 @item DGUX
 m88k-xdep.c
-@item DISABLE_UNSETTABLE_BREAK
-breakpoint.c
-@item DONT_USE_REMOTE
-remote.c
-@item DO_DEFERRED_STORES
-infrun.c
+
+@item DISABLE_UNSETTABLE_BREAK addr
+If defined, this should evaluate to 1 if @var{addr} is in a shared
+library in which breakpoints cannot be set and so should be disabled.
+
 @item DO_REGISTERS_INFO
 infcmd.c
 
@@ -2105,8 +2035,6 @@ the @code{symtab} structure defined in @code{symtab.h}.
 target.c
 @item FLOAT_INFO
 infcmd.c
-@item FOPEN_RB
-defs.h
 @item FP0_REGNUM
 a68v-xdep.c
 @item FPC_REGNUM
@@ -2143,9 +2071,11 @@ stack.c
 Given FRAME, return the pc saved there.  That is, the return address.
 
 @item FUNCTION_EPILOGUE_SIZE
-coffread.c
-@item F_OK
-xm-ultra3.h
+For some COFF targets, the @code{x_sym.x_misc.x_fsize} field of the
+function end symbol is 0.  For such targets, you must define
+@code{FUNCTION_EPILOGUE_SIZE} to expand into the standard size
+of a function's epilogue.
+
 @item GCC2_COMPILED_FLAG_SYMBOL
 dbxread.c
 @item GCC_COMPILED_FLAG_SYMBOL
@@ -2178,29 +2108,21 @@ takes a CORE_ADDR * as argument, and stores the target PC value through
 this pointer.  It examines the current state of the machine as needed.
 
 @item GET_SAVED_REGISTER
-findvar.c
+Define this if you need to supply your own definition for the
+function @code{get_saved_register}.
+Currently this is only done for the a29k.
+
 @item GPLUS_PRODUCER
 dwarfread.c
+
 @item GR64_REGNUM
-remote-adapt.c
-@item GR64_REGNUM
-remote-mm.c
-@item HANDLE_RBRAC
-partial-stab.h
-@item HAVE_68881
-m68k-tdep.c
+Very a29k-specific.
+
 @item HAVE_REGISTER_WINDOWS
-findvar.c
-@item HAVE_SIGSETMASK
-main.c
-@item HAVE_TERMIO
-inflow.c
-@item HEADER_SEEK_FD
-arm-tdep.c
-@item HOSTING_ONLY
-xm-rtbsd.h
-@item HP_OS_BUG
-infrun.c
+Define this if the target has register windows.
+@item REGISTER_IN_WINDOW_P regnum
+Define this to be an expression that is 1 is the given register is
+in the window.
 
 @item IBM6000_TARGET
 Shows that we are configured for an IBM RS/6000 target.  This conditional
@@ -2208,9 +2130,10 @@ should be eliminated (FIXME) and replaced by feature-specific macros.
 It was introduced in haste and we are repenting at leisure.
 
 @item IEEE_FLOAT
-valprint.c
-@item IGNORE_SYMBOL
-dbxread.c
+Define this if the target system uses IEEE-format floating point numbers.
+
+@item IGNORE_SYMBOL type
+This seems to be no longer used.
 
 @item INIT_EXTRA_FRAME_INFO (fromleaf, fci)
 If defined, this should be a C expression or statement that fills
@@ -2227,36 +2150,43 @@ to by @var{prev}.  [By default...]
 Define this to be either @code{<} if the target's stack grows
 downward in memory, or @code{>} is the stack grows upwards.
 
-@item IN_GDB
-i960-pinsn.c
-@item IN_SIGTRAMP
-infrun.c
-@item IN_SOLIB_TRAMPOLINE
-infrun.c
-@item IS_TRAPPED_INTERNALVAR
-values.c
+@item IN_SIGTRAMP pc name
+Define this to return true if the given pc and/or name indicates
+that the current function is a sigtramp.
+
+@item SIGTRAMP_START
+@item SIGTRAMP_END
+Define these to be the start and end address of the sigtramp.
+These will be used if defined, and @code{IN_SIGTRAMP} is not;
+otherwise the name of the sigtramp will be assumed to be @code{_sigtramp}.
+
+@item IN_SOLIB_TRAMPOLINE pc name
+Define this to evaluate to nonzero if the program is stopped in
+the trampoline that connects to a shared library.
+
+@item IS_TRAPPED_INTERNALVAR name
+This is an ugly hook to allow the specification of special actions
+that should occur as a side-effect of setting the value of a variable
+internal to GDB.  Currently only used by the h8500.
+Note that this could be either a host or target conditional.
+
 @item KERNEL_DEBUGGING
 tm-ultra3.h
 @item LCC_PRODUCER
 dwarfread.c
-@item LOG_FILE
-remote-adapt.c
 @item L_LNNO32
 coffread.c
-@item MACHKERNELDEBUG
-hppabsd-tdep.c
-@item MAINTENANCE
-dwarfread.c
 @item MIPSEL
 mips-tdep.c
 @item MOTOROLA
 xm-altos.h
 @item NBPG
 altos-xdep.c
-@item NEED_POSIX_SETPGID
-infrun.c
+
 @item NEED_TEXT_START_END
-exec.c
+Define this if GDB should determine the start and end addresses
+of the text section.  (Seems dubious.)
+
 @item NOTICE_SIGNAL_HANDLING_CHANGE
 infrun.c
 @item NO_HIF_SUPPORT
@@ -2272,8 +2202,6 @@ It must insert breakpoints at each possible destinations of the next
 instruction.  See @code{sparc-tdep.c} and @code{rs6000-tdep.c}
 for examples.
 
-@item NS32K_SVC_IMMED_OPERANDS
-ns32k-opcode.h
 @item NUMERIC_REG_NAMES
 mips-tdep.c
 @item N_SETV
@@ -2282,8 +2210,6 @@ dbxread.c
 hppabsd-tdep.c
 @item ONE_PROCESS_WRITETEXT
 breakpoint.c
-@item PC
-convx-opcode.h
 @item PCC_SOL_BROKEN
 dbxread.c
 @item PC_IN_CALL_DUMMY
@@ -2307,22 +2233,27 @@ Currently, this is only defined for the Motorola 88K.
 infcmd.c
 @item PRINT_REGISTER_HOOK
 infcmd.c
+
 @item PRINT_TYPELESS_INTEGER
-valprint.c
+This is an obscure substitute for @code{print_longest} that
+seems to have been defined for the Convex target.
+
 @item PROCESS_LINENUMBER_HOOK
 buildsym.c
 @item PROLOGUE_FIRSTLINE_OVERLAP
 infrun.c
-@item PSIGNAL_IN_SIGNAL_H
-defs.h
 @item PS_REGNUM
 parse.c
 @item PUSH_ARGUMENTS
 valops.c
 @item REGISTER_BYTES
 remote.c
+
 @item REGISTER_NAMES
-tm-a29k.h
+Define this to expand into an initializer of an array of strings.
+Each string is the name of a register.
+[more detail]
+
 @item REG_STACK_SEGMENT
 exec.c
 @item REG_STRUCT_HAS_ADDR
@@ -2374,8 +2305,6 @@ into GDB regnums.  If not defined, no conversion will be done.
 
 @item STACK_ALIGN
 valops.c
-@item START_INFERIOR_TRAPS_EXPECTED
-infrun.c
 @item STOP_SIGNAL
 main.c
 
@@ -2475,7 +2404,7 @@ remote-vx.c
 
 Motorola M68K target conditionals.
 
-@table
+@table @code
 
 @item BPT_VECTOR
 Define this to be the 4-bit location of the breakpoint trap vector.
@@ -2499,6 +2428,14 @@ in @file{nm-@var{system}.h}.
 @item ATTACH_DETACH
 If defined, then GDB will include support for the @code{attach} and
 @code{detach} commands.
+
+@item CHILD_PREPARE_TO_STORE
+If the machine stores all registers at once in the child process,
+then define this to ensure that all values are correct.
+This usually entails a read from the child.
+
+[Note that this is incorrectly defined in @file{xm-@var{system}.h}
+files currently.]
 
 @item FETCH_INFERIOR_REGISTERS
 Define this if the native-dependent code will provide its
@@ -2542,6 +2479,12 @@ in @var{filename} to be added to GDB's symbol table.
 Define this to expand into any shared-library-relocation code
 that you want to be run just after the child process has been forked.
 
+@item START_INFERIOR_TRAPS_EXPECTED
+When starting an inferior, GDB normally expects to trap twice;
+once when the shell execs, and once when the program itself execs.
+If the actual number of traps is something other than 2, then
+define this macro to expand into the number expected.
+
 @item USE_PROC_FS
 This determines whether small routines in @file{*-tdep.c}, which
 translate register values
@@ -2560,6 +2503,12 @@ The default value means that u.u_ar0 @emph{points to} the location of the
 registers.  I'm guessing that @code{#define U_REGS_OFFSET 0} means that
 u.u_ar0 @emph{is} the location of the registers.
 
+@item CLEAR_SOLIB
+objfiles.c
+
+@item DEBUG_PTRACE
+Define this to debug ptrace calls.
+
 @end table
 
 @node Obsolete Conditionals
@@ -2571,6 +2520,7 @@ old uses should be removed as those parts of the debugger are
 otherwise touched.
 
 @table @code
+
 @item STACK_END_ADDR
 This macro used to define where the end of the stack appeared, for use
 in interpreting core file formats that don't record this address in the
@@ -2581,6 +2531,7 @@ and deleted from all of GDB's config files.
 
 Any @file{@var{foo}-xdep.c} file that references STACK_END_ADDR
 is so old that it has never been converted to use BFD.  Now that's old!
+
 @end table
 
 @node XCOFF

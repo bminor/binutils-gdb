@@ -1,3 +1,10 @@
+Fri Jul  5 15:38:54 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbint.texinfo (NO_MMCHECK): Renamed from NO_MMALLOC_CHECK.
+  	Also document that some systems can use mmalloc but must define
+ 	this if their C runtime allocates memory that is later freed.
+	(MMCHECK_FORCE): Document new macro.
+	
 Fri Jun 28 22:17:10 1996  Dawn Perchik  <dawn@cygnus.com>
 
 	* remote.texi: Add documentation for target Sparclet.

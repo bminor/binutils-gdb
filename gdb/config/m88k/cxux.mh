@@ -7,4 +7,4 @@ NAT_FILE= nm-cxux.h
 NATDEPFILES= infptrace.o inftarg.o fork-child.o cxux-nat.o corelow.o core-aout.o
 
 MMALLOC=
-MMALLOC_DISABLE= -DNO_MMALLOC
+MMALLOC_CFLAGS= -DNO_MMALLOC

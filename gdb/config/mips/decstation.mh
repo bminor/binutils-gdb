@@ -8,4 +8,4 @@ NATDEPFILES= infptrace.o inftarg.o corelow.o mips-nat.o fork-child.o
 # with a malloc(0) that returns 0.  Besides, it's useless on a machine
 # without a real mmap().
 MMALLOC = 
-MMALLOC_DISABLE = -DNO_MMALLOC
+MMALLOC_CFLAGS = -DNO_MMALLOC

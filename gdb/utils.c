@@ -51,14 +51,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Prototypes for local functions */
 
-#if defined (NO_MMALLOC) || defined (NO_MMALLOC_CHECK)
-#else
-
-static void
-malloc_botch PARAMS ((void));
-
-#endif /* NO_MMALLOC, etc */
-
 static void
 fatal_dump_core PARAMS((char *, ...));
 
@@ -663,7 +655,7 @@ mfree (md, ptr)
 
 #endif	/* NO_MMALLOC */
 
-#if defined (NO_MMALLOC) || defined (NO_MMALLOC_CHECK)
+#if defined (NO_MMALLOC) || defined (NO_MMCHECK)
 
 void
 init_malloc (md)
@@ -671,7 +663,7 @@ init_malloc (md)
 {
 }
 
-#else /* have mmalloc and want corruption checking  */
+#else /* Have mmalloc and want corruption checking */
 
 static void
 malloc_botch ()
@@ -683,7 +675,7 @@ malloc_botch ()
    by MD, to detect memory corruption.  Note that MD may be NULL to specify
    the default heap that grows via sbrk.
 
-   Note that for freshly created regions, we must call mmcheck prior to any
+   Note that for freshly created regions, we must call mmcheckf prior to any
    mallocs in the region.  Otherwise, any region which was allocated prior to
    installing the checking hooks, which is later reallocated or freed, will
    fail the checks!  The mmcheck function only allows initial hooks to be
@@ -693,13 +685,24 @@ malloc_botch ()
 
    Returns zero on failure, non-zero on success. */
 
+#ifndef MMCHECK_FORCE
+#define MMCHECK_FORCE 0
+#endif
+
 void
 init_malloc (md)
      PTR md;
 {
-  if (!mmcheck (md, malloc_botch))
+  if (!mmcheckf (md, malloc_botch, MMCHECK_FORCE))
     {
-      warning ("internal error: failed to install memory consistency checks");
+      /* Don't use warning(), which relies on current_target being set
+	 to something other than dummy_target, until after
+	 initialize_all_files(). */
+
+      fprintf_unfiltered
+	(gdb_stderr, "warning: failed to install memory consistency checks; ");
+      fprintf_unfiltered
+	(gdb_stderr, "configuration should define NO_MMCHECK or MMCHECK_FORCE\n");
     }
 
   mmtrace ();
@@ -1951,8 +1954,7 @@ initialize_utils ()
         SIGWINCH_HANDLER_BODY
 #endif
 
-#ifdef HAVE_LONG_DOUBLE
-/* Support for converting target fp numbers into host long double format.  */
+/* Support for converting target fp numbers into host DOUBLEST format.  */
 
 /* XXX - This code should really be in libiberty/floatformat.c, however
    configuration issues with libiberty made this very difficult to do in the
@@ -2019,18 +2021,18 @@ get_field (data, order, total_len, start, len)
   return result;
 }
   
-/* Convert from FMT to a long double.
+/* Convert from FMT to a DOUBLEST.
    FROM is the address of the extended float.
-   Store the long double in *TO.  */
+   Store the DOUBLEST in *TO.  */
 
 void
-floatformat_to_long_double (fmt, from, to)
+floatformat_to_doublest (fmt, from, to)
      const struct floatformat *fmt;
      char *from;
-     long double *to;
+     DOUBLEST *to;
 {
   unsigned char *ufrom = (unsigned char *)from;
-  long double dto;
+  DOUBLEST dto;
   long exponent;
   unsigned long mant;
   unsigned int mant_bits, mant_off;
@@ -2141,6 +2143,7 @@ put_field (data, order, total_len, start, len, stuff_to_put)
     }
 }
 
+#ifdef HAVE_LONG_DOUBLE
 /* Return the fractional part of VALUE, and put the exponent of VALUE in *EPTR.
    The range of the returned value is >= 0.5 and < 1.0.  This is equivalent to
    frexp, but operates on the long double data type.  */
@@ -2185,20 +2188,22 @@ ldfrexp (value, eptr)
   *eptr = exp;
   return value/tmp;
 }
+#endif /* HAVE_LONG_DOUBLE */
 
-/* The converse: convert the long double *FROM to an extended float
+
+/* The converse: convert the DOUBLEST *FROM to an extended float
    and store where TO points.  Neither FROM nor TO have any alignment
    restrictions.  */
 
 void
-floatformat_from_long_double (fmt, from, to)
+floatformat_from_doublest (fmt, from, to)
      CONST struct floatformat *fmt;
-     long double *from;
+     DOUBLEST *from;
      char *to;
 {
-  long double dfrom;
+  DOUBLEST dfrom;
   int exponent;
-  long double mant;
+  DOUBLEST mant;
   unsigned int mant_bits, mant_off;
   int mant_bits_left;
   unsigned char *uto = (unsigned char *)to;
@@ -2227,7 +2232,12 @@ floatformat_from_long_double (fmt, from, to)
 
   /* How to tell an infinity from an ordinary number?  FIXME-someday */
 
+#ifdef HAVE_LONG_DOUBLE
   mant = ldfrexp (dfrom, &exponent);
+#else
+  mant = frexp (dfrom, &exponent);
+#endif
+
   put_field (uto, fmt->byteorder, fmt->totalsize, fmt->exp_start, fmt->exp_len,
 	     exponent + fmt->exp_bias - 1);
 
@@ -2265,5 +2275,3 @@ floatformat_from_long_double (fmt, from, to)
       mant_bits_left -= mant_bits;
     }
 }
-
-#endif /* HAVE_LONG_DOUBLE */

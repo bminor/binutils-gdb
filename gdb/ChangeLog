@@ -1,3 +1,43 @@
+Wed Jul 10 16:54:41 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (MMALLOC_CFLAGS): Eliminate intermediate MMALLOC_DISABLE
+	and MMALLOC_CHECK macros, and add comment indicating how host dependent
+	makefile fragment should modify MMALLOC_CFLAGS to not use mmalloc, or
+	to use it but to not do heap corruption checking.
+	* gdbserver/Makefile.in: Ditto.
+	* utils.c (init_malloc): Replace warning() use with direct call of
+	fprintf_unfiltered, since current_target has not yet been set and thus
+ 	we cannot use warning().  If we try to use mmcheck and it fails,
+	suggest that this configuration needs NO_MMCHECK or MMCHECK_FORCE
+ 	defined.  Other small mmalloc related cleanups.
+	* config/sparc/sun4os4.mh (MMALLOC_CFLAGS): Define MMCHECK_FORCE to 1.
+	* config/alpha/alpha-osf2.mh (MMALLOC_CFLAGS): Set to -DNO_MMCHECK.
+
+	* config/sparc/xm-sun4os4.h (MMAP_BASE_ADDRESS, MMAP_INCREMENT):
+	* config/i386/xm-i386v4.h (MMAP_BASE_ADDRESS, MMAP_INCREMENT): 
+	* config/i386/xm-linux.h (MMAP_BASE_ADDRESS, MMAP_INCREMENT):
+	* config/m68k/xm-hp300hpux.h (MMAP_BASE_ADDRESS, MMAP_INCREMENT):
+	* config/m68k/xm-m68kv4.h (MMAP_BASE_ADDRESS, MMAP_INCREMENT);
+	* config/m68k/xm-sun3os4.h (MMAP_BASE_ADDRESS, MMAP_INCREMENT):
+	* config/pa/xm-hppah.h (MMAP_BASE_ADDRESS, MMAP_INCREMENT):
+	* config/sparc/xm-sun4sol2.h (MMAP_BASE_ADDRESS, MMAP_INCREMENT):
+	Remove obsolete defines.
+
+	* config/alpha/alpha-linux.mh (MMALLOC_DISABLE):
+	* config/alpha/alpha-osf1.mh (MMALLOC_DISABLE):
+	* config/rs6000/rs6000.mh (MMALLOC_DISABLE):
+	* config/rs6000/aix4.mh (MMALLOC_DISABLE):
+	* config/powerpc/aix4.mh (MMALLOC_DISABLE):
+	* config/powerpc/aix.mh (MMALLOC_DISABLE):
+	* config/ns32k/ns32km3.mh (MMALLOC_DISABLE):
+	* config/mips/mipsm3.mh (MMALLOC_DISABLE):
+	* config/mips/decstation.mh (MMALLOC_DISABLE):
+	* config/m88k/cxux.mh (MMALLOC_DISABLE):
+	* config/i386/i386mk.mh (MMALLOC_DISABLE):
+	* config/i386/i386m3.mh (MMALLOC_DISABLE):
+	* config/i386/i386gnu.mh (MMALLOC_DISABLE):
+	Use MMALLOC_CFLAGS instead.
+
 Tue Jul  9 22:41:12 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* h8300-tdep.c: Remove some outdated comments.

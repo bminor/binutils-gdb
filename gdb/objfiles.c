@@ -48,6 +48,9 @@ open_mapped_file PARAMS ((char *filename, long mtime, int mapped));
 static CORE_ADDR
 map_to_address PARAMS ((void));
 
+static PTR
+map_to_file PARAMS ((int));
+
 #endif  /* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
 
 /* Externally visible variables that are owned by this module.
@@ -144,11 +147,9 @@ allocate_objfile (abfd, mapped)
 			   mapped);
     if (fd >= 0)
       {
-	CORE_ADDR mapto;
 	PTR md;
 
-	if (((mapto = map_to_address ()) == 0) ||
-	    ((md = mmalloc_attach (fd, (PTR) mapto)) == NULL))
+	if ((md = map_to_file (fd)) == NULL)
 	  {
 	    close (fd);
 	  }
@@ -868,6 +869,50 @@ map_to_address ()
 
 #endif
 
+}
+
+static PTR
+map_to_file (fd)
+     int fd;
+{
+  PTR md;
+  CORE_ADDR mapto;
+  int tempfd;
+
+  md = mmalloc_attach (fd, (PTR) 0);
+  if (md != NULL)
+    {
+      mapto = (CORE_ADDR) mmalloc_getkey (md, 1);
+      md = mmalloc_detach (md);
+      if (md != NULL)
+	{
+	  /* FIXME: should figure out why detach failed */
+	  md = NULL;
+	}
+      else if (mapto != (CORE_ADDR) NULL)
+	{
+	  /* This mapping file needs to be remapped at "mapto" */
+	  md = mmalloc_attach (fd, (PTR) mapto);
+	}
+      else
+	{
+	  /* This is a freshly created mapping file. */
+	  mapto = (CORE_ADDR) mmalloc_findbase (20 * 1024 * 1024);
+	  if (mapto != -1)
+	    {
+	      /* To avoid reusing the freshly created mapping file, at the 
+		 address selected by mmap, we must truncate it before trying
+		 to do an attach at the address we want. */
+	      ftruncate (fd, 0);
+	      md = mmalloc_attach (fd, (PTR) mapto);
+	      if (md != NULL)
+		{
+		  mmalloc_setkey (md, 1, (PTR) mapto);
+		}
+	    }
+	}
+    }
+  return (md);
 }
 
 #endif	/* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
