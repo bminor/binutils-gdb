@@ -2821,6 +2821,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     tdep->ppc_mq_regnum = -1;
   tdep->ppc_fp0_regnum = 32;
   tdep->ppc_fpscr_regnum = power ? 71 : 70;
+  tdep->ppc_vr0_regnum = -1;
+  tdep->ppc_vrsave_regnum = -1;
+  tdep->ppc_ev0_regnum = -1;
+  tdep->ppc_ev31_regnum = -1;
 
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 1);
@@ -2835,20 +2839,32 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_store_return_value (gdbarch, rs6000_store_return_value);
     }
 
+  /* Set lr_frame_offset.  */
+  if (wordsize == 8)
+    tdep->lr_frame_offset = 16;
+  else if (sysv_abi)
+    tdep->lr_frame_offset = 4;
+  else
+    tdep->lr_frame_offset = 8;
+
+  /* Calculate byte offsets in raw register array.  */
+  tdep->regoff = xmalloc (v->num_tot_regs * sizeof (int));
+  for (i = off = 0; i < v->num_tot_regs; i++)
+    {
+      tdep->regoff[i] = off;
+      off += regsize (v->regs + i, wordsize);
+    }
+
   if (v->arch == bfd_arch_powerpc)
     switch (v->mach)
       {
       case bfd_mach_ppc: 
 	tdep->ppc_vr0_regnum = 71;
 	tdep->ppc_vrsave_regnum = 104;
-	tdep->ppc_ev0_regnum = -1;
-	tdep->ppc_ev31_regnum = -1;
 	break;
       case bfd_mach_ppc_7400:
 	tdep->ppc_vr0_regnum = 119;
 	tdep->ppc_vrsave_regnum = 152;
-	tdep->ppc_ev0_regnum = -1;
-	tdep->ppc_ev31_regnum = -1;
 	break;
       case bfd_mach_ppc_e500:
         tdep->ppc_gp0_regnum = 41;
@@ -2868,32 +2884,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
         set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
 	break;
-      default:
-	tdep->ppc_vr0_regnum = -1;
-	tdep->ppc_vrsave_regnum = -1;
-	tdep->ppc_ev0_regnum = -1;
-	tdep->ppc_ev31_regnum = -1;
-	break;
       }   
 
   /* Sanity check on registers.  */
   gdb_assert (strcmp (tdep->regs[tdep->ppc_gp0_regnum].name, "r0") == 0);
-
-  /* Set lr_frame_offset.  */
-  if (wordsize == 8)
-    tdep->lr_frame_offset = 16;
-  else if (sysv_abi)
-    tdep->lr_frame_offset = 4;
-  else
-    tdep->lr_frame_offset = 8;
-
-  /* Calculate byte offsets in raw register array.  */
-  tdep->regoff = xmalloc (v->num_tot_regs * sizeof (int));
-  for (i = off = 0; i < v->num_tot_regs; i++)
-    {
-      tdep->regoff[i] = off;
-      off += regsize (v->regs + i, wordsize);
-    }
 
   /* Select instruction printer.  */
   if (arch == power)

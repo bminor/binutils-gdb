@@ -1,3 +1,10 @@
+2004-05-18  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Initialize tdep fields
+	before the mach-specific switch, and then let the individual cases
+	override the defaults, rather than leaving them uninitialized
+	until the switch and then setting them in each case.
+
 2004-05-18  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa_frame_cache): Check for validity of r31 for
