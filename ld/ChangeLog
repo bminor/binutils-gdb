@@ -1,3 +1,8 @@
+Mon Nov  9 22:44:58 1998  DJ Delorie  <dj@cygnus.com>
+
+	* pe-dll.c (process_def_file): don't assume exports won't move
+	during a realloc
+
 Mon Nov  9 16:41:30 1998  DJ Delorie  <dj@cygnus.com>
 
 	* pe-dll.c: New file; direct support for PE DLLs

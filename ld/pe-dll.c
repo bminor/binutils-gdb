@@ -182,7 +182,7 @@ process_def_file (abfd, info)
   struct bfd_link_hash_entry *blhe;
   bfd *b;
   struct sec *s;
-  def_file_export *e;
+  def_file_export *e=0;
 
   if (!pe_def_file)
     pe_def_file = def_file_empty ();
@@ -233,7 +233,6 @@ process_def_file (abfd, info)
 
 #undef NE
 #define NE pe_def_file->num_exports
-  e = pe_def_file->exports;	/* convenience */
 
   /* Canonicalize the export list */
 
@@ -241,13 +240,13 @@ process_def_file (abfd, info)
     {
       for (i = 0; i < NE; i++)
 	{
-	  if (strchr (e[i].name, '@'))
+	  if (strchr (pe_def_file->exports[i].name, '@'))
 	    {
 	      /* This will preserve internal_name, which may have been pointing
 	         to the same memory as name, or might not have */
-	      char *tmp = xstrdup (e[i].name);
+	      char *tmp = xstrdup (pe_def_file->exports[i].name);
 	      *(strchr (tmp, '@')) = 0;
-	      e[i].name = tmp;
+	      pe_def_file->exports[i].name = tmp;
 	    }
 	}
     }
@@ -256,17 +255,20 @@ process_def_file (abfd, info)
     {
       for (i = 0; i < NE; i++)
 	{
-	  if (strchr (e[i].name, '@'))
+	  if (strchr (pe_def_file->exports[i].name, '@'))
 	    {
-	      char *tmp = xstrdup (e[i].name);
+	      char *tmp = xstrdup (pe_def_file->exports[i].name);
 	      *(strchr (tmp, '@')) = 0;
 	      if (auto_export (pe_def_file, tmp))
-		def_file_add_export (pe_def_file, tmp, e[i].internal_name, -1);
+		def_file_add_export (pe_def_file, tmp,
+				     pe_def_file->exports[i].internal_name, -1);
 	      else
 		free (tmp);
 	    }
 	}
     }
+
+  e = pe_def_file->exports;	/* convenience */
 
   exported_symbol_offsets = (bfd_vma *) xmalloc (NE * sizeof (bfd_vma));
   exported_symbol_sections = (struct sec **) xmalloc (NE * sizeof (struct sec *));
