@@ -1,5 +1,12 @@
 2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/exception.cc: Add copyright notice.
+	* gdb.cp/exception.exp: Add a notice that this file is broken
+	because of line number changes caused by addition of copyright
+	notice.
+
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/exception.cc: Renamed from gdb.hp/gdb.aCC/exception.cc.
 	* gdb.cp/exception.exp: Renamed from gdb.hp/gdb.aCC/exception.exp.
 
