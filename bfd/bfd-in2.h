@@ -58,6 +58,7 @@ extern "C" {
 #define BFD_DEFAULT_TARGET_SIZE @bfd_default_target_size@
 
 #define BFD_HOST_64BIT_LONG @BFD_HOST_64BIT_LONG@
+#define BFD_HOST_LONG_LONG @BFD_HOST_LONG_LONG@
 #if @BFD_HOST_64_BIT_DEFINED@
 #define BFD_HOST_64_BIT @BFD_HOST_64_BIT@
 #define BFD_HOST_U_64_BIT @BFD_HOST_U_64_BIT@
@@ -103,21 +104,19 @@ typedef int bfd_boolean;
 
 /* Support for different sizes of target format ints and addresses.
    If the type `long' is at least 64 bits, BFD_HOST_64BIT_LONG will be
-   set to 1 above.  Otherwise, if gcc is being used, this code will
-   use gcc's "long long" type.  Otherwise, BFD_HOST_64_BIT must be
-   defined above.  */
+   set to 1 above.  Otherwise, if the host compiler used during
+   configuration supports long long, this code will use it.
+   Otherwise, BFD_HOST_64_BIT must be defined above.  */
 
 #ifndef BFD_HOST_64_BIT
 # if BFD_HOST_64BIT_LONG
 #  define BFD_HOST_64_BIT long
 #  define BFD_HOST_U_64_BIT unsigned long
 # else
-#  ifdef __GNUC__
-#   if __GNUC__ >= 2
+#  if BFD_HOST_LONG_LONG
 #    define BFD_HOST_64_BIT long long
 #    define BFD_HOST_U_64_BIT unsigned long long
-#   endif /* __GNUC__ >= 2 */
-#  endif /* ! defined (__GNUC__) */
+#  endif /* ! BFD_HOST_LONG_LONG */
 # endif /* ! BFD_HOST_64BIT_LONG */
 #endif /* ! defined (BFD_HOST_64_BIT) */
 
@@ -1629,6 +1628,10 @@ enum bfd_architecture
 #define bfd_mach_rs6k_rsc      6003
 #define bfd_mach_rs6k_rs2      6002
   bfd_arch_hppa,      /* HP PA RISC */
+#define bfd_mach_hppa10        10
+#define bfd_mach_hppa11        11
+#define bfd_mach_hppa20        20
+#define bfd_mach_hppa20w       25
   bfd_arch_d10v,      /* Mitsubishi D10V */
 #define bfd_mach_d10v          1
 #define bfd_mach_d10v_ts2      2
@@ -1683,6 +1686,7 @@ enum bfd_architecture
   bfd_arch_v850,      /* NEC V850 */
 #define bfd_mach_v850          1
 #define bfd_mach_v850e         'E'
+#define bfd_mach_v850e1        '1'
   bfd_arch_arc,       /* ARC Cores */
 #define bfd_mach_arc_5         5
 #define bfd_mach_arc_6         6
@@ -1731,19 +1735,20 @@ enum bfd_architecture
   bfd_arch_xstormy16,
 #define bfd_mach_xstormy16     1
   bfd_arch_msp430,    /* Texas Instruments MSP430 architecture.  */
-#define bfd_mach_msp110         110
 #define bfd_mach_msp11          11
+#define bfd_mach_msp110         110
 #define bfd_mach_msp12          12
 #define bfd_mach_msp13          13
 #define bfd_mach_msp14          14
-#define bfd_mach_msp41          41
+#define bfd_mach_msp15          15
+#define bfd_mach_msp16          16  
 #define bfd_mach_msp31          31
 #define bfd_mach_msp32          32
 #define bfd_mach_msp33          33
+#define bfd_mach_msp41          41
+#define bfd_mach_msp42          42
 #define bfd_mach_msp43          43
 #define bfd_mach_msp44          44
-#define bfd_mach_msp15          15
-#define bfd_mach_msp16          16  
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
 #define bfd_mach_xtensa        1
   bfd_arch_last
@@ -2323,6 +2328,7 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_MIPS_RELGOT,
   BFD_RELOC_MIPS_JALR,
 
+
 /* Fujitsu Frv Relocations.  */
   BFD_RELOC_FRV_LABEL16,
   BFD_RELOC_FRV_LABEL24,
@@ -2333,6 +2339,7 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_FRV_GPREL32,
   BFD_RELOC_FRV_GPRELHI,
   BFD_RELOC_FRV_GPRELLO,
+
 
 /* This is a 24bit GOT-relative reloc for the mn10300.  */
   BFD_RELOC_MN10300_GOTOFF24,
@@ -4339,7 +4346,7 @@ typedef struct bfd_target
 
   /* Data for use by back-end routines, which isn't
      generic enough to belong in this structure.  */
-  void *backend_data;
+  const void *backend_data;
 
 } bfd_target;
 

@@ -1,3 +1,212 @@
+2003-09-14  Andreas Jaeger  <aj@suse.de>
+
+	* i386-dis.c: Convert to ISO C90 prototypes.
+	* i370-dis.c: Likewise.
+	* i370-opc.c: Likewiwse.
+	* i960-dis.c: Likewise.
+	* ia64-opc.c: Likewise.
+
+2003-09-09  Dave Brolley  <brolley@redhat.com>
+
+	* frv-desc.c: Regenerated.
+
+2003-09-08  Dave Brolley  <brolley@redhat.com>
+
+	On behalf of Doug Evans <dje@sebabeach.org>
+	* Makefile.am (run-cgen): Pass new args archfile and opcfile
+	to cgen.sh.
+	(stamp-ip2k,stamp-m32r,stamp-fr30,stamp-frv,stamp-openrisc,
+	stamp-iq2000,stamp-xstormy16): Pass paths of .cpu and .opc files
+	to cgen.sh.
+	(stamp-frv): Delete hardcoded path spec workaround.
+	* Makefile.in: Regenerate.
+	* cgen.sh: New args archfile and opcfile.  Pass on to cgen.
+
+2003-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* v850-dis.c (disassemble): Accept bfd_mach_v850e1.
+	* v850-opc.c (v850_opcodes): Add DBTRAP and DBRET instructions.
+	
+2003-09-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-dis.c (struct dis_private): New.
+	(powerpc_dialect): Make static.  Accept -Many in addition to existing
+	options.  Save dialect in dis_private.
+	(print_insn_big_powerpc): Retrieve dialect from dis_private.
+	(print_insn_little_powerpc): Likewise.
+	(print_insn_powerpc): Call powpc_dialect here.  Remove unnecessary
+	efs/altivec check.  Try harder to disassemble if given -Many.
+	* ppc-opc.c (insert_fxm): Expand comment.
+	(PPC, PPCCOM, PPC32, PPC64, PPCVEC): Remove PPC_OPCODE_ANY.
+	(POWER, POWER2, PPCPWR2, POWER32, COM, COM32, M601, PWRCOM): Likewise.
+	(POWER4): Remove PPCCOM.
+	(PPCONLY): Don't define.  Update all occurrences to PPC.
+
+2003-09-03  Andrew Cagney  <cagney@redhat.com>
+
+	* dis-init.c (init_disassemble_info): New file and function.
+	* Makefile.am (CFILES): Add "dis-init.c".
+	(libopcodes_la_SOURCES): Add "dis-init.c".
+	(dis-init.lo): Specify dependencies.
+	* Makefile.in: Regenerate.
+
+2003-09-03  Dave Brolley  <brolley@redhat.com>
+
+	* frv-*: Regenerated.
+
+2003-09-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (powerpc_opcodes): Combine identical PPC403/BOOKE entries.
+	Move duplicate mnemonic entries together.  Use RS instead of RT on
+	all mt*.
+	* ppc-dis.c: Convert to ISO C.
+
+2003-08-29  Dave Brolley  <brolley@redhat.com>
+
+	* Makefile.am (stamp-frv): Copy frv.cpu and frv.opc from
+	$(srcdir)/../cpu temporarily when regenerating source files.
+	* Makefile.in: Regenerated.
+
+2003-08-19  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c (print_insn_arm: case 'A'): Add code to
+	disassemble unindexed form of Addressing Mode 5.
+
+2003-08-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (PPC440): Define.
+	(powerpc_opcodes): Allow mac*, mul*, nmac*, dccci, dcread, iccci,
+	icread instructions when PPC440.  Add dlmzb instruction.
+
+2003-08-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* dep-in.sed: Remove libintl.h.
+	* Makefile.am (POTFILES.in): Unset LC_COLLATE.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2003-08-07  Michael Meissner  <gnu@the-meissners.org>
+
+	* cgen-asm.c (hash_insn_array): Remove PARAMS macro.
+	(hash_insn_list): Ditto.
+	(build_asm_hash_table): Ditto.
+	(cgen_set_parse_operand_fn): Prototype definition.
+	(cgen_init_parse_operand): Ditto.
+	(hash_insn_array): Ditto.
+	(hash_insn_list): Ditto.
+	(build_asm_hash_table): Ditto.
+	(cgen_asm_lookup_insn): Ditto.
+	(cgen_parse_keyword): Ditto.
+	(cgen_parse_signed_integer): Ditto.
+	(cgen_parse_unsigned_integer): Ditto.
+	(cgen_parse_address): Ditto.
+	(cgen_validate_signed_integer): Ditto.
+	(cgen_validate_unsigned_integer): Ditto.
+
+	* cgen-opc.c (hash_keyword_name): Remove PARAMS macro.
+	(hash_keyword_value): Ditto.
+	(build_keyword_hash_tables): Ditto.
+	(cgen_keyword_lookup_name): Prototype definition.
+	(cgen_keyword_lookup_value): Ditto.
+	(cgen_keyword_add): Ditto.
+	(cgen_keyword_search_init): Ditto.
+	(cgen_keyword_search_next): Ditto.
+	(hash_keyword_name): Ditto.
+	(hash_keyword_value): Ditto.
+	(build_keyword_hash_tables): Ditto.
+	(cgen_hw_lookup_by_name): Ditto.
+	(cgen_hw_lookup_by_num): Ditto.
+	(cgen_operand_lookup_by_name): Ditto.
+	(cgen_operand_lookup_by_num): Ditto.
+	(cgen_insn_count): Ditto.
+	(cgen_macro_insn_count): Ditto.
+	(cgen_get_insn_value): Ditto.
+	(cgen_put_insn_value): Ditto.
+	(cgen_lookup_insn): Ditto.
+	(cgen_get_insn_operands): Ditto.
+	(cgen_lookup_get_insn_operands): Ditto.
+	(cgen_set_signed_overflow_ok): Ditto.
+	(cgen_clear_signed_overflow_ok): Ditto.
+	(cgen_signed_overflow_ok_p): Ditto.
+
+	* cgen-dis.c (hash_insn_array): Remove PARAMS macro.
+	(hash_insn_list): Ditto.
+	(build_dis_hash_table): Ditto.
+	(count_decodable_bits): Ditto.
+	(add_insn_to_hash_chain): Ditto.
+	(count_decodable_bits): Prototype definition.
+	(add_insn_to_hash_chain): Ditto.
+	(hash_insn_array): Ditto.
+	(hash_insn_list): Ditto.
+	(build_dis_hash_table): Ditto.
+	(cgen_dis_lookup_insn): Ditto.
+
+	* cgen-asm.in (parse_insn_normal): Remove PARAMS macro.
+	(@arch@_cgen_build_insn_regex): Prototype definition.
+	(parse_insn_normal): Ditto.
+	(@arch@_cgen_assemble_insn): Ditto.
+	(@arch@_cgen_asm_hash_keywords): Ditto.
+
+	* cgen-dis.in (print_normal): Remove PARAMS macro.  Use void *
+	instead of PTR.
+	(print_address): Ditto.
+	(print_keyword): Ditto.
+	(print_insn_normal): Ditto.
+	(print_insn): Ditto.
+	(default_print_insn): Ditto.
+	(read_insn): Ditto.
+	(print_normal): Prototype definition.  Use void * instead of PTR.
+	(print_address): Ditto.
+	(print_keyword): Ditto.
+	(print_insn_normal): Ditto.
+	(read_insn): Ditto.
+	(print_insn): Ditto.
+	(default_print_insn): Ditto.
+	(print_insn_@arch@): Ditto.
+
+	* cgen-ibld.in (insert_normal): Remove PARAMS macro.
+	(insn_insn_normal): Ditto.
+	(extract_normal): Ditto.
+	(extract_insn_normal): Ditto.
+	(put_insn_int_value): Ditto.
+	(insert_1): Ditto.
+	(fill_cache): Ditto.
+	(extract_1): Ditto.
+	(insert_1): Prototype definition.
+	(insert_normal): Ditto.
+	(insert_insn_normal): Ditto.
+	(put_insn_int_value): Ditto.
+	(fill_cache): Ditto.
+	(extract_1): Ditto.
+	(extract_normal): Ditto.
+	(extract_insn_normal): Ditto.
+
+	* fr30-asm.c: Regenerate.
+	* fr30-dis.c: Ditto.
+	* fr30-ibld.c: Ditto.
+	* frv-asm.c: Ditto.
+	* frv-dis.c: Ditto.
+	* frv-ibld.c: Ditto.
+	* ip2k-asm.c: Ditto.
+	* ip2k-dis.c: Ditto.
+	* ip2k-ibld.c: Ditto.
+	* iq2000-asm.c: Ditto.
+	* iq2000-dis.c: Ditto.
+	* iq2000-ibld.c: Ditto.
+	* m32r-asm.c: Ditto.
+	* m32r-dis.c: Ditto.
+	* m32r-ibld.c: Ditto.
+	* openrisc-asm.c: Ditto.
+	* openrisc-dis.c: Ditto.
+	* openrisc-ibld.c: Ditto.
+	* xstormy16-asm.c: Ditto.
+	* xstormy16-dis.c: Ditto.
+	* xstormy16-ibld.c: Ditto.
+
+2003-08-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
 2003-08-05  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add nl.
@@ -6,7 +215,7 @@
 
 2003-07-30  Jason Eckhardt  <jle@rice.edu>
 
-        * i860-dis.c: Convert to ISO C90.  Remove superflous prototypes.
+	* i860-dis.c: Convert to ISO C90.  Remove superflous prototypes.
 
 2003-07-30  Nick Clifton  <nickc@redhat.com>
 
@@ -24,8 +233,8 @@
 
 	* arm-dis.c (parse_arm_disassembler_option): Do not expect
 	option string to be NUL terminated.
-        (parse_disassembler_options): Allow options to be space or
-	comma separated.  
+	(parse_disassembler_options): Allow options to be space or
+	comma separated.
 
 2003-07-17  Nick Clifton  <nickc@redhat.com>
 

@@ -68,7 +68,7 @@ static bfd_boolean create_got_section
 static bfd_boolean elf32_sparc_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static void elf32_sparc_copy_indirect_symbol
-  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+  PARAMS ((const struct elf_backend_data *, struct elf_link_hash_entry *,
 	  struct elf_link_hash_entry *));
 static int elf32_sparc_tls_transition
   PARAMS ((struct bfd_link_info *, bfd *, int, int));
@@ -750,7 +750,7 @@ elf32_sparc_create_dynamic_sections (dynobj, info)
 
 static void
 elf32_sparc_copy_indirect_symbol (bed, dir, ind)
-     struct elf_backend_data *bed;
+     const struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   struct elf32_sparc_link_hash_entry *edir, *eind;
@@ -2186,42 +2186,12 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  bfd_boolean warned ATTRIBUTE_UNUSED;
 
-	  relocation = 0;
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-	      if (sec->output_section == NULL)
-		 /* Set a flag that will be cleared later if we find a
-		   relocation value for this symbol.  output_section
-		   is typically NULL for symbols satisfied by a shared
-		   library.  */
-		unresolved_reloc = TRUE;
-	      else
-		relocation = (h->root.u.def.value
-			      + sec->output_section->vma
-			      + sec->output_offset);
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    ;
-	  else if (!info->executable
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    ;
-	  else
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined
-		       || ELF_ST_VISIBILITY (h->other)))))
-		return FALSE;
-	    }
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
+				   symtab_hdr, relocation, sec,
+				   unresolved_reloc, info,
+				   warned);
 	}
 
       switch (r_type)

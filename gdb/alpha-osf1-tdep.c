@@ -45,30 +45,6 @@ alpha_osf1_sigcontext_addr (struct frame_info *frame)
     return (read_memory_integer (get_frame_base (frame), 8));
 }
 
-/* This is the definition of CALL_DUMMY_ADDRESS.  It's a heuristic that is used
-   to find a convenient place in the text segment to stick a breakpoint to
-   detect the completion of a target function call (ala call_function_by_hand).
- */
-
-static CORE_ADDR
-alpha_call_dummy_address (void)
-{
-  CORE_ADDR entry;
-  struct minimal_symbol *sym;
-
-  entry = entry_point_address ();
-
-  if (entry != 0)
-    return entry;
-
-  sym = lookup_minimal_symbol ("_Prelude", NULL, symfile_objfile);
-
-  if (!sym || MSYMBOL_TYPE (sym) != mst_text)
-    return 0;
-  else
-    return SYMBOL_VALUE_ADDRESS (sym) + 4;
-}
-
 static void
 alpha_osf1_init_abi (struct gdbarch_info info,
                      struct gdbarch *gdbarch)
@@ -83,11 +59,6 @@ alpha_osf1_init_abi (struct gdbarch_info info,
      on multi-processor machines. We need to use software single stepping
      instead.  */
   set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
-
-  /* Alpha OSF/1 inhibits execution of code on the stack.  But there is
-     no need for a dummy on the Alpha.  PUSH_ARGUMENTS takes care of all
-     argument handling and bp_call_dummy takes care of stopping the dummy.  */
-  set_gdbarch_call_dummy_address (gdbarch, alpha_call_dummy_address);
 
   tdep->sigcontext_addr = alpha_osf1_sigcontext_addr;
 

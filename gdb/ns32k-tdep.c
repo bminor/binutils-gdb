@@ -28,6 +28,7 @@
 #include "target.h"
 #include "arch-utils.h"
 #include "osabi.h"
+#include "dis-asm.h"
 
 #include "ns32k-tdep.h"
 #include "gdb_string.h"
@@ -146,7 +147,7 @@ ns32k_saved_pc_after_call (struct frame_info *frame)
 static CORE_ADDR
 umax_skip_prologue (CORE_ADDR pc)
 {
-  register unsigned char op = read_memory_integer (pc, 1);
+  unsigned char op = read_memory_integer (pc, 1);
   if (op == 0x82)
     {
       op = read_memory_integer (pc + 2, 1);
@@ -308,7 +309,7 @@ ns32k_frame_chain (struct frame_info *frame)
      FP value, and that address is saved at the previous FP value as a
      4-byte word.  */
 
-  if (inside_entry_file (get_frame_pc (frame)))
+  if (deprecated_inside_entry_file (get_frame_pc (frame)))
     return 0;
 
   return (read_memory_integer (get_frame_base (frame), 4));
@@ -482,7 +483,7 @@ static void
 ns32k_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 {
   memcpy (valbuf,
-          regbuf + REGISTER_BYTE (TYPE_CODE (valtype) == TYPE_CODE_FLT ?
+          regbuf + DEPRECATED_REGISTER_BYTE (TYPE_CODE (valtype) == TYPE_CODE_FLT ?
 				  FP0_REGNUM : 0), TYPE_LENGTH (valtype));
 }
 
@@ -497,7 +498,7 @@ ns32k_store_return_value (struct type *valtype, char *valbuf)
 static CORE_ADDR
 ns32k_extract_struct_value_address (char *regbuf)
 {
-  return (extract_unsigned_integer (regbuf + REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
+  return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
 }
 
 void
@@ -606,6 +607,8 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
+  set_gdbarch_print_insn (gdbarch, print_insn_ns32k);
+
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
@@ -619,5 +622,4 @@ _initialize_ns32k_tdep (void)
 {
   gdbarch_register (bfd_arch_ns32k, ns32k_gdbarch_init, NULL);
 
-  deprecated_tm_print_insn = print_insn_ns32k;
 }

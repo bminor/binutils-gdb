@@ -97,6 +97,28 @@ static struct dwarf2_fde *dwarf2_frame_find_fde (CORE_ADDR *pc);
 
 /* Structure describing a frame state.  */
 
+enum dwarf2_reg_rule
+{
+  /* Make certain that 0 maps onto the correct enum value - the
+     corresponding structure is being initialized using memset zero.
+     This indicates that CFI didn't provide any information at all
+     about a register - leaving how to obtain it's value totally
+     unspecified.  */
+  REG_UNSPECIFIED = 0,
+  /* The term "undefined" comes from the DWARF2 CFI spec which this
+     code is moddeling - it indicates that the register's value is
+     "undefined".  */
+  /* NOTE: cagney/2003-09-08: GCC uses the less formal term "unsaved"
+     - it's definition is a combination of REG_UNDEFINED and
+     REG_UNSPECIFIED - the failure to differentiate the two helps
+     explain a few problems with the CFI GCC outputs.  */
+  REG_UNDEFINED,
+  REG_SAVED_OFFSET,
+  REG_SAVED_REG,
+  REG_SAVED_EXP,
+  REG_SAME_VALUE
+};
+
 struct dwarf2_frame_state
 {
   /* Each register save state can be described in terms of a CFA slot,
@@ -111,13 +133,7 @@ struct dwarf2_frame_state
 	unsigned char *exp;
       } loc;
       ULONGEST exp_len;
-      enum {
-	REG_UNSAVED,
-	REG_SAVED_OFFSET,
-	REG_SAVED_REG,
-	REG_SAVED_EXP,
-	REG_UNMODIFIED
-      } how;
+      enum dwarf2_reg_rule how;
     } *reg;
     int num_regs;
 
@@ -354,13 +370,13 @@ execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
 	    case DW_CFA_undefined:
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
 	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
-	      fs->regs.reg[reg].how = REG_UNSAVED;
+	      fs->regs.reg[reg].how = REG_UNDEFINED;
 	      break;
 
 	    case DW_CFA_same_value:
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
 	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
-	      fs->regs.reg[reg].how = REG_UNMODIFIED;
+	      fs->regs.reg[reg].how = REG_SAME_VALUE;
 	      break;
 
 	    case DW_CFA_register:
@@ -460,11 +476,10 @@ static struct dwarf2_frame_cache *
 dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct cleanup *old_chain;
-  int num_regs = NUM_REGS + NUM_PSEUDO_REGS;
+  const int num_regs = NUM_REGS + NUM_PSEUDO_REGS;
   struct dwarf2_frame_cache *cache;
   struct dwarf2_frame_state *fs;
   struct dwarf2_fde *fde;
-  int reg;
 
   if (*this_cache)
     return *this_cache;
@@ -535,34 +550,65 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
       internal_error (__FILE__, __LINE__, "Unknown CFA rule.");
     }
 
-  /* Save the register info in the cache.  */
-  for (reg = 0; reg < fs->regs.num_regs; reg++)
-    {
-      int regnum;
+  /* Initialize things so that all registers are marked as
+     unspecified.  */
+  {
+    int regnum;
+    for (regnum = 0; regnum < num_regs; regnum++)
+      cache->reg[regnum].how = REG_UNSPECIFIED;
+  }
 
-      /* Skip the return address column.  */
-      if (reg == fs->retaddr_column)
-	/* NOTE: cagney/2003-06-07: Is this right?  What if the
-           RETADDR_COLUM corresponds to a real register (and, worse,
-           that isn't the PC_REGNUM)?  I'm guessing that the PC_REGNUM
-           further down is trying to handle this.  That can't be right
-           though - PC_REGNUM may not be valid (it can be -ve).  I
-           think, instead when RETADDR_COLUM isn't a real register, it
-           should map itself onto frame_pc_unwind.  */
-	continue;
+  /* Go through the DWARF2 CFI generated table and save its register
+     location information in the cache.  */
+  {
+    int column;		/* CFI speak for "register number".  */
+    for (column = 0; column < fs->regs.num_regs; column++)
+      {
+	int regnum;
+	
+	/* Skip the return address column.  */
+	if (column == fs->retaddr_column)
+	  /* NOTE: cagney/2003-06-07: Is this right?  What if
+	     RETADDR_COLUMN corresponds to a real register (and,
+	     worse, that isn't the PC_REGNUM)?  I'm guessing that the
+	     PC_REGNUM further down is trying to handle this.  That
+	     can't be right though - PC_REGNUM may not be valid (it
+	     can be -ve).  I think, instead when RETADDR_COLUM isn't a
+	     real register, it should map itself onto frame_pc_unwind.  */
+	  continue;
 
-      /* Use the GDB register number as index.  */
-      regnum = DWARF2_REG_TO_REGNUM (reg);
+	/* Use the GDB register number as the destination index.  */
+	regnum = DWARF2_REG_TO_REGNUM (column);
 
-      if (regnum >= 0 && regnum < num_regs)
-	cache->reg[regnum] = fs->regs.reg[reg];
-    }
+	/* If there's no corresponding GDB register, ignore it.  */
+	if (regnum < 0 || regnum >= num_regs)
+	  continue;
+
+	/* NOTE: cagney/2003-09-05: CFI should specify the disposition
+	   of all debug info registers.  If it doesn't complain (but
+	   not too loudly).  It turns out that GCC, assumes that an
+	   unspecified register implies "same value" when CFI (draft
+	   7) specifies nothing at all.  Such a register could equally
+	   be interpreted as "undefined".  Also note that this check
+	   isn't sufficient - it only checks that all registers in the
+	   range [0 .. max column] are specified - and won't detect
+	   problems when a debug info register falls outside of the
+	   table.  Need a way of iterating through all the valid
+	   DWARF2 register numbers.  */
+	if (fs->regs.reg[column].how == REG_UNSPECIFIED)
+	  complaint (&symfile_complaints,
+		     "Incomplete CFI data; unspecified registers at 0x%s",
+		     paddr (fs->pc));
+
+	cache->reg[regnum] = fs->regs.reg[column];
+      }
+  }
 
   /* Store the location of the return addess.  If the return address
      column (adjusted) is not the same as gdb's PC_REGNUM, then this
      implies a copy from the ra column register.  */
   if (fs->retaddr_column < fs->regs.num_regs
-      && fs->regs.reg[fs->retaddr_column].how != REG_UNSAVED)
+      && fs->regs.reg[fs->retaddr_column].how != REG_UNDEFINED)
     {
       /* See comment above about a possibly -ve PC_REGNUM.  If this
          assertion fails, it's a problem with this code and not the
@@ -572,7 +618,7 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
     }
   else
     {
-      reg = DWARF2_REG_TO_REGNUM (fs->retaddr_column);
+      int reg = DWARF2_REG_TO_REGNUM (fs->retaddr_column);
       if (reg != PC_REGNUM)
 	{
 	  /* See comment above about PC_REGNUM being -ve.  If this
@@ -611,7 +657,9 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 
   switch (cache->reg[regnum].how)
     {
-    case REG_UNSAVED:
+    case REG_UNDEFINED:
+      /* If CFI explicitly specified that the value isn't defined,
+	 mark it as optimized away - the value isn't available.  */
       *optimizedp = 1;
       *lvalp = not_lval;
       *addrp = 0;
@@ -636,6 +684,13 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
              very real posibility that CFA is an offset from some
              other register, having nothing to do with the unwound SP
              value.  */
+	  /* FIXME: cagney/2003-09-05: I think I understand.  GDB was
+	     lumping the two states "unspecified" and "undefined"
+	     together.  Here SP_REGNUM was "unspecified", GCC assuming
+	     that in such a case CFA would be used.  This branch of
+	     the if statement should be deleted - the problem of
+	     SP_REGNUM is now handed by the case REG_UNSPECIFIED
+	     below.  */
 	  *optimizedp = 0;
 	  if (valuep)
 	    {
@@ -687,7 +742,59 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	}
       break;
 
-    case REG_UNMODIFIED:
+    case REG_UNSPECIFIED:
+      /* GCC, in its infinite wisdom decided to not provide unwind
+	 information for registers that are "same value".  Since
+	 DWARF2 (3 draft 7) doesn't define such behavior, said
+	 registers are actually undefined (which is different to CFI
+	 "undefined").  Code above issues a complaint about this.
+	 Here just fudge the books, assume GCC, and that the value is
+	 more inner on the stack.  */
+      if (SP_REGNUM >= 0 && regnum == SP_REGNUM)
+	{
+	  /* Can things get worse?  Yep!  One of the registers GCC
+	     forgot to provide unwind information for was the stack
+	     pointer.  Outch!  GCC appears to assumes that the CFA
+	     address can be used - after all it points to the inner
+	     most address of the previous frame before the function
+	     call and that's always the same as the stack pointer on
+	     return, right?  Wrong.  See GCC's i386 STDCALL option for
+	     an ABI that has a different entry and return stack
+	     pointer.  */
+	  /* DWARF V3 Draft 7 p102: Typically, the CFA is defined to
+	     be the value of the stack pointer at the call site in the
+	     previous frame (which may be different from its value on
+	     entry to the current frame).  */
+	  /* DWARF V3 Draft 7 p103: The first column of the rules
+             defines the rule which computes the CFA value; it may be
+             either a register and a signed offset that are added
+             together or a DWARF expression that is evaluated.  */
+	  /* NOTE: cagney/2003-09-05: Should issue a complain.
+             Unfortunatly it turns out that DWARF2 CFI has a problem.
+             Since CFI specifies the location at which a register was
+             saved (not its value) it isn't possible to specify
+             something like "unwound(REG) == REG + constant" using CFI
+             as will almost always occure with the stack pointer.  I
+             guess CFI should be point SP at CFA.  Ref: danielj,
+             "Describing unsaved stack pointers", posted to dwarf2
+             list 2003-08-15.  */
+	  *optimizedp = 0;
+	  *lvalp = not_lval;
+	  *addrp = 0;
+	  *realnump = -1;
+	  if (valuep)
+	    /* Store the value.  */
+	    store_typed_address (valuep, builtin_type_void_data_ptr,
+				 cache->cfa);
+	}
+      else
+	/* Assume that the register can be found in the next inner
+           most frame.  */
+	frame_register_unwind (next_frame, regnum,
+			       optimizedp, lvalp, addrp, realnump, valuep);
+      break;
+
+    case REG_SAME_VALUE:
       frame_register_unwind (next_frame, regnum,
 			     optimizedp, lvalp, addrp, realnump, valuep);
       break;
@@ -779,6 +886,8 @@ struct comp_unit
   /* Base for DW_EH_PE_datarel encodings.  */
   bfd_vma dbase;
 };
+
+const struct objfile_data *dwarf2_frame_data;
 
 static unsigned int
 read_1_byte (bfd *bfd, char *buf)
@@ -930,6 +1039,8 @@ static CORE_ADDR
 read_encoded_value (struct comp_unit *unit, unsigned char encoding,
 		    char *buf, unsigned int *bytes_read_ptr)
 {
+  int ptr_len = size_of_encoded_value (DW_EH_PE_absptr);
+  ptrdiff_t offset;
   CORE_ADDR base;
 
   /* GCC currently doesn't generate DW_EH_PE_indirect encodings for
@@ -937,6 +1048,8 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
   if (encoding & DW_EH_PE_indirect)
     internal_error (__FILE__, __LINE__, 
 		    "Unsupported encoding: DW_EH_PE_indirect");
+
+  *bytes_read_ptr = 0;
 
   switch (encoding & 0x70)
     {
@@ -950,32 +1063,41 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
     case DW_EH_PE_datarel:
       base = unit->dbase;
       break;
+    case DW_EH_PE_aligned:
+      base = 0;
+      offset = buf - unit->dwarf_frame_buffer;
+      if ((offset % ptr_len) != 0)
+	{
+	  *bytes_read_ptr = ptr_len - (offset % ptr_len);
+	  buf += *bytes_read_ptr;
+	}
+      break;
     default:
       internal_error (__FILE__, __LINE__, "Invalid or unsupported encoding");
     }
 
   if ((encoding & 0x0f) == 0x00)
-    encoding |= encoding_for_size (TYPE_LENGTH(builtin_type_void_data_ptr));
+    encoding |= encoding_for_size (ptr_len);
 
   switch (encoding & 0x0f)
     {
     case DW_EH_PE_udata2:
-      *bytes_read_ptr = 2;
+      *bytes_read_ptr += 2;
       return (base + bfd_get_16 (unit->abfd, (bfd_byte *) buf));
     case DW_EH_PE_udata4:
-      *bytes_read_ptr = 4;
+      *bytes_read_ptr += 4;
       return (base + bfd_get_32 (unit->abfd, (bfd_byte *) buf));
     case DW_EH_PE_udata8:
-      *bytes_read_ptr = 8;
+      *bytes_read_ptr += 8;
       return (base + bfd_get_64 (unit->abfd, (bfd_byte *) buf));
     case DW_EH_PE_sdata2:
-      *bytes_read_ptr = 2;
+      *bytes_read_ptr += 2;
       return (base + bfd_get_signed_16 (unit->abfd, (bfd_byte *) buf));
     case DW_EH_PE_sdata4:
-      *bytes_read_ptr = 4;
+      *bytes_read_ptr += 4;
       return (base + bfd_get_signed_32 (unit->abfd, (bfd_byte *) buf));
     case DW_EH_PE_sdata8:
-      *bytes_read_ptr = 8;
+      *bytes_read_ptr += 8;
       return (base + bfd_get_signed_64 (unit->abfd, (bfd_byte *) buf));
     default:
       internal_error (__FILE__, __LINE__, "Invalid or unsupported encoding");
@@ -1022,9 +1144,13 @@ dwarf2_frame_find_fde (CORE_ADDR *pc)
       struct dwarf2_fde *fde;
       CORE_ADDR offset;
 
+      fde = objfile_data (objfile, dwarf2_frame_data);
+      if (fde == NULL)
+	continue;
+
+      gdb_assert (objfile->section_offsets);
       offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-      
-      fde = objfile->sym_private;
+
       while (fde)
 	{
 	  if (*pc >= fde->initial_location + offset
@@ -1044,8 +1170,8 @@ dwarf2_frame_find_fde (CORE_ADDR *pc)
 static void
 add_fde (struct comp_unit *unit, struct dwarf2_fde *fde)
 {
-  fde->next = unit->objfile->sym_private;
-  unit->objfile->sym_private = fde;
+  fde->next = objfile_data (unit->objfile, dwarf2_frame_data);
+  set_objfile_data (unit->objfile, dwarf2_frame_data, fde);
 }
 
 #ifdef CC_HAS_LONG_LONG
@@ -1440,4 +1566,13 @@ dwarf2_build_frame_info (struct objfile *objfile)
       while (frame_ptr < unit.dwarf_frame_buffer + unit.dwarf_frame_size)
 	frame_ptr = decode_frame_entry (&unit, frame_ptr, 0);
     }
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_dwarf2_frame (void);
+
+void
+_initialize_dwarf2_frame (void)
+{
+  dwarf2_frame_data = register_objfile_data ();
 }

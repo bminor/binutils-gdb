@@ -102,8 +102,7 @@ static void malloc_botch (void);
 
 static void prompt_for_continue (void);
 
-static void set_width_command (char *, int, struct cmd_list_element *);
-
+static void set_screen_size (void);
 static void set_width (void);
 
 /* Chain of cleanup actions established with make_cleanup,
@@ -267,9 +266,9 @@ struct cleanup *
 make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
 		 void *arg)
 {
-  register struct cleanup *new
+  struct cleanup *new
     = (struct cleanup *) xmalloc (sizeof (struct cleanup));
-  register struct cleanup *old_chain = *pmy_chain;
+  struct cleanup *old_chain = *pmy_chain;
 
   new->next = *pmy_chain;
   new->function = function;
@@ -283,40 +282,40 @@ make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
    until we get back to the point OLD_CHAIN in the cleanup_chain.  */
 
 void
-do_cleanups (register struct cleanup *old_chain)
+do_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&cleanup_chain, old_chain);
 }
 
 void
-do_final_cleanups (register struct cleanup *old_chain)
+do_final_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&final_cleanup_chain, old_chain);
 }
 
 void
-do_run_cleanups (register struct cleanup *old_chain)
+do_run_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&run_cleanup_chain, old_chain);
 }
 
 void
-do_exec_cleanups (register struct cleanup *old_chain)
+do_exec_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&exec_cleanup_chain, old_chain);
 }
 
 void
-do_exec_error_cleanups (register struct cleanup *old_chain)
+do_exec_error_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&exec_error_cleanup_chain, old_chain);
 }
 
 void
-do_my_cleanups (register struct cleanup **pmy_chain,
-		register struct cleanup *old_chain)
+do_my_cleanups (struct cleanup **pmy_chain,
+		struct cleanup *old_chain)
 {
-  register struct cleanup *ptr;
+  struct cleanup *ptr;
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;	/* Do this first incase recursion */
@@ -329,28 +328,28 @@ do_my_cleanups (register struct cleanup **pmy_chain,
    until we get back to the point OLD_CHAIN in the cleanup_chain.  */
 
 void
-discard_cleanups (register struct cleanup *old_chain)
+discard_cleanups (struct cleanup *old_chain)
 {
   discard_my_cleanups (&cleanup_chain, old_chain);
 }
 
 void
-discard_final_cleanups (register struct cleanup *old_chain)
+discard_final_cleanups (struct cleanup *old_chain)
 {
   discard_my_cleanups (&final_cleanup_chain, old_chain);
 }
 
 void
-discard_exec_error_cleanups (register struct cleanup *old_chain)
+discard_exec_error_cleanups (struct cleanup *old_chain)
 {
   discard_my_cleanups (&exec_error_cleanup_chain, old_chain);
 }
 
 void
-discard_my_cleanups (register struct cleanup **pmy_chain,
-		     register struct cleanup *old_chain)
+discard_my_cleanups (struct cleanup **pmy_chain,
+		     struct cleanup *old_chain)
 {
-  register struct cleanup *ptr;
+  struct cleanup *ptr;
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;
@@ -1178,6 +1177,17 @@ xfree (void *ptr)
 /* Like asprintf/vasprintf but get an internal_error if the call
    fails. */
 
+char *
+xstrprintf (const char *format, ...)
+{
+  char *ret;
+  va_list args;
+  va_start (args, format);
+  xvasprintf (&ret, format, args);
+  va_end (args);
+  return ret;
+}
+
 void
 xasprintf (char **ret, const char *format, ...)
 {
@@ -1210,7 +1220,7 @@ xvasprintf (char **ret, const char *format, va_list ap)
 int
 myread (int desc, char *addr, int len)
 {
-  register int val;
+  int val;
   int orglen = len;
 
   while (len > 0)
@@ -1233,7 +1243,7 @@ myread (int desc, char *addr, int len)
 char *
 savestring (const char *ptr, size_t size)
 {
-  register char *p = (char *) xmalloc (size + 1);
+  char *p = (char *) xmalloc (size + 1);
   memcpy (p, ptr, size);
   p[size] = 0;
   return p;
@@ -1242,7 +1252,7 @@ savestring (const char *ptr, size_t size)
 char *
 msavestring (void *md, const char *ptr, size_t size)
 {
-  register char *p = (char *) xmmalloc (md, size + 1);
+  char *p = (char *) xmmalloc (md, size + 1);
   memcpy (p, ptr, size);
   p[size] = 0;
   return p;
@@ -1255,7 +1265,7 @@ mstrsave (void *md, const char *ptr)
 }
 
 void
-print_spaces (register int n, register struct ui_file *file)
+print_spaces (int n, struct ui_file *file)
 {
   fputs_unfiltered (n_spaces (n), file);
 }
@@ -1283,8 +1293,8 @@ int
 query (const char *ctlstr, ...)
 {
   va_list args;
-  register int answer;
-  register int ans2;
+  int answer;
+  int ans2;
   int retval;
 
   va_start (args, ctlstr);
@@ -1388,7 +1398,7 @@ int
 parse_escape (char **string_ptr)
 {
   int target_char;
-  register int c = *(*string_ptr)++;
+  int c = *(*string_ptr)++;
   if (c_parse_backslash (c, &target_char))
     return target_char;
   else
@@ -1446,8 +1456,8 @@ parse_escape (char **string_ptr)
       case '6':
       case '7':
 	{
-	  register int i = c - '0';
-	  register int count = 0;
+	  int i = c - '0';
+	  int count = 0;
 	  while (++count < 3)
 	    {
 	      c = (**string_ptr);
@@ -1556,11 +1566,12 @@ fputstrn_unfiltered (const char *str, int n, int quoter,
 }
 
 
-
 /* Number of lines per page or UINT_MAX if paging is disabled.  */
 static unsigned int lines_per_page;
+
 /* Number of chars per line or UINT_MAX if line folding is disabled.  */
 static unsigned int chars_per_line;
+
 /* Current count of lines printed on this page, chars on this line.  */
 static unsigned int lines_printed, chars_printed;
 
@@ -1589,7 +1600,8 @@ static char *wrap_indent;
 static int wrap_column;
 
 
-/* Inialize the lines and chars per page */
+/* Inialize the number of lines per page and chars per line.  */
+
 void
 init_page_info (void)
 {
@@ -1597,65 +1609,64 @@ init_page_info (void)
   if (!tui_get_command_dimension (&chars_per_line, &lines_per_page))
 #endif
     {
-      /* These defaults will be used if we are unable to get the correct
-         values from termcap.  */
 #if defined(__GO32__)
       lines_per_page = ScreenRows ();
       chars_per_line = ScreenCols ();
 #else
-      lines_per_page = 24;
-      chars_per_line = 80;
+      int rows, cols;
 
-#if !defined (_WIN32)
-      /* Initialize the screen height and width from termcap.  */
-      {
-	char *termtype = getenv ("TERM");
+      /* Make sure Readline has initialized its terminal settings.  */
+      rl_reset_terminal (NULL);
 
-	/* Positive means success, nonpositive means failure.  */
-	int status;
+      /* Get the screen size from Readline.  */
+      rl_get_screen_size (&rows, &cols);
+      lines_per_page = rows;
+      chars_per_line = cols;
 
-	/* 2048 is large enough for all known terminals, according to the
-	   GNU termcap manual.  */
-	char term_buffer[2048];
+      /* Readline should have fetched the termcap entry for us.  */
+      if (tgetnum ("li") < 0 || getenv ("EMACS"))
+	{
+	  /* The number of lines per page is not mentioned in the
+	     terminal description.  This probably means that paging is
+	     not useful (e.g. emacs shell window), so disable paging.  */
+	  lines_per_page = UINT_MAX;
+	}
 
-	if (termtype)
-	  {
-	    status = tgetent (term_buffer, termtype);
-	    if (status > 0)
-	      {
-		int val;
-		int running_in_emacs = getenv ("EMACS") != NULL;
-
-		val = tgetnum ("li");
-		if (val >= 0 && !running_in_emacs)
-		  lines_per_page = val;
-		else
-		  /* The number of lines per page is not mentioned
-		     in the terminal description.  This probably means
-		     that paging is not useful (e.g. emacs shell window),
-		     so disable paging.  */
-		  lines_per_page = UINT_MAX;
-
-		val = tgetnum ("co");
-		if (val >= 0)
-		  chars_per_line = val;
-	      }
-	  }
-      }
-#endif
-
+      /* FIXME: Get rid of this junk.  */
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
-
-      /* If there is a better way to determine the window size, use it. */
       SIGWINCH_HANDLER (SIGWINCH);
 #endif
-#endif
+
       /* If the output is not a terminal, don't paginate it.  */
       if (!ui_file_isatty (gdb_stdout))
 	lines_per_page = UINT_MAX;
-    }				/* the command_line_version */
+    }
+#endif
+
+  set_screen_size ();
   set_width ();
 }
+
+/* Set the screen size based on LINES_PER_PAGE and CHARS_PER_LINE.  */
+
+static void
+set_screen_size (void)
+{
+  int rows = lines_per_page;
+  int cols = chars_per_line;
+
+  if (rows <= 0)
+    rows = INT_MAX;
+
+  if (cols <= 0)
+    rl_get_screen_size (NULL, &cols);
+
+  /* Update Readline's idea of the terminal size.  */
+  rl_set_screen_size (rows, cols);
+}
+
+/* Reinitialize WRAP_BUFFER according to the current value of
+   CHARS_PER_LINE.  */
 
 static void
 set_width (void)
@@ -1670,14 +1681,22 @@ set_width (void)
     }
   else
     wrap_buffer = (char *) xrealloc (wrap_buffer, chars_per_line + 2);
-  wrap_pointer = wrap_buffer;	/* Start it at the beginning */
+  wrap_pointer = wrap_buffer;	/* Start it at the beginning.  */
 }
 
 /* ARGSUSED */
 static void
 set_width_command (char *args, int from_tty, struct cmd_list_element *c)
 {
+  set_screen_size ();
   set_width ();
+}
+
+/* ARGSUSED */
+static void
+set_height_command (char *args, int from_tty, struct cmd_list_element *c)
+{
+  set_screen_size ();
 }
 
 /* Wait, so the user can read what's on the screen.  Prompt the user
@@ -2476,26 +2495,18 @@ initialize_utils (void)
 {
   struct cmd_list_element *c;
 
-  c = add_set_cmd ("width", class_support, var_uinteger,
-		   (char *) &chars_per_line,
+  c = add_set_cmd ("width", class_support, var_uinteger, &chars_per_line,
 		   "Set number of characters gdb thinks are in a line.",
 		   &setlist);
   add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, set_width_command);
 
-  add_show_from_set
-    (add_set_cmd ("height", class_support,
-		  var_uinteger, (char *) &lines_per_page,
-		  "Set number of lines gdb thinks are in a page.", &setlist),
-     &showlist);
+  c = add_set_cmd ("height", class_support, var_uinteger, &lines_per_page,
+		   "Set number of lines gdb thinks are in a page.", &setlist);
+  add_show_from_set (c, &showlist);
+  set_cmd_sfunc (c, set_height_command);
 
   init_page_info ();
-
-  /* If the output is not a terminal, don't paginate it.  */
-  if (!ui_file_isatty (gdb_stdout))
-    lines_per_page = UINT_MAX;
-
-  set_width_command ((char *) NULL, 0, c);
 
   add_show_from_set
     (add_set_cmd ("demangle", class_support, var_boolean,

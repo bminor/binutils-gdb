@@ -1,3 +1,12 @@
+2003-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (install-only): Create dest dir. Support DESTDIR.
+	(uninstall): Support DESTDIR.
+
+Mon Jul 21 20:09:34 UTC 2003  Brendan Conoboy  <blc@redhat.com>
+
+	* configure.srv: Add xscale*linux copy of arm*linux entry.
+
 2003-07-24  Daniel Jacobowitz  <drow@mvista.com>
 
 	* linux-arm-low.c (arm_reinsert_addr): New function.

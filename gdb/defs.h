@@ -285,6 +285,15 @@ struct cleanup
 #endif
 #endif
 
+/* Be conservative and use enum bitfields only with GCC.
+   This is copied from gcc 3.3.1, system.h.  */
+
+#if defined(__GNUC__) && (__GNUC__ >= 2)
+#define ENUM_BITFIELD(TYPE) enum TYPE
+#else
+#define ENUM_BITFIELD(TYPE) unsigned int
+#endif
+
 /* Needed for various prototypes */
 
 struct symtab;
@@ -294,7 +303,7 @@ struct breakpoint;
 
 extern int inside_entry_func (CORE_ADDR);
 
-extern int inside_entry_file (CORE_ADDR addr);
+extern int deprecated_inside_entry_file (CORE_ADDR addr);
 
 extern int inside_main_func (CORE_ADDR pc);
 
@@ -855,6 +864,9 @@ extern void xfree (void *);
 extern void xasprintf (char **ret, const char *format, ...) ATTR_FORMAT (printf, 2, 3);
 extern void xvasprintf (char **ret, const char *format, va_list ap);
 
+/* Like asprintf, but return the string, throw an error if no memory.  */
+extern char *xstrprintf (const char *format, ...) ATTR_FORMAT (printf, 1, 2);
+
 extern int parse_escape (char **);
 
 /* Message to be printed before the error message, when an error occurs.  */
@@ -1074,14 +1086,17 @@ extern void *alloca ();
 #endif /* Not GNU C */
 #endif /* alloca not defined */
 
+/* Is GDB multi-arch?  If there's a "tm.h" file, it is not.  */
+#ifndef GDB_MULTI_ARCH
+#ifdef GDB_TM_FILE
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
+#else
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PURE
+#endif
+#endif
+
 /* Dynamic target-system-dependent parameters for GDB. */
 #include "gdbarch.h"
-#if (GDB_MULTI_ARCH == 0)
-/* Multi-arch targets _should_ be including "arch-utils.h" directly
-   into their *-tdep.c file.  This is a prop to help old non-
-   multi-arch targets to continue to compile. */
-#include "arch-utils.h"
-#endif
 
 /* Maximum size of a register.  Something small, but large enough for
    all known ISAs.  If it turns out to be too small, make it bigger.  */

@@ -63,6 +63,16 @@ if { [istarget "alpha*-*-*"] } then {
     gdb_test "info float" "f0.*f1.*f127.*" "info float"
 } elseif [istarget "m68k-*-*"] then {
     gdb_test "info float" "fp0.*fp1.*fp7.*" "info float"
+} elseif [istarget "sh*-*"] then {
+    # SH may or may not have an FPU
+    gdb_test_multiple "info float" "info float" {
+	-re "fpul.*fr0.*fr1.*fr15.*$gdb_prompt $" {
+	      pass "info float (with FPU)"
+	  }
+	-re "No floating.point info available for this processor.*" {
+	      pass "info float (without FPU)"
+	}
+    }
 } else {
     gdb_test "info float" "No floating.point info available for this processor." "info float"
 }

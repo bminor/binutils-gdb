@@ -3074,7 +3074,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
          this may help reduce memory usage and processing time later.  */
       maybe_dynamic = FALSE;
       if (h && ((info->shared
-		 && (!info->symbolic || info->allow_shlib_undefined))
+		 && (!info->symbolic || info->unresolved_syms_in_shared_libs == RM_IGNORE))
 		|| ! (h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		|| h->root.root.type == bfd_link_hash_defweak))
         maybe_dynamic = TRUE;
@@ -4445,48 +4445,25 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  h = alpha_elf_sym_hashes (input_bfd)[r_symndx - symtab_hdr->sh_info];
+	  bfd_boolean warned;
+	  bfd_boolean unresolved_reloc;
+	  struct elf_link_hash_entry *hh;
+	  
+	  RELOC_FOR_GLOBAL_SYMBOL (hh,
+				   (struct elf_link_hash_entry *) alpha_elf_sym_hashes (input_bfd),
+				   r_symndx, symtab_hdr, value,
+				   sec, unresolved_reloc, info,
+				   warned);
 
-	  while (h->root.root.type == bfd_link_hash_indirect
-		 || h->root.root.type == bfd_link_hash_warning)
-	    h = (struct alpha_elf_link_hash_entry *)h->root.root.u.i.link;
+	  if (warned)
+	    continue;
 
-	  value = 0;
-	  if (h->root.root.type == bfd_link_hash_defined
-	      || h->root.root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.root.u.def.section;
-
-	      /* Detect the cases that sym_sec->output_section is
-		 expected to be NULL -- all cases in which the symbol
-		 is defined in another shared module.  This includes
-		 PLT relocs for which we've created a PLT entry and
-		 other relocs for which we're prepared to create
-		 dynamic relocations.  */
-	      /* ??? Just accept it NULL and continue.  */
-
-	      if (sec->output_section != NULL)
-		value = (h->root.root.u.def.value
-			 + sec->output_section->vma
-			      + sec->output_offset);
-	    }
-	  else if (h->root.root.type == bfd_link_hash_undefweak)
+	  if (value == 0
+	      && ! unresolved_reloc
+	      && hh->root.type == bfd_link_hash_undefweak)
 	    undef_weak_ref = TRUE;
-	  else if (!info->executable
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
-	    ;
-	  else
-	    {
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, h->root.root.root.string, input_bfd,
-		     input_section, rel->r_offset,
-		     (!info->shared || info->no_undefined
-		      || ELF_ST_VISIBILITY (h->root.other)))))
-		return FALSE;
-	      continue;
-	    }
 
+	  h = (struct alpha_elf_link_hash_entry *) hh;
           dynamic_symbol_p = alpha_elf_dynamic_symbol_p (&h->root, info);
 	  gotent = h->got_entries;
 	}

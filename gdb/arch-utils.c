@@ -22,23 +22,9 @@
 
 #include "defs.h"
 
-#if GDB_MULTI_ARCH
 #include "arch-utils.h"
 #include "gdbcmd.h"
 #include "inferior.h"		/* enum CALL_DUMMY_LOCATION et.al. */
-#else
-/* Just include everything in sight so that the every old definition
-   of macro is visible. */
-#include "symtab.h"
-#include "frame.h"
-#include "inferior.h"
-#include "breakpoint.h"
-#include "gdb_wait.h"
-#include "gdbcore.h"
-#include "gdbcmd.h"
-#include "target.h"
-#include "annotate.h"
-#endif
 #include "gdb_string.h"
 #include "regcache.h"
 #include "gdb_assert.h"
@@ -154,14 +140,6 @@ generic_prologue_frameless_p (CORE_ADDR ip)
   return ip == SKIP_PROLOGUE (ip);
 }
 
-/* New/multi-arched targets should use the correct gdbarch field
-   instead of using this global pointer. */
-int
-legacy_print_insn (bfd_vma vma, disassemble_info *info)
-{
-  return (*deprecated_tm_print_insn) (vma, info);
-}
-
 /* Helper functions for INNER_THAN */
 
 int
@@ -182,11 +160,7 @@ core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs)
 const struct floatformat *
 default_float_format (struct gdbarch *gdbarch)
 {
-#if GDB_MULTI_ARCH
   int byte_order = gdbarch_byte_order (gdbarch);
-#else
-  int byte_order = TARGET_BYTE_ORDER;
-#endif
   switch (byte_order)
     {
     case BFD_ENDIAN_BIG:
@@ -203,11 +177,7 @@ default_float_format (struct gdbarch *gdbarch)
 const struct floatformat *
 default_double_format (struct gdbarch *gdbarch)
 {
-#if GDB_MULTI_ARCH
   int byte_order = gdbarch_byte_order (gdbarch);
-#else
-  int byte_order = TARGET_BYTE_ORDER;
-#endif
   switch (byte_order)
     {
     case BFD_ENDIAN_BIG:
@@ -436,67 +406,27 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
     }
   else if (set_endian_string == endian_little)
     {
+      struct gdbarch_info info;
       target_byte_order_auto = 0;
-      if (GDB_MULTI_ARCH)
-	{
-	  struct gdbarch_info info;
-	  gdbarch_info_init (&info);
-	  info.byte_order = BFD_ENDIAN_LITTLE;
-	  if (! gdbarch_update_p (info))
-	    {
-	      printf_unfiltered ("Little endian target not supported by GDB\n");
-	    }
-	}
-      else
-	{
-	  target_byte_order = BFD_ENDIAN_LITTLE;
-	}
+      gdbarch_info_init (&info);
+      info.byte_order = BFD_ENDIAN_LITTLE;
+      if (! gdbarch_update_p (info))
+	printf_unfiltered ("Little endian target not supported by GDB\n");
     }
   else if (set_endian_string == endian_big)
     {
+      struct gdbarch_info info;
       target_byte_order_auto = 0;
-      if (GDB_MULTI_ARCH)
-	{
-	  struct gdbarch_info info;
-	  gdbarch_info_init (&info);
-	  info.byte_order = BFD_ENDIAN_BIG;
-	  if (! gdbarch_update_p (info))
-	    {
-	      printf_unfiltered ("Big endian target not supported by GDB\n");
-	    }
-	}
-      else
-	{
-	  target_byte_order = BFD_ENDIAN_BIG;
-	}
+      gdbarch_info_init (&info);
+      info.byte_order = BFD_ENDIAN_BIG;
+      if (! gdbarch_update_p (info))
+	printf_unfiltered ("Big endian target not supported by GDB\n");
     }
   else
     internal_error (__FILE__, __LINE__,
 		    "set_endian: bad value");
   show_endian (NULL, from_tty);
 }
-
-/* Set the endianness from a BFD.  */
-
-static void
-set_endian_from_file (bfd *abfd)
-{
-  int want;
-  if (GDB_MULTI_ARCH)
-    internal_error (__FILE__, __LINE__,
-		    "set_endian_from_file: not for multi-arch");
-  if (bfd_big_endian (abfd))
-    want = BFD_ENDIAN_BIG;
-  else
-    want = BFD_ENDIAN_LITTLE;
-  if (TARGET_BYTE_ORDER_AUTO)
-    target_byte_order = want;
-  else if (TARGET_BYTE_ORDER != want)
-    warning ("%s endian file does not match %s endian target.",
-	     want == BFD_ENDIAN_BIG ? "big" : "little",
-	     TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "big" : "little");
-}
-
 
 /* Functions to manipulate the architecture of the target */
 
@@ -505,96 +435,6 @@ enum set_arch { set_arch_auto, set_arch_manual };
 int target_architecture_auto = 1;
 
 const char *set_architecture_string;
-
-/* Old way of changing the current architecture. */
-
-extern const struct bfd_arch_info bfd_default_arch_struct;
-const struct bfd_arch_info *target_architecture = &bfd_default_arch_struct;
-int (*target_architecture_hook) (const struct bfd_arch_info *ap);
-
-static int
-arch_ok (const struct bfd_arch_info *arch)
-{
-  if (GDB_MULTI_ARCH)
-    internal_error (__FILE__, __LINE__,
-		    "arch_ok: not multi-arched");
-  /* Should be performing the more basic check that the binary is
-     compatible with GDB. */
-  /* Check with the target that the architecture is valid. */
-  return (target_architecture_hook == NULL
-	  || target_architecture_hook (arch));
-}
-
-static void
-set_arch (const struct bfd_arch_info *arch,
-          enum set_arch type)
-{
-  if (GDB_MULTI_ARCH)
-    internal_error (__FILE__, __LINE__,
-		    "set_arch: not multi-arched");
-  switch (type)
-    {
-    case set_arch_auto:
-      if (!arch_ok (arch))
-	warning ("Target may not support %s architecture",
-		 arch->printable_name);
-      target_architecture = arch;
-      break;
-    case set_arch_manual:
-      if (!arch_ok (arch))
-	{
-	  printf_unfiltered ("Target does not support `%s' architecture.\n",
-			     arch->printable_name);
-	}
-      else
-	{
-	  target_architecture_auto = 0;
-	  target_architecture = arch;
-	}
-      break;
-    }
-  if (gdbarch_debug)
-    gdbarch_dump (current_gdbarch, gdb_stdlog);
-}
-
-/* Set the architecture from arch/machine (deprecated) */
-
-void
-set_architecture_from_arch_mach (enum bfd_architecture arch,
-				 unsigned long mach)
-{
-  const struct bfd_arch_info *wanted = bfd_lookup_arch (arch, mach);
-  if (GDB_MULTI_ARCH)
-    internal_error (__FILE__, __LINE__,
-		    "set_architecture_from_arch_mach: not multi-arched");
-  if (wanted != NULL)
-    set_arch (wanted, set_arch_manual);
-  else
-    internal_error (__FILE__, __LINE__,
-		    "gdbarch: hardwired architecture/machine not recognized");
-}
-
-/* Set the architecture from a BFD (deprecated) */
-
-static void
-set_architecture_from_file (bfd *abfd)
-{
-  const struct bfd_arch_info *wanted = bfd_get_arch_info (abfd);
-  if (GDB_MULTI_ARCH)
-    internal_error (__FILE__, __LINE__,
-		    "set_architecture_from_file: not multi-arched");
-  if (target_architecture_auto)
-    {
-      set_arch (wanted, set_arch_auto);
-    }
-  else if (wanted != target_architecture)
-    {
-      warning ("%s architecture file may be incompatible with %s target.",
-	       wanted->printable_name,
-	       target_architecture->printable_name);
-    }
-}
-
 
 /* Called if the user enters ``show architecture'' without an
    argument. */
@@ -621,7 +461,7 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
     {
       target_architecture_auto = 1;
     }
-  else if (GDB_MULTI_ARCH)
+  else
     {
       struct gdbarch_info info;
       gdbarch_info_init (&info);
@@ -635,15 +475,6 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
 	printf_unfiltered ("Architecture `%s' not recognized.\n",
 			   set_architecture_string);
     }
-  else
-    {
-      const struct bfd_arch_info *arch
-	= bfd_scan_arch (set_architecture_string);
-      if (arch == NULL)
-	internal_error (__FILE__, __LINE__,
-			"set_architecture: bfd_scan_arch failed");
-      set_arch (arch, set_arch_manual);
-    }
   show_architecture (NULL, from_tty);
 }
 
@@ -653,19 +484,11 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
 void
 set_gdbarch_from_file (bfd *abfd)
 {
-  if (GDB_MULTI_ARCH)
-    {
-      struct gdbarch_info info;
-      gdbarch_info_init (&info);
-      info.abfd = abfd;
-      if (! gdbarch_update_p (info))
-	error ("Architecture of file not recognized.\n");
-    }
-  else
-    {
-      set_architecture_from_file (abfd);
-      set_endian_from_file (abfd);
-    }
+  struct gdbarch_info info;
+  gdbarch_info_init (&info);
+  info.abfd = abfd;
+  if (! gdbarch_update_p (info))
+    error ("Architecture of file not recognized.\n");
 }
 
 /* Initialize the current architecture.  Update the ``set
@@ -752,22 +575,9 @@ initialize_current_architecture (void)
       info.byte_order = BFD_ENDIAN_BIG;
     }
 
-  if (GDB_MULTI_ARCH)
-    {
-      if (! gdbarch_update_p (info))
-	{
-	  internal_error (__FILE__, __LINE__,
-			  "initialize_current_architecture: Selection of initial architecture failed");
-	}
-    }
-  else
-    {
-      /* If the multi-arch logic comes up with a byte-order (from BFD)
-         use it for the non-multi-arch case.  */
-      if (info.byte_order != BFD_ENDIAN_UNKNOWN)
-	target_byte_order = info.byte_order;
-      initialize_non_multiarch ();
-    }
+  if (! gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__,
+		    "initialize_current_architecture: Selection of initial architecture failed");
 
   /* Create the ``set architecture'' command appending ``auto'' to the
      list of architectures. */

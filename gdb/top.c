@@ -640,8 +640,8 @@ do_chdir_cleanup (void *old_dir)
 void
 execute_command (char *p, int from_tty)
 {
-  register struct cmd_list_element *c;
-  register enum language flang;
+  struct cmd_list_element *c;
+  enum language flang;
   static int warned = 0;
   char *line;
   
@@ -1135,7 +1135,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 {
   static char *linebuffer = 0;
   static unsigned linelength = 0;
-  register char *p;
+  char *p;
   char *p1;
   char *rl;
   char *local_prompt = prompt_arg;
@@ -1388,267 +1388,13 @@ There is absolutely no warranty for GDB.  Type \"show warranty\" for details.\n"
 
 /* get_prompt: access method for the GDB prompt string.  */
 
-#define MAX_PROMPT_SIZE 256
-
-/*
- * int get_prompt_1 (char * buf);
- *
- * Work-horse for get_prompt (called via catch_errors).
- * Argument is buffer to hold the formatted prompt.
- *
- * Returns: 1 for success (use formatted prompt)
- *          0 for failure (use gdb_prompt_string).
- */
-
-static int gdb_prompt_escape;
-
-static int
-get_prompt_1 (void *data)
-{
-  char *formatted_prompt = data;
-  char *local_prompt;
-
-  if (event_loop_p)
-    local_prompt = PROMPT (0);
-  else
-    local_prompt = gdb_prompt_string;
-
-
-  if (gdb_prompt_escape == 0)
-    {
-      return 0;			/* do no formatting */
-    }
-  else
-    /* formatted prompt */
-    {
-      char fmt[40], *promptp, *outp, *tmp;
-      struct value *arg_val;
-      DOUBLEST doubleval;
-      LONGEST longval;
-      CORE_ADDR addrval;
-
-      int i, len;
-      struct type *arg_type, *elt_type;
-
-      promptp = local_prompt;
-      outp = formatted_prompt;
-
-      while (*promptp != '\0')
-	{
-	  int available = MAX_PROMPT_SIZE - (outp - formatted_prompt) - 1;
-
-	  if (*promptp != gdb_prompt_escape)
-	    {
-	      if (available >= 1)	/* overflow protect */
-		*outp++ = *promptp++;
-	    }
-	  else
-	    {
-	      /* GDB prompt string contains escape char.  Parse for arg.
-	         Two consecutive escape chars followed by arg followed by
-	         a comma means to insert the arg using a default format.
-	         Otherwise a printf format string may be included between
-	         the two escape chars.  eg:
-	         %%foo, insert foo using default format
-	         %2.2f%foo,     insert foo using "%2.2f" format
-	         A mismatch between the format string and the data type
-	         of "foo" is an error (which we don't know how to protect
-	         against).  */
-
-	      fmt[0] = '\0';	/* assume null format string */
-	      if (promptp[1] == gdb_prompt_escape)	/* double esc char */
-		{
-		  promptp += 2;	/* skip past two escape chars. */
-		}
-	      else
-		{
-		  /* extract format string from between two esc chars */
-		  i = 0;
-		  do
-		    {
-		      fmt[i++] = *promptp++;	/* copy format string */
-		    }
-		  while (i < sizeof (fmt) - 1 &&
-			 *promptp != gdb_prompt_escape &&
-			 *promptp != '\0');
-
-		  if (*promptp != gdb_prompt_escape)
-		    error ("Syntax error at prompt position %d",
-			   (int) (promptp - local_prompt));
-		  else
-		    {
-		      promptp++;	/* skip second escape char */
-		      fmt[i++] = '\0';	/* terminate the format string */
-		    }
-		}
-
-	      arg_val = parse_to_comma_and_eval (&promptp);
-	      if (*promptp == ',')
-		promptp++;	/* skip past the comma */
-	      arg_type = check_typedef (VALUE_TYPE (arg_val));
-	      switch (TYPE_CODE (arg_type))
-		{
-		case TYPE_CODE_ARRAY:
-		  elt_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
-		  if (TYPE_LENGTH (arg_type) > 0 &&
-		      TYPE_LENGTH (elt_type) == 1 &&
-		      TYPE_CODE (elt_type) == TYPE_CODE_INT)
-		    {
-		      int len = TYPE_LENGTH (arg_type);
-
-		      if (VALUE_LAZY (arg_val))
-			value_fetch_lazy (arg_val);
-		      tmp = VALUE_CONTENTS (arg_val);
-
-		      if (len > available)
-			len = available;	/* overflow protect */
-
-		      /* FIXME: how to protect GDB from crashing
-		         from bad user-supplied format string? */
-		      if (fmt[0] != 0)
-			sprintf (outp, fmt, tmp);
-		      else
-			strncpy (outp, tmp, len);
-		      outp[len] = '\0';
-		    }
-		  break;
-		case TYPE_CODE_PTR:
-		  elt_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
-		  addrval = value_as_address (arg_val);
-
-		  if (TYPE_LENGTH (elt_type) == 1 &&
-		      TYPE_CODE (elt_type) == TYPE_CODE_INT &&
-		      addrval != 0)
-		    {
-		      /* display it as a string */
-		      char *default_fmt = "%s";
-		      char *tmp;
-		      int err = 0;
-
-		      /* Limiting the number of bytes that the following call
-		         will read protects us from sprintf overflow later. */
-		      i = target_read_string (addrval,	/* src */
-					      &tmp,	/* dest */
-					      available,	/* len */
-					      &err);
-		      if (err)	/* read failed */
-			error ("%s on target_read", safe_strerror (err));
-
-		      tmp[i] = '\0';	/* force-terminate string */
-		      /* FIXME: how to protect GDB from crashing
-		         from bad user-supplied format string? */
-		      sprintf (outp, fmt[0] == 0 ? default_fmt : fmt,
-			       tmp);
-		      xfree (tmp);
-		    }
-		  else
-		    {
-		      /* display it as a pointer */
-		      char *default_fmt = "0x%x";
-
-		      /* FIXME: how to protect GDB from crashing
-		         from bad user-supplied format string? */
-		      if (available >= 16 /*? */ )	/* overflow protect */
-			sprintf (outp, fmt[0] == 0 ? default_fmt : fmt,
-				 (long) addrval);
-		    }
-		  break;
-		case TYPE_CODE_FLT:
-		  {
-		    char *default_fmt = "%g";
-
-		    doubleval = value_as_double (arg_val);
-		    /* FIXME: how to protect GDB from crashing
-		       from bad user-supplied format string? */
-		    if (available >= 16 /*? */ )	/* overflow protect */
-		      sprintf (outp, fmt[0] == 0 ? default_fmt : fmt,
-			       (double) doubleval);
-		    break;
-		  }
-		case TYPE_CODE_INT:
-		  {
-		    char *default_fmt = "%d";
-
-		    longval = value_as_long (arg_val);
-		    /* FIXME: how to protect GDB from crashing
-		       from bad user-supplied format string? */
-		    if (available >= 16 /*? */ )	/* overflow protect */
-		      sprintf (outp, fmt[0] == 0 ? default_fmt : fmt,
-			       (long) longval);
-		    break;
-		  }
-		case TYPE_CODE_BOOL:
-		  {
-		    /* no default format for bool */
-		    longval = value_as_long (arg_val);
-		    if (available >= 8 /*? */ )		/* overflow protect */
-		      {
-			if (longval)
-			  strcpy (outp, "<true>");
-			else
-			  strcpy (outp, "<false>");
-		      }
-		    break;
-		  }
-		case TYPE_CODE_ENUM:
-		  {
-		    /* no default format for enum */
-		    longval = value_as_long (arg_val);
-		    len = TYPE_NFIELDS (arg_type);
-		    /* find enum name if possible */
-		    for (i = 0; i < len; i++)
-		      if (TYPE_FIELD_BITPOS (arg_type, i) == longval)
-			break;	/* match -- end loop */
-
-		    if (i < len)	/* enum name found */
-		      {
-			char *name = TYPE_FIELD_NAME (arg_type, i);
-
-			strncpy (outp, name, available);
-			/* in casel available < strlen (name), */
-			outp[available] = '\0';
-		      }
-		    else
-		      {
-			if (available >= 16 /*? */ )	/* overflow protect */
-			  sprintf (outp, "%ld", (long) longval);
-		      }
-		    break;
-		  }
-		case TYPE_CODE_VOID:
-		  *outp = '\0';
-		  break;	/* void type -- no output */
-		default:
-		  error ("bad data type at prompt position %d",
-			 (int) (promptp - local_prompt));
-		  break;
-		}
-	      outp += strlen (outp);
-	    }
-	}
-      *outp++ = '\0';		/* terminate prompt string */
-      return 1;
-    }
-}
-
 char *
 get_prompt (void)
 {
-  static char buf[MAX_PROMPT_SIZE];
-
-  if (catch_errors (get_prompt_1, buf, "bad formatted prompt: ",
-		    RETURN_MASK_ALL))
-    {
-      return &buf[0];		/* successful formatted prompt */
-    }
+  if (event_loop_p)
+    return PROMPT (0);
   else
-    {
-      /* Prompt could not be formatted.  */
-      if (event_loop_p)
-	return PROMPT (0);
-      else
-	return gdb_prompt_string;
-    }
+    return gdb_prompt_string;
 }
 
 void
@@ -1693,6 +1439,39 @@ quit_confirm (void)
   return 1;
 }
 
+/* Helper routine for quit_force that requires error handling.  */
+
+struct qt_args
+{
+  char *args;
+  int from_tty;
+};
+
+static int
+quit_target (void *arg)
+{
+  struct qt_args *qt = (struct qt_args *)arg;
+
+  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
+    {
+      if (attach_flag)
+        target_detach (qt->args, qt->from_tty);
+      else
+        target_kill ();
+    }
+
+  /* UDI wants this, to kill the TIP.  */
+  target_close (1);
+
+  /* Save the history information if it is appropriate to do so.  */
+  if (write_history_p && history_filename)
+    write_history (history_filename);
+
+  do_final_cleanups (ALL_CLEANUPS);	/* Do any final cleanups before exiting */
+
+  return 0;
+}
+
 /* Quit without asking for confirmation.  */
 
 void
@@ -1709,22 +1488,9 @@ quit_force (char *args, int from_tty)
       exit_code = (int) value_as_long (val);
     }
 
-  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
-    {
-      if (attach_flag)
-	target_detach (args, from_tty);
-      else
-	target_kill ();
-    }
-
-  /* UDI wants this, to kill the TIP.  */
-  target_close (1);
-
-  /* Save the history information if it is appropriate to do so.  */
-  if (write_history_p && history_filename)
-    write_history (history_filename);
-
-  do_final_cleanups (ALL_CLEANUPS);	/* Do any final cleanups before exiting */
+  /* We want to handle any quit errors and exit regardless.  */
+  catch_errors (quit_target, args,
+	        "Quitting: ", RETURN_MASK_ALL);
 
   exit (exit_code);
 }
@@ -1946,7 +1712,6 @@ init_main (void)
       if (annotation_level > 1)
         set_async_annotation_level (NULL, 0, NULL);
     }
-  gdb_prompt_escape = 0;	/* default to none.  */
 
   /* Set the important stuff up for command editing.  */
   command_editing_p = 1;
@@ -1985,13 +1750,6 @@ init_main (void)
       add_show_from_set (c, &showlist);
       set_cmd_sfunc (c, set_async_prompt);
     }
-
-  add_show_from_set
-    (add_set_cmd ("prompt-escape-char", class_support, var_zinteger,
-		  (char *) &gdb_prompt_escape,
-		  "Set escape character for formatting of gdb's prompt",
-		  &setlist),
-     &showlist);
 
   add_com ("dont-repeat", class_support, dont_repeat_command, "Don't repeat this command.\n\
 Primarily used inside of user-defined commands that should not be repeated when\n\

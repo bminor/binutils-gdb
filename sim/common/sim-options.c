@@ -769,7 +769,10 @@ print_help (SIM_DESC sd, sim_cpu *cpu, const struct option_list *ol, int is_comm
 		end --;
 	      if (end == chp)
 		end = chp + doc_width - 1;
-	      sim_io_printf (sd, "%.*s\n%*s", end - chp, chp, indent, "");
+	      /* The cast should be ok - its distances between to
+                 points in a string.  */
+	      sim_io_printf (sd, "%.*s\n%*s", (int) (end - chp), chp, indent,
+			     "");
 	      chp = end;
 	      while (isspace (*chp) && *chp != '\0')
 		chp++;

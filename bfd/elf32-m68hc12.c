@@ -538,6 +538,25 @@ m68hc12_elf_set_mach_from_flags (abfd)
   return TRUE;
 }
 
+/* Specific sections:
+   - The .page0 is a data section that is mapped in [0x0000..0x00FF].
+     Page0 accesses are faster on the M68HC12.
+   - The .vectors is the section that represents the interrupt
+     vectors.  */
+static struct bfd_elf_special_section const elf32_m68hc12_special_sections[]=
+{
+  { ".eeprom",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".softregs",	0,	NULL,	0,
+    SHT_NOBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".page0",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".vectors",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
+
 #define ELF_ARCH		bfd_arch_m68hc12
 #define ELF_MACHINE_CODE	EM_68HC12
 #define ELF_MAXPAGESIZE		0x1000
@@ -554,6 +573,7 @@ m68hc12_elf_set_mach_from_flags (abfd)
 #define elf_backend_object_p		m68hc12_elf_set_mach_from_flags
 #define elf_backend_final_write_processing	0
 #define elf_backend_can_gc_sections		1
+#define elf_backend_special_sections elf32_m68hc12_special_sections
 #define elf_backend_post_process_headers     elf32_m68hc11_post_process_headers
 #define elf_backend_add_symbol_hook  elf32_m68hc11_add_symbol_hook
 

@@ -277,9 +277,9 @@ d10v_ts3_imap_register (void *regcache, int reg_nr)
   return reg;
 }
 
-/* MAP GDB's internal register numbering (determined by the layout fo
-   the REGISTER_BYTE array) onto the simulator's register
-   numbering. */
+/* MAP GDB's internal register numbering (determined by the layout
+   from the DEPRECATED_REGISTER_BYTE array) onto the simulator's
+   register numbering. */
 
 static int
 d10v_ts2_register_sim_regno (int nr)
@@ -1405,7 +1405,7 @@ d10v_frame_this_id (struct frame_info *next_frame,
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
-  if (func <= IMEM_START || inside_entry_file (func))
+  if (func <= IMEM_START || deprecated_inside_entry_file (func))
     return;
 
   /* Hopefully the prologue analysis either correctly determined the

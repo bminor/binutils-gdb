@@ -26,6 +26,237 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-bfd.h"
 #include "elf/i860.h"
 
+/* special_function for R_860_PC26 relocation.  */
+static bfd_reloc_status_type
+i860_howto_pc26_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+                       arelent *reloc_entry,
+                       asymbol *symbol,
+                       void *data ATTRIBUTE_UNUSED,
+                       asection *input_section,
+                       bfd *output_bfd,
+                       char **error_message ATTRIBUTE_UNUSED)
+{
+  bfd_vma insn;
+  bfd_vma relocation;
+  bfd_byte *addr;
+
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* Used elf32-mips.c as an example.  */
+  if (bfd_is_und_section (symbol->section)
+      && output_bfd == (bfd *) NULL)
+    return bfd_reloc_undefined;
+
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc_entry->addend;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  /* Adjust for PC-relative relocation.  */
+  relocation -= (input_section->output_section->vma
+                 + input_section->output_offset
+                 + reloc_entry->address
+                 + 4);
+
+  /* Check for target out of range.  */
+  if ((bfd_signed_vma)relocation > (0x3ffffff << 2)
+      || (bfd_signed_vma)relocation < (-0x4000000 << 2))
+    return bfd_reloc_outofrange;
+
+  addr = (bfd_byte *) data + reloc_entry->address;
+  insn = bfd_get_32 (abfd, addr);
+
+  relocation >>= reloc_entry->howto->rightshift;
+  insn = (insn & ~reloc_entry->howto->dst_mask)
+         | (relocation & reloc_entry->howto->dst_mask);
+
+  bfd_put_32 (abfd, (bfd_vma) insn, addr);
+
+  return bfd_reloc_ok;
+}
+
+/* special_function for R_860_PC16 relocation.  */
+static bfd_reloc_status_type
+i860_howto_pc16_reloc (bfd *abfd,
+                       arelent *reloc_entry,
+                       asymbol *symbol,
+                       void *data,
+                       asection *input_section,
+                       bfd *output_bfd,
+                       char **error_message ATTRIBUTE_UNUSED)
+{
+  bfd_vma insn;
+  bfd_vma relocation;
+  bfd_byte *addr;
+
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* Used elf32-mips.c as an example.  */
+  if (bfd_is_und_section (symbol->section)
+      && output_bfd == (bfd *) NULL)
+    return bfd_reloc_undefined;
+
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc_entry->addend;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  /* Adjust for PC-relative relocation.  */
+  relocation -= (input_section->output_section->vma
+                 + input_section->output_offset
+                 + reloc_entry->address
+                 + 4);
+
+  /* Check for target out of range.  */
+  if ((bfd_signed_vma)relocation > (0x7fff << 2)
+      || (bfd_signed_vma)relocation < (-0x8000 << 2))
+    return bfd_reloc_outofrange;
+
+  addr = (bfd_byte *) data + reloc_entry->address;
+  insn = bfd_get_32 (abfd, addr);
+
+  relocation >>= reloc_entry->howto->rightshift;
+  relocation = (((relocation & 0xf800) << 5) | (relocation & 0x7ff))
+               & reloc_entry->howto->dst_mask;
+  insn = (insn & ~reloc_entry->howto->dst_mask) | relocation;
+
+  bfd_put_32 (abfd, (bfd_vma) insn, addr);
+
+  return bfd_reloc_ok;
+}
+
+/* special_function for R_860_HIGHADJ relocation.  */
+static bfd_reloc_status_type
+i860_howto_highadj_reloc (bfd *abfd,
+                          arelent *reloc_entry,
+                          asymbol *symbol,
+                          void *data,
+                          asection *input_section,
+                          bfd *output_bfd,
+                          char **error_message ATTRIBUTE_UNUSED)
+{
+  bfd_vma insn;
+  bfd_vma relocation;
+  bfd_byte *addr;
+
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* Used elf32-mips.c as an example.  */
+  if (bfd_is_und_section (symbol->section)
+      && output_bfd == (bfd *) NULL)
+    return bfd_reloc_undefined;
+
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc_entry->addend;
+  relocation += 0x8000;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  addr = (bfd_byte *) data + reloc_entry->address;
+  insn = bfd_get_32 (abfd, addr);
+
+  relocation = ((relocation >> 16) & 0xffff);
+
+  insn = (insn & 0xffff0000) | relocation;
+
+  bfd_put_32 (abfd, (bfd_vma) insn, addr);
+
+  return bfd_reloc_ok;
+}
+
+/* special_function for R_860_SPLITn relocations.  */
+static bfd_reloc_status_type
+i860_howto_splitn_reloc (bfd *abfd,
+                         arelent *reloc_entry,
+                         asymbol *symbol,
+                         void *data,
+                         asection *input_section,
+                         bfd *output_bfd,
+                         char **error_message ATTRIBUTE_UNUSED)
+{
+  bfd_vma insn;
+  bfd_vma relocation;
+  bfd_byte *addr;
+
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* Used elf32-mips.c as an example.  */
+  if (bfd_is_und_section (symbol->section)
+      && output_bfd == (bfd *) NULL)
+    return bfd_reloc_undefined;
+
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc_entry->addend;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  addr = (bfd_byte *) data + reloc_entry->address;
+  insn = bfd_get_32 (abfd, addr);
+
+  relocation = (((relocation & 0xf800) << 5) | (relocation & 0x7ff))
+               & reloc_entry->howto->dst_mask;
+  insn = (insn & ~reloc_entry->howto->dst_mask) | relocation;
+
+  bfd_put_32 (abfd, (bfd_vma) insn, addr);
+
+  return bfd_reloc_ok;
+}
 
 /* This howto table is preliminary.  */
 static reloc_howto_type elf32_i860_howto_table [] =
@@ -124,7 +355,7 @@ static reloc_howto_type elf32_i860_howto_table [] =
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_pc26_reloc,	/* special_function */
 	 "R_860_PC26",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0x3ffffff,		/* src_mask */
@@ -153,7 +384,7 @@ static reloc_howto_type elf32_i860_howto_table [] =
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_pc16_reloc,	/* special_function */
 	 "R_860_PC16",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0x1f07ff,		/* src_mask */
@@ -181,7 +412,7 @@ static reloc_howto_type elf32_i860_howto_table [] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_splitn_reloc, /* special_function */
 	 "R_860_SPLIT0",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0x1f07ff,		/* src_mask */
@@ -209,7 +440,7 @@ static reloc_howto_type elf32_i860_howto_table [] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_splitn_reloc, /* special_function */
 	 "R_860_SPLIT1",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0x1f07fe,		/* src_mask */
@@ -237,7 +468,7 @@ static reloc_howto_type elf32_i860_howto_table [] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_splitn_reloc, /* special_function */
 	 "R_860_SPLIT2",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0x1f07fc,		/* src_mask */
@@ -419,7 +650,7 @@ static reloc_howto_type elf32_i860_howto_table [] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 i860_howto_highadj_reloc, /* special_function */
 	 "R_860_HIGHADJ",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -712,7 +943,8 @@ elf32_i860_relocate_pc16 (bfd *input_bfd,
   /* Relocate.  */
   value += rello->r_addend;
 
-  /* Separate the fields and insert.  */
+  /* Adjust the value by 4, then separate the fields and insert.  */
+  value = (value - 4) >> howto->rightshift;
   value = (((value & 0xf800) << 5) | (value & 0x7ff)) & howto->dst_mask;
   insn = (insn & ~howto->dst_mask) | value;
 

@@ -1,3 +1,31 @@
+2003-09-11  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/testsuite/sim/frv/movgs.cgs: Change lcr to spr[273],
+	which according to the comments seems to be the intent.
+
+2003-09-09  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/maddaccs.cgs: move to fr400 subdirectory.
+	* sim/frv/msubaccs.cgs: move to fr400 subdirectory.
+	* sim/frv/masaccs.cgs: move to fr400 subdirectory.
+
+2003-09-03  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/fr500/mclracc.cgs: Change mach to 'all', to be
+	consistent with other tests in the directory.
+
+2003-09-03  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/interrupts/Ipipe-fr400.cgs: New file.
+	* sim/frv/interrupts/Ipipe-fr500.cgs: New file.
+	* sim/frv/interrupts/Ipipe.cgs: Remove (replaced by above).
+
+2003-08-20  Michael Snyder  <msnyder@redhat.com>
+            On behalf of Dave Brolley
+  
+	* sim/frv: New testsuite.
+	* frv-elf: New testsuite.
+  
 2003-07-09  Michael Snyder  <msnyder@redhat.com>
 
 	* sim/sh: New directory.  Tests for Renesas sh family.

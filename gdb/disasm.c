@@ -26,6 +26,7 @@
 #include "gdb_string.h"
 #include "disasm.h"
 #include "gdbcore.h"
+#include "dis-asm.h"
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
@@ -46,14 +47,15 @@ struct dis_line_entry
 /* Like target_read_memory, but slightly different parameters.  */
 static int
 dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr, unsigned int len,
-		     disassemble_info *info)
+		     struct disassemble_info *info)
 {
   return target_read_memory (memaddr, (char *) myaddr, len);
 }
 
 /* Like memory_error with slightly different parameters.  */
 static void
-dis_asm_memory_error (int status, bfd_vma memaddr, disassemble_info *info)
+dis_asm_memory_error (int status, bfd_vma memaddr,
+		      struct disassemble_info *info)
 {
   memory_error (status, memaddr);
 }
@@ -83,7 +85,7 @@ compare_lines (const void *mle1p, const void *mle2p)
 }
 
 static int
-dump_insns (struct ui_out *uiout, disassemble_info * di,
+dump_insns (struct ui_out *uiout, struct disassemble_info * di,
 	    CORE_ADDR low, CORE_ADDR high,
 	    int how_many, struct ui_stream *stb)
 {
@@ -296,7 +298,7 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 
 
 static void
-do_assembly_only (struct ui_out *uiout, disassemble_info * di,
+do_assembly_only (struct ui_out *uiout, struct disassemble_info * di,
 		  CORE_ADDR low, CORE_ADDR high,
 		  int how_many, struct ui_stream *stb)
 {
@@ -313,12 +315,22 @@ do_assembly_only (struct ui_out *uiout, disassemble_info * di,
 /* Initialize the disassemble info struct ready for the specified
    stream.  */
 
-static disassemble_info
+static int
+fprintf_disasm (void *stream, const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  vfprintf_filtered (stream, format, args);
+  va_end (args);
+  /* Something non -ve.  */
+  return 0;
+}
+
+static struct disassemble_info
 gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  disassemble_info di;
-  INIT_DISASSEMBLE_INFO_NO_ARCH (di, file,
-				 (fprintf_ftype) fprintf_filtered);
+  struct disassemble_info di;
+  init_disassemble_info (&di, file, fprintf_disasm);
   di.flavour = bfd_target_unknown_flavour;
   di.memory_error_func = dis_asm_memory_error;
   di.print_address_func = dis_asm_print_address;
@@ -346,7 +358,7 @@ gdb_disassembly (struct ui_out *uiout,
 {
   struct ui_stream *stb = ui_out_stream_new (uiout);
   struct cleanup *cleanups = make_cleanup_ui_out_stream_delete (stb);
-  disassemble_info di = gdb_disassemble_info (current_gdbarch, stb->stream);
+  struct disassemble_info di = gdb_disassemble_info (current_gdbarch, stb->stream);
   /* To collect the instruction outputted from opcodes. */
   struct symtab *symtab = NULL;
   struct linetable_entry *le = NULL;
@@ -380,25 +392,6 @@ gdb_disassembly (struct ui_out *uiout,
 int
 gdb_print_insn (CORE_ADDR memaddr, struct ui_file *stream)
 {
-  disassemble_info di = gdb_disassemble_info (current_gdbarch, stream);
+  struct disassemble_info di = gdb_disassemble_info (current_gdbarch, stream);
   return TARGET_PRINT_INSN (memaddr, &di);
-}
-
-
-/* FIXME: cagney/2003-04-28: This global deprecated_tm_print_insn_info
-   is going away.  */
-disassemble_info deprecated_tm_print_insn_info;
-
-extern void _initialize_disasm (void);
-
-void
-_initialize_disasm (void)
-{
-  
-  INIT_DISASSEMBLE_INFO_NO_ARCH (deprecated_tm_print_insn_info, gdb_stdout,
-				 (fprintf_ftype)fprintf_filtered);
-  deprecated_tm_print_insn_info.flavour = bfd_target_unknown_flavour;
-  deprecated_tm_print_insn_info.read_memory_func = dis_asm_read_memory;
-  deprecated_tm_print_insn_info.memory_error_func = dis_asm_memory_error;
-  deprecated_tm_print_insn_info.print_address_func = dis_asm_print_address;
 }

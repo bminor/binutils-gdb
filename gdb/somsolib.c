@@ -74,9 +74,6 @@ extern struct unwind_table_entry *find_unwind_entry (CORE_ADDR pc);
 
 /* TODO:
 
-   * Most of this code should work for hp300 shared libraries.  Does
-   anyone care enough to weed out any SOM-isms.
-
    * Support for hpux8 dynamic linker.  */
 
 /* The basic structure which describes a dynamically loaded object.  This

@@ -189,7 +189,7 @@ alpha_lds (void *out, const void *in)
 /* Similarly, this represents exactly the conversion performed by
    the STS instruction.  */
 
-static inline void
+static void
 alpha_sts (void *out, const void *in)
 {
   ULONGEST reg, mem;
@@ -278,7 +278,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
     };
   struct alpha_arg *alpha_args
     = (struct alpha_arg *) alloca (nargs * sizeof (struct alpha_arg));
-  register struct alpha_arg *m_arg;
+  struct alpha_arg *m_arg;
   char arg_reg_buffer[ALPHA_REGISTER_SIZE * ALPHA_NUM_ARG_REGS];
   int required_arg_regs;
 
@@ -1138,7 +1138,7 @@ alpha_heuristic_frame_this_id (struct frame_info *next_frame,
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
-  if (inside_entry_file (info->start_pc))
+  if (deprecated_inside_entry_file (info->start_pc))
     return;
 
   *this_id = frame_id_build (info->vfp, info->start_pc);

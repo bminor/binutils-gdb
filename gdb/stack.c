@@ -213,7 +213,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
   struct block *b = NULL;
   int first = 1;
   struct dict_iterator iter;
-  register struct symbol *sym;
+  struct symbol *sym;
   struct value *val;
   /* Offset of next stack argument beyond the one we have seen that is
      at the highest offset.
@@ -538,7 +538,7 @@ print_frame (struct frame_info *fi,
 	     struct symtab_and_line sal)
 {
   struct symbol *func;
-  register const char *funname = 0;
+  const char *funname = 0;
   enum language funlang = language_unknown;
   struct ui_stream *stb;
   struct cleanup *old_chain;
@@ -899,7 +899,7 @@ frame_info (char *addr_exp, int from_tty)
     }
   else
     {
-      register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
+      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
       if (msymbol != NULL)
 	{
 	  funname = DEPRECATED_SYMBOL_NAME (msymbol);
@@ -1139,10 +1139,10 @@ static void
 backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
 {
   struct frame_info *fi;
-  register int count;
-  register int i;
-  register struct frame_info *trailing;
-  register int trailing_level;
+  int count;
+  int i;
+  struct frame_info *trailing;
+  int trailing_level;
 
   if (!target_has_stack)
     error ("No stack.");
@@ -1347,11 +1347,11 @@ print_block_frame_locals (struct block *b, struct frame_info *fi,
 
 static int
 print_block_frame_labels (struct block *b, int *have_default,
-			  register struct ui_file *stream)
+			  struct ui_file *stream)
 {
   struct dict_iterator iter;
-  register struct symbol *sym;
-  register int values_printed = 0;
+  struct symbol *sym;
+  int values_printed = 0;
 
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
@@ -1388,11 +1388,11 @@ print_block_frame_labels (struct block *b, int *have_default,
    on the function running in FRAME.  */
 
 static void
-print_frame_local_vars (register struct frame_info *fi, register int num_tabs,
-			register struct ui_file *stream)
+print_frame_local_vars (struct frame_info *fi, int num_tabs,
+			struct ui_file *stream)
 {
-  register struct block *block = get_frame_block (fi, 0);
-  register int values_printed = 0;
+  struct block *block = get_frame_block (fi, 0);
+  int values_printed = 0;
 
   if (block == 0)
     {
@@ -1421,12 +1421,12 @@ print_frame_local_vars (register struct frame_info *fi, register int num_tabs,
 /* Same, but print labels.  */
 
 static void
-print_frame_label_vars (register struct frame_info *fi, int this_level_only,
-			register struct ui_file *stream)
+print_frame_label_vars (struct frame_info *fi, int this_level_only,
+			struct ui_file *stream)
 {
-  register struct blockvector *bl;
-  register struct block *block = get_frame_block (fi, 0);
-  register int values_printed = 0;
+  struct blockvector *bl;
+  struct block *block = get_frame_block (fi, 0);
+  int values_printed = 0;
   int index, have_default = 0;
   char *blocks_printed;
   CORE_ADDR pc = get_frame_pc (fi);
@@ -1526,14 +1526,14 @@ catch_info (char *ignore, int from_tty)
 }
 
 static void
-print_frame_arg_vars (register struct frame_info *fi,
-		      register struct ui_file *stream)
+print_frame_arg_vars (struct frame_info *fi,
+		      struct ui_file *stream)
 {
   struct symbol *func = get_frame_function (fi);
-  register struct block *b;
+  struct block *b;
   struct dict_iterator iter;
-  register struct symbol *sym, *sym2;
-  register int values_printed = 0;
+  struct symbol *sym, *sym2;
+  int values_printed = 0;
 
   if (func == 0)
     {
@@ -1657,11 +1657,11 @@ get_selected_block (CORE_ADDR *addr_in_block)
    how much farther the original request asked to go.  */
 
 struct frame_info *
-find_relative_frame (register struct frame_info *frame,
-		     register int *level_offset_ptr)
+find_relative_frame (struct frame_info *frame,
+		     int *level_offset_ptr)
 {
-  register struct frame_info *prev;
-  register struct frame_info *frame1;
+  struct frame_info *prev;
+  struct frame_info *frame1;
 
   /* Going up is simple: just do get_prev_frame enough times
      or until initial frame is reached.  */
@@ -1740,7 +1740,7 @@ current_frame_command (char *level_exp, int from_tty)
 static void
 up_silently_base (char *count_exp)
 {
-  register struct frame_info *fi;
+  struct frame_info *fi;
   int count = 1, count1;
   if (count_exp)
     count = parse_and_eval_long (count_exp);
@@ -1777,7 +1777,7 @@ up_command (char *count_exp, int from_tty)
 static void
 down_silently_base (char *count_exp)
 {
-  register struct frame_info *frame;
+  struct frame_info *frame;
   int count = -1, count1;
   if (count_exp)
     count = -parse_and_eval_long (count_exp);
@@ -1981,7 +1981,7 @@ func_command (char *arg, int from_tty)
 enum language
 get_frame_language (void)
 {
-  register struct symtab *s;
+  struct symtab *s;
   enum language flang;		/* The language of the current frame */
 
   if (deprecated_selected_frame)

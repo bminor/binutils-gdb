@@ -324,6 +324,8 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
       gdb_assert (pid == GET_LWP (ptid)
 		  && WIFSTOPPED (status) && WSTOPSIG (status));
 
+      child_post_attach (pid);
+
       lp->stopped = 1;
 
       if (debug_lin_lwp)
@@ -415,7 +417,12 @@ detach_callback (struct lwp_info *lp, void *data)
       lp->stopped = 0;
       lp->signalled = 0;
       lp->status = 0;
-      stop_wait_callback (lp, NULL);
+      /* FIXME drow/2003-08-26: There was a call to stop_wait_callback
+	 here.  But since lp->signalled was cleared above,
+	 stop_wait_callback didn't do anything; the process was left
+	 running.  Shouldn't we be waiting for it to stop?
+	 I've removed the call, since stop_wait_callback now does do
+	 something when called with lp->signalled == 0.  */
 
       gdb_assert (lp->status == 0 || WIFSTOPPED (lp->status));
     }
@@ -583,6 +590,77 @@ kill_lwp (int lwpid, int signo)
   return kill (lwpid, signo);
 }
 
+/* Wait for LP to stop.  Returns the wait status, or 0 if the LWP has
+   exited.  */
+
+static int
+wait_lwp (struct lwp_info *lp)
+{
+  pid_t pid;
+  int status;
+  int thread_dead = 0;
+
+  gdb_assert (!lp->stopped);
+  gdb_assert (lp->status == 0);
+
+  pid = waitpid (GET_LWP (lp->ptid), &status, 0);
+  if (pid == -1 && errno == ECHILD)
+    {
+      pid = waitpid (GET_LWP (lp->ptid), &status, __WCLONE);
+      if (pid == -1 && errno == ECHILD)
+	{
+	  /* The thread has previously exited.  We need to delete it now
+	     because in the case of NPTL threads, there won't be an
+	     exit event unless it is the main thread.  */
+	  thread_dead = 1;
+	  if (debug_lin_lwp)
+	    fprintf_unfiltered (gdb_stdlog, "WL: %s vanished.\n",
+				target_pid_to_str (lp->ptid));
+	}
+    }
+
+  if (!thread_dead)
+    {
+      gdb_assert (pid == GET_LWP (lp->ptid));
+
+      if (debug_lin_lwp)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "WL: waitpid %s received %s\n",
+			      target_pid_to_str (lp->ptid),
+			      status_to_str (status));
+	}
+    }
+
+  /* Check if the thread has exited.  */
+  if (WIFEXITED (status) || WIFSIGNALED (status))
+    {
+      thread_dead = 1;
+      if (debug_lin_lwp)
+	fprintf_unfiltered (gdb_stdlog, "WL: %s exited.\n",
+			    target_pid_to_str (lp->ptid));
+    }
+
+  if (thread_dead)
+    {
+      if (in_thread_list (lp->ptid))
+	{
+	  /* Core GDB cannot deal with us deleting the current thread.  */
+	  if (!ptid_equal (lp->ptid, inferior_ptid))
+	    delete_thread (lp->ptid);
+	  printf_unfiltered ("[%s exited]\n",
+			     target_pid_to_str (lp->ptid));
+	}
+
+      delete_lwp (lp->ptid);
+      return 0;
+    }
+
+  gdb_assert (WIFSTOPPED (status));
+
+  return status;
+}
+
 /* Send a SIGSTOP to LP.  */
 
 static int
@@ -623,92 +701,23 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 {
   sigset_t *flush_mask = data;
 
-  if (!lp->stopped && lp->signalled)
+  if (!lp->stopped)
     {
-      pid_t pid;
       int status;
 
-      gdb_assert (lp->status == 0);
-
-      pid = waitpid (GET_LWP (lp->ptid), &status, 0);
-      if (pid == -1 && errno == ECHILD)
-	{
-	  pid = waitpid (GET_LWP (lp->ptid), &status, __WCLONE);
-	  if (pid == -1 && errno == ECHILD)
-	    {
-	      /* The thread has previously exited.  We need to delete it now
-	         because in the case of nptl threads, there won't be an
-	         exit event unless it is the main thread.  */
-	      if (debug_lin_lwp)
-		fprintf_unfiltered (gdb_stdlog,
-				    "SWC: %s exited.\n",
-				    target_pid_to_str (lp->ptid));
-	      delete_lwp (lp->ptid);
-	      return 0;
-	    }
-	}
-
-      gdb_assert (pid == GET_LWP (lp->ptid));
-
-      if (debug_lin_lwp)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "SWC: waitpid %s received %s\n",
-			      target_pid_to_str (lp->ptid),
-			      status_to_str (status));
-	}
-
-      /* Check if the thread has exited.  */
-      if (WIFEXITED (status) || WIFSIGNALED (status))
-	{
-	  gdb_assert (num_lwps > 1);
-
-	  if (in_thread_list (lp->ptid))
-	    {
-	      /* Core GDB cannot deal with us deleting the current
-	         thread.  */
-	      if (!ptid_equal (lp->ptid, inferior_ptid))
-		delete_thread (lp->ptid);
-	      printf_unfiltered ("[%s exited]\n",
-				 target_pid_to_str (lp->ptid));
-	    }
-	  if (debug_lin_lwp)
-	    fprintf_unfiltered (gdb_stdlog,
-				"SWC: %s exited.\n",
-				target_pid_to_str (lp->ptid));
-
-	  delete_lwp (lp->ptid);
-	  return 0;
-	}
-
-      /* Check if the current LWP has previously exited.  For nptl threads,
-         there is no exit signal issued for LWPs that are not the
-         main thread so we should check whenever the thread is stopped.  */
-      if (!lin_lwp_thread_alive (lp->ptid))
-	{
-	  if (in_thread_list (lp->ptid))
-	    {
-	      /* Core GDB cannot deal with us deleting the current
-	         thread.  */
-	      if (!ptid_equal (lp->ptid, inferior_ptid))
-		delete_thread (lp->ptid);
-	      printf_unfiltered ("[%s exited]\n",
-				 target_pid_to_str (lp->ptid));
-	    }
-	  if (debug_lin_lwp)
-	    fprintf_unfiltered (gdb_stdlog,
-				"SWC: %s already exited.\n",
-				target_pid_to_str (lp->ptid));
-
-	  delete_lwp (lp->ptid);
-	  return 0;
-	}
-
-      gdb_assert (WIFSTOPPED (status));
+      status = wait_lwp (lp);
+      if (status == 0)
+	return 0;
 
       /* Ignore any signals in FLUSH_MASK.  */
       if (flush_mask && sigismember (flush_mask, WSTOPSIG (status)))
 	{
+	  if (!lp->signalled)
+	    {
+	      lp->stopped = 1;
+	      return 0;
+	    }
+
 	  errno = 0;
 	  ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
 	  if (debug_lin_lwp)
@@ -819,6 +828,88 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 	  lp->stopped = 1;
 	  lp->signalled = 0;
 	}
+    }
+
+  return 0;
+}
+
+/* Check whether PID has any pending signals in FLUSH_MASK.  If so set
+   the appropriate bits in PENDING, and return 1 - otherwise return 0.  */
+
+static int
+lin_lwp_has_pending (int pid, sigset_t *pending, sigset_t *flush_mask)
+{
+  sigset_t blocked, ignored;
+  int i;
+
+  linux_proc_pending_signals (pid, pending, &blocked, &ignored);
+
+  if (!flush_mask)
+    return 0;
+
+  for (i = 1; i < NSIG; i++)
+    if (sigismember (pending, i))
+      if (!sigismember (flush_mask, i)
+	  || sigismember (&blocked, i)
+	  || sigismember (&ignored, i))
+	sigdelset (pending, i);
+
+  if (sigisemptyset (pending))
+    return 0;
+
+  return 1;
+}
+
+/* DATA is interpreted as a mask of signals to flush.  If LP has
+   signals pending, and they are all in the flush mask, then arrange
+   to flush them.  LP should be stopped, as should all other threads
+   it might share a signal queue with.  */
+
+static int
+flush_callback (struct lwp_info *lp, void *data)
+{
+  sigset_t *flush_mask = data;
+  sigset_t pending, intersection, blocked, ignored;
+  int pid, status;
+
+  /* Normally, when an LWP exits, it is removed from the LWP list.  The
+     last LWP isn't removed till later, however.  So if there is only
+     one LWP on the list, make sure it's alive.  */
+  if (lwp_list == lp && lp->next == NULL)
+    if (!lin_lwp_thread_alive (lp->ptid))
+      return 0;
+
+  /* Just because the LWP is stopped doesn't mean that new signals
+     can't arrive from outside, so this function must be careful of
+     race conditions.  However, because all threads are stopped, we
+     can assume that the pending mask will not shrink unless we resume
+     the LWP, and that it will then get another signal.  We can't
+     control which one, however.  */
+
+  if (lp->status)
+    {
+      if (debug_lin_lwp)
+	printf_unfiltered ("FC: LP has pending status %06x\n", lp->status);
+      if (WIFSTOPPED (lp->status) && sigismember (flush_mask, WSTOPSIG (lp->status)))
+	lp->status = 0;
+    }
+
+  while (lin_lwp_has_pending (GET_LWP (lp->ptid), &pending, flush_mask))
+    {
+      int ret;
+      
+      errno = 0;
+      ret = ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
+      if (debug_lin_lwp)
+	fprintf_unfiltered (gdb_stderr,
+			    "FC: Sent PTRACE_CONT, ret %d %d\n", ret, errno);
+
+      lp->stopped = 0;
+      stop_wait_callback (lp, flush_mask);
+      if (debug_lin_lwp)
+	fprintf_unfiltered (gdb_stderr,
+			    "FC: Wait finished; saved status is %d\n",
+			    lp->status);
     }
 
   return 0;
@@ -1047,6 +1138,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       if (pid != -1 && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP
 	  && pid != GET_PID (inferior_ptid))
 	{
+	  linux_record_stopped_pid (pid);
 	  pid = -1;
 	  save_errno = EINTR;
 	}
@@ -1066,6 +1158,10 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
       return minus_one_ptid;
     }
+
+  /* Handle GNU/Linux's extended waitstatus for trace events.  */
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+    return linux_handle_extended_wait (pid, status, ourstatus);
 
   store_waitstatus (ourstatus, status);
   return pid_to_ptid (pid);
@@ -1462,6 +1558,7 @@ retry:
   /* ... and wait until all of them have reported back that they're no
      longer running.  */
   iterate_over_lwps (stop_wait_callback, &flush_mask);
+  iterate_over_lwps (flush_callback, &flush_mask);
 
   /* If we're not waiting for a specific LWP, choose an event LWP from
      among those that have had events.  Giving equal priority to all
@@ -1487,6 +1584,14 @@ retry:
     }
   else
     trap_ptid = null_ptid;
+
+  /* Handle GNU/Linux's extended waitstatus for trace events.  */
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+    {
+      linux_handle_extended_wait (ptid_get_pid (trap_ptid),
+				  status, ourstatus);
+      return trap_ptid;
+    }
 
   store_waitstatus (ourstatus, status);
   return (threaded ? lp->ptid : pid_to_ptid (GET_LWP (lp->ptid)));
@@ -1657,6 +1762,12 @@ init_lin_lwp_ops (void)
   lin_lwp_ops.to_mourn_inferior = lin_lwp_mourn_inferior;
   lin_lwp_ops.to_thread_alive = lin_lwp_thread_alive;
   lin_lwp_ops.to_pid_to_str = lin_lwp_pid_to_str;
+  lin_lwp_ops.to_post_startup_inferior = child_post_startup_inferior;
+  lin_lwp_ops.to_post_attach = child_post_attach;
+  lin_lwp_ops.to_insert_fork_catchpoint = child_insert_fork_catchpoint;
+  lin_lwp_ops.to_insert_vfork_catchpoint = child_insert_vfork_catchpoint;
+  lin_lwp_ops.to_insert_exec_catchpoint = child_insert_exec_catchpoint;
+
   lin_lwp_ops.to_stratum = thread_stratum;
   lin_lwp_ops.to_has_thread_control = tc_schedlock;
   lin_lwp_ops.to_magic = OPS_MAGIC;

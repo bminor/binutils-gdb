@@ -515,7 +515,7 @@ new_tty_prefork (char *ttyname)
 void
 new_tty (void)
 {
-  register int tty;
+  int tty;
 
   if (inferior_thisrun_terminal == 0)
     return;

@@ -113,15 +113,15 @@ mipscoff_symfile_read (struct objfile *objfile, int mainline)
 
   if (mainline
       && objfile->ei.entry_point != INVALID_ENTRY_POINT
-      && objfile->ei.entry_file_lowpc == INVALID_ENTRY_LOWPC)
+      && objfile->ei.deprecated_entry_file_lowpc == INVALID_ENTRY_LOWPC)
     {
       struct minimal_symbol *m;
 
       m = lookup_minimal_symbol_by_pc (objfile->ei.entry_point);
       if (m && DEPRECATED_SYMBOL_NAME (m + 1))
 	{
-	  objfile->ei.entry_file_lowpc = SYMBOL_VALUE_ADDRESS (m);
-	  objfile->ei.entry_file_highpc = SYMBOL_VALUE_ADDRESS (m + 1);
+	  objfile->ei.deprecated_entry_file_lowpc = SYMBOL_VALUE_ADDRESS (m);
+	  objfile->ei.deprecated_entry_file_highpc = SYMBOL_VALUE_ADDRESS (m + 1);
 	}
     }
 
@@ -193,7 +193,7 @@ struct alphacoff_dynsecinfo
 static void
 alphacoff_locate_sections (bfd *ignore_abfd, asection *sectp, void *sip)
 {
-  register struct alphacoff_dynsecinfo *si;
+  struct alphacoff_dynsecinfo *si;
 
   si = (struct alphacoff_dynsecinfo *) sip;
 

@@ -562,7 +562,7 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
   flagword   pltflags;
   asection * s;
   struct elf_link_hash_entry * h;
-  struct elf_backend_data *    bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data * bed = get_elf_backend_data (abfd);
   int ptralign;
 
   /* This function may be called more than once.  */
@@ -1158,9 +1158,8 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	    }
 
 	  bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-				     (((Elf32_External_Rela *)
-				       sreloc->contents)
-				      + sreloc->reloc_count));
+				     (bfd_byte *) (((Elf32_External_Rela *) sreloc->contents)
+						   + sreloc->reloc_count));
 	  ++sreloc->reloc_count;
 
 	  /* If this reloc is against an external symbol, we do
@@ -1295,9 +1294,9 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	    }
 
 	  bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-				     (((Elf32_External_Rela *)
-				       sreloc->contents)
-				      + sreloc->reloc_count));
+				     (bfd_byte *) (((Elf32_External_Rela *)
+						    sreloc->contents)
+						   + sreloc->reloc_count));
 	  ++sreloc->reloc_count;
 
 	  return bfd_reloc_ok;
@@ -1480,9 +1479,9 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
 		  outrel.r_info = ELF32_R_INFO (0, R_MN10300_RELATIVE);
 		  outrel.r_addend = value;
 		  bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-					     (((Elf32_External_Rela *)
-					       srelgot->contents)
-					      + srelgot->reloc_count));
+					     (bfd_byte *) (((Elf32_External_Rela *)
+							    srelgot->contents)
+							   + srelgot->reloc_count));
 		  ++ srelgot->reloc_count;
 		}
 
@@ -1579,15 +1578,20 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.root.type == bfd_link_hash_indirect
-		 || h->root.root.type == bfd_link_hash_warning)
-	    h = (struct elf32_mn10300_link_hash_entry *) h->root.root.u.i.link;
-	  if (h->root.root.type == bfd_link_hash_defined
+	  bfd_boolean unresolved_reloc;
+	  bfd_boolean warned;
+	  struct elf_link_hash_entry *hh;
+
+	  RELOC_FOR_GLOBAL_SYMBOL (hh, (struct elf_link_hash_entry *) sym_hashes,
+				   r_symndx, symtab_hdr, relocation,
+				   sec, unresolved_reloc, info,
+				   warned);
+
+	  h = (struct elf32_mn10300_link_hash_entry *) hh;
+
+	  if ((h->root.root.type == bfd_link_hash_defined
 	      || h->root.root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.root.u.def.section;
-	      if (   r_type == R_MN10300_GOTPC32
+	      && (   r_type == R_MN10300_GOTPC32
 		  || r_type == R_MN10300_GOTPC16
 		  || ((   r_type == R_MN10300_PLT32
 		       || r_type == R_MN10300_PLT16)
@@ -1615,41 +1619,17 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			     do anything with them here.  */
 			  || ((input_section->flags & SEC_DEBUGGING) != 0
 			      && (h->root.elf_link_hash_flags
-				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))))
-		{
-		  /* In these cases, we don't need the relocation
-                     value.  We check specially because in some
-                     obscure cases sec->output_section will be NULL.  */
-		  relocation = 0;
-		}
-	      else if (sec->output_section == NULL)
-		{
-		  (*_bfd_error_handler)
-		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-		     bfd_get_filename (input_bfd), h->root.root.root.string,
-		     bfd_get_section_name (input_bfd, input_section));
-		  relocation = 0;
-		}
-	      else	      
-		relocation = (h->root.root.u.def.value
-			      + sec->output_section->vma
-			      + sec->output_offset);
-	    }
-	  else if (h->root.root.type == bfd_link_hash_undefweak)
+				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0)))))
+	    /* In these cases, we don't need the relocation
+	       value.  We check specially because in some
+	       obscure cases sec->output_section will be NULL.  */
 	    relocation = 0;
-	  else if (info->shared && !info->symbolic && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
-	    relocation = 0;
-	  else
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.root.string, input_bfd,
-		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined
-		       || ELF_ST_VISIBILITY (h->root.other)))))
-		return FALSE;
-	      relocation = 0;
-	    }
+
+	  else if (unresolved_reloc)
+	    (*_bfd_error_handler)
+	      (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
+	       bfd_get_filename (input_bfd), h->root.root.root.string,
+	       bfd_get_section_name (input_bfd, input_section));
 	}
 
       r = mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
@@ -4049,7 +4029,7 @@ _bfd_mn10300_elf_create_dynamic_sections (abfd, info)
 {
   flagword   flags;
   asection * s;
-  struct elf_backend_data * bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data * bed = get_elf_backend_data (abfd);
   int ptralign = 0;
 
   switch (bed->s->arch_size)
@@ -4626,8 +4606,8 @@ _bfd_mn10300_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       rel.r_info = ELF32_R_INFO (h->dynindx, R_MN10300_JMP_SLOT);
       rel.r_addend = 0;
       bfd_elf32_swap_reloca_out (output_bfd, &rel,
-				((Elf32_External_Rela *) srel->contents
-				 + plt_index));
+				 (bfd_byte *) ((Elf32_External_Rela *) srel->contents
+					       + plt_index));
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	/* Mark the symbol as undefined, rather than as defined in
@@ -4673,8 +4653,8 @@ _bfd_mn10300_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
 
       bfd_elf32_swap_reloca_out (output_bfd, &rel,
-				 ((Elf32_External_Rela *) srel->contents
-				  + srel->reloc_count));
+				 (bfd_byte *) ((Elf32_External_Rela *) srel->contents
+					       + srel->reloc_count));
       ++ srel->reloc_count;
     }
 
@@ -4698,8 +4678,8 @@ _bfd_mn10300_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       rel.r_info = ELF32_R_INFO (h->dynindx, R_MN10300_COPY);
       rel.r_addend = 0;
       bfd_elf32_swap_reloca_out (output_bfd, &rel,
-				 ((Elf32_External_Rela *) s->contents
-				  + s->reloc_count));
+				 (bfd_byte *) ((Elf32_External_Rela *) s->contents
+					       + s->reloc_count));
       ++ s->reloc_count;
     }
 

@@ -41,11 +41,12 @@
    is to execute a particular software interrupt, rather than use a
    particular undefined instruction to provoke a trap.  Upon exection
    of the software interrupt the kernel stops the inferior with a
-   SIGTRAP, and wakes the debugger.  Since ARM GNU/Linux is little
-   endian, and doesn't support Thumb at the moment we only override
-   the ARM little-endian breakpoint.  */
+   SIGTRAP, and wakes the debugger.  Since ARM GNU/Linux doesn't support
+   Thumb at the moment we only override the ARM breakpoints.  */
 
-static const char arm_linux_arm_le_breakpoint[] = {0x01,0x00,0x9f,0xef};
+static const char arm_linux_arm_le_breakpoint[] = { 0x01, 0x00, 0x9f, 0xef };
+
+static const char arm_linux_arm_be_breakpoint[] = { 0xef, 0x9f, 0x00, 0x01 };
 
 /* DEPRECATED_CALL_DUMMY_WORDS:
    This sequence of words is the instructions
@@ -85,7 +86,7 @@ arm_linux_extract_return_value (struct type *type,
 
   int regnum = ((TYPE_CODE_FLT == TYPE_CODE (type))
 		? ARM_F0_REGNUM : ARM_A1_REGNUM);
-  memcpy (valbuf, &regbuf[REGISTER_BYTE (regnum)], TYPE_LENGTH (type));
+  memcpy (valbuf, &regbuf[DEPRECATED_REGISTER_BYTE (regnum)], TYPE_LENGTH (type));
 }
 
 /* Note: ScottB
@@ -566,7 +567,10 @@ arm_linux_init_abi (struct gdbarch_info info,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   tdep->lowest_pc = 0x8000;
-  tdep->arm_breakpoint = arm_linux_arm_le_breakpoint;
+  if (info.byte_order == BFD_ENDIAN_BIG)
+    tdep->arm_breakpoint = arm_linux_arm_be_breakpoint;
+  else
+    tdep->arm_breakpoint = arm_linux_arm_le_breakpoint;
   tdep->arm_breakpoint_size = sizeof (arm_linux_arm_le_breakpoint);
 
   tdep->fp_model = ARM_FLOAT_FPA;

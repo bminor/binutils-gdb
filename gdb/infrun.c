@@ -2446,9 +2446,9 @@ process_event_stop_test:
       return;
     }
 
-  if (stop_pc == ecs->stop_func_start	/* Quick test */
-      || (in_prologue (stop_pc, ecs->stop_func_start) &&
-	  !IN_SOLIB_RETURN_TRAMPOLINE (stop_pc, ecs->stop_func_name))
+  if (((stop_pc == ecs->stop_func_start	/* Quick test */
+	|| in_prologue (stop_pc, ecs->stop_func_start))
+       && !IN_SOLIB_RETURN_TRAMPOLINE (stop_pc, ecs->stop_func_name))
       || IN_SOLIB_CALL_TRAMPOLINE (stop_pc, ecs->stop_func_name)
       || ecs->stop_func_name == 0)
     {
@@ -3054,14 +3054,22 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
 void
 normal_stop (void)
 {
+  struct target_waitstatus last;
+  ptid_t last_ptid;
+
+  get_last_target_status (&last_ptid, &last);
+
   /* As with the notification of thread events, we want to delay
      notifying the user that we've switched thread context until
      the inferior actually stops.
 
-     (Note that there's no point in saying anything if the inferior
-     has exited!) */
+     There's no point in saying anything if the inferior has exited.
+     Note that SIGNALLED here means "exited with a signal", not
+     "received a signal".  */
   if (!ptid_equal (previous_inferior_ptid, inferior_ptid)
-      && target_has_execution)
+      && target_has_execution
+      && last.kind != TARGET_WAITKIND_SIGNALLED
+      && last.kind != TARGET_WAITKIND_EXITED)
     {
       target_terminal_ours_for_output ();
       printf_filtered ("[Switching to %s]\n",
@@ -3907,8 +3915,8 @@ build_infrun (void)
 void
 _initialize_infrun (void)
 {
-  register int i;
-  register int numsigs;
+  int i;
+  int numsigs;
   struct cmd_list_element *c;
 
   register_gdbarch_swap (&stop_registers, sizeof (stop_registers), NULL);

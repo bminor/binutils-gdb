@@ -33,10 +33,16 @@ set srcfile  ${testfile}.c
 set binfile  ${objdir}/${subdir}/${testfile}
 set options  {debug}
 
+set is64bitonly "no"
+
 if [istarget "alpha*-*-*"] then {
     # SREC etc cannot handle 64-bit addresses.  Force the test
     # program into the low 31 bits of the address space.
     lappend options "additional_flags=-Wl,-taso"
+}
+
+if [istarget "ia64*-*-*"] then {
+    set is64bitonly "yes"
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable ${options}] != "" } {
@@ -213,32 +219,42 @@ proc test_restore_saved_value { restore_args msg oldval newval } {
     }
 }
 
-test_reload_saved_value "intarr1.srec" "reload array as value, srec" \
+# srec format can not be loaded for 64-bit-only platforms
+if ![string compare $is64bitonly "no"] then {
+  test_reload_saved_value "intarr1.srec" "reload array as value, srec" \
 	$array_val "intarray"
-test_reload_saved_value "intstr1.srec" "reload struct as value, srec" \
+  test_reload_saved_value "intstr1.srec" "reload struct as value, srec" \
 	$struct_val "intstruct"
-test_reload_saved_value "intarr2.srec" "reload array as memory, srec" \
+  test_reload_saved_value "intarr2.srec" "reload array as memory, srec" \
 	$array_val "intarray"
-test_reload_saved_value "intstr2.srec" "reload struct as memory, srec" \
+  test_reload_saved_value "intstr2.srec" "reload struct as memory, srec" \
 	$struct_val "intstruct"
+}
 
-test_reload_saved_value "intarr1.ihex" "reload array as value, intel hex" \
-	$array_val "intarray"
-test_reload_saved_value "intstr1.ihex" "reload struct as value, intel hex" \
-	$struct_val "intstruct"
-test_reload_saved_value "intarr2.ihex" "reload array as memory, intel hex" \
-	$array_val "intarray"
-test_reload_saved_value "intstr2.ihex" "reload struct as memory, intel hex" \
-	$struct_val "intstruct"
+# ihex format can not be loaded for 64-bit-only platforms
+if ![string compare $is64bitonly "no"] then {
 
-test_reload_saved_value "intarr1.tekhex" "reload array as value, tekhex" \
+  test_reload_saved_value "intarr1.ihex" "reload array as value, intel hex" \
 	$array_val "intarray"
-test_reload_saved_value "intstr1.tekhex" "reload struct as value, tekhex" \
+  test_reload_saved_value "intstr1.ihex" "reload struct as value, intel hex" \
 	$struct_val "intstruct"
-test_reload_saved_value "intarr2.tekhex" "reload array as memory, tekhex" \
+  test_reload_saved_value "intarr2.ihex" "reload array as memory, intel hex" \
 	$array_val "intarray"
-test_reload_saved_value "intstr2.tekhex" "reload struct as memory, tekhex" \
+  test_reload_saved_value "intstr2.ihex" "reload struct as memory, intel hex" \
 	$struct_val "intstruct"
+}
+
+# tekhex format can not be loaded for 64-bit-only platforms
+if ![string compare $is64bitonly "no"] then {
+  test_reload_saved_value "intarr1.tekhex" "reload array as value, tekhex" \
+	$array_val "intarray"
+  test_reload_saved_value "intstr1.tekhex" "reload struct as value, tekhex" \
+	$struct_val "intstruct"
+  test_reload_saved_value "intarr2.tekhex" "reload array as memory, tekhex" \
+	$array_val "intarray"
+  test_reload_saved_value "intstr2.tekhex" "reload struct as memory, tekhex" \
+	$struct_val "intstruct"
+}
 
 # Start a fresh gdb session
 
@@ -264,51 +280,53 @@ if { ![string compare $struct_val [capture_value "intstruct"]] } then {
     pass "start with intstruct un-initialized, runto main"
 }
 
-test_restore_saved_value "intarr1.srec" "array as value, srec" \
+if ![string compare $is64bitonly "no"] then {
+  test_restore_saved_value "intarr1.srec" "array as value, srec" \
 	$array_val "intarray"
 
-test_restore_saved_value "intstr1.srec" "struct as value, srec" \
+  test_restore_saved_value "intstr1.srec" "struct as value, srec" \
 	$struct_val "intstruct"
 
-gdb_test "print zero_all ()" "void" "zero all"
+  gdb_test "print zero_all ()" "void" "zero all"
 
-test_restore_saved_value "intarr2.srec" "array as memory, srec" \
+  test_restore_saved_value "intarr2.srec" "array as memory, srec" \
 	$array_val "intarray"
 
-test_restore_saved_value "intstr2.srec" "struct as memory, srec" \
+  test_restore_saved_value "intstr2.srec" "struct as memory, srec" \
 	$struct_val "intstruct"
 
-gdb_test "print zero_all ()" ""
+  gdb_test "print zero_all ()" ""
 
-test_restore_saved_value "intarr1.ihex" "array as value, ihex" \
+  test_restore_saved_value "intarr1.ihex" "array as value, ihex" \
 	$array_val "intarray"
 
-test_restore_saved_value "intstr1.ihex" "struct as value, ihex" \
+  test_restore_saved_value "intstr1.ihex" "struct as value, ihex" \
 	$struct_val "intstruct"
 
-gdb_test "print zero_all ()" ""
+  gdb_test "print zero_all ()" ""
 
-test_restore_saved_value "intarr2.ihex" "array as memory, ihex" \
+  test_restore_saved_value "intarr2.ihex" "array as memory, ihex" \
 	$array_val "intarray"
 
-test_restore_saved_value "intstr2.ihex" "struct as memory, ihex" \
+  test_restore_saved_value "intstr2.ihex" "struct as memory, ihex" \
 	$struct_val "intstruct"
 
-gdb_test "print zero_all ()" ""
+  gdb_test "print zero_all ()" ""
 
-test_restore_saved_value "intarr1.tekhex" "array as value, tekhex" \
+  test_restore_saved_value "intarr1.tekhex" "array as value, tekhex" \
 	$array_val "intarray"
 
-test_restore_saved_value "intstr1.tekhex" "struct as value, tekhex" \
+  test_restore_saved_value "intstr1.tekhex" "struct as value, tekhex" \
 	$struct_val "intstruct"
 
-gdb_test "print zero_all ()" ""
+  gdb_test "print zero_all ()" ""
 
-test_restore_saved_value "intarr2.tekhex" "array as memory, tekhex" \
+  test_restore_saved_value "intarr2.tekhex" "array as memory, tekhex" \
 	$array_val "intarray"
 
-test_restore_saved_value "intstr2.tekhex" "struct as memory, tekhex" \
+  test_restore_saved_value "intstr2.tekhex" "struct as memory, tekhex" \
 	$struct_val "intstruct"
+}
 
 gdb_test "print zero_all ()" ""
 
@@ -341,33 +359,36 @@ set struct2_offset \
 
 gdb_test "print zero_all ()" ""
 
-test_restore_saved_value "intarr1.srec $array2_offset" \
+
+if ![string compare $is64bitonly "no"] then {
+  test_restore_saved_value "intarr1.srec $array2_offset" \
 	"array copy, srec" \
 	$array_val "intarray2"
 
-test_restore_saved_value "intstr1.srec $struct2_offset" \
+  test_restore_saved_value "intstr1.srec $struct2_offset" \
 	"struct copy, srec" \
 	$struct_val "intstruct2"
 
-gdb_test "print zero_all ()" ""
+  gdb_test "print zero_all ()" ""
 
-test_restore_saved_value "intarr1.ihex $array2_offset" \
+  test_restore_saved_value "intarr1.ihex $array2_offset" \
 	"array copy, ihex" \
 	$array_val "intarray2"
 
-test_restore_saved_value "intstr1.ihex $struct2_offset" \
+  test_restore_saved_value "intstr1.ihex $struct2_offset" \
 	"struct copy, ihex" \
 	$struct_val "intstruct2"
 
-gdb_test "print zero_all ()" ""
+  gdb_test "print zero_all ()" ""
 
-test_restore_saved_value "intarr1.tekhex $array2_offset" \
+  test_restore_saved_value "intarr1.tekhex $array2_offset" \
 	"array copy, tekhex" \
 	$array_val "intarray2"
 
-test_restore_saved_value "intstr1.tekhex $struct2_offset" \
+  test_restore_saved_value "intstr1.tekhex $struct2_offset" \
 	"struct copy, tekhex" \
 	$struct_val "intstruct2"
+}
 
 gdb_test "print zero_all ()" ""
 
@@ -395,32 +416,34 @@ set element3_offset \
 set element4_offset \
 	[capture_value "/x (char *) &intarray\[4\] - (char *) &intarray\[0\]"]
 
-gdb_test "print zero_all ()" ""
+if ![string compare $is64bitonly "no"] then {
+  gdb_test "print zero_all ()" ""
 
-test_restore_saved_value "intarr1.srec 0 $element3_start $element4_start" \
+  test_restore_saved_value "intarr1.srec 0 $element3_start $element4_start" \
 	"array partial, srec" \
 	[capture_value "4"] "intarray\[3\]"
 
-gdb_test "print intarray\[2\] == 0" " = 1" "element 2 not changed - 1"
-gdb_test "print intarray\[4\] == 0" " = 1" "element 4 not changed - 1"
+  gdb_test "print intarray\[2\] == 0" " = 1" "element 2 not changed - 1"
+  gdb_test "print intarray\[4\] == 0" " = 1" "element 4 not changed - 1"
 
-gdb_test "print zero_all ()" ""
+  gdb_test "print zero_all ()" ""
 
-test_restore_saved_value "intarr1.ihex 0 $element3_start $element4_start" \
+  test_restore_saved_value "intarr1.ihex 0 $element3_start $element4_start" \
 	"array partial, ihex" \
 	[capture_value "4"] "intarray\[3\]"
 
-gdb_test "print intarray\[2\] == 0" " = 1" "element 2 not changed - 2"
-gdb_test "print intarray\[4\] == 0" " = 1" "element 4 not changed - 2"
+  gdb_test "print intarray\[2\] == 0" " = 1" "element 2 not changed - 2"
+  gdb_test "print intarray\[4\] == 0" " = 1" "element 4 not changed - 2"
 
-gdb_test "print zero_all ()" ""
+  gdb_test "print zero_all ()" ""
 
-test_restore_saved_value "intarr1.tekhex 0 $element3_start $element4_start" \
+  test_restore_saved_value "intarr1.tekhex 0 $element3_start $element4_start" \
 	"array partial, tekhex" \
 	[capture_value "4"] "intarray\[3\]"
 
-gdb_test "print intarray\[2\] == 0" " = 1" "element 2 not changed - 3"
-gdb_test "print intarray\[4\] == 0" " = 1" "element 4 not changed - 3"
+  gdb_test "print intarray\[2\] == 0" " = 1" "element 2 not changed - 3"
+  gdb_test "print intarray\[4\] == 0" " = 1" "element 4 not changed - 3"
+}
 
 gdb_test "print zero_all ()" ""
 
@@ -432,17 +455,18 @@ test_restore_saved_value \
 gdb_test "print intarray\[2\] == 0" " = 1" "element 2 not changed - 4"
 gdb_test "print intarray\[4\] == 0" " = 1" "element 4 not changed - 4"
 
-gdb_test "print zero_all ()" "" ""
+if ![string compare $is64bitonly "no"] then {
+  gdb_test "print zero_all ()" "" ""
 
-# restore with expressions 
-test_restore_saved_value \
+  # restore with expressions 
+  test_restore_saved_value \
 	"intarr3.srec ${array2_start}-${array_start} &intarray\[3\] &intarray\[4\]" \
 	"array partial with expressions" \
 	[capture_value "4"] "intarray2\[3\]"
 
-gdb_test "print intarray2\[2\] == 0" " = 1" "element 2 not changed, == 4"
-gdb_test "print intarray2\[4\] == 0" " = 1" "element 4 not changed, == 4"
-
+  gdb_test "print intarray2\[2\] == 0" " = 1" "element 2 not changed, == 4"
+  gdb_test "print intarray2\[4\] == 0" " = 1" "element 4 not changed, == 4"
+}
 
 # clean up files
 

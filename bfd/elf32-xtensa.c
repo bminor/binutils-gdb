@@ -48,7 +48,7 @@ static bfd_boolean elf_xtensa_check_relocs
 static void elf_xtensa_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean));
 static void elf_xtensa_copy_indirect_symbol
-  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+  PARAMS ((const struct elf_backend_data *, struct elf_link_hash_entry *,
 	   struct elf_link_hash_entry *));
 static asection *elf_xtensa_gc_mark_hook
   PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
@@ -799,7 +799,7 @@ elf_xtensa_hide_symbol (info, h, force_local)
 
 static void
 elf_xtensa_copy_indirect_symbol (bed, dir, ind)
-     struct elf_backend_data *bed;
+     const struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
@@ -2009,45 +2009,15 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
+				   symtab_hdr, relocation, sec,
+				   unresolved_reloc, info,
+				   warned);
 
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  relocation = 0;
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-
-	      if (sec->output_section == NULL)
-		/* Set a flag that will be cleared later if we find a
-		   relocation value for this symbol.  output_section
-		   is typically NULL for symbols satisfied by a shared
-		   library.  */
-		unresolved_reloc = TRUE;
-	      else
-		relocation = (h->root.u.def.value
-			      + sec->output_section->vma
-			      + sec->output_offset);
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
+	  if (relocation == 0
+	      && !unresolved_reloc
+	      && h->root.type == bfd_link_hash_undefweak)
 	    is_weak_undef = TRUE;
-	  else if (info->shared
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    ;
-	  else
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined
-		       || ELF_ST_VISIBILITY (h->other)))))
-		return FALSE;
-	      warned = TRUE;
-	    }
 	}
 
       if (relaxing_section)
@@ -3575,6 +3545,7 @@ hash_literal_value (src)
      const literal_value *src;
 {
   unsigned hash_val;
+
   if (r_reloc_is_const (&src->r_rel))
     return hash_bfd_vma (src->value);
 
@@ -3583,9 +3554,9 @@ hash_literal_value (src)
   
   /* Now check for the same section and the same elf_hash.  */
   if (r_reloc_is_defined (&src->r_rel))
-    hash_val += hash_bfd_vma ((bfd_vma) r_reloc_get_section (&src->r_rel));
+    hash_val += hash_bfd_vma ((bfd_vma) (unsigned) r_reloc_get_section (&src->r_rel));
   else
-    hash_val += hash_bfd_vma ((bfd_vma) r_reloc_get_hash_entry (&src->r_rel));
+    hash_val += hash_bfd_vma ((bfd_vma) (unsigned) r_reloc_get_hash_entry (&src->r_rel));
 
   return hash_val;
 }

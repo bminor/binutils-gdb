@@ -1,4 +1,5 @@
 /* Native-dependent code for FreeBSD/amd64.
+
    Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -44,13 +45,14 @@ typedef struct fpreg fpregset_t;
 
 #include "gregset.h"
 #include "x86-64-tdep.h"
+#include "amd64-nat.h"
 
 
 /* Offset to the gregset_t location where REG is stored.  */
 #define REG_OFFSET(reg) offsetof (gregset_t, reg)
 
-/* At reg_offset[REGNO] you'll find the offset to the gregset_t
-   location where the GDB register REGNO is stored.  Unsupported
+/* At reg_offset[REGNUM] you'll find the offset to the gregset_t
+   location where the GDB register REGNUM is stored.  Unsupported
    registers are marked with `-1'.  */
 static int reg_offset[] =
 {
@@ -77,12 +79,27 @@ static int reg_offset[] =
   -1,
   -1
 };
+
 
-#define REG_ADDR(regset, regno) ((char *) (regset) + reg_offset[regno])
+/* Mapping between the general-purpose registers in FreeBSD/amd64
+   `struct reg' format and GDB's register cache layout for
+   FreeBSD/i386.
 
-/* Macro to determine if a register is fetched with PT_GETREGS.  */
-#define GETREGS_SUPPLIES(regno) \
-  ((0 <= (regno) && (regno) < X86_64_NUM_GREGS))
+   Note that most FreeBSD/amd64 registers are 64-bit, while the
+   FreeBSD/i386 registers are all 32-bit, but since we're
+   little-endian we get away with that.  */
+
+/* From <machine/reg.h>.  */
+static int amd64fbsd32_r_reg_offset[I386_NUM_GREGS] =
+{
+  14 * 8, 13 * 8,		/* %eax, %ecx */
+  12 * 8, 11 * 8,		/* %edx, %ebx */
+  20 * 8, 10 * 8,		/* %esp, %ebp */
+  9 * 8, 8 * 8,			/* %esi, %edi */
+  17 * 8, 19 * 8,		/* %eip, %eflags */
+  18 * 8, 21 * 8,		/* %cs, %ss */
+  -1, -1, -1, -1		/* %ds, %es, %fs, %gs */
+};
 
 
 /* Transfering the registers between GDB, inferiors and core files.  */
@@ -93,29 +110,17 @@ static int reg_offset[] =
 void
 supply_gregset (gregset_t *gregsetp)
 {
-  int i;
-
-  for (i = 0; i < X86_64_NUM_GREGS; i++)
-    {
-      if (reg_offset[i] == -1)
-	supply_register (i, NULL);
-      else
-	supply_register (i, REG_ADDR (gregsetp, i));
-    }
+  amd64_supply_native_gregset (current_regcache, gregsetp, -1);
 }
 
-/* Fill register REGNO (if it is a general-purpose register) in
-   *GREGSETPS with the value in GDB's register array.  If REGNO is -1,
+/* Fill register REGNUM (if it is a general-purpose register) in
+   *GREGSETPS with the value in GDB's register array.  If REGNUM is -1,
    do this for all registers.  */
 
 void
-fill_gregset (gregset_t *gregsetp, int regno)
+fill_gregset (gregset_t *gregsetp, int regnum)
 {
-  int i;
-
-  for (i = 0; i < X86_64_NUM_GREGS; i++)
-    if ((regno == -1 || regno == i) && reg_offset[i] != -1)
-      regcache_collect (i, REG_ADDR (gregsetp, i));
+  amd64_collect_native_gregset (current_regcache, gregsetp, regnum);
 }
 
 /* Fill GDB's register array with the floating-point register values
@@ -124,84 +129,84 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  x86_64_supply_fxsave ((char *) fpregsetp);
+  x86_64_supply_fxsave ((const char *) fpregsetp, -1);
 }
 
-/* Fill register REGNO (if it is a floating-point register) in
-   *FPREGSETP with the value in GDB's register array.  If REGNO is -1,
+/* Fill register REGNUM (if it is a floating-point register) in
+   *FPREGSETP with the value in GDB's register array.  If REGNUM is -1,
    do this for all registers.  */
 
 void
-fill_fpregset (fpregset_t *fpregsetp, int regno)
+fill_fpregset (fpregset_t *fpregsetp, int regnum)
 {
-  x86_64_fill_fxsave ((char *) fpregsetp, regno);
+  x86_64_fill_fxsave ((char *) fpregsetp, regnum);
 }
 
-/* Fetch register REGNO from the inferior.  If REGNO is -1, do this
+/* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating point registers).  */
 
 void
-fetch_inferior_registers (int regno)
+fetch_inferior_registers (int regnum)
 {
-  if (regno == -1 || GETREGS_SUPPLIES (regno))
+  if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
     {
-      gregset_t gregs;
+      struct reg regs;
 
       if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+		  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
 	perror_with_name ("Couldn't get registers");
 
-      supply_gregset (&gregs);
-      if (regno != -1)
+      amd64_supply_native_gregset (current_regcache, &regs, -1);
+      if (regnum != -1)
 	return;
     }
 
-  if (regno == -1 || regno >= FP0_REGNUM)
+  if (regnum == -1 || regnum >= FP0_REGNUM)
     {
-      fpregset_t fpregs;
+      struct fpreg fpregs;
 
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
-      supply_fpregset (&fpregs);
+      x86_64_supply_fxsave ((const char *) &fpregs, -1);
     }
 }
 
-/* Store register REGNO back into the inferior.  If REGNO is -1, do
+/* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers (including the floating point registers).  */
 
 void
-store_inferior_registers (int regno)
+store_inferior_registers (int regnum)
 {
-  if (regno == -1 || GETREGS_SUPPLIES (regno))
+  if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
     {
-      gregset_t gregs;
+      struct reg regs;
 
       if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-                  (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+                  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
         perror_with_name ("Couldn't get registers");
 
-      fill_gregset (&gregs, regno);
+      amd64_collect_native_gregset (current_regcache, &regs, regnum);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
-	          (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+	          (PTRACE_ARG3_TYPE) &regs, 0) == -1)
         perror_with_name ("Couldn't write registers");
 
-      if (regno != -1)
+      if (regnum != -1)
 	return;
     }
 
-  if (regno == -1 || regno >= FP0_REGNUM)
+  if (regnum == -1 || regnum >= FP0_REGNUM)
     {
-      fpregset_t fpregs;
+      struct fpreg fpregs;
 
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
-      fill_fpregset (&fpregs, regno);
-  
+      x86_64_fill_fxsave ((char *) &fpregs, regnum);
+
       if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't write floating point status");
@@ -213,9 +218,12 @@ store_inferior_registers (int regno)
 void _initialize_amd64fbsd_nat (void);
 
 void
-_initialize_am64fbsd_nat (void)
+_initialize_amd64fbsd_nat (void)
 {
   int offset;
+
+  amd64_native_gregset32_reg_offset = amd64fbsd32_r_reg_offset;
+  amd64_native_gregset64_reg_offset = reg_offset;
 
   /* To support the recognition of signal handlers, i386bsd-tdep.c
      hardcodes some constants.  Inclusion of this file means that we
@@ -223,7 +231,6 @@ _initialize_am64fbsd_nat (void)
      system header files and sysctl(3) to get at the relevant
      information.  */
 
-  extern int amd64fbsd_sc_reg_offset[];
 #define SC_REG_OFFSET amd64fbsd_sc_reg_offset
 
   /* We only check the program counter, stack pointer and frame
@@ -282,11 +289,8 @@ Please report this to <bug-gdb@gnu.org>.",
      environment can be found.  */
   {
     int mib[2];
-    int ps_strings;
+    long ps_strings;
     size_t len;
-
-    extern CORE_ADDR amd64fbsd_sigtramp_start;
-    extern CORE_ADDR amd64fbsd_sigtramp_end;
 
     mib[0] = CTL_KERN;
     mib[1] = KERN_PS_STRINGS;

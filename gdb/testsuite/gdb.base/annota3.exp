@@ -331,7 +331,7 @@ gdb_expect_list "annotate ignore count change" "$gdb_prompt$" {
     "\r\n\032\032post-prompt\r\n"
     "\(\r\n\032\032frames-invalid\r\n\)+"
     "\r\n\032\032breakpoint 5\r\n"
-    "Breakpoint 5, main \\(\\) at .*annota3.c:46"
+    "Breakpoint 5, main \\(\\) at .*annota3.c:46\r\n"
     "\r\n\032\032source .*annota3.c:46:\[0-9\]+:beg:0x\[0-9a-z\]+\r\n"
     "1: value = 11\r\n"
     "\r\n\032\032stopped\r\n"

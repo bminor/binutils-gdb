@@ -242,7 +242,7 @@ exec_file_attach (char *filename, int from_tty)
 
       /* FIXME - This should only be run for RS6000, but the ifdef is a poor
          way to accomplish.  */
-#ifdef IBM6000_TARGET
+#ifdef DEPRECATED_IBM6000_TARGET
       /* Setup initial vmap. */
 
       map_vmap (exec_bfd, 0);
@@ -254,7 +254,7 @@ exec_file_attach (char *filename, int from_tty)
 	  error ("\"%s\": can't find the file sections: %s",
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
-#endif /* IBM6000_TARGET */
+#endif /* DEPRECATED_IBM6000_TARGET */
 
       if (build_section_table (exec_bfd, &exec_ops.to_sections,
 			       &exec_ops.to_sections_end))

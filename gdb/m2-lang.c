@@ -45,7 +45,7 @@ static void m2_emit_char (int, struct ui_file *, int);
  */
 
 static void
-m2_emit_char (register int c, struct ui_file *stream, int quoter)
+m2_emit_char (int c, struct ui_file *stream, int quoter)
 {
 
   c &= 0xFF;			/* Avoid sign bit follies */
@@ -112,7 +112,7 @@ static void
 m2_printstr (struct ui_file *stream, char *string, unsigned int length,
 	     int width, int force_ellipses)
 {
-  register unsigned int i;
+  unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
@@ -198,7 +198,7 @@ m2_printstr (struct ui_file *stream, char *string, unsigned int length,
 static struct type *
 m2_create_fundamental_type (struct objfile *objfile, int typeid)
 {
-  register struct type *type = NULL;
+  struct type *type = NULL;
 
   switch (typeid)
     {

@@ -33,6 +33,7 @@
 #include "regcache.h"
 #include "arch-utils.h"
 #include "osabi.h"
+#include "dis-asm.h"
 
 #include "m68k-tdep.h"
 
@@ -947,8 +948,8 @@ m68k_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 void
 supply_gregset (gregset_t *gregsetp)
 {
-  register int regi;
-  register greg_t *regp = (greg_t *) gregsetp;
+  int regi;
+  greg_t *regp = (greg_t *) gregsetp;
 
   for (regi = 0; regi < R_PC; regi++)
     {
@@ -961,8 +962,8 @@ supply_gregset (gregset_t *gregsetp)
 void
 fill_gregset (gregset_t *gregsetp, int regno)
 {
-  register int regi;
-  register greg_t *regp = (greg_t *) gregsetp;
+  int regi;
+  greg_t *regp = (greg_t *) gregsetp;
 
   for (regi = 0; regi < R_PC; regi++)
     {
@@ -984,7 +985,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   char *from;
 
   for (regi = FP0_REGNUM; regi < M68K_FPC_REGNUM; regi++)

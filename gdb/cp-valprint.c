@@ -686,7 +686,7 @@ cp_print_class_member (char *valaddr, struct type *domain,
      print it.  */
   int extra = 0;
   int bits = 0;
-  register unsigned int i;
+  unsigned int i;
   unsigned len = TYPE_NFIELDS (domain);
 
   /* @@ Make VAL into bit offset */

@@ -20,9 +20,6 @@
 
 /* This target uses an architecture vector for most architecture methods.  */
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
-
-
 #define TARGET_HW_BREAK_LIMIT 4
 #define TARGET_HW_WATCH_LIMIT 4
 
@@ -45,18 +42,4 @@ extern int frv_check_watch_resources (int type, int cnt, int ot);
 extern CORE_ADDR frv_stopped_data_address(void);
 
 /* Use these macros for watchpoint insertion/deletion.  */
-#define target_insert_watchpoint(addr, len, type) \
-		remote_insert_watchpoint (addr, len, type)
-#define target_remove_watchpoint(addr, len, type) \
-		remote_remove_watchpoint (addr, len, type)
-#define target_insert_hw_breakpoint(addr, shadow) \
-		remote_insert_hw_breakpoint (addr, 1)
-#define target_remove_hw_breakpoint(addr, shadow) \
-		remote_remove_hw_breakpoint (addr, 1)
 #define target_stopped_data_address() frv_stopped_data_address()
-
-/* These declarations should be in remote.h, no?  */
-extern int remote_insert_watchpoint (CORE_ADDR addr, int len, int type);
-extern int remote_remove_watchpoint (CORE_ADDR addr, int len, int type);
-extern int remote_insert_hw_breakpoint (CORE_ADDR addr, int len);
-extern int remote_remove_hw_breakpoint (CORE_ADDR addr, int len);

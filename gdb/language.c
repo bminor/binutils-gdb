@@ -151,7 +151,6 @@ static char *case_sensitive;
 char lang_frame_mismatch_warn[] =
 "Warning: the current language does not match this frame.";
 
-
 /* This page contains the functions corresponding to GDB commands
    and their helpers. */
 
@@ -987,209 +986,9 @@ value_true (struct value *val)
   return !value_logical_not (val);
 }
 
-/* Returns non-zero if the operator OP is defined on
-   the values ARG1 and ARG2. */
-
-#if 0				/* Currently unused */
-
-void
-binop_type_check (struct value *arg1, struct value *arg2, int op)
-{
-  struct type *t1, *t2;
-
-  /* If we're not checking types, always return success. */
-  if (!STRICT_TYPE)
-    return;
-
-  t1 = VALUE_TYPE (arg1);
-  if (arg2 != NULL)
-    t2 = VALUE_TYPE (arg2);
-  else
-    t2 = NULL;
-
-  switch (op)
-    {
-    case BINOP_ADD:
-    case BINOP_SUB:
-      if ((numeric_type (t1) && pointer_type (t2)) ||
-	  (pointer_type (t1) && numeric_type (t2)))
-	{
-	  warning ("combining pointer and integer.\n");
-	  break;
-	}
-    case BINOP_MUL:
-    case BINOP_LSH:
-    case BINOP_RSH:
-      if (!numeric_type (t1) || !numeric_type (t2))
-	type_op_error ("Arguments to %s must be numbers.", op);
-      else if (!same_type (t1, t2))
-	type_op_error ("Arguments to %s must be of the same type.", op);
-      break;
-
-    case BINOP_LOGICAL_AND:
-    case BINOP_LOGICAL_OR:
-      if (!boolean_type (t1) || !boolean_type (t2))
-	type_op_error ("Arguments to %s must be of boolean type.", op);
-      break;
-
-    case BINOP_EQUAL:
-      if ((pointer_type (t1) && !(pointer_type (t2) || integral_type (t2))) ||
-	  (pointer_type (t2) && !(pointer_type (t1) || integral_type (t1))))
-	type_op_error ("A pointer can only be compared to an integer or pointer.", op);
-      else if ((pointer_type (t1) && integral_type (t2)) ||
-	       (integral_type (t1) && pointer_type (t2)))
-	{
-	  warning ("combining integer and pointer.\n");
-	  break;
-	}
-      else if (!simple_type (t1) || !simple_type (t2))
-	type_op_error ("Arguments to %s must be of simple type.", op);
-      else if (!same_type (t1, t2))
-	type_op_error ("Arguments to %s must be of the same type.", op);
-      break;
-
-    case BINOP_REM:
-    case BINOP_MOD:
-      if (!integral_type (t1) || !integral_type (t2))
-	type_op_error ("Arguments to %s must be of integral type.", op);
-      break;
-
-    case BINOP_LESS:
-    case BINOP_GTR:
-    case BINOP_LEQ:
-    case BINOP_GEQ:
-      if (!ordered_type (t1) || !ordered_type (t2))
-	type_op_error ("Arguments to %s must be of ordered type.", op);
-      else if (!same_type (t1, t2))
-	type_op_error ("Arguments to %s must be of the same type.", op);
-      break;
-
-    case BINOP_ASSIGN:
-      if (pointer_type (t1) && !integral_type (t2))
-	type_op_error ("A pointer can only be assigned an integer.", op);
-      else if (pointer_type (t1) && integral_type (t2))
-	{
-	  warning ("combining integer and pointer.");
-	  break;
-	}
-      else if (!simple_type (t1) || !simple_type (t2))
-	type_op_error ("Arguments to %s must be of simple type.", op);
-      else if (!same_type (t1, t2))
-	type_op_error ("Arguments to %s must be of the same type.", op);
-      break;
-
-    case BINOP_CONCAT:
-      /* FIXME:  Needs to handle bitstrings as well. */
-      if (!(string_type (t1) || character_type (t1) || integral_type (t1))
-	|| !(string_type (t2) || character_type (t2) || integral_type (t2)))
-	type_op_error ("Arguments to %s must be strings or characters.", op);
-      break;
-
-      /* Unary checks -- arg2 is null */
-
-    case UNOP_LOGICAL_NOT:
-      if (!boolean_type (t1))
-	type_op_error ("Argument to %s must be of boolean type.", op);
-      break;
-
-    case UNOP_PLUS:
-    case UNOP_NEG:
-      if (!numeric_type (t1))
-	type_op_error ("Argument to %s must be of numeric type.", op);
-      break;
-
-    case UNOP_IND:
-      if (integral_type (t1))
-	{
-	  warning ("combining pointer and integer.\n");
-	  break;
-	}
-      else if (!pointer_type (t1))
-	type_op_error ("Argument to %s must be a pointer.", op);
-      break;
-
-    case UNOP_PREINCREMENT:
-    case UNOP_POSTINCREMENT:
-    case UNOP_PREDECREMENT:
-    case UNOP_POSTDECREMENT:
-      if (!ordered_type (t1))
-	type_op_error ("Argument to %s must be of an ordered type.", op);
-      break;
-
-    default:
-      /* Ok.  The following operators have different meanings in
-         different languages. */
-      switch (current_language->la_language)
-	{
-#ifdef _LANG_c
-	case language_c:
-	case language_cplus:
-	case language_objc:
-	  switch (op)
-	    {
-	    case BINOP_DIV:
-	      if (!numeric_type (t1) || !numeric_type (t2))
-		type_op_error ("Arguments to %s must be numbers.", op);
-	      break;
-	    }
-	  break;
-#endif
-
-#ifdef _LANG_m2
-	case language_m2:
-	  switch (op)
-	    {
-	    case BINOP_DIV:
-	      if (!float_type (t1) || !float_type (t2))
-		type_op_error ("Arguments to %s must be floating point numbers.", op);
-	      break;
-	    case BINOP_INTDIV:
-	      if (!integral_type (t1) || !integral_type (t2))
-		type_op_error ("Arguments to %s must be of integral type.", op);
-	      break;
-	    }
-#endif
-
-#ifdef _LANG_pascal
-      case language_pascal:
-	 switch(op)
-	 {
-	 case BINOP_DIV:
-	    if (!float_type(t1) && !float_type(t2))
-	       type_op_error ("Arguments to %s must be floating point numbers.",op);
-	    break;
-	 case BINOP_INTDIV:
-	    if (!integral_type(t1) || !integral_type(t2))
-	       type_op_error ("Arguments to %s must be of integral type.",op);
-	    break;
-	 }
-#endif
-
-	}
-    }
-}
-
-#endif /* 0 */
-
-
 /* This page contains functions for the printing out of
    error messages that occur during type- and range-
    checking. */
-
-/* Prints the format string FMT with the operator as a string
-   corresponding to the opcode OP.  If FATAL is non-zero, then
-   this is an error and error () is called.  Otherwise, it is
-   a warning and printf() is called. */
-void
-op_error (char *fmt, enum exp_opcode op, int fatal)
-{
-  if (fatal)
-    error (fmt, op_string (op));
-  else
-    {
-      warning (fmt, op_string (op));
-    }
-}
 
 /* These are called when a language fails a type- or range-check.  The
    first argument should be a printf()-style format string, and the
@@ -1394,13 +1193,13 @@ unk_lang_error (char *msg)
 }
 
 static void
-unk_lang_emit_char (register int c, struct ui_file *stream, int quoter)
+unk_lang_emit_char (int c, struct ui_file *stream, int quoter)
 {
   error ("internal error - unimplemented function unk_lang_emit_char called.");
 }
 
 static void
-unk_lang_printchar (register int c, struct ui_file *stream)
+unk_lang_printchar (int c, struct ui_file *stream)
 {
   error ("internal error - unimplemented function unk_lang_printchar called.");
 }

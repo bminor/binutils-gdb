@@ -50,8 +50,7 @@ arm*-wince-pe)		gdb_target=wince ;;
 arm*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
-arm*-*-netbsd*)		gdb_target=nbsd
-			gdb_multi_arch=yes ;;
+arm*-*-netbsd*)		gdb_target=nbsd ;;
 arm-*-nto*)		gdb_target=nto ;;
 arm*-*-* | thumb*-*-* | strongarm*-*-*)
 			gdb_target=embed
@@ -61,9 +60,7 @@ xscale-*-*)		gdb_target=embed
                         configdirs="$configdirs rdi-share"
                         ;;
 
-avr-*-*)		gdb_target=avr
-			gdb_multi_arch=yes
-			;;
+avr-*-*)		gdb_target=avr ;;
 
 cris*)                  gdb_target=cris ;;
 
@@ -131,7 +128,6 @@ m68*-*-aout*)		gdb_target=monitor ;;
 m68*-*-coff*)		gdb_target=monitor ;;
 m68*-*-elf*)		gdb_target=monitor ;;
 m68*-*-linux*)		gdb_target=linux
-			gdb_multi_arch=1
 			build_gdbserver=yes
 			;;
 m68*-*-lynxos*)		gdb_target=m68klynx ;;
@@ -143,36 +139,25 @@ m68*-*-sysv4*)		gdb_target=m68kv4 ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
 mcore*-*-*)		gdb_target=mcore ;;
-mips64*-big-*)		gdb_target=mips64 ;;
-mips*-big-*)		gdb_target=mips ;;
-mips*-dec-*)		gdb_target=mips ;;
+
+# "mipsisa64" targets are 64-bit MIPS, MIPS64 ISA.  They need these
+# special cases because otherwise they (obviously) are not matched by
+# the "mips64" target cases, and would therefore be treated as 32-bit.
+mipsisa64*-*-linux*)	gdb_target=linux64 ;;
+mipsisa64*-*-*)		gdb_target=embed64 ;;
 mips*-*-pe)		gdb_target=wince ;;
-mips64*el-*-ecoff*)	gdb_target=embedl64 ;;
-mips64*-*-ecoff*)	gdb_target=embed64 ;;
-mips64*vr*-*-elf*)	gdb_target=mips64 ;;
 mips*tx39*-elf*)	gdb_target=tx39 ;;
-mips64*el-*-elf*)	gdb_target=embedl64 ;;
-mips64*-*-elf*)		gdb_target=embed64 ;;
 mips64*-*-linux*)	gdb_target=linux64 ;;
-mips*el-*-ecoff*)	gdb_target=embedl ;;
-mips*-*-ecoff*)		gdb_target=embed ;;
-mips*el-*-elf*)		gdb_target=embedl ;;
-mips*-*-elf*)		gdb_target=embed ;;
-mips*-little-*)		gdb_target=mips ;;
-mips*-*-lnews*)		gdb_target=embedl ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-irix6*)	gdb_target=irix6 ;;
-mips*-sgi-*)		gdb_target=irix3 ;;
-mips*-sony-*)		gdb_target=mips64 ;;
 mips*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
 mips*-*-netbsd*)	gdb_target=nbsd ;;
 # OBSOLETE mips*-*-mach3*)		gdb_target=mipsm3 ;;
 mips*-*-sysv4*)		gdb_target=mipsv4 ;;
-mips*-*-sysv*)		gdb_target=mips ;;
-mips*-*-riscos*)	gdb_target=mips ;;
 mips*-*-vxworks*)       gdb_target=vxmips ;;
+mips64*-*-*)		gdb_target=embed64 ;;
 mips*-*-*)		gdb_target=embed ;;
 
 # OBSOLETE mn10200-*-*)		gdb_target=mn10200 ;;
@@ -209,6 +194,7 @@ s390x-*-*)		gdb_target=s390x
 sh*-*-pe)		gdb_target=wince ;;
 sh-*-coff*)		gdb_target=embed ;;
 sh-*-elf*)		gdb_target=embed ;;
+# FIXME should that be sh*-*-linux*, perhaps?
 sh-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
@@ -258,21 +244,6 @@ x86_64-*-linux*)	gdb_target=x86-64linux
 
 # OBSOLETE z8k-*-coff*)		gdb_target=z8k ;;
 
-esac
-
-
-# map GDB target onto multi-arch support
-
-case "${gdb_target}" in
-d10v)		gdb_multi_arch=yes ;;
-fbsd64)		gdb_multi_arch=yes ;;
-m32r)		gdb_multi_arch=yes ;;
-m68hc11)	gdb_multi_arch=yes ;;
-mn10300)	gdb_multi_arch=yes ;;
-x86-64linux)    gdb_multi_arch=yes ;;
-v850)           gdb_multi_arch=yes ;;
-xstormy16)      gdb_multi_arch=yes ;;
-mcore)		gdb_multi_arch=yes ;;
 esac
 
 # map target onto default OS ABI

@@ -84,8 +84,8 @@ static struct value *
 value_arg_coerce (struct value *arg, struct type *param_type,
 		  int is_prototyped)
 {
-  register struct type *arg_type = check_typedef (VALUE_TYPE (arg));
-  register struct type *type
+  struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+  struct type *type
     = param_type ? check_typedef (param_type) : arg_type;
 
   switch (TYPE_CODE (type))
@@ -161,8 +161,8 @@ value_arg_coerce (struct value *arg, struct type *param_type,
 CORE_ADDR
 find_function_addr (struct value *function, struct type **retval_type)
 {
-  register struct type *ftype = check_typedef (VALUE_TYPE (function));
-  register enum type_code code = TYPE_CODE (ftype);
+  struct type *ftype = check_typedef (VALUE_TYPE (function));
+  enum type_code code = TYPE_CODE (ftype);
   struct type *value_type;
   CORE_ADDR funaddr;
 
@@ -375,7 +375,7 @@ push_dummy_code (struct gdbarch *gdbarch,
 struct value *
 call_function_by_hand (struct value *function, int nargs, struct value **args)
 {
-  register CORE_ADDR sp;
+  CORE_ADDR sp;
   CORE_ADDR dummy_addr;
   struct type *value_type;
   unsigned char struct_return;
@@ -440,6 +440,18 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     CORE_ADDR old_sp = read_sp ();
     if (gdbarch_frame_align_p (current_gdbarch))
       {
+	sp = gdbarch_frame_align (current_gdbarch, old_sp);
+	/* NOTE: cagney/2003-08-13: Skip the "red zone".  For some
+	   ABIs, a function can use memory beyond the inner most stack
+	   address.  AMD64 called that region the "red zone".  Skip at
+	   least the "red zone" size before allocating any space on
+	   the stack.  */
+	if (INNER_THAN (1, 2))
+	  sp -= gdbarch_frame_red_zone_size (current_gdbarch);
+	else
+	  sp += gdbarch_frame_red_zone_size (current_gdbarch);
+	/* Still aligned?  */
+	gdb_assert (sp == gdbarch_frame_align (current_gdbarch, sp));
 	/* NOTE: cagney/2002-09-18:
 	   
 	   On a RISC architecture, a void parameterless generic dummy
@@ -460,7 +472,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	   stack.  That way, two dummy frames can never be identical.
 	   It does burn a few bytes of stack but that is a small price
 	   to pay :-).  */
-	sp = gdbarch_frame_align (current_gdbarch, old_sp);
 	if (sp == old_sp)
 	  {
 	    if (INNER_THAN (1, 2))
@@ -476,12 +487,16 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     else
       /* FIXME: cagney/2002-09-18: Hey, you loose!
 
-	 Who knows how badly aligned the SP is!  Further, per comment
-	 above, if the generic dummy frame ends up empty (because
-	 nothing is pushed) GDB won't be able to correctly perform
-	 back traces.  If a target is having trouble with backtraces,
-	 first thing to do is add FRAME_ALIGN() to the architecture
-	 vector. If that fails, try unwind_dummy_id().  */
+	 Who knows how badly aligned the SP is!
+
+	 If the generic dummy frame ends up empty (because nothing is
+	 pushed) GDB won't be able to correctly perform back traces.
+	 If a target is having trouble with backtraces, first thing to
+	 do is add FRAME_ALIGN() to the architecture vector. If that
+	 fails, try unwind_dummy_id().
+
+         If the ABI specifies a "Red Zone" (see the doco) the code
+         below will quietly trash it.  */
       sp = old_sp;
   }
 
@@ -497,8 +512,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   /* Are we returning a value using a structure return or a normal
      value return? */
 
-  struct_return = using_struct_return (function, funaddr, value_type,
-				       using_gcc);
+  struct_return = using_struct_return (value_type, using_gcc);
 
   /* Determine the location of the breakpoint (and possibly other
      stuff) that the called function will return to.  The SPARC, for a
@@ -542,11 +556,39 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 				     value_type, using_gcc);
 	}
       real_pc = funaddr;
-      dummy_addr = CALL_DUMMY_ADDRESS ();
+      dummy_addr = entry_point_address ();
+      if (DEPRECATED_CALL_DUMMY_ADDRESS_P ())
+	/* Override it.  */
+	dummy_addr = DEPRECATED_CALL_DUMMY_ADDRESS ();
+      /* Make certain that the address points at real code, and not a
+         function descriptor.  */
+      dummy_addr = CONVERT_FROM_FUNC_PTR_ADDR (dummy_addr);
       /* A call dummy always consists of just a single breakpoint, so
          it's address is the same as the address of the dummy.  */
       bp_addr = dummy_addr;
       break;
+    case AT_SYMBOL:
+      /* Some executables define a symbol __CALL_DUMMY_ADDRESS whose
+	 address is the location where the breakpoint should be
+	 placed.  Once all targets are using the overhauled frame code
+	 this can be deleted - ON_STACK is a better option.  */
+      {
+	struct minimal_symbol *sym;
+
+	sym = lookup_minimal_symbol ("__CALL_DUMMY_ADDRESS", NULL, NULL);
+	real_pc = funaddr;
+	if (sym)
+	  dummy_addr = SYMBOL_VALUE_ADDRESS (sym);
+	else
+	  dummy_addr = entry_point_address ();
+	/* Make certain that the address points at real code, and not
+	   a function descriptor.  */
+	dummy_addr = CONVERT_FROM_FUNC_PTR_ADDR (dummy_addr);
+	/* A call dummy always consists of just a single breakpoint,
+	   so it's address is the same as the address of the dummy.  */
+	bp_addr = dummy_addr;
+	break;
+      }
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }
@@ -621,7 +663,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       }
   }
 
-  if (REG_STRUCT_HAS_ADDR_P ())
+  if (DEPRECATED_REG_STRUCT_HAS_ADDR_P ())
     {
       int i;
       /* This is a machine like the sparc, where we may need to pass a
@@ -638,7 +680,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	       || (TYPE_CODE (arg_type) == TYPE_CODE_FLT
 		   && TYPE_LENGTH (arg_type) > 8)
 	       )
-	      && REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
+	      && DEPRECATED_REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
 	    {
 	      CORE_ADDR addr;
 	      int len;		/*  = TYPE_LENGTH (arg_type); */
@@ -646,12 +688,12 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	      arg_type = check_typedef (VALUE_ENCLOSING_TYPE (args[i]));
 	      len = TYPE_LENGTH (arg_type);
 
-	      if (STACK_ALIGN_P ())
+	      if (DEPRECATED_STACK_ALIGN_P ())
 		/* MVS 11/22/96: I think at least some of this
 		   stack_align code is really broken.  Better to let
 		   PUSH_ARGUMENTS adjust the stack in a target-defined
 		   manner.  */
-		aligned_len = STACK_ALIGN (len);
+		aligned_len = DEPRECATED_STACK_ALIGN (len);
 	      else
 		aligned_len = len;
 	      if (INNER_THAN (1, 2))
@@ -689,10 +731,10 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (struct_return)
     {
       int len = TYPE_LENGTH (value_type);
-      if (STACK_ALIGN_P ())
+      if (DEPRECATED_STACK_ALIGN_P ())
 	/* NOTE: cagney/2003-03-22: Should rely on frame align, rather
            than stack align to force the alignment of the stack.  */
-	len = STACK_ALIGN (len);
+	len = DEPRECATED_STACK_ALIGN (len);
       if (INNER_THAN (1, 2))
 	{
 	  /* Stack grows downward.  Align STRUCT_ADDR and SP after
@@ -717,8 +759,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
   /* elz: on HPPA no need for this extra alignment, maybe it is needed
      on other architectures. This is because all the alignment is
-     taken care of in the above code (ifdef REG_STRUCT_HAS_ADDR) and
-     in hppa_push_arguments */
+     taken care of in the above code (ifdef DEPRECATED_REG_STRUCT_HAS_ADDR)
+     and in hppa_push_arguments */
   /* NOTE: cagney/2003-03-24: The below code is very broken.  Given an
      odd sized parameter the below will mis-align the stack.  As was
      suggested back in '96, better to let PUSH_ARGUMENTS handle it.  */
@@ -727,7 +769,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       /* MVS 11/22/96: I think at least some of this stack_align code
 	 is really broken.  Better to let push_dummy_call() adjust the
 	 stack in a target-defined manner.  */
-      if (STACK_ALIGN_P () && INNER_THAN (1, 2))
+      if (DEPRECATED_STACK_ALIGN_P () && INNER_THAN (1, 2))
 	{
 	  /* If stack grows down, we must leave a hole at the top. */
 	  int len = 0;
@@ -736,7 +778,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	    len += TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
 	  if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
 	    len += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
-	  sp -= STACK_ALIGN (len) - len;
+	  sp -= DEPRECATED_STACK_ALIGN (len) - len;
 	}
     }
 
@@ -781,13 +823,13 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      handled any alignment issues, the code below is entirely
      redundant.  */
   if (!gdbarch_push_dummy_call_p (current_gdbarch)
-      && STACK_ALIGN_P () && !INNER_THAN (1, 2))
+      && DEPRECATED_STACK_ALIGN_P () && !INNER_THAN (1, 2))
     {
       /* If stack grows up, we must leave a hole at the bottom, note
          that sp already has been advanced for the arguments!  */
       if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
 	sp += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
-      sp = STACK_ALIGN (sp);
+      sp = DEPRECATED_STACK_ALIGN (sp);
     }
 
 /* XXX This seems wrong.  For stacks that grow down we shouldn't do
@@ -920,7 +962,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (stopped_by_random_signal || !stop_stack_dummy)
     {
       /* Find the name of the function we're about to complain about.  */
-      char *name = NULL;
+      const char *name = NULL;
       {
 	struct symbol *symbol = find_pc_function (funaddr);
 	if (symbol)
@@ -932,17 +974,17 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	    if (msymbol)
 	      name = SYMBOL_PRINT_NAME (msymbol);
 	  }
+	if (name == NULL)
+	  {
+	    /* Can't use a cleanup here.  It is discarded, instead use
+               an alloca.  */
+	    char *tmp = xstrprintf ("at %s", local_hex_string (funaddr));
+	    char *a = alloca (strlen (tmp) + 1);
+	    strcpy (a, tmp);
+	    xfree (tmp);
+	    name = a;
+	  }
       }
-      if (name == NULL)
-	{
-	  /* NOTE: cagney/2003-04-23: Don't blame me.  This code dates
-             back to 1993-07-08, I simply moved it.  */
-	  char format[80];
-	  sprintf (format, "at %s", local_hex_format ());
-	  name = alloca (80);
-	  /* FIXME-32x64: assumes funaddr fits in a long.  */
-	  sprintf (name, format, (unsigned long) funaddr);
-	}
       if (stopped_by_random_signal)
 	{
 	  /* We stopped inside the FUNCTION because of a random

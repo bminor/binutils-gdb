@@ -23,6 +23,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "linux-nat.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -319,7 +320,7 @@ static void store_regs (int tid, int regno) {}
 void 
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
-  i387_supply_fsave ((char *) fpregsetp);
+  i387_supply_fsave ((const char *) fpregsetp, -1);
   dummy_sse_values ();
 }
 
@@ -384,7 +385,7 @@ static void store_fpregs (int tid, int regno) {}
 void
 supply_fpxregset (elf_fpxregset_t *fpxregsetp)
 {
-  i387_supply_fxsave ((char *) fpxregsetp);
+  i387_supply_fxsave ((const char *) fpxregsetp, -1);
 }
 
 /* Fill register REGNO (if it is a floating-point or SSE register) in
@@ -686,21 +687,6 @@ i386_linux_dr_set (int regnum, unsigned long value)
     perror_with_name ("Couldn't write debug register");
 }
 
-extern ps_err_e
-ps_get_thread_area(const struct ps_prochandle *ph, 
-		   lwpid_t lwpid, int idx, void **base)
-{
-  unsigned long int desc[3];
-#define PTRACE_GET_THREAD_AREA 25
-
-  if  (ptrace (PTRACE_GET_THREAD_AREA, 
-	       lwpid, (void *) idx, (unsigned long) &desc) < 0)
-    return PS_ERR;
-
-  *(int *)base = desc[1];
-  return PS_OK;
-}
-
 void
 i386_linux_dr_set_control (unsigned long control)
 {
@@ -727,6 +713,46 @@ unsigned long
 i386_linux_dr_get_status (void)
 {
   return i386_linux_dr_get (DR_STATUS);
+}
+
+
+/* Called by libthread_db.  Returns a pointer to the thread local
+   storage (or its descriptor).  */
+
+ps_err_e
+ps_get_thread_area (const struct ps_prochandle *ph, 
+		    lwpid_t lwpid, int idx, void **base)
+{
+  /* NOTE: cagney/2003-08-26: The definition of this buffer is found
+     in the kernel header <asm-i386/ldt.h>.  It, after padding, is 4 x
+     4 byte integers in size: `entry_number', `base_addr', `limit',
+     and a bunch of status bits.
+
+     The values returned by this ptrace call should be part of the
+     regcache buffer, and ps_get_thread_area should channel its
+     request through the regcache.  That way remote targets could
+     provide the value using the remote protocol and not this direct
+     call.
+
+     Is this function needed?  I'm guessing that the `base' is the
+     address of a a descriptor that libthread_db uses to find the
+     thread local address base that GDB needs.  Perhaphs that
+     descriptor is defined by the ABI.  Anyway, given that
+     libthread_db calls this function without prompting (gdb
+     requesting tls base) I guess it needs info in there anyway.  */
+  unsigned int desc[4];
+  gdb_assert (sizeof (int) == 4);
+
+#ifndef PTRACE_GET_THREAD_AREA
+#define PTRACE_GET_THREAD_AREA 25
+#endif
+
+  if (ptrace (PTRACE_GET_THREAD_AREA, lwpid,
+	      (void *) idx, (unsigned long) &desc) < 0)
+    return PS_ERR;
+
+  *(int *)base = desc[1];
+  return PS_OK;
 }
 
 
@@ -889,6 +915,13 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 
   if (ptrace (request, pid, 0, target_signal_to_host (signal)) == -1)
     perror_with_name ("ptrace");
+}
+
+void
+child_post_startup_inferior (ptid_t ptid)
+{
+  i386_cleanup_dregs ();
+  linux_child_post_startup_inferior (ptid);
 }
 
 

@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/cris.h"
 #include "arch-utils.h"
 #include "regcache.h"
+#include "gdb_assert.h"
 
 /* To get entry_point_address.  */
 #include "symfile.h"
@@ -38,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "solib.h"              /* Support for shared libraries. */
 #include "solib-svr4.h"         /* For struct link_map_offsets.  */
 #include "gdb_string.h"
+#include "dis-asm.h"
 
 
 enum cris_num_regs
@@ -372,8 +374,6 @@ static CORE_ADDR cris_skip_prologue_main (CORE_ADDR pc, int frameless_p);
 
 static struct gdbarch *cris_gdbarch_init (struct gdbarch_info,
                                           struct gdbarch_list *);
-
-static int cris_delayed_get_disassembler (bfd_vma, disassemble_info *);
 
 static void cris_dump_tdep (struct gdbarch *, struct ui_file *);
 
@@ -972,7 +972,7 @@ cris_abi_original_store_return_value (struct type *type, char *valbuf)
   int len = TYPE_LENGTH (type);
   
   if (len <= DEPRECATED_REGISTER_SIZE) 
-    deprecated_write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf, len);
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (RET_REGNUM), valbuf, len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_original_store_return_value: type length too large.");
 }
@@ -987,8 +987,8 @@ cris_abi_v2_store_return_value (struct type *type, char *valbuf)
   if (len <= 2 * DEPRECATED_REGISTER_SIZE)
     {
       /* Note that this works since R10 and R11 are consecutive registers.  */
-      deprecated_write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf,
-				       len);
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (RET_REGNUM),
+				       valbuf, len);
     }
   else
     internal_error (__FILE__, __LINE__, "cris_abi_v2_store_return_value: type length too large.");
@@ -1058,7 +1058,7 @@ cris_abi_original_extract_return_value (struct type *type, char *regbuf,
   int len = TYPE_LENGTH (type);
   
   if (len <= DEPRECATED_REGISTER_SIZE)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (RET_REGNUM), len);
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (RET_REGNUM), len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_original_extract_return_value: type length too large");
 }
@@ -1072,7 +1072,7 @@ cris_abi_v2_extract_return_value (struct type *type, char *regbuf,
   int len = TYPE_LENGTH (type);
   
   if (len <= 2 * DEPRECATED_REGISTER_SIZE)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (RET_REGNUM), len);
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (RET_REGNUM), len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_v2_extract_return_value: type length too large");
 }
@@ -1148,7 +1148,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
 							  get_frame_base (fi));
   
   /* Examine the entire prologue.  */
-  register int frameless_p = 0; 
+  int frameless_p = 0; 
 
   /* Has this frame's registers already been initialized?  */
   if (get_frame_saved_regs (fi))
@@ -1248,7 +1248,7 @@ cris_frame_chain (struct frame_info *fi)
     {
       return get_frame_base (fi);
     }
-  else if (!inside_entry_file (get_frame_pc (fi)))
+  else if (!deprecated_inside_entry_file (get_frame_pc (fi)))
     {
       return read_memory_unsigned_integer (get_frame_base (fi), 4);
     }
@@ -1489,7 +1489,7 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 static CORE_ADDR
 cris_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (SRP_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (SRP_REGNUM, entry_point_address ());
   return sp;
 }
 
@@ -1500,9 +1500,9 @@ cris_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 static void 
 cris_pop_frame (void)
 {
-  register struct frame_info *fi = get_current_frame ();
-  register int regno;
-  register int stack_offset = 0;
+  struct frame_info *fi = get_current_frame ();
+  int regno;
+  int stack_offset = 0;
   
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
 				   get_frame_base (fi),
@@ -3538,10 +3538,16 @@ cris_gdb_func (enum cris_op_type op_type, unsigned short inst,
    exec_bfd has been set.  */
 
 static int
-cris_delayed_get_disassembler (bfd_vma addr, disassemble_info *info)
+cris_delayed_get_disassembler (bfd_vma addr, struct disassemble_info *info)
 {
-  deprecated_tm_print_insn = cris_get_disassembler (exec_bfd);
-  return TARGET_PRINT_INSN (addr, info);
+  int (*print_insn) (bfd_vma addr, struct disassemble_info *info);
+  /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
+     disassembler, even when there is no BFD.  Does something like
+     "gdb; target remote; disassmeble *0x123" work?  */
+  gdb_assert (exec_bfd != NULL);
+  print_insn =  cris_get_disassembler (exec_bfd);
+  gdb_assert (print_insn != NULL);
+  return print_insn (addr, info);
 }
 
 /* Copied from <asm/elf.h>.  */
@@ -3854,9 +3860,6 @@ _initialize_cris_tdep (void)
 
   gdbarch_register (bfd_arch_cris, cris_gdbarch_init, cris_dump_tdep);
   
-  /* Used in disassembly.  */
-  deprecated_tm_print_insn = cris_delayed_get_disassembler;
-
   /* CRIS-specific user-commands.  */
   c = add_set_cmd ("cris-version", class_support, var_integer, 
                    (char *) &usr_cmd_cris_version, 
@@ -4153,7 +4156,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                       cris_abi_original_store_return_value);
       set_gdbarch_deprecated_extract_return_value 
         (gdbarch, cris_abi_original_extract_return_value);
-      set_gdbarch_reg_struct_has_addr 
+      set_gdbarch_deprecated_reg_struct_has_addr 
         (gdbarch, cris_abi_original_reg_struct_has_addr);
     }
   else if (tdep->cris_abi == CRIS_ABI_V2)
@@ -4163,8 +4166,8 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_store_return_value (gdbarch, cris_abi_v2_store_return_value);
       set_gdbarch_deprecated_extract_return_value
 	(gdbarch, cris_abi_v2_extract_return_value);
-      set_gdbarch_reg_struct_has_addr (gdbarch, 
-                                       cris_abi_v2_reg_struct_has_addr);
+      set_gdbarch_deprecated_reg_struct_has_addr
+	(gdbarch, cris_abi_v2_reg_struct_has_addr);
     }
   else
     internal_error (__FILE__, __LINE__, "cris_gdbarch_init: unknown CRIS ABI");
@@ -4304,5 +4307,10 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_solib_svr4_fetch_link_map_offsets 
     (gdbarch, cris_linux_svr4_fetch_link_map_offsets);
   
+  /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
+     disassembler, even when there is no BFD.  Does something like
+     "gdb; target remote; disassmeble *0x123" work?  */
+  set_gdbarch_print_insn (gdbarch, cris_delayed_get_disassembler);
+
   return gdbarch;
 }

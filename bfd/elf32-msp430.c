@@ -550,16 +550,16 @@ bfd_elf_msp430_final_write_processing (abfd, linker)
   switch (bfd_get_mach (abfd))
     {
     default:
-    case bfd_mach_msp12:
-      val = E_MSP430_MACH_MSP430x12;
-      break;
-
     case bfd_mach_msp110:
       val = E_MSP430_MACH_MSP430x11x1;
       break;
 
     case bfd_mach_msp11:
       val = E_MSP430_MACH_MSP430x11;
+      break;
+
+    case bfd_mach_msp12:
+      val = E_MSP430_MACH_MSP430x12;
       break;
 
     case bfd_mach_msp13:
@@ -570,16 +570,12 @@ bfd_elf_msp430_final_write_processing (abfd, linker)
       val = E_MSP430_MACH_MSP430x14;
       break;
 
-    case bfd_mach_msp41:
-      val = E_MSP430_MACH_MSP430x41;
+    case bfd_mach_msp15:
+      val = E_MSP430_MACH_MSP430x15;
       break;
 
-    case bfd_mach_msp43:
-      val = E_MSP430_MACH_MSP430x43;
-      break;
-
-    case bfd_mach_msp44:
-      val = E_MSP430_MACH_MSP430x44;
+    case bfd_mach_msp16:
+      val = E_MSP430_MACH_MSP430x16;
       break;
 
     case bfd_mach_msp31:
@@ -594,12 +590,20 @@ bfd_elf_msp430_final_write_processing (abfd, linker)
       val = E_MSP430_MACH_MSP430x33;
       break;
 
-    case bfd_mach_msp15:
-      val = E_MSP430_MACH_MSP430x15;
+    case bfd_mach_msp41:
+      val = E_MSP430_MACH_MSP430x41;
       break;
 
-    case bfd_mach_msp16:
-      val = E_MSP430_MACH_MSP430x16;
+    case bfd_mach_msp42:
+      val = E_MSP430_MACH_MSP430x42;
+      break;
+
+    case bfd_mach_msp43:
+      val = E_MSP430_MACH_MSP430x43;
+      break;
+
+    case bfd_mach_msp44:
+      val = E_MSP430_MACH_MSP430x44;
       break;
     }
 
@@ -624,16 +628,16 @@ elf32_msp430_object_p (abfd)
       switch (e_mach)
 	{
 	default:
-	case E_MSP430_MACH_MSP430x12:
-	  e_set = bfd_mach_msp12;
-	  break;
-
 	case E_MSP430_MACH_MSP430x11:
 	  e_set = bfd_mach_msp11;
 	  break;
 
 	case E_MSP430_MACH_MSP430x11x1:
 	  e_set = bfd_mach_msp110;
+	  break;
+
+	case E_MSP430_MACH_MSP430x12:
+	  e_set = bfd_mach_msp12;
 	  break;
 
 	case E_MSP430_MACH_MSP430x13:
@@ -644,8 +648,12 @@ elf32_msp430_object_p (abfd)
 	  e_set = bfd_mach_msp14;
 	  break;
 
-	case E_MSP430_MACH_MSP430x41:
-	  e_set = bfd_mach_msp41;
+	case E_MSP430_MACH_MSP430x15:
+	  e_set = bfd_mach_msp15;
+	  break;
+
+	case E_MSP430_MACH_MSP430x16:
+	  e_set = bfd_mach_msp16;
 	  break;
 
 	case E_MSP430_MACH_MSP430x31:
@@ -660,20 +668,20 @@ elf32_msp430_object_p (abfd)
 	  e_set = bfd_mach_msp33;
 	  break;
 
+	case E_MSP430_MACH_MSP430x41:
+	  e_set = bfd_mach_msp41;
+	  break;
+
+	case E_MSP430_MACH_MSP430x42:
+	  e_set = bfd_mach_msp42;
+	  break;
+
 	case E_MSP430_MACH_MSP430x43:
 	  e_set = bfd_mach_msp43;
 	  break;
 
 	case E_MSP430_MACH_MSP430x44:
 	  e_set = bfd_mach_msp44;
-	  break;
-
-	case E_MSP430_MACH_MSP430x15:
-	  e_set = bfd_mach_msp15;
-	  break;
-
-	case E_MSP430_MACH_MSP430x16:
-	  e_set = bfd_mach_msp16;
 	  break;
 	}
     }

@@ -180,7 +180,7 @@ convert_floatformat_to_doublest (const struct floatformat *fmt,
   if (!special_exponent)
     exponent -= fmt->exp_bias;
   else if (exponent == 0)
-    exponent = 1 - (int) fmt->exp_bias;
+    exponent = 1 - fmt->exp_bias;
 
   /* Build the result algebraically.  Might go infinite, underflow, etc;
      who cares. */

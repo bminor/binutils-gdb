@@ -492,7 +492,7 @@ elf_object_p (bfd *abfd)
   Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
   unsigned int shindex;
   char *shstrtab;		/* Internal copy of section header stringtab */
-  struct elf_backend_data *ebd;
+  const struct elf_backend_data *ebd;
   struct bfd_preserve preserve;
   asection *s;
   bfd_size_type amt;
@@ -591,11 +591,11 @@ elf_object_p (bfd *abfd)
 	 for which we do not have a specific backend.  */
       for (target_ptr = bfd_target_vector; *target_ptr != NULL; target_ptr++)
 	{
-	  struct elf_backend_data *back;
+	  const struct elf_backend_data *back;
 
 	  if ((*target_ptr)->flavour != bfd_target_elf_flavour)
 	    continue;
-	  back = (struct elf_backend_data *) (*target_ptr)->backend_data;
+	  back = (const struct elf_backend_data *) (*target_ptr)->backend_data;
 	  if (back->elf_machine_code == i_ehdrp->e_machine
 	      || (back->elf_machine_alt1 != 0
 		  && back->elf_machine_alt1 == i_ehdrp->e_machine)
@@ -818,7 +818,7 @@ elf_write_relocs (bfd *abfd, asection *sec, void *data)
   bfd_boolean *failedp = data;
   Elf_Internal_Shdr *rela_hdr;
   bfd_vma addr_offset;
-  void (*swap_out) PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
+  void (*swap_out) (bfd *, const Elf_Internal_Rela *, bfd_byte *);
   size_t extsize;
   bfd_byte *dst_rela;
   unsigned int idx;
@@ -1008,7 +1008,7 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
   Elf_Internal_Sym *isymbuf = NULL;
   Elf_External_Versym *xver;
   Elf_External_Versym *xverbuf = NULL;
-  struct elf_backend_data *ebd;
+  const struct elf_backend_data *ebd;
   bfd_size_type amt;
 
   /* Read each raw ELF symbol, converting from external ELF form to
@@ -1238,7 +1238,7 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
 				    asymbol **symbols,
 				    bfd_boolean dynamic)
 {
-  struct elf_backend_data * const ebd = get_elf_backend_data (abfd);
+  const struct elf_backend_data * const ebd = get_elf_backend_data (abfd);
   void *allocated = NULL;
   bfd_byte *native_relocs;
   arelent *relent;

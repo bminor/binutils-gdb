@@ -214,7 +214,7 @@ value_release_to_mark (struct value *mark)
 struct value *
 value_copy (struct value *arg)
 {
-  register struct type *encl_type = VALUE_ENCLOSING_TYPE (arg);
+  struct type *encl_type = VALUE_ENCLOSING_TYPE (arg);
   struct value *val = allocate_value (encl_type);
   VALUE_TYPE (val) = VALUE_TYPE (arg);
   VALUE_LVAL (val) = VALUE_LVAL (arg);
@@ -291,8 +291,8 @@ struct value *
 access_value_history (int num)
 {
   struct value_history_chunk *chunk;
-  register int i;
-  register int absnum = num;
+  int i;
+  int absnum = num;
 
   if (absnum <= 0)
     absnum += value_history_count;
@@ -329,7 +329,7 @@ void
 clear_value_history (void)
 {
   struct value_history_chunk *next;
-  register int i;
+  int i;
   struct value *val;
 
   while (value_history_chain)
@@ -347,7 +347,7 @@ clear_value_history (void)
 static void
 show_values (char *num_exp, int from_tty)
 {
-  register int i;
+  int i;
   struct value *val;
   static int num = 1;
 
@@ -404,7 +404,7 @@ static struct internalvar *internalvars;
 struct internalvar *
 lookup_internalvar (char *name)
 {
-  register struct internalvar *var;
+  struct internalvar *var;
 
   for (var = internalvars; var; var = var->next)
     if (strcmp (var->name, name) == 0)
@@ -436,7 +436,7 @@ void
 set_internalvar_component (struct internalvar *var, int offset, int bitpos,
 			   int bitsize, struct value *newval)
 {
-  register char *addr = VALUE_CONTENTS (var->value) + offset;
+  char *addr = VALUE_CONTENTS (var->value) + offset;
 
   if (bitsize)
     modify_field (addr, value_as_long (newval),
@@ -483,7 +483,7 @@ internalvar_name (struct internalvar *var)
 void
 clear_internalvars (void)
 {
-  register struct internalvar *var;
+  struct internalvar *var;
 
   while (internalvars)
     {
@@ -498,7 +498,7 @@ clear_internalvars (void)
 static void
 show_convenience (char *ignore, int from_tty)
 {
-  register struct internalvar *var;
+  struct internalvar *var;
   int varseen = 0;
 
   for (var = internalvars; var; var = var->next)
@@ -664,9 +664,9 @@ value_as_address (struct value *val)
 LONGEST
 unpack_long (struct type *type, const char *valaddr)
 {
-  register enum type_code code = TYPE_CODE (type);
-  register int len = TYPE_LENGTH (type);
-  register int nosign = TYPE_UNSIGNED (type);
+  enum type_code code = TYPE_CODE (type);
+  int len = TYPE_LENGTH (type);
+  int nosign = TYPE_UNSIGNED (type);
 
   if (current_language->la_language == language_scm
       && is_scmvalue_type (type))
@@ -739,7 +739,14 @@ unpack_double (struct type *type, const char *valaddr, int *invp)
 	 also not defined either.  Oops!
 
          Hopefully someone will add both the missing floatformat
-         definitions and floatformat_is_invalid() function.  */
+         definitions and the new cases for floatformat_is_valid ().  */
+
+      if (!floatformat_is_valid (floatformat_from_type (type), valaddr))
+	{
+	  *invp = 1;
+	  return 0.0;
+	}
+
       return extract_typed_floating (valaddr, type);
     }
   else if (nosign)
@@ -876,10 +883,10 @@ value_change_enclosing_type (struct value *val, struct type *new_encl_type)
 
 struct value *
 value_primitive_field (struct value *arg1, int offset,
-		       register int fieldno, register struct type *arg_type)
+		       int fieldno, struct type *arg_type)
 {
   struct value *v;
-  register struct type *type;
+  struct type *type;
 
   CHECK_TYPEDEF (arg_type);
   type = TYPE_FIELD_TYPE (arg_type, fieldno);
@@ -945,7 +952,7 @@ value_primitive_field (struct value *arg1, int offset,
    FIELDNO says which field. */
 
 struct value *
-value_field (struct value *arg1, register int fieldno)
+value_field (struct value *arg1, int fieldno)
 {
   return value_primitive_field (arg1, 0, fieldno, VALUE_TYPE (arg1));
 }
@@ -963,7 +970,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *ty
 		int offset)
 {
   struct value *v;
-  register struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);
+  struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);
   char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
   struct symbol *sym;
   struct minimal_symbol *msym;
@@ -1107,11 +1114,11 @@ modify_field (char *addr, LONGEST fieldval, int bitpos, int bitsize)
 /* Convert C numbers into newly allocated values */
 
 struct value *
-value_from_longest (struct type *type, register LONGEST num)
+value_from_longest (struct type *type, LONGEST num)
 {
   struct value *val = allocate_value (type);
-  register enum type_code code;
-  register int len;
+  enum type_code code;
+  int len;
 retry:
   code = TYPE_CODE (type);
   len = TYPE_LENGTH (type);
@@ -1182,8 +1189,8 @@ value_from_double (struct type *type, DOUBLEST num)
 {
   struct value *val = allocate_value (type);
   struct type *base_type = check_typedef (type);
-  register enum type_code code = TYPE_CODE (base_type);
-  register int len = TYPE_LENGTH (base_type);
+  enum type_code code = TYPE_CODE (base_type);
+  int len = TYPE_LENGTH (base_type);
 
   if (code == TYPE_CODE_FLT)
     {
@@ -1272,19 +1279,15 @@ generic_use_struct_convention (int gcc_p, struct type *value_type)
 	       || TYPE_LENGTH (value_type) == 8));
 }
 
-/* Return true if the function specified is using the structure returning
-   convention on this machine to return arguments, or 0 if it is using
-   the value returning convention.  FUNCTION is the value representing
-   the function, FUNCADDR is the address of the function, and VALUE_TYPE
-   is the type returned by the function.  GCC_P is nonzero if compiled
+/* Return true if the function returning the specified type is using
+   the convention of returning structures in memory (passing in the
+   address as a hidden first parameter).  GCC_P is nonzero if compiled
    with GCC.  */
 
-/* ARGSUSED */
 int
-using_struct_return (struct value *function, CORE_ADDR funcaddr,
-		     struct type *value_type, int gcc_p)
+using_struct_return (struct type *value_type, int gcc_p)
 {
-  register enum type_code code = TYPE_CODE (value_type);
+  enum type_code code = TYPE_CODE (value_type);
 
   if (code == TYPE_CODE_ERROR)
     error ("Function return type unknown.");
@@ -1306,7 +1309,7 @@ void
 set_return_value (struct value *val)
 {
   struct type *type = check_typedef (VALUE_TYPE (val));
-  register enum type_code code = TYPE_CODE (type);
+  enum type_code code = TYPE_CODE (type);
 
   if (code == TYPE_CODE_ERROR)
     error ("Function return type unknown.");

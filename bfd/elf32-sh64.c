@@ -410,7 +410,7 @@ sh64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	{
 	  /* No previous datalabel symbol.  Make one.  */
 	  struct bfd_link_hash_entry *bh = NULL;
-	  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+	  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
 	  if (! _bfd_generic_link_add_one_symbol (info, abfd, dl_name,
 						  flags, *secp, *valp,

@@ -319,17 +319,13 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	}
     }
 
-  /* We assume that if GDB_MULTI_ARCH is less than GDB_MULTI_ARCH_TM
-     that an ABI variant can be supported by overriding definitions in
-     the tm-file.  */
-  if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-    fprintf_filtered
-      (gdb_stderr,
-       "A handler for the OS ABI \"%s\" is not built into this "
-       "configuration of GDB.  "
-       "Attempting to continue with the default %s settings",
-       gdbarch_osabi_name (info.osabi),
-       bfd_printable_arch_mach (arch_info->arch, arch_info->mach));
+  fprintf_filtered
+    (gdb_stderr,
+     "A handler for the OS ABI \"%s\" is not built into this "
+     "configuration of GDB.  "
+     "Attempting to continue with the default %s settings",
+     gdbarch_osabi_name (info.osabi),
+     bfd_printable_arch_mach (arch_info->arch, arch_info->mach));
 }
 
 
@@ -571,8 +567,7 @@ _initialize_gdb_osabi (void)
 				  bfd_target_elf_flavour,
 				  generic_elf_osabi_sniffer);
 
-  if (!GDB_MULTI_ARCH)
-    return;
+  return;
 
   /* Register the "set osabi" command.  */
   c = add_set_enum_cmd ("osabi", class_support, gdb_osabi_available_names,

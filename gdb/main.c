@@ -150,7 +150,7 @@ captured_main (void *data)
   struct stat homebuf, cwdbuf;
   char *homedir, *homeinit;
 
-  register int i;
+  int i;
 
   long time_at_startup = get_run_time ();
 

@@ -69,6 +69,7 @@ switch -glob -- [istarget] {
     }
     "m32r*-*" {
         set asm-arch m32r
+        set link-flags "-Wl,--whole-archive -lgloss -Wl,--no-whole-archive"
     }
     "m6811-*-*" {
         set asm-arch m68hc11
@@ -83,6 +84,11 @@ switch -glob -- [istarget] {
     }
     "powerpc*-*" {
         set asm-arch powerpc
+    }
+    "sh*-*-*" {
+        set asm-arch sh
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+        set link-flags "--entry _start"
     }
     "sparc-*-*" {
         set asm-arch sparc
@@ -101,6 +107,10 @@ switch -glob -- [istarget] {
     }
     "m68k-*-*" {
         set asm-arch m68k
+    }
+    "ia64-*-*" {
+        set asm-arch ia64
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
     }
 }
 

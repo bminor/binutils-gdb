@@ -32,12 +32,18 @@ extern initialize_file_ftype _initialize_hppa_hpux_tdep;
 /* FIXME: brobecker 2002-12-25.  The following functions will eventually
    become static, after the multiarching conversion is done.  */
 int hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name);
-void hppa_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi,
-                                           CORE_ADDR *tmp);
-void hppa_hpux_frame_base_before_sigtramp (struct frame_info *fi,
-                                           CORE_ADDR *tmp);
-void hppa_hpux_frame_find_saved_regs_in_sigtramp
-      (struct frame_info *fi, CORE_ADDR *fsr);
+void hppa32_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi,
+                                             CORE_ADDR *tmp);
+void hppa32_hpux_frame_base_before_sigtramp (struct frame_info *fi,
+                                             CORE_ADDR *tmp);
+void hppa32_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
+                                                    CORE_ADDR *fsr);
+void hppa64_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi,
+                                             CORE_ADDR *tmp);
+void hppa64_hpux_frame_base_before_sigtramp (struct frame_info *fi,
+                                             CORE_ADDR *tmp);
+void hppa64_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
+                                                    CORE_ADDR *fsr);
 
 int
 hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name)
@@ -48,9 +54,9 @@ hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name)
   return (name && (strcmp ("_sigreturn", name) == 0));
 }
 
-/* For hppa_hpux_frame_saved_pc_in_sigtramp, 
-   hppa_hpux_frame_base_before_sigtramp and
-   hppa_hpux_frame_find_saved_regs_in_sigtramp:
+/* For hppa32_hpux_frame_saved_pc_in_sigtramp, 
+   hppa32_hpux_frame_base_before_sigtramp and
+   hppa32_hpux_frame_find_saved_regs_in_sigtramp:
 
    The signal context structure pointer is always saved at the base
    of the frame which "calls" the signal handler.  We only want to find
@@ -67,21 +73,21 @@ hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name)
    written.  */
 
 void
-hppa_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi, CORE_ADDR *tmp)
+hppa32_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi, CORE_ADDR *tmp)
 {
   *tmp = read_memory_integer (get_frame_base (fi) + (43 * 4), 4);
 }
 
 void
-hppa_hpux_frame_base_before_sigtramp (struct frame_info *fi,
-                                      CORE_ADDR *tmp)
+hppa32_hpux_frame_base_before_sigtramp (struct frame_info *fi,
+                                        CORE_ADDR *tmp)
 {
   *tmp = read_memory_integer (get_frame_base (fi) + (40 * 4), 4);
 }
 
 void
-hppa_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
-					     CORE_ADDR *fsr)
+hppa32_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
+					       CORE_ADDR *fsr)
 {
   int i;
   const CORE_ADDR tmp = get_frame_base (fi) + (10 * 4);
@@ -92,6 +98,53 @@ hppa_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
 	fsr[SP_REGNUM] = read_memory_integer (tmp + SP_REGNUM * 4, 4);
       else
 	fsr[i] = tmp + i * 4;
+    }
+}
+
+/* For hppa64_hpux_frame_saved_pc_in_sigtramp, 
+   hppa64_hpux_frame_base_before_sigtramp and
+   hppa64_hpux_frame_find_saved_regs_in_sigtramp:
+
+   These functions are the PA64 ABI equivalents of the 32bits counterparts
+   above. See the comments there.
+
+   For PA64, the save_state structure is at an offset of 24 32-bit words
+   from the sigcontext structure. The 64 bit general registers are at an
+   offset of 640 bytes from the beginning of the save_state structure,
+   and the floating pointer register are at an offset of 256 bytes from
+   the beginning of the save_state structure.  */
+
+void
+hppa64_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi, CORE_ADDR *tmp)
+{
+  *tmp = read_memory_integer
+           (get_frame_base (fi) + (24 * 4) + 640 + (33 * 8), 8);
+}
+
+void
+hppa64_hpux_frame_base_before_sigtramp (struct frame_info *fi,
+                                        CORE_ADDR *tmp)
+{
+  *tmp = read_memory_integer
+           (get_frame_base (fi) + (24 * 4) + 640 + (30 * 8), 8);
+}
+
+void
+hppa64_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
+					       CORE_ADDR *fsr)
+{
+  int i;
+  const CORE_ADDR tmp1 = get_frame_base (fi) + (24 * 4) + 640;
+  const CORE_ADDR tmp2 = get_frame_base (fi) + (24 * 4) + 256;
+
+  for (i = 0; i < NUM_REGS; i++)
+    {
+      if (i == SP_REGNUM)
+        fsr[SP_REGNUM] = read_memory_integer (tmp1 + SP_REGNUM * 8, 8);
+      else if (i >= FP0_REGNUM)
+        fsr[i] = tmp2 + (i - FP0_REGNUM) * 8;
+      else
+        fsr[i] = tmp1 + i * 8;
     }
 }
 
@@ -118,6 +171,9 @@ _initialize_hppa_hpux_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_HPUX_SOM,
                           hppa_hpux_som_init_abi);
-  gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_HPUX_ELF,
+  /* FIXME brobecker 2003-08-13: The machine number 25 corresponds to
+     the hppa2.0w bfd arch_info. A #define should probably be defined
+     in bfd, instead of using this hard-coded number.  */
+  gdbarch_register_osabi (bfd_arch_hppa, 25, GDB_OSABI_HPUX_ELF,
                           hppa_hpux_elf_init_abi);
 }

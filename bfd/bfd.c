@@ -920,6 +920,11 @@ bfd_scan_vma (const char *string, const char **end, int base)
   if (sizeof (bfd_vma) <= sizeof (unsigned long))
     return strtoul (string, (char **) end, base);
 
+#ifdef HAVE_STRTOULL
+  if (sizeof (bfd_vma) <= sizeof (unsigned long long))
+    return strtoull (string, (char **) end, base);
+#endif
+
   if (base == 0)
     {
       if (string[0] == '0')

@@ -191,7 +191,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
 void
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   char zerobuf[MAX_REGISTER_SIZE];
 
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
@@ -216,13 +216,13 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
 
   if ((regno >= FP0_REGNUM) && (regno < FP0_REGNUM + 32))
     {
-      from = (char *) &deprecated_registers[REGISTER_BYTE (regno)];
+      from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + regno - FP0_REGNUM);
       memcpy (to, from, REGISTER_RAW_SIZE (regno - FP0_REGNUM));
     }
   else if (regno == FCRCS_REGNUM)
     {
-      from = (char *) &deprecated_registers[REGISTER_BYTE (regno)];
+      from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + 32);
       memcpy (to, from, REGISTER_RAW_SIZE (regno));
     }
@@ -466,7 +466,7 @@ mips64_fill_gregset (mips64_elf_gregset_t *gregsetp, int regno)
 static void
 mips64_supply_fpregset (mips64_elf_fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   char zerobuf[MAX_REGISTER_SIZE];
 
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
@@ -491,13 +491,13 @@ mips64_fill_fpregset (mips64_elf_fpregset_t *fpregsetp, int regno)
 
   if ((regno >= FP0_REGNUM) && (regno < FP0_REGNUM + 32))
     {
-      from = (char *) &deprecated_registers[REGISTER_BYTE (regno)];
+      from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + regno - FP0_REGNUM);
       memcpy (to, from, REGISTER_RAW_SIZE (regno - FP0_REGNUM));
     }
   else if (regno == FCRCS_REGNUM)
     {
-      from = (char *) &deprecated_registers[REGISTER_BYTE (regno)];
+      from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + 32);
       memcpy (to, from, REGISTER_RAW_SIZE (regno));
     }

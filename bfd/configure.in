@@ -113,6 +113,7 @@ AC_SUBST(HDEFINES)
 AC_PROG_INSTALL
 
 BFD_HOST_64BIT_LONG=0
+BFD_HOST_LONG_LONG=0
 BFD_HOST_64_BIT_DEFINED=0
 BFD_HOST_64_BIT=
 BFD_HOST_U_64_BIT=
@@ -123,7 +124,19 @@ elif test "x${HOST_64BIT_TYPE}" != "x"; then
   BFD_HOST_64_BIT=${HOST_64BIT_TYPE}
   BFD_HOST_U_64_BIT=${HOST_U_64BIT_TYPE}
 fi
+
+AC_MSG_CHECKING([for long long])
+AC_CACHE_VAL(bfd_cv_has_long_long,
+[AC_TRY_COMPILE(,
+[unsigned long long ll = 18446744073709551615ULL;],
+bfd_cv_has_long_long=yes, bfd_cv_has_long_long=no)])
+AC_MSG_RESULT($bfd_cv_has_long_long)
+if test $bfd_cv_has_long_long = yes; then
+  BFD_HOST_LONG_LONG=1
+fi
+
 AC_SUBST(BFD_HOST_64BIT_LONG)
+AC_SUBST(BFD_HOST_LONG_LONG)
 AC_SUBST(BFD_HOST_64_BIT_DEFINED)
 AC_SUBST(BFD_HOST_64_BIT)
 AC_SUBST(BFD_HOST_U_64_BIT)
@@ -135,6 +148,7 @@ AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
 AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid)
+AC_CHECK_FUNCS(strtoull)
 
 BFD_BINARY_FOPEN
 
@@ -150,7 +164,7 @@ COREFLAG=
 TRAD_HEADER=
 if test "${target}" = "${host}"; then
   case "${host}" in
-  alpha*-*-freebsd*)
+  alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
 	COREFILE=''
 	;;
   alpha*-*-linux-gnu*)
@@ -161,7 +175,8 @@ if test "${target}" = "${host}"; then
 	COREFILE=netbsd-core.lo
 	;;
   alpha*-*-*)		COREFILE=osf-core.lo ;;
-  arm-*-freebsd*)	COREFILE='' ;;
+  arm-*-freebsd* | arm-*-kfreebsd*-gnu)
+			COREFILE='' ;;
   arm-*-netbsd*)	COREFILE=netbsd-core.lo ;;
   arm-*-riscix)		COREFILE=trad-core.lo ;;
   hppa*-*-hpux*)	COREFILE=hpux-core.lo ;;
@@ -199,7 +214,7 @@ changequote([,])dnl
 	TRAD_HEADER='"hosts/i386bsd.h"'
 	;;
 changequote(,)dnl
-  i[3-7]86-*-freebsd*)
+  i[3-7]86-*-freebsd* | i[3-7]86-*-kfreebsd*-gnu)
 changequote([,])dnl
 	COREFILE=''
 	TRAD_HEADER='"hosts/i386bsd.h"'
@@ -347,7 +362,8 @@ changequote([,])dnl
   powerpc-*-aix4*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-beos*)	;;
-  powerpc-*-freebsd*)	COREFILE='' ;;
+  powerpc-*-freebsd* | powerpc-*-kfreebsd*-gnu)
+		        COREFILE='' ;;
   powerpc-*-netbsd*)	COREFILE=netbsd-core.lo ;;
   powerpc-*-*bsd*)	COREFILE=netbsd-core.lo ;;
   s390*-*-*)            COREFILE=trad-core.lo ;;

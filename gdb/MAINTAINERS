@@ -79,6 +79,9 @@ maintainer works with the native maintainer when resolving API issues.
 
 	fr30		Deleted.
 
+	frv		--target=frv-elf ,-Werror
+			Maintenance only
+
 	h8300		--target=h8300hms ,-Werror
 			Maintenance only
 
@@ -236,7 +239,7 @@ language support	(Blanket Write Privs Maintainers)
   C++			Daniel Jacobowitz	dan@debian.org
   Java support		(Global Maintainers)
   Pascal support	Pierre Muller		muller@sources.redhat.com
-
+  Objective C support   Adam Fedor		fedor@gnu.org
 shared libs (devolved)	Kevin Buettner		kevinb@redhat.com
   xcoffsolib		Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 
@@ -307,6 +310,7 @@ To get recommended for the Write After Approval list you need a valid
 FSF assignment and have submitted one good patch.
 
 David Anderson					davea@sgi.com
+Shrinivas Atre					shrinivasa@kpitcummins.com
 Scott Bambrough					scottb@netwinder.org
 Jim Blandy					jimb@redhat.com
 Philip Blundell					philb@gnu.org
@@ -320,13 +324,14 @@ Stephane Carrez					stcarrez@nerim.fr
 Michael Chastain				mec@shout.net
 Eric Christopher				echristo@redhat.com
 Nick Clifton					nickc@redhat.com
+Brendan Conoboy					blc@redhat.com
 DJ Delorie					dj@redhat.com
 Chris G. Demetriou				cgd@broadcom.com
 Philippe De Muyter				phdm@macqel.be
 Klee Dienes					kdienes@apple.com
 Richard Earnshaw				rearnsha@arm.com
 Frank Ch. Eigler				fche@redhat.com
-Ben Elliston					bje@redhat.com
+Ben Elliston					bje@wasabisystems.com
 Raoul Gough					RaoulGough@yahoo.co.uk
 Anthony Green			 		green@redhat.com
 Matthew Green					mrg@eterna.com.au
@@ -373,6 +378,7 @@ Bob Rossi 					bob_rossi@cox.net
 Theodore A. Roth				troth@openavr.org
 Ian Roxborough					irox@redhat.com
 Grace Sainsbury					graces@redhat.com
+Kei Sakamoto					sakamoto.kei@renesas.com
 Mark Salter					msalter@redhat.com
 Peter Schauer					Peter.Schauer@regent
 Andreas Schwab					schwab@suse.de
@@ -385,7 +391,7 @@ Stephen P. Smith				ischis2@cox.net
 Jackie Smith Cashion				jsmith@redhat.com
 Michael Snyder					msnyder@redhat.com
 Petr Sorfa					petrs@caldera.com
-Ian Lance Taylor				ian@airs.com
+Ian Lance Taylor				ian@wasabisystems.com
 Gary Thomas					gthomas@redhat.com
 Jason Thorpe					thorpej@wasabisystems.com
 Tom Tromey					tromey@redhat.com
@@ -393,7 +399,6 @@ D Venkatasubramanian				dvenkat@noida.hcltech.com
 Corinna Vinschen				vinschen@redhat.com
 Keith Walker					keith.walker@arm.com
 Kris Warkentin					kewarken@qnx.com
-Jim Wilson					wilson@tuliptree.org
 Elena Zannoni					ezannoni@redhat.com
 Eli Zaretskii					eliz@gnu.org
 
@@ -417,6 +422,7 @@ Anthony Green (Java)				green at redhat dot com
 Folks that have been caught up in a paper trail:
 
 Jim Kingdon					jkingdon@engr.sgi.com
+Jim Wilson					wilson@specifixinc.com
 
 --
 

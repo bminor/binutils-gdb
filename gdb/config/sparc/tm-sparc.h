@@ -22,8 +22,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
-
 #include "regcache.h"
 
 struct type;
@@ -118,8 +116,6 @@ enum {	/* Sparc64 control registers, excluding Y, PC, and NPC.  */
  * Make sparc target multi-archable: April 2000
  */
 
-#if defined (GDB_MULTI_ARCH) && (GDB_MULTI_ARCH > 0)
-
 /* Multi-arch definition of TARGET_IS_SPARC64, TARGET_ELF64 */
 #undef  GDB_TARGET_IS_SPARC64
 #define GDB_TARGET_IS_SPARC64 \
@@ -128,198 +124,13 @@ enum {	/* Sparc64 control registers, excluding Y, PC, and NPC.  */
 #define TARGET_ELF64 \
      (sparc_intreg_size () == 8)
 extern int sparc_intreg_size (void);
-#else
 
-/* Non-multi-arch: if it isn't defined, define it to zero.  */
-#ifndef GDB_TARGET_IS_SPARC64
-#define GDB_TARGET_IS_SPARC64 0
-#endif
-#ifndef TARGET_ELF64
-#define TARGET_ELF64 0
-#endif
-#endif
-
-#if !defined (GDB_MULTI_ARCH) || (GDB_MULTI_ARCH == 0)
-/*
- * The following defines must go away for MULTI_ARCH
- */
-
-/* Initializer for an array of names of registers.
-   There should be NUM_REGS strings in this initializer.  */
-
-#define REGISTER_NAMES  \
-{ "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",		\
-  "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7",		\
-  "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7",		\
-  "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7",		\
-								\
-  "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",		\
-  "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",		\
-  "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",	\
-  "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",	\
-                                                                \
-  "y", "psr", "wim", "tbr", "pc", "npc", "fpsr", "cpsr" 	\
-}
-extern const char *legacy_register_name (int i);
-#define REGISTER_NAME legacy_register_name
-
-/* Offset from address of function to start of its code.
-   Zero on most machines.  */
-
-#define FUNCTION_START_OFFSET 0
-
-/* Amount PC must be decremented by after a breakpoint.  This is often
-   the number of bytes returned by BREAKPOINT_FROM_PC but not always.  */
-
-#define DECR_PC_AFTER_BREAK 0
-
-/* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places; REGISTER_RAW_SIZE is the
-   real way to know how big a register is.  */
-
-#define DEPRECATED_REGISTER_SIZE 4
-
-/* Number of machine registers */
-
-#define NUM_REGS 72
-
-#define	SP_REGNUM 14		/* Contains address of top of stack, \
-				   which is also the bottom of the frame.  */
-#define	DEPRECATED_FP_REGNUM 30		/* Contains address of executing stack frame */
-
-#define	FP0_REGNUM 32		/* Floating point register 0 */
-
-#define	Y_REGNUM 64		/* Temp register for multiplication, etc.  */
-
-#define	PC_REGNUM 68		/* Contains program counter */
-
-#define	NPC_REGNUM 69		/* Contains next PC */
-
-
-/* Total amount of space needed to store our copies of the machine's
-   register state, the array `registers'.  On the sparc, `registers'
-   contains the ins and locals, even though they are saved on the
-   stack rather than with the other registers, and this causes hair
-   and confusion in places like pop_frame.  It might be better to
-   remove the ins and locals from `registers', make sure that
-   frame_register() can get them from the stack (even in the innermost
-   frame), and make this the way to access them.  For the frame
-   pointer we would do that via DEPRECATED_TARGET_READ_FP.  On the
-   other hand, that is likely to be confusing or worse for flat
-   frames.  */
-
-#define DEPRECATED_REGISTER_BYTES (32*4+32*4+8*4)
-
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-#define REGISTER_BYTE(N)  ((N)*4)
-
-/* Number of bytes of storage in the actual machine representation for
-   register N.  */
-
-/* On the SPARC, all regs are 4 bytes (except Sparc64, where they're 8).  */
-
-#define REGISTER_RAW_SIZE(N) (4)
-
-/* Number of bytes of storage in the program's representation
-   for register N.  */
-
-/* On the SPARC, all regs are 4 bytes (except Sparc64, where they're 8).  */
-
-#define REGISTER_VIRTUAL_SIZE(N) (4)
-
-/* Largest value REGISTER_RAW_SIZE can have.  */
-
-#define DEPRECATED_MAX_REGISTER_RAW_SIZE 8
-
-/* Largest value REGISTER_VIRTUAL_SIZE can have.  */
-
-#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE 8
-
-/* Return the GDB type object for the "standard" data type
-   of data in register N.  */
-
-#define REGISTER_VIRTUAL_TYPE(N) \
-     ((N) < 32 ? builtin_type_int : (N) < 64 ? builtin_type_float : \
-      builtin_type_int)
-
-/* Sun /bin/cc gets this right as of SunOS 4.1.x.  We need to define
-   BELIEVE_PCC_PROMOTION to get this right now that the code which
-   detects gcc2_compiled. is broken.  This loses for SunOS 4.0.x and
-   earlier.  */
-
-#define BELIEVE_PCC_PROMOTION 1
-
-/* Advance PC across any function entry prologue instructions
-   to reach some "real" code.  */
-
-extern CORE_ADDR sparc_skip_prologue (CORE_ADDR);
-#define SKIP_PROLOGUE(PC) sparc_skip_prologue (PC)
-
-/* Immediately after a function call, return the saved pc.
-   Can't go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.  */
-
-#define DEPRECATED_SAVED_PC_AFTER_CALL(FRAME) PC_ADJUST (read_register (RP_REGNUM))
-
-/* Stack grows downward.  */
-
-#define INNER_THAN(LHS,RHS) ((LHS) < (RHS))
-
-/* Write into appropriate registers a function return value of type
-   TYPE, given in virtual format.  */
-
-#define STORE_RETURN_VALUE(TYPE, REGCACHE, VALBUF) \
-     sparc32_store_return_value (TYPE, REGCACHE, VALBUF)
-extern void sparc32_store_return_value (struct type *, struct regcache *,
-					const void *);
-
-/* Extract from REGCACHE the address in which a function should return
-   its structure value.  */
-
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGCACHE) \
-     sparc_extract_struct_value_address (REGCACHE)
-extern CORE_ADDR sparc_extract_struct_value_address (struct regcache *);
-
-/* Stack must be aligned on 64-bit boundaries when synthesizing
-   function calls (128-bit for sparc64).  */
-
-#define STACK_ALIGN(ADDR) sparc32_stack_align (ADDR)
-extern CORE_ADDR sparc32_stack_align (CORE_ADDR addr);
-
-/* The Sparc returns long doubles on the stack.  */
-
-#define RETURN_VALUE_ON_STACK(TYPE) \
-  (TYPE_CODE(TYPE) == TYPE_CODE_FLT \
-   && TYPE_LENGTH(TYPE) > 8)
-
-/* When passing a structure to a function, Sun cc passes the address
-   not the structure itself.  It (under SunOS4) creates two symbols,
-   which we need to combine to a LOC_REGPARM.  Gcc version two (as of
-   1.92) behaves like sun cc.  REG_STRUCT_HAS_ADDR is smart enough to
-   distinguish between Sun cc, gcc version 1 and gcc version 2.  */
-
-#define REG_STRUCT_HAS_ADDR(GCC_P, TYPE) \
-     sparc_reg_struct_has_addr (GCC_P, TYPE)
-extern int sparc_reg_struct_has_addr (int, struct type *);
-
-/* Is the prologue at PC frameless?  */
-#define PROLOGUE_FRAMELESS_P(PC) sparc_prologue_frameless_p (PC)
-extern int sparc_prologue_frameless_p (CORE_ADDR);
-
-#endif /* GDB_MULTI_ARCH */
-
-#if defined (GDB_MULTI_ARCH) && (GDB_MULTI_ARCH > 0)
 /*
  * The following defines should ONLY appear for MULTI_ARCH.
  */
 
 /* Multi-arch the nPC and Y registers.  */
 #define Y_REGNUM              (sparc_y_regnum ())
-
-#endif /* GDB_MULTI_ARCH */
 
 /* On the Sun 4 under SunOS, the compile will leave a fake insn which
    encodes the structure size being returned.  If we detect such
@@ -392,69 +203,6 @@ extern const unsigned char *sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len);
    that, however).  */
 
 #define CANNOT_STORE_REGISTER(regno) ((regno) == G0_REGNUM)
-
-/*
- * DEPRECATED_FRAME_CHAIN and FRAME_INFO definitions, collected here
- * for convenience.  */
-
-#if !defined (GDB_MULTI_ARCH) || (GDB_MULTI_ARCH == 0)
-/*
- * The following defines must go away for MULTI_ARCH.
- */
-
-/* Describe the pointer in each stack frame to the previous stack frame
-   (its caller).  */
-
-/* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
-   the frame's chain-pointer. */
-
-/* We need to override DEPRECATED_GET_SAVED_REGISTER so that we can
-   deal with the way outs change into ins in different frames.  */
-
-void sparc_get_saved_register (char *raw_buffer,
-			       int *optimized,
-			       CORE_ADDR * addrp,
-			       struct frame_info *frame,
-			       int regnum, enum lval_type *lvalp);
-
-#define DEPRECATED_GET_SAVED_REGISTER(RAW_BUFFER, OPTIMIZED, ADDRP, FRAME, REGNUM, LVAL) \
-     sparc_get_saved_register (RAW_BUFFER, OPTIMIZED, ADDRP, \
-			       FRAME, REGNUM, LVAL)
-
-#define DEPRECATED_FRAME_INIT_SAVED_REGS(FP)	/*no-op */
-
-#define DEPRECATED_INIT_EXTRA_FRAME_INFO(FROMLEAF, FCI) \
-     sparc_init_extra_frame_info (FROMLEAF, FCI)
-extern void sparc_init_extra_frame_info (int, struct frame_info *);
-
-#define DEPRECATED_FRAME_CHAIN(THISFRAME) (sparc_frame_chain (THISFRAME))
-extern CORE_ADDR sparc_frame_chain (struct frame_info *);
-
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
-
-#define FRAMELESS_FUNCTION_INVOCATION(FI) \
-     frameless_look_for_prologue (FI)
-
-/* Where is the PC for a specific frame */
-
-#define DEPRECATED_FRAME_SAVED_PC(FRAME) sparc_frame_saved_pc (FRAME)
-extern CORE_ADDR sparc_frame_saved_pc (struct frame_info *);
-
-/* If the argument is on the stack, it will be here.  */
-#define DEPRECATED_FRAME_ARGS_ADDRESS(FI) (get_frame_base (FI))
-
-#define DEPRECATED_FRAME_LOCALS_ADDRESS(FI) (get_frame_base (FI))
-
-/* Set VAL to the number of args passed to frame described by FI.
-   Can set VAL to -1, meaning no way to tell.  */
-
-/* Return number of bytes at start of arglist that are not really args.  */
-
-#define FRAME_ARGS_SKIP 68
-
-#endif /* GDB_MULTI_ARCH */
 
 #define	PRINT_EXTRA_FRAME_INFO(FI) \
      sparc_print_extra_frame_info (FI)
@@ -573,106 +321,8 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
      clobbering things (if NPC pointed to garbage instead).
  */
 
-#if !defined (GDB_MULTI_ARCH) || (GDB_MULTI_ARCH == 0)
-/*
- * The following defines must go away for MULTI_ARCH.
- */
-
-#define CALL_DUMMY { 0xbc100001, 0x9de38000, 0xbc100002, 0xbe100003,	\
-		     0xda03a058, 0xd803a054, 0xd603a050, 0xd403a04c,	\
-		     0xd203a048, 0x40000000, 0xd003a044, 0x01000000,	\
-		     0x91d02001, 0x01000000 }
-
-
-/* Size of the call dummy in bytes. */
-
-#define DEPRECATED_CALL_DUMMY_LENGTH 0x38
-
-/* Offset within call dummy of first instruction to execute. */
-
-#define DEPRECATED_CALL_DUMMY_START_OFFSET 0
-
-/* Offset within CALL_DUMMY of the 'call' instruction. */
-
-#define CALL_DUMMY_CALL_OFFSET (DEPRECATED_CALL_DUMMY_START_OFFSET + 0x24)
-
-/* Offset within CALL_DUMMY of the 'ta 1' trap instruction. */
-
-#define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET (DEPRECATED_CALL_DUMMY_START_OFFSET + 0x30)
-
-#define DEPRECATED_CALL_DUMMY_STACK_ADJUST 68
-
-/* Call dummy method (eg. on stack, at entry point, etc.) */
-
-#define CALL_DUMMY_LOCATION ON_STACK
-
-/* Method for detecting dummy frames.  */
-
-#define DEPRECATED_PC_IN_CALL_DUMMY(PC, SP, FRAME_ADDRESS) \
-     deprecated_pc_in_call_dummy_on_stack (PC, SP, FRAME_ADDRESS)
-
-#endif /* GDB_MULTI_ARCH */
-
 #endif /* CALL_DUMMY */
 
-#if !defined (GDB_MULTI_ARCH) || (GDB_MULTI_ARCH == 0)
-/*
- * The following defines must go away for MULTI_ARCH. 
- */
-
-/* Insert the specified number of args and function address
-   into a call sequence of the above form stored at DUMMYNAME.  */
-
-#define DEPRECATED_FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) \
-     sparc_fix_call_dummy (DUMMYNAME, PC, FUN, TYPE, GCC_P)
-void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
-			   struct type *value_type, int using_gcc);
-
-/* Arguments smaller than an int must be promoted to ints when
-   synthesizing function calls.  */
-
-/* Push an empty stack frame, to record the current PC, etc.  */
-
-#define DEPRECATED_PUSH_DUMMY_FRAME	sparc_push_dummy_frame ()
-#define DEPRECATED_POP_FRAME		sparc_pop_frame ()
-
-void sparc_push_dummy_frame (void);
-void sparc_pop_frame (void);
-
-#define DEPRECATED_PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
-     sparc32_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
-
-extern CORE_ADDR sparc32_push_arguments (int, struct value **, CORE_ADDR, int,
-					 CORE_ADDR);
-
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function_by_hand. 
-   The ultimate mystery is, tho, what is the value "16"?  */
-
-#define STORE_STRUCT_RETURN(ADDR, SP) \
-  { char val[4]; \
-    store_unsigned_integer (val, 4, (ADDR)); \
-    write_memory ((SP)+(16*4), val, 4); }
-
-/* Default definition of USE_STRUCT_CONVENTION.  */
-
-#ifndef USE_STRUCT_CONVENTION
-#define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
-     generic_use_struct_convention (GCC_P, TYPE)
-#endif
-
-/* Extract from an array REGBUF containing the (raw) register state a
-   function return value of type TYPE, and copy that, in virtual
-   format, into VALBUF.  */
-
-#define EXTRACT_RETURN_VALUE(TYPE, REGCACHE, VALBUF) \
-     sparc32_extract_return_value (TYPE, REGCACHE, VALBUF)
-extern void sparc32_extract_return_value (struct type *, struct regcache *,
-					  void *valbuf);
-
-#endif /* GDB_MULTI_ARCH */
-
-
 /* Sparc has no reliable single step ptrace call */
 
 #define SOFTWARE_SINGLE_STEP_P() 1

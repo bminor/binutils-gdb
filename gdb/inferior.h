@@ -438,6 +438,7 @@ extern int attach_flag;
 /* Possible values for CALL_DUMMY_LOCATION.  */
 #define ON_STACK 1
 #define AT_ENTRY_POINT 4
+#define AT_SYMBOL 5
 
 /* FIXME: cagney/2000-04-17: gdbarch should manage this.  The default
    shouldn't be necessary. */

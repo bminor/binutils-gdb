@@ -65,7 +65,7 @@ void
 c_print_type (struct type *type, const char *varstring, struct ui_file *stream,
 	      int show, int level)
 {
-  register enum type_code code;
+  enum type_code code;
   int demangled_args;
   int need_post_space;
 

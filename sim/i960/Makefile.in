@@ -107,19 +107,24 @@ CGEN_MAINT = ; @true
 
 stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CGEN_CPU_DIR)/i960.cpu
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all \
+	  archfile=$(CGEN_CPU_DIR)/i960.cpu \
 	  FLAGS="with-scache with-profile=fn"
 	touch stamp-arch
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 
 stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DIR)/i960.cpu
 	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
-	  cpu=i960base mach=i960:ka_sa,i960:ca SUFFIX= FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
+	  cpu=i960base mach=i960:ka_sa,i960:ca SUFFIX= \
+	  archfile=$(CGEN_CPU_DIR)/i960.cpu \
+	  FLAGS="with-scache with-profile=fn" \
+	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
 	touch stamp-cpu
 cpu.h sem.c sem-switch.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu
 
 stamp-desc: $(CGEN_READ_SCM) $(CGEN_DESC_SCM) \
 		$(CGEN_CPU_DIR)/sparc.cpu $(CGEN_CPU_DIR)/sparccom.cpu $(CGEN_CPU_DIR)/i960.cpu $(CGEN_CPU_DIR)/i960.cpu
 	$(MAKE) cgen-desc $(CGEN_FLAGS_TO_PASS) \
-		cpu=i960 mach=all
+	  cpu=i960 mach=all \
+	  archfile=$(CGEN_CPU_DIR)/i960.cpu
 	touch stamp-desc
 i960-desc.c i960-desc.h i960-opc.h: $(CGEN_MAINT) stamp-desc

@@ -255,11 +255,11 @@ vx_create_inferior (char *exec_file, char *args, char **env)
    argument string ARGSTRING.  */
 
 static void
-parse_args (register char *arg_string, arg_array *arg_struct)
+parse_args (char *arg_string, arg_array *arg_struct)
 {
-  register int arg_count = 0;	/* number of arguments */
-  register int arg_index = 0;
-  register char *p0;
+  int arg_count = 0;	/* number of arguments */
+  int arg_index = 0;
+  char *p0;
 
   memset ((char *) arg_struct, '\0', sizeof (arg_array));
 
@@ -295,7 +295,7 @@ parse_args (register char *arg_string, arg_array *arg_struct)
    to the first non-white character.  */
 
 static char *
-skip_white_space (register char *p)
+skip_white_space (char *p)
 {
   while (*p == ' ' || *p == '\t')
     p++;
@@ -307,9 +307,9 @@ skip_white_space (register char *p)
    if no whitespace is found.  */
 
 static char *
-find_white_space (register char *p)
+find_white_space (char *p)
 {
-  register int c;
+  int c;
 
   while ((c = *p) != ' ' && c != '\t' && c)
     {
@@ -934,7 +934,7 @@ sleep_ms (long ms)
 static ptid_t
 vx_wait (ptid_t ptid_to_wait_for, struct target_waitstatus *status)
 {
-  register int pid;
+  int pid;
   RDB_EVENT rdbEvent;
   int quit_failed;
 
@@ -1139,7 +1139,7 @@ vx_open (char *args, int from_tty)
       pLoadFile = &loadTable.tbl_ent[i];
 #ifdef WRS_ORIG
       {
-	register int desc;
+	int desc;
 	struct cleanup *old_chain;
 	char *fullname = NULL;
 

@@ -21,6 +21,7 @@ sparcv9 | sparc64)	gdb_host_cpu=sparc ;;
 s390*)			gdb_host_cpu=s390 ;;
 sh*)			gdb_host_cpu=sh ;;
 x86_64*)		gdb_host_cpu=i386 ;;
+xscale*)		gdb_host_cpu=arm ;;
 *)			gdb_host_cpu=$host_cpu ;;
 
 esac
@@ -98,8 +99,6 @@ m68*-sun-*)		gdb_host=sun3os4 ;;
 # OBSOLETE mips-dec-mach3*)	gdb_host=mipsm3 ;;
 mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
-mips-sgi-irix3*)	gdb_host=irix3 ;;
-mips-sgi-irix4*)	gdb_host=irix4 ;;
 mips-sgi-irix5*)	gdb_host=irix5 ;;
 mips-sgi-irix6*)	gdb_host=irix6 ;;
 mips-sony-*)		gdb_host=news-mips ;;

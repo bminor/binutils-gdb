@@ -22,6 +22,4 @@
 #ifndef TM_VAX_H
 #define TM_VAX_H
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
-
 #endif /* TM_VAX_H */

@@ -70,7 +70,7 @@ extern bfd_boolean _bfd_mips_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 extern void _bfd_mips_elf_copy_indirect_symbol
-  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+  PARAMS ((const struct elf_backend_data *, struct elf_link_hash_entry *,
 	   struct elf_link_hash_entry *));
 extern void _bfd_mips_elf_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean));

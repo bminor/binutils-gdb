@@ -1,5 +1,5 @@
 /* Native-dependent code for modern i386 BSD's.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -157,7 +157,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  i387_supply_fsave ((char *) fpregsetp);
+  i387_supply_fsave ((const char *) fpregsetp, -1);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -176,7 +176,6 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 void
 fetch_inferior_registers (int regno)
 {
-
   if (regno == -1 || GETREGS_SUPPLIES (regno))
     {
       gregset_t gregs;
@@ -196,12 +195,12 @@ fetch_inferior_registers (int regno)
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
-      if (have_ptrace_xmmregs != 0 &&
-	  ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
-		 (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
+      if (have_ptrace_xmmregs != 0
+	  && ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
+		    (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
 	{
 	  have_ptrace_xmmregs = 1;
-	  i387_supply_fxsave (xmmregs);
+	  i387_supply_fxsave (xmmregs, -1);
 	}
       else
 	{
@@ -209,14 +208,14 @@ fetch_inferior_registers (int regno)
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	    perror_with_name ("Couldn't get floating point status");
 
-	  supply_fpregset (&fpregs);
+	  i387_supply_fsave ((const char *) &fpregs, -1);
 	}
 #else
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
-      supply_fpregset (&fpregs);
+      i387_supply_fsave ((const char *) &fpregs, -1);
 #endif
     }
 }
@@ -227,7 +226,6 @@ fetch_inferior_registers (int regno)
 void
 store_inferior_registers (int regno)
 {
-
   if (regno == -1 || GETREGS_SUPPLIES (regno))
     {
       gregset_t gregs;
@@ -252,9 +250,9 @@ store_inferior_registers (int regno)
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
-      if (have_ptrace_xmmregs != 0 &&
-	  ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
-		 (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
+      if (have_ptrace_xmmregs != 0
+	  && ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
+		    (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
 	{
 	  have_ptrace_xmmregs = 1;
 
@@ -272,7 +270,7 @@ store_inferior_registers (int regno)
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	    perror_with_name ("Couldn't get floating point status");
 
-          fill_fpregset (&fpregs, regno);
+          i387_fill_fsave ((char *) &fpregs, regno);
   
           if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
@@ -395,20 +393,15 @@ _initialize_i386bsd_nat (void)
      information.  */
 
 #if defined (__FreeBSD_version) && __FreeBSD_version >= 400011
-  extern int i386fbsd4_sc_reg_offset[];
 #define SC_REG_OFFSET i386fbsd4_sc_reg_offset
 #elif defined (__FreeBSD_version) && __FreeBSD_version >= 300005
-  extern int i386fbsd_sc_reg_offset[];
 #define SC_REG_OFFSET i386fbsd_sc_reg_offset
 #elif defined (NetBSD) || defined (__NetBSD_Version__)
-  extern int i386nbsd_sc_reg_offset[];
 #define SC_REG_OFFSET i386nbsd_sc_reg_offset
 #elif defined (OpenBSD)
-  extern int i386obsd_sc_reg_offset[];
 #define SC_REG_OFFSET i386obsd_sc_reg_offset
 #else
-  extern int i386bsd_sc_reg_offset[];
-#define SC_PC_OFFSET i386bsd_sc_reg_offset
+#define SC_REG_OFFSET i386bsd_sc_reg_offset
 #endif
 
   /* We only check the program counter, stack pointer and frame

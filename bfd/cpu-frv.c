@@ -21,13 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
-enum {
-  I_frv_generic,
-  I_frv_simple,
-  I_frv_500,
-  I_frv_300,
-};
-
 #define FRV_ARCH(MACHINE, NAME, DEFAULT, NEXT)				\
 {									\
   32,	                        /* 32 bits in a word */			\

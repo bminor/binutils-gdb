@@ -373,7 +373,7 @@ static FDR *
 get_rfd (int cf, int rf)
 {
   FDR *fdrs;
-  register FDR *f;
+  FDR *f;
   RFDT rfd;
 
   fdrs = debug_info->fdr;
@@ -508,7 +508,7 @@ push_parse_stack (void)
   /* Initialize new frame with previous content */
   if (top_stack)
     {
-      register struct parse_stack *prev = new->prev;
+      struct parse_stack *prev = new->prev;
 
       *new = *top_stack;
       top_stack->prev = new;
@@ -558,7 +558,7 @@ static struct mdebug_pending *
 is_pending_symbol (FDR *fh, char *sh)
 {
   int f_idx = fh - debug_info->fdr;
-  register struct mdebug_pending *p;
+  struct mdebug_pending *p;
 
   /* Linear search is ok, list is typically no more than 10 deep */
   for (p = pending_list[f_idx]; p; p = p->next)
@@ -2228,7 +2228,7 @@ parse_partial_symbols (struct objfile *objfile)
   char *ext_out;
   char *ext_out_end;
   EXTR *ext_block;
-  register EXTR *ext_in;
+  EXTR *ext_in;
   EXTR *ext_in_end;
   SYMR sh;
   struct partial_symtab *pst;
@@ -2936,7 +2936,7 @@ parse_partial_symbols (struct objfile *objfile)
 		      if (pst && STREQ (namestring, pst->filename))
 			continue;
 		      {
-			register int i;
+			int i;
 			for (i = 0; i < includes_used; i++)
 			  if (STREQ (namestring, psymtab_include_list[i]))
 			    {
@@ -3627,8 +3627,8 @@ parse_partial_symbols (struct objfile *objfile)
       if (objfile->ei.entry_point >= save_pst->textlow &&
 	  objfile->ei.entry_point < save_pst->texthigh)
 	{
-	  objfile->ei.entry_file_lowpc = save_pst->textlow;
-	  objfile->ei.entry_file_highpc = save_pst->texthigh;
+	  objfile->ei.deprecated_entry_file_lowpc = save_pst->textlow;
+	  objfile->ei.deprecated_entry_file_highpc = save_pst->texthigh;
 	}
 
       /* The objfile has its functions reordered if this partial symbol
@@ -4438,7 +4438,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp, enum type_code type_cod
    keeping the symtab sorted */
 
 static struct symbol *
-mylookup_symbol (char *name, register struct block *block,
+mylookup_symbol (char *name, struct block *block,
 		 domain_enum domain, enum address_class class)
 {
   struct dict_iterator iter;
@@ -4527,7 +4527,7 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
 static int
 compare_blocks (const void *arg1, const void *arg2)
 {
-  register int addr_diff;
+  int addr_diff;
   struct block **b1 = (struct block **) arg1;
   struct block **b2 = (struct block **) arg2;
 
@@ -4568,8 +4568,8 @@ sort_blocks (struct symtab *s)
 	   compare_blocks);
 
   {
-    register CORE_ADDR high = 0;
-    register int i, j = BLOCKVECTOR_NBLOCKS (bv);
+    CORE_ADDR high = 0;
+    int i, j = BLOCKVECTOR_NBLOCKS (bv);
 
     for (i = FIRST_LOCAL_BLOCK; i < j; i++)
       if (high < BLOCK_END (BLOCKVECTOR_BLOCK (bv, i)))
@@ -4700,6 +4700,9 @@ new_bvect (int nblocks)
 static struct block *
 new_block (enum block_type type)
 {
+  /* FIXME: carlton/2003-09-11: This should use allocate_block to
+     allocate the block.  Which, in turn, suggests that the block
+     should be allocated on an obstack.  */
   struct block *retval = xzalloc (sizeof (struct block));
 
   if (type == FUNCTION_BLOCK)

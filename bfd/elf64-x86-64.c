@@ -501,7 +501,7 @@ elf64_x86_64_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf64_x86_64_copy_indirect_symbol (struct elf_backend_data *bed,
+elf64_x86_64_copy_indirect_symbol (const struct elf_backend_data *bed,
 				   struct elf_link_hash_entry *dir,
 				   struct elf_link_hash_entry *ind)
 {
@@ -1827,45 +1827,12 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  bfd_boolean warned;
 
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-	      if (sec->output_section == NULL)
-		{
-		  /* Set a flag that will be cleared later if we find a
-		     relocation value for this symbol.  output_section
-		     is typically NULL for symbols satisfied by a shared
-		     library.  */
-		  unresolved_reloc = TRUE;
-		  relocation = 0;
-		}
-	      else
-		relocation = (h->root.u.def.value
-			      + sec->output_section->vma
-			      + sec->output_offset);
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
-	  else if (!info->executable
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    relocation = 0;
-	  else
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined
-		       || ELF_ST_VISIBILITY (h->other)))))
-		return FALSE;
-	      relocation = 0;
-	    }
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
+				   symtab_hdr, relocation, sec,
+				   unresolved_reloc, info,
+				   warned);
 	}
       /* When generating a shared object, the relocations handled here are
 	 copied into the output file to be resolved at run time.  */

@@ -147,7 +147,7 @@ static void virtual_base_list_aux (struct type *dclass);
 struct type *
 alloc_type (struct objfile *objfile)
 {
-  register struct type *type;
+  struct type *type;
 
   /* Alloc the structure and start off with all fields zeroed. */
 
@@ -228,7 +228,7 @@ smash_type (struct type *type)
 struct type *
 make_pointer_type (struct type *type, struct type **typeptr)
 {
-  register struct type *ntype;	/* New type */
+  struct type *ntype;	/* New type */
   struct objfile *objfile;
 
   ntype = TYPE_POINTER_TYPE (type);
@@ -295,7 +295,7 @@ lookup_pointer_type (struct type *type)
 struct type *
 make_reference_type (struct type *type, struct type **typeptr)
 {
-  register struct type *ntype;	/* New type */
+  struct type *ntype;	/* New type */
   struct objfile *objfile;
 
   ntype = TYPE_REFERENCE_TYPE (type);
@@ -357,7 +357,7 @@ lookup_reference_type (struct type *type)
 struct type *
 make_function_type (struct type *type, struct type **typeptr)
 {
-  register struct type *ntype;	/* New type */
+  struct type *ntype;	/* New type */
   struct objfile *objfile;
 
   if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
@@ -509,8 +509,8 @@ make_type_with_address_space (struct type *type, int space_flag)
 struct type *
 make_cv_type (int cnst, int voltl, struct type *type, struct type **typeptr)
 {
-  register struct type *ntype;	/* New type */
-  register struct type *tmp_type = type;	/* tmp type */
+  struct type *ntype;	/* New type */
+  struct type *tmp_type = type;	/* tmp type */
   struct objfile *objfile;
 
   int new_flags = (TYPE_INSTANCE_FLAGS (type)
@@ -593,7 +593,7 @@ replace_type (struct type *ntype, struct type *type)
 struct type *
 lookup_member_type (struct type *type, struct type *domain)
 {
-  register struct type *mtype;
+  struct type *mtype;
 
   mtype = alloc_type (TYPE_OBJFILE (type));
   smash_to_member_type (mtype, domain, type);
@@ -1020,7 +1020,7 @@ smash_to_method_type (struct type *type, struct type *domain,
    "union ", or "enum ".  If the type has a NULL name, return NULL.  */
 
 char *
-type_name_no_tag (register const struct type *type)
+type_name_no_tag (const struct type *type)
 {
   if (TYPE_TAG_NAME (type) != NULL)
     return TYPE_TAG_NAME (type);
@@ -1056,8 +1056,8 @@ lookup_primitive_typename (const char *name)
 struct type *
 lookup_typename (const char *name, struct block *block, int noerr)
 {
-  register struct symbol *sym;
-  register struct type *tmp;
+  struct symbol *sym;
+  struct type *tmp;
 
   sym = lookup_symbol (name, block, VAR_DOMAIN, 0, (struct symtab **) NULL);
   if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
@@ -1110,7 +1110,7 @@ lookup_signed_typename (const char *name)
 struct type *
 lookup_struct (char *name, struct block *block)
 {
-  register struct symbol *sym;
+  struct symbol *sym;
 
   sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0,
 		       (struct symtab **) NULL);
@@ -1132,7 +1132,7 @@ lookup_struct (char *name, struct block *block)
 struct type *
 lookup_union (char *name, struct block *block)
 {
-  register struct symbol *sym;
+  struct symbol *sym;
   struct type *t;
 
   sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0,
@@ -1164,7 +1164,7 @@ lookup_union (char *name, struct block *block)
 struct type *
 lookup_enum (char *name, struct block *block)
 {
-  register struct symbol *sym;
+  struct symbol *sym;
 
   sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0,
 		       (struct symtab **) NULL);
@@ -1876,7 +1876,7 @@ struct type *
 init_type (enum type_code code, int length, int flags, char *name,
 	   struct objfile *objfile)
 {
-  register struct type *type;
+  struct type *type;
 
   type = alloc_type (objfile);
   TYPE_CODE (type) = code;
@@ -1971,8 +1971,8 @@ append_composite_type_field (struct type *t, char *name, struct type *field)
 struct type *
 lookup_fundamental_type (struct objfile *objfile, int typeid)
 {
-  register struct type **typep;
-  register int nbytes;
+  struct type **typep;
+  int nbytes;
 
   if (typeid < 0 || typeid >= FT_NUM_MEMBERS)
     {
@@ -2066,7 +2066,7 @@ has_vtable (struct type *dclass)
   /* In the HP ANSI C++ runtime model, a class has a vtable only if it
      has virtual functions or virtual bases.  */
 
-  register int i;
+  int i;
 
   if (TYPE_CODE (dclass) != TYPE_CODE_CLASS)
     return 0;
@@ -2109,7 +2109,7 @@ primary_base_class (struct type *dclass)
      is the first directly inherited, non-virtual base class that
      requires a virtual table */
 
-  register int i;
+  int i;
 
   if (TYPE_CODE (dclass) != TYPE_CODE_CLASS)
     return NULL;
@@ -2138,7 +2138,7 @@ static void
 virtual_base_list_aux (struct type *dclass)
 {
   struct vbase *tmp_vbase;
-  register int i;
+  int i;
 
   if (TYPE_CODE (dclass) != TYPE_CODE_CLASS)
     return;
@@ -2195,9 +2195,9 @@ virtual_base_list_aux (struct type *dclass)
 struct type **
 virtual_base_list (struct type *dclass)
 {
-  register struct vbase *tmp_vbase;
-  register struct vbase *tmp_vbase_2;
-  register int i;
+  struct vbase *tmp_vbase;
+  struct vbase *tmp_vbase_2;
+  int i;
   int count;
   struct type **vbase_array;
 
@@ -2232,8 +2232,8 @@ virtual_base_list (struct type *dclass)
 int
 virtual_base_list_length (struct type *dclass)
 {
-  register int i;
-  register struct vbase *tmp_vbase;
+  int i;
+  struct vbase *tmp_vbase;
 
   current_vbase_list = NULL;
   virtual_base_list_aux (dclass);
@@ -2250,8 +2250,8 @@ virtual_base_list_length (struct type *dclass)
 int
 virtual_base_list_length_skip_primaries (struct type *dclass)
 {
-  register int i;
-  register struct vbase *tmp_vbase;
+  int i;
+  struct vbase *tmp_vbase;
   struct type *primary;
 
   primary = TYPE_RUNTIME_PTR (dclass) ? TYPE_PRIMARY_BASE (dclass) : NULL;
@@ -2279,8 +2279,8 @@ virtual_base_list_length_skip_primaries (struct type *dclass)
 int
 virtual_base_index (struct type *base, struct type *dclass)
 {
-  register struct type *vbase;
-  register int i;
+  struct type *vbase;
+  int i;
 
   if ((TYPE_CODE (dclass) != TYPE_CODE_CLASS) ||
       (TYPE_CODE (base) != TYPE_CODE_CLASS))
@@ -2309,8 +2309,8 @@ virtual_base_index (struct type *base, struct type *dclass)
 int
 virtual_base_index_skip_primaries (struct type *base, struct type *dclass)
 {
-  register struct type *vbase;
-  register int i, j;
+  struct type *vbase;
+  int i, j;
   struct type *primary;
 
   if ((TYPE_CODE (dclass) != TYPE_CODE_CLASS) ||

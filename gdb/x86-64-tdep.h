@@ -48,17 +48,24 @@ struct frame_info;
 
 void x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 
-/* Fill GDB's register array with the floating-point and SSE register
-   values in *FXSAVE.  This function masks off any of the reserved
-   bits in *FXSAVE.  */
+/* Fill register REGNUM in GDB's register cache with the appropriate
+   floating-point or SSE register value from *FXSAVE.  If REGNUM is
+   -1, do this for all registers.  This function masks off any of the
+   reserved bits in *FXSAVE.  */
 
-void x86_64_supply_fxsave (char *fxsave);
+void x86_64_supply_fxsave (const char *fxsave, int regnum);
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register array.  If REGNUM is -1, do
+   *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
    this for all registers.  This function doesn't touch any of the
    reserved bits in *FXSAVE.  */
 
 void x86_64_fill_fxsave (char *fxsave, int regnum);
+
+
+/* Variables exported from amd64fbsd-tdep.c.  */
+extern CORE_ADDR amd64fbsd_sigtramp_start;
+extern CORE_ADDR amd64fbsd_sigtramp_end;
+extern int amd64fbsd_sc_reg_offset[];
 
 #endif /* x86-64-tdep.h */

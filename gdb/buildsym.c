@@ -84,7 +84,7 @@ static int compare_line_numbers (const void *ln1p, const void *ln2p);
 void
 add_free_pendings (struct pending *list)
 {
-  register struct pending *link = list;
+  struct pending *link = list;
 
   if (list)
     {
@@ -102,7 +102,7 @@ add_free_pendings (struct pending *list)
 void
 add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
 {
-  register struct pending *link;
+  struct pending *link;
 
   /* If this is an alias for another symbol, don't add it.  */
   if (symbol->ginfo.name && symbol->ginfo.name[0] == '#')
@@ -226,24 +226,20 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      CORE_ADDR start, CORE_ADDR end,
 	      struct objfile *objfile)
 {
-  register struct pending *next, *next1;
-  register struct block *block;
-  register struct pending_block *pblock;
+  struct pending *next, *next1;
+  struct block *block;
+  struct pending_block *pblock;
   struct pending_block *opblock;
 
-  /* Initialize the block's dictionary.  */
+  block = allocate_block (&objfile->symbol_obstack);
 
   if (symbol)
     {
-      block = (struct block *) 
-	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
       BLOCK_DICT (block) = dict_create_linear (&objfile->symbol_obstack,
 					       *listhead);
     }
   else
     {
-      block = (struct block *) 
-	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
       BLOCK_DICT (block) = dict_create_hashed (&objfile->symbol_obstack,
 					       *listhead);
     }
@@ -451,7 +447,7 @@ void
 record_pending_block (struct objfile *objfile, struct block *block,
 		      struct pending_block *opblock)
 {
-  register struct pending_block *pblock;
+  struct pending_block *pblock;
 
   pblock = (struct pending_block *)
     obstack_alloc (&objfile->symbol_obstack, sizeof (struct pending_block));
@@ -471,9 +467,9 @@ record_pending_block (struct objfile *objfile, struct block *block,
 static struct blockvector *
 make_blockvector (struct objfile *objfile)
 {
-  register struct pending_block *next;
-  register struct blockvector *blockvector;
-  register int i;
+  struct pending_block *next;
+  struct blockvector *blockvector;
+  int i;
 
   /* Count the length of the list of blocks.  */
 
@@ -543,7 +539,7 @@ make_blockvector (struct objfile *objfile)
 void
 start_subfile (const char *name, char *dirname)
 {
-  register struct subfile *subfile;
+  struct subfile *subfile;
 
   /* See if this subfile is already known as a subfile of the current
      main source file.  */
@@ -681,7 +677,7 @@ patch_subfile_names (struct subfile *subfile, char *name)
 void
 push_subfile (void)
 {
-  register struct subfile_stack *tem
+  struct subfile_stack *tem
   = (struct subfile_stack *) xmalloc (sizeof (struct subfile_stack));
 
   tem->next = subfile_stack;
@@ -696,8 +692,8 @@ push_subfile (void)
 char *
 pop_subfile (void)
 {
-  register char *name;
-  register struct subfile_stack *link = subfile_stack;
+  char *name;
+  struct subfile_stack *link = subfile_stack;
 
   if (link == NULL)
     {
@@ -713,7 +709,7 @@ pop_subfile (void)
    line vector for SUBFILE.  */
 
 void
-record_line (register struct subfile *subfile, int line, CORE_ADDR pc)
+record_line (struct subfile *subfile, int line, CORE_ADDR pc)
 {
   struct linetable_entry *e;
   /* Ignore the dummy line number in libg.o */
@@ -828,10 +824,10 @@ start_symtab (const char *name, char *dirname, CORE_ADDR start_addr)
 struct symtab *
 end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 {
-  register struct symtab *symtab = NULL;
-  register struct blockvector *blockvector;
-  register struct subfile *subfile;
-  register struct context_stack *cstk;
+  struct symtab *symtab = NULL;
+  struct blockvector *blockvector;
+  struct subfile *subfile;
+  struct context_stack *cstk;
   struct subfile *nextsub;
 
   /* Finish the lexical context of the last function in the file; pop
@@ -1060,7 +1056,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 struct context_stack *
 push_context (int desc, CORE_ADDR valu)
 {
-  register struct context_stack *new;
+  struct context_stack *new;
 
   if (context_stack_depth == context_stack_size)
     {
@@ -1122,7 +1118,7 @@ record_debugformat (char *format)
 void
 merge_symbol_lists (struct pending **srclist, struct pending **targetlist)
 {
-  register int i;
+  int i;
 
   if (!srclist || !*srclist)
     return;

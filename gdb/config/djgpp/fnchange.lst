@@ -70,8 +70,8 @@
 @V@/gdb/ChangeLog-2002 @V@/gdb/ChangeLog.002
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
 @V@/gdb/ada-exp.tab.c @V@/gdb/ada-exp_tab.c
-@V@/gdb/amd64fbsd-tdep.c @V@/gdb/x86fb-tdep.c
-@V@/gdb/amd64fbsd-nat.c @V@/gdb/x86fb-nat.c
+@V@/gdb/amd64fbsd-tdep.c @V@/gdb/a64fb-tdep.c
+@V@/gdb/amd64fbsd-nat.c @V@/gdb/a64fb-nat.c
 @V@/gdb/alphabsd-nat.c @V@/gdb/alphb-nat.c
 @V@/gdb/alphabsd-tdep.c @V@/gdb/alphb-tdep.c
 @V@/gdb/alphanbsd-nat.c @V@/gdb/alphnb-nat.c
@@ -100,10 +100,7 @@
 @V@/gdb/config/i386/xm-i386v4.h @V@/gdb/config/i386/xm-v4.h
 @V@/gdb/config/m68k/apollo68v.mh @V@/gdb/config/m68k/apollo-v.mh
 @V@/gdb/config/m68k/nm-apollo68v.h @V@/gdb/config/m68k/nm-apolv.h
-@V@/gdb/config/m68k/nm-hp300hpux.h @V@/gdb/config/m68k/nm-300ux.h
-@V@/gdb/config/m68k/tm-hp300hpux.h @V@/gdb/config/m68k/tm-300ux.h
 @V@/gdb/config/m68k/xm-apollo68v.h @V@/gdb/config/m68k/xm-apolv.h
-@V@/gdb/config/m68k/xm-hp300hpux.h @V@/gdb/config/m68k/xm-300ux.h
 @V@/gdb/config/m88k/tm-delta88v4.h @V@/gdb/config/m88k/tm-d88v4.h
 @V@/gdb/config/m88k/xm-delta88v4.h @V@/gdb/config/m88k/xm-d88v4.h
 @V@/gdb/config/mips/tm-bigmips64.h @V@/gdb/config/mips/tm-bigm64.h
@@ -209,6 +206,10 @@
 @V@/gdb/testsuite/gdb.mi/mi1-var-child.exp @V@/gdb/testsuite/gdb.mi/mi1varchild.exp
 @V@/gdb/testsuite/gdb.mi/mi1-var-cmd.exp @V@/gdb/testsuite/gdb.mi/mi1varcmd.exp
 @V@/gdb/testsuite/gdb.mi/mi1-var-display.exp @V@/gdb/testsuite/gdb.mi/mi1vardisplay.exp
+@V@/gdb/testsuite/gdb.mi/mi2-var-block.exp @V@/gdb/testsuite/gdb.mi/mi2varblock.exp
+@V@/gdb/testsuite/gdb.mi/mi2-var-child.exp @V@/gdb/testsuite/gdb.mi/mi2varchild.exp
+@V@/gdb/testsuite/gdb.mi/mi2-var-cmd.exp @V@/gdb/testsuite/gdb.mi/mi2varcmd.exp
+@V@/gdb/testsuite/gdb.mi/mi2-var-display.exp @V@/gdb/testsuite/gdb.mi/mi2vardisplay.exp
 @V@/gdb/tui/tuiSourceWin.c @V@/gdb/tui/tuiWinSource.c
 @V@/gdb/tui/tuiSourceWin.h @V@/gdb/tui/tuiWinSource.h
 @V@/gdb/x86-64-linux-tdep.c @V@/gdb/x8664-ltdep.c
@@ -340,6 +341,10 @@
 @V@/opcodes/po/.cvsignore @V@/opcodes/po/_cvsignore
 @V@/readline/config.h.bot @V@/readline/config.h-bot
 @V@/readline/config.h.in @V@/readline/config.h-in
+@V@/sim/frv/profile-fr400.c @V@/sim/frv/fr400-profile.c
+@V@/sim/frv/profile-fr400.h @V@/sim/frv/fr400-profile.h
+@V@/sim/frv/profile-fr500.c @V@/sim/frv/fr500-profile.c
+@V@/sim/frv/profile-fr500.h @V@/sim/frv/fr500-profile.h
 @V@/sim/m68hc11/dv-m68hc11eepr.c @V@/sim/m68hc11/dv-eepr.c
 @V@/sim/m68hc11/dv-m68hc11sio.c @V@/sim/m68hc11/dv-sio.c
 @V@/sim/m68hc11/dv-m68hc11spi.c @V@/sim/m68hc11/dv-spi.c

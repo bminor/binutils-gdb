@@ -25,6 +25,7 @@
 struct gdbarch;
 struct frame_info;
 struct value;
+struct regcache;
 
 /* From ppc-linux-tdep.c... */
 CORE_ADDR ppc_linux_frame_saved_pc (struct frame_info *fi);
@@ -34,8 +35,13 @@ void ppc_linux_frame_init_saved_regs (struct frame_info *);
 CORE_ADDR ppc_linux_frame_chain (struct frame_info *);
 int ppc_sysv_abi_use_struct_convention (int, struct type *);
 int ppc_sysv_abi_broken_use_struct_convention (int, struct type *);
-CORE_ADDR ppc_sysv_abi_push_arguments (int, struct value **, CORE_ADDR, int,
-				       CORE_ADDR);
+CORE_ADDR ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
+					CORE_ADDR func_addr,
+					struct regcache *regcache,
+					CORE_ADDR bp_addr, int nargs,
+					struct value **args, CORE_ADDR sp,
+					int struct_return,
+					CORE_ADDR struct_addr);
 int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
 struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
 void ppc_linux_supply_gregset (char *buf);

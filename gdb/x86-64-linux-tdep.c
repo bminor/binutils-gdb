@@ -68,7 +68,7 @@ static int user_to_gdb_regmap[] =
   USER_RSI, USER_RDI, USER_RBP, USER_RSP,
   USER_R8, USER_R9, USER_R10, USER_R11,
   USER_R12, USER_R13, USER_R14, USER_R15,
-  USER_RIP, USER_EFLAGS, USER_CS, USER_SS,
+  USER_RIP, USER_EFLAGS,
   USER_DS, USER_ES, USER_FS, USER_GS
 };
 
@@ -123,7 +123,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size != 512)
 	warning ("Wrong size XMM register set in core file.");
       else
-	x86_64_supply_fxsave (core_reg_sect);
+	x86_64_supply_fxsave (core_reg_sect, -1);
       break;
 
     default:

@@ -375,6 +375,15 @@ thread_db_init (struct target_ops *target)
   target_beneath = target;
 }
 
+static void *
+verbose_dlsym (void *handle, const char *name)
+{
+  void *sym = dlsym (handle, name);
+  if (sym == NULL)
+    warning ("Symbol \"%s\" not found in libthread_db: %s", name, dlerror ());
+  return sym;
+}
+
 static int
 thread_db_load (void)
 {
@@ -394,47 +403,47 @@ thread_db_load (void)
   /* Initialize pointers to the dynamic library functions we will use.
      Essential functions first.  */
 
-  td_init_p = dlsym (handle, "td_init");
+  td_init_p = verbose_dlsym (handle, "td_init");
   if (td_init_p == NULL)
     return 0;
 
-  td_ta_new_p = dlsym (handle, "td_ta_new");
+  td_ta_new_p = verbose_dlsym (handle, "td_ta_new");
   if (td_ta_new_p == NULL)
     return 0;
 
-  td_ta_map_id2thr_p = dlsym (handle, "td_ta_map_id2thr");
+  td_ta_map_id2thr_p = verbose_dlsym (handle, "td_ta_map_id2thr");
   if (td_ta_map_id2thr_p == NULL)
     return 0;
 
-  td_ta_map_lwp2thr_p = dlsym (handle, "td_ta_map_lwp2thr");
+  td_ta_map_lwp2thr_p = verbose_dlsym (handle, "td_ta_map_lwp2thr");
   if (td_ta_map_lwp2thr_p == NULL)
     return 0;
 
-  td_ta_thr_iter_p = dlsym (handle, "td_ta_thr_iter");
+  td_ta_thr_iter_p = verbose_dlsym (handle, "td_ta_thr_iter");
   if (td_ta_thr_iter_p == NULL)
     return 0;
 
-  td_thr_validate_p = dlsym (handle, "td_thr_validate");
+  td_thr_validate_p = verbose_dlsym (handle, "td_thr_validate");
   if (td_thr_validate_p == NULL)
     return 0;
 
-  td_thr_get_info_p = dlsym (handle, "td_thr_get_info");
+  td_thr_get_info_p = verbose_dlsym (handle, "td_thr_get_info");
   if (td_thr_get_info_p == NULL)
     return 0;
 
-  td_thr_getfpregs_p = dlsym (handle, "td_thr_getfpregs");
+  td_thr_getfpregs_p = verbose_dlsym (handle, "td_thr_getfpregs");
   if (td_thr_getfpregs_p == NULL)
     return 0;
 
-  td_thr_getgregs_p = dlsym (handle, "td_thr_getgregs");
+  td_thr_getgregs_p = verbose_dlsym (handle, "td_thr_getgregs");
   if (td_thr_getgregs_p == NULL)
     return 0;
 
-  td_thr_setfpregs_p = dlsym (handle, "td_thr_setfpregs");
+  td_thr_setfpregs_p = verbose_dlsym (handle, "td_thr_setfpregs");
   if (td_thr_setfpregs_p == NULL)
     return 0;
 
-  td_thr_setgregs_p = dlsym (handle, "td_thr_setgregs");
+  td_thr_setgregs_p = verbose_dlsym (handle, "td_thr_setgregs");
   if (td_thr_setgregs_p == NULL)
     return 0;
 
@@ -587,6 +596,30 @@ thread_db_new_objfile (struct objfile *objfile)
 {
   td_err_e err;
 
+  /* First time through, report that libthread_db was successfuly
+     loaded.  Can't print this in in thread_db_load as, at that stage,
+     the interpreter and it's console haven't started.  The real
+     problem here is that libthread_db is loaded too early - it should
+     only be loaded when there is a program to debug.  */
+  {
+    static int dejavu;
+    if (!dejavu)
+      {
+	Dl_info info;
+	const char *library = NULL;
+	/* Try dladdr.  */
+	if (dladdr ((*td_ta_new_p), &info) != 0)
+	  library = info.dli_fname;
+	/* Try dlinfo?  */
+	if (library == NULL)
+	  /* Paranoid - don't let a NULL path slip through.  */
+	  library = LIBTHREAD_DB_SO;
+	printf_unfiltered ("Using host libthread_db library \"%s\".\n",
+			   library);
+	dejavu = 1;
+      }
+  }
+
   /* Don't attempt to use thread_db on targets which can not run
      (core files).  */
   if (objfile == NULL || !target_has_execution)
@@ -624,6 +657,8 @@ thread_db_new_objfile (struct objfile *objfile)
       break;
 
     case TD_OK:
+      printf_unfiltered ("[Thread debugging using libthread_db enabled]\n");
+
       /* The thread library was detected.  Activate the thread_db target.  */
       push_target (&thread_db_ops);
       using_thread_db = 1;

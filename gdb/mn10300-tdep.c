@@ -32,6 +32,7 @@
 #include "regcache.h"
 #include "arch-utils.h"
 #include "gdb_assert.h"
+#include "dis-asm.h"
 
 #define D0_REGNUM 0
 #define D2_REGNUM 2
@@ -124,15 +125,15 @@ static void
 mn10300_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (4), TYPE_LENGTH (type));
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (4), TYPE_LENGTH (type));
   else
-    memcpy (valbuf, regbuf + REGISTER_BYTE (0), TYPE_LENGTH (type));
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (0), TYPE_LENGTH (type));
 }
 
 static CORE_ADDR
 mn10300_extract_struct_value_address (char *regbuf)
 {
-  return extract_unsigned_integer (regbuf + REGISTER_BYTE (4),
+  return extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (4),
 				   REGISTER_RAW_SIZE (4));
 }
 
@@ -140,10 +141,10 @@ static void
 mn10300_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    deprecated_write_register_bytes (REGISTER_BYTE (4), valbuf,
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (4), valbuf,
 				     TYPE_LENGTH (type));
   else
-    deprecated_write_register_bytes (REGISTER_BYTE (0), valbuf,
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (0), valbuf,
 				     TYPE_LENGTH (type));
 }
 
@@ -862,7 +863,7 @@ mn10300_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[4];
 
-  store_unsigned_integer (buf, 4, CALL_DUMMY_ADDRESS ());
+  store_unsigned_integer (buf, 4, entry_point_address ());
   write_memory (sp - 4, buf, 4);
   return sp - 4;
 }
@@ -1208,7 +1209,8 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (mn10300_call_dummy_words));
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_deprecated_push_arguments (gdbarch, mn10300_push_arguments);
-  set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);
+  set_gdbarch_deprecated_reg_struct_has_addr
+    (gdbarch, mn10300_reg_struct_has_addr);
   set_gdbarch_deprecated_push_return_address (gdbarch, mn10300_push_return_address);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_use_struct_convention (gdbarch, mn10300_use_struct_convention);
@@ -1218,6 +1220,8 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
+  set_gdbarch_print_insn (gdbarch, print_insn_mn10300);
+
   return gdbarch;
 }
  
@@ -1225,8 +1229,6 @@ void
 _initialize_mn10300_tdep (void)
 {
 /*  printf("_initialize_mn10300_tdep\n"); */
-
-  deprecated_tm_print_insn = print_insn_mn10300;
 
   register_gdbarch_init (bfd_arch_mn10300, mn10300_gdbarch_init);
 }

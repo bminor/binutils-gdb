@@ -48,6 +48,7 @@
 #include "elf-bfd.h"
 #include "symcat.h"
 #include "sim-regno.h"
+#include "dis-asm.h"
 
 static void set_reg_offset (CORE_ADDR *saved_regs, int regnum, CORE_ADDR off);
 static struct type *mips_register_type (struct gdbarch *gdbarch, int regnum);
@@ -374,8 +375,6 @@ mips_stack_argsize (void)
 
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
-int gdb_print_insn_mips (bfd_vma, disassemble_info *);
-
 static mips_extra_func_info_t heuristic_proc_desc (CORE_ADDR, CORE_ADDR,
 						   struct frame_info *, int);
 
@@ -655,7 +654,7 @@ mips_register_raw_size (int regnum)
 	 NOTE: cagney/2003-06-15: This is so bogus.  The register's
 	 raw size is changing according to the ABI
 	 (FP_REGISTER_DOUBLE).  Also, GDB's protocol is defined by a
-	 combination of REGISTER_RAW_SIZE and REGISTER_BYTE.  */
+	 combination of REGISTER_RAW_SIZE and DEPRECATED_REGISTER_BYTE.  */
       if (mips64_transfers_32bit_regs_p)
 	return REGISTER_VIRTUAL_SIZE (regnum);
       else if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 32
@@ -2590,7 +2589,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
          to have their own proc_descs, and even if they don't,
          heuristic_proc_desc knows how to create them! */
 
-      register struct linked_proc_info *link;
+      struct linked_proc_info *link;
 
       for (link = linked_proc_desc_table; link; link = link->next)
 	if (PROC_LOW_ADDR (&link->info) <= pc
@@ -2624,7 +2623,7 @@ mips_frame_chain (struct frame_info *frame)
   CORE_ADDR tmp;
   CORE_ADDR saved_pc = DEPRECATED_FRAME_SAVED_PC (frame);
 
-  if (saved_pc == 0 || inside_entry_file (saved_pc))
+  if (saved_pc == 0 || deprecated_inside_entry_file (saved_pc))
     return 0;
 
   /* Check if the PC is inside a call stub.  If it is, fetch the
@@ -3947,7 +3946,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 static void
 mips_pop_frame (void)
 {
-  register int regnum;
+  int regnum;
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR new_sp = get_frame_base (frame);
   mips_extra_func_info_t proc_desc;
@@ -4743,12 +4742,12 @@ mips_eabi_extract_return_value (struct type *valtype,
   return_value_location (valtype, &hi, &lo);
 
   memcpy (valbuf + lo.buf_offset,
-	  regbuf + REGISTER_BYTE (lo.reg) + lo.reg_offset,
+	  regbuf + DEPRECATED_REGISTER_BYTE (lo.reg) + lo.reg_offset,
 	  lo.len);
 
   if (hi.len > 0)
     memcpy (valbuf + hi.buf_offset,
-	    regbuf + REGISTER_BYTE (hi.reg) + hi.reg_offset,
+	    regbuf + DEPRECATED_REGISTER_BYTE (hi.reg) + hi.reg_offset,
 	    hi.len);
 }
 
@@ -4762,12 +4761,12 @@ mips_o64_extract_return_value (struct type *valtype,
   return_value_location (valtype, &hi, &lo);
 
   memcpy (valbuf + lo.buf_offset,
-	  regbuf + REGISTER_BYTE (lo.reg) + lo.reg_offset,
+	  regbuf + DEPRECATED_REGISTER_BYTE (lo.reg) + lo.reg_offset,
 	  lo.len);
 
   if (hi.len > 0)
     memcpy (valbuf + hi.buf_offset,
-	    regbuf + REGISTER_BYTE (hi.reg) + hi.reg_offset,
+	    regbuf + DEPRECATED_REGISTER_BYTE (hi.reg) + hi.reg_offset,
 	    hi.len);
 }
 
@@ -4784,14 +4783,14 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
-  deprecated_write_register_bytes (REGISTER_BYTE (lo.reg), raw_buffer,
+  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg), raw_buffer,
 				   REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
-      deprecated_write_register_bytes (REGISTER_BYTE (hi.reg), raw_buffer,
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg), raw_buffer,
 				       REGISTER_RAW_SIZE (hi.reg));
     }
 }
@@ -4806,14 +4805,14 @@ mips_o64_store_return_value (struct type *valtype, char *valbuf)
 
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
-  deprecated_write_register_bytes (REGISTER_BYTE (lo.reg), raw_buffer,
+  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg), raw_buffer,
 				   REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
-      deprecated_write_register_bytes (REGISTER_BYTE (hi.reg), raw_buffer,
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg), raw_buffer,
 				       REGISTER_RAW_SIZE (hi.reg));
     }
 }
@@ -5255,9 +5254,10 @@ reinit_frame_cache_sfunc (char *args, int from_tty,
   reinit_frame_cache ();
 }
 
-int
-gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
+static int
+gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   mips_extra_func_info_t proc_desc;
 
   /* Search for the function containing this address.  Set the low bit
@@ -5289,6 +5289,26 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
 
   /* Round down the instruction address to the appropriate boundary.  */
   memaddr &= (info->mach == bfd_mach_mips16 ? ~1 : ~3);
+
+  /* Set the disassembler options.  */
+  if (tdep->mips_abi == MIPS_ABI_N32
+      || tdep->mips_abi == MIPS_ABI_N64)
+    {
+      /* Set up the disassembler info, so that we get the right
+	 register names from libopcodes.  */
+      if (tdep->mips_abi == MIPS_ABI_N32)
+	info->disassembler_options = "gpr-names=n32";
+      else
+	info->disassembler_options = "gpr-names=64";
+      info->flavour = bfd_target_elf_flavour;
+    }
+  else
+    /* This string is not recognized explicitly by the disassembler,
+       but it tells the disassembler to not try to guess the ABI from
+       the bfd elf headers, such that, if the user overrides the ABI
+       of a program linked as NewABI, the disassembly will follow the
+       register naming conventions specified by the user.  */
+    info->disassembler_options = "gpr-names=32";
 
   /* Call the appropriate disassembler based on the target endian-ness.  */
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
@@ -5540,25 +5560,6 @@ mips_ignore_helper (CORE_ADDR pc)
 }
 
 
-/* Return a location where we can set a breakpoint that will be hit
-   when an inferior function call returns.  This is normally the
-   program's entry point.  Executables that don't have an entry
-   point (e.g. programs in ROM) should define a symbol __CALL_DUMMY_ADDRESS
-   whose address is the location where the breakpoint should be placed.  */
-
-static CORE_ADDR
-mips_call_dummy_address (void)
-{
-  struct minimal_symbol *sym;
-
-  sym = lookup_minimal_symbol ("__CALL_DUMMY_ADDRESS", NULL, NULL);
-  if (sym)
-    return SYMBOL_VALUE_ADDRESS (sym);
-  else
-    return entry_point_address ();
-}
-
-
 /* When debugging a 64 MIPS target running a 32 bit ABI, the size of
    the register stored on the stack (32) is different to its real raw
    size (64).  The below ensures that registers are fetched from the
@@ -5745,12 +5746,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   enum mips_abi mips_abi, found_abi, wanted_abi;
   int num_regs;
 
-  /* Reset the disassembly info, in case it was set to something
-     non-default.  */
-  deprecated_tm_print_insn_info.flavour = bfd_target_unknown_flavour;
-  deprecated_tm_print_insn_info.arch = bfd_arch_unknown;
-  deprecated_tm_print_insn_info.mach = 0;
-
   elf_flags = 0;
 
   if (info.abfd)
@@ -5830,34 +5825,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   if (wanted_abi != MIPS_ABI_UNKNOWN)
     mips_abi = wanted_abi;
 
-  /* We have to set deprecated_tm_print_insn_info before looking for a
-     pre-existing architecture, otherwise we may return before we get
-     a chance to set it up.  */
-  if (mips_abi == MIPS_ABI_N32 || mips_abi == MIPS_ABI_N64)
-    {
-      /* Set up the disassembler info, so that we get the right
-	 register names from libopcodes.  */
-      if (mips_abi == MIPS_ABI_N32)
-	deprecated_tm_print_insn_info.disassembler_options = "gpr-names=n32";
-      else
-	deprecated_tm_print_insn_info.disassembler_options = "gpr-names=64";
-      deprecated_tm_print_insn_info.flavour = bfd_target_elf_flavour;
-      deprecated_tm_print_insn_info.arch = bfd_arch_mips;
-      if (info.bfd_arch_info != NULL
-	  && info.bfd_arch_info->arch == bfd_arch_mips
-	  && info.bfd_arch_info->mach)
-	deprecated_tm_print_insn_info.mach = info.bfd_arch_info->mach;
-      else
-	deprecated_tm_print_insn_info.mach = bfd_mach_mips8000;
-    }
-  else
-    /* This string is not recognized explicitly by the disassembler,
-       but it tells the disassembler to not try to guess the ABI from
-       the bfd elf headers, such that, if the user overrides the ABI
-       of a program linked as NewABI, the disassembly will follow the
-       register naming conventions specified by the user.  */
-    deprecated_tm_print_insn_info.disassembler_options = "gpr-names=32";
-
   if (gdbarch_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
@@ -5931,8 +5898,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_reg_struct_has_addr (gdbarch, 
-				       mips_o32_reg_struct_has_addr);
+      set_gdbarch_deprecated_reg_struct_has_addr
+	(gdbarch, mips_o32_reg_struct_has_addr);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 always_use_struct_convention);
       break;
@@ -5950,8 +5917,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_reg_struct_has_addr (gdbarch, 
-				       mips_o32_reg_struct_has_addr);
+      set_gdbarch_deprecated_reg_struct_has_addr
+	(gdbarch, mips_o32_reg_struct_has_addr);
       set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
       break;
     case MIPS_ABI_EABI32:
@@ -5968,8 +5935,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_reg_struct_has_addr (gdbarch, 
-				       mips_eabi_reg_struct_has_addr);
+      set_gdbarch_deprecated_reg_struct_has_addr
+	(gdbarch, mips_eabi_reg_struct_has_addr);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 mips_eabi_use_struct_convention);
       break;
@@ -5987,8 +5954,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_reg_struct_has_addr (gdbarch, 
-				       mips_eabi_reg_struct_has_addr);
+      set_gdbarch_deprecated_reg_struct_has_addr
+	(gdbarch, mips_eabi_reg_struct_has_addr);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 mips_eabi_use_struct_convention);
       break;
@@ -6008,8 +5975,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 mips_n32n64_use_struct_convention);
-      set_gdbarch_reg_struct_has_addr (gdbarch, 
-				       mips_n32n64_reg_struct_has_addr);
+      set_gdbarch_deprecated_reg_struct_has_addr
+	(gdbarch, mips_n32n64_reg_struct_has_addr);
       break;
     case MIPS_ABI_N64:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
@@ -6027,8 +5994,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 mips_n32n64_use_struct_convention);
-      set_gdbarch_reg_struct_has_addr (gdbarch, 
-				       mips_n32n64_reg_struct_has_addr);
+      set_gdbarch_deprecated_reg_struct_has_addr
+	(gdbarch, mips_n32n64_reg_struct_has_addr);
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -6113,7 +6080,10 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   /* MIPS version of CALL_DUMMY */
 
-  set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
+  /* NOTE: cagney/2003-08-05: Eventually call dummy location will be
+     replaced by a command, and all targets will default to on stack
+     (regardless of the stack's execute status).  */
+  set_gdbarch_call_dummy_location (gdbarch, AT_SYMBOL);
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
@@ -6146,6 +6116,16 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   set_gdbarch_print_registers_info (gdbarch, mips_print_registers_info);
   set_gdbarch_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
+
+  set_gdbarch_print_insn (gdbarch, gdb_print_insn_mips);
+
+  /* FIXME: cagney/2003-08-29: The macros HAVE_STEPPABLE_WATCHPOINT,
+     HAVE_NONSTEPPABLE_WATCHPOINT, and HAVE_CONTINUABLE_WATCHPOINT
+     need to all be folded into the target vector.  Since they are
+     being used as guards for STOPPED_BY_WATCHPOINT, why not have
+     STOPPED_BY_WATCHPOINT return the type of watchpoint that the code
+     is sitting on?  */
+  set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
@@ -6327,9 +6307,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: GDB_TARGET_IS_MIPS64 = %d\n",
 		      GDB_TARGET_IS_MIPS64);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: HAVE_NONSTEPPABLE_WATCHPOINT # %s\n",
-		      XSTRING (HAVE_NONSTEPPABLE_WATCHPOINT));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep:  HI_REGNUM = %d\n",
 		      HI_REGNUM);
@@ -6561,8 +6538,6 @@ _initialize_mips_tdep (void)
     internal_error (__FILE__, __LINE__, "mips_abi_strings out of sync");
 
   gdbarch_register (bfd_arch_mips, mips_gdbarch_init, mips_dump_tdep);
-  if (!deprecated_tm_print_insn)	 /* Someone may have already set it */
-    deprecated_tm_print_insn = gdb_print_insn_mips;
 
   /* Add root prefix command for all "set mips"/"show mips" commands */
   add_prefix_cmd ("mips", no_class, set_mips_command,

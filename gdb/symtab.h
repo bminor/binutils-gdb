@@ -35,24 +35,55 @@ struct blockvector;
 struct axs_value;
 struct agent_expr;
 
-/* Don't do this; it means that if some .o's are compiled with GNU C
-   and some are not (easy to do accidentally the way we configure
-   things; also it is a pain to have to "make clean" every time you
-   want to switch compilers), then GDB dies a horrible death.  */
-/* GNU C supports enums that are bitfields.  Some compilers don't. */
-#if 0 && defined(__GNUC__) && !defined(BYTE_BITFIELD)
-#define	BYTE_BITFIELD	:8;
-#else
-#define	BYTE_BITFIELD		/*nothing */
-#endif
+/* Some of the structures in this file are space critical.
+   The space-critical structures are:
+
+     struct general_symbol_info
+     struct symbol
+     struct partial_symbol
+
+   These structures are layed out to encourage good packing.
+   They use ENUM_BITFIELD and short int fields, and they order the
+   structure members so that fields less than a word are next
+   to each other so they can be packed together. */
+
+/* Rearranged: used ENUM_BITFIELD and rearranged field order in
+   all the space critical structures (plus struct minimal_symbol).
+   Memory usage dropped from 99360768 bytes to 90001408 bytes.
+   I measured this with before-and-after tests of
+   "HEAD-old-gdb -readnow HEAD-old-gdb" and
+   "HEAD-new-gdb -readnow HEAD-old-gdb" on native i686-pc-linux-gnu,
+   red hat linux 8, with LD_LIBRARY_PATH=/usr/lib/debug,
+   typing "maint space 1" at the first command prompt.
+
+   Here is another measurement (from andrew c):
+     # no /usr/lib/debug, just plain glibc, like a normal user
+     gdb HEAD-old-gdb
+     (gdb) break internal_error
+     (gdb) run
+     (gdb) maint internal-error
+     (gdb) backtrace
+     (gdb) maint space 1
+
+   gdb gdb_6_0_branch  2003-08-19  space used: 8896512
+   gdb HEAD            2003-08-19  space used: 8904704
+   gdb HEAD            2003-08-21  space used: 8396800 (+symtab.h)
+   gdb HEAD            2003-08-21  space used: 8265728 (+gdbtypes.h)
+
+   The third line shows the savings from the optimizations in symtab.h.
+   The fourth line shows the savings from the optimizations in
+   gdbtypes.h.  Both optimizations are in gdb HEAD now.
+
+   --chastain 2003-08-21  */
+
+
 
 /* Define a structure for the information that is common to all symbol types,
    including minimal symbols, partial symbols, and full symbols.  In a
    multilanguage environment, some language specific information may need to
-   be recorded along with each symbol.
+   be recorded along with each symbol. */
 
-   These fields are ordered to encourage good packing, since we frequently
-   have tens or hundreds of thousands of these.  */
+/* This structure is space critical.  See space comments at the top. */
 
 struct general_symbol_info
 {
@@ -107,7 +138,7 @@ struct general_symbol_info
      This is used to select one of the fields from the language specific
      union above. */
 
-  enum language language BYTE_BITFIELD;
+  ENUM_BITFIELD(language) language : 8;
 
   /* Which section is this symbol in?  This is an index into
      section_offsets for this objfile.  Negative means that the symbol
@@ -228,6 +259,37 @@ extern const char *symbol_demangled_name (const struct general_symbol_info
 #define SYMBOL_MATCHES_NATURAL_NAME(symbol, name)			\
   (strcmp_iw (SYMBOL_NATURAL_NAME (symbol), (name)) == 0)
 
+/* Classification types for a minimal symbol.  These should be taken as
+   "advisory only", since if gdb can't easily figure out a
+   classification it simply selects mst_unknown.  It may also have to
+   guess when it can't figure out which is a better match between two
+   types (mst_data versus mst_bss) for example.  Since the minimal
+   symbol info is sometimes derived from the BFD library's view of a
+   file, we need to live with what information bfd supplies. */
+
+enum minimal_symbol_type
+{
+  mst_unknown = 0,		/* Unknown type, the default */
+  mst_text,			/* Generally executable instructions */
+  mst_data,			/* Generally initialized data */
+  mst_bss,			/* Generally uninitialized data */
+  mst_abs,			/* Generally absolute (nonrelocatable) */
+  /* GDB uses mst_solib_trampoline for the start address of a shared
+     library trampoline entry.  Breakpoints for shared library functions
+     are put there if the shared library is not yet loaded.
+     After the shared library is loaded, lookup_minimal_symbol will
+     prefer the minimal symbol from the shared library (usually
+     a mst_text symbol) over the mst_solib_trampoline symbol, and the
+     breakpoints will be moved to their true address in the shared
+     library via breakpoint_re_set.  */
+  mst_solib_trampoline,		/* Shared library trampoline code */
+  /* For the mst_file* types, the names are only guaranteed to be unique
+     within a given .o file.  */
+  mst_file_text,		/* Static version of mst_text */
+  mst_file_data,		/* Static version of mst_data */
+  mst_file_bss			/* Static version of mst_bss */
+};
+
 /* Define a simple structure used to hold some very basic information about
    all defined global symbols (text, data, bss, abs, etc).  The only required
    information is the general_symbol_info.
@@ -269,37 +331,9 @@ struct minimal_symbol
   char *filename;
 #endif
 
-  /* Classification types for this symbol.  These should be taken as "advisory
-     only", since if gdb can't easily figure out a classification it simply
-     selects mst_unknown.  It may also have to guess when it can't figure out
-     which is a better match between two types (mst_data versus mst_bss) for
-     example.  Since the minimal symbol info is sometimes derived from the
-     BFD library's view of a file, we need to live with what information bfd
-     supplies. */
+  /* Classification type for this minimal symbol.  */
 
-  enum minimal_symbol_type
-  {
-    mst_unknown = 0,		/* Unknown type, the default */
-    mst_text,			/* Generally executable instructions */
-    mst_data,			/* Generally initialized data */
-    mst_bss,			/* Generally uninitialized data */
-    mst_abs,			/* Generally absolute (nonrelocatable) */
-    /* GDB uses mst_solib_trampoline for the start address of a shared
-       library trampoline entry.  Breakpoints for shared library functions
-       are put there if the shared library is not yet loaded.
-       After the shared library is loaded, lookup_minimal_symbol will
-       prefer the minimal symbol from the shared library (usually
-       a mst_text symbol) over the mst_solib_trampoline symbol, and the
-       breakpoints will be moved to their true address in the shared
-       library via breakpoint_re_set.  */
-    mst_solib_trampoline,	/* Shared library trampoline code */
-    /* For the mst_file* types, the names are only guaranteed to be unique
-       within a given .o file.  */
-    mst_file_text,		/* Static version of mst_text */
-    mst_file_data,		/* Static version of mst_data */
-    mst_file_bss		/* Static version of mst_bss */
-  }
-  type BYTE_BITFIELD;
+  ENUM_BITFIELD(minimal_symbol_type) type : 8;
 
   /* Minimal symbols with the same hash key are kept on a linked
      list.  This is the link.  */
@@ -322,10 +356,7 @@ struct minimal_symbol
 /* Different name domains for symbols.  Looking up a symbol specifies a
    domain and ignores symbol definitions in other name domains. */
 
-/* FIXME: carlton/2002-11-22: This name me crazy when doing C++
-   namespace stuff.  Maybe name_space_enum and XXX_NAME_SPACE?  */
-
-typedef enum
+typedef enum domain_enum_tag
 {
   /* UNDEF_DOMAIN is used when a domain has not been discovered or
      none of the following apply.  This usually indicates an error either
@@ -571,6 +602,8 @@ struct alias_list
   struct alias_list *next;
 };
 
+/* This structure is space critical.  See space comments at the top. */
+
 struct symbol
 {
 
@@ -584,11 +617,11 @@ struct symbol
 
   /* Domain code.  */
 
-  domain_enum domain BYTE_BITFIELD;
+  ENUM_BITFIELD(domain_enum_tag) domain : 6;
 
   /* Address class */
 
-  enum address_class aclass BYTE_BITFIELD;
+  ENUM_BITFIELD(address_class) aclass : 6;
 
   /* Line number of definition.  FIXME:  Should we really make the assumption
      that nobody will try to debug files longer than 64K lines?  What about
@@ -652,6 +685,8 @@ struct symbol
    on a  partial symtab list and which points to the corresponding 
    normal symtab once the partial_symtab has been referenced.  */
 
+/* This structure is space critical.  See space comments at the top. */
+
 struct partial_symbol
 {
 
@@ -661,11 +696,11 @@ struct partial_symbol
 
   /* Name space code.  */
 
-  domain_enum domain BYTE_BITFIELD;
+  ENUM_BITFIELD(domain_enum_tag) domain : 6;
 
   /* Address class (for info_symbols) */
 
-  enum address_class aclass BYTE_BITFIELD;
+  ENUM_BITFIELD(address_class) aclass : 6;
 
 };
 

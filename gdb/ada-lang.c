@@ -3027,9 +3027,9 @@ place_on_stack (struct value *val, CORE_ADDR *sp)
 {
   CORE_ADDR old_sp = *sp;
 
-#ifdef STACK_ALIGN
+#ifdef DEPRECATED_STACK_ALIGN
   *sp = push_bytes (*sp, VALUE_CONTENTS_RAW (val),
-		    STACK_ALIGN (TYPE_LENGTH
+		    DEPRECATED_STACK_ALIGN (TYPE_LENGTH
 				 (check_typedef (VALUE_TYPE (val)))));
 #else
   *sp = push_bytes (*sp, VALUE_CONTENTS_RAW (val),

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU bfd 2.14rel030712\n"
 "POT-Creation-Date: 2003-07-11 13:53+0930\n"
-"PO-Revision-Date: 2003-07-22 08:00-0500\n"
+"PO-Revision-Date: 2003-08-05 08:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
@@ -598,7 +598,7 @@ msgstr "%s: AVERTISSEMENT: relocalisation sans solution vers le symbole « %s » d
 #: elf32-openrisc.c:436 elf32-v850.c:1777 elf32-xstormy16.c:976
 #: elf64-mmix.c:1332
 msgid "internal error: out of range error"
-msgstr "erreur interne: hors gamme"
+msgstr "erreur interne: hors limite"
 
 #: elf-m10200.c:446 elf-m10300.c:1699 elf32-arm.h:2092 elf32-avr.c:816
 #: elf32-cris.c:1394 elf32-d10v.c:574 elf32-fr30.c:638 elf32-frv.c:819
@@ -2059,7 +2059,7 @@ msgstr "%s: longuer erronée de section dans ihex_read_section"
 #: ihex.c:872
 #, c-format
 msgid "%s: address 0x%s out of range for Intel Hex file"
-msgstr "%s: adresse 0x%s hors gamme pour le fichier Intel hexadécimal"
+msgstr "%s: adresse 0x%s hors limite pour le fichier Intel hexadécimal"
 
 #: libbfd.c:861
 #, c-format

@@ -427,8 +427,7 @@ extern struct value *value_in (struct value *element, struct value *set);
 
 extern int value_bit_index (struct type *type, char *addr, int index);
 
-extern int using_struct_return (struct value *function, CORE_ADDR funcaddr,
-				struct type *value_type, int gcc_p);
+extern int using_struct_return (struct type *value_type, int gcc_p);
 
 extern void set_return_value (struct value *val);
 

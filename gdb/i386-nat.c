@@ -230,6 +230,7 @@ i386_cleanup_dregs (void)
   dr_status_mirror  = 0;
 }
 
+#ifndef LINUX_CHILD_POST_STARTUP_INFERIOR
 /* Reset all debug registers at each new startup
    to avoid missing watchpoints after restart.  */
 void
@@ -237,6 +238,7 @@ child_post_startup_inferior (ptid_t ptid)
 {
   i386_cleanup_dregs ();
 }
+#endif /* LINUX_CHILD_POST_STARTUP_INFERIOR */
 
 /* Print the values of the mirrored debug registers.
    This is called when maint_show_dr is non-zero.  To set that

@@ -367,76 +367,29 @@ elf32_m68hc11_size_stubs (output_bfd, stub_bfd, info, add_stub_section)
        input_bfd = input_bfd->link_next, bfd_indx++)
     {
       Elf_Internal_Shdr *symtab_hdr;
-      Elf_Internal_Shdr *shndx_hdr;
-      Elf_Internal_Sym *isym;
-      Elf32_External_Sym *extsyms, *esym, *end_sy;
-      Elf_External_Sym_Shndx *shndx_buf, *shndx;
-      bfd_size_type sec_size;
 
       /* We'll need the symbol table in a second.  */
       symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
       if (symtab_hdr->sh_info == 0)
 	continue;
 
-      /* We need an array of the local symbols attached to the input bfd.
-	 Unfortunately, we're going to have to read & swap them in.  */
-      sec_size = symtab_hdr->sh_info;
-      sec_size *= sizeof (Elf_Internal_Sym);
-      local_syms = (Elf_Internal_Sym *) bfd_malloc (sec_size);
+      /* We need an array of the local symbols attached to the input bfd.  */
+      local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
       if (local_syms == NULL)
-	goto error_ret_free_local;
+	{
+	  local_syms = bfd_elf_get_elf_syms (input_bfd, symtab_hdr,
+					     symtab_hdr->sh_info, 0,
+					     NULL, NULL, NULL);
+	  /* Cache them for elf_link_input_bfd.  */
+	  symtab_hdr->contents = (unsigned char *) local_syms;
+	}
+      if (local_syms == NULL)
+        {
+          free (all_local_syms);
+	  return FALSE;
+        }
 
       all_local_syms[bfd_indx] = local_syms;
-      sec_size = symtab_hdr->sh_info;
-      sec_size *= sizeof (Elf32_External_Sym);
-
-      /* Get the cached copy.  */
-      if (symtab_hdr->contents != NULL)
-        extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
-      else
-        {
-          /* Go get them off disk.  */
-          bfd_size_type amt = symtab_hdr->sh_size;
-          extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
-          if (extsyms == NULL)
-            goto error_ret_free_local;
-
-          if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-              || bfd_bread ((PTR) extsyms, amt, input_bfd) != amt)
-            {
-            error_ret_free_ext_syms:
-              free (extsyms);
-              goto error_ret_free_local;
-            }
-        }
-      shndx_buf = NULL;
-      shndx_hdr = &elf_tdata (input_bfd)->symtab_shndx_hdr;
-      if (shndx_hdr->sh_size != 0)
-        {
-          bfd_size_type amt;
-
-          amt = symtab_hdr->sh_info * sizeof (Elf_External_Sym_Shndx);
-          shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
-          if (shndx_buf == NULL)
-            goto error_ret_free_ext_syms;
-          if (bfd_seek (input_bfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-              || bfd_bread ((PTR) shndx_buf, amt, input_bfd) != amt)
-            {
-              free (shndx_buf);
-              goto error_ret_free_ext_syms;
-            }
-          shndx_hdr->contents = (PTR) shndx_buf;
-        }
-
-      /* Swap the local symbols in.  */
-      for (esym = extsyms, end_sy = esym + symtab_hdr->sh_info,
-	     isym = local_syms, shndx = shndx_buf;
-	   esym < end_sy;
-	   esym++, isym++, shndx = (shndx ? shndx + 1 : NULL))
-	bfd_elf32_swap_symbol_in (input_bfd, esym, shndx, isym);
-
-      /* Now we can free the external symbols.  */
-      free (shndx_buf);
     }
 
   for (input_bfd = info->input_bfds, bfd_indx = 0;
@@ -608,11 +561,11 @@ elf32_m68hc11_size_stubs (output_bfd, stub_bfd, info, add_stub_section)
 
       bfd_hash_traverse (htab->stub_hash_table, htab->size_one_stub, htab);
     }
-  free (htab->all_local_syms);
+  free (all_local_syms);
   return TRUE;
 
  error_ret_free_local:
-  free (htab->all_local_syms);
+  free (all_local_syms);
   return FALSE;
 }
 
@@ -1119,7 +1072,7 @@ elf32_m68hc11_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel, *relend;
   const char *name;
   struct m68hc11_page_info *pinfo;
-  struct elf_backend_data * const ebd = get_elf_backend_data (input_bfd);
+  const struct elf_backend_data * const ebd = get_elf_backend_data (input_bfd);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);

@@ -1,3 +1,12 @@
+2003-08-28  Andrew Cagney  <cagney@redhat.com>
+
+	* dv-mn103ser.c (do_polling_event): Change type of "serial_reg" to
+	"long".
+	(read_status_reg): Cast "serial_reg" to "long".
+	* dv-mn103tim.c (do_counter_event): Change type of "timer_nr" to
+	"long".
+	(do_counter6_event, write_mode_reg, write_tm6md): Ditto.
+
 2003-02-27  Andrew Cagney  <cagney@redhat.com>
 
 	* interp.c (sim_open, sim_create_inferior, sim_open)

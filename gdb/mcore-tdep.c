@@ -29,6 +29,7 @@
 #include "arch-utils.h"
 #include "gdb_string.h"
 #include "disasm.h"
+#include "dis-asm.h"
 
 static CORE_ADDR mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc,
 					 int skip_prologue);
@@ -908,14 +909,14 @@ mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
-/* Store the return address for the call dummy. For MCore, we've
-   opted to use generic call dummies, so we simply store the
-   CALL_DUMMY_ADDRESS into the PR register (r15). */
+/* Store the return address for the call dummy. For MCore, we've opted
+   to use generic call dummies, so we simply store the entry-point
+   address into the PR register (r15). */
 
 static CORE_ADDR
 mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (PR_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (PR_REGNUM, entry_point_address ());
   return sp;
 }
 
@@ -951,7 +952,7 @@ mcore_use_struct_convention (int gcc_p, struct type *type)
 static CORE_ADDR
 mcore_extract_struct_value_address (char *regbuf)
 {
-  return extract_unsigned_integer (regbuf + REGISTER_BYTE (FIRST_ARGREG), DEPRECATED_REGISTER_SIZE);
+  return extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (FIRST_ARGREG), DEPRECATED_REGISTER_SIZE);
 }
 
 /* Given a function which returns a value of type TYPE, extract the
@@ -964,7 +965,7 @@ mcore_extract_return_value (struct type *type, char *regbuf, char *valbuf)
   /* Copy the return value (starting) in RETVAL_REGNUM to VALBUF. */
   /* Only getting the first byte! if len = 1, we need the last byte of
      the register, not the first. */
-  memcpy (valbuf, regbuf + REGISTER_BYTE (RETVAL_REGNUM) +
+  memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (RETVAL_REGNUM) +
   (TYPE_LENGTH (type) < 4 ? 4 - TYPE_LENGTH (type) : 0), TYPE_LENGTH (type));
 }
 
@@ -990,11 +991,11 @@ mcore_store_return_value (struct type *type, char *valbuf)
 
   /* Return value fits into registers. */
   return_size = (value_size + DEPRECATED_REGISTER_SIZE - 1) & ~(DEPRECATED_REGISTER_SIZE - 1);
-  offset = REGISTER_BYTE (RETVAL_REGNUM) + (return_size - value_size);
+  offset = DEPRECATED_REGISTER_BYTE (RETVAL_REGNUM) + (return_size - value_size);
   zeros = alloca (return_size);
   memset (zeros, 0, return_size);
 
-  deprecated_write_register_bytes (REGISTER_BYTE (RETVAL_REGNUM), zeros,
+  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (RETVAL_REGNUM), zeros,
 				   return_size);
   deprecated_write_register_bytes (offset, valbuf, value_size);
 }
@@ -1114,10 +1115,13 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   /* MCore will never pass a sturcture by reference. It will always be split
      between registers and stack.  */
-  set_gdbarch_reg_struct_has_addr (gdbarch, mcore_reg_struct_has_addr);
+  set_gdbarch_deprecated_reg_struct_has_addr
+    (gdbarch, mcore_reg_struct_has_addr);
 
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
+
+  set_gdbarch_print_insn (gdbarch, print_insn_mcore);
 
   return gdbarch;
 }
@@ -1133,9 +1137,7 @@ extern initialize_file_ftype _initialize_mcore_tdep; /* -Wmissing-prototypes */
 void
 _initialize_mcore_tdep (void)
 {
-  extern int print_insn_mcore (bfd_vma, disassemble_info *);
   gdbarch_register (bfd_arch_mcore, mcore_gdbarch_init, mcore_dump_tdep);
-  deprecated_tm_print_insn = print_insn_mcore;
 
 #ifdef MCORE_DEBUG
   add_show_from_set (add_set_cmd ("mcoredebug", no_class,

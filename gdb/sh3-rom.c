@@ -77,9 +77,9 @@ sh3_supply_register (char *regname, int regnamelen, char *val, int vallen)
 	  break;
 	case 'S':
 	  if (regname[1] == 'S' && regname[2] == 'R')
-	    regno = gdbarch_tdep (current_gdbarch)->SSR_REGNUM;
+	    regno = SSR_REGNUM;
 	  else if (regname[1] == 'P' && regname[2] == 'C')
-	    regno = gdbarch_tdep (current_gdbarch)->SPC_REGNUM;
+	    regno = SPC_REGNUM;
 	  break;
 	}
     }
@@ -281,8 +281,15 @@ sh3_open (char *args, int from_tty)
       parallel_in_use = 1;
     }
 
+
   /* If we connected successfully, we know the processor is an SH3.  */
-  set_architecture_from_arch_mach (bfd_arch_sh, bfd_mach_sh3);
+  {
+    struct gdbarch_info info;
+    gdbarch_info_init (&info);
+    info.bfd_arch_info = bfd_lookup_arch (bfd_arch_sh, bfd_mach_sh3);
+    if (!gdbarch_update_p (info))
+      error ("Target is not an SH3");
+  }
 }
 
 
@@ -329,7 +336,13 @@ sh3e_open (char *args, int from_tty)
     }
 
   /* If we connected successfully, we know the processor is an SH3E.  */
-  set_architecture_from_arch_mach (bfd_arch_sh, bfd_mach_sh3);
+  {
+    struct gdbarch_info info;
+    gdbarch_info_init (&info);
+    info.bfd_arch_info = bfd_lookup_arch (bfd_arch_sh, bfd_mach_sh3);
+    if (!gdbarch_update_p (info))
+      error ("Target is not an SH3");
+  }
 }
 
 static void

@@ -35,6 +35,8 @@
 #include "cli/cli-decode.h"	/* for add_info */
 #include "gdb_string.h"
 
+#include <signal.h>
+
 #include "linux-nat.h"
 
 #ifndef O_LARGEFILE
@@ -404,35 +406,52 @@ linux_info_proc_cmd (char *args, int from_tty)
 	{
 	  long long addr, endaddr, size, offset, inode;
 	  char permissions[8], device[8], filename[MAXPATHLEN];
-	  char *header_fmt_string, *data_fmt_string;
-
-	  if (TARGET_ADDR_BIT == 32)
-	    {
-	      header_fmt_string = "\t%10s %10s %10s %10s %7s\n";
-	      data_fmt_string = "\t%#10lx %#10lx %#10x %#10x %7s\n";
-	    }
-	  else
-	    {
-	      header_fmt_string = "  %18s %18s %10s %10s %7s\n";
-	      data_fmt_string = "  %#18lx %#18lx %#10x %#10x %7s\n";
-	    }
 
 	  printf_filtered ("Mapped address spaces:\n\n");
-	  printf_filtered (header_fmt_string,
+	  if (TARGET_ADDR_BIT == 32)
+	    {
+	      printf_filtered ("\t%10s %10s %10s %10s %7s\n",
 			   "Start Addr",
 			   "  End Addr",
 			   "      Size", "    Offset", "objfile");
+            }
+	  else
+            {
+	      printf_filtered ("  %18s %18s %10s %10s %7s\n",
+			   "Start Addr",
+			   "  End Addr",
+			   "      Size", "    Offset", "objfile");
+	    }
 
 	  while (read_mapping (procfile, &addr, &endaddr, &permissions[0],
 			       &offset, &device[0], &inode, &filename[0]))
 	    {
 	      size = endaddr - addr;
-	      printf_filtered (data_fmt_string, (unsigned long) addr,	/* FIXME: pr_addr */
+
+	      /* FIXME: carlton/2003-08-27: Maybe the printf_filtered
+		 calls here (and possibly above) should be abstracted
+		 out into their own functions?  Andrew suggests using
+		 a generic local_address_string instead to print out
+		 the addresses; that makes sense to me, too.  */
+
+	      if (TARGET_ADDR_BIT == 32)
+	        {
+	          printf_filtered ("\t%#10lx %#10lx %#10x %#10x %7s\n",
+			       (unsigned long) addr,	/* FIXME: pr_addr */
 			       (unsigned long) endaddr,
 			       (int) size,
 			       (unsigned int) offset,
 			       filename[0] ? filename : "");
-
+		}
+	      else
+	        {
+	          printf_filtered ("  %#18lx %#18lx %#10x %#10x %7s\n",
+			       (unsigned long) addr,	/* FIXME: pr_addr */
+			       (unsigned long) endaddr,
+			       (int) size,
+			       (unsigned int) offset,
+			       filename[0] ? filename : "");
+	        }
 	    }
 
 	  fclose (procfile);
@@ -592,11 +611,7 @@ linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len, int write,
   /* If pread64 is available, use it.  It's faster if the kernel
      supports it (only one syscall), and it's 64-bit safe even
      on 32-bit platforms (for instance, SPARC debugging a SPARC64
-     application).
-
-     We play some autoconf and CFLAGS games to get this declaration
-     exposed: -D_XOPEN_SOURCE=500 -D_LARGEFILE64_SOURCE.  And then
-     a -D_BSD_SOURCE to counteract the defaults for _XOPEN_SOURCE.  */
+     application).  */
 #ifdef HAVE_PREAD64
   if (pread64 (fd, myaddr, len, addr) != len)
 #else
@@ -608,4 +623,85 @@ linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len, int write,
 
   close (fd);
   return ret;
+}
+
+/* Parse LINE as a signal set and add its set bits to SIGS.  */
+
+static void
+linux_proc_add_line_to_sigset (const char *line, sigset_t *sigs)
+{
+  int len = strlen (line) - 1;
+  const char *p;
+  int signum;
+
+  if (line[len] != '\n')
+    error ("Could not parse signal set: %s", line);
+
+  p = line;
+  signum = len * 4;
+  while (len-- > 0)
+    {
+      int digit;
+
+      if (*p >= '0' && *p <= '9')
+	digit = *p - '0';
+      else if (*p >= 'a' && *p <= 'f')
+	digit = *p - 'a' + 10;
+      else
+	error ("Could not parse signal set: %s", line);
+
+      signum -= 4;
+
+      if (digit & 1)
+	sigaddset (sigs, signum + 1);
+      if (digit & 2)
+	sigaddset (sigs, signum + 2);
+      if (digit & 4)
+	sigaddset (sigs, signum + 3);
+      if (digit & 8)
+	sigaddset (sigs, signum + 4);
+
+      p++;
+    }
+}
+
+/* Find process PID's pending signals from /proc/pid/status and set SIGS
+   to match.  */
+
+void
+linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigset_t *ignored)
+{
+  FILE *procfile;
+  char buffer[MAXPATHLEN], fname[MAXPATHLEN];
+  int signum;
+
+  sigemptyset (pending);
+  sigemptyset (blocked);
+  sigemptyset (ignored);
+  sprintf (fname, "/proc/%d/status", pid);
+  procfile = fopen (fname, "r");
+  if (procfile == NULL)
+    error ("Could not open %s", fname);
+
+  while (fgets (buffer, MAXPATHLEN, procfile) != NULL)
+    {
+      /* Normal queued signals are on the SigPnd line in the status
+	 file.  However, 2.6 kernels also have a "shared" pending queue
+	 for delivering signals to a thread group, so check for a ShdPnd
+	 line also.
+
+	 Unfortunately some Red Hat kernels include the shared pending queue
+	 but not the ShdPnd status field.  */
+
+      if (strncmp (buffer, "SigPnd:\t", 8) == 0)
+	linux_proc_add_line_to_sigset (buffer + 8, pending);
+      else if (strncmp (buffer, "ShdPnd:\t", 8) == 0)
+	linux_proc_add_line_to_sigset (buffer + 8, pending);
+      else if (strncmp (buffer, "SigBlk:\t", 8) == 0)
+	linux_proc_add_line_to_sigset (buffer + 8, blocked);
+      else if (strncmp (buffer, "SigIgn:\t", 8) == 0)
+	linux_proc_add_line_to_sigset (buffer + 8, ignored);
+    }
+
+  fclose (procfile);
 }

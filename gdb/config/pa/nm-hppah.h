@@ -25,7 +25,7 @@
 
 /* What a coincidence! */
 #define REGISTER_U_ADDR(addr, blockend, regno)				\
-{ addr = (int)(blockend) + REGISTER_BYTE (regno);}
+{ addr = (int)(blockend) + DEPRECATED_REGISTER_BYTE (regno);}
 
 /* This isn't really correct, because ptrace is actually a 32-bit
    interface.  However, the modern HP-UX targets all really use
@@ -168,12 +168,6 @@ extern int hppa_can_use_hw_watchpoint (int type, int cnt, int ot);
          (stop_signal == TARGET_SIGNAL_BUS) && \
          ! stepped_after_stopped_by_watchpoint && \
          bpstat_have_active_hw_watchpoints ())
-
-/* When a hardware watchpoint triggers, we'll move the inferior past it
-   by removing all eventpoints; stepping past the instruction that caused
-   the trigger; reinserting eventpoints; and checking whether any watched
-   location changed. */
-#define HAVE_NONSTEPPABLE_WATCHPOINT 1
 
 /* Our implementation of "hardware" watchpoints uses memory page-protection
    faults.  However, HP-UX has unfortunate interactions between these and

@@ -154,9 +154,9 @@ const struct block *block_found;
 struct symtab *
 lookup_symtab (const char *name)
 {
-  register struct symtab *s;
-  register struct partial_symtab *ps;
-  register struct objfile *objfile;
+  struct symtab *s;
+  struct partial_symtab *ps;
+  struct objfile *objfile;
   char *real_path = NULL;
   char *full_path = NULL;
 
@@ -247,8 +247,8 @@ got_symtab:
 struct partial_symtab *
 lookup_partial_symtab (const char *name)
 {
-  register struct partial_symtab *pst;
-  register struct objfile *objfile;
+  struct partial_symtab *pst;
+  struct objfile *objfile;
   char *full_path = NULL;
   char *real_path = NULL;
 
@@ -682,8 +682,8 @@ init_sal (struct symtab_and_line *sal)
 struct partial_symtab *
 find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
 {
-  register struct partial_symtab *pst;
-  register struct objfile *objfile;
+  struct partial_symtab *pst;
+  struct objfile *objfile;
   struct minimal_symbol *msymbol;
 
   /* If we know that this is not a text address, return failure.  This is
@@ -929,6 +929,14 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
 {
   struct symbol *sym;
 
+  /* Make sure we do something sensible with is_a_field_of_this, since
+     the callers that set this parameter to some non-null value will
+     certainly use it later and expect it to be either 0 or 1.
+     If we don't set it, the contents of is_a_field_of_this are
+     undefined.  */
+  if (is_a_field_of_this != NULL)
+    *is_a_field_of_this = 0;
+
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
@@ -945,7 +953,6 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
     {
       struct value *v = current_language->la_value_of_this (0);
 
-      *is_a_field_of_this = 0;
       if (v && check_field (v, name))
 	{
 	  *is_a_field_of_this = 1;
@@ -1612,12 +1619,12 @@ lookup_transparent_type (const char *name)
 struct type *
 lookup_transparent_type_aux (const char *name)
 {
-  register struct symbol *sym;
-  register struct symtab *s = NULL;
-  register struct partial_symtab *ps;
+  struct symbol *sym;
+  struct symtab *s = NULL;
+  struct partial_symtab *ps;
   struct blockvector *bv;
-  register struct objfile *objfile;
-  register struct block *block;
+  struct objfile *objfile;
+  struct block *block;
 
   /* Now search all the global symbols.  Do the symtab's first, then
      check the psymtab's. If a psymtab indicates the existence
@@ -1716,8 +1723,8 @@ lookup_transparent_type_aux (const char *name)
 struct partial_symtab *
 find_main_psymtab (void)
 {
-  register struct partial_symtab *pst;
-  register struct objfile *objfile;
+  struct partial_symtab *pst;
+  struct objfile *objfile;
 
   ALL_PSYMTABS (objfile, pst)
   {
@@ -1745,7 +1752,7 @@ find_main_psymtab (void)
 */
 
 struct symbol *
-lookup_block_symbol (register const struct block *block, const char *name,
+lookup_block_symbol (const struct block *block, const char *name,
 		     const char *linkage_name,
 		     const domain_enum domain)
 {
@@ -1861,12 +1868,12 @@ find_active_alias (struct symbol *sym, CORE_ADDR addr)
 struct symtab *
 find_pc_sect_symtab (CORE_ADDR pc, asection *section)
 {
-  register struct block *b;
+  struct block *b;
   struct blockvector *bv;
-  register struct symtab *s = NULL;
-  register struct symtab *best_s = NULL;
-  register struct partial_symtab *ps;
-  register struct objfile *objfile;
+  struct symtab *s = NULL;
+  struct symtab *best_s = NULL;
+  struct partial_symtab *ps;
+  struct objfile *objfile;
   CORE_ADDR distance = 0;
   struct minimal_symbol *msymbol;
 
@@ -1990,10 +1997,10 @@ struct symtab_and_line
 find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
 {
   struct symtab *s;
-  register struct linetable *l;
-  register int len;
-  register int i;
-  register struct linetable_entry *item;
+  struct linetable *l;
+  int len;
+  int i;
+  struct linetable_entry *item;
   struct symtab_and_line val;
   struct blockvector *bv;
   struct minimal_symbol *msymbol;
@@ -2403,11 +2410,11 @@ find_line_pc_range (struct symtab_and_line sal, CORE_ADDR *startptr,
    Set *EXACT_MATCH nonzero if the value returned is an exact match.  */
 
 static int
-find_line_common (register struct linetable *l, register int lineno,
+find_line_common (struct linetable *l, int lineno,
 		  int *exact_match)
 {
-  register int i;
-  register int len;
+  int i;
+  int len;
 
   /* BEST is the smallest linenumber > LINENO so far seen,
      or 0 if none has been seen so far.
@@ -2424,7 +2431,7 @@ find_line_common (register struct linetable *l, register int lineno,
   len = l->nitems;
   for (i = 0; i < len; i++)
     {
-      register struct linetable_entry *item = &(l->item[i]);
+      struct linetable_entry *item = &(l->item[i]);
 
       if (item->line == lineno)
 	{
@@ -2532,7 +2539,7 @@ operator_chars (char *p, char **end)
 
   if (isalpha (*p) || *p == '_' || *p == '$')
     {
-      register char *q = p + 1;
+      char *q = p + 1;
       while (isalnum (*q) || *q == '_' || *q == '$')
 	q++;
       *end = q;
@@ -2722,9 +2729,9 @@ output_source_filename (char *name, int *first)
 static void
 sources_info (char *ignore, int from_tty)
 {
-  register struct symtab *s;
-  register struct partial_symtab *ps;
-  register struct objfile *objfile;
+  struct symtab *s;
+  struct partial_symtab *ps;
+  struct objfile *objfile;
   int first;
 
   if (!have_full_symbols () && !have_partial_symbols ())
@@ -2868,14 +2875,14 @@ void
 search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 		struct symbol_search **matches)
 {
-  register struct symtab *s;
-  register struct partial_symtab *ps;
-  register struct blockvector *bv;
+  struct symtab *s;
+  struct partial_symtab *ps;
+  struct blockvector *bv;
   struct blockvector *prev_bv = 0;
-  register struct block *b;
-  register int i = 0;
+  struct block *b;
+  int i = 0;
   struct dict_iterator iter;
-  register struct symbol *sym;
+  struct symbol *sym;
   struct partial_symbol **psym;
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
@@ -3692,9 +3699,9 @@ make_symbol_completion_list (char *text, char *word)
 char **
 make_file_symbol_completion_list (char *text, char *word, char *srcfile)
 {
-  register struct symbol *sym;
-  register struct symtab *s;
-  register struct block *b;
+  struct symbol *sym;
+  struct symtab *s;
+  struct block *b;
   struct dict_iterator iter;
   /* The symbol we are completing on.  Points in same buffer as text.  */
   char *sym_text;
@@ -3855,9 +3862,9 @@ not_interesting_fname (const char *fname)
 char **
 make_source_files_completion_list (char *text, char *word)
 {
-  register struct symtab *s;
-  register struct partial_symtab *ps;
-  register struct objfile *objfile;
+  struct symtab *s;
+  struct partial_symtab *ps;
+  struct objfile *objfile;
   int first = 1;
   int list_alloced = 1;
   int list_used = 0;

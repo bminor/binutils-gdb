@@ -1285,7 +1285,7 @@ m68hc11_elf_relax_delete_bytes (abfd, sec, addr, count)
    - The .page0 is a data section that is mapped in [0x0000..0x00FF].
      Page0 accesses are faster on the M68HC11. Soft registers used by GCC-m6811
      are located in .page0.
-   - The .vectors is the data section that represents the interrupt
+   - The .vectors is the section that represents the interrupt
      vectors.  */
 static struct bfd_elf_special_section const elf32_m68hc11_special_sections[]=
 {
@@ -1296,7 +1296,7 @@ static struct bfd_elf_special_section const elf32_m68hc11_special_sections[]=
   { ".page0",		0,	NULL,	0,
     SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
   { ".vectors",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+    SHT_PROGBITS,	SHF_ALLOC },
   { NULL,		0,	NULL,	0,
     0,			0 }
 };

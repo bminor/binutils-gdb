@@ -169,6 +169,7 @@ static char **prog_argv;
 
 #if 1
 static int maskw = 0;
+static int maskl = 0;
 #endif
 
 static SIM_OPEN_KIND sim_kind;
@@ -651,6 +652,7 @@ rbat_fast (memory, x, maskb)
 
 #define RUWAT(x)  (RWAT(x) & 0xffff)
 #define RSWAT(x)  ((short)(RWAT(x)))
+#define RSLAT(x)  ((long)(RLAT(x)))
 #define RSBAT(x)  (SEXT(RBAT(x)))
 
 #define RDAT(x, n) (do_rdat (memory, (x), (n), (maskl)))
@@ -1346,6 +1348,56 @@ macw (regs, memory, n, m, endianw)
       MACH = (mach & 0x1ff) | -(mach & 0x200);
     }
   MACL = sum;
+}
+
+static void
+macl (regs, memory, n, m)
+     int *regs;
+     unsigned char *memory;
+     int m, n;
+{
+  long tempm, tempn;
+  long prod, macl, mach, sum;
+  long long ans,ansl,ansh,t;
+  unsigned long long high,low,combine;
+  union mac64
+  {
+    long m[2]; /* mach and macl*/
+    long long m64; /* 64 bit MAC */
+  }mac64;
+
+  tempm = RSLAT(regs[m]);
+  regs[m] += 4;
+
+  tempn = RSLAT(regs[n]);
+  regs[n] += 4;
+
+  mach = MACH;
+  macl = MACL;
+
+  mac64.m[0] = macl;
+  mac64.m[1] = mach;
+
+  ans = (long long)tempm * (long long)tempn; /* Multiply 32bit * 32bit */
+
+  mac64.m64 += ans; /* Accumulate   64bit + 64 bit */
+
+  macl = mac64.m[0];
+  mach = mac64.m[1];
+
+  if (S)  /* Store only 48 bits of the result */
+    {
+      if (mach < 0) /* Result is negative */
+        {
+          mach = mach & 0x0000ffff; /* Mask higher 16 bits */
+          mach |= 0xffff8000; /* Sign extend higher 16 bits */
+        }
+      else
+        mach = mach & 0x00007fff; /* Postive Result */
+    }
+
+  MACL = macl;
+  MACH = mach;
 }
 
 static struct loop_bounds

@@ -1,3 +1,49 @@
+2003-09-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	REG_STRUCT_HAS_ADDR with DEPRECATED_REG_STRUCT_HAS_ADDR.
+
+2003-09-11  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	STACK_ALIGN with DEPRECATED_STACK_ALIGN.
+
+2003-08-18  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	"frame_red_zone_size".
+
+2003-08-09  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Backtrace): Replace "set/show backtrace-below-main"
+	with "set/show backtrace past-main" and "set/show backtrace
+	limit".
+
+2003-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (install-info): Support DESTDIR.
+	(install-html): Likewise.
+
+2003-08-07  Andrew Cagney  <cagney@redhat.com>
+
+	Patch from Nick Roberts.
+	* gdb.texinfo (Using GDB under GNU Emacs): Fix/update key
+	bindings.  Remove description of send-gdb-command.
+
+2003-08-07  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Mode Options): Mention that "mi2" was included in
+	GDB 6.0.
+
+2003-08-06  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Mode Options): Mention that level three is the
+	highest available and that level 2 is deprecated.
+	(Annotations Overview): Mention annotation levels. Cross reference
+	to "Limitations of the Annotation Interface" in annotate.texi.
+	(TODO, Value Annotations, Frame Annotations): Delete section.
+	(Displays, Breakpoint Info): Delete.
+
 2003-08-04  Andrew Cagney  <cagney@redhat.com>
 
 	* agentexpr.texi: Delete @bye.

@@ -4497,6 +4497,7 @@ test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 
 BFD_HOST_64BIT_LONG=0
+BFD_HOST_LONG_LONG=0
 BFD_HOST_64_BIT_DEFINED=0
 BFD_HOST_64_BIT=
 BFD_HOST_U_64_BIT=
@@ -4507,6 +4508,38 @@ elif test "x${HOST_64BIT_TYPE}" != "x"; then
   BFD_HOST_64_BIT=${HOST_64BIT_TYPE}
   BFD_HOST_U_64_BIT=${HOST_U_64BIT_TYPE}
 fi
+
+echo $ac_n "checking for long long""... $ac_c" 1>&6
+echo "configure:4514: checking for long long" >&5
+if eval "test \"`echo '$''{'bfd_cv_has_long_long'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 4519 "configure"
+#include "confdefs.h"
+
+int main() {
+unsigned long long ll = 18446744073709551615ULL;
+; return 0; }
+EOF
+if { (eval echo configure:4526: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  bfd_cv_has_long_long=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  bfd_cv_has_long_long=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$bfd_cv_has_long_long" 1>&6
+if test $bfd_cv_has_long_long = yes; then
+  BFD_HOST_LONG_LONG=1
+fi
+
+
 
 
 
@@ -4526,7 +4559,7 @@ if test "x$cross_compiling" = "xno"; then
   EXEEXT_FOR_BUILD='$(EXEEXT)'
 else
   echo $ac_n "checking for build system executable suffix""... $ac_c" 1>&6
-echo "configure:4530: checking for build system executable suffix" >&5
+echo "configure:4563: checking for build system executable suffix" >&5
 if eval "test \"`echo '$''{'bfd_cv_build_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4554,17 +4587,17 @@ for ac_hdr in stddef.h string.h strings.h stdlib.h time.h unistd.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:4558: checking for $ac_hdr" >&5
+echo "configure:4591: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4563 "configure"
+#line 4596 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4568: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4601: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -4594,17 +4627,17 @@ for ac_hdr in fcntl.h sys/file.h sys/time.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:4598: checking for $ac_hdr" >&5
+echo "configure:4631: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4603 "configure"
+#line 4636 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4608: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4641: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -4631,12 +4664,12 @@ fi
 done
 
 echo $ac_n "checking whether time.h and sys/time.h may both be included""... $ac_c" 1>&6
-echo "configure:4635: checking whether time.h and sys/time.h may both be included" >&5
+echo "configure:4668: checking whether time.h and sys/time.h may both be included" >&5
 if eval "test \"`echo '$''{'ac_cv_header_time'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4640 "configure"
+#line 4673 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/time.h>
@@ -4645,7 +4678,7 @@ int main() {
 struct tm *tp;
 ; return 0; }
 EOF
-if { (eval echo configure:4649: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4682: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_header_time=yes
 else
@@ -4670,12 +4703,12 @@ for ac_hdr in dirent.h sys/ndir.h sys/dir.h ndir.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr that defines DIR""... $ac_c" 1>&6
-echo "configure:4674: checking for $ac_hdr that defines DIR" >&5
+echo "configure:4707: checking for $ac_hdr that defines DIR" >&5
 if eval "test \"`echo '$''{'ac_cv_header_dirent_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4679 "configure"
+#line 4712 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <$ac_hdr>
@@ -4683,7 +4716,7 @@ int main() {
 DIR *dirp = 0;
 ; return 0; }
 EOF
-if { (eval echo configure:4687: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4720: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_header_dirent_$ac_safe=yes"
 else
@@ -4708,7 +4741,7 @@ done
 # Two versions of opendir et al. are in -ldir and -lx on SCO Xenix.
 if test $ac_header_dirent = dirent.h; then
 echo $ac_n "checking for opendir in -ldir""... $ac_c" 1>&6
-echo "configure:4712: checking for opendir in -ldir" >&5
+echo "configure:4745: checking for opendir in -ldir" >&5
 ac_lib_var=`echo dir'_'opendir | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4716,7 +4749,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldir  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4720 "configure"
+#line 4753 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4727,7 +4760,7 @@ int main() {
 opendir()
 ; return 0; }
 EOF
-if { (eval echo configure:4731: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4764: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4749,7 +4782,7 @@ fi
 
 else
 echo $ac_n "checking for opendir in -lx""... $ac_c" 1>&6
-echo "configure:4753: checking for opendir in -lx" >&5
+echo "configure:4786: checking for opendir in -lx" >&5
 ac_lib_var=`echo x'_'opendir | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4757,7 +4790,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lx  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4761 "configure"
+#line 4794 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4768,7 +4801,7 @@ int main() {
 opendir()
 ; return 0; }
 EOF
-if { (eval echo configure:4772: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4805: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4793,12 +4826,12 @@ fi
 for ac_func in fcntl getpagesize setitimer sysconf fdopen getuid getgid
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:4797: checking for $ac_func" >&5
+echo "configure:4830: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4802 "configure"
+#line 4835 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -4821,7 +4854,62 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:4825: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4858: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=yes"
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=no"
+fi
+rm -f conftest*
+fi
+
+if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_func=HAVE_`echo $ac_func | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_func 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+
+for ac_func in strtoull
+do
+echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
+echo "configure:4885: checking for $ac_func" >&5
+if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 4890 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char $ac_func();
+
+int main() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+$ac_func();
+#endif
+
+; return 0; }
+EOF
+if { (eval echo configure:4913: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -4856,12 +4944,12 @@ EOF
 esac
 
 echo $ac_n "checking whether strstr must be declared""... $ac_c" 1>&6
-echo "configure:4860: checking whether strstr must be declared" >&5
+echo "configure:4948: checking whether strstr must be declared" >&5
 if eval "test \"`echo '$''{'bfd_cv_decl_needed_strstr'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4865 "configure"
+#line 4953 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -4882,7 +4970,7 @@ int main() {
 char *(*pfn) = (char *(*)) strstr
 ; return 0; }
 EOF
-if { (eval echo configure:4886: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4974: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_strstr=no
 else
@@ -4903,12 +4991,12 @@ EOF
 fi
 
 echo $ac_n "checking whether malloc must be declared""... $ac_c" 1>&6
-echo "configure:4907: checking whether malloc must be declared" >&5
+echo "configure:4995: checking whether malloc must be declared" >&5
 if eval "test \"`echo '$''{'bfd_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4912 "configure"
+#line 5000 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -4929,7 +5017,7 @@ int main() {
 char *(*pfn) = (char *(*)) malloc
 ; return 0; }
 EOF
-if { (eval echo configure:4933: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5021: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_malloc=no
 else
@@ -4950,12 +5038,12 @@ EOF
 fi
 
 echo $ac_n "checking whether realloc must be declared""... $ac_c" 1>&6
-echo "configure:4954: checking whether realloc must be declared" >&5
+echo "configure:5042: checking whether realloc must be declared" >&5
 if eval "test \"`echo '$''{'bfd_cv_decl_needed_realloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4959 "configure"
+#line 5047 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -4976,7 +5064,7 @@ int main() {
 char *(*pfn) = (char *(*)) realloc
 ; return 0; }
 EOF
-if { (eval echo configure:4980: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5068: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_realloc=no
 else
@@ -4997,12 +5085,12 @@ EOF
 fi
 
 echo $ac_n "checking whether free must be declared""... $ac_c" 1>&6
-echo "configure:5001: checking whether free must be declared" >&5
+echo "configure:5089: checking whether free must be declared" >&5
 if eval "test \"`echo '$''{'bfd_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5006 "configure"
+#line 5094 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -5023,7 +5111,7 @@ int main() {
 char *(*pfn) = (char *(*)) free
 ; return 0; }
 EOF
-if { (eval echo configure:5027: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5115: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_free=no
 else
@@ -5044,12 +5132,12 @@ EOF
 fi
 
 echo $ac_n "checking whether getenv must be declared""... $ac_c" 1>&6
-echo "configure:5048: checking whether getenv must be declared" >&5
+echo "configure:5136: checking whether getenv must be declared" >&5
 if eval "test \"`echo '$''{'bfd_cv_decl_needed_getenv'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5053 "configure"
+#line 5141 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -5070,7 +5158,7 @@ int main() {
 char *(*pfn) = (char *(*)) getenv
 ; return 0; }
 EOF
-if { (eval echo configure:5074: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5162: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_getenv=no
 else
@@ -5097,7 +5185,7 @@ COREFLAG=
 TRAD_HEADER=
 if test "${target}" = "${host}"; then
   case "${host}" in
-  alpha*-*-freebsd*)
+  alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
 	COREFILE=''
 	;;
   alpha*-*-linux-gnu*)
@@ -5108,7 +5196,8 @@ if test "${target}" = "${host}"; then
 	COREFILE=netbsd-core.lo
 	;;
   alpha*-*-*)		COREFILE=osf-core.lo ;;
-  arm-*-freebsd*)	COREFILE='' ;;
+  arm-*-freebsd* | arm-*-kfreebsd*-gnu)
+			COREFILE='' ;;
   arm-*-netbsd*)	COREFILE=netbsd-core.lo ;;
   arm-*-riscix)		COREFILE=trad-core.lo ;;
   hppa*-*-hpux*)	COREFILE=hpux-core.lo ;;
@@ -5137,7 +5226,7 @@ if test "${target}" = "${host}"; then
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i386bsd.h"'
 	;;
-  i[3-7]86-*-freebsd*)
+  i[3-7]86-*-freebsd* | i[3-7]86-*-kfreebsd*-gnu)
 	COREFILE=''
 	TRAD_HEADER='"hosts/i386bsd.h"'
 	;;
@@ -5257,16 +5346,16 @@ if test "${target}" = "${host}"; then
 	# Not all versions of AIX with -DAIX_CORE_DUMPX_CORE
 	# have c_impl as a member of struct core_dumpx
 	echo $ac_n "checking for c_impl in struct core_dumpx""... $ac_c" 1>&6
-echo "configure:5261: checking for c_impl in struct core_dumpx" >&5
+echo "configure:5350: checking for c_impl in struct core_dumpx" >&5
 	cat > conftest.$ac_ext <<EOF
-#line 5263 "configure"
+#line 5352 "configure"
 #include "confdefs.h"
 #include <core.h>
 int main() {
 struct core_dumpx c; c.c_impl = 0;
 ; return 0; }
 EOF
-if { (eval echo configure:5270: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5359: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   cat >> confdefs.h <<\EOF
 #define HAVE_ST_C_IMPL 1
@@ -5286,7 +5375,8 @@ rm -f conftest*
   powerpc-*-aix4*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-beos*)	;;
-  powerpc-*-freebsd*)	COREFILE='' ;;
+  powerpc-*-freebsd* | powerpc-*-kfreebsd*-gnu)
+		        COREFILE='' ;;
   powerpc-*-netbsd*)	COREFILE=netbsd-core.lo ;;
   powerpc-*-*bsd*)	COREFILE=netbsd-core.lo ;;
   s390*-*-*)            COREFILE=trad-core.lo ;;
@@ -5336,17 +5426,17 @@ rm -f conftest*
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:5340: checking for $ac_hdr" >&5
+echo "configure:5430: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5345 "configure"
+#line 5435 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:5350: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:5440: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -5374,12 +5464,12 @@ done
 
   if test "$ac_cv_header_sys_procfs_h" = yes; then
     echo $ac_n "checking for prstatus_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5378: checking for prstatus_t in sys/procfs.h" >&5
+echo "configure:5468: checking for prstatus_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_prstatus_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5383 "configure"
+#line 5473 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5388,7 +5478,7 @@ int main() {
 prstatus_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5392: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5482: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_prstatus_t=yes
 else
@@ -5410,12 +5500,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_prstatus_t" 1>&6
 
     echo $ac_n "checking for prstatus32_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5414: checking for prstatus32_t in sys/procfs.h" >&5
+echo "configure:5504: checking for prstatus32_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_prstatus32_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5419 "configure"
+#line 5509 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5424,7 +5514,7 @@ int main() {
 prstatus32_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5428: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5518: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_prstatus32_t=yes
 else
@@ -5446,12 +5536,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_prstatus32_t" 1>&6
 
     echo $ac_n "checking for prstatus_t.pr_who in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5450: checking for prstatus_t.pr_who in sys/procfs.h" >&5
+echo "configure:5540: checking for prstatus_t.pr_who in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_member_prstatus_t_pr_who'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5455 "configure"
+#line 5545 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5460,7 +5550,7 @@ int main() {
 prstatus_t avar; void* aref = (void*) &avar.pr_who
 ; return 0; }
 EOF
-if { (eval echo configure:5464: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5554: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_member_prstatus_t_pr_who=yes
 else
@@ -5482,12 +5572,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_member_prstatus_t_pr_who" 1>&6
 
     echo $ac_n "checking for prstatus32_t.pr_who in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5486: checking for prstatus32_t.pr_who in sys/procfs.h" >&5
+echo "configure:5576: checking for prstatus32_t.pr_who in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_member_prstatus32_t_pr_who'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5491 "configure"
+#line 5581 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5496,7 +5586,7 @@ int main() {
 prstatus32_t avar; void* aref = (void*) &avar.pr_who
 ; return 0; }
 EOF
-if { (eval echo configure:5500: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5590: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_member_prstatus32_t_pr_who=yes
 else
@@ -5518,12 +5608,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_member_prstatus32_t_pr_who" 1>&6
 
     echo $ac_n "checking for pstatus_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5522: checking for pstatus_t in sys/procfs.h" >&5
+echo "configure:5612: checking for pstatus_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_pstatus_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5527 "configure"
+#line 5617 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5532,7 +5622,7 @@ int main() {
 pstatus_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5536: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5626: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_pstatus_t=yes
 else
@@ -5554,12 +5644,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_pstatus_t" 1>&6
 
     echo $ac_n "checking for pxstatus_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5558: checking for pxstatus_t in sys/procfs.h" >&5
+echo "configure:5648: checking for pxstatus_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_pxstatus_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5563 "configure"
+#line 5653 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5568,7 +5658,7 @@ int main() {
 pxstatus_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5572: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5662: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_pxstatus_t=yes
 else
@@ -5590,12 +5680,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_pxstatus_t" 1>&6
 
     echo $ac_n "checking for pstatus32_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5594: checking for pstatus32_t in sys/procfs.h" >&5
+echo "configure:5684: checking for pstatus32_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_pstatus32_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5599 "configure"
+#line 5689 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5604,7 +5694,7 @@ int main() {
 pstatus32_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5608: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5698: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_pstatus32_t=yes
 else
@@ -5626,12 +5716,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_pstatus32_t" 1>&6
 
     echo $ac_n "checking for prpsinfo_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5630: checking for prpsinfo_t in sys/procfs.h" >&5
+echo "configure:5720: checking for prpsinfo_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_prpsinfo_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5635 "configure"
+#line 5725 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5640,7 +5730,7 @@ int main() {
 prpsinfo_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5644: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5734: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_prpsinfo_t=yes
 else
@@ -5662,12 +5752,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_prpsinfo_t" 1>&6
 
     echo $ac_n "checking for prpsinfo32_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5666: checking for prpsinfo32_t in sys/procfs.h" >&5
+echo "configure:5756: checking for prpsinfo32_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_prpsinfo32_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5671 "configure"
+#line 5761 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5676,7 +5766,7 @@ int main() {
 prpsinfo32_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5680: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5770: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_prpsinfo32_t=yes
 else
@@ -5698,12 +5788,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_prpsinfo32_t" 1>&6
 
     echo $ac_n "checking for psinfo_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5702: checking for psinfo_t in sys/procfs.h" >&5
+echo "configure:5792: checking for psinfo_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_psinfo_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5707 "configure"
+#line 5797 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5712,7 +5802,7 @@ int main() {
 psinfo_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5716: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5806: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_psinfo_t=yes
 else
@@ -5734,12 +5824,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_psinfo_t" 1>&6
 
     echo $ac_n "checking for psinfo32_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5738: checking for psinfo32_t in sys/procfs.h" >&5
+echo "configure:5828: checking for psinfo32_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_psinfo32_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5743 "configure"
+#line 5833 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5748,7 +5838,7 @@ int main() {
 psinfo32_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5752: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5842: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_psinfo32_t=yes
 else
@@ -5770,12 +5860,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_psinfo32_t" 1>&6
 
     echo $ac_n "checking for lwpstatus_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5774: checking for lwpstatus_t in sys/procfs.h" >&5
+echo "configure:5864: checking for lwpstatus_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_lwpstatus_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5779 "configure"
+#line 5869 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5784,7 +5874,7 @@ int main() {
 lwpstatus_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5788: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5878: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_lwpstatus_t=yes
 else
@@ -5806,12 +5896,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_lwpstatus_t" 1>&6
 
     echo $ac_n "checking for lwpxstatus_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5810: checking for lwpxstatus_t in sys/procfs.h" >&5
+echo "configure:5900: checking for lwpxstatus_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_lwpxstatus_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5815 "configure"
+#line 5905 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5820,7 +5910,7 @@ int main() {
 lwpxstatus_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5824: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5914: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_lwpxstatus_t=yes
 else
@@ -5842,12 +5932,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_lwpxstatus_t" 1>&6
 
     echo $ac_n "checking for lwpstatus_t.pr_context in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5846: checking for lwpstatus_t.pr_context in sys/procfs.h" >&5
+echo "configure:5936: checking for lwpstatus_t.pr_context in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_context'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5851 "configure"
+#line 5941 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5856,7 +5946,7 @@ int main() {
 lwpstatus_t avar; void* aref = (void*) &avar.pr_context
 ; return 0; }
 EOF
-if { (eval echo configure:5860: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5950: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_context=yes
 else
@@ -5878,12 +5968,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_context" 1>&6
 
     echo $ac_n "checking for lwpstatus_t.pr_reg in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5882: checking for lwpstatus_t.pr_reg in sys/procfs.h" >&5
+echo "configure:5972: checking for lwpstatus_t.pr_reg in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_reg'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5887 "configure"
+#line 5977 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5892,7 +5982,7 @@ int main() {
 lwpstatus_t avar; void* aref = (void*) &avar.pr_reg
 ; return 0; }
 EOF
-if { (eval echo configure:5896: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5986: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_reg=yes
 else
@@ -5914,12 +6004,12 @@ EOF
  echo "$ac_t""$bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_reg" 1>&6
 
     echo $ac_n "checking for win32_pstatus_t in sys/procfs.h""... $ac_c" 1>&6
-echo "configure:5918: checking for win32_pstatus_t in sys/procfs.h" >&5
+echo "configure:6008: checking for win32_pstatus_t in sys/procfs.h" >&5
  if eval "test \"`echo '$''{'bfd_cv_have_sys_procfs_type_win32_pstatus_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5923 "configure"
+#line 6013 "configure"
 #include "confdefs.h"
 
 #define _SYSCALL32
@@ -5928,7 +6018,7 @@ int main() {
 win32_pstatus_t avar
 ; return 0; }
 EOF
-if { (eval echo configure:5932: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:6022: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_have_sys_procfs_type_win32_pstatus_t=yes
 else
@@ -6397,10 +6487,10 @@ case ${host64}-${target64}-${want64} in
     if test -n "$GCC" ; then
        bad_64bit_gcc=no;
        echo $ac_n "checking for gcc version with buggy 64-bit support""... $ac_c" 1>&6
-echo "configure:6401: checking for gcc version with buggy 64-bit support" >&5
+echo "configure:6491: checking for gcc version with buggy 64-bit support" >&5
        # Add more tests for gcc versions with non-working 64-bit support here.
        cat > conftest.$ac_ext <<EOF
-#line 6404 "configure"
+#line 6494 "configure"
 #include "confdefs.h"
 :__GNUC__:__GNUC_MINOR__:__i386__:
 EOF
@@ -6446,17 +6536,17 @@ for ac_hdr in unistd.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:6450: checking for $ac_hdr" >&5
+echo "configure:6540: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6455 "configure"
+#line 6545 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:6460: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:6550: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -6485,12 +6575,12 @@ done
 for ac_func in getpagesize
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:6489: checking for $ac_func" >&5
+echo "configure:6579: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6494 "configure"
+#line 6584 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -6513,7 +6603,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:6517: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:6607: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -6538,7 +6628,7 @@ fi
 done
 
 echo $ac_n "checking for working mmap""... $ac_c" 1>&6
-echo "configure:6542: checking for working mmap" >&5
+echo "configure:6632: checking for working mmap" >&5
 if eval "test \"`echo '$''{'ac_cv_func_mmap_fixed_mapped'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6546,7 +6636,7 @@ else
   ac_cv_func_mmap_fixed_mapped=no
 else
   cat > conftest.$ac_ext <<EOF
-#line 6550 "configure"
+#line 6640 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test.
@@ -6686,7 +6776,7 @@ main()
 }
 
 EOF
-if { (eval echo configure:6690: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:6780: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_func_mmap_fixed_mapped=yes
 else
@@ -6711,12 +6801,12 @@ fi
 for ac_func in madvise mprotect
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:6715: checking for $ac_func" >&5
+echo "configure:6805: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6720 "configure"
+#line 6810 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -6739,7 +6829,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:6743: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:6833: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -6972,6 +7062,7 @@ s%@MKINSTALLDIRS@%$MKINSTALLDIRS%g
 s%@l@%$l%g
 s%@HDEFINES@%$HDEFINES%g
 s%@BFD_HOST_64BIT_LONG@%$BFD_HOST_64BIT_LONG%g
+s%@BFD_HOST_LONG_LONG@%$BFD_HOST_LONG_LONG%g
 s%@BFD_HOST_64_BIT_DEFINED@%$BFD_HOST_64_BIT_DEFINED%g
 s%@BFD_HOST_64_BIT@%$BFD_HOST_64_BIT%g
 s%@BFD_HOST_U_64_BIT@%$BFD_HOST_U_64_BIT%g

@@ -39,7 +39,7 @@
 #include "regcache.h"
 #include "value.h"
 #include "gdb_assert.h"
-
+#include "dis-asm.h"
 
 
 
@@ -122,8 +122,7 @@ struct frame_extra_info
 static CORE_ADDR s390_frame_saved_pc_nofix (struct frame_info *fi);
 
 static int
-s390_readinstruction (bfd_byte instr[], CORE_ADDR at,
-		      struct disassemble_info *info)
+s390_readinstruction (bfd_byte instr[], CORE_ADDR at)
 {
   int instrlen;
 
@@ -133,12 +132,12 @@ s390_readinstruction (bfd_byte instr[], CORE_ADDR at,
     4,
     6
   };
-  if ((*info->read_memory_func) (at, &instr[0], 2, info))
+  if (target_read_memory (at, &instr[0], 2))
     return -1;
   instrlen = s390_instrlen[instr[0] >> 6];
   if (instrlen > 2)
     {
-      if ((*info->read_memory_func) (at + 2, &instr[2], instrlen - 2, info))
+      if (target_read_memory (at + 2, &instr[2], instrlen - 2))
         return -1;
     }
   return instrlen;
@@ -904,7 +903,7 @@ s390_get_signal_frame_info (struct frame_info *fi)
       /* We're definitely backtracing from a signal handler.  */
       CORE_ADDR *saved_regs = get_frame_saved_regs (fi);
       CORE_ADDR save_reg_addr = (get_frame_extra_info (next_frame)->sigcontext
-                                 + REGISTER_BYTE (S390_GP0_REGNUM));
+                                 + DEPRECATED_REGISTER_BYTE (S390_GP0_REGNUM));
       int reg;
 
       for (reg = 0; reg < S390_NUM_GPRS; reg++)
@@ -936,9 +935,6 @@ s390_get_frame_info (CORE_ADDR start_pc,
      -1 if we got an error trying to read memory.  */
   int result = 0;
 
-  /* We just use this for reading instructions.  */
-  disassemble_info info;
-
   /* The current PC for our abstract interpretation.  */
   CORE_ADDR pc;
 
@@ -966,8 +962,6 @@ s390_get_frame_info (CORE_ADDR start_pc,
      the SP, FP, or back chain.  */
   CORE_ADDR after_last_frame_setup_insn = start_pc;
 
-  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
-
   /* Set up everything's initial value.  */
   {
     int i;
@@ -991,7 +985,7 @@ s390_get_frame_info (CORE_ADDR start_pc,
   for (pc = start_pc; ; pc = next_pc)
     {
       bfd_byte insn[S390_MAX_INSTR_SIZE];
-      int insn_len = s390_readinstruction (insn, pc, &info);
+      int insn_len = s390_readinstruction (insn, pc);
 
       /* Fields for various kinds of instructions.  */
       unsigned int b2, r1, r2, d2, x2, r3;
@@ -1487,11 +1481,9 @@ static int
 s390_check_function_end (CORE_ADDR pc)
 {
   bfd_byte instr[S390_MAX_INSTR_SIZE];
-  disassemble_info info;
   int regidx, instrlen;
 
-  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
-  instrlen = s390_readinstruction (instr, pc, &info);
+  instrlen = s390_readinstruction (instr, pc);
   if (instrlen < 0)
     return -1;
   /* check for BR */
@@ -1500,7 +1492,7 @@ s390_check_function_end (CORE_ADDR pc)
   regidx = instr[1] & 0xf;
   /* Check for LMG or LG */
   instrlen =
-    s390_readinstruction (instr, pc - (GDB_TARGET_IS_ESAME ? 6 : 4), &info);
+    s390_readinstruction (instr, pc - (GDB_TARGET_IS_ESAME ? 6 : 4));
   if (instrlen < 0)
     return -1;
   if (GDB_TARGET_IS_ESAME)
@@ -1517,8 +1509,7 @@ s390_check_function_end (CORE_ADDR pc)
     return 0;
   if (regidx == 14)
     return 1;
-  instrlen = s390_readinstruction (instr, pc - (GDB_TARGET_IS_ESAME ? 12 : 8),
-				   &info);
+  instrlen = s390_readinstruction (instr, pc - (GDB_TARGET_IS_ESAME ? 12 : 8));
   if (instrlen < 0)
     return -1;
   if (GDB_TARGET_IS_ESAME)
@@ -1619,7 +1610,6 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
 		   CORE_ADDR *sregs, CORE_ADDR *sigcaller_pc)
 {
   bfd_byte instr[S390_MAX_INSTR_SIZE];
-  disassemble_info info;
   int instrlen;
   CORE_ADDR scontext;
   int retval = 0;
@@ -1628,8 +1618,7 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
 
   scontext = temp_sregs = 0;
 
-  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
-  instrlen = s390_readinstruction (instr, pc, &info);
+  instrlen = s390_readinstruction (instr, pc);
   if (sigcaller_pc)
     *sigcaller_pc = 0;
   if (((instrlen == S390_SYSCALL_SIZE) &&
@@ -1673,8 +1662,7 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
 	      *sigcaller_pc =
 		ADDR_BITS_REMOVE ((CORE_ADDR)
 				  read_memory_integer (temp_sregs +
-						       REGISTER_BYTE
-						       (S390_PC_REGNUM),
+						       DEPRECATED_REGISTER_BYTE (S390_PC_REGNUM),
 						       S390_PSW_ADDR_SIZE));
 	    }
 	}
@@ -1844,7 +1832,7 @@ s390_frame_chain (struct frame_info *thisframe)
 	{
 	  /* read sigregs,regs.gprs[11 or 15] */
 	  prev_fp = read_memory_integer (sregs +
-					 REGISTER_BYTE (S390_GP0_REGNUM +
+					 DEPRECATED_REGISTER_BYTE (S390_GP0_REGNUM +
 							(prev_fextra_info.
 							 frame_pointer_saved_pc
 							 ? 11 : 15)),
@@ -1897,7 +1885,7 @@ s390_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
   int len = TYPE_LENGTH (valtype);
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
-    memcpy (valbuf, &regbuf[REGISTER_BYTE (S390_FP0_REGNUM)], len);
+    memcpy (valbuf, &regbuf[DEPRECATED_REGISTER_BYTE (S390_FP0_REGNUM)], len);
   else
     {
       int offset = 0;
@@ -1905,7 +1893,7 @@ s390_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
       if (TYPE_LENGTH (valtype) < S390_GPR_SIZE)
 	offset = S390_GPR_SIZE - TYPE_LENGTH (valtype);
       memcpy (valbuf,
-	      regbuf + REGISTER_BYTE (S390_GP0_REGNUM + 2) + offset,
+	      regbuf + DEPRECATED_REGISTER_BYTE (S390_GP0_REGNUM + 2) + offset,
 	      TYPE_LENGTH (valtype));
     }
 }
@@ -1956,7 +1944,7 @@ s390_store_return_value (struct type *valtype, char *valbuf)
     {
       if (TYPE_LENGTH (valtype) == 4
           || TYPE_LENGTH (valtype) == 8)
-        deprecated_write_register_bytes (REGISTER_BYTE (S390_FP0_REGNUM),
+        deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (S390_FP0_REGNUM),
 					 valbuf, TYPE_LENGTH (valtype));
       else
         error ("GDB is unable to return `long double' values "
@@ -1967,30 +1955,10 @@ s390_store_return_value (struct type *valtype, char *valbuf)
       value =
 	s390_promote_integer_argument (valtype, valbuf, reg_buff, &arglen);
       /* Everything else is returned in GPR2 and up. */
-      deprecated_write_register_bytes (REGISTER_BYTE (S390_GP0_REGNUM + 2),
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (S390_GP0_REGNUM + 2),
 				       value, arglen);
     }
 }
-static int
-gdb_print_insn_s390 (bfd_vma memaddr, disassemble_info * info)
-{
-  bfd_byte instrbuff[S390_MAX_INSTR_SIZE];
-  int instrlen, cnt;
-
-  instrlen = s390_readinstruction (instrbuff, (CORE_ADDR) memaddr, info);
-  if (instrlen < 0)
-    {
-      (*info->memory_error_func) (instrlen, memaddr, info);
-      return -1;
-    }
-  for (cnt = 0; cnt < instrlen; cnt++)
-    info->fprintf_func (info->stream, "%02X ", instrbuff[cnt]);
-  for (cnt = instrlen; cnt < S390_MAX_INSTR_SIZE; cnt++)
-    info->fprintf_func (info->stream, "   ");
-  instrlen = print_insn_s390 (memaddr, info);
-  return instrlen;
-}
-
 
 
 /* Not the most efficent code in the world */
@@ -2394,7 +2362,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
           {
             /* When we store a single-precision value in an FP register,
                it occupies the leftmost bits.  */
-            deprecated_write_register_bytes (REGISTER_BYTE (S390_FP0_REGNUM + fr),
+            deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (S390_FP0_REGNUM + fr),
 					     VALUE_CONTENTS (arg),
 					     TYPE_LENGTH (type));
             fr += 2;
@@ -2567,7 +2535,7 @@ s390_addr_bits_remove (CORE_ADDR addr)
 static CORE_ADDR
 s390_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (S390_RETADDR_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (S390_RETADDR_REGNUM, entry_point_address ());
   return sp;
 }
 
@@ -2722,6 +2690,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
+  set_gdbarch_print_insn (gdbarch, print_insn_s390);
+
   return gdbarch;
 }
 
@@ -2735,6 +2705,4 @@ _initialize_s390_tdep (void)
 
   /* Hook us into the gdbarch mechanism.  */
   register_gdbarch_init (bfd_arch_s390, s390_gdbarch_init);
-  if (!deprecated_tm_print_insn)	/* Someone may have already set it */
-    deprecated_tm_print_insn = gdb_print_insn_s390;
 }

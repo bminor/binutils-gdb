@@ -338,7 +338,7 @@ free_so (struct so_list *so)
 static int
 symbol_add_stub (void *arg)
 {
-  register struct so_list *so = (struct so_list *) arg;  /* catch_errs bogon */
+  struct so_list *so = (struct so_list *) arg;  /* catch_errs bogon */
   struct section_addr_info *sap;
 
   /* Have we already loaded this shared object?  */
@@ -627,7 +627,7 @@ solib_add (char *pattern, int from_tty, struct target_ops *target, int readsyms)
 static void
 info_sharedlibrary_command (char *ignore, int from_tty)
 {
-  register struct so_list *so = NULL;	/* link map state variable */
+  struct so_list *so = NULL;	/* link map state variable */
   int header_done = 0;
   int addr_width;
   char *addr_fmt;
@@ -709,7 +709,7 @@ info_sharedlibrary_command (char *ignore, int from_tty)
 char *
 solib_address (CORE_ADDR address)
 {
-  register struct so_list *so = 0;	/* link map state variable */
+  struct so_list *so = 0;	/* link map state variable */
 
   for (so = so_list_head; so; so = so->next)
     {

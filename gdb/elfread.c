@@ -77,7 +77,7 @@ static void free_elfinfo (void *);
 static void
 elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
 {
-  register struct elfinfo *ei;
+  struct elfinfo *ei;
 
   ei = (struct elfinfo *) eip;
   if (STREQ (sectp->name, ".debug"))

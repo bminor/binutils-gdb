@@ -118,7 +118,6 @@ struct m68hc11_elf_link_hash_table
   unsigned int bfd_count;
   int top_index;
   asection **input_list;
-  Elf_Internal_Sym **all_local_syms;
 
   /* Small local sym to section mapping cache.  */
   struct sym_sec_cache sym_sec;

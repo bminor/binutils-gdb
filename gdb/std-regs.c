@@ -90,7 +90,7 @@ value_of_builtin_frame_fp_reg (struct frame_info *frame)
 	memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
       else
 	ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
-			    get_frame_base (frame));
+			    get_frame_base_address (frame));
       return val;
     }
 }

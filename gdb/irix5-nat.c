@@ -53,8 +53,8 @@ static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 void
 supply_gregset (gregset_t *gregsetp)
 {
-  register int regi;
-  register greg_t *regp = &(*gregsetp)[0];
+  int regi;
+  greg_t *regp = &(*gregsetp)[0];
   int gregoff = sizeof (greg_t) - MIPS_REGSIZE;
   static char zerobuf[32] = {0};
 
@@ -74,7 +74,7 @@ void
 fill_gregset (gregset_t *gregsetp, int regno)
 {
   int regi;
-  register greg_t *regp = &(*gregsetp)[0];
+  greg_t *regp = &(*gregsetp)[0];
 
   /* Under Irix6, if GDB is built with N32 ABI and is debugging an O32
      executable, we have to sign extend the registers to 64 bits before
@@ -83,27 +83,27 @@ fill_gregset (gregset_t *gregsetp, int regno)
   for (regi = 0; regi <= CTX_RA; regi++)
     if ((regno == -1) || (regno == regi))
       *(regp + regi) =
-	extract_signed_integer (&deprecated_registers[REGISTER_BYTE (regi)],
+	extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)],
 				REGISTER_RAW_SIZE (regi));
 
   if ((regno == -1) || (regno == PC_REGNUM))
     *(regp + CTX_EPC) =
-      extract_signed_integer (&deprecated_registers[REGISTER_BYTE (PC_REGNUM)],
+      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)],
 			      REGISTER_RAW_SIZE (PC_REGNUM));
 
   if ((regno == -1) || (regno == CAUSE_REGNUM))
     *(regp + CTX_CAUSE) =
-      extract_signed_integer (&deprecated_registers[REGISTER_BYTE (CAUSE_REGNUM)],
+      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (CAUSE_REGNUM)],
 			      REGISTER_RAW_SIZE (CAUSE_REGNUM));
 
   if ((regno == -1) || (regno == HI_REGNUM))
     *(regp + CTX_MDHI) =
-      extract_signed_integer (&deprecated_registers[REGISTER_BYTE (HI_REGNUM)],
+      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (HI_REGNUM)],
 			      REGISTER_RAW_SIZE (HI_REGNUM));
 
   if ((regno == -1) || (regno == LO_REGNUM))
     *(regp + CTX_MDLO) =
-      extract_signed_integer (&deprecated_registers[REGISTER_BYTE (LO_REGNUM)],
+      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (LO_REGNUM)],
 			      REGISTER_RAW_SIZE (LO_REGNUM));
 }
 
@@ -118,7 +118,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   static char zerobuf[32] = {0};
 
   /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */
@@ -145,14 +145,14 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  from = (char *) &deprecated_registers[REGISTER_BYTE (regi)];
+	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
 	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
 
   if ((regno == -1) || (regno == FCRCS_REGNUM))
-    fpregsetp->fp_csr = *(unsigned *) &deprecated_registers[REGISTER_BYTE (FCRCS_REGNUM)];
+    fpregsetp->fp_csr = *(unsigned *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (FCRCS_REGNUM)];
 }
 
 

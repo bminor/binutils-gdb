@@ -59,8 +59,8 @@ static void
 fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
 			  int which, CORE_ADDR reg_addr)
 {
-  register int regno;
-  register int addr;
+  int regno;
+  int addr;
   int bad_reg = -1;
 
   /* Table to map a gdb regnum to an index in the core register
@@ -200,7 +200,7 @@ kernel_u_size (void)
 void
 supply_gregset (gdb_gregset_t *gregsetp)
 {
-  register long *regp = ALPHA_REGSET_BASE (gregsetp);
+  long *regp = ALPHA_REGSET_BASE (gregsetp);
   void *unique = ALPHA_REGSET_UNIQUE (gregsetp);
 
   /* PC is in slot 32.  */
@@ -210,7 +210,7 @@ supply_gregset (gdb_gregset_t *gregsetp)
 void
 fill_gregset (gdb_gregset_t *gregsetp, int regno)
 {
-  register long *regp = ALPHA_REGSET_BASE (gregsetp);
+  long *regp = ALPHA_REGSET_BASE (gregsetp);
   void *unique = ALPHA_REGSET_UNIQUE (gregsetp);
 
   /* PC is in slot 32.  */
@@ -225,7 +225,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 void
 supply_fpregset (gdb_fpregset_t *fpregsetp)
 {
-  register long *regp = ALPHA_REGSET_BASE (fpregsetp);
+  long *regp = ALPHA_REGSET_BASE (fpregsetp);
 
   /* FPCR is in slot 32.  */
   alpha_supply_fp_regs (-1, regp, regp + 31);
@@ -234,7 +234,7 @@ supply_fpregset (gdb_fpregset_t *fpregsetp)
 void
 fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 {
-  register long *regp = ALPHA_REGSET_BASE (fpregsetp);
+  long *regp = ALPHA_REGSET_BASE (fpregsetp);
 
   /* FPCR is in slot 32.  */
   alpha_fill_fp_regs (regno, regp, regp + 31);

@@ -285,7 +285,7 @@ ppc_elf_link_hash_table_create (bfd *abfd)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-ppc_elf_copy_indirect_symbol (struct elf_backend_data *bed,
+ppc_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
 			      struct elf_link_hash_entry *dir,
 			      struct elf_link_hash_entry *ind)
 {
@@ -2581,11 +2581,12 @@ elf_finish_pointer_linker_section (bfd *output_bfd,
 	      asection *srel = lsect->rel_section;
 	      Elf_Internal_Rela outrel[MAX_INT_RELS_PER_EXT_REL];
 	      bfd_byte *erel;
-	      struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
+	      const struct elf_backend_data *bed;
 	      unsigned int i;
 
 	      BFD_ASSERT (srel != NULL);
 
+	      bed = get_elf_backend_data (output_bfd);
 	      for (i = 0; i < bed->s->int_rels_per_ext_rel; i++)
 		{
 		  outrel[i].r_offset = (lsect->section->output_section->vma
@@ -4717,6 +4718,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
       unresolved_reloc = FALSE;
       warned = FALSE;
       r_symndx = ELF32_R_SYM (rel->r_info);
+
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -4727,44 +4729,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
+				   symtab_hdr, relocation, sec,
+				   unresolved_reloc, info,
+				   warned);
+	  
 	  sym_name = h->root.root.string;
-
-	  relocation = 0;
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-	      /* Set a flag that will be cleared later if we find a
-		 relocation value for this symbol.  output_section
-		 is typically NULL for symbols satisfied by a shared
-		 library.  */
-	      if (sec->output_section == NULL)
-		unresolved_reloc = TRUE;
-	      else
-		relocation = (h->root.u.def.value
-			      + sec->output_section->vma
-			      + sec->output_offset);
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    ;
-	  else if (!info->executable
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    ;
-	  else
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd, input_section,
-		      rel->r_offset, (!info->shared
-				      || info->no_undefined
-				      || ELF_ST_VISIBILITY (h->other)))))
-		return FALSE;
-	      warned = TRUE;
-	    }
 	}
 
       /* TLS optimizations.  Replace instruction sequences and relocs
@@ -5499,49 +5469,16 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      }
 	    else
 	      {
-		long indx;
+		bfd_boolean warned;
+		bfd_boolean unresolved_reloc;
 
-		indx = r_symndx - symtab_hdr->sh_info;
-		h = elf_sym_hashes (input_bfd)[indx];
-		while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-		  h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-		value = 0;
-		if (h->root.type == bfd_link_hash_defined
-		    || h->root.type == bfd_link_hash_defweak)
-		  {
-		    sym_sec = h->root.u.def.section;
-
-		    /* Detect the cases that sym_sec->output_section is
-		       expected to be NULL -- all cases in which the symbol
-		       is defined in another shared module.  This includes
-		       PLT relocs for which we've created a PLT entry and
-		       other relocs for which we're prepared to create
-		       dynamic relocations.  */
-		    /* ??? Just accept it NULL and continue.  */
-
-		    if (sym_sec->output_section != NULL)
-		      {
-			value = (h->root.u.def.value
-				 + sym_sec->output_section->vma
-				 + sym_sec->output_offset);
-		      }
-		  }
-		else if (info->shared
-			 && !info->no_undefined
-			 && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-		  ;
-		else
-		  {
-		    if (! ((*info->callbacks->undefined_symbol)
-			   (info, h->root.root.string, input_bfd,
-			    input_section, rel->r_offset,
-			    (!info->shared || info->no_undefined
-			     || ELF_ST_VISIBILITY (h->other)))))
-		      return FALSE;
-		    continue;
-		  }
+		RELOC_FOR_GLOBAL_SYMBOL (h, elf_sym_hashes (input_bfd),
+					 r_symndx, symtab_hdr,
+					 value, sym_sec,
+					 unresolved_reloc, info,
+					 warned);
+		if (warned)
+		  continue;
 	      }
 	    hit_addr = contents + rel->r_offset;
 	    value += rel->r_addend;

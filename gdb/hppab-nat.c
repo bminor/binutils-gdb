@@ -54,9 +54,9 @@
 static void
 fetch_register (int regno)
 {
-  register unsigned int regaddr;
+  unsigned int regaddr;
   char buf[MAX_REGISTER_SIZE];
-  register int i;
+  int i;
 
   /* Offset of registers within the u area.  */
   unsigned int offset;
@@ -104,9 +104,9 @@ fetch_inferior_registers (int regno)
 void
 store_inferior_registers (int regno)
 {
-  register unsigned int regaddr;
+  unsigned int regaddr;
   char buf[80];
-  register int i;
+  int i;
   unsigned int offset = U_REGS_OFFSET;
   int scratch;
 
@@ -118,7 +118,7 @@ store_inferior_registers (int regno)
       errno = 0;
       if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
 	{
-	  scratch = *(int *) &deprecated_registers[REGISTER_BYTE (regno)] | 0x3;
+	  scratch = *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)] | 0x3;
 	  ptrace (PT_WUREGS, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) regaddr,
 		  scratch);
 	  if (errno != 0)
@@ -135,7 +135,7 @@ store_inferior_registers (int regno)
 	    errno = 0;
 	    ptrace (PT_WUREGS, PIDGET (inferior_ptid),
 	            (PTRACE_ARG3_TYPE) regaddr,
-		    *(int *) &deprecated_registers[REGISTER_BYTE (regno) + i]);
+		    *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno) + i]);
 	    if (errno != 0)
 	      {
 		/* Warning, not error, in case we are attached; sometimes the

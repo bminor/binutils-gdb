@@ -1,4 +1,4 @@
-#   Copyright 2002
+#   Copyright 2002, 2003
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -31,15 +31,6 @@ set bug_id 0
 # are we on a target board
 if [is_remote target] {
     return
-}
-
-if [istarget "m68k*-*-hpux*"] then {
-    # The top-level makefile passes CFLAGS= (no -g) for hp300.  This probably
-    # should be fixed (it is only needed for gcc bootstrapping, not gdb),
-    # but until then.....
-    setup_xfail "*-*-*"
-    fail "cannot test self if compiled without debug info"
-    return -1
 }
 
 proc setup_test { executable } {

@@ -851,8 +851,8 @@ java_emit_char (int c, struct ui_file *stream, int quoter)
 }
 
 static struct value *
-evaluate_subexp_java (struct type *expect_type, register struct expression *exp,
-		      register int *pos, enum noside noside)
+evaluate_subexp_java (struct type *expect_type, struct expression *exp,
+		      int *pos, enum noside noside)
 {
   int pc = *pos;
   int i;

@@ -1430,6 +1430,9 @@ case "${target}" in
 	sim_target=h8300 
 	extra_subdirs="${extra_subdirs} testsuite"
 	;;
+  frv-*-*)		sim_target=frv
+	extra_subdirs="${extra_subdirs} testsuite"
+	;;
   h8500-*-*)		sim_target=h8500 ;;
   i960-*-*)		sim_target=i960 ;;
   m32r-*-*)		sim_target=m32r ;;

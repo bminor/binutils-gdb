@@ -27,6 +27,7 @@
 #include "regcache.h"
 #include "gdbcore.h"
 #include "objfiles.h"
+#include "dis-asm.h"
 
 struct gdbarch_tdep
 {
@@ -220,7 +221,7 @@ xstormy16_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       /* Scalar return values of <= 12 bytes are returned in 
          E_1ST_ARG_REGNUM to E_LST_ARG_REGNUM. */
       memcpy (valbuf,
-	      &regbuf[REGISTER_BYTE (E_1ST_ARG_REGNUM)] + offset,
+	      &regbuf[DEPRECATED_REGISTER_BYTE (E_1ST_ARG_REGNUM)] + offset,
 	      TYPE_LENGTH (type));
     }
   else
@@ -228,7 +229,7 @@ xstormy16_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       /* Aggregates and return values > 12 bytes are returned in memory,
          pointed to by R2. */
       return_buffer =
-	extract_unsigned_integer (regbuf + REGISTER_BYTE (E_PTR_RET_REGNUM),
+	extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (E_PTR_RET_REGNUM),
 				  REGISTER_RAW_SIZE (E_PTR_RET_REGNUM));
 
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
@@ -312,7 +313,7 @@ xstormy16_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[xstormy16_pc_size];
 
-  store_unsigned_integer (buf, xstormy16_pc_size, CALL_DUMMY_ADDRESS ());
+  store_unsigned_integer (buf, xstormy16_pc_size, entry_point_address ());
   write_memory (sp, buf, xstormy16_pc_size);
   return sp + xstormy16_pc_size;
 }
@@ -392,7 +393,7 @@ xstormy16_store_return_value (struct type *type, char *valbuf)
     }
   else if (xstormy16_type_is_scalar (type) &&
 	   TYPE_LENGTH (type) <= E_MAX_RETTYPE_SIZE_IN_REGS)
-    deprecated_write_register_bytes (REGISTER_BYTE (E_1ST_ARG_REGNUM),
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (E_1ST_ARG_REGNUM),
 				     valbuf, TYPE_LENGTH (type));
   else
     {
@@ -1102,7 +1103,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_address_to_pointer (gdbarch, xstormy16_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, xstormy16_pointer_to_address);
 
-  set_gdbarch_stack_align (gdbarch, xstormy16_stack_align);
+  set_gdbarch_deprecated_stack_align (gdbarch, xstormy16_stack_align);
 
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, xstormy16_save_dummy_frame_tos);
 
@@ -1113,6 +1114,8 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
+
+  set_gdbarch_print_insn (gdbarch, print_insn_xstormy16);
 
   return gdbarch;
 }
@@ -1126,8 +1129,5 @@ extern initialize_file_ftype _initialize_xstormy16_tdep; /* -Wmissing-prototypes
 void
 _initialize_xstormy16_tdep (void)
 {
-  extern int print_insn_xstormy16 ();
-
   register_gdbarch_init (bfd_arch_xstormy16, xstormy16_gdbarch_init);
-  deprecated_tm_print_insn = print_insn_xstormy16;
 }

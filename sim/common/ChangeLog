@@ -1,3 +1,26 @@
+2003-09-08  Dave Brolley  <brolley@redhat.com>
+
+	On behalf of Doug Evans <dje@sebabeach.org>
+	* cgen.sh: New arg archfile.
+	* Make-common.in (cgen-arch,cgen-cpu,cgen-defs,cgen-decode,
+	cgen-cpu-decode,cgen-desc): Update call to cgen.sh.
+
+2003-08-28  Andrew Cagney  <cagney@redhat.com>
+
+	* dv-glue.c (hw_glue_finish): Change %d to %ld to match sizeof.
+	* sim-options.c (print_help): Cast the format with specifier to
+	"int".
+
+2003-08-20  Michael Snyder  <msnyder@redhat.com>
+            Dave Brolley  <brolley@redhat.com>
+
+	* cgen-par.h (flags, word1): New target-specific 
+	fields of CGEN_WRITE_QUEUE_ELEMENT.
+	(CGEN_WRITE_QUEUE_ELEMENT_FLAGS): New accessor macro.
+	(CGEN_WRITE_QUEUE_ELEMENT_WORD1): New accessor macro.
+	* gennltvals.sh: Add frv target.
+	* nltvals.def: Add frv target.
+
 2003-06-23  Michael Snyder  <msnyder@redhat.com>
 
 	* nrun.c (main): Delete h8/300 ifdef (sim now handles signals).

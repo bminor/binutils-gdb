@@ -86,8 +86,8 @@ static void
 java_type_print_base (struct type *type, struct ui_file *stream, int show,
 		      int level)
 {
-  register int i;
-  register int len;
+  int i;
+  int len;
   char *mangled_name;
   char *demangled_name;
   QUIT;

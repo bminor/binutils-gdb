@@ -219,7 +219,7 @@ clear_current_source_symtab_and_line (void)
    before we need to would make things slower than necessary.  */
 
 void
-select_source_symtab (register struct symtab *s)
+select_source_symtab (struct symtab *s)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -317,8 +317,8 @@ show_directories (char *ignore, int from_tty)
 void
 forget_cached_source_info (void)
 {
-  register struct symtab *s;
-  register struct objfile *objfile;
+  struct symtab *s;
+  struct objfile *objfile;
   struct partial_symtab *pst;
 
   for (objfile = object_files; objfile != NULL; objfile = objfile->next)
@@ -418,7 +418,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
   do
     {
       char *name = dirname;
-      register char *p;
+      char *p;
       struct stat st;
 
       {
@@ -526,7 +526,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
 
     append:
       {
-	register unsigned int len = strlen (name);
+	unsigned int len = strlen (name);
 
 	p = *which_path;
 	while (1)
@@ -594,7 +594,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
 static void
 source_info (char *ignore, int from_tty)
 {
-  register struct symtab *s = current_source_symtab;
+  struct symtab *s = current_source_symtab;
 
   if (!s)
     {
@@ -660,11 +660,11 @@ openp (const char *path, int try_cwd_first, const char *string,
        int mode, int prot,
        char **filename_opened)
 {
-  register int fd;
-  register char *filename;
+  int fd;
+  char *filename;
   const char *p;
   const char *p1;
-  register int len;
+  int len;
   int alloclen;
 
   if (!path)
@@ -907,7 +907,7 @@ void
 find_source_lines (struct symtab *s, int desc)
 {
   struct stat st;
-  register char *data, *p, *end;
+  char *data, *p, *end;
   int nlines = 0;
   int lines_allocated = 1000;
   int *line_charpos;
@@ -1019,10 +1019,10 @@ source_line_charpos (struct symtab *s, int line)
 /* Return the line number of character position POS in symtab S.  */
 
 int
-source_charpos_line (register struct symtab *s, register int chr)
+source_charpos_line (struct symtab *s, int chr)
 {
-  register int line = 0;
-  register int *lnp;
+  int line = 0;
+  int *lnp;
 
   if (s == 0 || s->line_charpos == 0)
     return 0;
@@ -1049,7 +1049,7 @@ source_charpos_line (register struct symtab *s, register int chr)
 static int
 get_filename_and_charpos (struct symtab *s, char **fullname)
 {
-  register int desc, linenums_changed = 0;
+  int desc, linenums_changed = 0;
 
   desc = open_source_file (s);
   if (desc < 0)
@@ -1107,9 +1107,9 @@ static void print_source_lines_base (struct symtab *s, int line, int stopline,
 static void
 print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 {
-  register int c;
-  register int desc;
-  register FILE *stream;
+  int c;
+  int desc;
+  FILE *stream;
   int nlines = stopline - line;
 
   /* Regardless of whether we can open the file, set current_source_symtab. */
@@ -1351,9 +1351,9 @@ line_info (char *arg, int from_tty)
 static void
 forward_search_command (char *regex, int from_tty)
 {
-  register int c;
-  register int desc;
-  register FILE *stream;
+  int c;
+  int desc;
+  FILE *stream;
   int line;
   char *msg;
 
@@ -1390,7 +1390,7 @@ forward_search_command (char *regex, int from_tty)
   while (1)
     {
       static char *buf = NULL;
-      register char *p;
+      char *p;
       int cursize, newsize;
 
       cursize = 256;
@@ -1447,9 +1447,9 @@ forward_search_command (char *regex, int from_tty)
 static void
 reverse_search_command (char *regex, int from_tty)
 {
-  register int c;
-  register int desc;
-  register FILE *stream;
+  int c;
+  int desc;
+  FILE *stream;
   int line;
   char *msg;
 
@@ -1487,7 +1487,7 @@ reverse_search_command (char *regex, int from_tty)
     {
 /* FIXME!!!  We walk right off the end of buf if we get a long line!!! */
       char buf[4096];		/* Should be reasonable??? */
-      register char *p = buf;
+      char *p = buf;
 
       c = getc (stream);
       if (c == EOF)

@@ -264,6 +264,9 @@ AC_CHECK_LIB(m, main)
 AC_CHECK_FUNC(wctype, [],
   [AC_CHECK_LIB(w, wctype)])
 
+# Some systems (e.g. Solaris) have `gethostbyname' in libnsl.
+AC_SEARCH_LIBS(gethostbyname, nsl)
+
 # Some systems (e.g. Solaris) have `socketpair' in libsocket.
 AC_SEARCH_LIBS(socketpair, socket)
 
@@ -526,7 +529,6 @@ AC_CACHE_CHECK([for uintptr_t in stdint.h], gdb_cv_have_uintptr_t,
     [uintptr_t foo = 0;],
     gdb_cv_have_uintptr_t=yes,
     gdb_cv_have_uintptr_t=no)])
-AC_MSG_RESULT($gdb_cv_have_uintptr_t)
 if test $gdb_cv_have_uintptr_t = yes; then
   AC_DEFINE(HAVE_UINTPTR_T, 1, [Define if <stdint.h> provides the uintptr_t type.])
 fi
@@ -1304,10 +1306,6 @@ targetfile=`sed -n '
 s/TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${target_makefile_frag}`
 
-GDB_MULTI_ARCH=`sed -n '
-s/GDB_MULTI_ARCH[ 	]*=[ 	]*\([^ 	]*\)[ 	]*/\1/p
-' ${target_makefile_frag}`
-
 if test "${target}" = "${host}"; then
 # We pick this up from the host configuration file (.mh) because we
 # do not have a native configuration Makefile fragment.
@@ -1316,33 +1314,6 @@ s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${host_makefile_frag}`
 fi
 changequote([,])
-
-# New targets should just set gdb_multi_arch=yes in configure.tgt.
-# Old targets being converted can either do that or set GDB_MULTI_ARCH
-# in the target specific makefile frag.  Eventually gdb_multi_arch=yes
-# will be the default.
-if test x"${GDB_MULTI_ARCH}" = x ; then
-    case "${gdb_multi_arch}" in
-    yes ) GDB_MULTI_ARCH=GDB_MULTI_ARCH_PURE ;;
-    no ) GDB_MULTI_ARCH=0 ;;
-    0|1|2 ) GDB_MULTI_ARCH=${gdb_multi_arch} ;;
-    esac
-fi
-if test x"${GDB_MULTI_ARCH}" != x ; then
-    AC_DEFINE_UNQUOTED(GDB_MULTI_ARCH, ${GDB_MULTI_ARCH})
-fi
-# Warn the user when they use an old practice
-case "${GDB_MULTI_ARCH}" in
-    "" ) ;;
-    0 | GDB_MULTI_ARCH_PARTIAL | 1 | GDB_MULTI_ARCH_TM | 2 )
-	AC_MSG_WARN("GDB: Target is not pure multi-arch") ;;
-    GDB_MULTI_ARCH_PURE )
-	if test x"${targetfile}" != x ; then
-	    AC_MSG_WARN("GDB: Ignoring TM_FILE in ${target_makefile_frag}")
-	    targetfile=""
-	fi ;;
-    *)  AC_MSG_ERROR("GDB: Unknown GDB_MULTI_ARCH value ${GDB_MULTI_ARCH}");;
-esac
 
 if test x"${gdb_osabi}" != x ; then
     AC_DEFINE_UNQUOTED(GDB_OSABI_DEFAULT, $gdb_osabi,

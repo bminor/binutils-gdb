@@ -1518,7 +1518,7 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
       /* If the die has a sibling, skip to the sibling, unless another
 	 function has already updated info_ptr for us.  */
 
-      /* NOTE: carlton/2003-01-07: This is a bit hackish, but whether
+      /* NOTE: carlton/2003-06-16: This is a bit hackish, but whether
 	 or not we want to update this depends on enough stuff (not
 	 only pdi.tag but also whether or not pdi.name is NULL) that
 	 this seems like the easiest way to handle the issue.  */
@@ -1812,15 +1812,16 @@ add_partial_enumeration (struct partial_die_info *enum_pdi, char *info_ptr,
       info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu_header);
       if (pdi.tag == 0)
 	break;
-      gdb_assert (pdi.tag == DW_TAG_enumerator);
-      gdb_assert (pdi.name != NULL);
-      add_partial_symbol (&pdi, objfile, cu_header, namespace);
+      if (pdi.tag != DW_TAG_enumerator || pdi.name == NULL)
+	complaint (&symfile_complaints, "malformed enumerator DIE ignored");
+      else
+	add_partial_symbol (&pdi, objfile, cu_header, namespace);
     }
 
   return info_ptr;
 }
 
-/* Locate ORIG_PDI's sibling; INFO_PTR should point to the next PDI
+/* Locate ORIG_PDI's sibling; INFO_PTR should point to the next DIE
    after ORIG_PDI.  */
 
 static char *
@@ -2164,8 +2165,8 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
   if (objfile->ei.entry_point >= lowpc &&
       objfile->ei.entry_point < highpc)
     {
-      objfile->ei.entry_file_lowpc = lowpc;
-      objfile->ei.entry_file_highpc = highpc;
+      objfile->ei.deprecated_entry_file_lowpc = lowpc;
+      objfile->ei.deprecated_entry_file_highpc = highpc;
     }
 
   attr = dwarf_attr (die, DW_AT_language);
@@ -2258,7 +2259,7 @@ static void
 read_func_scope (struct die_info *die, struct objfile *objfile,
 		 const struct comp_unit_head *cu_header)
 {
-  register struct context_stack *new;
+  struct context_stack *new;
   CORE_ADDR lowpc;
   CORE_ADDR highpc;
   struct die_info *child_die;
@@ -2369,7 +2370,7 @@ static void
 read_lexical_block_scope (struct die_info *die, struct objfile *objfile,
 			  const struct comp_unit_head *cu_header)
 {
-  register struct context_stack *new;
+  struct context_stack *new;
   CORE_ADDR lowpc, highpc;
   struct die_info *child_die;
 
@@ -2439,7 +2440,7 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 	  unsigned int addr_size = cu_header->addr_size;
 	  CORE_ADDR mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
 	  /* Value of the DW_AT_ranges attribute is the offset in the
-	     .debug_renges section.  */
+	     .debug_ranges section.  */
 	  unsigned int offset = DW_UNSND (attr);
 	  /* Base address selection entry.  */
 	  CORE_ADDR base;
@@ -2452,6 +2453,14 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
  
 	  found_base = cu_header->base_known;
 	  base = cu_header->base_address;
+
+	  if (offset >= dwarf_ranges_size)
+	    {
+	      complaint (&symfile_complaints,
+	                 "Offset %d out of bounds for DW_AT_ranges attribute",
+			 offset);
+	      return 0;
+	    }
 	  buffer = dwarf_ranges_buffer + offset;
 
 	  /* Read in the largest possible address.  */
@@ -3565,16 +3574,9 @@ read_namespace (struct die_info *die, struct objfile *objfile,
       processing_current_prefix = temp_name;
     }
 
-  /* If it's an anonymous namespace that we're seeing for the first
-     time, add a using directive.  */
-
-  if (is_anonymous && dwarf_attr (die, DW_AT_extension) == NULL)
-    cp_add_using_directive (processing_current_prefix,
-			    strlen (previous_prefix),
-			    strlen (processing_current_prefix));
-
   /* Add a symbol associated to this if we haven't seen the namespace
-     before.  */
+     before.  Also, add a using directive if it's an anonymous
+     namespace.  */
 
   if (dwarf2_extension (die) == NULL)
     {
@@ -3588,6 +3590,11 @@ read_namespace (struct die_info *die, struct objfile *objfile,
       TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
       new_symbol (die, type, objfile, cu_header);
+
+      if (is_anonymous)
+	cp_add_using_directive (processing_current_prefix,
+				strlen (previous_prefix),
+				strlen (processing_current_prefix));
     }
 
   if (die->child != NULL)
@@ -6319,7 +6326,7 @@ dwarf2_extension (struct die_info *die)
 /* Convert a DIE tag into its string name.  */
 
 static char *
-dwarf_tag_name (register unsigned tag)
+dwarf_tag_name (unsigned tag)
 {
   switch (tag)
     {
@@ -6451,7 +6458,7 @@ dwarf_tag_name (register unsigned tag)
 /* Convert a DWARF attribute code into its string name.  */
 
 static char *
-dwarf_attr_name (register unsigned attr)
+dwarf_attr_name (unsigned attr)
 {
   switch (attr)
     {
@@ -6616,9 +6623,9 @@ dwarf_attr_name (register unsigned attr)
       return "DW_AT_MIPS_loop_unroll_factor";
     case DW_AT_MIPS_software_pipeline_depth:
       return "DW_AT_MIPS_software_pipeline_depth";
+#endif
     case DW_AT_MIPS_linkage_name:
       return "DW_AT_MIPS_linkage_name";
-#endif
 
     case DW_AT_sf_names:
       return "DW_AT_sf_names";
@@ -6642,7 +6649,7 @@ dwarf_attr_name (register unsigned attr)
 /* Convert a DWARF value form code into its string name.  */
 
 static char *
-dwarf_form_name (register unsigned form)
+dwarf_form_name (unsigned form)
 {
   switch (form)
     {
@@ -6696,7 +6703,7 @@ dwarf_form_name (register unsigned form)
 /* Convert a DWARF stack opcode into its string name.  */
 
 static char *
-dwarf_stack_op_name (register unsigned op)
+dwarf_stack_op_name (unsigned op)
 {
   switch (op)
     {
@@ -7019,7 +7026,7 @@ dwarf_bool_name (unsigned mybool)
 /* Convert a DWARF type code into its string name.  */
 
 static char *
-dwarf_type_encoding_name (register unsigned enc)
+dwarf_type_encoding_name (unsigned enc)
 {
   switch (enc)
     {
@@ -7050,7 +7057,7 @@ dwarf_type_encoding_name (register unsigned enc)
 
 #if 0
 static char *
-dwarf_cfi_name (register unsigned cfi_opc)
+dwarf_cfi_name (unsigned cfi_opc)
 {
   switch (cfi_opc)
     {

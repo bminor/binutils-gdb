@@ -160,7 +160,7 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
    lookup_minimal_symbol_linkage_or_natural.  */
 
 struct minimal_symbol *
-lookup_minimal_symbol (register const char *linkage_name, const char *sfile,
+lookup_minimal_symbol (const char *linkage_name, const char *sfile,
 		       struct objfile *objf)
 {
   return lookup_minimal_symbol_aux (linkage_name, 1, sfile, objf);
@@ -316,7 +316,7 @@ lookup_minimal_symbol_aux (const char *name, int linkage,
    This function only searches the mangled (linkage) names.  */
 
 struct minimal_symbol *
-lookup_minimal_symbol_text (register const char *name, const char *sfile,
+lookup_minimal_symbol_text (const char *name, const char *sfile,
 			    struct objfile *objf)
 {
   struct objfile *objfile;
@@ -393,8 +393,9 @@ lookup_minimal_symbol_text (register const char *name, const char *sfile,
    This function only searches the mangled (linkage) names.  */
 
 struct minimal_symbol *
-lookup_minimal_symbol_solib_trampoline (register const char *name,
-					const char *sfile, struct objfile *objf)
+lookup_minimal_symbol_solib_trampoline (const char *name,
+					const char *sfile,
+					struct objfile *objf)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
@@ -647,8 +648,8 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
 				     asection *bfd_section,
 				     struct objfile *objfile)
 {
-  register struct msym_bunch *new;
-  register struct minimal_symbol *msymbol;
+  struct msym_bunch *new;
+  struct minimal_symbol *msymbol;
 
   if (ms_type == mst_file_text)
     {
@@ -709,8 +710,8 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
 static int
 compare_minimal_symbols (const void *fn1p, const void *fn2p)
 {
-  register const struct minimal_symbol *fn1;
-  register const struct minimal_symbol *fn2;
+  const struct minimal_symbol *fn1;
+  const struct minimal_symbol *fn2;
 
   fn1 = (const struct minimal_symbol *) fn1p;
   fn2 = (const struct minimal_symbol *) fn2p;
@@ -751,7 +752,7 @@ compare_minimal_symbols (const void *fn1p, const void *fn2p)
 static void
 do_discard_minimal_symbols_cleanup (void *arg)
 {
-  register struct msym_bunch *next;
+  struct msym_bunch *next;
 
   while (msym_bunch != NULL)
     {
@@ -895,12 +896,12 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
 void
 install_minimal_symbols (struct objfile *objfile)
 {
-  register int bindex;
-  register int mcount;
-  register struct msym_bunch *bunch;
-  register struct minimal_symbol *msymbols;
+  int bindex;
+  int mcount;
+  struct msym_bunch *bunch;
+  struct minimal_symbol *msymbols;
   int alloc_count;
-  register char leading_char;
+  char leading_char;
 
   if (msym_count > 0)
     {

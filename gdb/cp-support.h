@@ -33,6 +33,7 @@
 struct symbol;
 struct obstack;
 struct block;
+struct objfile;
 
 /* This struct is designed to store data from using directives.  It
    says that names from namespace INNER should be visible within

@@ -62,6 +62,8 @@
 #include "regcache.h"
 #include "symfile.h"
 
+#include "gdb_string.h"
+
 extern struct target_ops sol_thread_ops;	/* Forward declaration */
 extern struct target_ops sol_core_ops;	/* Forward declaration */
 
@@ -646,10 +648,10 @@ sol_thread_store_registers (int regno)
 
   if (regno != -1)
     {				/* Not writing all the regs */
-      /* save new register value */
-      char* old_value = (char*) alloca (DEPRECATED_REGISTER_SIZE);
-      memcpy (old_value, &deprecated_registers[REGISTER_BYTE (regno)],
-	      DEPRECATED_REGISTER_SIZE);
+      char old_value[MAX_REGISTER_SIZE];
+      
+      /* Save new register value.  */
+      regcache_collect (regno, old_value);
 
       val = p_td_thr_getgregs (&thandle, gregset);
       if (val != TD_OK)
@@ -660,9 +662,8 @@ sol_thread_store_registers (int regno)
 	error ("sol_thread_store_registers: td_thr_getfpregs %s",
 	       td_err_string (val));
 
-      /* restore new register value */
-      memcpy (&deprecated_registers[REGISTER_BYTE (regno)], old_value,
-	      DEPRECATED_REGISTER_SIZE);
+      /* Restore new register value.  */
+      supply_register (regno, old_value);
 
 #if 0
 /* thread_db doesn't seem to handle this right */

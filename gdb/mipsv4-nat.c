@@ -45,8 +45,8 @@
 void
 supply_gregset (gregset_t *gregsetp)
 {
-  register int regi;
-  register greg_t *regp = &(*gregsetp)[0];
+  int regi;
+  greg_t *regp = &(*gregsetp)[0];
   char zerobuf[MAX_REGISTER_SIZE];
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
@@ -71,23 +71,23 @@ void
 fill_gregset (gregset_t *gregsetp, int regno)
 {
   int regi;
-  register greg_t *regp = &(*gregsetp)[0];
+  greg_t *regp = &(*gregsetp)[0];
 
   for (regi = 0; regi <= 32; regi++)
     if ((regno == -1) || (regno == regi))
-      *(regp + regi) = *(greg_t *) & deprecated_registers[REGISTER_BYTE (regi)];
+      *(regp + regi) = *(greg_t *) & deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 
   if ((regno == -1) || (regno == PC_REGNUM))
-    *(regp + CXT_EPC) = *(greg_t *) & deprecated_registers[REGISTER_BYTE (PC_REGNUM)];
+    *(regp + CXT_EPC) = *(greg_t *) & deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)];
 
   if ((regno == -1) || (regno == CAUSE_REGNUM))
-    *(regp + CXT_CAUSE) = *(greg_t *) & deprecated_registers[REGISTER_BYTE (CAUSE_REGNUM)];
+    *(regp + CXT_CAUSE) = *(greg_t *) & deprecated_registers[DEPRECATED_REGISTER_BYTE (CAUSE_REGNUM)];
 
   if ((regno == -1) || (regno == HI_REGNUM))
-    *(regp + CXT_MDHI) = *(greg_t *) & deprecated_registers[REGISTER_BYTE (HI_REGNUM)];
+    *(regp + CXT_MDHI) = *(greg_t *) & deprecated_registers[DEPRECATED_REGISTER_BYTE (HI_REGNUM)];
 
   if ((regno == -1) || (regno == LO_REGNUM))
-    *(regp + CXT_MDLO) = *(greg_t *) & deprecated_registers[REGISTER_BYTE (LO_REGNUM)];
+    *(regp + CXT_MDLO) = *(greg_t *) & deprecated_registers[DEPRECATED_REGISTER_BYTE (LO_REGNUM)];
 }
 
 /*
@@ -101,7 +101,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  register int regi;
+  int regi;
   char zerobuf[MAX_REGISTER_SIZE];
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
@@ -125,14 +125,14 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  from = (char *) &deprecated_registers[REGISTER_BYTE (regi)];
+	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
 	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
 
   if ((regno == -1) || (regno == FCRCS_REGNUM))
-    fpregsetp->fp_csr = *(unsigned *) &deprecated_registers[REGISTER_BYTE (FCRCS_REGNUM)];
+    fpregsetp->fp_csr = *(unsigned *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (FCRCS_REGNUM)];
 }
 
 

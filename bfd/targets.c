@@ -477,7 +477,7 @@ to find an alternative output format that is suitable.
 
 .  {* Data for use by back-end routines, which isn't
 .     generic enough to belong in this structure.  *}
-.  void *backend_data;
+.  const void *backend_data;
 .
 .} bfd_target;
 .

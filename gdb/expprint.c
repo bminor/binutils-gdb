@@ -54,14 +54,14 @@ print_expression (struct expression *exp, struct ui_file *stream)
    parentheses are needed here.  */
 
 static void
-print_subexp (register struct expression *exp, register int *pos,
+print_subexp (struct expression *exp, int *pos,
 	      struct ui_file *stream, enum precedence prec)
 {
-  register unsigned tem;
-  register const struct op_print *op_print_tab;
-  register int pc;
+  unsigned tem;
+  const struct op_print *op_print_tab;
+  int pc;
   unsigned nargs;
-  register char *op_str;
+  char *op_str;
   int assign_modify = 0;
   enum exp_opcode opcode;
   enum precedence myprec = PREC_NULL;
@@ -535,7 +535,7 @@ char *
 op_string (enum exp_opcode op)
 {
   int tem;
-  register const struct op_print *op_print_tab;
+  const struct op_print *op_print_tab;
 
   op_print_tab = current_language->la_op_print_tab;
   for (tem = 0; op_print_tab[tem].opcode != OP_NULL; tem++)

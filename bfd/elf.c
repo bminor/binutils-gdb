@@ -325,7 +325,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
   Elf_External_Sym_Shndx *shndx;
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   size_t extsym_size;
   bfd_size_type amt;
   file_ptr pos;
@@ -638,7 +638,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 {
   asection *newsect;
   flagword flags;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
 
   if (hdr->bfd_section != NULL)
     {
@@ -1193,7 +1193,7 @@ bfd_elf_print_symbol (bfd *abfd,
       {
 	const char *section_name;
 	const char *name = NULL;
-	struct elf_backend_data *bed;
+	const struct elf_backend_data *bed;
 	unsigned char st_other;
 	bfd_vma val;
 
@@ -1344,7 +1344,7 @@ _bfd_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
    old indirect symbol.  Also used for copying flags to a weakdef.  */
 
 void
-_bfd_elf_link_hash_copy_indirect (struct elf_backend_data *bed,
+_bfd_elf_link_hash_copy_indirect (const struct elf_backend_data *bed,
 				  struct elf_link_hash_entry *dir,
 				  struct elf_link_hash_entry *ind)
 {
@@ -1649,7 +1649,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 {
   Elf_Internal_Shdr *hdr = elf_elfsections (abfd)[shindex];
   Elf_Internal_Ehdr *ehdr = elf_elfheader (abfd);
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   const char *name;
 
   name = elf_string_from_elf_strtab (abfd, hdr->sh_name);
@@ -2123,13 +2123,13 @@ bfd_boolean
 _bfd_elf_get_sec_type_attr (bfd *abfd, const char *name, int *type, int *attr)
 {
   bfd_boolean found = FALSE;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   /* See if this is one of the special sections.  */
   if (name)
     {
       const struct bfd_elf_special_section *ssect = NULL;
-      unsigned int rela = get_elf_backend_data (abfd)->default_use_rela_p;
+      unsigned int rela = bed->default_use_rela_p;
 
       if (bed->special_sections)
 	ssect = get_special_section (name, bed->special_sections, rela);
@@ -2274,7 +2274,7 @@ _bfd_elf_make_section_from_phdr (bfd *abfd,
 bfd_boolean
 bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index)
 {
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
 
   switch (hdr->p_type)
     {
@@ -2332,7 +2332,7 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
 			  bfd_boolean use_rela_p)
 {
   char *name;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_size_type amt = sizeof ".rela" + strlen (asect->name);
 
   name = bfd_alloc (abfd, amt);
@@ -2362,7 +2362,7 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
 static void
 elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
 {
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_boolean *failedptr = failedptrarg;
   Elf_Internal_Shdr *this_hdr;
 
@@ -2872,7 +2872,7 @@ static int
 sym_is_global (bfd *abfd, asymbol *sym)
 {
   /* If the backend has a special mapping, use it.  */
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   if (bed->elf_backend_sym_is_global)
     return (*bed->elf_backend_sym_is_global) (abfd, sym);
 
@@ -3066,7 +3066,7 @@ bfd_boolean
 _bfd_elf_compute_section_file_positions (bfd *abfd,
 					 struct bfd_link_info *link_info)
 {
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_boolean failed;
   struct bfd_strtab_hash *strtab;
   Elf_Internal_Shdr *shstrtab_hdr;
@@ -4059,7 +4059,7 @@ get_program_header_size (bfd *abfd)
 {
   size_t segs;
   asection *s;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   /* We can't return a different result each time we're called.  */
   if (elf_tdata (abfd)->program_header_size != 0)
@@ -4162,7 +4162,7 @@ assign_file_positions_except_relocs (bfd *abfd)
   Elf_Internal_Shdr ** const i_shdrpp = elf_elfsections (abfd);
   unsigned int num_sec = elf_numsections (abfd);
   file_ptr off;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0
       && bfd_get_format (abfd) != bfd_core)
@@ -4269,7 +4269,7 @@ prep_headers (bfd *abfd)
   Elf_Internal_Phdr *i_phdrp = 0; /* Program header table, internal form */
   Elf_Internal_Shdr **i_shdrp;	/* Section header table, internal form */
   struct elf_strtab_hash *shstrtab;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   i_ehdrp = elf_elfheader (abfd);
   i_shdrp = elf_elfsections (abfd);
@@ -4314,11 +4314,8 @@ prep_headers (bfd *abfd)
 	 Such need can generally be supplied by replacing the tests for
 	 e_machine with the conditions used to determine it.  */
     default:
-      if (get_elf_backend_data (abfd) != NULL)
-	i_ehdrp->e_machine = get_elf_backend_data (abfd)->elf_machine_code;
-      else
-	i_ehdrp->e_machine = EM_NONE;
-      }
+      i_ehdrp->e_machine = bed->elf_machine_code;
+    }
 
   i_ehdrp->e_version = bed->s->ev_current;
   i_ehdrp->e_ehsize = bed->s->sizeof_ehdr;
@@ -4396,7 +4393,7 @@ _bfd_elf_assign_file_positions_for_relocs (bfd *abfd)
 bfd_boolean
 _bfd_elf_write_object_contents (bfd *abfd)
 {
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   Elf_Internal_Ehdr *i_ehdrp;
   Elf_Internal_Shdr **i_shdrp;
   bfd_boolean failed;
@@ -4458,7 +4455,7 @@ _bfd_elf_write_corefile_contents (bfd *abfd)
 int
 _bfd_elf_section_from_bfd_section (bfd *abfd, struct sec *asect)
 {
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   int index;
 
   if (elf_section_data (asect) != NULL
@@ -4574,7 +4571,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   bfd_vma maxpagesize;
   struct elf_segment_map *phdr_adjust_seg = NULL;
   unsigned int phdr_adjust_num = 0;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -5269,7 +5266,7 @@ swap_out_syms (bfd *abfd,
 	       struct bfd_strtab_hash **sttp,
 	       int relocatable_p)
 {
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   int symcount;
   asymbol **syms;
   struct bfd_strtab_hash *stt;
@@ -5601,7 +5598,7 @@ _bfd_elf_canonicalize_reloc (bfd *abfd,
 {
   arelent *tblptr;
   unsigned int i;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if (! bed->s->slurp_reloc_table (abfd, section, symbols, FALSE))
     return -1;
@@ -5618,7 +5615,7 @@ _bfd_elf_canonicalize_reloc (bfd *abfd,
 long
 _bfd_elf_get_symtab (bfd *abfd, asymbol **allocation)
 {
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   long symcount = bed->s->slurp_symbol_table (abfd, allocation, FALSE);
 
   if (symcount >= 0)
@@ -5630,7 +5627,7 @@ long
 _bfd_elf_canonicalize_dynamic_symtab (bfd *abfd,
 				      asymbol **allocation)
 {
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   long symcount = bed->s->slurp_symbol_table (abfd, allocation, TRUE);
 
   if (symcount >= 0)
@@ -6758,7 +6755,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 static bfd_boolean
 elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 {
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   switch (note->type)
     {
@@ -7062,7 +7059,7 @@ elfcore_write_note (bfd  *abfd,
   pad = 0;
   if (name != NULL)
     {
-      struct elf_backend_data *bed;
+      const struct elf_backend_data *bed;
 
       namesz = strlen (name) + 1;
       bed = get_elf_backend_data (abfd);

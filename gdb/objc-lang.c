@@ -83,7 +83,7 @@ struct objc_method {
 struct symbol *
 lookup_struct_typedef (char *name, struct block *block, int noerr)
 {
-  register struct symbol *sym;
+  struct symbol *sym;
 
   sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0, 
 		       (struct symtab **) NULL);
@@ -274,7 +274,7 @@ objc_demangle (const char *mangled, int options)
    for printing characters and strings is language specific.  */
 
 static void
-objc_emit_char (register int c, struct ui_file *stream, int quoter)
+objc_emit_char (int c, struct ui_file *stream, int quoter)
 {
 
   c &= 0xFF;			/* Avoid sign bit follies.  */
@@ -337,7 +337,7 @@ static void
 objc_printstr (struct ui_file *stream, char *string, 
 	       unsigned int length, int width, int force_ellipses)
 {
-  register unsigned int i;
+  unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
@@ -449,7 +449,7 @@ objc_printstr (struct ui_file *stream, char *string,
 static struct type *
 objc_create_fundamental_type (struct objfile *objfile, int typeid)
 {
-  register struct type *type = NULL;
+  struct type *type = NULL;
 
   switch (typeid)
     {
@@ -703,7 +703,7 @@ static char *msglist_sel;
 void
 start_msglist(void)
 {
-  register struct selname *new = 
+  struct selname *new = 
     (struct selname *) xmalloc (sizeof (struct selname));
 
   new->next = selname_chain;
@@ -749,9 +749,9 @@ add_msglist(struct stoken *str, int addcolon)
 int
 end_msglist(void)
 {
-  register int val = msglist_len;
-  register struct selname *sel = selname_chain;
-  register char *p = msglist_sel;
+  int val = msglist_len;
+  struct selname *sel = selname_chain;
+  char *p = msglist_sel;
   int selid;
 
   selname_chain = sel->next;
@@ -1536,7 +1536,7 @@ print_object_command (char *args, int from_tty)
 
   {
     struct expression *expr = parse_expression (args);
-    register struct cleanup *old_chain = 
+    struct cleanup *old_chain = 
       make_cleanup (free_current_contents, &expr);
     int pc = 0;
 

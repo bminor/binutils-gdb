@@ -2100,7 +2100,7 @@ mips_elf64_canonicalize_reloc (abfd, section, relptr, symbols)
 {
   arelent *tblptr;
   unsigned int i;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if (! bed->s->slurp_reloc_table (abfd, section, symbols, FALSE))
     return -1;
@@ -2899,6 +2899,8 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_modify_segment_map	_bfd_mips_elf_modify_segment_map
 #define elf_backend_gc_mark_hook	_bfd_mips_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook	_bfd_mips_elf_gc_sweep_hook
+#define elf_backend_copy_indirect_symbol \
+					_bfd_mips_elf_copy_indirect_symbol
 #define elf_backend_hide_symbol		_bfd_mips_elf_hide_symbol
 #define elf_backend_ignore_discarded_relocs \
 					_bfd_mips_elf_ignore_discarded_relocs

@@ -393,10 +393,10 @@ symbol_read_needs_frame (const struct symbol *sym)
 struct value *
 read_var_value (const struct symbol *var, struct frame_info *frame)
 {
-  register struct value *v;
+  struct value *v;
   struct type *type = SYMBOL_TYPE (var);
   CORE_ADDR addr;
-  register int len;
+  int len;
 
   v = allocate_value (type);
   VALUE_LVAL (v) = lval_memory;	/* The most likely possibility.  */
@@ -404,8 +404,11 @@ read_var_value (const struct symbol *var, struct frame_info *frame)
 
   len = TYPE_LENGTH (type);
 
+
+  /* FIXME drow/2003-09-06: this call to the selected frame should be
+     pushed upwards to the callers.  */
   if (frame == NULL)
-    frame = deprecated_selected_frame;
+    frame = deprecated_safe_get_selected_frame ();
 
   switch (SYMBOL_CLASS (var))
     {
@@ -727,7 +730,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
    address.  */
 
 struct value *
-locate_var_value (register struct symbol *var, struct frame_info *frame)
+locate_var_value (struct symbol *var, struct frame_info *frame)
 {
   CORE_ADDR addr = 0;
   struct type *type = SYMBOL_TYPE (var);

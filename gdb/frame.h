@@ -639,6 +639,19 @@ extern void return_command (char *, int);
 
 extern struct frame_info *deprecated_selected_frame;
 
+/* NOTE: drow/2003-09-06:
+
+   This function is "a step sideways" for uses of deprecated_selected_frame.
+   They should be fixed as above, but meanwhile, we needed a solution for
+   cases where functions are called with a NULL frame meaning either "the
+   program is not running" or "use the selected frame".  Lazy building of
+   deprecated_selected_frame confuses the situation, because now
+   deprecated_selected_frame can be NULL even when the inferior is running.
+
+   This function calls get_selected_frame if the inferior should have a
+   frame, or returns NULL otherwise.  */
+
+extern struct frame_info *deprecated_safe_get_selected_frame (void);
 
 /* Create a frame using the specified BASE and PC.  */
 

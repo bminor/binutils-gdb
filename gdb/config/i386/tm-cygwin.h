@@ -19,13 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Use SSE registers if winnt.h contains information about them.  */
-#ifdef HAVE_CONTEXT_EXTENDED_REGISTERS
-#define HAVE_SSE_REGS
-#else
-#undef HAVE_SSE_REGS
-#endif /* CONTEXT_EXTENDED_REGISTERS */
-
 #include "i386/tm-i386.h"
 
 #define ATTACH_NO_WAIT

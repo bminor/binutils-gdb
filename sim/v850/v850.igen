@@ -12,6 +12,8 @@
 
 :option:::multi-sim:true
 :model:::v850e:v850e:
+:option:::multi-sim:true
+:model:::v850e1:v850e1:
 
 // Cache macros
 
@@ -156,6 +158,7 @@ ddddd,1011,ddd,cccc:III:::Bcond
 // BSH
 rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
 *v850e
+*v850e1
 "bsh r<reg2>, r<reg3>"
 {
   unsigned32 value;
@@ -178,6 +181,7 @@ rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
 // BSW
 rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 *v850e
+*v850e1
 "bsw r<reg2>, r<reg3>"
 {
 #define WORDHASNULLBYTE(x) (((x) - 0x01010101) & ~(x)&0x80808080)
@@ -203,6 +207,7 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 // CALLT
 0000001000,iiiiii:II:::callt
 *v850e
+*v850e1
 "callt <imm6>"
 {
   unsigned32 adr;
@@ -225,6 +230,7 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 
 rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 *v850e
+*v850e1
 "clr1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E407E0 ());
@@ -234,6 +240,7 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 // CTRET
 0000011111100000 + 0000000101000100:X:::ctret
 *v850e
+*v850e1
 "ctret"
 {
   nia  = (CTPC & ~1);
@@ -244,6 +251,7 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 // CMOV
 rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
 *v850e
+*v850e1
 "cmov %s<cccc>, r<reg1>, r<reg2>, r<reg3>"
 {
   int cond = condition_met (cccc);
@@ -254,6 +262,7 @@ rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
 
 rrrrr,111111,iiiii + wwwww,011000,cccc,0:XII:::cmov
 *v850e
+*v850e1
 "cmov %s<cccc>, <imm5>, r<reg2>, r<reg3>"
 {
   int cond = condition_met (cccc);
@@ -291,6 +300,7 @@ rrrrr,010011,iiiii:II:::cmp
 // "dispose <imm5>, <list12>"
 0000011001,iiiii,L + LLLLLLLLLLL,RRRRR:XIII:::dispose
 *v850e
+*v850e1
 "dispose <imm5>, <list12>":RRRRR == 0
 "dispose <imm5>, <list12>, [reg1]"
 {
@@ -322,6 +332,7 @@ rrrrr,010011,iiiii:II:::cmp
 // DIV
 rrrrr,111111,RRRRR + wwwww,01011000000:XI:::div
 *v850e
+*v850e1
 "div r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_2C007E0 ());
@@ -378,6 +389,7 @@ rrrrr!0,000010,RRRRR!0:I:::divh
 
 rrrrr,111111,RRRRR + wwwww,01010000000:XI:::divh
 *v850e
+*v850e1
 "divh r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_28007E0 ());
@@ -387,6 +399,7 @@ rrrrr,111111,RRRRR + wwwww,01010000000:XI:::divh
 // DIVHU
 rrrrr,111111,RRRRR + wwwww,01010000010:XI:::divhu
 *v850e
+*v850e1
 "divhu r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_28207E0 ());
@@ -396,6 +409,7 @@ rrrrr,111111,RRRRR + wwwww,01010000010:XI:::divhu
 // DIVU
 rrrrr,111111,RRRRR + wwwww,01011000010:XI:::divu
 *v850e
+*v850e1
 "divu r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_2C207E0 ());
@@ -423,6 +437,7 @@ rrrrr,111111,RRRRR + wwwww,01011000010:XI:::divu
 // HSW
 rrrrr,11111100000 + wwwww,01101000100:XII:::hsw
 *v850e
+*v850e1
 "hsw r<reg2>, r<reg3>"
 {
   unsigned32 value;
@@ -497,6 +512,7 @@ rrrrr,111001,RRRRR + ddddddddddddddd,1:VII:::ld.w
 
 rrrrr!0,11110,b,RRRRR + ddddddddddddddd,1:VII:::ld.bu
 *v850e
+*v850e1
 "ld.bu <disp16>[r<reg1>], r<reg2>"
 {
   COMPAT_2 (OP_10780 ());
@@ -504,6 +520,7 @@ rrrrr!0,11110,b,RRRRR + ddddddddddddddd,1:VII:::ld.bu
 
 rrrrr!0,111111,RRRRR + ddddddddddddddd,1:VII:::ld.hu
 *v850e
+*v850e1
 "ld.hu <disp16>[r<reg1>], r<reg2>"
 {
   COMPAT_2 (OP_107E0 ());
@@ -544,6 +561,7 @@ rrrrr!0,010000,iiiii:II:::mov
 
 00000110001,RRRRR + iiiiiiiiiiiiiiii + IIIIIIIIIIIIIIII:VI:::mov
 *v850e
+*v850e1
 "mov <imm32>, r<reg1>"
 {
   SAVE_2;
@@ -577,6 +595,7 @@ rrrrr!0,110010,RRRRR + iiiiiiiiiiiiiiii:VI:::movhi
 // MUL
 rrrrr,111111,RRRRR + wwwww,01000100000:XI:::mul
 *v850e
+*v850e1
 "mul r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_22007E0 ());
@@ -584,6 +603,7 @@ rrrrr,111111,RRRRR + wwwww,01000100000:XI:::mul
 
 rrrrr,111111,iiiii + wwwww,01001,IIII,00:XII:::mul
 *v850e
+*v850e1
 "mul <imm9>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_24007E0 ());
@@ -617,6 +637,7 @@ rrrrr!0,110111,RRRRR + iiiiiiiiiiiiiiii:VI:::mulhi
 // MULU
 rrrrr,111111,RRRRR + wwwww,01000100010:XI:::mulu
 *v850e
+*v850e1
 "mulu r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_22207E0 ());
@@ -624,6 +645,7 @@ rrrrr,111111,RRRRR + wwwww,01000100010:XI:::mulu
 
 rrrrr,111111,iiiii + wwwww,01001,IIII,10:XII:::mulu
 *v850e
+*v850e1
 "mulu <imm9>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_24207E0 ());
@@ -658,6 +680,7 @@ rrrrr,000001,RRRRR:I:::not
 
 rrrrr,111111,RRRRR + 0000000011100010:IX:::not1
 *v850e
+*v850e1
 "not1 r<reg2>, r<reg1>"
 {
   COMPAT_2 (OP_E207E0 ());
@@ -686,6 +709,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 // PREPARE
 0000011110,iiiii,L + LLLLLLLLLLL,00001:XIII:::prepare
 *v850e
+*v850e1
 "prepare <list12>, <imm5>"
 {
   int  i;
@@ -710,6 +734,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,00011:XIII:::prepare00
 *v850e
+*v850e1
 "prepare <list12>, <imm5>, sp"
 {
   COMPAT_2 (OP_30780 ());
@@ -717,6 +742,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,01011 + iiiiiiiiiiiiiiii:XIII:::prepare01
 *v850e
+*v850e1
 "prepare <list12>, <imm5>, <uimm16>"
 {
   COMPAT_2 (OP_B0780 ());
@@ -724,6 +750,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,10011 + iiiiiiiiiiiiiiii:XIII:::prepare10
 *v850e
+*v850e1
 "prepare <list12>, <imm5>, <uimm16>"
 {
   COMPAT_2 (OP_130780 ());
@@ -731,6 +758,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,11011 + iiiiiiiiiiiiiiii + dddddddddddddddd:XIII:::prepare11
 *v850e
+*v850e1
 "prepare <list12>, <imm5>, <uimm32>"
 {
   COMPAT_2 (OP_1B0780 ());
@@ -780,6 +808,7 @@ rrrrr,010101,iiiii:II:::sar
 // SASF
 rrrrr,1111110,cccc + 0000001000000000:IX:::sasf
 *v850e
+*v850e1
 "sasf %s<cccc>, r<reg2>"
 {
   COMPAT_2 (OP_20007E0 ());
@@ -848,6 +877,7 @@ rrrrr,1111110,cccc + 0000000000000000:IX:::setf
 
 rrrrr,111111,RRRRR + 0000000011100000:IX:::set1
 *v850e
+*v850e1
 "set1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E007E0 ());
@@ -935,6 +965,7 @@ rrrrr,1010,dddddd,0:IV:::sld.w
 
 rrrrr!0,0000110,dddd:IV:::sld.bu
 *v850e
+*v850e1
 "sld.b <disp4>[ep], r<reg2>":(PSW & PSW_US)
 "sld.bu <disp4>[ep], r<reg2>"
 {
@@ -955,6 +986,7 @@ rrrrr!0,0000110,dddd:IV:::sld.bu
 
 rrrrr!0,0000111,dddd:IV:::sld.hu
 *v850e
+*v850e1
 "sld.h <disp5>[ep], r<reg2>":(PSW & PSW_US)
 "sld.hu <disp5>[ep], r<reg2>"
 {
@@ -1037,6 +1069,7 @@ rrrrr,001100,RRRRR:I:::subr
 // SWITCH
 00000000010,RRRRR:I:::switch
 *v850e
+*v850e1
 "switch r<reg1>"
 {
   unsigned long adr;
@@ -1050,6 +1083,7 @@ rrrrr,001100,RRRRR:I:::subr
 // SXB
 00000000101,RRRRR:I:::sxb
 *v850e
+*v850e1
 "sxb r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -1060,6 +1094,7 @@ rrrrr,001100,RRRRR:I:::subr
 // SXH
 00000000111,RRRRR:I:::sxh
 *v850e
+*v850e1
 "sxh r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -1090,6 +1125,7 @@ rrrrr,001011,RRRRR:I:::tst
 
 rrrrr,111111,RRRRR + 0000000011100110:IX:::tst1
 *v850e
+*v850e1
 "tst1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E607E0 ());
@@ -1112,6 +1148,7 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 // ZXB
 00000000100,RRRRR:I:::zxb
 *v850e
+*v850e1
 "zxb r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -1122,6 +1159,7 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 // ZXH
 00000000110,RRRRR:I:::zxh
 *v850e
+*v850e1
 "zxh r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -1132,12 +1170,36 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 // Right field must be zero so that it doesn't clash with DIVH
 // Left field must be non-zero so that it doesn't clash with SWITCH
 11111,000010,00000:I:::break
+*v850
+*v850e
 {
   sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
+}
+
+11111,000010,00000:I:::dbtrap
+*v850e1
+"dbtrap"
+{
+  DBPC = cia + 2;
+  DBPSW = PSW;
+  PSW = PSW | (PSW_NP | PSW_EP | PSW_ID);
+  PC = 0x00000060;
+  nia = 0x00000060;
+  TRACE_BRANCH0 ();
 }
 
 // New breakpoint: 0x7E0 0x7E0
 00000,111111,00000 + 00000,11111,100000:X:::ilgop
 {
   sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
+}
+
+// Return from debug trap: 0x146007e0
+0000011111100000 + 0000000101000110:X:::dbret
+*v850e1
+"dbret"
+{
+  nia = DBPC;
+  PSW = DBPSW;
+  TRACE_BRANCH1 (PSW);
 }

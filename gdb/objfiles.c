@@ -34,6 +34,7 @@
 #include "target.h"
 #include "bcache.h"
 
+#include "gdb_assert.h"
 #include <sys/types.h>
 #include "gdb_stat.h"
 #include <fcntl.h>
@@ -60,6 +61,9 @@ static void *map_to_file (int);
 #endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
 static void add_to_objfile_sections (bfd *, sec_ptr, void *);
+
+static void objfile_alloc_data (struct objfile *objfile);
+static void objfile_free_data (struct objfile *objfile);
 
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info. */
@@ -301,6 +305,8 @@ allocate_objfile (bfd *abfd, int flags)
 
       terminate_minimal_symbol_table (objfile);
     }
+
+  objfile_alloc_data (objfile);
 
   /* Update the per-objfile information that comes from the bfd, ensuring
      that any data that is reference is saved in the per-objfile data
@@ -565,6 +571,7 @@ free_objfile (struct objfile *objfile)
 
   if (objfile != NULL)
     {
+      objfile_free_data (objfile);
       if (objfile->name != NULL)
 	{
 	  xmfree (objfile->md, objfile->name);
@@ -780,10 +787,10 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
       objfile->ei.entry_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
     }
 
-  if (objfile->ei.entry_file_lowpc != INVALID_ENTRY_LOWPC)
+  if (objfile->ei.deprecated_entry_file_lowpc != INVALID_ENTRY_LOWPC)
     {
-      objfile->ei.entry_file_lowpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-      objfile->ei.entry_file_highpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+      objfile->ei.deprecated_entry_file_lowpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
+      objfile->ei.deprecated_entry_file_highpc += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
     }
 
   if (objfile->ei.main_func_lowpc != INVALID_ENTRY_LOWPC)
@@ -1091,7 +1098,7 @@ in_plt_section (CORE_ADDR pc, char *name)
 int
 is_in_import_list (char *name, struct objfile *objfile)
 {
-  register int i;
+  int i;
 
   if (!objfile || !name || !*name)
     return 0;
@@ -1101,4 +1108,74 @@ is_in_import_list (char *name, struct objfile *objfile)
       return 1;
   return 0;
 }
+
 
+/* Keep a registry of per-objfile data-pointers required by other GDB
+   modules.  */
+
+struct objfile_data
+{
+  unsigned index;
+};
+
+struct objfile_data_registration
+{
+  struct objfile_data *data;
+  struct objfile_data_registration *next;
+};
+  
+struct objfile_data_registry
+{
+  struct objfile_data_registration *registrations;
+  unsigned num_registrations;
+};
+
+static struct objfile_data_registry objfile_data_registry = { NULL, 0 };
+
+const struct objfile_data *
+register_objfile_data (void)
+{
+  struct objfile_data_registration **curr;
+
+  /* Append new registration.  */
+  for (curr = &objfile_data_registry.registrations;
+       *curr != NULL; curr = &(*curr)->next);
+
+  *curr = XMALLOC (struct objfile_data_registration);
+  (*curr)->next = NULL;
+  (*curr)->data = XMALLOC (struct objfile_data);
+  (*curr)->data->index = objfile_data_registry.num_registrations++;
+
+  return (*curr)->data;
+}
+
+static void
+objfile_alloc_data (struct objfile *objfile)
+{
+  gdb_assert (objfile->data == NULL);
+  objfile->num_data = objfile_data_registry.num_registrations;
+  objfile->data = XCALLOC (objfile->num_data, void *);
+}
+
+static void
+objfile_free_data (struct objfile *objfile)
+{
+  gdb_assert (objfile->data != NULL);
+  xfree (objfile->data);
+  objfile->data = NULL;
+}
+
+void
+set_objfile_data (struct objfile *objfile, const struct objfile_data *data,
+		  void *value)
+{
+  gdb_assert (data->index < objfile->num_data);
+  objfile->data[data->index] = value;
+}
+
+void *
+objfile_data (struct objfile *objfile, const struct objfile_data *data)
+{
+  gdb_assert (data->index < objfile->num_data);
+  return objfile->data[data->index];
+}

@@ -76,7 +76,7 @@ elf_core_file_p (bfd *abfd)
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form.  */
   Elf_Internal_Phdr *i_phdrp;	/* Elf program header, internal form.  */
   unsigned int phindex;
-  struct elf_backend_data *ebd;
+  const struct elf_backend_data *ebd;
   struct bfd_preserve preserve;
   bfd_size_type amt;
 
@@ -153,11 +153,11 @@ elf_core_file_p (bfd *abfd)
 
       for (target_ptr = bfd_target_vector; *target_ptr != NULL; target_ptr++)
 	{
-	  struct elf_backend_data *back;
+	  const struct elf_backend_data *back;
 
 	  if ((*target_ptr)->flavour != bfd_target_elf_flavour)
 	    continue;
-	  back = (struct elf_backend_data *) (*target_ptr)->backend_data;
+	  back = (const struct elf_backend_data *) (*target_ptr)->backend_data;
 	  if (back->elf_machine_code == i_ehdrp->e_machine
 	      || (back->elf_machine_alt1 != 0
 	          && i_ehdrp->e_machine == back->elf_machine_alt1)

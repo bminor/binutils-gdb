@@ -25,7 +25,11 @@
 
 int global = 0;
 
-void gamma (int *parray)
+/* Foo, gcc thinks 'gamma' is a reserved identifier.
+   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=12213
+   I am not interested in testing that point so just avoid the word.
+   -- chastain 2003-09-08. */
+void my_gamma (int *parray)
 {
   return;
 }
@@ -37,7 +41,7 @@ void beta ()
   array [1] = global++;
   array [2] = global++;
   array [3] = global++;
-  gamma (array);
+  my_gamma (array);
   abort ();
 }
 

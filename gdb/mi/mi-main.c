@@ -405,13 +405,13 @@ register_changed_p (int regnum)
   if (! frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     return -1;
 
-  if (memcmp (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
+  if (memcmp (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
 	      REGISTER_RAW_SIZE (regnum)) == 0)
     return 0;
 
   /* Found a changed register. Return 1. */
 
-  memcpy (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
+  memcpy (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
 	  REGISTER_RAW_SIZE (regnum));
 
   return 1;
@@ -642,7 +642,7 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  old_chain = make_cleanup (xfree, buffer);
 	  store_signed_integer (buffer, DEPRECATED_REGISTER_SIZE, value);
 	  /* Write it down */
-	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
+	  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
 	  /* Free the buffer.  */
 	  do_cleanups (old_chain);
 	}
@@ -1161,7 +1161,9 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 
       /* If we changed interpreters, DON'T print out anything. */
       if (current_interp_named_p (INTERP_MI)
-	  || current_interp_named_p (INTERP_MI1))
+	  || current_interp_named_p (INTERP_MI1)
+	  || current_interp_named_p (INTERP_MI2)
+	  || current_interp_named_p (INTERP_MI3))
 	{
 	  /* print the result */
 	  /* FIXME: Check for errors here. */
@@ -1476,9 +1478,8 @@ mi_load_progress (const char *section_name,
 void
 mi_setup_architecture_data (void)
 {
-  /* don't trust DEPRECATED_REGISTER_BYTES to be zero. */
-  old_regs = xmalloc (DEPRECATED_REGISTER_BYTES + 1);
-  memset (old_regs, 0, DEPRECATED_REGISTER_BYTES + 1);
+  old_regs = xmalloc ((NUM_REGS + NUM_PSEUDO_REGS) * MAX_REGISTER_SIZE + 1);
+  memset (old_regs, 0, (NUM_REGS + NUM_PSEUDO_REGS) * MAX_REGISTER_SIZE + 1);
 }
 
 void

@@ -1,3 +1,116 @@
+2003-09-15  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add sh*-*-* as supported target.
+	* gdb.asm/sh.inc: New file.
+
+2003-09-11  David Carlton  <carlton@kealia.com>
+
+	* gdb.c++/namespace.exp: Add tests for namespace types.
+	* gdb.c++/maint.exp (test_help): Test 'help maint cp namespace'.
+	(test_namespace): New.
+
+2003-09-11  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.base/relocate.exp: Handle new gdb output at startup.
+	* gdb.stabs/weird.exp: Ditto.
+
+2003-09-08  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/gdb1250.c: Rename 'gamma' to 'my_gamma'.
+
+2003-09-07  Michael Chastain  <mec@shout.net>
+
+	* gdb.cp/classes.exp: Accommodate both 'syntax error' and
+	'parse error'.
+
+2003-09-07  Mark Kettenis  <m.kettenis@osp.nl>
+
+	* gdb.arch/i386-prologue.exp: Add checks for saved registers.
+
+2003-08-30  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/selftest.exp: Remove support for m68k*-*-hpux.
+	* gdb.gdb/observer.exp: Ditto.
+	* gdb.gdb/xfullpath.exp: Ditto.
+
+2003-08-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/interrupt.exp: XFAIL "call function when asleep" for
+	*-*-*bsd*.
+
+2003-08-28  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.base/dump.exp: Skip for ia64.
+
+2003-08-25  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add ia64 support.
+	* gdb.asm/ia64.inc: New file.
+
+2003-08-22  Michael Chastain  <mec@shout.net>
+
+	* gdb.cp: New directory.
+	* gdb.cp/*: Copy from gdb.c++/*.
+	* gdb.c++/*: Remove.
+	* Makefile.in: Change gdb.c++ to gdb.cp.
+	* configure.in:  Ditto.
+	* configure: Regnerate.
+
+2003-08-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-prologue.exp: Add testcase for PR backtrace/1338.
+	* gdb.arch/i386-prologue.c (gdb1338): Add function.
+
+2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mi-var-display.exp (-var-list-children weird): Accept function
+	pointers with argument types.
+	* mi1-var-display.exp (-var-list-children weird): Likewise.
+	* mi2-var-display.exp (-var-list-children weird): Likewise.
+
+2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/annota3.exp: Add missing newline.
+
+2003-08-06  Michael Chastain  <mec@shout.net>
+
+	* gdb.java/jmisc1.exp: Add test for pr gdb/1322.
+
+2003-08-12  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/float.exp: Add test for SH.
+
+2003-08-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-prologue.c, gdb.arch/i386-prologue.exp: New files.
+
+2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
+
+       * gdb.base/completion.exp: Remove reduntant completion test
+       on filename.
+
+2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.base/attach.exp, gdb.base/detach.exp, gdb.base/gcore.exp,
+        gdb.mi/mi-basics.exp, gdb.threads/gcore-thread.exp,
+        gdb.trace/save-trace.exp: Make sure that full pathnames are
+        escaped correctly.
+
+2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
+        
+        * configure.in: Don't generate config.h from config.hin.
+        * configure: Regenerate.
+        * config.hin: Remove file.
+        * gdb.mi/pthreads.c: Remove include of config.h, and other ifdefs.
+        * gdb.threads/pthreads.c: Ditto.
+
+2003-08-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	From Kei Sakamoto <sakamoto.kei@renesas.com>:
+	* gdb.asm/asm-source.exp : Add -lgloss to link-flags.
+	* gdb.asm/m32r.inc : Remove an illegal nop after bl instruction.
+	Replace ld24 with seth/add3.
+
 2003-09-12  David Carlton  <carlton@kealia.com>
 
 	* carlton_runnamespace (TESTS): Fix typo in gdb.c++->gdb.cp
@@ -45,6 +158,16 @@
 
 	From Kei Sakamoto <sakamoto.kei@renesas.com>:
 	* gdb.base/relocate.c (dummy): New padding array.
+
+2003-07-22  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.disasm/8300s.s: Fix syntax of bsr insn.  
+
+	* gdb.disasm/h8300s.exp : Minor changes in disassembler output require
+	patterns to be more general, accepting old and new output.
+	Some output chars (such as '+') also must be quoted.
+	Some addresses are displayed numerically instead of 
+	symbolically.
 
 2003-07-23  Michael Snyder  <msnyder@redhat.com>
 
@@ -10711,7 +10834,7 @@ Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 	made in a future update.
 
 Local Variables:
-mode: indented-text
+mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never

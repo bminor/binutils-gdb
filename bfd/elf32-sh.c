@@ -57,7 +57,7 @@ static bfd_byte *sh_elf_get_relocated_section_contents
   (bfd *, struct bfd_link_info *, struct bfd_link_order *, bfd_byte *,
    bfd_boolean, asymbol **);
 static void sh_elf_copy_indirect_symbol
-  (struct elf_backend_data *, struct elf_link_hash_entry *,
+  (const struct elf_backend_data *, struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);
 static int sh_elf_optimized_tls_reloc
   (struct bfd_link_info *, int, int);
@@ -3692,7 +3692,7 @@ sh_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   struct elf_sh_link_hash_table *htab;
   flagword flags, pltflags;
   register asection *s;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ptralign = 0;
 
   switch (bed->s->arch_size)
@@ -4663,6 +4663,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	}
       else
 	{
+	  /* FIXME: Ought to make use of the RELOC_FOR_GLOBAL_SYMBOL macro.  */
+
 	  /* Section symbol are never (?) placed in the hash table, so
 	     we can just ignore hash relocations when creating a
 	     relocatable object file.  */
@@ -4764,17 +4766,18 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
-	  else if (info->shared
-		   && ! info->no_undefined
+	  else if (! info->executable
+		   && info->unresolved_syms_in_objects == RM_IGNORE
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
 	  else
 	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined
-		       || ELF_ST_VISIBILITY (h->other)))))
+	      if (! info->callbacks->undefined_symbol
+		  (info, h->root.root.string, input_bfd,
+		   input_section, rel->r_offset,
+		   ((info->shared && info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)
+		    || (!info->shared && info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
+		    || ELF_ST_VISIBILITY (h->other))))
 		return FALSE;
 	      relocation = 0;
 	    }
@@ -6011,7 +6014,7 @@ sh_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-sh_elf_copy_indirect_symbol (struct elf_backend_data *bed,
+sh_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
 			     struct elf_link_hash_entry *dir,
 			     struct elf_link_hash_entry *ind)
 {

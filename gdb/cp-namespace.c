@@ -500,8 +500,8 @@ lookup_symbol_file (const char *name,
      classes, then we should have found a match for them above.  So if
      we find them now, they should be genuine.  */
 
-  /* FIXME: carlton/2002-12-18: This is a hack and should eventually
-     be deleted: see cp-support.c.  */
+  /* FIXME: carlton/2003-06-12: This is a hack and should eventually
+     be deleted: see comments below.  */
 
   /* FIXME: carlton/2003-01-06: Searching this seems a bit fishy if
      anonymous_namespace is nonzero, since we might return a namespace
@@ -623,7 +623,16 @@ initialize_namespace_symtab (struct objfile *objfile)
   /* Allocate the possible namespace block; we put it where the first
      local block will live, though I don't think there's any need to
      pretend that it's actually a local block (e.g. by setting
-     BLOCK_SUPERBLOCK appropriately).  */
+     BLOCK_SUPERBLOCK appropriately).  We don't use the global or
+     static block because we don't want it searched during the normal
+     search of all global/static blocks in lookup_symbol: we only want
+     it used as a last resort.  */
+
+  /* NOTE: carlton/2003-09-11: I considered not associating the fake
+     symbols to a block/symtab at all.  But that would cause problems
+     with lookup_symbol's SYMTAB argument and with block_found, so
+     having a symtab/block for this purpose seems like the best
+     solution for now.  */
 
   bl = allocate_block (&objfile->symbol_obstack);
   BLOCK_DICT (bl) = dict_create_hashed_expandable ();

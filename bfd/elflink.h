@@ -415,7 +415,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   Elf_Internal_Sym *isymbuf = NULL;
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   bfd_boolean dt_needed;
   struct elf_link_hash_table * hash_table;
   bfd_size_type amt;
@@ -1186,7 +1186,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      bfd *common_bfd;
 
 	      symbol_align = ffs (h->root.u.def.value) - 1;
-	      if ((h->root.u.def.section->owner->flags & DYNAMIC) == 0)
+	      if (h->root.u.def.section->owner != NULL
+		  && (h->root.u.def.section->owner->flags & DYNAMIC) == 0)
 		{
 		  normal_align = h->root.u.def.section->alignment_power;
 		  if (normal_align > symbol_align)
@@ -1888,7 +1889,7 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 {
   bfd_size_type soname_indx;
   bfd *dynobj;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   struct elf_assign_sym_version_info asvinfo;
 
   *sinterpptr = NULL;
@@ -2859,7 +2860,7 @@ elf_link_adjust_relocs (bfd *abfd,
 			struct elf_link_hash_entry **rel_hash)
 {
   unsigned int i;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_byte *erela;
   void (*swap_in) (bfd *, const bfd_byte *, Elf_Internal_Rela *);
   void (*swap_out) (bfd *, const Elf_Internal_Rela *, bfd_byte *);
@@ -2964,7 +2965,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
   size_t i, ret, sort_elt, ext_size;
   bfd_byte *sort, *s_non_relative, *p;
   struct elf_link_sort_rela *sq;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int i2e = bed->s->int_rels_per_ext_rel;
   void (*swap_in) (bfd *, const bfd_byte *, Elf_Internal_Rela *);
   void (*swap_out) (bfd *, const Elf_Internal_Rela *, bfd_byte *);
@@ -3096,7 +3097,7 @@ elf_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Shdr *symtab_shndx_hdr;
   Elf_Internal_Shdr *symstrtab_hdr;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_outext_info eoinfo;
   bfd_boolean merged;
   size_t relativecount = 0;
@@ -4363,24 +4364,19 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 	return TRUE;
     }
 
-  /* If we are not creating a shared library, and this symbol is
-     referenced by a shared library but is not defined anywhere, then
-     warn that it is undefined.  If we do not do this, the runtime
-     linker will complain that the symbol is undefined when the
-     program is run.  We don't have to worry about symbols that are
-     referenced by regular files, because we will already have issued
-     warnings for them.  */
-  if (! finfo->info->relocatable
-      && (finfo->info->executable
-	  || ! finfo->info->allow_shlib_undefined)
-      && h->root.type == bfd_link_hash_undefined
+  /* If we have an undefined symbol reference here then it must have
+     come from a shared library that is being linked in.  (Undefined
+     references in regular files have already been handled).  If we
+     are reporting errors for this situation then do so now.  */
+  if (h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
-      && ! elf_link_check_versioned_symbol (finfo->info, h))
+      && ! elf_link_check_versioned_symbol (finfo->info, h)
+      && finfo->info->unresolved_syms_in_shared_libs != RM_IGNORE)
     {
       if (! ((*finfo->info->callbacks->undefined_symbol)
 	     (finfo->info, h->root.root.string, h->root.u.undef.abfd,
-	      NULL, 0, TRUE)))
+	      NULL, 0, finfo->info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)))
 	{
 	  eoinfo->failed = TRUE;
 	  return FALSE;
@@ -4390,10 +4386,9 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
   /* We should also warn if a forced local symbol is referenced from
      shared libraries.  */
   if (! finfo->info->relocatable
-      && (! finfo->info->shared || ! finfo->info->allow_shlib_undefined)
+      && (! finfo->info->shared)
       && (h->elf_link_hash_flags
-	  & (ELF_LINK_FORCED_LOCAL | ELF_LINK_HASH_REF_DYNAMIC
-	     | ELF_LINK_DYNAMIC_DEF | ELF_LINK_DYNAMIC_WEAK))
+	  & (ELF_LINK_FORCED_LOCAL | ELF_LINK_HASH_REF_DYNAMIC | ELF_LINK_DYNAMIC_DEF | ELF_LINK_DYNAMIC_WEAK))
 	 == (ELF_LINK_FORCED_LOCAL | ELF_LINK_HASH_REF_DYNAMIC)
       && ! elf_link_check_versioned_symbol (finfo->info, h))
     {
@@ -4541,7 +4536,7 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 	  || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
       && elf_hash_table (finfo->info)->dynamic_sections_created)
     {
-      struct elf_backend_data *bed;
+      const struct elf_backend_data *bed;
 
       bed = get_elf_backend_data (finfo->output_bfd);
       if (! ((*bed->elf_backend_finish_dynamic_symbol)
@@ -4687,7 +4682,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
   long *pindex;
   asection **ppsection;
   asection *o;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   bfd_boolean emit_relocs;
   struct elf_link_hash_entry **sym_hashes;
 
@@ -5321,7 +5316,7 @@ elf_reloc_link_order (bfd *output_bfd,
   bfd_vma addend;
   struct elf_link_hash_entry **rel_hash_ptr;
   Elf_Internal_Shdr *rel_hdr;
-  struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
   Elf_Internal_Rela irel[MAX_INT_RELS_PER_EXT_REL];
   bfd_byte *erel;
   unsigned int i;
@@ -5509,7 +5504,7 @@ elf_gc_mark (struct bfd_link_info *info,
       size_t nlocsyms;
       size_t extsymoff;
       bfd *input_bfd = sec->owner;
-      struct elf_backend_data *bed = get_elf_backend_data (input_bfd);
+      const struct elf_backend_data *bed = get_elf_backend_data (input_bfd);
       Elf_Internal_Sym *isym = NULL;
 
       symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -5727,10 +5722,11 @@ elf_gc_propagate_vtable_entries_used (struct elf_link_hash_entry *h, void *okp)
       pu = h->vtable_parent->vtable_entries_used;
       if (pu != NULL)
 	{
-	  asection *sec = h->root.u.def.section;
-	  struct elf_backend_data *bed = get_elf_backend_data (sec->owner);
-	  unsigned int log_file_align = bed->s->log_file_align;
+	  const struct elf_backend_data *bed;
+	  unsigned int log_file_align;
 
+	  bed = get_elf_backend_data (h->root.u.def.section->owner);
+	  log_file_align = bed->s->log_file_align;
 	  n = h->vtable_parent->vtable_entries_size >> log_file_align;
 	  while (n--)
 	    {
@@ -5751,7 +5747,7 @@ elf_gc_smash_unused_vtentry_relocs (struct elf_link_hash_entry *h, void *okp)
   asection *sec;
   bfd_vma hstart, hend;
   Elf_Internal_Rela *relstart, *relend, *rel;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   unsigned int log_file_align;
 
   if (h->root.type == bfd_link_hash_warning)
@@ -5914,7 +5910,7 @@ elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
 		       struct elf_link_hash_entry *h,
 		       bfd_vma addend)
 {
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   unsigned int log_file_align = bed->s->log_file_align;
 
   if (addend >= h->vtable_entries_size)
@@ -5980,7 +5976,7 @@ elf_gc_common_finalize_got_offsets (bfd *abfd,
 				    struct bfd_link_info *info)
 {
   bfd *i;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_vma gotoff;
 
   /* The GOT offset is relative to the .got section, but the GOT header is
@@ -6183,7 +6179,7 @@ elf_bfd_discard_info (bfd *output_bfd, struct bfd_link_info *info)
   struct elf_reloc_cookie cookie;
   asection *stab, *eh;
   Elf_Internal_Shdr *symtab_hdr;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   bfd *abfd;
   unsigned int count;
   bfd_boolean ret = FALSE;
@@ -6316,7 +6312,7 @@ elf_bfd_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 static bfd_boolean
 elf_section_ignore_discarded_relocs (asection *sec)
 {
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
 
   switch (sec->sec_info_type)
     {

@@ -273,11 +273,31 @@ enum type_code
 #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
 				   & TYPE_FLAG_ADDRESS_CLASS_ALL)
 
+/*  Array bound type.  */
+enum array_bound_type
+{
+  BOUND_SIMPLE = 0,
+  BOUND_BY_VALUE_IN_REG,
+  BOUND_BY_REF_IN_REG,
+  BOUND_BY_VALUE_ON_STACK,
+  BOUND_BY_REF_ON_STACK,
+  BOUND_CANNOT_BE_DETERMINED
+};
+
+/* This structure is space-critical.
+   Its layout has been tweaked to reduce the space used.  */
+
 struct main_type
 {
   /* Code for kind of type */
 
-  enum type_code code;
+  ENUM_BITFIELD(type_code) code : 8;
+
+  /* Array bounds.  These fields appear at this location because
+     they pack nicely here.  */
+
+  ENUM_BITFIELD(array_bound_type) upper_bound_type : 4;
+  ENUM_BITFIELD(array_bound_type) lower_bound_type : 4;
 
   /* Name of this type, or NULL if none.
 
@@ -298,17 +318,6 @@ struct main_type
      the name to use to look for definitions in other files.  */
 
   char *tag_name;
-
-  /* FIXME, these should probably be restricted to a Fortran-specific
-     field in some fashion.  */
-#define BOUND_CANNOT_BE_DETERMINED   5
-#define BOUND_BY_REF_ON_STACK        4
-#define BOUND_BY_VALUE_ON_STACK      3
-#define BOUND_BY_REF_IN_REG          2
-#define BOUND_BY_VALUE_IN_REG        1
-#define BOUND_SIMPLE                 0
-  int upper_bound_type;
-  int lower_bound_type;
 
   /* Every type is now associated with a particular objfile, and the
      type is allocated on the type_obstack for that objfile.  One problem
@@ -340,6 +349,15 @@ struct main_type
   /* Number of fields described for this type */
 
   short nfields;
+
+  /* Field number of the virtual function table pointer in
+     VPTR_BASETYPE.  If -1, we were unable to find the virtual
+     function table pointer in initial symbol reading, and
+     fill_in_vptr_fieldno should be called to find it if possible.
+
+     Unused if this type does not have virtual functions.  */
+
+  short vptr_fieldno;
 
   /* For structure and union types, a description of each field.
      For set and pascal array types, there is one "field",
@@ -421,15 +439,6 @@ struct main_type
      Unused otherwise.  */
 
   struct type *vptr_basetype;
-
-  /* Field number of the virtual function table pointer in
-     VPTR_BASETYPE.  If -1, we were unable to find the virtual
-     function table pointer in initial symbol reading, and
-     fill_in_vptr_fieldno should be called to find it if possible.
-
-     Unused if this type does not have virtual functions.  */
-
-  int vptr_fieldno;
 
   /* Slot to point to additional language-specific fields of this type.  */
 

@@ -1,3 +1,13 @@
+2003-08-11  Shrinivas Atre  <shrinivasa@KPITCummins.com>	
+	* sim/sh/gencode.c ( tab[] ): Addition of MAC.L handler and 
+	correction for MAC.W handler
+	* sim/sh/interp.c ( macl ): New Function. Implementation of 
+	MAC.L handler.
+
+2003-08-07  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (expand_ppi_code): Comment spelling fix.
+
 2003-07-25  Michael Snyder  <msnyder@redhat.com>
 
 	* gencode.c (pshl): Change < to <= (shift by 16 is allowed).

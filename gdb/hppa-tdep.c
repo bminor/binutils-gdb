@@ -37,6 +37,7 @@
 /* For argument passing to the inferior */
 #include "symtab.h"
 #include "infcall.h"
+#include "dis-asm.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -64,9 +65,20 @@
 #include "target.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "hppa-tdep.h"
 
 /* Some local constants.  */
-static const int hppa_num_regs = 128;
+static const int hppa32_num_regs = 128;
+static const int hppa64_num_regs = 96;
+
+static const int hppa64_call_dummy_breakpoint_offset = 22 * 4;
+
+/* DEPRECATED_CALL_DUMMY_LENGTH is computed based on the size of a
+   word on the target machine, not the size of an instruction.  Since
+   a word on this target holds two instructions we have to divide the
+   instruction size by two to get the word size of the dummy.  */
+static const int hppa32_call_dummy_length = INSTRUCTION_SIZE * 28;
+static const int hppa64_call_dummy_length = INSTRUCTION_SIZE * 26 / 2;
 
 /* Get at various relevent fields of an instruction word. */
 #define MASK_5 0x1f
@@ -164,16 +176,23 @@ int hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name);
 int hppa_in_solib_return_trampoline (CORE_ADDR pc, char *name);
 CORE_ADDR hppa_saved_pc_after_call (struct frame_info *frame);
 int hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs);
-CORE_ADDR hppa_stack_align (CORE_ADDR sp);
+CORE_ADDR hppa32_stack_align (CORE_ADDR sp);
+CORE_ADDR hppa64_stack_align (CORE_ADDR sp);
 int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 int hppa_instruction_nullified (void);
 int hppa_register_raw_size (int reg_nr);
 int hppa_register_byte (int reg_nr);
-struct type * hppa_register_virtual_type (int reg_nr);
+struct type * hppa32_register_virtual_type (int reg_nr);
+struct type * hppa64_register_virtual_type (int reg_nr);
 void hppa_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
-void hppa_extract_return_value (struct type *type, char *regbuf, char *valbuf);
-int hppa_use_struct_convention (int gcc_p, struct type *type);
-void hppa_store_return_value (struct type *type, char *valbuf);
+void hppa32_extract_return_value (struct type *type, char *regbuf,
+                                  char *valbuf);
+void hppa64_extract_return_value (struct type *type, char *regbuf,
+                                  char *valbuf);
+int hppa32_use_struct_convention (int gcc_p, struct type *type);
+int hppa64_use_struct_convention (int gcc_p, struct type *type);
+void hppa32_store_return_value (struct type *type, char *valbuf);
+void hppa64_store_return_value (struct type *type, char *valbuf);
 CORE_ADDR hppa_extract_struct_value_address (char *regbuf);
 int hppa_cannot_store_register (int regnum);
 void hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame);
@@ -182,7 +201,6 @@ int hppa_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe);
 int hppa_frameless_function_invocation (struct frame_info *frame);
 CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
 CORE_ADDR hppa_frame_args_address (struct frame_info *fi);
-CORE_ADDR hppa_frame_locals_address (struct frame_info *fi);
 int hppa_frame_num_args (struct frame_info *frame);
 void hppa_push_dummy_frame (void);
 void hppa_pop_frame (void);
@@ -217,11 +235,19 @@ extern int exception_catchpoints_are_fragile;
 /* Should call_function allocate stack space for a struct return?  */
 
 int
-hppa_use_struct_convention (int gcc_p, struct type *type)
+hppa32_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 2 * DEPRECATED_REGISTER_SIZE);
 }
-
+
+/* Same as hppa32_use_struct_convention() for the PA64 ABI.  */
+
+int
+hppa64_use_struct_convention (int gcc_p, struct type *type)
+{
+  /* RM: struct upto 128 bits are returned in registers */
+  return TYPE_LENGTH (type) > 16;
+}
 
 /* Routines to extract various sized constants out of hppa 
    instructions. */
@@ -681,7 +707,7 @@ hppa_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 /* Return the name of a register.  */
 
 const char *
-hppa_register_name (int i)
+hppa32_register_name (int i)
 {
   static char *names[] = {
     "flags",  "r1",      "rp",     "r3",
@@ -1562,7 +1588,7 @@ void
 hppa_push_dummy_frame (void)
 {
   CORE_ADDR sp, pc, pcspace;
-  register int regnum;
+  int regnum;
   CORE_ADDR int_buffer;
   double freg_buffer;
 
@@ -1607,7 +1633,7 @@ hppa_push_dummy_frame (void)
 
   for (regnum = FP0_REGNUM; regnum < NUM_REGS; regnum++)
     {
-      deprecated_read_register_bytes (REGISTER_BYTE (regnum),
+      deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (regnum),
 				      (char *) &freg_buffer, 8);
       sp = push_bytes (sp, (char *) &freg_buffer, 8);
     }
@@ -1664,9 +1690,9 @@ find_dummy_frame_regs (struct frame_info *frame,
 void
 hppa_pop_frame (void)
 {
-  register struct frame_info *frame = get_current_frame ();
-  register CORE_ADDR fp, npc, target_pc;
-  register int regnum;
+  struct frame_info *frame = get_current_frame ();
+  CORE_ADDR fp, npc, target_pc;
+  int regnum;
   CORE_ADDR *fsr;
   double freg_buffer;
 
@@ -1688,7 +1714,7 @@ hppa_pop_frame (void)
     if (fsr[regnum])
       {
 	read_memory (fsr[regnum], (char *) &freg_buffer, 8);
-	deprecated_write_register_bytes (REGISTER_BYTE (regnum),
+	deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (regnum),
 					 (char *) &freg_buffer, 8);
       }
 
@@ -1844,7 +1870,7 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
   /* The value of SP as it was passed into this function after
      aligning.  */
-  CORE_ADDR orig_sp = STACK_ALIGN (sp);
+  CORE_ADDR orig_sp = DEPRECATED_STACK_ALIGN (sp);
 
   /* The number of stack bytes occupied by the current argument.  */
   int bytes_reserved;
@@ -1907,7 +1933,7 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
      The ABIs also mandate minimum stack alignments which we must
      preserve.  */
-  cum_bytes_aligned = STACK_ALIGN (cum_bytes_reserved);
+  cum_bytes_aligned = DEPRECATED_STACK_ALIGN (cum_bytes_reserved);
   sp += max (cum_bytes_aligned, REG_PARM_STACK_SPACE);
 
   /* Now write each of the args at the proper offset down the stack.  */
@@ -2014,7 +2040,7 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
      The ABI also mandates minimum stack alignments which we must
      preserve.  */
-  cum_bytes_aligned = STACK_ALIGN (cum_bytes_reserved);
+  cum_bytes_aligned = DEPRECATED_STACK_ALIGN (cum_bytes_reserved);
   sp += max (cum_bytes_aligned, REG_PARM_STACK_SPACE);
 
   /* Now write each of the args at the proper offset down the stack.
@@ -2042,9 +2068,9 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    gets the value from the stack rather than from the buffer where all the
    registers were saved when the function called completed. */
 struct value *
-hppa_value_returned_from_stack (register struct type *valtype, CORE_ADDR addr)
+hppa_value_returned_from_stack (struct type *valtype, CORE_ADDR addr)
 {
-  register struct value *val;
+  struct value *val;
 
   val = allocate_value (valtype);
   CHECK_TYPEDEF (valtype);
@@ -2603,7 +2629,7 @@ hppa_target_write_pc (CORE_ADDR v, ptid_t ptid)
     write_register_pid (31, v | 0x3, ptid);
 
   write_register_pid (PC_REGNUM, v, ptid);
-  write_register_pid (NPC_REGNUM, v + 4, ptid);
+  write_register_pid (DEPRECATED_NPC_REGNUM, v + 4, ptid);
 }
 
 /* return the alignment of a type in bytes. Structures have the maximum
@@ -2652,7 +2678,8 @@ pa_do_registers_info (int regnum, int fpregs)
   /* Make a copy of gdb's save area (may cause actual
      reads from the target). */
   for (i = 0; i < NUM_REGS; i++)
-    frame_register_read (deprecated_selected_frame, i, raw_regs + REGISTER_BYTE (i));
+    frame_register_read (deprecated_selected_frame, i,
+			 raw_regs + DEPRECATED_REGISTER_BYTE (i));
 
   if (regnum == -1)
     pa_print_registers (raw_regs, regnum, fpregs);
@@ -2696,7 +2723,8 @@ pa_do_strcat_registers_info (int regnum, int fpregs, struct ui_file *stream,
   /* Make a copy of gdb's save area (may cause actual
      reads from the target). */
   for (i = 0; i < NUM_REGS; i++)
-    frame_register_read (deprecated_selected_frame, i, raw_regs + REGISTER_BYTE (i));
+    frame_register_read (deprecated_selected_frame, i,
+			 raw_regs + DEPRECATED_REGISTER_BYTE (i));
 
   if (regnum == -1)
     pa_strcat_registers (raw_regs, regnum, fpregs, stream);
@@ -2743,7 +2771,7 @@ pa_register_look_aside (char *raw_regs, int regnum, long *raw_val)
 
   int regaddr;
   unsigned int offset;
-  register int i;
+  int i;
   int start;
 
 
@@ -2765,7 +2793,7 @@ pa_register_look_aside (char *raw_regs, int regnum, long *raw_val)
 
   if (!is_pa_2)
     {
-      raw_val[1] = *(long *) (raw_regs + REGISTER_BYTE (regnum));
+      raw_val[1] = *(long *) (raw_regs + DEPRECATED_REGISTER_BYTE (regnum));
       return;
     }
 
@@ -4779,7 +4807,7 @@ hppa_skip_permanent_breakpoint (void)
    Called only in the context of the "return" command.  */
 
 void
-hppa_store_return_value (struct type *type, char *valbuf)
+hppa32_store_return_value (struct type *type, char *valbuf)
 {
   /* For software floating point, the return value goes into the
      integer registers.  But we do not have any flag to key this on,
@@ -4787,14 +4815,40 @@ hppa_store_return_value (struct type *type, char *valbuf)
 
      If its a float value, then we also store it into the floating
      point registers.  */
-  deprecated_write_register_bytes (REGISTER_BYTE (28)
+  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (28)
 				   + (TYPE_LENGTH (type) > 4
 				      ? (8 - TYPE_LENGTH (type))
 				      : (4 - TYPE_LENGTH (type))),
 				   valbuf, TYPE_LENGTH (type));
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    deprecated_write_register_bytes (REGISTER_BYTE (FP4_REGNUM),
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (FP4_REGNUM),
 				     valbuf, TYPE_LENGTH (type));
+}
+
+/* Same as hppa32_store_return_value(), but for the PA64 ABI.  */
+
+void
+hppa64_store_return_value (struct type *type, char *valbuf)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    deprecated_write_register_bytes
+      (DEPRECATED_REGISTER_BYTE (FP4_REGNUM)
+        + DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (type),
+       valbuf, TYPE_LENGTH (type));
+  else if (is_integral_type(type))
+    deprecated_write_register_bytes
+      (DEPRECATED_REGISTER_BYTE (28)
+        + DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (type),
+       valbuf, TYPE_LENGTH (type));
+  else if (TYPE_LENGTH (type) <= 8)
+    deprecated_write_register_bytes
+      (DEPRECATED_REGISTER_BYTE (28),valbuf, TYPE_LENGTH (type));
+  else if (TYPE_LENGTH (type) <= 16)
+    {
+      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (28),valbuf, 8);
+      deprecated_write_register_bytes
+        (DEPRECATED_REGISTER_BYTE (29), valbuf + 8, TYPE_LENGTH (type) - 8);
+    }
 }
 
 /* Copy the function's return value into VALBUF.
@@ -4805,20 +4859,48 @@ hppa_store_return_value (struct type *type, char *valbuf)
    "return" command.  */
 
 void
-hppa_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+hppa32_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    memcpy (valbuf,
-	    (char *)regbuf + REGISTER_BYTE (FP4_REGNUM),
-	    TYPE_LENGTH (type));
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (FP4_REGNUM), TYPE_LENGTH (type));
   else
     memcpy (valbuf,
-	    ((char *)regbuf
-	     + REGISTER_BYTE (28)
+	    (regbuf
+	     + DEPRECATED_REGISTER_BYTE (28)
 	     + (TYPE_LENGTH (type) > 4
 		? (8 - TYPE_LENGTH (type))
 		: (4 - TYPE_LENGTH (type)))),
 	    TYPE_LENGTH (type));
+}
+
+/* Same as hppa32_extract_return_value but for the PA64 ABI case.  */
+
+void
+hppa64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+{
+  /* RM: Floats are returned in FR4R, doubles in FR4.
+         Integral values are in r28, padded on the left.
+         Aggregates less that 65 bits are in r28, right padded.
+         Aggregates upto 128 bits are in r28 and r29, right padded.  */ 
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    memcpy (valbuf,
+            regbuf + DEPRECATED_REGISTER_BYTE (FP4_REGNUM)
+             + DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (type),
+            TYPE_LENGTH (type));
+  else if (is_integral_type(type))
+    memcpy (valbuf,
+            regbuf + DEPRECATED_REGISTER_BYTE (28)
+             + DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (type),
+            TYPE_LENGTH (type));
+  else if (TYPE_LENGTH (type) <= 8)
+    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (28),
+	    TYPE_LENGTH (type));
+  else if (TYPE_LENGTH (type) <= 16)
+    {
+      memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (28), 8);
+      memcpy (valbuf + 8, regbuf + DEPRECATED_REGISTER_BYTE (29),
+	      TYPE_LENGTH (type) - 8);
+    }
 }
 
 int
@@ -4837,12 +4919,19 @@ hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs)
 }
 
 CORE_ADDR
-hppa_stack_align (CORE_ADDR sp)
+hppa32_stack_align (CORE_ADDR sp)
 {
   /* elz: adjust the quantity to the next highest value which is
      64-bit aligned.  This is used in valops.c, when the sp is adjusted.
      On hppa the sp must always be kept 64-bit aligned */
   return ((sp % 8) ? (sp + 7) & -8 : sp);
+}
+
+CORE_ADDR
+hppa64_stack_align (CORE_ADDR sp)
+{
+  /* The PA64 ABI mandates a 16 byte stack alignment.  */
+  return ((sp % 16) ? (sp + 15) & -16 : sp);
 }
 
 int
@@ -4898,19 +4987,33 @@ hppa_register_raw_size (int reg_nr)
 int
 hppa_register_byte (int reg_nr)
 {
-  return reg_nr * 4;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  return reg_nr * tdep->bytes_per_address;
 }
 
 /* Return the GDB type object for the "standard" data type of data
    in register N.  */
 
 struct type *
-hppa_register_virtual_type (int reg_nr)
+hppa32_register_virtual_type (int reg_nr)
 {
    if (reg_nr < FP4_REGNUM)
      return builtin_type_int;
    else
      return builtin_type_float;
+}
+
+/* Return the GDB type object for the "standard" data type of data
+   in register N.  hppa64 version.  */
+
+struct type *
+hppa64_register_virtual_type (int reg_nr)
+{
+   if (reg_nr < FP4_REGNUM)
+     return builtin_type_unsigned_long_long;
+   else
+     return builtin_type_double;
 }
 
 /* Store the address of the place in which to copy the structure the
@@ -4934,7 +5037,7 @@ hppa_extract_struct_value_address (char *regbuf)
      the address size is equal to the size of an int* _on the host_...
      One possible implementation that crossed my mind is to use
      extract_address.  */
-  return (*(int *)(regbuf + REGISTER_BYTE (28)));
+  return (*(int *)(regbuf + DEPRECATED_REGISTER_BYTE (28)));
 }
 
 /* Return True if REGNUM is not a register available to the user
@@ -4976,6 +5079,7 @@ hppa_fetch_pointer_argument (struct frame_info *frame, int argi,
 static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
+  struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
   
   /* Try to determine the ABI of the object we are loading.  */
@@ -4992,12 +5096,71 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return (arches->gdbarch);
 
   /* If none found, then allocate and initialize one.  */
-  gdbarch = gdbarch_alloc (&info, NULL);
+  tdep = XMALLOC (struct gdbarch_tdep);
+  gdbarch = gdbarch_alloc (&info, tdep);
 
-  /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch);
+  /* Determine from the bfd_arch_info structure if we are dealing with
+     a 32 or 64 bits architecture.  If the bfd_arch_info is not available,
+     then default to a 32bit machine.  */
+  if (info.bfd_arch_info != NULL)
+    tdep->bytes_per_address =
+      info.bfd_arch_info->bits_per_address / info.bfd_arch_info->bits_per_byte;
+  else
+    tdep->bytes_per_address = 4;
 
-  set_gdbarch_reg_struct_has_addr (gdbarch, hppa_reg_struct_has_addr);
+  /* Some parts of the gdbarch vector depend on whether we are running
+     on a 32 bits or 64 bits target.  */
+  switch (tdep->bytes_per_address)
+    {
+      case 4:
+        set_gdbarch_num_regs (gdbarch, hppa32_num_regs);
+        set_gdbarch_register_name (gdbarch, hppa32_register_name);
+        set_gdbarch_deprecated_register_virtual_type
+          (gdbarch, hppa32_register_virtual_type);
+        set_gdbarch_deprecated_call_dummy_length
+          (gdbarch, hppa32_call_dummy_length);
+        set_gdbarch_deprecated_stack_align (gdbarch, hppa32_stack_align);
+        set_gdbarch_deprecated_reg_struct_has_addr
+	  (gdbarch, hppa_reg_struct_has_addr);
+        set_gdbarch_deprecated_extract_return_value
+          (gdbarch, hppa32_extract_return_value);
+        set_gdbarch_use_struct_convention
+          (gdbarch, hppa32_use_struct_convention);
+        set_gdbarch_deprecated_store_return_value
+          (gdbarch, hppa32_store_return_value);
+        break;
+      case 8:
+        set_gdbarch_num_regs (gdbarch, hppa64_num_regs);
+        set_gdbarch_register_name (gdbarch, hppa64_register_name);
+        set_gdbarch_deprecated_register_virtual_type
+          (gdbarch, hppa64_register_virtual_type);
+        set_gdbarch_deprecated_call_dummy_breakpoint_offset
+          (gdbarch, hppa64_call_dummy_breakpoint_offset);
+        set_gdbarch_deprecated_call_dummy_length
+          (gdbarch, hppa64_call_dummy_length);
+        set_gdbarch_deprecated_stack_align (gdbarch, hppa64_stack_align);
+        set_gdbarch_deprecated_extract_return_value
+          (gdbarch, hppa64_extract_return_value);
+        set_gdbarch_use_struct_convention
+          (gdbarch, hppa64_use_struct_convention);
+        set_gdbarch_deprecated_store_return_value
+          (gdbarch, hppa64_store_return_value);
+        break;
+      default:
+        internal_error (__FILE__, __LINE__, "Unsupported address size: %d",
+                        tdep->bytes_per_address);
+    }
+
+  /* The following gdbarch vector elements depend on other parts of this
+     vector which have been set above, depending on the ABI.  */
+  set_gdbarch_deprecated_register_bytes
+    (gdbarch, gdbarch_num_regs (gdbarch) * tdep->bytes_per_address);
+  set_gdbarch_long_bit (gdbarch, tdep->bytes_per_address * TARGET_CHAR_BIT);
+  set_gdbarch_long_long_bit (gdbarch, 64);
+  set_gdbarch_ptr_bit (gdbarch, tdep->bytes_per_address * TARGET_CHAR_BIT);
+
+  /* The following gdbarch vector elements do not depend on the address
+     size, or in any other gdbarch element previously set.  */
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_skip_prologue (gdbarch, hppa_skip_prologue);
   set_gdbarch_skip_trampoline_code (gdbarch, hppa_skip_trampoline_code);
@@ -5006,28 +5169,19 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                           hppa_in_solib_return_trampoline);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, hppa_saved_pc_after_call);
   set_gdbarch_inner_than (gdbarch, hppa_inner_than);
-  set_gdbarch_stack_align (gdbarch, hppa_stack_align);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  set_gdbarch_deprecated_register_size (gdbarch, 4);
-  set_gdbarch_num_regs (gdbarch, hppa_num_regs);
+  set_gdbarch_deprecated_register_size (gdbarch, tdep->bytes_per_address);
   set_gdbarch_deprecated_fp_regnum (gdbarch, 3);
   set_gdbarch_sp_regnum (gdbarch, 30);
   set_gdbarch_fp0_regnum (gdbarch, 64);
   set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
-  set_gdbarch_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
+  set_gdbarch_deprecated_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
   set_gdbarch_deprecated_register_raw_size (gdbarch, hppa_register_raw_size);
-  set_gdbarch_deprecated_register_bytes (gdbarch, hppa_num_regs * 4);
   set_gdbarch_deprecated_register_byte (gdbarch, hppa_register_byte);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, hppa_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, tdep->bytes_per_address);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, hppa_register_virtual_type);
-  set_gdbarch_register_name (gdbarch, hppa_register_name);
   set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
-  set_gdbarch_deprecated_extract_return_value (gdbarch,
-                                               hppa_extract_return_value);
-  set_gdbarch_use_struct_convention (gdbarch, hppa_use_struct_convention);
-  set_gdbarch_deprecated_store_return_value (gdbarch, hppa_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, hppa_extract_struct_value_address);
   set_gdbarch_cannot_store_register (gdbarch, hppa_cannot_store_register);
@@ -5040,9 +5194,9 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);
-  set_gdbarch_deprecated_call_dummy_length (gdbarch, INSTRUCTION_SIZE * 28);
   /* set_gdbarch_deprecated_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */
   set_gdbarch_deprecated_push_arguments (gdbarch, hppa_push_arguments);
+  set_gdbarch_addr_bits_remove (gdbarch, hppa_smash_text_address);
   set_gdbarch_smash_text_address (gdbarch, hppa_smash_text_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_read_pc (gdbarch, hppa_target_read_pc);
@@ -5051,6 +5205,17 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Helper for function argument information.  */
   set_gdbarch_fetch_pointer_argument (gdbarch, hppa_fetch_pointer_argument);
+
+  set_gdbarch_print_insn (gdbarch, print_insn_hppa);
+
+  /* When a hardware watchpoint triggers, we'll move the inferior past
+     it by removing all eventpoints; stepping past the instruction
+     that caused the trigger; reinserting eventpoints; and checking
+     whether any watched location changed.  */
+  set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }
@@ -5070,7 +5235,6 @@ _initialize_hppa_tdep (void)
   void break_at_finish_at_depth_command (char *arg, int from_tty);
 
   gdbarch_register (bfd_arch_hppa, hppa_gdbarch_init, hppa_dump_tdep);
-  deprecated_tm_print_insn = print_insn_hppa;
 
   add_cmd ("unwind", class_maintenance, unwind_command,
 	   "Print unwind table entry at given address.",

@@ -60,12 +60,21 @@ struct lwp_info
    system".  */
 struct mem_attrib;
 struct target_ops;
+struct target_waitstatus;
 
 extern int linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len,
 				   int write, struct mem_attrib *attrib,
 				   struct target_ops *target);
 
+/* Find process PID's pending signal set from /proc/pid/status.  */
+void linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigset_t *ignored);
+
+/* linux-nat functions for handling fork events.  */
 extern void linux_record_stopped_pid (int pid);
+extern void linux_enable_event_reporting (ptid_t ptid);
+extern ptid_t linux_handle_extended_wait (int pid, int status,
+					  struct target_waitstatus *ourstatus);
+extern void linux_child_post_startup_inferior (ptid_t ptid);
 
 /* Iterator function for lin-lwp's lwp list.  */
 struct lwp_info *iterate_over_lwps (int (*callback) (struct lwp_info *, 

@@ -135,9 +135,11 @@ struct frame_info
 
 static int frame_debug;
 
-/* Flag to indicate whether backtraces should stop at main.  */
+/* Flag to indicate whether backtraces should stop at main et.al.  */
 
-static int backtrace_below_main;
+static int backtrace_past_main;
+static unsigned int backtrace_limit = UINT_MAX;
+
 
 void
 fprint_frame_id (struct ui_file *file, struct frame_id id)
@@ -915,12 +917,24 @@ get_selected_frame (void)
   return deprecated_selected_frame;
 }
 
+/* This is a variant of get_selected_frame which can be called when
+   the inferior does not have a frame; in that case it will return
+   NULL instead of calling error ().  */
+
+struct frame_info *
+deprecated_safe_get_selected_frame (void)
+{
+  if (!target_has_registers || !target_has_stack || !target_has_memory)
+    return NULL;
+  return get_selected_frame ();
+}
+
 /* Select frame FI (or NULL - to invalidate the current frame).  */
 
 void
 select_frame (struct frame_info *fi)
 {
-  register struct symtab *s;
+  struct symtab *s;
 
   deprecated_selected_frame = fi;
   /* NOTE: cagney/2002-05-04: FI can be NULL.  This occures when the
@@ -1075,9 +1089,9 @@ const struct frame_unwind *legacy_saved_regs_unwind = &legacy_saved_regs_unwinde
    calculated rather than fetched).  We will use not_lval for values
    fetched from generic dummy frames.
 
-   Set *ADDRP to the address, either in memory or as a REGISTER_BYTE
-   offset into the registers array.  If the value is stored in a dummy
-   frame, set *ADDRP to zero.
+   Set *ADDRP to the address, either in memory or as a
+   DEPRECATED_REGISTER_BYTE offset into the registers array.  If the
+   value is stored in a dummy frame, set *ADDRP to zero.
 
    The argument RAW_BUFFER must point to aligned memory.  */
 
@@ -1158,7 +1172,7 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
   if (lval)			/* found it in a live register */
     *lval = lval_register;
   if (addrp)
-    *addrp = REGISTER_BYTE (regnum);
+    *addrp = DEPRECATED_REGISTER_BYTE (regnum);
   if (raw_buffer)
     deprecated_read_register_gen (regnum, raw_buffer);
 }
@@ -1802,7 +1816,7 @@ get_prev_frame (struct frame_info *this_frame)
   gdb_assert (this_frame != NULL);
 
   if (this_frame->level >= 0
-      && !backtrace_below_main
+      && !backtrace_past_main
       && inside_main_func (get_frame_pc (this_frame)))
     /* Don't unwind past main(), bug always unwind the sentinel frame.
        Note, this is done _before_ the frame has been marked as
@@ -1812,6 +1826,11 @@ get_prev_frame (struct frame_info *this_frame)
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog, "-> NULL // inside main func }\n");
       return NULL;
+    }
+
+  if (this_frame->level > backtrace_limit)
+    {
+      error ("Backtrace limit of %d exceeded", backtrace_limit);
     }
 
   /* If we're already inside the entry function for the main objfile,
@@ -1825,8 +1844,9 @@ get_prev_frame (struct frame_info *this_frame)
      checking for "main" in the minimal symbols.  With that fixed
      asm-source tests now stop in "main" instead of halting the
      backtrace in wierd and wonderful ways somewhere inside the entry
-     file.  Suspect that inside_entry_file and inside_entry_func tests
-     were added to work around that (now fixed) case.  */
+     file.  Suspect that deprecated_inside_entry_file and
+     inside_entry_func tests were added to work around that (now
+     fixed) case.  */
   /* NOTE: cagney/2003-07-15: danielj (if I'm reading it right)
      suggested having the inside_entry_func test use the
      inside_main_func msymbol trick (along with entry_point_address I
@@ -1865,7 +1885,6 @@ get_prev_frame (struct frame_info *this_frame)
     }
   this_frame->prev_p = 1;
 
-#if 0
   /* If we're inside the entry file, it isn't valid.  Don't apply this
      test to a dummy frame - dummy frame PC's typically land in the
      entry file.  Don't apply this test to the sentinel frame.
@@ -1877,17 +1896,19 @@ get_prev_frame (struct frame_info *this_frame)
   /* NOTE: cagney/2003-01-10: If there is a way of disabling this test
      then it should probably be moved to before the ->prev_p test,
      above.  */
-  /* NOTE: vinschen/2003-04-01: Disabled.  It turns out that the call to
-     inside_entry_file destroys a meaningful backtrace under some
-     conditions.  E. g. the backtrace tests in the asm-source testcase
-     are broken for some targets.  In this test the functions are all
-     implemented as part of one file and the testcase is not necessarily
-     linked with a start file (depending on the target).  What happens is,
-     that the first frame is printed normaly and following frames are
-     treated as being inside the enttry file then.  This way, only the
-     #0 frame is printed in the backtrace output.  */
-  if (this_frame->type != DUMMY_FRAME && this_frame->level >= 0
-      && inside_entry_file (get_frame_pc (this_frame)))
+  /* NOTE: vinschen/2003-04-01: Disabled.  It turns out that the call
+     to deprecated_inside_entry_file destroys a meaningful backtrace
+     under some conditions.  E. g. the backtrace tests in the
+     asm-source testcase are broken for some targets.  In this test
+     the functions are all implemented as part of one file and the
+     testcase is not necessarily linked with a start file (depending
+     on the target).  What happens is, that the first frame is printed
+     normaly and following frames are treated as being inside the
+     enttry file then.  This way, only the #0 frame is printed in the
+     backtrace output.  */
+  if (0
+      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
+      && deprecated_inside_entry_file (get_frame_pc (this_frame)))
     {
       if (frame_debug)
 	{
@@ -1897,7 +1918,6 @@ get_prev_frame (struct frame_info *this_frame)
 	}
       return NULL;
     }
-#endif
 
   /* If any of the old frame initialization methods are around, use
      the legacy get_prev_frame method.  */
@@ -2272,7 +2292,8 @@ deprecated_set_frame_context (struct frame_info *fi,
 struct frame_info *
 deprecated_frame_xmalloc (void)
 {
-  struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  struct frame_info *frame = XMALLOC (struct frame_info);
+  memset (frame, 0, sizeof (*frame));
   frame->this_id.p = 1;
   return frame;
 }
@@ -2370,18 +2391,39 @@ legacy_frame_p (struct gdbarch *current_gdbarch)
 
 extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */
 
+static struct cmd_list_element *set_backtrace_cmdlist;
+static struct cmd_list_element *show_backtrace_cmdlist;
+
+static void
+set_backtrace_cmd (char *args, int from_tty)
+{
+  help_list (set_backtrace_cmdlist, "set backtrace ", -1, gdb_stdout);
+}
+
+static void
+show_backtrace_cmd (char *args, int from_tty)
+{
+  cmd_show_list (show_backtrace_cmdlist, from_tty, "");
+}
+
 void
 _initialize_frame (void)
 {
   obstack_init (&frame_cache_obstack);
 
-  /* FIXME: cagney/2003-01-19: This command needs a rename.  Suggest
-     `set backtrace {past,beyond,...}-main'.  Also suggest adding `set
-     backtrace ...-start' to control backtraces past start.  The
-     problem with `below' is that it stops the `up' command.  */
+  add_prefix_cmd ("backtrace", class_maintenance, set_backtrace_cmd, "\
+Set backtrace specific variables.\n\
+Configure backtrace variables such as the backtrace limit",
+		  &set_backtrace_cmdlist, "set backtrace ",
+		  0/*allow-unknown*/, &setlist);
+  add_prefix_cmd ("backtrace", class_maintenance, show_backtrace_cmd, "\
+Show backtrace specific variables\n\
+Show backtrace variables such as the backtrace limit",
+		  &show_backtrace_cmdlist, "show backtrace ",
+		  0/*allow-unknown*/, &showlist);
 
-  add_setshow_boolean_cmd ("backtrace-below-main", class_obscure,
-			   &backtrace_below_main, "\
+  add_setshow_boolean_cmd ("past-main", class_obscure,
+			   &backtrace_past_main, "\
 Set whether backtraces should continue past \"main\".\n\
 Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
@@ -2390,8 +2432,17 @@ Show whether backtraces should continue past \"main\".\n\
 Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
 of the stack trace.",
-			   NULL, NULL, &setlist, &showlist);
+			   NULL, NULL, &set_backtrace_cmdlist,
+			   &show_backtrace_cmdlist);
 
+  add_setshow_uinteger_cmd ("limit", class_obscure,
+			    &backtrace_limit, "\
+Set an upper bound on the number of backtrace levels.\n\
+No more than the specified number of frames can be displayed or examined.\n\
+Zero is unlimited.", "\
+Show the upper bound on the number of backtrace levels.",
+			    NULL, NULL, &set_backtrace_cmdlist,
+			    &show_backtrace_cmdlist);
 
   /* Debug this files internals. */
   add_show_from_set (add_set_cmd ("frame", class_maintenance, var_zinteger,

@@ -310,8 +310,8 @@ read_memory_unsigned_integer (CORE_ADDR memaddr, int len)
 void
 read_memory_string (CORE_ADDR memaddr, char *buffer, int max_len)
 {
-  register char *cp;
-  register int i;
+  char *cp;
+  int i;
   int cnt;
 
   cp = buffer;

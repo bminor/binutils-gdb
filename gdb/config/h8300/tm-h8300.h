@@ -20,8 +20,6 @@
    Boston, MA 02111-1307, USA.  */
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
-
 /* NOTE: ezannoni 2000-07-18: these variables are part of sim, defined
    in sim/h8300/compile.c.  They really should not be used this
    way. Because of this we cannot get rid of the macro

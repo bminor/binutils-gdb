@@ -177,7 +177,7 @@ static CORE_ADDR breakpoint_addr;	/* Address where end bkpt is set */
 
 static int match_main (char *);
 
-static CORE_ADDR bfd_lookup_symbol (bfd *, char *);
+static CORE_ADDR bfd_lookup_symbol (bfd *, char *, flagword);
 
 /*
 
@@ -187,7 +187,7 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, char *);
 
    SYNOPSIS
 
-   CORE_ADDR bfd_lookup_symbol (bfd *abfd, char *symname)
+   CORE_ADDR bfd_lookup_symbol (bfd *abfd, char *symname, flagword sect_flags)
 
    DESCRIPTION
 
@@ -196,12 +196,15 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, char *);
    shared library support to find the address of the debugger
    interface structures in the shared library.
 
+   If SECT_FLAGS is non-zero, only match symbols in sections whose
+   flags include all those in SECT_FLAGS.
+
    Note that 0 is specifically allowed as an error return (no
    such symbol).
  */
 
 static CORE_ADDR
-bfd_lookup_symbol (bfd *abfd, char *symname)
+bfd_lookup_symbol (bfd *abfd, char *symname, flagword sect_flags)
 {
   long storage_needed;
   asymbol *sym;
@@ -222,7 +225,8 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = *symbol_table++;
-	  if (STREQ (sym->name, symname))
+	  if (STREQ (sym->name, symname)
+              && (sym->section->flags & sect_flags) == sect_flags)
 	    {
 	      /* Bfd symbols are section relative. */
 	      symaddr = sym->value + sym->section->vma;
@@ -249,7 +253,9 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = *symbol_table++;
-	  if (STREQ (sym->name, symname))
+
+	  if (STREQ (sym->name, symname)
+              && (sym->section->flags & sect_flags) == sect_flags)
 	    {
 	      /* Bfd symbols are section relative. */
 	      symaddr = sym->value + sym->section->vma;
@@ -355,7 +361,7 @@ look_for_base (int fd, CORE_ADDR baseaddr)
 
   for (symbolp = debug_base_symbols; *symbolp != NULL; symbolp++)
     {
-      address = bfd_lookup_symbol (interp_bfd, *symbolp);
+      address = bfd_lookup_symbol (interp_bfd, *symbolp, 0);
       if (address != 0)
 	{
 	  break;
@@ -1060,7 +1066,16 @@ enable_break (void)
       /* Now try to set a breakpoint in the dynamic linker.  */
       for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
-	  sym_addr = bfd_lookup_symbol (tmp_bfd, *bkpt_namep);
+          /* On ABI's that use function descriptors, there are usually
+             two linker symbols associated with each C function: one
+             pointing at the actual entry point of the machine code,
+             and one pointing at the function's descriptor.  The
+             latter symbol has the same name as the C function.
+
+             What we're looking for here is the machine code entry
+             point, so we are only interested in symbols in code
+             sections.  */
+	  sym_addr = bfd_lookup_symbol (tmp_bfd, *bkpt_namep, SEC_CODE);
 	  if (sym_addr != 0)
 	    break;
 	}

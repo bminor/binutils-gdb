@@ -202,8 +202,8 @@ scm_evaluate_string (char *str, int len)
 }
 
 static struct value *
-evaluate_subexp_scm (struct type *expect_type, register struct expression *exp,
-		     register int *pos, enum noside noside)
+evaluate_subexp_scm (struct type *expect_type, struct expression *exp,
+		     int *pos, enum noside noside)
 {
   enum exp_opcode op = exp->elts[*pos].opcode;
   int len, pc;

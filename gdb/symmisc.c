@@ -116,10 +116,10 @@ free_symtab_block (struct objfile *objfile, struct block *b)
    It is s->free_code that says which alternative to use.  */
 
 void
-free_symtab (register struct symtab *s)
+free_symtab (struct symtab *s)
 {
-  register int i, n;
-  register struct blockvector *bv;
+  int i, n;
+  struct blockvector *bv;
 
   switch (s->free_code)
     {
@@ -1129,13 +1129,13 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
 void
 maintenance_check_symtabs (char *ignore, int from_tty)
 {
-  register struct symbol *sym;
-  register struct partial_symbol **psym;
-  register struct symtab *s = NULL;
-  register struct partial_symtab *ps;
+  struct symbol *sym;
+  struct partial_symbol **psym;
+  struct symtab *s = NULL;
+  struct partial_symtab *ps;
   struct blockvector *bv;
-  register struct objfile *objfile;
-  register struct block *b;
+  struct objfile *objfile;
+  struct block *b;
   int length;
 
   ALL_PSYMTABS (objfile, ps)
@@ -1214,7 +1214,7 @@ maintenance_check_symtabs (char *ignore, int from_tty)
 static int
 block_depth (struct block *block)
 {
-  register int i = 0;
+  int i = 0;
   while ((block = BLOCK_SUPERBLOCK (block)) != NULL)
     {
       i++;
@@ -1228,7 +1228,7 @@ block_depth (struct block *block)
    be freed in free_objfile().  */
 
 void
-extend_psymbol_list (register struct psymbol_allocation_list *listp,
+extend_psymbol_list (struct psymbol_allocation_list *listp,
 		     struct objfile *objfile)
 {
   int new_size;

@@ -1054,12 +1054,15 @@ separate window.
 @cindex @code{--annotate}
 This option sets the @dfn{annotation level} inside @value{GDBN}.  Its
 effect is identical to using @samp{set annotate @var{level}}
-(@pxref{Annotations}).
-Annotation level controls how much information does @value{GDBN} print
-together with its prompt, values of expressions, source lines, and other
-types of output.  Level 0 is the normal, level 1 is for use when
-@value{GDBN} is run as a subprocess of @sc{gnu} Emacs, level 2 is the
-maximum annotation suitable for programs that control @value{GDBN}.
+(@pxref{Annotations}).  The annotation @var{level} controls how much
+information @value{GDBN} prints together with its prompt, values of
+expressions, source lines, and other types of output.  Level 0 is the
+normal, level 1 is for use when @value{GDBN} is run as a subprocess of
+@sc{gnu} Emacs, level 3 is the maximum annotation suitable for programs
+that control @value{GDBN}, and level 2 has been deprecated.
+
+The annotation mechanism has largely been superseeded by @sc{gdb/mi}
+(@pxref{GDB/MI}).
 
 @item -async
 @cindex @code{--async}
@@ -1130,11 +1133,11 @@ communicate with @value{GDBN} using it as a back end.
 @xref{Interpreters, , Command Interpreters}.
 
 @samp{--interpreter=mi} (or @samp{--interpreter=mi2}) causes
-@value{GDBN} to use the current @dfn{@sc{gdb/mi} interface}
-(@pxref{GDB/MI, , The @sc{gdb/mi} Interface}).  The previous @sc{gdb/mi}
-interface, included in @value{GDBN} version 5.3, can be selected with
-@samp{--interpreter=mi1}.  Earlier @sc{gdb/mi} interfaces
-are not supported.
+@value{GDBN} to use the @dfn{@sc{gdb/mi} interface} (@pxref{GDB/MI, ,
+The @sc{gdb/mi} Interface}) included in @var{GDBN} version 6.0.  The
+previous @sc{gdb/mi} interface, included in @value{GDBN} version 5.3,
+can be selected with @samp{--interpreter=mi1}.  Earlier @sc{gdb/mi}
+interfaces are not supported.
 
 @item -write
 @cindex @code{--write}
@@ -3919,27 +3922,40 @@ The display for frame zero does not begin with a program counter
 value, indicating that your program has stopped at the beginning of the
 code for line @code{993} of @code{builtin.c}.
 
-@kindex set backtrace-below-main
-@kindex show backtrace-below-main
+@kindex set backtrace past-main
+@kindex show backtrace past-main
+@kindex set backtrace limit
+@kindex show backtrace limit
 
-Most programs have a standard entry point---a place where system libraries
-and startup code transition into user code.  For C this is @code{main}.
-When @value{GDBN} finds the entry function in a backtrace it will terminate
-the backtrace, to avoid tracing into highly system-specific (and generally
-uninteresting) code.  If you need to examine the startup code, then you can
-change this behavior.
+Most programs have a standard user entry point---a place where system
+libraries and startup code transition into user code.  For C this is
+@code{main}.  When @value{GDBN} finds the entry function in a backtrace
+it will terminate the backtrace, to avoid tracing into highly
+system-specific (and generally uninteresting) code.
+
+If you need to examine the startup code, or limit the number of levels
+in a backtrace, you can change this behavior:
 
 @table @code
-@item set backtrace-below-main off
+@item set backtrace past-main
+@itemx set backtrace past-main on
+Backtraces will continue past the user entry point.
+
+@item set backtrace past-main off
 Backtraces will stop when they encounter the user entry point.  This is the
 default.
 
-@item set backtrace-below-main
-@itemx set backtrace-below-main on
-Backtraces will continue past the user entry point to the top of the stack.
+@item show backtrace past-main
+Display the current user entry point backtrace policy.
 
-@item show backtrace-below-main
-Display the current backtrace policy.
+@item set backtrace limit @var{n}
+@itemx set backtrace limit 0
+@cindex backtrace limit
+Limit the backtrace to @var{n} levels.  A value of zero means
+unlimited.
+
+@item show backtrace limit
+Display the current limit on backtrace levels.
 @end table
 
 @node Selection
@@ -14142,36 +14158,26 @@ and the source.
 Explicit @value{GDBN} @code{list} or search commands still produce output as
 usual, but you probably have no reason to use them from Emacs.
 
-@quotation
-@emph{Warning:} If the directory where your program resides is not your
-current directory, it can be easy to confuse Emacs about the location of
-the source files, in which case the auxiliary display buffer does not
-appear to show your source.  @value{GDBN} can find programs by searching your
-environment's @code{PATH} variable, so the @value{GDBN} input and output
-session proceeds normally; but Emacs does not get enough information
-back from @value{GDBN} to locate the source files in this situation.  To
-avoid this problem, either start @value{GDBN} mode from the directory where
-your program resides, or specify an absolute file name when prompted for the
-@kbd{M-x gdb} argument.
+If you specify an absolute file name when prompted for the @kbd{M-x
+gdb} argument, then Emacs sets your current working directory to where
+your program resides.  If you only specify the file name, then Emacs
+sets your current working directory to to the directory associated
+with the previous buffer.  In this case, @value{GDBN} may find your
+program by searching your environment's @code{PATH} variable, but on
+some operating systems it might not find the source.  So, although the
+@value{GDBN} input and output session proceeds normally, the auxiliary
+buffer does not display the current source and line of execution.
 
-A similar confusion can result if you use the @value{GDBN} @code{file} command to
-switch to debugging a program in some other location, from an existing
-@value{GDBN} buffer in Emacs.
-@end quotation
+The initial working directory of @value{GDBN} is printed on the top
+line of the @value{GDBN} I/O buffer and this serves as a default for
+the commands that specify files for @value{GDBN} to operate
+on.  @xref{Files, ,Commands to specify files}.
 
-By default, @kbd{M-x gdb} calls the program called @file{gdb}.  If
-you need to call @value{GDBN} by a different name (for example, if you keep
-several configurations around, with different names) you can set the
-Emacs variable @code{gdb-command-name}; for example,
-
-@smallexample
-(setq gdb-command-name "mygdb")
-@end smallexample
-
-@noindent
-(preceded by @kbd{M-:} or @kbd{ESC :}, or typed in the @code{*scratch*} buffer, or
-in your @file{.emacs} file) makes Emacs call the program named
-``@code{mygdb}'' instead.
+By default, @kbd{M-x gdb} calls the program called @file{gdb}.  If you
+need to call @value{GDBN} by a different name (for example, if you
+keep several configurations around, with different names) you can
+customize the Emacs variable @code{gud-gdb-command-name} to run the
+one you want.
 
 In the @value{GDBN} I/O buffer, you can use these special Emacs commands in
 addition to the standard Shell mode commands:
@@ -14180,65 +14186,46 @@ addition to the standard Shell mode commands:
 @item C-h m
 Describe the features of Emacs' @value{GDBN} Mode.
 
-@item M-s
+@item C-c C-s
 Execute to another source line, like the @value{GDBN} @code{step} command; also
 update the display window to show the current file and location.
 
-@item M-n
+@item C-c C-n
 Execute to next source line in this function, skipping all function
 calls, like the @value{GDBN} @code{next} command.  Then update the display window
 to show the current file and location.
 
-@item M-i
+@item C-c C-i
 Execute one instruction, like the @value{GDBN} @code{stepi} command; update
-display window accordingly.
-
-@item M-x gdb-nexti
-Execute to next instruction, using the @value{GDBN} @code{nexti} command; update
 display window accordingly.
 
 @item C-c C-f
 Execute until exit from the selected stack frame, like the @value{GDBN}
 @code{finish} command.
 
-@item M-c
+@item C-c C-r
 Continue execution of your program, like the @value{GDBN} @code{continue}
 command.
 
-@emph{Warning:} In Emacs v19, this command is @kbd{C-c C-p}.
-
-@item M-u
+@item C-c <
 Go up the number of frames indicated by the numeric argument
 (@pxref{Arguments, , Numeric Arguments, Emacs, The @sc{gnu} Emacs Manual}),
 like the @value{GDBN} @code{up} command.
 
-@emph{Warning:} In Emacs v19, this command is @kbd{C-c C-u}.
-
-@item M-d
+@item C-c >
 Go down the number of frames indicated by the numeric argument, like the
 @value{GDBN} @code{down} command.
-
-@emph{Warning:} In Emacs v19, this command is @kbd{C-c C-d}.
-
-@item C-x &
-Read the number where the cursor is positioned, and insert it at the end
-of the @value{GDBN} I/O buffer.  For example, if you wish to disassemble code
-around an address that was displayed earlier, type @kbd{disassemble};
-then move the cursor to the address display, and pick up the
-argument for @code{disassemble} by typing @kbd{C-x &}.
-
-You can customize this further by defining elements of the list
-@code{gdb-print-command}; once it is defined, you can format or
-otherwise process numbers picked up by @kbd{C-x &} before they are
-inserted.  A numeric argument to @kbd{C-x &} indicates that you
-wish special formatting, and also acts as an index to pick an element of the
-list.  If the list element is a string, the number to be inserted is
-formatted using the Emacs function @code{format}; otherwise the number
-is passed as an argument to the corresponding list element.
 @end table
 
-In any source file, the Emacs command @kbd{C-x SPC} (@code{gdb-break})
+In any source file, the Emacs command @kbd{C-x SPC} (@code{gud-break})
 tells @value{GDBN} to set a breakpoint on the source line point is on.
+
+If you type @kbd{M-x speedbar}, then Emacs displays a separate frame which
+shows a backtrace when the @value{GDBN} I/O buffer is current.  Move
+point to any frame in the stack and type @key{RET} to make it become the
+current frame and display the associated source in the source buffer.
+Alternatively, click @kbd{Mouse-2} to make the selected frame become the
+current one.
 
 If you accidentally delete the source-display buffer, an easy way to get
 it back is to type the command @code{f} in the @value{GDBN} buffer, to
@@ -14252,6 +14239,10 @@ the files with these buffers if you wish; but keep in mind that @value{GDBN}
 communicates with Emacs in terms of line numbers.  If you add or
 delete lines from the text, the line numbers that @value{GDBN} knows cease
 to correspond properly with the code.
+  
+The description given here is for GNU Emacs version 21.3 and a more
+detailed description of its interaction with @value{GDBN} is given in
+the Emacs manual (@pxref{Debuggers,,, Emacs, The @sc{gnu} Emacs Manual}).
 
 @c The following dropped because Epoch is nonstandard.  Reactivate
 @c if/when v19 does something similar. ---doc@cygnus.com 19dec1990
@@ -18200,10 +18191,13 @@ A @samp{*} causes all existing variable objects to be updated.
 @node Annotations
 @chapter @value{GDBN} Annotations
 
-This chapter describes annotations in @value{GDBN}.  Annotations are
-designed to interface @value{GDBN} to graphical user interfaces or
-other similar programs which want to interact with @value{GDBN} at a
+This chapter describes annotations in @value{GDBN}.  Annotations were
+designed to interface @value{GDBN} to graphical user interfaces or other
+similar programs which want to interact with @value{GDBN} at a
 relatively high level.
+
+The annotation mechanism has largely been superseeded by @sc{gdb/mi}
+(@pxref{GDB/MI}).
 
 @ignore
 This is Edition @value{EDITION}, @value{DATE}.
@@ -18212,24 +18206,17 @@ This is Edition @value{EDITION}, @value{DATE}.
 @menu
 * Annotations Overview::  What annotations are; the general syntax.
 * Server Prefix::       Issuing a command without affecting user state.
-* Value Annotations::   Values are marked as such.
-* Frame Annotations::   Stack frames are annotated.
-* Displays::            @value{GDBN} can be told to display something periodically.
 * Prompting::           Annotations marking @value{GDBN}'s need for input.
 * Errors::              Annotations for error messages.
-* Breakpoint Info::     Information on breakpoints.
 * Invalidation::        Some annotations describe things now invalid.
 * Annotations for Running::
                         Whether the program is running, how it stopped, etc.
 * Source Annotations::  Annotations describing source code.
-* TODO::                Annotations which might be added in the future.
 @end menu
 
 @node Annotations Overview
 @section What is an Annotation?
 @cindex annotations
-
-To produce annotations, start @value{GDBN} with the @code{--annotate=2} option.
 
 Annotations start with a newline character, two @samp{control-z}
 characters, and the name of the annotation.  If there is no additional
@@ -18246,24 +18233,35 @@ no need for @value{GDBN} to output a newline followed by two
 annotations could be extended with an @samp{escape} annotation which
 means those three characters as output.
 
+The annotation @var{level}, which is specified using the
+@option{--annotate} command line option (@pxref{Mode Options}), controls
+how much information @value{GDBN} prints together with its prompt,
+values of expressions, source lines, and other types of output.  Level 0
+is for no anntations, level 1 is for use when @value{GDBN} is run as a
+subprocess of @sc{gnu} Emacs, level 3 is the maximum annotation suitable
+for programs that control @value{GDBN}, and level 2 annotations have
+been made obsolete (@pxref{Limitations, , Limitations of the Annotation
+Interface, annotate, GDB's Obsolete Annotations}).  This chapter
+describes level 3 annotations.
+
 A simple example of starting up @value{GDBN} with annotations is:
 
 @smallexample
-$ gdb --annotate=2
-GNU GDB 5.0
-Copyright 2000 Free Software Foundation, Inc.
+$ @kbd{gdb --annotate=3}
+GNU gdb 6.0
+Copyright 2003 Free Software Foundation, Inc.
 GDB is free software, covered by the GNU General Public License,
 and you are welcome to change it and/or distribute copies of it
 under certain conditions.
 Type "show copying" to see the conditions.
 There is absolutely no warranty for GDB.  Type "show warranty"
 for details.
-This GDB was configured as "sparc-sun-sunos4.1.3"
+This GDB was configured as "i386-pc-linux-gnu"
 
 ^Z^Zpre-prompt
 (gdb) 
 ^Z^Zprompt
-quit
+@kbd{quit}
 
 ^Z^Zpost-prompt
 $ 
@@ -18287,311 +18285,6 @@ pressed on a line by itself.
 The server prefix does not affect the recording of values into the value
 history; to print a value without recording it into the value history,
 use the @code{output} command instead of the @code{print} command.
-
-@node Value Annotations
-@section Values
-
-@cindex annotations for values
-When a value is printed in various contexts, @value{GDBN} uses
-annotations to delimit the value from the surrounding text.
-
-@findex value-history-begin
-@findex value-history-value
-@findex value-history-end
-If a value is printed using @code{print} and added to the value history,
-the annotation looks like
-
-@smallexample
-^Z^Zvalue-history-begin @var{history-number} @var{value-flags}
-@var{history-string}
-^Z^Zvalue-history-value
-@var{the-value}
-^Z^Zvalue-history-end
-@end smallexample
-
-@noindent
-where @var{history-number} is the number it is getting in the value
-history, @var{history-string} is a string, such as @samp{$5 = }, which
-introduces the value to the user, @var{the-value} is the output
-corresponding to the value itself, and @var{value-flags} is @samp{*} for
-a value which can be dereferenced and @samp{-} for a value which cannot.
-
-@findex value-begin
-@findex value-end
-If the value is not added to the value history (it is an invalid float
-or it is printed with the @code{output} command), the annotation is similar:
-
-@smallexample
-^Z^Zvalue-begin @var{value-flags}
-@var{the-value}
-^Z^Zvalue-end
-@end smallexample
-
-@findex arg-begin
-@findex arg-name-end
-@findex arg-value
-@findex arg-end
-When @value{GDBN} prints an argument to a function (for example, in the output
-from the @code{backtrace} command), it annotates it as follows:
-
-@smallexample
-^Z^Zarg-begin
-@var{argument-name}
-^Z^Zarg-name-end
-@var{separator-string}
-^Z^Zarg-value @var{value-flags}
-@var{the-value}
-^Z^Zarg-end
-@end smallexample
-
-@noindent
-where @var{argument-name} is the name of the argument,
-@var{separator-string} is text which separates the name from the value
-for the user's benefit (such as @samp{=}), and @var{value-flags} and
-@var{the-value} have the same meanings as in a
-@code{value-history-begin} annotation.
-
-@findex field-begin
-@findex field-name-end
-@findex field-value
-@findex field-end
-When printing a structure, @value{GDBN} annotates it as follows:
-
-@smallexample
-^Z^Zfield-begin @var{value-flags}
-@var{field-name}
-^Z^Zfield-name-end
-@var{separator-string}
-^Z^Zfield-value
-@var{the-value}
-^Z^Zfield-end
-@end smallexample
-
-@noindent
-where @var{field-name} is the name of the field, @var{separator-string}
-is text which separates the name from the value for the user's benefit
-(such as @samp{=}), and @var{value-flags} and @var{the-value} have the
-same meanings as in a @code{value-history-begin} annotation.
-
-When printing an array, @value{GDBN} annotates it as follows:
-
-@smallexample
-^Z^Zarray-section-begin @var{array-index} @var{value-flags}
-@end smallexample
-
-@noindent
-where @var{array-index} is the index of the first element being
-annotated and @var{value-flags} has the same meaning as in a
-@code{value-history-begin} annotation.  This is followed by any number
-of elements, where is element can be either a single element:
-
-@findex elt
-@smallexample
-@samp{,} @var{whitespace}         ; @r{omitted for the first element}
-@var{the-value}
-^Z^Zelt
-@end smallexample
-
-or a repeated element
-
-@findex elt-rep
-@findex elt-rep-end
-@smallexample
-@samp{,} @var{whitespace}         ; @r{omitted for the first element}
-@var{the-value}
-^Z^Zelt-rep @var{number-of-repetitions}
-@var{repetition-string}
-^Z^Zelt-rep-end
-@end smallexample
-
-In both cases, @var{the-value} is the output for the value of the
-element and @var{whitespace} can contain spaces, tabs, and newlines.  In
-the repeated case, @var{number-of-repetitions} is the number of
-consecutive array elements which contain that value, and
-@var{repetition-string} is a string which is designed to convey to the
-user that repetition is being depicted.
-
-@findex array-section-end
-Once all the array elements have been output, the array annotation is
-ended with
-
-@smallexample
-^Z^Zarray-section-end
-@end smallexample
-
-@node Frame Annotations
-@section Frames
-
-@cindex annotations for frames
-Whenever @value{GDBN} prints a frame, it annotates it.  For example, this applies
-to frames printed when @value{GDBN} stops, output from commands such as
-@code{backtrace} or @code{up}, etc.
-
-@findex frame-begin
-The frame annotation begins with
-
-@smallexample
-^Z^Zframe-begin @var{level} @var{address}
-@var{level-string}
-@end smallexample
-
-@noindent
-where @var{level} is the number of the frame (0 is the innermost frame,
-and other frames have positive numbers), @var{address} is the address of
-the code executing in that frame, and @var{level-string} is a string
-designed to convey the level to the user.  @var{address} is in the form
-@samp{0x} followed by one or more lowercase hex digits (note that this
-does not depend on the language).  The frame ends with
-
-@findex frame-end
-@smallexample
-^Z^Zframe-end
-@end smallexample
-
-Between these annotations is the main body of the frame, which can
-consist of
-
-@itemize @bullet
-@item
-@findex function-call
-@smallexample
-^Z^Zfunction-call
-@var{function-call-string}
-@end smallexample
-
-where @var{function-call-string} is text designed to convey to the user
-that this frame is associated with a function call made by @value{GDBN} to a
-function in the program being debugged.
-
-@item
-@findex signal-handler-caller
-@smallexample
-^Z^Zsignal-handler-caller
-@var{signal-handler-caller-string}
-@end smallexample
-
-where @var{signal-handler-caller-string} is text designed to convey to
-the user that this frame is associated with whatever mechanism is used
-by this operating system to call a signal handler (it is the frame which
-calls the signal handler, not the frame for the signal handler itself).
-
-@item
-A normal frame.
-
-@findex frame-address
-@findex frame-address-end
-This can optionally (depending on whether this is thought of as
-interesting information for the user to see) begin with
-
-@smallexample
-^Z^Zframe-address
-@var{address}
-^Z^Zframe-address-end
-@var{separator-string}
-@end smallexample
-
-where @var{address} is the address executing in the frame (the same
-address as in the @code{frame-begin} annotation, but printed in a form
-which is intended for user consumption---in particular, the syntax varies
-depending on the language), and @var{separator-string} is a string
-intended to separate this address from what follows for the user's
-benefit.
-
-@findex frame-function-name
-@findex frame-args
-Then comes
-
-@smallexample
-^Z^Zframe-function-name
-@var{function-name}
-^Z^Zframe-args
-@var{arguments}
-@end smallexample
-
-where @var{function-name} is the name of the function executing in the
-frame, or @samp{??} if not known, and @var{arguments} are the arguments
-to the frame, with parentheses around them (each argument is annotated
-individually as well, @pxref{Value Annotations}).
-
-@findex frame-source-begin
-@findex frame-source-file
-@findex frame-source-file-end
-@findex frame-source-line
-@findex frame-source-end
-If source information is available, a reference to it is then printed:
-
-@smallexample
-^Z^Zframe-source-begin
-@var{source-intro-string}
-^Z^Zframe-source-file
-@var{filename}
-^Z^Zframe-source-file-end
-:
-^Z^Zframe-source-line
-@var{line-number}
-^Z^Zframe-source-end
-@end smallexample
-
-where @var{source-intro-string} separates for the user's benefit the
-reference from the text which precedes it, @var{filename} is the name of
-the source file, and @var{line-number} is the line number within that
-file (the first line is line 1).
-
-@findex frame-where
-If @value{GDBN} prints some information about where the frame is from (which
-library, which load segment, etc.; currently only done on the RS/6000),
-it is annotated with
-
-@smallexample
-^Z^Zframe-where
-@var{information}
-@end smallexample
-
-Then, if source is to actually be displayed for this frame (for example,
-this is not true for output from the @code{backtrace} command), then a
-@code{source} annotation (@pxref{Source Annotations}) is displayed.  Unlike
-most annotations, this is output instead of the normal text which would be
-output, not in addition.
-@end itemize
-
-@node Displays
-@section Displays
-
-@findex display-begin
-@findex display-number-end
-@findex display-format
-@findex display-expression
-@findex display-expression-end
-@findex display-value
-@findex display-end
-@cindex annotations for display
-When @value{GDBN} is told to display something using the @code{display} command,
-the results of the display are annotated:
-
-@smallexample
-^Z^Zdisplay-begin
-@var{number}
-^Z^Zdisplay-number-end
-@var{number-separator}
-^Z^Zdisplay-format
-@var{format}
-^Z^Zdisplay-expression
-@var{expression}
-^Z^Zdisplay-expression-end
-@var{expression-separator}
-^Z^Zdisplay-value
-@var{value}
-^Z^Zdisplay-end
-@end smallexample
-
-@noindent
-where @var{number} is the number of the display, @var{number-separator}
-is intended to separate the number from what follows for the user,
-@var{format} includes information such as the size, format, or other
-information about how the value is being displayed, @var{expression} is
-the expression being displayed, @var{expression-separator} is intended
-to separate the expression from the text that follows for the user,
-and @var{value} is the actual value being displayed.
 
 @node Prompting
 @section Annotation for @value{GDBN} Input
@@ -18692,64 +18385,6 @@ message.
 Warning messages are not yet annotated.
 @c If we want to change that, need to fix warning(), type_error(),
 @c range_error(), and possibly other places.
-
-@node Breakpoint Info
-@section Information on Breakpoints
-
-@cindex annotations for breakpoints
-The output from the @code{info breakpoints} command is annotated as follows:
-
-@findex breakpoints-headers
-@findex breakpoints-table
-@smallexample
-^Z^Zbreakpoints-headers
-@var{header-entry}
-^Z^Zbreakpoints-table
-@end smallexample
-
-@noindent
-where @var{header-entry} has the same syntax as an entry (see below) but
-instead of containing data, it contains strings which are intended to
-convey the meaning of each field to the user.  This is followed by any
-number of entries.  If a field does not apply for this entry, it is
-omitted.  Fields may contain trailing whitespace.  Each entry consists
-of:
-
-@findex record
-@findex field
-@smallexample
-^Z^Zrecord
-^Z^Zfield 0
-@var{number}
-^Z^Zfield 1
-@var{type}
-^Z^Zfield 2
-@var{disposition}
-^Z^Zfield 3
-@var{enable}
-^Z^Zfield 4
-@var{address}
-^Z^Zfield 5
-@var{what}
-^Z^Zfield 6
-@var{frame}
-^Z^Zfield 7
-@var{condition}
-^Z^Zfield 8
-@var{ignore-count}
-^Z^Zfield 9
-@var{commands}
-@end smallexample
-
-Note that @var{address} is intended for user consumption---the syntax
-varies depending on the language.
-
-The output ends with
-
-@findex breakpoints-table-end
-@smallexample
-^Z^Zbreakpoints-table-end
-@end smallexample
 
 @node Invalidation
 @section Invalidation Notices
@@ -18865,23 +18500,6 @@ line, or @samp{beg} if @var{addr} is at the beginning of the line, and
 source which is being displayed.  @var{addr} is in the form @samp{0x}
 followed by one or more lowercase hex digits (note that this does not
 depend on the language).
-
-@node TODO
-@section Annotations We Might Want in the Future
-
-@format
-    - target-invalid
-      the target might have changed (registers, heap contents, or
-      execution status).  For performance, we might eventually want
-      to hit `registers-invalid' and `all-registers-invalid' with
-      greater precision
-
-    - systematic annotation for set/show parameters (including
-      invalidation notices).
-
-    - similarly, `info' returns a list of candidates for invalidation
-      notices.
-@end format
 
 @node GDB Bugs
 @chapter Reporting Bugs in @value{GDBN}

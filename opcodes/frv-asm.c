@@ -43,7 +43,7 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
 static const char * parse_insn_normal
-     PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
+  (CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *);
 
 /* -- assembler routines inserted here.  */
 
@@ -66,6 +66,12 @@ static const char * parse_u12
   PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
 static const char * parse_even_register
   PARAMS ((CGEN_CPU_DESC, const char **, CGEN_KEYWORD *, long *));
+static const char * parse_A0
+  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+static const char * parse_A1
+  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+static const char * parse_A
+  PARAMS ((CGEN_CPU_DESC, const char **, int, long *, long));
 
 static const char *
 parse_ulo16 (cd, strp, opindex, valuep)
@@ -349,6 +355,49 @@ parse_u12 (cd, strp, opindex, valuep)
 }
 
 static const char *
+parse_A (cd, strp, opindex, valuep, A)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     long *valuep;
+     long A;
+{
+  const char *errmsg;
+ 
+  if (**strp == '#')
+    ++*strp;
+
+  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+  if (errmsg)
+    return errmsg;
+
+  if (*valuep != A)
+    return "Value of A operand must be 0 or 1";
+
+  return NULL;
+}
+
+static const char *
+parse_A0 (cd, strp, opindex, valuep)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     long *valuep;
+{
+  return parse_A (cd, strp, opindex, valuep, 0);
+}
+
+static const char *
+parse_A1 (cd, strp, opindex, valuep)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     long *valuep;
+{
+  return parse_A (cd, strp, opindex, valuep, 1);
+}
+
+static const char *
 parse_even_register (cd, strP, tableP, valueP)
      CGEN_CPU_DESC  cd;
      const char **  strP;
@@ -399,8 +448,11 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
 
   switch (opindex)
     {
-    case FRV_OPERAND_A :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_A, &fields->f_A);
+    case FRV_OPERAND_A0 :
+      errmsg = parse_A0 (cd, strp, FRV_OPERAND_A0, &fields->f_A);
+      break;
+    case FRV_OPERAND_A1 :
+      errmsg = parse_A1 (cd, strp, FRV_OPERAND_A1, &fields->f_A);
       break;
     case FRV_OPERAND_ACC40SI :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_acc_names, & fields->f_ACC40Si);
@@ -659,8 +711,7 @@ frv_cgen_init_asm (cd)
    Returns NULL for success, an error message for failure.  */
 
 char * 
-frv_cgen_build_insn_regex (insn)
-     CGEN_INSN *insn;
+frv_cgen_build_insn_regex (CGEN_INSN *insn)
 {  
   CGEN_OPCODE *opc = (CGEN_OPCODE *) CGEN_INSN_OPCODE (insn);
   const char *mnem = CGEN_INSN_MNEMONIC (insn);
@@ -783,11 +834,10 @@ frv_cgen_build_insn_regex (insn)
    Returns NULL for success, an error message for failure.  */
 
 static const char *
-parse_insn_normal (cd, insn, strp, fields)
-     CGEN_CPU_DESC cd;
-     const CGEN_INSN *insn;
-     const char **strp;
-     CGEN_FIELDS *fields;
+parse_insn_normal (CGEN_CPU_DESC cd,
+		   const CGEN_INSN *insn,
+		   const char **strp,
+		   CGEN_FIELDS *fields)
 {
   /* ??? Runtime added insns not handled yet.  */
   const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
@@ -925,12 +975,11 @@ parse_insn_normal (cd, insn, strp, fields)
    mind helps keep the design clean.  */
 
 const CGEN_INSN *
-frv_cgen_assemble_insn (cd, str, fields, buf, errmsg)
-     CGEN_CPU_DESC cd;
-     const char *str;
-     CGEN_FIELDS *fields;
-     CGEN_INSN_BYTES_PTR buf;
-     char **errmsg;
+frv_cgen_assemble_insn (CGEN_CPU_DESC cd,
+			   const char *str,
+			   CGEN_FIELDS *fields,
+			   CGEN_INSN_BYTES_PTR buf,
+			   char **errmsg)
 {
   const char *start;
   CGEN_INSN_LIST *ilist;
@@ -1034,9 +1083,7 @@ frv_cgen_assemble_insn (cd, str, fields, buf, errmsg)
    FIXME: Not currently used.  */
 
 void
-frv_cgen_asm_hash_keywords (cd, opvals)
-     CGEN_CPU_DESC cd;
-     CGEN_KEYWORD *opvals;
+frv_cgen_asm_hash_keywords (CGEN_CPU_DESC cd, CGEN_KEYWORD *opvals)
 {
   CGEN_KEYWORD_SEARCH search = cgen_keyword_search_init (opvals, NULL);
   const CGEN_KEYWORD_ENTRY * ke;

@@ -48,6 +48,7 @@
 #include "ppc-tdep.h"
 
 #include "gdb_assert.h"
+#include "dis-asm.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
@@ -1053,7 +1054,7 @@ rs6000_pop_frame (void)
       addr = prev_sp + fdata.gpr_offset;
       for (ii = fdata.saved_gpr; ii <= 31; ++ii)
 	{
-	  read_memory (addr, &deprecated_registers[REGISTER_BYTE (ii)],
+	  read_memory (addr, &deprecated_registers[DEPRECATED_REGISTER_BYTE (ii)],
 		       wordsize);
 	  addr += wordsize;
 	}
@@ -1064,7 +1065,7 @@ rs6000_pop_frame (void)
       addr = prev_sp + fdata.fpr_offset;
       for (ii = fdata.saved_fpr; ii <= 31; ++ii)
 	{
-	  read_memory (addr, &deprecated_registers[REGISTER_BYTE (ii + FP0_REGNUM)], 8);
+	  read_memory (addr, &deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + FP0_REGNUM)], 8);
 	  addr += 8;
 	}
     }
@@ -1072,25 +1073,6 @@ rs6000_pop_frame (void)
   write_register (SP_REGNUM, prev_sp);
   target_store_registers (-1);
   flush_cached_frames ();
-}
-
-/* Fixup the call sequence of a dummy function, with the real function
-   address.  Its arguments will be passed by gdb.  */
-
-static void
-rs6000_fix_call_dummy (char *dummyname, CORE_ADDR pc, CORE_ADDR fun,
-		       int nargs, struct value **args, struct type *type,
-		       int gcc_p)
-{
-  int ii;
-  CORE_ADDR target_addr;
-
-  if (rs6000_find_toc_address_hook != NULL)
-    {
-      CORE_ADDR tocvalue = (*rs6000_find_toc_address_hook) (fun);
-      write_register (gdbarch_tdep (current_gdbarch)->ppc_toc_regnum,
-		      tocvalue);
-    }
 }
 
 /* All the ABI's require 16 byte alignment.  */
@@ -1117,9 +1099,12 @@ rs6000_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
    starting from r4.  */
 
 static CORE_ADDR
-rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		       int struct_return, CORE_ADDR struct_addr)
+rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+			struct regcache *regcache, CORE_ADDR bp_addr,
+			int nargs, struct value **args, CORE_ADDR sp,
+			int struct_return, CORE_ADDR struct_addr)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int ii;
   int len = 0;
   int argno;			/* current argument number */
@@ -1134,14 +1119,19 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   CORE_ADDR saved_sp;
 
   /* The first eight words of ther arguments are passed in registers.
-     Copy them appropriately.
+     Copy them appropriately.  */
+  ii = 0;
 
-     If the function is returning a `struct', then the first word (which 
-     will be passed in r3) is used for struct return address.  In that
-     case we should advance one word and start from r4 register to copy 
-     parameters.  */
-
-  ii = struct_return ? 1 : 0;
+  /* If the function is returning a `struct', then the first word
+     (which will be passed in r3) is used for struct return address.
+     In that case we should advance one word and start from r4
+     register to copy parameters.  */
+  if (struct_return)
+    {
+      regcache_raw_write_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
+				   struct_addr);
+      ii++;
+    }
 
 /* 
    effectively indirect call... gcc does...
@@ -1181,7 +1171,7 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	    printf_unfiltered (
 				"Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
-	  memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
+	  memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
 		  VALUE_CONTENTS (arg),
 		  len);
 	  ++f_argno;
@@ -1193,9 +1183,9 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  /* Argument takes more than one register.  */
 	  while (argbytes < len)
 	    {
-	      memset (&deprecated_registers[REGISTER_BYTE (ii + 3)], 0,
+	      memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)], 0,
 		      reg_size);
-	      memcpy (&deprecated_registers[REGISTER_BYTE (ii + 3)],
+	      memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)],
 		      ((char *) VALUE_CONTENTS (arg)) + argbytes,
 		      (len - argbytes) > reg_size
 		        ? reg_size : len - argbytes);
@@ -1211,8 +1201,8 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	{
 	  /* Argument can fit in one register.  No problem.  */
 	  int adj = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? reg_size - len : 0;
-	  memset (&deprecated_registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
-	  memcpy ((char *)&deprecated_registers[REGISTER_BYTE (ii + 3)] + adj, 
+	  memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)], 0, reg_size);
+	  memcpy ((char *)&deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + 3)] + adj, 
 	          VALUE_CONTENTS (arg), len);
 	}
       ++argno;
@@ -1256,14 +1246,6 @@ ran_out_of_registers_for_arguments:
       space = (space + 15) & -16;
       sp -= space;
 
-      /* This is another instance we need to be concerned about
-         securing our stack space. If we write anything underneath %sp
-         (r1), we might conflict with the kernel who thinks he is free
-         to use this area. So, update %sp first before doing anything
-         else.  */
-
-      write_register (SP_REGNUM, sp);
-
       /* If the last argument copied into the registers didn't fit there 
          completely, push the rest of it into stack.  */
 
@@ -1294,7 +1276,7 @@ ran_out_of_registers_for_arguments:
 		printf_unfiltered (
 				    "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
-	      memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
+	      memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
 		      VALUE_CONTENTS (arg),
 		      len);
 	      ++f_argno;
@@ -1304,26 +1286,30 @@ ran_out_of_registers_for_arguments:
 	  ii += ((len + 3) & -4) / 4;
 	}
     }
-  else
-    /* Secure stack areas first, before doing anything else.  */
-    write_register (SP_REGNUM, sp);
 
   /* set back chain properly */
   store_unsigned_integer (tmp_buffer, 4, saved_sp);
   write_memory (sp, tmp_buffer, 4);
 
+  /* Set the stack pointer.  According to the ABI, the SP is meant to
+     be set _before_ the corresponding stack space is used.  No need
+     for that here though - the target has been completely stopped -
+     it isn't possible for an exception handler to stomp on the stack.  */
+  regcache_raw_write_signed (regcache, SP_REGNUM, sp);
+
+  /* Point the inferior function call's return address at the dummy's
+     breakpoint.  */
+  regcache_raw_write_signed (regcache, tdep->ppc_lr_regnum, bp_addr);
+
+  /* Set the TOC register, get the value from the objfile reader
+     which, in turn, gets it from the VMAP table.  */
+  if (rs6000_find_toc_address_hook != NULL)
+    {
+      CORE_ADDR tocvalue = (*rs6000_find_toc_address_hook) (func_addr);
+      regcache_raw_write_signed (regcache, tdep->ppc_toc_regnum, tocvalue);
+    }
+
   target_store_registers (-1);
-  return sp;
-}
-
-/* Function: ppc_push_return_address (pc, sp)
-   Set up the return address for the inferior function call.  */
-
-static CORE_ADDR
-ppc_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
-{
-  write_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum,
-		  CALL_DUMMY_ADDRESS ());
   return sp;
 }
 
@@ -1386,6 +1372,18 @@ e500_extract_return_value (struct type *valtype, struct regcache *regbuf, void *
     }
 }
 
+/* PowerOpen always puts structures in memory.  Vectors, which were
+   added later, do get returned in a register though.  */
+
+static int     
+rs6000_use_struct_convention (int gcc_p, struct type *value_type)
+{  
+  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
+      && TYPE_VECTOR (value_type))
+    return 0;                            
+  return 1;
+}
+
 static void
 rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 {
@@ -1403,11 +1401,11 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 
       if (TYPE_LENGTH (valtype) > 4)	/* this is a double */
 	memcpy (valbuf,
-		&regbuf[REGISTER_BYTE (FP0_REGNUM + 1)],
+		&regbuf[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1)],
 		TYPE_LENGTH (valtype));
       else
 	{			/* float */
-	  memcpy (&dd, &regbuf[REGISTER_BYTE (FP0_REGNUM + 1)], 8);
+	  memcpy (&dd, &regbuf[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1)], 8);
 	  ff = (float) dd;
 	  memcpy (valbuf, &ff, sizeof (float));
 	}
@@ -1416,7 +1414,7 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
            && TYPE_LENGTH (valtype) == 16
            && TYPE_VECTOR (valtype))
     {
-      memcpy (valbuf, regbuf + REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
+      memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
 	      TYPE_LENGTH (valtype));
     }
   else
@@ -1427,7 +1425,7 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 	offset = REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
 
       memcpy (valbuf,
-	      regbuf + REGISTER_BYTE (3) + offset,
+	      regbuf + DEPRECATED_REGISTER_BYTE (3) + offset,
 	      TYPE_LENGTH (valtype));
     }
 }
@@ -1477,7 +1475,7 @@ rs6000_in_solib_return_trampoline (CORE_ADDR pc, char *name)
 CORE_ADDR
 rs6000_skip_trampoline_code (CORE_ADDR pc)
 {
-  register unsigned int ii, op;
+  unsigned int ii, op;
   int rel;
   CORE_ADDR solib_target_pc;
   struct minimal_symbol *msymbol;
@@ -1817,7 +1815,7 @@ rs6000_frame_chain (struct frame_info *thisframe)
        frame.  */
     return read_memory_addr (get_frame_base (thisframe), wordsize);
 
-  if (inside_entry_file (get_frame_pc (thisframe))
+  if (deprecated_inside_entry_file (get_frame_pc (thisframe))
       || get_frame_pc (thisframe) == entry_point_address ())
     return 0;
 
@@ -2048,16 +2046,6 @@ rs6000_stab_reg_to_regnum (int num)
   return regnum;
 }
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  */
-
-static void
-rs6000_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  write_register (tdep->ppc_gp0_regnum + 3, addr);
-}
-
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 static void
@@ -2093,18 +2081,18 @@ rs6000_store_return_value (struct type *type, char *valbuf)
        Say a double_double_double type could be returned in
        FPR1/FPR2/FPR3 triple.  */
 
-    deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM + 1), valbuf,
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1), valbuf,
 				     TYPE_LENGTH (type));
   else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
     {
       if (TYPE_LENGTH (type) == 16
           && TYPE_VECTOR (type))
-	deprecated_write_register_bytes (REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
+	deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
 					 valbuf, TYPE_LENGTH (type));
     }
   else
     /* Everything else is returned in GPR3 and up.  */
-    deprecated_write_register_bytes (REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
 				     valbuf, TYPE_LENGTH (type));
 }
 
@@ -2915,7 +2903,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_print_insn (gdbarch, gdb_print_insn_powerpc);
 
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   set_gdbarch_num_regs (gdbarch, v->nregs);
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
@@ -2924,9 +2911,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_register_bytes (gdbarch, off);
   set_gdbarch_deprecated_register_byte (gdbarch, rs6000_register_byte);
   set_gdbarch_deprecated_register_raw_size (gdbarch, rs6000_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 16);
-  set_gdbarch_deprecated_register_virtual_size (gdbarch, generic_register_size);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 16);
   set_gdbarch_deprecated_register_virtual_type (gdbarch, rs6000_register_virtual_type);
 
   set_gdbarch_ptr_bit (gdbarch, wordsize * TARGET_CHAR_BIT);
@@ -2942,10 +2926,14 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_char_signed (gdbarch, 0);
 
-  set_gdbarch_deprecated_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
+  if (sysv_abi && wordsize == 8)
+    /* PPC64 SYSV.  */
+    set_gdbarch_frame_red_zone_size (gdbarch, 288);
+  else if (!sysv_abi && wordsize == 4)
+    /* PowerOpen / AIX 32 bit.  */
+    set_gdbarch_frame_red_zone_size (gdbarch, 220);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   set_gdbarch_deprecated_register_convertible (gdbarch, rs6000_register_convertible);
@@ -2960,11 +2948,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      64-bit code.  At some point in the future, this matter needs to be
      revisited.  */
   if (sysv_abi && wordsize == 4)
-    set_gdbarch_deprecated_push_arguments (gdbarch, ppc_sysv_abi_push_arguments);
+    set_gdbarch_push_dummy_call (gdbarch, ppc_sysv_abi_push_dummy_call);
   else
-    set_gdbarch_deprecated_push_arguments (gdbarch, rs6000_push_arguments);
+    set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);
 
-  set_gdbarch_deprecated_store_struct_return (gdbarch, rs6000_store_struct_return);
   set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, rs6000_pop_frame);
 
@@ -2982,7 +2969,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     				       ppc_sysv_abi_use_struct_convention);
   else
     set_gdbarch_use_struct_convention (gdbarch,
-				       generic_use_struct_convention);
+				       rs6000_use_struct_convention);
 
   set_gdbarch_frameless_function_invocation (gdbarch,
                                          rs6000_frameless_function_invocation);

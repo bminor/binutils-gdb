@@ -266,7 +266,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
       set_internalvar (lookup_internalvar ("trace_file"),
 		       value_from_pointer (charstar, (LONGEST) 0));
       set_internalvar (lookup_internalvar ("trace_line"),
-		       value_from_pointer (builtin_type_int, (LONGEST) - 1));
+		       value_from_longest (builtin_type_int, (LONGEST) - 1));
       return;
     }
 
@@ -334,7 +334,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
 static struct tracepoint *
 set_raw_tracepoint (struct symtab_and_line sal)
 {
-  register struct tracepoint *t, *tc;
+  struct tracepoint *t, *tc;
   struct cleanup *old_chain;
 
   t = (struct tracepoint *) xmalloc (sizeof (struct tracepoint));
@@ -2511,7 +2511,7 @@ trace_dump_command (char *args, int from_tty)
      to the tracepoint PC.  If not, then the current frame was
      collected during single-stepping.  */
 
-  stepping_frame = (t->address != read_pc ());
+  stepping_frame = (t->address != (read_pc () - DECR_PC_AFTER_BREAK));
 
   for (action = t->actions; action; action = action->next)
     {

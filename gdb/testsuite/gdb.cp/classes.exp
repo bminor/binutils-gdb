@@ -682,8 +682,14 @@ proc test_enums {} {
     send_gdb "print (ClassWithEnum::PrivEnum) 42\n"
     gdb_expect {
 	-re "\\$\[0-9\]* = yellow.*$gdb_prompt $" { pass "print (ClassWithEnum::PrivEnum) 42" }
-	-re "A parse error in expression, near `42'.\r\n$gdb_prompt $"
-	{ kfail "gdb/826" "print (ClassWithEnum::PrivEnum) 42" }
+	-re "A parse error in expression, near `42'.\r\n$gdb_prompt $" {
+	    # bison 1.35
+	    kfail "gdb/826" "print (ClassWithEnum::PrivEnum) 42"
+	}
+	-re "A syntax error in expression, near `42'.\r\n$gdb_prompt $" {
+	    # bison 1.875
+	    kfail "gdb/826" "print (ClassWithEnum::PrivEnum) 42"
+	}
 	-re "$gdb_prompt $"                     { fail "print (ClassWithEnum::PrivEnum) 42" }
 	timeout                             { fail "(timeout) print (ClassWithEnum::PrivEnum) 42" }
     }

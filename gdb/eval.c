@@ -67,8 +67,8 @@ static LONGEST init_array_element (struct value *, struct value *,
 				   LONGEST, LONGEST);
 
 static struct value *
-evaluate_subexp (struct type *expect_type, register struct expression *exp,
-		 register int *pos, enum noside noside)
+evaluate_subexp (struct type *expect_type, struct expression *exp,
+		 int *pos, enum noside noside)
 {
   return (*exp->language_defn->evaluate_exp) (expect_type, exp, pos, noside);
 }
@@ -80,8 +80,8 @@ CORE_ADDR
 parse_and_eval_address (char *exp)
 {
   struct expression *expr = parse_expression (exp);
-  register CORE_ADDR addr;
-  register struct cleanup *old_chain =
+  CORE_ADDR addr;
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
 
   addr = value_as_address (evaluate_expression (expr));
@@ -96,8 +96,8 @@ CORE_ADDR
 parse_and_eval_address_1 (char **expptr)
 {
   struct expression *expr = parse_exp_1 (expptr, (struct block *) 0, 0);
-  register CORE_ADDR addr;
-  register struct cleanup *old_chain =
+  CORE_ADDR addr;
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
 
   addr = value_as_address (evaluate_expression (expr));
@@ -111,8 +111,8 @@ LONGEST
 parse_and_eval_long (char *exp)
 {
   struct expression *expr = parse_expression (exp);
-  register LONGEST retval;
-  register struct cleanup *old_chain =
+  LONGEST retval;
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
 
   retval = value_as_long (evaluate_expression (expr));
@@ -125,7 +125,7 @@ parse_and_eval (char *exp)
 {
   struct expression *expr = parse_expression (exp);
   struct value *val;
-  register struct cleanup *old_chain =
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
@@ -142,7 +142,7 @@ parse_to_comma_and_eval (char **expp)
 {
   struct expression *expr = parse_exp_1 (expp, (struct block *) 0, 1);
   struct value *val;
-  register struct cleanup *old_chain =
+  struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
@@ -176,7 +176,7 @@ evaluate_type (struct expression *exp)
    returning the label.  Otherwise, does nothing and returns NULL. */
 
 static char *
-get_label (register struct expression *exp, int *pos)
+get_label (struct expression *exp, int *pos)
 {
   if (exp->elts[*pos].opcode == OP_LABELED)
     {
@@ -195,8 +195,8 @@ get_label (register struct expression *exp, int *pos)
 
 static struct value *
 evaluate_struct_tuple (struct value *struct_val,
-		       register struct expression *exp,
-		       register int *pos, enum noside noside, int nargs)
+		       struct expression *exp,
+		       int *pos, enum noside noside, int nargs)
 {
   struct type *struct_type = check_typedef (VALUE_TYPE (struct_val));
   struct type *substruct_type = struct_type;
@@ -338,7 +338,7 @@ evaluate_struct_tuple (struct value *struct_val,
 
 static LONGEST
 init_array_element (struct value *array, struct value *element,
-		    register struct expression *exp, register int *pos,
+		    struct expression *exp, int *pos,
 		    enum noside noside, LONGEST low_bound, LONGEST high_bound)
 {
   LONGEST index;
@@ -379,12 +379,12 @@ init_array_element (struct value *array, struct value *element,
 
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
-			  register struct expression *exp, register int *pos,
+			  struct expression *exp, int *pos,
 			  enum noside noside)
 {
   enum exp_opcode op;
   int tem, tem2, tem3;
-  register int pc, pc2 = 0, oldpos;
+  int pc, pc2 = 0, oldpos;
   struct value *arg1 = NULL;
   struct value *arg2 = NULL;
   struct value *arg3;
@@ -855,11 +855,11 @@ evaluate_subexp_standard (struct type *expect_type,
 		  value_type = expect_type;
 	      }
 
-	    struct_return = using_struct_return (method, funaddr, value_type, using_gcc);
+	    struct_return = using_struct_return (value_type, using_gcc);
 	  }
 	else if (expect_type != NULL)
 	  {
-	    struct_return = using_struct_return (NULL, addr, check_typedef (expect_type), using_gcc);
+	    struct_return = using_struct_return (check_typedef (expect_type), using_gcc);
 	  }
 	
 	/* Found a function symbol.  Now we will substitute its
@@ -2071,11 +2071,11 @@ nosideret:
    then only the type of the result need be correct.  */
 
 static struct value *
-evaluate_subexp_for_address (register struct expression *exp, register int *pos,
+evaluate_subexp_for_address (struct expression *exp, int *pos,
 			     enum noside noside)
 {
   enum exp_opcode op;
-  register int pc;
+  int pc;
   struct symbol *var;
 
   pc = (*pos);
@@ -2151,11 +2151,11 @@ evaluate_subexp_for_address (register struct expression *exp, register int *pos,
  */
 
 struct value *
-evaluate_subexp_with_coercion (register struct expression *exp,
-			       register int *pos, enum noside noside)
+evaluate_subexp_with_coercion (struct expression *exp,
+			       int *pos, enum noside noside)
 {
-  register enum exp_opcode op;
-  register int pc;
+  enum exp_opcode op;
+  int pc;
   struct value *val;
   struct symbol *var;
 
@@ -2188,10 +2188,10 @@ evaluate_subexp_with_coercion (register struct expression *exp,
    Advance *POS over the subexpression.  */
 
 static struct value *
-evaluate_subexp_for_sizeof (register struct expression *exp, register int *pos)
+evaluate_subexp_for_sizeof (struct expression *exp, int *pos)
 {
   enum exp_opcode op;
-  register int pc;
+  int pc;
   struct type *type;
   struct value *val;
 

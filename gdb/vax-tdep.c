@@ -30,6 +30,7 @@
 #include "arch-utils.h"
 #include "gdb_string.h"
 #include "osabi.h"
+#include "dis-asm.h"
 
 #include "vax-tdep.h"
 
@@ -187,7 +188,7 @@ vax_frame_chain (struct frame_info *frame)
 {
   /* In the case of the VAX, the frame's nominal address is the FP value,
      and 12 bytes later comes the saved previous FP value as a 4-byte word.  */
-  if (inside_entry_file (get_frame_pc (frame)))
+  if (deprecated_inside_entry_file (get_frame_pc (frame)))
     return (0);
 
   return (read_memory_integer (get_frame_base (frame) + 12, 4));
@@ -266,7 +267,7 @@ vax_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static void
 vax_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 {
-  memcpy (valbuf, regbuf + REGISTER_BYTE (0), TYPE_LENGTH (valtype));
+  memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (0), TYPE_LENGTH (valtype));
 }
 
 static void
@@ -278,7 +279,7 @@ vax_store_return_value (struct type *valtype, char *valbuf)
 static CORE_ADDR
 vax_extract_struct_value_address (char *regbuf)
 {
-  return (extract_unsigned_integer (regbuf + REGISTER_BYTE (0),
+  return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0),
 				    REGISTER_RAW_SIZE (0)));
 }
 
@@ -297,7 +298,7 @@ vax_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 static CORE_ADDR
 vax_skip_prologue (CORE_ADDR pc)
 {
-  register int op = (unsigned char) read_memory_integer (pc, 1);
+  int op = (unsigned char) read_memory_integer (pc, 1);
   if (op == 0x11)
     pc += 2;			/* skip brb */
   if (op == 0x31)

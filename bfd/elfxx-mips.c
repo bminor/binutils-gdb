@@ -3008,6 +3008,8 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
     }
   else
     {
+      /* ??? Could we use RELOC_FOR_GLOBAL_SYMBOL here ?  */
+
       /* For global symbols we look up the symbol in the hash-table.  */
       h = ((struct mips_elf_link_hash_entry *)
 	   elf_sym_hashes (input_bfd) [r_symndx - extsymoff]);
@@ -3021,7 +3023,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 
       /* See if this is the special _gp_disp symbol.  Note that such a
 	 symbol must always be a global symbol.  */
-      if (strcmp (h->root.root.root.string, "_gp_disp") == 0
+      if (strcmp (*namep, "_gp_disp") == 0
 	  && ! NEWABI_P (input_bfd))
 	{
 	  /* Relocations against _gp_disp are permitted only with
@@ -3054,11 +3056,11 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 	   addresses.  */
 	symbol = 0;
       else if (info->shared
-	       && !info->no_undefined
+	       && info->unresolved_syms_in_objects == RM_IGNORE
 	       && ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
 	symbol = 0;
-      else if (strcmp (h->root.root.root.string, "_DYNAMIC_LINK") == 0 ||
-              strcmp (h->root.root.root.string, "_DYNAMIC_LINKING") == 0)
+      else if (strcmp (*namep, "_DYNAMIC_LINK") == 0 ||
+              strcmp (*namep, "_DYNAMIC_LINKING") == 0)
 	{
 	  /* If this is a dynamic link, we should have created a
 	     _DYNAMIC_LINK symbol or _DYNAMIC_LINKING(for normal mips) symbol
@@ -3075,7 +3077,8 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 	  if (! ((*info->callbacks->undefined_symbol)
 		 (info, h->root.root.root.string, input_bfd,
 		  input_section, relocation->r_offset,
-		  (!info->shared || info->no_undefined
+		  ((info->shared && info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)
+		   || (!info->shared && info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
 		   || ELF_ST_VISIBILITY (h->root.other)))))
 	    return bfd_reloc_undefined;
 	  symbol = 0;
@@ -4985,7 +4988,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel_end;
   asection *sgot;
   asection *sreloc;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
 
   if (info->relocatable)
     return TRUE;
@@ -6171,7 +6174,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   const Elf_Internal_Rela *relend;
   bfd_vma addend = 0;
   bfd_boolean use_saved_addend_p = FALSE;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
 
   bed = get_elf_backend_data (output_bfd);
   relend = relocs + input_section->reloc_count * bed->s->int_rels_per_ext_rel;
@@ -7474,7 +7477,7 @@ _bfd_mips_elf_modify_segment_map (abfd)
 	  unsigned int i, c;
 	  struct elf_segment_map *n;
 
-	  low = 0xffffffff;
+	  low = ~(bfd_vma) 0;
 	  high = 0;
 	  for (i = 0; i < sizeof sec_names / sizeof sec_names[0]; i++)
 	    {
@@ -7626,7 +7629,7 @@ _bfd_mips_elf_gc_sweep_hook (abfd, info, sec, relocs)
 
 void
 _bfd_mips_elf_copy_indirect_symbol (bed, dir, ind)
-     struct elf_backend_data *bed;
+     const struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   struct mips_elf_link_hash_entry *dirmips, *indmips;

@@ -55,9 +55,6 @@ extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_in
    language family, so that case is irrelevant for C.  */
 extern gdbarch_return_value_on_stack_ftype generic_return_value_on_stack_not;
 
-/* Accessor for old global function pointer for disassembly. */
-extern int legacy_print_insn (bfd_vma vma, disassemble_info *info);
-
 /* Backward compatible call_dummy_words. */
 extern LONGEST legacy_call_dummy_words[];
 extern int legacy_sizeof_call_dummy_words;
@@ -77,22 +74,6 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 /* Floating point values. */
 extern const struct floatformat *default_float_format (struct gdbarch *gdbarch);
 extern const struct floatformat *default_double_format (struct gdbarch *gdbarch);
-
-/* The following DEPRECATED interfaces are for pre- multi-arch legacy
-   targets. */
-
-/* DEPRECATED pre- multi-arch interface.  Explicitly set the dynamic
-   target-system-dependent parameters based on bfd_architecture and
-   machine.  This function is deprecated, use
-   set_gdbarch_from_arch_machine(). */
-
-extern void set_architecture_from_arch_mach (enum bfd_architecture, unsigned long);
-
-/* DEPRECATED pre- multi-arch interface.  Notify the target dependent
-   backend of a change to the selected architecture. A zero return
-   status indicates that the target did not like the change. */
-
-extern int (*target_architecture_hook) (const struct bfd_arch_info *);
 
 /* Identity function on a CORE_ADDR.  Just returns its parameter.  */
 

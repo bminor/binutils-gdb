@@ -518,7 +518,7 @@ sparc64_elf_canonicalize_reloc (abfd, section, relptr, symbols)
 {
   arelent *tblptr;
   unsigned int i;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if (! bed->s->slurp_reloc_table (abfd, section, symbols, FALSE))
     return -1;
@@ -2074,42 +2074,14 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  bfd_boolean warned;
 
-	  relocation = 0;
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
+				   symtab_hdr, relocation, sec,
+				   unresolved_reloc, info,
+				   warned);
+	  if (warned)
 	    {
-	      sec = h->root.u.def.section;
-	      if (sec->output_section == NULL)
-		/* Set a flag that will be cleared later if we find a
-		   relocation value for this symbol.  output_section
-		   is typically NULL for symbols satisfied by a shared
-		   library.  */
-		unresolved_reloc = TRUE;
-	      else
-		relocation = (h->root.u.def.value
-			      + sec->output_section->vma
-			      + sec->output_offset);
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    ;
-	  else if (!info->executable
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    ;
-	  else
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined
-		       || ELF_ST_VISIBILITY (h->other)))))
-		return FALSE;
-
 	      /* To avoid generating warning messages about truncated
 		 relocations, set the relocation's address to be the same as
 		 the start of this section.  */

@@ -112,7 +112,7 @@ static struct funcall *funcall_chain;
 void
 start_arglist (void)
 {
-  register struct funcall *new;
+  struct funcall *new;
 
   new = (struct funcall *) xmalloc (sizeof (struct funcall));
   new->next = funcall_chain;
@@ -127,8 +127,8 @@ start_arglist (void)
 int
 end_arglist (void)
 {
-  register int val = arglist_len;
-  register struct funcall *call = funcall_chain;
+  int val = arglist_len;
+  struct funcall *call = funcall_chain;
   funcall_chain = call->next;
   arglist_len = call->arglist_len;
   xfree (call);
@@ -141,7 +141,7 @@ end_arglist (void)
 static void
 free_funcalls (void *ignore)
 {
-  register struct funcall *call, *next;
+  struct funcall *call, *next;
 
   for (call = funcall_chain; call; call = next)
     {
@@ -263,9 +263,9 @@ write_exp_elt_intern (struct internalvar *expelt)
 void
 write_exp_string (struct stoken str)
 {
-  register int len = str.length;
-  register int lenelt;
-  register char *strdata;
+  int len = str.length;
+  int lenelt;
+  char *strdata;
 
   /* Compute the number of expression elements required to hold the string
      (including a null byte terminator), along with one expression element
@@ -312,10 +312,10 @@ write_exp_string (struct stoken str)
 void
 write_exp_bitstring (struct stoken str)
 {
-  register int bits = str.length;	/* length in bits */
-  register int len = (bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
-  register int lenelt;
-  register char *strdata;
+  int bits = str.length;	/* length in bits */
+  int len = (bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
+  int lenelt;
+  char *strdata;
 
   /* Compute the number of expression elements required to hold the bitstring,
      along with one expression element at each end to record the actual
@@ -563,7 +563,7 @@ parse_nested_classes_for_hpacc (char *name, int len, char **token,
      consider *prefixes* of the string; there is no need to look up
      "B::C" separately as a symbol in the previous example. */
 
-  register char *p;
+  char *p;
   char *start, *end;
   char *prefix = NULL;
   char *tmp;
@@ -768,12 +768,12 @@ copy_name (struct stoken token)
    to prefix form (in which we can conveniently print or execute it).  */
 
 static void
-prefixify_expression (register struct expression *expr)
+prefixify_expression (struct expression *expr)
 {
-  register int len =
+  int len =
   sizeof (struct expression) + EXP_ELEM_TO_BYTES (expr->nelts);
-  register struct expression *temp;
-  register int inpos = expr->nelts, outpos = 0;
+  struct expression *temp;
+  int inpos = expr->nelts, outpos = 0;
 
   temp = (struct expression *) alloca (len);
 
@@ -787,11 +787,11 @@ prefixify_expression (register struct expression *expr)
    whose last exp_element is at index ENDPOS - 1 in EXPR.  */
 
 int
-length_of_subexp (register struct expression *expr, register int endpos)
+length_of_subexp (struct expression *expr, int endpos)
 {
-  register int oplen = 1;
-  register int args = 0;
-  register int i;
+  int oplen = 1;
+  int args = 0;
+  int i;
 
   if (endpos < 1)
     error ("?error in length_of_subexp");
@@ -933,12 +933,12 @@ length_of_subexp (register struct expression *expr, register int endpos)
    In the process, convert it from suffix to prefix form.  */
 
 static void
-prefixify_subexp (register struct expression *inexpr,
-		  struct expression *outexpr, register int inend, int outbeg)
+prefixify_subexp (struct expression *inexpr,
+		  struct expression *outexpr, int inend, int outbeg)
 {
-  register int oplen = 1;
-  register int args = 0;
-  register int i;
+  int oplen = 1;
+  int args = 0;
+  int i;
   int *arglens;
   enum exp_opcode opcode;
 
@@ -1182,7 +1182,7 @@ parse_exp_1 (char **stringptr, struct block *block, int comma)
 struct expression *
 parse_expression (char *string)
 {
-  register struct expression *exp;
+  struct expression *exp;
   exp = parse_exp_1 (&string, 0, 0);
   if (*string)
     error ("Junk after end of expression.");

@@ -31,6 +31,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "symtab.h"
+#include "dis-asm.h"
 
 struct gdbarch_tdep
 {
@@ -171,6 +172,10 @@ v850_processor_type_table[] =
   ,
   {
     v850e_reg_names, bfd_mach_v850e
+  }
+  ,
+  {
+    v850e_reg_names, bfd_mach_v850e1
   }
   ,
   {
@@ -1000,7 +1005,7 @@ v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 static CORE_ADDR
 v850_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (E_RP_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (E_RP_REGNUM, entry_point_address ());
   return sp;
 }
 
@@ -1060,7 +1065,7 @@ v850_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       /* Scalar return values of <= 8 bytes are returned in 
          E_V0_REGNUM to E_V1_REGNUM. */
       memcpy (valbuf,
-	      &regbuf[REGISTER_BYTE (E_V0_REGNUM)],
+	      &regbuf[DEPRECATED_REGISTER_BYTE (E_V0_REGNUM)],
 	      TYPE_LENGTH (type));
     }
   else
@@ -1068,7 +1073,7 @@ v850_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       /* Aggregates and return values > 8 bytes are returned in memory,
          pointed to by R6. */
       return_buffer =
-	extract_unsigned_integer (regbuf + REGISTER_BYTE (E_V0_REGNUM),
+	extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (E_V0_REGNUM),
 				  REGISTER_RAW_SIZE (E_V0_REGNUM));
 
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
@@ -1096,7 +1101,7 @@ v850_store_return_value (struct type *type, char *valbuf)
   CORE_ADDR return_buffer;
 
   if (!v850_use_struct_convention (0, type))
-    deprecated_write_register_bytes (REGISTER_BYTE (E_V0_REGNUM), valbuf,
+    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (E_V0_REGNUM), valbuf,
 				     TYPE_LENGTH (type));
   else
     {
@@ -1215,7 +1220,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (v850_processor_type_table[i].mach == info.bfd_arch_info->mach)
 	{
 	  v850_register_names = v850_processor_type_table[i].regnames;
-	  deprecated_tm_print_insn_info.mach = info.bfd_arch_info->mach;
 	  break;
 	}
     }
@@ -1288,6 +1292,8 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
+  set_gdbarch_print_insn (gdbarch, print_insn_v850);
+
   return gdbarch;
 }
 
@@ -1296,6 +1302,5 @@ extern initialize_file_ftype _initialize_v850_tdep; /* -Wmissing-prototypes */
 void
 _initialize_v850_tdep (void)
 {
-  deprecated_tm_print_insn = print_insn_v850;
   register_gdbarch_init (bfd_arch_v850, v850_gdbarch_init);
 }

@@ -53,13 +53,14 @@ void _initialize_blockframe (void);
    A PC of zero is always considered to be the bottom of the stack. */
 
 int
-inside_entry_file (CORE_ADDR addr)
+deprecated_inside_entry_file (CORE_ADDR addr)
 {
   if (addr == 0)
     return 1;
   if (symfile_objfile == 0)
     return 0;
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
+  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT
+      || CALL_DUMMY_LOCATION == AT_SYMBOL)
     {
       /* Do not stop backtracing if the pc is in the call dummy
          at the entry point.  */
@@ -67,8 +68,8 @@ inside_entry_file (CORE_ADDR addr)
       if (DEPRECATED_PC_IN_CALL_DUMMY (addr, 0, 0))
 	return 0;
     }
-  return (addr >= symfile_objfile->ei.entry_file_lowpc &&
-	  addr < symfile_objfile->ei.entry_file_highpc);
+  return (addr >= symfile_objfile->ei.deprecated_entry_file_lowpc &&
+	  addr < symfile_objfile->ei.deprecated_entry_file_highpc);
 }
 
 /* Test a specified PC value to see if it is in the range of addresses
@@ -271,7 +272,7 @@ get_pc_function_start (CORE_ADDR pc)
 struct symbol *
 get_frame_function (struct frame_info *frame)
 {
-  register struct block *bl = get_frame_block (frame, 0);
+  struct block *bl = get_frame_block (frame, 0);
   if (bl == 0)
     return 0;
   return block_function (bl);
@@ -284,7 +285,7 @@ get_frame_function (struct frame_info *frame)
 struct symbol *
 find_pc_sect_function (CORE_ADDR pc, struct sec *section)
 {
-  register struct block *b = block_for_pc_sect (pc, section);
+  struct block *b = block_for_pc_sect (pc, section);
   if (b == 0)
     return 0;
   return block_function (b);
@@ -512,8 +513,8 @@ struct frame_info *
 block_innermost_frame (const struct block *block)
 {
   struct frame_info *frame;
-  register CORE_ADDR start;
-  register CORE_ADDR end;
+  CORE_ADDR start;
+  CORE_ADDR end;
   CORE_ADDR calling_pc;
 
   if (block == NULL)
@@ -569,8 +570,10 @@ int
 deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
 					    CORE_ADDR frame_address)
 {
-  return ((pc) >= CALL_DUMMY_ADDRESS ()
-	  && (pc) <= (CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK));
+  CORE_ADDR addr = entry_point_address ();
+  if (DEPRECATED_CALL_DUMMY_ADDRESS_P ())
+    addr = DEPRECATED_CALL_DUMMY_ADDRESS ();
+  return ((pc) >= addr && (pc) <= (addr + DECR_PC_AFTER_BREAK));
 }
 
 /* Returns true for a user frame or a call_function_by_hand dummy
@@ -608,7 +611,7 @@ legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
   /* NOTE/drow 2002-12-25: should there be a way to disable this check?  It
      assumes a single small entry file, and the way some debug readers (e.g.
      dbxread) figure out which object is the entry file is somewhat hokey.  */
-  if (inside_entry_file (frame_pc_unwind (fi)))
+  if (deprecated_inside_entry_file (frame_pc_unwind (fi)))
       return 0;
 
   return 1;

@@ -25,8 +25,6 @@
 
 #define NUM_REALREGS 59 /* used in remote-e7000.c which is not multiarched. */
 
-#define REGISTER_TYPE  long /* used in standalone.c */
-
 #define DEPRECATED_BIG_REMOTE_BREAKPOINT    { 0xc3, 0x20 } /* Used in remote.c */
 #define DEPRECATED_LITTLE_REMOTE_BREAKPOINT { 0x20, 0xc3 } /* Used in remote.c */
 

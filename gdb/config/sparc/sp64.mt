@@ -4,6 +4,3 @@
 # Then again, having procfs.o in a target makefile fragment seems wrong.
 TDEPFILES = sparc-tdep.o
 TM_FILE= tm-sp64.h
-
-# Need gcc for long long support.
-CC = gcc

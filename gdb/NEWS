@@ -3,7 +3,24 @@
 
 *** Changes since GDB 6.0:
 
+* "set prompt-escape-char" command deleted.
+
+The command "set prompt-escape-char" has been deleted.  This command,
+and its very obscure effet on GDB's prompt, was never documented,
+tested, nor mentioned in the NEWS file.
+
+* REMOVED configurations and files
+
+SGI Irix-4.x				mips-sgi-irix4	or iris4
+SGI Iris (MIPS) running Irix V3:  	mips-sgi-irix   or  iris
+
 *** Changes in GDB 6.0:
+
+* GNU/Linux support for fork, vfork, and exec.
+
+The "catch fork", "catch exec", "catch vfork", and "set follow-fork-mode"
+commands are now implemented for GNU/Linux.  They require a 2.5.x or later
+kernel.
 
 * GDB supports logging output to a file
 
@@ -43,9 +60,13 @@ Fix for gdb/672: update changelist is now output in mi list format.
 Fix for gdb/702: a -var-assign that updates the value now shows up
                  in a subsequent -var-update.
 
+* New native configurations.
+
+FreeBSD/amd64					x86_64-*-freebsd*
+
 * Multi-arched targets.
 
-HP/PA HPUX11, 32bit ABI (partial)	hppa*-*-hpux* except hppa*64*-*-hpux11*
+HP/PA HPUX11                                    hppa*-*-hpux*
 Mitsubishi M32R/D w/simulator			m32r-*-elf*
 
 * OBSOLETE configurations and files

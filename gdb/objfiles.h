@@ -29,6 +29,7 @@
 struct bcache;
 struct htab;
 struct symtab;
+struct objfile_data;
 
 /* This structure maintains information on a per-objfile basis about the
    "entry point" of the objfile, and the scope within which the entry point
@@ -43,14 +44,28 @@ struct symtab;
    to the user executable's recorded entry point, as if the call had been made
    directly by the kernel.
 
-   The traditional gdb method of using this info is to use the recorded entry
-   point to set the variables entry_file_lowpc and entry_file_highpc from
-   the debugging information, where these values are the starting address
-   (inclusive) and ending address (exclusive) of the instruction space in the
-   executable which correspond to the "startup file", I.E. crt0.o in most
-   cases.  This file is assumed to be a startup file and frames with pc's
-   inside it are treated as nonexistent.  Setting these variables is necessary
-   so that backtraces do not fly off the bottom of the stack.
+   The traditional gdb method of using this info is to use the
+   recorded entry point to set the variables
+   deprecated_entry_file_lowpc and deprecated_entry_file_highpc from
+   the debugging information, where these values are the starting
+   address (inclusive) and ending address (exclusive) of the
+   instruction space in the executable which correspond to the
+   "startup file", I.E. crt0.o in most cases.  This file is assumed to
+   be a startup file and frames with pc's inside it are treated as
+   nonexistent.  Setting these variables is necessary so that
+   backtraces do not fly off the bottom of the stack.
+
+   NOTE: cagney/2003-09-09: It turns out that this "traditional"
+   method doesn't work.  Corinna writes: ``It turns out that the call
+   to deprecated_inside_entry_file destroys a meaningful backtrace
+   under some conditions.  E. g. the backtrace tests in the asm-source
+   testcase are broken for some targets.  In this test the functions
+   are all implemented as part of one file and the testcase is not
+   necessarily linked with a start file (depending on the target).
+   What happens is, that the first frame is printed normaly and
+   following frames are treated as being inside the enttry file then.
+   This way, only the #0 frame is printed in the backtrace output.''
+   Ref "frame.c" "NOTE: vinschen/2003-04-01".
 
    Gdb also supports an alternate method to avoid running off the bottom
    of the stack.
@@ -116,8 +131,8 @@ struct entry_info
     /* Start (inclusive) and end (exclusive) of object file containing the
        entry point. */
 
-    CORE_ADDR entry_file_lowpc;
-    CORE_ADDR entry_file_highpc;
+    CORE_ADDR deprecated_entry_file_lowpc;
+    CORE_ADDR deprecated_entry_file_highpc;
 
     /* Start (inclusive) and end (exclusive) of the user code main() function. */
 
@@ -380,6 +395,13 @@ struct objfile
 
     void *obj_private;
 
+    /* Per objfile data-pointers required by other GDB modules.  */
+    /* FIXME: kettenis/20030711: This mechanism could replace
+       sym_stab_info, sym_private and obj_private entirely.  */
+
+    void **data;
+    unsigned num_data;
+
     /* Set of relocation offsets to apply to each section.
        Currently on the psymbol_obstack (which makes no sense, but I'm
        not sure it's harming anything).
@@ -572,6 +594,16 @@ extern struct obj_section *find_pc_sect_section (CORE_ADDR pc,
 extern int in_plt_section (CORE_ADDR, char *);
 
 extern int is_in_import_list (char *, struct objfile *);
+
+/* Keep a registry of per-objfile data-pointers required by other GDB
+   modules.  */
+
+extern const struct objfile_data *register_objfile_data (void);
+extern void set_objfile_data (struct objfile *objfile,
+			      const struct objfile_data *data, void *value);
+extern void *objfile_data (struct objfile *objfile,
+			   const struct objfile_data *data);
+
 
 /* Traverse all object files.  ALL_OBJFILES_SAFE works even if you delete
    the objfile during the traversal.  */

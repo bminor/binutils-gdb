@@ -1,6 +1,6 @@
 /* Register groupings for GDB, the GNU debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -103,6 +103,7 @@ void
 reggroup_add (struct gdbarch *gdbarch, struct reggroup *group)
 {
   struct reggroups *groups = gdbarch_data (gdbarch, reggroups_data);
+
   if (groups == NULL)
     {
       /* ULGH, called during architecture initialization.  Patch
@@ -125,6 +126,7 @@ reggroup_next (struct gdbarch *gdbarch, struct reggroup *last)
 {
   struct reggroups *groups;
   struct reggroup_el *el;
+
   /* Don't allow this function to be called during architecture
      creation.  If there are no groups, use the default groups list.  */
   groups = gdbarch_data (gdbarch, reggroups_data);
@@ -132,13 +134,18 @@ reggroup_next (struct gdbarch *gdbarch, struct reggroup *last)
   if (groups->first == NULL)
     groups = &default_groups;
 
-  /* Retun the first/next reggroup.  */
+  /* Return the first/next reggroup.  */
   if (last == NULL)
     return groups->first->group;
   for (el = groups->first; el != NULL; el = el->next)
     {
       if (el->group == last)
-	return el->next->group;
+	{
+	  if (el->next != NULL)
+	    return el->next->group;
+	  else
+	    return NULL;
+	}
     }
   return NULL;
 }
@@ -151,6 +158,7 @@ default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   int vector_p;
   int float_p;
   int raw_p;
+
   if (REGISTER_NAME (regnum) == NULL
       || *REGISTER_NAME (regnum) == '\0')
     return 0;
@@ -178,6 +186,7 @@ static void
 reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
 {
   struct reggroup *group = NULL;
+
   do
     {
       /* Group name.  */

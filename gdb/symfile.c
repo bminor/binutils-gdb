@@ -206,7 +206,7 @@ int auto_solib_limit;
 static int
 compare_symbols (const void *s1p, const void *s2p)
 {
-  register struct symbol **s1, **s2;
+  struct symbol **s1, **s2;
 
   s1 = (struct symbol **) s1p;
   s2 = (struct symbol **) s2p;
@@ -244,13 +244,13 @@ sort_pst_symbols (struct partial_symtab *pst)
 char *
 obsavestring (const char *ptr, int size, struct obstack *obstackp)
 {
-  register char *p = (char *) obstack_alloc (obstackp, size + 1);
+  char *p = (char *) obstack_alloc (obstackp, size + 1);
   /* Open-coded memcpy--saves function call time.  These strings are usually
      short.  FIXME: Is this really still true with a compiler that can
      inline memcpy? */
   {
-    register const char *p1 = ptr;
-    register char *p2 = p;
+    const char *p1 = ptr;
+    char *p2 = p;
     const char *end = ptr + size;
     while (p1 != end)
       *p2++ = *p1++;
@@ -266,8 +266,8 @@ char *
 obconcat (struct obstack *obstackp, const char *s1, const char *s2,
 	  const char *s3)
 {
-  register int len = strlen (s1) + strlen (s2) + strlen (s3) + 1;
-  register char *val = (char *) obstack_alloc (obstackp, len);
+  int len = strlen (s1) + strlen (s2) + strlen (s3) + 1;
+  char *val = (char *) obstack_alloc (obstackp, len);
   strcpy (val, s1);
   strcat (val, s2);
   strcat (val, s3);
@@ -290,7 +290,7 @@ decrement_reading_symtab (void *dummy)
    case inline.  */
 
 struct symtab *
-psymtab_to_symtab (register struct partial_symtab *pst)
+psymtab_to_symtab (struct partial_symtab *pst)
 {
   /* If it's been looked up before, return it. */
   if (pst->symtab)
@@ -327,8 +327,8 @@ init_entry_point_info (struct objfile *objfile)
       /* Examination of non-executable.o files.  Short-circuit this stuff.  */
       objfile->ei.entry_point = INVALID_ENTRY_POINT;
     }
-  objfile->ei.entry_file_lowpc = INVALID_ENTRY_LOWPC;
-  objfile->ei.entry_file_highpc = INVALID_ENTRY_HIGHPC;
+  objfile->ei.deprecated_entry_file_lowpc = INVALID_ENTRY_LOWPC;
+  objfile->ei.deprecated_entry_file_highpc = INVALID_ENTRY_HIGHPC;
   objfile->ei.entry_func_lowpc = INVALID_ENTRY_LOWPC;
   objfile->ei.entry_func_highpc = INVALID_ENTRY_HIGHPC;
   objfile->ei.main_func_lowpc = INVALID_ENTRY_LOWPC;
@@ -710,7 +710,7 @@ syms_from_objfile (struct objfile *objfile,
       init_objfile_sect_indices (objfile);
     }
 
-#ifndef IBM6000_TARGET
+#ifndef DEPRECATED_IBM6000_TARGET
   /* This is a SVR4/SunOS specific hack, I think.  In any event, it
      screws RS/6000.  sym_offsets should be doing this sort of thing,
      because it knows the mapping between bfd sections and
@@ -758,7 +758,7 @@ syms_from_objfile (struct objfile *objfile,
 	  s->offset += s_addr;
 	}
     }
-#endif /* not IBM6000_TARGET */
+#endif /* not DEPRECATED_IBM6000_TARGET */
 
   (*objfile->sf->sym_read) (objfile, mainline);
 
@@ -854,7 +854,12 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
   orig_addrs = alloc_section_addr_info (bfd_count_sections (abfd));
   my_cleanups = make_cleanup (xfree, orig_addrs);
   if (addrs)
-    *orig_addrs = *addrs;
+    {
+      int i;
+      orig_addrs->num_sections = addrs->num_sections;
+      for (i = 0; i < addrs->num_sections; i++)
+	orig_addrs->other[i] = addrs->other[i];
+    }
 
   /* If the objfile uses a mapped symbol file, and we have a psymtab for
      it, then skip reading any symbols at this time. */
@@ -1377,10 +1382,6 @@ find_sym_fns (struct objfile *objfile)
       || our_flavour == bfd_target_tekhex_flavour)
     return;	/* No symbols. */
 
-  /* Special kludge for apollo.  See dstread.c.  */
-  if (STREQN (our_target, "apollo", 6))
-    our_flavour = (enum bfd_flavour) -2;
-
   for (sf = symtab_fns; sf != NULL; sf = sf->next)
     {
       if (our_flavour == sf->sym_flavour)
@@ -1865,7 +1866,7 @@ reread_symbols (void)
     {
       if (objfile->obfd)
 	{
-#ifdef IBM6000_TARGET
+#ifdef DEPRECATED_IBM6000_TARGET
 	  /* If this object is from a shared library, then you should
 	     stat on the library name, not member name. */
 
@@ -2280,7 +2281,7 @@ deduce_language_from_filename (char *filename)
 struct symtab *
 allocate_symtab (char *filename, struct objfile *objfile)
 {
-  register struct symtab *symtab;
+  struct symtab *symtab;
 
   symtab = (struct symtab *)
     obstack_alloc (&objfile->symbol_obstack, sizeof (struct symtab));
@@ -2519,9 +2520,9 @@ free_named_symtabs (char *name)
      compilation units.  We want to blow away any old info about these
      compilation units, regardless of which objfiles they arrived in. --gnu.  */
 
-  register struct symtab *s;
-  register struct symtab *prev;
-  register struct partial_symtab *ps;
+  struct symtab *s;
+  struct symtab *prev;
+  struct partial_symtab *ps;
   struct blockvector *bv;
   int blewit = 0;
 
@@ -2633,12 +2634,19 @@ start_psymtab_common (struct objfile *objfile,
 }
 
 /* Add a symbol with a long value to a psymtab.
-   Since one arg is a struct, we pass in a ptr and deref it (sigh).  */
+   Since one arg is a struct, we pass in a ptr and deref it (sigh).  
+   Return the partial symbol that has been added.  */
 
-/* NOTE: carlton/2002-12-18: I've modified this function to return the
-   partial symbol in question.  But pay heed to the 'const' qualifier
-   in front: these partial symbols are stored in a bcache, and bad
-   things will happen if you modify them.  */
+/* NOTE: carlton/2003-09-11: The reason why we return the partial
+   symbol is so that callers can get access to the symbol's demangled
+   name, which they don't have any cheap way to determine otherwise.
+   (Currenly, dwarf2read.c is the only file who uses that information,
+   though it's possible that other readers might in the future.)
+   Elena wasn't thrilled about that, and I don't blame her, but we
+   couldn't come up with a better way to get that information.  If
+   it's needed in other situations, we could consider breaking up
+   SYMBOL_SET_NAMES to provide access to the demangled name lookup
+   cache.  */
 
 const struct partial_symbol *
 add_psymbol_to_list (char *name, int namelength, domain_enum domain,
@@ -2647,7 +2655,7 @@ add_psymbol_to_list (char *name, int namelength, domain_enum domain,
 		     CORE_ADDR coreaddr,	/* Value as a CORE_ADDR */
 		     enum language language, struct objfile *objfile)
 {
-  register struct partial_symbol *psym;
+  struct partial_symbol *psym;
   char *buf = alloca (namelength + 1);
   /* psymbol is static so that there will be no uninitialized gaps in the
      structure which might contain random data, causing cache misses in
@@ -2700,7 +2708,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
 				   enum language language,
 				   struct objfile *objfile)
 {
-  register struct partial_symbol *psym;
+  struct partial_symbol *psym;
   char *buf = alloca (namelength + 1);
   /* psymbol is static so that there will be no uninitialized gaps in the
      structure which might contain random data, causing cache misses in

@@ -199,6 +199,10 @@ DESCRIPTION
 .#define bfd_mach_rs6k_rsc	6003
 .#define bfd_mach_rs6k_rs2	6002
 .  bfd_arch_hppa,      {* HP PA RISC *}
+.#define bfd_mach_hppa10	10
+.#define bfd_mach_hppa11	11
+.#define bfd_mach_hppa20	20
+.#define bfd_mach_hppa20w	25
 .  bfd_arch_d10v,      {* Mitsubishi D10V *}
 .#define bfd_mach_d10v		1
 .#define bfd_mach_d10v_ts2	2
@@ -253,6 +257,7 @@ DESCRIPTION
 .  bfd_arch_v850,      {* NEC V850 *}
 .#define bfd_mach_v850          1
 .#define bfd_mach_v850e 	'E'
+.#define bfd_mach_v850e1	'1'
 .  bfd_arch_arc,       {* ARC Cores *}
 .#define bfd_mach_arc_5         5
 .#define bfd_mach_arc_6         6
@@ -301,19 +306,20 @@ DESCRIPTION
 .  bfd_arch_xstormy16,
 .#define bfd_mach_xstormy16	1
 .  bfd_arch_msp430,    {* Texas Instruments MSP430 architecture.  *}
-.#define bfd_mach_msp110         110
 .#define bfd_mach_msp11          11
+.#define bfd_mach_msp110         110
 .#define bfd_mach_msp12          12
 .#define bfd_mach_msp13          13
 .#define bfd_mach_msp14          14
-.#define bfd_mach_msp41          41
+.#define bfd_mach_msp15          15
+.#define bfd_mach_msp16          16  
 .#define bfd_mach_msp31          31
 .#define bfd_mach_msp32          32
 .#define bfd_mach_msp33          33
+.#define bfd_mach_msp41          41
+.#define bfd_mach_msp42          42
 .#define bfd_mach_msp43          43
 .#define bfd_mach_msp44          44
-.#define bfd_mach_msp15          15
-.#define bfd_mach_msp16          16  
 .  bfd_arch_xtensa,    {* Tensilica's Xtensa cores.  *}
 .#define bfd_mach_xtensa	1
 .  bfd_arch_last

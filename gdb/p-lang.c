@@ -99,7 +99,7 @@ static void pascal_one_char (int, struct ui_file *, int *);
    In_quotes is reset to 0 if a char is written with #4 notation */
 
 static void
-pascal_one_char (register int c, struct ui_file *stream, int *in_quotes)
+pascal_one_char (int c, struct ui_file *stream, int *in_quotes)
 {
 
   c &= 0xFF;			/* Avoid sign bit follies */
@@ -132,7 +132,7 @@ static void pascal_emit_char (int c, struct ui_file *stream, int quoter);
    characters and strings is language specific. */
 
 static void
-pascal_emit_char (register int c, struct ui_file *stream, int quoter)
+pascal_emit_char (int c, struct ui_file *stream, int quoter)
 {
   int in_quotes = 0;
   pascal_one_char (c, stream, &in_quotes);
@@ -158,7 +158,7 @@ void
 pascal_printstr (struct ui_file *stream, char *string, unsigned int length,
 		 int width, int force_ellipses)
 {
-  register unsigned int i;
+  unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
@@ -274,7 +274,7 @@ pascal_printstr (struct ui_file *stream, char *string, unsigned int length,
 struct type *
 pascal_create_fundamental_type (struct objfile *objfile, int typeid)
 {
-  register struct type *type = NULL;
+  struct type *type = NULL;
 
   switch (typeid)
     {

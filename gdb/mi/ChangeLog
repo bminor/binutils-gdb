@@ -1,3 +1,32 @@
+2003-09-17  Andrew Cagney  <cagney@redhat.com>
+
+	* mi/mi-main.c: Rename REGISTER_BYTE to DEPRECATED_REGISTER_BYTE.
+
+2003-09-10  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-main.c (mi_setup_architecture_data): Don't use
+	DEPRECATED_REGISTER_BYTES because some architecture don't set it
+	and its default is 0. 
+
+2003-08-08  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (captured_mi_execute_command): Add "mi2" and "mi3" to
+	interpreters that hack around CLI.
+	* mi-interp.c (mi3_command_loop): New function.
+	(mi_interpreter_resume): Check for "mi3", default to "mi2".
+
+2003-08-07  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-interp.c (_initialize_mi_interp): Register "mi2" and "mi3".
+	Make "mi" select "mi2".
+
+2003-08-05  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-cmd-env.c (env_execute_cli_command): Use an explicit "%s %s"
+	when constructing the run command.
+	(mi_cmd_env_cd, mi_cmd_env_path, mi_cmd_env_dir): Simplify command
+	string removing the "%s".
+
 2003-08-04  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-cmds.h (struct mi_cli): Define.

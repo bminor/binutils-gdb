@@ -599,7 +599,7 @@ command_line_handler (char *rl)
 {
   static char *linebuffer = 0;
   static unsigned linelength = 0;
-  register char *p;
+  char *p;
   char *p1;
   extern char *line;
   extern int linesize;

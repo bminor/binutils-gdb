@@ -3218,16 +3218,34 @@ Otherwise return 0.
 Define this to adjust @var{address} so that it meets the alignment
 requirements for the start of a new stack frame.  A stack frame's
 alignment requirements are typically stronger than a target processors
-stack alignment requirements (@pxref{STACK_ALIGN}).
+stack alignment requirements (@pxref{DEPRECATED_STACK_ALIGN}).
 
 This function is used to ensure that, when creating a dummy frame, both
 the initial stack pointer and (if needed) the address of the return
 value are correctly aligned.
 
-Unlike @code{STACK_ALIGN}, this function always adjusts the address in
-the direction of stack growth.
+Unlike @code{DEPRECATED_STACK_ALIGN}, this function always adjusts the
+address in the direction of stack growth.
 
 By default, no frame based stack alignment is performed.
+
+@item int frame_red_zone_size
+
+The number of bytes, beyond the innermost-stack-address, reserved by the
+@sc{abi}.  A function is permitted to use this scratch area (instead of
+allocating extra stack space).
+
+When performing an inferior function call, to ensure that it does not
+modify this area, @value{GDBN} adjusts the innermost-stack-address by
+@var{frame_red_zone_size} bytes before pushing parameters onto the
+stack.
+
+By default, zero bytes are allocated.  The value must be aligned
+(@pxref{frame_align}).
+
+The @sc{amd64} (nee x86-64) @sc{abi} documentation refers to the
+@emph{red zone} when describing this scratch area.
+@cindex red zone
 
 @item DEPRECATED_FRAME_CHAIN(@var{frame})
 @findex DEPRECATED_FRAME_CHAIN
@@ -3742,8 +3760,8 @@ or @code{NUL} to indicate that register @var{i} is not valid.
 @findex REGISTER_NAMES
 Deprecated in favor of @code{REGISTER_NAME}.
 
-@item REG_STRUCT_HAS_ADDR (@var{gcc_p}, @var{type})
-@findex REG_STRUCT_HAS_ADDR
+@item DEPRECATED_REG_STRUCT_HAS_ADDR (@var{gcc_p}, @var{type})
+@findex DEPRECATED_REG_STRUCT_HAS_ADDR
 Define this to return 1 if the given type will be passed by pointer
 rather than directly.
 
@@ -3794,9 +3812,9 @@ Define this to convert stab register numbers (as gotten from `r'
 declarations) into @value{GDBN} regnums.  If not defined, no conversion will be
 done.
 
-@item STACK_ALIGN (@var{addr})
-@anchor{STACK_ALIGN}
-@findex STACK_ALIGN
+@item DEPRECATED_STACK_ALIGN (@var{addr})
+@anchor{DEPRECATED_STACK_ALIGN}
+@findex DEPRECATED_STACK_ALIGN
 Define this to increase @var{addr} so that it meets the alignment
 requirements for the processor's stack.
 

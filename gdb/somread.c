@@ -477,9 +477,9 @@ init_import_symbols (struct objfile *objfile)
   unsigned int string_table;
   unsigned int string_table_size;
   char *string_buffer;
-  register int i;
-  register int j;
-  register int k;
+  int i;
+  int j;
+  int k;
   asection *text_section;	/* section handle */
   unsigned int dl_header[12];	/* SOM executable header */
 
@@ -597,9 +597,9 @@ init_export_symbols (struct objfile *objfile)
   unsigned int string_table;
   unsigned int string_table_size;
   char *string_buffer;
-  register int i;
-  register int j;
-  register int k;
+  int i;
+  int j;
+  int k;
   asection *text_section;	/* section handle */
   unsigned int dl_header[12];	/* SOM executable header */
 

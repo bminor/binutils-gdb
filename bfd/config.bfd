@@ -100,7 +100,7 @@ case "${targ}" in
 
 # START OF targmatch.h
 #ifdef BFD64
-  alpha*-*-freebsd*)
+  alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
     targ_defvec=bfd_elf64_alpha_freebsd_vec
     targ_selvecs=ecoffalpha_little_vec
     # FreeBSD <= 4.0 supports only the old nonstandard way of ABI labelling.
@@ -131,7 +131,7 @@ case "${targ}" in
   alpha*-*-*)
     targ_defvec=ecoffalpha_little_vec
     ;;
-  ia64*-*-freebsd* | ia64*-*-netbsd* | ia64*-*-linux-gnu* | ia64*-*-elf*)
+  ia64*-*-freebsd* | ia64*-*-netbsd* | ia64*-*-linux-gnu* | ia64*-*-elf* | ia64*-*-kfreebsd*-gnu)
     targ_defvec=bfd_elf64_ia64_little_vec
     targ_selvecs="bfd_elf64_ia64_big_vec bfd_efi_app_ia64_vec"
     ;;
@@ -139,7 +139,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_ia64_hpux_big_vec
     targ_selvecs="bfd_elf64_ia64_hpux_big_vec"
     ;;
-  sparc64-*-freebsd* | sparc64-*-netbsd* | sparc64-*-openbsd*)
+  sparc64-*-freebsd* | sparc64-*-netbsd* | sparc64-*-openbsd* | sparc64-*-kfreebsd*-gnu)
     targ_defvec=bfd_elf64_sparc_vec
     targ_selvecs="bfd_elf32_sparc_vec sunos_big_vec"
     ;;
@@ -222,7 +222,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_littlearm_vec
     targ_selvecs=bfd_elf32_bigarm_vec
     ;;
-  arm-*-elf | arm-*-freebsd* | arm*-*-linux-gnu* | arm*-*-conix* | arm*-*-uclinux*)
+  arm-*-elf | arm-*-freebsd* | arm*-*-linux-gnu* | arm*-*-conix* | arm*-*-uclinux* | arm-*-kfreebsd*-gnu)
     targ_defvec=bfd_elf32_littlearm_vec
     targ_selvecs=bfd_elf32_bigarm_vec
     ;;
@@ -452,7 +452,7 @@ case "${targ}" in
     targ_selvecs=i386bsd_vec
     targ_underscore=yes
     ;;
-  i[3-7]86-*-freebsd*)
+  i[3-7]86-*-freebsd* | i[3-7]86-*-kfreebsd*-gnu)
     targ_defvec=bfd_elf32_i386_freebsd_vec
     targ_selvecs=i386coff_vec
     # FreeBSD <= 4.0 supports only the old nonstandard way of ABI labelling.
@@ -494,7 +494,7 @@ case "${targ}" in
     targ64_selvecs=bfd_elf64_x86_64_vec
     ;;
 #ifdef BFD64
-  x86_64-*-freebsd*)
+  x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
     targ_defvec=bfd_elf64_x86_64_vec
     targ_selvecs="bfd_elf32_i386_vec i386coff_vec bfd_efi_app_ia32_vec"
     ;;

@@ -271,7 +271,7 @@ init_remote_state (struct gdbarch *gdbarch)
       struct packet_reg *r = &rs->regs[regnum];
       r->pnum = regnum;
       r->regnum = regnum;
-      r->offset = REGISTER_BYTE (regnum);
+      r->offset = DEPRECATED_REGISTER_BYTE (regnum);
       r->in_g_packet = (regnum < NUM_REGS);
       /* ...name = REGISTER_NAME (regnum); */
 

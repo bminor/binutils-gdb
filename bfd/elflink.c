@@ -32,7 +32,7 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   asection *s;
   struct elf_link_hash_entry *h;
   struct bfd_link_hash_entry *bh;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ptralign;
 
   /* This function may be called more than once.  */
@@ -115,7 +115,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   register asection *s;
   struct elf_link_hash_entry *h;
   struct bfd_link_hash_entry *bh;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
 
   if (! is_elf_hash_table (info))
     return FALSE;
@@ -248,7 +248,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 {
   flagword flags, pltflags;
   asection *s;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   /* We need to create .plt, .rel[a].plt, .got, .got.plt, .dynbss, and
      .rel[a].bss sections.  */
@@ -309,7 +309,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 section into the .bss section of the final image.  */
       s = bfd_make_section (abfd, ".dynbss");
       if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, SEC_ALLOC))
+	  || ! bfd_set_section_flags (abfd, s, SEC_ALLOC | SEC_LINKER_CREATED))
 	return FALSE;
 
       /* The .rel[a].bss section holds copy relocs.  This section is not
@@ -1164,7 +1164,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       /* Handle the case where we had a versioned symbol in a dynamic
 	 library and now find a definition in a normal object.  In this
 	 case, we make the versioned symbol point to the normal one.  */
-      struct elf_backend_data *bed = get_elf_backend_data (abfd);
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
       flip->root.type = h->root.type;
       h->root.type = bfd_link_hash_indirect;
       h->root.u.i.link = (struct bfd_link_hash_entry *) flip;
@@ -1247,7 +1247,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   char *shortname;
   struct elf_link_hash_entry *hi;
   struct bfd_link_hash_entry *bh;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   bfd_boolean collect;
   bfd_boolean dynamic;
   char *p;
@@ -1621,7 +1621,7 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 {
   struct elf_assign_sym_version_info *sinfo;
   struct bfd_link_info *info;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   struct elf_info_failed eif;
   char *p;
   bfd_size_type amt;
@@ -1879,7 +1879,7 @@ elf_link_read_relocs_from_section (bfd *abfd,
 				   void *external_relocs,
 				   Elf_Internal_Rela *internal_relocs)
 {
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   void (*swap_in) (bfd *, const bfd_byte *, Elf_Internal_Rela *);
   const bfd_byte *erela;
   const bfd_byte *erelaend;
@@ -1943,7 +1943,7 @@ _bfd_elf_link_read_relocs (bfd *abfd,
   Elf_Internal_Shdr *rel_hdr;
   void *alloc1 = NULL;
   Elf_Internal_Rela *alloc2 = NULL;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if (elf_section_data (o)->relocs != NULL)
     return elf_section_data (o)->relocs;
@@ -2076,7 +2076,7 @@ _bfd_elf_link_output_relocs (bfd *output_bfd,
   Elf_Internal_Shdr *output_rel_hdr;
   asection *output_section;
   unsigned int *rel_countp = NULL;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
   void (*swap_out) (bfd *, const Elf_Internal_Rela *, bfd_byte *);
 
   output_section = input_section->output_section;
@@ -2223,7 +2223,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 	  || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
     {
-      struct elf_backend_data *bed;
+      const struct elf_backend_data *bed;
       bfd_boolean force_local;
 
       bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
@@ -2238,7 +2238,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
   if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
       && h->root.type == bfd_link_hash_undefweak)
     {
-      struct elf_backend_data *bed;
+      const struct elf_backend_data *bed;
       bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
       (*bed->elf_backend_hide_symbol) (eif->info, h, TRUE);
     }
@@ -2267,7 +2267,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 	h->weakdef = NULL;
       else
 	{
-	  struct elf_backend_data *bed;
+	  const struct elf_backend_data *bed;
 
 	  bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
 	  (*bed->elf_backend_copy_indirect_symbol) (bed, weakdef, h);
@@ -2286,7 +2286,7 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
 {
   struct elf_info_failed *eif = data;
   bfd *dynobj;
-  struct elf_backend_data *bed;
+  const struct elf_backend_data *bed;
 
   if (! is_elf_hash_table (eif->info))
     return FALSE;
