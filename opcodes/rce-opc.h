@@ -1,5 +1,5 @@
 typedef enum {
-	O0, OT, O1, OC, O2, OI, OB, LS, BR, LI, LR, LJ, OM
+	O0, OT, O1, OC, O2, X1, OI, OB, SI, I7, LS, BR, LI, LR, LJ, OM, OQ, JSR
 } rce_opclass;
 
 typedef struct inst
@@ -21,13 +21,15 @@ rce_opcode_info rce_table[]={
 { "mvc",	O1,	0x0020 },
 { "mvcv",	O1,	0x0030 },
 { "jmp",	O1,	0x0040 },
-{ "jsr",	O1,	0x0050 },
+{ "jsr",	JSR,	0x0050 },
+/*****
 { "jmpt",	O1,	0x0060 },
 { "jmpf",	O1,	0x0070 },
-{ "tsteq",	O1,	0x0080 },
+*****/
+{ "tstne",	O1,	0x0080 },
 { "tstgt",	O1,	0x0090 },
 { "tstlt",	O1,	0x00A0 },
-{ "tstbz",	O1,	0x00B0 },
+{ "tstnbz",	O1,	0x00B0 },
 { "inct",	O1,	0x00C0 },
 { "incf",	O1,	0x00D0 },
 { "dect",	O1,	0x00E0 },
@@ -36,23 +38,23 @@ rce_opcode_info rce_table[]={
 { "sextb",	O1,	0x0110 },
 { "zexth",	O1,	0x0120 },
 { "sexth",	O1,	0x0130 },
-{ "xtrb3",	O1,	0x0140 },
-{ "xtrb2",	O1,	0x0150 },
-{ "xtrb1",	O1,	0x0160 },
-{ "xtrb0",	O1,	0x0170 },
+{ "xtrb3",	X1,	0x0140 },
+{ "xtrb2",	X1,	0x0150 },
+{ "xtrb1",	X1,	0x0160 },
+{ "xtrb0",	X1,	0x0170 },
 
 { "decgt",	O1,	0x01C0 },
 { "declt",	O1,	0x01D0 },
 { "brev",	O1,	0x01E0 },
 { "not",	O1,	0x01F0 },
-{ "mfcr",	OC,	0x0200 },
-{ "mtcr",	OC,	0x0300 },
-{ "mov",	O2,	0x0400 },
-{ "movnc",	O2,	0x0600 },
-{ "tst",	O2,	0x0700 },
-{ "cmpeq",	O2,	0x0800 },
-{ "cmpgt",	O2,	0x0900 },
-{ "cmphi",	O2,	0x0A00 },
+{ "mfcr",	OC,	0x0400 },
+{ "mtcr",	OC,	0x0600 },
+{ "mov",	O2,	0x0200 },
+{ "movnc",	O2,	0x0C00 },
+{ "tst",	O2,	0x0B00 },
+{ "cmpne",	O2,	0x0800 },
+{ "cmplt",	O2,	0x0900 },
+{ "cmphs",	O2,	0x0A00 },
 { "bgenr",	O2,	0x0D00 },
 { "movt",	O2,	0x0E00 },
 { "movf",	O2,	0x0F00 },
@@ -71,8 +73,11 @@ rce_opcode_info rce_table[]={
 { "lsr",	O2,	0x1C00 },
 { "asr",	O2,	0x1D00 },
 { "lsl",	O2,	0x1E00 },
+/*****
 { "rotl",	O2,	0x1F00 },
-{ "movi",	OB,	0x2000 },
+*****/
+
+{ "movi",	I7,	0x6800 },
 
 { "andi",	OB,	0x2200 },
 { "movit",	OB,	0x2400 },
@@ -85,26 +90,30 @@ rce_opcode_info rce_table[]={
 { "rsubi",	OB,	0x3200 },
 { "addi",	OI,	0x3400 },
 { "subi",	OI,	0x3600 },
-{ "lsri",	OB,	0x3800 },
+{ "lsri",	SI,	0x3800 },
 { "lsrc",	O1,	0x3800 },
-{ "asri",	OB,	0x3A00 },
+{ "asri",	SI,	0x3A00 },
 { "asrc",	O1,	0x3A00 },
-{ "lsli",	OB,	0x3C00 },
+{ "lsli",	SI,	0x3C00 },
 { "lslc",	O1,	0x3C00 },
-{ "rotli",	OB,	0x3E00 },
-{ "rotlc",	O1,	0x3E00 },
+{ "rotli",	SI,	0x3E00 },
+{ "xsr",	O1,	0x3E00 },
 
 { "ldm",	OM,	0x6000 },
 { "stm",	OM,	0x6010 },
+{ "ldq",	OQ,	0x6000 },
+{ "stq",	OQ,	0x6010 },
 { "mult",	O2,	0x6100 },
 
-{ "mvir1",	LI,	0x6800 },
+/* { "mvir1",	LI,	0x6800 }, */
 { "lrw",	LR,	0x7000 },
-{ "jmpi",	LJ,	0x7300 },
+{ "jmpi",	LJ,	0x7000 },
 { "jsri",	LJ,	0x7F00 },
 
 { "ld",		LS,	0x8000 },
 { "st",		LS,	0x9000 },
+{ "ld.w",	LS,	0x8000 },
+{ "st.w",	LS,	0x9000 },
 { "ld.b",	LS,	0xA000 },
 { "st.b",	LS,	0xB000 },
 { "ld.h",	LS,	0xC000 },

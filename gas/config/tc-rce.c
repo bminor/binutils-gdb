@@ -30,6 +30,7 @@
 #define DEFINE_TABLE
 #include "../opcodes/rce-opc.h"
 #include <ctype.h>
+#include <string.h>
 
 #if 1	/**** TEMP ****/
 #define R_PCRELIMM8BY4  23	/* 8 bit pc relative to long boundary shifted 4 */
@@ -148,7 +149,7 @@ parse_reg (s, reg)
 char *s;
 unsigned *reg;
 {
-    if (s[0] == 'r')
+    if ( tolower(s[0]) == 'r')
     {
 	if (s[1] == '1' && s[2] >= '0' && s[2] <= '5')
 	{
@@ -165,14 +166,46 @@ unsigned *reg;
     return s;
 }
 
+static struct Cregs {
+	char *name;
+	unsigned int crnum;
+} cregs[] = {
+	{"psr",		0},
+	{"epsr",	1},
+	{"fpsr",	2},
+	{"epc",		3},
+	{"fpc",		4},
+	{"ss0",		5},
+	{"ss1",		6},
+	{"ss2",		7},
+	{"ss3",		8},
+	{"aar",		9},
+	{"gcr",		10},
+	{"gsr",		11},
+	{"",		0}
+};
+
 static char *
 parse_creg (s, reg)
 char *s;
 unsigned *reg;
 {
-    if (s[0] == 'c' && s[1] == 'r')
+  char buf[10];
+  int i,j,length;
+
+    if ( (tolower(s[0]) == 'c' && tolower(s[1]) == 'r') )
     {
-	if (s[2] == '1' && s[3] >= '0' && s[3] <= '5')
+	if (s[2] == '3' && s[3] >= '0' && s[3] <= '1')
+	{
+	    *reg = 30 + s[3] - '0';
+	    return s+4;
+	}
+	if (s[2] == '2' && s[3] >= '0' && s[3] <= '9')
+	{
+	    *reg = 20 + s[3] - '0';
+	    return s+4;
+	}
+	if (s[2] == '1' && s[3] >= '0' && s[3] <= '9')
 	{
 	    *reg = 10 + s[3] - '0';
 	    return s+4;
@@ -183,6 +216,15 @@ unsigned *reg;
 	    return s+3;
 	}
     }
+  /** look at alternate creg names before giving error **/
+  for(i=0; *(cregs[i].name)!='\0'; i++) {
+	length=strlen(cregs[i].name);
+	for(j=0; j<length; j++) buf[j]=tolower(s[j]);
+	if ( strncmp(cregs[i].name,buf,length)==0 ) {
+		*reg=cregs[i].crnum;
+		return( s+length );
+	}
+  }
     as_bad("register expected");
     return s;
 }
@@ -229,11 +271,15 @@ unsigned *reg;
 unsigned *off;
 unsigned siz;
 {   char *new;
+    char *parse_imm_notation();
 
     if (*s == '(')
     {   s = parse_reg(s+1, reg);
 	if (*s == ',')
-	{   s = parse_imm(s+1, off, 0, 63);
+	{   
+	    s = parse_imm_notation(s+1);
+	    if( parse_imm_notation(NULL) ) siz=1;
+	    s = parse_imm(s, off, 0, 63);
 	    if (siz > 1)
 	    {   if (siz > 2)
 		  {
@@ -258,6 +304,25 @@ unsigned siz;
 	as_bad("base register expected");
     return s;
 }
+
+/* look for immediate notation '#' */
+static char *
+parse_imm_notation(s)
+char *s;
+{
+  static int isa_imm;
+
+  if( s == (char *)(NULL) ) return( (char *)(isa_imm) );
+  isa_imm=0;
+  while( isspace(*s) )
+	s++;
+  if( *s=='#' ) {
+	isa_imm=1;
+	s++;
+  }
+  return(s);
+}
+
 
 
 
@@ -310,12 +375,20 @@ char *str;
 	output = frag_more (2);
 	break;
       case OT:
-	op_end = parse_imm(op_end + 1, &reg, 0, 15);
+	op_end = parse_imm_notation(op_end + 1);
+	op_end = parse_imm(op_end, &reg, 0, 7);
 	inst |= reg;
 	output = frag_more (2);
 	break;
       case O1:
 	op_end = parse_reg (op_end + 1, &reg);
+	inst |= reg;
+	output = frag_more (2);
+	break;
+      case JSR:
+	op_end = parse_reg (op_end + 1, &reg);
+	if(reg==15)
+	    as_bad("invalid register specified -> r15");
 	inst |= reg;
 	output = frag_more (2);
 	break;
@@ -339,12 +412,31 @@ char *str;
 	    as_bad("second operand missing");
 	output = frag_more (2);
 	break;
+      case X1:		/** handle both syntax-> xtrb- r1,rx OR xtrb- rx **/
+	op_end = parse_reg (op_end + 1, &reg);
+	if (*op_end == ',') {	/** xtrb- r1,rx	**/
+	  if (reg != 1)
+	    as_bad("destination register must be r1");
+	  op_end = parse_reg(op_end + 1, &reg);
+	}
+	else {			/** xtrb- rx	**/
+	}
+	inst |= reg;
+	output = frag_more (2);
+	break;
       case OI:
 	op_end = parse_reg (op_end + 1, &reg);
 	inst |= reg;
 	if (*op_end == ',')
-	{   op_end = parse_imm(op_end + 1, &reg, 1, 32);
-	    inst |= (reg-1)<<4;
+	{   unsigned int maxval = 32;
+	    unsigned int minval = 1;
+	    op_end = parse_imm_notation(op_end + 1);
+	    if( parse_imm_notation(NULL) ) {
+		maxval=31;
+		minval=0;
+	    }
+	    op_end = parse_imm(op_end, &reg, minval, maxval);
+	    inst |= (reg-minval)<<4;
 	}
 	else
 	    as_bad("second operand missing");
@@ -354,7 +446,35 @@ char *str;
 	op_end = parse_reg (op_end + 1, &reg);
 	inst |= reg;
 	if (*op_end == ',')
-	{   op_end = parse_imm(op_end + 1, &reg, 0, 31);
+	{   unsigned upper = 31;
+	    op_end = parse_imm_notation(op_end + 1);
+	    op_end = parse_imm(op_end, &reg, 0, upper);
+	    inst |= reg<<4;
+	}
+	else
+	    as_bad("second operand missing");
+	output = frag_more (2);
+	break;
+      case SI:
+	op_end = parse_reg (op_end + 1, &reg);
+	inst |= reg;
+	if (*op_end == ',')
+	{   unsigned upper = 31;
+	    op_end = parse_imm_notation(op_end + 1);
+	    op_end = parse_imm(op_end, &reg, 1, upper);
+	    inst |= reg<<4;
+	}
+	else
+	    as_bad("second operand missing");
+	output = frag_more (2);
+	break;
+      case I7:
+	op_end = parse_reg (op_end + 1, &reg);
+	inst |= reg;
+	if (*op_end == ',')
+	{   unsigned upper = 0x7f;
+	    op_end = parse_imm_notation(op_end + 1);
+	    op_end = parse_imm(op_end, &reg, 0, upper);
 	    inst |= reg<<4;
 	}
 	else
@@ -384,7 +504,8 @@ char *str;
 	op_end = parse_reg (op_end + 1, &reg);
 	if (*op_end == ',')
 	{   unsigned val;
-	    op_end = parse_imm(op_end + 1, &val, 0, 0x7FF);
+	    op_end = parse_imm_notation(op_end + 1);
+	    op_end = parse_imm(op_end, &val, 0, 0x7FF);
 	    inst |= val&0x7FF;
 	}
 	else
@@ -395,32 +516,53 @@ char *str;
 	break;
       case LR:
 	op_end = parse_reg(op_end + 1, &reg);
-	if (reg == 3 || reg == 15)
-	  as_bad("register must not be r3 or r15");
+	if( reg==0 || reg==15 )
+	        as_bad ("invalid register 'r0' and 'r15' illegal");
 	inst |= (reg<<8);
-	output = frag_more (2);
 	if (*op_end++ == ',')
 	  {   
-	    if (*op_end++ != '[')
-	      as_bad ("second operand missing '['");
-	    input_line_pointer = parse_exp(op_end);
-	    if (*input_line_pointer++ != ']')
-	      as_bad ("second operand missing ']'");
-	    fix_new_exp(frag_now, output-frag_now->fr_literal, 2, &immediate,
+	    /** look for # notation **/
+	    op_end = parse_imm_notation(op_end);
+	    if( parse_imm_notation(NULL) ) 
+	    {	unsigned val;
+	    	op_end = parse_imm(op_end, &val, 0, 0x0FF);
+	    	inst |= val&0x0FF;
+		output = frag_more (2);
+	    }
+	    else
+	    {
+	      output = frag_more (2);
+	      if (*op_end++ != '[' )
+	        as_bad ("second operand missing '['");
+	      input_line_pointer = parse_exp(op_end);
+	      if (*input_line_pointer++ != ']' )
+	        as_bad ("second operand missing ']'");
+	      fix_new_exp(frag_now, output-frag_now->fr_literal, 2, &immediate,
 			1, R_PCRELIMM8BY4);
+	    }
 	  }
 	else
 	    as_bad("second operand missing");
 	break;
       case LJ:
-	output = frag_more (2);
-	if (*++op_end != '[')
-	    as_bad ("operand missing '['");
-	input_line_pointer = parse_exp(op_end+1);
-	if (*input_line_pointer++ != ']')
-	    as_bad ("operand missing ']'");
-	fix_new_exp(frag_now, output-frag_now->fr_literal, 2, &immediate,
-		1, R_PCRELIMM8BY4);
+	 /** look for # notation **/
+	op_end = parse_imm_notation(op_end + 1) -1;
+	if( parse_imm_notation(NULL) ) 
+	 {	unsigned val;
+	    	op_end = parse_imm(op_end+1, &val, 0, 0x0FF);
+	    	inst |= val&0x0FF;
+		output = frag_more (2);
+	 }
+	else
+	 {	output = frag_more (2);
+		if (*++op_end != '[')
+	    	  as_bad ("operand missing '['");
+		input_line_pointer = parse_exp(op_end+1);
+		if (*input_line_pointer++ != ']')
+		  as_bad ("operand missing ']'");
+		fix_new_exp(frag_now, output-frag_now->fr_literal, 
+			2, &immediate, 1, R_PCRELIMM8BY4);
+	  }
 	break;
       case OM:
 	op_end = parse_reg(op_end + 1, &reg);
@@ -434,8 +576,11 @@ char *str;
 		{   op_end = parse_reg(op_end + 1, &basereg);
 		    if (*op_end == ')')
 			op_end++;
-		    if (endreg == 15 && basereg == 3)
-		    {	inst |= 0x0080;		/* list form */
+		    if (endreg == 15 && basereg == 0)
+		    {	
+			if(reg==0 || reg==15)
+			  as_bad("bad register list, r0 and r15 invalid as starting registers");
+			inst |= 0x0080;		/* list form */
 		    	inst |= reg;
 		    }
 		    else if (endreg - reg == 3)
@@ -462,11 +607,56 @@ char *str;
 	    as_bad("reg-reg expected");
 	output = frag_more (2);
 	break;
-      case BR:
+      case OQ:
+	op_end = parse_reg(op_end + 1, &reg);
+	if (*op_end == '-')
+	{   int endreg;
+	    op_end = parse_reg(op_end + 1, &endreg);
+	    if (*op_end == ',')
+	    {   int basereg;
+		op_end++;
+		if (*op_end == '(')
+		{   op_end = parse_reg(op_end + 1, &basereg);
+		    if (*op_end == ')')
+			op_end++;
+		    if (endreg - reg == 3)
+		    {	inst |= basereg;	/* quadrant form */
+			switch (reg)
+			{ case 0:		   break;
+			  case 4:  inst |= (1<<5); break;
+			  case 8:  inst |= (2<<5); break;
+			  case 12: inst |= (3<<5); break;
+			  default:
+			    as_bad("first register must be r0, r4, r8, or r12");
+			}
+		    }
+		    else
+			as_bad("bad register list or base register");
+		}
+		else
+		    as_bad("base register expected");
+	    }
+	    else
+		as_bad("second operand missing");
+	}
+	else
+	    as_bad("reg-reg expected");
 	output = frag_more (2);
-	input_line_pointer = parse_exp(op_end+1);
-	fix_new_exp (frag_now, output-frag_now->fr_literal, 2, &immediate,
-		     1, R_PCRELIMM11BY2);
+	break;
+      case BR:
+	op_end = parse_imm_notation(op_end + 1);
+	if( parse_imm_notation(NULL) ) 
+	  {	unsigned val;
+	    	op_end = parse_imm(op_end, &val, 0, 0x7FF);
+	    	inst |= val&0x7FF;
+		output = frag_more (2);
+	  }
+	else
+	 {	output = frag_more (2);
+		input_line_pointer = parse_exp(op_end);
+		fix_new_exp (frag_now, output-frag_now->fr_literal, 
+			2, &immediate, 1, R_PCRELIMM11BY2);
+	 }
 	break;
       default:
 	as_bad("cant deal with opcode \"%s\"", name);
@@ -791,9 +981,14 @@ md_apply_fix1 (fixP, val)
       val /= 2;
       if (((val & ~0x3ff) != 0) && ((val | 0x3ff) != -1))
 	as_warn ("pcrel for branch too far (0x%x) at 0x%x", val, addr);
+    /*****
+	BR no longer puts the sign-bit in bit0, leaves it in bit10
       buf[0] |= ((val >> 7) & 0x7);
       buf[1] |= ((val & 0x7f) << 1);
       buf[1] |= ((val >> 10) & 0x1);
+    *****/
+      buf[0] |= ((val >> 8) & 0x7);
+      buf[1] |= (val & 0xff);
       break;
     case R_PCRELIMM8BY4:	/* lower 8 bits of 2 byte opcode */
       val += 3;
@@ -1040,4 +1235,3 @@ tc_aout_pre_write_hook (headers)
 }
 #endif
 #endif	/* !BFD_ASSEMBLER */
-

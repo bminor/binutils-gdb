@@ -15,7 +15,7 @@
 
 Do-first:
 
-r16_files="tc-r16.c tc-r16.h"
+r16_files="tc-r16.c tc-r16.h rce.mt"
 
 if ( echo $* | grep keep\-r16 > /dev/null ) ; then
 	keep_these_too="${r16_files} ${keep_these_too}"

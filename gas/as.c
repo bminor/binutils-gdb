@@ -144,12 +144,10 @@ parse_args (pargc, pargv)
 
   char *shortopts;
   extern CONST char *md_shortopts;
-  /* -v takes an argument on VMS, so we don't make it a generic option
-     in that case.  */
-#ifdef OBJ_VMS
+#ifdef VMS
+  /* -v takes an argument on VMS, so we don't make it a generic option.  */
   CONST char *std_shortopts = "-JKLRWZfa::DI:o:wX";
 #else
-  /* Normal set of short options.  */
   CONST char *std_shortopts = "-JKLRWZfa::DI:o:vwX";
 #endif
 
@@ -167,6 +165,8 @@ parse_args (pargc, pargv)
     {"version", no_argument, NULL, OPTION_VERSION},
 #define OPTION_DUMPCONFIG (OPTION_STD_BASE + 4)
     {"dump-config", no_argument, NULL, OPTION_DUMPCONFIG},
+#define OPTION_VERBOSE (OPTION_STD_BASE + 5)
+    {"verbose", no_argument, NULL, OPTION_VERBOSE},
   };
 
   /* Construct the option lists from the standard list and the
@@ -203,9 +203,28 @@ parse_args (pargc, pargv)
 	default:
 	  /* md_parse_option should return 1 if it recognizes optc,
 	     0 if not.  */
-	  if (md_parse_option (optc, optarg) == 0)
-	    exit (EXIT_FAILURE);
-	  break;
+	  if (md_parse_option (optc, optarg) != 0)
+	    break;
+	  /* `-v' isn't included in the general short_opts list, so check for
+	     it explicity here before deciding we've gotten a bad argument.  */
+	  if (optc == 'v')
+	    {
+#ifdef VMS
+	      /* Telling getopt to treat -v's value as optional can result
+		 in it picking up a following filename argument here.  The
+		 VMS code in md_parse_option can return 0 in that case,
+		 but it has no way of pushing the filename argument back.  */
+	      if (optarg && *optarg)
+		new_argv[new_argc++] = optarg,  new_argv[new_argc] = NULL;
+	      else
+#else
+	      case 'v':
+#endif
+	      case OPTION_VERBOSE:
+		print_version_id ();
+	      break;
+	    }
+	  /*FALLTHRU*/
 
 	case '?':
 	  exit (EXIT_FAILURE);
@@ -243,9 +262,6 @@ parse_args (pargc, pargv)
 	  fprintf (stderr, "bfd-target = %s\n", TARGET_FORMAT);
 #endif
 	  exit (EXIT_SUCCESS);
-
-	case 'v':
-	  print_version_id ();
 
 	case 'J':
 	  flag_signed_overflow_ok = 1;
@@ -398,6 +414,11 @@ main (argc, argv)
 #ifdef TC_I960
   brtab_emit ();
 #endif
+/* start-sanitize-rce */
+#ifdef TC_RCE
+  dump_literals(0);
+#endif
+/* end-sanitize-rce */
 
   if (seen_at_least_1_file ()
       && !((had_warnings () && flag_always_generate_output)

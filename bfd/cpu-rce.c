@@ -1,4 +1,4 @@
-/* BFD library support routines for the Experiment SOP architecture.
+/* BFD library support routines for the Experiment RCE architecture.
    Copyright (C) 1993 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -29,8 +29,8 @@ DEFUN(scan_mach,(info, string),
 CONST struct bfd_arch_info *info AND
 CONST char *string)
 {
-  if (strcmp(string,"sop") == 0) return true;
-  if (strcmp(string,"SOP") == 0) return true;
+  if (strcmp(string,"rce") == 0) return true;
+  if (strcmp(string,"RCE") == 0) return true;
   return false;
 }
 
@@ -58,8 +58,8 @@ static bfd_arch_info_type arch_info_struct[] =
     8,				/* 8 bits in a byte */
     bfd_arch_rce,
     0,				/* only 1 machine */
-    "SOP",			/* arch_name  */
-    "SOP",			/* printable name */
+    "RCE",			/* arch_name  */
+    "RCE",			/* printable name */
     1,
     true,			/* the default machine */
     bfd_default_compatible,
@@ -76,4 +76,3 @@ DEFUN_VOID(bfd_rce_arch)
 {
   bfd_arch_linkin(&arch_info_struct[0]);
 }
-

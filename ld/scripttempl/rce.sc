@@ -2,53 +2,31 @@ cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 
-MEMORY {
-	ram   : o = 0x1000, l = 512k
-	}
-
-SECTIONS 				
-{ 					
-.text :
-	{ 					
-	  *(.text) 				
-	  *(.strings)
-   	 ${RELOCATING+ _etext = . ; }
-	} ${RELOCATING+ > ram}
-
-
-.tors   : {
-	___ctors = . ;
-	*(.ctors)
-	___ctors_end = . ;
-	___dtors = . ;
-	*(.dtors)
-	___dtors_end = . ;
-}  ${RELOCATING+ > ram}
-
-.data  :
-	{
-	*(.data)
-	${RELOCATING+ _edata = . ; }
-	} ${RELOCATING+ > ram}
-.bss  :
-	{
-	${RELOCATING+ _bss_start = . ; }
-	*(.bss)
-	*(COMMON)
-	${RELOCATING+ _end = . ;  }
-	} ${RELOCATING+ >ram}
-.stack ${RELOCATING+ 0x30000 }  : 
-	{
-	${RELOCATING+ _stack = . ; }
-	*(.stack)
-	} ${RELOCATING+ > ram}
-  .stab  0 ${RELOCATING+(NOLOAD)} : 
+${RELOCATING+${LIB_SEARCH_DIRS}}
+${RELOCATING+__DYNAMIC  =  0;}
+${STACKZERO+${RELOCATING+${STACKZERO}}}
+${SHLIB_PATH+${RELOCATING+${SHLIB_PATH}}}
+SECTIONS
+{
+  .text ${RELOCATING+${TEXT_START_ADDR}}:
   {
-    [ .stab ]
+    CREATE_OBJECT_SYMBOLS
+    *(.text)
+    ${RELOCATING+_etext = ${DATA_ALIGNMENT};}
   }
-  .stabstr  0 ${RELOCATING+(NOLOAD)} :
+  .data  ${RELOCATING+${DATA_ALIGNMENT}} :
   {
-    [ .stabstr ]
+    *(.data)
+    ${CONSTRUCTING+CONSTRUCTORS}
+    ${RELOCATING+_edata  =  .;}
+  }
+  .bss ${RELOCATING+SIZEOF(.data) + ADDR(.data)} :
+  {
+    ${RELOCATING+ __bss_start = .};
+   *(.bss)
+   *(COMMON)
+   ${RELOCATING+_end = . };
+   ${RELOCATING+__end = . };
   }
 }
 EOF

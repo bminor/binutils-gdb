@@ -203,15 +203,26 @@ enum machine_type {
   M_68020 = 2,
   M_SPARC = 3,
   /* skip a bunch so we don't run into any of suns numbers */
+  /* make these up for the ns32k*/
+  M_NS32032 = (64),		/* ns32032 running ? */
+  M_NS32532 = (64 + 5),		/* ns32532 running mach */
+
   M_386 = 100,
   M_29K = 101,          /* AMD 29000 */
   M_386_DYNIX = 102,	/* Sequent running dynix */
-  M_386_NETBSD = 134,		/* NetBSD/386 binary */
+  M_ARM = 103,		/* Advanced Risc Machines ARM */
+  M_386_NETBSD = 134,	/* NetBSD/i386 binary */
+  M_68K_NETBSD = 135,	/* NetBSD/m68k binary */
+  M_532_NETBSD = 137,	/* NetBSD/ns32k binary */
+  M_SPARC_NETBSD = 138,	/* NetBSD/sparc binary */
   M_MIPS1 = 151,        /* MIPS R2000/R3000 binary */
   M_MIPS2 = 152,        /* MIPS R4000/R6000 binary */
   M_HP200 = 200,	/* HP 200 (68010) BSD binary */
   M_HP300 = (300 % 256), /* HP 300 (68020+68881) BSD binary */
   M_HPUX = (0x20c % 256)/* HP 200/300 HPUX binary */
+/* start-sanitize-rce */
+  M_RCE = 155,		/* Motorola RCE binary */
+/* end-sanitize-rce */
 };
 
 #define N_DYNAMIC(exec) ((exec).a_info & 0x80000000)
@@ -295,6 +306,10 @@ struct aoutdata {
   /* Segment size - needed for alignment of demand paged files. */
   unsigned long segment_size;
 
+  /* Zmagic disk block size - need to align the start of the text
+     section in ZMAGIC binaries.  Normally the same as page_size.  */
+  unsigned long zmagic_disk_block_size;
+
   unsigned exec_bytes_size;
   unsigned vma_adjusted : 1;
 
@@ -374,10 +389,10 @@ NAME(aout,squirt_out_relocs) PARAMS ((bfd *abfd, asection *section));
 boolean
 NAME(aout,make_sections) PARAMS ((bfd *));
 
-bfd_target *
+const bfd_target *
 NAME(aout,some_aout_object_p) PARAMS ((bfd *abfd,
-			struct internal_exec *execp,
-			bfd_target * (*callback)(bfd *)));
+				       struct internal_exec *execp,
+				       const bfd_target *(*callback)(bfd *)));
 
 boolean
 NAME(aout,mkobject) PARAMS ((bfd *abfd));

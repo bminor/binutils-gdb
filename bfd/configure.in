@@ -203,7 +203,7 @@ do
     rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
     shcoff_vec)			tb="$tb coff-sh.o cofflink.o" ;;
 # start-sanitize-rce
-    rce_aout_vec)		tb="$tb aout32.o reloc16.o" ;;
+    rce_aout_vec)		tb="$tb aout-rce.o aout32.o stab-syms.o" ;;
 # end-sanitize-rce
     shlcoff_vec)		tb="$tb coff-sh.o cofflink.o" ;;
     som_vec)			tb="$tb som.o" ;;
