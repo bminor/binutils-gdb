@@ -53,29 +53,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldgram.h"
 #include "elf/common.h"
 
-static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
+static void gld${EMULATION_NAME}_before_parse
+  PARAMS ((void));
 static void gld${EMULATION_NAME}_vercheck
   PARAMS ((lang_input_statement_type *));
 static void gld${EMULATION_NAME}_stat_needed
   PARAMS ((lang_input_statement_type *));
-static boolean gld${EMULATION_NAME}_try_needed PARAMS ((const char *, int));
+static boolean gld${EMULATION_NAME}_try_needed
+  PARAMS ((const char *, int));
 static boolean gld${EMULATION_NAME}_search_needed
   PARAMS ((const char *, const char *, int));
 static void gld${EMULATION_NAME}_check_needed
   PARAMS ((lang_input_statement_type *));
-static void gld${EMULATION_NAME}_after_open PARAMS ((void));
-static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
+static void gld${EMULATION_NAME}_after_open
+  PARAMS ((void));
+static void gld${EMULATION_NAME}_find_exp_assignment
+  PARAMS ((etree_type *));
 static void gld${EMULATION_NAME}_find_statement_assignment
   PARAMS ((lang_statement_union_type *));
-static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
+static void gld${EMULATION_NAME}_before_allocation
+  PARAMS ((void));
 static boolean gld${EMULATION_NAME}_open_dynamic_archive
   PARAMS ((const char *, search_dirs_type *, lang_input_statement_type *));
-static lang_output_section_statement_type *output_rel_find PARAMS ((void));
+static lang_output_section_statement_type *output_rel_find
+  PARAMS ((void));
 static asection *output_prev_sec_find
   PARAMS ((lang_output_section_statement_type *));
 static boolean gld${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
-static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
+static char *gld${EMULATION_NAME}_get_script
+  PARAMS ((int *isfile));
 
 EOF
 
@@ -241,8 +248,7 @@ gld${EMULATION_NAME}_stat_needed (s)
   if (soname == NULL)
     soname = basename (s->filename);
 
-  if (strncmp (soname, global_needed->name,
-	       suffix - global_needed->name) == 0)
+  if (strncmp (soname, global_needed->name, suffix - global_needed->name) == 0)
     einfo ("%P: warning: %s, needed by %B, may conflict with %s\n",
 	   global_needed->name, global_needed->by, soname);
 }
@@ -265,12 +271,12 @@ gld${EMULATION_NAME}_try_needed (name, force)
     return false;
   if (! bfd_check_format (abfd, bfd_object))
     {
-      (void) bfd_close (abfd);
+      bfd_close (abfd);
       return false;
     }
   if ((bfd_get_file_flags (abfd) & DYNAMIC) == 0)
     {
-      (void) bfd_close (abfd);
+      bfd_close (abfd);
       return false;
     }
 
@@ -293,7 +299,7 @@ gld${EMULATION_NAME}_try_needed (name, force)
 	  lang_for_each_input_file (gld${EMULATION_NAME}_vercheck);
 	  if (global_vercheck_failed)
 	    {
-	      (void) bfd_close (abfd);
+	      bfd_close (abfd);
 	      /* Return false to force the caller to move on to try
                  another file on the search path.  */
 	      return false;
@@ -318,7 +324,7 @@ case ${target} in
 		break;
 	    if (l == NULL)
 	      {
-		(void) bfd_close (abfd);
+		bfd_close (abfd);
 		return false;
 	      }
 	  }
@@ -978,6 +984,8 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
 
 EOF
 fi
+
+if test x"$LDEMUL_PLACE_ORPHAN" != xgld"$EMULATION_NAME"_place_orphan; then
 cat >>e${EMULATION_NAME}.c <<EOF
 
 /* A variant of lang_output_section_find.  Used by place_orphan.  */
@@ -1003,11 +1011,6 @@ output_rel_find ()
   return (lang_output_section_statement_type *) NULL;
 }
 
-EOF
-
-if test x"$LDEMUL_PLACE_ORPHAN" != xgld"$EMULATION_NAME"_place_orphan; then
-cat >>e${EMULATION_NAME}.c <<EOF
-
 /* Find the last output section before given output statement.
    Used by place_orphan.  */
 
@@ -1025,20 +1028,14 @@ output_prev_sec_find (os)
     {
       lookup = &u->output_section_statement;
       if (lookup == os)
-	break;
-      if (lookup->bfd_section != NULL
-          && lookup->bfd_section != bfd_abs_section_ptr
-          && lookup->bfd_section != bfd_com_section_ptr 
-          && lookup->bfd_section != bfd_und_section_ptr)
+	return s;
+
+      if (lookup->bfd_section != NULL && lookup->bfd_section->owner != NULL)
 	s = lookup->bfd_section;
     }
 
-  if (u == NULL)
-    return NULL;
-
-  return s;
+  return NULL;
 }
-
 
 /* Place an orphan section.  We use this to put random SHF_ALLOC
    sections in the right segment.  */
@@ -1231,36 +1228,29 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 
   if (place != NULL)
     {
-      asection *snew, **pps, *bfd_section;
+      asection *snew, **pps;
 
       snew = os->bfd_section;
-      bfd_section = place->os->bfd_section;
-      if (place->section == NULL && bfd_section == NULL)
-	bfd_section = output_prev_sec_find (place->os);
 
-      if (place->section != NULL
-	  || (bfd_section != NULL
-	      && bfd_section != snew))
+      /* Shuffle the bfd section list to make the output file look
+	 neater.  This is really only cosmetic.  */
+      if (place->section == NULL)
 	{
-	  /* Shuffle the section to make the output file look neater.
-	     This is really only cosmetic.  */
-	  if (place->section == NULL)
-	    {
-#if 0
-	      /* Finding the end of the list is a little tricky.  We
-		 make a wild stab at it by comparing section flags.  */
-	      flagword first_flags = bfd_section->flags;
-	      for (pps = &bfd_section->next;
-		   *pps != NULL && (*pps)->flags == first_flags;
-		   pps = &(*pps)->next)
-		;
-	      place->section = pps;
-#else
-	      /* Put orphans after the first section on the list.  */
-	      place->section = &bfd_section->next;
-#endif
-	    }
+	  asection *bfd_section = place->os->bfd_section;
 
+	  /* If the output statement hasn't been used to place
+	     any input sections (and thus doesn't have an output
+	     bfd_section), look for the closest prior output statement
+	     having an output section.  */
+	  if (bfd_section == NULL)
+	    bfd_section = output_prev_sec_find (place->os);
+
+	  if (bfd_section != NULL && bfd_section != snew)
+	    place->section = &bfd_section->next;
+	}
+
+      if (place->section != NULL)
+	{
 	  /*  Unlink the section.  */
 	  for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
 	    ;
@@ -1270,13 +1260,22 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	  snew->next = *place->section;
 	  *place->section = snew;
 	}
-      place->section = &snew->next;	/* Save the end of this list.  */
 
+      /* Save the end of this list.  Further ophans of this type will
+	 follow the one we've just added.  */
+      place->section = &snew->next;
+
+      /* The following is non-cosmetic.  We try to put the output
+	 statements in some sort of reasonable order here, because
+	 they determine the final load addresses of the orphan
+	 sections.  In addition, placing output statements in the
+	 wrong order may require extra segments.  For instance,
+	 given a typical situation of all read-only sections placed
+	 in one segment and following that a segment containing all
+	 the read-write sections, we wouldn't want to place an orphan
+	 read/write section before or amongst the read-only ones.  */
       if (add.head != NULL)
 	{
-	  /* We try to put the output statements in some sort of
-	     reasonable order here, because they determine the final
-	     load addresses of the orphan sections.  */
 	  if (place->stmt == NULL)
 	    {
 	      /* Put the new statement list right at the head.  */

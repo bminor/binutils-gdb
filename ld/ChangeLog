@@ -1,5 +1,12 @@
 2001-08-14  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/elf32.em: Formatting fixes.
+	(output_prev_sec_find): Test for bfd_ind_section too;  do so by
+	looking at sec->owner.
+	(output_rel_find): Move function inside LDEMUL_PLACE_ORPHAN test.
+	(gld${EMULATION_NAME}_place_orphan): Add a few comments.  Remove
+	unused code, and reorganize orphan section placement code.
+
 	* ldlang.c (wild_doit): Rename to lang_add_section.
 	* ldlang.h: Here too.
 	* mpw-elfmips.c: And here.
