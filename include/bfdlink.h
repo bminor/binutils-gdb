@@ -273,7 +273,7 @@ struct bfd_link_callbacks
   /* A function which is called when a relocation is attempted against
      an undefined symbol.  NAME is the symbol which is undefined.
      ABFD, SECTION and ADDRESS identify the location from which the
-     reference is made.  */
+     reference is made.  In some cases SECTION may be NULL.  */
   boolean (*undefined_symbol) PARAMS ((struct bfd_link_info *,
 				       const char *name, bfd *abfd,
 				       asection *section, bfd_vma address));
