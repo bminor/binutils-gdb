@@ -199,6 +199,7 @@ static int gdb_regnames PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST [
 static int gdb_search PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST
 			       objv[]));
 static int gdb_set_bp PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
+static int gdb_set_bp_addr PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_find_bp_at_line PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_find_bp_at_addr PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_stop PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []));
@@ -302,6 +303,7 @@ Gdbtk_Init (interp)
   Tcl_CreateObjCommand (gdbtk_interp, "gdb_search", call_wrapper,
 			gdb_search,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_set_bp", call_wrapper, gdb_set_bp,  NULL);
+  Tcl_CreateObjCommand (interp, "gdb_set_bp_addr", call_wrapper, gdb_set_bp_addr,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_find_bp_at_line", call_wrapper, gdb_find_bp_at_line,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_find_bp_at_addr", call_wrapper, gdb_find_bp_at_addr,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_get_trace_frame_num",
@@ -2851,6 +2853,91 @@ gdb_set_bp (clientData, interp, objc, objv)
   Tcl_DStringAppendElement (&cmd, buf);
   Tcl_DStringAppendElement (&cmd, Tcl_GetStringFromObj (objv[2], NULL));
   Tcl_DStringAppendElement (&cmd, Tcl_GetStringFromObj (objv[1], NULL));
+
+  ret = Tcl_Eval (interp, Tcl_DStringValue (&cmd));
+  Tcl_DStringFree (&cmd);
+  return ret;
+}
+
+/* This implements the tcl command "gdb_set_bp_addr"
+ * It sets breakpoints, and runs the Tcl command
+ *     gdbtk_tcl_breakpoint create
+ * to register the new breakpoint with the GUI.
+ *
+ * Tcl Arguments:
+ *    addr: the address at which to set the breakpoint
+ *    type:     the type of the breakpoint
+ *    thread:	optional thread number
+ * Tcl Result:
+ *    The return value of the call to gdbtk_tcl_breakpoint.
+ */
+
+static int
+gdb_set_bp_addr (clientData, interp, objc, objv)
+  ClientData clientData;
+  Tcl_Interp *interp;
+  int objc;
+  Tcl_Obj *CONST objv[];
+
+{
+  struct symtab_and_line sal;
+  int line, flags, ret, thread = -1;
+  long addr;
+  struct breakpoint *b;
+  char buf[64];
+  Tcl_DString cmd;
+
+  if (objc != 4 && objc != 3)
+    {
+      Tcl_WrongNumArgs(interp, 1, objv, "addr type [thread]");
+      return TCL_ERROR; 
+    }
+  
+  if (Tcl_GetLongFromObj( interp, objv[1], &addr) == TCL_ERROR)
+    {
+      result_ptr->flags = GDBTK_IN_TCL_RESULT;
+      return TCL_ERROR;
+    }
+
+  if (Tcl_GetIntFromObj( interp, objv[2], &flags) == TCL_ERROR)
+    {
+      result_ptr->flags = GDBTK_IN_TCL_RESULT;
+      return TCL_ERROR;
+    }
+
+  if (objc == 4)
+    {
+      if (Tcl_GetIntFromObj( interp, objv[3], &thread) == TCL_ERROR)
+	{
+	  result_ptr->flags = GDBTK_IN_TCL_RESULT;
+	  return TCL_ERROR;
+	}
+    }
+
+  sal = find_pc_line (addr, 0);
+  sal.pc = addr;
+  b = set_raw_breakpoint (sal);
+  set_breakpoint_count (breakpoint_count + 1);
+  b->number = breakpoint_count;
+  b->type = flags >> 2;
+  b->disposition = flags & 3;
+  b->thread = thread;
+
+  sprintf (buf, "*(0x%lx)",addr);
+  b->addr_string = strsave (buf);
+
+  /* now send notification command back to GUI */
+
+  Tcl_DStringInit (&cmd);
+
+  Tcl_DStringAppend (&cmd, "gdbtk_tcl_breakpoint create ", -1);
+  sprintf (buf, "%d", b->number);
+  Tcl_DStringAppendElement(&cmd, buf);
+  sprintf (buf, "0x%lx", addr);
+  Tcl_DStringAppendElement (&cmd, buf);
+  sprintf (buf, "%d", b->line_number);
+  Tcl_DStringAppendElement (&cmd, buf);
+  Tcl_DStringAppendElement (&cmd, b->source_file);
 
   ret = Tcl_Eval (interp, Tcl_DStringValue (&cmd));
   Tcl_DStringFree (&cmd);
