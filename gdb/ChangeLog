@@ -1,3 +1,17 @@
+2002-09-30  Fernando Nasser  <fnasser@redhat.com>
+
+	* disasm.c: New file.
+	* disasm.h: New file.
+	* mi/mi-cmd-disas.c (gdb_dis_asm_read_memory): Moved to disasm.c.
+	(compare_lines): Ditto.
+	(dump_insns): Ditto.
+	(do_mixed_source_and_assembly): Moved to disasm.c. Added uiout argument.
+	(do_assembly_only): Ditto.
+	(do_disassembly): Renamed to gdb_disassembly and moved to disasm.c.
+	Sdded uiout argument.
+	* Makefile.in: Add new files.  Reorder SFILES list. Update dependencies.
+	Include libgdb.a later in the insight executable. 
+
 2002-09-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/djgpp/fnchange.lst: Rename bfd/elf64-alpha.c and
