@@ -1,5 +1,23 @@
 2004-11-01  Joseph S. Myers  <joseph@codesourcery.com>
 
+	* Makefile.in (ALLDEPFILES): Add amd64-sol2-tdep.c.
+	(amd64-sol2-tdep.o): Add dependencies.
+	* amd64-sol2-tdep.c, config/i386/sol2-64.mh,
+	config/i386/sol2-64.mt: New files.
+	* i386-sol2-nat.c (amd64_sol2_gregset64_reg_offset,
+	amd64_sol2_gregset32_reg_offset, _initialize_amd64_sol2_nat): New.
+	(supply_gregset): Correct order of arguments to
+	amd64_supply_native_gregset.
+	(fill_gregset): Correct order of arguments to
+	amd64_collect_native_gregset.
+	* configure.host (i[34567]86-*-solaris2.1[0-9]*): Add new case.
+	* configure.tgt (i[34567]86-*-solaris2.1[0-9]*): Likewise.
+	* configure.in (*-*-solaris2.[[6789]]): Add *-*-solaris2.1[[0-9]]
+	for definition of NEW_PROC_API.
+	* configure: Regenerate.
+
+2004-11-01  Joseph S. Myers  <joseph@codesourcery.com>
+
 	* MAINTAINERS (Write After Approval): Add myself.
 
 2004-11-01  Andrew Cagney  <cagney@gnu.org>

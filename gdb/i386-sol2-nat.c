@@ -46,10 +46,62 @@
 #include "amd64-nat.h"
 #include "amd64-tdep.h"
 
+/* Mapping between the general-purpose registers in gregset_t format
+   and GDB's register cache layout.  */
+
+/* From <sys/regset.h>.  */
+static int amd64_sol2_gregset64_reg_offset[] = {
+  14 * 8,			/* %rax */
+  11 * 8,			/* %rbx */
+  13 * 8,			/* %rcx */
+  12 * 8,			/* %rdx */
+  9 * 8,			/* %rsi */
+  8 * 8,			/* %rdi */
+  10 * 8,			/* %rbp */
+  20 * 8,			/* %rsp */
+  7 * 8,			/* %r8 ... */
+  6 * 8,
+  5 * 8,
+  4 * 8,
+  3 * 8,
+  2 * 8,
+  1 * 8,
+  0 * 8,			/* ... %r15 */
+  17 * 8,			/* %rip */
+  16 * 8,			/* %eflags */
+  18 * 8,			/* %cs */
+  21 * 8,			/* %ss */
+  25 * 8,			/* %ds */
+  24 * 8,			/* %es */
+  22 * 8,			/* %fs */
+  23 * 8			/* %gs */
+};
+
+/* 32-bit registers are provided by Solaris in 64-bit format, so just
+   give a subset of the list above.  */
+static int amd64_sol2_gregset32_reg_offset[] = {
+  14 * 8,			/* %eax */
+  13 * 8,			/* %ecx */
+  12 * 8,			/* %edx */
+  11 * 8,			/* %ebx */
+  20 * 8,			/* %esp */
+  10 * 8,			/* %ebp */
+  9 * 8,			/* %esi */
+  8 * 8,			/* %edi */
+  17 * 8,			/* %eip */
+  16 * 8,			/* %eflags */
+  18 * 8,			/* %cs */
+  21 * 8,			/* %ss */
+  25 * 8,			/* %ds */
+  24 * 8,			/* %es */
+  22 * 8,			/* %fs */
+  23 * 8			/* %gs */
+};
+
 void
 supply_gregset (prgregset_t *gregs)
 {
-  amd64_supply_native_gregset (current_regcache, -1, gregs);
+  amd64_supply_native_gregset (current_regcache, gregs, -1);
 }
 
 void
@@ -61,7 +113,7 @@ supply_fpregset (prfpregset_t *fpregs)
 void
 fill_gregset (prgregset_t *gregs, int regnum)
 {
-  amd64_collect_native_gregset (current_regcache, regnum, gregs);
+  amd64_collect_native_gregset (current_regcache, gregs, regnum);
 }
 
 void
@@ -75,3 +127,19 @@ fill_fpregset (prfpregset_t *fpregs, int regnum)
 /* For 32-bit Solaris x86, we use the Unix SVR4 code in i386v4-nat.c.  */
 
 #endif
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern void _initialize_amd64_sol2_nat (void);
+
+void
+_initialize_amd64_sol2_nat (void)
+{
+#if defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
+  amd64_native_gregset32_reg_offset = amd64_sol2_gregset32_reg_offset;
+  amd64_native_gregset32_num_regs =
+    ARRAY_SIZE (amd64_sol2_gregset32_reg_offset);
+  amd64_native_gregset64_reg_offset = amd64_sol2_gregset64_reg_offset;
+  amd64_native_gregset64_num_regs =
+    ARRAY_SIZE (amd64_sol2_gregset64_reg_offset);
+#endif
+}

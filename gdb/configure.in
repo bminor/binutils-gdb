@@ -725,7 +725,7 @@ if test "${target}" = "${host}"; then
   *-*-unixware* | *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
       AC_DEFINE(NEW_PROC_API)
       ;;
-  *-*-solaris2.[[6789]])
+  *-*-solaris2.[[6789]] | *-*-solaris2.1[[0-9]])
       AC_DEFINE(NEW_PROC_API)
       ;;
   mips-sgi-irix5*)

@@ -77,6 +77,7 @@ i[34567]86-*-openbsd*)	gdb_host=obsd ;;
 i[34567]86-*-sco3.2v5*)	gdb_host=i386sco5 ;;
 i[34567]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
 i[34567]86-*-sco*)	gdb_host=i386sco ;;
+i[34567]86-*-solaris2.1[0-9]*)	gdb_host=sol2-64 ;;
 i[34567]86-*-solaris*)	gdb_host=i386sol2 ;;
 i[34567]86-*-sysv4.2*)	gdb_host=i386v42mp ;;
 i[34567]86-*-sysv4*)	gdb_host=i386v4 ;;

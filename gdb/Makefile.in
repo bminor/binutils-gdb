@@ -1360,6 +1360,7 @@ ALLDEPFILES = \
 	amd64nbsd-nat.c amd64nbsd-tdep.c \
 	amd64obsd-nat.c amd64obsd-tdep.c \
 	amd64-linux-nat.c amd64-linux-tdep.c \
+	amd64-sol2-tdep.c \
 	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
 	armnbsd-nat.c armnbsd-tdep.c \
 	avr-tdep.c \
@@ -1693,6 +1694,9 @@ amd64obsd-nat.o: amd64obsd-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 amd64obsd-tdep.o: amd64obsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(symtab_h) $(objfiles_h) $(osabi_h) $(regset_h) $(target_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(amd64_tdep_h) $(i387_tdep_h) \
+	$(solib_svr4_h)
+amd64-sol2-tdep.o: amd64-sol2-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
+	$(regcache_h) $(osabi_h) $(symtab_h) $(gdb_string_h) $(amd64_tdep_h) \
 	$(solib_svr4_h)
 amd64-tdep.o: amd64-tdep.c $(defs_h) $(arch_utils_h) $(block_h) \
 	$(dummy_frame_h) $(frame_h) $(frame_base_h) $(frame_unwind_h) \
