@@ -646,7 +646,7 @@ done
 
 for lost in .. $lose_these_too; do
   if test $lost != ..; then
-    for i in Makefile.am Makefile.in config.bfd configure.host configure.in; do
+    for i in Makefile.am Makefile.in config.bfd configure.host configure.in configure; do
       if fgrep $lost $i >/dev/null 2>&1; then
         echo '***' File $lost was sanitized out but is still mentioned in bfd/$i 1>&2
       fi
