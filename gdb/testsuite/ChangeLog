@@ -1,3 +1,10 @@
+2004-02-26  J. Brobecker  <brobecker@gnat.com>
+
+	* gdb.cp/class2.cc (empty): New class.
+	(refer): New function.
+	(main): Declare an object of type empty and use it.
+	* gdb.cp/class2.exp: Print the value of an object of type empty.
+
 2004-02-26  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.base/langs.exp: Update query string to match the
