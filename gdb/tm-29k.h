@@ -620,24 +620,36 @@ extern void pop_frame ();
    mtsrim cr, 15
    loadm 0, 0, lr2, msp     ; load first 16 words of arguments into registers
    add msp, msp, 16 * 4     ; point to the remaining arguments
-  CONST_INSN:
-   const lr0,inf
-   consth lr0,inf
+ CONST_INSN:
+   const lr0,inf		; (replaced by       half of target addr)
+   consth lr0,inf		; (replaced by other half of target addr)
    calli lr0, lr0 
    aseq 0x40,gr1,gr1   ; nop
-   asneq 0x50,gr1,gr1  ; breakpoint
+ BREAKPT_INSN:
+   asneq 0x50,gr1,gr1  ; breakpoint	(replaced by local breakpoint insn)
    */
 
-/* Position of the "const" instruction within CALL_DUMMY in bytes.  */
-#define CONST_INSN (3 * 4)
 #if TARGET_BYTE_ORDER == HOST_BYTE_ORDER
-#define CALL_DUMMY {0x0400870f,\
-		0x36008200|(MSP_HW_REGNUM), \
-		0x15000040|(MSP_HW_REGNUM<<8)|(MSP_HW_REGNUM<<16), \
-		0x03ff80ff, 0x02ff80ff, 0xc8008080, 0x70400101, 0x72500101}
-#else /* Byte order differs.  */
-  you lose
-#endif /* Byte order differs.  */
+#define BS(const)	const
+#else
+#define	BS(const)	(((const) & 0xff) << 24) |	\
+			(((const) & 0xff00) << 8) |	\
+			(((const) & 0xff0000) >> 8) |	\
+			(((const) & 0xff000000) >> 24)
+#endif
+
+/* Position of the "const" and blkt instructions within CALL_DUMMY in bytes. */
+#define CONST_INSN (3 * 4)
+#define BREAKPT_INSN (7 * 4)
+#define CALL_DUMMY {	\
+		BS(0x0400870f),\
+		BS(0x36008200|(MSP_HW_REGNUM)), \
+		BS(0x15000040|(MSP_HW_REGNUM<<8)|(MSP_HW_REGNUM<<16)), \
+		BS(0x03ff80ff),	\
+		BS(0x02ff80ff),	\
+		BS(0xc8008080),	\
+		BS(0x70400101),	\
+		BS(0x72500101)}
 #define CALL_DUMMY_LENGTH (8 * 4)
 
 #define CALL_DUMMY_START_OFFSET 0  /* Start execution at beginning of dummy */
@@ -664,14 +676,15 @@ extern void pop_frame ();
    into a call sequence of the above form stored at DUMMYNAME.  */
 
 /* Currently this stuffs in the address of the function that we are calling.
-   If different 29k systems use different breakpoint instructions, it
-   could also stuff BREAKPOINT in the right place (to avoid having to
+   Since different 29k systems use different breakpoint instructions, it
+   also stuffs BREAKPOINT in the right place (to avoid having to
    duplicate CALL_DUMMY in each tm-*.h file).  */
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)   \
   {\
-    STUFF_I16((char *)dummyname + CONST_INSN, fun);\
-    STUFF_I16((char *)dummyname + CONST_INSN + 4, fun >> 16);\
+    STUFF_I16((char *)dummyname + CONST_INSN, fun);		\
+    STUFF_I16((char *)dummyname + CONST_INSN + 4, fun >> 16);	\
+  /* FIXME  memcpy ((char *)(dummyname) + BREAKPT_INSN, break_insn, 4); */ \
   }
 
 /* 29k architecture has separate data & instruction memories -- wired to

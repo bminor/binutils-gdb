@@ -1,3 +1,18 @@
+Tue Aug 11 02:49:39 1992  John Gilmore  (gnu at cygnus.com)
+
+	* am29k-tdep.c:  Lint from DECstation compiler.
+	* mem-break.c:  Restore test of BREAKPOINT size that Fred removed.
+	As the man page says, "Sometimes you just can't get lint to shut
+	up".  That doesn't mean you should blow away the code it won't
+	shut up about.
+	* mips-xdep.c:  Revise stubbing-out of code until Rich cleans
+	it up over the next few weeks.  Make mips x 29k build.
+	* tm-29k.h (CALL_DUMMY):  Make it work on cross-endian hosts.
+	(FIX_CALL_DUMMY):  Comment in the patching of the breakpoint,
+	but leave it as a comment because the breakpoint instruction 
+	is not easily accessible at this moment (it's static, and if
+	we define one here, it goes into every file compiled).
+
 Mon Aug 10 22:27:19 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.6.3.

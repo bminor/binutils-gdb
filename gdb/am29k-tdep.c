@@ -513,7 +513,7 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
   /* If we don't do this 'info register' stops in the middle. */
   if (memaddr >= rstack_high_address) 
     {
-      int val=-1;			/* a bogus value */
+      int val = -1;			/* a bogus value */
       /* It's in a local register, but off the end of the stack.  */
       int regnum = (memaddr - rsp) / 4 + LR0_REGNUM;
       if (myaddr != NULL)

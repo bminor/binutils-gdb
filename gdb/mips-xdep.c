@@ -23,10 +23,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "gdbcore.h"
 
-/* For now we stub this out; sgi format is super-hairy (and completely
-   different in the new release) */
+/* For now we stub this out; sgi core format is super-hairy (and completely
+   different in the new release).
+   For most mips systems, this function is defined in coredep.c.   */
 
-#if defined(sgi) || !defined(GDB_TARGET_IS_MIPS)
+#if defined(sgi) 
 void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
@@ -36,6 +37,12 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 {
   return;
 }
+#endif
+
+/* Access to the inferior is only good for native systems, not cross.
+   I am not sure why this is stubbed out on SGI...   --gnu@cygnus.com  */
+
+#if defined(sgi) || !defined(GDB_TARGET_IS_MIPS)
 
 /* ARGSUSED */
 void
@@ -143,26 +150,3 @@ store_inferior_registers (regno)
 }
 
 #endif /* sgi */
-
-#if 0
-void
-fetch_core_registers ()
-{
-  register int regno;
-  int val;
-
-  for (regno = 1; regno < NUM_REGS; regno++) {
-    char buf[MAX_REGISTER_RAW_SIZE];
-
-    val = bfd_seek (core_bfd, register_addr (regno, 0));
-    if (val < 0 || (val = bfd_read (core_bfd, buf, sizeof buf)) < 0) {
-      char buffer[50];
-      strcpy (buffer, "Reading register ");
-      strcat (buffer, reg_names[regno]);
-
-      perror_with_name (buffer);
-    }
-    supply_register (regno, buf);
-  }
-}
-#endif /* 0 */
