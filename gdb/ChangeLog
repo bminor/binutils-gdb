@@ -1,3 +1,12 @@
+Sun Feb 27 21:39:48 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/i386/tm-i386v4.h (I386V4_SIGTRAMP_SAVED_PC, IN_SIGTRAMP,
+	FRAME_CHAIN, FRAMELESS_FUNCTION_INVOCATION, FRAME_SAVED_PC):
+	Define to make backtracing through the various sigtramp handlers
+	work.
+	* i386-tdep.c (i386v4_sigtramp_saved_pc):  New routine to fetch
+	the saved pc from ucontext on the stack for SVR4 signal handling.
+
 Fri Feb 25 09:41:11 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* remote.c, remote-mon.c, remote-utils.c, remote-utils.h,
