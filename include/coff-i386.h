@@ -22,24 +22,15 @@ struct external_filehdr {
  *	F_AR32WR	file has byte ordering of an AR32WR machine (e.g. vax)
  */
 
-#define F_RELFLG	0000001
-#define F_EXEC		0000002
-#define F_LNNO		0000004
-#define F_LSYMS		0000010
-#define F_MINMAL        0000020
-#define F_UPDATE        0000040
-#define F_SWABD         0000100
-#define F_AR16WR        0000200
-#define F_AR32WR        0000400
-#define F_AR32W         0001000
-#define F_PATCH         0002000
-#define F_NODF          0002000
+#define F_RELFLG	(0x0001)
+#define F_EXEC		(0x0002)
+#define F_LNNO		(0x0004)
+#define F_LSYMS		(0x0008)
 
-#define	I386MAGIC	0514
+
+
+#define	I386MAGIC	0x14c
 #define I386BADMAG(x) (((x).f_magic!=I386MAGIC))
-#define I386AOUTMAGIC   0413
-#define I386AOUTVSTAMP  0000
-#define COFF_TIMESTAMP
 
 
 #define	FILHDR	struct external_filehdr
@@ -119,7 +110,7 @@ struct external_scnhdr {
 #define _TEXT	".text"
 #define _DATA	".data"
 #define _BSS	".bss"
-#define _COMMENT ".comment"
+
 /*
  * s_flags "type"
  */
@@ -320,6 +311,5 @@ struct external_reloc {
 #define DEFAULT_DATA_SECTION_ALIGNMENT 4
 #define DEFAULT_BSS_SECTION_ALIGNMENT 4
 #define DEFAULT_TEXT_SECTION_ALIGNMENT 4
-#define DEFAULT_COMMENT_SECTION_ALIGNMENT 4
 /* For new sections we havn't heard of before */
 #define DEFAULT_SECTION_ALIGNMENT 4

@@ -13,7 +13,7 @@ struct external_filehdr {
 };
 
 
-/* Motorola 68000/68008/68010/68020 file magic numbers*/
+/* Motorola 68000/68008/68010/68020 */
 #define	MC68MAGIC	0520
 #define MC68KWRMAGIC	0520	/* writeable text segments */
 #define	MC68TVMAGIC	0521
@@ -22,15 +22,8 @@ struct external_filehdr {
 #define	M68MAGIC	0210
 #define	M68TVMAGIC	0211
 
-#    define COFF_TIMESTAMP
-#    define XPG3_FLAG
-#    define MC68KBCSMAGIC   0526
-#define M68KBADMAG(x) \
-  (((x).f_magic!=MC68MAGIC) && ((x).f_magic!=MC68KWRMAGIC) \
-   && ((x).f_magic!=MC68TVMAGIC) && ((x).f_magic!=MC68KROMAGIC) \
-   && ((x).f_magic!=MC68KPGMAGIC) && ((x).f_magic!=M68MAGIC) \
-   && ((x).f_magic!=M68TVMAGIC) && ((x).f_magic!=MC68KBCSMAGIC) )
-
+#define M68KBADMAG(x) (((x).f_magic!=MC68MAGIC) && ((x).f_magic!=MC68KWRMAGIC) && ((x).f_magic!=MC68TVMAGIC) && \
+  ((x).f_magic!=MC68KROMAGIC) && ((x).f_magic!=MC68KPGMAGIC) && ((x).f_magic!=M68MAGIC) && ((x).f_magic!=M68TVMAGIC) )
 
 			
 
@@ -57,14 +50,6 @@ AOUTHDR;
 
 #define AOUTSZ (sizeof(AOUTHDR))
 
-  
-/* a.out header magic numbers */
-
-#define MC68PGMAGIC     0413	/* Page aligned shared a.out */
-#define MC68WRMAGIC     0407	/* Private text */
-#define MC68ROMAGIC     0410	/* Shared text */
-#define MC68PGLIBMAGIC  0443	/* Page aligned shared lib */
-#define MC68AOUTVSTAMP  0000	/* Version stamp */
 
 
 /********************** SECTION HEADER **********************/
@@ -89,10 +74,6 @@ struct external_scnhdr {
 #define _TEXT	".text"
 #define _DATA	".data"
 #define _BSS	".bss"
-#define _TV     ".tv"
-#define _NL     ".nl"
-#define _INIT   ".init"
-#define _FINI   ".fini"
 
 
 #define	SCNHDR	struct external_scnhdr

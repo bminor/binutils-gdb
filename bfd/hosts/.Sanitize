@@ -33,7 +33,6 @@ h-hp9000.h
 h-hp300bsd.h
 h-i386v.h
 h-irix3.h
-h-m68kv.h
 h-rs6000.h
 h-rtbsd.h
 h-sun3.h
@@ -51,8 +50,8 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.6  1991/09/19 21:05:02  steve
-# Stuff for new machiens
+# Revision 1.7  1991/09/20 03:42:22  gnu
+# Undo precipitous changes.
 #
 # Revision 1.5  1991/09/17  06:57:44  grossman
 # sgi/irix config stuff.
