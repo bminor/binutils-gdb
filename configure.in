@@ -40,7 +40,11 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 target_libs="libm xiberty newlib libg++"
 
 # these tools are built using the target libs, and are intended to run only in the
-# target environment.  we currently have none
+# target environment.  we currently have none.  
+#
+# note: any program that uses libraries that are in the "target_libs" list
+# belongs in this list.  those programs are also very likely candidates for
+# the "native_only" list which follows
 #
 target_tools=
 
@@ -54,7 +58,8 @@ target_tools=
 
 # directories to be built in the native environment only
 #
-native_only="m4 autoconf ispell grep diff rcs cvs sed fileutils shellutils textutils wdiff find emacs"
+native_only="autoconf cvs diff emacs fileutils find grep ispell m4
+             rcs sed shellutils textutils wdiff"
 
 # directories to be built in the target environment only
 #
@@ -145,7 +150,7 @@ case "${target}" in
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
   *-*-solaris2)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/gas//'`
     ;;
 esac
 

@@ -1,3 +1,7 @@
+Thu Dec 24 17:26:24 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: don't remove binutils from Solaris builds
+
 Thu Dec 24 14:08:38 1992 david d`zoo' zuhn  (zoo@cygnus.com)
 
 	* Makefile.in: get rid of earlier definitions for *clean,
