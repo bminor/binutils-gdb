@@ -79,8 +79,8 @@ sparclite-*-* | sparclitefrw*-*-*)
 sparc-*-* | sparcfrw*-*-*)
 	multidirs="soft v8 soft/v8"
 	;;
-z8k-*-*)
-	multidirs="z8001"
+z8k-*-coff)
+	multidirs="z8001 std z8001/std"
 	;;
 h8300-*-*)
 	multidirs=h8300h
