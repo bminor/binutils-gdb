@@ -1,3 +1,8 @@
+Wed Jul 14 15:37:13 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in: If configured -with-stabs on any target, add
+	stabsdirs to configdirs.
+
 Wed Jul 14 09:36:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmds.exp: Change printf "%f\n" to printf "%f is fun" so

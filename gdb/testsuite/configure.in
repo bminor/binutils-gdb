@@ -60,6 +60,10 @@ rs6000-*-aix*)		configdirs="${configdirs} ${stabsdirs}" ;;
 *-*-linux*)		configdirs="${configdirs} ${stabsdirs}" ;;
 *-sun-*)		configdirs="${configdirs} ${stabsdirs}" ;;
 
+*)			if [ x${with_stabs} = xyes ]; then
+			  configdirs="${configdirs} ${stabsdirs}"
+			fi
+			;;
 esac
 
 	# link in the lib directory if needed
