@@ -1,3 +1,26 @@
+Wed Aug 18 15:37:48 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h: Added M_LI_S and M_LI_SS.
+
+Tue Aug 17 07:08:08 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* h8300.h: Get some rare mov.bs correct.
+
+Thu Aug  5 09:15:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* sparc.h: Don't define const ourself; rely on ansidecl.h having
+	been included.
+
+Fri Jul 30 18:41:11 1993  John Gilmore  (gnu@cygnus.com)
+
+	* sparc.h (F_JSR, F_UNBR, F_CONDBR):  Add new flags to mark
+	jump instructions, for use in disassemblers.
+
+Thu Jul 22 07:25:27 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* m88k.h: Make bitfields just unsigned, not unsigned long or
+	unsigned short.
+
 Wed Jul 21 11:55:31 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* hppa.h: New argument type 'y'.  Use in various float instructions.
