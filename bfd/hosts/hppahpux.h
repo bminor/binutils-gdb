@@ -31,6 +31,9 @@ rename(from, to)
 }
 #endif
 
+extern PTR   EXFUN(malloc,(unsigned));
+extern PTR   EXFUN(realloc, (PTR, unsigned));
+
 /* EXACT TYPES */
 typedef char int8e_type;
 typedef unsigned char uint8e_type;
