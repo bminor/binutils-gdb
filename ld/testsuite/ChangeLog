@@ -1,3 +1,9 @@
+2003-06-16  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/ldsym1.d: Restrict to cris-*-*elf* and cris-*-*aout*.
+	* ld-cris/noglob1.d: Ditto.
+	* ld-cris/badgotr1.d: Pass --underscore to gas.
+
 2003-06-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* ld-mips-elf/elf-rel-got-n64-linux.d: New file.
