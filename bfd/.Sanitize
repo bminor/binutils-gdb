@@ -98,6 +98,7 @@ libbfd.c
 libbfd.h
 libcoff-in.h
 libcoff.h
+libecoff.h
 libhppa.h
 libieee.h
 liboasys.h

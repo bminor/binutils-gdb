@@ -1,3 +1,14 @@
+Thu Feb  4 12:35:02 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* libecoff.h: New file.  Defines ECOFF backend data for gdb.
+	* coff-mips.c: Now includes libecoff.h.
+	(ecoff_data_type): Moved to libecoff.h.
+	(ecoff_slurp_symbolic_info): Made globally visible so that gdb can
+	call it.  If there is ever another ECOFF target, this and the
+	swapping functions should be accessed via an ECOFF specific target
+	vector.
+	Makefile.in (coff-mips.o): Depends on libecoff.h.
+
 Wed Feb  3 09:14:36 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coffcode.h: Removed MIPS specific information, since coff-mips.c
