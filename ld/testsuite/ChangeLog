@@ -1,3 +1,17 @@
+2001-02-14  H.J. Lu  <hjl@gnu.org>
+
+	* ld-bootstrap/bootstrap.exp: Rebuild tmpdir/ld2 with tmpdir/ld3
+	for -static on ia64.
+
+	* ld-checks/checks.exp: Don't run on ia64-*-elf* nor
+	ia64-*-linux*.
+
+	* ld-elfvers/vers.exp: Also run ia64-*-elf* and ia64-*-linux*.
+
+	* ld-elfvsb/elfvsb.exp: Use i?86-*-*. Also run on ia64-*-linux*.
+	Set up expected failures for ia64-*-linux*.
+	* ld-shared/shared.exp: Likewise.
+
 2001-02-08  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* ld-srec/srec.exp (run_srec_test): m6811 code has references

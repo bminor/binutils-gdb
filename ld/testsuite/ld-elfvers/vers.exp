@@ -29,6 +29,8 @@ if { ![istarget i?86-*-sysv4*] \
      && ![istarget i?86-*-unixware] \
      && ![istarget i?86-*-elf*] \
      && ![istarget i?86-*-linux*] \
+     && ![istarget ia64-*-elf*] \
+     && ![istarget ia64-*-linux*] \
      && ![istarget m68k-*-linux*] \
      && ![istarget mips*-*-irix5*] \
      && ![istarget powerpc-*-elf*] \
