@@ -1,3 +1,10 @@
+2001-03-02  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/atof-ieee.c (TC_LARGEST_EXPONENT_IS_NORMAL): New macro.
+	(gen_to_words): Print warnings if NaNs are found and the target CPU
+	does not support them.  Allow largest exponent to be used in normal
+	numbers if TC_LARGEST_EXPONENT_IS_NORMAL evaluates to true.
+
 2001-02-28  Andreas Jaeger  <aj@suse.de>, Bo Thorsen  <bo@suse.de>
 
 	* config/tc-i386.c (tc_gen_reloc): Remove ugly hack which is not needed
