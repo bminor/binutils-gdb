@@ -241,7 +241,7 @@ ptrace_check (int req, int id, int ret)
       break;
     }
   error ("aix-thread: ptrace (%d, %d) returned %d (errno = %d %s)",
-	 req, id, ret, errno, strerror (errno));
+	 req, id, ret, errno, safe_strerror (errno));
   return 0;  /* not reached.  */
 }
 
@@ -507,7 +507,7 @@ pdc_realloc (pthdb_user_t user, void *buf, size_t len, void **bufp)
     fprintf_unfiltered (gdb_stdlog,
       "pdc_realloc (user = %ld, buf = 0x%lx, len = %ld, bufp = 0x%lx)",
       user, (long) buf, len, (long) bufp);
-  *bufp = realloc (buf, len);
+  *bufp = xrealloc (buf, len);
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, "  realloc returned 0x%lx", (long) *bufp);
   return *bufp ? PDC_SUCCESS : PDC_FAILURE;
