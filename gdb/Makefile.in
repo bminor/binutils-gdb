@@ -108,7 +108,7 @@ MMALLOC_CFLAGS = $(MMALLOC_CHECK) $(MMALLOC_DISABLE)
 BFD_DIR = ../bfd
 BFD = $(BFD_DIR)/libbfd.a
 BFD_SRC = $(srcdir)/$(BFD_DIR)
-BFD_CFLAGS = -I$(BFD) -I$(BFD_SRC)
+BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
 
 # Where is the READLINE library?  Typically in ../readline.
 READLINE_DIR = ../readline
