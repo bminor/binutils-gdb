@@ -1,5 +1,17 @@
 2004-01-05  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
+	* Makefile.am (Makefile): Move the dependency on
+	$(BFDDIR)/configure.in to...
+	(CONFIG_STATUS_DEPENDENCIES): ... here.
+	(AUTOMAKE_OPTIONS): Require automake 1.8.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.am (BASEDIR, BFDDIR): Define.
+	(CONFIG_STATUS_DEPENDENCIES): Add a dependency on
+	$(BFDDIR)/configure.in here as well.
+	* doc/Makefile.in: Regenerate.
+
+2004-01-05  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
 	* Makefile.am (install, install-info, RECURSIVE_TARGETS): Remove.
 	* Makefile.in: Regenerate.
 	* aclocal.m4: Regenerate.

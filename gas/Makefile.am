@@ -3,7 +3,7 @@
 ## Work around apparent automake bug.
 INTLLIBS = @INTLLIBS@
 
-AUTOMAKE_OPTIONS = cygnus dejagnu
+AUTOMAKE_OPTIONS = 1.8 cygnus dejagnu
 
 SUBDIRS = doc po
 
@@ -788,7 +788,7 @@ de-stage3:
 DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	$(TARGET_CPU_HFILES) $(OBJ_FORMAT_CFILES) $(OBJ_FORMAT_HFILES)
 
-Makefile: $(BFDDIR)/configure.in
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
 
 # Automatic dependency computation.  This is a real pain, because the
 # dependencies change based on target_cpu_type and obj_format.
