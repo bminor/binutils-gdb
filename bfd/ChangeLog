@@ -5,6 +5,14 @@ Mon Jul 10 11:45:55 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 Mon Jul 10 11:09:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (NAME(aout,link_hash_table_create)): Allocate hash table
+	using bfd_alloc, not malloc.
+	* cofflink.c (_bfd_coff_link_hash_table_create): Likewise.
+	* ecoff.c (_bfd_ecoff_bfd_link_hash_table_create): Likewise.
+	* i386linux.c (linux_link_hash_table_create): Likewise.
+	* linker.c (_bfd_generic_link_hash_table_create): Likewise.
+	* sunos.c (sunos_link_hash_table_create): Likewise.
+
 	Based on patches from Eric Youngdale <eric@aib.com>:
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): If -Bsymbolic,
 	output a DT_SYMBOLIC dynamic entry.

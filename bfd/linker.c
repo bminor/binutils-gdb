@@ -597,12 +597,12 @@ _bfd_generic_link_hash_table_create (abfd)
   struct generic_link_hash_table *ret;
 
   ret = ((struct generic_link_hash_table *)
-	 malloc (sizeof (struct generic_link_hash_table)));
-  if (!ret)
-      {
-	bfd_set_error (bfd_error_no_memory);
-	return (struct bfd_link_hash_table *) NULL;
-      }
+	 bfd_alloc (abfd, sizeof (struct generic_link_hash_table)));
+  if (ret == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return (struct bfd_link_hash_table *) NULL;
+    }
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
 				   generic_link_hash_newfunc))
     {

@@ -190,7 +190,7 @@ _bfd_coff_link_hash_table_create (abfd)
   struct coff_link_hash_table *ret;
 
   ret = ((struct coff_link_hash_table *)
-	 malloc (sizeof (struct coff_link_hash_table)));
+	 bfd_alloc (abfd, sizeof (struct coff_link_hash_table)));
   if (ret == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
