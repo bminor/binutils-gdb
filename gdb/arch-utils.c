@@ -528,31 +528,6 @@ gdbarch_update_p (struct gdbarch_info info)
   return 1;
 }
 
-/* FIXME: kettenis/20031124: Of the functions that follow, only
-   gdbarch_from_bfd is supposed to survive.  The others will
-   dissappear since in the future GDB will (hopefully) be truly
-   multi-arch.  However, for now we're still stuck with the concept of
-   a single active architecture.  */
-
-/* Make GDBARCH the currently selected architecture.  */
-
-static void
-deprecated_select_gdbarch_hack (struct gdbarch *gdbarch)
-{
-  struct gdbarch_info info;
-
-  /* FIXME: kettenis/20031024: The only way to select a specific
-     architecture is to clone its `struct gdbarch_info', and update
-     according to that copy.  This is gross, but significant work will
-     need to be done before we can take a more sane approach.  */
-  gdbarch_info_init (&info);
-  info.bfd_arch_info = gdbarch_bfd_arch_info (gdbarch);
-  info.byte_order = gdbarch_byte_order (gdbarch);
-  info.osabi = gdbarch_osabi (gdbarch);
-  gdbarch_update_p (info);
-  gdb_assert (gdbarch == current_gdbarch);
-}
-
 /* Return the architecture for ABFD.  If no suitable architecture
    could be find, return NULL.  */
 
@@ -563,19 +538,9 @@ gdbarch_from_bfd (bfd *abfd)
   struct gdbarch *new_gdbarch;
   struct gdbarch_info info;
 
-  /* FIXME: kettenis/20031024: The only way to find the architecture
-     for a certain BFD is by doing an architecture update.  This
-     activates the architecture, so we need to reactivate the old
-     architecture.  This is gross, but significant work will need to
-     be done before we can take a more sane approach.  */
   gdbarch_info_init (&info);
   info.abfd = abfd;
-  if (! gdbarch_update_p (info))
-    return NULL;
-
-  new_gdbarch = current_gdbarch;
-  deprecated_select_gdbarch_hack (old_gdbarch);
-  return new_gdbarch;
+  return gdbarch_find_by_info (info);
 }
 
 /* Set the dynamic target-system-dependent parameters (architecture,
@@ -589,7 +554,7 @@ set_gdbarch_from_file (bfd *abfd)
   gdbarch = gdbarch_from_bfd (abfd);
   if (gdbarch == NULL)
     error ("Architecture of file not recognized.\n");
-  deprecated_select_gdbarch_hack (gdbarch);
+  deprecated_current_gdbarch_select_hack (gdbarch);
 }
 
 /* Initialize the current architecture.  Update the ``set
