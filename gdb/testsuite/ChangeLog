@@ -1,5 +1,11 @@
 2004-08-08  Daniel Jacobowitz  <dan@debian.org>
 
+	PR gdb/1738
+	* gdb.base/signals.exp (signal_tests_1): KFAIL bug in continuing
+	from a breakpoint with a pending signal.
+
+2004-08-08  Daniel Jacobowitz  <dan@debian.org>
+
 	PR gdb/1736
 	* lib/gdb.exp (gdb_test_multiple): Handle return -code return.
 	* gdb.base/sigaltstack.exp (finish_test): Consume output until

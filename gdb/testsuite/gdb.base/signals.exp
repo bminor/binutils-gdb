@@ -114,9 +114,24 @@ proc signal_tests_1 {} {
 	# In running to func2, the 2rd alarm call will have been set
 	# up, let it be delivered.
 
+	# This doesn't work correctly on platforms with hardware single
+	# step...
+
 	sleep 2
+
+	setup_kfail "i*86-*-*" gdb/1738
+	setup_kfail "x86_64-*-*" gdb/1738
+	setup_kfail "rs6000-*-*" gdb/1738
+	setup_kfail "powerpc-*-*" gdb/1738
+	setup_kfail "sparc-*-*" gdb/1738
 	gdb_test "continue" "Breakpoint.*handler.*" \
 	    "continue to handler for 3rd alarm call"
+
+	setup_kfail "i*86-*-*" gdb/1738
+	setup_kfail "x86_64-*-*" gdb/1738
+	setup_kfail "rs6000-*-*" gdb/1738
+	setup_kfail "powerpc-*-*" gdb/1738
+	setup_kfail "sparc-*-*" gdb/1738
 	gdb_test "backtrace" \
 	    "#0  handler.*#1.*signal handler called.*#2  func2.*#3.*main.*" \
 	    "backtrace for 3rd alarm"
