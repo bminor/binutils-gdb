@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Wed Oct 2 00:21:53 PDT 1991, by rich@cygnus.com
+# Last Mod Tue Oct 8 15:43:17 PDT 1991, by rich@cygnus.com
 #
 # $Id$
 
@@ -33,7 +33,9 @@ AR = ar
 AR_FLAGS = cq
 BISONPATH = 
 
-BISON = `if [ -d $(srcdir)/../bison\`if [ -d $(srcdir)/bison.$(target) ] ; then echo .$(target) ; fi\`$(subdir) ] ; then echo $(srcdir)/../bison\`if [ -d $(srcdir)/bison.$(target) ] ; then echo .$(target) ; fi\`$(subdir)/bison -L $(srcdir)/../bison\`if [ -d $(srcdir)/bison.$(target) ] ; then echo .$(target) ; fi\`/; else echo yacc ; fi`
+BISON = `if [ -d $(unsubdir)/../bison ] ; \
+	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L \`pwd\`/$(unsubdir)/../bison/ ; \
+	else echo yacc ; fi`
 
 SUBDIRS = libiberty readline bfd gdb binutils ld gas gcc gnulib
 OTHERS = 
@@ -46,8 +48,8 @@ all:
 
 subdir_do: force
 	for i in $(DODIRS); do \
-		if [ -d $(srcdir)/$$i -o -d $(srcdir)/$$i.$(target) ] ; then \
-			if (cd $(srcdir)/$$i`if [ -d $(srcdir)/$$i.$(target) ] ; \
+		if [ -d $(unsubdir)/$$i -o -d $(unsubdir)/$$i.$(target) ] ; then \
+			if (cd $(unsubdir)/$$i`if [ -d $(unsubdir)/$$i.$(target) ] ; \
 				then echo .$(target) ; fi`$(subdir); \
 				$(MAKE) \
 					"against=$(against)" \
@@ -81,28 +83,28 @@ bootstrap3:
 	$(MAKE) comparison
 
 pass:
-	cp $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
-                then echo .$(target) ; fi`/gstdarg.h $(srcdir)/gas/stdarg.h
+	cp $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
+                then echo .$(target) ; fi`/gstdarg.h $(unsubdir)/gas/stdarg.h
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" \
-		"CC=`pwd`/$(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+		"CC=`pwd`/$(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gcc \
 		-O \
-		-B`pwd`/$(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+		-B`pwd`/$(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ \
-		-B`pwd`/$(srcdir)/gas`if [ -d $(srcdir)/gas.$(target) ] ; \
+		-B`pwd`/$(unsubdir)/gas`if [ -d $(unsubdir)/gas.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ \
-		-B`pwd`/$(srcdir)/ld`if [ -d $(srcdir)/ld.$(target) ] ; \
+		-B`pwd`/$(unsubdir)/ld`if [ -d $(unsubdir)/ld.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/" \
-		"AR=`pwd`/$(srcdir)/binutils`if [ -d $(srcdir)/binutils.$(target) ] ; \
+		"AR=`pwd`/$(unsubdir)/binutils`if [ -d $(unsubdir)/binutils.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ar" \
-		"RANLIB=`pwd`/$(srcdir)/binutils`if [ -d $(srcdir)/binutils.$(target) ] ; \
+		"RANLIB=`pwd`/$(unsubdir)/binutils`if [ -d $(unsubdir)/binutils.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ranlib" \
-		"LOADLIBES=`pwd`/$(srcdir)/gnulib`if [ -d $(srcdir)/binutils.$(target) ] ; \
+		"LOADLIBES=`pwd`/$(unsubdir)/gnulib`if [ -d $(unsubdir)/binutils.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gnulib.a /lib/libc.a" \
 		"LDFLAGS=-nostdlib /lib/crt0.o \
-		-L`pwd`/$(srcdir)/gnulib`if [ -d $(srcdir)/gnulib.$(target) ] ; \
+		-L`pwd`/$(unsubdir)/gnulib`if [ -d $(unsubdir)/gnulib.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ \
-		-B`pwd`/$(srcdir)/ld`if [ -d $(srcdir)/ld.$(target) ] ; \
+		-B`pwd`/$(unsubdir)/ld`if [ -d $(unsubdir)/ld.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/"
 
 
@@ -152,18 +154,18 @@ install-dirs: force
 	- mkdir $(destdir)/man/man6
 	- mkdir $(destdir)/man/man7
 	- mkdir $(destdir)/man/man8
-	if [ -d $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+	if [ -d $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
                 then echo .$(target) ; fi`$(subdir) ] ; then \
-		(cd  $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+		(cd  $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
 	                then echo .$(target) ; fi`$(subdir) ; \
 				$(MAKE) install-dir) ; \
 	else true; \
 	fi
 
 install-fixed-includes: force
-	if [ -d $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+	if [ -d $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
                 then echo .$(target) ; fi`$(subdir) ] ; then \
-		(cd  $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+		(cd  $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
 	                then echo .$(target) ; fi`$(subdir) ; \
 				$(MAKE) install-fixed-includes) ; \
 	else true; \
@@ -238,7 +240,13 @@ force_update:
 
 #
 # $Log$
-# Revision 1.38  1991/10/02 07:21:55  rich
+# Revision 1.40  1991/10/09 00:11:14  rich
+# Getting BISON right.
+#
+# Revision 1.39  1991/10/02  10:03:15  rich
+# Some $(srcdir)'s become $(unsubdir)'s in order to support +objdir.
+#
+# Revision 1.38  1991/10/02  07:21:55  rich
 # no more configure on which to depend
 #
 # Revision 1.37  1991/10/01  13:41:00  gnu
