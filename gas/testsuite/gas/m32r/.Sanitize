@@ -38,6 +38,7 @@ fslot.s
 high-1.d
 high-1.s
 m32r.exp
+outofrange.s
 relax-1.d
 relax-1.s
 uppercase.d
