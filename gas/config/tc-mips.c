@@ -146,18 +146,11 @@ struct mips_cl_insn
   /* The relocs associated with the instruction, if any.  */
   fixS *fixp[3];
 
-  /* True if this entry describes a real instruction.  */
-  unsigned int valid_p : 1;
+  /* True if this entry cannot be moved from its current position.  */
+  unsigned int fixed_p : 1;
 
   /* True if this instruction occured in a .set noreorder block.  */
   unsigned int noreorder_p : 1;
-
-  /* True if this instruction corresponds to an assembler-filled
-     delay slot.  Always false if noreorder_p.  */
-  unsigned int delay_slot_p : 1;
-
-  /* True for extended mips16 instructions.  */
-  unsigned int extended_p : 1;
 
   /* True for mips16 instructions that jump to an absolute address.  */
   unsigned int mips16_absolute_jump_p : 1;
@@ -2357,12 +2350,9 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      /* If we had to emit any NOP instructions, then we
 		 already know we can not swap.  */
 	      || nops != 0
-	      /* If we don't even know the previous insn, we can not
-		 swap.  */
-	      || ! history[0].valid_p
-	      /* If the previous insn is already in a branch delay
-		 slot, then we can not swap.  */
-	      || history[0].delay_slot_p
+	      /* We can't swap if the previous instruction's position
+		 is fixed.  */
+	      || history[0].fixed_p
 	      /* If the previous previous insn was in a .set
 		 noreorder, we can't swap.  Actually, the MIPS
 		 assembler will swap in this situation.  However, gcc
@@ -2374,11 +2364,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		   bne	$4,$0,foo
 		 in which we can not swap the bne and INSN.  If gcc is
 		 not configured -with-gnu-as, it does not output the
-		 .set pseudo-ops.  We don't have to check
-		 history[0].noreorder_p, because history[0].valid_p will
-		 be 0 in that case.  We don't want to use
-		 history[1].valid_p, because we do want to be able
-		 to swap at the start of a function.  */
+		 .set pseudo-ops.  */
 	      || history[1].noreorder_p
 	      /* If the branch is itself the target of a branch, we
 		 can not swap.  We cheat on this; all we check for is
@@ -2542,9 +2528,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
                  swap.  */
 	      || (mips_opts.mips16
 		  && (prev_pinfo & MIPS16_INSN_READ_PC))
-	      /* If the previous instruction was extended, we can not
-                 swap.  */
-	      || (mips_opts.mips16 && history[0].extended_p)
 	      /* If the previous instruction had a fixup in mips16
                  mode, we can not swap.  This normally means that the
                  previous instruction was a 4 byte branch anyhow.  */
@@ -2700,7 +2683,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      history[1].extend = ip->extend;
 	      history[1].insn_opcode = ip->insn_opcode;
 	    }
-	  history[0].delay_slot_p = 1;
+	  history[0].fixed_p = 1;
 
 	  /* If that was an unconditional branch, forget the previous
 	     insn information.  */
@@ -2714,7 +2697,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  history[0].fixp[1] = NULL;
 	  history[0].fixp[2] = NULL;
 	  history[0].mips16_absolute_jump_p = 0;
-	  history[0].extended_p = 0;
 	}
       else if (pinfo & INSN_COND_BRANCH_LIKELY)
 	{
@@ -2733,8 +2715,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  history[0].fixp[1] = NULL;
 	  history[0].fixp[2] = NULL;
 	  history[0].mips16_absolute_jump_p = 0;
-	  history[0].extended_p = 0;
-	  history[0].delay_slot_p = 1;
+	  history[0].fixed_p = 1;
 	}
       else
 	{
@@ -2752,27 +2733,20 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  history[0].use_extend = ip->use_extend;
 	  history[0].extend = ip->extend;
 	  history[0].insn_opcode = ip->insn_opcode;
-
-	  /* Any time we see a branch, we always fill the delay slot
-	     immediately; since this insn is not a branch, we know it
-	     is not in a delay slot.  */
-	  history[0].delay_slot_p = 0;
-
+	  history[0].fixed_p = (mips_opts.mips16
+				&& (ip->use_extend
+				    || *reloc_type > BFD_RELOC_UNUSED));
 	  history[0].fixp[0] = fixp[0];
 	  history[0].fixp[1] = fixp[1];
 	  history[0].fixp[2] = fixp[2];
 	  history[0].mips16_absolute_jump_p = (reloc_type[0]
 					       == BFD_RELOC_MIPS16_JMP);
-	  if (mips_opts.mips16)
-	    history[0].extended_p = (ip->use_extend
-				     || *reloc_type > BFD_RELOC_UNUSED);
 	}
 
       history[1].noreorder_p = history[0].noreorder_p;
       history[0].noreorder_p = 0;
       history[0].frag = frag_now;
       history[0].where = f - frag_now->fr_literal;
-      history[0].valid_p = 1;
     }
   else if (mips_relax.sequence != 2)
     {
@@ -2791,6 +2765,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 					   == BFD_RELOC_MIPS16_JMP);
       history[1].noreorder_p = history[0].noreorder_p;
       history[0].noreorder_p = 1;
+      history[0].fixed_p = 1;
     }
 
   /* We just output an insn, so the next one doesn't have a label.  */
@@ -2813,10 +2788,8 @@ mips_no_prev_insn (int preserve)
       prev_nop_frag_required = 0;
       prev_nop_frag_since = 0;
     }
-  history[0].valid_p = 0;
-  history[0].delay_slot_p = 0;
+  history[0].fixed_p = 1;
   history[0].noreorder_p = 0;
-  history[0].extended_p = 0;
   history[0].mips16_absolute_jump_p = 0;
   history[1].noreorder_p = 0;
   mips_clear_insn_labels ();

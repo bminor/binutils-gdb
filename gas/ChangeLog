@@ -1,5 +1,11 @@
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (mips_cl_insn): Replace the valid_p, delay_slot_p
+	and extended_p fields with a single fixed_p field.
+	(append_insn, mips_no_prev_insn): Adjust accordingly.
+
+2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (mips_cl_insn): Replace reloc_type array with
 	a single mips16_absolute_jump_p bit.
 	(append_insn): Adjust accordingly.
