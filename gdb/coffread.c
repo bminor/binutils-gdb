@@ -137,6 +137,10 @@ struct coff_symbol
     unsigned int c_type;
   };
 
+/* When starting a symtab, this is the file name.  */
+
+static char *coff_source_file;
+
 extern void stabsread_clear_cache (void);
 
 static struct type *coff_read_struct_type (int, int, int);
@@ -358,12 +362,13 @@ coff_alloc_type (int index)
 static void
 coff_start_symtab (char *name)
 {
-  start_symtab (
   /* We fill in the filename later.  start_symtab puts
      this pointer into last_source_file and we put it in
      subfiles->name, which end_symtab frees; that's why
      it must be malloc'd.  */
-		 savestring (name, strlen (name)),
+  coff_source_file = savestring (name, strlen (name));
+
+  start_symtab (coff_source_file,
   /* We never know the directory name for COFF.  */
 		 NULL,
   /* The start address is irrelevant, since we set
@@ -380,9 +385,10 @@ coff_start_symtab (char *name)
 static void
 complete_symtab (char *name, CORE_ADDR start_addr, unsigned int size)
 {
-  if (last_source_file != NULL)
-    xfree (last_source_file);
-  last_source_file = savestring (name, strlen (name));
+  if (coff_source_file != NULL)
+    xfree (coff_source_file);
+  coff_source_file = savestring (name, strlen (name));
+  last_source_file = coff_source_file;
   current_source_start_addr = start_addr;
   current_source_end_addr = start_addr + size;
 
@@ -413,6 +419,7 @@ coff_end_symtab (struct objfile *objfile)
 
   /* Reinitialize for beginning of new file. */
   last_source_file = NULL;
+  coff_source_file = NULL;
 }
 
 static void
@@ -722,6 +729,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
   nlist_bfd_global = objfile->obfd;
   nlist_nsyms_global = nsyms;
   last_source_file = NULL;
+  coff_source_file = NULL;
   memset (opaque_type_chain, 0, sizeof opaque_type_chain);
 
   if (type_vector)		/* Get rid of previous one */

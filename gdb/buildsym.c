@@ -31,7 +31,6 @@
 #include "bfd.h"
 #include "gdb_obstack.h"
 #include "symtab.h"
-#include "block.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbtypes.h"
@@ -44,6 +43,7 @@
 #include "filenames.h"		/* For DOSish file names */
 #include "macrotab.h"
 #include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
+#include "block.h"
 #include "dictionary.h"
 #include "gdb_assert.h"
 #include "cp-support.h"
@@ -69,18 +69,12 @@ static int have_line_numbers;
 
 /* List of using directives that are active in the current file.  */
 
-static struct using_direct_node *using_list;
+static struct using_direct *using_list;
 
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
 
 static void scan_for_anonymous_namespaces (struct symbol *symbol);
-
-static struct using_direct_node *copy_usings_to_obstack (struct
-							 using_direct_node
-							 *usings,
-							 struct obstack
-							 *obstack);
 
 
 /* Initial sizes of data structures.  These are realloc'd larger if
@@ -162,23 +156,24 @@ static void
 scan_for_anonymous_namespaces (struct symbol *symbol)
 {
   const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
-  int old_index;
-  int new_index;
+  unsigned int previous_component;
+  unsigned int next_component;
   const char *len;
 
   /* Start with a quick-and-dirty check for mention of "(anonymous
      namespace)".  */
 
-  if (!cp_is_anonymous (name, -1))
+  if (!cp_is_anonymous (name))
     return;
 
-  old_index = 0;
-  new_index = cp_find_first_component (name + old_index);
+  previous_component = 0;
+  next_component = cp_find_first_component (name + previous_component);
 
-  while (name[new_index] == ':')
+  while (name[next_component] == ':')
     {
-      if ((new_index - old_index) == ANONYMOUS_NAMESPACE_LEN
-	  && strncmp (name + old_index, "(anonymous namespace)",
+      if ((next_component - previous_component) == ANONYMOUS_NAMESPACE_LEN
+	  && strncmp (name + previous_component,
+		      "(anonymous namespace)",
 		      ANONYMOUS_NAMESPACE_LEN) == 0)
 	{
 	  /* We've found a component of the name that's an anonymous
@@ -186,12 +181,14 @@ scan_for_anonymous_namespaces (struct symbol *symbol)
 	     by the previous component if there is one, or to the
 	     global namespace if there isn't.  */
 	  add_using_directive (name,
-			       old_index == 0 ? 0 : old_index - 2,
-			       new_index);
+			       previous_component == 0
+			       ? 0 : previous_component - 2,
+			       next_component);
 	}
       /* The "+ 2" is for the "::".  */
-      old_index = new_index + 2;
-      new_index = old_index + cp_find_first_component (name + old_index);
+      previous_component = next_component + 2;
+      next_component = (previous_component
+			+ cp_find_first_component (name + previous_component));
     }
 }
 
@@ -220,8 +217,8 @@ find_symbol_in_list (struct pending *list, char *name, int length)
   return (NULL);
 }
 
-/* This adds a using directive to using_list.  NAME is the start of a
-   string that should contain the namespaces we want to add as initial
+/* Add a using directive to using_list.  NAME is the start of a string
+   that should contain the namespaces we want to add as initial
    substrings, OUTER_LENGTH is the end of the outer namespace, and
    INNER_LENGTH is the end of the inner namespace.  If the using
    directive in question has already been added, don't add it
@@ -231,22 +228,21 @@ void
 add_using_directive (const char *name, unsigned int outer_length,
 		     unsigned int inner_length)
 {
-  struct using_direct_node *current;
-  struct using_direct_node *new_node;
-  struct using_direct *new;
-
-  gdb_assert (outer_length < inner_length);
+  struct using_direct *current;
+  struct using_direct *new_node;
 
   /* Has it already been added?  */
 
-  for (current = using_list; current; current = current->next)
-    if (current->current->outer_length == outer_length
-	&& current->current->inner_length == inner_length
-	&& (strncmp (current->current->name, name, inner_length) == 0))
-      return;
+  for (current = using_list; current != NULL; current = current->next)
+    {
+      if ((strncmp (current->inner, name, inner_length) == 0)
+	  && (strlen (current->inner) == inner_length)
+	  && (strlen (current->outer) == outer_length))
+	return;
+    }
 
-  using_list = cp_add_using_xmalloc (name, outer_length, inner_length,
-				     using_list);
+  using_list = cp_add_using (name, inner_length, outer_length,
+			     using_list);
 }
 
 /* At end of reading syms, or in case of quit, really free as many
@@ -433,49 +429,38 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	    }
 	}
 
-      /* If we're in the C++ case, make sure that we add 'using'
-	 directives for all of the namespaces in which this function
-	 lives.  Also, make sure that the name was originally mangled:
-	 if not, there certainly isn't any namespace information to
-	 worry about!  (Also, if not, the gdb_assert will fail.)  */
+      /* If we're in the C++ case, record the namespace that the
+	 function was defined in.  Make sure that the name was
+	 originally mangled: if not, there certainly isn't any
+	 namespace information to worry about!  */
       if (SYMBOL_LANGUAGE (symbol) == language_cplus
 	  && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
 	{
-	  const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
-	  const char *next;
-
 	  if (processing_has_namespace_info)
-	    block_set_scope (block, processing_current_prefix,
-			     &objfile->symbol_obstack);
+	    {
+	      block_set_scope
+		(block, obsavestring (processing_current_prefix,
+				      strlen (processing_current_prefix),
+				      &objfile->symbol_obstack),
+		 &objfile->symbol_obstack);
+	    }
 	  else
 	    {
-	      const char *current, *next;
+	      /* Try to figure out the appropriate namespace from the
+		 demangled name.  */
 
-	      /* FIXME: carlton/2002-11-14: For members of classes,
-		 with this include the class name as well?  I don't
-		 think that's a problem yet, but it will be.  */
+	      /* FIXME: carlton/2003-02-21: If the function in
+		 question is a method of a class, the name will
+		 actually include the name of the class as well.  This
+		 should be harmless, but is a little unfortunate.  */
 
-	      current = name;
-	      next = current + cp_find_first_component (current);
-	      while (*next == ':')
-		{
-		  current = next;
-		  /* The '+ 2' is to skip the '::'.  */
-		  next = current + 2;
-		  next += cp_find_first_component (next);
-		}
-	      if (current == name)
-		block_set_scope (block, "", &objfile->symbol_obstack);
-	      else
-		block_set_scope (block,
-				 obsavestring (name, current - name,
-					       &objfile->symbol_obstack),
-				 &objfile->symbol_obstack);
-	      
-	      /* FIXME: carlton/2002-10-09: Until I understand the
-		 possible pitfalls of demangled names a lot better, I
-		 want to make sure I'm not running into surprises.  */
-	      gdb_assert (*next == '\0');
+	      const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
+	      unsigned int prefix_len = cp_entire_prefix_len (name);
+
+	      block_set_scope (block,
+			       obsavestring (name, prefix_len,
+					     &objfile->symbol_obstack),
+			       &objfile->symbol_obstack);
 	    }
 	}
     }
@@ -664,7 +649,7 @@ make_blockvector (struct objfile *objfile)
    the directory in which it resides (or NULL if not known).  */
 
 void
-start_subfile (char *name, char *dirname)
+start_subfile (const char *name, char *dirname)
 {
   register struct subfile *subfile;
 
@@ -899,7 +884,7 @@ compare_line_numbers (const void *ln1p, const void *ln2p)
    one original source file.  */
 
 void
-start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
+start_symtab (const char *name, char *dirname, CORE_ADDR start_addr)
 {
 
   last_source_file = name;
@@ -1045,8 +1030,8 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
       if (using_list != NULL)
 	{
 	  block_set_using (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK),
-			   copy_usings_to_obstack (using_list,
-						   &objfile->symbol_obstack),
+			   cp_copy_usings (using_list,
+					   &objfile->symbol_obstack),
 			   &objfile->symbol_obstack);
 	  using_list = NULL;
 	}
@@ -1178,32 +1163,6 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
   pending_macros = NULL;
 
   return symtab;
-}
-
-/* This reallocates USINGS using OBSTACK and xfree's USINGS.  It
-   returns the reallocated version of USINGS.  */
-
-static struct using_direct_node *
-copy_usings_to_obstack (struct using_direct_node *usings,
-			struct obstack *obstack)
-{
-  if (usings == NULL)
-    return NULL;
-  else
-    {
-      struct using_direct_node *new_node
-	= cp_add_using_obstack (usings->current->name,
-				usings->current->outer_length,
-				usings->current->inner_length,
-				copy_usings_to_obstack (usings->next,
-							obstack),
-				obstack);
-
-      xfree (usings->current);
-      xfree (usings);
-
-      return new_node;
-    }
 }
 
 /* Push a context block.  Args are an identifying nesting level

@@ -1233,7 +1233,7 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 CORE_ADDR
-find_stab_function_addr (char *namestring, char *filename,
+find_stab_function_addr (char *namestring, const char *filename,
 			 struct objfile *objfile)
 {
   struct minimal_symbol *msym;

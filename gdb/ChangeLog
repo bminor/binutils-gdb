@@ -1,3 +1,73 @@
+2003-02-21  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (locate_compound_sym): Update call to
+	lookup_symbol_namespace.
+	* symtab.c (make_symbol_overload_list): Delete namespace_len
+	argument.
+	* symtab.h: Update declaration for make_symbol_overload_list.
+	* valops.c (find_oload_champ_namespace_loop): New format for
+	make_symbol_overload_list.
+	* symtab.c (lookup_symbol_namespace): Delete namespace_len
+	argument.
+	(lookup_symbol_aux_using_loop): Update call to
+	lookup_symbol_namespace.
+	(make_symbol_overload_list_using): Delete namespace_len argument.
+	* linespec.c (decode_namespace): Update call to
+	lookup_symbol_namespace.
+	* valops.c (value_namespace_elt): Ditto.
+	* symtab.c (lookup_nested_type): Ditto.
+	* symtab.h: Update declaration for lookup_symbol_namespace.
+	* block.c (block_all_usings): Delete.
+	(block_using): Make static.
+	(block_using_iterator_next): New using_direct format.
+	(block_using_iterator_first): Ditto.
+	* buildsym.c (scan_for_anonymous_namespaces): Rename variables.
+	(add_using_directive): New using functions.
+	(end_symtab): Use cp_copy_usings.
+	(copy_usings_to_obstack): Delete.
+	* block.c: Tweak initial comment.
+	(struct namespace_info): Move here.
+	(block_initialize_namespace): Set scope to NULL!
+	* block.h: Add compilation guards.
+	Reorder and update declarations.
+	* cp-support.c (cp_find_first_component): Return unsigned int.
+	(cp_entire_prefix_len): New.
+	(cp_add_using_obstack): Delete.
+	(cp_add_using_xmalloc): Delete.
+	(cp_copy_usings): Rewrite.
+	(cp_free_usings): Delete.
+	(cp_add_using): New.
+	(cp_is_anonymous): Delete second argument.
+	(xstrndup): New.
+	* cp-support.h: Add compilation guards.
+	Update declarations.
+	* coffread.c: New variable coff_source_file.
+	(coff_start_symtab): Use coff_source_file.
+	(complete_symtab): Ditto.
+	(coff_end_symtab): Ditto.
+	(coff_symtab_read): Ditto.
+	* dbxread.c (find_stab_function_addr): Const fix.
+	* buildsym.h: Const fix.
+	* buildsym.c (start_symtab): Const fix.
+	(start_subfile): Ditto.
+	* cp-support.c (cp_add_using_xmalloc): Copy name.
+	* dwarf2read.c (read_namespace): Loop through extensions
+	correctly.
+	(read_file_scope): Const fix.
+	(dwarf2_add_field): Ditto.
+	(read_structure_scope): Ditto.
+	(read_enumeration): Ditto.
+	(read_typedef): Ditto.
+	* buildsym.c (finish_block): Update comments and simplify code
+	when setting scope.
+	* buildsym.h: Add opaque declaration of 'struct block'.
+	Change comment before processing_current_prefix.
+	* arm-tdep.c (arm_gdbarch_init): Add break; after default:.
+
+2003-02-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (dwarf2_get_pc_bounds): Offset addresses by base.
+
 2003-02-19  David Carlton  <carlton@math.stanford.edu>
 
 	* mdebugread.c (new_block): Add 'function' arg.

@@ -772,8 +772,8 @@ locate_compound_sym (char **argptr, char *current_component,
     current_component++;
   *argptr = current_component;
 
-  return lookup_symbol_namespace (namespace, strlen (namespace),
-				  copy, NULL, get_selected_block(0),
+  return lookup_symbol_namespace (namespace, copy, NULL,
+				  get_selected_block(0),
 				  VAR_NAMESPACE, NULL);
 }
 
@@ -803,8 +803,8 @@ decode_namespace (char **argptr, int funfirstline,
   copy[next_component - *argptr] = '\0';
   *argptr = next_component;
 
-  sym = lookup_symbol_namespace (namespace, strlen (namespace),
-				 copy, NULL, get_selected_block(0),
+  sym = lookup_symbol_namespace (namespace, copy, NULL,
+				 get_selected_block(0),
 				 VAR_NAMESPACE, &sym_symtab);
 
   if (sym != NULL)

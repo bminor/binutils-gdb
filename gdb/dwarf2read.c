@@ -879,7 +879,7 @@ static void process_die (struct die_info *, struct objfile *,
 
 static char *dwarf2_linkage_name (struct die_info *);
 
-static char *dwarf2_name (struct die_info *);
+static char *dwarf2_name (struct die_info *die);
 
 static struct die_info *dwarf2_extension (struct die_info *die);
 
@@ -929,7 +929,7 @@ static struct die_info *dwarf_alloc_die (void);
 
 static void initialize_cu_func_list (void);
 
-static void add_to_cu_func_list (const char *, CORE_ADDR, CORE_ADDR);
+static void add_to_cu_func_list (char *, CORE_ADDR, CORE_ADDR);
 
 static void dwarf_decode_macros (struct line_header *, unsigned int,
                                  char *, bfd *, const struct comp_unit_head *,
@@ -2012,7 +2012,7 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
   CORE_ADDR lowpc = ((CORE_ADDR) -1);
   CORE_ADDR highpc = ((CORE_ADDR) 0);
   struct attribute *attr;
-  char *name;
+  const char *name;
   char *comp_dir = NULL;
   struct die_info *child_die;
   bfd *abfd = objfile->obfd;
@@ -2139,7 +2139,7 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
 }
 
 static void
-add_to_cu_func_list (const char *name, CORE_ADDR lowpc, CORE_ADDR highpc)
+add_to_cu_func_list (char *name, CORE_ADDR lowpc, CORE_ADDR highpc)
 {
   struct function_range *thisfn;
 
@@ -2427,6 +2427,9 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 		  return 0;
 		}
 
+	      range_beginning += base;
+	      range_end += base;
+
 	      /* FIXME: This is recording everything as a low-high
 		 segment of consecutive addresses.  We should have a
 		 data structure for discontiguous block ranges
@@ -2484,7 +2487,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
   struct nextfield *new_field;
   struct attribute *attr;
   struct field *fp;
-  char *fieldname;
+  const char *fieldname;
 
   /* Allocate a new field list entry and link it in.  */
   new_field = (struct nextfield *) xmalloc (sizeof (struct nextfield));
@@ -2926,7 +2929,7 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 {
   struct type *type;
   struct attribute *attr;
-  char *name;
+  const char *name;
   const char *previous_prefix = processing_current_prefix;
   /* This says whether or not we want to try to update the structure's
      name to include enclosing namespace/class information, if
@@ -3145,7 +3148,7 @@ read_enumeration (struct die_info *die, struct objfile *objfile,
   struct field *fields;
   struct attribute *attr;
   struct symbol *sym;
-  char *name;
+  const char *name;
   int num_fields;
   int unsigned_enum = 1;
 
@@ -3449,10 +3452,11 @@ read_namespace (struct die_info *die, struct objfile *objfile,
 
   /* Loop through the extensions until we find a name.  */
 
-  for (current_die = die; current_die != NULL;
+  for (current_die = die;
+       current_die != NULL;
        current_die = dwarf2_extension (die))
     {
-      name = dwarf2_name (die);
+      name = dwarf2_name (current_die);
       if (name != NULL)
 	break;
     }
@@ -3465,11 +3469,22 @@ read_namespace (struct die_info *die, struct objfile *objfile,
 
   /* Now build the name of the current namespace.  */
 
-  processing_current_prefix = obconcat (&objfile->symbol_obstack,
-					previous_prefix,
-					previous_prefix[0] == '\0'
-					? "" : "::",
-					name);
+  if (previous_prefix[0] == '\0')
+    {
+      processing_current_prefix = name;
+    }
+  else
+    {
+      /* We need temp_name around because processing_current_namespace
+	 is a const char *.  */
+      char *temp_name = alloca (strlen (previous_prefix)
+				+ 2 + strlen(name) + 1);
+      strcpy (temp_name, previous_prefix);
+      strcat (temp_name, "::");
+      strcat (temp_name, name);
+
+      processing_current_prefix = temp_name;
+    }
 
   /* If it's an anonymous namespace that we're seeing for the first
      time, add a using directive.  */
@@ -3478,7 +3493,6 @@ read_namespace (struct die_info *die, struct objfile *objfile,
     add_using_directive (processing_current_prefix,
 			 strlen (previous_prefix),
 			 strlen (processing_current_prefix));
-  
   
   if (die->has_children)
     {
@@ -3777,7 +3791,8 @@ read_typedef (struct die_info *die, struct objfile *objfile,
   if (!die->type)
     {
       name = dwarf2_name (die);
-      die->type = init_type (TYPE_CODE_TYPEDEF, 0, TYPE_FLAG_TARGET_STUB, name, objfile);
+      die->type = init_type (TYPE_CODE_TYPEDEF, 0, TYPE_FLAG_TARGET_STUB,
+			     name, objfile);
       TYPE_TARGET_TYPE (die->type) = die_type (die, objfile, cu_header);
     }
 }

@@ -34,6 +34,8 @@
    normally extern, but which get defined in a single module using
    this technique.  */
 
+struct block;
+
 #ifndef EXTERN
 #define	EXTERN extern
 #endif
@@ -44,7 +46,7 @@
 /* Name of source file whose symbol data we are now processing.  This
    comes from a symbol of type N_SO. */
 
-EXTERN char *last_source_file;
+EXTERN const char *last_source_file;
 
 /* Core address of start of text of current source file.  This too
    comes from the N_SO symbol. */
@@ -91,9 +93,7 @@ EXTERN unsigned char processing_has_namespace_info;
 
 /* If processing_has_namespace_info is nonzero, this string should
    contain the name of the current prefix (namespaces plus classes).
-   Other people shouldn't have to copy it when referring to it, so
-   don't free its previous contents when setting this to a new
-   value.  */
+   The string is temporary; copy it if you need it.  */
 
 EXTERN const char *processing_current_prefix;
 
@@ -252,7 +252,7 @@ extern void finish_block (struct symbol *symbol,
 
 extern void really_free_pendings (void *dummy);
 
-extern void start_subfile (char *name, char *dirname);
+extern void start_subfile (const char *name, char *dirname);
 
 extern void patch_subfile_names (struct subfile *subfile, char *name);
 
@@ -277,7 +277,8 @@ extern struct context_stack *pop_context (void);
 
 extern void record_line (struct subfile *subfile, int line, CORE_ADDR pc);
 
-extern void start_symtab (char *name, char *dirname, CORE_ADDR start_addr);
+extern void start_symtab (const char *name, char *dirname,
+			  CORE_ADDR start_addr);
 
 extern int hashname (char *name);
 

@@ -170,8 +170,7 @@ static void overload_list_add_symbol (struct symbol *sym,
 				      const char *oload_name);
 
 static void make_symbol_overload_list_using (const char *func_name,
-					     const char *namespace_name,
-					     int namespace_len,
+					     const char *namespace,
 					     const struct block *block);
 
 static void make_symbol_overload_list_qualified (const char *func_name);
@@ -1287,6 +1286,8 @@ lookup_symbol_aux_using_loop (const char *name,
 			      const char *scope,
 			      int scope_len)
 {
+  char *cp_namespace;
+
   if (scope[scope_len] != '\0')
     {
       struct symbol *sym;
@@ -1305,31 +1306,23 @@ lookup_symbol_aux_using_loop (const char *name,
 	return sym;
     }
 
-  return lookup_symbol_namespace (scope, scope_len, name, linkage_name,
+  cp_namespace = alloca (scope_len + 1);
+  strncpy (cp_namespace, scope, scope_len);
+  cp_namespace[scope_len] = '\0';
+  return lookup_symbol_namespace (cp_namespace, name, linkage_name,
 				  block, namespace, symtab);
 }
 
-/* This tries to look up NAME in the namespace given by the initial
-   substring of NAMESPACE_NAME of length NAMESPACE_LEN.  It applies
-   the using directives that are active in BLOCK.  It doesn't look
-   into NAME at all, so if NAME happens to contain some namespaces, it
-   won't apply using directives to those namespaces.  */
-
-/* FIXME: carlton/2002-11-27: Currently, there's no way to specify
-   that additional using directives are active.  When we get around to
-   implementing Koenig lookup, that will have to change.  */
-
-/* NOTE: carlton/2002-11-27: I'm calling the namespace_enum argument
-   NAME_SPACE instead of NAMESPACE because I'm being driven crazy by
-   the two different meanings of "namespace" in this function.  */
+/* This tries to look up NAME in the C++ namespace CP_NAMESPACE.  It
+   applies the using directives that are active in BLOCK.  Otherwise,
+   arguments are as in lookup_symbol_aux.  */
 
 struct symbol *
-lookup_symbol_namespace (const char *namespace_name,
-			 int namespace_len,
+lookup_symbol_namespace (const char *cp_namespace,
 			 const char *name,
 			 const char *linkage_name,
 			 const struct block *block,
-			 namespace_enum name_space,
+			 namespace_enum gdb_namespace,
 			 struct symtab **symtab)
 {
   struct block_using_iterator iter;
@@ -1344,15 +1337,13 @@ lookup_symbol_namespace (const char *namespace_name,
        current != NULL;
        current = block_using_iterator_next (&iter))
     {
-      if (namespace_len == current->outer_length
-	  && strncmp (namespace_name, current->name, namespace_len) == 0)
+      if (strcmp (cp_namespace, current->outer) == 0)
 	{
-	  sym = lookup_symbol_namespace (current->name,
-					 current->inner_length,
+	  sym = lookup_symbol_namespace (current->inner,
 					 name,
 					 linkage_name,
 					 block,
-					 name_space,
+					 gdb_namespace,
 					 symtab);
 	  if (sym != NULL)
 	    return sym;
@@ -1363,24 +1354,22 @@ lookup_symbol_namespace (const char *namespace_name,
      that are still applicable; so let's see if we've got a match
      using the current namespace.  */
   
-  if (namespace_len == 0)
+  if (cp_namespace[0] == '\0')
     {
       return lookup_symbol_aux_file (name, linkage_name, block,
-				     name_space, symtab,
+				     gdb_namespace, symtab,
 				     0);
     }
   else
     {
       char *concatenated_name
-	= alloca (namespace_len + 2 + strlen (name) + 1);
-      strncpy (concatenated_name, namespace_name, namespace_len);
-      strcpy (concatenated_name + namespace_len, "::");
-      strcpy (concatenated_name + namespace_len + 2, name);
+	= alloca (strlen (cp_namespace) + 2 + strlen (name) + 1);
+      strcpy (concatenated_name, cp_namespace);
+      strcat (concatenated_name, "::");
+      strcat (concatenated_name, name);
       sym = lookup_symbol_aux_file (concatenated_name, linkage_name,
-				    block, name_space, symtab,
-				    cp_is_anonymous (namespace_name,
-						     namespace_len));
-
+				    block, gdb_namespace, symtab,
+				    cp_is_anonymous (cp_namespace));
       return sym;
     }
 }
@@ -1473,7 +1462,6 @@ lookup_nested_type (struct type *parent_type,
 	   something.  */
 	const char *parent_name = TYPE_TAG_NAME (parent_type);
 	struct symbol *sym = lookup_symbol_namespace (parent_name,
-						      strlen (parent_name),
 						      nested_name,
 						      NULL,
 						      block,
@@ -4028,8 +4016,8 @@ overload_list_add_symbol (struct symbol *sym, const char *oload_name)
 
 struct symbol **
 make_symbol_overload_list (const char *func_name,
-			   const char *namespace_name,
-			   int namespace_len, const struct block *block)
+			   const char *namespace,
+			   const struct block *block)
 {
   struct cleanup *old_cleanups;
 
@@ -4041,8 +4029,8 @@ make_symbol_overload_list (const char *func_name,
 
   old_cleanups = make_cleanup (xfree, sym_return_val);
 
-  make_symbol_overload_list_using (func_name, namespace_name,
-				   namespace_len, block);
+  make_symbol_overload_list_using (func_name, namespace,
+				   block);
 
   discard_cleanups (old_cleanups);
 
@@ -4056,8 +4044,7 @@ make_symbol_overload_list (const char *func_name,
 
 static void
 make_symbol_overload_list_using (const char *func_name,
-				 const char *namespace_name,
-				 int namespace_len,
+				 const char *namespace,
 				 const struct block *block)
 {
   struct block_using_iterator iter;
@@ -4071,29 +4058,27 @@ make_symbol_overload_list_using (const char *func_name,
        current != NULL;
        current = block_using_iterator_next (&iter))
     {
-      if (namespace_len == current->outer_length
-	  && strncmp (namespace_name, current->name, namespace_len) == 0)
+      if (strcmp (namespace, current->outer) == 0)
 	{
 	  make_symbol_overload_list_using (func_name,
-					   current->name,
-					   current->inner_length,
+					   current->inner,
 					   block);
 	}
     }
 
   /* Now, add names for this namespace.  */
   
-  if (namespace_len == 0)
+  if (namespace[0] == '\0')
     {
       make_symbol_overload_list_qualified (func_name);
     }
   else
     {
       char *concatenated_name
-	= alloca (namespace_len + 2 + strlen (func_name) + 1);
-      strncpy (concatenated_name, namespace_name, namespace_len);
-      strcpy (concatenated_name + namespace_len, "::");
-      strcpy (concatenated_name + namespace_len + 2, func_name);
+	= alloca (strlen (namespace) + 2 + strlen (func_name) + 1);
+      strcpy (concatenated_name, namespace);
+      strcat (concatenated_name, "::");
+      strcat (concatenated_name, func_name);
       make_symbol_overload_list_qualified (concatenated_name);
     }
 }

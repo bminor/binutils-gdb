@@ -1,8 +1,7 @@
 /* Helper routines for C++ support in GDB.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
-   Contributed by MontaVista Software and by David Carlton, Stanford
-   University.
+   Contributed by MontaVista Software and Stanford University.
 
    This file is part of GDB.
 
@@ -25,8 +24,8 @@
 #include "cp-support.h"
 #include "gdb_string.h"
 #include "demangle.h"
-#include "gdb_obstack.h"
 #include "gdb_assert.h"
+#include "gdb_obstack.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "block.h"
@@ -34,6 +33,8 @@
 #include "gdbtypes.h"
 #include "dictionary.h"
 #include "gdbcmd.h"
+
+static char *xstrndup (const char *string, size_t len);
 
 static const char *find_last_component (const char *name);
 
@@ -78,9 +79,9 @@ static void maintenance_print_namespace (char *args, int from_tty);
      a template argument might be a type that's a function.
 
    - Conversely, even if you're trying to deal with a function, its
-     demangled name might not end with ')': it could be a const (or
-     volatile, I suppose) class method, in which case it ends with
-     "const".
+     demangled name might not end with ')': it could be a const or
+     volatile class method, in which case it ends with "const" or
+     "volatile".
 
    - Parentheses are also used in anonymous namespaces: a variable
      'foo' in an anonymous namespace gets demangled as "(anonymous
@@ -215,102 +216,11 @@ method_name_from_physname (const char *physname)
   return ret;
 }
 
-/* This allocates a new using_direct structure initialized to contain
-   NAME, OUTER_LENGTH, and INNER_LENGTH, and puts it at the beginning
-   of the linked list given by NEXT.  It returns the resulting struct
-   using_direct_node.  All memory is allocated using OBSTACK.  */
-
-struct using_direct_node *
-cp_add_using_obstack (const char *name,
-		      unsigned short outer_length,
-		      unsigned short inner_length,
-		      struct using_direct_node *next,
-		      struct obstack *obstack)
-{
-  struct using_direct *current
-    = obstack_alloc (obstack, sizeof (struct using_direct));
-  struct using_direct_node *retval
-    = obstack_alloc (obstack, sizeof (struct using_direct_node));
-
-  gdb_assert (outer_length < inner_length);
-
-  current->name = name;
-  current->outer_length = outer_length;
-  current->inner_length = inner_length;
-  retval->current = current;
-  retval->next = next;
-
-  return retval;
-}
-
-/* Same as cp_add_using, except that it uses xmalloc instead of
-   obstacks.  */
-
-struct using_direct_node *
-cp_add_using_xmalloc (const char *name,
-		      unsigned short outer_length,
-		      unsigned short inner_length,
-		      struct using_direct_node *next)
-{
-  struct using_direct *current = xmalloc (sizeof (struct using_direct));
-  struct using_direct_node *retval
-    = xmalloc (sizeof (struct using_direct_node));
-
-  gdb_assert (outer_length < inner_length);
-
-  current->name = name;
-  current->outer_length = outer_length;
-  current->inner_length = inner_length;
-  retval->current = current;
-  retval->next = next;
-
-  return retval;
-}
-
-/* This copies the using_direct_nodes in TOCOPY, using xmalloc, and
-   sticks them onto a list ending in TAIL.  (It doesn't copy the
-   using_directs, just the using_direct_nodes.)  */
-
-struct using_direct_node *
-cp_copy_usings (struct using_direct_node *tocopy,
-		struct using_direct_node *tail)
-{
-  struct using_direct_node *new_node;
-  
-  if (tocopy == NULL)
-    return tail;
-
-  new_node = xmalloc (sizeof (struct using_direct_node));
-  new_node->current = tocopy->current;
-  new_node->next = cp_copy_usings (tocopy->next, tail);
-
-  return new_node;
-}
-
-/* This xfree's all the using_direct_nodes in USING (but not their
-   using_directs!)  */
-void
-cp_free_usings (struct using_direct_node *using)
-{
-  struct using_direct_node *next;
-
-  if (using != NULL)
-    {
-      for (next = using->next; next;
-	   using = next, next = next->next)
-	xfree (using);
-      
-      xfree (using);
-    }
-}
-
-
-/* This returns the first component of NAME, which should be the
-   demangled name of a C++ variable/function/method/etc.
-   Specifically, it returns a pointer to the first colon forming the
+/* This returns the length of first component of NAME, which should be
+   the demangled name of a C++ variable/function/method/etc.
+   Specifically, it returns the index of the first colon forming the
    boundary of the first component: so, given 'A::foo' or 'A::B::foo'
-   it returns a pointer to the first :, and given 'foo', it returns a
-   pointer to the trailing '\0'.  */
+   it returns the 1, and given 'foo', it returns 0.  */
 
 /* Well, that's what it should do when called externally, but to make
    the recursion easier, it also stops if it reaches an unexpected ')'
@@ -320,14 +230,14 @@ cp_free_usings (struct using_direct_node *using)
 
 #define LENGTH_OF_OPERATOR 8
 
-int
-cp_find_first_component (const char *const name)
+unsigned int
+cp_find_first_component (const char *name)
 {
   /* Names like 'operator<<' screw up the recursion, so let's
      special-case them.  I _hope_ they can only occur at the start of
      a component.  */
 
-  int index = 0;
+  unsigned int index = 0;
 
   if (strncmp (name, "operator", LENGTH_OF_OPERATOR) == 0)
     {
@@ -393,6 +303,84 @@ cp_find_first_component (const char *const name)
 	default:
 	  break;
 	}
+    }
+}
+
+/* If NAME is the fully-qualified name of a C++
+   function/variable/method/etc., this returns the length of its
+   entire prefix: all of the namespaces and classes that make up its
+   name.  Given 'A::foo', it returns 1, given 'A::B::foo', it returns
+   4, given 'foo', it returns 0.  */
+
+unsigned int cp_entire_prefix_len (const char *name)
+{
+  unsigned int current_len = cp_find_first_component (name);
+  unsigned int previous_len = 0;
+
+  while (name[current_len] != '\0')
+    {
+      gdb_assert (name[current_len] == ':');
+      previous_len = current_len;
+      /* Skip the '::'.  */
+      current_len += 2;
+      current_len += cp_find_first_component (name + current_len);
+    }
+
+  return previous_len;
+}
+
+/* Create a new struct using direct whose inner namespace is the
+   initial substring of NAME of leng INNER_LEN and whose outer
+   namespace is the initial substring of NAME of length OUTER_LENGTH.
+   Set its next member in the linked list to NEXT; allocate all memory
+   using xmalloc.  It copies the strings, so NAME can be a temporary
+   string.  */
+
+struct using_direct *
+cp_add_using (const char *name,
+	      unsigned int inner_len,
+	      unsigned int outer_len,
+	      struct using_direct *next)
+{
+  struct using_direct *retval;
+
+  gdb_assert (outer_len < inner_len);
+
+  retval = xmalloc (sizeof (struct using_direct));
+  retval->inner = xstrndup (name, inner_len);
+  retval->outer = xstrndup (name, outer_len);
+  retval->next = next;
+
+  return retval;
+}
+
+/* Make a copy of the using directives in the list pointed to by
+   USING, using OBSTACK to allocate memory.  Free all memory pointed
+   to by USING via xfree.  */
+
+extern struct using_direct *
+cp_copy_usings (struct using_direct *using,
+		struct obstack *obstack)
+{
+  if (using == NULL)
+    {
+      return NULL;
+    }
+  else
+    {
+      struct using_direct *retval
+	= obstack_alloc (obstack, sizeof (struct using_direct));
+      retval->inner = obsavestring (using->inner, strlen (using->inner),
+				    obstack);
+      retval->outer = obsavestring (using->outer, strlen (using->outer),
+				    obstack);
+      retval->next = cp_copy_usings (using->next, obstack);
+
+      xfree (using->inner);
+      xfree (using->outer);
+      xfree (using);
+
+      return retval;
     }
 }
 
@@ -658,22 +646,28 @@ maintenance_print_namespace (char *args, int from_tty)
     }
 }
 
-/* Test whether or not the initial substring of NAMESPACE_NAME of
-   length NAMESPACE_LEN mentions an anonymous namespace.
-   NAMESPACE_NAME must be a NULL-terminated string.  If NAMESPACE_LEN
-   is -1, search the entire string.  */
+/* Test whether or not NAMESPACE looks like it mentions an anonymous
+   namespace; return nonzero if so.  */
 
 int
-cp_is_anonymous (const char *namespace_name, int namespace_len)
+cp_is_anonymous (const char *namespace)
 {
-  const char *location = strstr (namespace_name, "(anonymous namespace)");
+  return (strstr (namespace, "(anonymous namespace)")
+	  != NULL);
+}
 
-  if (location == NULL)
-    return 0;
-  else if (namespace_len == -1)
-    return 1;
-  else
-    return (location - namespace_name) < namespace_len;
+/* Create a copy of the initial substring of STRING of length LEN.
+   Allocate memory via xmalloc.  */
+
+static char *
+xstrndup (const char *string, size_t len)
+{
+  char *retval = xmalloc (len + 1);
+
+  strncpy (retval, string, len);
+  retval[len] = '\0';
+
+  return retval;
 }
 
 /* If FULL_NAME is the demangled name of a C++ function (including an

@@ -1,7 +1,6 @@
-/* Block definitions for GDB.
-   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+/* Code dealing with blocks for GDB.
+
+   Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,6 +18,17 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
+
+#ifndef BLOCK_H
+#define BLOCK_H
+
+/* Opaque declarations.  */
+
+struct symbol;
+struct dictionary;
+struct namespace_info;
+struct using_direct;
+struct obstack;
 
 /* All of the name-scope contours of the program
    are represented by `struct block' objects.
@@ -45,14 +55,6 @@
 
    This implies that within the body of one function
    the blocks appear in the order of a depth-first tree walk.  */
-
-/* Opaque declarations.  */
-
-struct symbol;
-struct dictionary;
-struct namespace_info;
-struct using_direct_node;
-struct obstack;
 
 struct block
 {
@@ -113,7 +115,7 @@ struct block
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_DICT(bl)		(bl)->dict
-#define BLOCK_NAMESPACE(bl)	(bl)->language_specific.cplus_specific.namespace
+#define BLOCK_NAMESPACE(bl)   (bl)->language_specific.cplus_specific.namespace
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
 
 struct blockvector
@@ -137,22 +139,13 @@ extern struct symbol *block_function (const struct block *);
 
 extern int contained_in (const struct block *, const struct block *);
 
-/* NOTE: carlton/2002-11-27: I'm a little bit torn about whether many
-   of these should go here or in cp-support.h.  I ended up putting
-   them here, since they really do use the block structure, but one
-   could argue with my decision.  */
-
-extern struct using_direct_node *block_using (const struct block *);
-
-extern struct using_direct_node *block_all_usings (const struct block *block);
-
-extern void block_set_using (struct block *block,
-			     struct using_direct_node *using,
-			     struct obstack *obstack);
-
 extern const char *block_scope (const struct block *block);
 
 extern void block_set_scope (struct block *block, const char *scope,
+			     struct obstack *obstack);
+
+extern void block_set_using (struct block *block,
+			     struct using_direct *using,
 			     struct obstack *obstack);
 
 extern const struct block *block_static_block (const struct block *block);
@@ -163,14 +156,14 @@ extern const struct block *block_static_block (const struct block *block);
 struct block_using_iterator
 {
   const struct block *current_block;
-  const struct using_direct_node *next_node;
+  const struct using_direct *next_directive;
 };
 
 /* Initialize ITERATOR to point at the first using directive valid for
    BLOCK, and return that using directive, or NULL if there aren't
    any.  */
 
-extern struct
+extern const struct
 using_direct *block_using_iterator_first (const struct block *block,
 					  struct block_using_iterator
 					  *iterator);
@@ -180,7 +173,7 @@ using_direct *block_using_iterator_first (const struct block *block,
    received NULL from block_using_iterator_first or
    block_using_iterator_next during this iteration.  */
 
-extern struct
+extern const struct
 using_direct *block_using_iterator_next (struct block_using_iterator
 					 *iterator);
 
@@ -188,3 +181,5 @@ using_direct *block_using_iterator_next (struct block_using_iterator
    this function about using it correctly.  */
 
 extern struct block *allocate_block (struct obstack *obstack);
+
+#endif /* BLOCK_H */

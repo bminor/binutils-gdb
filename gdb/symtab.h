@@ -942,12 +942,11 @@ extern struct symbol *lookup_symbol (const char *, const struct block *,
 
 /* Lookup a symbol within a namespace.  */
 
-extern struct symbol *lookup_symbol_namespace (const char *namespace_name,
-					       int namespace_len,
+extern struct symbol *lookup_symbol_namespace (const char *cp_namespace,
 					       const char *name,
 					       const char *mangled_name,
 					       const struct block *block,
-					       namespace_enum name_space,
+					       namespace_enum gdb_namespace,
 					       struct symtab **symtab);
 
 /* Lookup the symbol associated to a minimal symbol.  */
@@ -1229,7 +1228,7 @@ extern char **make_file_symbol_completion_list (char *, char *, char *);
 extern char *remove_params (const char *demangled_name);
 
 extern struct symbol **make_symbol_overload_list (const char *,
-						  const char *, int,
+						  const char *,
 						  const struct block *);
 
 extern char **make_source_files_completion_list (char *, char *);

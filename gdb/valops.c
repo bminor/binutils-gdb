@@ -2946,6 +2946,7 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
   int new_oload_champ;
   struct symbol **new_oload_syms;
   struct badness_vector *new_oload_champ_bv;
+  char *new_namespace;
 
   if (next_namespace_len != 0)
     {
@@ -2986,9 +2987,11 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
 
   old_cleanups = make_cleanup (xfree, *oload_syms);
   old_cleanups = make_cleanup (xfree, *oload_champ_bv);
+  new_namespace = alloca (namespace_len + 1);
+  strncpy (new_namespace, qualified_name, namespace_len);
+  new_namespace[namespace_len] = '\0';
   new_oload_syms = make_symbol_overload_list (func_name,
-					      qualified_name,
-					      namespace_len,
+					      new_namespace,
 					      current_block);
   while (new_oload_syms[num_fns])
     ++num_fns;
@@ -3428,8 +3431,8 @@ value_namespace_elt (const struct type *curtype,
   const char *namespace_name = TYPE_TAG_NAME (curtype);
   const struct symbol *sym;
 
-  sym = lookup_symbol_namespace (namespace_name, strlen (namespace_name),
-				 name, NULL, block, VAR_NAMESPACE, NULL);
+  sym = lookup_symbol_namespace (namespace_name, name, NULL,
+				 block, VAR_NAMESPACE, NULL);
 
   /* FIXME: carlton/2002-11-24: Should this really be here, or should
      it be in c-exp.y like the other similar messages?  Hmm...  */

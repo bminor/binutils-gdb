@@ -1,6 +1,6 @@
-/* Block support for the GNU debugger, GDB.
+/* Block-related functions for the GNU debugger, GDB.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,8 +24,34 @@
 #include "gdb_obstack.h"
 #include "cp-support.h"
 
+/* This is used by struct block to store namespace-related info for
+   C++ files, namely using declarations and the current namespace in
+   scope.  */
+
+struct namespace_info
+{
+  const char *scope;
+  struct using_direct *using;
+};
+
+static struct using_direct *block_using (const struct block *);
+
 static void block_initialize_namespace (struct block *block,
 					struct obstack *obstack);
+
+/* Return Nonzero if block a is lexically nested within block b,
+   or if a and b have the same pc range.
+   Return zero otherwise. */
+
+int
+contained_in (const struct block *a, const struct block *b)
+{
+  if (!a || !b)
+    return 0;
+  return BLOCK_START (a) >= BLOCK_START (b)
+    && BLOCK_END (a) <= BLOCK_END (b);
+}
+
 
 /* Return the symbol for the function which contains a specified
    lexical block, described by a struct block BL.  */
@@ -39,25 +65,13 @@ block_function (const struct block *bl)
   return BLOCK_FUNCTION (bl);
 }
 
-/* Return Nonzero if block A is lexically nested within block B,
-   or if A and B have the same pc range.
-   Return zero otherwise. */
-
-int
-contained_in (const struct block *a, const struct block *b)
-{
-  if (!a || !b)
-    return 0;
-  return BLOCK_START (a) >= BLOCK_START (b) && BLOCK_END (a) <= BLOCK_END (b);
-}
-
 /* Now come some functions designed to deal with C++ namespace issues.
    The accessors are safe to use even in the non-C++ case.  */
 
 /* This returns the using directives associated to BLOCK (but _not_
    its parents), if any.  */
 
-struct using_direct_node *
+static struct using_direct *
 block_using (const struct block *block)
 {
   if (BLOCK_NAMESPACE (block) == NULL)
@@ -66,29 +80,11 @@ block_using (const struct block *block)
     return BLOCK_NAMESPACE (block)->using;
 }
 
-/* This returns the using directives associated to BLOCK and its
-   parents, if any.  The resulting structure must be freed by calling
-   cp_free_usings on it.  */
-
-struct using_direct_node *
-block_all_usings (const struct block *block)
-{
-  struct using_direct_node *using = NULL;
-
-  while (block != NULL)
-    {
-      using = cp_copy_usings (block_using (block), using);
-      block = BLOCK_SUPERBLOCK (block);
-    }
-
-  return using;
-}
-
 /* Set block_using (BLOCK) to USING; if needed, allocate memory via
    OBSTACK.  */
 
 void
-block_set_using (struct block *block, struct using_direct_node *using,
+block_set_using (struct block *block, struct using_direct *using,
 		 struct obstack *obstack)
 {
   block_initialize_namespace (block, obstack);
@@ -136,6 +132,7 @@ block_initialize_namespace (struct block *block, struct obstack *obstack)
     {
       BLOCK_NAMESPACE (block)
 	= obstack_alloc (obstack, sizeof (struct namespace_info));
+      BLOCK_NAMESPACE (block)->scope = NULL;
       BLOCK_NAMESPACE (block)->using = NULL;
     }
 }
@@ -159,7 +156,7 @@ block_static_block (const struct block *block)
    BLOCK, and return that using directive, or NULL if there aren't
    any.  */
 
-struct using_direct *
+const struct using_direct *
 block_using_iterator_first (const struct block *block,
 			    struct block_using_iterator *iterator)
 {
@@ -167,7 +164,7 @@ block_using_iterator_first (const struct block *block,
     return NULL;
   
   iterator->current_block = block;
-  iterator->next_node = block_using (block);
+  iterator->next_directive = block_using (block);
 
   return block_using_iterator_next (iterator);
 }
@@ -177,13 +174,13 @@ block_using_iterator_first (const struct block *block,
    received NULL from block_using_iterator_first or
    block_using_iterator_next during this iteration.  */
 
-struct using_direct *
+const struct using_direct *
 block_using_iterator_next (struct block_using_iterator *iterator)
 {
-  if (iterator->next_node != NULL)
+  if (iterator->next_directive != NULL)
     {
-      struct using_direct *retval = iterator->next_node->current;
-      iterator->next_node = iterator->next_node->next;
+      const struct using_direct *retval = iterator->next_directive;
+      iterator->next_directive = retval->next;
       return retval;
     }
   else
@@ -192,11 +189,11 @@ block_using_iterator_next (struct block_using_iterator *iterator)
 	{
 	  iterator->current_block
 	    = BLOCK_SUPERBLOCK (iterator->current_block);
-	  iterator->next_node = block_using (iterator->current_block); 
-	  if (iterator->next_node != NULL)
+	  iterator->next_directive = block_using (iterator->current_block); 
+	  if (iterator->next_directive != NULL)
 	    {
-	      struct using_direct *retval = iterator->next_node->current;
-	      iterator->next_node = iterator->next_node->next;
+	      const struct using_direct *retval = iterator->next_directive;
+	      iterator->next_directive = retval->next;
 	      return retval;
 	    }
 	}
