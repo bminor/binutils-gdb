@@ -1,5 +1,12 @@
 2002-07-11  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-ppc.c (ppc_elf_frob_symbol): Delete.
+	(ppc_frob_file_before_adjust): New function.
+	* config/tc-ppc.h (tc_frob_symbol): Don't define.
+	(ppc_elf_frob_symbol): Don't declare.
+	(tc_frob_file_before_adjust): Define.
+	(ppc_frob_file_before_adjust): Declare.
+
 	* config/tc-ppc.c (md_pseudo_table): Warning fix.
 	(ppc_cpu): Make it unsigned long to agree with struct powerpc_opcode
 	flags.

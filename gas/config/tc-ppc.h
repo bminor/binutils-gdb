@@ -271,9 +271,8 @@ extern int ppc_fix_adjustable PARAMS ((struct fix *));
        && S_IS_DEFINED ((FIX)->fx_addsy) \
        && ! S_IS_COMMON ((FIX)->fx_addsy)))
 
-/* Finish up the symbol.  */
-#define tc_frob_symbol(sym, punt) punt = ppc_elf_frob_symbol (sym)
-extern int ppc_elf_frob_symbol PARAMS ((symbolS *));
+#define tc_frob_file_before_adjust ppc_frob_file_before_adjust
+extern void ppc_frob_file_before_adjust PARAMS ((void));
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 4
 #endif /* OBJ_ELF */

@@ -1688,21 +1688,49 @@ ppc_elf_validate_fix (fixp, seg)
     }
 }
 
-/* Don't emit .TOC. symbol.  */
-int
-ppc_elf_frob_symbol (sym)
-     symbolS *sym;
-{
-  const char *name;
+/* Prevent elf_frob_file_before_adjust removing a weak undefined
+   function descriptor sym if the corresponding code sym is used.  */
 
-  name = S_GET_NAME (sym);
-  if (name != NULL && strcmp (name, ".TOC.") == 0)
+void
+ppc_frob_file_before_adjust ()
+{
+  symbolS *symp;
+
+  if (!ppc_obj64)
+    return;
+
+  for (symp = symbol_rootP; symp; symp = symbol_next (symp))
     {
-      S_CLEAR_EXTERNAL (sym);
-      return 1;
+      const char *name;
+      char *dotname;
+      symbolS *dotsym;
+      size_t len;
+
+      name = S_GET_NAME (symp);
+      if (name[0] == '.')
+	continue;
+
+      if (! S_IS_WEAK (symp)
+	  || S_IS_DEFINED (symp))
+	continue;
+
+      len = strlen (name) + 1;
+      dotname = xmalloc (len + 1);
+      dotname[0] = '.';
+      memcpy (dotname + 1, name, len);
+      dotsym = symbol_find (dotname);
+      free (dotname);
+      if (dotsym != NULL && (symbol_used_p (dotsym)
+			     || symbol_used_in_reloc_p (dotsym)))
+	{
+	  symbol_mark_used (symp);
+	}
     }
 
-  return 0;
+  /* Don't emit .TOC. symbol.  */
+  symp = symbol_find (".TOC.");
+  if (symp != NULL)
+    symbol_remove (symp, &symbol_rootP, &symbol_lastP);
 }
 #endif /* OBJ_ELF */
 
