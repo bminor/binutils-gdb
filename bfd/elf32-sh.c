@@ -276,8 +276,36 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 0xff,			/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
-  EMPTY_HOWTO (10),
-  EMPTY_HOWTO (11),
+  /* 8 bit PC relative divided by 2 - but specified in a very odd way.  */
+  HOWTO (R_SH_LOOP_START,	/* type */
+	 1,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 sh_elf_ignore_reloc,	/* special_function */
+	 "R_SH_LOOP_START",	/* name */
+	 TRUE,			/* partial_inplace */
+	 0xff,			/* src_mask */
+	 0xff,			/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  /* 8 bit PC relative divided by 2 - but specified in a very odd way.  */
+  HOWTO (R_SH_LOOP_END,		/* type */
+	 1,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 sh_elf_ignore_reloc,	/* special_function */
+	 "R_SH_LOOP_END",	/* name */
+	 TRUE,			/* partial_inplace */
+	 0xff,			/* src_mask */
+	 0xff,			/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
   EMPTY_HOWTO (12),
   EMPTY_HOWTO (13),
   EMPTY_HOWTO (14),
@@ -288,14 +316,58 @@ static reloc_howto_type sh_elf_howto_table[] =
   EMPTY_HOWTO (19),
   EMPTY_HOWTO (20),
   EMPTY_HOWTO (21),
-  EMPTY_HOWTO (22),
-  EMPTY_HOWTO (23),
-  EMPTY_HOWTO (24),
 
   /* The remaining relocs are a GNU extension used for relaxing.  The
      final pass of the linker never needs to do anything with any of
      these relocs.  Any required operations are handled by the
      relaxation code.  */
+
+  /* GNU extension to record C++ vtable hierarchy */
+  HOWTO (R_SH_GNU_VTINHERIT, /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 NULL,			/* special_function */
+	 "R_SH_GNU_VTINHERIT", /* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* GNU extension to record C++ vtable member usage */
+  HOWTO (R_SH_GNU_VTENTRY,     /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 _bfd_elf_rel_vtable_reloc_fn,	/* special_function */
+	 "R_SH_GNU_VTENTRY",   /* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* An 8 bit switch table entry.  This is generated for an expression
+     such as ``.word L1 - L2''.  The offset holds the difference
+     between the reloc address and L2.  */
+  HOWTO (R_SH_SWITCH8,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 sh_elf_ignore_reloc,	/* special_function */
+	 "R_SH_SWITCH8",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 TRUE),			/* pcrel_offset */
 
   /* A 16 bit switch table entry.  This is generated for an expression
      such as ``.word L1 - L2''.  The offset holds the difference
@@ -434,90 +506,174 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 0,			/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
-  /* An 8 bit switch table entry.  This is generated for an expression
-     such as ``.word L1 - L2''.  The offset holds the difference
-     between the reloc address and L2.  */
-  HOWTO (R_SH_SWITCH8,		/* type */
+  /* The next 12 are only supported via linking in SHC-generated objects.  */
+  HOWTO (R_SH_DIR16,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR16",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_SH_DIR8,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR8",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_SH_DIR8UL,		/* type */
+	 2,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR8UL",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_SH_DIR8UW,		/* type */
+	 1,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR8UW",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_SH_DIR8U,		/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
-	 "R_SH_SWITCH8",	/* name */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR8U",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 TRUE),			/* pcrel_offset */
-
-  /* GNU extension to record C++ vtable hierarchy */
-  HOWTO (R_SH_GNU_VTINHERIT, /* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 FALSE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 NULL,			/* special_function */
-	 "R_SH_GNU_VTINHERIT", /* name */
-	 FALSE,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
+	 0xff,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* GNU extension to record C++ vtable member usage */
-  HOWTO (R_SH_GNU_VTENTRY,     /* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 FALSE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 _bfd_elf_rel_vtable_reloc_fn,	/* special_function */
-	 "R_SH_GNU_VTENTRY",   /* name */
-	 FALSE,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
-
-  /* 8 bit PC relative divided by 2 - but specified in a very odd way.  */
-  HOWTO (R_SH_LOOP_START,	/* type */
+  HOWTO (R_SH_DIR8SW,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
-	 "R_SH_LOOP_START",	/* name */
-	 TRUE,			/* partial_inplace */
-	 0xff,			/* src_mask */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR8SW",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
-  /* 8 bit PC relative divided by 2 - but specified in a very odd way.  */
-  HOWTO (R_SH_LOOP_END,		/* type */
-	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+  HOWTO (R_SH_DIR8S,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 sh_elf_ignore_reloc,	/* special_function */
-	 "R_SH_LOOP_END",	/* name */
-	 TRUE,			/* partial_inplace */
-	 0xff,			/* src_mask */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR8S",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
-  EMPTY_HOWTO (38),
-  EMPTY_HOWTO (39),
-  EMPTY_HOWTO (40),
-  EMPTY_HOWTO (41),
-  EMPTY_HOWTO (42),
-  EMPTY_HOWTO (43),
-  EMPTY_HOWTO (44),
+  HOWTO (R_SH_DIR4UL,		/* type */
+	 2,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR4UL",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x0f,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_SH_DIR4UW,		/* type */
+	 1,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR4UW",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x0f,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_SH_DIR4U,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR4U",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x0f,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_SH_PSHA,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 7,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 4,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_PSHA",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x0f,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_SH_PSHL,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 7,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 4,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_PSHL",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x0f,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
 #ifdef INCLUDE_SHMEDIA
   /* Used in SHLLI.L and SHLRI.L.  */
@@ -636,7 +792,21 @@ static reloc_howto_type sh_elf_howto_table[] =
 #endif
 
   EMPTY_HOWTO (52),
-  EMPTY_HOWTO (53),
+
+  HOWTO (R_SH_DIR16S,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR16S",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
   EMPTY_HOWTO (54),
   EMPTY_HOWTO (55),
   EMPTY_HOWTO (56),
@@ -1861,6 +2031,8 @@ static const struct elf_reloc_map sh_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_SH_NONE },
   { BFD_RELOC_32, R_SH_DIR32 },
+  { BFD_RELOC_16, R_SH_DIR16 },
+  { BFD_RELOC_8, R_SH_DIR8 },
   { BFD_RELOC_CTOR, R_SH_DIR32 },
   { BFD_RELOC_32_PCREL, R_SH_REL32 },
   { BFD_RELOC_SH_PCDISP8BY2, R_SH_DIR8WPN },
@@ -4546,8 +4718,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
       /* Many of the relocs are only used for relaxing, and are
 	 handled entirely by the relaxation code.  */
-      if (r_type > (int) R_SH_LAST_INVALID_RELOC
-	  && r_type < (int) R_SH_LOOP_START)
+      if (r_type >= (int) R_SH_GNU_VTINHERIT
+	  && r_type <= (int) R_SH_LABEL)
 	continue;
       if (r_type == (int) R_SH_NONE)
 	continue;
@@ -4842,6 +5014,70 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 #endif
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
+
+	case R_SH_DIR16:
+	case R_SH_DIR8:
+	case R_SH_DIR8U:
+	case R_SH_DIR8S:
+	case R_SH_DIR4U:
+	  goto final_link_relocate;
+
+	case R_SH_DIR8UL:
+	case R_SH_DIR4UL:
+	  if (relocation & 3)
+	    {
+	      ((*_bfd_error_handler)
+	       (_("%s: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
+		bfd_archive_filename (input_section->owner),
+		(unsigned long) rel->r_offset, howto->name, 
+		(unsigned long)relocation));
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	  goto final_link_relocate;
+
+	case R_SH_DIR8UW:
+	case R_SH_DIR8SW:
+	case R_SH_DIR4UW:
+	  if (relocation & 1)
+	    {
+	      ((*_bfd_error_handler)
+	       (_("%s: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
+		bfd_archive_filename (input_section->owner),
+		(unsigned long) rel->r_offset, howto->name, 
+		(unsigned long)relocation));
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	  goto final_link_relocate;
+
+	case R_SH_PSHA:
+	  if ((signed int)relocation < -32
+	      || (signed int)relocation > 32)
+	    {
+	      ((*_bfd_error_handler)
+	       (_("%s: 0x%lx: fatal: R_SH_PSHA relocation %d not in range -32..32"),
+		bfd_archive_filename (input_section->owner),
+		(unsigned long) rel->r_offset,
+		(unsigned long)relocation));
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	  goto final_link_relocate;
+
+	case R_SH_PSHL:
+	  if ((signed int)relocation < -16
+	      || (signed int)relocation > 16)
+	    {
+	      ((*_bfd_error_handler)
+	       (_("%s: 0x%lx: fatal: R_SH_PSHL relocation %d not in range -32..32"),
+		bfd_archive_filename (input_section->owner),
+		(unsigned long) rel->r_offset,
+		(unsigned long)relocation));
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	  goto final_link_relocate;
 
 	case R_SH_DIR32:
 	case R_SH_REL32:
