@@ -1,3 +1,10 @@
+Fri May 21 11:20:31 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Builtin Type Descriptors): Document the floating
+	point types used with @samp{R} type descriptor.
+	(Symbol Descriptors): Describe how to handle conflict between
+	different meanings of @samp{P} symbol descriptor.
+
 Thu May 20 13:35:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo: Remove node Quick Reference and put its children

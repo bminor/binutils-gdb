@@ -1208,7 +1208,8 @@ I'm not sure how a boolean type is represented.
 There are various type descriptors to define builtin types:
 
 @table @code
-@c FIXME: clean up description of width and offset
+@c FIXME: clean up description of width and offset, once we figure out
+@c what they mean
 @item b @var{signed} @var{char-flag} @var{width} ; @var{offset} ; @var{nbits} ;
 Define an integral type.  @var{signed} is @samp{u} for unsigned or
 @samp{s} for signed.  @var{char-flag} is @samp{c} which indicates this
@@ -1233,11 +1234,32 @@ will be a digit, @samp{(}, or @samp{-} for a Pascal space type, or
 Documented by AIX to define a wide character type, but their compiler
 actually uses negative type numbers (@pxref{Negative Type Numbers}).
 
-@item R @var{details} ; @var{bytes} ;
-@c FIXME: What does @var{details} mean?
-Define a floating point type.  @var{details} is a number which has
-details about the type, for example whether it is complex.  @var{bytes}
-is the number of bytes occupied by the type.
+@item R @var{fp_type} ; @var{bytes} ;
+Define a floating point type.  @var{fp_type} has one of the following values:
+
+@table @code
+@item 1 (NF_SINGLE)
+IEEE 32-bit (single precision) floating point format.
+
+@item 2 (NF_DOUBLE)
+IEEE 64-bit (double precision) floating point format.
+
+@item 3 (NF_COMPLEX)
+@item 4 (NF_COMPLEX16)
+@item 5 (NF_COMPLEX32)
+These are for complex numbers.  A comment in
+@file{include/aout/stab_gnu.h} describes them as Fortran complex, double
+complex, and complex*16, respectively, but what does that mean?  (i.e.
+Single precision?  Double precison?).
+
+@item 6 (NF_LDOUBLE)
+Long double.  It would be cleaner to define a different code for every
+possible format of long double.
+@end table
+
+@var{bytes} is the number of bytes occupied by the type.  This allows a
+debugger to perform some operations with the type even if it doesn't
+understand @var{fp_code}.
 
 @item g @var{type-information} ; @var{nbits}
 Documented by AIX to define a floating type, but their compiler actually
@@ -2923,11 +2945,12 @@ Argument list parameter, @xref{Parameters}.
 FORTRAN Function parameter, @xref{Parameters}.
 
 @item P
-Global Procedure (AIX), @xref{Procedures}.  Register parameter (GNU),
-@xref{Parameters}.  These two uses can be distinguised because a
-register parameter uses N_PSYM and a procedure uses some other symbol
-type.  Prototype of function referenced by this file (Sun acc) (have not
-yet investigated this conflict.  FIXME).
+Unfortunately, three separate meanings have been independently invented
+for this symbol descriptor.  At least the GNU and Sun uses can be
+distinguished by the symbol type.  Global Procedure (AIX) (symbol type
+used unknown), @xref{Procedures}.  Register parameter (GNU) (symbol type
+N_PSYM), @xref{Parameters}.  Prototype of function referenced by this
+file (Sun acc) (symbol type N_FUN).
 
 @item Q
 Static Procedure, @xref{Procedures}.
@@ -3631,9 +3654,6 @@ dbx?
 @appendix Differences between GNU stabs in a.out and GNU stabs in xcoff
 
 @c FIXME: Merge *all* these into the main body of the document.
-@c Progress report: I have merged all the information from the
-@c "dbx stabstring grammar" section of the AIX documentation into
-@c the main body of this document, except the types.
 (The AIX/RS6000 native object file format is xcoff with stabs).  This
 appendix only covers those differences which are not covered in the main
 body of this document.
@@ -3644,9 +3664,10 @@ Instead of .stabs, xcoff uses .stabx.
 
 @item
 The data fields of an xcoff .stabx are in a different order than an
-a.out .stabs.  The order is: string, value, type.  The desc and null
-fields present in a.out stabs are missing in xcoff stabs.  For N_GSYM
-the value field is the name of the symbol.
+a.out .stabs.  The order is: string, value, type, sdb-type.  The desc
+and null fields present in a.out stabs are missing in xcoff stabs.  For
+N_GSYM the value field is the name of the symbol.  sdb-type is unused
+with stabs; it can always be set to 0.
 
 @item
 BSD a.out stab types correspond to AIX xcoff storage classes. In general the
