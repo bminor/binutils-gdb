@@ -1,3 +1,10 @@
+2005-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* gas/d30v/serial.l: Remove listing lines that are no longer
+	emitted and fix up expected binary encoding.
+	* gas/d30v/serial2.l: Likewise.
+	* gas/d30v/serial2O.l: Likewise.
+
 2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
 	* gas/arc/extensions.s: Add tests for extcoreregister
