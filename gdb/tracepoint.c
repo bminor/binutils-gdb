@@ -825,12 +825,7 @@ read_actions (struct tracepoint *t)
      isn't declared.  Leave this alone for now.  */
 #ifdef STOP_SIGNAL
   if (job_control)
-    {
-      if (event_loop_p)
-	signal (STOP_SIGNAL, handle_stop_sig);
-      else
-	signal (STOP_SIGNAL, stop_sig);
-    }
+    signal (STOP_SIGNAL, handle_stop_sig);
 #endif
   old_chain = make_cleanup_free_actions (t);
   while (1)

@@ -1173,13 +1173,6 @@ extern char *interpreter_p;
 struct target_waitstatus;
 struct cmd_list_element;
 
-/* Should the asynchronous variant of the interpreter (using the
-   event-loop) be enabled?  */
-/* NOTE: cagney/2004-06-10: GDB changed to always uses the event-loop.
-   A follow-on cleanup is to eliminate references to
-   "event_loop_p".  */
-#define event_loop_p 1
-
 extern void (*deprecated_pre_add_symbol_hook) (const char *);
 extern void (*deprecated_post_add_symbol_hook) (void);
 extern void (*selected_frame_level_changed_hook) (int);

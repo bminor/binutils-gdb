@@ -1802,12 +1802,7 @@ prompt_for_continue (void)
       while (*p == ' ' || *p == '\t')
 	++p;
       if (p[0] == 'q')
-	{
-	  if (!event_loop_p)
-	    request_quit (SIGINT);
-	  else
-	    async_request_quit (0);
-	}
+	async_request_quit (0);
       xfree (ignore);
     }
   immediate_quit--;

@@ -434,7 +434,7 @@ run_command (char *args, int from_tty)
 
   if (!args)
     {
-      if (event_loop_p && target_can_async_p ())
+      if (target_can_async_p ())
 	async_disable_stdin ();
     }
   else
@@ -443,12 +443,12 @@ run_command (char *args, int from_tty)
 
       /* If we get a request for running in the bg but the target
          doesn't support it, error out. */
-      if (event_loop_p && async_exec && !target_can_async_p ())
+      if (async_exec && !target_can_async_p ())
 	error ("Asynchronous execution not supported on this target.");
 
       /* If we don't get a request of running in the bg, then we need
          to simulate synchronous (fg) execution. */
-      if (event_loop_p && !async_exec && target_can_async_p ())
+      if (!async_exec && target_can_async_p ())
 	{
 	  /* Simulate synchronous execution */
 	  async_disable_stdin ();
@@ -526,12 +526,12 @@ continue_command (char *proc_count_exp, int from_tty)
 
   /* If we must run in the background, but the target can't do it,
      error out. */
-  if (event_loop_p && async_exec && !target_can_async_p ())
+  if (async_exec && !target_can_async_p ())
     error ("Asynchronous execution not supported on this target.");
 
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously. */
-  if (event_loop_p && !async_exec && target_can_async_p ())
+  if (!async_exec && target_can_async_p ())
     {
       /* Simulate synchronous execution */
       async_disable_stdin ();
@@ -620,12 +620,12 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 
   /* If we get a request for running in the bg but the target
      doesn't support it, error out. */
-  if (event_loop_p && async_exec && !target_can_async_p ())
+  if (async_exec && !target_can_async_p ())
     error ("Asynchronous execution not supported on this target.");
 
   /* If we don't get a request of running in the bg, then we need
      to simulate synchronous (fg) execution. */
-  if (event_loop_p && !async_exec && target_can_async_p ())
+  if (!async_exec && target_can_async_p ())
     {
       /* Simulate synchronous execution */
       async_disable_stdin ();
@@ -636,14 +636,14 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
   if (!single_inst || skip_subroutines)		/* leave si command alone */
     {
       enable_longjmp_breakpoint ();
-      if (!event_loop_p || !target_can_async_p ())
+      if (!target_can_async_p ())
 	cleanups = make_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
       else
         make_exec_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
     }
 
   /* In synchronous case, all is well, just use the regular for loop. */
-  if (!event_loop_p || !target_can_async_p ())
+  if (!target_can_async_p ())
     {
       for (; count > 0; count--)
 	{
@@ -701,7 +701,7 @@ which has no line number information.\n", name);
      and handle them one at the time, through step_once(). */
   else
     {
-      if (event_loop_p && target_can_async_p ())
+      if (target_can_async_p ())
 	step_once (skip_subroutines, single_inst, count);
     }
 }
@@ -828,12 +828,12 @@ jump_command (char *arg, int from_tty)
 
   /* If we must run in the background, but the target can't do it,
      error out. */
-  if (event_loop_p && async_exec && !target_can_async_p ())
+  if (async_exec && !target_can_async_p ())
     error ("Asynchronous execution not supported on this target.");
 
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously. */
-  if (event_loop_p && !async_exec && target_can_async_p ())
+  if (!async_exec && target_can_async_p ())
     {
       /* Simulate synchronous execution */
       async_disable_stdin ();
@@ -1024,12 +1024,12 @@ until_command (char *arg, int from_tty)
 
   /* If we must run in the background, but the target can't do it,
      error out. */
-  if (event_loop_p && async_exec && !target_can_async_p ())
+  if (async_exec && !target_can_async_p ())
     error ("Asynchronous execution not supported on this target.");
 
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously. */
-  if (event_loop_p && !async_exec && target_can_async_p ())
+  if (!async_exec && target_can_async_p ())
     {
       /* Simulate synchronous execution */
       async_disable_stdin ();
@@ -1058,12 +1058,12 @@ advance_command (char *arg, int from_tty)
 
   /* If we must run in the background, but the target can't do it,
      error out.  */
-  if (event_loop_p && async_exec && !target_can_async_p ())
+  if (async_exec && !target_can_async_p ())
     error ("Asynchronous execution not supported on this target.");
 
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously.  */
-  if (event_loop_p && !async_exec && target_can_async_p ())
+  if (!async_exec && target_can_async_p ())
     {
       /* Simulate synchronous execution.  */
       async_disable_stdin ();
@@ -1199,12 +1199,12 @@ finish_command (char *arg, int from_tty)
 
   /* If we must run in the background, but the target can't do it,
      error out.  */
-  if (event_loop_p && async_exec && !target_can_async_p ())
+  if (async_exec && !target_can_async_p ())
     error ("Asynchronous execution not supported on this target.");
 
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously.  */
-  if (event_loop_p && !async_exec && target_can_async_p ())
+  if (!async_exec && target_can_async_p ())
     {
       /* Simulate synchronous execution.  */
       async_disable_stdin ();
@@ -1228,7 +1228,7 @@ finish_command (char *arg, int from_tty)
 
   breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame), bp_finish);
 
-  if (!event_loop_p || !target_can_async_p ())
+  if (!target_can_async_p ())
     old_chain = make_cleanup_delete_breakpoint (breakpoint);
   else
     old_chain = make_exec_cleanup_delete_breakpoint (breakpoint);
@@ -1249,7 +1249,7 @@ finish_command (char *arg, int from_tty)
      execution, set things up for the rest of the finish command to be
      completed later on, when gdb has detected that the target has
      stopped, in fetch_inferior_event.  */
-  if (event_loop_p && target_can_async_p ())
+  if (target_can_async_p ())
     {
       arg1 =
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
@@ -1272,7 +1272,7 @@ finish_command (char *arg, int from_tty)
   /* Do this only if not running asynchronously or if the target
      cannot do async execution.  Otherwise, complete this command when
      the target actually stops, in fetch_inferior_event.  */
-  if (!event_loop_p || !target_can_async_p ())
+  if (!target_can_async_p ())
     {
       /* Did we stop at our breakpoint?  */
       if (bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL
@@ -1897,7 +1897,7 @@ disconnect_command (char *args, int from_tty)
 void
 interrupt_target_command (char *args, int from_tty)
 {
-  if (event_loop_p && target_can_async_p ())
+  if (target_can_async_p ())
     {
       dont_repeat ();		/* Not for the faint of heart */
       target_stop ();

@@ -275,10 +275,8 @@ current_interp_command_loop (void)
   else if (current_interpreter != NULL
 	   && current_interpreter->procs->command_loop_proc != NULL)
     current_interpreter->procs->command_loop_proc (current_interpreter->data);
-  else if (event_loop_p)
-    cli_command_loop ();
   else
-    command_loop ();
+    cli_command_loop ();
 }
 
 int

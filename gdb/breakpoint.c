@@ -6123,7 +6123,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
 					   get_frame_id (deprecated_selected_frame),
 					   bp_until);
 
-  if (!event_loop_p || !target_can_async_p ())
+  if (!target_can_async_p ())
     old_chain = make_cleanup_delete_breakpoint (breakpoint);
   else
     old_chain = make_exec_cleanup_delete_breakpoint (breakpoint);
@@ -6135,7 +6135,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
      where we get a chance to do that is in fetch_inferior_event, so
      we must set things up for that. */
 
-  if (event_loop_p && target_can_async_p ())
+  if (target_can_async_p ())
     {
       /* In this case the arg for the continuation is just the point
          in the exec_cleanups chain from where to start doing
@@ -6157,7 +6157,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
       sal.pc = get_frame_pc (prev_frame);
       breakpoint = set_momentary_breakpoint (sal, get_frame_id (prev_frame),
 					     bp_until);
-      if (!event_loop_p || !target_can_async_p ())
+      if (!target_can_async_p ())
 	make_cleanup_delete_breakpoint (breakpoint);
       else
 	make_exec_cleanup_delete_breakpoint (breakpoint);
@@ -6166,7 +6166,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
   proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
   /* Do the cleanups now, anly if we are not running asynchronously,
      of if we are, but the target is still synchronous. */
-  if (!event_loop_p || !target_can_async_p ())
+  if (!target_can_async_p ())
     do_cleanups (old_chain);
 }
 

@@ -51,7 +51,6 @@ struct mi_interp
 /* These are the interpreter setup, etc. functions for the MI interpreter */
 static void mi_execute_command_wrapper (char *cmd);
 static void mi_command_loop (int mi_version);
-static char *mi_input (char *);
 
 /* These are hooks that we put in place while doing interpreter_exec
    so we can report interesting things that happened "behind the mi's
@@ -99,22 +98,19 @@ mi_interpreter_resume (void *data)
 
   gdb_setup_readline ();
 
-  if (event_loop_p)
-    {
-      /* These overwrite some of the initialization done in
-         _intialize_event_loop. */
-      call_readline = gdb_readline2;
-      input_handler = mi_execute_command_wrapper;
-      add_file_handler (input_fd, stdin_event_handler, 0);
-      async_command_editing_p = 0;
-      /* FIXME: This is a total hack for now.  PB's use of the MI implicitly
-         relies on a bug in the async support which allows asynchronous
-         commands to leak through the commmand loop.  The bug involves
-         (but is not limited to) the fact that sync_execution was
-         erroneously initialized to 0.  Duplicate by initializing it
-         thus here... */
-      sync_execution = 0;
-    }
+  /* These overwrite some of the initialization done in
+     _intialize_event_loop.  */
+  call_readline = gdb_readline2;
+  input_handler = mi_execute_command_wrapper;
+  add_file_handler (input_fd, stdin_event_handler, 0);
+  async_command_editing_p = 0;
+  /* FIXME: This is a total hack for now.  PB's use of the MI
+     implicitly relies on a bug in the async support which allows
+     asynchronous commands to leak through the commmand loop.  The bug
+     involves (but is not limited to) the fact that sync_execution was
+     erroneously initialized to 0.  Duplicate by initializing it thus
+     here...  */
+  sync_execution = 0;
 
   gdb_stdout = mi->out;
   /* Route error and log output through the MI */
@@ -365,16 +361,7 @@ mi_command_loop (int mi_version)
   /* Tell the world that we're alive */
   fputs_unfiltered ("(gdb) \n", raw_stdout);
   gdb_flush (raw_stdout);
-  if (!event_loop_p)
-    simplified_command_loop (mi_input, mi_execute_command);
-  else
-    start_event_loop ();
-}
-
-static char *
-mi_input (char *buf)
-{
-  return gdb_readline (NULL);
+  start_event_loop ();
 }
 
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */

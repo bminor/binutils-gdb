@@ -809,7 +809,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
      and in any case decode why it stopped, and act accordingly.  */
   /* Do this only if we are not using the event loop, or if the target
      does not support asynchronous execution. */
-  if (!event_loop_p || !target_can_async_p ())
+  if (!target_can_async_p ())
     {
       wait_for_inferior ();
       normal_stop ();

@@ -2552,7 +2552,7 @@ remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
   /* FIXME: ezannoni 1999-09-28: We may need to move this out of here
      into infcmd.c in order to allow inferior function calls to work
      NOT asynchronously. */
-  if (event_loop_p && target_can_async_p ())
+  if (target_can_async_p ())
     target_async (inferior_event_handler, 0);
   /* Tell the world that the target is now executing. */
   /* FIXME: cagney/1999-09-23: Is it the targets responsibility to set
@@ -4277,7 +4277,7 @@ extended_remote_async_create_inferior (char *exec_file, char *args, char **env,
 
   /* If running asynchronously, register the target file descriptor
      with the event loop. */
-  if (event_loop_p && target_can_async_p ())
+  if (target_can_async_p ())
     target_async (inferior_event_handler, 0);
 
   /* Now restart the remote server.  */

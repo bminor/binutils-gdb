@@ -1,5 +1,25 @@
 2004-09-13  Andrew Cagney  <cagney@gnu.org>
 
+	Eliminate event_loop_p, always has the value 1.
+	* defs.h (event_loop_p): Delete macro.
+	* breakpoint.c (until_break_command): Simplify.
+	* utils.c (prompt_for_continue): Simplify.
+	* tracepoint.c (read_actions): Simplify.
+	* top.c (throw_exception, execute_command, gdb_readline_wrapper) 
+	(gdb_rl_operate_and_get_next, command_line_input, get_prompt) 
+	(set_prompt, init_main): Simplify.
+	(init_signals, disconnect): Delete, unused.
+	* remote.c (remote_async_resume) 
+	(extended_remote_async_create_inferior): Simplify.
+	* mi/mi-interp.c (mi_input): Delete, unused.
+	(mi_interpreter_resume, mi_command_loop): Simplify.
+	* interps.c (current_interp_command_loop): Simplify.
+	* infrun.c (proceed): Simplify.
+	* infcmd.c (run_command, continue_command, step_1, jump_command)
+	(until_command, advance_command, finish_command)
+	(interrupt_target_command): Simplify.
+	* event-top.c (gdb_setup_readline, gdb_disable_readline): Simplify.
+
 	* config/i386/nm-i386.h (TARGET_HAS_HARDWARE_WATCHPOINTS): Delete.
 	* config/s390/nm-linux.h (TARGET_HAS_HARDWARE_WATCHPOINTS): Delete.
 	* config/pa/nm-hppah.h (TARGET_HAS_HARDWARE_WATCHPOINTS): Delete.

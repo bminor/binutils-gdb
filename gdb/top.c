@@ -322,9 +322,9 @@ throw_exception (enum return_reason reason)
 
   disable_current_display ();
   do_cleanups (ALL_CLEANUPS);
-  if (event_loop_p && target_can_async_p () && !target_executing)
+  if (target_can_async_p () && !target_executing)
     do_exec_cleanups (ALL_CLEANUPS);
-  if (event_loop_p && sync_execution)
+  if (sync_execution)
     do_exec_error_cleanups (ALL_CLEANUPS);
 
   if (annotation_level > 1)
@@ -578,8 +578,6 @@ catch_command_errors (catch_command_errors_ftype * command,
 /* Handler for SIGHUP.  */
 
 #ifdef SIGHUP
-/* Just a little helper function for disconnect().  */
-
 /* NOTE 1999-04-29: This function will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
@@ -590,15 +588,6 @@ quit_cover (void *s)
 				   This prevents asking the user dumb questions.  */
   quit_command ((char *) 0, 0);
   return 0;
-}
-
-static void
-disconnect (int signo)
-{
-  catch_errors (quit_cover, NULL,
-	      "Could not kill the program being debugged", RETURN_MASK_ALL);
-  signal (SIGHUP, SIG_DFL);
-  kill (getpid (), SIGHUP);
 }
 #endif /* defined SIGHUP */
 
@@ -696,7 +685,7 @@ execute_command (char *p, int from_tty)
 
       /* If the target is running, we allow only a limited set of
          commands. */
-      if (event_loop_p && target_can_async_p () && target_executing)
+      if (target_can_async_p () && target_executing)
 	if (strcmp (c->name, "help") != 0
 	    && strcmp (c->name, "pwd") != 0
 	    && strcmp (c->name, "show") != 0
@@ -991,7 +980,7 @@ char *
 gdb_readline_wrapper (char *prompt)
 {
   /* Set the hook that works in this case.  */
-  if (event_loop_p && after_char_processing_hook)
+  if (after_char_processing_hook)
     {
       rl_pre_input_hook = (Function *) after_char_processing_hook;
       after_char_processing_hook = NULL;
@@ -1052,37 +1041,6 @@ do_nothing (int signo)
   signal (signo, do_nothing);
 }
 
-static void
-init_signals (void)
-{
-  signal (SIGINT, request_quit);
-
-  /* If SIGTRAP was set to SIG_IGN, then the SIG_IGN will get passed
-     to the inferior and breakpoints will be ignored.  */
-#ifdef SIGTRAP
-  signal (SIGTRAP, SIG_DFL);
-#endif
-
-  /* If we initialize SIGQUIT to SIG_IGN, then the SIG_IGN will get
-     passed to the inferior, which we don't want.  It would be
-     possible to do a "signal (SIGQUIT, SIG_DFL)" after we fork, but
-     on BSD4.3 systems using vfork, that can affect the
-     GDB process as well as the inferior (the signal handling tables
-     might be in memory, shared between the two).  Since we establish
-     a handler for SIGQUIT, when we call exec it will set the signal
-     to SIG_DFL for us.  */
-  signal (SIGQUIT, do_nothing);
-#ifdef SIGHUP
-  if (signal (SIGHUP, do_nothing) != SIG_IGN)
-    signal (SIGHUP, disconnect);
-#endif
-  signal (SIGFPE, float_handler);
-
-#if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
-  signal (SIGWINCH, SIGWINCH_HANDLER);
-#endif
-}
-
 /* The current saved history number from operate-and-get-next.
    This is -1 if not valid.  */
 static int operate_saved_history = -1;
@@ -1114,17 +1072,8 @@ gdb_rl_operate_and_get_next (int count, int key)
 {
   int where;
 
-  if (event_loop_p)
-    {
-      /* Use the async hook.  */
-      after_char_processing_hook = gdb_rl_operate_and_get_next_completion;
-    }
-  else
-    {
-      /* This hook only works correctly when we are using the
-	 synchronous readline.  */
-      rl_pre_input_hook = (Function *) gdb_rl_operate_and_get_next_completion;
-    }
+  /* Use the async hook.  */
+  after_char_processing_hook = gdb_rl_operate_and_get_next_completion;
 
   /* Find the current line, and find the next line to use.  */
   where = where_history();
@@ -1200,12 +1149,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
   immediate_quit++;
 #ifdef STOP_SIGNAL
   if (job_control)
-    {
-      if (event_loop_p)
-	signal (STOP_SIGNAL, handle_stop_sig);
-      else
-	signal (STOP_SIGNAL, stop_sig);
-    }
+    signal (STOP_SIGNAL, handle_stop_sig);
 #endif
 
   while (1)
@@ -1419,10 +1363,7 @@ There is absolutely no warranty for GDB.  Type \"show warranty\" for details.\n"
 char *
 get_prompt (void)
 {
-  if (event_loop_p)
-    return PROMPT (0);
-  else
-    return gdb_prompt_string;
+  return PROMPT (0);
 }
 
 void
@@ -1433,10 +1374,7 @@ set_prompt (char *s)
    if (prompt != NULL)
    xfree (prompt);
  */
-  if (event_loop_p)
-    PROMPT (0) = savestring (s, strlen (s));
-  else
-    gdb_prompt_string = savestring (s, strlen (s));
+  PROMPT (0) = savestring (s, strlen (s));
 }
 
 
@@ -1713,32 +1651,23 @@ init_main (void)
 {
   struct cmd_list_element *c;
 
-  /* If we are running the asynchronous version,
-     we initialize the prompts differently. */
-  if (!event_loop_p)
-    {
-      gdb_prompt_string = savestring (DEFAULT_PROMPT, strlen (DEFAULT_PROMPT));
-    }
-  else
-    {
-      /* initialize the prompt stack to a simple "(gdb) " prompt or to
-         whatever the DEFAULT_PROMPT is. */
-      the_prompts.top = 0;
-      PREFIX (0) = "";
-      PROMPT (0) = savestring (DEFAULT_PROMPT, strlen (DEFAULT_PROMPT));
-      SUFFIX (0) = "";
-      /* Set things up for annotation_level > 1, if the user ever decides
-         to use it. */
-      async_annotation_suffix = "prompt";
-      /* Set the variable associated with the setshow prompt command. */
-      new_async_prompt = savestring (PROMPT (0), strlen (PROMPT (0)));
+  /* initialize the prompt stack to a simple "(gdb) " prompt or to
+     whatever the DEFAULT_PROMPT is.  */
+  the_prompts.top = 0;
+  PREFIX (0) = "";
+  PROMPT (0) = savestring (DEFAULT_PROMPT, strlen (DEFAULT_PROMPT));
+  SUFFIX (0) = "";
+  /* Set things up for annotation_level > 1, if the user ever decides
+     to use it.  */
+  async_annotation_suffix = "prompt";
+  /* Set the variable associated with the setshow prompt command.  */
+  new_async_prompt = savestring (PROMPT (0), strlen (PROMPT (0)));
 
-      /* If gdb was started with --annotate=2, this is equivalent to
-	 the user entering the command 'set annotate 2' at the gdb
-	 prompt, so we need to do extra processing. */
-      if (annotation_level > 1)
-        set_async_annotation_level (NULL, 0, NULL);
-    }
+  /* If gdb was started with --annotate=2, this is equivalent to the
+     user entering the command 'set annotate 2' at the gdb prompt, so
+     we need to do extra processing.  */
+  if (annotation_level > 1)
+    set_async_annotation_level (NULL, 0, NULL);
 
   /* Set the important stuff up for command editing.  */
   command_editing_p = 1;
@@ -1756,55 +1685,24 @@ init_main (void)
      15 is Control-o, the same binding this function has in Bash.  */
   rl_add_defun ("operate-and-get-next", gdb_rl_operate_and_get_next, 15);
 
-  /* The set prompt command is different depending whether or not the
-     async version is run. NOTE: this difference is going to
-     disappear as we make the event loop be the default engine of
-     gdb. */
-  if (!event_loop_p)
-    {
-      deprecated_add_show_from_set
-	(add_set_cmd ("prompt", class_support, var_string,
-		      (char *) &gdb_prompt_string, "Set gdb's prompt",
-		      &setlist),
-	 &showlist);
-    }
-  else
-    {
-      c = add_set_cmd ("prompt", class_support, var_string,
-		       (char *) &new_async_prompt, "Set gdb's prompt",
-		       &setlist);
-      deprecated_add_show_from_set (c, &showlist);
-      set_cmd_sfunc (c, set_async_prompt);
-    }
+  c = add_set_cmd ("prompt", class_support, var_string,
+		   (char *) &new_async_prompt, "Set gdb's prompt",
+		   &setlist);
+  deprecated_add_show_from_set (c, &showlist);
+  set_cmd_sfunc (c, set_async_prompt);
 
   add_com ("dont-repeat", class_support, dont_repeat_command, "Don't repeat this command.\n\
 Primarily used inside of user-defined commands that should not be repeated when\n\
 hitting return.");
 
-  /* The set editing command is different depending whether or not the
-     async version is run. NOTE: this difference is going to disappear
-     as we make the event loop be the default engine of gdb. */
-  if (!event_loop_p)
-    {
-      deprecated_add_show_from_set
-	(add_set_cmd ("editing", class_support, var_boolean, (char *) &command_editing_p,
-		      "Set editing of command lines as they are typed.\n\
-Use \"on\" to enable the editing, and \"off\" to disable it.\n\
-Without an argument, command line editing is enabled.  To edit, use\n\
-EMACS-like or VI-like commands like control-P or ESC.", &setlist),
-	 &showlist);
-    }
-  else
-    {
-      c = add_set_cmd ("editing", class_support, var_boolean, (char *) &async_command_editing_p,
-		       "Set editing of command lines as they are typed.\n\
+  c = add_set_cmd ("editing", class_support, var_boolean, (char *) &async_command_editing_p,
+		   "Set editing of command lines as they are typed.\n\
 Use \"on\" to enable the editing, and \"off\" to disable it.\n\
 Without an argument, command line editing is enabled.  To edit, use\n\
 EMACS-like or VI-like commands like control-P or ESC.", &setlist);
 
-      deprecated_add_show_from_set (c, &showlist);
-      set_cmd_sfunc (c, set_async_editing_command);
-    }
+  deprecated_add_show_from_set (c, &showlist);
+  set_cmd_sfunc (c, set_async_editing_command);
 
   deprecated_add_show_from_set
     (add_set_cmd ("save", no_class, var_boolean, (char *) &write_history_p,
@@ -1833,37 +1731,19 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
 		  &setlist),
      &showlist);
 
-  /* The set annotate command is different depending whether or not
-     the async version is run. NOTE: this difference is going to
-     disappear as we make the event loop be the default engine of
-     gdb. */
-  if (!event_loop_p)
-    {
-      c = add_set_cmd ("annotate", class_obscure, var_zinteger,
-		       (char *) &annotation_level, "Set annotation_level.\n\
+  c = add_set_cmd ("annotate", class_obscure, var_zinteger,
+		   (char *) &annotation_level, "Set annotation_level.\n\
 0 == normal;     1 == fullname (for use when running under emacs)\n\
 2 == output annotated suitably for use by programs that control GDB.",
-		       &setlist);
-      c = deprecated_add_show_from_set (c, &showlist);
-    }
-  else
-    {
-      c = add_set_cmd ("annotate", class_obscure, var_zinteger,
-		       (char *) &annotation_level, "Set annotation_level.\n\
-0 == normal;     1 == fullname (for use when running under emacs)\n\
-2 == output annotated suitably for use by programs that control GDB.",
-		       &setlist);
-      deprecated_add_show_from_set (c, &showlist);
-      set_cmd_sfunc (c, set_async_annotation_level);
-    }
-  if (event_loop_p)
-    {
-      deprecated_add_show_from_set
-	(add_set_cmd ("exec-done-display", class_support, var_boolean, (char *) &exec_done_display_p,
-		      "Set notification of completion for asynchronous execution commands.\n\
+		   &setlist);
+  deprecated_add_show_from_set (c, &showlist);
+  set_cmd_sfunc (c, set_async_annotation_level);
+
+  deprecated_add_show_from_set
+    (add_set_cmd ("exec-done-display", class_support, var_boolean, (char *) &exec_done_display_p,
+		  "Set notification of completion for asynchronous execution commands.\n\
 Use \"on\" to enable the notification, and \"off\" to disable it.", &setlist),
-	 &showlist);
-    }
+     &showlist);
 }
 
 void
@@ -1891,14 +1771,7 @@ gdb_init (char *argv0)
   init_cli_cmds();
   init_main ();			/* But that omits this file!  Do it now */
 
-  /* The signal handling mechanism is different depending whether or
-     not the async version is run. NOTE: in the future we plan to make
-     the event loop be the default engine of gdb, and this difference
-     will disappear. */
-  if (event_loop_p)
-    async_init_signals ();
-  else
-    init_signals ();
+  async_init_signals ();
 
   /* We need a default language for parsing expressions, so simple things like
      "set width 0" won't fail if no language is explicitly set in a config file
