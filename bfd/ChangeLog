@@ -1,3 +1,7 @@
+2002-01-31  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure: Re-generate.
+
 2002-01-31  David O'Brien  <obrien@FreeBSD>
 
 	* configure.in: Recognize the differences in core files from FreeBSD
