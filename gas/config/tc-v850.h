@@ -72,6 +72,7 @@ extern const struct relax_type md_relax_table[];
   { ".rozdata",	SHT_PROGBITS,	SHF_ALLOC +             SHF_V850_R0REL	}, \
   { ".zcommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
   { ".zbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
+  { ".tcommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
   { ".call_table_data",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },	   \
   { ".call_table_text",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_EXECINSTR },
 
