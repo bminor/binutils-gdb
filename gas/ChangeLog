@@ -1,3 +1,8 @@
+Tue Jun 10 17:08:34 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (md_assemble): Allow an empty register
+	list for instructions which use register lists.
+
 Tue Jun 10 11:18:09 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* config/tc-arm.c (md_apply_fix3): Make temp unsigned long.
