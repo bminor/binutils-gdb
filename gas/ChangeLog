@@ -1,5 +1,12 @@
 Sun Aug 28 13:22:52 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
+	* frags.c (frag_variant): Removed PCREL_ADJUST and BSR arguments.
+	Always initialize them to zero.
+	* frags.h (frag_variant): Fixed prototype.
+	* config/tc-i960.c (get_cdisp): Don't pass the extra zero args.
+	* config/tc-ns32k.c (convert_iif): Don't pass the arguments; cache
+	the value of frag_now and fill in the fields later.
+
 	* Makefile.in (distclean, realclean): Remove new
 	configure-generated files.
 
