@@ -2116,11 +2116,12 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
   }     								\
 
 void
-NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols)
+NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
      bfd *abfd;
      struct reloc_ext_external *bytes;
      arelent *cache_ptr;
      asymbol **symbols;
+     bfd_size_type symcount;
 {
   int r_index;
   int r_extern;
@@ -2146,7 +2147,17 @@ NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols)
 				      >> RELOC_EXT_BITS_TYPE_SH_LITTLE;
   }
 
-  if (r_extern && r_index > bfd_get_symcount (abfd))
+  cache_ptr->howto =  howto_table_ext + r_type;
+
+  /* Base relative relocs are always against the symbol table,
+     regardless of the setting of r_extern.  r_extern just reflects
+     whether the symbol the reloc is against is local or global.  */
+  if (r_type == RELOC_BASE10
+      || r_type == RELOC_BASE13
+      || r_type == RELOC_BASE22)
+    r_extern = 1;
+
+  if (r_extern && r_index > symcount)
     {
       /* We could arrange to return an error, but it might be useful
          to see the file even if it is bad.  */
@@ -2154,16 +2165,16 @@ NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols)
       r_index = N_ABS;
     }
 
-  cache_ptr->howto =  howto_table_ext + r_type;
   MOVE_ADDRESS(GET_SWORD(abfd, bytes->r_addend));
 }
 
 void
-NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
+NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
      bfd *abfd;
      struct reloc_std_external *bytes;
      arelent *cache_ptr;
      asymbol **symbols;
+     bfd_size_type symcount;
 {
   int r_index;
   int r_extern;
@@ -2206,7 +2217,13 @@ NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
   cache_ptr->howto =  howto_table_std + howto_idx;
   BFD_ASSERT (cache_ptr->howto->type != -1);
 
-  if (r_extern && r_index > bfd_get_symcount (abfd))
+  /* Base relative relocs are always against the symbol table,
+     regardless of the setting of r_extern.  r_extern just reflects
+     whether the symbol the reloc is against is local or global.  */
+  if (r_baserel)
+    r_extern = 1;
+
+  if (r_extern && r_index > symcount)
     {
       /* We could arrange to return an error, but it might be useful
          to see the file even if it is bad.  */
@@ -2288,7 +2305,8 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
 	(struct reloc_ext_external *) relocs;
 
       for (; counter < count; counter++, rptr++, cache_ptr++)
-	NAME(aout,swap_ext_reloc_in) (abfd, rptr, cache_ptr, symbols);
+	NAME(aout,swap_ext_reloc_in) (abfd, rptr, cache_ptr, symbols,
+				      bfd_get_symcount (abfd));
     }
   else
     {
@@ -2296,7 +2314,8 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
 	(struct reloc_std_external *) relocs;
 
       for (; counter < count; counter++, rptr++, cache_ptr++)
-	MY_swap_std_reloc_in(abfd, rptr, cache_ptr, symbols);
+	MY_swap_std_reloc_in (abfd, rptr, cache_ptr, symbols,
+			      bfd_get_symcount (abfd));
     }
 
   free (relocs);
