@@ -33,7 +33,8 @@ extern boolean write_map;
 
 boolean hex_mode;
 
-
+strip_symbols_type strip_symbols=STRIP_NONE;
+discard_locals_type discard_locals=DISCARD_NONE;
 
 
 lang_memory_region_type *region;

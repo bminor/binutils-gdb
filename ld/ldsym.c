@@ -39,6 +39,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* IMPORT */
 
 extern bfd *output_bfd;
+extern strip_symbols_type strip_symbols;
+extern discard_locals_type discard_locals;
 /* Head and tail of global symbol table chronological list */
 
 ldsym_type *symbol_head = (ldsym_type *)NULL;
