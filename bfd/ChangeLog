@@ -1,3 +1,8 @@
+2004-06-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf-m10300.c (_bfd_mn10300_elf_reloc_type_class): New.
+	(elf_backend_reloc_type_class): New.
+
 2004-06-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in (hppa*-*-netbsd*, hppa*-*-openbsd): Set COREFILE to

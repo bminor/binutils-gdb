@@ -4866,6 +4866,25 @@ _bfd_mn10300_elf_finish_dynamic_sections (output_bfd, info)
   return TRUE;
 }
 
+/* Classify relocation types, such that combreloc can sort them
+   properly.  */
+
+static enum elf_reloc_type_class
+_bfd_mn10300_elf_reloc_type_class (const Elf_Internal_Rela *rela)
+{
+  switch ((int) ELF32_R_TYPE (rela->r_info))
+    {
+    case R_MN10300_RELATIVE:
+      return reloc_class_relative;
+    case R_MN10300_JMP_SLOT:
+      return reloc_class_plt;
+    case R_MN10300_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
+
 #ifndef ELF_ARCH
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10300_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10300"
@@ -4913,6 +4932,9 @@ _bfd_mn10300_elf_finish_dynamic_sections (output_bfd, info)
   _bfd_mn10300_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
   _bfd_mn10300_elf_finish_dynamic_sections
+
+#define elf_backend_reloc_type_class \
+  _bfd_mn10300_elf_reloc_type_class
 
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
