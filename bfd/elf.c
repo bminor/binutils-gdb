@@ -591,6 +591,8 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
   if (hdr->sh_flags & SHF_GROUP)
     if (!setup_group (abfd, hdr, newsect))
       return false;
+  if ((hdr->sh_flags & SHF_TLS) != 0)
+    flags |= SEC_THREAD_LOCAL;
 
   /* The debugging sections appear to be recognized only by name, not
      any sort of flag.  */
@@ -883,6 +885,7 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	    case PT_NOTE: pt = "NOTE"; break;
 	    case PT_SHLIB: pt = "SHLIB"; break;
 	    case PT_PHDR: pt = "PHDR"; break;
+	    case PT_TLS: pt = "TLS"; break;
 	    case PT_GNU_EH_FRAME: pt = "EH_FRAME"; break;
 	    default: sprintf (buf, "0x%lx", p->p_type); pt = buf; break;
 	    }
@@ -2274,6 +2277,8 @@ elf_fake_sections (abfd, asect, failedptrarg)
     }
   if (elf_group_name (asect) != NULL)
     this_hdr->sh_flags |= SHF_GROUP;
+  if ((asect->flags & SEC_THREAD_LOCAL) != 0)
+    this_hdr->sh_flags |= SHF_TLS;
 
   /* Check for processor-specific section types.  */
   if (bed->elf_backend_fake_sections
@@ -2956,6 +2961,8 @@ map_sections_to_segments (abfd)
   asection **hdrpp;
   boolean phdr_in_segment = true;
   boolean writable;
+  int tls_count = 0;
+  asection *first_tls = NULL;
   asection *dynsec, *eh_frame_hdr;
   bfd_size_type amt;
 
@@ -3194,6 +3201,39 @@ map_sections_to_segments (abfd)
 	  *pm = m;
 	  pm = &m->next;
 	}
+      if (s->flags & SEC_THREAD_LOCAL)
+	{
+	  if (! tls_count)
+	    first_tls = s;
+	  tls_count++;
+	}
+    }
+
+  /* If there are any SHF_TLS output sections, add PT_TLS segment.  */
+  if (tls_count > 0)
+    {
+      int i;
+
+      amt = sizeof (struct elf_segment_map);
+      amt += (tls_count - 1) * sizeof (asection *);
+      m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
+      if (m == NULL)
+	goto error_return;
+      m->next = NULL;
+      m->p_type = PT_TLS;
+      m->count = tls_count;
+      /* Mandated PF_R.  */
+      m->p_flags = PF_R;
+      m->p_flags_valid = 1;
+      for (i = 0; i < tls_count; ++i)
+	{
+	  BFD_ASSERT (first_tls->flags & SEC_THREAD_LOCAL);
+	  m->sections[i] = first_tls;
+	  first_tls = first_tls->next;
+	}
+
+      *pm = m;
+      pm = &m->next;
     }
 
   /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
@@ -3618,6 +3658,20 @@ Error: First section in segment (%s) starts at 0x%x whereas the segment starts a
 	      if ((flags & SEC_LOAD) != 0)
 		p->p_filesz += sec->_raw_size;
 
+	      if (p->p_type == PT_TLS
+		  && sec->_raw_size == 0
+		  && (sec->flags & SEC_HAS_CONTENTS) == 0)
+		{
+		  struct bfd_link_order *o;
+		  bfd_vma tbss_size = 0;
+
+		  for (o = sec->link_order_head; o != NULL; o = o->next)
+		    if (tbss_size < o->offset + o->size)
+		      tbss_size = o->offset + o->size;
+
+		  p->p_memsz += tbss_size;
+		}
+
 	      if (align > p->p_align
 		  && (p->p_type != PT_LOAD || (abfd->flags & D_PAGED) == 0))
 		p->p_align = align;
@@ -3749,6 +3803,16 @@ get_program_header_size (abfd)
 	{
 	  /* We need a PT_NOTE segment.  */
 	  ++segs;
+	}
+    }
+
+  for (s = abfd->sections; s != NULL; s = s->next)
+    {
+      if (s->flags & SEC_THREAD_LOCAL)
+	{
+	  /* We need a PT_TLS segment.  */
+	  ++segs;
+	  break;
 	}
     }
 
@@ -5045,12 +5109,17 @@ swap_out_syms (abfd, sttp, relocatable_p)
 	  sym.st_shndx = shndx;
 	}
 
-      if ((flags & BSF_FUNCTION) != 0)
+      if ((flags & BSF_THREAD_LOCAL) != 0)
+	type = STT_TLS;
+      else if ((flags & BSF_FUNCTION) != 0)
 	type = STT_FUNC;
       else if ((flags & BSF_OBJECT) != 0)
 	type = STT_OBJECT;
       else
 	type = STT_NOTYPE;
+
+      if (syms[idx]->section->flags & SEC_THREAD_LOCAL)
+	type = STT_TLS;
 
       /* Processor-specific types */
       if (type_ptr != NULL

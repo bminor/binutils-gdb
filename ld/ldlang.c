@@ -1210,6 +1210,10 @@ lang_add_section (ptr, section, output, file)
 	  flags &= ~ (SEC_MERGE | SEC_STRINGS);
 	}
 
+      /* For now make .tbss normal section.  */
+      if (flags & SEC_THREAD_LOCAL)
+	flags |= SEC_LOAD;
+
       section->output_section->flags |= flags;
 
       if (flags & SEC_MERGE)
@@ -3010,6 +3014,9 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 
 	    if (bfd_is_abs_section (os->bfd_section))
 	      ASSERT (after == os->bfd_section->vma);
+	    else if ((os->bfd_section->flags & SEC_HAS_CONTENTS) == 0
+		     && (os->bfd_section->flags & SEC_THREAD_LOCAL))
+	      os->bfd_section->_raw_size = 0;
 	    else
 	      os->bfd_section->_raw_size =
 		(after - os->bfd_section->vma) * opb;

@@ -61,6 +61,7 @@ static void adjust_stab_sections PARAMS ((bfd *, asection *, PTR));
 static void build_group_lists PARAMS ((bfd *, asection *, PTR));
 static int elf_separate_stab_sections PARAMS ((void));
 static void elf_init_stab_section PARAMS ((segT));
+static symbolS *elf_common PARAMS ((int));
 
 #ifdef NEED_ECOFF_DEBUG
 static boolean elf_get_extr PARAMS ((asymbol *, EXTR *));
@@ -84,6 +85,7 @@ static int obj_elf_section_type PARAMS ((char *, size_t));
 static void obj_elf_symver PARAMS ((int));
 static void obj_elf_subsection PARAMS ((int));
 static void obj_elf_popsection PARAMS ((int));
+static void obj_elf_tls_common PARAMS ((int));
 
 static const pseudo_typeS elf_pseudo_table[] =
 {
@@ -129,6 +131,8 @@ static const pseudo_typeS elf_pseudo_table[] =
   /* We need to trap the section changing calls to handle .previous.  */
   {"data", obj_elf_data, 0},
   {"text", obj_elf_text, 0},
+
+  {"tls_common", obj_elf_tls_common, 0},
 
   /* End sentinel.  */
   {NULL, NULL, 0},
@@ -280,8 +284,8 @@ elf_file_symbol (s)
 #endif
 }
 
-void
-obj_elf_common (is_common)
+static symbolS *
+elf_common (is_common)
      int is_common;
 {
   char *name;
@@ -294,7 +298,7 @@ obj_elf_common (is_common)
   if (flag_mri && is_common)
     {
       s_mri_common (0);
-      return;
+      return NULL;
     }
 
   name = input_line_pointer;
@@ -307,14 +311,14 @@ obj_elf_common (is_common)
     {
       as_bad (_("expected comma after symbol-name"));
       ignore_rest_of_line ();
-      return;
+      return NULL;
     }
   input_line_pointer++;		/* skip ',' */
   if ((temp = get_absolute_expression ()) < 0)
     {
       as_bad (_(".COMMon length (%d.) <0! Ignored."), temp);
       ignore_rest_of_line ();
-      return;
+      return NULL;
     }
   size = temp;
   *p = 0;
@@ -324,7 +328,7 @@ obj_elf_common (is_common)
     {
       as_bad (_("symbol `%s' is already defined"), S_GET_NAME (symbolP));
       ignore_rest_of_line ();
-      return;
+      return NULL;
     }
   if (S_GET_VALUE (symbolP) != 0)
     {
@@ -374,7 +378,7 @@ obj_elf_common (is_common)
 		{
 		  as_bad (_("common alignment not a power of 2"));
 		  ignore_rest_of_line ();
-		  return;
+		  return NULL;
 		}
 	    }
 	  else
@@ -426,7 +430,7 @@ obj_elf_common (is_common)
   symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
 
   demand_empty_rest_of_line ();
-  return;
+  return symbolP;
 
   {
   bad_common_segment:
@@ -439,8 +443,25 @@ obj_elf_common (is_common)
     *p = c;
     input_line_pointer = p;
     ignore_rest_of_line ();
-    return;
+    return NULL;
   }
+}
+
+void
+obj_elf_common (is_common)
+     int is_common;
+{
+  elf_common (is_common);
+}
+
+static void
+obj_elf_tls_common (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  symbolS *symbolP = elf_common (0);
+
+  if (symbolP)
+    symbol_get_bfdsym (symbolP)->flags |= BSF_THREAD_LOCAL;
 }
 
 static void
@@ -594,6 +615,8 @@ static struct special_section const special_sections[] =
   { ".note",	SHT_NOTE,	0				},
   { ".rodata",	SHT_PROGBITS,	SHF_ALLOC			},
   { ".rodata1",	SHT_PROGBITS,	SHF_ALLOC			},
+  { ".tbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_TLS	},
+  { ".tdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_TLS	},
   { ".text",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
 #if 0
   /* FIXME: The current gcc, as of 2002-03-03, will emit
@@ -717,7 +740,8 @@ obj_elf_change_section (name, type, attr, entsize, group_name, push)
 	   | (((attr & SHF_ALLOC) && type != SHT_NOBITS) ? SEC_LOAD : 0)
 	   | ((attr & SHF_EXECINSTR) ? SEC_CODE : 0)
 	   | ((attr & SHF_MERGE) ? SEC_MERGE : 0)
-	   | ((attr & SHF_STRINGS) ? SEC_STRINGS : 0));
+	   | ((attr & SHF_STRINGS) ? SEC_STRINGS : 0)
+	   | ((attr & SHF_TLS) ? SEC_THREAD_LOCAL : 0));
 #ifdef md_elf_section_flags
   flags = md_elf_section_flags (flags, attr, type);
 #endif
@@ -749,7 +773,8 @@ obj_elf_change_section (name, type, attr, entsize, group_name, push)
 	 saw the first time.  */
       if ((old_sec->flags ^ flags)
 	  & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
-	     | SEC_EXCLUDE | SEC_SORT_ENTRIES | SEC_MERGE | SEC_STRINGS))
+	     | SEC_EXCLUDE | SEC_SORT_ENTRIES | SEC_MERGE | SEC_STRINGS
+	     | SEC_THREAD_LOCAL))
 	as_warn (_("ignoring changed section attributes for %s"), name);
       else if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
 	as_warn (_("ignoring changed section entity size for %s"), name);
@@ -792,6 +817,9 @@ obj_elf_parse_section_letters (str, len)
 	case 'G':
 	  attr |= SHF_GROUP;
 	  break;
+	case 'T':
+	  attr |= SHF_TLS;
+	  break;
 	/* Compatibility.  */
 	case 'm':
 	  if (*(str - 1) == 'a')
@@ -806,7 +834,7 @@ obj_elf_parse_section_letters (str, len)
 	    }
 	default:
 	  {
-	    char *bad_msg = _("unrecognized .section attribute: want a,w,x,M,S,G");
+	    char *bad_msg = _("unrecognized .section attribute: want a,w,x,M,S,G,T");
 #ifdef md_elf_section_letter
 	    int md_attr = md_elf_section_letter (*str, &bad_msg);
 	    if (md_attr >= 0)

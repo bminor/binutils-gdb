@@ -1556,7 +1556,8 @@ tc_gen_reloc (sec, fixp)
        * of thing, and as a result we need to fake it out here.
        */
       if ((S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy)
-	   || (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE))
+	   || (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE)
+	   || (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_THREAD_LOCAL))
 	  && !S_IS_COMMON (fixp->fx_addsy))
 	reloc->addend -= symbol_get_bfdsym (fixp->fx_addsy)->value;
 #endif
@@ -5467,7 +5468,7 @@ alpha_elf_section_letter (letter, ptr_msg)
   if (letter == 's')
     return SHF_ALPHA_GPREL;
 
-  *ptr_msg = _("Bad .section directive: want a,s,w,x,M,S in string");
+  *ptr_msg = _("Bad .section directive: want a,s,w,x,M,S,G,T in string");
   return 0;
 }
 

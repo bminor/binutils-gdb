@@ -1987,6 +1987,7 @@ get_segment_type (p_type)
     case PT_NOTE:       return "NOTE";
     case PT_SHLIB:      return "SHLIB";
     case PT_PHDR:       return "PHDR";
+    case PT_TLS:	return "TLS";
 
     case PT_GNU_EH_FRAME:
 			return "GNU_EH_FRAME";
@@ -3202,6 +3203,7 @@ get_elf_section_flags (sh_flags)
 	case SHF_LINK_ORDER:       strcat (buff, "L"); break;
 	case SHF_OS_NONCONFORMING: strcat (buff, "O"); break;
 	case SHF_GROUP:            strcat (buff, "G"); break;
+	case SHF_TLS:		   strcat (buff, "T"); break;
 
 	default:
 	  if (flag & SHF_MASKOS)
@@ -4242,7 +4244,10 @@ static const char *
 get_dynamic_flags (flags)
      bfd_vma flags;
 {
-  static char buff [64];
+  static char buff [128];
+  char *p = buff;
+
+  *p = '\0';
   while (flags)
     {
       bfd_vma flag;
@@ -4250,14 +4255,20 @@ get_dynamic_flags (flags)
       flag = flags & - flags;
       flags &= ~ flag;
 
+      if (p != buff)
+	*p++ = ' ';
+
       switch (flag)
 	{
-	case DF_ORIGIN:   strcat (buff, "ORIGIN "); break;
-	case DF_SYMBOLIC: strcat (buff, "SYMBOLIC "); break;
-	case DF_TEXTREL:  strcat (buff, "TEXTREL "); break;
-	case DF_BIND_NOW: strcat (buff, "BIND_NOW "); break;
-	default:          strcat (buff, "unknown "); break;
+	case DF_ORIGIN:   strcpy (p, "ORIGIN"); break;
+	case DF_SYMBOLIC: strcpy (p, "SYMBOLIC"); break;
+	case DF_TEXTREL:  strcpy (p, "TEXTREL"); break;
+	case DF_BIND_NOW: strcpy (p, "BIND_NOW"); break;
+	case DF_STATIC_TLS: strcpy (p, "STATIC_TLS"); break;
+	default:          strcpy (p, "unknown"); break;
 	}
+
+      p = strchr (p, '\0');
     }
   return buff;
 }
@@ -4443,7 +4454,7 @@ process_dynamic_segment (file)
 	{
 	case DT_FLAGS:
 	  if (do_dynamic)
-	    printf ("%s", get_dynamic_flags (entry->d_un.d_val));
+	    puts (get_dynamic_flags (entry->d_un.d_val));
 	  break;
 
 	case DT_AUXILIARY:
@@ -5252,6 +5263,7 @@ get_symbol_type (type)
     case STT_SECTION:  return "SECTION";
     case STT_FILE:     return "FILE";
     case STT_COMMON:   return "COMMON";
+    case STT_TLS:      return "TLS";
     default:
       if (type >= STT_LOPROC && type <= STT_HIPROC)
 	{

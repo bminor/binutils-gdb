@@ -77,6 +77,8 @@ enum special_section
 
 enum reloc_func
   {
+    FUNC_DTP_MODULE,
+    FUNC_DTP_RELATIVE,
     FUNC_FPTR_RELATIVE,
     FUNC_GP_RELATIVE,
     FUNC_LT_RELATIVE,
@@ -84,8 +86,12 @@ enum reloc_func
     FUNC_PLT_RELATIVE,
     FUNC_SEC_RELATIVE,
     FUNC_SEG_RELATIVE,
+    FUNC_TP_RELATIVE,
     FUNC_LTV_RELATIVE,
     FUNC_LT_FPTR_RELATIVE,
+    FUNC_LT_DTP_MODULE,
+    FUNC_LT_DTP_RELATIVE,
+    FUNC_LT_TP_RELATIVE,
     FUNC_IPLT_RELOC,
   };
 
@@ -476,6 +482,8 @@ static struct
 pseudo_func[] =
   {
     /* reloc pseudo functions (these must come first!):  */
+    { "dtpmod",	PSEUDO_FUNC_RELOC, { 0 } },
+    { "dtprel",	PSEUDO_FUNC_RELOC, { 0 } },
     { "fptr",	PSEUDO_FUNC_RELOC, { 0 } },
     { "gprel",	PSEUDO_FUNC_RELOC, { 0 } },
     { "ltoff",	PSEUDO_FUNC_RELOC, { 0 } },
@@ -483,8 +491,12 @@ pseudo_func[] =
     { "pltoff",	PSEUDO_FUNC_RELOC, { 0 } },
     { "secrel",	PSEUDO_FUNC_RELOC, { 0 } },
     { "segrel",	PSEUDO_FUNC_RELOC, { 0 } },
+    { "tprel",	PSEUDO_FUNC_RELOC, { 0 } },
     { "ltv",	PSEUDO_FUNC_RELOC, { 0 } },
     { "", 0, { 0 } },	/* placeholder for FUNC_LT_FPTR_RELATIVE */
+    { "", 0, { 0 } },	/* placeholder for FUNC_LT_DTP_MODULE */
+    { "", 0, { 0 } },	/* placeholder for FUNC_LT_DTP_RELATIVE */
+    { "", 0, { 0 } },	/* placeholder for FUNC_LT_TP_RELATIVE */
     { "iplt",	PSEUDO_FUNC_RELOC, { 0 } },
 
     /* mbtype4 constants:  */
@@ -943,7 +955,7 @@ ia64_elf_section_letter (letter, ptr_msg)
   if (letter == 's')
     return SHF_IA_64_SHORT;
 
-  *ptr_msg = _("Bad .section directive: want a,s,w,x,M,S in string");
+  *ptr_msg = _("Bad .section directive: want a,s,w,x,M,S,G,T in string");
   return 0;
 }
 
@@ -6494,6 +6506,14 @@ md_begin ()
   bfd_set_section_alignment (stdoutput, text_section, 4);
 
   target_big_endian = TARGET_BYTES_BIG_ENDIAN;
+  pseudo_func[FUNC_DTP_MODULE].u.sym =
+    symbol_new (".<dtpmod>", undefined_section, FUNC_DTP_MODULE,
+		&zero_address_frag);
+
+  pseudo_func[FUNC_DTP_RELATIVE].u.sym =
+    symbol_new (".<dtprel>", undefined_section, FUNC_DTP_RELATIVE,
+		&zero_address_frag);
+
   pseudo_func[FUNC_FPTR_RELATIVE].u.sym =
     symbol_new (".<fptr>", undefined_section, FUNC_FPTR_RELATIVE,
 		&zero_address_frag);
@@ -6522,12 +6542,28 @@ md_begin ()
     symbol_new (".<segrel>", undefined_section, FUNC_SEG_RELATIVE,
 		&zero_address_frag);
 
+  pseudo_func[FUNC_TP_RELATIVE].u.sym =
+    symbol_new (".<tprel>", undefined_section, FUNC_TP_RELATIVE,
+		&zero_address_frag);
+
   pseudo_func[FUNC_LTV_RELATIVE].u.sym =
     symbol_new (".<ltv>", undefined_section, FUNC_LTV_RELATIVE,
 		&zero_address_frag);
 
   pseudo_func[FUNC_LT_FPTR_RELATIVE].u.sym =
     symbol_new (".<ltoff.fptr>", undefined_section, FUNC_LT_FPTR_RELATIVE,
+		&zero_address_frag);
+
+  pseudo_func[FUNC_LT_DTP_MODULE].u.sym =
+    symbol_new (".<ltoff.dtpmod>", undefined_section, FUNC_LT_DTP_MODULE,
+		&zero_address_frag);
+
+  pseudo_func[FUNC_LT_DTP_RELATIVE].u.sym =
+    symbol_new (".<ltoff.dptrel>", undefined_section, FUNC_LT_DTP_RELATIVE,
+		&zero_address_frag);
+
+  pseudo_func[FUNC_LT_TP_RELATIVE].u.sym =
+    symbol_new (".<ltoff.tprel>", undefined_section, FUNC_LT_TP_RELATIVE,
 		&zero_address_frag);
 
   pseudo_func[FUNC_IPLT_RELOC].u.sym =
@@ -9826,11 +9862,22 @@ md_operand (e)
 		  as_bad ("Not a symbolic expression");
 		  goto err;
 		}
-	      if (S_GET_VALUE (e->X_op_symbol) == FUNC_FPTR_RELATIVE
-		  && i == FUNC_LT_RELATIVE)
-		i = FUNC_LT_FPTR_RELATIVE;
-	      else
+	      if (i != FUNC_LT_RELATIVE)
 		{
+		  as_bad ("Illegal combination of relocation functions");
+		  goto err;
+		}
+	      switch (S_GET_VALUE (e->X_op_symbol))
+		{
+		case FUNC_FPTR_RELATIVE:
+		  i = FUNC_LT_FPTR_RELATIVE; break;
+		case FUNC_DTP_MODULE:
+		  i = FUNC_LT_DTP_MODULE; break;
+		case FUNC_DTP_RELATIVE:
+		  i = FUNC_LT_DTP_RELATIVE; break;
+		case FUNC_TP_RELATIVE:
+		  i = FUNC_LT_TP_RELATIVE; break;
+		default:
 		  as_bad ("Illegal combination of relocation functions");
 		  goto err;
 		}
@@ -10158,6 +10205,64 @@ ia64_gen_real_reloc_type (sym, r_type)
 	  new = BFD_RELOC_IA64_LTOFF_FPTR22; break;
 	case BFD_RELOC_IA64_IMM64:
 	  new = BFD_RELOC_IA64_LTOFF_FPTR64I; break;
+	default:
+	  break;
+	}
+      break;
+
+    case FUNC_TP_RELATIVE:
+      switch (r_type)
+	{
+	case BFD_RELOC_IA64_IMM14:
+	  new = BFD_RELOC_IA64_TPREL14; break;
+	case BFD_RELOC_IA64_IMM22:
+	  new = BFD_RELOC_IA64_TPREL22; break;
+	case BFD_RELOC_IA64_IMM64:
+	  new = BFD_RELOC_IA64_TPREL64I; break;
+	default:
+	  break;
+	}
+      break;
+
+    case FUNC_LT_TP_RELATIVE:
+      switch (r_type)
+	{
+	case BFD_RELOC_IA64_IMM22:
+	  new = BFD_RELOC_IA64_LTOFF_TPREL22; break;
+	default:
+	  break;
+	}
+      break;
+
+    case FUNC_LT_DTP_MODULE:
+      switch (r_type)
+	{
+	case BFD_RELOC_IA64_IMM22:
+	  new = BFD_RELOC_IA64_LTOFF_DTPMOD22; break;
+	default:
+	  break;
+	}
+      break;
+
+    case FUNC_DTP_RELATIVE:
+      switch (r_type)
+	{
+	case BFD_RELOC_IA64_IMM14:
+	  new = BFD_RELOC_IA64_DTPREL14; break;
+	case BFD_RELOC_IA64_IMM22:
+	  new = BFD_RELOC_IA64_DTPREL22; break;
+	case BFD_RELOC_IA64_IMM64:
+	  new = BFD_RELOC_IA64_DTPREL64I; break;
+	default:
+	  break;
+	}
+      break;
+
+    case FUNC_LT_DTP_RELATIVE:
+      switch (r_type)
+	{
+	case BFD_RELOC_IA64_IMM22:
+	  new = BFD_RELOC_IA64_LTOFF_DTPREL22; break;
 	default:
 	  break;
 	}

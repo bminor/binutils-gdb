@@ -1,3 +1,45 @@
+2002-05-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/obj-elf.c (elf_common): Renamed from obj_elf_common.
+	(obj_elf_common): Call elf_common.
+	(obj_elf_tls_common): New function.
+	(elf_pseudo_tab): Support .tls_common.
+	(special_sections): Add .tdata and .tbss.
+	(obj_elf_change_section): Set SEC_THREAD_LOCAL for SHF_TLS
+	sections.
+	(obj_elf_parse_section_letters): Support T in section flags (SHF_TLS).
+	(obj_elf_parse_section_letters): Include T in error message.
+	* config/tc-ppc.c (ppc_section_letter): Likewise.
+	* config/tc-alpha.c (alpha_elf_section_letter): Likewise.
+	(tc_gen_reloc): Handle SEC_THREAD_LOCAL the same way as
+	SEC_MERGE.
+	* config/tc-sparc.c (md_apply_fix3): Likewise.
+	* config/tc-i386.c (tc_i386_fix_adjustable): Add TLS relocs.
+	Define them if not BFD_ASSEMBLER.
+	(lex_got): Support @TLSGD, @TLSLDM, @GOTTPOFF, @TPOFF, @DTPOFF
+	and @NTPOFF.
+	(md_apply_fix3): Add TLS relocs.
+	* config/tc-ia64.c (enum reloc_func): Add FUNC_DTP_MODULE,
+	FUNC_DTP_RELATIVE, FUNC_TP_RELATIVE, FUNC_LT_DTP_MODULE,
+	FUNC_LT_DTP_RELATIVE, FUNC_LT_TP_RELATIVE.
+	(pseudo_func): Support @dtpmod(), @dtprel() and @tprel().
+	(ia64_elf_section_letter): Include T in error message.
+	(md_begin): Support TLS operators.
+	(md_operand): Likewise.
+	(ia64_gen_real_reloc_type): Support TLS relocs.
+	* testsuite/gas/i386/tlspic.s: New file.
+	* testsuite/gas/i386/tlsd.s: New file.
+	* testsuite/gas/i386/tlsnopic.s: New file.
+	* testsuite/gas/i386/tlsd.d: New file.
+	* testsuite/gas/i386/tlsnopic.d: New file.
+	* testsuite/gas/i386/tlspic.d: New file.
+	* testsuite/gas/i386/i386.exp: Add tlsd, tlsnopic and tlspic tests.
+	* testsuite/gas/ia64/tls.s: New file.
+	* testsuite/gas/ia64/tls.d: New file.
+	* testsuite/gas/ia64/ia64.exp: Add tls test.
+	* write.c (adjust_reloc_syms): Don't change symbols in
+	SEC_THREAD_LOCAL sections to STT_SECTION + addend.
+
 2002-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.c (md_apply_fix3): For the Thumb BLX reloc

@@ -1723,7 +1723,23 @@ elf_link_add_object_symbols (abfd, info)
       if (name == (const char *) NULL)
 	goto error_return;
 
-      if (add_symbol_hook)
+      if (sym.st_shndx == SHN_COMMON && ELF_ST_TYPE (sym.st_info) == STT_TLS)
+	{
+	  asection *tcomm = bfd_get_section_by_name (abfd, ".tcommon");
+
+	  if (tcomm == NULL)
+	    {
+	      tcomm = bfd_make_section (abfd, ".tcommon");
+	      if (tcomm == NULL
+		  || !bfd_set_section_flags (abfd, tcomm, (SEC_ALLOC
+							   | SEC_IS_COMMON
+							   | SEC_LINKER_CREATED
+							   | SEC_THREAD_LOCAL)))
+		goto error_return;
+	    }
+	  sec = tcomm;
+	}
+      else if (add_symbol_hook)
 	{
 	  if (! (*add_symbol_hook) (abfd, info, &sym, &name, &flags, &sec,
 				    &value))
@@ -3457,7 +3473,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  elf_tdata (output_bfd)->cverdefs = cdefs;
 	}
 
-      if (info->new_dtags && info->flags)
+      if ((info->new_dtags && info->flags) || (info->flags & DF_STATIC_TLS))
 	{
 	  if (! elf_add_dynamic_entry (info, (bfd_vma) DT_FLAGS, info->flags))
 	    return false;
@@ -4481,6 +4497,8 @@ struct elf_final_link_info
   asection *hash_sec;
   /* symbol version section (.gnu.version).  */
   asection *symver_sec;
+  /* first SHF_TLS section (if any).  */
+  asection *first_tls_sec;
   /* Buffer large enough to hold contents of any section.  */
   bfd_byte *contents;
   /* Buffer large enough to hold external relocs of any section.  */
@@ -4960,6 +4978,14 @@ elf_bfd_final_link (abfd, info)
   finfo.symbuf = NULL;
   finfo.symshndxbuf = NULL;
   finfo.symbuf_count = 0;
+  finfo.first_tls_sec = NULL;
+  for (o = abfd->sections; o != (asection *) NULL; o = o->next)
+    if ((o->flags & SEC_THREAD_LOCAL) != 0
+	&& (o->flags & SEC_LOAD) != 0)
+      {
+	finfo.first_tls_sec = o;
+	break;
+      }
 
   /* Count up the number of relocations we will output for each output
      section, so that we know the sizes of the reloc sections.  We
@@ -5322,6 +5348,40 @@ elf_bfd_final_link (abfd, info)
       finfo.locsym_shndx = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
       if (finfo.locsym_shndx == NULL)
 	goto error_return;
+    }
+
+  if (finfo.first_tls_sec)
+    {
+      unsigned int align = 0;
+      bfd_vma base = finfo.first_tls_sec->vma, end = 0;
+      asection *sec;
+
+      for (sec = finfo.first_tls_sec;
+	   sec && (sec->flags & SEC_THREAD_LOCAL);
+	   sec = sec->next)
+	{
+	  bfd_vma size = sec->_raw_size;
+
+	  if (bfd_get_section_alignment (abfd, sec) > align)
+	    align = bfd_get_section_alignment (abfd, sec);
+	  if (sec->_raw_size == 0 && (sec->flags & SEC_HAS_CONTENTS) == 0)
+	    {
+	      struct bfd_link_order *o;
+
+	      size = 0;
+	      for (o = sec->link_order_head; o != NULL; o = o->next)
+		if (size < o->offset + o->size)
+	      size = o->offset + o->size;
+	    }
+	  end = sec->vma + size;
+	}
+      elf_hash_table (info)->tls_segment
+	= bfd_zalloc (abfd, sizeof (struct elf_link_tls_segment));
+      if (elf_hash_table (info)->tls_segment == NULL)
+	goto error_return;
+      elf_hash_table (info)->tls_segment->start = base;
+      elf_hash_table (info)->tls_segment->size = end - base;
+      elf_hash_table (info)->tls_segment->align = align;
     }
 
   /* Since ELF permits relocations to be against local symbols, we
@@ -6100,7 +6160,16 @@ elf_link_output_extsym (h, data)
 	       addresses.  */
 	    sym.st_value = h->root.u.def.value + input_sec->output_offset;
 	    if (! finfo->info->relocateable)
-	      sym.st_value += input_sec->output_section->vma;
+	      {
+		sym.st_value += input_sec->output_section->vma;
+		if (h->type == STT_TLS)
+		  {
+		    /* STT_TLS symbols are relative to PT_TLS segment
+		       base.  */
+		    BFD_ASSERT (finfo->first_tls_sec != NULL);
+		    sym.st_value -= finfo->first_tls_sec->vma;
+		  }
+	      }
 	  }
 	else
 	  {
@@ -6564,7 +6633,15 @@ elf_link_input_bfd (finfo, input_bfd)
 	 these requirements.  */
       osym.st_value += isec->output_offset;
       if (! finfo->info->relocateable)
-	osym.st_value += isec->output_section->vma;
+	{
+	  osym.st_value += isec->output_section->vma;
+	  if (ELF_ST_TYPE (osym.st_info) == STT_TLS)
+	    {
+	      /* STT_TLS symbols are relative to PT_TLS segment base.  */
+	      BFD_ASSERT (finfo->first_tls_sec != NULL);
+	      osym.st_value -= finfo->first_tls_sec->vma;
+	    }
+	}
 
       if (! elf_link_output_sym (finfo, name, &osym, isec))
 	return false;
@@ -6899,7 +6976,16 @@ elf_link_input_bfd (finfo, input_bfd)
 
 			  isym->st_value += sec->output_offset;
 			  if (! finfo->info->relocateable)
-			    isym->st_value += osec->vma;
+			    {
+			      isym->st_value += osec->vma;
+			      if (ELF_ST_TYPE (isym->st_info) == STT_TLS)
+				{
+				  /* STT_TLS symbols are relative to PT_TLS
+				     segment base.  */
+				  BFD_ASSERT (finfo->first_tls_sec != NULL);
+				  isym->st_value -= finfo->first_tls_sec->vma;
+				}
+			    }
 
 			  finfo->indices[r_symndx]
 			    = bfd_get_symcount (output_bfd);

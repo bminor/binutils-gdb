@@ -1068,12 +1068,6 @@ typedef struct sec
      standard data.  */
 #define SEC_CONSTRUCTOR 0x100
 
-  /* The section is a constructor, and should be placed at the
-     end of the text, data, or bss section(?).  */
-#define SEC_CONSTRUCTOR_TEXT 0x1100
-#define SEC_CONSTRUCTOR_DATA 0x2100
-#define SEC_CONSTRUCTOR_BSS  0x3100
-
   /* The section has contents - a data section could be
      <<SEC_ALLOC>> | <<SEC_HAS_CONTENTS>>; a debug section could be
      <<SEC_HAS_CONTENTS>>  */
@@ -1093,6 +1087,9 @@ typedef struct sec
      allow the back end to control what the linker does with
      sections.  */
 #define SEC_COFF_SHARED_LIBRARY 0x800
+
+  /* The section contains thread local data.  */
+#define SEC_THREAD_LOCAL 0x1000
 
   /* The section has GOT references.  This flag is only for the
      linker, and is currently only used by the elf32-hppa back end.
@@ -2211,6 +2208,15 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_386_RELATIVE,
   BFD_RELOC_386_GOTOFF,
   BFD_RELOC_386_GOTPC,
+  BFD_RELOC_386_TLS_LE,
+  BFD_RELOC_386_TLS_GD,
+  BFD_RELOC_386_TLS_LDM,
+  BFD_RELOC_386_TLS_LDO_32,
+  BFD_RELOC_386_TLS_IE_32,
+  BFD_RELOC_386_TLS_LE_32,
+  BFD_RELOC_386_TLS_DTPMOD32,
+  BFD_RELOC_386_TLS_DTPOFF32,
+  BFD_RELOC_386_TLS_TPOFF32,
 
 /* x86-64/elf relocations  */
   BFD_RELOC_X86_64_GOT32,
@@ -2922,12 +2928,25 @@ this offset in the reloc's section offset.  */
   BFD_RELOC_IA64_IPLTMSB,
   BFD_RELOC_IA64_IPLTLSB,
   BFD_RELOC_IA64_COPY,
-  BFD_RELOC_IA64_TPREL22,
-  BFD_RELOC_IA64_TPREL64MSB,
-  BFD_RELOC_IA64_TPREL64LSB,
-  BFD_RELOC_IA64_LTOFF_TP22,
   BFD_RELOC_IA64_LTOFF22X,
   BFD_RELOC_IA64_LDXMOV,
+  BFD_RELOC_IA64_TPREL14,
+  BFD_RELOC_IA64_TPREL22,
+  BFD_RELOC_IA64_TPREL64I,
+  BFD_RELOC_IA64_TPREL64MSB,
+  BFD_RELOC_IA64_TPREL64LSB,
+  BFD_RELOC_IA64_LTOFF_TPREL22,
+  BFD_RELOC_IA64_DTPMOD64MSB,
+  BFD_RELOC_IA64_DTPMOD64LSB,
+  BFD_RELOC_IA64_LTOFF_DTPMOD22,
+  BFD_RELOC_IA64_DTPREL14,
+  BFD_RELOC_IA64_DTPREL22,
+  BFD_RELOC_IA64_DTPREL64I,
+  BFD_RELOC_IA64_DTPREL32MSB,
+  BFD_RELOC_IA64_DTPREL32LSB,
+  BFD_RELOC_IA64_DTPREL64MSB,
+  BFD_RELOC_IA64_DTPREL64LSB,
+  BFD_RELOC_IA64_LTOFF_DTPREL22,
 
 /* Motorola 68HC11 reloc.
 This is the 8 bits high part of an absolute address.  */
@@ -3137,6 +3156,9 @@ typedef struct symbol_cache_entry
      into the section of the data.  BSF_DEBUGGING should be set
      as well.  */
 #define BSF_DEBUGGING_RELOC 0x20000
+
+  /* This symbol is thread local.  Used in ELF.  */
+#define BSF_THREAD_LOCAL  0x40000
 
   flagword flags;
 

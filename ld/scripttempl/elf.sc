@@ -60,6 +60,8 @@
 #  .sdata2	.gnu.linkonce.s2.foo
 #  .sbss2	.gnu.linkonce.sb2.foo
 #  .debug_info	.gnu.linkonce.wi.foo
+#  .tdata	.gnu.linkonce.td.foo
+#  .tbss	.gnu.linkonce.tb.foo
 #
 #  Each of these can also have corresponding .rel.* and .rela.* sections.
 
@@ -208,6 +210,10 @@ eval $COMBRELOCCAT <<EOF
   ${OTHER_READONLY_RELOC_SECTIONS}
   .rel.data     ${RELOCATING-0} : { *(.rel.data${RELOCATING+ .rel.data.* .rel.gnu.linkonce.d.*}) }
   .rela.data    ${RELOCATING-0} : { *(.rela.data${RELOCATING+ .rela.data.* .rela.gnu.linkonce.d.*}) }
+  .rel.tdata	${RELOCATING-0} : { *(.rel.tdata${RELOCATING+ .rel.tdata.* .rel.gnu.linkonce.td.*}) }
+  .rela.tdata	${RELOCATING-0} : { *(.rela.tdata${RELOCATING+ .rela.tdata.* .rela.gnu.linkonce.td.*}) }
+  .rel.tbss	${RELOCATING-0} : { *(.rel.tbss${RELOCATING+ .rel.tbss.* .rel.gnu.linkonce.tb.*}) }
+  .rela.tbss	${RELOCATING-0} : { *(.rela.tbss${RELOCATING+ .rela.tbss.* .rela.gnu.linkonce.tb.*}) }
   .rel.ctors    ${RELOCATING-0} : { *(.rel.ctors) }
   .rela.ctors   ${RELOCATING-0} : { *(.rela.ctors) }
   .rel.dtors    ${RELOCATING-0} : { *(.rel.dtors) }
@@ -304,6 +310,8 @@ cat <<EOF
     ${CONSTRUCTING+SORT(CONSTRUCTORS)}
   }
   .data1        ${RELOCATING-0} : { *(.data1) }
+  .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
+  .tbss		${RELOCATING-0} : { *(.tbss${RELOCATING+ .tbss.* .gnu.linkonce.tb.*) *(.tcommon}) }
   .eh_frame     ${RELOCATING-0} : { KEEP (*(.eh_frame)) }
   .gcc_except_table ${RELOCATING-0} : { *(.gcc_except_table) }
   ${WRITABLE_RODATA+${RODATA}}

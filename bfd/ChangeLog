@@ -1,3 +1,61 @@
+2002-05-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Set SEC_THREAD_LOCAL
+	for symbols from SHF_TLS section.
+	(_bfd_elf_print_private_bfd_data): Add PT_TLS.
+	(elf_fake_sections): Set SHF_TLS for SEC_THREAD_LOCAL sections.
+	(map_sections_to_segments): Build PT_TLS segment if necessary.
+	(assign_file_positions_for_segments): Likewise.
+	(get_program_header_size): Account for PT_TLS segment.
+	(swap_out_syms): Set type of BSF_THREAD_LOCAL symbols and symbols from
+	SEC_THREAD_LOCAL sections to STT_TLS.
+	* reloc.c: Add 386 and IA-64 TLS relocs.
+	* section.c (SEC_THREAD_LOCAL): Define.
+	(SEC_CONSTRUCTOR_TEXT, SEC_CONSTRUCTOR_DATA, SEC_CONSTRUCTOR_BSS):
+	Remove.
+	* elflink.h (elf_link_add_object_symbols): Support .tcommon.
+	(size_dynamic_sections): If DF_STATIC_TLS, set DF_FLAGS
+	unconditionally.
+	(struct elf_final_link_info): Add first_tls_sec.
+	(elf_bfd_final_link): Set first_tls_sec.
+	Compute elf_hash_table (info)->tls_segment.
+	(elf_link_output_extsym): Handle STT_TLS symbols.
+	(elf_link_input_bfd): Likewise.
+	* syms.c (BSF_THREAD_LOCAL): Define.
+	* bfd-in2.h: Rebuilt.
+	* libbfd.h: Rebuilt.
+	* elf32-i386.c (elf_i386_tls_transition, dtpoff_base, tpoff,
+	elf_i386_mkobject, elf_i386_object_p): New functions.
+	(elf_howto_table): Add TLS relocs.
+	(elf_i386_reloc_type_lookup): Support TLS relocs.
+	(elf_i386_info_to_howto_rel): Likewise.
+	(struct elf_i386_link_hash_entry): Add tls_type.
+	(struct elf_i386_obj_tdata): New.
+	(elf_i386_hash_entry, elf_i386_tdata, elf_i386_local_got_tls_type):
+	New macros.
+	(struct elf_i386_link_hash_table): Add tls_ldm_got.
+	(link_hash_newfunc): Clear tls_type.
+	(elf_i386_check_relocs): Support TLS relocs.
+	(elf_i386_gc_sweep_hook): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(bfd_elf32_mkobject, elf_backend_object_p): Define.
+	* elfxx-ia64.c (struct elfNN_ia64_dyn_sym_info): Add tprel_offset,
+	dtpmod_offset, dtprel_offset, tprel_done, dtpmod_done, dtprel_done,
+	want_tprel, want_dtpmod, want_dtprel.
+	(elfNN_ia64_tprel_base, elfNN_ia64_dtprel_base): New functions.
+	(ia64_howto_table): Add TLS relocs, rename R_IA64_LTOFF_TP22 to
+	R_IA64_LTOFF_TPREL22.
+	(elf_code_to_howto_index): Add TLS relocs.
+	(elfNN_ia64_check_relocs): Support TLS relocs.
+	(allocate_global_data_got): Account for TLS .got data.
+	(allocate_dynrel_entries): Account for TLS dynamic relocations.
+	(elfNN_ia64_install_value): Supprt TLS relocs.
+	(set_got_entry): Support TLS relocs.
+	(elfNN_ia64_relocate_section): Likewise.
+
 2002-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): For the Thumb

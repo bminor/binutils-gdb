@@ -285,6 +285,9 @@ CODE_FRAGMENT
 .     as well.  *}
 .#define BSF_DEBUGGING_RELOC 0x20000
 .
+.  {* This symbol is thread local.  Used in ELF.  *}
+.#define BSF_THREAD_LOCAL  0x40000
+.
 .  flagword flags;
 .
 .  {* A pointer to the section to which this symbol is

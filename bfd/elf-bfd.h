@@ -234,6 +234,14 @@ enum elf_link_info_type
   ELF_INFO_TYPE_LAST
 };
 
+/* Cached start, size and alignment of PT_TLS segment.  */
+struct elf_link_tls_segment
+{
+  bfd_vma start;
+  bfd_size_type size;
+  unsigned int align;
+};
+
 /* ELF linker hash table.  */
 
 struct elf_link_hash_table
@@ -286,6 +294,9 @@ struct elf_link_hash_table
   /* A linked list of DT_RPATH/DT_RUNPATH names found in dynamic
      objects included in the link.  */
   struct bfd_link_needed_list *runpath;
+
+  /* Cached start, size and alignment of PT_TLS segment.  */
+  struct elf_link_tls_segment *tls_segment;
 };
 
 /* Look up an entry in an ELF linker hash table.  */

@@ -233,7 +233,9 @@ build_link_order (statement)
 
 	  ASSERT (output_section->owner == output_bfd);
 
-	  if ((output_section->flags & SEC_HAS_CONTENTS) != 0)
+	  if ((output_section->flags & SEC_HAS_CONTENTS) != 0
+	      || ((output_section->flags & SEC_LOAD) != 0
+		  && (output_section->flags & SEC_THREAD_LOCAL)))
 	    {
 	      struct bfd_link_order *link_order;
 

@@ -1219,6 +1219,12 @@ tc_i386_fix_adjustable (fixP)
   if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_386_PLT32
       || fixP->fx_r_type == BFD_RELOC_386_GOT32
+      || fixP->fx_r_type == BFD_RELOC_386_TLS_GD
+      || fixP->fx_r_type == BFD_RELOC_386_TLS_LDM
+      || fixP->fx_r_type == BFD_RELOC_386_TLS_LDO_32
+      || fixP->fx_r_type == BFD_RELOC_386_TLS_IE_32
+      || fixP->fx_r_type == BFD_RELOC_386_TLS_LE_32
+      || fixP->fx_r_type == BFD_RELOC_386_TLS_LE
       || fixP->fx_r_type == BFD_RELOC_X86_64_PLT32
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOT32
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOTPCREL
@@ -1236,6 +1242,12 @@ tc_i386_fix_adjustable (fixP)
 #define BFD_RELOC_386_PLT32		0
 #define BFD_RELOC_386_GOT32		0
 #define BFD_RELOC_386_GOTOFF		0
+#define BFD_RELOC_386_TLS_GD		0
+#define BFD_RELOC_386_TLS_LDM		0
+#define BFD_RELOC_386_TLS_LDO_32	0
+#define BFD_RELOC_386_TLS_IE_32		0
+#define BFD_RELOC_386_TLS_LE_32		0
+#define BFD_RELOC_386_TLS_LE		0
 #define BFD_RELOC_X86_64_PLT32		0
 #define BFD_RELOC_X86_64_GOT32		0
 #define BFD_RELOC_X86_64_GOTPCREL	0
@@ -3371,10 +3383,16 @@ lex_got (reloc, adjust)
     const char *str;
     const RELOC_ENUM rel[NUM_FLAG_CODE];
   } gotrel[] = {
-    { "PLT",      { BFD_RELOC_386_PLT32,  0, BFD_RELOC_X86_64_PLT32    } },
-    { "GOTOFF",   { BFD_RELOC_386_GOTOFF, 0, 0                         } },
-    { "GOTPCREL", { 0,                    0, BFD_RELOC_X86_64_GOTPCREL } },
-    { "GOT",      { BFD_RELOC_386_GOT32,  0, BFD_RELOC_X86_64_GOT32    } }
+    { "PLT",      { BFD_RELOC_386_PLT32,      0, BFD_RELOC_X86_64_PLT32    } },
+    { "GOTOFF",   { BFD_RELOC_386_GOTOFF,     0, 0                         } },
+    { "GOTPCREL", { 0,                        0, BFD_RELOC_X86_64_GOTPCREL } },
+    { "TLSGD",    { BFD_RELOC_386_TLS_GD,     0, 0                         } },
+    { "TLSLDM",   { BFD_RELOC_386_TLS_LDM,    0, 0                         } },
+    { "GOTTPOFF", { BFD_RELOC_386_TLS_IE_32,  0, 0                         } },
+    { "TPOFF",    { BFD_RELOC_386_TLS_LE_32,  0, 0                         } },
+    { "NTPOFF",   { BFD_RELOC_386_TLS_LE,     0, 0                         } },
+    { "DTPOFF",   { BFD_RELOC_386_TLS_LDO_32, 0, 0                         } },
+    { "GOT",      { BFD_RELOC_386_GOT32,      0, BFD_RELOC_X86_64_GOT32    } }
   };
   char *cp;
   unsigned int j;
@@ -4577,6 +4595,12 @@ md_apply_fix3 (fixP, valP, seg)
 	value -= 1;
 	break;
       case BFD_RELOC_386_GOT32:
+      case BFD_RELOC_386_TLS_GD:
+      case BFD_RELOC_386_TLS_LDM:
+      case BFD_RELOC_386_TLS_LDO_32:
+      case BFD_RELOC_386_TLS_IE_32:
+      case BFD_RELOC_386_TLS_LE_32:
+      case BFD_RELOC_386_TLS_LE:
       case BFD_RELOC_X86_64_GOT32:
 	value = 0; /* Fully resolved at runtime.  No addend.  */
 	break;
@@ -5045,6 +5069,12 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_386_GOT32:
     case BFD_RELOC_386_GOTOFF:
     case BFD_RELOC_386_GOTPC:
+    case BFD_RELOC_386_TLS_GD:
+    case BFD_RELOC_386_TLS_LDM:
+    case BFD_RELOC_386_TLS_LDO_32:
+    case BFD_RELOC_386_TLS_IE_32:
+    case BFD_RELOC_386_TLS_LE_32:
+    case BFD_RELOC_386_TLS_LE:
     case BFD_RELOC_X86_64_32S:
     case BFD_RELOC_RVA:
     case BFD_RELOC_VTABLE_ENTRY:

@@ -1,3 +1,14 @@
+2002-05-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (get_segment_type): Add PT_TLS.
+	(get_elf_section_flags): Add SHF_TLS.
+	(get_dynamic_flags): Optimize.  Add DF_STATIC_TLS.
+	(process_dynamic_segment): Use puts instead of printf.
+	(get_symbol_type): Support STT_TLS.
+	* objdump.c (dump_section_header): Remove SEC_CONSTRUCTOR_TEXT,
+	SEC_CONSTRUCTOR_DATA, SEC_CONSTRUCTOR_BSS.
+	Add SEC_THREAD_LOCAL.
+
 2002-05-23  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* rdcoff.c: Fix formatting.

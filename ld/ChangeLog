@@ -1,3 +1,12 @@
+2002-05-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* scripttempl/elf.sc: Add .rel{,a}.t{bss,data}, .tdata and .tbss.
+	* ldlang.c (lang_add_section): Set SEC_THREAD_LOCAL for
+	output section if necessary.  Handle .tbss.
+	(lang_size_sections): Clear _raw_size for .tbss section
+	(it allocates space in PT_TLS segment only).
+	* ldwrite.c (build_link_order): Build link order for .tbss too.
+
 2002-05-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in: Correct spelling of AC_PREREQ.

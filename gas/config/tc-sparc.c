@@ -2916,6 +2916,7 @@ md_apply_fix3 (fixP, valP, segment)
 	  && (S_IS_EXTERNAL (sym)
 	      || S_IS_WEAK (sym)
 	      || (seg->flags & SEC_MERGE)
+	      || (seg->flags & SEC_THREAD_LOCAL)
 	      || (sparc_pic_code && ! fixP->fx_pcrel)
 	      || (seg != segment
 		  && (((bfd_get_section_flags (stdoutput, seg) & SEC_LINK_ONCE) != 0)
