@@ -1,3 +1,9 @@
+Thu Jan 14 18:36:48 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* constvars.c: Remove C++-isms.
+	* constvars.exp: Use gdb_test everywhere, add xfails if compiled
+ 	with GCC.
+
 Mon Jan 11 10:08:03 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes are part of the HP merge.
@@ -35,7 +41,6 @@ Mon Jan 11 10:08:03 1999  David Taylor  <taylor@texas.cygnus.com>
 	gcc, then skip these tests.
 
 Sun Jan 10 23:44:11 1999  David Taylor  <taylor@texas.cygnus.com>
-
 
 	The following files are part of the HP merge; some had longer
 	names at HP, but have been renamed to be no more than 14
