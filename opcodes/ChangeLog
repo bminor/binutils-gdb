@@ -16,6 +16,7 @@ start-sanitize-sky
 	(gif_opcodes): Likewise.
 	({insert,extract,print}_gif_regs): Likewise.
 	(gif_regs): Add new register number/name changes.
+	(dma_opcodes): Add dmarefe insn.
 end-sanitize-sky
 
 Tue Feb 24 11:06:18 1998  Nick Clifton  <nickc@cygnus.com>
