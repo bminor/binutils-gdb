@@ -1,3 +1,7 @@
+Fri Oct 20 19:08:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* MAINTAINERS: Add Fred Fish to Blanket Write Privs list.
+
 2000-10-19  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib.c (LM_ADDR, LM_NEXT, LM_NAME, IGNORE_FIRST_LINK_MAP_ENTRY,
