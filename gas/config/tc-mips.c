@@ -4619,7 +4619,7 @@ macro (struct mips_cl_insn *ip)
 	  macro_build (NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
 	  macro_build (NULL, &icnt, NULL, dbl ? "ddiv" : "div", "z,s,t",
 		       sreg, treg);
-	  macro_build (NULL, &icnt,NULL, "break", "c", 7);
+	  macro_build (NULL, &icnt, NULL, "break", "c", 7);
 	}
       expr1.X_add_number = -1;
       macro_build (NULL, &icnt, &expr1, dbl ? "daddiu" : "addiu", "t,r,j",
@@ -5139,7 +5139,7 @@ macro (struct mips_cl_insn *ip)
 		  else
 		    {
 		      assert (tempreg == AT);
-		      macro_build (NULL, &icnt,NULL, ADDRESS_ADD_INSN,
+		      macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN,
 				   "d,v,t", treg, AT, breg);
 		      dreg = treg;
 		      adj = 4;
@@ -7322,7 +7322,7 @@ macro2 (struct mips_cl_insn *ip)
 	  macro_build (NULL, &icnt, NULL, "drorv", "d,t,s", dreg, sreg, treg);
 	  return;
 	}
-      macro_build (NULL, &icnt,NULL, "dsubu", "d,v,t", AT, 0, treg);
+      macro_build (NULL, &icnt, NULL, "dsubu", "d,v,t", AT, 0, treg);
       macro_build (NULL, &icnt, NULL, "dsllv", "d,t,s", AT, sreg, AT);
       macro_build (NULL, &icnt, NULL, "dsrlv", "d,t,s", dreg, sreg, treg);
       macro_build (NULL, &icnt, NULL, "or", "d,v,t", dreg, dreg, AT);
@@ -7366,7 +7366,7 @@ macro2 (struct mips_cl_insn *ip)
 	r = (rot < 0x20) ? "dsrl" : "dsrl32";
 	l = ((0x40 - rot) < 0x20) ? "dsll" : "dsll32";
 	rot &= 0x1f;
-	macro_build ( NULL, &icnt,NULL, r, "d,w,<", AT, sreg, rot);
+	macro_build (NULL, &icnt, NULL, r, "d,w,<", AT, sreg, rot);
 	macro_build (NULL, &icnt, NULL, l, "d,w,<", dreg, sreg,
 		     (0x20 - rot) & 0x1f);
 	macro_build (NULL, &icnt, NULL, "or", "d,v,t", dreg, dreg, AT);
@@ -7579,7 +7579,7 @@ macro2 (struct mips_cl_insn *ip)
 
     case M_SNE:
       if (sreg == 0)
-	macro_build (NULL, &icnt,NULL, "sltu","d,v,t", dreg, 0, treg);
+	macro_build (NULL, &icnt, NULL, "sltu","d,v,t", dreg, 0, treg);
       else if (treg == 0)
 	macro_build (NULL, &icnt, NULL, "sltu", "d,v,t", dreg, 0, sreg);
       else
