@@ -3000,6 +3000,7 @@ output_jump ()
 {
   char *p;
   int size;
+  fixS *fixP;
 
   if (i.tm.opcode_modifier & JumpByte)
     {
@@ -3050,8 +3051,14 @@ output_jump ()
   p = frag_more (1 + size);
   *p++ = i.tm.base_opcode;
 
-  fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-	       i.op[0].disps, 1, reloc (size, 1, 1, i.reloc[0]));
+  fixP = fix_new_exp (frag_now, p - frag_now->fr_literal, size,
+		      i.op[0].disps, 1, reloc (size, 1, 1, i.reloc[0]));
+
+  /* All jumps handled here are signed, but don't use a signed limit
+     check for 32 and 16 bit jumps as we want to allow wrap around at
+     4G and 64k respectively.  */
+  if (size == 1)
+    fixP->fx_signed = 1;
 }
 
 static void
@@ -4394,11 +4401,14 @@ md_estimate_size_before_relax (fragP, segment)
 	case COND_JUMP:
 	  if (no_cond_jump_promotion && fragP->fr_var == NO_RELOC)
 	    {
+	      fixS *fixP;
+
 	      fragP->fr_fix += 1;
-	      fix_new (fragP, old_fr_fix, 1,
-		       fragP->fr_symbol,
-		       fragP->fr_offset, 1,
-		       BFD_RELOC_8_PCREL);
+	      fixP = fix_new (fragP, old_fr_fix, 1,
+			      fragP->fr_symbol,
+			      fragP->fr_offset, 1,
+			      BFD_RELOC_8_PCREL);
+	      fixP->fx_signed = 1;
 	      break;
 	    }
 

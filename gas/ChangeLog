@@ -1,3 +1,9 @@
+2002-10-11  Michel Six  <msix@ccr.jussieu.fr>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.c (output_jump): Set fx_signed for loop/jcxz.
+	(md_estimate_size_before_relax): Likewise for 8 bit branches.
+
 Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config/tc-sh.c (assemble_ppi): Initialize reg_x / reg_y / reg_n
@@ -22,12 +28,12 @@ Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	(TC_FORCE_RELOCATION): Tidy arg.
 
 2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
-            Ken Raeburn  <raeburn@cygnus.com>
-            Aldy Hernandez  <aldyh@redhat.com>
-            DJ Delorie  <dj@redhat.com>
-            Michael Meissner  <meissner@redhat.com>
-            Eric Christopher  <echristo@redhat.com>
-            Richard Sandiford  <rsandifo@redhat.com>
+	    Ken Raeburn  <raeburn@cygnus.com>
+	    Aldy Hernandez  <aldyh@redhat.com>
+	    DJ Delorie  <dj@redhat.com>
+	    Michael Meissner  <meissner@redhat.com>
+	    Eric Christopher  <echristo@redhat.com>
+	    Richard Sandiford  <rsandifo@redhat.com>
 
 	* doc/c-mips.texi: Add entries for -march=vr4120,vr4130,vr4181,
 	vr5400 and vr5500.  Add entry for -mfix-vr4122-bugs.
@@ -53,7 +59,7 @@ Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	twice if howto->pcrel_offset is true.
 
 2002-09-28  Matt Thomas  <matt@3am-software.com>
-            Jason Thorpe  <thorpej@wasabisystems.com>
+	    Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config/tc-vax.c (md_estimate_size_before_relax): Only try to
 	convert undefined references to GOT32/PLT32 if PIC code is
