@@ -3820,8 +3820,9 @@ load_address (int reg, expressionS *ep, int *used_at)
        */
       if (HAVE_64BIT_ADDRESSES)
 	{
-	  /* We don't do GP optimization for now because RELAX_ENCODE can't
-	     hold the data for such large chunks.  */
+	  /* ??? We don't provide a GP-relative alternative for these macros.
+	     It used not to be possible with the original relaxation code,
+	     but it could be done now.  */
 
 	  if (*used_at == 0 && ! mips_opts.noat)
 	    {
@@ -4931,8 +4932,9 @@ macro (struct mips_cl_insn *ip)
 	  */
 	  if (HAVE_64BIT_ADDRESSES)
 	    {
-	      /* We don't do GP optimization for now because RELAX_ENCODE can't
-		 hold the data for such large chunks.  */
+	      /* ??? We don't provide a GP-relative alternative for
+		 these macros.  It used not to be possible with the
+		 original relaxation code, but it could be done now.  */
 
 	      if (used_at == 0 && ! mips_opts.noat)
 		{
@@ -6017,8 +6019,9 @@ macro (struct mips_cl_insn *ip)
 		  && offset_expr.X_op == O_constant
 		  && ! IS_SEXT_32BIT_NUM (offset_expr.X_add_number + 0x8000)))
 	    {
-	      /* We don't do GP optimization for now because RELAX_ENCODE can't
-		 hold the data for such large chunks.  */
+	      /* ??? We don't provide a GP-relative alternative for
+		 these macros.  It used not to be possible with the
+		 original relaxation code, but it could be done now.  */
 
 	      if (used_at == 0 && ! mips_opts.noat)
 		{

@@ -1,5 +1,10 @@
 2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (load_address, macro): Update comments about
+	NewABI GP relaxation.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (macro_build): Remove place and counter arguments.
 	(mips_build_lui, macro_build_ldst_constoffset): Likewise.
 	(mips16_macro_build, macro_build_jalr): Remove counter argument.
