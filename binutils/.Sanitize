@@ -63,6 +63,7 @@ sanity.sh
 size.1
 size.c
 strip.1
+testsuite
 version.c
 
 Do-last:
