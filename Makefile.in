@@ -1,7 +1,7 @@
 #
 # Makefile for directory with subdirs to build.
 #
-# Last Mod Mon Apr 15 13:57:46 PDT 1991, by rich@sendai
+# Last Mod Tue Apr 16 12:57:52 PDT 1991, by rich@sendai
 #
 
 # $Id$
@@ -43,6 +43,13 @@ subdir_do: $(SUBDIRS) $(TARGETDIRS)
 
 all:
 	$(MAKE) subdir_do DO=all
+
+stage1:
+	$(MAKE) subdir_do DO=stage1
+
+bootstrap:
+	$(MAKE) all
+	$(MAKE) stage1
 
 clean:
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
@@ -96,7 +103,11 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 
 #
 # $Log$
-# Revision 1.8  1991/04/15 23:43:45  rich
+# Revision 1.9  1991/04/17 01:34:36  rich
+# Added getopt for binutils, fixed problem with host dependancies in
+# configure.template.
+#
+# Revision 1.8  1991/04/15  23:43:45  rich
 # Now handles multiple hosts and targets.
 #
 # Revision 1.7  1991/04/13  13:06:16  tiemann
