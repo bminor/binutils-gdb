@@ -61,14 +61,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
  */
 
-#define IS_PUSH(x) ((x & 0xff00)==0x6d00)
+#define IS_PUSH(x) (((x) & 0xff00)==0x6d00)
 #define IS_LINK_8(x) ((x) == 0x17)
 #define IS_LINK_16(x) ((x) == 0x1f)
-#define IS_MOVE_FP(x) (x == 0x0d76)
-#define IS_MOV_SP_FP(x) (x == 0x0d76)
-#define IS_SUB2_SP(x) (x==0x1b87)
-#define IS_MOVK_R5(x) (x==0x7905)
-#define IS_SUB_R5SP(x) (x==0x1957)
+#define IS_MOVE_FP(x) ((x) == 0x0d76)
+#define IS_MOV_SP_FP(x) ((x) == 0x0d76)
+#define IS_SUB2_SP(x) ((x) == 0x1b87)
+#define IS_MOVK_R5(x) ((x) == 0x7905)
+#define IS_SUB_R5SP(x) ((x) == 0x1957)
 
 #define LINK_8 0x17
 #define LINK_16 0x1f
@@ -214,6 +214,7 @@ NEXT_PROLOGUE_INSN (addr, lim, pword1)
    info about the registers saved by this frame.
    `fi' is a struct frame_info pointer; we fill in various fields in it
    to reflect the offsets of the arg pointer and the locals pointer.  */
+
 #if 0
 static CORE_ADDR
 examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
@@ -508,7 +509,7 @@ frame_find_saved_regs (frame_info, frame_saved_regs)
       else
 	goto lose;
 #if 0
-      fixme steve
+      /* FIXME steve */
       /* If have an add:g.waddal #-n, sp next, adjust next_addr.  */
       if ((0x0c0177777 & read_memory_integer (pc, 2)) == 0157774)
 	next_addr += read_memory_integer (pc += 2, 4), pc += 4;

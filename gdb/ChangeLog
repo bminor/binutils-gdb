@@ -1,3 +1,7 @@
+Sun Aug  1 09:42:13 1993  Fred Fish  (fnf@cygnus.com)
+
+	* h8500-tdep.c:  Add parens around a few macro args.
+
 Fri Jul 30 15:43:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* TODO: Remove items about unix-to-unix/rapp debugging (now we
