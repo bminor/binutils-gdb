@@ -1,5 +1,11 @@
 2002-08-25  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (c-exp.tab.o, jv-exp.tab.o, f-exp.tab.o)
+	(m2-exp.tab.o, p-exp.tab.o, ada-exp.tab.o): Move to before the
+	source file dependencies.  Cleanup corresponding generator rules.
+
+2002-08-25  Andrew Cagney  <ac131313@redhat.com>
+
 	* regcache.h (register_offset_hack): Declare.
 	(regcache_cooked_read_using_offset_hack): Declare.
 	(regcache_cooked_write_using_offset_hack): Declare.

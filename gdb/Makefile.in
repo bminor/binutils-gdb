@@ -1198,15 +1198,20 @@ version.c: Makefile version.in
 	mv version.c-tmp version.c
 version.o: version.c $(version_h)
 
-# c-exp.tab.c is generated in objdir from c-exp.y if it doesn't exist
-# in srcdir, then compiled in objdir to c-exp.tab.o.
 
-# If we said c-exp.tab.c rather than ./c-exp.tab.c some makes
-# would sometimes re-write it into $(srcdir)/c-exp.tab.c.
+# LANG-exp.tab.c is generated in objdir from LANG-exp.y if it doesn't
+# exist in srcdir, then compiled in objdir to LANG-exp.tab.o.
 
-# Remove bogus decls for malloc/realloc/free which conflict with everything
-# else.  Strictly speaking c-exp.tab.c should therefore depend on
-# Makefile.in, but that was a pretty big annoyance.
+# If we said LANG-exp.tab.c rather than ./c-exp.tab.c some makes would
+# sometimes re-write it into $(srcdir)/c-exp.tab.c.
+
+# Remove bogus decls for malloc/realloc/free which conflict with
+# everything else.  Strictly speaking c-exp.tab.c should therefore
+# depend on Makefile.in, but that was a pretty big annoyance.
+
+# See comments above ...
+.PRECIOUS: c-exp.tab.c
+c-exp.tab.o: c-exp.tab.c
 c-exp.tab.c: c-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/c-exp.y  y.tab.c c-exp.tmp -- $(YFLAGS) 
 	-sed -e '/extern.*malloc/d' \
@@ -1220,6 +1225,8 @@ c-exp.tab.c: c-exp.y
 	-rm c-exp.tmp
 	mv c-exp.new ./c-exp.tab.c
 
+# See comments above ...
+.PRECIOUS: jv-exp.tab.c
 jv-exp.tab.o: jv-exp.tab.c
 jv-exp.tab.c: jv-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/jv-exp.y  y.tab.c jv-exp.tmp -- $(YFLAGS) 
@@ -1234,6 +1241,8 @@ jv-exp.tab.c: jv-exp.y
 	-rm jv-exp.tmp
 	mv jv-exp.new ./jv-exp.tab.c
 
+# See comments above ...
+.PRECIOUS: f-exp.tab.c
 f-exp.tab.o: f-exp.tab.c
 f-exp.tab.c: f-exp.y c-exp.tab.c
 	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/f-exp.y  y.tab.c f-exp.tmp -- $(YFLAGS) 
@@ -1248,10 +1257,8 @@ f-exp.tab.c: f-exp.y c-exp.tab.c
 	-rm f-exp.tmp
 	mv f-exp.new ./f-exp.tab.c
 
-# m2-exp.tab.c is generated in objdir from m2-exp.y if it doesn't exist
-# in srcdir, then compiled in objdir to m2-exp.tab.o.
-# Remove bogus decls for malloc/realloc/free which conflict with everything
-# else.
+# See comments above ...
+.PRECIOUS: m2-exp.tab.c
 m2-exp.tab.o: m2-exp.tab.c
 m2-exp.tab.c: m2-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/m2-exp.y  y.tab.c m2-exp.tmp -- $(YFLAGS) 
@@ -1266,10 +1273,9 @@ m2-exp.tab.c: m2-exp.y
 	-rm m2-exp.tmp
 	mv m2-exp.new ./m2-exp.tab.c
 
-# ada-exp.tab.c is generated in objdir from ada-exp.y if it doesn't exist
-# in srcdir, then compiled in objdir to ada-exp.tab.o.
-# Remove bogus decls for malloc/realloc/free which conflict with everything
-# else.
+# See comments above ...
+.PRECIOUS: ada-exp.tab.c
+ada-exp.tab.o: ada-exp.tab.c
 ada-exp.tab.c: ada-exp.y 
 	$(YACC) $(YFLAGS) $(srcdir)/ada-exp.y
 	-sed -e '/extern.*malloc/d' \
@@ -1282,6 +1288,9 @@ ada-exp.tab.c: ada-exp.y
 	-rm y.tab.c
 	mv ada-exp.new ./ada-exp.tab.c
 
+# See comments above ...
+.PRECIOUS: ada-lex.c
+ada-lex.o: ada-lex.c
 ada-lex.c: ada-lex.l
 	@if [ "$(FLEX)" ] && $(FLEX) --version >/dev/null 2>&1; then \
 	    echo $(FLEX) -Isit $(srcdir)/ada-lex.l ">" ada-lex.c; \
@@ -1293,10 +1302,8 @@ ada-lex.c: ada-lex.l
 	    echo "Warning: ada-lex.c older than ada-lex.l and flex not available."; \
 	fi
 
-# p-exp.tab.c is generated in objdir from p-exp.y if it doesn't exist
-# in srcdir, then compiled in objdir to p-exp.tab.o.
-# Remove bogus decls for malloc/realloc/free which conflict with everything
-# else.
+# See comments above ...
+.PRECIOUS: p-exp.tab.c
 p-exp.tab.o: p-exp.tab.c
 p-exp.tab.c: p-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/p-exp.y  y.tab.c p-exp.tmp -- $(YFLAGS)
@@ -1310,10 +1317,6 @@ p-exp.tab.c: p-exp.y
 	  < p-exp.tmp > p-exp.new
 	-rm p-exp.tmp
 	mv p-exp.new ./p-exp.tab.c
-
-# These files are updated atomically, so make never has to remove them
-.PRECIOUS: m2-exp.tab.c f-exp.tab.c c-exp.tab.c
-.PRECIOUS: jv-exp.tab.c p-exp.tab.c ada-exp.tab.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
@@ -1428,6 +1431,35 @@ v850ice.o: $(srcdir)/v850ice.c
 z8k-tdep.o: $(srcdir)/z8k-tdep.c
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
 		$(srcdir)/z8k-tdep.c
+
+#
+# Generated YACC/LEX dependencies
+#
+
+c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
+	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
+	$(symfile_h) $(objfiles_h)
+
+jv-exp.tab.o: jv-exp.tab.c jv-lang.h $(defs_h) $(expression_h) \
+	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
+	$(bfd_h) $(objfiles_h) $(symfile_h)
+
+f-exp.tab.o: f-exp.tab.c f-lang.h $(defs_h) $(expression_h) \
+	$(language_h) $(parser_defs_h) $(value_h) $(bfd_h) $(objfiles_h) \
+	$(symfile_h)
+
+m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
+	$(language_h) m2-lang.h $(parser_defs_h) $(symtab_h) $(value_h) \
+	$(bfd_h) $(objfiles_h) $(symfile_h)
+
+p-exp.tab.o: p-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
+	$(language_h) p-lang.h $(parser_defs_h) $(symtab_h) $(value_h) \
+	$(bfd_h) $(objfiles_h) $(symfile_h)
+
+ada-exp.tab.o: ada-exp.tab.c ada-lex.c ada-lang.h \
+	$(defs_h) $(expression_h) \
+	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
+	$(bfd_h) objfiles.h symfile.h
 
 # The dependencies.  In aphabetic order.
 
@@ -2379,31 +2411,6 @@ xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) $(xcoffsolib_h) $(inferior_h) \
 # cagney 1999-09-02.
 z8k-tdep.o: z8k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbcmd_h) \
 	$(gdbtypes_h) $(dis_asm_h) $(gdbcore_h) $(regcache_h)
-
-c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
-	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h)
-
-jv-exp.tab.o: jv-exp.tab.c jv-lang.h $(defs_h) $(expression_h) \
-	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
-	$(bfd_h) $(objfiles_h) $(symfile_h)
-
-f-exp.tab.o: f-exp.tab.c f-lang.h $(defs_h) $(expression_h) \
-	$(language_h) $(parser_defs_h) $(value_h) $(bfd_h) $(objfiles_h) \
-	$(symfile_h)
-
-m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
-	$(language_h) m2-lang.h $(parser_defs_h) $(symtab_h) $(value_h) \
-	$(bfd_h) $(objfiles_h) $(symfile_h)
-
-p-exp.tab.o: p-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
-	$(language_h) p-lang.h $(parser_defs_h) $(symtab_h) $(value_h) \
-	$(bfd_h) $(objfiles_h) $(symfile_h)
-
-ada-exp.tab.o: ada-exp.tab.c ada-lex.c ada-lang.h \
-	$(defs_h) $(expression_h) \
-	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
-	$(bfd_h) objfiles.h symfile.h
 
 gdb-events.o: gdb-events.c $(gdb_events_h) $(defs_h) $(gdbcmd_h)
 
