@@ -1,5 +1,9 @@
 2001-06-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* config/tc-sh.c (md_pseudo_table): Only intercept the .file and
+	.loc pseudos if the dfwarf2 functions are available.
+	(md_assemble): Only call dwarf2_emit_insn if it is available.
+
 	* expr.c: Fix typo in comment.
 
 2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
