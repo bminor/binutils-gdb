@@ -1,5 +1,5 @@
 /* m68hc11-dis.c -- Motorola 68HC11 & 68HC12 disassembly
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
 This program is free software; you can redistribute it and/or modify
@@ -35,6 +35,14 @@ static const char *const reg_dst_table[] = {
 };
 
 #define OP_PAGE_MASK (M6811_OP_PAGE2|M6811_OP_PAGE3|M6811_OP_PAGE4)
+
+/* Prototypes for local functions.  */
+static int read_memory
+  PARAMS ((bfd_vma, bfd_byte *, int, struct disassemble_info *));
+static int print_indexed_operand
+  PARAMS ((bfd_vma, struct disassemble_info *, int));
+static int print_insn
+  PARAMS ((bfd_vma, struct disassemble_info *, int));
 
 static int
 read_memory (memaddr, buffer, size, info)
