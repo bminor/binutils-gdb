@@ -45,5 +45,25 @@ Things-to-lose:
 # done.
 
 Do-last:
+sh3e_files="ChangeLog"
+if ( echo $* | grep keep\-sh3e > /dev/null ) ; then
+	if [ -n "${verbose}" ] ; then
+		echo Keeping sh3e stuff in $sh3e_files.
+	fi
+else
+	if [ -n "${verbose}" ]; then
+		echo -n Cleaning sh3e in `pwd`:
+	fi
+	for f in $sh3e_files ; do
+		if [ -n "${verbose}" ] ; then
+			echo -n " " $f
+		fi
+		sed -e '/start\-sanitize\-sh3e/,/end\-sanitize\-sh3e/d' -e '/ xl /d' < $f > new
+		if [ -n "${safe}" ] ; then
+			mv $f .Recover
+		fi
+		mv new $f
+	done
+fi
 
 # eof

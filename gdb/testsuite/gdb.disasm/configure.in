@@ -13,5 +13,8 @@ srcname="gdb.disasm"
 case "${target}" in
 
 hppa*-*-*)		target_makefile_frag=hppa.mt ;;
+# start-sanitize-sh3e
+sh*-*-*)		target_makefile_frag=sh3.mt ;;
+# end-sanitize-sh3e
 
 esac

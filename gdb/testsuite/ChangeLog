@@ -1,3 +1,12 @@
+start-sanitize-sh3e
+Mon Aug  7 02:43:28 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/sh3.s: Source for sh3 disassembler tests.
+	* gdb.disasm/sh3.exp: Run the sh3 disassembler tests.
+	* gdb.disasm/configure.in (sh-*-*): Use sh3.mt makefile fragment.
+	* gdb.disasm/sh3.mt: Makefile fragment for sh3 ests.
+
+end-sanitize-sh3e
 Sun Aug  6 16:52:29 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/corefile.exp:  Change xfail for backtrace in
