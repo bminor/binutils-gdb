@@ -1,5 +1,15 @@
 2001-11-29  Jim Blandy  <jimb@redhat.com>
 
+	Tighten up GDB's support for returning structs by value.
+	* s390-tdep.c (s390_use_struct_convention): New function.
+	(s390_gdbarch_init): Register it as the S/390's
+ 	USE_STRUCT_CONVENTION method.  Register
+	generic_cannot_extract_struct_value_address as our
+	EXTRACT_STRUCT_VALUE_ADDRESS method.
+	* arch-utils.c (generic_cannot_extract_struct_value_address): New
+ 	function.
+	* arch-utils.h: Add corresponding prototype.
+
 	* values.c (value_being_returned): Make error message a proper
  	sentence.
 

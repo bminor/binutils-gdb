@@ -240,6 +240,21 @@ generic_register_convertible_not (int num)
 }
   
 
+/* Under some ABI's that specify the `struct convention' for returning
+   structures by value, by the time we've returned from the function,
+   the return value is sitting there in the caller's buffer, but GDB
+   has no way to find the address of that buffer.
+
+   On such architectures, use this function as your
+   extract_struct_value_address method.  When asked to a struct
+   returned by value in this fashion, GDB will print a nice error
+   message, instead of garbage.  */
+CORE_ADDR
+generic_cannot_extract_struct_value_address (char *dummy)
+{
+  return 0;
+}
+
 int
 default_register_sim_regno (int num)
 {

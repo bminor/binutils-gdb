@@ -1592,6 +1592,17 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
+
+static int
+s390_use_struct_convention (int gcc_p, struct type *value_type)
+{
+  enum type_code code = TYPE_CODE (value_type);
+
+  return (code == TYPE_CODE_STRUCT
+          || code == TYPE_CODE_UNION);
+}
+
+
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 struct type *
@@ -1735,12 +1746,14 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_cannot_fetch_register (gdbarch, s390_cannot_fetch_register);
   set_gdbarch_cannot_store_register (gdbarch, s390_cannot_fetch_register);
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
-  set_gdbarch_use_struct_convention (gdbarch, generic_use_struct_convention);
+  set_gdbarch_use_struct_convention (gdbarch, s390_use_struct_convention);
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_register_name (gdbarch, s390_register_name);
   set_gdbarch_stab_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
+  set_gdbarch_extract_struct_value_address
+    (gdbarch, generic_cannot_extract_struct_value_address);
 
   /* Parameters for inferior function calls.  */
   set_gdbarch_call_dummy_p (gdbarch, 1);
@@ -1756,7 +1769,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_extract_struct_value_address (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_push_return_address (gdbarch, s390_push_return_address);
   set_gdbarch_sizeof_call_dummy_words (gdbarch,

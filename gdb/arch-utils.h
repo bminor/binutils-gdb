@@ -27,6 +27,8 @@ extern int gdbarch_debug;
 /* Fallback for register convertible. */
 extern gdbarch_register_convertible_ftype generic_register_convertible_not;
 
+extern CORE_ADDR generic_cannot_extract_struct_value_address (char *dummy);
+
 /* Helper function for targets that don't know how my arguments are
    being passed */
 extern gdbarch_frame_num_args_ftype frame_num_args_unknown;
