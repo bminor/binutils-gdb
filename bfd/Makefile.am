@@ -172,6 +172,8 @@ BFD32_BACKENDS = \
 	elf32-v850.lo \
 	elf32.lo \
 	elflink.lo \
+	epoc-pe-arm.lo \
+	epoc-pei-arm.lo \
 	hp300bsd.lo \
 	hp300hpux.lo \
 	som.lo \
@@ -291,6 +293,8 @@ BFD32_BACKENDS_CFILES = \
 	elf32-v850.c \
 	elf32.c \
 	elflink.c \
+	epoc-pe-arm.c \
+	epoc-pei-arm.c \
 	hp300bsd.c \
 	hp300hpux.c \
 	som.c \
@@ -888,6 +892,12 @@ elf32.lo: elf32.c elfcode.h $(INCDIR)/bfdlink.h elf-bfd.h \
   elfcore.h elflink.h
 elflink.lo: elflink.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
+epoc-pe-arm.lo: epoc-ep-arm.c pe-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+epoc-pei-arm.lo: epoc-pei-arm.c pei-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h
 hp300bsd.lo: hp300bsd.c libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h

@@ -25,6 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define TARGET_BIG_SYM       arm_epoc_pe_big_vec
 #define TARGET_BIG_NAME      "epoc-pe-arm-big"
 
+#define bfd_arm_allocate_interworking_sections \
+	bfd_arm_epoc_pe_allocate_interworking_sections
+#define bfd_arm_get_bfd_for_interworking \
+	bfd_arm_epoc_pe_get_bfd_for_interworking
+#define bfd_arm_process_before_allocation \
+	bfd_arm_epoc_pe_process_before_allocation
 
 #include "pe-arm.c"
 
