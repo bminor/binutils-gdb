@@ -1,3 +1,12 @@
+Sun Aug 15 20:48:55 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.guess: Recognize BSD on hp300.
+
+Wed Aug 11 18:35:13 1993  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.guess:  Map (9000/[34]??:HP-UX:*:*) to m68k-hp-hpux.
+	Bug report from "Hamish (H.I.) Macdonald" <hamish@bnr.ca>.
+
 Wed Aug 11 15:37:51 1993  Jason Merrill  (jason@deneb.cygnus.com)
 
 	* Makefile.in (all-send-pr): depends on all-prms
