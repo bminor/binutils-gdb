@@ -5006,12 +5006,12 @@ rm -f conftest*
 fi
 
 echo "$ac_t""$bu_cv_have_fopen64" 1>&6
-if test $bu_cv_have_fopen64 != no; then
+if test "$bu_cv_have_fopen64" != no; then
   cat >> confdefs.h <<\EOF
 #define HAVE_FOPEN64 1
 EOF
 
-  if test $bu_cv_have_fopen64 = "need -D_LARGEFILE64_SOURCE"; then
+  if test "$bu_cv_have_fopen64" = "need -D_LARGEFILE64_SOURCE"; then
     cat >> confdefs.h <<\EOF
 #define _LARGEFILE64_SOURCE 1
 EOF

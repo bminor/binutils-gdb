@@ -115,10 +115,10 @@ bu_cv_have_fopen64="need -D_LARGEFILE64_SOURCE",
 bu_cv_have_fopen64=no)
  CPPFLAGS=$saved_CPPFLAGS])])
 AC_MSG_RESULT($bu_cv_have_fopen64)
-if test $bu_cv_have_fopen64 != no; then
+if test "$bu_cv_have_fopen64" != no; then
   AC_DEFINE([HAVE_FOPEN64], 1,
 	    [Is fopen64 available?])
-  if test $bu_cv_have_fopen64 = "need -D_LARGEFILE64_SOURCE"; then
+  if test "$bu_cv_have_fopen64" = "need -D_LARGEFILE64_SOURCE"; then
     AC_DEFINE([_LARGEFILE64_SOURCE], 1,
 	      [Enable LFS])
   fi

@@ -1,3 +1,8 @@
+2002-06-21  Igor Schein  <igor@txc.com>
+
+	* configure.in: Quote bu_cv_have_fopen64.
+	* configure: Regenerate.
+
 2002-06-21  Mitsru Chinen  <chinen@jp.ibm.com>
 
 	* configure.in: Check for strcoll.
