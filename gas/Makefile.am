@@ -134,6 +134,7 @@ GAS_CFILES = \
 	bignum-copy.c \
 	cond.c \
 	depend.c \
+	dwarf2dbg.c \
 	ecoff.c \
 	ehopt.c \
 	expr.c \
@@ -164,6 +165,7 @@ HFILES = \
 	bignum.h \
 	bit_fix.h \
 	cgen.h \
+	dwarf2dbg.h \
 	ecoff.h \
 	emul-target.h \
 	emul.h \
@@ -331,6 +333,7 @@ GENERIC_OBJS = \
 	bignum-copy.o \
 	cond.o \
 	depend.o \
+	dwarf2dbg.o \
 	ehopt.o \
 	expr.o \
 	flonum-konst.o \
@@ -879,6 +882,7 @@ atof-generic.o: atof-generic.c
 bignum-copy.o: bignum-copy.c
 cond.o: cond.c macro.h sb.h $(INCDIR)/obstack.h
 depend.o: depend.c
+dwarf2dbg.o: dwarf2dbg.c dwarf2dbg.h subsegs.h
 ecoff.o: ecoff.c
 ehopt.o: ehopt.c subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
 expr.o: expr.c $(INCDIR)/obstack.h

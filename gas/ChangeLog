@@ -1,3 +1,37 @@
+1999-06-03  David Mosberger  <davidm@hpl.hp.com>
+
+	* dwarf2dbg.c (INITIAL_STATE): New macro encapsulating initial
+	state of line state-machine.
+	(struct ls): Collect DWARF2 line state-machine state in new member
+	SM.  Add member EMPTY_SEQUENCE to keep track if a code sequence
+	resulted in any DWARF2 directives.
+	(reset_state_machine): New function.
+	(out_end_sequence): Ditto.
+	(dwarf2_gen_line_info): When switching sections or switching to a
+	lower text address, call out_end_sequence() first to terminate the
+	previous code sequence as code sequences MUST have monotonically
+	increasing addresses.
+	(dwarf2_finish): Call out_end_sequence() instead of open coding it.
+
+1999-06-03  David Mosberger  <davidm@hpl.hp.com>
+
+	* as.c (parse_args): Add option -gdwarf2 to allow requesting
+	DWARF2 debug info (line information only, at this point).
+	* as.h: Update comment about supported debug formats.
+	* dwarf2dbg.c, dwarf2dbg.h: New files.
+	* Makefile.am (GAS_CFILES, HFILES, GENERIC_OBJS): Add them.
+
+	* expr.c (operand): Don't use [ for parens if we want an index op.
+	(op_encoding): Switch [ into O_index, if desired.
+	(op_rank): Renumber with O_index on bottom.
+	(expr): If O_index, match closing bracket.
+	* expr.h (O_index): New.
+
+	* read.c (read_a_source_file): Conditionally allow matched "
+	in lines passed to md_assemble.
+
+	* config/obj-elf.c (elf_pseudo_table): Add `common'.
+
 1999-06-03  Ian Lance Taylor  <ian@zembu.com>
 
 	Add support for storing local symbols in a small structure to save

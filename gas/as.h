@@ -457,7 +457,7 @@ COMMON int linkrelax;
 extern int listing;
 
 /* Type of debugging information we should generate.  We currently
-   only support stabs and ECOFF.  */
+   support stabs, ECOFF, and DWARF2.  */
 
 enum debug_info_type
   {
