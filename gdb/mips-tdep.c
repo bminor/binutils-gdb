@@ -4126,6 +4126,32 @@ mips_integer_to_address (struct type *type, void *buf)
 				 TYPE_LENGTH (builtin_type_void_data_ptr));
 }
 
+static void
+mips_find_abi_section (bfd *abfd, asection *sect, void *obj)
+{
+  enum mips_abi *abip = (enum mips_abi *) obj;
+  const char *name = bfd_get_section_name (abfd, sect);
+
+  if (*abip != MIPS_ABI_UNKNOWN)
+    return;
+
+  if (strncmp (name, ".mdebug.", 8) != 0)
+    return;
+
+  if (strcmp (name, ".mdebug.abi32") == 0)
+    *abip = MIPS_ABI_O32;
+  else if (strcmp (name, ".mdebug.abiN32") == 0)
+    *abip = MIPS_ABI_N32;
+  else if (strcmp (name, ".mdebug.abiO64") == 0)
+    *abip = MIPS_ABI_O64;
+  else if (strcmp (name, ".mdebug.eabi32") == 0)
+    *abip = MIPS_ABI_EABI32;
+  else if (strcmp (name, ".mdebug.eabi64") == 0)
+    *abip = MIPS_ABI_EABI64;
+  else
+    warning ("unsupported ABI %s.", name + 8);
+}
+
 static struct gdbarch *
 mips_gdbarch_init (struct gdbarch_info info,
 		   struct gdbarch_list *arches)
@@ -4179,6 +4205,10 @@ mips_gdbarch_init (struct gdbarch_info info,
 	mips_abi = MIPS_ABI_UNKNOWN;
       break;
     }
+
+  /* GCC creates a pseudo-section whose name describes the ABI.  */
+  if (mips_abi == MIPS_ABI_UNKNOWN && info.abfd != NULL)
+    bfd_map_over_sections (info.abfd, mips_find_abi_section, &mips_abi);
 
   /* Try the architecture for any hint of the corect ABI */
   if (mips_abi == MIPS_ABI_UNKNOWN
