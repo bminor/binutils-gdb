@@ -1,3 +1,8 @@
+2002-10-01  Elena Zannoni  <ezannoni@redhat.com>
+
+	* dwarf2read.c (dwarf_stack_op_name): Recognize more dwarf3 and
+	GNU operators.
+
 2002-10-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* NEWS: Mention that MI syntax, selected by "mi" changed to "mi2"

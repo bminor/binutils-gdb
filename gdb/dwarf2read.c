@@ -5961,6 +5961,18 @@ dwarf_stack_op_name (register unsigned op)
       return "DW_OP_xderef_size";
     case DW_OP_nop:
       return "DW_OP_nop";
+      /* DWARF 3 extensions.  */
+    case DW_OP_push_object_address:
+      return "DW_OP_push_object_address";
+    case DW_OP_call2:
+      return "DW_OP_call2";
+    case DW_OP_call4:
+      return "DW_OP_call4";
+    case DW_OP_call_ref:
+      return "DW_OP_call_ref";
+      /* GNU extensions.  */
+    case DW_OP_GNU_push_tls_address:
+      return "DW_OP_GNU_push_tls_address";
     default:
       return "OP_<unknown>";
     }
