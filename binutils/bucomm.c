@@ -1,5 +1,5 @@
 /* bucomm.c -- Bin Utils COMmon code.
-   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 1997 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -15,15 +15,24 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 /* We might put this in a library someday so it could be dynamically
    loaded, but for now it's not necessary.  */
 
 #include "bfd.h"
-#include "sysdep.h"
 #include "libiberty.h"
 #include "bucomm.h"
+
+#include <sys/stat.h>
+#include <time.h>		/* ctime, maybe time_t */
+
+#ifndef HAVE_TIME_T_IN_TIME_H
+#ifndef HAVE_TIME_T_IN_TYPES_H
+typedef long time_t;
+#endif
+#endif
 
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
@@ -88,9 +97,30 @@ fatal (va_alist)
 }
 #endif
 
+/* Set the default BFD target based on the configured target.  Doing
+   this permits the binutils to be configured for a particular target,
+   and linked against a shared BFD library which was configured for a
+   different target.  */
+
+void
+set_default_bfd_target ()
+{
+  /* The macro TARGET is defined by Makefile.  */
+  const char *target = TARGET;
+
+  if (! bfd_set_default_target (target))
+    {
+      char *errmsg;
+
+      errmsg = (char *) xmalloc (100 + strlen (target));
+      sprintf (errmsg, "can't set BFD default target to `%s'", target);
+      bfd_fatal (errmsg);
+    }
+}
+
 /* After a false return from bfd_check_format_matches with
-   bfd_get_error () == bfd_error_file_ambiguously_recognized, print the possible
-   matching targets.  */
+   bfd_get_error () == bfd_error_file_ambiguously_recognized, print
+   the possible matching targets.  */
 
 void
 list_matching_formats (p)
@@ -155,4 +185,61 @@ print_arelt_descr (file, abfd, verbose)
     }
 
   fprintf (file, "%s\n", bfd_get_filename (abfd));
+}
+
+/* Return the name of a temporary file in the same directory as FILENAME.  */
+
+char *
+make_tempname (filename)
+     char *filename;
+{
+  static char template[] = "stXXXXXX";
+  char *tmpname;
+  char *slash = strrchr (filename, '/');
+
+#if defined (__DJGPP__) || defined (__GO32__) || defined (_WIN32)
+  if (slash == NULL)
+    slash = strrchr (filename, '\\');
+#endif
+
+  if (slash != (char *) NULL)
+    {
+      char c;
+
+      c = *slash;
+      *slash = 0;
+      tmpname = xmalloc (strlen (filename) + sizeof (template) + 1);
+      strcpy (tmpname, filename);
+      strcat (tmpname, "/");
+      strcat (tmpname, template);
+      mktemp (tmpname);
+      *slash = c;
+    }
+  else
+    {
+      tmpname = xmalloc (sizeof (template));
+      strcpy (tmpname, template);
+      mktemp (tmpname);
+    }
+  return tmpname;
+}
+
+/* Parse a string into a VMA, with a fatal error if it can't be
+   parsed.  */
+
+bfd_vma
+parse_vma (s, arg)
+     const char *s;
+     const char *arg;
+{
+  bfd_vma ret;
+  const char *end;
+
+  ret = bfd_scan_vma (s, &end, 0);
+  if (*end != '\0')
+    {
+      fprintf (stderr, "%s: %s: bad number: %s\n", program_name, arg, s);
+      exit (1);
+    }
+  return ret;
 }
