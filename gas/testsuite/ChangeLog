@@ -1,3 +1,11 @@
+1999-11-15  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* gas/mips/la.d: Adjust for new la macro expansion.
+	Change matches for explicit addresses to matches for
+	any address.
+	* gas/mips/la-xgot.d: Same.
+	* gas/mips/la-svr4pic.d: Same.
+
 1999-11-01  Nick Clifton  <nickc@cygnus.com>
 
 	Remove reloc generating references to local labels in test code.
