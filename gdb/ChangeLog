@@ -1,3 +1,11 @@
+2004-02-08  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (init.c): Eliminate duplicates.  Combine two greps
+	and a sed into a single sed.  Make .c and .o patterns more robust.
+	(OBS): Delete.
+	(INIT_FILES): Replace OBS with COMMON_OBS.
+	(COMMON_OBS): Move DEPFILES and YYOBJ to start of definition.
+
 2004-02-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-nat.c (sparc_xfer_wcookie): Try to fetch the cookie using

@@ -863,7 +863,8 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 	$(SUBDIR_CLI_SRCS)
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
-COMMON_OBS = version.o \
+COMMON_OBS = $(DEPFILES) $(YYOBJ) \
+	version.o \
 	annotate.o \
 	auxv.o \
 	bfd-target.o \
@@ -878,8 +879,8 @@ COMMON_OBS = version.o \
 	main.o \
 	macrotab.o macrocmd.o macroexp.o macroscope.o \
 	event-loop.o event-top.o inf-loop.o completer.o \
-	gdbarch.o arch-utils.o gdbtypes.o osabi.o copying.o $(DEPFILES) \
-	memattr.o mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
+	gdbarch.o arch-utils.o gdbtypes.o osabi.o copying.o \
+	memattr.o mem-break.o target.o parse.o language.o buildsym.o \
 	std-regs.o \
 	signals.o \
 	kod.o kod-cisco.o \
@@ -907,8 +908,6 @@ COMMON_OBS = version.o \
 	cp-namespace.o \
 	reggroups.o \
 	trad-frame.o
-
-OBS = $(COMMON_OBS)
 
 TSOBS = inflow.o
 
@@ -1002,21 +1001,21 @@ uninstall: force $(CONFIG_UNINSTALL)
 # Note that the set of files with init functions might change, or the names
 # of the functions might change, so this files needs to depend on all the
 # object files that will be linked into gdb.
-#
-# FIXME: There are 2 problems with this approach. First, if the INIT_FILES
-# list includes a file twice (because of some mistake somewhere else)
-# the _initialize_* function will be included twice in init.c. Second,
-# init.c may force unnecessary files to be linked in.
+
+# FIXME: There is a problem with this approach - init.c may force
+# unnecessary files to be linked in.
 
 # FIXME: cagney/2002-06-09: gdb/564: gdb/563: Force the order so that
-# the first call is to _initialize_gdbtypes.  This is a hack to ensure
-# that all the architecture dependant global builtin_type_* variables
-# are initialized before anything else (per-architecture code is
-# called in the same order that it is registered).  The ``correct
-# fix'' is to have all the builtin types made part of the architecture
-# and initialize them on-demand (using gdbarch_data) just like
-# everything else.  The catch is that other modules still take the
-# address of these builtin types forcing them to be variables, sigh!
+# the first call is to _initialize_gdbtypes (implemented by explicitly
+# putting that function's name first in the init.l-tmp file).  This is
+# a hack to ensure that all the architecture dependant global
+# builtin_type_* variables are initialized before anything else
+# (per-architecture code is called in the same order that it is
+# registered).  The ``correct fix'' is to have all the builtin types
+# made part of the architecture and initialize them on-demand (using
+# gdbarch_data) just like everything else.  The catch is that other
+# modules still take the address of these builtin types forcing them
+# to be variables, sigh!
 
 # NOTE: cagney/2003-03-18: The sed pattern ``s|^\([^ /]...'' is
 # anchored on the first column and excludes the ``/'' character so
@@ -1025,38 +1024,51 @@ uninstall: force $(CONFIG_UNINSTALL)
 # automatically adds the $(srcdir) prefixes when it encounters files
 # in sub-directories such as cli/ and mi/.
 
-INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_SRCS)
+# NOTE: cagney/2004-02-08: The ``case "$$fs" in'' eliminates
+# duplicates.  Files in the gdb/ directory can end up appearing in
+# COMMON_OBS (as a .o file) and CONFIG_SRCS (as a .c file).
+
+INIT_FILES = $(COMMON_OBS) $(TSOBS) $(CONFIG_SRCS)
 init.c: $(INIT_FILES)
 	@echo Making init.c
 	@rm -f init.c-tmp init.l-tmp
+	@touch init.c-tmp
+	@echo gdbtypes > init.l-tmp
 	@-echo $(INIT_FILES) | \
 	tr ' ' '\012' | \
 	sed \
-	    -e '/^init.o/d' \
-	    -e '/xdr_ld.o/d' \
-	    -e '/xdr_ptrace.o/d' \
-	    -e '/xdr_rdb.o/d' \
-	    -e '/udr.o/d' \
-	    -e '/udip2soc.o/d' \
-	    -e '/udi2go32.o/d' \
-	    -e '/version.o/d' \
-	    -e '/^[a-z0-9A-Z_]*_[SU].o/d' \
-	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
-	    -e 's/\.o/.c/' \
+	    -e '/^gdbtypes.[co]$$/d' \
+	    -e '/^init.[co]$$/d' \
+	    -e '/xdr_ld.[co]$$/d' \
+	    -e '/xdr_ptrace.[co]$$/d' \
+	    -e '/xdr_rdb.[co]$$/d' \
+	    -e '/udr.[co]$$/d' \
+	    -e '/udip2soc.[co]$$/d' \
+	    -e '/udi2go32.[co]$$/d' \
+	    -e '/version.[co]$$/d' \
+	    -e '/^[a-z0-9A-Z_]*_[SU].[co]$$/d' \
+	    -e '/[a-z0-9A-Z_]*-exp.tab.[co]$$/d' \
+	    -e 's/\.[co]$$/.c/' \
 	    -e 's,signals\.c,signals/signals\.c,' \
 	    -e 's|^\([^  /][^     ]*\)|$(srcdir)/\1|g' | \
-	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
-	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' | \
-	( echo _initialize_gdbtypes ; grep -v '^_initialize_gdbtypes$$' ) > init.l-tmp
+	while read f; do \
+	    sed -n -e 's/^_initialize_\([a-z_0-9A-Z]*\).*/\1/p' $$f 2>/dev/null; \
+	done | \
+	while read f; do \
+	    case "$$fs" in \
+	        "* $$f *") ;; \
+	        *) echo $$f ; fs="$$fs $$f ";; \
+            esac; \
+	done >> init.l-tmp
 	@echo '/* Do not modify this file.  */' >>init.c-tmp
 	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
-	@echo '#include "defs.h"' >>init.c-tmp
-	@echo '#include "call-cmds.h"' >>init.c-tmp
-	@sed -e 's/\(.*\)/extern initialize_file_ftype \1;/' <init.l-tmp >>init.c-tmp
+	@echo '#include "defs.h"      /* For initialize_file_ftype.  */' >>init.c-tmp
+	@echo '#include "call-cmds.h" /* For initialize_all_files.  */' >>init.c-tmp
+	@sed -e 's/\(.*\)/extern initialize_file_ftype _initialize_\1;/' <init.l-tmp >>init.c-tmp
 	@echo 'void' >>init.c-tmp
 	@echo 'initialize_all_files (void)' >>init.c-tmp
 	@echo '{' >>init.c-tmp
-	@sed -e 's/\(.*\)/  \1 ();/' <init.l-tmp >>init.c-tmp
+	@sed -e 's/\(.*\)/  _initialize_\1 ();/' <init.l-tmp >>init.c-tmp
 	@echo '}' >>init.c-tmp
 	@rm init.l-tmp
 	@mv init.c-tmp init.c
@@ -1079,7 +1091,7 @@ nlm:	force
 # against that.
 #
 # init.o is very important.  It pulls in the rest of GDB.
-LIBGDB_OBS= $(OBS) $(TSOBS) $(ADD_FILES) init.o
+LIBGDB_OBS= $(COMMON_OBS) $(TSOBS) $(ADD_FILES) init.o
 libgdb.a: $(LIBGDB_OBS)
 	-rm -f libgdb.a
 	$(AR) q libgdb.a $(LIBGDB_OBS)
