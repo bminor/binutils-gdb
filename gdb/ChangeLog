@@ -1,3 +1,11 @@
+Tue Mar 31 17:18:43 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Add $(LIBIDETCL) as well as $(LIBIDE) if
+	--enable-ide.
+	* Makefile.in (IDE_CFLAGS_X): Add -I for libidetcl/src.
+	(LIBIDETCL): Define.
+	* configure: Rebuild.
+
 Mon Mar 30 16:42:12 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* rdi-share/Makefile.am, rdi-share/aclocal.m4,
