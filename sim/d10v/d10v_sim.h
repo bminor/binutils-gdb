@@ -81,6 +81,12 @@ extern struct simops Simops[];
 /* sign extend a 40 bit number */
 #define SEXT40(x)	((((x)&0xffffffffffLL)^(~0x7fffffffffLL))+0x8000000000LL)
 
+/* sign extend a 44 bit number */
+#define SEXT44(x)	((((x)&0xfffffffffffLL)^(~0x7ffffffffffLL))+0x80000000000LL)
+
+/* sign extend a 60 bit number */
+#define SEXT60(x)	((((x)&0xfffffffffffffffLL)^(~0x7ffffffffffffffLL))+0x800000000000000LL)
+
 #define MAX32	0x7fffffffLL
 #define MIN32	0xff80000000LL
 #define MASK32	0xffffffffLL
@@ -93,17 +99,28 @@ extern struct simops Simops[];
 
 #ifdef WORDS_BIGENDIAN
 
-#define RW(x)	(*((uint16 *)((x)+State.imem)))
-#define RLW(x)	(*((uint32 *)((x)+State.imem)))
-#define SW(addr,data)	RW(addr)=data
+#define RW(x)			(*((uint16 *)((x)+State.imem)))
+#define RLW(x)			(*((uint32 *)((x)+State.imem)))
+#define SW(addr,data)		RW(addr)=data
+#define READ_16(x)		(*((int16 *)(x)))
+#define WRITE_16(addr,data)	(*(int16 *)(addr)=data)	
+#define READ_64(x)		(*((int64 *)(x)))
+#define WRITE_64(addr,data)	(*(int64 *)(addr)=data)	
 
 #else
 
-uint32 get_longword_swap PARAMS ((uint16 x));
-uint16 get_word_swap PARAMS ((uint16 x));
-void write_word_swap PARAMS ((uint16 addr, uint16 data));
-#define SW(addr,data)	write_word_swap(addr,data)
-#define RW(x)	get_word_swap(x)
-#define RLW(x)	get_longword_swap(x)
+uint32 get_longword PARAMS ((uint8 *));
+uint16 get_word PARAMS ((uint8 *));
+int64 get_longlong PARAMS ((uint8 *));
+void write_word PARAMS ((uint8 *addr, uint16 data));
+void write_longlong PARAMS ((uint8 *addr, int64 data));
+
+#define SW(addr,data)		write_word((long)(addr)+State.imem,data)
+#define RW(x)			get_word((long)(x)+State.imem)
+#define RLW(x)			get_longword((long)(x)+State.imem)
+#define READ_16(x)		get_word(x)
+#define WRITE_16(addr,data)	write_word(addr,data)
+#define READ_64(x)		get_longlong(x)
+#define WRITE_64(addr,data)	write_longlong(addr,data)
 
 #endif /* not WORDS_BIGENDIAN */
