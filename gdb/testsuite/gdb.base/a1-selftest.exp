@@ -168,7 +168,7 @@ proc test_with_self {} {
 	    fail "$description"
 	}
 	timeout {
-	    fail "$description" (timeout)"
+	    fail "$description (timeout)"
 	}
     }
 
@@ -188,7 +188,7 @@ proc test_with_self {} {
 	    fail "$description"
 	}
 	timeout {
-	    fail "$description" (timeout)"
+	    fail "$description (timeout)"
 	}
     }
     
@@ -208,7 +208,7 @@ proc test_with_self {} {
 	    fail "$description"
 	}
 	timeout {
-	    fail "$description" (timeout)"
+	    fail "$description (timeout)"
 	}
     }
     
@@ -228,7 +228,7 @@ proc test_with_self {} {
 	    fail "$description"
 	}
 	timeout {
-	    fail "$description" (timeout)"
+	    fail "$description (timeout)"
 	}
     }
 
@@ -366,7 +366,7 @@ proc test_with_self {} {
 		fail "$description"
 	    }
 	    timeout {
-		fail "$description" (timeout)"
+		fail "$description (timeout)"
 	    }
 	}
     }
