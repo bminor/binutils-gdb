@@ -295,7 +295,7 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
   /* Get address of the relocation entry (Elf32_Rela) */
   if (target_read_memory (plt_table + reloc_index, buf, 4) != 0)
     return 0;
-  reloc = extract_address (buf, 4);
+  reloc = extract_unsigned_integer (buf, 4);
 
   sect = find_pc_section (reloc);
   if (!sect)

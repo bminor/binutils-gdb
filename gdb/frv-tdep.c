@@ -762,8 +762,8 @@ frv_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 static CORE_ADDR
 frv_extract_struct_value_address (char *regbuf)
 {
-  return extract_address (regbuf + frv_register_byte (struct_return_regnum),
-			  4);
+  return extract_unsigned_integer (regbuf + frv_register_byte (struct_return_regnum),
+				   4);
 }
 
 static void
@@ -859,7 +859,7 @@ frv_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
 	  if (argreg < 14)
 	    {
-	      regval = extract_address (val, partial_len);
+	      regval = extract_unsigned_integer (val, partial_len);
 #if 0
 	      printf("  Argnum %d data %x -> reg %d\n",
 		     argnum, (int) regval, argreg);

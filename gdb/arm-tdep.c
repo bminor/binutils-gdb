@@ -1465,7 +1465,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	  && target_type != NULL
 	  && TYPE_CODE_FUNC == TYPE_CODE (target_type))
 	{
-	  CORE_ADDR regval = extract_address (val, len);
+	  CORE_ADDR regval = extract_unsigned_integer (val, len);
 	  if (arm_pc_is_thumb (regval))
 	    {
 	      val = alloca (len);
@@ -1484,7 +1484,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	    {
 	      /* The argument is being passed in a general purpose
 		 register.  */
-	      CORE_ADDR regval = extract_address (val, partial_len);
+	      CORE_ADDR regval = extract_unsigned_integer (val, partial_len);
 	      if (arm_debug)
 		fprintf_unfiltered (gdb_stdlog, "arg %d in %s = 0x%s\n",
 				    argnum, REGISTER_NAME (argreg),
@@ -2494,7 +2494,7 @@ arm_get_longjmp_target (CORE_ADDR *pc)
 			  INT_REGISTER_RAW_SIZE))
     return 0;
 
-  *pc = extract_address (buf, INT_REGISTER_RAW_SIZE);
+  *pc = extract_unsigned_integer (buf, INT_REGISTER_RAW_SIZE);
   return 1;
 }
 

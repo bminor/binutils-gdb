@@ -508,7 +508,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
          stack layout has changed or the stack is corrupt.  */
       target_read_memory (sigcontext_addr + saved_pc_offset,
 			  scbuf, sizeof (scbuf));
-      return extract_address (scbuf, sizeof (scbuf));
+      return extract_unsigned_integer (scbuf, sizeof (scbuf));
     }
   else if (get_frame_extra_info (frame)->in_prologue ||
 	   (get_next_frame (frame) != NULL &&
@@ -534,7 +534,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
     return PC_ADJUST (read_register (O7_REGNUM));
 
   read_memory (addr, buf, SPARC_INTREG_SIZE);
-  return PC_ADJUST (extract_address (buf, SPARC_INTREG_SIZE));
+  return PC_ADJUST (extract_unsigned_integer (buf, SPARC_INTREG_SIZE));
 }
 
 /* Since an individual frame in the frame cache is defined by two
@@ -1796,7 +1796,7 @@ get_longjmp_target (CORE_ADDR *pc)
 			  LONGJMP_TARGET_SIZE))
     return 0;
 
-  *pc = extract_address (buf, LONGJMP_TARGET_SIZE);
+  *pc = extract_unsigned_integer (buf, LONGJMP_TARGET_SIZE);
 
   return 1;
 }

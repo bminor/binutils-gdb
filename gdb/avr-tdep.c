@@ -324,7 +324,7 @@ avr_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
 static CORE_ADDR
 avr_pointer_to_address (struct type *type, const void *buf)
 {
-  CORE_ADDR addr = extract_address (buf, TYPE_LENGTH (type));
+  CORE_ADDR addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
 
   if (TYPE_CODE_SPACE (TYPE_TARGET_TYPE (type)))
     {
@@ -1084,7 +1084,7 @@ avr_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       while (len > 0)
 	{			/* there's room in registers */
 	  len -= wordsize;
-	  regval = extract_address (val + len, wordsize);
+	  regval = extract_unsigned_integer (val + len, wordsize);
 	  write_register (argreg--, regval);
 	}
     }

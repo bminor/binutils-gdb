@@ -161,28 +161,6 @@ extract_long_unsigned_integer (const void *addr, int orig_len, LONGEST *pval)
 }
 
 
-/* Treat the LEN bytes at ADDR as a target-format address, and return
-   that address.  ADDR is a buffer in the GDB process, not in the
-   inferior.
-
-   This function should only be used by target-specific code.  It
-   assumes that a pointer has the same representation as that thing's
-   address represented as an integer.  Some machines use word
-   addresses, or similarly munged things, for certain types of
-   pointers, so that assumption doesn't hold everywhere.
-
-   Common code should use extract_typed_address instead, or something
-   else based on POINTER_TO_ADDRESS.  */
-
-CORE_ADDR
-extract_address (const void *addr, int len)
-{
-  /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
-     whether we want this to be true eventually.  */
-  return (CORE_ADDR) extract_unsigned_integer (addr, len);
-}
-
-
 /* Treat the bytes at BUF as a pointer of type TYPE, and return the
    address it represents.  */
 CORE_ADDR

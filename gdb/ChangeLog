@@ -1,5 +1,53 @@
 2003-06-01  Andrew Cagney  <cagney@redhat.com>
 
+	* defs.h (extract_address): Delete declaration.
+	* findvar.c (extract_address): Delete function.
+	* xstormy16-tdep.c (xstormy16_extract_return_value): Replace
+	extract_address with the inline equivalent,
+	extract_unsigned_integer.
+	(xstormy16_extract_struct_value_address): Ditto.
+	(xstormy16_pointer_to_address): Ditto.
+	* vax-tdep.c (vax_extract_struct_value_address): Ditto.
+	* v850-tdep.c (v850_push_arguments): Ditto.
+	(v850_extract_return_value): Ditto.
+	(v850_extract_struct_value_address): Ditto.
+	* sparcnbsd-tdep.c (sparcnbsd_get_longjmp_target_32): Ditto.
+	(sparcnbsd_get_longjmp_target_64): Ditto.
+	* sparc-tdep.c (sparc_frame_saved_pc): Ditto.
+	(get_longjmp_target): Ditto.
+	* sh-tdep.c (sh_extract_struct_value_address): Ditto.
+	(sh64_extract_struct_value_address): Ditto.
+	(sh_push_arguments): Ditto.
+	(sh64_push_arguments): Ditto.
+	* remote-vxsparc.c (vx_read_register): Ditto.
+	* ppc-linux-tdep.c (ppc_linux_skip_trampoline_code): Ditto.
+	* ns32k-tdep.c (ns32k_extract_struct_value_address): Ditto.
+	* mn10300-tdep.c (mn10300_extract_struct_value_address): Ditto.
+	* mipsv4-nat.c (get_longjmp_target): Ditto.
+	* mipsnbsd-tdep.c (mipsnbsd_get_longjmp_target): Ditto.
+	* mips-nat.c (get_longjmp_target): Ditto.
+	* mips-linux-tdep.c (mips_linux_get_longjmp_target): Ditto.
+	* mcore-tdep.c (mcore_extract_struct_value_address): Ditto.
+	* m68k-tdep.c (m68k_get_longjmp_target): Ditto.
+	* m68hc11-tdep.c (m68hc11_extract_struct_value_address): Ditto.
+	* irix5-nat.c (get_longjmp_target): Ditto.
+	* irix4-nat.c (get_longjmp_target): Ditto.
+	* ia64-tdep.c (generic_elf_find_global_pointer): Ditto.
+	(ia64_push_arguments): Ditto.
+	* hpux-thread.c (hpux_thread_store_registers): Ditto.
+	* h8300-tdep.c (h8300_push_arguments): Ditto.
+	(h8300_store_return_value): Ditto.
+	(h8300_extract_struct_value_address): Ditto.
+	* frv-tdep.c (frv_extract_struct_value_address): Ditto.
+	(frv_push_arguments): Ditto.
+	* avr-tdep.c (avr_pointer_to_address): Ditto.
+	(avr_push_arguments): Ditto.
+	* arm-tdep.c (arm_push_dummy_call): Ditto.
+	(arm_get_longjmp_target): Ditto.
+	* arm-linux-tdep.c (arm_linux_push_arguments): Ditto.
+	* alpha-tdep.c (alpha_extract_struct_value_address): Ditto.
+	(alpha_get_longjmp_target): Ditto.
+
 	* solib-irix.c (extract_mips_address): Inline extract_address,
 	replacing it with extract_signed_integer.
 	* solib-svr4.c (SOLIB_EXTRACT_ADDRESS): Ditto.

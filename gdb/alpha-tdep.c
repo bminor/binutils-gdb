@@ -381,8 +381,8 @@ alpha_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static CORE_ADDR
 alpha_extract_struct_value_address (char *regbuf)
 {
-  return (extract_address (regbuf + REGISTER_BYTE (ALPHA_V0_REGNUM),
-			   REGISTER_RAW_SIZE (ALPHA_V0_REGNUM)));
+  return (extract_unsigned_integer (regbuf + REGISTER_BYTE (ALPHA_V0_REGNUM),
+				    REGISTER_RAW_SIZE (ALPHA_V0_REGNUM)));
 }
 
 
@@ -518,7 +518,7 @@ alpha_get_longjmp_target (CORE_ADDR *pc)
 			  raw_buffer, tdep->jb_elt_size))
     return 0;
 
-  *pc = extract_address (raw_buffer, tdep->jb_elt_size);
+  *pc = extract_unsigned_integer (raw_buffer, tdep->jb_elt_size);
   return 1;
 }
 

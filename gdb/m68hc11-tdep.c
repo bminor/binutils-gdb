@@ -1171,8 +1171,8 @@ m68hc11_return_value_on_stack (struct type *type)
 static CORE_ADDR
 m68hc11_extract_struct_value_address (char *regbuf)
 {
-  return extract_address (&regbuf[HARD_D_REGNUM * 2],
-                          REGISTER_RAW_SIZE (HARD_D_REGNUM));
+  return extract_unsigned_integer (&regbuf[HARD_D_REGNUM * 2],
+				   REGISTER_RAW_SIZE (HARD_D_REGNUM));
 }
 
 /* Function: push_return_address (pc)

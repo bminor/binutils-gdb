@@ -250,7 +250,7 @@ mipsnbsd_get_longjmp_target (CORE_ADDR *pc)
   			  NBSD_MIPS_JB_ELEMENT_SIZE))
     return 0;
 
-  *pc = extract_address (buf, NBSD_MIPS_JB_ELEMENT_SIZE);
+  *pc = extract_unsigned_integer (buf, NBSD_MIPS_JB_ELEMENT_SIZE);
 
   return 1;
 }

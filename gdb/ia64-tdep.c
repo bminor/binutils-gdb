@@ -1747,7 +1747,7 @@ generic_elf_find_global_pointer (CORE_ADDR faddr)
 		  status = target_read_memory (addr + 8, buf, sizeof (buf));
 		  if (status != 0)
 		    break;
-		  global_pointer = extract_address (buf, sizeof (buf));
+		  global_pointer = extract_unsigned_integer (buf, sizeof (buf));
 
 		  /* The payoff... */
 		  return global_pointer;
@@ -1929,7 +1929,7 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  char val_buf[8];
 
 	  store_unsigned_integer (val_buf, 8,
-				  find_func_descr (extract_address (VALUE_CONTENTS (arg), 8),
+				  find_func_descr (extract_unsigned_integer (VALUE_CONTENTS (arg), 8),
 						   &funcdescaddr));
 	  if (slotnum < rseslots)
 	    write_memory (rse_address_add (bsp, slotnum), val_buf, 8);
