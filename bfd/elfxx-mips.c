@@ -3956,6 +3956,7 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
 
 	  cr = (scpt->contents
 		+ sizeof (Elf32_External_compact_rel));
+	  mips_elf_set_cr_relvaddr (cptrel, 0);
 	  bfd_elf32_swap_crinfo_out (output_bfd, &cptrel,
 				     ((Elf32_External_crinfo *) cr
 				      + scpt->reloc_count));

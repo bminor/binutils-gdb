@@ -1,5 +1,8 @@
 2005-02-23  Nick Clifton  <nickc@redhat.com>
 
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Initialise
+	the relvaddr field of the Elf32_crinfo structure.
+
 	* elf32-m68hc1x.c (elf32_m68hc11_relocate_section): Initialise
 	variables that are passed by reference to
 	m68hc11_get_relocation_value in case that function does not
