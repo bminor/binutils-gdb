@@ -206,8 +206,15 @@ unsigned long mips_cprmask[4];
 /* MIPS ISA we are using for this output file.  */
 static int file_mips_isa = ISA_UNKNOWN;
 
-/* The CPU type we are using for this output file.  */
+/* The argument of the -mcpu= flag.  Historical for code generation.  */
 static int mips_cpu = CPU_UNKNOWN;
+
+/* The argument of the -march= flag.  The architecture we are assembling.  */
+static int mips_arch = CPU_UNKNOWN;
+
+/* The argument of the -mtune= flag.  The architecture for which we
+   are optimizing.  */
+static int mips_tune = CPU_UNKNOWN;
 
 /* The argument of the -mabi= flag.  */
 static char * mips_abi_string = 0;
@@ -246,44 +253,21 @@ static int mips_gp32 = 0;
 
 /* Whether the processor uses hardware interlocks to protect
    reads from the HI and LO registers, and thus does not
-   require nops to be inserted.
+   require nops to be inserted.  */
 
-   FIXME: GCC makes a distinction between -mcpu=FOO and -mFOO:
-   -mcpu=FOO schedules for FOO, but still produces code that meets the
-   requirements of MIPS ISA I.  For example, it won't generate any
-   FOO-specific instructions, and it will still assume that any
-   scheduling hazards described in MIPS ISA I are there, even if FOO
-   has interlocks.  -mFOO gives GCC permission to generate code that
-   will only run on a FOO; it will generate FOO-specific instructions,
-   and assume interlocks provided by a FOO.
-
-   However, GAS currently doesn't make this distinction; before Jan 28
-   1999, GAS's -mcpu=FOO implied -mFOO, which violates GCC's
-   assumptions.  The GCC driver passes these flags through to GAS, so
-   if GAS actually does anything that doesn't meet MIPS ISA I with
-   -mFOO, then GCC's -mcpu=FOO flag isn't going to work.
-
-   And furthermore, it did not assume that -mFOO implied -mcpu=FOO,
-   which seems senseless --- why generate code which will only run on
-   a FOO, but schedule for something else?
-
-   So now, at least, -mcpu=FOO and -mFOO are exactly equivalent.
-
-   -- Jim Blandy <jimb@cygnus.com> */
-
-#define hilo_interlocks (mips_cpu == CPU_R4010                       \
+#define hilo_interlocks (mips_arch == CPU_R4010                       \
                          )
 
 /* Whether the processor uses hardware interlocks to protect reads
    from the GPRs, and thus does not require nops to be inserted.  */
 #define gpr_interlocks \
   (mips_opts.isa != ISA_MIPS1  \
-   || mips_cpu == CPU_R3900)
+   || mips_arch == CPU_R3900)
 
 /* As with other "interlocks" this is used by hardware that has FP
    (co-processor) interlocks.  */
 /* Itbl support may require additional care here.  */
-#define cop_interlocks (mips_cpu == CPU_R4300                        \
+#define cop_interlocks (mips_arch == CPU_R4300                        \
 			)
 
 /* Is this a mfhi or mflo instruction?  */
@@ -955,40 +939,56 @@ md_begin ()
   if (mips_opts.mips16 < 0)
     mips_opts.mips16 = target_cpu_had_mips16;
 
-  /* At this point, mips_cpu will either be CPU_UNKNOWN if no CPU was
+  /* At this point, mips_arch will either be CPU_UNKNOWN if no ARCH was
      specified on the command line, or some other value if one was.
      Similarly, mips_opts.isa will be ISA_UNKNOWN if not specified on
      the command line, or will be set otherwise if one was.  */
-  if (mips_cpu != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
+  if (mips_arch != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
     {
       /* We have it all.  There's nothing to do.  */
     }
-  else if (mips_cpu != CPU_UNKNOWN && mips_opts.isa == ISA_UNKNOWN)
+  else if (mips_arch != CPU_UNKNOWN && mips_opts.isa == ISA_UNKNOWN)
     {
-      /* We have CPU, we need ISA.  */
-      ci = mips_cpu_info_from_cpu (mips_cpu);
+      /* We have ARCH, we need ISA.  */
+      ci = mips_cpu_info_from_cpu (mips_arch);
       assert (ci != NULL);
       mips_opts.isa = ci->isa;
     }
-  else if (mips_cpu == CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
+  else if (mips_arch == CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
     {
-      /* We have ISA, we need default CPU.  */
+      /* We have ISA, we need default ARCH.  */
       ci = mips_cpu_info_from_isa (mips_opts.isa);
       assert (ci != NULL);
-      mips_cpu = ci->cpu;
+      mips_arch = ci->cpu;
+    }
+  else if (mips_arch == CPU_UNKNOWN
+	   && mips_opts.isa == ISA_UNKNOWN
+	   && mips_cpu != CPU_UNKNOWN)
+    {
+      /* Historic -mcpu= option.  Warn.  */
+      ci = mips_cpu_info_from_cpu (mips_cpu);
+      assert (ci != NULL);
+      mips_arch = ci->cpu;
+      mips_tune = ci->cpu;
+      mips_opts.isa = ci->isa;
+      as_warn (_("The -mcpu option is deprecated.  Please use -march and -mtune instead."));
+
     }
   else
     {
-      /* We need to set both ISA and CPU from target cpu.  */
+      /* We need to set both ISA and ARCH from target cpu.  */
       ci = mips_cpu_info_from_name (cpu);
       if (ci == NULL)
 	ci = mips_cpu_info_from_cpu (CPU_R3000);
       assert (ci != NULL);
       mips_opts.isa = ci->isa;
-      mips_cpu = ci->cpu;
+      mips_arch = ci->cpu;
     }
 
-  ci = mips_cpu_info_from_cpu (mips_cpu);
+  if (mips_tune == CPU_UNKNOWN)
+    mips_tune = mips_arch;
+
+  ci = mips_cpu_info_from_cpu (mips_arch);
   assert (ci != NULL);
   mips_isa_from_cpu = ci->isa;
 
@@ -1019,7 +1019,7 @@ md_begin ()
       && ISA_HAS_64BIT_REGS (mips_isa_from_cpu))
     mips_32bitmode = 1;
 
-  if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, mips_cpu))
+  if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, mips_arch))
     as_warn (_("Could not set architecture and machine"));
 
   file_mips_isa = mips_opts.isa;
@@ -1593,7 +1593,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
              though the tx39's divide insns still do require the
 	     delay.  */
 	  if (! (hilo_interlocks
-		 || (mips_cpu == CPU_R3900 && (pinfo & INSN_MULT)))
+		 || (mips_tune == CPU_R3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_LO)))
 	    nops += 2;
@@ -1615,7 +1615,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	     insert a NOP.  Some newer processors have interlocks.
 	     Also the note tx39's multiply above.  */
 	  if (! (hilo_interlocks
-		 || (mips_cpu == CPU_R3900 && (pinfo & INSN_MULT)))
+		 || (mips_tune == CPU_R3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_HI)))
 	    nops += 2;
@@ -1654,11 +1654,11 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
 	      && (pinfo & INSN_WRITE_LO)
 	      && ! (hilo_interlocks
-		    || (mips_cpu == CPU_R3900 && (pinfo & INSN_MULT))))
+		    || (mips_tune == CPU_R3900 && (pinfo & INSN_MULT))))
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 	      && (pinfo & INSN_WRITE_HI)
 	      && ! (hilo_interlocks
-		    || (mips_cpu == CPU_R3900 && (pinfo & INSN_MULT)))))
+		    || (mips_tune == CPU_R3900 && (pinfo & INSN_MULT)))))
 	prev_prev_nop = 1;
       else
 	prev_prev_nop = 0;
@@ -2011,7 +2011,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 			 | INSN_COPROC_MOVE_DELAY
 			 | INSN_WRITE_COND_CODE)))
 	      || (! (hilo_interlocks
-		     || (mips_cpu == CPU_R3900 && (pinfo & INSN_MULT)))
+		     || (mips_tune == CPU_R3900 && (pinfo & INSN_MULT)))
 		  && (prev_pinfo
 		      & (INSN_READ_LO
 			 | INSN_READ_HI)))
@@ -2496,9 +2496,9 @@ macro_build (place, counter, ep, name, fmt, va_alist)
     {
       if (strcmp (fmt, insn.insn_mo->args) == 0
 	  && insn.insn_mo->pinfo != INSN_MACRO
-	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_cpu,
+	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_arch,
 			       mips_gp32)
-	  && (mips_cpu != CPU_R4650 || (insn.insn_mo->pinfo & FP_D) == 0))
+	  && (mips_arch != CPU_R4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
 
       ++insn.insn_mo;
@@ -4848,7 +4848,7 @@ macro (ip)
       lr = 1;
       goto ld;
     case M_LDC1_AB:
-      if (mips_cpu == CPU_R4650)
+      if (mips_arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -4937,7 +4937,7 @@ macro (ip)
       s = "scd";
       goto st;
     case M_SDC1_AB:
-      if (mips_cpu == CPU_R4650)
+      if (mips_arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -5425,7 +5425,7 @@ macro (ip)
 	}
 
     case M_L_DOB:
-      if (mips_cpu == CPU_R4650)
+      if (mips_arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -5466,7 +5466,7 @@ macro (ip)
        * But, the resulting address is the same after relocation so why
        * generate the extra instruction?
        */
-      if (mips_cpu == CPU_R4650)
+      if (mips_arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -5484,7 +5484,7 @@ macro (ip)
       goto ldd_std;
 
     case M_S_DAB:
-      if (mips_cpu == CPU_R4650)
+      if (mips_arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -6113,7 +6113,7 @@ macro2 (ip)
       break;
 
     case M_S_DOB:
-      if (mips_cpu == CPU_R4650)
+      if (mips_arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -7084,14 +7084,14 @@ mips_ip (str, ip)
 
       assert (strcmp (insn->name, str) == 0);
 
-      if (OPCODE_IS_MEMBER (insn, mips_opts.isa, mips_cpu, mips_gp32))
+      if (OPCODE_IS_MEMBER (insn, mips_opts.isa, mips_arch, mips_gp32))
 	ok = true;
       else
 	ok = false;
 
       if (insn->pinfo != INSN_MACRO)
 	{
-	  if (mips_cpu == CPU_R4650 && (insn->pinfo & FP_D) != 0)
+	  if (mips_arch == CPU_R4650 && (insn->pinfo & FP_D) != 0)
 	    ok = false;
 	}
 
@@ -7110,7 +7110,7 @@ mips_ip (str, ip)
 		  static char buf[100];
 		  sprintf (buf,
 			   _("opcode not supported on this processor: %s (%s)"),
-			   mips_cpu_to_str (mips_cpu),
+			   mips_cpu_to_str (mips_arch),
 			   mips_isa_to_str (mips_opts.isa));
 
 		  insn_error = buf;
@@ -8941,6 +8941,10 @@ struct option md_longopts[] =
   {"mips5", no_argument, NULL, OPTION_MIPS5},
 #define OPTION_MIPS64 (OPTION_MD_BASE + 30)
   {"mips64", no_argument, NULL, OPTION_MIPS64},
+#define OPTION_MARCH (OPTION_MD_BASE + 31)
+  {"march", required_argument, NULL, OPTION_MARCH},
+#define OPTION_MTUNE (OPTION_MD_BASE + 32)
+  {"mtune", required_argument, NULL, OPTION_MTUNE},
 #ifdef OBJ_ELF
 #define OPTION_ELF_BASE    (OPTION_MD_BASE + 35)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
@@ -9042,47 +9046,78 @@ md_parse_option (c, arg)
       mips_opts.isa = ISA_MIPS64;
       break;
 
+    case OPTION_MTUNE:
+    case OPTION_MARCH:
     case OPTION_MCPU:
       {
+	int cpu = CPU_UNKNOWN;
+
 	/* Identify the processor type.  */
-	if (strcasecmp (arg, "default") == 0)
-	  mips_cpu = CPU_UNKNOWN;
-	else
+	if (strcasecmp (arg, "default") != 0)
 	  {
 	    const struct mips_cpu_info *ci;
 
 	    ci = mips_cpu_info_from_name (arg);
 	    if (ci == NULL || ci->is_isa)
-	      as_bad (_("invalid architecture -mcpu=%s"), arg);
+	      {
+		switch (c)
+		  {
+		  case OPTION_MTUNE:
+		    as_fatal (_("invalid architecture -mtune=%s"), arg);
+		    break;
+		  case OPTION_MARCH:
+		    as_fatal (_("invalid architecture -march=%s"), arg);
+		    break;
+		  case OPTION_MCPU:
+		    as_fatal (_("invalid architecture -mcpu=%s"), arg);
+		    break;
+		  }
+	      }
 	    else
-	      mips_cpu = ci->cpu;
+		cpu = ci->cpu;
+	  }
+
+	switch (c)
+	  {
+	  case OPTION_MTUNE:
+	    mips_tune = cpu;
+	    break;
+	  case OPTION_MARCH:
+	    mips_arch = cpu;
+	    break;
+	  case OPTION_MCPU:
+	    mips_cpu = cpu;
 	  }
       }
       break;
 
     case OPTION_M4650:
-      mips_cpu = CPU_R4650;
+      mips_arch = CPU_R4650;
+      mips_tune = CPU_R4650;
       break;
 
     case OPTION_NO_M4650:
       break;
 
     case OPTION_M4010:
-      mips_cpu = CPU_R4010;
+      mips_arch = CPU_R4010;
+      mips_tune = CPU_R4010;
       break;
 
     case OPTION_NO_M4010:
       break;
 
     case OPTION_M4100:
-      mips_cpu = CPU_VR4100;
+      mips_arch = CPU_VR4100;
+      mips_tune = CPU_VR4100;
       break;
 
     case OPTION_NO_M4100:
       break;
 
     case OPTION_M3900:
-      mips_cpu = CPU_R3900;
+      mips_arch = CPU_R3900;
+      mips_tune = CPU_R3900;
       break;
 
     case OPTION_NO_M3900:
@@ -9288,7 +9323,7 @@ MIPS options:\n\
 -mips5                  generate MIPS ISA V instructions\n\
 -mips32                 generate MIPS32 ISA instructions\n\
 -mips64                 generate MIPS64 ISA instructions\n\
--mcpu=CPU		generate code for CPU, where CPU is one of:\n"));
+-march=CPU/-mtune=CPU	generate code/schedule for CPU, where CPU is one of:\n"));
 
   first = 1;
 
@@ -9313,7 +9348,7 @@ MIPS options:\n\
   fputc ('\n', stream);
 
   fprintf (stream, _("\
--mCPU			equivalent to -mcpu=CPU.\n\
+-mCPU			equivalent to -march=CPU -mtune=CPU. Deprecated.\n\
 -no-mCPU		don't generate code specific to CPU.\n\
 			For -mCPU and -no-mCPU, CPU must be one of:\n"));
 

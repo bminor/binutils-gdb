@@ -1,3 +1,37 @@
+2001-06-28  Eric Christopher  <echristo@redhat.com>
+
+	* gas/mips/usd.d: Change for march/mtune.
+	* gas/mips/ulh-xgot.d: Ditto.
+	* gas/mips/uld.d: Ditto.
+	* gas/mips/trunc.d: Ditto.
+	* gas/mips/rol.d: Ditto.
+	* gas/mips/nodelay.d: Ditto.
+	* gas/mips/mul.d: Ditto.
+	* gas/mips/mul-ilocks.d: Ditto.
+	* gas/mips/trap20.d: Ditto.
+	* gas/mips/mips4.d: Ditto.
+	* gas/mips/mips16.d: Ditto.
+	* gas/mips/lif-xgot.d: Ditto.
+	* gas/mips/lif-svr4pic.d: Ditto.
+	* gas/mips/ld-xgot.d: Ditto.
+	* gas/mips/ld-svr4pic.d: Ditto.
+	* gas/mips/ld-ilocks-addr32.d: Ditto.
+	* gas/mips/lb-xgot.d: Ditto.
+	* gas/mips/jal-xgot.d: Ditto.
+	* gas/mips/jal-svr4pic.d: Ditto.
+	* gas/mips/delay.d: Ditto.
+	* gas/mips/lb-xgot-ilocks.d: Ditto.
+	* gas/mips/div.d: Ditto.
+	* gas/mips/break20.d: Ditto.
+	* gas/mips/delay.d: Ditto.
+	* gas/mips/elf_e_flags3.d: Ditto.
+	* gas/mips/elf_e_flags4.d: Ditto.
+	* gas/mips/lineno.d: Ditto.
+	* gas/mips/mips16.d: Ditto.
+	* gas/mips/mips4.d: Ditto.
+	* gas/mips/mips4010.d: Ditto.
+	* gas/mips/mips4650.d: Ditto.
+
 2001-06-21  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* gas/arm/arm.exp: Remove msr-bad.s test.
@@ -13,7 +47,7 @@
 
 	* gas/ppc/aix.exp: New file, aix specific tests.
 	* gas/ppc/align.s: New file, .comm alignment test.
-	
+
 2001-06-13  Andreas Jaeger  <aj@suse.de>
 
 	* gas/vtable/vtable.exp (run_list_test): Don't run on sparc64.

@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses -mmips:3000
 #name: MIPS R3000 jal-xgot
-#as: -mips1 -KPIC -xgot -mcpu=r3000
+#as: -mips1 -KPIC -xgot -mtune=r3000
 #source: jal-svr4pic.s
 
 # Test the jal macro with -KPIC -xgot.

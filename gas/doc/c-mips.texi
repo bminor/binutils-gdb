@@ -72,7 +72,7 @@ Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips64} correspond to generic @sc{MIPS V}, @sc{MIPS32}, and
 @sc{MIPS64} ISA processors, respectively.  You can also switch
 instruction sets during the assembly; see @ref{MIPS ISA, Directives to
-override the ISA level}. 
+override the ISA level}.
 
 @item -mgp32
 Assume that 32-bit general purpose registers are available.  This
@@ -121,7 +121,7 @@ For each option @samp{-m@var{nnnn}}, generate code for the MIPS
 @sc{r@var{nnnn}} chip.  This tells the assembler to accept instructions
 specific to that chip, and to schedule for that chip's hazards.
 
-@item -mcpu=@var{cpu}
+@item -march=@var{cpu}
 Generate code for a particular MIPS cpu.  It is exactly equivalent to
 @samp{-m@var{cpu}}, except that there are more value of @var{cpu}
 understood.  Valid @var{cpu} value are:
@@ -151,6 +151,16 @@ rm7000,
 mips32-4k,
 sb1
 @end quotation
+
+@item -mtune=@var{cpu}
+Schedule and tune for a particular MIPS cpu.  Valid @var{cpu} values are
+identical to @samp{-march=@var{cpu}}.
+
+@item -mcpu=@var{cpu}
+Generate code and schedule for a particular MIPS cpu.  This is exactly
+equivalent to @samp{-march=@var{cpu}} and @samp{-mtune=@var{cpu}}.  Valid
+@var{cpu} values are identical to @samp{-march=@var{cpu}}.
+Use of this option is discouraged.
 
 
 @cindex @code{-nocpp} ignored (MIPS)
@@ -258,13 +268,13 @@ mips0} restores the @sc{isa} level to its original level: either the
 level you selected with command line options, or the default for your
 configuration.  You can use this feature to permit specific @sc{r4000}
 instructions while assembling in 32 bit mode.  Use this directive with
-care! 
+care!
 
 The directive @samp{.set mips16} puts the assembler into MIPS 16 mode,
 in which it will assemble instructions for the MIPS 16 processor.  Use
 @samp{.set nomips16} to return to normal 32 bit mode.
 
-Traditional @sc{mips} assemblers do not support this directive.  
+Traditional @sc{mips} assemblers do not support this directive.
 
 @node MIPS autoextend
 @section Directives for extending MIPS 16 bit instructions

@@ -1,6 +1,6 @@
-# name: ELF e_flags: -m4650 -mcpu=4650
+# name: ELF e_flags: -march=4650 -mtune=4650
 # source: elf_e_flags.s
-# as: -m4650 -mcpu=4650
+# as: -march=4650 -mtune=4650
 # objdump: -fd
 
 .*:.*file format.*mips.*

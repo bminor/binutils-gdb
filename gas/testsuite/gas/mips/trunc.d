@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses -mmips:3000
 #name: MIPS trunc
-#as: -mips1 -mcpu=r3000
+#as: -mips1 -mtune=r3000
 
 # Test the trunc macros.
 

@@ -1,3 +1,24 @@
+2001-06-28  Eric Christopher <echristo@redhat.com>
+	    H.J. Lu  <hjl@gnu.org>
+
+        * config/tc-mips.c (mips_arch): New. Use mips_arch instead
+        of mips_cpu for the ISA selection.
+        (md_longopts): Add OPTION_MARCH and OPTION_MTUNE.
+        (md_parse_option): Handle OPTION_MARCH and OPTION_MTUNE.
+	(mips_tune): New.  Use mips_tune for scheduling and optimization
+	issues.
+	(append_insn): Use mips_tune and mips_arch.
+	(macro_build): Ditto.
+	(mips_ip): Ditto.
+	(md_begin): Handle mips_arch, mips_tune and mips_cpu.  For
+	backwards compatability mips_cpu generates arch and tune.
+	(md_show_usage): Document new behavior.
+
+	* doc/c-mips.texi (MIPS Opts): Document -march and -mtune.
+	Deprecate -mcpu.
+
+	* NEWS: Update.
+
 2001-06-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* write.c (write_object_file): Do not set finalize_syms until
