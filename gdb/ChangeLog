@@ -9,8 +9,8 @@
 
 2002-02-01  Michael Snyder  <msnyder@redhat.com>
 
-	* breakpoint.c (set_ignore_count): Move misplaced comment
-	back where it belongs.
+	* breakpoint.c (breakpoint_re_set): Delete ancient #if 0 code.
+	(set_ignore_count): Move misplaced comment back where it belongs.
 
 2002-02-01  Andrew Cagney  <ac131313@redhat.com>
 

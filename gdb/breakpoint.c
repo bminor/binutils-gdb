@@ -6789,7 +6789,7 @@ breakpoint_re_set_one (PTR bint)
 	      b->address = sals.sals[i].pc;
 
 	      /* Used to check for duplicates here, but that can
-	         cause trouble, as it doesn't check for disable
+	         cause trouble, as it doesn't check for disabled
 	         breakpoints. */
 
 	      mention (b);
@@ -6918,13 +6918,6 @@ breakpoint_re_set (void)
   create_longjmp_breakpoint ("siglongjmp");
   create_longjmp_breakpoint ("_siglongjmp");
   create_longjmp_breakpoint (NULL);
-#endif
-
-#if 0
-  /* Took this out (temporarily at least), since it produces an extra 
-     blank line at startup. This messes up the gdbtests. -PB */
-  /* Blank line to finish off all those mention() messages we just printed.  */
-  printf_filtered ("\n");
 #endif
 }
 
