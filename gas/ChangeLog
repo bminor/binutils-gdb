@@ -1,3 +1,24 @@
+Sat Oct  8 01:48:04 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	ELF symbol size handling, based on code from Eric Youngdale:
+	* config/obj-elf.h (OBJ_SYMFIELD_TYPE): New macro.  Adds an
+	expression pointer to the symbol structure, used for `size'
+	expressions that couldn't be reduced to constants when initially
+	processed.
+	(elf_frob_symbol): Declare.
+	(obj_frob_symbol): Call elf_frob_symbol always, rather than
+	ecoff_frob_symbol only if ECOFF_DEBUGGING defined.
+	* config/obj-elf.c (obj_symbol_new_hook): Deleted unused code.
+	Clear sy_obj field.
+	(obj_elf_size): Deleted unused code.  If size is non-reducible
+	expression, allocate some storage for the sy_obj field and copy
+	the expression.
+	(elf_frob_symbol): New function.  Computes sizes, calls
+	ecoff_frob_symbol if appropriate.
+
+	* write.c (fixup_segment): For i386 elf and coff (for now), don't
+	add in value of symbol from another defined section of the file.
+
 Fri Oct  7 17:54:02 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-m88k.h (TC_KEEP_FX_OFFSET): Define.
