@@ -94,6 +94,8 @@ delta68-nat.c
 demangle.c
 doc
 dpx2-nat.c
+dst.h
+dstread.c
 dwarfread.c
 elfread.c
 environ.c
