@@ -26,7 +26,7 @@ Do-first:
 
 Things-to-keep:
 
-unix-gas.exp
+default.exp
 
 Things-to-lose:
 
