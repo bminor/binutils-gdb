@@ -1,5 +1,10 @@
 2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiSource.h (m_tuiShowSourceAsIs): Remove macro.
+	(tuiShowSourceAsIs): Don't declare.
+
+2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tui-hooks.c (tui_selected_frame_level_changed_hook): Always update
 	the frame position.
 
