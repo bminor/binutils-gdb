@@ -1050,6 +1050,16 @@ bfd_elf_set_dt_needed_name (abfd, name)
     elf_dt_name (abfd) = name;
 }
 
+void
+bfd_elf_set_dt_needed_soname (abfd, name)
+     bfd *abfd;
+     const char *name;
+{
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+      && bfd_get_format (abfd) == bfd_object)
+    elf_dt_soname (abfd) = name;
+}
+
 /* Get the list of DT_NEEDED entries for a link.  This is a hook for
    the linker ELF emulation code.  */
 

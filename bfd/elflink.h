@@ -890,6 +890,7 @@ elf_link_add_object_symbols (abfd, info)
   Elf_External_Sym *esym;
   Elf_External_Sym *esymend;
   struct elf_backend_data *bed;
+  boolean dt_needed;
 
   bed = get_elf_backend_data (abfd);
   add_symbol_hook = bed->elf_add_symbol_hook;
@@ -1049,6 +1050,8 @@ elf_link_add_object_symbols (abfd, info)
     goto error_return;
   elf_sym_hashes (abfd) = sym_hash;
 
+  dt_needed = false;
+
   if (! dynamic)
     {
       /* If we are creating a shared library, create all the dynamic
@@ -1085,7 +1088,12 @@ elf_link_add_object_symbols (abfd, info)
 	{
 	  name = elf_dt_name (abfd);
 	  if (*name == '\0')
-	    add_needed = false;
+	    {
+	      if (elf_dt_soname (abfd) != NULL)
+	        dt_needed = true;
+
+	      add_needed = false;
+	    }
 	}
       s = bfd_get_section_by_name (abfd, ".dynamic");
       if (s != NULL)
@@ -1863,6 +1871,53 @@ elf_link_add_object_symbols (abfd, info)
 		(*bed->elf_backend_hide_symbol) (info, h);
 		break;
 	      }
+
+	  if (dt_needed && definition
+	      && (h->elf_link_hash_flags
+		  & ELF_LINK_HASH_REF_REGULAR) != 0)
+	    {
+	      bfd_size_type oldsize;
+	      bfd_size_type strindex;
+
+	      /* The symbol from a DT_NEEDED object is referenced from
+	         the regular object to create a dynamic executable. We
+		 have to make sure there is a DT_NEEDED entry for it. */
+
+	      dt_needed = false;
+	      oldsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
+	      strindex = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+	      				     elf_dt_soname (abfd),
+					     true, false);
+	      if (strindex == (bfd_size_type) -1)
+		goto error_return;
+
+	      if (oldsize
+		  == _bfd_stringtab_size (elf_hash_table (info)->dynstr))
+		{
+		  asection *sdyn;
+		  Elf_External_Dyn *dyncon, *dynconend;
+
+		  sdyn = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
+						  ".dynamic");
+		  BFD_ASSERT (sdyn != NULL);
+
+		  dyncon = (Elf_External_Dyn *) sdyn->contents;
+		  dynconend = (Elf_External_Dyn *) (sdyn->contents +
+						    sdyn->_raw_size);
+		  for (; dyncon < dynconend; dyncon++)
+		    {
+		      Elf_Internal_Dyn dyn;
+
+		      elf_swap_dyn_in (elf_hash_table (info)->dynobj,
+				       dyncon, &dyn);
+		      BFD_ASSERT (dyn.d_tag != DT_NEEDED ||
+				  dyn.d_un.d_val != strindex);
+		    }
+		}
+
+	      if (! elf_add_dynamic_entry (info, DT_NEEDED, strindex))
+		goto error_return;
+	    }
 	}
     }
 

@@ -627,6 +627,7 @@ extern boolean bfd_elf64_size_dynamic_sections
 	   const char * const *, struct bfd_link_info *, struct sec **,
 	   struct bfd_elf_version_tree *));
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
+extern void bfd_elf_set_dt_needed_soname PARAMS ((bfd *, const char *));
 extern const char *bfd_elf_get_dt_soname PARAMS ((bfd *));
 
 /* Return an upper bound on the number of bytes required to store a

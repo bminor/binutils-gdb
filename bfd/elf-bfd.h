@@ -838,6 +838,14 @@ struct elf_obj_tdata
      one.  */
   const char *dt_name;
 
+  /* When a reference in a regular object is resolved by a shared
+     object is loaded into via the DT_NEEDED entries by the linker
+     ELF emulation code, we need to add the shared object to the
+     DT_NEEDED list of the resulting binary to indicate the dependency
+     as if the -l option is passed to the linker. This field holds the
+     name of the loaded shared object. */
+  const char *dt_soname;
+
   /* Irix 5 often screws up the symbol table, sorting local symbols
      after global symbols.  This flag is set if the symbol table in
      this BFD appears to be screwed up.  If it is, we ignore the
@@ -915,6 +923,7 @@ struct elf_obj_tdata
 #define elf_local_got_offsets(bfd) (elf_tdata(bfd) -> local_got.offsets)
 #define elf_local_ptr_offsets(bfd) (elf_tdata(bfd) -> linker_section_pointers)
 #define elf_dt_name(bfd)	(elf_tdata(bfd) -> dt_name)
+#define elf_dt_soname(bfd)	(elf_tdata(bfd) -> dt_soname)
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
 #define elf_flags_init(bfd)	(elf_tdata(bfd) -> flags_init)
 #define elf_linker_section(bfd,n) (elf_tdata(bfd) -> linker_section[(int)n])

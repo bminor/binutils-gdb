@@ -1,5 +1,19 @@
 2000-07-19  H.J. Lu  <hjl@gnu.org>
 
+	* bfd-in.h (bfd_elf_set_dt_needed_soname): New.
+	* bfd-in2.h: Rebuild.
+
+	* elf-bfd.h (elf_obj_tdata): Add dt_soname.
+	(elf_dt_soname): New.
+
+	* elf.c (bfd_elf_set_dt_needed_soname): New.
+
+	* elflink.h (elf_link_add_object_symbols): Add the DT_NEEDED
+	entry if the shared object loaded by DT_NEEDED is used to
+	resolve the reference in a regular object.
+
+2000-07-19  H.J. Lu  <hjl@gnu.org>
+
 	* elf.c (_bfd_elf_print_private_bfd_data): Handle DT_CONFIG,
 	DT_DEPAUDIT and DT_AUDIT as strings.
 
