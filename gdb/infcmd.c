@@ -1653,14 +1653,14 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	{
 	  /* Print the register in hex.  */
 	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
-		     gdb_stdout, 'x', 1, 0, Val_pretty_default);
+		     file, 'x', 1, 0, Val_pretty_default);
           /* If not a vector register, print it also according to its
              natural format.  */
 	  if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)) == 0)
 	    {
-	      printf_filtered ("\t");
+	      fprintf_filtered (file, "\t");
 	      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
-			 gdb_stdout, 0, 1, 0, Val_pretty_default);
+			 file, 0, 1, 0, Val_pretty_default);
 	    }
 	}
 
