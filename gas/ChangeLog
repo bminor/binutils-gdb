@@ -1,3 +1,8 @@
+Tue Sep  4 20:01:19 2001  Jeffrey A Law  (law@cygnus.com)
+
+	* tc-h8300.c (tc_gen_reloc): Give an error if we try to take the
+	address of two symbols in different sections.
+
 2001-08-31  Eric Christopher  <echristo@redhat.com>
 	    Jason Eckhardt  <jle@redhat.com>
 

@@ -1147,9 +1147,8 @@ build_bytes (this_try, operand)
 	     want the relocation's offset to point to the first byte
 	     that will be modified, not to the start of the instruction.  */
 	  where += 1;
-
-	     
 #endif
+
 	  /* This jmp may be a jump or a branch.  */
 
 	  check_operand (operand + i, Hmode ? 0xffffff : 0xffff, "@");
@@ -1623,6 +1622,17 @@ tc_gen_reloc (section, fixp)
 {
   arelent *rel;
   bfd_reloc_code_real_type r_type;
+
+  if (fixp->fx_addsy && fixp->fx_subsy)
+    {
+      if ((S_GET_SEGMENT (fixp->fx_addsy) != S_GET_SEGMENT (fixp->fx_subsy))
+	  || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
+	{
+	  as_bad_where (fixp->fx_file, fixp->fx_line,
+			"Difference of symbols in different sections is not supported");
+	  return NULL;
+	}
+    }
 
   rel = (arelent *) xmalloc (sizeof (arelent));
   rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
