@@ -1,3 +1,7 @@
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* symfile.c (reread_symbols): Clear sym_private.
+
 2003-06-17  Andrew Cagney  <cagney@redhat.com>
 
 	* trad-frame.h (struct frame_info): Add opaque declaration.

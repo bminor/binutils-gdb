@@ -1967,6 +1967,7 @@ reread_symbols (void)
 	      objfile->psymtabs = NULL;
 	      objfile->free_psymtabs = NULL;
 	      objfile->msymbols = NULL;
+	      objfile->sym_private = NULL;
 	      objfile->minimal_symbol_count = 0;
 	      memset (&objfile->msymbol_hash, 0,
 		      sizeof (objfile->msymbol_hash));
