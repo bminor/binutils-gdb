@@ -49,7 +49,8 @@ extern bfd *output_bfd;
 
 static void gldm88kbcs_before_parse()
 {
-
+  extern char lprefix;
+  lprefix = '@';
 }
 
 

@@ -8,7 +8,7 @@ srcdir = .
 
 destdir = /usr/local
 
-version=`awk '{print substr ($$4, 2, length ($$4) - 3); }' $(srcdir)/../gcc/version.c`
+version=`$(srcdir)/../gcc$(subdir)/gcc -dumpversion`
 prefix = $(destdir)
 bindir = $(prefix)/bin
 libdir = $(prefix)/lib
@@ -68,10 +68,10 @@ LDCSOURCES=ldlang.c ldmain.c ldwrite.c ldlnk960.c ldgld.c ldgld68k.c \
 	ldgldm88kbcs.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c ldvanilla.c
 
-GENERATED_SOURCES=ldgramtb.c ldlex.c ldgramtb.h 
-GENERATED_HEADERS=ldgramtb.h
+GENERATED_SOURCES=ldgram.c ldlex.c ldgram.h 
+GENERATED_HEADERS=ldgram.h
 
-LDSOURCES=$(LDCSOURCES) ldgram.y ldlex.l ldgramtb.h
+LDSOURCES=$(LDCSOURCES) ldgram.y ldlex.l ldgram.h
 
 BFDSOURCES=../../bfd/common/*.c
 
@@ -84,12 +84,14 @@ all: Makefile $(PROCESSED_SCRIPTS) $(LD_PROG)
 
 $(PROCESSED_SCRIPTS): mkscript $(SCRIPTS)
 
-ldgramtb.o ldgramtb.h:ldgram.y
-	$(YACC) $<
-	mv y.tab.c ldgramtb.c
-	mv y.tab.h ldgramtb.h
-	$(CC) -c $(CFLAGS) ldgramtb.c
-	mv ldgramtb.o ldgram.o
+ldgram.c:ldgram.y
+	$(YACC) $(VPATH)/ldgram.y
+	mv y.tab.c ldgram.c
+	mv y.tab.h ldgram.h
+
+ldlex.c:ldlex.l
+	lex -t $(VPATH)/ldlex.l >ldlex.c
+
 
 
 #$(BFDLIB): $(BFDSOURCES)
@@ -121,8 +123,10 @@ mkscript: mkscript.c
 
 ldgld.o: $(PROCESSED_SCRIPTS) ldgld.c 
 
-ldlex.c: ldlex.l ldgramtb.h
-ldlex.o: ldlex.c ldgramtb.h
+ldlex.c: ldlex.l ldgram.h
+ldlex.o: ldlex.c ldgram.h
+ldgram.o: ldgram.c
+ldgram.c:ldgram.y
 
 ldgld68k.x :ldgld68k.script 
 ldgld68kUr.x :ldgld68kUr.script 
@@ -152,9 +156,6 @@ stage3:	force
 	- mkdir stage3
 	- mv -f $(STAGESTUFF) stage3
 	- (cd stage3 ; ln -s $(LD_PROG) ld)
-
-comparison: force
-	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
 
 de-stage1: force
 	- (cd stage1 ; mv -f * ..)
