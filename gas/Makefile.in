@@ -150,6 +150,7 @@ REAL_SOURCES = \
 	$(srcdir)/hex-value.c \
 	$(srcdir)/input-file.c \
 	$(srcdir)/input-scrub.c \
+	$(srcdir)/literal.c \
 	$(srcdir)/messages.c \
 	$(srcdir)/output-file.c \
 	$(srcdir)/read.c \
@@ -216,6 +217,7 @@ OBJS = \
 	hex-value.o \
 	input-file.o \
 	input-scrub.o \
+	literal.o \
 	messages.o \
 	output-file.o \
 	read.o \
