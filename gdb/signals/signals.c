@@ -819,6 +819,8 @@ Use \"info signals\" for a list of symbolic signals.");
 }
 
 #ifndef GDBSERVER
+extern initialize_file_ftype _initialize_signals; /* -Wmissing-prototype */
+
 void
 _initialize_signals (void)
 {

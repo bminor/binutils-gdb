@@ -775,7 +775,8 @@ end_msglist(void)
  * Used for qsorting lists of objc methods (either by class or selector).
  */
 
-int specialcmp(char *a, char *b)
+static int
+specialcmp (char *a, char *b)
 {
   while (*a && *a != ' ' && *a != ']' && *b && *b != ' ' && *b != ']')
     {
@@ -1518,7 +1519,7 @@ char *find_imps (struct symtab *symtab, struct block *block,
   return method + (tmp - buf);
 }
 
-void 
+static void 
 print_object_command (char *args, int from_tty)
 {
   struct value *object, *function, *description;
@@ -1606,7 +1607,7 @@ static struct objc_methcall methcalls[] = {
  * case the functions have moved for some reason.  
  */
 
-void 
+static void 
 find_objc_msgsend (void)
 {
   unsigned int i;
@@ -1653,7 +1654,7 @@ struct objc_submethod_helper_data {
   CORE_ADDR *new_pc;
 };
 
-int 
+static int 
 find_objc_msgcall_submethod_helper (void * arg)
 {
   struct objc_submethod_helper_data *s = 
@@ -1665,7 +1666,7 @@ find_objc_msgcall_submethod_helper (void * arg)
     return 0;
 }
 
-int 
+static int 
 find_objc_msgcall_submethod (int (*f) (CORE_ADDR, CORE_ADDR *),
 			     CORE_ADDR pc, 
 			     CORE_ADDR *new_pc)
@@ -1708,6 +1709,8 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
 
   return 0;
 }
+
+extern initialize_file_ftype _initialize_objc_language;
 
 void
 _initialize_objc_language (void)
@@ -1772,7 +1775,7 @@ read_objc_class (CORE_ADDR addr, struct objc_class *class)
   class->protocols = read_memory_unsigned_integer (addr + 36, 4);
 }
 
-CORE_ADDR
+static CORE_ADDR
 find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
 {
   CORE_ADDR subclass = class;
@@ -1822,7 +1825,7 @@ find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
   return 0;
 }
 
-CORE_ADDR
+static CORE_ADDR
 find_implementation (CORE_ADDR object, CORE_ADDR sel)
 {
   struct objc_object ostr;

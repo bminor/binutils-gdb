@@ -3010,7 +3010,7 @@ pc_in_mapped_range (CORE_ADDR pc, asection *section)
 
 /* Return true if the mapped ranges of sections A and B overlap, false
    otherwise.  */
-int
+static int
 sections_overlap (asection *a, asection *b)
 {
   /* FIXME: need bfd *, so we can use bfd_section_vma methods. */

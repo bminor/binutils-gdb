@@ -82,7 +82,7 @@ struct regcache_descr
   struct type **register_type;
 };
 
-void
+static void
 init_legacy_regcache_descr (struct gdbarch *gdbarch,
 			    struct regcache_descr *descr)
 {
@@ -340,7 +340,7 @@ regcache_xfree (struct regcache *regcache)
   xfree (regcache);
 }
 
-void
+static void
 do_regcache_xfree (void *data)
 {
   regcache_xfree (data);
@@ -1064,7 +1064,7 @@ typedef void (regcache_read_ftype) (struct regcache *regcache, int regnum,
 typedef void (regcache_write_ftype) (struct regcache *regcache, int regnum,
 				     const void *buf);
 
-void
+static void
 regcache_xfer_part (struct regcache *regcache, int regnum,
 		    int offset, int len, void *in, const void *out,
 		    regcache_read_ftype *read, regcache_write_ftype *write)
@@ -1663,6 +1663,8 @@ maintenance_print_register_groups (char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_groups);
 }
+
+extern initialize_file_ftype _initialize_regcache; /* -Wmissing-prototype */
 
 void
 _initialize_regcache (void)

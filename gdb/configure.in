@@ -357,6 +357,12 @@ AC_CHECK_HEADERS(curses.h ncurses.h term.h)
 # unconditionally, so what's the point in checking these?
 AC_CHECK_HEADERS(ctype.h time.h)
 
+# ------------------------- #
+# Checks for declarations.  #
+# ------------------------- #
+
+gcc_AC_CHECK_DECLS(getopt)
+
 # ------------------ #
 # Checks for types.  #
 # ------------------ #

@@ -34,6 +34,7 @@
 #include "gdbcmd.h"
 #include "command.h"
 #include "gdb_string.h"
+#include "infcall.h"
 
 /* NOTE: cagney/2003-04-16: What's the future of this code?
 

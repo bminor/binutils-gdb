@@ -234,6 +234,8 @@ show_cp_abi_cmd (char *args, int from_tty)
   ui_out_text (uiout, ").\n");
 }
 
+extern initialize_file_ftype _initialize_cp_abi; /* -Wmissing-prototypes */
+
 void
 _initialize_cp_abi (void)
 {

@@ -123,7 +123,7 @@ macro_bcache_str (struct macro_table *t, const char *s)
 
 /* Free a possibly bcached object OBJ.  That is, if the macro table T
    has a bcache, it's an error; otherwise, xfree OBJ.  */
-void
+static void
 macro_bcache_free (struct macro_table *t, void *obj)
 {
   gdb_assert (! t->bcache);

@@ -118,6 +118,8 @@ safe_execute_command (struct ui_out *uiout, char *command, int from_tty)
 
 
 /* standard gdb initialization hook */
+extern initialize_file_ftype _initialize_cli_interp; /* -Wmissing-prototypes */
+
 void
 _initialize_cli_interp (void)
 {

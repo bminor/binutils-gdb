@@ -4854,7 +4854,7 @@ remote_remove_watchpoint (CORE_ADDR addr, int len, int type)
 int remote_hw_watchpoint_limit = -1;
 int remote_hw_breakpoint_limit = -1;
 
-int
+static int
 remote_check_watch_resources (int type, int cnt, int ot)
 {
   if (type == bp_hardware_breakpoint)
@@ -4880,13 +4880,13 @@ remote_check_watch_resources (int type, int cnt, int ot)
   return -1;
 }
 
-int
+static int
 remote_stopped_by_watchpoint (void)
 {
     return remote_stopped_by_watchpoint_p;
 }
 
-CORE_ADDR
+static CORE_ADDR
 remote_stopped_data_address (void)
 {
   if (remote_stopped_by_watchpoint ())

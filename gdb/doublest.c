@@ -625,7 +625,7 @@ floatformat_from_doublest (const struct floatformat *fmt,
    target-dependent code, the format of floating-point types is known,
    but not passed on by GDB.  This should be fixed.  */
 
-const struct floatformat *
+static const struct floatformat *
 floatformat_from_length (int len)
 {
   if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)

@@ -1,5 +1,102 @@
 2003-06-08  Andrew Cagney  <cagney@redhat.com>
 
+	* acinclude.m4 (gcc_AC_CHECK_DECL, (gcc_AC_CHECK_DECL): Stolen
+	from GCC's acinclude.m4.
+	* configure.in: Check for getopt's delcaration.
+	* aclocal.m4, config.in, configure: Re-generate.	
+	* main.c (error_init): Delete declaration.
+	* defs.h (error_init): Declare.
+	* rs6000-tdep.c (rs6000_fetch_pointer_argument): Make static.
+	(rs6000_convert_from_func_ptr_addr): Make static.
+	(_initialize_rs6000_tdep): Add declaration.
+	* cli/cli-cmds.c (dont_repeat): Delete declaration.
+	(show_commands, set_verbose, show_history): Delete declaration.
+	* top.h (set_verbose): Add declaration.
+	(show_history, set_history, show_commands): Add declaration.
+	(do_restore_instream_cleanup): Add declaration.
+	* objc-lang.c (specialcmp): Make static.
+	(print_object_command): Make static.
+	(find_objc_msgsend): Make static.
+	(find_objc_msgcall_submethod_helper): Make static.
+	(find_objc_msgcall_submethod): Make static.
+	(_initialize_objc_language): Add declaration.
+	(find_implementation_from_class): Make static.
+	(find_implementation): Make static.
+	* objc-exp.y (yylex): Delete lookup_struct_typedef declaration.
+	* objc-lang.h (lookup_struct_typedef): Add declaration.
+	* cli/cli-interp.c (_initialize_cli_interp): Add declaration.
+	* cli/cli-script.c (clear_hook_in_cleanup): Make static.
+	(do_restore_user_call_depth): Make static.
+	(do_restore_instream_cleanup): Delete declaration.
+	(dont_repeat): Delete declaration.
+	* cli/cli-decode.c (add_abbrev_cmd): Delete function.
+	* cli/cli-dump.c (_initialize_cli_dump): Add declaration.
+	* reggroups.c (_initialize_reggroup): Add declaration.
+	* cp-support.c (_initialize_cp_support): Add declaration.
+	* cp-abi.c (_initialize_cp_abi): Add declaration.
+	* hpacc-abi.c (_initialize_hpacc_abi): Add declaration.
+	* gnu-v3-abi.c (gnuv3_baseclass_offset): Make static.
+	(_initialize_gnu_v3_abi): Add declaration.
+	* gnu-v2-abi.c (gnuv2_value_rtti_type): Make static.
+	(_initialize_gnu_v2_abi): Add declaration.
+	* frame-base.c (_initialize_frame_base): Add declaration.
+	* doublest.c (floatformat_from_length): Make static.
+	* frame-unwind.c (_initialize_frame_unwind): Add declaration.
+	* frame.c (create_sentinel_frame): Make static.
+	(_initialize_frame): Add declaration.
+	* top.c (do_catch_errors): Make static.
+	(gdb_rl_operate_and_get_next_completion): Make static.
+	* typeprint.c: Include "typeprint.h".
+	* sentinel-frame.c (sentinel_frame_prev_register): Make static.
+	(sentinel_frame_this_id): Make static.
+	* p-valprint.c (_initialize_pascal_valprint): Add declaration.
+	* ui-out.c (make_cleanup_ui_out_begin_end): Delete function.
+	* dwarf2-frame.c (dwarf2_frame_cache): Make static.
+	* p-exp.y (push_current_type, pop_current_type): ISO C declaration.
+	* dwarf2expr.h (dwarf_expr_context): ISO C declaration.
+	* maint.c (maintenance_print_architecture): Make static.
+	* signals/signals.c (_initialize_signals): Add declaration.
+	* std-regs.c (_initialize_frame_reg): Add declaration.
+	* jv-exp.y (push_variable): ISO C definition.
+	(push_qualified_expression_name): Ditto.
+	* memattr.c (_initialize_mem): Add declaration.
+	* remote.c (remote_check_watch_resources): Make static.
+	(remote_stopped_by_watchpoint): Make static.
+	(remote_stopped_data_address): Make static.
+	* d10v-tdep.c (nr_dmap_regs): Make static.
+	(a0_regnum): Make static.
+	(d10v_frame_unwind_cache): Make static.
+	(d10v_frame_p): Make static.
+	* osabi.c (show_osabi): Make static.
+	(_initialize_gdb_osabi): Add extern declaration.
+	* gdbtypes.c (make_qualified_type): Make static.
+	(safe_parse_type): Make static.
+	* macrocmd.c (_initialize_macrocmd): Add extern declaration.
+	* macrotab.c (macro_bcache_free): Make static.
+	* interps.c (interp_set_quiet): Make static.
+	(interpreter_exec_cmd): Make static.
+	* stack.h (select_frame_command): New file.
+	* stack.c: Include "stack.h".
+	(select_frame_command_wrapper): Delete function.
+	(select_frame_command): Make global.
+	* infcall.c: Include "infcall.h".
+	* linespec.c: Include "linespec.h".
+	* symfile.c (sections_overlap): Make static.
+	* cp-support.h (cp_initialize_namespace): ISO C declaration.
+	* charset.c (_initialize_charset): Add missing prototype.
+	* regcache.c (init_legacy_regcache_descr): Make static.
+	(do_regcache_xfree): Make static.
+	(regcache_xfer_part): Make static.
+	(_initialize_regcache): Add missing prototype.
+	* breakpoint.c (parse_breakpoint_sals): Make static.
+	(breakpoint_sals_to_pc): Make static.
+	* interps.h (clear_interpreter_hooks): ISO C declaration.
+	* Makefile.in (stack_h): Define.
+	(stack.o, typeprint.o, mi-main.o): Update dependencies.
+	(mi-cmd-stack.o, infcall.o, linespec.o): Update dependencies.
+
+2003-06-08  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in (d10v-tdep.o): Update dependencies.
 	(SFILES): Add trad-frame.c.
 	(trad_frame_h): Define.

@@ -455,7 +455,7 @@ struct dwarf2_frame_cache
   struct dwarf2_frame_state_reg *reg;
 };
 
-struct dwarf2_frame_cache *
+static struct dwarf2_frame_cache *
 dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct cleanup *old_chain;

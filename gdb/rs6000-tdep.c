@@ -231,7 +231,7 @@ rs6000_saved_pc_after_call (struct frame_info *fi)
 }
 
 /* Get the ith function argument for the current function.  */
-CORE_ADDR
+static CORE_ADDR
 rs6000_fetch_pointer_argument (struct frame_info *frame, int argi, 
 			       struct type *type)
 {
@@ -2164,7 +2164,7 @@ rs6000_create_inferior (int pid)
 /* Return real function address if ADDR (a function pointer) is in the data
    space and is therefore a special function pointer.  */
 
-CORE_ADDR
+static CORE_ADDR
 rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
 {
   struct obj_section *s;
@@ -3032,6 +3032,8 @@ rs6000_info_powerpc_command (char *args, int from_tty)
 }
 
 /* Initialization code.  */
+
+extern initialize_file_ftype _initialize_rs6000_tdep; /* -Wmissing-protypes */
 
 void
 _initialize_rs6000_tdep (void)

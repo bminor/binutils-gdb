@@ -40,6 +40,7 @@
 #include "annotate.h"
 #include "ui-out.h"
 #include "block.h"
+#include "stack.h"
 
 /* Prototypes for exported functions. */
 
@@ -70,8 +71,6 @@ static void up_silently_command (char *, int);
 void frame_command (char *, int);
 
 static void current_frame_command (char *, int);
-
-static void select_frame_command (char *, int);
 
 static void print_frame_arg_vars (struct frame_info *, struct ui_file *);
 
@@ -1460,14 +1459,7 @@ find_relative_frame (register struct frame_info *frame,
    and select it.  See parse_frame_specification for more info on proper
    frame expressions. */
 
-/* ARGSUSED */
 void
-select_frame_command_wrapper (char *level_exp, int from_tty)
-{
-  select_frame_command (level_exp, from_tty);
-}
-
-static void
 select_frame_command (char *level_exp, int from_tty)
 {
   struct frame_info *frame;

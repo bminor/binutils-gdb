@@ -1,3 +1,13 @@
+2003-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-parse.c (_initialize_mi_parse): Delete function.
+	* mi-main.c: Include "mi-main.h".
+	* mi-interp.c (_initialize_mi_interp): Add declaration.
+	* mi-cmd-stack.c: Include "stack.h".
+	(select_frame_command_wrapper): Delete extern declaration.
+	(mi_cmd_stack_select_frame): Replace select_frame_command_wrapper
+	with select_frame_command.
+
 2003-05-16  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-main.c (mi_setup_architecture_data): 

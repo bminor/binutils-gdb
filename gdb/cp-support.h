@@ -71,7 +71,7 @@ extern void cp_add_using_directive (const char *name,
 				    unsigned int outer_length,
 				    unsigned int inner_length);
 
-extern void cp_initialize_namespace ();
+extern void cp_initialize_namespace (void);
 
 extern void cp_finalize_namespace (struct block *static_block,
 				   struct obstack *obstack);

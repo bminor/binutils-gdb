@@ -86,13 +86,13 @@ enum
     RET1_REGNUM = R0_REGNUM,
   };
 
-int
+static int
 nr_dmap_regs (struct gdbarch *gdbarch)
 {
   return gdbarch_tdep (gdbarch)->nr_dmap_regs;
 }
 
-int
+static int
 a0_regnum (struct gdbarch *gdbarch)
 {
   return gdbarch_tdep (gdbarch)->a0_regnum;
@@ -661,7 +661,7 @@ prologue_find_regs (struct d10v_unwind_cache *info, unsigned short op,
    in the stack frame.  sp is even more special: the address we return
    for it IS the sp for the next frame. */
 
-struct d10v_unwind_cache *
+static struct d10v_unwind_cache *
 d10v_frame_unwind_cache (struct frame_info *next_frame,
 			 void **this_prologue_cache)
 {
@@ -1448,7 +1448,7 @@ static const struct frame_unwind d10v_frame_unwind = {
   d10v_frame_prev_register
 };
 
-const struct frame_unwind *
+static const struct frame_unwind *
 d10v_frame_p (CORE_ADDR pc)
 {
   return &d10v_frame_unwind;

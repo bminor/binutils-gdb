@@ -1097,6 +1097,7 @@ pascal_object_print_class_member (char *valaddr, struct type *domain,
     fprintf_filtered (stream, "%ld", (long int) (val >> 3));
 }
 
+extern initialize_file_ftype _initialize_pascal_valprint; /* -Wmissing-prototypes */
 
 void
 _initialize_pascal_valprint (void)

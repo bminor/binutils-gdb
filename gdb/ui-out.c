@@ -437,15 +437,6 @@ make_cleanup_ui_out_end (struct ui_out *uiout,
 }
 
 struct cleanup *
-make_cleanup_ui_out_begin_end (struct ui_out *uiout,
-			       enum ui_out_type type,
-			       const char *id)
-{
-  ui_out_begin (uiout, type, id);
-  return make_cleanup_ui_out_end (uiout, type);
-}
-
-struct cleanup *
 make_cleanup_ui_out_tuple_begin_end (struct ui_out *uiout,
 				     const char *id)
 {

@@ -41,6 +41,7 @@
 #include "regcache.h"
 #include "gdb.h"
 #include "frame.h"
+#include "mi-main.h"
 
 #include <ctype.h>
 #include <sys/time.h>

@@ -514,6 +514,8 @@ mem_delete_command (char *args, int from_tty)
   dont_repeat ();
 }
 
+extern initialize_file_ftype _initialize_mem; /* -Wmissing-prototype */
+
 void
 _initialize_mem (void)
 {

@@ -372,7 +372,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
    to (the address of)(ARG) + OFFSET.
 
    -1 is returned on error. */
-int
+static int
 gnuv3_baseclass_offset (struct type *type, int index, char *valaddr,
 			CORE_ADDR address)
 {
@@ -447,6 +447,7 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.baseclass_offset = gnuv3_baseclass_offset;
 }
 
+extern initialize_file_ftype _initialize_gnu_v3_abi; /* -Wmissing-prototypes */
 
 void
 _initialize_gnu_v3_abi (void)

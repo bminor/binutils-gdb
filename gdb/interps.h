@@ -63,7 +63,7 @@ extern int current_interp_named_p (const char *name);
 extern int current_interp_display_prompt_p (void);
 extern void current_interp_command_loop (void);
 
-extern void clear_interpreter_hooks ();
+extern void clear_interpreter_hooks (void);
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"

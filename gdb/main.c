@@ -74,10 +74,6 @@ struct ui_file *gdb_stderr;
 struct ui_file *gdb_stdlog;
 struct ui_file *gdb_stdtarg;
 
-/* Used to initialize error() - defined in utils.c */
-
-extern void error_init (void);
-
 /* Whether to enable writing into executable and core files */
 extern int write_files;
 

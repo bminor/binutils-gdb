@@ -146,6 +146,8 @@ frame_base_find_by_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
   return table->default_base;
 }
 
+extern initialize_file_ftype _initialize_frame_base; /* -Wmissing-protypes */
+
 void
 _initialize_frame_base (void)
 {

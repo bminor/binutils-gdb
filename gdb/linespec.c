@@ -34,6 +34,7 @@
 #include "parser-defs.h"
 #include "block.h"
 #include "objc-lang.h"
+#include "linespec.h"
 
 /* We share this one with symtab.c, but it is not exported widely. */
 

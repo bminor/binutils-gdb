@@ -778,7 +778,7 @@ frame_map_regnum_to_name (int regnum)
 
 /* Create a sentinel frame.  */
 
-struct frame_info *
+static struct frame_info *
 create_sentinel_frame (struct regcache *regcache)
 {
   struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
@@ -2260,6 +2260,8 @@ legacy_frame_p (struct gdbarch *current_gdbarch)
 	  || !gdbarch_unwind_dummy_id_p (current_gdbarch)
 	  || !SAVE_DUMMY_FRAME_TOS_P ());
 }
+
+extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */
 
 void
 _initialize_frame (void)
