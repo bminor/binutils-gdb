@@ -5897,6 +5897,8 @@ elf_link_input_bfd (finfo, input_bfd)
   asection *o;
   struct elf_backend_data *bed;
   boolean emit_relocs;
+  reloc_howto_type *none_howto;
+  bfd_vma none_r_info;
 
   output_bfd = finfo->output_bfd;
   bed = get_elf_backend_data (output_bfd);
@@ -6068,6 +6070,9 @@ elf_link_input_bfd (finfo, input_bfd)
 	return false;
     }
 
+  none_howto = bfd_reloc_type_lookup (output_bfd, BFD_RELOC_NONE);
+  none_r_info = ELF_R_INFO (0, none_howto->type);
+
   /* Relocate the contents of each section.  */
   for (o = input_bfd->sections; o != NULL; o = o->next)
     {
@@ -6146,8 +6151,7 @@ elf_link_input_bfd (finfo, input_bfd)
 			    && (sec->flags & SEC_LINK_ONCE) != 0
 			    && bfd_is_abs_section (sec->output_section))
 			  {
-			    long r_type = ELF_R_TYPE (rel->r_info);
-			    rel->r_info = ELF_R_INFO (0, r_type);
+			    rel->r_info = none_r_info;
 
 #if BFD_VERSION_DATE > 20021005
 			    (*finfo->info->callbacks->warning)

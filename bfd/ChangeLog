@@ -1,3 +1,8 @@
+2001-10-15  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_link_input_bfd): Set type to BFD_RELOC_NONE
+	for relocations against discarded link-once section.
+
 2001-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i386.c (elf_i386_relocate_section): Report some detail on
