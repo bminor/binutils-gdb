@@ -435,37 +435,37 @@ static int
 wait_for (serial_t scb, int timeout)
 {
 #ifdef HAVE_SGTTY
-  {
-    struct timeval tv;
-    fd_set readfds;
+  while (1)
+    {
+      struct timeval tv;
+      fd_set readfds;
+      int numfds;
 
-    FD_ZERO (&readfds);
+      /* NOTE: Some OS's can scramble the READFDS when the select()
+         call fails (ex the kernel with Red Hat 5.2).  Initialize all
+         arguments before each call. */
 
-    tv.tv_sec = timeout;
-    tv.tv_usec = 0;
+      tv.tv_sec = timeout;
+      tv.tv_usec = 0;
 
-    FD_SET (scb->fd, &readfds);
+      FD_ZERO (&readfds);
+      FD_SET (scb->fd, &readfds);
 
-    while (1)
-      {
-	int numfds;
+      if (timeout >= 0)
+	numfds = select (scb->fd + 1, &readfds, 0, 0, &tv);
+      else
+	numfds = select (scb->fd + 1, &readfds, 0, 0, 0);
 
-	if (timeout >= 0)
-	  numfds = select (scb->fd + 1, &readfds, 0, 0, &tv);
+      if (numfds <= 0)
+	if (numfds == 0)
+	  return SERIAL_TIMEOUT;
+	else if (errno == EINTR)
+	  continue;
 	else
-	  numfds = select (scb->fd + 1, &readfds, 0, 0, 0);
+	  return SERIAL_ERROR;	/* Got an error from select or poll */
 
-	if (numfds <= 0)
-	  if (numfds == 0)
-	    return SERIAL_TIMEOUT;
-	  else if (errno == EINTR)
-	    continue;
-	  else
-	    return SERIAL_ERROR;	/* Got an error from select or poll */
-
-	return 0;
-      }
-  }
+      return 0;
+    }
 #endif /* HAVE_SGTTY */
 
 #if defined HAVE_TERMIO || defined HAVE_TERMIOS
@@ -858,21 +858,24 @@ ser_unix_nop_raw (serial_t scb)
 int
 ser_unix_wait_for (serial_t scb, int timeout)
 {
-  int numfds;
-  struct timeval tv;
-  fd_set readfds, exceptfds;
-
-  FD_ZERO (&readfds);
-  FD_ZERO (&exceptfds);
-
-  tv.tv_sec = timeout;
-  tv.tv_usec = 0;
-
-  FD_SET (scb->fd, &readfds);
-  FD_SET (scb->fd, &exceptfds);
-
   while (1)
     {
+      int numfds;
+      struct timeval tv;
+      fd_set readfds, exceptfds;
+
+      /* NOTE: Some OS's can scramble the READFDS when the select()
+         call fails (ex the kernel with Red Hat 5.2).  Initialize all
+         arguments before each call. */
+
+      tv.tv_sec = timeout;
+      tv.tv_usec = 0;
+
+      FD_ZERO (&readfds);
+      FD_ZERO (&exceptfds);
+      FD_SET (scb->fd, &readfds);
+      FD_SET (scb->fd, &exceptfds);
+
       if (timeout >= 0)
 	numfds = select (scb->fd + 1, &readfds, 0, &exceptfds, &tv);
       else
