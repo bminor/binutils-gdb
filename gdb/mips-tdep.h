@@ -95,4 +95,7 @@ extern void mips_software_single_step (enum target_signal, int);
    function.  */
 extern int mips_pc_is_mips16 (bfd_vma memaddr);
 
+/* Return the currently configured (or set) saved register size. */
+extern unsigned int mips_abi_regsize (struct gdbarch *gdbarch);
+
 #endif /* MIPS_TDEP_H */

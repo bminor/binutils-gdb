@@ -259,7 +259,7 @@ mips_isa_regsize (struct gdbarch *gdbarch)
 
 static const char *mips_abi_regsize_string = size_auto;
 
-static unsigned int
+unsigned int
 mips_abi_regsize (struct gdbarch *gdbarch)
 {
   if (mips_abi_regsize_string == size_auto)
