@@ -1,3 +1,7 @@
+Tue Oct 12 12:01:29 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* remote-sim.c: fix unterminated character string
+
 Tue Oct 12 08:59:15 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabsread.c: Fix comment about gcc 2.3.3 stab for long long int.

@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"
-#include "remote-sim.h
+#include "remote-sim.h"
 #include "remote-utils.h"
 
 /* Naming convention:
