@@ -1,3 +1,8 @@
+2005-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-iq2000.c (line_comment_chars): Include the # character
+	as otherwise this breaks #APP/#NO_APP processing.
+
 2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
 	* config/tc-arc.c(md_assemble): Remove dead code for handling
