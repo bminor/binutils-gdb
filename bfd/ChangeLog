@@ -1,3 +1,8 @@
+Fri Sep 13 14:32:42 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* aoutf1.h (MY_bfd_merge_private_bfd_data): Define.
+	(sunos_merge_private_bfd_data): New function.
+
 Fri Sep 13 15:50:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bfd.c (bfd_copy_private_bfd_data): Switch on output BFD rather
