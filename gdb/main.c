@@ -27,6 +27,7 @@ int fclose ();
 #include "signals.h"
 #include "target.h"
 #include "breakpoint.h"
+#include "language.h"
 
 #include "getopt.h"
 
@@ -79,6 +80,8 @@ extern char *version;
 /* Message to be printed before the error message, when an error occurs.  */
 
 extern char *error_pre_print;
+
+extern char lang_frame_mismatch_warn[];		/* language.c */
 
 /* Flag for whether we want all the "from_tty" gubbish printed.  */
 
@@ -144,7 +147,7 @@ static char dirbuf[MAXPATHLEN];
 /* Function to call before reading a command, if nonzero.
    The function receives two args: an input stream,
    and a prompt string.  */
-   
+
 void (*window_hook) ();
 
 extern int frame_file_full_name;
@@ -337,6 +340,11 @@ main (argc, argv)
   if (i != 0)
     alloca (4 - i);
 #endif
+
+  /* If error() is called from initialization code, just exit */
+  if (setjmp (to_top_level)) {
+    exit(1);
+  }
 
   cmdsize = 1;
   cmdarg = (char **) xmalloc (cmdsize * sizeof (*cmdarg));
@@ -542,7 +550,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
       print_gdb_version ();
       if (symarg)
 	printf_filtered ("..");
-      wrap_here();
+      wrap_here("");
       fflush (stdout);		/* Force to screen during slow operations */
     }
 
@@ -705,6 +713,9 @@ execute_command (p, from_tty)
 {
   register struct cmd_list_element *c;
   register struct command_line *cmdlines;
+  register enum language flang;
+  static enum language current = language_unknown;
+  static int warned = 0;
 
   free_all_values ();
 
@@ -748,7 +759,31 @@ execute_command (p, from_tty)
 	error ("That is not a command, just a help topic.");
       else
 	(*c->function) (arg, from_tty & caution);
+   }
+
+  /* Tell the user if the language has changed */
+  if (working_lang != current)
+  {
+    if (language_mode == language_mode_auto) {
+      if (current != language_unknown)
+	language_info ();
     }
+    current = working_lang;
+    warned = 0;
+  }
+
+  /* Warn the user if the working language does not match the
+     language of the current frame.  Only warn the user if we are
+     actually running the program, i.e. there is a stack. */
+  if (target_has_stack)
+  {
+    flang = get_frame_language();
+    if(!warned && flang != language_unknown && flang != working_lang)
+    {
+      printf_filtered ("%s\n", lang_frame_mismatch_warn);
+      warned = 1;
+    }
+  }
 }
 
 /* ARGSUSED */
