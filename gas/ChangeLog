@@ -1,9 +1,16 @@
+Fri Apr 24 12:47:42 1998  Philippe De Muyter  <phdm@macqel.be>
+
+	* read.c (s_set): Cast xmalloc return value to fragS *.
+	* config/tc-m68k.c (m68k_ip): Function made static to match
+	previous forward declaration.
+	(insert_reg, init_regtable, md_convert_frag_1): Likewise.
+
 Fri Apr 24 09:26:46 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c: Add internationalisation macros to error
 	strings.  
 
-	* config/tc-m32r.c (can_make_parallel): Add initernationalisation
+	* config/tc-m32r.c (can_make_parallel): Add internationalisation
 	macros to error strings.
 
 Thu Apr 23 19:23:23 1998  Ian Lance Taylor  <ian@cygnus.com>

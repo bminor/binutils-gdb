@@ -2710,7 +2710,7 @@ s_set (equiv)
       if (listing & LISTING_SYMBOLS)
 	{
 	  extern struct list_info_struct *listing_tail;
-	  fragS *dummy_frag = xmalloc (sizeof(fragS));
+	  fragS *dummy_frag = (fragS *) xmalloc (sizeof(fragS));
 	  memset (dummy_frag, 0, sizeof(fragS));
 	  dummy_frag->fr_type = rs_fill;
 	  dummy_frag->line = listing_tail;

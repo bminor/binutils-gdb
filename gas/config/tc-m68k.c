@@ -924,7 +924,7 @@ static struct hash_control *op_hash;
 
 /* Assemble an m68k instruction.  */
 
-void
+static void
 m68k_ip (instring)
      char *instring;
 {
@@ -3125,7 +3125,7 @@ crack_operand (str, opP)
    the frags/bytes it assembles to.
    */
 
-void
+static void
 insert_reg (regname, regnum)
      const char *regname;
      int regnum;
@@ -3321,7 +3321,7 @@ static const struct init_entry init_table[] =
   { 0, 0 }
 };
 
-void
+static void
 init_regtable ()
 {
   int i;
@@ -4110,7 +4110,7 @@ void md_apply_fix (fixP, val)
    the bytes inside it modified to conform to the new size  There is UGLY
    MAGIC here. ..
    */
-void
+static void
 md_convert_frag_1 (fragP)
      register fragS *fragP;
 {
