@@ -206,8 +206,8 @@ ALL_EMULATIONS = \
 	earcelf.o \
 	earmelf.o \
 	earmelf_oabi.o \
-	earmlinux.o \
-	earm26linux.o \
+	earmelf_linux.o \
+	earmelf_linux26.o \
 	earmaoutb.o \
 	earmaoutl.o \
 	earmcoff.o \

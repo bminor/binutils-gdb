@@ -1,3 +1,9 @@
+Wed May 19 12:44:26 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* Makefile.am (ALL_EMULATIONS): Remove earmlinux.o and
+	earm26linux.o, add earmelf_linux.o and earmelf_linux26.o.
+	* Makefile.in: Regenerated.
+
 1999-05-16  Nick Clifton  <nickc@cygnus.com>
 
 	* emulparams/elf32mcore.sh (GENERATE_SHLIB_SCRIPT): Define.
