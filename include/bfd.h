@@ -1348,10 +1348,6 @@ boolean
 core_file_matches_executable_p
  PARAMS ((bfd *core_bfd, bfd *exec_bfd));
 
-#define SDEF(ret, name, arglist) \
-                PROTO(ret,(*name),arglist)
-#define SDEF_FMT(ret, name, arglist) \
-                PROTO(ret,(*name[bfd_type_end]),arglist)
 #define BFD_SEND(bfd, message, arglist) \
                ((*((bfd)->xvec->message)) arglist)
 #define BFD_SEND_FMT(bfd, message, arglist) \
@@ -1375,131 +1371,140 @@ typedef struct bfd_target
   flagword section_flags;
   char symbol_leading_char;
   char ar_pad_char;            
- unsigned short ar_max_namelen;
+  unsigned short ar_max_namelen;
   unsigned int align_power_min;
-  SDEF (bfd_vma,      bfd_getx64, (bfd_byte *));
-  SDEF (void,         bfd_putx64, (bfd_vma, bfd_byte *));
-  SDEF (bfd_vma, bfd_getx32, (bfd_byte *));
-  SDEF (void,         bfd_putx32, (bfd_vma, bfd_byte *));
-  SDEF (bfd_vma, bfd_getx16, (bfd_byte *));
-  SDEF (void,         bfd_putx16, (bfd_vma, bfd_byte *));
-  SDEF (bfd_vma,   bfd_h_getx64, (bfd_byte *));
-  SDEF (void,          bfd_h_putx64, (bfd_vma, bfd_byte *));
-  SDEF (bfd_vma,  bfd_h_getx32, (bfd_byte *));
-  SDEF (void,          bfd_h_putx32, (bfd_vma, bfd_byte *));
-  SDEF (bfd_vma,  bfd_h_getx16, (bfd_byte *));
-  SDEF (void,          bfd_h_putx16, (bfd_vma, bfd_byte *));
-  SDEF_FMT (struct bfd_target *, _bfd_check_format, (bfd *));
-  SDEF_FMT (boolean,            _bfd_set_format, (bfd *));
-  SDEF_FMT (boolean,            _bfd_write_contents, (bfd *));
-  SDEF (char *, _core_file_failing_command, (bfd *));
-  SDEF (int,    _core_file_failing_signal, (bfd *));
-  SDEF (boolean, _core_file_matches_executable_p, (bfd *, bfd *));
- SDEF (boolean, _bfd_slurp_armap, (bfd *));
- SDEF (boolean, _bfd_slurp_extended_name_table, (bfd *));
- SDEF (void,   _bfd_truncate_arname, (bfd *, CONST char *, char *));
- SDEF (boolean, write_armap, (bfd *arch, 
+  bfd_vma      (*bfd_getx64) PARAMS ((bfd_byte *));
+  void         (*bfd_putx64) PARAMS ((bfd_vma, bfd_byte *));
+  bfd_vma      (*bfd_getx32) PARAMS ((bfd_byte *));
+  void         (*bfd_putx32) PARAMS ((bfd_vma, bfd_byte *));
+  bfd_vma      (*bfd_getx16) PARAMS ((bfd_byte *));
+  void         (*bfd_putx16) PARAMS ((bfd_vma, bfd_byte *));
+  bfd_vma      (*bfd_h_getx64) PARAMS ((bfd_byte *));
+  void         (*bfd_h_putx64) PARAMS ((bfd_vma, bfd_byte *));
+  bfd_vma      (*bfd_h_getx32) PARAMS ((bfd_byte *));
+  void         (*bfd_h_putx32) PARAMS ((bfd_vma, bfd_byte *));
+  bfd_vma      (*bfd_h_getx16) PARAMS ((bfd_byte *));
+  void         (*bfd_h_putx16) PARAMS ((bfd_vma, bfd_byte *));
+  struct bfd_target * (*_bfd_check_format[bfd_type_end]) PARAMS ((bfd *));
+  boolean             (*_bfd_set_format[bfd_type_end]) PARAMS ((bfd *));
+  boolean             (*_bfd_write_contents[bfd_type_end]) PARAMS ((bfd *));
+  char *   (*_core_file_failing_command) PARAMS ((bfd *));
+  int      (*_core_file_failing_signal) PARAMS ((bfd *));
+  boolean  (*_core_file_matches_executable_p) PARAMS ((bfd *, bfd *));
+  boolean  (*_bfd_slurp_armap) PARAMS ((bfd *));
+  boolean  (*_bfd_slurp_extended_name_table) PARAMS ((bfd *));
+  void     (*_bfd_truncate_arname) PARAMS ((bfd *, CONST char *, char *));
+  boolean  (*write_armap) PARAMS ((bfd *arch, 
                               unsigned int elength,
                               struct orl *map,
                               unsigned int orl_count, 
                               int stridx));
-  SDEF (boolean, _close_and_cleanup, (bfd *));
-  SDEF (boolean, _bfd_set_section_contents, (bfd *, sec_ptr, PTR,
+  boolean       (*_close_and_cleanup) PARAMS ((bfd *));
+  boolean       (*_bfd_set_section_contents) PARAMS ((bfd *, sec_ptr, PTR,
                                             file_ptr, bfd_size_type));
-  SDEF (boolean, _bfd_get_section_contents, (bfd *, sec_ptr, PTR, 
+  boolean       (*_bfd_get_section_contents) PARAMS ((bfd *, sec_ptr, PTR, 
                                             file_ptr, bfd_size_type));
-  SDEF (boolean, _new_section_hook, (bfd *, sec_ptr));
-  SDEF (unsigned int, _get_symtab_upper_bound, (bfd *));
-  SDEF (unsigned int, _bfd_canonicalize_symtab,
-           (bfd *, struct symbol_cache_entry **));
-  SDEF (unsigned int, _get_reloc_upper_bound, (bfd *, sec_ptr));
-  SDEF (unsigned int, _bfd_canonicalize_reloc, (bfd *, sec_ptr, arelent **,
-                                               struct symbol_cache_entry**));
-  SDEF (struct symbol_cache_entry  *, _bfd_make_empty_symbol, (bfd *));
-  SDEF (void,     _bfd_print_symbol, (bfd *, PTR, struct symbol_cache_entry  *,
+  boolean       (*_new_section_hook) PARAMS ((bfd *, sec_ptr));
+  unsigned int  (*_get_symtab_upper_bound) PARAMS ((bfd *));
+  unsigned int  (*_bfd_canonicalize_symtab) PARAMS ((bfd *,
+                                              struct symbol_cache_entry **));
+  unsigned int  (*_get_reloc_upper_bound) PARAMS ((bfd *, sec_ptr));
+  unsigned int  (*_bfd_canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **,
+                                              struct symbol_cache_entry **));
+  struct symbol_cache_entry  *
+                (*_bfd_make_empty_symbol) PARAMS ((bfd *));
+  void          (*_bfd_print_symbol) PARAMS ((bfd *, PTR,
+                                      struct symbol_cache_entry *,
                                       bfd_print_symbol_type));
 #define bfd_print_symbol(b,p,s,e) BFD_SEND(b, _bfd_print_symbol, (b,p,s,e))
-  SDEF (alent *,   _get_lineno, (bfd *, struct symbol_cache_entry  *));
+  alent *    (*_get_lineno) PARAMS ((bfd *, struct symbol_cache_entry *));
 
-  SDEF (boolean,   _bfd_set_arch_mach, (bfd *, enum bfd_architecture,
-                                       unsigned long));
+  boolean    (*_bfd_set_arch_mach) PARAMS ((bfd *, enum bfd_architecture,
+                    unsigned long));
 
-  SDEF (bfd *,  openr_next_archived_file, (bfd *arch, bfd *prev));
-  SDEF (boolean, _bfd_find_nearest_line,
-        (bfd *abfd, struct sec  *section,
-         struct symbol_cache_entry  **symbols,bfd_vma offset,
-        CONST char **file, CONST char **func, unsigned int *line));
-  SDEF (int,    _bfd_stat_arch_elt, (bfd *, struct stat *));
+  bfd *      (*openr_next_archived_file) PARAMS ((bfd *arch, bfd *prev));
+ 
+  boolean    (*_bfd_find_nearest_line) PARAMS ((bfd *abfd,
+                    struct sec *section, struct symbol_cache_entry **symbols,
+                    bfd_vma offset, CONST char **file, CONST char **func,
+                    unsigned int *line));
+ 
+  int        (*_bfd_stat_arch_elt) PARAMS ((bfd *, struct stat *));
 
-  SDEF (int,    _bfd_sizeof_headers, (bfd *, boolean));
+  int        (*_bfd_sizeof_headers) PARAMS ((bfd *, boolean));
 
-  SDEF (void, _bfd_debug_info_start, (bfd *));
-  SDEF (void, _bfd_debug_info_end, (bfd *));
-  SDEF (void, _bfd_debug_info_accumulate, (bfd *, struct sec  *));
-  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet *, bfd_byte *data));
-  SDEF (boolean,_bfd_relax_section,(bfd *, struct sec *, struct symbol_cache_entry **));
-  SDEF(void, _bfd_coff_swap_aux_in,(
+  void       (*_bfd_debug_info_start) PARAMS ((bfd *));
+  void       (*_bfd_debug_info_end) PARAMS ((bfd *));
+  void       (*_bfd_debug_info_accumulate) PARAMS ((bfd *, struct sec *));
+
+  bfd_byte * (*_bfd_get_relocated_section_contents) PARAMS ((bfd *,
+                    struct bfd_seclet *, bfd_byte *data));
+
+  boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
+                    struct symbol_cache_entry **));
+  void (*_bfd_coff_swap_aux_in) PARAMS ((
        bfd            *abfd ,
        PTR             ext,
        int             type,
        int             class ,
        PTR             in));
 
-  SDEF(void, _bfd_coff_swap_sym_in,(
+  void (*_bfd_coff_swap_sym_in) PARAMS ((
        bfd            *abfd ,
        PTR             ext,
        PTR             in));
 
-  SDEF(void, _bfd_coff_swap_lineno_in,  (
+  void (*_bfd_coff_swap_lineno_in) PARAMS ((
        bfd            *abfd,
        PTR            ext,
        PTR             in));
 
- SDEF(unsigned int, _bfd_coff_swap_aux_out,(
+ unsigned int (*_bfd_coff_swap_aux_out) PARAMS ((
        bfd   	*abfd,
        PTR	in,
        int    	type,
        int    	class,
        PTR    	ext));
 
- SDEF(unsigned int, _bfd_coff_swap_sym_out,(
+ unsigned int (*_bfd_coff_swap_sym_out) PARAMS ((
       bfd      *abfd,
       PTR	in,
       PTR	ext));
 
- SDEF(unsigned int, _bfd_coff_swap_lineno_out,(
+ unsigned int (*_bfd_coff_swap_lineno_out) PARAMS ((
       	bfd   	*abfd,
       	PTR	in,
 	PTR	ext));
 
- SDEF(unsigned int, _bfd_coff_swap_reloc_out,(
+ unsigned int (*_bfd_coff_swap_reloc_out) PARAMS ((
       	bfd     *abfd,
      	PTR	src,
 	PTR	dst));
 
- SDEF(unsigned int, _bfd_coff_swap_filehdr_out,(
+ unsigned int (*_bfd_coff_swap_filehdr_out) PARAMS ((
       	bfd  	*abfd,
 	PTR 	in,
 	PTR 	out));
 
- SDEF(unsigned int, _bfd_coff_swap_aouthdr_out,(
+ unsigned int (*_bfd_coff_swap_aouthdr_out) PARAMS ((
       	bfd 	*abfd,
 	PTR 	in,
 	PTR	out));
 
- SDEF(unsigned int, _bfd_coff_swap_scnhdr_out,(
+ unsigned int (*_bfd_coff_swap_scnhdr_out) PARAMS ((
       	bfd  	*abfd,
       	PTR	in,
 	PTR	out));
 
   /* See documentation on reloc types.  */
- SDEF (CONST struct reloc_howto_struct *,
-       reloc_type_lookup,
-       (bfd *abfd, bfd_reloc_code_real_type code));
+ CONST struct reloc_howto_struct *
+       (*reloc_type_lookup) PARAMS ((bfd *abfd,
+                                     bfd_reloc_code_real_type code));
 
-  /* Complete and utter crock, currently used for the assembler
+  /* Back-door to allow format-aware applications to create debug symbols
+    while using BFD for everything else.  Currently used by the assembler
     when creating COFF files.  */
- SDEF (asymbol *, _bfd_make_debug_symbol, (
+ asymbol *  (*_bfd_make_debug_symbol) PARAMS ((
        bfd *abfd,
        void *ptr,
        unsigned long size));
