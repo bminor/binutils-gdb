@@ -1109,7 +1109,7 @@ pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
 
 /* Dummy frame.  This saves the processor state just prior to setting
    up the inferior function call.  Older targets save the registers
-   target stack (but that really slows down function calls).  */
+   on the target stack (but that really slows down function calls).  */
 
 struct dummy_frame
 {

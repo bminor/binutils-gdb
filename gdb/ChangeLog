@@ -1,3 +1,7 @@
+2000-04-25  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* blockframe.c: Fix a minor typo in a comment.
+
 2000-04-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-tdep.c (examine_prologue): Recognize store instructions;
