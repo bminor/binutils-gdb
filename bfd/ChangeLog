@@ -1,5 +1,12 @@
 Mon Sep 12 11:43:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* coff-alpha.c (ecoffalpha_little_vec): Add SEC_CODE and SEC_DATA
+	to section_flags.
+	* coff-mips.c (ecoff_little_vec, ecoff_big_vec): Likewise.
+
+	* elfcode.h (swap_out_syms): Set the type of an undefined symbol
+	to STT_FUNC if the BSF_FUNCTION flag is set.
+
 	* cofflink.c (coff_link_input_bfd): If r_symndx is -1, don't
 	change it.
 	(_bfd_coff_generic_relocate_section): If r_symndx is -1, it is an

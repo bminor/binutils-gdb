@@ -2347,7 +2347,10 @@ swap_out_syms (abfd)
 	if (bfd_is_com_section (syms[idx]->section))
 	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_OBJECT);
 	else if (bfd_is_und_section (syms[idx]->section))
-	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_NOTYPE);
+	  sym.st_info = ELF_ST_INFO (STB_GLOBAL,
+				     ((syms[idx]->flags & BSF_FUNCTION)
+				      ? STT_FUNC
+				      : STT_NOTYPE));
 	else if (syms[idx]->flags & BSF_SECTION_SYM)
 	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
 	else if (syms[idx]->flags & BSF_FILE)
@@ -2511,7 +2514,8 @@ NAME(bfd_elf,write_object_contents) (abfd)
     }
 
   if (bed->elf_backend_final_write_processing)
-    (*bed->elf_backend_final_write_processing) (abfd, NULL);
+    (*bed->elf_backend_final_write_processing) (abfd,
+						elf_tdata (abfd)->linker);
 
   return write_shdrs_and_ehdr (abfd);
 }
@@ -5682,10 +5686,6 @@ elf_bfd_final_link (abfd, info)
 	}
     }
 
-  /* Now backend stuff.  */
-  if (bed->elf_backend_final_write_processing)
-    (*bed->elf_backend_final_write_processing) (abfd, NULL);
-
   if (finfo.contents != NULL)
     free (finfo.contents);
   if (finfo.external_relocs != NULL)
@@ -5708,6 +5708,8 @@ elf_bfd_final_link (abfd, info)
 	  && elf_section_data (o)->rel_hashes != NULL)
 	free (elf_section_data (o)->rel_hashes);
     }
+
+  elf_tdata (abfd)->linker = true;
 
   return true;
 
