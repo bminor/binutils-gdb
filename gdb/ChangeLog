@@ -1,3 +1,12 @@
+2001-05-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (struct gdbarch_info): Delete field bfd_architecture.
+	(gdbarch_update_p): Rewrite logic filling in INFO struct.  Use
+	user specified values when available.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.  Get the
+	architecture from info.bfd_arch_info.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
 2001-05-12  Fernando Nasser  <fnasser@redhat.com>
 
 	* remote-e7000.c (e7000_open): Check for bad baud rate.

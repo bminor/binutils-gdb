@@ -1607,9 +1607,6 @@ struct gdbarch_list
 
 struct gdbarch_info
 {
-  /* Use default: bfd_arch_unknown (ZERO). */
-  enum bfd_architecture bfd_architecture;
-
   /* Use default: NULL (ZERO). */
   const struct bfd_arch_info *bfd_arch_info;
 
@@ -1663,16 +1660,12 @@ extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gd
 extern void gdbarch_free (struct gdbarch *);
 
 
-/* Helper function. Force an update of the current architecture.  Used
-   by legacy targets that have added their own target specific
-   architecture manipulation commands.
+/* Helper function. Force an update of the current architecture.
 
-   The INFO parameter shall be fully initialized (``memset (&INFO,
-   sizeof (info), 0)'' set relevant fields) before gdbarch_update_p()
-   is called.  gdbarch_update_p() shall initialize any ``default''
-   fields using information obtained from the previous architecture or
-   INFO.ABFD (if specified) before calling the corresponding
-   architectures INIT function.
+   The actual architecture selected is determined by INFO, ``(gdb) set
+   architecture'' et.al., the existing architecture and BFD's default
+   architecture.  INFO should be initialized to zero and then selected
+   fields should be updated.
 
    Returns non-zero if the update succeeds */
 

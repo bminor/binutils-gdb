@@ -838,9 +838,6 @@ struct gdbarch_list
 
 struct gdbarch_info
 {
-  /* Use default: bfd_arch_unknown (ZERO). */
-  enum bfd_architecture bfd_architecture;
-
   /* Use default: NULL (ZERO). */
   const struct bfd_arch_info *bfd_arch_info;
 
@@ -894,16 +891,12 @@ extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gd
 extern void gdbarch_free (struct gdbarch *);
 
 
-/* Helper function. Force an update of the current architecture.  Used
-   by legacy targets that have added their own target specific
-   architecture manipulation commands.
+/* Helper function. Force an update of the current architecture.
 
-   The INFO parameter shall be fully initialized (\`\`memset (&INFO,
-   sizeof (info), 0)'' set relevant fields) before gdbarch_update_p()
-   is called.  gdbarch_update_p() shall initialize any \`\`default''
-   fields using information obtained from the previous architecture or
-   INFO.ABFD (if specified) before calling the corresponding
-   architectures INIT function.
+   The actual architecture selected is determined by INFO, \`\`(gdb) set
+   architecture'' et.al., the existing architecture and BFD's default
+   architecture.  INFO should be initialized to zero and then selected
+   fields should be updated.
 
    Returns non-zero if the update succeeds */
 
@@ -1945,73 +1938,70 @@ gdbarch_update_p (struct gdbarch_info info)
   struct gdbarch_list **list;
   struct gdbarch_registration *rego;
 
-  /* Fill in any missing bits. Most important is the bfd_architecture
-     which is used to select the target architecture. */
-  if (info.bfd_architecture == bfd_arch_unknown)
-    {
-      if (info.bfd_arch_info != NULL)
-	info.bfd_architecture = info.bfd_arch_info->arch;
-      else if (info.abfd != NULL)
-	info.bfd_architecture = bfd_get_arch (info.abfd);
-      /* FIXME - should query BFD for its default architecture. */
-      else
-	info.bfd_architecture = current_gdbarch->bfd_arch_info->arch;
-    }
+  /* Fill in missing parts of the INFO struct using a number of
+     sources: \`\`set ...''; INFOabfd supplied; existing target.  */
+
+  /* \`\`(gdb) set architecture ...'' */
+  if (info.bfd_arch_info == NULL
+      && !TARGET_ARCHITECTURE_AUTO)
+    info.bfd_arch_info = TARGET_ARCHITECTURE;
+  if (info.bfd_arch_info == NULL
+      && info.abfd != NULL
+      && bfd_get_arch (info.abfd) != bfd_arch_unknown
+      && bfd_get_arch (info.abfd) != bfd_arch_obscure)
+    info.bfd_arch_info = bfd_get_arch_info (info.abfd);
   if (info.bfd_arch_info == NULL)
-    {
-      if (target_architecture_auto && info.abfd != NULL)
-	info.bfd_arch_info = bfd_get_arch_info (info.abfd);
-      else
-	info.bfd_arch_info = current_gdbarch->bfd_arch_info;
-    }
+    info.bfd_arch_info = TARGET_ARCHITECTURE;
+
+  /* \`\`(gdb) set byte-order ...'' */
+  if (info.byte_order == 0
+      && !TARGET_BYTE_ORDER_AUTO)
+    info.byte_order = TARGET_BYTE_ORDER;
+  /* From the INFO struct. */
+  if (info.byte_order == 0
+      && info.abfd != NULL)
+    info.byte_order = (bfd_big_endian (info.abfd) ? BIG_ENDIAN
+		       : bfd_little_endian (info.abfd) ? LITTLE_ENDIAN
+		       : 0);
+  /* From the current target. */
   if (info.byte_order == 0)
+    info.byte_order = TARGET_BYTE_ORDER;
+
+  /* Must have found some sort of architecture. */
+  gdb_assert (info.bfd_arch_info != NULL);
+
+  if (gdbarch_debug)
     {
-      if (target_byte_order_auto && info.abfd != NULL)
-	info.byte_order = (bfd_big_endian (info.abfd) ? BIG_ENDIAN
-			   : bfd_little_endian (info.abfd) ? LITTLE_ENDIAN
-			   : 0);
-      else
-	info.byte_order = current_gdbarch->byte_order;
-      /* FIXME - should query BFD for its default byte-order. */
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.bfd_arch_info %s\n",
+			  (info.bfd_arch_info != NULL
+			   ? info.bfd_arch_info->printable_name
+			   : "(null)"));
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.byte_order %d (%s)\n",
+			  info.byte_order,
+			  (info.byte_order == BIG_ENDIAN ? "big"
+			   : info.byte_order == LITTLE_ENDIAN ? "little"
+			   : "default"));
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.abfd 0x%lx\n",
+			  (long) info.abfd);
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.tdep_info 0x%lx\n",
+			  (long) info.tdep_info);
     }
-  /* A default for abfd? */
 
   /* Find the target that knows about this architecture. */
   for (rego = gdbarch_registry;
        rego != NULL;
        rego = rego->next)
-    if (rego->bfd_architecture == info.bfd_architecture)
+    if (rego->bfd_architecture == info.bfd_arch_info->arch)
       break;
   if (rego == NULL)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: No matching architecture\\n");
       return 0;
-    }
-
-  if (gdbarch_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.bfd_architecture %d (%s)\\n",
-			  info.bfd_architecture,
-			  bfd_lookup_arch (info.bfd_architecture, 0)->printable_name);
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.bfd_arch_info %s\\n",
-			  (info.bfd_arch_info != NULL
-			   ? info.bfd_arch_info->printable_name
-			   : "(null)"));
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.byte_order %d (%s)\\n",
-			  info.byte_order,
-			  (info.byte_order == BIG_ENDIAN ? "big"
-			   : info.byte_order == LITTLE_ENDIAN ? "little"
-			   : "default"));
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.abfd 0x%lx\\n",
-			  (long) info.abfd);
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.tdep_info 0x%lx\\n",
-			  (long) info.tdep_info);
     }
 
   /* Ask the target for a replacement architecture. */
