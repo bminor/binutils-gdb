@@ -1,3 +1,8 @@
+Mon Aug 30 16:07:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* valops.c (call_function_by_hand): If we discard cleanups, call
+	bpstat_clear (&inf_status.stop_bpstat).
+
 Mon Aug 30 12:47:46 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* stabsread.h, dbxread.c (end_psymtab):  Return NULL if the psymtab
@@ -8,8 +13,8 @@ Mon Aug 30 12:47:46 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	* mipsread.c (parse_lines):  Check for cbLine being zero, not
 	cbLineOffset.
 	* mipsread.c (struct symloc):  Add pst_language.
-	* mipsread.c (parse_partial_symbols):  Set up proper language for header
-	files, save it in pst_language for psymtab_to_symtab_1.
+	* mipsread.c (parse_partial_symbols): Set up proper language for
+	header files, save it in pst_language for psymtab_to_symtab_1.
 	* mipsread.c (psymtab_to_symtab_1):  Use pst_language.
 
 Mon Aug 30 10:48:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
