@@ -1,3 +1,5 @@
+// -*- C -*-
+//
 //    <insn> ::=
 //        <insn-word> { "+" <insn-word> }
 //        ":" <format-name>
@@ -624,9 +626,10 @@
 *tx19:
 // end-sanitize-tx19
 {
+  /* this check's for overflow */
   ALU64_BEGIN (GPR[RS]);
   ALU64_ADD (GPR[RT]);
-  ALU64_END (GPR[RT]);
+  ALU64_END (GPR[RD]);
 }
 
 
@@ -787,7 +790,7 @@
 	LO = EXTEND32 (0x80000000);
 	HI = EXTEND32 (0);
       }
-    else if (d == -1 && d == 0x80000000)
+    else if (n == SIGNED32 (0x80000000) && d == -1)
       {
 	LO = EXTEND32 (0x80000000);
 	HI = EXTEND32 (0);

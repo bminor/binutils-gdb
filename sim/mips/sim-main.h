@@ -126,7 +126,7 @@ convert (SD, CPU, cia, rm, op, from, to)
   int bit = ((cc == 0) ? 23 : (24 + (cc)));\
   FCSR = ((FCSR & ~(1 << bit)) | ((v) << bit));\
 }
-#define GETFCC(cc) (((((cc) == 0) ? (FCSR & (1 << 23)) : (FCSR & (1 << (24 + (cc))))) != 0) ? 1 : 0)
+#define GETFCC(cc) (((((cc) == 0) ? (FCSR & (1 << 23)) : (FCSR & (1 << (24 + (cc))))) != 0) ? 1U : 0)
 
 /* This should be the COC1 value at the start of the preceding
    instruction: */
