@@ -1,3 +1,12 @@
+Thu Jul 15 17:55:31 1999  Mark P. Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (_bfd_mips_elf_modify_segment_map): Don't require
+	a PT_PHDR program headers.
+	(_bfd_mips_elf_final_link): Don't assume there are going to be
+	section symbols when we're not building a shared object.
+	(_bfd_mips_elf_check_relocs): Make sure we have a GOT when
+	we need one.
+
 1999-07-15  J.T. Conklin  <jtc@redback.com>
 
 	* config.bfd (i[3456]86-*-vxworks*): New target.

@@ -3245,23 +3245,25 @@ _bfd_mips_elf_modify_segment_map (abfd)
 	{
 	  struct elf_segment_map *options_segment;
 
-	  for (m = elf_tdata (abfd)->segment_map; m; m = m->next)
-	    if (m->p_type == PT_PHDR)
+	  /* Usually, there's a program header table.  But, sometimes
+	     there's not (like when running the `ld' testsuite).  So,
+	     if there's no program header table, we just put the
+	     options segement at the end.  */
+	  for (pm = &elf_tdata (abfd)->segment_map; 
+	       *pm != NULL;
+	       pm = &(*pm)->next)
+	    if ((*pm)->p_type == PT_PHDR)
 	      break;
-
-	  /* There should always be a program header table.  */
-	  if (m == NULL)
-	    return false;
 
 	  options_segment = bfd_zalloc (abfd, 
 					sizeof (struct elf_segment_map));
-	  options_segment->next = m->next;
+	  options_segment->next = *pm;
 	  options_segment->p_type = PT_MIPS_OPTIONS;
 	  options_segment->p_flags = PF_R;
 	  options_segment->p_flags_valid = true;
 	  options_segment->count = 1;
 	  options_segment->sections[0] = s;
-	  m->next = options_segment;
+	  *pm = options_segment;
 	}
     }
   else
@@ -4326,14 +4328,21 @@ _bfd_mips_elf_final_link (abfd, info)
      generic size_dynamic_sections renumbered them out from under us.
      Rather than trying somehow to prevent the renumbering, just do
      the sort again.  */
-
   if (elf_hash_table (info)->dynobj)
     {
       bfd *dynobj;
       asection *got;
       struct mips_got_info *g;
 
-      if (!mips_elf_sort_hash_table (info, bfd_count_sections (abfd) + 1))
+      /* When we resort, we must tell mips_elf_sort_hash_table what
+	 the lowest index it may use is.  That's the number of section
+	 symbols we're going to add.  The generic ELF linker only
+	 adds these symbols when building a shared object.  Note that
+	 we count the sections after (possibly) removing the .options
+	 section above.  */
+      if (!mips_elf_sort_hash_table (info, (info->shared 
+					    ? bfd_count_sections (abfd) + 1
+					    : 1)))
         return false;
 
       /* Make sure we didn't grow the global .got region.  */
@@ -5531,7 +5540,7 @@ mips_elf_next_lo16_addend (relocation, relend, addendp)
      immediately following.  However, for the IRIX6 ABI, the next
      relocation may be a composed relocation consisting of several
      relocations for the same address.  In that case, the R_MIPS_LO16
-     relo!scation may occur as one of these.  We permit a similar
+     relocation may occur as one of these.  We permit a similar
      extension in general, as that is useful for GCC.  */
   while (relocation < relend)
     {
@@ -7190,6 +7199,9 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	    case R_MIPS_CALL_LO16:
 	    case R_MIPS_GOT_HI16:
 	    case R_MIPS_GOT_LO16:
+	    case R_MIPS_GOT_PAGE:
+	    case R_MIPS_GOT_OFST:
+	    case R_MIPS_GOT_DISP:
 	      if (dynobj == NULL)
 		elf_hash_table (info)->dynobj = dynobj = abfd;
 	      if (! mips_elf_create_got_section (dynobj, info))
