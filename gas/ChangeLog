@@ -1,3 +1,9 @@
+Wed Jul 28 11:30:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-m68k.c (m68k_ip): If we have a normal constant when we
+	expect a bignum, turn it into a bignum.  Output extra zeroes
+	before a short bignum, rather than after.
+
 Tue Jul 27 15:54:27 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* symbols.c (symbol_new): Conditionalize verify_symbol_chain call
