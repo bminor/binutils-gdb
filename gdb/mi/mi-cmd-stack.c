@@ -214,7 +214,6 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
   struct block *block;
   struct symbol *sym;
   int i, nsyms;
-  int print_me = 0;
   static struct ui_stream *stb = NULL;
 
   stb = ui_out_stream_new (uiout);
@@ -227,6 +226,8 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
     {
       ALL_BLOCK_SYMBOLS (block, i, sym)
 	{
+          int print_me = 0;
+
 	  switch (SYMBOL_CLASS (sym))
 	    {
 	    default:

@@ -1,3 +1,10 @@
+2002-02-03  Jim Blandy  <jimb@redhat.com>
+
+	* mi-cmd-stack.c (list_args_or_locals): Move declaration of
+	print_me inside the loop body, so it gets re-initialized every
+	iteration.  The cases for the different symbol kinds leave
+	print_me unchanged if they don't want the symbol printed.
+
 2002-01-22  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbmi.texinfo: Remove makeinfo 3.12 hacks.
