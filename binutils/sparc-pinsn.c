@@ -20,9 +20,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
    $Log$
-   Revision 1.1.1.1  1991/03/21 21:26:56  gumby
-   Back from Intel with Steve
+   Revision 1.2  1991/04/18 21:14:21  steve
+   Send the right # of args to an fprintf
 
+ * Revision 1.1.1.1  1991/03/21  21:26:56  gumby
+ * Back from Intel with Steve
+ *
  * Revision 1.1  1991/03/21  21:26:55  gumby
  * Initial revision
  *
@@ -400,7 +403,7 @@ memcpy(&insn,buffer, sizeof (insn));
 	}
     }
 
-  fprintf ("%#8x", insn.code);
+  fprintf (stream, "%#8x", insn.code);
   return sizeof (insn);
 }
 
