@@ -1,3 +1,11 @@
+2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ld-mips-elf/multi-got-1.d: New.
+	* ld-mips-elf/multi-got-1-1.s: New.
+	* ld-mips-elf/multi-got-1-2.s: New.
+	* ld-mips-elf/mips-elf.exp (elf): mips*-*-irix* is elf.
+	Run multi-got-1.
+
 2003-01-25  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-sparc/sparc.exp: New.

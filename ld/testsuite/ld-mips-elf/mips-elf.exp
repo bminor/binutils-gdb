@@ -19,7 +19,7 @@
 if { [istarget mips*-*-*] } then {
 
     set elf [expr [istarget mips*-*-elf] || [istarget mips*-*-linux*] || \
-		  [istarget mips*-*-netbsd]]
+		  [istarget mips*-*-netbsd] || [istarget mips*-*-irix*]]
     set embedded_elf [expr [istarget mips*-*-elf]]
 
 
@@ -29,6 +29,9 @@ if { [istarget mips*-*-*] } then {
 
 	# MIPS branch offset final link checking.
 	run_dump_test "branch-misc-1"
+
+	# Test multi-got link.
+	run_dump_test "multi-got-1"
     }
 
     if { $embedded_elf } {
