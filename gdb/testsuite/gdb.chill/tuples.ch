@@ -31,3 +31,26 @@ DCL i INT;
 i := 0;
 
 END x;
+
+setmode: MODULE /* This is from Cygnus PR chill/5024. */
+
+NEWMODE day = SET( monday, tuesday, wednesday, thursday, friday, saturday, sunday );
+NEWMODE dow = POWERSET day;
+
+DCL d day;
+DCL w dow;
+
+printdow: PROC( w dow );
+  DCL d day;
+  DO FOR d in w;
+    WRITETEXT( stdout, "%C ", d );
+  OD;
+END;
+
+d := monday;
+w := dow[monday : friday];
+printdow( w );
+
+printdow( dow[LOWER(dow) : UPPER(dow)] );
+
+END setmode;

@@ -1,3 +1,8 @@
+Mon Mar  6 14:11:01 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* tuples.ch (setnmode);  New module.
+	* tuples.exp:  Add some extra tests.
+
 Sat Mar  4 15:16:17 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* callch.ch, callch.exp, Makefile.in:  New test case.
