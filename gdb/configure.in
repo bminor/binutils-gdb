@@ -78,6 +78,8 @@ AC_PROG_AWK
 AC_PROG_INSTALL
 AC_CHECK_TOOL(AR, ar)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
+AC_CHECK_TOOL(DLLTOOL, dlltool)
+AC_CHECK_TOOL(WINDRES, windres)
 AC_PROG_YACC
 
 dnl MiG is needed for the Hurd.

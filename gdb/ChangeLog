@@ -1,3 +1,9 @@
+2000-06-02  Christopher Faylor  <cgf@cygnus.com>
+
+	* configure.in: Detect correct versions of ranlib and windres when
+	cross-compiling.
+	* configure: Regenerate.
+
 2000-06-02  J.T. Conklin  <jtc@redback.com>
 
 	* configure.tgt: Add pattern for i[3456]86-*-netbsdelf*.
