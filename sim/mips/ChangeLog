@@ -1,3 +1,10 @@
+start-sanitize-tx3904
+
+	* dv-tx3904cpu.c (deliver_tx3904cpu_interrupt): Add dummy
+	interrupt level number to match changed SignalExceptionInterrupt
+	macro.
+
+end-sanitize-tx3904
 start-sanitize-sky
 Thu Oct 29 12:47:46 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
