@@ -1,5 +1,9 @@
 2001-02-04  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* ser-go32.c (dos_write) [UART_FIFO_WORKS]: Use outportsb only if
+	UART_FIFO_WORKS is defined.  Otherwise use outportb.
+	From Francisco Pastor <fpastor.etra-id@etra.es>
+
 	* go32-nat.c (go32_xfer_memory): Make the argument list consistent
 	with target.h's `to_xfer_memory' member.
 

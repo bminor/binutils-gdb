@@ -796,9 +796,16 @@ dos_write (serial_t scb, const char *str, int len)
       /* send the data, fifosize bytes at a time */
       cnt = fifosize > len ? len : fifosize;
       port->txbusy = 1;
+      /* Francisco Pastor <fpastor.etra-id@etra.es> says OUTSB messes
+	 up the communications with UARTs with FIFOs.  */
+#ifdef UART_FIFO_WORKS
       outportsb (port->base + com_data, str, cnt);
       str += cnt;
       len -= cnt;
+#else
+      for ( ; cnt > 0; cnt--, len--)
+	outportb (port->base + com_data, *str++);
+#endif
 #ifdef DOS_STATS
       cnts[CNT_TX] += cnt;
 #endif
