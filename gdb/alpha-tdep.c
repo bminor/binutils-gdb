@@ -1776,7 +1776,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       /* If it's an ECOFF file, assume it's OSF/1.  */
       if (bfd_get_flavour (info.abfd) == bfd_target_ecoff_flavour)
-	osabi = GDB_OSABI_OSF1;
+	info.osabi = GDB_OSABI_OSF1;
     }
 
   /* Find a candidate among extant architectures.  */
