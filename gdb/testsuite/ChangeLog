@@ -1,4 +1,12 @@
+Tue Aug 17 00:05:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t00/teststrategy.exp: Deal with it if cmdsize = 1 line
+	doesn't exist (due to optimization).
+
 Mon Aug 16 21:05:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.stabs/wierd.exp: Deal with it if echo of "file" command
+	contains \r because the filename is long.
 
 	* gdb.t06/signals.exp: Revise comments regarding "'next' behaved as
 	'continue'" bug, and change xfail back to i*86-univel-sysv4*.
