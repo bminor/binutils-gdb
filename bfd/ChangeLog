@@ -1,5 +1,9 @@
 2003-08-27  Ian Lance Taylor  <ian@airs.com>
 
+	* configure.in: Check for strtoull.
+	* bfd.c (bfd_scan_vma): Use strtoull when available.
+	* configure, config.in: Regenerate.
+
 	* configure.in: Define and substitute BFD_HOST_LONG_LONG.
 	* bfd-in.h: Define BFD_HOST_LONG_LONG.  Test it rather than
 	__GNUC__ when deciding whether to use long long for
