@@ -1,5 +1,8 @@
 Sat Aug 27 20:26:12 1994  Ken Raeburn  (raeburn@kr-laptop.cygnus.com)
 
+	* input-file.c: Don't include assert.h here, 'cause as.h already
+	includes it.
+
 	* config/tc-alpha.c: Added various prototypes for static
 	functions.
 	(in_range): New function, tests whether a value can fit in an
