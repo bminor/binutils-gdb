@@ -95,6 +95,7 @@ PACKAGE = @PACKAGE@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+STRINGIFY = @STRINGIFY@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 USE_SYMBOL_UNDERSCORE = @USE_SYMBOL_UNDERSCORE@
@@ -351,7 +352,7 @@ POTFILES = $(CFILES) $(HFILES) $(EMULATION_FILES)
 # These all start with e so 'make clean' can find them.
 
 GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} @host@ @target@ @target_alias@ "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@"
-GEN_DEPENDS = $(srcdir)/genscripts.sh $(srcdir)/emultempl/stringify.sed
+GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 
 ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
@@ -964,6 +965,9 @@ ldemul-list.h: Makefile
 	done;\
 	echo "  0") >ldemul-tmp.h
 	mv ldemul-tmp.h ldemul-list.h
+
+stringify.sed: ${srcdir}/emultempl/$(STRINGIFY)
+	  cp ${srcdir}/emultempl/$(STRINGIFY) stringify.sed
 @TDIRS@
 
 ea29k.c: $(srcdir)/emulparams/a29k.sh \

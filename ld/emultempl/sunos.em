@@ -971,28 +971,25 @@ then
 # Scripts compiled in.
 
 # sed commands to quote an ld script as a C string.
-sc='s/["\\]/\\&/g
-s/$/\\n\\/
-1s/^/"/
-$s/$/n"/
-'
+sc="-f stringify.sed"
 
 cat >>e${EMULATION_NAME}.c <<EOF
 {			     
   *isfile = 0;
 
   if (link_info.relocateable == true && config.build_constructors == true)
-    return `sed "$sc" ldscripts/${EMULATION_NAME}.xu`;
-  else if (link_info.relocateable == true)
-    return `sed "$sc" ldscripts/${EMULATION_NAME}.xr`;
-  else if (!config.text_read_only)
-    return `sed "$sc" ldscripts/${EMULATION_NAME}.xbn`;
-  else if (!config.magic_demand_paged)
-    return `sed "$sc" ldscripts/${EMULATION_NAME}.xn`;
-  else
-    return `sed "$sc" ldscripts/${EMULATION_NAME}.x`;
-}
+    return
 EOF
+sed $sc ldscripts/${EMULATION_NAME}.xu                     >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocateable == true) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xr                     >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.magic_demand_paged) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xn                     >> e${EMULATION_NAME}.c
+echo '  ; else return'                                     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.x                      >> e${EMULATION_NAME}.c
+echo '; }'                                                 >> e${EMULATION_NAME}.c
 
 else
 # Scripts read from the filesystem.

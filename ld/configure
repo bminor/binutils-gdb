@@ -4717,6 +4717,42 @@ EOF
 fi
 
 
+# When converting linker scripts into strings for use in emulation
+# files, use astring.sed if the compiler supports ANSI string
+# concatenation, or ostring.sed otherwise.  This is to support the
+# broken Microsoft MSVC compiler, which limits the length of string
+# constants, while still supporting pre-ANSI compilers which do not
+# support string concatenation.
+if eval "test \"`echo '$''{'ld_cv_string_concatenation'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 4731 "configure"
+#include "confdefs.h"
+
+int main() {
+char *a = "a" "a";
+; return 0; }
+EOF
+if { (eval echo configure:4738: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ld_cv_string_concatenation=true
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ld_cv_string_concatenation=false
+fi
+rm -f conftest*
+fi
+
+if test "$ld_cv_string_concatenation" = "true"; then
+  STRINGIFY=astring.sed
+else
+  STRINGIFY=ostring.sed
+fi
+
+
 # target-specific stuff:
 
 all_targets=
@@ -5013,6 +5049,7 @@ s%@HDEFINES@%$HDEFINES%g
 s%@HOSTING_CRT0@%$HOSTING_CRT0%g
 s%@HOSTING_LIBS@%$HOSTING_LIBS%g
 s%@NATIVE_LIB_DIRS@%$NATIVE_LIB_DIRS%g
+s%@STRINGIFY@%$STRINGIFY%g
 s%@EMUL@%$EMUL%g
 /@TDIRS@/r $TDIRS
 s%@TDIRS@%%g

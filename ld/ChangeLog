@@ -1,3 +1,20 @@
+1999-08-06  Ian Lance Taylor  <ian@zembu.com>
+
+	* emultempl/ostring.sed: Rename from stringify.sed.
+	* emultempl/astring.sed: New file.
+	* Makefile.am (stringify.sed): New target.
+	(GEN_DEPENDS): Change $(srcdir)/emultempl/stringify.sed to
+	stringify.sed.
+	* configure.in: Define and substitute STRINGIFY.
+	* emultempl/*.em: Use stringify.sed from build directory rather
+	than source directory.
+	* emultempl/elf32.em: Use stringify.sed rather than inline sed
+	script.
+	* emultempl/gld960.em, emultempl/gld960c.em: Likewise.
+	* emultempl/hppaelf.em, emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em, emultempl/sunos.em: Likewise.
+	* configure, Makefile.in: Rebuild.
+
 1999-08-05  Donn Terry  <donn@interix.com>
 
 	* emulparams/i386pe.sh: Define ENTRY, SUBSYSTEM, and

@@ -260,10 +260,13 @@ ldemul-list.h: Makefile
 	echo "  0") >ldemul-tmp.h
 	mv ldemul-tmp.h ldemul-list.h
 
+stringify.sed: ${srcdir}/emultempl/$(STRINGIFY)
+	  cp ${srcdir}/emultempl/$(STRINGIFY) stringify.sed
+
 # These all start with e so 'make clean' can find them.
 
 GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} @host@ @target@ @target_alias@ "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@"
-GEN_DEPENDS = $(srcdir)/genscripts.sh $(srcdir)/emultempl/stringify.sed
+GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 @TDIRS@
 
 ea29k.c: $(srcdir)/emulparams/a29k.sh \

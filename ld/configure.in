@@ -68,6 +68,23 @@ BFD_NEED_DECLARATION(sbrk)
 BFD_NEED_DECLARATION(getenv)
 BFD_NEED_DECLARATION(environ)
 
+# When converting linker scripts into strings for use in emulation
+# files, use astring.sed if the compiler supports ANSI string
+# concatenation, or ostring.sed otherwise.  This is to support the
+# broken Microsoft MSVC compiler, which limits the length of string
+# constants, while still supporting pre-ANSI compilers which do not
+# support string concatenation.
+AC_CACHE_VAL(ld_cv_string_concatenation,
+[AC_TRY_COMPILE(,[char *a = "a" "a";],
+  [ld_cv_string_concatenation=true],
+  [ld_cv_string_concatenation=false])])
+if test "$ld_cv_string_concatenation" = "true"; then
+  STRINGIFY=astring.sed
+else
+  STRINGIFY=ostring.sed
+fi
+AC_SUBST(STRINGIFY)
+
 # target-specific stuff:
 
 all_targets=
