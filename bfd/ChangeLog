@@ -1,3 +1,11 @@
+Tue Jun 25 11:41:24 1996  Richard Henderson  <rth@tamu.edu>
+
+	* elf64-alpha.c (elf64_alpha_adjust_dynamic_symbol): Don't
+	increment the .rela.plt size until after we're done creating the
+	.plt entry.
+	(elf64_alpha_finish_dynamic_symbol): Change .plt entry to load the
+	.rela.plt offset directly rather than calculating it.
+
 Mon Jun 24 17:15:10 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
  
         * Makefile.in, (bindir, libdir, datadir, mandir, infodir, includedir): 
