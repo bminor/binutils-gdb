@@ -9,6 +9,20 @@ General To Do List
 This list is probably not up to date, and opinions vary about the
 importance or even desirability of some of the items.
 
+Document trace machinery.
+
+Document overlay machinery.
+
+Extend .gdbinit mechanism to specify name on command line, allow for
+lists of files to load, include function of --tclcommand.
+
+@c This does not work (yet if ever).  FIXME.
+@c @item --parse=@var{lang} @dots{}
+@c Configure the @value{GDBN} expression parser to parse the listed languages.
+@c @samp{all} configures @value{GDBN} for all supported languages.  To get a
+@c list of all supported languages, omit the argument.  Without this
+@c option, @value{GDBN} is configured to parse all supported languages.
+
 Add an "info bfd" command that displays supported object formats,
 similarly to objdump -i.
 
@@ -382,9 +396,6 @@ Why do we allow a target to omit standard register names (NO_STD_REGS
 in tm-z8k.h)?  I thought the standard register names were supposed to
 be just that, standard.
 
-Make DEBUG_EXPRESSIONS a maintenance command, dependent on
-MAINTENANCE_COMMANDS.
-
 Allow core file without exec file on RS/6000.
 
 Make sure "shell" with no arguments works right on DOS.
@@ -465,6 +476,9 @@ Modify gdb to work correctly with Pascal.
 Add a command for searching memory, a la adb.  It specifies size,
 mask, value, start address.  ADB searches until it finds it or hits
 an error (or is interrupted).
+
+Remove the range and type checking code and documentation, if not
+going to implement.
 
 # Local Variables:
 # mode: text

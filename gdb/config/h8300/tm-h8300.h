@@ -69,7 +69,7 @@ extern void h8300_init_extra_frame_info ();
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(ip)   {(ip) = h8300_skip_prologue(ip);}
+#define SKIP_PROLOGUE(ip)   (h8300_skip_prologue(ip))
 extern CORE_ADDR h8300_skip_prologue ();
 
 /* Immediately after a function call, return the saved pc.

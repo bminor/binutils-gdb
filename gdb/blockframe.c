@@ -307,9 +307,9 @@ frameless_look_for_prologue (frame)
 #ifdef SKIP_PROLOGUE_FRAMELESS_P
       /* This is faster, since only care whether there *is* a prologue,
 	 not how long it is.  */
-      SKIP_PROLOGUE_FRAMELESS_P (after_prologue);
+      after_prologue = SKIP_PROLOGUE_FRAMELESS_P (after_prologue);
 #else
-      SKIP_PROLOGUE (after_prologue);
+      after_prologue = SKIP_PROLOGUE (after_prologue);
 #endif
       return after_prologue == func_start;
     }

@@ -503,16 +503,16 @@ jump_command (arg, from_tty)
 
 /* Go to line or address in current procedure */
 static void
-go_command(line_no, from_tty)
+go_command (line_no, from_tty)
      char *line_no;
      int from_tty;
 {
   if (line_no == (char *)NULL || !*line_no)
-    printf_filtered(GO_USAGE);
+    printf_filtered (GO_USAGE);
   else
     {
-      tbreak_command(line_no, from_tty);
-      jump_command(line_no, from_tty);
+      tbreak_command (line_no, from_tty);
+      jump_command (line_no, from_tty);
     }
 }
 
@@ -1496,15 +1496,17 @@ Execution will also stop upon exit from the current stack frame.");
 Give as argument either LINENUM or *ADDR, where ADDR is an expression\n\
 for an address to start at.");
 
-  add_com ("go", class_run, go_command,
-	   "Usage: go <location>\n\
+  if (xdb_commands)
+    add_com ("go", class_run, go_command,
+	     "Usage: go <location>\n\
 Continue program being debugged, stopping at specified line or \n\
 address.\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an \n\
 expression for an address to start at.\n\
 This command is a combination of tbreak and jump.");
+
   if (xdb_commands)
-    add_com_alias("g", "g", class_run, 1);
+    add_com_alias("g", "go", class_run, 1);
 
   add_com ("continue", class_run, continue_command,
 	   "Continue program being debugged, after signal or breakpoint.\n\

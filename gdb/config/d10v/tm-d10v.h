@@ -48,8 +48,7 @@ struct value;
    to reach some "real" code.  */
 
 extern CORE_ADDR d10v_skip_prologue ();
-#define SKIP_PROLOGUE(ip) \
-    {(ip) = d10v_skip_prologue(ip);}
+#define SKIP_PROLOGUE(ip) (d10v_skip_prologue (ip))
 
 
 /* Stack grows downward.  */

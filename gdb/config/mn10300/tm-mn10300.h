@@ -113,7 +113,7 @@ extern CORE_ADDR mn10300_frame_saved_pc   PARAMS ((struct frame_info *));
   (SP) = mn10300_store_struct_return (STRUCT_ADDR, SP)
 
 extern CORE_ADDR mn10300_skip_prologue PARAMS ((CORE_ADDR));
-#define SKIP_PROLOGUE(pc) pc = mn10300_skip_prologue (pc)
+#define SKIP_PROLOGUE(pc) (mn10300_skip_prologue (pc))
 
 #define FRAME_ARGS_SKIP 0
 

@@ -29,11 +29,71 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "floatformat.h"
 
+#include <stdio.h>     /* required for __DJGPP_MINOR__ */
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <debug/v2load.h>
 #include <debug/dbgcom.h>
+
+#if __DJGPP_MINOR__ < 3
+/* This code will be provided from DJGPP 2.03 on. Until then I code it
+   here */
+typedef struct {
+  unsigned short sig0;
+  unsigned short sig1;
+  unsigned short sig2;
+  unsigned short sig3;
+  unsigned short exponent:15;
+  unsigned short sign:1;
+} NPXREG;
+
+typedef struct {
+  unsigned int control;
+  unsigned int status;
+  unsigned int tag;
+  unsigned int eip;
+  unsigned int cs;
+  unsigned int dataptr;
+  unsigned int datasel;
+  NPXREG reg[8];
+} NPX;
+
+static NPX npx;
+
+static void save_npx (void); /* Save the FPU of the debugged program */
+static void load_npx (void); /* Restore the FPU of the debugged program */
+
+/* ------------------------------------------------------------------------- */
+/* Store the contents of the NPX in the global variable `npx'.  */
+
+static void
+save_npx (void)
+{
+  asm ("inb    $0xa0, %%al
+       testb   $0x20, %%al
+       jz      1f
+       xorb    %%al, %%al
+       outb    %%al, $0xf0
+       movb    $0x20, %%al
+       outb    %%al, $0xa0
+       outb    %%al, $0x20
+1:
+       fnsave  %0
+       fwait"
+       : "=m" (npx)
+       : /* No input */
+       : "%eax");
+}
+/* ------------------------------------------------------------------------- */
+/* Reload the contents of the NPX from the global variable `npx'.  */
+
+static void
+load_npx (void)
+{
+  asm ("frstor %0" : "=m" (npx));
+}
+#endif /* __DJGPP_MINOR < 3 */
 
 extern void _initialize_go32_nat (void);
 
@@ -58,9 +118,54 @@ extern char **environ;
 
 #define SOME_PID 42
 
-/* FIXME add decls of all static functions here */
-
 static int prog_has_started = 0;
+static void
+print_387_status (unsigned short status, struct env387 *ep);
+static void
+go32_open (char *name, int from_tty);
+static void
+go32_close (int quitting);
+static void
+go32_attach (char *args, int from_tty);
+static void
+go32_detach (char *args, int from_tty);
+static void
+go32_resume (int pid, int step, enum target_signal siggnal);
+static int
+go32_wait (int pid, struct target_waitstatus *status);
+static void
+go32_fetch_registers (int regno);
+static void
+store_register (int regno);
+static void
+go32_store_registers (int regno);
+static void
+go32_prepare_to_store (void);
+static int
+go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+                 struct target_ops *target);
+static void
+go32_files_info (struct target_ops *target);
+static void
+go32_stop (void);
+static void
+go32_kill_inferior (void);
+static void
+go32_create_inferior (char *exec_file, char *args, char **env);
+static void
+go32_mourn_inferior (void);
+static int
+go32_can_run (void);
+static void
+ignore (void);
+static void
+ignore2 (char *a, int b);
+static int go32_insert_aligned_watchpoint (int pid, CORE_ADDR waddr,
+                                          CORE_ADDR addr, int len, int rw);
+static int go32_insert_nonaligned_watchpoint (int pid, CORE_ADDR waddr,
+                                             CORE_ADDR addr, int len, int rw);
+
+static struct target_ops go32_ops;
 
 static void
 print_387_status (unsigned short status, struct env387 *ep)
@@ -245,7 +350,13 @@ go32_wait (int pid, struct target_waitstatus *status)
   else
     a_tss.tss_eflags &= 0xfeff;
 
+#if __DJGPP_MINOR__ < 3
+  save_npx ();
+#endif
   run_child ();
+#if __DJGPP_MINOR__ < 3
+  load_npx ();
+#endif
 
   if (a_tss.tss_irqn == 0x21)
     {
@@ -388,7 +499,6 @@ go32_stop (void)
 static void
 go32_kill_inferior (void)
 {
-  go32_stop ();
   unpush_target (&go32_ops);
 }
 
@@ -401,6 +511,7 @@ go32_create_inferior (char *exec_file, char *args, char **env)
 
   if (prog_has_started)
     {
+      go32_stop ();
       go32_kill_inferior ();
     }
 
@@ -426,6 +537,7 @@ go32_create_inferior (char *exec_file, char *args, char **env)
   clear_proceed_status ();
   insert_breakpoints ();
   proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
+  prog_has_started = 1;
 }
 
 static void
@@ -521,12 +633,6 @@ do { \
 #else
 #define SHOW_DR(text) do {} while (0)
 #endif
-
-static int go32_insert_aligned_watchpoint (int pid, CORE_ADDR waddr,
-					   CORE_ADDR addr, int len, int rw);
-
-static int go32_insert_nonaligned_watchpoint (int pid, CORE_ADDR waddr,
-					      CORE_ADDR addr, int len, int rw);
 
 /* Insert a watchpoint.  */
 
@@ -705,8 +811,6 @@ go32_insert_hw_breakpoint (CORE_ADDR addr, CORE_ADDR shadow)
 
   return 0;
 }
-
-static struct target_ops go32_ops;
 
 static void
 init_go32_ops (void)

@@ -26,6 +26,53 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "inferior.h"
 
 
+/* The only reason this is here is the tm-altos.h reference below.  It
+   was moved back here from tm-m68k.h.  FIXME? */
+
+extern CORE_ADDR
+altos_skip_prologue (pc)
+     CORE_ADDR pc;
+{
+  register int op = read_memory_integer (pc, 2);
+  if (op == 0047126)
+    pc += 4;   /* Skip link #word */
+  else if (op == 0044016)
+    pc += 6;   /* Skip link #long */
+  /* Not sure why branches are here.  */
+  /* From tm-isi.h, tm-altos.h */
+  else if (op == 0060000)
+    pc += 4;   /* Skip bra #word */
+  else if (op == 00600377)
+    pc += 6;   /* skip bra #long */
+  else if ((op & 0177400) == 0060000)
+    pc += 2;   /* skip bra #char */
+  return pc;
+}
+
+/* The only reason this is here is the tm-isi.h reference below.  It
+   was moved back here from tm-m68k.h.  FIXME? */
+
+extern CORE_ADDR
+isi_skip_prologue (pc)
+     CORE_ADDR pc;
+{
+  register int op = read_memory_integer (pc, 2);
+  if (op == 0047126)
+    pc += 4;   /* Skip link #word */
+  else if (op == 0044016)
+    pc += 6;   /* Skip link #long */
+  /* Not sure why branches are here.  */
+  /* From tm-isi.h, tm-altos.h */
+  else if (op == 0060000)
+    pc += 4;   /* Skip bra #word */
+  else if (op == 00600377)
+    pc += 6;   /* skip bra #long */
+  else if ((op & 0177400) == 0060000)
+    pc += 2;   /* skip bra #char */
+  return pc;
+}
+
+
 /* Push an empty stack frame, to record the current PC, etc.  */
 
 void

@@ -3384,6 +3384,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_ops.to_load = generic_load;		
   remote_ops.to_mourn_inferior = remote_mourn;
   remote_ops.to_thread_alive = remote_thread_alive;
+  remote_ops.to_find_new_threads = remote_find_new_threads;
   remote_ops.to_stop = remote_stop;
   remote_ops.to_query = remote_query;
   remote_ops.to_stratum = process_stratum;
@@ -3472,8 +3473,9 @@ in a memory packet.\n",
 		  &setlist),
      &showlist);  
 
-  add_show_from_set (add_set_cmd ("remotebinarydownload", no_class,
-				  var_boolean, (char *) &remote_binary_download,
-				  "Set binary downloads.\n", &setlist),
-		     &showlist);
+  add_show_from_set 
+    (add_set_cmd ("remotebinarydownload", no_class,
+		  var_boolean, (char *) &remote_binary_download,
+		  "Set binary downloads.\n", &setlist),
+     &showlist);
 }

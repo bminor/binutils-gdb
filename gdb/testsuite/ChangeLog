@@ -1,3 +1,17 @@
+1999-05-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/call-ar-st.exp: Fix one regular expression in test
+	output.
+
+	* gdb.base/annota1.exp: New file. Annotation level 2 tests.
+	* gdb.base/annota2.exp: New file. More annotation tests.
+	* gdb.base/annota1.c: New file. Source file for annota1.exp.
+	* gdb.base/annota2.cc: New file. Source file for annota2.exp.
+
+1999-04-23  Angela Marie Thomas <angela@cygnus.com>
+
+	* config/cfdbug.exp: New file.
+
 1999-04-20  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* gdb.c++/demangle.exp (test_gnu_style_demangling): Add tests for

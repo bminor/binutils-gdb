@@ -571,9 +571,14 @@ main (argc, argv)
     {
       if (!SET_TOP_LEVEL ())
 	{
+	  /* NOTE: I am commenting this out, because it is not clear
+	     where this feature is used. It is very old and
+	     undocumented. ezannoni: 5/4/99*/
+#if 0
 	  if (cmdarg[i][0] == '-' && cmdarg[i][1] == '\0')
 	    read_command_file (stdin);
 	  else
+#endif
 	    source_command (cmdarg[i], !batch);
 	  do_cleanups (ALL_CLEANUPS);
 	}

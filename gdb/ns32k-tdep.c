@@ -26,6 +26,46 @@ _initialize_ns32k_tdep ()
   tm_print_insn = print_insn_ns32k;
 }
 
+/* Advance PC across any function entry prologue instructions
+   to reach some "real" code.  */
+
+CORE_ADDR
+merlin_skip_prologue (pc)
+     CORE_ADDR pc;
+{
+  register int op = read_memory_integer (pc, 1);
+  if (op == 0x82)
+    {
+      op = read_memory_integer (pc+2,1);
+      if ((op & 0x80) == 0)
+	pc += 3;
+      else if ((op & 0xc0) == 0x80)
+	pc += 4;
+      else pc += 6;
+    }
+  return pc;
+}
+
+CORE_ADDR
+umax_skip_prologue (pc)
+     CORE_ADDR pc;
+{
+  register unsigned char op = read_memory_integer (pc, 1);
+  if (op == 0x82)
+    {
+      op = read_memory_integer (pc+2,1);
+      if ((op & 0x80) == 0)
+	pc += 3;
+      else if ((op & 0xc0) == 0x80)
+	pc += 4;
+      else
+	pc += 6;
+    } 
+  return pc;
+}
+
+
+
 sign_extend (value, bits)
 {
   value = value & ((1 << bits) - 1);

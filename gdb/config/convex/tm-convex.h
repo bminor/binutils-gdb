@@ -52,26 +52,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
        [ld.- -(ap),-]		pcc/gcc register arg loads
 */
 
-#define SKIP_PROLOGUE(pc)  \
-{ int op, ix;								\
-  op = read_memory_integer (pc, 2);					\
-  if ((op & 0xffc7) == 0x5ac0) pc += 2;					\
-  else if (op == 0x1580) pc += 4;					\
-  else if (op == 0x15c0) pc += 6;					\
-  if ((read_memory_integer (pc, 2) & 0xfff8) == 0x7c40			\
-      && (read_memory_integer (pc + 2, 2) & 0xfff8) == 0x1240		\
-      && (read_memory_integer (pc + 8, 2) & 0xfff8) == 0x7c48)		\
-    pc += 10;								\
-  if (read_memory_integer (pc, 2) == 0x1240) pc += 6;			\
-  for (;;) {								\
-    op = read_memory_integer (pc, 2);					\
-    ix = (op >> 3) & 7;							\
-    if (ix != 6) break;							\
-    if ((op & 0xfcc0) == 0x3000) pc += 4;				\
-    else if ((op & 0xfcc0) == 0x3040) pc += 6;				\
-    else if ((op & 0xfcc0) == 0x2800) pc += 4;				\
-    else if ((op & 0xfcc0) == 0x2840) pc += 6;				\
-    else break;}}
+extern CORE_ADDR convex_skip_prologue PARAMS ((CORE_ADDR pc));
+#define SKIP_PROLOGUE(pc) (convex_skip_prologue (pc))
 
 /* Immediately after a function call, return the saved pc.
    (ignore frame and return *$sp so we can handle both calls and callq) */

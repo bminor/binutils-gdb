@@ -42,6 +42,45 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "gdbcmd.h"
 
+CORE_ADDR
+convex_skip_prologue (pc)
+     CORE_ADDR pc;
+{
+  int op, ix;
+  op = read_memory_integer (pc, 2);
+  if ((op & 0xffc7) == 0x5ac0)
+    pc += 2;
+  else if (op == 0x1580)
+    pc += 4;
+  else if (op == 0x15c0)
+    pc += 6;
+  if ((read_memory_integer (pc, 2) & 0xfff8) == 0x7c40
+      && (read_memory_integer (pc + 2, 2) & 0xfff8) == 0x1240
+      && (read_memory_integer (pc + 8, 2) & 0xfff8) == 0x7c48)
+    pc += 10;
+  if (read_memory_integer (pc, 2) == 0x1240)
+    pc += 6;
+  for (;;)
+    {
+      op = read_memory_integer (pc, 2);
+      ix = (op >> 3) & 7;
+      if (ix != 6)
+	break;
+      if ((op & 0xfcc0) == 0x3000)
+	pc += 4;
+      else if ((op & 0xfcc0) == 0x3040)
+	pc += 6;
+      else if ((op & 0xfcc0) == 0x2800)
+	pc += 4;
+      else if ((op & 0xfcc0) == 0x2840)
+	pc += 6;
+      else
+	break;
+    }
+  return pc;
+}
+
+
 exec_file_command (filename, from_tty)
      char *filename;
      int from_tty;

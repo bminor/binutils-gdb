@@ -1,5 +1,5 @@
 /* Semi-dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, Free Software Foundation, Inc.
+   Copyright 1998-1999, Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -196,27 +196,36 @@ const struct bfd_arch_info *target_architecture = &bfd_default_arch_struct;
 int (*target_architecture_hook) PARAMS ((const struct bfd_arch_info *ap));
 
 /* Do the real work of changing the current architecture */
+
+static int arch_valid PARAMS ((const struct bfd_arch_info *arch));
+static int
+arch_ok (arch)
+     const struct bfd_arch_info *arch;
+{
+  /* Should be performing the more basic check that the binary is
+     compatible with GDB. */
+  /* Check with the target that the architecture is valid. */
+  return (target_architecture_hook == NULL
+	  || target_architecture_hook (arch));
+}
+
 enum set_arch { set_arch_auto, set_arch_manual };
+
 static void
 set_arch (arch, type)
      const struct bfd_arch_info *arch;
      enum set_arch type;
 {
-  /* FIXME: Should be performing the more basic check that the binary
-     is compatible with GDB. */
-  /* Check with the target that the architecture is valid. */
-  int arch_valid = (target_architecture_hook != NULL
-		    && !target_architecture_hook (arch));
   switch (type)
     {
     case set_arch_auto:
-      if (!arch_valid)
+      if (!arch_ok (arch))
 	warning ("Target may not support %s architecture",
 		 arch->printable_name);
       target_architecture = arch;
       break;
     case set_arch_manual:
-      if (!arch_valid)
+      if (!arch_ok (arch))
 	{
 	  printf_unfiltered ("Target does not support `%s' architecture.\n",
 			     arch->printable_name);

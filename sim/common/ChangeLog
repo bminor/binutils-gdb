@@ -53,9 +53,6 @@ Wed Mar 31 18:55:41 1999  Doug Evans  <devans@canuck.cygnus.com>
 
 1999-02-09  Doug Evans  <devans@casey.cygnus.com>
 
-	* Make-common.in (CGEN_READ_SCM): Renamed from CGEN_MAIN_SCM.
-	(CGEN_DESC_SCM): New variable.
-	(cgen-desc): New rule.
 	* cgen-cpu.h (CGEN_DISASSEMBLER): New type.
 	(CGEN_CPU): Member opcode renamed to cpu_desc.
 	New members get_idata,disassembler.
@@ -162,8 +159,6 @@ Wed Jan 27 17:19:09 1999  Doug Evans  <devans@canuck.cygnus.com>
 1999-01-05  Doug Evans  <devans@casey.cygnus.com>
 
 	* Make-common.in (CGEN_INCLUDE_DEPS): Add cgen-defs.h, cgen-engine.h.
-	(CGEN_MAIN_SCM): Add rtx-funcs.scm.
-	(cgen-arch): Pass $(mach) to cgen.sh.
 	* cgen-engine.h (SEM_BRANCH_FINI): New arg pcvar, all uses updated.
 	(SEM_BRANCH_INIT_EXTRACT): New macro.
 	(SEM_BRANCH_INIT): Add taken_p.
@@ -333,7 +328,6 @@ Mon Nov 23 13:28:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 1998-11-18  Doug Evans  <devans@casey.cygnus.com>
 
 	* Make-common.in (cgen-utils.o): Depend on cgen-engine.h.
-	(CGEN_ARCH_SCM): New variable.
 	* cgen-engine.h (EXTRACT_[ML]SB0_{INT,UINT}): New macros.
 	(EXTRACT_INT,EXTRACT_UINT): New macros.
 	(SEM_SEM_ARG): New macro.
@@ -342,7 +336,7 @@ Mon Nov 23 13:28:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(sim_disassemble_insn): Update prototype.
 	* cgen-trace.c (current_insn,insn_fields): New static locals.
 	(trace_insn): Set them.
-	* cgen-utils.scm: #include cgen-engine.h.
+	* cgen-utils.c: #include cgen-engine.h.
 	(sim_disassemble_insn): New arg insn_fields.
 	Handle variable length insns.
 	* genmloop.sh: Only emit pbb decls if -pbb.
@@ -537,15 +531,6 @@ Thu Jul  2 17:13:25 1998  Doug Evans  <devans@seba.cygnus.com>
 	computation out of main loop.
 
 Wed Jul  1 16:44:12 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* Make-common.in (SCHEME,SCHEMEFLAGS): Delete.
-	(CGENDIR,CGEN): New variables.
-	(CGEN_VERBOSE): Renamed to CGENFLAGS.
-	(cgen-arch,cgen-cpu,cgen-decode): Update.
-	(CGEN_CPU_WRITE): New variable.
-	(CGEN_CPU_SEMSW): -W -> -X.
-	(CGEN_FLAGS_TO_PASS): Delete SCHEME.  Add CGEN,CGENFLAGS.
-	* cgen.sh: Delete args scheme,schemeflags.  New arg cgen.
 
 	* cgen-sim.h (RECORD_IADDR): Delete.
 	* cgen-types.h (HOSTINT,HOSTUINT,HOSTPTR): New types.
@@ -792,8 +777,6 @@ Wed May  6 16:04:18 1998  Doug Evans  <devans@seba.cygnus.com>
 	(CGEN_CPU): Always define scache member.  New members idesc,opcode.
 	(cgen_cpu_max_extra_bytes): Declare.
 	* cgen-utils.c (cgen_cpu_max_extra_bytes): New function.
-
-	* cgen.sh: s/@arch@/${arch}/ for cpu files.
 
 	* sim-cpu.h: New file.  sim_cpu_base moved here.
 	Move sim_cpu_lookup decl here.
@@ -1551,14 +1534,12 @@ Tue Feb 17 16:27:46 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	
 Tue Feb 17 17:27:30 1998  Doug Evans  <devans@seba.cygnus.com>
 
-	* Make-common.in (CGEN_MAIN_SCM): Update.
 	* aclocal.m4 (USE_MAINTAINER_MODE): New variable.
 
 	* cgen-sim.h (SEMANTIC_CACHE_FN): Delete.
 	(SEMANTIC_FN): Rewrite declaration.
 	(DECODE): Update type of semantic_fast member.
 	({EX,SEM}_FN_NAME): Have only one version.
-	* cgen.sh: Support building cpu.c.
 	* sim-base.h (sim_state_base): Delete conditionals surrounding
 	member scache_size.
 
@@ -1578,7 +1559,6 @@ Mon Feb  9 14:48:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* cgen-sim.h (DECODE): Always use switch for `read' for now.
 	(PAREXEC): Renamed from PARALLEL_EXEC.  All uses updated.
 	(SEMANTIC{,_CACHE}_FN): Fix return type.
-	* cgen.sh (decode): Add s/@arch@/$arch/.
 	* genmloop.sh (@cpu@_engine_run): Delete `current_state'.
 	(engine_resume): Likewise.  Make `engine' volatile.  Save copy
 	of cpu pointer in volatile object.  Initialize read switch if
@@ -1648,10 +1628,6 @@ Fri Jan 30 09:36:33 1998  Andrew Cagney  <cagney@b1.cygnus.com>
  	MAX_NR_PROCESSORS.
 	(sim_engine_nr_cpus) sim-engine.c, sim-engine.h: New function
 	
-Thu Jan 29 12:13:01 1998  Doug Evans  <devans@canuck.cygnus.com>
-
-	* cgen.sh: Portably read parms past $9.
-
 Fri Jan 23 14:20:54 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Make-common.in (stamp-tvals): New rule.
@@ -1672,7 +1648,6 @@ Mon Jan 19 12:45:45 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-scache.h: Deleted.
 	* Make-common.in (cgen-run.o,cgen-scache.o): Delete cgen-scache.h dep.
-	(CGEN_CPU_SCM): Add sim-model.scm.
 	* cgen-scache.c: Only compile contents if WITH_SCACHE.
 	(scache_init): Use runtime computed size of SCACHE.
 	(scache_flush): Likewise.

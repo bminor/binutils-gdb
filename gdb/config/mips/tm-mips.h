@@ -83,7 +83,7 @@ CORE_ADDR mips_addr_bits_remove PARAMS ((CORE_ADDR addr));
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc)	pc = mips_skip_prologue (pc, 0)
+#define SKIP_PROLOGUE(pc) (mips_skip_prologue (pc, 0))
 extern CORE_ADDR mips_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
 
 /* Return non-zero if PC points to an instruction which will cause a step

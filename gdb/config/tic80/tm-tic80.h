@@ -171,7 +171,7 @@ extern void tic80_frame_find_saved_regs PARAMS ((struct frame_info *, struct fra
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc)	{ (pc) = tic80_skip_prologue (pc); }
+#define SKIP_PROLOGUE(pc) (tic80_skip_prologue (pc))
 extern CORE_ADDR tic80_skip_prologue PARAMS ((CORE_ADDR pc));
 
 /* Immediately after a function call, return the saved pc.

@@ -56,7 +56,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    If so, what do they look like?
    This is becoming harder, since tege@sics.SE wants to change
    gcc to not output a prologue when no frame is needed.   */
-#define SKIP_PROLOGUE(pc)  do {} while (0)
+#define SKIP_PROLOGUE(pc)  (pc)
 
 
 /* Immediately after a function call, return the saved pc.

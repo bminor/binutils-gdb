@@ -1389,7 +1389,7 @@ sol_find_new_threads_callback(th, ignored)
 }
 
 void
-sol_find_new_threads()
+sol_find_new_threads ()
 {
   /* don't do anything if init failed to resolve the libthread_db library */
   if (!procfs_suppress_run)
@@ -1542,6 +1542,7 @@ init_sol_thread_ops ()
   sol_thread_ops.to_can_run = sol_thread_can_run;
   sol_thread_ops.to_notice_signals = sol_thread_notice_signals;
   sol_thread_ops.to_thread_alive = sol_thread_alive;
+  sol_thread_ops.to_find_new_threads = sol_find_new_threads;
   sol_thread_ops.to_stop = sol_thread_stop;
   sol_thread_ops.to_stratum = process_stratum;
   sol_thread_ops.to_has_all_memory = 1;

@@ -405,7 +405,7 @@ set_initial_gprs ()
   
   memsize = cpu.asregs.msize / (1024 * 1024);
 
-  if (issue_messages)
+  if (issue_messages > 1)
     fprintf (stderr, "Simulated memory of %d Mbytes (0x0 .. 0x%08x)\n",
 	     memsize, cpu.asregs.msize - 1);
 
@@ -2107,7 +2107,7 @@ sim_do_command (sd, cmd)
 	}
       else if (strcmp (simargv[0], "verbose") == 0)
 	{
-	  issue_messages = 1;
+	  issue_messages = 2;
 	}
       else
 	{

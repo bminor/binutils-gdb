@@ -52,9 +52,8 @@ extern void init_extra_frame_info ();
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(frompc)   \
-	{ (frompc) = skip_prologue (frompc); }
-extern CORE_ADDR skip_prologue ();
+extern CORE_ADDR m88k_skip_prologue PARAMS ((CORE_ADDR));
+#define SKIP_PROLOGUE(frompc) (m88k_skip_prologue (frompc))
 
 /* The m88k kernel aligns all instructions on 4-byte boundaries.  The
    kernel also uses the least significant two bits for its own hocus

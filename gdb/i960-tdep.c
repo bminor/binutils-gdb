@@ -312,7 +312,7 @@ examine_prologue (ip, limit, frame_addr, fsr)
    prologue.  */
 
 CORE_ADDR
-skip_prologue (ip)
+i960_skip_prologue (ip)
      CORE_ADDR (ip);
 {
   struct frame_saved_regs saved_regs_dummy;

@@ -585,7 +585,7 @@ examine_prologue (start_pc, frameless_p, fi, saved_regs)
 }
 
 CORE_ADDR 
-skip_prologue (start_pc, frameless_p)
+sparc_skip_prologue (start_pc, frameless_p)
      CORE_ADDR start_pc;
      int frameless_p;
 {

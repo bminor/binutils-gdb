@@ -33,14 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc)   				\
-{ register unsigned char op = read_memory_integer (pc, 1);	\
-  if (op == 0x82) { op = read_memory_integer (pc+2,1);  \
-  		    if ((op & 0x80) == 0) pc += 3;	\
-		    else if ((op & 0xc0) == 0x80) pc += 4;	\
-		    else pc += 6;			\
-		   }					\
-}
+extern CORE_ADDR umax_skip_prologue PARAMS ((CORE_ADDR));
+#define SKIP_PROLOGUE(pc) (umax_skip_prologue (pc))
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines

@@ -40,7 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(ip)   {(ip) = z8k_skip_prologue(ip);}
+#define SKIP_PROLOGUE(ip)   (z8k_skip_prologue (ip))
 extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 

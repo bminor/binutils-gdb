@@ -56,7 +56,7 @@ CORE_ADDR arm_addr_bits_remove PARAMS ((CORE_ADDR));
 
 extern CORE_ADDR arm_skip_prologue PARAMS ((CORE_ADDR pc));
 
-#define SKIP_PROLOGUE(pc) { pc = arm_skip_prologue (pc); }
+#define SKIP_PROLOGUE(pc) (arm_skip_prologue (pc))
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines

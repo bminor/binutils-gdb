@@ -108,8 +108,11 @@ static unsigned int heuristic_fence_post = 0;
 */
 
 #define PROC_LOW_ADDR(proc) ((proc)->pdr.adr) /* least address */
+/* These next two fields are kind of being hijacked.  I wonder if
+   iline is too small for the values it needs to hold, if GDB is
+   running on a 32-bit host.  */
 #define PROC_HIGH_ADDR(proc) ((proc)->pdr.iline) /* upper address bound */
-#define PROC_DUMMY_FRAME(proc) ((proc)->pdr.iopt) /* frame for CALL_DUMMY */
+#define PROC_DUMMY_FRAME(proc) ((proc)->pdr.cbLineOffset) /*CALL_DUMMY frame */
 #define PROC_FRAME_OFFSET(proc) ((proc)->pdr.frameoffset)
 #define PROC_FRAME_REG(proc) ((proc)->pdr.framereg)
 #define PROC_REG_MASK(proc) ((proc)->pdr.regmask)

@@ -80,7 +80,7 @@ void _initialize_thread PARAMS ((void));
 /* Prototypes for local functions. */
 
 #if !defined(FIND_NEW_THREADS)
-#define FIND_NEW_THREADS target_find_new_threads
+#define FIND_NEW_THREADS local_find_new_threads
 #endif  
 			   
 static struct thread_info *thread_list = NULL;
@@ -104,10 +104,8 @@ static void prune_threads PARAMS ((void));
 
 static struct target_thread_vector *target_thread_functions;
 
-static int target_find_new_threads PARAMS ((void));
-
 static int
-target_find_new_threads ()
+local_find_new_threads ()
 {
   int retval = 0;
   if (target_thread_functions &&
@@ -454,9 +452,7 @@ info_threads_command (arg, from_tty)
   if (!target_has_stack) error ("No stack.");
 
   prune_threads ();
-#if defined(FIND_NEW_THREADS)
-  FIND_NEW_THREADS ();
-#endif
+  target_find_new_threads ();
   current_pid = inferior_pid;
   for (tp = thread_list; tp; tp = tp->next)
     {

@@ -529,7 +529,7 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
   mode |= O_BINARY;
 #endif
 
-  if (try_cwd_first || SLASH_P (string[0]))
+  if (try_cwd_first || ROOTED_P (string))
     {
       int i;
       filename = string;

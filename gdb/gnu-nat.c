@@ -2004,6 +2004,10 @@ gnu_attach (args, from_tty)
   attach_flag = 1;
   push_target (&gnu_ops);
 
+  /* We have to initialize the terminal settings now, since the code
+     below might try to restore them.  */
+  target_terminal_init ();
+ 
   inf_update_signal_thread (inf);
   inf_set_traced (inf, inf->want_signals);
 

@@ -356,6 +356,7 @@ struct target_ops
   int	      (*to_can_run) PARAMS ((void));
   void	      (*to_notice_signals) PARAMS ((int pid));
   int	      (*to_thread_alive) PARAMS ((int pid));
+  void        (*to_find_new_threads) PARAMS ((void));
   void	      (*to_stop) PARAMS ((void));
   int 	      (*to_query) PARAMS ((int/*char*/, char *, char *, int *));
   struct symtab_and_line * (*to_enable_exception_callback) PARAMS ((enum exception_event_kind, int));
@@ -886,6 +887,14 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 
 #define target_thread_alive(pid) \
 	(*current_target.to_thread_alive) (pid)
+
+/* Query for new threads and add them to the thread list.  */
+
+#define target_find_new_threads() \
+     do { \
+       if (current_target.to_find_new_threads) \
+         (*current_target.to_find_new_threads) (); \
+     } while (0);
 
 /* Make target stop in a continuable fashion.  (For instance, under Unix, this
    should act like SIGSTOP).  This function is normally used by GUIs to

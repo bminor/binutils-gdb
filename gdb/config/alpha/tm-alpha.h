@@ -59,7 +59,7 @@ struct symbol;
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc)	pc = alpha_skip_prologue(pc, 0)
+#define SKIP_PROLOGUE(pc)	(alpha_skip_prologue(pc, 0))
 extern CORE_ADDR alpha_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
 
 /* Immediately after a function call, return the saved pc.

@@ -33,26 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc)	\
-{ register int op = (unsigned char) read_memory_integer (pc, 1);  \
-  if (op == 0x11) pc += 2;  /* skip brb */			  \
-  if (op == 0x13) pc += 3;  /* skip brw */			  \
-  if (op == 0x2c &&						  \
-      ((unsigned char) read_memory_integer (pc+2, 1)) == 0x5e)	  \
-    pc += 3;  /* skip subl2 */					  \
-  if (op == 0xe9 &&						  \
-      ((unsigned char) read_memory_integer (pc+1, 1)) == 0xae &&  \
-      ((unsigned char) read_memory_integer(pc+3, 1)) == 0x5e)	  \
-     pc += 4;  /* skip movab */					  \
-  if (op == 0xe9 &&						  \
-      ((unsigned char) read_memory_integer (pc+1, 1)) == 0xce &&  \
-      ((unsigned char) read_memory_integer(pc+4, 1)) == 0x5e)	  \
-    pc += 5;  /* skip movab */					  \
-  if (op == 0xe9 &&						  \
-      ((unsigned char) read_memory_integer (pc+1, 1)) == 0xee &&  \
-      ((unsigned char) read_memory_integer(pc+6, 1)) == 0x5e)	  \
-    pc += 7;  /* skip movab */					  \
-}
+extern CORE_ADDR tahoe_skip_prologue PARAMS ((CORE_ADDR));
+#define SKIP_PROLOGUE(pc) (tahoe_skip_prologue (pc))
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines

@@ -126,9 +126,10 @@
 #define	MSR_DDSR	0x02
 #define	MSR_DCTS	0x01
 
-#include <sys/dos.h>
-#include <sys/go32.h>
-#include <sys/dpmi.h>
+#include <dos.h>
+#include <go32.h>
+#include <dpmi.h>
+typedef unsigned long u_long;
 
 /* DPMI Communication */
 static union REGS dpmi_regs;

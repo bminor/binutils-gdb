@@ -1,3 +1,133 @@
+1999-05-04  DJ Delorie  <dj@cygnus.com>
+
+	DJGPP changes from Robert Hoehne  <robert.hoehne@gmx.net>
+
+	* ser-go32.c: correct includes
+	* source.c (openp): use ROOTED_P instead of SLASH_P
+	* go32-nat.c: enhance exception and NPX handling
+	(go32_kill_inferior): fix small bug killing inferior
+	* configure.in: don't look for termcap with djgpp
+	* configure: rebuild
+
+1999-05-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* main.c (main): Comment out unused and undocumented command line
+ 	option '-'.
+
+1999-04-30  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Cleanup from Philippe De Muyter:
+	* configure.in (BFD_NEED_DECLARATION): Check also for strstr.
+	* acconfig.h (NEED_DECLARATION_MALLOC, NEED_DECLARATION_REALLOC,
+	NEED_DECLARATION_FREE, NEED_DECLARATION_STRERROR): Define slots
+	removed; they are now generated automatically.
+	* gdb_string.h (strstr): Provide function prototype if
+	NEED_DECLARATION_STRSTR.
+	* configure, config.in: Regenerated.
+
+Fri Apr 30 11:16:09 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* target.h (to_find_new_threads): new target ops vector.
+	(target_find_new_threads): define.
+	* target.c (update_current_target): inherit new target ops vector.
+	* remote.c: Setup to_find_new_threads vector.
+	* sol-thread.c: ditto.
+	* thread.c (target_find_new_threads): rename: local_find_new_threads.
+	(info_threads_command): call target_find_new_threads by new method,
+	as a target ops vector, rather than previous macro definition method.
+	* infcmd.c (go_command): define only if in xdb mode.
+	* procfs.c: fix typo in comment.
+	
+Fri Apr 30 01:02:05 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppah-nat.c: Fix various coding convention violations introduced
+	by HP.
+	(child_acknowledge_created_inferior): Do nothing if PT_SET_EVENT_MASK
+	is not defined.
+
+1999-04-28  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* TODO: Add some items inspired by review of the manual.
+
+Tue Apr 27 17:38:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/z8k/tm-z8k.h, config/v850/tm-v850.h,
+ 	config/tic80/tm-tic80.h, config/sparc/tm-sparc.h,
+ 	config/sh/tm-sh.h, config/pyr/tm-pyr.h, config/pa/tm-hppa.h,
+ 	config/mn10300/tm-mn10300.h, config/mn10200/tm-mn10200.h,
+ 	config/mips/tm-mips.h, config/m88k/tm-m88k.h,
+ 	config/m68k/tm-m68k.h, config/m32r/tm-m32r.h,
+ 	config/i960/tm-i960.h, config/i386/tm-i386.h,
+ 	config/h8500/tm-h8500.h, config/h8300/tm-h8300.h,
+ 	config/fr30/tm-fr30.h, config/d30v/tm-d30v.h,
+ 	config/d10v/tm-d10v.h, config/alpha/tm-alpha.h,
+ 	config/arm/tm-arm.h, config/a29k/tm-a29k.h, config/arc/tm-arc.h:
+ 	Change SKIP_PROLOGUE and SKIP_PROLOGUE_FRAMELESS_P macros so that
+ 	they return the new address.
+
+	* sparc-tdep.c (sparc_skip_prologue), hppa-tdep.c
+ 	(hppa_skip_prologue), m88k-tdep.c
+ 	(m88k_skip_prologue), i960-tdep.c
+ 	(i960_skip_prologue), arc-tdep.c
+ 	(arc_skip_prologue), a29k-tdep.c (a29k_skip_prologue): Rename
+ 	skip_prologue function.
+
+	* config/m68k/tm-isi.h: Convert macro SKIP_PROLOGUE into a new
+ 	function.
+	* m68k-tdep.c (isi_skip_prologue): That new function.
+	* vax-tdep.c (vax_skip_prologue), config/vax/tm-vax.h: Ditto.
+	* tahoe-tdep.c (tahoe_skip_prologue), config/tahoe/tm-tahoe.h: Ditto.
+	* rs6000-tdep.c (rs6000_skip_prologue), config/rs6000/tm-rs6000.h:
+ 	Ditto.
+	* ns32k-tdep.c (umax_skip_prologue), config/ns32k/tm-umax.h: Ditto.
+	* config/ns32k/tm-merlin.h, ns32k-tdep.c (merlin_skip_prologue):
+ 	Ditto.
+	* config/m68k/tm-altos.h, m68k-tdep.c (altos_skip_prologue): Ditto.
+	* config/convex/tm-convex.h, convex-tdep.c (convex_skip_prologue):
+ 	Ditto.
+
+	* symtab.c (in_prologue, find_function_start_sal, decode_line_1),
+ 	infrun.c (wait_for_inferior), blockframe.c
+ 	(frameless_look_for_prologue): Update.
+	* config/fr30/tm-fr30.h (FRAMELESS_FUNCTION_INVOCATION): Update.
+
+1999-04-27  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* TODO: Remove item about DEBUG_EXPRESSIONS, no longer meaningful.
+
+	* infrun.c (enum wfi_state): New enum.
+	(wait_for_inferior): Merge all but one of the target_wait calls
+	into a single call, add a wfi_state variable to encode which of
+	the calls is being made.
+
+1999-04-26  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Fix from Dave Holcomb.
+	* hpux-thread.c (init_hpux_thread_ops): Use the right function
+	name when initializing hpux_thread_ops.to_thread_alive.
+
+	* coffread.c (coff_symfile_read): If we have a `.stab' section,
+	but no `.stabstr' section, then print an error message; don't
+	crash.
+
+1999-04-26  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	1999-04-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* gnu-nat.c (gnu_attach): Call target_terminal_init before calling
+	inf_set_traced, since that function calls code that might try to
+	restore the terminal settings.
+
+Mon Apr 26 08:55:46 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h, gdbarch.c: More format cleanups.
+
+Fri Apr 23 15:00:25 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.c (arch_ok): New function. Fix logic test for a valid
+ 	architecture.
+	(set_arch): Use.
+
 1999-04-22  Jason Molenda  (jsm@bugshack.cygnus.com)
 
         * README: Note that readline is not installed as a part of

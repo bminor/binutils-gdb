@@ -1,3 +1,8 @@
+Tue Apr 27 19:14:20 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (SKIP_PROLOGUE, SKIP_PROLOGUE_FRAMELESS_P):
+ 	Update.
+
 Thu Apr 22 13:07:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (USE_GENERIC_DUMMY_FRAMES): Document.

@@ -88,11 +88,9 @@ struct value;
    knows that the function has a frame.  Its result is equal
    to its input PC if the function is frameless, unequal otherwise.  */
 
-#define SKIP_PROLOGUE(pc) \
-  { pc = skip_prologue (pc, 0); }
-#define SKIP_PROLOGUE_FRAMELESS_P(pc) \
-  { pc = skip_prologue (pc, 1); }
-extern CORE_ADDR skip_prologue PARAMS ((CORE_ADDR, int));
+#define SKIP_PROLOGUE(pc) (sparc_skip_prologue (pc, 0))
+#define SKIP_PROLOGUE_FRAMELESS_P(pc) (sparc_skip_prologue (pc, 1))
+extern CORE_ADDR sparc_skip_prologue PARAMS ((CORE_ADDR, int));
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines

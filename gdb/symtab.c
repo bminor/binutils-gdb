@@ -2089,7 +2089,7 @@ find_function_start_sal (sym, funfirstline)
 	pc = overlay_unmapped_address (pc, section);
 
       pc += FUNCTION_START_OFFSET;
-      SKIP_PROLOGUE (pc);
+      pc = SKIP_PROLOGUE (pc);
 
       /* For overlays, map pc back into its mapped VMA range */
       pc = overlay_mapped_address (pc, section);
@@ -3144,7 +3144,7 @@ minimal_symbol_found: /* We also jump here from the case for variables
       if (funfirstline)
 	{
 	  values.sals[0].pc += FUNCTION_START_OFFSET;
-	  SKIP_PROLOGUE (values.sals[0].pc);
+	  values.sals[0].pc = SKIP_PROLOGUE (values.sals[0].pc);
 	}
       values.nelts = 1;
       return values;
@@ -4285,7 +4285,7 @@ in_prologue (pc, func_start)
    function's start address because PC may be pointing at an instruction that
    could be mistakenly considered part of the prologue.  */
 
-  SKIP_PROLOGUE (func_start);
+  func_start = SKIP_PROLOGUE (func_start);
 
   return pc < func_start;
 }

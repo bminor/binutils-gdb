@@ -43,9 +43,8 @@ struct type;
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-extern CORE_ADDR sh_skip_prologue ();
-#define SKIP_PROLOGUE(ip) \
-    {(ip) = sh_skip_prologue(ip);}
+extern CORE_ADDR sh_skip_prologue PARAMS ((CORE_ADDR));
+#define SKIP_PROLOGUE(ip) (sh_skip_prologue (ip))
 
 
 /* Immediately after a function call, return the saved pc.

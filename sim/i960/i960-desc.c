@@ -1883,8 +1883,7 @@ build_insn_table (cd)
   cd->insn_table.num_init_entries = MAX_INSNS;
 }
 
-/* Subroutine of i960_cgen_cpu_open to rebuild the tables.
-   This is also called by cgen_set_cpu (via an entry in CD).  */
+/* Subroutine of i960_cgen_cpu_open to rebuild the tables.  */
 
 static void
 i960_cgen_rebuild_tables (cd)

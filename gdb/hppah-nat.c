@@ -1,5 +1,5 @@
 /* Native support code for HPUX PA-RISC.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1998
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1998, 1999
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -66,24 +66,24 @@ store_inferior_registers (regno)
       regaddr = register_addr (regno, offset);
       errno = 0;
       if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
-        {
-          scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
-          call_ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-                  scratch);
-          if (errno != 0)
-            {
+	{
+	  scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
+	  call_ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		       scratch);
+	  if (errno != 0)
+	    {
 	      /* Error, even if attached.  Failing to write these two
 		 registers is pretty serious.  */
-              sprintf (buf, "writing register number %d", regno);
-              perror_with_name (buf);
-            }
-        }
+	      sprintf (buf, "writing register number %d", regno);
+	      perror_with_name (buf);
+	    }
+	}
       else
 	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
 	  {
 	    errno = 0;
 	    call_ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		    *(int *) &registers[REGISTER_BYTE (regno) + i]);
+			 *(int *) &registers[REGISTER_BYTE (regno) + i]);
 	    if (errno != 0)
 	      {
 		/* Warning, not error, in case we are attached; sometimes the
@@ -123,13 +123,12 @@ fetch_register (regno)
     {
       errno = 0;
       *(int *) &buf[i] = call_ptrace (PT_RUREGS, inferior_pid,
-				 (PTRACE_ARG3_TYPE) regaddr, 0);
+				      (PTRACE_ARG3_TYPE) regaddr, 0);
       regaddr += sizeof (int);
       if (errno != 0)
 	{
 	  /* Warning, not error, in case we are attached; sometimes the
-	   * kernel doesn't let us at the registers.
-	   */
+	     kernel doesn't let us at the registers.  */
 	  char *err = safe_strerror (errno);
 	  char *msg = alloca (strlen (err) + 128);
 	  sprintf (msg, "reading register %s: %s", REGISTER_NAME (regno), err);
@@ -167,77 +166,75 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
   register int count
     = (((memaddr + len) - addr) + sizeof (int) - 1) / sizeof (int);
 
-  /* Allocate buffer of that many longwords.  */
-  /* Note (RT) - This code formerly used alloca, which I have
-   * replaced with xmalloc and a matching free() at the end.
-   * The problem with alloca() is that there is no guarantee of
-   * when it'll be freed, and we were seeing cases of memory
-   * leaks on:
-   * (gdb) watch x
-   * (gdb) cont
-   * where the piled-up alloca's for the child_xfer_memory buffers
-   * were not getting freed.
-   */
+  /* Allocate buffer of that many longwords.
+     Note -- do not use alloca to allocate this buffer since there is no
+     guarantee of when the buffer will actually be deallocated.
+
+     This routine can be called over and over with the same call chain;
+     this (in effect) would pile up all those alloca requests until a call
+     to alloca was made from a point higher than this routine in the
+     call chain.  */
   register int *buffer = (int *) xmalloc (count * sizeof (int));
 
   if (write)
     {
       /* Fill start and end extra bytes of buffer with existing memory data.  */
-
-      if (addr != memaddr || len < (int)sizeof (int)) {
-	/* Need part of initial word -- fetch it.  */
-        buffer[0] = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, 
-			    inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
-      }
+      if (addr != memaddr || len < (int)sizeof (int))
+	{
+	  /* Need part of initial word -- fetch it.  */
+	  buffer[0] = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, 
+				   inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
+	}
 
       if (count > 1)		/* FIXME, avoid if even boundary */
 	{
 	  buffer[count - 1]
-	    = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, inferior_pid,
-		      (PTRACE_ARG3_TYPE) (addr + (count - 1) * sizeof (int)),
-		      0);
+	    = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER,
+			   inferior_pid,
+			   (PTRACE_ARG3_TYPE) (addr
+					       + (count - 1) * sizeof (int)),
+			   0);
 	}
 
       /* Copy data to be written over corresponding part of buffer */
-
       memcpy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
 
       /* Write the entire buffer.  */
-
       for (i = 0; i < count; i++, addr += sizeof (int))
 	{
-          int  pt_status;
-          int  pt_request;
-	  /* The HP-UX kernel crashes if you use PT_WDUSER to write into the text
-	     segment.  FIXME -- does it work to write into the data segment using
-	     WIUSER, or do these idiots really expect us to figure out which segment
-	     the address is in, so we can use a separate system call for it??!  */
+	  int pt_status;
+	  int pt_request;
+	  /* The HP-UX kernel crashes if you use PT_WDUSER to write into the
+	     text segment.  FIXME -- does it work to write into the data
+	     segment using WIUSER, or do these idiots really expect us to
+	     figure out which segment the address is in, so we can use a
+	     separate system call for it??!  */
 	  errno = 0;
-          pt_request = (addr < text_end) ? PT_WIUSER : PT_WDUSER;
+	  pt_request = (addr < text_end) ? PT_WIUSER : PT_WDUSER;
 	  pt_status = call_ptrace (pt_request,
-                                   inferior_pid, 
-                                   (PTRACE_ARG3_TYPE) addr,
-                                   buffer[i]);
+				   inferior_pid, 
+				   (PTRACE_ARG3_TYPE) addr,
+				   buffer[i]);
 
-          /* Did we fail?  Might we've guessed wrong about which
-             segment this address resides in?  Try the other request,
-             and see if that works...
-             */
-	  if ((pt_status == -1) && errno) {
-            errno = 0;
-            pt_request = (pt_request == PT_WIUSER) ? PT_WDUSER : PT_WIUSER;
-            pt_status = call_ptrace (pt_request,
-                                     inferior_pid, 
-                                     (PTRACE_ARG3_TYPE) addr,
-                                     buffer[i]);
+	  /* Did we fail?  Might we've guessed wrong about which
+	     segment this address resides in?  Try the other request,
+	     and see if that works...  */
+	  if ((pt_status == -1) && errno)
+	    {
+	      errno = 0;
+	      pt_request = (pt_request == PT_WIUSER) ? PT_WDUSER : PT_WIUSER;
+	      pt_status = call_ptrace (pt_request,
+				       inferior_pid, 
+				       (PTRACE_ARG3_TYPE) addr,
+				       buffer[i]);
 
-            /* No, we still fail.  Okay, time to punt. */
-            if ((pt_status == -1) && errno)
-              {
-                free(buffer);
-                return 0;
-              }
-	  }
+	      /* No, we still fail.  Okay, time to punt. */
+	      if ((pt_status == -1) && errno)
+		{
+		  free(buffer);
+		  return 0;
+		}
+	    }
 	}
     }
   else
@@ -247,11 +244,12 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 	{
 	  errno = 0;
 	  buffer[i] = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, 
-			      inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
-	  if (errno) {
-	    free(buffer);
-	    return 0;
-	  }
+				   inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
+	  if (errno)
+	    {
+	      free(buffer);
+	      return 0;
+	    }
 	  QUIT;
 	}
 
@@ -266,7 +264,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 void
 child_post_follow_inferior_by_clone ()
 {
-  int  status;
+  int status;
 
   /* This function is used when following both the parent and child
      of a fork.  In this case, the debugger clones itself.  The original
@@ -283,12 +281,11 @@ child_post_follow_inferior_by_clone ()
 
 void
 child_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child)
-     int  parent_pid;
-     int  followed_parent;
-     int  child_pid;
-     int  followed_child;
+     int parent_pid;
+     int followed_parent;
+     int child_pid;
+     int followed_child;
 {
-
   /* Are we a debugger that followed the parent of a vfork?  If so,
      then recall that the child's vfork event was delivered to us
      first.  And, that the parent was suspended by the OS until the
@@ -312,48 +309,46 @@ child_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child)
 
   /* Are we a debugger that followed the child of a vfork?  If so,
      then recall that we don't actually acquire control of the child
-     until after it has exec'd or exited.
-     */
+     until after it has exec'd or exited.  */
   if (followed_child)
     {
       /* If the child has exited, then there's nothing for us to do.
-         In the case of an exec event, we'll let that be handled by
-         the normal mechanism that notices and handles exec events, in
-         resume(). */
-
+	 In the case of an exec event, we'll let that be handled by
+	 the normal mechanism that notices and handles exec events, in
+	 resume(). */
     }
 }
 
-/* Format a process id, given a pid.  Be sure to terminate
- * this with a null--it's going to be printed via a "%s".
- */
+/* Format a process id, given PID.  Be sure to terminate
+   this with a null--it's going to be printed via a "%s".  */
 char *
-hppa_pid_to_str( pid )
+hppa_pid_to_str (pid)
     pid_t pid;
 {
-    static char buf[30]; /* Static because address returned */
+    /* Static because address returned */
+    static char buf[30];
 
-    sprintf( buf, "process %d\0\0\0\0", pid );
-             /* Extra NULLs for paranoia's sake */
-             
+    /* Extra NULLs for paranoia's sake */
+    sprintf (buf, "process %d\0\0\0\0", pid);
+	     
     return buf;
 }
 
-/* Format a thread id, given a tid.  Be sure to terminate
- * this with a null--it's going to be printed via a "%s".
- *
- * Note: This is a core-gdb tid, not the actual system tid.
- *       See infttrace.c for details.
- */
+/* Format a thread id, given TID.  Be sure to terminate
+   this with a null--it's going to be printed via a "%s".
+
+   Note: This is a core-gdb tid, not the actual system tid.
+         See infttrace.c for details.  */
 char *
-hppa_tid_to_str( tid )
+hppa_tid_to_str (tid)
     pid_t tid;
 {
-    static char buf[30]; /* Static because address returned */
+    /* Static because address returned */
+    static char buf[30];
 
-    sprintf( buf, "system thread %d\0\0\0\0", tid );
-             /* Extra NULLs for paranoia's sake */
-             
+    /* Extra NULLs for paranoia's sake */
+    sprintf (buf, "system thread %d\0\0\0\0", tid);
+	     
     return buf;
 }
 
@@ -420,13 +415,13 @@ parent_attach_all (pid, addr, data)
 
   /* Notify the parent that we're potentially ready to exec(). */
   write (startup_semaphore.child_channel[SEM_TALK],
-         &tc_magic_child,
-         sizeof (tc_magic_child));
+	 &tc_magic_child,
+	 sizeof (tc_magic_child));
 
   /* Wait for acknowledgement from the parent. */
   read (startup_semaphore.parent_channel[SEM_LISTEN],
-        &tc_magic_parent,
-        sizeof (tc_magic_parent));
+	&tc_magic_parent,
+	sizeof (tc_magic_parent));
   if (tc_magic_child != tc_magic_parent)
       warning ("mismatched semaphore magic");
 
@@ -446,8 +441,8 @@ hppa_require_attach (pid)
      int pid;
 {
   int pt_status;
-  CORE_ADDR  pc;
-  CORE_ADDR  pc_addr;
+  CORE_ADDR pc;
+  CORE_ADDR pc_addr;
   unsigned int regs_offset;
 
   /* Are we already attached?  There appears to be no explicit way to
@@ -466,7 +461,7 @@ hppa_require_attach (pid)
       pt_status = call_ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0);
 
       if (errno)
-        return -1;
+	return -1;
 
       /* Now we really are attached. */
       errno = 0;
@@ -580,7 +575,7 @@ hppa_resume_execd_vforking_child_to_get_parent_vfork ()
 
 void
 require_notification_of_events (pid)
-  int pid;
+     int pid;
 {
 #if defined(PT_SET_EVENT_MASK)
   int pt_status;
@@ -589,15 +584,13 @@ require_notification_of_events (pid)
   /* Instruct the kernel as to the set of events we wish to be
      informed of.  (This support does not exist before HPUX 10.0.
      We'll assume if PT_SET_EVENT_MASK has not been defined by
-     <sys/ptrace.h>, then we're being built on pre-10.0.)
-     */
+     <sys/ptrace.h>, then we're being built on pre-10.0.)  */
   memset (&ptrace_events, 0, sizeof (ptrace_events));
 
   /* Note: By default, all signals are visible to us.  If we wish
      the kernel to keep certain signals hidden from us, we do it
      by calling sigdelset (ptrace_events.pe_signals, signal) for
-     each such signal here, before doing PT_SET_EVENT_MASK.
-     */
+     each such signal here, before doing PT_SET_EVENT_MASK.  */
   sigemptyset (&ptrace_events.pe_signals);
 
   ptrace_events.pe_set_event = 0;
@@ -612,9 +605,9 @@ require_notification_of_events (pid)
 
   errno = 0;
   pt_status = call_ptrace (PT_SET_EVENT_MASK,
-                      pid,
-                      (PTRACE_ARG3_TYPE) &ptrace_events,
-                      sizeof (ptrace_events));
+		      pid,
+		      (PTRACE_ARG3_TYPE) &ptrace_events,
+		      sizeof (ptrace_events));
   if (errno)
     perror_with_name ("ptrace");
   if (pt_status < 0)
@@ -624,7 +617,7 @@ require_notification_of_events (pid)
 
 void
 require_notification_of_exec_events (pid)
-  int pid;
+     int pid;
 {
 #if defined(PT_SET_EVENT_MASK)
   int pt_status;
@@ -633,15 +626,13 @@ require_notification_of_exec_events (pid)
   /* Instruct the kernel as to the set of events we wish to be
      informed of.  (This support does not exist before HPUX 10.0.
      We'll assume if PT_SET_EVENT_MASK has not been defined by
-     <sys/ptrace.h>, then we're being built on pre-10.0.)
-     */
+     <sys/ptrace.h>, then we're being built on pre-10.0.)  */
   memset (&ptrace_events, 0, sizeof (ptrace_events));
 
   /* Note: By default, all signals are visible to us.  If we wish
      the kernel to keep certain signals hidden from us, we do it
      by calling sigdelset (ptrace_events.pe_signals, signal) for
-     each such signal here, before doing PT_SET_EVENT_MASK.
-     */
+     each such signal here, before doing PT_SET_EVENT_MASK.  */
   sigemptyset (&ptrace_events.pe_signals);
 
   ptrace_events.pe_set_event = 0;
@@ -653,9 +644,9 @@ require_notification_of_exec_events (pid)
 
   errno = 0;
   pt_status = call_ptrace (PT_SET_EVENT_MASK,
-                      pid,
-                      (PTRACE_ARG3_TYPE) &ptrace_events,
-                      sizeof (ptrace_events));
+		      pid,
+		      (PTRACE_ARG3_TYPE) &ptrace_events,
+		      sizeof (ptrace_events));
   if (errno)
     perror_with_name ("ptrace");
   if (pt_status < 0)
@@ -668,26 +659,29 @@ require_notification_of_exec_events (pid)
 
 void
 child_acknowledge_created_inferior (pid)
-    int pid;
+     int pid;
 {
   /* We need a memory home for a constant.  */
   int tc_magic_parent = PT_VERSION;
   int tc_magic_child = 0;
 
+  /* The remainder of this function is only useful for HPUX 10.0 and
+     later, as it depends upon the ability to request notification
+     of specific kinds of events by the kernel.  */
+#if defined(PT_SET_EVENT_MASK)
   /* Wait for the child to tell us that it has forked. */
   read (startup_semaphore.child_channel[SEM_LISTEN],
-        &tc_magic_child,
-        sizeof(tc_magic_child));
+	&tc_magic_child,
+	sizeof(tc_magic_child));
 
   /* Notify the child that it can exec.
 
      In the infttrace.c variant of this function, we set the child's
      event mask after the fork but before the exec.  In the ptrace
      world, it seems we can't set the event mask until after the exec.  */
-
   write (startup_semaphore.parent_channel[SEM_TALK],
-         &tc_magic_parent,
-         sizeof (tc_magic_parent));
+	 &tc_magic_parent,
+	 sizeof (tc_magic_parent));
 
   /* We'd better pause a bit before trying to set the event mask,
      though, to ensure that the exec has happened.  We don't want to
@@ -697,12 +691,10 @@ child_acknowledge_created_inferior (pid)
      After an exec, the child is no longer executing gdb code.  Hence,
      we can't have yet another synchronization via the pipes.  We'll
      just sleep for a second, and hope that's enough delay...  */
-
   sleep (1);
 
   /* Instruct the kernel as to the set of events we wish to be
      informed of.  */
-
   require_notification_of_exec_events (pid);
 
   /* Discard our copy of the semaphore. */
@@ -710,26 +702,26 @@ child_acknowledge_created_inferior (pid)
   (void) close (startup_semaphore.parent_channel[SEM_TALK]);
   (void) close (startup_semaphore.child_channel[SEM_LISTEN]);
   (void) close (startup_semaphore.child_channel[SEM_TALK]);
+#endif
 }
 
 void
 child_post_startup_inferior (pid)
-  int pid;
-
+     int pid;
 {
   require_notification_of_events (pid);
 }
 
 void
 child_post_attach (pid)
-  int pid;
+     int pid;
 {
   require_notification_of_events (pid);
 }
 
 int
 child_insert_fork_catchpoint (pid)
-  int pid;
+     int pid;
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_SET_EVENT_MASK)
@@ -737,15 +729,14 @@ child_insert_fork_catchpoint (pid)
 #else
   /* Enable reporting of fork events from the kernel. */
   /* ??rehrauer: For the moment, we're always enabling these events,
-     and just ignoring them if there's no catchpoint to catch them.
-     */
+     and just ignoring them if there's no catchpoint to catch them.  */
   return 0;
 #endif
 }
 
 int
 child_remove_fork_catchpoint (pid)
-  int pid;
+     int pid;
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_SET_EVENT_MASK)
@@ -760,7 +751,7 @@ child_remove_fork_catchpoint (pid)
 
 int
 child_insert_vfork_catchpoint (pid)
-  int pid;
+     int pid;
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_SET_EVENT_MASK)
@@ -775,7 +766,7 @@ child_insert_vfork_catchpoint (pid)
 
 int
 child_remove_vfork_catchpoint (pid)
-  int pid;
+     int pid;
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_SET_EVENT_MASK)
@@ -790,8 +781,8 @@ child_remove_vfork_catchpoint (pid)
 
 int
 child_has_forked (pid, childpid)
-  int pid;
-  int *  childpid;
+     int pid;
+     int *childpid;
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
@@ -803,9 +794,9 @@ child_has_forked (pid, childpid)
 
   errno = 0;
   pt_status = call_ptrace (PT_GET_PROCESS_STATE,
-                      pid,
-                      (PTRACE_ARG3_TYPE) &ptrace_state,
-                      sizeof (ptrace_state));
+			   pid,
+			   (PTRACE_ARG3_TYPE) &ptrace_state,
+			   sizeof (ptrace_state));
   if (errno)
     perror_with_name ("ptrace");
   if (pt_status < 0)
@@ -823,8 +814,8 @@ child_has_forked (pid, childpid)
 
 int
 child_has_vforked (pid, childpid)
-  int pid;
-  int * childpid;
+     int pid;
+     int *childpid;
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
@@ -837,9 +828,9 @@ child_has_vforked (pid, childpid)
 
   errno = 0;
   pt_status = call_ptrace (PT_GET_PROCESS_STATE,
-                      pid,
-                      (PTRACE_ARG3_TYPE) &ptrace_state,
-                      sizeof (ptrace_state));
+			   pid,
+			   (PTRACE_ARG3_TYPE) &ptrace_state,
+			   sizeof (ptrace_state));
   if (errno)
     perror_with_name ("ptrace");
   if (pt_status < 0)
@@ -864,48 +855,42 @@ child_can_follow_vfork_prior_to_exec ()
 
 int
 child_insert_exec_catchpoint (pid)
-  int pid;
+     int pid;
 {
-  /* This request is only available on HPUX 10.0 and later.
-     */
+  /* This request is only available on HPUX 10.0 and later.   */
 #if !defined(PT_SET_EVENT_MASK)
   error ("Unable to catch execs prior to HPUX 10.0");
 
 #else
-  /* Enable reporting of exec events from the kernel. */
+  /* Enable reporting of exec events from the kernel.  */
   /* ??rehrauer: For the moment, we're always enabling these events,
-     and just ignoring them if there's no catchpoint to catch them.
-     */
+     and just ignoring them if there's no catchpoint to catch them.  */
   return 0;
 #endif
 }
 
 int
 child_remove_exec_catchpoint (pid)
-  int pid;
+     int pid;
 {
-  /* This request is only available on HPUX 10.0 and later.
-     */
+  /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_SET_EVENT_MASK)
   error ("Unable to catch execs prior to HPUX 10.0");
 
 #else
   /* Disable reporting of exec events from the kernel. */
   /* ??rehrauer: For the moment, we're always enabling these events,
-     and just ignoring them if there's no catchpoint to catch them.
-     */
+     and just ignoring them if there's no catchpoint to catch them.  */
   return 0;
 #endif
 }
 
 int
 child_has_execd (pid, execd_pathname)
-  int pid;
-  char **  execd_pathname;
+     int pid;
+     char **execd_pathname;
 {
-
-  /* This request is only available on HPUX 10.0 and later.
-     */
+  /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
   *execd_pathname = NULL;
   return 0;
@@ -916,9 +901,9 @@ child_has_execd (pid, execd_pathname)
 
   errno = 0;
   pt_status = call_ptrace (PT_GET_PROCESS_STATE,
-                      pid,
-                      (PTRACE_ARG3_TYPE) &ptrace_state,
-                      sizeof (ptrace_state));
+			   pid,
+			   (PTRACE_ARG3_TYPE) &ptrace_state,
+			   sizeof (ptrace_state));
   if (errno)
     perror_with_name ("ptrace");
   if (pt_status < 0)
@@ -957,23 +942,23 @@ child_has_syscall_event (pid, kind, syscall_id)
 
 char *
 child_pid_to_exec_file (pid)
-    int pid;
+     int pid;
 {
-  static char  exec_file_buffer[1024];
+  static char exec_file_buffer[1024];
   int pt_status;
-  CORE_ADDR  top_of_stack;
-  char  four_chars[4];
+  CORE_ADDR top_of_stack;
+  char four_chars[4];
   int name_index;
   int i;
   int saved_inferior_pid;
-  boolean  done;
+  boolean done;
   
 #ifdef PT_GET_PROCESS_PATHNAME
   /* As of 10.x HP-UX, there's an explicit request to get the pathname. */
   pt_status = call_ptrace (PT_GET_PROCESS_PATHNAME,
-                           pid,
-                           (PTRACE_ARG3_TYPE) exec_file_buffer,
-                           sizeof (exec_file_buffer) - 1);
+			   pid,
+			   (PTRACE_ARG3_TYPE) exec_file_buffer,
+			   sizeof (exec_file_buffer) - 1);
   if (pt_status == 0)
     return exec_file_buffer;
 #endif

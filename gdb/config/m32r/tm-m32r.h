@@ -155,7 +155,7 @@ extern CORE_ADDR m32r_frame_saved_pc PARAMS((struct frame_info *));
 
 extern CORE_ADDR m32r_skip_prologue PARAMS ((CORE_ADDR pc));
 /* mvs_check  SKIP_PROLOGUE */
-#define SKIP_PROLOGUE(pc) pc = m32r_skip_prologue (pc)
+#define SKIP_PROLOGUE(pc) (m32r_skip_prologue (pc))
 
 /* mvs_no_check  FRAME_ARGS_SKIP */
 #define FRAME_ARGS_SKIP 0

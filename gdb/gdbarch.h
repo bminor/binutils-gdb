@@ -1,5 +1,5 @@
 /* Architecture commands for GDB, the GNU debugger.
-   Copyright 1998, Free Software Foundation, Inc.
+   Copyright 1998-1999, Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* The target-system-dependant byte order is dynamic */
 
 /* TARGET_BYTE_ORDER_SELECTABLE_P determines if the target endianness
-   is selectable at runtime.  The user can use the `set endian'
+   is selectable at runtime.  The user can use the ``set endian''
    command to change it.  TARGET_BYTE_ORDER_AUTO is nonzero when
    target_byte_order should be auto-detected (from the program image
    say). */

@@ -516,6 +516,7 @@ update_current_target ()
       INHERIT (to_can_run, t);
       INHERIT (to_notice_signals, t);
       INHERIT (to_thread_alive, t);
+      INHERIT (to_find_new_threads, t);
       INHERIT (to_stop, t);
       INHERIT (to_query, t);
       INHERIT (to_enable_exception_callback, t);

@@ -49,8 +49,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Advance ip across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(ip)	{ ip = skip_prologue (ip); }
-extern CORE_ADDR skip_prologue ();
+#define SKIP_PROLOGUE(ip)	(i960_skip_prologue (ip))
+extern CORE_ADDR i960_skip_prologue ();
 
 /* Immediately after a function call, return the saved ip.
    Can't always go through the frames for this because on some machines

@@ -47,7 +47,7 @@ struct type;
 /* Advance PC across any function entry prologue instructions to reach some
    "real" code.  */
 
-#define SKIP_PROLOGUE(frompc)   {(frompc) = i386_skip_prologue((frompc));}
+#define SKIP_PROLOGUE(frompc)   (i386_skip_prologue (frompc))
 
 extern int i386_skip_prologue PARAMS ((int));
 

@@ -210,6 +210,7 @@ gdb_test continue "Continuing\\..*array_c.*array_f.*array_d.*HELLO WORLD.*main \
 
 
 #call sum_array_print(10, *list1, *list2, *list3, *list4)
+
 send_gdb "print sum_array_print(10, *list1, *list2, *list3, *list4)\n"
 gdb_expect {
     -re ".*Sum of 4 arrays, by element \\(add in seed as well\\):\[ \t\r\n\]+Seed: 10\[ \t\r\n\]+Element Index . Sum\[ \t\r\n\]+-------------------------\[ \t\r\n\]+.*\[ \t\]+0\[ \t\]+52\[ \t\r\n\]+1\[ \t\]+60\[ \t\r\n\]+2\[ \t\]+68\[ \t\r\n\]+3\[ \t\]+76\[ \t\r\n\]+4\[ \t\]+84\[ \t\r\n\]+5\[ \t\]+92\[ \t\r\n\]+6\[ \t\]+100\[ \t\r\n\]+7\[ \t\]+108\[ \t\r\n\]+8\[ \t\]+116\[ \t\r\n\]+9\[ \t\]+124\[ \t\r\n\]+.*$gdb_prompt $" {
@@ -219,27 +220,24 @@ gdb_expect {
     timeout           { fail "(timeout) print sum_array_print(10, *list1, *list2, *list3, *list4)" }
   }
 
-
-#step -over
-    send_gdb "next\n"
-    gdb_expect {
-        -re "BYE BYE FOR NOW\[ \t\r\n\]main.*+1035\[ \t\r\n\]+printf\\(.VERY GREEN GRASS.n.\\);\[ \t\r\n\]+.*$gdb_prompt $" { pass "next to 1035"}
-        -re ".*$gdb_prompt $" { fail "next to 1035" }
-        timeout { fail "next to 1035(timeout)" }
-    }
+#step over
+send_gdb "n\n"
+gdb_expect {
+    -re ".*BYE BYE FOR NOW.*1035.*printf\\(.VERY GREEN GRASS.n.\\);.*$gdb_prompt $" { pass "next to 1035"}
+    -re ".*$gdb_prompt $" { fail "next to 1035" }
+    timeout { fail "next to 1035(timeout)" }
+}
 
 #call print_array_rep(\*list1, \*list2, \*list3)
 
 send_gdb "print print_array_rep(\*list1, \*list2, \*list3)\n"
 gdb_expect {
-    -re ".*.*$gdb_prompt $" {
+    -re ".*$gdb_prompt $" {
         pass "print print_array_rep(*list1, *list2, *list3)"
       }
     -re ".*$gdb_prompt $" { fail "print print_array_rep(*list1, *list2, *list3)" }
     timeout           { fail "(timeout) print print_array_rep(*list1, *list2, *list3)" }
   }
-
-
 
 #go -until 1039
 gdb_test "tbreak 1039" \

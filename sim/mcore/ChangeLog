@@ -1,3 +1,8 @@
+1999-04-29  Nick Clifton  <nickc@cygnus.com>
+
+	* interp.c (set_initial_gprs): Only display memory range if
+	verbose option has been set.
+
 1999-04-22  Nick Clifton  <nickc@cygnus.com>
 
 	* interp.c: Add tracing and verbose options.

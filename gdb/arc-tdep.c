@@ -264,7 +264,7 @@ arc_get_frame_setup (pc)
    This allows a quicker answer.  */
 
 CORE_ADDR
-skip_prologue (pc, frameless_p)
+arc_skip_prologue (pc, frameless_p)
      CORE_ADDR pc;
      int frameless_p;
 {

@@ -43,9 +43,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc) \
-  { pc = skip_prologue (pc); }
-CORE_ADDR skip_prologue ();
+#define SKIP_PROLOGUE(pc) (a29k_skip_prologue (pc))
+CORE_ADDR a29k_skip_prologue ();
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines

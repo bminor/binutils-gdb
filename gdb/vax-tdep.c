@@ -29,6 +29,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static unsigned char *print_insn_arg ();
 
+/* Advance PC across any function entry prologue instructions
+   to reach some "real" code.  */
+
+CORE_ADDR
+vax_skip_prologue (pc)
+     CORE_ADDR pc;
+{
+  register int op = (unsigned char) read_memory_integer (pc, 1);
+  if (op == 0x11)
+    pc += 2;  /* skip brb */
+  if (op == 0x31)
+    pc += 3;  /* skip brw */
+  if (op == 0xC2
+      && ((unsigned char) read_memory_integer (pc+2, 1)) == 0x5E)
+    pc += 3;  /* skip subl2 */
+  if (op == 0x9E
+      && ((unsigned char) read_memory_integer (pc+1, 1)) == 0xAE
+      && ((unsigned char) read_memory_integer(pc+3, 1)) == 0x5E)
+    pc += 4;  /* skip movab */
+  if (op == 0x9E
+      && ((unsigned char) read_memory_integer (pc+1, 1)) == 0xCE
+      && ((unsigned char) read_memory_integer(pc+4, 1)) == 0x5E)
+    pc += 5;  /* skip movab */
+  if (op == 0x9E
+      && ((unsigned char) read_memory_integer (pc+1, 1)) == 0xEE
+      && ((unsigned char) read_memory_integer(pc+6, 1)) == 0x5E)
+    pc += 7;  /* skip movab */
+  return pc;
+}
+
 /* Print the vax instruction at address MEMADDR in debugged memory,
    from disassembler info INFO.
    Returns length of the instruction, in bytes.  */

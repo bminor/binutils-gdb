@@ -686,6 +686,17 @@ coff_symfile_read (objfile, section_offsets, mainline)
 
   if (info->stabsects)
     {
+      if (! info->stabstrsect)
+	{
+	  error_begin ();
+	  fprintf_filtered
+	    (gdb_stderr,
+	     ("The debugging information in `%s' is corrupted.\n"
+	      "The file has a `.stabs' section, but no `.stabstr' section.\n"),
+	     name);
+	  return_to_top_level (RETURN_ERROR);
+	}
+
       /* FIXME: dubious.  Why can't we use something normal like
 	 bfd_get_section_contents?  */
       bfd_seek (abfd, abfd->where, 0);

@@ -1056,6 +1056,17 @@ delete_breakpoint_current_contents (arg)
    When this function actually returns it means the inferior
    should be left stopped and GDB should read more commands.  */
 
+/* This enum encodes possible reasons for doing a target_wait, so that
+   wfi can call target_wait in one place.  (Ultimately the call will be
+   moved out of the infinite loop entirely.) */
+
+enum wfi_states {
+  wfi_normal_state,
+  wfi_thread_hop_state,
+  wfi_nullified_state,
+  wfi_nonstep_watch_state
+};
+
 void
 wait_for_inferior ()
 {
@@ -1081,6 +1092,10 @@ wait_for_inferior ()
   int stepping_through_sigtramp = 0;
   int new_thread_event;
   int stepped_after_stopped_by_watchpoint;
+  struct target_waitstatus tmpstatus;
+  enum wfi_states wfi_state;
+  int waiton_pid;
+  struct target_waitstatus *wp;
 
   old_cleanups = make_cleanup (delete_breakpoint_current_contents,
 			       &step_resume_breakpoint);
@@ -1105,43 +1120,75 @@ wait_for_inferior ()
   if (may_switch_from_inferior_pid)
     switched_from_inferior_pid = inferior_pid;
 
+  wfi_state = wfi_normal_state;
+
   while (1)
     {
-      overlay_cache_invalid = 1;
-
-      /* We have to invalidate the registers BEFORE calling target_wait because
-	 they can be loaded from the target while in target_wait.  This makes
-	 remote debugging a bit more efficient for those targets that provide
-	 critical registers as part of their normal status mechanism. */
-
-      registers_changed ();
-
-      if (target_wait_hook)
-	pid = target_wait_hook (-1, &w);
-      else
-	pid = target_wait (-1, &w);
-
-      /* Since we've done a wait, we have a new event.  Don't carry
-         over any expectations about needing to step over a
-         breakpoint. */
-      thread_step_needed = 0;
-
-      /* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event is
-         serviced in this loop, below. */
-      if (enable_hw_watchpoints_after_wait)
+      if (wfi_state == wfi_normal_state)
 	{
-	  TARGET_ENABLE_HW_WATCHPOINTS (inferior_pid);
-	  enable_hw_watchpoints_after_wait = 0;
+	  overlay_cache_invalid = 1;
+
+	  /* We have to invalidate the registers BEFORE calling
+	     target_wait because they can be loaded from the target
+	     while in target_wait.  This makes remote debugging a bit
+	     more efficient for those targets that provide critical
+	     registers as part of their normal status mechanism. */
+
+	  registers_changed ();
+	  waiton_pid = -1;
+	  wp = &w;
 	}
 
-      stepped_after_stopped_by_watchpoint = 0;
+      if (target_wait_hook)
+	pid = target_wait_hook (waiton_pid, wp);
+      else
+	pid = target_wait (waiton_pid, wp);
 
-      /* Gross.
+      switch (wfi_state)
+	{
+	case wfi_normal_state:
+	  /* Since we've done a wait, we have a new event.  Don't
+	     carry over any expectations about needing to step over a
+	     breakpoint. */
+	  thread_step_needed = 0;
 
-       We goto this label from elsewhere in wait_for_inferior when we want
-       to continue the main loop without calling "wait" and trashing the
-       waitstatus contained in W.  */
-    have_waited:
+	  /* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event
+	     is serviced in this loop, below. */
+	  if (enable_hw_watchpoints_after_wait)
+	    {
+	      TARGET_ENABLE_HW_WATCHPOINTS (inferior_pid);
+	      enable_hw_watchpoints_after_wait = 0;
+	    }
+	  stepped_after_stopped_by_watchpoint = 0;
+	  break;
+
+	case wfi_thread_hop_state:
+	  insert_breakpoints ();
+
+	  /* We need to restart all the threads now,
+	   * unles we're running in scheduler-locked mode. 
+	   * FIXME: shouldn't we look at CURRENTLY_STEPPING ()?
+	   */
+	  if (scheduler_mode == schedlock_on)
+	    target_resume (pid, 0, TARGET_SIGNAL_0);
+	  else
+	    target_resume (-1, 0, TARGET_SIGNAL_0);
+	  wfi_state = wfi_normal_state;
+	  continue;
+
+	case wfi_nullified_state:
+	  break;
+
+	case wfi_nonstep_watch_state:
+	  insert_breakpoints ();
+
+	  /* FIXME-maybe: is this cleaner than setting a flag?  Does it
+	     handle things like signals arriving and other things happening
+	     in combination correctly?  */
+	  stepped_after_stopped_by_watchpoint = 1;
+	  break;
+	}
+      wfi_state = wfi_normal_state;
 
       flush_cached_frames ();
 
@@ -1536,11 +1583,10 @@ wait_for_inferior ()
 		      /* FIXME: What if a signal arrives instead of the
 			   single-step happening?  */
 
-		      if (target_wait_hook)
-			target_wait_hook (pid, &w);
-		      else
-			target_wait (pid, &w);
-		      insert_breakpoints ();
+		      waiton_pid = pid;
+		      wp = &w;
+		      wfi_state = wfi_thread_hop_state;
+		      continue;
 		    }
 
 		    /* We need to restart all the threads now,
@@ -1551,7 +1597,7 @@ wait_for_inferior ()
 		      target_resume (pid, 0, TARGET_SIGNAL_0);
 		    else
 		      target_resume (-1, 0, TARGET_SIGNAL_0);
-		  continue;
+		    continue;
 		}
 	      else
 		{
@@ -1673,21 +1719,17 @@ wait_for_inferior ()
       /*      if (INSTRUCTION_NULLIFIED && CURRENTLY_STEPPING ()) */
       if (INSTRUCTION_NULLIFIED)
 	{
-	  struct target_waitstatus tmpstatus;
-
 	  registers_changed ();
 	  target_resume (pid, 1, TARGET_SIGNAL_0);
 
 	  /* We may have received a signal that we want to pass to
 	     the inferior; therefore, we must not clobber the waitstatus
-	     in W.  So we call wait ourselves, then continue the loop
-	     at the "have_waited" label.  */
-	  if (target_wait_hook)
-	    target_wait_hook (pid, &tmpstatus);
-	  else
-	    target_wait (pid, &tmpstatus);
+	     in W. */
 
-	  goto have_waited;
+	  wfi_state = wfi_nullified_state;
+	  waiton_pid = pid;
+	  wp = &tmpstatus;
+	  continue;
 	}
 
       /* It may not be necessary to disable the watchpoint to stop over
@@ -1727,17 +1769,10 @@ wait_for_inferior ()
 	  registers_changed ();
 	  target_resume (pid, 1, TARGET_SIGNAL_0);	/* Single step */
 
-	  if (target_wait_hook)
-	    target_wait_hook (pid, &w);
-	  else
-	    target_wait (pid, &w);
-	  insert_breakpoints ();
-
-	  /* FIXME-maybe: is this cleaner than setting a flag?  Does it
-	     handle things like signals arriving and other things happening
-	     in combination correctly?  */
-	  stepped_after_stopped_by_watchpoint = 1;
-	  goto have_waited;
+	  waiton_pid = pid;
+	  wp = &w;
+	  wfi_state = wfi_nonstep_watch_state;
+	  continue;
 	}
 
       /* It may be possible to simply continue after a watchpoint.  */
@@ -2477,7 +2512,7 @@ wait_for_inferior ()
 
 	    s = find_pc_symtab (stop_pc);
 	    if (s && s->language != language_asm)
-	      SKIP_PROLOGUE (stop_func_start);
+	      stop_func_start = SKIP_PROLOGUE (stop_func_start);
 	  }
 	  sal = find_pc_line (stop_func_start, 0);
 	  /* Use the step_resume_break to step until

@@ -1,17 +1,5 @@
 /* config.in.  Generated automatically from configure.in by autoheader.  */
 
-/* Whether malloc must be declared even if <stdlib.h> is included.  */
-#undef NEED_DECLARATION_MALLOC
-
-/* Whether realloc must be declared even if <stdlib.h> is included.  */
-#undef NEED_DECLARATION_REALLOC
-
-/* Whether free must be declared even if <stdlib.h> is included.  */
-#undef NEED_DECLARATION_FREE
-
-/* Whether strerror must be declared even if <string.h> is included.  */
-#undef NEED_DECLARATION_STRERROR
-
 /* Define if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
@@ -320,6 +308,9 @@
 
 /* Define if strdup is not declared in system header files. */
 #undef NEED_DECLARATION_STRDUP
+
+/* Define if strstr is not declared in system header files. */
+#undef NEED_DECLARATION_STRSTR
 
 /* Define if <sys/procfs.h> has pstatus_t. */
 #undef HAVE_PSTATUS_T

@@ -72,8 +72,8 @@ struct inferior_status;
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc) pc = skip_prologue (pc)
-extern CORE_ADDR skip_prologue PARAMS ((CORE_ADDR));
+extern CORE_ADDR hppa_skip_prologue PARAMS ((CORE_ADDR));
+#define SKIP_PROLOGUE(pc) (hppa_skip_prologue (pc))
 
 /* If PC is in some function-call trampoline code, return the PC
    where the function itself actually starts.  If not, return NULL.  */

@@ -97,11 +97,8 @@ struct rs6000_framedata {
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc)						\
-do {									\
-  struct rs6000_framedata _frame;					\
-  pc = skip_prologue (pc, &_frame);					\
-} while (0)
+extern CORE_ADDR rs6000_skip_prologue PARAMS ((CORE_ADDR));
+#define SKIP_PROLOGUE(pc) (rs6000_skip_prologue (pc))
 
 extern CORE_ADDR skip_prologue PARAMS((CORE_ADDR, struct rs6000_framedata *));
 

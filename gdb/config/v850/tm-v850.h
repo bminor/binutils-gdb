@@ -126,7 +126,7 @@ extern CORE_ADDR v850_frame_saved_pc   PARAMS ((struct frame_info *));
   write_register_bytes(REGISTER_BYTE (V0_REGNUM), VALBUF, TYPE_LENGTH (TYPE));
 
 extern CORE_ADDR v850_skip_prologue PARAMS ((CORE_ADDR pc));
-#define SKIP_PROLOGUE(pc) pc = v850_skip_prologue (pc)
+#define SKIP_PROLOGUE(pc) (v850_skip_prologue (pc))
 
 #define FRAME_ARGS_SKIP 0
 

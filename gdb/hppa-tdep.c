@@ -3513,7 +3513,7 @@ after_prologue (pc)
    stuff some day.  */
 
 CORE_ADDR
-skip_prologue (pc)
+hppa_skip_prologue (pc)
      CORE_ADDR pc;
 {
     unsigned long inst;

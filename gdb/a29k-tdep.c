@@ -337,7 +337,7 @@ examine_prologue (pc, rsize, msize, mfp_used)
    to reach some "real" code.  */
 
 CORE_ADDR
-skip_prologue (pc)
+a29k_skip_prologue (pc)
      CORE_ADDR pc;
 {
   return examine_prologue (pc, NULL, NULL, NULL);

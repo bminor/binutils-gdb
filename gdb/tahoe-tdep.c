@@ -31,6 +31,37 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static unsigned char *print_insn_arg ();
 
+/* Advance PC across any function entry prologue instructions
+   to reach some "real" code.  */
+
+CORE_ADDR
+tahoe_skip_prologue (pc)
+     CORE_ADDR pc;
+{
+  register int op = (unsigned char) read_memory_integer (pc, 1);
+  if (op == 0x11)
+    pc += 2;  /* skip brb */
+  if (op == 0x13)
+    pc += 3;  /* skip brw */
+  if (op == 0x2c
+      && ((unsigned char) read_memory_integer (pc+2, 1)) == 0x5e)
+    pc += 3;  /* skip subl2 */
+  if (op == 0xe9
+      && ((unsigned char) read_memory_integer (pc+1, 1)) == 0xae
+      && ((unsigned char) read_memory_integer(pc+3, 1)) == 0x5e)
+    pc += 4;  /* skip movab */
+  if (op == 0xe9
+      && ((unsigned char) read_memory_integer (pc+1, 1)) == 0xce
+      && ((unsigned char) read_memory_integer(pc+4, 1)) == 0x5e)
+    pc += 5;  /* skip movab */
+  if (op == 0xe9
+      && ((unsigned char) read_memory_integer (pc+1, 1)) == 0xee
+      && ((unsigned char) read_memory_integer(pc+6, 1)) == 0x5e)
+    pc += 7;  /* skip movab */
+  return pc;
+}
+
+
 /* Print the Tahoe instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns length of the instruction, in bytes.  */
 

@@ -46,9 +46,8 @@ struct value;
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-extern CORE_ADDR d30v_skip_prologue ();
-#define SKIP_PROLOGUE(ip) \
-    {(ip) = d30v_skip_prologue(ip);}
+extern CORE_ADDR d30v_skip_prologue PARAMS ((CORE_ADDR));
+#define SKIP_PROLOGUE(ip) (d30v_skip_prologue (ip))
 
 
 /* Stack grows downward.  */

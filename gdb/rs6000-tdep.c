@@ -58,6 +58,16 @@ static void pop_dummy_frame PARAMS ((void));
 
 static CORE_ADDR frame_initial_stack_address PARAMS ((struct frame_info *));
 
+CORE_ADDR
+rs6000_skip_prologue (pc)
+     CORE_ADDR pc;
+{
+  struct rs6000_framedata frame;
+  pc = skip_prologue (pc, &frame);
+  return pc;
+}
+
+
 /* Fill in fi->saved_regs */
 
 struct frame_extra_info

@@ -159,7 +159,7 @@ extern CORE_ADDR fr30_frame_saved_pc   PARAMS ((struct frame_info *));
 #define SAVED_PC_AFTER_CALL(fi) read_register (RP_REGNUM)
 
 extern CORE_ADDR fr30_skip_prologue PARAMS ((CORE_ADDR pc));
-#define SKIP_PROLOGUE(pc) pc = fr30_skip_prologue (pc)
+#define SKIP_PROLOGUE(pc) (fr30_skip_prologue (pc))
 
 /* Write into appropriate registers a function return value of type
    TYPE, given in virtual format.  VALBUF is in the target byte order;
@@ -199,7 +199,7 @@ extern void fr30_store_return_value PARAMS ((struct type *type, char *valbuf));
   func_start = (get_pc_function_start ((FI)->pc) +	\
 		FUNCTION_START_OFFSET);			\
   after_prologue = func_start;				\
-  SKIP_PROLOGUE (after_prologue);			\
+  after_prologue = SKIP_PROLOGUE (after_prologue);	\
   (FRAMELESS) = (after_prologue == func_start);		\
 }
 

@@ -33,9 +33,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    to reach some "real" code.  */
 
 #if !defined(SKIP_PROLOGUE)
-#define SKIP_PROLOGUE(ip)   {(ip) = m68k_skip_prologue(ip);}
-extern CORE_ADDR m68k_skip_prologue PARAMS ((CORE_ADDR ip));
+#define SKIP_PROLOGUE(ip) (m68k_skip_prologue (ip))
 #endif
+extern CORE_ADDR m68k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines

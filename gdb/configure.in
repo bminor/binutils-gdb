@@ -83,6 +83,7 @@ BFD_NEED_DECLARATION(realloc)
 BFD_NEED_DECLARATION(free)
 BFD_NEED_DECLARATION(strerror)
 BFD_NEED_DECLARATION(strdup)
+BFD_NEED_DECLARATION(strstr)
 
 
 # The following save_state_t checkery is only necessary for HPUX 
@@ -424,6 +425,9 @@ AC_SUBST(DLLTOOL)
 AC_SUBST(WINDRES)
 
 dnl Figure out which term library to use.
+if test x$gdb_host = xgo32; then
+  TERM_LIB=
+else
 if test x$gdb_cv_os_cygwin = xyes; then
   TERM_LIB='`if test -r ../libtermcap/libtermcap.a; then echo ../libtermcap/libtermcap.a; else echo -ltermcap; fi`'
 else
@@ -439,6 +443,7 @@ else
   then
     AC_MSG_ERROR(Could not find a term library, e.g. termcap or termlib!)
   fi
+fi
 fi
 AC_SUBST(TERM_LIB)
 

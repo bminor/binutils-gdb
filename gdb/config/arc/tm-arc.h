@@ -37,11 +37,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    knows that the function has a frame.  Its result is equal
    to its input PC if the function is frameless, unequal otherwise.  */
 
-#define SKIP_PROLOGUE(pc) \
-  { pc = skip_prologue (pc, 0); }
-#define SKIP_PROLOGUE_FRAMELESS_P(pc) \
-  { pc = skip_prologue (pc, 1); }
-extern CORE_ADDR skip_prologue PARAMS ((CORE_ADDR, int));
+#define SKIP_PROLOGUE(pc) (arc_skip_prologue (pc, 0))
+#define SKIP_PROLOGUE_FRAMELESS_P(pc) (arc_skip_prologue (pc, 1))
+extern CORE_ADDR arc_skip_prologue PARAMS ((CORE_ADDR, int));
 
 /* Sequence of bytes for breakpoint instruction.
    ??? The current value is "sr -1,[-1]" and is for the simulator only.

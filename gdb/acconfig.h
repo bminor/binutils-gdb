@@ -1,17 +1,3 @@
-
-/* Whether malloc must be declared even if <stdlib.h> is included.  */
-#undef NEED_DECLARATION_MALLOC
-
-/* Whether realloc must be declared even if <stdlib.h> is included.  */
-#undef NEED_DECLARATION_REALLOC
-
-/* Whether free must be declared even if <stdlib.h> is included.  */
-#undef NEED_DECLARATION_FREE
-
-/* Whether strerror must be declared even if <string.h> is included.  */
-#undef NEED_DECLARATION_STRERROR
-@TOP@
-
 /* Define if pstatus_t type is available */
 #undef HAVE_PSTATUS_T
 

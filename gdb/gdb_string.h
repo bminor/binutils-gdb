@@ -37,10 +37,6 @@ extern char *strchr PARAMS ((const char *, int));	/* X3.159-1989  4.11.5.2 */
 extern char *strrchr PARAMS ((const char *, int));	/* X3.159-1989  4.11.5.5 */
 #endif
 
-#ifndef strstr
-extern char *strstr PARAMS ((const char *, const char *));	/* X3.159-1989  4.11.5.7 */
-#endif
-
 #ifndef strtok
 extern char *strtok PARAMS ((char *, const char *));	/* X3.159-1989  4.11.5.8 */
 #endif
@@ -63,6 +59,12 @@ extern char *strerror PARAMS ((int));	/* X3.159-1989  4.11.6.2 */
 
 #ifdef NEED_DECLARATION_STRDUP
 extern char *strdup (); /* full prototype collides w/ some OSes (AIX 3.2.5) */
+#endif
+
+#ifdef NEED_DECLARATION_STRSTR
+#ifndef strstr
+extern char *strstr PARAMS ((const char *, const char *));	/* X3.159-1989  4.11.5.7 */
+#endif
 #endif
 
 #endif	/* !defined(GDB_STRING_H) */
