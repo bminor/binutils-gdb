@@ -560,6 +560,11 @@ case "${target}" in
            use_gnu_ld=no
     fi
     ;;
+# start-sanitize-tic80
+  tic80-*-*)
+    noconfigdirs="$noconfigdirs gcc gdb ld target-libio target-libg++ target-libstdc++ target-libgloss"
+    ;;
+# end-sanitize-v850
   v810-*-*)
     noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld target-libio target-libg++ target-libstdc++ opcodes target-libgloss"
     ;;
