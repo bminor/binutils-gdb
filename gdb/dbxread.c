@@ -400,13 +400,16 @@ struct complaint lbrac_rbrac_complaint =
   {"block start larger than block end", 0, 0};
 
 struct complaint const_vol_complaint =
-  {"const/volatile indicator missing, got '%c'", 0, 0};
+  {"const/volatile indicator missing (ok if using g++ v1.x), got '%c'", 0, 0};
 
 struct complaint error_type_complaint =
   {"C++ type mismatch between compiler and debugger", 0, 0};
 
 struct complaint invalid_member_complaint =
   {"invalid (minimal) member type data format at symtab pos %d.", 0, 0};
+
+struct complaint range_type_base_complaint =
+  {"base type %d of range type is not defined", 0, 0};
 
 /* Support for Sun changes to dbx symbol format */
 
@@ -1825,10 +1828,7 @@ read_dbx_symtab (symfile_name, addr,
 	  /* We need to be able to deal with both N_FN or N_TEXT,
 	     because we have no way of knowing whether the sys-supplied ld
 	     or GNU ld was used to make the executable.  */
-#if ! (N_FN & N_EXT)
 	case N_FN:
-#endif
-	case N_FN | N_EXT:
 	case N_TEXT:
 	  bufp->n_value += addr;		/* Relocate */
 	  SET_NAMESTRING();
@@ -2008,7 +2008,7 @@ read_dbx_symtab (symfile_name, addr,
 	     source file, or a previously included file.
 
 	     This seems to be a lot of time to be spending on N_SOL, but
-	     things like "break expread.y:435" need to work (I
+	     things like "break c-exp.y:435" need to work (I
 	     suppose the psymtab_include_list could be hashed or put
 	     in a binary tree, if profiling shows this is a major hog).  */
 	  if (!strcmp (namestring, pst->filename))
@@ -2039,6 +2039,11 @@ read_dbx_symtab (symfile_name, addr,
 	  continue;
 
 	case N_LSYM:		/* Typedef or automatic variable. */
+	case N_STSYM:		/* Data seg var -- static  */
+	case N_LCSYM:		/* BSS      "  */
+	case N_NBSTS:           /* Gould nobase.  */
+	case N_NBLCS:           /* symbols.  */
+
 	  SET_NAMESTRING();
 
 	  p = (char *) strchr (namestring, ':');
@@ -2140,11 +2145,6 @@ read_dbx_symtab (symfile_name, addr,
 	case N_FUN:
 	case N_GSYM:		/* Global (extern) variable; can be
 				   data or bss (sigh).  */
-	case N_STSYM:		/* Data seg var -- static  */
-	case N_LCSYM:		/* BSS      "  */
-
-	case N_NBSTS:           /* Gould nobase.  */
-	case N_NBLCS:           /* symbols.  */
 
 	/* Following may probably be ignored; I'll leave them here
 	   for now (until I do Pascal and Modula 2 extensions).  */
@@ -2194,7 +2194,7 @@ read_dbx_symtab (symfile_name, addr,
 	    case 't':
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_TYPEDEF,
-				   global_psymbols, bufp->n_value);
+				   static_psymbols, bufp->n_value);
 	      continue;
 
 	    case 'f':
@@ -3151,9 +3151,8 @@ process_one_symbol (type, desc, valu, name)
 	local_symbols = new->locals;
       break;
 
-    case N_FN | N_EXT:
-      /* This kind of symbol supposedly indicates the start
-	 of an object file.  In fact this type does not appear.  */
+    case N_FN:
+      /* This kind of symbol indicates the start of an object file.  */
       break;
 
     case N_SO:
@@ -4292,23 +4291,6 @@ read_struct_type (pp, type)
 	  baseclass = read_type (pp);
 	  *pp += 1;		/* skip trailing ';' */
 
-#if 0
-/* One's understanding improves, grasshopper... */
-	  if (offset != 0)
-	    {
-	      static int error_printed = 0;
-
-	      if (!error_printed)
-		{
-		  fprintf (stderr, 
-"\nWarning:  GDB has limited understanding of multiple inheritance...");
-		  if (!info_verbose)
-		    fprintf(stderr, "\n");
-		  error_printed = 1;
-		}
-	    }
-#endif
-
 	  /* Make this baseclass visible for structure-printing purposes.  */
 	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
 	  new->next = list;
@@ -4628,12 +4610,11 @@ read_struct_type (pp, type)
 		 D for `const volatile' member functions.  */
 	      if (**pp == 'A' || **pp == 'B' || **pp == 'C' || **pp == 'D')
 	        (*pp)++;
-#if 0
+
 	      /* This probably just means we're processing a file compiled
 		 with g++ version 1.  */
 	      else
 	        complain(&const_vol_complaint, **pp);
-#endif /* 0 */
 
 	      switch (*(*pp)++)
 		{
@@ -5263,6 +5244,10 @@ read_range_type (pp, typenums)
   TYPE_CODE (result_type) = TYPE_CODE_RANGE;
 
   TYPE_TARGET_TYPE (result_type) = *dbx_lookup_type(rangenums);
+  if (TYPE_TARGET_TYPE (result_type) == 0) {
+    complain (&range_type_base_complaint, rangenums[1]);
+    TYPE_TARGET_TYPE (result_type) = builtin_type_int;
+  }
 
   TYPE_NFIELDS (result_type) = 2;
   TYPE_FIELDS (result_type) =

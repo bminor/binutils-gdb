@@ -1,5 +1,11 @@
 Mon Sep 30 13:15:31 1991  John Gilmore  (gnu at cygnus.com)
 
+	* dbxread.c:  Enable, but soften, const_vol_complaint.
+	(read_dbx_symtab):  N_STSYM and N_LCSYM define static vars.
+	Ditto Gould N_NBSTS and N_NBLCS.  Also, all types in the psymtab
+	should be file-scope, not global.
+	(read_struct_type):  Remove ancient multiple-inheritance warning.
+	(read_range_type):  Check base type, complain & patch if undefined.
 	* stack.c (frame_info):  Demangle the function name in `info stack'.
 	(From Peter Schauer)
 
