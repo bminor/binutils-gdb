@@ -576,7 +576,7 @@ asgnsamples()
 
     /* read samples and assign to namelist symbols */
     scale = highpc - lowpc;
-    scale /= nsamples;
+    scale /= nsamples - 1;
     alignentries();
     for (i = 0, j = 1; i < nsamples; i++) {
 	ccnt = samples[i];
@@ -683,6 +683,7 @@ funcsymbol( symp )
   extern int	aflag;		/* if static functions aren't desired */
   CONST char	*name;
   int i;
+  char		symprefix;
 
   /*
    *	must be a text symbol,
@@ -699,6 +700,31 @@ funcsymbol( symp )
 #endif
     return FALSE;
   }
+
+  symprefix = bfd_get_symbol_leading_char (abfd);
+  i = bfd_decode_symclass (symp);
+#if defined(DEBUG) && 0
+  if (i != 'T' && i != 't')
+    fprintf (stderr, "%s(%d):  %s is of class %c\n", __FILE__, __LINE__, symp->name, i);
+#endif
+
+  /*
+   * Any external text symbol should be okay.  (Only problem would be
+   * variables in the text section.)
+   */
+
+  if (i == 'T')
+    return TRUE;
+
+  /*
+   * 't' is static text; -a says to ignore it.  So if it's not
+   * a static text symbol, *or* it is and the user gave -a, we
+   * ignore it.
+   */
+
+  if (i != 't' || aflag)
+    return FALSE;
+
   /*
    *	can't have any `funny' characters in name,
    *	where `funny' includes	`.', .o file names
@@ -713,13 +739,19 @@ funcsymbol( symp )
     }
   }
 
-  i = bfd_decode_symclass (symp);
-#if defined(DEBUG) && 0
-  if (i != 'T' && i != 't')
-    fprintf (stderr, "%s(%d):  %s is of class %c\n", __FILE__, __LINE__, symp->name, i);
-#endif
+  /* On systems where the C compiler adds an underscore to all names,
+   * static names without underscores seem usually to be labels in
+   * hand written assembler in the library.  We don't want these
+   * names.  This is certainly necessary on a Sparc running SunOS 4.1
+   * (try profiling a program that does a lot of division). I don't
+   * know whether it has harmful side effects on other systems.
+   * Perhaps it should be made configurable.
+   */
 
-  return (i == 'T' || i == 't');
+  if (symprefix && symprefix != *symp->name)
+    return FALSE;
+
+  return TRUE;
 }
 
 done()
