@@ -263,14 +263,21 @@ The general target vector.
 .  {* Entry points to copy private data.  *}
 .#define BFD_JUMP_TABLE_COPY(NAME)\
 .CAT(NAME,_bfd_copy_private_bfd_data),\
-.CAT(NAME,_bfd_copy_private_section_data)
+.CAT(NAME,_bfd_merge_private_bfd_data),\
+.CAT(NAME,_bfd_copy_private_section_data),\
+.CAT(NAME,_bfd_set_private_flags)
 .  {* Called to copy BFD general private data from one object file
 .     to another.  *}
 .  boolean	 (*_bfd_copy_private_bfd_data) PARAMS ((bfd *, bfd *));
+.  {* Called to merge BFD general private data from one object file
+.     to a common output file when linking.  *}
+.  boolean	 (*_bfd_merge_private_bfd_data) PARAMS ((bfd *, bfd *));
 .  {* Called to copy BFD private section data from one object file
 .     to another.  *}
 .  boolean       (*_bfd_copy_private_section_data) PARAMS ((bfd *, sec_ptr,
 .                                                       bfd *, sec_ptr));
+.  {* Called to set private backend flags *}
+.  boolean	 (*_bfd_set_private_flags) PARAMS ((bfd *, flagword));
 .
 .  {* Core file entry points.  *}
 .#define BFD_JUMP_TABLE_CORE(NAME)\
@@ -446,6 +453,7 @@ extern const bfd_target bfd_elf32_littlemips_vec;
 extern const bfd_target bfd_elf32_m68k_vec;
 extern const bfd_target bfd_elf32_m88k_vec;
 extern const bfd_target bfd_elf32_powerpc_vec;
+extern const bfd_target bfd_elf32_powerpcle_vec;
 extern const bfd_target bfd_elf32_sparc_vec;
 extern const bfd_target bfd_elf64_big_generic_vec;
 extern const bfd_target bfd_elf64_little_generic_vec;

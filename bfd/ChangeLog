@@ -1,3 +1,26 @@
+Tue May  9 17:01:38 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config.bfd: Add little endian PowerPC support.
+	* configure.in: Ditto.
+	* targets.c: Ditto.
+	* config/ppcle-elf.mt: New file, for little endian PowerPC
+	support.
+	* config/ppc-elf.mt: Add little endian powerpc to the BFD
+	selection vectors.
+	* elf32-ppc.c (ppc_elf_merge_private_bfd_data): Complain if
+	linking a different endian object than we expect.
+	(TARGET_LITTLE_SYM, TARGET_LITTLE_NAME): Define, to provide little
+	endian support.
+
+Tue May  2 16:32:24 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config.bfd (hppa*-*-lites*): Treat just like hppa*-*-*elf*.
+
+Tue Apr 25 19:38:43 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* coffgen.c (make_a_section_from_file): Initialize lma same as
+	vma.
+
 Tue Apr 25 11:03:21 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* hosts/std-host.h: #include ansidecl.h 'cause PTR is used in

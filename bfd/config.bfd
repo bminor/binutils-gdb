@@ -42,6 +42,7 @@ case "${canon}" in
   rce-*-aout)		bfd_name=rce-aout ;;
 # end-sanitize-rce
   hppa*-*-*elf*)	bfd_name=hppa-elf ;;
+  hppa*-*-lites*)	bfd_name=hppa-elf ;;
   hppa*-*-bsd*)		bfd_name=hppabsd ;;
   hppa*-*-hpux*)	bfd_name=hppahpux ;;
   hppa*-*-hiux*)	bfd_name=hppahpux ;;
@@ -60,8 +61,10 @@ case "${canon}" in
   i[345]86-*-freebsd*)	bfd_name=i386-bsd strip_underscore=yes ;;
   i[345]86-*-netbsd*)	bfd_name=i386-nbsd strip_underscore=yes ;;
   i[345]86-*-netware*)	bfd_name=i386-nlm ;;
+  i[345]86-*-linuxaout*) bfd_name=i386-laout strip_underscore=yes ;;
   i[345]86-*-linux*)	bfd_name=i386-linux strip_underscore=yes ;;
   i[345]86-*-lynxos*)	bfd_name=i386-lynx ;;
+  i[345]86-*-gnuelf*)	bfd_name=i386-gelf strip_underscore=yes ;;
   i[345]86-*-gnu*)	bfd_name=i386-gnu strip_underscore=yes ;;
   i[345]86-*-mach*)	bfd_name=i386-mach3 strip_underscore=yes ;;
   i[345]86-*-osf1mk*)	bfd_name=i386-mach3 strip_underscore=yes ;;
@@ -82,6 +85,7 @@ case "${canon}" in
   m68*-est-coff)	bfd_name=m68k-coff ;;
   m68*-*-aout*)		bfd_name=m68k-0aout strip_underscore=yes ;;
   m68*-*-coff*)		bfd_name=m68k-coff ;;
+  m68*-*-elf*)		bfd_name=m68k-elf ;;
   m68*-*-hpux*)		bfd_name=hp300hpux strip_underscore=yes ;;
   m68*-*-lynxos*)	bfd_name=m68k-lynx ;;
   m68*-*-netbsd*)	bfd_name=m68k-nbsd strip_underscore=yes ;;
@@ -122,6 +126,9 @@ case "${canon}" in
   powerpc-*-sysv4*)	bfd_name=ppc-elf ;;
   powerpc-*-eabi*)	bfd_name=ppc-elf ;;
   powerpc-*-netware*)	bfd_name=ppc-nlm ;;
+  powerpcle-*-elf*)	bfd_name=ppcle-elf ;;
+  powerpcle-*-sysv4*)	bfd_name=ppcle-elf ;;
+  powerpcle-*-eabi*)	bfd_name=ppcle-elf ;;
   rs6000-*-*)		bfd_name=rs6000 ;;
   sparc-*-lynxos*)	bfd_name=sparc-lynx ;;
   sparc-*-netbsd*)	bfd_name=sparc-nbsd strip_underscore=yes;;

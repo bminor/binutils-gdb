@@ -143,16 +143,21 @@ do
     apollocoff_vec)		tb="$tb coff-apollo.o" ;;
     b_out_vec_big_host)		tb="$tb bout.o aout32.o stab-syms.o" ;;
     b_out_vec_little_host)	tb="$tb bout.o aout32.o stab-syms.o" ;;
+# start-sanitize-arc
+    bfd_elf32_littlearc_vec)	tb="$tb elf32-arc.o elf32.o elf.o" ;;
+    bfd_elf32_bigarc_vec)	tb="$tb elf32-arc.o elf32.o elf.o" ;;
+# end-sanitize-arc
     bfd_elf32_big_generic_vec) 	tb="$tb elf32-gen.o elf32.o elf.o" ;;
-    bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o ecoff.o ecofflink.o" ;;
+    bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o ecofflink.o" ;;
     bfd_elf32_hppa_vec)		tb="$tb elf32-hppa.o elf32.o elf.o" ;;
     bfd_elf32_i386_vec)		tb="$tb elf32-i386.o elf32.o elf.o" ;;
     bfd_elf32_i860_vec)		tb="$tb elf32-i860.o elf32.o elf.o" ;;
     bfd_elf32_little_generic_vec) tb="$tb elf32-gen.o elf32.o elf.o" ;;
-    bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o ecoff.o ecofflink.o" ;;
+    bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o ecofflink.o" ;;
     bfd_elf32_m68k_vec)		tb="$tb elf32-m68k.o elf32.o elf.o" ;;
     bfd_elf32_m88k_vec)		tb="$tb elf32-m88k.o elf32.o elf.o" ;;
     bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.o elf32.o elf.o" ;;
+    bfd_elf32_powerpcle_vec)	tb="$tb elf32-ppc.o elf32.o elf.o" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.o elf32.o elf.o" ;;
     bfd_elf64_big_generic_vec) 	tb="$tb elf64-gen.o elf64.o elf.o"
 				target64=true ;;
@@ -176,6 +181,7 @@ do
     i386bsd_vec)		tb="$tb i386bsd.o aout32.o stab-syms.o" ;;
     i386dynix_vec)		tb="$tb i386dynix.o aout32.o stab-syms.o" ;;
     i386coff_vec)		tb="$tb coff-i386.o cofflink.o" ;;
+    i386msdos_vec)		tb="$tb i386msdos.o" ;;
     i386linux_vec)		tb="$tb i386linux.o aout32.o stab-syms.o" ;;
     i386lynx_aout_vec)		tb="$tb i386lynx.o lynx-core.o aout32.o stab-syms.o" ;;
     i386lynx_coff_vec)		tb="$tb cf-i386lynx.o cofflink.o lynx-core.o stab-syms.o" ;;
@@ -217,6 +223,7 @@ do
     tekhex_vec)			tb="$tb tekhex.o" ;;
     we32kcoff_vec)		tb="$tb coff-we32k.o" ;;
     z8kcoff_vec)		tb="$tb coff-z8k.o reloc16.o" ;;
+    w65_vec)			tb="$tb coff-w65.o reloc16.o" ;;
 
     "")			;;
     *) echo "*** unknown target vector $vec" 1>&2; exit 1 ;;
@@ -277,11 +284,11 @@ echo BFD_MACHINES=${bfd_machines}	>> Makefile.2
 
 test -n "$DEFAULT_VECTOR" && defvec="$DEFAULT_VECTOR"
 
-echo "TDEFAULTS = \
-${defvec+-DDEFAULT_VECTOR=$defvec} \
-${selvecs+-DSELECT_VECS='$selvecs'} \
-${selarchs+-DSELECT_ARCHITECTURES='$selarchs'}" \
-  >> Makefile.2
+tdefaults="TDEFAULTS ="
+test -n "${defvec}" && tdefaults="${tdefaults} -DDEFAULT_VECTOR=${defvec}"
+test -n "${selvecs}" && tdefaults="${tdefaults} -DSELECT_VECS='${selvecs}'"
+test -n "${selarchs}" && tdefaults="${tdefaults} -DSELECT_ARCHITECTURES='${selarchs}'"
+echo "${tdefaults}" >> Makefile.2
 
 cat Makefile.tmp >> Makefile.2
 rm -f Makefile.tmp

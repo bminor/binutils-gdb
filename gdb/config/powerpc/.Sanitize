@@ -25,7 +25,9 @@ gdbserve.mt
 ppc-nw.mt
 tm-ppc-nw.h
 tm-ppc-eabi.h
+tm-ppcle-eabi.h
 ppc-eabi.mt
+ppcle-eabi.mt
 
 Things-to-lose:
 

@@ -22,6 +22,7 @@ m68*)			gdb_host_cpu=m68k ;;
 m88*)			gdb_host_cpu=m88k ;;
 np1)			gdb_host_cpu=gould ;;
 pyramid)		gdb_host_cpu=pyr ;;
+powerpc*)		gdb_host_cpu=powerpc ;;
 *)			gdb_host_cpu=$host_cpu ;;
 
 esac
@@ -167,6 +168,7 @@ m68*)			gdb_target_cpu=m68k ;;
 m88*)			gdb_target_cpu=m88k ;;
 mips*)			gdb_target_cpu=mips ;;
 np1)			gdb_target_cpu=gould ;;
+powerpc*)		gdb_target_cpu=powerpc ;;
 pn)			gdb_target_cpu=gould ;;
 pyramid)		gdb_target_cpu=pyr ;;
 sparclite*)		gdb_target_cpu=sparc
@@ -323,6 +325,9 @@ powerpc-*-netware*)	gdb_target=ppc-nw
 			configdirs="${configdirs} nlm" ;;
 
 powerpc-*-eabi*)	gdb_target=ppc-eabi
+			configdirs="${configdirs}" ;;
+
+powerpcle-*-eabi*)	gdb_target=ppcle-eabi
 			configdirs="${configdirs}" ;;
 
 pyramid-*-*)		gdb_target=pyramid ;;

@@ -1,3 +1,10 @@
+Tue May  9 16:58:50 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in: Add little endian PowerPC support.
+	* config/powerpc/ppcle-eabi.mt: New file for little endian PowerPC
+	support.
+	* config/powerpc/tm-ppcle-eabi.h: ditto.
+
 Mon May  8 12:11:38 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* nlm/configure.in (gdb_host, gdb_host_cpu, gdb_target): Removed.
