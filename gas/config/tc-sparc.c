@@ -3764,7 +3764,7 @@ s_common (ignore)
   char *name;
   char c;
   char *p;
-  int temp, size;
+  offsetT temp, size;
   symbolS *symbolP;
 
   name = input_line_pointer;
@@ -3785,7 +3785,8 @@ s_common (ignore)
 
   if ((temp = get_absolute_expression ()) < 0)
     {
-      as_bad (_(".COMMon length (%d.) <0! Ignored."), temp);
+      as_bad (_(".COMMon length (%lu) out of range ignored"),
+	      (unsigned long) temp);
       ignore_rest_of_line ();
       return;
     }

@@ -609,7 +609,6 @@ e-criself.o: $(srcdir)/config/e-criself.c
 
 xtensa-relax.o: $(srcdir)/config/xtensa-relax.c
 	$(COMPILE) -c $(srcdir)/config/xtensa-relax.c
- 
 
 # The m68k operand parser.
 

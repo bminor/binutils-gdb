@@ -1,3 +1,15 @@
+2003-06-24  Nick Clifton  <nickc@redhat.com>
+
+	* read.c (s_comm): Change error message to assume an unsigned size
+	has been passed to .comm.
+	* config/tc-sparc.c (s_common): Likewise.
+	* write.c (write_contents): Replace 'unsigned long' with
+	'addressT' and 'long' with offsetT in order to allow computations
+	with very large values to work for 64-bit addressed targets.
+	(relax_and_size_all_segments): Likewise.
+	(relax_frag): Likewise.
+	(relax_segment): Likewise.
+	
 2003-06-23  Mark Mitchell  <mark@codesourcery.com>
 
 	* config/tc-ppc.c (ppc_cleanup): Use bytes to count APUinfo slots.

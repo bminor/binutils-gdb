@@ -195,7 +195,7 @@ v850_offset (ignore)
 {
   char *pfrag;
   int temp = get_absolute_expression ();
-   
+
   pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, (symbolS *)0,
                        (offsetT) temp, (char *) 0);
   *pfrag = 0;

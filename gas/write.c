@@ -1135,7 +1135,7 @@ write_contents (abfd, sec, xxx)
      PTR xxx ATTRIBUTE_UNUSED;
 {
   segment_info_type *seginfo = seg_info (sec);
-  unsigned long offset = 0;
+  addressT offset = 0;
   fragS *f;
 
   /* Write out the frags.  */
@@ -1148,9 +1148,9 @@ write_contents (abfd, sec, xxx)
        f = f->fr_next)
     {
       int x;
-      unsigned long fill_size;
+      addressT fill_size;
       char *fill_literal;
-      long count;
+      offsetT count;
 
       assert (f->fr_type == rs_fill);
       if (f->fr_fix)
@@ -1310,7 +1310,7 @@ relax_and_size_all_segments ()
 #ifdef OBJ_BOUT
   /* See above comments on b.out data section address.  */
   {
-    long bss_vma;
+    addressT bss_vma;
     if (data_last_frag == 0)
       bss_vma = H_GET_TEXT_SIZE (&headers);
     else
@@ -2070,7 +2070,7 @@ relax_frag (segment, fragP, stretch)
   const relax_typeS *start_type;
   relax_substateT next_state;
   relax_substateT this_state;
-  long growth;
+  offsetT growth;
   offsetT aim;
   addressT target;
   addressT address;
@@ -2293,7 +2293,7 @@ relax_segment (segment_frag_root, segment)
 
   /* Do relax().  */
   {
-    long stretch;	/* May be any size, 0 or negative.  */
+    offsetT stretch;	/* May be any size, 0 or negative.  */
     /* Cumulative number of addresses we have relaxed this pass.
        We may have relaxed more than one address.  */
     int stretched;	/* Have we stretched on this pass?  */
@@ -2308,7 +2308,7 @@ relax_segment (segment_frag_root, segment)
 
 	for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next)
 	  {
-	    long growth = 0;
+	    offsetT growth = 0;
 	    addressT was_address;
 	    offsetT offset;
 	    symbolS *symbolP;
@@ -2443,7 +2443,7 @@ relax_segment (segment_frag_root, segment)
 			 cannot have fewer than 0 chars.  That is, we can't
 			 .org backwards.  */
 		      as_bad_where (fragP->fr_file, fragP->fr_line,
-				    _("attempt to .org backwards"));
+				    _("attempt to move .org backwards"));
 
 		      /* We've issued an error message.  Change the
                          frag to avoid cascading errors.  */
@@ -2502,7 +2502,7 @@ relax_segment (segment_frag_root, segment)
 	      case rs_leb128:
 		{
 		  valueT value;
-		  int size;
+		  offsetT size;
 
 		  value = resolve_symbol_value (fragP->fr_symbol);
 		  size = sizeof_leb128 (value, fragP->fr_subtype);

@@ -1389,7 +1389,8 @@ s_comm (ignore)
 
   if ((temp = get_absolute_expression ()) < 0)
     {
-      as_warn (_(".COMMon length (%ld) < 0 ignored"), (long) temp);
+      as_warn (_(".COMMon length (%lu) out of range ignored"),
+	       (unsigned long) temp);
       ignore_rest_of_line ();
       if (flag_mri)
 	mri_comment_end (stop, stopc);
