@@ -1,3 +1,9 @@
+start-sanitize-cygnus
+1998-12-14  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config.sub (mips64vr5xxxel-elf): New.
+
+end-sanitize-cygnus
 start-sanitize-sky
 Fri Dec 11 17:02:29 1998  Doug Evans  <devans@canuck.cygnus.com>
 
