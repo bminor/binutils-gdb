@@ -39,6 +39,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "stabsread.h"		/* Our own declarations */
 #undef	EXTERN
 
+/* The routines that read and process a complete stabs for a C struct or 
+   C++ class pass lists of data member fields and lists of member function
+   fields in an instance of a field_info structure, as defined below.
+   This is part of some reorganization of low level C++ support and is
+   expected to eventually go away... (FIXME) */
+
+struct field_info
+{
+  struct nextfield
+    {
+      struct nextfield *next;
+      int visibility;
+      struct field field;
+    } *list;
+  struct next_fnfieldlist
+    {
+      struct next_fnfieldlist *next;
+      struct fn_fieldlist fn_fieldlist;
+    } *fnlist;
+};
+
 static struct type *
 dbx_alloc_type PARAMS ((int [2], struct objfile *));
 
@@ -64,6 +85,29 @@ read_sun_floating_type PARAMS ((char **, int [2], struct objfile *));
 static struct type *
 read_enum_type PARAMS ((char **, struct type *, struct objfile *));
 
+static int
+read_member_functions PARAMS ((struct field_info *, char **, struct type *,
+			       struct objfile *));
+
+static int
+read_struct_fields PARAMS ((struct field_info *, char **, struct type *,
+			    struct objfile *));
+
+static int
+read_baseclasses PARAMS ((struct field_info *, char **, struct type *,
+			  struct objfile *));
+
+static int
+read_tilde_fields PARAMS ((struct field_info *, char **, struct type *,
+			   struct objfile *));
+
+static int
+attach_fn_fields_to_type PARAMS ((struct field_info *, struct type *));
+
+static int
+attach_fields_to_type PARAMS ((struct field_info *, struct type *,
+			       struct objfile *));
+
 static struct type *
 read_struct_type PARAMS ((char **, struct type *, struct objfile *));
 
@@ -72,6 +116,10 @@ read_array_type PARAMS ((char **, struct type *, struct objfile *));
 
 static struct type **
 read_args PARAMS ((char **, int, struct objfile *));
+
+static void
+read_cpp_abbrev PARAMS ((struct field_info *, char **, struct type *,
+			 struct objfile *));
 
 static const char vptr_name[] = { '_','v','p','t','r',CPLUS_MARKER,'\0' };
 static const char vb_name[] =   { '_','v','b',CPLUS_MARKER,'\0' };
@@ -127,11 +175,20 @@ struct complaint range_type_base_complaint =
 struct complaint reg_value_complaint =
   {"register number too large in symbol %s", 0, 0};
 
+struct complaint stabs_general_complaint =
+  {"%s", 0, 0};
+
 /* Make a list of forward references which haven't been defined.  */
 
 static struct type **undef_types;
 static int undef_types_allocated;
 static int undef_types_length;
+
+/* Check for and handle cretinous stabs symbol name continuation!  */
+#define STABS_CONTINUE(pp)				\
+  do {							\
+    if (**(pp) == '\\') *(pp) = next_symbol_text ();	\
+  } while (0)
 
 
 int
@@ -538,7 +595,7 @@ define_symbol (valu, string, desc, type, objfile)
 
       if (synonym)
 	{
-	  p += 1;
+	  p++;
 	  type_synonym_name = obsavestring (SYMBOL_NAME (sym),
 					    strlen (SYMBOL_NAME (sym)),
 					    &objfile -> symbol_obstack);
@@ -891,15 +948,21 @@ error_type (pp)
     {
       /* Skip to end of symbol.  */
       while (**pp != '\0')
-	(*pp)++;
+	{
+	  (*pp)++;
+	}
 
       /* Check for and handle cretinous dbx symbol name continuation!  */
       if ((*pp)[-1] == '\\')
-	*pp = next_symbol_text ();
+	{
+	  *pp = next_symbol_text ();
+	}
       else
-	break;
+	{
+	  break;
+	}
     }
-  return builtin_type_error;
+  return (builtin_type_error);
 }
 
 
@@ -920,6 +983,7 @@ read_type (pp, objfile)
   struct type *type1;
   int typenums[2];
   int xtypenums[2];
+  char type_descriptor;
 
   /* Read type number if present.  The type number may be omitted.
      for instance in a two-dimensional array declared with type
@@ -958,10 +1022,11 @@ read_type (pp, objfile)
       /* 'typenums=' not present, type is anonymous.  Read and return
 	 the definition, but don't put it in the type vector.  */
       typenums[0] = typenums[1] = -1;
-      *pp += 1;
+      (*pp)++;
     }
 
-  switch ((*pp)[-1])
+  type_descriptor = (*pp)[-1];
+  switch (type_descriptor)
     {
     case 'x':
       {
@@ -1161,7 +1226,7 @@ read_type (pp, objfile)
 	  /* We'll get the parameter types from the name.  */
 	  struct type *return_type;
 
-	  *pp += 1;
+	  (*pp)++;
 	  return_type = read_type (pp, objfile);
 	  if (*(*pp)++ != ';')
 	    complain (&invalid_member_complaint, (char *) symnum);
@@ -1211,20 +1276,23 @@ read_type (pp, objfile)
       break;
 
     case 's':				/* Struct type */
-      type = dbx_alloc_type (typenums, objfile);
-      if (!TYPE_NAME (type))
-        TYPE_NAME (type) = type_synonym_name;
-      type_synonym_name = 0;
-      type = read_struct_type (pp, type, objfile);
-      break;
-
     case 'u':				/* Union type */
       type = dbx_alloc_type (typenums, objfile);
       if (!TYPE_NAME (type))
-	TYPE_NAME (type) = type_synonym_name;
-      type_synonym_name = 0;
+	{
+	  TYPE_NAME (type) = type_synonym_name;
+	}
+      type_synonym_name = NULL;
+      switch (type_descriptor)
+	{
+	  case 's':
+	    TYPE_CODE (type) = TYPE_CODE_STRUCT;
+	    break;
+	  case 'u':
+	    TYPE_CODE (type) = TYPE_CODE_UNION;
+	    break;
+	}
       type = read_struct_type (pp, type, objfile);
-      TYPE_CODE (type) = TYPE_CODE_UNION;
       break;
 
     case 'a':				/* Array type */
@@ -1250,623 +1318,293 @@ read_type (pp, objfile)
 
 /* This page contains subroutines of read_type.  */
 
-/* Read the description of a structure (or union type)
-   and return an object describing the type.  */
+#define VISIBILITY_PRIVATE	'0'	/* Stabs character for private field */
+#define VISIBILITY_PROTECTED	'1'	/* Stabs character for protected fld */
+#define VISIBILITY_PUBLIC	'2'	/* Stabs character for public field */
 
-static struct type *
-read_struct_type (pp, type, objfile)
+/* Read member function stabs info for C++ classes.  The form of each member
+   function data is:
+
+	NAME :: TYPENUM[=type definition] ARGS : PHYSNAME ;
+
+   An example with two member functions is:
+
+	afunc1::20=##15;:i;2A.;afunc2::20:i;2A.;
+
+   For the case of overloaded operators, the format is op$::*.funcs, where
+   $ is the CPLUS_MARKER (usually '$'), `*' holds the place for an operator
+   name (such as `+=') and `.' marks the end of the operator name.  */
+
+static int
+read_member_functions (fip, pp, type, objfile)
+     struct field_info *fip;
      char **pp;
-     register struct type *type;
+     struct type *type;
      struct objfile *objfile;
 {
-  /* Total number of methods defined in this class.
-     If the class defines two `f' methods, and one `g' method,
-     then this will have the value 3.  */
+  int nfn_fields = 0;
+  int length = 0;
+  /* Total number of member functions defined in this class.  If the class
+     defines two `f' functions, and one `g' function, then this will have
+     the value 3.  */
   int total_length = 0;
-
-  struct nextfield
-    {
-      struct nextfield *next;
-      int visibility;			/* 0=public, 1=protected, 2=public */
-      struct field field;
-    };
-
+  int i;
   struct next_fnfield
     {
       struct next_fnfield *next;
       struct fn_field fn_field;
-    };
-
-  struct next_fnfieldlist
-    {
-      struct next_fnfieldlist *next;
-      struct fn_fieldlist fn_fieldlist;
-    };
-
-  register struct nextfield *list = 0;
-  struct nextfield *new;
+    } *sublist;
+  struct type *look_ahead_type;
+  struct next_fnfieldlist *new_fnlist;
+  struct next_fnfield *new_sublist;
+  char *main_fn_name;
   register char *p;
-  int nfields = 0;
-  int non_public_fields = 0;
-  register int n;
-
-  register struct next_fnfieldlist *mainlist = 0;
-  int nfn_fields = 0;
-
-  TYPE_CODE (type) = TYPE_CODE_STRUCT;
-  INIT_CPLUS_SPECIFIC(type);
-  TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
-
-  /* First comes the total size in bytes.  */
-
-  TYPE_LENGTH (type) = read_number (pp, 0);
-
-  /* C++: Now, if the class is a derived class, then the next character
-     will be a '!', followed by the number of base classes derived from.
-     Each element in the list contains visibility information,
-     the offset of this base class in the derived structure,
-     and then the base type. */
-  if (**pp == '!')
-    {
-      int i, n_baseclasses, offset;
-      struct type *baseclass;
-      int via_public;
-
-      /* Nonzero if it is a virtual baseclass, i.e.,
-
-	 struct A{};
-	 struct B{};
-	 struct C : public B, public virtual A {};
-
-	 B is a baseclass of C; A is a virtual baseclass for C.  This is a C++
-	 2.0 language feature.  */
-      int via_virtual;
-
-      *pp += 1;
-
-      ALLOCATE_CPLUS_STRUCT_TYPE(type);
-
-      n_baseclasses = read_number (pp, ',');
-      /* Some stupid compilers have trouble with the following, so break
-	 it up into simpler expressions.  */
-#if 0
-      TYPE_FIELD_VIRTUAL_BITS (type) = (B_TYPE *)
-	TYPE_ALLOC (type, B_BYTES (n_baseclasses));
-#else
-      {
-	int num_bytes = B_BYTES (n_baseclasses);
-	char *pointer;
-	
-	pointer = (char *) TYPE_ALLOC (type, num_bytes);
-	TYPE_FIELD_VIRTUAL_BITS (type) = (B_TYPE *) pointer;
-      }
-#endif /* 0 */
-
-      B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), n_baseclasses);
-
-      for (i = 0; i < n_baseclasses; i++)
-	{
-	  if (**pp == '\\')
-	    *pp = next_symbol_text ();
-
-	  switch (**pp)
-	    {
-	    case '0':
-	      via_virtual = 0;
-	      break;
-	    case '1':
-	      via_virtual = 1;
-	      break;
-	    default:
-	      /* Bad visibility format.  */
-	      return error_type (pp);
-	    }
-	  ++*pp;
-
-	  switch (**pp)
-	    {
-	    case '0':
-	      via_public = 0;
-	      non_public_fields++;
-	      break;
-	    case '2':
-	      via_public = 2;
-	      break;
-	    default:
-	      /* Bad visibility format.  */
-	      return error_type (pp);
-	    }
-	  if (via_virtual) 
-	    SET_TYPE_FIELD_VIRTUAL (type, i);
-	  ++*pp;
-
-	  /* Offset of the portion of the object corresponding to
-	     this baseclass.  Always zero in the absence of
-	     multiple inheritance.  */
-	  offset = read_number (pp, ',');
-	  baseclass = read_type (pp, objfile);
-	  *pp += 1;		/* skip trailing ';' */
-
-	  /* Make this baseclass visible for structure-printing purposes.  */
-	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
-	  memset (new, 0, sizeof (struct nextfield));
-	  new->next = list;
-	  list = new;
-	  list->visibility = via_public;
-	  list->field.type = baseclass;
-	  list->field.name = type_name_no_tag (baseclass);
-	  list->field.bitpos = offset;
-	  list->field.bitsize = 0;	/* this should be an unpacked field! */
-	  nfields++;
-	}
-      TYPE_N_BASECLASSES (type) = n_baseclasses;
-    }
-
-  /* Now come the fields, as NAME:?TYPENUM,BITPOS,BITSIZE; for each one.
-     At the end, we see a semicolon instead of a field.
-
-     In C++, this may wind up being NAME:?TYPENUM:PHYSNAME; for
-     a static field.
-
-     The `?' is a placeholder for one of '/2' (public visibility),
-     '/1' (protected visibility), '/0' (private visibility), or nothing
-     (C style symbol table, public visibility).  */
-
-  /* We better set p right now, in case there are no fields at all...    */
-  p = *pp;
+      
+  /* Process each list until we find something that is not a member function
+     or find the end of the functions. */
 
   while (**pp != ';')
     {
-      /* Check for and handle cretinous dbx symbol name continuation!  */
-      if (**pp == '\\') *pp = next_symbol_text ();
-
-      /* Get space to record the next field's data.  */
-      new = (struct nextfield *) alloca (sizeof (struct nextfield));
-      memset (new, 0, sizeof (struct nextfield));
-      new->next = list;
-      list = new;
-
-      /* Get the field name.  */
+      /* We should be positioned at the start of the function name.
+	 Scan forward to find the first ':' and if it is not the
+	 first of a "::" delimiter, then this is not a member function. */
       p = *pp;
-      if (*p == CPLUS_MARKER)
+      while (*p != ':')
 	{
-	  if (*p == '_')    /* GNU C++ anonymous type.  */
-	    ;
-	  /* Special GNU C++ name.  */
-	  else if (*++p == 'v')
-	    {
-	      const char *prefix;
-	      char *name = 0;
-	      struct type *context;
-
-	      switch (*++p)
-		{
-		case 'f':
-		  prefix = vptr_name;
-		  break;
-		case 'b':
-		  prefix = vb_name;
-		  break;
-		default:
-		  complain (&invalid_cpp_abbrev_complaint, *pp);
-		  prefix = "INVALID_C++_ABBREV";
-		  break;
-		}
-	      *pp = p + 1;
-	      context = read_type (pp, objfile);
-	      name = type_name_no_tag (context);
-	      if (name == 0)
-		{
-		  complain (&invalid_cpp_type_complaint, (char *) symnum);
-		  name = "FOO";
-		}
-	      list->field.name = obconcat (&objfile -> type_obstack,
-					   prefix, name, "");
-	      p = ++(*pp);
-	      if (p[-1] != ':')
-		complain (&invalid_cpp_abbrev_complaint, *pp);
-	      list->field.type = read_type (pp, objfile);
-	      (*pp)++;			/* Skip the comma.  */
-	      list->field.bitpos = read_number (pp, ';');
-	      /* This field is unpacked.  */
-	      list->field.bitsize = 0;
-	      list->visibility = 0;	/* private */
-	      non_public_fields++;
-
-	      nfields++;
-	      continue;
-	    }
-	  else
-	    complain (&invalid_cpp_abbrev_complaint, *pp);
+	  p++;
+	}
+      if (p[1] != ':')
+	{
+	  break;
 	}
 
-      while (*p != ':') p++;
-      list->field.name = obsavestring (*pp, p - *pp,
-				       &objfile -> type_obstack);
-
-      /* C++: Check to see if we have hit the methods yet.  */
-      if (p[1] == ':')
-	break;
-
-      *pp = p + 1;
-
-      /* This means we have a visibility for a field coming. */
-      if (**pp == '/')
+      sublist = NULL;
+      look_ahead_type = NULL;
+      length = 0;
+      
+      new_fnlist = (struct next_fnfieldlist *)
+	xmalloc (sizeof (struct next_fnfieldlist));
+      make_cleanup (free, new_fnlist);
+      memset (new_fnlist, 0, sizeof (struct next_fnfieldlist));
+      
+      if ((*pp)[0] == 'o' && (*pp)[1] == 'p' && (*pp)[2] == CPLUS_MARKER)
 	{
-	  switch (*++*pp)
+	  /* This is a completely wierd case.  In order to stuff in the
+	     names that might contain colons (the usual name delimiter),
+	     Mike Tiemann defined a different name format which is
+	     signalled if the identifier is "op$".  In that case, the
+	     format is "op$::XXXX." where XXXX is the name.  This is
+	     used for names like "+" or "=".  YUUUUUUUK!  FIXME!  */
+	  /* This lets the user type "break operator+".
+	     We could just put in "+" as the name, but that wouldn't
+	     work for "*".  */
+	  static char opname[32] = {'o', 'p', CPLUS_MARKER};
+	  char *o = opname + 3;
+	  
+	  /* Skip past '::'.  */
+	  *pp = p + 2;
+
+	  STABS_CONTINUE (pp);
+	  p = *pp;
+	  while (*p != '.')
 	    {
-	    case '0':
-	      list->visibility = 0;	/* private */
-	      non_public_fields++;
-	      *pp += 1;
-	      break;
-
- 	    case '1':
- 	      list->visibility = 1;	/* protected */
-	      non_public_fields++;
- 	      *pp += 1;
- 	      break;
-
- 	    case '2':
- 	      list->visibility = 2;	/* public */
- 	      *pp += 1;
- 	      break;
- 	    }
- 	}
-       else /* normal dbx-style format.  */
-	list->visibility = 2;		/* public */
-
-      list->field.type = read_type (pp, objfile);
-      if (**pp == ':')
- 	{
- 	  p = ++(*pp);
-#if 0
-	  /* Possible future hook for nested types. */
-	  if (**pp == '!')
-	    {
-	      list->field.bitpos = (long)-2; /* nested type */
- 	      p = ++(*pp);
+	      *o++ = *p++;
 	    }
-	  else
-#endif
-	    { /* Static class member.  */
-	      list->field.bitpos = (long)-1;
-	    }
- 	  while (*p != ';') p++;
- 	  list->field.bitsize = (long) savestring (*pp, p - *pp);
- 	  *pp = p + 1;
- 	  nfields++;
- 	  continue;
- 	}
-       else if (**pp != ',')
-	 /* Bad structure-type format.  */
-	 return error_type (pp);
-
-      (*pp)++;			/* Skip the comma.  */
-      list->field.bitpos = read_number (pp, ',');
-      list->field.bitsize = read_number (pp, ';');
-
-#if 0
-      /* FIXME-tiemann: Can't the compiler put out something which
-	 lets us distinguish these? (or maybe just not put out anything
-	 for the field).  What is the story here?  What does the compiler
-	really do?  Also, patch gdb.texinfo for this case; I document
-	it as a possible problem there.  Search for "DBX-style".  */
-
-      /* This is wrong because this is identical to the symbols
-	 produced for GCC 0-size arrays.  For example:
-         typedef union {
-	   int num;
-	   char str[0];
-	 } foo;
-	 The code which dumped core in such circumstances should be
-	 fixed not to dump core.  */
-
-      /* g++ -g0 can put out bitpos & bitsize zero for a static
-	 field.  This does not give us any way of getting its
-	 class, so we can't know its name.  But we can just
-	 ignore the field so we don't dump core and other nasty
-	 stuff.  */
-      if (list->field.bitpos == 0
-	  && list->field.bitsize == 0)
-	{
-	  complain (&dbx_class_complaint, 0);
-	  /* Ignore this field.  */
-	  list = list->next;
+	  main_fn_name = savestring (opname, o - opname);
+	  /* Skip past '.'  */
+	  *pp = p + 1;
 	}
       else
-#endif /* 0 */
 	{
-	  /* Detect an unpacked field and mark it as such.
-	     dbx gives a bit size for all fields.
-	     Note that forward refs cannot be packed,
-	     and treat enums as if they had the width of ints.  */
-	  if (TYPE_CODE (list->field.type) != TYPE_CODE_INT
-	      && TYPE_CODE (list->field.type) != TYPE_CODE_ENUM)
-	    list->field.bitsize = 0;
-	  if ((list->field.bitsize == 8 * TYPE_LENGTH (list->field.type)
-	       || (TYPE_CODE (list->field.type) == TYPE_CODE_ENUM
-		   && (list->field.bitsize
-		       == 8 * TYPE_LENGTH (lookup_fundamental_type (objfile, FT_INTEGER)))
-		   )
-	       )
-	      &&
-	      list->field.bitpos % 8 == 0)
-	    list->field.bitsize = 0;
-	  nfields++;
+	  main_fn_name = savestring (*pp, p - *pp);
+	  /* Skip past '::'.  */
+	  *pp = p + 2;
 	}
-    }
-
-  if (p[1] == ':')
-    /* chill the list of fields: the last entry (at the head)
-       is a partially constructed entry which we now scrub.  */
-    list = list->next;
-
-  /* Now create the vector of fields, and record how big it is.
-     We need this info to record proper virtual function table information
-     for this class's virtual functions.  */
-
-  TYPE_NFIELDS (type) = nfields;
-  TYPE_FIELDS (type) = (struct field *)
-    TYPE_ALLOC (type, sizeof (struct field) * nfields);
-  memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nfields);
-
-  if (non_public_fields)
-    {
-      ALLOCATE_CPLUS_STRUCT_TYPE (type);
-
-      TYPE_FIELD_PRIVATE_BITS (type) = (B_TYPE *)
-	TYPE_ALLOC (type, B_BYTES (nfields));
-      B_CLRALL (TYPE_FIELD_PRIVATE_BITS (type), nfields);
-
-      TYPE_FIELD_PROTECTED_BITS (type) = (B_TYPE *)
-	TYPE_ALLOC (type, B_BYTES (nfields));
-      B_CLRALL (TYPE_FIELD_PROTECTED_BITS (type), nfields);
-    }
-
-  /* Copy the saved-up fields into the field vector.  */
-
-  for (n = nfields; list; list = list->next)
-    {
-      n -= 1;
-      TYPE_FIELD (type, n) = list->field;
-      if (list->visibility == 0)
-	SET_TYPE_FIELD_PRIVATE (type, n);
-      else if (list->visibility == 1)
-	SET_TYPE_FIELD_PROTECTED (type, n);
-    }
-
-  /* Now come the method fields, as NAME::methods
-     where each method is of the form TYPENUM,ARGS,...:PHYSNAME;
-     At the end, we see a semicolon instead of a field.
-
-     For the case of overloaded operators, the format is
-     op$::*.methods, where $ is the CPLUS_MARKER (usually '$'),
-     `*' holds the place for an operator name (such as `+=')
-     and `.' marks the end of the operator name.  */
-  if (p[1] == ':')
-    {
-      /* Now, read in the methods.  To simplify matters, we
-	 "unread" the name that has been read, so that we can
-	 start from the top.  */
-
-      ALLOCATE_CPLUS_STRUCT_TYPE (type);
-      /* For each list of method lists... */
+      new_fnlist -> fn_fieldlist.name = main_fn_name;
+      
       do
 	{
-	  int i;
-	  struct next_fnfield *sublist = 0;
-	  struct type *look_ahead_type = NULL;
-	  int length = 0;
-	  struct next_fnfieldlist *new_mainlist;
-	  char *main_fn_name;
-
-	  new_mainlist = (struct next_fnfieldlist *)
-	      alloca (sizeof (struct next_fnfieldlist));
-	  memset (new_mainlist, 0, sizeof (struct next_fnfieldlist));
-
-	  p = *pp;
-
-	  /* read in the name.  */
-	  while (*p != ':') p++;
-	  if ((*pp)[0] == 'o' && (*pp)[1] == 'p' && (*pp)[2] == CPLUS_MARKER)
+	  new_sublist =
+	    (struct next_fnfield *) xmalloc (sizeof (struct next_fnfield));
+	  make_cleanup (free, new_sublist);
+	  memset (new_sublist, 0, sizeof (struct next_fnfield));
+	  
+	  /* Check for and handle cretinous dbx symbol name continuation!  */
+	  if (look_ahead_type == NULL)
 	    {
-	      /* This is a completely wierd case.  In order to stuff in the
-		 names that might contain colons (the usual name delimiter),
-		 Mike Tiemann defined a different name format which is
-		 signalled if the identifier is "op$".  In that case, the
-		 format is "op$::XXXX." where XXXX is the name.  This is
-		 used for names like "+" or "=".  YUUUUUUUK!  FIXME!  */
-	      /* This lets the user type "break operator+".
-	         We could just put in "+" as the name, but that wouldn't
-		 work for "*".  */
-	      static char opname[32] = {'o', 'p', CPLUS_MARKER};
-	      char *o = opname + 3;
-
-	      /* Skip past '::'.  */
-	      *pp = p + 2;
-	      if (**pp == '\\') *pp = next_symbol_text ();
-	      p = *pp;
-	      while (*p != '.')
-		*o++ = *p++;
-	      main_fn_name = savestring (opname, o - opname);
-	      /* Skip past '.'  */
-	      *pp = p + 1;
+	      /* Normal case. */
+	      STABS_CONTINUE (pp);
+	      
+	      new_sublist -> fn_field.type = read_type (pp, objfile);
+	      if (**pp != ':')
+		{
+		  /* Invalid symtab info for member function.  */
+		  return (0);
+		}
 	    }
 	  else
 	    {
-	      main_fn_name = savestring (*pp, p - *pp);
-	      /* Skip past '::'.  */
-	      *pp = p + 2;
+	      /* g++ version 1 kludge */
+	      new_sublist -> fn_field.type = look_ahead_type;
+	      look_ahead_type = NULL;
 	    }
-	  new_mainlist->fn_fieldlist.name = main_fn_name;
-
-	  do
+	  
+	  (*pp)++;
+	  p = *pp;
+	  while (*p != ';')
 	    {
-	      struct next_fnfield *new_sublist =
-		(struct next_fnfield *) alloca (sizeof (struct next_fnfield));
-	      memset (new_sublist, 0, sizeof (struct next_fnfield));
-
-	      /* Check for and handle cretinous dbx symbol name continuation!  */
-	      if (look_ahead_type == NULL) /* Normal case. */
-		{
-		  if (**pp == '\\') *pp = next_symbol_text ();
-
-		  new_sublist->fn_field.type = read_type (pp, objfile);
-		  if (**pp != ':')
-		    /* Invalid symtab info for method.  */
-		    return error_type (pp);
-	        }
-	      else
-		{ /* g++ version 1 kludge */
-		  new_sublist->fn_field.type = look_ahead_type;
-		  look_ahead_type = NULL;
-	        }
-
-	      *pp += 1;
-	      p = *pp;
-	      while (*p != ';') p++;
-
-	      /* If this is just a stub, then we don't have the
-		 real name here.  */
-	      if (TYPE_FLAGS (new_sublist->fn_field.type) & TYPE_FLAG_STUB)
-		new_sublist->fn_field.is_stub = 1;
-	      new_sublist->fn_field.physname = savestring (*pp, p - *pp);
-	      *pp = p + 1;
-
-	      /* Set this method's visibility fields.  */
-	      switch (*(*pp)++ - '0')
-		{
-		case 0:
-		  new_sublist->fn_field.is_private = 1;
-		  break;
-		case 1:
-		  new_sublist->fn_field.is_protected = 1;
-		  break;
-		}
-
-	      if (**pp == '\\') *pp = next_symbol_text ();
-	      switch (**pp)
-		{
-		case 'A': /* Normal functions. */
-		  new_sublist->fn_field.is_const = 0;
-		  new_sublist->fn_field.is_volatile = 0;
-	          (*pp)++;
-		  break;
-		case 'B': /* `const' member functions. */
-		  new_sublist->fn_field.is_const = 1;
-		  new_sublist->fn_field.is_volatile = 0;
-	          (*pp)++;
-		  break;
-		case 'C': /* `volatile' member function. */
-		  new_sublist->fn_field.is_const = 0;
-		  new_sublist->fn_field.is_volatile = 1;
-	          (*pp)++;
-		  break;
-		case 'D': /* `const volatile' member function. */
-		  new_sublist->fn_field.is_const = 1;
-		  new_sublist->fn_field.is_volatile = 1;
-	          (*pp)++;
-		  break;
-		case '*': /* File compiled with g++ version 1 -- no info */
-		case '?':
-		case '.':
-		  break;
-		default:
-		  complain (&const_vol_complaint, (char *) (long) **pp);
-		  break;
-		}
-
-	      switch (*(*pp)++)
-		{
-		case '*':
-		  /* virtual member function, followed by index.  */
-		  /* The sign bit is set to distinguish pointers-to-methods
-		     from virtual function indicies.  Since the array is
-		     in words, the quantity must be shifted left by 1
-		     on 16 bit machine, and by 2 on 32 bit machine, forcing
-		     the sign bit out, and usable as a valid index into
-		     the array.  Remove the sign bit here.  */
-		  new_sublist->fn_field.voffset =
-		      (0x7fffffff & read_number (pp, ';')) + 2;
-
-		  if (**pp == '\\') *pp = next_symbol_text ();
-
-		  if (**pp == ';' || **pp == '\0')
-		    /* Must be g++ version 1.  */
-		    new_sublist->fn_field.fcontext = 0;
-		  else
-		    {
-		      /* Figure out from whence this virtual function came.
-			 It may belong to virtual function table of
-			 one of its baseclasses.  */
-		      look_ahead_type = read_type (pp, objfile);
-		      if (**pp == ':')
-			{ /* g++ version 1 overloaded methods. */ }
-		      else
-			{
-			  new_sublist->fn_field.fcontext = look_ahead_type;
-			  if (**pp != ';')
-			    return error_type (pp);
-			  else
-			    ++*pp;
-			  look_ahead_type = NULL;
-		        }
-		    }
-		  break;
-
-		case '?':
-		  /* static member function.  */
-		  new_sublist->fn_field.voffset = VOFFSET_STATIC;
-		  if (strncmp (new_sublist->fn_field.physname,
-			       main_fn_name, strlen (main_fn_name)))
-		    new_sublist->fn_field.is_stub = 1;
-		  break;
-
-		default:
-		  /* error */
-		  complain (&member_fn_complaint, (char *) (long) (*pp)[-1]);
-		  /* Fall through into normal member function.  */
-
-		case '.':
-		  /* normal member function.  */
-		  new_sublist->fn_field.voffset = 0;
-		  new_sublist->fn_field.fcontext = 0;
-		  break;
-		}
-
-	      new_sublist->next = sublist;
-	      sublist = new_sublist;
-	      length++;
-	      if (**pp == '\\') *pp = next_symbol_text ();
+	      p++;
 	    }
-	  while (**pp != ';' && **pp != '\0');
+	  
+	  /* If this is just a stub, then we don't have the real name here. */
 
-	  *pp += 1;
-
-	  new_mainlist->fn_fieldlist.fn_fields = (struct fn_field *)
-	    obstack_alloc (&objfile -> type_obstack,
-			   sizeof (struct fn_field) * length);
-	  memset (new_mainlist->fn_fieldlist.fn_fields, 0,
-		  sizeof (struct fn_field) * length);
-	  for (i = length; (i--, sublist); sublist = sublist->next)
-	    new_mainlist->fn_fieldlist.fn_fields[i] = sublist->fn_field;
-
-	  new_mainlist->fn_fieldlist.length = length;
-	  new_mainlist->next = mainlist;
-	  mainlist = new_mainlist;
-	  nfn_fields++;
-	  total_length += length;
-	  if (**pp == '\\') *pp = next_symbol_text ();
+	  if (TYPE_FLAGS (new_sublist -> fn_field.type) & TYPE_FLAG_STUB)
+	    {
+	      new_sublist -> fn_field.is_stub = 1;
+	    }
+	  new_sublist -> fn_field.physname = savestring (*pp, p - *pp);
+	  *pp = p + 1;
+	  
+	  /* Set this member function's visibility fields.  */
+	  switch (*(*pp)++)
+	    {
+	      case VISIBILITY_PRIVATE:
+	        new_sublist -> fn_field.is_private = 1;
+		break;
+	      case VISIBILITY_PROTECTED:
+		new_sublist -> fn_field.is_protected = 1;
+		break;
+	    }
+	  
+	  STABS_CONTINUE (pp);
+	  switch (**pp)
+	    {
+	      case 'A': /* Normal functions. */
+	        new_sublist -> fn_field.is_const = 0;
+		new_sublist -> fn_field.is_volatile = 0;
+		(*pp)++;
+		break;
+	      case 'B': /* `const' member functions. */
+		new_sublist -> fn_field.is_const = 1;
+		new_sublist -> fn_field.is_volatile = 0;
+		(*pp)++;
+		break;
+	      case 'C': /* `volatile' member function. */
+		new_sublist -> fn_field.is_const = 0;
+		new_sublist -> fn_field.is_volatile = 1;
+		(*pp)++;
+		break;
+	      case 'D': /* `const volatile' member function. */
+		new_sublist -> fn_field.is_const = 1;
+		new_sublist -> fn_field.is_volatile = 1;
+		(*pp)++;
+		break;
+	      case '*': /* File compiled with g++ version 1 -- no info */
+	      case '?':
+	      case '.':
+		break;
+	      default:
+		complain (&const_vol_complaint, (char *) (long) **pp);
+		break;
+	    }
+	  
+	  switch (*(*pp)++)
+	    {
+	      case '*':
+	        /* virtual member function, followed by index.
+		   The sign bit is set to distinguish pointers-to-methods
+		   from virtual function indicies.  Since the array is
+		   in words, the quantity must be shifted left by 1
+		   on 16 bit machine, and by 2 on 32 bit machine, forcing
+		   the sign bit out, and usable as a valid index into
+		   the array.  Remove the sign bit here.  */
+	        new_sublist -> fn_field.voffset =
+		  (0x7fffffff & read_number (pp, ';')) + 2;
+	      
+		STABS_CONTINUE (pp);
+		if (**pp == ';' || **pp == '\0')
+		  {
+		    /* Must be g++ version 1.  */
+		    new_sublist -> fn_field.fcontext = 0;
+		  }
+		else
+		  {
+		    /* Figure out from whence this virtual function came.
+		       It may belong to virtual function table of
+		       one of its baseclasses.  */
+		    look_ahead_type = read_type (pp, objfile);
+		    if (**pp == ':')
+		      {
+			/* g++ version 1 overloaded methods. */
+		      }
+		    else
+		      {
+			new_sublist -> fn_field.fcontext = look_ahead_type;
+			if (**pp != ';')
+			  {
+			    return (0);
+			  }
+			else
+			  {
+			    ++*pp;
+			  }
+			look_ahead_type = NULL;
+		      }
+		  }
+		break;
+	      
+	      case '?':
+		/* static member function.  */
+		new_sublist -> fn_field.voffset = VOFFSET_STATIC;
+		if (strncmp (new_sublist -> fn_field.physname,
+			     main_fn_name, strlen (main_fn_name)))
+		  {
+		    new_sublist -> fn_field.is_stub = 1;
+		  }
+		break;
+	      
+	      default:
+		/* error */
+		complain (&member_fn_complaint, (char *) (long) (*pp)[-1]);
+		/* Fall through into normal member function.  */
+	      
+	      case '.':
+		/* normal member function.  */
+		new_sublist -> fn_field.voffset = 0;
+		new_sublist -> fn_field.fcontext = 0;
+		break;
+	    }
+	  
+	  new_sublist -> next = sublist;
+	  sublist = new_sublist;
+	  length++;
+	  STABS_CONTINUE (pp);
 	}
-      while (**pp != ';');
+      while (**pp != ';' && **pp != '\0');
+      
+      (*pp)++;
+      
+      new_fnlist -> fn_fieldlist.fn_fields = (struct fn_field *)
+	obstack_alloc (&objfile -> type_obstack, 
+		       sizeof (struct fn_field) * length);
+      memset (new_fnlist -> fn_fieldlist.fn_fields, 0,
+	      sizeof (struct fn_field) * length);
+      for (i = length; (i--, sublist); sublist = sublist -> next)
+	{
+	  new_fnlist -> fn_fieldlist.fn_fields[i] = sublist -> fn_field;
+	}
+      
+      new_fnlist -> fn_fieldlist.length = length;
+      new_fnlist -> next = fip -> fnlist;
+      fip -> fnlist = new_fnlist;
+      nfn_fields++;
+      total_length += length;
+      STABS_CONTINUE (pp);
     }
-
-  *pp += 1;
-
 
   if (nfn_fields)
     {
+      ALLOCATE_CPLUS_STRUCT_TYPE (type);
       TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
 	TYPE_ALLOC (type, sizeof (struct fn_fieldlist) * nfn_fields);
       memset (TYPE_FN_FIELDLISTS (type), 0,
@@ -1875,32 +1613,438 @@ read_struct_type (pp, type, objfile)
       TYPE_NFN_FIELDS_TOTAL (type) = total_length;
     }
 
-  {
-    int i;
-    for (i = 0; i < TYPE_N_BASECLASSES (type); ++i)
-      {
-	if (TYPE_CODE (TYPE_BASECLASS (type, i)) == TYPE_CODE_UNDEF)
-	  /* @@ Memory leak on objfile->type_obstack?  */
-	  return error_type (pp);
-	TYPE_NFN_FIELDS_TOTAL (type) +=
-	  TYPE_NFN_FIELDS_TOTAL (TYPE_BASECLASS (type, i));
-      }
-  }
+  return (1);
+}
 
-  for (n = nfn_fields; mainlist; mainlist = mainlist->next) {
-    --n;                      /* Circumvent Sun3 compiler bug */
-    TYPE_FN_FIELDLISTS (type)[n] = mainlist->fn_fieldlist;
+/* Special GNU C++ name.
+   FIXME:  Still need to properly handle parse error conditions. */
+
+static void
+read_cpp_abbrev (fip, pp, type, objfile)
+     struct field_info *fip;
+     char **pp;
+     struct type *type;
+     struct objfile *objfile;
+{
+  register char *p;
+  const char *prefix;
+  char *name;
+  struct type *context;
+
+  p = *pp;
+  if (*++p == 'v')
+    {
+      name = NULL;
+      switch (*++p)
+	{
+	  case 'f':
+	    prefix = vptr_name;
+	    break;
+	  case 'b':
+	    prefix = vb_name;
+	    break;
+	  default:
+	    complain (&invalid_cpp_abbrev_complaint, *pp);
+	    prefix = "INVALID_C++_ABBREV";
+	    break;
+	}
+      *pp = p + 1;
+
+      /* At this point, *pp points to something like "22:23=*22...",
+	 where the type number before the ':' is the "context" and
+	 everything after is a regular type definition.  Lookup the
+	 type, find it's name, and construct the field name. */
+
+      context = read_type (pp, objfile);
+      name = type_name_no_tag (context);
+      if (name == NULL)
+	{
+	  complain (&invalid_cpp_type_complaint, (char *) symnum);
+	  name = "FOO";
+	}
+      fip -> list -> field.name =
+	obconcat (&objfile -> type_obstack, prefix, name, "");
+
+      /* At this point, *pp points to the ':'.  Skip it and read the
+	 field type. */
+
+      p = ++(*pp);
+      if (p[-1] != ':')
+	{
+	  complain (&invalid_cpp_abbrev_complaint, *pp);
+	}
+      fip -> list -> field.type = read_type (pp, objfile);
+      (*pp)++;			/* Skip the comma.  */
+      fip -> list -> field.bitpos = read_number (pp, ';');
+      /* This field is unpacked.  */
+      fip -> list -> field.bitsize = 0;
+      fip -> list -> visibility = VISIBILITY_PRIVATE;
+    }
+  else if (*p == '_')
+    {
+      /* GNU C++ anonymous type.  */
+      complain (&stabs_general_complaint, "g++ anonymous type $_ not handled");
+    }
+  else
+    {
+      complain (&invalid_cpp_abbrev_complaint, *pp);
+    }
+}
+
+static void
+read_one_struct_field (fip, pp, p, type, objfile)
+     struct field_info *fip;
+     char **pp;
+     char *p;
+     struct type *type;
+     struct objfile *objfile;
+{
+  fip -> list -> field.name =
+    obsavestring (*pp, p - *pp, &objfile -> type_obstack);
+  *pp = p + 1;
+  
+  /* This means we have a visibility for a field coming. */
+  if (**pp == '/')
+    {
+      (*pp)++;
+      fip -> list -> visibility = *(*pp)++;
+      switch (fip -> list -> visibility)
+	{
+	  case VISIBILITY_PRIVATE:
+	  case VISIBILITY_PROTECTED:
+	    break;
+	  
+	  case VISIBILITY_PUBLIC:
+	    /* Nothing to do */
+	    break;
+	  
+	  default:
+	    /* Unknown visibility specifier. */
+	    complain (&stabs_general_complaint,
+		      "unknown visibility specifier");
+	    return;
+	    break;
+	}
+    }
+  else
+    {
+      /* normal dbx-style format, no explicit visibility */
+      fip -> list -> visibility = VISIBILITY_PUBLIC;
+    }
+  
+  fip -> list -> field.type = read_type (pp, objfile);
+  if (**pp == ':')
+    {
+      p = ++(*pp);
+#if 0
+      /* Possible future hook for nested types. */
+      if (**pp == '!')
+	{
+	  fip -> list -> field.bitpos = (long)-2; /* nested type */
+	  p = ++(*pp);
+	}
+      else
+#endif
+	{
+	  /* Static class member.  */
+	  fip -> list -> field.bitpos = (long) -1;
+	}
+      while (*p != ';') 
+	{
+	  p++;
+	}
+      fip -> list -> field.bitsize = (long) savestring (*pp, p - *pp);
+      *pp = p + 1;
+      return;
+    }
+  else if (**pp != ',')
+    {
+      /* Bad structure-type format.  */
+      complain (&stabs_general_complaint, "bad structure-type format");
+      return;
+    }
+  
+  (*pp)++;			/* Skip the comma.  */
+  fip -> list -> field.bitpos = read_number (pp, ',');
+  fip -> list -> field.bitsize = read_number (pp, ';');
+  
+#if 0
+  /* FIXME-tiemann: Can't the compiler put out something which
+     lets us distinguish these? (or maybe just not put out anything
+     for the field).  What is the story here?  What does the compiler
+     really do?  Also, patch gdb.texinfo for this case; I document
+     it as a possible problem there.  Search for "DBX-style".  */
+  
+  /* This is wrong because this is identical to the symbols
+     produced for GCC 0-size arrays.  For example:
+     typedef union {
+     int num;
+     char str[0];
+     } foo;
+     The code which dumped core in such circumstances should be
+     fixed not to dump core.  */
+  
+  /* g++ -g0 can put out bitpos & bitsize zero for a static
+     field.  This does not give us any way of getting its
+     class, so we can't know its name.  But we can just
+     ignore the field so we don't dump core and other nasty
+     stuff.  */
+  if (fip -> list -> field.bitpos == 0 && fip -> list -> field.bitsize == 0)
+    {
+      complain (&dbx_class_complaint, 0);
+      /* Ignore this field.  */
+      fip -> list = fip -> list -> next;
+    }
+  else
+#endif /* 0 */
+    {
+      /* Detect an unpacked field and mark it as such.
+	 dbx gives a bit size for all fields.
+	 Note that forward refs cannot be packed,
+	 and treat enums as if they had the width of ints.  */
+      
+      if (TYPE_CODE (fip -> list -> field.type) != TYPE_CODE_INT
+	  && TYPE_CODE (fip -> list -> field.type) != TYPE_CODE_ENUM)
+	{
+	  fip -> list -> field.bitsize = 0;
+	}
+      if ((fip -> list -> field.bitsize 
+	   == 8 * TYPE_LENGTH (fip -> list -> field.type)
+	   || (TYPE_CODE (fip -> list -> field.type) == TYPE_CODE_ENUM
+	       && (fip -> list -> field.bitsize
+		   == 8 * TYPE_LENGTH (lookup_fundamental_type (objfile, FT_INTEGER)))
+	       )
+	   )
+	  &&
+	  fip -> list -> field.bitpos % 8 == 0)
+	{
+	  fip -> list -> field.bitsize = 0;
+	}
+    }
+}
+
+
+/* Read struct or class data fields.  They have the form:
+
+   	NAME : [VISIBILITY] TYPENUM , BITPOS , BITSIZE ;
+
+   At the end, we see a semicolon instead of a field.
+
+   In C++, this may wind up being NAME:?TYPENUM:PHYSNAME; for
+   a static field.
+
+   The optional VISIBILITY is one of:
+
+   	'/0'	(VISIBILITY_PRIVATE)
+	'/1'	(VISIBILITY_PROTECTED)
+	'/2'	(VISIBILITY_PUBLIC)
+
+   or nothing, for C style fields with public visibility. */
+       
+static int
+read_struct_fields (fip, pp, type, objfile)
+     struct field_info *fip;
+     char **pp;
+     struct type *type;
+     struct objfile *objfile;
+{
+  register char *p;
+  struct nextfield *new;
+
+  /* We better set p right now, in case there are no fields at all...    */
+
+  p = *pp;
+
+  /* Read each data member type until we find the terminating ';' at the end of
+     the data member list, or break for some other reason such as finding the
+     start of the member function list. */
+
+  while (**pp != ';')
+    {
+      STABS_CONTINUE (pp);
+      /* Get space to record the next field's data.  */
+      new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
+      make_cleanup (free, new);
+      memset (new, 0, sizeof (struct nextfield));
+      new -> next = fip -> list;
+      fip -> list = new;
+
+      /* Get the field name.  */
+      p = *pp;
+      if (*p == CPLUS_MARKER)
+	{
+	  read_cpp_abbrev (fip, pp, type, objfile);
+	  continue;
+	}
+
+      /* Look for the ':' that separates the field name from the field
+	 values.  Data members are delimited by a single ':', while member
+	 functions are delimited by a pair of ':'s.  When we hit the member
+	 functions (if any), terminate scan loop and return. */
+
+      while (*p != ':') 
+	{
+	  p++;
+	}
+
+      /* Check to see if we have hit the member functions yet.  */
+      if (p[1] == ':')
+	{
+	  break;
+	}
+      read_one_struct_field (fip, pp, p, type, objfile);
+    }
+  if (p[1] == ':')
+    {
+      /* chill the list of fields: the last entry (at the head) is a
+	 partially constructed entry which we now scrub. */
+      fip -> list = fip -> list -> next;
+    }
+  return (1);
+}
+
+/* The stabs for C++ derived classes contain baseclass information which
+   is marked by a '!' character after the total size.  This function is
+   called when we encounter the baseclass marker, and slurps up all the
+   baseclass information.
+
+   Immediately following the '!' marker is the number of base classes that
+   the class is derived from, followed by information for each base class.
+   For each base class, there are two visibility specifiers, a bit offset
+   to the base class information within the derived class, a reference to
+   the type for the base class, and a terminating semicolon.
+
+   A typical example, with two base classes, would be "!2,020,19;0264,21;".
+   						       ^^ ^ ^ ^  ^ ^  ^
+	Baseclass information marker __________________|| | | |  | |  |
+	Number of baseclasses __________________________| | | |  | |  |
+	Visibility specifiers (2) ________________________| | |  | |  |
+	Offset in bits from start of class _________________| |  | |  |
+	Type number for base class ___________________________|  | |  |
+	Visibility specifiers (2) _______________________________| |  |
+	Offset in bits from start of class ________________________|  |
+	Type number of base class ____________________________________|
+ */
+
+static int
+read_baseclasses (fip, pp, type, objfile)
+     struct field_info *fip;
+     char **pp;
+     struct type *type;
+     struct objfile *objfile;
+{
+  int i;
+  struct nextfield *new;
+
+  if (**pp != '!')
+    {
+      return (1);
+    }
+  else
+    {
+      /* Skip the '!' baseclass information marker. */
+      (*pp)++;
+    }
+
+  ALLOCATE_CPLUS_STRUCT_TYPE (type);
+  TYPE_N_BASECLASSES (type) = read_number (pp, ',');
+
+#if 0
+  /* Some stupid compilers have trouble with the following, so break
+     it up into simpler expressions.  */
+  TYPE_FIELD_VIRTUAL_BITS (type) = (B_TYPE *)
+    TYPE_ALLOC (type, B_BYTES (TYPE_N_BASECLASSES (type)));
+#else
+  {
+    int num_bytes = B_BYTES (TYPE_N_BASECLASSES (type));
+    char *pointer;
+
+    pointer = (char *) TYPE_ALLOC (type, num_bytes);
+    TYPE_FIELD_VIRTUAL_BITS (type) = (B_TYPE *) pointer;
   }
+#endif /* 0 */
+
+  B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), TYPE_N_BASECLASSES (type));
+
+  for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
+    {
+      new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
+      make_cleanup (free, new);
+      memset (new, 0, sizeof (struct nextfield));
+      new -> next = fip -> list;
+      fip -> list = new;
+      new -> field.bitsize = 0;	/* this should be an unpacked field! */
+
+      STABS_CONTINUE (pp);
+      switch (*(*pp)++)
+	{
+	  case '0':
+	    /* Nothing to do. */
+	    break;
+	  case '1':
+	    SET_TYPE_FIELD_VIRTUAL (type, i);
+	    break;
+	  default:
+	    /* Bad visibility format.  */
+	    return (0);
+	}
+
+      new -> visibility = *(*pp)++;
+      switch (new -> visibility)
+	{
+	  case VISIBILITY_PRIVATE:
+	  case VISIBILITY_PROTECTED:
+	  case VISIBILITY_PUBLIC:
+	    break;
+	  default:
+	    /* Bad visibility format.  */
+	    return (0);
+	}
+
+      /* The remaining value is the bit offset of the portion of the object
+	 corresponding to this baseclass.  Always zero in the absence of
+	 multiple inheritance.  */
+
+      new -> field.bitpos = read_number (pp, ',');
+
+      /* The last piece of baseclass information is the type of the base
+	 class.  Read it, and remember it's type name as this field's name. */
+
+      new -> field.type = read_type (pp, objfile);
+      new -> field.name = type_name_no_tag (new -> field.type);
+
+      /* skip trailing ';' and bump count of number of fields seen */
+      (*pp)++;
+    }
+  return (1);
+}
+
+static int
+read_tilde_fields (fip, pp, type, objfile)
+     struct field_info *fip;
+     char **pp;
+     struct type *type;
+     struct objfile *objfile;
+{
+  register char *p;
+
+  STABS_CONTINUE (pp);
+
+  /* If we are positioned at a ';', then skip it. */
+  if (**pp == ';')
+    {
+      (*pp)++;
+    }
 
   if (**pp == '~')
     {
-      *pp += 1;
+      (*pp)++;
 
       if (**pp == '=' || **pp == '+' || **pp == '-')
 	{
 	  /* Obsolete flags that used to indicate the presence
 	     of constructors and/or destructors. */
-	  *pp += 1;
+	  (*pp)++;
 	}
 
       /* Read either a '%' or the final ';'.  */
@@ -1925,37 +2069,45 @@ read_struct_type (pp, type, objfile)
 	  struct type *t;
 	  int i;
 
-
 #if 0
 	  {
 	    /* In version 2, we derive the vfield ourselves.  */
-	    for (n = 0; n < nfields; n++)
+	    for (n = 0; n < TYPE_NFIELDS (type); n++)
 	      {
 		if (! strncmp (TYPE_FIELD_NAME (type, n), vptr_name, 
-			       sizeof (vptr_name) -1))
+			       sizeof (vptr_name) - 1))
 		  {
 		    predicted_fieldno = n;
 		    break;
 		  }
 	      }
 	    if (predicted_fieldno < 0)
-	      for (n = 0; n < TYPE_N_BASECLASSES (type); n++)
-		if (! TYPE_FIELD_VIRTUAL (type, n)
-		    && TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, n)) >= 0)
+	      {
+		for (n = 0; n < TYPE_N_BASECLASSES (type); n++)
 		  {
-		    predicted_fieldno = TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, n));
-		    break;
+		    if (! TYPE_FIELD_VIRTUAL (type, n)
+			&& TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, n)) >= 0)
+		      {
+			predicted_fieldno =
+			  TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, n));
+			break;
+		      }
 		  }
+	      }
 	  }
 #endif
 
 	  t = read_type (pp, objfile);
 	  p = (*pp)++;
 	  while (*p != '\0' && *p != ';')
-	    p++;
+	    {
+	      p++;
+	    }
 	  if (*p == '\0')
-	    /* Premature end of symbol.  */
-	    return error_type (pp);
+	    {
+	      /* Premature end of symbol.  */
+	      return (0);
+	    }
 	  
 	  TYPE_VPTR_BASETYPE (type) = t;
 	  if (type == t)
@@ -1969,30 +2121,204 @@ read_struct_type (pp, type, objfile)
 		  error_type (pp);
 #endif
 		}
-	      else for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); --i)
-		if (! strncmp (TYPE_FIELD_NAME (t, i), vptr_name, 
-			       sizeof (vptr_name) - 1))
-		  {
-		    TYPE_VPTR_FIELDNO (type) = i;
-		    break;
-		  }
+	      else
+		{
+		  for (i = TYPE_NFIELDS (t) - 1;
+		       i >= TYPE_N_BASECLASSES (t);
+		       --i)
+		    {
+		      if (! strncmp (TYPE_FIELD_NAME (t, i), vptr_name, 
+				     sizeof (vptr_name) - 1))
+			{
+			  TYPE_VPTR_FIELDNO (type) = i;
+			  break;
+			}
+		    }
+		}
 	      if (i < 0)
-		/* Virtual function table field not found.  */
-		return error_type (pp);
+		{
+		  /* Virtual function table field not found.  */
+		  return (0);
+		}
 	    }
 	  else
-	    TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (t);
+	    {
+	      TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (t);
+	    }
 
 #if 0
 	  if (TYPE_VPTR_FIELDNO (type) != predicted_fieldno)
-	    error ("TYPE_VPTR_FIELDNO miscalculated");
+	    {
+	      error ("TYPE_VPTR_FIELDNO miscalculated");
+	    }
 #endif
 
 	  *pp = p + 1;
 	}
     }
+  return (1);
+}
 
-  return type;
+static int
+attach_fn_fields_to_type (fip, type)
+     struct field_info *fip;
+     register struct type *type;
+{
+  register int n;
+
+  for (n = 0; n < TYPE_N_BASECLASSES (type); n++)
+    {
+      if (TYPE_CODE (TYPE_BASECLASS (type, n)) == TYPE_CODE_UNDEF)
+	{
+	  /* @@ Memory leak on objfile -> type_obstack?  */
+	  return (0);
+	}
+      TYPE_NFN_FIELDS_TOTAL (type) +=
+	TYPE_NFN_FIELDS_TOTAL (TYPE_BASECLASS (type, n));
+    }
+
+  for (n = TYPE_NFN_FIELDS (type);
+       fip -> fnlist != NULL;
+       fip -> fnlist = fip -> fnlist -> next)
+    {
+      --n;                      /* Circumvent Sun3 compiler bug */
+      TYPE_FN_FIELDLISTS (type)[n] = fip -> fnlist -> fn_fieldlist;
+    }
+  return (1);
+}
+
+/* Create the vector of fields, and record how big it is.
+   We need this info to record proper virtual function table information
+   for this class's virtual functions.  */
+
+static int
+attach_fields_to_type (fip, type, objfile)
+     struct field_info *fip;
+     register struct type *type;
+     struct objfile *objfile;
+{
+  register int nfields = 0;
+  register int non_public_fields = 0;
+  register struct nextfield *scan;
+
+  /* Count up the number of fields that we have, as well as taking note of
+     whether or not there are any non-public fields, which requires us to
+     allocate and build the private_field_bits and protected_field_bits
+     bitfields. */
+
+  for (scan = fip -> list; scan != NULL; scan = scan -> next)
+    {
+      nfields++;
+      if (scan -> visibility != VISIBILITY_PUBLIC)
+	{
+	  non_public_fields++;
+	}
+    }
+
+  /* Now we know how many fields there are, and whether or not there are any
+     non-public fields.  Record the field count, allocate space for the
+     array of fields, and create blank visibility bitfields if necessary. */
+
+  TYPE_NFIELDS (type) = nfields;
+  TYPE_FIELDS (type) = (struct field *)
+    TYPE_ALLOC (type, sizeof (struct field) * nfields);
+  memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nfields);
+
+  if (non_public_fields)
+    {
+      ALLOCATE_CPLUS_STRUCT_TYPE (type);
+
+      TYPE_FIELD_PRIVATE_BITS (type) =
+	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
+      B_CLRALL (TYPE_FIELD_PRIVATE_BITS (type), nfields);
+
+      TYPE_FIELD_PROTECTED_BITS (type) =
+	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
+      B_CLRALL (TYPE_FIELD_PROTECTED_BITS (type), nfields);
+    }
+
+  /* Copy the saved-up fields into the field vector.  Start from the head
+     of the list, adding to the tail of the field array, so that they end
+     up in the same order in the array in which they were added to the list. */
+
+  while (nfields-- > 0)
+    {
+      TYPE_FIELD (type, nfields) = fip -> list -> field;
+      switch (fip -> list -> visibility)
+	{
+	  case VISIBILITY_PRIVATE:
+	    SET_TYPE_FIELD_PRIVATE (type, nfields);
+	    break;
+
+	  case VISIBILITY_PROTECTED:
+	    SET_TYPE_FIELD_PROTECTED (type, nfields);
+	    break;
+
+	  case VISIBILITY_PUBLIC:
+	    break;
+
+	  default:
+	    /* Should warn about this unknown visibility? */
+	    break;
+	}
+      fip -> list = fip -> list -> next;
+    }
+  return (1);
+}
+
+/* Read the description of a structure (or union type) and return an object
+   describing the type.
+
+   PP points to a character pointer that points to the next unconsumed token
+   in the the stabs string.  For example, given stabs "A:T4=s4a:1,0,32;;",
+   *PP will point to "4a:1,0,32;;".
+
+   TYPE points to an incomplete type that needs to be filled in.
+
+   OBJFILE points to the current objfile from which the stabs information is
+   being read.  (Note that it is redundant in that TYPE also contains a pointer
+   to this same objfile, so it might be a good idea to eliminate it.  FIXME). 
+   */
+
+static struct type *
+read_struct_type (pp, type, objfile)
+     char **pp;
+     struct type *type;
+     struct objfile *objfile;
+{
+  struct cleanup *back_to;
+  struct field_info fi;
+
+  fi.list = NULL;
+  fi.fnlist = NULL;
+
+  back_to = make_cleanup (null_cleanup, 0);
+
+  INIT_CPLUS_SPECIFIC (type);
+  TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
+
+  /* First comes the total size in bytes.  */
+
+  TYPE_LENGTH (type) = read_number (pp, 0);
+
+  /* Now read the baseclasses, if any, read the regular C struct or C++
+     class member fields, attach the fields to the type, read the C++
+     member functions, attach them to the type, and then read any tilde
+     fields. */
+
+  if (!read_baseclasses (&fi, pp, type, objfile)
+      || !read_struct_fields (&fi, pp, type, objfile)
+      || !attach_fields_to_type (&fi, type, objfile)
+      || !read_member_functions (&fi, pp, type, objfile)
+      || !attach_fn_fields_to_type (&fi, type)
+      || !read_tilde_fields (&fi, pp, type, objfile))
+    {
+      do_cleanups (back_to);
+      return (error_type (pp));
+    }
+
+  do_cleanups (back_to);
+  return (type);
 }
 
 /* Read a definition of an array type,
@@ -2025,14 +2351,14 @@ read_array_type (pp, type, objfile)
 
   if (!(**pp >= '0' && **pp <= '9'))
     {
-      *pp += 1;
+      (*pp)++;
       adjustable = 1;
     }
   lower = read_number (pp, ';');
 
   if (!(**pp >= '0' && **pp <= '9'))
     {
-      *pp += 1;
+      (*pp)++;
       adjustable = 1;
     }
   upper = read_number (pp, ';');
@@ -2116,9 +2442,7 @@ read_enum_type (pp, type, objfile)
      A semicolon or comma instead of a NAME means the end.  */
   while (**pp && **pp != ';' && **pp != ',')
     {
-      /* Check for and handle cretinous dbx symbol name continuation!  */
-      if (**pp == '\\')	*pp = next_symbol_text ();
-
+      STABS_CONTINUE (pp);
       p = *pp;
       while (*p != ':') p++;
       name = obsavestring (*pp, p - *pp, &objfile -> symbol_obstack);
@@ -2611,7 +2935,7 @@ read_range_type (pp, typenums, objfile)
 
   TYPE_NFIELDS (result_type) = 2;
   TYPE_FIELDS (result_type) = (struct field *)
-    TYPE_ALLOC (result_type, 2 * sizeof (struct field));
+      TYPE_ALLOC (result_type, 2 * sizeof (struct field));
   memset (TYPE_FIELDS (result_type), 0, 2 * sizeof (struct field));
   TYPE_FIELD_BITPOS (result_type, 0) = n2;
   TYPE_FIELD_BITPOS (result_type, 1) = n3;
@@ -2684,15 +3008,11 @@ read_args (pp, end, objfile)
       if (**pp != ',')
 	/* Invalid argument list: no ','.  */
 	return (struct type **)-1;
-      *pp += 1;
-
-      /* Check for and handle cretinous dbx symbol name continuation! */
-      if (**pp == '\\')
-	*pp = next_symbol_text ();
-
+      (*pp)++;
+      STABS_CONTINUE (pp);
       types[n++] = read_type (pp, objfile);
     }
-  *pp += 1;			/* get past `end' (the ':' character) */
+  (*pp)++;			/* get past `end' (the ':' character) */
 
   if (n == 1)
     {
