@@ -1,5 +1,10 @@
 2002-02-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* regformats/regdat.sh: Add braces to the definition of
+	expedite_regs_${arch}.
+
+2002-02-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* regformats/regdef.h (struct reg): Add comment describing the
 	requirements for offset and size fields.
 

@@ -150,7 +150,7 @@ done
 
 echo "};"
 echo
-echo "const char *expedite_regs_${name} = { \"`echo ${expedite} | sed 's/,/", "/g'`\", 0 };"
+echo "const char *expedite_regs_${name}[] = { \"`echo ${expedite} | sed 's/,/", "/g'`\", 0 };"
 
 # close things off
 exec 1>&2
