@@ -1,3 +1,10 @@
+Thu Sep 16 17:22:12 1993  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* config/vx-gdb.exp: Use fake device to load files rather than
+	NFS.
+	* lib/gdb.exp: New proc to do "file" command.
+	* config/unix-gdb.exp: Use new "file" proc.
+
 Thu Sep 16 13:45:44 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/mips-gdb.exp (gdb_load): Increase timeout to 2400.
