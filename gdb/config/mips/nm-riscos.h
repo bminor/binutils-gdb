@@ -16,6 +16,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define PCB_OFFSET(FIELD) ((int)&((struct user*)0)->u_pcb.FIELD)
 
+#include <bsd43/machine/vmparam.h>
+#define NBPG BSD43_NBPG
+#define UPAGES BSD43_UPAGES
+
 #define REGISTER_U_ADDR(addr, blockend, regno) 		\
 	      if (regno < FP0_REGNUM) \
 		  addr =  UPAGES*NBPG-EF_SIZE+4*((regno)+EF_AT-1); \

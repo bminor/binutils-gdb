@@ -25,3 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	MEM_FNS_DECLARED
 
 #define USG 1
+
+/* setjmp.h requires uid_t.  */
+#include <sys/types.h>
