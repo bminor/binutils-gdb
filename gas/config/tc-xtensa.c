@@ -715,13 +715,6 @@ static void add_section_rename
   PARAMS ((char *, char *));
 #endif
 
-#ifdef XTENSA_COMBINE_LITERALS
-static void find_lit_sym_translation
-  PARAMS ((expressionS *));
-static void add_lit_sym_translation
-  PARAMS ((char *, offsetT, symbolS *));
-#endif
-
 
 /* ISA imported from bfd.  */
 extern xtensa_isa xtensa_default_isa;
@@ -1441,15 +1434,8 @@ xtensa_literal_pseudo (ignored)
      int ignored ATTRIBUTE_UNUSED;
 {
   emit_state state;
-  char *base_name;
-#ifdef XTENSA_COMBINE_LITERALS
-  char *next_name;
-  symbolS *duplicate;
-  bfd_boolean used_name = FALSE;
-  int offset = 0;
-#endif
+  char *p, *base_name;
   char c;
-  char *p;
   expressionS expP;
   segT dest_seg;
 
@@ -1485,21 +1471,7 @@ xtensa_literal_pseudo (ignored)
     }
   *p = 0;
 
-#ifdef XTENSA_COMBINE_LITERALS
-  /* We need next name to start out equal to base_name,
-     but we modify it later to refer to a symbol and an offset.  */
-  next_name = xmalloc (strlen (base_name) + 1);
-  strcpy (next_name, base_name);
-
-  /* We need a copy of base_name because we refer to it in the 
-     lit_sym_translations and the source is somewhere in the input stream.  */
-  base_name = xmalloc (strlen (base_name) + 1);
-  strcpy (base_name, next_name);
-
-#else
-
   colon (base_name);
-#endif
 
   do 
     {
@@ -1507,41 +1479,12 @@ xtensa_literal_pseudo (ignored)
       
       expr (0, &expP);
 
-#ifdef XTENSA_COMBINE_LITERALS
-      duplicate = is_duplicate_literal (&expP, dest_seg);
-      if (duplicate)
-	{
-	  add_lit_sym_translation (base_name, offset, duplicate);
-	  used_name = TRUE;
-	  continue;
-	}
-      colon (next_name);
-#endif
-
       /* We only support 4-byte literals with .literal.  */
       emit_expr (&expP, 4);
-
-#ifdef XTENSA_COMBINE_LITERALS
-      cache_literal (next_name, &expP, dest_seg);
-      free (next_name);
-
-      if (*input_line_pointer == ',') 
-	{
-	  offset += 4;
-	  next_name = xmalloc (strlen (base_name) + 
-			       strlen (XTENSA_LIT_PLUS_OFFSET) + 10);
-	  sprintf (next_name, "%s%s%d", 
-		   XTENSA_LIT_PLUS_OFFSET, base_name, offset);
-	}
-#endif
     }
   while (*input_line_pointer == ',');
 
   *p = c;
-#ifdef XTENSA_COMBINE_LITERALS
-  if (!used_name)
-    free (base_name);
-#endif
 
   demand_empty_rest_of_line ();
 
@@ -1708,9 +1651,6 @@ expression_maybe_register (opnd, tok)
 	  tok->X_add_symbol->sy_tc.plt = 1;
 	  input_line_pointer += strlen (plt_suffix);
 	}
-#ifdef XTENSA_COMBINE_LITERALS
-      find_lit_sym_translation (tok);
-#endif
     }
   else
     {
@@ -8872,138 +8812,3 @@ xtensa_section_rename (name)
 }
 
 #endif /* XTENSA_SECTION_RENAME */
-
-
-/* Combining identical literals.  */
-
-#ifdef XTENSA_COMBINE_LITERALS 
-
-/* This code records all the .literal values that are ever seen and
-   detects duplicates so that identical values can be combined.  This
-   is currently disabled because it's only half-baked.  */
-
-#define XTENSA_LIT_PLUS_OFFSET ".xtensa_litsym_offset_"
-
-/* TODO: make this into a more efficient data structure.  */
-typedef struct literal_list_elem
-{
-  symbolS *sym;			/* The symbol that points to this literal.  */
-  expressionS expr;		/* The expression.  */
-  segT seg;
-  struct literal_list_elem *next; /* Next in the list.  */
-} literal_list_elem;
-
-literal_list_elem *lit_cache = NULL;
-
-typedef struct lit_sym_translation
-{
-  char *name;			/* This name.  */
-  offsetT offset;		/* Plus this offset.  */
-  symbolS *sym;			/* Should really mean this symbol.  */
-  struct lit_sym_translation *next;
-} lit_sym_translation;
-
-lit_sym_translation *translations = NULL;
-
-static bfd_boolean is_duplicate_expression
-  PARAMS ((expressionS *, expressionS *));
-static void cache_literal
-  PARAMS ((char *sym_name, expressionS *, segT));
-static symbolS *is_duplicate_literal
-  PARAMS ((expressionS *, segT));
-
-
-static bfd_boolean
-is_duplicate_expression (e1, e2)
-     expressionS *e1;
-     expressionS *e2;
-{
-  if (e1->X_op != e2->X_op)
-    return FALSE;
-  if (e1->X_add_symbol != e2->X_add_symbol)
-    return FALSE;
-  if (e1->X_op_symbol != e2->X_op_symbol)
-    return FALSE;
-  if (e1->X_add_number != e2->X_add_number)
-    return FALSE;
-  if (e1->X_unsigned != e2->X_unsigned)
-    return FALSE;
-  if (e1->X_md != e2->X_md)
-    return FALSE;
-  return TRUE;
-}
-
-
-static void
-cache_literal (sym_name, expP, seg)
-     char *sym_name;
-     expressionS *expP;
-     segT seg;
-{
-  literal_list_elem *lit = xmalloc (sizeof (literal_list_elem));
-
-  lit->sym = symbol_find (sym_name);
-  lit->expr = *expP;
-  lit->seg = seg;
-  lit->next = lit_cache;
-  lit_cache = lit;
-}
-
- 
-static symbolS *
-is_duplicate_literal (expr, seg)
-     expressionS *expr;
-     segT seg;
-{
-  literal_list_elem *lit = lit_cache;
-
-  while (lit != NULL) 
-    {
-      if (is_duplicate_expression (&lit->expr, expr) && seg == lit->seg)
-	return lit->sym;
-      lit = lit->next;
-    }
-
-  return NULL;
-}
-
-
-static void
-add_lit_sym_translation (name, offset, target)
-     char * name;
-     offsetT offset;
-     symbolS * target;
-{
-  lit_sym_translation *lit_trans = xmalloc (sizeof (lit_sym_translation));
-
-  lit_trans->name = name;
-  lit_trans->offset = offset;
-  lit_trans->sym = target;
-  lit_trans->next = translations;
-  translations = lit_trans;
-}
-
-
-static void
-find_lit_sym_translation (expr)
-     expressionS *expr;
-{
-  lit_sym_translation *lit_trans = translations;
-
-  if (expr->X_op != O_symbol)
-    return;
-
-  while (lit_trans != NULL)
-    {
-      if (lit_trans->offset == expr->X_add_number 
-	  && strcmp (lit_trans->name, S_GET_NAME (expr->X_add_symbol)) == 0)
-	{
-	  expr->X_add_symbol = lit_trans->sym;
-	  expr->X_add_number = 0;
-	  return;
-	}
-      lit_trans = lit_trans->next;
-    }
-}
-
-#endif /* XTENSA_COMBINE_LITERALS */

@@ -1,3 +1,11 @@
+2003-09-09  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xtensa_literal_pseudo): Remove code for
+	combining identical literals.
+	(expression_maybe_register): Remove call to find_lit_sym_translation.
+	(is_duplicate_expression, cache_literal, is_duplicate_literal,
+	add_lit_sym_translation, find_lit_sym_translation): Delete.
+
 2003-09-07  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.texinfo (Comments): Comment character for PPC is #.
