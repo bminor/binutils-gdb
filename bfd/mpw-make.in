@@ -20,8 +20,6 @@
 
 DebugOptions = -d DEBUG_BFD_SEND
 
-gC = gC1
-
 s = "{srcdir}"
 
 o = :
@@ -32,9 +30,6 @@ o = :
 
 .c.o  \Option-f .c
    {CC}  {DepDir}{Default}.c {ALL_CFLAGS} -s bfd_{Default} -o {TargDir}{Default}.c.o
-
-.gc.o  \Option-f .c
-   {gC}  {DepDir}{Default}.c {ALL_CFLAGS} -s bfd_{Default} -o {TargDir}{Default}.gc.o
 
 HDEFINES =
 TDEFINES =
@@ -108,7 +103,7 @@ BFD_LIBS = \Option-d
 	"{o}"archive.c.o "{o}"archures.c.o "{o}"bfd.c.o "{o}"cache.c.o "{o}"coffgen.c.o "{o}"core.c.o \Option-d
 	"{o}"format.c.o "{o}"init.c.o "{o}"libbfd.c.o "{o}"opncls.c.o "{o}"reloc.c.o \Option-d
 	"{o}"section.c.o "{o}"syms.c.o "{o}"targets.c.o "{o}"hash.c.o "{o}"linker.c.o \Option-d
-	"{o}"elf.c.o "{o}"srec.c.o
+	"{o}"elf.c.o "{o}"srec.c.o "{o}"binary.c.o
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -255,10 +250,10 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \Option-d
 	 sparclynx.c cf-sparclynx.c aix386-core.c hpux-core.c \Option-d
 	 irix-core.c lynx-core.c osf-core.c
 
-HFILES = aout-target.h aoutf1.h aoutx.h coffcode.h \Option-d
-	 "{s}"coffswap.h "{s}"ecoffswap.h elf32-hppa.h elf32-target.h elf64-target.h \Option-d
-	 elfcode.h hppa_stubs.h "{s}"libaout.h "{s}"libbfd.h \Option-d
-	 libcoff.h "{s}"libecoff.h libelf.h libhppa.h libieee.h libnlm.h \Option-d
+HFILES = "{s}"aout-target.h aoutf1.h aoutx.h "{s}"coffcode.h \Option-d
+	 "{s}"coffswap.h "{s}"ecoffswap.h elf32-hppa.h "{s}"elf32-target.h elf64-target.h \Option-d
+	 "{s}"elfcode.h hppa_stubs.h "{s}"libaout.h "{s}"libbfd.h \Option-d
+	 libcoff.h "{s}"libecoff.h libelf.h libhppa.h libieee.h"{s}"libnlm.h \Option-d
 	 liboasys.h nlm-target.h nlmcode.h som.h
 
 STAGESTUFF = {TARGETLIB} {OFILES}
@@ -368,20 +363,21 @@ saber \Option-f
 "{o}"cache.c.o  \Option-f "{s}"cache.c
 "{o}"archures.c.o  \Option-f "{s}"archures.c
 "{o}"coff-i386.c.o  \Option-f "{s}"coff-i386.c {INCDIR}:coff:i386.h {INCDIR}:coff:internal.h \Option-d
-  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+  "{s}"libcoff.h "{s}"coffcode.h "{s}"coffswap.h
 "{o}"aout64.c.o  \Option-f "{s}"aout64.c aoutx.h "{s}"libaout.h {INCDIR}:aout:aout64.h \Option-d
   {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
 "{o}"aout32.c.o  \Option-f "{s}"aout32.c aoutx.h "{s}"libaout.h {INCDIR}:aout:aout64.h \Option-d
   {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
 "{o}"sunos.c.o  \Option-f "{s}"sunos.c aoutf1.h {INCDIR}:aout:sun4.h "{s}"libaout.h \Option-d
   {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def \Option-d
-  {INCDIR}:aout:ar.h aout-target.h
+  {INCDIR}:aout:ar.h "{s}"aout-target.h
 "{o}"demo64.c.o  \Option-f "{s}"demo64.c aoutf1.h {INCDIR}:aout:sun4.h \Option-d
   "{s}"libaout.h {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h \Option-d
-  {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h aout-target.h
+  {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h "{s}"aout-target.h
 "{o}"coff-i960.c.o  \Option-f "{s}"coff-i960.c {INCDIR}:coff:i960.h {INCDIR}:coff:internal.h \Option-d
-  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+  "{s}"libcoff.h "{s}"coffcode.h "{s}"coffswap.h
 "{o}"srec.c.o  \Option-f "{s}"srec.c
+"{o}"binary.c.o  \Option-f "{s}"binary.c
 "{o}"tekhex.c.o  \Option-f "{s}"tekhex.c
 "{o}"oasys.c.o  \Option-f "{s}"oasys.c {INCDIR}:oasys.h liboasys.h
 "{o}"ieee.c.o  \Option-f "{s}"ieee.c {INCDIR}:ieee.h libieee.h
@@ -392,17 +388,17 @@ saber \Option-f
 "{o}"ecofflink.c.o  \Option-f "{s}"ecofflink.c {INCDIR}:coff:internal.h \Option-d
   {INCDIR}:coff:sym.h {INCDIR}:coff:symconst.h {INCDIR}:coff:ecoff.h
 "{o}"coff-m68k.c.o  \Option-f "{s}"coff-m68k.c {INCDIR}:coff:m68k.h {INCDIR}:coff:internal.h \Option-d
-  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+  "{s}"libcoff.h "{s}"coffcode.h "{s}"coffswap.h
 "{o}"coff-u68k.c.o  \Option-f "{s}"coff-u68k.c coff-m68k.c {INCDIR}:coff:m68k.h \Option-d
-  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h \Option-d
+  {INCDIR}:coff:internal.h "{s}"libcoff.h "{s}"coffcode.h \Option-d
   "{s}"coffswap.h
 "{o}"coff-apollo.c.o  \Option-f "{s}"coff-apollo.c {INCDIR}:coff:apollo.h \Option-d
-  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h \Option-d
+  {INCDIR}:coff:internal.h "{s}"libcoff.h "{s}"coffcode.h \Option-d
   "{s}"coffswap.h
 "{o}"coff-a29k.c.o  \Option-f "{s}"coff-a29k.c {INCDIR}:coff:a29k.h {INCDIR}:coff:internal.h \Option-d
-  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+  "{s}"libcoff.h "{s}"coffcode.h "{s}"coffswap.h
 "{o}"coff-rs6000.c.o  \Option-f "{s}"coff-rs6000.c {INCDIR}:coff:internal.h \Option-d
-  {INCDIR}:coff:rs6000.h "{s}"libcoff.h coffcode.h \Option-d
+  {INCDIR}:coff:rs6000.h "{s}"libcoff.h "{s}"coffcode.h \Option-d
   "{s}"coffswap.h
 "{o}"coffgen.c.o  \Option-f "{s}"coffgen.c {INCDIR}:coff:internal.h \Option-d
   "{s}"libcoff.h
@@ -415,35 +411,35 @@ saber \Option-f
 "{o}"reloc.c.o  \Option-f "{s}"reloc.c
 "{o}"init.c.o  \Option-f "{s}"init.c
 "{o}"coff-m88k.c.o  \Option-f "{s}"coff-m88k.c {INCDIR}:coff:m88k.h {INCDIR}:coff:internal.h \Option-d
-  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+  "{s}"libcoff.h "{s}"coffcode.h "{s}"coffswap.h
 "{o}"coff-mips.c.o  \Option-f "{s}"coff-mips.c {INCDIR}:coff:internal.h \Option-d
   {INCDIR}:coff:sym.h {INCDIR}:coff:symconst.h {INCDIR}:coff:ecoff.h \Option-d
   {INCDIR}:coff:mips.h "{s}"libcoff.h "{s}"libecoff.h "{s}"coffswap.h \Option-d
   "{s}"ecoffswap.h
 "{o}"coff-sh.c.o  \Option-f "{s}"coff-sh.c {INCDIR}:coff:sh.h {INCDIR}:coff:internal.h \Option-d
-  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+  "{s}"libcoff.h "{s}"coffcode.h "{s}"coffswap.h
 "{o}"trad-core.c.o  \Option-f "{s}"trad-core.c "{s}"libaout.h
 "{o}"newsos3.c.o  \Option-f "{s}"newsos3.c {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h \Option-d
   {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h "{s}"libaout.h \Option-d
-  aout-target.h
-"{o}"i386aout.c.o  \Option-f "{s}"i386aout.c "{s}"libaout.h aout-target.h {INCDIR}:aout:aout64.h \Option-d
+  "{s}"aout-target.h
+"{o}"i386aout.c.o  \Option-f "{s}"i386aout.c "{s}"libaout.h "{s}"aout-target.h {INCDIR}:aout:aout64.h \Option-d
   {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
 "{o}"i386linux.c.o  \Option-f "{s}"i386linux.c {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h \Option-d
   {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h "{s}"libaout.h \Option-d
-  aout-target.h
-"{o}"netbsd386.c.o  \Option-f "{s}"netbsd386.c "{s}"libaout.h aout-target.h {INCDIR}:aout:aout64.h \Option-d
+  "{s}"aout-target.h
+"{o}"netbsd386.c.o  \Option-f "{s}"netbsd386.c "{s}"libaout.h "{s}"aout-target.h {INCDIR}:aout:aout64.h \Option-d
   {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
 "{o}"i386mach3.c.o  \Option-f "{s}"i386mach3.c {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h \Option-d
   {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h "{s}"libaout.h \Option-d
-  aout-target.h
+  "{s}"aout-target.h
 "{o}"bout.c.o  \Option-f "{s}"bout.c {INCDIR}:bout.h {INCDIR}:aout:stab_gnu.h \Option-d
   {INCDIR}:aout:stab.def "{s}"libaout.h
 "{o}"aout-adobe.c.o  \Option-f "{s}"aout-adobe.c {INCDIR}:aout:adobe.h \Option-d
   {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def "{s}"libaout.h
 "{o}"coff-we32k.c.o  \Option-f "{s}"coff-we32k.c {INCDIR}:coff:we32k.h \Option-d
-  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h \Option-d
+  {INCDIR}:coff:internal.h "{s}"libcoff.h "{s}"coffcode.h \Option-d
   "{s}"coffswap.h
-"{o}"i386bsd.c.o  \Option-f "{s}"i386bsd.c "{s}"libaout.h aout-target.h {INCDIR}:aout:aout64.h \Option-d
+"{o}"i386bsd.c.o  \Option-f "{s}"i386bsd.c "{s}"libaout.h "{s}"aout-target.h {INCDIR}:aout:aout64.h \Option-d
   {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
 "{o}"cpu-h8300.c.o  \Option-f "{s}"cpu-h8300.c
 "{o}"cpu-i960.c.o  \Option-f "{s}"cpu-i960.c
@@ -456,90 +452,90 @@ saber \Option-f
 "{o}"cpu-i386.c.o  \Option-f "{s}"cpu-i386.c
 "{o}"cpu-rs6000.c.o  \Option-f "{s}"cpu-rs6000.c
 "{o}"coff-h8300.c.o  \Option-f "{s}"coff-h8300.c {INCDIR}:coff:h8300.h \Option-d
-  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h \Option-d
+  {INCDIR}:coff:internal.h "{s}"libcoff.h "{s}"coffcode.h \Option-d
   "{s}"coffswap.h
 "{o}"som.c.o  \Option-f "{s}"som.c
 "{o}"cpu-hppa.c.o  \Option-f "{s}"cpu-hppa.c
 "{o}"cpu-we32k.c.o  \Option-f "{s}"cpu-we32k.c
 "{o}"reloc16.c.o  \Option-f "{s}"reloc16.c {INCDIR}:coff:internal.h \Option-d
   "{s}"libcoff.h
-"{o}"mipsbsd.c.o  \Option-f "{s}"mipsbsd.c "{s}"libaout.h aout-target.h {INCDIR}:aout:aout64.h \Option-d
+"{o}"mipsbsd.c.o  \Option-f "{s}"mipsbsd.c "{s}"libaout.h "{s}"aout-target.h {INCDIR}:aout:aout64.h \Option-d
   {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
 "{o}"cpu-sh.c.o  \Option-f "{s}"cpu-sh.c
 "{o}"elf.c.o  \Option-f "{s}"elf.c "{s}"libelf.h {INCDIR}:elf:common.h {INCDIR}:elf:internal.h \Option-d
   {INCDIR}:elf:external.h
-"{o}"elf32.c.o  \Option-f "{s}"elf32.c elfcode.h "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
+"{o}"elf32.c.o  \Option-f "{s}"elf32.c "{s}"elfcode.h "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
   {INCDIR}:elf:internal.h {INCDIR}:elf:external.h
 "{o}"elf32-sparc.c.o  \Option-f "{s}"elf32-sparc.c "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
-  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h "{s}"elf32-target.h
 "{o}"elf32-i386.c.o  \Option-f "{s}"elf32-i386.c "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
-  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h "{s}"elf32-target.h
 "{o}"elf32-i860.c.o  \Option-f "{s}"elf32-i860.c "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
-  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h "{s}"elf32-target.h
 "{o}"elf32-m68k.c.o  \Option-f "{s}"elf32-m68k.c "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
-  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h "{s}"elf32-target.h
 "{o}"elf32-hppa.c.o  \Option-f "{s}"elf32-hppa.c "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
   {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-hppa.h \Option-d
-  libhppa.h {INCDIR}:aout:aout64.h hppa_stubs.h elf32-target.h
+  libhppa.h {INCDIR}:aout:aout64.h hppa_stubs.h "{s}"elf32-target.h
 "{o}"elf32-m88k.c.o  \Option-f "{s}"elf32-m88k.c "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
-  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h "{s}"elf32-target.h
 "{o}"elf32-mips.c.o  \Option-f "{s}"elf32-mips.c "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
   {INCDIR}:elf:internal.h {INCDIR}:elf:external.h {INCDIR}:elf:mips.h \Option-d
   {INCDIR}:coff:sym.h {INCDIR}:coff:symconst.h {INCDIR}:coff:internal.h \Option-d
   {INCDIR}:coff:ecoff.h {INCDIR}:coff:mips.h "{s}"ecoffswap.h \Option-d
-  elf32-target.h
+  "{s}"elf32-target.h
 "{o}"elf32-gen.c.o  \Option-f "{s}"elf32-gen.c "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
-  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
-"{o}"elf64.c.o  \Option-f "{s}"elf64.c elfcode.h "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h "{s}"elf32-target.h
+"{o}"elf64.c.o  \Option-f "{s}"elf64.c "{s}"elfcode.h "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
   {INCDIR}:elf:internal.h {INCDIR}:elf:external.h
 "{o}"elf64-gen.c.o  \Option-f "{s}"elf64-gen.c "{s}"libelf.h {INCDIR}:elf:common.h \Option-d
   {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf64-target.h
-"{o}"nlm.c.o  \Option-f "{s}"nlm.c libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h \Option-d
+"{o}"nlm.c.o  \Option-f "{s}"nlm.c"{s}"libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h \Option-d
   {INCDIR}:nlm:external.h
-"{o}"nlm32.c.o  \Option-f "{s}"nlm32.c nlmcode.h libnlm.h {INCDIR}:nlm:common.h \Option-d
+"{o}"nlm32.c.o  \Option-f "{s}"nlm32.c nlmcode.h"{s}"libnlm.h {INCDIR}:nlm:common.h \Option-d
   {INCDIR}:nlm:internal.h {INCDIR}:nlm:external.h
-"{o}"nlm32-gen.c.o  \Option-f "{s}"nlm32-gen.c libnlm.h {INCDIR}:nlm:common.h \Option-d
+"{o}"nlm32-gen.c.o  \Option-f "{s}"nlm32-gen.c"{s}"libnlm.h {INCDIR}:nlm:common.h \Option-d
   {INCDIR}:nlm:internal.h {INCDIR}:nlm:external.h nlm-target.h
 "{o}"nlm32-i386.c.o  \Option-f "{s}"nlm32-i386.c {INCDIR}:nlm:i386-ext.h \Option-d
-  libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h \Option-d
+ "{s}"libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h \Option-d
   {INCDIR}:nlm:external.h nlmswap.h nlm-target.h
 "{o}"nlm32-sparc.c.o  \Option-f "{s}"nlm32-sparc.c {INCDIR}:nlm:sparc32-ext.h \Option-d
-  libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h \Option-d
+ "{s}"libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h \Option-d
   {INCDIR}:nlm:external.h nlmswap.h nlm-target.h
 "{o}"nlm32-alpha.c.o  \Option-f "{s}"nlm32-alpha.c {INCDIR}:nlm:alpha-ext.h \Option-d
-  libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h \Option-d
+ "{s}"libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h \Option-d
   {INCDIR}:nlm:external.h nlmswap.h nlm-target.h
-"{o}"nlm64.c.o  \Option-f "{s}"nlm64.c nlmcode.h libnlm.h {INCDIR}:nlm:common.h \Option-d
+"{o}"nlm64.c.o  \Option-f "{s}"nlm64.c nlmcode.h"{s}"libnlm.h {INCDIR}:nlm:common.h \Option-d
   {INCDIR}:nlm:internal.h {INCDIR}:nlm:external.h
-"{o}"nlm64-gen.c.o  \Option-f "{s}"nlm64-gen.c libnlm.h {INCDIR}:nlm:common.h \Option-d
+"{o}"nlm64-gen.c.o  \Option-f "{s}"nlm64-gen.c"{s}"libnlm.h {INCDIR}:nlm:common.h \Option-d
   {INCDIR}:nlm:internal.h {INCDIR}:nlm:external.h nlm-target.h
 "{o}"coff-alpha.c.o  \Option-f "{s}"coff-alpha.c {INCDIR}:coff:internal.h \Option-d
   {INCDIR}:coff:sym.h {INCDIR}:coff:symconst.h {INCDIR}:coff:ecoff.h \Option-d
   {INCDIR}:coff:alpha.h "{s}"libcoff.h "{s}"libecoff.h "{s}"coffswap.h \Option-d
   "{s}"ecoffswap.h
 "{o}"cpu-alpha.c.o  \Option-f "{s}"cpu-alpha.c
-"{o}"hp300bsd.c.o  \Option-f "{s}"hp300bsd.c "{s}"libaout.h aout-target.h {INCDIR}:aout:aout64.h \Option-d
+"{o}"hp300bsd.c.o  \Option-f "{s}"hp300bsd.c "{s}"libaout.h "{s}"aout-target.h {INCDIR}:aout:aout64.h \Option-d
   {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
 "{o}"hp300hpux.c.o  \Option-f "{s}"hp300hpux.c {INCDIR}:aout:hp300hpux.h \Option-d
   aoutx.h "{s}"libaout.h {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h \Option-d
-  {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h aout-target.h
+  {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h "{s}"aout-target.h
 "{o}"i386lynx.c.o  \Option-f "{s}"i386lynx.c "{s}"libaout.h {INCDIR}:aout:aout64.h \Option-d
-  aout-target.h {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def \Option-d
+  "{s}"aout-target.h {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def \Option-d
   {INCDIR}:aout:ar.h
 "{o}"cf-i386lynx.c.o  \Option-f "{s}"cf-i386lynx.c "{s}"coff-i386.c {INCDIR}:coff:i386.h \Option-d
-  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h \Option-d
+  {INCDIR}:coff:internal.h "{s}"libcoff.h "{s}"coffcode.h \Option-d
   "{s}"coffswap.h
 "{o}"m68klynx.c.o  \Option-f "{s}"m68klynx.c "{s}"libaout.h {INCDIR}:aout:aout64.h \Option-d
-  aout-target.h {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def \Option-d
+  "{s}"aout-target.h {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def \Option-d
   {INCDIR}:aout:ar.h
 "{o}"cf-m68klynx.c.o  \Option-f "{s}"cf-m68klynx.c "{s}"coff-m68k.c {INCDIR}:coff:m68k.h \Option-d
-  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h \Option-d
+  {INCDIR}:coff:internal.h "{s}"libcoff.h "{s}"coffcode.h \Option-d
   "{s}"coffswap.h
 "{o}"sparclynx.c.o  \Option-f "{s}"sparclynx.c {INCDIR}:aout:sun4.h "{s}"libaout.h \Option-d
   {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def \Option-d
-  {INCDIR}:aout:ar.h aout-target.h
+  {INCDIR}:aout:ar.h "{s}"aout-target.h
 "{o}"cf-sparclynx.c.o  \Option-f "{s}"cf-sparclynx.c "{s}"coff-sparc.c {INCDIR}:coff:sparc.h \Option-d
-  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h \Option-d
+  {INCDIR}:coff:internal.h "{s}"libcoff.h "{s}"coffcode.h \Option-d
   "{s}"coffswap.h
 "{o}"aix386-core.c.o  \Option-f "{s}"aix386-core.c {INCDIR}:coff:i386.h \Option-d
   {INCDIR}:coff:internal.h "{s}"libcoff.h

@@ -2,13 +2,26 @@
 
 forward-include "{srcdir}"hosts:mpw.h sysdep.h
 
-sed -e 's/@WORDSIZE@/32/' {srcdir}bfd-in2.h >bfd.h-new
+sed -e 's/@WORDSIZE@/32/' -e "s/@VERSION@/`Catenate {srcdir}VERSION`/" {srcdir}bfd-in2.h >bfd.h-new
 MoveIfChange bfd.h-new bfd.h
 
-If "{target_canonical}" =~ /m68k-aout/
+Echo '# From mpw-config.in' > "{o}"mk.tmp
+
+If "{target_canonical}" =~ /m68k-apple-macos/
+	Echo 'WORDSIZE = 32' >> "{o}"mk.tmp
+	Echo 'BFD_BACKENDS = "{o}"coff-m68k.c.o "{o}"cofflink.c.o' >>"{o}"mk.tmp
+	Echo 'BFD_MACHINES = "{o}"cpu-m68k.c.o' >>"{o}"mk.tmp
+	Echo 'TDEFAULTS = -d DEFAULT_VECTOR=m68kcoff_vec -d SELECT_VECS=&m68kcoff_vec -d SELECT_ARCHITECTURES=bfd_m68k_arch' >> "{o}"mk.tmp
+Else If "{target_canonical}" =~ /ppc-apple-macos/
+	Echo 'WORDSIZE = 32' >> "{o}"mk.tmp
+	Echo 'BFD_BACKENDS = "{o}"elf32-ppc.c.o "{o}"elf32.c.o' >> "{o}"mk.tmp
+	Echo 'BFD_MACHINES = "{o}"cpu-powerpc.c.o' >>"{o}"mk.tmp
+	Echo 'TDEFAULTS = -d DEFAULT_VECTOR=bfd_elf32_powerpc_vec -d SELECT_VECS= -d SELECT_ARCHITECTURES=bfd_ppc_arch' >> "{o}"mk.tmp
 Else If "{target_canonical}" =~ /mips-idt-ecoff/
-	Echo 'WORDSIZE = 32' >"{objdir}"mk.tmp
-	Echo 'BFD_BACKENDS = "{o}"coff-mips.c.o "{o}"ecoff.c.o "{o}"ecofflink.c.o' >>"{objdir}"mk.tmp
-	Echo 'BFD_MACHINES = "{o}"cpu-mips.c.o' >>"{objdir}"mk.tmp
-	Echo 'TDEFAULTS = -d DEFAULT_VECTOR=ecoff_big_vec -d SELECT_VECS=&ecoff_big_vec,&ecoff_little_vec -d SELECT_ARCHITECTURES=bfd_mips_arch' >>"{objdir}"mk.tmp
+	Echo 'WORDSIZE = 32' >> "{o}"mk.tmp
+	Echo 'BFD_BACKENDS = "{o}"coff-mips.c.o "{o}"ecoff.c.o "{o}"ecofflink.c.o' >> "{o}"mk.tmp
+	Echo 'BFD_MACHINES = "{o}"cpu-mips.c.o' >> "{o}"mk.tmp
+	Echo 'TDEFAULTS = -d DEFAULT_VECTOR=ecoff_big_vec -d SELECT_VECS=&ecoff_big_vec,&ecoff_little_vec -d SELECT_ARCHITECTURES=bfd_mips_arch' >> "{o}"mk.tmp
 End If
+
+Echo '# End from mpw-config.in' >> "{o}"mk.tmp

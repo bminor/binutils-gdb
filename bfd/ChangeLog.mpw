@@ -1,3 +1,10 @@
+Mon Dec 12 19:29:34 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Edit the BFD version into bfd.h.
+	(m68k-apple-macos, ppc-apple-macos): New targets.
+	* mpw-make.in: Remove use of gC in rules, add srcdir pathnames to
+        more files.
+
 Mon Sep 12 16:49:58 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-make.in (ctor.c): Remove references.
