@@ -33,7 +33,7 @@ struct sym_id
     struct sym_id *next;
     char *spec;			/* Parsing modifies this.  */
     Table_Id which_table;
-    bool has_right;
+    boolean has_right;
 
     struct match
       {
@@ -169,7 +169,7 @@ DEFUN (parse_id, (id), struct sym_id *id)
     {
       parse_spec (slash + 1, &id->right.sym);
       *slash = '\0';
-      id->has_right = TRUE;
+      id->has_right = true;
     }
   parse_spec (id->spec, &id->left.sym);
 
@@ -206,21 +206,21 @@ DEFUN (parse_id, (id), struct sym_id *id)
 
 /* Return TRUE iff PATTERN matches SYM.  */
 
-static bool
+static boolean
 DEFUN (match, (pattern, sym), Sym * pattern AND Sym * sym)
 {
-  return (pattern->file ? pattern->file == sym->file : TRUE)
-    && (pattern->line_num ? pattern->line_num == sym->line_num : TRUE)
+  return (pattern->file ? pattern->file == sym->file : true)
+    && (pattern->line_num ? pattern->line_num == sym->line_num : true)
     && (pattern->name
 	? strcmp (pattern->name,
 		  sym->name+(discard_underscores && sym->name[0] == '_')) == 0
-	: TRUE);
+	: true);
 }
 
 
 static void
 DEFUN (extend_match, (m, sym, tab, second_pass),
-     struct match *m AND Sym * sym AND Sym_Table * tab AND bool second_pass)
+     struct match *m AND Sym * sym AND Sym_Table * tab AND boolean second_pass)
 {
   if (m->prev_match != sym - 1)
     {
@@ -271,10 +271,10 @@ DEFUN_VOID (sym_id_parse)
       for (id = id_list; id; id = id->next)
 	{
 	  if (match (&id->left.sym, sym))
-	    extend_match (&id->left, sym, &syms[id->which_table], FALSE);
+	    extend_match (&id->left, sym, &syms[id->which_table], false);
 
 	  if (id->has_right && match (&id->right.sym, sym))
-	    extend_match (&id->right, sym, &right_ids, FALSE);
+	    extend_match (&id->right, sym, &right_ids, false);
 	}
     }
 
@@ -302,10 +302,10 @@ DEFUN_VOID (sym_id_parse)
       for (id = id_list; id; id = id->next)
 	{
 	  if (match (&id->left.sym, sym))
-	    extend_match (&id->left, sym, &syms[id->which_table], TRUE);
+	    extend_match (&id->left, sym, &syms[id->which_table], true);
 
 	  if (id->has_right && match (&id->right.sym, sym))
-	    extend_match (&id->right, sym, &right_ids, TRUE);
+	    extend_match (&id->right, sym, &right_ids, true);
 	}
     }
 
@@ -353,7 +353,7 @@ DEFUN_VOID (sym_id_parse)
    time requesting -k a/b.  Fortunately, those symbol tables don't get
    very big (the user has to type them!), so a linear search is probably
    tolerable.  */
-bool
+boolean
 DEFUN (sym_id_arc_is_present, (symtab, from, to),
        Sym_Table * symtab AND Sym * from AND Sym * to)
 {
@@ -363,8 +363,8 @@ DEFUN (sym_id_arc_is_present, (symtab, from, to),
     {
       if (from->addr >= sym->addr && from->addr <= sym->end_addr
 	  && arc_lookup (sym, to))
-	return TRUE;
+	return true;
     }
 
-  return FALSE;
+  return false;
 }

@@ -532,7 +532,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
       printf (nbbs == 1 ?
 	      _("\t%d basic-block count record\n") :
 	      _("\t%d basic-block count records\n"), nbbs);
-      first_output = FALSE;
+      first_output = false;
     }
 }
 

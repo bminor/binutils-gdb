@@ -291,7 +291,7 @@ DEFUN_VOID (cycle_link)
       ++num;
       ++cyc;
       sym_init (cyc);
-      cyc->cg.print_flag = TRUE;	/* should this be printed? */
+      cyc->cg.print_flag = true;	/* should this be printed? */
       cyc->cg.top_order = DFN_NAN;	/* graph call chain top-sort order */
       cyc->cg.cyc.num = num;	/* internal number of cycle on */
       cyc->cg.cyc.head = cyc;	/* pointer to head of cycle */
@@ -349,7 +349,7 @@ DEFUN (inherit_flags, (child), Sym * child)
   if (child == head)
     {
       /* just a regular child, check its parents: */
-      child->cg.print_flag = FALSE;
+      child->cg.print_flag = false;
       child->cg.prop.fract = 0.0;
       for (arc = child->cg.parents; arc; arc = arc->next_parent)
 	{
@@ -377,7 +377,7 @@ DEFUN (inherit_flags, (child), Sym * child)
        * Its a member of a cycle, look at all parents from outside
        * the cycle.
        */
-      head->cg.print_flag = FALSE;
+      head->cg.print_flag = false;
       head->cg.prop.fract = 0.0;
       for (member = head->cg.cyc.next; member; member = member->cg.cyc.next)
 	{
@@ -454,7 +454,7 @@ DEFUN (propagate_flags, (symbols), Sym ** symbols)
 	      || (syms[INCL_GRAPH].len == 0
 		  && !sym_lookup (&syms[EXCL_GRAPH], child->addr)))
 	    {
-	      child->cg.print_flag = TRUE;
+	      child->cg.print_flag = true;
 	    }
 	}
       else
@@ -467,7 +467,7 @@ DEFUN (propagate_flags, (symbols), Sym ** symbols)
 	  if (!sym_lookup (&syms[INCL_GRAPH], child->addr)
 	      && sym_lookup (&syms[EXCL_GRAPH], child->addr))
 	    {
-	      child->cg.print_flag = FALSE;
+	      child->cg.print_flag = false;
 	    }
 	}
       if (child->cg.prop.fract == 0.0)
@@ -603,7 +603,7 @@ DEFUN_VOID (cg_assemble)
       parent->cg.prop.fract = 0.0;
       parent->cg.prop.self = 0.0;
       parent->cg.prop.child = 0.0;
-      parent->cg.print_flag = FALSE;
+      parent->cg.print_flag = false;
       parent->cg.top_order = DFN_NAN;
       parent->cg.cyc.num = 0;
       parent->cg.cyc.head = parent;

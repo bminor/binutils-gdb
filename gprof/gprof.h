@@ -62,16 +62,6 @@
 
 #include "bin-bugs.h"
 
-/*
- * These may already be defined on some systems.  We could probably
- * just use the BFD versions of these, since BFD has already dealt
- * with this problem.
- */
-#undef FALSE
-#define	FALSE	0
-#undef TRUE
-#define	TRUE	1
-
 #define STYLE_FLAT_PROFILE	(1<<0)
 #define STYLE_CALL_GRAPH	(1<<1)
 #define STYLE_SUMMARY_FILE	(1<<2)
@@ -118,23 +108,23 @@ extern long hz;			/* ticks per second */
 /*
  * Command-line options:
  */
-extern int debug_level;		/* debug level */
+extern int debug_level;			/* debug level */
 extern int output_style;
-extern int output_width;	/* controls column width in index */
-extern bool bsd_style_output;	/* as opposed to FSF style output */
-extern bool demangle;		/* demangle symbol names? */
-extern bool discard_underscores;	/* discard leading underscores? */
-extern bool ignore_direct_calls;	/* don't count direct calls */
-extern bool ignore_static_funcs;	/* suppress static functions */
-extern bool ignore_zeros;	/* ignore unused symbols/files */
-extern bool line_granularity;	/* function or line granularity? */
-extern bool print_descriptions;	/* output profile description */
-extern bool print_path;		/* print path or just filename? */
-extern bool ignore_non_functions;/* Ignore non-function symbols.  */
+extern int output_width;		/* controls column width in index */
+extern boolean bsd_style_output;	/* as opposed to FSF style output */
+extern boolean demangle;		/* demangle symbol names? */
+extern boolean discard_underscores;	/* discard leading underscores? */
+extern boolean ignore_direct_calls;	/* don't count direct calls */
+extern boolean ignore_static_funcs;	/* suppress static functions */
+extern boolean ignore_zeros;		/* ignore unused symbols/files */
+extern boolean line_granularity;	/* function or line granularity? */
+extern boolean print_descriptions;	/* output profile description */
+extern boolean print_path;		/* print path or just filename? */
+extern boolean ignore_non_functions;	/* Ignore non-function symbols.  */
 
-extern File_Format file_format;	/* requested file format */
+extern File_Format file_format;		/* requested file format */
 
-extern bool first_output;	/* no output so far? */
+extern boolean first_output;		/* no output so far? */
 
 extern void done PARAMS ((int status));
 

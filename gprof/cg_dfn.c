@@ -43,7 +43,7 @@ int dfn_counter = DFN_NAN;
 /*
  * Is CHILD already numbered?
  */
-static bool
+static boolean
 DEFUN (is_numbered, (child), Sym * child)
 {
   return child->cg.top_order != DFN_NAN && child->cg.top_order != DFN_BUSY;
@@ -53,14 +53,14 @@ DEFUN (is_numbered, (child), Sym * child)
 /*
  * Is CHILD already busy?
  */
-static bool
+static boolean
 DEFUN (is_busy, (child), Sym * child)
 {
   if (child->cg.top_order == DFN_NAN)
     {
-      return FALSE;
+      return false;
     }
-  return TRUE;
+  return true;
 }
 
 

@@ -1,3 +1,27 @@
+2002-02-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* basic_blocks.c: Replace bool with boolean, TRUE with true and
+	FALSE with false throughout.
+	* basic_blocks.h: Likewise.
+	* cg_arcs.c: Likewise.
+	* cg_dfn.c: Likewise.
+	* cg_print.c: Likewise.
+	* corefile.c: Likewise.
+	* gmon_io.c: Likewise.
+	* gprof.c: Likewise.
+	* hist.c: Likewise.
+	* mips.c: Likewise.
+	* source.c: Likewise.
+	* source.h: Likewise.
+	* sym_ids.c: Likewise.
+	* sym_ids.h: Likewise.
+	* symtab.h: Likewise.
+	* tahoe.c: Likewise.
+	* vax.c: Likewise.
+	* gprof.h: Likewise.
+	(TRUE): Don't define.
+	(FALSE): Don't define.
+
 2002-01-31  Jason R Thorpe <thorpej@wasabisystems.com>
 
 	* TODO: Remove "host architecture pointer size" item.

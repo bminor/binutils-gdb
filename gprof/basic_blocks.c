@@ -33,7 +33,7 @@
 #include "sym_ids.h"
 
 /* Default option values:  */
-bool bb_annotate_all_lines = FALSE;
+boolean bb_annotate_all_lines = false;
 unsigned long bb_min_calls = 1;
 int bb_table_length = 10;
 
@@ -138,8 +138,8 @@ DEFUN (bb_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
 	     care about anymore.  */
 	  if ((fread (&ncalls, sizeof (ncalls), 1, ifp) != 1)
 	      || (fread (&addr, sizeof (addr), 1, ifp) != 1)
-	      || (fskip_string (ifp), FALSE)
-	      || (fskip_string (ifp), FALSE)
+	      || (fskip_string (ifp), false)
+	      || (fskip_string (ifp), false)
 	      || (fread (&line_num, sizeof (line_num), 1, ifp) != 1))
 	    {
 	      perror (filename);
@@ -181,11 +181,11 @@ DEFUN (bb_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
 	}
       else
 	{
-	  static bool user_warned = FALSE;
+	  static boolean user_warned = false;
 
 	  if (!user_warned)
 	    {
-	      user_warned = TRUE;
+	      user_warned = true;
 	      fprintf (stderr,
   _("%s: warning: ignoring basic-block exec counts (use -l or --line)\n"),
 		       whoami);
@@ -248,7 +248,7 @@ DEFUN_VOID (print_exec_counts)
   int i, j, len;
 
   if (first_output)
-    first_output = FALSE;
+    first_output = false;
   else
     printf ("\f\n");
 

@@ -48,7 +48,7 @@ static void
 DEFUN_VOID (print_header)
 {
   if (first_output)
-    first_output = FALSE;
+    first_output = false;
   else
     printf ("\f\n");
 

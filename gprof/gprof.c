@@ -44,19 +44,19 @@ long hz = HZ_WRONG;
 int debug_level = 0;
 int output_style = 0;
 int output_width = 80;
-bool bsd_style_output = FALSE;
-bool demangle = TRUE;
-bool discard_underscores = TRUE;
-bool ignore_direct_calls = FALSE;
-bool ignore_static_funcs = FALSE;
-bool ignore_zeros = TRUE;
-bool line_granularity = FALSE;
-bool print_descriptions = TRUE;
-bool print_path = FALSE;
-bool ignore_non_functions = FALSE;
+boolean bsd_style_output = false;
+boolean demangle = true;
+boolean discard_underscores = true;
+boolean ignore_direct_calls = false;
+boolean ignore_static_funcs = false;
+boolean ignore_zeros = true;
+boolean line_granularity = false;
+boolean print_descriptions = true;
+boolean print_path = false;
+boolean ignore_non_functions = false;
 File_Format file_format = FF_AUTO;
 
-bool first_output = TRUE;
+boolean first_output = true;
 
 char copyright[] =
  "@(#) Copyright (c) 1983 Regents of the University of California.\n\
@@ -192,7 +192,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
       switch (ch)
 	{
 	case 'a':
-	  ignore_static_funcs = TRUE;
+	  ignore_static_funcs = true;
 	  break;
 	case 'A':
 	  if (optarg)
@@ -203,14 +203,14 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  user_specified |= STYLE_ANNOTATED_SOURCE;
 	  break;
 	case 'b':
-	  print_descriptions = FALSE;
+	  print_descriptions = false;
 	  break;
 	case 'B':
 	  output_style |= STYLE_CALL_GRAPH;
 	  user_specified |= STYLE_CALL_GRAPH;
 	  break;
 	case 'c':
-	  ignore_direct_calls = TRUE;
+	  ignore_direct_calls = true;
 	  break;
 	case 'C':
 	  if (optarg)
@@ -236,7 +236,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 #endif	/* DEBUG */
 	  break;
 	case 'D':
-	  ignore_non_functions = TRUE;
+	  ignore_non_functions = true;
 	  break;
 	case 'E':
 	  sym_id_add (optarg, EXCL_TIME);
@@ -279,10 +279,10 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  sym_id_add (optarg, EXCL_ARCS);
 	  break;
 	case 'l':
-	  line_granularity = TRUE;
+	  line_granularity = true;
 	  break;
 	case 'L':
-	  print_path = TRUE;
+	  print_path = true;
 	  break;
 	case 'm':
 	  bb_min_calls = (unsigned long) strtoul (optarg, (char **) NULL, 10);
@@ -392,7 +392,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	    }
 	  break;
 	case 'T':
-	  bsd_style_output = TRUE;
+	  bsd_style_output = true;
 	  break;
 	case 'v':
 	  /* This output is intended to follow the GNU standards document.  */
@@ -409,13 +409,13 @@ This program is free software.  This program has absolutely no warranty.\n"));
 	    }
 	  break;
 	case 'x':
-	  bb_annotate_all_lines = TRUE;
+	  bb_annotate_all_lines = true;
 	  break;
 	case 'y':
-	  create_annotation_files = TRUE;
+	  create_annotation_files = true;
 	  break;
 	case 'z':
-	  ignore_zeros = FALSE;
+	  ignore_zeros = false;
 	  break;
 	case 'Z':
 	  if (optarg)
@@ -430,7 +430,7 @@ This program is free software.  This program has absolutely no warranty.\n"));
 	  user_specified |= STYLE_ANNOTATED_SOURCE;
 	  break;
 	case OPTION_DEMANGLE:
-	  demangle = TRUE;
+	  demangle = true;
 	  if (optarg != NULL)
 	    {
 	      enum demangling_styles style;
@@ -448,7 +448,7 @@ This program is free software.  This program has absolutely no warranty.\n"));
 	   }
 	  break;
 	case OPTION_NO_DEMANGLE:
-	  demangle = FALSE;
+	  demangle = false;
 	  break;
 	default:
 	  usage (stderr, 1);

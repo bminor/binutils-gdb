@@ -273,7 +273,7 @@ DEFUN (find_call, (parent, p_lowpc, p_highpc),
 	       whoami, bfd_printable_name(core_bfd));
 
       /* Don't give the error more than once.  */
-      ignore_direct_calls = FALSE;
+      ignore_direct_calls = false;
     }
 }
 
@@ -365,7 +365,7 @@ DEFUN (core_sym_class, (sym), asymbol * sym)
 
 /* Get whatever source info we can get regarding address ADDR.  */
 
-static bool
+static boolean
 DEFUN (get_src_info, (addr, filename, name, line_num),
        bfd_vma addr AND const char **filename AND const char **name
        AND int *line_num)
@@ -383,14 +383,14 @@ DEFUN (get_src_info, (addr, filename, name, line_num),
       *filename = fname;
       *name = func_name;
       *line_num = l;
-      return TRUE;
+      return true;
     }
   else
     {
       DBG (AOUTDEBUG, printf ("[get_src_info] no info for 0x%lx (%s:%d,%s)\n",
 			      (long) addr, fname ? fname : "<unknown>", l,
 			      func_name ? func_name : "<unknown>"));
-      return FALSE;
+      return false;
     }
 }
 
@@ -528,11 +528,11 @@ core_create_function_syms (core_bfd)
 	  }
       }
 
-      symtab.limit->is_func = TRUE;
-      symtab.limit->is_bb_head = TRUE;
+      symtab.limit->is_func = true;
+      symtab.limit->is_bb_head = true;
 
       if (class == 't')
-	symtab.limit->is_static = TRUE;
+	symtab.limit->is_static = true;
 
       min_vma = MIN (symtab.limit->addr, min_vma);
       max_vma = MAX (symtab.limit->addr, max_vma);

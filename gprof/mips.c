@@ -38,11 +38,11 @@ mips_find_call (parent, p_lowpc, p_highpc)
   unsigned int op;
   int offset;
   Sym *child;
-  static bool inited = FALSE;
+  static boolean inited = false;
 
   if (!inited)
     {
-      inited = TRUE;
+      inited = true;
       sym_init (&indirect_child);
       indirect_child.name = _("<indirect child>");
       indirect_child.cg.prop.fract = 1.0;

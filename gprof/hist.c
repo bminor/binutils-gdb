@@ -456,7 +456,7 @@ DEFUN_VOID (hist_print)
   bfd_vma addr;
 
   if (first_output)
-    first_output = FALSE;
+    first_output = false;
   else
     printf ("\f\n");
 
