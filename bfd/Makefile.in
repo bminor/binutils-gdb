@@ -42,8 +42,9 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 
 BFD_BACKENDS = oasys.o ieee.o srec.o \
 	aout64.o aout32.o demo64.o sunos.o newsos3.o bout.o \
-	icoff.o amdcoff.o m68kcoff.o i386coff.o m88k-bcs.o ecoff.o \
-	# trad-core.o 
+	icoff.o amdcoff.o m68kcoff.o i386coff.o m88k-bcs.o ecoff.o
+
+OPTIONAL_BACKENDS = trad-core.o
 
 BFD_H=$(INCDIR)/bfd.h
 SYSDEP_H=$(INCDIR)/sysdep.h
@@ -107,7 +108,7 @@ clean:
 clobber realclean: clean
 	rm -f libbfd.a TAGS
 
-$(BFD_LIBS) $(BFD_BACKENDS):  libbfd.h $(BFD_H)
+$(BFD_LIBS) $(BFD_BACKENDS) $(OPTIONAL_BACKENDS):  libbfd.h $(BFD_H)
 
 saber:
 	#suppress 65 on bfd_map_over_sections 
