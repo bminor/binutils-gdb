@@ -1,5 +1,17 @@
 2004-08-05  Andrew Cagney  <cagney@gnu.org>
 
+	* config/i386/xm-i386v.h: Delete file.
+	* config/i386/i386v.mh (XM_FILE, XM_CLIBS): Delete.
+	* config/i386/i386sco5.mh (XM_FILE, XM_CLIBS): Delete.
+	* config/i386/xm-i386sco.h: Delete file.
+	* config/i386/i386sco4.mh (XM_FILE, XM_CLIBS, MH_CFLAGS): Delete.
+	* config/i386/i386sco.mh (XM_FILE, XM_CLIBS, CC): Delete.
+	* config/i386/xm-i386v4.h: Delete file.
+	* config/djgpp/fnchange.lst: Do not fix xm-i386v4.h.
+	* config/i386/ncr3000.mh (CC, CFLAGS, XM_FILE): Delete.
+	* config/i386/i386v42mp.mh (XM_FILE, XM_CLIBS): Delete.
+	* config/i386/i386v4.mh (XM_FILE, XM_CLIBS): Delete.
+
 	* config/vax/xm-vax.h: Delete file.
 	* Makefile.in (xm-vaxult.h, xm-vaxbsd.h): Delete.
 	* config/vax/xm-vaxult2.h: Delete file.
