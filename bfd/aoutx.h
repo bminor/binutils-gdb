@@ -1,4 +1,3 @@
-#define BFD_AOUT_DEBUG
 /* BFD semi-generic back-end for a.out binaries
    Copyright (C) 1990-1991 Free Software Foundation, Inc.
    Written by Cygnus Support.
@@ -591,20 +590,12 @@ DEFUN(NAME(aout,set_arch_mach),(abfd, arch, machine),
       enum bfd_architecture arch AND
       unsigned long machine)
 {
-  bfd_arch_info_type *ainfo;
-
   bfd_default_set_arch_mach(abfd, arch, machine);
   if (arch != bfd_arch_unknown &&
       NAME(aout,machine_type) (arch, machine) == M_UNKNOWN)
     return false;		/* We can't represent this type */
 
-  BFD_ASSERT (&adata(abfd) != 0);
-  ainfo = bfd_get_arch_info (abfd);
-  if (ainfo->segment_size)
-    adata(abfd).segment_size = ainfo->segment_size;
-  if (ainfo->page_size)
-    adata(abfd).page_size = ainfo->page_size;
-  return true;			/* We're easy ... */
+  return (*aout_backend_info(abfd)->set_sizes) (abfd);
 }
 
 boolean
@@ -1420,13 +1411,33 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
     
   /* name was clobbered by aout_write_syms to be symbol index */
 
+  /* If this relocation is relative to a symbol then set the 
+     r_index to the symbols index, and the r_extern bit.
+
+     Absolute symbols can come in in two ways, either as an offset
+     from the abs section, or as a symbol which has an abs value.
+     check for that here
+     */
+     
+
   if (output_section == &bfd_com_section 
       || output_section == &bfd_abs_section
       || output_section == &bfd_und_section) 
     {
-      /* Fill in symbol */
-      r_extern = 1;
-      r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
+      if (bfd_abs_section.symbol == sym)
+      {
+	/* Whoops, looked like an abs symbol, but is really an offset
+	   from the abs section */
+	r_index = 0;
+	r_extern = 0;
+       }
+      else 
+      {
+	/* Fill in symbol */
+	r_extern = 1;
+	r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
+     
+      }
     }
   else 
     {
@@ -1485,13 +1496,30 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
   r_addend = g->addend + (*(g->sym_ptr_ptr))->section->output_section->vma;
 
 
- if (output_section == &bfd_com_section 
-     || output_section == &bfd_abs_section
-     || output_section == &bfd_und_section) 
+  /* If this relocation is relative to a symbol then set the 
+     r_index to the symbols index, and the r_extern bit.
+
+     Absolute symbols can come in in two ways, either as an offset
+     from the abs section, or as a symbol which has an abs value.
+     check for that here
+     */
+     
+  if (output_section == &bfd_com_section 
+      || output_section == &bfd_abs_section
+      || output_section == &bfd_und_section) 
   {
-    /* Fill in symbol */
-    r_extern = 1;
-    r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
+    if (bfd_abs_section.symbol == sym)
+    {
+      /* Whoops, looked like an abs symbol, but is really an offset
+	 from the abs section */
+      r_index = 0;
+      r_extern = 0;
+     }
+    else 
+    {
+      r_extern = 1;
+      r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
+    }
   }
   else 
   {
@@ -1503,20 +1531,20 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
 	 
   /* now the fun stuff */
   if (abfd->xvec->header_byteorder_big_p != false) {
-      natptr->r_index[0] = r_index >> 16;
-      natptr->r_index[1] = r_index >> 8;
-      natptr->r_index[2] = r_index;
-      natptr->r_type[0] =
-       (r_extern? RELOC_EXT_BITS_EXTERN_BIG: 0)
-	| (r_type << RELOC_EXT_BITS_TYPE_SH_BIG);
-    } else {
-	natptr->r_index[2] = r_index >> 16;
-	natptr->r_index[1] = r_index >> 8;
-	natptr->r_index[0] = r_index;
-	natptr->r_type[0] =
-	 (r_extern? RELOC_EXT_BITS_EXTERN_LITTLE: 0)
-	  | (r_type << RELOC_EXT_BITS_TYPE_SH_LITTLE);
-      }
+    natptr->r_index[0] = r_index >> 16;
+    natptr->r_index[1] = r_index >> 8;
+    natptr->r_index[2] = r_index;
+    natptr->r_type[0] =
+     (r_extern? RELOC_EXT_BITS_EXTERN_BIG: 0)
+      | (r_type << RELOC_EXT_BITS_TYPE_SH_BIG);
+  } else {
+    natptr->r_index[2] = r_index >> 16;
+    natptr->r_index[1] = r_index >> 8;
+    natptr->r_index[0] = r_index;
+    natptr->r_type[0] =
+     (r_extern? RELOC_EXT_BITS_EXTERN_LITTLE: 0)
+      | (r_type << RELOC_EXT_BITS_TYPE_SH_LITTLE);
+  }
 
   PUT_WORD (abfd, r_addend, natptr->r_addend);
 }

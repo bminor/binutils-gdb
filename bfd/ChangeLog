@@ -1,3 +1,9 @@
+Mon Aug 31 08:07:58 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* aoutx.h (aout<n>swap_ext_reloc_out), bout.c
+	(b_out_squirt_out_relocs): fix bug 1506 where abs symbols attached
+	to the built-in abs_section were not written out correctly.
+
 Fri Aug 28 16:29:15 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* archive.c (bfd_slurp_bsd_armap): if the symdef_count is too
