@@ -1,5 +1,11 @@
 Fri Jun 28 13:48:45 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (xcoff_link_check_ar_symbols): An undefined symbol
+	with XCOFF_DEF_DYNAMIC set is really defined.
+	(xcoff_link_check_dynamic_ar_symbols): Likewise.
+	(xcoff_link_add_symbols): Only create special sections if using an
+	XCOFF hash table.
+
 	* reloc.c (bfd_perform_relocation): Handle xcoff-powermac like
 	aixcoff-rs6000.
 	(bfd_install_relocation): Likewise.
