@@ -439,7 +439,8 @@ find_pc_sect_psymbol (psymtab, pc, section)
   if (!psymtab)
     return 0;
 
-  best_pc = psymtab->textlow - 1;
+  /* Cope with programs that start at address 0 */
+  best_pc = (psymtab->textlow != 0) ? psymtab->textlow - 1 : 0;
 
   /* Search the global symbols as well as the static symbols, so that
      find_pc_partial_function doesn't use a minimal symbol and thus
@@ -453,7 +454,9 @@ find_pc_sect_psymbol (psymtab, pc, section)
       if (SYMBOL_NAMESPACE (p) == VAR_NAMESPACE
 	  && SYMBOL_CLASS (p) == LOC_BLOCK
 	  && pc >= SYMBOL_VALUE_ADDRESS (p)
-	  && SYMBOL_VALUE_ADDRESS (p) > best_pc)
+	  && (SYMBOL_VALUE_ADDRESS (p) > best_pc
+	      || (psymtab->textlow == 0
+		  && best_pc == 0 && SYMBOL_VALUE_ADDRESS (p) == 0)))
 	{
 	  if (section)	/* match on a specific section */
 	    {
@@ -465,6 +468,7 @@ find_pc_sect_psymbol (psymtab, pc, section)
 	  best = p;
 	}
     }
+
   for (pp = psymtab->objfile->static_psymbols.list + psymtab->statics_offset;
        (pp - (psymtab->objfile->static_psymbols.list + psymtab->statics_offset)
 	< psymtab->n_static_syms);
@@ -474,7 +478,9 @@ find_pc_sect_psymbol (psymtab, pc, section)
       if (SYMBOL_NAMESPACE (p) == VAR_NAMESPACE
 	  && SYMBOL_CLASS (p) == LOC_BLOCK
 	  && pc >= SYMBOL_VALUE_ADDRESS (p)
-	  && SYMBOL_VALUE_ADDRESS (p) > best_pc)
+	  && (SYMBOL_VALUE_ADDRESS (p) > best_pc
+	      || (psymtab->textlow == 0 
+		  && best_pc == 0 && SYMBOL_VALUE_ADDRESS (p) == 0)))
 	{
 	  if (section)	/* match on a specific section */
 	    {
@@ -486,8 +492,7 @@ find_pc_sect_psymbol (psymtab, pc, section)
 	  best = p;
 	}
     }
-  if (best_pc == psymtab->textlow - 1)
-    return 0;
+
   return best;
 }
 
@@ -1466,24 +1471,23 @@ find_pc_line (pc, notcurrent)
 }
 
 
-static int find_line_symtab PARAMS ((struct symtab *, int, struct linetable **,
-				     int *, int *));
+static struct symtab* find_line_symtab PARAMS ((struct symtab *, int,
+						int *, int *));
 
 /* Find line number LINE in any symtab whose name is the same as
    SYMTAB.
 
-   If found, return 1, set *LINETABLE to the linetable in which it was
+   If found, return the symtab that contains the linetable in which it was
    found, set *INDEX to the index in the linetable of the best entry
    found, and set *EXACT_MATCH nonzero if the value returned is an
    exact match.
 
-   If not found, return 0.  */
+   If not found, return NULL.  */
 
-static int
-find_line_symtab (symtab, line, linetable, index, exact_match)
+static struct symtab*
+find_line_symtab (symtab, line, index, exact_match)
      struct symtab *symtab;
      int line;
-     struct linetable **linetable;
      int *index;
      int *exact_match;
 {
@@ -1494,9 +1498,11 @@ find_line_symtab (symtab, line, linetable, index, exact_match)
 
   int best_index;
   struct linetable *best_linetable;
+  struct symtab *best_symtab;
 
   /* First try looking it up in the given symtab.  */
   best_linetable = LINETABLE (symtab);
+  best_symtab = symtab;
   best_index = find_line_common (best_linetable, line, &exact);
   if (best_index < 0 || !exact)
     {
@@ -1535,6 +1541,7 @@ find_line_symtab (symtab, line, linetable, index, exact_match)
 		{
 		  best_index = ind;
 		  best_linetable = l;
+		  best_symtab = s;
 		  goto done;
 		}
 	      if (best == 0 || l->item[ind].line < best)
@@ -1542,21 +1549,21 @@ find_line_symtab (symtab, line, linetable, index, exact_match)
 		  best = l->item[ind].line;
 		  best_index = ind;
 		  best_linetable = l;
+		  best_symtab = s;
 		}
 	    }
 	}
     }
  done:
   if (best_index < 0)
-    return 0;
+    return NULL;
 
   if (index)
     *index = best_index;
-  if (linetable)
-    *linetable = best_linetable;
   if (exact_match)
     *exact_match = exact;
-  return 1;
+
+  return best_symtab;
 }
 
 /* Set the PC value for a given source file and line number and return true.
@@ -1576,8 +1583,10 @@ find_line_pc (symtab, line, pc)
   if (symtab == 0)
     return 0;
 
-  if (find_line_symtab (symtab, line, &l, &ind, NULL))
+  symtab = find_line_symtab (symtab, line, &ind, NULL);
+  if (symtab != NULL)
     {
+      l = LINETABLE (symtab);
       *pc = l->item[ind].pc;
       return 1;
     }
@@ -2427,7 +2436,14 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
       *argptr = q;
       if (s == 0)
 	s = default_symtab;
-      val.symtab = s;
+
+      /* It is possible that this source file has more than one symtab, 
+	 and that the new line number specification has moved us from the
+	 default (in s) to a new one.  */
+      val.symtab = find_line_symtab (s, val.line, NULL, NULL);
+      if (val.symtab == 0)
+	val.symtab = s;
+     
       val.pc = 0;
       values.sals = (struct symtab_and_line *)
 	xmalloc (sizeof (struct symtab_and_line));

@@ -38,6 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "language.h"
 #include "parser-defs.h"
+#include "symfile.h"	/* for overlay functions */
 
 /* Global variables declared in parser-defs.h (and commented there).  */
 struct expression *expout;
@@ -406,9 +407,16 @@ write_exp_msymbol (msymbol, text_symbol_type, data_symbol_type)
      struct type *text_symbol_type;
      struct type *data_symbol_type;
 {
+  CORE_ADDR addr;
+
   write_exp_elt_opcode (OP_LONG);
   write_exp_elt_type (lookup_pointer_type (builtin_type_void));
-  write_exp_elt_longcst ((LONGEST) SYMBOL_VALUE_ADDRESS (msymbol));
+
+  addr = SYMBOL_VALUE_ADDRESS (msymbol);
+  if (overlay_debugging)
+    addr = symbol_overlayed_address (addr, SYMBOL_BFD_SECTION (msymbol));
+  write_exp_elt_longcst ((LONGEST) addr);
+						
   write_exp_elt_opcode (OP_LONG);
 
   write_exp_elt_opcode (UNOP_MEMVAL);

@@ -1,3 +1,19 @@
+Fri Jul 17 9:26:50 1998  Ron Unrau  <runrau@cygnus.com>
+
+	* blockframe.c (find_pc_sect_partial_function): allow for the possi-
+	  bility of multiple symbols at the same address when finding high.
+	* breakpoint.c (resolve_sal_pc): if the function based section lookup
+	  fails, try getting the section from the minimal symbol table.
+	* parse.c (write_exp_msymbol): use symbol_overlayed_address to get
+	  the LMA of a minimal symbol if unmapped.
+	* symtab.c (find_line_symtab): change interface to return symtab 
+	  containing the best linetable found.
+	  (decode_line_1): use find_line_symtab to set val.symtab. This should
+	  improve support for source files with multiple symtabs.
+start-sanitize-sky
+	* tm-txvu.h: include tm-mips64.h instead of starting from scratch.
+end-sanitize-sky
+
 Wed Jul 15 11:51:33 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* main.c (main): Fix violations of GNU coding standard.
