@@ -1,6 +1,6 @@
 /* Memory-access and commands for "inferior" process, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -661,6 +661,13 @@ which has no line number information.\n", name);
 
 	  if (!stop_step)
 	    break;
+
+	  /* FIXME: On nexti, this may have already been done (when we hit the
+	     step resume break, I think).  Probably this should be moved to
+	     wait_for_inferior (near the top).  */
+#if defined (SHIFT_INST_REGS)
+	  SHIFT_INST_REGS ();
+#endif
 	}
 
       if (!single_inst || skip_subroutines)
@@ -695,7 +702,15 @@ step_1_continuation (struct continuation_arg *arg)
   count            = arg->next->next->data.integer;
 
   if (stop_step)
-    step_once (skip_subroutines, single_inst, count - 1);
+    {
+      /* FIXME: On nexti, this may have already been done (when we hit the
+	 step resume break, I think).  Probably this should be moved to
+	 wait_for_inferior (near the top).  */
+#if defined (SHIFT_INST_REGS)
+      SHIFT_INST_REGS ();
+#endif
+      step_once (skip_subroutines, single_inst, count - 1);
+    }
   else
     if (!single_inst || skip_subroutines)
       do_exec_cleanups (ALL_CLEANUPS);
@@ -1090,6 +1105,14 @@ print_return_value (int structure_return, struct type *value_type)
       if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
 	{
 	  CORE_ADDR addr = EXTRACT_STRUCT_VALUE_ADDRESS (stop_registers);
+	  if (!addr)
+	    error ("Function return value unknown.");
+	  value = value_at (value_type, addr, NULL);
+	}
+      else if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
+	{
+	  char *buf = deprecated_grub_regcache_for_registers (stop_registers);
+	  CORE_ADDR addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (buf);
 	  if (!addr)
 	    error ("Function return value unknown.");
 	  value = value_at (value_type, addr, NULL);

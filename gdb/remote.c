@@ -1,8 +1,7 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1162,6 +1161,10 @@ static int remote_unpack_thread_info_response (char *pkt,
 static int remote_get_threadinfo (threadref * threadid, int fieldset,	/*TAG mask */
 				  struct gdb_ext_thread_info *info);
 
+static int adapt_remote_get_threadinfo (gdb_threadref * ref,
+					int selection,
+					struct gdb_ext_thread_info *info);
+
 static char *pack_threadlist_request (char *pkt, int startflag,
 				      int threadcount,
 				      threadref * nextthread);
@@ -1571,6 +1574,19 @@ remote_get_threadinfo (threadref *threadid, int fieldset,	/* TAG mask */
   result = remote_unpack_thread_info_response (threadinfo_pkt + 2, threadid,
 					       info);
   return result;
+}
+
+/* Unfortunately, 61 bit thread-ids are bigger than the internal
+   representation of a threadid.  */
+
+static int
+adapt_remote_get_threadinfo (gdb_threadref *ref, int selection,
+			     struct gdb_ext_thread_info *info)
+{
+  threadref lclref;
+
+  int_to_threadref (&lclref, *ref);
+  return remote_get_threadinfo (&lclref, selection, info);
 }
 
 /*    Format: i'Q':8,i"L":8,initflag:8,batchsize:16,lastthreadid:32   */
@@ -2567,7 +2583,7 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   struct remote_state *rs = get_remote_state ();
   int pid = PIDGET (ptid);
-  char *buf = NULL, *outbuf;
+  char *buf = NULL;
   struct cleanup *old_cleanup;
 
   buf = xmalloc (rs->remote_packet_size);
@@ -2592,45 +2608,40 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	 don't have any PID numbers the inferior will understand.  Make sure
 	 to only send forms that do not specify a PID.  */
       if (step && siggnal != TARGET_SIGNAL_0)
-	outbuf = xstrprintf ("vCont;S%02x", siggnal);
+	sprintf (buf, "vCont;S%02x", siggnal);
       else if (step)
-	outbuf = xstrprintf ("vCont;s");
+	sprintf (buf, "vCont;s");
       else if (siggnal != TARGET_SIGNAL_0)
-	outbuf = xstrprintf ("vCont;C%02x", siggnal);
+	sprintf (buf, "vCont;C%02x", siggnal);
       else
-	outbuf = xstrprintf ("vCont;c");
+	sprintf (buf, "vCont;c");
     }
   else if (pid == -1)
     {
       /* Resume all threads, with preference for INFERIOR_PTID.  */
       if (step && siggnal != TARGET_SIGNAL_0)
-	outbuf = xstrprintf ("vCont;S%02x:%x;c", siggnal,
-			     PIDGET (inferior_ptid));
+	sprintf (buf, "vCont;S%02x:%x;c", siggnal, PIDGET (inferior_ptid));
       else if (step)
-	outbuf = xstrprintf ("vCont;s:%x;c", PIDGET (inferior_ptid));
+	sprintf (buf, "vCont;s:%x;c", PIDGET (inferior_ptid));
       else if (siggnal != TARGET_SIGNAL_0)
-	outbuf = xstrprintf ("vCont;C%02x:%x;c", siggnal,
-			     PIDGET (inferior_ptid));
+	sprintf (buf, "vCont;C%02x:%x;c", siggnal, PIDGET (inferior_ptid));
       else
-	outbuf = xstrprintf ("vCont;c");
+	sprintf (buf, "vCont;c");
     }
   else
     {
       /* Scheduler locking; resume only PTID.  */
       if (step && siggnal != TARGET_SIGNAL_0)
-	outbuf = xstrprintf ("vCont;S%02x:%x", siggnal, pid);
+	sprintf (buf, "vCont;S%02x:%x", siggnal, pid);
       else if (step)
-	outbuf = xstrprintf ("vCont;s:%x", pid);
+	sprintf (buf, "vCont;s:%x", pid);
       else if (siggnal != TARGET_SIGNAL_0)
-	outbuf = xstrprintf ("vCont;C%02x:%x", siggnal, pid);
+	sprintf (buf, "vCont;C%02x:%x", siggnal, pid);
       else
-	outbuf = xstrprintf ("vCont;c:%x", pid);
+	sprintf (buf, "vCont;c:%x", pid);
     }
 
-  gdb_assert (outbuf && strlen (outbuf) < rs->remote_packet_size);
-  make_cleanup (xfree, outbuf);
-
-  putpkt (outbuf);
+  putpkt (buf);
 
   do_cleanups (old_cleanup);
 

@@ -36,7 +36,6 @@
 
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
-#include "mips-tdep.h"
 
 static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 

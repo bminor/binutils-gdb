@@ -270,8 +270,7 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* NTO uses ELF.  */
   i386_elf_init_abi (info, gdbarch);
 
-  /* Neutrino rewinds to look more normal.  Need to override the i386
-     default which is [unfortunatly] to decrement the PC.  */
+  /* Neutrino rewinds to look more normal.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* NTO has shared libraries.  */

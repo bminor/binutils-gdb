@@ -1,8 +1,7 @@
 /* Intel 386 target-dependent stuff.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -509,13 +508,9 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	    subl %edx, %edx
 	    subl %eax, %eax
 
-	 Because of the symmetry, there are actually two ways to
-	 encode these instructions; with opcode bytes 0x29 and 0x2b
-	 for `subl' and opcode bytes 0x31 and 0x33 for `xorl'.
-
 	 Make sure we only skip these instructions if we later see the
 	 `movl %esp, %ebp' that actually sets up the frame.  */
-      while (op == 0x29 || op == 0x2b || op == 0x31 || op == 0x33)
+      while (op == 0x29 || op == 0x31)
 	{
 	  op = read_memory_unsigned_integer (pc + skip + 2, 1);
 	  switch (op)
@@ -1275,6 +1270,19 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 
 #undef I387_ST0_REGNUM
 }
+
+/* Extract from REGCACHE, which contains the (raw) register state, the
+   address in which a function should return its structure value, as a
+   CORE_ADDR.  */
+
+static CORE_ADDR
+i386_extract_struct_value_address (struct regcache *regcache)
+{
+  char buf[4];
+
+  regcache_cooked_read (regcache, I386_EAX_REGNUM, buf);
+  return extract_unsigned_integer (buf, 4);
+}
 
 
 /* This is the variable that is set with "set struct-convention", and
@@ -1983,6 +1991,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_value_to_register (gdbarch, i386_value_to_register);
 
   set_gdbarch_return_value (gdbarch, i386_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch,
+					    i386_extract_struct_value_address);
 
   set_gdbarch_skip_prologue (gdbarch, i386_skip_prologue);
 
@@ -1991,6 +2001,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, i386_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
+  set_gdbarch_function_start_offset (gdbarch, 0);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);

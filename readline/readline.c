@@ -933,9 +933,7 @@ rl_save_state (sp)
   sp->macro = rl_executing_macro;
 
   sp->catchsigs = rl_catch_signals;
-#if defined (SIGWINCH)
   sp->catchsigwinch = rl_catch_sigwinch;
-#endif
 
   return (0);
 }
@@ -969,9 +967,7 @@ rl_restore_state (sp)
   rl_executing_macro = sp->macro;
 
   rl_catch_signals = sp->catchsigs;
-#if defined (SIGWINCH)
   rl_catch_sigwinch = sp->catchsigwinch;
-#endif
 
   return (0);
 }

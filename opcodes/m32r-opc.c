@@ -1413,7 +1413,7 @@ static const CGEN_IBASE m32r_cgen_macro_insn_table[] =
 /* pop $dr */
   {
     -1, "pop", "pop", 16,
-    { 0|A(ALIAS), { (1<<MACH_BASE), PIPE_O } }
+    { 0|A(ALIAS), { (1<<MACH_BASE), PIPE_NONE } }
   },
 /* ldi $dr,$simm8 */
   {
