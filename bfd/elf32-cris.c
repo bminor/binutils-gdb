@@ -1916,7 +1916,7 @@ elf_cris_adjust_gotplt_to_got (h, p)
 	 Probably not necessary at this stage, but keeping it accurate
 	 helps avoiding surprises later.  */
       h->root.got.refcount += h->gotplt_refcount;
-      h->gotplt_refcount = -1;
+      h->gotplt_refcount = 0;
     }
   else
     {
@@ -1928,7 +1928,7 @@ elf_cris_adjust_gotplt_to_got (h, p)
       /* Put an accurate refcount there.  */
       h->root.got.refcount = h->gotplt_refcount;
 
-      h->gotplt_refcount = -1;
+      h->gotplt_refcount = 0;
 
       /* We always have a .got and a .rela.got section if there were
 	 GOTPLT relocs in input.  */

@@ -1,3 +1,8 @@
+2004-09-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (elf_cris_adjust_gotplt_to_got): Reset
+	h->gotplt_refcount to 0, not -1.
+
 2004-09-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_16_GOTPLT,
