@@ -61,6 +61,8 @@ extern void notice_quit PARAMS ((void));
 extern void report_transfer_performance PARAMS ((unsigned long,
 						 time_t, time_t));
 
+extern char *sh_processor_type;
+
 /* Local function declarations.  */
 
 static void e7000_close PARAMS ((int));
@@ -518,7 +520,7 @@ or \t\ttarget e7000 <host>[:<port>]\n\
 or \t\ttarget e7000 pc\n");
 	}
 
-#ifndef __GO32__
+#if !defined(__GO32__) && !defined(__WIN32__)
       if (n == 1 && strchr (dev_name, ':') == 0)
 	{
 	  /* Default to normal telnet port */
@@ -673,6 +675,26 @@ char *want_nopc = "%16 SR=%22\n\
  R0-7  %0 %1 %2 %3 %4 %5 %6 %7\n\
  R8-15 %8 %9 %10 %11 %12 %13 %14 %15";
 
+char *want_sh3 = "PC=%16 SR=%22\n\
+PR=%17 GBR=%18 VBR=%19\n\
+MACH=%20 MACL=%21 SSR=%23 SPC=%24\n\
+R0-7  %0 %1 %2 %3 %4 %5 %6 %7\n\
+R8-15 %8 %9 %10 %11 %12 %13 %14 %15\n\
+R0_BANK0-R3_BANK0 %25 %26 %27 %28\n\
+R4_BANK0-R7_BANK0 %29 %30 %31 %32\n\
+R0_BANK1-R3_BANK1 %33 %34 %35 %36\n\
+R4_BANK1-R7_BANK1 %37 %38 %39 %40";
+
+char *want_sh3_nopc = "%16 SR=%22\n\
+ PR=%17 GBR=%18 VBR=%19\n\
+ MACH=%20 MACL=%21 SSR=%22 SPC=%23\n\
+ R0-7  %0 %1 %2 %3 %4 %5 %6 %7\n\
+ R8-15 %8 %9 %10 %11 %12 %13 %14 %15\n\
+ R0_BANK0-R3_BANK0 %25 %26 %27 %28\n\
+ R4_BANK0-R7_BANK0 %29 %30 %31 %32\n\
+ R0_BANK1-R3_BANK1 %33 %34 %35 %36\n\
+ R4_BANK1-R7_BANK1 %37 %38 %39 %40";
+
 #endif
 
 static int
@@ -812,7 +834,16 @@ e7000_fetch_registers ()
   int regno;
 
   puts_e7000debug ("R\r");
+
+#ifdef GDB_TARGET_IS_SH
+  if  ((sh_processor_type != NULL) && (*(sh_processor_type+2) == '3')) 
+     fetch_regs_from_dump (gch, want_sh3);
+  else
+     fetch_regs_from_dump (gch, want);
+#else
   fetch_regs_from_dump (gch, want);
+#endif
+
 
   /* And supply the extra ones the simulator uses */
   for (regno = NUM_REALREGS; regno < NUM_REGS; regno++)
@@ -1185,7 +1216,7 @@ e7000_read_inferior_memory (memaddr, myaddr, len)
 }
 
 
-#if 0
+
 /*
   For large transfers we used to send
 
@@ -1193,10 +1224,10 @@ e7000_read_inferior_memory (memaddr, myaddr, len)
   d <addr> <endaddr>\r
 
   and receive
-   <ADDR>              <    D   A   T   A    >               <   ASCII CODE   >
-   000000  5F FD FD FF DF 7F DF FF  01 00 01 00 02 00 08 04  "_..............."
-   000010  FF D7 FF 7F D7 F1 7F FF  00 05 00 00 08 00 40 00  "..............@."
-   000020  7F FD FF F7 7F FF FF F7  00 00 00 00 00 00 00 00  "................"
+   <ADDRESS>           <    D   A   T   A    >               <   ASCII CODE   >
+   00000000 5F FD FD FF DF 7F DF FF  01 00 01 00 02 00 08 04  "_..............."
+   00000010 FF D7 FF 7F D7 F1 7F FF  00 05 00 00 08 00 40 00  "..............@."
+   00000020 7F FD FF F7 7F FF FF F7  00 00 00 00 00 00 00 00  "................"
 
   A cost in chars for each transaction of 80 + 5*n-bytes. 
 
@@ -1206,7 +1237,7 @@ e7000_read_inferior_memory (memaddr, myaddr, len)
 */
 
 static int
-e7000_read_inferior_memory (memaddr, myaddr, len)
+e7000_read_inferior_memory_large (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      unsigned char *myaddr;
      int len;
@@ -1228,29 +1259,22 @@ e7000_read_inferior_memory (memaddr, myaddr, len)
 
   count = 0;
   c = gch ();
-
-  /* First skip the command */
-  while (c == '\n')
+  
+  /* skip down to the first ">" */
+  while( c != '>' )
     c = gch ();
-
-  while (c == ' ')
-    c = gch ();
-  if (c == '*')
-    {
-      expect ("\r");
-      return -1;
-    }
-
-  /* Skip the title line */
-  while (c != '\n')
+  /* now skip to the end of that line */
+  while( c != '\r' )
     c = gch ();
   c = gch ();
+
   while (count < len)
     {
-      /* Skip the address */
+      /* get rid of any white space before the address */
       while (c <= ' ')
 	c = gch ();
 
+      /* Skip the address */
       get_hex (&c);
 
       /* read in the bytes on the line */
@@ -1263,16 +1287,19 @@ e7000_read_inferior_memory (memaddr, myaddr, len)
 	      myaddr[count++] = get_hex (&c);
 	    }
 	}
-
-      while (c != '\n')
+      /* throw out the rest of the line */
+      while( c != '\r' )
 	c = gch ();
     }
 
+  /* wait for the ":" prompt */
   while (c != ':')
     c = gch ();
 
   return len;
 }
+
+#if 0
 
 static int
 fast_but_for_the_pause_e7000_read_inferior_memory (memaddr, myaddr, len)
@@ -1374,8 +1401,11 @@ e7000_xfer_inferior_memory (memaddr, myaddr, len, write, target)
 {
   if (write)
     return e7000_write_inferior_memory( memaddr, myaddr, len);
-  else
-    return e7000_read_inferior_memory( memaddr, myaddr, len);
+  else 
+    if( len < 16 )
+      return e7000_read_inferior_memory( memaddr, myaddr, len);
+    else
+      return e7000_read_inferior_memory_large( memaddr, myaddr, len);
 }
 
 static void
@@ -1938,7 +1968,15 @@ e7000_wait (pid, status)
 
   /* Skip till the PC= */
   expect ("=");
+
+#ifdef GDB_TARGET_IS_SH
+  if  ((sh_processor_type != NULL) && (*(sh_processor_type+2) == '3')) 
+     fetch_regs_from_dump (gch, want_sh3_nopc);
+  else
+     fetch_regs_from_dump (gch, want_nopc);
+#else
   fetch_regs_from_dump (gch, want_nopc);
+#endif
 
   /* And supply the extra ones the simulator uses */
   for (regno = NUM_REALREGS; regno < NUM_REGS; regno++)

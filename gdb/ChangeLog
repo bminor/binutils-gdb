@@ -1,3 +1,8 @@
+Tue Jun 25 17:41:06 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* remote-e7000.c (e7000_read_inferior_memory_large): New function.
+	(e7000_xfer_inferior_memory): Call it.
+
 Tue Jun 25 23:14:07 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
 	* gdb/gdbserver/Makefile.in (docdir): Removed.
