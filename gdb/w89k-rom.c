@@ -88,11 +88,18 @@ struct monitor_ops w89k_cmds = {
   "T\r",				/* single step */
   "BP %x\r",				/* set a breakpoint */
   "BC %x\r",				/* clear a breakpoint */
-  "E %x %x\r",				/* set memory to a value */
-  "D %x\r",				/* display memory */
-  "",					/* prompt memory commands use */
+  {
+    "e %x %x\n",			/* set memory */
+    "",				        /* delimiter */
+    "",					/* the result */
+  },
+  {
+    "db %x %x\n",			/* get memory */
+    "",				        /* delimiter */
+    "",					/* the result */
+  },
   {					/* set a register */
-    "r %s %x\r",			/* set a register */
+    "r %s %x\n",			/* set a register */
     "",				        /* delimiter between registers */
     "",					/* the result */
   },

@@ -44,9 +44,11 @@ static char *op50n_regnames[] = {
 struct target_ops op50n_ops = {
   "op50n",
   "Oki's debug monitor for the Op50n Eval board",
+
   "Debug on a Oki OP50N eval board.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).",
   op50n_open,
+
   monitor_close, 
   0,
   monitor_detach,
@@ -85,18 +87,25 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 
 struct monitor_ops op50n_cmds = {
   1,					/* 1 for ASCII, 0 for binary */
-  "\n",					/* monitor init string */
+  ".\n",				/* monitor init string */
   "",		        /* execute or usually GO command */
   "",				/* continue command */
   "",				/* single step */
   "",				/* set a breakpoint */
   "",				/* clear a breakpoint */
-  "",				/* set memory to a value */
-  "",				/* display memory */
-  "",					/* prompt memory commands use */
-  {					/* set a register */
+  {
+    "sx %x %x;.\n",			/* set memory */
+    "",				/* delimiter  */
+    "",					/* the result */
+  },
+  {
+    "sx %x\n",				/* get memory */
+    ": ",				/* delimiter */
+    " ",				/* the result */
+  },
+  {
     "x %s %x\n",			/* set a register */
-    "",				        /* delimiter between registers */
+    "=",				/* delimiter between registers */
     "",					/* the result */
   },
   {
@@ -104,7 +113,7 @@ struct monitor_ops op50n_cmds = {
     "=",				/* delimiter between registers */
     " ",				/* the result */
   },
-  "r 0\r",				/* download command */
+  "r 0\n",				/* download command */
   "#",					/* monitor command prompt */
   " ",					/* end-of-command delimitor */
   ".\n",				/* optional command terminator */

@@ -1,4 +1,4 @@
-/* Remote debugging interface for ROM68K boot monitor, for GDB.
+/* Remote debugging interface ROM monitors.
  *  Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
  *  Contributed by Cygnus Support. Written by Rob Savoye for Cygnus.
  *
@@ -22,41 +22,73 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+struct rom_cmd_data {
+  char *cmd;			/* command to send */
+  char *delim;			/* the delimiter */
+  char *result;			/* the result */
+};
+
 struct monitor_ops {
+  int	type;			/* 1 is ascii, 0 is binary */
+  char  *init;			/* initialize to the monitor */
   char	*execute;		/* execute or usually GO command */
   char	*resume;		/* continue command */
   char	*step;			/* single step */
   char	*set_break;		/* set a breakpoint */
   char	*clr_break;		/* clear a breakpoint */
-  char	*set_mem;		/* set memory to a value */
-  char	*dis_mem;		/* display memory */
-  char	*mem_prompt;		/* prompt memory commands use */
-  char	*set_reg;		/* set a register */
-  char	*reg_delim;		/* delimiter between registers */
-  char	*get_reg;		/* read a register */
-  char	*load;			/* download command */
+  struct rom_cmd_data setmem;	/* set memory to a value */
+  struct rom_cmd_data getmem;	/* display memory */
+  struct rom_cmd_data regset;	/* set a register */
+  struct rom_cmd_data regget;	/* read a register */
+  char	*load;			/* load command */
   char	*prompt;		/* monitor command prompt */
   char	*cmd_delim;		/* end-of-command delimitor */
   char	*cmd_end;		/* optional command terminator */
+  struct target_ops *target;	/* target operations */
+  char	*loadtypes;		/* the load types that are supported */
+  char  **regnames;		/* array of register names in ascii */
 };
 
 extern struct monitor_ops        *current_monitor;
 
+#define PROTO_TYPE		(current_monitor->type)
+#define LOADTYPES		(current_monitor->loadtypes)
+#define INIT_CMD 		(current_monitor->init)
 #define GO_CMD 			(current_monitor->execute)
 #define CONT_CMD		(current_monitor->resume)
 #define STEP_CMD		(current_monitor->step)
 #define SET_BREAK_CMD		(current_monitor->set_break)
 #define CLR_BREAK_CMD		(current_monitor->clr_break)
-#define MEM_SET_CMD		(current_monitor->set_mem)
-#define MEM_DIS_CMD		(current_monitor->dis_mem)
+#define SET_MEM			(current_monitor->setmem)
+#define GET_MEM			(current_monitor->getmem)
 #define LOAD_CMD		(current_monitor->load)
-#define GET_REG			(current_monitor->get_reg)
-#define REG_DELIM		(current_monitor->reg_delim)
-#define SET_REG			(current_monitor->set_reg)
+#define GET_REG			(current_monitor->regget)
+#define SET_REG			(current_monitor->regset)
 #define CMD_END			(current_monitor->cmd_end)
 #define CMD_DELIM		(current_monitor->cmd_delim)
 #define PROMPT			(current_monitor->prompt)
-#define MEM_PROMPT		(current_monitor->mem_prompt)
+#define TARGET_OPS		(current_monitor->target)
+#define TARGET_NAME		(current_monitor->target->to_shortname)
+#define REGNAMES(x)		(current_monitor->regnames[x])
+#define ROMCMD(x)		(x.cmd)
+#define ROMDELIM(x)		(x.delim)
+#define ROMRES(x)		(x.result)
 
 #define push_monitor(x)		current_monitor = x;
-				 
+
+extern void monitor_open();
+extern void monitor_close();
+extern void monitor_detach();
+extern void monitor_resume();
+extern int  monitor_wait();
+extern void monitor_fetch_register();
+extern void monitor_store_register();
+extern void monitor_prepare_to_store();
+extern int  monitor_xfer_inferior_memory();
+extern void monitor_files_info();
+extern int  monitor_insert_breakpoint();
+extern int  monitor_remove_breakpoint();
+extern void monitor_kill();
+extern void monitor_load();
+extern void monitor_create_inferior();
+extern void monitor_mourn_inferior();
