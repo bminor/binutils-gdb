@@ -1,3 +1,7 @@
+Sun Feb 23 18:01:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* itbl-ops.c: Don't define DEBUG.
+
 Sun Feb 23 17:49:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* Makefile.in: Update itbl-test.c to reflect its new location.
