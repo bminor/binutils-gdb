@@ -1,3 +1,7 @@
+Fri May 21 17:02:22 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Use i386-sco.mt for i[36]86-*-isc*.
+
 Fri May 21 13:44:18 1993  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* aix386-core.c, aout-target.h, aoutx.h, coff-alpha.c,
