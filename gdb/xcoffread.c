@@ -529,17 +529,16 @@ process_linenos (start, end)
   char *pp;
   int offset, ii;
 
-  struct subfile main_subfile;		/* subfile structure for the main
-  					   compilation unit. */
+  /* subfile structure for the main compilation unit.  */
+  struct subfile main_subfile;
 
-  /* in the main source file, any time we see a function entry, we reset
-     this variable to function's absolute starting line number. All the
-     following line numbers in the function are relative to this, and
-     we record absolute line numbers in record_line(). */
+  /* In the main source file, any time we see a function entry, we
+     reset this variable to function's absolute starting line number.
+     All the following line numbers in the function are relative to
+     this, and we record absolute line numbers in record_line().  */
 
   int main_source_baseline = 0;
 
-  
   unsigned *firstLine;
   CORE_ADDR addr;
 
@@ -555,126 +554,146 @@ process_linenos (start, end)
     enter_line_range (&main_subfile, offset, 0, start, end, 
     						&main_source_baseline);
 
-  /* else, there was source with line numbers in include files */
-  else {
+  else
+    {
+      /* There was source with line numbers in include files.  */
+      main_source_baseline = 0;
+      for (ii=0; ii < inclIndx; ++ii)
+	{
+	  struct subfile *tmpSubfile;
 
-    main_source_baseline = 0;
-    for (ii=0; ii < inclIndx; ++ii) {
+	  /* If there is main file source before include file, enter it.  */
+	  if (offset < inclTable[ii].begin)
+	    {
+	      enter_line_range
+		(&main_subfile, offset, inclTable[ii].begin - LINESZ,
+		 start, 0, &main_source_baseline);
+	    }
 
-      struct subfile *tmpSubfile;
+	  /* Have a new subfile for the include file.  */
 
-      /* if there is main file source before include file, enter it. */
-      if (offset < inclTable[ii].begin) {
-	enter_line_range
-	  (&main_subfile, offset, inclTable[ii].begin - LINESZ, start, 0, 
-	  					&main_source_baseline);
-      }
+	  tmpSubfile = inclTable[ii].subfile =
+	    (struct subfile *) xmalloc (sizeof (struct subfile));
 
-      /* Have a new subfile for the include file */
+	  memset (tmpSubfile, '\0', sizeof (struct subfile));
+	  firstLine = &(inclTable[ii].funStartLine);
 
-      tmpSubfile = inclTable[ii].subfile = (struct subfile*) 
-      				xmalloc (sizeof (struct subfile));
+	  /* Enter include file's lines now.  */
+	  enter_line_range (tmpSubfile, inclTable[ii].begin, 
+			    inclTable[ii].end, start, 0, firstLine);
 
-      memset (tmpSubfile, '\0', sizeof (struct subfile));
-      firstLine = &(inclTable[ii].funStartLine);
+	  offset = inclTable[ii].end + LINESZ;
+	}
 
-      /* enter include file's lines now. */
-      enter_line_range (tmpSubfile, inclTable[ii].begin, 
-      				inclTable[ii].end, start, 0, firstLine);
-
-      offset = inclTable[ii].end + LINESZ;
+      /* All the include files' line have been processed at this point.  Now,
+	 enter remaining lines of the main file, if any left.  */
+      if (offset < (linetab_offset + linetab_size + 1 - LINESZ))
+	{
+	  enter_line_range (&main_subfile, offset, 0, start, end, 
+			    &main_source_baseline);
+	}
     }
 
-    /* all the include files' line have been processed at this point. Now,
-       enter remaining lines of the main file, if any left. */
-    if (offset < (linetab_offset + linetab_size + 1 - LINESZ)) {
-      enter_line_range (&main_subfile, offset, 0, start, end, 
-      						&main_source_baseline);
-    }
-  }
+  /* Process main file's line numbers.  */
+  if (main_subfile.line_vector)
+    {
+      struct linetable *lineTb, *lv;
 
-  /* Process main file's line numbers. */
-  if (main_subfile.line_vector) {
-    struct linetable *lineTb, *lv;
+      lv = main_subfile.line_vector;
 
-    lv = main_subfile.line_vector;
+      /* Line numbers are not necessarily ordered. xlc compilation will
+	 put static function to the end. */
 
-    /* Line numbers are not necessarily ordered. xlc compilation will
-       put static function to the end. */
+      lineTb = arrange_linetable (lv);
+      if (lv == lineTb)
+	{
+	  current_subfile->line_vector = (struct linetable *)
+	    xrealloc (lv, (sizeof (struct linetable)
+			   + lv->nitems * sizeof (struct linetable_entry)));
+	}
+      else
+	{
+	  free (lv);
+	  current_subfile->line_vector = lineTb;
+	}
 
-    lineTb = arrange_linetable (lv);
-    if (lv == lineTb) {
-      current_subfile->line_vector = (struct linetable *)
-	xrealloc (lv, (sizeof (struct linetable)
-			+ lv->nitems * sizeof (struct linetable_entry)));
-
-    }
-    else {
-	free (lv);
-	current_subfile->line_vector = lineTb;
+      current_subfile->line_vector_length = 
+	current_subfile->line_vector->nitems;
     }
 
-    current_subfile->line_vector_length = 
-    			current_subfile->line_vector->nitems;
-  }
+  /* Now, process included files' line numbers.  */
 
-    /* Now, process included files' line numbers. */
+  for (ii=0; ii < inclIndx; ++ii)
+    {
+      if ((inclTable[ii].subfile)->line_vector) /* Useless if!!! FIXMEmgo */
+	{
+	  struct linetable *lineTb, *lv;
 
-    for (ii=0; ii < inclIndx; ++ii) {
+	  lv = (inclTable[ii].subfile)->line_vector;
 
-      if ( (inclTable[ii].subfile)->line_vector) { /* Useless if!!! FIXMEmgo */
-        struct linetable *lineTb, *lv;
+	  /* Line numbers are not necessarily ordered. xlc compilation will
+	     put static function to the end. */
 
-        lv = (inclTable[ii].subfile)->line_vector;
+	  lineTb = arrange_linetable (lv);
 
-        /* Line numbers are not necessarily ordered. xlc compilation will
-           put static function to the end. */
+	  push_subfile ();
 
-        lineTb = arrange_linetable (lv);
+	  /* For the same include file, we might want to have more than one
+	     subfile.  This happens if we have something like:
 
-	push_subfile ();
-
-	/* For the same include file, we might want to have more than one subfile.
-	   This happens if we have something like:
-   
   		......
 	        #include "foo.h"
 		......
 	 	#include "foo.h"
 		......
 
-	   while foo.h including code in it. (stupid but possible)
-	   Since start_subfile() looks at the name and uses an existing one if finds,
-	   we need to provide a fake name and fool it. */
+	     while foo.h including code in it. (stupid but possible)
+	     Since start_subfile() looks at the name and uses an
+	     existing one if finds, we need to provide a fake name and
+	     fool it.  */
 
-/*	start_subfile (inclTable[ii].name, (char*)0);  */
-	start_subfile (" ?", (char*)0);
-	free (current_subfile->name);
-	current_subfile->name = strdup (inclTable[ii].name);
+#if 0
+	  start_subfile (inclTable[ii].name, (char*)0);
+#else
+	  {
+	    /* Pick a fake name that will produce the same results as this
+	       one when passed to deduce_language_from_filename.  Kludge on
+	       top of kludge.  */
+	    char *fakename = strrchr (inclTable[ii].name, '.');
+	    if (fakename == NULL)
+	      fakename = " ?";
+	    start_subfile (fakename, (char*)0);
+	    free (current_subfile->name);
+	  }
+	  current_subfile->name = strdup (inclTable[ii].name);
+#endif
 
-        if (lv == lineTb) {
-	  current_subfile->line_vector = (struct linetable *)
-		xrealloc (lv, (sizeof (struct linetable)
+	  if (lv == lineTb)
+	    {
+	      current_subfile->line_vector =
+		(struct linetable *) xrealloc
+		  (lv, (sizeof (struct linetable)
 			+ lv->nitems * sizeof (struct linetable_entry)));
 
-	}
-	else {
-	  free (lv);
-	  current_subfile->line_vector = lineTb;
-	}
+	    }
+	  else
+	    {
+	      free (lv);
+	      current_subfile->line_vector = lineTb;
+	    }
 
-	current_subfile->line_vector_length = 
-    			current_subfile->line_vector->nitems;
-	start_subfile (pop_subfile (), (char*)0);
-      }
+	  current_subfile->line_vector_length = 
+	    current_subfile->line_vector->nitems;
+	  start_subfile (pop_subfile (), (char*)0);
+	}
     }
 
-return_after_cleanup:
+ return_after_cleanup:
 
-  /* We don't want to keep alloc/free'ing the global include file table. */
+  /* We don't want to keep alloc/free'ing the global include file table.  */
   inclIndx = 0;
 
-  /* start with a fresh subfile structure for the next file. */
+  /* Start with a fresh subfile structure for the next file.  */
   memset (&main_subfile, '\0', sizeof (struct subfile));
 }
 
