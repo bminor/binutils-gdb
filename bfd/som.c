@@ -36,6 +36,7 @@
 #include <machine/reg.h>
 #include <sys/file.h>
 #include <errno.h>
+#include <ctype.h>
 
 /* Magic not defined in standard HP-UX header files until 8.0 */
 
@@ -250,8 +251,8 @@ static boolean som_bfd_prep_for_ar_write PARAMS ((bfd *, unsigned int *,
 static unsigned int som_bfd_ar_symbol_hash PARAMS ((asymbol *));
 static boolean som_bfd_ar_write_symbol_stuff PARAMS ((bfd *, unsigned int,
 						      unsigned int,
-						      struct lst_header));
-static CONST char *normalize PARAMS ((CONST char *file));
+						      struct lst_header,
+						      unsigned int));
 static boolean som_is_space PARAMS ((asection *));
 static boolean som_is_subspace PARAMS ((asection *));
 static boolean som_is_container PARAMS ((asection *, asection *));
@@ -5044,7 +5045,7 @@ som_sizeof_headers (abfd, reloc)
      bfd *abfd;
      boolean reloc;
 {
-  (*_bfd_error_handler) ("som_sizeof_headers unimplemented");
+  (*_bfd_error_handler) (_("som_sizeof_headers unimplemented"));
   fflush (stderr);
   abort ();
   return (0);
@@ -5518,27 +5519,15 @@ som_bfd_ar_symbol_hash (symbol)
 	  | (symbol->name[len-2] << 8) | symbol->name[len-1];
 }
 
-static CONST char *
-normalize (file)
-     CONST char *file;
-{
-  CONST char *filename = strrchr (file, '/');
-
-  if (filename != NULL)
-    filename++;
-  else
-    filename = file;
-  return filename;
-}
-
 /* Do the bulk of the work required to write the SOM library
    symbol table.  */
    
 static boolean
-som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
+som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst, elength)
      bfd *abfd;
      unsigned int nsyms, string_size;
      struct lst_header lst;
+     unsigned elength;
 {
   file_ptr lst_filepos;
   char *strings = NULL, *p;
@@ -5547,8 +5536,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   unsigned int *hash_table = NULL;
   struct som_entry *som_dict = NULL;
   struct lst_symbol_record **last_hash_entry = NULL;
-  unsigned int curr_som_offset, som_index, extended_name_length = 0;
-  unsigned int maxname = abfd->xvec->ar_max_namelen;
+  unsigned int curr_som_offset, som_index = 0;
 
   hash_table =
     (unsigned int *) bfd_malloc (lst.hash_size * sizeof (unsigned int));
@@ -5584,28 +5572,17 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
      describes.  We have to compute that information as we iterate
      through the SOMs/symbols.  */
   som_index = 0;
+
+  /* We add in the size of the archive header twice as the location
+     in the SOM dictionary is the actual offset of the SOM, not the
+     archive header before the SOM.  */
   curr_som_offset = 8 + 2 * sizeof (struct ar_hdr) + lst.file_end;
 
-  /* Yow!  We have to know the size of the extended name table
-     too.  */
-  for (curr_bfd = abfd->archive_head;
-       curr_bfd != NULL;
-       curr_bfd = curr_bfd->next)
-    {
-      CONST char *normal = normalize (curr_bfd->filename);
-      unsigned int thislen;
-
-      if (!normal)
-	return false;
-      thislen = strlen (normal);
-      if (thislen > maxname)
-	extended_name_length += thislen + 2;
-    }
-
   /* Make room for the archive header and the contents of the
-     extended string table.  */
-  if (extended_name_length)
-    curr_som_offset += extended_name_length + sizeof (struct ar_hdr);
+     extended string table.  Note that elength includes the size
+     of the archive header for the extended name table!  */
+  if (elength)
+    curr_som_offset += elength;
 
   /* Make sure we're properly aligned.  */
   curr_som_offset = (curr_som_offset + 0x1) & ~0x1;
@@ -5922,7 +5899,8 @@ som_write_armap (abfd, elength, map, orl_count, stridx)
     return false;
 
   /* Build and write the armap.  */
-  if (som_bfd_ar_write_symbol_stuff (abfd, nsyms, stringsize, lst) == false)
+  if (som_bfd_ar_write_symbol_stuff (abfd, nsyms, stringsize, lst, elength)
+      == false)
     return false;
   
   /* Done.  */

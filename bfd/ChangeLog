@@ -1,3 +1,8 @@
+Tue May  5 23:36:06 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* som.c: Include <ctype.h>.
+	* som.h: Don't include sysdep.h.
+
 Tue May  5 18:29:24 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* libbfd.h: Rebuilt.
