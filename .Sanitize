@@ -123,9 +123,6 @@ done
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
 
-# ??? It is debatable whether cfg-*.in belongs in Things-to-keep or
-# keep_these_too.  If someone feels strongly about it, please move them.
-
 Things-to-keep:
 
 COPYING
@@ -134,13 +131,13 @@ ChangeLog
 Makefile.in
 README
 config
-cfg-ml-com.in
-cfg-ml-pos.in
+config-ml.in
 config.guess
 config.sub
 configure
 configure.in
 etc
+symlink-tree
 
 Things-to-lose:
 

@@ -1,3 +1,14 @@
+Tue Nov 14 01:25:50 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (CONFIGURE_TARGET_MODULES): Pass --with-target-subdir.
+	Preserve relative path names in $srcdir.  Build symlink tree if
+	configuring cross target dir and srcdir=. (= no VPATH support).
+	(configure-target-libg++): Depend on configure-target-librx.
+	* cfg-ml-com.in, cfg-ml-pos.in: Deleted.
+	* config-ml.in: New file.
+	* symlink-tree: New file.
+	* configure: Ensure srcdir="." if that's what it is.
+
 Mon Nov 13 12:34:20 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-README: Clarify some phrasing, add notes about CodeWarrior
