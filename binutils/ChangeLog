@@ -1,3 +1,31 @@
+2001-12-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (symtab_shndx_hdr): New global.
+	(SECTION_HEADER_INDEX): Define.
+	(SECTION_HEADER_NUM): Define.
+	(SECTION_HEADER): Define.
+	(GET_ELF_SYMBOLS): Pass two params rather than three.
+	(get_32bit_elf_symbols): Take file and section args.  Read and
+	use SHT_SYMTAB_SHNDX.
+	(get_64bit_elf_symbols): Likewise.
+	(dump_relocations): Use SECTION_HEADER to index "section_headers".
+	(process_section_headers): Likewise.  Use SECTION_HEADER_NUM too.
+	Remember symtab_shdx_hdr.
+	(process_program_headers): Scan from index 1 for segment map.
+	(slurp_ia64_unwind_table): Use SECTION_HEADER to index
+	"section_headers".
+	(process_relocs): Likewise.  Also adjust call to GET_ELF_SYMBOLS.
+	(process_unwind): Likewise.
+	(process_version_sections): Likewise.
+	(process_symbol_table): Likewise.
+	(display_debug_info): Likewise.
+	(process_dynamic_segment): Fake up a symtab section for changed
+	GET_ELF_SYMBOLS.
+	(get_symbol_index_type): Check SHN_LOOS before SHN_LORESERVE.
+	(process_program_headers): Kill signed/unsigned warning.
+	(load_debug_str): Likewise.
+	(display_debug_info): Likewise.
+
 2001-12-13  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (get_segment_type): Support PT_GNU_EH_FRAME.

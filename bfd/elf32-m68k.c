@@ -805,13 +805,7 @@ elf_m68k_gc_mark_hook (abfd, info, rel, h, sym)
     }
   else
     {
-      if (!(elf_bad_symtab (abfd)
-	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-		&& sym->st_shndx != SHN_COMMON))
-	{
-	  return bfd_section_from_elf_index (abfd, sym->st_shndx);
-	}
+      return bfd_section_from_elf_index (abfd, sym->st_shndx);
     }
 
   return NULL;
@@ -2154,8 +2148,10 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
      char **errmsg;
 {
   Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *shndx_hdr;
   Elf32_External_Sym *extsyms;
   Elf32_External_Sym *free_extsyms = NULL;
+  Elf_External_Sym_Shndx *shndx_buf = NULL;
   Elf_Internal_Rela *internal_relocs;
   Elf_Internal_Rela *free_relocs = NULL;
   Elf_Internal_Rela *irel, *irelend;
@@ -2177,20 +2173,32 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
   else
     {
       /* Go get them off disk.  */
+      amt = symtab_hdr->sh_info * sizeof (Elf32_External_Sym);
       if (info->keep_memory)
-	extsyms = (Elf32_External_Sym *) bfd_alloc (abfd, symtab_hdr->sh_size);
+	extsyms = (Elf32_External_Sym *) bfd_alloc (abfd, amt);
       else
-	extsyms = (Elf32_External_Sym *) bfd_malloc (symtab_hdr->sh_size);
+	extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
       if (extsyms == NULL)
 	goto error_return;
       if (! info->keep_memory)
 	free_extsyms = extsyms;
       if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	  || (bfd_bread (extsyms, symtab_hdr->sh_size, abfd)
-	      != symtab_hdr->sh_size))
+	  || bfd_bread (extsyms, amt, abfd) != amt)
 	goto error_return;
       if (info->keep_memory)
 	symtab_hdr->contents = (unsigned char *) extsyms;
+    }
+
+  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+  if (shndx_hdr->sh_size != 0)
+    {
+      amt = symtab_hdr->sh_info * sizeof (Elf_External_Sym_Shndx);
+      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+      if (shndx_buf == NULL)
+	goto error_return;
+      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+	  || bfd_bread ((PTR) shndx_buf, amt, abfd) != amt)
+	goto error_return;
     }
 
   /* Get a copy of the native relocations.  */
@@ -2231,12 +2239,14 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
       /* Get the target section referred to by the reloc.  */
       if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
+	  Elf32_External_Sym *esym;
+	  Elf_External_Sym_Shndx *shndx;
 	  Elf_Internal_Sym isym;
 
 	  /* A local symbol.  */
-	  bfd_elf32_swap_symbol_in (abfd,
-				    extsyms + ELF32_R_SYM (irel->r_info),
-				    &isym);
+	  esym = extsyms + ELF32_R_SYM (irel->r_info);
+	  shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (irel->r_info) : 0);
+	  bfd_elf32_swap_symbol_in (abfd, esym, shndx, &isym);
 
 	  targetsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 	}
@@ -2262,6 +2272,8 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 	strncpy (p + 4, targetsec->output_section->name, 8);
     }
 
+  if (shndx_buf != NULL)
+    free (shndx_buf);
   if (free_extsyms != NULL)
     free (free_extsyms);
   if (free_relocs != NULL)
@@ -2269,6 +2281,8 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
   return true;
 
 error_return:
+  if (shndx_buf != NULL)
+    free (shndx_buf);
   if (free_extsyms != NULL)
     free (free_extsyms);
   if (free_relocs != NULL)

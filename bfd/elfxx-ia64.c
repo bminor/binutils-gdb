@@ -644,6 +644,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
     };
 
   Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *shndx_hdr;
   Elf_Internal_Rela *internal_relocs;
   Elf_Internal_Rela *free_relocs = NULL;
   Elf_Internal_Rela *irel, *irelend;
@@ -651,6 +652,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
   bfd_byte *free_contents = NULL;
   ElfNN_External_Sym *extsyms;
   ElfNN_External_Sym *free_extsyms = NULL;
+  Elf_External_Sym_Shndx *shndx_buf = NULL;
   struct elfNN_ia64_link_hash_table *ia64_info;
   struct one_fixup *fixups = NULL;
   boolean changed_contents = false;
@@ -712,18 +714,34 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	goto error_return;
     }
 
-  /* Read this BFD's symbols.  */
+  /* Read this BFD's local symbols.  */
   if (symtab_hdr->contents != NULL)
     extsyms = (ElfNN_External_Sym *) symtab_hdr->contents;
   else
     {
-      extsyms = (ElfNN_External_Sym *) bfd_malloc (symtab_hdr->sh_size);
+      bfd_size_type amt;
+
+      amt = symtab_hdr->sh_info * sizeof (ElfNN_External_Sym);
+      extsyms = (ElfNN_External_Sym *) bfd_malloc (amt);
       if (extsyms == NULL)
 	goto error_return;
       free_extsyms = extsyms;
       if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	  || (bfd_bread (extsyms, symtab_hdr->sh_size, abfd)
-	      != symtab_hdr->sh_size))
+	  || bfd_bread (extsyms, amt, abfd) != amt)
+	goto error_return;
+    }
+
+  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+  if (shndx_hdr->sh_size != 0)
+    {
+      bfd_size_type amt;
+
+      amt = symtab_hdr->sh_info * sizeof (Elf_External_Sym_Shndx);
+      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+      if (shndx_buf == NULL)
+	goto error_return;
+      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+	  || bfd_bread (shndx_buf, amt, abfd) != amt)
 	goto error_return;
     }
 
@@ -741,20 +759,21 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       /* Get the value of the symbol referred to by the reloc.  */
       if (ELFNN_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
+	  ElfNN_External_Sym *esym;
+	  Elf_External_Sym_Shndx *shndx;
+
 	  /* A local symbol.  */
-	  bfd_elfNN_swap_symbol_in (abfd,
-				    extsyms + ELFNN_R_SYM (irel->r_info),
-				    &isym);
+	  esym = extsyms + ELFNN_R_SYM (irel->r_info);
+	  shndx = shndx_buf + (shndx_buf ? ELFNN_R_SYM (irel->r_info) : 0);
+	  bfd_elfNN_swap_symbol_in (abfd, esym, shndx, &isym);
 	  if (isym.st_shndx == SHN_UNDEF)
 	    continue;	/* We can't do anthing with undefined symbols.  */
 	  else if (isym.st_shndx == SHN_ABS)
 	    tsec = bfd_abs_section_ptr;
 	  else if (isym.st_shndx == SHN_COMMON)
 	    tsec = bfd_com_section_ptr;
-	  else if (isym.st_shndx > 0 && isym.st_shndx < SHN_LORESERVE)
-	    tsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 	  else
-	    continue;	/* who knows.  */
+	    tsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 
 	  toff = isym.st_value;
 	}
@@ -922,6 +941,9 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	}
     }
 
+  if (shndx_buf != NULL)
+    free (shndx_buf);
+
   if (free_extsyms != NULL)
     {
       if (! link_info->keep_memory)
@@ -941,6 +963,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
     free (free_relocs);
   if (free_contents != NULL)
     free (free_contents);
+  if (shndx_buf != NULL)
+    free (shndx_buf);
   if (free_extsyms != NULL)
     free (free_extsyms);
   return false;
@@ -1225,15 +1249,15 @@ elfNN_ia64_aix_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
     }
   else if (sym->st_shndx == SHN_LOOS)
     {
-      int i;
+      unsigned int i;
 
       /* SHN_AIX_SYSCALL: Treat this as any other symbol.  The special symbol
 	 is only relevant when compiling code for extended system calls.
 	 Replace the "special" section with .text, if possible.
 	 Note that these symbols are always assumed to be in .text. */
-      for (i = 1; i < elf_elfheader (abfd)->e_shnum; i++)
+      for (i = 1; i < elf_numsections (abfd); i++)
 	{
-	  asection * sec = bfd_section_from_elf_index (abfd, (unsigned) i);
+	  asection * sec = bfd_section_from_elf_index (abfd, i);
 
 	  if (sec && strcmp (sec->name, ".text") == 0)
 	    {

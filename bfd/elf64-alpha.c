@@ -1362,12 +1362,14 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
      boolean *again;
 {
   Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *shndx_hdr;
   Elf_Internal_Rela *internal_relocs;
   Elf_Internal_Rela *free_relocs = NULL;
   Elf_Internal_Rela *irel, *irelend;
   bfd_byte *free_contents = NULL;
   Elf64_External_Sym *extsyms = NULL;
   Elf64_External_Sym *free_extsyms = NULL;
+  Elf_External_Sym_Shndx *shndx_buf = NULL;
   struct alpha_elf_got_entry **local_got_entries;
   struct alpha_relax_info info;
 
@@ -1448,17 +1450,33 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
       /* Read this BFD's symbols if we haven't done so already.  */
       if (extsyms == NULL)
 	{
+	  bfd_size_type amt;
+
 	  if (symtab_hdr->contents != NULL)
 	    extsyms = (Elf64_External_Sym *) symtab_hdr->contents;
 	  else
 	    {
-	      extsyms = (Elf64_External_Sym *) bfd_malloc (symtab_hdr->sh_size);
+	      amt = symtab_hdr->sh_info;
+	      amt *= sizeof (Elf64_External_Sym);
+	      extsyms = (Elf64_External_Sym *) bfd_malloc (amt);
 	      if (extsyms == NULL)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || (bfd_bread (extsyms, symtab_hdr->sh_size, abfd)
-		      != symtab_hdr->sh_size))
+		  || bfd_bread ((PTR) extsyms, amt, abfd) != amt)
+		goto error_return;
+	    }
+
+	  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+	  if (shndx_hdr->sh_size != 0)
+	    {
+	      amt = symtab_hdr->sh_info;
+	      amt *= sizeof (Elf_External_Sym_Shndx);
+	      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+	      if (shndx_buf == NULL)
+		goto error_return;
+	      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+		  || bfd_bread ((PTR) shndx_buf, amt, abfd) != amt)
 		goto error_return;
 	    }
 	}
@@ -1467,19 +1485,20 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
       if (ELF64_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  bfd_elf64_swap_symbol_in (abfd,
-				    extsyms + ELF64_R_SYM (irel->r_info),
-				    &isym);
+	  Elf64_External_Sym *esym;
+	  Elf_External_Sym_Shndx *shndx;
+
+	  esym = extsyms + ELF64_R_SYM (irel->r_info);
+	  shndx = shndx_buf + (shndx_buf ? ELF64_R_SYM (irel->r_info) : 0);
+	  bfd_elf64_swap_symbol_in (abfd, esym, shndx, &isym);
 	  if (isym.st_shndx == SHN_UNDEF)
 	    info.tsec = bfd_und_section_ptr;
-	  else if (isym.st_shndx > 0 && isym.st_shndx < SHN_LORESERVE)
-	    info.tsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 	  else if (isym.st_shndx == SHN_ABS)
 	    info.tsec = bfd_abs_section_ptr;
 	  else if (isym.st_shndx == SHN_COMMON)
 	    info.tsec = bfd_com_section_ptr;
 	  else
-	    continue;	/* who knows.  */
+	    info.tsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 
 	  info.h = NULL;
 	  info.other = isym.st_other;
@@ -1566,6 +1585,9 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	}
     }
 
+  if (shndx_buf != NULL)
+    free (shndx_buf);
+
   if (free_extsyms != NULL)
     {
       if (! link_info->keep_memory)
@@ -1586,6 +1608,8 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
     free (free_relocs);
   if (free_contents != NULL)
     free (free_contents);
+  if (shndx_buf != NULL)
+    free (shndx_buf);
   if (free_extsyms != NULL)
     free (free_extsyms);
   return false;

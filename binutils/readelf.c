@@ -102,6 +102,7 @@ int			loadaddr = 0;
 Elf_Internal_Ehdr       elf_header;
 Elf_Internal_Shdr *     section_headers;
 Elf_Internal_Dyn *      dynamic_segment;
+Elf_Internal_Shdr *     symtab_shndx_hdr;
 int			show_name;
 int			do_dynamic;
 int			do_syms;
@@ -202,8 +203,8 @@ static int                get_64bit_section_headers   PARAMS ((FILE *, unsigned 
 static int		  get_32bit_program_headers   PARAMS ((FILE *, Elf_Internal_Phdr *));
 static int		  get_64bit_program_headers   PARAMS ((FILE *, Elf_Internal_Phdr *));
 static int                get_file_header             PARAMS ((FILE *));
-static Elf_Internal_Sym * get_32bit_elf_symbols       PARAMS ((FILE *, unsigned long, unsigned long));
-static Elf_Internal_Sym * get_64bit_elf_symbols       PARAMS ((FILE *, unsigned long, unsigned long));
+static Elf_Internal_Sym * get_32bit_elf_symbols       PARAMS ((FILE *, Elf_Internal_Shdr *));
+static Elf_Internal_Sym * get_64bit_elf_symbols       PARAMS ((FILE *, Elf_Internal_Shdr *));
 static const char *	  get_elf_section_flags	      PARAMS ((bfd_vma));
 static int *              get_dynamic_data            PARAMS ((FILE *, unsigned int));
 static int                get_32bit_dynamic_segment   PARAMS ((FILE *));
@@ -264,6 +265,22 @@ typedef int Elf32_Word;
 				 ((X)->sh_name >= string_table_length \
 				  ? "<corrupt>" : string_table + (X)->sh_name))
 
+/* Given st_shndx I, map to section_headers index.  */
+#define SECTION_HEADER_INDEX(I)				\
+  ((I) < SHN_LORESERVE					\
+   ? (I)						\
+   : ((I) <= SHN_HIRESERVE				\
+      ? 0						\
+      : (I) - (SHN_HIRESERVE + 1 - SHN_LORESERVE)))
+
+/* Reverse of the above.  */
+#define SECTION_HEADER_NUM(N)				\
+  ((N) < SHN_LORESERVE					\
+   ? (N)						\
+   : (N) + (SHN_HIRESERVE + 1 - SHN_LORESERVE))
+
+#define SECTION_HEADER(I) (section_headers + SECTION_HEADER_INDEX (I))
+
 #define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order! */
 
 #define BYTE_GET(field)	byte_get (field, sizeof (field))
@@ -284,9 +301,9 @@ typedef int Elf32_Word;
 
 #define NUM_ELEM(array) 	(sizeof (array) / sizeof ((array)[0]))
 
-#define GET_ELF_SYMBOLS(file, offset, size)			\
-  (is_32bit_elf ? get_32bit_elf_symbols (file, offset, size)	\
-   : get_64bit_elf_symbols (file, offset, size))
+#define GET_ELF_SYMBOLS(file, section)			\
+  (is_32bit_elf ? get_32bit_elf_symbols (file, section)	\
+   : get_64bit_elf_symbols (file, section))
 
 
 static void
@@ -1042,7 +1059,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 	      if (psym->st_name == 0)
 		printf ("%-25.25s",
-			SECTION_NAME (section_headers + psym->st_shndx));
+			SECTION_NAME (SECTION_HEADER (psym->st_shndx)));
 	      else if (strtab == NULL)
 		printf (_("<string table index %3ld>"), psym->st_name);
 	      else
@@ -2745,7 +2762,7 @@ process_program_headers (file)
 
       for (i = 0; i < elf_header.e_phnum; i++)
 	{
-	  int                 j;
+	  unsigned int j;
 	  Elf_Internal_Shdr * section;
 
 	  segment = program_headers + i;
@@ -2753,7 +2770,7 @@ process_program_headers (file)
 
 	  printf ("   %2.2d     ", i);
 
-	  for (j = 0; j < elf_header.e_shnum; j++, section ++)
+	  for (j = 1; j < elf_header.e_shnum; j++, section ++)
 	    {
 	      if (section->sh_size > 0
 		  /* Compare allocated sections by VMA, unallocated
@@ -2871,29 +2888,47 @@ get_64bit_section_headers (file, num)
 }
 
 static Elf_Internal_Sym *
-get_32bit_elf_symbols (file, offset, number)
+get_32bit_elf_symbols (file, section)
      FILE * file;
-     unsigned long offset;
-     unsigned long number;
+     Elf_Internal_Shdr *section;
 {
+  unsigned long number;
   Elf32_External_Sym * esyms;
+  Elf_External_Sym_Shndx *shndx;
   Elf_Internal_Sym *   isyms;
   Elf_Internal_Sym *   psym;
   unsigned int         j;
 
   esyms = ((Elf32_External_Sym *)
-	   get_data (NULL, file, offset,
-		     number * sizeof (Elf32_External_Sym), _("symbols")));
+	   get_data (NULL, file, section->sh_offset,
+		     section->sh_size, _("symbols")));
   if (!esyms)
     return NULL;
 
+  shndx = NULL;
+  if (symtab_shndx_hdr != NULL
+      && (symtab_shndx_hdr->sh_link
+	  == (unsigned long) SECTION_HEADER_NUM (section - section_headers)))
+    {
+      shndx = ((Elf_External_Sym_Shndx *)
+	       get_data (NULL, file, symtab_shndx_hdr->sh_offset,
+			 symtab_shndx_hdr->sh_size, _("symtab shndx")));
+      if (!shndx)
+	{
+	  free (esyms);
+	  return NULL;
+	}
+    }
+
+  number = section->sh_size / section->sh_entsize;
   isyms = (Elf_Internal_Sym *) malloc (number * sizeof (Elf_Internal_Sym));
 
   if (isyms == NULL)
     {
       error (_("Out of memory\n"));
+      if (shndx)
+	free (shndx);
       free (esyms);
-
       return NULL;
     }
 
@@ -2905,39 +2940,62 @@ get_32bit_elf_symbols (file, offset, number)
       psym->st_value = BYTE_GET (esyms[j].st_value);
       psym->st_size  = BYTE_GET (esyms[j].st_size);
       psym->st_shndx = BYTE_GET (esyms[j].st_shndx);
+      if (psym->st_shndx == SHN_XINDEX && shndx != NULL)
+	psym->st_shndx
+	  = byte_get ((unsigned char *) &shndx[j], sizeof (shndx[j]));
       psym->st_info  = BYTE_GET (esyms[j].st_info);
       psym->st_other = BYTE_GET (esyms[j].st_other);
     }
 
+  if (shndx)
+    free (shndx);
   free (esyms);
 
   return isyms;
 }
 
 static Elf_Internal_Sym *
-get_64bit_elf_symbols (file, offset, number)
+get_64bit_elf_symbols (file, section)
      FILE * file;
-     unsigned long offset;
-     unsigned long number;
+     Elf_Internal_Shdr *section;
 {
+  unsigned long number;
   Elf64_External_Sym * esyms;
+  Elf_External_Sym_Shndx *shndx;
   Elf_Internal_Sym *   isyms;
   Elf_Internal_Sym *   psym;
   unsigned int         j;
 
   esyms = ((Elf64_External_Sym *)
-	   get_data (NULL, file, offset,
-		     number * sizeof (Elf64_External_Sym), _("symbols")));
+	   get_data (NULL, file, section->sh_offset,
+		     section->sh_size, _("symbols")));
   if (!esyms)
     return NULL;
 
+  shndx = NULL;
+  if (symtab_shndx_hdr != NULL
+      && (symtab_shndx_hdr->sh_link
+	  == (unsigned long) SECTION_HEADER_NUM (section - section_headers)))
+    {
+      shndx = ((Elf_External_Sym_Shndx *)
+	       get_data (NULL, file, symtab_shndx_hdr->sh_offset,
+			 symtab_shndx_hdr->sh_size, _("symtab shndx")));
+      if (!shndx)
+	{
+	  free (esyms);
+	  return NULL;
+	}
+    }
+
+  number = section->sh_size / section->sh_entsize;
   isyms = (Elf_Internal_Sym *) malloc (number * sizeof (Elf_Internal_Sym));
 
   if (isyms == NULL)
     {
       error (_("Out of memory\n"));
+      if (shndx)
+	free (shndx);
       free (esyms);
-
       return NULL;
     }
 
@@ -2949,10 +3007,15 @@ get_64bit_elf_symbols (file, offset, number)
       psym->st_info  = BYTE_GET (esyms[j].st_info);
       psym->st_other = BYTE_GET (esyms[j].st_other);
       psym->st_shndx = BYTE_GET (esyms[j].st_shndx);
+      if (psym->st_shndx == SHN_XINDEX && shndx != NULL)
+	psym->st_shndx
+	  = byte_get ((unsigned char *) &shndx[j], sizeof (shndx[j]));
       psym->st_value = BYTE_GET8 (esyms[j].st_value);
       psym->st_size  = BYTE_GET8 (esyms[j].st_size);
     }
 
+  if (shndx)
+    free (shndx);
   free (esyms);
 
   return isyms;
@@ -3010,7 +3073,7 @@ process_section_headers (file)
      FILE * file;
 {
   Elf_Internal_Shdr * section;
-  int                 i;
+  unsigned int        i;
 
   section_headers = NULL;
 
@@ -3035,7 +3098,7 @@ process_section_headers (file)
     return 0;
 
   /* Read in the string table, so that we have names to display.  */
-  section = section_headers + elf_header.e_shstrndx;
+  section = SECTION_HEADER (elf_header.e_shstrndx);
 
   if (section->sh_size != 0)
     {
@@ -3066,8 +3129,7 @@ process_section_headers (file)
 	    }
 
 	  num_dynamic_syms = section->sh_size / section->sh_entsize;
-	  dynamic_symbols =
-	    GET_ELF_SYMBOLS (file, section->sh_offset, num_dynamic_syms);
+	  dynamic_symbols = GET_ELF_SYMBOLS (file, section);
 	}
       else if (section->sh_type == SHT_STRTAB
 	       && strcmp (name, ".dynstr") == 0)
@@ -3081,6 +3143,15 @@ process_section_headers (file)
 	  dynamic_strings = (char *) get_data (NULL, file, section->sh_offset,
 					       section->sh_size,
 					       _("dynamic strings"));
+	}
+      else if (section->sh_type == SHT_SYMTAB_SHNDX)
+	{
+	  if (symtab_shndx_hdr != NULL)
+	    {
+	      error (_("File contains multiple symtab shndx tables\n"));
+	      continue;
+	    }
+	  symtab_shndx_hdr = section;
 	}
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
 		|| do_debug_lines || do_debug_pubnames || do_debug_aranges
@@ -3130,8 +3201,8 @@ process_section_headers (file)
        i < elf_header.e_shnum;
        i ++, section ++)
     {
-      printf ("  [%2d] %-17.17s %-15.15s ",
-	      i,
+      printf ("  [%2u] %-17.17s %-15.15s ",
+	      SECTION_HEADER_NUM (i),
 	      SECTION_NAME (section),
 	      get_section_type_name (section->sh_type));
 
@@ -3330,14 +3401,14 @@ process_relocs (file)
 		{
 		  Elf32_Internal_Shdr * symsec;
 
-		  symsec = section_headers + section->sh_link;
+		  symsec = SECTION_HEADER (section->sh_link);
 		  nsyms = symsec->sh_size / symsec->sh_entsize;
-		  symtab = GET_ELF_SYMBOLS (file, symsec->sh_offset, nsyms);
+		  symtab = GET_ELF_SYMBOLS (file, symsec);
 
 		  if (symtab == NULL)
 		    continue;
 
-		  strsec = section_headers + symsec->sh_link;
+		  strsec = SECTION_HEADER (symsec->sh_link);
 
 		  strtab = (char *) get_data (NULL, file, strsec->sh_offset,
 					      strsec->sh_size,
@@ -3589,7 +3660,7 @@ slurp_ia64_unwind_table (file, aux, sec)
        ++relsec)
     {
       if (relsec->sh_type != SHT_RELA
-	  || section_headers + relsec->sh_info != sec)
+	  || SECTION_HEADER (relsec->sh_info) != sec)
 	continue;
 
       if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
@@ -3683,9 +3754,9 @@ process_unwind (file)
       if (sec->sh_type == SHT_SYMTAB)
 	{
 	  aux.nsyms = sec->sh_size / sec->sh_entsize;
-	  aux.symtab = GET_ELF_SYMBOLS (file, sec->sh_offset, aux.nsyms);
+	  aux.symtab = GET_ELF_SYMBOLS (file, sec);
 
-	  strsec = section_headers + sec->sh_link;
+	  strsec = SECTION_HEADER (sec->sh_link);
 	  aux.strtab_size = strsec->sh_size;
 	  aux.strtab = (char *) get_data (NULL, file, strsec->sh_offset,
 					  aux.strtab_size, _("string table"));
@@ -4065,7 +4136,7 @@ process_dynamic_segment (file)
 	   i < dynamic_size;
 	   ++i, ++ entry)
 	{
-	  unsigned long        offset;
+	  Elf32_Internal_Shdr section;
 
 	  if (entry->d_tag != DT_SYMTAB)
 	    continue;
@@ -4076,23 +4147,25 @@ process_dynamic_segment (file)
 	     we default to reading in the entire file (!) and
 	     processing that.  This is overkill, I know, but it
 	     should work.  */
-	  offset = entry->d_un.d_val - loadaddr;
+	  section.sh_offset = entry->d_un.d_val - loadaddr;
 
 	  if (fseek (file, 0, SEEK_END))
 	    error (_("Unable to seek to end of file!"));
 
+	  section.sh_size = ftell (file) - section.sh_offset;
 	  if (is_32bit_elf)
-	    num_dynamic_syms = (ftell (file) - offset) / sizeof (Elf32_External_Sym);
+	    section.sh_entsize = sizeof (Elf32_External_Sym);
 	  else
-	    num_dynamic_syms = (ftell (file) - offset) / sizeof (Elf64_External_Sym);
+	    section.sh_entsize = sizeof (Elf64_External_Sym);
 
+	  num_dynamic_syms = section.sh_size / section.sh_entsize;
 	  if (num_dynamic_syms < 1)
 	    {
 	      error (_("Unable to determine the number of symbols to load\n"));
 	      continue;
 	    }
 
-	  dynamic_symbols = GET_ELF_SYMBOLS (file, offset, num_dynamic_syms);
+	  dynamic_symbols = GET_ELF_SYMBOLS (file, &section);
 	}
     }
 
@@ -4613,7 +4686,7 @@ process_version_sections (file)
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %lx (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
-		    SECTION_NAME (section_headers + section->sh_link));
+		    SECTION_NAME (SECTION_HEADER (section->sh_link)));
 
 	    edefs = ((Elf_External_Verdef *)
 		     get_data (NULL, file, section->sh_offset,
@@ -4704,7 +4777,7 @@ process_version_sections (file)
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link to section: %ld (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
-		    SECTION_NAME (section_headers + section->sh_link));
+		    SECTION_NAME (SECTION_HEADER (section->sh_link)));
 
 	    eneed = ((Elf_External_Verneed *)
 		     get_data (NULL, file, section->sh_offset,
@@ -4786,15 +4859,14 @@ process_version_sections (file)
 	    Elf_Internal_Sym * 		symbols;
 	    Elf32_Internal_Shdr *       string_sec;
 
-	    link_section = section_headers + section->sh_link;
+	    link_section = SECTION_HEADER (section->sh_link);
 	    total = section->sh_size / section->sh_entsize;
 
 	    found = 1;
 
-	    symbols = GET_ELF_SYMBOLS (file, link_section->sh_offset,
-				       link_section->sh_size / link_section->sh_entsize);
+	    symbols = GET_ELF_SYMBOLS (file, link_section);
 
-	    string_sec = section_headers + link_section->sh_link;
+	    string_sec = SECTION_HEADER (link_section->sh_link);
 
 	    strtab = (char *) get_data (NULL, file, string_sec->sh_offset,
 					string_sec->sh_size,
@@ -4855,8 +4927,7 @@ process_version_sections (file)
 
 		      check_def = 1;
 		      check_need = 1;
-		      if (symbols [cnt + j].st_shndx >= SHN_LORESERVE
-			  || section_headers[symbols [cnt + j].st_shndx].sh_type
+		      if (SECTION_HEADER (symbols [cnt + j].st_shndx)->sh_type
 			  != SHT_NOBITS)
 			{
 			  if (symbols [cnt + j].st_shndx == SHN_UNDEF)
@@ -5082,10 +5153,10 @@ get_symbol_index_type (type)
     default:
       if (type >= SHN_LOPROC && type <= SHN_HIPROC)
 	return "PRC";
-      else if (type >= SHN_LORESERVE && type <= SHN_HIRESERVE)
-	return "RSV";
       else if (type >= SHN_LOOS && type <= SHN_HIOS)
 	return "OS ";
+      else if (type >= SHN_LORESERVE && type <= SHN_HIRESERVE)
+	return "RSV";
       else
 	{
 	  static char buff [32];
@@ -5244,8 +5315,7 @@ process_symbol_table (file)
 	  else
 	    printf (_("   Num:    Value          Size Type    Bind   Vis      Ndx Name\n"));
 
-	  symtab = GET_ELF_SYMBOLS (file, section->sh_offset,
-				    section->sh_size / section->sh_entsize);
+	  symtab = GET_ELF_SYMBOLS (file, section);
 	  if (symtab == NULL)
 	    continue;
 
@@ -5255,7 +5325,7 @@ process_symbol_table (file)
 	    {
 	      Elf32_Internal_Shdr * string_sec;
 
-	      string_sec = section_headers + section->sh_link;
+	      string_sec = SECTION_HEADER (section->sh_link);
 
 	      strtab = (char *) get_data (NULL, file, string_sec->sh_offset,
 					  string_sec->sh_size,
@@ -5293,9 +5363,8 @@ process_symbol_table (file)
 
 		  vers_data = byte_get (data, 2);
 
-		  is_nobits = psym->st_shndx < SHN_LORESERVE ?
-		    (section_headers [psym->st_shndx].sh_type == SHT_NOBITS)
-		    : 0;
+		  is_nobits = (SECTION_HEADER (psym->st_shndx)->sh_type
+			       == SHT_NOBITS);
 
 		  check_def = (psym->st_shndx != SHN_UNDEF);
 
@@ -6976,7 +7045,7 @@ load_debug_str (file)
      FILE * file;
 {
   Elf32_Internal_Shdr * sec;
-  int                   i;
+  unsigned int          i;
 
   /* If it is already loaded, do nothing.  */
   if (debug_str_contents != NULL)
@@ -7414,7 +7483,7 @@ display_debug_info (section, start, file)
       DWARF2_Internal_CompUnit   compunit;
       Elf32_Internal_Shdr *      relsec;
       unsigned char *            tags;
-      int                        i;
+      unsigned int               i;
       int			 level;
       unsigned long		 cu_offset;
 
@@ -7437,23 +7506,22 @@ display_debug_info (section, start, file)
 	   relsec < section_headers + elf_header.e_shnum;
 	   ++relsec)
 	{
-	  unsigned long nrelas, nsyms;
+	  unsigned long nrelas;
 	  Elf_Internal_Rela *rela, *rp;
 	  Elf32_Internal_Shdr *symsec;
 	  Elf_Internal_Sym *symtab;
 	  Elf_Internal_Sym *sym;
 
 	  if (relsec->sh_type != SHT_RELA
-	      || section_headers + relsec->sh_info != section)
+	      || SECTION_HEADER (relsec->sh_info) != section)
 	    continue;
 
 	  if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
 				  & rela, & nrelas))
 	    return 0;
 
-	  symsec = section_headers + relsec->sh_link;
-	  nsyms = symsec->sh_size / symsec->sh_entsize;
-	  symtab = GET_ELF_SYMBOLS (file, symsec->sh_offset, nsyms);
+	  symsec = SECTION_HEADER (relsec->sh_link);
+	  symtab = GET_ELF_SYMBOLS (file, symsec);
 
 	  for (rp = rela; rp < rela + nrelas; ++rp)
 	    {

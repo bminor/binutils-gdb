@@ -577,32 +577,59 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
     {
       bfd_vma *local_plt_offsets = elf_local_got_offsets (ibfd);
       Elf_Internal_Shdr *symtab_hdr;
+      Elf_Internal_Shdr *shndx_hdr;
       Elf32_External_Sym *extsyms;
+      Elf_External_Sym_Shndx *shndx_buf;
       unsigned int idx;
 
       if (! local_plt_offsets)
 	continue;
 
       symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+      shndx_hdr = &elf_tdata (ibfd)->symtab_shndx_hdr;
 
       if (symtab_hdr->contents != NULL)
 	extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
       else
 	{
-	  extsyms = (Elf32_External_Sym *) bfd_malloc (symtab_hdr->sh_size);
+	  bfd_size_type amt;
+
+	  amt = symtab_hdr->sh_info;
+	  amt *= sizeof (Elf32_External_Sym);
+	  extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
 	  if (extsyms == NULL)
 	    return false;
 	  if (bfd_seek (ibfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_bread (extsyms, symtab_hdr->sh_size, ibfd)
-		  != symtab_hdr->sh_size))
+	      || bfd_bread ((PTR) extsyms, amt, ibfd) != amt)
 	    {
+	    error_ret_free_extsyms:
 	      free (extsyms);
 	      return false;
 	    }
 	}
 
+      shndx_buf = NULL;
+      if (shndx_hdr->sh_size != 0)
+	{
+	  bfd_size_type amt;
+
+	  amt = symtab_hdr->sh_info;
+	  amt *= sizeof (Elf_External_Sym_Shndx);
+	  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+	  if (shndx_buf == NULL)
+	    goto error_ret_free_extsyms;
+	  if (bfd_seek (ibfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+	      || bfd_bread ((PTR) shndx_buf, amt, ibfd) != amt)
+	    {
+	      free (shndx_buf);
+	      goto error_ret_free_extsyms;
+	    }
+	  shndx_hdr->contents = (bfd_byte *) shndx_buf;
+	}
+
       for (idx = 0; idx < symtab_hdr->sh_info; ++idx)
 	{
+	  Elf_External_Sym_Shndx *shndx;
 	  Elf_Internal_Sym isym;
 	  asection *tsec;
 	  bfd_vma address;
@@ -610,15 +637,18 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
 	  if (local_plt_offsets[idx] == (bfd_vma) -1)
 	    continue;
 
-	  bfd_elf32_swap_symbol_in (ibfd, extsyms + idx, &isym);
+	  shndx = shndx_buf;
+	  if (shndx != NULL)
+	    shndx += idx;
+	  bfd_elf32_swap_symbol_in (ibfd, extsyms + idx, shndx, &isym);
 	  if (isym.st_shndx == SHN_UNDEF)
 	    continue;
-	  else if (isym.st_shndx > 0 && isym.st_shndx < SHN_LORESERVE)
-	    tsec = bfd_section_from_elf_index (ibfd, isym.st_shndx);
 	  else if (isym.st_shndx == SHN_ABS)
 	    tsec = bfd_abs_section_ptr;
+	  else if (isym.st_shndx == SHN_COMMON)
+	    tsec = bfd_com_section_ptr;
 	  else
-	    continue;
+	    tsec = bfd_section_from_elf_index (ibfd, isym.st_shndx);
 
 	  address = (tsec->output_section->vma
 		     + tsec->output_offset
@@ -631,7 +661,10 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
 	    }
 	}
 
-      if (symtab_hdr->contents != extsyms)
+      if (shndx_buf != NULL)
+	free (shndx_buf);
+
+      if ((Elf32_External_Sym *) symtab_hdr->contents != extsyms)
         free (extsyms);
     }
 
@@ -1024,13 +1057,7 @@ xstormy16_elf_gc_mark_hook (abfd, info, rel, h, sym)
     }
   else
     {
-      if (!(elf_bad_symtab (abfd)
-	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-		&& sym->st_shndx != SHN_COMMON))
-	{
-	  return bfd_section_from_elf_index (abfd, sym->st_shndx);
-	}
+      return bfd_section_from_elf_index (abfd, sym->st_shndx);
     }
 
   return NULL;

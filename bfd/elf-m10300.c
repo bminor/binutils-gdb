@@ -125,7 +125,7 @@ static asection *mn10300_elf_gc_mark_hook
 static boolean mn10300_elf_relax_delete_bytes
   PARAMS ((bfd *, asection *, bfd_vma, int));
 static boolean mn10300_elf_symbol_address_p
-  PARAMS ((bfd *, asection *, Elf32_External_Sym *, bfd_vma));
+  PARAMS ((bfd *, asection *, bfd_vma));
 static boolean elf32_mn10300_finish_hash_table_entry
   PARAMS ((struct bfd_hash_entry *, PTR));
 static void compute_function_info
@@ -427,13 +427,7 @@ mn10300_elf_gc_mark_hook (abfd, info, rel, h, sym)
     }
   else
     {
-      if (!(elf_bad_symtab (abfd)
-	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-		&& sym->st_shndx != SHN_COMMON))
-	{
-	  return bfd_section_from_elf_index (abfd, sym->st_shndx);
-	}
+      return bfd_section_from_elf_index (abfd, sym->st_shndx);
     }
 
   return NULL;
@@ -803,6 +797,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
      boolean *again;
 {
   Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *shndx_hdr;
   Elf_Internal_Rela *internal_relocs = NULL;
   Elf_Internal_Rela *free_relocs = NULL;
   Elf_Internal_Rela *irel, *irelend;
@@ -810,6 +805,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
   bfd_byte *free_contents = NULL;
   Elf32_External_Sym *extsyms = NULL;
   Elf32_External_Sym *free_extsyms = NULL;
+  Elf_External_Sym_Shndx *shndx_buf = NULL;
   struct elf32_mn10300_link_hash_table *hash_table;
 
   /* Assume nothing changes.  */
@@ -832,20 +828,38 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 	  /* We're going to need all the symbols for each bfd.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+	  shndx_hdr = &elf_tdata (input_bfd)->symtab_shndx_hdr;
 
 	  /* Get cached copy if it exists.  */
 	  if (symtab_hdr->contents != NULL)
 	    extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
 	  else
 	    {
-	      bfd_size_type amt = symtab_hdr->sh_size;
 	      /* Go get them off disk.  */
+	      bfd_size_type amt;
+
+	      amt = symtab_hdr->sh_info;
+	      amt *= sizeof (Elf32_External_Sym);
 	      extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
 	      if (extsyms == NULL)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || bfd_bread (extsyms, amt, input_bfd) != amt)
+		  || bfd_bread ((PTR) extsyms, amt, input_bfd) != amt)
+		goto error_return;
+	    }
+
+	  if (shndx_hdr->sh_size != 0)
+	    {
+	      bfd_size_type amt;
+
+	      amt = symtab_hdr->sh_info;
+	      amt *= sizeof (Elf_External_Sym_Shndx);
+	      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+	      if (shndx_buf == NULL)
+		goto error_return;
+	      if (bfd_seek (input_bfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+		  || bfd_bread ((PTR) shndx_buf, amt, input_bfd) != amt)
 		goto error_return;
 	    }
 
@@ -921,28 +935,33 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		      if (r_index < symtab_hdr->sh_info)
 			{
 			  /* A local symbol.  */
+			  Elf32_External_Sym *esym;
+			  Elf_External_Sym_Shndx *shndx;
 			  Elf_Internal_Sym isym;
 			  struct elf_link_hash_table *elftab;
 			  bfd_size_type amt;
 
-			  bfd_elf32_swap_symbol_in (input_bfd,
-						    extsyms + r_index, &isym);
+			  esym = extsyms + r_index;
+			  shndx = shndx_buf + (shndx_buf ? r_index : 0);
+			  bfd_elf32_swap_symbol_in (input_bfd, esym, shndx,
+						    &isym);
 
 			  if (isym.st_shndx == SHN_UNDEF)
 			    sym_sec = bfd_und_section_ptr;
-			  else if (isym.st_shndx > 0
-				   && isym.st_shndx < SHN_LORESERVE)
-			    sym_sec
-			      = bfd_section_from_elf_index (input_bfd,
-							    isym.st_shndx);
 			  else if (isym.st_shndx == SHN_ABS)
 			    sym_sec = bfd_abs_section_ptr;
 			  else if (isym.st_shndx == SHN_COMMON)
 			    sym_sec = bfd_com_section_ptr;
+			  else
+			    sym_sec
+			      = bfd_section_from_elf_index (input_bfd,
+							    isym.st_shndx);
 
-			  sym_name = bfd_elf_string_from_elf_section (input_bfd,
-							   symtab_hdr->sh_link,
-							   isym.st_name);
+			  sym_name
+			    = bfd_elf_string_from_elf_section (input_bfd,
+							       (symtab_hdr
+								->sh_link),
+							       isym.st_name);
 
 			  /* If it isn't a function, then we don't care
 			     about it.  */
@@ -999,21 +1018,24 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		{
 
 		  Elf32_External_Sym *esym, *esymend;
-		  int idx, shndx;
+		  Elf_External_Sym_Shndx *shndx;
+		  int idx;
+		  unsigned int sec_shndx;
 
-		  shndx = _bfd_elf_section_from_bfd_section (input_bfd,
-							     section);
+		  sec_shndx = _bfd_elf_section_from_bfd_section (input_bfd,
+								 section);
 
 		  /* Look at each function defined in this section and
 		     update info for that function.  */
-		  esym = extsyms;
-		  esymend = esym + symtab_hdr->sh_info;
-		  for (; esym < esymend; esym++)
+		  for (esym = extsyms, esymend = esym + symtab_hdr->sh_info,
+			 shndx = shndx_buf;
+		       esym < esymend;
+		       esym++, shndx = (shndx ? shndx + 1 : NULL))
 		    {
 		      Elf_Internal_Sym isym;
 
-		      bfd_elf32_swap_symbol_in (input_bfd, esym, &isym);
-		      if (isym.st_shndx == shndx
+		      bfd_elf32_swap_symbol_in (input_bfd, esym, shndx, &isym);
+		      if (isym.st_shndx == sec_shndx
 			  && ELF_ST_TYPE (isym.st_info) == STT_FUNC)
 			{
 			  struct elf_link_hash_table *elftab;
@@ -1021,15 +1043,14 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 			  if (isym.st_shndx == SHN_UNDEF)
 			    sym_sec = bfd_und_section_ptr;
-			  else if (isym.st_shndx > 0
-				   && isym.st_shndx < SHN_LORESERVE)
-			    sym_sec
-			      = bfd_section_from_elf_index (input_bfd,
-							    isym.st_shndx);
 			  else if (isym.st_shndx == SHN_ABS)
 			    sym_sec = bfd_abs_section_ptr;
 			  else if (isym.st_shndx == SHN_COMMON)
 			    sym_sec = bfd_com_section_ptr;
+			  else
+			    sym_sec
+			      = bfd_section_from_elf_index (input_bfd,
+							    isym.st_shndx);
 
 			  sym_name = (bfd_elf_string_from_elf_section
 				      (input_bfd, symtab_hdr->sh_link,
@@ -1063,14 +1084,12 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    {
 		      Elf_Internal_Sym isym;
 
-		      bfd_elf32_swap_symbol_in (input_bfd, esym, &isym);
 		      hash = (struct elf32_mn10300_link_hash_entry *)
 			       elf_sym_hashes (input_bfd)[idx];
-		      if (isym.st_shndx == shndx
-			  && ELF_ST_TYPE (isym.st_info) == STT_FUNC
-			  && (hash)->root.root.u.def.section == section
-			  && ((hash)->root.root.type == bfd_link_hash_defined
-			      || (hash)->root.root.type == bfd_link_hash_defweak))
+		      if ((hash->root.root.type == bfd_link_hash_defined
+			   || hash->root.root.type == bfd_link_hash_defweak)
+			  && hash->root.root.u.def.section == section
+			  && ELF_ST_TYPE (isym.st_info) == STT_FUNC)
 			compute_function_info (input_bfd, hash,
 					       (hash)->root.root.u.def.value,
 					       contents);
@@ -1096,6 +1115,12 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    }
 		  free_contents = NULL;
 		}
+	    }
+
+	  if (shndx_buf != NULL)
+	    {
+	      free (shndx_buf);
+	      shndx_buf = NULL;
 	    }
 
 	  /* Cache or free any memory we allocated for the symbols.  */
@@ -1134,23 +1159,43 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	{
 	  asection *section;
 
-	  /* We're going to need all the symbols for each bfd.  */
+	  /* We're going to need all the local symbols for each bfd.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+	  shndx_hdr = &elf_tdata (input_bfd)->symtab_shndx_hdr;
 
 	  /* Get cached copy if it exists.  */
 	  if (symtab_hdr->contents != NULL)
 	    extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
 	  else
 	    {
-	      bfd_size_type amt = symtab_hdr->sh_size;
 	      /* Go get them off disk.  */
+	      bfd_size_type amt;
+
+	      amt = symtab_hdr->sh_info;
+	      amt *= sizeof (Elf32_External_Sym);
 	      extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
 	      if (extsyms == NULL)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || bfd_bread (extsyms, amt, input_bfd) != amt)
+		  || bfd_bread ((PTR) extsyms, amt, input_bfd) != amt)
 		goto error_return;
+	      symtab_hdr->contents = (bfd_byte *) extsyms;
+	    }
+
+	  if (shndx_hdr->sh_size != 0)
+	    {
+	      bfd_size_type amt;
+
+	      amt = symtab_hdr->sh_info;
+	      amt *= sizeof (Elf_External_Sym_Shndx);
+	      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+	      if (shndx_buf == NULL)
+		goto error_return;
+	      if (bfd_seek (input_bfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+		  || bfd_bread ((PTR) shndx_buf, amt, input_bfd) != amt)
+		goto error_return;
+	      shndx_hdr->contents = (bfd_byte *) shndx_buf;
 	    }
 
 	  /* Walk over each section in this bfd.  */
@@ -1158,9 +1203,10 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	       section != NULL;
 	       section = section->next)
 	    {
-	      int shndx;
+	      unsigned int sec_shndx;
 	      Elf32_External_Sym *esym, *esymend;
-	      int idx;
+	      Elf_External_Sym_Shndx *shndx;
+	      unsigned int idx;
 
 	      /* Skip non-code sections and empty sections.  */
 	      if ((section->flags & SEC_CODE) == 0 || section->_raw_size == 0)
@@ -1196,13 +1242,15 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    goto error_return;
 		}
 
-	      shndx = _bfd_elf_section_from_bfd_section (input_bfd, section);
+	      sec_shndx = _bfd_elf_section_from_bfd_section (input_bfd,
+							     section);
 
 	      /* Now look for any function in this section which needs
 		 insns deleted from its prologue.  */
-	      esym = extsyms;
-	      esymend = esym + symtab_hdr->sh_info;
-	      for (; esym < esymend; esym++)
+	      for (esym = extsyms, esymend = esym + symtab_hdr->sh_info,
+		     shndx = shndx_buf;
+		   esym < esymend;
+		   esym++, shndx = (shndx ? shndx + 1 : NULL))
 		{
 		  Elf_Internal_Sym isym;
 		  struct elf32_mn10300_link_hash_entry *sym_hash;
@@ -1212,26 +1260,25 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  struct elf_link_hash_table *elftab;
 		  bfd_size_type amt;
 
-		  bfd_elf32_swap_symbol_in (input_bfd, esym, &isym);
+		  bfd_elf32_swap_symbol_in (input_bfd, esym, shndx, &isym);
 
-		  if (isym.st_shndx != shndx)
+		  if (isym.st_shndx != sec_shndx)
 		    continue;
 
 		  if (isym.st_shndx == SHN_UNDEF)
 		    sym_sec = bfd_und_section_ptr;
-		  else if (isym.st_shndx > 0 && isym.st_shndx < SHN_LORESERVE)
-		    sym_sec
-		      = bfd_section_from_elf_index (input_bfd, isym.st_shndx);
 		  else if (isym.st_shndx == SHN_ABS)
 		    sym_sec = bfd_abs_section_ptr;
 		  else if (isym.st_shndx == SHN_COMMON)
 		    sym_sec = bfd_com_section_ptr;
 		  else
-		    abort ();
+		    sym_sec
+		      = bfd_section_from_elf_index (input_bfd, isym.st_shndx);
 
-		  sym_name = bfd_elf_string_from_elf_section (input_bfd,
-							symtab_hdr->sh_link,
-							isym.st_name);
+		  sym_name
+		    = bfd_elf_string_from_elf_section (input_bfd,
+						       symtab_hdr->sh_link,
+						       isym.st_name);
 
 		  /* Tack on an ID so we can uniquely identify this
 		     local symbol in the global hash table.  */
@@ -1251,8 +1298,8 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  if (sym_hash == NULL)
 		    continue;
 
-		  if (! ((sym_hash)->flags & MN10300_CONVERT_CALL_TO_CALLS)
-		      && ! ((sym_hash)->flags & MN10300_DELETED_PROLOGUE_BYTES))
+		  if (! (sym_hash->flags & MN10300_CONVERT_CALL_TO_CALLS)
+		      && ! (sym_hash->flags & MN10300_DELETED_PROLOGUE_BYTES))
 		    {
 		      int bytes = 0;
 
@@ -1263,7 +1310,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		      elf_section_data (section)->this_hdr.contents = contents;
 		      free_contents = NULL;
 
-		      symtab_hdr->contents = (bfd_byte *) extsyms;
 		      free_extsyms = NULL;
 
 		      /* Count how many bytes we're going to delete.  */
@@ -1295,23 +1341,23 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 	      /* Look for any global functions in this section which
 		 need insns deleted from their prologues.  */
-	      esym = extsyms + symtab_hdr->sh_info;
-	      esymend = extsyms + (symtab_hdr->sh_size
-				   / sizeof (Elf32_External_Sym));
-	      for (idx = 0; esym < esymend; esym++, idx++)
+	      for (idx = 0;
+		   idx < (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
+			  - symtab_hdr->sh_info);
+		   idx++)
 		{
-		  Elf_Internal_Sym isym;
 		  struct elf32_mn10300_link_hash_entry *sym_hash;
 
-		  bfd_elf32_swap_symbol_in (input_bfd, esym, &isym);
 		  sym_hash = (struct elf32_mn10300_link_hash_entry *)
 			       (elf_sym_hashes (input_bfd)[idx]);
-		  if (isym.st_shndx == shndx
-		      && (sym_hash)->root.root.u.def.section == section
-		      && ! ((sym_hash)->flags & MN10300_CONVERT_CALL_TO_CALLS)
-		      && ! ((sym_hash)->flags & MN10300_DELETED_PROLOGUE_BYTES))
+		  if ((sym_hash->root.root.type == bfd_link_hash_defined
+		       || sym_hash->root.root.type == bfd_link_hash_defweak)
+		      && sym_hash->root.root.u.def.section == section
+		      && ! (sym_hash->flags & MN10300_CONVERT_CALL_TO_CALLS)
+		      && ! (sym_hash->flags & MN10300_DELETED_PROLOGUE_BYTES))
 		    {
 		      int bytes = 0;
+		      bfd_vma symval;
 
 		      /* Note that we've changed things.  */
 		      elf_section_data (section)->relocs = internal_relocs;
@@ -1320,7 +1366,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		      elf_section_data (section)->this_hdr.contents = contents;
 		      free_contents = NULL;
 
-		      symtab_hdr->contents = (bfd_byte *) extsyms;
 		      free_extsyms = NULL;
 
 		      /* Count how many bytes we're going to delete.  */
@@ -1338,9 +1383,10 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		      sym_hash->flags |= MN10300_DELETED_PROLOGUE_BYTES;
 
 		      /* Actually delete the bytes.  */
+		      symval = sym_hash->root.root.u.def.value;
 		      if (!mn10300_elf_relax_delete_bytes (input_bfd,
 							   section,
-							   (sym_hash)->root.root.u.def.value,
+							   symval,
 							   bytes))
 			goto error_return;
 
@@ -1371,15 +1417,20 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		}
 	    }
 
+	  if (shndx_buf != NULL)
+	    {
+	      shndx_hdr->contents = NULL;
+	      free (shndx_buf);
+	      shndx_buf = NULL;
+	    }
+
 	  /* Cache or free any memory we allocated for the symbols.  */
 	  if (free_extsyms != NULL)
 	    {
 	      if (! link_info->keep_memory)
-		free (free_extsyms);
-	      else
 		{
-		  /* Cache the symbols for elf_link_input_bfd.  */
-		  symtab_hdr->contents = (unsigned char *) extsyms;
+		  symtab_hdr->contents = NULL;
+		  free (free_extsyms);
 		}
 	      free_extsyms = NULL;
 	    }
@@ -1409,6 +1460,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
     sec->_cooked_size = sec->_raw_size;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
 
   /* Get a copy of the native relocations.  */
   internal_relocs = (_bfd_elf32_link_read_relocs
@@ -1461,41 +1513,60 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	    extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
 	  else
 	    {
-	      bfd_size_type amt = symtab_hdr->sh_size;
 	      /* Go get them off disk.  */
+	      bfd_size_type amt;
+
+	      amt = symtab_hdr->sh_info;
+	      amt *= sizeof (Elf32_External_Sym);
 	      extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
 	      if (extsyms == NULL)
 		goto error_return;
 	      free_extsyms = extsyms;
 	      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		  || bfd_bread (extsyms, amt, abfd) != amt)
+		  || bfd_bread ((PTR) extsyms, amt, abfd) != amt)
 		goto error_return;
+	      symtab_hdr->contents = (bfd_byte *) extsyms;
+	    }
+
+	  if (shndx_hdr->sh_size != 0)
+	    {
+	      bfd_size_type amt;
+
+	      amt = symtab_hdr->sh_info;
+	      amt *= sizeof (Elf_External_Sym_Shndx);
+	      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+	      if (shndx_buf == NULL)
+		goto error_return;
+	      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+		  || bfd_bread ((PTR) shndx_buf, amt, abfd) != amt)
+		goto error_return;
+	      shndx_hdr->contents = (bfd_byte *) shndx_buf;
 	    }
 	}
 
       /* Get the value of the symbol referred to by the reloc.  */
       if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
+	  Elf32_External_Sym *esym;
+	  Elf_External_Sym_Shndx *shndx;
 	  Elf_Internal_Sym isym;
 	  asection *sym_sec = NULL;
 	  const char *sym_name;
 	  char *new_name;
 
 	  /* A local symbol.  */
-	  bfd_elf32_swap_symbol_in (abfd,
-				    extsyms + ELF32_R_SYM (irel->r_info),
-				    &isym);
+	  esym = extsyms + ELF32_R_SYM (irel->r_info);
+	  shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (irel->r_info) : 0);
+	  bfd_elf32_swap_symbol_in (abfd, esym, shndx, &isym);
 
 	  if (isym.st_shndx == SHN_UNDEF)
 	    sym_sec = bfd_und_section_ptr;
-	  else if (isym.st_shndx > 0 && isym.st_shndx < SHN_LORESERVE)
-	    sym_sec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 	  else if (isym.st_shndx == SHN_ABS)
 	    sym_sec = bfd_abs_section_ptr;
 	  else if (isym.st_shndx == SHN_COMMON)
 	    sym_sec = bfd_com_section_ptr;
 	  else
-	    abort ();
+	    sym_sec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 
 	  symval = (isym.st_value
 		    + sym_sec->output_section->vma
@@ -1575,7 +1646,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  elf_section_data (sec)->this_hdr.contents = contents;
 		  free_contents = NULL;
 
-		  symtab_hdr->contents = (bfd_byte *) extsyms;
 		  free_extsyms = NULL;
 
 		  /* Fix the opcode.  */
@@ -1640,7 +1710,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	      elf_section_data (sec)->this_hdr.contents = contents;
 	      free_contents = NULL;
 
-	      symtab_hdr->contents = (bfd_byte *) extsyms;
 	      free_extsyms = NULL;
 
 	      /* Fix the opcode.  */
@@ -1692,7 +1761,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  elf_section_data (sec)->this_hdr.contents = contents;
 		  free_contents = NULL;
 
-		  symtab_hdr->contents = (bfd_byte *) extsyms;
 		  free_extsyms = NULL;
 
 		  /* Fix the opcode.  */
@@ -1755,7 +1823,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	      elf_section_data (sec)->this_hdr.contents = contents;
 	      free_contents = NULL;
 
-	      symtab_hdr->contents = (bfd_byte *) extsyms;
 	      free_extsyms = NULL;
 
 	      /* Fix the opcode.  */
@@ -1840,8 +1907,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 	  /* We also have to be sure there is no symbol/label
 	     at the unconditional branch.  */
-	  if (mn10300_elf_symbol_address_p (abfd, sec, extsyms,
-					    irel->r_offset + 1))
+	  if (mn10300_elf_symbol_address_p (abfd, sec, irel->r_offset + 1))
 	    continue;
 
 	  /* Note that we've changed the relocs, section contents, etc.  */
@@ -1851,7 +1917,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  elf_section_data (sec)->this_hdr.contents = contents;
 	  free_contents = NULL;
 
-	  symtab_hdr->contents = (bfd_byte *) extsyms;
 	  free_extsyms = NULL;
 
 	  /* Reverse the condition of the first branch.  */
@@ -1965,7 +2030,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			  elf_section_data (sec)->this_hdr.contents = contents;
 			  free_contents = NULL;
 
-			  symtab_hdr->contents = (bfd_byte *) extsyms;
 			  free_extsyms = NULL;
 
 			  /* Fix the opcode.  */
@@ -2041,7 +2105,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			  elf_section_data (sec)->this_hdr.contents = contents;
 			  free_contents = NULL;
 
-			  symtab_hdr->contents = (bfd_byte *) extsyms;
 			  free_extsyms = NULL;
 
 			  /* Fix the opcode.  */
@@ -2125,7 +2188,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    elf_section_data (sec)->this_hdr.contents = contents;
 		    free_contents = NULL;
 
-		    symtab_hdr->contents = (bfd_byte *) extsyms;
 		    free_extsyms = NULL;
 
 		    /* Fix the opcode.  */
@@ -2163,7 +2225,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    elf_section_data (sec)->this_hdr.contents = contents;
 		    free_contents = NULL;
 
-		    symtab_hdr->contents = (bfd_byte *) extsyms;
 		    free_extsyms = NULL;
 
 		    if ((code & 0xf3) == 0x81)
@@ -2218,7 +2279,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    elf_section_data (sec)->this_hdr.contents = contents;
 		    free_contents = NULL;
 
-		    symtab_hdr->contents = (bfd_byte *) extsyms;
 		    free_extsyms = NULL;
 
 		    /* Fix the opcode.  */
@@ -2271,7 +2331,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    elf_section_data (sec)->this_hdr.contents = contents;
 		    free_contents = NULL;
 
-		    symtab_hdr->contents = (bfd_byte *) extsyms;
 		    free_extsyms = NULL;
 
 		    if ((code & 0xfc) == 0xcc)
@@ -2353,7 +2412,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    elf_section_data (sec)->this_hdr.contents = contents;
 		    free_contents = NULL;
 
-		    symtab_hdr->contents = (bfd_byte *) extsyms;
 		    free_extsyms = NULL;
 
 		    /* Fix the opcode.  */
@@ -2385,7 +2443,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  elf_section_data (sec)->this_hdr.contents = contents;
 		  free_contents = NULL;
 
-		  symtab_hdr->contents = (bfd_byte *) extsyms;
 		  free_extsyms = NULL;
 
 		  /* Fix the opcode.  */
@@ -2411,10 +2468,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
     }
 
   if (free_relocs != NULL)
-    {
-      free (free_relocs);
-      free_relocs = NULL;
-    }
+    free (free_relocs);
 
   if (free_contents != NULL)
     {
@@ -2425,19 +2479,21 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  /* Cache the section contents for elf_link_input_bfd.  */
 	  elf_section_data (sec)->this_hdr.contents = contents;
 	}
-      free_contents = NULL;
+    }
+
+  if (shndx_buf != NULL)
+    {
+      shndx_hdr->contents = NULL;
+      free (shndx_buf);
     }
 
   if (free_extsyms != NULL)
     {
       if (! link_info->keep_memory)
-	free (free_extsyms);
-      else
 	{
-	  /* Cache the symbols for elf_link_input_bfd.  */
-	  symtab_hdr->contents = (unsigned char *) extsyms;
+	  symtab_hdr->contents = NULL;
+	  free (free_extsyms);
 	}
-      free_extsyms = NULL;
     }
 
   return true;
@@ -2447,8 +2503,17 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
     free (free_relocs);
   if (free_contents != NULL)
     free (free_contents);
+  if (shndx_buf != NULL)
+    {
+      shndx_hdr->contents = NULL;
+      free (shndx_buf);
+    }
   if (free_extsyms != NULL)
-    free (free_extsyms);
+    {
+      symtab_hdr->contents = NULL;
+      free (free_extsyms);
+    }
+
   return false;
 }
 
@@ -2562,19 +2627,23 @@ mn10300_elf_relax_delete_bytes (abfd, sec, addr, count)
      int count;
 {
   Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *shndx_hdr;
   Elf32_External_Sym *extsyms;
-  int shndx, index;
+  unsigned int sec_shndx;
   bfd_byte *contents;
   Elf_Internal_Rela *irel, *irelend;
   Elf_Internal_Rela *irelalign;
   bfd_vma toaddr;
   Elf32_External_Sym *esym, *esymend;
-  struct elf32_mn10300_link_hash_entry *sym_hash;
+  Elf_External_Sym_Shndx *shndx;
+  struct elf_link_hash_entry **sym_hashes;
+  struct elf_link_hash_entry **end_hashes;
+  unsigned int symcount;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
 
-  shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
+  sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
 
   contents = elf_section_data (sec)->this_hdr.contents;
 
@@ -2602,41 +2671,41 @@ mn10300_elf_relax_delete_bytes (abfd, sec, addr, count)
     }
 
   /* Adjust the local symbols defined in this section.  */
+  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+  shndx = (Elf_External_Sym_Shndx *) shndx_hdr->contents;
   esym = extsyms;
   esymend = esym + symtab_hdr->sh_info;
-  for (; esym < esymend; esym++)
+  for (; esym < esymend; esym++, shndx = (shndx ? shndx + 1 : NULL))
     {
       Elf_Internal_Sym isym;
+      Elf_External_Sym_Shndx dummy;
 
-      bfd_elf32_swap_symbol_in (abfd, esym, &isym);
+      bfd_elf32_swap_symbol_in (abfd, esym, shndx, &isym);
 
-      if (isym.st_shndx == shndx
+      if (isym.st_shndx == sec_shndx
 	  && isym.st_value > addr
 	  && isym.st_value < toaddr)
 	{
 	  isym.st_value -= count;
-	  bfd_elf32_swap_symbol_out (abfd, &isym, esym);
+	  bfd_elf32_swap_symbol_out (abfd, &isym, (PTR) esym, (PTR) &dummy);
 	}
     }
 
   /* Now adjust the global symbols defined in this section.  */
-  esym = extsyms + symtab_hdr->sh_info;
-  esymend = extsyms + (symtab_hdr->sh_size / sizeof (Elf32_External_Sym));
-  for (index = 0; esym < esymend; esym++, index++)
+  symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
+	      - symtab_hdr->sh_info);
+  sym_hashes = elf_sym_hashes (abfd);
+  end_hashes = sym_hashes + symcount;
+  for (; sym_hashes < end_hashes; sym_hashes++)
     {
-      Elf_Internal_Sym isym;
-
-      bfd_elf32_swap_symbol_in (abfd, esym, &isym);
-      sym_hash = (struct elf32_mn10300_link_hash_entry *)
-		   (elf_sym_hashes (abfd)[index]);
-      if (isym.st_shndx == shndx
-	  && ((sym_hash)->root.root.type == bfd_link_hash_defined
-	      || (sym_hash)->root.root.type == bfd_link_hash_defweak)
-	  && (sym_hash)->root.root.u.def.section == sec
-	  && (sym_hash)->root.root.u.def.value > addr
-	  && (sym_hash)->root.root.u.def.value < toaddr)
+      struct elf_link_hash_entry *sym_hash = *sym_hashes;
+      if ((sym_hash->root.type == bfd_link_hash_defined
+	   || sym_hash->root.type == bfd_link_hash_defweak)
+	  && sym_hash->root.u.def.section == sec
+	  && sym_hash->root.u.def.value > addr
+	  && sym_hash->root.u.def.value < toaddr)
 	{
-	  (sym_hash)->root.root.u.def.value -= count;
+	  sym_hash->root.u.def.value -= count;
 	}
     }
 
@@ -2646,46 +2715,53 @@ mn10300_elf_relax_delete_bytes (abfd, sec, addr, count)
 /* Return true if a symbol exists at the given address, else return
    false.  */
 static boolean
-mn10300_elf_symbol_address_p (abfd, sec, extsyms, addr)
+mn10300_elf_symbol_address_p (abfd, sec, addr)
      bfd *abfd;
      asection *sec;
-     Elf32_External_Sym *extsyms;
      bfd_vma addr;
 {
   Elf_Internal_Shdr *symtab_hdr;
-  int shndx;
+  Elf_Internal_Shdr *shndx_hdr;
+  unsigned int sec_shndx;
   Elf32_External_Sym *esym, *esymend;
-  struct elf32_mn10300_link_hash_entry **sym_hash, **sym_hash_end;
+  Elf_External_Sym_Shndx *shndx;
+  struct elf_link_hash_entry **sym_hashes;
+  struct elf_link_hash_entry **end_hashes;
+  unsigned int symcount;
 
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
+  sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
 
   /* Examine all the symbols.  */
-  esym = extsyms;
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+  shndx = (Elf_External_Sym_Shndx *) shndx_hdr->contents;
+  esym = (Elf32_External_Sym *) symtab_hdr->contents;
   esymend = esym + symtab_hdr->sh_info;
-  for (; esym < esymend; esym++)
+  for (; esym < esymend; esym++, shndx = (shndx ? shndx + 1 : NULL))
     {
       Elf_Internal_Sym isym;
 
-      bfd_elf32_swap_symbol_in (abfd, esym, &isym);
+      bfd_elf32_swap_symbol_in (abfd, esym, shndx, &isym);
 
-      if (isym.st_shndx == shndx
+      if (isym.st_shndx == sec_shndx
 	  && isym.st_value == addr)
 	return true;
     }
 
-  sym_hash = (struct elf32_mn10300_link_hash_entry **) (elf_sym_hashes (abfd));
-  sym_hash_end = (sym_hash
-		  + (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
-		     - symtab_hdr->sh_info));
-  for (; sym_hash < sym_hash_end; sym_hash++)
+  symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
+	      - symtab_hdr->sh_info);
+  sym_hashes = elf_sym_hashes (abfd);
+  end_hashes = sym_hashes + symcount;
+  for (; sym_hashes < end_hashes; sym_hashes++)
     {
-      if (((*sym_hash)->root.root.type == bfd_link_hash_defined
-	   || (*sym_hash)->root.root.type == bfd_link_hash_defweak)
-	  && (*sym_hash)->root.root.u.def.section == sec
-	  && (*sym_hash)->root.root.u.def.value == addr)
+      struct elf_link_hash_entry *sym_hash = *sym_hashes;
+      if ((sym_hash->root.type == bfd_link_hash_defined
+	   || sym_hash->root.type == bfd_link_hash_defweak)
+	  && sym_hash->root.u.def.section == sec
+	  && sym_hash->root.u.def.value == addr)
 	return true;
     }
+
   return false;
 }
 
@@ -2703,11 +2779,14 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
      asymbol **symbols;
 {
   Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *shndx_hdr;
   asection *input_section = link_order->u.indirect.section;
   bfd *input_bfd = input_section->owner;
   asection **sections = NULL;
   Elf_Internal_Rela *internal_relocs = NULL;
   Elf32_External_Sym *external_syms = NULL;
+  Elf_External_Sym_Shndx *shndx_buf = NULL;
+  Elf_External_Sym_Shndx *shndx;
   Elf_Internal_Sym *internal_syms = NULL;
 
   /* We only need to handle the case of relaxing, or of having a
@@ -2720,6 +2799,7 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 						       symbols);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+  shndx_hdr = &elf_tdata (input_bfd)->symtab_shndx_hdr;
 
   memcpy (data, elf_section_data (input_section)->this_hdr.contents,
 	  (size_t) input_section->_raw_size);
@@ -2730,19 +2810,31 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       Elf_Internal_Sym *isymp;
       asection **secpp;
       Elf32_External_Sym *esym, *esymend;
-      bfd_size_type size;
+      bfd_size_type amt;
 
       if (symtab_hdr->contents != NULL)
 	external_syms = (Elf32_External_Sym *) symtab_hdr->contents;
-      else
+      else if (symtab_hdr->sh_info != 0)
 	{
-	  size = symtab_hdr->sh_info;
-	  size *= sizeof (Elf32_External_Sym);
-	  external_syms = (Elf32_External_Sym *) bfd_malloc (size);
-	  if (external_syms == NULL && size != 0)
+	  amt = symtab_hdr->sh_info;
+	  amt *= sizeof (Elf32_External_Sym);
+	  external_syms = (Elf32_External_Sym *) bfd_malloc (amt);
+	  if (external_syms == NULL)
 	    goto error_return;
 	  if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread (external_syms, size, input_bfd) != size)
+	      || bfd_bread ((PTR) external_syms, amt, input_bfd) != amt)
+	    goto error_return;
+	}
+
+      if (symtab_hdr->sh_info != 0 && shndx_hdr->sh_size != 0)
+	{
+	  amt = symtab_hdr->sh_info;
+	  amt *= sizeof (Elf_External_Sym_Shndx);
+	  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+	  if (shndx_buf == NULL)
+	    goto error_return;
+	  if (bfd_seek (input_bfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+	      || bfd_bread ((PTR) shndx_buf, amt, input_bfd) != amt)
 	    goto error_return;
 	}
 
@@ -2752,41 +2844,35 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       if (internal_relocs == NULL)
 	goto error_return;
 
-      size = symtab_hdr->sh_info;
-      size *= sizeof (Elf_Internal_Sym);
-      internal_syms = (Elf_Internal_Sym *) bfd_malloc (size);
-      if (internal_syms == NULL && size != 0)
+      amt = symtab_hdr->sh_info;
+      amt *= sizeof (Elf_Internal_Sym);
+      internal_syms = (Elf_Internal_Sym *) bfd_malloc (amt);
+      if (internal_syms == NULL && amt != 0)
 	goto error_return;
 
-      size = symtab_hdr->sh_info;
-      size *= sizeof (asection *);
-      sections = (asection **) bfd_malloc (size);
-      if (sections == NULL && size != 0)
+      amt = symtab_hdr->sh_info;
+      amt *= sizeof (asection *);
+      sections = (asection **) bfd_malloc (amt);
+      if (sections == NULL && amt != 0)
 	goto error_return;
 
-      isymp = internal_syms;
-      secpp = sections;
-      esym = external_syms;
-      esymend = esym + symtab_hdr->sh_info;
-      for (; esym < esymend; ++esym, ++isymp, ++secpp)
+      for (isymp = internal_syms, secpp = sections, shndx = shndx_buf,
+	     esym = external_syms, esymend = esym + symtab_hdr->sh_info;
+	   esym < esymend;
+	   ++esym, ++isymp, ++secpp, shndx = (shndx ? shndx + 1 : NULL))
 	{
 	  asection *isec;
 
-	  bfd_elf32_swap_symbol_in (input_bfd, esym, isymp);
+	  bfd_elf32_swap_symbol_in (input_bfd, esym, shndx, isymp);
 
 	  if (isymp->st_shndx == SHN_UNDEF)
 	    isec = bfd_und_section_ptr;
-	  else if (isymp->st_shndx > 0 && isymp->st_shndx < SHN_LORESERVE)
-	    isec = bfd_section_from_elf_index (input_bfd, isymp->st_shndx);
 	  else if (isymp->st_shndx == SHN_ABS)
 	    isec = bfd_abs_section_ptr;
 	  else if (isymp->st_shndx == SHN_COMMON)
 	    isec = bfd_com_section_ptr;
 	  else
-	    {
-	      /* Who knows?  */
-	      isec = NULL;
-	    }
+	    isec = bfd_section_from_elf_index (input_bfd, isymp->st_shndx);
 
 	  *secpp = isec;
 	}
@@ -2798,16 +2884,14 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 
       if (sections != NULL)
 	free (sections);
-      sections = NULL;
       if (internal_syms != NULL)
 	free (internal_syms);
-      internal_syms = NULL;
+      if (shndx_buf != NULL)
+	free (shndx_buf);
       if (external_syms != NULL && symtab_hdr->contents == NULL)
 	free (external_syms);
-      external_syms = NULL;
       if (internal_relocs != elf_section_data (input_section)->relocs)
 	free (internal_relocs);
-      internal_relocs = NULL;
     }
 
   return data;
@@ -2816,6 +2900,8 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
   if (internal_relocs != NULL
       && internal_relocs != elf_section_data (input_section)->relocs)
     free (internal_relocs);
+  if (shndx_buf != NULL)
+    free (shndx_buf);
   if (external_syms != NULL && symtab_hdr->contents == NULL)
     free (external_syms);
   if (internal_syms != NULL)

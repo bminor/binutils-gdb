@@ -585,6 +585,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
   struct elf64_hppa_link_hash_table *hppa_info;
   const Elf_Internal_Rela *relend;
   Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *shndx_hdr;
   const Elf_Internal_Rela *rel;
   asection *dlt, *plt, *stubs;
   char *buf;
@@ -611,9 +612,10 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
   if (info->shared && hppa_info->section_syms_bfd != abfd)
     {
       unsigned long i;
-      int highest_shndx;
+      unsigned int highest_shndx;
       Elf_Internal_Sym *local_syms, *isym;
       Elf64_External_Sym *ext_syms, *esym;
+      Elf_External_Sym_Shndx *shndx_buf, *shndx;
       bfd_size_type amt;
 
       /* We're done with the old cache of section index to section symbol
@@ -644,24 +646,49 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
       if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
           || bfd_bread (ext_syms, amt, abfd) != amt)
         {
-	  free (local_syms);
 	  free (ext_syms);
+	  free (local_syms);
 	  return false;
         }
 
+      shndx_buf = NULL;
+      shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+      if (shndx_hdr->sh_size != 0)
+	{
+	  amt = symtab_hdr->sh_info;
+	  amt *= sizeof (Elf_External_Sym_Shndx);
+	  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+	  if (shndx_buf == NULL)
+	    {
+	      free (ext_syms);
+	      free (local_syms);
+	      return false;
+	    }
+
+	  if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+	      || bfd_bread (shndx_buf, amt, abfd) != amt)
+	    {
+	      free (shndx_buf);
+	      free (ext_syms);
+	      free (local_syms);
+	      return false;
+	    }
+	}
+
       /* Swap in the local symbols, also record the highest section index
 	 referenced by the local symbols.  */
-      isym = local_syms;
-      esym = ext_syms;
       highest_shndx = 0;
-      for (i = 0; i < symtab_hdr->sh_info; i++, esym++, isym++)
+      for (i = 0, isym = local_syms, esym = ext_syms, shndx = shndx_buf;
+	   i < symtab_hdr->sh_info;
+	   i++, esym++, isym++, shndx = (shndx != NULL ? shndx + 1 : NULL))
 	{
-	  bfd_elf64_swap_symbol_in (abfd, esym, isym);
+	  bfd_elf64_swap_symbol_in (abfd, esym, shndx, isym);
 	  if (isym->st_shndx > highest_shndx)
 	    highest_shndx = isym->st_shndx;
 	}
 
       /* Now we can free the external symbols.  */
+      free (shndx_buf);
       free (ext_syms);
 
       /* Allocate an array to hold the section index to section symbol index

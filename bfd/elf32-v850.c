@@ -1774,14 +1774,9 @@ v850_elf_gc_mark_hook (abfd, info, rel, h, sym)
      }
    else
      {
-       if (!(elf_bad_symtab (abfd)
-           && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-         && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-                && sym->st_shndx != SHN_COMMON))
-          {
-            return bfd_section_from_elf_index (abfd, sym->st_shndx);
-          }
-      }
+       return bfd_section_from_elf_index (abfd, sym->st_shndx);
+     }
+
   return NULL;
 }
 
@@ -1985,9 +1980,9 @@ v850_elf_symbol_processing (abfd, asym)
      asymbol * asym;
 {
   elf_symbol_type * elfsym = (elf_symbol_type *) asym;
-  unsigned short index;
+  unsigned int indx;
 
-  index = elfsym->internal_elf_sym.st_shndx;
+  indx = elfsym->internal_elf_sym.st_shndx;
 
   /* If the section index is an "ordinary" index, then it may
      refer to a v850 specific section created by the assembler.
@@ -1995,26 +1990,26 @@ v850_elf_symbol_processing (abfd, asym)
 
      FIXME: Should we alter the st_shndx field as well ?  */
 
-  if (index < elf_elfheader(abfd)[0].e_shnum)
-    switch (elf_elfsections(abfd)[index]->sh_type)
+  if (indx < elf_numsections (abfd))
+    switch (elf_elfsections(abfd)[indx]->sh_type)
       {
       case SHT_V850_SCOMMON:
-	index = SHN_V850_SCOMMON;
+	indx = SHN_V850_SCOMMON;
 	break;
 
       case SHT_V850_TCOMMON:
-	index = SHN_V850_TCOMMON;
+	indx = SHN_V850_TCOMMON;
 	break;
 
       case SHT_V850_ZCOMMON:
-	index = SHN_V850_ZCOMMON;
+	indx = SHN_V850_ZCOMMON;
 	break;
 
       default:
 	break;
       }
 
-  switch (index)
+  switch (indx)
     {
     case SHN_V850_SCOMMON:
       if (v850_elf_scom_section.name == NULL)
@@ -2085,7 +2080,7 @@ v850_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      asection **              secp;
      bfd_vma *                valp;
 {
-  int index = sym->st_shndx;
+  unsigned int indx = sym->st_shndx;
 
   /* If the section index is an "ordinary" index, then it may
      refer to a v850 specific section created by the assembler.
@@ -2093,26 +2088,26 @@ v850_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
      FIXME: Should we alter the st_shndx field as well ?  */
 
-  if (index < elf_elfheader(abfd)[0].e_shnum)
-    switch (elf_elfsections(abfd)[index]->sh_type)
+  if (indx < elf_numsections (abfd))
+    switch (elf_elfsections(abfd)[indx]->sh_type)
       {
       case SHT_V850_SCOMMON:
-	index = SHN_V850_SCOMMON;
+	indx = SHN_V850_SCOMMON;
 	break;
 
       case SHT_V850_TCOMMON:
-	index = SHN_V850_TCOMMON;
+	indx = SHN_V850_TCOMMON;
 	break;
 
       case SHT_V850_ZCOMMON:
-	index = SHN_V850_ZCOMMON;
+	indx = SHN_V850_ZCOMMON;
 	break;
 
       default:
 	break;
       }
 
-  switch (index)
+  switch (indx)
     {
     case SHN_V850_SCOMMON:
       *secp = bfd_make_section_old_way (abfd, ".scommon");

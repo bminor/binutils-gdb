@@ -1,5 +1,153 @@
 2001-12-17  Alan Modra  <amodra@bigpond.net.au>
+	Support for more than 64k ELF sections.
+	* elf-bfd.h (elf_size_info <swap_symbol_out>): Add shndx param.
+	(bfd_elf32_swap_symbol_in): Likewise.
+	(bfd_elf32_swap_symbol_out): Likewise.
+	(bfd_elf64_swap_symbol_in): Likewise.
+	(bfd_elf64_swap_symbol_out): Likewise.
+	(elf_reloc_cookie): Add locsym_shndx field.  Make locsyms a PTR.
+	(elf_obj_tdata): Add num_elf_sections, symtab_shndx_hdr and
+	symtab_shndx_section.
+	(elf_numsections): Define.
+	(elf_symtab_shndx): Define.
+	* elf.c (setup_group): Use elf_numsections rather than header e_shnum.
+	(bfd_elf_find_section): Likewise.
+	(bfd_section_from_elf_index): Likewise.
+	(bfd_section_from_shdr): Likewise.  Handle SHT_SYMTAB_SHNDX.
+	(bfd_section_from_r_symndx): Read symbol shndx extension, and
+	translate st_shndx for > SHN_HIRESERVE.
+	(assign_section_numbers): Skip reserved sections.  Assign
+	symtab_shndx_section and elf_numsections.  Exclude reserved
+	sections from e_shnum.  Set up symtab_shndx_hdr.
+	(_bfd_elf_compute_section_file_positions): Handle symtab_shndx_hdr.
+	(map_sections_to_segments): Don't map eh_frame_hdr unless required.
+	(assign_file_positions_except_relocs): Use elf_numsections rather
+	than header e_shnum.  Skip reserved sections and symtab_shndx_section.
+	(prep_headers): Set name for symtab_shndx_hdr.
+	(_bfd_elf_assign_file_positions_for_relocs): Use elf_numsections.
+	(_bfd_elf_write_object_contents): Likewise.  Skip reserved sections.
+	(_bfd_elf_section_from_bfd_section): Check bfd_{abs,com,und}_section
+	first.  Use elf_section_data if available.  Use elf_numsections.
+	Start scan at index 1.
+	(copy_private_bfd_data ): Comment fixes.
+	(MAP_ONESYMTAB): Define above SHN_HIOS.
+	(MAP_DYNSYMTAB): Likewise.
+	(MAP_STRTAB): Likewise.
+	(MAP_SHSTRTAB): Likewise.
+	(MAP_SYM_SHNDX): New define.
+	(_bfd_elf_copy_private_symbol_data): Handle symtab_shndx_section.
+	(swap_out_syms): Swap out SHT_SYMTAB_SHNDX section too.
+	* elfcode.h (elf_swap_symbol_in): Add shndx param, and handle shndx
+	extension.
+	(elf_swap_symbol_out): Likewise.
+	(elf_object_p): Set elf_numsections, and use instead of e_shnum.
+	Initialialise reserved elf_elfsections to point at shdr[0].  Remove
+	redundant bfd_release calls.
+	(elf_slurp_symbol_table): Read symbol shndx extension, and use with
+	elf_swap_symbol_in.  Translate st_shndx for > SHN_HIRESERVE too.
+	* elflink.h (elf_link_is_defined_archive_symbol): Read symbol shndx
+	extension, and use with elf_swap_symbol_in.
+	(elf_link_record_local_dynamic_symbol): Likewise.
+	(elf_link_add_object_symbols): Likewise.  Also translate st_shndx
+	for elf sections > SHN_HIRESERVE.
+	(NAME(bfd_elf,size_dynamic_sections)): Adjust elf_swap_symbol_out
+	call.
+	(struct elf_final_link_info): Add locsym_shndx and symshndxbuf.
+	(elf_bfd_final_link): Allocate the above, and tidy code allocating
+	other buffers.  Use elf_numsections instead of e_shnum.  Adjust
+	elf_swap_symbol_out calls.
+	(elf_link_output_sym): Swap out symbol shndx extension too.
+	(elf_link_flush_output_syms): And flush them to disk.
+	(elf_link_output_extsym): Use SHN_BAD.  Adjust elf_swap_symbol_out
+	calls.
+	(elf_gc_mark): Read symbol shndx extension, and use with
+	elf_swap_symbol_in.
+	(elf_link_input_bfd): Likewise,  Translate st_shndx for elf sections
+	> SHN_HIRESERVE too.  Use SHN_BAD.
+	(elf_reloc_symbol_deleted_p): Use symbol shndx extensions with
+	elf_swap_symbol_in.  Translate st_shndx > SHN_HIRESERVE too.
+	(elf_bfd_discard_info): Read symbol shndx extension.  Don't attempt
+	to continue after a bfd error.
+	* elf-m10200.c (mn10200_elf_relax_section): Only read local syms.
+	Stash them immediately to symtab_hdr->contents rather than later
+	in multiple places.  Clean up afterwards.  Read symbol shndx
+	extension, and use with swap_symbol_in.  Translate SHN_UNDEF,
+	SHN_ABS, SHN_COMMON and elf sections > SHN_HIRESERVE to bfd
+	sections too.  Remove dead code.
+	(mn10200_elf_relax_delete_bytes): Use symbol shndx extension
+	when swapping in symbols.  Tidy code adjusting global syms.
+	Don't swap in global syms.
+	(mn10200_elf_symbol_address_p): Likewise.  Remove extsyms param.
+	(mn10200_elf_get_relocated_section_contents): Read symbol shndx
+	extension, and use with swap_symbol_in.  Rename "size" -> "amt"
+	to maximize code in common with other files.  Translate st_shndx
+	for > SHN_HIRESERVE too.  Remove dead code.
+	* elf-m10300.c (mn10300_elf_relax_section): Only read local syms.
+	Stash them immediately to symtab_hdr->contents rather than later
+	in multiple places.  Clean up afterwards.  Read symbol shndx
+	extension, and use with swap_symbol_in.  Remove dead code.
+	(mn10300_elf_relax_delete_bytes): As for elf-m10200.c.
+	(mn10300_elf_symbol_address_p): Likewise.
+	(mn10300_elf_get_relocated_section_contents): Likewise.
+	* elf32-h8300.c (elf32_h8_relax_section): As for elf-m10300.c.
+	(elf32_h8_relax_delete_bytes): Likewise.
+	(elf32_h8_symbol_address_p): Likewise.
+	(elf32_h8_get_relocated_section_contents): Likewise.
+	* elf32-hppa.c (elf32_hppa_size_stubs): Read symbol shndx
+	extension, and use with swap_symbol_in.
+	* elf64-hppa.c (elf64_hppa_check_relocs): Likewise.
+	* elf32-i370.c (i370_elf_finish_dynamic_sections): Adjust call to
+	bfd_elf32_swap_symbol_out.
+	* elf32-m32r.c (m32r_elf_get_relocated_section_contents): Translate
+	elf sections > SHN_HIRESERVE too.
+	* elf32-m68k.c (bfd_m68k_elf32_create_embedded_relocs): Only read
+	local syms.  Read symbol shndx extension, and use with swap_symbol_in.
+	* elf32-mips.c (_bfd_mips_elf_final_write_processing): Use
+	elf_numsections rather than header e_shnum.
+	* elf32-sh.c (sh_elf_relax_section): As for elf-m10300.c.
+	(sh_elf_relax_delete_bytes): Likewise.
+	(sh_elf_get_relocated_section_contents): Likewise.  Only read local
+	symbols.
+	* elf32-v850.c (v850_elf_symbol_processing): Use an unsigned int to
+	hold section index.  Use elf_numsections rather than e_shnum.
+	Rename "index" -> "indx" to avoid shadowing warning.
+	(v850_elf_add_symbol_hook): Likewise.
+	* elf64-alpha.c (elf64_alpha_relax_section): Only read local syms.
+	Read symbol shndx extension, and use with swap_symbol_in.
+	* elf32-xstormy16.c (xstormy16_elf_relax_section): Likewise.
+	Translate SHN_COMMON and elf sections > SHN_HIRESERVE too.
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Likewise.
+	(elfNN_ia64_aix_add_symbol_hook): Use elf_numsections.
 
+	* elf-m10300.c (mn10300_elf_gc_mark_hook): Remove unnecessary checks
+	before calling bfd_section_from_elf_index on local syms.
+	* elf32-arm.h (elf32_arm_gc_mark_hook): Likewise.
+	* elf32-avr.c (elf32_avr_gc_mark_hook): Likewise.
+	* elf32-cris.c (cris_elf_gc_mark_hook): Likewise.
+	* elf32-d10v.c (elf32_d10v_gc_mark_hook): Likewise.
+	* elf32-fr30.c (fr30_elf_gc_mark_hook): Likewise.
+	* elf32-hppa.c (elf32_hppa_gc_mark_hook): Likewise.
+	* elf32-i386.c (elf_i386_gc_mark_hook): Likewise.
+	* elf32-m32r.c (m32r_elf_gc_mark_hook): Likewise.
+	* elf32-m68k.c (elf_m68k_gc_mark_hook): Likewise.
+	* elf32-mcore.c (mcore_elf_gc_mark_hook): Likewise.
+	* elf32-mips.c (_bfd_mips_elf_gc_mark_hook): Likewise.
+	* elf32-openrisc.c (openrisc_elf_gc_mark_hook): Likewise.
+	* elf32-ppc.c (ppc_elf_gc_mark_hook): Likewise.
+	* elf32-s390.c (elf_s390_gc_mark_hook): Likewise.
+	* elf32-sh.c (sh_elf_gc_mark_hook): Likewise.
+	* elf32-sparc.c (elf32_sparc_gc_mark_hook): Likewise.
+	* elf32-v850.c (v850_elf_gc_mark_hook): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_gc_mark_hook): Likewise.
+	* elf64-mips.c (mips_elf64_gc_mark_hook): Likewise.
+	* elf64-mmix.c (mmix_elf_gc_mark_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_gc_mark_hook): Likewise.
+	* elf64-s390.c (elf_s390_gc_mark_hook): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_gc_mark_hook): Likewise.
+
+2001-12-17  Alan Modra  <amodra@bigpond.net.au>
+
+	Hash bfd sections for fast lookup and create.
 	* bfd.c (struct _bfd): Add section_htab, section_tail.
 	* libbfd-in.h (_bfd_delete_bfd): Declare.
 	(bfd_section_hash_newfunc): Declare.

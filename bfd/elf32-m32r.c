@@ -1856,8 +1856,6 @@ m32r_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 
 	  if (isymp->st_shndx == SHN_UNDEF)
 	    isec = bfd_und_section_ptr;
-	  else if (isymp->st_shndx > 0 && isymp->st_shndx < SHN_LORESERVE)
-	    isec = bfd_section_from_elf_index (input_bfd, isymp->st_shndx);
 	  else if (isymp->st_shndx == SHN_ABS)
 	    isec = bfd_abs_section_ptr;
 	  else if (isymp->st_shndx == SHN_COMMON)
@@ -1865,10 +1863,7 @@ m32r_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 	  else if (isymp->st_shndx == SHN_M32R_SCOMMON)
 	    isec = &m32r_elf_scom_section;
 	  else
-	    {
-	      /* Who knows?  */
-	      isec = NULL;
-	    }
+	    isec = bfd_section_from_elf_index (input_bfd, isymp->st_shndx);
 
 	  *secpp = isec;
 	}
@@ -2095,14 +2090,8 @@ m32r_elf_gc_mark_hook (abfd, info, rel, h, sym)
      }
    else
      {
-       if (!(elf_bad_symtab (abfd)
-           && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-         && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-                && sym->st_shndx != SHN_COMMON))
-          {
-            return bfd_section_from_elf_index (abfd, sym->st_shndx);
-          }
-      }
+       return bfd_section_from_elf_index (abfd, sym->st_shndx);
+     }
   return NULL;
 }
 

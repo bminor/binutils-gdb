@@ -342,7 +342,7 @@ struct elf_size_info {
   void (*write_relocs)
     PARAMS ((bfd *, asection *, PTR));
   void (*swap_symbol_out)
-    PARAMS ((bfd *, const Elf_Internal_Sym *, PTR));
+    PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
   boolean (*slurp_reloc_table)
     PARAMS ((bfd *, asection *, asymbol **, boolean));
   long (*slurp_symbol_table)
@@ -394,7 +394,8 @@ enum elf_reloc_type_class {
 struct elf_reloc_cookie
 {
   Elf_Internal_Rela *rels, *rel, *relend;
-  void *locsyms;
+  PTR locsyms;
+  PTR locsym_shndx;
   bfd *abfd;
   size_t locsymcount;
   size_t extsymoff;
@@ -943,6 +944,7 @@ struct elf_obj_tdata
   struct elf_strtab_hash *strtab_ptr;
   int num_locals;
   int num_globals;
+  unsigned int num_elf_sections;	/* elf_sect_ptr size */
   int num_section_syms;
   asymbol **section_syms;		/* STT_SECTION symbols for each section */
   Elf_Internal_Shdr symtab_hdr;
@@ -953,8 +955,10 @@ struct elf_obj_tdata
   Elf_Internal_Shdr dynversym_hdr;
   Elf_Internal_Shdr dynverref_hdr;
   Elf_Internal_Shdr dynverdef_hdr;
+  Elf_Internal_Shdr symtab_shndx_hdr;
   unsigned int symtab_section, shstrtab_section;
   unsigned int strtab_section, dynsymtab_section;
+  unsigned int symtab_shndx_section;
   unsigned int dynversym_section, dynverdef_section, dynverref_section;
   file_ptr next_file_pos;
 #if 0
@@ -1083,8 +1087,10 @@ struct elf_obj_tdata
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
 #define elf_elfheader(bfd)	(elf_tdata(bfd) -> elf_header)
 #define elf_elfsections(bfd)	(elf_tdata(bfd) -> elf_sect_ptr)
+#define elf_numsections(bfd)	(elf_tdata(bfd) -> num_elf_sections)
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
+#define elf_symtab_shndx(bfd)	(elf_tdata(bfd) -> symtab_shndx_section)
 #define elf_dynsymtab(bfd)	(elf_tdata(bfd) -> dynsymtab_section)
 #define elf_dynversym(bfd)	(elf_tdata(bfd) -> dynversym_section)
 #define elf_dynverdef(bfd)	(elf_tdata(bfd) -> dynverdef_section)
@@ -1371,9 +1377,10 @@ extern boolean bfd_elf32_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void bfd_elf32_swap_symbol_in
-  PARAMS ((bfd *, const Elf32_External_Sym *, Elf_Internal_Sym *));
+  PARAMS ((bfd *, const Elf32_External_Sym *, const Elf_External_Sym_Shndx *,
+	   Elf_Internal_Sym *));
 extern void bfd_elf32_swap_symbol_out
-  PARAMS ((bfd *, const Elf_Internal_Sym *, PTR));
+  PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
 extern void bfd_elf32_swap_reloc_in
   PARAMS ((bfd *, const Elf32_External_Rel *, Elf_Internal_Rel *));
 extern void bfd_elf32_swap_reloc_out
@@ -1423,9 +1430,10 @@ extern boolean bfd_elf64_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void bfd_elf64_swap_symbol_in
-  PARAMS ((bfd *, const Elf64_External_Sym *, Elf_Internal_Sym *));
+  PARAMS ((bfd *, const Elf64_External_Sym *, const Elf_External_Sym_Shndx *,
+	   Elf_Internal_Sym *));
 extern void bfd_elf64_swap_symbol_out
-  PARAMS ((bfd *, const Elf_Internal_Sym *, PTR));
+  PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
 extern void bfd_elf64_swap_reloc_in
   PARAMS ((bfd *, const Elf64_External_Rel *, Elf_Internal_Rel *));
 extern void bfd_elf64_swap_reloc_out

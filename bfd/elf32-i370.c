@@ -1209,6 +1209,7 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
       for (s = output_bfd->sections; s != NULL; s = s->next)
 	{
 	  int indx, dindx;
+	  Elf32_External_Sym *esym;
 
 	  sym.st_value = s->vma;
 
@@ -1224,10 +1225,8 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
 
 	      sym.st_shndx = indx;
 
-	      bfd_elf32_swap_symbol_out (output_bfd, &sym,
-					 (PTR) (((Elf32_External_Sym *)
-						 sdynsym->contents)
-						+ dindx));
+	      esym = (Elf32_External_Sym *) sdynsym->contents + dindx;
+	      bfd_elf32_swap_symbol_out (output_bfd, &sym, (PTR) esym, (PTR) 0);
 	    }
 	}
 

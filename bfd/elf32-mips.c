@@ -2955,7 +2955,7 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
   /* Set the sh_info field for .gptab sections and other appropriate
      info for each special section.  */
   for (i = 1, hdrpp = elf_elfsections (abfd) + 1;
-       i < elf_elfheader (abfd)->e_shnum;
+       i < elf_numsections (abfd);
        i++, hdrpp++)
     {
       switch ((*hdrpp)->sh_type)
@@ -8539,13 +8539,7 @@ _bfd_mips_elf_gc_mark_hook (abfd, info, rel, h, sym)
     }
   else
     {
-      if (!(elf_bad_symtab (abfd)
-	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-		&& sym->st_shndx != SHN_COMMON))
-	{
-	  return bfd_section_from_elf_index (abfd, sym->st_shndx);
-	}
+      return bfd_section_from_elf_index (abfd, sym->st_shndx);
     }
 
   return NULL;
