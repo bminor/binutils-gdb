@@ -1,5 +1,12 @@
 Fri Apr 15 12:22:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* bfd/archive.c: Consistently use ARFMAG; from
+	schwab@issan.informatik.uni-dortmund.de (Andreas Schwab).
+	(_bfd_write_archive_contents): Use ARFMAG rather than '`' and
+	'\012'.
+	(bsd_write_armap): Likewise.
+	(coff_write_armap): Likewise.
+
 	* coff-mips.c (mips_relocate_section): When relaxing, adjust local
 	relocs against the .text section as required.
 	* ecofflink.c (bfd_ecoff_debug_accumulate): When relaxing, adjust
