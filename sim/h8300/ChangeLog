@@ -1,3 +1,7 @@
+Fri Jun 30 16:50:24 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* compile.c (sim_do_command): New function.
+
 Tue Jun 20 16:18:13 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* compile.c (get_now): Don't do if win32.
