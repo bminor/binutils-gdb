@@ -1,3 +1,8 @@
+2002-05-08  Richard Earnshaw  <rearnsha@arm.com>
+
+	* remote-rdi.c (_initializie_remote_rdi): Use ANSI-style string
+	concatenation for command help messages.
+
 2002-05-08  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* NEWS: Note new sh*-*-netbsdelf* configuration.
