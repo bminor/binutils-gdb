@@ -1,6 +1,7 @@
 Tue Apr 25 11:27:14 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dbxread.c: Add comment explaining lowest_text_address.
+	Add comment regarding stringtab_global and psymtabs.
 
 Sat Apr 22 01:26:29 1995  Jeff Law  (law@snake.cs.utah.edu)
 
