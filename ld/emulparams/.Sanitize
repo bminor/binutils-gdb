@@ -27,8 +27,8 @@ Things-to-keep:
 README
 a29k.sh
 ebmon29k.sh
-elf32-sparc.sh
-elf64-sparc.sh
+elf32_sparc.sh
+elf64_sparc.sh
 gld960.sh
 go32.sh
 h8300.sh
@@ -39,6 +39,7 @@ hppaosf.sh
 i386aout.sh
 i386bsd.sh
 i386coff.sh
+i386linux.sh
 lnk960.sh
 m68kcoff.sh
 m88kbcs.sh
@@ -67,16 +68,16 @@ Do-last:
 
 if ( echo $* | grep keep-v9 > /dev/null ) ; then
 	if [ -n "${verbose}" ] ; then
-		echo Keeping `pwd`/elf64-sparc.sh.
+		echo Keeping `pwd`/elf64_sparc.sh.
 	fi
 else
 	if [ -n "${verbose}" ] ; then
-		echo Removing `pwd`/elf64-sparc.sh.
+		echo Removing `pwd`/elf64_sparc.sh.
 	fi
 	if [ -n "${safe}" ] ; then
-		mv elf64-sparc.sh .Recover
+		mv elf64_sparc.sh .Recover
 	else
-		rm elf64-sparc.sh
+		rm elf64_sparc.sh
 	fi
 fi
 
