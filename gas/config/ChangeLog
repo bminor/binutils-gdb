@@ -1,3 +1,11 @@
+Tue Jun  9 07:50:46 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* tc-m68k.c (m68kip): Fix typo so that only arch's >=68020 do
+	pcrel data stuff. (md_estimate_size_before_relax): when relaxing a
+	68010 bxx into a bra+6 jmpxx, put the bytes of the jmp opcode into
+	the right place. (s_bss): Don't put .bss stuff into SEG_DATA, put
+	it into SEG_BSS
+
 Thu May 28 11:20:27 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* tc-sparc.c: Use new ARCHITECTURES_CONFLICT_P macro.  Mention new

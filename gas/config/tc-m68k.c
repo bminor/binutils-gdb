@@ -1708,7 +1708,7 @@ char *instring;
 					   && !subs(opP->con1)
 					   && seg(opP->con1) == SEG_TEXT
 					   && now_seg == SEG_TEXT
-					   && cpu_of_arch(current_architecture) < m68020
+					   && cpu_of_arch(current_architecture) >= m68020
 					   && !flagseen['S']
 					   && !strchr("~%&$?", s[0])) {
 						tmpreg=0x3A; /* 7.2 */
@@ -3203,8 +3203,8 @@ segT segment;
 		} else {
 			fragP->fr_opcode[1] = 0x06;   /* branch offset = 6 */
 			/* JF: these were fr_opcode[2,3] */
-			buffer_address[2] = 0x4e;  /* put in jmp long (0x4ef9) */ 
-			buffer_address[3] = 0xf9;
+			buffer_address[0] = 0x4e;  /* put in jmp long (0x4ef9) */ 
+			buffer_address[1] = 0xf9;
 			fragP->fr_fix += 2;	     /* account for jmp instruction */
 			subseg_change(SEG_TEXT,0);
 			fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, 
@@ -3598,10 +3598,12 @@ static void s_data2() {
 	demand_empty_rest_of_line();
 } /* s_data2() */
 
-static void s_bss() {
-	/* We don't support putting frags in the BSS segment, but we
-	   can put them into initialized data for now... */
-	subseg_new(SEG_DATA,255);	/* FIXME-SOON */
+static void s_bss() 
+{
+	/* We don't support putting frags in the BSS segment, we fake it 
+	   by marking in_bss, then looking at s_skip for clues */
+
+        subseg_new(SEG_BSS, 0);
 	demand_empty_rest_of_line();
 } /* s_bss() */
 
