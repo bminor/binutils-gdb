@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog
 run.c
 run.1
 
