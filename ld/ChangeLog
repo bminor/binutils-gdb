@@ -1,7 +1,7 @@
 Thu Aug 27 16:38:42 1992  Ian Lance Taylor  (ian@cygnus.com)
 
- 	* gld960.em (gld960_choose_target): the target depends on
-	HOST_BIG_ENDIAN_P.
+	* gld960.em (gld960_choose_target): default to little endian, not
+	big endian.
 
 Wed Aug 26 17:28:51 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
