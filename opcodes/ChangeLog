@@ -1,3 +1,8 @@
+2001-02-02  Patrick Macdonald  <patrickm@redhat.com>
+
+	* fr30-desc.h: Regenerate with CGEN_MAX_SYNTAX_ELEMENTS. 
+	* m32r-desc.h: Regenerate.
+
 Thu Feb  1 16:29:06 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* (dis386_att, grps): Use 'T' for push/pop

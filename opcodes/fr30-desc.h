@@ -44,7 +44,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define CGEN_INT_INSN_P 0
 
 /* Maximum nymber of syntax bytes in an instruction.  */
-#define CGEN_ACTUAL_MAX_SYNTAX_BYTES 15
+#define CGEN_ACTUAL_MAX_SYNTAX_ELEMENTS 15
 
 /* CGEN_MNEMONIC_OPERANDS is defined if mnemonics have operands.
    e.g. In "b,a foo" the ",a" is an operand.  If mnemonics have operands
