@@ -1,3 +1,7 @@
+Thu Oct 26 05:45:10 1995  Ken Raeburn  <raeburn@kr-pc.cygnus.com>
+
+	* Makefile.in (taz): Use ";" instead of ";;".
+
 Wed Oct 25 15:18:24 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* Makefile.in (taz):  Grep for '^diststuff:' or '^info:' in

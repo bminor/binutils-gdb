@@ -1161,9 +1161,9 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	for d in $$dirs ; do \
 	  if [ -d $$d ]; then \
 	    if grep '^diststuff:' $$d/Makefile >/dev/null ; then \
-		(cd $$d ; $(MAKE) diststuff ) || exit 1  ;; \
+		(cd $$d ; $(MAKE) diststuff ) || exit 1  ; \
 	    elif grep '^info:' $$d/Makefile >/dev/null ; then \
-	        (cd $$d ; $(MAKE) info ) || exit 1  ;; \
+	        (cd $$d ; $(MAKE) info ) || exit 1  ; \
 	    fi ; \
 	    if [ -d $$d/proto-$$d.dir ]; then \
 	      ln -s ../$$d/proto-$$d.dir proto-toplev/$$d ; \
