@@ -183,14 +183,6 @@ static int may_follow_exec = MAY_FOLLOW_EXEC;
 #define SKIP_SOLIB_RESOLVER(pc) 0
 #endif
 
-/* For SVR4 shared libraries, each call goes through a small piece of
-   trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
-   to nonzero if we are current stopped in one of these. */
-
-#ifndef IN_SOLIB_CALL_TRAMPOLINE
-#define IN_SOLIB_CALL_TRAMPOLINE(pc,name)	0
-#endif
-
 /* In some shared library schemes, the return path from a shared library
    call may need to go through a trampoline too.  */
 

@@ -253,6 +253,7 @@ struct gdbarch
   gdbarch_software_single_step_ftype *software_single_step;
   gdbarch_print_insn_ftype *print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
+  gdbarch_in_solib_call_trampoline_ftype *in_solib_call_trampoline;
 };
 
 
@@ -338,6 +339,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -497,6 +499,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->addr_bits_remove = core_addr_identity;
   current_gdbarch->print_insn = legacy_print_insn;
   current_gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
+  current_gdbarch->in_solib_call_trampoline = generic_in_solib_call_trampoline;
   /* gdbarch_alloc() */
 
   return current_gdbarch;
@@ -795,6 +798,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of software_single_step, has predicate */
   /* Skip verify of print_insn, invalid_p == 0 */
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
+  /* Skip verify of in_solib_call_trampoline, invalid_p == 0 */
 }
 
 
@@ -1326,6 +1330,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: INTEGER_TO_ADDRESS = 0x%08lx\n",
                         (long) current_gdbarch->integer_to_address
                         /*INTEGER_TO_ADDRESS ()*/);
+#endif
+#ifdef IN_SOLIB_CALL_TRAMPOLINE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "IN_SOLIB_CALL_TRAMPOLINE(pc, name)",
+                      XSTRING (IN_SOLIB_CALL_TRAMPOLINE (pc, name)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: IN_SOLIB_CALL_TRAMPOLINE = 0x%08lx\n",
+                        (long) current_gdbarch->in_solib_call_trampoline
+                        /*IN_SOLIB_CALL_TRAMPOLINE ()*/);
 #endif
 #ifdef MAX_REGISTER_RAW_SIZE
   fprintf_unfiltered (file,
@@ -4238,6 +4253,24 @@ set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch,
                                   gdbarch_skip_trampoline_code_ftype skip_trampoline_code)
 {
   gdbarch->skip_trampoline_code = skip_trampoline_code;
+}
+
+int
+gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, char *name)
+{
+  if (gdbarch->in_solib_call_trampoline == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_in_solib_call_trampoline invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_in_solib_call_trampoline called\n");
+  return gdbarch->in_solib_call_trampoline (pc, name);
+}
+
+void
+set_gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch,
+                                      gdbarch_in_solib_call_trampoline_ftype in_solib_call_trampoline)
+{
+  gdbarch->in_solib_call_trampoline = in_solib_call_trampoline;
 }
 
 
