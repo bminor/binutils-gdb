@@ -1,3 +1,7 @@
+Thu Sep 15 18:36:34 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* expr.c (clean_up_expression): Use addressT, not bfd_vma.
+
 Tue Sep 13 20:05:47 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* expr.c (expr): Don't reduce the difference of two symbols in the
