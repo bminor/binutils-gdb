@@ -392,6 +392,24 @@ path-list for occurrences of @code{lib@var{archive}.a} for every
 @var{archive} specified.  File extensions other than @code{.a} may be
 used on certain systems.
 
+The linker will search an archive only once, at the location where it is
+specified on the command line.  If the archive defines a symbol which
+was undefined in some object which appeared before the archive on the
+command line, the linker will include the appropriate file(s) from the
+archive.  However, an undefined symbol in an object appearing later on
+the command line will not cause the linker to search the archive again.
+
+See the @code{-(} option for a way to force the linker to search
+archives multiple times.
+
+You may list the same archive multiple times on the command line.
+
+@ifset GENERIC
+This type of archive searching is standard for Unix linkers.  However,
+if you are using @code{ld} on AIX, note that it is different from the
+behaviour of the AIX linker.
+@end ifset
+
 @cindex search directory, from cmd line
 @kindex -L@var{dir}
 @kindex --library-path=@var{dir}
@@ -1682,6 +1700,14 @@ Return the size in bytes of the output file's headers.  You can use this number
 as the start address of the first section, if you choose, to facilitate
 paging. 
 
+@kindex MAX
+@item MAX(@var{exp1}, @var{exp2})
+Returns the maximum of @var{exp1} and @var{exp2}.
+
+@kindex MIN
+@item MIN(@var{exp1}, @var{exp2})
+Returns the minimum of @var{exp1} and @var{exp2}.
+
 @end table
 
 @node Semicolons
@@ -1822,6 +1848,7 @@ output file will match the order in the first input file.
 * Section Placement::           Section Placement
 * Section Data Expressions::    Section Data Expressions
 * Section Options::             Optional Section Attributes
+* Overlays::			Overlays
 @end menu
 
 @node Section Definition
@@ -2351,11 +2378,115 @@ of a section definition.
 
 @end table
 
+@node Overlays
+@subsection Overlays
+@kindex OVERLAY
+@cindex overlays
+
+The @code{OVERLAY} command provides an easy way to describe sections
+which are to be loaded as part of a single memory image but are to be
+run at the same memory address.  At run time, some sort of overlay
+manager will copy the overlaid sections in and out of the runtime memory
+address as required, perhaps by simply manipulating addressing bits.
+This approach can be useful, for example, when a certain region of
+memory is faster than another.
+
+The @code{OVERLAY} command is used within a @code{SECTIONS} command.  It
+appears as follows:
+@smallexample
+@group
+  OVERLAY @var{start} : [ NOCROSSREFS ] AT ( @var{ldaddr} )
+   @{
+     @var{secname1} @{ @var{contents} @} :@var{phdr} =@var{fill}
+     @var{secname2} @{ @var{contents} @} :@var{phdr} =@var{fill}
+     @dots{}
+   @} >@var{region} :@var{phdr} =@var{fill}
+@end group
+@end smallexample
+
+Everything is optional except @code{OVERLAY} (a keyword), and each
+section must have a name (@var{secname1} and @var{secname2} above).  The
+section definitions within the @code{OVERLAY} construct are identical to
+those within the general @code{SECTIONS} contruct (@pxref{SECTIONS}),
+except that no addresses and no memory regions may be defined for
+sections within an @code{OVERLAY}.
+
+The sections are all defined with the same starting address.  The load
+addresses of the sections are arranged such that they are consecutive in
+memory starting at the load address used for the @code{OVERLAY} as a
+whole (as with normal section definitions, the load address is optional,
+and defaults to the start address; the start address is also optional,
+and defaults to @code{.}).
+
+If the @code{NOCROSSREFS} keyword is used, and there any references
+among the sections, the linker will report an error.  Since the sections
+all run at the same address, it normally does not make sense for one
+section to refer directly to another.  @xref{Option Commands,
+NOCROSSREFS}.
+
+For each section within the @code{OVERLAY}, the linker automatically
+defines two symbols.  The symbol @code{__load_start_@var{secname}} is
+defined as the starting load address of the section.  The symbol
+@code{__load_stop_@var{secname}} is defined as the final load address of
+the section.  Any characters within @var{secname} which are not legal
+within C identifiers are removed.  C (or assembler) code may use these
+symbols to move the overlaid sections around as necessary.
+
+At the end of the overlay, the value of @code{.} is set to the start
+address of the overlay plus the size of the largest section.
+
+Here is an example.  Remember that this would appear inside a
+@code{SECTIONS} construct.
+
+@smallexample
+@group
+  OVERLAY 0x1000 : AT (0x4000)
+   @{
+     .text0 @{ o1/*.o(.text) @}
+     .text1 @{ o2/*.o(.text) @}
+   @}
+@end group
+@end smallexample
+
+This will define both @code{.text0} and @code{.text1} to start at
+address 0x1000.  @code{.text0} will be loaded at address 0x4000, and
+@code{.text1} will be loaded immediately after @code{.text0}.  The
+following symbols will be defined: @code{__load_start_text0},
+@code{__load_stop_text0}, @code{__load_start_text1},
+@code{__load_stop_text1}.
+
+C code to copy overlay @code{.text1} into the overlay area might look
+like the following.
+
+@smallexample
+@group
+  extern char __load_start_text1, __load_stop_text1;
+  memcpy ((char *) 0x1000, &__load_start_text1,
+          &__load_stop_text1 - &__load_start_text1);
+@end group
+@end smallexample
+
+Note that the @code{OVERLAY} command is just syntactic sugar, since
+everything it does can be done using the more basic commands.  The above
+example could have been written identically as follows.
+
+@smallexample
+@group
+  .text0 0x1000 : AT (0x4000) @{ o1/*.o(.text) @}
+  __load_start_text0 = LOADADDR (.text0);
+  __load_stop_text0 = LOADADDR (.text0) + SIZEOF (.text0);
+  .text1 0x1000 : AT (0x4000 + SIZEOF (.text0)) @{ o2/*.o(.text) @}
+  __load_start_text1 = LOADADDR (.text1);
+  __load_stop_text1 = LOADADDR (.text1) + SIZEOF (.text1);
+  . = 0x1000 + MAX (SIZEOF (.text0), SIZEOF (.text1));
+@end group
+@end smallexample
+
 @node PHDRS
 @section ELF Program Headers
 @kindex PHDRS
-@kindex program headers
-@kindex ELF program headers
+@cindex program headers
+@cindex ELF program headers
 
 The ELF object file format uses @dfn{program headers}, which are read by
 the system loader and describe how the program should be loaded into

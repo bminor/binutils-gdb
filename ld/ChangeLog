@@ -4,6 +4,8 @@ Tue Oct  1 16:17:33 1996  Joel Sherrill  <joel@oarcorp.com>
 
 Tue Oct  1 15:50:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld.texinfo (Options): Give more detail on -l option.
+
 	* scripttempl/elfmips.sc: Handle CREATE_SHLIB the same way that
 	elf.sc does, so that glibc works better.
 
