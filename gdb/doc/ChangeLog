@@ -1,3 +1,7 @@
+2003-09-21  Anthony Green  <green@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Fix typos.
+
 2003-09-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbint.texinfo (Target Architecture Definition): Document

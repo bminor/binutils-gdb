@@ -3693,8 +3693,8 @@ pushing them on the stack.
 function argument of type @var{type} is passed by reference instead of
 value.
 
-This method replaces @code{DEPRECTAED_REG_STRUCT_HAS_ADDR}
-(@pxref{DEPRECATED_REG_STRUCT_ADDR}).
+This method replaces @code{DEPRECATED_REG_STRUCT_HAS_ADDR}
+(@pxref{DEPRECATED_REG_STRUCT_HAS_ADDR}).
 
 @item PROCESS_LINENUMBER_HOOK
 @findex PROCESS_LINENUMBER_HOOK
