@@ -67,10 +67,7 @@ CC=@CC@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-# If you use bison instead of yacc, it needs to include the "-y" argument.
-#BISON=bison -y
-BISON=yacc
-YACC=$(BISON)
+YACC=@YACC@
 
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
@@ -262,8 +259,7 @@ FLAGS_TO_PASS = \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"RUNTEST=$(RUNTEST)" \
-	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
-	"BISON=$(BISON)"
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
 
 # Flags that we pass when building the testsuite.
 
@@ -324,7 +320,6 @@ TARGET_FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
 	"against=$(against)" \
-	"BISON=$(BISON)" \
 	'CC=$$(CC_FOR_TARGET)' \
 	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"CFLAGS=$(CFLAGS)" \
