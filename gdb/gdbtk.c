@@ -850,11 +850,12 @@ gdb_disassemble (clientData, interp, argc, argv)
       struct symtab *symtab;
       struct linetable_entry *le;
       int nlines;
+      int newlines;
       struct my_line_entry *mle;
       struct symtab_and_line sal;
       int i;
       int out_of_order;
-      int current_line;
+      int next_line;
 
       symtab = find_pc_symtab (low); /* Assume symtab is valid for whole PC range */
 
@@ -873,45 +874,66 @@ gdb_disassemble (clientData, interp, argc, argv)
 
       out_of_order = 0;
 
-      for (i = 0; i < nlines - 1; i++)
+/* Copy linetable entries for this function into our data structure, creating
+   end_pc's and setting out_of_order as appropriate.  */
+
+/* First, skip all the preceding functions.  */
+
+      for (i = 0; i < nlines - 1 && le[i].pc < low; i++) ;
+
+/* Now, copy all entries before the end of this function.  */
+
+      newlines = 0;
+      for (; i < nlines - 1 && le[i].pc < high; i++)
 	{
-	  mle[i].line = le[i].line;
+	  if (le[i].line == le[i + 1].line
+	      && le[i].pc == le[i + 1].pc)
+	    continue;		/* Ignore duplicates */
+
+	  mle[newlines].line = le[i].line;
 	  if (le[i].line > le[i + 1].line)
 	    out_of_order = 1;
-	  mle[i].start_pc = le[i].pc;
-	  mle[i].end_pc = le[i + 1].pc;
+	  mle[newlines].start_pc = le[i].pc;
+	  mle[newlines].end_pc = le[i + 1].pc;
+	  newlines++;
 	}
 
-      mle[i].line = le[i].line;
-      mle[i].start_pc = le[i].pc;
-      sal = find_pc_line (le[i].pc, 0);
-      mle[i].end_pc = sal.end;
+/* If we're on the last line, and it's part of the function, then we need to
+   get the end pc in a special way.  */
+
+      if (i == nlines - 1
+	  && le[i].pc < high)
+	{
+	  mle[newlines].line = le[i].line;
+	  mle[newlines].start_pc = le[i].pc;
+	  sal = find_pc_line (le[i].pc, 0);
+	  mle[newlines].end_pc = sal.end;
+	  newlines++;
+	}
 
 /* Now, sort mle by line #s (and, then by addresses within lines). */
 
       if (out_of_order)
-	qsort (mle, nlines, sizeof (struct my_line_entry), compare_lines);
-
-/* Scan forward until we find the start of the function.  */
-
-      for (i = 0; i < nlines; i++)
-	if (mle[i].start_pc >= low)
-	  break;
+	qsort (mle, newlines, sizeof (struct my_line_entry), compare_lines);
 
 /* Now, for each line entry, emit the specified lines (unless they have been
    emitted before), followed by the assembly code for that line.  */
 
-      current_line = 0;		/* Force out first line */
-      for (;i < nlines && mle[i].start_pc < high; i++)
+      next_line = 0;		/* Force out first line */
+      for (i = 0; i < newlines; i++)
 	{
-	  if (mle[i].line > current_line)
+/* Print out everything from next_line to the current line.  */
+
+	  if (mle[i].line >= next_line)
 	    {
-	      if (i == nlines - 1)
-		print_source_lines (symtab, mle[i].line, INT_MAX, 0);
+	      if (next_line != 0)
+		print_source_lines (symtab, next_line, mle[i].line + 1, 0);
 	      else
-		print_source_lines (symtab, mle[i].line, mle[i + 1].line, 0);
-	      current_line = mle[i].line;
+		print_source_lines (symtab, mle[i].line, mle[i].line + 1, 0);
+
+	      next_line = mle[i].line + 1;
 	    }
+
 	  for (pc = mle[i].start_pc; pc < mle[i].end_pc; )
 	    {
 	      QUIT;

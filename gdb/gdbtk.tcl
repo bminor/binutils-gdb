@@ -1701,12 +1701,36 @@ proc files_command {} {
 
 	wm minsize .files_window 1 1
 #	wm overrideredirect .files_window true
-	listbox .files_window.list -geometry 30x20 -setgrid true
+	listbox .files_window.list -geometry 30x20 -setgrid true \
+		-yscrollcommand {.files_window.scroll set} -relief raised \
+		-borderwidth 2
+	scrollbar .files_window.scroll -orient vertical \
+		-command {.files_window.list yview}
 	button .files_window.close -text Close -command {destroy .files_window}
 	tk_listboxSingleSelect .files_window.list
-	eval .files_window.list insert 0 [lsort [gdb_listfiles]]
-	pack .files_window.list -side top -fill both -expand yes
+
+# Get the file list from GDB, sort it, and format it as one entry per line.
+
+	set filelist [join [lsort [gdb_listfiles]] "\n"]
+
+# Now, remove duplicates (by using uniq)
+
+	set fh [open "| uniq > /tmp/gdbtk.[pid]" w]
+	puts $fh $filelist
+	close $fh
+	set fh [open /tmp/gdbtk.[pid]]
+	set filelist [split [read $fh] "\n"]
+	set filelist [lrange $filelist 0 [expr [llength $filelist] - 2]]
+	close $fh
+	exec rm /tmp/gdbtk.[pid]
+
+# Insert the file list into the widget
+
+	eval .files_window.list insert 0 $filelist
+
 	pack .files_window.close -side bottom -fill x -expand no -anchor s
+	pack .files_window.scroll -side right -fill both
+	pack .files_window.list -side left -fill both -expand yes
 	bind .files_window.list <Any-ButtonRelease-1> {
 		set file [%W get [%W curselection]]
 		gdb_cmd "list $file:1,0"

@@ -1,3 +1,10 @@
+Tue Jan 24 12:10:28 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdb_disassemble):  Fix problem with source+assembly and
+	g++ caused by out-of-order pc's.
+	* gdbtk.tcl (files_command):  Remove duplicate file names.  Also,
+	add scrollbar.
+
 Mon Jan 23 17:21:09 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.tcl:  Take .gdbtkinit if it exists.  Makes gdbtk match the
