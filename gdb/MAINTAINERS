@@ -59,7 +59,6 @@ resolving build issues.  The Target/Architecture maintainer works with
 the native maintainer when resolving ABI issues.
 
 	alpha		--target=alpha-elf ,-Werror
-			Maintenance only
 
 	arm		--target=arm-elf ,-Werror
 			Scott Bambrough		scottb@netwinder.org
@@ -74,7 +73,6 @@ the native maintainer when resolving ABI issues.
 	d10v		OBSOLETE
 
 	frv		--target=frv-elf ,-Werror
-			Maintenance only
 
 	h8300		Deleted
 
@@ -91,7 +89,6 @@ the native maintainer when resolving ABI issues.
 			Stephane Carrez		stcarrez@nerim.fr
 
 	m68k		--target=m68k-elf ,-Werror
-			Maintenance only
 
 	m88k		--target=m88k-openbsd ,-Werror
 			Mark Kettenis		kettenis@gnu.org
@@ -99,7 +96,6 @@ the native maintainer when resolving ABI issues.
 	mcore		Deleted
 
 	mips		--target=mips-elf ,-Werror
-			Maintenance only
 
 	mn10300		--target=mn10300-elf
 			Michael Snyder		msnyder@redhat.com
@@ -107,33 +103,29 @@ the native maintainer when resolving ABI issues.
 	ns32k		Deleted
 
 	pa		--target=hppa-elf ,-Werror
-			Maintenance only
 
 	powerpc		--target=powerpc-eabi ,-Werror
 			Kevin Buettner		kevinb@redhat.com
 
 	s390		--target=s390-linux-gnu ,-Werror
-			(contact DJ Barrow	djbarrow@de.ibm.com)
 
 	sh		--target=sh-elf ,-Werror
 			--target=sh64-elf broken
 			Elena Zannoni		ezannoni@redhat.com
 
 	sparc		--target=sparc-elf ,-Werror
-			Maintenance only
 
 	v850		Deleted
 
 	vax		--target=vax-netbsd ,-Werror
-			Maintenance only
 
 	x86-64		--target=x86_64-linux-gnu ,-Werror
-			Maintenance only
 
 	xstormy16	--target=xstormy16-elf
 			Corinna Vinschen	vinschen@redhat.com
 
-The following developers can commit changes to specific architectures:
+The following developers CAN COMMIT changes (and hence approve
+patches) to specific architectures:
 
 	Randolph Chung (pa)
 	Jeff Johnston (ia64)
@@ -143,13 +135,6 @@ The following developers can commit changes to specific architectures:
 
 All developers recognized by this file can make arbitrary changes to
 OBSOLETE targets.
-
-All maintainers can test and thence approve non-trivial changes to
-``maintenance only'' targets submitted by recognized developers.
-
-All recognized developers can make mechanical changes (by virtue of
-the obvious fix rule) to ``maintenance only'' targets.  The change
-shall be sanity checked by compiling with one of the listed targets.
 
 The Bourne shell script gdb_mbuild.sh can be used to rebuild all the
 above targets.
