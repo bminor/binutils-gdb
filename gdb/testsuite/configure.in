@@ -48,7 +48,7 @@ a29k-*-udi)		target_abbrev=udi ;
 				target_makefile_frag=config/mt-a29k-udi ;;
 a29k-isstip-*)		target_abbrev=itip ; 
 				target_makefile_frag=config/mt-a29k-isstip ;;
-mips-idt-ecoff)		target_abbrev=mips ;
+mips-idt-ecoff*)	target_abbrev=mips ;
 				target_makefile_frag=config/mt-mips ;;
 esac
 
