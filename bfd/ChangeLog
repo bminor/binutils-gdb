@@ -90,7 +90,7 @@ Mon Feb 12 17:46:24 CET 2001  Jan Hubicka  <jh@suse.cz>
 
 2001-02-11  H.J. Lu  <hjl@gnu.org>
 
-	* elflink.h (elf_bfd_final_link): Use file_align for STMTAB
+	* elflink.h (elf_bfd_final_link): Use file_align for SYMTAB
 	alignment.
 
 2001-02-11  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
