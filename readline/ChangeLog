@@ -1,3 +1,10 @@
+Fri Jan 21 14:40:43 1994  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (distclean, realclean):  Expand local-distclean
+	inline after doing recursion.  You can't recurse after removing
+	Makefile.  Make them depend on local-clean.
+	* Makefile.in (local-distclean):  Remove now superfluous target.
+
 Mon Jan 17 12:42:07 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* readline.c (doing_an_undo): Delete second declaration, since it
