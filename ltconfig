@@ -779,8 +779,8 @@ __dll_entry (HINSTANCE hinst, DWORD reason, LPVOID reserved)
   _impure_ptr = __imp_reent_data;
 }
 ' > libtool.c
-    archive_cmds='$CC -c libtool.c;echo EXPORTS > $soname.def;$NM$libobjs | $global_symbol_pipe | sed '\''s/.* //'\'' >> $soname.def;$LD -s --base-file $soname.base --dll -e ___dll_entry@12 -o $lib libtool.o$libobjs$deplibs;$DLLTOOL --as=$AS --dllname $soname --def $soname.def --base-file $soname.base --output-exp $soname.exp;$LD -s --base-file $soname.base $soname.exp --dll -e ___dll_entry@12 -o $lib libtool.o$libobjs$deplibs;$DLLTOOL --as=$AS --dllname $soname --def $soname.def --base-file $soname.base --output-exp $soname.exp;$LD $soname.exp --dll -e ___dll_entry@12 -o $lib libtool.o$libobjs$deplibs;$rm libtool.o $soname.base $soname.exp'
-    old_archive_from_new_cmds='$DLLTOOL --as=$AS --dllname $soname --def $soname.def --output-lib $objdir/$libname.a'
+    archive_cmds='$CC -c '"`pwd`"'/libtool.c;echo EXPORTS > $soname-def;$NM$libobjs | $global_symbol_pipe | sed '\''s/.* //'\'' >> $soname-def;$LD -s --base-file $soname-base --dll -e ___dll_entry@12 -o $lib libtool.o$libobjs$deplibs;$DLLTOOL --as=$AS --dllname $soname --def $soname-def --base-file $soname-base --output-exp $soname-exp;$LD -s --base-file $soname-base $soname-exp --dll -e ___dll_entry@12 -o $lib libtool.o$libobjs$deplibs;$DLLTOOL --as=$AS --dllname $soname --def $soname-def --base-file $soname-base --output-exp $soname-exp;$LD $soname-exp --dll -e ___dll_entry@12 -o $lib libtool.o$libobjs$deplibs;$rm libtool.o $soname-base $soname-exp'
+    old_archive_from_new_cmds='$DLLTOOL --as=$AS --dllname $soname --def $soname-def --output-lib $objdir/$libname.a;$rm $soname-def'
     ;;
 
   # FreeBSD 2.2.[012] allows us to include c++rt0.o to get C++ constructor
@@ -1149,11 +1149,11 @@ echo $ac_n "checking dynamic linker characteristics... $ac_c" 1>&6
 case "$host_os" in
 aix3* | aix4*)
   version_type=linux
-  library_names_spec='${libname}${release}.so.$versuffix $libname.a'
+  library_names_spec='${libname}${release}.so$versuffix $libname.a'
   shlibpath_var=LIBPATH
 
   # AIX has no versioning support, so we append a major version to the name.
-  soname_spec='${libname}${release}.so.$major'
+  soname_spec='${libname}${release}.so$major'
   ;;
 
 amigaos*)
@@ -1163,21 +1163,22 @@ amigaos*)
   ;;
 
 cygwin32*)
-  library_names_spec='${libname}${release}.dll $libname.a'
+  version_type=windows
+  library_names_spec='${libname}`echo ${release} | sed -e 's/[.]/-/g'`${versuffix}.dll $libname.a'
   dynamic_linker='Win32 ld.exe'
   shlibpath_var=PATH
   ;;
 
 freebsd2* | freebsd3*)
   version_type=sunos
-  library_names_spec='${libname}${release}.so.$versuffix $libname.so'
+  library_names_spec='${libname}${release}.so$versuffix $libname.so'
   finish_cmds='PATH="$PATH:/sbin" ldconfig -m $libdir'
   shlibpath_var=LD_LIBRARY_PATH
   ;;
 
 gnu*)
   version_type=sunos
-  library_names_spec='${libname}${release}.so.$versuffix'
+  library_names_spec='${libname}${release}.so$versuffix'
   shlibpath_var=LD_LIBRARY_PATH
   ;;
 
@@ -1187,8 +1188,8 @@ hpux9* | hpux10* | hpux11*)
   dynamic_linker="$host_os dld.sl"
   version_type=sunos
   shlibpath_var=SHLIB_PATH
-  library_names_spec='${libname}${release}.sl.$versuffix ${libname}${release}.sl.$major $libname.sl'
-  soname_spec='${libname}${release}.sl.$major'
+  library_names_spec='${libname}${release}.sl$versuffix ${libname}${release}.sl$major $libname.sl'
+  soname_spec='${libname}${release}.sl$major'
   # HP-UX runs *really* slowly unless shared libraries are mode 555.
   postinstall_cmds='chmod 555 $lib'
   ;;
@@ -1196,7 +1197,7 @@ hpux9* | hpux10* | hpux11*)
 irix5* | irix6*)
   version_type=osf
   soname_spec='${libname}${release}.so'
-  library_names_spec='${libname}${release}.so.$versuffix $libname.so'
+  library_names_spec='${libname}${release}.so$versuffix $libname.so'
   shlibpath_var=LD_LIBRARY_PATH
   ;;
 
@@ -1208,8 +1209,8 @@ linux-gnuoldld* | linux-gnuaout* | linux-gnucoff*)
 # This must be Linux ELF.
 linux-gnu*)
   version_type=linux
-  library_names_spec='${libname}${release}.so.$versuffix ${libname}${release}.so.$major $libname.so'
-  soname_spec='${libname}${release}.so.$major'
+  library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so$major $libname.so'
+  soname_spec='${libname}${release}.so$major'
   finish_cmds='PATH="$PATH:/sbin" ldconfig -n $libdir'
   shlibpath_var=LD_LIBRARY_PATH
 
@@ -1226,7 +1227,7 @@ linux-gnu*)
 
 netbsd* | openbsd*)
   version_type=sunos
-  library_names_spec='${libname}${release}.so.$versuffix'
+  library_names_spec='${libname}${release}.so$versuffix'
   finish_cmds='PATH="$PATH:/sbin" ldconfig -m $libdir'
   shlibpath_var=LD_LIBRARY_PATH
   ;;
@@ -1241,42 +1242,42 @@ os2*)
 osf3* | osf4*)
   version_type=osf
   soname_spec='${libname}${release}.so'
-  library_names_spec='${libname}${release}.so.$versuffix $libname.so'
+  library_names_spec='${libname}${release}.so$versuffix $libname.so'
   shlibpath_var=LD_LIBRARY_PATH
   ;;
 
 sco3.2v5*)
   version_type=osf
-  soname_spec='${libname}${release}.so.$major'
-  library_names_spec='${libname}${release}.so.$versuffix ${libname}${release}.so.$major $libname.so'
+  soname_spec='${libname}${release}.so$major'
+  library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so$major $libname.so'
   shlibpath_var=LD_LIBRARY_PATH
   ;;
 
 solaris2*)
   version_type=linux
-  library_names_spec='${libname}${release}.so.$versuffix ${libname}${release}.so.$major $libname.so'
-  soname_spec='${libname}${release}.so.$major'
+  library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so$major $libname.so'
+  soname_spec='${libname}${release}.so$major'
   shlibpath_var=LD_LIBRARY_PATH
   ;;
 
 sunos4*)
   version_type=sunos
-  library_names_spec='${libname}${release}.so.$versuffix'
+  library_names_spec='${libname}${release}.so$versuffix'
   finish_cmds='PATH="$PATH:/usr/etc" ldconfig $libdir'
   shlibpath_var=LD_LIBRARY_PATH
   ;;
 
 sysv4.2uw2*)
   version_type=linux
-  library_names_spec='${libname}${release}.so.$versuffix ${libname}${release}.so.$major $libname.so'
-  soname_spec='${libname}${release}.so.$major'
+  library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so$major $libname.so'
+  soname_spec='${libname}${release}.so$major'
   shlibpath_var=LD_LIBRARY_PATH
   ;;
 
 uts4*)
   version_type=linux
-  library_names_spec='${libname}${release}.so.$versuffix ${libname}${release}.so.$major $libname.so'
-  soname_spec='${libname}${release}.so.$major'
+  library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so$major $libname.so'
+  soname_spec='${libname}${release}.so$major'
   shlibpath_var=LD_LIBRARY_PATH
   ;;
 

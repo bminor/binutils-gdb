@@ -1,3 +1,8 @@
+Thu May  7 17:27:35 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ltconfig, ltmain.sh: Avoid producing a version number if
+	-version-info was not used.
+
 start-sanitize-java
 Wed May  6 10:26:06 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
