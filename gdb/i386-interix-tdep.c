@@ -149,7 +149,7 @@ i386_interix_back_one_frame (int fromleaf, struct frame_info *frame)
 
   if (fromleaf)
     {
-      frame->pc = SAVED_PC_AFTER_CALL (frame->next);
+      frame->pc = DEPRECATED_SAVED_PC_AFTER_CALL (frame->next);
       return;
     }
 
@@ -162,7 +162,7 @@ i386_interix_back_one_frame (int fromleaf, struct frame_info *frame)
         {
           /* We know we're in a system call mini-frame; was it
              NullApi or something else?  */
-          ra = SAVED_PC_AFTER_CALL (frame);
+          ra = DEPRECATED_SAVED_PC_AFTER_CALL (frame);
           if (ra >= null_start && ra < null_end)
 	    deprecated_set_frame_type (frame, SIGTRAMP_FRAME);
           /* There might also be an indirect call to the mini-frame,

@@ -258,7 +258,7 @@ extern CORE_ADDR sparc_skip_prologue (CORE_ADDR);
    the new frame is not set up until the new function executes
    some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(FRAME) PC_ADJUST (read_register (RP_REGNUM))
+#define DEPRECATED_SAVED_PC_AFTER_CALL(FRAME) PC_ADJUST (read_register (RP_REGNUM))
 
 /* Stack grows downward.  */
 
@@ -471,7 +471,7 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
 extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 #define	DEPRECATED_INIT_FRAME_PC(FROMLEAF, PREV)	(init_frame_pc_noop (FROMLEAF, PREV))
 #define DEPRECATED_INIT_FRAME_PC_FIRST(FROMLEAF, PREV) \
-  ((FROMLEAF) ? SAVED_PC_AFTER_CALL ((PREV)->next) : \
+  ((FROMLEAF) ? DEPRECATED_SAVED_PC_AFTER_CALL ((PREV)->next) : \
 	      (PREV)->next ? DEPRECATED_FRAME_SAVED_PC ((PREV)->next) : read_pc ())
 
 /* Define other aspects of the stack frame.  */

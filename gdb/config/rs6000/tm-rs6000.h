@@ -79,7 +79,7 @@ extern void aix_process_linenos (void);
 /* Define other aspects of the stack frame.  */
 
 #define DEPRECATED_INIT_FRAME_PC_FIRST(fromleaf, prev) \
-  (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
+  (fromleaf ? DEPRECATED_SAVED_PC_AFTER_CALL (prev->next) : \
 	      prev->next ? DEPRECATED_FRAME_SAVED_PC (prev->next) : read_pc ())
 /* NOTE: cagney/2002-12-08: Add local declaration of
    init_frame_pc_noop() because it isn't possible to include

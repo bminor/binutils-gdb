@@ -2957,7 +2957,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
   set_gdbarch_frame_args_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, rs6000_frame_args_address);
-  set_gdbarch_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
 
   /* We can't tell how many args there are
      now that the C compiler delays popping them.  */

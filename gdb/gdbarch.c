@@ -244,7 +244,7 @@ struct gdbarch
   gdbarch_unwind_pc_ftype *unwind_pc;
   gdbarch_frame_args_address_ftype *frame_args_address;
   gdbarch_frame_locals_address_ftype *frame_locals_address;
-  gdbarch_saved_pc_after_call_ftype *saved_pc_after_call;
+  gdbarch_deprecated_saved_pc_after_call_ftype *deprecated_saved_pc_after_call;
   gdbarch_frame_num_args_ftype *frame_num_args;
   gdbarch_stack_align_ftype *stack_align;
   gdbarch_frame_align_ftype *frame_align;
@@ -728,7 +728,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of unwind_pc, has predicate */
   /* Skip verify of frame_args_address, invalid_p == 0 */
   /* Skip verify of frame_locals_address, invalid_p == 0 */
-  /* Skip verify of saved_pc_after_call, has predicate */
+  /* Skip verify of deprecated_saved_pc_after_call, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_num_args == 0))
     fprintf_unfiltered (log, "\n\tframe_num_args");
@@ -1454,6 +1454,26 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->deprecated_push_return_address
                         /*DEPRECATED_PUSH_RETURN_ADDRESS ()*/);
 #endif
+#ifdef DEPRECATED_SAVED_PC_AFTER_CALL_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_SAVED_PC_AFTER_CALL_P()",
+                      XSTRING (DEPRECATED_SAVED_PC_AFTER_CALL_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_SAVED_PC_AFTER_CALL_P() = %d\n",
+                      DEPRECATED_SAVED_PC_AFTER_CALL_P ());
+#endif
+#ifdef DEPRECATED_SAVED_PC_AFTER_CALL
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_SAVED_PC_AFTER_CALL(frame)",
+                      XSTRING (DEPRECATED_SAVED_PC_AFTER_CALL (frame)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_SAVED_PC_AFTER_CALL = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_saved_pc_after_call
+                        /*DEPRECATED_SAVED_PC_AFTER_CALL ()*/);
+#endif
 #ifdef DEPRECATED_STORE_RETURN_VALUE
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -2149,26 +2169,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: RETURN_VALUE_ON_STACK = <0x%08lx>\n",
                         (long) current_gdbarch->return_value_on_stack
                         /*RETURN_VALUE_ON_STACK ()*/);
-#endif
-#ifdef SAVED_PC_AFTER_CALL_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SAVED_PC_AFTER_CALL_P()",
-                      XSTRING (SAVED_PC_AFTER_CALL_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SAVED_PC_AFTER_CALL_P() = %d\n",
-                      SAVED_PC_AFTER_CALL_P ());
-#endif
-#ifdef SAVED_PC_AFTER_CALL
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SAVED_PC_AFTER_CALL(frame)",
-                      XSTRING (SAVED_PC_AFTER_CALL (frame)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: SAVED_PC_AFTER_CALL = <0x%08lx>\n",
-                        (long) current_gdbarch->saved_pc_after_call
-                        /*SAVED_PC_AFTER_CALL ()*/);
 #endif
 #ifdef SAVE_DUMMY_FRAME_TOS_P
   fprintf_unfiltered (file,
@@ -4910,29 +4910,29 @@ set_gdbarch_frame_locals_address (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_saved_pc_after_call_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_saved_pc_after_call_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->saved_pc_after_call != 0;
+  return gdbarch->deprecated_saved_pc_after_call != 0;
 }
 
 CORE_ADDR
-gdbarch_saved_pc_after_call (struct gdbarch *gdbarch, struct frame_info *frame)
+gdbarch_deprecated_saved_pc_after_call (struct gdbarch *gdbarch, struct frame_info *frame)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->saved_pc_after_call == 0)
+  if (gdbarch->deprecated_saved_pc_after_call == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_saved_pc_after_call invalid");
+                    "gdbarch: gdbarch_deprecated_saved_pc_after_call invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_saved_pc_after_call called\n");
-  return gdbarch->saved_pc_after_call (frame);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_saved_pc_after_call called\n");
+  return gdbarch->deprecated_saved_pc_after_call (frame);
 }
 
 void
-set_gdbarch_saved_pc_after_call (struct gdbarch *gdbarch,
-                                 gdbarch_saved_pc_after_call_ftype saved_pc_after_call)
+set_gdbarch_deprecated_saved_pc_after_call (struct gdbarch *gdbarch,
+                                            gdbarch_deprecated_saved_pc_after_call_ftype deprecated_saved_pc_after_call)
 {
-  gdbarch->saved_pc_after_call = saved_pc_after_call;
+  gdbarch->deprecated_saved_pc_after_call = deprecated_saved_pc_after_call;
 }
 
 int

@@ -2685,9 +2685,9 @@ step_over_function (struct execution_control_state *ecs)
      very messy when there is no debug info available (look at the
      heuristic find pc start code found in targets like the MIPS).  */
 
-  /* NOTE: cagney/2003-04-06: Deprecate SAVED_PC_AFTER_CALL?
+  /* NOTE: cagney/2003-04-06:
 
-     The intent of SAVED_PC_AFTER_CALL was to:
+     The intent of DEPRECATED_SAVED_PC_AFTER_CALL was to:
 
      - provide a very light weight equivalent to frame_unwind_pc()
      (nee FRAME_SAVED_PC) that avoids the prologue analyzer
@@ -2709,8 +2709,8 @@ step_over_function (struct execution_control_state *ecs)
      The d10v handles all this by bailing out of the prologue analsis
      when it reaches the current instruction.  */
 
-  if (SAVED_PC_AFTER_CALL_P ())
-    sr_sal.pc = ADDR_BITS_REMOVE (SAVED_PC_AFTER_CALL (get_current_frame ()));
+  if (DEPRECATED_SAVED_PC_AFTER_CALL_P ())
+    sr_sal.pc = ADDR_BITS_REMOVE (DEPRECATED_SAVED_PC_AFTER_CALL (get_current_frame ()));
   else
     sr_sal.pc = ADDR_BITS_REMOVE (frame_pc_unwind (get_current_frame ()));
   sr_sal.section = find_pc_overlay (sr_sal.pc);

@@ -1601,7 +1601,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                            i386_frameless_function_invocation);
   set_gdbarch_deprecated_frame_chain (gdbarch, i386_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, i386_frame_saved_pc);
-  set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 

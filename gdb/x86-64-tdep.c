@@ -1036,7 +1036,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* FIXME: kettenis/20021026: These two are GNU/Linux-specific and
      should be moved elsewhere.  */
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);
-  set_gdbarch_saved_pc_after_call (gdbarch, x86_64_linux_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, x86_64_linux_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   /* FIXME: kettenis/20021026: This one is GNU/Linux-specific too.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_in_sigtramp);

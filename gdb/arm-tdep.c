@@ -2961,7 +2961,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_prologue (gdbarch, arm_skip_prologue);
 
   /* Get the PC when a frame might not be available.  */
-  set_gdbarch_saved_pc_after_call (gdbarch, arm_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, arm_saved_pc_after_call);
 
   /* The stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

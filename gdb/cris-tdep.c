@@ -4301,7 +4301,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_chain (gdbarch, cris_frame_chain);
 
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, cris_frame_saved_pc);
-  set_gdbarch_saved_pc_after_call (gdbarch, cris_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, cris_saved_pc_after_call);
 
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   

@@ -1,5 +1,51 @@
 2003-04-11  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_SAVED_PC_AFTER_CALL): Deprecate
+	SAVED_PC_AFTER_CALL.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_init_abi): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	(ia64_saved_pc_after_call): Update declaration.
+	* i386ly-tdep.c (i386lynx_init_abi): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* hppa-tdep.c (hppa_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+	* ns32knbsd-nat.c (frame_num_args): Update.
+	* ns32k-tdep.c (umax_frame_num_args): Update.
+	* mips-tdep.c (mips_init_frame_pc_first): Update.
+	* infrun.c (step_over_function): Update.
+	* i386-linux-tdep.c (skip_hurd_resolver): Update.
+	* i386-interix-tdep.c (i386_interix_back_one_frame): Update.
+	* config/sparc/tm-sparc.h (DEPRECATED_SAVED_PC_AFTER_CALL): Update.
+	(DEPRECATED_INIT_FRAME_PC_FIRST): Update.
+	* config/rs6000/tm-rs6000.h (DEPRECATED_INIT_FRAME_PC_FIRST): Update.
+	* config/pa/tm-hppa.h (DEPRECATED_SAVED_PC_AFTER_CALL): Update.
+	* arm-linux-tdep.c (skip_hurd_resolver): Update.
+	* arch-utils.c (init_frame_pc_default): Update.
+	* alpha-tdep.c (alpha_init_frame_pc_first): Update.
+	* x86-64-tdep.h (x86_64_linux_saved_pc_after_call): Update
+	declaration.
+	
+2003-04-11  Andrew Cagney  <cagney@redhat.com>
+
 	* i387-tdep.c: Update copyright.
 	(i387_to_double): Delete function.
 	(double_to_i387): Delete function.

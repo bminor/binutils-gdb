@@ -1715,7 +1715,7 @@ mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
   CORE_ADDR pc, tmp;
 
   pc = ((fromleaf)
-	? SAVED_PC_AFTER_CALL (get_next_frame (prev))
+	? DEPRECATED_SAVED_PC_AFTER_CALL (get_next_frame (prev))
 	: get_next_frame (prev)
 	? DEPRECATED_FRAME_SAVED_PC (get_next_frame (prev))
 	: read_pc ());
@@ -6035,7 +6035,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   set_gdbarch_skip_prologue (gdbarch, mips_skip_prologue);
-  set_gdbarch_saved_pc_after_call (gdbarch, mips_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, mips_saved_pc_after_call);
 
   set_gdbarch_pointer_to_address (gdbarch, signed_pointer_to_address);
   set_gdbarch_address_to_pointer (gdbarch, address_to_signed_pointer);

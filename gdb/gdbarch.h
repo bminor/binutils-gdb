@@ -2385,40 +2385,40 @@ extern void set_gdbarch_frame_locals_address (struct gdbarch *gdbarch, gdbarch_f
 #endif
 #endif
 
-#if defined (SAVED_PC_AFTER_CALL)
-/* Legacy for systems yet to multi-arch SAVED_PC_AFTER_CALL */
-#if !defined (SAVED_PC_AFTER_CALL_P)
-#define SAVED_PC_AFTER_CALL_P() (1)
+#if defined (DEPRECATED_SAVED_PC_AFTER_CALL)
+/* Legacy for systems yet to multi-arch DEPRECATED_SAVED_PC_AFTER_CALL */
+#if !defined (DEPRECATED_SAVED_PC_AFTER_CALL_P)
+#define DEPRECATED_SAVED_PC_AFTER_CALL_P() (1)
 #endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (SAVED_PC_AFTER_CALL_P)
-#define SAVED_PC_AFTER_CALL_P() (0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_SAVED_PC_AFTER_CALL_P)
+#define DEPRECATED_SAVED_PC_AFTER_CALL_P() (0)
 #endif
 
-extern int gdbarch_saved_pc_after_call_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SAVED_PC_AFTER_CALL_P)
-#error "Non multi-arch definition of SAVED_PC_AFTER_CALL"
+extern int gdbarch_deprecated_saved_pc_after_call_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SAVED_PC_AFTER_CALL_P)
+#error "Non multi-arch definition of DEPRECATED_SAVED_PC_AFTER_CALL"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SAVED_PC_AFTER_CALL_P)
-#define SAVED_PC_AFTER_CALL_P() (gdbarch_saved_pc_after_call_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_SAVED_PC_AFTER_CALL_P)
+#define DEPRECATED_SAVED_PC_AFTER_CALL_P() (gdbarch_deprecated_saved_pc_after_call_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (SAVED_PC_AFTER_CALL)
-#define SAVED_PC_AFTER_CALL(frame) (internal_error (__FILE__, __LINE__, "SAVED_PC_AFTER_CALL"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_SAVED_PC_AFTER_CALL)
+#define DEPRECATED_SAVED_PC_AFTER_CALL(frame) (internal_error (__FILE__, __LINE__, "DEPRECATED_SAVED_PC_AFTER_CALL"), 0)
 #endif
 
-typedef CORE_ADDR (gdbarch_saved_pc_after_call_ftype) (struct frame_info *frame);
-extern CORE_ADDR gdbarch_saved_pc_after_call (struct gdbarch *gdbarch, struct frame_info *frame);
-extern void set_gdbarch_saved_pc_after_call (struct gdbarch *gdbarch, gdbarch_saved_pc_after_call_ftype *saved_pc_after_call);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SAVED_PC_AFTER_CALL)
-#error "Non multi-arch definition of SAVED_PC_AFTER_CALL"
+typedef CORE_ADDR (gdbarch_deprecated_saved_pc_after_call_ftype) (struct frame_info *frame);
+extern CORE_ADDR gdbarch_deprecated_saved_pc_after_call (struct gdbarch *gdbarch, struct frame_info *frame);
+extern void set_gdbarch_deprecated_saved_pc_after_call (struct gdbarch *gdbarch, gdbarch_deprecated_saved_pc_after_call_ftype *deprecated_saved_pc_after_call);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SAVED_PC_AFTER_CALL)
+#error "Non multi-arch definition of DEPRECATED_SAVED_PC_AFTER_CALL"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SAVED_PC_AFTER_CALL)
-#define SAVED_PC_AFTER_CALL(frame) (gdbarch_saved_pc_after_call (current_gdbarch, frame))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_SAVED_PC_AFTER_CALL)
+#define DEPRECATED_SAVED_PC_AFTER_CALL(frame) (gdbarch_deprecated_saved_pc_after_call (current_gdbarch, frame))
 #endif
 #endif
 
