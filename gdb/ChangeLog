@@ -1,5 +1,13 @@
 Sat Apr 24 19:59:54 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* Changes from (or inspired by) AMD:
+	* remote-udi.c (udi_attach): Assignments to Space and Offset were
+	switched, fix it.
+	(udi_wait): Make error message (UDIGetStdout) match error.
+	(udi_wait): Handle UDIStdinNeeded.
+	* command.c [CANT_FORK]: Use system().
+	* utils.c (prompt_for_continue): Allow quit with 'q'.
+
 	* solib.c (solib_add): Don't call special_symbol_handling if there
 	were errors in symbol_add_stub.  Also set so->from_tty before
 	calling symbol_add_stub.

@@ -1163,13 +1163,17 @@ cmd_show_list (list, from_tty, prefix)
   }
 }
 
-#ifndef CANT_FORK
 /* ARGSUSED */
 static void
 shell_escape (arg, from_tty)
      char *arg;
      int from_tty;
 {
+#ifdef CANT_FORK
+  /* FIXME: what about errors (I don't know how GO32 system() handles
+     them)?  */
+  system (arg);
+#else /* Can fork.  */
   int rc, status, pid;
   char *p, *user_shell;
 
@@ -1198,10 +1202,9 @@ shell_escape (arg, from_tty)
       ;
   else
     error ("Fork failed");
+#endif /* Can fork.  */
 }
-#endif
 
-#ifndef CANT_FORK
 static void
 make_command (arg, from_tty)
      char *arg;
@@ -1220,7 +1223,6 @@ make_command (arg, from_tty)
   
   shell_escape (p, from_tty);
 }
-#endif
 
 static void
 show_user_1 (c, stream)
@@ -1273,15 +1275,11 @@ show_user (args, from_tty)
 void
 _initialize_command ()
 {
-#ifndef CANT_FORK
   add_com ("shell", class_support, shell_escape,
 	   "Execute the rest of the line as a shell command.  \n\
 With no arguments, run an inferior shell.");
-#endif
-#ifndef CANT_FORK
   add_com ("make", class_support, make_command,
 	   "Run the ``make'' program using the rest of the line as arguments.");
-#endif
   add_cmd ("user", no_class, show_user, 
 	   "Show definitions of user defined commands.\n\
 Argument is the name of the user defined command.\n\

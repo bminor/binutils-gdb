@@ -405,8 +405,8 @@ udi_attach (args, from_tty)
       printf ("Attaching to remote program %s...\n", prog_name);
 
   UDIStop();
-  From.Space = 11;
-  From.Offset = UDI29KSpecialRegs;
+  From.Space = UDI29KSpecialRegs;
+  From.Offset = 11;
   if (err = UDIRead(From, &PC_adds, Count, Size, &CountDone, HostEndian))
     error ("UDIRead failed in udi_attach");
   printf ("Remote process is now halted, pc1 = 0x%x.\n", PC_adds);
@@ -494,7 +494,7 @@ udi_wait (status)
 	{
 	case UDIStdoutReady:
 	  if (UDIGetStdout (sbuf, (UDISizeT)SBUF_MAX, &CountDone))
-	    error ("UDIGetStdin() failed in udi_wait");
+	    error ("UDIGetStdout() failed in udi_wait");
 	  fwrite (sbuf, 1, CountDone, stdout);
 	  fflush(stdout);
 	  continue;
@@ -504,8 +504,9 @@ udi_wait (status)
 	  fflush(stderr);
 	  continue;
 	case UDIStdinNeeded:
-	  printf("DEBUG: stdin requested ... continue\n");
-	  /*	UDIPutStdin(sbuf, (UDISizeT)i, &CountDone); */
+	  scanf ("%s", sbuf);
+	  i = strlen (sbuf);
+	  UDIPutStdin (sbuf, (UDISizeT)i, &CountDone);
 	  continue;
 	case UDIRunning:
 	  /* In spite of the fact that we told UDIWait to wait forever, it will
