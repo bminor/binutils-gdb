@@ -1,8 +1,5 @@
 Mon Sep 14 19:20:43 1992  Stu Grossman  (grossman at cygnus.com)
 
-	* utils.c (query):  Remove test for energize from top.  Now
-	handled in input_from_terminal_p().
-
 	* energize.c (send_location):  New routine to consolidate all
 	places where we must notify kernel of where the given pc is.
 	(cplus_demangle):  Put single-quotes around demangled names.
