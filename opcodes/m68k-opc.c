@@ -1260,8 +1260,8 @@ const struct m68k_opcode m68k_opcodes[] =
 {"movew",	one(0030000),	one(0170000), "*w$d", m68000up | mcf5200 },
 {"movew",	one(0030100),	one(0170700), "*wAd", m68000up | mcf5200 },
 
-{"movew",	one(0040300),	one(0177700), "SsDs", mcf5200 },
-{"movew",	one(0041300),	one(0177700), "CsDs", mcf5200 },
+{"movew",	one(0040300),	one(0177770), "SsDs", mcf5200 },
+{"movew",	one(0041300),	one(0177770), "CsDs", mcf5200 },
 {"movew",	one(0040300),	one(0177700), "Ss$s", m68000up },
 {"movew",	one(0041300),	one(0177700), "Cs$s", m68010up },
 {"movew",	one(0042300),	one(0177700), ";wCd", m68000up | mcf5200 },
@@ -1275,8 +1275,8 @@ const struct m68k_opcode m68k_opcodes[] =
 {"move",	one(0030000),	one(0170000), "*w$d", m68000up | mcf5200 },
 {"move",	one(0030100),	one(0170700), "*wAd", m68000up | mcf5200 },
 
-{"move",	one(0040300),	one(0177700), "SsDs", mcf5200 },
-{"move",	one(0041300),	one(0177700), "CsDs", mcf5200 },
+{"move",	one(0040300),	one(0177770), "SsDs", mcf5200 },
+{"move",	one(0041300),	one(0177770), "CsDs", mcf5200 },
 {"move",	one(0040300),	one(0177700), "Ss$s", m68000up },
 {"move",	one(0041300),	one(0177700), "Cs$s", m68010up },
 {"move",	one(0042300),	one(0177700), ";wCd", m68000up | mcf5200 },

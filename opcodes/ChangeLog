@@ -1,9 +1,15 @@
+Mon Jul 22 15:38:53 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68k-opc.c (m68k_opcodes): Make opcode masks for the ColdFire
+ 	move ccr/sr insns more strict so that the disassembler only
+ 	selects them when the addressing mode is data register.
+
 start-sanitize-d10v
 Mon Jul 22 11:25:24 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
         * d10v-opc.c (pre_defined_registers):  Declare.
         * d10v-dis.c (print_operand): Now uses pre_defined_registers
         to pick a better name for the registers.
-          
+
 end-sanitize-d10v	
 Mon Jul 22 13:47:23 1996  Ian Lance Taylor  <ian@cygnus.com>
 
