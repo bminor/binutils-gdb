@@ -1,9 +1,11 @@
 2004-03-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (set_variant_scratch_registers): New function.
-	(frv_gdbarch_init): Add FR450 support.
 	* frv-tdep.h (scr0_regnum, scr1_regnum, scr2_regnum, scr3_regnum):
 	New constants.
+
+	From Richard Sandiford  <rsandifo@redhat.com>:
+	* frv-tdep.c (frv_gdbarch_init): Add FR450 support.
 
 2004-03-12  Kevin Buettner  <kevinb@redhat.com>
 
