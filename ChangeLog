@@ -1,3 +1,8 @@
+Mon Apr 10 14:38:20 1995  Jason Molenda (crash@phydeaux.cygnus.com)
+
+	* Makefile.in: move {all,check,install}-gdb from *_MODULES 
+	to *_X11_MODULES due to gdbtk needing X include files et al.
+
 Mon Apr 10 11:42:22 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	Merge in support for Mac MPW as a host.
