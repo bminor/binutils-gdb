@@ -1,3 +1,11 @@
+start-sanitize-d10v
+Wed Aug 28 19:20:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c (find_opcode): Fix a bug which could generate
+	the wrong opcode for cases like st2w where there are many forms
+	of the same instruction.
+
+end-sanitize-d10v
 Tue Aug 27 13:53:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* expr.c (operand): If md_parse_name is defined, call it before
