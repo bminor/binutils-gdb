@@ -1,3 +1,12 @@
+Wed Jan 31 16:16:53 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_bfd_final_link): Don't output initial dummy
+	symbol or section symbols if stripping all symbols and this is not
+	a relocateable link.  Don't output the symbol string table if
+	there are no symbols.
+	(elf_link_flush_output_syms): Don't do anything if there are no
+	symbols to flush.
+
 Wed Jan 31 12:55:49 1996  Richard Henderson  <rth@tamu.edu>
 
 	* coff-aux.c: New file.

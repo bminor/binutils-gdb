@@ -1888,14 +1888,17 @@ elf_bfd_final_link (abfd, info)
 
   /* Start writing out the symbol table.  The first symbol is always a
      dummy symbol.  */
-  elfsym.st_value = 0;
-  elfsym.st_size = 0;
-  elfsym.st_info = 0;
-  elfsym.st_other = 0;
-  elfsym.st_shndx = SHN_UNDEF;
-  if (! elf_link_output_sym (&finfo, (const char *) NULL,
-			     &elfsym, bfd_und_section_ptr))
-    goto error_return;
+  if (info->strip != strip_all || info->relocateable)
+    {
+      elfsym.st_value = 0;
+      elfsym.st_size = 0;
+      elfsym.st_info = 0;
+      elfsym.st_other = 0;
+      elfsym.st_shndx = SHN_UNDEF;
+      if (! elf_link_output_sym (&finfo, (const char *) NULL,
+				 &elfsym, bfd_und_section_ptr))
+	goto error_return;
+    }
 
 #if 0
   /* Some standard ELF linkers do this, but we don't because it causes
@@ -1918,19 +1921,22 @@ elf_bfd_final_link (abfd, info)
      symbols have no names.  We store the index of each one in the
      index field of the section, so that we can find it again when
      outputting relocs.  */
-  elfsym.st_value = 0;
-  elfsym.st_size = 0;
-  elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
-  elfsym.st_other = 0;
-  for (i = 1; i < elf_elfheader (abfd)->e_shnum; i++)
+  if (info->strip != strip_all || info->relocateable)
     {
-      o = section_from_elf_index (abfd, i);
-      if (o != NULL)
-	o->target_index = abfd->symcount;
-      elfsym.st_shndx = i;
-      if (! elf_link_output_sym (&finfo, (const char *) NULL,
-				 &elfsym, o))
-	goto error_return;
+      elfsym.st_value = 0;
+      elfsym.st_size = 0;
+      elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
+      elfsym.st_other = 0;
+      for (i = 1; i < elf_elfheader (abfd)->e_shnum; i++)
+	{
+	  o = section_from_elf_index (abfd, i);
+	  if (o != NULL)
+	    o->target_index = abfd->symcount;
+	  elfsym.st_shndx = i;
+	  if (! elf_link_output_sym (&finfo, (const char *) NULL,
+				     &elfsym, o))
+	    goto error_return;
+	}
     }
 
   /* Allocate some memory to hold information read in from the input
@@ -2051,9 +2057,12 @@ elf_bfd_final_link (abfd, info)
   off = _bfd_elf_assign_file_position_for_section (symstrtab_hdr, off, true);
   elf_tdata (abfd)->next_file_pos = off;
 
-  if (bfd_seek (abfd, symstrtab_hdr->sh_offset, SEEK_SET) != 0
-      || ! _bfd_stringtab_emit (abfd, finfo.symstrtab))
-    return false;
+  if (abfd->symcount > 0)
+    {
+      if (bfd_seek (abfd, symstrtab_hdr->sh_offset, SEEK_SET) != 0
+	  || ! _bfd_stringtab_emit (abfd, finfo.symstrtab))
+	return false;
+    }
 
   /* Adjust the relocs to have the correct symbol indices.  */
   for (o = abfd->sections; o != NULL; o = o->next)
@@ -2369,20 +2378,23 @@ static boolean
 elf_link_flush_output_syms (finfo)
      struct elf_final_link_info *finfo;
 {
-  Elf_Internal_Shdr *symtab;
+  if (finfo->symbuf_count > 0)
+    {
+      Elf_Internal_Shdr *symtab;
 
-  symtab = &elf_tdata (finfo->output_bfd)->symtab_hdr;
+      symtab = &elf_tdata (finfo->output_bfd)->symtab_hdr;
 
-  if (bfd_seek (finfo->output_bfd, symtab->sh_offset + symtab->sh_size,
-		SEEK_SET) != 0
-      || (bfd_write ((PTR) finfo->symbuf, finfo->symbuf_count,
-		     sizeof (Elf_External_Sym), finfo->output_bfd)
-	  != finfo->symbuf_count * sizeof (Elf_External_Sym)))
-    return false;
+      if (bfd_seek (finfo->output_bfd, symtab->sh_offset + symtab->sh_size,
+		    SEEK_SET) != 0
+	  || (bfd_write ((PTR) finfo->symbuf, finfo->symbuf_count,
+			 sizeof (Elf_External_Sym), finfo->output_bfd)
+	      != finfo->symbuf_count * sizeof (Elf_External_Sym)))
+	return false;
 
-  symtab->sh_size += finfo->symbuf_count * sizeof (Elf_External_Sym);
+      symtab->sh_size += finfo->symbuf_count * sizeof (Elf_External_Sym);
 
-  finfo->symbuf_count = 0;
+      finfo->symbuf_count = 0;
+    }
 
   return true;
 }
