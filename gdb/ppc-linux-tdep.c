@@ -731,6 +731,16 @@ insn_ds_field (unsigned int insn)
 }
 
 
+/* If DESC is the address of a 64-bit PowerPC Linux function
+   descriptor, return the descriptor's entry point.  */
+static CORE_ADDR
+ppc64_desc_entry_point (CORE_ADDR desc)
+{
+  /* The first word of the descriptor is the entry point.  */
+  return (CORE_ADDR) read_memory_unsigned_integer (desc, 8);
+}
+
+
 /* Pattern for the standard linkage function.  These are built by
    build_plt_stub in elf64-ppc.c, whose GLINK argument is always
    zero.  */
@@ -865,7 +875,7 @@ ppc64_standard_linkage_target (CORE_ADDR pc, unsigned int *insn)
        + insn_ds_field (insn[2]));
 
   /* The first word of the descriptor is the entry point.  Return that.  */
-  return (CORE_ADDR) read_memory_unsigned_integer (desc, 8);
+  return ppc64_desc_entry_point (desc);
 }
 
 
