@@ -1,3 +1,7 @@
+2001-10-08  Aldy Hernandez  <aldyh@redhat.com>
+
+	* configure.tgt (targ): Add arm9e-*-elf.
+
 2001-10-05  H.J. Lu  <hjl@gnu.org>
 
 	* genscripts.sh: Fix a typo in the last change.
